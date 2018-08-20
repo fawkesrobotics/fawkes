@@ -92,10 +92,6 @@ private:
 	void proc_queue(const std::string& msg_type);
 	queue_entry& get_queue(const std::string& msg_type);
 
-	bool verify_args(const std::vector<PLEXIL::Value> &args, const std::string& func,
-	                 const std::vector<std::pair<std::string, PLEXIL::ValueType>> &types);
-
-
 	void pb_create(PLEXIL::Command* cmd);
 	void pb_destroy(PLEXIL::Command* cmd);
   void pb_set_value(PLEXIL::Command* cmd);

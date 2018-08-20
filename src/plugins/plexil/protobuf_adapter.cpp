@@ -454,41 +454,13 @@ ProtobufCommPlexilAdapter::get_queue(const std::string& msg_type)
 }
 
 
-bool
-ProtobufCommPlexilAdapter::verify_args(const std::vector<PLEXIL::Value> &args, const std::string& func,
-                                       const std::vector<std::pair<std::string, PLEXIL::ValueType>> &types)
-{
-	if (args.size() != types.size()) {
-		warn("ProtobufCommAdapter:" << func << ":"
-		     << "Command requires " << types.size() << " arguments, got " << args.size());
-		for (size_t i = 0; i < args.size(); ++i) {
-			warn("ProtobufCommAdapter:" << func << ":"
-			     << " Argument " << i << " = " << args[i]);
-		}
-		return false;
-	}
-	for (size_t i = 0; i < args.size(); ++i) {
-		// Treat UNKNOWN_TYPE as "any type and we don't care/inspect later"
-		if (types[i].second == PLEXIL::UNKNOWN_TYPE) continue;
-
-		if (args[i].valueType() != types[i].second) {
-			warn("ProtobufCommAdapter:" << func << ":"
-			     << "Command argument " << i << "(" << types[i].first << ") expected to be of type "
-			     << PLEXIL::valueTypeName(types[i].second) << ", but is of type "
-			     << PLEXIL::valueTypeName(args[i].valueType()));
-			return false;
-		}
-	}
-	return true;
-}
-
 /** Create Protobuf message.
  */
 void
 ProtobufCommPlexilAdapter::pb_create(PLEXIL::Command* cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "pb_create",
+	if (! verify_args(args, "ProtobufCommAdapter:pb_create",
 	                  {{"msg_type", PLEXIL::STRING_TYPE}}))
 	{
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
@@ -532,7 +504,7 @@ void
 ProtobufCommPlexilAdapter::pb_destroy(PLEXIL::Command* cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "pb_destroy",
+	if (! verify_args(args, "ProtobufCommAdapter:pb_destroy",
 	                  {{"msg_id", PLEXIL::STRING_TYPE}}))
 	{
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
@@ -664,7 +636,7 @@ void
 ProtobufCommPlexilAdapter::pb_set_value(PLEXIL::Command* cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "pb_set_value",
+	if (! verify_args(args, "ProtobufCommAdapter:pb_set_value",
 	                  {{"msg_id", PLEXIL::STRING_TYPE},
 	                   {"field", PLEXIL::STRING_TYPE},
 	                   {"value", PLEXIL::UNKNOWN_TYPE}}))
@@ -967,7 +939,7 @@ void
 ProtobufCommPlexilAdapter::pb_get_value(PLEXIL::Command* cmd, PLEXIL::ValueType value_type)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "pb_get_value",
+	if (! verify_args(args, "ProtobufCommAdapter:pb_get_value",
 	                  {{"msg_id", PLEXIL::STRING_TYPE},
 	                   {"field", PLEXIL::STRING_TYPE}}))
 	{
@@ -1198,7 +1170,7 @@ void
 ProtobufCommPlexilAdapter::pb_get_length(PLEXIL::Command* cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "pb_get_length",
+	if (! verify_args(args, "ProtobufCommAdapter:pb_get_length",
 	                  {{"msg_id", PLEXIL::STRING_TYPE},
 	                   {"field", PLEXIL::STRING_TYPE}}))
 	{
@@ -1261,7 +1233,7 @@ void
 ProtobufCommPlexilAdapter::pb_tostring(PLEXIL::Command* cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "pb_tostring",
+	if (! verify_args(args, "ProtobufCommAdapter:pb_tostring",
 	                  {{"msg_id", PLEXIL::STRING_TYPE}}))
 	{
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
@@ -1293,7 +1265,7 @@ void
 ProtobufCommPlexilAdapter::pb_broadcast(PLEXIL::Command* cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "pb_broadcast",
+	if (! verify_args(args, "ProtobufCommAdapter:pb_broadcast",
 	                  {{"peer_id", PLEXIL::INTEGER_TYPE},
 	                   {"msg_id", PLEXIL::STRING_TYPE}}))
 	{
@@ -1372,7 +1344,7 @@ ProtobufCommPlexilAdapter::pb_peer_create_local_crypto(PLEXIL::Command* cmd,
 {
 	std::vector<PLEXIL::Value> const &args = override_args ? *override_args : cmd->getArgValues();
 
-	if (! verify_args(args, "pb_peer_create_local_crypto",
+	if (! verify_args(args, "ProtobufCommAdapter:pb_peer_create_local_crypto",
 	                  {{"address",    PLEXIL::STRING_TYPE},
 	                   {"send_port",  PLEXIL::INTEGER_TYPE},
 	                   {"recv_port",  PLEXIL::INTEGER_TYPE},
@@ -1510,7 +1482,7 @@ void
 ProtobufCommPlexilAdapter::pb_peer_destroy(PLEXIL::Command* cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "pb_peer_destroy",
+	if (! verify_args(args, "ProtobufCommAdapter:pb_peer_destroy",
 	                  {{"peer_id",    PLEXIL::INTEGER_TYPE}}))
 	{
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
@@ -1538,7 +1510,7 @@ void
 ProtobufCommPlexilAdapter::pb_peer_setup_crypto(PLEXIL::Command* cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "pb_peer_setup_crypto",
+	if (! verify_args(args, "ProtobufCommAdapter:pb_peer_setup_crypto",
 	                  {{"peer_id",    PLEXIL::INTEGER_TYPE},
 	                   {"crypto_key",  PLEXIL::STRING_TYPE},
 	                   {"cipher",  PLEXIL::STRING_TYPE}}))

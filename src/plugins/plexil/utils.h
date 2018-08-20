@@ -22,7 +22,13 @@
 #ifndef __PLUGINS_PLEXIL_UTILS_H_
 #define __PLUGINS_PLEXIL_UTILS_H_
 
+#include <Error.hh>
+#include <Debug.hh>
+#include <Value.hh>
+
 #include <string>
+#include <map>
+#include <vector>
 
 inline void
 replace_tokens(std::string &s)
@@ -40,5 +46,32 @@ replace_tokens(std::string &s)
 		}
 	}
 }
+
+inline bool
+verify_args(const std::vector<PLEXIL::Value> &args, const std::string& func,
+            const std::vector<std::pair<std::string, PLEXIL::ValueType>> &types)
+{
+	if (args.size() != types.size()) {
+		warn(func << ": Command requires " << types.size() << " arguments, got " << args.size());
+		for (size_t i = 0; i < args.size(); ++i) {
+			warn(func << ": Argument " << i << " = " << args[i]);
+		}
+		return false;
+	}
+	for (size_t i = 0; i < args.size(); ++i) {
+		// Treat UNKNOWN_TYPE as "any type and we don't care/inspect later"
+		if (types[i].second == PLEXIL::UNKNOWN_TYPE) continue;
+
+		if (args[i].valueType() != types[i].second) {
+			warn(func << ":"
+			     << "Command argument " << i << "(" << types[i].first << ") expected to be of type "
+			     << PLEXIL::valueTypeName(types[i].second) << ", but is of type "
+			     << PLEXIL::valueTypeName(args[i].valueType()));
+			return false;
+		}
+	}
+	return true;
+}
+
 
 #endif
