@@ -74,7 +74,7 @@ YamlConfiguration::YamlValueIterator::YamlValueIterator()
 YamlConfiguration::YamlValueIterator::YamlValueIterator(std::map<std::string, std::shared_ptr<YamlConfigurationNode>> &nodes)
 	: first_(true), nodes_(nodes)
 {
-	current_ = nodes_.end();
+	current_ = nodes_.begin();
 }
 
 bool
@@ -82,7 +82,6 @@ YamlConfiguration::YamlValueIterator::next()
 {
 	if (first_) {
 		first_ = false;
-		current_ = nodes_.begin();
 	} else {
 		++current_;
 	}
