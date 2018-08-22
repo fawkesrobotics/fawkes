@@ -89,6 +89,9 @@ PlexilExecutiveThread::init()
 	std::map<std::string, plexil_interface_config> cfg_listeners =
 	  read_plexil_interface_configs(cfg_prefix + "listeners/");
 
+	std::vector<std::string> cfg_lib_path =
+	  config->get_strings_or_defaults((cfg_prefix + "plan/lib-path").c_str(), {});
+
 	for (auto &a_item : cfg_adapters) {
 		auto &a = a_item.second;
 		if (a.type == "Utility") {
@@ -113,6 +116,10 @@ PlexilExecutiveThread::init()
 	PLEXIL::g_manager->setProperty("::Fawkes::Clock", clock);
 	PLEXIL::g_manager->setProperty("::Fawkes::Logger", logger);
 	PLEXIL::g_manager->setProperty("::Fawkes::BlackBoard", blackboard);
+
+	for (const auto &p: cfg_lib_path) {
+		plexil_->addLibraryPath(p);
+	}
 
 	pugi::xml_document xml_config;
 	pugi::xml_node xml_interfaces =
@@ -171,7 +178,6 @@ PlexilExecutiveThread::init()
 	log_stream_.reset(new std::ostream(&*log_buffer_));
 	PLEXIL::setDebugOutputStream(*log_stream_);
 
-
 	if (! plexil_->initialize(xml_interfaces)) {
 		throw Exception("Failed to initialize Plexil application");
 	}
@@ -223,6 +229,8 @@ PlexilExecutiveThread::init()
 			logger->log_warn(name(), "PLX older than PLE, but auto-compile disabled");
 		}
 	}
+
+	plexil_->addLibraryPath(ple_path.parent_path().string());
 
 	plan_plx_.reset(new pugi::xml_document);
 	pugi::xml_parse_result parse_result = plan_plx_->load_file(cfg_plan_plx_.c_str());
