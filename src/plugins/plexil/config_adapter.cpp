@@ -322,7 +322,7 @@ ConfigurationPlexilAdapter::config_get_value(PLEXIL::Command* cmd, PLEXIL::Value
 			// this would only occur when misconfiguring in initialize()
 			warn("ConfigCommAdapter:config_get_value:"
 			     << " Unsupported Plexil type " << PLEXIL::valueTypeName(value_type));
-			m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
+			m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 			m_execInterface.notifyOfExternalEvent();
 			return;
 		}
@@ -334,7 +334,7 @@ ConfigurationPlexilAdapter::config_get_value(PLEXIL::Command* cmd, PLEXIL::Value
 		warn("ConfigCommAdapter:config_get_value:"
 		     << " Failed to get value " << path << " as " << PLEXIL::valueTypeName(value_type)
 		     << ": " << e.what_no_backtrace());
-		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
+		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
@@ -354,10 +354,6 @@ ConfigurationPlexilAdapter::config_exists(PLEXIL::Command* cmd)
 
 	std::string   path;
 	args[0].getValue(path);
-
-	printf("Checking %s\n", path.c_str());
-	printf("Checking %i\n", config_->exists(path.c_str()));
-	printf("Checking %u\n", config_->get_uint(path.c_str()));
 	
 	try {
 		m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(config_->exists(path.c_str())));
