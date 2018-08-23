@@ -103,6 +103,7 @@ plexil:
       - type: ProtobufCommAdapter
         attr:
           protos: "@BASEDIR@/src/plugins/plexil/specs/test/msgs"
+      - type: GlobalState
       - type: NavGraphAdapter
 
       # - type: UdpAdapter
@@ -179,3 +180,11 @@ plexil:
         # Force a fresh compile on every startup. Otherwise, will only
         # compile if PLX does exist or PLE has been modified after PLX.
         force: false
+
+    # Global states are variables that can be accessed using a Lookup.
+    # They allow to share information across libraries, can reduce the
+    # number of parameteres passed around, and enables waiting for
+    # changes of a value.
+    global-states:
+      - name: team_name
+        type: String
