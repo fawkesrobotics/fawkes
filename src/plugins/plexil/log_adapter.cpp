@@ -72,6 +72,7 @@ LoggingPlexilAdapter::initialize()
   PLEXIL::g_configuration->registerCommandInterface("pprint", this);
   PLEXIL::g_configuration->registerCommandInterface("printToString",this);
   PLEXIL::g_configuration->registerCommandInterface("pprintToString",this);
+  PLEXIL::g_configuration->registerCommandInterface("to_string",this);
 
   PLEXIL::g_configuration->registerCommandInterface("log_debug", this);
   PLEXIL::g_configuration->registerCommandInterface("log_info", this);
@@ -174,6 +175,8 @@ LoggingPlexilAdapter::executeCommand(PLEXIL::Command * cmd)
 		                      return v_tovalue(values, false);}},
 	   {"pprintToString", [](const std::vector<PLEXIL::Value> &values) {
 		                      return v_tovalue(values, true);}},
+	   {"to_string",      [](const std::vector<PLEXIL::Value> &values) {
+		                      return v_tovalue(values, false);}},
 	  };
 
   const auto &entry_norv = mapping_norv.find(cmd->getName());
