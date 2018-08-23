@@ -71,8 +71,9 @@ bool
 GlobalStatePlexilAdapter::initialize()
 {
 	config_     = reinterpret_cast<fawkes::Configuration *>(m_execInterface.getProperty("::Fawkes::Config"));
+	logger_     = reinterpret_cast<fawkes::Logger *>(m_execInterface.getProperty("::Fawkes::Logger"));
 
-	if (!config_) {
+	if (!config_ || !logger_) {
 		warn("GlobalState:initialize: requires FawkesRemoteAdapter or must run in plexil plugin");
 		return false;
 	}
@@ -123,7 +124,7 @@ GlobalStatePlexilAdapter::initialize()
 	}
 
 	for (const auto &v: values_) {
-		printf("Registering value %s\n", v.first.c_str());
+		logger_->log_debug("GlobalState", "Registering value %s", v.first.c_str());
 		PLEXIL::g_configuration->registerLookupInterface(v.first, this);
 	}
 
@@ -284,7 +285,7 @@ GlobalStatePlexilAdapter::global_set_value(PLEXIL::Command* cmd, PLEXIL::ValueTy
 		return;
 	}
 
-	printf("Setting %s = %s\n", name.c_str(), args[1].valueToString().c_str());
+	logger_->log_debug("GlobalState", "Setting %s = %s", name.c_str(), args[1].valueToString().c_str());
 	values_[name].second = args[1];
 
 	if (subscribed_states_.find(name) != subscribed_states_.end()) {

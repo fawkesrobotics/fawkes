@@ -23,6 +23,7 @@
 #define __PLUGINS_PLEXIL_GLOBALS_ADAPTER_H_
 
 #include <config/config.h>
+#include <logging/logger.h>
 
 #include <InterfaceAdapter.hh>
 #include <Value.hh>
@@ -67,6 +68,7 @@ private:
 
 private:
 	fawkes::Configuration *     config_;
+	fawkes::Logger *            logger_;
 	
 	std::map<std::string, std::function<void (PLEXIL::Command*)>> commands_;
 
