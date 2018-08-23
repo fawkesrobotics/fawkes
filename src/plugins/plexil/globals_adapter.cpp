@@ -380,8 +380,11 @@ GlobalStatePlexilAdapter::global_set_value(PLEXIL::Command* cmd, PLEXIL::ValueTy
 
 	if (values_.find(s) == values_.end()) {
 		if (cfg_default_adapter_) {
-			warn("GlobalState:global_set_value: adding previously unknown state " << s.toString());
-			values_[s] = std::make_pair(args.back().valueType(), args.back());
+			if (args.back().valueType() != PLEXIL::UNKNOWN_TYPE) {
+				logger_->log_debug("GlobalState", "Adding state %s (value type %s)",
+				                   s.toString().c_str(), PLEXIL::valueTypeName(args.back().valueType()).c_str());
+				values_[s] = std::make_pair(args.back().valueType(), args.back());
+			}
 		} else {
 			warn("GlobalState:global_set_value: called for unknown state " << s.toString()
 			     << " and not default adapter");
@@ -391,10 +394,10 @@ GlobalStatePlexilAdapter::global_set_value(PLEXIL::Command* cmd, PLEXIL::ValueTy
 		}
 	}
 
-	if (args.back().valueType() != values_[name].first) {
+	if (args.back().valueType() != values_[s].first) {
 		warn("GlobalState:global_set_value: state " << s.toString() << " is of type "
-		     << PLEXIL::valueTypeName(values_[name].first) << ", but called "
-		     << "with " << PLEXIL::valueTypeName(args[1].valueType()));
+		     << PLEXIL::valueTypeName(values_[s].first) << ", but called "
+		     << "with " << PLEXIL::valueTypeName(args.back().valueType()));
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
