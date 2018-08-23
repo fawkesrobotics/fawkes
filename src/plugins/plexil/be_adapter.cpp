@@ -310,6 +310,7 @@ BehaviorEnginePlexilAdapter::map_skillstring(const std::string& name,
 void
 BehaviorEnginePlexilAdapter::call_skill(const std::string& skill_string, PLEXIL::Command* cmd)
 {
+	logger_->log_info("PlexilBE", "Executing skill '%s'", skill_string.c_str());
 	SkillerInterface::ExecSkillMessage *msg =
 	  new SkillerInterface::ExecSkillMessage(skill_string.c_str());
 	msg->ref();
