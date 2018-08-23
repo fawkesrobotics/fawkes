@@ -88,7 +88,18 @@ GlobalStatePlexilAdapter::initialize()
 	}
 	cfg_prefix += "global-states/";
 
-	std::map<std::string, std::pair<std::string, PLEXIL::ValueType>> configured_values;
+	struct GlobalStateValueConfig {
+		GlobalStateValueConfig() : arity(0) {}
+		std::string name;
+		PLEXIL::ValueType value_type;
+		unsigned int arity;
+		struct StateValue {
+			std::vector<std::string> args;
+			PLEXIL::Value value;
+		};
+		std::map<std::string, StateValue> values;
+	};
+	std::map<std::string, GlobalStateValueConfig> configured_values;
 	std::unique_ptr<Configuration::ValueIterator>
 	  cfg_item{config_->search(cfg_prefix)};
 	while (cfg_item->next()) {
@@ -104,28 +115,85 @@ GlobalStatePlexilAdapter::initialize()
 			std::string what = path.substr(start_pos, slash_pos - start_pos);
 
 			if (what == "name") {
-				configured_values[id].first  = cfg_item->get_string();
+				configured_values[id].name  = cfg_item->get_string();
 			} else if (what == "type") {
-				configured_values[id].second = PLEXIL::parseValueType(cfg_item->get_string());
+				configured_values[id].value_type = PLEXIL::parseValueType(cfg_item->get_string());
+			} else if (what == "arity") {
+				configured_values[id].arity = cfg_item->get_uint();
+			} else if (what == "values") {
+				start_pos = slash_pos + 1;
+				slash_pos = path.find("/", start_pos);
+				std::string value_id = path.substr(start_pos, slash_pos - start_pos);
+
+				start_pos = slash_pos + 1;
+				slash_pos = path.find("/", start_pos);
+				std::string value_what = path.substr(start_pos, slash_pos - start_pos);
+
+				if (value_what == "args") {
+					configured_values[id].values[value_id].args = cfg_item->get_strings();
+				}  // ignore value here, we may not know its type, yet
 			}
 		}
 	}
 
 	for (const auto &c: configured_values) {
-		if (c.second.first.empty()) {
+		if (c.second.name.empty()) {
 			warn("GlobalState:initialize: no name for state at index " << c.first);
 			return false;
 		}
-		if (c.second.second == PLEXIL::UNKNOWN_TYPE) {
+		if (c.second.value_type == PLEXIL::UNKNOWN_TYPE) {
 			warn("GlobalState:initialize: missing or invalid type at index " << c.first);
 			return false;
 		}
-		values_[c.second.first] = std::make_pair(c.second.second, PLEXIL::Value());
+		for (const auto &v: c.second.values) {
+			if (v.second.args.size() != c.second.arity) {
+				warn("GlobalState:initialize: invalid arity value for state " << c.first
+				     << " of " << c.second.name);
+				return false;
+			}
+		}
+
+		if (c.second.values.empty()) {
+			PLEXIL::State s(c.second.name);
+			values_[s] = std::make_pair(c.second.value_type, PLEXIL::Value());
+		} else {
+			for (const auto &vc: c.second.values) {
+				PLEXIL::State s(c.second.name, vc.second.args.size());
+				for (size_t i = 0; i < vc.second.args.size(); ++i) {
+					s.setParameter(i, vc.second.args[i]);
+				}
+
+				PLEXIL::Value v;
+				std::string conf_path = cfg_prefix + c.first + "/values/" + vc.first + "/value";
+				if (config_->exists(conf_path)) {
+					switch (c.second.value_type) {
+					case PLEXIL::STRING_TYPE:
+						v = config_->get_string(conf_path);
+						break;
+					case PLEXIL::INTEGER_TYPE:
+						v = config_->get_int(conf_path);
+						break;
+					case PLEXIL::REAL_TYPE:
+						v = config_->get_float(conf_path);
+						break;
+					case PLEXIL::BOOLEAN_TYPE:
+						v = config_->get_bool(conf_path);
+						break;
+					default:
+						warn("GlobalState:initialize: Unsupported value type " << PLEXIL::valueTypeName(c.second.value_type)
+						     << " for " << s.toString() << " at " << conf_path);
+						return false;
+					}
+				}
+				values_[s] = std::make_pair(c.second.value_type, v);
+			}
+		}
 	}
 
 	for (const auto &v: values_) {
-		logger_->log_debug("GlobalState", "Registering value %s", v.first.c_str());
-		PLEXIL::g_configuration->registerLookupInterface(v.first, this);
+		logger_->log_debug("GlobalState", "Registering value %s=%s",
+		                   v.first.toString().c_str(), v.second.second.valueToString().c_str());
+		PLEXIL::g_configuration->registerLookupInterface(v.first.name(), this);
 	}
 
 	namespace p = std::placeholders;
@@ -226,12 +294,12 @@ GlobalStatePlexilAdapter::invokeAbort(PLEXIL::Command *cmd)
 void
 GlobalStatePlexilAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCacheEntry &cache_entry)
 {
-	if (values_.find(state.name()) == values_.end()) {
+	if (values_.find(state) == values_.end()) {
 		cache_entry.setUnknown();
 		return;
 	}
 
-	cache_entry.update(values_[state.name()].second);
+	cache_entry.update(values_.at(state).second);
 }
 
 /** Subscribe to updates for given state.
@@ -240,7 +308,7 @@ GlobalStatePlexilAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCac
 void
 GlobalStatePlexilAdapter::subscribe(const PLEXIL::State& state)
 {
-	subscribed_states_[state.name()] = state;
+	subscribed_states_.insert(state);
 }
 
 /** Unsubscribe from updates.
@@ -249,7 +317,7 @@ GlobalStatePlexilAdapter::subscribe(const PLEXIL::State& state)
 void
 GlobalStatePlexilAdapter::unsubscribe(const PLEXIL::State& state)
 {
-	subscribed_states_.erase(state.name());
+	subscribed_states_.erase(state);
 }
 
 
@@ -257,27 +325,55 @@ void
 GlobalStatePlexilAdapter::global_set_value(PLEXIL::Command* cmd, PLEXIL::ValueType value_type)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "GlobalState:global_set_value",
-	                  {{"name", PLEXIL::STRING_TYPE},
-	                   {"value", value_type}}))
-	{
-		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
-		m_execInterface.notifyOfExternalEvent();
-		return;
+	if (value_type != PLEXIL::UNKNOWN_TYPE) {
+		if (! verify_args(args, "GlobalState:global_set_value",
+		                  {{"name", PLEXIL::STRING_TYPE},
+		                   {"value", value_type}}))
+		{
+			m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+			m_execInterface.notifyOfExternalEvent();
+			return;
+		}
+	} else {
+		if (args.size() < 2) {
+			warn("GlobalState:global_set_value: Command requires at least 2 arguments, got " << args.size());
+			m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+			m_execInterface.notifyOfExternalEvent();
+			return;
+		}
+		for (size_t i = 0; i < args.size() - 1; ++i) {
+			if (args[i].valueType() != PLEXIL::STRING_TYPE) {
+				warn("GlobalState:global_set_value: "
+				     << " argument " << i << " expected to be of type "
+				     << "String, but is of type " << PLEXIL::valueTypeName(args[i].valueType()));
+				m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+				m_execInterface.notifyOfExternalEvent();
+				return;
+			}
+		}
 	}
 
 	std::string   name;
 	args[0].getValue(name);
 
-	if (values_.find(name) == values_.end()) {
-		warn("GlobalState:global_set_value: called for unknown state " << name);
+	// first is name, last is value, everything in between are params
+	size_t num_args = args.size() - 2;
+
+	PLEXIL::State s(name, num_args);
+	for (size_t i = 0; i < args.size() - 2; ++i) {
+		s.setParameter(i, args[i+1]);
+	}
+
+	if (values_.find(s) == values_.end()) {
+		warn("GlobalState:global_set_value: called for unknown state " << s.toString()
+		     << " and not default adapter");
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
 
-	if (args[1].valueType() != values_[name].first) {
-		warn("GlobalState:global_set_value: state " << name << " is of type "
+	if (args.back().valueType() != values_[name].first) {
+		warn("GlobalState:global_set_value: state " << s.toString() << " is of type "
 		     << PLEXIL::valueTypeName(values_[name].first) << ", but called "
 		     << "with " << PLEXIL::valueTypeName(args[1].valueType()));
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
@@ -285,11 +381,12 @@ GlobalStatePlexilAdapter::global_set_value(PLEXIL::Command* cmd, PLEXIL::ValueTy
 		return;
 	}
 
-	logger_->log_debug("GlobalState", "Setting %s = %s", name.c_str(), args[1].valueToString().c_str());
-	values_[name].second = args[1];
+	logger_->log_debug("GlobalState", "Setting %s = %s",
+	                   s.toString().c_str(), args.back().valueToString().c_str());
+	values_[s].second = args.back();
 
-	if (subscribed_states_.find(name) != subscribed_states_.end()) {
-		m_execInterface.handleValueChange(subscribed_states_[name], args[1]);
+	if (subscribed_states_.find(s) != subscribed_states_.end()) {
+		m_execInterface.handleValueChange(s, args.back());
 	}
 
 	m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);

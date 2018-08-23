@@ -72,8 +72,8 @@ private:
 	
 	std::map<std::string, std::function<void (PLEXIL::Command*)>> commands_;
 
-	std::map<std::string, std::pair<PLEXIL::ValueType, PLEXIL::Value>> values_;
-	std::map<std::string, PLEXIL::State> subscribed_states_;
+	std::map<PLEXIL::State, std::pair<PLEXIL::ValueType, PLEXIL::Value>> values_;
+	std::set<PLEXIL::State> subscribed_states_;
 
 };
 
