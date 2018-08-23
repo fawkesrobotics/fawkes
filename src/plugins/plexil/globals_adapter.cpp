@@ -224,6 +224,10 @@ GlobalStatePlexilAdapter::initialize()
 		PLEXIL::g_configuration->registerCommandInterface(c.first, this);
 	}
 
+	// For some reason having the respective XML tag is not enough by itself
+	if (cfg_default_adapter_) {
+		PLEXIL::g_configuration->defaultRegisterAdapter(this);
+	}
 	return true;
 }
 
