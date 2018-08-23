@@ -92,6 +92,9 @@ PlexilExecutiveThread::init()
 	std::vector<std::string> cfg_lib_path =
 	  config->get_strings_or_defaults((cfg_prefix + "plan/lib-path").c_str(), {});
 
+	std::string cfg_basedir =
+	  config->get_string_or_default((cfg_prefix + "plan/basedir").c_str(), "");
+
 	for (auto &a_item : cfg_adapters) {
 		auto &a = a_item.second;
 		if (a.type == "Utility") {
@@ -182,55 +185,60 @@ PlexilExecutiveThread::init()
 		throw Exception("Failed to initialize Plexil application");
 	}
 
-	cfg_plan_ple_           = config->get_string_or_default((cfg_prefix + "plan/ple").c_str(), "");
-	cfg_plan_plx_           = config->get_string_or_default((cfg_prefix + "plan/plx").c_str(), "");
+	if (config->is_list(cfg_prefix + "plan/ple")) {
+		cfg_plan_ple_ = config->get_strings_or_defaults((cfg_prefix + "plan/ple").c_str(), {});
+	} else {
+		std::string ple = config->get_string_or_default((cfg_prefix + "plan/ple").c_str(), "");
+		if (! ple.empty()) {
+			cfg_plan_ple_ = {ple};
+		}
+	}
+	if (cfg_plan_ple_.empty()) {
+		throw Exception("No PLE configured");
+	}
+	cfg_plan_plx_           = config->get_string((cfg_prefix + "plan/plx").c_str());
 	cfg_plan_auto_compile_  = config->get_bool_or_default((cfg_prefix + "plan/compilation/enable").c_str(), false);
 	cfg_plan_force_compile_ = config->get_bool_or_default((cfg_prefix + "plan/compilation/force").c_str(), false);
 
-	fs::path ple_path, plx_path;
+	if (! cfg_plan_plx_.empty()) {
+		cfg_plan_plx_ = cfg_basedir + "/" + cfg_plan_plx_;
+		replace_tokens(cfg_plan_plx_);
+	}
 
-	replace_tokens(cfg_plan_ple_);
-	replace_tokens(cfg_plan_plx_);
+	std::set<std::string> base_paths;
 
-	if (cfg_plan_plx_.empty()) {
-		if (! cfg_plan_auto_compile_) {
-			throw Exception("PLX not configured and auto-compile disabled");
-		}
-		if (cfg_plan_ple_.empty()) {
-			throw Exception("Neither PLX nor PLE configured");
-		}
-		ple_path = cfg_plan_ple_;
-		if (! fs::exists(ple_path)) {
-			throw Exception("PLE configured, but file does not exist");
-		}
-		if (ple_path.extension() != ".ple") {
-			throw Exception("Unknown PLE extension %s, expected .ple", ple_path.extension().string().c_str());
-		}
-		plx_path = fs::path{ple_path}.replace_extension(".plx");
-		cfg_plan_plx_ = plx_path.string();
-		if (cfg_plan_plx_.empty()) {
-			throw Exception("Failed to automatically determine PLX");
+	for (auto &p: cfg_plan_ple_) {
+		p = cfg_basedir + "/" + p;
+		replace_tokens(p);
+
+		fs::path ple_path{p};
+		fs::path plx_path{fs::path{ple_path}.replace_extension(".plx")};
+
+		base_paths.insert(plx_path.parent_path().string());
+
+		if (cfg_plan_auto_compile_) {
+			if (cfg_plan_force_compile_ || ! fs::exists(plx_path) ||
+			    fs::last_write_time(plx_path) < fs::last_write_time(ple_path))
+			{
+				logger->log_info(name(), "Compiling %s", ple_path.string().c_str());
+				plexil_compile(ple_path.string());
+			}
+		} else {
+			if (! fs::exists(plx_path)) {
+				throw Exception("PLX %s does not exist and auto-compile disabled");
+			} else if (fs::last_write_time(plx_path) < fs::last_write_time(ple_path)) {
+				logger->log_warn(name(), "PLX %s older than PLE, auto-compile disabled", plx_path.string().c_str());
+			}
 		}
 	}
 
-	if (cfg_plan_auto_compile_) {
-		if (! fs::exists(cfg_plan_plx_) || cfg_plan_force_compile_ ||
-		    fs::last_write_time(cfg_plan_plx_) < fs::last_write_time(cfg_plan_ple_))
-		{
-			logger->log_info(name(), "Compiling %s", cfg_plan_ple_.c_str());
-			plexil_compile(cfg_plan_ple_, cfg_plan_plx_);
-		}
-	} else {
-		if (! fs::exists(cfg_plan_plx_)) {
-			throw Exception("PLX %s does not exist and auto-compile disabled", cfg_plan_plx_.c_str());
-		}
-		if (fs::last_write_time(cfg_plan_plx_) < fs::last_write_time(cfg_plan_ple_))
-		{
-			logger->log_warn(name(), "PLX older than PLE, but auto-compile disabled");
-		}
+	if (! fs::exists(cfg_plan_plx_)) {
+		throw Exception("PLX %s does not exist", cfg_plan_plx_.c_str());
 	}
 
-	plexil_->addLibraryPath(ple_path.parent_path().string());
+	for (const auto &p: base_paths) {
+		plexil_->addLibraryPath(p);
+	}
 
 	plan_plx_.reset(new pugi::xml_document);
 	pugi::xml_parse_result parse_result = plan_plx_->load_file(cfg_plan_plx_.c_str());
@@ -415,9 +423,9 @@ PlexilExecutiveThread::add_plexil_interface_configs(
 }
 
 void
-PlexilExecutiveThread::plexil_compile(const std::string& ple_file, const std::string& plx_file)
+PlexilExecutiveThread::plexil_compile(const std::string& ple_file)
 {
-	std::vector<std::string> argv{"plexilc", "-o", plx_file, ple_file};
+	std::vector<std::string> argv{"plexilc", ple_file};
 	std::string command_line =
 	  std::accumulate(std::next(argv.begin()), argv.end(), argv.front(),
 	                  [](std::string &s, const std::string &a) { return s + " " + a; });
