@@ -113,6 +113,7 @@ ProtobufCommPlexilAdapter::initialize()
 	  {"pb_get_bool",     std::bind(&ProtobufCommPlexilAdapter::pb_get_value, this, p::_1, PLEXIL::BOOLEAN_TYPE)},
 	  {"pb_get_string",   std::bind(&ProtobufCommPlexilAdapter::pb_get_value, this, p::_1, PLEXIL::STRING_TYPE)},
 	  {"pb_get_length",   std::bind(&ProtobufCommPlexilAdapter::pb_get_length, this, p::_1)},
+	  {"pb_has_field",    std::bind(&ProtobufCommPlexilAdapter::pb_has_field, this, p::_1)},
 	  {"pb_broadcast",    std::bind(&ProtobufCommPlexilAdapter::pb_broadcast, this, p::_1)},
 	  {"pb_tostring",     std::bind(&ProtobufCommPlexilAdapter::pb_tostring, this, p::_1)},
 	  {"pb_peer_create",  std::bind(&ProtobufCommPlexilAdapter::pb_peer_create, this, p::_1)},
@@ -1094,7 +1095,7 @@ ProtobufCommPlexilAdapter::pb_get_value(PLEXIL::Command* cmd, PLEXIL::ValueType 
 
   } else {
 	  if (! refl->HasField(*msg, field)) {
-		  warn("ProtobufCommAdapter:pb_get_value:" << m->GetTypeName() << " not set");
+		  warn("ProtobufCommAdapter:pb_get_value:" << m->GetTypeName() << ":" << field_name << " not set");
 		  m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		  m_execInterface.notifyOfExternalEvent();
 		  return;
@@ -1210,6 +1211,65 @@ ProtobufCommPlexilAdapter::pb_get_length(PLEXIL::Command* cmd)
   const Reflection *refl       = msg->GetReflection();
 
   m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(refl->FieldSize(*msg, field)));
+  m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
+  m_execInterface.notifyOfExternalEvent();
+}
+
+
+void
+ProtobufCommPlexilAdapter::pb_has_field(PLEXIL::Command* cmd)
+{
+	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
+	if (! verify_args(args, "ProtobufCommAdapter:pb_has_field",
+	                  {{"msg_id", PLEXIL::STRING_TYPE},
+	                   {"field", PLEXIL::STRING_TYPE}}))
+	{
+		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+		m_execInterface.notifyOfExternalEvent();
+		return;
+	}
+
+	std::string   msg_id;
+	std::string   field_name;
+	args[0].getValue(msg_id);
+	args[1].getValue(field_name);
+
+	if (messages_.find(msg_id) == messages_.end()) {
+		warn("ProtobufCommAdapter:pb_has_field:"
+		     << " Unknown message " << msg_id);
+		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+		m_execInterface.notifyOfExternalEvent();
+		return;
+	}
+
+	message_meta &msgmeta = messages_[msg_id];
+	std::shared_ptr<google::protobuf::Message> m = msgmeta.message;
+
+  const FieldDescriptor *field = nullptr;
+  google::protobuf::Message *msg= m.get();
+
+  std::string partial_name;
+  long int    partial_index = -1;
+
+  if (! traverse_field(msg, field_name, field, partial_name, partial_index, "pb_has_field")) {
+	  warn("ProtobufCommAdapter:pb_has_field: err traverse");
+	  m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(false));
+	  m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
+	  m_execInterface.notifyOfExternalEvent();
+	  return;
+  }
+
+  if (! field) {
+	  warn("ProtobufCommAdapter:pb_has_field: err field");
+	  m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(false));
+	  m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
+		m_execInterface.notifyOfExternalEvent();
+		return;
+  }
+
+  const Reflection *refl       = msg->GetReflection();
+
+  m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(refl->HasField(*msg, field)));
   m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
   m_execInterface.notifyOfExternalEvent();
 }
