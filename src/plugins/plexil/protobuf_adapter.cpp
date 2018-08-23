@@ -559,9 +559,15 @@ traverse_field(google::protobuf::Message* &  msg,
 
 	  const Descriptor *desc = msg->GetDescriptor();
 	  field = desc->FindFieldByName(partial_name);
+	  if (! field) {
+		  warn("ProtobufCommAdapter:" << func << ":"
+		       << " Field " << partial_name << " not found");
+		  return false;
+	  }
+
 	  if (partial_index >= 0 && ! field->is_repeated()) {
 		  warn("ProtobufCommAdapter:" << func << ":"
-		       << " Index for non-repeated field " << partial_name);		  
+		       << " Index for non-repeated field " << partial_name);
 		  return false;
 			  
 	  } else if (partial_index < 0 && field->is_repeated()) {
