@@ -133,7 +133,7 @@ function process_skiller_messages()
 															m:sender_thread_name(), m:skill_string())
 							 end
 						else
-							 print_debug("%s executes '%s'", m:sender_thread_name(), m:skill_string())
+							 print_info("%s executes '%s'", m:sender_thread_name(), m:skill_string())
 						end
 
             if sksf then
