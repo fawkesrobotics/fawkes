@@ -217,6 +217,7 @@ GlobalStatePlexilAdapter::initialize()
 	                                  this, p::_1, PLEXIL::STRING_TYPE)},
 	  {"global_set_value",  std::bind(&GlobalStatePlexilAdapter::global_set_value,
 	                                  this, p::_1, PLEXIL::UNKNOWN_TYPE)},
+	  {"global_print_all",  std::bind(&GlobalStatePlexilAdapter::global_print_all, this, p::_1)},
 	};
 
 	for (const auto &c: commands_) {
@@ -403,6 +404,19 @@ GlobalStatePlexilAdapter::global_set_value(PLEXIL::Command* cmd, PLEXIL::ValueTy
 		m_execInterface.handleValueChange(s, args.back());
 	}
 
+	m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
+	m_execInterface.notifyOfExternalEvent();
+}
+
+void
+GlobalStatePlexilAdapter::global_print_all(PLEXIL::Command* cmd)
+{
+	logger_->log_info("GlobalState", "Current globals");
+	for (const auto &v: values_) {
+		logger_->log_info("GlobalState", "%-40s %-10s %s",
+		                  v.first.toString().c_str(), PLEXIL::valueTypeName(v.second.first).c_str(),
+		                  v.second.second.valueToString().c_str());
+	}
 	m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
 	m_execInterface.notifyOfExternalEvent();
 }

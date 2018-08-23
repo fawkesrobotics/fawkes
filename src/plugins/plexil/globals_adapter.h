@@ -65,6 +65,7 @@ public:
 	
 private:
 	void global_set_value(PLEXIL::Command* cmd, PLEXIL::ValueType value_type);
+	void global_print_all(PLEXIL::Command* cmd);
 
 private:
 	fawkes::Configuration *     config_;
