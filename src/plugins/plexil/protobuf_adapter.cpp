@@ -595,13 +595,7 @@ traverse_field(google::protobuf::Message* &  msg,
 		  return false;
 	  }
 
-	  if (i == (field_path.size() - 1)) {
-		  if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
-			  warn("ProtobufCommAdapter:" << func << ":"
-			       << " Final sub-field " << field_path[i] << " is a message");
-			  return false;
-		  }
-	  } else {
+	  if (i < (field_path.size() - 1)) {
 		  if (field->type() != FieldDescriptor::TYPE_MESSAGE) {
 			  warn("ProtobufCommAdapter:" << func << ":"
 			       << " Sub-field " << field_path[i] << " is not a message");
@@ -667,8 +661,6 @@ ProtobufCommPlexilAdapter::pb_set_value(PLEXIL::Command* cmd)
 	  m_execInterface.notifyOfExternalEvent();
 	  return;
   }
-  
-  //field = desc->FindFieldByName(field_path.back());
 
   if (! field) {
 		warn("ProtobufCommAdapter:pb_set_value:"
@@ -677,6 +669,15 @@ ProtobufCommPlexilAdapter::pb_set_value(PLEXIL::Command* cmd)
 		m_execInterface.notifyOfExternalEvent();
 		return;
   }
+
+  if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+	  warn("ProtobufCommAdapter:pb_set_value:"
+	       << " Final sub-field " << field_name << " is a message");
+		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+		m_execInterface.notifyOfExternalEvent();
+	  return;
+  }
+
   const Reflection *refl       = msg->GetReflection();
 
   bool add_repeated = false;
@@ -967,8 +968,6 @@ ProtobufCommPlexilAdapter::pb_get_value(PLEXIL::Command* cmd, PLEXIL::ValueType 
 	  m_execInterface.notifyOfExternalEvent();
 	  return;
   }
-  
-  //field = desc->FindFieldByName(field_path.back());
 
   if (! field) {
 		warn("ProtobufCommAdapter:pb_get_value:"
@@ -977,7 +976,16 @@ ProtobufCommPlexilAdapter::pb_get_value(PLEXIL::Command* cmd, PLEXIL::ValueType 
 		m_execInterface.notifyOfExternalEvent();
 		return;
   }
-  const Reflection *refl       = msg->GetReflection();
+
+  if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+	  warn("ProtobufCommAdapter:pb_get_value:"
+	       << " Final sub-field " << field_name << " is a message");
+		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+		m_execInterface.notifyOfExternalEvent();
+	  return;
+  }
+
+  const Reflection *refl = msg->GetReflection();
 
   // check return value
   switch (field->type()) {
@@ -1214,7 +1222,7 @@ ProtobufCommPlexilAdapter::pb_get_length(PLEXIL::Command* cmd)
 		m_execInterface.notifyOfExternalEvent();
 		return;
   }
-  const Reflection *refl       = msg->GetReflection();
+  const Reflection *refl = msg->GetReflection();
 
   m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(refl->FieldSize(*msg, field)));
   m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
@@ -1258,7 +1266,6 @@ ProtobufCommPlexilAdapter::pb_has_field(PLEXIL::Command* cmd)
   long int    partial_index = -1;
 
   if (! traverse_field(msg, field_name, field, partial_name, partial_index, "pb_has_field")) {
-	  warn("ProtobufCommAdapter:pb_has_field: err traverse");
 	  m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(false));
 	  m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
 	  m_execInterface.notifyOfExternalEvent();
@@ -1266,14 +1273,13 @@ ProtobufCommPlexilAdapter::pb_has_field(PLEXIL::Command* cmd)
   }
 
   if (! field) {
-	  warn("ProtobufCommAdapter:pb_has_field: err field");
 	  m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(false));
 	  m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
 		m_execInterface.notifyOfExternalEvent();
 		return;
   }
 
-  const Reflection *refl       = msg->GetReflection();
+  const Reflection *refl = msg->GetReflection();
 
   m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(refl->HasField(*msg, field)));
   m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
