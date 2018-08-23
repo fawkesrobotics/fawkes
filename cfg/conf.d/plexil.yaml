@@ -170,10 +170,19 @@ plexil:
         template: goto{place=?(place)s, duration=1.0, error_prob=.1}
 
     plan:
-      ple: "@BASEDIR@/src/plugins/plexil/specs/test/plan.ple"
-      # If plx is not configured and compilation is enabled, will
-      # replace ".ple" with ".plx" from ple and use that as plx.
-      #plx: "@BASEDIR@/src/plugins/plexil/specs/test/plan.plx"
+      # If configured and non-empty, the basedir is prepended to all PLE and PLX
+      basedir: "@BASEDIR@/src/plugins/plexil/specs/test"
+
+      # List all PLE files which we should consider for compilation.
+      ple:
+        - plan.ple
+
+      # PLX to execute.
+      plx: plan.plx
+
+      # Extra lib path to search for (Plexil) libraries
+      #lib-path: ["@BASEDIR@/src/plexil/specs/common-libs"]
+
       compilation:
         enable: true
         # If compilation is enabled:
