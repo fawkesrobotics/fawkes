@@ -258,8 +258,11 @@ PlexilExecutiveThread::once()
 		throw Exception("Failed to start Plexil");
 	}
 
-	plexil_->addPlan(&*plan_plx_);
-	plexil_->notifyExec();
+	if (!plexil_->addPlan(&*plan_plx_)) {
+		logger->log_error(name(), "Failed to add Plexil plan. See log for details");
+	} else {
+		plexil_->notifyExec();
+	}
 }
 
 
