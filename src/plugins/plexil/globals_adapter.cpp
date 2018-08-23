@@ -78,6 +78,15 @@ GlobalStatePlexilAdapter::initialize()
 		return false;
 	}
 
+	cfg_default_adapter_ = false;
+	const pugi::xml_node config = getXml();
+	for (const auto &c : config.children()) {
+		if (strcmp(c.name(), "DefaultLookupAdapter") == 0) {
+			cfg_default_adapter_ = true;
+			logger_->log_warn("GlobalState", "Default lookup adapter, allowing on-the-fly state registration");
+		}
+	}
+
 	std::string cfg_prefix;
 	try {
 		std::string cfg_spec = config_->get_string("/plexil/spec");
@@ -365,11 +374,16 @@ GlobalStatePlexilAdapter::global_set_value(PLEXIL::Command* cmd, PLEXIL::ValueTy
 	}
 
 	if (values_.find(s) == values_.end()) {
-		warn("GlobalState:global_set_value: called for unknown state " << s.toString()
-		     << " and not default adapter");
-		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
-		m_execInterface.notifyOfExternalEvent();
-		return;
+		if (cfg_default_adapter_) {
+			warn("GlobalState:global_set_value: adding previously unknown state " << s.toString());
+			values_[s] = std::make_pair(args.back().valueType(), args.back());
+		} else {
+			warn("GlobalState:global_set_value: called for unknown state " << s.toString()
+			     << " and not default adapter");
+			m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
+			m_execInterface.notifyOfExternalEvent();
+			return;
+		}
 	}
 
 	if (args.back().valueType() != values_[name].first) {
