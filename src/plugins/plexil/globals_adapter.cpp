@@ -313,6 +313,7 @@ GlobalStatePlexilAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCac
 		return;
 	}
 
+	//printf("Returning %s = %s\n", state.toString().c_str(), values_.at(state).second.valueToString().c_str());
 	cache_entry.update(values_.at(state).second);
 }
 

@@ -29,7 +29,7 @@ LIBS_plexil = \
 OBJS_plexil = plexil_plugin.o plexil_thread.o
 
 OBJS_plexil_FawkesTimeAdapter = clock_adapter.o timer_thread.o
-LIBS_plexil_FawkesTimeAdapter = fawkescore fawkesutils PlexilAppFramework PlexilIntfc
+LIBS_plexil_FawkesTimeAdapter = fawkescore fawkesutils PlexilAppFramework PlexilIntfc PlexilUtils
 NOSOVER_plexil_FawkesTimeAdapter = 1
 
 OBJS_plexil_FawkesLoggingAdapter = log_adapter.o

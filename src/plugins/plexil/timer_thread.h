@@ -52,7 +52,7 @@ class PlexilTimerThread
 	fawkes::WaitCondition * waitcond_;
 
 	CallbackListener *      listener_;
-	fawkes::Time            wait_until_;
+	fawkes::Time            queued_wait_until_;
 	bool                    aborted_;
 };
 

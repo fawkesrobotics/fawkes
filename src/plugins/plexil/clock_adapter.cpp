@@ -166,7 +166,13 @@ ClockPlexilTimeAdapter::setThresholds(const PLEXIL::State& state, double hi, dou
 		return;
 	}
 
-	timer_->start_timer(this, hi);
+	fawkes::Time now(clock_);
+	if (now.in_sec() > hi) {
+		warn("FawkesTimeAdapter:setThresholds: timeout already passed");
+		timer_event();
+	} else {
+		timer_->start_timer(this, hi);
+	}
 }
 
 /** Set thresholds for subscription.
