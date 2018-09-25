@@ -1,6 +1,6 @@
 # Fawkes Buildkite Pipeline
 steps:
-  - label: ":hammer: Build"
+  - label: ":fedora: Fedora"
     command: .buildkite/build.sh
     plugins:
       docker#v1.4.0:
@@ -13,6 +13,7 @@ steps:
           - /var/lib/buildkite-agent/ccache:/var/cache/ccache
         user: builder
         debug: true
+
   - label: ":pencil: Checks"
     command: .buildkite/check.sh
     plugins:
