@@ -13,5 +13,5 @@ make -j$(nproc) clean
 rm -rf bin/ lib/ plugins/
 
 # Build software
-make -j$(nproc)
+make -j$(nproc) all gui
 
