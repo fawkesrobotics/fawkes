@@ -90,7 +90,7 @@ RobotMemoryThread::loop()
 	      mongo::BSONObj doc = res->next();
 	      result += doc.toString() + "\n";
 	    }
-	    logger->log_info(name(), result.c_str());
+	    logger->log_info(name(), "%s", result.c_str());
 	    robot_memory->rm_if_->set_result(result.c_str());
     } else if (robot_memory->rm_if_->msgq_first_is<RobotMemoryInterface::InsertMessage>()) {
 	    RobotMemoryInterface::InsertMessage* msg = (RobotMemoryInterface::InsertMessage*) robot_memory->rm_if_->msgq_first();
