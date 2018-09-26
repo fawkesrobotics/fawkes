@@ -1,7 +1,7 @@
 # Fawkes Buildkite Pipeline
 steps:
   - label: ":fedora: Fedora"
-    command: .buildkite/build.sh
+    command: .buildkite/build
     plugins:
       docker#v1.4.0:
         image: timn/fawkes-builder:fedora28-kinetic
@@ -15,7 +15,7 @@ steps:
         debug: true
 
   - label: ":pencil: Checks"
-    command: .buildkite/check.sh
+    command: .buildkite/check
     plugins:
       docker#v1.4.0:
         image: timn/fawkes-builder:fedora28-kinetic
