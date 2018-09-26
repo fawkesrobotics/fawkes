@@ -7,8 +7,18 @@ steps:
         image: timn/fawkes-builder:fedora28-kinetic
         workdir: /opt/fawkes
         always-pull: true
-        environment:
-          - BUILDKITE
+        mounts:
+          - /var/lib/buildkite-agent/ccache:/var/cache/ccache
+        user: builder
+        debug: true
+
+  - label: ":ubuntu: Ubuntu"
+    command: .buildkite/build
+    plugins:
+      docker#v1.4.0:
+        image: timn/fawkes-builder:ubuntu1804-melodic
+        workdir: /opt/fawkes
+        always-pull: true
         mounts:
           - /var/lib/buildkite-agent/ccache:/var/cache/ccache
         user: builder
