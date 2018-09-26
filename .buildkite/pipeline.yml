@@ -8,7 +8,7 @@ steps:
         workdir: /opt/fawkes
         always-pull: true
         mounts:
-          - /var/lib/buildkite-agent/ccache:/var/cache/ccache
+          - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
         user: builder
         debug: true
 
@@ -20,7 +20,7 @@ steps:
         workdir: /opt/fawkes
         always-pull: true
         mounts:
-          - /var/lib/buildkite-agent/ccache:/var/cache/ccache
+          - /var/lib/buildkite-agent/ccache_ubuntu:/var/cache/ccache
         user: builder
         debug: true
 
