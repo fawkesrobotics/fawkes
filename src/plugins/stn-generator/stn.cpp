@@ -418,13 +418,13 @@ Stn::log(std::string s, Stn::LogLevel log_level)
   std::string name = "STN";
   switch (log_level) {
     case LogLevel::WARN:
-      logger_->log_warn(name.c_str(), s.c_str());
+      logger_->log_warn(name.c_str(), "%s", s.c_str());
       break;
     case LogLevel::INFO:
-      logger_->log_info(name.c_str(), s.c_str());
+      logger_->log_info(name.c_str(), "%s", s.c_str());
       break;
     case LogLevel::DEBUG:
-      logger_->log_debug(name.c_str(), s.c_str());
+      logger_->log_debug(name.c_str(), "%s", s.c_str());
       break;
   }
 }
