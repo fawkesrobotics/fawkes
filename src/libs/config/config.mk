@@ -24,5 +24,8 @@ endif
 ifeq ($(HAVE_YAMLCPP),1)
   CFLAGS_YAMLCPP  = -DHAVE_YAMLCPP $(shell $(PKGCONFIG) --cflags 'yaml-cpp')
   LDFLAGS_YAMLCPP = $(shell $(PKGCONFIG) --libs 'yaml-cpp')
+  ifeq ($(if $(shell $(PKGCONFIG) --atleast-version 0.5.3 'yaml-cpp'; echo $${?/1/}),1,0),1)
+    CFLAGS_YAMLCPP += -DHAVE_YAMLCPP_NODE_MARK
+  endif
 endif
 
