@@ -10,7 +10,7 @@ steps:
     plugins:
       <<: *merged-pr-plugin
       docker#v1.4.0:
-        image: timn/fawkes-builder:fedora28-kinetic
+        image: fawkesrobotics/fawkes-builder:fedora28-kinetic
         always-pull: true
         mounts:
           - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
@@ -21,7 +21,7 @@ steps:
     plugins:
       <<: *merged-pr-plugin
       docker#v1.4.0:
-        image: timn/fawkes-builder:ubuntu1804-melodic
+        image: fawkesrobotics/fawkes-builder:ubuntu1804-melodic
         always-pull: true
         mounts:
           - /var/lib/buildkite-agent/ccache_ubuntu:/var/cache/ccache
@@ -32,6 +32,6 @@ steps:
     plugins:
       <<: *merged-pr-plugin
       docker#v1.4.0:
-        image: timn/fawkes-builder:fedora28-kinetic
+        image: fawkesrobotics/fawkes-builder:fedora28-kinetic
         always-pull: true
         debug: true
