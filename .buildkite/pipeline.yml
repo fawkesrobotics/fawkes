@@ -1,10 +1,20 @@
 # Fawkes Buildkite Pipeline
+# SPDX-License-Identifier: GPL-2.0-or-later
 
 merged-pr-plugin: &merged-pr-plugin
   seek-oss/github-merged-pr#v0.0.6:
     mode: checkout
 
 steps:
+  - label: ":pencil: Checks"
+    command: .buildkite/check
+    plugins:
+      <<: *merged-pr-plugin
+      docker#v1.4.0:
+        image: fawkesrobotics/fawkes-builder:fedora28-kinetic
+        always-pull: true
+        debug: true
+
   - label: ":fedora: Fedora"
     command: .buildkite/build
     plugins:
@@ -27,11 +37,3 @@ steps:
           - /var/lib/buildkite-agent/ccache_ubuntu:/var/cache/ccache
         debug: true
 
-  - label: ":pencil: Checks"
-    command: .buildkite/check
-    plugins:
-      <<: *merged-pr-plugin
-      docker#v1.4.0:
-        image: fawkesrobotics/fawkes-builder:fedora28-kinetic
-        always-pull: true
-        debug: true
