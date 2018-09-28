@@ -6,14 +6,16 @@ merged-pr-plugin: &merged-pr-plugin
     mode: checkout
 
 steps:
-  - label: ":pencil: Checks"
-    command: .buildkite/check
+  - label: ":lint: Linter"
+    command: .buildkite/lint
     plugins:
       <<: *merged-pr-plugin
       docker#v1.4.0:
         image: fawkesrobotics/fawkes-builder:fedora28-kinetic
         always-pull: true
         debug: true
+
+  - wait
 
   - label: ":fedora: Fedora"
     command: .buildkite/build
