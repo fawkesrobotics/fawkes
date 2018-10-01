@@ -101,6 +101,19 @@ git_repo_clone()
 		print_fail "git_repo_clone" "Target directory $DIR already exists"
 		return 1
 	fi
+	if [[ "$URL" =~ ^ssh://([^/]+)/(.+)$ ]]; then
+		mkdir -m 0700 -p ~/.ssh
+		if ! ssh-keyscan "${BASH_REMATCH[1]}" >>~/.ssh/known_hosts; then
+			print_fail "git_repo_clone" "Failed to scan key for $URL (1)"
+			return 2
+		fi
+	elif [[ "$URL" =~ ^[^@]+@([^:]+):(.+)$ ]]; then
+		mkdir -m 0700 -p ~/.ssh
+		if ! ssh-keyscan "${BASH_REMATCH[1]}" >>~/.ssh/known_hosts; then
+			print_fail "git_repo_clone" "Failed to scan key for $URL (2)"
+			return 2
+		fi
+	fi
 	if ! git clone --recursive $URL $DIR; then
 		print_fail "git_repo_clone" "Failed to clone from $URL"
 		return 2
