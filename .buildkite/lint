@@ -43,17 +43,12 @@ error_exit () {
 
 set -o pipefail
 
-COMMITTERS_REPO=${COMMITTERS_REPO:-}
 AUTHORS_FILE=
 
-if [ -z "$COMMITTERS_REPO" ]; then
-	if [[ "${BUILDKITE_REPO-}" =~ ^.*github.com/([a-zA-Z0-9-]+)/ ]]; then
-		COMMITTERS_REPO="git@github.com:${BASH_REMATCH[1]}/committers.git"
-		COMMITTERS_DIR="$HOME/committers/${BASH_REMATCH[1]}/committers"
-		AUTHORS_FILE="$COMMITTERS_DIR/committers.csv"
-	fi
-fi
-if [ -n "$COMMITTERS_REPO" ]; then
+if [[ "${BUILDKITE_REPO-}" =~ ^.*github.com/([a-zA-Z0-9-]+)/ ]]; then
+	COMMITTERS_REPO="git@github.com:${BASH_REMATCH[1]}/committers.git"
+	COMMITTERS_DIR="$HOME/committers/${BASH_REMATCH[1]}/committers"
+	AUTHORS_FILE="$COMMITTERS_DIR/committers.csv"
 	if [ -d "$COMMITTERS_DIR" ]; then
 		pushd $COMMITTERS_DIR >/dev/null
 		git_repo_pull
