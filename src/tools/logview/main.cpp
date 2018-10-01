@@ -85,9 +85,7 @@ class NetLogConsolePrinter
 	 (m->msgid() == NetworkLogger::MSGTYPE_LOGMESSAGE) ) {
       NetworkLoggerMessageContent *content = m->msgc<NetworkLoggerMessageContent>();
       struct timeval t = content->get_time();
-      /* Yes, it is risky to just use get_message() as format, but for now we are happy
-       * and do not expect bad guys. To be fixed. */
-      logger->tlog(content->get_loglevel(), &t, content->get_component(), content->get_message());
+      logger->tlog(content->get_loglevel(), &t, content->get_component(), "%s", content->get_message());
     }
   }
 

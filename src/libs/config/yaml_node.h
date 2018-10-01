@@ -779,8 +779,12 @@ class YamlConfigurationNode : public std::enable_shared_from_this<YamlConfigurat
 	void set_sequence(const YAML::Node &n)
 	{
 		if (n.Type() != YAML::NodeType::Sequence) {
+#ifdef HAVE_YAMLCPP_NODE_MARK
 			throw Exception("Cannot initialize list from non-sequence (line %i, column %i)",
 			                n.Mark().line, n.Mark().column);
+#else
+			throw Exception("Cannot initialize list from non-sequence");
+#endif
 		}
 		type_ = Type::SEQUENCE;
 		list_values_.resize(n.size());
@@ -797,8 +801,12 @@ class YamlConfigurationNode : public std::enable_shared_from_this<YamlConfigurat
 					add_child(key, YamlConfigurationNode::create(n[i], key));
 				}
 			} else {
+#ifdef HAVE_YAMLCPP_NODE_MARK
 				throw Exception("Sequence neither of type scalar nor map (line %i, column %i)",
 				                n.Mark().line, n.Mark().column);
+#else
+				throw Exception("Sequence neither of type scalar nor map");
+#endif
 			}
 		}
 	}
@@ -827,8 +835,12 @@ class YamlConfigurationNode : public std::enable_shared_from_this<YamlConfigurat
 				// we are updating a value
 				auto new_value = YamlConfigurationNode::create(it->second, key);
 				if (new_value->get_type() != children_[key]->get_type()) {
+#ifdef HAVE_YAMLCPP_NODE_MARK
 					throw Exception("YamlConfig (line %d, column %d): overwriting value with incompatible type",
 					                node.Mark().line, node.Mark().column);
+#else
+					throw Exception("YamlConfig: overwriting value with incompatible type");
+#endif
 				}
 				in->add_child(key, new_value);
 			} else {
@@ -977,8 +989,12 @@ class YamlConfigurationNode : public std::enable_shared_from_this<YamlConfigurat
 			try {
 				addr_s = get_string();
 			} catch (Exception &e) {
-				e.prepend("YamlConfig (line %d, column %d) Invalid IPv4 or IPv6 address (not a string)",
+#ifdef HAVE_YAMLCPP_NODE_MARK
+				e.prepend("YamlConfig (line %d, column %d): Invalid IPv4 or IPv6 address (not a string)",
 				          node.Mark().line, node.Mark().column);
+#else
+				e.prepend("YamlConfig: Invalid IPv4 or IPv6 address (not a string)");
+#endif
 				throw;
 			}
 
@@ -1002,8 +1018,12 @@ class YamlConfigurationNode : public std::enable_shared_from_this<YamlConfigurat
 			try {
 				p = get_uint();
 			} catch (Exception &e) {
+#ifdef HAVE_YAMLCPP_NODE_MARK
 				e.prepend("YamlConfig (line %d, column %d): Invalid TCP/UDP port number (not an unsigned int)",
 				          node.Mark().line, node.Mark().column);
+#else
+				e.prepend("YamlConfig: Invalid TCP/UDP port number (not an unsigned int)");
+#endif
 				throw;
 			}
 			if (p <= 0 || p >= 65535) {
@@ -1013,14 +1033,22 @@ class YamlConfigurationNode : public std::enable_shared_from_this<YamlConfigurat
 		} else if (node.Tag() == "tag:fawkesrobotics.org,cfg/url") {
 			std::string scalar = node.Scalar();
 			if (! regex_match(scalar, yaml_utils::url_regex)) {
+#ifdef HAVE_YAMLCPP_NODE_MARK
 				throw Exception("YamlConfig (line %d, column %d): %s is not a valid URL",
 				                node.Mark().line, node.Mark().column, scalar.c_str());
+#else
+				throw Exception("YamlConfig: %s is not a valid URL", scalar.c_str());
+#endif
 			}
 		} else if (node.Tag() == "tag:fawkesrobotics.org,cfg/frame") {
 			std::string scalar = node.Scalar();
 			if (! regex_match(scalar, yaml_utils::frame_regex)) {
+#ifdef HAVE_YAMLCPP_NODE_MARK
 				throw Exception("YamlConfig (line %d, column %d): %s is not a valid frame ID",
 				                node.Mark().line, node.Mark().column, scalar.c_str());
+#else
+				throw Exception("YamlConfig: %s is not a valid frame ID", scalar.c_str());
+#endif
 			}
 		}
 	}

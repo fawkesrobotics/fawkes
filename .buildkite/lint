@@ -1,0 +1,254 @@
+#!/bin/bash
+
+############################################################################
+#  Lint script to check some basic things on the relevant commits
+#
+#  Created: Fri Sep 28 15:59:06 2018 +0200
+#  Copyright  2018  Tim Niemueller [www.niemueller.org]
+############################################################################
+
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Library General Public License for more details.
+#
+#  Read the full text in the LICENSE.GPL file in the doc directory.
+
+SCRIPT_PATH=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
+
+# Source standard environment, may setup ccache if available
+source /etc/profile
+
+source $SCRIPT_PATH/functions.sh
+
+# Error out on any error in the script, pipes etc.
+set -eu
+
+# Enable debug output, only enable temporarily, rather verbose
+# set -x
+
+if [ -n "${SSH_DEPLOY_PRIVKEY:-}" ]; then
+	mkdir -m 0700 -p $HOME/.ssh
+	echo "$SSH_DEPLOY_PRIVKEY" >$HOME/.ssh/id_ed25519
+	chmod 600 $HOME/.ssh/id_ed25519
+fi
+
+MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "master") | head -1)
+
+error_exit () {
+	MSG="$@"
+	if [ -n "${BUILDKITE:-}" ]; then
+		buildkite-agent annotate --context ctx-creator --style warning "$MSG"
+	else
+		print_fail "lint" "$MSG"
+	fi
+	exit 1
+}
+
+set -o pipefail
+
+AUTHORS_FILE=
+
+echo "-> Getting committer information"
+if [[ "${BUILDKITE_REPO-}" =~ ^.*github.com/([a-zA-Z0-9-]+)/ ]]; then
+	COMMITTERS_REPO="git@github.com:${BASH_REMATCH[1]}/committers.git"
+	COMMITTERS_DIR="$HOME/committers/${BASH_REMATCH[1]}/committers"
+	AUTHORS_FILE="$COMMITTERS_DIR/committers.csv"
+	if [ -d "$COMMITTERS_DIR" ]; then
+		pushd $COMMITTERS_DIR >/dev/null
+		git_repo_pull
+		popd
+	else
+		git_repo_clone "$COMMITTERS_REPO" "$COMMITTERS_DIR"
+	fi
+fi
+
+if [ ! -e "$AUTHORS_FILE" ]; then
+	error_exit "Cannot open authors file"
+fi
+
+declare -a AUTHOR_NAME=()
+declare -a AUTHOR_EMAILS=()
+declare -a AUTHOR_GITHUB=()
+declare -a AUTHOR_BRANCHES=()
+AUTHOR_INDEX=
+
+OIFS=$IFS
+IFS=$'\n'
+for line in $(cat $AUTHORS_FILE); do
+	if [[ "$line" =~ ^# ]]; then continue; fi
+	OIFSF=$IFS
+	IFS=";"
+	# Temporarily disable pathname expansion, could expand branch patterns
+	set -f
+	declare -a AUTHOR=($line)
+	set +f
+	IFS=$OIFSF
+
+	AUTHOR_NAME[${#AUTHOR_NAME[*]}]="${AUTHOR[0]}"
+	AUTHOR_EMAILS[${#AUTHOR_EMAILS[*]}]="${AUTHOR[1]}"
+	AUTHOR_GITHUB[${#AUTHOR_GITHUB[*]}]="${AUTHOR[2]}"
+	AUTHOR_BRANCHES[${#AUTHOR_BRANCHES[*]}]="${AUTHOR[3]}"
+done
+IFS=$OIFS
+
+check_build_creator () {
+	for ((i=0; i<${#AUTHOR_NAME[@]}; i++)); do
+		if [ "${AUTHOR_NAME[$i]}" == "${BUILDKITE_BUILD_CREATOR:-}" ]; then
+			OIFS=$IFS
+			IFS=","
+			declare -a EMAILS=(${AUTHOR_EMAILS[$i]})
+			IFS=$OIFS
+			for E in $EMAILS; do
+				if [ "$E" == "${BUILDKITE_BUILD_CREATOR_EMAIL:-}" ]; then
+					AUTHOR_INDEX=$i
+				fi
+			done
+			break;
+		fi
+	done
+
+	if [ -z "$AUTHOR_INDEX" ]; then
+		error_exit "Unrecognized build creator '${BUILDKITE_BUILD_CREATOR:-UNSET} <${BUILDKITE_BUILD_CREATOR_EMAIL:-UNSET}>'"
+	fi
+	echo $AUTHOR_INDEX
+}
+
+check_branch_name () {
+	AUTHOR_INDEX=$1
+
+	if [ -z "$AUTHOR_INDEX" ]; then
+		error_exit "Cannot check branch name, failed to determine build creator"
+	fi
+
+	BRANCH_OK=false
+
+	OIFS=$IFS
+	IFS=","
+	set -f
+	declare -a BRANCHES=(${AUTHOR_BRANCHES[$AUTHOR_INDEX]})
+	for ((i=0; i<${#BRANCHES[@]}; i++)); do
+		BRANCHES[$i]=${BRANCHES[$i]//@/${AUTHOR_GITHUB[$AUTHOR_INDEX]}}
+	done
+	IFS=$OIFS
+
+	for ((i=0; i<${#BRANCHES[@]}; i++)); do
+		B=${BRANCHES[$i]}
+		case "${BUILDKITE_BRANCH-}" in ($B)
+			BRANCH_OK=true;
+			break;
+			;;
+		esac
+	done
+
+	if [ "$BRANCH_OK" != "true" ]; then
+		error_exit "Disallowed branch name '${BUILDKITE_BRANCH-}' (must match one of '${AUTHOR_BRANCHES[$AUTHOR_INDEX]}')"
+	fi
+	set +f
+}
+
+check_commit_authors () {
+	OTHER_BRANCHES=$(git for-each-ref --format='%(refname)' refs/heads/ | grep -F -v "refs/heads/${BUILDKITE_BRANCH-}")
+
+	OIFSN=$IFS
+	IFS=$'\n'
+	git rev-parse --not $OTHER_BRANCHES |
+	git rev-list --stdin $MERGE_BASE..HEAD |
+	while read onerev
+	do
+	  l=$(git log --pretty="format:%h:%ae:%ce:%an:%cn" -n1 $onerev)
+	  OIFS=$IFS
+	  IFS=":"
+	  declare -a LOGENTRIES=($l)
+	  HASH=${LOGENTRIES[0]}
+	  AE=${LOGENTRIES[1]}
+	  CE=${LOGENTRIES[2]}
+	  AN=${LOGENTRIES[3]}
+	  CN=${LOGENTRIES[4]}
+	  VALID_AE=0
+	  VALID_CE=0
+	  VALID_AN=0
+	  VALID_CN=0
+		IFS=$OIFS
+
+	  for ((i=0; i<${#AUTHOR_NAME[@]}; i++)); do
+			OIFS=$IFS
+			IFS=","
+			declare -a EMAILS=(${AUTHOR_EMAILS[$i]})
+			declare -a BRANCHES=(${AUTHOR_BRANCHES[$i]})
+			IFS=$OIFS
+
+			for ((i=0; i<${#EMAILS[@]}; i++)); do
+				a=${EMAILS[$i]}
+				if [ "$a" == "$AE" ]; then
+					VALID_AE=1
+				fi
+				if [ "$a" == "$CE" ]; then
+					VALID_CE=1
+				fi
+	    done
+	    if [ -z "$AN" ]; then
+				error_exit "Author name may not be empty."
+	    fi
+	    if [ -z "$CN" ]; then
+				error_exit "Committer name may not be empty."
+	    fi
+	    if [[ $VALID_AE == 0 ]]; then
+				error_exit "Invalid author email address '$AE' in commit $HASH."
+			fi
+			if [ $VALID_CE == 0 ]; then
+				error_exit "Invalid committer email address '$CE' in commit $HASH."
+	    fi
+	    for ((i=0; i<${#AUTHOR_NAME[@]}; i++)); do
+				n=${AUTHOR_NAME[$i]}
+				if [ "$n" == "$AN" ]; then
+					VALID_AN=1
+				fi
+				if [ "$n" == "$CN" ]; then
+					VALID_CN=1
+				fi
+	    done
+	    if [[ $VALID_AN == 0 ]]; then
+				error_exit "Invalid author name '$AN' in commit $HASH."
+			fi
+			if [ $VALID_CN == 0 ]; then
+				error_exit "Invalid committer name '$AN' in commit $HASH."
+	    fi
+		done
+	done
+	# This is required because we are piping to the while loop which will
+	# cause a subshell to be used and only this is exited by "exit 1"
+	LOOP_EXIT=$?
+	if [ "$LOOP_EXIT" != "0" ]; then
+	    exit $LOOP_EXIT;
+	fi
+}
+
+check_gitlint ()
+{
+	gitlint --commits "$MERGE_BASE..HEAD" || error_exit "Gitlint reported errors"
+}
+
+
+### Main Program
+
+echo "-> Verifying build creator"
+AUTHOR_INDEX=$(check_build_creator)
+
+echo "-> Verifying branch name"
+check_branch_name $AUTHOR_INDEX
+
+echo "-> Verifying committer and author information for branch commits"
+check_commit_authors
+
+echo "-> Running gitlint to check commit messages"
+check_gitlint
+
+echo "-> Running 'make check'"
+make check
+

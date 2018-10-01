@@ -24,7 +24,7 @@ LIBS_openrave_robot_memory = m fawkescore fawkesutils fawkesaspects fawkesbaseap
 
 OBJS_openrave_robot_memory = openrave-robot-memory_plugin.o openrave-robot-memory_thread.o
 
-OBJS_all = $(OBJS_openrave-robot-memory)
+OBJS_all = $(OBJS_openrave_robot_memory)
 
 ifeq ($(HAVE_CPP11)$(HAVE_ROBOT_MEMORY),11)
   CFLAGS  += $(CFLAGS_CPP11)

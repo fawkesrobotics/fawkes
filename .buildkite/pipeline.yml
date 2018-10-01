@@ -1,0 +1,48 @@
+# Fawkes Buildkite Pipeline
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+merged-pr-plugin: &merged-pr-plugin
+  seek-oss/github-merged-pr#v0.0.6:
+    mode: checkout
+
+steps:
+  - label: ":memo: Linter"
+    command: .buildkite/lint
+    plugins:
+      <<: *merged-pr-plugin
+      docker#v1.4.0:
+        image: fawkesrobotics/fawkes-builder:fedora28-kinetic
+        always-pull: true
+        debug: true
+        environment:
+          - BUILDKITE_REPO
+          - BUILDKITE_BRANCH
+          - BUILDKITE_BUILD_CREATOR
+          - BUILDKITE_BUILD_CREATOR_EMAIL
+          # the following is set by the agent environment (ansible)
+          - SSH_DEPLOY_PRIVKEY
+
+  - wait
+
+  - label: ":fedora: Fedora"
+    command: .buildkite/build
+    plugins:
+      <<: *merged-pr-plugin
+      docker#v1.4.0:
+        image: fawkesrobotics/fawkes-builder:fedora28-kinetic
+        always-pull: true
+        mounts:
+          - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
+        debug: true
+
+  - label: ":ubuntu: Ubuntu"
+    command: .buildkite/build
+    plugins:
+      <<: *merged-pr-plugin
+      docker#v1.4.0:
+        image: fawkesrobotics/fawkes-builder:ubuntu1804-melodic
+        always-pull: true
+        mounts:
+          - /var/lib/buildkite-agent/ccache_ubuntu:/var/cache/ccache
+        debug: true
+
