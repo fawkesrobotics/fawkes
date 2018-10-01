@@ -30,7 +30,7 @@ source $SCRIPT_PATH/functions.sh
 set -eu
 
 # Enable debug output, only enable temporarily, rather verbose
-set -x
+#set -x
 
 if [ -n "${SSH_DEPLOY_PRIVKEY:-}" ]; then
 	mkdir -m 0700 -p $HOME/.ssh
@@ -187,8 +187,8 @@ check_commit_authors () {
 			declare -a BRANCHES=(${AUTHOR_BRANCHES[$i]})
 			IFS=$OIFS
 
-			for ((i=0; i<${#EMAILS[@]}; i++)); do
-				a=${EMAILS[$i]}
+			for ((j=0; j<${#EMAILS[@]}; j++)); do
+				a=${EMAILS[$j]}
 				if [ "$a" == "$AE" ]; then
 					VALID_AE=1
 				fi
@@ -202,28 +202,26 @@ check_commit_authors () {
 	    if [ -z "$CN" ]; then
 				error_exit "Committer name may not be empty."
 	    fi
-	    if [[ $VALID_AE == 0 ]]; then
-				error_exit "Invalid author email address '$AE' in commit $HASH."
+			n=${AUTHOR_NAME[$i]}
+			if [ "$n" == "$AN" ]; then
+				VALID_AN=1
 			fi
-			if [ $VALID_CE == 0 ]; then
-				error_exit "Invalid committer email address '$CE' in commit $HASH."
-	    fi
-	    for ((i=0; i<${#AUTHOR_NAME[@]}; i++)); do
-				n=${AUTHOR_NAME[$i]}
-				if [ "$n" == "$AN" ]; then
-					VALID_AN=1
-				fi
-				if [ "$n" == "$CN" ]; then
-					VALID_CN=1
-				fi
-	    done
-	    if [[ $VALID_AN == 0 ]]; then
-				error_exit "Invalid author name '$AN' in commit $HASH."
+			if [ "$n" == "$CN" ]; then
+				VALID_CN=1
 			fi
-			if [ $VALID_CN == 0 ]; then
-				error_exit "Invalid committer name '$AN' in commit $HASH."
-	    fi
 		done
+		if [[ $VALID_AE == 0 ]]; then
+			error_exit "Invalid author email address '$AE' in commit $HASH."
+		fi
+		if [ $VALID_CE == 0 ]; then
+			error_exit "Invalid committer email address '$CE' in commit $HASH."
+		fi
+		if [[ $VALID_AN == 0 ]]; then
+			error_exit "Invalid author name '$AN' in commit $HASH."
+		fi
+		if [ $VALID_CN == 0 ]; then
+			error_exit "Invalid committer name '$AN' in commit $HASH."
+		fi
 	done
 	# This is required because we are piping to the while loop which will
 	# cause a subshell to be used and only this is exited by "exit 1"
