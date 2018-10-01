@@ -21,8 +21,8 @@
 # Print failure message
 print_fail()
 {
-	local COMPONENT=$1
-	local MESSAGE=$2
+	local COMPONENT=${1:-C}
+	local MESSAGE=${2:-}
 	>&2 echo -e "\033[1;31mFAIL|$COMPONENT:\033[0m $MESSAGE"
 }
 
@@ -95,8 +95,8 @@ git_repo_changed()
 
 git_repo_clone()
 {
-	URL=$1
-	DIR=$2
+	URL=${1:-}
+	DIR=${2:-}
 	if [ -d $DIR ]; then
 		print_fail "git_repo_clone" "Target directory $DIR already exists"
 		return 1
@@ -198,7 +198,7 @@ git_repo_hash()
 
 print_sechead()
 {
-		local SECHEAD=$1
+		local SECHEAD={$1:-}
 		local HALF_WIDTH_L=$(((64-${#SECHEAD})/2))
 		local HALF_WIDTH_R=$HALF_WIDTH_L
 		if (( ( $HALF_WIDTH_L * 2 + ${#SECHEAD} ) < 64 )); then
@@ -214,7 +214,7 @@ print_sechead()
 
 patch_apply()
 {
-		local P=$1
+		local P=${1:-}
 
 		if patch -p1 -N --dry-run --quiet <$P 2>&1 >/dev/null; then
 			if patch -p1 -N <$P ; then
@@ -254,7 +254,7 @@ patch_apply_all()
 
 patch_check_applied()
 {
-		local P=$1
+		local P=${1:-}
 		if patch -p1 -N --dry-run --quiet <$P 2>&1 >/dev/null; then
 				return 1
 		else

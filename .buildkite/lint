@@ -29,7 +29,17 @@ source $SCRIPT_PATH/functions.sh
 # Error out on any error in the script, pipes etc.
 set -eu
 
-MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "$BUILDKITE_BRANCH") <(git rev-list --first-parent "master") | head -1)
+MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${BUILDKITE_BRANCH:-master}") <(git rev-list --first-parent "master") | head -1)
+
+error_exit () {
+	MSG="$@"
+	if [ -n "${BUILDKITE:-}" ]; then
+		buildkite-agent annotate --context ctx-creator --style warning "$MSG"
+	else
+		print_fail "lint" "$MSG"
+	fi
+	exit 1
+}
 
 set -o pipefail
 
@@ -37,7 +47,7 @@ COMMITTERS_REPO=${COMMITTERS_REPO:-}
 AUTHORS_FILE=
 
 if [ -z "$COMMITTERS_REPO" ]; then
-	if [[ "${BUILDKITE_REPO}" =~ ^.*github.com/([a-zA-Z0-9-]+)/ ]]; then
+	if [[ "${BUILDKITE_REPO-}" =~ ^.*github.com/([a-zA-Z0-9-]+)/ ]]; then
 		COMMITTERS_REPO="git@github.com:${BASH_REMATCH[1]}/committers.git"
 		COMMITTERS_DIR="$HOME/committers/${BASH_REMATCH[1]}/committers"
 		AUTHORS_FILE="$COMMITTERS_DIR/committers.csv"
@@ -54,7 +64,7 @@ if [ -n "$COMMITTERS_REPO" ]; then
 fi
 
 if [ ! -e "$AUTHORS_FILE" ]; then
-	print_fail "Cannot open authors file"
+	error_exit "Cannot open authors file"
 fi
 
 declare -a AUTHOR_NAME=()
@@ -82,25 +92,15 @@ for line in $(cat $AUTHORS_FILE); do
 done
 IFS=$OIFS
 
-error_exit () {
-	MSG="$@"
-	if [ -n "${BUILDKITE:-}" ]; then
-		buildkite-agent annotate --context ctx-creator --style warning "$MSG"
-	else
-		echo "$MSG"
-	fi
-	exit 1
-}
-
 check_build_creator () {
 	for ((i=0; i<${#AUTHOR_NAME[@]}; i++)); do
-		if [ "${AUTHOR_NAME[$i]}" == "$BUILDKITE_BUILD_CREATOR" ]; then
+		if [ "${AUTHOR_NAME[$i]}" == "${BUILDKITE_BUILD_CREATOR:-}" ]; then
 			OIFS=$IFS
 			IFS=","
 			declare -a EMAILS=(${AUTHOR_EMAILS[$i]})
 			IFS=$OIFS
 			for E in $EMAILS; do
-				if [ "$E" == "$BUILDKITE_BUILD_CREATOR_EMAIL" ]; then
+				if [ "$E" == "${BUILDKITE_BUILD_CREATOR_EMAIL:-}" ]; then
 					AUTHOR_INDEX=$i
 				fi
 			done
@@ -109,7 +109,7 @@ check_build_creator () {
 	done
 
 	if [ -z "$AUTHOR_INDEX" ]; then
-		error_exit "Unrecognized build creator '$BUILDKITE_BUILD_CREATOR <$BUILDKITE_BUILD_CREATOR_EMAIL>'"
+		error_exit "Unrecognized build creator '${BUILDKITE_BUILD_CREATOR:-UNSET} <${BUILDKITE_BUILD_CREATOR_EMAIL:-UNSET}>'"
 	fi
 	echo $AUTHOR_INDEX
 }
@@ -134,7 +134,7 @@ check_branch_name () {
 
 	for ((i=0; i<${#BRANCHES[@]}; i++)); do
 		B=${BRANCHES[$i]}
-		case "$BUILDKITE_BRANCH" in ($B)
+		case "${BUILDKITE_BRANCH-}" in ($B)
 			BRANCH_OK=true;
 			break;
 			;;
@@ -142,13 +142,13 @@ check_branch_name () {
 	done
 
 	if [ "$BRANCH_OK" != "true" ]; then
-		error_exit "Disallowed branch name '$BUILDKITE_BRANCH' (must match one of '${AUTHOR_BRANCHES[$AUTHOR_INDEX]}')"
+		error_exit "Disallowed branch name '${BUILDKITE_BRANCH-}' (must match one of '${AUTHOR_BRANCHES[$AUTHOR_INDEX]}')"
 	fi
 	set +f
 }
 
 check_commit_authors () {
-	OTHER_BRANCHES=$(git for-each-ref --format='%(refname)' refs/heads/ | grep -F -v "refs/heads/$BUILDKITE_BRANCH")
+	OTHER_BRANCHES=$(git for-each-ref --format='%(refname)' refs/heads/ | grep -F -v "refs/heads/${BUILDKITE_BRANCH-}")
 
 	OIFSN=$IFS
 	IFS=$'\n'
