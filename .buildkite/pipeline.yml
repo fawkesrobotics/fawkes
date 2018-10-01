@@ -6,7 +6,7 @@ merged-pr-plugin: &merged-pr-plugin
     mode: checkout
 
 steps:
-  - label: ":lint: Linter"
+  - label: ":memo: Linter"
     command: .buildkite/lint
     plugins:
       <<: *merged-pr-plugin
