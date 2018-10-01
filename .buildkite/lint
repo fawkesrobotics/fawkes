@@ -29,6 +29,9 @@ source $SCRIPT_PATH/functions.sh
 # Error out on any error in the script, pipes etc.
 set -eu
 
+# Enable debug output
+set -x
+
 MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "master") | head -1)
 
 error_exit () {
