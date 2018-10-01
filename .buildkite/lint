@@ -32,6 +32,12 @@ set -eu
 # Enable debug output
 set -x
 
+if [ -n "${SSH_DEPLOY_PRIVKEY:-}" ]; then
+	mkdir -m 0700 -p $HOME/.ssh
+	echo "$SSH_DEPLOY_PRIVKEY" >$HOME/.ssh/id_ed25519
+	chmod 600 $HOME/.ssh/id_ed25519
+fi
+
 MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "master") | head -1)
 
 error_exit () {

@@ -19,6 +19,8 @@ steps:
           - BUILDKITE_BRANCH
           - BUILDKITE_BUILD_CREATOR
           - BUILDKITE_BUILD_CREATOR_EMAIL
+          # the following is set by the agent environment (ansible)
+          - SSH_DEPLOY_PRIVKEY
 
   - wait
 
