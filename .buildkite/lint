@@ -30,7 +30,7 @@ source $SCRIPT_PATH/functions.sh
 set -eu
 
 # Enable debug output, only enable temporarily, rather verbose
-# set -x
+set -x
 
 if [ -n "${SSH_DEPLOY_PRIVKEY:-}" ]; then
 	mkdir -m 0700 -p $HOME/.ssh
