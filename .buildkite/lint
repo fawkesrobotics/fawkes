@@ -229,6 +229,11 @@ check_commit_authors () {
 	fi
 }
 
+check_gitlint ()
+{
+	gitlint --commits "$MERGE_BASE..HEAD" || error_exit "Gitlint reported errors"
+}
+
 
 ### Main Program
 
@@ -241,5 +246,9 @@ check_branch_name $AUTHOR_INDEX
 echo "-> Verifying committer and author information for branch commits"
 check_commit_authors
 
+echo "-> Running gitlint to check commit messages"
+check_gitlint
+
 echo "-> Running 'make check'"
 make check
+
