@@ -29,8 +29,8 @@ source $SCRIPT_PATH/functions.sh
 # Error out on any error in the script, pipes etc.
 set -eu
 
-# Enable debug output
-set -x
+# Enable debug output, only enable temporarily, rather verbose
+# set -x
 
 if [ -n "${SSH_DEPLOY_PRIVKEY:-}" ]; then
 	mkdir -m 0700 -p $HOME/.ssh
@@ -54,6 +54,7 @@ set -o pipefail
 
 AUTHORS_FILE=
 
+echo "-> Getting committer information"
 if [[ "${BUILDKITE_REPO-}" =~ ^.*github.com/([a-zA-Z0-9-]+)/ ]]; then
 	COMMITTERS_REPO="git@github.com:${BASH_REMATCH[1]}/committers.git"
 	COMMITTERS_DIR="$HOME/committers/${BASH_REMATCH[1]}/committers"
