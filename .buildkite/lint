@@ -62,7 +62,7 @@ if [[ "${BUILDKITE_REPO-}" =~ ^.*github.com/([a-zA-Z0-9-]+)/ ]]; then
 	if [ -d "$COMMITTERS_DIR" ]; then
 		pushd $COMMITTERS_DIR >/dev/null
 		git_repo_pull
-		popd
+		popd >/dev/null
 	else
 		git_repo_clone "$COMMITTERS_REPO" "$COMMITTERS_DIR"
 	fi
@@ -153,6 +153,10 @@ check_branch_name () {
 }
 
 check_commit_authors () {
+
+	git_repo_clone "$(git config --get remote.origin.url)" ".barerepo" "--reference . --bare"
+	pushd .barerepo >/dev/null
+
 	OTHER_BRANCHES=$(git for-each-ref --format='%(refname)' refs/heads/ | grep -F -v "refs/heads/${BUILDKITE_BRANCH-}")
 
 	OIFSN=$IFS
@@ -227,6 +231,8 @@ check_commit_authors () {
 	if [ "$LOOP_EXIT" != "0" ]; then
 	    exit $LOOP_EXIT;
 	fi
+	popd >/dev/null
+	rm -rf .barerepo
 }
 
 check_gitlint ()
