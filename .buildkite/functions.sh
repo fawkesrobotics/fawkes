@@ -97,6 +97,8 @@ git_repo_clone()
 {
 	URL=${1:-}
 	DIR=${2:-}
+	ARGS=${3:-}
+
 	if [ -d $DIR ]; then
 		print_fail "git_repo_clone" "Target directory $DIR already exists"
 		return 1
@@ -114,7 +116,7 @@ git_repo_clone()
 			return 2
 		fi
 	fi
-	if ! git clone --recursive $URL $DIR; then
+	if ! git clone --recursive $ARGS $URL $DIR; then
 		print_fail "git_repo_clone" "Failed to clone from $URL"
 		return 2
 	fi
