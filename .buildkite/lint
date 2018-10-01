@@ -29,7 +29,7 @@ source $SCRIPT_PATH/functions.sh
 # Error out on any error in the script, pipes etc.
 set -eu
 
-MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "${BUILDKITE_BRANCH:-master}") <(git rev-list --first-parent "master") | head -1)
+MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "master") | head -1)
 
 error_exit () {
 	MSG="$@"
