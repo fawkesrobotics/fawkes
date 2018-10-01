@@ -14,6 +14,11 @@ steps:
         image: fawkesrobotics/fawkes-builder:fedora28-kinetic
         always-pull: true
         debug: true
+        environment:
+          - BUILDKITE_REPO
+          - BUILDKITE_BRANCH
+          - BUILDKITE_BUILD_CREATOR
+          - BUILDKITE_BUILD_CREATOR_EMAIL
 
   - wait
 
