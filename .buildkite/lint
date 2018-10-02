@@ -32,9 +32,9 @@ set -eu
 # Enable debug output, only enable temporarily, rather verbose
 #set -x
 
-if [ -n "${SSH_DEPLOY_PRIVKEY:-}" ]; then
+if [ -n "${SSH_DEPLOY_PRIVKEY_COMMITTERS:-}" ]; then
 	mkdir -m 0700 -p $HOME/.ssh
-	echo "$SSH_DEPLOY_PRIVKEY" >$HOME/.ssh/id_ed25519
+	echo "$SSH_DEPLOY_PRIVKEY_COMMITTERS" >$HOME/.ssh/id_ed25519
 	chmod 600 $HOME/.ssh/id_ed25519
 fi
 
