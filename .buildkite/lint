@@ -55,9 +55,9 @@ set -o pipefail
 AUTHORS_FILE=
 
 echo "-> Getting committer information"
-if [[ "${BUILDKITE_REPO-}" =~ ^.*github.com/([a-zA-Z0-9-]+)/ ]]; then
-	COMMITTERS_REPO="git@github.com:${BASH_REMATCH[1]}/committers.git"
-	COMMITTERS_DIR="$HOME/committers/${BASH_REMATCH[1]}/committers"
+if [[ "${BUILDKITE_REPO-}" =~ ^(https://|git@)github.com(/|:)([^/]+)/ ]]; then
+	COMMITTERS_REPO="git@github.com:${BASH_REMATCH[3]}/committers.git"
+	COMMITTERS_DIR="$HOME/committers/${BASH_REMATCH[3]}/committers"
 	AUTHORS_FILE="$COMMITTERS_DIR/committers.csv"
 	if [ -d "$COMMITTERS_DIR" ]; then
 		pushd $COMMITTERS_DIR >/dev/null
