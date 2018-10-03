@@ -38,7 +38,7 @@
 
 using namespace fawkes;
 
-/** @class MetricsRequestProcessor "rrdweb_processor.h"
+/** @class MetricsRequestProcessor "metrics_processor.h"
  * Metrics web request processor.
  * Process web requests to the metrics URL space.
  * @author Tim Niemueller
