@@ -3,11 +3,10 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable, interval } from 'rxjs';
+import { interval } from 'rxjs';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { TransformsApiService } from '../services/api.service';
-import { TransformsGraph } from '../models/TransformsGraph';
 
 @Component({
   selector: 'ff-transforms-overview',

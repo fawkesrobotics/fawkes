@@ -17,7 +17,7 @@ import { DomainPrecondition } from '../models/DomainPrecondition';
 import { DomainPreconditionAtom } from '../models/DomainPreconditionAtom';
 import { DomainPreconditionCompound } from '../models/DomainPreconditionCompound';
 
-import { Observable, interval, forkJoin } from 'rxjs';
+import { interval, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'ff-clips-executive-goal-list',

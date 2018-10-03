@@ -2,9 +2,8 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { MatTableDataSource } from '@angular/material';
-import { Observable, interval } from 'rxjs';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { interval } from 'rxjs';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { ConfigurationService } from '../../../services/config/config.service';

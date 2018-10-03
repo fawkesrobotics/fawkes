@@ -6,7 +6,7 @@ import { Component, Input, AfterViewInit, ViewChild,
          OnInit, OnDestroy, HostListener } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable, forkJoin, interval } from 'rxjs';
+import { forkJoin, interval } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { BackendConfigurationService } from '../../services/backend-config/backend-config.service';
@@ -156,7 +156,6 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
                 types[d.name] = 'area';
               }
 
-              const group = [];
               if (this.group_all) {
                 for (const d of data) {
                   groups[0].push(d.name);
@@ -221,7 +220,7 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
                 }
               };
 
-            const chart = c3.generate({
+            c3.generate({
               bindto: this.chart_elem.nativeElement,
               size: {
                 height: 200
@@ -317,7 +316,6 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
         }
       }
       if (to_erase.length > 0) {
-        const erase_names = to_erase.map((e) => data[e].name);
         for (const e of to_erase.sort((a, b) => b - a)) {
           data.splice(e, 1);
         }

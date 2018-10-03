@@ -3,8 +3,8 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router, ActivatedRoute, ParamMap } from '@angular/router';
-import { Observable, interval, forkJoin } from 'rxjs';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { interval, forkJoin } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs/operators';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
@@ -12,9 +12,7 @@ import { ClipsExecutiveApiService } from '../services/api.service';
 import { Goal } from '../models/Goal';
 import { Plan } from '../models/Plan';
 import { PlanAction } from '../models/PlanAction';
-import { DomainOperator } from '../models/DomainOperator';
 import { DomainPrecondition } from '../models/DomainPrecondition';
-import { DomainPreconditionAtom } from '../models/DomainPreconditionAtom';
 import { DomainPreconditionCompound } from '../models/DomainPreconditionCompound';
 
 

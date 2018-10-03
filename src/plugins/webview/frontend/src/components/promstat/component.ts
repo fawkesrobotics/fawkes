@@ -2,11 +2,11 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import {Component, Input, AfterViewInit, ViewChild,
+import {Component, Input, AfterViewInit,
         OnInit, OnDestroy, HostListener} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable, interval } from 'rxjs';
+import { interval } from 'rxjs';
 
 import { BackendConfigurationService } from '../../services/backend-config/backend-config.service';
 

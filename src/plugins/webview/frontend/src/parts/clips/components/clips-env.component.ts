@@ -9,9 +9,8 @@ import { MatTableDataSource } from '@angular/material';
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { CardListFilterComponent } from '../../../components/filter/component';
 import { ClipsApiService } from '../services/api.service';
-import { Fact } from '../models/Fact';
 
-import { Observable, interval } from 'rxjs';
+import { interval } from 'rxjs';
 
 @Component({
   selector: 'ff-clips-env',

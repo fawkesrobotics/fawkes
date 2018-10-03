@@ -13,7 +13,7 @@ import { PluginApiService } from '../services/api.service';
 import { Plugin } from '../models/Plugin';
 import { PluginOpRequest } from '../models/PluginOpRequest';
 
-import { Observable, interval } from 'rxjs';
+import { interval } from 'rxjs';
 
 @Component({
   selector: 'ff-plugins-overview',
@@ -73,10 +73,8 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
           this.data_source.data = plugins;
           this.selection.clear();
           this.selection.select(...plugins.filter(p => p.is_loaded));
-          for (const p of plugins) {
-          if (plugins.length === 0) {
+          if (plugins.length == 0) {
             this.zero_message = 'No plugins available';
-          }
           }
           this.loading = false;
         },

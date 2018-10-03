@@ -3,13 +3,11 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Injectable, EventEmitter } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 
-import { Observable, from } from 'rxjs';
+import { from } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 
 import { BackendConfigurationService } from '../backend-config/backend-config.service';
-import { ConfigTree } from './model/ConfigTree';
 import { ConfigurationApiService } from './api.service';
 
 const CACHE_INTERVAL_MSEC = 300000;

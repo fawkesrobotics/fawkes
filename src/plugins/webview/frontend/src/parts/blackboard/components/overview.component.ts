@@ -3,12 +3,11 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable, interval } from 'rxjs';
+import { interval } from 'rxjs';
 import { SessionStorage } from 'ngx-store';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { BlackboardApiService } from '../services/api.service';
-import { InterfaceInfo } from '../models/InterfaceInfo';
 
 @Component({
   selector: 'ff-blackboard-overview',

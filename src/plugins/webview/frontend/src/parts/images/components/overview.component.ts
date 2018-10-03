@@ -3,7 +3,7 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Component, OnInit, OnDestroy, ViewChild, HostListener, ElementRef } from '@angular/core';
-import { Observable, interval } from 'rxjs';
+import { interval } from 'rxjs';
 
 import { ImageApiService } from '../services/api.service';
 import { ImageInfo } from '../models/ImageInfo';

@@ -5,7 +5,7 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { SwUpdate } from '@angular/service-worker';
-import { Observable, interval } from 'rxjs';
+import { interval } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 @Injectable()

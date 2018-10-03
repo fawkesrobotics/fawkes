@@ -5,13 +5,12 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable, interval } from 'rxjs';
+import { interval } from 'rxjs';
 import { delay, retryWhen } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 
 import { Backend } from './model/Backend';
-import { Service } from './model/Service';
 
 @Injectable()
 export class BackendConfigurationService {
@@ -195,7 +194,7 @@ export class BackendConfigurationService {
           if (err.status === 0) {
             console.error('Failed to retrieve list of available backends, API not reachable');
           } else {
-            console.error('Failed to retrieve list of available backends: ${err.error}');
+            console.error(`Failed to retrieve list of available backends: ${err.error}`);
           }
         });
   }
