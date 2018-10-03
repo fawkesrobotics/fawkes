@@ -93,33 +93,70 @@ git_repo_changed()
 		fi
 }
 
+git_ssh_keyscan ()
+{
+	URL=${1:-}
+	if [[ "$URL" =~ ^(ssh://|git@)([^/]+)[/:]([^/]+)/(.+)\.git$ ]]; then
+		HOST=${BASH_REMATCH[2]}
+		mkdir -m 0700 -p ~/.ssh
+		if ! ssh-keyscan "$HOST" >>~/.ssh/known_hosts; then
+			print_fail "git_repo_clone" "Failed to scan key for $HOST ($URL)"
+			return 2
+		fi
+	fi
+}
+
+git_ssh_identity () {
+	URL=${1:-}
+
+	IDENTITY=
+
+	if [[ "$URL" =~ ^(ssh://|git@)([^/]+)[/:]([^/]+)/(.+)\.git$ ]]; then
+		ORG=${BASH_REMATCH[3]}
+		REPO=${BASH_REMATCH[4]}
+
+		KEY_REPO=${REPO^^}
+		KEY_REPO=${KEY_REPO//-/_}
+		IDENTITY=
+		SSH_KEY_VARNAME=SSH_DEPLOY_PRIVKEY_${KEY_REPO}
+		if [ -n "${!SSH_KEY_VARNAME}" ]; then
+			IDENTITY=$HOME/.ssh/id_${ORG}_${REPO}
+			mkdir -m 0700 -p $HOME/.ssh
+			echo "${!SSH_KEY_VARNAME}" >$IDENTITY
+			chmod 600 $IDENTITY
+		fi
+	fi
+
+	echo $IDENTITY
+}
+
 git_repo_clone()
 {
 	URL=${1:-}
 	DIR=${2:-}
 	ARGS=${3:-}
 
+	if [ -z "$DIR" ]; then
+		print_fail "git_repo_clone" "Target directory argument missing for $URL"
+		return 1
+	fi
 	if [ -d $DIR ]; then
 		print_fail "git_repo_clone" "Target directory $DIR already exists"
 		return 1
 	fi
-	if [[ "$URL" =~ ^ssh://([^/]+)/(.+)$ ]]; then
-		mkdir -m 0700 -p ~/.ssh
-		if ! ssh-keyscan "${BASH_REMATCH[1]}" >>~/.ssh/known_hosts; then
-			print_fail "git_repo_clone" "Failed to scan key for $URL (1)"
-			return 2
-		fi
-	elif [[ "$URL" =~ ^[^@]+@([^:]+):(.+)$ ]]; then
-		mkdir -m 0700 -p ~/.ssh
-		if ! ssh-keyscan "${BASH_REMATCH[1]}" >>~/.ssh/known_hosts; then
-			print_fail "git_repo_clone" "Failed to scan key for $URL (2)"
-			return 2
-		fi
+
+	git_ssh_keyscan "$URL"
+	IDENTITY=$(git_ssh_identity "$URL")
+
+	if [ -n "$IDENTITY" ]; then
+		export GIT_SSH_COMMAND="ssh -o IdentitiesOnly=yes -i $IDENTITY"
 	fi
 	if ! git clone --recursive $ARGS $URL $DIR; then
+		if [ -n "$IDENTITY" ]; then unset GIT_SSH_COMMAND; fi
 		print_fail "git_repo_clone" "Failed to clone from $URL"
 		return 2
 	fi
+	if [ -n "$IDENTITY" ]; then unset GIT_SSH_COMMAND; fi
 
 	return 0
 }
@@ -140,12 +177,20 @@ git_repo_pull()
 
 		case "$REPO_CHANGED" in
 				pull)
-						echo "Pulling changes from remote"
-						if ! git pull --ff-only ; then
-								print_fail "git_repo_pull" "failed to update $(dirname $(pwd))"
-								return 1
-						fi
-						;;
+					git_ssh_keyscan "$REMOTE_URL"
+					IDENTITY=$(git_ssh_identity "$REMOTE_URL")
+
+					if [ -n "$IDENTITY" ]; then
+						export GIT_SSH_COMMAND="ssh -o IdentitiesOnly=yes -i $IDENTITY"
+					fi
+					echo "Pulling changes from remote"
+					if ! git pull --ff-only ; then
+						if [ -n "$IDENTITY" ]; then unset GIT_SSH_COMMAND; fi
+						print_fail "git_repo_pull" "failed to update $(dirname $(pwd))"
+						return 1
+					fi
+					if [ -n "$IDENTITY" ]; then unset GIT_SSH_COMMAND; fi
+					;;
 				push)
 						print_fail "git_pull" "Repository $REPO_NAME contains local changes to push"
 						;;
