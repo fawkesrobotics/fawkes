@@ -21,7 +21,7 @@ number
 %- endmacro
 
 %- macro return_type(op)
-%- if op.responses and '200' in op.responses and op.responses['200'].content and op.responses and op.responses['200'].content['application/json'] and op.responses['200'].content['application/json'].schema
+%- if op.responses and '200' in op.responses and op.responses['200'].content and op.responses['200'].content['application/json'] and op.responses['200'].content['application/json'].schema
 %-   set schema = op.responses['200'].content['application/json'].schema
 %-   if schema.type
 %-     if schema.type == 'array'
@@ -45,6 +45,17 @@ HttpResponse<string>
 %- endif
 %- endmacro
 
+%- macro http_response_import(spec)
+%- for p in spec.paths
+%-   for method in spec.paths[p]
+%-     set op = spec.paths[p][method]
+%-     if not op.responses or '200' not in op.responses or not op.responses['200'].content or not op.responses['200'].content['application/json'] or not op.responses['200'].content['application/json'].schema
+, HttpResponse
+%-     endif
+%-   endfor
+%- endfor
+%- endmacro
+
 {#- #}
 /****************************************************************************
  *  {{ spec.info.title }} -- API Service
@@ -60,7 +71,7 @@ HttpResponse<string>
  ****************************************************************************/
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams{{ http_response_import(spec) }} } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
