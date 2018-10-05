@@ -2,9 +2,7 @@
 #         Makefile Build System for Fawkes: stn-generator Plugin
 #                            -------------------
 #   Created on Sat May  6 20:16:21 2017
- 
 #   Copyright (C) 2017 by Matthias Loebach
-#
 #*****************************************************************************
 #
 #   This program is free software; you can redistribute it and/or modify
@@ -25,7 +23,7 @@ LIBS_stn_generator = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
 
 OBJS_stn_generator = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all = $(OBJS_stn-generator)
+OBJS_all = $(OBJS_stn_generator)
 
 ifeq ($(HAVE_PDDL_PARSER)$(HAVE_MONGODB),11)
   PLUGINS_all = $(PLUGINDIR)/stn-generator.$(SOEXT)
