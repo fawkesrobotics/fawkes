@@ -510,7 +510,8 @@
 	?wf <- (wm-fact (id ?id) (type SYMBOL) (is-list TRUE) (values $?objs&~:(member$ ?name ?objs)))
 	(test (> (fact-index ?wf) ?wf-idx))
 	=>
-	(delayed-do-for-all-facts ((?df domain-object)) (not (member$ ?df:name ?objs))
+	(delayed-do-for-all-facts ((?df domain-object))
+    (and (eq ?df:type ?type) (not (member$ ?df:name ?objs)))
 		(retract ?df)
 	)
 	(modify ?wm (wm-fact-idx (fact-index ?wf)))
