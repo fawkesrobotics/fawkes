@@ -372,7 +372,7 @@
 	(wm-fact (id "/config/coordination/mutex/renew-interval") (type FLOAT|UINT|INT) (value ?renew-interval))
 	?mf <- (mutex (name ?name) (state LOCKED) (request NONE) (pending-requests)
 								(locked-by ?lb&:(eq ?lb (cx-identity)))
-								(lock-time $?lt&:(timeout ?now ?lt ?renew-interval)))
+								(lock-time $?lt&:(timeout (time-trunc-ms (now-systime)) ?lt ?renew-interval)))
 	=>
 	(printout t "Automatic renewal of lock for mutex " ?name crlf)
 	(modify ?mf (request RENEW-LOCK) (response NONE) (pending-requests AUTO-RENEW-PROC))
