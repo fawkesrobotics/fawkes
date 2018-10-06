@@ -352,7 +352,7 @@
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   (plan-action (action-name ?op) (goal-id ?g) (plan-id ?p) (id ?action-id)
-    (status FORMULATED|PENDING|WAITING))
+    (state FORMULATED|PENDING|WAITING))
   ?precond <- (domain-precondition
                 (name ?precond-name)
                 (part-of ?op)
@@ -372,7 +372,7 @@
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   (plan-action (action-name ?op) (id ?action-id) (goal-id ?g) (plan-id ?p)
-    (status EXECUTION-SUCCEEDED))
+    (state EXECUTION-SUCCEEDED))
   (domain-effect (name ?effect-name) (part-of ?op))
   ?precond <- (domain-precondition
                 (name ?precond-name)
@@ -707,7 +707,7 @@
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   ?pa <- (plan-action	(id ?id) (goal-id ?g) (plan-id ?p) (action-name ?op)
-                      (status EXECUTION-SUCCEEDED)
+                      (state EXECUTION-SUCCEEDED)
 											(param-names $?action-param-names)
                       (param-values $?action-param-values))
 	(domain-operator (name ?op) (wait-sensed TRUE))
@@ -731,16 +731,16 @@
 			(bind ?next-state SENSED-EFFECTS-WAIT)
 		)
 	)
-	(modify ?pa (status ?next-state))
+	(modify ?pa (state ?next-state))
 )
 
 (defrule domain-effects-ignore-sensed
   "Apply effects of an action after it succeeded."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
-  ?pa <- (plan-action	(id ?id) (action-name ?op) (status EXECUTION-SUCCEEDED))
+  ?pa <- (plan-action	(id ?id) (action-name ?op) (state EXECUTION-SUCCEEDED))
 	(domain-operator (name ?op) (wait-sensed FALSE))
 	=>
-	(modify ?pa (status SENSED-EFFECTS-HOLD))
+	(modify ?pa (state SENSED-EFFECTS-HOLD))
 )
 
 ; Atomically assert all effects of an action after it has been executed.
@@ -750,7 +750,7 @@
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   ?pa <- (plan-action	(id ?id) (goal-id ?g) (plan-id ?p) (action-name ?op)
-                      (status SENSED-EFFECTS-HOLD)
+                      (state SENSED-EFFECTS-HOLD)
 											(param-names $?action-param-names)
                       (param-values $?action-param-values))
 	(domain-operator (name ?op))
@@ -796,7 +796,7 @@
 			)
 		)
 	)
-	(modify ?pa (status EFFECTS-APPLIED))
+	(modify ?pa (state EFFECTS-APPLIED))
 )
 
 (defrule domain-effect-sensed-positive-holds
@@ -822,10 +822,10 @@
 (defrule domain-effect-wait-sensed-done
   "After the effects of an action have been applied, change it to SENSED-EFFECTS-HOLD."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
-  ?a <- (plan-action (id ?action-id) (status SENSED-EFFECTS-WAIT) (plan-id ?p) (goal-id ?g))
+  ?a <- (plan-action (id ?action-id) (state SENSED-EFFECTS-WAIT) (plan-id ?p) (goal-id ?g))
   (not (domain-pending-sensed-fact (action-id ?action-id) (goal-id ?g) (plan-id ?p)))
   =>
-  (modify ?a (status SENSED-EFFECTS-HOLD))
+  (modify ?a (state SENSED-EFFECTS-HOLD))
 )
 
 (defrule domain-effect-sensed-remove-on-removed-action
@@ -839,9 +839,9 @@
 (defrule domain-action-final
   "After the effects of an action have been applied, change it to FINAL."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
-  ?a <- (plan-action (id ?action-id) (status EFFECTS-APPLIED))
+  ?a <- (plan-action (id ?action-id) (state EFFECTS-APPLIED))
   =>
-  (modify ?a (status FINAL))
+  (modify ?a (state FINAL))
   (domain-retract-grounding)
 )
 
@@ -853,9 +853,9 @@
 (defrule domain-action-failed
   "An action has failed."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
-  ?a <- (plan-action (id ?action-id) (status EXECUTION-FAILED))
+  ?a <- (plan-action (id ?action-id) (state EXECUTION-FAILED))
   =>
-  (modify ?a (status FAILED))
+  (modify ?a (state FAILED))
   (domain-retract-grounding)
 )
 

@@ -95,8 +95,8 @@ DomainPreconditionCompound::from_json_value(const rapidjson::Value& d)
 			std::shared_ptr<DomainPrecondition> nv{new DomainPrecondition()};
 			nv->from_json_value(v);
 			elements_.push_back(std::move(nv));
-		}	
-	}	
+		}
+	}
 
 }
 

@@ -38,8 +38,7 @@
 	<mat-divider></mat-divider>
 	<mat-card-content class="ff-card-content">
 		<div *ngIf="goal; else nodata">		
-			<div fxLayout="row" fxLayoutWrap fxLayoutAlign="space-between">
-
+			<div fxLayout="row wrap" fxLayoutWrap fxLayoutAlign="space-between">
 				<ff-property>
 					<div key>Class</div>
 					<div value>{{ goal.class }}</div>
@@ -48,6 +47,11 @@
 				<ff-property>
 					<div key>Type</div>
 					<div value>{{ goal.type }}</div>
+				</ff-property>
+
+				<ff-property>
+					<div key>Sub-Type</div>
+					<div value>{{ goal['sub-type'] | default:'&mdash;' }}</div>
 				</ff-property>
 
 				<ff-property>
@@ -63,11 +67,84 @@
 				</ff-property>
 
 				<ff-property>
-					<div key>Mesage</div>
-					<div value>{{ goal.message | default:'&mdash;'}}</div>
+					<div key>Required Resources</div>
+					<div value>
+						<ng-container *ngIf="goal['required-resources'] && goal['required-resources'].length > 0">
+							<ng-container *ngIf="goal.mode == 'COMMITTED'">
+								<span *ngFor="let r of goal['required-resources']; let last = last;"
+											[ngClass]="{'ff-warning': goal['acquired-resources'].indexOf(r) == -1}">
+									{{ r }}{{ last ? "" : "," }}
+								</span>
+							</ng-container>
+							<ng-container *ngIf="goal.mode != 'COMMITTED'">
+								{{ goal['required-resources'].join(", ") }}
+							</ng-container>
+						</ng-container>
+						<ng-container *ngIf="! goal['required-resources'] || goal['required-resources'].length == 0">
+							&mdash;
+						</ng-container>
+					</div>
+				</ff-property>
+
+				<ff-property>
+					<div key>Acquired Resources</div>
+					<div value>
+						<ng-container *ngIf="goal['acquired-resources'] && goal['acquired-resources'].length > 0">
+							<span *ngIf="goal.mode == 'RETRACTED'" ngClass="ff-warning">
+								{{ goal['acquired-resources'].join(", ") }}
+							</span>
+							<span *ngIf="goal.mode != 'RETRACTED'">
+								{{ goal['acquired-resources'].join(", ") }}
+							</span>
+						</ng-container>
+						<ng-container *ngIf="! goal['acquired-resources'] || goal['acquired-resources'].length == 0">
+							&mdash;
+						</ng-container>
+					</div>
 				</ff-property>
 			</div>
-		
+			<div fxLayout="row wrap" fxLayoutWrap fxLayoutAlign="start">
+				<ff-property>
+					<div key>Parent</div>
+					<div value>
+						<a *ngIf="goal.parent != ''"
+							 [routerLink]="['/clips-executive/goal', goal.parent]">{{ goal.parent }}</a>
+						<span *ngIf="goal.parent == ''">&mdash;</span>
+					</div>
+				</ff-property>
+
+				<ff-property>
+					<div key>Priority</div>
+					<div value [ngClass]="{'ff-warning': goal.priority > 0}">
+						{{ goal.priority }}
+					</div>
+				</ff-property>
+
+				<ff-property>
+					<div key>Children</div>
+					<div value>
+						<a *ngFor="let sg of sub_goals; let last=last;"
+							 [routerLink]="['/clips-executive/goal', sg.id]">{{ sg.id }}{{ last ? "" : ", " }}</a>
+						<span *ngIf="sub_goals.length == 0">&mdash;</span>
+					</div>
+				</ff-property>
+
+				<ff-property>
+					<div key>Siblings</div>
+					<div value>
+						<a *ngFor="let sg of sibling_goals; let last=last;"
+							 [routerLink]="['/clips-executive/goal', sg.id]">{{ sg.id }}{{ last ? "" : ", " }}</a>
+						<span *ngIf="sibling_goals.length == 0">&mdash;</span>
+					</div>
+				</ff-property>
+
+				<ff-property>
+					<div key>Message</div>
+					<div value>{{ goal.message | default:'&mdash;'}}</div>
+				</ff-property>
+
+			</div>
+			
 		</div>
 		<ng-template #nodata>
 			<ff-list-zero-state [message]="zero_message_goal"></ff-list-zero-state>

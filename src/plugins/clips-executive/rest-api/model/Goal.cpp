@@ -81,6 +81,11 @@ Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_type.SetString(*type_, allocator);
 		v.AddMember("type", v_type, allocator);
 	}
+	if (sub_type_) {
+		rapidjson::Value v_sub_type;
+		v_sub_type.SetString(*sub_type_, allocator);
+		v.AddMember("sub-type", v_sub_type, allocator);
+	}
 	if (_class_) {
 		rapidjson::Value v__class;
 		v__class.SetString(*_class_, allocator);
@@ -96,6 +101,14 @@ Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_outcome.SetString(*outcome_, allocator);
 		v.AddMember("outcome", v_outcome, allocator);
 	}
+	rapidjson::Value v_error(rapidjson::kArrayType);
+	v_error.Reserve(error_.size(), allocator);
+	for (const auto & e : error_) {
+		rapidjson::Value v;
+		v.SetString(e, allocator);
+		v_error.PushBack(v, allocator);
+	}
+	v.AddMember("error", v_error, allocator);
 	if (message_) {
 		rapidjson::Value v_message;
 		v_message.SetString(*message_, allocator);
@@ -119,6 +132,14 @@ Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_parameters.PushBack(v, allocator);
 	}
 	v.AddMember("parameters", v_parameters, allocator);
+	rapidjson::Value v_meta(rapidjson::kArrayType);
+	v_meta.Reserve(meta_.size(), allocator);
+	for (const auto & e : meta_) {
+		rapidjson::Value v;
+		v.SetString(e, allocator);
+		v_meta.PushBack(v, allocator);
+	}
+	v.AddMember("meta", v_meta, allocator);
 	rapidjson::Value v_plans(rapidjson::kArrayType);
 	v_plans.Reserve(plans_.size(), allocator);
 	for (const auto & e : plans_) {
@@ -127,6 +148,22 @@ Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_plans.PushBack(v, allocator);
 	}
 	v.AddMember("plans", v_plans, allocator);
+	rapidjson::Value v_required_resources(rapidjson::kArrayType);
+	v_required_resources.Reserve(required_resources_.size(), allocator);
+	for (const auto & e : required_resources_) {
+		rapidjson::Value v;
+		v.SetString(e, allocator);
+		v_required_resources.PushBack(v, allocator);
+	}
+	v.AddMember("required-resources", v_required_resources, allocator);
+	rapidjson::Value v_acquired_resources(rapidjson::kArrayType);
+	v_acquired_resources.Reserve(acquired_resources_.size(), allocator);
+	for (const auto & e : acquired_resources_) {
+		rapidjson::Value v;
+		v.SetString(e, allocator);
+		v_acquired_resources.PushBack(v, allocator);
+	}
+	v.AddMember("acquired-resources", v_acquired_resources, allocator);
 
 }
 
@@ -154,6 +191,9 @@ Goal::from_json_value(const rapidjson::Value& d)
 	if (d.HasMember("type") && d["type"].IsString()) {
 		type_ = d["type"].GetString();
 	}
+	if (d.HasMember("sub-type") && d["sub-type"].IsString()) {
+		sub_type_ = d["sub-type"].GetString();
+	}
 	if (d.HasMember("class") && d["class"].IsString()) {
 		_class_ = d["class"].GetString();
 	}
@@ -162,6 +202,15 @@ Goal::from_json_value(const rapidjson::Value& d)
 	}
 	if (d.HasMember("outcome") && d["outcome"].IsString()) {
 		outcome_ = d["outcome"].GetString();
+	}
+	if (d.HasMember("error") && d["error"].IsArray()) {
+		const rapidjson::Value& a = d["error"];
+		error_ = std::vector<std::string>{};
+;
+		error_.reserve(a.Size());
+		for (auto& v : a.GetArray()) {
+			error_.push_back(v.GetString());
+		}
 	}
 	if (d.HasMember("message") && d["message"].IsString()) {
 		message_ = d["message"].GetString();
@@ -179,8 +228,17 @@ Goal::from_json_value(const rapidjson::Value& d)
 		parameters_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			parameters_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
+	if (d.HasMember("meta") && d["meta"].IsArray()) {
+		const rapidjson::Value& a = d["meta"];
+		meta_ = std::vector<std::string>{};
+;
+		meta_.reserve(a.Size());
+		for (auto& v : a.GetArray()) {
+			meta_.push_back(v.GetString());
+		}
+	}
 	if (d.HasMember("plans") && d["plans"].IsArray()) {
 		const rapidjson::Value& a = d["plans"];
 		plans_ = std::vector<std::string>{};
@@ -188,8 +246,26 @@ Goal::from_json_value(const rapidjson::Value& d)
 		plans_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			plans_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
+	if (d.HasMember("required-resources") && d["required-resources"].IsArray()) {
+		const rapidjson::Value& a = d["required-resources"];
+		required_resources_ = std::vector<std::string>{};
+;
+		required_resources_.reserve(a.Size());
+		for (auto& v : a.GetArray()) {
+			required_resources_.push_back(v.GetString());
+		}
+	}
+	if (d.HasMember("acquired-resources") && d["acquired-resources"].IsArray()) {
+		const rapidjson::Value& a = d["acquired-resources"];
+		acquired_resources_ = std::vector<std::string>{};
+;
+		acquired_resources_.reserve(a.Size());
+		for (auto& v : a.GetArray()) {
+			acquired_resources_.push_back(v.GetString());
+		}
+	}
 
 }
 

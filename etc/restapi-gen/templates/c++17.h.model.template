@@ -78,7 +78,7 @@
 % endif
 %- endmacro
 
-%- macro gen_superclasses(schema)	
+%- macro gen_superclasses(schema)
 % if schema.allOf
 %   for r in schema.allOf | refs
 %     if loop.first

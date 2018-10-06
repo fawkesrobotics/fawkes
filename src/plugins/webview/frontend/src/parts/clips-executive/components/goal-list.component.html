@@ -32,7 +32,10 @@
 				<ng-container matColumnDef="mode">
 					<mat-header-cell *matHeaderCellDef> Mode </mat-header-cell>
 					<mat-cell *matCellDef="let item">
-						<mat-icon  [ngClass]="icon_class(item.goal)"[matTooltip]="item.goal.mode">{{ icon_name(item.goal) }}</mat-icon>
+						<mat-icon  [ngClass]="icon_class(item.goal)"
+											 [matTooltip]="icon_tooltip(item.goal)">
+							{{ icon_name(item.goal) }}
+						</mat-icon>
 					</mat-cell>
 				</ng-container>
 
@@ -71,12 +74,35 @@
 
 <mat-card class="ff-content-card" fxFlex="50">
 	<mat-card-title>
-		<div>Goal Graph</div>
+		<div fxLayout="row">
+			<div>Goal Graph</div>
+			<div class="ff-right">
+				<a mat-icon-button
+					 [href]="graph_svg_base64"
+					 download="goal-tree.svg"
+					 class="ff-card-title-button"
+					 [disabled]="! graph_svg_available || loading">
+					<mat-icon>save</mat-icon>
+				</a>
+				<button mat-icon-button
+								class="ff-card-title-button"
+								[disabled]="auto_refresh_subscription != null || loading"
+								(click)="refresh()">
+					<mat-icon *ngIf="!loading">refresh</mat-icon>
+					<mat-spinner *ngIf="loading" [diameter]="20"></mat-spinner>
+				</button>
+				<button mat-icon-button
+								class="ff-card-title-button"
+								(click)="toggle_autorefresh()">
+					<mat-icon [ngClass]="{'ff-warning': auto_refresh_subscription != null}">autorenew</mat-icon>
+				</button>
+			</div>
+		</div>
 	</mat-card-title>
 	<mat-divider></mat-divider>
 	<mat-card-content class="ff-card-content">
 		<div fxLayoutAlign="center" *ngIf="!show_zero_state() && goals_graph && goals_graph != ''" class="card-div">
-			<dotgraph [dot]="goals_graph" [strip_size]="false" ngClass="goals-graph"></dotgraph>
+			<dotgraph #dotgraph [dot]="goals_graph" [strip_size]="false" ngClass="goals-graph"></dotgraph>
 		</div>
 		<div *ngIf="show_zero_state() || !goals_graph">
 			<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>

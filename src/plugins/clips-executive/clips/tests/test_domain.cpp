@@ -309,17 +309,17 @@ TEST_F(DomainTest, WaitForSensedEffects)
   env.assert_fact("(plan-action"
                   " (goal-id g0) (plan-id p0)"
                   " (id 1)"
-                  " (status EXECUTION-SUCCEEDED)"
+                  " (state EXECUTION-SUCCEEDED)"
                   " (action-name drop)"
                   " (param-names o)"
                   " (param-values obj1))");
   env.run();
   EXPECT_FALSE(has_fact("((?a plan-action))",
-        "(and (eq ?a:id 1) (eq ?a:status FINAL))"));
+        "(and (eq ?a:id 1) (eq ?a:state FINAL))"));
   EXPECT_FALSE(has_fact("((?a plan-action))",
-        "(and (eq ?a:id 1) (eq ?a:status SENSED-EFFECTS-HOLD))"));
+        "(and (eq ?a:id 1) (eq ?a:state SENSED-EFFECTS-HOLD))"));
   EXPECT_TRUE(has_fact("((?a plan-action))",
-        "(and (eq ?a:id 1) (eq ?a:status SENSED-EFFECTS-WAIT))"));
+        "(and (eq ?a:id 1) (eq ?a:state SENSED-EFFECTS-WAIT))"));
   EXPECT_FALSE(has_fact("((?f domain-fact))",
         "(and (eq ?f:name on-ground) (eq ?f:param-values (create$ obj1)))"));
   env.evaluate("(delayed-do-for-all-facts ((?df domain-fact)) "
@@ -330,7 +330,7 @@ TEST_F(DomainTest, WaitForSensedEffects)
   EXPECT_TRUE(has_fact("((?f domain-fact))",
         "(and (eq ?f:name on-ground) (eq ?f:param-values (create$ obj1)))"));
   EXPECT_TRUE(has_fact("((?a plan-action))",
-        "(and (eq ?a:id 1) (eq ?a:status FINAL))"));
+        "(and (eq ?a:id 1) (eq ?a:state FINAL))"));
 }
 
 /** Do not wait if the operator has wait-sensed set to FALSE. */
@@ -364,7 +364,7 @@ TEST_F(DomainTest, OnlyWaitForEffectsIfWaitSensedIsTRUE)
   env.assert_fact("(plan-action"
                   " (id 1)"
                   " (goal-id g0) (plan-id p0)"
-                  " (status EXECUTION-SUCCEEDED)"
+                  " (state EXECUTION-SUCCEEDED)"
                   " (action-name drop)"
                   " (param-names o)"
                   " (param-values obj1))");
@@ -372,7 +372,7 @@ TEST_F(DomainTest, OnlyWaitForEffectsIfWaitSensedIsTRUE)
   EXPECT_TRUE(has_fact("((?f domain-fact))",
         "(and (eq ?f:name on-ground) (eq ?f:param-values (create$ obj1)))"));
   EXPECT_TRUE(has_fact("((?a plan-action))",
-        "(and (eq ?a:id 1) (eq ?a:status FINAL))"));
+        "(and (eq ?a:id 1) (eq ?a:state FINAL))"));
 }
 
 /** Sensed effects of an exogenous action are dropped from the precondition. */
@@ -427,7 +427,7 @@ TEST_F(DomainTest, ApplyCondtradictingEffectsWithSameParams)
   env.assert_fact("(domain-predicate (name p) (param-names x))");
   env.assert_fact("(plan-action"
                   " (id 1)"
-                  " (status EXECUTION-SUCCEEDED)"
+                  " (state EXECUTION-SUCCEEDED)"
                   " (action-name op1)"
                   " (param-names x)"
                   " (param-values a))");
@@ -530,7 +530,7 @@ TEST_F(DomainTest, Equality)
   env.reset();
   env.assert_fact("(plan-action"
                   " (id 1)"
-                  " (status PENDING)"
+                  " (state PENDING)"
                   " (goal-id g0) (plan-id p0)"
                   " (action-name op1)"
                   " (param-names x y)"
@@ -547,7 +547,7 @@ TEST_F(DomainTest, Equality)
         "(and (eq ?a:id 1) (eq ?a:executable TRUE))"));
   env.assert_fact("(plan-action"
                   " (id 2)"
-                  " (status PENDING)"
+                  " (state PENDING)"
                   " (goal-id g0) (plan-id p0)"
                   " (action-name op1)"
                   " (param-names x y)"
@@ -755,7 +755,7 @@ TEST_F(ConditionalSayDomainTest, ApplyCondEffectIfCondHolds)
   env.assert_fact(
       "(domain-fact (name speaker-ready) (param-values front_speaker))");
   env.run();
-  EXPECT_TRUE(has_fact("((?a plan-action))", "(eq ?a:status FINAL)"));
+  EXPECT_TRUE(has_fact("((?a plan-action))", "(eq ?a:state FINAL)"));
   EXPECT_TRUE(has_fact("((?fact domain-fact))",
         "(and (eq ?fact:name said) (eq ?fact:param-values (create$ hello)))"));
 }
@@ -785,7 +785,7 @@ TEST_F(DomainTest, ExogenousActionWithNonValuePredicatePrecondition)
   env.assert_fact("(domain-effect (part-of put) (predicate wp-at)"
       " (param-names mps wp)" ")");
   env.assert_fact("(plan-action (id 1) (goal-id g0) (plan-id p0)"
-      " (status FORMULATED)"
+      " (state FORMULATED)"
       " (action-name put) (param-names mps wp) (param-values C-CS wp1)" ")");
   env.run();
   EXPECT_TRUE(has_fact("((?a plan-action))", "(eq ?a:executable TRUE)"));
@@ -816,7 +816,7 @@ TEST_F(DomainTest, ExogenousActionWithValuePredicatePrecondition)
       " (type NEGATIVE)"
       " (param-names mps c) (param-constants nil PROCESSING)" ")");
   env.assert_fact("(plan-action (id 1) (goal-id g0) (plan-id p0)"
-      " (status FORMULATED)"
+      " (state FORMULATED)"
       " (action-name dispense) (param-names mps) (param-values C-CS)" ")");
   env.run();
   EXPECT_TRUE(has_fact("((?a plan-action))", "(eq ?a:executable FALSE)"));

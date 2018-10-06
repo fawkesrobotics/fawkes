@@ -125,8 +125,8 @@ DomainOperator::from_json_value(const rapidjson::Value& d)
 			std::shared_ptr<DomainOperatorParameter> nv{new DomainOperatorParameter()};
 			nv->from_json_value(v);
 			parameters_.push_back(std::move(nv));
-		}	
-	}	
+		}
+	}
 
 }
 

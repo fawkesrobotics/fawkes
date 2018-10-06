@@ -31,13 +31,13 @@
 )
 
 (defrule test-domain-set-domain-fact-said-hello
-  (plan-action (action-name say-hello) (param-values peggy) (status EXECUTION-SUCCEEDED))
+  (plan-action (action-name say-hello) (param-values peggy) (state EXECUTION-SUCCEEDED))
 =>
   (assert (domain-fact (name said) (param-values peggy hello)))
 )
 
 (defrule test-domain-set-domain-fact-said-goodbye
-  (plan-action (action-name say-goodbye) (param-values peggy goodbye) (status EXECUTION-SUCCEEDED))
+  (plan-action (action-name say-goodbye) (param-values peggy goodbye) (state EXECUTION-SUCCEEDED))
 =>
   (assert (domain-fact (name said) (param-values peggy goodbye)))
 )

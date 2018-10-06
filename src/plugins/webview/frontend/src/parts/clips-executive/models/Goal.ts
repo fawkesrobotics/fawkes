@@ -19,14 +19,19 @@ export interface Goal
 	apiVersion: string;
 	id: string;
 	type: Goal.TypeEnum;
+	sub_type?: string;
 	_class: string;
 	mode: Goal.ModeEnum;
 	outcome?: Goal.OutcomeEnum;
+	error?: Array<string>;
 	message?: string;
 	parent?: string;
 	priority?: number;
 	parameters?: Array<string>;
+	meta?: Array<string>;
 	plans?: Array<string>;
+	required_resources?: Array<string>;
+	acquired_resources?: Array<string>;
 }
 
 export namespace Goal
@@ -38,7 +43,7 @@ export namespace Goal
 		ACHIEVE: 'ACHIEVE' as TypeEnum,
 		MAINTAIN: 'MAINTAIN' as TypeEnum
 	}
-	export type ModeEnum = 'FORMULATED' | 'SELECTED' | 'EXPANDED' | 'COMMITTED' | 'DISPATCHED' | 'FINISHED' | 'EVALUATED' | 'REJECTED';
+	export type ModeEnum = 'FORMULATED' | 'SELECTED' | 'EXPANDED' | 'COMMITTED' | 'DISPATCHED' | 'FINISHED' | 'EVALUATED' | 'RETRACTED';
 	export const ModeEnum = {
 		FORMULATED: 'FORMULATED' as ModeEnum,
 		SELECTED: 'SELECTED' as ModeEnum,
@@ -47,12 +52,13 @@ export namespace Goal
 		DISPATCHED: 'DISPATCHED' as ModeEnum,
 		FINISHED: 'FINISHED' as ModeEnum,
 		EVALUATED: 'EVALUATED' as ModeEnum,
-		REJECTED: 'REJECTED' as ModeEnum
+		RETRACTED: 'RETRACTED' as ModeEnum
 	}
-	export type OutcomeEnum = 'UNKNOWN' | 'COMPLETED' | 'FAILED';
+	export type OutcomeEnum = 'UNKNOWN' | 'COMPLETED' | 'FAILED' | 'REJECTED';
 	export const OutcomeEnum = {
 		UNKNOWN: 'UNKNOWN' as OutcomeEnum,
 		COMPLETED: 'COMPLETED' as OutcomeEnum,
-		FAILED: 'FAILED' as OutcomeEnum
+		FAILED: 'FAILED' as OutcomeEnum,
+		REJECTED: 'REJECTED' as OutcomeEnum
 	}
 }

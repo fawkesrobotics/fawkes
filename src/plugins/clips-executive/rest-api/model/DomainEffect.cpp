@@ -147,8 +147,8 @@ DomainEffect::from_json_value(const rapidjson::Value& d)
 		param_names_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			param_names_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 	if (d.HasMember("param-values") && d["param-values"].IsArray()) {
 		const rapidjson::Value& a = d["param-values"];
 		param_values_ = std::vector<std::string>{};
@@ -156,8 +156,8 @@ DomainEffect::from_json_value(const rapidjson::Value& d)
 		param_values_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			param_values_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 	if (d.HasMember("param-constants") && d["param-constants"].IsArray()) {
 		const rapidjson::Value& a = d["param-constants"];
 		param_constants_ = std::vector<std::string>{};
@@ -165,8 +165,8 @@ DomainEffect::from_json_value(const rapidjson::Value& d)
 		param_constants_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			param_constants_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 
 }
 

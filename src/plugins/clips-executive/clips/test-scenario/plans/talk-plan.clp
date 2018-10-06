@@ -1,6 +1,6 @@
 
-(defrule goal-expander-create-sequence
-	?g <- (goal (mode SELECTED) (id ?goal-id) (class TESTGOAL))
+(defrule plan-talk-expand
+	?g <- (goal (mode SELECTED) (id ?goal-id) (class TALK))
 	=>
 	(bind ?plan-id (sym-cat ?goal-id -PLAN))
 	(assert
@@ -11,8 +11,8 @@
 		             (param-names name) (param-values peggy))
 		;(plan-action (id 11) (goal-id ?goal-id) (plan-id ?plan-id)
 		;             (action-name lock)
-	;							 (param-names name)
-;		             (param-values lock1))
+		;             (param-names name)
+		;	            (param-values lock1))
 		(plan-action (id 20) (goal-id ?goal-id) (plan-id ?plan-id)
 		             (duration 4.0)
 		             (action-name print)
@@ -41,5 +41,4 @@
 		             (duration 4.0)
 		             (action-name say-cleanup))
 	)
-	(modify ?g (mode EXPANDED))
 )

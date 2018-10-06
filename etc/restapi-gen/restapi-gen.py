@@ -314,7 +314,7 @@ if __name__ == '__main__':
 			f['filename'] = "%s/%sApiService.%s" % (args.output_dir, vars['name'], f['suffix'])
 
 			if not args.quiet:
-				print("%s: %s" % (f['name'], f['filename']))
+				print("%s" % f['filename'])
 
 			try:
 				res = template.render(vars)

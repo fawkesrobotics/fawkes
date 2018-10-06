@@ -40,6 +40,8 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
   zero_message_plans = "Plans or domain info not available";
   
   goal: Goal = null;
+  sub_goals: Goal[] = [];
+  sibling_goals: Goal[] = [];
   plans: Plan[] = [];
   domain = null;
 
@@ -104,9 +106,12 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
           }
           this.loading_goal = false;
           this.refresh_plans();
+          this.refresh_goals();
         },
         (err) => {
           this.goal = null;
+          this.sub_goals = [];
+          this.sibling_goals = [];
           this.loading_goal = false;
           this.domain = null; 
           if (err.status == 0) {
@@ -116,6 +121,20 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
           }
         }
       );
+  }
+
+  refresh_goals()
+  {
+    this.api_service.list_goals().subscribe(
+      (goals) => {
+        this.sub_goals = goals.filter(g => g.parent == this.goal.id);
+        if (this.goal.parent != "") {
+          this.sibling_goals = goals.filter(g => g.parent == this.goal.parent && g.id != this.goal.id);
+        } else {
+          this.sibling_goals = [];
+        }
+      }
+    );
   }
 
   refresh_plans()
@@ -199,7 +218,7 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
   {
     return domain.operators.find(op => op.name === name);
   }
-  
+
   action_status_classes(action: PlanAction)
   {
     return {
