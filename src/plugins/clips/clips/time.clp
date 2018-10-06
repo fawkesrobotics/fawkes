@@ -43,6 +43,13 @@
 	(return ?rv)
 )
 
+(deffunction time-trunc-ms (?time)
+	(bind ?rv ?time)
+	(if (= (length$ ?time) 2) then
+		(bind ?rv (create$ (nth$ 1 ?time) (* (div (nth$ 2 ?time) 1000) 1000)))
+	)
+	(return ?rv)
+)
 
 ; Timer deftemplate, to be used with the timeout function.
 ; An example for a periodically triggered rule (assuming that you do have

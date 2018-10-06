@@ -218,7 +218,7 @@
 	(not (wm-robmem-sync-map-entry (wm-fact-id ?id)))
 	=>
 	;(printout error "Add " ?id " to robot memory" crlf)
-	(bind ?now (now))
+	(bind ?now (time-trunc-ms (now-systime)))
 	(assert (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key ?key-prefix ?rest)
 																		(wm-fact-idx (fact-index ?wf))
 																		(update-timestamp ?now)))
@@ -249,7 +249,7 @@
 																	 (wm-fact-idx ?idx&:(neq ?idx (fact-index ?wf))))
 	=>
 	;(printout error "Modify " ?id " in robot memory" crlf)
-	(bind ?now (now))
+	(bind ?now (time-trunc-ms (now-systime)))
 	(modify ?sm (wm-fact-idx (fact-index ?wf)) (update-timestamp ?now))
 
 	(wm-robmem-sync-fact-update ?wf ?identity ?now)
