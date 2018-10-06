@@ -112,6 +112,12 @@
 			(bind ?is-list (sym-cat (bson-get ?doc "is-list")))
 			(bind ?value  (if (eq ?is-list TRUE) then nil else (bson-get ?doc "value")))
 			(bind ?values (if (eq ?is-list TRUE) then (bson-get-array ?doc "values") else (create$)))
+			(if (eq ?type SYMBOL) then
+				(bind ?value (sym-cat ?value))
+				(bind ?new-values (create$))
+				(foreach ?v ?values (bind ?new-values (append$ ?new-values (sym-cat ?v))))
+				(bind ?values ?new-values)
+			)
 			(if (any-factp ((?wf wm-fact)) (eq ?wf:id ?id))
 			then
 				(do-for-fact ((?wf wm-fact)) (eq ?wf:id ?id)
@@ -263,6 +269,12 @@
 			(bind ?values (bson-get-array ?obj "o.values"))
 		else
 			(bind ?value (bson-get ?obj "o.value"))
+		)
+		(if (eq ?type SYMBOL) then
+			(bind ?value (sym-cat ?value))
+			(bind ?new-values (create$))
+			(foreach ?v ?values (bind ?new-values (append$ ?new-values (sym-cat ?v))))
+			(bind ?values ?new-values)
 		)
 		(if (any-factp ((?wf wm-fact) (?sm wm-robmem-sync-map-entry)) (and (eq ?sm:wm-fact-id ?id) (eq ?wf:id ?id)))
 		then
