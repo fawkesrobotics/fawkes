@@ -45,8 +45,7 @@
 ; User: RETRACT goal
 
 (defrule retry-goal-failed-no-subgoal
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
-							 (mode EXPANDED))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL) (mode EXPANDED))
 	(not (goal (type ACHIEVE) (parent ?id)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED)
@@ -55,13 +54,12 @@
 )
 
 (defrule retry-goal-failed-invalid-params
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
-							 (mode EXPANDED)
-							 (params $?params&~:(member$ max-tries ?params)|~:(= (length$ ?params) 2)))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL) (mode EXPANDED)
+	             (params $?params&~:(member$ max-tries ?params)|~:(= (length$ ?params) 2)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED)
-					(error INVALID-PARAMETERS)
-					(message (str-cat "Invalid parameters for RETRY goal '" ?id "'")))
+	            (error INVALID-PARAMETERS)
+	            (message (str-cat "Invalid parameters for RETRY goal '" ?id "'")))
 )
 
 (defrule retry-goal-failed-many-subgoals
@@ -71,45 +69,44 @@
 	(goal (id ?id2&~?id1) (type ACHIEVE) (parent ?id))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED)
-					(error TOO-MANY-SUBGOALS)
-					(message (str-cat "More than one sub-goal for RETRY goal '" ?id "'")))
+	            (error TOO-MANY-SUBGOALS)
+	            (message (str-cat "More than one sub-goal for RETRY goal '" ?id "'")))
 )
 
 (defrule retry-goal-add-meta
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
-							 (mode EXPANDED) (meta $?meta&~:(member$ num-tries ?meta)))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL) (mode EXPANDED)
+	             (meta $?meta&~:(member$ num-tries ?meta)))
 	=>
 	(modify ?gf (meta num-tries 0))
 )
 
 (defrule retry-goal-auto-expand
 	"If a sub-goal has already been specified, automatically switch to EXPANDED."
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
-							 (mode SELECTED))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL) (mode SELECTED))
 	(goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FORMULATED))
 	=>
 	(modify ?gf (mode EXPANDED))
 )
 
 (defrule retry-goal-commit
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
-							 (mode EXPANDED)
-							 (params max-tries ?max-tries)
-							 (meta num-tries ?num-tries&:(< ?num-tries ?max-tries)))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL) (mode EXPANDED)
+	             (params max-tries ?max-tries)
+	             (meta num-tries ?num-tries&:(< ?num-tries ?max-tries)))
 	(goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FORMULATED))
 	=>
 	(bind ?new-num-tries (+ ?num-tries 1))
 	(if (> ?new-num-tries 1) then
-		(printout warn "Committing to RETRY " ?id " -> " ?sub-goal " (try " ?new-num-tries "/" ?max-tries ")" crlf)
+		(printout warn "Committing to RETRY " ?id " -> " ?sub-goal
+		               " (try " ?new-num-tries "/" ?max-tries ")" crlf)
 	)
 	(modify ?gf (mode COMMITTED) (committed-to ?sub-goal) (meta num-tries ?new-num-tries))
 )
 
 (defrule retry-goal-dispatch
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
-							 (mode COMMITTED) (committed-to ?sub-goal)
-							 (required-resources $?req)
-							 (acquired-resources $?acq&:(subsetp ?req ?acq)))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL) (mode COMMITTED)
+	             (committed-to ?sub-goal)
+	             (required-resources $?req)
+	             (acquired-resources $?acq&:(subsetp ?req ?acq)))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FORMULATED))
 	=>
 	(modify ?gf (mode DISPATCHED))
@@ -117,27 +114,27 @@
 )
 
 (defrule retry-goal-subgoal-evaluated
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
-							 (mode DISPATCHED) (committed-to ?sub-goal))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL) (mode DISPATCHED)
+	             (committed-to ?sub-goal))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED))
 	=>
 	(modify ?sg (mode RETRACTED))
 )
 
 (defrule retry-goal-subgoal-failed-or-rejected-resources-clear
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
-							 (mode DISPATCHED) (committed-to ?sub-goal)
-							 (params max-tries ?max-tries)
-							 (meta num-tries ?num-tries))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL) (mode DISPATCHED)
+	             (committed-to ?sub-goal)
+	             (params max-tries ?max-tries)
+	             (meta num-tries ?num-tries))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
-							 (type ACHIEVE) (mode RETRACTED) (outcome ?outcome&FAILED|REJECTED))
+	             (type ACHIEVE) (mode RETRACTED) (outcome ?outcome&FAILED|REJECTED))
 	=>
 	(if (= ?num-tries ?max-tries)
 	then
 		(modify ?gf (mode FINISHED) (outcome ?outcome) (committed-to nil)
-						(error (sym-cat SUB-GOAL- ?outcome))
-						(message (str-cat "RETRY goal '" ?id "' sub-goal '" ?sub-goal "' " ?outcome " in try "
-															?num-tries "/" ?max-tries)))
+		            (error (sym-cat SUB-GOAL- ?outcome))
+		            (message (str-cat "RETRY goal '" ?id "' sub-goal '" ?sub-goal
+		                              "' " ?outcome " in try " ?num-tries "/" ?max-tries)))
 	else
 		(modify ?sg (mode FORMULATED) (outcome UNKNOWN))
 		(modify ?gf (mode EXPANDED) (committed-to nil))
@@ -145,10 +142,10 @@
 )
 
 (defrule retry-goal-subgoal-completed-resources-clear
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL)
-							 (mode DISPATCHED) (committed-to ?sub-goal))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RETRY-SUBGOAL) (mode DISPATCHED)
+	             (committed-to ?sub-goal))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
-							 (type ACHIEVE) (mode RETRACTED) (outcome COMPLETED))
+	             (type ACHIEVE) (mode RETRACTED) (outcome COMPLETED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome COMPLETED))
 )

@@ -16,15 +16,18 @@
 ; TODO: Rename slots
 (deftemplate plan-action
 	(slot id (type INTEGER))
-  (slot goal-id (type SYMBOL))
+	(slot goal-id (type SYMBOL))
 	(slot plan-id (type SYMBOL))
 	(slot action-name (type SYMBOL))
 	(multislot param-names)
 	(multislot param-values)
 	(slot duration (type FLOAT))
 	(slot dispatch-time (type FLOAT) (default -1.0))
-	(slot state (type SYMBOL) (allowed-values FORMULATED PENDING WAITING RUNNING EXECUTION-SUCCEEDED SENSED-EFFECTS-WAIT SENSED-EFFECTS-HOLD EFFECTS-APPLIED FINAL EXECUTION-FAILED FAILED))
-  (slot executable (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
+	(slot state (type SYMBOL)
+	            (allowed-values FORMULATED PENDING WAITING RUNNING EXECUTION-SUCCEEDED
+	                            SENSED-EFFECTS-WAIT SENSED-EFFECTS-HOLD EFFECTS-APPLIED
+	                            FINAL EXECUTION-FAILED FAILED))
+	(slot executable (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
 	(slot error-msg (type STRING))
 )
 

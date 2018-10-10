@@ -37,8 +37,7 @@
 ; User: RETRACT goal
 
 (defrule run-one-goal-expand-failed
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
-							 (mode EXPANDED))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS) (mode EXPANDED))
 	(not (goal (type ACHIEVE) (parent ?id)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED)
@@ -46,31 +45,29 @@
 )
 
 (defrule run-one-goal-commit
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
-							 (mode EXPANDED))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS) (mode EXPANDED))
 	(goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FORMULATED)
-				(priority ?priority))
+	      (priority ?priority))
 	(not (goal (id ~?sub-goal) (parent ?id) (type ACHIEVE) (mode FORMULATED)
-						 (priority ?priority2&:(> ?priority2 ?priority))))
+	           (priority ?priority2&:(> ?priority2 ?priority))))
 	=>
 	(modify ?gf (mode COMMITTED) (committed-to ?sub-goal))
 )
 
 (defrule run-one-goal-reject
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
-							 (mode EXPANDED))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS) (mode EXPANDED))
 	(forall (goal (id ?sub-goal) (parent ?id) (type ACHIEVE))
-					(goal (id ?sub-goal) (mode EVALUATED) (outcome REJECTED)))
+		(goal (id ?sub-goal) (mode EVALUATED) (outcome REJECTED)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to nil)
-					(error SUB-GOALS-REJECTED))
+	        (error SUB-GOALS-REJECTED))
 )
 
 (defrule run-one-goal-dispatch
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
-							 (mode COMMITTED) (committed-to ?sub-goal)
-							 (required-resources $?req)
-							 (acquired-resources $?acq&:(subsetp ?req ?acq)))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS) (mode COMMITTED)
+	             (committed-to ?sub-goal)
+	             (required-resources $?req)
+	             (acquired-resources $?acq&:(subsetp ?req ?acq)))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode FORMULATED))
 	=>
 	(modify ?gf (mode DISPATCHED))
@@ -78,27 +75,27 @@
 )
 
 (defrule run-one-goal-subgoal-evaluated
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
-							 (mode DISPATCHED) (committed-to ?sub-goal))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS) (mode DISPATCHED)
+	             (committed-to ?sub-goal))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (type ACHIEVE) (mode EVALUATED))
 	=>
 	(modify ?sg (mode RETRACTED))
 )
 
 (defrule run-one-goal-subgoal-rejected-resources-clear
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
-							 (mode DISPATCHED) (committed-to ?sub-goal))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS) (mode DISPATCHED)
+	             (committed-to ?sub-goal))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
-							 (type ACHIEVE) (mode RETRACTED) (outcome REJECTED))
+	             (type ACHIEVE) (mode RETRACTED) (outcome REJECTED))
 	=>
 	(modify ?gf (mode EXPANDED) (committed-to nil))
 )
 
 (defrule run-one-goal-subgoal-failed-resources-clear
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
-							 (mode DISPATCHED) (committed-to ?sub-goal))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS) (mode DISPATCHED)
+	             (committed-to ?sub-goal))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
-							 (type ACHIEVE) (mode RETRACTED) (outcome FAILED))
+	             (type ACHIEVE) (mode RETRACTED) (outcome FAILED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to nil)
 					(error SUB-GOAL-FAILED)
@@ -106,10 +103,10 @@
 )
 
 (defrule run-one-goal-subgoal-completed-resources-clear
-	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS)
-							 (mode DISPATCHED) (committed-to ?sub-goal))
+	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS) (mode DISPATCHED)
+	             (committed-to ?sub-goal))
 	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
-							 (type ACHIEVE) (mode RETRACTED) (outcome COMPLETED))
+	             (type ACHIEVE) (mode RETRACTED) (outcome COMPLETED))
 	=>
 	(modify ?gf (mode FINISHED) (outcome COMPLETED) (committed-to nil))
 )

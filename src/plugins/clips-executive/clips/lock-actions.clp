@@ -50,9 +50,9 @@
 
 (defrule lock-actions-lock-start
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (state PENDING)
-                      (action-name lock) (executable TRUE)
-                      (param-names $?param-names)
-                      (param-values $?param-values))
+	                    (action-name lock) (executable TRUE)
+	                    (param-names $?param-names)
+	                    (param-values $?param-values))
 	=>
 	(bind ?lock-name (plan-action-arg name ?param-names ?param-values))
 	; The following performs a synchronous/blocking call
@@ -64,10 +64,10 @@
 
 (defrule lock-actions-lock-acquired
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
-                      (action-name lock) (state RUNNING)
-                      (param-names $?param-names) (param-values $?param-values))
+	                    (action-name lock) (state RUNNING)
+	                    (param-names $?param-names) (param-values $?param-values))
 	?mf <- (mutex (name ?name&:(eq ?name (plan-action-arg name ?param-names ?param-values)))
-								(request LOCK) (response ACQUIRED))
+	              (request LOCK) (response ACQUIRED))
 	=>
 	(modify ?pa (state EXECUTION-SUCCEEDED))
 	(modify ?mf (request NONE) (response NONE))
@@ -75,10 +75,10 @@
 
 (defrule lock-actions-lock-rejected
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
-                      (action-name lock) (state RUNNING)
-                      (param-names $?param-names) (param-values $?param-values))
+	                    (action-name lock) (state RUNNING)
+	                    (param-names $?param-names) (param-values $?param-values))
 	?mf <- (mutex (name ?name&:(eq ?name (plan-action-arg name ?param-names ?param-values)))
-								(request LOCK) (response REJECTED|ERROR) (error-msg ?error-msg))
+	              (request LOCK) (response REJECTED|ERROR) (error-msg ?error-msg))
 	=>
 	(modify ?pa (state EXECUTION-FAILED) (error-msg ?error-msg))
 	(modify ?mf (request NONE) (response NONE) (error-msg ""))
@@ -86,9 +86,9 @@
 
 (defrule lock-actions-unlock-start
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (state PENDING)
-                      (action-name unlock) (executable TRUE)
-                      (param-names $?param-names)
-                      (param-values $?param-values))
+	                    (action-name unlock) (executable TRUE)
+	                    (param-names $?param-names)
+	                    (param-values $?param-values))
 	=>
 	(bind ?lock-name (plan-action-arg name ?param-names ?param-values))
 	; The following performs a synchronous/blocking call
@@ -100,10 +100,10 @@
 
 (defrule lock-actions-unlock-done
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
-                      (action-name unlock) (state RUNNING)
-                      (param-names $?param-names) (param-values $?param-values))
+	                    (action-name unlock) (state RUNNING)
+	                    (param-names $?param-names) (param-values $?param-values))
 	?mf <- (mutex (name ?name&:(eq ?name (plan-action-arg name ?param-names ?param-values)))
-								(request UNLOCK) (response UNLOCKED))
+	              (request UNLOCK) (response UNLOCKED))
 	=>
 	(modify ?pa (state EXECUTION-SUCCEEDED))
 	(modify ?mf (request NONE) (response NONE))
@@ -111,7 +111,7 @@
 
 (defrule lock-actions-flush-locks-start
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (state PENDING)
-                      (action-name flush-locks) (executable TRUE))
+	                    (action-name flush-locks) (executable TRUE))
 	=>
 	(mutex-flush-locks-async)
 	(modify ?pa (state RUNNING))
@@ -119,7 +119,7 @@
 
 (defrule lock-actions-flush-locks-succeeded
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
-                      (action-name flush-locks) (state RUNNING))
+	                    (action-name flush-locks) (state RUNNING))
 	?mf <- (mutex-expire-task (task FLUSH) (state COMPLETED))
 	=>
 	(modify ?pa (state EXECUTION-SUCCEEDED))
@@ -128,7 +128,7 @@
 
 (defrule lock-actions-flush-locks-failed
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
-                      (action-name flush-locks) (state RUNNING))
+	                    (action-name flush-locks) (state RUNNING))
 	?mf <- (mutex-expire-task (task FLUSH) (state FAILED))
 	=>
 	(modify ?pa (state EXECUTION-FAILED))
@@ -137,7 +137,7 @@
 
 (defrule lock-actions-expire-locks-start
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id) (state PENDING)
-                      (action-name expire-locks) (executable TRUE))
+	                    (action-name expire-locks) (executable TRUE))
 	=>
 	(mutex-expire-locks-async)
 	(modify ?pa (state RUNNING))
@@ -145,7 +145,7 @@
 
 (defrule lock-actions-expire-locks-succeeded
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
-                      (action-name expire-locks) (state RUNNING))
+	                    (action-name expire-locks) (state RUNNING))
 	?mf <- (mutex-expire-task (task EXPIRE) (state COMPLETED))
 	=>
 	(modify ?pa (state EXECUTION-SUCCEEDED))
@@ -154,7 +154,7 @@
 
 (defrule lock-actions-expire-locks-failed
 	?pa <- (plan-action (plan-id ?plan-id) (id ?id)
-                      (action-name expire-locks) (state RUNNING))
+	                    (action-name expire-locks) (state RUNNING))
 	?mf <- (mutex-expire-task (task EXPIRE) (state FAILED))
 	=>
 	(modify ?pa (state EXECUTION-FAILED))

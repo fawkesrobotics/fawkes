@@ -89,7 +89,7 @@
   "
 	(slot id (type SYMBOL))
 	(slot class (type SYMBOL))
-  (slot type (type SYMBOL) (allowed-values ACHIEVE MAINTAIN) (default ACHIEVE))
+	(slot type (type SYMBOL) (allowed-values ACHIEVE MAINTAIN) (default ACHIEVE))
 
 	; The sub-type of a goal describes the inherent behavior of a
 	; goal. It is used to specify well-known goals with specific
@@ -104,7 +104,7 @@
 	; RUN-ALL-OF-SUBGOALS, TRY-ALL-OF-SUBGOALS, or RETRY-SUBGOAL) is
 	; used for the parent goal, the user must take take care of all
 	; stages of the lifecycle.
-  (slot parent (type SYMBOL))
+	(slot parent (type SYMBOL))
 
 	; The mode describes the stage in the goal lifecycle the goal is in, see
 	; general template documentation above.
@@ -161,8 +161,8 @@
 	; advance beyond a goal until all resources for a goal have been
 	; deallocated. The automatic cleanup waits for all resources to be
 	; deallocated.
-  (multislot required-resources (type SYMBOL))
-  (multislot acquired-resources (type SYMBOL))
+	(multislot required-resources (type SYMBOL))
+	(multislot acquired-resources (type SYMBOL))
 
 	; Once committing to a goal, this identifies the goal or plan to
 	; which we have committed, in particular if there are multiple
@@ -187,7 +187,7 @@
 	; we can retract if there is no parent goal, or the parent goal is a
 	; MAINTAIN goal, i.e., it is never RETRACTED itself.
 	(or (goal (id ?id) (parent nil))
-			(goal (id ?parent) (type MAINTAIN)))
+	    (goal (id ?parent) (type MAINTAIN)))
 	=>
 	(printout t "Retracting goal " ?id crlf)
 	(goal-retract-goal-tree ?id)
