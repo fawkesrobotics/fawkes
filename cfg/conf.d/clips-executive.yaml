@@ -31,6 +31,12 @@ clips-executive:
   # the lock just due to an oversight.
   steal-skiller-control: true
 
+  # If set to true, goals will be cleaned automatically when they
+  # reach the RETRACTED state. Disabling be useful for debugging.
+  # You need to manually cleanup goals (and associated data such as
+  # plans) to keep things tidy.
+  automatic-goal-retraction: true
+
   # Directory where to look for CLIPS files
   clips-dirs: ["@BASEDIR@/src/clips-specs"]
 
@@ -80,6 +86,16 @@ clips-executive:
         # stage-2 is domain-independent CX initialization
         # It contains a set of fixed items loaded. Custom extensions may
         # be loaded in this stage. They are loaded *after* the defaults.
+        stage-2:
+          - name: goal-types
+            files:
+              - goals/run-one.clp
+              - goals/run-all.clp
+              - goals/try-all.clp
+              - goals/retry.clp
+              - goals/timeout.clp
+              - goals/automatic.clp
+              - goal-tree.clp
 
         # Domain-specific CX initialization.
         # In the third stage load domain-specific files such as domain
@@ -102,9 +118,16 @@ clips-executive:
           #- name: coordination
           #  file: coordination-mutex.clp
           - name: goal-reasoner
-            file: test-scenario/goal-reasoner.clp
-          - name: goal-expander
-            file: test-scenario/fixed-sequence.clp
+            files:
+              - test-scenario/goal-reasoner.clp
+              - test-scenario/goals/always-fail.clp
+              - test-scenario/goals/always-reject.clp
+              - test-scenario/goals/succeed-second-try.clp
+              - test-scenario/goals/hang-noop.clp
+              - test-scenario/goals/talk.clp
+          - name: plans
+            files:
+              - test-scenario/plans/talk-plan.clp
           - name: action-selection
             file: test-scenario/action-selection.clp
           - name: action-execution

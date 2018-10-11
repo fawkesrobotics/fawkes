@@ -12,7 +12,7 @@
 )
 
 (defrule done
-	(plan-action (id ?id) (status ?s))
+	(plan-action (id ?id) (state ?s))
 	=>
 	(printout t "Action " ?id " is now " ?s crlf)
 )

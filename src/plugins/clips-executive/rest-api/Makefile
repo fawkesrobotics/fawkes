@@ -31,6 +31,8 @@ ifeq ($(HAVE_CPP17)$(HAVE_WEBVIEW)$(HAVE_CLIPS)$(HAVE_RAPIDJSON),1111)
   LDFLAGS += $(LDFLAGS_WEBVIEW) $(LDFLAGS_CLIPS) $(LDFLAGS_RAPIDJSON) 
 
   PLUGINS_all = $(PLUGINDIR)/clips-executive-rest-api.$(SOEXT)
+
+  WEBVIEW_FRONTEND_PART=clips-executive
 else
   ifneq ($(HAVE_CPP17),1)
     WARN_TARGETS += warning_cpp17

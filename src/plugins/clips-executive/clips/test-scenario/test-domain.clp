@@ -38,13 +38,13 @@
 )
 
 (defrule test-domain-set-domain-fact-said-hello
-  (plan-action (action-name say-hello|say-hello-again) (param-values peggy) (status SENSED-EFFECTS-WAIT))
+  (plan-action (action-name say-hello|say-hello-again) (param-values peggy) (state SENSED-EFFECTS-WAIT))
 =>
   (assert (domain-fact (name said) (param-values peggy hello)))
 )
 
 (defrule test-domain-set-domain-fact-said-goodbye
-  (plan-action (action-name say-goodbye) (status SENSED-EFFECTS-WAIT))
+  (plan-action (action-name say-goodbye) (state SENSED-EFFECTS-WAIT))
 =>
   (assert (domain-fact (name said) (param-values peggy goodbye)))
 )

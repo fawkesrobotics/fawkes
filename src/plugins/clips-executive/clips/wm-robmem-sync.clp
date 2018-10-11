@@ -112,6 +112,12 @@
 			(bind ?is-list (sym-cat (bson-get ?doc "is-list")))
 			(bind ?value  (if (eq ?is-list TRUE) then nil else (bson-get ?doc "value")))
 			(bind ?values (if (eq ?is-list TRUE) then (bson-get-array ?doc "values") else (create$)))
+			(if (or (eq ?type SYMBOL) (eq ?type BOOL)) then
+				(bind ?value (sym-cat ?value))
+				(bind ?new-values (create$))
+				(foreach ?v ?values (bind ?new-values (append$ ?new-values (sym-cat ?v))))
+				(bind ?values ?new-values)
+			)
 			(if (any-factp ((?wf wm-fact)) (eq ?wf:id ?id))
 			then
 				(do-for-fact ((?wf wm-fact)) (eq ?wf:id ?id)
@@ -212,7 +218,7 @@
 	(not (wm-robmem-sync-map-entry (wm-fact-id ?id)))
 	=>
 	;(printout error "Add " ?id " to robot memory" crlf)
-	(bind ?now (now))
+	(bind ?now (time-trunc-ms (now-systime)))
 	(assert (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key ?key-prefix ?rest)
 																		(wm-fact-idx (fact-index ?wf))
 																		(update-timestamp ?now)))
@@ -243,7 +249,7 @@
 																	 (wm-fact-idx ?idx&:(neq ?idx (fact-index ?wf))))
 	=>
 	;(printout error "Modify " ?id " in robot memory" crlf)
-	(bind ?now (now))
+	(bind ?now (time-trunc-ms (now-systime)))
 	(modify ?sm (wm-fact-idx (fact-index ?wf)) (update-timestamp ?now))
 
 	(wm-robmem-sync-fact-update ?wf ?identity ?now)
@@ -264,13 +270,20 @@
 		else
 			(bind ?value (bson-get ?obj "o.value"))
 		)
+		(if (or (eq ?type SYMBOL) (eq ?type BOOL)) then
+			(bind ?value (sym-cat ?value))
+			(bind ?new-values (create$))
+			(foreach ?v ?values (bind ?new-values (append$ ?new-values (sym-cat ?v))))
+			(bind ?values ?new-values)
+		)
 		(if (any-factp ((?wf wm-fact) (?sm wm-robmem-sync-map-entry)) (and (eq ?sm:wm-fact-id ?id) (eq ?wf:id ?id)))
 		then
 			(do-for-fact ((?wf wm-fact) (?sm wm-robmem-sync-map-entry)) (and (eq ?sm:wm-fact-id ?id) (eq ?wf:id ?id))
 				(if (time> ?update-timestamp ?sm:update-timestamp)
 				then
 					(printout debug "wm-robmem-sync-update: updating (known fact) " ?id crlf)
-					(modify ?wf (type ?type) (is-list ?is-list) (value ?value) (values ?values))
+					(bind ?new-wf (modify ?wf (type ?type) (is-list ?is-list) (value ?value) (values ?values)))
+					(modify ?sm (wm-fact-idx (fact-index ?new-wf)))
 				else
 					(printout warn "wm-robmem-sync-update: received update for " ?id " with older data than our own" crlf)
 				)

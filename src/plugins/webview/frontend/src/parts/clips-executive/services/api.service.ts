@@ -38,7 +38,7 @@ export class ClipsExecutiveApiService
 		  params = params.set("pretty", pretty.toString());
 		}
     let headers = new HttpHeaders();
-		
+
     headers = headers.set('Accept', 'application/json');
     return this.http.get<Goal[]>(`${this.backend.url_for('api')}/clips-executive/goals`, 
 		  { headers: headers, params: params,
@@ -55,7 +55,7 @@ export class ClipsExecutiveApiService
 		  params = params.set("pretty", pretty.toString());
 		}
     let headers = new HttpHeaders();
-		
+
     headers = headers.set('Accept', 'application/json');
     return this.http.get<Goal>(`${this.backend.url_for('api')}/clips-executive/goals/${encodeURIComponent(String(id))}`, 
 		  { headers: headers, params: params,
@@ -69,7 +69,7 @@ export class ClipsExecutiveApiService
 		  params = params.set("pretty", pretty.toString());
 		}
     let headers = new HttpHeaders();
-		
+
     headers = headers.set('Accept', 'application/json');
     return this.http.get<Plan[]>(`${this.backend.url_for('api')}/clips-executive/plans`, 
 		  { headers: headers, params: params,
@@ -89,7 +89,7 @@ export class ClipsExecutiveApiService
 		  params = params.set("pretty", pretty.toString());
 		}
     let headers = new HttpHeaders();
-		
+
     headers = headers.set('Accept', 'application/json');
     return this.http.get<Plan>(`${this.backend.url_for('api')}/clips-executive/plans/${encodeURIComponent(String(goal_id))}/${encodeURIComponent(String(id))}`, 
 		  { headers: headers, params: params,
@@ -103,7 +103,7 @@ export class ClipsExecutiveApiService
 		  params = params.set("pretty", pretty.toString());
 		}
     let headers = new HttpHeaders();
-		
+
     headers = headers.set('Accept', 'application/json');
     return this.http.get<DomainObject[]>(`${this.backend.url_for('api')}/clips-executive/domain-objects`, 
 		  { headers: headers, params: params,
@@ -117,7 +117,7 @@ export class ClipsExecutiveApiService
 		  params = params.set("pretty", pretty.toString());
 		}
     let headers = new HttpHeaders();
-		
+
     headers = headers.set('Accept', 'application/json');
     return this.http.get<DomainPredicate[]>(`${this.backend.url_for('api')}/clips-executive/domain-predicates`, 
 		  { headers: headers, params: params,
@@ -131,7 +131,7 @@ export class ClipsExecutiveApiService
 		  params = params.set("pretty", pretty.toString());
 		}
     let headers = new HttpHeaders();
-		
+
     headers = headers.set('Accept', 'application/json');
     return this.http.get<DomainFact[]>(`${this.backend.url_for('api')}/clips-executive/domain-facts`, 
 		  { headers: headers, params: params,
@@ -145,7 +145,7 @@ export class ClipsExecutiveApiService
 		  params = params.set("pretty", pretty.toString());
 		}
     let headers = new HttpHeaders();
-		
+
     headers = headers.set('Accept', 'application/json');
     return this.http.get<DomainOperator[]>(`${this.backend.url_for('api')}/clips-executive/domain-operators`, 
 		  { headers: headers, params: params,

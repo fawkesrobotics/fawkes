@@ -25,7 +25,7 @@
 (defrule skill-action-init
 	(confval (path "/clips-executive/spec") (type STRING) (value ?spec))
 	(confval (path ?p&:(eq (str-index (str-cat "/clips-executive/specs/" ?spec "/action-mapping/") ?p) 1))
-					 (type STRING) (value ?s))
+	         (type STRING) (value ?s))
 	=>
 	(bind ?prefix (str-cat "/clips-executive/specs/" ?spec "/action-mapping/"))
 	(bind ?name (sym-cat (sub-string (+ (str-length ?prefix) 1) (str-length ?p) ?p)))
@@ -33,16 +33,16 @@
 )
 
 (defrule skill-action-start
-	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id) (status PENDING)
-                      (action-name ?action-name) (executable TRUE)
-                      (param-names $?params)
-                      (param-values $?param-values))
+	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id) (state PENDING)
+	                    (action-name ?action-name) (executable TRUE)
+	                    (param-names $?params)
+	                    (param-values $?param-values))
 	(skill-action-mapping (name ?action-name))
 	(not (skill-action-execinfo))
 	(skiller-control (acquired TRUE))
 	=>
 	(bind ?skill-id (skill-call ?action-name ?params ?param-values))
-	(modify ?pa (status WAITING))
+	(modify ?pa (state WAITING))
 	(bind ?args (create$))
 	(loop-for-count (?i (length$ ?params))
 		(bind ?args (append$ ?args (nth$ ?i ?params) (nth$ ?i ?param-values)))
@@ -53,35 +53,58 @@
 
 (defrule skill-action-running
 	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
-											(action-name ?action-name) (status WAITING))
+	                    (action-name ?action-name) (state WAITING))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
-																(action-id ?id) (skill-id ?skill-id))
+	                              (action-id ?id) (skill-id ?skill-id))
 	(skill (id ?skill-id) (status S_RUNNING))
 	=>
 	(printout t "Action " ?action-name " is running" crlf)
-	(modify ?pa (status RUNNING))
+	(modify ?pa (state RUNNING))
 )
 
 (defrule skill-action-final
 	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
-											(action-name ?action-name) (status WAITING|RUNNING))
+	                    (action-name ?action-name) (state WAITING|RUNNING))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
-																(action-id ?id) (skill-id ?skill-id))
+	                              (action-id ?id) (skill-id ?skill-id))
 	?sf <- (skill (id ?skill-id) (status S_FINAL))
 	=>
 	(printout t "Execution of " ?action-name " completed successfully" crlf)
-	(modify ?pa (status EXECUTION-SUCCEEDED))
+	(modify ?pa (state EXECUTION-SUCCEEDED))
 	(retract ?sf ?pe)
 )
 
 (defrule skill-action-failed
 	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
-											(action-name ?action-name) (status WAITING|RUNNING))
+	                    (action-name ?action-name) (state WAITING|RUNNING))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
-																(action-id ?id) (skill-id ?skill-id))
+	                              (action-id ?id) (skill-id ?skill-id))
 	?sf <- (skill (id ?skill-id) (status S_FAILED) (error-msg ?error))
 	=>
 	(printout warn "Execution of " ?action-name " FAILED (" ?error ")" crlf)
-	(modify ?pa (status EXECUTION-FAILED))
+	(modify ?pa (state EXECUTION-FAILED))
 	(retract ?sf ?pe)
+)
+
+(defrule skill-action-cancel-if-action-does-not-exist
+	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
+	                              (action-id ?id) (skill-id ?skill-id))
+	(skill (id ?skill-id) (status S_RUNNING))
+	(not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)))
+	=>
+	(printout warn
+		  "Cancelling Skill Execution, corresponding action does not exist" crlf)
+	(bind ?m
+	  (blackboard-create-msg "SkillerInterface::Skiller" "StopExecMessage"))
+	(blackboard-send-msg ?m)
+	(retract ?pe)
+)
+
+(defrule skill-action-retract-execinfo-without-action
+	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
+	                              (action-id ?id) (skill-id ?skill-id))
+	(not (skill (status S_RUNNING) (id ?skill-id)))
+	(not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?action-id)))
+	=>
+	(retract ?pe)
 )

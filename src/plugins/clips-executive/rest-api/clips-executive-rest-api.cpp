@@ -145,7 +145,22 @@ get_values(const CLIPS::Fact::pointer &fact, const std::string &slot_name)
 	CLIPS::Values v = fact->slot_value(slot_name);
 	std::vector<std::string> rv(v.size());
 	for (size_t i = 0; i < v.size(); ++i) {
-		rv[i] = static_cast<std::string&>(v[i]);
+		switch (v[i].type()) {
+		case CLIPS::TYPE_FLOAT:
+			rv[i] = std::to_string(static_cast<double>(v[i]));
+			break;
+		case CLIPS::TYPE_INTEGER:
+			rv[i] = std::to_string(static_cast<long long int>(v[i]));
+			break;
+		case CLIPS::TYPE_SYMBOL:
+		case CLIPS::TYPE_STRING:
+		case CLIPS::TYPE_INSTANCE_NAME:
+			rv[i] = static_cast<std::string&>(v[i]);
+			break;
+		default:
+			rv[i] = "CANNOT-REPRESENT";
+			break;
+		}
 	}
 	return rv;
 }
@@ -160,12 +175,17 @@ ClipsExecutiveRestApi::generate_goal(CLIPS::Fact::pointer fact)
 	g.set_id(get_value<std::string>(fact, "id"));
 	g.set__class(get_value<std::string>(fact, "class"));
 	g.set_type(get_value<std::string>(fact, "type"));
+	g.set_sub_type(get_value<std::string>(fact, "sub-type"));
 	g.set_mode(get_value<std::string>(fact, "mode"));
-	g.set_outcome(get_value<std::string>(fact, "outcome"));
 	g.set_parent(get_value<std::string>(fact, "parent"));
+	g.set_outcome(get_value<std::string>(fact, "outcome"));
+	g.set_error(get_values(fact, "error"));
 	g.set_message(get_value<std::string>(fact, "message"));
 	g.set_priority(get_value<long int>(fact, "priority"));
 	g.set_parameters(get_values(fact, "params"));
+	g.set_meta(get_values(fact, "meta"));
+	g.set_required_resources(get_values(fact, "required-resources"));
+	g.set_acquired_resources(get_values(fact, "acquired-resources"));
 
 	CLIPS::Fact::pointer pfact = clips_->get_facts();
 	while (pfact) {

@@ -147,6 +147,22 @@ class Goal
 	{
 		type_ = type;
 	}
+  /** Get sub-type value.
+   * @return sub-type value
+   */
+	std::optional<std::string>
+ sub_type() const
+	{
+		return sub_type_;
+	}
+
+	/** Set sub-type value.
+	 * @param sub_type new value
+	 */
+	void set_sub_type(const std::string& sub_type)
+	{
+		sub_type_ = sub_type;
+	}
   /** Get class value.
    * @return class value
    */
@@ -194,6 +210,38 @@ class Goal
 	void set_outcome(const std::string& outcome)
 	{
 		outcome_ = outcome;
+	}
+  /** Get error value.
+   * @return error value
+   */
+	std::vector<std::string>
+ error() const
+	{
+		return error_;
+	}
+
+	/** Set error value.
+	 * @param error new value
+	 */
+	void set_error(const std::vector<std::string>& error)
+	{
+		error_ = error;
+	}
+	/** Add element to error array.
+	 * @param error new value
+	 */
+	void addto_error(const std::string&& error)
+	{
+		error_.push_back(std::move(error));
+	}
+
+	/** Add element to error array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param error new value
+	 */
+	void addto_error(const std::string& error)
+	{
+		error_.push_back(error);
 	}
   /** Get message value.
    * @return message value
@@ -275,6 +323,38 @@ class Goal
 	{
 		parameters_.push_back(parameters);
 	}
+  /** Get meta value.
+   * @return meta value
+   */
+	std::vector<std::string>
+ meta() const
+	{
+		return meta_;
+	}
+
+	/** Set meta value.
+	 * @param meta new value
+	 */
+	void set_meta(const std::vector<std::string>& meta)
+	{
+		meta_ = meta;
+	}
+	/** Add element to meta array.
+	 * @param meta new value
+	 */
+	void addto_meta(const std::string&& meta)
+	{
+		meta_.push_back(std::move(meta));
+	}
+
+	/** Add element to meta array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param meta new value
+	 */
+	void addto_meta(const std::string& meta)
+	{
+		meta_.push_back(meta);
+	}
   /** Get plans value.
    * @return plans value
    */
@@ -307,6 +387,70 @@ class Goal
 	{
 		plans_.push_back(plans);
 	}
+  /** Get required-resources value.
+   * @return required-resources value
+   */
+	std::vector<std::string>
+ required_resources() const
+	{
+		return required_resources_;
+	}
+
+	/** Set required-resources value.
+	 * @param required_resources new value
+	 */
+	void set_required_resources(const std::vector<std::string>& required_resources)
+	{
+		required_resources_ = required_resources;
+	}
+	/** Add element to required-resources array.
+	 * @param required_resources new value
+	 */
+	void addto_required_resources(const std::string&& required_resources)
+	{
+		required_resources_.push_back(std::move(required_resources));
+	}
+
+	/** Add element to required-resources array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param required_resources new value
+	 */
+	void addto_required_resources(const std::string& required_resources)
+	{
+		required_resources_.push_back(required_resources);
+	}
+  /** Get acquired-resources value.
+   * @return acquired-resources value
+   */
+	std::vector<std::string>
+ acquired_resources() const
+	{
+		return acquired_resources_;
+	}
+
+	/** Set acquired-resources value.
+	 * @param acquired_resources new value
+	 */
+	void set_acquired_resources(const std::vector<std::string>& acquired_resources)
+	{
+		acquired_resources_ = acquired_resources;
+	}
+	/** Add element to acquired-resources array.
+	 * @param acquired_resources new value
+	 */
+	void addto_acquired_resources(const std::string&& acquired_resources)
+	{
+		acquired_resources_.push_back(std::move(acquired_resources));
+	}
+
+	/** Add element to acquired-resources array.
+	 * The move-semantics version (std::move) should be preferred.
+	 * @param acquired_resources new value
+	 */
+	void addto_acquired_resources(const std::string& acquired_resources)
+	{
+		acquired_resources_.push_back(acquired_resources);
+	}
  private:
 	std::optional<std::string>
  kind_;
@@ -317,11 +461,15 @@ class Goal
 	std::optional<std::string>
  type_;
 	std::optional<std::string>
+ sub_type_;
+	std::optional<std::string>
  _class_;
 	std::optional<std::string>
  mode_;
 	std::optional<std::string>
  outcome_;
+	std::vector<std::string>
+ error_;
 	std::optional<std::string>
  message_;
 	std::optional<std::string>
@@ -331,6 +479,12 @@ class Goal
 	std::vector<std::string>
  parameters_;
 	std::vector<std::string>
+ meta_;
+	std::vector<std::string>
  plans_;
+	std::vector<std::string>
+ required_resources_;
+	std::vector<std::string>
+ acquired_resources_;
 
 };

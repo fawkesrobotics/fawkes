@@ -115,8 +115,8 @@ DomainFact::from_json_value(const rapidjson::Value& d)
 		param_values_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			param_values_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 
 }
 

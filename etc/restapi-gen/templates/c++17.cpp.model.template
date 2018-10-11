@@ -52,8 +52,8 @@
 %    else
 			{{ propname | sanitize }}_.push_back(v.Get{{ common.rapidjson_type(p) }}());
 %    endif
-		}	
-	}	
+		}
+	}
 %  elif p.type and p.type == 'object'
 	if (d.HasMember("{{ propname }}") && d["{{ propname }}"].IsObject()) {
 		std::shared_ptr<rapidjson::Document> d_{{ propname | sanitize }} =

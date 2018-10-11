@@ -2,12 +2,14 @@
 // Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChildren, AfterViewInit, QueryList } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 import { ClipsExecutiveApiService } from '../services/api.service';
+import { DotGraphComponent } from '../../../components/dotgraph/component';
 import { Goal } from '../models/Goal';
 import { Plan } from '../models/Plan';
 import { DomainOperator } from '../models/DomainOperator';
@@ -22,7 +24,11 @@ import { Observable, interval, forkJoin } from 'rxjs';
   templateUrl: './goal-list.component.html',
   styleUrls: ['./goal-list.component.scss']
 })
-export class GoalListComponent implements OnInit, OnDestroy {
+export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
+
+  @ViewChildren("dotgraph")
+  public dotgraphs: QueryList<DotGraphComponent>;
+  public dotgraph: DotGraphComponent;
 
   private backend_subscription = null;
 
@@ -38,17 +44,22 @@ export class GoalListComponent implements OnInit, OnDestroy {
   goals_graph: string = null;
   loading = false;
 
+  graph_svg_available = false;
+  graph_svg_base64: SafeUrl = null;
+
   zero_message = "No goals received.";
   
   constructor(private readonly api_service: ClipsExecutiveApiService,
               private router : Router,
-              private backendcfg: BackendConfigurationService)
+              private backendcfg: BackendConfigurationService,
+              private sanitizer: DomSanitizer)
   {}
 
   ngOnInit() {
     this.refresh_domain();
     this.refresh();
     this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => { this.refresh() });
+    this.graph_svg_base64 = this.sanitizer.bypassSecurityTrustUrl('#');
   }
 
   ngOnDestroy()
@@ -58,6 +69,18 @@ export class GoalListComponent implements OnInit, OnDestroy {
     this.disable_autorefresh();
   }
 
+  ngAfterViewInit()
+  {
+    this.dotgraphs.changes.subscribe((comps: QueryList<DotGraphComponent>) =>
+    {
+      this.dotgraph = comps.first;
+      this.graph_svg_available = false;
+      if (this.dotgraph) {
+        this.dotgraph.svg_updated.subscribe((svg: string) => this.svg_updated(svg));
+      }
+    });
+  }
+
   refresh()
   {
     this.loading = true;
@@ -65,7 +88,7 @@ export class GoalListComponent implements OnInit, OnDestroy {
 
     this.api_service.list_goals().subscribe(
       (goals) => {
-        console.log("Goals", goals)
+        //console.log("Goals", goals)
         let plans = [];
         goals
           .filter(g => g.plans.length > 0)
@@ -121,10 +144,10 @@ export class GoalListComponent implements OnInit, OnDestroy {
     .subscribe(
       (plans : Plan[]) => {
         for (let i = 0; i < plans.length; ++i) {
-          console.log("Got plan", this.plans[i].goal_id, this.plans[i].plan_id)
+          //console.log("Got plan", this.plans[i].goal_id, this.plans[i].plan_id)
           this.plans[i].plan = plans[i];
         }
-        console.log("Plans", this.plans)
+        //console.log("Plans", this.plans)
         this.create_goals_graph();
         this.loading = false;
       },
@@ -183,6 +206,7 @@ export class GoalListComponent implements OnInit, OnDestroy {
         switch (goal.outcome) {
           case "COMPLETED": return "check";
           case "FAILED": return "error_outline";
+          case "REJECTED": return "report";
           default: return "help";
         }
       }
@@ -191,10 +215,11 @@ export class GoalListComponent implements OnInit, OnDestroy {
         switch (goal.outcome) {
           case "COMPLETED": return "check_circle";
           case "FAILED": return "error";
+          case "REJECTED": return "report";
           default: return "help";
         }
       }
-      case "REJECTED":   return "report";
+      case "RETRACTED":   return "delete";
       default: return "help_outline";
     }
   }
@@ -212,6 +237,7 @@ export class GoalListComponent implements OnInit, OnDestroy {
         switch (goal.outcome) {
           case "COMPLETED": return "ff-success";
           case "FAILED": return "ff-error";
+          case "REJECTED": return "ff-warning";
           default: return "ff-warning";
         }
       }
@@ -220,11 +246,29 @@ export class GoalListComponent implements OnInit, OnDestroy {
         switch (goal.outcome) {
           case "COMPLETED": return "ff-success";
           case "FAILED": return "ff-error";
+          case "REJECTED": return "ff-warning";
           default: return "ff-warning";
         }
       }
-      case "REJECTED":   return "ff-warning";
+      case "RETRACTED":
+        switch (goal.outcome) {
+          case "COMPLETED": return "ff-success";
+          case "FAILED": return "ff-error";
+          case "REJECTED": return "ff-warning";
+          default: return "ff-primary";
+        }
       default: return "ff-warning";
+    }
+  }
+
+  icon_tooltip(goal: Goal): string
+  {
+    switch (goal.mode) {
+      case "FINISHED":
+      case "EVALUATED":
+        return `${goal.mode}|${goal.outcome}`;
+      default:
+        return goal.mode;
     }
   }
 
@@ -315,7 +359,7 @@ export class GoalListComponent implements OnInit, OnDestroy {
       graph += '  "no goals"';
     } else {
       for (let g of this.goals) {
-        let shape = g.type == 'ACHIEVE' ? 'ellipse' : 'box';
+        let shape = g.type == 'ACHIEVE' ? 'box' : 'ellipse';
         let color = '';
 
         switch (g.mode) {
@@ -328,12 +372,68 @@ export class GoalListComponent implements OnInit, OnDestroy {
             switch (g.outcome) {
               case "COMPLETED": color='#A5D6A7'; break;
               case "FAILED":    color='#EF9A9A'; break;
+              case "REJECTED":  color='#FFCC80'; break;
             }
             break;
-          case "REJECTED":   color='#FFCC80'; break;
+          case "RETRACTED":
+            switch (g.outcome) {
+              case "COMPLETED": color='#A5D6A7'; break;
+              case "FAILED":    color='#EF9A9A'; break;
+              case "REJECTED":  color='#FFCC80'; break;
+              default:          color='#eeeeee'; break;
+            }
           default:;
         }
-        graph += `  "${g.id}" [href="/clips-executive/goal/${g.id}", shape=${shape}`;
+
+        let node_label = `<table border="0" cellspacing="2"><tr><td colspan="2" align="center"><b>${g.id}</b></td></tr>`;
+        node_label += `<tr><td align="left"><font color="#444444">Mode:</font></td><td align="left"><font color="#444444">${this.icon_tooltip(g)}</font></td></tr>`;
+
+        if (g['class'] && g['class'] != "") {
+          node_label += `<tr><td align="left"><font color="#444444">Class:</font></td><td align="left"><font color="#444444">${g['class']}</font></td></tr>`;
+        }
+        if (g['sub-type'] && g['sub-type'] != "") {
+          node_label += `<tr><td align="left"><font color="#444444">Sub-type:</font></td><td align="left"><font color="#444444">${g['sub-type']}</font></td></tr>`;
+        }
+        if (g.priority > 0) {
+          node_label += `<tr><td align="left"><font color="#444444">Priority:</font></td><td align="left"><font color="#444444">${g.priority}</font></td></tr>`;
+        }
+        if (g['sub-type'] && g['sub-type'] == 'RETRY-SUBGOAL') {
+          if (g.parameters.length == 2 && g.parameters[0] == 'max-tries' &&
+              g.meta.length == 2 && g.meta[0] == 'num-tries')
+          {
+            node_label += `<tr><td align="left"><font color="#444444">Tries:</font></td><td align="left"><font color="#444444">${g.meta[1]}/${g.parameters[1]}</font></td></tr>`;
+          }
+        }
+				if (g['parameters'] && g['parameters'].length > 0) {
+          node_label += `<tr><td align="left"><font color="#444444">Params:</font></td><td align="left"><font color="#444444">${g['parameters'].join(" ")}</font></td></tr>`;
+        }
+				if (g['error'] && g['error'].length > 0) {
+          node_label += `<tr><td align="left"><font color="#444444">Error:</font></td><td align="left"><font color="#ff0000">${g['error'].join(" ")}</font></td></tr>`;
+        }
+				if (g['required-resources'] && g['required-resources'] != "") {
+          node_label += `<tr><td align="left"><font color="#444444">Req Resrc:</font></td><td align="left"><font color="#444444">`;
+					if (g.mode == 'COMMITTED') {
+						let values = [];
+						for (let r of g['required-resources']) {
+							if (g['acquired-resources'].indexOf(r) == -1) {
+								values.push(`<font color="#ff0000">${r}</font>`);
+							} else {
+								values.push(r);
+							}
+						}
+						node_label += values.join(", ");
+					} else {
+						node_label += g['required-resources'].join(", ");
+					}
+					node_label += '</font></td></tr>';
+        }
+				if (g['acquired-resources'] && g['acquired-resources'] != "") {
+					let res_color = (g.mode == 'RETRACTED') ? "#ff0000" : "#444444";
+          node_label += `<tr><td align="left"><font color="#444444">Acq Resrc:</font></td><td align="left"><font color="${res_color}">${g['acquired-resources'].join(", ")}</font></td></tr>`;
+        }
+        node_label += "</table>";
+
+        graph += `  "${g.id}" [label=<${node_label}>, tooltip="${g.id}", href="/clips-executive/goal/${g.id}", shape=${shape}`;
         if (color != '') {
           graph += `, style="filled", fillcolor="${color}"`;
         }
@@ -394,7 +494,14 @@ export class GoalListComponent implements OnInit, OnDestroy {
       }
     }
     graph += "}";
-    console.log(`Graph: ${graph}`);
+    //console.log(`Graph: ${graph}`);
     this.goals_graph = graph;
+  }
+
+  svg_updated(svg: string)
+  {
+    this.graph_svg_base64 =
+      this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,'+btoa(svg));
+    this.graph_svg_available = true;
   }
 }

@@ -131,8 +131,8 @@ DomainPredicate::from_json_value(const rapidjson::Value& d)
 		param_names_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			param_names_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 	if (d.HasMember("param-types") && d["param-types"].IsArray()) {
 		const rapidjson::Value& a = d["param-types"];
 		param_types_ = std::vector<std::string>{};
@@ -140,8 +140,8 @@ DomainPredicate::from_json_value(const rapidjson::Value& d)
 		param_types_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			param_types_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 
 }
 
