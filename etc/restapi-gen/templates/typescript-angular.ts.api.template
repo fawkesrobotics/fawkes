@@ -68,36 +68,35 @@ import { BackendConfigurationService } from '../../../services/backend-config/ba
 {{ gen_imports(spec) }}
 
 @Injectable()
-export class {{ name | sanitize }}ApiService
-{
+export class {{ name | sanitize }}ApiService {
   constructor(private backend: BackendConfigurationService,
               private http: HttpClient) {}
 
 % for p in spec.paths
 %-   for method in spec.paths[p]
 %     set op = spec.paths[p][method]
-  public {{ op.operationId }}({{ args(op) }}): Observable<{{ return_type(op) }}>
-  {
+  public {{ op.operationId }}({{ args(op) }}): Observable<{{ return_type(op) }}> {
 % for p in op | path_args
 %   if p.required
-    if ({{ p.name | sanitize }} === null || {{ p.name | sanitize }} == undefined) {
-      throw new Error("Required parameter {{p.name}} is null or undefined ({{ op.operationId}})");
+    if ({{ p.name | sanitize }} === null || {{ p.name | sanitize }} === undefined) {
+      throw new Error('Required parameter {{p.name}} is null or undefined ({{ op.operationId}})');
     }
 %   endif
 % endfor
 
-
-		let params = new HttpParams();
+    // tslint:disable-next-line:prefer-const
+    let params = new HttpParams();
 % for p in op | path_args(only_in='query')
 %   if p.required
-		params = params.set("{{ p.name | sanitize }}", {{ p.name | sanitize }}.toString());
+    params = params.set('{{ p.name | sanitize }}', {{ p.name | sanitize }}.toString());
 %   else
-		if ({{ p.name | sanitize }}) {
-		  params = params.set("{{ p.name | sanitize }}", {{ p.name | sanitize }}.toString());
-		}
+    if ({{ p.name | sanitize }}) {
+      params = params.set('{{ p.name | sanitize }}', {{ p.name | sanitize }}.toString());
+    }
 % endif
 % endfor
 
+    // tslint:disable-next-line:prefer-const
     let headers = new HttpHeaders();
 
 % if op.requestBody
@@ -112,11 +111,13 @@ export class {{ name | sanitize }}ApiService
 % set response_type = 'json'
 % endif
 
-    return this.http.{{ method }}{% if response_type == 'json' %}<{{ return_type(op) }}>{% endif %}(`${this.backend.url_for('api')}{{ p | path_substargs(op, '${encodeURIComponent(String($$))}') }}`, {% for p in op | path_args(only_in='body') %}{{ p.name | sanitize }}, {% endfor %}
-		  { headers: headers, params: params,
-		    observe: '{{ observe }}', responseType: '{{ response_type }}' })	;
-	}
+    // tslint:disable-next-line:max-line-length
+    return this.http.{{ method }}{% if response_type == 'json' %}<{{ return_type(op) }}>{% endif %}(`${this.backend.url_for('api')}{{ p | path_substargs(op, '${encodeURIComponent(String($$))}') }}`,{% for p in op | path_args(only_in='body') %} {{ p.name | sanitize }},{% endfor %}
+      { headers: headers, params: params,
+        observe: '{{ observe }}', responseType: '{{ response_type }}' });
+      }
 
 %    endfor
 % endfor
 }
+
