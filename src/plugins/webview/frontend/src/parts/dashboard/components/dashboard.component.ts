@@ -23,16 +23,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   zero_message = "No facts received.";
 
   query_cpu =
-    'avg without (cpu)(irate(node_cpu{job="node",instance="localhost:9100",mode!="idle"}[5m]))';
+    'avg without (cpu)(irate(node_cpu_seconds_total{job="node",instance="localhost:9100",mode!="idle"}[5m]))';
 
-  query_threads = 'sum by (threadname)(irate(namedprocess_namegroup_thread_cpu_seconds_total{groupname="fawkes",instance="localhost:9256",job="proc"}[5m]))';
+  query_threads = 'sum by (threadname)(irate(namedprocess_namegroup_thread_cpu_seconds_total{groupname="fawkes",' +
+    'instance="localhost:9256",job="proc"}[5m]))';
 
   query_mem = 'namedprocess_namegroup_memory_bytes{memtype="resident"}';
 
   query_ntp_offset = 'node_ntp_offset_seconds{instance="localhost:9100"}';
-  query_mem_avail = 'node_memory_MemAvailable{instance="localhost:9100"}';
-  query_ssd_avail = 'node_filesystem_avail{instance="localhost:9100",mountpoint="/"}'
-  query_swap_used = '(node_memory_SwapTotal{instance="localhost:9100"}-node_memory_SwapFree{instance="localhost:9100"})/node_memory_SwapTotal{instance="localhost:9100"}';
+  query_mem_avail = 'node_memory_MemAvailable_bytes{instance="localhost:9100"}';
+  query_ssd_avail = 'node_filesystem_avail_bytes{instance="localhost:9100",mountpoint="/"}';
+  query_swap_used = '(node_memory_SwapTotal_bytes{instance="localhost:9100"}-' +
+    'node_memory_SwapFree_bytes{instance="localhost:9100"})/node_memory_SwapTotal_bytes{instance="localhost:9100"}';
 
   charts = [];
 
