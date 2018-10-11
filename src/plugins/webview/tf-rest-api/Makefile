@@ -17,4 +17,6 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/rest-api.mk
 
+WEBVIEW_FRONTEND_PART=transforms
+
 include $(BUILDSYSDIR)/base.mk
