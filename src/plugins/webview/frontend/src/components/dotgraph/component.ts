@@ -7,7 +7,7 @@ import {Component, Input, Output, EventEmitter} from '@angular/core';
 import * as Viz from 'viz.js/viz.js';
 
 @Component({
-  selector: 'dotgraph',
+  selector: 'dot-graph',
   templateUrl: './template.html',
 })
 export class DotGraphComponent {
