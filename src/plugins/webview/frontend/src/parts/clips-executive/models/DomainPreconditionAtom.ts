@@ -13,29 +13,28 @@
 
 
 /** DomainPreconditionAtom representation for JSON transfer. */
-export interface DomainPreconditionAtom
-{
-	kind: string;
-	apiVersion: string;
-	name: string;
-	type: DomainPreconditionAtom.TypeEnum;
-	grounded: boolean;
-	is_satisfied: boolean;
-	predicate: string;
-	param_names: Array<string>;
-	param_values: Array<string>;
-	param_constants: Array<string>;
+export interface DomainPreconditionAtom {
+  kind: string;
+  apiVersion: string;
+  name: string;
+  type: DomainPreconditionAtom.TypeEnum;
+  grounded: boolean;
+  is_satisfied: boolean;
+  predicate: string;
+  param_names: Array<string>;
+  param_values: Array<string>;
+  param_constants: Array<string>;
 }
 
-export namespace DomainPreconditionAtom
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace DomainPreconditionAtom {
+  export const API_VERSION = 'v1beta1';
 
-	export type TypeEnum = 'conjunction' | 'disjunction' | 'negation' | 'atom';
-	export const TypeEnum = {
-		conjunction: 'conjunction' as TypeEnum,
-		disjunction: 'disjunction' as TypeEnum,
-		negation: 'negation' as TypeEnum,
-		atom: 'atom' as TypeEnum
-	}
+  // tslint:disable-next-line:max-line-length
+  export type TypeEnum = 'conjunction' | 'disjunction' | 'negation' | 'atom';
+  export const TypeEnum = {
+    conjunction: 'conjunction' as TypeEnum,
+    disjunction: 'disjunction' as TypeEnum,
+    negation: 'negation' as TypeEnum,
+    atom: 'atom' as TypeEnum
+  };
 }

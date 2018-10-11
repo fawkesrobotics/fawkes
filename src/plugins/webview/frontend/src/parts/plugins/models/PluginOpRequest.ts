@@ -13,21 +13,19 @@
 
 
 /** PluginOpRequest representation for JSON transfer. */
-export interface PluginOpRequest
-{
-	kind: string;
-	apiVersion: string;
-	desired_state: PluginOpRequest.Desired_stateEnum;
+export interface PluginOpRequest {
+  kind: string;
+  apiVersion: string;
+  desired_state: PluginOpRequest.Desired_stateEnum;
 }
 
-export namespace PluginOpRequest
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace PluginOpRequest {
+  export const API_VERSION = 'v1beta1';
 
-	export type Desired_stateEnum = 'LOADED' | 'AVAILABLE' | 'UNLOADED';
-	export const Desired_stateEnum = {
-		LOADED: 'LOADED' as Desired_stateEnum,
-		AVAILABLE: 'AVAILABLE' as Desired_stateEnum,
-		UNLOADED: 'UNLOADED' as Desired_stateEnum
-	}
+  export type Desired_stateEnum = 'LOADED' | 'AVAILABLE' | 'UNLOADED';
+  export const Desired_stateEnum = {
+    LOADED: 'LOADED' as Desired_stateEnum,
+    AVAILABLE: 'AVAILABLE' as Desired_stateEnum,
+    UNLOADED: 'UNLOADED' as Desired_stateEnum
+  };
 }

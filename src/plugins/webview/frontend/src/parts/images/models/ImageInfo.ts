@@ -13,20 +13,18 @@
 
 
 /** ImageInfo representation for JSON transfer. */
-export interface ImageInfo
-{
-	kind: string;
-	apiVersion: string;
-	id: string;
-	colorspace: string;
-	frame: string;
-	width: number;
-	height: number;
-	mem_size: number;
+export interface ImageInfo {
+  kind: string;
+  apiVersion: string;
+  id: string;
+  colorspace: string;
+  frame: string;
+  width: number;
+  height: number;
+  mem_size: number;
 }
 
-export namespace ImageInfo
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace ImageInfo {
+  export const API_VERSION = 'v1beta1';
 
 }

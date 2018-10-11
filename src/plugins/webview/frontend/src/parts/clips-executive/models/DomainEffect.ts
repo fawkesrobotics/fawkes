@@ -13,25 +13,24 @@
 
 
 /** DomainEffect representation for JSON transfer. */
-export interface DomainEffect
-{
-	kind: string;
-	apiVersion: string;
-	name: string;
-	type: DomainEffect.TypeEnum;
-	predicate: string;
-	param_names: Array<string>;
-	param_values: Array<string>;
-	param_constants: Array<string>;
+export interface DomainEffect {
+  kind: string;
+  apiVersion: string;
+  name: string;
+  type: DomainEffect.TypeEnum;
+  predicate: string;
+  param_names: Array<string>;
+  param_values: Array<string>;
+  param_constants: Array<string>;
 }
 
-export namespace DomainEffect
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace DomainEffect {
+  export const API_VERSION = 'v1beta1';
 
-	export type TypeEnum = 'POSITIVE' | 'NEGATIVE';
-	export const TypeEnum = {
-		POSITIVE: 'POSITIVE' as TypeEnum,
-		NEGATIVE: 'NEGATIVE' as TypeEnum
-	}
+  // tslint:disable-next-line:max-line-length
+  export type TypeEnum = 'POSITIVE' | 'NEGATIVE';
+  export const TypeEnum = {
+    POSITIVE: 'POSITIVE' as TypeEnum,
+    NEGATIVE: 'NEGATIVE' as TypeEnum
+  };
 }

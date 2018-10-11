@@ -15,21 +15,19 @@ import { InterfaceMessageType } from './InterfaceMessageType';
 
 
 /** InterfaceInfo representation for JSON transfer. */
-export interface InterfaceInfo
-{
-	kind: string;
-	apiVersion: string;
-	id: string;
-	type: string;
-	hash: string;
-	writer?: string;
-	readers?: Array<string>;
-	fields: Array<InterfaceFieldType>;
-	message_types: Array<InterfaceMessageType>;
+export interface InterfaceInfo {
+  kind: string;
+  apiVersion: string;
+  id: string;
+  type: string;
+  hash: string;
+  writer?: string;
+  readers?: Array<string>;
+  fields: Array<InterfaceFieldType>;
+  message_types: Array<InterfaceMessageType>;
 }
 
-export namespace InterfaceInfo
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace InterfaceInfo {
+  export const API_VERSION = 'v1beta1';
 
 }

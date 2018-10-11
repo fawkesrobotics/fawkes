@@ -13,24 +13,22 @@
 
 
 /** PluginOpResponse representation for JSON transfer. */
-export interface PluginOpResponse
-{
-	kind: string;
-	apiVersion: string;
-	name: string;
-	state: PluginOpResponse.StateEnum;
-	message?: string;
+export interface PluginOpResponse {
+  kind: string;
+  apiVersion: string;
+  name: string;
+  state: PluginOpResponse.StateEnum;
+  message?: string;
 }
 
-export namespace PluginOpResponse
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace PluginOpResponse {
+  export const API_VERSION = 'v1beta1';
 
-	export type StateEnum = 'LOADED' | 'AVAILABLE' | 'UNLOADED' | 'ERROR';
-	export const StateEnum = {
-		LOADED: 'LOADED' as StateEnum,
-		AVAILABLE: 'AVAILABLE' as StateEnum,
-		UNLOADED: 'UNLOADED' as StateEnum,
-		ERROR: 'ERROR' as StateEnum
-	}
+  export type StateEnum = 'LOADED' | 'AVAILABLE' | 'UNLOADED' | 'ERROR';
+  export const StateEnum = {
+    LOADED: 'LOADED' as StateEnum,
+    AVAILABLE: 'AVAILABLE' as StateEnum,
+    UNLOADED: 'UNLOADED' as StateEnum,
+    ERROR: 'ERROR' as StateEnum
+  };
 }

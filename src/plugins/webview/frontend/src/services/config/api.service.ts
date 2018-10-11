@@ -21,26 +21,24 @@ import { ConfigTree } from './model/ConfigTree';
 
 
 @Injectable()
-export class ConfigurationApiService
-{
+export class ConfigurationApiService {
   constructor(private backend: BackendConfigurationService,
               private http: HttpClient) {}
 
-  public get_config(query?: string, pretty?: boolean): Observable<ConfigTree>
-  {
-		let params = new HttpParams();
-		if (query) {
-		  params = params.set("query", query.toString());
-		}
-		if (pretty) {
-		  params = params.set("pretty", pretty.toString());
-		}
+  public get_config(query?: string, pretty?: boolean): Observable<ConfigTree> {
+    let params = new HttpParams();
+    if (query) {
+      params = params.set('query', query.toString());
+    }
+    if (pretty) {
+      params = params.set('pretty', pretty.toString());
+    }
     let headers = new HttpHeaders();
-		
+
     headers = headers.set('Accept', 'application/json');
-    return this.http.get<ConfigTree>(`${this.backend.url_for('api')}/config`, 
-		  { headers: headers, params: params,
-		    observe: 'body', responseType: 'json' })	;
-	}
+    return this.http.get<ConfigTree>(`${this.backend.url_for('api')}/config`,
+      { headers: headers, params: params,
+        observe: 'body', responseType: 'json' });
+      }
 
 }

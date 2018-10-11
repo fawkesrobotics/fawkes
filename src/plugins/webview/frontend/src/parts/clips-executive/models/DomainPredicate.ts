@@ -13,18 +13,16 @@
 
 
 /** DomainPredicate representation for JSON transfer. */
-export interface DomainPredicate
-{
-	kind: string;
-	apiVersion: string;
-	name: string;
-	sensed: boolean;
-	param_names: Array<string>;
-	param_types: Array<string>;
+export interface DomainPredicate {
+  kind: string;
+  apiVersion: string;
+  name: string;
+  sensed: boolean;
+  param_names: Array<string>;
+  param_types: Array<string>;
 }
 
-export namespace DomainPredicate
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace DomainPredicate {
+  export const API_VERSION = 'v1beta1';
 
 }

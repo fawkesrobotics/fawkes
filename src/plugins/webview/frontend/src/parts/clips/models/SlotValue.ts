@@ -13,24 +13,23 @@
 
 
 /** SlotValue representation for JSON transfer. */
-export interface SlotValue
-{
-	name: string;
-	type?: SlotValue.TypeEnum;
-	is_multifield: boolean;
-	values: Array<string>;
+export interface SlotValue {
+  name: string;
+  type?: SlotValue.TypeEnum;
+  is_multifield: boolean;
+  values: Array<string>;
 }
 
-export namespace SlotValue
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace SlotValue {
+  export const API_VERSION = 'v1beta1';
 
-	export type TypeEnum = 'FLOAT' | 'INTEGER' | 'SYMBOL' | 'STRING' | 'EXTERNAL-ADDRESS';
-	export const TypeEnum = {
-		FLOAT: 'FLOAT' as TypeEnum,
-		INTEGER: 'INTEGER' as TypeEnum,
-		SYMBOL: 'SYMBOL' as TypeEnum,
-		STRING: 'STRING' as TypeEnum,
-		EXTERNAL_ADDRESS: 'EXTERNAL-ADDRESS' as TypeEnum
-	}
+  // tslint:disable-next-line:max-line-length
+  export type TypeEnum = 'FLOAT' | 'INTEGER' | 'SYMBOL' | 'STRING' | 'EXTERNAL-ADDRESS';
+  export const TypeEnum = {
+    FLOAT: 'FLOAT' as TypeEnum,
+    INTEGER: 'INTEGER' as TypeEnum,
+    SYMBOL: 'SYMBOL' as TypeEnum,
+    STRING: 'STRING' as TypeEnum,
+    EXTERNAL_ADDRESS: 'EXTERNAL-ADDRESS' as TypeEnum
+  };
 }

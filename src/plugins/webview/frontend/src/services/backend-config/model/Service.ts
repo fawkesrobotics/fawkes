@@ -13,14 +13,12 @@
 
 
 /** Service representation for JSON transfer. */
-export interface Service
-{
-	name: string;
-	url: string;
+export interface Service {
+  name: string;
+  url: string;
 }
 
-export namespace Service
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace Service {
+  export const API_VERSION = 'v1beta1';
 
 }

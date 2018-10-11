@@ -13,15 +13,13 @@
 
 
 /** BlackboardGraph representation for JSON transfer. */
-export interface BlackboardGraph
-{
-	kind: string;
-	apiVersion: string;
-	dotgraph: string;
+export interface BlackboardGraph {
+  kind: string;
+  apiVersion: string;
+  dotgraph: string;
 }
 
-export namespace BlackboardGraph
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace BlackboardGraph {
+  export const API_VERSION = 'v1beta1';
 
 }

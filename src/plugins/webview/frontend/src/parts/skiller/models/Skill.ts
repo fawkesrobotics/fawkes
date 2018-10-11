@@ -14,28 +14,27 @@
 
 
 /** Skill representation for JSON transfer. */
-export interface Skill
-{
-	kind: string;
-	apiVersion: string;
-	name: string;
-	graph?: string;
-	skill_string?: string;
-	error?: string;
-	msg_id?: number;
-	exclusive_controller?: number;
-	status?: Skill.StatusEnum;
+export interface Skill {
+  kind: string;
+  apiVersion: string;
+  name: string;
+  graph?: string;
+  skill_string?: string;
+  error?: string;
+  msg_id?: number;
+  exclusive_controller?: number;
+  status?: Skill.StatusEnum;
 }
 
-export namespace Skill
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace Skill {
+  export const API_VERSION = 'v1beta1';
 
-	export type StatusEnum = 'INACTIVE' | 'FINAL' | 'RUNNING' | 'FAILED';
-	export const StatusEnum = {
-		INACTIVE: 'INACTIVE' as StatusEnum,
-		FINAL: 'FINAL' as StatusEnum,
-		RUNNING: 'RUNNING' as StatusEnum,
-		FAILED: 'FAILED' as StatusEnum
-	}
+  // tslint:disable-next-line:max-line-length
+  export type StatusEnum = 'INACTIVE' | 'FINAL' | 'RUNNING' | 'FAILED';
+  export const StatusEnum = {
+    INACTIVE: 'INACTIVE' as StatusEnum,
+    FINAL: 'FINAL' as StatusEnum,
+    RUNNING: 'RUNNING' as StatusEnum,
+    FAILED: 'FAILED' as StatusEnum
+  };
 }

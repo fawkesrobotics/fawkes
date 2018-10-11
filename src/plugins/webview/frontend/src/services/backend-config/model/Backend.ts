@@ -14,18 +14,16 @@ import { Service } from './Service';
 
 
 /** Backend representation for JSON transfer. */
-export interface Backend
-{
-	kind: string;
-	apiVersion: string;
-	id: string;
-	name: string;
-	url?: string;
-	services: Array<Service>;
+export interface Backend {
+  kind: string;
+  apiVersion: string;
+  id: string;
+  name: string;
+  url?: string;
+  services: Array<Service>;
 }
 
-export namespace Backend
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace Backend {
+  export const API_VERSION = 'v1beta1';
 
 }

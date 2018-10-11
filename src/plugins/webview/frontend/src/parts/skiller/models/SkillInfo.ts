@@ -14,15 +14,13 @@
 
 
 /** SkillInfo representation for JSON transfer. */
-export interface SkillInfo
-{
-	kind: string;
-	apiVersion: string;
-	name: string;
+export interface SkillInfo {
+  kind: string;
+  apiVersion: string;
+  name: string;
 }
 
-export namespace SkillInfo
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace SkillInfo {
+  export const API_VERSION = 'v1beta1';
 
 }
