@@ -19,7 +19,7 @@ import { DomainPreconditionCompound } from '../models/DomainPreconditionCompound
 
 
 @Component({
-  selector: 'clips-executive-goal-detail',
+  selector: 'ff-clips-executive-goal-detail',
   templateUrl: './goal-detail.component.html',
   styleUrls: ['./goal-detail.component.scss']
 })

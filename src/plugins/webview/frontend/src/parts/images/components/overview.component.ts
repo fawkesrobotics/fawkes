@@ -11,7 +11,7 @@ import { ImageInfo } from '../models/ImageInfo';
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 
 @Component({
-  selector: 'blackboard-overview',
+  selector: 'ff-images-overview',
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss']
 })

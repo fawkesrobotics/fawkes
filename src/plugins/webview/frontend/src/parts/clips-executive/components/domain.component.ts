@@ -20,7 +20,7 @@ import { DomainPreconditionCompound } from '../models/DomainPreconditionCompound
 
 
 @Component({
-  selector: 'clips-executive-domain',
+  selector: 'ff-clips-executive-domain',
   templateUrl: './domain.component.html',
   styleUrls: ['./domain.component.scss']
 })

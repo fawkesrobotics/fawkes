@@ -11,7 +11,7 @@ import { BlackboardApiService } from '../services/api.service';
 import { InterfaceInfo } from '../models/InterfaceInfo';
 
 @Component({
-  selector: 'blackboard-overview',
+  selector: 'ff-blackboard-overview',
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss']
 })

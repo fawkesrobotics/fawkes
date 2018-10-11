@@ -20,7 +20,7 @@ import { DomainPreconditionCompound } from '../models/DomainPreconditionCompound
 import { Observable, interval, forkJoin } from 'rxjs';
 
 @Component({
-  selector: 'clips-executive-goal-list',
+  selector: 'ff-clips-executive-goal-list',
   templateUrl: './goal-list.component.html',
   styleUrls: ['./goal-list.component.scss']
 })

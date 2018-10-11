@@ -14,7 +14,7 @@ import { Fact } from '../models/Fact';
 import { Observable, interval } from 'rxjs';
 
 @Component({
-  selector: 'clips-env',
+  selector: 'ff-clips-env',
   templateUrl: './clips-env.component.html',
   styleUrls: ['./clips-env.component.scss']
 })

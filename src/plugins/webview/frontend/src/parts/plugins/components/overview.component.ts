@@ -16,7 +16,7 @@ import { PluginOpRequest } from '../models/PluginOpRequest';
 import { Observable, interval } from 'rxjs';
 
 @Component({
-  selector: 'plugins-overview',
+  selector: 'ff-plugins-overview',
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss'],
   providers: [{provide: MAT_CHECKBOX_CLICK_ACTION, useValue: 'noop'}]

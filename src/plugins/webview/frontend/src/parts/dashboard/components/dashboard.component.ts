@@ -10,7 +10,7 @@ import { BackendConfigurationService } from '../../../services/backend-config/ba
 import { ConfigurationService } from '../../../services/config/config.service';
 
 @Component({
-  selector: 'dashboard',
+  selector: 'ff-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })

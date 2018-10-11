@@ -12,7 +12,7 @@ import { BehaviorEngineApiService } from '../services/api.service';
 import { SkillCall } from '../models/SkillCall';
 
 @Component({
-  selector: 'skiller-overview',
+  selector: 'ff-skiller-overview',
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss']
 })

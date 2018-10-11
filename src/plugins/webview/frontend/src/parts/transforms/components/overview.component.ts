@@ -10,7 +10,7 @@ import { TransformsApiService } from '../services/api.service';
 import { TransformsGraph } from '../models/TransformsGraph';
 
 @Component({
-  selector: 'transforms-overview',
+  selector: 'ff-transforms-overview',
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss']
 })
