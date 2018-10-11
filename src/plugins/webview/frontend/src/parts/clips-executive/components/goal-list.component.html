@@ -102,7 +102,7 @@
 	<mat-divider></mat-divider>
 	<mat-card-content class="ff-card-content">
 		<div fxLayoutAlign="center" *ngIf="!show_zero_state() && goals_graph && goals_graph != ''" class="card-div">
-			<dotgraph #dotgraph [dot]="goals_graph" [strip_size]="false" ngClass="goals-graph"></dotgraph>
+			<dot-graph #dotgraph [dot]="goals_graph" [strip_size]="false" ngClass="goals-graph"></dot-graph>
 		</div>
 		<div *ngIf="show_zero_state() || !goals_graph">
 			<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>

@@ -167,7 +167,7 @@
 		<mat-divider></mat-divider>
 		<mat-card-content class="ff-card-content graph-card">
 			<div *ngIf="dotgraph != ''" fxLayoutAlign="center" class="card-div">
-				<dotgraph [dot]="dotgraph" class="blackboard-graph"></dotgraph>
+				<dot-graph [dot]="dotgraph" class="blackboard-graph"></dot-graph>
 			</div>
 			<div *ngIf="dotgraph == ''">
 				<ff-list-zero-state [message]="dotgraph_zero_message"></ff-list-zero-state>

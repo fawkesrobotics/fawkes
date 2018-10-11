@@ -44,7 +44,7 @@
 	<mat-divider></mat-divider>
 	<mat-card-content class="ff-card-content">
 		<div fxLayoutAlign="center" *ngIf="skill && skill.graph != ''" class="card-div">
-			<dotgraph [dot]="skill.graph" ngClass="skill-graph"></dotgraph>
+			<dot-graph [dot]="skill.graph" ngClass="skill-graph"></dot-graph>
 		</div>
 		<div *ngIf="!skill || skill.graph == ''">
 			<ff-list-zero-state [message]="zero_message"></ff-list-zero-state>
