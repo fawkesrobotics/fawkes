@@ -8,7 +8,6 @@ import { SwUpdateNotifierService } from '../services/update-notifier/update-noti
 
 @Component({
   selector: 'app-root',
-  //templateUrl: './app.component.html',
   template: '<ff-chrome class="ff-light-theme"></ff-chrome>',
   styleUrls: ['./app.component.scss'],
   providers: [SwUpdateNotifierService]
@@ -16,6 +15,5 @@ import { SwUpdateNotifierService } from '../services/update-notifier/update-noti
 export class AppComponent {
   title = 'app';
 
-  constructor(private update_notifier: SwUpdateNotifierService)
-  {}
+  constructor(private update_notifier: SwUpdateNotifierService) {}
 }

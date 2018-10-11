@@ -24,10 +24,10 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
 
   displayed_columns = ['index', 'formatted'];
 
-  env: string = "";
+  env = '';
   auto_refresh_subscription = null;
   loading = false;
-  zero_message = "No facts received.";
+  zero_message = 'No facts received.';
   font_large = false;
 
   envs: string[] = [];
@@ -39,8 +39,7 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
   constructor(private readonly api_service: ClipsApiService,
               private route: ActivatedRoute,
               private router: Router,
-              private backendcfg: BackendConfigurationService)
-  {}
+              private backendcfg: BackendConfigurationService) {}
 
   ngOnInit() {
 
@@ -55,7 +54,7 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
 
     this.card_filter_.filterEvent
       .subscribe((query: string) => {
-        this.apply_filter(query)
+        this.apply_filter(query);
       });
 
     this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => {
@@ -64,54 +63,50 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy()
-  {
+  ngOnDestroy() {
     this.backend_subscription.unsubscribe();
     this.backend_subscription = null;
     this.disable_autorefresh();
   }
 
-  refresh()
-  {
+  refresh() {
     this.loading = true;
-    this.zero_message = "Retrieving facts";
-    
+    this.zero_message = 'Retrieving facts';
+
     this.api_service.get_facts(this.env, false, true)
       .subscribe(
         (facts) => {
           this.data_source.data = facts;
-          if (facts.length == 0) {
-            this.zero_message = "No facts in fact base";
+          if (facts.length === 0) {
+            this.zero_message = 'No facts in fact base';
           }
           this.loading = false;
         },
         (err) => {
           this.data_source.data = [];
-          if (err.status == 0) {
-            this.zero_message="API server unavailable. Robot down?";
+          if (err.status === 0) {
+            this.zero_message = 'API server unavailable. Robot down?';
           } else {
-            this.zero_message=`Failed to retrieve facts: ${err.error}`;
+            this.zero_message = `Failed to retrieve facts: ${err.error}`;
           }
           this.loading = false;
         }
       );
   }
 
-  refresh_envs()
-  {
+  refresh_envs() {
     this.api_service.list_environments().subscribe(
       (envs) => {
         this.envs = envs.map(env => env.name);
       },
       (err) => {
-        this.envs = [this.env]
+        this.envs = [this.env];
       }
     );
   }
 
-  private enable_autorefresh()
-  {
-    if (this.auto_refresh_subscription)  return;
+  private enable_autorefresh() {
+    if (this.auto_refresh_subscription) {  return; }
     this.auto_refresh_subscription =
       interval(2000).subscribe((num) => {
         this.refresh();
@@ -119,16 +114,14 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
     this.refresh();
   }
 
-  private disable_autorefresh()
-  {
+  private disable_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.auto_refresh_subscription.unsubscribe();
       this.auto_refresh_subscription = null;
     }
   }
 
-  toggle_autorefresh()
-  {
+  toggle_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.disable_autorefresh();
     } else {
@@ -136,8 +129,7 @@ export class ClipsEnvComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggle_fontsize()
-  {
+  toggle_fontsize() {
     this.font_large = !this.font_large;
   }
 

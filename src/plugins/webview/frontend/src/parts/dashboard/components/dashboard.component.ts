@@ -20,7 +20,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   auto_refresh_subscription = null;
   loading = false;
-  zero_message = "No facts received.";
+  zero_message = 'No facts received.';
 
   query_cpu =
     'avg without (cpu)(irate(node_cpu_seconds_total{job="node",instance="localhost:9100",mode!="idle"}[5m]))';
@@ -39,17 +39,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   charts = [];
 
   constructor(private backendcfg: BackendConfigurationService,
-              private config: ConfigurationService)
-  {}
+              private config: ConfigurationService) {}
 
   ngOnInit() {
-    this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => { this.refresh() });
+    this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => { this.refresh(); });
     this.config.get('/webview/dashboard')
       .subscribe(conf => {
         if ('webview' in conf &&
             'dashboard' in conf['webview'] &&
-            'charts' in conf['webview']['dashboard'])
-        {
+            'charts' in conf['webview']['dashboard']) {
           this.charts = Object.values(conf['webview']['dashboard']['charts']);
           this.charts.forEach(c => {
             if (! ('remove_all_zero' in c)) {
@@ -60,19 +58,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  ngOnDestroy()
-  {
+  ngOnDestroy() {
     this.backend_subscription.unsubscribe();
     this.backend_subscription = null;
   }
 
-  refresh()
-  {
+  refresh() {
   }
 
-  private enable_autorefresh()
-  {
-    if (this.auto_refresh_subscription)  return;
+  private enable_autorefresh() {
+    if (this.auto_refresh_subscription) {  return; }
     this.auto_refresh_subscription =
       interval(2000).subscribe((num) => {
         this.refresh();
@@ -80,16 +75,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.refresh();
   }
 
-  private disable_autorefresh()
-  {
+  private disable_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.auto_refresh_subscription.unsubscribe();
       this.auto_refresh_subscription = null;
     }
   }
 
-  toggle_autorefresh()
-  {
+  toggle_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.disable_autorefresh();
     } else {

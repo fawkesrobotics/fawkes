@@ -20,18 +20,15 @@ export class ConfigurationService {
   public changed: EventEmitter<string>;
 
   private cache = {};
-  
+
   constructor(private backendcfg: BackendConfigurationService,
-              private config_api: ConfigurationApiService)
-  {
+              private config_api: ConfigurationApiService) {
     this.changed = new EventEmitter();
   }
 
-  get(query: string = "")
-  {
+  get(query: string = '') {
     if (query in this.cache &&
-        (Date.now() - this.cache[query].retrieval_time) <= CACHE_INTERVAL_MSEC)
-    {
+        (Date.now() - this.cache[query].retrieval_time) <= CACHE_INTERVAL_MSEC) {
       return from([this.cache[query].data]);
     } else {
       return this.config_api.get_config(query)
@@ -40,7 +37,7 @@ export class ConfigurationService {
             this.cache[query] = {
               retrieval_time: Date.now(),
               data: conf.config
-            }}),
+            }; }),
           map(conf => conf.config)
         );
     }

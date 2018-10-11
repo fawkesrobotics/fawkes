@@ -36,42 +36,40 @@ const DEFAULT_LEGEND: c3.LegendOptions = {
   styleUrls: ['./style.scss']
 })
 export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestroy {
-  @Input() time_range?: number = 900;
-  @Input() step_sec?: number = 15;
+  @Input() time_range = 900;
+  @Input() step_sec = 15;
   @Input() query?: string = null;
   @Input() queries?: string[] = [];
-  @Input() legend_format?: string = null;;
+  @Input() legend_format?: string = null;
   @Input() legend_formats?: string[] = [];
   @Input() y_axis?: c3.YAxisConfiguration = Object.assign({}, DEFAULT_Y_AXIS);
-  @Input() show_grid?: boolean = true;
+  @Input() show_grid = true;
   @Input() legend?: c3.LegendOptions = Object.assign({}, DEFAULT_LEGEND);
   @Input() groups?: string[][] = null;
-  @Input() group_all?: boolean = true;
-  @Input() remove_all_zero?: boolean = true;
-  @Input() x_tick_format?: string = '%H:%M:%S';
-  @Input() y_tick_format?: string = '.1f';
+  @Input() group_all = true;
+  @Input() remove_all_zero = true;
+  @Input() x_tick_format = '%H:%M:%S';
+  @Input() y_tick_format = '.1f';
   @Input() y_min?: number = null;
   @Input() y_max?: number = null;
-  @Input() y_tick_count?: number = 4;
+  @Input() y_tick_count = 4;
   @Input() y_axis_center?: number = null;
-  @Input() refresh_interval_sec?: number = 60;
+  @Input() refresh_interval_sec = 60;
 
   @ViewChild('chart') chart_elem;
 
-  have_data: boolean = false;
-  zero_message: string = "No data received";
+  have_data = false;
+  zero_message = 'No data received';
   auto_refresh_subscription = null;
 
   private backend_subscription = null;
 
   constructor(private backendcfg: BackendConfigurationService,
-              private http: HttpClient)
-  {}
+              private http: HttpClient) {}
 
-  ngAfterViewInit()
-  {
-    if (!this.query && this.queries.length == 0) {
-      this.zero_message='No query configured';
+  ngAfterViewInit() {
+    if (!this.query && this.queries.length === 0) {
+      this.zero_message = 'No query configured';
     } else {
       if (this.query) {
         this.queries.push(this.query);
@@ -82,11 +80,11 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
         }
       }
 
-      if (this.queries.length == 0) {
-        this.zero_message='No queries configured';
-      } else if (this.legend_formats.length != this.queries.length) {
+      if (this.queries.length === 0) {
+        this.zero_message = 'No queries configured';
+      } else if (this.legend_formats.length !== this.queries.length) {
         this.queries = [];
-        this.zero_message = '#queries != #legend_formats';
+        this.zero_message = '#queries !== #legend_formats';
       }
 
       this.enable_autorefresh();
@@ -99,82 +97,80 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
     });
   }
 
-  ngOnDestroy()
-  {
+  ngOnDestroy() {
     this.disable_autorefresh();
     this.backend_subscription.unsubscribe();
     this.backend_subscription = null;
   }
 
   @HostListener('window:focus', ['$event'])
-  onFocus(ev: FocusEvent)
-  {
+  onFocus(ev: FocusEvent) {
     this.enable_autorefresh();
   }
 
   @HostListener('window:blur', ['$event'])
-  onBlur(ev: FocusEvent)
-  {
+  onBlur(ev: FocusEvent) {
     this.disable_autorefresh();
   }
 
-  refresh()
-  {
+  refresh() {
     if (! this.backendcfg.has_url_for('prometheus')) {
       this.zero_message = 'No Prometheus backend service known';
       return;
     }
 
-    let end   = Math.floor(Date.now() / 1000);
-    let start = end - this.time_range;
-    let step_sec = this.step_sec;
-    let urls = this.queries
+    const end   = Math.floor(Date.now() / 1000);
+    const start = end - this.time_range;
+    const step_sec = this.step_sec;
+    // tslint:disable:max-line-length
+    const urls = this.queries
       .map((q) =>
            `${this.backendcfg.url_for('prometheus')}/api/v1/query_range?query=${encodeURIComponent(String(q))}&start=${start}&end=${end}&step=${this.step_sec}s`);
+    // tslint:enable:max-line-length
 
 
     forkJoin(urls.map((u) => this.http.get<any>(u)))
       .pipe(
         map((res: any[]) =>
-            res.map((r,i) => this.proc_res(r, start, end, step_sec, this.legend_formats[i])))
+            res.map((r, i) => this.proc_res(r, start, end, step_sec, this.legend_formats[i])))
       )
       .subscribe(
         (data_arr: any[]) => {
           if (data_arr.length > 0) {
 
-            let timeline: number[] = [];
+            const timeline: number[] = [];
             for (let i = start; i <= end; i += this.step_sec) {
               timeline.push(i * 1000);
             }
 
-            let columns = [['__x', ...timeline]];
-            let groups = this.group_all ? [[]] : this.groups;
-            let types = {};
+            const columns = [['__x', ...timeline]];
+            const groups = this.group_all ? [[]] : this.groups;
+            const types = {};
 
-            for (let data of data_arr) {
+            for (const data of data_arr) {
 
-              for (let d of data) {
+              for (const d of data) {
                 if (d.name in types) {
                   console.warn(`Duplicate data name ${d.name}, overwriting`);
                 }
                 types[d.name] = 'area';
               }
 
-              let group = [];
+              const group = [];
               if (this.group_all) {
-                for (let d of data) {
+                for (const d of data) {
                   groups[0].push(d.name);
                 }
               }
 
-              for (let d of data) {
+              for (const d of data) {
                 columns.push([d.name, ...d.values]);
               }
             }
 
             // If we only have the x axis, but no actual data, abort
-            if (columns.length == 1) {
-              this.zero_message = "No data available";
+            if (columns.length === 1) {
+              this.zero_message = 'No data available';
               return;
             }
 
@@ -182,7 +178,7 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
               this.y_axis.tick = {};
             }
             if (this.y_tick_format) {
-              if (this.y_tick_format == 'bytes' || this.y_tick_format == 'bytes/s') {
+              if (this.y_tick_format === 'bytes' || this.y_tick_format === 'bytes/s') {
                 this.y_axis.tick.format = this.format_bytes_func(this.y_tick_format);
               } else {
                 this.y_axis.tick.format = d3.format(this.y_tick_format);
@@ -199,7 +195,7 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
             if (this.y_tick_count) {
               this.y_axis.tick.count = this.y_tick_count + 1;
             }
-            if (this.y_axis_center != null) {
+            if (this.y_axis_center !== null) {
               this.y_axis.center = this.y_axis_center;
             }
 
@@ -208,8 +204,8 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
             }
             this.legend.item.onclick =
               function (d) {
-                let shown = this.api.data.shown();
-                if (shown.findIndex((de) => de.id == d) < 0) {
+                const shown = this.api.data.shown();
+                if (shown.findIndex((de) => de.id === d) < 0) {
                   // we are switching from another activated single data
                   this.api.hide();
                   this.api.show(d);
@@ -225,7 +221,7 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
                 }
               };
 
-            let chart = c3.generate({
+            const chart = c3.generate({
               bindto: this.chart_elem.nativeElement,
               size: {
                 height: 200
@@ -260,45 +256,44 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
             });
             this.have_data = true;
           } else {
-            this.zero_message = "No data available";
+            this.zero_message = 'No data available';
           }
         },
         (err) => {
           this.have_data = false;
-          if (err.status == 0) {
-            this.zero_message="Prometheus server unavailable.";
+          if (err.status === 0) {
+            this.zero_message = 'Prometheus server unavailable.';
           } else {
-            this.zero_message=`Failed to retrieve data: ${err.error || err.status}`;
+            this.zero_message = `Failed to retrieve data: ${err.error || err.status}`;
           }
         }
       );
   }
 
   render_label_template(str, labels) {
-    var regex = /\(\(\s*(.+?)\s*\)\)/g;
-    return str.replace(regex, (m,g) => labels[g] ? labels[g] : g);
+    const regex = /\(\(\s*(.+?)\s*\)\)/g;
+    return str.replace(regex, (m, g) => labels[g] ? labels[g] : g);
   }
 
   private proc_res(res, start, end, step_sec, legend_format) {
-    if (res.status != 'success')  return null;
-    let data = [];
+    if (res.status !== 'success') {  return null; }
+    const data = [];
 
-    for (let r of  res.data.result) {
-      let d = {
+    for (const r of  res.data.result) {
+      const d = {
         name: this.render_label_template(legend_format, r.metric),
         values: []
       };
 
       let base_timestamp = start;
-      for (let v of r.values) {
+      for (const v of r.values) {
         let dp = parseFloat(v[1]);
         if (isNaN(dp)) {
           dp = 0.;
         }
 
         const timestamp = parseFloat(v[0]);
-        for (let t = base_timestamp; t < timestamp; t += step_sec)
-        {
+        for (let t = base_timestamp; t < timestamp; t += step_sec) {
           d.values.push(0.);
         }
 
@@ -306,8 +301,7 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
         d.values.push(dp);
       }
 
-      for (let t = base_timestamp; t < end; t += step_sec)
-      {
+      for (let t = base_timestamp; t < end; t += step_sec) {
         d.values.push(0.);
       }
 
@@ -316,15 +310,15 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
 
     // filter all-zero metrics
     if (this.remove_all_zero) {
-      let to_erase = []
+      const to_erase = [];
       for (let i = 0; i < res.data.result.length; ++i) {
         if (data[i].values.every((y) => (Math.abs(y) < Number.EPSILON))) {
           to_erase.push(i);
         }
       }
       if (to_erase.length > 0) {
-        let erase_names = to_erase.map((e) => data[e].name);
-        for (let e of to_erase.sort((a,b) => b - a)) {
+        const erase_names = to_erase.map((e) => data[e].name);
+        for (const e of to_erase.sort((a, b) => b - a)) {
           data.splice(e, 1);
         }
       }
@@ -333,11 +327,10 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
     return data;
   }
 
-  format_bytes_func(what: string)
-  {
-    let units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB']
-    if (what == "bytes/s") {
-      units = ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s', 'PB/s', 'EB/s']
+  format_bytes_func(what: string) {
+    let units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
+    if (what === 'bytes/s') {
+      units = ['B/s', 'KB/s', 'MB/s', 'GB/s', 'TB/s', 'PB/s', 'EB/s'];
     }
     return function(value: number): string {
       let idx = 0;
@@ -350,12 +343,11 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
       } else {
         return d3.format('.0f')(value) + ' ' + units[idx];
       }
-    }
+    };
   }
 
-  private enable_autorefresh()
-  {
-    if (this.auto_refresh_subscription)  return;
+  private enable_autorefresh() {
+    if (this.auto_refresh_subscription) {  return; }
     this.auto_refresh_subscription =
       interval(this.refresh_interval_sec * 1000).subscribe((num) => {
         this.refresh();
@@ -363,16 +355,14 @@ export class PrometheusChartComponent implements AfterViewInit, OnInit, OnDestro
     this.refresh();
   }
 
-  private disable_autorefresh()
-  {
+  private disable_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.auto_refresh_subscription.unsubscribe();
       this.auto_refresh_subscription = null;
     }
   }
 
-  toggle_autorefresh()
-  {
+  toggle_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.disable_autorefresh();
     } else {

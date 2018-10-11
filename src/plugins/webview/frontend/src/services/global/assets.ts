@@ -17,8 +17,7 @@ export class AssetsService {
 
   constructor(
     @Inject(MatIconRegistry) private readonly iconRegistry_: MatIconRegistry,
-    @Inject(DomSanitizer) private readonly sanitizer_: DomSanitizer)
-  {
+    @Inject(DomSanitizer) private readonly sanitizer_: DomSanitizer) {
     iconRegistry_.addSvgIcon(
       this.appLogoIcon_,
       sanitizer_.bypassSecurityTrustResourceUrl(`${this.assetsPath_}/${this.appLogoSvg_}`));
