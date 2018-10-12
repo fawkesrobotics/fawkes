@@ -109,10 +109,7 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 	}
 
 	if (enabled_) {
-		std::string extra_args;
-		try {
-			extra_args = config->get_string(prefix + "args");
-		} catch (Exception &e) {}
+		std::string extra_args = config->get_string_or_default((prefix + "args").c_str(), "");
 		if (! extra_args.empty()) {
 			wordexp_t p;
 			int wrv = wordexp(extra_args.c_str(), &p, WRDE_NOCMD | WRDE_UNDEF);
