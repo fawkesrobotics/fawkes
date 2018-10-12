@@ -114,6 +114,7 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 			wordexp_t p;
 			int wrv = wordexp(extra_args.c_str(), &p, WRDE_NOCMD | WRDE_UNDEF);
 			switch (wrv) {
+			case 0: break; // all good
 			case WRDE_BADCHAR:
 				throw Exception("%s: invalid character in args", name());
 			case WRDE_BADVAL:
@@ -124,7 +125,8 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 				throw OutOfMemoryException("Cannot parse args");
 			case WRDE_SYNTAX:
 				throw Exception("%s: shell syntax error in args", name());
-			default: break;
+			default:
+				throw Exception("Unexpected wordexp error %d when parsing args", wrv);
 			}
 
 			// These arguments may not be passed, they are either configured through
