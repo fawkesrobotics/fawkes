@@ -879,29 +879,32 @@ RobotMemory::mutex_try_lock(const std::string& name,
 	} catch (mongo::OperationException &e) {
 		logger_->log_error(name_, "Mongo OperationException: %s", e.what());
 		try {
-		mongo::BSONObjBuilder check_doc;
-		check_doc.append("_id", name);
-		check_doc.append("locked", true);
-		check_doc.append("locked-by", identity);
-		BSONObj res_doc  =
-		  client->findOne(cfg_coord_mutex_collection_, check_doc.obj());
-		logger_->log_info(name_,
-		  "Checking whether mutex was acquired succeeded");
-		if (!res_doc.isEmpty()) {
-			logger_->log_warn(name_,
-			  "Exception during try-lock for %s, but mutex was still acquired",
-			  name.c_str());
-		} else {
+			mongo::BSONObjBuilder check_doc;
+			check_doc.append("_id", name);
+			check_doc.append("locked", true);
+			check_doc.append("locked-by", identity);
+			BSONObj res_doc  =
+			  client->findOne(cfg_coord_mutex_collection_, check_doc.obj());
 			logger_->log_info(name_,
-			  "Exception during try-lock for %s, and mutex was not acquired",
-			  name.c_str());
-		}
-		return !res_doc.isEmpty();
+			                  "Checking whether mutex was acquired succeeded");
+			if (!res_doc.isEmpty()) {
+				logger_->log_warn(name_,
+				                  "Exception during try-lock for %s, "
+				                  "but mutex was still acquired",
+				                  name.c_str());
+			} else {
+				logger_->log_info(name_,
+				                  "Exception during try-lock for %s, "
+				                  "and mutex was not acquired",
+				                  name.c_str());
+			}
+			return !res_doc.isEmpty();
 		} catch (mongo::OperationException &e) {
-		logger_->log_error(name_,
-		  "Mongo OperationException while handling the first exception: %s",
-		  e.what());
-		return false;
+			logger_->log_error(name_,
+			                   "Mongo OperationException while handling "
+			                   "the first exception: %s",
+			                   e.what());
+			return false;
 		}
 	}
 }

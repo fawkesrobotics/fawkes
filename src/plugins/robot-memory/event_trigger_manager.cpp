@@ -82,8 +82,7 @@ void EventTriggerManager::check_events()
   for(EventTrigger *trigger : triggers)
   {
     try {
-      while(trigger->oplog_cursor->more())
-      {
+      while (trigger->oplog_cursor->more()) {
         BSONObj change = trigger->oplog_cursor->next();
         //logger_->log_info(name.c_str(), "Triggering: %s", change.toString().c_str());
         //actually call the callback function
