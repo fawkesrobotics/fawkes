@@ -17,16 +17,16 @@ import { DomainPrecondition } from '../models/DomainPrecondition';
 import { DomainPreconditionAtom } from '../models/DomainPreconditionAtom';
 import { DomainPreconditionCompound } from '../models/DomainPreconditionCompound';
 
-import { Observable, interval, forkJoin } from 'rxjs';
+import { interval, forkJoin } from 'rxjs';
 
 @Component({
-  selector: 'clips-executive-goal-list',
+  selector: 'ff-clips-executive-goal-list',
   templateUrl: './goal-list.component.html',
   styleUrls: ['./goal-list.component.scss']
 })
 export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  @ViewChildren("dotgraph")
+  @ViewChildren('dotgraph')
   public dotgraphs: QueryList<DotGraphComponent>;
   public dotgraph: DotGraphComponent;
 
@@ -47,32 +47,28 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
   graph_svg_available = false;
   graph_svg_base64: SafeUrl = null;
 
-  zero_message = "No goals received.";
-  
+  zero_message = 'No goals received.';
+
   constructor(private readonly api_service: ClipsExecutiveApiService,
-              private router : Router,
+              private router: Router,
               private backendcfg: BackendConfigurationService,
-              private sanitizer: DomSanitizer)
-  {}
+              private sanitizer: DomSanitizer) {}
 
   ngOnInit() {
     this.refresh_domain();
     this.refresh();
-    this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => { this.refresh() });
+    this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => { this.refresh(); });
     this.graph_svg_base64 = this.sanitizer.bypassSecurityTrustUrl('#');
   }
 
-  ngOnDestroy()
-  {
+  ngOnDestroy() {
     this.backend_subscription.unsubscribe();
     this.backend_subscription = null;
     this.disable_autorefresh();
   }
 
-  ngAfterViewInit()
-  {
-    this.dotgraphs.changes.subscribe((comps: QueryList<DotGraphComponent>) =>
-    {
+  ngAfterViewInit() {
+    this.dotgraphs.changes.subscribe((comps: QueryList<DotGraphComponent>) => {
       this.dotgraph = comps.first;
       this.graph_svg_available = false;
       if (this.dotgraph) {
@@ -81,22 +77,21 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  refresh()
-  {
+  refresh() {
     this.loading = true;
-    this.zero_message = "Retrieving goals";
+    this.zero_message = 'Retrieving goals';
 
     this.api_service.list_goals().subscribe(
       (goals) => {
-        //console.log("Goals", goals)
-        let plans = [];
+        // console.log("Goals", goals)
+        const plans = [];
         goals
           .filter(g => g.plans.length > 0)
           .forEach(g => g.plans.forEach(p => plans.push({goal_id: g.id, plan_id: p})));
 
         this.dataSource.data = this.process_tree(goals);
-        if (this.dataSource.data.length == 0) {
-          this.zero_message = "Executive has currently no goals";
+        if (this.dataSource.data.length === 0) {
+          this.zero_message = 'Executive has currently no goals';
         }
 
         this.goals = goals;
@@ -111,73 +106,69 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
       },
       (err) => {
         this.dataSource.data = [];
-        if (err.status == 0) {
-          this.zero_message="API server unavailable. Robot down?";
+        if (err.status === 0) {
+          this.zero_message = 'API server unavailable. Robot down?';
         } else {
-          this.zero_message=`Failed to retrieve goals: ${err.error}`;
+          this.zero_message = `Failed to retrieve goals: ${err.error}`;
         }
         this.loading = false;
       }
     );
   }
 
-  refresh_domain()
-  {
+  refresh_domain() {
     this.api_service.list_domain_operators()
       .subscribe(
-        (operators) => { this.operators = operators;},
-        (err) => { console.log("Failed to receive domain data"); }
+        (operators) => { this.operators = operators; },
+        (err) => { console.log('Failed to receive domain data'); }
       );
   }
 
-  refresh_plans()
-  {
+  refresh_plans() {
     this.loading = true;
-    this.zero_message = "Retrieving plans";
+    this.zero_message = 'Retrieving plans';
 
     forkJoin(
       // forkJoin: retrieve all plans associated to goal in parallel
       this.plans.map((plan) => {
-        return this.api_service.get_plan(plan.goal_id, plan.plan_id)
+        return this.api_service.get_plan(plan.goal_id, plan.plan_id);
       })
     )
     .subscribe(
-      (plans : Plan[]) => {
+      (plans: Plan[]) => {
         for (let i = 0; i < plans.length; ++i) {
-          //console.log("Got plan", this.plans[i].goal_id, this.plans[i].plan_id)
+          // console.log("Got plan", this.plans[i].goal_id, this.plans[i].plan_id)
           this.plans[i].plan = plans[i];
         }
-        //console.log("Plans", this.plans)
+        // console.log("Plans", this.plans)
         this.create_goals_graph();
         this.loading = false;
       },
       (err) => {
-        console.log("Failed to retrieve plans");
+        console.log('Failed to retrieve plans');
         this.create_goals_graph();
         this.loading = false;
       }
     );
   }
 
-  recursive_add_goals(l, level : number,
-                      goals : Goal[], sub_goals : Map<string, Goal[]>)
-  {
-    for (let g of goals) {
-      l.push({goal: g, level: level, width: 16*level});
+  recursive_add_goals(l, level: number,
+                      goals: Goal[], sub_goals: Map<string, Goal[]>) {
+    for (const g of goals) {
+      l.push({goal: g, level: level, width: 16 * level});
       if (g.id in sub_goals) {
-        this.recursive_add_goals(l, level+1, sub_goals[g.id], sub_goals);
+        this.recursive_add_goals(l, level + 1, sub_goals[g.id], sub_goals);
       }
     }
   }
 
-  process_tree(data: Goal[])
-  {
-    let rv = []
+  process_tree(data: Goal[]) {
+    const rv = [];
 
-    let top_goals : Goal[] = [];
-    let sub_goals : Map<string, Goal[]> = new Map();
-    for (let g of data) {
-      if (! g.parent || g.parent == "") {
+    const top_goals: Goal[] = [];
+    const sub_goals: Map<string, Goal[]> = new Map();
+    for (const g of data) {
+      if (! g.parent || g.parent === '') {
         top_goals.push(g);
       } else if (g.parent) {
         if (g.parent in sub_goals) {
@@ -189,102 +180,96 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     this.recursive_add_goals(rv, 0, top_goals, sub_goals);
-    
+
     return rv;
   }
-  
-  icon_name(goal : Goal) : string
-  {
+
+  icon_name(goal: Goal): string {
     switch (goal.mode) {
-      case "FORMULATED": return "note_add";
-      case "SELECTED":   return "build";
-      case "EXPANDED":   return "assignment";
-      case "COMMITTED":   return "assignment_turned_in";
-      case "DISPATCHED":   return "loop";
-      case "FINISHED":
+      case 'FORMULATED': return 'note_add';
+      case 'SELECTED':   return 'build';
+      case 'EXPANDED':   return 'assignment';
+      case 'COMMITTED':   return 'assignment_turned_in';
+      case 'DISPATCHED':   return 'loop';
+      case 'FINISHED':
       {
         switch (goal.outcome) {
-          case "COMPLETED": return "check";
-          case "FAILED": return "error_outline";
-          case "REJECTED": return "report";
-          default: return "help";
+          case 'COMPLETED': return 'check';
+          case 'FAILED': return 'error_outline';
+          case 'REJECTED': return 'report';
+          default: return 'help';
         }
       }
-      case "EVALUATED":
+      case 'EVALUATED':
       {
         switch (goal.outcome) {
-          case "COMPLETED": return "check_circle";
-          case "FAILED": return "error";
-          case "REJECTED": return "report";
-          default: return "help";
+          case 'COMPLETED': return 'check_circle';
+          case 'FAILED': return 'error';
+          case 'REJECTED': return 'report';
+          default: return 'help';
         }
       }
-      case "RETRACTED":   return "delete";
-      default: return "help_outline";
+      case 'RETRACTED':   return 'delete';
+      default: return 'help_outline';
     }
   }
 
-  icon_class(goal : Goal) : string
-  {
+  icon_class(goal: Goal): string {
     switch (goal.mode) {
-      case "FORMULATED": return "ff-muted";
-      case "SELECTED":   return "ff-primary";
-      case "EXPANDED":   return "ff-primary";
-      case "COMMITTED":   return "ff-primary";
-      case "DISPATCHED":   return "ff-primary";
-      case "FINISHED":
+      case 'FORMULATED': return 'ff-muted';
+      case 'SELECTED':   return 'ff-primary';
+      case 'EXPANDED':   return 'ff-primary';
+      case 'COMMITTED':   return 'ff-primary';
+      case 'DISPATCHED':   return 'ff-primary';
+      case 'FINISHED':
       {
         switch (goal.outcome) {
-          case "COMPLETED": return "ff-success";
-          case "FAILED": return "ff-error";
-          case "REJECTED": return "ff-warning";
-          default: return "ff-warning";
+          case 'COMPLETED': return 'ff-success';
+          case 'FAILED': return 'ff-error';
+          case 'REJECTED': return 'ff-warning';
+          default: return 'ff-warning';
         }
       }
-      case "EVALUATED":
+      case 'EVALUATED':
       {
         switch (goal.outcome) {
-          case "COMPLETED": return "ff-success";
-          case "FAILED": return "ff-error";
-          case "REJECTED": return "ff-warning";
-          default: return "ff-warning";
+          case 'COMPLETED': return 'ff-success';
+          case 'FAILED': return 'ff-error';
+          case 'REJECTED': return 'ff-warning';
+          default: return 'ff-warning';
         }
       }
-      case "RETRACTED":
+      case 'RETRACTED':
         switch (goal.outcome) {
-          case "COMPLETED": return "ff-success";
-          case "FAILED": return "ff-error";
-          case "REJECTED": return "ff-warning";
-          default: return "ff-primary";
+          case 'COMPLETED': return 'ff-success';
+          case 'FAILED': return 'ff-error';
+          case 'REJECTED': return 'ff-warning';
+          default: return 'ff-primary';
         }
-      default: return "ff-warning";
+      default: return 'ff-warning';
     }
   }
 
-  icon_tooltip(goal: Goal): string
-  {
+  icon_tooltip(goal: Goal): string {
     switch (goal.mode) {
-      case "FINISHED":
-      case "EVALUATED":
+      case 'FINISHED':
+      case 'EVALUATED':
         return `${goal.mode}|${goal.outcome}`;
       default:
         return goal.mode;
     }
   }
 
-  goto_goal(goal : Goal)
-  {
+  goto_goal(goal: Goal) {
     this.router.navigate(['/clips-executive/goal/', goal.id]);
   }
 
-  show_zero_state() : boolean
-  {
-    return ! this.dataSource.data || this.dataSource.data.length == 0;
+  show_zero_state(): boolean {
+    return ! this.dataSource.data || this.dataSource.data.length === 0;
   }
 
-  private enable_autorefresh()
-  {
-    if (this.auto_refresh_subscription)  return;
+  private enable_autorefresh() {
+    if (this.auto_refresh_subscription) {  return; }
     this.auto_refresh_subscription =
       interval(2000).subscribe((num) => {
         this.refresh();
@@ -292,16 +277,14 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
     this.refresh();
   }
 
-  private disable_autorefresh()
-  {
+  private disable_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.auto_refresh_subscription.unsubscribe();
       this.auto_refresh_subscription = null;
     }
   }
 
-  toggle_autorefresh()
-  {
+  toggle_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.disable_autorefresh();
     } else {
@@ -309,15 +292,14 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  format_precondition(cond : DomainPrecondition, indent: string = "") : string
-  {
+  format_precondition(cond: DomainPrecondition, indent: string = ''): string {
     let s = indent;
     if (cond.kind === 'DomainPreconditionCompound') {
-      let compound = cond as DomainPreconditionCompound;
+      const compound = cond as DomainPreconditionCompound;
       if (! cond['is-satisfied']) {
-        s += "! ";
+        s += '! ';
       }
-      s += "(";
+      s += '(';
       switch (compound.type) {
         case 'conjunction':
           s += 'AND';
@@ -330,18 +312,18 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
           break;
       }
       s += ' ';
-      for (let e of compound.elements) {
-        s += '\\l' + this.format_precondition(e, indent+"&nbsp;&nbsp;&nbsp;");
+      for (const e of compound.elements) {
+        s += '\\l' + this.format_precondition(e, indent + '&nbsp;&nbsp;&nbsp;');
       }
       s += ')';
     } else {
-      let atom = cond as DomainPreconditionAtom;
+      const atom = cond as DomainPreconditionAtom;
       if (! cond['is-satisfied']) {
-        s += "! ";
+        s += '! ';
       }
       s += '(';
       s += `${atom.predicate}`;
-      for (let p of atom['param-values']) {
+      for (const p of atom['param-values']) {
         s += ' ' + p;
       }
       s += ')';
@@ -349,111 +331,119 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
     return s;
   }
 
-  create_goals_graph()
-  {
-    let graph = 'digraph {\n'+
-      '  graph [fontsize=10];\n'+
-      '  node [fontsize=10];\n'+
+  create_goals_graph() {
+    let graph = 'digraph {\n' +
+      '  graph [fontsize=10];\n' +
+      '  node [fontsize=10];\n' +
       '  edge [fontsize=10];\n\n';
     if (! this.goals) {
       graph += '  "no goals"';
     } else {
-      for (let g of this.goals) {
-        let shape = g.type == 'ACHIEVE' ? 'box' : 'ellipse';
+      for (const g of this.goals) {
+        const shape = g.type === 'ACHIEVE' ? 'box' : 'ellipse';
         let color = '';
 
         switch (g.mode) {
-          case "SELECTED":   color='#eeeeee'; break;
-          case "EXPANDED":   color='#FFE082'; break;
-          case "COMMITTED":  color='#FFF59D'; break;
-          case "DISPATCHED": color='#90CAF9'; break;
-          case "FINISHED":
-          case "EVALUATED":
+          case 'SELECTED':   color = '#eeeeee'; break;
+          case 'EXPANDED':   color = '#FFE082'; break;
+          case 'COMMITTED':  color = '#FFF59D'; break;
+          case 'DISPATCHED': color = '#90CAF9'; break;
+          case 'FINISHED':
+          case 'EVALUATED':
             switch (g.outcome) {
-              case "COMPLETED": color='#A5D6A7'; break;
-              case "FAILED":    color='#EF9A9A'; break;
-              case "REJECTED":  color='#FFCC80'; break;
+              case 'COMPLETED': color = '#A5D6A7'; break;
+              case 'FAILED':    color = '#EF9A9A'; break;
+              case 'REJECTED':  color = '#FFCC80'; break;
             }
             break;
-          case "RETRACTED":
+          case 'RETRACTED':
             switch (g.outcome) {
-              case "COMPLETED": color='#A5D6A7'; break;
-              case "FAILED":    color='#EF9A9A'; break;
-              case "REJECTED":  color='#FFCC80'; break;
-              default:          color='#eeeeee'; break;
+              case 'COMPLETED': color = '#A5D6A7'; break;
+              case 'FAILED':    color = '#EF9A9A'; break;
+              case 'REJECTED':  color = '#FFCC80'; break;
+              default:          color = '#eeeeee'; break;
             }
-          default:;
+            break;
+          default:
         }
 
         let node_label = `<table border="0" cellspacing="2"><tr><td colspan="2" align="center"><b>${g.id}</b></td></tr>`;
-        node_label += `<tr><td align="left"><font color="#444444">Mode:</font></td><td align="left"><font color="#444444">${this.icon_tooltip(g)}</font></td></tr>`;
+        node_label += `<tr><td align="left"><font color="#444444">Mode:</font></td>` +
+          `<td align="left"><font color="#444444">${this.icon_tooltip(g)}</font></td></tr>`;
 
-        if (g['class'] && g['class'] != "") {
-          node_label += `<tr><td align="left"><font color="#444444">Class:</font></td><td align="left"><font color="#444444">${g['class']}</font></td></tr>`;
+        if (g['class'] && g['class'] !== '') {
+          node_label += `<tr><td align="left"><font color="#444444">Class:</font></td>` +
+            `<td align="left"><font color="#444444">${g['class']}</font></td></tr>`;
         }
-        if (g['sub-type'] && g['sub-type'] != "") {
-          node_label += `<tr><td align="left"><font color="#444444">Sub-type:</font></td><td align="left"><font color="#444444">${g['sub-type']}</font></td></tr>`;
+        if (g['sub-type'] && g['sub-type'] !== '') {
+          node_label += `<tr><td align="left"><font color="#444444">Sub-type:</font></td>` +
+            `<td align="left"><font color="#444444">${g['sub-type']}</font></td></tr>`;
         }
         if (g.priority > 0) {
-          node_label += `<tr><td align="left"><font color="#444444">Priority:</font></td><td align="left"><font color="#444444">${g.priority}</font></td></tr>`;
+          node_label += `<tr><td align="left"><font color="#444444">Priority:</font></td>` +
+            `<td align="left"><font color="#444444">${g.priority}</font></td></tr>`;
         }
-        if (g['sub-type'] && g['sub-type'] == 'RETRY-SUBGOAL') {
-          if (g.parameters.length == 2 && g.parameters[0] == 'max-tries' &&
-              g.meta.length == 2 && g.meta[0] == 'num-tries')
-          {
-            node_label += `<tr><td align="left"><font color="#444444">Tries:</font></td><td align="left"><font color="#444444">${g.meta[1]}/${g.parameters[1]}</font></td></tr>`;
+        if (g['sub-type'] && g['sub-type'] === 'RETRY-SUBGOAL') {
+          if (g.parameters.length === 2 && g.parameters[0] === 'max-tries' &&
+              g.meta.length === 2 && g.meta[0] === 'num-tries') {
+            node_label += `<tr><td align="left"><font color="#444444">Tries:</font></td>` +
+              `<td align="left"><font color="#444444">${g.meta[1]}/${g.parameters[1]}</font></td></tr>`;
           }
         }
-				if (g['parameters'] && g['parameters'].length > 0) {
-          node_label += `<tr><td align="left"><font color="#444444">Params:</font></td><td align="left"><font color="#444444">${g['parameters'].join(" ")}</font></td></tr>`;
+        if (g['parameters'] && g['parameters'].length > 0) {
+          node_label += `<tr><td align="left"><font color="#444444">Params:</font></td>` +
+            `<td align="left"><font color="#444444">${g['parameters'].join(' ')}</font></td></tr>`;
         }
-				if (g['error'] && g['error'].length > 0) {
-          node_label += `<tr><td align="left"><font color="#444444">Error:</font></td><td align="left"><font color="#ff0000">${g['error'].join(" ")}</font></td></tr>`;
+        if (g['error'] && g['error'].length > 0) {
+          node_label += `<tr><td align="left"><font color="#444444">Error:</font></td>` +
+            `<td align="left"><font color="#ff0000">${g['error'].join(' ')}</font></td></tr>`;
         }
-				if (g['required-resources'] && g['required-resources'] != "") {
-          node_label += `<tr><td align="left"><font color="#444444">Req Resrc:</font></td><td align="left"><font color="#444444">`;
-					if (g.mode == 'COMMITTED') {
-						let values = [];
-						for (let r of g['required-resources']) {
-							if (g['acquired-resources'].indexOf(r) == -1) {
-								values.push(`<font color="#ff0000">${r}</font>`);
-							} else {
-								values.push(r);
-							}
-						}
-						node_label += values.join(", ");
-					} else {
-						node_label += g['required-resources'].join(", ");
-					}
-					node_label += '</font></td></tr>';
+        if (g['required-resources'] && g['required-resources'].length > 0) {
+          node_label += `<tr><td align="left"><font color="#444444">Req Resrc:</font></td>` +
+            `<td align="left"><font color="#444444">`;
+          if (g.mode === 'COMMITTED') {
+            const values = [];
+            for (const r of g['required-resources']) {
+              if (g['acquired-resources'].indexOf(r) === -1) {
+                values.push(`<font color="#ff0000">${r}</font>`);
+              } else {
+                values.push(r);
+              }
+            }
+            node_label += values.join(', ');
+          } else {
+            node_label += g['required-resources'].join(', ');
+          }
+          node_label += '</font></td></tr>';
         }
-				if (g['acquired-resources'] && g['acquired-resources'] != "") {
-					let res_color = (g.mode == 'RETRACTED') ? "#ff0000" : "#444444";
-          node_label += `<tr><td align="left"><font color="#444444">Acq Resrc:</font></td><td align="left"><font color="${res_color}">${g['acquired-resources'].join(", ")}</font></td></tr>`;
+        if (g['acquired-resources'] && g['acquired-resources'].length > 0) {
+          const res_color = (g.mode === 'RETRACTED') ? '#ff0000' : '#444444';
+          node_label += `<tr><td align="left"><font color="#444444">Acq Resrc:</font></td>` +
+            `<td align="left"><font color="${res_color}">${g['acquired-resources'].join(', ')}</font></td></tr>`;
         }
-        node_label += "</table>";
+        node_label += '</table>';
 
         graph += `  "${g.id}" [label=<${node_label}>, tooltip="${g.id}", href="/clips-executive/goal/${g.id}", shape=${shape}`;
-        if (color != '') {
+        if (color !== '') {
           graph += `, style="filled", fillcolor="${color}"`;
         }
-        graph += "];\n";
+        graph += '];\n';
         if (g.parent) {
           graph += `  "${g.parent}" -> "${g.id}";\n`;
         }
 
-        let plans = this.plans.filter(p => p.goal_id == g.id && p.plan);
-        for (let p of plans) {
+        const plans = this.plans.filter(p => p.goal_id === g.id && p.plan);
+        for (const p of plans) {
           graph +=
-            `  subgraph "cluster_${p.goal_id}__${p.plan_id}" {\n`+
-            `    label="${p.plan_id}";\n`+
-            `    style=filled; fillcolor="#efefef";\n`+
-            `    node [shape=invhouse,style=filled];\n`+
+            `  subgraph "cluster_${p.goal_id}__${p.plan_id}" {\n` +
+            `    label="${p.plan_id}";\n` +
+            `    style=filled; fillcolor="#efefef";\n` +
+            `    node [shape=invhouse,style=filled];\n` +
             `    edge [labelangle=290,labeldistance=6.0,labeljust=l];\n`;
           let prev = p.goal_id;
-          for (let a of p.plan.actions) {
+          for (const a of p.plan.actions) {
             let bgcolor = '#ffffff';
-            let prec_string = "";
+            let prec_string = '';
             if (a.preconditions && a.preconditions.length > 0) {
               prec_string = this.format_precondition(a.preconditions[0]);
             }
@@ -475,33 +465,32 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
             }
             /*
             let label = "";
-            if (prec_string != "" && prec_string != "()" && prec_string != "TRUE") {
+            if (prec_string !== "" && prec_string !== "()" && prec_string !== "TRUE") {
               label = `{ ${prec_string} | ${a["operator-name"]} }`;
             } else {
               label = a["operator-name"];
             }
             */
-            let label = a["operator-name"];
+            const label = a['operator-name'];
 
             graph += `    "${p.goal_id}__${p.plan_id}__${a.id}" [label="${label}",fillcolor="${bgcolor}"];\n`;
-            graph += `    "${prev}" -> "${p.goal_id}__${p.plan_id}__${a.id}" `+
+            graph += `    "${prev}" -> "${p.goal_id}__${p.plan_id}__${a.id}" ` +
               `[headlabel="${prec_string}"];\n`;
 
             prev = `${p.goal_id}__${p.plan_id}__${a.id}`;
           }
-          graph += "  }\n";
+          graph += '  }\n';
         }
       }
     }
-    graph += "}";
-    //console.log(`Graph: ${graph}`);
+    graph += '}';
+    // console.log(`Graph: ${graph}`);
     this.goals_graph = graph;
   }
 
-  svg_updated(svg: string)
-  {
+  svg_updated(svg: string) {
     this.graph_svg_base64 =
-      this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,'+btoa(svg));
+      this.sanitizer.bypassSecurityTrustUrl('data:image/svg+xml;base64,' + btoa(svg));
     this.graph_svg_available = true;
   }
 }

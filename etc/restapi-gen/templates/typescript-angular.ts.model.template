@@ -16,9 +16,9 @@ Array<{{ type(property['items']) }}>
 %- macro gen_schema(schema)
 % for propname, p in schema['properties'].items()
 %   if p.enum
-	{{ propname | sanitize }}{% if not schema.required or propname not in schema.required %}?{% endif %}: {{ name }}.{{ propname | capitalize }}Enum;
+  {{ propname | sanitize }}{% if not schema.required or propname not in schema.required %}?{% endif %}: {{ name }}.{{ propname | capitalize }}Enum;
 %   else
-	{{ propname | sanitize }}{% if not schema.required or propname not in schema.required %}?{% endif %}: {{ type(p) }};
+  {{ propname | sanitize }}{% if not schema.required or propname not in schema.required %}?{% endif %}: {{ type(p) }};
 %   endif
 % endfor
 %- endmacro
@@ -26,12 +26,13 @@ Array<{{ type(property['items']) }}>
 %- macro gen_enums(schema)
 % for propname, p in schema['properties'].items()
 %   if 'enum' in p
-	export type {{ propname | capitalize }}Enum = {{ p['enum'] | map('quote') | join(' | ') }};
-	export const {{ propname | capitalize }}Enum = {
+  // tslint:disable-next-line:max-line-length
+  export type {{ propname | capitalize }}Enum = {{ p['enum'] | map('quote') | join(' | ') }};
+  export const {{ propname | capitalize }}Enum = {
 %     for e in p.enum
-		{{ e | sanitize }}: {{ e|quote }} as {{ propname | capitalize }}Enum{% if not loop.last %},{% endif %}
+    {{ e | sanitize }}: {{ e|quote }} as {{ propname | capitalize }}Enum{% if not loop.last %},{% endif %}
 %     endfor
-	}
+  };
 %   endif
 % endfor
 %- endmacro
@@ -75,8 +76,7 @@ import { {{ c }} } from './{{ c }}';
 {{ gen_imports(schema) }}
 
 /** {{ name }} representation for JSON transfer. */
-export interface {{ name }}
-{
+export interface {{ name }} {
 % if 'properties' in schema
 {{ gen_schema(schema) }}
 %- elif schema.allOf
@@ -90,9 +90,8 @@ export interface {{ name }}
 %- endif
 }
 
-export namespace {{ name }}
-{
-	export const API_VERSION: string = "{{ spec.info.version }}";
+export namespace {{ name }} {
+  export const API_VERSION = '{{ spec.info.version }}';
 
 %if 'properties' in schema
 {{ gen_enums(schema) }}
@@ -106,3 +105,4 @@ export namespace {{ name }}
 %-   endfor
 %- endif
 }
+

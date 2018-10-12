@@ -13,25 +13,24 @@
 
 
 /** DomainPrecondition representation for JSON transfer. */
-export interface DomainPrecondition
-{
-	kind: string;
-	apiVersion: string;
-	name: string;
-	type: DomainPrecondition.TypeEnum;
-	grounded: boolean;
-	is_satisfied: boolean;
+export interface DomainPrecondition {
+  kind: string;
+  apiVersion: string;
+  name: string;
+  type: DomainPrecondition.TypeEnum;
+  grounded: boolean;
+  is_satisfied: boolean;
 }
 
-export namespace DomainPrecondition
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace DomainPrecondition {
+  export const API_VERSION = 'v1beta1';
 
-	export type TypeEnum = 'conjunction' | 'disjunction' | 'negation' | 'atom';
-	export const TypeEnum = {
-		conjunction: 'conjunction' as TypeEnum,
-		disjunction: 'disjunction' as TypeEnum,
-		negation: 'negation' as TypeEnum,
-		atom: 'atom' as TypeEnum
-	}
+  // tslint:disable-next-line:max-line-length
+  export type TypeEnum = 'conjunction' | 'disjunction' | 'negation' | 'atom';
+  export const TypeEnum = {
+    conjunction: 'conjunction' as TypeEnum,
+    disjunction: 'disjunction' as TypeEnum,
+    negation: 'negation' as TypeEnum,
+    atom: 'atom' as TypeEnum
+  };
 }

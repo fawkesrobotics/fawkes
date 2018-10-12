@@ -13,14 +13,12 @@
 
 
 /** DomainOperatorParameter representation for JSON transfer. */
-export interface DomainOperatorParameter
-{
-	name: string;
-	type: string;
+export interface DomainOperatorParameter {
+  name: string;
+  type: string;
 }
 
-export namespace DomainOperatorParameter
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace DomainOperatorParameter {
+  export const API_VERSION = 'v1beta1';
 
 }

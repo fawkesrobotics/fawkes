@@ -4,17 +4,17 @@
 
 import {NgModule} from '@angular/core';
 
-//import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
+// import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 
 import { ClipsExecutiveApiService } from './services/api.service';
-//import { ClipsExecutiveInMemoryDataService } from './services/mock-data.service';
+// import { ClipsExecutiveInMemoryDataService } from './services/mock-data.service';
 
 @NgModule({
   imports: [
     // The HttpClientInMemoryWebApiModule module intercepts HTTP requests
     // and returns simulated server responses.
     // Remove it when a real server is ready to receive requests.
-    //HttpClientInMemoryWebApiModule
+    // HttpClientInMemoryWebApiModule
     //  .forFeature(ClipsExecutiveInMemoryDataService, {apiBase: "api/clips-executive/"}),
   ],
 

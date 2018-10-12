@@ -30,6 +30,8 @@ ifeq ($(HAVE_CPP17)$(HAVE_WEBVIEW)$(HAVE_RAPIDJSON),111)
   LDFLAGS += $(LDFLAGS_WEBVIEW) $(LDFLAGS_RAPIDJSON) 
 
   PLUGINS_all = $(PLUGINDIR)/skiller-rest-api.$(SOEXT)
+
+  WEBVIEW_FRONTEND_PART=skiller
 else
   ifneq ($(HAVE_CPP17),1)
     WARN_TARGETS += warning_cpp17

@@ -14,15 +14,13 @@
 
 
 /** SkillCall representation for JSON transfer. */
-export interface SkillCall
-{
-	kind: string;
-	apiVersion: string;
-	skill_string: string;
+export interface SkillCall {
+  kind: string;
+  apiVersion: string;
+  skill_string: string;
 }
 
-export namespace SkillCall
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace SkillCall {
+  export const API_VERSION = 'v1beta1';
 
 }

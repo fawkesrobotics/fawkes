@@ -13,15 +13,13 @@
 
 
 /** TransformsGraph representation for JSON transfer. */
-export interface TransformsGraph
-{
-	kind: string;
-	apiVersion: string;
-	dotgraph: string;
+export interface TransformsGraph {
+  kind: string;
+  apiVersion: string;
+  dotgraph: string;
 }
 
-export namespace TransformsGraph
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace TransformsGraph {
+  export const API_VERSION = 'v1beta1';
 
 }

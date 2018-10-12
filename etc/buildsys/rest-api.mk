@@ -39,7 +39,7 @@ RESTAPI_FORCE=-f
 RESTAPI_STAMPFILES_CPP=$(addsuffix .cpp.stamp,$(RESTAPI_SPECFILES))
 RESTAPI_STAMPFILES_TYPESCRIPT=$(addsuffix .ts.stamp,$(RESTAPI_SPECFILES))
 ifeq ($(words $(RESTAPI_SPECFILES)),1)
-  RESTAPI_TS_API=$(shell grep -A10 ^info: $(SRCDIR)/api.yaml  | grep "^  title:" | awk -F: '{ print $$2 }' | tr -d " \d")ApiService
+  RESTAPI_TS_API=$(shell grep -A10 ^info: $(SRCDIR)/api.yaml  | grep "^  title:" | awk -F: '{ print $$2 }' | tr -d " [:digit:]")ApiService
 endif
 
 WEBVIEW_FRONTEND_DIR=$(FAWKES_BASEDIR)/src/plugins/webview/frontend

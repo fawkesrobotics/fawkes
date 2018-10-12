@@ -13,20 +13,18 @@
 
 
 /** InterfaceData representation for JSON transfer. */
-export interface InterfaceData
-{
-	kind: string;
-	apiVersion: string;
-	id: string;
-	type: string;
-	writer?: string;
-	readers?: Array<string>;
-	data: object;
-	timestamp: string;
+export interface InterfaceData {
+  kind: string;
+  apiVersion: string;
+  id: string;
+  type: string;
+  writer?: string;
+  readers?: Array<string>;
+  data: object;
+  timestamp: string;
 }
 
-export namespace InterfaceData
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace InterfaceData {
+  export const API_VERSION = 'v1beta1';
 
 }

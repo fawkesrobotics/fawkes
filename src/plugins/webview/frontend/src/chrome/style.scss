@@ -39,8 +39,8 @@
   .ff-toolbar-logo-text {
     @extend %ff-toolbar-logo-placeholder;
 
-    min-width: 10 * $baseline-grid;
-    width: 14 * $baseline-grid;
+    max-width: 16.5 * $baseline-grid;
+    width: 16.5 * $baseline-grid;
   }
 }
 

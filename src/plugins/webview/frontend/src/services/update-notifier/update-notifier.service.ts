@@ -5,19 +5,18 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { SwUpdate } from '@angular/service-worker';
-import { Observable, interval } from 'rxjs';
+import { interval } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 @Injectable()
 export class SwUpdateNotifierService {
 
   constructor(private updates: SwUpdate,
-              private snack_bar: MatSnackBar)
-  {
+              private snack_bar: MatSnackBar) {
     updates.available.subscribe(event => {
       console.log('current version is', event.current);
       console.log('available version is', event.available);
-      let ref = snack_bar.open('Webview Update Available', 'Reload');
+      const ref = snack_bar.open('Webview Update Available', 'Reload');
       ref.onAction().subscribe(() => {
         updates.activateUpdate().then(() => document.location.reload());
       });
@@ -37,21 +36,19 @@ export class SwUpdateNotifierService {
     }
   }
 
-  check_now()
-  {
+  check_now() {
     this.updates.checkForUpdate();
   }
 
-  force_install()
-  {
+  force_install() {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/ngsw-worker.js').then(function (registration) {
-        //console.log('Service Worker registered');
+        // console.log('Service Worker registered');
       }).catch(function (err) {
         console.error('Service Worker registration failed: ', err);
       });
     } else {
-      console.warn("No service worker");
+      console.warn('No service worker');
     }
   }
 }

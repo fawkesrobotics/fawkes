@@ -7,20 +7,20 @@ import { NgModule } from '@angular/core';
 import { ClipsExecutiveRoutingModule } from './routing.module';
 import { ClipsExecutiveServicesModule } from './service.module';
 import { ClipsExecutiveComponentModule } from './component.module';
-//import { ApiModule as ClipsExecutiveApiModule } from './api/api.module';
+// import { ApiModule as ClipsExecutiveApiModule } from './api/api.module';
 
 @NgModule({
   imports: [
     ClipsExecutiveRoutingModule,
     ClipsExecutiveServicesModule,
     ClipsExecutiveComponentModule,
-    //ClipsExecutiveApiModule,
+    // ClipsExecutiveApiModule,
   ],
   exports: [
     ClipsExecutiveRoutingModule,
     ClipsExecutiveServicesModule,
     ClipsExecutiveComponentModule,
-    //ClipsExecutiveApiModule,
+    // ClipsExecutiveApiModule,
   ],
 })
 export class ClipsExecutiveModule { }

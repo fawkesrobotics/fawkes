@@ -14,18 +14,16 @@ import { SlotValue } from './SlotValue';
 
 
 /** Fact representation for JSON transfer. */
-export interface Fact
-{
-	kind: string;
-	apiVersion: string;
-	index: number;
-	template_name: string;
-	formatted?: string;
-	slots?: Array<SlotValue>;
+export interface Fact {
+  kind: string;
+  apiVersion: string;
+  index: number;
+  template_name: string;
+  formatted?: string;
+  slots?: Array<SlotValue>;
 }
 
-export namespace Fact
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace Fact {
+  export const API_VERSION = 'v1beta1';
 
 }

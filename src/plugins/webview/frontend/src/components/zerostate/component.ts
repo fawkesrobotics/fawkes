@@ -10,7 +10,6 @@ import {Component, Input} from '@angular/core';
   templateUrl: './template.html',
   styleUrls: ['./style.scss']
 })
-export class ListZeroStateComponent
-{
-  @Input() message: string = "No resources found.";
+export class ListZeroStateComponent {
+  @Input() message = 'No resources found.';
 }

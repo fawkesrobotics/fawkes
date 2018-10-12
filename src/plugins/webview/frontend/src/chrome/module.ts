@@ -5,20 +5,20 @@
 
 import {NgModule} from '@angular/core';
 
-//import {ComponentsModule} from '../common/components/module';
+// import {ComponentsModule} from '../common/components/module';
 import { AppRoutingModule } from '../app/app-routing.module';
 import {SharedModule} from '../shared.module';
 
 import {ChromeComponent} from './component';
 import {NavModule} from './nav/module';
-//import {NotificationsComponent} from './notifications/component';
-//import {UserPanelComponent} from './userpanel/component';
+// import {NotificationsComponent} from './notifications/component';
+// import {UserPanelComponent} from './userpanel/component';
 
 @NgModule({
   declarations: [
     ChromeComponent,
-    //NotificationsComponent,
-    //UserPanelComponent,
+    // NotificationsComponent,
+    // UserPanelComponent,
   ],
   imports: [
     SharedModule,

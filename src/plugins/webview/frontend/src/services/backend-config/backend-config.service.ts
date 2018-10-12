@@ -5,30 +5,28 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable, interval } from 'rxjs';
+import { interval } from 'rxjs';
 import { delay, retryWhen } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 
 import { Backend } from './model/Backend';
-import { Service } from './model/Service';
 
 @Injectable()
 export class BackendConfigurationService {
 
   public backend_changed: EventEmitter<string>;
-  
-  private backends_ = {}
+
+  private backends_ = {};
   private backends_list_ = null;
   private auto_refresh_subscription_ = null;
 
-  public current_backend:string = 'origin';
+  public current_backend = 'origin';
 
-  constructor(private http: HttpClient)
-  {
+  constructor(private http: HttpClient) {
     this.backend_changed = new EventEmitter();
 
-    let local_url = new URL(window.location.href);
+    const local_url = new URL(window.location.href);
     let api_url   = new URL(`${local_url.origin}/api`);
     let prom_url  = null;
 
@@ -50,48 +48,43 @@ export class BackendConfigurationService {
     this.refresh();
   }
 
-  set_backend(backend: string)
-  {
+  set_backend(backend: string) {
     if (this.backends_[backend]) {
       this.current_backend = backend;
       this.backend_changed.emit(backend);
     }
   }
 
-  get backend()
-  {
+  get backend() {
     return this.current_backend;
   }
 
-  get backend_name()
-  {
+  get backend_name() {
     return this.backends_[this.current_backend].name;
   }
 
-  get backends()
-  {
+  get backends() {
     return Object.assign({}, this.backends_);
   }
 
-  get backend_list()
-  {
+  get backend_list() {
     if (! this.backends_list_) {
-      this.backends_list_ = []
-      for (let b in this.backends_) {
+      this.backends_list_ = [];
+      for (const b in this.backends_) {
         if (this.backends_[b].show) {
           this.backends_list_.push(Object.assign({id: b}, this.backends_[b]));
         }
       }
-      this.backends_list_.sort((a,b) => {
-        if (a.id == 'origin' && b.id == 'origin') {
+      this.backends_list_.sort((a, b) => {
+        if (a.id === 'origin' && b.id === 'origin') {
           return 0;
-        } else if (a.id == 'origin') {
+        } else if (a.id === 'origin') {
           return 1;
-        } else if (b.id == 'origin') {
+        } else if (b.id === 'origin') {
           return -1;
         } else {
-          let a_s = a.name.toUpperCase();
-          let b_s = b.name.toUpperCase();
+          const a_s = a.name.toUpperCase();
+          const b_s = b.name.toUpperCase();
           if (a_s < b_s) {
             return -1;
           } else if (a_s > b_s) {
@@ -105,27 +98,25 @@ export class BackendConfigurationService {
     return this.backends_list_;
   }
 
-  services(): string[]
-  {
+  services(): string[] {
     return Object.keys(this.backends_[this.current_backend]);
   }
 
   has_url_for(service: string): boolean {
-    return (this.backends_[this.current_backend].services[service] != null);
+    return (this.backends_[this.current_backend].services[service] !== null);
   }
 
-  url_for(service : string) {
+  url_for(service: string) {
     if (this.backends_[this.current_backend].services[service]) {
-      let url = this.backends_[this.current_backend].services[service].toString();
-      return url.replace(/\/$/, "");
+      const url = this.backends_[this.current_backend].services[service].toString();
+      return url.replace(/\/$/, '');
     } else {
       console.log(`No service ${service} known for backend ${this.current_backend}`);
       return null;
     }
   }
 
-  url_expand(url: string)
-  {
+  url_expand(url: string) {
     return new URL(url
                    .replace('$ORIGIN', this.backends_['origin'].url.origin)
                    .replace('$HOSTNAME', this.backends_['origin'].url.hostname)
@@ -133,22 +124,21 @@ export class BackendConfigurationService {
                    .replace('$SCHEME', this.backends_['origin'].url.protocol)
                    .replace('$PORT', this.backends_['origin'].url.port));
   }
-  
-  refresh()
-  {
+
+  refresh() {
     this.http.get<Backend[]>(this.backends_['origin'].services['api'] + '/backends')
       .pipe(
         retryWhen(errors => errors.pipe(delay(5000)))
       )
       .subscribe(
         (recv_backends) => {
-          let new_backends = {};
-          for (let backend of recv_backends) {
+          const new_backends = {};
+          for (const backend of recv_backends) {
             // Ignore if we got some "origin" from the remote
-            if (backend.id == 'origin')  continue;
+            if (backend.id === 'origin') {  continue; }
 
-            let services = {};
-            for (let service of backend.services) {
+            const services = {};
+            for (const service of backend.services) {
               services[service.name] = this.url_expand(service.url);
             }
             new_backends[backend.id] = {
@@ -156,22 +146,23 @@ export class BackendConfigurationService {
               name: backend.name,
               url: this.url_expand(backend.url),
               services: services
-            }
+            };
           }
           // Check if origin backend should be show, i.e., it is not
           // included in the list of received backends.
           // check if any of the received environments maches origin
           let have_origin = false;
-          let new_origin = "origin";
-          let origin_backend = this.backends_['origin'];
-          for (let bn in new_backends) {
-            let backend = new_backends[bn];
-            if (backend.url.toString() == origin_backend.url.toString() &&
-                backend.services['api'].toString() === origin_backend.services['api'].toString())
-            {
-              have_origin = true;
-              new_origin = bn;
-              break;
+          let new_origin = 'origin';
+          const origin_backend = this.backends_['origin'];
+          for (const bn in new_backends) {
+            if (typeof(bn) === 'string') {
+              const backend = new_backends[bn];
+              if (backend.url.toString() === origin_backend.url.toString() &&
+                  backend.services['api'].toString() === origin_backend.services['api'].toString()) {
+                have_origin = true;
+                new_origin = bn;
+                break;
+              }
             }
           }
 
@@ -182,11 +173,11 @@ export class BackendConfigurationService {
           this.backends_ = new_backends;
           this.backends_list_ = null;
 
-          if (have_origin && this.current_backend == 'origin') {
+          if (have_origin && this.current_backend === 'origin') {
             this.set_backend(new_origin);
           }
-          let new_idx = Object.keys(this.backends_).findIndex((b) => {
-            return (b == new_origin && this.backends_[b].show);
+          const new_idx = Object.keys(this.backends_).findIndex((b) => {
+            return (b === new_origin && this.backends_[b].show);
           });
           if (new_idx < 0) {
             this.set_backend(new_origin);
@@ -200,10 +191,10 @@ export class BackendConfigurationService {
             });
         },
         (err) => {
-          if (err.status == 0) {
-            console.error("Failed to retrieve list of available backends, API not reachable");
+          if (err.status === 0) {
+            console.error('Failed to retrieve list of available backends, API not reachable');
           } else {
-            console.error("Failed to retrieve list of available backends: ${err.error}");
+            console.error(`Failed to retrieve list of available backends: ${err.error}`);
           }
         });
   }

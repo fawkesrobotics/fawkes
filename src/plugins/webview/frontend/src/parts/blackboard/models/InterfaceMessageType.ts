@@ -14,14 +14,12 @@ import { InterfaceFieldType } from './InterfaceFieldType';
 
 
 /** InterfaceMessageType representation for JSON transfer. */
-export interface InterfaceMessageType
-{
-	name: string;
-	fields: Array<InterfaceFieldType>;
+export interface InterfaceMessageType {
+  name: string;
+  fields: Array<InterfaceFieldType>;
 }
 
-export namespace InterfaceMessageType
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace InterfaceMessageType {
+  export const API_VERSION = 'v1beta1';
 
 }

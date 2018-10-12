@@ -24,67 +24,74 @@ import { SkillInfo } from '../models/SkillInfo';
 
 
 @Injectable()
-export class BehaviorEngineApiService
-{
+export class BehaviorEngineApiService {
   constructor(private backend: BackendConfigurationService,
               private http: HttpClient) {}
 
-  public list_skills(pretty?: boolean): Observable<SkillInfo[]>
-  {
-		let params = new HttpParams();
-		if (pretty) {
-		  params = params.set("pretty", pretty.toString());
-		}
-    let headers = new HttpHeaders();
-		
-    headers = headers.set('Accept', 'application/json');
-    return this.http.get<SkillInfo[]>(`${this.backend.url_for('api')}/skiller/skills`, 
-		  { headers: headers, params: params,
-		    observe: 'body', responseType: 'json' })	;
-	}
-
-  public get_skill(id: string, pretty?: boolean): Observable<Skill>
-  {
-    if (id === null || id == undefined) {
-      throw new Error("Required parameter id is null or undefined (get_skill)");
+  public list_skills(pretty?: boolean): Observable<SkillInfo[]> {
+    // tslint:disable-next-line:prefer-const
+    let params = new HttpParams();
+    if (pretty) {
+      params = params.set('pretty', pretty.toString());
     }
-		let params = new HttpParams();
-		if (pretty) {
-		  params = params.set("pretty", pretty.toString());
-		}
+    // tslint:disable-next-line:prefer-const
     let headers = new HttpHeaders();
-		
-    headers = headers.set('Accept', 'application/json');
-    return this.http.get<Skill>(`${this.backend.url_for('api')}/skiller/skills/${encodeURIComponent(String(id))}`, 
-		  { headers: headers, params: params,
-		    observe: 'body', responseType: 'json' })	;
-	}
 
-  public stop_skill(id: string): Observable<HttpResponse<string>>
-  {
-    if (id === null || id == undefined) {
-      throw new Error("Required parameter id is null or undefined (stop_skill)");
-    }
-		let params = new HttpParams();
-    let headers = new HttpHeaders();
-		
-    return this.http.delete(`${this.backend.url_for('api')}/skiller/skills/${encodeURIComponent(String(id))}`, 
-		  { headers: headers, params: params,
-		    observe: 'response', responseType: 'text' })	;
-	}
-
-  public exec_skill(skill_call: SkillCall): Observable<Skill>
-  {
-    if (skill_call === null || skill_call == undefined) {
-      throw new Error("Required parameter skill_call is null or undefined (exec_skill)");
-    }
-		let params = new HttpParams();
-    let headers = new HttpHeaders();
-		
     headers = headers.set('Accept', 'application/json');
-    return this.http.post<Skill>(`${this.backend.url_for('api')}/skiller/call`, skill_call, 
-		  { headers: headers, params: params,
-		    observe: 'body', responseType: 'json' })	;
-	}
+    // tslint:disable-next-line:max-line-length
+    return this.http.get<SkillInfo[]>(`${this.backend.url_for('api')}/skiller/skills`,
+      { headers: headers, params: params,
+        observe: 'body', responseType: 'json' });
+      }
+
+  public get_skill(id: string, pretty?: boolean): Observable<Skill> {
+    if (id === null || id === undefined) {
+      throw new Error('Required parameter id is null or undefined (get_skill)');
+    }
+    // tslint:disable-next-line:prefer-const
+    let params = new HttpParams();
+    if (pretty) {
+      params = params.set('pretty', pretty.toString());
+    }
+    // tslint:disable-next-line:prefer-const
+    let headers = new HttpHeaders();
+
+    headers = headers.set('Accept', 'application/json');
+    // tslint:disable-next-line:max-line-length
+    return this.http.get<Skill>(`${this.backend.url_for('api')}/skiller/skills/${encodeURIComponent(String(id))}`,
+      { headers: headers, params: params,
+        observe: 'body', responseType: 'json' });
+      }
+
+  public stop_skill(id: string): Observable<HttpResponse<string>> {
+    if (id === null || id === undefined) {
+      throw new Error('Required parameter id is null or undefined (stop_skill)');
+    }
+    // tslint:disable-next-line:prefer-const
+    let params = new HttpParams();
+    // tslint:disable-next-line:prefer-const
+    let headers = new HttpHeaders();
+
+    // tslint:disable-next-line:max-line-length
+    return this.http.delete(`${this.backend.url_for('api')}/skiller/skills/${encodeURIComponent(String(id))}`,
+      { headers: headers, params: params,
+        observe: 'response', responseType: 'text' });
+      }
+
+  public exec_skill(skill_call: SkillCall): Observable<Skill> {
+    if (skill_call === null || skill_call === undefined) {
+      throw new Error('Required parameter skill_call is null or undefined (exec_skill)');
+    }
+    // tslint:disable-next-line:prefer-const
+    let params = new HttpParams();
+    // tslint:disable-next-line:prefer-const
+    let headers = new HttpHeaders();
+
+    headers = headers.set('Accept', 'application/json');
+    // tslint:disable-next-line:max-line-length
+    return this.http.post<Skill>(`${this.backend.url_for('api')}/skiller/call`, skill_call,
+      { headers: headers, params: params,
+        observe: 'body', responseType: 'json' });
+      }
 
 }

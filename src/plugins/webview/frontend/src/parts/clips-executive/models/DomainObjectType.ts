@@ -13,16 +13,14 @@
 
 
 /** DomainObjectType representation for JSON transfer. */
-export interface DomainObjectType
-{
-	kind: string;
-	apiVersion: string;
-	name: string;
-	super_type: string;
+export interface DomainObjectType {
+  kind: string;
+  apiVersion: string;
+  name: string;
+  super_type: string;
 }
 
-export namespace DomainObjectType
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace DomainObjectType {
+  export const API_VERSION = 'v1beta1';
 
 }

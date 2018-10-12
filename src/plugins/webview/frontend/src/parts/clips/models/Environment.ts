@@ -13,15 +13,13 @@
 
 
 /** Environment representation for JSON transfer. */
-export interface Environment
-{
-	kind: string;
-	apiVersion: string;
-	name: string;
+export interface Environment {
+  kind: string;
+  apiVersion: string;
+  name: string;
 }
 
-export namespace Environment
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace Environment {
+  export const API_VERSION = 'v1beta1';
 
 }

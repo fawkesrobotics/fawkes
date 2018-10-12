@@ -11,26 +11,22 @@ export class LockoutService {
   public changed: EventEmitter<boolean>;
 
   @LocalStorage()
-  private lockout_enabled: boolean = false;
-  
-  constructor()
-  {
+  private lockout_enabled = false;
+
+  constructor() {
     this.changed = new EventEmitter();
   }
 
-  toggle()
-  {
+  toggle() {
     this.enabled = ! this.enabled;
   }
-  
-  set enabled(en: boolean)
-  {
+
+  set enabled(en: boolean) {
     this.lockout_enabled = en;
     this.changed.emit(this.lockout_enabled);
   }
 
-  get enabled(): boolean
-  {
+  get enabled(): boolean {
     return this.lockout_enabled;
   }
 }

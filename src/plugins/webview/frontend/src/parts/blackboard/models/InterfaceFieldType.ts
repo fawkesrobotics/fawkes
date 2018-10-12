@@ -13,16 +13,14 @@
 
 
 /** InterfaceFieldType representation for JSON transfer. */
-export interface InterfaceFieldType
-{
-	name: string;
-	type: string;
-	is_array?: boolean;
-	enums?: Array<string>;
+export interface InterfaceFieldType {
+  name: string;
+  type: string;
+  is_array?: boolean;
+  enums?: Array<string>;
 }
 
-export namespace InterfaceFieldType
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace InterfaceFieldType {
+  export const API_VERSION = 'v1beta1';
 
 }

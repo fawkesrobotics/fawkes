@@ -20,7 +20,6 @@
 #  Read the full text in the LICENSE.GPL file in the doc directory.
 
 import time
-import openravepy
 from openravepy import *
 from numpy import *
 
@@ -90,10 +89,9 @@ class GraspPlanner:
                                                                                 target=target,approachoffset=approachoffset,destposes=dests,
                                                                                 seedgrasps = 3,seeddests=8,seedik=1,maxiter=1000,
                                                                                 randomgrasps=True,randomdests=True,outputtraj=True,execute=False)
-            istartgrasp = graspindex+1
+            # istartgrasp = graspindex+1
 	    ## stored trajectory for planned path
 	    self.trajdata = trajdata
-            Tglobalgrasp = gmodel.getGlobalGraspTransform(gmodel.grasps[graspindex],collisionfree=True)
 
             print 'grasp %d initial planning time: %f'%(graspindex,searchtime)
 	    print 'goals:'

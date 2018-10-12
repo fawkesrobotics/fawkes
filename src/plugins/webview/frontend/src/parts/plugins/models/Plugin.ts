@@ -13,19 +13,17 @@
 
 
 /** Plugin representation for JSON transfer. */
-export interface Plugin
-{
-	kind: string;
-	apiVersion: string;
-	name: string;
-	description: string;
-	is_meta: boolean;
-	meta_children?: Array<string>;
-	is_loaded: boolean;
+export interface Plugin {
+  kind: string;
+  apiVersion: string;
+  name: string;
+  description: string;
+  is_meta: boolean;
+  meta_children?: Array<string>;
+  is_loaded: boolean;
 }
 
-export namespace Plugin
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace Plugin {
+  export const API_VERSION = 'v1beta1';
 
 }

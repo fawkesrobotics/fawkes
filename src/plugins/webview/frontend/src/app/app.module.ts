@@ -31,33 +31,33 @@ import { PluginModule } from '../parts/plugins/module';
 import { TransformsModule } from '../parts/transforms/module';
 
 @NgModule({
-	declarations: [
-	  AppComponent,
-	],
-	imports: [
-	  BrowserModule,
-	  BrowserAnimationsModule,
-	  
-	  HttpClientModule,
-	  ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
-	  WebStorageModule,
+  declarations: [
+    AppComponent,
+  ],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
 
-	  ChromeModule,
-	  DashboardModule,
-	  ClipsExecutiveModule,
-	  SkillerModule,
-	  BlackboardModule,
-	  ClipsModule,
-	  ImageModule,
-	  PluginModule,
-	  TransformsModule,
+    HttpClientModule,
+    ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
+    WebStorageModule,
 
-	  // Keep the AppRoutingModule last
-	  AppRoutingModule,
-	],
+    ChromeModule,
+    DashboardModule,
+    ClipsExecutiveModule,
+    SkillerModule,
+    BlackboardModule,
+    ClipsModule,
+    ImageModule,
+    PluginModule,
+    TransformsModule,
+
+    // Keep the AppRoutingModule last
+    AppRoutingModule,
+  ],
   providers: [LockoutService, BackendConfigurationService,
               ConfigurationService, ConfigurationApiService,
               AssetsService, SwUpdateNotifierService],
-	bootstrap: [AppComponent]
+  bootstrap: [AppComponent]
 })
 export class AppModule { }

@@ -25,7 +25,6 @@ import re
 import sys
 import yaml
 import argparse
-from pprint import pprint
 import jinja2
 from jinja2.ext import Extension
 from jinja2.exceptions import TemplateRuntimeError

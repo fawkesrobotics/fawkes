@@ -3,7 +3,7 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { Component, OnInit, OnDestroy, ViewChild, HostListener, ElementRef } from '@angular/core';
-import { Observable, interval } from 'rxjs';
+import { interval } from 'rxjs';
 
 import { ImageApiService } from '../services/api.service';
 import { ImageInfo } from '../models/ImageInfo';
@@ -11,7 +11,7 @@ import { ImageInfo } from '../models/ImageInfo';
 import { BackendConfigurationService } from '../../../services/backend-config/backend-config.service';
 
 @Component({
-  selector: 'blackboard-overview',
+  selector: 'ff-images-overview',
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss']
 })
@@ -41,7 +41,7 @@ export class ImageOverviewComponent implements OnInit, OnDestroy {
 
   loading = false;
   auto_refresh_subscription = null;
-  zero_message = "No graph has been retrieved";
+  zero_message = 'No graph has been retrieved';
 
   images: ImageInfo[] = null;
 
@@ -52,8 +52,7 @@ export class ImageOverviewComponent implements OnInit, OnDestroy {
   private backend_subscription = null;
 
   constructor(private api_service: ImageApiService,
-              private backendcfg: BackendConfigurationService)
-  {}
+              private backendcfg: BackendConfigurationService) {}
 
   ngOnInit() {
     this.refresh();
@@ -65,8 +64,7 @@ export class ImageOverviewComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy()
-  {
+  ngOnDestroy() {
     this.disable_autorefresh();
     this.deselect_image();
     this.backend_subscription.unsubscribe();
@@ -74,8 +72,7 @@ export class ImageOverviewComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('window:focus', ['$event'])
-  onFocus(ev: FocusEvent)
-  {
+  onFocus(ev: FocusEvent) {
     if (this.image_on_blur) {
       this.select_image(this.image_on_blur[0], this.image_on_blur[1]);
       this.image_on_blur = null;
@@ -83,28 +80,25 @@ export class ImageOverviewComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('window:blur', ['$event'])
-  onBlur(ev: FocusEvent)
-  {
+  onBlur(ev: FocusEvent) {
     this.image_on_blur = this.image_selected;
     this.deselect_image();
   }
 
-  select_image(image: string, mode: string)
-  {
-    if (this.image_src)  this.deselect_image();
-    
+  select_image(image: string, mode: string) {
+    if (this.image_src) {  this.deselect_image(); }
+
     this.image_selected = [image, mode];
-    let cache_bust = `${Date.now()}-${Math.random()}`;
+    const cache_bust = `${Date.now()}-${Math.random()}`;
     this.image_src = `${this.backendcfg.url_for('api')}/images/${image}.${mode}?cb=${cache_bust}`;
 
     // see @ViewChild comment why we do this
-    let img_elem = document.createElement("img");
+    const img_elem = document.createElement('img');
     img_elem.src = this.image_src;
     this.image_div.nativeElement.appendChild(img_elem);
   }
 
-  deselect_image()
-  {
+  deselect_image() {
     this.image_src = null;
     this.image_selected = null;
     // see @ViewChild comment why we do this
@@ -114,34 +108,32 @@ export class ImageOverviewComponent implements OnInit, OnDestroy {
     }
   }
 
-  refresh()
-  {
+  refresh() {
     this.loading = true;
-    this.zero_message = "Retrieving image info";
+    this.zero_message = 'Retrieving image info';
 
     this.api_service.list_images().subscribe(
       (images) => {
         this.images = images;
-        if (this.images.length == 0) {
+        if (this.images.length === 0) {
           this.zero_message = 'No images available';
         }
         this.loading = false;
       },
       (err) => {
         this.images = null;
-        if (err.status == 0) {
-          this.zero_message="API server unavailable. Robot down?";
+        if (err.status === 0) {
+          this.zero_message = 'API server unavailable. Robot down?';
         } else {
-          this.zero_message=`Failed to retrieve images: ${err.error}`;
+          this.zero_message = `Failed to retrieve images: ${err.error}`;
         }
         this.loading = false;
       }
     );
   }
 
-  private enable_autorefresh()
-  {
-    if (this.auto_refresh_subscription)  return;
+  private enable_autorefresh() {
+    if (this.auto_refresh_subscription) {  return; }
     this.auto_refresh_subscription =
       interval(2000).subscribe((num) => {
         this.refresh();
@@ -149,16 +141,14 @@ export class ImageOverviewComponent implements OnInit, OnDestroy {
     this.refresh();
   }
 
-  private disable_autorefresh()
-  {
+  private disable_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.auto_refresh_subscription.unsubscribe();
       this.auto_refresh_subscription = null;
     }
   }
 
-  toggle_autorefresh()
-  {
+  toggle_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.disable_autorefresh();
     } else {

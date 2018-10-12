@@ -21,39 +21,36 @@ import { ImageInfo } from '../models/ImageInfo';
 
 
 @Injectable()
-export class ImageApiService
-{
+export class ImageApiService {
   constructor(private backend: BackendConfigurationService,
               private http: HttpClient) {}
 
-  public list_images(pretty?: boolean): Observable<ImageInfo[]>
-  {
-		let params = new HttpParams();
-		if (pretty) {
-		  params = params.set("pretty", pretty.toString());
-		}
-    let headers = new HttpHeaders();
-		
-    headers = headers.set('Accept', 'application/json');
-    return this.http.get<ImageInfo[]>(`${this.backend.url_for('api')}/images`, 
-		  { headers: headers, params: params,
-		    observe: 'body', responseType: 'json' })	;
-	}
-
-  public get_image(id: string, pretty?: boolean): Observable<HttpResponse<string>>
-  {
-    if (id === null || id == undefined) {
-      throw new Error("Required parameter id is null or undefined (get_image)");
+  public list_images(pretty?: boolean): Observable<ImageInfo[]> {
+    let params = new HttpParams();
+    if (pretty) {
+      params = params.set('pretty', pretty.toString());
     }
-		let params = new HttpParams();
-		if (pretty) {
-		  params = params.set("pretty", pretty.toString());
-		}
     let headers = new HttpHeaders();
-		
-    return this.http.get(`${this.backend.url_for('api')}/images/${encodeURIComponent(String(id))}`, 
-		  { headers: headers, params: params,
-		    observe: 'response', responseType: 'text' })	;
-	}
+
+    headers = headers.set('Accept', 'application/json');
+    return this.http.get<ImageInfo[]>(`${this.backend.url_for('api')}/images`,
+      { headers: headers, params: params,
+        observe: 'body', responseType: 'json' });
+      }
+
+  public get_image(id: string, pretty?: boolean): Observable<HttpResponse<string>> {
+    if (id === null || id === undefined) {
+      throw new Error('Required parameter id is null or undefined (get_image)');
+    }
+    let params = new HttpParams();
+    if (pretty) {
+      params = params.set('pretty', pretty.toString());
+    }
+    const headers = new HttpHeaders();
+
+    return this.http.get(`${this.backend.url_for('api')}/images/${encodeURIComponent(String(id))}`,
+      { headers: headers, params: params,
+        observe: 'response', responseType: 'text' });
+      }
 
 }

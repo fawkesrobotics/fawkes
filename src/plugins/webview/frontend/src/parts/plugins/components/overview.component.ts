@@ -13,10 +13,10 @@ import { PluginApiService } from '../services/api.service';
 import { Plugin } from '../models/Plugin';
 import { PluginOpRequest } from '../models/PluginOpRequest';
 
-import { Observable, interval } from 'rxjs';
+import { interval } from 'rxjs';
 
 @Component({
-  selector: 'plugins-overview',
+  selector: 'ff-plugins-overview',
   templateUrl: './overview.component.html',
   styleUrls: ['./overview.component.scss'],
   providers: [{provide: MAT_CHECKBOX_CLICK_ACTION, useValue: 'noop'}]
@@ -29,7 +29,7 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
 
   auto_refresh_subscription = null;
   loading = false;
-  zero_message = "No plugins received.";
+  zero_message = 'No plugins received.';
 
   ops_pending = {};
   data_source = new MatTableDataSource();
@@ -37,19 +37,18 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
   @ViewChild(CardListFilterComponent) private readonly card_filter_: CardListFilterComponent;
 
   selection = new SelectionModel<Plugin>(true, []);
-  
+
   constructor(private snack_bar: MatSnackBar,
               private readonly api_service: PluginApiService,
               private backendcfg: BackendConfigurationService,
-              private lockout: LockoutService)
-  {}
+              private lockout: LockoutService) {}
 
   ngOnInit() {
     this.refresh();
 
     this.card_filter_.filterEvent
       .subscribe((query: string) => {
-        this.apply_filter(query)
+        this.apply_filter(query);
       });
 
     this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => {
@@ -57,18 +56,16 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy()
-  {
+  ngOnDestroy() {
     this.backend_subscription.unsubscribe();
     this.backend_subscription = null;
     this.disable_autorefresh();
   }
 
-  refresh()
-  {
+  refresh() {
     this.loading = true;
-    this.zero_message = "Retrieving plugins";
-    
+    this.zero_message = 'Retrieving plugins';
+
     this.api_service.list_plugins()
       .subscribe(
         (plugins) => {
@@ -76,31 +73,29 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
           this.data_source.data = plugins;
           this.selection.clear();
           this.selection.select(...plugins.filter(p => p.is_loaded));
-          for (let p of plugins)
           if (plugins.length == 0) {
-            this.zero_message = "No plugins available";
+            this.zero_message = 'No plugins available';
           }
           this.loading = false;
         },
         (err) => {
           this.data_source.data = [];
-          if (err.status == 0) {
-            this.zero_message="API server unavailable. Robot down?";
+          if (err.status === 0) {
+            this.zero_message = 'API server unavailable. Robot down?';
           } else {
-            this.zero_message=`Failed to retrieve plugins: ${err.error}`;
+            this.zero_message = `Failed to retrieve plugins: ${err.error}`;
           }
           this.loading = false;
         }
       );
   }
 
-  plugin_toggle(plugin: Plugin)
-  {
-    if (this.lockout.enabled)  return;
-    if (this.ops_pending[plugin.name])  return;
+  plugin_toggle(plugin: Plugin) {
+    if (this.lockout.enabled) {  return; }
+    if (this.ops_pending[plugin.name]) {  return; }
 
-    let request: PluginOpRequest = {
-      kind: "PluginOpRequest",
+    const request: PluginOpRequest = {
+      kind: 'PluginOpRequest',
       apiVersion: PluginOpRequest.API_VERSION,
       desired_state: plugin.is_loaded ? 'UNLOADED' : 'LOADED'
     };
@@ -126,7 +121,7 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
         },
         (err) => {
           this.ops_pending[plugin.name] = false;
-          if (err.status == 0) {
+          if (err.status === 0) {
             this.snack_bar.open(`Loading '${plugin.name} failed: backend not reachable`, '',
                                 { duration: 3000 });
           } else if (err.error && err.error.message) {
@@ -138,10 +133,9 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
           }
         });
   }
-  
-  private enable_autorefresh()
-  {
-    if (this.auto_refresh_subscription)  return;
+
+  private enable_autorefresh() {
+    if (this.auto_refresh_subscription) {  return; }
     this.auto_refresh_subscription =
       interval(10000).subscribe((num) => {
         this.refresh();
@@ -149,16 +143,14 @@ export class PluginOverviewComponent implements OnInit, OnDestroy {
     this.refresh();
   }
 
-  private disable_autorefresh()
-  {
+  private disable_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.auto_refresh_subscription.unsubscribe();
       this.auto_refresh_subscription = null;
     }
   }
 
-  toggle_autorefresh()
-  {
+  toggle_autorefresh() {
     if (this.auto_refresh_subscription) {
       this.disable_autorefresh();
     } else {

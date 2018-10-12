@@ -11,5 +11,5 @@ import {Component, Input} from '@angular/core';
   styleUrls: ['./style.scss'],
 })
 export class PropertyComponent {
-  @Input() direction?: string = "horizontal";
+  @Input() direction = 'horizontal';
 }

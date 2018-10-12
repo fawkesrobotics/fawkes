@@ -3,7 +3,6 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { SharedModule } from '../../shared.module';
 
 import { ImageRoutingModule } from './routing.module';

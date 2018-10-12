@@ -13,15 +13,13 @@
 
 
 /** ConfigTree representation for JSON transfer. */
-export interface ConfigTree
-{
-	kind: string;
-	apiVersion: string;
-	config: object;
+export interface ConfigTree {
+  kind: string;
+  apiVersion: string;
+  config: object;
 }
 
-export namespace ConfigTree
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace ConfigTree {
+  export const API_VERSION = 'v1beta1';
 
 }

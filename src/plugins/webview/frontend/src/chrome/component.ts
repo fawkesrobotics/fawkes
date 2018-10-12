@@ -5,7 +5,7 @@
 
 import {Component} from '@angular/core';
 
-//import {NotificationsService} from '../common/services/global/notifications';
+// import {NotificationsService} from '../common/services/global/notifications';
 import { AssetsService } from '../services/global/assets';
 
 import { BackendConfigurationService } from '../services/backend-config/backend-config.service';
@@ -19,8 +19,7 @@ export class ChromeComponent {
   loading = false;
 
   constructor(public assets: AssetsService,
-              public backend_conf: BackendConfigurationService)
-  {}
+              public backend_conf: BackendConfigurationService) {}
 
   isSystemBannerVisible(): boolean {
     return false;
@@ -34,9 +33,8 @@ export class ChromeComponent {
     return `<b>System is going to be shut down in 5 min...</b>`;
   }
 
-  number_symbol(num: number)
-  {
-    switch (num+1) {
+  number_symbol(num: number) {
+    switch (num + 1) {
       case 1: return 'looks_one';
       case 2: return 'looks_two';
       case 3: return 'looks_3';
@@ -44,6 +42,6 @@ export class ChromeComponent {
       case 5: return 'looks_5';
       case 6: return 'looks_6';
       default: return 'add_box';
-    }   
+    }
   }
 }

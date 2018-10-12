@@ -14,17 +14,15 @@ import { DomainOperatorParameter } from './DomainOperatorParameter';
 
 
 /** DomainOperator representation for JSON transfer. */
-export interface DomainOperator
-{
-	kind: string;
-	apiVersion: string;
-	name: string;
-	wait_sensed: boolean;
-	parameters: Array<DomainOperatorParameter>;
+export interface DomainOperator {
+  kind: string;
+  apiVersion: string;
+  name: string;
+  wait_sensed: boolean;
+  parameters: Array<DomainOperatorParameter>;
 }
 
-export namespace DomainOperator
-{
-	export const API_VERSION: string = "v1beta1";
+export namespace DomainOperator {
+  export const API_VERSION = 'v1beta1';
 
 }

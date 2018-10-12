@@ -4,7 +4,7 @@
 // License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
 import {NgModule} from '@angular/core';
-//import {ComponentsModule} from '../../common/components/module';
+// import {ComponentsModule} from '../../common/components/module';
 
 import {NavServiceModule} from '../../services/nav/module';
 import {SharedModule} from '../../shared.module';
