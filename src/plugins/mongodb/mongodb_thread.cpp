@@ -178,11 +178,12 @@ MongoDBThread::init_replicaset_configs()
 
 			std::string cfg_prefix = prefix + cfg_name + "/";
 
-			std::shared_ptr<mongo::DBClientBase> bootstrap_client(create_client(bootstrap_client_cfg));
 			try {
 				auto conf = std::make_shared<MongoDBReplicaSetConfig>(config, cfg_name, cfg_prefix,
-				                                                      bootstrap_client, bootstrap_database);
+				                                                      bootstrap_database);
 				if (conf->is_enabled()) {
+					std::shared_ptr<mongo::DBClientBase> bootstrap_client(create_client(bootstrap_client_cfg));
+					conf->bootstrap(bootstrap_client);
 					replicaset_configs_[cfg_name] = conf;
 					logger->log_info(name(), "Added MongoDB replica set configuration %s",
 					                 cfg_name.c_str());
@@ -243,11 +244,11 @@ MongoDBThread::create_client(const std::string &config_name)
 
 	if (client_configs_.find(cname) != client_configs_.end()) {
 		if (! client_configs_[cname]->is_enabled()) {
-			throw Exception("MongoDB config '%s' is not marked enabled", cname);
+			throw Exception("MongoDB config '%s' is not marked enabled", cname.c_str());
 		}
 		return client_configs_[cname]->create_client();
 	} else {
-		throw Exception("No MongoDB config named '%s' exists", cname);
+		throw Exception("No MongoDB config named '%s' exists", cname.c_str());
 	}
 }
 

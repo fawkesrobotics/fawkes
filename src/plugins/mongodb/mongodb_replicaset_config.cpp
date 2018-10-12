@@ -50,12 +50,10 @@ using namespace fawkes;
  * @param config configuration to query
  * @param cfgname configuration name
  * @param prefix configuration path prefix
- * @param bootstrap_client MongoDB client to access bootstrap database
  * @param bootstrap_database database to hold leader election data
  */
 MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
                                                  std::string cfgname, std::string prefix,
-                                                 std::shared_ptr<mongo::DBClientBase> bootstrap_client,
                                                  std::string bootstrap_database)
 	: Thread("MongoDBReplicaSet", Thread::OPMODE_CONTINUOUS)
 {
@@ -73,8 +71,6 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
 	} catch (Exception &e) {}
 
 	if (enabled_) {
-
-		bootstrap_client_     = bootstrap_client;
 		bootstrap_database_   = bootstrap_database;
 		bootstrap_ns_         = bootstrap_database + "." + config_name_;
 
@@ -107,13 +103,6 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
 			throw Exception("%s host list does not include local client", name());
 		}
 
-		local_client_.reset(client_config.create_client());
-		bootstrap_client_->createCollection(bootstrap_ns_);
-		bootstrap_client_->createIndex(bootstrap_ns_, mongo::IndexSpec().addKey("host"));
-		bootstrap_client_->createIndex(bootstrap_ns_, mongo::IndexSpec().addKey("master").unique());
-		bootstrap_client_->createIndex(bootstrap_ns_,
-		                               mongo::IndexSpec().addKey("last_seen").expireAfterSeconds(leader_expiration_));
-
 		leader_elec_query_ = BSON("host" << local_hostport_ << "master" << false);
 		leader_elec_query_force_ = BSON("master" << true);
 
@@ -124,9 +113,26 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
 		update_set.append("host", local_hostport_);
 		update.append("$set", update_set.obj());
 		leader_elec_update_ = update.obj();
+
+		local_client_.reset(client_config.create_client());
 	}
 }
 
+/** Setup replicaset bootstrap client.
+ * @param bootstrap_client MongoDB client to access bootstrap database
+ */
+void
+MongoDBReplicaSetConfig::bootstrap(std::shared_ptr<mongo::DBClientBase> bootstrap_client)
+{
+	if (enabled_) {
+		bootstrap_client_ = bootstrap_client;
+		bootstrap_client_->createCollection(bootstrap_ns_);
+		bootstrap_client_->createIndex(bootstrap_ns_, mongo::IndexSpec().addKey("host"));
+		bootstrap_client_->createIndex(bootstrap_ns_, mongo::IndexSpec().addKey("master").unique());
+		bootstrap_client_->createIndex(bootstrap_ns_,
+		                               mongo::IndexSpec().addKey("last_seen").expireAfterSeconds(leader_expiration_));
+	}
+}
 
 bool
 MongoDBReplicaSetConfig::leader_elect(bool force)
