@@ -56,6 +56,15 @@ plugins/mongodb:
       termination-grace-period: 15
       clear-data-on-termination: false
       port: 27018
+      # You can pass additional arguments to mongod with the args value.
+      # The following arguments must not be added, they are either configured
+      # through other config values, or they interfere with our rs handling.
+      # --port, --dbpath, --fork, --logappend, --logpath, --replSet,
+      #--oplogSize, --master, --slave, --source, --only
+      # You may even reference environment variables in this string, e.g.,
+      # $MY_VARIABLE. Use with caution. See "man wordexp" on specifics.
+      # Sub-commands have been *disabled*.
+      #args: --bind_ip 0.0.0.0 -vvvvv
       data-path: /tmp/mongodb-local
       log:
         path: /tmp/mongodb-local.log
