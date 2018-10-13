@@ -1,0 +1,6 @@
+extraction:
+  cpp:
+    index:
+      build_command:
+        - cat /usr/include/pcl-1.8/pcl/pcl_config.h > /dev/null # trigger install of non-whitelisted libpcl-dev
+        - make -j2 uncolored-all
