@@ -32,7 +32,7 @@ set -eu
 # Enable debug output, only enable temporarily, rather verbose
 #set -x
 
-MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "master") | head -1)
+MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "origin/master") | head -1)
 
 error_exit () {
 	MSG="$@"
@@ -93,13 +93,17 @@ IFS=$OIFS
 
 check_build_creator () {
 	for ((i=0; i<${#AUTHOR_NAME[@]}; i++)); do
-		if [ "${AUTHOR_NAME[$i]}" == "${BUILDKITE_BUILD_CREATOR:-}" ]; then
+		n=${AUTHOR_NAME[$i]}
+		g=${AUTHOR_GITHUB[$i]}
+		c=${BUILDKITE_BUILD_CREATOR:-}
+		ce=${BUILDKITE_BUILD_CREATOR_EMAIL:-}
+		if [[ "$n" == "$c" || "$g" == "$c" ]]; then
 			OIFS=$IFS
 			IFS=","
 			declare -a EMAILS=(${AUTHOR_EMAILS[$i]})
 			IFS=$OIFS
 			for E in $EMAILS; do
-				if [ "$E" == "${BUILDKITE_BUILD_CREATOR_EMAIL:-}" ]; then
+				if [[ "$E" == "$ce" || "$E" == "$g@users.noreply.github.com" ]]; then
 					AUTHOR_INDEX=$i
 				fi
 			done
