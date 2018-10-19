@@ -362,7 +362,8 @@ Bumblebee2Camera::open()
     throw Exception("Bumblebee2Camera::open: FirewireCamera::open dit not suceed");
   }
 
-  __buffer_deinterlaced = (unsigned char *)malloc(pixel_width() * pixel_height() * 2);
+  size_t buffer_size = (size_t)pixel_width() * (size_t)pixel_height() * 2;
+  __buffer_deinterlaced = (unsigned char *)malloc(buffer_size);
   __buffer_rgb = malloc_buffer(RGB, pixel_width(), pixel_height() * 2);
   __buffer = NULL;
 
