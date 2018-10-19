@@ -225,6 +225,7 @@ LaserDataFilter::set_array_ownership(bool own_in, bool own_out)
  * given number of elements
  */
 LaserDataFilter::Buffer::Buffer(size_t num_values)
+: values(NULL)
 {
   if (num_values > 0) {
     values = (float *)malloc(num_values * sizeof(float));
@@ -237,4 +238,7 @@ LaserDataFilter::Buffer::Buffer(size_t num_values)
 LaserDataFilter::Buffer::~Buffer()
 {
   delete timestamp;
+  if (values) {
+	  free(values);
+  }
 }

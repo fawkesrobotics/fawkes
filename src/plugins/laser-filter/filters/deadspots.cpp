@@ -115,7 +115,7 @@ LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const std::string filter_name
 
 LaserDeadSpotsDataFilter::~LaserDeadSpotsDataFilter()
 {
-  delete __dead_spots;
+  delete[] __dead_spots;
 }
 
 

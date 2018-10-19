@@ -140,7 +140,7 @@ LaserProjectionDataFilter::filter()
     if (in_data_size == 360) {
       for (unsigned int i = 0; i < 360; ++i) {
         if (inbuf[i] == 0.)  continue;
-        p.setValue(inbuf[i] * cos_angles360[i], inbuf[i] * sin_angles360[i], 0.);
+        p.setValue((btScalar)inbuf[i] * cos_angles360[i], (btScalar)inbuf[i] * sin_angles360[i], 0.);
         p = t * p;
 
         set_output(outbuf, p);
@@ -149,7 +149,7 @@ LaserProjectionDataFilter::filter()
       for (unsigned int i = 0; i < 720; ++i) {
         if (inbuf[i] == 0.)  continue;
 
-        p.setValue(inbuf[i] * cos_angles720[i], inbuf[i] * sin_angles720[i], 0.);
+        p.setValue((btScalar)inbuf[i] * cos_angles720[i], (btScalar)inbuf[i] * sin_angles720[i], 0.);
         p = t * p;
 
         set_output(outbuf, p);
@@ -159,7 +159,7 @@ LaserProjectionDataFilter::filter()
         if (inbuf[i] == 0.)  continue;
 
         float a = deg2rad(360.f / (float)i);
-        p.setValue(inbuf[i] * cos(a), inbuf[i] * sin(a), 0.);
+        p.setValue((btScalar)inbuf[i] * cos(a), (btScalar)inbuf[i] * sin(a), 0.);
         p = t * p;
 
         set_output(outbuf, p);
