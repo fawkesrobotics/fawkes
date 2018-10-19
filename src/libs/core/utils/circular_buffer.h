@@ -68,14 +68,27 @@ class CircularBuffer
   {}
 
   /** Destructor. */
-  virtual ~CircularBuffer()
+  ~CircularBuffer()
   {}
+
+
+	/** Assignment operator.
+   * @param other CircularBuffer to copy
+   * @return reference to this instance
+   */
+	CircularBuffer<Type>&
+	operator=(const CircularBuffer<Type> &other)
+  {
+	  __deque = other.get_deque();
+	  __max_size = other.get_max_size();
+	  return *this;
+  }
 
   /** Insert an element at the end of the buffer
    *  and delete the first element if necessary
    *  @param val the value to insert
    */
-  virtual void push_back(const Type& val)
+  void push_back(const Type& val)
   {
     if (__deque.size() >= __max_size) {
       __deque.pop_front();
@@ -84,7 +97,7 @@ class CircularBuffer
   }
 
   /** Delete the first element */
-  virtual void pop_front()
+  void pop_front()
   {
     __deque.pop_front();
   }
@@ -92,7 +105,7 @@ class CircularBuffer
   /** Get the maximum size of the buffer
    * @return the maximum size
    */
-  virtual size_type get_max_size() const
+  size_type get_max_size() const
   {
     return __max_size;
   }
@@ -100,7 +113,7 @@ class CircularBuffer
   /** Get the deque used to store the elements
    * @return the deque
    */
-  virtual std::deque<Type> get_deque() const
+  std::deque<Type> get_deque() const
   {
     return __deque;
   }
@@ -109,7 +122,7 @@ class CircularBuffer
    * @param n position of the element
    * @return reference to the n-th element
    */
-  virtual const Type & operator[](size_type n) const
+  const Type & operator[](size_type n) const
   {
     return __deque[n];
   }
@@ -118,7 +131,7 @@ class CircularBuffer
    * @param n position of the element
    * @return reference to the n-th element
    */
-  virtual const Type & at(size_type n) const
+  const Type & at(size_type n) const
   {
     return __deque.at(n);
   }
@@ -126,7 +139,7 @@ class CircularBuffer
   /** Access the first element in the buffer
    * @return reference to the first element
    */
-  virtual const Type & front() const
+  const Type & front() const
   {
     return __deque.front();
   }
@@ -134,7 +147,7 @@ class CircularBuffer
   /** Access the last element in the buffer
    * @return reference to the last element
    */
-  virtual const Type & back() const
+  const Type & back() const
   {
     return __deque.back();
   }
@@ -142,7 +155,7 @@ class CircularBuffer
   /** Get iterator to the beginning
    * @return iterator
    */
-  virtual const_iterator begin() const
+  const_iterator begin() const
   {
     return __deque.begin();
   }
@@ -150,7 +163,7 @@ class CircularBuffer
   /** Get iterator to the end
    * @return iterator
    */
-  virtual const_iterator end() const
+  const_iterator end() const
   {
     return __deque.end();
   }
@@ -158,7 +171,7 @@ class CircularBuffer
   /** Get actual size of the buffer
    * @return number of elements in the buffer
    */
-  virtual size_type size() const
+  size_type size() const
   {
     return __deque.size();
   }
