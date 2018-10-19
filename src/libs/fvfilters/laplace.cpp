@@ -67,10 +67,10 @@ FilterLaplace::FilterLaplace(float sigma, unsigned int size, float scale)
   : Filter("FilterLaplace")
 {
   kernel_size = size;
-  kernel = (int *)malloc( size * size * sizeof(int) );
+  kernel = (int *)malloc( (size_t)size * (size_t)size * sizeof(int) );
   calculate_kernel( kernel, sigma, size, scale );
 #ifdef HAVE_OPENCV
-  kernel_float = (float *)malloc(size * size * sizeof(float));
+  kernel_float = (float *)malloc((size_t)size * (size_t)size * sizeof(float));
   for (unsigned int i = 0; i < size * size; ++i) {
     kernel_float[i] = kernel[i];
   }
