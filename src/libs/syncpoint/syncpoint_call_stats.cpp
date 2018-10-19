@@ -49,7 +49,7 @@ SyncPointCallStats::SyncPointCallStats()
  * @param wait_time the time the caller had to wait, 0 for emit()
  */
 void
-SyncPointCallStats::update_calls(Time new_call, Time wait_time)
+SyncPointCallStats::update_calls(const Time& new_call, const Time& wait_time)
 {
   num_calls_++;
   total_wait_time_ += wait_time;
@@ -65,7 +65,7 @@ SyncPointCallStats::update_calls(Time new_call, Time wait_time)
  * @param call the new call
  */
 void
-SyncPointCallStats::update_calls(SyncPointCall call)
+SyncPointCallStats::update_calls(const SyncPointCall& call)
 {
   update_calls(call.get_call_time(), call.get_wait_time());
 }
