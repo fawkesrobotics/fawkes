@@ -196,20 +196,25 @@ class MirrorCalibTool::StepResult {
 }; // StepResult
 
 
-/**
- * Abstract Point class.
- */
+/** Abstract Point class. */
 class MirrorCalibTool::Point {
  public:
-  const int x; /**< X coordinate. */
-  const int y; /**< Y coordinate. */
+  int x; /**< X coordinate. */
+  int y; /**< Y coordinate. */
 
   /** Constructor.
    * @param x
    * @param y */
   Point(int x, int y)
-  : x(x),
-    y(y)
+  : x(x), y(y)
+  {
+  }
+
+	/** Copy constructor.
+   * @param p point to copy from
+   */
+  Point(const Point& p)
+  : x(p.x), y(p.y)
   {
   }
 
@@ -229,15 +234,15 @@ class MirrorCalibTool::Point {
     return normalize_rad(atan2(y, x));
   }
 
-  /** Assignment.
-   * @return A copy.
-   * @param p */
-  Point operator=(const Point& p)
+  /** Assignment operator.
+   * @return reference to this
+   * @param p point to copy from
+   */
+  Point& operator=(const Point& p)
   {
-    if (&p == this) {
-      return *this;
-    }
-    return Point(p.x, p.y);
+	  x = p.x;
+	  y = p.y;
+	  return *this;
   }
 }; // Point
 
@@ -459,15 +464,15 @@ class MirrorCalibTool::CartesianImage
   /** Width of buffer.
    * @return width of buffer
    */
-  inline const int width() const { return width_; }
+  inline int width() const { return width_; }
   /** Height of buffer.
    * @return height of buffer
    */
-  inline const int height() const { return height_; }
+  inline int height() const { return height_; }
   /** Phi angle.
    * @return Phi angle
    */
-  inline const PolarAngle phi() const { return phi_; }
+  inline PolarAngle phi() const { return phi_; }
 
   /** Converts a cartesian point to a pixel point.
    * @param p The point.

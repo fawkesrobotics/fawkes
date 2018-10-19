@@ -74,7 +74,7 @@ Bulb::Bulb(const char *filename)
  * @see SharedMemoryLookupTable
  */
 Bulb::Bulb(const char *filename,
-     const char *lut_id, bool destroy_on_delete)
+           const char *lut_id, bool destroy_on_delete)
 {
   init();
 
@@ -95,7 +95,7 @@ Bulb::Bulb(const char *filename,
  * @see SharedMemoryLookupTable
  */
 Bulb::Bulb(unsigned int width, unsigned int height,
-     const char *lut_id, bool destroy_on_delete)
+           const char *lut_id, bool destroy_on_delete)
 {
   init();
 
@@ -160,6 +160,37 @@ Bulb::Bulb(const Bulb &bulb)
   memcpy(lut, bulb.lut, lut_bytes);
 }
 
+
+/** Assignment operator.
+ * @param bulb bulb to copy from
+ * @return reference to this instance
+ */
+Bulb&
+Bulb::operator=(const Bulb& bulb)
+{
+	erase();
+	init();
+
+	valid = bulb.valid;
+
+  width = bulb.width;
+  height = bulb.height;
+  bytes_per_sample = bulb.bytes_per_sample;
+
+  image_center_x = bulb.image_center_x;
+  image_center_y = bulb.image_center_y;
+
+  orientation = bulb.orientation;
+
+  distance_min = bulb.distance_min;
+  distance_max = bulb.distance_max;
+
+  create();
+
+  memcpy(lut, bulb.lut, lut_bytes);
+
+  return *this;
+}
 
 /** Initializer. */
 void

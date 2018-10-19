@@ -55,6 +55,8 @@ class Bulb : public MirrorModel
 
   virtual ~Bulb();
 
+	Bulb& operator=(const Bulb& bulb);
+
   virtual void warp2unwarp(unsigned int warp_x, unsigned int warp_y,
          unsigned int *unwarp_x, unsigned int *unwarp_y);
   virtual void unwarp2warp(unsigned int unwarp_x, unsigned int unwarp_y,

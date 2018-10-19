@@ -150,7 +150,7 @@ CornerHorizon::calculate()
   float alpha = atan2f( d, camera_height );
   float beta  = M_PI_HALF - alpha;
 
-  int hor = (int)round((beta + tilt) * tilt_pixel_per_rad);
+  int hor = (int)roundf((beta + tilt) * tilt_pixel_per_rad);
 
   if ((unsigned int)abs(hor) >= (image_height / 2)) {
     if ( hor < 0 ) {
