@@ -60,6 +60,7 @@ HungarianMethod::HungarianMethod()
 /** Destructor. */
 HungarianMethod::~HungarianMethod()
 {
+	this->free();
   ::free(p);
 }
 

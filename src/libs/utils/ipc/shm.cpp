@@ -239,9 +239,9 @@ const short SharedMemory::MaxNumConcurrentReaders = 8;
  * @param registry_name name of the SharedMemoryRegistry to use
  */
 SharedMemory::SharedMemory(const char *magic_token,
-			   bool is_read_only,
-			   bool create,
-			   bool destroy_on_delete,
+                           bool is_read_only,
+                           bool create,
+                           bool destroy_on_delete,
                            const char *registry_name)
 {
   _magic_token = new char[MagicTokenSize];
@@ -350,8 +350,8 @@ SharedMemory::SharedMemory(const SharedMemory &s)
  *                                       memory segment
  */
 SharedMemory::SharedMemory(const char *magic_token,
-			   SharedMemoryHeader *header,
-			   bool is_read_only, bool create, bool destroy_on_delete,
+                           SharedMemoryHeader *header,
+                           bool is_read_only, bool create, bool destroy_on_delete,
                            const char *registry_name)
 {
   _magic_token = new char[MagicTokenSize];
@@ -412,6 +412,71 @@ SharedMemory::~SharedMemory()
   free();
   delete __shm_registry;
   if (__registry_name)  ::free(__registry_name);
+}
+
+/** Assignment operator.
+ * If the given SharedMemory was attached, this instance will also attach.
+ * @param s SharedMemory instance to copy from
+ * @return reference to this instance
+ */
+SharedMemory&
+SharedMemory::operator=(const SharedMemory &s)
+{
+  if ( __semset != NULL ) {
+    // if we destroy the shared memory region we can as well delete the semaphore,
+    // it is not necessary anymore.
+    __semset->set_destroy_on_delete( _destroy_on_delete );
+    if ( _destroy_on_delete && ! _is_read_only ) {
+      _shm_header->semaphore = 0;
+    }
+    delete __semset;
+  }
+  delete[] _magic_token;
+  free();
+  delete __shm_registry;
+  if (__registry_name)  ::free(__registry_name);
+
+  _magic_token = new char[MagicTokenSize];
+  memset(_magic_token, 0, MagicTokenSize);
+  strncpy(_magic_token, s._magic_token, MagicTokenSize);
+
+  _is_read_only      = s._is_read_only;
+  _destroy_on_delete = s._destroy_on_delete;
+  _should_create     = s._should_create;
+
+  _memptr          = NULL;
+  _shm_magic_token = NULL;
+  _shm_header      = NULL;
+  _header          = s._header->clone();
+  _data_size       = 0;
+
+  __semset         = NULL;
+  __created        = false;
+  __shared_mem     = NULL;
+  __shared_mem_id  = 0;
+  __shared_mem_upper_bound = NULL;
+
+  __write_lock_aquired     = false;
+  if (s.__registry_name) {
+    __registry_name = strdup(s.__registry_name);
+  } else {
+    __registry_name = NULL;
+  }
+
+  try {
+    attach();
+  } catch (Exception &e) {
+    e.append("SharedMemory public copy constructor");
+    throw;
+  }
+
+  if (_memptr == NULL) {
+    throw ShmCouldNotAttachException("Could not attach to created shared memory segment");
+  }
+
+  __shm_registry = new SharedMemoryRegistry(__registry_name);
+
+  return *this;
 }
 
 

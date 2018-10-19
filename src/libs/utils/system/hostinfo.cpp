@@ -45,7 +45,7 @@ HostInfo::HostInfo()
   utsname = (struct ::utsname *)malloc(sizeof(struct ::utsname));
 
   if ( uname(utsname) != 0 ) {
-    delete utsname;
+	  ::free(utsname);
     utsname = NULL;
     throw NullPointerException("Could not call uname");
   }

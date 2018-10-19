@@ -55,14 +55,16 @@ class SharedMemory
   static const short        MaxNumConcurrentReaders;
 
   SharedMemory(const char *magic_token,
-	       SharedMemoryHeader *header,
-	       bool is_read_only, bool create,
-	       bool destroy_on_delete,
+               SharedMemoryHeader *header,
+               bool is_read_only, bool create,
+               bool destroy_on_delete,
                const char *registry_name = 0);
 
-  SharedMemory(const SharedMemory &s);
+	SharedMemory(const SharedMemory &s);
 
   virtual ~SharedMemory();
+
+	SharedMemory& operator=(const SharedMemory &s);
 
   bool                is_read_only() const;
   bool                is_destroyed() const;
@@ -89,22 +91,22 @@ class SharedMemory
   void *              ptr(void *addr) const;
   void *              addr(void *ptr) const;
 
-  static void         list(const char *magic_token,
-			   SharedMemoryHeader *header, SharedMemoryLister *lister,
-                           const char *registry_name = 0);
+	static void         list(const char *magic_token,
+                           SharedMemoryHeader *header, SharedMemoryLister *lister,
+	                         const char *registry_name = 0);
 
   static void         erase(const char *magic_token,
-			    SharedMemoryHeader *header,
+                            SharedMemoryHeader *header,
                             SharedMemoryLister *lister = 0,
                             const char *registry_name = 0);
 
   static void         erase_orphaned(const char *magic_token,
-				     SharedMemoryHeader *header,
-				     SharedMemoryLister *lister = 0,
+                                     SharedMemoryHeader *header,
+                                     SharedMemoryLister *lister = 0,
                                      const char *registry_name = 0);
 
   static bool         exists(const char *magic_token,
-			     SharedMemoryHeader *header,
+                             SharedMemoryHeader *header,
                              const char *registry_name = 0);
 
   static bool         is_destroyed(int shm_id);
