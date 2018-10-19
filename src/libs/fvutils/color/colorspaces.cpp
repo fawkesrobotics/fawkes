@@ -199,13 +199,13 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
     return (width * height) / 2;
 
   case CARTESIAN_3D_FLOAT:
-    return (3 * width * height * sizeof(float));
+    return (3 * (size_t)width * height * sizeof(float));
 
   case CARTESIAN_3D_DOUBLE:
-    return (3 * width * height * sizeof(double));
+    return (3 * (size_t)width * height * sizeof(double));
 
   case CARTESIAN_3D_FLOAT_RGB:
-    return (4 * width * height * sizeof(float));
+    return (4 * (size_t)width * height * sizeof(float));
 
   case CS_UNKNOWN:
   case COLORSPACE_N:

@@ -360,9 +360,9 @@ size_t
 SharedMemoryLookupTableHeader::data_size()
 {
   if (__header == NULL) {
-    return __width * __height * __depth * __bytes_per_cell;
+    return (size_t)__width * __height * __depth * __bytes_per_cell;
   } else {
-    return __header->width * __header->height * __header->depth * __header->bytes_per_cell;
+    return (size_t)__header->width * __header->height * __header->depth * __header->bytes_per_cell;
   }
 }
 

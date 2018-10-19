@@ -77,12 +77,12 @@ gray8_to_yuy2(const unsigned char *src, unsigned char *dest, unsigned int width,
  */
 void
 gray8_to_yuv422planar_plainc(const unsigned char *src, unsigned char *dst,
-			     unsigned int width, unsigned int height)
+                             unsigned int width, unsigned int height)
 {
-  // copy Y plane
-  memcpy(dst, src, width * height);
+	// copy Y plane
+	memcpy(dst, src, (size_t)width * (size_t)height);
   // set U and V plane
-  memset(YUV422_PLANAR_U_PLANE(dst, width, height), 128, width * height);
+  memset(YUV422_PLANAR_U_PLANE(dst, width, height), 128, (size_t)width * (size_t)height);
 }
 
 /** 8-Bit gray to YUV422_PACKED
@@ -150,7 +150,7 @@ yuv420planar_to_yuv422planar(const unsigned char *src, unsigned char *dst,
   unsigned int h;
 
   // cp Y plane
-  memcpy(dst, src, width * height);
+  memcpy(dst, src, (size_t)width * (size_t)height);
 
   for (h = 0; h < height / 2; ++h) {
     // cp U line twice!
@@ -525,8 +525,8 @@ void
 grayscale_yuv422planar(const unsigned char *src, unsigned char *dst,
 		       unsigned int width, unsigned int height)
 {
-  memcpy(dst, src, width * height);
-  memset(dst + width * height, 128, width * height);
+  memcpy(dst, src, (size_t)width * (size_t)height);
+  memset(dst + width * height, 128, (size_t)width * (size_t)height);
 }
 
 } // end namespace firevision

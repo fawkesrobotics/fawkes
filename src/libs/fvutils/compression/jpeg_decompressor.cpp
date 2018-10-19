@@ -193,9 +193,12 @@ JpegImageDecompressor::decompress()
   // jpeg_start_decompress(...);
   jpeg_start_decompress(&cinfo);
 
-  buffer = (unsigned char*)malloc( cinfo.output_width * cinfo.output_height * cinfo.num_components );
+  buffer = (unsigned char*)malloc( (size_t)cinfo.output_width *
+                                   (size_t)cinfo.output_height *
+                                   (size_t)cinfo.num_components );
   
-  row_pointer[0] = (unsigned char *)malloc( cinfo.output_width * cinfo.num_components );
+  row_pointer[0] = (unsigned char *)malloc( (size_t)cinfo.output_width *
+                                            (size_t)cinfo.num_components );
   
   // while (scan lines remain to be read)
   //   jpeg_read_scanlines(...);

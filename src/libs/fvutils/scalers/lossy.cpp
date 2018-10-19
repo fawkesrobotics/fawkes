@@ -69,11 +69,11 @@ LossyScaler::set_scale_factor(float factor)
   }
 
   if (orig_width != 0) {
-    scal_width = (unsigned int) ceil(orig_width * scale_factor);
+    scal_width = (unsigned int) ceilf(orig_width * scale_factor);
     scal_width += (scal_width % 2);
   }
   if (orig_height != 0) {
-    scal_height = (unsigned int) ceil(orig_height * scale_factor);
+    scal_height = (unsigned int) ceilf(orig_height * scale_factor);
     scal_height += (scal_width % 2);
   }
 }
@@ -107,8 +107,8 @@ LossyScaler::set_scaled_dimensions(unsigned int width,
 
   scale_factor = (scale_factor_width < scale_factor_height) ? scale_factor_width : scale_factor_height;
 
-  scal_width  = (unsigned int) floor(orig_width * scale_factor);
-  scal_height = (unsigned int) floor(orig_height * scale_factor);
+  scal_width  = (unsigned int) floorf(orig_width * scale_factor);
+  scal_height = (unsigned int) floorf(orig_height * scale_factor);
 
   scal_width  += (scal_width % 2);
   scal_height += (scal_height % 2);
@@ -170,8 +170,8 @@ LossyScaler::scale()
   unsigned char *sup = YUV422_PLANAR_U_PLANE( scal_buffer, scal_width, scal_height );
   unsigned char *svp = YUV422_PLANAR_V_PLANE( scal_buffer, scal_width, scal_height );
 
-  memset( syp,   0, scal_width * scal_height );
-  memset( sup, 128, scal_width * scal_height );
+  memset( syp,   0, (size_t)scal_width * scal_height );
+  memset( sup, 128, (size_t)scal_width * scal_height );
 
   float oh_float = 0.0;
   float ow_float = 0.0;

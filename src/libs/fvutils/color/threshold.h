@@ -55,7 +55,7 @@ inline bool is_similar(int u, int v, int ref_u, int ref_v, int ref_length, int c
   diffu = ref_u * length - u * ref_length;
   diffv = ref_v * length - v * ref_length;
   difflen2 = diffu * diffu + diffv * diffv;
-  thres = length * ref_length;
+  thres = (int64_t)length * ref_length;
   thres *= thres;
 
   return (length > sat_thresh) && (difflen2 * chroma_thresh < thres);
