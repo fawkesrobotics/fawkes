@@ -38,31 +38,31 @@ class NetworkService
 {
  public:
   NetworkService(const char         *name,
-		 const char         *type,
-		 const char         *domain,
-		 const char         *host,
-		 unsigned short int  port);
+                 const char         *type,
+                 const char         *domain,
+                 const char         *host,
+                 unsigned short int  port);
 
-  NetworkService(const char         *name,
-		 const char         *type,
-		 const char         *domain,
-		 const char         *host,
-		 unsigned short int  port,
-		 const struct sockaddr *addr,
-		 const socklen_t     addr_size,
-		 std::list<std::string> &txt);
+	NetworkService(const char         *name,
+	               const char         *type,
+	               const char         *domain,
+	               const char         *host,
+	               unsigned short int  port,
+	               const struct sockaddr *addr,
+	               const socklen_t     addr_size,
+	               std::list<std::string> &txt);
 
-  NetworkService(const char         *name,
-		 const char         *type,
-		 unsigned short int  port);
+	NetworkService(const char         *name,
+	               const char         *type,
+	               unsigned short int  port);
 
-  NetworkService(const char         *name,
-		 const char         *type,
-		 const char         *domain);
+	NetworkService(const char         *name,
+	               const char         *type,
+	               const char         *domain);
 
   NetworkService(NetworkNameResolver *nnresolver,
-		 const char *name, const char *type,
-		 unsigned short int port);
+                 const char *name, const char *type,
+                 unsigned short int port);
 
   NetworkService(const NetworkService *s);
   NetworkService(const NetworkService &s);
@@ -83,6 +83,7 @@ class NetworkService
   unsigned short int  port() const;
   const std::list<std::string> & txt() const;
 
+  NetworkService&     operator=(const NetworkService &s);
   bool                operator==(const NetworkService &s) const;
   bool                operator==(const NetworkService *s) const;
   bool                operator<(const NetworkService &s) const;

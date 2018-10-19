@@ -48,13 +48,13 @@ namespace fawkes {
  * @param timeout timeout, if 0 all operationsare blocking, otherwise it
  * is tried for timeout seconds.
  */
-	MulticastDatagramSocket::MulticastDatagramSocket(AddrType addr_type,
+MulticastDatagramSocket::MulticastDatagramSocket(AddrType addr_type,
                                                  const char *multicast_addr_s,
-						 unsigned short port,
-						 float timeout)
-  : Socket(addr_type, UDP, timeout)
+                                                 unsigned short port,
+                                                 float timeout)
+: Socket(addr_type, UDP, timeout)
 {
-  multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
+	multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
 
   struct in_addr a;
   if ( inet_aton(multicast_addr_s, &a) == -1 ) {
@@ -75,12 +75,25 @@ MulticastDatagramSocket::~MulticastDatagramSocket()
   free(multicast_addr);
 }
 
+/** Assignment operator.
+ * @param s socket to copy from
+ * @return reference to this instance
+ */
+MulticastDatagramSocket&
+MulticastDatagramSocket::operator=(MulticastDatagramSocket& s)
+{
+	Socket::operator=(s);
+	free(multicast_addr);
+  multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
+  memcpy(multicast_addr, s.multicast_addr, sizeof(struct ::sockaddr_in));
+  return *this;
+}
 
 /** Copy constructor.
  * @param datagram_socket socket to copy.
  */
 MulticastDatagramSocket::MulticastDatagramSocket(MulticastDatagramSocket &datagram_socket)
-  : Socket(datagram_socket)
+: Socket(datagram_socket)
 {
   multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
   memcpy(multicast_addr, datagram_socket.multicast_addr, sizeof(struct ::sockaddr_in));

@@ -72,8 +72,8 @@ namespace fawkes {
 /** Constructor.
  * @param format format for reason that caused the exception.
  */
-	SocketException::SocketException(const char *format, ...)
-  : Exception()
+SocketException::SocketException(const char *format, ...)
+: Exception()
 {
 	va_list va;
   va_start(va, format);
@@ -87,7 +87,7 @@ namespace fawkes {
  * @param _errno error number (errno returned by a syscall)
  */
 SocketException::SocketException(int _errno, const char *msg)
-  : Exception(_errno, "%s", msg)
+: Exception(_errno, "%s", msg)
 {
 }
 
@@ -161,8 +161,8 @@ const short Socket::POLL_NVAL  = POLLNVAL;
  * @exception SocketException thrown if socket cannot be opened, check errno for cause
  */
 Socket::Socket(AddrType addr_type, SocketType sock_type, float timeout)
-	: addr_type(addr_type), sock_fd(-1), timeout(timeout),
-	  client_addr(NULL), client_addr_len(0), socket_protocol_(0)
+: addr_type(addr_type), sock_fd(-1), timeout(timeout),
+  client_addr(NULL), client_addr_len(0), socket_protocol_(0)
 {
   if (addr_type == IPv4) {
 	  socket_addr_family_ = AF_INET;
@@ -189,8 +189,8 @@ Socket::Socket(AddrType addr_type, SocketType sock_type, float timeout)
  * @exception SocketException thrown if socket cannot be opened, check errno for cause
  */
 Socket::Socket(SocketType sock_type, float timeout)
-	: sock_fd(-1), timeout(timeout), client_addr(NULL), client_addr_len(0),
-	  socket_addr_family_(-1), socket_protocol_(0)
+: sock_fd(-1), timeout(timeout), client_addr(NULL), client_addr_len(0),
+  socket_addr_family_(-1), socket_protocol_(0)
 {
 	if (sock_type == TCP) {
 	  socket_type_ = SOCK_STREAM;
@@ -208,8 +208,8 @@ Socket::Socket(SocketType sock_type, float timeout)
  * properly.
  */
 Socket::Socket()
-	: sock_fd(-1), timeout(0.f), client_addr(NULL), client_addr_len(0),
-	  socket_addr_family_(0), socket_type_(0), socket_protocol_(0)
+: sock_fd(-1), timeout(0.f), client_addr(NULL), client_addr_len(0),
+  socket_addr_family_(0), socket_type_(0), socket_protocol_(0)
 {
 }
 
@@ -231,10 +231,43 @@ Socket::Socket(Socket &socket)
     client_addr_len = 0;
   }    
   timeout = socket.timeout;
-  sock_fd = socket.sock_fd;
+  sock_fd = dup(socket.sock_fd);
   socket_addr_family_ = socket.socket_addr_family_;
   socket_type_ = socket.socket_type_;
   socket_protocol_ = socket.socket_protocol_;
+}
+
+/** Copy constructor.
+ * @param socket socket to copy
+ * @return reference to this instance
+ */
+Socket&
+Socket::operator=(Socket &socket)
+{
+	close();
+  if ( client_addr != NULL ) {
+    free(client_addr);
+    client_addr = NULL;
+  }
+
+  if ( socket.client_addr != NULL ) {
+	  if (socket.client_addr_len > sizeof(struct ::sockaddr_storage)) {
+		  throw SocketException("Invalid client socket address length");
+	  }
+	  client_addr = (struct ::sockaddr_storage *)malloc(sizeof(struct ::sockaddr_storage));
+	  client_addr_len = sizeof(struct ::sockaddr_storage);
+    memcpy(client_addr, socket.client_addr, client_addr_len);
+  } else {
+    client_addr = NULL;
+    client_addr_len = 0;
+  }
+  timeout = socket.timeout;
+  sock_fd = dup(socket.sock_fd);
+  socket_addr_family_ = socket.socket_addr_family_;
+  socket_type_ = socket.socket_type_;
+  socket_protocol_ = socket.socket_protocol_;
+
+  return *this;
 }
 
 void

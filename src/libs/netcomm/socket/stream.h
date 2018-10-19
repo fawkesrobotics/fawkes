@@ -35,6 +35,8 @@ class StreamSocket : public Socket
 	StreamSocket(AddrType addr_type, float timeout = 0.f);
   StreamSocket(StreamSocket &s);
 
+	StreamSocket& operator=(StreamSocket& s);
+
   virtual Socket *  clone();
 
   void set_nodelay(bool no_delay);

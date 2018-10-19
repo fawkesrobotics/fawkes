@@ -34,6 +34,8 @@ class DatagramSocket : public Socket
 	DatagramSocket(AddrType addr_type, float timeout = 0.f);
   DatagramSocket(DatagramSocket &s);
 
+	DatagramSocket& operator=(DatagramSocket& s);
+
   virtual Socket *  clone();
 };
 

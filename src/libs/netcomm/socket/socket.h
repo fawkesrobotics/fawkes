@@ -91,6 +91,8 @@ class Socket
   Socket(Socket &socket);
   virtual ~Socket();
 
+	Socket& operator=(Socket &socket);
+
   virtual void         connect(const char *hostname, const unsigned short int port);
   virtual void         connect(const struct ::sockaddr_storage &addr_port);
   virtual void         connect(const struct sockaddr *addr_port, socklen_t struct_size);

@@ -49,9 +49,9 @@ namespace fawkes {
  * is tried for timeout seconds.
  */
 BroadcastDatagramSocket::BroadcastDatagramSocket(const char *broadcast_addr_s,
-						 unsigned short port,
-						 float timeout)
-  : Socket(IPv4, UDP, timeout)
+                                                 unsigned short port,
+                                                 float timeout)
+: Socket(IPv4, UDP, timeout)
 {
   broadcast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
 
@@ -81,12 +81,26 @@ BroadcastDatagramSocket::~BroadcastDatagramSocket()
  * @param datagram_socket socket to copy.
  */
 BroadcastDatagramSocket::BroadcastDatagramSocket(BroadcastDatagramSocket &datagram_socket)
-  : Socket(datagram_socket)
+: Socket(datagram_socket)
 {
   broadcast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
   memcpy(broadcast_addr, datagram_socket.broadcast_addr, sizeof(struct ::sockaddr_in));
 }
 
+
+/** Assignment operator.
+ * @param s socket to copy from
+ * @return reference to this instance
+ */
+BroadcastDatagramSocket&
+BroadcastDatagramSocket::operator=(BroadcastDatagramSocket& s)
+{
+	Socket::operator=(s);
+	free(broadcast_addr);
+  broadcast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
+  memcpy(broadcast_addr, s.broadcast_addr, sizeof(struct ::sockaddr_in));
+  return *this;
+}
 
 /** Bind socket.
  * This will make the socket listen for incoming traffic.

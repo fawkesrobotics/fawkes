@@ -37,6 +37,8 @@ class BroadcastDatagramSocket : public Socket
   BroadcastDatagramSocket(BroadcastDatagramSocket &s);
   virtual ~BroadcastDatagramSocket();
 
+	BroadcastDatagramSocket& operator=(BroadcastDatagramSocket& s);
+
   virtual Socket *  clone();
 
   virtual void bind();

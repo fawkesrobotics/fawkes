@@ -58,10 +58,10 @@ namespace fawkes {
  * @param port port of service
  */
 NetworkService::NetworkService(const char         *name,
-			       const char         *type,
-			       const char         *domain,
-			       const char         *host,
-			       unsigned short int  port)
+                               const char         *type,
+                               const char         *domain,
+                               const char         *host,
+                               unsigned short int  port)
 {
   _name   = strdup(name);
   _type   = strdup(type);
@@ -87,14 +87,13 @@ NetworkService::NetworkService(const char         *name,
  * @param txt list of TXT records
  */
 NetworkService::NetworkService(const char         *name,
-			       const char         *type,
-			       const char         *domain,
-			       const char         *host,
-			       unsigned short int  port,
-			       const struct sockaddr *addr,
-			       const socklen_t     addr_size,
-			       std::list<std::string> &txt)
-
+                               const char         *type,
+                               const char         *domain,
+                               const char         *host,
+                               unsigned short int  port,
+                               const struct sockaddr *addr,
+                               const socklen_t     addr_size,
+                               std::list<std::string> &txt)
 {
   _name   = strdup(name);
   _type   = strdup(type);
@@ -149,9 +148,9 @@ NetworkService::NetworkService(const char         *name,
  * @param port port of service
  */
 NetworkService::NetworkService(NetworkNameResolver *nnresolver,
-			       const char         *name,
-			       const char         *type,
-			       unsigned short int  port)
+                               const char         *name,
+                               const char         *type,
+                               unsigned short int  port)
 {
   std::string s = name;
   std::string::size_type hpos = s.find("%h");
@@ -176,8 +175,8 @@ NetworkService::NetworkService(NetworkNameResolver *nnresolver,
  * @param domain domain of service
  */
 NetworkService::NetworkService(const char         *name,
-			       const char         *type,
-			       const char         *domain)
+                               const char         *type,
+                               const char         *domain)
 {
   _name   = strdup(name);
   _type   = strdup(type);
@@ -262,6 +261,51 @@ NetworkService::NetworkService(const NetworkService &s)
   memcpy(&_addr, &s._addr, sizeof(_addr));
 
   list = s.list;
+}
+
+/** Assignment operator.
+ * @param s network service to copy from
+ * @return reference to this instance
+ */
+NetworkService&
+NetworkService::operator=(const NetworkService& s)
+{
+  if ( _name   != NULL)  free( _name );
+  if ( _type   != NULL)  free( _type );
+  if ( _domain != NULL)  free( _domain );
+  if ( _host   != NULL)  free( _host );
+  if ( _modified_name   != NULL)  free( _modified_name );
+
+  _name = NULL;
+  _type = NULL;
+  _domain = NULL;
+  _host = NULL;
+  _modified_name = NULL;
+
+  _name = strdup(s._name);
+  _type = strdup(s._type);
+  _port = s._port;
+  if ( s._domain != NULL ) {
+    _domain = strdup(s._domain);
+  } else {
+    _domain = NULL;
+  }
+  if ( s._host != NULL ) {
+    _host = strdup(s._host);
+  } else {
+    _host = NULL;
+  }
+
+  _modified_name = NULL;
+  if (s._modified_name != NULL) {
+    _modified_name = strdup(s._modified_name);
+  }
+
+  memcpy(&_addr, &s._addr, sizeof(_addr));
+
+  list = s.list;
+
+  return *this;
 }
 
 

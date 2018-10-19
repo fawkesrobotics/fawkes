@@ -40,7 +40,7 @@ namespace fawkes {
  * is tried for timeout seconds.
  */
 DatagramSocket::DatagramSocket(AddrType addr_type, float timeout)
-  : Socket(addr_type, UDP, timeout)
+: Socket(addr_type, UDP, timeout)
 {
 }
 
@@ -49,8 +49,19 @@ DatagramSocket::DatagramSocket(AddrType addr_type, float timeout)
  * @param datagram_socket socket to copy.
  */
 DatagramSocket::DatagramSocket(DatagramSocket &datagram_socket)
-  : Socket(datagram_socket)
+: Socket(datagram_socket)
 {
+}
+
+/** Assingment operator.
+ * @param s socket to copy from
+ * @return reference to this
+ */
+DatagramSocket&
+DatagramSocket::operator=(DatagramSocket& s)
+{
+	Socket::operator=(s);
+	return *this;
 }
 
 
