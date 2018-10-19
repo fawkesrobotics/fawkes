@@ -1250,7 +1250,7 @@ Interface::resize_buffers(unsigned int num_buffers)
       __num_buffers = 0;
     }
   } else {
-    void *tmp = realloc(__buffers, num_buffers * data_size);
+    void *tmp = realloc(__buffers, (size_t)num_buffers * data_size);
     if (tmp == NULL) {
       __data_mutex->unlock();
       throw Exception(errno, "Resizing buffers for interface %s failed", __uid);

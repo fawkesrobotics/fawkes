@@ -95,6 +95,33 @@ InterfaceInfo::~InterfaceInfo()
 }
 
 
+/** Assignment operator.
+ * @param i info to copy from
+ * @return reference to this instance
+ */
+InterfaceInfo&
+InterfaceInfo::operator=(const InterfaceInfo &i)
+{
+  free(__type);
+  free(__id);
+  free(__hash);
+  delete __timestamp;
+
+  __type = strndup(i.__type, __INTERFACE_TYPE_SIZE);
+  __id   = strndup(i.__id, __INTERFACE_ID_SIZE);
+  __hash = (unsigned char *)malloc(__INTERFACE_HASH_SIZE);
+  memcpy(__hash, i.__hash, __INTERFACE_HASH_SIZE);
+  __has_writer = i.__has_writer;
+  __num_readers = i.__num_readers;
+  __serial = i.__serial;
+  __timestamp = new Time(i.__timestamp);
+  __readers = i.__readers;
+  __writer  = i.__writer;
+
+  return *this;
+}
+
+
 /** Get interface type.
  * @return type string
  */
