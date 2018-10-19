@@ -62,7 +62,7 @@ void DepthcamSimThread::init()
   pcl_->is_dense = false;
   pcl_->width    = width_;
   pcl_->height   = height_;
-  pcl_->points.resize(width_ * height_);
+  pcl_->points.resize((size_t)width_ * (size_t)height_);
   pcl_->header.frame_id = frame_;
 
   pcl_manager->add_pointcloud(pcl_id_.c_str(), pcl_);
