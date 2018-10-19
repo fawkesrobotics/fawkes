@@ -197,14 +197,14 @@ OpenNiPointCloudThread::init()
     __pcl_xyz->is_dense = false;
     __pcl_xyz->width    = __width;
     __pcl_xyz->height   = __height;
-    __pcl_xyz->points.resize(__width * __height);
+    __pcl_xyz->points.resize((size_t)__width * (size_t)__height);
     __pcl_xyz->header.frame_id = __cfg_register_depth_image ? __cfg_frame_image : __cfg_frame_depth;
 
     __pcl_xyzrgb = new pcl::PointCloud<pcl::PointXYZRGB>();
     __pcl_xyzrgb->is_dense = false;
     __pcl_xyzrgb->width    = __width;
     __pcl_xyzrgb->height   = __height;
-    __pcl_xyzrgb->points.resize(__width * __height);
+    __pcl_xyzrgb->points.resize((size_t)__width * (size_t)__height);
     __pcl_xyzrgb->header.frame_id = __cfg_register_depth_image ? __cfg_frame_image : __cfg_frame_depth;
 
     pcl_manager->add_pointcloud("openni-pointcloud-xyz", __pcl_xyz);
