@@ -71,7 +71,7 @@ class BlackBoardInterfaceListMaintainer
  private:
   BlackBoard                            *blackboard_;
   Logger                                *logger_;
-  const char                            *name_;
+  char                                  *name_;
   fawkes::LockList<fawkes::Interface *> ifs_;
 };
 
