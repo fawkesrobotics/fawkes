@@ -107,7 +107,7 @@ init(int argc, char **argv, int & retval)
 
 
 bool
-init(InitOptions options, int & retval)
+init(const InitOptions& options, int & retval)
 {
   init_options = new InitOptions(options);
 
