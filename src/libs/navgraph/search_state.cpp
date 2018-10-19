@@ -51,13 +51,13 @@ namespace fawkes {
  * match the cost function to be admissible.
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
-NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
-					 double cost_sofar, NavGraphSearchState *parent,
-					 NavGraph *map_graph,
-					 navgraph::EstimateFunction estimate_func,
-					 navgraph::CostFunction cost_func,
-					 fawkes::NavGraphConstraintRepo *constraint_repo)
-  : AStarState(cost_sofar, parent), estimate_func_(estimate_func), cost_func_(cost_func)
+NavGraphSearchState::NavGraphSearchState(const NavGraphNode& node, const NavGraphNode& goal,
+                                         double cost_sofar, NavGraphSearchState *parent,
+                                         NavGraph *map_graph,
+                                         navgraph::EstimateFunction estimate_func,
+                                         navgraph::CostFunction cost_func,
+                                         fawkes::NavGraphConstraintRepo *constraint_repo)
+: AStarState(cost_sofar, parent), estimate_func_(estimate_func), cost_func_(cost_func)
 {
   node_ = node;
   goal_ = goal;
@@ -78,10 +78,10 @@ NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
  * @param map_graph map graph
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
-NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
-					 NavGraph *map_graph,
-					 fawkes::NavGraphConstraintRepo *constraint_repo)
-  : AStarState(0, NULL)
+NavGraphSearchState::NavGraphSearchState(const NavGraphNode& node, const NavGraphNode& goal,
+                                         NavGraph *map_graph,
+                                         fawkes::NavGraphConstraintRepo *constraint_repo)
+: AStarState(0, NULL)
 {
   node_ = node;
   goal_ = goal;
@@ -114,12 +114,13 @@ NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
  * match the cost function to be admissible.
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
-NavGraphSearchState::NavGraphSearchState(NavGraphNode node, NavGraphNode goal,
-					 NavGraph *map_graph,
-					 navgraph::EstimateFunction estimate_func,
-					 navgraph::CostFunction cost_func,
-					 fawkes::NavGraphConstraintRepo *constraint_repo)
-  : AStarState(0, NULL), estimate_func_(estimate_func), cost_func_(cost_func)
+NavGraphSearchState::NavGraphSearchState(const NavGraphNode& node,
+                                         const NavGraphNode& goal,
+                                         NavGraph *map_graph,
+                                         navgraph::EstimateFunction estimate_func,
+                                         navgraph::CostFunction cost_func,
+                                         fawkes::NavGraphConstraintRepo *constraint_repo)
+: AStarState(0, NULL), estimate_func_(estimate_func), cost_func_(cost_func)
 {
   node_ = node;
   goal_ = goal;

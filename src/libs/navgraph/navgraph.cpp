@@ -80,6 +80,23 @@ NavGraph::NavGraph(const std::string &graph_name)
 }
 
 
+
+/** Copy constructor.
+ * This method will remove internal data like nodes, and edges
+ * and copy the data from the passed instance. The change listeners will
+ * not be copied. The assignment operator will trigger all registered
+ * change listeners to be called.
+ * @param g graph from which to copy the data
+ */
+NavGraph::NavGraph(const NavGraph &g)
+{
+  graph_name_ = g.graph_name_;
+  nodes_.clear();
+  nodes_      = g.nodes_;
+  edges_.clear();
+  edges_      = g.edges_;
+}
+
 /** Virtual empty destructor. */
 NavGraph::~NavGraph()
 {
