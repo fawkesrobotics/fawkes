@@ -356,7 +356,7 @@ SickTiM55xCommonAcquisitionThread::parse_datagram(const unsigned char *datagram,
 
   float time_increment = scan_time * angle_increment / (2.0 * M_PI);
 
-  *_timestamp -= number_of_data * time_increment;
+  *_timestamp -= (double)number_of_data * time_increment;
   *_timestamp += cfg_time_offset_;
 
   _data_mutex->unlock();
