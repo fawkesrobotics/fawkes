@@ -85,7 +85,7 @@ class BlackBoardSynchronizationThread
 
     /** Constructor. */
     InterfaceInfo()
-      : combo(NULL), writer(NULL), reader_bb(NULL), writer_bb(NULL)
+    : combo(NULL), writer(NULL), reader_bb(NULL), writer_bb(NULL)
     {}
 
     /** Constructor.
@@ -95,8 +95,15 @@ class BlackBoardSynchronizationThread
      * @param pwriter_bb Blackboard to write to
      */
     InterfaceInfo(combo_t *pcombo, fawkes::Interface  *pwriter,
-		  fawkes::BlackBoard *preader_bb, fawkes::BlackBoard *pwriter_bb)
-      : combo(pcombo), writer(pwriter), reader_bb(preader_bb), writer_bb(pwriter_bb)
+                  fawkes::BlackBoard *preader_bb, fawkes::BlackBoard *pwriter_bb)
+    : combo(pcombo), writer(pwriter), reader_bb(preader_bb), writer_bb(pwriter_bb)
+    {}
+
+	  /** Copy constructor.
+     * @param ii info to copy from
+     */
+    InterfaceInfo(const InterfaceInfo &ii)
+    : combo(ii.combo), writer(ii.writer), reader_bb(ii.reader_bb), writer_bb(ii.writer_bb)
     {}
 
     /** Assignment operator.
