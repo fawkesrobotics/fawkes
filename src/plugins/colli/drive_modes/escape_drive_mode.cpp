@@ -43,23 +43,19 @@ namespace fawkes
 EscapeDriveModule::EscapeDriveModule( Logger* logger, Configuration* config )
  : AbstractDriveMode(logger, config)
 {
-  logger_->log_info("EscapeDriveModule", "(Constructor): Entering...");
   drive_mode_ = NavigatorInterface::ESCAPE;
 
   max_trans_ = config_->get_float( "/plugins/colli/drive_mode/escape/max_trans" );
   max_rot_    = config_->get_float( "/plugins/colli/drive_mode/escape/max_rot" );
 
   robo_shape_ = new RoboShapeColli( "/plugins/colli/roboshape/", logger, config, 2 );
-
-  logger_->log_info("EscapeDriveModule", "(Constructor): Exiting...");
 }
 
 
 /** Destructor. Destruct your local values here. */
 EscapeDriveModule::~EscapeDriveModule()
 {
-  logger_->log_info("EscapeDriveModule", "(Destructor): Entering...");
-  logger_->log_info("EscapeDriveModule", "(Destructor): Exiting...");
+	delete robo_shape_;
 }
 
 

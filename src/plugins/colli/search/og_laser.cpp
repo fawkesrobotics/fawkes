@@ -58,18 +58,17 @@ namespace fawkes
  * @param cell_width The width of a cell (in cm)
  * @param cell_height The height of a cell (in cm)
  */
-LaserOccupancyGrid::LaserOccupancyGrid( Laser360Interface * laser, Logger* logger, Configuration* config, tf::Transformer* listener,
-                                        int width, int height, int cell_width, int cell_height)
- : OccupancyGrid( width, height, cell_width, cell_height ),
-   tf_listener_(listener ),
-   logger_( logger ),
-   if_laser_( laser )
+LaserOccupancyGrid::LaserOccupancyGrid(Laser360Interface * laser, Logger* logger,
+                                       Configuration* config, tf::Transformer* listener,
+                                       int width, int height, int cell_width, int cell_height)
+: OccupancyGrid( width, height, cell_width, cell_height ),
+  tf_listener_(listener), logger_(logger), if_laser_(laser)
 {
-  logger->log_debug("LaserOccupancyGrid", "(Constructor): Entering");
+	logger->log_debug("LaserOccupancyGrid", "(Constructor): Entering");
 
   //read config
-  std::string cfg_prefix = "/plugins/colli/";
-  obstacle_distance_     = config->get_float((cfg_prefix + "laser_occupancy_grid/distance_account").c_str());
+	std::string cfg_prefix = "/plugins/colli/";
+	obstacle_distance_     = config->get_float((cfg_prefix + "laser_occupancy_grid/distance_account").c_str());
   initial_history_size_  = 3*config->get_int((cfg_prefix + "laser_occupancy_grid/history/initial_size").c_str());
   max_history_length_    = config->get_float((cfg_prefix + "laser_occupancy_grid/history/max_length").c_str());
   min_history_length_    = config->get_float((cfg_prefix + "laser_occupancy_grid/history/min_length").c_str());
@@ -145,6 +144,7 @@ LaserOccupancyGrid::LaserOccupancyGrid( Laser360Interface * laser, Logger* logge
 LaserOccupancyGrid::~LaserOccupancyGrid()
 {
   delete robo_shape_;
+  delete obstacle_map;
 }
 
 /** Reset all old readings and forget about the world state! */

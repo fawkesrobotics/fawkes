@@ -158,12 +158,12 @@ BaseMotorInstruct::set_command()
     float reduction = 3. / exec_trans;
 
     //Calculate positive maximum for vx and vy
-    float vx_max  = fabs( exec_.x * reduction );
-    float vy_max  = fabs( exec_.y * reduction );
+    float vx_max  = fabsf( exec_.x * reduction );
+    float vy_max  = fabsf( exec_.y * reduction );
 
     //Calculate new desired velocities
-    cmd.x = std::fmin(std::fmax(exec_.x, -vx_max), vx_max);
-    cmd.y = std::fmin(std::fmax(exec_.y, -vy_max), vy_max);
+    cmd.x = std::fminf(std::fmaxf(exec_.x, -vx_max), vx_max);
+    cmd.y = std::fminf(std::fmaxf(exec_.y, -vy_max), vy_max);
   }
 
   // Rotation borders
