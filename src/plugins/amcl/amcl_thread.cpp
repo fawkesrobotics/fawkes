@@ -301,7 +301,7 @@ void AmclThread::init()
   pf_init_pose_cov.m[0][0] = init_cov_[0]; //last_covariance_[6 * 0 + 0];
   pf_init_pose_cov.m[1][1] = init_cov_[1]; //last_covariance_[6 * 1 + 1];
   pf_init_pose_cov.m[2][2] = init_cov_[2]; //last_covariance_[6 * 5 + 5];
-  pf_init(pf_, pf_init_pose_mean, pf_init_pose_cov);
+  pf_init(pf_, &pf_init_pose_mean, &pf_init_pose_cov);
   pf_init_ = false;
 
   initial_pose_hyp_ = new amcl_hyp_t();
@@ -868,6 +868,8 @@ void AmclThread::finalize()
   initial_pose_hyp_ = NULL;
 
   delete last_move_time_;
+  delete odom_;
+  delete laser_;
 
   blackboard->close(laser_if_);
   blackboard->close(pos3d_if_);
@@ -986,8 +988,8 @@ AmclThread::apply_initial_pose()
 		     initial_pose_hyp_->pf_pose_cov.m[2][0],
 		     initial_pose_hyp_->pf_pose_cov.m[2][1],
 		     initial_pose_hyp_->pf_pose_cov.m[2][2]);
-    pf_init(pf_, initial_pose_hyp_->pf_pose_mean,
-	    initial_pose_hyp_->pf_pose_cov);
+    pf_init(pf_, &initial_pose_hyp_->pf_pose_mean,
+            &initial_pose_hyp_->pf_pose_cov);
     pf_init_ = false;
   } else {
     logger->log_warn(name(), "Called apply initial pose but no pose to apply");

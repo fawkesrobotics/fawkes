@@ -70,7 +70,7 @@ typedef struct
 
 
 // Create a gaussian pdf
-pf_pdf_gaussian_t *pf_pdf_gaussian_alloc(pf_vector_t x, pf_matrix_t cx);
+pf_pdf_gaussian_t *pf_pdf_gaussian_alloc(pf_vector_t *x, pf_matrix_t *cx);
 
 // Destroy the pdf
 void pf_pdf_gaussian_free(pf_pdf_gaussian_t *pdf);
