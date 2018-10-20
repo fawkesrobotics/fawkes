@@ -1,4 +1,4 @@
- // only if type is Expression
+
 /***************************************************************************
  *  stn.cpp - stn-generator
  *
@@ -61,7 +61,7 @@ Stn::~Stn()
  * @param action The action to add.
  */
 void
-Stn::add_domain_action(DomainAction action)
+Stn::add_domain_action(const DomainAction& action)
 {
   domain_actions_.push_back(action);
 }
@@ -82,7 +82,7 @@ Stn::add_plan_action(std::string name, std::string params)
  * @param action The action whose effects define the initial state.
  */
 void
-Stn::set_initial_state(StnAction action)
+Stn::set_initial_state(const StnAction& action)
 {
   initial_state_ = action;
 }
