@@ -341,9 +341,9 @@ class RRDGraphDefinition
   /** Get vertical label. @return vertical label */
   const char *          get_vertical_label() const { return __vertical_label; }
   /** Get update interval. @return update interval */
-  const unsigned int    get_update_interval() const { return __update_interval; }
+  unsigned int          get_update_interval() const { return __update_interval; }
   /** Get slope moe. @return slope mode  */
-  const bool            get_slope_mode() const { return __slope_mode; }
+  bool                  get_slope_mode() const { return __slope_mode; }
   /** Get definitions. @return definitions  */
   const std::vector<RRDGraphDataDefinition> & get_defs() const { return __defs; }
   /** Get graph elements. @return graph elements */
