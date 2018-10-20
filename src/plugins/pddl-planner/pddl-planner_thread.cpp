@@ -242,8 +242,7 @@ PddlPlannerThread::fd_planner()
   size_t cur_pos = 0;
   if ( result.find("Solution found!", cur_pos) == std::string::npos) {
     logger->log_error(name(), "Planning Failed: %s", result.c_str());
-    //TODO handle with correct exception
-    throw;
+    throw Exception("No solution found");
   } else {
     cur_pos = result.find("Solution found!", cur_pos);
     cur_pos = result.find("\n", cur_pos);
