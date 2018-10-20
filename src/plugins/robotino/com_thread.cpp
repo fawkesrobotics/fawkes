@@ -103,7 +103,7 @@ RobotinoComThread::SensorData::SensorData()
  * @param thread_name name of thread
  */
 RobotinoComThread::RobotinoComThread(const char *thread_name)
-	: Thread(thread_name, Thread::OPMODE_CONTINUOUS)
+: Thread(thread_name, Thread::OPMODE_CONTINUOUS)
 {
 	data_mutex_  = new Mutex();
 	new_data_    = false;
@@ -139,8 +139,11 @@ RobotinoComThread::RobotinoComThread(const char *thread_name)
 RobotinoComThread::~RobotinoComThread()
 {
 	delete data_mutex_;
+	delete vel_mutex_;
+	delete vel_last_update_;
 #ifdef USE_VELOCITY_RECORDING
 	fclose(f_);
+	delete start_;
 #endif
 }
 
