@@ -72,6 +72,7 @@ EventTriggerManager::~EventTriggerManager()
 	}
   mongo_connection_manager_->delete_client(con_local_);
   mongo_connection_manager_->delete_client(con_replica_);
+  delete mutex_;
 }
 
 void EventTriggerManager::check_events()
