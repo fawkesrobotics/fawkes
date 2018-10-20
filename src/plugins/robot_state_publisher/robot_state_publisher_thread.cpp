@@ -3,7 +3,6 @@
  *
  *  Created on Thu Aug 22 11:19:00 2013
  *  Copyright (C) 2013 by Till Hofmann, AllemaniACs RoboCup Team
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -107,7 +106,7 @@ void RobotStatePublisherThread::init()
 
   if (!kdl_parser::tree_from_string(urdf, tree_)) {
     logger->log_error(name(), "failed to parse urdf description to tree");
-    throw;
+    throw Exception("Failed to parse URDF description");
   }
   // walk the tree and add segments to segments_
   add_children(tree_.getRootSegment());
