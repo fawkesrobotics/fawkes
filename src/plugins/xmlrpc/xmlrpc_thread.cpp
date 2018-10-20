@@ -110,6 +110,7 @@ XmlRpcThread::finalize()
 
     delete __webserver;
     delete __plugin_methods;
+    delete __log_methods;
     delete __dispatcher;
     delete __url_manager;
   } else {
