@@ -332,6 +332,11 @@ TabletopObjectsThread::finalize()
   fclusters_.reset();
   ftable_model_.reset();
   fsimplified_polygon_.reset();
+
+  delete last_pcl_time_;
+#ifdef USE_TIMETRACKER
+  delete tt_;
+#endif
 }
 
 template <typename PointType>
@@ -1507,7 +1512,7 @@ TabletopObjectsThread::generate_table_model(const float length, const float widt
   c->height = 1;
   c->width = num_t * num_w * num_h;
   c->is_dense = true;
-  c->points.resize(num_t * num_w * num_h);
+  c->points.resize((size_t)num_t * (size_t)num_w * (size_t)num_h);
 
   unsigned int idx = 0;
   for (unsigned int t = 0; t < num_t; ++t) {
@@ -1553,7 +1558,7 @@ TabletopObjectsThread::generate_table_model(const float length, const float widt
   c->height = 1;
   c->width = num_w * num_h;
   c->is_dense = true;
-  c->points.resize(num_w * num_h);
+  c->points.resize((size_t)num_w * (size_t)num_h);
 
   unsigned int idx = 0;
   for (unsigned int w = 0; w < num_w; ++w) {
@@ -1729,8 +1734,8 @@ Eigen::Vector4f TabletopObjectsThread::fit_cylinder(
   for (int os = 0; os < NUM_KNOWN_OBJS_; os++) {
     logger->log_debug(name(), "** Cup %i: %f in x, %f in y, %f in z.", os,
         obj_size_scores[os][0], obj_size_scores[os][1], obj_size_scores[os][2]);
-    obj_likelihoods_[centroid_i][os] = obj_size_scores[os][0]
-        * obj_size_scores[os][1] * obj_size_scores[os][2];
+    obj_likelihoods_[centroid_i][os] =
+      (double)obj_size_scores[os][0] * obj_size_scores[os][1] * obj_size_scores[os][2];
   }
 
   //Fit cylinder:
