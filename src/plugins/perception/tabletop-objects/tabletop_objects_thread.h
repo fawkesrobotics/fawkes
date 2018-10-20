@@ -64,7 +64,7 @@ class TabletopVisualizationThreadBase;
 #endif
 
 /** @class OldCentroid "tabletop_objects_thread.h"
- * This class is used to save old centroids in order to check for reappearance
+ * This class is used to save old centroids in order to check for reappearance.
  */
 class OldCentroid {
 public:
@@ -74,26 +74,45 @@ public:
    * @param centroid The position of the centroid
    */
   OldCentroid(const unsigned int &id, const Eigen::Vector4f &centroid)
-  : id_(id), age_(0), centroid_(centroid) { }
+  : id_(id), age_(0), centroid_(centroid) {}
+
   /** Copy constructor
    * @param other The other OldCentroid */
   OldCentroid(const OldCentroid &other)
-  : id_(other.getId()), age_(other.getAge()), centroid_(other.getCentroid()) { }
+  : id_(other.get_id()), age_(other.get_age()), centroid_(other.get_centroid()) { }
+
+  /** Destructor. */
   virtual ~OldCentroid() { }
+
+  /** Assignment operator.
+   * @param other The other OldCentroid
+   * @return reference to this instance */
+  OldCentroid& operator=(const OldCentroid &other)
+  {
+    id_       = other.get_id();
+    age_      = other.get_age();
+    centroid_ = other.get_centroid();
+    return *this;
+  }
+
   // any class with Eigen::Vector4f needs a custom new operator
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  /** get the ID of the centroid
+
+  /** Get the ID of the centroid
    * @return the ID of the centroid */
-  unsigned int getId() const { return id_; }
-  /** get the position of the centroid
+  unsigned int get_id() const { return id_; }
+
+  /** Get the position of the centroid
    * @return a reference to the centroid */
-  const Eigen::Vector4f& getCentroid() const { return centroid_; }
-  /** get the age of the centroid
+  const Eigen::Vector4f& get_centroid() const { return centroid_; }
+
+  /** Get the age of the centroid
    * @return the number of loops the centroids has been invisible
    */
-  unsigned int getAge() const { return age_; }
-  /** increment the age of the centroid */
-  void age() { age_++; }
+  unsigned int get_age() const { return age_; }
+
+  /** Increment the age of the centroid */
+  void increment_age() { age_ += 1; }
 
 protected:
   /** The ID of the centroid */

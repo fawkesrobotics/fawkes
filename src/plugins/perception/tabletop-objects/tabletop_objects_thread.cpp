@@ -1131,7 +1131,7 @@ TabletopObjectsThread::loop()
   // age all old centroids
   for (OldCentroidVector::iterator it = old_centroids_.begin();
       it != old_centroids_.end(); it++) {
-    it->age();
+    it->increment_age();
   }
   // delete centroids which are older than cfg_centroid_max_age_
   delete_old_centroids(old_centroids_, cfg_centroid_max_age_);
@@ -1651,8 +1651,8 @@ void TabletopObjectsThread::delete_old_centroids(OldCentroidVector centroids,
           centroids.begin(),
           centroids.end(),
           [&](const OldCentroid &centroid)->bool {
-            if (centroid.getAge() > age) {
-              free_ids_.push_back(centroid.getId());
+            if (centroid.get_age() > age) {
+              free_ids_.push_back(centroid.get_id());
               return true;
             }
             return false;
@@ -1660,7 +1660,7 @@ void TabletopObjectsThread::delete_old_centroids(OldCentroidVector centroids,
 }
 
 void TabletopObjectsThread::delete_near_centroids(CentroidMap reference,
-  OldCentroidVector centroids, float min_distance)
+                                                  OldCentroidVector centroids, float min_distance)
 {
   centroids.erase(
       std::remove_if(
@@ -1668,8 +1668,8 @@ void TabletopObjectsThread::delete_near_centroids(CentroidMap reference,
           centroids.end(),
           [&](const OldCentroid &old)->bool {
             for (CentroidMap::const_iterator it = reference.begin(); it != reference.end(); it++) {
-              if (pcl::distances::l2(it->second, old.getCentroid()) < min_distance) {
-                free_ids_.push_back(old.getId());
+              if (pcl::distances::l2(it->second, old.get_centroid()) < min_distance) {
+                free_ids_.push_back(old.get_id());
                 return true;
               }
             }
@@ -1935,9 +1935,9 @@ TabletopObjectsThread::track_objects(
         // first, check if there is an old centroid close enough
         for (OldCentroidVector::iterator it = old_centroids_.begin();
             it != old_centroids_.end(); it++) {
-          if (pcl::distances::l2(new_centroids[row], it->getCentroid())
+          if (pcl::distances::l2(new_centroids[row], it->get_centroid())
               <= cfg_centroid_max_distance_) {
-            id = it->getId();
+            id = it->get_id();
             old_centroids_.erase(it);
             assigned = true;
             break;
