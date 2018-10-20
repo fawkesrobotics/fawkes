@@ -95,6 +95,10 @@ TimeTrackerMainLoopThread::init()
 void
 TimeTrackerMainLoopThread::finalize()
 {
+	delete __loop_start;
+	delete __loop_end;
+	delete __last_outp_time;
+  delete __now;
   delete __tt;
 }
 
