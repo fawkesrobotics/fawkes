@@ -61,6 +61,8 @@ void
 RosImagesThread::finalize()
 {
   delete it_;
+  delete last_update_;
+  delete now_;
 
   std::map<std::string, PublisherInfo>::iterator p;
   for (p = pubs_.begin(); p != pubs_.end(); ++p) {
