@@ -242,20 +242,19 @@ RoombaJoystickThread::loop()
       float forward  = __joy_if->axis(__cfg_axis_forward) *  __cfg_max_velocity;
       float sideward = __joy_if->axis(__cfg_axis_sideward);
       float radius   = copysignf(std::max(__cfg_min_radius,
-					  (int)(1. - fabs(sideward)) *
-					  __cfg_max_radius),
-				 sideward);
+                                          (int)(1. - fabsf(sideward)) * __cfg_max_radius),
+                                 sideward);
       float velocity = .5;
       if (__cfg_axis_speed < __joy_if->maxlenof_axis()) {
-	velocity = __joy_if->axis(__cfg_axis_speed);
+	      velocity = __joy_if->axis(__cfg_axis_speed);
       }
 
       int16_t velmm = (int16_t)roundf(forward * velocity);
       int16_t radmm = (int16_t)roundf(radius);
       // special case handling for "turn on place"
       if (fabsf(__joy_if->axis(__cfg_axis_forward)) < 0.1) {
-	velmm =  (int16_t)fabs(sideward * velocity) * __cfg_max_velocity;
-	radmm =  (int16_t)copysignf(1, sideward);
+	      velmm =  (int16_t)fabs(sideward * velocity) * __cfg_max_velocity;
+	      radmm =  (int16_t)copysignf(1, sideward);
       }
 
       /*
