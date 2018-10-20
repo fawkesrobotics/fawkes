@@ -160,12 +160,20 @@ main(int argc, char **argv)
   try {
     for (list<string>::iterator f = files.begin(); f != files.end(); ++f) {
       FvRawReader *fvraw = new FvRawReader((dirname + "/" + (*f)).c_str());
-      printf("%4u Converting %s (%s)  ", ++in, (dirname + "/" + (*f)).c_str(), colorspace_to_string(fvraw->colorspace()));
-      unsigned char *raw16 = malloc_buffer(fvraw->colorspace(), fvraw->pixel_width(), fvraw->pixel_height() * 2);
-      unsigned char *rgb = (unsigned char *)malloc(colorspace_buffer_size(RGB, fvraw->pixel_width(), fvraw->pixel_height()) * 2);
-      unsigned char *deinterlaced = (unsigned char *)malloc(fvraw->pixel_width() * fvraw->pixel_height() * 2);
-      unsigned char *yuv = (unsigned char *)malloc_buffer(YUV422_PLANAR, fvraw->pixel_width(), fvraw->pixel_height() * 2);
-      unsigned char *yuv_interleaved = (unsigned char *)malloc_buffer(YUV422_PLANAR, fvraw->pixel_width(), fvraw->pixel_height() * 2);
+      printf("%4u Converting %s (%s)  ", ++in, (dirname + "/" + (*f)).c_str(),
+             colorspace_to_string(fvraw->colorspace()));
+      unsigned char *raw16 =
+        malloc_buffer(fvraw->colorspace(), fvraw->pixel_width(), fvraw->pixel_height() * 2);
+      unsigned char *rgb =
+        (unsigned char *)malloc(colorspace_buffer_size(RGB,
+                                                       fvraw->pixel_width(),
+                                                       fvraw->pixel_height()) * 2);
+      unsigned char *deinterlaced =
+        (unsigned char *)malloc((size_t)fvraw->pixel_width() * (size_t)fvraw->pixel_height() * 2);
+      unsigned char *yuv =
+        (unsigned char *)malloc_buffer(YUV422_PLANAR, fvraw->pixel_width(), fvraw->pixel_height() * 2);
+      unsigned char *yuv_interleaved =
+        (unsigned char *)malloc_buffer(YUV422_PLANAR, fvraw->pixel_width(), fvraw->pixel_height() * 2);
       fvraw->set_buffer(raw16);
       fvraw->read();
 
