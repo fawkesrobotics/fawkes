@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  clips-executive-rest-api.h -  CLIPS Executive REST API
+ *  skiller-rest-api.h -  Behavior Engine REST API
  *
- *  Created: Fri Mar 16 17:15:34 2018
+ *  Created: Mon Mar 26 22:00:43 2018 +0200
  *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
@@ -18,6 +18,8 @@
  *
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
+
+#pragma once
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
