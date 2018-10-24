@@ -1,8 +1,8 @@
 
 /***************************************************************************
- *  blackboard-rest-api.h -  Blackboard REST API
+ *  image-rest-api.h -  Image REST API
  *
- *  Created: Mon Mar 26 23:26:40 2018
+ *  Created: Sun Apr 8 19:07:16 2018 +0200
  *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
@@ -18,6 +18,8 @@
  *
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
+
+#pragma once
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>

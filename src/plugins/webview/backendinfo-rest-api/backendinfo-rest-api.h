@@ -19,6 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#pragma once
+
 #include <core/threading/thread.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
