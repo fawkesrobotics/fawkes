@@ -420,15 +420,11 @@ DirectedPerceptionPTU::read(char *buffer, unsigned int buffer_size)
   if (num_bytes == 0) {
     return false;
   }
-  int bytes_read = ::read(__fd, buffer, buffer_size);
+  ssize_t bytes_read = ::read(__fd, buffer, buffer_size);
   if ( bytes_read < 0 ) {
     return false;
   } else {
-    if ((unsigned int)bytes_read == buffer_size) {
-      return true;
-    } else {
-      return false;
-    }
+    return (bytes_read > 0);
   }
 }
 
@@ -459,15 +455,16 @@ int
 DirectedPerceptionPTU::query_int(const char *query_command)
 {
   send(query_command);
-  ssize_t read_bytes = read(__ibuffer, DPPTU_MAX_OBUFFER_SIZE);
-  if ( read_bytes == -1 ) {
-    throw FileReadException(__device_file, errno, "Querying integer from PTU failed");
-  } else if (read_bytes == 0) {
-    return 0;
+  bool ok = read(__ibuffer, DPPTU_MAX_IBUFFER_SIZE);
+  if (ok) {
+  } else {
+    throw Exception("DP PTU: failed to query integer");
   }
-  int rv = 0;
-  sscanf(__ibuffer, "* %i", &rv);
-  return rv;
+  int intrv = 0;
+  if (sscanf(__ibuffer, "* %i", &intrv) <= 0) {
+    throw Exception(errno, "DP PTU: failed to query int");
+  }
+  return intrv;
 }
 
 
