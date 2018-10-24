@@ -99,8 +99,10 @@ getkey(int timeout_decisecs)
   
   if (read_bytes == 1) {
     return buf[0];
-  } else {
+  } else if (read_bytes < 0) {
     throw Exception(errno, "Failed to read key from keyboard (getkey)");
+  } else {
+    return 0;
   }
 }
 
