@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_GAZEBO_ASPECT_GAZEBO_H_
-#define __PLUGINS_GAZEBO_ASPECT_GAZEBO_H_
+#ifndef _PLUGINS_GAZEBO_ASPECT_GAZEBO_H_
+#define _PLUGINS_GAZEBO_ASPECT_GAZEBO_H_
 
 #include <aspect/aspect.h>
 

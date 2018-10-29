@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_GAZSIM_WEBCAM_THREAD_H_
-#define __PLUGINS_GAZSIM_WEBCAM_THREAD_H_
+#ifndef _PLUGINS_GAZSIM_WEBCAM_THREAD_H_
+#define _PLUGINS_GAZSIM_WEBCAM_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
