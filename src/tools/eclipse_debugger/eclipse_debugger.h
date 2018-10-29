@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_ECLIPSEDEBUGGER_ECLIPSEDEBUGGER_H_
-#define __TOOLS_ECLIPSEDEBUGGER_ECLIPSEDEBUGGER_H_
+#ifndef _TOOLS_ECLIPSEDEBUGGER_ECLIPSEDEBUGGER_H_
+#define _TOOLS_ECLIPSEDEBUGGER_ECLIPSEDEBUGGER_H_
 
 #include <interfaces/EclipseDebuggerInterface.h>
 
