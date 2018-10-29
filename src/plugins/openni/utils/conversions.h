@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_UTILS_CONVERSIONS_H_
-#define __PLUGINS_OPENNI_UTILS_CONVERSIONS_H_
+#ifndef _PLUGINS_OPENNI_UTILS_CONVERSIONS_H_
+#define _PLUGINS_OPENNI_UTILS_CONVERSIONS_H_
 
 #include <core/exception.h>
 #include <core/utils/lockptr.h>
