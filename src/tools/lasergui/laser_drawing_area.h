@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_LASERGUI_LASER_DRAWING_AREA_H_
-#define __TOOLS_LASERGUI_LASER_DRAWING_AREA_H_
+#ifndef _TOOLS_LASERGUI_LASER_DRAWING_AREA_H_
+#define _TOOLS_LASERGUI_LASER_DRAWING_AREA_H_
 
 #include <gtkmm.h>
 #include <list>

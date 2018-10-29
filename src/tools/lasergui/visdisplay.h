@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_LASERGUI_VISDISPLAY_H_
-#define __TOOLS_LASERGUI_VISDISPLAY_H_
+#ifndef _TOOLS_LASERGUI_VISDISPLAY_H_
+#define _TOOLS_LASERGUI_VISDISPLAY_H_
 
 #include <cairomm/context.h>
 #include <string>
