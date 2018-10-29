@@ -20,8 +20,8 @@
  */
 
 
-#ifndef __FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_
-#define __FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_
+#ifndef _FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_
+#define _FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_
 
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/types.h>

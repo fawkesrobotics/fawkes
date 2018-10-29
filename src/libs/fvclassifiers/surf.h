@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CLASSIFIERS_SURF_H_
-#define __FIREVISION_CLASSIFIERS_SURF_H_
+#ifndef _FIREVISION_CLASSIFIERS_SURF_H_
+#define _FIREVISION_CLASSIFIERS_SURF_H_
 
 #ifndef HAVE_SURF
 #  error SURF not available, you may not use the SurfClassifier
