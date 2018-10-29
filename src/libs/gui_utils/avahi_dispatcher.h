@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_GUI_UTILS_AVAHI_DISPATCHER_H_
-#define __LIBS_GUI_UTILS_AVAHI_DISPATCHER_H_
+#ifndef _LIBS_GUI_UTILS_AVAHI_DISPATCHER_H_
+#define _LIBS_GUI_UTILS_AVAHI_DISPATCHER_H_
 
 #include <cstddef>
 #include <glibmm/dispatcher.h>

@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __GUI_UTILS_PLUGIN_TREE_VIEW_H_
-#define __GUI_UTILS_PLUGIN_TREE_VIEW_H_
+#ifndef _GUI_UTILS_PLUGIN_TREE_VIEW_H_
+#define _GUI_UTILS_PLUGIN_TREE_VIEW_H_
 
 #include <netcomm/fawkes/client_handler.h>
 #include <core/utils/lock_queue.h>
