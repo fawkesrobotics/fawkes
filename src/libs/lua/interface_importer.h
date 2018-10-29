@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LUA_INTERFACEIMPORTER_H_
-#define __LUA_INTERFACEIMPORTER_H_
+#ifndef _LUA_INTERFACEIMPORTER_H_
+#define _LUA_INTERFACEIMPORTER_H_
 
 #include <lua/context_watcher.h>
 
