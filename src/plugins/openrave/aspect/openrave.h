@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENRAVE_ASPECT_OPENRAVE_H_
-#define __PLUGINS_OPENRAVE_ASPECT_OPENRAVE_H_
+#ifndef _PLUGINS_OPENRAVE_ASPECT_OPENRAVE_H_
+#define _PLUGINS_OPENRAVE_ASPECT_OPENRAVE_H_
 
 #include <aspect/aspect.h>
 #include <plugins/openrave/aspect/openrave_connector.h>

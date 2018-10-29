@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENRAVE_OPENRAVE_PLUGIN_H_
-#define __PLUGINS_OPENRAVE_OPENRAVE_PLUGIN_H_
+#ifndef _PLUGINS_OPENRAVE_OPENRAVE_PLUGIN_H_
+#define _PLUGINS_OPENRAVE_OPENRAVE_PLUGIN_H_
 
 #include <core/plugin.h>
 
