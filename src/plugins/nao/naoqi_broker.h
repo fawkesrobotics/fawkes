@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_NAO_NAOQI_BROKER_H_
-#define __PLUGINS_NAO_NAOQI_BROKER_H_
+#ifndef _PLUGINS_NAO_NAOQI_BROKER_H_
+#define _PLUGINS_NAO_NAOQI_BROKER_H_
 
 #include <alcore/alptr.h>
 #include <alcommon/albroker.h>
