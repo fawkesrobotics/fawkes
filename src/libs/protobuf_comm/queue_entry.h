@@ -34,8 +34,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PROTOBUF_COMM_QUEUE_ENTRY_H_
-#define __PROTOBUF_COMM_QUEUE_ENTRY_H_
+#ifndef _PROTOBUF_COMM_QUEUE_ENTRY_H_
+#define _PROTOBUF_COMM_QUEUE_ENTRY_H_
 
 #include <boost/asio.hpp>
 #include <array>
