@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __INTERFACES_GENERATOR_TYPE_CHECKER_H_
-#define __INTERFACES_GENERATOR_TYPE_CHECKER_H_
+#ifndef _INTERFACES_GENERATOR_TYPE_CHECKER_H_
+#define _INTERFACES_GENERATOR_TYPE_CHECKER_H_
 
 #define __STDC_LIMIT_MACROS
 

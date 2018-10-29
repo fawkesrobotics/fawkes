@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __INTERFACES_GENERATOR_PSEUDOMAP_H_
-#define __INTERFACES_GENERATOR_PSEUDOMAP_H_
+#ifndef _INTERFACES_GENERATOR_PSEUDOMAP_H_
+#define _INTERFACES_GENERATOR_PSEUDOMAP_H_
 
 #include <interfaces/generator/enum_constant.h>
 
