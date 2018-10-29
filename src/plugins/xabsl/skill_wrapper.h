@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_XABSL_SKILL_WRAPPER_H_
-#define __PLUGINS_XABSL_SKILL_WRAPPER_H_
+#ifndef _PLUGINS_XABSL_SKILL_WRAPPER_H_
+#define _PLUGINS_XABSL_SKILL_WRAPPER_H_
 
 #include <XabslEngine/XabslBasicBehavior.h>
 
