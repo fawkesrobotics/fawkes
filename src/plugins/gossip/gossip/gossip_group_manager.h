@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_GOSSIP_GOSSIP_GOSSIP_GROUP_MANAGER_H_
-#define __PLUGINS_GOSSIP_GOSSIP_GOSSIP_GROUP_MANAGER_H_
+#ifndef _PLUGINS_GOSSIP_GOSSIP_GOSSIP_GROUP_MANAGER_H_
+#define _PLUGINS_GOSSIP_GOSSIP_GOSSIP_GROUP_MANAGER_H_
 
 #include <core/utils/refptr.h>
 
