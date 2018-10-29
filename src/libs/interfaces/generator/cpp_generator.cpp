@@ -94,7 +94,7 @@ CppInterfaceGenerator::CppInterfaceGenerator(std::string directory, std::string 
     class_name = interface_name;
   }
 
-  deflector = "__INTERFACES_" + fawkes::StringConversions::to_upper(config_basename) + "_H_";
+  deflector = "_INTERFACES_" + fawkes::StringConversions::to_upper(config_basename) + "_H_";
 }
 
 
