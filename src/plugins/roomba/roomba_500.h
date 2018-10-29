@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROOMBA_ROOMBA_500_H_
-#define __PLUGINS_ROOMBA_ROOMBA_500_H_
+#ifndef _PLUGINS_ROOMBA_ROOMBA_500_H_
+#define _PLUGINS_ROOMBA_ROOMBA_500_H_
 
 #include <core/plugin.h>
 
