@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_ASPECT_CLIPS_INIFIN_H_
-#define __PLUGINS_CLIPS_ASPECT_CLIPS_INIFIN_H_
+#ifndef _PLUGINS_CLIPS_ASPECT_CLIPS_INIFIN_H_
+#define _PLUGINS_CLIPS_ASPECT_CLIPS_INIFIN_H_
 
 #include <aspect/inifins/inifin.h>
 #include <plugins/clips/aspect/clips.h>
