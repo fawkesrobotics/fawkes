@@ -20,8 +20,8 @@
  */
 
 
-#ifndef __LIBS_BASEAPP_TIMING_THREAD_H_
-#define __LIBS_BASEAPP_TIMING_THREAD_H_
+#ifndef _LIBS_BASEAPP_TIMING_THREAD_H_
+#define _LIBS_BASEAPP_TIMING_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/syncpoint_manager.h>

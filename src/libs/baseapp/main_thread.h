@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_BASEAPP_MAIN_THREAD_H_
-#define __LIBS_BASEAPP_MAIN_THREAD_H_
+#ifndef _LIBS_BASEAPP_MAIN_THREAD_H_
+#define _LIBS_BASEAPP_MAIN_THREAD_H_
 
 #include <syncpoint/syncpoint_manager.h>
 #include <baseapp/thread_manager.h>
