@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_WEBVIEW_REST_ARRAY_H_
-#define __LIBS_WEBVIEW_REST_ARRAY_H_
+#ifndef _LIBS_WEBVIEW_REST_ARRAY_H_
+#define _LIBS_WEBVIEW_REST_ARRAY_H_
 
 #include <string>
 #include <sstream>

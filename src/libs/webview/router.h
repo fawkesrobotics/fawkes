@@ -20,8 +20,8 @@
  */
 
 
-#ifndef __LIBS_WEBVIEW_ROUTER_H_
-#define __LIBS_WEBVIEW_ROUTER_H_
+#ifndef _LIBS_WEBVIEW_ROUTER_H_
+#define _LIBS_WEBVIEW_ROUTER_H_
 
 #include <core/exceptions/software.h>
 
