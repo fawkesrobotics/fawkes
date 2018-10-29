@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_IPC_SHM_H_
-#define __UTILS_IPC_SHM_H_
+#ifndef _UTILS_IPC_SHM_H_
+#define _UTILS_IPC_SHM_H_
 
 // for size_t
 #include <sys/types.h>

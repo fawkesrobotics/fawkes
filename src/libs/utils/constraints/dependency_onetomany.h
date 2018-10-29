@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_CONSTRAINTS_DEPENDENCY_ONETOMANY_H_
-#define __UTILS_CONSTRAINTS_DEPENDENCY_ONETOMANY_H_
+#ifndef _UTILS_CONSTRAINTS_DEPENDENCY_ONETOMANY_H_
+#define _UTILS_CONSTRAINTS_DEPENDENCY_ONETOMANY_H_
 
 #include <utils/constraints/dependency.h>
 

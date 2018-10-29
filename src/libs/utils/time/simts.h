@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_TIME_SIMTS_H_
-#define __UTILS_TIME_SIMTS_H_
+#ifndef _UTILS_TIME_SIMTS_H_
+#define _UTILS_TIME_SIMTS_H_
 
 #include <utils/time/clock.h>
 #include <utils/time/timesource.h>

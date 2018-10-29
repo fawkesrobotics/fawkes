@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __UTILS_SYSTEM_FAM_THREAD_H_
-#define __UTILS_SYSTEM_FAM_THREAD_H_
+#ifndef _UTILS_SYSTEM_FAM_THREAD_H_
+#define _UTILS_SYSTEM_FAM_THREAD_H_
 
 #include <core/utils/refptr.h>
 #include <utils/system/fam.h>
