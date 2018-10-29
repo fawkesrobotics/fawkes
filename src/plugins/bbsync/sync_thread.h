@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_BBSYNC_SYNC_THREAD_H_
-#define __PLUGINS_BBSYNC_SYNC_THREAD_H_
+#ifndef _PLUGINS_BBSYNC_SYNC_THREAD_H_
+#define _PLUGINS_BBSYNC_SYNC_THREAD_H_
 
 #include "sync_listener.h"
 #include "writer_listener.h"
