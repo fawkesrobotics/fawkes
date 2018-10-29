@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGODB_MONGODB_THREAD_H_
-#define __PLUGINS_MONGODB_MONGODB_THREAD_H_
+#ifndef _PLUGINS_MONGODB_MONGODB_THREAD_H_
+#define _PLUGINS_MONGODB_MONGODB_THREAD_H_
 
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
 #include <plugins/mongodb/aspect/mongodb_inifin.h>
