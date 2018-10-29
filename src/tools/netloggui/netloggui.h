@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_NETLOGGUI_NETLOGGUI_H_
-#define __TOOLS_NETLOGGUI_NETLOGGUI_H_
+#ifndef _TOOLS_NETLOGGUI_NETLOGGUI_H_
+#define _TOOLS_NETLOGGUI_NETLOGGUI_H_
 
 #include <gtkmm.h>
 
