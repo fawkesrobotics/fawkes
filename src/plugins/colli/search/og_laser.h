@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_SEARCH_OG_LASER_H_
-#define __PLUGINS_COLLI_SEARCH_OG_LASER_H_
+#ifndef _PLUGINS_COLLI_SEARCH_OG_LASER_H_
+#define _PLUGINS_COLLI_SEARCH_OG_LASER_H_
 
 #include "../utils/occupancygrid/occupancygrid.h"
 #include "../common/types.h"

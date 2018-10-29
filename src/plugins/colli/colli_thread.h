@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_COLLI_THREAD_H_
-#define __PLUGINS_COLLI_COLLI_THREAD_H_
+#ifndef _PLUGINS_COLLI_COLLI_THREAD_H_
+#define _PLUGINS_COLLI_COLLI_THREAD_H_
 
 #include "common/types.h"
 

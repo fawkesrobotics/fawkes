@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_TYPES_H_
-#define __PLUGINS_COLLI_TYPES_H_
+#ifndef _PLUGINS_COLLI_TYPES_H_
+#define _PLUGINS_COLLI_TYPES_H_
 
 #include <utils/math/types.h>
 

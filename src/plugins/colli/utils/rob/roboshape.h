@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_UTILS_ROB_ROBOSHAPE_H_
-#define __PLUGINS_COLLI_UTILS_ROB_ROBOSHAPE_H_
+#ifndef _PLUGINS_COLLI_UTILS_ROB_ROBOSHAPE_H_
+#define _PLUGINS_COLLI_UTILS_ROB_ROBOSHAPE_H_
 
 namespace fawkes
 {
