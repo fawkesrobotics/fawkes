@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_ARM_KINDRV_H_
-#define __PLUGINS_JACO_ARM_KINDRV_H_
+#ifndef _PLUGINS_JACO_ARM_KINDRV_H_
+#define _PLUGINS_JACO_ARM_KINDRV_H_
 
 #include "arm.h"
 #include "types.h"

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_TYPES_H_
-#define __PLUGINS_JACO_TYPES_H_
+#ifndef _PLUGINS_JACO_TYPES_H_
+#define _PLUGINS_JACO_TYPES_H_
 
 #include <core/utils/refptr.h>
 
