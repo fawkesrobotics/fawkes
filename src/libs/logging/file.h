@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_LOGGING_FILE_H_
-#define __UTILS_LOGGING_FILE_H_
+#ifndef _UTILS_LOGGING_FILE_H_
+#define _UTILS_LOGGING_FILE_H_
 
 #include <logging/logger.h>
 #include <cstdio>
