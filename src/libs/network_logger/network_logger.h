@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LOGGING_NETWORK_H_
-#define __LOGGING_NETWORK_H_
+#ifndef _LOGGING_NETWORK_H_
+#define _LOGGING_NETWORK_H_
 
 #include <core/utils/lock_list.h>
 #include <core/utils/lock_queue.h>
