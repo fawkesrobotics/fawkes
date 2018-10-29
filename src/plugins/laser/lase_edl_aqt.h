@@ -25,8 +25,8 @@
 #  error "Cannot use Lase EDL driver without libpcan"
 #endif
 
-#ifndef __PLUGINS_LASER_LASE_EDL_AQT_H_
-#define __PLUGINS_LASER_LASE_EDL_AQT_H_
+#ifndef _PLUGINS_LASER_LASE_EDL_AQT_H_
+#define _PLUGINS_LASER_LASE_EDL_AQT_H_
 
 #include "acquisition_thread.h"
 
