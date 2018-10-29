@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_DYNAMIXEL_SERVO_CHAIN_H_
-#define __PLUGINS_DYNAMIXEL_SERVO_CHAIN_H_
+#ifndef _PLUGINS_DYNAMIXEL_SERVO_CHAIN_H_
+#define _PLUGINS_DYNAMIXEL_SERVO_CHAIN_H_
 
 #include <core/exception.h>
 
