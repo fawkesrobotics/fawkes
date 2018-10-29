@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_VELOCITY_RELATIVE_H_
-#define __FIREVISION_MODELS_VELOCITY_RELATIVE_H_
+#ifndef _FIREVISION_MODELS_VELOCITY_RELATIVE_H_
+#define _FIREVISION_MODELS_VELOCITY_RELATIVE_H_
 
 #include <fvmodels/velocity/velocitymodel.h>
 #include <fvmodels/relative_position/relativepositionmodel.h>

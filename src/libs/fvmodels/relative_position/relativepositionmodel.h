@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_RELATIVEPOSITIONMODEL_H_
-#define __FIREVISION_RELATIVEPOSITIONMODEL_H_
+#ifndef _FIREVISION_RELATIVEPOSITIONMODEL_H_
+#define _FIREVISION_RELATIVEPOSITIONMODEL_H_
 
 #include <fvutils/base/types.h>
 

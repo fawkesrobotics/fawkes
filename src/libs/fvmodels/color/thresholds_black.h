@@ -13,8 +13,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_DARKNESS_THRESHOLD_H_
-#define __FIREVISION_DARKNESS_THRESHOLD_H_
+#ifndef _FIREVISION_DARKNESS_THRESHOLD_H_
+#define _FIREVISION_DARKNESS_THRESHOLD_H_
 
 #include <fvmodels/color/colormodel.h>
 
