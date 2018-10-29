@@ -1,9 +1,10 @@
-/*
- * colorthreshold.cpp
+
+/***************************************************************************
+ *  colorthreshold.cpp - color threshold filter
  *
- *  Created on: 23.01.2014
- *      Author: Victor Mataré
- */
+ *  Created: Mon Jan 27 06:36:27 2014 +0100
+ *  Copyright  2014  Victor Matare
+ ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,8 +34,8 @@ namespace firevision
 
 
 FilterColorThreshold::FilterColorThreshold(ColorModelSimilarity *color_model)
-    : Filter("FilterColorThreshold", 1),
-      color_model_(color_model)
+: Filter("FilterColorThreshold", 1),
+  color_model_(color_model)
 {}
 
 FilterColorThreshold::~FilterColorThreshold() {

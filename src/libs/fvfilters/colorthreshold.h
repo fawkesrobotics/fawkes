@@ -1,9 +1,10 @@
-/*
- * colorthreshold.h
+
+/***************************************************************************
+ *  colorthreshold.h - Header of color threshold filter
  *
- *  Created on: 23.01.2014
- *      Author: Victor Mataré
- */
+ *  Created: Mon Jan 27 06:36:27 2014 +0100
+ *  Copyright  2014  Victor Matare
+ ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,7 +27,6 @@
 #include <fvutils/color/rgb.h>
 #include <fvmodels/color/similarity.h>
 
-
 namespace firevision
 {
 
@@ -36,17 +36,17 @@ namespace firevision
  */
 class FilterColorThreshold : public Filter
 {
-  public:
-    /**
-     * Constructor
-     * @param color_model Accepted color
-     */
-    FilterColorThreshold(ColorModelSimilarity *color_model);
-    ~FilterColorThreshold();
+public:
+	/**
+	 * Constructor
+	 * @param color_model Accepted color
+	 */
+	FilterColorThreshold(ColorModelSimilarity *color_model);
+	~FilterColorThreshold();
 
-    virtual void apply();
-  private:
-    ColorModelSimilarity *color_model_;
+	virtual void apply();
+private:
+	ColorModelSimilarity *color_model_;
 };
 
 } /* namespace firevision */
