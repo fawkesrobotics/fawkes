@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_PCL_UTILS_TRANSFORMS_H_
-#define __LIBS_PCL_UTILS_TRANSFORMS_H_
+#ifndef _LIBS_PCL_UTILS_TRANSFORMS_H_
+#define _LIBS_PCL_UTILS_TRANSFORMS_H_
 
 #include <tf/types.h>
 #include <tf/transformer.h>
