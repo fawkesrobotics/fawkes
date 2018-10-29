@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_MEDIATOR_H_
-#define __INTERFACE_MEDIATOR_H_
+#ifndef _INTERFACE_MEDIATOR_H_
+#define _INTERFACE_MEDIATOR_H_
 
 #include <list>
 #include <string>

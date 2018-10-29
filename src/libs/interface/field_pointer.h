@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_FIELD_POINTER_H_
-#define __INTERFACE_FIELD_POINTER_H_
+#ifndef _INTERFACE_FIELD_POINTER_H_
+#define _INTERFACE_FIELD_POINTER_H_
 
 #include <interface/interface.h>
 

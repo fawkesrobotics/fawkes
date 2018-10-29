@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_TYPES_H__
-#define __INTERFACE_TYPES_H__
+#ifndef _INTERFACE_TYPES_H__
+#define _INTERFACE_TYPES_H__
 
 #include <sys/types.h>
 #include <map>

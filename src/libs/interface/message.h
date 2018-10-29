@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_MESSAGE_H_
-#define __INTERFACE_MESSAGE_H_
+#ifndef _INTERFACE_MESSAGE_H_
+#define _INTERFACE_MESSAGE_H_
 
 #include <interface/field_iterator.h>
 #include <interface/types.h>

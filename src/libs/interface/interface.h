@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_H_
-#define __INTERFACE_H_
+#ifndef _INTERFACE_H_
+#define _INTERFACE_H_
 
 #include <interface/message.h>
 #include <interface/message_queue.h>

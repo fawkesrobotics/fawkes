@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_INTERFACE_INFO_H_
-#define __INTERFACE_INTERFACE_INFO_H_
+#ifndef _INTERFACE_INTERFACE_INFO_H_
+#define _INTERFACE_INTERFACE_INFO_H_
 
 #include <list>
 #include <string>

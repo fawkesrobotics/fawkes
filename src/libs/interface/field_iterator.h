@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_FIELD_ITERATOR_H__
-#define __INTERFACE_FIELD_ITERATOR_H__
+#ifndef _INTERFACE_FIELD_ITERATOR_H__
+#define _INTERFACE_FIELD_ITERATOR_H__
 
 #include <interface/types.h>
 
