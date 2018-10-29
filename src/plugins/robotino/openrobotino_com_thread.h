@@ -18,8 +18,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROBOTINO_OPENROBOTINO_COM_THREAD_H_
-#define __PLUGINS_ROBOTINO_OPENROBOTINO_COM_THREAD_H_
+#ifndef _PLUGINS_ROBOTINO_OPENROBOTINO_COM_THREAD_H_
+#define _PLUGINS_ROBOTINO_OPENROBOTINO_COM_THREAD_H_
 
 #include "com_thread.h"
 #include <core/threading/thread.h>
