@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_VERSION_H_
-#define __CORE_VERSION_H_
+#ifndef _CORE_VERSION_H_
+#define _CORE_VERSION_H_
 
 #define FAWKES_VERSION_MAJOR  1
 #define FAWKES_VERSION_MINOR  0

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_THREADING_INTERRUPTIBLE_BARRIER_H_
-#define __CORE_THREADING_INTERRUPTIBLE_BARRIER_H_
+#ifndef _CORE_THREADING_INTERRUPTIBLE_BARRIER_H_
+#define _CORE_THREADING_INTERRUPTIBLE_BARRIER_H_
 
 #include <core/threading/barrier.h>
 #include <core/utils/refptr.h>

@@ -23,8 +23,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_UTILS_LOCKPTR_H_
-#define __CORE_UTILS_LOCKPTR_H_
+#ifndef _CORE_UTILS_LOCKPTR_H_
+#define _CORE_UTILS_LOCKPTR_H_
 
 #include <core/utils/refptr.h>
 #include <core/threading/mutex.h>

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_PLUGIN_H_
-#define __CORE_PLUGIN_H_
+#ifndef _CORE_PLUGIN_H_
+#define _CORE_PLUGIN_H_
 
 #include <core/threading/thread_list.h>
 

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_UTILS_LOCK_MULTIMAP_H_
-#define __CORE_UTILS_LOCK_MULTIMAP_H_
+#ifndef _CORE_UTILS_LOCK_MULTIMAP_H_
+#define _CORE_UTILS_LOCK_MULTIMAP_H_
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
