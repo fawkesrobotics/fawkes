@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CAMERA_H_
-#define __FIREVISION_CAMERA_H_
+#ifndef _FIREVISION_CAMERA_H_
+#define _FIREVISION_CAMERA_H_
 
 #include <fvutils/color/colorspaces.h>
 #include <utils/time/time.h>

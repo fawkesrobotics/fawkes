@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CAMS_NAO_H_
-#define __FIREVISION_CAMS_NAO_H_
+#ifndef _FIREVISION_CAMS_NAO_H_
+#define _FIREVISION_CAMS_NAO_H_
 
 #include <fvcams/v4l2.h>
 

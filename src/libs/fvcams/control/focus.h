@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CAMS_CONTROL_FOCUS_H_
-#define __FIREVISION_CAMS_CONTROL_FOCUS_H_
+#ifndef _FIREVISION_CAMS_CONTROL_FOCUS_H_
+#define _FIREVISION_CAMS_CONTROL_FOCUS_H_
 
 #include <fvcams/control/control.h>
 
