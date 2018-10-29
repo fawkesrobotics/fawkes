@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_RRD_ASPECT_RRD_DESCRIPTIONS_H_
-#define __PLUGINS_RRD_ASPECT_RRD_DESCRIPTIONS_H_
+#ifndef _PLUGINS_RRD_ASPECT_RRD_DESCRIPTIONS_H_
+#define _PLUGINS_RRD_ASPECT_RRD_DESCRIPTIONS_H_
 
 #include <vector>
 #include <ctime>

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_RRD_RRD_THREAD_H_
-#define __PLUGINS_RRD_RRD_THREAD_H_
+#ifndef _PLUGINS_RRD_RRD_THREAD_H_
+#define _PLUGINS_RRD_RRD_THREAD_H_
 
 #include <plugins/rrd/aspect/rrd_manager.h>
 #include <plugins/rrd/aspect/rrd_inifin.h>
