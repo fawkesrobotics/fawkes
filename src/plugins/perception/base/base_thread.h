@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_APPS_BASE_BASE_THREAD_H_
-#define __FIREVISION_APPS_BASE_BASE_THREAD_H_
+#ifndef _FIREVISION_APPS_BASE_BASE_THREAD_H_
+#define _FIREVISION_APPS_BASE_BASE_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <core/threading/thread_notification_listener.h>
