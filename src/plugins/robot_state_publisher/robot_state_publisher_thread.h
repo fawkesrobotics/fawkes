@@ -55,8 +55,8 @@
  *********************************************************************/
 
 
-#ifndef __PLUGINS_ROBOTSTATEPUBLISHER_ROBOTSTATEPUBLISHER_THREAD_H_
-#define __PLUGINS_ROBOTSTATEPUBLISHER_ROBOTSTATEPUBLISHER_THREAD_H_
+#ifndef _PLUGINS_ROBOTSTATEPUBLISHER_ROBOTSTATEPUBLISHER_THREAD_H_
+#define _PLUGINS_ROBOTSTATEPUBLISHER_ROBOTSTATEPUBLISHER_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
