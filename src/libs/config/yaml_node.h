@@ -20,10 +20,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CONFIG_YAML_NODE_H_
-#define __CONFIG_YAML_NODE_H_
+#ifndef _CONFIG_YAML_NODE_H_
+#define _CONFIG_YAML_NODE_H_
 
-#ifndef __CONFIG_YAML_H_
+#ifndef _CONFIG_YAML_H_
 #  error Do not include yaml_node.h directly
 #endif
 

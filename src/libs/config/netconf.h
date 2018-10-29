@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CONFIG_NETCONF_H_
-#define __CONFIG_NETCONF_H_
+#ifndef _CONFIG_NETCONF_H_
+#define _CONFIG_NETCONF_H_
 
 #include <config/config.h>
 #include <netcomm/fawkes/client_handler.h>

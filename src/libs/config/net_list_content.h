@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CONFIG_NET_LIST_CONTENT_H_
-#define __CONFIG_NET_LIST_CONTENT_H_
+#ifndef _CONFIG_NET_LIST_CONTENT_H_
+#define _CONFIG_NET_LIST_CONTENT_H_
 
 #include <config/net_messages.h>
 #include <config/config.h>

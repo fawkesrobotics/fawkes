@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CONFIG_CHANGE_HANDLER_H_
-#define __CONFIG_CHANGE_HANDLER_H_
+#ifndef _CONFIG_CHANGE_HANDLER_H_
+#define _CONFIG_CHANGE_HANDLER_H_
 
 #include <config/config.h>
 
