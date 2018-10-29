@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_NAVGRAPH_GENERATOR_GRID_H_
-#define __LIBS_NAVGRAPH_GENERATOR_GRID_H_
+#ifndef _LIBS_NAVGRAPH_GENERATOR_GRID_H_
+#define _LIBS_NAVGRAPH_GENERATOR_GRID_H_
 
 #include <navgraph/navgraph.h>
 #include <navgraph/generators/generator.h>

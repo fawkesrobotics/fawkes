@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_GRAPH_TOPOLOGICAL_MAP_NODE_H_
-#define __UTILS_GRAPH_TOPOLOGICAL_MAP_NODE_H_
+#ifndef _UTILS_GRAPH_TOPOLOGICAL_MAP_NODE_H_
+#define _UTILS_GRAPH_TOPOLOGICAL_MAP_NODE_H_
 
 #include <utils/misc/string_conversions.h>
 

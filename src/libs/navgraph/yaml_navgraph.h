@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_GRAPH_YAML_NAVGRAPH_H_
-#define __UTILS_GRAPH_YAML_NAVGRAPH_H_
+#ifndef _UTILS_GRAPH_YAML_NAVGRAPH_H_
+#define _UTILS_GRAPH_YAML_NAVGRAPH_H_
 
 #include <string>
 

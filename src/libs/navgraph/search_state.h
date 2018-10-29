@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_NAVGRAPH_SEARCH_STATE_H_
-#define __LIBS_NAVGRAPH_SEARCH_STATE_H_
+#ifndef _LIBS_NAVGRAPH_SEARCH_STATE_H_
+#define _LIBS_NAVGRAPH_SEARCH_STATE_H_
 
 #include <utils/search/astar_state.h>
 #include <navgraph/constraints/constraint_repo.h>
