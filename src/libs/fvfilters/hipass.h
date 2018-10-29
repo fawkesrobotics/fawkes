@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FILTERS_HIPASS_H_
-#define __FIREVISION_FILTERS_HIPASS_H_
+#ifndef _FIREVISION_FILTERS_HIPASS_H_
+#define _FIREVISION_FILTERS_HIPASS_H_
 
 #if ! (defined(HAVE_IPP) || defined(HAVE_OPENCV))
 #error "Neither IPP nor OpenCV installed"
