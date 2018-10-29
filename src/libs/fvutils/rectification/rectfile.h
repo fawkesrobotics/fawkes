@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_RECTIFICATION_RECTFILE_H_
-#define __FIREVISION_FVUTILS_RECTIFICATION_RECTFILE_H_
+#ifndef _FIREVISION_FVUTILS_RECTIFICATION_RECTFILE_H_
+#define _FIREVISION_FVUTILS_RECTIFICATION_RECTFILE_H_
 
 #include <fvutils/rectification/rectinfo.h>
 #include <fvutils/fileformat/fvfile.h>

@@ -23,8 +23,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_WRITERS_PNM_H_
-#define __FIREVISION_FVUTILS_WRITERS_PNM_H_
+#ifndef _FIREVISION_FVUTILS_WRITERS_PNM_H_
+#define _FIREVISION_FVUTILS_WRITERS_PNM_H_
 
 
 #include <fvutils/color/colorspaces.h>

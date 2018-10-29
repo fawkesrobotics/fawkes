@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_COLORMAP_GENERATOR_H__
-#define __FIREVISION_FVUTILS_COLORMAP_GENERATOR_H__
+#ifndef _FIREVISION_FVUTILS_COLORMAP_GENERATOR_H__
+#define _FIREVISION_FVUTILS_COLORMAP_GENERATOR_H__
 
 #include <fvutils/base/roi.h>
 #include <string>

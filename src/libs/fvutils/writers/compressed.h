@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_WRITERS_COMPRESSED_H_
-#define __FIREVISION_FVUTILS_WRITERS_COMPRESSED_H_
+#ifndef _FIREVISION_FVUTILS_WRITERS_COMPRESSED_H_
+#define _FIREVISION_FVUTILS_WRITERS_COMPRESSED_H_
 
 #include <fvutils/writers/writer.h>
 

@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_CPU_MMX_H_
-#define __FIREVISION_FVUTILS_CPU_MMX_H_
+#ifndef _FIREVISION_FVUTILS_CPU_MMX_H_
+#define _FIREVISION_FVUTILS_CPU_MMX_H_
 
 namespace firevision {
 

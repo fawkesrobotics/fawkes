@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FVUTILS_DRAWER_FIELD_DRAWER_H__
-#define __FVUTILS_DRAWER_FIELD_DRAWER_H__
+#ifndef _FVUTILS_DRAWER_FIELD_DRAWER_H__
+#define _FVUTILS_DRAWER_FIELD_DRAWER_H__
 
 #include <fvutils/draw/field.h>
 

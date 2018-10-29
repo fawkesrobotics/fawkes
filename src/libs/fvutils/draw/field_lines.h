@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FVUTILS_DRAW_FIELD_LINES_H__
-#define __FVUTILS_DRAW_FIELD_LINES_H__
+#ifndef _FVUTILS_DRAW_FIELD_LINES_H__
+#define _FVUTILS_DRAW_FIELD_LINES_H__
 
 #include <utils/math/types.h>
 #include <list>

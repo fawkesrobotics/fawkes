@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FVUTILS_DRAW_FIELD_H_
-#define __FVUTILS_DRAW_FIELD_H_
+#ifndef _FVUTILS_DRAW_FIELD_H_
+#define _FVUTILS_DRAW_FIELD_H_
 
 #include <fvutils/draw/field_lines.h>
 

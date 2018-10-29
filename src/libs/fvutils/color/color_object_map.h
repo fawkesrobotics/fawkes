@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_COLOR_COLOR_MAPPING_H__
-#define __FIREVISION_MODELS_COLOR_COLOR_MAPPING_H__
+#ifndef _FIREVISION_MODELS_COLOR_COLOR_MAPPING_H__
+#define _FIREVISION_MODELS_COLOR_COLOR_MAPPING_H__
 
 #include <fvutils/base/types.h>
 #include <fvutils/base/roi.h>

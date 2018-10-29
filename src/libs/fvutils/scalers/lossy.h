@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_SCALERS_LOSSY_H_
-#define __FIREVISION_UTILS_SCALERS_LOSSY_H_
+#ifndef _FIREVISION_UTILS_SCALERS_LOSSY_H_
+#define _FIREVISION_UTILS_SCALERS_LOSSY_H_
 
 #include <fvutils/scalers/scaler.h>
 

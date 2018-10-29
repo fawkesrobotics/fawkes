@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_
-#define __FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_
+#ifndef _FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_
+#define _FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_
 
 #include <fvutils/fileformat/fvfile_block.h>
 #include <fvutils/base/roi.h>
