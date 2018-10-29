@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_PANTILT_ROBOTIS_RX28_H_
-#define __PLUGINS_PANTILT_ROBOTIS_RX28_H_
+#ifndef _PLUGINS_PANTILT_ROBOTIS_RX28_H_
+#define _PLUGINS_PANTILT_ROBOTIS_RX28_H_
 
 #include <core/exception.h>
 

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_PANTILT_DIRPERC_DP_PTU_H_
-#define __PLUGINS_PANTILT_DIRPERC_DP_PTU_H_
+#ifndef _PLUGINS_PANTILT_DIRPERC_DP_PTU_H_
+#define _PLUGINS_PANTILT_DIRPERC_DP_PTU_H_
 
 #define DPPTU_MAX_OBUFFER_SIZE  20
 #define DPPTU_MAX_IBUFFER_SIZE 255
