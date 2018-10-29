@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGIN_LISTENER_H_
-#define __PLUGIN_LISTENER_H_
+#ifndef _PLUGIN_LISTENER_H_
+#define _PLUGIN_LISTENER_H_
 
 namespace fawkes {
 

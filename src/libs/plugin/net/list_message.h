@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FAWKES_PLUGIN_LIST_MESSAGE_H_
-#define __FAWKES_PLUGIN_LIST_MESSAGE_H_
+#ifndef _FAWKES_PLUGIN_LIST_MESSAGE_H_
+#define _FAWKES_PLUGIN_LIST_MESSAGE_H_
 
 #include <plugin/net/messages.h>
 #include <netcomm/fawkes/message_content.h>

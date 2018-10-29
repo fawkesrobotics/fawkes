@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGIN_LOADER_H_
-#define __PLUGIN_LOADER_H_
+#ifndef _PLUGIN_LOADER_H_
+#define _PLUGIN_LOADER_H_
 
 #include <core/plugin.h>
 #include <core/exception.h>

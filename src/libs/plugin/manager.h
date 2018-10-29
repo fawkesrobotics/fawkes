@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGIN_MANAGER_H_
-#define __PLUGIN_MANAGER_H_
+#ifndef _PLUGIN_MANAGER_H_
+#define _PLUGIN_MANAGER_H_
 
 #include <netcomm/fawkes/handler.h>
 #include <core/utils/lock_list.h>
