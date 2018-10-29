@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_STATIC_TRANSFORMS_STATIC_TRANSFORMS_THREAD_H_
-#define __PLUGINS_STATIC_TRANSFORMS_STATIC_TRANSFORMS_THREAD_H_
+#ifndef _PLUGINS_STATIC_TRANSFORMS_STATIC_TRANSFORMS_THREAD_H_
+#define _PLUGINS_STATIC_TRANSFORMS_STATIC_TRANSFORMS_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
