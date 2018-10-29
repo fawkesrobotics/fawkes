@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_XMLRPC_XMLRPC_PROCESSOR_H_
-#define __PLUGINS_XMLRPC_XMLRPC_PROCESSOR_H_
+#ifndef _PLUGINS_XMLRPC_XMLRPC_PROCESSOR_H_
+#define _PLUGINS_XMLRPC_XMLRPC_PROCESSOR_H_
 
 #include <map>
 #include <string>
