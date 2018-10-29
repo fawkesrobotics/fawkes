@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_BLOCKED_TIMING_EXECUTOR_H_
-#define __ASPECT_BLOCKED_TIMING_EXECUTOR_H_
+#ifndef _ASPECT_BLOCKED_TIMING_EXECUTOR_H_
+#define _ASPECT_BLOCKED_TIMING_EXECUTOR_H_
 
 #include <aspect/blocked_timing.h>
 #include <list>

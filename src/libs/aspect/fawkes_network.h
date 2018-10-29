@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_FAWKES_NETWORK_H_
-#define __ASPECT_FAWKES_NETWORK_H_
+#ifndef _ASPECT_FAWKES_NETWORK_H_
+#define _ASPECT_FAWKES_NETWORK_H_
 
 #include <aspect/aspect.h>
 #include <netcomm/fawkes/hub.h>

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_TF_H_
-#define __ASPECT_TF_H_
+#ifndef _ASPECT_TF_H_
+#define _ASPECT_TF_H_
 
 #ifndef HAVE_TF
 #  error TF not available. Forgot to add CFLAGS_TF?

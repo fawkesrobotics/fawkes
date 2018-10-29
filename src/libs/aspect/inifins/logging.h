@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_INIFINS_LOGGING_H_
-#define __ASPECT_INIFINS_LOGGING_H_
+#ifndef _ASPECT_INIFINS_LOGGING_H_
+#define _ASPECT_INIFINS_LOGGING_H_
 
 #include <aspect/inifins/inifin.h>
 

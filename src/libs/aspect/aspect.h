@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_H_
-#define __ASPECT_H_
+#ifndef _ASPECT_H_
+#define _ASPECT_H_
 
 #include <list>
 

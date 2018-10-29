@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_CONFIGURABLE_H_
-#define __ASPECT_CONFIGURABLE_H_
+#ifndef _ASPECT_CONFIGURABLE_H_
+#define _ASPECT_CONFIGURABLE_H_
 
 #include <aspect/aspect.h>
 #include <config/config.h>
