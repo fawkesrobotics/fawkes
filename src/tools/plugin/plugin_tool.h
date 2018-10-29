@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_PLUGIN_PLUGIN_TOOL_H_
-#define __TOOLS_PLUGIN_PLUGIN_TOOL_H_
+#ifndef _TOOLS_PLUGIN_PLUGIN_TOOL_H_
+#define _TOOLS_PLUGIN_PLUGIN_TOOL_H_
 
 #include <netcomm/fawkes/client_handler.h>
 #include <utils/system/signal.h>
