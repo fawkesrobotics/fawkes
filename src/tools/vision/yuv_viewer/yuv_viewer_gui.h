@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_TOOLS_YUV_VIEWER_LOC_VIEWER_GUI_H_
-#define __FIREVISION_TOOLS_YUV_VIEWER_LOC_VIEWER_GUI_H_
+#ifndef _FIREVISION_TOOLS_YUV_VIEWER_LOC_VIEWER_GUI_H_
+#define _FIREVISION_TOOLS_YUV_VIEWER_LOC_VIEWER_GUI_H_
 
 #define LOC_PLUGIN_NAME       "fvnao_loc"
 #define FUSE_PLUGIN_NAME      "fvfountain"

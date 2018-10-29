@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H_
-#define __FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H_
+#ifndef _FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H_
+#define _FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H_
 
 #define FUSE_PLUGIN_NAME      "fvfountain"
 #define FOUNTAIN_PORT_PATH    "/firevision/fountain/tcp_port"

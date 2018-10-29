@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_
-#define __FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_
+#ifndef _FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_
+#define _FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_
 
 #include <gtkmm.h>
 #include <fvutils/base/roi.h>
