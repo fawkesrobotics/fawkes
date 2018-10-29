@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PLAYER_MOTOR_MAPPER_H_
-#define __PLUGINS_PLAYER_MOTOR_MAPPER_H_
+#ifndef _PLUGINS_PLAYER_MOTOR_MAPPER_H_
+#define _PLUGINS_PLAYER_MOTOR_MAPPER_H_
 
 #include "mapper.h"
 
