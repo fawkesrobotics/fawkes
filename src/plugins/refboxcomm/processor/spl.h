@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_REFBOXREP_SPL_H_
-#define __TOOLS_REFBOXREP_SPL_H_
+#ifndef _TOOLS_REFBOXREP_SPL_H_
+#define _TOOLS_REFBOXREP_SPL_H_
 
 #include "processor.h"
 #include "enums.h"

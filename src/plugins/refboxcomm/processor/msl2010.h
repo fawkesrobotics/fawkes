@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_REFBOXCOMM_PROCESSOR_MSL2010_H_
-#define __PLUGINS_REFBOXCOMM_PROCESSOR_MSL2010_H_
+#ifndef _PLUGINS_REFBOXCOMM_PROCESSOR_MSL2010_H_
+#define _PLUGINS_REFBOXCOMM_PROCESSOR_MSL2010_H_
 
 #include "processor.h"
 #include "state_handler.h"
