@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JOYSTICK_REMOTE_BB_POSTER_H_
-#define __PLUGINS_JOYSTICK_REMOTE_BB_POSTER_H_
+#ifndef _PLUGINS_JOYSTICK_REMOTE_BB_POSTER_H_
+#define _PLUGINS_JOYSTICK_REMOTE_BB_POSTER_H_
 
 #include "acquisition_thread.h"
 #include <utils/system/argparser.h>
