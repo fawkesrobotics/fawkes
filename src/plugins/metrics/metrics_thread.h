@@ -18,8 +18,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_METRICS_METRICS_THREAD_H_
-#define __PLUGINS_METRICS_METRICS_THREAD_H_
+#ifndef _PLUGINS_METRICS_METRICS_THREAD_H_
+#define _PLUGINS_METRICS_METRICS_THREAD_H_
 
 #include "aspect/metrics_supplier.h"
 #include "aspect/metrics_inifin.h"
