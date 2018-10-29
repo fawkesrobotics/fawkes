@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROS_ASPECT_ROS_INIFIN_H_
-#define __PLUGINS_ROS_ASPECT_ROS_INIFIN_H_
+#ifndef _PLUGINS_ROS_ASPECT_ROS_INIFIN_H_
+#define _PLUGINS_ROS_ASPECT_ROS_INIFIN_H_
 
 #include <aspect/inifins/inifin.h>
 #include <plugins/ros/aspect/ros.h>
