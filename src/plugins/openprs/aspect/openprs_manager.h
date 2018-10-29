@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENPRS_ASPECT_OPENPRS_MANAGER_H_
-#define __PLUGINS_OPENPRS_ASPECT_OPENPRS_MANAGER_H_
+#ifndef _PLUGINS_OPENPRS_ASPECT_OPENPRS_MANAGER_H_
+#define _PLUGINS_OPENPRS_ASPECT_OPENPRS_MANAGER_H_
 
 #include <aspect/aspect.h>
 #include <core/utils/lockptr.h>
