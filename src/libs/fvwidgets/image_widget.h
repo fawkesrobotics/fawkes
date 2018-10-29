@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVWIDGETS_IMAGE_WIDGET_H_
-#define __FIREVISION_FVWIDGETS_IMAGE_WIDGET_H_
+#ifndef _FIREVISION_FVWIDGETS_IMAGE_WIDGET_H_
+#define _FIREVISION_FVWIDGETS_IMAGE_WIDGET_H_
 
 #include <core/threading/thread.h>
 #include <fvutils/color/colorspaces.h>

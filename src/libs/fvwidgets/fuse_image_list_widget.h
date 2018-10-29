@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVWIDGETS_FUSE_IMAGE_LIST_WIDGET_H_
-#define __FIREVISION_FVWIDGETS_FUSE_IMAGE_LIST_WIDGET_H_
+#ifndef _FIREVISION_FVWIDGETS_FUSE_IMAGE_LIST_WIDGET_H_
+#define _FIREVISION_FVWIDGETS_FUSE_IMAGE_LIST_WIDGET_H_
 
 #include <fvutils/net/fuse_client_handler.h>
 #include <fvutils/net/fuse_client.h>
