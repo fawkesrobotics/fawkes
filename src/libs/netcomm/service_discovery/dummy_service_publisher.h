@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_SERVICE_DISCOVERY_DUMMY_SERVICE_PUBLISHER_H_
-#define __NETCOMM_SERVICE_DISCOVERY_DUMMY_SERVICE_PUBLISHER_H_
+#ifndef _NETCOMM_SERVICE_DISCOVERY_DUMMY_SERVICE_PUBLISHER_H_
+#define _NETCOMM_SERVICE_DISCOVERY_DUMMY_SERVICE_PUBLISHER_H_
 
 #include <netcomm/service_discovery/service_publisher.h>
 

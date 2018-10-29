@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_DNSSD_AVAHI_THREAD_H_
-#define __NETCOMM_DNSSD_AVAHI_THREAD_H_
+#ifndef _NETCOMM_DNSSD_AVAHI_THREAD_H_
+#define _NETCOMM_DNSSD_AVAHI_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <netcomm/service_discovery/service_publisher.h>

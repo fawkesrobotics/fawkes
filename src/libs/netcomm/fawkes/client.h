@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_FAWKES_CLIENT_H_
-#define __NETCOMM_FAWKES_CLIENT_H_
+#ifndef _NETCOMM_FAWKES_CLIENT_H_
+#define _NETCOMM_FAWKES_CLIENT_H_
 
 #include <netcomm/fawkes/message_queue.h>
 #include <netcomm/fawkes/message.h>

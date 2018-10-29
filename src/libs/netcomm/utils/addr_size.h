@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_UTILS_ADDR_SIZE_H_
-#define __NETCOMM_UTILS_ADDR_SIZE_H_
+#ifndef _NETCOMM_UTILS_ADDR_SIZE_H_
+#define _NETCOMM_UTILS_ADDR_SIZE_H_
 
 #include <netinet/in.h>
 

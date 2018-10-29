@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FAWKES_NETWORK_MANAGER_H_
-#define __FAWKES_NETWORK_MANAGER_H_
+#ifndef _FAWKES_NETWORK_MANAGER_H_
+#define _FAWKES_NETWORK_MANAGER_H_
 
 #include <string>
 
