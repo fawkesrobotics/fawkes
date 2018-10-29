@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGODB_LOG_MONGODB_LOG_TF_THREAD_H_
-#define __PLUGINS_MONGODB_LOG_MONGODB_LOG_TF_THREAD_H_
+#ifndef _PLUGINS_MONGODB_LOG_MONGODB_LOG_TF_THREAD_H_
+#define _PLUGINS_MONGODB_LOG_MONGODB_LOG_TF_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <utils/time/time.h>
