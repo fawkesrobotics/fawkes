@@ -67,7 +67,7 @@ check-parallel:
 	fi
 
 .PHONY: check
-check: quickdoc license-check format-check
+check: quickdoc license-check
 
 
 endif # __buildsys_root_check_mk_
