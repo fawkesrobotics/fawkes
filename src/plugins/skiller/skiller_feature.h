@@ -18,8 +18,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_SKILLER_SKILLER_FEATURE_H_
-#define __PLUGINS_SKILLER_SKILLER_FEATURE_H_
+#ifndef _PLUGINS_SKILLER_SKILLER_FEATURE_H_
+#define _PLUGINS_SKILLER_SKILLER_FEATURE_H_
 
 #include <core/threading/thread.h>
 #include <aspect/configurable.h>
