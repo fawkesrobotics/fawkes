@@ -20,12 +20,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#ifndef __FIREVISION_FILTER_THRESHOLD_H_
+#define __FIREVISION_FILTER_THRESHOLD_H_
+
 #if ! (defined(HAVE_IPP) || defined(HAVE_OPENCV))
 #error "Neither IPP nor OpenCV installed"
 #endif
-
-#ifndef __FIREVISION_FILTER_THRESHOLD_H_
-#define __FIREVISION_FILTER_THRESHOLD_H_
 
 #include <fvfilters/filter.h>
 
