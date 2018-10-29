@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTER_FILTERS_DEADSPOTS_H_
-#define __PLUGINS_LASER_FILTER_FILTERS_DEADSPOTS_H_
+#ifndef _PLUGINS_LASER_FILTER_FILTERS_DEADSPOTS_H_
+#define _PLUGINS_LASER_FILTER_FILTERS_DEADSPOTS_H_
 
 #include "filter.h"
 
