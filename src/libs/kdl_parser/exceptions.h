@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __KDLPARSER_EXCEPTIONS_H_
-#define __KDLPARSER_EXCEPTIONS_H_
+#ifndef _KDLPARSER_EXCEPTIONS_H_
+#define _KDLPARSER_EXCEPTIONS_H_
 
 #include <core/exception.h>
 
