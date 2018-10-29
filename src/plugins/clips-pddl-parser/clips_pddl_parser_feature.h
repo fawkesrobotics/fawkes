@@ -18,8 +18,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H_
-#define __PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H_
+#ifndef _PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H_
+#define _PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H_
 
 #include <plugins/clips/aspect/clips_feature.h>
 
