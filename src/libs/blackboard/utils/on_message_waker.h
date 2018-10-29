@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_UTILS_ON_MESSAGE_WAKER_H_
-#define __BLACKBOARD_UTILS_ON_MESSAGE_WAKER_H_
+#ifndef _BLACKBOARD_UTILS_ON_MESSAGE_WAKER_H_
+#define _BLACKBOARD_UTILS_ON_MESSAGE_WAKER_H_
 
 #include <blackboard/interface_listener.h>
 

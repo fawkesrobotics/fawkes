@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FAWKES_BLACKBOARD_NETWORK_HANDLER_H_
-#define __FAWKES_BLACKBOARD_NETWORK_HANDLER_H_
+#ifndef _FAWKES_BLACKBOARD_NETWORK_HANDLER_H_
+#define _FAWKES_BLACKBOARD_NETWORK_HANDLER_H_
 
 #include <core/threading/thread.h>
 #include <netcomm/fawkes/handler.h>

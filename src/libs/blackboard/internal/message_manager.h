@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_MESSAGE_MANAGER_H_
-#define __BLACKBOARD_MESSAGE_MANAGER_H_
+#ifndef _BLACKBOARD_MESSAGE_MANAGER_H_
+#define _BLACKBOARD_MESSAGE_MANAGER_H_
 
 #include <interface/mediators/message_mediator.h>
 

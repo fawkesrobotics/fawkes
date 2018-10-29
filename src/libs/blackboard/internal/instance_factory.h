@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_INSTANCE_FACTORY_H_
-#define __BLACKBOARD_INSTANCE_FACTORY_H_
+#ifndef _BLACKBOARD_INSTANCE_FACTORY_H_
+#define _BLACKBOARD_INSTANCE_FACTORY_H_
 
 namespace fawkes {
 

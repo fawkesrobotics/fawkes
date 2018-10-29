@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_REMOTE_H_
-#define __BLACKBOARD_REMOTE_H_
+#ifndef _BLACKBOARD_REMOTE_H_
+#define _BLACKBOARD_REMOTE_H_
 
 #include <blackboard/blackboard.h>
 #include <netcomm/fawkes/client_handler.h>

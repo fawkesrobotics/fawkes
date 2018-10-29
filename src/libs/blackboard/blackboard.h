@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_BLACKBOARD_H_
-#define __BLACKBOARD_BLACKBOARD_H_
+#ifndef _BLACKBOARD_BLACKBOARD_H_
+#define _BLACKBOARD_BLACKBOARD_H_
 
 #include <core/exceptions/software.h>
 #include <interface/interface.h>

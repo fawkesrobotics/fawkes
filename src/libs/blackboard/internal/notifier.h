@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_NOTIFIER_H_
-#define __BLACKBOARD_NOTIFIER_H_
+#ifndef _BLACKBOARD_NOTIFIER_H_
+#define _BLACKBOARD_NOTIFIER_H_
 
 #include <blackboard/blackboard.h>
 #include <blackboard/interface_listener.h>
