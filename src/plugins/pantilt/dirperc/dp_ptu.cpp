@@ -456,8 +456,7 @@ DirectedPerceptionPTU::query_int(const char *query_command)
 {
   send(query_command);
   bool ok = read(__ibuffer, DPPTU_MAX_IBUFFER_SIZE);
-  if (ok) {
-  } else {
+  if (! ok) {
     throw Exception("DP PTU: failed to query integer");
   }
   int intrv = 0;
