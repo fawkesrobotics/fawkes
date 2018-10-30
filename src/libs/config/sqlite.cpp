@@ -407,17 +407,16 @@ SQLiteConfiguration::try_dump()
 }
 
 
-/** Check input SQL.
- * This can be used to verify valid input to be applied to the database.
+/** SQL escaping stub.
+ * This could be extended to perform actual escaping on the provided
+ * SQL line.
  * @param line line to check
- * @return true, currently accepts any line, we read this into a new
- * database every time, so any argument may only disrupt the very data
- * currently read.
+ * @return string conversion of line
  */
-static bool
-is_sql_ok(const char *line)
+static std::string
+sql_escape_noop(const char *line)
 {
-	return true;
+	return std::string(line);
 }
 
 void
@@ -446,14 +445,9 @@ SQLiteConfiguration::import(::sqlite3 *tdb, const char *dumpfile)
     }
     line[i] = 0;
     if ( line[0] != 0 ) {
-	    if (! is_sql_ok(line)) {
-		    ConfigurationException e("Invalid SQL argument", line);
-		    sqlite3_free(errmsg);
-		    fclose(f);
-		    throw e;
-	    }
+      std::string stmt{sql_escape_noop(line)};
 
-      if (sqlite3_exec(tdb, line, 0, 0, &errmsg) != SQLITE_OK) {
+      if (sqlite3_exec(tdb, stmt.c_str(), 0, 0, &errmsg) != SQLITE_OK) {
         ConfigurationException e(errmsg, line);
         sqlite3_free(errmsg);
         fclose(f);
