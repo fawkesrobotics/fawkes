@@ -3,8 +3,7 @@
  *  sqlite.cpp - Fawkes configuration stored in a SQLite database
  *
  *  Created: Wed Dec 06 17:23:00 2006
- *  Copyright  2006-2009  Tim Niemueller [www.niemueller.de]
- *
+ *  Copyright  2006-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -407,6 +406,20 @@ SQLiteConfiguration::try_dump()
   }
 }
 
+
+/** Check input SQL.
+ * This can be used to verify valid input to be applied to the database.
+ * @param line line to check
+ * @return true, currently accepts any line, we read this into a new
+ * database every time, so any argument may only disrupt the very data
+ * currently read.
+ */
+static bool
+is_sql_ok(const char *line)
+{
+	return true;
+}
+
 void
 SQLiteConfiguration::import(::sqlite3 *tdb, const char *dumpfile)
 {
@@ -423,20 +436,28 @@ SQLiteConfiguration::import(::sqlite3 *tdb, const char *dumpfile)
     unsigned int i = 0;
     while (! feof(f) && (i < sizeof(line) - 1)) {
       if (fread(&(line[i]), 1, 1, f) == 1) {
-	++i;
-	if ( (i > 2) && (line[i-1] == '\n') && (line[i-2] == ';') ) {
-	  break;
-	}
+        ++i;
+        if ( (i > 2) && (line[i-1] == '\n') && (line[i-2] == ';') ) {
+          break;
+        }
       } else {
-	break;
+        break;
       }
     }
     line[i] = 0;
     if ( line[0] != 0 ) {
-      if ( sqlite3_exec(tdb, line, 0, 0, &errmsg) != SQLITE_OK ) {
-	ConfigurationException e(errmsg, line);
-	sqlite3_free(errmsg);
-	throw e;
+	    if (! is_sql_ok(line)) {
+		    ConfigurationException e("Invalid SQL argument", line);
+		    sqlite3_free(errmsg);
+		    fclose(f);
+		    throw e;
+	    }
+
+      if (sqlite3_exec(tdb, line, 0, 0, &errmsg) != SQLITE_OK) {
+        ConfigurationException e(errmsg, line);
+        sqlite3_free(errmsg);
+        fclose(f);
+        throw e;
       }
     }
   }
