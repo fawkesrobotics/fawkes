@@ -32,7 +32,9 @@ steps:
   - wait
 
   - label: ":fedora: Fedora"
-    command: .buildkite/build
+    command:
+      - .buildkite/build
+      - .buildkite/test
     plugins:
       <<: *merged-pr-plugin
       docker#v2.0.0:
@@ -42,7 +44,9 @@ steps:
           - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
 
   - label: ":ubuntu: Ubuntu"
-    command: .buildkite/build
+    command:
+      - .buildkite/build
+      - .buildkite/test
     plugins:
       <<: *merged-pr-plugin
       docker#v2.0.0:
