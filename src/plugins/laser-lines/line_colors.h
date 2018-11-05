@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_CLUSTER_CLUSTER_COLORS_H_
-#define __PLUGINS_LASER_CLUSTER_CLUSTER_COLORS_H_
+#ifndef __PLUGINS_LASER_LINES_LINE_COLORS_H_
+#define __PLUGINS_LASER_LINES_LINE_COLORS_H_
 
 #include <stdint.h>
 

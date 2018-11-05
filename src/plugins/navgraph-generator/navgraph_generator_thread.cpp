@@ -555,7 +555,7 @@ NavGraphGeneratorThread::map_obstacles(float line_max_dist)
 		   map->size_x * map->size_y,
                    (float)free_space_indices.size() / (float)(map->size_x * map->size_y) * 100.);
 
-  size_t occ_cells = map->size_x * map->size_y - free_space_indices.size();
+  size_t occ_cells = (size_t)map->size_x * map->size_y - free_space_indices.size();
 
   // convert map to point cloud
   pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud(new pcl::PointCloud<pcl::PointXYZ>());

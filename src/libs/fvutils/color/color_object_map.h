@@ -42,10 +42,18 @@ class ColorObjectMap
   static const ColorObjectMap& get_instance() { return *__singleton; }
   static YUV_t get_color(color_t color);
 
-  const color_t& get(hint_t hint) const
-  { return __color_for_hint.find(hint) != __color_for_hint.end() ? __color_for_hint.find(hint)->second : __c_other; }
-  const hint_t get(color_t color) const
-  { return __hint_for_color.find(color) != __hint_for_color.end() ? __hint_for_color.find(color)->second : __h_unknown; }
+  color_t get(hint_t hint) const
+  {
+	  return __color_for_hint.find(hint) != __color_for_hint.end()
+	    ? __color_for_hint.find(hint)->second
+	    : __c_other;
+  }
+  hint_t get(color_t color) const
+  {
+	  return __hint_for_color.find(color) != __hint_for_color.end()
+	    ? __hint_for_color.find(color)->second
+	    : __h_unknown;
+  }
 
  private:
   ColorObjectMap();

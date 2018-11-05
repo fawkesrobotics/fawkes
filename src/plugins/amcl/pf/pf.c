@@ -135,7 +135,7 @@ void pf_free(pf_t *pf)
 
 
 // Initialize the filter using a guassian
-void pf_init(pf_t *pf, pf_vector_t mean, pf_matrix_t cov)
+void pf_init(pf_t *pf, pf_vector_t *mean, pf_matrix_t *cov)
 {
   int i;
   pf_sample_set_t *set;

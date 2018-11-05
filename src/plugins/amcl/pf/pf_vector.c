@@ -153,13 +153,13 @@ pf_matrix_t pf_matrix_zero()
 
 
 // Check for NAN or INF in any component
-int pf_matrix_finite(pf_matrix_t a)
+int pf_matrix_finite(pf_matrix_t *a)
 {
   int i, j;
   
   for (i = 0; i < 3; i++)
     for (j = 0; j < 3; j++)
-      if (!finite(a.m[i][j]))
+      if (!finite(a->m[i][j]))
         return 0;
   
   return 1;
@@ -167,7 +167,7 @@ int pf_matrix_finite(pf_matrix_t a)
 
 
 // Print a matrix
-void pf_matrix_fprintf(pf_matrix_t a, FILE *file, const char *fmt)
+void pf_matrix_fprintf(pf_matrix_t *a, FILE *file, const char *fmt)
 {
   int i, j;
 
@@ -175,7 +175,7 @@ void pf_matrix_fprintf(pf_matrix_t a, FILE *file, const char *fmt)
   {
     for (j = 0; j < 3; j++)
     {
-      fprintf(file, fmt, a.m[i][j]);
+      fprintf(file, fmt, a->m[i][j]);
       fprintf(file, " ");
     }
     fprintf(file, "\n");
@@ -227,7 +227,7 @@ pf_matrix_t pf_matrix_inverse(pf_matrix_t a, double *det)
 
 // Decompose a covariance matrix [a] into a rotation matrix [r] and a diagonal
 // matrix [d] such that a = r d r^T.
-void pf_matrix_unitary(pf_matrix_t *r, pf_matrix_t *d, pf_matrix_t a)
+void pf_matrix_unitary(pf_matrix_t *r, pf_matrix_t *d, pf_matrix_t *a)
 {
   int i, j;
   /*
@@ -250,7 +250,7 @@ void pf_matrix_unitary(pf_matrix_t *r, pf_matrix_t *d, pf_matrix_t a)
     for (j = 0; j < 3; j++)
     {
       //gsl_matrix_set(aa, i, j, a.m[i][j]);
-      aa[i][j] = a.m[i][j];
+      aa[i][j] = a->m[i][j];
     }
   }
 

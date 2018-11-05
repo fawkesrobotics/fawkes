@@ -73,7 +73,7 @@ InterfaceDigest::InterfaceDigest(std::string config_filename)
   digest = new unsigned char[digest_size];
 
   if ( ! EVP_DigestFinal(ctx, digest, NULL) ) {
-    delete digest;
+    delete[] digest;
     digest = NULL;
     EVP_MD_CTX_destroy(ctx);
     throw Exception("Could not finalize digest");
@@ -85,7 +85,7 @@ InterfaceDigest::InterfaceDigest(std::string config_filename)
 /** Destructor. */
 InterfaceDigest::~InterfaceDigest()
 {
-  delete digest;
+  delete[] digest;
 }
 
 

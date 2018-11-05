@@ -275,20 +275,25 @@ FieldDrawer::draw_field(unsigned char *yuv422_planar, unsigned int img_width, un
 
     if (_img_width == draw_width) {//use memcpy
       unsigned int offset = (_img_height - draw_height) / 2;
-      memset(_img_buffer, __c_background.Y, offset * _img_width);
-      memset(_img_buffer + offset * _img_width, __c_field.Y, draw_height * _img_width);
-      memset(_img_buffer + (offset + draw_height) * _img_width, __c_background.Y, offset * _img_width);
+      memset(_img_buffer, __c_background.Y, (size_t)offset * _img_width);
+      memset(_img_buffer + offset * _img_width, __c_field.Y, (size_t)draw_height * _img_width);
+      memset(_img_buffer + (offset + draw_height) * _img_width, __c_background.Y,
+             (size_t)offset * _img_width);
 
       offset /= 2;
       draw_height /= 2;
 
-      memset(_img_buffer + u_offset, __c_background.U, offset * _img_width);
-      memset(_img_buffer + u_offset + offset * _img_width, __c_field.U, draw_height * _img_width);
-      memset(_img_buffer + u_offset + (offset + draw_height) * _img_width, __c_background.U, offset * _img_width);
+      memset(_img_buffer + u_offset, __c_background.U, (size_t)offset * _img_width);
+      memset(_img_buffer + u_offset + offset * _img_width, __c_field.U,
+             (size_t)draw_height * _img_width);
+      memset(_img_buffer + u_offset + (offset + draw_height) * _img_width, __c_background.U,
+             (size_t)offset * _img_width);
 
-      memset(_img_buffer + v_offset, __c_background.V, offset * _img_width);
-      memset(_img_buffer + v_offset + offset * _img_width, __c_field.V, draw_height * _img_width);
-      memset(_img_buffer + v_offset + (offset + draw_height) * _img_width, __c_background.V, offset * _img_width);
+      memset(_img_buffer + v_offset, __c_background.V, (size_t)offset * _img_width);
+      memset(_img_buffer + v_offset + offset * _img_width, __c_field.V,
+             (size_t)draw_height * _img_width);
+      memset(_img_buffer + v_offset + (offset + draw_height) * _img_width, __c_background.V,
+             (size_t)offset * _img_width);
     } else {
       //center the field
       unsigned int sx = (_img_width - draw_width) / 2;

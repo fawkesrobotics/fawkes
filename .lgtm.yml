@@ -2,5 +2,10 @@ extraction:
   cpp:
     index:
       build_command:
-        - cat /usr/include/pcl-1.8/pcl/pcl_config.h > /dev/null # trigger install of non-whitelisted libpcl-dev
-        - make -j2 uncolored-all
+      # trigger install of non-whitelisted libpcl-dev
+      - cat /usr/include/pcl-1.8/pcl/pcl_config.h > /dev/null
+      - make -j2 uncolored-all
+
+queries:
+# use custom cpp/resource-not-released-in-destructor-or-finalize
+- exclude: cpp/resource-not-released-in-destructor

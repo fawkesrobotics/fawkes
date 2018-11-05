@@ -33,11 +33,9 @@ namespace stn {
  * @param condition False iff this predicate is negated.
  * @param attrs Parameters of the predicate.
  */
-Predicate::Predicate(std::string name, bool condition, std::vector<std::string> attrs)
+Predicate::Predicate(const std::string& name, bool condition, const std::vector<std::string>& attrs)
+: name_(name), condition_(condition), attrs_(attrs)
 {
-  name_ = name;
-  condition_ = condition;
-  attrs_ = attrs;
 }
 
 /** Print a Predicate.
@@ -71,7 +69,7 @@ Predicate::operator==(const Predicate& rhs)
  * @return The name of the predicate.
  */
 std::string
-Predicate::name()
+Predicate::name() const
 {
   return name_;
 }
@@ -80,7 +78,7 @@ Predicate::name()
  * @return True iff the predicate's condition is true.
  */
 bool
-Predicate::condition()
+Predicate::condition() const
 {
   return condition_;
 }
@@ -88,8 +86,8 @@ Predicate::condition()
 /** Get the attributes of the predicate.
  * @return A vector of attributes as strings.
  */
-std::vector<std::string>
-Predicate::attrs()
+const std::vector<std::string>&
+Predicate::attrs() const
 {
   return attrs_;
 }

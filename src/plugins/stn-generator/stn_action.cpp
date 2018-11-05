@@ -42,10 +42,14 @@ size_t StnAction::count = 0;
  * @param cond_breakups A vector of conditional breakups as strings.
  * @param temp_breakups A vector of temporal breakups as strings.
  */
-StnAction::StnAction(std::string name, std::vector<Predicate> preconds, std::vector<Predicate> effects, std::string opts,
-    size_t duration, std::vector<std::string> cond_breakups, std::vector<std::string> temp_breakups)
+StnAction::StnAction(const std::string& name, const std::vector<Predicate>& preconds,
+                     const std::vector<Predicate>& effects,
+                     const std::string &opts,
+                     size_t duration,
+                     const std::vector<std::string>& cond_breakups,
+                     const std::vector<std::string>& temp_breakups)
 {
-  id_ = count++;
+  id_ = ++count;
   name_ = name;
   preconds_ = preconds;
   effects_ = effects;
@@ -119,7 +123,7 @@ StnAction::operator!=(const StnAction &o)
  * @return The unique ID.
  */
 size_t
-StnAction::id()
+StnAction::id() const
 {
   return id_;
 }
@@ -128,7 +132,7 @@ StnAction::id()
  * @return A vector of IDs.
  */
 std::vector<size_t>
-StnAction::condActionIds()
+StnAction::condActionIds() const
 {
   std::vector<size_t> ids;
   for ( auto const &kv : cond_actions_) {
@@ -143,9 +147,9 @@ StnAction::condActionIds()
  * @return True iff a breakup by the given predicate is possible.
  */
 bool
-StnAction::checkForBreakup(EdgeType t, Predicate p)
+StnAction::checkForBreakup(EdgeType t, const Predicate& p) const
 {
-  std::vector<std::string> *breakups;
+  const std::vector<std::string> *breakups;
   if ( t == EdgeType::CONDITIONAL ) {
     breakups = &cond_breakups_;
   }
@@ -170,7 +174,7 @@ StnAction::checkForBreakup(EdgeType t, Predicate p)
  * @return The string describing the StnAction.
  */
 std::string
-StnAction::genGraphNodeName()
+StnAction::genGraphNodeName() const
 {
   return  "Action ID: " + std::to_string(id_) + "\n"
      + "Name: " + name_ + "\n"
@@ -182,10 +186,11 @@ StnAction::genGraphNodeName()
  * @return The string describing the conditional action.
  */
 std::string
-StnAction::genConditionEdgeLabel(size_t cond_action)
+StnAction::genConditionEdgeLabel(size_t cond_action) const
 {
   std::string edge_label;
-  std::map<size_t, std::pair<std::string, std::vector<Predicate>>>::iterator it = cond_actions_.find(cond_action);
+  std::map<size_t, std::pair<std::string, std::vector<Predicate>>>::const_iterator it =
+    cond_actions_.find(cond_action);
   if ( it == cond_actions_.end() ) return "";
   for ( Predicate p : it->second.second ) {
     if ( p.condition() ) {
@@ -206,7 +211,7 @@ StnAction::genConditionEdgeLabel(size_t cond_action)
  * @return The string label for the temporal edge.
  */
 std::string
-StnAction::genTemporalEdgeLabel()
+StnAction::genTemporalEdgeLabel() const
 {
   std::string edge_label = "<FONT COLOR=\"blue\">";
   edge_label += std::to_string(duration_);
@@ -260,8 +265,8 @@ StnAction::genConditionalActions(const std::vector<StnAction> candidate_actions)
 /** Get the effects of the StnAction.
  * @return A vector of Predicates that are part of the effect.
  */
-std::vector<Predicate>
-StnAction::effects()
+const std::vector<Predicate>&
+StnAction::effects() const
 {
   return effects_;
 }
@@ -270,7 +275,7 @@ StnAction::effects()
  * @return The name as string.
  */
 std::string
-StnAction::name()
+StnAction::name() const
 {
   return name_;
 }
@@ -279,7 +284,7 @@ StnAction::name()
  * @return The duration.
  */
 size_t
-StnAction::duration()
+StnAction::duration() const
 {
   return duration_;
 }
@@ -288,7 +293,7 @@ StnAction::duration()
  * @return The parameters as string.
  */
 std::string
-StnAction::opts()
+StnAction::opts() const
 {
   return opts_;
 }

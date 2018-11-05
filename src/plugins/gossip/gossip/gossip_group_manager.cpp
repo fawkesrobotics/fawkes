@@ -4,7 +4,6 @@
  *
  *  Created: Fri Feb 28 16:55:24 2014
  *  Copyright  2006-2014  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -37,7 +36,7 @@ namespace fawkes {
 
 /** Constructor. */
 GossipGroupConfiguration::GossipGroupConfiguration()
-  : send_port(0), recv_port(0)
+: send_port(0), recv_port(0)
 {
 }
 
@@ -47,10 +46,10 @@ GossipGroupConfiguration::GossipGroupConfiguration()
  * @param broadcast_port UDP port to listen on for the group
  */
 GossipGroupConfiguration::GossipGroupConfiguration(std::string &name,
-						   std::string &broadcast_address,
-						   unsigned short broadcast_port)
-  : name(name), broadcast_addr(broadcast_address),
-    send_port(broadcast_port), recv_port(broadcast_port)
+                                                   std::string &broadcast_address,
+                                                   unsigned short broadcast_port)
+: name(name), broadcast_addr(broadcast_address),
+  send_port(broadcast_port), recv_port(broadcast_port)
 {
 }
 
@@ -61,11 +60,11 @@ GossipGroupConfiguration::GossipGroupConfiguration(std::string &name,
  * @param recv_port UDP port to listen on for the group
  */
 GossipGroupConfiguration::GossipGroupConfiguration(std::string &name,
-						   std::string &broadcast_address,
-						   unsigned short send_port,
-						   unsigned short recv_port)
-  : name(name), broadcast_addr(broadcast_address),
-    send_port(send_port), recv_port(recv_port)
+                                                   std::string &broadcast_address,
+                                                   unsigned short send_port,
+                                                   unsigned short recv_port)
+: name(name), broadcast_addr(broadcast_address),
+  send_port(send_port), recv_port(recv_port)
 {
 }
 
@@ -73,11 +72,28 @@ GossipGroupConfiguration::GossipGroupConfiguration(std::string &name,
  * @param c group configuration to copy
  */
 GossipGroupConfiguration::GossipGroupConfiguration(const GossipGroupConfiguration &c)
-  : name(c.name), broadcast_addr(c.broadcast_addr), send_port(c.send_port),
-    recv_port(c.recv_port), crypto_key(c.crypto_key), crypto_cipher(c.crypto_cipher)
+: name(c.name), broadcast_addr(c.broadcast_addr), send_port(c.send_port),
+  recv_port(c.recv_port), crypto_key(c.crypto_key), crypto_cipher(c.crypto_cipher)
 {
 }
 
+
+/** Assignment operator.
+ * @param c group configuration to copy from
+ * @return reference to this instance
+ */
+GossipGroupConfiguration&
+GossipGroupConfiguration::operator=(const GossipGroupConfiguration &c)
+{
+	name           = c.name;
+	broadcast_addr = c.broadcast_addr;
+	send_port      = c.send_port;
+	recv_port      = c.recv_port;
+	crypto_key     = c.crypto_key;
+	crypto_cipher  = c.crypto_cipher;
+
+	return *this;
+}
 
 /** @class GossipGroupManager <plugins/gossip/gossip/gossip_group_manager.h>
  * Abstract class for a Gossip group manager.
@@ -91,9 +107,9 @@ GossipGroupConfiguration::GossipGroupConfiguration(const GossipGroupConfiguratio
  * @param initial_groups initial group configurations to join
  */
 GossipGroupManager::GossipGroupManager(std::string &service_name,
-				       ServicePublisher *service_publisher,
-				       std::map<std::string, GossipGroupConfiguration> &initial_groups)
-  : service_name_(service_name), service_publisher_(service_publisher)
+                                       ServicePublisher *service_publisher,
+                                       std::map<std::string, GossipGroupConfiguration> &initial_groups)
+: service_name_(service_name), service_publisher_(service_publisher)
 {
 #if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
   for (auto g : initial_groups) {

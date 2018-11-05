@@ -106,14 +106,14 @@ FireVisionDataFile::FireVisionDataFile(unsigned short int magic_token,
 
   __owns_blocks = true;
 
-  clear();
+  FireVisionDataFile::clear();
 }
 
 
 /** Destructor. */
 FireVisionDataFile::~FireVisionDataFile()
 {
-  clear();
+  FireVisionDataFile::clear();
 
   free(__header);
   free(__comment);

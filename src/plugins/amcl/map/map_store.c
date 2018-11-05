@@ -87,7 +87,7 @@ int map_load_occ(map_t *map, const char *filename, double scale, int negate)
     map->scale = scale;
     map->size_x = width;
     map->size_y = height;
-    map->cells = calloc(width * height, sizeof(map->cells[0]));
+    map->cells = calloc((size_t)width * height, sizeof(map->cells[0]));
   }
   else
   {

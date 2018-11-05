@@ -45,26 +45,27 @@ class StnAction
 {
 
  public:
-  StnAction(std::string name, std::vector<Predicate> preconds, std::vector<Predicate> effects, std::string opts,
-      size_t duration = 0, std::vector<std::string> cond_breakups = {}, std::vector<std::string> temp_breakups = {});
+  StnAction(const std::string& name, const std::vector<Predicate>& preconds,
+            const std::vector<Predicate>& effects, const std::string& opts,
+            size_t duration = 0, const std::vector<std::string>& cond_breakups = {},
+            const std::vector<std::string>& temp_breakups = {});
   StnAction(){ };
   virtual ~StnAction(){ };
 
   bool operator==(const StnAction &o);
   bool operator!=(const StnAction &o);
 
-  size_t id();
-  bool checkForBreakup(EdgeType t, Predicate p);
-  std::vector<size_t> condActionIds();
-  std::string genGraphNodeName();
-  std::string genConditionEdgeLabel(size_t cond_action);
-  std::string genTemporalEdgeLabel();
-  void genConditionalActions(std::vector<StnAction> candidate_actions);
-  std::vector<Predicate> effects();
-  std::string name();
-  size_t duration();
-  std::string opts();
-
+  size_t id() const;
+  bool checkForBreakup(EdgeType t, const Predicate& p) const;
+  std::vector<size_t> condActionIds() const;
+  std::string genGraphNodeName() const;
+  std::string genConditionEdgeLabel(size_t cond_action) const;
+  std::string genTemporalEdgeLabel() const;
+	void genConditionalActions(std::vector<StnAction> candidate_actions);
+  const std::vector<Predicate>& effects() const;
+  std::string name() const;
+  size_t      duration() const;
+  std::string opts() const;
 
  private:
   friend std::ostream& operator<<(std::ostream&, const StnAction&);

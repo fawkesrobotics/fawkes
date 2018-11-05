@@ -171,7 +171,7 @@ AmclROSThread::publish_map(const std::string &global_frame_id,
   msg.info.origin.orientation.w = q.w();
 
   // Allocate space to hold the data
-  msg.data.resize(msg.info.width * msg.info.height);
+  msg.data.resize((size_t)msg.info.width * msg.info.height);
 
   for (unsigned int i = 0; i < msg.info.width * msg.info.height; ++i) {
     if (map->cells[i].occ_state == +1) {

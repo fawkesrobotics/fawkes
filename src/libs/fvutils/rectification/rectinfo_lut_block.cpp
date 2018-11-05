@@ -50,7 +50,7 @@ RectificationLutInfoBlock::RectificationLutInfoBlock(uint16_t width,
   : RectificationInfoBlock(FIREVISION_RECTINFO_TYPE_LUT_16x16,
 			   camera,
 			   sizeof(rectinfo_lut_16x16_block_header_t) +
-			   (width * height * sizeof(rectinfo_lut_16x16_entry_t)))
+			   ((size_t)width * height * sizeof(rectinfo_lut_16x16_entry_t)))
 {
   _lut_block_header = (rectinfo_lut_16x16_block_header_t *)_data;
   _lut_data         = (rectinfo_lut_16x16_entry_t *)((char *)_data +

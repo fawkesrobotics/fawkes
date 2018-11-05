@@ -73,6 +73,7 @@ RRDThread::init()
 void
 RRDThread::finalize()
 {
+	delete __time_wait;
 }
 
 

@@ -159,10 +159,10 @@ Colormap::to_image(unsigned char *yuv422_planar_buffer, unsigned int level)
     }
     // Double line
     unsigned int lines = (2 * (lines_per_step - 1)) + 1;
-    memcpy(yp, (yp - iwidth * 2), (iwidth * 2) * lines);
+    memcpy(yp, yp - ((size_t)iwidth * 2), ((size_t)iwidth * 2) * lines);
     yp += (iwidth * 2) * lines;
-    memcpy(up, (up - iwidth), iwidth * lines);
-    memcpy(vp, (vp - iwidth), iwidth * lines);
+    memcpy(up, (up - iwidth), (size_t)iwidth * lines);
+    memcpy(vp, (vp - iwidth), (size_t)iwidth * lines);
     up += iwidth * lines;
     vp += iwidth * lines;
   }

@@ -32,15 +32,15 @@ namespace stn {
 class Predicate {
 
  public:
-  Predicate(std::string name, bool condition, std::vector<std::string> attrs);
+  Predicate(const std::string& name, bool condition, const std::vector<std::string>& attrs);
   virtual ~Predicate(){ };
 
   friend std::ostream& operator<<(std::ostream&, const Predicate&);
   bool operator==( const Predicate& rhs);
 
-  std::string name();
-  bool condition();
-  std::vector<std::string> attrs();
+  std::string name() const;
+  bool condition() const;
+  const std::vector<std::string>& attrs() const;
 
  private:
   std::string name_;

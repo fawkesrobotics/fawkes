@@ -46,7 +46,7 @@ class Stn
   virtual ~Stn();
 
   void add_plan_action(std::string name, std::string params);
-  void set_initial_state(StnAction action);
+  void set_initial_state(const StnAction& action);
   void read_initial_state(std::string pddl_problem_string);
   void set_pddl_domain(std::string pddl_domain_string);
   void generate();
@@ -79,7 +79,7 @@ class Stn
   void log_debug(std::string s);
   void log(std::string s, Stn::LogLevel log_leve);
   StnAction findActionById(size_t id);
-  void add_domain_action(DomainAction action);
+  void add_domain_action(const DomainAction& action);
   void build_pred_list(pddl_parser::Expression e,
       std::vector<Predicate> *preconds, bool condition);
   void build_breakup_list(pddl_parser::Expression e,

@@ -50,7 +50,7 @@ namespace firevision {
  * @exception TypeMismatchException thrown if type does not equal FUSE_MT_LUT
  */
 FuseLutContent::FuseLutContent(uint32_t type,
-			       void *payload, size_t payload_size)
+                               void *payload, size_t payload_size)
 {
   if ( (type != FUSE_MT_LUT) && (type != FUSE_MT_SET_LUT) ) {
     throw fawkes::TypeMismatchException("Type %u != FUSE_MT_LUT/FUSE_MT_SET_LUT (%u/%u)",
@@ -68,8 +68,8 @@ FuseLutContent::FuseLutContent(uint32_t type,
   __lut_id[LUT_ID_MAX_LENGTH] = 0;
   strncpy(__lut_id, __header->lut_id, LUT_ID_MAX_LENGTH);
 
-  __buffer_size = ntohl(__header->width) * ntohl(__header->height) *
-                  ntohl(__header->depth) * ntohl(__header->bytes_per_cell);
+  __buffer_size = (size_t)ntohl(__header->width) * ntohl(__header->height) *
+                  (size_t)ntohl(__header->depth) * ntohl(__header->bytes_per_cell);
 }
 
 
@@ -78,7 +78,7 @@ FuseLutContent::FuseLutContent(uint32_t type,
  */
 FuseLutContent::FuseLutContent(SharedMemoryLookupTable *b)
 {
-  __buffer_size  = b->width() * b->height() * b->depth() * b->bytes_per_cell();
+  __buffer_size  = (size_t)b->width() * b->height() * b->depth() * b->bytes_per_cell();
   _payload_size = __buffer_size + sizeof(FUSE_lut_message_header_t);
 
   _payload = malloc(_payload_size);
@@ -112,10 +112,10 @@ FuseLutContent::FuseLutContent(SharedMemoryLookupTable *b)
  * @param bpc LUT bytes per cell
  */
 FuseLutContent::FuseLutContent(const char *lut_id, void *buffer,
-			       unsigned int width, unsigned int height,
-			       unsigned int depth, unsigned int bpc)
+                               unsigned int width, unsigned int height,
+                               unsigned int depth, unsigned int bpc)
 {
-  __buffer_size  = width * height * depth * bpc;
+  __buffer_size  = (size_t)width * height * depth * bpc;
   _payload_size = __buffer_size + sizeof(FUSE_lut_message_header_t);
 
   _payload = malloc(_payload_size);

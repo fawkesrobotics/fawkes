@@ -377,9 +377,6 @@ RobotisRX28::recv(const unsigned char exp_length, unsigned int timeout_ms)
     printf("\n");
 #endif
   }
-  if (bytes_read < 6) {
-    throw Exception("Failed to read packet header");
-  }
   if ( (__ibuffer[0] != 0xFF) || (__ibuffer[1] != 0xFF) ) {
     throw Exception("Packet does not start with 0xFFFF.");
   }

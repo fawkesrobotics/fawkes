@@ -87,7 +87,7 @@ BlackBoardInterfaceListMaintainer::BlackBoardInterfaceListMaintainer(const char*
 /** Destructor. */
 BlackBoardInterfaceListMaintainer::~BlackBoardInterfaceListMaintainer()
 {
-  delete(name_);
+  free(name_);
 
   MutexLocker lock( ifs_.mutex() );
   fawkes::LockList<fawkes::Interface *>::iterator pif;

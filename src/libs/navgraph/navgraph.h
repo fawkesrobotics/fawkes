@@ -77,6 +77,7 @@ class NavGraph
   } EdgeMode;
 
   NavGraph(const std::string &graph_name);
+  NavGraph(const NavGraph &g);
   virtual ~NavGraph();
   
   std::string                              name() const;

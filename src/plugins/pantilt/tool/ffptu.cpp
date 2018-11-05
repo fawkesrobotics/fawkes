@@ -47,7 +47,7 @@ print_usage(const char *program_name)
 	 " -h              This help message\n"
 	 " -r host[:port]  Remote host (and optionally port) to connect to\n"
          " -p <ptu>        PTU, interface must have id 'PanTilt <ptu>'\n"
-         " -l              List available PTUs\n"
+         " -l              List available PTUs (only on remote blackboard)\n"
          " -i              Invert tilt control buttons\n\n"
          " Commands:\n"
          "move [pan P] [tilt T]\n"
@@ -165,7 +165,9 @@ class PTUJoystickControl
   /** Run control loop. */
   void run()
   {
-    if (__argp.num_items() == 0) {
+    if (__argp.has_arg("l")) {
+      init_bb();
+    } else if (__argp.num_items() == 0) {
       interactive_move();
     } else if (strcmp(__argp.items()[0], "move") == 0) {
       if (__argp.num_items() == 1) {

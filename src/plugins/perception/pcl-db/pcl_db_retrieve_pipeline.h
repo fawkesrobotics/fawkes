@@ -133,7 +133,7 @@ class PointCloudDBRetrievePipeline : public PointCloudDBPipeline<PointType>
     actual_time = actual_times[0];
 
     if (target_frame == "SENSOR") {
-      target_frame == cfg_sensor_frame_;
+      target_frame = cfg_sensor_frame_;
     }
 
     if (target_frame != "") {

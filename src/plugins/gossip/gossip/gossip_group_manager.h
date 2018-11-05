@@ -41,15 +41,17 @@ class GossipAspectIniFin;
 
 class GossipGroupConfiguration
 {
- public:
-  GossipGroupConfiguration();
-  GossipGroupConfiguration(const GossipGroupConfiguration &c);
+public:
+	GossipGroupConfiguration();
+	GossipGroupConfiguration(const GossipGroupConfiguration &c);
+	GossipGroupConfiguration(std::string &name,
+	                         std::string &broadcast_address,
+	                         unsigned short broadcast_port);
   GossipGroupConfiguration(std::string &name,
-			   std::string &broadcast_address,
-			   unsigned short broadcast_port);
-  GossipGroupConfiguration(std::string &name,
-			   std::string &broadcast_address,
-			   unsigned short send_port, unsigned short recv_port);
+                           std::string &broadcast_address,
+                           unsigned short send_port, unsigned short recv_port);
+
+	GossipGroupConfiguration& operator=(const GossipGroupConfiguration& c);
 
   std::string    name;			///< name of the group
   std::string    broadcast_addr;	///< Broadcast IP Addr

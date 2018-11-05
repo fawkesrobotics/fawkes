@@ -71,7 +71,7 @@ extern tf::TransformListener *tf_listener;
 extern Time                  *start_time;
 
 bool init(int argc, char **argv, int & retval);
-bool init(InitOptions options, int & retval);
+bool init(const InitOptions& options, int & retval);
 void run();
 void cleanup();
 void quit();

@@ -78,7 +78,7 @@ Histogram::Histogram(unsigned int width, unsigned int height,
                width, height, depth);
   histogram = (unsigned int*) histogram_block->data_ptr();
 
-  histogram_size = width * height * depth * sizeof(unsigned int);
+  histogram_size = (size_t)width * height * depth * sizeof(unsigned int);
 
   undo_overlay = (unsigned int **)malloc(undo_num * sizeof(unsigned int *));
   for (unsigned int i = 0; i < undo_num; ++i) {
@@ -111,7 +111,7 @@ Histogram::Histogram(HistogramBlock* block)
 
   histogram_block = block;
   histogram = (unsigned int*) histogram_block->data_ptr();
-  histogram_size = width * height * depth * sizeof(unsigned int);
+  histogram_size = (size_t)width * height * depth * sizeof(unsigned int);
 
   undo_overlay = (unsigned int **)malloc(undo_num * sizeof(unsigned int *));
   for (unsigned int i = 0; i < undo_num; ++i) {
@@ -429,7 +429,7 @@ Histogram::load(const char *filename)
 
   histogram_block = (HistogramBlock*) histogram_file.blocks().front();
   histogram = (unsigned int*) histogram_block->data_ptr();
-  histogram_size = width * height * depth * sizeof(unsigned int);
+  histogram_size = (size_t)width * height * depth * sizeof(unsigned int);
 
   for (unsigned int i = 0; i < undo_num; ++i) {
     free(undo_overlay[i]);
@@ -506,13 +506,13 @@ Histogram::get_num_undos()
 unsigned int
 Histogram::get_median()
 {
-  vector< unsigned int > *values = new vector< unsigned int >( width * height * depth);
+  vector<unsigned int> *values = new vector<unsigned int>((size_t)width * height * depth);
 
   values->clear();
   for (unsigned int z = 0; z < depth; ++z) {
     for (unsigned int y = 0; y < height; ++y) {
       for (unsigned int x = 0; x < width; ++x) {
-  values->push_back( histogram_block->get_value(x, y, z) );
+	      values->push_back( histogram_block->get_value(x, y, z) );
       }
     }
   }

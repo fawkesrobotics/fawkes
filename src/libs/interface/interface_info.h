@@ -52,6 +52,7 @@ class InterfaceInfo
   unsigned int                    serial() const;
   const Time *                    timestamp() const;
 
+	InterfaceInfo& operator=(const InterfaceInfo &i);
   bool operator<(const InterfaceInfo &ii) const;
 
  private:

@@ -39,11 +39,14 @@ class SharedMemoryLookupTable;
 class YuvColormap : public Colormap
 {
  public:
-  YuvColormap(unsigned int depth = 1, unsigned int width = 256, unsigned int height = 256);
-  YuvColormap(const char *shmem_lut_id, unsigned int depth = 1, unsigned int width = 256, unsigned int height = 256);
-  YuvColormap(const char *shmem_lut_id, bool destroy_on_free, unsigned int depth = 1, unsigned int width = 256, unsigned int height = 256);
+	YuvColormap(unsigned int depth = 1, unsigned int width = 256, unsigned int height = 256);
+  YuvColormap(const char *shmem_lut_id, unsigned int depth = 1,
+              unsigned int width = 256, unsigned int height = 256);
+  YuvColormap(const char *shmem_lut_id, bool destroy_on_free,
+              unsigned int depth = 1, unsigned int width = 256, unsigned int height = 256);
   YuvColormap(YuvColormap *cm, const char *shmem_lut_id, bool destroy_on_free = false);
-  virtual ~YuvColormap();
+	YuvColormap(const YuvColormap& cm);
+	virtual ~YuvColormap();
 
   virtual color_t          determine(unsigned int y, unsigned int u, unsigned int v) const;
   virtual void             set(unsigned int y, unsigned int u, unsigned int v, color_t c);

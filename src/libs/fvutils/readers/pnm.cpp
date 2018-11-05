@@ -122,7 +122,7 @@ PNMReader::PNMReader(const char* filename)
     throw Exception("PNMReader::ctor: unknown color depth");
   }
 
-  size_t img_size = m_img_width * m_img_height * m_img_depth;
+  size_t img_size = (size_t)m_img_width * m_img_height * m_img_depth;
   m_pnm_buffer = (unsigned char*) malloc(img_size);
 }
 
@@ -166,7 +166,8 @@ PNMReader::read()
     throw Exception("PNMReader::read: buffer = NULL");
   }
 
-  if (fread(m_pnm_buffer, m_img_depth, m_img_width * m_img_height, m_pnmfile) != m_img_width * m_img_height)
+  if (fread(m_pnm_buffer, m_img_depth, (size_t)m_img_width * m_img_height, m_pnmfile) !=
+      (size_t)m_img_width * m_img_height)
   {
     throw fawkes::FileReadException(m_filename, "Failed to read data");
   }

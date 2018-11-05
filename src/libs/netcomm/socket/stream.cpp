@@ -45,7 +45,7 @@ namespace fawkes {
  * is tried for timeout seconds.
  */
 StreamSocket::StreamSocket(float timeout)
-	: Socket(Socket::TCP, timeout)
+: Socket(Socket::TCP, timeout)
 {
 }
 
@@ -55,7 +55,7 @@ StreamSocket::StreamSocket(float timeout)
  * is tried for timeout seconds.
  */
 StreamSocket::StreamSocket(AddrType addr_type, float timeout)
-	: Socket(addr_type, Socket::TCP, timeout)
+: Socket(addr_type, Socket::TCP, timeout)
 {
 }
 
@@ -64,10 +64,20 @@ StreamSocket::StreamSocket(AddrType addr_type, float timeout)
  * @param stream_socket socket to copy.
  */
 StreamSocket::StreamSocket(StreamSocket &stream_socket)
-  : Socket(stream_socket)
+: Socket(stream_socket)
 {
 }
 
+/** Assingment operator.
+ * @param s socket to copy from
+ * @return reference to this
+ */
+StreamSocket&
+StreamSocket::operator=(StreamSocket& s)
+{
+	Socket::operator=(s);
+	return *this;
+}
 
 /** Clone socket.
  * @return a copied instance of StreamSocket.

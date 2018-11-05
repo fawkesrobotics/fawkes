@@ -38,15 +38,17 @@ namespace fawkes {
 class NavGraphSearchState : public fawkes::AStarState
 {
  public:
-  NavGraphSearchState(fawkes::NavGraphNode node, fawkes::NavGraphNode goal,
-		      fawkes::NavGraph *map_graph,
-		      fawkes::NavGraphConstraintRepo *constraint_repo = NULL);
+  NavGraphSearchState(const fawkes::NavGraphNode& node,
+                      const fawkes::NavGraphNode& goal,
+                      fawkes::NavGraph *map_graph,
+                      fawkes::NavGraphConstraintRepo *constraint_repo = NULL);
 
-  NavGraphSearchState(fawkes::NavGraphNode node, fawkes::NavGraphNode goal,
-		      fawkes::NavGraph *map_graph,
-		      navgraph::EstimateFunction estimate_func,
-		      navgraph::CostFunction cost_func = NavGraphSearchState::euclidean_cost,
-		      fawkes::NavGraphConstraintRepo *constraint_repo = NULL);
+  NavGraphSearchState(const fawkes::NavGraphNode& node,
+                      const fawkes::NavGraphNode& goal,
+                      fawkes::NavGraph *map_graph,
+                      navgraph::EstimateFunction estimate_func,
+                      navgraph::CostFunction cost_func = NavGraphSearchState::euclidean_cost,
+                      fawkes::NavGraphConstraintRepo *constraint_repo = NULL);
 
   ~NavGraphSearchState();
 
@@ -64,7 +66,7 @@ class NavGraphSearchState : public fawkes::AStarState
    */
   static float
   euclidean_cost(const fawkes::NavGraphNode &from,
-		 const fawkes::NavGraphNode &to)
+                 const fawkes::NavGraphNode &to)
   {
     return sqrtf(powf(to.x() - from.x(), 2) +
 		 powf(to.y() - from.y(), 2) );
@@ -77,19 +79,20 @@ class NavGraphSearchState : public fawkes::AStarState
    */
   static float
   straight_line_estimate(const fawkes::NavGraphNode &node,
-			 const fawkes::NavGraphNode &goal)
+                         const fawkes::NavGraphNode &goal)
   {
     return sqrtf(powf(goal.x() - node.x(), 2) +
 		 powf(goal.y() - node.y(), 2) );
   }
 
  private:
-  NavGraphSearchState(fawkes::NavGraphNode node, fawkes::NavGraphNode goal,
-		      double cost_sofar, NavGraphSearchState *parent_state,
-		      fawkes::NavGraph *map_graph,
-		      navgraph::EstimateFunction estimate_func,
-		      navgraph::CostFunction cost_func,
-		      fawkes::NavGraphConstraintRepo *constraint_repo = NULL);
+  NavGraphSearchState(const fawkes::NavGraphNode& node,
+                      const fawkes::NavGraphNode& goal,
+                      double cost_sofar, NavGraphSearchState *parent_state,
+                      fawkes::NavGraph *map_graph,
+                      navgraph::EstimateFunction estimate_func,
+                      navgraph::CostFunction cost_func,
+                      fawkes::NavGraphConstraintRepo *constraint_repo = NULL);
 
  private:
   std::vector<AStarState *> children();

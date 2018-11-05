@@ -144,8 +144,8 @@ SonyEviD100PVisca::set_pan_tilt_rad(float pan, float tilt)
 
   int tpan = 0, ttilt = 0;
 
-  tpan = (int)rint(  pan  * PAN_STEPS_PER_RAD  );
-  ttilt = (int)rint( tilt * TILT_STEPS_PER_RAD );
+  tpan = (int)rintf(  pan  * PAN_STEPS_PER_RAD  );
+  ttilt = (int)rintf( tilt * TILT_STEPS_PER_RAD );
 
   set_pan_tilt(tpan, ttilt);
 }

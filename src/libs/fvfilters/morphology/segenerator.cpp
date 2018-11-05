@@ -103,8 +103,8 @@ SEGenerator::linear(unsigned int width, unsigned int height,
 
   delete d;
 
-  unsigned char *se = (unsigned char *)malloc(width * height);
-  memcpy(se, tmp, width * height);
+  unsigned char *se = (unsigned char *)malloc((size_t)width * (size_t)height);
+  memcpy(se, tmp, (size_t)width * (size_t)height);
 
   PNGWriter *png = new PNGWriter();
   png->set_dimensions( width, height );
@@ -152,8 +152,8 @@ SEGenerator::linear(unsigned int width, unsigned int height,
 unsigned char *
 SEGenerator::square(unsigned int width, unsigned int height)
 {
-  unsigned char *se = (unsigned char *)malloc(width * height);
-  memset(se, 1, width * height);
+  unsigned char *se = (unsigned char *)malloc((size_t)width * (size_t)height);
+  memset(se, 1, (size_t)width * (size_t)height);
   return se;
 }
 
@@ -190,7 +190,7 @@ void
 SEGenerator::drawSEbw(unsigned char *yuv422planar_buffer, unsigned char *mask, unsigned int width, unsigned int height)
 {
   memset(yuv422planar_buffer, 128, colorspace_buffer_size(YUV422_PLANAR, width, height) );
-  memset(yuv422planar_buffer, 255, width * height );
+  memset(yuv422planar_buffer, 255, (size_t)width * (size_t)height );
   for (unsigned int h = 0; h < height; ++h) {
     for (unsigned int w = 0; w < width; ++w) {
       if ( mask[ h * width + w ] != 0 ) {

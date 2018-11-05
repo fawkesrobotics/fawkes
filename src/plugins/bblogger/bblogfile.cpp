@@ -208,8 +208,8 @@ BBLogFile::sanity_check()
   }
 
   long int expected_size = sizeof(bblog_file_header)
-    + __header->num_data_items * __header->data_size
-    + __header->num_data_items * sizeof(bblog_entry_header);
+    + (size_t)__header->num_data_items * __header->data_size
+    + (size_t)__header->num_data_items * sizeof(bblog_entry_header);
   if (expected_size != fs.st_size) {
     Exception e("Size of file %s does not match expectation "
 		"(actual: %li, actual: %li)",

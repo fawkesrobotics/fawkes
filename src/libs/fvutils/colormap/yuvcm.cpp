@@ -107,6 +107,17 @@ YuvColormap::YuvColormap(YuvColormap *cm, const char *shmem_lut_id, bool destroy
   memcpy(__lut, cm->__lut, __lut_size);
 }
 
+/** Copy constructor.
+ * Creates a colormap in shared memory for the given LUT ID and copies the data of the
+ * given existing colormap.
+ * @param cm color mape to copy from
+ */
+YuvColormap::YuvColormap(const YuvColormap& cm)
+{
+  constructor(cm.depth(), cm.width(), cm.height());
+  memcpy(__lut, cm.__lut, __lut_size);
+}
+
 
 /** Internal constructor.
  * @param shmem_lut_id shared memory LUT ID
@@ -158,7 +169,7 @@ YuvColormap::constructor(unsigned int depth, unsigned int width, unsigned int he
     __lut_size = __shm_lut->data_size();
   } else {
     __shm_lut = NULL;
-    __lut_size = __width * __height * __depth;
+    __lut_size = (size_t)__width * (size_t)__height * (size_t)__depth;
     __lut = (unsigned char *)malloc( __lut_size );
   }
   memset(__lut, C_OTHER, __lut_size);

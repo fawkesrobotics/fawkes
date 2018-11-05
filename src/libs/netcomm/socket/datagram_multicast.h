@@ -38,6 +38,8 @@ class MulticastDatagramSocket : public Socket
   MulticastDatagramSocket(MulticastDatagramSocket &s);
   virtual ~MulticastDatagramSocket();
 
+	MulticastDatagramSocket& operator=(MulticastDatagramSocket& s);
+
   virtual Socket *  clone();
 
   virtual void bind();

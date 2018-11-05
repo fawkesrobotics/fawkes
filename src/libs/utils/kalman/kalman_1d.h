@@ -20,27 +20,31 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#ifndef __UTILS_KALMAN_KALMAN_1D_H_
+#define __UTILS_KALMAN_KALMAN_1D_H_
+
 namespace fawkes  {
 
 class KalmanFilter1D
 {
-  public:
-    KalmanFilter1D(float noise_x = 1.0, float noise_z = 1.0, float mu = 0.0,
-		   float sig = 1.0);
-    ~KalmanFilter1D();
+public:
+	KalmanFilter1D(float noise_x = 1.0, float noise_z = 1.0, float mu = 0.0,
+	               float sig = 1.0);
+	~KalmanFilter1D();
 
-    void filter(float observe);
-    void filter(float observe, float& mu, float& sig);
-    float predict() const;
-    float predict(float vel) const;
-    float predict(float vel, int steps, float noise_z) const;
-    float predict(float mu, float vel, int steps, float noise_z) const;
+	void filter(float observe);
+	void filter(float observe, float& mu, float& sig);
+	float predict() const;
+	float predict(float vel) const;
+	float predict(float vel, int steps, float noise_z) const;
+	float predict(float mu, float vel, int steps, float noise_z) const;
 
-  private:
-    float __noise_x;	/**< transition noise */
-    float __noise_z;	/**< "sigma_z", sensor noise */
-    float __mu;		/**< mean "mu" */
-    float __sig;	/**< "sigma_0". sigma ~ standard deviation */
+private:
+	float __noise_x;	/**< transition noise */
+	float __noise_z;	/**< "sigma_z", sensor noise */
+	float __mu;		/**< mean "mu" */
+	float __sig;	/**< "sigma_0". sigma ~ standard deviation */
 };
-}
+} // end namespace fawkes
 
+#endif

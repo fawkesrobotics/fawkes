@@ -106,6 +106,7 @@ OpenNiDepthThread::finalize()
   delete __depth_gen;
   delete __depth_md;
   delete __depth_buf;
+  delete __capture_start;
 }
 
 
