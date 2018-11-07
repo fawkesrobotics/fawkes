@@ -21,8 +21,8 @@ ifndef __buildsys_root_format_mk_
 __buildsys_root_format_mk_ := 1
 
 .PHONY: format-clang
-format: check-parallel
-	$(SILENT) echo -e "$(INDENT_PRINT)[FMT] Formatting where necessary"
+format-clang: check-parallel
+	$(SILENT) echo -e "$(INDENT_PRINT)[FMT] Formatting full tree"
 	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
 		ALL_FILES=$$(git ls-files *.{h,cpp}); \
 		if type -p parallel >/dev/null; then \
@@ -30,6 +30,38 @@ format: check-parallel
 		else \
 			echo "$$ALL_FILES" | xargs -P$$(nproc) -n1 clang-format -i; \
 		fi; \
+	else \
+		echo -e "$(INDENT_PRINT)$(TRED)--- Cannot format code$(TNORMAL) (clang-format not found)"; \
+    exit 1; \
+  fi
+
+.PHONY: format-modified-clang
+format-modified-clang: check-parallel
+	$(SILENT) echo -e "$(INDENT_PRINT)[FMT] Formatting modified files (git)"
+	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
+		ALL_FILES=$$(git ls-files -m *.{h,cpp}); \
+		if type -p parallel >/dev/null; then \
+			parallel -u --will-cite --bar clang-format -i ::: $$ALL_FILES; \
+		else \
+			echo "$$ALL_FILES" | xargs -P$$(nproc) -n1 clang-format -i; \
+		fi; \
+	else \
+		echo -e "$(INDENT_PRINT)$(TRED)--- Cannot format code$(TNORMAL) (clang-format not found)"; \
+    exit 1; \
+  fi
+
+.PHONY: format-branch-clang
+format-branch-clang: check-parallel
+	$(SILENT) echo -e "$(INDENT_PRINT)[FMT] Formatting branch (git)"
+	$(SILENT) git fetch --quiet origin master
+	$(SILENT) \
+	MERGE_BASE=$$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent \
+	              "origin/master") <(git rev-list --first-parent "HEAD") | head -1); \
+	MERGE_BASE_SHORT=$$(git rev-parse --short $$MERGE_BASE); \
+	HEAD_HASH=$$(git rev-parse --short HEAD); \
+	echo -e "$(INDENT_PRINT)[FMT] Processing range $$MERGE_BASE_SHORT..$$HEAD_HASH"; \
+	if type -p clang-format >/dev/null; then \
+		MERGE_BASE=$$MERGE_BASE git filter-branch -f --tree-filter 'PREV=$$(map $$(git rev-parse $$GIT_COMMIT^)); $(BUILDSYSDIR)/root/format-tree-filter.sh $$MERGE_BASE $$GIT_COMMIT $$PREV' -- $$MERGE_BASE..HEAD; \
 	else \
 		echo -e "$(INDENT_PRINT)$(TRED)--- Cannot format code$(TNORMAL) (clang-format not found)"; \
     exit 1; \
@@ -56,5 +88,13 @@ format-emacs: check-parallel
 # Using clang-format is the default, faster and better results
 .PHONY: format
 format: format-clang
+
+# Format currently modified files
+.PHONY: format-modified
+format-modified: format-modified-clang
+
+# Filter branch fixing the format in each commit of the branch
+.PHONY: format-branch
+format-branch: format-branch-clang
 
 endif # __buildsys_root_format_mk_
