@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 merged-pr-plugin: &merged-pr-plugin
-  seek-oss/github-merged-pr#v0.0.7:
+  seek-oss/github-merged-pr#v0.0.8:
     mode: checkout
 
 steps:
