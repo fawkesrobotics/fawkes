@@ -5,15 +5,20 @@ merged-pr-plugin: &merged-pr-plugin
   seek-oss/github-merged-pr#v0.0.8:
     mode: checkout
 
+docker-plugin-base: &docker-plugin-base
+  image: fawkesrobotics/fawkes-builder:fedora28-kinetic
+  always-pull: true
+  debug: true
+  workdir: /workdir
+  volumes: [".:/workdir"]
+
 steps:
   - label: ":memo: Linter"
     command: .buildkite/lint
     plugins:
       <<: *merged-pr-plugin
-      docker#v1.4.0:
-        image: fawkesrobotics/fawkes-builder:fedora28-kinetic
-        always-pull: true
-        debug: true
+      docker#v2.0.0:
+        <<: *docker-plugin-base
         environment:
           - BUILDKITE_REPO
           - BUILDKITE_BRANCH
@@ -28,21 +33,20 @@ steps:
     command: .buildkite/build
     plugins:
       <<: *merged-pr-plugin
-      docker#v1.4.0:
-        image: fawkesrobotics/fawkes-builder:fedora28-kinetic
-        always-pull: true
-        debug: true
-        mounts:
+      docker#v2.0.0:
+        <<: *docker-plugin-base
+        volumes:
+          - .:/workdir
           - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
 
   - label: ":ubuntu: Ubuntu"
     command: .buildkite/build
     plugins:
       <<: *merged-pr-plugin
-      docker#v1.4.0:
+      docker#v2.0.0:
+        <<: *docker-plugin-base
         image: fawkesrobotics/fawkes-builder:ubuntu1804-melodic
-        always-pull: true
-        debug: true
-        mounts:
+        volumes:
+          - .:/workdir
           - /var/lib/buildkite-agent/ccache_ubuntu:/var/cache/ccache
 
