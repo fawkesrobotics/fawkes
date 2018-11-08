@@ -29,22 +29,22 @@ LIBS_realsense = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
 
 OBJS_realsense = realsense_plugin.o realsense_thread.o 
 
-__REALSENSE1_INCLUDE_PATHS = /usr/include/librealsense1 /usr/local/include/librealsense1
-__REALSENSE_INCLUDE_PATHS = /usr/include/librealsense /usr/local/include/librealsense
+REALSENSE1_INCLUDE_PATHS_ = /usr/include/librealsense1 /usr/local/include/librealsense1
+REALSENSE_INCLUDE_PATHS_ = /usr/include/librealsense /usr/local/include/librealsense
 
-ifneq ($(wildcard $(addsuffix /rs.h,$(__REALSENSE1_INCLUDE_PATHS))),)
+ifneq ($(wildcard $(addsuffix /rs.h,$(REALSENSE1_INCLUDE_PATHS_))),)
 	# The old librealsense has been moved to librealsense1, librealsense is now
 	# librealsense2.  We need the old version because the newer version does not
 	# support our camera.
   CFLAGS += -DHAVE_REALSENSE1
   LIBS_realsense += realsense1
   PLUGINS_all = $(PLUGINDIR)/realsense.$(SOEXT)
-else ifneq ($(wildcard $(addsuffix /rs.h,$(__REALSENSE_INCLUDE_PATHS))),)
+else ifneq ($(wildcard $(addsuffix /rs.h,$(REALSENSE_INCLUDE_PATHS_))),)
 	# No librealsense1 but there is a librealsense.
 	# Check its version by checking for RS_API_MAJOR_VERSION in the header.
   REALSENSE_VERSION=$(shell awk \
     '/^\#define\s+RS_API_MAJOR_VERSION\s+\S+/{ print $$3; }' \
-    $(firstword $(wildcard $(addsuffix /rs.h,$(__REALSENSE_INCLUDE_PATHS)))))
+    $(firstword $(wildcard $(addsuffix /rs.h,$(REALSENSE_INCLUDE_PATHS_)))))
   ifeq ($(REALSENSE_VERSION),1)
     LIBS_realsense += realsense
     PLUGINS_all = $(PLUGINDIR)/realsense.$(SOEXT)
