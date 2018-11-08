@@ -61,9 +61,9 @@ class BlackBoardInterfaceObserver
   ObservedInterfaceLockMap *  bbio_get_observed_destroy() throw();
 
  private:
-  ObservedInterfaceLockMap         __bbio_observed_create;
-  ObservedInterfaceLockMap         __bbio_observed_destroy;
-  ObservedInterfaceLockMapIterator __bbio_iti;
+  ObservedInterfaceLockMap         bbio_observed_create_;
+  ObservedInterfaceLockMap         bbio_observed_destroy_;
+  ObservedInterfaceLockMapIterator bbio_iti_;
 };
 
 } // end namespace fawkes

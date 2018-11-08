@@ -53,11 +53,11 @@ class BlackBoardNetHandlerInterfaceListener
  private:
   void send_event_serial(Interface *interface, unsigned int msg_id, unsigned int event_serial);
 
-  BlackBoard       *__blackboard;
-  Interface        *__interface;
-  FawkesNetworkHub *__fnh;
+  BlackBoard       *blackboard_;
+  Interface        *interface_;
+  FawkesNetworkHub *fnh_;
 
-  unsigned int      __clid;
+  unsigned int      clid_;
 };
 
 } // end namespace fawkes

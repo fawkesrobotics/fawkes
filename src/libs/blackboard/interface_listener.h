@@ -119,13 +119,13 @@ class BlackBoardInterfaceListener
 
 
  private:
-  Mutex *__bbil_queue_mutex;
-  Mutex *__bbil_maps_mutex;
+  Mutex *bbil_queue_mutex_;
+  Mutex *bbil_maps_mutex_;
 
-  InterfaceMaps  __bbil_maps;
-  InterfaceQueue __bbil_queue;
+  InterfaceMaps  bbil_maps_;
+  InterfaceQueue bbil_queue_;
 
-  char *__name;
+  char *name_;
 };
 
 } // end namespace fawkes

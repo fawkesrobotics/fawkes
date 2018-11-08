@@ -41,7 +41,7 @@ class BlackBoardInstanceFactory
   void         delete_interface_instance(Interface *interface);
 
  private:
-  ModuleManager  *__mm;
+  ModuleManager  *mm_;
 };
 
 } // end namespace fawkes

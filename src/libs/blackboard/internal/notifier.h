@@ -122,36 +122,36 @@ class BlackBoardNotifier
   bool is_in_queue(bool op, BBilQueue &queue, const char *uid,
                    BlackBoardInterfaceListener *bbil);
 
-  BBilMap __bbil_data;
-  BBilMap __bbil_reader;
-  BBilMap __bbil_writer;
-  BBilMap __bbil_messages;
+  BBilMap bbil_data_;
+  BBilMap bbil_reader_;
+  BBilMap bbil_writer_;
+  BBilMap bbil_messages_;
 
-  Mutex *__bbil_unregister_mutex;
-  BBilQueue       __bbil_unregister_queue;
+  Mutex *bbil_unregister_mutex_;
+  BBilQueue       bbil_unregister_queue_;
 
-  Mutex *__bbil_writer_mutex;
-  unsigned int    __bbil_writer_events;
-  BBilQueue       __bbil_writer_queue;
+  Mutex *bbil_writer_mutex_;
+  unsigned int    bbil_writer_events_;
+  BBilQueue       bbil_writer_queue_;
 
-  Mutex *__bbil_reader_mutex;
-  unsigned int    __bbil_reader_events;
-  BBilQueue       __bbil_reader_queue;
+  Mutex *bbil_reader_mutex_;
+  unsigned int    bbil_reader_events_;
+  BBilQueue       bbil_reader_queue_;
 
-  Mutex *__bbil_data_mutex;
-  unsigned int    __bbil_data_events;
-  BBilQueue       __bbil_data_queue;
+  Mutex *bbil_data_mutex_;
+  unsigned int    bbil_data_events_;
+  BBilQueue       bbil_data_queue_;
 
-  Mutex *__bbil_messages_mutex;
-  unsigned int    __bbil_messages_events;
-  BBilQueue       __bbil_messages_queue;
+  Mutex *bbil_messages_mutex_;
+  unsigned int    bbil_messages_events_;
+  BBilQueue       bbil_messages_queue_;
 
-  BBioMap        __bbio_created;
-  BBioMap        __bbio_destroyed;
+  BBioMap        bbio_created_;
+  BBioMap        bbio_destroyed_;
 
-  Mutex *__bbio_mutex;
-  unsigned int    __bbio_events;
-  BBioQueue       __bbio_queue;
+  Mutex *bbio_mutex_;
+  unsigned int    bbio_events_;
+  BBioQueue       bbio_queue_;
 
 };
 

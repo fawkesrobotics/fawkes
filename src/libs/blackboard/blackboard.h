@@ -116,7 +116,7 @@ class BlackBoard
   BlackBoard(bool create_notifier = true);
 
  protected:
-  BlackBoardNotifier *__notifier;	///< Notifier for BB events.
+  BlackBoardNotifier *notifier_;	///< Notifier for BB events.
 };
 
 

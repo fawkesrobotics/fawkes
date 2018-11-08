@@ -62,26 +62,26 @@ class BlackBoardNetworkHandler
   void send_openfailure(unsigned int clid, unsigned int error_code);
 
 
-  BlackBoard *__bb;
-  LockQueue< FawkesNetworkMessage * >  __inbound_queue;
+  BlackBoard *bb_;
+  LockQueue< FawkesNetworkMessage * >  inbound_queue_;
 
   // All interfaces, key is the instance serial, value the interface
-  LockMap< unsigned int, Interface * > __interfaces;
-  LockMap< unsigned int, Interface * >::iterator __iit;
+  LockMap< unsigned int, Interface * > interfaces_;
+  LockMap< unsigned int, Interface * >::iterator iit_;
 
-  std::map<unsigned int, BlackBoardNetHandlerInterfaceListener *>  __listeners;
-  std::map<unsigned int, BlackBoardNetHandlerInterfaceListener *>::iterator  __lit;
+  std::map<unsigned int, BlackBoardNetHandlerInterfaceListener *>  listeners_;
+  std::map<unsigned int, BlackBoardNetHandlerInterfaceListener *>::iterator  lit_;
 
-  BlackBoardNetHandlerInterfaceObserver *__observer;
+  BlackBoardNetHandlerInterfaceObserver *observer_;
 
   // Map from instance serial to clid
-  LockMap<unsigned int, unsigned int > __serial_to_clid;
+  LockMap<unsigned int, unsigned int > serial_to_clid_;
 
   // Interfaces per client, key is the client ID, value a list of interfaces opened by client
-  LockMap< unsigned int, std::list<Interface *> > __client_interfaces;
-  std::list<Interface *>::iterator __ciit;
+  LockMap< unsigned int, std::list<Interface *> > client_interfaces_;
+  std::list<Interface *>::iterator ciit_;
 
-  FawkesNetworkHub *__nhub;
+  FawkesNetworkHub *nhub_;
 };
 
 } // end namespace fawkes

@@ -55,7 +55,7 @@ class QaBBEventListener
  public:
   QaBBEventListener(BlackBoard *bb)
     : BlackBoardInterfaceListener("QaBBEventListener"),
-      __bb(bb)
+      bb_(bb)
   {
     bbio_add_observed_create("TestInterface", "AnotherID *");
     bbio_add_observed_destroy("TestInterface");
@@ -86,7 +86,7 @@ class QaBBEventListener
       printf("BBIL: Received message of type %s, unregistering from inside "
              "event handler\n", message->type());
       bbil_remove_message_interface(interface);
-      __bb->update_listener(this);
+      bb_->update_listener(this);
     }
     return false;
   }
@@ -137,7 +137,7 @@ class QaBBEventListener
   }
 
  private:
-  BlackBoard *__bb;
+  BlackBoard *bb_;
 };
 
 

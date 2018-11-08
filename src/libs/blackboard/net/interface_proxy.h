@@ -70,25 +70,25 @@ class BlackBoardInterfaceProxy
  private:
   inline unsigned int next_msg_id()
   {
-    return ((__instance_serial << 16) | __next_msg_id++);
+    return ((instance_serial_ << 16) | next_msg_id_++);
   }
 
  private:
-  FawkesNetworkClient *__fnc;
+  FawkesNetworkClient *fnc_;
 
-  RefCountRWLock      *__rwlock;
-  BlackBoardNotifier  *__notifier;
-  Interface           *__interface;
+  RefCountRWLock      *rwlock_;
+  BlackBoardNotifier  *notifier_;
+  Interface           *interface_;
 
-  void                *__mem_chunk;
-  void                *__data_chunk;
-  size_t               __data_size;
+  void                *mem_chunk_;
+  void                *data_chunk_;
+  size_t               data_size_;
 
-  unsigned short       __instance_serial;
-  unsigned short       __next_msg_id;
-  unsigned int         __num_readers;
-  bool                 __has_writer;
-  unsigned int         __clid;
+  unsigned short       instance_serial_;
+  unsigned short       next_msg_id_;
+  unsigned int         num_readers_;
+  bool                 has_writer_;
+  unsigned int         clid_;
 };
 
 } // end namespace fawkes

@@ -59,26 +59,26 @@ BlackBoardNetworkHandler::BlackBoardNetworkHandler(BlackBoard *blackboard,
   : Thread("BlackBoardNetworkHandler", Thread::OPMODE_WAITFORWAKEUP),
     FawkesNetworkHandler(FAWKES_CID_BLACKBOARD)
 {
-  __bb   = blackboard;
-  __nhub = hub;
-  __nhub->add_handler(this);
+  bb_   = blackboard;
+  nhub_ = hub;
+  nhub_->add_handler(this);
 
-  __observer = new BlackBoardNetHandlerInterfaceObserver(blackboard, hub);
+  observer_ = new BlackBoardNetHandlerInterfaceObserver(blackboard, hub);
 }
 
 
 /** Destructor. */
 BlackBoardNetworkHandler::~BlackBoardNetworkHandler()
 {
-  delete __observer;
-  __nhub->remove_handler(this);
-  __inbound_queue.clear();
+  delete observer_;
+  nhub_->remove_handler(this);
+  inbound_queue_.clear();
   // close all open interfaces
-  for (__lit = __listeners.begin(); __lit != __listeners.end(); ++__lit) {
-    delete __lit->second;
+  for (lit_ = listeners_.begin(); lit_ != listeners_.end(); ++lit_) {
+    delete lit_->second;
   }
-  for (__iit = __interfaces.begin(); __iit != __interfaces.end(); ++__iit) {
-    __bb->close(__iit->second);
+  for (iit_ = interfaces_.begin(); iit_ != interfaces_.end(); ++iit_) {
+    bb_->close(iit_->second);
   }
 }
 
@@ -87,8 +87,8 @@ BlackBoardNetworkHandler::~BlackBoardNetworkHandler()
 void
 BlackBoardNetworkHandler::loop()
 {
-  while ( ! __inbound_queue.empty() ) {
-    FawkesNetworkMessage *msg = __inbound_queue.front();
+  while ( ! inbound_queue_.empty() ) {
+    FawkesNetworkMessage *msg = inbound_queue_.front();
 
     // used often and thus queried _once_
     unsigned int clid = msg->clid();
@@ -97,14 +97,14 @@ BlackBoardNetworkHandler::loop()
     case MSG_BB_LIST_ALL:
       {
 	BlackBoardInterfaceListContent *ilist = new BlackBoardInterfaceListContent();
-	InterfaceInfoList *infl = __bb->list_all();
+	InterfaceInfoList *infl = bb_->list_all();
 	
 	for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i) {
 	  ilist->append_interface(*i);
 	}
 
 	try {
-	  __nhub->send(clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_LIST, ilist);
+	  nhub_->send(clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_LIST, ilist);
 	} catch (Exception &e) {
 	  LibLogger::log_error("BlackBoardNetworkHandler", "Failed to send interface "
 			       "list to %u, exception follows", clid);
@@ -121,21 +121,21 @@ BlackBoardNetworkHandler::loop()
 
 	bb_ilistreq_msg_t *lrm = msg->msg<bb_ilistreq_msg_t>();
 
-	char type_pattern[__INTERFACE_TYPE_SIZE + 1];
-	char id_pattern[__INTERFACE_ID_SIZE + 1];
-	type_pattern[__INTERFACE_TYPE_SIZE] = 0;
-	id_pattern[__INTERFACE_ID_SIZE] = 0;
-	strncpy(type_pattern, lrm->type_pattern, __INTERFACE_TYPE_SIZE);
-	strncpy(id_pattern, lrm->id_pattern, __INTERFACE_ID_SIZE);
+	char type_pattern[INTERFACE_TYPE_SIZE_ + 1];
+	char id_pattern[INTERFACE_ID_SIZE_ + 1];
+	type_pattern[INTERFACE_TYPE_SIZE_] = 0;
+	id_pattern[INTERFACE_ID_SIZE_] = 0;
+	strncpy(type_pattern, lrm->type_pattern, INTERFACE_TYPE_SIZE_);
+	strncpy(id_pattern, lrm->id_pattern, INTERFACE_ID_SIZE_);
 
-	InterfaceInfoList *infl = __bb->list(type_pattern, id_pattern);
+	InterfaceInfoList *infl = bb_->list(type_pattern, id_pattern);
 	for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i)
 	{
 	  ilist->append_interface(*i);
 	}
 
 	try {
-	  __nhub->send(clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_LIST, ilist);
+	  nhub_->send(clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_LIST, ilist);
 	} catch (Exception &e) {
 	  LibLogger::log_error("BlackBoardNetworkHandler", "Failed to send "
 			       "interface list to %u, exception follows", clid);
@@ -150,12 +150,12 @@ BlackBoardNetworkHandler::loop()
       {
 	bb_iopen_msg_t *om = msg->msg<bb_iopen_msg_t>();
 
-	char type[__INTERFACE_TYPE_SIZE + 1];
-	char id[__INTERFACE_ID_SIZE + 1];
-	type[__INTERFACE_TYPE_SIZE] = 0;
-	id[__INTERFACE_ID_SIZE] = 0;
-	strncpy(type, om->type, __INTERFACE_TYPE_SIZE);
-	strncpy(id, om->id, __INTERFACE_ID_SIZE);
+	char type[INTERFACE_TYPE_SIZE_ + 1];
+	char id[INTERFACE_ID_SIZE_ + 1];
+	type[INTERFACE_TYPE_SIZE_] = 0;
+	id[INTERFACE_ID_SIZE_] = 0;
+	strncpy(type, om->type, INTERFACE_TYPE_SIZE_);
+	strncpy(id, om->id, INTERFACE_ID_SIZE_);
 
 	LibLogger::log_debug("BlackBoardNetworkHandler", "Remote opens interface %s::%s",
 			     type, id);
@@ -163,21 +163,21 @@ BlackBoardNetworkHandler::loop()
 	  Interface *iface;
 
 	  if ( msg->msgid() == MSG_BB_OPEN_FOR_READING ) {
-	    iface = __bb->open_for_reading(type, id, "remote");
+	    iface = bb_->open_for_reading(type, id, "remote");
 	  } else {
-	    iface = __bb->open_for_writing(type, id, "remote");
+	    iface = bb_->open_for_writing(type, id, "remote");
 	  }
-	  if ( memcmp(iface->hash(), om->hash, __INTERFACE_HASH_SIZE) != 0 ) {
+	  if ( memcmp(iface->hash(), om->hash, INTERFACE_HASH_SIZE_) != 0 ) {
 	    LibLogger::log_warn("BlackBoardNetworkHandler", "Opening interface %s::%s failed, "
 				"hash mismatch", type, id);
 	    send_openfailure(clid, BB_ERR_HASH_MISMATCH);
 	  } else {
-	    __interfaces[iface->serial()] = iface;
-	    __client_interfaces[clid].push_back(iface);
-	    __serial_to_clid[iface->serial()] = clid;
-	    __listeners[iface->serial()] = new BlackBoardNetHandlerInterfaceListener(__bb,
+	    interfaces_[iface->serial()] = iface;
+	    client_interfaces_[clid].push_back(iface);
+	    serial_to_clid_[iface->serial()] = clid;
+	    listeners_[iface->serial()] = new BlackBoardNetHandlerInterfaceListener(bb_,
 										     iface,
-										     __nhub,
+										     nhub_,
 										     clid);
 	    send_opensuccess(clid, iface);
 	  }
@@ -197,8 +197,8 @@ BlackBoardNetworkHandler::loop()
 	}
 	
 	//LibLogger::log_debug("BBNH", "interfaces: %zu  s2c: %zu  ci: %zu",
-	//		     __interfaces.size(), __serial_to_clid.size(),
-	//		     __client_interfaces.size());
+	//		     interfaces_.size(), serial_to_clid_.size(),
+	//		     client_interfaces_.size());
 
       }
       break;
@@ -207,34 +207,34 @@ BlackBoardNetworkHandler::loop()
       {
 	bb_iserial_msg_t *sm = msg->msg<bb_iserial_msg_t>();
 	unsigned int sm_serial = ntohl(sm->serial);
-	if ( __interfaces.find(sm_serial) != __interfaces.end() ) {
+	if ( interfaces_.find(sm_serial) != interfaces_.end() ) {
 	  bool close = false;
-	  __client_interfaces.lock();
-	  if ( __client_interfaces.find(clid) != __client_interfaces.end()) {
+	  client_interfaces_.lock();
+	  if ( client_interfaces_.find(clid) != client_interfaces_.end()) {
 	    // this client has interfaces, check if this one as well
-	    for ( __ciit = __client_interfaces[clid].begin(); __ciit != __client_interfaces[clid].end(); ++__ciit) {
-	      if ( (*__ciit)->serial() == sm_serial ) {
+	    for ( ciit_ = client_interfaces_[clid].begin(); ciit_ != client_interfaces_[clid].end(); ++ciit_) {
+	      if ( (*ciit_)->serial() == sm_serial ) {
 		close = true;
-		__serial_to_clid.erase(sm_serial);
-		__client_interfaces[clid].erase(__ciit);
-		if ( __client_interfaces[clid].empty() ) {
-		  __client_interfaces.erase(clid);
+		serial_to_clid_.erase(sm_serial);
+		client_interfaces_[clid].erase(ciit_);
+		if ( client_interfaces_[clid].empty() ) {
+		  client_interfaces_.erase(clid);
 		}
 		break;
 	      }
 	    }
 	  }
-	  __client_interfaces.unlock();
+	  client_interfaces_.unlock();
 
 	  if ( close ) {
-	    __interfaces.lock();
+	    interfaces_.lock();
 	    LibLogger::log_debug("BlackBoardNetworkHandler", "Remote %u closing interface %s",
-				 clid, __interfaces[sm_serial]->uid());
-	    delete __listeners[sm_serial];
-	    __listeners.erase(sm_serial);
-	    __bb->close(__interfaces[sm_serial]);
-	    __interfaces.erase(sm_serial);
-	    __interfaces.unlock();
+				 clid, interfaces_[sm_serial]->uid());
+	    delete listeners_[sm_serial];
+	    listeners_.erase(sm_serial);
+	    bb_->close(interfaces_[sm_serial]);
+	    interfaces_.erase(sm_serial);
+	    interfaces_.unlock();
 	  } else {
 	    LibLogger::log_warn("BlackBoardNetworkHandler", "Client %u tried to close "
 				"interface with serial %u, but opened by other client",
@@ -247,8 +247,8 @@ BlackBoardNetworkHandler::loop()
 	}
 
 	//LibLogger::log_debug("BBNH", "C: interfaces: %zu  s2c: %zu  ci: %zu",
-	//		     __interfaces.size(), __serial_to_clid.size(),
-	//		     __client_interfaces.size());
+	//		     interfaces_.size(), serial_to_clid_.size(),
+	//		     client_interfaces_.size());
       }
       break;
 
@@ -257,15 +257,15 @@ BlackBoardNetworkHandler::loop()
 	void *payload = msg->payload();
 	bb_idata_msg_t *dm = (bb_idata_msg_t *)payload;
 	unsigned int dm_serial = ntohl(dm->serial);
-	if ( __interfaces.find(dm_serial) != __interfaces.end() ) {
+	if ( interfaces_.find(dm_serial) != interfaces_.end() ) {
 	
-	  if ( ntohl(dm->data_size) != __interfaces[dm_serial]->datasize() ) {
+	  if ( ntohl(dm->data_size) != interfaces_[dm_serial]->datasize() ) {
 	    LibLogger::log_error("BlackBoardNetworkHandler", "DATA_CHANGED: Data size mismatch, "
 				 "expected %zu, but got %zu, ignoring.",
-				 __interfaces[dm_serial]->datasize(), ntohl(dm->data_size));
+				 interfaces_[dm_serial]->datasize(), ntohl(dm->data_size));
 	  } else {
-	    __interfaces[dm_serial]->set_from_chunk((char *)payload + sizeof(bb_idata_msg_t));
-	    __interfaces[dm_serial]->write();
+	    interfaces_[dm_serial]->set_from_chunk((char *)payload + sizeof(bb_idata_msg_t));
+	    interfaces_[dm_serial]->write();
 	  }
 	} else {
 	  LibLogger::log_error("BlackBoardNetworkHandler", "DATA_CHANGED: Interface with "
@@ -279,11 +279,11 @@ BlackBoardNetworkHandler::loop()
 	void *payload = msg->payload();
 	bb_imessage_msg_t *mm = (bb_imessage_msg_t *)payload;
 	unsigned int mm_serial = ntohl(mm->serial);
-	if ( __interfaces.find(mm_serial) != __interfaces.end() ) {
+	if ( interfaces_.find(mm_serial) != interfaces_.end() ) {
 
-	  if ( ! __interfaces[mm_serial]->is_writer() ) {
+	  if ( ! interfaces_[mm_serial]->is_writer() ) {
 	    try {
-	      Message *ifm = __interfaces[mm_serial]->create_message(mm->msg_type);
+	      Message *ifm = interfaces_[mm_serial]->create_message(mm->msg_type);
 	      ifm->set_id(ntohl(mm->msgid));
 	      ifm->set_hops(ntohl(mm->hops));
 
@@ -294,7 +294,7 @@ BlackBoardNetworkHandler::loop()
 	      } else {
 		ifm->set_from_chunk((char *)payload + sizeof(bb_imessage_msg_t));
 
-		__interfaces[mm_serial]->msgq_enqueue(ifm);
+		interfaces_[mm_serial]->msgq_enqueue(ifm);
 
 	      }
 	    } catch (Exception &e) {
@@ -320,7 +320,7 @@ BlackBoardNetworkHandler::loop()
     }
 
     msg->unref();
-    __inbound_queue.pop_locked();
+    inbound_queue_.pop_locked();
   }
 }
 
@@ -351,7 +351,7 @@ BlackBoardNetworkHandler::send_opensuccess(unsigned int clid, Interface *interfa
 							sizeof(bb_iopensucc_msg_t) +
 							interface->datasize());
   try {
-    __nhub->send(omsg);
+    nhub_->send(omsg);
   } catch (Exception &e) {
     LibLogger::log_error("BlackBoardNetworkHandler", "Failed to send interface "
 			 "open success to %u, exception follows", clid);
@@ -370,7 +370,7 @@ BlackBoardNetworkHandler::send_openfailure(unsigned int clid, unsigned int error
 							MSG_BB_OPEN_FAILURE, ofm,
 							sizeof(bb_iopenfail_msg_t));
   try {
-    __nhub->send(omsg);
+    nhub_->send(omsg);
   } catch (Exception &e) {
     LibLogger::log_error("BlackBoardNetworkHandler", "Failed to send interface "
 			 "open failure to %u, exception follows", clid);
@@ -387,7 +387,7 @@ void
 BlackBoardNetworkHandler::handle_network_message(FawkesNetworkMessage *msg)
 {
   msg->ref();
-  __inbound_queue.push_locked(msg);
+  inbound_queue_.push_locked(msg);
   wakeup();
 }
 
@@ -409,24 +409,24 @@ void
 BlackBoardNetworkHandler::client_disconnected(unsigned int clid)
 {
   // close any interface that this client had opened
-  __client_interfaces.lock();
-  if ( __client_interfaces.find(clid) != __client_interfaces.end() ) {
+  client_interfaces_.lock();
+  if ( client_interfaces_.find(clid) != client_interfaces_.end() ) {
     // Close all interfaces
-    for ( __ciit = __client_interfaces[clid].begin(); __ciit != __client_interfaces[clid].end(); ++__ciit) {
+    for ( ciit_ = client_interfaces_[clid].begin(); ciit_ != client_interfaces_[clid].end(); ++ciit_) {
       LibLogger::log_debug("BlackBoardNetworkHandler", "Closing interface %s::%s of remote "
 			   "%u (client disconnected)",
-			   (*__ciit)->type(), (*__ciit)->id(), clid);
+			   (*ciit_)->type(), (*ciit_)->id(), clid);
 
-      unsigned int serial = (*__ciit)->serial();
-      __serial_to_clid.erase(serial);
-      __interfaces.erase_locked(serial);
-      delete __listeners[serial];
-      __listeners.erase(serial);
-      __bb->close(*__ciit);
+      unsigned int serial = (*ciit_)->serial();
+      serial_to_clid_.erase(serial);
+      interfaces_.erase_locked(serial);
+      delete listeners_[serial];
+      listeners_.erase(serial);
+      bb_->close(*ciit_);
     }
-    __client_interfaces.erase(clid);
+    client_interfaces_.erase(clid);
   }
-  __client_interfaces.unlock();
+  client_interfaces_.unlock();
 }
 
 } // end namespace fawkes

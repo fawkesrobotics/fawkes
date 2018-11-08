@@ -34,9 +34,9 @@ namespace fawkes {
  * This header is stored at the beginning of each allocated memory chunk.
  */
 typedef struct {
-  char             type[__INTERFACE_TYPE_SIZE];	/**< interface type */
-  char             id[__INTERFACE_ID_SIZE];	/**< interface identifier */
-  unsigned char    hash[__INTERFACE_HASH_SIZE];	/**< interface type version hash */
+  char             type[INTERFACE_TYPE_SIZE_];	/**< interface type */
+  char             id[INTERFACE_ID_SIZE_];	/**< interface identifier */
+  unsigned char    hash[INTERFACE_HASH_SIZE_];	/**< interface type version hash */
   uint16_t         flag_writer_active :  1;	/**< 1 if there is a writer, 0 otherwise */
   uint16_t         flag_reserved      : 15;	/**< reserved for future use */
   uint16_t         num_readers;			/**< number of active readers */

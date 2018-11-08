@@ -84,9 +84,9 @@ main(int argc, char **argv)
   InterfaceInfoList *infl = bb->list_all();
   for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i) {
     const unsigned char *hash = (*i).hash();
-    char phash[__INTERFACE_HASH_SIZE * 2 + 1];
+    char phash[INTERFACE_HASH_SIZE_ * 2 + 1];
     memset(phash, 0, sizeof(phash));
-    for (unsigned int j = 0; j < __INTERFACE_HASH_SIZE; ++j) {
+    for (unsigned int j = 0; j < INTERFACE_HASH_SIZE_; ++j) {
       sprintf(&phash[j * 2], "%02x", hash[j]);
     }
     printf("%s::%s (%s), w:%i  r:%u  s:%u\n",

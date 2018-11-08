@@ -45,8 +45,8 @@ class BlackBoardNetHandlerInterfaceObserver
   void send_event(unsigned int msg_id, const char *type, const char *id);
 
  private:
-  BlackBoard       *__blackboard;
-  FawkesNetworkHub *__fnh;
+  BlackBoard       *blackboard_;
+  FawkesNetworkHub *fnh_;
 };
 
 } // end namespace fawkes

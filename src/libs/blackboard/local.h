@@ -76,10 +76,10 @@ class LocalBlackBoard : public BlackBoard
   const BlackBoardMemoryManager * memory_manager() const;
 
  private: /* members */
-  BlackBoardInterfaceManager *__im;
-  BlackBoardMemoryManager    *__memmgr;
-  BlackBoardMessageManager   *__msgmgr;
-  BlackBoardNetworkHandler   *__nethandler;
+  BlackBoardInterfaceManager *im_;
+  BlackBoardMemoryManager    *memmgr_;
+  BlackBoardMessageManager   *msgmgr_;
+  BlackBoardNetworkHandler   *nethandler_;
 };
 
 

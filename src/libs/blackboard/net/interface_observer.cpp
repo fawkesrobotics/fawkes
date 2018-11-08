@@ -47,20 +47,20 @@ namespace fawkes {
 BlackBoardNetHandlerInterfaceObserver::BlackBoardNetHandlerInterfaceObserver(BlackBoard *blackboard,
 									     FawkesNetworkHub *hub)
 {
-  __blackboard = blackboard;
-  __fnh = hub;
+  blackboard_ = blackboard;
+  fnh_ = hub;
 
   bbio_add_observed_create("*", "*");
   bbio_add_observed_destroy("*", "*");
 
-  __blackboard->register_observer(this);
+  blackboard_->register_observer(this);
 }
 
 
 /** Destructor. */
 BlackBoardNetHandlerInterfaceObserver::~BlackBoardNetHandlerInterfaceObserver()
 {
-  __blackboard->unregister_observer(this);
+  blackboard_->unregister_observer(this);
 }
 
 
@@ -74,11 +74,11 @@ BlackBoardNetHandlerInterfaceObserver::send_event(unsigned int msg_id,
 						  const char *type, const char *id)
 {
   bb_ievent_msg_t *esm = (bb_ievent_msg_t *)malloc(sizeof(bb_ievent_msg_t));
-  strncpy(esm->type, type, __INTERFACE_TYPE_SIZE-1);
-  strncpy(esm->id, id, __INTERFACE_ID_SIZE-1);
+  strncpy(esm->type, type, INTERFACE_TYPE_SIZE_-1);
+  strncpy(esm->id, id, INTERFACE_ID_SIZE_-1);
 
   try {
-    __fnh->broadcast(FAWKES_CID_BLACKBOARD, msg_id, esm, sizeof(bb_ievent_msg_t));  
+    fnh_->broadcast(FAWKES_CID_BLACKBOARD, msg_id, esm, sizeof(bb_ievent_msg_t));  
   } catch (Exception &e) {
     LibLogger::log_warn("BlackBoardNetHandlerInterfaceObserver",
 			"Failed to send BlackBoard event (%s), exception follows",

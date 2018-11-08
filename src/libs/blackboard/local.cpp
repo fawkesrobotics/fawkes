@@ -56,14 +56,14 @@ namespace fawkes {
 LocalBlackBoard::LocalBlackBoard(size_t memsize,
 				 const char *magic_token, bool master)
 {
-  __memmgr = new BlackBoardMemoryManager(memsize, BLACKBOARD_VERSION, master);
+  memmgr_ = new BlackBoardMemoryManager(memsize, BLACKBOARD_VERSION, master);
 
-  __msgmgr = new BlackBoardMessageManager(__notifier);
-  __im = new BlackBoardInterfaceManager(__memmgr, __msgmgr, __notifier);
+  msgmgr_ = new BlackBoardMessageManager(notifier_);
+  im_ = new BlackBoardInterfaceManager(memmgr_, msgmgr_, notifier_);
 
-  __msgmgr->set_interface_manager(__im);
+  msgmgr_->set_interface_manager(im_);
 
-  __nethandler = NULL;
+  nethandler_ = NULL;
 }
 
 
@@ -72,28 +72,28 @@ LocalBlackBoard::LocalBlackBoard(size_t memsize,
  */
 LocalBlackBoard::LocalBlackBoard(size_t memsize)
 {
-  __memmgr = new BlackBoardMemoryManager(memsize);
+  memmgr_ = new BlackBoardMemoryManager(memsize);
 
-  __msgmgr = new BlackBoardMessageManager(__notifier);
-  __im = new BlackBoardInterfaceManager(__memmgr, __msgmgr, __notifier);
+  msgmgr_ = new BlackBoardMessageManager(notifier_);
+  im_ = new BlackBoardInterfaceManager(memmgr_, msgmgr_, notifier_);
 
-  __msgmgr->set_interface_manager(__im);
+  msgmgr_->set_interface_manager(im_);
 
-  __nethandler = NULL;
+  nethandler_ = NULL;
 }
 
 
 /** Destructor. */
 LocalBlackBoard::~LocalBlackBoard()
 {
-  if ( __nethandler ) {
-    __nethandler->cancel();
-    __nethandler->join();
-    delete __nethandler;
+  if ( nethandler_ ) {
+    nethandler_->cancel();
+    nethandler_->join();
+    delete nethandler_;
   }
-  delete __im;
-  delete __msgmgr;
-  delete __memmgr;
+  delete im_;
+  delete msgmgr_;
+  delete memmgr_;
 }
 
 
@@ -101,7 +101,7 @@ Interface *
 LocalBlackBoard::open_for_reading(const char *type, const char *identifier, const char *owner)
 {
   try {
-    return __im->open_for_reading(type, identifier, owner);
+    return im_->open_for_reading(type, identifier, owner);
   } catch (Exception &e) {
     throw;
   }
@@ -112,7 +112,7 @@ Interface *
 LocalBlackBoard::open_for_writing(const char *type, const char *identifier, const char *owner)
 {
   try {
-    return __im->open_for_writing(type, identifier, owner);
+    return im_->open_for_writing(type, identifier, owner);
   } catch (Exception &e) {
     throw;
   }
@@ -125,7 +125,7 @@ LocalBlackBoard::open_multiple_for_reading(const char *type_pattern,
 					   const char *owner)
 {
   try {
-    return __im->open_multiple_for_reading(type_pattern, id_pattern, owner);
+    return im_->open_multiple_for_reading(type_pattern, id_pattern, owner);
   } catch (Exception &e) {
     throw;
   }  
@@ -135,21 +135,21 @@ LocalBlackBoard::open_multiple_for_reading(const char *type_pattern,
 void
 LocalBlackBoard::close(Interface *interface)
 {
-  __im->close(interface);
+  im_->close(interface);
 }
 
 
 InterfaceInfoList *
 LocalBlackBoard::list_all()
 {
-  return __im->list_all();
+  return im_->list_all();
 }
 
 
 InterfaceInfoList *
 LocalBlackBoard::list(const char *type_pattern, const char *id_pattern)
 {
-  return __im->list(type_pattern, id_pattern);
+  return im_->list(type_pattern, id_pattern);
 }
 
 
@@ -197,7 +197,7 @@ LocalBlackBoard::cleanup(const char *magic_token, bool use_lister)
 const BlackBoardMemoryManager *
 LocalBlackBoard::memory_manager() const
 {
-  return __memmgr;
+  return memmgr_;
 }
 
 
@@ -208,11 +208,11 @@ LocalBlackBoard::memory_manager() const
 void
 LocalBlackBoard::start_nethandler(FawkesNetworkHub *hub)
 {
-  if ( __nethandler ) {
+  if ( nethandler_ ) {
     throw Exception("BlackBoardNetworkHandler already started");
   }
-  __nethandler = new BlackBoardNetworkHandler(this, hub);
-  __nethandler->start();
+  nethandler_ = new BlackBoardNetworkHandler(this, hub);
+  nethandler_->start();
 }
 
 } // end namespace fawkes

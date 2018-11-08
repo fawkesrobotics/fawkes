@@ -121,8 +121,8 @@ class BlackBoardMemoryManager
     unsigned int    overhang() const;
 
    private:
-    SharedMemory *__shmem;
-    chunk_list_t *__cur;
+    SharedMemory *shmem_;
+    chunk_list_t *cur_;
   };
 
   ChunkIterator begin();
@@ -143,21 +143,21 @@ class BlackBoardMemoryManager
   void * alloc_nolock(unsigned int num_bytes);
 
  private:
-  bool __master;
+  bool master_;
 
-  size_t __memsize;
+  size_t memsize_;
 
   // Mutex to be used for all list operations (alloc, free)
-  Mutex *__mutex;
+  Mutex *mutex_;
 
   // used for shmem
-  BlackBoardSharedMemoryHeader *__shmem_header;
-  SharedMemory *__shmem;
+  BlackBoardSharedMemoryHeader *shmem_header_;
+  SharedMemory *shmem_;
 
   // Used for heap memory
-  void  *__memory;
-  chunk_list_t *__free_list_head;	/**< offset of the free chunks list head */
-  chunk_list_t *__alloc_list_head;	/**< offset of the allocated chunks list head */
+  void  *memory_;
+  chunk_list_t *free_list_head_;	/**< offset of the free chunks list head */
+  chunk_list_t *alloc_list_head_;	/**< offset of the allocated chunks list head */
 
 };
 

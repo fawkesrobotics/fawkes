@@ -125,24 +125,24 @@ public:
 			fawkes::BlackBoard *writer_bb)
     : BlackBoardInterfaceListener("SyncInterfaceListener(%s-%s)", writer->uid(), reader->id())
   {
-    __reader    = reader;
-    __writer    = writer;
-    __reader_bb = reader_bb;
-    __writer_bb = writer_bb;
+    reader_    = reader;
+    writer_    = writer;
+    reader_bb_ = reader_bb;
+    writer_bb_ = writer_bb;
 
-    bbil_add_data_interface(__reader);
-    bbil_add_message_interface(__writer);
+    bbil_add_data_interface(reader_);
+    bbil_add_message_interface(writer_);
 
-    __reader_bb->register_listener(this);
-    __writer_bb->register_listener(this);
+    reader_bb_->register_listener(this);
+    writer_bb_->register_listener(this);
   }
 
 
   /** Destructor. */
   ~SyncInterfaceListener()
   {
-    __reader_bb->unregister_listener(this);
-    __writer_bb->unregister_listener(this);
+    reader_bb_->unregister_listener(this);
+    writer_bb_->unregister_listener(this);
   }
 
 
@@ -151,12 +151,12 @@ public:
 				Message *message) throw()
   {
     try {
-      if ( interface == __writer ) {
+      if ( interface == writer_ ) {
 	printf("%s: Forwarding message\n", bbil_name());
 	Message *m = message->clone();
 	m->set_hops(message->hops());
 	m->ref();
-	__reader->msgq_enqueue(m);
+	reader_->msgq_enqueue(m);
 	message->set_id(m->id());
 	m->unref();
 	return false;
@@ -177,11 +177,11 @@ public:
   bb_interface_data_changed(Interface *interface) throw()
   {
     try {
-      if ( interface == __reader ) {
-	//__logger->log_debug(bbil_name(), "Copying data");
-	__reader->read();
-	__writer->copy_values(__reader);
-	__writer->write();
+      if ( interface == reader_ ) {
+	//logger_->log_debug(bbil_name(), "Copying data");
+	reader_->read();
+	writer_->copy_values(reader_);
+	writer_->write();
       } else {
 	// Don't know why we were called, let 'em enqueue
 	printf("%s: Data changed for unknown interface", bbil_name());
@@ -193,11 +193,11 @@ public:
   }
 
  private:
-  fawkes::Interface  *__writer;
-  fawkes::Interface  *__reader;
+  fawkes::Interface  *writer_;
+  fawkes::Interface  *reader_;
 
-  fawkes::BlackBoard *__writer_bb;
-  fawkes::BlackBoard *__reader_bb;
+  fawkes::BlackBoard *writer_bb_;
+  fawkes::BlackBoard *reader_bb_;
 
 };
 
@@ -220,9 +220,9 @@ main(int argc, char **argv)
   InterfaceInfoList *infl = rbb->list_all();
   for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i) {
     const unsigned char *hash = (*i).hash();
-    char phash[__INTERFACE_HASH_SIZE * 2 + 1];
+    char phash[INTERFACE_HASH_SIZE_ * 2 + 1];
     memset(phash, 0, sizeof(phash));
-    for (unsigned int j = 0; j < __INTERFACE_HASH_SIZE; ++j) {
+    for (unsigned int j = 0; j < INTERFACE_HASH_SIZE_; ++j) {
       sprintf(&phash[j * 2], "%02x", hash[j]);
     }
     printf("%s::%s (%s), w:%i  r:%u  s:%u\n",

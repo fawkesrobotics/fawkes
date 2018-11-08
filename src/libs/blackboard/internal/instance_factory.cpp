@@ -46,14 +46,14 @@ namespace fawkes {
 /** Constructor.*/
 BlackBoardInstanceFactory::BlackBoardInstanceFactory()
 {
-  __mm = new ModuleManager(IFACEDIR);
+  mm_ = new ModuleManager(IFACEDIR);
 }
 
 
 /** Destructor */
 BlackBoardInstanceFactory::~BlackBoardInstanceFactory()
 {
-  delete __mm;
+  delete mm_;
 }
 
 
@@ -76,19 +76,19 @@ BlackBoardInstanceFactory::new_interface_instance(const char *type, const char *
 	if (strlen(type) == 0) {
 		throw Exception("Interface type may not be empty");	
 	}
-	if (strlen(type) > __INTERFACE_TYPE_SIZE) {
+	if (strlen(type) > INTERFACE_TYPE_SIZE_) {
 		throw Exception("Interface type '%s' too long, maximum length is %zu",
-		                type, __INTERFACE_TYPE_SIZE);
+		                type, INTERFACE_TYPE_SIZE_);
 	}
-	if (strlen(identifier) > __INTERFACE_ID_SIZE) {
+	if (strlen(identifier) > INTERFACE_ID_SIZE_) {
 		throw Exception("Interface ID '%s' too long, maximum length is %zu",
-		                type, __INTERFACE_ID_SIZE);
+		                type, INTERFACE_ID_SIZE_);
 	}
 
   Module *mod = NULL;
-  std::string filename = std::string("lib") + type + "." + __mm->get_module_file_extension();
+  std::string filename = std::string("lib") + type + "." + mm_->get_module_file_extension();
   try {
-      mod = __mm->open_module(filename.c_str());
+      mod = mm_->open_module(filename.c_str());
   } catch (Exception &e) {
     throw BlackBoardInterfaceNotFoundException(type, " Module file not found.");
   }
@@ -116,22 +116,22 @@ BlackBoardInstanceFactory::new_interface_instance(const char *type, const char *
 void
 BlackBoardInstanceFactory::delete_interface_instance(Interface *interface)
 {
-  std::string filename = std::string("lib") + interface->__type + "." + __mm->get_module_file_extension();
-  Module *mod = __mm->get_module(filename.c_str());
+  std::string filename = std::string("lib") + interface->type_ + "." + mm_->get_module_file_extension();
+  Module *mod = mm_->get_module(filename.c_str());
 
   if ( ! mod) {
-    throw BlackBoardInterfaceNotFoundException(interface->__type, " Interface module not opened.");
+    throw BlackBoardInterfaceNotFoundException(interface->type_, " Interface module not opened.");
   }
 
   if ( ! mod->has_symbol("interface_destroy") ) {
-    throw BlackBoardInterfaceNotFoundException(interface->__type, " Destroyer function not found.");
+    throw BlackBoardInterfaceNotFoundException(interface->type_, " Destroyer function not found.");
   }
 
   InterfaceDestroyFunc idf = (InterfaceDestroyFunc)mod->get_symbol("interface_destroy");
   idf(interface);
 
   mod->unref();
-  __mm->close_module(mod);
+  mm_->close_module(mod);
 }
 
 } // end namespace fawkes
