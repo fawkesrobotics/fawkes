@@ -142,4 +142,4 @@ class FuseImageListWidget : FuseClientHandler, public Gtk::TreeView
 
 } // end namespace firevision
 
-#endif /* __FIREVISION_FVWIDGETS_FUSE_IMAGE_LIST_WIDGET_H_ */
+#endif /* FIREVISION_FVWIDGETS_FUSE_IMAGE_LIST_WIDGET_H__ */

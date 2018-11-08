@@ -48,10 +48,10 @@ namespace firevision {
  */
 ImageWidget::ImageWidget(unsigned int width, unsigned int height)
 {
-  __cam            = NULL;
-  __cam_enabled    = false;
-  __cam_mutex      = new fawkes::Mutex;
-  __refresh_thread = NULL;
+  cam_            = NULL;
+  cam_enabled_    = false;
+  cam_mutex_      = new fawkes::Mutex;
+  refresh_thread_ = NULL;
 
   set_size(width, height);
 }
@@ -70,25 +70,25 @@ ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay, unsigned int w
 {
   if (!cam) throw fawkes::NullPointerException("Parameter cam may not be NULL");
 
-  __cam            = cam;
-  __cam_enabled    = true;
-  __cam_mutex      = new fawkes::Mutex;
-  __cam_has_buffer = false;
+  cam_            = cam;
+  cam_enabled_    = true;
+  cam_mutex_      = new fawkes::Mutex;
+  cam_has_buffer_ = false;
 
   set_size(width, height);
 
   try {
-    fawkes::Time *time = __cam->capture_time();
+    fawkes::Time *time = cam_->capture_time();
     delete time;
-    __cam_has_timestamp = true;
+    cam_has_timestamp_ = true;
   }
   catch (fawkes::Exception &e) {
-    __cam_has_timestamp = false;
+    cam_has_timestamp_ = false;
   }
 
-  __refresh_thread = new RefThread(this, refresh_delay);
-  __refresh_thread->start();
-  __refresh_thread->refresh_cam();
+  refresh_thread_ = new RefThread(this, refresh_delay);
+  refresh_thread_->start();
+  refresh_thread_->refresh_cam();
 }
 
 /** Constructor for Gtk::Builder.
@@ -105,10 +105,10 @@ ImageWidget::ImageWidget(Camera *cam, unsigned int refresh_delay, unsigned int w
 ImageWidget::ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gtk::Builder> builder)
   : Gtk::Image(cobject)
 {
-  __cam            = NULL;
-  __cam_enabled    = false;
-  __cam_mutex      = new fawkes::Mutex;
-  __refresh_thread = NULL;
+  cam_            = NULL;
+  cam_enabled_    = false;
+  cam_mutex_      = new fawkes::Mutex;
+  refresh_thread_ = NULL;
 //   set_size(Gtk::Image::get_width(), Gtk::Image::get_height());
 }
 
@@ -127,10 +127,10 @@ ImageWidget::ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gtk::Builder> bui
 ImageWidget::ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gnome::Glade::Xml> refxml)
   : Gtk::Image( cobject )
 {
-  __cam            = NULL;
-  __cam_enabled    = false;
-  __cam_mutex      = new fawkes::Mutex;
-  __refresh_thread = NULL;
+  cam_            = NULL;
+  cam_enabled_    = false;
+  cam_mutex_      = new fawkes::Mutex;
+  refresh_thread_ = NULL;
 
 //   set_size(Gtk::Image::get_width(), Gtk::Image::get_height());
 }
@@ -141,8 +141,8 @@ ImageWidget::ImageWidget(BaseObjectType* cobject, Glib::RefPtr<Gnome::Glade::Xml
  */
 ImageWidget::~ImageWidget()
 {
-  if (__refresh_thread) __refresh_thread->stop();
-  delete __cam_mutex;
+  if (refresh_thread_) refresh_thread_->stop();
+  delete cam_mutex_;
 }
 
 /** Set the camera from which the ImageWidget obtains the images.
@@ -157,29 +157,29 @@ ImageWidget::~ImageWidget()
 void
 ImageWidget::set_camera(Camera *cam, unsigned int refresh_delay)
 {
-  __cam            = cam;
-  __cam_enabled    = true;
-  __cam_has_buffer = false;
+  cam_            = cam;
+  cam_enabled_    = true;
+  cam_has_buffer_ = false;
 
-  set_size(__cam->pixel_width(), __cam->pixel_height());
+  set_size(cam_->pixel_width(), cam_->pixel_height());
 
   try {
-    fawkes::Time *time = __cam->capture_time();
+    fawkes::Time *time = cam_->capture_time();
     delete time;
-    __cam_has_timestamp = true;
+    cam_has_timestamp_ = true;
   }
   catch (fawkes::Exception &e) {
-    __cam_has_timestamp = false;
+    cam_has_timestamp_ = false;
   }
 
-  if ( __refresh_thread ) {
-    __refresh_thread->set_delay(refresh_delay);
+  if ( refresh_thread_ ) {
+    refresh_thread_->set_delay(refresh_delay);
   } else {
-    __refresh_thread = new RefThread(this, refresh_delay);
-    __refresh_thread->start();
+    refresh_thread_ = new RefThread(this, refresh_delay);
+    refresh_thread_->start();
   }
 
-  __refresh_thread->refresh_cam();
+  refresh_thread_->refresh_cam();
 }
 
 /**
@@ -191,13 +191,13 @@ ImageWidget::set_camera(Camera *cam, unsigned int refresh_delay)
 void
 ImageWidget::enable_camera(bool enable)
 {
-  if ( !enable && __cam_enabled ) {
-    __refresh_thread->stop();
-  } else if ( __refresh_thread && enable && !__cam_enabled ) {
-    __refresh_thread->start();
+  if ( !enable && cam_enabled_ ) {
+    refresh_thread_->stop();
+  } else if ( refresh_thread_ && enable && !cam_enabled_ ) {
+    refresh_thread_->start();
   }
 
-  __cam_enabled = enable;
+  cam_enabled_ = enable;
 }
 
 /** Sets the size of the ImageWidget.
@@ -214,28 +214,28 @@ void
 ImageWidget::set_size(unsigned int width, unsigned int height)
 {
   if (!width || ! height) {
-    if (__cam) {
-      width  = __cam->pixel_width();
-      height = __cam->pixel_height();
+    if (cam_) {
+      width  = cam_->pixel_width();
+      height = cam_->pixel_height();
     }
     else {
       throw fawkes::IllegalArgumentException("ImageWidget::set_size(): width and/or height may not be 0 if no Camera is set");
     }
   }
 
-  if (!__pixbuf || __width != width || __height != height) {
-    __width  = width;
-    __height = height;
+  if (!pixbuf_ || width_ != width || height_ != height) {
+    width_  = width;
+    height_ = height;
 
 #if GLIBMM_MAJOR_VERSION > 2 || ( GLIBMM_MAJOR_VERSION == 2 && GLIBMM_MINOR_VERSION >= 14 )
-    __pixbuf.reset();
+    pixbuf_.reset();
 #else
-    __pixbuf.clear();
+    pixbuf_.clear();
 #endif
 
-    __pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, __width, __height);
+    pixbuf_ = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, false, 8, width_, height_);
 
-    set_size_request(__width, __height);
+    set_size_request(width_, height_);
   }
 }
 /**
@@ -245,7 +245,7 @@ ImageWidget::set_size(unsigned int width, unsigned int height)
 unsigned int
 ImageWidget::get_width() const
 {
-    return __width;
+    return width_;
 }
 
 /**
@@ -255,7 +255,7 @@ ImageWidget::get_width() const
 unsigned int
 ImageWidget::get_height() const
 {
-    return __height;
+    return height_;
 }
 
 /**
@@ -265,7 +265,7 @@ ImageWidget::get_height() const
 Glib::RefPtr<Gdk::Pixbuf>
 ImageWidget::get_buffer() const
 {
-    return __pixbuf;
+    return pixbuf_;
 }
 
 /**
@@ -293,10 +293,10 @@ ImageWidget::set_rgb(unsigned int x, unsigned int y, unsigned char r, unsigned c
 void
 ImageWidget::set_rgb(unsigned int x, unsigned int y, RGB_t rgb)
 {
-  if (x >= __width) throw fawkes::OutOfBoundsException("x-Coordinate exeeds image width", x, 0, __width);
-  if (y >= __height) throw fawkes::OutOfBoundsException("y-Coordinate exeeds image height", x, 0, __height);
+  if (x >= width_) throw fawkes::OutOfBoundsException("x-Coordinate exeeds image width", x, 0, width_);
+  if (y >= height_) throw fawkes::OutOfBoundsException("y-Coordinate exeeds image height", x, 0, height_);
 
-  RGB_t * target = RGB_PIXEL_AT(__pixbuf->get_pixels(), __width, x, y);
+  RGB_t * target = RGB_PIXEL_AT(pixbuf_->get_pixels(), width_, x, y);
   *target = rgb;
 }
 
@@ -317,21 +317,21 @@ bool
 ImageWidget::show(colorspace_t colorspace, unsigned char *buffer, unsigned int width, unsigned int height)
 {
   try {
-    if (!width || !height || (width == __width && height == __height)) {
-      convert(colorspace, RGB, buffer, __pixbuf->get_pixels(), __width, __height);
+    if (!width || !height || (width == width_ && height == height_)) {
+      convert(colorspace, RGB, buffer, pixbuf_->get_pixels(), width_, height_);
     }
     else {
-      unsigned char *scaled_buffer = (unsigned char *)malloc(colorspace_buffer_size(colorspace, __width, __height));
+      unsigned char *scaled_buffer = (unsigned char *)malloc(colorspace_buffer_size(colorspace, width_, height_));
 
       if (scaled_buffer) {
         LossyScaler scaler;
         scaler.set_original_buffer(buffer);
         scaler.set_original_dimensions(width, height);
         scaler.set_scaled_buffer(scaled_buffer);
-        scaler.set_scaled_dimensions(__width, __height);
+        scaler.set_scaled_dimensions(width_, height_);
         scaler.scale();
 
-        convert(colorspace, RGB, scaled_buffer, __pixbuf->get_pixels(), __width, __height);
+        convert(colorspace, RGB, scaled_buffer, pixbuf_->get_pixels(), width_, height_);
 
         free(scaled_buffer);
       }
@@ -343,8 +343,8 @@ ImageWidget::show(colorspace_t colorspace, unsigned char *buffer, unsigned int w
   }
 
   try {
-    set(__pixbuf);
-    __signal_show.emit(colorspace, buffer, width, height);
+    set(pixbuf_);
+    signal_show_.emit(colorspace, buffer, width, height);
     return true;
   }
   catch (fawkes::Exception &e) {
@@ -367,7 +367,7 @@ ImageWidget::show(colorspace_t colorspace, unsigned char *buffer, unsigned int w
 sigc::signal<void, colorspace_t, unsigned char *, unsigned int, unsigned int> &
 ImageWidget::signal_show()
 {
-  return __signal_show;
+  return signal_show_;
 }
 
 
@@ -379,7 +379,7 @@ ImageWidget::signal_show()
 void
 ImageWidget::set_refresh_delay(unsigned int refresh_delay)
 {
-  __refresh_thread->set_delay(refresh_delay);
+  refresh_thread_->set_delay(refresh_delay);
 }
 
 
@@ -389,8 +389,8 @@ ImageWidget::set_refresh_delay(unsigned int refresh_delay)
 void
 ImageWidget::refresh_cam()
 {
-  if ( __cam_enabled ) {
-    __refresh_thread->refresh_cam();
+  if ( cam_enabled_ ) {
+    refresh_thread_->refresh_cam();
   }
 }
 
@@ -401,17 +401,17 @@ ImageWidget::refresh_cam()
 void
 ImageWidget::set_cam()
 {
-  if ( !__cam_enabled ) { return; }
+  if ( !cam_enabled_ ) { return; }
 
-  __cam_mutex->lock();
+  cam_mutex_->lock();
 
-  if (__cam_has_buffer) {
-    show(__cam->colorspace(), __cam->buffer(), __cam->pixel_width(), __cam->pixel_height());
-    __cam->flush();
-    __cam_has_buffer = false;
+  if (cam_has_buffer_) {
+    show(cam_->colorspace(), cam_->buffer(), cam_->pixel_width(), cam_->pixel_height());
+    cam_->flush();
+    cam_has_buffer_ = false;
   }
 
-  __cam_mutex->unlock();
+  cam_mutex_->unlock();
 }
 
 /**
@@ -427,15 +427,15 @@ ImageWidget::set_cam()
 bool
 ImageWidget::save_image(std::string filename, Glib::ustring type) const throw()
 {
-  __cam_mutex->lock();
+  cam_mutex_->lock();
 
   try {
-    __pixbuf->save(filename, type);
-    __cam_mutex->unlock();
+    pixbuf_->save(filename, type);
+    cam_mutex_->unlock();
     return true;
   }
   catch (Glib::Exception &e) {
-    __cam_mutex->unlock();
+    cam_mutex_->unlock();
     printf("save failed: %s\n", e.what().c_str());
     return false;
   }
@@ -453,7 +453,7 @@ ImageWidget::save_image(std::string filename, Glib::ustring type) const throw()
 void
 ImageWidget::save_on_refresh_cam(bool enable, std::string path, Glib::ustring type, unsigned int img_num)
 {
-  __refresh_thread->save_on_refresh(enable, path, type, img_num);
+  refresh_thread_->save_on_refresh(enable, path, type, img_num);
 }
 
 /**
@@ -463,7 +463,7 @@ ImageWidget::save_on_refresh_cam(bool enable, std::string path, Glib::ustring ty
 unsigned int
 ImageWidget::get_image_num()
 {
-  return __refresh_thread->get_img_num();
+  return refresh_thread_->get_img_num();
 }
 
 /**
@@ -477,14 +477,14 @@ ImageWidget::RefThread::RefThread(ImageWidget *widget, unsigned int refresh_dela
 {
   set_delete_on_exit(true);
 
-  __widget     = widget;
-  __stop       = false;
-  __do_refresh = false;
+  widget_     = widget;
+  stop_       = false;
+  do_refresh_ = false;
 
-  __save_imgs  = false;
-  __save_num   = 0;
+  save_imgs_  = false;
+  save_num_   = 0;
 
-  __dispatcher.connect( sigc::mem_fun( *widget , &ImageWidget::set_cam ) );
+  dispatcher_.connect( sigc::mem_fun( *widget , &ImageWidget::set_cam ) );
 
   set_delay(refresh_delay);
 }
@@ -497,8 +497,8 @@ ImageWidget::RefThread::RefThread(ImageWidget *widget, unsigned int refresh_dela
 void
 ImageWidget::RefThread::set_delay(unsigned int refresh_delay)
 {
-  __refresh_delay = refresh_delay;
-  __loop_cnt = 0;
+  refresh_delay_ = refresh_delay;
+  loop_cnt_ = 0;
 }
 
 /**
@@ -507,7 +507,7 @@ ImageWidget::RefThread::set_delay(unsigned int refresh_delay)
 void
 ImageWidget::RefThread::refresh_cam()
 {
-  __do_refresh = true;
+  do_refresh_ = true;
 }
 
 /**
@@ -516,29 +516,29 @@ ImageWidget::RefThread::refresh_cam()
 void
 ImageWidget::RefThread::perform_refresh()
 {
-  if (!__widget->__cam) {
+  if (!widget_->cam_) {
     throw fawkes::NullPointerException("Camera hasn't been given during creation");
   }
 
   try {
-    if (__widget->__cam_mutex->try_lock()) {
-      __widget->__cam->dispose_buffer();
-      __widget->__cam->capture();
-      if (!__stop) {
-        __widget->__cam_has_buffer = true;
-        __widget->__cam_mutex->unlock();
+    if (widget_->cam_mutex_->try_lock()) {
+      widget_->cam_->dispose_buffer();
+      widget_->cam_->capture();
+      if (!stop_) {
+        widget_->cam_has_buffer_ = true;
+        widget_->cam_mutex_->unlock();
 
-        if (__widget->__cam->ready()) {
-          __dispatcher();
+        if (widget_->cam_->ready()) {
+          dispatcher_();
 
-          if (__save_imgs) {
+          if (save_imgs_) {
             char *ctmp;
-            if (__widget->__cam_has_timestamp) {
+            if (widget_->cam_has_timestamp_) {
               try {
-                fawkes::Time *ts = __widget->__cam->capture_time();
-                if (asprintf(&ctmp, "%s/%06u.%ld.%s", __save_path.c_str(), ++__save_num, ts->in_msec(), __save_type.c_str()) != -1) {
+                fawkes::Time *ts = widget_->cam_->capture_time();
+                if (asprintf(&ctmp, "%s/%06u.%ld.%s", save_path_.c_str(), ++save_num_, ts->in_msec(), save_type_.c_str()) != -1) {
                   Glib::ustring fn = ctmp;
-                  __widget->save_image(fn, __save_type);
+                  widget_->save_image(fn, save_type_);
                   free(ctmp);
                 } else {
                   printf("Cannot save image, asprintf() ran out of memory\n");
@@ -550,9 +550,9 @@ ImageWidget::RefThread::perform_refresh()
               }
             }
             else {
-              if (asprintf(&ctmp, "%s/%06u.%s", __save_path.c_str(), ++__save_num, __save_type.c_str()) != -1) {
+              if (asprintf(&ctmp, "%s/%06u.%s", save_path_.c_str(), ++save_num_, save_type_.c_str()) != -1) {
                 Glib::ustring fn = ctmp;
-                __widget->save_image(fn, __save_type);
+                widget_->save_image(fn, save_type_);
                 free(ctmp);
               } else {
                 printf("Cannot save image, asprintf() ran out of memory\n");
@@ -572,19 +572,19 @@ ImageWidget::RefThread::perform_refresh()
 void
 ImageWidget::RefThread::loop()
 {
-  if (!__stop) {
-    ++__loop_cnt;
+  if (!stop_) {
+    ++loop_cnt_;
 
-    if (__refresh_delay && !(__loop_cnt % __refresh_delay)) {
+    if (refresh_delay_ && !(loop_cnt_ % refresh_delay_)) {
       perform_refresh();
-      __do_refresh = false;
-      __loop_cnt = 0;
+      do_refresh_ = false;
+      loop_cnt_ = 0;
     }
 
-    if (__do_refresh) {
+    if (do_refresh_) {
       perform_refresh();
-      __do_refresh = false;
-      __loop_cnt   = 0;
+      do_refresh_ = false;
+      loop_cnt_   = 0;
     }
   }
   else exit();
@@ -598,7 +598,7 @@ ImageWidget::RefThread::loop()
 void
 ImageWidget::RefThread::stop()
 {
-  __stop = true;
+  stop_ = true;
 }
 
 
@@ -611,12 +611,12 @@ ImageWidget::RefThread::stop()
 void
 ImageWidget::RefThread::save_on_refresh(bool enabled, std::string path, Glib::ustring type, unsigned int img_num)
 {
-  __save_imgs = enabled;
+  save_imgs_ = enabled;
 
-  if (__save_imgs) {
-    __save_path = path;
-    __save_type = type;
-    __save_num  = img_num;
+  if (save_imgs_) {
+    save_path_ = path;
+    save_type_ = type;
+    save_num_  = img_num;
   }
 }
 
@@ -626,7 +626,7 @@ ImageWidget::RefThread::save_on_refresh(bool enabled, std::string path, Glib::us
 unsigned int
 ImageWidget::RefThread::get_img_num()
 {
-  return __save_num;
+  return save_num_;
 }
 
 } // end namespace firevision

@@ -56,17 +56,17 @@ class ImageWidget : public Gtk::Image
     void loop();
     void perform_refresh();
 
-    ImageWidget     *__widget;
-    bool             __stop;
-    bool             __do_refresh;
-    unsigned int     __refresh_delay;
-    unsigned int     __loop_cnt;
-    Glib::Dispatcher __dispatcher;
+    ImageWidget     *widget_;
+    bool             stop_;
+    bool             do_refresh_;
+    unsigned int     refresh_delay_;
+    unsigned int     loop_cnt_;
+    Glib::Dispatcher dispatcher_;
 
-    bool          __save_imgs;
-    std::string   __save_path;
-    Glib::ustring __save_type;
-    unsigned int  __save_num;
+    bool          save_imgs_;
+    std::string   save_path_;
+    Glib::ustring save_type_;
+    unsigned int  save_num_;
   };
 
  public:
@@ -97,21 +97,21 @@ class ImageWidget : public Gtk::Image
  private:
   void set_cam();
 
-  unsigned int __width;
-  unsigned int __height;
+  unsigned int width_;
+  unsigned int height_;
 
-  Glib::RefPtr<Gdk::Pixbuf> __pixbuf;
+  Glib::RefPtr<Gdk::Pixbuf> pixbuf_;
 
-  RefThread       *__refresh_thread;
-  Camera          *__cam;
-  fawkes::Mutex   *__cam_mutex;
-  bool             __cam_has_buffer;
-  bool             __cam_has_timestamp;
-  bool             __cam_enabled;
+  RefThread       *refresh_thread_;
+  Camera          *cam_;
+  fawkes::Mutex   *cam_mutex_;
+  bool             cam_has_buffer_;
+  bool             cam_has_timestamp_;
+  bool             cam_enabled_;
 
-  sigc::signal<void, colorspace_t, unsigned char *, unsigned int, unsigned int> __signal_show;
+  sigc::signal<void, colorspace_t, unsigned char *, unsigned int, unsigned int> signal_show_;
 };
 
 } // end namespace firevision
 
-#endif /* __FIREVISION_FVWIDGETS_IMAGE_WIDGET_H_ */
+#endif /* FIREVISION_FVWIDGETS_IMAGE_WIDGET_H__ */
