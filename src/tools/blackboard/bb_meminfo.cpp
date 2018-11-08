@@ -104,8 +104,8 @@ main(int argc, char **argv)
 	break;
       } else {
 	ih = (interface_header_t *)*cit;
-	char tmp_hash[__INTERFACE_HASH_SIZE * 2 + 1];
-	for (size_t s = 0; s < __INTERFACE_HASH_SIZE; ++s) {
+	char tmp_hash[INTERFACE_HASH_SIZE_ * 2 + 1];
+	for (size_t s = 0; s < INTERFACE_HASH_SIZE_; ++s) {
 	  snprintf(&tmp_hash[s*2], 3, "%02X", ih->hash[s]);
 	}
 	printf("%7u  %8u  %sT%s %-32s %6u  %3u  %1d/%-3d\n%18s %sI%s %-32s\n%18s %sH%s %-32s\n",
