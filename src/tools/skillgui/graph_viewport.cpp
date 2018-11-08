@@ -40,35 +40,35 @@ SkillGuiGraphViewport::SkillGuiGraphViewport()
   c->set_scroll_anchor(Papyrus::SCROLL_ANCHOR_TOP_LEFT);
   c->set_background(pp);
 
-  __affine = Papyrus::AffineController::create();
-  __affine->insert(c);
-  __translator = Papyrus::Translator::create();
-  add_controller(__translator);
+  affine_ = Papyrus::AffineController::create();
+  affine_->insert(c);
+  translator_ = Papyrus::Translator::create();
+  add_controller(translator_);
 
-  __gvc = gvContext();
-  __gvjob = NULL;
+  gvc_ = gvContext();
+  gvjob_ = NULL;
 
-  __graph_fsm = "";
-  __graph = "";
+  graph_fsm_ = "";
+  graph_ = "";
 
-  __bbw = __bbh = __pad_x = __pad_y = 0.0;
-  __translation_x = __translation_y = 0.0;
-  __scale = 1.0;
-  __update_graph = true;
+  bbw_ = bbh_ = pad_x_ = pad_y_ = 0.0;
+  translation_x_ = translation_y_ = 0.0;
+  scale_ = 1.0;
+  update_graph_ = true;
 
   Gtk::Window *w = dynamic_cast<Gtk::Window *>(get_toplevel());
   if (w) {
-    __fcd = new Gtk::FileChooserDialog(*w, "Save Graph",
+    fcd_ = new Gtk::FileChooserDialog(*w, "Save Graph",
 				       Gtk::FILE_CHOOSER_ACTION_SAVE);
-    __fcd->set_transient_for(*w);
+    fcd_->set_transient_for(*w);
   } else {
-    __fcd = new Gtk::FileChooserDialog("Save Graph",
+    fcd_ = new Gtk::FileChooserDialog("Save Graph",
 				       Gtk::FILE_CHOOSER_ACTION_SAVE);
   }
 
   //Add response buttons the the dialog:
-  __fcd->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-  __fcd->add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
+  fcd_->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  fcd_->add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
 
   Gtk::FileFilter *filter_pdf = Gtk::manage(new Gtk::FileFilter());
   filter_pdf->set_name("Portable Document Format (PDF)");
@@ -79,12 +79,12 @@ SkillGuiGraphViewport::SkillGuiGraphViewport()
   Gtk::FileFilter *filter_png = Gtk::manage(new Gtk::FileFilter());;
   filter_png->set_name("Portable Network Graphic (PNG)");
   filter_png->add_pattern("*.png");
-  __fcd->add_filter(*filter_pdf);
-  __fcd->add_filter(*filter_svg);
-  __fcd->add_filter(*filter_png);
-  __fcd->set_filter(*filter_pdf);
+  fcd_->add_filter(*filter_pdf);
+  fcd_->add_filter(*filter_svg);
+  fcd_->add_filter(*filter_png);
+  fcd_->set_filter(*filter_pdf);
 
-  gvplugin_skillgui_setup(__gvc, this);
+  gvplugin_skillgui_setup(gvc_, this);
 
   signal_size_allocate().connect_notify(sigc::hide(sigc::mem_fun(*this, &SkillGuiGraphViewport::render)));
   signal_expose_event().connect_notify(sigc::mem_fun(*this, &SkillGuiGraphViewport::on_expose));
@@ -94,8 +94,8 @@ SkillGuiGraphViewport::SkillGuiGraphViewport()
 /** Destructor. */
 SkillGuiGraphViewport::~SkillGuiGraphViewport()
 {
-  gvFreeContext(__gvc);
-  delete __fcd;
+  gvFreeContext(gvc_);
+  delete fcd_;
 }
 
 
@@ -105,7 +105,7 @@ SkillGuiGraphViewport::~SkillGuiGraphViewport()
 void
 SkillGuiGraphViewport::set_gvjob(GVJ_t *job)
 {
-  __gvjob = job;
+  gvjob_ = job;
 }
 
 
@@ -115,10 +115,10 @@ SkillGuiGraphViewport::set_gvjob(GVJ_t *job)
 void
 SkillGuiGraphViewport::set_graph_fsm(std::string fsm_name)
 {
-  if ( __graph_fsm != fsm_name ) {
-    __translator->set_translate(0, 0);
+  if ( graph_fsm_ != fsm_name ) {
+    translator_->set_translate(0, 0);
   }
-  __graph_fsm = fsm_name;
+  graph_fsm_ = fsm_name;
 }
 
 
@@ -128,7 +128,7 @@ SkillGuiGraphViewport::set_graph_fsm(std::string fsm_name)
 void
 SkillGuiGraphViewport::set_graph(std::string graph)
 {
-  __graph = graph;
+  graph_ = graph;
 }
 
 
@@ -140,7 +140,7 @@ void
 SkillGuiGraphViewport::add_drawable(Papyrus::Drawable::pointer d)
 {
   canvas()->add(d);
-  __translator->insert(d);
+  translator_->insert(d);
 }
 
 
@@ -151,7 +151,7 @@ void
 SkillGuiGraphViewport::clear()
 {
   Papyrus::Gtk::Viewport::clear();
-  __translator->clear();
+  translator_->clear();
 }
 
 
@@ -163,8 +163,8 @@ SkillGuiGraphViewport::clear()
 void
 SkillGuiGraphViewport::set_bb(double bbw, double bbh)
 {
-  __bbw = bbw;
-  __bbh = bbh;
+  bbw_ = bbw;
+  bbh_ = bbh;
 }
 
 
@@ -176,8 +176,8 @@ SkillGuiGraphViewport::set_bb(double bbw, double bbh)
 void
 SkillGuiGraphViewport::set_pad(double pad_x, double pad_y)
 {
-  __pad_x = pad_x;
-  __pad_y = pad_y;
+  pad_x_ = pad_x;
+  pad_y_ = pad_y;
 }
 
 
@@ -189,8 +189,8 @@ SkillGuiGraphViewport::set_pad(double pad_x, double pad_y)
 void
 SkillGuiGraphViewport::set_translation(double tx, double ty)
 {
-  __translation_x = tx;
-  __translation_y = ty;
+  translation_x_ = tx;
+  translation_y_ = ty;
 }
 
 
@@ -201,7 +201,7 @@ SkillGuiGraphViewport::set_translation(double tx, double ty)
 void
 SkillGuiGraphViewport::set_scale(double scale)
 {
-  __scale = scale;
+  scale_ = scale;
 }
 
 /** Check if graph is being updated.
@@ -210,7 +210,7 @@ SkillGuiGraphViewport::set_scale(double scale)
 bool
 SkillGuiGraphViewport::get_update_graph()
 {
-  return __update_graph;
+  return update_graph_;
 }
 
 
@@ -220,7 +220,7 @@ SkillGuiGraphViewport::get_update_graph()
 void
 SkillGuiGraphViewport::set_update_graph(bool update)
 {
-  __update_graph = update;
+  update_graph_ = update;
 }
 
 
@@ -233,13 +233,13 @@ SkillGuiGraphViewport::zoom_in()
   double sx, sy;
   Gtk::Allocation alloc = get_allocation();
 
-  __affine->get_scale(sx, sy);
+  affine_->get_scale(sx, sy);
   sx += 0.1; sy += 0.1;
-  __affine->set_scale(sx, sy);
-  __affine->set_translate((alloc.get_width()  - __bbw * sx) / 2.0,
-			  (alloc.get_height() - __bbh * sy) / 2.0);
+  affine_->set_scale(sx, sy);
+  affine_->set_translate((alloc.get_width()  - bbw_ * sx) / 2.0,
+			  (alloc.get_height() - bbh_ * sy) / 2.0);
 
-  __scale_override = true;
+  scale_override_ = true;
 }
 
 
@@ -250,15 +250,15 @@ void
 SkillGuiGraphViewport::zoom_out()
 {
   double sx, sy;
-  __affine->get_scale(sx, sy);
+  affine_->get_scale(sx, sy);
   if ( (sx > 0.1) && (sy > 0.1) ) {
     Gtk::Allocation alloc = get_allocation();
     sx -= 0.1; sy -= 0.1;
-    __affine->set_scale(sx, sy);
-    __affine->set_translate((alloc.get_width()  - __bbw * sx) / 2.0,
-			    (alloc.get_height() - __bbh * sy) / 2.0);
+    affine_->set_scale(sx, sy);
+    affine_->set_translate((alloc.get_width()  - bbw_ * sx) / 2.0,
+			    (alloc.get_height() - bbh_ * sy) / 2.0);
   }
-  __scale_override = true;
+  scale_override_ = true;
 }
 
 
@@ -268,10 +268,10 @@ SkillGuiGraphViewport::zoom_out()
 void
 SkillGuiGraphViewport::zoom_fit()
 {
-  __affine->set_scale(__scale);
-  __affine->set_translate(__pad_x + __translation_x, __pad_y + __translation_y);
-  __translator->set_translate(0, 0);
-  __scale_override = false;
+  affine_->set_scale(scale_);
+  affine_->set_translate(pad_x_ + translation_x_, pad_y_ + translation_y_);
+  translator_->set_translate(0, 0);
+  scale_override_ = false;
 }
 
 
@@ -281,13 +281,13 @@ SkillGuiGraphViewport::zoom_fit()
 void
 SkillGuiGraphViewport::zoom_reset()
 {
-  __affine->set_scale(1.0);
-  if ( __scale == 1.0 ) {
-    __affine->set_translate(__pad_x + __translation_x, __pad_y + __translation_y);
+  affine_->set_scale(1.0);
+  if ( scale_ == 1.0 ) {
+    affine_->set_translate(pad_x_ + translation_x_, pad_y_ + translation_y_);
   } else {
-    __affine->set_translate(__pad_x, __pad_y);
+    affine_->set_translate(pad_x_, pad_y_);
   }
-  __scale_override = true;
+  scale_override_ = true;
 }
 
 
@@ -297,7 +297,7 @@ SkillGuiGraphViewport::zoom_reset()
 bool
 SkillGuiGraphViewport::scale_override()
 {
-  return __scale_override;
+  return scale_override_;
 }
 
 
@@ -307,7 +307,7 @@ SkillGuiGraphViewport::scale_override()
 Papyrus::AffineController::pointer
 SkillGuiGraphViewport::get_affine()
 {
-  return __affine;
+  return affine_;
 }
 
 /** Render current graph. */
@@ -316,29 +316,29 @@ SkillGuiGraphViewport::save()
 {
   Gtk::Window *w = dynamic_cast<Gtk::Window *>(get_toplevel());
 
-  int result = __fcd->run();
+  int result = fcd_->run();
   if (result == Gtk::RESPONSE_OK) {
 
     double old_scale_x, old_scale_y, old_translate_x, old_translate_y;
-    __affine->get_scale(old_scale_x, old_scale_y);
-    __affine->get_translate(old_translate_x, old_translate_y);
-    __affine->set_scale(1);
-    __affine->set_translate(__pad_x, __pad_y);
+    affine_->get_scale(old_scale_x, old_scale_y);
+    affine_->get_translate(old_translate_x, old_translate_y);
+    affine_->set_scale(1);
+    affine_->set_translate(pad_x_, pad_y_);
 
     Papyrus::Canvas::pointer c = canvas();
 
     Cairo::RefPtr<Cairo::Surface> surface;
 
-    std::string filename = __fcd->get_filename();
+    std::string filename = fcd_->get_filename();
     bool write_to_png = false;
     if (filename != "") {
-      Gtk::FileFilter *f = __fcd->get_filter();
+      Gtk::FileFilter *f = fcd_->get_filter();
       if (f->get_name().find("PDF") != Glib::ustring::npos) {
-	surface = Cairo::PdfSurface::create(filename, __bbw, __bbh);
+	surface = Cairo::PdfSurface::create(filename, bbw_, bbh_);
       } else if (f->get_name().find("SVG") != Glib::ustring::npos) {
-	surface = Cairo::SvgSurface::create(filename, __bbw, __bbh);
+	surface = Cairo::SvgSurface::create(filename, bbw_, bbh_);
       } else if (f->get_name().find("PNG") != Glib::ustring::npos) {
-	surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, __bbw, __bbh);
+	surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, bbw_, bbh_);
 	write_to_png = true;
       }
 
@@ -358,11 +358,11 @@ SkillGuiGraphViewport::save()
       md.run();
     }
 
-    __affine->set_scale(old_scale_x, old_scale_y);
-    __affine->set_translate(old_translate_x, old_translate_y);
+    affine_->set_scale(old_scale_x, old_scale_y);
+    affine_->set_translate(old_translate_x, old_translate_y);
   }
 
-  __fcd->hide();
+  fcd_->hide();
 }
 
 
@@ -370,17 +370,17 @@ SkillGuiGraphViewport::save()
 void
 SkillGuiGraphViewport::render()
 {
-  if (!  __update_graph)  return;
+  if (!  update_graph_)  return;
 
   Papyrus::Canvas::pointer c = canvas();
 #ifdef HAVE_TIMS_PAPYRUS_PATCHES
   c->set_redraw_enabled(false);
 #endif
-  Agraph_t *g = agmemread((char *)__graph.c_str());
+  Agraph_t *g = agmemread((char *)graph_.c_str());
   if (g) {
-    gvLayout(__gvc, g, (char *)"dot");
-    gvRender(__gvc, g, (char *)"skillgui", NULL);
-    gvFreeLayout(__gvc, g);
+    gvLayout(gvc_, g, (char *)"dot");
+    gvRender(gvc_, g, (char *)"skillgui", NULL);
+    gvFreeLayout(gvc_, g);
     agclose(g);
   } else {
     clear();
@@ -397,13 +397,13 @@ SkillGuiGraphViewport::render()
 void
 SkillGuiGraphViewport::on_expose(GdkEventExpose *event)
 {
-  if (__scale_override) {
+  if (scale_override_) {
     Gtk::Allocation alloc = get_allocation();
 
     double sx, sy;
-    __affine->get_scale(sx, sy);
-    __affine->set_translate(((alloc.get_width()  - __bbw * sx) / 2.0) + __pad_x,
-			    ((alloc.get_height() - __bbh * sy) / 2.0) + __pad_y);
+    affine_->get_scale(sx, sy);
+    affine_->set_translate(((alloc.get_width()  - bbw_ * sx) / 2.0) + pad_x_,
+			    ((alloc.get_height() - bbh_ * sy) / 2.0) + pad_y_);
     
   }
 }

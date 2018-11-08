@@ -64,21 +64,21 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   : Gtk::Window(cobject)
 {
   bb = NULL;
-  __skiller_if = NULL;
-  __skdbg_if = NULL;
-  __agdbg_if = NULL;
+  skiller_if_ = NULL;
+  skdbg_if_ = NULL;
+  agdbg_if_ = NULL;
 
 #ifdef HAVE_GCONFMM
   try {
-    __gconf = Gnome::Conf::Client::get_default_client();
-    __gconf->add_dir(GCONF_PREFIX);
+    gconf_ = Gnome::Conf::Client::get_default_client();
+    gconf_->add_dir(GCONF_PREFIX);
   } catch (Gnome::Conf::Error &e) {
     std::cerr << e.what() << std::endl;
 	throw;
   }
 #endif
 
-  builder->get_widget_derived("trv_log", __logview);
+  builder->get_widget_derived("trv_log", logview_);
   builder->get_widget("tb_connection", tb_connection);
   builder->get_widget("but_clearlog", but_clearlog);
   builder->get_widget("tb_exit", tb_exit);
@@ -110,7 +110,7 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
 #if GTKMM_VERSION_GE(2,20)
   builder->get_widget("tb_spinner", tb_spinner);
 #endif
-  builder->get_widget_derived("trv_plugins",  __trv_plugins);
+  builder->get_widget_derived("trv_plugins",  trv_plugins_);
 
   Gtk::SeparatorToolItem *spacesep;
   builder->get_widget("tb_spacesep", spacesep);
@@ -133,19 +133,19 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
     throw Exception("Skill string combo box has no entry, invalid UI file?");
   }
 #endif
-  __sks_list = Gtk::ListStore::create(__sks_record);
-  cbe_skillstring->set_model(__sks_list);
+  sks_list_ = Gtk::ListStore::create(sks_record_);
+  cbe_skillstring->set_model(sks_list_);
 #if GTK_VERSION_GE(3,0)
-  cbe_skillstring->set_entry_text_column(__sks_record.skillstring);
+  cbe_skillstring->set_entry_text_column(sks_record_.skillstring);
 #else
-  cbe_skillstring->set_text_column(__sks_record.skillstring);
+  cbe_skillstring->set_text_column(sks_record_.skillstring);
 #endif
 
   cbe_skillstring->get_entry()->set_activates_default(true);
 
-  __trv_plugins->set_network_client(connection_dispatcher.get_client());
+  trv_plugins_->set_network_client(connection_dispatcher.get_client());
 #ifdef HAVE_GCONFMM
-  __trv_plugins->set_gconf_prefix(GCONF_PREFIX);
+  trv_plugins_->set_gconf_prefix(GCONF_PREFIX);
 #endif
 
 #ifdef USE_PAPYRUS
@@ -178,7 +178,7 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
   tb_controller->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_controller_clicked));
   tb_exit->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_exit_clicked));
   but_stop->signal_clicked().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_stop_clicked));
-  but_clearlog->signal_clicked().connect(sigc::mem_fun(*__logview, &LogView::clear));
+  but_clearlog->signal_clicked().connect(sigc::mem_fun(*logview_, &LogView::clear));
   tb_skiller->signal_toggled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_skdbg_data_changed));
   tb_skiller->signal_toggled().connect(sigc::bind(sigc::mem_fun(*cb_graphlist, &Gtk::ComboBoxText::set_sensitive),true));
   tb_agent->signal_toggled().connect(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_agdbg_data_changed));
@@ -205,7 +205,7 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
 #endif
 
 #ifdef HAVE_GCONFMM
-  __gconf->signal_value_changed().connect(sigc::hide(sigc::hide(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_config_changed))));
+  gconf_->signal_value_changed().connect(sigc::hide(sigc::hide(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_config_changed))));
   on_config_changed();
 #endif
 }
@@ -215,10 +215,10 @@ SkillGuiGtkWindow::SkillGuiGtkWindow(BaseObjectType* cobject,
 SkillGuiGtkWindow::~SkillGuiGtkWindow()
 {
 #ifdef HAVE_GCONFMM
-  __gconf->remove_dir(GCONF_PREFIX);
+  gconf_->remove_dir(GCONF_PREFIX);
 #endif
-  __logview->set_client(NULL);
-  __trv_plugins->set_network_client(NULL);
+  logview_->set_client(NULL);
+  trv_plugins_->set_network_client(NULL);
 }
 
 
@@ -226,15 +226,15 @@ void
 SkillGuiGtkWindow::on_config_changed()
 {
 #ifdef HAVE_GCONFMM
-  Gnome::Conf::SListHandle_ValueString l(__gconf->get_string_list(GCONF_PREFIX"/command_history"));
+  Gnome::Conf::SListHandle_ValueString l(gconf_->get_string_list(GCONF_PREFIX"/command_history"));
 
-  __sks_list->clear();
+  sks_list_->clear();
   for (Gnome::Conf::SListHandle_ValueString::const_iterator i = l.begin(); i != l.end(); ++i) {
-    Gtk::TreeModel::Row row  = *__sks_list->append();
-    row[__sks_record.skillstring] = *i;
+    Gtk::TreeModel::Row row  = *sks_list_->append();
+    row[sks_record_.skillstring] = *i;
   }
 
-  bool colored    = __gconf->get_bool(GCONF_PREFIX"/graph_colored");
+  bool colored    = gconf_->get_bool(GCONF_PREFIX"/graph_colored");
   tb_graphcolored->set_active(colored);
 #endif
 }
@@ -250,7 +250,7 @@ SkillGuiGtkWindow::on_skill_changed()
     skill = "SKILL_DEP";
   }
   SkillerDebugInterface::SetGraphMessage *sgm = new SkillerDebugInterface::SetGraphMessage(skill.c_str());
-  __skdbg_if->msgq_enqueue(sgm);
+  skdbg_if_->msgq_enqueue(sgm);
 }
 
 /** Event handler for connection button. */
@@ -276,16 +276,16 @@ SkillGuiGtkWindow::on_exit_clicked()
 void
 SkillGuiGtkWindow::on_controller_clicked()
 {
-  if (__skiller_if && __skiller_if->is_valid() && __skiller_if->has_writer() &&
-      __skiller_if->exclusive_controller() == __skiller_if->serial()) {
+  if (skiller_if_ && skiller_if_->is_valid() && skiller_if_->has_writer() &&
+      skiller_if_->exclusive_controller() == skiller_if_->serial()) {
     // we are exclusive controller, release control
     SkillerInterface::ReleaseControlMessage *rcm = new SkillerInterface::ReleaseControlMessage();
-    __skiller_if->msgq_enqueue(rcm);
-  } else if (__skiller_if && __skiller_if->is_valid() && __skiller_if->has_writer() &&
-	     __skiller_if->exclusive_controller() == 0) {
+    skiller_if_->msgq_enqueue(rcm);
+  } else if (skiller_if_ && skiller_if_->is_valid() && skiller_if_->has_writer() &&
+	     skiller_if_->exclusive_controller() == 0) {
     // there is no exclusive controller, try to acquire control
     SkillerInterface::AcquireControlMessage *acm = new SkillerInterface::AcquireControlMessage();
-    __skiller_if->msgq_enqueue(acm);
+    skiller_if_->msgq_enqueue(acm);
   } else {
     Gtk::MessageDialog md(*this,
 			  "Another component already acquired the exclusive "
@@ -301,9 +301,9 @@ SkillGuiGtkWindow::on_controller_clicked()
 void
 SkillGuiGtkWindow::on_stop_clicked()
 {
-  if ( bb && __skiller_if && __skiller_if->is_valid() && __skiller_if->has_writer() ) {
+  if ( bb && skiller_if_ && skiller_if_->is_valid() && skiller_if_->has_writer() ) {
     SkillerInterface::StopExecMessage *sem = new SkillerInterface::StopExecMessage();
-    __skiller_if->msgq_enqueue(sem);
+    skiller_if_->msgq_enqueue(sem);
   }
 }
 
@@ -311,24 +311,24 @@ void
 SkillGuiGtkWindow::close_bb()
 {
   if ( bb ) {
-    bb->unregister_listener(__skiller_ifd);
-    bb->unregister_listener(__skdbg_ifd);
-    bb->unregister_listener(__agdbg_ifd);
-    delete __skiller_ifd;
-    delete __skdbg_ifd;
-    delete __agdbg_ifd;
-    if ( __skiller_if && __skiller_if->is_valid() && __skiller_if->has_writer() &&
-	 (__skiller_if->exclusive_controller() == __skiller_if->serial()) ) {
+    bb->unregister_listener(skiller_ifd_);
+    bb->unregister_listener(skdbg_ifd_);
+    bb->unregister_listener(agdbg_ifd_);
+    delete skiller_ifd_;
+    delete skdbg_ifd_;
+    delete agdbg_ifd_;
+    if ( skiller_if_ && skiller_if_->is_valid() && skiller_if_->has_writer() &&
+	 (skiller_if_->exclusive_controller() == skiller_if_->serial()) ) {
       SkillerInterface::ReleaseControlMessage *rcm = new SkillerInterface::ReleaseControlMessage();
-      __skiller_if->msgq_enqueue(rcm);
+      skiller_if_->msgq_enqueue(rcm);
     }
-    bb->close(__skiller_if);
-    bb->close(__skdbg_if);
-    bb->close(__agdbg_if);
+    bb->close(skiller_if_);
+    bb->close(skdbg_if_);
+    bb->close(agdbg_if_);
     delete bb;
-    __skiller_if = NULL;
-    __skdbg_if = NULL;
-    __agdbg_if = NULL;
+    skiller_if_ = NULL;
+    skdbg_if_ = NULL;
+    agdbg_if_ = NULL;
     bb = NULL;
   }
 }
@@ -340,37 +340,37 @@ SkillGuiGtkWindow::on_connect()
   try {
     if ( ! bb ) {
       bb           = new RemoteBlackBoard(connection_dispatcher.get_client());
-      __skiller_if = bb->open_for_reading<SkillerInterface>("Skiller");
-      __skdbg_if   = bb->open_for_reading<SkillerDebugInterface>("Skiller");
-      __agdbg_if   = bb->open_for_reading<SkillerDebugInterface>("LuaAgent");
+      skiller_if_ = bb->open_for_reading<SkillerInterface>("Skiller");
+      skdbg_if_   = bb->open_for_reading<SkillerDebugInterface>("Skiller");
+      agdbg_if_   = bb->open_for_reading<SkillerDebugInterface>("LuaAgent");
       on_skiller_data_changed();
       on_skdbg_data_changed();
       on_agdbg_data_changed();
 
-      __skiller_ifd = new InterfaceDispatcher("Skiller IFD", __skiller_if);
-      __skdbg_ifd   = new InterfaceDispatcher("SkillerDebug IFD", __skdbg_if);
-      __agdbg_ifd   = new InterfaceDispatcher("LuaAgent SkillerDebug IFD", __agdbg_if);
-      bb->register_listener(__skiller_ifd, BlackBoard::BBIL_FLAG_DATA);
-      bb->register_listener(__skdbg_ifd, BlackBoard::BBIL_FLAG_DATA);
-      bb->register_listener(__agdbg_ifd, BlackBoard::BBIL_FLAG_DATA);
-      __skiller_ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_skiller_data_changed)));
-      __skdbg_ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_skdbg_data_changed)));
-      __agdbg_ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_agdbg_data_changed)));
+      skiller_ifd_ = new InterfaceDispatcher("Skiller IFD", skiller_if_);
+      skdbg_ifd_   = new InterfaceDispatcher("SkillerDebug IFD", skdbg_if_);
+      agdbg_ifd_   = new InterfaceDispatcher("LuaAgent SkillerDebug IFD", agdbg_if_);
+      bb->register_listener(skiller_ifd_, BlackBoard::BBIL_FLAG_DATA);
+      bb->register_listener(skdbg_ifd_, BlackBoard::BBIL_FLAG_DATA);
+      bb->register_listener(agdbg_ifd_, BlackBoard::BBIL_FLAG_DATA);
+      skiller_ifd_->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_skiller_data_changed)));
+      skdbg_ifd_->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_skdbg_data_changed)));
+      agdbg_ifd_->signal_data_changed().connect(sigc::hide(sigc::mem_fun(*this, &SkillGuiGtkWindow::on_agdbg_data_changed)));
 
       // always try to acquire control on connect, this may well fail, for
       // example if agent is running, but we don't care
-      __skiller_if->read();
-      if (__skiller_if->has_writer() && __skiller_if->exclusive_controller() == 0) {
+      skiller_if_->read();
+      if (skiller_if_->has_writer() && skiller_if_->exclusive_controller() == 0) {
 	SkillerInterface::AcquireControlMessage *aqm = new SkillerInterface::AcquireControlMessage();
-	__skiller_if->msgq_enqueue(aqm);
+	skiller_if_->msgq_enqueue(aqm);
       }
-      if (__skdbg_if->has_writer()) {
+      if (skdbg_if_->has_writer()) {
 	SkillerDebugInterface::SetGraphMessage *sgm = new SkillerDebugInterface::SetGraphMessage("LIST");
-	__skdbg_if->msgq_enqueue(sgm);
+	skdbg_if_->msgq_enqueue(sgm);
       }
     }
     tb_connection->set_stock_id(Gtk::Stock::DISCONNECT);
-    __logview->set_client(connection_dispatcher.get_client());
+    logview_->set_client(connection_dispatcher.get_client());
 
     tb_controller->set_sensitive(true);
     cbe_skillstring->set_sensitive(true);
@@ -404,7 +404,7 @@ SkillGuiGtkWindow::on_disconnect()
 #ifdef USE_PAPYRUS
   pvp_graph->queue_draw();
 #endif
-  __logview->set_client(NULL);
+  logview_->set_client(NULL);
 
   this->set_title("Skill GUI");
 }
@@ -431,40 +431,40 @@ SkillGuiGtkWindow::on_exec_clicked()
 	  tb_spinner->start();
 #endif
 
-    if (__skiller_if && __skiller_if->is_valid() && __skiller_if->has_writer() &&
-	__skiller_if->exclusive_controller() == __skiller_if->serial()) {
+    if (skiller_if_ && skiller_if_->is_valid() && skiller_if_->has_writer() &&
+	skiller_if_->exclusive_controller() == skiller_if_->serial()) {
 
       SkillerInterface::ExecSkillMessage *esm = new SkillerInterface::ExecSkillMessage(sks.c_str());
-      __skiller_if->msgq_enqueue(esm);
+      skiller_if_->msgq_enqueue(esm);
 
-      Gtk::TreeModel::Children children = __sks_list->children();
+      Gtk::TreeModel::Children children = sks_list_->children();
       bool ok = true;
       if ( ! children.empty() ) {
 	size_t num = 0;
 	Gtk::TreeIter i = children.begin();
 	while (ok && (i != children.end())) {
 	  if ( num >= 9 ) {
-	    i = __sks_list->erase(i);
+	    i = sks_list_->erase(i);
 	} else {
 	    Gtk::TreeModel::Row row = *i;
-	    ok = (row[__sks_record.skillstring] != sks);
+	    ok = (row[sks_record_.skillstring] != sks);
 	    ++num;
 	    ++i;
 	  }
 	}
       }
       if (ok) {
-	Gtk::TreeModel::Row row  = *__sks_list->prepend();
-	row[__sks_record.skillstring] = sks;
+	Gtk::TreeModel::Row row  = *sks_list_->prepend();
+	row[sks_record_.skillstring] = sks;
 
 	std::list<Glib::ustring> l;
 	for (Gtk::TreeIter i = children.begin(); i != children.end(); ++i) {
 	  Gtk::TreeModel::Row row = *i;
-	  l.push_back(row[__sks_record.skillstring]);
+	  l.push_back(row[sks_record_.skillstring]);
 	}
 
 #ifdef HAVE_GCONFMM
-	__gconf->set_string_list(GCONF_PREFIX"/command_history", l);
+	gconf_->set_string_list(GCONF_PREFIX"/command_history", l);
 #endif
       }
     } else {
@@ -484,9 +484,9 @@ void
 SkillGuiGtkWindow::on_skiller_data_changed()
 {
   try {
-    __skiller_if->read();
+    skiller_if_->read();
 
-    switch (__skiller_if->status()) {
+    switch (skiller_if_->status()) {
     case SkillerInterface::S_INACTIVE:
 #if GTKMM_VERSION_GE(2,20)
 	    tb_spinner->stop();
@@ -497,7 +497,7 @@ SkillGuiGtkWindow::on_skiller_data_changed()
 #if GTKMM_VERSION_GE(2,20)
 	    tb_spinner->stop();
 #endif
-	    //__throbber->set_stock(Gtk::Stock::APPLY);
+	    //throbber_->set_stock(Gtk::Stock::APPLY);
       lab_status->set_text("S_FINAL");
       break;
     case SkillerInterface::S_RUNNING:
@@ -510,20 +510,20 @@ SkillGuiGtkWindow::on_skiller_data_changed()
 #if GTKMM_VERSION_GE(2,20)
 	    tb_spinner->stop();
 #endif
-	    //__throbber->set_stock(Gtk::Stock::DIALOG_WARNING);
+	    //throbber_->set_stock(Gtk::Stock::DIALOG_WARNING);
       lab_status->set_text("S_FAILED");
       break;
     }
 
-    lab_skillstring->set_text(__skiller_if->skill_string());
-    lab_error->set_text(__skiller_if->error());
+    lab_skillstring->set_text(skiller_if_->skill_string());
+    lab_error->set_text(skiller_if_->error());
 #if GTKMM_MAJOR_VERSION > 2 || ( GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 12 )
-    lab_skillstring->set_tooltip_text(__skiller_if->skill_string());
-    lab_error->set_tooltip_text(__skiller_if->error());
+    lab_skillstring->set_tooltip_text(skiller_if_->skill_string());
+    lab_error->set_tooltip_text(skiller_if_->error());
 #endif
-    lab_alive->set_text(__skiller_if->has_writer() ? "Yes" : "No");
+    lab_alive->set_text(skiller_if_->has_writer() ? "Yes" : "No");
 
-    if ( __skiller_if->exclusive_controller() == __skiller_if->serial() ) {
+    if ( skiller_if_->exclusive_controller() == skiller_if_->serial() ) {
       if ( tb_controller->get_stock_id() == Gtk::Stock::NO.id ) {
 	tb_controller->set_stock_id(Gtk::Stock::YES);
 #if GTKMM_MAJOR_VERSION > 2 || ( GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 12 )
@@ -555,12 +555,12 @@ SkillGuiGtkWindow::on_skiller_data_changed()
 void
 SkillGuiGtkWindow::on_skdbg_data_changed()
 {
-  if (tb_skiller->get_active() && __skdbg_if) {
+  if (tb_skiller->get_active() && skdbg_if_) {
     try {
-      __skdbg_if->read();
+      skdbg_if_->read();
 
-      if (strcmp(__skdbg_if->graph_fsm(), "LIST") == 0) {
-	Glib::ustring list = __skdbg_if->graph();
+      if (strcmp(skdbg_if_->graph_fsm(), "LIST") == 0) {
+	Glib::ustring list = skdbg_if_->graph();
 #if GTK_VERSION_GE(3,0)
 	cb_graphlist->remove_all();
 	cb_graphlist->append(ACTIVE_SKILL);
@@ -584,22 +584,22 @@ SkillGuiGtkWindow::on_skdbg_data_changed()
 #endif
 	}
 #endif
-	if (__skdbg_if->has_writer()) {
+	if (skdbg_if_->has_writer()) {
 	  SkillerDebugInterface::SetGraphMessage *sgm = new SkillerDebugInterface::SetGraphMessage("ACTIVE");
-	  __skdbg_if->msgq_enqueue(sgm);
+	  skdbg_if_->msgq_enqueue(sgm);
 	}
       } else {
 #ifdef USE_PAPYRUS
-	pvp_graph->set_graph_fsm(__skdbg_if->graph_fsm());
-	pvp_graph->set_graph(__skdbg_if->graph());
+	pvp_graph->set_graph_fsm(skdbg_if_->graph_fsm());
+	pvp_graph->set_graph(skdbg_if_->graph());
 	pvp_graph->render();
 #else
-	gda->set_graph_fsm(__skdbg_if->graph_fsm());
-	gda->set_graph(__skdbg_if->graph());
+	gda->set_graph_fsm(skdbg_if_->graph_fsm());
+	gda->set_graph(skdbg_if_->graph());
 #endif
       }
 
-      switch (__skdbg_if->graph_dir()) {
+      switch (skdbg_if_->graph_dir()) {
       case SkillerDebugInterface::GD_TOP_BOTTOM:
 	tb_graphdir->set_stock_id(Gtk::Stock::GO_DOWN); break;
       case SkillerDebugInterface::GD_BOTTOM_TOP:
@@ -610,8 +610,8 @@ SkillGuiGtkWindow::on_skdbg_data_changed()
 	tb_graphdir->set_stock_id(Gtk::Stock::GO_BACK); break;
       }
 
-      if (__skdbg_if->is_graph_colored() != tb_graphcolored->get_active()) {
-	      tb_graphcolored->set_active(__skdbg_if->is_graph_colored());
+      if (skdbg_if_->is_graph_colored() != tb_graphcolored->get_active()) {
+	      tb_graphcolored->set_active(skdbg_if_->is_graph_colored());
       }
     } catch (Exception &e) {
       // ignored
@@ -623,19 +623,19 @@ SkillGuiGtkWindow::on_skdbg_data_changed()
 void
 SkillGuiGtkWindow::on_agdbg_data_changed()
 {
-  if (tb_agent->get_active() && __agdbg_if) {
+  if (tb_agent->get_active() && agdbg_if_) {
     try {
-      __agdbg_if->read();
+      agdbg_if_->read();
 #ifdef USE_PAPYRUS
-      pvp_graph->set_graph_fsm(__agdbg_if->graph_fsm());
-      pvp_graph->set_graph(__agdbg_if->graph());
+      pvp_graph->set_graph_fsm(agdbg_if_->graph_fsm());
+      pvp_graph->set_graph(agdbg_if_->graph());
       pvp_graph->render();
 #else
-      gda->set_graph_fsm(__agdbg_if->graph_fsm());
-      gda->set_graph(__agdbg_if->graph());
+      gda->set_graph_fsm(agdbg_if_->graph_fsm());
+      gda->set_graph(agdbg_if_->graph());
 #endif
 
-      switch (__agdbg_if->graph_dir()) {
+      switch (agdbg_if_->graph_dir()) {
       case SkillerDebugInterface::GD_TOP_BOTTOM:
 	tb_graphdir->set_stock_id(Gtk::Stock::GO_DOWN); break;
       case SkillerDebugInterface::GD_BOTTOM_TOP:
@@ -679,9 +679,9 @@ SkillGuiGtkWindow::on_graphupd_clicked()
 void
 SkillGuiGtkWindow::on_graphdir_clicked()
 {
-  SkillerDebugInterface *iface = __skdbg_if;
+  SkillerDebugInterface *iface = skdbg_if_;
   if (tb_agent->get_active()) {
-    iface = __agdbg_if;
+    iface = agdbg_if_;
   }
 
   Glib::ustring stockid = tb_graphdir->get_stock_id();
@@ -723,9 +723,9 @@ void
 SkillGuiGtkWindow::on_graphdir_changed(SkillerDebugInterface::GraphDirectionEnum gd)
 {
   if (tb_agent->get_active()) {
-    send_graphdir_message(__agdbg_if, gd);
+    send_graphdir_message(agdbg_if_, gd);
   } else {
-    send_graphdir_message(__skdbg_if, gd);
+    send_graphdir_message(skdbg_if_, gd);
   }
 }
 
@@ -734,12 +734,12 @@ void
 SkillGuiGtkWindow::on_graphcolor_toggled()
 {
 #ifdef HAVE_GCONFMM
-  __gconf->set(GCONF_PREFIX"/graph_colored", tb_graphcolored->get_active());
+  gconf_->set(GCONF_PREFIX"/graph_colored", tb_graphcolored->get_active());
 #endif
 
-  SkillerDebugInterface *iface = __skdbg_if;
+  SkillerDebugInterface *iface = skdbg_if_;
   if (tb_agent->get_active()) {
-    iface = __agdbg_if;
+    iface = agdbg_if_;
   }
 
   try {

@@ -81,48 +81,48 @@ class SkillGuiGraphDrawingArea
   void save_dotfile(const char *filename);
 
  private:
-  Cairo::RefPtr<Cairo::Context> __cairo;
-  Gtk::FileChooserDialog *__fcd_save;
-  Gtk::FileChooserDialog *__fcd_open;
-  Gtk::FileChooserDialog *__fcd_recording;
+  Cairo::RefPtr<Cairo::Context> cairo_;
+  Gtk::FileChooserDialog *fcd_save_;
+  Gtk::FileChooserDialog *fcd_open_;
+  Gtk::FileChooserDialog *fcd_recording_;
 #if GTK_VERSION_GE(3,0)
-  Glib::RefPtr<Gtk::FileFilter> __filter_pdf;
-  Glib::RefPtr<Gtk::FileFilter> __filter_svg;
-  Glib::RefPtr<Gtk::FileFilter> __filter_png;
-  Glib::RefPtr<Gtk::FileFilter> __filter_dot;
+  Glib::RefPtr<Gtk::FileFilter> filter_pdf_;
+  Glib::RefPtr<Gtk::FileFilter> filter_svg_;
+  Glib::RefPtr<Gtk::FileFilter> filter_png_;
+  Glib::RefPtr<Gtk::FileFilter> filter_dot_;
 #else
-  Gtk::FileFilter *__filter_pdf;
-  Gtk::FileFilter *__filter_svg;
-  Gtk::FileFilter *__filter_png;
-  Gtk::FileFilter *__filter_dot;
+  Gtk::FileFilter *filter_pdf_;
+  Gtk::FileFilter *filter_svg_;
+  Gtk::FileFilter *filter_png_;
+  Gtk::FileFilter *filter_dot_;
 #endif
 
-  sigc::signal<void> __signal_update_disabled;
+  sigc::signal<void> signal_update_disabled_;
 
-  GVC_t *__gvc;
+  GVC_t *gvc_;
 
-  std::string __graph_fsm;
-  std::string __graph;
-  std::string __nonupd_graph;
-  std::string __nonupd_graph_fsm;
+  std::string graph_fsm_;
+  std::string graph_;
+  std::string nonupd_graph_;
+  std::string nonupd_graph_fsm_;
 
-  double __bbw;
-  double __bbh;
-  double __pad_x;
-  double __pad_y;
-  double __translation_x;
-  double __translation_y;
-  double __scale;
+  double bbw_;
+  double bbh_;
+  double pad_x_;
+  double pad_y_;
+  double translation_x_;
+  double translation_y_;
+  double scale_;
 
-  double __last_mouse_x;
-  double __last_mouse_y;
+  double last_mouse_x_;
+  double last_mouse_y_;
 
-  bool __scale_override;
-  bool __update_graph;
+  bool scale_override_;
+  bool update_graph_;
 
 
-  bool __recording;
-  std::string __record_directory;
+  bool recording_;
+  std::string record_directory_;
 };
 
 #endif

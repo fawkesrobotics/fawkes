@@ -66,26 +66,26 @@ class SkillGuiGraphViewport : public Papyrus::Gtk::Viewport
   void on_expose(GdkEventExpose *event);
 
  private:
-  GVC_t *__gvc;
-  GVJ_t *__gvjob;
+  GVC_t *gvc_;
+  GVJ_t *gvjob_;
 
-  std::string __graph_fsm;
-  std::string __graph;
+  std::string graph_fsm_;
+  std::string graph_;
 
-  double __bbw;
-  double __bbh;
-  double __pad_x;
-  double __pad_y;
-  double __translation_x;
-  double __translation_y;
-  double __scale;
-  bool   __update_graph;
+  double bbw_;
+  double bbh_;
+  double pad_x_;
+  double pad_y_;
+  double translation_x_;
+  double translation_y_;
+  double scale_;
+  bool   update_graph_;
 
-  bool __scale_override;
+  bool scale_override_;
 
-  Gtk::FileChooserDialog *__fcd;
-  Papyrus::AffineController::pointer __affine;
-  Papyrus::Translator::pointer __translator;
+  Gtk::FileChooserDialog *fcd_;
+  Papyrus::AffineController::pointer affine_;
+  Papyrus::Translator::pointer translator_;
 };
 
 
