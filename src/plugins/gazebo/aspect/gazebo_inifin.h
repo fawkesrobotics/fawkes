@@ -45,8 +45,8 @@ class GazeboAspectIniFin : public AspectIniFin
   void set_gazebo_world_node(gazebo::transport::NodePtr gazebo_world_node);
 
  private:
-  gazebo::transport::NodePtr __gazebonode;
-  gazebo::transport::NodePtr __gazebo_world_node;
+  gazebo::transport::NodePtr gazebonode_;
+  gazebo::transport::NodePtr gazebo_world_node_;
 
 };
 

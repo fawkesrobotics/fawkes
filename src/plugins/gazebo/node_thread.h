@@ -62,13 +62,13 @@ class GazeboNodeThread
 
  private:
   //Node for communication to gazebo-robot-plugins
-  gazebo::transport::NodePtr  __gazebonode;
+  gazebo::transport::NodePtr  gazebonode_;
   //Node to control the gazebo world (e.g. spawn visual objects)
-  gazebo::transport::NodePtr  __gazebo_world_node;
+  gazebo::transport::NodePtr  gazebo_world_node_;
   //Publisher to send Messages:
-  gazebo::transport::PublisherPtr __visual_publisher, __model_publisher, __request_publisher, __light_publisher;
+  gazebo::transport::PublisherPtr visual_publisher_, model_publisher_, request_publisher_, light_publisher_;
 
-  fawkes::GazeboAspectIniFin  __gazebo_aspect_inifin;
+  fawkes::GazeboAspectIniFin  gazebo_aspect_inifin_;
 
   //channel of a specified robot for the gazebo node communication
   std::string robot_channel, world_name;
