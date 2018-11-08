@@ -112,8 +112,8 @@ class NetworkLogger
 
   LockQueue< FawkesNetworkMessage * > inbound_queue;
 
-  LockList<unsigned int>           __subscribers;
-  LockList<unsigned int>::iterator __ssit;
+  LockList<unsigned int>           subscribers_;
+  LockList<unsigned int>::iterator ssit_;
 };
 
 
@@ -141,9 +141,9 @@ class NetworkLoggerMessageContent : public FawkesNetworkMessageContent
 
  private:
   NetworkLogger::network_logger_header_t *header;
-  const char *__component;
-  const char *__message;
-  bool __own_payload;
+  const char *component_;
+  const char *message_;
+  bool own_payload_;
 };
 
 } // end namespace fawkes
