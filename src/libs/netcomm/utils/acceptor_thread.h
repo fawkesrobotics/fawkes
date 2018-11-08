@@ -56,10 +56,10 @@ class NetworkAcceptorThread : public Thread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  unsigned short int        __port;
-  StreamSocket             *__socket;
+  unsigned short int        port_;
+  StreamSocket             *socket_;
 
-  NetworkIncomingConnectionHandler *__handler;
+  NetworkIncomingConnectionHandler *handler_;
 
 };
 

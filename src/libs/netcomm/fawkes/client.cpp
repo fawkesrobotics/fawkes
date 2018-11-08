@@ -73,53 +73,53 @@ class FawkesNetworkClientSendThread : public Thread
   FawkesNetworkClientSendThread(StreamSocket *s, FawkesNetworkClient *parent)
     : Thread("FawkesNetworkClientSendThread", Thread::OPMODE_WAITFORWAKEUP)
   {
-    __s = s;
-    __parent = parent;
-    __outbound_mutex    = new Mutex();
-    __outbound_msgqs[0] = new FawkesNetworkMessageQueue();
-    __outbound_msgqs[1] = new FawkesNetworkMessageQueue();
-    __outbound_active   = 0;
-    __outbound_msgq     = __outbound_msgqs[0];
-    __outbound_havemore = false;
+    s_ = s;
+    parent_ = parent;
+    outbound_mutex_    = new Mutex();
+    outbound_msgqs_[0] = new FawkesNetworkMessageQueue();
+    outbound_msgqs_[1] = new FawkesNetworkMessageQueue();
+    outbound_active_   = 0;
+    outbound_msgq_     = outbound_msgqs_[0];
+    outbound_havemore_ = false;
   }
 
   /** Destructor. */
   ~FawkesNetworkClientSendThread()
   {
     for (unsigned int i = 0; i < 2; ++i) {
-      while ( ! __outbound_msgqs[i]->empty() ) {
-	FawkesNetworkMessage *m = __outbound_msgqs[i]->front();
+      while ( ! outbound_msgqs_[i]->empty() ) {
+	FawkesNetworkMessage *m = outbound_msgqs_[i]->front();
 	m->unref();
-	__outbound_msgqs[i]->pop();
+	outbound_msgqs_[i]->pop();
       }
     }
-    delete __outbound_msgqs[0];
-    delete __outbound_msgqs[1];
-    delete __outbound_mutex;
+    delete outbound_msgqs_[0];
+    delete outbound_msgqs_[1];
+    delete outbound_mutex_;
   }
 
   virtual void once()
   {
-    __parent->set_send_slave_alive();
+    parent_->set_send_slave_alive();
   }
 
   virtual void loop()
   {
-    if ( ! __parent->connected() )  return;
+    if ( ! parent_->connected() )  return;
 
-    while ( __outbound_havemore ) {
-      __outbound_mutex->lock();
-      __outbound_havemore = false;
-      FawkesNetworkMessageQueue *q = __outbound_msgq;
-      __outbound_active = 1 - __outbound_active;
-      __outbound_msgq = __outbound_msgqs[__outbound_active];
-      __outbound_mutex->unlock();
+    while ( outbound_havemore_ ) {
+      outbound_mutex_->lock();
+      outbound_havemore_ = false;
+      FawkesNetworkMessageQueue *q = outbound_msgq_;
+      outbound_active_ = 1 - outbound_active_;
+      outbound_msgq_ = outbound_msgqs_[outbound_active_];
+      outbound_mutex_->unlock();
 
       if ( ! q->empty() ) {
 	try {
-	  FawkesNetworkTransceiver::send(__s, q);
+	  FawkesNetworkTransceiver::send(s_, q);
 	} catch (ConnectionDiedException &e) {
-	  __parent->connection_died();
+	  parent_->connection_died();
 	  exit();
 	}
       }
@@ -150,10 +150,10 @@ class FawkesNetworkClientSendThread : public Thread
    */
   void enqueue(FawkesNetworkMessage *message)
   {
-    __outbound_mutex->lock();
-    __outbound_msgq->push(message);
-    __outbound_havemore = true;
-    __outbound_mutex->unlock();
+    outbound_mutex_->lock();
+    outbound_msgq_->push(message);
+    outbound_havemore_ = true;
+    outbound_mutex_->unlock();
     wakeup();
   }
 
@@ -161,13 +161,13 @@ class FawkesNetworkClientSendThread : public Thread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  StreamSocket *__s;
-  FawkesNetworkClient *__parent;
-  Mutex                     *__outbound_mutex;
-  unsigned int               __outbound_active;
-  bool                       __outbound_havemore;
-  FawkesNetworkMessageQueue *__outbound_msgq;
-  FawkesNetworkMessageQueue *__outbound_msgqs[2];
+  StreamSocket *s_;
+  FawkesNetworkClient *parent_;
+  Mutex                     *outbound_mutex_;
+  unsigned int               outbound_active_;
+  bool                       outbound_havemore_;
+  FawkesNetworkMessageQueue *outbound_msgq_;
+  FawkesNetworkMessageQueue *outbound_msgqs_[2];
   
 };
 
@@ -190,21 +190,21 @@ class FawkesNetworkClientRecvThread : public Thread
 				Mutex *recv_mutex)
     : Thread("FawkesNetworkClientRecvThread")
   {
-    __s = s;
-    __parent = parent;
-    __inbound_msgq = new FawkesNetworkMessageQueue();
-    __recv_mutex = recv_mutex;
+    s_ = s;
+    parent_ = parent;
+    inbound_msgq_ = new FawkesNetworkMessageQueue();
+    recv_mutex_ = recv_mutex;
   }
 
   /** Destructor. */
   ~FawkesNetworkClientRecvThread()
   {
-    while ( ! __inbound_msgq->empty() ) {
-      FawkesNetworkMessage *m = __inbound_msgq->front();
+    while ( ! inbound_msgq_->empty() ) {
+      FawkesNetworkMessage *m = inbound_msgq_->front();
       m->unref();
-      __inbound_msgq->pop();
+      inbound_msgq_->pop();
     }
-    delete __inbound_msgq;
+    delete inbound_msgq_;
   }
 
   /** Receive and process messages. */
@@ -213,26 +213,26 @@ class FawkesNetworkClientRecvThread : public Thread
     std::list<unsigned int> wakeup_list;
 
     try {
-      FawkesNetworkTransceiver::recv(__s, __inbound_msgq);
+      FawkesNetworkTransceiver::recv(s_, inbound_msgq_);
 
-      MutexLocker lock(__recv_mutex);
+      MutexLocker lock(recv_mutex_);
 
-      __inbound_msgq->lock();
-      while ( ! __inbound_msgq->empty() ) {
-	FawkesNetworkMessage *m = __inbound_msgq->front();
+      inbound_msgq_->lock();
+      while ( ! inbound_msgq_->empty() ) {
+	FawkesNetworkMessage *m = inbound_msgq_->front();
 	wakeup_list.push_back(m->cid());
-	__parent->dispatch_message(m);
+	parent_->dispatch_message(m);
 	m->unref();
-	__inbound_msgq->pop();
+	inbound_msgq_->pop();
       }
-      __inbound_msgq->unlock();
+      inbound_msgq_->unlock();
 
       lock.unlock();
     
       wakeup_list.sort();
       wakeup_list.unique();
       for (std::list<unsigned int>::iterator i = wakeup_list.begin(); i != wakeup_list.end(); ++i) {
-	__parent->wake_handlers(*i);
+	parent_->wake_handlers(*i);
       }
     } catch (ConnectionDiedException &e) {
       throw;
@@ -241,17 +241,17 @@ class FawkesNetworkClientRecvThread : public Thread
 
   virtual void once()
   {
-    __parent->set_recv_slave_alive();
+    parent_->set_recv_slave_alive();
   }
 
   virtual void loop()
   {
     // just return if not connected
-    if (! __s ) return;
+    if (! s_ ) return;
 
     short p = 0;
     try {
-      p = __s->poll();
+      p = s_->poll();
     } catch (InterruptedException &e) {
       return;
     }
@@ -259,14 +259,14 @@ class FawkesNetworkClientRecvThread : public Thread
     if ( (p & Socket::POLL_ERR) ||
 	 (p & Socket::POLL_HUP) ||
 	 (p & Socket::POLL_RDHUP)) {
-      __parent->connection_died();
+      parent_->connection_died();
       exit();
     } else if ( p & Socket::POLL_IN ) {
       // Data can be read
       try {
 	recv();
       } catch (ConnectionDiedException &e) {
-	__parent->connection_died();
+	parent_->connection_died();
 	exit();
       }
     }
@@ -276,10 +276,10 @@ class FawkesNetworkClientRecvThread : public Thread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  StreamSocket *__s;
-  FawkesNetworkClient *__parent;
-  FawkesNetworkMessageQueue *  __inbound_msgq;
-  Mutex *__recv_mutex;
+  StreamSocket *s_;
+  FawkesNetworkClient *parent_;
+  FawkesNetworkMessageQueue *  inbound_msgq_;
+  Mutex *recv_mutex_;
 };
 
 
@@ -297,30 +297,30 @@ class FawkesNetworkClientRecvThread : public Thread
  */
 FawkesNetworkClient::FawkesNetworkClient(const char *host, unsigned short int port)
 {
-  __host = strdup(host);
-  __port = port;
+  host_ = strdup(host);
+  port_ = port;
   addr_  = NULL;
   addr_len_ = 0;
 
   s = NULL;
-  __send_slave = NULL;
-  __recv_slave = NULL;
+  send_slave_ = NULL;
+  recv_slave_ = NULL;
 
   connection_died_recently = false;
-  __send_slave_alive = false;
-  __recv_slave_alive = false;
+  send_slave_alive_ = false;
+  recv_slave_alive_ = false;
 
   slave_status_mutex = new Mutex();
 
   _id     = 0;
   _has_id = false;
 
-  __recv_mutex          = new Mutex();
-  __recv_waitcond       = new WaitCondition(__recv_mutex);
-  __connest_mutex       = new Mutex();
-  __connest_waitcond    = new WaitCondition(__connest_mutex);
-  __connest             = false;
-  __connest_interrupted = false;
+  recv_mutex_          = new Mutex();
+  recv_waitcond_       = new WaitCondition(recv_mutex_);
+  connest_mutex_       = new Mutex();
+  connest_waitcond_    = new WaitCondition(connest_mutex_);
+  connest_             = false;
+  connest_interrupted_ = false;
 }
 
 
@@ -330,30 +330,30 @@ FawkesNetworkClient::FawkesNetworkClient(const char *host, unsigned short int po
  */
 FawkesNetworkClient::FawkesNetworkClient()
 {
-  __host = NULL;
-  __port = 0;
+  host_ = NULL;
+  port_ = 0;
   addr_  = NULL;
   addr_len_ = 0;
 
   s = NULL;
-  __send_slave = NULL;
-  __recv_slave = NULL;
+  send_slave_ = NULL;
+  recv_slave_ = NULL;
 
   connection_died_recently = false;
-  __send_slave_alive = false;
-  __recv_slave_alive = false;
+  send_slave_alive_ = false;
+  recv_slave_alive_ = false;
 
   slave_status_mutex = new Mutex();
 
   _id     = 0;
   _has_id = false;
 
-  __recv_mutex          = new Mutex();
-  __recv_waitcond       = new WaitCondition(__recv_mutex);
-  __connest_mutex       = new Mutex();
-  __connest_waitcond    = new WaitCondition(__connest_mutex);
-  __connest             = false;
-  __connest_interrupted = false;
+  recv_mutex_          = new Mutex();
+  recv_waitcond_       = new WaitCondition(recv_mutex_);
+  connest_mutex_       = new Mutex();
+  connest_waitcond_    = new WaitCondition(connest_mutex_);
+  connest_             = false;
+  connest_interrupted_ = false;
 }
 
 
@@ -365,30 +365,30 @@ FawkesNetworkClient::FawkesNetworkClient()
 FawkesNetworkClient::FawkesNetworkClient(unsigned int id, const char *host,
                                          unsigned short int port)
 {
-  __host = strdup(host);
-  __port = port;
+  host_ = strdup(host);
+  port_ = port;
   addr_  = NULL;
   addr_len_ = 0;
 
   s = NULL;
-  __send_slave = NULL;
-  __recv_slave = NULL;
+  send_slave_ = NULL;
+  recv_slave_ = NULL;
 
   connection_died_recently = false;
-  __send_slave_alive = false;
-  __recv_slave_alive = false;
+  send_slave_alive_ = false;
+  recv_slave_alive_ = false;
 
   slave_status_mutex = new Mutex();
 
   _id     = id;
   _has_id = true;
 
-  __recv_mutex          = new Mutex();
-  __recv_waitcond       = new WaitCondition(__recv_mutex);
-  __connest_mutex       = new Mutex();
-  __connest_waitcond    = new WaitCondition(__connest_mutex);
-  __connest             = false;
-  __connest_interrupted = false;
+  recv_mutex_          = new Mutex();
+  recv_waitcond_       = new WaitCondition(recv_mutex_);
+  connest_mutex_       = new Mutex();
+  connest_waitcond_    = new WaitCondition(connest_mutex_);
+  connest_             = false;
+  connest_interrupted_ = false;
 }
 
 
@@ -398,14 +398,14 @@ FawkesNetworkClient::~FawkesNetworkClient()
   disconnect();
 
   delete s;
-  if (__host) free(__host);
+  if (host_) free(host_);
   if (addr_) free(addr_);
   delete slave_status_mutex;
 
-  delete __connest_waitcond;
-  delete __connest_mutex;
-  delete __recv_waitcond;
-  delete __recv_mutex;
+  delete connest_waitcond_;
+  delete connest_mutex_;
+  delete recv_waitcond_;
+  delete recv_mutex_;
 }
 
 
@@ -416,7 +416,7 @@ FawkesNetworkClient::~FawkesNetworkClient()
 void
 FawkesNetworkClient::connect()
 {
-  if ( __host == NULL && addr_ == NULL) {
+  if ( host_ == NULL && addr_ == NULL) {
     throw NullPointerException("Neither hostname nor sockaddr set. Cannot connect.");
   }
 
@@ -431,43 +431,43 @@ FawkesNetworkClient::connect()
     s = new StreamSocket();
     if (addr_) {
 	    s->connect(addr_, addr_len_);
-    } else if (__host) {
-	    s->connect(__host, __port);
+    } else if (host_) {
+	    s->connect(host_, port_);
     } else {
 	    throw NullPointerException("Nothing to connect to!?");
     }
-    __send_slave = new FawkesNetworkClientSendThread(s, this);
-    __send_slave->start();
-    __recv_slave = new FawkesNetworkClientRecvThread(s, this, __recv_mutex);
-    __recv_slave->start();
+    send_slave_ = new FawkesNetworkClientSendThread(s, this);
+    send_slave_->start();
+    recv_slave_ = new FawkesNetworkClientRecvThread(s, this, recv_mutex_);
+    recv_slave_->start();
   } catch (SocketException &e) {
     connection_died_recently = true;
-    if ( __send_slave ) {
-      __send_slave->cancel();
-      __send_slave->join();
-      delete __send_slave;
-      __send_slave = NULL;
+    if ( send_slave_ ) {
+      send_slave_->cancel();
+      send_slave_->join();
+      delete send_slave_;
+      send_slave_ = NULL;
     }
-    if ( __recv_slave ) {
-      __recv_slave->cancel();
-      __recv_slave->join();
-      delete __recv_slave;
-      __recv_slave = NULL;
+    if ( recv_slave_ ) {
+      recv_slave_->cancel();
+      recv_slave_->join();
+      delete recv_slave_;
+      recv_slave_ = NULL;
     }
-    __send_slave_alive = false;
-    __recv_slave_alive = false;
+    send_slave_alive_ = false;
+    recv_slave_alive_ = false;
     delete s;
     s = NULL;
     throw;
   }
 
-  __connest_mutex->lock();
-  while ( ! __connest && ! __connest_interrupted ) {
-    __connest_waitcond->wait();
+  connest_mutex_->lock();
+  while ( ! connest_ && ! connest_interrupted_ ) {
+    connest_waitcond_->wait();
   }
-  bool interrupted = __connest_interrupted;
-  __connest_interrupted = false;
-  __connest_mutex->unlock();
+  bool interrupted = connest_interrupted_;
+  connest_interrupted_ = false;
+  connest_mutex_->unlock();
   if ( interrupted ) {
     throw InterruptedException("FawkesNetworkClient::connect()");
   }
@@ -485,9 +485,9 @@ FawkesNetworkClient::connect()
 void
 FawkesNetworkClient::connect(const char *host, unsigned short int port)
 {
-  if (__host)  free(__host);
-  __host = strdup(host);
-  __port = port;
+  if (host_)  free(host_);
+  host_ = strdup(host);
+  port_ = port;
   connect();
 }
 
@@ -499,12 +499,12 @@ FawkesNetworkClient::connect(const char *host, unsigned short int port)
 void
 FawkesNetworkClient::connect(const char *hostname, const struct sockaddr *addr, socklen_t addr_len)
 {
-  if (__host)  free(__host);
+  if (host_)  free(host_);
   if (addr_) free(addr_);
 	addr_ = (struct sockaddr *)malloc(addr_len);
 	addr_len_ = addr_len;
 	memcpy(addr_, addr, addr_len);
-	__host = strdup(hostname);
+	host_ = strdup(hostname);
   connect();
 }
 
@@ -515,12 +515,12 @@ FawkesNetworkClient::connect(const char *hostname, const struct sockaddr *addr, 
 void
 FawkesNetworkClient::connect(const char *hostname, const struct sockaddr_storage &addr)
 {
-  if (__host)  free(__host);
+  if (host_)  free(host_);
   if (addr_) free(addr_);
   addr_ = (struct sockaddr *)malloc(sizeof(sockaddr_storage));
   addr_len_ = sizeof(sockaddr_storage);
 	memcpy(addr_, &addr, addr_len_);
-	__host = strdup(hostname);
+	host_ = strdup(hostname);
   connect();
 }
 
@@ -530,25 +530,25 @@ FawkesNetworkClient::disconnect()
 {
   if ( s == NULL ) return;
 
-  if ( __send_slave_alive ) {
+  if ( send_slave_alive_ ) {
     if ( ! connection_died_recently ) {
-      __send_slave->force_send();
+      send_slave_->force_send();
       // Give other side some time to read the messages just sent
       usleep(100000);
     }
-    __send_slave->cancel();
-    __send_slave->join();
-    delete __send_slave;
-    __send_slave = NULL;
+    send_slave_->cancel();
+    send_slave_->join();
+    delete send_slave_;
+    send_slave_ = NULL;
   }
-  if ( __recv_slave_alive ) {
-    __recv_slave->cancel();
-    __recv_slave->join();
-    delete __recv_slave;
-    __recv_slave = NULL;
+  if ( recv_slave_alive_ ) {
+    recv_slave_->cancel();
+    recv_slave_->join();
+    delete recv_slave_;
+    recv_slave_ = NULL;
   }
-  __send_slave_alive = false;
-  __recv_slave_alive = false;
+  send_slave_alive_ = false;
+  recv_slave_alive_ = false;
   delete s;
   s = NULL;
 
@@ -565,10 +565,10 @@ FawkesNetworkClient::disconnect()
 void
 FawkesNetworkClient::interrupt_connect()
 {
-  __connest_mutex->lock();
-  __connest_interrupted = true;
-  __connest_waitcond->wake_all();
-  __connest_mutex->unlock();
+  connest_mutex_->lock();
+  connest_interrupted_ = true;
+  connest_waitcond_->wake_all();
+  connest_mutex_->unlock();
 }
 
 
@@ -586,7 +586,7 @@ FawkesNetworkClient::interrupt_connect()
 void
 FawkesNetworkClient::enqueue(FawkesNetworkMessage *message)
 {
-  if (__send_slave)  __send_slave->enqueue(message);
+  if (send_slave_)  send_slave_->enqueue(message);
 }
 
 
@@ -605,27 +605,27 @@ void
 FawkesNetworkClient::enqueue_and_wait(FawkesNetworkMessage *message,
 				      unsigned int timeout_sec)
 {
-  if (__send_slave && __recv_slave) {
-    __recv_mutex->lock();
-    if ( __recv_received.find(message->cid()) != __recv_received.end()) {
-      __recv_mutex->unlock();
+  if (send_slave_ && recv_slave_) {
+    recv_mutex_->lock();
+    if ( recv_received_.find(message->cid()) != recv_received_.end()) {
+      recv_mutex_->unlock();
       unsigned int cid = message->cid();
       throw Exception("There is already a thread waiting for messages of "
 		      "component id %u", cid);
     }
-    __send_slave->enqueue(message);
+    send_slave_->enqueue(message);
     unsigned int cid = message->cid();
-    __recv_received[cid] = false;
-    while (!__recv_received[cid] && ! connection_died_recently) {
-      if (!__recv_waitcond->reltimed_wait(timeout_sec, 0)) {
-	__recv_received.erase(cid);
-	__recv_mutex->unlock();
+    recv_received_[cid] = false;
+    while (!recv_received_[cid] && ! connection_died_recently) {
+      if (!recv_waitcond_->reltimed_wait(timeout_sec, 0)) {
+	recv_received_.erase(cid);
+	recv_mutex_->unlock();
 	throw TimeoutException("Timeout reached while waiting for incoming message "
 			       "(outgoing was %u:%u)", message->cid(), message->msgid());
       }
     }
-    __recv_received.erase(cid);
-    __recv_mutex->unlock();
+    recv_received_.erase(cid);
+    recv_mutex_->unlock();
   } else {
     unsigned int cid = message->cid();
     unsigned int msgid = message->msgid();
@@ -670,12 +670,12 @@ FawkesNetworkClient::deregister_handler(unsigned int component_id)
     handlers.erase(component_id);
   }
   handlers.unlock();
-  __recv_mutex->lock();
-  if (__recv_received.find(component_id) != __recv_received.end()) {
-    __recv_received[component_id] = true;
-    __recv_waitcond->wake_all();
+  recv_mutex_->lock();
+  if (recv_received_.find(component_id) != recv_received_.end()) {
+    recv_received_[component_id] = true;
+    recv_waitcond_->wake_all();
   }
-  __recv_mutex->unlock();
+  recv_mutex_->unlock();
 }
 
 
@@ -694,20 +694,20 @@ FawkesNetworkClient::dispatch_message(FawkesNetworkMessage *m)
 void
 FawkesNetworkClient::wake_handlers(unsigned int cid)
 {
-  __recv_mutex->lock();
-  if (__recv_received.find(cid) != __recv_received.end()) {
-    __recv_received[cid] = true;
+  recv_mutex_->lock();
+  if (recv_received_.find(cid) != recv_received_.end()) {
+    recv_received_[cid] = true;
   }
-  __recv_waitcond->wake_all();
-  __recv_mutex->unlock();
+  recv_waitcond_->wake_all();
+  recv_mutex_->unlock();
 }
 
 void
 FawkesNetworkClient::notify_of_connection_dead()
 {
-  __connest_mutex->lock();
-  __connest = false;
-  __connest_mutex->unlock();
+  connest_mutex_->lock();
+  connest_ = false;
+  connest_mutex_->unlock();
 
   handlers.lock();
   for ( HandlerMap::iterator i = handlers.begin(); i != handlers.end(); ++i ) {
@@ -715,9 +715,9 @@ FawkesNetworkClient::notify_of_connection_dead()
   }
   handlers.unlock();
 
-  __recv_mutex->lock();
-  __recv_waitcond->wake_all();
-  __recv_mutex->unlock();
+  recv_mutex_->lock();
+  recv_waitcond_->wake_all();
+  recv_mutex_->unlock();
 }
 
 void
@@ -743,12 +743,12 @@ void
 FawkesNetworkClient::set_send_slave_alive()
 {
   slave_status_mutex->lock();
-  __send_slave_alive = true;
-  if ( __send_slave_alive && __recv_slave_alive ) {
-    __connest_mutex->lock();
-    __connest = true;
-    __connest_waitcond->wake_all();
-    __connest_mutex->unlock();
+  send_slave_alive_ = true;
+  if ( send_slave_alive_ && recv_slave_alive_ ) {
+    connest_mutex_->lock();
+    connest_ = true;
+    connest_waitcond_->wake_all();
+    connest_mutex_->unlock();
   }
   slave_status_mutex->unlock();
 }
@@ -758,12 +758,12 @@ void
 FawkesNetworkClient::set_recv_slave_alive()
 {
   slave_status_mutex->lock();
-  __recv_slave_alive = true;
-  if ( __send_slave_alive && __recv_slave_alive ) {
-    __connest_mutex->lock();
-    __connest = true;
-    __connest_waitcond->wake_all();
-    __connest_mutex->unlock();
+  recv_slave_alive_ = true;
+  if ( send_slave_alive_ && recv_slave_alive_ ) {
+    connest_mutex_->lock();
+    connest_ = true;
+    connest_waitcond_->wake_all();
+    connest_mutex_->unlock();
   }
   slave_status_mutex->unlock();
 }
@@ -779,23 +779,23 @@ FawkesNetworkClient::set_recv_slave_alive()
 void
 FawkesNetworkClient::wait(unsigned int component_id, unsigned int timeout_sec)
 {
-  __recv_mutex->lock();
-  if ( __recv_received.find(component_id) != __recv_received.end()) {
-    __recv_mutex->unlock();
+  recv_mutex_->lock();
+  if ( recv_received_.find(component_id) != recv_received_.end()) {
+    recv_mutex_->unlock();
     throw Exception("There is already a thread waiting for messages of "
 		    "component id %u", component_id);
   }
-  __recv_received[component_id] = false;
-  while (! __recv_received[component_id] && ! connection_died_recently) {
-    if (!__recv_waitcond->reltimed_wait(timeout_sec, 0)) {
-      __recv_received.erase(component_id);
-      __recv_mutex->unlock();
+  recv_received_[component_id] = false;
+  while (! recv_received_[component_id] && ! connection_died_recently) {
+    if (!recv_waitcond_->reltimed_wait(timeout_sec, 0)) {
+      recv_received_.erase(component_id);
+      recv_mutex_->unlock();
       throw TimeoutException("Timeout reached while waiting for incoming message "
 			     "(component %u)", component_id);
     }
   }
-  __recv_received.erase(component_id);
-  __recv_mutex->unlock();
+  recv_received_.erase(component_id);
+  recv_mutex_->unlock();
 }
 
 
@@ -807,12 +807,12 @@ FawkesNetworkClient::wait(unsigned int component_id, unsigned int timeout_sec)
 void
 FawkesNetworkClient::wake(unsigned int component_id)
 {
-  __recv_mutex->lock();
-  if ( __recv_received.find(component_id) != __recv_received.end()) {
-    __recv_received[component_id] = true;
+  recv_mutex_->lock();
+  if ( recv_received_.find(component_id) != recv_received_.end()) {
+    recv_received_[component_id] = true;
   }
-  __recv_waitcond->wake_all();
-  __recv_mutex->unlock();
+  recv_waitcond_->wake_all();
+  recv_mutex_->unlock();
 }
 
 
@@ -855,7 +855,7 @@ FawkesNetworkClient::id() const
 const char *
 FawkesNetworkClient::get_hostname() const
 {
-  return __host;
+  return host_;
 }
 
 } // end namespace fawkes

@@ -43,8 +43,8 @@ class StringContent : public FawkesNetworkMessageContent
   virtual void  serialize();
 
  private:
-  bool    __string_owner;
-  char *  __string;
+  bool    string_owner_;
+  char *  string_;
 
 };
 

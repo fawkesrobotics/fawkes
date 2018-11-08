@@ -69,8 +69,8 @@ class NetworkNameResolver
 
  private:
   NetworkNameResolverThread *resolver_thread;
-  HostInfo *__host_info;
-  unsigned int __cache_timeout;
+  HostInfo *host_info_;
+  unsigned int cache_timeout_;
 
   LockHashMap<uint32_t, std::pair<std::string, time_t> >          addr2name_cache;
   LockHashMap<std::string, std::pair<struct sockaddr *, time_t> > name2addr_cache;

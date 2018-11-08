@@ -54,14 +54,14 @@ class FawkesNetworkManager
   unsigned short int     fawkes_port() const;
 
  private:
-  unsigned short int          __fawkes_port;
-  ThreadCollector            *__thread_collector;
-  FawkesNetworkServerThread  *__fawkes_network_thread;
-  AvahiThread                *__avahi_thread;
+  unsigned short int          fawkes_port_;
+  ThreadCollector            *thread_collector_;
+  FawkesNetworkServerThread  *fawkes_network_thread_;
+  AvahiThread                *avahi_thread_;
 
-  NetworkNameResolver        *__nnresolver;
-  ServicePublisher           *__service_publisher;
-  ServiceBrowser             *__service_browser;
+  NetworkNameResolver        *nnresolver_;
+  ServicePublisher           *service_publisher_;
+  ServiceBrowser             *service_browser_;
 };
 
 } // end namespace fawkes

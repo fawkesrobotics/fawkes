@@ -616,7 +616,7 @@ Socket::accept()
   }
 
   // Does not work, evaluated at compile time, thus need clone()
-  //__typeof(this) s = new __typeof(*this);
+  //typeof_(this) s = new typeof_(*this);
   //s->timeout = timeout;
 
   Socket *s = clone();

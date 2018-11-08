@@ -75,25 +75,25 @@ class NetworkNameResolverThread : public Thread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  NetworkNameResolver  *__resolver;
+  NetworkNameResolver  *resolver_;
 #ifdef HAVE_AVAHI
-  AvahiThread          *__avahi_thread;
+  AvahiThread          *avahi_thread_;
 #endif
 
-  Mutex *__namesq_mutex;
-  unsigned int __namesq_active;
+  Mutex *namesq_mutex_;
+  unsigned int namesq_active_;
   typedef LockHashSet<std::string>  NamesQMap;
-  NamesQMap   __namesqs[2];
-  NamesQMap  *__namesq;
-  NamesQMap  *__namesq_proc;
+  NamesQMap   namesqs_[2];
+  NamesQMap  *namesq_;
+  NamesQMap  *namesq_proc_;
 
 
-  Mutex *__addrq_mutex;
-  unsigned int __addrq_active;
+  Mutex *addrq_mutex_;
+  unsigned int addrq_active_;
   typedef std::list<struct sockaddr *> AddrQList;
-  AddrQList   __addrqs[2];
-  AddrQList  *__addrq;
-  AddrQList  *__addrq_proc;
+  AddrQList   addrqs_[2];
+  AddrQList  *addrq_;
+  AddrQList  *addrq_proc_;
 };
 
 } // end namespace fawkes
