@@ -52,25 +52,25 @@ class LaserGuiHildonWindow : public Hildon::Window
  public:
   /** Constructor. */
   LaserGuiHildonWindow()
-    : __athome_drawer(true),
-      __img_lines(RESDIR"/guis/lasergui/lines_"ICON_FORMAT".png"),
-      __img_points(RESDIR"/guis/lasergui/points_"ICON_FORMAT".png"),
-      __img_hull(RESDIR"/guis/lasergui/hull_"ICON_FORMAT".png"),
-      __img_lowres(RESDIR"/guis/lasergui/lines_lowres_"ICON_FORMAT".png"),
-      __img_rotation(RESDIR"/guis/lasergui/rotate-90.png"),
-      __tb_connection(Gtk::Stock::CONNECT),
-      __tb_lines(__img_lines),
-      __tb_points(__img_points),
-      __tb_hull(__img_hull),
-      __tb_lowres(__img_lowres),
-      __tb_rotation(__img_rotation),
-      __tb_zoom_in(Gtk::Stock::ZOOM_IN),
-      __tb_zoom_out(Gtk::Stock::ZOOM_OUT)
+    : athome_drawer_(true),
+      img_lines_(RESDIR"/guis/lasergui/lines_"ICON_FORMAT".png"),
+      img_points_(RESDIR"/guis/lasergui/points_"ICON_FORMAT".png"),
+      img_hull_(RESDIR"/guis/lasergui/hull_"ICON_FORMAT".png"),
+      img_lowres_(RESDIR"/guis/lasergui/lines_lowres_"ICON_FORMAT".png"),
+      img_rotation_(RESDIR"/guis/lasergui/rotate-90.png"),
+      tb_connection_(Gtk::Stock::CONNECT),
+      tb_lines_(img_lines_),
+      tb_points_(img_points_),
+      tb_hull_(img_hull_),
+      tb_lowres_(img_lowres_),
+      tb_rotation_(img_rotation_),
+      tb_zoom_in_(Gtk::Stock::ZOOM_IN),
+      tb_zoom_out_(Gtk::Stock::ZOOM_OUT)
   {
-    __fullscreen = false;
-    __bb = NULL;
-    __laser_if = NULL;
-    __ifd = NULL;
+    fullscreen_ = false;
+    bb_ = NULL;
+    laser_if_ = NULL;
+    ifd_ = NULL;
 
 #  if GLIBMM_MAJOR_VERSION > 2 || (GLIBMM_MAJOR_VERSION == 2 && GLIBMM_MINOR_VERSION >= 48)
     std::unique_ptr<Glib::Error> error;
@@ -79,51 +79,51 @@ class LaserGuiHildonWindow : public Hildon::Window
 #  endif
     set_icon_from_file(RESDIR"/guis/lasergui/lines_"ICON_FORMAT".png", error);
 
-    add(__area);
-    __area.show();
-    __area.set_robot_drawer(&__athome_drawer);
+    add(area_);
+    area_.show();
+    area_.set_robot_drawer(&athome_drawer_);
 
-    Gtk::RadioButton::Group group = __tb_lines.get_group();
-    __tb_points.set_group(group);
-    group = __tb_lines.get_group();
-    __tb_hull.set_group(group);
-    __tb_lines.set_active(true);
+    Gtk::RadioButton::Group group = tb_lines_.get_group();
+    tb_points_.set_group(group);
+    group = tb_lines_.get_group();
+    tb_hull_.set_group(group);
+    tb_lines_.set_active(true);
 
-    __tb_lines.set_sensitive(false);
-    __tb_points.set_sensitive(false);
-    __tb_hull.set_sensitive(false);
-    __tb_lowres.set_sensitive(false);
-    __tb_rotation.set_sensitive(false);
-    __tb_zoom_in.set_sensitive(false);
-    __tb_zoom_out.set_sensitive(false);
+    tb_lines_.set_sensitive(false);
+    tb_points_.set_sensitive(false);
+    tb_hull_.set_sensitive(false);
+    tb_lowres_.set_sensitive(false);
+    tb_rotation_.set_sensitive(false);
+    tb_zoom_in_.set_sensitive(false);
+    tb_zoom_out_.set_sensitive(false);
 
-    __tbar.append(__tb_connection);
-    __tbar.append(__sep_0);
-    __tbar.append(__tb_lines);
-    __tbar.append(__tb_points);
-    __tbar.append(__tb_hull);
-    __tbar.append(__sep_1);
-    __tbar.append(__tb_lowres);
-    __tbar.append(__tb_rotation);
-    __tbar.append(__sep_2);
-    __tbar.append(__tb_zoom_in);
-    __tbar.append(__tb_zoom_out);
+    tbar_.append(tb_connection_);
+    tbar_.append(sep_0_);
+    tbar_.append(tb_lines_);
+    tbar_.append(tb_points_);
+    tbar_.append(tb_hull_);
+    tbar_.append(sep_1_);
+    tbar_.append(tb_lowres_);
+    tbar_.append(tb_rotation_);
+    tbar_.append(sep_2_);
+    tbar_.append(tb_zoom_in_);
+    tbar_.append(tb_zoom_out_);
 
-    add_toolbar(__tbar);
-    __tbar.show_all();
+    add_toolbar(tbar_);
+    tbar_.show_all();
 
-    __tb_lines.signal_toggled().connect(sigc::bind(sigc::mem_fun(__area, &LaserDrawingArea::set_draw_mode), LaserDrawingArea::MODE_LINES));
-    __tb_points.signal_toggled().connect(sigc::bind(sigc::mem_fun(__area, &LaserDrawingArea::set_draw_mode), LaserDrawingArea::MODE_POINTS));
-    __tb_hull.signal_toggled().connect(sigc::bind(sigc::mem_fun(__area, &LaserDrawingArea::set_draw_mode), LaserDrawingArea::MODE_HULL));
-    __tb_zoom_in.signal_clicked().connect(sigc::mem_fun(__area, &LaserDrawingArea::zoom_in));
-    __tb_zoom_out.signal_clicked().connect(sigc::mem_fun(__area, &LaserDrawingArea::zoom_out));
+    tb_lines_.signal_toggled().connect(sigc::bind(sigc::mem_fun(area_, &LaserDrawingArea::set_draw_mode), LaserDrawingArea::MODE_LINES));
+    tb_points_.signal_toggled().connect(sigc::bind(sigc::mem_fun(area_, &LaserDrawingArea::set_draw_mode), LaserDrawingArea::MODE_POINTS));
+    tb_hull_.signal_toggled().connect(sigc::bind(sigc::mem_fun(area_, &LaserDrawingArea::set_draw_mode), LaserDrawingArea::MODE_HULL));
+    tb_zoom_in_.signal_clicked().connect(sigc::mem_fun(area_, &LaserDrawingArea::zoom_in));
+    tb_zoom_out_.signal_clicked().connect(sigc::mem_fun(area_, &LaserDrawingArea::zoom_out));
 
-    __tb_connection.signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiHildonWindow::on_connection_clicked));
-    __tb_rotation.signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiHildonWindow::on_rotation_toggled));
-    __tb_lowres.signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiHildonWindow::on_resolution_toggled));
+    tb_connection_.signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiHildonWindow::on_connection_clicked));
+    tb_rotation_.signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiHildonWindow::on_rotation_toggled));
+    tb_lowres_.signal_clicked().connect(sigc::mem_fun(*this, &LaserGuiHildonWindow::on_resolution_toggled));
 
-    __connection_dispatcher.signal_connected().connect(sigc::mem_fun(*this, &LaserGuiHildonWindow::on_connect));
-    __connection_dispatcher.signal_disconnected().connect(sigc::mem_fun(*this, &LaserGuiHildonWindow::on_disconnect));
+    connection_dispatcher_.signal_connected().connect(sigc::mem_fun(*this, &LaserGuiHildonWindow::on_connect));
+    connection_dispatcher_.signal_disconnected().connect(sigc::mem_fun(*this, &LaserGuiHildonWindow::on_disconnect));
 
 #ifndef GLIBMM_DEFAULT_SIGNAL_HANDLERS_ENABLED
     signal_key_press_event().connect(sigc::mem_fun(*this, &LaserGuiHildonWindow::on_key_pressed));
@@ -134,11 +134,11 @@ class LaserGuiHildonWindow : public Hildon::Window
   /** Destructor. */
   ~LaserGuiHildonWindow()
   {
-    __area.set_laser360_if(NULL);
-    if (__bb) {
-      __bb->close(__laser_if);
-      delete __bb;
-      delete __ifd;
+    area_.set_laser360_if(NULL);
+    if (bb_) {
+      bb_->close(laser_if_);
+      delete bb_;
+      delete ifd_;
     }
   }
 
@@ -153,17 +153,17 @@ class LaserGuiHildonWindow : public Hildon::Window
 
     switch (event->keyval) {
     case GDK_F6:
-      if ( __fullscreen ) {
+      if ( fullscreen_ ) {
 	unfullscreen();
       } else {
 	fullscreen();
       }
       break;
     case GDK_F7:
-      __area.zoom_in();
+      area_.zoom_in();
       break;
     case GDK_F8:
-      __area.zoom_out();
+      area_.zoom_out();
       break;
     }
 
@@ -178,9 +178,9 @@ class LaserGuiHildonWindow : public Hildon::Window
   virtual bool on_window_state_event(GdkEventWindowState *event)
   {
     if (event->new_window_state == GDK_WINDOW_STATE_FULLSCREEN) {
-      __fullscreen = true;
+      fullscreen_ = true;
     } else {
-      __fullscreen = false;
+      fullscreen_ = false;
     }
     return false;
   }
@@ -188,11 +188,11 @@ class LaserGuiHildonWindow : public Hildon::Window
   /** Event handler for connection button. */
   void on_connection_clicked()
   {
-    if ( ! __connection_dispatcher.get_client()->connected() ) {
-      ServiceChooserDialog ssd(*this, __connection_dispatcher.get_client());
+    if ( ! connection_dispatcher_.get_client()->connected() ) {
+      ServiceChooserDialog ssd(*this, connection_dispatcher_.get_client());
       ssd.run_and_connect();
     } else {
-      __connection_dispatcher.get_client()->disconnect();
+      connection_dispatcher_.get_client()->disconnect();
     }
   }
 
@@ -200,34 +200,34 @@ class LaserGuiHildonWindow : public Hildon::Window
   virtual void on_connect()
   {
     try {
-      __bb = new RemoteBlackBoard(__connection_dispatcher.get_client());
-      __laser_if = __bb->open_for_reading<Laser360Interface>("Laser");
+      bb_ = new RemoteBlackBoard(connection_dispatcher_.get_client());
+      laser_if_ = bb_->open_for_reading<Laser360Interface>("Laser");
 
-      __area.set_laser360_if(__laser_if);
-      __ifd = new InterfaceDispatcher("LaserInterfaceDispatcher", __laser_if);
-      __ifd->signal_data_changed().connect(sigc::hide(sigc::mem_fun(__area, &LaserDrawingArea::queue_draw)));
-      __ifd->signal_writer_removed().connect(sigc::hide(sigc::mem_fun(__area, &LaserDrawingArea::queue_draw)));
-      __bb->register_listener(__ifd, BlackBoard::BBIL_FLAG_DATA | BlackBoard::BBIL_FLAG_WRITER);
+      area_.set_laser360_if(laser_if_);
+      ifd_ = new InterfaceDispatcher("LaserInterfaceDispatcher", laser_if_);
+      ifd_->signal_data_changed().connect(sigc::hide(sigc::mem_fun(area_, &LaserDrawingArea::queue_draw)));
+      ifd_->signal_writer_removed().connect(sigc::hide(sigc::mem_fun(area_, &LaserDrawingArea::queue_draw)));
+      bb_->register_listener(ifd_, BlackBoard::BBIL_FLAG_DATA | BlackBoard::BBIL_FLAG_WRITER);
 
-      __area.queue_draw();
+      area_.queue_draw();
 
-      __tb_connection.set_stock_id(Gtk::Stock::DISCONNECT);
-      __tb_lines.set_sensitive(true);
-      __tb_points.set_sensitive(true);
-      __tb_hull.set_sensitive(true);
-      __tb_lowres.set_sensitive(true);
-      __tb_rotation.set_sensitive(true);
-      __tb_zoom_in.set_sensitive(true);
-      __tb_zoom_out.set_sensitive(true);
+      tb_connection_.set_stock_id(Gtk::Stock::DISCONNECT);
+      tb_lines_.set_sensitive(true);
+      tb_points_.set_sensitive(true);
+      tb_hull_.set_sensitive(true);
+      tb_lowres_.set_sensitive(true);
+      tb_rotation_.set_sensitive(true);
+      tb_zoom_in_.set_sensitive(true);
+      tb_zoom_out_.set_sensitive(true);
     } catch (Exception &e) {
       e.print_trace();
-      if ( __bb ) {
-	__bb->close(__laser_if);
-	delete __ifd;
-	delete __bb;
-	__laser_if = NULL;
-	__bb = NULL;
-	__ifd = NULL;
+      if ( bb_ ) {
+	bb_->close(laser_if_);
+	delete ifd_;
+	delete bb_;
+	laser_if_ = NULL;
+	bb_ = NULL;
+	ifd_ = NULL;
       }
     }
   }
@@ -235,72 +235,72 @@ class LaserGuiHildonWindow : public Hildon::Window
   /** Event handler for disconnected event. */
   virtual void on_disconnect()
   {
-    __area.set_laser360_if(NULL);
-    __area.queue_draw();
-    __bb->close(__laser_if);
-    delete __bb;
-    delete __ifd;
-    __bb = NULL;
-    __ifd = NULL;
-    __laser_if = NULL;
-    __tb_connection.set_stock_id(Gtk::Stock::CONNECT);
-    __tb_lines.set_sensitive(false);
-    __tb_points.set_sensitive(false);
-    __tb_hull.set_sensitive(false);
-    __tb_lowres.set_sensitive(false);
-    __tb_rotation.set_sensitive(false);
-    __tb_zoom_in.set_sensitive(false);
-    __tb_zoom_out.set_sensitive(false);
+    area_.set_laser360_if(NULL);
+    area_.queue_draw();
+    bb_->close(laser_if_);
+    delete bb_;
+    delete ifd_;
+    bb_ = NULL;
+    ifd_ = NULL;
+    laser_if_ = NULL;
+    tb_connection_.set_stock_id(Gtk::Stock::CONNECT);
+    tb_lines_.set_sensitive(false);
+    tb_points_.set_sensitive(false);
+    tb_hull_.set_sensitive(false);
+    tb_lowres_.set_sensitive(false);
+    tb_rotation_.set_sensitive(false);
+    tb_zoom_in_.set_sensitive(false);
+    tb_zoom_out_.set_sensitive(false);
   }
 
   /** Event handler for rotation button. */
   void on_rotation_toggled()
   {
-    if ( __tb_rotation.get_active() ) {
-      __area.set_rotation(M_PI / 2);
+    if ( tb_rotation_.get_active() ) {
+      area_.set_rotation(M_PI / 2);
     } else {
-      __area.set_rotation(0);
+      area_.set_rotation(0);
     }
   }
 
   /** Event handler for rotation button. */
   void on_resolution_toggled()
   {
-    if ( __tb_lowres.get_active() ) {
-      __area.set_resolution(3);
+    if ( tb_lowres_.get_active() ) {
+      area_.set_resolution(3);
     } else {
-      __area.set_resolution(1);
+      area_.set_resolution(1);
     }
   }
 
  private:
-  AllemaniACsAtHomeCairoRobotDrawer  __athome_drawer;
-  BlackBoard                        *__bb;
-  Laser360Interface                 *__laser_if;
-  InterfaceDispatcher               *__ifd;
-  ConnectionDispatcher               __connection_dispatcher;
+  AllemaniACsAtHomeCairoRobotDrawer  athome_drawer_;
+  BlackBoard                        *bb_;
+  Laser360Interface                 *laser_if_;
+  InterfaceDispatcher               *ifd_;
+  ConnectionDispatcher               connection_dispatcher_;
 
-  Gtk::Image                         __img_lines;
-  Gtk::Image                         __img_points;
-  Gtk::Image                         __img_hull;
-  Gtk::Image                         __img_lowres;
-  Gtk::Image                         __img_rotation;
-  Gtk::ToolButton                    __tb_connection;
-  Gtk::SeparatorToolItem             __sep_0;
-  Gtk::RadioToolButton               __tb_lines;
-  Gtk::RadioToolButton               __tb_points;
-  Gtk::RadioToolButton               __tb_hull;
-  Gtk::SeparatorToolItem             __sep_1;
-  Gtk::ToggleToolButton              __tb_lowres;
-  Gtk::ToggleToolButton              __tb_rotation;
-  Gtk::SeparatorToolItem             __sep_2;
-  Gtk::ToolButton                    __tb_zoom_in;
-  Gtk::ToolButton                    __tb_zoom_out;
-  Gtk::Toolbar                       __tbar;
+  Gtk::Image                         img_lines_;
+  Gtk::Image                         img_points_;
+  Gtk::Image                         img_hull_;
+  Gtk::Image                         img_lowres_;
+  Gtk::Image                         img_rotation_;
+  Gtk::ToolButton                    tb_connection_;
+  Gtk::SeparatorToolItem             sep_0_;
+  Gtk::RadioToolButton               tb_lines_;
+  Gtk::RadioToolButton               tb_points_;
+  Gtk::RadioToolButton               tb_hull_;
+  Gtk::SeparatorToolItem             sep_1_;
+  Gtk::ToggleToolButton              tb_lowres_;
+  Gtk::ToggleToolButton              tb_rotation_;
+  Gtk::SeparatorToolItem             sep_2_;
+  Gtk::ToolButton                    tb_zoom_in_;
+  Gtk::ToolButton                    tb_zoom_out_;
+  Gtk::Toolbar                       tbar_;
 
-  LaserDrawingArea                   __area;
+  LaserDrawingArea                   area_;
 
-  bool                               __fullscreen;
+  bool                               fullscreen_;
 };
 
 int

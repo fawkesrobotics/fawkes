@@ -37,16 +37,16 @@ using namespace fawkes;
 /** Constructor. */
 VisualDisplay2D::VisualDisplay2D()
 {
-  __interface = NULL;
+  interface_ = NULL;
 }
 
 /** Destructor. */
 VisualDisplay2D::~VisualDisplay2D()
 {
-  for (__sit = __shapes.begin(); __sit != __shapes.end(); ++__sit) {
-    delete __sit->second;
+  for (sit_ = shapes_.begin(); sit_ != shapes_.end(); ++sit_) {
+    delete sit_->second;
   }
-  __shapes.clear();
+  shapes_.clear();
 }
 
 
@@ -56,7 +56,7 @@ VisualDisplay2D::~VisualDisplay2D()
 void
 VisualDisplay2D::set_interface(fawkes::VisualDisplay2DInterface *interface)
 {
-  __interface = interface;
+  interface_ = interface;
 }
 
 
@@ -67,44 +67,44 @@ VisualDisplay2D::set_interface(fawkes::VisualDisplay2DInterface *interface)
 void
 VisualDisplay2D::process_messages()
 {
-  while (! __interface->msgq_empty()) {
-    if ( __interface->msgq_first_is<VisualDisplay2DInterface::AddCartLineMessage>() ) {
-      VisualDisplay2DInterface::AddCartLineMessage *m = __interface->msgq_first<VisualDisplay2DInterface::AddCartLineMessage>();
-      __shapes[m->id()] = new Line(m->x(0), m->y(0), m->x(1), m->y(1),
+  while (! interface_->msgq_empty()) {
+    if ( interface_->msgq_first_is<VisualDisplay2DInterface::AddCartLineMessage>() ) {
+      VisualDisplay2DInterface::AddCartLineMessage *m = interface_->msgq_first<VisualDisplay2DInterface::AddCartLineMessage>();
+      shapes_[m->id()] = new Line(m->x(0), m->y(0), m->x(1), m->y(1),
 				   m->id(), m->sender_id(),
 				   m->style(), m->color(0),
 				   m->color(1), m->color(2), m->color(3));
 
-    } else if ( __interface->msgq_first_is<VisualDisplay2DInterface::AddCartRectMessage>() ) {
-      VisualDisplay2DInterface::AddCartRectMessage *m = __interface->msgq_first<VisualDisplay2DInterface::AddCartRectMessage>();
-      __shapes[m->id()] = new Rectangle(m->x(), m->y(), m->width(), m->height(),
+    } else if ( interface_->msgq_first_is<VisualDisplay2DInterface::AddCartRectMessage>() ) {
+      VisualDisplay2DInterface::AddCartRectMessage *m = interface_->msgq_first<VisualDisplay2DInterface::AddCartRectMessage>();
+      shapes_[m->id()] = new Rectangle(m->x(), m->y(), m->width(), m->height(),
 					m->id(), m->sender_id(),
 					m->style(), m->color(0),
 					m->color(1), m->color(2), m->color(3));
 
-    } else if ( __interface->msgq_first_is<VisualDisplay2DInterface::AddCartCircleMessage>() ) {
-      VisualDisplay2DInterface::AddCartCircleMessage *m = __interface->msgq_first<VisualDisplay2DInterface::AddCartCircleMessage>();
-      __shapes[m->id()] = new Circle(m->x(), m->y(), m->radius(),
+    } else if ( interface_->msgq_first_is<VisualDisplay2DInterface::AddCartCircleMessage>() ) {
+      VisualDisplay2DInterface::AddCartCircleMessage *m = interface_->msgq_first<VisualDisplay2DInterface::AddCartCircleMessage>();
+      shapes_[m->id()] = new Circle(m->x(), m->y(), m->radius(),
 				     m->id(), m->sender_id(),
 				     m->style(), m->color(0),
 				     m->color(1), m->color(2), m->color(3));
 
-    } else if ( __interface->msgq_first_is<VisualDisplay2DInterface::AddCartTextMessage>() ) {
-      VisualDisplay2DInterface::AddCartTextMessage *m = __interface->msgq_first<VisualDisplay2DInterface::AddCartTextMessage>();
-      __shapes[m->id()] = new Text(m->x(), m->y(), m->text(),
+    } else if ( interface_->msgq_first_is<VisualDisplay2DInterface::AddCartTextMessage>() ) {
+      VisualDisplay2DInterface::AddCartTextMessage *m = interface_->msgq_first<VisualDisplay2DInterface::AddCartTextMessage>();
+      shapes_[m->id()] = new Text(m->x(), m->y(), m->text(),
 				   m->anchor(), m->size(),
 				   m->id(), m->sender_id(),
 				   m->color(0),
 				   m->color(1), m->color(2), m->color(3));
 
-    } else if (__interface->msgq_first_is<VisualDisplay2DInterface::DeleteAllMessage>() ) {
-      for (__sit = __shapes.begin(); __sit != __shapes.end(); ++__sit) {
-	delete __sit->second;
+    } else if (interface_->msgq_first_is<VisualDisplay2DInterface::DeleteAllMessage>() ) {
+      for (sit_ = shapes_.begin(); sit_ != shapes_.end(); ++sit_) {
+	delete sit_->second;
       }
-      __shapes.clear();
+      shapes_.clear();
     }
 
-    __interface->msgq_pop();
+    interface_->msgq_pop();
   }
 }
 
@@ -117,11 +117,11 @@ void
 VisualDisplay2D::draw(Cairo::RefPtr<Cairo::Context> cr)
 {
   cr->save();
-  for (__sit = __shapes.begin(); __sit != __shapes.end(); ++__sit) {
+  for (sit_ = shapes_.begin(); sit_ != shapes_.end(); ++sit_) {
     float r, g, b, a;
-    __sit->second->color(r, g, b, a);
-    __sit->second->apply_style(cr);
-    __sit->second->draw(cr);
+    sit_->second->color(r, g, b, a);
+    sit_->second->apply_style(cr);
+    sit_->second->draw(cr);
   }
   cr->stroke();
   cr->restore();
@@ -223,18 +223,18 @@ VisualDisplay2D::Line::Line(float x1, float y1, float x2, float y2,
 			    unsigned char b, unsigned char a)
   : Shape(id, owner, line_style, r, g, b, a)
 {
-  __x1 = x1;
-  __y1 = y1;
-  __x2 = x2;
-  __y2 = y2;
+  x1_ = x1;
+  y1_ = y1;
+  x2_ = x2;
+  y2_ = y2;
 }
 
 
 void
 VisualDisplay2D::Line::draw(Cairo::RefPtr<Cairo::Context> &cr)
 {
-  cr->move_to(__x1, __y1);
-  cr->line_to(__x2, __y2);
+  cr->move_to(x1_, y1_);
+  cr->line_to(x2_, y2_);
   cr->stroke();
 }
 
@@ -267,17 +267,17 @@ VisualDisplay2D::Rectangle::Rectangle(float x, float y, float width, float heigh
 				      unsigned char b, unsigned char a)
   : Shape(id, owner, line_style, r, g, b, a)
 {
-  __x      = x;
-  __y      = y;
-  __width  = width;
-  __height = height;
+  x_      = x;
+  y_      = y;
+  width_  = width;
+  height_ = height;
 }
 
 
 void
 VisualDisplay2D::Rectangle::draw(Cairo::RefPtr<Cairo::Context> &cr)
 {
-  cr->rectangle(__x, __y, __width, __height);
+  cr->rectangle(x_, y_, width_, height_);
 }
 
 
@@ -307,16 +307,16 @@ VisualDisplay2D::Circle::Circle(float x, float y, float radius,
 				unsigned char b, unsigned char a)
   : Shape(id, owner, line_style, r, g, b, a)
 {
-  __x      = x;
-  __y      = y;
-  __radius = radius;
+  x_      = x;
+  y_      = y;
+  radius_ = radius;
 }
 
 
 void
 VisualDisplay2D::Circle::draw(Cairo::RefPtr<Cairo::Context> &cr)
 {
-  cr->arc(__x, __y, __radius, 0, 2*M_PI);
+  cr->arc(x_, y_, radius_, 0, 2*M_PI);
 }
 
 
@@ -348,11 +348,11 @@ VisualDisplay2D::Text::Text(float x, float y, std::string text,
 			    unsigned char b, unsigned char a)
   : Shape(id, owner, fawkes::VisualDisplay2DInterface::LS_SOLID, r, g, b, a)
 {
-  __x      = x;
-  __y      = y;
-  __text   = text;
-  __size   = size;
-  __anchor = anchor;
+  x_      = x;
+  y_      = y;
+  text_   = text;
+  size_   = size;
+  anchor_ = anchor;
 }
 
 
@@ -362,34 +362,34 @@ VisualDisplay2D::Text::draw(Cairo::RefPtr<Cairo::Context> &cr)
   cr->save();
   cr->scale(-1, 1);
   cr->rotate(-0.5 * M_PI);
-  cr->set_font_size(1.36 * __size);
+  cr->set_font_size(1.36 * size_);
 
   Cairo::TextExtents te;
-  cr->get_text_extents(__text, te);
+  cr->get_text_extents(text_, te);
 
-  float x = __x, y = __y;
-  switch (__anchor) {
+  float x = x_, y = y_;
+  switch (anchor_) {
   case VisualDisplay2DInterface::CENTERED:
-    x = __x - te.width / 2.;  y = __y + te.height / 2.; break;
+    x = x_ - te.width / 2.;  y = y_ + te.height / 2.; break;
   case VisualDisplay2DInterface::NORTH:
-    x = __x - te.width / 2.;  y = __y + te.height; break;
+    x = x_ - te.width / 2.;  y = y_ + te.height; break;
   case VisualDisplay2DInterface::EAST:
-    x = __x - te.width; y = __y + te.height / 2.; break;
+    x = x_ - te.width; y = y_ + te.height / 2.; break;
   case VisualDisplay2DInterface::SOUTH:
-    x = __x - te.width / 2.; break;
+    x = x_ - te.width / 2.; break;
   case VisualDisplay2DInterface::WEST:
-    y = __y + te.height / 2.; break;
+    y = y_ + te.height / 2.; break;
   case VisualDisplay2DInterface::NORTH_EAST:
-    x = __x - te.width;  y = __y + te.height; break;
+    x = x_ - te.width;  y = y_ + te.height; break;
   case VisualDisplay2DInterface::SOUTH_EAST:
-    x = __x - te.width; break;
+    x = x_ - te.width; break;
   case VisualDisplay2DInterface::SOUTH_WEST:
     break;
   case VisualDisplay2DInterface::NORTH_WEST:
-    y = __y + te.height; break;
+    y = y_ + te.height; break;
   }
 
   cr->move_to(x, y);
-  cr->show_text(__text);
+  cr->show_text(text_);
   cr->restore();
 }
