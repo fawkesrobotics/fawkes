@@ -93,7 +93,7 @@ class Thread {
   bool          detached() const;
   bool          running() const;
   bool          waiting() const;
-  const char *  name() const { return __name; }
+  const char *  name() const { return name_; }
 
   void  set_flags(uint32_t flags);
   void  set_flag(uint32_t flag);
@@ -155,43 +155,43 @@ class Thread {
   static void init_thread_key();
   static void set_tsd_thread_instance(Thread *t);
 
-  pthread_t      __thread_id;
+  pthread_t      thread_id_;
 
-  Barrier       *__startup_barrier;
-  mutable Mutex *__sleep_mutex;
-  WaitCondition *__sleep_condition;
-  unsigned int   __pending_wakeups;
-  Barrier       *__barrier;
+  Barrier       *startup_barrier_;
+  mutable Mutex *sleep_mutex_;
+  WaitCondition *sleep_condition_;
+  unsigned int   pending_wakeups_;
+  Barrier       *barrier_;
 
-  bool           __loop_done;
-  Mutex         *__loop_done_mutex;
-  WaitCondition *__loop_done_waitcond;
+  bool           loop_done_;
+  Mutex         *loop_done_mutex_;
+  WaitCondition *loop_done_waitcond_;
 
-  bool           __prepfin_hold;
-  Mutex         *__prepfin_hold_mutex;
-  WaitCondition *__prepfin_hold_waitcond;
+  bool           prepfin_hold_;
+  Mutex         *prepfin_hold_mutex_;
+  WaitCondition *prepfin_hold_waitcond_;
 
-  bool           __started;
-  bool           __cancelled;
-  bool           __detached;
-  bool           __waiting_for_wakeup;
-  bool           __delete_on_exit;
-  bool           __wait;
-  char          *__name;
+  bool           started_;
+  bool           cancelled_;
+  bool           detached_;
+  bool           waiting_for_wakeup_;
+  bool           delete_on_exit_;
+  bool           wait_;
+  char          *name_;
 
-  OpMode         __op_mode;
-  bool           __prepfin_conc_loop;
-  bool           __coalesce_wakeups;
+  OpMode         op_mode_;
+  bool           prepfin_conc_loop_;
+  bool           coalesce_wakeups_;
 
-  uint32_t       __flags;
+  uint32_t       flags_;
 
-  LockList<ThreadNotificationListener *>  *__notification_listeners;
+  LockList<ThreadNotificationListener *>  *notification_listeners_;
 
-  LockList<ThreadLoopListener *> *__loop_listeners;
+  LockList<ThreadLoopListener *> *loop_listeners_;
 
   static pthread_key_t   THREAD_KEY;
   static pthread_key_t   MAIN_THREAD_KEY;
-  static pthread_mutex_t __thread_key_mutex;
+  static pthread_mutex_t thread_key_mutex_;
 };
 
 

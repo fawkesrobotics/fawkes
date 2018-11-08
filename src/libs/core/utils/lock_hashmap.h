@@ -30,7 +30,7 @@
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
 #  include <unordered_map>
 #  include <functional>
-#elif __GLIBCXX__ > 20080305
+#elif GLIBCXX___ > 20080305
 #  include <tr1/unordered_map>
 #else
 #  include <ext/hash_map>
@@ -45,14 +45,14 @@ template <class KeyType,
           class HashFunction = std::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType> >
 class LockHashMap : public std::unordered_map<KeyType, ValueType, HashFunction, EqualKey>
-#elif __GLIBCXX__ > 20080305
+#elif GLIBCXX___ > 20080305
           class HashFunction = std::tr1::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType> >
 class LockHashMap : public std::tr1::unordered_map<KeyType, ValueType, HashFunction, EqualKey>
 #else
-          class HashFunction = __gnu_cxx::hash<KeyType>,
+          class HashFunction = gnu_cxx_::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType> >
-class LockHashMap : public __gnu_cxx::hash_map<KeyType, ValueType, HashFunction, EqualKey>
+class LockHashMap : public gnu_cxx_::hash_map<KeyType, ValueType, HashFunction, EqualKey>
 #endif
 {
  public:
@@ -69,7 +69,7 @@ class LockHashMap : public __gnu_cxx::hash_map<KeyType, ValueType, HashFunction,
   operator=(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &ll);
 
  private:
-  mutable RefPtr<Mutex> __mutex;
+  mutable RefPtr<Mutex> mutex_;
 
 };
 
@@ -88,7 +88,7 @@ class LockHashMap : public __gnu_cxx::hash_map<KeyType, ValueType, HashFunction,
 /** Constructor. */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap()
-  : __mutex(new Mutex())
+  : mutex_(new Mutex())
 {
 }
 
@@ -100,12 +100,12 @@ template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &lh)
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
   : std::unordered_map<KeyType, ValueType, HashFunction, EqualKey>::unordered_map(lh)
-#elif __GLIBCXX__ > 20080305
+#elif GLIBCXX___ > 20080305
   : std::tr1::unordered_map<KeyType, ValueType, HashFunction, EqualKey>::unordered_map(lh)
 #else
-  : __gnu_cxx::hash_map<KeyType, ValueType, HashFunction, EqualKey>::hash_map(lh)
+  : gnu_cxx_::hash_map<KeyType, ValueType, HashFunction, EqualKey>::hash_map(lh)
 #endif
-    , __mutex(new Mutex())
+    , mutex_(new Mutex())
 {
 }
 
@@ -122,7 +122,7 @@ template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 void
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::lock() const
 {
-  __mutex->lock();
+  mutex_->lock();
 }
 
 
@@ -133,7 +133,7 @@ template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 bool
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::try_lock() const
 {
-  return __mutex->try_lock();
+  return mutex_->try_lock();
 }
 
 
@@ -142,7 +142,7 @@ template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 void
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::unlock() const
 {
-  return __mutex->unlock();
+  return mutex_->unlock();
 }
 
 
@@ -154,7 +154,7 @@ template <typename KeyType, typename ValueType, class HashFunction, typename Equ
 RefPtr<Mutex>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::mutex() const
 {
-  return __mutex;
+  return mutex_;
 }
 
 
@@ -169,7 +169,7 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::operator=(
   const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &ll)
 {
-  __mutex->lock();
+  mutex_->lock();
   ll.lock();
   this->clear();
   typename LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::const_iterator i;
@@ -177,7 +177,7 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::operator=(
     this->insert(*i);
   }
   ll.unlock();
-  __mutex->unlock();
+  mutex_->unlock();
 
   return *this;
 }

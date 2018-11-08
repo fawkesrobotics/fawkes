@@ -41,9 +41,9 @@ class MutexLocker
   void unlock();
 
  private:
-  bool           __locked;
-  RefPtr<Mutex>  __refmutex;
-  Mutex         *__rawmutex;
+  bool           locked_;
+  RefPtr<Mutex>  refmutex_;
+  Mutex         *rawmutex_;
 };
 
 

@@ -92,17 +92,17 @@ namespace fawkes {
 ScopedRWLock::ScopedRWLock(RefPtr<ReadWriteLock> rwlock, ScopedRWLock::LockType lock_type,
                            bool initially_lock)
 {
-  __rawrwlock = 0;
-  __refrwlock = rwlock;
-  __lock_type = lock_type;
+  rawrwlock_ = 0;
+  refrwlock_ = rwlock;
+  lock_type_ = lock_type;
   if ( initially_lock ) {
-    if (__lock_type == LOCK_WRITE) {
-      __refrwlock->lock_for_write();
+    if (lock_type_ == LOCK_WRITE) {
+      refrwlock_->lock_for_write();
     } else {
-      __refrwlock->lock_for_read();
+      refrwlock_->lock_for_read();
     }
   }
-  __locked = initially_lock;
+  locked_ = initially_lock;
 }
 
 
@@ -115,27 +115,27 @@ ScopedRWLock::ScopedRWLock(RefPtr<ReadWriteLock> rwlock, ScopedRWLock::LockType 
 ScopedRWLock::ScopedRWLock(ReadWriteLock *rwlock, ScopedRWLock::LockType lock_type,
                            bool initially_lock)
 {
-  __rawrwlock = rwlock;
-  __lock_type = lock_type;
+  rawrwlock_ = rwlock;
+  lock_type_ = lock_type;
   if ( initially_lock ) {
-    if (__lock_type == LOCK_WRITE) {
-      __rawrwlock->lock_for_write();
+    if (lock_type_ == LOCK_WRITE) {
+      rawrwlock_->lock_for_write();
     } else {
-      __rawrwlock->lock_for_read();
+      rawrwlock_->lock_for_read();
     }
   }
-  __locked = initially_lock;
+  locked_ = initially_lock;
 }
 
 
 /** Destructor */
 ScopedRWLock::~ScopedRWLock()
 {
-  if ( __locked ) {
-    if ( __rawrwlock) {
-      __rawrwlock->unlock();
+  if ( locked_ ) {
+    if ( rawrwlock_) {
+      rawrwlock_->unlock();
     } else {
-      __refrwlock->unlock();
+      refrwlock_->unlock();
     }
   }
 }
@@ -147,20 +147,20 @@ ScopedRWLock::~ScopedRWLock()
 void
 ScopedRWLock::relock()
 {
-  if ( __rawrwlock ) {
-    if (__lock_type == LOCK_WRITE) {
-      __rawrwlock->lock_for_write();
+  if ( rawrwlock_ ) {
+    if (lock_type_ == LOCK_WRITE) {
+      rawrwlock_->lock_for_write();
     } else {
-      __rawrwlock->lock_for_read();
+      rawrwlock_->lock_for_read();
     }
   } else {
-    if (__lock_type == LOCK_WRITE) {
-      __refrwlock->lock_for_write();
+    if (lock_type_ == LOCK_WRITE) {
+      refrwlock_->lock_for_write();
     } else {
-      __refrwlock->lock_for_read();
+      refrwlock_->lock_for_read();
     }
   }
-  __locked = true;
+  locked_ = true;
 }
 
 
@@ -168,11 +168,11 @@ ScopedRWLock::relock()
 void
 ScopedRWLock::unlock()
 {
-  __locked = false;
-  if ( __rawrwlock ) {
-    __rawrwlock->unlock();
+  locked_ = false;
+  if ( rawrwlock_ ) {
+    rawrwlock_->unlock();
   } else {
-    __refrwlock->unlock();
+    refrwlock_->unlock();
   }
 }
 

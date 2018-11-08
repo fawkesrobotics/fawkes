@@ -52,7 +52,7 @@ class RWLockList : public std::list<Type>
   RWLockList<Type> &  operator=(const RWLockList<Type> &ll);
   RWLockList<Type> &  operator=(const std::list<Type> &l);
  private:
-  RefPtr<ReadWriteLock> __rwlock;
+  RefPtr<ReadWriteLock> rwlock_;
 
 };
 
@@ -71,7 +71,7 @@ class RWLockList : public std::list<Type>
 /** Constructor. */
 template <typename Type>
 RWLockList<Type>::RWLockList()
-  : __rwlock(new ReadWriteLock())
+  : rwlock_(new ReadWriteLock())
 {}
 
 
@@ -80,7 +80,7 @@ RWLockList<Type>::RWLockList()
  */
 template <typename Type>
 RWLockList<Type>::RWLockList(const RWLockList<Type> &ll)
-  : std::list<Type>::list(ll), __rwlock(new ReadWriteLock())
+  : std::list<Type>::list(ll), rwlock_(new ReadWriteLock())
 {}
 
 
@@ -95,7 +95,7 @@ template <typename Type>
 void
 RWLockList<Type>::lock_for_read()
 {
-  __rwlock->lock_for_read();
+  rwlock_->lock_for_read();
 }
 
 
@@ -104,7 +104,7 @@ template <typename Type>
 void
 RWLockList<Type>::lock_for_write()
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
 }
 
 
@@ -115,7 +115,7 @@ template <typename Type>
 bool
 RWLockList<Type>::try_lock_for_read()
 {
-  return __rwlock->try_lock_for_read();
+  return rwlock_->try_lock_for_read();
 }
 
 
@@ -126,7 +126,7 @@ template <typename Type>
 bool
 RWLockList<Type>::try_lock_for_write()
 {
-  return __rwlock->try_lock_for_write();
+  return rwlock_->try_lock_for_write();
 }
 
 
@@ -135,7 +135,7 @@ template <typename Type>
 void
 RWLockList<Type>::unlock()
 {
-  return __rwlock->unlock();
+  return rwlock_->unlock();
 }
 
 
@@ -146,9 +146,9 @@ template <typename Type>
 void
 RWLockList<Type>::push_back_locked(const Type& x)
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
   std::list<Type>::push_back(x);
-  __rwlock->unlock();
+  rwlock_->unlock();
 }
 
 
@@ -159,9 +159,9 @@ template <typename Type>
 void
 RWLockList<Type>::push_front_locked(const Type& x)
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
   std::list<Type>::push_front(x);
-  __rwlock->unlock();
+  rwlock_->unlock();
 }
 
 
@@ -172,9 +172,9 @@ template <typename Type>
 void
 RWLockList<Type>::remove_locked(const Type& x)
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
   std::list<Type>::remove(x);
-  __rwlock->unlock();
+  rwlock_->unlock();
 }
 
 
@@ -185,7 +185,7 @@ template <typename Type>
 RefPtr<ReadWriteLock>
 RWLockList<Type>::rwlock() const
 {
-  return __rwlock;
+  return rwlock_;
 }
 
 
@@ -199,7 +199,7 @@ template <typename Type>
 RWLockList<Type> &
 RWLockList<Type>::operator=(const RWLockList<Type> &ll)
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
   ll.lock_for_read();
   this->clear();
   typename RWLockList<Type>::const_iterator i;
@@ -207,7 +207,7 @@ RWLockList<Type>::operator=(const RWLockList<Type> &ll)
     this->push_back(*i);
   }
   ll.unlock();
-  __rwlock->unlock();
+  rwlock_->unlock();
 
   return *this;
 }
@@ -223,13 +223,13 @@ template <typename Type>
 RWLockList<Type> &
 RWLockList<Type>::operator=(const std::list<Type> &l)
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
   this->clear();
   typename std::list<Type>::const_iterator i;
   for (i = l.begin(); i != l.end(); ++i) {
     this->push_back(*i);
   }
-  __rwlock->unlock();
+  rwlock_->unlock();
 
   return *this;
 }

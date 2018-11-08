@@ -89,12 +89,12 @@ namespace fawkes {
  */
 MutexLocker::MutexLocker(RefPtr<Mutex> mutex, bool initially_lock)
 {
-  __rawmutex = 0;
-  __refmutex = mutex;
+  rawmutex_ = 0;
+  refmutex_ = mutex;
   if ( initially_lock ) {
-    __refmutex->lock();
+    refmutex_->lock();
   }
-  __locked = initially_lock;
+  locked_ = initially_lock;
 }
 
 
@@ -104,22 +104,22 @@ MutexLocker::MutexLocker(RefPtr<Mutex> mutex, bool initially_lock)
  */
 MutexLocker::MutexLocker(Mutex *mutex, bool initially_lock)
 {
-  __rawmutex = mutex;
+  rawmutex_ = mutex;
   if ( initially_lock ) {
-    __rawmutex->lock();
+    rawmutex_->lock();
   }
-  __locked = initially_lock;
+  locked_ = initially_lock;
 }
 
 
 /** Destructor */
 MutexLocker::~MutexLocker()
 {
-  if ( __locked ) {
-    if ( __rawmutex) {
-      __rawmutex->unlock();
+  if ( locked_ ) {
+    if ( rawmutex_) {
+      rawmutex_->unlock();
     } else {
-      __refmutex->unlock();
+      refmutex_->unlock();
     }
   }
 }
@@ -131,12 +131,12 @@ MutexLocker::~MutexLocker()
 void
 MutexLocker::relock()
 {
-  if ( __rawmutex ) {
-    __rawmutex->lock();
+  if ( rawmutex_ ) {
+    rawmutex_->lock();
   } else {
-    __refmutex->lock();
+    refmutex_->lock();
   }
-  __locked = true;
+  locked_ = true;
 }
 
 
@@ -144,11 +144,11 @@ MutexLocker::relock()
 void
 MutexLocker::unlock()
 {
-  __locked = false;
-  if ( __rawmutex ) {
-    __rawmutex->unlock();
+  locked_ = false;
+  if ( rawmutex_ ) {
+    rawmutex_->unlock();
   } else {
-    __refmutex->unlock();
+    refmutex_->unlock();
   }
 }
 

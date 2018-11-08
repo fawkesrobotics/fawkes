@@ -70,7 +70,7 @@ class LockQueue : public std::queue<Type>
    * @return internal mutex
    */
   RefPtr<Mutex>  mutex() const
-  { return __mutex; }
+  { return mutex_; }
 
   /** Push element to queue with lock protection.
    * @param x element to add
@@ -86,7 +86,7 @@ class LockQueue : public std::queue<Type>
   // not needed, no change to mutex required (thus "incomplete" BigThree)
   //LockList<Type> &  operator=(const LockList<Type> &ll);
  private:
-  mutable RefPtr<Mutex> __mutex;
+  mutable RefPtr<Mutex> mutex_;
 
 };
 
@@ -95,13 +95,13 @@ class LockQueue : public std::queue<Type>
 
 template <typename Type>
 LockQueue<Type>::LockQueue()
-  : __mutex(new Mutex())
+  : mutex_(new Mutex())
 {}
 
 
 template <typename Type>
 LockQueue<Type>::LockQueue(const LockQueue<Type> &ll)
-  : std::queue<Type>::queue(ll), __mutex(new Mutex())
+  : std::queue<Type>::queue(ll), mutex_(new Mutex())
 {}
 
 
@@ -114,7 +114,7 @@ template <typename Type>
 void
 LockQueue<Type>::lock() const
 {
-  __mutex->lock();
+  mutex_->lock();
 }
 
 
@@ -122,7 +122,7 @@ template <typename Type>
 bool
 LockQueue<Type>::try_lock() const
 {
-  return __mutex->try_lock();
+  return mutex_->try_lock();
 }
 
 
@@ -130,7 +130,7 @@ template <typename Type>
 void
 LockQueue<Type>::unlock() const
 {
-  return __mutex->unlock();
+  return mutex_->unlock();
 }
 
 
@@ -138,9 +138,9 @@ template <typename Type>
 void
 LockQueue<Type>::push_locked(const Type& x)
 {
-  __mutex->lock();
+  mutex_->lock();
   std::queue<Type>::push(x);
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -148,20 +148,20 @@ template <typename Type>
 void
 LockQueue<Type>::pop_locked()
 {
-  __mutex->lock();
+  mutex_->lock();
   std::queue<Type>::pop();
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 template <typename Type>
 void
 LockQueue<Type>::clear()
 {
-  __mutex->lock();
+  mutex_->lock();
   while ( ! std::queue<Type>::empty() ) {
     std::queue<Type>::pop();
   }
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 

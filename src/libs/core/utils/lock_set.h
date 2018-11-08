@@ -55,7 +55,7 @@ class LockSet : public std::set<KeyType, LessKey>
   LockSet<KeyType, LessKey> & operator=(const std::set<KeyType, LessKey> &l);
 
  private:
-  mutable RefPtr<Mutex>  __mutex;
+  mutable RefPtr<Mutex>  mutex_;
 
 };
 
@@ -74,7 +74,7 @@ class LockSet : public std::set<KeyType, LessKey>
 /** Constructor. */
 template <typename KeyType, typename LessKey>
 LockSet<KeyType, LessKey>::LockSet()
-  : __mutex(new Mutex())
+  : mutex_(new Mutex())
 {}
 
 
@@ -84,7 +84,7 @@ LockSet<KeyType, LessKey>::LockSet()
 template <typename KeyType, typename LessKey>
 LockSet<KeyType, LessKey>::LockSet(const LockSet<KeyType, LessKey> &lm)
   : std::set<KeyType, LessKey>::set(lm),
-    __mutex(new Mutex())
+    mutex_(new Mutex())
 {}
 
 
@@ -99,7 +99,7 @@ template <typename KeyType, typename LessKey>
 void
 LockSet<KeyType, LessKey>::lock() const
 {
-  __mutex->lock();
+  mutex_->lock();
 }
 
 
@@ -110,7 +110,7 @@ template <typename KeyType, typename LessKey>
 bool
 LockSet<KeyType, LessKey>::try_lock() const
 {
-  return __mutex->try_lock();
+  return mutex_->try_lock();
 }
 
 
@@ -119,7 +119,7 @@ template <typename KeyType, typename LessKey>
 void
 LockSet<KeyType, LessKey>::unlock() const
 {
-  return __mutex->unlock();
+  return mutex_->unlock();
 }
 
 
@@ -132,10 +132,10 @@ template <typename KeyType, typename LessKey>
 std::pair<typename LockSet<KeyType, LessKey>::iterator, bool>
 LockSet<KeyType, LessKey>::insert_locked(const KeyType &key)
 {
-  __mutex->lock();
+  mutex_->lock();
   std::pair<iterator, bool> ret =
       std::set<KeyType, LessKey>::insert(key);
-  __mutex->unlock();
+  mutex_->unlock();
   return ret;
 }
 
@@ -147,9 +147,9 @@ template <typename KeyType, typename LessKey>
 void
 LockSet<KeyType, LessKey>::erase_locked(const KeyType &key)
 {
-  __mutex->lock();
+  mutex_->lock();
   std::set<KeyType, LessKey>::erase(key);
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -161,7 +161,7 @@ template <typename KeyType, typename LessKey>
 RefPtr<Mutex>
 LockSet<KeyType, LessKey>::mutex() const
 {
-  return __mutex;
+  return mutex_;
 }
 
 
@@ -175,7 +175,7 @@ template <typename KeyType, typename LessKey>
 LockSet<KeyType, LessKey> &
 LockSet<KeyType, LessKey>::operator=(const LockSet<KeyType, LessKey> &ll)
 {
-  __mutex->lock();
+  mutex_->lock();
   ll.lock();
   this->clear();
   typename LockSet<KeyType, LessKey>::const_iterator i;
@@ -183,7 +183,7 @@ LockSet<KeyType, LessKey>::operator=(const LockSet<KeyType, LessKey> &ll)
     this->insert(*i);
   }
   ll.unlock();
-  __mutex->unlock();
+  mutex_->unlock();
 
   return *this;
 }
@@ -199,13 +199,13 @@ template <typename KeyType, typename LessKey>
 LockSet<KeyType, LessKey> &
 LockSet<KeyType, LessKey>::operator=(const std::set<KeyType, LessKey> &l)
 {
-  __mutex->lock();
+  mutex_->lock();
   this->clear();
   typename std::set<KeyType, LessKey>::const_iterator i;
   for (i = l.begin(); i != l.end(); ++i) {
     this->insert(*i);
   }
-  __mutex->unlock();
+  mutex_->unlock();
 
   return *this;
 }

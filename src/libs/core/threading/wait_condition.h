@@ -46,9 +46,9 @@ class WaitCondition {
   void wake_all();
 
  private:
-  WaitConditionData *__cond_data;
-  Mutex             *__mutex;
-  bool               __own_mutex;
+  WaitConditionData *cond_data_;
+  Mutex             *mutex_;
+  bool               own_mutex_;
 };
 
 

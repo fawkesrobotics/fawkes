@@ -56,13 +56,13 @@ class InterruptibleBarrier : public Barrier
   InterruptibleBarrier &  operator=(const InterruptibleBarrier *b);
 
  private:
-  InterruptibleBarrierData *__data;
-  RefPtr<ThreadList>        __passed_threads;
+  InterruptibleBarrierData *data_;
+  RefPtr<ThreadList>        passed_threads_;
 
-  bool __interrupted;
-  bool __timeout;
-  bool __wait_at_barrier;
-  int __num_threads_in_wait_function;
+  bool interrupted_;
+  bool timeout_;
+  bool wait_at_barrier_;
+  int num_threads_in_wait_function_;
 };
 
 

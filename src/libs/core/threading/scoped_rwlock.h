@@ -49,10 +49,10 @@ class ScopedRWLock
   void unlock();
 
  private:
-  LockType               __lock_type;
-  bool                   __locked;
-  RefPtr<ReadWriteLock>  __refrwlock;
-  ReadWriteLock         *__rawrwlock;
+  LockType               lock_type_;
+  bool                   locked_;
+  RefPtr<ReadWriteLock>  refrwlock_;
+  ReadWriteLock         *rawrwlock_;
 };
 
 

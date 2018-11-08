@@ -111,7 +111,7 @@ class Exception : public std::exception {
   int              _errno;
 
  private:
-  const char *__type_id;
+  const char *type_id_;
 };
 
 

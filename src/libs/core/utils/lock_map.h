@@ -55,7 +55,7 @@ class LockMap : public std::map<KeyType, ValueType, LessKey>
   operator=(const std::map<KeyType, ValueType, LessKey> &l);
 
  private:
-  mutable RefPtr<Mutex>  __mutex;
+  mutable RefPtr<Mutex>  mutex_;
 
 };
 
@@ -74,7 +74,7 @@ class LockMap : public std::map<KeyType, ValueType, LessKey>
 /** Constructor. */
 template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey>::LockMap()
-  : __mutex(new Mutex())
+  : mutex_(new Mutex())
 {}
 
 
@@ -84,7 +84,7 @@ LockMap<KeyType, ValueType, LessKey>::LockMap()
 template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey>::LockMap(const LockMap<KeyType, ValueType, LessKey> &lm)
   : std::map<KeyType, ValueType, LessKey>::map(lm),
-    __mutex(new Mutex())
+    mutex_(new Mutex())
 {}
 
 
@@ -99,7 +99,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 LockMap<KeyType, ValueType, LessKey>::lock() const
 {
-  __mutex->lock();
+  mutex_->lock();
 }
 
 
@@ -110,7 +110,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 bool
 LockMap<KeyType, ValueType, LessKey>::try_lock() const
 {
-  return __mutex->try_lock();
+  return mutex_->try_lock();
 }
 
 
@@ -119,7 +119,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 LockMap<KeyType, ValueType, LessKey>::unlock() const
 {
-  return __mutex->unlock();
+  return mutex_->unlock();
 }
 
 
@@ -131,9 +131,9 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 LockMap<KeyType, ValueType, LessKey>::erase_locked(const KeyType &key)
 {
-  __mutex->lock();
+  mutex_->lock();
   std::map<KeyType, ValueType, LessKey>::erase(key);
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -145,7 +145,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 RefPtr<Mutex>
 LockMap<KeyType, ValueType, LessKey>::mutex() const
 {
-  return __mutex;
+  return mutex_;
 }
 
 
@@ -160,7 +160,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey> &
 LockMap<KeyType, ValueType, LessKey>::operator=(const LockMap<KeyType, ValueType, LessKey> &ll)
 {
-  __mutex->lock();
+  mutex_->lock();
   ll.lock();
   this->clear();
   typename LockMap<KeyType, ValueType, LessKey>::const_iterator i;
@@ -168,7 +168,7 @@ LockMap<KeyType, ValueType, LessKey>::operator=(const LockMap<KeyType, ValueType
     this->insert(*i);
   }
   ll.unlock();
-  __mutex->unlock();
+  mutex_->unlock();
 
   return *this;
 }
@@ -184,13 +184,13 @@ template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey> &
 LockMap<KeyType, ValueType, LessKey>::operator=(const std::map<KeyType, ValueType, LessKey> &l)
 {
-  __mutex->lock();
+  mutex_->lock();
   this->clear();
   typename std::map<KeyType, ValueType, LessKey>::const_iterator i;
   for (i = l.begin(); i != l.end(); ++i) {
     this->insert(*i);
   }
-  __mutex->unlock();
+  mutex_->unlock();
 
   return *this;
 }

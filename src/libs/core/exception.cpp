@@ -147,7 +147,7 @@ Exception::Exception(const char *format, ...) throw()
   messages_mutex = new Mutex();
 
   _errno = 0;
-  __type_id = "unknown";
+  type_id_ = "unknown";
 
   messages = NULL;
   messages_end = NULL;
@@ -178,7 +178,7 @@ Exception::Exception(int errnoval, const char *format, ...) throw()
   messages_mutex = new Mutex();
 
   _errno = errnoval;
-  __type_id = "unknown";
+  type_id_ = "unknown";
 
   messages = NULL;
   messages_end = NULL;
@@ -244,7 +244,7 @@ Exception::Exception(const Exception &exc) throw()
   messages_iterator = NULL;
 
   _errno = exc._errno;
-  __type_id = exc.__type_id;
+  type_id_ = exc.type_id_;
   copy_messages(exc);
 }
 
@@ -258,7 +258,7 @@ Exception::Exception() throw()
 {
   messages_mutex = new Mutex();
   _errno = 0;
-  __type_id = "unknown";
+  type_id_ = "unknown";
   messages = NULL;
   messages_end = NULL;
   messages_iterator = NULL;
@@ -291,7 +291,7 @@ Exception::~Exception() throw()
 void
 Exception::set_type_id(const char *id)
 {
-  __type_id = id;
+  type_id_ = id;
 }
 
 
@@ -310,7 +310,7 @@ Exception::set_type_id(const char *id)
 const char *
 Exception::type_id() const
 {
-  return __type_id;
+  return type_id_;
 }
 
 

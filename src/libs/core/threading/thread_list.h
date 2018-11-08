@@ -121,13 +121,13 @@ class ThreadList : private LockList<Thread *>
   void update_barrier();
 
  private:
-  char                   *__name;
-  bool                    __sealed;
-  Mutex                  *__finalize_mutex;
-  InterruptibleBarrier   *__wnw_barrier;
+  char                   *name_;
+  bool                    sealed_;
+  Mutex                  *finalize_mutex_;
+  InterruptibleBarrier   *wnw_barrier_;
 
-  std::list<std::pair<InterruptibleBarrier *, ThreadList> >  __wnw_bad_barriers;
-  std::list<std::pair<InterruptibleBarrier *, ThreadList> >::iterator __wnw_bbit;
+  std::list<std::pair<InterruptibleBarrier *, ThreadList> >  wnw_bad_barriers_;
+  std::list<std::pair<InterruptibleBarrier *, ThreadList> >::iterator wnw_bbit_;
 };
 
 
