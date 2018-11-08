@@ -90,14 +90,14 @@ class FvBaseThread
   firevision::CameraControl * create_camctrl(const char *camera_string);
 
  private:
-  fawkes::LockMap<std::string, FvAcquisitionThread *> __aqts;
-  fawkes::LockMap<std::string, FvAcquisitionThread *>::iterator __ait;
-  unsigned int __aqt_timeout;
+  fawkes::LockMap<std::string, FvAcquisitionThread *> aqts_;
+  fawkes::LockMap<std::string, FvAcquisitionThread *>::iterator ait_;
+  unsigned int aqt_timeout_;
 
-  fawkes::LockList<firevision::CameraControl *>  __owned_controls;
-  fawkes::LockMap<Thread *, FvAcquisitionThread *> __started_threads;
+  fawkes::LockList<firevision::CameraControl *>  owned_controls_;
+  fawkes::LockMap<Thread *, FvAcquisitionThread *> started_threads_;
 
-  fawkes::Barrier *__aqt_barrier;
+  fawkes::Barrier *aqt_barrier_;
 };
 
 

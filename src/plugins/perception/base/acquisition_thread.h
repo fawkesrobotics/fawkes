@@ -98,32 +98,32 @@ class FvAcquisitionThread
                                              fawkes::Message *message) throw();
 
  private:
-  bool                      __enabled;
-  fawkes::Mutex            *__enabled_mutex;
-  fawkes::WaitCondition    *__enabled_waitcond;
+  bool                      enabled_;
+  fawkes::Mutex            *enabled_mutex_;
+  fawkes::WaitCondition    *enabled_waitcond_;
 
-  firevision::Camera       *__camera;
-  char                     *__image_id;
+  firevision::Camera       *camera_;
+  char                     *image_id_;
 
-  firevision::colorspace_t  __colorspace;
-  unsigned int              __width;
-  unsigned int              __height;
+  firevision::colorspace_t  colorspace_;
+  unsigned int              width_;
+  unsigned int              height_;
 
-  AqtMode                   __mode;
+  AqtMode                   mode_;
 
-  std::map<firevision::colorspace_t, firevision::SharedMemoryImageBuffer *> __shm;
-  std::map<firevision::colorspace_t, firevision::SharedMemoryImageBuffer *>::iterator __shmit;
+  std::map<firevision::colorspace_t, firevision::SharedMemoryImageBuffer *> shm_;
+  std::map<firevision::colorspace_t, firevision::SharedMemoryImageBuffer *>::iterator shmit_;
 
-  fawkes::SwitchInterface  *__enabled_if;
+  fawkes::SwitchInterface  *enabled_if_;
 
 #ifdef FVBASE_TIMETRACKER
-  fawkes::TimeTracker *__tt;
-  unsigned int __loop_count;
-  unsigned int __ttc_capture;
-  unsigned int __ttc_lock;
-  unsigned int __ttc_convert;
-  unsigned int __ttc_unlock;
-  unsigned int __ttc_dispose;
+  fawkes::TimeTracker *tt_;
+  unsigned int loop_count_;
+  unsigned int ttc_capture_;
+  unsigned int ttc_lock_;
+  unsigned int ttc_convert_;
+  unsigned int ttc_unlock_;
+  unsigned int ttc_dispose_;
 #endif
 };
 

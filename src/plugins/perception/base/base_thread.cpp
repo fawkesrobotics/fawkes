@@ -59,15 +59,15 @@ FvBaseThread::FvBaseThread()
     VisionMasterAspect(this)
 {
   // default to 30 seconds
-  __aqt_timeout = 30;
-  __aqt_barrier = new Barrier(1);
+  aqt_timeout_ = 30;
+  aqt_barrier_ = new Barrier(1);
 }
 
 
 /** Destructor. */
 FvBaseThread::~FvBaseThread()
 {
-  delete __aqt_barrier;
+  delete aqt_barrier_;
 }
 
 
@@ -84,20 +84,20 @@ FvBaseThread::init()
 void
 FvBaseThread::finalize()
 {
-  __aqts.lock();
-  for (__ait = __aqts.begin(); __ait != __aqts.end(); ++__ait) {
-    thread_collector->remove(__ait->second);
-    delete __ait->second;
+  aqts_.lock();
+  for (ait_ = aqts_.begin(); ait_ != aqts_.end(); ++ait_) {
+    thread_collector->remove(ait_->second);
+    delete ait_->second;
   }
-  __aqts.clear();
-  __aqts.unlock();
-  __owned_controls.lock();
+  aqts_.clear();
+  aqts_.unlock();
+  owned_controls_.lock();
   LockList<CameraControl *>::iterator i;
-  for (i = __owned_controls.begin(); i != __owned_controls.end(); ++i) {
+  for (i = owned_controls_.begin(); i != owned_controls_.end(); ++i) {
     delete *i;
   }
-  __owned_controls.clear();
-  __owned_controls.unlock();
+  owned_controls_.clear();
+  owned_controls_.unlock();
 }
 
 
@@ -105,54 +105,54 @@ FvBaseThread::finalize()
 void
 FvBaseThread::loop()
 {
-  __aqts.lock();
+  aqts_.lock();
 
   try {
-    for (__ait = __aqts.begin(); __ait != __aqts.end(); ++__ait) {
-      __ait->second->set_vt_prepfin_hold(true);
+    for (ait_ = aqts_.begin(); ait_ != aqts_.end(); ++ait_) {
+      ait_->second->set_vt_prepfin_hold(true);
     }
   } catch (Exception &e) {
     logger->log_warn(name(), "Cannot get prepfin hold status, skipping this loop");
-    for (__ait = __aqts.begin(); __ait != __aqts.end(); ++__ait) {
-      __ait->second->set_vt_prepfin_hold(false);
+    for (ait_ = aqts_.begin(); ait_ != aqts_.end(); ++ait_) {
+      ait_->second->set_vt_prepfin_hold(false);
     }
-    __aqts.unlock();
+    aqts_.unlock();
     return;
   }
 
   // Wakeup all cyclic acquisition threads and wait for them
-  for (__ait = __aqts.begin(); __ait != __aqts.end(); ++__ait) {
-    if ( __ait->second->aqtmode() == FvAcquisitionThread::AqtCyclic ) {
-      //logger->log_debug(name(), "Waking Thread %s", __ait->second->name());
-      __ait->second->wakeup(__aqt_barrier);
+  for (ait_ = aqts_.begin(); ait_ != aqts_.end(); ++ait_) {
+    if ( ait_->second->aqtmode() == FvAcquisitionThread::AqtCyclic ) {
+      //logger->log_debug(name(), "Waking Thread %s", ait_->second->name());
+      ait_->second->wakeup(aqt_barrier_);
     }
   }
 
-  __aqt_barrier->wait();
+  aqt_barrier_->wait();
 
   // Check for aqt timeouts
-  for (__ait = __aqts.begin(); __ait != __aqts.end();) {
-    if ( __ait->second->vision_threads->empty() &&
-	 (__ait->second->vision_threads->empty_time() > __aqt_timeout) ) {
+  for (ait_ = aqts_.begin(); ait_ != aqts_.end();) {
+    if ( ait_->second->vision_threads->empty() &&
+	 (ait_->second->vision_threads->empty_time() > aqt_timeout_) ) {
 
       logger->log_info(name(), "Acquisition thread %s timed out, destroying",
-		       __ait->second->name());
+		       ait_->second->name());
 
 
-      thread_collector->remove(__ait->second);
-      delete __ait->second;
-      __aqts.erase(__ait++);
+      thread_collector->remove(ait_->second);
+      delete ait_->second;
+      aqts_.erase(ait_++);
     } else {
-      ++__ait;
+      ++ait_;
     }
   }
 
-  __started_threads.lock();
-  fawkes::LockMap<Thread *, FvAcquisitionThread *>::iterator stit = __started_threads.begin();
-  while (stit != __started_threads.end()) {
+  started_threads_.lock();
+  fawkes::LockMap<Thread *, FvAcquisitionThread *>::iterator stit = started_threads_.begin();
+  while (stit != started_threads_.end()) {
 
     logger->log_info(name(), "Thread %s has been started, %zu",
-		     stit->second->name(), __started_threads.size());
+		     stit->second->name(), started_threads_.size());
 
     // if the thread is registered in that aqt mark it running
     stit->second->vision_threads->set_thread_running(stit->first);
@@ -195,24 +195,24 @@ FvBaseThread::loop()
 
     fawkes::LockMap<Thread *, FvAcquisitionThread *>::iterator stittmp = stit;
     ++stit;
-    __started_threads.erase( stittmp );
+    started_threads_.erase( stittmp );
   }
-  __started_threads.unlock();
+  started_threads_.unlock();
 
   // Re-create barrier as necessary after _adding_ threads
   unsigned int num_cyclic_threads = 0;
-  for (__ait = __aqts.begin(); __ait != __aqts.end(); ++__ait) {
-    if ( __ait->second->vision_threads->has_cyclic_thread() ) {
+  for (ait_ = aqts_.begin(); ait_ != aqts_.end(); ++ait_) {
+    if ( ait_->second->vision_threads->has_cyclic_thread() ) {
       ++num_cyclic_threads;
     }
   }
   cond_recreate_barrier(num_cyclic_threads);
 
-  for (__ait = __aqts.begin(); __ait != __aqts.end(); ++__ait) {
-    __ait->second->set_vt_prepfin_hold(false);
+  for (ait_ = aqts_.begin(); ait_ != aqts_.end(); ++ait_) {
+    ait_->second->set_vt_prepfin_hold(false);
   }
 
-  __aqts.unlock();
+  aqts_.unlock();
 }
 
 
@@ -231,7 +231,7 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread,
 				  colorspace_t cspace)
 {
   Camera *c = NULL;
-  __aqts.lock();
+  aqts_.lock();
 
   logger->log_info(name(), "Thread '%s' registers for camera '%s'", thread->name(), camera_string);
 
@@ -243,13 +243,13 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread,
   CameraArgumentParser *cap = new CameraArgumentParser(camera_string);
   try {
     std::string id = cap->cam_type() + "." + cap->cam_id();
-    if ( __aqts.find(id) != __aqts.end() ) {
+    if ( aqts_.find(id) != aqts_.end() ) {
       // this camera has already been loaded
-      c = __aqts[id]->camera_instance(cspace,
+      c = aqts_[id]->camera_instance(cspace,
 				    (vision_thread->vision_thread_mode() ==
 				     VisionAspect::CONTINUOUS));
 
-      __aqts[id]->vision_threads->add_waiting_thread(thread);
+      aqts_[id]->vision_threads->add_waiting_thread(thread);
 
     } else {
       Camera *cam = NULL;
@@ -269,7 +269,7 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread,
 
       aqt->vision_threads->add_waiting_thread(thread);
 
-      __aqts[id] = aqt;
+      aqts_[id] = aqt;
       thread_collector->add(aqt);
 
       // no need to recreate barrier, by default aqts operate in continuous mode
@@ -284,18 +284,18 @@ FvBaseThread::register_for_camera(const char *camera_string, Thread *thread,
   } catch (UnknownCameraTypeException &e) {
     delete cap;
     e.append("FvBaseVisionMaster: could not instantiate camera");
-    __aqts.unlock();
+    aqts_.unlock();
     throw;
   } catch (Exception &e) {
     delete cap;
     e.append("FvBaseVisionMaster: could not open or start camera");
-    __aqts.unlock();
+    aqts_.unlock();
     throw;
   }
 
   delete cap;
 
-  __aqts.unlock();
+  aqts_.unlock();
   return c;
 }
 
@@ -307,13 +307,13 @@ FvBaseThread::register_for_raw_camera(const char *camera_string, Thread *thread)
   CameraArgumentParser cap(camera_string);
   try {
     std::string id = cap.cam_type() + "." + cap.cam_id();
-    __aqts.lock();
-    if ( __aqts.find(id) != __aqts.end() ) {
-      __aqts[id]->raw_subscriber_thread = thread;
+    aqts_.lock();
+    if ( aqts_.find(id) != aqts_.end() ) {
+      aqts_[id]->raw_subscriber_thread = thread;
     }
-    __aqts.unlock();
+    aqts_.unlock();
   } catch (Exception &e) {
-    __aqts.unlock();
+    aqts_.unlock();
     throw;
   }
   return camera;
@@ -324,11 +324,11 @@ FvBaseThread::create_camctrl(const char *camera_string)
 {
   CameraControl *cc = CameraControlFactory::instance(camera_string);
   if (cc) {
-    __owned_controls.lock();
-    __owned_controls.push_back(cc);
-    __owned_controls.sort();
-    __owned_controls.unique();
-    __owned_controls.unlock();
+    owned_controls_.lock();
+    owned_controls_.push_back(cc);
+    owned_controls_.sort();
+    owned_controls_.unique();
+    owned_controls_.unlock();
     return cc;
   } else {
     throw Exception("Cannot create camera control of desired type");
@@ -342,9 +342,9 @@ FvBaseThread::acquire_camctrl(const char *cam_string)
   std::string id = cap.cam_type() + "." + cap.cam_id();
 
   // Has this camera been loaded?
-  MutexLocker lock(__aqts.mutex());
-  if (__aqts.find(id) != __aqts.end()) {
-    return CameraControlFactory::instance(__aqts[id]->get_camera());
+  MutexLocker lock(aqts_.mutex());
+  if (aqts_.find(id) != aqts_.end()) {
+    return CameraControlFactory::instance(aqts_[id]->get_camera());
   } else {
     return create_camctrl(cam_string);
   }
@@ -359,9 +359,9 @@ FvBaseThread::acquire_camctrl(const char *cam_string,
   std::string id = cap.cam_type() + "." + cap.cam_id();
 
   // Has this camera been loaded?
-  MutexLocker lock(__aqts.mutex());
-  if (__aqts.find(id) != __aqts.end()) {
-    return CameraControlFactory::instance(typeinf, __aqts[id]->get_camera());
+  MutexLocker lock(aqts_.mutex());
+  if (aqts_.find(id) != aqts_.end()) {
+    return CameraControlFactory::instance(typeinf, aqts_[id]->get_camera());
   } else {
     return create_camctrl(cam_string);
   }
@@ -371,13 +371,13 @@ FvBaseThread::acquire_camctrl(const char *cam_string,
 void
 FvBaseThread::release_camctrl(CameraControl *cc)
 {
-  __owned_controls.lock();
+  owned_controls_.lock();
   LockList<CameraControl *>::iterator f;
-  if ((f = std::find(__owned_controls.begin(), __owned_controls.end(), cc)) != __owned_controls.end()) {
+  if ((f = std::find(owned_controls_.begin(), owned_controls_.end(), cc)) != owned_controls_.end()) {
     delete *f;
-    __owned_controls.erase(f);
+    owned_controls_.erase(f);
   }
-  __owned_controls.unlock();
+  owned_controls_.unlock();
 }
 
 
@@ -388,9 +388,9 @@ FvBaseThread::release_camctrl(CameraControl *cc)
 void
 FvBaseThread::cond_recreate_barrier(unsigned int num_cyclic_threads)
 {
-  if ( (num_cyclic_threads + 1) != __aqt_barrier->count() ) {
-    delete __aqt_barrier;
-    __aqt_barrier = new Barrier( num_cyclic_threads + 1 ); // +1 for base thread
+  if ( (num_cyclic_threads + 1) != aqt_barrier_->count() ) {
+    delete aqt_barrier_;
+    aqt_barrier_ = new Barrier( num_cyclic_threads + 1 ); // +1 for base thread
   }
 }
 
@@ -398,59 +398,59 @@ FvBaseThread::cond_recreate_barrier(unsigned int num_cyclic_threads)
 void
 FvBaseThread::unregister_thread(Thread *thread)
 {
-  __aqts.lock();
+  aqts_.lock();
   unsigned int num_cyclic_threads = 0;
 
-  for (__ait = __aqts.begin(); __ait != __aqts.end(); ++__ait) {
+  for (ait_ = aqts_.begin(); ait_ != aqts_.end(); ++ait_) {
 
     // Remove thread from all aqts
-    __ait->second->vision_threads->remove_thread(thread);
+    ait_->second->vision_threads->remove_thread(thread);
 
-    if (__ait->second->raw_subscriber_thread == thread) {
-      __ait->second->raw_subscriber_thread = NULL;
+    if (ait_->second->raw_subscriber_thread == thread) {
+      ait_->second->raw_subscriber_thread = NULL;
     }
 
-    if ( __ait->second->vision_threads->has_cyclic_thread() ) {
+    if ( ait_->second->vision_threads->has_cyclic_thread() ) {
       ++num_cyclic_threads;
 
-    } else if (__ait->second->aqtmode() != FvAcquisitionThread::AqtContinuous ) {
+    } else if (ait_->second->aqtmode() != FvAcquisitionThread::AqtContinuous ) {
       logger->log_info(name(), "Switching acquisition thread %s to continuous mode "
-		               "on unregister", __ait->second->name());
+		               "on unregister", ait_->second->name());
 
-      __ait->second->prepare_finalize();
-      __ait->second->cancel();
-      __ait->second->join();
-      __ait->second->set_aqtmode(FvAcquisitionThread::AqtContinuous);
-      __ait->second->start();
-      __ait->second->cancel_finalize();
+      ait_->second->prepare_finalize();
+      ait_->second->cancel();
+      ait_->second->join();
+      ait_->second->set_aqtmode(FvAcquisitionThread::AqtContinuous);
+      ait_->second->start();
+      ait_->second->cancel_finalize();
     }
 
-    if (__ait->second->vision_threads->empty()) {
+    if (ait_->second->vision_threads->empty()) {
       // Make thread stop capturing data
       logger->log_info(name(), "Disabling capturing on thread %s (no more threads)",
-		       __ait->second->name());
-      __ait->second->set_enabled(false);
+		       ait_->second->name());
+      ait_->second->set_enabled(false);
     }
   }
   // Recreate as necessary after _removing_ threads
   cond_recreate_barrier(num_cyclic_threads);
 
-  __aqts.unlock();
+  aqts_.unlock();
 }
 
 
 bool
 FvBaseThread::thread_started(Thread *thread) throw()
 {
-  __aqts.lock();
-  for (__ait = __aqts.begin(); __ait != __aqts.end(); ++__ait) {
-    if (__ait->second->vision_threads->has_waiting_thread(thread)) {
-      __started_threads.lock();
-      __started_threads[thread] = __ait->second;
-      __started_threads.unlock();
+  aqts_.lock();
+  for (ait_ = aqts_.begin(); ait_ != aqts_.end(); ++ait_) {
+    if (ait_->second->vision_threads->has_waiting_thread(thread)) {
+      started_threads_.lock();
+      started_threads_[thread] = ait_->second;
+      started_threads_.unlock();
     }
   }
-  __aqts.unlock();
+  aqts_.unlock();
 
   return false;
 }
@@ -459,11 +459,11 @@ FvBaseThread::thread_started(Thread *thread) throw()
 bool
 FvBaseThread::thread_init_failed(Thread *thread) throw()
 {
-  __aqts.lock();
-  for (__ait = __aqts.begin(); __ait != __aqts.end(); ++__ait) {
-    __ait->second->vision_threads->remove_waiting_thread(thread);
+  aqts_.lock();
+  for (ait_ = aqts_.begin(); ait_ != aqts_.end(); ++ait_) {
+    ait_->second->vision_threads->remove_waiting_thread(thread);
   }
-  __aqts.unlock();
+  aqts_.unlock();
 
   return false;
 }
