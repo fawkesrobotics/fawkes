@@ -217,7 +217,7 @@ bool RobotStatePublisherThread::joint_is_in_model(const char *id) {
 void
 RobotStatePublisherThread::bb_interface_created(const char *type, const char *id) throw()
 {
-  if (strncmp(type, "JointInterface", __INTERFACE_TYPE_SIZE) != 0)  return;
+  if (strncmp(type, "JointInterface", INTERFACE_TYPE_SIZE_) != 0)  return;
   if (!joint_is_in_model(id)) return;
   JointInterface *interface;
   try {
