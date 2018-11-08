@@ -54,59 +54,59 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
   WorkerThread(fawkes::Logger *logger, fawkes::Clock *clock,
 	       fawkes::RefPtr<Roomba500> roomba, bool query_mode)
     : Thread("Roomba500WorkerThread", Thread::OPMODE_CONTINUOUS),
-      logger(logger), __roomba(roomba), __query_mode(query_mode)
+      logger(logger), roomba_(roomba), query_mode_(query_mode)
   {
-    __fresh_data_mutex = new Mutex();
-    __time_wait = new TimeWait(clock, Roomba500::STREAM_INTERVAL_MS * 1000);
+    fresh_data_mutex_ = new Mutex();
+    time_wait_ = new TimeWait(clock, Roomba500::STREAM_INTERVAL_MS * 1000);
 
 #ifdef USE_TIMETRACKER
-    __tt_count  = 0;
-    __ttc_query = __tt.add_class("Query");
-    __ttc_loop = __tt.add_class("Loop");
+    tt_count_  = 0;
+    ttc_query_ = tt_.add_class("Query");
+    ttc_loop_ = tt_.add_class("Loop");
 #endif
 
-    if (! __query_mode)  __roomba->enable_sensors();
+    if (! query_mode_)  roomba_->enable_sensors();
   }
 
   /** Destructor. */
   ~WorkerThread()
   {
-    if (! __query_mode)  __roomba->disable_sensors();
-    delete __fresh_data_mutex;
-    delete __time_wait;
+    if (! query_mode_)  roomba_->disable_sensors();
+    delete fresh_data_mutex_;
+    delete time_wait_;
   }
 
   virtual void loop()
   {
 #ifdef USE_TIMETRACKER
-    __tt.ping_start(__ttc_loop);
+    tt_.ping_start(ttc_loop_);
 #endif
     
-    //__time_wait->mark_start();
+    //time_wait_->mark_start();
 
     try {
 #ifdef USE_TIMETRACKER
-      __tt.ping_start(__ttc_query);
+      tt_.ping_start(ttc_query_);
 #endif
-      if (__query_mode)  __roomba->query_sensors();
-      else               __roomba->read_sensors();
+      if (query_mode_)  roomba_->query_sensors();
+      else               roomba_->read_sensors();
 #ifdef USE_TIMETRACKER
-      __tt.ping_end(__ttc_query);
+      tt_.ping_end(ttc_query_);
 #endif
-      __fresh_data = __roomba->has_sensor_packet();
+      fresh_data_ = roomba_->has_sensor_packet();
     } catch (Exception &e) {
       logger->log_warn(name(), "Failed to read sensor info, exception follows");
       logger->log_warn(name(), e);
     }
 
-    //__time_wait->wait_systime();
+    //time_wait_->wait_systime();
 
 #ifdef USE_TIMETRACKER
-      __tt.ping_end(__ttc_loop);
-      if (++__tt_count == 300) {
-	__tt_count = 0;
-	__tt.print_to_stdout();
-	__tt.reset();
+      tt_.ping_end(ttc_loop_);
+      if (++tt_count_ == 300) {
+	tt_count_ = 0;
+	tt_.print_to_stdout();
+	tt_.reset();
       }
 #endif
   }
@@ -116,28 +116,28 @@ class Roomba500Thread::WorkerThread : public fawkes::Thread
    */
   bool has_fresh_data()
   {
-    __fresh_data_mutex->lock();
-    bool rv = __fresh_data;
-    __fresh_data = false;
-    __fresh_data_mutex->unlock();
+    fresh_data_mutex_->lock();
+    bool rv = fresh_data_;
+    fresh_data_ = false;
+    fresh_data_mutex_->unlock();
     return rv;
   }
 
  private:
   Logger            *logger;
-  RefPtr<Roomba500>  __roomba;
-  TimeWait          *__time_wait;
-  Mutex             *__fresh_data_mutex;
+  RefPtr<Roomba500>  roomba_;
+  TimeWait          *time_wait_;
+  Mutex             *fresh_data_mutex_;
 #ifdef USE_TIMETRACKER
-  TimeTracker        __tt;
-  unsigned int       __ttc_query;
-  unsigned int       __ttc_loop;
-  unsigned int       __tt_count;
+  TimeTracker        tt_;
+  unsigned int       ttc_query_;
+  unsigned int       ttc_loop_;
+  unsigned int       tt_count_;
 #endif
 
  private:
-  bool __fresh_data;
-  bool __query_mode;
+  bool fresh_data_;
+  bool query_mode_;
 };
 
 
@@ -159,213 +159,213 @@ Roomba500Thread::Roomba500Thread()
 void
 Roomba500Thread::init()
 {
-  __led_if_debris = NULL;
-  __led_if_spot = NULL;
-  __led_if_dock = NULL;
-  __led_if_check_robot = NULL;
-  __led_if_clean_color = NULL;
-  __led_if_clean_intensity = NULL;
-  __switch_if_vacuuming = NULL;
-  __switch_if_but_clean = NULL;
-  __switch_if_but_spot = NULL;
-  __switch_if_but_dock = NULL;
-  __switch_if_but_minute = NULL;
-  __switch_if_but_hour = NULL;
-  __switch_if_but_day = NULL;
-  __switch_if_but_schedule = NULL;
-  __switch_if_but_clock = NULL;
-  //__motor_if = NULL;
-  __battery_if = NULL;
-  __roomba500_if = NULL;
+  led_if_debris_ = NULL;
+  led_if_spot_ = NULL;
+  led_if_dock_ = NULL;
+  led_if_check_robot_ = NULL;
+  led_if_clean_color_ = NULL;
+  led_if_clean_intensity_ = NULL;
+  switch_if_vacuuming_ = NULL;
+  switch_if_but_clean_ = NULL;
+  switch_if_but_spot_ = NULL;
+  switch_if_but_dock_ = NULL;
+  switch_if_but_minute_ = NULL;
+  switch_if_but_hour_ = NULL;
+  switch_if_but_day_ = NULL;
+  switch_if_but_schedule_ = NULL;
+  switch_if_but_clock_ = NULL;
+  //motor_if_ = NULL;
+  battery_if_ = NULL;
+  roomba500_if_ = NULL;
 
-  __greeting_loop_count = 0;
+  greeting_loop_count_ = 0;
 
-  __cfg_device = "";
-  __cfg_btsave = false;
+  cfg_device_ = "";
+  cfg_btsave_ = false;
 
   Roomba500::ConnectionType conntype;
-  __cfg_conntype = config->get_string("/hardware/roomba/connection_type");
-  __cfg_btfast = false;
-  __cfg_bttype = "firefly";
-  __cfg_play_fanfare = true;
-  __cfg_query_mode = true;
+  cfg_conntype_ = config->get_string("/hardware/roomba/connection_type");
+  cfg_btfast_ = false;
+  cfg_bttype_ = "firefly";
+  cfg_play_fanfare_ = true;
+  cfg_query_mode_ = true;
 
   try {
-    __cfg_play_fanfare = config->get_bool("/hardware/roomba/play_fanfare");
+    cfg_play_fanfare_ = config->get_bool("/hardware/roomba/play_fanfare");
   } catch (Exception &e) {}
 
   try {
-    __cfg_query_mode = config->get_bool("/hardware/roomba/query_mode");
+    cfg_query_mode_ = config->get_bool("/hardware/roomba/query_mode");
   } catch (Exception &e) {}
 
-  if (__cfg_conntype == "rootooth") {
+  if (cfg_conntype_ == "rootooth") {
     try {
-      __cfg_device = config->get_string("/hardware/roomba/btaddr");
+      cfg_device_ = config->get_string("/hardware/roomba/btaddr");
     } catch (Exception &e) {
       try {
-	__cfg_device = config->get_string("/hardware/roomba/btname");
+	cfg_device_ = config->get_string("/hardware/roomba/btname");
       } catch (Exception &e2) {
 	logger->log_info(name(), "Neither bluetooth name nor address set, "
 			 "trying auto-detect");
       }
     }
     try {
-      __cfg_btfast = config->get_bool("/hardware/roomba/btfast");
+      cfg_btfast_ = config->get_bool("/hardware/roomba/btfast");
     } catch (Exception &e) {}
 
     try {
-      __cfg_bttype = config->get_string("/hardware/roomba/bttype");
+      cfg_bttype_ = config->get_string("/hardware/roomba/bttype");
     } catch (Exception &e) {
       logger->log_info(name(), "RooTooth type not set, assuming 'firefly'");
     }
-    if (__cfg_bttype == "firefly") {
+    if (cfg_bttype_ == "firefly") {
       // we're cool
-    } else if (__cfg_bttype == "mitsumi") {
-      if (__cfg_btfast) {
+    } else if (cfg_bttype_ == "mitsumi") {
+      if (cfg_btfast_) {
 	logger->log_warn(name(), "Fast mode setting for Mitsumi RooTooth not "
 			 "supported, please set outside of Fawkes or wait "
 			 "until configuration timeout has passed.");
-	__cfg_btfast = false;
+	cfg_btfast_ = false;
       }
     } else {
       logger->log_warn(name(), "Unknown RooTooth hardware type '%s' set",
-		       __cfg_bttype.c_str());
-      if (__cfg_btfast) {
+		       cfg_bttype_.c_str());
+      if (cfg_btfast_) {
 	logger->log_warn(name(), "Fast mode setting only supported for "
 			 "FireFly RooTooth");
-	__cfg_btfast = false;
+	cfg_btfast_ = false;
       }
     }
 
     conntype = Roomba500::CONNTYPE_ROOTOOTH;
-  } else if (__cfg_conntype == "serial") {
-    __cfg_device = config->get_string("/hardware/roomba/device");
+  } else if (cfg_conntype_ == "serial") {
+    cfg_device_ = config->get_string("/hardware/roomba/device");
     conntype = Roomba500::CONNTYPE_SERIAL;
   } else {
     throw Exception("Unknown mode '%s', must be rootooth or serial",
-		    __cfg_conntype.c_str());
+		    cfg_conntype_.c_str());
   }
 
   try {
-    __cfg_btsave = config->get_bool("/hardware/roomba/btsave");
+    cfg_btsave_ = config->get_bool("/hardware/roomba/btsave");
   } catch (Exception &e) {}
 
   Roomba500::Mode mode = Roomba500::MODE_PASSIVE;
-  __cfg_mode = "passive";
+  cfg_mode_ = "passive";
   try {
-    __cfg_mode = config->get_string("/hardware/roomba/mode");
+    cfg_mode_ = config->get_string("/hardware/roomba/mode");
   } catch (Exception &e) {}
-  if (__cfg_mode == "passive") {
+  if (cfg_mode_ == "passive") {
     mode = Roomba500::MODE_PASSIVE;
-  } else if (__cfg_mode == "safe") {
+  } else if (cfg_mode_ == "safe") {
     mode = Roomba500::MODE_SAFE;
-  } else if (__cfg_mode == "full") {
+  } else if (cfg_mode_ == "full") {
     mode = Roomba500::MODE_FULL;
   } else {
     throw Exception("Unknown mode '%s', must be one of passive, safe, or full",
-		    __cfg_mode.c_str());
+		    cfg_mode_.c_str());
   }
 
 
   try {
-    __roomba500_if = blackboard->open_for_writing<Roomba500Interface>("Roomba 500");
-    __led_if_debris =
+    roomba500_if_ = blackboard->open_for_writing<Roomba500Interface>("Roomba 500");
+    led_if_debris_ =
       blackboard->open_for_writing<LedInterface>("Roomba LED Debris");
-    __led_if_spot = blackboard->open_for_writing<LedInterface>("Roomba LED Spot");
-    __led_if_dock = blackboard->open_for_writing<LedInterface>("Roomba LED Dock");
-    __led_if_check_robot =
+    led_if_spot_ = blackboard->open_for_writing<LedInterface>("Roomba LED Spot");
+    led_if_dock_ = blackboard->open_for_writing<LedInterface>("Roomba LED Dock");
+    led_if_check_robot_ =
       blackboard->open_for_writing<LedInterface>("Roomba LED Check Robot");
-    __led_if_clean_color =
+    led_if_clean_color_ =
       blackboard->open_for_writing<LedInterface>("Roomba LED Clean Color");
-    __led_if_clean_intensity =
+    led_if_clean_intensity_ =
       blackboard->open_for_writing<LedInterface>("Roomba LED Clean Intensity");
-    __switch_if_vacuuming =
+    switch_if_vacuuming_ =
       blackboard->open_for_writing<SwitchInterface>("Roomba Vacuuming");
-    __switch_if_but_clean =
+    switch_if_but_clean_ =
       blackboard->open_for_writing<SwitchInterface>("Roomba Button Clean");
-    __switch_if_but_spot =
+    switch_if_but_spot_ =
       blackboard->open_for_writing<SwitchInterface>("Roomba Button Spot");
-    __switch_if_but_dock =
+    switch_if_but_dock_ =
       blackboard->open_for_writing<SwitchInterface>("Roomba Button Dock");
-    __switch_if_but_minute =
+    switch_if_but_minute_ =
       blackboard->open_for_writing<SwitchInterface>("Roomba Button Minute");
-    __switch_if_but_hour =
+    switch_if_but_hour_ =
       blackboard->open_for_writing<SwitchInterface>("Roomba Button Hour");
-    __switch_if_but_day =
+    switch_if_but_day_ =
       blackboard->open_for_writing<SwitchInterface>("Roomba Button Day");
-    __switch_if_but_schedule =
+    switch_if_but_schedule_ =
       blackboard->open_for_writing<SwitchInterface>("Roomba Button Schedule");
-    __switch_if_but_clock =
+    switch_if_but_clock_ =
       blackboard->open_for_writing<SwitchInterface>("Roomba Button Clock");
-    //__motor_if = blackboard->open_for_writing<MotorInterface>("Roomba Motor");
-    __battery_if = blackboard->open_for_writing<BatteryInterface>("Roomba Battery");
+    //motor_if_ = blackboard->open_for_writing<MotorInterface>("Roomba Motor");
+    battery_if_ = blackboard->open_for_writing<BatteryInterface>("Roomba Battery");
   } catch (Exception &e) {
     close_interfaces();
     throw;
   }
 
-  __wt = NULL;
+  wt_ = NULL;
   try {
     unsigned int flags = 0;
     if (conntype == Roomba500::CONNTYPE_ROOTOOTH) {
       logger->log_debug(name(), "Connecting via RooTooth, this may take a while");
-      if (__cfg_btfast) flags |= Roomba500::FLAG_FIREFLY_FASTMODE;
+      if (cfg_btfast_) flags |= Roomba500::FLAG_FIREFLY_FASTMODE;
     }
-    __roomba = new Roomba500(conntype, __cfg_device.c_str(), flags);
+    roomba_ = new Roomba500(conntype, cfg_device_.c_str(), flags);
 
-    if (__cfg_btsave) {
+    if (cfg_btsave_) {
       logger->log_debug(name(), "Saving Bluetooth address %s. Will be used for "
-			"next connection.", __roomba->get_device());
-      config->set_string("/hardware/roomba/btaddr", __roomba->get_device());
+			"next connection.", roomba_->get_device());
+      config->set_string("/hardware/roomba/btaddr", roomba_->get_device());
     }
 
-    __roomba->set_mode(mode);
-    if (__roomba->is_controlled()) {
-      if (__cfg_play_fanfare)  __roomba->play_fanfare();
-      __roomba->set_leds(false, false, false, true, 0, 255);
+    roomba_->set_mode(mode);
+    if (roomba_->is_controlled()) {
+      if (cfg_play_fanfare_)  roomba_->play_fanfare();
+      roomba_->set_leds(false, false, false, true, 0, 255);
     }
-    __wt = new WorkerThread(logger, clock, __roomba, __cfg_query_mode);
+    wt_ = new WorkerThread(logger, clock, roomba_, cfg_query_mode_);
   } catch (Exception &e) {
     close_interfaces();
-    __roomba.clear();
-    delete __wt;
+    roomba_.clear();
+    delete wt_;
     throw;
   }
-  __wt->start();
+  wt_->start();
 }
 
 void
 Roomba500Thread::close_interfaces()
 {
-  blackboard->close(__led_if_debris);
-  blackboard->close(__led_if_spot);
-  blackboard->close(__led_if_dock);
-  blackboard->close(__led_if_check_robot);
-  blackboard->close(__led_if_clean_color);
-  blackboard->close(__led_if_clean_intensity);
-  blackboard->close(__switch_if_vacuuming);
-  blackboard->close(__switch_if_but_clean);
-  blackboard->close(__switch_if_but_spot);
-  blackboard->close(__switch_if_but_dock);
-  blackboard->close(__switch_if_but_minute);
-  blackboard->close(__switch_if_but_hour);
-  blackboard->close(__switch_if_but_day);
-  blackboard->close(__switch_if_but_schedule);
-  blackboard->close(__switch_if_but_clock);
-  //blackboard->close(__motor_if);
-  blackboard->close(__battery_if);
-  blackboard->close(__roomba500_if);
+  blackboard->close(led_if_debris_);
+  blackboard->close(led_if_spot_);
+  blackboard->close(led_if_dock_);
+  blackboard->close(led_if_check_robot_);
+  blackboard->close(led_if_clean_color_);
+  blackboard->close(led_if_clean_intensity_);
+  blackboard->close(switch_if_vacuuming_);
+  blackboard->close(switch_if_but_clean_);
+  blackboard->close(switch_if_but_spot_);
+  blackboard->close(switch_if_but_dock_);
+  blackboard->close(switch_if_but_minute_);
+  blackboard->close(switch_if_but_hour_);
+  blackboard->close(switch_if_but_day_);
+  blackboard->close(switch_if_but_schedule_);
+  blackboard->close(switch_if_but_clock_);
+  //blackboard->close(motor_if_);
+  blackboard->close(battery_if_);
+  blackboard->close(roomba500_if_);
 }
 
 
 void
 Roomba500Thread::finalize()
 {
-  __wt->cancel();
-  __wt->join();
-  delete __wt;
-  __roomba->set_mode(Roomba500::MODE_PASSIVE);
-  __roomba.clear();
+  wt_->cancel();
+  wt_->join();
+  delete wt_;
+  roomba_->set_mode(Roomba500::MODE_PASSIVE);
+  roomba_.clear();
   close_interfaces();
 }
 
@@ -389,22 +389,22 @@ void
 Roomba500Thread::loop()
 {
   // process actuation
-  float led_debris          = led_process(__led_if_debris);
-  float led_spot            = led_process(__led_if_spot);
-  float led_dock            = led_process(__led_if_dock);
-  float led_check_robot     = led_process(__led_if_check_robot);
-  float led_clean_color     = led_process(__led_if_clean_color);
-  float led_clean_intensity = led_process(__led_if_clean_intensity);
+  float led_debris          = led_process(led_if_debris_);
+  float led_spot            = led_process(led_if_spot_);
+  float led_dock            = led_process(led_if_dock_);
+  float led_check_robot     = led_process(led_if_check_robot_);
+  float led_clean_color     = led_process(led_if_clean_color_);
+  float led_clean_intensity = led_process(led_if_clean_intensity_);
 
-  if ( (led_debris != __led_if_debris->intensity()) ||
-       (led_spot != __led_if_spot->intensity()) ||
-       (led_dock != __led_if_dock->intensity()) ||
-       (led_check_robot != __led_if_check_robot->intensity()) ||
-       (led_clean_color != __led_if_clean_color->intensity()) ||
-       (led_clean_intensity != __led_if_clean_intensity->intensity()) )
+  if ( (led_debris != led_if_debris_->intensity()) ||
+       (led_spot != led_if_spot_->intensity()) ||
+       (led_dock != led_if_dock_->intensity()) ||
+       (led_check_robot != led_if_check_robot_->intensity()) ||
+       (led_clean_color != led_if_clean_color_->intensity()) ||
+       (led_clean_intensity != led_if_clean_intensity_->intensity()) )
   {
     try {
-      __roomba->set_leds(led_debris > 0.5, led_spot > 0.5,
+      roomba_->set_leds(led_debris > 0.5, led_spot > 0.5,
 			 led_dock > 0.5, led_check_robot > 0.5,
 			 (char)roundf(led_clean_color * 255.),
 			 (char)roundf(led_clean_intensity * 255.));
@@ -413,38 +413,38 @@ Roomba500Thread::loop()
       logger->log_warn(name(), e);
     }
 
-    __led_if_debris->set_intensity(led_debris);
-    __led_if_spot->set_intensity(led_spot);
-    __led_if_dock->set_intensity(led_dock);
-    __led_if_check_robot->set_intensity(led_check_robot);
-    __led_if_clean_color->set_intensity(led_clean_color);
-    __led_if_clean_intensity->set_intensity(led_clean_intensity);
+    led_if_debris_->set_intensity(led_debris);
+    led_if_spot_->set_intensity(led_spot);
+    led_if_dock_->set_intensity(led_dock);
+    led_if_check_robot_->set_intensity(led_check_robot);
+    led_if_clean_color_->set_intensity(led_clean_color);
+    led_if_clean_intensity_->set_intensity(led_clean_intensity);
 
-    __led_if_debris->write();
-    __led_if_spot->write();
-    __led_if_dock->write();
-    __led_if_check_robot->write();
-    __led_if_clean_color->write();
-    __led_if_clean_intensity->write();
+    led_if_debris_->write();
+    led_if_spot_->write();
+    led_if_dock_->write();
+    led_if_check_robot_->write();
+    led_if_clean_color_->write();
+    led_if_clean_intensity_->write();
   }
 
-  while (! __roomba500_if->msgq_empty() ) {
-    if (__roomba500_if->msgq_first_is<Roomba500Interface::StopMessage>())
+  while (! roomba500_if_->msgq_empty() ) {
+    if (roomba500_if_->msgq_first_is<Roomba500Interface::StopMessage>())
     {
       try {
-	__roomba->stop();
-	//__roomba->set_motors(false, false, false, false, false);
+	roomba_->stop();
+	//roomba_->set_motors(false, false, false, false, false);
 	//logger->log_debug(name(), "Stopped");
       } catch (Exception &e) {
 	logger->log_warn(name(), "Failed to stop robot, exception follows");
 	logger->log_warn(name(), e);
       }
-    } else  if (__roomba500_if->msgq_first_is<Roomba500Interface::SetModeMessage>())
+    } else  if (roomba500_if_->msgq_first_is<Roomba500Interface::SetModeMessage>())
     {
       Roomba500Interface::SetModeMessage *msg =
-	__roomba500_if->msgq_first(msg);
+	roomba500_if_->msgq_first(msg);
 
-      Roomba500::Mode mode = __roomba->get_mode();
+      Roomba500::Mode mode = roomba_->get_mode();
       char color     =   0;
       char intensity = 255;
 
@@ -474,64 +474,64 @@ Roomba500Thread::loop()
 			 msg->mode());
       }
       try {
-	bool was_controlled = __roomba->is_controlled();
+	bool was_controlled = roomba_->is_controlled();
 	if (! was_controlled) {
 	  // set first
-	  __roomba->set_mode(mode);
+	  roomba_->set_mode(mode);
 	}
-	if (__roomba->is_controlled()) {
-	  __roomba->set_leds(__led_if_debris->intensity() >= 0.5,
-			     __led_if_spot->intensity() >= 0.5,
-			     __led_if_dock->intensity() >= 0.5,
-			     __led_if_check_robot->intensity() >= 0.5,
+	if (roomba_->is_controlled()) {
+	  roomba_->set_leds(led_if_debris_->intensity() >= 0.5,
+			     led_if_spot_->intensity() >= 0.5,
+			     led_if_dock_->intensity() >= 0.5,
+			     led_if_check_robot_->intensity() >= 0.5,
 			     color, intensity);
 	}
 	if (was_controlled) {
-	  __roomba->set_mode(mode);
+	  roomba_->set_mode(mode);
 	}
       } catch (Exception &e) {
 	logger->log_warn(name(), "Cannot set mode, exception follows");
 	logger->log_warn(name(), e);
       }
 
-    } else if (__roomba500_if->msgq_first_is<Roomba500Interface::DockMessage>()) {
+    } else if (roomba500_if_->msgq_first_is<Roomba500Interface::DockMessage>()) {
       try {
-	__roomba->seek_dock();
+	roomba_->seek_dock();
 	logger->log_debug(name(), "Docking");
       } catch (Exception &e) {
 	logger->log_warn(name(), "Failed to seek dock, exception follows");
 	logger->log_warn(name(), e);
       }
-    } else  if (__roomba500_if->msgq_first_is<Roomba500Interface::DriveStraightMessage>())
+    } else  if (roomba500_if_->msgq_first_is<Roomba500Interface::DriveStraightMessage>())
     {
       Roomba500Interface::DriveStraightMessage *msg =
-	__roomba500_if->msgq_first(msg);
+	roomba500_if_->msgq_first(msg);
 
       try {
-	__roomba->drive_straight(msg->velocity());
+	roomba_->drive_straight(msg->velocity());
       } catch (Exception &e) {
 	logger->log_warn(name(), "Failed to drive straight, exception follows");
 	logger->log_warn(name(), e);
       }
-    } else  if (__roomba500_if->msgq_first_is<Roomba500Interface::DriveMessage>())
+    } else  if (roomba500_if_->msgq_first_is<Roomba500Interface::DriveMessage>())
     {
       Roomba500Interface::DriveMessage *msg =
-	__roomba500_if->msgq_first(msg);
+	roomba500_if_->msgq_first(msg);
 
       try {
-	__roomba->drive(msg->velocity(), msg->radius());
+	roomba_->drive(msg->velocity(), msg->radius());
       } catch (Exception &e) {
 	logger->log_warn(name(), "Failed to drive, exception follows");
 	logger->log_warn(name(), e);
       }
 
-    } else  if (__roomba500_if->msgq_first_is<Roomba500Interface::SetMotorsMessage>())
+    } else  if (roomba500_if_->msgq_first_is<Roomba500Interface::SetMotorsMessage>())
     {
       Roomba500Interface::SetMotorsMessage *msg =
-	__roomba500_if->msgq_first(msg);
+	roomba500_if_->msgq_first(msg);
 
       try {
-	__roomba->set_motors(
+	roomba_->set_motors(
 	  (msg->main() != Roomba500Interface::BRUSHSTATE_OFF),
 	  (msg->side() != Roomba500Interface::BRUSHSTATE_OFF),
 	  msg->is_vacuuming(),
@@ -542,16 +542,16 @@ Roomba500Thread::loop()
 	logger->log_warn(name(), e);
       }
     }
-    __roomba500_if->msgq_pop();
+    roomba500_if_->msgq_pop();
   }
 
-  if (__roomba->is_controlled()) {
-    if (__greeting_loop_count < 50) {
-      if (++__greeting_loop_count == 50) {
-	__roomba->set_leds(false, false, false, false, 0, 0);
+  if (roomba_->is_controlled()) {
+    if (greeting_loop_count_ < 50) {
+      if (++greeting_loop_count_ == 50) {
+	roomba_->set_leds(false, false, false, false, 0, 0);
       } else {
-	__roomba->set_leds(false, false, false, true,
-			   0, __greeting_loop_count * 5);
+	roomba_->set_leds(false, false, false, true,
+			   0, greeting_loop_count_ * 5);
       }
     }
   }
@@ -565,144 +565,144 @@ Roomba500Thread::loop()
 void
 Roomba500Thread::write_blackboard()
 {
-  if (__wt->has_fresh_data()) {
-    const Roomba500::SensorPacketGroupAll sp(__roomba->get_sensor_packet());
+  if (wt_->has_fresh_data()) {
+    const Roomba500::SensorPacketGroupAll sp(roomba_->get_sensor_packet());
 
     int charge = (int)roundf(((float)ntohs(sp.battery_charge) /
 			      (float)ntohs(sp.battery_capacity)) * 100.);
 
-    if (__roomba->is_controlled()) {
-      if (charge != __battery_percent) {
+    if (roomba_->is_controlled()) {
+      if (charge != battery_percent_) {
 	char digits[4];
 	snprintf(digits, 4, "%u%%", charge);
-	__roomba->set_digit_leds(digits);
-	__battery_percent = charge;
+	roomba_->set_digit_leds(digits);
+	battery_percent_ = charge;
       }
     }
 
-    __roomba500_if->set_mode((Roomba500Interface::Mode)sp.mode);
-    __roomba500_if->set_wheel_drop_left(
+    roomba500_if_->set_mode((Roomba500Interface::Mode)sp.mode);
+    roomba500_if_->set_wheel_drop_left(
         sp.bumps_wheeldrops & Roomba500::WHEEL_DROP_LEFT);
-    __roomba500_if->set_wheel_drop_right(
+    roomba500_if_->set_wheel_drop_right(
 	sp.bumps_wheeldrops & Roomba500::WHEEL_DROP_RIGHT);
-    __roomba500_if->set_bump_left(sp.bumps_wheeldrops & Roomba500::BUMP_LEFT);
-    __roomba500_if->set_bump_right(sp.bumps_wheeldrops & Roomba500::BUMP_RIGHT);
-    __roomba500_if->set_cliff_left(sp.cliff_left == 1);
-    __roomba500_if->set_cliff_front_left(sp.cliff_front_left == 1);
-    __roomba500_if->set_cliff_front_right(sp.cliff_front_right == 1);
-    __roomba500_if->set_cliff_right(sp.cliff_right == 1);
-    __roomba500_if->set_wall(sp.virtual_wall == 1);
-    __roomba500_if->set_overcurrent_left_wheel(
+    roomba500_if_->set_bump_left(sp.bumps_wheeldrops & Roomba500::BUMP_LEFT);
+    roomba500_if_->set_bump_right(sp.bumps_wheeldrops & Roomba500::BUMP_RIGHT);
+    roomba500_if_->set_cliff_left(sp.cliff_left == 1);
+    roomba500_if_->set_cliff_front_left(sp.cliff_front_left == 1);
+    roomba500_if_->set_cliff_front_right(sp.cliff_front_right == 1);
+    roomba500_if_->set_cliff_right(sp.cliff_right == 1);
+    roomba500_if_->set_wall(sp.virtual_wall == 1);
+    roomba500_if_->set_overcurrent_left_wheel(
         sp.overcurrents & Roomba500::OVERCURRENT_WHEEL_LEFT);
-    __roomba500_if->set_overcurrent_right_wheel(
+    roomba500_if_->set_overcurrent_right_wheel(
         sp.overcurrents & Roomba500::OVERCURRENT_WHEEL_RIGHT);
-    __roomba500_if->set_overcurrent_main_brush(
+    roomba500_if_->set_overcurrent_main_brush(
 	sp.overcurrents & Roomba500::OVERCURRENT_MAIN_BRUSH);
-    __roomba500_if->set_overcurrent_side_brush(
+    roomba500_if_->set_overcurrent_side_brush(
         sp.overcurrents & Roomba500::OVERCURRENT_SIDE_BRUSH);
-    __roomba500_if->set_dirt_detect(sp.dirt_detect == 1);
-    __roomba500_if->set_ir_opcode_omni(
+    roomba500_if_->set_dirt_detect(sp.dirt_detect == 1);
+    roomba500_if_->set_ir_opcode_omni(
 	(Roomba500Interface::InfraredCharacter)sp.ir_opcode_omni);
-    __roomba500_if->set_button_clean(sp.buttons & Roomba500::BUTTON_CLEAN);
-    __roomba500_if->set_button_spot(sp.buttons & Roomba500::BUTTON_SPOT);
-    __roomba500_if->set_button_dock(sp.buttons & Roomba500::BUTTON_DOCK);
-    __roomba500_if->set_button_minute(sp.buttons & Roomba500::BUTTON_MINUTE);
-    __roomba500_if->set_button_hour(sp.buttons & Roomba500::BUTTON_HOUR);
-    __roomba500_if->set_button_day(sp.buttons & Roomba500::BUTTON_DAY);
-    __roomba500_if->set_button_schedule(sp.buttons & Roomba500::BUTTON_SCHEDULE);
-    __roomba500_if->set_button_clock(sp.buttons & Roomba500::BUTTON_CLOCK);
+    roomba500_if_->set_button_clean(sp.buttons & Roomba500::BUTTON_CLEAN);
+    roomba500_if_->set_button_spot(sp.buttons & Roomba500::BUTTON_SPOT);
+    roomba500_if_->set_button_dock(sp.buttons & Roomba500::BUTTON_DOCK);
+    roomba500_if_->set_button_minute(sp.buttons & Roomba500::BUTTON_MINUTE);
+    roomba500_if_->set_button_hour(sp.buttons & Roomba500::BUTTON_HOUR);
+    roomba500_if_->set_button_day(sp.buttons & Roomba500::BUTTON_DAY);
+    roomba500_if_->set_button_schedule(sp.buttons & Roomba500::BUTTON_SCHEDULE);
+    roomba500_if_->set_button_clock(sp.buttons & Roomba500::BUTTON_CLOCK);
 
-    __switch_if_but_clean->set_enabled(sp.buttons & Roomba500::BUTTON_CLEAN);
-    __switch_if_but_spot->set_enabled(sp.buttons & Roomba500::BUTTON_SPOT);
-    __switch_if_but_dock->set_enabled(sp.buttons & Roomba500::BUTTON_DOCK);
-    __switch_if_but_minute->set_enabled(sp.buttons & Roomba500::BUTTON_MINUTE);
-    __switch_if_but_hour->set_enabled(sp.buttons & Roomba500::BUTTON_HOUR);
-    __switch_if_but_day->set_enabled(sp.buttons & Roomba500::BUTTON_DAY);
-    __switch_if_but_schedule->set_enabled(sp.buttons & Roomba500::BUTTON_SCHEDULE);
-    __switch_if_but_clock->set_enabled(sp.buttons & Roomba500::BUTTON_CLOCK);
+    switch_if_but_clean_->set_enabled(sp.buttons & Roomba500::BUTTON_CLEAN);
+    switch_if_but_spot_->set_enabled(sp.buttons & Roomba500::BUTTON_SPOT);
+    switch_if_but_dock_->set_enabled(sp.buttons & Roomba500::BUTTON_DOCK);
+    switch_if_but_minute_->set_enabled(sp.buttons & Roomba500::BUTTON_MINUTE);
+    switch_if_but_hour_->set_enabled(sp.buttons & Roomba500::BUTTON_HOUR);
+    switch_if_but_day_->set_enabled(sp.buttons & Roomba500::BUTTON_DAY);
+    switch_if_but_schedule_->set_enabled(sp.buttons & Roomba500::BUTTON_SCHEDULE);
+    switch_if_but_clock_->set_enabled(sp.buttons & Roomba500::BUTTON_CLOCK);
 
     // Convert mm to m for distance
-    __roomba500_if->set_distance((int16_t)ntohs(sp.distance));
+    roomba500_if_->set_distance((int16_t)ntohs(sp.distance));
     // invert because in Fawkes positive angles go counter-clockwise, while
     // for the Roomba they go clockwise
-    __roomba500_if->set_angle(- (int16_t)ntohs(sp.angle));
-    __roomba500_if->set_charging_state(
+    roomba500_if_->set_angle(- (int16_t)ntohs(sp.angle));
+    roomba500_if_->set_charging_state(
 	(Roomba500Interface::ChargingState)sp.charging_state);
-    __roomba500_if->set_voltage(ntohs(sp.voltage));
-    __roomba500_if->set_current((int)ntohs(sp.current));
-    __roomba500_if->set_temperature((int)sp.temperature);
-    __roomba500_if->set_battery_charge(ntohs(sp.battery_charge));
-    __roomba500_if->set_battery_capacity(ntohs(sp.battery_capacity));
+    roomba500_if_->set_voltage(ntohs(sp.voltage));
+    roomba500_if_->set_current((int)ntohs(sp.current));
+    roomba500_if_->set_temperature((int)sp.temperature);
+    roomba500_if_->set_battery_charge(ntohs(sp.battery_charge));
+    roomba500_if_->set_battery_capacity(ntohs(sp.battery_capacity));
 
-    __battery_if->set_voltage(ntohs(sp.voltage));
-    __battery_if->set_current((int)ntohs(sp.current));
-    __battery_if->set_temperature((char)sp.temperature);
-    __battery_if->set_absolute_soc((float)ntohs(sp.battery_charge) /
+    battery_if_->set_voltage(ntohs(sp.voltage));
+    battery_if_->set_current((int)ntohs(sp.current));
+    battery_if_->set_temperature((char)sp.temperature);
+    battery_if_->set_absolute_soc((float)ntohs(sp.battery_charge) /
 				   (float)ntohs(sp.battery_capacity));
-    __battery_if->set_relative_soc(__battery_if->absolute_soc());
+    battery_if_->set_relative_soc(battery_if_->absolute_soc());
 
-    __roomba500_if->set_wall_signal(ntohs(sp.wall_signal));
-    __roomba500_if->set_cliff_left_signal(ntohs(sp.cliff_left_signal));
-    __roomba500_if->set_cliff_front_left_signal(ntohs(sp.cliff_front_left_signal));
-    __roomba500_if->set_cliff_front_right_signal(ntohs(sp.cliff_front_right_signal));
-    __roomba500_if->set_cliff_right_signal(ntohs(sp.cliff_right_signal));
-    __roomba500_if->set_home_base_charger_available(
+    roomba500_if_->set_wall_signal(ntohs(sp.wall_signal));
+    roomba500_if_->set_cliff_left_signal(ntohs(sp.cliff_left_signal));
+    roomba500_if_->set_cliff_front_left_signal(ntohs(sp.cliff_front_left_signal));
+    roomba500_if_->set_cliff_front_right_signal(ntohs(sp.cliff_front_right_signal));
+    roomba500_if_->set_cliff_right_signal(ntohs(sp.cliff_right_signal));
+    roomba500_if_->set_home_base_charger_available(
 	sp.charger_available & Roomba500::CHARGER_HOME_BASE);
-    __roomba500_if->set_internal_charger_available(
+    roomba500_if_->set_internal_charger_available(
 	sp.charger_available & Roomba500::CHARGER_INTERNAL);
-    __roomba500_if->set_song_number(sp.song_number);
-    __roomba500_if->set_song_playing(sp.song_playing == 1);
+    roomba500_if_->set_song_number(sp.song_number);
+    roomba500_if_->set_song_playing(sp.song_playing == 1);
 
-    __roomba500_if->set_velocity((int16_t)ntohs(sp.velocity));
-    __roomba500_if->set_radius((int16_t)ntohs(sp.radius));
-    __roomba500_if->set_velocity_right((int16_t)ntohs(sp.velocity_right));
-    __roomba500_if->set_velocity_left((int16_t)ntohs(sp.velocity_left));
-    __roomba500_if->set_encoder_counts_left(ntohs(sp.encoder_counts_left));
-    __roomba500_if->set_encoder_counts_right(ntohs(sp.encoder_counts_right));
+    roomba500_if_->set_velocity((int16_t)ntohs(sp.velocity));
+    roomba500_if_->set_radius((int16_t)ntohs(sp.radius));
+    roomba500_if_->set_velocity_right((int16_t)ntohs(sp.velocity_right));
+    roomba500_if_->set_velocity_left((int16_t)ntohs(sp.velocity_left));
+    roomba500_if_->set_encoder_counts_left(ntohs(sp.encoder_counts_left));
+    roomba500_if_->set_encoder_counts_right(ntohs(sp.encoder_counts_right));
 
-    __roomba500_if->set_bumper_left(
+    roomba500_if_->set_bumper_left(
 	sp.light_bumper & Roomba500::BUMPER_LEFT);
-    __roomba500_if->set_bumper_front_left(
+    roomba500_if_->set_bumper_front_left(
 	sp.light_bumper & Roomba500::BUMPER_FRONT_LEFT);
-    __roomba500_if->set_bumper_center_left(
+    roomba500_if_->set_bumper_center_left(
 	sp.light_bumper & Roomba500::BUMPER_CENTER_LEFT);
-    __roomba500_if->set_bumper_center_right(
+    roomba500_if_->set_bumper_center_right(
 	sp.light_bumper & Roomba500::BUMPER_CENTER_RIGHT);
-    __roomba500_if->set_bumper_front_right(
+    roomba500_if_->set_bumper_front_right(
 	sp.light_bumper & Roomba500::BUMPER_FRONT_RIGHT);
-    __roomba500_if->set_bumper_right(
+    roomba500_if_->set_bumper_right(
 	sp.light_bumper & Roomba500::BUMPER_RIGHT);
 
-    __roomba500_if->set_light_bump_left(ntohs(sp.light_bump_left));
-    __roomba500_if->set_light_bump_front_left(ntohs(sp.light_bump_front_left));
-    __roomba500_if->set_light_bump_center_left(ntohs(sp.light_bump_center_left));
-    __roomba500_if->set_light_bump_center_right(ntohs(sp.light_bump_center_right));
-    __roomba500_if->set_light_bump_front_right(ntohs(sp.light_bump_front_right));
-    __roomba500_if->set_light_bump_right(ntohs(sp.light_bump_right));
+    roomba500_if_->set_light_bump_left(ntohs(sp.light_bump_left));
+    roomba500_if_->set_light_bump_front_left(ntohs(sp.light_bump_front_left));
+    roomba500_if_->set_light_bump_center_left(ntohs(sp.light_bump_center_left));
+    roomba500_if_->set_light_bump_center_right(ntohs(sp.light_bump_center_right));
+    roomba500_if_->set_light_bump_front_right(ntohs(sp.light_bump_front_right));
+    roomba500_if_->set_light_bump_right(ntohs(sp.light_bump_right));
 
-    __roomba500_if->set_ir_opcode_left(
+    roomba500_if_->set_ir_opcode_left(
 	(Roomba500Interface::InfraredCharacter)sp.ir_opcode_left);
-    __roomba500_if->set_ir_opcode_right(
+    roomba500_if_->set_ir_opcode_right(
 	(Roomba500Interface::InfraredCharacter)sp.ir_opcode_right);
 
-    __roomba500_if->set_left_motor_current((int)ntohs(sp.left_motor_current));
-    __roomba500_if->set_right_motor_current((int)ntohs(sp.right_motor_current));
-    __roomba500_if->set_side_brush_current((int)ntohs(sp.side_brush_current));
-    __roomba500_if->set_main_brush_current((int)ntohs(sp.main_brush_current));
-    __roomba500_if->set_caster_stasis(sp.stasis == 1);
+    roomba500_if_->set_left_motor_current((int)ntohs(sp.left_motor_current));
+    roomba500_if_->set_right_motor_current((int)ntohs(sp.right_motor_current));
+    roomba500_if_->set_side_brush_current((int)ntohs(sp.side_brush_current));
+    roomba500_if_->set_main_brush_current((int)ntohs(sp.main_brush_current));
+    roomba500_if_->set_caster_stasis(sp.stasis == 1);
 
-    __roomba500_if->write();
+    roomba500_if_->write();
 
-    __switch_if_but_clean->write();
-    __switch_if_but_spot->write();
-    __switch_if_but_dock->write();
-    __switch_if_but_minute->write();
-    __switch_if_but_hour->write();
-    __switch_if_but_day->write();
-    __switch_if_but_schedule->write();
-    __switch_if_but_clock->write();
+    switch_if_but_clean_->write();
+    switch_if_but_spot_->write();
+    switch_if_but_dock_->write();
+    switch_if_but_minute_->write();
+    switch_if_but_hour_->write();
+    switch_if_but_day_->write();
+    switch_if_but_schedule_->write();
+    switch_if_but_clock_->write();
 
-    __battery_if->write();
+    battery_if_->write();
   }
 }
 
@@ -726,10 +726,10 @@ Roomba500Thread::set_mode(Roomba500::Mode mode)
   case Roomba500::MODE_FULL:    color     = 255; break;
   }
 
-  __roomba->set_mode(mode);
-  __roomba->set_leds(__led_if_debris->intensity() >= 0.5,
-		     __led_if_spot->intensity() >= 0.5,
-		     __led_if_dock->intensity() >= 0.5,
-		     __led_if_check_robot->intensity() >= 0.5,
+  roomba_->set_mode(mode);
+  roomba_->set_leds(led_if_debris_->intensity() >= 0.5,
+		     led_if_spot_->intensity() >= 0.5,
+		     led_if_dock_->intensity() >= 0.5,
+		     led_if_check_robot_->intensity() >= 0.5,
 		     color, intensity);
 }

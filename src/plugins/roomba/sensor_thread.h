@@ -43,7 +43,7 @@ class RoombaSensorThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  Roomba500Thread *__roomba500_thread;
+  Roomba500Thread *roomba500_thread_;
 };
 
 

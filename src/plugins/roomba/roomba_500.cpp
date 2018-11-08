@@ -241,31 +241,31 @@ typedef struct {
 Roomba500::Roomba500(Roomba500::ConnectionType conntype, const char *device,
 		     unsigned int flags)
 {
-  __conntype   = conntype;
-  __conn_flags = flags;
+  conntype_   = conntype;
+  conn_flags_ = flags;
 #ifndef HAVE_BLUEZ
-  if (__conntype == CONNTYPE_ROOTOOTH) {
+  if (conntype_ == CONNTYPE_ROOTOOTH) {
     throw Exception("Native RooTooth not available at compile time.");
   }
 #endif
-  __mode = MODE_OFF;
-  __fd = -1;
-  __packet_id = SENSPACK_GROUP_ALL;
-  __sensors_enabled = false;
+  mode_ = MODE_OFF;
+  fd_ = -1;
+  packet_id_ = SENSPACK_GROUP_ALL;
+  sensors_enabled_ = false;
 
-  __device = strdup(device);
+  device_ = strdup(device);
 
-  __sensor_mutex = new Mutex();
-  __read_mutex   = new Mutex();
-  __write_mutex  = new Mutex();
+  sensor_mutex_ = new Mutex();
+  read_mutex_   = new Mutex();
+  write_mutex_  = new Mutex();
 
   try {
     open();
   } catch (Exception &e) {
-    free(__device);
-    delete __write_mutex;
-    delete __read_mutex;
-    delete __sensor_mutex;
+    free(device_);
+    delete write_mutex_;
+    delete read_mutex_;
+    delete sensor_mutex_;
     throw;
   }
 }
@@ -275,10 +275,10 @@ Roomba500::Roomba500(Roomba500::ConnectionType conntype, const char *device,
 Roomba500::~Roomba500()
 {
   close();
-  free(__device);
-  delete __write_mutex;
-  delete __read_mutex;
-  delete __sensor_mutex;
+  free(device_);
+  delete write_mutex_;
+  delete read_mutex_;
+  delete sensor_mutex_;
 }
 
 
@@ -286,18 +286,18 @@ Roomba500::~Roomba500()
 void
 Roomba500::open()
 {
-  if (__conntype == CONNTYPE_SERIAL) {
+  if (conntype_ == CONNTYPE_SERIAL) {
     struct termios param;
 
-    __fd = ::open(__device, O_NOCTTY | O_RDWR);
-    if (__fd == -1) {
-      throw CouldNotOpenFileException(__device, errno, "Cannot open device file");
+    fd_ = ::open(device_, O_NOCTTY | O_RDWR);
+    if (fd_ == -1) {
+      throw CouldNotOpenFileException(device_, errno, "Cannot open device file");
     }
 
-    if (tcgetattr(__fd, &param) == -1) {
+    if (tcgetattr(fd_, &param) == -1) {
       Exception e(errno, "Getting the port parameters failed");
-      ::close(__fd);
-      __fd = -1;
+      ::close(fd_);
+      fd_ = -1;
       throw e;
     }
 
@@ -330,12 +330,12 @@ Roomba500::open()
     param.c_cc[VMIN]  = 1;
     param.c_cc[VTIME] = 0;
     
-    tcflush(__fd, TCIOFLUSH);
+    tcflush(fd_, TCIOFLUSH);
 
-    if (tcsetattr(__fd, TCSANOW, &param) != 0) {
+    if (tcsetattr(fd_, TCSANOW, &param) != 0) {
       Exception e(errno, "Setting the port parameters failed");
-      ::close(__fd);
-      __fd = -1;
+      ::close(fd_);
+      fd_ = -1;
       throw e;
     }
   } else {
@@ -367,7 +367,7 @@ Roomba500::open()
     flags = IREQ_CACHE_FLUSH;
     ii = (inquiry_info*)malloc(max_rsp * sizeof(inquiry_info));
 
-    if (strcmp(__device, "") == 0) {
+    if (strcmp(device_, "") == 0) {
       // we simply guess from the device class
 
       num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
@@ -409,20 +409,20 @@ Roomba500::open()
 	    // found a device which is likely a 
 	    ba2str(&(ii+i)->bdaddr, addrstr);
 	    //printf("found A: %s  %s\n", addrstr, name);
-	    free(__device);
-	    __device = strdup(addrstr);
+	    free(device_);
+	    device_ = strdup(addrstr);
 	    bacpy(&baddr, &(ii+i)->bdaddr);
 	    break;
 	  }
 	}
       }
     } else {
-      bool is_bdaddr = (bachk(__device) == 0);
+      bool is_bdaddr = (bachk(device_) == 0);
 
       if (is_bdaddr) {
 	//printf("Match by bdaddr\n");
 
-	str2ba(__device, &baddr);
+	str2ba(device_, &baddr);
 	ba2str(&baddr, addrstr);
 
 	//printf("found B: %s  %s\n", addrstr, name);
@@ -443,11 +443,11 @@ Roomba500::open()
 	  {
 	    strcpy(name, "[unknown]");
 	  }
-	  if (fnmatch(__device, name, FNM_NOESCAPE) == 0) {
+	  if (fnmatch(device_, name, FNM_NOESCAPE) == 0) {
 	    // found the device
 	    //printf("found C: %s  %s\n", addrstr, name);
-	    free(__device);
-	    __device = strdup(addrstr);
+	    free(device_);
+	    device_ = strdup(addrstr);
 	    bacpy(&baddr, &(ii+i)->bdaddr);
 	    break;
 	  }
@@ -467,7 +467,7 @@ Roomba500::open()
     struct sockaddr_rc rcaddr = { 0 };
 
     // allocate a socket
-    __fd = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+    fd_ = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
 
     // set the connection parameters (who to connect to)
     rcaddr.rc_family = AF_BLUETOOTH;
@@ -475,7 +475,7 @@ Roomba500::open()
     bacpy(&rcaddr.rc_bdaddr, &baddr);
 
     // connect to server
-    if (connect(__fd, (struct sockaddr *)&rcaddr, sizeof(rcaddr)) < 0) {
+    if (connect(fd_, (struct sockaddr *)&rcaddr, sizeof(rcaddr)) < 0) {
       throw Exception(errno, "Failed to connect to %s", addrstr);
     }
 
@@ -483,19 +483,19 @@ Roomba500::open()
       // Set to passive mode to ensure that auto-detection does no harm
       send(OPCODE_START);
       usleep(MODE_CHANGE_WAIT_MS * 1000);
-      __mode = MODE_PASSIVE;
+      mode_ = MODE_PASSIVE;
       // disable sensors just in case
       disable_sensors();
     } catch (Exception &e) {
-      ::close(__fd);
-      __mode = MODE_OFF;
+      ::close(fd_);
+      mode_ = MODE_OFF;
       throw;
     }
 
     if (flags & FLAG_FIREFLY_FASTMODE) {
       const char *cmd_seq = "$$$";
-      if (write(__fd, cmd_seq, 3) != 3) {
-	::close(__fd);
+      if (write(fd_, cmd_seq, 3) != 3) {
+	::close(fd_);
 	throw Exception(errno, "Roomba500 (RooTooth): Failed to send command "
 			"sequence to enable fast mode");
       }
@@ -503,19 +503,19 @@ Roomba500::open()
       timeval timeout = {1, 500000};
       fd_set read_fds;
       FD_ZERO(&read_fds);
-      FD_SET(__fd, &read_fds);
+      FD_SET(fd_, &read_fds);
 
       int rv = 0;
-      rv = select(__fd + 1, &read_fds, NULL, NULL, &timeout);
+      rv = select(fd_ + 1, &read_fds, NULL, NULL, &timeout);
 
       if (rv > 0) {
 	char cmd_reply[4];
-	if (read(__fd, cmd_reply, 4) == 4) {
+	if (read(fd_, cmd_reply, 4) == 4) {
 	  if (strncmp(cmd_reply, "CMD", 3) == 0) {
 	    // We entered command mode, enable fast mode
 	    const char *cmd_fastmode = "F,1\r";
-	    if (write(__fd, cmd_fastmode, 4) != 4) {
-	      ::close(__fd);
+	    if (write(fd_, cmd_fastmode, 4) != 4) {
+	      ::close(fd_);
 	      throw Exception(errno, "Roomba500 (RooTooth): Failed to send fast "
 			      "mode command sequence.");
 	    } // else fast mode enabled
@@ -530,10 +530,10 @@ Roomba500::open()
   try {
     send(OPCODE_START);
     usleep(MODE_CHANGE_WAIT_MS * 1000);
-    __mode = MODE_PASSIVE;
+    mode_ = MODE_PASSIVE;
   } catch (Exception &e) {
-    ::close(__fd);
-    __mode = MODE_OFF;
+    ::close(fd_);
+    mode_ = MODE_OFF;
     throw;
   }
 
@@ -544,11 +544,11 @@ Roomba500::open()
 void
 Roomba500::close()
 {
-  if (__fd >= 0) {
-    ::close(__fd);
-    __fd = -1;
+  if (fd_ >= 0) {
+    ::close(fd_);
+    fd_ = -1;
   }
-  __mode = MODE_OFF;
+  mode_ = MODE_OFF;
 }
 
 /** Send instruction packet.
@@ -560,40 +560,40 @@ void
 Roomba500::send(Roomba500::OpCode opcode,
 		const void *params, const size_t plength)
 {
-  MutexLocker write_lock(__write_mutex);
+  MutexLocker write_lock(write_mutex_);
 
   // Byte 0 and 1 must be 0xFF
-  __obuffer[0] = opcode;
-  __obuffer_length = 1;
+  obuffer_[0] = opcode;
+  obuffer_length_ = 1;
 
   if (params && (plength > 0)) {
-    if (plength > (sizeof(__obuffer) - __obuffer_length)) {
+    if (plength > (sizeof(obuffer_) - obuffer_length_)) {
       throw Exception("Parameters for command %i too long, maximum length is %zu",
-		      opcode, (sizeof(__obuffer) - __obuffer_length));
+		      opcode, (sizeof(obuffer_) - obuffer_length_));
     }
     unsigned char *pbytes = (unsigned char *)params;
     for (size_t i = 0; i < plength; ++i) {
-      __obuffer[1+i] = pbytes[i];
+      obuffer_[1+i] = pbytes[i];
     }
-    __obuffer_length += plength;
+    obuffer_length_ += plength;
   }
 
-  int written = write(__fd, __obuffer, __obuffer_length);
+  int written = write(fd_, obuffer_, obuffer_length_);
 
   /*
-  printf("Wrote %i of %i bytes:\n", written, __obuffer_length);
-  for (int i = 0; i < __obuffer_length; ++i) {
-    printf("%2u %s", __obuffer[i], i == written ? "| " : "");
+  printf("Wrote %i of %i bytes:\n", written, obuffer_length_);
+  for (int i = 0; i < obuffer_length_; ++i) {
+    printf("%2u %s", obuffer_[i], i == written ? "| " : "");
   }
   printf("\n");
   */
 
   if ( written < 0 ) {
     throw Exception(errno, "Failed to write Roomba 500 packet %i", opcode);
-  } else if (written < __obuffer_length) {
+  } else if (written < obuffer_length_) {
     throw Exception("Failed to write Roomba 500 packet %i, "
 		    "only %d of %d bytes sent",
-		    opcode, written, __obuffer_length);
+		    opcode, written, obuffer_length_);
   }
 }
 
@@ -610,10 +610,10 @@ Roomba500::recv(size_t index, size_t num_bytes, unsigned int timeout_ms)
 
   fd_set read_fds;
   FD_ZERO(&read_fds);
-  FD_SET(__fd, &read_fds);
+  FD_SET(fd_, &read_fds);
 
   int rv = 0;
-  rv = select(__fd + 1, &read_fds, NULL, NULL, (timeout_ms > 0) ? &timeout : NULL);
+  rv = select(fd_ + 1, &read_fds, NULL, NULL, (timeout_ms > 0) ? &timeout : NULL);
 
   if ( rv == -1 ) {
    throw Exception(errno, "Roomba500::recv(): select on file descriptor failed");
@@ -621,12 +621,12 @@ Roomba500::recv(size_t index, size_t num_bytes, unsigned int timeout_ms)
     throw TimeoutException("Timeout while waiting for incoming Roomba data");
   }
 
-  __ibuffer_length = 0;
+  ibuffer_length_ = 0;
 
   // get octets one by one
   int bytes_read = 0;
   while (bytes_read < (int)num_bytes) {
-    int rv = read(__fd, &__ibuffer[index] +bytes_read, num_bytes -bytes_read);
+    int rv = read(fd_, &ibuffer_[index] +bytes_read, num_bytes -bytes_read);
     if (rv == -1) {
       throw Exception(errno, "Roomba500::recv(): read failed");
     }
@@ -637,7 +637,7 @@ Roomba500::recv(size_t index, size_t num_bytes, unsigned int timeout_ms)
     throw Exception("Roomba500::recv(): failed to read packet data");
   }
 
-  __ibuffer_length = index + num_bytes;
+  ibuffer_length_ = index + num_bytes;
 }
 
 
@@ -647,7 +647,7 @@ Roomba500::recv(size_t index, size_t num_bytes, unsigned int timeout_ms)
 bool
 Roomba500::is_data_available()
 {
-  if (!__sensors_enabled) {
+  if (!sensors_enabled_) {
     throw Exception("Roomba 500 sensors have not been enabled.");
   }
 
@@ -655,10 +655,10 @@ Roomba500::is_data_available()
 
   fd_set read_fds;
   FD_ZERO(&read_fds);
-  FD_SET(__fd, &read_fds);
+  FD_SET(fd_, &read_fds);
 
   int rv = 0;
-  rv = select(__fd + 1, &read_fds, NULL, NULL, &timeout);
+  rv = select(fd_ + 1, &read_fds, NULL, NULL, &timeout);
 
   return (rv > 0);
 }
@@ -672,60 +672,60 @@ Roomba500::is_data_available()
 void
 Roomba500::read_sensors()
 {
-  MutexLocker read_lock(__read_mutex);
+  MutexLocker read_lock(read_mutex_);
 
-  if (!__sensors_enabled) {
+  if (!sensors_enabled_) {
     throw Exception("Roomba 500 sensors have not been enabled.");
   }
 
   bool done = false;
   unsigned int skipped = 0;
   while (!done) {
-    __ibuffer_length = 0;
+    ibuffer_length_ = 0;
 
-    recv(__ibuffer_length, 1);
-    if (__ibuffer[0] != 19) {
+    recv(ibuffer_length_, 1);
+    if (ibuffer_[0] != 19) {
       ++skipped;
       continue;
     }
 
-    recv(__ibuffer_length, 1);
-    if (__ibuffer[1] != __packet_length + 1) {
+    recv(ibuffer_length_, 1);
+    if (ibuffer_[1] != packet_length_ + 1) {
       ++skipped;
       continue;
     }
 
-    recv(__ibuffer_length, 1);
-    if (__ibuffer[2] != __packet_id) {
+    recv(ibuffer_length_, 1);
+    if (ibuffer_[2] != packet_id_) {
       ++skipped;
       continue;
     }
 
-    recv(__ibuffer_length, __packet_length);
+    recv(ibuffer_length_, packet_length_);
 
-    recv(__ibuffer_length++, 1);
+    recv(ibuffer_length_++, 1);
 
     unsigned int sum = 0;
-    for (int i = 0; i < __ibuffer_length; ++i) {
-      sum += __ibuffer[i];
+    for (int i = 0; i < ibuffer_length_; ++i) {
+      sum += ibuffer_[i];
     }
 
     if ((sum & 0xFF) != 0) {
-      __sensor_packet_received = false;
+      sensor_packet_received_ = false;
     } else {
-      __sensor_mutex->lock();
-      memcpy(&__sensor_packet, &__ibuffer[3], sizeof(SensorPacketGroupAll));
-      __sensor_packet_received = true;
-      __sensor_mutex->unlock();
+      sensor_mutex_->lock();
+      memcpy(&sensor_packet_, &ibuffer_[3], sizeof(SensorPacketGroupAll));
+      sensor_packet_received_ = true;
+      sensor_mutex_->unlock();
     }
 
     done = true;
   }
 
   /*
-  printf("Read %u bytes: ", __ibuffer_length);
-  for (int i = 0; i < __ibuffer_length; ++i) {
-    printf("%2u ", __ibuffer[i]);
+  printf("Read %u bytes: ", ibuffer_length_);
+  for (int i = 0; i < ibuffer_length_; ++i) {
+    printf("%2u ", ibuffer_[i]);
   }
   printf(" (skipped %u)\n", skipped);
   */
@@ -748,11 +748,11 @@ Roomba500::enable_sensors()
 
   send(OPCODE_STREAM, &sp, sizeof(StreamOnePacketParams));
 
-  __packet_id = SENSPACK_GROUP_ALL;
-  __packet_reply_id = 19;
-  __packet_length = get_packet_size(SENSPACK_GROUP_ALL);
-  __sensors_enabled = true;
-  __sensor_packet_received = false;
+  packet_id_ = SENSPACK_GROUP_ALL;
+  packet_reply_id_ = 19;
+  packet_length_ = get_packet_size(SENSPACK_GROUP_ALL);
+  sensors_enabled_ = true;
+  sensor_packet_received_ = false;
 }
 
 
@@ -766,8 +766,8 @@ Roomba500::disable_sensors()
 
   send(OPCODE_PAUSE_RESUME_STREAM, &streamstate, 1);
 
-  __sensors_enabled = false;
-  __sensor_packet_received = false;
+  sensors_enabled_ = false;
+  sensor_packet_received_ = false;
 }
 
 
@@ -784,19 +784,19 @@ Roomba500::query_sensors()
 
   send(OPCODE_QUERY, &p, 1);
 
-  __packet_id = SENSPACK_GROUP_ALL;
-  __packet_reply_id = 0;
-  __packet_length = get_packet_size(SENSPACK_GROUP_ALL);
-  __sensor_packet_received = true;
+  packet_id_ = SENSPACK_GROUP_ALL;
+  packet_reply_id_ = 0;
+  packet_length_ = get_packet_size(SENSPACK_GROUP_ALL);
+  sensor_packet_received_ = true;
 
 
-  __read_mutex->lock();
-  recv(0, __packet_length);
-  __read_mutex->unlock();
+  read_mutex_->lock();
+  recv(0, packet_length_);
+  read_mutex_->unlock();
 
-  __sensor_mutex->lock();
-  memcpy(&__sensor_packet, __ibuffer, sizeof(SensorPacketGroupAll));
-  __sensor_mutex->unlock();
+  sensor_mutex_->lock();
+  memcpy(&sensor_packet_, ibuffer_, sizeof(SensorPacketGroupAll));
+  sensor_mutex_->unlock();
 }
 
 
@@ -806,12 +806,12 @@ Roomba500::query_sensors()
 const Roomba500::SensorPacketGroupAll
 Roomba500::get_sensor_packet() const
 {
-  MutexLocker lock(__sensor_mutex);
-  if (! __sensor_packet_received) {
+  MutexLocker lock(sensor_mutex_);
+  if (! sensor_packet_received_) {
     throw Exception("No valid data received, yet.");
   }
 
-  return __sensor_packet;
+  return sensor_packet_;
 }
 
 /** Set control mode.
@@ -834,7 +834,7 @@ Roomba500::set_mode(Roomba500::Mode mode)
   }
 
   usleep(MODE_CHANGE_WAIT_MS * 1000);
-  __mode = mode;
+  mode_ = mode;
 }
 
 
@@ -846,7 +846,7 @@ Roomba500::clean()
 {
   send(OPCODE_CLEAN);
 
-  __mode = MODE_PASSIVE;
+  mode_ = MODE_PASSIVE;
 }
 
 
@@ -858,7 +858,7 @@ Roomba500::clean_spot()
 {
   send(OPCODE_SPOT);
 
-  __mode = MODE_PASSIVE;
+  mode_ = MODE_PASSIVE;
 }
 
 
@@ -871,7 +871,7 @@ Roomba500::seek_dock()
   assert_connected();
 
   send(OPCODE_SEEK_DOCK);
-  __mode = MODE_PASSIVE;
+  mode_ = MODE_PASSIVE;
 }
 
 
@@ -884,7 +884,7 @@ Roomba500::power_down()
   assert_connected();
 
   send(OPCODE_POWER);
-  __mode = MODE_PASSIVE;
+  mode_ = MODE_PASSIVE;
 }
 
 
