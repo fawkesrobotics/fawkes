@@ -34,4 +34,4 @@ class ClipsPddlParserThread
     ClipsPddlParserThread();
     //virtual ~ClipsPddlParserThread();
 };
-#endif /* !__PLUGINS_CLIPS_PDDL_PARSER_THEAD_H_ */
+#endif /* !PLUGINS_CLIPS_PDDL_PARSER_THEAD_H__ */

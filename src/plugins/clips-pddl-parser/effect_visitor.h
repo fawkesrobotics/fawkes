@@ -38,4 +38,4 @@ class EffectToCLIPSFactVisitor
   bool positive_effect_;
 };
 
-#endif /* !__PLUGINS_CLIPS_PDDL_PARSER_EFFECT_VISITOR_H_ */
+#endif /* !PLUGINS_CLIPS_PDDL_PARSER_EFFECT_VISITOR_H__ */

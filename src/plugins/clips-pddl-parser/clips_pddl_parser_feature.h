@@ -51,4 +51,4 @@ class PDDLCLIPSFeature : public fawkes::CLIPSFeature
   std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
 };
 
-#endif /* !__PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H_ */
+#endif /* !PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H__ */
