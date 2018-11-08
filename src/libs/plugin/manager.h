@@ -98,27 +98,27 @@ class PluginManager
  private:
   ThreadCollector   *thread_collector;
   PluginLoader      *plugin_loader;
-  Mutex             *__mutex;
+  Mutex             *mutex_;
 
   LockList<Plugin *> plugins;
   LockList<Plugin *>::iterator pit;
   LockList<Plugin *>::reverse_iterator rpit;
 
-  LockMap< std::string, std::list<std::string> > __meta_plugins;
-  LockMap< std::string, std::list<std::string> >::iterator __mpit;
+  LockMap< std::string, std::list<std::string> > meta_plugins_;
+  LockMap< std::string, std::list<std::string> >::iterator mpit_;
 
   unsigned int next_plugin_id;
   std::map< std::string, unsigned int > plugin_ids;
 
-  LockList<std::pair<std::string, std::string> > __pinfo_cache;
+  LockList<std::pair<std::string, std::string> > pinfo_cache_;
 
-  LockList<PluginManagerListener *>           __listeners;
-  LockList<PluginManagerListener *>::iterator __lit;
+  LockList<PluginManagerListener *>           listeners_;
+  LockList<PluginManagerListener *>::iterator lit_;
 
-  Configuration *__config;
-  std::string __meta_plugin_prefix;
+  Configuration *config_;
+  std::string meta_plugin_prefix_;
 
-  FamThread *__fam_thread;
+  FamThread *fam_thread_;
 };
 
 } // end namespace fawkes

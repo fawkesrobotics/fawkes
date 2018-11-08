@@ -45,7 +45,7 @@ class PluginLoadException : public Exception
   std::string  plugin_name() const;
 
  private:
-  std::string __plugin_name;
+  std::string plugin_name_;
 };
 
 class PluginUnloadException : public Exception
