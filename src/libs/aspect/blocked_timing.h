@@ -90,8 +90,8 @@ class BlockedTimingAspect : public SyncPointAspect
   static const std::map<const WakeupHook, const std::string> hook_to_syncpoint;
 
  private:
-  WakeupHook __wakeup_hook;
-  BlockedTimingLoopListener *__loop_listener;
+  WakeupHook wakeup_hook_;
+  BlockedTimingLoopListener *loop_listener_;
 };
 
 } // end namespace fawkes

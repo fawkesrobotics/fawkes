@@ -42,8 +42,8 @@ class TransformAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  BlackBoard      *__blackboard;
-  tf::Transformer *__transformer;
+  BlackBoard      *blackboard_;
+  tf::Transformer *transformer_;
 };
 
 } // end namespace fawkes

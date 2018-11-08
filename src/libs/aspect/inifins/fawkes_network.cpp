@@ -38,7 +38,7 @@ namespace fawkes {
 FawkesNetworkAspectIniFin::FawkesNetworkAspectIniFin(FawkesNetworkHub *hub)
   : AspectIniFin("FawkesNetworkAspect")
 {
-  __hub = hub;
+  hub_ = hub;
 }
 
 
@@ -53,7 +53,7 @@ FawkesNetworkAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  fnet_thread->init_FawkesNetworkAspect(__hub);
+  fnet_thread->init_FawkesNetworkAspect(hub_);
 }
 
 

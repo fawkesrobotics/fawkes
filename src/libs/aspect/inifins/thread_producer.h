@@ -39,7 +39,7 @@ class ThreadProducerAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  ThreadCollector *__collector;
+  ThreadCollector *collector_;
 };
 
 } // end namespace fawkes

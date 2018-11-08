@@ -64,10 +64,10 @@ namespace fawkes {
 AspectManager::~AspectManager()
 {
   std::map<std::string, AspectIniFin *>::iterator i;
-  for (i = __default_inifins.begin(); i != __default_inifins.end(); ++i) {
+  for (i = default_inifins_.begin(); i != default_inifins_.end(); ++i) {
     delete i->second;
   }
-  __default_inifins.clear();
+  default_inifins_.clear();
 }
 
 /** Register initializer/finalizer.
@@ -76,11 +76,11 @@ AspectManager::~AspectManager()
 void
 AspectManager::register_inifin(AspectIniFin *inifin)
 {
-  if (__inifins.find(inifin->get_aspect_name()) != __inifins.end()) {
+  if (inifins_.find(inifin->get_aspect_name()) != inifins_.end()) {
     throw Exception("An initializer for %s has already been registered",
 		    inifin->get_aspect_name());
   }
-  __inifins[inifin->get_aspect_name()] = inifin;
+  inifins_[inifin->get_aspect_name()] = inifin;
 }
 
 /** Unregister initializer/finalizer.
@@ -89,16 +89,16 @@ AspectManager::register_inifin(AspectIniFin *inifin)
 void
 AspectManager::unregister_inifin(AspectIniFin *inifin)
 {
-  if (__inifins.find(inifin->get_aspect_name()) == __inifins.end()) {
+  if (inifins_.find(inifin->get_aspect_name()) == inifins_.end()) {
     throw Exception("An initializer for %s has not been registered",
 		    inifin->get_aspect_name());
   }
-  if (! __threads[inifin->get_aspect_name()].empty()) {
+  if (! threads_[inifin->get_aspect_name()].empty()) {
     throw Exception("Threads with the %s aspect are still alive, cannot "
 		    "unregister the aspect", inifin->get_aspect_name());
   }
-  __inifins.erase(inifin->get_aspect_name());
-  __threads.erase(inifin->get_aspect_name());
+  inifins_.erase(inifin->get_aspect_name());
+  threads_.erase(inifin->get_aspect_name());
 }
 
 /** Check if threads for a particular aspect still exist.
@@ -109,8 +109,8 @@ AspectManager::unregister_inifin(AspectIniFin *inifin)
 bool
 AspectManager::has_threads_for_aspect(const char *aspect_name)
 {
-  return (__threads.find(aspect_name) != __threads.end()) &&
-         (! __threads[aspect_name].empty());
+  return (threads_.find(aspect_name) != threads_.end()) &&
+         (! threads_[aspect_name].empty());
 }
 
 void
@@ -125,28 +125,28 @@ AspectManager::init(Thread *thread)
     try {
       std::list<const char *>::const_iterator i;
       for (i = aspects.begin(); i != aspects.end(); ++i) {
-	if (__inifins.find(*i) == __inifins.end()) {
+	if (inifins_.find(*i) == inifins_.end()) {
 	  throw CannotInitializeThreadException("Thread '%s' has the %s, "
 						"but no initiliazer is known.",
 						thread->name(), *i);
 	}
-	__inifins[*i]->init(thread);
+	inifins_[*i]->init(thread);
 	initialized.push_back(*i);
       }
 
       for (i = aspects.begin(); i != aspects.end(); ++i) {
-	__threads[*i].push_back(thread);
+	threads_[*i].push_back(thread);
       }
     } catch (CannotInitializeThreadException &e) {
       std::list<const char *>::const_reverse_iterator i;
       for (i = initialized.rbegin(); i != initialized.rend(); ++i) {
-	__inifins[*i]->finalize(thread);
+	inifins_[*i]->finalize(thread);
       }
       throw;
     } catch (Exception &e) {
       std::list<const char *>::const_reverse_iterator i;
       for (i = initialized.rbegin(); i != initialized.rend(); ++i) {
-	__inifins[*i]->finalize(thread);
+	inifins_[*i]->finalize(thread);
       }
       CannotInitializeThreadException ce;
       ce.append(e);
@@ -163,18 +163,18 @@ void AspectManager::finalize(Thread *thread)
 
     std::list<const char *>::const_iterator i;
     for (i = aspects.begin(); i != aspects.end(); ++i) {
-      if (__inifins.find(*i) == __inifins.end()) {
+      if (inifins_.find(*i) == inifins_.end()) {
 	throw CannotFinalizeThreadException("Thread '%s' has the %s, "
 					    "but no finalizer is known.",
 					    thread->name(), *i);
       }
-      __inifins[*i]->finalize(thread);
+      inifins_[*i]->finalize(thread);
     }
 
     // We remove the threads afterwards, because we assume that the plugin
     // will not be unloaded, if the finalization throws an exception.
     for (i = aspects.begin(); i != aspects.end(); ++i) {
-      __threads[*i].remove(thread);
+      threads_[*i].remove(thread);
     }
   }
 }
@@ -189,12 +189,12 @@ AspectManager::prepare_finalize(Thread *thread)
 
     std::list<const char *>::const_iterator i;
     for (i = aspects.begin(); i != aspects.end(); ++i) {
-      if (__inifins.find(*i) == __inifins.end()) {
+      if (inifins_.find(*i) == inifins_.end()) {
 	throw CannotFinalizeThreadException("Thread '%s' has the %s, "
 					    "but no finalizer is known.",
 					    thread->name(), *i);
       }
-      if (!__inifins[*i]->prepare_finalize(thread)) {
+      if (!inifins_[*i]->prepare_finalize(thread)) {
 	return false;
       }
     }
@@ -239,7 +239,7 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
 					tf::Transformer *tf_listener,
 					SyncPointManager *syncpoint_manager)
 {
-  if (! __default_inifins.empty())  return;
+  if (! default_inifins_.empty())  return;
 
   AspectProviderAspectIniFin *prov_aif = new AspectProviderAspectIniFin(this);
   BlackBoardAspectIniFin *bb_aif = new BlackBoardAspectIniFin(blackboard);
@@ -272,36 +272,36 @@ AspectManager::register_default_inifins(BlackBoard *blackboard,
 #endif
 
 
-  __default_inifins[prov_aif->get_aspect_name()] = prov_aif;
-  __default_inifins[bb_aif->get_aspect_name()] = bb_aif;
-  __default_inifins[bt_aif->get_aspect_name()] = bt_aif;
-  __default_inifins[clock_aif->get_aspect_name()] = clock_aif;
-  __default_inifins[conf_aif->get_aspect_name()] = conf_aif;
-  __default_inifins[fnet_aif->get_aspect_name()] = fnet_aif;
-  __default_inifins[logger_aif->get_aspect_name()] = logger_aif;
-  __default_inifins[log_aif->get_aspect_name()] = log_aif;
-  __default_inifins[mloop_aif->get_aspect_name()] = mloop_aif;
-  __default_inifins[net_aif->get_aspect_name()] = net_aif;
-  __default_inifins[plug_aif->get_aspect_name()] = plug_aif;
-  __default_inifins[tp_aif->get_aspect_name()] = tp_aif;
-  __default_inifins[ts_aif->get_aspect_name()] = ts_aif;
-  __default_inifins[vm_aif->get_aspect_name()] = vm_aif;
-  __default_inifins[vis_aif->get_aspect_name()] = vis_aif;
-  __default_inifins[spm_aif->get_aspect_name()] = spm_aif;
-  __default_inifins[sp_aif->get_aspect_name()] = sp_aif;
+  default_inifins_[prov_aif->get_aspect_name()] = prov_aif;
+  default_inifins_[bb_aif->get_aspect_name()] = bb_aif;
+  default_inifins_[bt_aif->get_aspect_name()] = bt_aif;
+  default_inifins_[clock_aif->get_aspect_name()] = clock_aif;
+  default_inifins_[conf_aif->get_aspect_name()] = conf_aif;
+  default_inifins_[fnet_aif->get_aspect_name()] = fnet_aif;
+  default_inifins_[logger_aif->get_aspect_name()] = logger_aif;
+  default_inifins_[log_aif->get_aspect_name()] = log_aif;
+  default_inifins_[mloop_aif->get_aspect_name()] = mloop_aif;
+  default_inifins_[net_aif->get_aspect_name()] = net_aif;
+  default_inifins_[plug_aif->get_aspect_name()] = plug_aif;
+  default_inifins_[tp_aif->get_aspect_name()] = tp_aif;
+  default_inifins_[ts_aif->get_aspect_name()] = ts_aif;
+  default_inifins_[vm_aif->get_aspect_name()] = vm_aif;
+  default_inifins_[vis_aif->get_aspect_name()] = vis_aif;
+  default_inifins_[spm_aif->get_aspect_name()] = spm_aif;
+  default_inifins_[sp_aif->get_aspect_name()] = sp_aif;
 #ifdef HAVE_WEBVIEW
-  __default_inifins[web_aif->get_aspect_name()] = web_aif;
+  default_inifins_[web_aif->get_aspect_name()] = web_aif;
 #endif
 #ifdef HAVE_TF
-  __default_inifins[tf_aif->get_aspect_name()] = tf_aif;
+  default_inifins_[tf_aif->get_aspect_name()] = tf_aif;
 #endif
 #ifdef HAVE_PCL
-  __default_inifins[pcl_aif->get_aspect_name()] = pcl_aif;
+  default_inifins_[pcl_aif->get_aspect_name()] = pcl_aif;
 #endif
 
   std::map<std::string, AspectIniFin *>::iterator i;
-  for (i = __default_inifins.begin(); i != __default_inifins.end(); ++i) {
-    __inifins[i->first] = i->second;
+  for (i = default_inifins_.begin(); i != default_inifins_.end(); ++i) {
+    inifins_[i->first] = i->second;
   }
 }
 

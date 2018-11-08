@@ -39,7 +39,7 @@ class TimeSourceAspect : public virtual Aspect
   TimeSource *  get_timesource() const;
 
  private:
-  TimeSource *__time_source;
+  TimeSource *time_source_;
 };
 
 } // end namespace fawkes

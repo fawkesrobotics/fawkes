@@ -49,7 +49,7 @@ class VisionAspect : public virtual Aspect
   /** Vision master */
   firevision::VisionMaster *vision_master;
  private:
-  VisionThreadMode __vision_thread_mode;
+  VisionThreadMode vision_thread_mode_;
 };
 
 } // end namespace fawkes

@@ -36,7 +36,7 @@ namespace fawkes {
 SyncPointManagerAspectIniFin::SyncPointManagerAspectIniFin(SyncPointManager *syncpoint_manager)
 : AspectIniFin("SyncPointManagerAspect")
 {
-  __syncpoint_manager = syncpoint_manager;
+  syncpoint_manager_ = syncpoint_manager;
 }
 
 void
@@ -50,7 +50,7 @@ SyncPointManagerAspectIniFin::init(Thread *thread)
         "has not. ", thread->name());
   }
 
-  syncpoint_thread->init_SyncPointManagerAspect(__syncpoint_manager);
+  syncpoint_thread->init_SyncPointManagerAspect(syncpoint_manager_);
 
 }
 

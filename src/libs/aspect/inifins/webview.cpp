@@ -40,19 +40,19 @@ namespace fawkes {
 WebviewAspectIniFin::WebviewAspectIniFin()
   : AspectIniFin("WebviewAspect")
 {
-  __url_manager = new WebUrlManager();
-  __nav_manager = new WebNavManager();
-  __request_manager = new WebRequestManager();
-  __rest_api_manager = new WebviewRestApiManager();
+  url_manager_ = new WebUrlManager();
+  nav_manager_ = new WebNavManager();
+  request_manager_ = new WebRequestManager();
+  rest_api_manager_ = new WebviewRestApiManager();
 }
 
 /** Destructor. */
 WebviewAspectIniFin::~WebviewAspectIniFin()
 {
-  delete __url_manager;
-  delete __nav_manager;
-  delete __request_manager;
-  delete __rest_api_manager;
+  delete url_manager_;
+  delete nav_manager_;
+  delete request_manager_;
+  delete rest_api_manager_;
 }
 
 
@@ -67,8 +67,8 @@ WebviewAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  webview_thread->init_WebviewAspect(__url_manager, __nav_manager,
-                                     __request_manager, __rest_api_manager);
+  webview_thread->init_WebviewAspect(url_manager_, nav_manager_,
+                                     request_manager_, rest_api_manager_);
 }
 
 

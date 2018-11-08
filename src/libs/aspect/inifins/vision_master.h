@@ -50,7 +50,7 @@ class VisionMasterAspectIniFin : public AspectIniFin
   bool can_remove_vision_thread(VisionAspect *thread);
 
  private:
-  OneToManyDependency<VisionMasterAspect, VisionAspect> __vision_dependency;
+  OneToManyDependency<VisionMasterAspect, VisionAspect> vision_dependency_;
 };
 
 } // end namespace fawkes

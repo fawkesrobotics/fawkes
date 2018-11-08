@@ -38,7 +38,7 @@ class PointCloudAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  PointCloudManager *__pcl_manager;
+  PointCloudManager *pcl_manager_;
 };
 
 } // end namespace fawkes

@@ -41,8 +41,8 @@ class TimeSourceAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  Clock *__clock;
-  UniquenessConstraint<TimeSource> __timesource_uc;
+  Clock *clock_;
+  UniquenessConstraint<TimeSource> timesource_uc_;
 };
 
 } // end namespace fawkes

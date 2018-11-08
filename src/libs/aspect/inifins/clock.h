@@ -39,7 +39,7 @@ class ClockAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  Clock *__clock;
+  Clock *clock_;
 };
 
 } // end namespace fawkes

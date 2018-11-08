@@ -40,7 +40,7 @@ namespace fawkes {
 LoggerAspectIniFin::LoggerAspectIniFin(LoggerEmployer *employer)
   : AspectIniFin("LoggerAspect")
 {
-  __employer = employer;
+  employer_ = employer;
 }
 
 
@@ -56,7 +56,7 @@ LoggerAspectIniFin::init(Thread *thread)
   }
 
   try {
-    __employer->add_logger(logger_thread->get_logger());
+    employer_->add_logger(logger_thread->get_logger());
   } catch (Exception &e) {
     CannotInitializeThreadException ce("Thread has LoggerAspect but Logger "
 				       "could not be added.");
@@ -81,7 +81,7 @@ LoggerAspectIniFin::finalize(Thread *thread)
   }
 
   try {
-    __employer->remove_logger(logger_thread->get_logger());
+    employer_->remove_logger(logger_thread->get_logger());
   } catch (Exception &e) {
     CannotFinalizeThreadException ce("Failed to remove logger");
     ce.append(e);

@@ -43,7 +43,7 @@ class AspectIniFin
   const char * get_aspect_name() const;
 
  private:
-  const char *__aspect_name;
+  const char *aspect_name_;
 };
 
 } // end namespace fawkes

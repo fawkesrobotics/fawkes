@@ -39,7 +39,7 @@ class PluginDirectorAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  PluginManager *__manager;
+  PluginManager *manager_;
 };
 
 } // end namespace fawkes

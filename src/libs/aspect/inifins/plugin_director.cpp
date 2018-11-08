@@ -39,7 +39,7 @@ namespace fawkes {
 PluginDirectorAspectIniFin::PluginDirectorAspectIniFin(PluginManager *manager)
   : AspectIniFin("PluginDirectorAspect")
 {
-  __manager = manager;
+  manager_ = manager;
 }
 
 
@@ -62,7 +62,7 @@ PluginDirectorAspectIniFin::init(Thread *thread)
 					  thread->name());
   }
 
-  plugin_director_thread->init_PluginDirectorAspect(__manager);
+  plugin_director_thread->init_PluginDirectorAspect(manager_);
 }
 
 

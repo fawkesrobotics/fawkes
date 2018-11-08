@@ -35,7 +35,7 @@ class Aspect
  protected:
   void add_aspect(const char *name);
  private:
-  std::list<const char *> __aspects;
+  std::list<const char *> aspects_;
 };
 
 } // end namespace fawkes

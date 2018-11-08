@@ -45,7 +45,7 @@ namespace fawkes {
 TimeSourceAspect::TimeSourceAspect(TimeSource *timesource)
 {
   add_aspect("TimeSourceAspect");
-  __time_source = timesource;
+  time_source_ = timesource;
 }
 
 /** Virtual empty destructor. */
@@ -62,7 +62,7 @@ TimeSourceAspect::~TimeSourceAspect()
 TimeSource *
 TimeSourceAspect::get_timesource() const
 {
-  return __time_source;
+  return time_source_;
 }
 
 } // end namespace fawkes

@@ -40,7 +40,7 @@ class LoggerAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  LoggerEmployer      *__employer;
+  LoggerEmployer      *employer_;
 };
 
 } // end namespace fawkes

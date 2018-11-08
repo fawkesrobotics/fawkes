@@ -42,7 +42,7 @@ class AspectProviderAspect : public virtual Aspect
   const std::list<AspectIniFin *> &  aspect_provider_aspects() const;
 
  private:
-  std::list<AspectIniFin *> __aspect_provider_aspects;
+  std::list<AspectIniFin *> aspect_provider_aspects_;
 };
 
 } // end namespace fawkes

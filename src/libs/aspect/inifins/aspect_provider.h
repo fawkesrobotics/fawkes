@@ -40,7 +40,7 @@ class AspectProviderAspectIniFin : public AspectIniFin
   virtual bool prepare_finalize(Thread *thread);
 
  private:
-  AspectManager *__aspect_manager;
+  AspectManager *aspect_manager_;
 };
 
 } // end namespace fawkes

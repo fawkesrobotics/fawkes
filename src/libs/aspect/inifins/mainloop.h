@@ -49,9 +49,9 @@ class MainLoopAspectIniFin
   virtual bool thread_init_failed(Thread *thread) throw();
 
  private:
-  MainLoopEmployer      *__employer;
-  BlockedTimingExecutor *__btexec;
-  UniquenessConstraint<MainLoopAspect> __mainloop_uc;
+  MainLoopEmployer      *employer_;
+  BlockedTimingExecutor *btexec_;
+  UniquenessConstraint<MainLoopAspect> mainloop_uc_;
 };
 
 } // end namespace fawkes

@@ -38,7 +38,7 @@ namespace fawkes {
 ThreadProducerAspectIniFin::ThreadProducerAspectIniFin(ThreadCollector *collector)
   : AspectIniFin("ThreadProducerAspect")
 {
-  __collector = collector;
+  collector_ = collector;
 }
 
 
@@ -53,7 +53,7 @@ ThreadProducerAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  thread_producer_thread->init_ThreadProducerAspect(__collector);
+  thread_producer_thread->init_ThreadProducerAspect(collector_);
 }
 
 

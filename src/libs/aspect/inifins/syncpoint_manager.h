@@ -37,7 +37,7 @@ class SyncPointManagerAspectIniFin : public AspectIniFin
     virtual void finalize(Thread *thread);
 
   private:
-    SyncPointManager *__syncpoint_manager;
+    SyncPointManager *syncpoint_manager_;
 
 };
 

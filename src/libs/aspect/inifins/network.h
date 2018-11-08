@@ -43,9 +43,9 @@ class NetworkAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  NetworkNameResolver *__nnresolver;
-  ServicePublisher    *__service_publisher;
-  ServiceBrowser      *__service_browser;
+  NetworkNameResolver *nnresolver_;
+  ServicePublisher    *service_publisher_;
+  ServiceBrowser      *service_browser_;
 };
 
 } // end namespace fawkes

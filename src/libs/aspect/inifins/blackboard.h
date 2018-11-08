@@ -39,7 +39,7 @@ class BlackBoardAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  BlackBoard *__blackboard;
+  BlackBoard *blackboard_;
 };
 
 } // end namespace fawkes

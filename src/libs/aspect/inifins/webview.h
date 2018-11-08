@@ -39,10 +39,10 @@ class WebviewAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  WebUrlManager *__url_manager;
-  WebNavManager *__nav_manager;
-  WebRequestManager *__request_manager;
-  WebviewRestApiManager *__rest_api_manager;
+  WebUrlManager *url_manager_;
+  WebNavManager *nav_manager_;
+  WebRequestManager *request_manager_;
+  WebviewRestApiManager *rest_api_manager_;
 };
 
 } // end namespace fawkes

@@ -40,7 +40,7 @@ class VisionAspectIniFin : public AspectIniFin
   virtual bool prepare_finalize(Thread *thread);
 
  private:
-  VisionMasterAspectIniFin *__master_inifin;
+  VisionMasterAspectIniFin *master_inifin_;
 };
 
 } // end namespace fawkes

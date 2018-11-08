@@ -55,7 +55,7 @@ namespace fawkes {
 VisionAspect::VisionAspect(VisionThreadMode mode)
 {
   add_aspect("VisionAspect");
-  __vision_thread_mode = mode;
+  vision_thread_mode_ = mode;
 }
 
 
@@ -84,7 +84,7 @@ VisionAspect::init_VisionAspect(firevision::VisionMaster *vision_master)
 VisionAspect::VisionThreadMode
 VisionAspect::vision_thread_mode()
 {
-  return __vision_thread_mode;
+  return vision_thread_mode_;
 }
 
 } // end namespace fawkes

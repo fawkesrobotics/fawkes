@@ -39,7 +39,7 @@ class ConfigurableAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  Configuration *__config;
+  Configuration *config_;
 };
 
 } // end namespace fawkes

@@ -43,7 +43,7 @@ namespace fawkes {
 LoggerAspect::LoggerAspect(Logger *logger)
 {
   add_aspect("LoggerAspect");
-  __logger = logger;
+  logger_ = logger;
 }
 
 /** Virtual empty destructor. */
@@ -60,7 +60,7 @@ LoggerAspect::~LoggerAspect()
 Logger *
 LoggerAspect::get_logger() const
 {
-  return __logger;
+  return logger_;
 }
 
 } // end namespace fawkes

@@ -38,7 +38,7 @@ namespace fawkes {
 ConfigurableAspectIniFin::ConfigurableAspectIniFin(Configuration *config)
   : AspectIniFin("ConfigurableAspect")
 {
-  __config = config;
+  config_ = config;
 }
 
 
@@ -53,7 +53,7 @@ ConfigurableAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  configurable_thread->init_ConfigurableAspect(__config);
+  configurable_thread->init_ConfigurableAspect(config_);
 }
 
 

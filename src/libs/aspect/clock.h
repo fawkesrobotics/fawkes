@@ -44,4 +44,4 @@ class ClockAspect : public virtual Aspect
 
 } // end namespace fawkes
 
-#endif /*__ASPECT_CLOCK_H_ */
+#endif /*ASPECT_CLOCK_H__ */

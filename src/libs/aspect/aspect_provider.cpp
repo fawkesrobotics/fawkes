@@ -55,7 +55,7 @@ namespace fawkes {
 AspectProviderAspect::AspectProviderAspect(AspectIniFin *inifin)
 {
   add_aspect("AspectProviderAspect");
-  __aspect_provider_aspects.push_back(inifin);
+  aspect_provider_aspects_.push_back(inifin);
 }
 
 /** Constructor.
@@ -65,7 +65,7 @@ AspectProviderAspect::AspectProviderAspect(AspectIniFin *inifin)
 AspectProviderAspect::AspectProviderAspect(const std::list<AspectIniFin *> aspects)
 {
   add_aspect("AspectProviderAspect");
-  __aspect_provider_aspects = aspects;
+  aspect_provider_aspects_ = aspects;
 }
 
 
@@ -81,7 +81,7 @@ AspectProviderAspect::~AspectProviderAspect()
 const std::list<AspectIniFin *> &
 AspectProviderAspect::aspect_provider_aspects() const
 {
-  return __aspect_provider_aspects;
+  return aspect_provider_aspects_;
 }
 
 } // end namespace fawkes

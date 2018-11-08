@@ -41,7 +41,7 @@ namespace fawkes {
 AspectProviderAspectIniFin::AspectProviderAspectIniFin(AspectManager *manager)
   : AspectIniFin("AspectProviderAspect")
 {
-  __aspect_manager = manager;
+  aspect_manager_ = manager;
 }
 
 
@@ -61,7 +61,7 @@ AspectProviderAspectIniFin::init(Thread *thread)
     provider_thread->aspect_provider_aspects();
   std::list<AspectIniFin *>::const_iterator a;
   for (a = aspects.begin(); a != aspects.end(); ++a) {
-    __aspect_manager->register_inifin(*a);
+    aspect_manager_->register_inifin(*a);
   }
 }
 
@@ -77,7 +77,7 @@ AspectProviderAspectIniFin::prepare_finalize(Thread *thread)
   const std::list<AspectIniFin *> &aspects = p_thr->aspect_provider_aspects();
   std::list<AspectIniFin *>::const_iterator a;
   for (a = aspects.begin(); a != aspects.end(); ++a) {
-    if (__aspect_manager->has_threads_for_aspect((*a)->get_aspect_name())) {
+    if (aspect_manager_->has_threads_for_aspect((*a)->get_aspect_name())) {
       return false;
     }
   }
@@ -102,7 +102,7 @@ AspectProviderAspectIniFin::finalize(Thread *thread)
     provider_thread->aspect_provider_aspects();
   std::list<AspectIniFin *>::const_iterator a;
   for (a = aspects.begin(); a != aspects.end(); ++a) {
-    __aspect_manager->unregister_inifin(*a);  
+    aspect_manager_->unregister_inifin(*a);  
   }
 }
 

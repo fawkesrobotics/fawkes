@@ -39,7 +39,7 @@ class LoggerAspect : public virtual Aspect
   Logger *  get_logger() const;
 
  private:
-  Logger *__logger;
+  Logger *logger_;
 };
 
 } // end namespace fawkes

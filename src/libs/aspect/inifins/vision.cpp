@@ -39,7 +39,7 @@ namespace fawkes {
 VisionAspectIniFin::VisionAspectIniFin(VisionMasterAspectIniFin *master_inifin)
   : AspectIniFin("VisionAspect")
 {
-  __master_inifin = master_inifin;
+  master_inifin_ = master_inifin;
 }
 
 
@@ -69,8 +69,8 @@ VisionAspectIniFin::init(Thread *thread)
 					    thread->name());
     }
 
-    __master_inifin->add_vision_thread(vision_thread);
-    vision_thread->init_VisionAspect(__master_inifin->vision_master());
+    master_inifin_->add_vision_thread(vision_thread);
+    vision_thread->init_VisionAspect(master_inifin_->vision_master());
   } catch (DependencyViolationException &e) {
     CannotInitializeThreadException ce("Dependency violation for "
 				       "VisionAspect detected");
@@ -90,8 +90,8 @@ VisionAspectIniFin::prepare_finalize(Thread *thread)
     return true;
   }
 
-  if ( ! __master_inifin->can_remove_vision_thread(vision_thread) ) {
-    //__logger->log_warn("AspectIniFin", "Cannot remove vision master, there are "
+  if ( ! master_inifin_->can_remove_vision_thread(vision_thread) ) {
+    //logger_->log_warn("AspectIniFin", "Cannot remove vision master, there are "
     //		"still vision threads that depend on it");
     return false;
   }
@@ -111,7 +111,7 @@ VisionAspectIniFin::finalize(Thread *thread)
   }
 
   try {
-    __master_inifin->remove_vision_thread(vision_thread);
+    master_inifin_->remove_vision_thread(vision_thread);
   } catch (DependencyViolationException &e) {
     CannotFinalizeThreadException ce("Dependency violation for "
 				     "VisionAspect detected");

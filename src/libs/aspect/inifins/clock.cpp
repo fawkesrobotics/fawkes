@@ -38,7 +38,7 @@ namespace fawkes {
 ClockAspectIniFin::ClockAspectIniFin(Clock *clock)
   : AspectIniFin("ClockAspect")
 {
-  __clock = clock;
+  clock_ = clock;
 }
 
 
@@ -53,7 +53,7 @@ ClockAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  clock_thread->init_ClockAspect(__clock);
+  clock_thread->init_ClockAspect(clock_);
 }
 
 
