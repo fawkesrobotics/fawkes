@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PREDICATE_H
-#define __PLUGINS_PREDICATE_H
+#ifndef PLUGINS_PREDICATE_H_
+#define PLUGINS_PREDICATE_H_
 
 #include <string>
 #include <vector>

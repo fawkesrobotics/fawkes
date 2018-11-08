@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_STN_ACTION_H
-#define __PLUGINS_STN_ACTION_H
+#ifndef PLUGINS_STN_ACTION_H_
+#define PLUGINS_STN_ACTION_H_
 
 #include <string>
 #include <vector>
