@@ -57,10 +57,10 @@ class JacoActThread
   bool _is_initializing();
   void _process_msgs();
 
-  fawkes::jaco_arm_t* __arm;
+  fawkes::jaco_arm_t* arm_;
 
-  bool __cfg_auto_init;
-  bool __cfg_auto_calib;
+  bool cfg_auto_init_;
+  bool cfg_auto_calib_;
 };
 
 

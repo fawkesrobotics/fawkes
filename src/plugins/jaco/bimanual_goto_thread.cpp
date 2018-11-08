@@ -47,9 +47,9 @@ using namespace fawkes;
 JacoBimanualGotoThread::JacoBimanualGotoThread(jaco_dual_arm_t *arms)
   : Thread("JacoBimanualGotoThread", Thread::OPMODE_CONTINUOUS)
 {
-  __dual_arms = arms;
-  __final_mutex = NULL;
-  __final = true;
+  dual_arms_ = arms;
+  final_mutex_ = NULL;
+  final_ = true;
 }
 
 
@@ -61,27 +61,27 @@ JacoBimanualGotoThread::~JacoBimanualGotoThread()
 void
 JacoBimanualGotoThread::init()
 {
-  __arms.l.arm = __dual_arms->left;
-  __arms.r.arm = __dual_arms->right;
+  arms_.l.arm = dual_arms_->left;
+  arms_.r.arm = dual_arms_->right;
 
-  __final_mutex = new Mutex();
-  __v_arms[0] = &(__arms.l);
-  __v_arms[1] = &(__arms.r);
+  final_mutex_ = new Mutex();
+  v_arms_[0] = &(arms_.l);
+  v_arms_[1] = &(arms_.r);
 }
 
 void
 JacoBimanualGotoThread::finalize()
 {
-  __dual_arms = NULL;
+  dual_arms_ = NULL;
 
-  __v_arms[0] = NULL;
-  __v_arms[1] = NULL;
+  v_arms_[0] = NULL;
+  v_arms_[1] = NULL;
 
-  __arms.l.arm = NULL;
-  __arms.r.arm = NULL;
+  arms_.l.arm = NULL;
+  arms_.r.arm = NULL;
 
-  delete __final_mutex;
-  __final_mutex = NULL;
+  delete final_mutex_;
+  final_mutex_ = NULL;
 }
 
 /** The main loop of this thread.
@@ -90,83 +90,83 @@ JacoBimanualGotoThread::finalize()
 void
 JacoBimanualGotoThread::loop()
 {
-  __final_mutex->lock();
-  bool final = __final;
-  __final_mutex->unlock();
+  final_mutex_->lock();
+  bool final = final_;
+  final_mutex_->unlock();
 
-  if( __arms.l.arm == NULL || __arms.r.arm == NULL || !final ) {
+  if( arms_.l.arm == NULL || arms_.r.arm == NULL || !final ) {
     usleep(30e3);
     return;
   }
 
  // Current targets have been processed. Unref, if still refed
-  if(__arms.l.target && __arms.r.target) {
-    __arms.l.target.clear();
-    __arms.r.target.clear();
+  if(arms_.l.target && arms_.r.target) {
+    arms_.l.target.clear();
+    arms_.r.target.clear();
     // trajectories hav been processed. remove those targets from queues.
     // This will automatically delete the trajectories as well as soon
     // as we leave this block (thanks to refptr)
     _lock_queues();
-    __arms.l.arm->target_queue->pop_front();
-    __arms.r.arm->target_queue->pop_front();
+    arms_.l.arm->target_queue->pop_front();
+    arms_.r.arm->target_queue->pop_front();
     _unlock_queues();
   }
 
   // Check for new targets
   _lock_queues();
-  if( !__arms.l.arm->target_queue->empty() && !__arms.r.arm->target_queue->empty() ) {
+  if( !arms_.l.arm->target_queue->empty() && !arms_.r.arm->target_queue->empty() ) {
     // get RefPtr to first target in queue
-    __arms.l.target = __arms.l.arm->target_queue->front();
-    __arms.r.target = __arms.r.arm->target_queue->front();
+    arms_.l.target = arms_.l.arm->target_queue->front();
+    arms_.r.target = arms_.r.arm->target_queue->front();
   }
   _unlock_queues();
 
-  if( !__arms.l.target || !__arms.r.target || !__arms.l.target->coord || !__arms.r.target->coord) {
+  if( !arms_.l.target || !arms_.r.target || !arms_.l.target->coord || !arms_.r.target->coord) {
     //no new target in queue, or at least one target is not meant for
     // coordinated manipulation
-    __arms.l.target.clear();
-    __arms.r.target.clear();
+    arms_.l.target.clear();
+    arms_.r.target.clear();
     usleep(30e3);
     return;
   }
 
-  if( __arms.l.target->type != __arms.r.target->type ) {
-    logger->log_debug(name(), "target type mismatch, %i != %i", __arms.l.target->type, __arms.r.target->type);
-    __arms.l.target.clear();
-    __arms.r.target.clear();
+  if( arms_.l.target->type != arms_.r.target->type ) {
+    logger->log_debug(name(), "target type mismatch, %i != %i", arms_.l.target->type, arms_.r.target->type);
+    arms_.l.target.clear();
+    arms_.r.target.clear();
     usleep(30e3);
     return;
   }
 
-  if( __arms.l.target->trajec_state == TRAJEC_IK_ERROR
-   || __arms.r.target->trajec_state == TRAJEC_IK_ERROR
-   || __arms.l.target->trajec_state == TRAJEC_PLANNING_ERROR
-   || __arms.r.target->trajec_state == TRAJEC_PLANNING_ERROR ) {
+  if( arms_.l.target->trajec_state == TRAJEC_IK_ERROR
+   || arms_.r.target->trajec_state == TRAJEC_IK_ERROR
+   || arms_.l.target->trajec_state == TRAJEC_PLANNING_ERROR
+   || arms_.r.target->trajec_state == TRAJEC_PLANNING_ERROR ) {
       logger->log_warn(name(), "Trajectory could not be planned. Abort!");
     // stop the current target and empty remaining queue, with appropriate error_code. This also sets "final" to true.
-    __dual_arms->iface->set_error_code( __arms.l.target->trajec_state );
+    dual_arms_->iface->set_error_code( arms_.l.target->trajec_state );
     stop();
     return;
   }
 
-  if( __arms.l.target->trajec_state != __arms.r.target->trajec_state ) {
-    logger->log_debug(name(), "trajec state mismatch, %i != %i", __arms.l.target->trajec_state, __arms.r.target->trajec_state);
-    __arms.l.target.clear();
-    __arms.r.target.clear();
+  if( arms_.l.target->trajec_state != arms_.r.target->trajec_state ) {
+    logger->log_debug(name(), "trajec state mismatch, %i != %i", arms_.l.target->trajec_state, arms_.r.target->trajec_state);
+    arms_.l.target.clear();
+    arms_.r.target.clear();
     usleep(30e3);
     return;
   }
 
-  switch( __arms.l.target->trajec_state ) {
+  switch( arms_.l.target->trajec_state ) {
     case TRAJEC_SKIP:
       // "regular" target. For now, we just process "GRIPPER", therefore do not
       //  change plotting
       logger->log_debug(name(), "No planning for these targets. Process, using current finger positions...");
 
-      if(__arms.l.target->type != TARGET_GRIPPER) {
-        logger->log_warn(name(), "Unknown target type %i, cannot process without planning!", __arms.l.target->type);
+      if(arms_.l.target->type != TARGET_GRIPPER) {
+        logger->log_warn(name(), "Unknown target type %i, cannot process without planning!", arms_.l.target->type);
         stop();
-        __dual_arms->iface->set_error_code( JacoInterface::ERROR_UNSPECIFIC );
+        dual_arms_->iface->set_error_code( JacoInterface::ERROR_UNSPECIFIC );
       } else {
         _move_grippers();
         logger->log_debug(name(), "...targets processed");
@@ -177,19 +177,19 @@ JacoBimanualGotoThread::loop()
       //logger->log_debug(name(), "Trajectories ready! Processing now.");
       // update trajectory state
       _lock_queues();
-      __arms.l.target->trajec_state = TRAJEC_EXECUTING;
-      __arms.r.target->trajec_state = TRAJEC_EXECUTING;
+      arms_.l.target->trajec_state = TRAJEC_EXECUTING;
+      arms_.r.target->trajec_state = TRAJEC_EXECUTING;
       _unlock_queues();
 
       // process trajectories only if it actually "exists"
-      if( !__arms.l.target->trajec->empty() && !__arms.r.target->trajec->empty() ) {
+      if( !arms_.l.target->trajec->empty() && !arms_.r.target->trajec->empty() ) {
         // first let the openrave_thread show the trajectory in the viewer
-        __arms.l.arm->openrave_thread->plot_first();
-        __arms.r.arm->openrave_thread->plot_first();
+        arms_.l.arm->openrave_thread->plot_first();
+        arms_.r.arm->openrave_thread->plot_first();
 
         // enable plotting of current positions
-        __arms.l.arm->openrave_thread->plot_current(true);
-        __arms.r.arm->openrave_thread->plot_current(true);
+        arms_.l.arm->openrave_thread->plot_current(true);
+        arms_.r.arm->openrave_thread->plot_current(true);
 
         // then execute the trajectories
         _exec_trajecs();
@@ -199,8 +199,8 @@ JacoBimanualGotoThread::loop()
 
     default:
       //logger->log_debug(name(), "Target is trajectory, but not ready yet!");
-      __arms.l.target.clear();
-      __arms.r.target.clear();
+      arms_.l.target.clear();
+      arms_.r.target.clear();
       usleep(30e3);
       break;
   }
@@ -215,16 +215,16 @@ JacoBimanualGotoThread::loop()
 bool
 JacoBimanualGotoThread::final()
 {
-  // Check if any movement has startet (__final would be false then)
-  __final_mutex->lock();
-  bool final = __final;
-  __final_mutex->unlock();
+  // Check if any movement has startet (final_ would be false then)
+  final_mutex_->lock();
+  bool final = final_;
+  final_mutex_->unlock();
   if( !final ) {
     // There was some movement initiated. Check if it has finished
     _check_final();
-    __final_mutex->lock();
-    final = __final;
-    __final_mutex->unlock();
+    final_mutex_->lock();
+    final = final_;
+    final_mutex_->unlock();
   }
 
   if( !final )
@@ -232,7 +232,7 @@ JacoBimanualGotoThread::final()
 
   // arm is not moving right now. Check if all targets have been processed
   _lock_queues();
-  final = __arms.l.arm->target_queue->empty() && __arms.r.arm->target_queue->empty();
+  final = arms_.l.arm->target_queue->empty() && arms_.r.arm->target_queue->empty();
   _unlock_queues();
 
   return final;
@@ -244,15 +244,15 @@ JacoBimanualGotoThread::final()
 void
 JacoBimanualGotoThread::stop()
 {
-  __arms.l.arm->goto_thread->stop();
-  __arms.r.arm->goto_thread->stop();
+  arms_.l.arm->goto_thread->stop();
+  arms_.r.arm->goto_thread->stop();
 
-  __arms.l.target.clear();
-  __arms.r.target.clear();
+  arms_.l.target.clear();
+  arms_.r.target.clear();
 
-  __final_mutex->lock();
-  __final = true;
-  __final_mutex->unlock();
+  final_mutex_->lock();
+  final_ = true;
+  final_mutex_->unlock();
 }
 
 
@@ -293,36 +293,36 @@ JacoBimanualGotoThread::move_gripper(float l_f1, float l_f2, float l_f3, float r
 inline void
 JacoBimanualGotoThread::_lock_queues() const
 {
-  __arms.l.arm->target_mutex->lock();
-  __arms.r.arm->target_mutex->lock();
+  arms_.l.arm->target_mutex->lock();
+  arms_.r.arm->target_mutex->lock();
 }
 
 inline void
 JacoBimanualGotoThread::_unlock_queues() const
 {
-  __arms.l.arm->target_mutex->unlock();
-  __arms.r.arm->target_mutex->unlock();
+  arms_.l.arm->target_mutex->unlock();
+  arms_.r.arm->target_mutex->unlock();
 }
 
 inline void
 JacoBimanualGotoThread::_enqueue_targets(RefPtr<jaco_target_t> l, RefPtr<jaco_target_t> r)
 {
-  __arms.l.arm->target_queue->push_back(l);
-  __arms.r.arm->target_queue->push_back(r);
+  arms_.l.arm->target_queue->push_back(l);
+  arms_.r.arm->target_queue->push_back(r);
 }
 
 void
 JacoBimanualGotoThread::_move_grippers()
 {
-  __final_mutex->lock();
-  __final = false;
-  __final_mutex->unlock();
+  final_mutex_->lock();
+  final_ = false;
+  final_mutex_->unlock();
 
   for(unsigned int i=0; i<2; ++i) {
-    __v_arms[i]->finger_last[0] = __v_arms[i]->arm->iface->finger1();
-    __v_arms[i]->finger_last[1] = __v_arms[i]->arm->iface->finger2();
-    __v_arms[i]->finger_last[2] = __v_arms[i]->arm->iface->finger3();
-    __v_arms[i]->finger_last[3] = 0; // counter
+    v_arms_[i]->finger_last[0] = v_arms_[i]->arm->iface->finger1();
+    v_arms_[i]->finger_last[1] = v_arms_[i]->arm->iface->finger2();
+    v_arms_[i]->finger_last[2] = v_arms_[i]->arm->iface->finger3();
+    v_arms_[i]->finger_last[3] = 0; // counter
   }
 
   // process new target
@@ -332,19 +332,19 @@ JacoBimanualGotoThread::_move_grippers()
     // that we move the gripper with the current joint values, not with the ones we had
     // when the target was enqueued!
     for(unsigned int i=0; i<2; ++i) {
-      __v_arms[i]->target->pos.clear(); // just in case; should be empty anyway
-      __v_arms[i]->target->pos.push_back(__v_arms[i]->arm->iface->joints(0));
-      __v_arms[i]->target->pos.push_back(__v_arms[i]->arm->iface->joints(1));
-      __v_arms[i]->target->pos.push_back(__v_arms[i]->arm->iface->joints(2));
-      __v_arms[i]->target->pos.push_back(__v_arms[i]->arm->iface->joints(3));
-      __v_arms[i]->target->pos.push_back(__v_arms[i]->arm->iface->joints(4));
-      __v_arms[i]->target->pos.push_back(__v_arms[i]->arm->iface->joints(5));
-      __v_arms[i]->target->type = TARGET_ANGULAR;
+      v_arms_[i]->target->pos.clear(); // just in case; should be empty anyway
+      v_arms_[i]->target->pos.push_back(v_arms_[i]->arm->iface->joints(0));
+      v_arms_[i]->target->pos.push_back(v_arms_[i]->arm->iface->joints(1));
+      v_arms_[i]->target->pos.push_back(v_arms_[i]->arm->iface->joints(2));
+      v_arms_[i]->target->pos.push_back(v_arms_[i]->arm->iface->joints(3));
+      v_arms_[i]->target->pos.push_back(v_arms_[i]->arm->iface->joints(4));
+      v_arms_[i]->target->pos.push_back(v_arms_[i]->arm->iface->joints(5));
+      v_arms_[i]->target->type = TARGET_ANGULAR;
     }
 
     // just send the messages to the arm. nothing special here
-    __arms.l.arm->arm->goto_joints(__arms.l.target->pos, __arms.l.target->fingers);
-    __arms.r.arm->arm->goto_joints(__arms.r.target->pos, __arms.r.target->fingers);
+    arms_.l.arm->arm->goto_joints(arms_.l.target->pos, arms_.l.target->fingers);
+    arms_.r.arm->arm->goto_joints(arms_.r.target->pos, arms_.r.target->fingers);
 
   } catch( Exception &e ) {
     logger->log_warn(name(), "Error sending commands to arm. Ex:%s", e.what_no_backtrace());
@@ -354,23 +354,23 @@ JacoBimanualGotoThread::_move_grippers()
 void
 JacoBimanualGotoThread::_exec_trajecs()
 {
-  __final_mutex->lock();
-  __final = false;
-  __final_mutex->unlock();
+  final_mutex_->lock();
+  final_ = false;
+  final_mutex_->unlock();
 
   for(unsigned int i=0; i<2; ++i) {
-    if( __v_arms[i]->target->fingers.empty() ) {
+    if( v_arms_[i]->target->fingers.empty() ) {
       // have no finger values. use current ones
-      __v_arms[i]->target->fingers.push_back(__v_arms[i]->arm->iface->finger1());
-      __v_arms[i]->target->fingers.push_back(__v_arms[i]->arm->iface->finger2());
-      __v_arms[i]->target->fingers.push_back(__v_arms[i]->arm->iface->finger3());
+      v_arms_[i]->target->fingers.push_back(v_arms_[i]->arm->iface->finger1());
+      v_arms_[i]->target->fingers.push_back(v_arms_[i]->arm->iface->finger2());
+      v_arms_[i]->target->fingers.push_back(v_arms_[i]->arm->iface->finger3());
     }
   }
 
   try {
      // stop old movement, if there was any
-    __arms.l.arm->arm->stop();
-    __arms.r.arm->arm->stop();
+    arms_.l.arm->arm->stop();
+    arms_.r.arm->arm->stop();
 
     // execute the trajectories
     logger->log_debug(name(), "exec traj: send traj commands...");
@@ -378,14 +378,14 @@ JacoBimanualGotoThread::_exec_trajecs()
     // find out which arm has the shorter trajectory
     unsigned int first = 0;
     unsigned int second = 1;
-    if( __v_arms[1]->target->trajec->size() < __v_arms[0]->target->trajec->size() ) {
+    if( v_arms_[1]->target->trajec->size() < v_arms_[0]->target->trajec->size() ) {
       first = 1;
       second = 0;
     }
-    JacoArm* arm_first  = __v_arms[first]->arm->arm;
-    JacoArm* arm_second = __v_arms[second]->arm->arm;
-    jaco_trajec_t* trajec_first  = *(__v_arms[first]->target->trajec);
-    jaco_trajec_t* trajec_second = *(__v_arms[second]->target->trajec);
+    JacoArm* arm_first  = v_arms_[first]->arm->arm;
+    JacoArm* arm_second = v_arms_[second]->arm->arm;
+    jaco_trajec_t* trajec_first  = *(v_arms_[first]->target->trajec);
+    jaco_trajec_t* trajec_second = *(v_arms_[second]->target->trajec);
     unsigned int size_first =  trajec_first->size();
     unsigned int size_second = trajec_second->size();
 
@@ -394,27 +394,27 @@ JacoBimanualGotoThread::_exec_trajecs()
     // send current position as initial trajec-point to arms
     for(unsigned int i=0; i<2; ++i) {
       jaco_trajec_point_t cur;
-      cur.push_back( __v_arms[i]->arm->iface->joints(0) );
-      cur.push_back( __v_arms[i]->arm->iface->joints(1) );
-      cur.push_back( __v_arms[i]->arm->iface->joints(2) );
-      cur.push_back( __v_arms[i]->arm->iface->joints(3) );
-      cur.push_back( __v_arms[i]->arm->iface->joints(4) );
-      cur.push_back( __v_arms[i]->arm->iface->joints(5) );
-      __v_arms[i]->arm->arm->goto_joints(cur, __v_arms[i]->target->fingers, /*followup=*/false);
+      cur.push_back( v_arms_[i]->arm->iface->joints(0) );
+      cur.push_back( v_arms_[i]->arm->iface->joints(1) );
+      cur.push_back( v_arms_[i]->arm->iface->joints(2) );
+      cur.push_back( v_arms_[i]->arm->iface->joints(3) );
+      cur.push_back( v_arms_[i]->arm->iface->joints(4) );
+      cur.push_back( v_arms_[i]->arm->iface->joints(5) );
+      v_arms_[i]->arm->arm->goto_joints(cur, v_arms_[i]->target->fingers, /*followup=*/false);
     }
 
     // send rest of trajectory as followup trajectory points.
     // Make sure to send the trajectory points alternatingly to the arm's
     // internal FIFO trajectory queue.
     while(it < size_first) {
-      arm_first->goto_joints(trajec_first->at(it), __v_arms[first]->target->fingers, /*followup=*/true);
-      arm_second->goto_joints(trajec_second->at(it), __v_arms[second]->target->fingers, /*followup=*/true);
+      arm_first->goto_joints(trajec_first->at(it), v_arms_[first]->target->fingers, /*followup=*/true);
+      arm_second->goto_joints(trajec_second->at(it), v_arms_[second]->target->fingers, /*followup=*/true);
       ++it;
     }
 
     // continue sending the rest of the longer trajectory
     while(it < size_second) {
-      arm_second->goto_joints(trajec_second->at(it), __v_arms[second]->target->fingers, /*followup=*/true);
+      arm_second->goto_joints(trajec_second->at(it), v_arms_[second]->target->fingers, /*followup=*/true);
       ++it;
     }
 
@@ -432,18 +432,18 @@ JacoBimanualGotoThread::_check_final()
 
   //logger->log_debug(name(), "check final");
   for(unsigned int i=0; i<2; ++i) {
-    switch( __v_arms[i]->target->type ) {
+    switch( v_arms_[i]->target->type ) {
       case TARGET_ANGULAR:
         //logger->log_debug(name(), "check[%u] final for TARGET ANGULAR", i);
         for( unsigned int j=0; j<6; ++j ) {
-          final &= angle_distance(deg2rad(__v_arms[i]->target->pos.at(j)),
-                                  deg2rad(__v_arms[i]->arm->iface->joints(j))) < 0.05;
+          final &= angle_distance(deg2rad(v_arms_[i]->target->pos.at(j)),
+                                  deg2rad(v_arms_[i]->arm->iface->joints(j))) < 0.05;
         }
         break;
 
       case TARGET_GRIPPER:
         //logger->log_debug(name(), "check[%u] final for TARGET GRIPPER", i);
-        final &= __v_arms[i]->arm->arm->final();
+        final &= v_arms_[i]->arm->arm->final();
         break;
 
       default:
@@ -461,22 +461,22 @@ JacoBimanualGotoThread::_check_final()
     for(unsigned int i=0; i<2; ++i) {
       //logger->log_debug(name(), "check[%u] fingers for final", i);
 
-      if( __v_arms[i]->finger_last[0] == __v_arms[i]->arm->iface->finger1() &&
-          __v_arms[i]->finger_last[1] == __v_arms[i]->arm->iface->finger2() &&
-          __v_arms[i]->finger_last[2] == __v_arms[i]->arm->iface->finger3() ) {
-        __v_arms[i]->finger_last[3] += 1;
+      if( v_arms_[i]->finger_last[0] == v_arms_[i]->arm->iface->finger1() &&
+          v_arms_[i]->finger_last[1] == v_arms_[i]->arm->iface->finger2() &&
+          v_arms_[i]->finger_last[2] == v_arms_[i]->arm->iface->finger3() ) {
+        v_arms_[i]->finger_last[3] += 1;
       } else {
-        __v_arms[i]->finger_last[0] = __v_arms[i]->arm->iface->finger1();
-        __v_arms[i]->finger_last[1] = __v_arms[i]->arm->iface->finger2();
-        __v_arms[i]->finger_last[2] = __v_arms[i]->arm->iface->finger3();
-        __v_arms[i]->finger_last[3] = 0; // counter
+        v_arms_[i]->finger_last[0] = v_arms_[i]->arm->iface->finger1();
+        v_arms_[i]->finger_last[1] = v_arms_[i]->arm->iface->finger2();
+        v_arms_[i]->finger_last[2] = v_arms_[i]->arm->iface->finger3();
+        v_arms_[i]->finger_last[3] = 0; // counter
       }
-      final &= __v_arms[i]->finger_last[3] > 10;
+      final &= v_arms_[i]->finger_last[3] > 10;
       //logger->log_debug(name(), "check[%u] final (all): %u", i, final);
     }
   }
 
-  __final_mutex->lock();
-  __final = final;
-  __final_mutex->unlock();
+  final_mutex_->lock();
+  final_ = final;
+  final_mutex_->unlock();
 }

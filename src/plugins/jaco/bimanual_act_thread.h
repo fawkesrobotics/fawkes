@@ -53,7 +53,7 @@ class JacoBimanualActThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::jaco_dual_arm_t* __arms;
+  fawkes::jaco_dual_arm_t* arms_;
 };
 
 

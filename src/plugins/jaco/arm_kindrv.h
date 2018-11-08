@@ -60,12 +60,12 @@ class JacoArmKindrv : public JacoArm
   virtual void goto_retract();
 
  private:
-  KinDrv::JacoArm  *__arm;
+  KinDrv::JacoArm  *arm_;
 
-  fawkes::jaco_target_type_t __target_type;
-  bool __final;
+  fawkes::jaco_target_type_t target_type_;
+  bool final_;
 
-  bool __ctrl_ang;
+  bool ctrl_ang_;
 };
 
 

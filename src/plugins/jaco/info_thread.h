@@ -54,10 +54,10 @@ class JacoInfoThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::jaco_arm_t *__arm;
+  fawkes::jaco_arm_t *arm_;
 
-  std::vector<float> __cpos;
-  std::vector<float> __apos;
+  std::vector<float> cpos_;
+  std::vector<float> apos_;
 };
 
 

@@ -121,15 +121,15 @@ class JacoArm
   std::string get_name() const;
 
  protected:
-  std::string __name;        /**< the name of this arm */
-  bool        __initialized; /**< track if the arm has been initialized or not */
+  std::string name_;        /**< the name of this arm */
+  bool        initialized_; /**< track if the arm has been initialized or not */
 };
 
 inline
 std::string
 JacoArm::get_name() const
 {
-  return __name;
+  return name_;
 }
 
 } // end of namespace fawkes

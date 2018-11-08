@@ -54,27 +54,27 @@ namespace fawkes {
  */
 JacoArmDummy::JacoArmDummy(const char *name)
 {
-  __name = name;
-  __initialized = true;
+  name_ = name;
+  initialized_ = true;
 
   // initialize target vectors for READY and RETRACT positions
-  __pos_ready.push_back(READY_J0);
-  __pos_ready.push_back(READY_J1);
-  __pos_ready.push_back(READY_J2);
-  __pos_ready.push_back(READY_J3);
-  __pos_ready.push_back(READY_J4);
-  __pos_ready.push_back(READY_J5);
-  __pos_retract.push_back(RETRACT_J0);
-  __pos_retract.push_back(RETRACT_J1);
-  __pos_retract.push_back(RETRACT_J2);
-  __pos_retract.push_back(RETRACT_J3);
-  __pos_retract.push_back(RETRACT_J4);
-  __pos_retract.push_back(RETRACT_J5);
+  pos_ready_.push_back(READY_J0);
+  pos_ready_.push_back(READY_J1);
+  pos_ready_.push_back(READY_J2);
+  pos_ready_.push_back(READY_J3);
+  pos_ready_.push_back(READY_J4);
+  pos_ready_.push_back(READY_J5);
+  pos_retract_.push_back(RETRACT_J0);
+  pos_retract_.push_back(RETRACT_J1);
+  pos_retract_.push_back(RETRACT_J2);
+  pos_retract_.push_back(RETRACT_J3);
+  pos_retract_.push_back(RETRACT_J4);
+  pos_retract_.push_back(RETRACT_J5);
 
   // initialize position vectors
-  __coords.assign(6, 0.f);
-  __joints.assign(6, 0.f);
-  __fingers.assign(3, 0.f);
+  coords_.assign(6, 0.f);
+  joints_.assign(6, 0.f);
+  fingers_.assign(3, 0.f);
 }
 
 /** Destructor. */
@@ -98,26 +98,26 @@ JacoArmDummy::final()
 bool
 JacoArmDummy::initialized()
 {
-  return __initialized;
+  return initialized_;
 }
 
 
 void
 JacoArmDummy::get_coords(std::vector<float> &to)
 {
-  to = __coords;
+  to = coords_;
 }
 
 void
 JacoArmDummy::get_joints(std::vector<float> &to) const
 {
-  to = __joints;
+  to = joints_;
 }
 
 void
 JacoArmDummy::get_fingers(std::vector<float> &to) const
 {
-  to = __fingers;
+  to = fingers_;
 }
 
 
@@ -168,8 +168,8 @@ JacoArmDummy::goto_joints(std::vector<float> &joints, std::vector<float> &finger
   if(followup)
     usleep(10e3);
 
-  __joints = joints;
-  __fingers = fingers;
+  joints_ = joints;
+  fingers_ = fingers;
 }
 
 /** Move the arm to given configuration.
@@ -182,20 +182,20 @@ JacoArmDummy::goto_joints(std::vector<float> &joints, std::vector<float> &finger
 void
 JacoArmDummy::goto_coords(std::vector<float> &coords, std::vector<float> &fingers)
 {
-  __coords = coords;
-  __fingers = fingers;
+  coords_ = coords;
+  fingers_ = fingers;
 }
 
 void
 JacoArmDummy::goto_ready()
 {
-  goto_joints(__pos_ready, __fingers);
+  goto_joints(pos_ready_, fingers_);
 }
 
 void
 JacoArmDummy::goto_retract()
 {
-  goto_joints(__pos_retract, __fingers);
+  goto_joints(pos_retract_, fingers_);
 }
 
 

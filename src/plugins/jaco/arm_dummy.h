@@ -58,12 +58,12 @@ class JacoArmDummy : public JacoArm
 
  private:
 
-  std::vector<float> __coords;
-  std::vector<float> __joints;
-  std::vector<float> __fingers;
+  std::vector<float> coords_;
+  std::vector<float> joints_;
+  std::vector<float> fingers_;
 
-  std::vector<float> __pos_ready;
-  std::vector<float> __pos_retract;
+  std::vector<float> pos_ready_;
+  std::vector<float> pos_retract_;
 
 };
 

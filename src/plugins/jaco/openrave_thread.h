@@ -60,24 +60,24 @@ class JacoOpenraveThread : public JacoOpenraveBaseThread
 
   void _plan_path(fawkes::RefPtr<fawkes::jaco_target_t> &from, fawkes::RefPtr<fawkes::jaco_target_t> &to);
 
-  fawkes::jaco_arm_t  *__arm;
+  fawkes::jaco_arm_t  *arm_;
 
-  std::string __cfg_manipname;
-  bool        __load_robot;
+  std::string cfg_manipname_;
+  bool        load_robot_;
 
 #ifdef HAVE_OPENRAVE
-  fawkes::jaco_openrave_set_t __planner_env;
+  fawkes::jaco_openrave_set_t planner_env_;
 
-  OpenRAVE::RobotBasePtr              __robot;
-  OpenRAVE::RobotBase::ManipulatorPtr __manip;
-  std::vector<OpenRAVE::dReal>        __joints;
+  OpenRAVE::RobotBasePtr              robot_;
+  OpenRAVE::RobotBase::ManipulatorPtr manip_;
+  std::vector<OpenRAVE::dReal>        joints_;
 
-  std::vector<OpenRAVE::GraphHandlePtr> __graph_handle;
-  std::vector<OpenRAVE::GraphHandlePtr> __graph_current;
+  std::vector<OpenRAVE::GraphHandlePtr> graph_handle_;
+  std::vector<OpenRAVE::GraphHandlePtr> graph_current_;
 
-  std::vector<OpenRAVE::KinBody::LinkPtr> __links;
+  std::vector<OpenRAVE::KinBody::LinkPtr> links_;
 
-  bool __plotted_current;   // keep track of plotting
+  bool plotted_current_;   // keep track of plotting
 #endif
 };
 

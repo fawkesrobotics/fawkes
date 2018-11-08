@@ -53,9 +53,9 @@ JacoOpenraveBaseThread::JacoOpenraveBaseThread(const char *name)
   : Thread(name, Thread::OPMODE_CONTINUOUS)
 {
 #ifdef HAVE_OPENRAVE
-  __cfg_OR_auto_load_ik = false;
-  __plannerparams = "";
-  __plot_current = false;
+  cfg_OR_auto_load_ik_ = false;
+  plannerparams_ = "";
+  plot_current_ = false;
 #endif
 }
 
@@ -64,9 +64,9 @@ JacoOpenraveBaseThread::JacoOpenraveBaseThread(const char *name)
 JacoOpenraveBaseThread::~JacoOpenraveBaseThread()
 {
 #ifdef HAVE_OPENRAVE
-  __viewer_env.env   = NULL;
-  __viewer_env.robot = NULL;
-  __viewer_env.manip = NULL;
+  viewer_env_.env   = NULL;
+  viewer_env_.robot = NULL;
+  viewer_env_.manip = NULL;
 #endif
 }
 
@@ -79,29 +79,29 @@ JacoOpenraveBaseThread::~JacoOpenraveBaseThread()
 void
 JacoOpenraveBaseThread::init()
 {
-  __planning_mutex = new Mutex();
+  planning_mutex_ = new Mutex();
 
 #ifdef HAVE_OPENRAVE
-  __cfg_OR_use_viewer    = config->get_bool("/hardware/jaco/openrave/use_viewer");
-  __cfg_OR_auto_load_ik  = config->get_bool("/hardware/jaco/openrave/auto_load_ik");
-  __cfg_OR_sampling      = config->get_float("/hardware/jaco/openrave/sampling");
+  cfg_OR_use_viewer_    = config->get_bool("/hardware/jaco/openrave/use_viewer");
+  cfg_OR_auto_load_ik_  = config->get_bool("/hardware/jaco/openrave/auto_load_ik");
+  cfg_OR_sampling_      = config->get_float("/hardware/jaco/openrave/sampling");
 
-  __cfg_OR_plot_traj_manip  = config->get_bool("/hardware/jaco/openrave/plotting/planned_manipulator");
-  __cfg_OR_plot_traj_joints = config->get_bool("/hardware/jaco/openrave/plotting/planned_joints");
-  __cfg_OR_plot_cur_manip   = config->get_bool("/hardware/jaco/openrave/plotting/current_manipulator");
-  __cfg_OR_plot_cur_joints  = config->get_bool("/hardware/jaco/openrave/plotting/current_joints");
+  cfg_OR_plot_traj_manip_  = config->get_bool("/hardware/jaco/openrave/plotting/planned_manipulator");
+  cfg_OR_plot_traj_joints_ = config->get_bool("/hardware/jaco/openrave/plotting/planned_joints");
+  cfg_OR_plot_cur_manip_   = config->get_bool("/hardware/jaco/openrave/plotting/current_manipulator");
+  cfg_OR_plot_cur_joints_  = config->get_bool("/hardware/jaco/openrave/plotting/current_joints");
 
   // perform other initialization stuff (for child classes, that do not want to overload "init()")
   _init();
 
-  __viewer_env.env = openrave->get_environment();
-  __viewer_env.env->enable_debug();
-  __viewer_env.env->set_name("Viewer");
+  viewer_env_.env = openrave->get_environment();
+  viewer_env_.env->enable_debug();
+  viewer_env_.env->set_name("Viewer");
 
   // load robot
   _load_robot();
 
-  if( __cfg_OR_use_viewer )
+  if( cfg_OR_use_viewer_ )
     openrave->start_viewer();
 
   _post_init();
@@ -111,13 +111,13 @@ JacoOpenraveBaseThread::init()
 void
 JacoOpenraveBaseThread::finalize()
 {
-  delete __planning_mutex;
-  __planning_mutex = NULL;
+  delete planning_mutex_;
+  planning_mutex_ = NULL;
 
 #ifdef HAVE_OPENRAVE
-  __viewer_env.robot = NULL;
-  __viewer_env.manip = NULL;
-  __viewer_env.env = NULL;
+  viewer_env_.robot = NULL;
+  viewer_env_.manip = NULL;
+  viewer_env_.env = NULL;
 #endif
 }
 
@@ -131,7 +131,7 @@ void
 JacoOpenraveBaseThread::set_plannerparams(const std::string &params)
 {
 #ifdef HAVE_OPENRAVE
-  __plannerparams = params;
+  plannerparams_ = params;
 #endif
 }
 
@@ -145,7 +145,7 @@ void
 JacoOpenraveBaseThread::set_plannerparams(const char* params)
 {
 #ifdef HAVE_OPENRAVE
-  __plannerparams = params;
+  plannerparams_ = params;
 #endif
 }
 
@@ -156,7 +156,7 @@ void
 JacoOpenraveBaseThread::plot_current(bool enable)
 {
 #ifdef HAVE_OPENRAVE
-  __plot_current = enable;
+  plot_current_ = enable;
 #endif
 }
 

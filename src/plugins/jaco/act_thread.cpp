@@ -47,12 +47,12 @@ JacoActThread::JacoActThread(const char *name, jaco_arm_t* arm)
   : Thread(name, Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
-  __arm = arm;
-  __arm->arm = NULL;
-  __arm->iface = NULL;
+  arm_ = arm;
+  arm_->arm = NULL;
+  arm_->iface = NULL;
 
-  __arm->goto_thread = NULL;
-  __arm->openrave_thread = NULL;
+  arm_->goto_thread = NULL;
+  arm_->openrave_thread = NULL;
 }
 
 /** Destructor. */
@@ -68,8 +68,8 @@ JacoActThread::~JacoActThread()
 void
 JacoActThread::init()
 {
-  __cfg_auto_init       = config->get_bool("/hardware/jaco/auto_initialize");
-  __cfg_auto_calib      = config->get_bool("/hardware/jaco/auto_calibrate");
+  cfg_auto_init_       = config->get_bool("/hardware/jaco/auto_initialize");
+  cfg_auto_calib_      = config->get_bool("/hardware/jaco/auto_calibrate");
 
   std::string cfg_arm = config->get_string("/hardware/jaco/arm");
 
@@ -78,7 +78,7 @@ JacoActThread::init()
     throw fawkes::Exception("Bad config entry /hardware/jaco/arm '%s'", cfg_arm.c_str());
 
   std::string arm_name, arm_iface;
-  switch( __arm->config ) {
+  switch( arm_->config ) {
     case CONFIG_SINGLE:
       arm_name  = config->get_string("/hardware/jaco/config/single/name");
       arm_iface = config->get_string("/hardware/jaco/config/single/interface");
@@ -102,9 +102,9 @@ JacoActThread::init()
   // create the JacoArm object and assign correctly to config
   try {
     if( !cfg_arm.compare("dummy") ) {
-      __arm->arm = new JacoArmDummy("JacoDummy");
+      arm_->arm = new JacoArmDummy("JacoDummy");
     } else {
-      __arm->arm = new JacoArmKindrv(arm_name.c_str());
+      arm_->arm = new JacoArmKindrv(arm_name.c_str());
     }
   } catch(fawkes::Exception &e) {
     logger->log_error(name(), "Could not connect to JacoArm. Exception follows.");
@@ -113,27 +113,27 @@ JacoActThread::init()
 
   // open interface for writing
   try {
-    __arm->iface = blackboard->open_for_writing<JacoInterface>(arm_iface.c_str());
+    arm_->iface = blackboard->open_for_writing<JacoInterface>(arm_iface.c_str());
   } catch(fawkes::Exception &e) {
     logger->log_error(name(), "Could not open interface %s for writing. Exception follows.", arm_iface.c_str());
-    delete __arm->arm;
-    __arm = NULL;
+    delete arm_->arm;
+    arm_ = NULL;
     throw;
   }
 
   // create target/trajectory queues and mutexes
-  __arm->target_mutex = RefPtr<Mutex>(new Mutex());
-  __arm->trajec_mutex = RefPtr<Mutex>(new Mutex());
-  __arm->target_queue = RefPtr<jaco_target_queue_t>(new jaco_target_queue_t());
+  arm_->target_mutex = RefPtr<Mutex>(new Mutex());
+  arm_->trajec_mutex = RefPtr<Mutex>(new Mutex());
+  arm_->target_queue = RefPtr<jaco_target_queue_t>(new jaco_target_queue_t());
 
   // set trajectory colors (TODO: configurable)
-  __arm->trajec_color[0] = 0.f;
-  __arm->trajec_color[1] = 0.f;
-  __arm->trajec_color[2] = 1.f;
-  __arm->trajec_color[3] = 1.f;
-  if( __arm->config==CONFIG_RIGHT ) {
-    __arm->trajec_color[0] = 1.f;
-    __arm->trajec_color[2] = 0.f;
+  arm_->trajec_color[0] = 0.f;
+  arm_->trajec_color[1] = 0.f;
+  arm_->trajec_color[2] = 1.f;
+  arm_->trajec_color[3] = 1.f;
+  if( arm_->config==CONFIG_RIGHT ) {
+    arm_->trajec_color[0] = 1.f;
+    arm_->trajec_color[2] = 0.f;
   }
 
   // initalize arm
@@ -147,12 +147,12 @@ void
 JacoActThread::finalize()
 {
   try {
-    blackboard->close(__arm->iface);
+    blackboard->close(arm_->iface);
   } catch(fawkes::Exception& e) {
     logger->log_warn(name(), "Could not close JacoInterface interface. Er:%s", e.what_no_backtrace());
   }
 
-  delete __arm->arm;
+  delete arm_->arm;
 }
 
 /** Main loop.
@@ -164,11 +164,11 @@ JacoActThread::finalize()
 void
 JacoActThread::loop()
 {
-  if( __arm==NULL || __arm->iface==NULL || __arm->openrave_thread==NULL)
+  if( arm_==NULL || arm_->iface==NULL || arm_->openrave_thread==NULL)
     return;
 
   // firts of all, submit interface updates (that other threads might have done)!
-  __arm->iface->write();
+  arm_->iface->write();
 
   // check if still initializing
   if( _is_initializing() )
@@ -176,7 +176,7 @@ JacoActThread::loop()
 
 #ifdef HAVE_OPENRAVE
   // make sure openrave-thread is ready!
-  if( !__arm->openrave_thread->started() )
+  if( !arm_->openrave_thread->started() )
     return;
 #endif
 
@@ -184,12 +184,12 @@ JacoActThread::loop()
   _process_msgs();
 
   // finally, again submit interface updates
-  __arm->iface->write();
+  arm_->iface->write();
 
 #ifdef HAVE_OPENRAVE
-  __arm->openrave_thread->update_openrave();
+  arm_->openrave_thread->update_openrave();
 #endif
-  __arm->iface->set_final(__arm->goto_thread->final());
+  arm_->iface->set_final(arm_->goto_thread->final());
 }
 
 
@@ -204,29 +204,29 @@ void
 JacoActThread::_initialize()
 {
   //check if we need to initialize arm
-  if( !__arm->arm->initialized() && __cfg_auto_init ) {
+  if( !arm_->arm->initialized() && cfg_auto_init_ ) {
     logger->log_debug(name(), "Initializing arm, wait until finished");
-    __arm->arm->initialize();
-    __arm->iface->set_final(false);
-    //__arm.goto_thread->pos_ready();
+    arm_->arm->initialize();
+    arm_->iface->set_final(false);
+    //arm_.goto_thread->pos_ready();
 
-  } else if( __arm->arm->initialized() && __cfg_auto_calib ) {
-    __arm->goto_thread->pos_ready();
+  } else if( arm_->arm->initialized() && cfg_auto_calib_ ) {
+    arm_->goto_thread->pos_ready();
   }
 
-  __arm->iface->set_initialized(__arm->arm->initialized());
-  __arm->iface->write();
+  arm_->iface->set_initialized(arm_->arm->initialized());
+  arm_->iface->write();
 }
 
 /** Check if arm is being initialized. */
 bool
 JacoActThread::_is_initializing()
 {
-  __arm->iface->set_initialized(__arm->arm->initialized());
+  arm_->iface->set_initialized(arm_->arm->initialized());
 
-  if( !__arm->arm->initialized() && __cfg_auto_init ) {
+  if( !arm_->arm->initialized() && cfg_auto_init_ ) {
     logger->log_debug(name(), "wait for arm to initialize");
-    //__arm->initialized = __arm->iface->is_final();
+    //arm_->initialized = arm_->iface->is_final();
     return true;
   }
 
@@ -237,102 +237,102 @@ JacoActThread::_is_initializing()
 void
 JacoActThread::_process_msgs()
 {
-  while( ! __arm->iface->msgq_empty() ) {
-    Message *m = __arm->iface->msgq_first(m);
-    __arm->iface->set_msgid(m->id());
-    __arm->iface->set_final(false);
-    __arm->iface->set_error_code(JacoInterface::ERROR_NONE);
-    __arm->iface->write();
+  while( ! arm_->iface->msgq_empty() ) {
+    Message *m = arm_->iface->msgq_first(m);
+    arm_->iface->set_msgid(m->id());
+    arm_->iface->set_final(false);
+    arm_->iface->set_error_code(JacoInterface::ERROR_NONE);
+    arm_->iface->write();
 
-    if( __arm->iface->msgq_first_is<JacoInterface::StopMessage>() ) {
-      JacoInterface::StopMessage *msg = __arm->iface->msgq_first(msg);
-      logger->log_debug(name(), "%s: StopMessage rcvd", __arm->iface->id());
+    if( arm_->iface->msgq_first_is<JacoInterface::StopMessage>() ) {
+      JacoInterface::StopMessage *msg = arm_->iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: StopMessage rcvd", arm_->iface->id());
 
-      __arm->goto_thread->stop();
+      arm_->goto_thread->stop();
 
-    } else if( __arm->iface->msgq_first_is<JacoInterface::CalibrateMessage>() ) {
-      JacoInterface::CalibrateMessage *msg = __arm->iface->msgq_first(msg);
-      logger->log_debug(name(), "%s: CalibrateMessage rcvd", __arm->iface->id());
+    } else if( arm_->iface->msgq_first_is<JacoInterface::CalibrateMessage>() ) {
+      JacoInterface::CalibrateMessage *msg = arm_->iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: CalibrateMessage rcvd", arm_->iface->id());
 
       // Stop all (current and planned) motion. Then calibrate
-      __arm->goto_thread->stop();
-      __arm->goto_thread->pos_ready();
+      arm_->goto_thread->stop();
+      arm_->goto_thread->pos_ready();
 
-    } else if( __arm->iface->msgq_first_is<JacoInterface::RetractMessage>() ) {
-      JacoInterface::RetractMessage *msg = __arm->iface->msgq_first(msg);
-      logger->log_debug(name(), "%s: RetractMessage rcvd", __arm->iface->id());
+    } else if( arm_->iface->msgq_first_is<JacoInterface::RetractMessage>() ) {
+      JacoInterface::RetractMessage *msg = arm_->iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: RetractMessage rcvd", arm_->iface->id());
 
       // Stop all (current and planned) motion. Then retract
-      __arm->goto_thread->stop();
-      __arm->goto_thread->pos_retract();
+      arm_->goto_thread->stop();
+      arm_->goto_thread->pos_retract();
 
-    } else if( __arm->iface->msgq_first_is<JacoInterface::SetPlannerParamsMessage>() ) {
-      JacoInterface::SetPlannerParamsMessage *msg = __arm->iface->msgq_first(msg);
-      logger->log_debug(name(), "%s: SetPlannerParamsMessage rcvd. params:%s", __arm->iface->id(), msg->params());
+    } else if( arm_->iface->msgq_first_is<JacoInterface::SetPlannerParamsMessage>() ) {
+      JacoInterface::SetPlannerParamsMessage *msg = arm_->iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: SetPlannerParamsMessage rcvd. params:%s", arm_->iface->id(), msg->params());
 
     #ifdef HAVE_OPENRAVE
-      __arm->openrave_thread->set_plannerparams(msg->params());
+      arm_->openrave_thread->set_plannerparams(msg->params());
     #endif
 
-    } else if( __arm->iface->msgq_first_is<JacoInterface::CartesianGotoMessage>() ) {
-      JacoInterface::CartesianGotoMessage *msg = __arm->iface->msgq_first(msg);
-      logger->log_debug(name(), "%s: CartesianGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f", __arm->iface->id(),
+    } else if( arm_->iface->msgq_first_is<JacoInterface::CartesianGotoMessage>() ) {
+      JacoInterface::CartesianGotoMessage *msg = arm_->iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: CartesianGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f", arm_->iface->id(),
                         msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
     #ifdef HAVE_OPENRAVE
-      logger->log_debug(name(), "%s: CartesianGotoMessage is being passed to openrave", __arm->iface->id());
+      logger->log_debug(name(), "%s: CartesianGotoMessage is being passed to openrave", arm_->iface->id());
       // add target to OpenRAVE queue for planning
-      bool solvable = __arm->openrave_thread->add_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
+      bool solvable = arm_->openrave_thread->add_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
       if( !solvable ) {
-        __arm->iface->set_error_code(JacoInterface::ERROR_NO_IK);
+        arm_->iface->set_error_code(JacoInterface::ERROR_NO_IK);
         logger->log_warn(name(), "Failed executing CartesianGotoMessage, arm %s and/or thread %s could not find IK solution",
-                         __arm->arm->get_name().c_str(), __arm->openrave_thread->name());
+                         arm_->arm->get_name().c_str(), arm_->openrave_thread->name());
       }
     #else
-      __arm->goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
+      arm_->goto_thread->set_target(msg->x(), msg->y(), msg->z(), msg->e1(), msg->e2(), msg->e3());
     #endif
 
-    } else if( __arm->iface->msgq_first_is<JacoInterface::AngularGotoMessage>() ) {
-      JacoInterface::AngularGotoMessage *msg = __arm->iface->msgq_first(msg);
+    } else if( arm_->iface->msgq_first_is<JacoInterface::AngularGotoMessage>() ) {
+      JacoInterface::AngularGotoMessage *msg = arm_->iface->msgq_first(msg);
 
-      logger->log_debug(name(), "%s: AngularGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f", __arm->iface->id(),
+      logger->log_debug(name(), "%s: AngularGotoMessage rcvd. x:%f  y:%f  z:%f  e1:%f  e2:%f  e3:%f", arm_->iface->id(),
                         msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
     #ifdef HAVE_OPENRAVE
-      logger->log_debug(name(), "%s: AngularGotoMessage is being passed to openrave", __arm->iface->id());
+      logger->log_debug(name(), "%s: AngularGotoMessage is being passed to openrave", arm_->iface->id());
       // add target to OpenRAVE queue for planning
-      bool joints_valid = __arm->openrave_thread->add_target_ang(msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
+      bool joints_valid = arm_->openrave_thread->add_target_ang(msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
       if( !joints_valid ) {
-        __arm->iface->set_error_code(JacoInterface::ERROR_NO_IK);
+        arm_->iface->set_error_code(JacoInterface::ERROR_NO_IK);
         logger->log_warn(name(), "Failed executing AngularGotoMessage, given target joints for arm %s are invalid or in self-collision",
-                         __arm->arm->get_name().c_str());
+                         arm_->arm->get_name().c_str());
       }
     #else
-      __arm->goto_thread->set_target_ang(msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
+      arm_->goto_thread->set_target_ang(msg->j1(), msg->j2(), msg->j3(), msg->j4(), msg->j5(), msg->j6());
     #endif
 
-    } else if( __arm->iface->msgq_first_is<JacoInterface::MoveGripperMessage>() ) {
-      JacoInterface::MoveGripperMessage *msg = __arm->iface->msgq_first(msg);
-      logger->log_debug(name(), "%s: MoveGripperMessage rcvd. f1:%f  f2:%f  f3:%f", __arm->iface->id(),
+    } else if( arm_->iface->msgq_first_is<JacoInterface::MoveGripperMessage>() ) {
+      JacoInterface::MoveGripperMessage *msg = arm_->iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: MoveGripperMessage rcvd. f1:%f  f2:%f  f3:%f", arm_->iface->id(),
                         msg->finger1(), msg->finger2(), msg->finger3());
 
-      __arm->goto_thread->move_gripper(msg->finger1(), msg->finger2(), msg->finger3());
+      arm_->goto_thread->move_gripper(msg->finger1(), msg->finger2(), msg->finger3());
 
-    } else if( __arm->iface->msgq_first_is<JacoInterface::JoystickPushMessage>() ) {
-      JacoInterface::JoystickPushMessage *msg = __arm->iface->msgq_first(msg);
-      logger->log_debug(name(), "%s: JoystickPush %u rcvd", __arm->iface->id(), msg->button());
+    } else if( arm_->iface->msgq_first_is<JacoInterface::JoystickPushMessage>() ) {
+      JacoInterface::JoystickPushMessage *msg = arm_->iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: JoystickPush %u rcvd", arm_->iface->id(), msg->button());
 
-      __arm->arm->push_joystick(msg->button());
+      arm_->arm->push_joystick(msg->button());
 
-    } else if( __arm->iface->msgq_first_is<JacoInterface::JoystickReleaseMessage>() ) {
-      JacoInterface::JoystickReleaseMessage *msg = __arm->iface->msgq_first(msg);
-      logger->log_debug(name(), "%s: JoystickRelease rcvd", __arm->iface->id());
+    } else if( arm_->iface->msgq_first_is<JacoInterface::JoystickReleaseMessage>() ) {
+      JacoInterface::JoystickReleaseMessage *msg = arm_->iface->msgq_first(msg);
+      logger->log_debug(name(), "%s: JoystickRelease rcvd", arm_->iface->id());
 
-      __arm->arm->release_joystick();
-      __arm->iface->set_final(true);
+      arm_->arm->release_joystick();
+      arm_->iface->set_final(true);
 
     } else {
-      logger->log_warn(name(), "%s: Unknown message received. Skipping", __arm->iface->id());
+      logger->log_warn(name(), "%s: Unknown message received. Skipping", arm_->iface->id());
     }
 
-    __arm->iface->msgq_pop();
+    arm_->iface->msgq_pop();
   }
 }

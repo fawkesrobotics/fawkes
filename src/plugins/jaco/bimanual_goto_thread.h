@@ -75,14 +75,14 @@ class JacoBimanualGotoThread
   struct {
     arm_struct_t l;
     arm_struct_t r;
-  } __arms;
+  } arms_;
 
-  arm_struct_t* __v_arms[2]; // just a helper, to be able to iterate over both arms
+  arm_struct_t* v_arms_[2]; // just a helper, to be able to iterate over both arms
 
-  fawkes::jaco_dual_arm_t *__dual_arms; // have redundancy now, but keep this just to be sure
+  fawkes::jaco_dual_arm_t *dual_arms_; // have redundancy now, but keep this just to be sure
 
-  fawkes::Mutex* __final_mutex;
-  bool __final;
+  fawkes::Mutex* final_mutex_;
+  bool final_;
 };
 
 
