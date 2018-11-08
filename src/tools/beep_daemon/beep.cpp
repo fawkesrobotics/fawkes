@@ -57,7 +57,7 @@
 /** Constructor. */
 BeepController::BeepController()
 {
-  __disable_beeping = false;
+  disable_beeping_ = false;
 }
 
 /** Enable beeping.
@@ -66,7 +66,7 @@ BeepController::BeepController()
 void
 BeepController::beep_on(float freq)
 {
-  if (__disable_beeping)  return;
+  if (disable_beeping_)  return;
     
   int beep_fd = open(CONSOLE_FILE, O_WRONLY);
   if (beep_fd == -1) {
@@ -74,11 +74,11 @@ BeepController::beep_on(float freq)
     strerror_r(errno, errstr, sizeof(errstr));
     //logger->log_warn(name(), "Could not open console (%s). "
     //		     "Disabling warning beeps.", errstr);
-    __disable_beeping = true;
+    disable_beeping_ = true;
   } else {
     if (ioctl(beep_fd, KIOCSOUND, (int)(CLOCK_TICK_RATE/freq)) < 0) {
       //logger->log_warn(name(), "Starting to beep failed. Disabling warning beeps.");
-      __disable_beeping = true;
+      disable_beeping_ = true;
     }
     close(beep_fd);
   }
@@ -89,7 +89,7 @@ BeepController::beep_on(float freq)
 void
 BeepController::beep_off()
 {
-  if (__disable_beeping)  return;
+  if (disable_beeping_)  return;
 
   int beep_fd = open(CONSOLE_FILE, O_WRONLY);
   if (beep_fd == -1) {
@@ -97,12 +97,12 @@ BeepController::beep_off()
     strerror_r(errno, errstr, sizeof(errstr));
     //logger->log_warn(name(), "Could not open console (%s) [stop]. "
     //		     "Disabling warning beeps.", errstr);
-    __disable_beeping = true;
+    disable_beeping_ = true;
   } else {
     if (ioctl(beep_fd, KIOCSOUND, 0) < 0) {
       //logger->log_warn(name(), "Stopping beeping failed. "
       //	       "Disabling warning beeps.");
-      __disable_beeping = true;
+      disable_beeping_ = true;
     }
     close(beep_fd);
   }
