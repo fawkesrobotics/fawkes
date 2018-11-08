@@ -36,33 +36,33 @@ class ColorObjectMap
 {
  public:
   ~ColorObjectMap();
-  static const ColorObjectMap& get_instance() { return *__singleton; }
+  static const ColorObjectMap& get_instance() { return *singleton_; }
   static YUV_t get_color(color_t color);
 
   color_t get(hint_t hint) const
   {
-	  return __color_for_hint.find(hint) != __color_for_hint.end()
-	    ? __color_for_hint.find(hint)->second
-	    : __c_other;
+	  return color_for_hint_.find(hint) != color_for_hint_.end()
+	    ? color_for_hint_.find(hint)->second
+	    : c_other_;
   }
   hint_t get(color_t color) const
   {
-	  return __hint_for_color.find(color) != __hint_for_color.end()
-	    ? __hint_for_color.find(color)->second
-	    : __h_unknown;
+	  return hint_for_color_.find(color) != hint_for_color_.end()
+	    ? hint_for_color_.find(color)->second
+	    : h_unknown_;
   }
 
  private:
   ColorObjectMap();
   void set_mapping(hint_t roi, color_t color);
 
-  static ColorObjectMap    *__singleton;
-  std::map<hint_t, color_t> __color_for_hint;
-  std::map<color_t, hint_t> __hint_for_color;
-  color_t                   __c_other;
-  hint_t                    __h_unknown;
+  static ColorObjectMap    *singleton_;
+  std::map<hint_t, color_t> color_for_hint_;
+  std::map<color_t, hint_t> hint_for_color_;
+  color_t                   c_other_;
+  hint_t                    h_unknown_;
 };
 
 } // end namespace firevision
 
-#endif // __FIREVISION_MODELS_COLOR_COLOR_MAPPING_H__
+#endif // FIREVISION_MODELS_COLOR_COLOR_MAPPING_H___

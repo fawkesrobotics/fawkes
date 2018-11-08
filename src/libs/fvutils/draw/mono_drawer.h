@@ -55,11 +55,11 @@ class MonoDrawer {
   void set_overlap(bool o);
 
  private:
-  unsigned char  *__buffer;
-  unsigned int    __width;
-  unsigned int    __height;
-  unsigned char   __brightness;
-  bool		  __overlap;
+  unsigned char  *buffer_;
+  unsigned int    width_;
+  unsigned int    height_;
+  unsigned char   brightness_;
+  bool		  overlap_;
 
 };
 

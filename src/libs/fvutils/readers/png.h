@@ -45,7 +45,7 @@ class PNGReader : public Reader {
  private:
   PNGReaderData *  setup_read(const char *filename);
 
-  PNGReaderData *__d;
+  PNGReaderData *d_;
   bool opened;
   unsigned char *buffer;
 };

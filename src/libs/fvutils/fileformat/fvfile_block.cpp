@@ -92,13 +92,13 @@ FireVisionDataFileBlock::FireVisionDataFileBlock(unsigned int type, size_t data_
 FireVisionDataFileBlock::FireVisionDataFileBlock(FireVisionDataFileBlock *block)
 {
   _data_size         = block->_data_size;
-  __spec_header_size = block->__spec_header_size;
-  __block_size       = block->__block_size;
-  __block_memptr     = block->__block_memptr;
-  __block_header     = (fvff_block_header_t *)__block_memptr;
-  _spec_header       = (char *)__block_memptr + sizeof(fvff_block_header_t);
-  _data              = (char *)__block_memptr + sizeof(fvff_block_header_t) + __spec_header_size;
-  __block_owner      = false;
+  spec_header_size_ = block->spec_header_size_;
+  block_size_       = block->block_size_;
+  block_memptr_     = block->block_memptr_;
+  block_header_     = (fvff_block_header_t *)block_memptr_;
+  _spec_header       = (char *)block_memptr_ + sizeof(fvff_block_header_t);
+  _data              = (char *)block_memptr_ + sizeof(fvff_block_header_t) + spec_header_size_;
+  block_owner_      = false;
 }
 
 
@@ -113,22 +113,22 @@ FireVisionDataFileBlock::constructor(unsigned int type, size_t data_size,
 				     void *spec_header, size_t spec_header_size)
 {
   _data_size         = data_size;
-  __spec_header_size = spec_header_size;
-  __block_size       = _data_size + sizeof(fvff_block_header_t) + spec_header_size;
+  spec_header_size_ = spec_header_size;
+  block_size_       = _data_size + sizeof(fvff_block_header_t) + spec_header_size;
 
-  __block_memptr = calloc(1, __block_size);
-  __block_owner  = true;
-  __block_header = (fvff_block_header_t *)__block_memptr;
-  _spec_header   = (char *)__block_memptr + sizeof(fvff_block_header_t);
-  _data          = (char *)__block_memptr + sizeof(fvff_block_header_t) + spec_header_size;
+  block_memptr_ = calloc(1, block_size_);
+  block_owner_  = true;
+  block_header_ = (fvff_block_header_t *)block_memptr_;
+  _spec_header   = (char *)block_memptr_ + sizeof(fvff_block_header_t);
+  _data          = (char *)block_memptr_ + sizeof(fvff_block_header_t) + spec_header_size;
 
   if ( (spec_header != NULL) && (spec_header_size > 0) ) {
-    memcpy((char *)__block_memptr + sizeof(fvff_block_header_t), spec_header, spec_header_size);
+    memcpy((char *)block_memptr_ + sizeof(fvff_block_header_t), spec_header, spec_header_size);
   }
 
-  __block_header->type = type;
-  __block_header->size = _data_size;
-  __block_header->spec_head_size = spec_header_size;
+  block_header_->type = type;
+  block_header_->size = _data_size;
+  block_header_->spec_head_size = spec_header_size;
 }
 
 
@@ -141,27 +141,27 @@ FireVisionDataFileBlock::constructor(unsigned int type, size_t data_size,
 void
 FireVisionDataFileBlock::set_spec_header(void *spec_header, size_t spec_header_size)
 {
-  if( spec_header_size != __spec_header_size ) {
+  if( spec_header_size != spec_header_size_ ) {
     // we need to re-create the memory and copy old data
-    __spec_header_size = spec_header_size;
-    __block_size       = _data_size + sizeof(fvff_block_header_t) + spec_header_size;
+    spec_header_size_ = spec_header_size;
+    block_size_       = _data_size + sizeof(fvff_block_header_t) + spec_header_size;
 
-    void *newblock = calloc(1, __block_size);
+    void *newblock = calloc(1, block_size_);
 
-    memcpy(newblock, __block_memptr, sizeof(fvff_block_header_t));
+    memcpy(newblock, block_memptr_, sizeof(fvff_block_header_t));
     memcpy((char *)newblock + sizeof(fvff_block_header_t) + spec_header_size, _data, _data_size);
 
-    free(__block_memptr);
-    __block_memptr = newblock;
-    __block_header = (fvff_block_header_t *)__block_memptr;
-    _spec_header = (char *)__block_memptr + sizeof(fvff_block_header_t);
-    _data = (char *)__block_memptr + sizeof(fvff_block_header_t) + spec_header_size;
+    free(block_memptr_);
+    block_memptr_ = newblock;
+    block_header_ = (fvff_block_header_t *)block_memptr_;
+    _spec_header = (char *)block_memptr_ + sizeof(fvff_block_header_t);
+    _data = (char *)block_memptr_ + sizeof(fvff_block_header_t) + spec_header_size;
 
-    __block_header->spec_head_size = spec_header_size;
+    block_header_->spec_head_size = spec_header_size;
   }
 
   if ( (spec_header != NULL) && (spec_header_size > 0) ) {
-    memcpy((char *)__block_memptr + sizeof(fvff_block_header_t), spec_header, spec_header_size);
+    memcpy((char *)block_memptr_ + sizeof(fvff_block_header_t), spec_header, spec_header_size);
   }
 }
 
@@ -169,8 +169,8 @@ FireVisionDataFileBlock::set_spec_header(void *spec_header, size_t spec_header_s
 /** Destructor. */
 FireVisionDataFileBlock::~FireVisionDataFileBlock()
 {
-  if ( __block_owner) {
-    free(__block_memptr);
+  if ( block_owner_) {
+    free(block_memptr_);
   }
 }
 
@@ -181,7 +181,7 @@ FireVisionDataFileBlock::~FireVisionDataFileBlock()
 unsigned int
 FireVisionDataFileBlock::type() const
 {
-  return __block_header->type;
+  return block_header_->type;
 }
 
 
@@ -191,7 +191,7 @@ FireVisionDataFileBlock::type() const
 void *
 FireVisionDataFileBlock::block_memptr() const
 {
-  return __block_memptr;
+  return block_memptr_;
 }
 
 
@@ -201,7 +201,7 @@ FireVisionDataFileBlock::block_memptr() const
 size_t
 FireVisionDataFileBlock::block_size() const
 {
-  return __block_size;
+  return block_size_;
 }
 
 

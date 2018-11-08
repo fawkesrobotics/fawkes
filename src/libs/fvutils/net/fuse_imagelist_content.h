@@ -47,8 +47,8 @@ class FuseImageListContent : public FuseMessageContent
   virtual void serialize();
 
  private:
-  fawkes::DynamicBuffer  *__list;
-  FUSE_imagelist_message_t __imagelist_msg;
+  fawkes::DynamicBuffer  *list_;
+  FUSE_imagelist_message_t imagelist_msg_;
 };
 
 } // end namespace firevision

@@ -82,4 +82,4 @@ class HistogramBlock : public FireVisionDataFileBlock
 
 } // end namespace firevision
 
-#endif /* __FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_ */
+#endif /* FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H__ */

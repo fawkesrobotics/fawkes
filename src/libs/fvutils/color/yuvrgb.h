@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_COLOR_YUVRGB_H
-#define __FIREVISION_UTILS_COLOR_YUVRGB_H
+#ifndef FIREVISION_UTILS_COLOR_YUVRGB_H_
+#define FIREVISION_UTILS_COLOR_YUVRGB_H_
 
 #include <fvutils/color/yuv.h>
 #include <fvutils/color/rgb.h>

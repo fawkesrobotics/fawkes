@@ -64,26 +64,26 @@ class FuseClient : public fawkes::Thread {
   void recv();
   void sleep();
 
-  char *__hostname;
-  unsigned short int __port;
+  char *hostname_;
+  unsigned short int port_;
 
-  fawkes::StreamSocket *__socket;
-  unsigned int __wait_timeout;
+  fawkes::StreamSocket *socket_;
+  unsigned int wait_timeout_;
 
-  fawkes::Mutex         *__mutex;
-  fawkes::Mutex         *__recv_mutex;
-  fawkes::WaitCondition *__recv_waitcond;
+  fawkes::Mutex         *mutex_;
+  fawkes::Mutex         *recv_mutex_;
+  fawkes::WaitCondition *recv_waitcond_;
 
-  FuseNetworkMessageQueue *  __inbound_msgq;
-  FuseNetworkMessageQueue *  __outbound_msgq;
+  FuseNetworkMessageQueue *  inbound_msgq_;
+  FuseNetworkMessageQueue *  outbound_msgq_;
 
-  FuseClientHandler       *__handler;
+  FuseClientHandler       *handler_;
 
-  bool __greeting_received;
-  fawkes::Mutex         *__greeting_mutex;
-  fawkes::WaitCondition *__greeting_waitcond;
+  bool greeting_received_;
+  fawkes::Mutex         *greeting_mutex_;
+  fawkes::WaitCondition *greeting_waitcond_;
 
-  bool __alive;
+  bool alive_;
 };
 
 } // end namespace firevision

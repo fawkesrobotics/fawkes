@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_COLOR_BAYES_BAYES_GENERATOR_
-#define __FIREVISION_MODELS_COLOR_BAYES_BAYES_GENERATOR_
+#ifndef FIREVISION_MODELS_COLOR_BAYES_BAYES_GENERATOR__
+#define FIREVISION_MODELS_COLOR_BAYES_BAYES_GENERATOR__
 
 #include <fvutils/colormap/generator.h>
 

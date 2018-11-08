@@ -67,20 +67,20 @@ protected:
   unsigned int   _img_height;
 
 private: //Members
-  const FieldLines     &__lines;
-  fawkes::field_pos_t   __own_position, __own_pos_est;
-  float                 __head_yaw;
+  const FieldLines     &lines_;
+  fawkes::field_pos_t   own_position_, own_pos_est_;
+  float                 head_yaw_;
 
-  const fld_line_points_t     *__points;
-  const fld_line_points_t     *__points_est;
+  const fld_line_points_t     *points_;
+  const fld_line_points_t     *points_est_;
 
-  YUV_t __c_background;
-  YUV_t __c_field;
-  YUV_t __c_lines;
-  YUV_t __c_line_points;
-  YUV_t __c_line_points_est;
-  YUV_t __c_own_pos;
-  YUV_t __c_own_pos_est;
+  YUV_t c_background_;
+  YUV_t c_field_;
+  YUV_t c_lines_;
+  YUV_t c_line_points_;
+  YUV_t c_line_points_est_;
+  YUV_t c_own_pos_;
+  YUV_t c_own_pos_est_;
 };
 
 } // end namespace firevision

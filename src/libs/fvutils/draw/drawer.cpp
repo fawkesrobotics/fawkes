@@ -40,8 +40,8 @@ namespace firevision {
  */
 Drawer::Drawer()
 {
-  __buffer = NULL;
-  __color  = YUV_t::white();
+  buffer_ = NULL;
+  color_  = YUV_t::white();
 }
 
 /** Destructor */
@@ -59,9 +59,9 @@ void
 Drawer::set_buffer(unsigned char *buffer,
 		  unsigned int width, unsigned int height)
 {
-  this->__buffer     = buffer;
-  this->__width      = width;
-  this->__height     = height;
+  this->buffer_     = buffer;
+  this->width_      = width;
+  this->height_     = height;
 }
 
 
@@ -73,9 +73,9 @@ Drawer::set_buffer(unsigned char *buffer,
 void
 Drawer::set_color(unsigned char y, unsigned char u, unsigned char v)
 {
-  __color.Y = y;
-  __color.U = u;
-  __color.V = v;
+  color_.Y = y;
+  color_.U = u;
+  color_.V = v;
 }
 
 
@@ -85,7 +85,7 @@ Drawer::set_color(unsigned char y, unsigned char u, unsigned char v)
 void
 Drawer::set_color(YUV_t color)
 {
-  __color = color;
+  color_ = color;
 }
 
 
@@ -99,14 +99,14 @@ void
 Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
 {
 
-  if (__buffer == NULL) return;
+  if (buffer_ == NULL) return;
 
   unsigned int x  = 0,
                y  = radius,
                r2 = radius * radius;
 
-  unsigned char *up = YUV422_PLANAR_U_PLANE(__buffer, __width, __height);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(__buffer, __width, __height);
+  unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
+  unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
 
   unsigned int x_tmp, y_tmp, ind_tmp;
 
@@ -114,82 +114,82 @@ Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
 
     x_tmp = center_x + x;
     y_tmp = center_y + y;
-    if ( (x_tmp < __width) && (y_tmp < __height) ) {
-      ind_tmp = y_tmp * __width + x_tmp;
-      __buffer[ind_tmp]   = __color.Y;
+    if ( (x_tmp < width_) && (y_tmp < height_) ) {
+      ind_tmp = y_tmp * width_ + x_tmp;
+      buffer_[ind_tmp]   = color_.Y;
       ind_tmp /= 2;
-      up[ind_tmp] = __color.U;
-      vp[ind_tmp] = __color.V;
+      up[ind_tmp] = color_.U;
+      vp[ind_tmp] = color_.V;
     }
 
     x_tmp = center_x - x;
     y_tmp = center_y + y;
-    if ( (x_tmp < __width) && (y_tmp < __height) ) {
-      ind_tmp = y_tmp * __width + x_tmp;
-      __buffer[ind_tmp]   = __color.Y;
+    if ( (x_tmp < width_) && (y_tmp < height_) ) {
+      ind_tmp = y_tmp * width_ + x_tmp;
+      buffer_[ind_tmp]   = color_.Y;
       ind_tmp /= 2;
-      up[ind_tmp] = __color.U;
-      vp[ind_tmp] = __color.V;
+      up[ind_tmp] = color_.U;
+      vp[ind_tmp] = color_.V;
     }
 
     x_tmp = center_x + y;
     y_tmp = center_y + x;
-    if ( (x_tmp < __width) && (y_tmp < __height) ) {
-      ind_tmp = y_tmp * __width + x_tmp;
-      __buffer[ind_tmp]   = __color.Y;
+    if ( (x_tmp < width_) && (y_tmp < height_) ) {
+      ind_tmp = y_tmp * width_ + x_tmp;
+      buffer_[ind_tmp]   = color_.Y;
       ind_tmp /= 2;
-      up[ind_tmp] = __color.U;
-      vp[ind_tmp] = __color.V;
+      up[ind_tmp] = color_.U;
+      vp[ind_tmp] = color_.V;
     }
 
     x_tmp = center_x - y;
     y_tmp = center_y + x;
-    if ( (x_tmp < __width) && (y_tmp < __height) ) {
-      ind_tmp = y_tmp * __width + x_tmp;
-      __buffer[ind_tmp]   = __color.Y;
+    if ( (x_tmp < width_) && (y_tmp < height_) ) {
+      ind_tmp = y_tmp * width_ + x_tmp;
+      buffer_[ind_tmp]   = color_.Y;
       ind_tmp /= 2;
-      up[ind_tmp] = __color.U;
-      vp[ind_tmp] = __color.V;
+      up[ind_tmp] = color_.U;
+      vp[ind_tmp] = color_.V;
     }
 
     x_tmp = center_x + x;
     y_tmp = center_y - y;
-    if ( (x_tmp < __width) && (y_tmp < __height) ) {
-      ind_tmp = y_tmp * __width + x_tmp;
-      __buffer[ind_tmp]   = __color.Y;
+    if ( (x_tmp < width_) && (y_tmp < height_) ) {
+      ind_tmp = y_tmp * width_ + x_tmp;
+      buffer_[ind_tmp]   = color_.Y;
       ind_tmp /= 2;
-      up[ind_tmp] = __color.U;
-      vp[ind_tmp] = __color.V;
+      up[ind_tmp] = color_.U;
+      vp[ind_tmp] = color_.V;
     }
 
     x_tmp = center_x - x;
     y_tmp = center_y - y;
-    if ( (x_tmp < __width) && (y_tmp < __height)) {
-      ind_tmp = y_tmp * __width + x_tmp;
-      __buffer[ind_tmp]   = __color.Y;
+    if ( (x_tmp < width_) && (y_tmp < height_)) {
+      ind_tmp = y_tmp * width_ + x_tmp;
+      buffer_[ind_tmp]   = color_.Y;
       ind_tmp /= 2;
-      up[ind_tmp] = __color.U;
-      vp[ind_tmp] = __color.V;
+      up[ind_tmp] = color_.U;
+      vp[ind_tmp] = color_.V;
     }
 
     x_tmp = center_x + y;
     y_tmp = center_y - x;
-    if ( (x_tmp < __width) && (y_tmp < __height)) {
-      ind_tmp = y_tmp * __width + x_tmp;
-      __buffer[ind_tmp]   = __color.Y;
+    if ( (x_tmp < width_) && (y_tmp < height_)) {
+      ind_tmp = y_tmp * width_ + x_tmp;
+      buffer_[ind_tmp]   = color_.Y;
       ind_tmp /= 2;
-      up[ind_tmp] = __color.U;
-      vp[ind_tmp] = __color.V;
+      up[ind_tmp] = color_.U;
+      vp[ind_tmp] = color_.V;
     }
 
     x_tmp = center_x - y;
     y_tmp = center_y - x;
-    if ( (x_tmp < __width) && (y_tmp < __height) ) {
-      ind_tmp = y_tmp * __width + x_tmp;
-      __buffer[ind_tmp]   = __color.Y;
+    if ( (x_tmp < width_) && (y_tmp < height_) ) {
+      ind_tmp = y_tmp * width_ + x_tmp;
+      buffer_[ind_tmp]   = color_.Y;
       ind_tmp /= 2;
-      up[ind_tmp] = __color.U;
-      vp[ind_tmp] = __color.V;
+      up[ind_tmp] = color_.U;
+      vp[ind_tmp] = color_.V;
     }
 
     ++x;
@@ -210,15 +210,15 @@ Drawer::draw_rectangle(unsigned int x, unsigned int y,
 		      unsigned int w, unsigned int h)
 {
 
-  unsigned char *up = YUV422_PLANAR_U_PLANE(__buffer, __width, __height);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(__buffer, __width, __height);
+  unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
+  unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
 
   // horizontal line at top
   for (unsigned int i = x; i < x + w; ++i) {
-    if ( i < __width ) {
-      __buffer[ y * __width + i ]   = __color.Y;
-      up[ (y * __width + i) / 2 ] = __color.U;
-      vp[ (y * __width + i) / 2 ] = __color.V;
+    if ( i < width_ ) {
+      buffer_[ y * width_ + i ]   = color_.Y;
+      up[ (y * width_ + i) / 2 ] = color_.U;
+      vp[ (y * width_ + i) / 2 ] = color_.V;
     } else {
       break;
     }
@@ -227,24 +227,24 @@ Drawer::draw_rectangle(unsigned int x, unsigned int y,
   // left and right
   for (unsigned int i = y; i < y + h; ++i) {
     // left
-    __buffer[ i * __width + x ]   = __color.Y;
-    up[ (i * __width + x) / 2 ] = __color.U;
-    vp[ (i * __width + x) / 2 ] = __color.V;
+    buffer_[ i * width_ + x ]   = color_.Y;
+    up[ (i * width_ + x) / 2 ] = color_.U;
+    vp[ (i * width_ + x) / 2 ] = color_.V;
 
-    if ( (x + w) < __width ) {
+    if ( (x + w) < width_ ) {
       // right
-      __buffer[ i * __width + x + w ]   = __color.Y;
-      up[ (i * __width + x + w) / 2 ] = __color.U;
-      vp[ (i * __width + x + w) / 2 ] = __color.V;
+      buffer_[ i * width_ + x + w ]   = color_.Y;
+      up[ (i * width_ + x + w) / 2 ] = color_.U;
+      vp[ (i * width_ + x + w) / 2 ] = color_.V;
     }
   }
 
   // horizontal line at bottom
   for (unsigned int i = x; i < x + w; ++i) {
-    if ( i < __width ) {
-      __buffer[ (y + h) * __width + i ]   = __color.Y;
-      up[ ((y + h) * __width + i) / 2 ] = __color.U;
-      vp[ ((y + h) * __width + i) / 2 ] = __color.V;
+    if ( i < width_ ) {
+      buffer_[ (y + h) * width_ + i ]   = color_.Y;
+      up[ ((y + h) * width_ + i) / 2 ] = color_.U;
+      vp[ ((y + h) * width_ + i) / 2 ] = color_.V;
     } else {
       break;
     }
@@ -270,9 +270,9 @@ Drawer::draw_rectangle_inverted(unsigned int x, unsigned int y,
 
   // horizontal line at top
   for (unsigned int i = x; i < x + w; ++i) {
-    if ( i < __width ) {
-      ind = y * __width + i;
-      __buffer[ind]   = 255 - __buffer[ind];
+    if ( i < width_ ) {
+      ind = y * width_ + i;
+      buffer_[ind]   = 255 - buffer_[ind];
     } else {
       break;
     }
@@ -281,20 +281,20 @@ Drawer::draw_rectangle_inverted(unsigned int x, unsigned int y,
   // left and right
   for (unsigned int i = y; i < y + h; ++i) {
     // left
-    ind = i * __width + x;
-    __buffer[ind]   = 255 - __buffer[ind];
+    ind = i * width_ + x;
+    buffer_[ind]   = 255 - buffer_[ind];
 
-    if ( (x + w) < __width ) {
+    if ( (x + w) < width_ ) {
       // right
       ind += w;
-      __buffer[ind]   = 255 - __buffer[ind];
+      buffer_[ind]   = 255 - buffer_[ind];
     }
   }
 
   // horizontal line at bottom
   for (unsigned int i = x; i < x + w; ++i) {
-    if ( i < __width ) {
-      __buffer[ind]   = 255 - __buffer[ind];
+    if ( i < width_ ) {
+      buffer_[ind]   = 255 - buffer_[ind];
     } else {
       break;
     }
@@ -310,15 +310,15 @@ Drawer::draw_rectangle_inverted(unsigned int x, unsigned int y,
 void
 Drawer::draw_point(unsigned int x, unsigned int y)
 {
-  if ( x > __width) return;
-  if ( y > __height) return;
+  if ( x > width_) return;
+  if ( y > height_) return;
 
-  unsigned char *up = YUV422_PLANAR_U_PLANE(__buffer, __width, __height);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(__buffer, __width, __height);
+  unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
+  unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
 
-  __buffer[ y * __width + x ]   = __color.Y;
-  up[ (y * __width + x) / 2 ] = __color.U;
-  vp[ (y * __width + x) / 2 ] = __color.V;
+  buffer_[ y * width_ + x ]   = color_.Y;
+  up[ (y * width_ + x) / 2 ] = color_.U;
+  vp[ (y * width_ + x) / 2 ] = color_.V;
 }
 
 
@@ -332,15 +332,15 @@ Drawer::draw_point(unsigned int x, unsigned int y)
 void
 Drawer::color_point(unsigned int x, unsigned int y)
 {
-  if ( x > __width) return;
-  if ( y > __height) return;
+  if ( x > width_) return;
+  if ( y > height_) return;
 
-  unsigned char *up = YUV422_PLANAR_U_PLANE(__buffer, __width, __height);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(__buffer, __width, __height);
+  unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
+  unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
 
-  __buffer[ y * __width + x ]   = __color.Y;
-  up[ (y * __width + x) / 2 ] = __color.U;
-  vp[ (y * __width + x) / 2 ] = __color.V;
+  buffer_[ y * width_ + x ]   = color_.Y;
+  up[ (y * width_ + x) / 2 ] = color_.U;
+  vp[ (y * width_ + x) / 2 ] = color_.V;
 }
 
 
@@ -354,15 +354,15 @@ Drawer::color_point(unsigned int x, unsigned int y)
 void
 Drawer::color_point(unsigned int x, unsigned int y, YUV_t color)
 {
-  if ( x > __width) return;
-  if ( y > __height) return;
+  if ( x > width_) return;
+  if ( y > height_) return;
 
-  unsigned char *up = YUV422_PLANAR_U_PLANE(__buffer, __width, __height);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(__buffer, __width, __height);
+  unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
+  unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
 
-  __buffer[ y * __width + x ] = color.Y;
-  up[ (y * __width + x) / 2 ] = color.U;
-  vp[ (y * __width + x) / 2 ] = color.V;
+  buffer_[ y * width_ + x ] = color.Y;
+  up[ (y * width_ + x) / 2 ] = color.U;
+  vp[ (y * width_ + x) / 2 ] = color.V;
 }
 
 
@@ -387,8 +387,8 @@ Drawer::draw_line(unsigned int x_start, unsigned int y_start,
   int x, y, dist, xerr, yerr, dx, dy, incx, incy;
   bool was_inside_image = false;
 
-  unsigned char *up = YUV422_PLANAR_U_PLANE(__buffer, __width, __height);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(__buffer, __width, __height);
+  unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
+  unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
 
   // calculate distance in both directions
   dx = x_end - x_start;
@@ -420,12 +420,12 @@ Drawer::draw_line(unsigned int x_start, unsigned int y_start,
 
   /* Calculate and draw pixels */
   for(int t = 0; t < dist; ++t) {
-    if ( ((unsigned int)x < __width) && ((unsigned int)y < __height) ) {
+    if ( ((unsigned int)x < width_) && ((unsigned int)y < height_) ) {
       if ( (x >= 0) && (y >= 0) ) {
 	was_inside_image = true;
-	__buffer[ y * __width + x ]   = __color.Y;
-	up[ (y * __width + x) / 2 ] = __color.U;
-	vp[ (y * __width + x) / 2 ] = __color.V;
+	buffer_[ y * width_ + x ]   = color_.Y;
+	up[ (y * width_ + x) / 2 ] = color_.U;
+	vp[ (y * width_ + x) / 2 ] = color_.V;
       }
     } else {
       if ( was_inside_image ) {
@@ -447,10 +447,10 @@ Drawer::draw_line(unsigned int x_start, unsigned int y_start,
     }
   }
 
-  if ( (x_end < __width) && (y_end < __height) ) {
-    __buffer[ y_end * __width + x_end ]   = __color.Y;
-    up[ (y_end * __width + x_end) / 2 ] = __color.U;
-    vp[ (y_end * __width + x_end) / 2 ] = __color.V;
+  if ( (x_end < width_) && (y_end < height_) ) {
+    buffer_[ y_end * width_ + x_end ]   = color_.Y;
+    up[ (y_end * width_ + x_end) / 2 ] = color_.U;
+    vp[ (y_end * width_ + x_end) / 2 ] = color_.V;
   }
 
 }
@@ -463,16 +463,16 @@ Drawer::draw_line(unsigned int x_start, unsigned int y_start,
 void
 Drawer::draw_cross(unsigned int x_center, unsigned int y_center, unsigned int width)
 {
-  x_center = std::min(x_center, __width);
-  y_center = std::min(y_center, __height);
+  x_center = std::min(x_center, width_);
+  y_center = std::min(y_center, height_);
 
   int r = width / 2;
   unsigned int a = std::max(0, (int)x_center - r);
-  unsigned int b = std::min(x_center + r, __width);
+  unsigned int b = std::min(x_center + r, width_);
   draw_line(a, y_center, b, y_center);
 
   a = std::max(0, (int)y_center - r);
-  b = std::min(y_center + r, __height);
+  b = std::min(y_center + r, height_);
   draw_line(x_center, a, x_center, b);
 }
 

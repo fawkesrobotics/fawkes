@@ -57,12 +57,12 @@ class FireVisionDataFileBlock
   void constructor(unsigned int type, size_t data_size,
 		   void *spec_header, size_t spec_header_size);
 
-  fvff_block_header_t *__block_header;
-  void                *__block_memptr;
-  size_t               __block_size;
-  bool                 __block_owner;
+  fvff_block_header_t *block_header_;
+  void                *block_memptr_;
+  size_t               block_size_;
+  bool                 block_owner_;
 
-  size_t               __spec_header_size;
+  size_t               spec_header_size_;
 };
 
 } // end namespace firevision

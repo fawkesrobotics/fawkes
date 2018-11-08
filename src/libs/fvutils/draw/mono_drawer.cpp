@@ -31,10 +31,10 @@
 
 #define PUT_POINT( x, y )									\
 {												\
-  if( __overlap )										\
-    __buffer[ y * __width + x ]   = std::min(255, __buffer[ y * __width + x ] + __brightness);  \
+  if( overlap_ )										\
+    buffer_[ y * width_ + x ]   = std::min(255, buffer_[ y * width_ + x ] + brightness_);  \
   else   											\
-    __buffer[ y * __width + x ]   = __brightness;						\
+    buffer_[ y * width_ + x ]   = brightness_;						\
 }
 
 namespace firevision {
@@ -48,9 +48,9 @@ namespace firevision {
 /** Constructor. */
 MonoDrawer::MonoDrawer()
 {
-  __buffer = NULL;
-  __brightness = 1;
-  __overlap = 1;
+  buffer_ = NULL;
+  brightness_ = 1;
+  overlap_ = 1;
 }
 
 /** Destructor */
@@ -68,9 +68,9 @@ void
 MonoDrawer::set_buffer(unsigned char *buffer,
 		  unsigned int width, unsigned int height)
 {
-  this->__buffer     = buffer;
-  this->__width      = width;
-  this->__height     = height;
+  this->buffer_     = buffer;
+  this->width_      = width;
+  this->height_     = height;
 }
 
 
@@ -80,7 +80,7 @@ MonoDrawer::set_buffer(unsigned char *buffer,
 void
 MonoDrawer::set_brightness(unsigned char b)
 {
-  __brightness = b;
+  brightness_ = b;
 }
 
 
@@ -90,7 +90,7 @@ MonoDrawer::set_brightness(unsigned char b)
 void
 MonoDrawer::set_overlap(bool o)
 {
-  __overlap = o;
+  overlap_ = o;
 }
 
 
@@ -103,7 +103,7 @@ MonoDrawer::set_overlap(bool o)
 void
 MonoDrawer::draw_circle(int center_x, int center_y, unsigned int radius)
 {
-  if (__buffer == NULL) return;
+  if (buffer_ == NULL) return;
 
   unsigned int x  = 0,
                y  = radius,
@@ -115,42 +115,42 @@ MonoDrawer::draw_circle(int center_x, int center_y, unsigned int radius)
 
     x_tmp = center_x + x;
     y_tmp = center_y + y;
-    if ( (x_tmp < __width) && (y_tmp < __height) )
+    if ( (x_tmp < width_) && (y_tmp < height_) )
       PUT_POINT( x_tmp, y_tmp );
 
     x_tmp = center_x - x;
     y_tmp = center_y + y;
-    if ( (x_tmp < __width) && (y_tmp < __height) )
+    if ( (x_tmp < width_) && (y_tmp < height_) )
       PUT_POINT( x_tmp, y_tmp );
 
     x_tmp = center_x + y;
     y_tmp = center_y + x;
-    if ( (x_tmp < __width) && (y_tmp < __height) )
+    if ( (x_tmp < width_) && (y_tmp < height_) )
       PUT_POINT( x_tmp, y_tmp );
 
     x_tmp = center_x - y;
     y_tmp = center_y + x;
-    if ( (x_tmp < __width) && (y_tmp < __height) )
+    if ( (x_tmp < width_) && (y_tmp < height_) )
       PUT_POINT( x_tmp, y_tmp );
 
     x_tmp = center_x + x;
     y_tmp = center_y - y;
-    if ( (x_tmp < __width) && (y_tmp < __height) )
+    if ( (x_tmp < width_) && (y_tmp < height_) )
       PUT_POINT( x_tmp, y_tmp );
 
     x_tmp = center_x - x;
     y_tmp = center_y - y;
-    if ( (x_tmp < __width) && (y_tmp < __height) )
+    if ( (x_tmp < width_) && (y_tmp < height_) )
       PUT_POINT( x_tmp, y_tmp );
 
     x_tmp = center_x + y;
     y_tmp = center_y - x;
-    if ( (x_tmp < __width) && (y_tmp < __height) )
+    if ( (x_tmp < width_) && (y_tmp < height_) )
       PUT_POINT( x_tmp, y_tmp );
 
     x_tmp = center_x - y;
     y_tmp = center_y - x;
-    if ( (x_tmp < __width) && (y_tmp < __height) )
+    if ( (x_tmp < width_) && (y_tmp < height_) )
       PUT_POINT( x_tmp, y_tmp );
 
     ++x;
@@ -173,7 +173,7 @@ MonoDrawer::draw_rectangle(unsigned int x, unsigned int y,
 
   // horizontal line at top
   for (unsigned int i = x; i < x + w; ++i) {
-    if ( i < __width ) {
+    if ( i < width_ ) {
       PUT_POINT( i, y );
     } else {
       break;
@@ -185,7 +185,7 @@ MonoDrawer::draw_rectangle(unsigned int x, unsigned int y,
     // left
     PUT_POINT( x, i );
 
-    if ( (x + w) < __width ) {
+    if ( (x + w) < width_ ) {
       // right
       PUT_POINT( x+w, i );
     }
@@ -193,7 +193,7 @@ MonoDrawer::draw_rectangle(unsigned int x, unsigned int y,
 
   // horizontal line at bottom
   for (unsigned int i = x; i < x + w; ++i) {
-    if ( i < __width ) {
+    if ( i < width_ ) {
       PUT_POINT( i, y+h );
     } else {
       break;
@@ -220,9 +220,9 @@ MonoDrawer::draw_rectangle_inverted(unsigned int x, unsigned int y,
 
   // horizontal line at top
   for (unsigned int i = x; i < x + w; ++i) {
-    if ( i < __width ) {
-      ind = y * __width + i;
-      __buffer[ind]   = 255 - __buffer[ind];
+    if ( i < width_ ) {
+      ind = y * width_ + i;
+      buffer_[ind]   = 255 - buffer_[ind];
     } else {
       break;
     }
@@ -231,20 +231,20 @@ MonoDrawer::draw_rectangle_inverted(unsigned int x, unsigned int y,
   // left and right
   for (unsigned int i = y; i < y + h; ++i) {
     // left
-    ind = i * __width + x;
-    __buffer[ind]   = 255 - __buffer[ind];
+    ind = i * width_ + x;
+    buffer_[ind]   = 255 - buffer_[ind];
 
-    if ( (x + w) < __width ) {
+    if ( (x + w) < width_ ) {
       // right
       ind += w;
-      __buffer[ind]   = 255 - __buffer[ind];
+      buffer_[ind]   = 255 - buffer_[ind];
     }
   }
 
   // horizontal line at bottom
   for (unsigned int i = x; i < x + w; ++i) {
-    if ( i < __width ) {
-      __buffer[ind]   = 255 - __buffer[ind];
+    if ( i < width_ ) {
+      buffer_[ind]   = 255 - buffer_[ind];
     } else {
       break;
     }
@@ -260,8 +260,8 @@ MonoDrawer::draw_rectangle_inverted(unsigned int x, unsigned int y,
 void
 MonoDrawer::draw_point(unsigned int x, unsigned int y)
 {
-  if ( x > __width) return;
-  if ( y > __height) return;
+  if ( x > width_) return;
+  if ( y > height_) return;
 
   PUT_POINT( x, y );
 }
@@ -318,7 +318,7 @@ MonoDrawer::draw_line(unsigned int x_start, unsigned int y_start,
 
   /* Calculate and draw pixels */
   for(int t = 0; t < dist; ++t) {
-    if ( ((unsigned int)x < __width) && ((unsigned int)y < __height) ) {
+    if ( ((unsigned int)x < width_) && ((unsigned int)y < height_) ) {
       if ( (x >= 0) && (y >= 0) ) {
 	was_inside_image = true;
         PUT_POINT( x, y );
@@ -343,7 +343,7 @@ MonoDrawer::draw_line(unsigned int x_start, unsigned int y_start,
     }
   }
 
-  if ( (x_end < __width) && (y_end < __height) ) {
+  if ( (x_end < width_) && (y_end < height_) ) {
     PUT_POINT( x_end, y_end );
   }
 
@@ -357,16 +357,16 @@ MonoDrawer::draw_line(unsigned int x_start, unsigned int y_start,
 void
 MonoDrawer::draw_cross(unsigned int x_center, unsigned int y_center, unsigned int width)
 {
-  x_center = std::min(x_center, __width);
-  y_center = std::min(y_center, __height);
+  x_center = std::min(x_center, width_);
+  y_center = std::min(y_center, height_);
 
   int r = width / 2;
   unsigned int a = std::max(0, (int)x_center - r);
-  unsigned int b = std::min(x_center + r, __width);
+  unsigned int b = std::min(x_center + r, width_);
   draw_line(a, y_center, b, y_center);
 
   a = std::max(0, (int)y_center - r);
-  b = std::min(y_center + r, __height);
+  b = std::min(y_center + r, height_);
   draw_line(x_center, a, x_center, b);
 }
 } // end namespace firevision

@@ -74,4 +74,4 @@ inline bool is_similar_y(int y, int u, int v,
 }
 }
 
-#endif /* __FIREVISION_UTILS_COLOR_THRESHOLD_H_ */
+#endif /* FIREVISION_UTILS_COLOR_THRESHOLD_H__ */

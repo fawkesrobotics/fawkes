@@ -124,7 +124,7 @@ class FuseNetworkMessage : public fawkes::RefCount
   FUSE_message_t _msg;
 
  private:
-  FuseMessageContent *__content;
+  FuseMessageContent *content_;
 };
 
 } // end namespace firevision

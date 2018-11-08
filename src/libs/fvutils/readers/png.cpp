@@ -61,7 +61,7 @@ PNGReader::PNGReader(const char *filename)
   opened = false;
   buffer = NULL;
 
-  __d = setup_read(filename);
+  d_ = setup_read(filename);
 
   opened = true;
 }
@@ -165,11 +165,11 @@ PNGReader::setup_read(const char *filename)
 /** Destructor. */
 PNGReader::~PNGReader()
 {
-  fclose( __d->infile );
+  fclose( d_->infile );
   /* clean up after the read, and free any memory allocated - REQUIRED */
-  png_destroy_read_struct(&__d->png_ptr, &__d->info_ptr, (png_infopp)NULL);
+  png_destroy_read_struct(&d_->png_ptr, &d_->info_ptr, (png_infopp)NULL);
 
-  delete __d;
+  delete d_;
 
   opened = false;
 }
@@ -193,7 +193,7 @@ unsigned int
 PNGReader::pixel_width()
 {
   if ( opened ) {
-    return png_get_image_width(__d->png_ptr, __d->info_ptr);
+    return png_get_image_width(d_->png_ptr, d_->info_ptr);
   } else {
     return 0;
   }
@@ -204,7 +204,7 @@ unsigned int
 PNGReader::pixel_height()
 {
   if ( opened ) {
-    return png_get_image_height(__d->png_ptr, __d->info_ptr);
+    return png_get_image_height(d_->png_ptr, d_->info_ptr);
   } else {
     return 0;
   }
@@ -217,27 +217,27 @@ PNGReader::read()
   if ( buffer == NULL ) {
     throw Exception("PNGReader::read: buffer == NULL");
   }
-  if ( __d->read ) {
+  if ( d_->read ) {
     throw Exception("Can read PNG file only once.");
   }
-  __d->read = true;
+  d_->read = true;
 
   png_bytep row_pointer;
-  row_pointer = (png_bytep)png_malloc(__d->png_ptr, png_get_rowbytes(__d->png_ptr, __d->info_ptr));
+  row_pointer = (png_bytep)png_malloc(d_->png_ptr, png_get_rowbytes(d_->png_ptr, d_->info_ptr));
 
   unsigned int lheight = pixel_height();
   unsigned int lwidth  = pixel_width();
 
-  for (int pass = 0; pass < __d->number_passes; ++pass) {
+  for (int pass = 0; pass < d_->number_passes; ++pass) {
     for (unsigned y = 0; y < lheight; ++y) {
-      png_read_rows(__d->png_ptr, &row_pointer, (png_bytepp)NULL, 1);
+      png_read_rows(d_->png_ptr, &row_pointer, (png_bytepp)NULL, 1);
       convert_line_rgb_to_yuv422planar( row_pointer, buffer, lwidth, lheight, 0, y );
     }
   }
 
   /* read rest of file, and get additional chunks in info_ptr - REQUIRED */
-  png_read_end(__d->png_ptr, __d->info_ptr);
-  png_free(__d->png_ptr, row_pointer);
+  png_read_end(d_->png_ptr, d_->info_ptr);
+  png_free(d_->png_ptr, row_pointer);
 
 }
 

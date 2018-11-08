@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_ADAPTERS_PCL_H
-#define __FIREVISION_UTILS_ADAPTERS_PCL_H
+#ifndef FIREVISION_UTILS_ADAPTERS_PCL_H_
+#define FIREVISION_UTILS_ADAPTERS_PCL_H_
 
 #ifdef HAVE_PCL
 #  include <pcl/point_cloud.h>

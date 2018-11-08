@@ -56,10 +56,10 @@ class Drawer {
   void set_color(YUV_t color);
 
  private:
-  unsigned char  *__buffer;
-  unsigned int    __width;
-  unsigned int    __height;
-  YUV_t           __color;
+  unsigned char  *buffer_;
+  unsigned int    width_;
+  unsigned int    height_;
+  YUV_t           color_;
 
 };
 

@@ -49,8 +49,8 @@ class FuseLutListContent : public FuseMessageContent
   virtual void        serialize();
 
  private:
-  fawkes::DynamicBuffer  *__list;
-  FUSE_lutlist_message_t __lutlist_msg;
+  fawkes::DynamicBuffer  *list_;
+  FUSE_lutlist_message_t lutlist_msg_;
 };
 
 } // end namespace firevision

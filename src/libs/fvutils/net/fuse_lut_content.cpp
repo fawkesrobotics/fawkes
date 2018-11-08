@@ -58,15 +58,15 @@ FuseLutContent::FuseLutContent(uint32_t type,
   _payload = payload;
   
 
-  __header = (FUSE_lut_message_header_t *)_payload;
-  __buffer = (unsigned char *)_payload + sizeof(FUSE_lut_message_header_t);
+  header_ = (FUSE_lut_message_header_t *)_payload;
+  buffer_ = (unsigned char *)_payload + sizeof(FUSE_lut_message_header_t);
 
-  __lut_id = (char *)malloc(LUT_ID_MAX_LENGTH + 1);
-  __lut_id[LUT_ID_MAX_LENGTH] = 0;
-  strncpy(__lut_id, __header->lut_id, LUT_ID_MAX_LENGTH);
+  lut_id_ = (char *)malloc(LUT_ID_MAX_LENGTH + 1);
+  lut_id_[LUT_ID_MAX_LENGTH] = 0;
+  strncpy(lut_id_, header_->lut_id, LUT_ID_MAX_LENGTH);
 
-  __buffer_size = (size_t)ntohl(__header->width) * ntohl(__header->height) *
-                  (size_t)ntohl(__header->depth) * ntohl(__header->bytes_per_cell);
+  buffer_size_ = (size_t)ntohl(header_->width) * ntohl(header_->height) *
+                  (size_t)ntohl(header_->depth) * ntohl(header_->bytes_per_cell);
 }
 
 
@@ -75,26 +75,26 @@ FuseLutContent::FuseLutContent(uint32_t type,
  */
 FuseLutContent::FuseLutContent(SharedMemoryLookupTable *b)
 {
-  __buffer_size  = (size_t)b->width() * b->height() * b->depth() * b->bytes_per_cell();
-  _payload_size = __buffer_size + sizeof(FUSE_lut_message_header_t);
+  buffer_size_  = (size_t)b->width() * b->height() * b->depth() * b->bytes_per_cell();
+  _payload_size = buffer_size_ + sizeof(FUSE_lut_message_header_t);
 
   _payload = malloc(_payload_size);
   if ( _payload == NULL ) {
     throw fawkes::OutOfMemoryException("Cannot allocate FuseLutContent buffer");
   }
 
-  __header = (FUSE_lut_message_header_t *)_payload;
-  __buffer = (unsigned char *)_payload + sizeof(FUSE_lut_message_header_t);
+  header_ = (FUSE_lut_message_header_t *)_payload;
+  buffer_ = (unsigned char *)_payload + sizeof(FUSE_lut_message_header_t);
 
-  strncpy(__header->lut_id, b->lut_id(), LUT_ID_MAX_LENGTH-1);
-  __header->width  = htonl(b->width());
-  __header->height = htonl(b->height());
-  __header->depth  = htonl(b->depth());
-  __header->bytes_per_cell = htonl(b->bytes_per_cell());
-  __lut_id = strdup(b->lut_id());
+  strncpy(header_->lut_id, b->lut_id(), LUT_ID_MAX_LENGTH-1);
+  header_->width  = htonl(b->width());
+  header_->height = htonl(b->height());
+  header_->depth  = htonl(b->depth());
+  header_->bytes_per_cell = htonl(b->bytes_per_cell());
+  lut_id_ = strdup(b->lut_id());
 
   // b->lock_for_read(); 
-  memcpy(__buffer, b->buffer(), __buffer_size);
+  memcpy(buffer_, b->buffer(), buffer_size_);
   // b->unlock();
 }
 
@@ -112,31 +112,31 @@ FuseLutContent::FuseLutContent(const char *lut_id, void *buffer,
                                unsigned int width, unsigned int height,
                                unsigned int depth, unsigned int bpc)
 {
-  __buffer_size  = (size_t)width * height * depth * bpc;
-  _payload_size = __buffer_size + sizeof(FUSE_lut_message_header_t);
+  buffer_size_  = (size_t)width * height * depth * bpc;
+  _payload_size = buffer_size_ + sizeof(FUSE_lut_message_header_t);
 
   _payload = malloc(_payload_size);
   if ( _payload == NULL ) {
     throw fawkes::OutOfMemoryException("Cannot allocate FuseLutContent buffer");
   }
 
-  __header = (FUSE_lut_message_header_t *)_payload;
-  __buffer = (unsigned char *)_payload + sizeof(FUSE_lut_message_header_t);
+  header_ = (FUSE_lut_message_header_t *)_payload;
+  buffer_ = (unsigned char *)_payload + sizeof(FUSE_lut_message_header_t);
 
-  strncpy(__header->lut_id, lut_id, LUT_ID_MAX_LENGTH-1);
-  __header->width  = htonl(width);
-  __header->height = htonl(height);
-  __header->depth  = htonl(depth);
-  __header->bytes_per_cell = htonl(bpc);
-  __lut_id = strdup(lut_id);
+  strncpy(header_->lut_id, lut_id, LUT_ID_MAX_LENGTH-1);
+  header_->width  = htonl(width);
+  header_->height = htonl(height);
+  header_->depth  = htonl(depth);
+  header_->bytes_per_cell = htonl(bpc);
+  lut_id_ = strdup(lut_id);
 
-  memcpy(__buffer, buffer, __buffer_size);
+  memcpy(buffer_, buffer, buffer_size_);
 }
 
 
 FuseLutContent::~FuseLutContent()
 {
-  free(__lut_id);
+  free(lut_id_);
 }
 
 
@@ -146,7 +146,7 @@ FuseLutContent::~FuseLutContent()
 const char *
 FuseLutContent::lut_id() const
 {
-  return __lut_id;
+  return lut_id_;
 }
 
 /** Get buffer.
@@ -155,7 +155,7 @@ FuseLutContent::lut_id() const
 unsigned char *
 FuseLutContent::buffer() const
 {
-  return __buffer;
+  return buffer_;
 }
 
 
@@ -165,7 +165,7 @@ FuseLutContent::buffer() const
 size_t
 FuseLutContent::buffer_size() const
 {
-  return __buffer_size;
+  return buffer_size_;
 }
 
 
@@ -175,7 +175,7 @@ FuseLutContent::buffer_size() const
 unsigned int
 FuseLutContent::width() const
 {
-  return ntohl(__header->width);
+  return ntohl(header_->width);
 }
 
 
@@ -185,7 +185,7 @@ FuseLutContent::width() const
 unsigned int
 FuseLutContent::height() const
 {
-  return ntohl(__header->height);
+  return ntohl(header_->height);
 }
 
 /** Depth of LUT.
@@ -194,7 +194,7 @@ FuseLutContent::height() const
 unsigned int
 FuseLutContent::depth() const
 {
-  return ntohl(__header->depth);
+  return ntohl(header_->depth);
 }
 
 
@@ -204,7 +204,7 @@ FuseLutContent::depth() const
 unsigned int
 FuseLutContent::bytes_per_cell() const
 {
-  return ntohl(__header->bytes_per_cell);
+  return ntohl(header_->bytes_per_cell);
 }
 
 

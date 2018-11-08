@@ -47,7 +47,7 @@ namespace firevision {
 FuseNetworkMessage::FuseNetworkMessage()
 {
   memset(&_msg, 0, sizeof(_msg));
-  __content = NULL;
+  content_ = NULL;
 }
 
 
@@ -57,7 +57,7 @@ FuseNetworkMessage::FuseNetworkMessage()
 FuseNetworkMessage::FuseNetworkMessage(FUSE_message_t *msg)
 {
   memcpy(&_msg, msg, sizeof(FUSE_message_t));
-  __content = NULL;
+  content_ = NULL;
 }
 
 
@@ -72,7 +72,7 @@ FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type,
 				       void *payload, size_t payload_size,
 				       bool copy_payload)
 {
-  __content = NULL;
+  content_ = NULL;
   _msg.header.message_type = htonl(type);
   _msg.header.payload_size = htonl(payload_size);
 
@@ -91,7 +91,7 @@ FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type,
  */
 FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type)
 {
-  __content = NULL;
+  content_ = NULL;
   _msg.header.message_type = htonl(type);
   _msg.header.payload_size = htonl(0);
   _msg.payload = NULL;
@@ -105,7 +105,7 @@ FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type)
  */
 FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type, FuseMessageContent *content)
 {
-  __content = content;
+  content_ = content;
   _msg.header.message_type = htonl(type);
   _msg.header.payload_size = htonl(0);
   _msg.payload = NULL;
@@ -114,14 +114,14 @@ FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type, FuseMessageCont
 /** Destructor. */
 FuseNetworkMessage::~FuseNetworkMessage()
 {
-  if ( __content == NULL ) {
+  if ( content_ == NULL ) {
     if ( _msg.payload != NULL ) {
       free(_msg.payload);
       _msg.payload = NULL;
     }
   } else {
-    __content->free_payload();
-    delete __content;
+    content_->free_payload();
+    delete content_;
   }
 }
 
@@ -198,10 +198,10 @@ FuseNetworkMessage::set(FUSE_message_t &msg)
 void
 FuseNetworkMessage::pack()
 {
-  if ( __content != NULL ) {
-    __content->serialize();
-    _msg.payload = __content->payload();
-    _msg.header.payload_size = htonl(__content->payload_size());
+  if ( content_ != NULL ) {
+    content_->serialize();
+    _msg.payload = content_->payload();
+    _msg.header.payload_size = htonl(content_->payload_size());
   }
 }
 

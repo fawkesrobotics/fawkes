@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_COLOR_YUV_H
-#define __FIREVISION_UTILS_COLOR_YUV_H
+#ifndef FIREVISION_UTILS_COLOR_YUV_H_
+#define FIREVISION_UTILS_COLOR_YUV_H_
 
 namespace firevision {
 

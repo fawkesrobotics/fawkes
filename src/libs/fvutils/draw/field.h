@@ -37,7 +37,7 @@ class Field
 public:
   ~Field();
 
-  const FieldLines& get_lines() const { return *__lines; }
+  const FieldLines& get_lines() const { return *lines_; }
   float get_field_length() const;
   float get_field_width() const;
 
@@ -48,8 +48,8 @@ public:
 private:
   Field(FieldLines *lines, bool manage_lines_memory = true);
 
-  FieldLines  *__lines;
-  bool         __manage_lines_memory;
+  FieldLines  *lines_;
+  bool         manage_lines_memory_;
 };
 
 } // end namespace firevision

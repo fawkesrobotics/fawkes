@@ -66,16 +66,16 @@ class FireVisionDataFile
   size_t        _spec_header_size;
 
  private:
-  fvff_header_t       *__header;
-  BlockList            __blocks;
-  BlockList::iterator  __bi;
+  fvff_header_t       *header_;
+  BlockList            blocks_;
+  BlockList::iterator  bi_;
 
-  unsigned int  __magic_token;
-  unsigned int  __version;
+  unsigned int  magic_token_;
+  unsigned int  version_;
 
-  char *        __comment;
+  char *        comment_;
 
-  bool          __owns_blocks;
+  bool          owns_blocks_;
 };
 
 } // end namespace firevision

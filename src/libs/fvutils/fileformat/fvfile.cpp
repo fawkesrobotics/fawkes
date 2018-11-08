@@ -92,16 +92,16 @@ namespace firevision {
 FireVisionDataFile::FireVisionDataFile(unsigned short int magic_token,
 				       unsigned short int version)
 {
-  __header       = (fvff_header_t *)calloc(1, sizeof(fvff_header_t));
+  header_       = (fvff_header_t *)calloc(1, sizeof(fvff_header_t));
 
-  __magic_token = magic_token;
-  __version     = version;
-  __comment     = strdup("");
+  magic_token_ = magic_token;
+  version_     = version;
+  comment_     = strdup("");
 
   _spec_header = NULL;
   _spec_header_size = 0;
 
-  __owns_blocks = true;
+  owns_blocks_ = true;
 
   FireVisionDataFile::clear();
 }
@@ -112,8 +112,8 @@ FireVisionDataFile::~FireVisionDataFile()
 {
   FireVisionDataFile::clear();
 
-  free(__header);
-  free(__comment);
+  free(header_);
+  free(comment_);
   if ( _spec_header ) {
     free(_spec_header);
   }
@@ -126,25 +126,25 @@ FireVisionDataFile::~FireVisionDataFile()
 void
 FireVisionDataFile::clear()
 {
-  if (__owns_blocks) {
-    for (__bi = __blocks.begin(); __bi != __blocks.end(); ++__bi) {
-      delete *__bi;
+  if (owns_blocks_) {
+    for (bi_ = blocks_.begin(); bi_ != blocks_.end(); ++bi_) {
+      delete *bi_;
     }
   }
 
-  __blocks.clear();
-  memset(__header, 0, sizeof(fvff_header_t));
+  blocks_.clear();
+  memset(header_, 0, sizeof(fvff_header_t));
 
-  __header->magic_token = htons(__magic_token);
-  __header->version     = __version;
-  __header->num_blocks = 0;
-#if __BYTE_ORDER == __BIG_ENDIAN
-  __header->endianess = 1;
+  header_->magic_token = htons(magic_token_);
+  header_->version     = version_;
+  header_->num_blocks = 0;
+#if BYTE_ORDER_ == BIG_ENDIAN_
+  header_->endianess = 1;
 #else
-  __header->endianess = 0;
+  header_->endianess = 0;
 #endif
-  free(__comment);
-  __comment = strdup("");
+  free(comment_);
+  comment_ = strdup("");
 }
 
 
@@ -154,7 +154,7 @@ FireVisionDataFile::clear()
 unsigned int
 FireVisionDataFile::magic_token()
 {
-  return __header->magic_token;
+  return header_->magic_token;
 }
 
 
@@ -164,7 +164,7 @@ FireVisionDataFile::magic_token()
 unsigned int
 FireVisionDataFile::version()
 {
-  return __header->version;
+  return header_->version;
 }
 
 
@@ -174,7 +174,7 @@ FireVisionDataFile::version()
 bool
 FireVisionDataFile::is_big_endian()
 {
-  return (__header->endianess == 1);
+  return (header_->endianess == 1);
 }
 
 
@@ -184,7 +184,7 @@ FireVisionDataFile::is_big_endian()
 bool
 FireVisionDataFile::is_little_endian()
 {
-  return (__header->endianess == 0);
+  return (header_->endianess == 0);
 }
 
 
@@ -194,7 +194,7 @@ FireVisionDataFile::is_little_endian()
 const char *
 FireVisionDataFile::get_comment() const
 {
-  return __comment;
+  return comment_;
 }
 
 
@@ -204,9 +204,9 @@ FireVisionDataFile::get_comment() const
 void
 FireVisionDataFile::set_comment(const char *comment)
 {
-  free(__comment);
-  __comment = strndup(comment, FVFF_COMMENT_SIZE);
-  strncpy(__header->comment, comment, FVFF_COMMENT_SIZE-1);
+  free(comment_);
+  comment_ = strndup(comment, FVFF_COMMENT_SIZE);
+  strncpy(header_->comment, comment, FVFF_COMMENT_SIZE-1);
 }
 
 
@@ -218,7 +218,7 @@ FireVisionDataFile::set_comment(const char *comment)
 void
 FireVisionDataFile::set_owns_blocks(bool owns_blocks)
 {
-  __owns_blocks = owns_blocks;
+  owns_blocks_ = owns_blocks;
 }
 
 
@@ -228,7 +228,7 @@ FireVisionDataFile::set_owns_blocks(bool owns_blocks)
 size_t
 FireVisionDataFile::num_blocks()
 {
-  return __blocks.size();
+  return blocks_.size();
 }
 
 
@@ -238,7 +238,7 @@ FireVisionDataFile::num_blocks()
 void
 FireVisionDataFile::add_block(FireVisionDataFileBlock *block)
 {
-  __blocks.push_back(block);
+  blocks_.push_back(block);
 }
 
 
@@ -248,7 +248,7 @@ FireVisionDataFile::add_block(FireVisionDataFileBlock *block)
 FireVisionDataFile::BlockList &
 FireVisionDataFile::blocks()
 {
-  return __blocks;
+  return blocks_;
 }
 
 
@@ -264,15 +264,15 @@ FireVisionDataFile::write(const char *file_name)
 				                      "for writing");
   }
 
-  __header->num_blocks = (unsigned int)__blocks.size();
+  header_->num_blocks = (unsigned int)blocks_.size();
   timeval t;
   gettimeofday(&t, NULL);
-  __header->created_sec  = t.tv_sec;
-  __header->created_usec = t.tv_usec;
-  __header->spec_head_size = _spec_header_size;
+  header_->created_sec  = t.tv_sec;
+  header_->created_usec = t.tv_usec;
+  header_->spec_head_size = _spec_header_size;
 
   //printf("Writing %zu bytes for header\n", sizeof(fvff_header_t));
-  if ( fwrite(__header, sizeof(fvff_header_t), 1, f) != 1 ) {
+  if ( fwrite(header_, sizeof(fvff_header_t), 1, f) != 1 ) {
     fclose(f);
     throw FileWriteException(file_name, errno, "Writing fvff header failed");
   }
@@ -285,10 +285,10 @@ FireVisionDataFile::write(const char *file_name)
     }
   }
 
-  for (__bi = __blocks.begin(); __bi != __blocks.end(); ++__bi) {
+  for (bi_ = blocks_.begin(); bi_ != blocks_.end(); ++bi_) {
     // write this info block
-    //printf("Writing %zu bytes for block\n", (*__bi)->block_size());
-    if ( fwrite((*__bi)->block_memptr(), (*__bi)->block_size(), 1, f) != 1 ) {
+    //printf("Writing %zu bytes for block\n", (*bi_)->block_size());
+    if ( fwrite((*bi_)->block_memptr(), (*bi_)->block_size(), 1, f) != 1 ) {
       fclose(f);
       throw FileWriteException(file_name, errno, "Failed to write info block");
     }
@@ -313,25 +313,25 @@ FireVisionDataFile::read(const char *file_name)
   clear();
 
   //printf("Reading %zu bytes for header\n", sizeof(fvff_header_t));
-  if ( fread(__header, sizeof(fvff_header_t), 1, f) != 1) {
+  if ( fread(header_, sizeof(fvff_header_t), 1, f) != 1) {
     fclose(f);
     throw FileReadException(file_name, errno, "Reading header failed");
   }
 
-  if ( __header->magic_token != htons(__magic_token) ) {
+  if ( header_->magic_token != htons(magic_token_) ) {
     fclose(f);
     throw Exception("Unknown magic in fvff file (read: 0x%04x req: 0x%04x)",
-		    __header->magic_token, __magic_token);
+		    header_->magic_token, magic_token_);
   }
 
-  if ( __header->version != __version ) {
+  if ( header_->version != version_ ) {
     fclose(f);
     throw Exception("Unsupported version of fvff file (read: %u req: %u)",
-		    __header->version, __version);
+		    header_->version, version_);
   }
 
-  if ( __header->endianess ==
-#if __BYTE_ORDER == __BIG_ENDIAN
+  if ( header_->endianess ==
+#if BYTE_ORDER_ == BIG_ENDIAN_
        0
 #else
        1
@@ -341,27 +341,27 @@ FireVisionDataFile::read(const char *file_name)
     throw Exception("FVFile header cannot be translated for endianess by now");
   }
 
-  free(__comment);
-  __comment = strndup(__header->comment, FVFF_COMMENT_SIZE);
+  free(comment_);
+  comment_ = strndup(header_->comment, FVFF_COMMENT_SIZE);
 
   if ( _spec_header ) {
     free(_spec_header);
   }
-  _spec_header = calloc(1, __header->spec_head_size);
+  _spec_header = calloc(1, header_->spec_head_size);
   if ( ! _spec_header ) {
     throw OutOfMemoryException("Cannot allocate memory for content specific header");
   }
 
-  if ( __header->spec_head_size > 0 ) {
-    //printf("Reading %u bytes for spec header\n", __header->spec_head_size);
-    if ( fread(_spec_header, __header->spec_head_size, 1, f) != 1) {
+  if ( header_->spec_head_size > 0 ) {
+    //printf("Reading %u bytes for spec header\n", header_->spec_head_size);
+    if ( fread(_spec_header, header_->spec_head_size, 1, f) != 1) {
       fclose(f);
       throw FileReadException(file_name, errno, "Reading content specific header failed");
     }
   }
 
-  //printf("Reading %u blocks\n", __header->num_blocks);
-  for (unsigned int b = 0; b < __header->num_blocks && !feof(f); ++b) {
+  //printf("Reading %u blocks\n", header_->num_blocks);
+  for (unsigned int b = 0; b < header_->num_blocks && !feof(f); ++b) {
     fvff_block_header_t bh;
     //printf("Reading %zu bytes for block header\n", sizeof(bh));
     if ( fread(&bh, sizeof(bh), 1, f) != 1 ) {
@@ -401,7 +401,7 @@ FireVisionDataFile::read(const char *file_name)
 			      "Could not read block data");
     }
 
-    __blocks.push_back(block);
+    blocks_.push_back(block);
   }
 
   fclose(f);

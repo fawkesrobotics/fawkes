@@ -82,13 +82,13 @@ class SharedMemoryLookupTableHeader : public fawkes::SharedMemoryHeader
   SharedMemoryLookupTable_header_t * raw_header();
 
  private:
-  SharedMemoryLookupTable_header_t *__header;
+  SharedMemoryLookupTable_header_t *header_;
 
-  char          *__lut_id;
-  unsigned int   __width;
-  unsigned int   __height;
-  unsigned int   __depth;
-  unsigned int   __bytes_per_cell;
+  char          *lut_id_;
+  unsigned int   width_;
+  unsigned int   height_;
+  unsigned int   depth_;
+  unsigned int   bytes_per_cell_;
 };
 
 class SharedMemoryLookupTableLister : public fawkes::SharedMemoryLister
@@ -139,14 +139,14 @@ class SharedMemoryLookupTable : public fawkes::SharedMemory
 		   unsigned int bytes_per_cell,
 		   bool is_read_only);
 
-  SharedMemoryLookupTableHeader    *__priv_header;
-  SharedMemoryLookupTable_header_t *__raw_header;
+  SharedMemoryLookupTableHeader    *priv_header_;
+  SharedMemoryLookupTable_header_t *raw_header_;
 
-  char          *__lut_id;
-  unsigned int   __width;
-  unsigned int   __height;
-  unsigned int   __depth;
-  unsigned int   __bytes_per_cell;
+  char          *lut_id_;
+  unsigned int   width_;
+  unsigned int   height_;
+  unsigned int   depth_;
+  unsigned int   bytes_per_cell_;
 
 };
 

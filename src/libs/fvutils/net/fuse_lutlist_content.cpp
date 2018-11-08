@@ -48,7 +48,7 @@ namespace firevision {
  */
 FuseLutListContent::FuseLutListContent()
 {
-  __list = new DynamicBuffer(&(__lutlist_msg.lut_list));
+  list_ = new DynamicBuffer(&(lutlist_msg_.lut_list));
   
   _payload_size = 0;
   _payload = NULL;
@@ -66,7 +66,7 @@ FuseLutListContent::FuseLutListContent(uint32_t type, void *payload, size_t payl
 {
   FUSE_lutlist_message_t *tmsg = (FUSE_lutlist_message_t *)payload;
   void *list_payload = (void *)((size_t)payload + sizeof(FUSE_lutlist_message_t));
-  __list = new DynamicBuffer(&(tmsg->lut_list), list_payload,
+  list_ = new DynamicBuffer(&(tmsg->lut_list), list_payload,
 			     payload_size - sizeof(FUSE_lutlist_message_t));
 }
 
@@ -74,7 +74,7 @@ FuseLutListContent::FuseLutListContent(uint32_t type, void *payload, size_t payl
 /** Destructor. */
 FuseLutListContent::~FuseLutListContent()
 {
-  delete __list;
+  delete list_;
 }
 
 
@@ -99,7 +99,7 @@ FuseLutListContent::add_lutinfo(const char *lut_id,
   lutinfo.depth  = ntohl(depth);  
   lutinfo.bytes_per_cell = ntohl(bytes_per_cell);
 
-  __list->append(&lutinfo, sizeof(lutinfo));
+  list_->append(&lutinfo, sizeof(lutinfo));
 }
 
 
@@ -107,7 +107,7 @@ FuseLutListContent::add_lutinfo(const char *lut_id,
 void
 FuseLutListContent::reset_iterator()
 {
-  __list->reset_iterator();
+  list_->reset_iterator();
 }
 
 
@@ -117,7 +117,7 @@ FuseLutListContent::reset_iterator()
 bool
 FuseLutListContent::has_next()
 {
-  return __list->has_next();
+  return list_->has_next();
 }
 
 
@@ -130,7 +130,7 @@ FUSE_lutinfo_t *
 FuseLutListContent::next()
 {
   size_t size;
-  void *tmp = __list->next(&size);
+  void *tmp = list_->next(&size);
   if ( size != sizeof(FUSE_lutinfo_t) ) {
     throw TypeMismatchException("Lut list content contains element that is of an "
 				"unexpected size");
@@ -143,11 +143,11 @@ FuseLutListContent::next()
 void
 FuseLutListContent::serialize()
 {
-  _payload_size = sizeof(FUSE_lutlist_message_t) + __list->buffer_size();
+  _payload_size = sizeof(FUSE_lutlist_message_t) + list_->buffer_size();
   _payload = malloc(_payload_size);
 
-  copy_payload(0, &__lutlist_msg, sizeof(FUSE_lutlist_message_t));
-  copy_payload(sizeof(FUSE_lutlist_message_t), __list->buffer(), __list->buffer_size());
+  copy_payload(0, &lutlist_msg_, sizeof(FUSE_lutlist_message_t));
+  copy_payload(sizeof(FUSE_lutlist_message_t), list_->buffer(), list_->buffer_size());
 }
 
 } // end namespace firevision

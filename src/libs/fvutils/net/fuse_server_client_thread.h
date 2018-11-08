@@ -64,21 +64,21 @@ class FuseServerClientThread : public fawkes::Thread
   void process_inbound();
   SharedMemoryImageBuffer *  get_shmimgbuf(const char *id);
 
-  FuseServer   *__fuse_server;
-  fawkes::StreamSocket *__socket;
+  FuseServer   *fuse_server_;
+  fawkes::StreamSocket *socket_;
 
-  FuseNetworkMessageQueue *__outbound_queue;
-  FuseNetworkMessageQueue *__inbound_queue;
+  FuseNetworkMessageQueue *outbound_queue_;
+  FuseNetworkMessageQueue *inbound_queue_;
 
-  JpegImageCompressor *__jpeg_compressor;
+  JpegImageCompressor *jpeg_compressor_;
 
-  std::map< std::string, SharedMemoryImageBuffer * >  __buffers;
-  std::map< std::string, SharedMemoryImageBuffer * >::iterator  __bit;
+  std::map< std::string, SharedMemoryImageBuffer * >  buffers_;
+  std::map< std::string, SharedMemoryImageBuffer * >::iterator  bit_;
 
-  std::map< std::string, SharedMemoryLookupTable * >  __luts;
-  std::map< std::string, SharedMemoryLookupTable * >::iterator  __lit;
+  std::map< std::string, SharedMemoryLookupTable * >  luts_;
+  std::map< std::string, SharedMemoryLookupTable * >::iterator  lit_;
 
-  bool __alive;
+  bool alive_;
 };
 
 } // end namespace firevision

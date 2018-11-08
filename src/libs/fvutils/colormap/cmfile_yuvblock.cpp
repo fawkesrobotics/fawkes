@@ -46,14 +46,14 @@ ColormapFileYuvBlock::ColormapFileYuvBlock(YuvColormap *cm, unsigned int level)
     throw fawkes::OutOfBoundsException("YuvColormap level is out of bounds", level, 0, cm->depth());
   }
 
-  __cm    = cm;
-  __level = level;
+  cm_    = cm;
+  level_ = level;
 
-  __header = (cmfile_yuvblock_header_t *)_spec_header;
-  __header->range_from = level * cm->deepness() / cm->depth();
-  __header->range_to   = ((level + 1) * cm->deepness() / cm->depth()) - 1;
+  header_ = (cmfile_yuvblock_header_t *)_spec_header;
+  header_->range_from = level * cm->deepness() / cm->depth();
+  header_->range_to   = ((level + 1) * cm->deepness() / cm->depth()) - 1;
 
-  memcpy(_data, __cm->get_buffer() + level * cm->plane_size(), _data_size);
+  memcpy(_data, cm_->get_buffer() + level * cm->plane_size(), _data_size);
 }
 
 
@@ -65,7 +65,7 @@ ColormapFileYuvBlock::ColormapFileYuvBlock(YuvColormap *cm, unsigned int level)
 ColormapFileYuvBlock::ColormapFileYuvBlock(FireVisionDataFileBlock *block)
   : ColormapFileBlock(block)
 {
-  __header = (cmfile_yuvblock_header_t *)_spec_header;
+  header_ = (cmfile_yuvblock_header_t *)_spec_header;
 }
 
 
@@ -75,7 +75,7 @@ ColormapFileYuvBlock::ColormapFileYuvBlock(FireVisionDataFileBlock *block)
 unsigned int
 ColormapFileYuvBlock::range_from() const
 {
-  return __header->range_from;
+  return header_->range_from;
 }
 
 
@@ -85,7 +85,7 @@ ColormapFileYuvBlock::range_from() const
 unsigned int
 ColormapFileYuvBlock::range_to() const
 {
-  return __header->range_to;
+  return header_->range_to;
 }
 
 } // end namespace firevision

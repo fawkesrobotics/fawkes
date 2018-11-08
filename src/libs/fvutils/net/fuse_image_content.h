@@ -59,11 +59,11 @@ class FuseImageContent : public FuseMessageContent
   virtual void     serialize();
 
  private:
-  unsigned char *__buffer;
-  size_t         __buffer_size;
-  FUSE_image_message_header_t *__header;
+  unsigned char *buffer_;
+  size_t         buffer_size_;
+  FUSE_image_message_header_t *header_;
 
-  mutable fawkes::Time  *__capture_time;
+  mutable fawkes::Time  *capture_time_;
 };
 
 } // end namespace firevision

@@ -53,10 +53,10 @@ class FuseLutContent : public FuseMessageContent
   virtual void     serialize();
 
  private:
-  char          *__lut_id;
-  unsigned char *__buffer;
-  size_t         __buffer_size;
-  FUSE_lut_message_header_t *__header;
+  char          *lut_id_;
+  unsigned char *buffer_;
+  size_t         buffer_size_;
+  FUSE_lut_message_header_t *header_;
 };
 
 } // end namespace firevision

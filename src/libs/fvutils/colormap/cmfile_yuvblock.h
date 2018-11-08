@@ -50,9 +50,9 @@ class ColormapFileYuvBlock : public ColormapFileBlock
 
  private:
 
-  YuvColormap  *__cm;
-  unsigned int  __level;
-  cmfile_yuvblock_header_t *__header;
+  YuvColormap  *cm_;
+  unsigned int  level_;
+  cmfile_yuvblock_header_t *header_;
 };
 
 } // end namespace firevision

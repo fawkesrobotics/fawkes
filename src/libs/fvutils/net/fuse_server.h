@@ -57,14 +57,14 @@ class FuseServer
   virtual void loop();
 
  private:
-  std::vector<fawkes::NetworkAcceptorThread *> __acceptor_threads;
+  std::vector<fawkes::NetworkAcceptorThread *> acceptor_threads_;
 
-  fawkes::LockList<FuseServerClientThread *>  __clients;
-  fawkes::LockList<FuseServerClientThread *>::iterator  __cit;
+  fawkes::LockList<FuseServerClientThread *>  clients_;
+  fawkes::LockList<FuseServerClientThread *>::iterator  cit_;
 
-  fawkes::LockList<FuseServerClientThread *>  __dead_clients;
+  fawkes::LockList<FuseServerClientThread *>  dead_clients_;
 
-  fawkes::ThreadCollector *__thread_collector;
+  fawkes::ThreadCollector *thread_collector_;
 };
 
 } // end namespace firevision

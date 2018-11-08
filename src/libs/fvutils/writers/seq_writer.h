@@ -55,4 +55,4 @@ class SeqWriter {
 
 } // end namespace firevision
 
-#endif /*  __FIREVISION_FVUTILS_WRITERS_SEQ_WRITER_H_ */
+#endif /*  FIREVISION_FVUTILS_WRITERS_SEQ_WRITER_H__ */

@@ -77,7 +77,7 @@ class ColormapFile : public FireVisionDataFile
  private:
   inline void assert_header();
  private:
-  cmfile_header_t  *__header;
+  cmfile_header_t  *header_;
 };
 
 } // end namespace firevision

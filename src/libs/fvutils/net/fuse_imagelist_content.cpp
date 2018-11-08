@@ -47,7 +47,7 @@ namespace firevision {
  */
 FuseImageListContent::FuseImageListContent()
 {
-  __list = new DynamicBuffer(&(__imagelist_msg.image_list));
+  list_ = new DynamicBuffer(&(imagelist_msg_.image_list));
   
   _payload_size = 0;
   _payload      = NULL;
@@ -69,7 +69,7 @@ FuseImageListContent::FuseImageListContent(uint32_t type, void *payload, size_t 
   }
   FUSE_imagelist_message_t *tmsg = (FUSE_imagelist_message_t *)payload;
   void *list_payload = (void *)((size_t)payload + sizeof(FUSE_imagelist_message_t));
-  __list = new DynamicBuffer(&(tmsg->image_list), list_payload,
+  list_ = new DynamicBuffer(&(tmsg->image_list), list_payload,
 			     payload_size - sizeof(FUSE_imagelist_message_t));
 }
 
@@ -77,7 +77,7 @@ FuseImageListContent::FuseImageListContent(uint32_t type, void *payload, size_t 
 /** Destructor. */
 FuseImageListContent::~FuseImageListContent()
 {
-  delete __list;
+  delete list_;
 }
 
 
@@ -102,7 +102,7 @@ FuseImageListContent::add_imageinfo(const char *image_id, colorspace_t colorspac
   imageinfo.height = htonl(pixel_height);
   imageinfo.buffer_size = htonl(colorspace_buffer_size(colorspace, pixel_width, pixel_height));
 
-  __list->append(&imageinfo, sizeof(imageinfo));
+  list_->append(&imageinfo, sizeof(imageinfo));
 }
 
 
@@ -110,7 +110,7 @@ FuseImageListContent::add_imageinfo(const char *image_id, colorspace_t colorspac
 void
 FuseImageListContent::reset_iterator()
 {
-  __list->reset_iterator();
+  list_->reset_iterator();
 }
 
 
@@ -120,7 +120,7 @@ FuseImageListContent::reset_iterator()
 bool
 FuseImageListContent::has_next()
 {
-  return __list->has_next();
+  return list_->has_next();
 }
 
 
@@ -133,7 +133,7 @@ FUSE_imageinfo_t *
 FuseImageListContent::next()
 {
   size_t size;
-  void *tmp = __list->next(&size);
+  void *tmp = list_->next(&size);
   if ( size != sizeof(FUSE_imageinfo_t) ) {
     throw TypeMismatchException("Image list content contains element that is of an "
 				"unexpected size");
@@ -146,11 +146,11 @@ FuseImageListContent::next()
 void
 FuseImageListContent::serialize()
 {
-  _payload_size = sizeof(FUSE_imagelist_message_t) + __list->buffer_size();
+  _payload_size = sizeof(FUSE_imagelist_message_t) + list_->buffer_size();
   _payload = malloc(_payload_size);
 
-  copy_payload(0, &__imagelist_msg, sizeof(FUSE_imagelist_message_t));
-  copy_payload(sizeof(FUSE_imagelist_message_t), __list->buffer(), __list->buffer_size());
+  copy_payload(0, &imagelist_msg_, sizeof(FUSE_imagelist_message_t));
+  copy_payload(sizeof(FUSE_imagelist_message_t), list_->buffer(), list_->buffer_size());
 }
 
 } // end namespace firevision

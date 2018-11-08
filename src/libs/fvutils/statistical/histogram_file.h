@@ -62,4 +62,4 @@ class HistogramFile : public FireVisionDataFile
 
 } // end namespace firevision
 
-#endif /* __FIREVISION_FVUTILS_STATISTICAL_HISTOGRAM_FILE_H_ */
+#endif /* FIREVISION_FVUTILS_STATISTICAL_HISTOGRAM_FILE_H__ */
