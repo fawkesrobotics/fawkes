@@ -91,14 +91,14 @@ class SplRefBoxProcessor : public RefBoxProcessor
   void process_struct(spl_gamecontrol_t *msg);
 
  private:
-  fawkes::DatagramSocket *__s;
-  fawkes::Logger         *__logger;
+  fawkes::DatagramSocket *s_;
+  fawkes::Logger         *logger_;
 
-  bool __quit;
+  bool quit_;
 
-  uint16_t __penalty;
-  uint8_t  __team_number;
-  uint8_t  __player_number;
+  uint16_t penalty_;
+  uint8_t  team_number_;
+  uint8_t  player_number_;
 };
 
 #endif

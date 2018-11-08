@@ -114,22 +114,22 @@ SplRefBoxProcessor::SplRefBoxProcessor(fawkes::Logger *logger,
                                        unsigned int team_number,
                                        unsigned int player_number)
 {
-  __player_number = player_number;
-  __team_number = team_number;
-  __logger = logger;
-  __quit = false;
-  __s = new DatagramSocket(Socket::IPv4, 0.0000000001);
-  __s->bind(broadcast_port);
+  player_number_ = player_number;
+  team_number_ = team_number;
+  logger_ = logger;
+  quit_ = false;
+  s_ = new DatagramSocket(Socket::IPv4, 0.0000000001);
+  s_->bind(broadcast_port);
 
-  __penalty = SPL_PENALTY_NONE;
+  penalty_ = SPL_PENALTY_NONE;
 }
 
 
 /** Destructor. */
 SplRefBoxProcessor::~SplRefBoxProcessor()
 {
-  __s->close();
-  delete __s;
+  s_->close();
+  delete s_;
 }
 
 
@@ -141,8 +141,8 @@ SplRefBoxProcessor::process_struct(spl_gamecontrol_t *msg)
   //fawkes::worldinfo_gamestate_goalcolor_t our_goal;
 
   int team_index;
-  if (msg->teams[0].team_number == __team_number) team_index = 0;
-  else if (msg->teams[1].team_number == __team_number) team_index = 1;
+  if (msg->teams[0].team_number == team_number_) team_index = 0;
+  else if (msg->teams[1].team_number == team_number_) team_index = 1;
   else return; //Message doesn't concern us
 
   switch (msg->teams[team_index].team_color) {
@@ -162,39 +162,39 @@ SplRefBoxProcessor::process_struct(spl_gamecontrol_t *msg)
 
   for (unsigned int pl_num = 0; pl_num < SPL_MAX_NUM_PLAYERS; ++pl_num)
   {
-    if ((pl_num + 1) == __player_number)
+    if ((pl_num + 1) == player_number_)
     {
-      if ((msg->teams[team_index].players[pl_num].penalty != __penalty) ||
+      if ((msg->teams[team_index].players[pl_num].penalty != penalty_) ||
           (msg->teams[team_index].players[pl_num].penalty != PENALTY_NONE))
       {
-        __penalty = msg->teams[team_index].players[pl_num].penalty;
+        penalty_ = msg->teams[team_index].players[pl_num].penalty;
 
 #ifdef USE_SPL_GC6
 	// convert GC6 codes to new GC7 codes, "closest match"
-	switch (__penalty) {
+	switch (penalty_) {
 	case SPL_PENALTY_BALL_HOLDING:
-	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_BALL_HOLDING; break;
+	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_BALL_HOLDING; break;
 	case SPL_PENALTY_GOALIE_PUSHING:
 	case SPL_PENALTY_PLAYER_PUSHING:
-	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_PLAYER_PUSHING; break;
+	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_PLAYER_PUSHING; break;
 	case SPL_PENALTY_ILLEGAL_DEFENDER:
 	case SPL_PENALTY_ILLEGAL_DEFENSE:
-	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_ILLEGAL_DEFENDER; break;
+	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_ILLEGAL_DEFENDER; break;
 	case SPL_PENALTY_OBSTRUCTION:
-	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_OBSTRUCTION; break;
+	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_OBSTRUCTION; break;
 	case SPL_PENALTY_REQ_FOR_PICKUP:
-	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_REQ_FOR_PICKUP; break;
+	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_REQ_FOR_PICKUP; break;
 	case SPL_PENALTY_LEAVING:
-	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_LEAVING_THE_FIELD; break;
+	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_LEAVING_THE_FIELD; break;
 	case SPL_PENALTY_DAMAGE:
 	case SPL_PENALTY_MANUAL:
-	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_MANUAL; break;
+	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_MANUAL; break;
 	default:
-	  __penalty = SoccerPenaltyInterface::SPL_PENALTY_NONE; break;
+	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_NONE; break;
 	}
 #endif
 
-        _rsh->add_penalty(__penalty,
+        _rsh->add_penalty(penalty_,
                           msg->teams[team_index].players[pl_num].secs_till_unpenalized);
       }
       break;
@@ -232,7 +232,7 @@ SplRefBoxProcessor::refbox_process()
 {
   try {
     spl_gamecontrol_t ctrlmsg;
-    size_t bytes_read = __s->recv((void *)&ctrlmsg, sizeof(ctrlmsg));
+    size_t bytes_read = s_->recv((void *)&ctrlmsg, sizeof(ctrlmsg));
     if ( bytes_read == sizeof(ctrlmsg) ) {
       if ((strncmp(ctrlmsg.header, SPL_GAMECONTROL_HEADER, SPL_HEADER_SIZE) == 0) &&
 	  (ctrlmsg.version == SPL_STRUCT_VERSION) ) {
@@ -241,8 +241,8 @@ SplRefBoxProcessor::refbox_process()
     }
   } catch (fawkes::Exception &e) {
     if ( e.get_errno() != EAGAIN ) {
-      __logger->log_warn("SplRefBoxProcessor", "Receiving failed, exception follows");
-      __logger->log_warn("SplRefBoxProcessor", e);
+      logger_->log_warn("SplRefBoxProcessor", "Receiving failed, exception follows");
+      logger_->log_warn("SplRefBoxProcessor", e);
     } // else just no data available this time
   }
 }
@@ -261,8 +261,8 @@ void
 SplRefBoxProcessor::run()
 {
   spl_gamecontrol_t ctrlmsg;
-  while ( ! __quit ) {
-    size_t bytes_read = __s->recv((void *)&ctrlmsg, sizeof(ctrlmsg));
+  while ( ! quit_ ) {
+    size_t bytes_read = s_->recv((void *)&ctrlmsg, sizeof(ctrlmsg));
     if ( bytes_read == sizeof(ctrlmsg) ) {
       if ( (strncmp(ctrlmsg.header, SPL_GAMECONTROL_HEADER, SPL_HEADER_SIZE) == 0) &&
 	   (ctrlmsg.version == SPL_STRUCT_VERSION) ) {
