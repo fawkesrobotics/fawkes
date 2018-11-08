@@ -76,4 +76,4 @@ class LineShape : public Shape
 
 } // end namespace firevision
 
-#endif // __FIREVISION_MODELS_SHAPE_LINE_H_
+#endif // FIREVISION_MODELS_SHAPE_LINE_H__

@@ -66,5 +66,5 @@ class RhtCircleModel: public ShapeModel
 
 } // end namespace firevision
 
-#endif // __FIREVISION_RHT_CIRCLE_H_
+#endif // FIREVISION_RHT_CIRCLE_H__
 

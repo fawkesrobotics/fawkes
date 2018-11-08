@@ -59,4 +59,4 @@ private:
   float         cam_angle_min_vertical_;
 };
 }
-#endif /* __FIREVISION_PIXELFROMPOSITION_H_ */
+#endif /* FIREVISION_PIXELFROMPOSITION_H__ */

@@ -184,5 +184,5 @@ class MirrorCalibTool
 
 }
 
-#endif /*  __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_ */
+#endif /*  FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H__ */
 

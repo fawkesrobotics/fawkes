@@ -119,4 +119,4 @@ class ColorModelSimilarity : public firevision::ColorModel
 
 } /* namespace firevision */
 
-#endif /* __FIREVISION_MODELS_COLOR_SIMILARITY_H_ */
+#endif /* FIREVISION_MODELS_COLOR_SIMILARITY_H__ */

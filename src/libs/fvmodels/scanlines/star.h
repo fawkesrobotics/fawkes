@@ -96,4 +96,4 @@ class ScanlineStar : public ScanlineModel
 
 } // end namespace firevision
 
-#endif /* __FIREVISION_MODELS_SCANLINES_STAR_H_ */
+#endif /* FIREVISION_MODELS_SCANLINES_STAR_H__ */

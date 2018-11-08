@@ -66,4 +66,4 @@ class Circle : public Shape
 
 } // end namespace firevision
 
-#endif // __FIREVISION_MODELS_SHAPE_CIRCLE_H_
+#endif // FIREVISION_MODELS_SHAPE_CIRCLE_H__

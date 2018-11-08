@@ -58,7 +58,7 @@ class ColorModelLookupTable : public ColorModel
   ColorModelLookupTable &  operator+=(const ColorModelLookupTable &cmlt);
 
  private:
-  YuvColormap *__colormap;
+  YuvColormap *colormap_;
 };
 
 } // end namespace firevision

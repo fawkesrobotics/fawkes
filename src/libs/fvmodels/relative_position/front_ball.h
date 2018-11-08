@@ -120,5 +120,5 @@ private:
 
 } // end namespace firevision
 
-#endif // __FIREVISION_MODELS_RELPOS_BALL_H_
+#endif // FIREVISION_MODELS_RELPOS_BALL_H__
 

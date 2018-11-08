@@ -63,33 +63,33 @@ class BallTrigoRelativePos : public RelativePositionModel
   virtual bool          is_pos_valid() const;
 
 private:
-  center_in_roi_t       __cirt_center;
-  float			__pan;
-  float			__tilt;
+  center_in_roi_t       cirt_center_;
+  float			pan_;
+  float			tilt_;
 
-  float                 __horizontal_angle;
-  float                 __vertical_angle;
-  float	                __pan_rad_per_pixel;
-  float	                __tilt_rad_per_pixel;
+  float                 horizontal_angle_;
+  float                 vertical_angle_;
+  float	                pan_rad_per_pixel_;
+  float	                tilt_rad_per_pixel_;
 
-  unsigned int          __image_width;
-  unsigned int          __image_width_2;  // image_width / 2
-  unsigned int          __image_height;
-  unsigned int          __image_height_2; // image_height / 2
+  unsigned int          image_width_;
+  unsigned int          image_width_2_;  // image_width / 2
+  unsigned int          image_height_;
+  unsigned int          image_height_2_; // image_height / 2
 
-  float                 __camera_height;
-  float                 __camera_offset_x;
-  float                 __camera_offset_y;
-  float                 __camera_base_pan;
-  float                 __camera_base_tilt;
+  float                 camera_height_;
+  float                 camera_offset_x_;
+  float                 camera_offset_y_;
+  float                 camera_base_pan_;
+  float                 camera_base_tilt_;
 
-  float                 __ball_circumference;
-  float                 __ball_radius;
-  float                 __ball_x;
-  float                 __ball_y;
-  float                 __bearing;
-  float                 __slope;
-  float                 __distance;
+  float                 ball_circumference_;
+  float                 ball_radius_;
+  float                 ball_x_;
+  float                 ball_y_;
+  float                 bearing_;
+  float                 slope_;
+  float                 distance_;
 };
 
 } // end namespace firevision

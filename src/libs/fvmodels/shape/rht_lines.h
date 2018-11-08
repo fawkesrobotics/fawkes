@@ -105,5 +105,5 @@ class RhtLinesModel: public ShapeModel
 
 } // end namespace firevision
 
-#endif // __FIREVISION_MODELS_SHAPE_RHT_LINES_H_
+#endif // FIREVISION_MODELS_SHAPE_RHT_LINES_H__
 
