@@ -67,20 +67,20 @@ class NaoQiLedThread
                                      fawkes::Message *message) throw();
 
  private:
-  AL::ALPtr<AL::DCMProxy>           __dcm;
-  AL::ALPtr<AL::ALMemoryProxy>      __almem;
-  AL::ALPtr<AL::ALMemoryFastAccess> __memfa;
+  AL::ALPtr<AL::DCMProxy>           dcm_;
+  AL::ALPtr<AL::ALMemoryProxy>      almem_;
+  AL::ALPtr<AL::ALMemoryFastAccess> memfa_;
 
-  std::vector<float> __values;
+  std::vector<float> values_;
 
   typedef std::multimap<fawkes::LedInterface *, unsigned int> LedMemMap;
-  LedMemMap  __memids;
+  LedMemMap  memids_;
 
   typedef fawkes::LockMultiMap<fawkes::LedInterface *, std::string> LedMap;
-  LedMap  __leds;
+  LedMap  leds_;
 
-  bool        __cfg_verbose_face;
-  std::string __subd_prefix;
+  bool        cfg_verbose_face_;
+  std::string subd_prefix_;
 };
 
 #endif

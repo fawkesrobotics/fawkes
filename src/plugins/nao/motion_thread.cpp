@@ -60,7 +60,7 @@ NaoQiMotionThread::~NaoQiMotionThread()
 void
 NaoQiMotionThread::init()
 {
-  __motion_task_id = -1;
+  motion_task_id_ = -1;
 
   // Is ALMotion available?
   try {
@@ -75,12 +75,12 @@ NaoQiMotionThread::init()
 		    e.toString().c_str());
   }
 
-  __almotion = naoqi_broker->getMotionProxy();
-  __thread_pool = naoqi_broker->getThreadPool();
+  almotion_ = naoqi_broker->getMotionProxy();
+  thread_pool_ = naoqi_broker->getThreadPool();
 
-  __hummot_if =
+  hummot_if_ =
     blackboard->open_for_writing<HumanoidMotionInterface>("NaoQi Motion");
-  __sensor_if =
+  sensor_if_ =
     blackboard->open_for_reading<NaoSensorInterface>("Nao Sensors");
 }
 
@@ -90,12 +90,12 @@ NaoQiMotionThread::finalize()
 {
   stop_motion();
 
-  blackboard->close(__hummot_if);
-  blackboard->close(__sensor_if);
-  __hummot_if = NULL;
-  __sensor_if = NULL;
+  blackboard->close(hummot_if_);
+  blackboard->close(sensor_if_);
+  hummot_if_ = NULL;
+  sensor_if_ = NULL;
 
-  __almotion.reset();
+  almotion_.reset();
 }
 
 
@@ -107,24 +107,24 @@ NaoQiMotionThread::finalize()
 void
 NaoQiMotionThread::stop_motion()
 {
-  if (__almotion->walkIsActive()) {
-    __almotion->setWalkTargetVelocity(0., 0., 0., 0.);
-  } else if (__motion_task_id != -1) {
-    if (__almotion->isRunning(__motion_task_id)) {
-      __almotion->killTask(__motion_task_id);
+  if (almotion_->walkIsActive()) {
+    almotion_->setWalkTargetVelocity(0., 0., 0., 0.);
+  } else if (motion_task_id_ != -1) {
+    if (almotion_->isRunning(motion_task_id_)) {
+      almotion_->killTask(motion_task_id_);
     }
-    __motion_task_id = -1;
-  } else if (__motion_task) {
-    if (__motion_task) {
-      __motion_task->exitTask();
-      __motion_task.reset();
+    motion_task_id_ = -1;
+  } else if (motion_task_) {
+    if (motion_task_) {
+      motion_task_->exitTask();
+      motion_task_.reset();
     }
   }
 
 
   AL::ALValue names  = AL::ALValue::array("HeadYaw", "HeadPitch");
-  std::vector<float> head_angles = __almotion->getAngles(names, false);
-  __almotion->setAngles(names, head_angles, 1.0);
+  std::vector<float> head_angles = almotion_->getAngles(names, false);
+  almotion_->setAngles(names, head_angles, 1.0);
 }
 
 
@@ -133,23 +133,23 @@ NaoQiMotionThread::loop()
 {
   process_messages();
 
-  bool walking = __almotion->walkIsActive();
-  bool tasking = __motion_task_id != -1 && __almotion->isRunning(__motion_task_id);
+  bool walking = almotion_->walkIsActive();
+  bool tasking = motion_task_id_ != -1 && almotion_->isRunning(motion_task_id_);
   bool custom_task  = false;
 
-  if (__motion_task) {
-    if (__motion_task->getState() == AL::ALTask::RUNNING) {
+  if (motion_task_) {
+    if (motion_task_->getState() == AL::ALTask::RUNNING) {
       custom_task = true;
-    } else if (__motion_task->getState() == AL::ALTask::ENDED) {
-      __motion_task.reset();
+    } else if (motion_task_->getState() == AL::ALTask::ENDED) {
+      motion_task_.reset();
     }
   }
 
-  __hummot_if->set_moving(walking || tasking || custom_task);
-  AL::ALValue varms_enabled = __almotion->getWalkArmsEnable();
+  hummot_if_->set_moving(walking || tasking || custom_task);
+  AL::ALValue varms_enabled = almotion_->getWalkArmsEnable();
   bool arms_enabled = varms_enabled[0] || varms_enabled[1];
-  __hummot_if->set_arms_enabled(arms_enabled);
-  __hummot_if->write();
+  hummot_if_->set_arms_enabled(arms_enabled);
+  hummot_if_->write();
 }
 
 
@@ -163,18 +163,18 @@ NaoQiMotionThread::process_messages()
   Message* msg_action = NULL;
 
   // process bb messages
-  while ( ! __hummot_if->msgq_empty() ) {
-    if (__hummot_if->msgq_first_is<HumanoidMotionInterface::StopMessage>())
+  while ( ! hummot_if_->msgq_empty() ) {
+    if (hummot_if_->msgq_first_is<HumanoidMotionInterface::StopMessage>())
     {
       stop = true;
     }
     else if (HumanoidMotionInterface::WalkStraightMessage *msg =
-	       __hummot_if->msgq_first_safe(msg))
+	       hummot_if_->msgq_first_safe(msg))
     {
 
     }
     else if (HumanoidMotionInterface::WalkVelocityMessage *msg =
-	     __hummot_if->msgq_first_safe(msg))
+	     hummot_if_->msgq_first_safe(msg))
     {
       if (msg_walk_velocity)  msg_walk_velocity->unref();
       msg_walk_velocity = msg;
@@ -185,7 +185,7 @@ NaoQiMotionThread::process_messages()
     }
 
     else if (HumanoidMotionInterface::MoveHeadMessage *msg =
-	     __hummot_if->msgq_first_safe(msg))
+	     hummot_if_->msgq_first_safe(msg))
     {
       if (msg_move_head)  msg_move_head->unref();
       msg_move_head = msg;
@@ -196,7 +196,7 @@ NaoQiMotionThread::process_messages()
     }
 
     else if (HumanoidMotionInterface::GetUpMessage *msg =
-	     __hummot_if->msgq_first_safe(msg))
+	     hummot_if_->msgq_first_safe(msg))
     {
       if (msg_action)  msg_action->unref();
       msg_action = msg;
@@ -204,7 +204,7 @@ NaoQiMotionThread::process_messages()
       stop = false;
     }
     else if (HumanoidMotionInterface::ParkMessage *msg =
-	     __hummot_if->msgq_first_safe(msg))
+	     hummot_if_->msgq_first_safe(msg))
     {
       if (msg_action)  msg_action->unref();
       msg_action = msg;
@@ -213,7 +213,7 @@ NaoQiMotionThread::process_messages()
     }
 
     else if (HumanoidMotionInterface::KickMessage *msg =
-	     __hummot_if->msgq_first_safe(msg))
+	     hummot_if_->msgq_first_safe(msg))
     {
       if (msg_action)  msg_action->unref();
       msg_action = msg;
@@ -222,7 +222,7 @@ NaoQiMotionThread::process_messages()
     }
 
     else if (HumanoidMotionInterface::StandupMessage *msg =
-	     __hummot_if->msgq_first_safe(msg))
+	     hummot_if_->msgq_first_safe(msg))
     {
       if (msg_action)  msg_action->unref();
       msg_action = msg;
@@ -230,7 +230,7 @@ NaoQiMotionThread::process_messages()
       stop = false;
     }
 
-    __hummot_if->msgq_pop();
+    hummot_if_->msgq_pop();
   }
 
   // process last message
@@ -240,7 +240,7 @@ NaoQiMotionThread::process_messages()
   }
   else if (msg_action) {
     if (msg_action->is_of_type<HumanoidMotionInterface::GetUpMessage>()) {
-      motion::timed_move_joints(__almotion,
+      motion::timed_move_joints(almotion_,
                                 /* head */ 0., 0.,
                                 /* l shoulder */ 2.1, 0.35,
                                 /* l elbow */ -1.40, -1.40,
@@ -256,10 +256,10 @@ NaoQiMotionThread::process_messages()
                                 /* r ankle */ -0.52, 0.,
                                 /* time */ 3.0);
 
-      __hummot_if->set_msgid(msg_action->id());
+      hummot_if_->set_msgid(msg_action->id());
     }
     else if (msg_action->is_of_type<HumanoidMotionInterface::ParkMessage>()) {
-      motion::timed_move_joints(__almotion,
+      motion::timed_move_joints(almotion_,
                                 /* head */ 0., 0.,
                                 /* l shoulder */ 1.58, 0.15,
                                 /* l elbow */ -1.20, -1.1,
@@ -275,32 +275,32 @@ NaoQiMotionThread::process_messages()
                                 /* r ankle */ -1.23, 0.,
                                 /* time */ 3.0);
 
-      __hummot_if->set_msgid(msg_action->id());
+      hummot_if_->set_msgid(msg_action->id());
     }
     else if (msg_action->is_of_type<HumanoidMotionInterface::StandupMessage>()) {
-      if (__motion_task) {
-	__motion_task->exitTask();
+      if (motion_task_) {
+	motion_task_->exitTask();
       }
 
       HumanoidMotionInterface::StandupMessage* msg = dynamic_cast<HumanoidMotionInterface::StandupMessage*>(msg_action);
-      __sensor_if->read();
-      __motion_task.reset(new NaoQiMotionStandupTask(__almotion, msg->from_pos(),
-						     __sensor_if->accel_x(),
-						     __sensor_if->accel_y(),
-						     __sensor_if->accel_z()));
-      __thread_pool->enqueue(__motion_task);
+      sensor_if_->read();
+      motion_task_.reset(new NaoQiMotionStandupTask(almotion_, msg->from_pos(),
+						     sensor_if_->accel_x(),
+						     sensor_if_->accel_y(),
+						     sensor_if_->accel_z()));
+      thread_pool_->enqueue(motion_task_);
 
-      __hummot_if->set_msgid(msg->id());
+      hummot_if_->set_msgid(msg->id());
     }
     else if (msg_action->is_of_type<HumanoidMotionInterface::KickMessage>()) {
       HumanoidMotionInterface::KickMessage* msg = dynamic_cast<HumanoidMotionInterface::KickMessage*>(msg_action);
-      if (__motion_task) {
-	__motion_task->exitTask();
+      if (motion_task_) {
+	motion_task_->exitTask();
       }
-      __motion_task.reset(new NaoQiMotionKickTask(__almotion, msg->leg()));
-      __thread_pool->enqueue(__motion_task);
+      motion_task_.reset(new NaoQiMotionKickTask(almotion_, msg->leg()));
+      thread_pool_->enqueue(motion_task_);
 
-      __hummot_if->set_msgid(msg->id());
+      hummot_if_->set_msgid(msg->id());
     }
 
     msg_action->unref();
@@ -312,13 +312,13 @@ NaoQiMotionThread::process_messages()
 			 "ignoring command", msg_walk_velocity->speed());
       } else {
 	try {
-	  __almotion->setWalkTargetVelocity(msg_walk_velocity->x(), msg_walk_velocity->y(), msg_walk_velocity->theta(),
+	  almotion_->setWalkTargetVelocity(msg_walk_velocity->x(), msg_walk_velocity->y(), msg_walk_velocity->theta(),
 					    msg_walk_velocity->speed());
 	} catch (AL::ALError &e) {
 	  logger->log_warn(name(), "WalkVelocity command failed: %s", e.what());
 	}
       }
-      __hummot_if->set_msgid(msg_walk_velocity->id());
+      hummot_if_->set_msgid(msg_walk_velocity->id());
       msg_walk_velocity->unref();
     }
 
@@ -326,7 +326,7 @@ NaoQiMotionThread::process_messages()
       AL::ALValue names  = AL::ALValue::array("HeadYaw", "HeadPitch");
       AL::ALValue angles = AL::ALValue::array(msg_move_head->yaw(), msg_move_head->pitch());
 
-      __almotion->setAngles(names, angles, msg_move_head->speed());
+      almotion_->setAngles(names, angles, msg_move_head->speed());
       msg_move_head->unref();
     }
   }

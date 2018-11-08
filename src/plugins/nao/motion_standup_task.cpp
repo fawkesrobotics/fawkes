@@ -51,11 +51,11 @@ NaoQiMotionStandupTask::NaoQiMotionStandupTask(AL::ALPtr<AL::ALMotionProxy> almo
 					       float accel_x, float accel_y,
 					       float accel_z)
 {
-  __almotion  = almotion;
-  __from_pos  = from_pos;
-  __accel_x   = accel_x;
-  __accel_y   = accel_y;
-  __accel_z   = accel_z;
+  almotion_  = almotion;
+  from_pos_  = from_pos;
+  accel_x_   = accel_x;
+  accel_y_   = accel_y;
+  accel_z_   = accel_z;
 
   // ALTask variable to cause auto-destruct when done
   fAutoDelete = true;
@@ -123,7 +123,7 @@ NaoQiMotionStandupTask::goto_start_pos()
 
 
   bool is_absolute = true;
-  __almotion->angleInterpolation(joints, all_angles, all_times, is_absolute);
+  almotion_->angleInterpolation(joints, all_angles, all_times, is_absolute);
 }
 
 void
@@ -193,7 +193,7 @@ NaoQiMotionStandupTask::standup_from_back()
   _tc(); _t(0.9); _t(1.9); _t(2.7); _t(3.4); _t(3.9); _t(4.9); _t(5.8); _t(6.8); _t(7.3); _t(8.4); _t(9.4); _tp();
 
   bool is_absolute = true;
-  __almotion->angleInterpolation(joints, all_angles, all_times, is_absolute);
+  almotion_->angleInterpolation(joints, all_angles, all_times, is_absolute);
 
 }
 
@@ -261,28 +261,28 @@ NaoQiMotionStandupTask::standup_from_front()
   _tc(); _t(1.4); _t(2.4); _t(3.7); _t(4.4); _t(5.2); _t(6.2); _t(7.4); _t(8.4); _tp();
 
   bool is_absolute = true;
-  __almotion->angleInterpolation(joints, all_angles, all_times, is_absolute);
+  almotion_->angleInterpolation(joints, all_angles, all_times, is_absolute);
 }
 
 /** Run the standup. */
 void
 NaoQiMotionStandupTask::run()
 {
-  if ( __from_pos == fawkes::HumanoidMotionInterface::STANDUP_BACK ) {
-    //__allogger->info("NaoQiMotionStandupTask", "Explicit standup back");
+  if ( from_pos_ == fawkes::HumanoidMotionInterface::STANDUP_BACK ) {
+    //allogger_->info("NaoQiMotionStandupTask", "Explicit standup back");
     standup_from_back();
-  } else if (__from_pos == fawkes::HumanoidMotionInterface::STANDUP_FRONT ) {
-    //__allogger->info("NaoQiMotionStandupTask", "Explicit standup front");
+  } else if (from_pos_ == fawkes::HumanoidMotionInterface::STANDUP_FRONT ) {
+    //allogger_->info("NaoQiMotionStandupTask", "Explicit standup front");
     standup_from_front();
   } else {
-    if ( __accel_x > 0.8 ) {
-      //__allogger->info("NaoQiMotionStandupTask", "Standup from front (detected)");
+    if ( accel_x_ > 0.8 ) {
+      //allogger_->info("NaoQiMotionStandupTask", "Standup from front (detected)");
       standup_from_front();
-    } else if ( __accel_x < -0.8 ) {
-      //__allogger->info("NaoQiMotionStandupTask", "Standup from back (detected)");
+    } else if ( accel_x_ < -0.8 ) {
+      //allogger_->info("NaoQiMotionStandupTask", "Standup from back (detected)");
       standup_from_back();
     } else {
-      //__allogger->error("NaoQiMotionStandupTask",
+      //allogger_->error("NaoQiMotionStandupTask",
       // "NaoQiMotionStandupTask: Does not seem that I'm lying on the ground, "
       //		"not standing up until you tell me from where");
     }

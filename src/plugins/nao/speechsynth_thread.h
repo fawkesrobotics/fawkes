@@ -66,11 +66,11 @@ class NaoQiSpeechSynthThread
   void say(const char *text);
 
  private:
-  AL::ALPtr<AL::ALTextToSpeechProxy> __altts;
+  AL::ALPtr<AL::ALTextToSpeechProxy> altts_;
 
-  fawkes::SpeechSynthInterface *__speechsynth_if;
+  fawkes::SpeechSynthInterface *speechsynth_if_;
 
-  int __tts_task_id;
+  int tts_task_id_;
 };
 
 #endif

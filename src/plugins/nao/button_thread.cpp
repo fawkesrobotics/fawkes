@@ -71,13 +71,13 @@ NaoQiButtonThread::~NaoQiButtonThread()
 void
 NaoQiButtonThread::init()
 {
-  __sound_longpling = __sound_pling = -1;
-  __sound_bumper_left = __sound_bumper_right = -1;
+  sound_longpling_ = sound_pling_ = -1;
+  sound_bumper_left_ = sound_bumper_right_ = -1;
   last_shutdown_actcount = 0;
 
-  __cfg_chest_triple_long_click_shutdown = false;
+  cfg_chest_triple_long_click_shutdown_ = false;
   try {
-    __cfg_chest_triple_long_click_shutdown =
+    cfg_chest_triple_long_click_shutdown_ =
       config->get_bool("/hardware/nao/chestbut_triple_long_click_shutdown");
   } catch (Exception &e) {} // ignored
 
@@ -90,14 +90,14 @@ NaoQiButtonThread::init()
     if (! is_auplayer_available) {
       logger->log_warn(name(), "ALAudioPlayer not available, disabling sounds");
     } else {
-      __auplayer =
+      auplayer_ =
         AL::ALPtr<AL::ALAudioPlayerProxy>(new AL::ALAudioPlayerProxy(naoqi_broker));
-      __sound_longpling = __auplayer->loadFile(RESDIR"/sounds/longpling.wav");
-      __sound_pling = __auplayer->loadFile(RESDIR"/sounds/pling.wav");
-      __sound_bumper_left =
-        __auplayer->loadFile(RESDIR"/sounds/metal_click_1_left.wav");
-      __sound_bumper_right =
-        __auplayer->loadFile(RESDIR"/sounds/metal_click_1_right.wav");
+      sound_longpling_ = auplayer_->loadFile(RESDIR"/sounds/longpling.wav");
+      sound_pling_ = auplayer_->loadFile(RESDIR"/sounds/pling.wav");
+      sound_bumper_left_ =
+        auplayer_->loadFile(RESDIR"/sounds/metal_click_1_left.wav");
+      sound_bumper_right_ =
+        auplayer_->loadFile(RESDIR"/sounds/metal_click_1_right.wav");
     }
 
     if (is_alsentinel_available) {
@@ -113,33 +113,33 @@ NaoQiButtonThread::init()
 		    e.toString().c_str());
   }
 
-  __sensor_if =
+  sensor_if_ =
     blackboard->open_for_reading<NaoSensorInterface>("Nao Sensors");
 
-  __chestbut_if =
+  chestbut_if_ =
     blackboard->open_for_writing<SwitchInterface>("Nao Button Chest");
-  __lfoot_bumper_if =
+  lfoot_bumper_if_ =
     blackboard->open_for_writing<SwitchInterface>("Nao Button Foot Left");
-  __rfoot_bumper_if =
+  rfoot_bumper_if_ =
     blackboard->open_for_writing<SwitchInterface>("Nao Button Foot Right");
-  __head_front_if =
+  head_front_if_ =
     blackboard->open_for_writing<SwitchInterface>("Nao Button Head Front");
-  __head_middle_if =
+  head_middle_if_ =
     blackboard->open_for_writing<SwitchInterface>("Nao Button Head Middle");
-  __head_rear_if =
+  head_rear_if_ =
     blackboard->open_for_writing<SwitchInterface>("Nao Button Head Rear");
 
-  __chestbut_if->resize_buffers(1);
-  __lfoot_bumper_if->resize_buffers(1);
-  __rfoot_bumper_if->resize_buffers(1);
-  __head_front_if->resize_buffers(1);
-  __head_middle_if->resize_buffers(1);
-  __head_rear_if->resize_buffers(1);
+  chestbut_if_->resize_buffers(1);
+  lfoot_bumper_if_->resize_buffers(1);
+  rfoot_bumper_if_->resize_buffers(1);
+  head_front_if_->resize_buffers(1);
+  head_middle_if_->resize_buffers(1);
+  head_rear_if_->resize_buffers(1);
 
-  __chestbut_remote_enabled = false;
-  __lfoot_bumper_remote_enabled = __rfoot_bumper_remote_enabled = false;
-  __head_front_remote_enabled = __head_middle_remote_enabled =
-    __head_rear_remote_enabled = false;
+  chestbut_remote_enabled_ = false;
+  lfoot_bumper_remote_enabled_ = rfoot_bumper_remote_enabled_ = false;
+  head_front_remote_enabled_ = head_middle_remote_enabled_ =
+    head_rear_remote_enabled_ = false;
 
   now.set_clock(clock);
   last.set_clock(clock);
@@ -151,27 +151,27 @@ NaoQiButtonThread::init()
 void
 NaoQiButtonThread::finalize()
 {
-  blackboard->close(__chestbut_if);
-  blackboard->close(__lfoot_bumper_if);
-  blackboard->close(__rfoot_bumper_if);
-  blackboard->close(__head_front_if);
-  blackboard->close(__head_middle_if);
-  blackboard->close(__head_rear_if);
-  blackboard->close(__sensor_if);
-  __chestbut_if = NULL;
-  __lfoot_bumper_if = NULL;
-  __rfoot_bumper_if = NULL;
-  __head_front_if = NULL;
-  __head_middle_if = NULL;
-  __head_rear_if = NULL;
-  __sensor_if = NULL;
+  blackboard->close(chestbut_if_);
+  blackboard->close(lfoot_bumper_if_);
+  blackboard->close(rfoot_bumper_if_);
+  blackboard->close(head_front_if_);
+  blackboard->close(head_middle_if_);
+  blackboard->close(head_rear_if_);
+  blackboard->close(sensor_if_);
+  chestbut_if_ = NULL;
+  lfoot_bumper_if_ = NULL;
+  rfoot_bumper_if_ = NULL;
+  head_front_if_ = NULL;
+  head_middle_if_ = NULL;
+  head_rear_if_ = NULL;
+  sensor_if_ = NULL;
 
-  if (__auplayer) {
-    __auplayer->unloadFile(__sound_longpling);
-    __auplayer->unloadFile(__sound_pling);
-    __auplayer->unloadFile(__sound_bumper_left);
-    __auplayer->unloadFile(__sound_bumper_right);
-    __auplayer.reset();
+  if (auplayer_) {
+    auplayer_->unloadFile(sound_longpling_);
+    auplayer_->unloadFile(sound_pling_);
+    auplayer_->unloadFile(sound_bumper_left_);
+    auplayer_->unloadFile(sound_bumper_right_);
+    auplayer_.reset();
   }
 }
 
@@ -184,33 +184,33 @@ NaoQiButtonThread::loop()
   float time_diff_sec = now - &last;
   last = now;
 
-  __sensor_if->read();
+  sensor_if_->read();
 
-  process_pattern_button(__chestbut_if, __sensor_if->chest_button(),
-                         time_diff_sec, __chestbut_remote_enabled,
-                         __sound_pling, __sound_longpling);
-  process_pattern_button(__head_front_if, __sensor_if->head_touch_front(),
-                         time_diff_sec, __head_front_remote_enabled);
-  process_pattern_button(__head_middle_if, __sensor_if->head_touch_middle(),
-                         time_diff_sec, __head_middle_remote_enabled);
-  process_pattern_button(__head_rear_if, __sensor_if->head_touch_rear(),
-                         time_diff_sec, __head_rear_remote_enabled);
+  process_pattern_button(chestbut_if_, sensor_if_->chest_button(),
+                         time_diff_sec, chestbut_remote_enabled_,
+                         sound_pling_, sound_longpling_);
+  process_pattern_button(head_front_if_, sensor_if_->head_touch_front(),
+                         time_diff_sec, head_front_remote_enabled_);
+  process_pattern_button(head_middle_if_, sensor_if_->head_touch_middle(),
+                         time_diff_sec, head_middle_remote_enabled_);
+  process_pattern_button(head_rear_if_, sensor_if_->head_touch_rear(),
+                         time_diff_sec, head_rear_remote_enabled_);
 
-  process_bumpers(__lfoot_bumper_if, __sensor_if->l_foot_bumper_l(),
-                  __sensor_if->l_foot_bumper_r(),  time_diff_sec,
-                  __lfoot_bumper_remote_enabled, __sound_bumper_left);
+  process_bumpers(lfoot_bumper_if_, sensor_if_->l_foot_bumper_l(),
+                  sensor_if_->l_foot_bumper_r(),  time_diff_sec,
+                  lfoot_bumper_remote_enabled_, sound_bumper_left_);
 
-  process_bumpers(__rfoot_bumper_if, __sensor_if->r_foot_bumper_l(),
-                  __sensor_if->r_foot_bumper_r(),  time_diff_sec,
-                  __rfoot_bumper_remote_enabled, __sound_bumper_right);
+  process_bumpers(rfoot_bumper_if_, sensor_if_->r_foot_bumper_l(),
+                  sensor_if_->r_foot_bumper_r(),  time_diff_sec,
+                  rfoot_bumper_remote_enabled_, sound_bumper_right_);
 
-  if (__cfg_chest_triple_long_click_shutdown &&
-      __chestbut_if->long_activations() == 3 &&
-      __chestbut_if->activation_count() != last_shutdown_actcount)
+  if (cfg_chest_triple_long_click_shutdown_ &&
+      chestbut_if_->long_activations() == 3 &&
+      chestbut_if_->activation_count() != last_shutdown_actcount)
   {
     logger->log_debug(name(), "Shutting down");
-    last_shutdown_actcount = __chestbut_if->activation_count();
-    if (__auplayer)  __auplayer->playFile(RESDIR"/sounds/naoshutdown.wav");
+    last_shutdown_actcount = chestbut_if_->activation_count();
+    if (auplayer_)  auplayer_->playFile(RESDIR"/sounds/naoshutdown.wav");
 
     struct stat s;
     if (stat(POWEROFF_PATH, &s) == -1) {
@@ -349,10 +349,10 @@ NaoQiButtonThread::pattern_button_logic(float value, float time_diff_sec,
       ++activations;
       if (history > 0.5) {
 	++long_act;
-        if (__auplayer && (sound_long != -1))   __auplayer->play(sound_long);
+        if (auplayer_ && (sound_long != -1))   auplayer_->play(sound_long);
       } else {
 	++short_act;
-        if (__auplayer && (sound_short != -1))  __auplayer->play(sound_short);
+        if (auplayer_ && (sound_short != -1))  auplayer_->play(sound_short);
       }
     } else if ( history < -2.0 /* sec */ ) {
       // reset after two seconds
@@ -399,7 +399,7 @@ NaoQiButtonThread::bumpers_logic(float value, float time_diff_sec,
 
   } else {  // at least one is enabled
     if (history <= 0. /* sec */) { // pressed
-      if (__auplayer && (sound_id != -1))  __auplayer->play(sound_id);
+      if (auplayer_ && (sound_id != -1))  auplayer_->play(sound_id);
       ++activations;
     }
 

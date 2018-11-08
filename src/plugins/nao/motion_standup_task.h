@@ -45,12 +45,12 @@ class NaoQiMotionStandupTask : public AL::ALTask
   void standup_from_front();
 
  private:
-  AL::ALPtr<AL::ALMotionProxy>  __almotion;
-  fawkes::HumanoidMotionInterface::StandupEnum __from_pos;
+  AL::ALPtr<AL::ALMotionProxy>  almotion_;
+  fawkes::HumanoidMotionInterface::StandupEnum from_pos_;
 
-  float __accel_x;
-  float __accel_y;
-  float __accel_z;
+  float accel_x_;
+  float accel_y_;
+  float accel_z_;
 };
 
 #endif

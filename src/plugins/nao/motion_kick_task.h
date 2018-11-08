@@ -43,9 +43,9 @@ class NaoQiMotionKickTask : public AL::ALTask
   void goto_start_pos(AL::ALValue speed, bool concurrent = false);
 
  private:
-  bool                                     __quit;
-  AL::ALPtr<AL::ALMotionProxy>             __almotion;
-  fawkes::HumanoidMotionInterface::LegEnum __leg;
+  bool                                     quit_;
+  AL::ALPtr<AL::ALMotionProxy>             almotion_;
+  fawkes::HumanoidMotionInterface::LegEnum leg_;
 };
 
 #endif

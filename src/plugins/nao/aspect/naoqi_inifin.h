@@ -40,7 +40,7 @@ class NaoQiAspectIniFin : public AspectIniFin
   void set_naoqi_broker(AL::ALPtr<AL::ALBroker> naoqi_broker);
 
  private:
-  AL::ALPtr<AL::ALBroker> __naoqi_broker;
+  AL::ALPtr<AL::ALBroker> naoqi_broker_;
 };
 
 } // end namespace fawkes

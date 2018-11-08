@@ -101,39 +101,39 @@ NaoQiLedThread::~NaoQiLedThread()
 void
 NaoQiLedThread::init()
 {
-  __cfg_verbose_face = false;
+  cfg_verbose_face_ = false;
   try {
-    __cfg_verbose_face = config->get_bool("/hardware/nao/leds/verbose_face");
+    cfg_verbose_face_ = config->get_bool("/hardware/nao/leds/verbose_face");
   } catch (Exception &e) {} // ignored, use default
 
-  __dcm   = naoqi_broker->getDcmProxy();
-  __almem = naoqi_broker->getMemoryProxy();
+  dcm_   = naoqi_broker->getDcmProxy();
+  almem_ = naoqi_broker->getMemoryProxy();
 
   try {
-    __subd_prefix = (std::string)__dcm->getPrefix()[0];
+    subd_prefix_ = (std::string)dcm_->getPrefix()[0];
   } catch (AL::ALError &e) {
     throw Exception("Failed to get DCM prefix: %s", e.toString().c_str());
   }
-  PathParser subdpp(__subd_prefix);
+  PathParser subdpp(subd_prefix_);
 
   std::vector<std::string> leddevs;
   try {
-    leddevs = dcm::get_devices(__dcm, __almem, "Led");
+    leddevs = dcm::get_devices(dcm_, almem_, "Led");
   } catch (AL::ALError &e) {
     throw Exception("Failed to get LED devices: %s", e.toString().c_str());
   }
 
   // Initialize fast memory access
-  std::string prefix = __subd_prefix;
+  std::string prefix = subd_prefix_;
   std::vector<std::string> keys;
   keys.resize(LedTypeN);
-  __values.resize(LedTypeN);
+  values_.resize(LedTypeN);
 
   keys[LED_CHESTBOARD_RED] = prefix + "ChestBoard/Led/Red/Actuator/Value";
   keys[LED_CHESTBOARD_GREEN] = prefix + "ChestBoard/Led/Green/Actuator/Value";
   keys[LED_CHESTBOARD_BLUE] = prefix + "ChestBoard/Led/Blue/Actuator/Value";
 
-  prefix = __subd_prefix + "Ears/Led/";
+  prefix = subd_prefix_ + "Ears/Led/";
   keys[LED_EARS_LEFT_0DEG] = prefix + "Left/0Deg/Actuator/Value";
   keys[LED_EARS_LEFT_36DEG] = prefix + "Left/36Deg/Actuator/Value";
   keys[LED_EARS_LEFT_72DEG] = prefix + "Left/72Deg/Actuator/Value";
@@ -156,7 +156,7 @@ NaoQiLedThread::init()
   keys[LED_EARS_RIGHT_288DEG] = prefix + "Right/288Deg/Actuator/Value";
   keys[LED_EARS_RIGHT_324DEG] = prefix + "Right/324Deg/Actuator/Value";
 
-  prefix = __subd_prefix + "Face/Led/";
+  prefix = subd_prefix_ + "Face/Led/";
   keys[LED_FACE_LEFT_RED_0DEG] = prefix + "Red/Left/0Deg/Actuator/Value";
   keys[LED_FACE_LEFT_RED_45DEG] = prefix + "Red/Left/45Deg/Actuator/Value";
   keys[LED_FACE_LEFT_RED_90DEG] = prefix + "Red/Left/90Deg/Actuator/Value";
@@ -213,7 +213,7 @@ NaoQiLedThread::init()
   keys[LED_FACE_RIGHT_BLUE_315DEG] = prefix + "Blue/Right/315Deg/Actuator/Value";
 
 
-  prefix = __subd_prefix;
+  prefix = subd_prefix_;
   keys[LED_LFOOT_RED] = prefix + "LFoot/Led/Red/Actuator/Value";
   keys[LED_LFOOT_GREEN] = prefix + "LFoot/Led/Green/Actuator/Value";
   keys[LED_LFOOT_BLUE] = prefix + "LFoot/Led/Blue/Actuator/Value";
@@ -222,9 +222,9 @@ NaoQiLedThread::init()
   keys[LED_RFOOT_GREEN] = prefix + "RFoot/Led/Green/Actuator/Value";
   keys[LED_RFOOT_BLUE] = prefix + "RFoot/Led/Blue/Actuator/Value";
 
-  __memfa.reset(new AL::ALMemoryFastAccess());
+  memfa_.reset(new AL::ALMemoryFastAccess());
   try {
-    __memfa->ConnectToVariables(naoqi_broker, keys, false);
+    memfa_->ConnectToVariables(naoqi_broker, keys, false);
   } catch (AL::ALError &e) {
     throw Exception("Failed to setup fast memory access: %s",
 		    e.toString().c_str());
@@ -246,7 +246,7 @@ NaoQiLedThread::init()
     PathParser pp(*l);
     std::string loc = pp[subdpp.size()];
 
-    if (! __cfg_verbose_face) {
+    if (! cfg_verbose_face_) {
       PathParser locpp(loc);
       if (locpp[0] == "Face")  continue;
     }
@@ -265,16 +265,16 @@ NaoQiLedThread::init()
     try {
       LedInterface *iface =
         blackboard->open_for_writing<LedInterface>(id.c_str());
-      __leds.insert(make_pair(iface, *l + "/Value"));
+      leds_.insert(make_pair(iface, *l + "/Value"));
     } catch (Exception &e) {
       fawkes::LedInterface *last = NULL;
-      for (LedMap::iterator i = __leds.begin(); i != __leds.end(); ++i) {
+      for (LedMap::iterator i = leds_.begin(); i != leds_.end(); ++i) {
         if (i->first != last) {
           blackboard->close(i->first);
           last = i->first;
         }
       }
-      __leds.clear();
+      leds_.clear();
       throw;
     }
   }
@@ -293,40 +293,40 @@ NaoQiLedThread::init()
         for (unsigned int a = 0; a < 8; ++a) {
           std::string entry = "Face/Led/" + rgb[cl] + "/" + left_right[lr];
           std::string memid =
-            __subd_prefix + entry + "/" + angles[a] + "Deg/Actuator/Value";
+            subd_prefix_ + entry + "/" + angles[a] + "Deg/Actuator/Value";
 
-          __leds.insert(make_pair(iface, memid));
+          leds_.insert(make_pair(iface, memid));
         }
       }
     }
 
   } catch (Exception &e) {
     fawkes::LedInterface *last = NULL;
-    for (LedMap::iterator i = __leds.begin(); i != __leds.end(); ++i) {
+    for (LedMap::iterator i = leds_.begin(); i != leds_.end(); ++i) {
       if (i->first != last) {
         blackboard->close(i->first);
         last = i->first;
       }
     }
-    __leds.clear();
+    leds_.clear();
     throw;
   }
 
   //logger->log_debug(name(), "Interfaces and device IDs:");
   fawkes::LedInterface *last = NULL;
-  for (LedMap::iterator i = __leds.begin(); i != __leds.end(); ++i) {
+  for (LedMap::iterator i = leds_.begin(); i != leds_.end(); ++i) {
     if (i->first == last)  continue;
 
     //logger->log_debug(name(), "  %s", i->first->id());
     std::pair<LedMap::iterator, LedMap::iterator> ret =
-      __leds.equal_range(i->first);
+      leds_.equal_range(i->first);
       
     for (LedMap::iterator j = ret.first; j != ret.second; ++j) {
       //logger->log_debug(name(), "    %s", j->second.c_str());
 
       for (unsigned int k = 0; k < keys.size(); ++k) {
         if (keys[k] == j->second) {
-          __memids.insert(std::make_pair(i->first, k));
+          memids_.insert(std::make_pair(i->first, k));
           break;
         }
       }
@@ -336,7 +336,7 @@ NaoQiLedThread::init()
   }
 
   last = NULL;
-  for (LedMap::iterator i = __leds.begin(); i != __leds.end(); ++i) {
+  for (LedMap::iterator i = leds_.begin(); i != leds_.end(); ++i) {
     if (i->first != last) {
       bbil_add_message_interface(i->first);
       last = i->first;
@@ -351,33 +351,33 @@ NaoQiLedThread::finalize()
   blackboard->unregister_listener(this);
 
   fawkes::LedInterface *last = NULL;
-  for (LedMap::iterator i = __leds.begin(); i != __leds.end(); ++i) {
+  for (LedMap::iterator i = leds_.begin(); i != leds_.end(); ++i) {
     if (i->first != last) {
       blackboard->close(i->first);
       last = i->first;
     }
   }
 
-  __dcm.reset();
-  __almem.reset();
-  __memfa.reset();
+  dcm_.reset();
+  almem_.reset();
+  memfa_.reset();
 }
 
 void
 NaoQiLedThread::loop()
 {
-  __memfa->GetValues(__values);
+  memfa_->GetValues(values_);
 
   fawkes::LedInterface *last = NULL;
-  for (LedMap::iterator i = __leds.begin(); i != __leds.end(); ++i) {
+  for (LedMap::iterator i = leds_.begin(); i != leds_.end(); ++i) {
     if (i->first == last)  continue;
 
     float maxval = 0.;
 
     std::pair<LedMemMap::iterator, LedMemMap::iterator> ret =
-      __memids.equal_range(i->first);
+      memids_.equal_range(i->first);
     for (LedMemMap::iterator j = ret.first; j != ret.second; ++j) {
-      if (__values[j->second] > maxval)  maxval = __values[j->second];
+      if (values_[j->second] > maxval)  maxval = values_[j->second];
     }
 
     if (maxval != i->first->intensity()) {
@@ -396,7 +396,7 @@ NaoQiLedThread::bb_interface_message_received(Interface *interface,
 {
   // some string magic to find the correct ALValue to write to
   std::string kind = "Merge";
-  int dcm_time = __dcm->getTime(0);
+  int dcm_time = dcm_->getTime(0);
 
   LedInterface::SetIntensityMessage *sim =
     dynamic_cast<LedInterface::SetIntensityMessage *>(message);
@@ -405,21 +405,21 @@ NaoQiLedThread::bb_interface_message_received(Interface *interface,
   if (led_if == NULL) return false;
 
   std::pair<LedMap::iterator, LedMap::iterator> ret =
-    __leds.equal_range(led_if);
+    leds_.equal_range(led_if);
 
   if (sim != NULL) {
     for (LedMap::iterator i = ret.first; i != ret.second; ++i) {
       printf("Set %s to %f\n", i->second.c_str(), sim->intensity());
-      dcm::set_value(__dcm, i->second, kind, sim->intensity(),
+      dcm::set_value(dcm_, i->second, kind, sim->intensity(),
                      (int)roundf(dcm_time + sim->time_sec() * 1000.));
     }
   } else if (dynamic_cast<LedInterface::TurnOnMessage *>(message) != NULL) {
     for (LedMap::iterator i = ret.first; i != ret.second; ++i) {
-      dcm::set_value(__dcm, i->second, kind, 1., dcm_time);
+      dcm::set_value(dcm_, i->second, kind, 1., dcm_time);
     }
   } else if (dynamic_cast<LedInterface::TurnOffMessage *>(message) != NULL) {
     for (LedMap::iterator i = ret.first; i != ret.second; ++i) {
-      dcm::set_value(__dcm, i->second, kind, 0., dcm_time);
+      dcm::set_value(dcm_, i->second, kind, 0., dcm_time);
     }
   }
 

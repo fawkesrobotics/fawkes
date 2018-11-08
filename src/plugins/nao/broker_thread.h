@@ -52,8 +52,8 @@ class NaoQiBrokerThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  AL::ALPtr<AL::ALBroker>      __broker;
-  fawkes::NaoQiAspectIniFin    __naoqi_aspect_inifin;
+  AL::ALPtr<AL::ALBroker>      broker_;
+  fawkes::NaoQiAspectIniFin    naoqi_aspect_inifin_;
 
 };
 

@@ -95,35 +95,35 @@ class NaoQiButtonThread
                        bool &remote_enabled, int sound_id = -1);
 
  private:
-  AL::ALPtr<AL::ALAudioPlayerProxy> __auplayer;
+  AL::ALPtr<AL::ALAudioPlayerProxy> auplayer_;
 
-  AL::ALProcessSignals::ProcessSignalConnection __dcm_sigconn;
+  AL::ALProcessSignals::ProcessSignalConnection dcm_sigconn_;
 
-  fawkes::NaoSensorInterface  *__sensor_if;
-  fawkes::SwitchInterface     *__chestbut_if;
-  fawkes::SwitchInterface     *__lfoot_bumper_if;
-  fawkes::SwitchInterface     *__rfoot_bumper_if;
-  fawkes::SwitchInterface     *__head_front_if;
-  fawkes::SwitchInterface     *__head_middle_if;
-  fawkes::SwitchInterface     *__head_rear_if;
+  fawkes::NaoSensorInterface  *sensor_if_;
+  fawkes::SwitchInterface     *chestbut_if_;
+  fawkes::SwitchInterface     *lfoot_bumper_if_;
+  fawkes::SwitchInterface     *rfoot_bumper_if_;
+  fawkes::SwitchInterface     *head_front_if_;
+  fawkes::SwitchInterface     *head_middle_if_;
+  fawkes::SwitchInterface     *head_rear_if_;
 
   fawkes::Time now;
   fawkes::Time last;
 
-  int __sound_longpling;
-  int __sound_pling;
-  int __sound_bumper_left;
-  int __sound_bumper_right;
+  int sound_longpling_;
+  int sound_pling_;
+  int sound_bumper_left_;
+  int sound_bumper_right_;
 
-  bool __chestbut_remote_enabled;
-  bool __lfoot_bumper_remote_enabled;
-  bool __rfoot_bumper_remote_enabled;
-  bool __head_front_remote_enabled;
-  bool __head_middle_remote_enabled;
-  bool __head_rear_remote_enabled;
+  bool chestbut_remote_enabled_;
+  bool lfoot_bumper_remote_enabled_;
+  bool rfoot_bumper_remote_enabled_;
+  bool head_front_remote_enabled_;
+  bool head_middle_remote_enabled_;
+  bool head_rear_remote_enabled_;
 
   unsigned int last_shutdown_actcount;
-  bool         __cfg_chest_triple_long_click_shutdown;
+  bool         cfg_chest_triple_long_click_shutdown_;
 };
 
 #endif
