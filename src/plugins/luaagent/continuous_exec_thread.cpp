@@ -70,7 +70,7 @@ LuaAgentContinuousExecutionThread::LuaAgentContinuousExecutionThread()
   : Thread("LuaAgentContinuousExecutionThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK)
 {
-  __lua = NULL;
+  lua_ = NULL;
   if (g_agent_thread != NULL) {
     throw Exception("A global thread has already been set");
   }
@@ -93,13 +93,13 @@ void
 LuaAgentContinuousExecutionThread::init_failure_cleanup()
 {
   try {
-    if ( __skiller_if ) {
-      __skiller_if->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
-      blackboard->close(__skiller_if);
+    if ( skiller_if_ ) {
+      skiller_if_->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
+      blackboard->close(skiller_if_);
     }
-    delete __lua_ifi;
-    delete __lua_thread;
-    delete __ifi_mutex;
+    delete lua_ifi_;
+    delete lua_thread_;
+    delete ifi_mutex_;
 
   } catch (...) {
     // we really screwed up, can't do anything about it, ignore error, logger is
@@ -115,77 +115,77 @@ void
 LuaAgentContinuousExecutionThread::init()
 {
   try {
-    __cfg_agent       = config->get_string("/luaagent/agent");
-    __cfg_watch_files = config->get_bool("/luaagent/watch_files");
+    cfg_agent_       = config->get_string("/luaagent/agent");
+    cfg_watch_files_ = config->get_bool("/luaagent/watch_files");
   } catch (Exception &e) {
     e.append("Insufficient configuration for LuaAgent");
     throw;
   }
 
-  logger->log_debug("LuaAgentContinuousExecutionThread", "Agent: %s", __cfg_agent.c_str());
+  logger->log_debug("LuaAgentContinuousExecutionThread", "Agent: %s", cfg_agent_.c_str());
 
-  __clog = new ComponentLogger(logger, "LuaAgentLua");
+  clog_ = new ComponentLogger(logger, "LuaAgentLua");
 
-  __lua = NULL;
-  __lua_ifi = NULL;
-  __lua_thread = NULL;
-  __skiller_if = NULL;
-  __ifi_mutex = NULL;
+  lua_ = NULL;
+  lua_ifi_ = NULL;
+  lua_thread_ = NULL;
+  skiller_if_ = NULL;
+  ifi_mutex_ = NULL;
 
-  std::string reading_prefix = "/luaagent/interfaces/" + __cfg_agent + "/reading/";
-  std::string writing_prefix = "/luaagent/interfaces/" + __cfg_agent + "/writing/";
+  std::string reading_prefix = "/luaagent/interfaces/" + cfg_agent_ + "/reading/";
+  std::string writing_prefix = "/luaagent/interfaces/" + cfg_agent_ + "/writing/";
 
-  __skiller_if = blackboard->open_for_reading<SkillerInterface>("Skiller");
+  skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");
 
-  __skiller_if->read();
-  if (__skiller_if->exclusive_controller() != 0) {
+  skiller_if_->read();
+  if (skiller_if_->exclusive_controller() != 0) {
     throw Exception("Skiller already has an exclusive controller");
   }
 
-  __skiller_if->msgq_enqueue(new SkillerInterface::AcquireControlMessage());
+  skiller_if_->msgq_enqueue(new SkillerInterface::AcquireControlMessage());
 
   try {
-    __lua  = new LuaContext();
-    if (__cfg_watch_files) {
-      __lua->setup_fam(/* auto restart */ false, /* conc thread */ true);
-      __lua->get_fam()->add_listener(this);
+    lua_  = new LuaContext();
+    if (cfg_watch_files_) {
+      lua_->setup_fam(/* auto restart */ false, /* conc thread */ true);
+      lua_->get_fam()->add_listener(this);
     }
 
-    __lua_ifi = new LuaInterfaceImporter(__lua, blackboard, config, logger);
-    __lua_ifi->open_reading_interfaces(reading_prefix);
-    __lua_ifi->open_writing_interfaces(writing_prefix);
+    lua_ifi_ = new LuaInterfaceImporter(lua_, blackboard, config, logger);
+    lua_ifi_->open_reading_interfaces(reading_prefix);
+    lua_ifi_->open_writing_interfaces(writing_prefix);
 
-    __lua->add_package_dir(LUADIR);
-    __lua->add_cpackage_dir(LUALIBDIR);
+    lua_->add_package_dir(LUADIR);
+    lua_->add_cpackage_dir(LUALIBDIR);
 
-    __lua->add_package("fawkesutils");
-    __lua->add_package("fawkesconfig");
-    __lua->add_package("fawkesinterface");
+    lua_->add_package("fawkesutils");
+    lua_->add_package("fawkesconfig");
+    lua_->add_package("fawkesinterface");
 #ifdef HAVE_TF
-    __lua->add_package("fawkestf");
+    lua_->add_package("fawkestf");
 #endif
 
-    __lua->set_string("AGENT", __cfg_agent.c_str());
-    __lua->set_usertype("config", config, "Configuration", "fawkes");
-    __lua->set_usertype("logger", __clog, "ComponentLogger", "fawkes");
-    __lua->set_usertype("clock", clock, "Clock", "fawkes");
+    lua_->set_string("AGENT", cfg_agent_.c_str());
+    lua_->set_usertype("config", config, "Configuration", "fawkes");
+    lua_->set_usertype("logger", clog_, "ComponentLogger", "fawkes");
+    lua_->set_usertype("clock", clock, "Clock", "fawkes");
 #ifdef HAVE_TF
-    __lua->set_usertype("tf", tf_listener, "Transformer", "fawkes::tf");
+    lua_->set_usertype("tf", tf_listener, "Transformer", "fawkes::tf");
 #endif
-    __lua->set_cfunction("read_interfaces", l_read_interfaces);
-    __lua->set_cfunction("write_interfaces", l_write_interfaces);
+    lua_->set_cfunction("read_interfaces", l_read_interfaces);
+    lua_->set_cfunction("write_interfaces", l_write_interfaces);
 
-    __lua_ifi->add_interface("skiller", __skiller_if);
+    lua_ifi_->add_interface("skiller", skiller_if_);
 
-    __lua_ifi->read_to_buffer();
-    __lua_ifi->push_interfaces();
+    lua_ifi_->read_to_buffer();
+    lua_ifi_->push_interfaces();
 
-    __lua->set_start_script(LUADIR"/luaagent/fawkes/start.lua");
+    lua_->set_start_script(LUADIR"/luaagent/fawkes/start.lua");
 
-    __lua_thread = new LuaThread(__lua);
-    thread_collector->add(__lua_thread);
+    lua_thread_ = new LuaThread(lua_);
+    thread_collector->add(lua_thread_);
 
-    __ifi_mutex = new Mutex();
+    ifi_mutex_ = new Mutex();
   } catch (Exception &e) {
     init_failure_cleanup();
     throw;
@@ -196,39 +196,39 @@ LuaAgentContinuousExecutionThread::init()
 void
 LuaAgentContinuousExecutionThread::finalize()
 {
-  if (__skiller_if->has_writer() ) {
-    __skiller_if->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
+  if (skiller_if_->has_writer() ) {
+    skiller_if_->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
   }
 
-  blackboard->close(__skiller_if);
+  blackboard->close(skiller_if_);
 
-  if (__lua_thread) {
-    thread_collector->remove(__lua_thread);
-    delete __lua_thread;
+  if (lua_thread_) {
+    thread_collector->remove(lua_thread_);
+    delete lua_thread_;
   }
 
-  delete __lua_ifi;
-  delete __ifi_mutex;
-  delete __lua;
-  delete __clog;
+  delete lua_ifi_;
+  delete ifi_mutex_;
+  delete lua_;
+  delete clog_;
 }
 
 
 void
 LuaAgentContinuousExecutionThread::loop()
 {
-  __ifi_mutex->lock();
+  ifi_mutex_->lock();
 
-  __lua_ifi->read_to_buffer();
-  __skiller_if->read();
+  lua_ifi_->read_to_buffer();
+  skiller_if_->read();
 
-  if (__lua_thread && __lua_thread->failed()) {
+  if (lua_thread_ && lua_thread_->failed()) {
     logger->log_error(name(), "LuaThread failed, agent died, removing thread");
-    thread_collector->remove(__lua_thread);
-    delete __lua_thread;
-    __lua_thread = NULL;
+    thread_collector->remove(lua_thread_);
+    delete lua_thread_;
+    lua_thread_ = NULL;
   }
-  __ifi_mutex->unlock();
+  ifi_mutex_->unlock();
 }
 
 
@@ -239,10 +239,10 @@ LuaAgentContinuousExecutionThread::loop()
 void
 LuaAgentContinuousExecutionThread::read_interfaces()
 {
-  __ifi_mutex->lock();
+  ifi_mutex_->lock();
   logger->log_debug(name(), "Reading interfaces");
-  __lua_ifi->read_from_buffer();
-  __ifi_mutex->unlock();
+  lua_ifi_->read_from_buffer();
+  ifi_mutex_->unlock();
 }
 
 
@@ -253,26 +253,26 @@ LuaAgentContinuousExecutionThread::read_interfaces()
 void
 LuaAgentContinuousExecutionThread::write_interfaces()
 {
-  __ifi_mutex->lock();
+  ifi_mutex_->lock();
   logger->log_debug(name(), "Writing interfaces");
-  __lua_ifi->write();
-  __ifi_mutex->unlock();
+  lua_ifi_->write();
+  ifi_mutex_->unlock();
 }
 
 void
 LuaAgentContinuousExecutionThread::fam_event(const char *filename,
 					     unsigned int mask)
 {
-  if (__lua_thread) {
-    __lua_thread->cancel();
-    __lua_thread->join();
+  if (lua_thread_) {
+    lua_thread_->cancel();
+    lua_thread_->join();
   }
 
-  __ifi_mutex->lock();
+  ifi_mutex_->lock();
   logger->log_warn(name(), "Restarting Lua context");
-  __lua->restart();
-  __lua_thread->start();
-  __ifi_mutex->unlock();
+  lua_->restart();
+  lua_thread_->start();
+  ifi_mutex_->unlock();
 }
 
 
@@ -284,8 +284,8 @@ LuaAgentContinuousExecutionThread::LuaThread::LuaThread(fawkes::LuaContext *lua)
 	   Thread::OPMODE_CONTINUOUS)
 {
   set_prepfin_conc_loop(true);
-  __lua = lua;
-  __failed = false;
+  lua_ = lua;
+  failed_ = false;
 }
 
 
@@ -293,12 +293,12 @@ LuaAgentContinuousExecutionThread::LuaThread::LuaThread(fawkes::LuaContext *lua)
 void
 LuaAgentContinuousExecutionThread::LuaThread::loop()
 {
-  while (!__failed) {
+  while (!failed_) {
     try {
       // Stack:
-      __lua->do_string("agentenv.execute()");
+      lua_->do_string("agentenv.execute()");
     } catch (Exception &e) {
-      __failed = true;
+      failed_ = true;
       logger->log_error(name(), "execute() failed, exception follows");
       logger->log_error(name(), e);
     }
