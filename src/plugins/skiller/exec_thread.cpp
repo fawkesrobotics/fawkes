@@ -72,78 +72,78 @@ void
 SkillerExecutionThread::init()
 {
   try {
-    __cfg_skillspace  = config->get_string("/skiller/skillspace");
-    __cfg_watch_files = config->get_bool("/skiller/watch_files");
+    cfg_skillspace_  = config->get_string("/skiller/skillspace");
+    cfg_watch_files_ = config->get_bool("/skiller/watch_files");
   } catch (Exception &e) {
     e.append("Insufficient configuration for Skiller");
     throw;
   }
 
-  logger->log_debug("SkillerExecutionThread", "Skill space: %s", __cfg_skillspace.c_str());
-  __clog = new ComponentLogger(logger, "SkillerLua");
+  logger->log_debug("SkillerExecutionThread", "Skill space: %s", cfg_skillspace_.c_str());
+  clog_ = new ComponentLogger(logger, "SkillerLua");
 
-  __lua = NULL;
-  __bbo = NULL;
-  __skiller_if = NULL;
+  lua_ = NULL;
+  bbo_ = NULL;
+  skiller_if_ = NULL;
 
   try {
-	  __skiller_if = 	  blackboard->open_for_reading<SkillerInterface>("Skiller");
+	  skiller_if_ = 	  blackboard->open_for_reading<SkillerInterface>("Skiller");
 
-    __lua  = new LuaContext();
-    if (__cfg_watch_files) {
-      __lua->setup_fam(/* auto restart */ true, /* conc thread */ false);
+    lua_  = new LuaContext();
+    if (cfg_watch_files_) {
+      lua_->setup_fam(/* auto restart */ true, /* conc thread */ false);
     }
 
-    __lua->add_package_dir(LUADIR, /* prefix */ true);
-    __lua->add_cpackage_dir(LUALIBDIR, /* prefix */ true);
+    lua_->add_package_dir(LUADIR, /* prefix */ true);
+    lua_->add_cpackage_dir(LUALIBDIR, /* prefix */ true);
 
-    __lua->add_package("fawkesutils");
-    __lua->add_package("fawkesconfig");
-    __lua->add_package("fawkeslogging");
-    __lua->add_package("fawkesinterface");
-    __lua->add_package("fawkesblackboard");
+    lua_->add_package("fawkesutils");
+    lua_->add_package("fawkesconfig");
+    lua_->add_package("fawkeslogging");
+    lua_->add_package("fawkesinterface");
+    lua_->add_package("fawkesblackboard");
 #ifdef HAVE_TF
-    __lua->add_package("fawkestf");
+    lua_->add_package("fawkestf");
 #endif
 
-    __bbo = new BlackBoardWithOwnership(blackboard, "SkillerLua");
+    bbo_ = new BlackBoardWithOwnership(blackboard, "SkillerLua");
     
-    __lua->set_string("SKILLSPACE", __cfg_skillspace.c_str());
-    __lua->set_string("LUADIR", LUADIR);
-    __lua->set_usertype("config", config, "Configuration", "fawkes");
-    __lua->set_usertype("logger", __clog, "ComponentLogger", "fawkes");
-    __lua->set_usertype("clock", clock, "Clock", "fawkes");
-    __lua->set_usertype("blackboard", __bbo, "BlackBoard", "fawkes");
+    lua_->set_string("SKILLSPACE", cfg_skillspace_.c_str());
+    lua_->set_string("LUADIR", LUADIR);
+    lua_->set_usertype("config", config, "Configuration", "fawkes");
+    lua_->set_usertype("logger", clog_, "ComponentLogger", "fawkes");
+    lua_->set_usertype("clock", clock, "Clock", "fawkes");
+    lua_->set_usertype("blackboard", bbo_, "BlackBoard", "fawkes");
 #ifdef HAVE_TF
-    __lua->set_usertype("tf", tf_listener, "Transformer", "fawkes::tf");
+    lua_->set_usertype("tf", tf_listener, "Transformer", "fawkes::tf");
 #endif
 
-    __lua->create_table();
-    __lua->set_global("features_env_template");
+    lua_->create_table();
+    lua_->set_global("features_env_template");
 
     std::list<SkillerFeature *>::iterator f;
-    for (f = __features.begin(); f != __features.end(); ++f) {
-      (*f)->init_lua_context(__lua);
+    for (f = features_.begin(); f != features_.end(); ++f) {
+      (*f)->init_lua_context(lua_);
     }
 
-    __lua->set_finalization_calls("skiller.fawkes.finalize()",
+    lua_->set_finalization_calls("skiller.fawkes.finalize()",
                                   "skiller.fawkes.finalize_prepare()",
                                   "skiller.fawkes.finalize_cancel()");
     
-    __lua->set_start_script(LUADIR"/skiller/fawkes/start.lua");
+    lua_->set_start_script(LUADIR"/skiller/fawkes/start.lua");
 
-    __lua->add_watcher(this);
+    lua_->add_watcher(this);
   
   } catch (Exception &e) {
-	  blackboard->close(__skiller_if);
-	  delete __lua;
-	  delete __bbo;
-	  delete __clog;
+	  blackboard->close(skiller_if_);
+	  delete lua_;
+	  delete bbo_;
+	  delete clog_;
 	  throw;
   }
 
   // We want to know if our reader leaves and closes the interface
-  bbil_add_reader_interface(__skiller_if);
+  bbil_add_reader_interface(skiller_if_);
   blackboard->register_listener(this);
 
 }
@@ -152,19 +152,19 @@ SkillerExecutionThread::init()
 void
 SkillerExecutionThread::finalize()
 {
-  __lua->remove_watcher(this);
+  lua_->remove_watcher(this);
 
   blackboard->unregister_listener(this);
-  blackboard->close(__skiller_if);
+  blackboard->close(skiller_if_);
 
   std::list<SkillerFeature *>::iterator f;
-  for (f = __features.begin(); f != __features.end(); ++f) {
-    (*f)->finalize_lua_context(__lua);
+  for (f = features_.begin(); f != features_.end(); ++f) {
+    (*f)->finalize_lua_context(lua_);
   }
 
-  delete __lua;
-  delete __clog;
-  delete __bbo;
+  delete lua_;
+  delete clog_;
+  delete bbo_;
 }
 
 
@@ -176,7 +176,7 @@ SkillerExecutionThread::finalize()
 void
 SkillerExecutionThread::add_skiller_feature(SkillerFeature *feature)
 {
-  __features.push_back(feature);
+  features_.push_back(feature);
 }
 
 
@@ -187,26 +187,26 @@ SkillerExecutionThread::lua_restarted(LuaContext *context)
   context->set_global("features_env_template");
 
   std::list<SkillerFeature *>::iterator f;
-  for (f = __features.begin(); f != __features.end(); ++f) {
+  for (f = features_.begin(); f != features_.end(); ++f) {
     (*f)->init_lua_context(context);
   }
 
   // move writing interfaces
-  __lua->do_string("return fawkes.interface_initializer.finalize_prepare()");
+  lua_->do_string("return fawkes.interface_initializer.finalize_prepare()");
 
   context->create_table();
 
-  __lua->push_nil();
-  while (__lua->table_next(-2) ) {
-	  void * udata = __lua->to_usertype(-1);
+  lua_->push_nil();
+  while (lua_->table_next(-2) ) {
+	  void * udata = lua_->to_usertype(-1);
 	  if (udata) {
 		  std::string type, id;
-		  Interface::parse_uid(__lua->to_string(-2), type, id);
+		  Interface::parse_uid(lua_->to_string(-2), type, id);
 		  context->do_string("require(\"interfaces.%s\")", type.c_str());
-		  context->push_string(__lua->to_string(-2));
+		  context->push_string(lua_->to_string(-2));
 		  context->push_usertype(udata, type.c_str(), "fawkes");
 		  context->set_table(-3);
-		  __lua->pop(1);
+		  lua_->pop(1);
 	  }
   }
 
@@ -218,7 +218,7 @@ void
 SkillerExecutionThread::bb_interface_reader_removed(Interface *interface,
                                                     unsigned int instance_serial) throw()
 {
-	__skiller_if_removed_readers.push_locked(instance_serial);
+	skiller_if_removed_readers_.push_locked(instance_serial);
 }
 
 
@@ -226,15 +226,15 @@ void
 SkillerExecutionThread::loop()
 {
 #ifdef HAVE_INOTIFY
-  __lua->process_fam_events();
+  lua_->process_fam_events();
 #endif
 
-  __skiller_if_removed_readers.lock();
-  while (! __skiller_if_removed_readers.empty()) {
-	  __lua->do_string("skiller.fawkes.notify_reader_removed(%u)", __skiller_if_removed_readers.front());
-	  __skiller_if_removed_readers.pop();
+  skiller_if_removed_readers_.lock();
+  while (! skiller_if_removed_readers_.empty()) {
+	  lua_->do_string("skiller.fawkes.notify_reader_removed(%u)", skiller_if_removed_readers_.front());
+	  skiller_if_removed_readers_.pop();
   }
-  __skiller_if_removed_readers.unlock();
+  skiller_if_removed_readers_.unlock();
 
-  __lua->do_string("skillenv.loop()");
+  lua_->do_string("skillenv.loop()");
 }

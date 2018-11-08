@@ -89,20 +89,20 @@ class SkillerExecutionThread
  protected: virtual void run() { Thread::run(); }
 
  private: /* members */
-  fawkes::ComponentLogger *__clog;
-  fawkes::BlackBoardWithOwnership *__bbo;
+  fawkes::ComponentLogger *clog_;
+  fawkes::BlackBoardWithOwnership *bbo_;
   
   // config values
-  std::string __cfg_skillspace;
-  bool        __cfg_watch_files;
+  std::string cfg_skillspace_;
+  bool        cfg_watch_files_;
 
-  fawkes::LockQueue<unsigned int> __skiller_if_removed_readers;
+  fawkes::LockQueue<unsigned int> skiller_if_removed_readers_;
   
-  fawkes::SkillerInterface      *__skiller_if;
+  fawkes::SkillerInterface      *skiller_if_;
 
-  fawkes::LuaContext  *__lua;
+  fawkes::LuaContext  *lua_;
 
-  std::list<SkillerFeature *> __features;
+  std::list<SkillerFeature *> features_;
 };
 
 #endif
