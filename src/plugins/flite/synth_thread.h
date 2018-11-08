@@ -67,11 +67,11 @@ class FliteSynthThread
   float get_duration(cst_wave *wave);
 
  private:
-  fawkes::SpeechSynthInterface   *__speechsynth_if;
+  fawkes::SpeechSynthInterface   *speechsynth_if_;
 
-  std::string __cfg_soundcard;
+  std::string cfg_soundcard_;
 
-  cst_voice  *__voice;
+  cst_voice  *voice_;
 };
 
 
