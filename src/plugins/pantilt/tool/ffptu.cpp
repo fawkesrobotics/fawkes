@@ -74,14 +74,14 @@ class PTUJoystickControl
    * @param argv array of parameters passed into the program
    */
   PTUJoystickControl(int argc, char **argv)
-    : __argp(argc, argv, "hr:p:li")
+    : argp_(argc, argv, "hr:p:li")
   {
-    __rx28 = NULL;
-    __bb = NULL;
-    __ptu_if = NULL;
-    __resolution = 0.1f;
+    rx28_ = NULL;
+    bb_ = NULL;
+    ptu_if_ = NULL;
+    resolution_ = 0.1f;
 
-    if ( __argp.has_arg("h") ) {
+    if ( argp_.has_arg("h") ) {
       print_usage(argv[0]);
       exit(0);
     }
@@ -90,11 +90,11 @@ class PTUJoystickControl
   /** Destructor. */
   ~PTUJoystickControl()
   {
-    if (__bb) {
-      __bb->close(__ptu_if);
-      delete __bb;
+    if (bb_) {
+      bb_->close(ptu_if_);
+      delete bb_;
     }
-    delete __rx28;
+    delete rx28_;
   }
 
 
@@ -103,13 +103,13 @@ class PTUJoystickControl
   {
     char *host = (char *)"localhost";
     unsigned short int port = 1910;
-    bool free_host = __argp.parse_hostport("r", &host, &port);
+    bool free_host = argp_.parse_hostport("r", &host, &port);
 
-    __bb = new RemoteBlackBoard(host, port);
+    bb_ = new RemoteBlackBoard(host, port);
     if (free_host)  free(host);
 
-    if (__argp.has_arg("l")) {
-      InterfaceInfoList *l = __bb->list("PanTiltInterface", "PanTilt *");
+    if (argp_.has_arg("l")) {
+      InterfaceInfoList *l = bb_->list("PanTiltInterface", "PanTilt *");
       if (l->empty()) {
         printf("No interfaces found");
       }
@@ -124,17 +124,17 @@ class PTUJoystickControl
       return;
     }
 
-    if (__argp.has_arg("p")) {
-      std::string iface_id = std::string("PanTilt ") + __argp.arg("p");
-      __ptu_if = __bb->open_for_reading<PanTiltInterface>(iface_id.c_str());
+    if (argp_.has_arg("p")) {
+      std::string iface_id = std::string("PanTilt ") + argp_.arg("p");
+      ptu_if_ = bb_->open_for_reading<PanTiltInterface>(iface_id.c_str());
     } else {
-      InterfaceInfoList *l = __bb->list("PanTiltInterface", "PanTilt *");
+      InterfaceInfoList *l = bb_->list("PanTiltInterface", "PanTilt *");
       if (l->empty()) {
         throw Exception("No PanTilt interface opened on remote!");
       }
       for (InterfaceInfoList::iterator i = l->begin(); i != l->end(); ++i) {
         if (i->has_writer()) {
-          __ptu_if = __bb->open_for_reading<PanTiltInterface>(i->id());
+          ptu_if_ = bb_->open_for_reading<PanTiltInterface>(i->id());
         } else {
           printf("Interface %s has no writer, ignoring\n", i->id());
         }
@@ -142,7 +142,7 @@ class PTUJoystickControl
       delete l;
     }
 
-    if (!__ptu_if) {
+    if (!ptu_if_) {
       throw Exception("No suitable PanTiltInterface found");
     } 
 
@@ -151,8 +151,8 @@ class PTUJoystickControl
   /** Initialize Robotis RX28 raw servo access. */
   void init_rx28()
   {
-    __rx28 = new RobotisRX28("/dev/ttyUSB0");
-    RobotisRX28::DeviceList devl = __rx28->discover();
+    rx28_ = new RobotisRX28("/dev/ttyUSB0");
+    RobotisRX28::DeviceList devl = rx28_->discover();
 
     if (devl.empty()) {
       throw Exception("No devices found\n");
@@ -165,24 +165,24 @@ class PTUJoystickControl
   /** Run control loop. */
   void run()
   {
-    if (__argp.has_arg("l")) {
+    if (argp_.has_arg("l")) {
       init_bb();
-    } else if (__argp.num_items() == 0) {
+    } else if (argp_.num_items() == 0) {
       interactive_move();
-    } else if (strcmp(__argp.items()[0], "move") == 0) {
-      if (__argp.num_items() == 1) {
+    } else if (strcmp(argp_.items()[0], "move") == 0) {
+      if (argp_.num_items() == 1) {
         interactive_move();
       } else {
         exec_move();
       }
-    } else if (strcmp(__argp.items()[0], "rx28-set-id") == 0) {
+    } else if (strcmp(argp_.items()[0], "rx28-set-id") == 0) {
       rx28_set_id();
 
-    } else if (strcmp(__argp.items()[0], "rx28-discover") == 0) {
+    } else if (strcmp(argp_.items()[0], "rx28-discover") == 0) {
       rx28_discover();
 
     } else {
-      printf("Unknown command '%s'\n", __argp.items()[0]);
+      printf("Unknown command '%s'\n", argp_.items()[0]);
     }
   }
 
@@ -196,14 +196,14 @@ class PTUJoystickControl
 
     char tilt_up = 65;
     char tilt_down = 66;
-    if (__argp.has_arg("i")) std::swap(tilt_up, tilt_down);
+    if (argp_.has_arg("i")) std::swap(tilt_up, tilt_down);
 
     float pan, tilt, new_pan, new_tilt;
     float speed = 0.0, new_speed = 0.5;
 
-    __ptu_if->read();
-    pan  = new_pan  = __ptu_if->pan();
-    tilt = new_tilt = __ptu_if->tilt();
+    ptu_if_->read();
+    pan  = new_pan  = ptu_if_->pan();
+    tilt = new_tilt = ptu_if_->tilt();
 
     last.stamp();
     char key = 0;
@@ -234,13 +234,13 @@ class PTUJoystickControl
           if (key == 0) continue;
 
           if (key == tilt_up) {
-            new_tilt = std::min(tilt + __resolution, __ptu_if->max_tilt());
+            new_tilt = std::min(tilt + resolution_, ptu_if_->max_tilt());
           } else if (key == tilt_down) {
-            new_tilt = std::max(tilt - __resolution, __ptu_if->min_tilt());
+            new_tilt = std::max(tilt - resolution_, ptu_if_->min_tilt());
           } else if (key == 67) {
-            new_pan = std::max(pan - __resolution, __ptu_if->min_pan());
+            new_pan = std::max(pan - resolution_, ptu_if_->min_pan());
           } else if (key == 68) {
-            new_pan = std::min(pan + __resolution, __ptu_if->max_pan());
+            new_pan = std::min(pan + resolution_, ptu_if_->max_pan());
           } else continue;
 
         }
@@ -250,9 +250,9 @@ class PTUJoystickControl
         new_pan = 0;
         new_tilt = M_PI / 2.;
       } else if (key == 'r') {
-        __resolution = 0.1f;
+        resolution_ = 0.1f;
       } else if (key == 'R') {
-        __resolution = 0.01f;
+        resolution_ = 0.01f;
       } else if (key == '+') {
         new_speed = std::min(speed + 0.1, 1.0);
       } else if (key == '-') {
@@ -261,15 +261,15 @@ class PTUJoystickControl
 
       if (speed != new_speed) {
         speed = new_speed;
-        float pan_vel  = speed * __ptu_if->max_pan_velocity();
-        float tilt_vel = speed * __ptu_if->max_tilt_velocity();
+        float pan_vel  = speed * ptu_if_->max_pan_velocity();
+        float tilt_vel = speed * ptu_if_->max_tilt_velocity();
 
         printf("Setting velocity %f/%f (max %f/%f)\n", pan_vel, tilt_vel,
-               __ptu_if->max_pan_velocity(), __ptu_if->max_tilt_velocity());
+               ptu_if_->max_pan_velocity(), ptu_if_->max_tilt_velocity());
 
         PanTiltInterface::SetVelocityMessage *svm =
           new PanTiltInterface::SetVelocityMessage(pan_vel, tilt_vel);
-        __ptu_if->msgq_enqueue(svm);
+        ptu_if_->msgq_enqueue(svm);
       }
 
       if ((pan != new_pan) || (tilt != new_tilt)) {
@@ -280,7 +280,7 @@ class PTUJoystickControl
 
         PanTiltInterface::GotoMessage *gm =
           new PanTiltInterface::GotoMessage(pan, tilt);
-        __ptu_if->msgq_enqueue(gm);        
+        ptu_if_->msgq_enqueue(gm);        
       }
     }
   }
@@ -292,22 +292,22 @@ class PTUJoystickControl
 
     float pan, tilt, new_pan, new_tilt;
 
-    __ptu_if->read();
-    pan  = new_pan  = __ptu_if->pan();
-    tilt = new_tilt = __ptu_if->tilt();
+    ptu_if_->read();
+    pan  = new_pan  = ptu_if_->pan();
+    tilt = new_tilt = ptu_if_->tilt();
 
-    const std::vector< const char * > &items = __argp.items();
+    const std::vector< const char * > &items = argp_.items();
     for (unsigned int i = 1; i < items.size(); ++i) {
       if (strcmp(items[i], "pan") == 0) {
         if (items.size() > i+1) {
-          new_pan = __argp.parse_item_float(++i);
+          new_pan = argp_.parse_item_float(++i);
         } else {
           printf("No pan value supplied, aborting.\n");
           return;
         }
       } else if (strcmp(items[i], "tilt") == 0) {
         if (items.size() > i+1) {
-          new_tilt = __argp.parse_item_float(++i);
+          new_tilt = argp_.parse_item_float(++i);
         } else {
           printf("No tilt value supplied, aborting.\n");
           return;
@@ -322,13 +322,13 @@ class PTUJoystickControl
       printf("Goto pan %f and tilt %f\n", new_pan, new_tilt);
 
       PanTiltInterface::SetVelocityMessage *svm =
-        new PanTiltInterface::SetVelocityMessage(__ptu_if->max_pan_velocity() / 2.,
-                                                 __ptu_if->max_tilt_velocity() / 2.);
-      __ptu_if->msgq_enqueue(svm);
+        new PanTiltInterface::SetVelocityMessage(ptu_if_->max_pan_velocity() / 2.,
+                                                 ptu_if_->max_tilt_velocity() / 2.);
+      ptu_if_->msgq_enqueue(svm);
 
       PanTiltInterface::GotoMessage *gm =
         new PanTiltInterface::GotoMessage(new_pan, new_tilt);
-      __ptu_if->msgq_enqueue(gm);
+      ptu_if_->msgq_enqueue(gm);
       usleep(5e5);
     }
   }
@@ -338,11 +338,11 @@ class PTUJoystickControl
   {
     init_rx28();
 
-    int old_id = __argp.parse_item_int(1);
-    int new_id = __argp.parse_item_int(2);
+    int old_id = argp_.parse_item_int(1);
+    int new_id = argp_.parse_item_int(2);
 
     printf("Servo IDs *before* setting the ID:\n");
-    RobotisRX28::DeviceList devl = __rx28->discover();
+    RobotisRX28::DeviceList devl = rx28_->discover();
     for (RobotisRX28::DeviceList::iterator i = devl.begin(); i != devl.end(); ++i) {
       printf("  %d\n", *i);
     }
@@ -359,10 +359,10 @@ class PTUJoystickControl
       return;
     }
 
-    __rx28->set_id(old_id, new_id);
+    rx28_->set_id(old_id, new_id);
 
     printf("Servo IDs *after* setting the ID:\n");
-    devl = __rx28->discover();
+    devl = rx28_->discover();
     for (RobotisRX28::DeviceList::iterator i = devl.begin(); i != devl.end(); ++i) {
       printf("  %d\n", *i);
     }
@@ -373,7 +373,7 @@ class PTUJoystickControl
     init_rx28();
 
     printf("Servo IDs on the bus:\n");
-    RobotisRX28::DeviceList devl = __rx28->discover();
+    RobotisRX28::DeviceList devl = rx28_->discover();
     for (RobotisRX28::DeviceList::iterator i = devl.begin(); i != devl.end(); ++i) {
       printf("  %d\n", *i);
     }
@@ -381,11 +381,11 @@ class PTUJoystickControl
 
 
  private:
-  ArgumentParser __argp;
-  BlackBoard *__bb;
-  PanTiltInterface *__ptu_if;
-  float __resolution;
-  RobotisRX28 *__rx28;
+  ArgumentParser argp_;
+  BlackBoard *bb_;
+  PanTiltInterface *ptu_if_;
+  float resolution_;
+  RobotisRX28 *rx28_;
 };
 
 

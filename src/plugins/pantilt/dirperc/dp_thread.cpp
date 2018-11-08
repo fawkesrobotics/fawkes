@@ -53,9 +53,9 @@ PanTiltDirectedPerceptionThread::PanTiltDirectedPerceptionThread(std::string &pa
 {
   set_name("PanTiltDirectedPerceptionThread(%s)", ptu_name.c_str());
 
-  __pantilt_cfg_prefix = pantilt_cfg_prefix;
-  __ptu_cfg_prefix     = ptu_cfg_prefix;
-  __ptu_name           = ptu_name;
+  pantilt_cfg_prefix_ = pantilt_cfg_prefix;
+  ptu_cfg_prefix_     = ptu_cfg_prefix;
+  ptu_name_           = ptu_name;
 }
 
 
@@ -66,59 +66,59 @@ PanTiltDirectedPerceptionThread::init()
   // freed on destruction, therefore no special handling is necessary in init()
   // itself!
 
-  __cfg_device           = config->get_string((__ptu_cfg_prefix + "device").c_str());
-  __cfg_read_timeout_ms  = config->get_uint((__ptu_cfg_prefix + "read_timeout_ms").c_str());
+  cfg_device_           = config->get_string((ptu_cfg_prefix_ + "device").c_str());
+  cfg_read_timeout_ms_  = config->get_uint((ptu_cfg_prefix_ + "read_timeout_ms").c_str());
 
-  __ptu = new DirectedPerceptionPTU(__cfg_device.c_str(), __cfg_read_timeout_ms);
+  ptu_ = new DirectedPerceptionPTU(cfg_device_.c_str(), cfg_read_timeout_ms_);
 
   // If you have more than one interface: catch exception and close them!
-  std::string bbid = "PanTilt " + __ptu_name;
-  __pantilt_if = blackboard->open_for_writing<PanTiltInterface>(bbid.c_str());
+  std::string bbid = "PanTilt " + ptu_name_;
+  pantilt_if_ = blackboard->open_for_writing<PanTiltInterface>(bbid.c_str());
 
   float min_pan=0, max_pan=0, min_tilt=0, max_tilt=0;
-  __ptu->get_limits(min_pan, max_pan, min_tilt, max_tilt);
+  ptu_->get_limits(min_pan, max_pan, min_tilt, max_tilt);
 
-  __pantilt_if->set_calibrated(true);
-  __pantilt_if->set_min_pan(min_pan);
-  __pantilt_if->set_max_pan(max_pan);
-  __pantilt_if->set_min_tilt(min_tilt);
-  __pantilt_if->set_max_tilt(max_tilt);
-  __pantilt_if->set_enabled(true); // Cannot be turned off
-  //__pantilt_if->set_max_pan_velocity(0);
-  //__pantilt_if->set_max_tilt_velocity(0);
-  //__pantilt_if->set_pan_velocity(0);
-  //__pantilt_if->set_tilt_velocity(0);
-  __pantilt_if->write();
+  pantilt_if_->set_calibrated(true);
+  pantilt_if_->set_min_pan(min_pan);
+  pantilt_if_->set_max_pan(max_pan);
+  pantilt_if_->set_min_tilt(min_tilt);
+  pantilt_if_->set_max_tilt(max_tilt);
+  pantilt_if_->set_enabled(true); // Cannot be turned off
+  //pantilt_if_->set_max_pan_velocity(0);
+  //pantilt_if_->set_max_tilt_velocity(0);
+  //pantilt_if_->set_pan_velocity(0);
+  //pantilt_if_->set_tilt_velocity(0);
+  pantilt_if_->write();
 
   float init_pan = 0.f;
   float init_tilt = 0.f;
   float init_pan_velocity = 0.f;
   float init_tilt_velocity = 0.f;
 
-  std::string panid = __ptu_name + " pan";
-  __panjoint_if = blackboard->open_for_writing<JointInterface>(panid.c_str());
-  __panjoint_if->set_position(init_pan);
-  __panjoint_if->set_velocity(init_pan_velocity);
-  __panjoint_if->write();
+  std::string panid = ptu_name_ + " pan";
+  panjoint_if_ = blackboard->open_for_writing<JointInterface>(panid.c_str());
+  panjoint_if_->set_position(init_pan);
+  panjoint_if_->set_velocity(init_pan_velocity);
+  panjoint_if_->write();
 
-  std::string tiltid = __ptu_name + " tilt";
-  __tiltjoint_if = blackboard->open_for_writing<JointInterface>(tiltid.c_str());
-  __tiltjoint_if->set_position(init_tilt);
-  __tiltjoint_if->set_velocity(init_tilt_velocity);
-  __tiltjoint_if->write();
+  std::string tiltid = ptu_name_ + " tilt";
+  tiltjoint_if_ = blackboard->open_for_writing<JointInterface>(tiltid.c_str());
+  tiltjoint_if_->set_position(init_tilt);
+  tiltjoint_if_->set_velocity(init_tilt_velocity);
+  tiltjoint_if_->write();
 
-  __wt = new WorkerThread(__ptu_name, logger, __ptu);
-  __wt->start();
+  wt_ = new WorkerThread(ptu_name_, logger, ptu_);
+  wt_->start();
 
-  bbil_add_message_interface(__pantilt_if);
-  bbil_add_message_interface(__panjoint_if);
-  bbil_add_message_interface(__tiltjoint_if);
+  bbil_add_message_interface(pantilt_if_);
+  bbil_add_message_interface(panjoint_if_);
+  bbil_add_message_interface(tiltjoint_if_);
   blackboard->register_listener(this);
 
 #ifdef USE_TIMETRACKER
-  __tt.reset(new TimeTracker());
-  __tt_count = 0;
-  __ttc_read_sensor = __tt->add_class("Read Sensor");
+  tt_.reset(new TimeTracker());
+  tt_count_ = 0;
+  ttc_read_sensor_ = tt_->add_class("Read Sensor");
 #endif  
 
 }
@@ -128,16 +128,16 @@ void
 PanTiltDirectedPerceptionThread::finalize()
 {
   blackboard->unregister_listener(this);
-  blackboard->close(__pantilt_if);
-  blackboard->close(__panjoint_if);
-  blackboard->close(__tiltjoint_if);
+  blackboard->close(pantilt_if_);
+  blackboard->close(panjoint_if_);
+  blackboard->close(tiltjoint_if_);
 
-  __wt->cancel();
-  __wt->join();
-  delete __wt;
+  wt_->cancel();
+  wt_->join();
+  delete wt_;
 
   // Setting to NULL deletes instance (RefPtr)
-  __ptu = NULL;
+  ptu_ = NULL;
 }
 
 
@@ -148,19 +148,19 @@ PanTiltDirectedPerceptionThread::finalize()
 void
 PanTiltDirectedPerceptionThread::update_sensor_values()
 {
-  if (__wt->has_fresh_data()) {
+  if (wt_->has_fresh_data()) {
     float pan = 0, tilt = 0;
-    __wt->get_pantilt(pan, tilt);
-    __pantilt_if->set_pan(pan);
-    __pantilt_if->set_tilt(tilt);
-    __pantilt_if->set_final(__wt->is_final());
-    __pantilt_if->write();
+    wt_->get_pantilt(pan, tilt);
+    pantilt_if_->set_pan(pan);
+    pantilt_if_->set_tilt(tilt);
+    pantilt_if_->set_final(wt_->is_final());
+    pantilt_if_->write();
 
-    __panjoint_if->set_position(pan);
-    __panjoint_if->write();
+    panjoint_if_->set_position(pan);
+    panjoint_if_->write();
 
-    __tiltjoint_if->set_position(tilt);
-    __tiltjoint_if->write();
+    tiltjoint_if_->set_position(tilt);
+    tiltjoint_if_->write();
   }
 }
 
@@ -168,51 +168,51 @@ PanTiltDirectedPerceptionThread::update_sensor_values()
 void
 PanTiltDirectedPerceptionThread::loop()
 {
-  __pantilt_if->set_final(__wt->is_final());
+  pantilt_if_->set_final(wt_->is_final());
 
-  while (! __pantilt_if->msgq_empty() ) {
-    if (__pantilt_if->msgq_first_is<PanTiltInterface::CalibrateMessage>()) {
-      __wt->reset();
+  while (! pantilt_if_->msgq_empty() ) {
+    if (pantilt_if_->msgq_first_is<PanTiltInterface::CalibrateMessage>()) {
+      wt_->reset();
 
-    } else if (__pantilt_if->msgq_first_is<PanTiltInterface::GotoMessage>()) {
-      PanTiltInterface::GotoMessage *msg = __pantilt_if->msgq_first(msg);
+    } else if (pantilt_if_->msgq_first_is<PanTiltInterface::GotoMessage>()) {
+      PanTiltInterface::GotoMessage *msg = pantilt_if_->msgq_first(msg);
 
-      __wt->goto_pantilt(msg->pan(), msg->tilt());
-      __pantilt_if->set_msgid(msg->id());
-      __pantilt_if->set_final(false);
+      wt_->goto_pantilt(msg->pan(), msg->tilt());
+      pantilt_if_->set_msgid(msg->id());
+      pantilt_if_->set_final(false);
 
-    } else if (__pantilt_if->msgq_first_is<PanTiltInterface::ParkMessage>()) {
-      PanTiltInterface::ParkMessage *msg = __pantilt_if->msgq_first(msg);
+    } else if (pantilt_if_->msgq_first_is<PanTiltInterface::ParkMessage>()) {
+      PanTiltInterface::ParkMessage *msg = pantilt_if_->msgq_first(msg);
 
-      __wt->goto_pantilt(0, 0);
-      __pantilt_if->set_msgid(msg->id());
-      __pantilt_if->set_final(false);
+      wt_->goto_pantilt(0, 0);
+      pantilt_if_->set_msgid(msg->id());
+      pantilt_if_->set_final(false);
 
-    } else if (__pantilt_if->msgq_first_is<PanTiltInterface::SetEnabledMessage>()) {
-      PanTiltInterface::SetEnabledMessage *msg = __pantilt_if->msgq_first(msg);
+    } else if (pantilt_if_->msgq_first_is<PanTiltInterface::SetEnabledMessage>()) {
+      PanTiltInterface::SetEnabledMessage *msg = pantilt_if_->msgq_first(msg);
 
       logger->log_warn(name(), "SetEnabledMessage ignored for Sony EviD100P");
 
-    } else if (__pantilt_if->msgq_first_is<PanTiltInterface::SetVelocityMessage>()) {
-      PanTiltInterface::SetVelocityMessage *msg = __pantilt_if->msgq_first(msg);
+    } else if (pantilt_if_->msgq_first_is<PanTiltInterface::SetVelocityMessage>()) {
+      PanTiltInterface::SetVelocityMessage *msg = pantilt_if_->msgq_first(msg);
 
       logger->log_warn(name(), "SetVelocityMessage ignored for Sony EviD100P");
 
       /* ignored for now
-      if (msg->pan_velocity() > __pantilt_if->max_pan_velocity()) {
+      if (msg->pan_velocity() > pantilt_if_->max_pan_velocity()) {
 	logger->log_warn(name(), "Desired pan velocity %f too high, max is %f",
-			 msg->pan_velocity(), __pantilt_if->max_pan_velocity());
-      } else if (msg->tilt_velocity() > __pantilt_if->max_tilt_velocity()) {
+			 msg->pan_velocity(), pantilt_if_->max_pan_velocity());
+      } else if (msg->tilt_velocity() > pantilt_if_->max_tilt_velocity()) {
 	logger->log_warn(name(), "Desired tilt velocity %f too high, max is %f",
-			 msg->tilt_velocity(), __pantilt_if->max_tilt_velocity());
+			 msg->tilt_velocity(), pantilt_if_->max_tilt_velocity());
       } else {
-	__wt->set_velocities(msg->pan_velocity(), msg->tilt_velocity());
-	__pantilt_if->set_pan_velocity(msg->pan_velocity());
-	__pantilt_if->set_tilt_velocity(msg->tilt_velocity());
-	__panjoint_if->set_velocity(msg->pan_velocity());
-	__panjoint_if->write();
-	__tiltjoint_if->set_velocity(msg->tilt_velocity());
-	__tiltjoint_if->write();
+	wt_->set_velocities(msg->pan_velocity(), msg->tilt_velocity());
+	pantilt_if_->set_pan_velocity(msg->pan_velocity());
+	pantilt_if_->set_tilt_velocity(msg->tilt_velocity());
+	panjoint_if_->set_velocity(msg->pan_velocity());
+	panjoint_if_->write();
+	tiltjoint_if_->set_velocity(msg->tilt_velocity());
+	tiltjoint_if_->write();
       }
       */
 
@@ -220,10 +220,10 @@ PanTiltDirectedPerceptionThread::loop()
       logger->log_warn(name(), "Unknown message received");
     }
 
-    __pantilt_if->msgq_pop();
+    pantilt_if_->msgq_pop();
   }
 
-  __pantilt_if->write();
+  pantilt_if_->write();
 
 }
 
@@ -233,12 +233,12 @@ PanTiltDirectedPerceptionThread::bb_interface_message_received(Interface *interf
 						 Message *message) throw()
 {
   if (message->is_of_type<PanTiltInterface::StopMessage>()) {
-    __wt->stop_motion();
+    wt_->stop_motion();
     return false; // do not enqueue StopMessage
   } else if (message->is_of_type<PanTiltInterface::FlushMessage>()) {
-    __wt->stop_motion();
+    wt_->stop_motion();
     logger->log_info(name(), "Flushing message queue");
-    __pantilt_if->msgq_flush();
+    pantilt_if_->msgq_flush();
     return false;
   } else {
     logger->log_info(name(), "Received message of type %s, enqueueing", message->type());
@@ -270,24 +270,24 @@ PanTiltDirectedPerceptionThread::WorkerThread::WorkerThread(std::string ptu_name
   set_name("SonyDirectedPerceptionWorkerThread(%s)", ptu_name.c_str());
   set_coalesce_wakeups(true);
 
-  __logger           = logger;
+  logger_           = logger;
 
-  __move_mutex       = new Mutex();
+  move_mutex_       = new Mutex();
 
-  __ptu              = ptu;
-  __move_pending     = false;
-  __reset_pending    = false;
-  __target_pan       = 0;
-  __target_tilt      = 0;
+  ptu_              = ptu;
+  move_pending_     = false;
+  reset_pending_    = false;
+  target_pan_       = 0;
+  target_tilt_      = 0;
 
-  __ptu->get_limits(__pan_min, __pan_max, __tilt_min, __tilt_max);
+  ptu_->get_limits(pan_min_, pan_max_, tilt_min_, tilt_max_);
 }
 
 
 /** Destructor. */
 PanTiltDirectedPerceptionThread::WorkerThread::~WorkerThread()
 {
-  delete __move_mutex;
+  delete move_mutex_;
 }
 
 
@@ -308,10 +308,10 @@ PanTiltDirectedPerceptionThread::WorkerThread::stop_motion()
 void
 PanTiltDirectedPerceptionThread::WorkerThread::goto_pantilt(float pan, float tilt)
 {
-  MutexLocker lock(__move_mutex);
-  __target_pan   = pan;
-  __target_tilt  = tilt;
-  __move_pending = true;
+  MutexLocker lock(move_mutex_);
+  target_pan_   = pan;
+  target_tilt_  = tilt;
+  move_pending_ = true;
   wakeup();
 }
 
@@ -323,8 +323,8 @@ PanTiltDirectedPerceptionThread::WorkerThread::goto_pantilt(float pan, float til
 void
 PanTiltDirectedPerceptionThread::WorkerThread::get_pantilt(float &pan, float &tilt)
 {
-  pan  = __cur_pan;
-  tilt = __cur_tilt;
+  pan  = cur_pan_;
+  tilt = cur_tilt_;
 }
 
 
@@ -332,7 +332,7 @@ PanTiltDirectedPerceptionThread::WorkerThread::get_pantilt(float &pan, float &ti
 void
 PanTiltDirectedPerceptionThread::WorkerThread::reset()
 {
-  __reset_pending = true;
+  reset_pending_ = true;
 }
 
 
@@ -342,9 +342,9 @@ PanTiltDirectedPerceptionThread::WorkerThread::reset()
 bool
 PanTiltDirectedPerceptionThread::WorkerThread::is_final()
 {
-  MutexLocker lock(__move_mutex);
-  return ( (fabs(__cur_pan  - __target_pan)  < 0.01) &&
-	   (fabs(__cur_tilt - __target_tilt) < 0.01));
+  MutexLocker lock(move_mutex_);
+  return ( (fabs(cur_pan_  - target_pan_)  < 0.01) &&
+	   (fabs(cur_tilt_ - target_tilt_) < 0.01));
 }
 
 
@@ -355,8 +355,8 @@ PanTiltDirectedPerceptionThread::WorkerThread::is_final()
 bool
 PanTiltDirectedPerceptionThread::WorkerThread::has_fresh_data()
 {
-  bool rv = __fresh_data;
-  __fresh_data = false;
+  bool rv = fresh_data_;
+  fresh_data_ = false;
   return rv;
 }
 
@@ -364,25 +364,25 @@ PanTiltDirectedPerceptionThread::WorkerThread::has_fresh_data()
 void
 PanTiltDirectedPerceptionThread::WorkerThread::loop()
 {
-  if (__move_pending) {
-    __move_mutex->lock();
-    exec_goto_pantilt(__target_pan, __target_tilt);
-    __move_mutex->unlock();
+  if (move_pending_) {
+    move_mutex_->lock();
+    exec_goto_pantilt(target_pan_, target_tilt_);
+    move_mutex_->unlock();
   }
 
-  if (__reset_pending) {
-    __move_mutex->lock();
-    __reset_pending = false;
-    __move_mutex->unlock();
-    __ptu->reset();
+  if (reset_pending_) {
+    move_mutex_->lock();
+    reset_pending_ = false;
+    move_mutex_->unlock();
+    ptu_->reset();
   }
 
   try {
-    __ptu->get_pan_tilt_rad(__cur_pan, __cur_tilt);
-    __fresh_data = true;
+    ptu_->get_pan_tilt_rad(cur_pan_, cur_tilt_);
+    fresh_data_ = true;
   } catch (Exception &e) {
-    __logger->log_warn(name(), "Failed to get new pan/tilt data, exception follows");
-    __logger->log_warn(name(), e);
+    logger_->log_warn(name(), "Failed to get new pan/tilt data, exception follows");
+    logger_->log_warn(name(), e);
   }
 
   if (! is_final()) {
@@ -399,17 +399,17 @@ PanTiltDirectedPerceptionThread::WorkerThread::loop()
 void
 PanTiltDirectedPerceptionThread::WorkerThread::exec_goto_pantilt(float pan_rad, float tilt_rad)
 {
-  if ( (pan_rad < __pan_min) || (pan_rad > __pan_max) ) {
-    __logger->log_warn(name(), "Pan value out of bounds, min: %f  max: %f  des: %f",
-		       __pan_min, __pan_max, pan_rad);
+  if ( (pan_rad < pan_min_) || (pan_rad > pan_max_) ) {
+    logger_->log_warn(name(), "Pan value out of bounds, min: %f  max: %f  des: %f",
+		       pan_min_, pan_max_, pan_rad);
     return;
   }
-  if ( (tilt_rad < __tilt_min) || (tilt_rad > __tilt_max) ) {
-    __logger->log_warn(name(), "Tilt value out of bounds, min: %f  max: %f  des: %f",
-		       __tilt_min, __tilt_max, tilt_rad);
+  if ( (tilt_rad < tilt_min_) || (tilt_rad > tilt_max_) ) {
+    logger_->log_warn(name(), "Tilt value out of bounds, min: %f  max: %f  des: %f",
+		       tilt_min_, tilt_max_, tilt_rad);
     return;
   }
 
-  __ptu->set_pan_tilt_rad(pan_rad, tilt_rad);
-  __move_pending = false;
+  ptu_->set_pan_tilt_rad(pan_rad, tilt_rad);
+  move_pending_ = false;
 }

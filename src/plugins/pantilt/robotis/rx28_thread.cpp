@@ -61,18 +61,18 @@ PanTiltRX28Thread::PanTiltRX28Thread(std::string &pantilt_cfg_prefix,
 {
   set_name("PanTiltRX28Thread(%s)", ptu_name.c_str());
 
-  __pantilt_cfg_prefix = pantilt_cfg_prefix;
-  __ptu_cfg_prefix     = ptu_cfg_prefix;
-  __ptu_name           = ptu_name;
+  pantilt_cfg_prefix_ = pantilt_cfg_prefix;
+  ptu_cfg_prefix_     = ptu_cfg_prefix;
+  ptu_name_           = ptu_name;
 
-  __rx28 = NULL;
+  rx28_ = NULL;
 }
 
 
 void
 PanTiltRX28Thread::init()
 {
-  __last_pan = __last_tilt = 0.f;
+  last_pan_ = last_tilt_ = 0.f;
   float init_pan_velocity = 0.f;
   float init_tilt_velocity = 0.f;
 
@@ -80,70 +80,70 @@ PanTiltRX28Thread::init()
   // freed on destruction, therefore no special handling is necessary in init()
   // itself!
 
-  __cfg_device           = config->get_string((__ptu_cfg_prefix + "device").c_str());
-  __cfg_read_timeout_ms  = config->get_uint((__ptu_cfg_prefix + "read_timeout_ms").c_str());
-  __cfg_disc_timeout_ms  = config->get_uint((__ptu_cfg_prefix + "discover_timeout_ms").c_str());
-  __cfg_pan_servo_id     = config->get_uint((__ptu_cfg_prefix + "pan_servo_id").c_str());
-  __cfg_tilt_servo_id    = config->get_uint((__ptu_cfg_prefix + "tilt_servo_id").c_str());
-  __cfg_pan_offset       = deg2rad(config->get_float((__ptu_cfg_prefix + "pan_offset").c_str()));
-  __cfg_tilt_offset      = deg2rad(config->get_float((__ptu_cfg_prefix + "tilt_offset").c_str()));
-  __cfg_goto_zero_start  = config->get_bool((__ptu_cfg_prefix + "goto_zero_start").c_str());
-  __cfg_turn_off         = config->get_bool((__ptu_cfg_prefix + "turn_off").c_str());
-  __cfg_cw_compl_margin  = config->get_uint((__ptu_cfg_prefix + "cw_compl_margin").c_str());
-  __cfg_ccw_compl_margin = config->get_uint((__ptu_cfg_prefix + "ccw_compl_margin").c_str());
-  __cfg_cw_compl_slope   = config->get_uint((__ptu_cfg_prefix + "cw_compl_slope").c_str());
-  __cfg_ccw_compl_slope  = config->get_uint((__ptu_cfg_prefix + "ccw_compl_slope").c_str());
-  __cfg_pan_min          = config->get_float((__ptu_cfg_prefix + "pan_min").c_str());
-  __cfg_pan_max          = config->get_float((__ptu_cfg_prefix + "pan_max").c_str());
-  __cfg_tilt_min         = config->get_float((__ptu_cfg_prefix + "tilt_min").c_str());
-  __cfg_tilt_max         = config->get_float((__ptu_cfg_prefix + "tilt_max").c_str());
-  __cfg_pan_margin       = config->get_float((__ptu_cfg_prefix + "pan_margin").c_str());
-  __cfg_tilt_margin      = config->get_float((__ptu_cfg_prefix + "tilt_margin").c_str());
-  __cfg_pan_start        = config->get_float((__ptu_cfg_prefix + "pan_start").c_str());
-  __cfg_tilt_start       = config->get_float((__ptu_cfg_prefix + "tilt_start").c_str());
+  cfg_device_           = config->get_string((ptu_cfg_prefix_ + "device").c_str());
+  cfg_read_timeout_ms_  = config->get_uint((ptu_cfg_prefix_ + "read_timeout_ms").c_str());
+  cfg_disc_timeout_ms_  = config->get_uint((ptu_cfg_prefix_ + "discover_timeout_ms").c_str());
+  cfg_pan_servo_id_     = config->get_uint((ptu_cfg_prefix_ + "pan_servo_id").c_str());
+  cfg_tilt_servo_id_    = config->get_uint((ptu_cfg_prefix_ + "tilt_servo_id").c_str());
+  cfg_pan_offset_       = deg2rad(config->get_float((ptu_cfg_prefix_ + "pan_offset").c_str()));
+  cfg_tilt_offset_      = deg2rad(config->get_float((ptu_cfg_prefix_ + "tilt_offset").c_str()));
+  cfg_goto_zero_start_  = config->get_bool((ptu_cfg_prefix_ + "goto_zero_start").c_str());
+  cfg_turn_off_         = config->get_bool((ptu_cfg_prefix_ + "turn_off").c_str());
+  cfg_cw_compl_margin_  = config->get_uint((ptu_cfg_prefix_ + "cw_compl_margin").c_str());
+  cfg_ccw_compl_margin_ = config->get_uint((ptu_cfg_prefix_ + "ccw_compl_margin").c_str());
+  cfg_cw_compl_slope_   = config->get_uint((ptu_cfg_prefix_ + "cw_compl_slope").c_str());
+  cfg_ccw_compl_slope_  = config->get_uint((ptu_cfg_prefix_ + "ccw_compl_slope").c_str());
+  cfg_pan_min_          = config->get_float((ptu_cfg_prefix_ + "pan_min").c_str());
+  cfg_pan_max_          = config->get_float((ptu_cfg_prefix_ + "pan_max").c_str());
+  cfg_tilt_min_         = config->get_float((ptu_cfg_prefix_ + "tilt_min").c_str());
+  cfg_tilt_max_         = config->get_float((ptu_cfg_prefix_ + "tilt_max").c_str());
+  cfg_pan_margin_       = config->get_float((ptu_cfg_prefix_ + "pan_margin").c_str());
+  cfg_tilt_margin_      = config->get_float((ptu_cfg_prefix_ + "tilt_margin").c_str());
+  cfg_pan_start_        = config->get_float((ptu_cfg_prefix_ + "pan_start").c_str());
+  cfg_tilt_start_       = config->get_float((ptu_cfg_prefix_ + "tilt_start").c_str());
 #ifdef HAVE_TF
-  __cfg_publish_transforms=config->get_bool((__ptu_cfg_prefix + "publish_transforms").c_str());
+  cfg_publish_transforms_=config->get_bool((ptu_cfg_prefix_ + "publish_transforms").c_str());
 #endif
 
 #ifdef HAVE_TF
-  if (__cfg_publish_transforms) {
+  if (cfg_publish_transforms_) {
     float pan_trans_x  =
-        config->get_float((__ptu_cfg_prefix + "pan_trans_x").c_str());
+        config->get_float((ptu_cfg_prefix_ + "pan_trans_x").c_str());
     float pan_trans_y  =
-        config->get_float((__ptu_cfg_prefix + "pan_trans_y").c_str());
+        config->get_float((ptu_cfg_prefix_ + "pan_trans_y").c_str());
     float pan_trans_z  =
-        config->get_float((__ptu_cfg_prefix + "pan_trans_z").c_str());
+        config->get_float((ptu_cfg_prefix_ + "pan_trans_z").c_str());
     float tilt_trans_x =
-        config->get_float((__ptu_cfg_prefix + "tilt_trans_x").c_str());
+        config->get_float((ptu_cfg_prefix_ + "tilt_trans_x").c_str());
     float tilt_trans_y =
-        config->get_float((__ptu_cfg_prefix + "tilt_trans_y").c_str());
+        config->get_float((ptu_cfg_prefix_ + "tilt_trans_y").c_str());
     float tilt_trans_z =
-        config->get_float((__ptu_cfg_prefix + "tilt_trans_z").c_str());
+        config->get_float((ptu_cfg_prefix_ + "tilt_trans_z").c_str());
 
 
-    std::string frame_id_prefix = std::string("") + __ptu_name;
+    std::string frame_id_prefix = std::string("") + ptu_name_;
     try {
       frame_id_prefix =
-          config->get_string((__ptu_cfg_prefix + "frame_id_prefix").c_str());
+          config->get_string((ptu_cfg_prefix_ + "frame_id_prefix").c_str());
     } catch (Exception &e) {} // ignore, use default
 
-    __cfg_base_frame = frame_id_prefix + "/base";
-    __cfg_pan_link   = frame_id_prefix + "/pan";
-    __cfg_tilt_link  = frame_id_prefix + "/tilt";
+    cfg_base_frame_ = frame_id_prefix + "/base";
+    cfg_pan_link_   = frame_id_prefix + "/pan";
+    cfg_tilt_link_  = frame_id_prefix + "/tilt";
 
-    __translation_pan.setValue(pan_trans_x, pan_trans_y, pan_trans_z);
-    __translation_tilt.setValue(tilt_trans_x, tilt_trans_y, tilt_trans_z);
+    translation_pan_.setValue(pan_trans_x, pan_trans_y, pan_trans_z);
+    translation_tilt_.setValue(tilt_trans_x, tilt_trans_y, tilt_trans_z);
   }
 #endif
 
   bool pan_servo_found = false, tilt_servo_found = false;
 
-  __rx28 = new RobotisRX28(__cfg_device.c_str(), __cfg_read_timeout_ms);
-  RobotisRX28::DeviceList devl = __rx28->discover();
+  rx28_ = new RobotisRX28(cfg_device_.c_str(), cfg_read_timeout_ms_);
+  RobotisRX28::DeviceList devl = rx28_->discover();
   for (RobotisRX28::DeviceList::iterator i = devl.begin(); i != devl.end(); ++i) {
-    if (__cfg_pan_servo_id == *i) {
+    if (cfg_pan_servo_id_ == *i) {
       pan_servo_found  = true;
-    } else if (__cfg_tilt_servo_id == *i) {
+    } else if (cfg_tilt_servo_id_ == *i) {
       tilt_servo_found = true;
     } else {
       logger->log_warn(name(), "Servo %u in PTU servo chain, but neither "
@@ -152,12 +152,12 @@ PanTiltRX28Thread::init()
   }
 
   // We only want responses to be sent on explicit READ to speed up communication
-  __rx28->set_status_return_level(RobotisRX28::BROADCAST_ID, RobotisRX28::SRL_RESPOND_READ);
+  rx28_->set_status_return_level(RobotisRX28::BROADCAST_ID, RobotisRX28::SRL_RESPOND_READ);
   // set compliance values
-  __rx28->set_compliance_values(RobotisRX28::BROADCAST_ID,
-				__cfg_cw_compl_margin, __cfg_cw_compl_slope,
-				__cfg_ccw_compl_margin, __cfg_ccw_compl_slope);
-  __rx28->set_led_enabled(__cfg_pan_servo_id, false);
+  rx28_->set_compliance_values(RobotisRX28::BROADCAST_ID,
+				cfg_cw_compl_margin_, cfg_cw_compl_slope_,
+				cfg_ccw_compl_margin_, cfg_ccw_compl_slope_);
+  rx28_->set_led_enabled(cfg_pan_servo_id_, false);
 
 
   if (! (pan_servo_found && tilt_servo_found)) {
@@ -166,55 +166,55 @@ PanTiltRX28Thread::init()
   }
 
   // If you have more than one interface: catch exception and close them!
-  std::string bbid = "PanTilt " + __ptu_name;
-  __pantilt_if = blackboard->open_for_writing<PanTiltInterface>(bbid.c_str());
-  __pantilt_if->set_calibrated(true);
-  __pantilt_if->set_min_pan(__cfg_pan_min);
-  __pantilt_if->set_max_pan(__cfg_pan_max);
-  __pantilt_if->set_min_tilt(__cfg_tilt_min);
-  __pantilt_if->set_max_tilt(__cfg_tilt_max);
-  __pantilt_if->set_pan_margin(__cfg_pan_margin);
-  __pantilt_if->set_tilt_margin(__cfg_tilt_margin);
-  __pantilt_if->set_max_pan_velocity(__rx28->get_max_supported_speed(__cfg_pan_servo_id));
-  __pantilt_if->set_max_tilt_velocity(__rx28->get_max_supported_speed(__cfg_tilt_servo_id));
-  __pantilt_if->set_pan_velocity(init_pan_velocity);
-  __pantilt_if->set_tilt_velocity(init_tilt_velocity);
-  __pantilt_if->write();
+  std::string bbid = "PanTilt " + ptu_name_;
+  pantilt_if_ = blackboard->open_for_writing<PanTiltInterface>(bbid.c_str());
+  pantilt_if_->set_calibrated(true);
+  pantilt_if_->set_min_pan(cfg_pan_min_);
+  pantilt_if_->set_max_pan(cfg_pan_max_);
+  pantilt_if_->set_min_tilt(cfg_tilt_min_);
+  pantilt_if_->set_max_tilt(cfg_tilt_max_);
+  pantilt_if_->set_pan_margin(cfg_pan_margin_);
+  pantilt_if_->set_tilt_margin(cfg_tilt_margin_);
+  pantilt_if_->set_max_pan_velocity(rx28_->get_max_supported_speed(cfg_pan_servo_id_));
+  pantilt_if_->set_max_tilt_velocity(rx28_->get_max_supported_speed(cfg_tilt_servo_id_));
+  pantilt_if_->set_pan_velocity(init_pan_velocity);
+  pantilt_if_->set_tilt_velocity(init_tilt_velocity);
+  pantilt_if_->write();
 
-  __led_if = blackboard->open_for_writing<LedInterface>(bbid.c_str());
+  led_if_ = blackboard->open_for_writing<LedInterface>(bbid.c_str());
 
-  std::string panid = __ptu_name + " pan";
-  __panjoint_if = blackboard->open_for_writing<JointInterface>(panid.c_str());
-  __panjoint_if->set_position(__last_pan);
-  __panjoint_if->set_velocity(init_pan_velocity);
-  __panjoint_if->write();
+  std::string panid = ptu_name_ + " pan";
+  panjoint_if_ = blackboard->open_for_writing<JointInterface>(panid.c_str());
+  panjoint_if_->set_position(last_pan_);
+  panjoint_if_->set_velocity(init_pan_velocity);
+  panjoint_if_->write();
 
-  std::string tiltid = __ptu_name + " tilt";
-  __tiltjoint_if = blackboard->open_for_writing<JointInterface>(tiltid.c_str());
-  __tiltjoint_if->set_position(__last_tilt);
-  __tiltjoint_if->set_velocity(init_tilt_velocity);
-  __tiltjoint_if->write();
+  std::string tiltid = ptu_name_ + " tilt";
+  tiltjoint_if_ = blackboard->open_for_writing<JointInterface>(tiltid.c_str());
+  tiltjoint_if_->set_position(last_tilt_);
+  tiltjoint_if_->set_velocity(init_tilt_velocity);
+  tiltjoint_if_->write();
 
-  __wt = new WorkerThread(__ptu_name, logger, __rx28,
-			  __cfg_pan_servo_id, __cfg_tilt_servo_id,
-			  __cfg_pan_min, __cfg_pan_max, __cfg_tilt_min, __cfg_tilt_max,
-			  __cfg_pan_offset, __cfg_tilt_offset);
-  __wt->set_margins(__cfg_pan_margin, __cfg_tilt_margin);
-  __wt->start();
-  __wt->set_enabled(true);
-  if ( __cfg_goto_zero_start ) {
-    __wt->goto_pantilt_timed(__cfg_pan_start, __cfg_tilt_start, 3.0);
+  wt_ = new WorkerThread(ptu_name_, logger, rx28_,
+			  cfg_pan_servo_id_, cfg_tilt_servo_id_,
+			  cfg_pan_min_, cfg_pan_max_, cfg_tilt_min_, cfg_tilt_max_,
+			  cfg_pan_offset_, cfg_tilt_offset_);
+  wt_->set_margins(cfg_pan_margin_, cfg_tilt_margin_);
+  wt_->start();
+  wt_->set_enabled(true);
+  if ( cfg_goto_zero_start_ ) {
+    wt_->goto_pantilt_timed(cfg_pan_start_, cfg_tilt_start_, 3.0);
   }
 
-  bbil_add_message_interface(__pantilt_if);
-  bbil_add_message_interface(__panjoint_if);
-  bbil_add_message_interface(__tiltjoint_if);
+  bbil_add_message_interface(pantilt_if_);
+  bbil_add_message_interface(panjoint_if_);
+  bbil_add_message_interface(tiltjoint_if_);
   blackboard->register_listener(this);
 
 #ifdef USE_TIMETRACKER
-  __tt.reset(new TimeTracker());
-  __tt_count = 0;
-  __ttc_read_sensor = __tt->add_class("Read Sensor");
+  tt_.reset(new TimeTracker());
+  tt_count_ = 0;
+  ttc_read_sensor_ = tt_->add_class("Read Sensor");
 #endif  
 
 }
@@ -223,17 +223,17 @@ PanTiltRX28Thread::init()
 bool
 PanTiltRX28Thread::prepare_finalize_user()
 {
-  if (__cfg_turn_off) {
+  if (cfg_turn_off_) {
     logger->log_info(name(), "Moving to park position");
-    __wt->goto_pantilt_timed(0, __cfg_tilt_max, 2.0);
+    wt_->goto_pantilt_timed(0, cfg_tilt_max_, 2.0);
     // we need to wait twice, because the first wakeup is likely to happen
     // before the command is actually send
-    __wt->wait_for_fresh_data();
-    __wt->wait_for_fresh_data();
+    wt_->wait_for_fresh_data();
+    wt_->wait_for_fresh_data();
 
-    while (! __wt->is_final()) {
-      //__wt->wakeup();
-      __wt->wait_for_fresh_data();
+    while (! wt_->is_final()) {
+      //wt_->wakeup();
+      wt_->wait_for_fresh_data();
     }
   }
   return true;
@@ -243,28 +243,28 @@ void
 PanTiltRX28Thread::finalize()
 {
   blackboard->unregister_listener(this);
-  blackboard->close(__pantilt_if);
-  blackboard->close(__led_if);
-  blackboard->close(__panjoint_if);
-  blackboard->close(__tiltjoint_if);
+  blackboard->close(pantilt_if_);
+  blackboard->close(led_if_);
+  blackboard->close(panjoint_if_);
+  blackboard->close(tiltjoint_if_);
 
-  __wt->cancel();
-  __wt->join();
-  delete __wt;
+  wt_->cancel();
+  wt_->join();
+  delete wt_;
 
-  if (__cfg_turn_off) {
+  if (cfg_turn_off_) {
     logger->log_info(name(), "Turning off PTU");
     try {
-      __rx28->set_led_enabled(__cfg_pan_servo_id,  false);
-      __rx28->set_led_enabled(__cfg_tilt_servo_id, false);
-      __rx28->set_torques_enabled(false, 2, __cfg_pan_servo_id, __cfg_tilt_servo_id);
+      rx28_->set_led_enabled(cfg_pan_servo_id_,  false);
+      rx28_->set_led_enabled(cfg_tilt_servo_id_, false);
+      rx28_->set_torques_enabled(false, 2, cfg_pan_servo_id_, cfg_tilt_servo_id_);
     } catch (Exception &e) {
       logger->log_warn(name(), "Failed to turn of PTU: %s", e.what());
     }
   }
   
   // Setting to NULL deletes instance (RefPtr)
-  __rx28 = NULL;
+  rx28_ = NULL;
 }
 
 
@@ -275,47 +275,47 @@ PanTiltRX28Thread::finalize()
 void
 PanTiltRX28Thread::update_sensor_values()
 {
-  if (__wt->has_fresh_data()) {
+  if (wt_->has_fresh_data()) {
     float pan = 0, tilt = 0, panvel=0, tiltvel=0;
     fawkes::Time time;
-    __wt->get_pantilt(pan, tilt, time);
-    __wt->get_velocities(panvel, tiltvel);
+    wt_->get_pantilt(pan, tilt, time);
+    wt_->get_velocities(panvel, tiltvel);
 
     // poor man's filter: only update if we get a change of least half a degree
-    if (fabs(__last_pan - pan) >= 0.009 || fabs(__last_tilt - tilt) >= 0.009) {
-      __last_pan  = pan;
-      __last_tilt = tilt;
+    if (fabs(last_pan_ - pan) >= 0.009 || fabs(last_tilt_ - tilt) >= 0.009) {
+      last_pan_  = pan;
+      last_tilt_ = tilt;
     } else {
-      pan  = __last_pan;
-      tilt = __last_tilt;
+      pan  = last_pan_;
+      tilt = last_tilt_;
     }
 
-    __pantilt_if->set_pan(pan);
-    __pantilt_if->set_tilt(tilt);
-    __pantilt_if->set_pan_velocity(panvel);
-    __pantilt_if->set_tilt_velocity(tiltvel);
-    __pantilt_if->set_enabled(__wt->is_enabled());
-    __pantilt_if->set_final(__wt->is_final());
-    __pantilt_if->write();
+    pantilt_if_->set_pan(pan);
+    pantilt_if_->set_tilt(tilt);
+    pantilt_if_->set_pan_velocity(panvel);
+    pantilt_if_->set_tilt_velocity(tiltvel);
+    pantilt_if_->set_enabled(wt_->is_enabled());
+    pantilt_if_->set_final(wt_->is_final());
+    pantilt_if_->write();
 
-    __panjoint_if->set_position(pan);
-    __panjoint_if->set_velocity(panvel);
-    __panjoint_if->write();
+    panjoint_if_->set_position(pan);
+    panjoint_if_->set_velocity(panvel);
+    panjoint_if_->write();
 
-    __tiltjoint_if->set_position(tilt);
-    __tiltjoint_if->set_velocity(tiltvel);
-    __tiltjoint_if->write();
+    tiltjoint_if_->set_position(tilt);
+    tiltjoint_if_->set_velocity(tiltvel);
+    tiltjoint_if_->write();
 
 #ifdef HAVE_TF
-    if (__cfg_publish_transforms) {
+    if (cfg_publish_transforms_) {
       // Always publish updated transforms
       tf::Quaternion pr;  pr.setEulerZYX(pan, 0, 0);
-      tf::Transform ptr(pr, __translation_pan);
-      tf_publisher->send_transform(ptr, time, __cfg_base_frame, __cfg_pan_link);
+      tf::Transform ptr(pr, translation_pan_);
+      tf_publisher->send_transform(ptr, time, cfg_base_frame_, cfg_pan_link_);
 
       tf::Quaternion tr; tr.setEulerZYX(0, tilt, 0);
-      tf::Transform ttr(tr, __translation_tilt);
-      tf_publisher->send_transform(ttr, time, __cfg_pan_link, __cfg_tilt_link);
+      tf::Transform ttr(tr, translation_tilt_);
+      tf_publisher->send_transform(ttr, time, cfg_pan_link_, cfg_tilt_link_);
     }
 #endif
   }
@@ -325,87 +325,87 @@ PanTiltRX28Thread::update_sensor_values()
 void
 PanTiltRX28Thread::loop()
 {
-  __pantilt_if->set_final(__wt->is_final());
+  pantilt_if_->set_final(wt_->is_final());
 
-  while (! __pantilt_if->msgq_empty() ) {
-    if (__pantilt_if->msgq_first_is<PanTiltInterface::CalibrateMessage>()) {
+  while (! pantilt_if_->msgq_empty() ) {
+    if (pantilt_if_->msgq_first_is<PanTiltInterface::CalibrateMessage>()) {
       // ignored
 
-    } else if (__pantilt_if->msgq_first_is<PanTiltInterface::GotoMessage>()) {
-      PanTiltInterface::GotoMessage *msg = __pantilt_if->msgq_first(msg);
+    } else if (pantilt_if_->msgq_first_is<PanTiltInterface::GotoMessage>()) {
+      PanTiltInterface::GotoMessage *msg = pantilt_if_->msgq_first(msg);
 
-      __wt->goto_pantilt(msg->pan(), msg->tilt());
-      __pantilt_if->set_msgid(msg->id());
-      __pantilt_if->set_final(false);
+      wt_->goto_pantilt(msg->pan(), msg->tilt());
+      pantilt_if_->set_msgid(msg->id());
+      pantilt_if_->set_final(false);
 
-    } else if (__pantilt_if->msgq_first_is<PanTiltInterface::TimedGotoMessage>()) {
-      PanTiltInterface::TimedGotoMessage *msg = __pantilt_if->msgq_first(msg);
+    } else if (pantilt_if_->msgq_first_is<PanTiltInterface::TimedGotoMessage>()) {
+      PanTiltInterface::TimedGotoMessage *msg = pantilt_if_->msgq_first(msg);
 
-      __wt->goto_pantilt_timed(msg->pan(), msg->tilt(), msg->time_sec());
-      __pantilt_if->set_msgid(msg->id());
-      __pantilt_if->set_final(false);
+      wt_->goto_pantilt_timed(msg->pan(), msg->tilt(), msg->time_sec());
+      pantilt_if_->set_msgid(msg->id());
+      pantilt_if_->set_final(false);
 
-    } else if (__pantilt_if->msgq_first_is<PanTiltInterface::ParkMessage>()) {
-      PanTiltInterface::ParkMessage *msg = __pantilt_if->msgq_first(msg);
+    } else if (pantilt_if_->msgq_first_is<PanTiltInterface::ParkMessage>()) {
+      PanTiltInterface::ParkMessage *msg = pantilt_if_->msgq_first(msg);
 
-      __wt->goto_pantilt(0, 0);
-      __pantilt_if->set_msgid(msg->id());
-      __pantilt_if->set_final(false);
+      wt_->goto_pantilt(0, 0);
+      pantilt_if_->set_msgid(msg->id());
+      pantilt_if_->set_final(false);
 
-    } else if (__pantilt_if->msgq_first_is<PanTiltInterface::SetEnabledMessage>()) {
-      PanTiltInterface::SetEnabledMessage *msg = __pantilt_if->msgq_first(msg);
+    } else if (pantilt_if_->msgq_first_is<PanTiltInterface::SetEnabledMessage>()) {
+      PanTiltInterface::SetEnabledMessage *msg = pantilt_if_->msgq_first(msg);
 
-      __wt->set_enabled(msg->is_enabled());
+      wt_->set_enabled(msg->is_enabled());
 
-    } else if (__pantilt_if->msgq_first_is<PanTiltInterface::SetVelocityMessage>()) {
-      PanTiltInterface::SetVelocityMessage *msg = __pantilt_if->msgq_first(msg);
+    } else if (pantilt_if_->msgq_first_is<PanTiltInterface::SetVelocityMessage>()) {
+      PanTiltInterface::SetVelocityMessage *msg = pantilt_if_->msgq_first(msg);
 
-      if (msg->pan_velocity() > __pantilt_if->max_pan_velocity()) {
+      if (msg->pan_velocity() > pantilt_if_->max_pan_velocity()) {
 	logger->log_warn(name(), "Desired pan velocity %f too high, max is %f",
-			 msg->pan_velocity(), __pantilt_if->max_pan_velocity());
-      } else if (msg->tilt_velocity() > __pantilt_if->max_tilt_velocity()) {
+			 msg->pan_velocity(), pantilt_if_->max_pan_velocity());
+      } else if (msg->tilt_velocity() > pantilt_if_->max_tilt_velocity()) {
 	logger->log_warn(name(), "Desired tilt velocity %f too high, max is %f",
-			 msg->tilt_velocity(), __pantilt_if->max_tilt_velocity());
+			 msg->tilt_velocity(), pantilt_if_->max_tilt_velocity());
       } else {
-	__wt->set_velocities(msg->pan_velocity(), msg->tilt_velocity());
+	wt_->set_velocities(msg->pan_velocity(), msg->tilt_velocity());
       }
 
-    } else if (__pantilt_if->msgq_first_is<PanTiltInterface::SetMarginMessage>()) {
-      PanTiltInterface::SetMarginMessage *msg = __pantilt_if->msgq_first(msg);
+    } else if (pantilt_if_->msgq_first_is<PanTiltInterface::SetMarginMessage>()) {
+      PanTiltInterface::SetMarginMessage *msg = pantilt_if_->msgq_first(msg);
 
-      __wt->set_margins(msg->pan_margin(), msg->tilt_margin());
-      __pantilt_if->set_pan_margin(msg->pan_margin());
-      __pantilt_if->set_tilt_margin(msg->tilt_margin());
+      wt_->set_margins(msg->pan_margin(), msg->tilt_margin());
+      pantilt_if_->set_pan_margin(msg->pan_margin());
+      pantilt_if_->set_tilt_margin(msg->tilt_margin());
 
     } else {
       logger->log_warn(name(), "Unknown message received");
     }
 
-    __pantilt_if->msgq_pop();
+    pantilt_if_->msgq_pop();
   }
 
-  __pantilt_if->write();
+  pantilt_if_->write();
 
   bool write_led_if = false;
-  while (! __led_if->msgq_empty() ) {
+  while (! led_if_->msgq_empty() ) {
     write_led_if = true;
-    if (__led_if->msgq_first_is<LedInterface::SetIntensityMessage>()) {
-      LedInterface::SetIntensityMessage *msg = __led_if->msgq_first(msg);
-      __wt->set_led_enabled((msg->intensity() >= 0.5));
-      __led_if->set_intensity((msg->intensity() >= 0.5) ? LedInterface::ON : LedInterface::OFF);
-    } else if (__led_if->msgq_first_is<LedInterface::TurnOnMessage>()) {
-      __wt->set_led_enabled(true);
-      __led_if->set_intensity(LedInterface::ON);
-    } else if (__led_if->msgq_first_is<LedInterface::TurnOffMessage>()) {
-      __wt->set_led_enabled(false);
-      __led_if->set_intensity(LedInterface::OFF);
+    if (led_if_->msgq_first_is<LedInterface::SetIntensityMessage>()) {
+      LedInterface::SetIntensityMessage *msg = led_if_->msgq_first(msg);
+      wt_->set_led_enabled((msg->intensity() >= 0.5));
+      led_if_->set_intensity((msg->intensity() >= 0.5) ? LedInterface::ON : LedInterface::OFF);
+    } else if (led_if_->msgq_first_is<LedInterface::TurnOnMessage>()) {
+      wt_->set_led_enabled(true);
+      led_if_->set_intensity(LedInterface::ON);
+    } else if (led_if_->msgq_first_is<LedInterface::TurnOffMessage>()) {
+      wt_->set_led_enabled(false);
+      led_if_->set_intensity(LedInterface::OFF);
     }
 
-    __led_if->msgq_pop();
+    led_if_->msgq_pop();
   }
-  if (write_led_if)  __led_if->write();
+  if (write_led_if)  led_if_->write();
 
-  //__wt->wakeup();
+  //wt_->wakeup();
 }
 
 
@@ -414,12 +414,12 @@ PanTiltRX28Thread::bb_interface_message_received(Interface *interface,
 						 Message *message) throw()
 {
   if (message->is_of_type<PanTiltInterface::StopMessage>()) {
-    __wt->stop_motion();
+    wt_->stop_motion();
     return false; // do not enqueue StopMessage
   } else if (message->is_of_type<PanTiltInterface::FlushMessage>()) {
-    __wt->stop_motion();
+    wt_->stop_motion();
     logger->log_info(name(), "Flushing message queue");
-    __pantilt_if->msgq_flush();
+    pantilt_if_->msgq_flush();
     return false;
   } else {
     logger->log_info(name(), "Received message of type %s, enqueueing", message->type());
@@ -464,43 +464,43 @@ PanTiltRX28Thread::WorkerThread::WorkerThread(std::string ptu_name,
   set_name("RX28WorkerThread(%s)", ptu_name.c_str());
   set_coalesce_wakeups(true);
 
-  __logger           = logger;
+  logger_           = logger;
 
-  __value_rwlock     = new ReadWriteLock();
-  __rx28_rwlock      = new ReadWriteLock();
-  __fresh_data_mutex = new Mutex();
-  __update_waitcond  = new WaitCondition();
+  value_rwlock_     = new ReadWriteLock();
+  rx28_rwlock_      = new ReadWriteLock();
+  fresh_data_mutex_ = new Mutex();
+  update_waitcond_  = new WaitCondition();
 
-  __rx28 = rx28;
-  __move_pending     = false;
-  __target_pan       = 0;
-  __target_tilt      = 0;
-  __pan_servo_id     = pan_servo_id;
-  __tilt_servo_id    = tilt_servo_id;
+  rx28_ = rx28;
+  move_pending_     = false;
+  target_pan_       = 0;
+  target_tilt_      = 0;
+  pan_servo_id_     = pan_servo_id;
+  tilt_servo_id_    = tilt_servo_id;
 
-  __pan_min          = pan_min;
-  __pan_max          = pan_max;
-  __tilt_min         = tilt_min;
-  __tilt_max         = tilt_max;
-  __pan_offset       = pan_offset;
-  __tilt_offset      = tilt_offset;
-  __enable           = false;
-  __disable          = false;
-  __led_enable       = false;
-  __led_disable      = false;
+  pan_min_          = pan_min;
+  pan_max_          = pan_max;
+  tilt_min_         = tilt_min;
+  tilt_max_         = tilt_max;
+  pan_offset_       = pan_offset;
+  tilt_offset_      = tilt_offset;
+  enable_           = false;
+  disable_          = false;
+  led_enable_       = false;
+  led_disable_      = false;
 
-  __max_pan_speed    = __rx28->get_max_supported_speed(__pan_servo_id);
-  __max_tilt_speed   = __rx28->get_max_supported_speed(__tilt_servo_id);
+  max_pan_speed_    = rx28_->get_max_supported_speed(pan_servo_id_);
+  max_tilt_speed_   = rx28_->get_max_supported_speed(tilt_servo_id_);
 }
 
 
 /** Destructor. */
 PanTiltRX28Thread::WorkerThread::~WorkerThread()
 {
-  delete __value_rwlock;
-  delete __rx28_rwlock;
-  delete __fresh_data_mutex;
-  delete __update_waitcond;
+  delete value_rwlock_;
+  delete rx28_rwlock_;
+  delete fresh_data_mutex_;
+  delete update_waitcond_;
 }
 
 
@@ -510,13 +510,13 @@ PanTiltRX28Thread::WorkerThread::~WorkerThread()
 void
 PanTiltRX28Thread::WorkerThread::set_enabled(bool enabled)
 {
-  ScopedRWLock lock(__value_rwlock);
+  ScopedRWLock lock(value_rwlock_);
   if (enabled) {
-    __enable  = true;
-    __disable = false;
+    enable_  = true;
+    disable_ = false;
   } else {
-    __enable  = false;
-    __disable = true;
+    enable_  = false;
+    disable_ = true;
   }
   wakeup();
 }
@@ -528,13 +528,13 @@ PanTiltRX28Thread::WorkerThread::set_enabled(bool enabled)
 void
 PanTiltRX28Thread::WorkerThread::set_led_enabled(bool enabled)
 {
-  ScopedRWLock lock(__value_rwlock);
+  ScopedRWLock lock(value_rwlock_);
   if (enabled) {
-    __led_enable  = true;
-    __led_disable = false;
+    led_enable_  = true;
+    led_disable_ = false;
   } else {
-    __led_enable  = false;
-    __led_disable = true;
+    led_enable_  = false;
+    led_disable_ = true;
   }
   wakeup();
 }
@@ -557,10 +557,10 @@ PanTiltRX28Thread::WorkerThread::stop_motion()
 void
 PanTiltRX28Thread::WorkerThread::goto_pantilt(float pan, float tilt)
 {
-  ScopedRWLock lock(__value_rwlock);
-  __target_pan   = pan;
-  __target_tilt  = tilt;
-  __move_pending = true;
+  ScopedRWLock lock(value_rwlock_);
+  target_pan_   = pan;
+  target_tilt_  = tilt;
+  move_pending_ = true;
   wakeup();
 }
 
@@ -573,9 +573,9 @@ PanTiltRX28Thread::WorkerThread::goto_pantilt(float pan, float tilt)
 void
 PanTiltRX28Thread::WorkerThread::goto_pantilt_timed(float pan, float tilt, float time_sec)
 {
-  __target_pan   = pan;
-  __target_tilt  = tilt;
-  __move_pending = true;
+  target_pan_   = pan;
+  target_tilt_  = tilt;
+  move_pending_ = true;
 
   float cpan=0, ctilt=0;
   get_pantilt(cpan, ctilt);
@@ -586,24 +586,24 @@ PanTiltRX28Thread::WorkerThread::goto_pantilt_timed(float pan, float tilt, float
   float req_pan_vel  = pan_diff  / time_sec;
   float req_tilt_vel = tilt_diff / time_sec;
 
-  //__logger->log_debug(name(), "Current: %f/%f Des: %f/%f  Time: %f  Diff: %f/%f  ReqVel: %f/%f",
+  //logger_->log_debug(name(), "Current: %f/%f Des: %f/%f  Time: %f  Diff: %f/%f  ReqVel: %f/%f",
   //		      cpan, ctilt, pan, tilt, time_sec, pan_diff, tilt_diff, req_pan_vel, req_tilt_vel);
 
 
-  if (req_pan_vel > __max_pan_speed) {
-    __logger->log_warn(name(), "Requested move to (%f, %f) in %f sec requires a "
+  if (req_pan_vel > max_pan_speed_) {
+    logger_->log_warn(name(), "Requested move to (%f, %f) in %f sec requires a "
 		       "pan speed of %f rad/s, which is greater than the maximum "
 		       "of %f rad/s, reducing to max", pan, tilt, time_sec,
-		       req_pan_vel, __max_pan_speed);
-    req_pan_vel = __max_pan_speed;
+		       req_pan_vel, max_pan_speed_);
+    req_pan_vel = max_pan_speed_;
   }
 
-  if (req_tilt_vel > __max_tilt_speed) {
-    __logger->log_warn(name(), "Requested move to (%f, %f) in %f sec requires a "
+  if (req_tilt_vel > max_tilt_speed_) {
+    logger_->log_warn(name(), "Requested move to (%f, %f) in %f sec requires a "
 		       "tilt speed of %f rad/s, which is greater than the maximum of "
 		       "%f rad/s, reducing to max", pan, tilt, time_sec,
-		       req_tilt_vel, __max_tilt_speed);
-    req_tilt_vel = __max_tilt_speed;
+		       req_tilt_vel, max_tilt_speed_);
+    req_tilt_vel = max_tilt_speed_;
   }
 
   set_velocities(req_pan_vel, req_tilt_vel);
@@ -619,26 +619,26 @@ PanTiltRX28Thread::WorkerThread::goto_pantilt_timed(float pan, float tilt, float
 void
 PanTiltRX28Thread::WorkerThread::set_velocities(float pan_vel, float tilt_vel)
 {
-  ScopedRWLock lock(__value_rwlock);
-  float pan_tmp  = roundf((pan_vel  / __max_pan_speed)  * RobotisRX28::MAX_SPEED);
-  float tilt_tmp = roundf((tilt_vel / __max_tilt_speed) * RobotisRX28::MAX_SPEED);
+  ScopedRWLock lock(value_rwlock_);
+  float pan_tmp  = roundf((pan_vel  / max_pan_speed_)  * RobotisRX28::MAX_SPEED);
+  float tilt_tmp = roundf((tilt_vel / max_tilt_speed_) * RobotisRX28::MAX_SPEED);
 
-  //__logger->log_debug(name(), "old speed: %u/%u new speed: %f/%f", __pan_vel,
-  //		      __tilt_vel, pan_tmp, tilt_tmp);
+  //logger_->log_debug(name(), "old speed: %u/%u new speed: %f/%f", pan_vel_,
+  //		      tilt_vel_, pan_tmp, tilt_tmp);
 
   if ((pan_tmp >= 0) && (pan_tmp <= RobotisRX28::MAX_SPEED)) {
-    __pan_vel = (unsigned int)pan_tmp;
-    __velo_pending = true;
+    pan_vel_ = (unsigned int)pan_tmp;
+    velo_pending_ = true;
   } else {
-    __logger->log_warn(name(), "Calculated pan value out of bounds, min: 0  max: %u  des: %u",
+    logger_->log_warn(name(), "Calculated pan value out of bounds, min: 0  max: %u  des: %u",
 		       RobotisRX28::MAX_SPEED, (unsigned int)pan_tmp);
   }
 
   if ((tilt_tmp >= 0) && (tilt_tmp <= RobotisRX28::MAX_SPEED)) {
-    __tilt_vel = (unsigned int)tilt_tmp;
-    __velo_pending = true;
+    tilt_vel_ = (unsigned int)tilt_tmp;
+    velo_pending_ = true;
   } else {
-    __logger->log_warn(name(), "Calculated tilt value out of bounds, min: 0  max: %u  des: %u",
+    logger_->log_warn(name(), "Calculated tilt value out of bounds, min: 0  max: %u  des: %u",
 		       RobotisRX28::MAX_SPEED, (unsigned int)tilt_tmp);
   }
 }
@@ -651,11 +651,11 @@ PanTiltRX28Thread::WorkerThread::set_velocities(float pan_vel, float tilt_vel)
 void
 PanTiltRX28Thread::WorkerThread::get_velocities(float &pan_vel, float &tilt_vel)
 {
-  unsigned int pan_velticks  = __rx28->get_goal_speed(__pan_servo_id);
-  unsigned int tilt_velticks = __rx28->get_goal_speed(__tilt_servo_id);
+  unsigned int pan_velticks  = rx28_->get_goal_speed(pan_servo_id_);
+  unsigned int tilt_velticks = rx28_->get_goal_speed(tilt_servo_id_);
 
-  pan_velticks  = (unsigned int)(((float)pan_velticks  / (float)RobotisRX28::MAX_SPEED) * __max_pan_speed);
-  tilt_velticks = (unsigned int)(((float)tilt_velticks / (float)RobotisRX28::MAX_SPEED) * __max_tilt_speed);
+  pan_velticks  = (unsigned int)(((float)pan_velticks  / (float)RobotisRX28::MAX_SPEED) * max_pan_speed_);
+  tilt_velticks = (unsigned int)(((float)tilt_velticks / (float)RobotisRX28::MAX_SPEED) * max_tilt_speed_);
 }
 
 
@@ -666,9 +666,9 @@ PanTiltRX28Thread::WorkerThread::get_velocities(float &pan_vel, float &tilt_vel)
 void
 PanTiltRX28Thread::WorkerThread::set_margins(float pan_margin, float tilt_margin)
 {
-  if (pan_margin  > 0.0)  __pan_margin  = pan_margin;
-  if (tilt_margin > 0.0)  __tilt_margin = tilt_margin;
-  //__logger->log_warn(name(), "Margins set to %f, %f", __pan_margin, __tilt_margin);
+  if (pan_margin  > 0.0)  pan_margin_  = pan_margin;
+  if (tilt_margin > 0.0)  tilt_margin_ = tilt_margin;
+  //logger_->log_warn(name(), "Margins set to %f, %f", pan_margin_, tilt_margin_);
 }
 
 
@@ -679,13 +679,13 @@ PanTiltRX28Thread::WorkerThread::set_margins(float pan_margin, float tilt_margin
 void
 PanTiltRX28Thread::WorkerThread::get_pantilt(float &pan, float &tilt)
 {
-  ScopedRWLock lock(__rx28_rwlock, ScopedRWLock::LOCK_READ);
+  ScopedRWLock lock(rx28_rwlock_, ScopedRWLock::LOCK_READ);
 
-  int pan_ticks  = ((int)__rx28->get_position(__pan_servo_id)  - (int)RobotisRX28::CENTER_POSITION);
-  int tilt_ticks = ((int)__rx28->get_position(__tilt_servo_id) - (int)RobotisRX28::CENTER_POSITION);
+  int pan_ticks  = ((int)rx28_->get_position(pan_servo_id_)  - (int)RobotisRX28::CENTER_POSITION);
+  int tilt_ticks = ((int)rx28_->get_position(tilt_servo_id_) - (int)RobotisRX28::CENTER_POSITION);
 
-  pan  = pan_ticks *  RobotisRX28::RAD_PER_POS_TICK + __pan_offset;
-  tilt = tilt_ticks * RobotisRX28::RAD_PER_POS_TICK + __tilt_offset;
+  pan  = pan_ticks *  RobotisRX28::RAD_PER_POS_TICK + pan_offset_;
+  tilt = tilt_ticks * RobotisRX28::RAD_PER_POS_TICK + tilt_offset_;
 }
 
 
@@ -699,7 +699,7 @@ PanTiltRX28Thread::WorkerThread::get_pantilt(float &pan, float &tilt,
                                              fawkes::Time &time)
 {
   get_pantilt(pan, tilt);
-  time = __pantilt_time;
+  time = pantilt_time_;
 }
 
 
@@ -713,21 +713,21 @@ PanTiltRX28Thread::WorkerThread::is_final()
   get_pantilt(pan, tilt);
 
   /*
-  __logger->log_debug(name(), "P: %f  T: %f  TP: %f  TT: %f  PM: %f  TM: %f  PMov: %i  TMov: %i  Final: %s",
-                      pan, tilt, __target_pan, __target_tilt, __pan_margin, __tilt_margin,
-                      __rx28->is_moving(__pan_servo_id), __rx28->is_moving(__tilt_servo_id),
-                      (( (fabs(pan  - __target_pan)  <= __pan_margin) &&
-                         (fabs(tilt - __target_tilt) <= __tilt_margin) ) ||
-                       (! __rx28->is_moving(__pan_servo_id) &&
-                        ! __rx28->is_moving(__tilt_servo_id))) ? "YES" : "NO");
+  logger_->log_debug(name(), "P: %f  T: %f  TP: %f  TT: %f  PM: %f  TM: %f  PMov: %i  TMov: %i  Final: %s",
+                      pan, tilt, target_pan_, target_tilt_, pan_margin_, tilt_margin_,
+                      rx28_->is_moving(pan_servo_id_), rx28_->is_moving(tilt_servo_id_),
+                      (( (fabs(pan  - target_pan_)  <= pan_margin_) &&
+                         (fabs(tilt - target_tilt_) <= tilt_margin_) ) ||
+                       (! rx28_->is_moving(pan_servo_id_) &&
+                        ! rx28_->is_moving(tilt_servo_id_))) ? "YES" : "NO");
   */
 
-  ScopedRWLock lock(__rx28_rwlock, ScopedRWLock::LOCK_READ);
+  ScopedRWLock lock(rx28_rwlock_, ScopedRWLock::LOCK_READ);
 
-  return  ( (fabs(pan  - __target_pan)  <= __pan_margin) &&
-	    (fabs(tilt - __target_tilt) <= __tilt_margin) ) ||
-          (! __rx28->is_moving(__pan_servo_id) &&
-	   ! __rx28->is_moving(__tilt_servo_id));
+  return  ( (fabs(pan  - target_pan_)  <= pan_margin_) &&
+	    (fabs(tilt - target_tilt_) <= tilt_margin_) ) ||
+          (! rx28_->is_moving(pan_servo_id_) &&
+	   ! rx28_->is_moving(tilt_servo_id_));
 }
 
 
@@ -737,8 +737,8 @@ PanTiltRX28Thread::WorkerThread::is_final()
 bool
 PanTiltRX28Thread::WorkerThread::is_enabled()
 {
-  return (__rx28->is_torque_enabled(__pan_servo_id) &&
-	  __rx28->is_torque_enabled(__tilt_servo_id));
+  return (rx28_->is_torque_enabled(pan_servo_id_) &&
+	  rx28_->is_torque_enabled(tilt_servo_id_));
 }
 
 
@@ -749,10 +749,10 @@ PanTiltRX28Thread::WorkerThread::is_enabled()
 bool
 PanTiltRX28Thread::WorkerThread::has_fresh_data()
 {
-  MutexLocker lock(__fresh_data_mutex);
+  MutexLocker lock(fresh_data_mutex_);
 
-  bool rv = __fresh_data;
-  __fresh_data = false;
+  bool rv = fresh_data_;
+  fresh_data_ = false;
   return rv;
 }
 
@@ -760,81 +760,81 @@ PanTiltRX28Thread::WorkerThread::has_fresh_data()
 void
 PanTiltRX28Thread::WorkerThread::loop()
 {
-  if (__enable) {
-    __value_rwlock->lock_for_write();
-    __enable  = false;
-    __value_rwlock->unlock();
-    ScopedRWLock lock(__rx28_rwlock);
-    __rx28->set_led_enabled(__tilt_servo_id, true);
-    __rx28->set_torques_enabled(true, 2, __pan_servo_id, __tilt_servo_id);
-  } else if (__disable) {
-    __value_rwlock->lock_for_write();
-    __disable = false;
-    __value_rwlock->unlock();
-    ScopedRWLock lock(__rx28_rwlock);
-    if (__led_enable || __led_disable || __velo_pending || __move_pending) usleep(3000);
+  if (enable_) {
+    value_rwlock_->lock_for_write();
+    enable_  = false;
+    value_rwlock_->unlock();
+    ScopedRWLock lock(rx28_rwlock_);
+    rx28_->set_led_enabled(tilt_servo_id_, true);
+    rx28_->set_torques_enabled(true, 2, pan_servo_id_, tilt_servo_id_);
+  } else if (disable_) {
+    value_rwlock_->lock_for_write();
+    disable_ = false;
+    value_rwlock_->unlock();
+    ScopedRWLock lock(rx28_rwlock_);
+    if (led_enable_ || led_disable_ || velo_pending_ || move_pending_) usleep(3000);
   }
 
-  if (__led_enable) {
-    __value_rwlock->lock_for_write();
-    __led_enable = false;
-    __value_rwlock->unlock();    
-    ScopedRWLock lock(__rx28_rwlock);
-    __rx28->set_led_enabled(__pan_servo_id, true);
-    if (__velo_pending || __move_pending) usleep(3000);
-  } else if (__led_disable) {
-    __value_rwlock->lock_for_write();
-    __led_disable = false;
-    __value_rwlock->unlock();    
-    ScopedRWLock lock(__rx28_rwlock);
-    __rx28->set_led_enabled(__pan_servo_id, false);    
-    if (__velo_pending || __move_pending) usleep(3000);
+  if (led_enable_) {
+    value_rwlock_->lock_for_write();
+    led_enable_ = false;
+    value_rwlock_->unlock();    
+    ScopedRWLock lock(rx28_rwlock_);
+    rx28_->set_led_enabled(pan_servo_id_, true);
+    if (velo_pending_ || move_pending_) usleep(3000);
+  } else if (led_disable_) {
+    value_rwlock_->lock_for_write();
+    led_disable_ = false;
+    value_rwlock_->unlock();    
+    ScopedRWLock lock(rx28_rwlock_);
+    rx28_->set_led_enabled(pan_servo_id_, false);    
+    if (velo_pending_ || move_pending_) usleep(3000);
   }
 
-  if (__velo_pending) {
-    __value_rwlock->lock_for_write();
-    __velo_pending = false;
-    unsigned int pan_vel  = __pan_vel;
-    unsigned int tilt_vel = __tilt_vel;
-    __value_rwlock->unlock();
-    ScopedRWLock lock(__rx28_rwlock);
-    __rx28->set_goal_speeds(2, __pan_servo_id, pan_vel, __tilt_servo_id, tilt_vel);
-    if (__move_pending) usleep(3000);
+  if (velo_pending_) {
+    value_rwlock_->lock_for_write();
+    velo_pending_ = false;
+    unsigned int pan_vel  = pan_vel_;
+    unsigned int tilt_vel = tilt_vel_;
+    value_rwlock_->unlock();
+    ScopedRWLock lock(rx28_rwlock_);
+    rx28_->set_goal_speeds(2, pan_servo_id_, pan_vel, tilt_servo_id_, tilt_vel);
+    if (move_pending_) usleep(3000);
   }
 
-  if (__move_pending) {
-    __value_rwlock->lock_for_write();
-    __move_pending    = false;
-    float target_pan  = __target_pan;
-    float target_tilt = __target_tilt;
-    __value_rwlock->unlock();
+  if (move_pending_) {
+    value_rwlock_->lock_for_write();
+    move_pending_    = false;
+    float target_pan  = target_pan_;
+    float target_tilt = target_tilt_;
+    value_rwlock_->unlock();
     exec_goto_pantilt(target_pan, target_tilt);
   }
 
   try {
-    ScopedRWLock lock(__rx28_rwlock, ScopedRWLock::LOCK_READ);
-    __rx28->read_table_values(__pan_servo_id);
-    __rx28->read_table_values(__tilt_servo_id);
+    ScopedRWLock lock(rx28_rwlock_, ScopedRWLock::LOCK_READ);
+    rx28_->read_table_values(pan_servo_id_);
+    rx28_->read_table_values(tilt_servo_id_);
     {
-      MutexLocker lock_fresh_data(__fresh_data_mutex);
-      __fresh_data = true;
-      __pantilt_time.stamp();
+      MutexLocker lock_fresh_data(fresh_data_mutex_);
+      fresh_data_ = true;
+      pantilt_time_.stamp();
     }
   } catch (Exception &e) {
     // usually just a timeout, too noisy
-    //__logger->log_warn(name(), "Error while reading table values from servos, exception follows");
-    //__logger->log_warn(name(), e);
+    //logger_->log_warn(name(), "Error while reading table values from servos, exception follows");
+    //logger_->log_warn(name(), e);
   }
 
   //if (! is_final() ||
-  //    ! __rx28->is_torque_enabled(__pan_servo_id) ||
-  //    ! __rx28->is_torque_enabled(__tilt_servo_id)) {
+  //    ! rx28_->is_torque_enabled(pan_servo_id_) ||
+  //    ! rx28_->is_torque_enabled(tilt_servo_id_)) {
     // while moving, and while the motor is off, wake us up to get new servo
     // position data
     //wakeup();
     //}
 
-  __update_waitcond->wake_all();
+  update_waitcond_->wake_all();
 
   // Wakeup ourselves for faster updates
   wakeup();
@@ -848,42 +848,42 @@ PanTiltRX28Thread::WorkerThread::loop()
 void
 PanTiltRX28Thread::WorkerThread::exec_goto_pantilt(float pan_rad, float tilt_rad)
 {
-  if ( (pan_rad < __pan_min) || (pan_rad > __pan_max) ) {
-    __logger->log_warn(name(), "Pan value out of bounds, min: %f  max: %f  des: %f",
-		       __pan_min, __pan_max, pan_rad);
+  if ( (pan_rad < pan_min_) || (pan_rad > pan_max_) ) {
+    logger_->log_warn(name(), "Pan value out of bounds, min: %f  max: %f  des: %f",
+		       pan_min_, pan_max_, pan_rad);
     return;
   }
-  if ( (tilt_rad < __tilt_min) || (tilt_rad > __tilt_max) ) {
-    __logger->log_warn(name(), "Tilt value out of bounds, min: %f  max: %f  des: %f",
-		       __tilt_min, __tilt_max, tilt_rad);
+  if ( (tilt_rad < tilt_min_) || (tilt_rad > tilt_max_) ) {
+    logger_->log_warn(name(), "Tilt value out of bounds, min: %f  max: %f  des: %f",
+		       tilt_min_, tilt_max_, tilt_rad);
     return;
   }
 
   unsigned int pan_min = 0, pan_max = 0, tilt_min = 0, tilt_max = 0;
 
-  __rx28->get_angle_limits(__pan_servo_id, pan_min, pan_max);
-  __rx28->get_angle_limits(__tilt_servo_id, tilt_min, tilt_max);
+  rx28_->get_angle_limits(pan_servo_id_, pan_min, pan_max);
+  rx28_->get_angle_limits(tilt_servo_id_, tilt_min, tilt_max);
 
 
-  int pan_pos  = (int)roundf(RobotisRX28::POS_TICKS_PER_RAD * (pan_rad - __pan_offset))
+  int pan_pos  = (int)roundf(RobotisRX28::POS_TICKS_PER_RAD * (pan_rad - pan_offset_))
                  + RobotisRX28::CENTER_POSITION;
-  int tilt_pos = (int)roundf(RobotisRX28::POS_TICKS_PER_RAD * (tilt_rad - __tilt_offset))
+  int tilt_pos = (int)roundf(RobotisRX28::POS_TICKS_PER_RAD * (tilt_rad - tilt_offset_))
                  + RobotisRX28::CENTER_POSITION;
 
   if ( (pan_pos < 0) || ((unsigned int)pan_pos < pan_min) || ((unsigned int)pan_pos > pan_max) ) {
-    __logger->log_warn(name(), "Pan position out of bounds, min: %u  max: %u  des: %i",
+    logger_->log_warn(name(), "Pan position out of bounds, min: %u  max: %u  des: %i",
 		       pan_min, pan_max, pan_pos);
     return;
   }
 
   if ( (tilt_pos < 0) || ((unsigned int)tilt_pos < tilt_min) || ((unsigned int)tilt_pos > tilt_max) ) {
-    __logger->log_warn(name(), "Tilt position out of bounds, min: %u  max: %u  des: %i",
+    logger_->log_warn(name(), "Tilt position out of bounds, min: %u  max: %u  des: %i",
 		       tilt_min, tilt_max, tilt_pos);
     return;
   }
 
-  ScopedRWLock lock(__rx28_rwlock);
-  __rx28->goto_positions(2, __pan_servo_id, pan_pos, __tilt_servo_id, tilt_pos);
+  ScopedRWLock lock(rx28_rwlock_);
+  rx28_->goto_positions(2, pan_servo_id_, pan_pos, tilt_servo_id_, tilt_pos);
 }
 
 
@@ -893,5 +893,5 @@ PanTiltRX28Thread::WorkerThread::exec_goto_pantilt(float pan_rad, float tilt_rad
 void
 PanTiltRX28Thread::WorkerThread::wait_for_fresh_data()
 {
-  __update_waitcond->wait();
+  update_waitcond_->wait();
 }

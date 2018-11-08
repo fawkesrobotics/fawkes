@@ -234,26 +234,26 @@ class RobotisRX28
   bool inline responds_read(unsigned int id)
   {
     
-    return ((__control_table[id][P_RETURN_LEVEL] == SRL_RESPOND_READ) ||
-	    (__control_table[id][P_RETURN_LEVEL] == SRL_RESPOND_ALL));
+    return ((control_table_[id][P_RETURN_LEVEL] == SRL_RESPOND_READ) ||
+	    (control_table_[id][P_RETURN_LEVEL] == SRL_RESPOND_ALL));
   }
 
   bool inline responds_all(unsigned int id)
   {
-    return (__control_table[id][P_RETURN_LEVEL] == SRL_RESPOND_ALL);
+    return (control_table_[id][P_RETURN_LEVEL] == SRL_RESPOND_ALL);
   }
 
-  int           __fd;
-  char         *__device_file;
-  unsigned int  __default_timeout_ms;
+  int           fd_;
+  char         *device_file_;
+  unsigned int  default_timeout_ms_;
 
-  unsigned char __obuffer[260];
-  unsigned char __ibuffer[260];
+  unsigned char obuffer_[260];
+  unsigned char ibuffer_[260];
 
-  int           __obuffer_length;
-  int           __ibuffer_length;
+  int           obuffer_length_;
+  int           ibuffer_length_;
 
-  char          __control_table[RX28_MAX_NUM_SERVOS][RX28_CONTROL_TABLE_LENGTH];
+  char          control_table_[RX28_MAX_NUM_SERVOS][RX28_CONTROL_TABLE_LENGTH];
 
 #ifdef TIMETRACKER_VISCA
   fawkes::TimeTracker    *tracker;

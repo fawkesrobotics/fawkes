@@ -50,8 +50,8 @@ class PanTiltSensorThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  std::list<PanTiltActThread *>           __act_threads;
-  std::list<PanTiltActThread *>::iterator __ati;
+  std::list<PanTiltActThread *>           act_threads_;
+  std::list<PanTiltActThread *>::iterator ati_;
 };
 
 

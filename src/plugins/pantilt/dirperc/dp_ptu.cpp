@@ -98,9 +98,9 @@ const char * DirectedPerceptionPTU::DPPTU_VERSION                = "V";
 DirectedPerceptionPTU::DirectedPerceptionPTU(const char *device_file,
 					     unsigned int timeout_ms)
 {
-  __device_file = strdup(device_file);
-  __opened      = false;
-  __timeout_ms  = timeout_ms;
+  device_file_ = strdup(device_file);
+  opened_      = false;
+  timeout_ms_  = timeout_ms;
 
   open();
 }
@@ -111,29 +111,29 @@ DirectedPerceptionPTU::DirectedPerceptionPTU(const char *device_file,
 DirectedPerceptionPTU::~DirectedPerceptionPTU()
 {
   close();
-  free(__device_file);
+  free(device_file_);
 }
 
 
 void
 DirectedPerceptionPTU::open()
 {
-  if (__opened) return;
+  if (opened_) return;
 
-  __fd = ::open(__device_file, O_RDWR | O_NOCTTY | O_NONBLOCK);
-  if ( ! __fd || ! isatty(__fd)) {
+  fd_ = ::open(device_file_, O_RDWR | O_NOCTTY | O_NONBLOCK);
+  if ( ! fd_ || ! isatty(fd_)) {
     throw Exception("Cannot open device or device is not a TTY");
   }
 
   struct termios param;
 
-  if (tcgetattr(__fd, &param) != 0) {
-    ::close(__fd);
+  if (tcgetattr(fd_, &param) != 0) {
+    ::close(fd_);
     throw Exception("DP PTU: Cannot get parameters");;
   }
 
   if ( cfsetspeed( &param, B9600 ) == -1 ) {
-    ::close( __fd );
+    ::close( fd_ );
     throw Exception("DP PTU: Cannot set speed");;
   }
 
@@ -156,8 +156,8 @@ DirectedPerceptionPTU::open()
   param.c_cc[ VTIME ] = 1;  // wait for a tenth of a second for data
   param.c_cc[ VMIN ] = 0;
 
-  if (tcsetattr(__fd, TCSANOW, &param) != 0) {
-    ::close(__fd);
+  if (tcsetattr(fd_, TCSANOW, &param) != 0) {
+    ::close(fd_);
     throw Exception("DP PTU: Cannot set parameters");;
   }
 
@@ -168,24 +168,24 @@ DirectedPerceptionPTU::open()
 
   send(DPPTU_RESET);
 
-  __pan_resolution   = query_int(DPPTU_PAN_RESOLUTION);
-  __tilt_resolution  = query_int(DPPTU_TILT_RESOLUTION);
+  pan_resolution_   = query_int(DPPTU_PAN_RESOLUTION);
+  tilt_resolution_  = query_int(DPPTU_TILT_RESOLUTION);
 
-  __pan_upper_limit  = query_int(DPPTU_PAN_MAX);
-  __pan_lower_limit  = query_int(DPPTU_PAN_MIN);
-  __tilt_upper_limit = query_int(DPPTU_TILT_MAX);
-  __tilt_lower_limit = query_int(DPPTU_TILT_MIN);
+  pan_upper_limit_  = query_int(DPPTU_PAN_MAX);
+  pan_lower_limit_  = query_int(DPPTU_PAN_MIN);
+  tilt_upper_limit_ = query_int(DPPTU_TILT_MAX);
+  tilt_lower_limit_ = query_int(DPPTU_TILT_MIN);
 
-  __opened = true;
+  opened_ = true;
 }
 
 
 void
 DirectedPerceptionPTU::close()
 {
-  if (__opened) {
-    ::close(__fd);
-    __opened = false;
+  if (opened_) {
+    ::close(fd_);
+    opened_ = false;
   }
 }
 
@@ -225,10 +225,10 @@ DirectedPerceptionPTU::set_tilt(int tilt)
 void
 DirectedPerceptionPTU::set_pan_tilt(int pan, int tilt)
 {
-  if ( pan  > __pan_upper_limit  )  pan  = __pan_upper_limit;
-  if ( pan  < __pan_lower_limit  )  pan  = __pan_lower_limit;
-  if ( tilt > __tilt_upper_limit )  tilt = __tilt_upper_limit;
-  if ( tilt < __tilt_lower_limit )  tilt = __tilt_lower_limit;
+  if ( pan  > pan_upper_limit_  )  pan  = pan_upper_limit_;
+  if ( pan  < pan_lower_limit_  )  pan  = pan_lower_limit_;
+  if ( tilt > tilt_upper_limit_ )  tilt = tilt_upper_limit_;
+  if ( tilt < tilt_lower_limit_ )  tilt = tilt_lower_limit_;
 
   send(DPPTU_PAN_ABSPOS, pan);
   send(DPPTU_TILT_ABSPOS, tilt);
@@ -300,7 +300,7 @@ DirectedPerceptionPTU::get_tilt()
 int
 DirectedPerceptionPTU::max_pan()
 {
-  return __pan_upper_limit;
+  return pan_upper_limit_;
 }
 
 
@@ -310,7 +310,7 @@ DirectedPerceptionPTU::max_pan()
 int
 DirectedPerceptionPTU::min_pan()
 {
-  return __pan_lower_limit;
+  return pan_lower_limit_;
 
 }
 
@@ -321,7 +321,7 @@ DirectedPerceptionPTU::min_pan()
 int
 DirectedPerceptionPTU::max_tilt()
 {
-  return __tilt_upper_limit;
+  return tilt_upper_limit_;
 }
 
 
@@ -331,7 +331,7 @@ DirectedPerceptionPTU::max_tilt()
 int
 DirectedPerceptionPTU::min_tilt()
 {
-  return __tilt_lower_limit;
+  return tilt_lower_limit_;
 }
 
 
@@ -345,10 +345,10 @@ void
 DirectedPerceptionPTU::get_limits(float &pan_min, float &pan_max,
 				  float &tilt_min, float &tilt_max)
 {
-  pan_min  = pan_ticks2rad(__pan_lower_limit);
-  pan_max  = pan_ticks2rad(__tilt_upper_limit);
-  tilt_min = tilt_ticks2rad(__tilt_lower_limit);
-  tilt_max = tilt_ticks2rad(__tilt_upper_limit);
+  pan_min  = pan_ticks2rad(pan_lower_limit_);
+  pan_max  = pan_ticks2rad(tilt_upper_limit_);
+  tilt_min = tilt_ticks2rad(tilt_lower_limit_);
+  tilt_max = tilt_ticks2rad(tilt_upper_limit_);
 }
 
 
@@ -363,10 +363,10 @@ DirectedPerceptionPTU::reset()
 void
 DirectedPerceptionPTU::send(const char *command, int value)
 {
-  snprintf(__obuffer, DPPTU_MAX_OBUFFER_SIZE, "%s%i ", command, value);
-  write(__obuffer);
+  snprintf(obuffer_, DPPTU_MAX_OBUFFER_SIZE, "%s%i ", command, value);
+  write(obuffer_);
   if ( ! result_ok() ) {
-    printf("Writing with value '%s' to PTU failed\n", __obuffer);
+    printf("Writing with value '%s' to PTU failed\n", obuffer_);
   }
 }
 
@@ -374,10 +374,10 @@ DirectedPerceptionPTU::send(const char *command, int value)
 void
 DirectedPerceptionPTU::send(const char *command)
 {
-  snprintf(__obuffer, DPPTU_MAX_OBUFFER_SIZE, "%s ", command);
-  write(__obuffer);
+  snprintf(obuffer_, DPPTU_MAX_OBUFFER_SIZE, "%s ", command);
+  write(obuffer_);
   if ( ! result_ok() ) {
-    printf("Writing '%s' to PTU failed\n", __obuffer);
+    printf("Writing '%s' to PTU failed\n", obuffer_);
   }
 }
 
@@ -385,12 +385,12 @@ DirectedPerceptionPTU::send(const char *command)
 void
 DirectedPerceptionPTU::write(const char *buffer)
 {
-  printf("Writing '%s'\n", __obuffer);
+  printf("Writing '%s'\n", obuffer_);
 
-  tcflush( __fd, TCIOFLUSH );
+  tcflush( fd_, TCIOFLUSH );
   unsigned int buffer_size = strlen(buffer);
-  int written = ::write(__fd, buffer, buffer_size);
-  tcdrain(__fd);
+  int written = ::write(fd_, buffer, buffer_size);
+  tcdrain(fd_);
 
   if (written < 0) {
     printf("Writing '%s' failed: %s\n", buffer, strerror(errno));
@@ -409,18 +409,18 @@ DirectedPerceptionPTU::read(char *buffer, unsigned int buffer_size)
   gettimeofday(&start, NULL);
 
   int num_bytes = 0;
-  ioctl(__fd, FIONREAD, &num_bytes);
-  while ( ((__timeout_ms == 0) || (diff_msec < __timeout_ms)) && (num_bytes == 0)) {
-    ioctl(__fd, FIONREAD, &num_bytes);
+  ioctl(fd_, FIONREAD, &num_bytes);
+  while ( ((timeout_ms_ == 0) || (diff_msec < timeout_ms_)) && (num_bytes == 0)) {
+    ioctl(fd_, FIONREAD, &num_bytes);
 
     gettimeofday(&now, NULL);
     diff_msec  = (now.tv_sec  - start.tv_sec) * 1000 + (now.tv_usec - start.tv_usec) / 1000;
-    usleep(__timeout_ms * 100);
+    usleep(timeout_ms_ * 100);
   }
   if (num_bytes == 0) {
     return false;
   }
-  ssize_t bytes_read = ::read(__fd, buffer, buffer_size);
+  ssize_t bytes_read = ::read(fd_, buffer, buffer_size);
   if ( bytes_read < 0 ) {
     return false;
   } else {
@@ -432,8 +432,8 @@ DirectedPerceptionPTU::read(char *buffer, unsigned int buffer_size)
 bool
 DirectedPerceptionPTU::result_ok()
 {
-  if ( read(__ibuffer, 1) ) {
-    if ( __ibuffer[0] == '*' ) {
+  if ( read(ibuffer_, 1) ) {
+    if ( ibuffer_[0] == '*' ) {
       return true;
     }
   }
@@ -446,7 +446,7 @@ bool
 DirectedPerceptionPTU::data_available()
 {
   int num_bytes = 0;
-  ioctl(__fd, FIONREAD, &num_bytes);
+  ioctl(fd_, FIONREAD, &num_bytes);
   return (num_bytes > 0);
 }
 
@@ -455,12 +455,12 @@ int
 DirectedPerceptionPTU::query_int(const char *query_command)
 {
   send(query_command);
-  bool ok = read(__ibuffer, DPPTU_MAX_IBUFFER_SIZE);
+  bool ok = read(ibuffer_, DPPTU_MAX_IBUFFER_SIZE);
   if (! ok) {
     throw Exception("DP PTU: failed to query integer");
   }
   int intrv = 0;
-  if (sscanf(__ibuffer, "* %i", &intrv) <= 0) {
+  if (sscanf(ibuffer_, "* %i", &intrv) <= 0) {
     throw Exception(errno, "DP PTU: failed to query int");
   }
   return intrv;
@@ -470,30 +470,30 @@ DirectedPerceptionPTU::query_int(const char *query_command)
 int
 DirectedPerceptionPTU::pan_rad2ticks(float r)
 {
-  if ( __pan_resolution == 0 )  return 0;
-  return (int)rint(rad2deg(r) * 3600 / __pan_resolution);
+  if ( pan_resolution_ == 0 )  return 0;
+  return (int)rint(rad2deg(r) * 3600 / pan_resolution_);
 }
 
 
 int
 DirectedPerceptionPTU::tilt_rad2ticks(float r)
 {
-  if ( __tilt_resolution == 0 )  return 0;
-  return (int)rint(rad2deg(r) * 3600 / __tilt_resolution);
+  if ( tilt_resolution_ == 0 )  return 0;
+  return (int)rint(rad2deg(r) * 3600 / tilt_resolution_);
 }
 
 
 float
 DirectedPerceptionPTU::pan_ticks2rad(int ticks)
 {
-  if ( __pan_resolution == 0 )  return 0;
-  return deg2rad(ticks * __pan_resolution / 3600);
+  if ( pan_resolution_ == 0 )  return 0;
+  return deg2rad(ticks * pan_resolution_ / 3600);
 }
 
 
 float
 DirectedPerceptionPTU::tilt_ticks2rad(int ticks)
 {
-  if ( __tilt_resolution == 0 )  return 0;
-  return deg2rad(ticks * __tilt_resolution / 3600);
+  if ( tilt_resolution_ == 0 )  return 0;
+  return deg2rad(ticks * tilt_resolution_ / 3600);
 }
