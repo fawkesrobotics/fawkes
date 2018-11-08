@@ -44,7 +44,7 @@ class XmlRpcPluginMethods {
     virtual void execute(xmlrpc_c::paramList const& params,
 			 xmlrpc_c::value *   const  result);
    private:
-    fawkes::PluginManager *__plugin_manager;
+    fawkes::PluginManager *plugin_manager_;
   };
 
   class plugin_load : public xmlrpc_c::method {
@@ -54,8 +54,8 @@ class XmlRpcPluginMethods {
     virtual void execute(xmlrpc_c::paramList const& params,
 			 xmlrpc_c::value *   const  result);
    private:
-    fawkes::PluginManager *__plugin_manager;
-    fawkes::Logger        *__logger;
+    fawkes::PluginManager *plugin_manager_;
+    fawkes::Logger        *logger_;
   };
 
   class plugin_unload : public xmlrpc_c::method {
@@ -65,18 +65,18 @@ class XmlRpcPluginMethods {
     virtual void execute(xmlrpc_c::paramList const& params,
 			 xmlrpc_c::value *   const  result);
    private:
-    fawkes::PluginManager *__plugin_manager;
-    fawkes::Logger        *__logger;
+    fawkes::PluginManager *plugin_manager_;
+    fawkes::Logger        *logger_;
   };
 
  private:
-  xmlrpc_c::registry *__xmlrpc_registry;
+  xmlrpc_c::registry *xmlrpc_registry_;
 
-  fawkes::PluginManager *__plugin_manager;
-  fawkes::Logger        *__logger;
-  plugin_list           *__plugin_list;
-  plugin_load           *__plugin_load;
-  plugin_unload         *__plugin_unload;
+  fawkes::PluginManager *plugin_manager_;
+  fawkes::Logger        *logger_;
+  plugin_list           *plugin_list_;
+  plugin_load           *plugin_load_;
+  plugin_unload         *plugin_unload_;
 };
 
 #endif

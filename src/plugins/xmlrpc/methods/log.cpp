@@ -41,35 +41,35 @@ XmlRpcLogMethods::XmlRpcLogMethods(xmlrpc_c::registry *registry,
 				   fawkes::CacheLogger *cache_logger,
 				   fawkes::Logger *logger)
 {
-  __xmlrpc_registry = registry;
-  __cache_logger    = cache_logger;
-  __logger          = logger;
-  __log_entries     = new log_entries(cache_logger);
-  __log_get_size    = new log_get_size(cache_logger);
-  __log_set_size    = new log_set_size(cache_logger);
-  __log_log_debug   = new log_log(logger, fawkes::Logger::LL_DEBUG);
-  __log_log_info    = new log_log(logger, fawkes::Logger::LL_INFO);
-  __log_log_warn    = new log_log(logger, fawkes::Logger::LL_WARN);
-  __log_log_error   = new log_log(logger, fawkes::Logger::LL_ERROR);
-  __xmlrpc_registry->addMethod("log.entries",   __log_entries);
-  __xmlrpc_registry->addMethod("log.get_size",  __log_get_size);
-  __xmlrpc_registry->addMethod("log.set_size",  __log_set_size);
-  __xmlrpc_registry->addMethod("log.log_debug", __log_log_debug);
-  __xmlrpc_registry->addMethod("log.log_info",  __log_log_info);
-  __xmlrpc_registry->addMethod("log.log_warn",  __log_log_warn);
-  __xmlrpc_registry->addMethod("log.log_error", __log_log_error);
+  xmlrpc_registry_ = registry;
+  cache_logger_    = cache_logger;
+  logger_          = logger;
+  log_entries_     = new log_entries(cache_logger);
+  log_get_size_    = new log_get_size(cache_logger);
+  log_set_size_    = new log_set_size(cache_logger);
+  log_log_debug_   = new log_log(logger, fawkes::Logger::LL_DEBUG);
+  log_log_info_    = new log_log(logger, fawkes::Logger::LL_INFO);
+  log_log_warn_    = new log_log(logger, fawkes::Logger::LL_WARN);
+  log_log_error_   = new log_log(logger, fawkes::Logger::LL_ERROR);
+  xmlrpc_registry_->addMethod("log.entries",   log_entries_);
+  xmlrpc_registry_->addMethod("log.get_size",  log_get_size_);
+  xmlrpc_registry_->addMethod("log.set_size",  log_set_size_);
+  xmlrpc_registry_->addMethod("log.log_debug", log_log_debug_);
+  xmlrpc_registry_->addMethod("log.log_info",  log_log_info_);
+  xmlrpc_registry_->addMethod("log.log_warn",  log_log_warn_);
+  xmlrpc_registry_->addMethod("log.log_error", log_log_error_);
 }
 
 /** Destructor. */
 XmlRpcLogMethods::~XmlRpcLogMethods()
 {
-  delete __log_entries;
-  delete __log_get_size;
-  delete __log_set_size;
-  delete __log_log_debug;
-  delete __log_log_info;
-  delete __log_log_warn;
-  delete __log_log_debug;
+  delete log_entries_;
+  delete log_get_size_;
+  delete log_set_size_;
+  delete log_log_debug_;
+  delete log_log_info_;
+  delete log_log_warn_;
+  delete log_log_debug_;
 }
 
 
@@ -87,7 +87,7 @@ XmlRpcLogMethods::log_entries::log_entries(fawkes::CacheLogger *cache_logger)
   _help = "Returns array of recent log messages. Each entry is a struct "
     "consisting of the entries component, time string and message.";
 
-  __cache_logger = cache_logger;
+  cache_logger_ = cache_logger;
 }
 
 /** Virtual empty destructor. */
@@ -104,9 +104,9 @@ XmlRpcLogMethods::log_entries::execute(xmlrpc_c::paramList const& params,
 				       xmlrpc_c::value *   const  result)
 {
   // No reference, copy!
-  __cache_logger->lock();
-  std::list<CacheLogger::CacheEntry> messages = __cache_logger->get_messages();
-  __cache_logger->unlock();
+  cache_logger_->lock();
+  std::list<CacheLogger::CacheEntry> messages = cache_logger_->get_messages();
+  cache_logger_->unlock();
   std::list<CacheLogger::CacheEntry>::iterator i;
 
   std::vector<xmlrpc_c::value> array;
@@ -137,7 +137,7 @@ XmlRpcLogMethods::log_get_size::log_get_size(fawkes::CacheLogger *cache_logger)
   _signature = "i:";
   _help = "Get current maximum size of the cache log.";
 
-  __cache_logger = cache_logger;
+  cache_logger_ = cache_logger;
 }
 
 /** Virtual empty destructor. */
@@ -153,7 +153,7 @@ void
 XmlRpcLogMethods::log_get_size::execute(xmlrpc_c::paramList const& params,
 					xmlrpc_c::value *   const  result)
 {
-  *result = xmlrpc_c::value_int(__cache_logger->size());
+  *result = xmlrpc_c::value_int(cache_logger_->size());
 }
 
 
@@ -171,7 +171,7 @@ XmlRpcLogMethods::log_set_size::log_set_size(fawkes::CacheLogger *cache_logger)
   _signature = "n:i";
   _help = "Set maximum size of cache logger.";
 
-  __cache_logger = cache_logger;
+  cache_logger_ = cache_logger;
 }
 
 /** Virtual empty destructor. */
@@ -192,7 +192,7 @@ XmlRpcLogMethods::log_set_size::execute(xmlrpc_c::paramList const& params,
     throw xmlrpc_c::fault("Illegal size value, must be integer > 0",
 			  xmlrpc_c::fault::CODE_UNSPECIFIED);
   }
-  __cache_logger->set_size(new_size);
+  cache_logger_->set_size(new_size);
   *result = xmlrpc_c::value_nil();
 }
 
@@ -213,8 +213,8 @@ XmlRpcLogMethods::log_log::log_log(fawkes::Logger *logger,
   _signature = "n:ss";
   _help = "Log message of specified level, arguments are component and message.";
 
-  __logger    = logger;
-  __log_level = log_level;
+  logger_    = logger;
+  log_level_ = log_level;
 }
 
 /** Virtual empty destructor. */
@@ -232,6 +232,6 @@ XmlRpcLogMethods::log_log::execute(xmlrpc_c::paramList const& params,
 {
   std::string component = params.getString(0);
   std::string message   = params.getString(1);
-  __logger->log(__log_level, component.c_str(), "%s", message.c_str());
+  logger_->log(log_level_, component.c_str(), "%s", message.c_str());
   *result = xmlrpc_c::value_nil();
 }

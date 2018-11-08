@@ -67,19 +67,19 @@ class XmlRpcThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::WebServer            *__webserver;
-  fawkes::WebRequestDispatcher *__dispatcher;
-  fawkes::WebUrlManager        *__url_manager;
+  fawkes::WebServer            *webserver_;
+  fawkes::WebRequestDispatcher *dispatcher_;
+  fawkes::WebUrlManager        *url_manager_;
 
-  XmlRpcRequestProcessor       *__processor;
-  XmlRpcPluginMethods          *__plugin_methods;
-  XmlRpcLogMethods             *__log_methods;
+  XmlRpcRequestProcessor       *processor_;
+  XmlRpcPluginMethods          *plugin_methods_;
+  XmlRpcLogMethods             *log_methods_;
 
-  bool                          __custom_server;
-  unsigned int                  __cfg_port;
+  bool                          custom_server_;
+  unsigned int                  cfg_port_;
 
-  fawkes::CacheLogger           __cache_logger;
-  fawkes::NetworkService       *__xmlrpc_service;
+  fawkes::CacheLogger           cache_logger_;
+  fawkes::NetworkService       *xmlrpc_service_;
 };
 
 #endif

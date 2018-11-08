@@ -47,8 +47,8 @@ class XmlRpcRequestProcessor
   xmlrpc_c::registry *  registry();
 
  private:
-  fawkes::Logger       *__logger;
-  xmlrpc_c::registry   *__xmlrpc_registry;
+  fawkes::Logger       *logger_;
+  xmlrpc_c::registry   *xmlrpc_registry_;
 };
 
 #endif
