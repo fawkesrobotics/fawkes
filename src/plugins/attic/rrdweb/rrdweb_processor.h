@@ -41,8 +41,8 @@ class RRDWebRequestProcessor
   fawkes::WebReply * process_graph(const fawkes::WebRequest *request);
 
  private:
-  fawkes::RRDManager   *__rrd_man;
-  fawkes::Logger       *__logger;
+  fawkes::RRDManager   *rrd_man_;
+  fawkes::Logger       *logger_;
 };
 
 #endif

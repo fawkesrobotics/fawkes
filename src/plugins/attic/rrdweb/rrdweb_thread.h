@@ -52,7 +52,7 @@ class RRDWebThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  RRDWebRequestProcessor *__processor;
+  RRDWebRequestProcessor *processor_;
 };
 
 #endif
