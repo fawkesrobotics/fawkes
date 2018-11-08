@@ -56,8 +56,8 @@ class ComponentLogger
   void log_error(Exception &e);
 
  private:
-  Logger *__logger;
-  char *__component;
+  Logger *logger_;
+  char *component_;
 };
 
 

@@ -77,7 +77,7 @@ class SyslogLogger : public Logger
  private:
   struct ::tm  *now_s;
   Mutex        *mutex;
-  char *__ident;
+  char *ident_;
 };
 
 

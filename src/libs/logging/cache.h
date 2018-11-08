@@ -111,9 +111,9 @@ class CacheLogger : public Logger
   struct ::tm  *now_s;
   Mutex        *mutex;
 
-  std::list<CacheEntry> __messages;
-  unsigned int  __num_entries;
-  unsigned int  __max_num_entries;
+  std::list<CacheEntry> messages_;
+  unsigned int  num_entries_;
+  unsigned int  max_num_entries_;
 
 };
 

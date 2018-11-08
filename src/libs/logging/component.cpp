@@ -45,15 +45,15 @@ namespace fawkes {
  */
 ComponentLogger::ComponentLogger(Logger *logger, const char *component)
 {
-  __logger = logger;
-  __component = strdup(component);
+  logger_ = logger;
+  component_ = strdup(component);
 }
 
 
 /** Destructor. */
 ComponentLogger::~ComponentLogger()
 {
-  free(__component);
+  free(component_);
 }
 
 
@@ -68,8 +68,8 @@ ComponentLogger::set_component(const char *format, ...)
   va_start(arg, format);
   char *new_component;
   if (vasprintf(&new_component, format, arg) > 0) {
-	  char *old_component = __component;
-	  __component = new_component;
+	  char *old_component = component_;
+	  component_ = new_component;
 	  free(old_component);
   }
   va_end(arg);
@@ -84,7 +84,7 @@ ComponentLogger::log_debug(const char *format, ...)
 {
   va_list va;
   va_start(va, format);
-  __logger->vlog_debug(__component, format, va);
+  logger_->vlog_debug(component_, format, va);
   va_end(va);
 }
 
@@ -98,7 +98,7 @@ ComponentLogger::log_info(const char *format, ...)
 {
   va_list va;
   va_start(va, format);
-  __logger->vlog_info(__component, format, va);
+  logger_->vlog_info(component_, format, va);
   va_end(va);
 }
 
@@ -112,7 +112,7 @@ ComponentLogger::log_warn(const char *format, ...)
 {
   va_list va;
   va_start(va, format);
-  __logger->vlog_warn(__component, format, va);
+  logger_->vlog_warn(component_, format, va);
   va_end(va);
 }
 
@@ -126,7 +126,7 @@ ComponentLogger::log_error(const char *format, ...)
 {
   va_list va;
   va_start(va, format);
-  __logger->vlog_error(__component, format, va);
+  logger_->vlog_error(component_, format, va);
   va_end(va);
 }
 
@@ -137,7 +137,7 @@ ComponentLogger::log_error(const char *format, ...)
 void
 ComponentLogger::log_debug(std::string message)
 {
-  __logger->log_debug(__component, "%s", message.c_str());
+  logger_->log_debug(component_, "%s", message.c_str());
 }
 
 
@@ -147,7 +147,7 @@ ComponentLogger::log_debug(std::string message)
 void
 ComponentLogger::log_info(std::string message)
 {
-  __logger->log_info(__component, "%s", message.c_str());
+  logger_->log_info(component_, "%s", message.c_str());
 }
 
 
@@ -157,7 +157,7 @@ ComponentLogger::log_info(std::string message)
 void
 ComponentLogger::log_warn(std::string message)
 {
-  __logger->log_warn(__component, "%s", message.c_str());
+  logger_->log_warn(component_, "%s", message.c_str());
 }
 
 
@@ -167,7 +167,7 @@ ComponentLogger::log_warn(std::string message)
 void
 ComponentLogger::log_error(std::string message)
 {
-  __logger->log_error(__component, "%s", message.c_str());
+  logger_->log_error(component_, "%s", message.c_str());
 }
 
 
@@ -177,7 +177,7 @@ ComponentLogger::log_error(std::string message)
 void
 ComponentLogger::log_debug(Exception &e)
 {
-  __logger->log_debug(__component, e);
+  logger_->log_debug(component_, e);
 }
 
 
@@ -187,7 +187,7 @@ ComponentLogger::log_debug(Exception &e)
 void
 ComponentLogger::log_info(Exception &e)
 {
-  __logger->log_info(__component, e);
+  logger_->log_info(component_, e);
 }
 
 
@@ -197,7 +197,7 @@ ComponentLogger::log_info(Exception &e)
 void
 ComponentLogger::log_warn(Exception &e)
 {
-  __logger->log_warn(__component, e);
+  logger_->log_warn(component_, e);
 }
 
 
@@ -207,7 +207,7 @@ ComponentLogger::log_warn(Exception &e)
 void
 ComponentLogger::log_error(Exception &e)
 {
-  __logger->log_debug(__component, e);
+  logger_->log_debug(component_, e);
 }
 
 

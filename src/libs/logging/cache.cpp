@@ -48,8 +48,8 @@ namespace fawkes {
 CacheLogger::CacheLogger(unsigned int num_entries, LogLevel log_level)
   : Logger(log_level)
 {
-  __max_num_entries = num_entries;
-  __num_entries = 0;
+  max_num_entries_ = num_entries;
+  num_entries_ = 0;
 
   now_s = (struct ::tm *)malloc(sizeof(struct ::tm));
   mutex = new Mutex();
@@ -65,15 +65,15 @@ CacheLogger::~CacheLogger()
 std::list<CacheLogger::CacheEntry> &
 CacheLogger::get_messages()
 {
-  return __messages;
+  return messages_;
 }
 
 void
 CacheLogger::clear()
 {
   mutex->lock();
-  __num_entries = 0;
-  __messages.clear();
+  num_entries_ = 0;
+  messages_.clear();
   mutex->unlock();
 }
 
@@ -84,7 +84,7 @@ CacheLogger::clear()
 unsigned int
 CacheLogger::size() const
 {
-  return __max_num_entries;
+  return max_num_entries_;
 }
 
 
@@ -95,11 +95,11 @@ void
 CacheLogger::set_size(unsigned int new_size)
 {
   MutexLocker lock(mutex);
-  if (new_size < __num_entries) {
-    __num_entries = new_size;
-    __messages.resize(__num_entries);
+  if (new_size < num_entries_) {
+    num_entries_ = new_size;
+    messages_.resize(num_entries_);
   }
-  __max_num_entries = new_size;
+  max_num_entries_ = new_size;
 }
 
 
@@ -146,15 +146,15 @@ CacheLogger::push_message(LogLevel ll, const char *component, const char *format
     e.time      = now;
     e.timestr   = timestr;
     e.message   = msg;
-    __messages.push_front(e);
+    messages_.push_front(e);
 
     free(timestr);
     free(msg);
 
-    if (__num_entries == __max_num_entries) {
-      __messages.pop_back();
+    if (num_entries_ == max_num_entries_) {
+      messages_.pop_back();
     } else {
-      ++__num_entries;
+      ++num_entries_;
     }
   }
 }
@@ -180,15 +180,15 @@ CacheLogger::push_message(LogLevel ll, const char *component, Exception &e)
       e.time      = now;
       e.timestr   = timestr;
       e.message   = std::string("[EXCEPTION] ") + *i;
-      __messages.push_front(e);
-      ++__num_entries;
+      messages_.push_front(e);
+      ++num_entries_;
     }
 
     free(timestr);
 
-    if (__num_entries > __max_num_entries) {
-      __num_entries = __max_num_entries;
-      __messages.resize(__max_num_entries);
+    if (num_entries_ > max_num_entries_) {
+      num_entries_ = max_num_entries_;
+      messages_.resize(max_num_entries_);
     }
   }
 }
@@ -301,15 +301,15 @@ CacheLogger::tlog_push_message(LogLevel ll, struct timeval *t, const char *compo
     e.time      = *t;
     e.timestr   = timestr;
     e.message   = msg;
-    __messages.push_front(e);
+    messages_.push_front(e);
 
     free(timestr);
     free(msg);
 
-    if (__num_entries == __max_num_entries) {
-      __messages.pop_back();
+    if (num_entries_ == max_num_entries_) {
+      messages_.pop_back();
     } else {
-      ++__num_entries;
+      ++num_entries_;
     }
     mutex->unlock();
   }
@@ -333,15 +333,15 @@ CacheLogger::tlog_push_message(LogLevel ll, struct timeval *t, const char *compo
       e.time      = *t;
       e.timestr   = timestr;
       e.message   = std::string("[EXCEPTION] ") + *i;
-      __messages.push_front(e);
-      ++__num_entries;
+      messages_.push_front(e);
+      ++num_entries_;
     }
 
     free(timestr);
 
-    if (__num_entries > __max_num_entries) {
-      __num_entries = __max_num_entries;
-      __messages.resize(__max_num_entries);
+    if (num_entries_ > max_num_entries_) {
+      num_entries_ = max_num_entries_;
+      messages_.resize(max_num_entries_);
     }
   }
 }
