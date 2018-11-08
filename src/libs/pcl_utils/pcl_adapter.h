@@ -81,10 +81,10 @@ class PointCloudAdapter
   void close(const std::string &id);
 
  private:
-  fawkes::PointCloudManager *__pcl_manager;
+  fawkes::PointCloudManager *pcl_manager_;
 
   class StorageAdapter;
-  std::map<std::string, StorageAdapter *> __sas;
+  std::map<std::string, StorageAdapter *> sas_;
 };
 
 
