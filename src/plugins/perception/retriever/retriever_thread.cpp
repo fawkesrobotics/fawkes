@@ -131,28 +131,28 @@ FvRetrieverThread::init()
     // ignored, not critical
   }
 
-  __tt = NULL;
+  tt_ = NULL;
   try {
     if ( config->get_bool("/firevision/retriever/use_time_tracker") ) {
-      __tt = new TimeTracker();
-      __ttc_capture = __tt->add_class("Capture");
-      __ttc_memcpy  = __tt->add_class("Memcpy");
-      __ttc_dispose = __tt->add_class("Dispose");
-      __loop_count  = 0;
+      tt_ = new TimeTracker();
+      ttc_capture_ = tt_->add_class("Capture");
+      ttc_memcpy_  = tt_->add_class("Memcpy");
+      ttc_dispose_ = tt_->add_class("Dispose");
+      loop_count_  = 0;
     }
   } catch (Exception &e) {
     // ignored, not critical
   }
 
-  __cm = new ColorModelLookupTable(1, "retriever-colormap", true);
-  YuvColormap *ycm = __cm->get_colormap();
+  cm_ = new ColorModelLookupTable(1, "retriever-colormap", true);
+  YuvColormap *ycm = cm_->get_colormap();
   for (unsigned int u = 100; u < 150; ++u) {
     for (unsigned int v = 100; v < 150; ++v) {
       ycm->set(128, u, v, C_ORANGE);
     }
   }
 
-  __cam_has_timestamp_support = true;
+  cam_has_timestamp_support_ = true;
   try {
     fawkes::Time *t = cam->capture_time();
     if (t->is_zero()) {
@@ -162,7 +162,7 @@ FvRetrieverThread::init()
   }
   catch (NotImplementedException &e)
   {
-    __cam_has_timestamp_support = false;
+    cam_has_timestamp_support_ = false;
     cap_time_ = new Time(clock);
   }
 }
@@ -176,8 +176,8 @@ FvRetrieverThread::finalize()
   delete cam;
   delete shm;
   delete seq_writer;
-  delete __tt;
-  delete __cm;
+  delete tt_;
+  delete cm_;
   delete cap_time_;
 }
 
@@ -186,23 +186,23 @@ FvRetrieverThread::finalize()
 void
 FvRetrieverThread::loop()
 {
-  if (__tt) {
+  if (tt_) {
     // use time tracker
-    __tt->ping_start(__ttc_capture);
+    tt_->ping_start(ttc_capture_);
     cam->capture();
-    __tt->ping_end(__ttc_capture);
-    __tt->ping_start(__ttc_memcpy);
+    tt_->ping_end(ttc_capture_);
+    tt_->ping_start(ttc_memcpy_);
     shm->lock_for_write();
     memcpy(shm->buffer(), cam->buffer(), cam->buffer_size()-1);
     shm->unlock();
-    __tt->ping_end(__ttc_memcpy);
-    if (__cam_has_timestamp_support) shm->set_capture_time(cam->capture_time());
-    __tt->ping_start(__ttc_dispose);
+    tt_->ping_end(ttc_memcpy_);
+    if (cam_has_timestamp_support_) shm->set_capture_time(cam->capture_time());
+    tt_->ping_start(ttc_dispose_);
     cam->dispose_buffer();
-    __tt->ping_end(__ttc_dispose);
-    if ( (++__loop_count % 200) == 0 ) {
+    tt_->ping_end(ttc_dispose_);
+    if ( (++loop_count_ % 200) == 0 ) {
       // output results every 200 loops
-      __tt->print_to_stdout();
+      tt_->print_to_stdout();
     }
   } else {
     // no time tracker
@@ -210,7 +210,7 @@ FvRetrieverThread::loop()
     shm->lock_for_write();
     memcpy(shm->buffer(), cam->buffer(), cam->buffer_size());
     shm->unlock();
-    if (__cam_has_timestamp_support) {
+    if (cam_has_timestamp_support_) {
       shm->set_capture_time(cam->capture_time());
     } else {
       cap_time_->stamp();
