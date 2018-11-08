@@ -50,11 +50,11 @@ BlackBoardSynchronizationThread::BlackBoardSynchronizationThread(std::string &bb
   set_name("BBSyncThread[%s]", peer.c_str());
   set_prepfin_conc_loop(true);
 
-  __bbsync_cfg_prefix = bbsync_cfg_prefix;
-  __peer_cfg_prefix   = peer_cfg_prefix;
-  __peer              = peer;
+  bbsync_cfg_prefix_ = bbsync_cfg_prefix;
+  peer_cfg_prefix_   = peer_cfg_prefix;
+  peer_              = peer;
 
-  __remote_bb = NULL;
+  remote_bb_ = NULL;
 }
 
 
@@ -69,40 +69,40 @@ BlackBoardSynchronizationThread::init()
   logger->log_debug(name(), "Initializing");
   unsigned int check_interval = 0;
   try {
-    __host = config->get_string((__peer_cfg_prefix + "host").c_str());
-    __port = config->get_uint((__peer_cfg_prefix + "port").c_str());
+    host_ = config->get_string((peer_cfg_prefix_ + "host").c_str());
+    port_ = config->get_uint((peer_cfg_prefix_ + "port").c_str());
 
-    check_interval = config->get_uint((__bbsync_cfg_prefix + "check_interval").c_str());
+    check_interval = config->get_uint((bbsync_cfg_prefix_ + "check_interval").c_str());
   } catch (Exception &e) {
     e.append("Host or port not specified for peer");
     throw;
   }
 
   try {
-    check_interval = config->get_uint((__peer_cfg_prefix + "check_interval").c_str());
+    check_interval = config->get_uint((peer_cfg_prefix_ + "check_interval").c_str());
     logger->log_debug(name(), "Peer check interval set, overriding default.");
   } catch (Exception &e) {
     logger->log_debug(name(), "No per-peer check interval set, using default");
   }
 
-  read_config_combos(__peer_cfg_prefix + "reading/", /* writing */ false);
-  read_config_combos(__peer_cfg_prefix + "writing/", /* writing */ true);
+  read_config_combos(peer_cfg_prefix_ + "reading/", /* writing */ false);
+  read_config_combos(peer_cfg_prefix_ + "writing/", /* writing */ true);
 
-  for (ComboMap::iterator i = __combos.begin(); i != __combos.end(); ++i) {
+  for (ComboMap::iterator i = combos_.begin(); i != combos_.end(); ++i) {
     logger->log_debug(name(), "Combo: %s, %s (%s, R) -> %s (%s, W)", i->second.type.c_str(),
 		      i->second.reader_id.c_str(), i->second.remote_writer ? "local" : "remote",
 		      i->second.writer_id.c_str(), i->second.remote_writer ? "remote" : "local");
   }
 
-  __wsl_local  = new SyncWriterInterfaceListener(this, logger, (__peer + "/local").c_str());
-  __wsl_remote = new SyncWriterInterfaceListener(this, logger, (__peer + "/remote").c_str());
+  wsl_local_  = new SyncWriterInterfaceListener(this, logger, (peer_ + "/local").c_str());
+  wsl_remote_ = new SyncWriterInterfaceListener(this, logger, (peer_ + "/remote").c_str());
 
   if (! check_connection()) {
     logger->log_warn(name(), "Remote peer not reachable, will keep trying");
   }
 
   logger->log_debug(name(), "Checking for remote aliveness every %u ms", check_interval);
-  __timewait = new TimeWait(clock, check_interval * 1000);
+  timewait_ = new TimeWait(clock, check_interval * 1000);
 }
 
 
@@ -110,48 +110,48 @@ void
 BlackBoardSynchronizationThread::finalize()
 {
 
-  delete __timewait;
+  delete timewait_;
 
   close_interfaces();
 
-  delete __wsl_local;
-  delete __wsl_remote;
-  delete __remote_bb;
-  __remote_bb = NULL;
+  delete wsl_local_;
+  delete wsl_remote_;
+  delete remote_bb_;
+  remote_bb_ = NULL;
 }
 
 
 void
 BlackBoardSynchronizationThread::loop()
 {
-  __timewait->mark_start();
+  timewait_->mark_start();
   check_connection();
-  __timewait->wait_systime();
+  timewait_->wait_systime();
 }
 
 
 bool
 BlackBoardSynchronizationThread::check_connection()
 {
-  if (! __remote_bb || ! __remote_bb->is_alive()) {
-    if (__remote_bb) {
+  if (! remote_bb_ || ! remote_bb_->is_alive()) {
+    if (remote_bb_) {
       logger->log_warn(name(), "Lost connection via remote BB to %s (%s:%u), will try to re-establish",
-		       __peer.c_str(), __host.c_str(), __port);
-      blackboard->unregister_listener(__wsl_local);
-      __remote_bb->unregister_listener(__wsl_remote);
+		       peer_.c_str(), host_.c_str(), port_);
+      blackboard->unregister_listener(wsl_local_);
+      remote_bb_->unregister_listener(wsl_remote_);
       close_interfaces();
-      delete __remote_bb;
-      __remote_bb = NULL;
+      delete remote_bb_;
+      remote_bb_ = NULL;
     }
 
     try {
-      __remote_bb = new RemoteBlackBoard(__host.c_str(), __port);
+      remote_bb_ = new RemoteBlackBoard(host_.c_str(), port_);
       logger->log_info(name(), "Successfully connected via remote BB to %s (%s:%u)",
-		       __peer.c_str(), __host.c_str(), __port);
+		       peer_.c_str(), host_.c_str(), port_);
 
       open_interfaces();
-      blackboard->register_listener(__wsl_local, BlackBoard::BBIL_FLAG_WRITER);
-      __remote_bb->register_listener(__wsl_remote, BlackBoard::BBIL_FLAG_WRITER);
+      blackboard->register_listener(wsl_local_, BlackBoard::BBIL_FLAG_WRITER);
+      remote_bb_->register_listener(wsl_remote_, BlackBoard::BBIL_FLAG_WRITER);
     } catch (Exception &e) {
       e.print_trace();
       return false;
@@ -193,7 +193,7 @@ BlackBoardSynchronizationThread::read_config_combos(std::string prefix, bool wri
       combo.writer_id = id.substr(sf + 1);
     }
 
-    __combos[varname] = combo;
+    combos_[varname] = combo;
   }
   delete i;
 }
@@ -203,14 +203,14 @@ void
 BlackBoardSynchronizationThread::open_interfaces()
 {
   logger->log_debug(name(), "Opening interfaces");
-  MutexLocker lock(__interfaces.mutex());
+  MutexLocker lock(interfaces_.mutex());
 
   ComboMap::iterator i;
-  for (i = __combos.begin(); i != __combos.end(); ++i) {
+  for (i = combos_.begin(); i != combos_.end(); ++i) {
     Interface *iface_reader = NULL, *iface_writer = NULL;
 
-    BlackBoard *writer_bb = i->second.remote_writer ? __remote_bb : blackboard;
-    BlackBoard *reader_bb = i->second.remote_writer ? blackboard  : __remote_bb;
+    BlackBoard *writer_bb = i->second.remote_writer ? remote_bb_ : blackboard;
+    BlackBoard *reader_bb = i->second.remote_writer ? blackboard  : remote_bb_;
 
     try {
       logger->log_debug(name(), "Opening reading %s (%s:%s)",
@@ -228,7 +228,7 @@ BlackBoardSynchronizationThread::open_interfaces()
       }
 
       InterfaceInfo ii(&i->second, iface_writer, reader_bb, writer_bb);
-      __interfaces[iface_reader] = ii;
+      interfaces_[iface_reader] = ii;
 
     } catch (Exception &e) {
       reader_bb->close(iface_reader);
@@ -242,12 +242,12 @@ BlackBoardSynchronizationThread::open_interfaces()
       sync_listener = new SyncInterfaceListener(logger, iface_reader, iface_writer,
 						reader_bb, writer_bb);
     }
-    __sync_listeners[iface_reader] = sync_listener;
+    sync_listeners_[iface_reader] = sync_listener;
 
     if (i->second.remote_writer) {
-      __wsl_local->add_interface(iface_reader);
+      wsl_local_->add_interface(iface_reader);
     } else {
-      __wsl_remote->add_interface(iface_reader);
+      wsl_remote_->add_interface(iface_reader);
     }
   }
 }
@@ -257,38 +257,38 @@ void
 BlackBoardSynchronizationThread::close_interfaces()
 {
   SyncListenerMap::iterator s;
-  for (s = __sync_listeners.begin(); s != __sync_listeners.end(); ++s) {
+  for (s = sync_listeners_.begin(); s != sync_listeners_.end(); ++s) {
     if (s->second) {
       logger->log_debug(name(), "Closing sync listener %s", s->second->bbil_name());
       delete s->second;
     }
   }
-  MutexLocker lock(__interfaces.mutex());
+  MutexLocker lock(interfaces_.mutex());
   InterfaceMap::iterator i;
-  for (i = __interfaces.begin(); i != __interfaces.end(); ++i) {
+  for (i = interfaces_.begin(); i != interfaces_.end(); ++i) {
     logger->log_debug(name(), "Closing %s reading interface %s",
 		      i->second.combo->remote_writer ? "local" : "remote",
 		      i->first->uid());
     if (i->second.combo->remote_writer) {
-      __wsl_local->remove_interface(i->first);
+      wsl_local_->remove_interface(i->first);
       blackboard->close(i->first);
     } else {
-      __wsl_remote->remove_interface(i->first);
-      __remote_bb->close(i->first);
+      wsl_remote_->remove_interface(i->first);
+      remote_bb_->close(i->first);
     }
     if (i->second.writer) {
       logger->log_debug(name(), "Closing %s writing interface %s",
 			i->second.combo->remote_writer ? "remote" : "local",
 			i->second.writer->uid());
       if (i->second.combo->remote_writer) {
-	__remote_bb->close(i->second.writer);
+	remote_bb_->close(i->second.writer);
       } else {
 	blackboard->close(i->second.writer);
       }
     }
   }
-  __interfaces.clear();
-  __sync_listeners.clear();
+  interfaces_.clear();
+  sync_listeners_.clear();
 }
 
 
@@ -299,9 +299,9 @@ BlackBoardSynchronizationThread::close_interfaces()
 void
 BlackBoardSynchronizationThread::writer_added(fawkes::Interface *interface) throw()
 {
-  MutexLocker lock(__interfaces.mutex());
+  MutexLocker lock(interfaces_.mutex());
 
-  if (__interfaces[interface].writer) {
+  if (interfaces_[interface].writer) {
     // There exists a writer!?
     logger->log_warn(name(), "Writer added for %s, but relay exists already. Bug?", interface->uid());
   } else {
@@ -309,7 +309,7 @@ BlackBoardSynchronizationThread::writer_added(fawkes::Interface *interface) thro
 
     Interface *iface = NULL;
     SyncInterfaceListener *sync_listener = NULL;
-    InterfaceInfo &ii = __interfaces[interface];
+    InterfaceInfo &ii = interfaces_[interface];
     try {
       iface = ii.writer_bb->open_for_writing(ii.combo->type.c_str(),
 					     ii.combo->writer_id.c_str());
@@ -321,7 +321,7 @@ BlackBoardSynchronizationThread::writer_added(fawkes::Interface *interface) thro
       sync_listener = new SyncInterfaceListener(logger, interface, iface,
 						ii.reader_bb, ii.writer_bb);
 
-      __sync_listeners[interface] = sync_listener;
+      sync_listeners_[interface] = sync_listener;
       ii.writer = iface;
 
     } catch (Exception &e) {
@@ -343,18 +343,18 @@ BlackBoardSynchronizationThread::writer_added(fawkes::Interface *interface) thro
 void
 BlackBoardSynchronizationThread::writer_removed(fawkes::Interface *interface) throw()
 {
-  MutexLocker lock(__interfaces.mutex());
+  MutexLocker lock(interfaces_.mutex());
 
-  if (! __interfaces[interface].writer) {
+  if (! interfaces_[interface].writer) {
     // We do not have a writer!?
     logger->log_warn(name(), "Writer removed for %s, but no relay exists. Bug?", interface->uid());
   } else {
     logger->log_warn(name(), "Writer removed for %s, closing relay writer", interface->uid());
 
-    InterfaceInfo &ii = __interfaces[interface];
+    InterfaceInfo &ii = interfaces_[interface];
     try {
-      delete __sync_listeners[interface];
-      __sync_listeners[interface] = NULL;
+      delete sync_listeners_[interface];
+      sync_listeners_[interface] = NULL;
 
       ii.writer_bb->close(ii.writer);
       ii.writer = NULL;

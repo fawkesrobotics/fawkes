@@ -49,8 +49,8 @@ class SyncWriterInterfaceListener
 					   unsigned int instance_serial) throw();
 
  private:
-  fawkes::Logger                   *__logger;
-  BlackBoardSynchronizationThread  *__sync_thread;
+  fawkes::Logger                   *logger_;
+  BlackBoardSynchronizationThread  *sync_thread_;
 };
 
 
