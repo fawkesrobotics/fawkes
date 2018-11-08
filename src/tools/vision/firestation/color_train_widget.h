@@ -126,4 +126,4 @@ class ColorTrainWidget
   Glib::Dispatcher m_signal_colormap_updated;
 };
 
-#endif /* __FIREVISION_TOOLS_FIRESTATION_COLOR_TRAIN_WIDGET_H_ */
+#endif /* FIREVISION_TOOLS_FIRESTATION_COLOR_TRAIN_WIDGET_H__ */

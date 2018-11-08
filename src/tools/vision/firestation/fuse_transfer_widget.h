@@ -154,4 +154,4 @@ class FuseTransferWidget : firevision::FuseClientHandler
   firevision::YuvColormap* m_remote_colormap;
 };
 
-#endif /* __FIREVISION_TOOLS_FIRESTATION_FUSE_TRANSFER_WIDGET_H_ */
+#endif /* FIREVISION_TOOLS_FIRESTATION_FUSE_TRANSFER_WIDGET_H__ */

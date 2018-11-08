@@ -233,4 +233,4 @@ class Firestation : public Gtk::Window
   fawkes::AvahiThread* m_avahi_thread;
 };
 
-#endif /* __FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H_ */
+#endif /* FIREVISION_TOOLS_FIRESTATION_FIRESTATION_H__ */
