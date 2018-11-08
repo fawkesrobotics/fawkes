@@ -58,8 +58,8 @@ SwissRangerCamera::~SwissRangerCamera()
 {
   close();
   
-  if ( __model != NULL ) {
-    free(__model);
+  if ( model_ != NULL ) {
+    free(model_);
   }
 }
 
@@ -71,7 +71,7 @@ SwissRangerCamera::open()
 
   usb_set_debug(0);
 
-  int num_cams = SR_OpenUSB(&__cam, 0);
+  int num_cams = SR_OpenUSB(&cam_, 0);
   if (num_cams <= 0) {
     throw Exception("Cannot find SwissRanger camera");
   }
@@ -80,7 +80,7 @@ SwissRangerCamera::open()
   usb_set_debug(0);
 
   char devstr[1024];
-  SR_GetDeviceString(__cam, devstr, 1024);
+  SR_GetDeviceString(cam_, devstr, 1024);
 
   regmatch_t m[5];
   regex_t re;
@@ -88,79 +88,79 @@ SwissRangerCamera::open()
 		"Manufacturer:'([^' ]+) *', Product:'([^' ]+) *'",
 		REG_EXTENDED) != 0) ||
        (regexec(&re, devstr, 5, m, 0) != 0) ) {
-    SR_Close(__cam);
+    SR_Close(cam_);
     throw Exception("Could not parse device string");
   }
   char *tmp;
   tmp = strndup(&(devstr[m[1].rm_so]), m[1].rm_eo - m[3].rm_so);
-  __vendor_id  = strtol(tmp, NULL, 16);
+  vendor_id_  = strtol(tmp, NULL, 16);
   free(tmp);
   tmp = strndup(&(devstr[m[2].rm_so]), m[2].rm_eo - m[3].rm_so);
-  __product_id  = strtol(tmp, NULL, 16);
+  product_id_  = strtol(tmp, NULL, 16);
   free(tmp);
-  __vendor     = strndup(&(devstr[m[3].rm_so]), m[3].rm_eo - m[3].rm_so);
-  __model      = strndup(&(devstr[m[4].rm_so]), m[4].rm_eo - m[4].rm_so);
+  vendor_     = strndup(&(devstr[m[3].rm_so]), m[3].rm_eo - m[3].rm_so);
+  model_      = strndup(&(devstr[m[4].rm_so]), m[4].rm_eo - m[4].rm_so);
   regfree(&re);
 
-  __serial = SR_ReadSerial(__cam);
+  serial_ = SR_ReadSerial(cam_);
 
-  __width  = SR_GetCols(__cam);
-  __height = SR_GetRows(__cam);
+  width_  = SR_GetCols(cam_);
+  height_ = SR_GetRows(cam_);
 
 
   int acqm = AM_COR_FIX_PTRN;
-  if ( (__mode == AMPLITUDE_GRAY) || (__mode == AMPLITUDE_GRAY_8) ) {
+  if ( (mode_ == AMPLITUDE_GRAY) || (mode_ == AMPLITUDE_GRAY_8) ) {
     acqm |= AM_CONV_GRAY;
-  } else if (__mode == CONF_MAP) {
+  } else if (mode_ == CONF_MAP) {
     acqm |= AM_CONF_MAP;
   }
-  if (__use_median) {
+  if (use_median_) {
     acqm |= AM_MEDIAN;
   }
-  if (__use_denoise) {
+  if (use_denoise_) {
     acqm |= AM_DENOISE_ANF;
   }
-  SR_SetMode(__cam, acqm);
+  SR_SetMode(cam_, acqm);
 
-  if (__integration_time > 0) {
-    SR_SetIntegrationTime(__cam, __integration_time);
+  if (integration_time_ > 0) {
+    SR_SetIntegrationTime(cam_, integration_time_);
   }
 
-  SR_SetAmplitudeThreshold(__cam, __amplitude_threshold);
+  SR_SetAmplitudeThreshold(cam_, amplitude_threshold_);
 
-  if (__set_modfreq) {
-    SR_SetModulationFrequency(__cam, __modulation_freq);
+  if (set_modfreq_) {
+    SR_SetModulationFrequency(cam_, modulation_freq_);
   }
 
-  __buffer_size      = __width * __height;
-  __gray_buffer      = NULL;
-  __coord_uint16_buf = NULL;
-  __coord_float_buf  = NULL;
-  __coord_double_buf = NULL;
-  if ( (__mode == AMPLITUDE_GRAY_8) || (__mode == DISTANCE_GRAY_8) ) {
-    __gray_buffer = (unsigned char *)malloc(__width * __height);
-    __buffer = __gray_buffer;
-  } else if (__mode == CARTESIAN_UINT16) {
-    __buffer_size = 3 * __width * __height * sizeof(unsigned short);
-    __coord_uint16_buf = (unsigned short *)malloc(__buffer_size);
-    __xu = (short *)__coord_uint16_buf;
-    __yu = &(__xu[__width * __height]);
-    __zu = (unsigned short *)&(__yu[__width * __height]);
-    __buffer = (unsigned char *)__coord_uint16_buf;
-  } else if (__mode == CARTESIAN_FLOAT) {
-    __buffer_size = 3 * __width * __height * sizeof(float);
-    __coord_float_buf = (float *)malloc(__buffer_size);
-    __xf = __coord_float_buf;
-    __yf = &(__coord_float_buf[    __width * __height]);
-    __zf = &(__coord_float_buf[2 * __width * __height]);
-    __buffer = (unsigned char *)__coord_float_buf;
-  } else if (__mode == CARTESIAN_FLOAT) {
-    __buffer_size = 3 * __width * __height * sizeof(double);
-    __coord_double_buf = (double *)malloc(__buffer_size);
-    __xd = __coord_double_buf;
-    __yd = &(__coord_double_buf[    __width * __height]);
-    __zd = &(__coord_double_buf[2 * __width * __height]);
-    __buffer = (unsigned char *)__coord_double_buf;
+  buffer_size_      = width_ * height_;
+  gray_buffer_      = NULL;
+  coord_uint16_buf_ = NULL;
+  coord_float_buf_  = NULL;
+  coord_double_buf_ = NULL;
+  if ( (mode_ == AMPLITUDE_GRAY_8) || (mode_ == DISTANCE_GRAY_8) ) {
+    gray_buffer_ = (unsigned char *)malloc(width_ * height_);
+    buffer_ = gray_buffer_;
+  } else if (mode_ == CARTESIAN_UINT16) {
+    buffer_size_ = 3 * width_ * height_ * sizeof(unsigned short);
+    coord_uint16_buf_ = (unsigned short *)malloc(buffer_size_);
+    xu_ = (short *)coord_uint16_buf_;
+    yu_ = &(xu_[width_ * height_]);
+    zu_ = (unsigned short *)&(yu_[width_ * height_]);
+    buffer_ = (unsigned char *)coord_uint16_buf_;
+  } else if (mode_ == CARTESIAN_FLOAT) {
+    buffer_size_ = 3 * width_ * height_ * sizeof(float);
+    coord_float_buf_ = (float *)malloc(buffer_size_);
+    xf_ = coord_float_buf_;
+    yf_ = &(coord_float_buf_[    width_ * height_]);
+    zf_ = &(coord_float_buf_[2 * width_ * height_]);
+    buffer_ = (unsigned char *)coord_float_buf_;
+  } else if (mode_ == CARTESIAN_FLOAT) {
+    buffer_size_ = 3 * width_ * height_ * sizeof(double);
+    coord_double_buf_ = (double *)malloc(buffer_size_);
+    xd_ = coord_double_buf_;
+    yd_ = &(coord_double_buf_[    width_ * height_]);
+    zd_ = &(coord_double_buf_[2 * width_ * height_]);
+    buffer_ = (unsigned char *)coord_double_buf_;
   }
 
   _opened = true;
@@ -193,7 +193,7 @@ SwissRangerCamera::print_info()
   printf("Vendor: %-20s (0x%04x)\n"
 	 "Model:  %-20s (0x%04x)\n"
 	 "Serial: %x\n",
-	 __vendor, __vendor_id, __model, __product_id, __serial);
+	 vendor_, vendor_id_, model_, product_id_, serial_);
 }
 
 
@@ -202,22 +202,22 @@ SwissRangerCamera::close()
 {
   if ( _started ) stop();
   if ( _opened ) {
-    SR_Close(__cam);
-    if (__gray_buffer) {
-      free(__gray_buffer);
-      __gray_buffer = NULL;
+    SR_Close(cam_);
+    if (gray_buffer_) {
+      free(gray_buffer_);
+      gray_buffer_ = NULL;
     }
-    if (__coord_uint16_buf) {
-      free(__coord_uint16_buf);
-      __coord_uint16_buf = NULL;
+    if (coord_uint16_buf_) {
+      free(coord_uint16_buf_);
+      coord_uint16_buf_ = NULL;
     }
-    if (__coord_float_buf) {
-      free(__coord_float_buf);
-      __coord_float_buf = NULL;
+    if (coord_float_buf_) {
+      free(coord_float_buf_);
+      coord_float_buf_ = NULL;
     }
-    if (__coord_double_buf) {
-      free(__coord_double_buf);
-      __coord_double_buf = NULL;
+    if (coord_double_buf_) {
+      free(coord_double_buf_);
+      coord_double_buf_ = NULL;
     }
     _opened = false;
   }
@@ -234,7 +234,7 @@ SwissRangerCamera::model() const
     throw Exception("Camera not opened");
   }
 
-  return __model;
+  return model_;
 }
 
 
@@ -243,39 +243,39 @@ SwissRangerCamera::capture()
 {
 
   if (! _opened) {
-    throw CaptureException("SwissRangerCamera(%s): cannot capture on closed camera", __model);
+    throw CaptureException("SwissRangerCamera(%s): cannot capture on closed camera", model_);
   }
   if (! _started) {
-    throw CaptureException("SwissRangerCamera(%s): cannot capture on stopped camera", __model);
+    throw CaptureException("SwissRangerCamera(%s): cannot capture on stopped camera", model_);
   }
 
-  _valid_frame_received = (SR_Acquire(__cam) > 0);
+  _valid_frame_received = (SR_Acquire(cam_) > 0);
   if (!_valid_frame_received) {
-    throw CaptureException("SwissRangerCamera(%s): failed to acquire image", __model);
+    throw CaptureException("SwissRangerCamera(%s): failed to acquire image", model_);
   }
 
-  if (__mode == DISTANCE) {
-    __buffer = (unsigned char *)SR_GetImage(__cam, 0);
-  } else if ( (__mode == AMPLITUDE) || (__mode == AMPLITUDE_GRAY) ) {
-    __buffer = (unsigned char *)SR_GetImage(__cam, 1);
-  } else if ( (__mode == DISTANCE_GRAY_8) || (__mode == AMPLITUDE_GRAY_8) ) {
-    unsigned int image_num = (__mode == DISTANCE_GRAY_8) ? 0 : 1;
-    unsigned short *buf = (unsigned short *)SR_GetImage(__cam, image_num);
+  if (mode_ == DISTANCE) {
+    buffer_ = (unsigned char *)SR_GetImage(cam_, 0);
+  } else if ( (mode_ == AMPLITUDE) || (mode_ == AMPLITUDE_GRAY) ) {
+    buffer_ = (unsigned char *)SR_GetImage(cam_, 1);
+  } else if ( (mode_ == DISTANCE_GRAY_8) || (mode_ == AMPLITUDE_GRAY_8) ) {
+    unsigned int image_num = (mode_ == DISTANCE_GRAY_8) ? 0 : 1;
+    unsigned short *buf = (unsigned short *)SR_GetImage(cam_, image_num);
     // convert image
-    for (unsigned int h = 0; h < __height; ++h) {
-      for (unsigned int w = 0; w < __width; ++w) {
-	__gray_buffer[h * __width + w] = buf[h * __width + w] / 2;
+    for (unsigned int h = 0; h < height_; ++h) {
+      for (unsigned int w = 0; w < width_; ++w) {
+	gray_buffer_[h * width_ + w] = buf[h * width_ + w] / 2;
       }
     }
-  } else if (__mode == CONF_MAP) {
-    __buffer = (unsigned char *)SR_GetImage(__cam, 2);
-  } else if (__mode == CARTESIAN_UINT16) {
-    SR_CoordTrfUint16(__cam, __xu, __yu, __zu, 2, 2, 2);
-  } else if (__mode == CARTESIAN_FLOAT) {
-    SR_CoordTrfFlt(__cam, __xf, __yf, __zf,
+  } else if (mode_ == CONF_MAP) {
+    buffer_ = (unsigned char *)SR_GetImage(cam_, 2);
+  } else if (mode_ == CARTESIAN_UINT16) {
+    SR_CoordTrfUint16(cam_, xu_, yu_, zu_, 2, 2, 2);
+  } else if (mode_ == CARTESIAN_FLOAT) {
+    SR_CoordTrfFlt(cam_, xf_, yf_, zf_,
 		   sizeof(float), sizeof(float), sizeof(float));
-  } else if (__mode == CARTESIAN_DOUBLE) {
-    SR_CoordTrfDbl(__cam, __xd, __yd, __zd,
+  } else if (mode_ == CARTESIAN_DOUBLE) {
+    SR_CoordTrfDbl(cam_, xd_, yd_, zd_,
 		   sizeof(double), sizeof(double), sizeof(double));
   }
 }
@@ -291,7 +291,7 @@ unsigned char*
 SwissRangerCamera::buffer()
 {
   if ( _valid_frame_received ) {
-    return __buffer;
+    return buffer_;
   } else {
     return NULL;
   }
@@ -302,7 +302,7 @@ unsigned int
 SwissRangerCamera::buffer_size()
 {
   if ( _valid_frame_received ) {
-    return __buffer_size;
+    return buffer_size_;
   } else {
     return 0;
   }
@@ -319,7 +319,7 @@ unsigned int
 SwissRangerCamera::pixel_width()
 {
   if (_opened) {
-    return __width;
+    return width_;
   } else {
     throw Exception("Camera not opened");
   }
@@ -330,7 +330,7 @@ unsigned int
 SwissRangerCamera::pixel_height()
 {
   if (_opened) {
-    return __height;
+    return height_;
   } else {
     throw Exception("Camera not opened");
   }
@@ -340,7 +340,7 @@ SwissRangerCamera::pixel_height()
 colorspace_t
 SwissRangerCamera::colorspace()
 {
-  switch (__mode) {
+  switch (mode_) {
   case DISTANCE:
   case AMPLITUDE:
   case CONF_MAP:
@@ -412,86 +412,86 @@ SwissRangerCamera::SwissRangerCamera(const CameraArgumentParser *cap)
   _started = _opened = false;
   _valid_frame_received = false;
 
-  __model = __vendor = NULL;
-  __vendor_id = __product_id = 0;
+  model_ = vendor_ = NULL;
+  vendor_id_ = product_id_ = 0;
 
-  __buffer = NULL;
+  buffer_ = NULL;
 
-  __mode = AMPLITUDE_GRAY_8;
+  mode_ = AMPLITUDE_GRAY_8;
   if (cap->has("mode")) {
     string m = cap->get("mode");
     if (m == "DISTANCE") {
-      __mode = DISTANCE;
+      mode_ = DISTANCE;
     } else if (m == "DISTANCE_GRAY_8") {
-      __mode = DISTANCE_GRAY_8;
+      mode_ = DISTANCE_GRAY_8;
     } else if (m == "AMPLITUDE") {
-      __mode = AMPLITUDE;
+      mode_ = AMPLITUDE;
     } else if (m == "AMPLITUDE_GRAY") {
-      __mode = AMPLITUDE_GRAY;
+      mode_ = AMPLITUDE_GRAY;
     } else if (m == "AMPLITUDE_GRAY_8") {
-      __mode = AMPLITUDE_GRAY_8;
+      mode_ = AMPLITUDE_GRAY_8;
     } else if (m == "CONF_MAP") {
-      __mode = CONF_MAP;
+      mode_ = CONF_MAP;
     } else if (m == "CARTESIAN_UINT16") {
-      __mode = CARTESIAN_UINT16;
+      mode_ = CARTESIAN_UINT16;
     } else if (m == "CARTESIAN_FLOAT") {
-      __mode = CARTESIAN_FLOAT;
+      mode_ = CARTESIAN_FLOAT;
     } else if (m == "CARTESIAN_DOUBLE") {
-      __mode = CARTESIAN_DOUBLE;
+      mode_ = CARTESIAN_DOUBLE;
     } else {
       throw Exception("Unknown mode %s given", m.c_str());
     }
   }
 
-  __use_median = false;
+  use_median_ = false;
   if (cap->get("median") == "on") {
-    __use_median=true;
+    use_median_=true;
   }
 
-  __use_denoise = false;
+  use_denoise_ = false;
   if (cap->get("denoise") == "on") {
-    __use_denoise=true;
+    use_denoise_=true;
   }
 
-  __integration_time = 0; // do not set
+  integration_time_ = 0; // do not set
   if (cap->has("integration_time")) {
-    __integration_time = cap->get_int("integration_time");
+    integration_time_ = cap->get_int("integration_time");
   }
 
-  __amplitude_threshold = 0;
+  amplitude_threshold_ = 0;
   if (cap->has("amplitude_threshold")) {
-    __amplitude_threshold = cap->get_int("amplitude_threshold");
+    amplitude_threshold_ = cap->get_int("amplitude_threshold");
   }
 
-  __set_modfreq = false;
-  __modulation_freq = MF_40MHz;
+  set_modfreq_ = false;
+  modulation_freq_ = MF_40MHz;
   if (cap->has("modfreq")) {
     string m = cap->get("modfreq");
-    __set_modfreq = true;
+    set_modfreq_ = true;
     if (m == "40MHz") {
-      __modulation_freq = MF_40MHz;
+      modulation_freq_ = MF_40MHz;
     } else if (m == "30MHz") {
-      __modulation_freq = MF_30MHz;
+      modulation_freq_ = MF_30MHz;
     } else if (m == "21MHz") {
-      __modulation_freq = MF_21MHz;
+      modulation_freq_ = MF_21MHz;
     } else if (m == "20MHz") {
-      __modulation_freq = MF_20MHz;
+      modulation_freq_ = MF_20MHz;
     } else if (m == "19MHz") {
-      __modulation_freq = MF_19MHz;
+      modulation_freq_ = MF_19MHz;
     } else if (m == "60MHz") {
-      __modulation_freq = MF_60MHz;
+      modulation_freq_ = MF_60MHz;
     } else if (m == "15MHz") {
-      __modulation_freq = MF_15MHz;
+      modulation_freq_ = MF_15MHz;
     } else if (m == "10MHz") {
-      __modulation_freq = MF_10MHz;
+      modulation_freq_ = MF_10MHz;
     } else if (m == "29MHz") {
-      __modulation_freq = MF_29MHz;
+      modulation_freq_ = MF_29MHz;
     } else if (m == "31MHz") {
-      __modulation_freq = MF_31MHz;
+      modulation_freq_ = MF_31MHz;
     } else if (m == "14.5MHz") {
-      __modulation_freq = MF_14_5MHz;
+      modulation_freq_ = MF_14_5MHz;
     } else if (m == "15.5MHz") {
-      __modulation_freq = MF_15_5MHz;
+      modulation_freq_ = MF_15_5MHz;
     } else {
       throw Exception("Unknown modulation frequency %s given", m.c_str());
     }

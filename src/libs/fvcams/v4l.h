@@ -64,4 +64,4 @@ class V4LCamera : public Camera
 
 } // end namespace firevision
 
-#endif //__FIREVISION_CAMS_V4L_H_
+#endif //FIREVISION_CAMS_V4L_H__

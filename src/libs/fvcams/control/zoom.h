@@ -46,4 +46,4 @@ class CameraControlZoom : virtual public CameraControl
 
 } // end namespace firevision
 
-#endif // __FIREVISION_CAMS_CONTROL_ZOOM_H_
+#endif // FIREVISION_CAMS_CONTROL_ZOOM_H__

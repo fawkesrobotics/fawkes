@@ -73,15 +73,15 @@ class SharedMemoryCamera : public Camera
  private:
   void init();
 
-  bool          __deep_copy;
-  bool          __opened;
-  char *        __image_id;
+  bool          deep_copy_;
+  bool          opened_;
+  char *        image_id_;
 
-  SharedMemoryImageBuffer  *__shm_buffer;
+  SharedMemoryImageBuffer  *shm_buffer_;
 
-  unsigned char *__deep_buffer;
+  unsigned char *deep_buffer_;
 
-  fawkes::Time *__capture_time;
+  fawkes::Time *capture_time_;
 };
 
 } // end namespace firevision

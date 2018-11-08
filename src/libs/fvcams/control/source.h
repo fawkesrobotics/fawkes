@@ -40,4 +40,4 @@ class CameraControlSource : virtual public CameraControl
 
 } // end namespace firevision
 
-#endif // __FIREVISION_CAMS_CONTROL_SOURCE_H_
+#endif // FIREVISION_CAMS_CONTROL_SOURCE_H__

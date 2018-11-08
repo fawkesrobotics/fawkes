@@ -68,4 +68,4 @@ class CameraControlColor : virtual public CameraControl
 
 } // end namespace firevision
 
-#endif // __FIREVISION_CAMS_CONTROL_COLOR_H_
+#endif // FIREVISION_CAMS_CONTROL_COLOR_H__

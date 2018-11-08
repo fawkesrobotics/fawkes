@@ -61,12 +61,12 @@ class NaoCamera :
   static void init_cam(const char *cam);
 
  private:
-  char *__i2c_device_name; ///< I2C device file descriptor
-  int   __cam_id;          ///< ID of the Camera to be used
-  bool  __can_switch_cam;  ///< Needs to be Nao V3 for camera switching
+  char *i2c_device_name_; ///< I2C device file descriptor
+  int   cam_id_;          ///< ID of the Camera to be used
+  bool  can_switch_cam_;  ///< Needs to be Nao V3 for camera switching
 };
 
 } // end namespace firevision
 
-#endif //__FIREVISION_CAMS_V4L2_H_
+#endif //FIREVISION_CAMS_V4L2_H__
 

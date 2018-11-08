@@ -47,14 +47,14 @@ class PikeCamera : public FirewireCamera
   virtual void parse_set_autofnc_aoi( const char* aoi );
 
  private:
-  bool __set_autofnc_aoi;
-  unsigned int __aoi_left;
-  unsigned int __aoi_top;
-  unsigned int __aoi_width;
-  unsigned int __aoi_height;
-  bool __aoi_show_work_area;
+  bool set_autofnc_aoi_;
+  unsigned int aoi_left_;
+  unsigned int aoi_top_;
+  unsigned int aoi_width_;
+  unsigned int aoi_height_;
+  bool aoi_show_work_area_;
 };
 
 } // end namespace firevision
 
-#endif /* __FIREVISION_CAMS_PIKE_H_ */
+#endif /* FIREVISION_CAMS_PIKE_H__ */

@@ -77,14 +77,14 @@ class Bumblebee2Camera : public FirewireCamera
 
 
   /** Bayer pattern */
-  dc1394color_filter_t __bayer_pattern;
+  dc1394color_filter_t bayer_pattern_;
 
   bool _auto_acquire_sensor_info;
 
-  unsigned int   __image_num;
-  unsigned char *__buffer;
-  unsigned char *__buffer_deinterlaced;
-  unsigned char *__buffer_rgb;
+  unsigned int   image_num_;
+  unsigned char *buffer_;
+  unsigned char *buffer_deinterlaced_;
+  unsigned char *buffer_rgb_;
 
   bool          _supports_color;
 };

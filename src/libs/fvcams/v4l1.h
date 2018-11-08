@@ -71,7 +71,7 @@ class V4L1Camera : public Camera
   static const int MMAP = 1;
   static const int READ = 2;
 
-  V4L1CameraData *__data;
+  V4L1CameraData *data_;
 
   bool opened;
   bool started;

@@ -61,4 +61,4 @@ class CameraControlImage : virtual public CameraControl
 
 } // end namespace firevision
 
-#endif // __FIREVISION_CAMS_CONTROL_IMAGE_H_
+#endif // FIREVISION_CAMS_CONTROL_IMAGE_H__

@@ -56,14 +56,14 @@ namespace firevision {
  */
 SharedMemoryCamera::SharedMemoryCamera(const char *image_id, bool deep_copy)
 {
-  __image_id = strdup(image_id);
-  __deep_copy = deep_copy;
+  image_id_ = strdup(image_id);
+  deep_copy_ = deep_copy;
 
   try {
     init();
   } catch (Exception &e) {
-    free(__image_id);
-    __image_id = NULL;
+    free(image_id_);
+    image_id_ = NULL;
     throw;
   }
 }
@@ -77,23 +77,23 @@ SharedMemoryCamera::SharedMemoryCamera(const char *image_id, bool deep_copy)
  */
 SharedMemoryCamera::SharedMemoryCamera(const CameraArgumentParser *cap)
 {
-  __image_id  = NULL;
-  __deep_copy = false;
+  image_id_  = NULL;
+  deep_copy_ = false;
 
   if ( cap->has("image_id") ) {
-    __image_id = strdup(cap->get("image_id").c_str());
+    image_id_ = strdup(cap->get("image_id").c_str());
   }
   else throw MissingParameterException("The parameter 'image_id' is required");
 
   if ( cap->has("deep_copy") ) {
-    __deep_copy = (strcasecmp(cap->get("deep_copy").c_str(), "true") == 0);
+    deep_copy_ = (strcasecmp(cap->get("deep_copy").c_str(), "true") == 0);
   }
 
   try {
     init();
   } catch (Exception &e) {
-    free(__image_id);
-    __image_id = NULL;
+    free(image_id_);
+    image_id_ = NULL;
     throw;
   }
 }
@@ -102,34 +102,34 @@ SharedMemoryCamera::SharedMemoryCamera(const CameraArgumentParser *cap)
 /** Destructor. */
 SharedMemoryCamera::~SharedMemoryCamera()
 {
-  free(__image_id);
-  if ( __deep_buffer != NULL ) {
-    free( __deep_buffer );
+  free(image_id_);
+  if ( deep_buffer_ != NULL ) {
+    free( deep_buffer_ );
   }
-  delete __shm_buffer;
-  delete __capture_time;
+  delete shm_buffer_;
+  delete capture_time_;
 }
 
 
 void
 SharedMemoryCamera::init()
 {
-  __deep_buffer  = NULL;
-  __capture_time = NULL;
+  deep_buffer_  = NULL;
+  capture_time_ = NULL;
   try {
-    __shm_buffer = new SharedMemoryImageBuffer(__image_id);
-    if ( __deep_copy ) {
-      __deep_buffer = (unsigned char *)malloc(__shm_buffer->data_size());
-      if ( ! __deep_buffer ) {
+    shm_buffer_ = new SharedMemoryImageBuffer(image_id_);
+    if ( deep_copy_ ) {
+      deep_buffer_ = (unsigned char *)malloc(shm_buffer_->data_size());
+      if ( ! deep_buffer_ ) {
 	throw OutOfMemoryException("SharedMemoryCamera: Cannot allocate deep buffer");
       }
     }
-    __opened = true;
+    opened_ = true;
   } catch (Exception &e) {
     e.append("Failed to open shared memory image");
     throw;
   }
-  __capture_time = new fawkes::Time(0, 0);
+  capture_time_ = new fawkes::Time(0, 0);
 }
 
 void
@@ -156,31 +156,31 @@ SharedMemoryCamera::print_info()
 void
 SharedMemoryCamera::capture()
 {
-  if ( __deep_copy ) {
-    __shm_buffer->lock_for_read();
-    memcpy(__deep_buffer, __shm_buffer->buffer(), __shm_buffer->data_size());
-    __capture_time->set_time(__shm_buffer->capture_time());
-    __shm_buffer->unlock();
+  if ( deep_copy_ ) {
+    shm_buffer_->lock_for_read();
+    memcpy(deep_buffer_, shm_buffer_->buffer(), shm_buffer_->data_size());
+    capture_time_->set_time(shm_buffer_->capture_time());
+    shm_buffer_->unlock();
   }
-  else __capture_time->set_time(__shm_buffer->capture_time());
+  else capture_time_->set_time(shm_buffer_->capture_time());
 }
 
 unsigned char*
 SharedMemoryCamera::buffer()
 {
-  if ( __deep_copy ) {
-    return __deep_buffer;
+  if ( deep_copy_ ) {
+    return deep_buffer_;
   } else {
-    return __shm_buffer->buffer();
+    return shm_buffer_->buffer();
   }
 }
 
 unsigned int
 SharedMemoryCamera::buffer_size()
 {
-  return colorspace_buffer_size(__shm_buffer->colorspace(),
-				__shm_buffer->width(),
-				__shm_buffer->height() );
+  return colorspace_buffer_size(shm_buffer_->colorspace(),
+				shm_buffer_->width(),
+				shm_buffer_->height() );
 }
 
 void
@@ -196,27 +196,27 @@ SharedMemoryCamera::dispose_buffer()
 unsigned int
 SharedMemoryCamera::pixel_width()
 {
-  return __shm_buffer->width();
+  return shm_buffer_->width();
 }
 
 unsigned int
 SharedMemoryCamera::pixel_height()
 {
-  return __shm_buffer->height();
+  return shm_buffer_->height();
 }
 
 
 colorspace_t
 SharedMemoryCamera::colorspace()
 {
-  return __shm_buffer->colorspace();
+  return shm_buffer_->colorspace();
 }
 
 
 fawkes::Time *
 SharedMemoryCamera::capture_time()
 {
-  return __capture_time;
+  return capture_time_;
 }
 
 
@@ -232,14 +232,14 @@ SharedMemoryCamera::flush()
 SharedMemoryImageBuffer *
 SharedMemoryCamera::shared_memory_image_buffer()
 {
-  return __shm_buffer;
+  return shm_buffer_;
 }
 
 
 bool
 SharedMemoryCamera::ready()
 {
-  return __opened;
+  return opened_;
 }
 
 
@@ -256,7 +256,7 @@ SharedMemoryCamera::set_image_number(unsigned int n)
 void
 SharedMemoryCamera::lock_for_read()
 {
-  __shm_buffer->lock_for_read();
+  shm_buffer_->lock_for_read();
 }
 
 
@@ -266,7 +266,7 @@ SharedMemoryCamera::lock_for_read()
 bool
 SharedMemoryCamera::try_lock_for_read()
 {
-  return __shm_buffer->try_lock_for_read();
+  return shm_buffer_->try_lock_for_read();
 }
 
 
@@ -276,7 +276,7 @@ SharedMemoryCamera::try_lock_for_read()
 void
 SharedMemoryCamera::lock_for_write()
 {
-  __shm_buffer->lock_for_write();
+  shm_buffer_->lock_for_write();
 }
 
 
@@ -286,7 +286,7 @@ SharedMemoryCamera::lock_for_write()
 bool
 SharedMemoryCamera::try_lock_for_write()
 {
-  return __shm_buffer->try_lock_for_write();
+  return shm_buffer_->try_lock_for_write();
 }
 
 
@@ -294,7 +294,7 @@ SharedMemoryCamera::try_lock_for_write()
 void
 SharedMemoryCamera::unlock()
 {
-  __shm_buffer->unlock();
+  shm_buffer_->unlock();
 }
 
 } // end namespace firevision

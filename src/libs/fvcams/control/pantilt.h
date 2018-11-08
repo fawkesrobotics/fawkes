@@ -59,4 +59,4 @@ class CameraControlPanTilt : virtual public CameraControl
 
 } // end namespace firevision
 
-#endif // __FIREVISION_CAMS_CONTROL_PANTILT_H_
+#endif // FIREVISION_CAMS_CONTROL_PANTILT_H__

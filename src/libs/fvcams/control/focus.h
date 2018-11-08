@@ -44,4 +44,4 @@ class CameraControlFocus : virtual public CameraControl
 
 } // end namespace firevision
 
-#endif // __FIREVISION_CAMS_CONTROL_FOCUS_H_
+#endif // FIREVISION_CAMS_CONTROL_FOCUS_H__

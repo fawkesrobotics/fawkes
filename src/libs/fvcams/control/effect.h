@@ -44,4 +44,4 @@ class CameraControlEffect : virtual public CameraControl
 
 } // end namespace firevision
 
-#endif // __FIREVISION_CAMS_CONTROL_EFFECT_H_
+#endif // FIREVISION_CAMS_CONTROL_EFFECT_H__

@@ -224,4 +224,4 @@ class V4L2Camera:
 
 } // end namespace firevision
 
-#endif //__FIREVISION_CAMS_V4L2_H_
+#endif //FIREVISION_CAMS_V4L2_H__

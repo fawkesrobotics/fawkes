@@ -100,4 +100,4 @@ class KinectCamera : public Camera
 
 } // end namespace firevision
 
-#endif /* __FIREVISION_CAMS_KINECT_H_ */
+#endif /* FIREVISION_CAMS_KINECT_H__ */
