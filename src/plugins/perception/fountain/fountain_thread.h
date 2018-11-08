@@ -53,8 +53,8 @@ class FountainThread
   virtual void loop();
 
  private:
-  firevision::FuseServer *__fuse_server;
-  fawkes::NetworkService *__service;
+  firevision::FuseServer *fuse_server_;
+  fawkes::NetworkService *service_;
 };
 
 
