@@ -42,7 +42,7 @@ namespace fawkes {
 OpenRaveAspectIniFin::OpenRaveAspectIniFin(OpenRaveConnector *openrave)
   : AspectIniFin("OpenRaveAspect")
 {
-  __openrave = openrave;
+  openrave_ = openrave;
 }
 
 void
@@ -57,7 +57,7 @@ OpenRaveAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  or_thread->init_OpenRaveAspect(__openrave);
+  or_thread->init_OpenRaveAspect(openrave_);
 }
 
 void

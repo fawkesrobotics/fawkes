@@ -43,10 +43,10 @@ namespace fawkes {
  * @param logger pointer to fawkes logger
  */
 OpenRaveRobot::OpenRaveRobot(fawkes::Logger* logger) :
-  __logger( logger ),
-  __name( "" ),
-  __manip( 0 ),
-  __find_best_ik( 1 )
+  logger_( logger ),
+  name_( "" ),
+  manip_( 0 ),
+  find_best_ik_( 1 )
 {
   init();
 }
@@ -56,10 +56,10 @@ OpenRaveRobot::OpenRaveRobot(fawkes::Logger* logger) :
  * @param logger pointer to fawkes logger
  */
 OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnvironmentPtr& env, fawkes::Logger* logger) :
-  __logger( logger ),
-  __name( "" ),
-  __manip( 0 ),
-  __find_best_ik( 1 )
+  logger_( logger ),
+  name_( "" ),
+  manip_( 0 ),
+  find_best_ik_( 1 )
 {
   init();
   this->load(filename, env);
@@ -67,32 +67,32 @@ OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnviro
 
 /** Copy Constructor.
  * @param src The OpenRaveRobot to clone
- * @param new_env Pointer to the new OpenRaveEnvironment. We need this to set __robot
+ * @param new_env Pointer to the new OpenRaveEnvironment. We need this to set robot_
  *  to the correct robot in the new OpenRAVE-environment.
  */
 OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnvironmentPtr& new_env) :
-  __logger( src.__logger ),
-  __name( src.__name ),
-  __find_best_ik( src.__find_best_ik )
+  logger_( src.logger_ ),
+  name_( src.name_ ),
+  find_best_ik_( src.find_best_ik_ )
 {
   build_name_str();
-  __traj = new std::vector< std::vector<dReal> >();
+  traj_ = new std::vector< std::vector<dReal> >();
 
-  __trans_offset_x = src.__trans_offset_x;
-  __trans_offset_y = src.__trans_offset_y;
-  __trans_offset_z = src.__trans_offset_z;
+  trans_offset_x_ = src.trans_offset_x_;
+  trans_offset_y_ = src.trans_offset_y_;
+  trans_offset_z_ = src.trans_offset_z_;
 
   // Get correct robot from environment.
   EnvironmentMutex::scoped_lock lock(new_env->get_env_ptr()->GetMutex());
   std::string name = src.get_robot_ptr()->GetName();
-  __robot = new_env->get_env_ptr()->GetRobot( name );
+  robot_ = new_env->get_env_ptr()->GetRobot( name );
 
-  if(!__robot)
+  if(!robot_)
     throw fawkes::IllegalArgumentException("%s: Robot '%s' could not be loaded. Check name.", this->name(), name.c_str());
 
   build_name_str();
-  if(__logger)
-    __logger->log_debug(this->name(), "Robot loaded.");
+  if(logger_)
+    logger_->log_debug(this->name(), "Robot loaded.");
 
   // Initialize robot
   set_ready();
@@ -101,34 +101,34 @@ OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnv
   // "set_ready()" just takes the first manipulator it finds
   {
     EnvironmentMutex::scoped_lock lock(src.get_robot_ptr()->GetEnv()->GetMutex());
-    __arm = __robot->SetActiveManipulator( src.get_robot_ptr()->GetActiveManipulator()->GetName() );
+    arm_ = robot_->SetActiveManipulator( src.get_robot_ptr()->GetActiveManipulator()->GetName() );
   }
-  __robot->SetActiveDOFs(__arm->GetArmIndices());
+  robot_->SetActiveDOFs(arm_->GetArmIndices());
 
-  __manip = src.get_manipulator()->copy();
-  __target.manip = __manip->copy();
-  __display_planned_movements = false;
+  manip_ = src.get_manipulator()->copy();
+  target_.manip = manip_->copy();
+  display_planned_movements_ = false;
 
-  if(__logger)
-    __logger->log_debug(this->name(), "Robot '%s' cloned.", name.c_str());
+  if(logger_)
+    logger_->log_debug(this->name(), "Robot '%s' cloned.", name.c_str());
 }
 
 /** Destructor */
 OpenRaveRobot::~OpenRaveRobot()
 {
-  __target.manip = NULL;
+  target_.manip = NULL;
 
   //unload everything related to this robot from environment
   try {
-    EnvironmentBasePtr env = __robot->GetEnv();
+    EnvironmentBasePtr env = robot_->GetEnv();
     EnvironmentMutex::scoped_lock lock(env->GetMutex());
-    env->Remove(__mod_basemanip);
-    env->Remove(__robot);
-    if(__logger)
-      __logger->log_warn(name(), "Robot unloaded from environment");
+    env->Remove(mod_basemanip_);
+    env->Remove(robot_);
+    if(logger_)
+      logger_->log_warn(name(), "Robot unloaded from environment");
   } catch(const openrave_exception &e) {
-    if(__logger)
-      __logger->log_warn(name(), "Could not unload robot properly from environment. Ex:%s", e.what());
+    if(logger_)
+      logger_->log_warn(name(), "Could not unload robot properly from environment. Ex:%s", e.what());
   }
 }
 
@@ -140,28 +140,28 @@ OpenRaveRobot::build_name_str()
 {
   std::stringstream n;
   n << "OpenRaveRobot" << "[";
-  if( __robot )
-    n << RaveGetEnvironmentId(__robot->GetEnv()) << ":";
-  n << __name << "]";
-  __name_str = n.str();
+  if( robot_ )
+    n << RaveGetEnvironmentId(robot_->GetEnv()) << ":";
+  n << name_ << "]";
+  name_str_ = n.str();
 }
 
 /** Get the name string to use in logging messages etc. */
 const char*
 OpenRaveRobot::name() const
 {
-  return __name_str.c_str();
+  return name_str_.c_str();
 }
 
 /** Inittialize object attributes */
 void
 OpenRaveRobot::init()
 {
-  __traj = new std::vector< std::vector<dReal> >();
+  traj_ = new std::vector< std::vector<dReal> >();
 
-  __trans_offset_x = 0.f;
-  __trans_offset_y = 0.f;
-  __trans_offset_z = 0.f;
+  trans_offset_x_ = 0.f;
+  trans_offset_y_ = 0.f;
+  trans_offset_z_ = 0.f;
 
   build_name_str();
 }
@@ -178,16 +178,16 @@ OpenRaveRobot::load(const std::string& filename, fawkes::OpenRaveEnvironmentPtr&
 
   // TODO: implementing without usage of 'environment'
   // openrave_exception handling is done in OpenRAVE (see environment-core.h)
-  __robot = env->get_env_ptr()->ReadRobotXMLFile(filename);
+  robot_ = env->get_env_ptr()->ReadRobotXMLFile(filename);
 
-  if(!__robot)
+  if(!robot_)
     throw fawkes::IllegalArgumentException("%s: Robot could not be loaded. Check xml file/path '%s'.", name(), filename.c_str());
 
-  __name = __robot->GetName();
+  name_ = robot_->GetName();
   build_name_str();
 
-  if(__logger)
-    __logger->log_debug(name(), "Robot loaded.");
+  if(logger_)
+    logger_->log_debug(name(), "Robot loaded.");
 }
 
 /** Set robot ready for usage.
@@ -196,39 +196,39 @@ OpenRaveRobot::load(const std::string& filename, fawkes::OpenRaveEnvironmentPtr&
 void
 OpenRaveRobot::set_ready()
 {
-  if(!__robot)
+  if(!robot_)
     throw fawkes::Exception("%s: Robot not loaded properly yet.", name());
 
-  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
+  EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
 
-  __robot->SetActiveManipulator(__robot->GetManipulators().at(0)->GetName());
-  __arm = __robot->GetActiveManipulator();
-  __robot->SetActiveDOFs(__arm->GetArmIndices());
+  robot_->SetActiveManipulator(robot_->GetManipulators().at(0)->GetName());
+  arm_ = robot_->GetActiveManipulator();
+  robot_->SetActiveDOFs(arm_->GetArmIndices());
 
-  if(__robot->GetActiveDOF() == 0)
+  if(robot_->GetActiveDOF() == 0)
     throw fawkes::Exception("%s: Robot not added to environment yet. Need to do that first, otherwise planner will fail.", name());
 
   // create planner parameters
   try {
     PlannerBase::PlannerParametersPtr params(new PlannerBase::PlannerParameters());
-    __planner_params = params;
-    __planner_params->_nMaxIterations = 4000; // max iterations before failure
-    __planner_params->SetRobotActiveJoints(__robot); // set planning configuration space to current active dofs
-    __planner_params->vgoalconfig.resize(__robot->GetActiveDOF());
+    planner_params_ = params;
+    planner_params_->_nMaxIterations = 4000; // max iterations before failure
+    planner_params_->SetRobotActiveJoints(robot_); // set planning configuration space to current active dofs
+    planner_params_->vgoalconfig.resize(robot_->GetActiveDOF());
   } catch(const openrave_exception &e) {
     throw fawkes::Exception("%s: Could not create PlannerParameters. Ex:%s", name(), e.what());
   }
 
   // create and load BaseManipulation module
   try {
-    __mod_basemanip = RaveCreateModule(__robot->GetEnv(), "basemanipulation");
-    __robot->GetEnv()->AddModule( __mod_basemanip, __robot->GetName());
+    mod_basemanip_ = RaveCreateModule(robot_->GetEnv(), "basemanipulation");
+    robot_->GetEnv()->AddModule( mod_basemanip_, robot_->GetName());
   } catch(const openrave_exception &e) {
     throw fawkes::Exception("%s: Cannot load BaseManipulation Module. Ex:%s", name(), e.what());
   }
 
-  if(__logger)
-    __logger->log_debug(name(), "Robot ready.");
+  if(logger_)
+    logger_->log_debug(name(), "Robot ready.");
 }
 
 /** Directly set transition offset between coordinate systems
@@ -240,14 +240,14 @@ OpenRaveRobot::set_ready()
  void
  OpenRaveRobot::set_offset(float trans_x, float trans_y, float trans_z)
  {
-  __trans_offset_x = trans_x;
-  __trans_offset_y = trans_y;
-  __trans_offset_z = trans_z;
+  trans_offset_x_ = trans_x;
+  trans_offset_y_ = trans_y;
+  trans_offset_z_ = trans_z;
  }
 
 /** Calculate transition offset between coordinate systems
  * of real device and OpenRAVE model.
- * Sets model's angles to current device's angles (from __manip),
+ * Sets model's angles to current device's angles (from manip_),
  * and compares transitions.
  * @param device_trans_x transition on x-axis (real device)
  * @param device_trans_y transition on y-axis (real device)
@@ -256,23 +256,23 @@ OpenRaveRobot::set_ready()
 void
 OpenRaveRobot::calibrate(float device_trans_x, float device_trans_y, float device_trans_z)
 {
-  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
+  EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
   // get device's current angles, and set them for OpenRAVE model
   std::vector<dReal> angles;
-  __manip->get_angles(angles);
-  __robot->SetActiveDOFValues(angles);
+  manip_->get_angles(angles);
+  robot_->SetActiveDOFValues(angles);
 
   // get model's current transition and compare
-  __arm = __robot->GetActiveManipulator();
-  Transform trans = __arm->GetEndEffectorTransform();
-  __trans_offset_x = trans.trans[0] - device_trans_x;
-  __trans_offset_y = trans.trans[1] - device_trans_y;
-  __trans_offset_z = trans.trans[2] - device_trans_z;
+  arm_ = robot_->GetActiveManipulator();
+  Transform trans = arm_->GetEndEffectorTransform();
+  trans_offset_x_ = trans.trans[0] - device_trans_x;
+  trans_offset_y_ = trans.trans[1] - device_trans_y;
+  trans_offset_z_ = trans.trans[2] - device_trans_z;
 }
 
 /** Set pointer to OpenRaveManipulator object.
  *  Make sure this is called AFTER all manipulator settings have
- *  been set (assures that __target.manip has the same settings).
+ *  been set (assures that target_.manip has the same settings).
  * @param manip pointer to OpenRaveManipulator object
  * @param display_movements true, if movements should be displayed in viewer.
  *  Better be "false" if want to sync OpenRAVE models with device
@@ -280,10 +280,10 @@ OpenRaveRobot::calibrate(float device_trans_x, float device_trans_y, float devic
 void
 OpenRaveRobot::set_manipulator(fawkes::OpenRaveManipulatorPtr& manip, bool display_movements)
 {
-  __manip = manip;
-  __target.manip = __manip->copy();
+  manip_ = manip;
+  target_.manip = manip_->copy();
 
-  __display_planned_movements = display_movements;
+  display_planned_movements_ = display_movements;
 }
 
 /** Update motor values from OpenRAVE model.
@@ -291,29 +291,29 @@ OpenRaveRobot::set_manipulator(fawkes::OpenRaveManipulatorPtr& manip, bool displ
 void
 OpenRaveRobot::update_manipulator()
 {
-  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
+  EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
   std::vector<dReal> angles;
-  __robot->GetActiveDOFValues(angles);
-  __manip->set_angles(angles);
+  robot_->GetActiveDOFValues(angles);
+  manip_->set_angles(angles);
 }
 
 /** Update/Set OpenRAVE motor angles */
 void
 OpenRaveRobot::update_model()
 {
-  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
+  EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
   std::vector<dReal> angles;
-  __manip->get_angles(angles);
-  __robot->SetActiveDOFValues(angles);
+  manip_->get_angles(angles);
+  robot_->SetActiveDOFValues(angles);
 }
 
-/** Getter for __display_planned_movements.
+/** Getter for display_planned_movements_.
  * @return return value
  */
 bool
 OpenRaveRobot::display_planned_movements() const
 {
-  return __display_planned_movements;
+  return display_planned_movements_;
 }
 
 /** Activate/Deactive IK comparison.
@@ -325,7 +325,7 @@ OpenRaveRobot::display_planned_movements() const
 void
 OpenRaveRobot::enable_ik_comparison(bool enable)
 {
-  __find_best_ik = enable;
+  find_best_ik_ = enable;
 }
 
 /** Set target, given relative transition.
@@ -340,19 +340,19 @@ bool
 OpenRaveRobot::set_target_rel(float trans_x, float trans_y, float trans_z, bool is_extension)
 {
   if( is_extension ) {
-    __target.type = TARGET_RELATIVE_EXT;
+    target_.type = TARGET_RELATIVE_EXT;
   } else {
-    __target.type = TARGET_RELATIVE;
+    target_.type = TARGET_RELATIVE;
   }
-  __target.x = trans_x;
-  __target.y = trans_y;
-  __target.z = trans_z;
+  target_.x = trans_x;
+  target_.y = trans_y;
+  target_.z = trans_z;
 
   // Not sure how to check IK solvability yet. Would be nice to have this
   // checked before planning a path.
-  __target.solvable = true;
+  target_.solvable = true;
 
-  return __target.solvable;
+  return target_.solvable;
 }
 
 /** Set target for a straight movement, given transition.
@@ -368,9 +368,9 @@ OpenRaveRobot::set_target_straight(float trans_x, float trans_y, float trans_z)
 {
   Transform trans;
   {
-    EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
-    __arm = __robot->GetActiveManipulator();
-    trans = __arm->GetEndEffectorTransform();
+    EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
+    arm_ = robot_->GetActiveManipulator();
+    trans = arm_->GetEndEffectorTransform();
   }
 
   return set_target_rel( trans_x - trans.trans[0],
@@ -448,32 +448,32 @@ OpenRaveRobot::set_target_euler(euler_rotation_t type,
 
   switch(type) {
     case (EULER_ZXZ) :
-        if(__logger)
-          __logger->log_debug(name(), "Target EULER_ZXZ: %f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
+        if(logger_)
+          logger_->log_debug(name(), "Target EULER_ZXZ: %f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
         rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
         rot.at(3) = theta; //2nd row, 1st value; rotation on x-axis
         rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
         break;
 
     case (EULER_ZYZ) :
-        if(__logger)
-          __logger->log_debug(name(), "Target EULER_ZYZ:", "%f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
+        if(logger_)
+          logger_->log_debug(name(), "Target EULER_ZYZ:", "%f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
         rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
         rot.at(4) = theta; //2nd row, 2nd value; rotation on y-axis
         rot.at(8) = psi;   //3rd row, 3rd value; rotation on z-axis
         break;
 
     case (EULER_ZYX) :
-        if(__logger)
-          __logger->log_debug(name(), "Target EULER_ZYX:", "%f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
+        if(logger_)
+          logger_->log_debug(name(), "Target EULER_ZYX:", "%f %f %f %f %f %f", trans_x, trans_y, trans_z, phi, theta, psi);
         rot.at(2) = phi;   //1st row, 3rd value; rotation on z-axis
         rot.at(4) = theta; //2nd row, 2nd value; rotation on y-axis
         rot.at(6) = psi;   //3rd row, 1st value; rotation on x-axis
         break;
 
     default :
-        __target.type = TARGET_NONE;
-        __target.solvable = false;
+        target_.type = TARGET_NONE;
+        target_.solvable = false;
         return false;
   }
 
@@ -500,12 +500,12 @@ OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float tr
 
   // release all attached/grabbed bodys
   {
-    EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
-    __robot->ReleaseAllGrabbed();
+    EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
+    robot_->ReleaseAllGrabbed();
   }
 
   // quaternion defining consecutiv rotations on axis
-  float alpha = atan2(trans_y - __trans_offset_y, trans_x - __trans_offset_x);      //angle to rotate left/right when manipulator points to +x
+  float alpha = atan2(trans_y - trans_offset_y_, trans_x - trans_offset_x_);      //angle to rotate left/right when manipulator points to +x
   Vector quat_y = quatFromAxisAngle(Vector(0.f, M_PI/2, 0.f));           //1st, rotate down -> manipulator points to +x
   Vector quat_x = quatFromAxisAngle(Vector(-alpha, 0.f, 0.f));           //2nd, rotate left/right -> manipulator points to object
   Vector quat_z = quatFromAxisAngle(Vector(0.f, 0.f, rot_x));             //last, rotate wrist -> manipulator ready to grab
@@ -557,14 +557,14 @@ OpenRaveRobot::set_target_object_position(float trans_x, float trans_y, float tr
 bool
 OpenRaveRobot::set_target_ikparam(IkParameterization ik_param, IkFilterOptions filter)
 {
-  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
-  __arm = __robot->GetActiveManipulator();
+  EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
+  arm_ = robot_->GetActiveManipulator();
 
-  __target.ikparam = ik_param;
-  __target.type = TARGET_IKPARAM;
+  target_.ikparam = ik_param;
+  target_.type = TARGET_IKPARAM;
   solve_ik(filter);
 
-  return __target.solvable;
+  return target_.solvable;
 }
 
 /** Set additional planner parameters.
@@ -577,7 +577,7 @@ OpenRaveRobot::set_target_ikparam(IkParameterization ik_param, IkFilterOptions f
 void
 OpenRaveRobot::set_target_plannerparams(std::string& params)
 {
-  __target.plannerparams = params;
+  target_.plannerparams = params;
 }
 
 /** Set additional planner parameters.
@@ -586,7 +586,7 @@ OpenRaveRobot::set_target_plannerparams(std::string& params)
 void
 OpenRaveRobot::set_target_plannerparams(const char* params)
 {
-  __target.plannerparams = params;
+  target_.plannerparams = params;
 }
 
 /** Set raw command for BaseManipulation module.
@@ -601,7 +601,7 @@ OpenRaveRobot::set_target_plannerparams(const char* params)
 void
 OpenRaveRobot::set_target_raw(std::string& cmd)
 {
-  __target.raw_cmd = cmd;
+  target_.raw_cmd = cmd;
 }
 
 /** Set raw command for BaseManipulation module.
@@ -610,7 +610,7 @@ OpenRaveRobot::set_target_raw(std::string& cmd)
 void
 OpenRaveRobot::set_target_raw(const char* cmd)
 {
-  __target.raw_cmd = cmd;
+  target_.raw_cmd = cmd;
 }
 
 /** Set target angles directly.
@@ -619,9 +619,9 @@ OpenRaveRobot::set_target_raw(const char* cmd)
 void
 OpenRaveRobot::set_target_angles( std::vector<float>& angles )
 {
-  __target.manip->set_angles(angles);
-  __target.type = TARGET_JOINTS;
-  __target.solvable = true; //no IK check done though!
+  target_.manip->set_angles(angles);
+  target_.type = TARGET_JOINTS;
+  target_.solvable = true; //no IK check done though!
 }
 
 
@@ -634,7 +634,7 @@ OpenRaveRobot::set_target_angles( std::vector<float>& angles )
 OpenRAVE::RobotBasePtr
 OpenRaveRobot::get_robot_ptr() const
 {
-  return __robot;
+  return robot_;
 }
 
 /** Get target.
@@ -643,7 +643,7 @@ OpenRaveRobot::get_robot_ptr() const
 target_t
 OpenRaveRobot::get_target() const
 {
-  return __target;
+  return target_;
 }
 
 /** Get manipulator.
@@ -652,7 +652,7 @@ OpenRaveRobot::get_target() const
 OpenRaveManipulatorPtr
 OpenRaveRobot::get_manipulator() const
 {
-  return __manip;
+  return manip_;
 }
 
 /** Updates planner parameters and return pointer to it
@@ -661,31 +661,31 @@ OpenRaveRobot::get_manipulator() const
 OpenRAVE::PlannerBase::PlannerParametersPtr
 OpenRaveRobot::get_planner_params() const
 {
-  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
+  EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
   // set planning configuration space to current active dofs
-  __planner_params->SetRobotActiveJoints(__robot);
-  __planner_params->vgoalconfig.resize(__robot->GetActiveDOF());
+  planner_params_->SetRobotActiveJoints(robot_);
+  planner_params_->vgoalconfig.resize(robot_->GetActiveDOF());
 
-  __manip->get_angles(__planner_params->vinitialconfig);
-  __target.manip->get_angles(__planner_params->vgoalconfig);
+  manip_->get_angles(planner_params_->vinitialconfig);
+  target_.manip->get_angles(planner_params_->vgoalconfig);
 
-  __robot->SetActiveDOFValues(__planner_params->vinitialconfig);
+  robot_->SetActiveDOFValues(planner_params_->vinitialconfig);
 
-  return __planner_params;
+  return planner_params_;
 }
 
 /** Return pointer to trajectory of motion from
- * __manip to __target.manip with OpenRAVE-model angle format
+ * manip_ to target_.manip with OpenRAVE-model angle format
  * @return pointer to trajectory
  */
 std::vector< std::vector<dReal> >*
 OpenRaveRobot::get_trajectory() const
 {
-  return __traj;
+  return traj_;
 }
 
 /** Return pointer to trajectory of motion from
- * __manip to __target.manip with device angle format
+ * manip_ to target_.manip with device angle format
  * @return pointer to trajectory
  */
 std::vector< std::vector<float> >*
@@ -695,8 +695,8 @@ OpenRaveRobot::get_trajectory_device() const
 
   std::vector<float> v;
 
-  for(unsigned int i=0; i<__traj->size(); i++) {
-    __manip->angles_or_to_device(__traj->at(i), v);
+  for(unsigned int i=0; i<traj_->size(); i++) {
+    manip_->angles_or_to_device(traj_->at(i), v);
     traj->push_back(v);
   }
 
@@ -709,7 +709,7 @@ OpenRaveRobot::get_trajectory_device() const
 OpenRAVE::ModuleBasePtr
 OpenRaveRobot::get_basemanip() const
 {
-  return __mod_basemanip;
+  return mod_basemanip_;
 }
 
 
@@ -723,29 +723,29 @@ OpenRaveRobot::get_basemanip() const
 bool
 OpenRaveRobot::attach_object(OpenRAVE::KinBodyPtr object, const char* manip_name)
 {
-  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
+  EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
 
   bool success = false;
   try{
     if( manip_name ) {
       // try attaching to given manipulator
-      RobotBase::ManipulatorPtr manip = __robot->SetActiveManipulator(manip_name);
+      RobotBase::ManipulatorPtr manip = robot_->SetActiveManipulator(manip_name);
       if( !manip ) {
-        if(__logger)
-          __logger->log_warn(name(), "Could not attach Object, could not get manipulator '%s'", manip_name);
+        if(logger_)
+          logger_->log_warn(name(), "Could not attach Object, could not get manipulator '%s'", manip_name);
         return false;
 
       } else {
-        success = __robot->Grab(object, manip->GetEndEffector());
+        success = robot_->Grab(object, manip->GetEndEffector());
       }
 
     } else {
       // use currently active manipulator
-      success = __robot->Grab(object);
+      success = robot_->Grab(object);
     }
   } catch(const OpenRAVE::openrave_exception &e) {
-    if(__logger)
-      __logger->log_warn(name(), "Could not attach Object. Ex:%s", e.what());
+    if(logger_)
+      logger_->log_warn(name(), "Could not attach Object. Ex:%s", e.what());
     return false;
   }
 
@@ -777,11 +777,11 @@ bool
 OpenRaveRobot::release_object(OpenRAVE::KinBodyPtr object)
 {
   try{
-    EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
-    __robot->Release(object);
+    EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
+    robot_->Release(object);
   } catch(const OpenRAVE::openrave_exception &e) {
-    if(__logger)
-      __logger->log_warn(name(), "Could not release Object. Ex:%s", e.what());
+    if(logger_)
+      logger_->log_warn(name(), "Could not release Object. Ex:%s", e.what());
     return false;
   }
 
@@ -811,11 +811,11 @@ bool
 OpenRaveRobot::release_all_objects()
 {
   try{
-    EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
-    __robot->ReleaseAllGrabbed();
+    EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
+    robot_->ReleaseAllGrabbed();
   } catch(const OpenRAVE::openrave_exception &e) {
-    if(__logger)
-      __logger->log_warn(name(), "Could not release all objects. Ex:%s", e.what());
+    if(logger_)
+      logger_->log_warn(name(), "Could not release all objects. Ex:%s", e.what());
     return false;
   }
 
@@ -831,7 +831,7 @@ OpenRaveRobot::release_all_objects()
 
 /** Set target, given transformation (transition, and rotation as quaternion).
  * Check IK solvability for target Transform. If solvable,
- * then set target angles to manipulator configuration __target.manip
+ * then set target angles to manipulator configuration target_.manip
  * @param trans transformation vector
  * @param rotQuat rotation vector; a quaternion
  * @param no_offset if true, do not include manipulator offset (default: false)
@@ -845,45 +845,45 @@ OpenRaveRobot::set_target_transform(Vector& trans, OpenRAVE::Vector& rotQuat, Ik
   target.rot = rotQuat;
 
   if( !no_offset ) {
-    target.trans[0] += __trans_offset_x;
-    target.trans[1] += __trans_offset_y;
-    target.trans[2] += __trans_offset_z;
+    target.trans[0] += trans_offset_x_;
+    target.trans[1] += trans_offset_y_;
+    target.trans[2] += trans_offset_z_;
   }
 
-  __target.type = TARGET_TRANSFORM;
-  __target.x  = target.trans[0];
-  __target.y  = target.trans[1];
-  __target.z  = target.trans[2];
-  __target.qw = target.rot[0];
-  __target.qx = target.rot[1];
-  __target.qy = target.rot[2];
-  __target.qz = target.rot[3];
+  target_.type = TARGET_TRANSFORM;
+  target_.x  = target.trans[0];
+  target_.y  = target.trans[1];
+  target_.z  = target.trans[2];
+  target_.qw = target.rot[0];
+  target_.qx = target.rot[1];
+  target_.qy = target.rot[2];
+  target_.qz = target.rot[3];
 
   // check for supported IK types
-  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
-  __arm = __robot->GetActiveManipulator();
-  if( __arm->GetIkSolver()->Supports(IKP_Transform6D) ) {
-    if(__logger)
-      __logger->log_debug(name(), "6D suppport for arm %s", __arm->GetName().c_str());
+  EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
+  arm_ = robot_->GetActiveManipulator();
+  if( arm_->GetIkSolver()->Supports(IKP_Transform6D) ) {
+    if(logger_)
+      logger_->log_debug(name(), "6D suppport for arm %s", arm_->GetName().c_str());
     // arm supports 6D ik. Perfect!
-    __target.ikparam = IkParameterization(target);
+    target_.ikparam = IkParameterization(target);
     solve_ik(filter);
 
-  } else if( __arm->GetIkSolver()->Supports(IKP_TranslationDirection5D) ) {
-    if(__logger)
-      __logger->log_debug(name(), "5D suppport");
+  } else if( arm_->GetIkSolver()->Supports(IKP_TranslationDirection5D) ) {
+    if(logger_)
+      logger_->log_debug(name(), "5D suppport");
     // arm has only 5 DOF.
-    __target.ikparam = get_5dof_ikparam(target);
-    __target.solvable = set_target_ikparam(__target.ikparam, filter);
+    target_.ikparam = get_5dof_ikparam(target);
+    target_.solvable = set_target_ikparam(target_.ikparam, filter);
 
   } else {
-    if(__logger)
-      __logger->log_debug(name(), "No IK suppport");
+    if(logger_)
+      logger_->log_debug(name(), "No IK suppport");
     //other IK types not supported yet
-    __target.solvable = false;
+    target_.solvable = false;
   }
 
-  return __target.solvable;
+  return target_.solvable;
 }
 
 /** Set target, given 3 consecutive axis rotations.
@@ -893,7 +893,7 @@ OpenRaveRobot::set_target_transform(Vector& trans, OpenRAVE::Vector& rotQuat, Ik
  * See public setTargetEuler methods to get a better understanding.
  *
  * Check IK solvability for target Transform. If solvable,
- * then set target angles to manipulator configuration __target.manip
+ * then set target angles to manipulator configuration target_.manip
  * @param rotations 3x3 matrix given as one row.
  * @param filter IK filter options (see OpenRAVE doc for details)
  * @param no_offset if true, do not include manipulator offset (default: false)
@@ -903,11 +903,11 @@ bool
 OpenRaveRobot::set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, OpenRAVE::IkFilterOptions filter, bool no_offset)
 {
   if( rotations.size() != 9 ) {
-    __target.type = TARGET_NONE;
-    __target.solvable = false;
+    target_.type = TARGET_NONE;
+    target_.solvable = false;
 
-    if(__logger)
-      __logger->log_error(name(), "Bad size of rotations vector. Is %i, expected 9", rotations.size());
+    if(logger_)
+      logger_->log_error(name(), "Bad size of rotations vector. Is %i, expected 9", rotations.size());
     return false;
   }
 
@@ -915,10 +915,10 @@ OpenRaveRobot::set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rot
   Vector r2(rotations.at(3), rotations.at(4), rotations.at(5));
   Vector r3(rotations.at(6), rotations.at(7), rotations.at(8));
 
-  if(__logger) {
-    __logger->log_debug(name(), "TEST Rot1: %f %f %f", r1[0], r1[1], r1[2]);
-    __logger->log_debug(name(), "TEST Rot2: %f %f %f", r2[0], r2[1], r2[2]);
-    __logger->log_debug(name(), "TEST Rot3: %f %f %f", r3[0], r3[1], r3[2]);
+  if(logger_) {
+    logger_->log_debug(name(), "TEST Rot1: %f %f %f", r1[0], r1[1], r1[2]);
+    logger_->log_debug(name(), "TEST Rot2: %f %f %f", r2[0], r2[1], r2[2]);
+    logger_->log_debug(name(), "TEST Rot3: %f %f %f", r3[0], r3[1], r3[2]);
   }
 
   Vector q1 = quatFromAxisAngle(r1);
@@ -952,10 +952,10 @@ OpenRaveRobot::get_5dof_ikparam(OpenRAVE::Transform& trans)
      If it was -90°, we need (0, 1, 0). So just take the inverse of the first rotation
      and apply it to (1,0,0)
   */
-  EnvironmentMutex::scoped_lock lock(__robot->GetEnv()->GetMutex());
+  EnvironmentMutex::scoped_lock lock(robot_->GetEnv()->GetMutex());
   Vector dir(1,0,0);
   {
-    RobotBasePtr tmp_robot = __robot;
+    RobotBasePtr tmp_robot = robot_;
     RobotBase::RobotStateSaver saver(tmp_robot); // save the state, do not modifiy currently active robot!
 
     //reset robot joints
@@ -964,7 +964,7 @@ OpenRaveRobot::get_5dof_ikparam(OpenRAVE::Transform& trans)
 
     // revert the rotations for the 5DOF manipulator specifition. See long comment above.
     // First rotate back -90° on x-axis (revert 2nd rotation)
-    Transform cur_pos = __arm->GetEndEffectorTransform();
+    Transform cur_pos = arm_->GetEndEffectorTransform();
     Vector v1 = quatFromAxisAngle(Vector(-M_PI/2, 0, 0));
     v1 = quatMultiply(cur_pos.rot, v1);
 
@@ -978,30 +978,30 @@ OpenRaveRobot::get_5dof_ikparam(OpenRAVE::Transform& trans)
   TransformMatrix mat = matrixFromQuat(trans.rot);
   dir = mat.rotate(dir);
 
-  IkParameterization ikparam = __arm->GetIkParameterization(IKP_TranslationDirection5D);
+  IkParameterization ikparam = arm_->GetIkParameterization(IKP_TranslationDirection5D);
   ikparam.SetTranslationDirection5D(RAY(trans.trans, dir));
 
   return ikparam;
 }
 
 /** Find IK solution that is closest to current configuration.
- * This method checks and updates the internal __target variable.
+ * This method checks and updates the internal target_ variable.
  * @return true if solvable, false otherwise.
  */
 bool
 OpenRaveRobot::solve_ik(IkFilterOptions filter)
 {
-  if( !__find_best_ik ) {
+  if( !find_best_ik_ ) {
     std::vector<dReal> solution;
-    __target.solvable = __arm->FindIKSolution(__target.ikparam,solution,filter);
-    __target.manip->set_angles(solution);
+    target_.solvable = arm_->FindIKSolution(target_.ikparam,solution,filter);
+    target_.manip->set_angles(solution);
 
   } else {
     std::vector< std::vector<dReal> > solutions;
 
     // get all IK solutions
-    __target.solvable = __arm->FindIKSolutions(__target.ikparam,solutions,filter);
-    if(!__target.solvable)
+    target_.solvable = arm_->FindIKSolutions(target_.ikparam,solutions,filter);
+    if(!target_.solvable)
       return false;
 
     // pick closest solution to current configuration
@@ -1009,11 +1009,11 @@ OpenRaveRobot::solve_ik(IkFilterOptions filter)
     std::vector<dReal> cur;
     std::vector<dReal> diff;
     float dist = 100.f;
-    __arm->GetArmDOFValues(cur);
+    arm_->GetArmDOFValues(cur);
 
     for( sol=solutions.begin(); sol!=solutions.end(); ++sol ) {
       diff = cur;
-      __robot->SubtractActiveDOFValues(diff, *sol);
+      robot_->SubtractActiveDOFValues(diff, *sol);
 
       float sol_dist = 0.f;
       for( unsigned int i=0; i<diff.size(); ++i ) {
@@ -1026,12 +1026,12 @@ OpenRaveRobot::solve_ik(IkFilterOptions filter)
       if( sol_dist < dist ) {
         // found a solution that is closer
         dist = sol_dist;
-        __target.manip->set_angles(*sol);
+        target_.manip->set_angles(*sol);
       }
     }
   }
 
-  return __target.solvable;
+  return target_.solvable;
 }
 
 } // end of namespace fawkes

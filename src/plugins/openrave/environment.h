@@ -79,19 +79,19 @@ class OpenRaveEnvironment
   virtual OpenRAVE::EnvironmentBasePtr get_env_ptr() const;
 
  private:
-  fawkes::Logger* __logger;
+  fawkes::Logger* logger_;
 
-  std::string __name;
-  std::string __name_str;
+  std::string name_;
+  std::string name_str_;
 
-  OpenRAVE::EnvironmentBasePtr  __env;
-  OpenRAVE::PlannerBasePtr      __planner;
-  OpenRAVE::ModuleBasePtr       __mod_ikfast;
+  OpenRAVE::EnvironmentBasePtr  env_;
+  OpenRAVE::PlannerBasePtr      planner_;
+  OpenRAVE::ModuleBasePtr       mod_ikfast_;
 
-  boost::thread*                __viewer_thread;
-  bool                          __viewer_running;
+  boost::thread*                viewer_thread_;
+  bool                          viewer_running_;
 
-  std::vector<OpenRAVE::GraphHandlePtr> __graph_handle;
+  std::vector<OpenRAVE::GraphHandlePtr> graph_handle_;
 
   virtual const char* name() const;
 

@@ -65,9 +65,9 @@ class OpenRaveManipulator
    */
   virtual float angle_device_to_OR(unsigned int number, float angle) const = 0;
 
-  std::vector<motor_t>  __motors;       /**< vector of motors */
-  unsigned int          __cnt;          /**< number of motors on OpenRAVE model */
-  unsigned int          __cnt_device;   /**< number of motors on real device */
+  std::vector<motor_t>  motors_;       /**< vector of motors */
+  unsigned int          cnt_;          /**< number of motors on OpenRAVE model */
+  unsigned int          cnt_device_;   /**< number of motors on real device */
 };
 
 
@@ -79,9 +79,9 @@ template <typename T>
 void
 OpenRaveManipulator::get_angles(std::vector<T>& to) const
 {
-  to.resize(__cnt);
-  for (unsigned int i=0; i<__motors.size(); i++) {
-    to[__motors[i].no] = (T)__motors[i].angle;
+  to.resize(cnt_);
+  for (unsigned int i=0; i<motors_.size(); i++) {
+    to[motors_[i].no] = (T)motors_[i].angle;
   }
 }
 
@@ -106,10 +106,10 @@ template <typename T_from, typename T_to>
 void
 OpenRaveManipulator::angles_or_to_device(std::vector<T_from>& from, std::vector<T_to>&to) const
 {
-  to.resize(__cnt_device);
+  to.resize(cnt_device_);
 
-  for (unsigned int i=0; i<__motors.size(); i++) {
-    to[__motors[i].no_device] = (T_to)angle_OR_to_device(__motors[i].no_device, (float)from[__motors[i].no]);
+  for (unsigned int i=0; i<motors_.size(); i++) {
+    to[motors_[i].no_device] = (T_to)angle_OR_to_device(motors_[i].no_device, (float)from[motors_[i].no]);
   }
 }
 
@@ -122,11 +122,11 @@ template <typename T>
 void
 OpenRaveManipulator::set_angles(std::vector<T>& angles)
 {
-  if( angles.size() < __motors.size() ) {
-    angles.reserve(__motors.size());
+  if( angles.size() < motors_.size() ) {
+    angles.reserve(motors_.size());
   }
-  for (unsigned int i=0; i<__motors.size(); i++) {
-    __motors[i].angle = (float)angles[__motors[i].no];
+  for (unsigned int i=0; i<motors_.size(); i++) {
+    motors_[i].angle = (float)angles[motors_[i].no];
   }
 }
 
@@ -137,11 +137,11 @@ template <typename T>
 void
 OpenRaveManipulator::set_angles_device(std::vector<T>& angles)
 {
-  if( angles.size() < __motors.size() ) {
-    angles.reserve(__motors.size());
+  if( angles.size() < motors_.size() ) {
+    angles.reserve(motors_.size());
   }
-  for (unsigned int i=0; i<__motors.size(); i++) {
-    __motors[i].angle = angle_device_to_OR(__motors[i].no_device, (float)angles[__motors[i].no_device]);
+  for (unsigned int i=0; i<motors_.size(); i++) {
+    motors_[i].angle = angle_device_to_OR(motors_[i].no_device, (float)angles[motors_[i].no_device]);
   }
 }
 

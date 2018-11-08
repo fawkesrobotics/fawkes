@@ -54,8 +54,8 @@ class OpenRaveMessageHandlerThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  OpenRaveThread*		__or_thread;
-  fawkes::OpenRaveInterface*	__if_openrave;
+  OpenRaveThread*		or_thread_;
+  fawkes::OpenRaveInterface*	if_openrave_;
 };
 
 #endif

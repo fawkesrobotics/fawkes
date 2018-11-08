@@ -95,10 +95,10 @@ class OpenRaveThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::OpenRaveAspectIniFin   __or_aspectIniFin;
+  fawkes::OpenRaveAspectIniFin   or_aspectIniFin_;
 
-  fawkes::OpenRaveEnvironmentPtr __OR_env;
-  fawkes::OpenRaveRobotPtr       __OR_robot;
+  fawkes::OpenRaveEnvironmentPtr OR_env_;
+  fawkes::OpenRaveRobotPtr       OR_robot_;
 };
 
 #endif

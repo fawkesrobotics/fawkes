@@ -56,14 +56,14 @@ main(int argc, char **argv)
   con->setup(robotFile);
 
  // configure manipulator
-  OpenRAVEManipulatorKatana6M180* __manipKatana = new OpenRAVEManipulatorKatana6M180(6, 5);
-  __manipKatana->addMotor(0,0);
-  __manipKatana->addMotor(1,1);
-  __manipKatana->addMotor(2,2);
-  __manipKatana->addMotor(4,3);
-  __manipKatana->addMotor(5,4);
+  OpenRAVEManipulatorKatana6M180* manipKatana_ = new OpenRAVEManipulatorKatana6M180(6, 5);
+  manipKatana_->addMotor(0,0);
+  manipKatana_->addMotor(1,1);
+  manipKatana_->addMotor(2,2);
+  manipKatana_->addMotor(4,3);
+  manipKatana_->addMotor(5,4);
 
-  con->setManipulator(__manipKatana);
+  con->setManipulator(manipKatana_);
 
   //con->startViewer();
 

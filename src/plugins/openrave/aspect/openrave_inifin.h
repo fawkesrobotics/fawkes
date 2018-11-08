@@ -41,7 +41,7 @@ class OpenRaveAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  OpenRaveConnector *__openrave;
+  OpenRaveConnector *openrave_;
 };
 
 } // end namespace fawkes
