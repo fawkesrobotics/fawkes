@@ -48,9 +48,9 @@ namespace fawkes {
  */
 InterfaceFieldIterator::InterfaceFieldIterator()
 {
-  __interface = NULL;
-  __infol = NULL;
-  __value_string = NULL;
+  interface_ = NULL;
+  infol_ = NULL;
+  value_string_ = NULL;
 }
 
 
@@ -62,9 +62,9 @@ InterfaceFieldIterator::InterfaceFieldIterator()
 InterfaceFieldIterator::InterfaceFieldIterator(Interface *interface,
 						 const interface_fieldinfo_t *info_list)
 {
-  __interface = interface;
-  __infol = info_list;
-  __value_string = NULL;
+  interface_ = interface;
+  infol_ = info_list;
+  value_string_ = NULL;
 }
 
 
@@ -73,12 +73,12 @@ InterfaceFieldIterator::InterfaceFieldIterator(Interface *interface,
  */
 InterfaceFieldIterator::InterfaceFieldIterator(const InterfaceFieldIterator &fit)
 {
-  __interface = fit.__interface;
-  __infol = fit.__infol;
-  if ( fit.__value_string ) {
-    __value_string = strdup(fit.__value_string);
+  interface_ = fit.interface_;
+  infol_ = fit.infol_;
+  if ( fit.value_string_ ) {
+    value_string_ = strdup(fit.value_string_);
   } else {
-    __value_string = NULL;
+    value_string_ = NULL;
   }
 }
 
@@ -86,7 +86,7 @@ InterfaceFieldIterator::InterfaceFieldIterator(const InterfaceFieldIterator &fit
 /** Destructor. */
 InterfaceFieldIterator::~InterfaceFieldIterator()
 {
-  if ( __value_string )  free(__value_string);
+  if ( value_string_ )  free(value_string_);
 }
 
 
@@ -96,10 +96,10 @@ InterfaceFieldIterator::~InterfaceFieldIterator()
 InterfaceFieldIterator &
 InterfaceFieldIterator::operator++()
 {
-  if ( __infol != NULL ) {
-    __infol = __infol->next;
-    if ( __value_string )  free(__value_string);
-    __value_string = NULL;
+  if ( infol_ != NULL ) {
+    infol_ = infol_->next;
+    if ( value_string_ )  free(value_string_);
+    value_string_ = NULL;
   }
 
   return *this;
@@ -154,7 +154,7 @@ InterfaceFieldIterator::operator+=(unsigned int i)
 bool
 InterfaceFieldIterator::operator==(const InterfaceFieldIterator & fi) const
 {
-  return (__infol == fi.__infol);
+  return (infol_ == fi.infol_);
 }
 
 
@@ -175,10 +175,10 @@ InterfaceFieldIterator::operator!=(const InterfaceFieldIterator & fi) const
 const void *
 InterfaceFieldIterator::operator*() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
   } else {
-    return __infol->value;
+    return infol_->value;
   }
 }
 
@@ -190,8 +190,8 @@ InterfaceFieldIterator::operator*() const
 InterfaceFieldIterator &
 InterfaceFieldIterator::operator=(const InterfaceFieldIterator & fi)
 {
-  __interface = fi.__interface;
-  __infol     = fi.__infol;
+  interface_ = fi.interface_;
+  infol_     = fi.infol_;
 
   return *this;
 }
@@ -203,10 +203,10 @@ InterfaceFieldIterator::operator=(const InterfaceFieldIterator & fi)
 interface_fieldtype_t
 InterfaceFieldIterator::get_type() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get type of end element");
   } else {
-    return __infol->type;
+    return infol_->type;
   }
 }
 
@@ -217,10 +217,10 @@ InterfaceFieldIterator::get_type() const
 const char *
 InterfaceFieldIterator::get_typename() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get type of end element");
   } else {
-    switch (__infol->type) {
+    switch (infol_->type) {
     case IFT_BOOL:     return "bool";
     case IFT_INT8:     return "int8";
     case IFT_UINT8:    return "uint8";
@@ -234,7 +234,7 @@ InterfaceFieldIterator::get_typename() const
     case IFT_DOUBLE:   return "double";
     case IFT_BYTE:     return "byte";
     case IFT_STRING:   return "string";
-    case IFT_ENUM:     return __infol->enumtype;
+    case IFT_ENUM:     return infol_->enumtype;
     default:           return "unknown";
     }
   }
@@ -247,10 +247,10 @@ InterfaceFieldIterator::get_typename() const
 bool
 InterfaceFieldIterator::is_enum() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get type of end element");
   } else {
-    return __infol->type == IFT_ENUM;
+    return infol_->type == IFT_ENUM;
   }
 }
 
@@ -262,7 +262,7 @@ InterfaceFieldIterator::get_enum_valuenames() const
 {
   std::list<const char*> enums;
   interface_enum_map_t::const_iterator enum_it;
-  for (enum_it = __infol->enum_map->begin(); enum_it != __infol->enum_map->end(); ++enum_it) {
+  for (enum_it = infol_->enum_map->begin(); enum_it != infol_->enum_map->end(); ++enum_it) {
 	  enums.push_back(enum_it->second.c_str());
   }
   return enums;
@@ -274,10 +274,10 @@ InterfaceFieldIterator::get_enum_valuenames() const
 const char *
 InterfaceFieldIterator::get_name() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get name of end element");
   } else {
-    return __infol->name;
+    return infol_->name;
   }
 }
 
@@ -288,10 +288,10 @@ InterfaceFieldIterator::get_name() const
 const void *
 InterfaceFieldIterator::get_value() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
   } else {
-    return __infol->value;
+    return infol_->value;
   }
 }
 
@@ -302,10 +302,10 @@ InterfaceFieldIterator::get_value() const
 size_t
 InterfaceFieldIterator::get_length() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get length of end element");
   } else {
-    return __infol->length;
+    return infol_->length;
   }
 }
 
@@ -318,69 +318,69 @@ InterfaceFieldIterator::get_length() const
 const char *
 InterfaceFieldIterator::get_value_string(const char *array_sep)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
   } else {
-    if ( __value_string == NULL ) {
-      if ( __infol->length == 0 )  throw OutOfBoundsException("Field length out of bounds",
-							      __infol->length, 1, (unsigned int)0xFFFFFFFF);
+    if ( value_string_ == NULL ) {
+      if ( infol_->length == 0 )  throw OutOfBoundsException("Field length out of bounds",
+							      infol_->length, 1, (unsigned int)0xFFFFFFFF);
 
       char *tmp1 = strdup("");
       char *tmp2;
 
-      if ( __infol->type != IFT_STRING ) {
-	for (size_t i = 0; i < __infol->length; ++i) {
+      if ( infol_->type != IFT_STRING ) {
+	for (size_t i = 0; i < infol_->length; ++i) {
           int rv = 0;
-	  switch (__infol->type) {
+	  switch (infol_->type) {
 	  case IFT_BOOL:
-	    rv = asprintf(&tmp2, "%s%s", tmp1, (((bool *)__infol->value)[i]) ? "true" : "false");
+	    rv = asprintf(&tmp2, "%s%s", tmp1, (((bool *)infol_->value)[i]) ? "true" : "false");
 	    break;
 	  case IFT_INT8:
-	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int8_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int8_t *)infol_->value)[i]);
 	    break;
 	  case IFT_INT16:
-	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int16_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int16_t *)infol_->value)[i]);
 	    break;
 	  case IFT_INT32:
-	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int32_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%i", tmp1, ((int32_t *)infol_->value)[i]);
 	    break;
 	  case IFT_INT64:
 #if (defined(__WORDSIZE) && __WORDSIZE == 64) || (defined(LONG_BIT) && LONG_BIT == 64) || defined(__x86_64__)
-	    rv = asprintf(&tmp2, "%s%li", tmp1, ((int64_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%li", tmp1, ((int64_t *)infol_->value)[i]);
 #else
-	    rv = asprintf(&tmp2, "%s%lli", tmp1, ((int64_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%lli", tmp1, ((int64_t *)infol_->value)[i]);
 #endif
 	    break;
 	  case IFT_UINT8:
-	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint8_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint8_t *)infol_->value)[i]);
 	    break;
 	  case IFT_UINT16:
-	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint16_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint16_t *)infol_->value)[i]);
 	    break;
 	  case IFT_UINT32:
-	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint32_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint32_t *)infol_->value)[i]);
 	    break;
 	  case IFT_UINT64:
 #if (defined(__WORDSIZE) && __WORDSIZE == 64) || (defined(LONG_BIT) && LONG_BIT == 64) || defined(__x86_64__)
-	    rv = asprintf(&tmp2, "%s%lu", tmp1, ((uint64_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%lu", tmp1, ((uint64_t *)infol_->value)[i]);
 #else
-	    rv = asprintf(&tmp2, "%s%llu", tmp1, ((uint64_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%llu", tmp1, ((uint64_t *)infol_->value)[i]);
 #endif
 	    break;
 	  case IFT_FLOAT:
-	    rv = asprintf(&tmp2, "%s%f", tmp1, ((float *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%f", tmp1, ((float *)infol_->value)[i]);
 	    break;
 	  case IFT_DOUBLE:
-	    rv = asprintf(&tmp2, "%s%f", tmp1, ((double *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%f", tmp1, ((double *)infol_->value)[i]);
 	    break;
 	  case IFT_BYTE:
-	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint8_t *)__infol->value)[i]);
+	    rv = asprintf(&tmp2, "%s%u", tmp1, ((uint8_t *)infol_->value)[i]);
 	    break;
 	  case IFT_STRING:
 	    // cannot happen, caught with surrounding if statement
 
 	  case IFT_ENUM:
-	    rv = asprintf(&tmp2, "%s%s", tmp1, __interface->enum_tostring(__infol->enumtype, ((int *)__infol->value)[i]));
+	    rv = asprintf(&tmp2, "%s%s", tmp1, interface_->enum_tostring(infol_->enumtype, ((int *)infol_->value)[i]));
 	    break;
 	  }
 
@@ -390,7 +390,7 @@ InterfaceFieldIterator::get_value_string(const char *array_sep)
 	  
 	  free(tmp1);
 	  tmp1 = tmp2;
-	  if ( (__infol->length > 1) && (i < __infol->length - 1) ) {
+	  if ( (infol_->length > 1) && (i < infol_->length - 1) ) {
 	    if (asprintf(&tmp2, "%s%s", tmp1, array_sep) == -1) {
 	      throw OutOfMemoryException("InterfaceFieldIterator::get_value_string(): asprintf() failed (2)");
 	    }
@@ -399,21 +399,21 @@ InterfaceFieldIterator::get_value_string(const char *array_sep)
 	  }
 	}
 
-	__value_string = tmp1;
+	value_string_ = tmp1;
       } else {
 	// it's a string, or a small number
-	if ( __infol->length > 1 ) {
-	  if (asprintf(&__value_string, "%s", (const char *)__infol->value) == -1) {
+	if ( infol_->length > 1 ) {
+	  if (asprintf(&value_string_, "%s", (const char *)infol_->value) == -1) {
 	    throw OutOfMemoryException("InterfaceFieldIterator::get_value_string(): asprintf() failed (3)");
 	  }
 	} else {
-	  if (asprintf(&__value_string, "%c", *((const char *)__infol->value)) == -1) {
+	  if (asprintf(&value_string_, "%c", *((const char *)infol_->value)) == -1) {
 	    throw OutOfMemoryException("InterfaceFieldIterator::get_value_string(): asprintf() failed (4)");
 	  }
 	}
       }
     }
-    return __value_string;
+    return value_string_;
   }
 }
 
@@ -428,14 +428,14 @@ InterfaceFieldIterator::get_value_string(const char *array_sep)
 bool
 InterfaceFieldIterator::get_bool(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_BOOL ) {
+  } else if ( infol_->type != IFT_BOOL ) {
     throw TypeMismatchException("Requested value is not of type bool");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((bool *)__infol->value)[index];
+    return ((bool *)infol_->value)[index];
   }
 }
 
@@ -450,14 +450,14 @@ InterfaceFieldIterator::get_bool(unsigned int index) const
 int8_t
 InterfaceFieldIterator::get_int8(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_INT8 ) {
+  } else if ( infol_->type != IFT_INT8 ) {
     throw TypeMismatchException("Requested value is not of type int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((int8_t *)__infol->value)[index];
+    return ((int8_t *)infol_->value)[index];
   }
 }
 
@@ -472,14 +472,14 @@ InterfaceFieldIterator::get_int8(unsigned int index) const
 uint8_t
 InterfaceFieldIterator::get_uint8(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_UINT8 ) {
+  } else if ( infol_->type != IFT_UINT8 ) {
     throw TypeMismatchException("Requested value is not of type unsigned int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((uint8_t *)__infol->value)[index];
+    return ((uint8_t *)infol_->value)[index];
   }
 }
 
@@ -493,14 +493,14 @@ InterfaceFieldIterator::get_uint8(unsigned int index) const
 int16_t
 InterfaceFieldIterator::get_int16(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_INT16 ) {
+  } else if ( infol_->type != IFT_INT16 ) {
     throw TypeMismatchException("Requested value is not of type int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((int16_t *)__infol->value)[index];
+    return ((int16_t *)infol_->value)[index];
   }
 }
 
@@ -515,14 +515,14 @@ InterfaceFieldIterator::get_int16(unsigned int index) const
 uint16_t
 InterfaceFieldIterator::get_uint16(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_UINT16 ) {
+  } else if ( infol_->type != IFT_UINT16 ) {
     throw TypeMismatchException("Requested value is not of type unsigned int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((uint16_t *)__infol->value)[index];
+    return ((uint16_t *)infol_->value)[index];
   }
 }
 
@@ -536,14 +536,14 @@ InterfaceFieldIterator::get_uint16(unsigned int index) const
 int32_t
 InterfaceFieldIterator::get_int32(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_INT32 ) {
+  } else if ( infol_->type != IFT_INT32 ) {
     throw TypeMismatchException("Requested value is not of type int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((int32_t *)__infol->value)[index];
+    return ((int32_t *)infol_->value)[index];
   }
 }
 
@@ -558,14 +558,14 @@ InterfaceFieldIterator::get_int32(unsigned int index) const
 uint32_t
 InterfaceFieldIterator::get_uint32(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_UINT32 ) {
+  } else if ( infol_->type != IFT_UINT32 ) {
     throw TypeMismatchException("Requested value is not of type unsigned int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((uint32_t *)__infol->value)[index];
+    return ((uint32_t *)infol_->value)[index];
   }
 }
 
@@ -579,14 +579,14 @@ InterfaceFieldIterator::get_uint32(unsigned int index) const
 int64_t
 InterfaceFieldIterator::get_int64(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_INT64 ) {
+  } else if ( infol_->type != IFT_INT64 ) {
     throw TypeMismatchException("Requested value is not of type int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((int64_t *)__infol->value)[index];
+    return ((int64_t *)infol_->value)[index];
   }
 }
 
@@ -601,14 +601,14 @@ InterfaceFieldIterator::get_int64(unsigned int index) const
 uint64_t
 InterfaceFieldIterator::get_uint64(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_UINT64 ) {
+  } else if ( infol_->type != IFT_UINT64 ) {
     throw TypeMismatchException("Requested value is not of type unsigned int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((uint64_t *)__infol->value)[index];
+    return ((uint64_t *)infol_->value)[index];
   }
 }
 
@@ -623,14 +623,14 @@ InterfaceFieldIterator::get_uint64(unsigned int index) const
 float
 InterfaceFieldIterator::get_float(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_FLOAT ) {
+  } else if ( infol_->type != IFT_FLOAT ) {
     throw TypeMismatchException("Requested value is not of type float");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((float *)__infol->value)[index];
+    return ((float *)infol_->value)[index];
   }
 }
 
@@ -645,14 +645,14 @@ InterfaceFieldIterator::get_float(unsigned int index) const
 double
 InterfaceFieldIterator::get_double(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_DOUBLE ) {
+  } else if ( infol_->type != IFT_DOUBLE ) {
     throw TypeMismatchException("Requested value is not of type double");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((double *)__infol->value)[index];
+    return ((double *)infol_->value)[index];
   }
 }
 
@@ -667,14 +667,14 @@ InterfaceFieldIterator::get_double(unsigned int index) const
 uint8_t
 InterfaceFieldIterator::get_byte(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_BYTE ) {
+  } else if ( infol_->type != IFT_BYTE ) {
     throw TypeMismatchException("Requested value is not of type byte");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((uint8_t *)__infol->value)[index];
+    return ((uint8_t *)infol_->value)[index];
   }
 }
 
@@ -689,14 +689,14 @@ InterfaceFieldIterator::get_byte(unsigned int index) const
 int32_t
 InterfaceFieldIterator::get_enum(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_ENUM ) {
+  } else if ( infol_->type != IFT_ENUM ) {
     throw TypeMismatchException("Requested value is not of type enum");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    return ((int32_t *)__infol->value)[index];
+    return ((int32_t *)infol_->value)[index];
   }
 }
 
@@ -713,16 +713,16 @@ InterfaceFieldIterator::get_enum(unsigned int index) const
 const char *
 InterfaceFieldIterator::get_enum_string(unsigned int index) const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_ENUM ) {
+  } else if ( infol_->type != IFT_ENUM ) {
     throw TypeMismatchException("Requested value is not of type enum");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    int32_t int_val = ((int32_t *)__infol->value)[index];
-    interface_enum_map_t::const_iterator ev = __infol->enum_map->find(int_val);
-    if (ev == __infol->enum_map->end()) {
+    int32_t int_val = ((int32_t *)infol_->value)[index];
+    interface_enum_map_t::const_iterator ev = infol_->enum_map->find(int_val);
+    if (ev == infol_->enum_map->end()) {
       throw IllegalArgumentException("Integer value is not a canonical enum value");
     }
     return ev->second.c_str();
@@ -738,14 +738,14 @@ InterfaceFieldIterator::get_enum_string(unsigned int index) const
 bool *
 InterfaceFieldIterator::get_bools() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_BOOL ) {
+  } else if ( infol_->type != IFT_BOOL ) {
     throw TypeMismatchException("Requested value is not of type bool");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    return (bool *)__infol->value;
+    return (bool *)infol_->value;
   }
 }
 
@@ -759,12 +759,12 @@ InterfaceFieldIterator::get_bools() const
 int8_t *
 InterfaceFieldIterator::get_int8s() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_INT8 ) {
+  } else if ( infol_->type != IFT_INT8 ) {
     throw TypeMismatchException("Requested value is not of type int");
   } else {
-    return (int8_t *)__infol->value;
+    return (int8_t *)infol_->value;
   }
 }
 
@@ -778,12 +778,12 @@ InterfaceFieldIterator::get_int8s() const
 uint8_t *
 InterfaceFieldIterator::get_uint8s() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_UINT8 ) {
+  } else if ( infol_->type != IFT_UINT8 ) {
     throw TypeMismatchException("Requested value is not of type unsigned int");
   } else {
-    return (uint8_t *)__infol->value;
+    return (uint8_t *)infol_->value;
   }
 }
 
@@ -797,12 +797,12 @@ InterfaceFieldIterator::get_uint8s() const
 int16_t *
 InterfaceFieldIterator::get_int16s() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_INT16 ) {
+  } else if ( infol_->type != IFT_INT16 ) {
     throw TypeMismatchException("Requested value is not of type int");
   } else {
-    return (int16_t *)__infol->value;
+    return (int16_t *)infol_->value;
   }
 }
 
@@ -816,12 +816,12 @@ InterfaceFieldIterator::get_int16s() const
 uint16_t *
 InterfaceFieldIterator::get_uint16s() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_UINT16 ) {
+  } else if ( infol_->type != IFT_UINT16 ) {
     throw TypeMismatchException("Requested value is not of type unsigned int");
   } else {
-    return (uint16_t *)__infol->value;
+    return (uint16_t *)infol_->value;
   }
 }
 
@@ -835,12 +835,12 @@ InterfaceFieldIterator::get_uint16s() const
 int32_t *
 InterfaceFieldIterator::get_int32s() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_INT32 ) {
+  } else if ( infol_->type != IFT_INT32 ) {
     throw TypeMismatchException("Requested value is not of type int");
   } else {
-    return (int32_t *)__infol->value;
+    return (int32_t *)infol_->value;
   }
 }
 
@@ -854,12 +854,12 @@ InterfaceFieldIterator::get_int32s() const
 uint32_t *
 InterfaceFieldIterator::get_uint32s() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_UINT32 ) {
+  } else if ( infol_->type != IFT_UINT32 ) {
     throw TypeMismatchException("Requested value is not of type unsigned int");
   } else {
-    return (uint32_t *)__infol->value;
+    return (uint32_t *)infol_->value;
   }
 }
 
@@ -873,12 +873,12 @@ InterfaceFieldIterator::get_uint32s() const
 int64_t *
 InterfaceFieldIterator::get_int64s() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_INT64 ) {
+  } else if ( infol_->type != IFT_INT64 ) {
     throw TypeMismatchException("Requested value is not of type int");
   } else {
-    return (int64_t *)__infol->value;
+    return (int64_t *)infol_->value;
   }
 }
 
@@ -892,12 +892,12 @@ InterfaceFieldIterator::get_int64s() const
 uint64_t *
 InterfaceFieldIterator::get_uint64s() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_UINT64 ) {
+  } else if ( infol_->type != IFT_UINT64 ) {
     throw TypeMismatchException("Requested value is not of type unsigned int");
   } else {
-    return (uint64_t *)__infol->value;
+    return (uint64_t *)infol_->value;
   }
 }
 
@@ -911,12 +911,12 @@ InterfaceFieldIterator::get_uint64s() const
 float *
 InterfaceFieldIterator::get_floats() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_FLOAT ) {
+  } else if ( infol_->type != IFT_FLOAT ) {
     throw TypeMismatchException("Requested value is not of type float");
   } else {
-    return (float *)__infol->value;
+    return (float *)infol_->value;
   }
 }
 
@@ -930,12 +930,12 @@ InterfaceFieldIterator::get_floats() const
 double *
 InterfaceFieldIterator::get_doubles() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_DOUBLE ) {
+  } else if ( infol_->type != IFT_DOUBLE ) {
     throw TypeMismatchException("Requested value is not of type double");
   } else {
-    return (double *)__infol->value;
+    return (double *)infol_->value;
   }
 }
 
@@ -949,12 +949,12 @@ InterfaceFieldIterator::get_doubles() const
 uint8_t *
 InterfaceFieldIterator::get_bytes() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_BYTE ) {
+  } else if ( infol_->type != IFT_BYTE ) {
     throw TypeMismatchException("Requested value is not of type byte");
   } else {
-    return (uint8_t *)__infol->value;
+    return (uint8_t *)infol_->value;
   }
 }
 
@@ -968,12 +968,12 @@ InterfaceFieldIterator::get_bytes() const
 int32_t *
 InterfaceFieldIterator::get_enums() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_ENUM ) {
+  } else if ( infol_->type != IFT_ENUM ) {
     throw TypeMismatchException("Requested value is not of type enum");
   } else {
-    return (int32_t *)__infol->value;
+    return (int32_t *)infol_->value;
   }
 }
 
@@ -986,12 +986,12 @@ InterfaceFieldIterator::get_enums() const
 const char *
 InterfaceFieldIterator::get_string() const
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot get value of end element");
-  } else if ( __infol->type != IFT_STRING ) {
+  } else if ( infol_->type != IFT_STRING ) {
     throw TypeMismatchException("Requested value is not of type string");
   } else {
-    return (const char *)__infol->value;
+    return (const char *)infol_->value;
   }
 }
 
@@ -1006,16 +1006,16 @@ InterfaceFieldIterator::get_string() const
 void
 InterfaceFieldIterator::set_bool(bool v, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_BOOL ) {
+  } else if ( infol_->type != IFT_BOOL ) {
     throw TypeMismatchException("Field to be written is not of type bool");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(bool);
+    char* dst = (char *) infol_->value + index * sizeof(bool);
     memcpy((void *) dst, &v, sizeof(bool));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1030,16 +1030,16 @@ InterfaceFieldIterator::set_bool(bool v, unsigned int index)
 void
 InterfaceFieldIterator::set_int8(int8_t v, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_INT8 ) {
+  } else if ( infol_->type != IFT_INT8 ) {
     throw TypeMismatchException("Field to be written is not of type int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(int8_t);
+    char* dst = (char *) infol_->value + index * sizeof(int8_t);
     memcpy((void *) dst, &v, sizeof(int8_t));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1054,16 +1054,16 @@ InterfaceFieldIterator::set_int8(int8_t v, unsigned int index)
 void
 InterfaceFieldIterator::set_uint8(uint8_t v, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_UINT8 ) {
+  } else if ( infol_->type != IFT_UINT8 ) {
     throw TypeMismatchException("Field to be written is not of type unsigned int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(uint8_t);
+    char* dst = (char *) infol_->value + index * sizeof(uint8_t);
     memcpy((void *) dst, &v, sizeof(uint8_t));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1078,16 +1078,16 @@ InterfaceFieldIterator::set_uint8(uint8_t v, unsigned int index)
 void
 InterfaceFieldIterator::set_int16(int16_t v, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_INT16 ) {
+  } else if ( infol_->type != IFT_INT16 ) {
     throw TypeMismatchException("Field to be written is not of type int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(int16_t);
+    char* dst = (char *) infol_->value + index * sizeof(int16_t);
     memcpy((void *) dst, &v, sizeof(int16_t));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1102,16 +1102,16 @@ InterfaceFieldIterator::set_int16(int16_t v, unsigned int index)
 void
 InterfaceFieldIterator::set_uint16(uint16_t v, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_UINT16 ) {
+  } else if ( infol_->type != IFT_UINT16 ) {
     throw TypeMismatchException("Field to be written is not of type unsigned int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(uint16_t);
+    char* dst = (char *) infol_->value + index * sizeof(uint16_t);
     memcpy((void *) dst, &v, sizeof(uint16_t));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1126,16 +1126,16 @@ InterfaceFieldIterator::set_uint16(uint16_t v, unsigned int index)
 void
 InterfaceFieldIterator::set_int32(int32_t v, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_INT32 ) {
+  } else if ( infol_->type != IFT_INT32 ) {
     throw TypeMismatchException("Field to be written is not of type int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(int32_t);
+    char* dst = (char *) infol_->value + index * sizeof(int32_t);
     memcpy((void *) dst, &v, sizeof(int32_t));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1150,16 +1150,16 @@ InterfaceFieldIterator::set_int32(int32_t v, unsigned int index)
 void
 InterfaceFieldIterator::set_uint32(uint32_t v, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_UINT32 ) {
+  } else if ( infol_->type != IFT_UINT32 ) {
     throw TypeMismatchException("Field to be written is not of type unsigned int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(uint32_t);
+    char* dst = (char *) infol_->value + index * sizeof(uint32_t);
     memcpy((void *) dst, &v, sizeof(uint32_t));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1174,16 +1174,16 @@ InterfaceFieldIterator::set_uint32(uint32_t v, unsigned int index)
 void
 InterfaceFieldIterator::set_int64(int64_t v, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_INT64 ) {
+  } else if ( infol_->type != IFT_INT64 ) {
     throw TypeMismatchException("Field to be written is not of type int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(int64_t);
+    char* dst = (char *) infol_->value + index * sizeof(int64_t);
     memcpy((void *) dst, &v, sizeof(int64_t));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1198,16 +1198,16 @@ InterfaceFieldIterator::set_int64(int64_t v, unsigned int index)
 void
 InterfaceFieldIterator::set_uint64(uint64_t v, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_UINT64 ) {
+  } else if ( infol_->type != IFT_UINT64 ) {
     throw TypeMismatchException("Field to be written is not of type unsigned int");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(uint64_t);
+    char* dst = (char *) infol_->value + index * sizeof(uint64_t);
     memcpy((void *) dst, &v, sizeof(uint64_t));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1222,16 +1222,16 @@ InterfaceFieldIterator::set_uint64(uint64_t v, unsigned int index)
 void
 InterfaceFieldIterator::set_float(float v, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_FLOAT ) {
+  } else if ( infol_->type != IFT_FLOAT ) {
     throw TypeMismatchException("Field to be written is not of type float");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(float);
+    char* dst = (char *) infol_->value + index * sizeof(float);
     memcpy((void *) dst, &v, sizeof(float));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1246,16 +1246,16 @@ InterfaceFieldIterator::set_float(float v, unsigned int index)
 void
 InterfaceFieldIterator::set_double(double v, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_DOUBLE ) {
+  } else if ( infol_->type != IFT_DOUBLE ) {
     throw TypeMismatchException("Field to be written is not of type double");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(double);
+    char* dst = (char *) infol_->value + index * sizeof(double);
     memcpy((void *) dst, &v, sizeof(double));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1270,16 +1270,16 @@ InterfaceFieldIterator::set_double(double v, unsigned int index)
 void
 InterfaceFieldIterator::set_byte(uint8_t v, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_BYTE ) {
+  } else if ( infol_->type != IFT_BYTE ) {
     throw TypeMismatchException("Field to be written is not of type byte");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    char* dst = (char *) __infol->value + index * sizeof(uint8_t);
+    char* dst = (char *) infol_->value + index * sizeof(uint8_t);
     memcpy((void *) dst, &v, sizeof(uint8_t));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1293,20 +1293,20 @@ InterfaceFieldIterator::set_byte(uint8_t v, unsigned int index)
 void
 InterfaceFieldIterator::set_enum(int32_t e, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_ENUM ) {
+  } else if ( infol_->type != IFT_ENUM ) {
     throw TypeMismatchException("Field to be written is not of type enum");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
-    interface_enum_map_t::const_iterator ev = __infol->enum_map->find(e);
-    if (ev == __infol->enum_map->end()) {
+    interface_enum_map_t::const_iterator ev = infol_->enum_map->find(e);
+    if (ev == infol_->enum_map->end()) {
       throw IllegalArgumentException("Integer value is not a canonical enum value");
     }
-    char* dst = (char *) __infol->value + index * sizeof(int32_t);
+    char* dst = (char *) infol_->value + index * sizeof(int32_t);
     memcpy((void *) dst, &e, sizeof(int32_t));
-    if (__interface)  __interface->mark_data_changed();
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1321,19 +1321,19 @@ InterfaceFieldIterator::set_enum(int32_t e, unsigned int index)
 void
 InterfaceFieldIterator::set_enum_string(const char *e, unsigned int index)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_ENUM ) {
+  } else if ( infol_->type != IFT_ENUM ) {
     throw TypeMismatchException("Field to be written is not of type enum");
-  } else if (index >= __infol->length) {
-    throw OutOfBoundsException("Field index out of bounds", index, 0, __infol->length);
+  } else if (index >= infol_->length) {
+    throw OutOfBoundsException("Field index out of bounds", index, 0, infol_->length);
   } else {
     interface_enum_map_t::const_iterator ev;
-    for (ev = __infol->enum_map->begin(); ev != __infol->enum_map->end(); ++ev) {
+    for (ev = infol_->enum_map->begin(); ev != infol_->enum_map->end(); ++ev) {
       if (ev->second == e) {
-	char* dst = (char *) __infol->value + index * sizeof(int32_t);
+	char* dst = (char *) infol_->value + index * sizeof(int32_t);
 	memcpy((void *) dst, &ev->first, sizeof(int32_t));
-	if (__interface)  __interface->mark_data_changed();
+	if (interface_)  interface_->mark_data_changed();
 	return;
       }
     }
@@ -1352,15 +1352,15 @@ InterfaceFieldIterator::set_enum_string(const char *e, unsigned int index)
 void
 InterfaceFieldIterator::set_bools(bool *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_BOOL ) {
+  } else if ( infol_->type != IFT_BOOL ) {
     throw TypeMismatchException("Field to be written is not of type bool");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(bool));
-    if (__interface)  __interface->mark_data_changed();
+    memcpy(infol_->value, v, infol_->length * sizeof(bool));
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1374,15 +1374,15 @@ InterfaceFieldIterator::set_bools(bool *v)
 void
 InterfaceFieldIterator::set_int8s(int8_t *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_INT8 ) {
+  } else if ( infol_->type != IFT_INT8 ) {
     throw TypeMismatchException("Field to be written is not of type int");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(int8_t));
-    if (__interface)  __interface->mark_data_changed();
+    memcpy(infol_->value, v, infol_->length * sizeof(int8_t));
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1396,15 +1396,15 @@ InterfaceFieldIterator::set_int8s(int8_t *v)
 void
 InterfaceFieldIterator::set_uint8s(uint8_t *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_UINT8 ) {
+  } else if ( infol_->type != IFT_UINT8 ) {
     throw TypeMismatchException("Field to be written is not of type unsigned int");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(uint8_t));
-    if (__interface)  __interface->mark_data_changed();
+    memcpy(infol_->value, v, infol_->length * sizeof(uint8_t));
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1418,15 +1418,15 @@ InterfaceFieldIterator::set_uint8s(uint8_t *v)
 void
 InterfaceFieldIterator::set_int16s(int16_t *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_INT16 ) {
+  } else if ( infol_->type != IFT_INT16 ) {
     throw TypeMismatchException("Field to be written is not of type int");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(int16_t));
-    if (__interface)  __interface->mark_data_changed();
+    memcpy(infol_->value, v, infol_->length * sizeof(int16_t));
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1440,15 +1440,15 @@ InterfaceFieldIterator::set_int16s(int16_t *v)
 void
 InterfaceFieldIterator::set_uint16s(uint16_t *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_UINT16 ) {
+  } else if ( infol_->type != IFT_UINT16 ) {
     throw TypeMismatchException("Field to be written is not of type unsigned int");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(uint16_t));
-    if (__interface)  __interface->mark_data_changed();
+    memcpy(infol_->value, v, infol_->length * sizeof(uint16_t));
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1462,15 +1462,15 @@ InterfaceFieldIterator::set_uint16s(uint16_t *v)
 void
 InterfaceFieldIterator::set_int32s(int32_t *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_INT32 ) {
+  } else if ( infol_->type != IFT_INT32 ) {
     throw TypeMismatchException("Field to be written is not of type int");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(int32_t));
-    if (__interface)  __interface->mark_data_changed();
+    memcpy(infol_->value, v, infol_->length * sizeof(int32_t));
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1484,15 +1484,15 @@ InterfaceFieldIterator::set_int32s(int32_t *v)
 void
 InterfaceFieldIterator::set_uint32s(uint32_t *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_UINT32 ) {
+  } else if ( infol_->type != IFT_UINT32 ) {
     throw TypeMismatchException("Field to be written is not of type unsigned int");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(uint32_t));
-    if (__interface)  __interface->mark_data_changed();
+    memcpy(infol_->value, v, infol_->length * sizeof(uint32_t));
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1506,15 +1506,15 @@ InterfaceFieldIterator::set_uint32s(uint32_t *v)
 void
 InterfaceFieldIterator::set_int64s(int64_t *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_INT64 ) {
+  } else if ( infol_->type != IFT_INT64 ) {
     throw TypeMismatchException("Field to be written is not of type int");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(int64_t));
-    if (__interface)  __interface->mark_data_changed();
+    memcpy(infol_->value, v, infol_->length * sizeof(int64_t));
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1528,15 +1528,15 @@ InterfaceFieldIterator::set_int64s(int64_t *v)
 void
 InterfaceFieldIterator::set_uint64s(uint64_t *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_UINT64 ) {
+  } else if ( infol_->type != IFT_UINT64 ) {
     throw TypeMismatchException("Field to be written is not of type unsigned int");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(uint64_t));
-    if (__interface)  __interface->mark_data_changed();
+    memcpy(infol_->value, v, infol_->length * sizeof(uint64_t));
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1550,15 +1550,15 @@ InterfaceFieldIterator::set_uint64s(uint64_t *v)
 void
 InterfaceFieldIterator::set_floats(float *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_FLOAT ) {
+  } else if ( infol_->type != IFT_FLOAT ) {
     throw TypeMismatchException("Field to be written is not of type float");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(float));
-    if (__interface)  __interface->mark_data_changed();
+    memcpy(infol_->value, v, infol_->length * sizeof(float));
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1571,15 +1571,15 @@ InterfaceFieldIterator::set_floats(float *v)
 void
 InterfaceFieldIterator::set_doubles(double *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_DOUBLE ) {
+  } else if ( infol_->type != IFT_DOUBLE ) {
     throw TypeMismatchException("Field to be written is not of type double");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(double));
-    if (__interface)  __interface->mark_data_changed();
+    memcpy(infol_->value, v, infol_->length * sizeof(double));
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1593,15 +1593,15 @@ InterfaceFieldIterator::set_doubles(double *v)
 void
 InterfaceFieldIterator::set_bytes(uint8_t *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_BYTE ) {
+  } else if ( infol_->type != IFT_BYTE ) {
     throw TypeMismatchException("Field to be written is not of type byte");
-  } else if (__infol->length == 1) {
-    throw TypeMismatchException("Field %s is not an array", __infol->name);
+  } else if (infol_->length == 1) {
+    throw TypeMismatchException("Field %s is not an array", infol_->name);
   } else {
-    memcpy(__infol->value, v, __infol->length * sizeof(uint8_t));
-    if (__interface)  __interface->mark_data_changed();
+    memcpy(infol_->value, v, infol_->length * sizeof(uint8_t));
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 
@@ -1614,13 +1614,13 @@ InterfaceFieldIterator::set_bytes(uint8_t *v)
 void
 InterfaceFieldIterator::set_string(const char *v)
 {
-  if ( __infol == NULL ) {
+  if ( infol_ == NULL ) {
     throw NullPointerException("Cannot set value of end element");
-  } else if ( __infol->type != IFT_STRING ) {
+  } else if ( infol_->type != IFT_STRING ) {
     throw TypeMismatchException("Field to be written is not of type string");
   } else {
-    strncpy((char *) __infol->value, v, __infol->length);
-    if (__interface)  __interface->mark_data_changed();
+    strncpy((char *) infol_->value, v, infol_->length);
+    if (interface_)  interface_->mark_data_changed();
   }
 }
 

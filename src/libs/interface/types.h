@@ -65,4 +65,4 @@ struct interface_fieldinfo_t {
 
 }
 
-#endif /* __INTERFACE_TYPES_H__ */
+#endif /* INTERFACE_TYPES_H___ */

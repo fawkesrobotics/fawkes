@@ -123,11 +123,11 @@ class InterfaceFieldIterator
 			 const interface_fieldinfo_t *info_list);
   
  private:
-  const interface_fieldinfo_t   *__infol;
-  char                          *__value_string;
-  Interface                     *__interface;
+  const interface_fieldinfo_t   *infol_;
+  char                          *value_string_;
+  Interface                     *interface_;
 };
 
 }
 
-#endif /* __INTERFACE_FIELD_ITERATOR_H__ */
+#endif /* INTERFACE_FIELD_ITERATOR_H___ */

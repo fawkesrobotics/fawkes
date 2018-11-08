@@ -109,9 +109,9 @@ class MessageQueue
  private:
   void remove(msg_list_t *l, msg_list_t *p);
 
-  msg_list_t  *__list;
-  msg_list_t  *__end_el;
-  Mutex       *__mutex;
+  msg_list_t  *list_;
+  msg_list_t  *end_el_;
+  Mutex       *mutex_;
 };
 
 
