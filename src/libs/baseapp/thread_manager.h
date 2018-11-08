@@ -109,21 +109,21 @@ class ThreadManager
     virtual void force_remove(Thread *t);
 
    private:
-    ThreadManager *__parent_manager;
+    ThreadManager *parent_manager_;
   };
 
  private:
-  ThreadInitializer *__initializer;
-  ThreadFinalizer   *__finalizer;
+  ThreadInitializer *initializer_;
+  ThreadFinalizer   *finalizer_;
 
-  LockMap< BlockedTimingAspect::WakeupHook, ThreadList > __threads;
-  LockMap< BlockedTimingAspect::WakeupHook, ThreadList >::iterator __tit;
+  LockMap< BlockedTimingAspect::WakeupHook, ThreadList > threads_;
+  LockMap< BlockedTimingAspect::WakeupHook, ThreadList >::iterator tit_;
 
-  ThreadList     __untimed_threads;
-  WaitCondition *__waitcond_timedthreads;
+  ThreadList     untimed_threads_;
+  WaitCondition *waitcond_timedthreads_;
 
-  ThreadManagerAspectCollector *__aspect_collector;
-  bool __interrupt_timed_thread_wait;
+  ThreadManagerAspectCollector *aspect_collector_;
+  bool interrupt_timed_thread_wait_;
 
 };
 

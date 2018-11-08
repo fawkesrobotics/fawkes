@@ -77,63 +77,63 @@ FawkesMainThread::FawkesMainThread(Configuration *config,
                                    const char *default_plugin)
   : Thread("FawkesMainThread")
 {
-  __plugin_manager    = plugin_manager;
-  __thread_manager    = thread_manager;
-  __syncpoint_manager = syncpoint_manager;
-  __multi_logger      = multi_logger;
-  __config            = config;
+  plugin_manager_    = plugin_manager;
+  thread_manager_    = thread_manager;
+  syncpoint_manager_ = syncpoint_manager;
+  multi_logger_      = multi_logger;
+  config_            = config;
 
-  __mainloop_thread   = NULL;
-  __mainloop_mutex    = new Mutex();
-  __mainloop_barrier  = new InterruptibleBarrier(__mainloop_mutex, 2);
+  mainloop_thread_   = NULL;
+  mainloop_mutex_    = new Mutex();
+  mainloop_barrier_  = new InterruptibleBarrier(mainloop_mutex_, 2);
 
-  __load_plugins      = NULL;
+  load_plugins_      = NULL;
   if (load_plugins) {
-    __load_plugins = strdup(load_plugins);
+    load_plugins_ = strdup(load_plugins);
   }
 
-  __default_plugin    = NULL;
+  default_plugin_    = NULL;
   if (default_plugin) {
-    __default_plugin = strdup(default_plugin);
+    default_plugin_ = strdup(default_plugin);
   }
 
   /* Clock */
-  __clock = Clock::instance();
+  clock_ = Clock::instance();
 
-  __loop_start = new Time(__clock);
-  __loop_end   = new Time(__clock);
+  loop_start_ = new Time(clock_);
+  loop_end_   = new Time(clock_);
   try {
-    __max_thread_time_usec = __config->get_uint("/fawkes/mainapp/max_thread_time");
+    max_thread_time_usec_ = config_->get_uint("/fawkes/mainapp/max_thread_time");
   } catch (Exception &e) {
-    __max_thread_time_usec = 30000;
-    __multi_logger->log_info("FawkesMainApp",
+    max_thread_time_usec_ = 30000;
+    multi_logger_->log_info("FawkesMainApp",
 			     "Maximum thread time not set, assuming 30ms.");
   }
-  __max_thread_time_nanosec = __max_thread_time_usec * 1000;
+  max_thread_time_nanosec_ = max_thread_time_usec_ * 1000;
 
-  __time_wait = NULL;
+  time_wait_ = NULL;
   try {
-    __desired_loop_time_usec =
-      __config->get_uint("/fawkes/mainapp/desired_loop_time");
-    if ( __desired_loop_time_usec > 0 ) {
-      __time_wait = new TimeWait(__clock, __desired_loop_time_usec);
+    desired_loop_time_usec_ =
+      config_->get_uint("/fawkes/mainapp/desired_loop_time");
+    if ( desired_loop_time_usec_ > 0 ) {
+      time_wait_ = new TimeWait(clock_, desired_loop_time_usec_);
     }
   } catch (Exception &e) {
-    __desired_loop_time_usec = 0;
-    __multi_logger->log_info("FawkesMainApp",
+    desired_loop_time_usec_ = 0;
+    multi_logger_->log_info("FawkesMainApp",
 			     "Desired loop time not set, assuming 0");
   }
 
-  __desired_loop_time_sec  = (float)__desired_loop_time_usec / 1000000.f;
+  desired_loop_time_sec_  = (float)desired_loop_time_usec_ / 1000000.f;
 
   try {
-    __enable_looptime_warnings =
-      __config->get_bool("/fawkes/mainapp/enable_looptime_warnings");
-    if(!__enable_looptime_warnings) {
-      __multi_logger->log_debug(name(), "loop time warnings are disabled");
+    enable_looptime_warnings_ =
+      config_->get_bool("/fawkes/mainapp/enable_looptime_warnings");
+    if(!enable_looptime_warnings_) {
+      multi_logger_->log_debug(name(), "loop time warnings are disabled");
     }
   } catch(Exception &e) {
-    __enable_looptime_warnings = true;
+    enable_looptime_warnings_ = true;
   }
 }
 
@@ -152,41 +152,41 @@ void
 FawkesMainThread::destruct()
 {
   try {
-    __config->try_dump();
+    config_->try_dump();
   } catch (CouldNotOpenFileException &e) {
     if (e.get_errno() == EACCES) {
-      __multi_logger->log_warn("FawkesMainThread", "Cannot write to dump file, "
+      multi_logger_->log_warn("FawkesMainThread", "Cannot write to dump file, "
 			       "no write ");
-      __multi_logger->log_warn("FawkesMainThread", "permission for file or "
+      multi_logger_->log_warn("FawkesMainThread", "permission for file or "
 			       "directory. This");
-      __multi_logger->log_warn("FawkesMainThread", "usually happens if running "
+      multi_logger_->log_warn("FawkesMainThread", "usually happens if running "
 			       "with system-wide");
-      __multi_logger->log_warn("FawkesMainThread", "installed Fawkes as non-root "
+      multi_logger_->log_warn("FawkesMainThread", "installed Fawkes as non-root "
 			       "user. Make");
-      __multi_logger->log_warn("FawkesMainThread", "configuration changes to the "
+      multi_logger_->log_warn("FawkesMainThread", "configuration changes to the "
 			       "host-based");
-      __multi_logger->log_warn("FawkesMainThread", "database (set as non-default "
+      multi_logger_->log_warn("FawkesMainThread", "database (set as non-default "
 			       "values).");
     } else {
-      __multi_logger->log_warn("FawkesMainThread", "Failed to dump default "
+      multi_logger_->log_warn("FawkesMainThread", "Failed to dump default "
 			       "config (open), exception follows.");
-      __multi_logger->log_warn("FawkesMainThread", e);
+      multi_logger_->log_warn("FawkesMainThread", e);
     }
   } catch (Exception &e) {
-    __multi_logger->log_warn("FawkesMainThread", "Failed to dump default config, "
+    multi_logger_->log_warn("FawkesMainThread", "Failed to dump default config, "
 			     "exception follows.");
-    __multi_logger->log_warn("FawkesMainThread", e);
+    multi_logger_->log_warn("FawkesMainThread", e);
   }
 
-  if (__load_plugins)   free(__load_plugins);
-  if (__default_plugin) free(__default_plugin);
+  if (load_plugins_)   free(load_plugins_);
+  if (default_plugin_) free(default_plugin_);
 
-  delete __time_wait;
-  delete __loop_start;
-  delete __loop_end;
+  delete time_wait_;
+  delete loop_start_;
+  delete loop_end_;
 
-  delete __mainloop_barrier;
-  delete __mainloop_mutex;
+  delete mainloop_barrier_;
+  delete mainloop_mutex_;
 }
 
 /** Start the thread and wait until once() completes.
@@ -196,13 +196,13 @@ FawkesMainThread::destruct()
 void
 FawkesMainThread::full_start()
 {
-  __init_barrier = new Barrier(2);
+  init_barrier_ = new Barrier(2);
   
   start(false);
 
-  __init_barrier->wait();
-  delete(__init_barrier);
-  __init_barrier = 0;
+  init_barrier_->wait();
+  delete(init_barrier_);
+  init_barrier_ = 0;
 }
 
 void
@@ -224,76 +224,76 @@ FawkesMainThread::once()
   try {
     for (std::vector<BlockedTimingAspect::WakeupHook>::const_iterator it =
         hooks.begin(); it != hooks.end(); it++) {
-      __syncpoints_start_hook.push_back(
-        __syncpoint_manager->get_syncpoint("FawkesMainThread",
+      syncpoints_start_hook_.push_back(
+        syncpoint_manager_->get_syncpoint("FawkesMainThread",
           BlockedTimingAspect::blocked_timing_hook_to_start_syncpoint(*it)));
-      __syncpoints_start_hook.back()->register_emitter("FawkesMainThread");
-      __syncpoints_end_hook.push_back(
-        __syncpoint_manager->get_syncpoint("FawkesMainThread",
+      syncpoints_start_hook_.back()->register_emitter("FawkesMainThread");
+      syncpoints_end_hook_.push_back(
+        syncpoint_manager_->get_syncpoint("FawkesMainThread",
           BlockedTimingAspect::blocked_timing_hook_to_end_syncpoint(*it)));
     }
   } catch (Exception &e) {
-    __multi_logger->log_error("FawkesMainThread",
+    multi_logger_->log_error("FawkesMainThread",
       "Failed to acquire mainloop syncpoint");
     throw;
   }
 
   // if plugins passed on command line or in init options, load!
-  if ( __load_plugins) {
+  if ( load_plugins_) {
     try {
-      __plugin_manager->load(__load_plugins);
+      plugin_manager_->load(load_plugins_);
     } catch (Exception &e) {
-      __multi_logger->log_error("FawkesMainThread", "Failed to load plugins %s, "
-				"exception follows", __load_plugins);
-      __multi_logger->log_error("FawkesMainThread", e);
+      multi_logger_->log_error("FawkesMainThread", "Failed to load plugins %s, "
+				"exception follows", load_plugins_);
+      multi_logger_->log_error("FawkesMainThread", e);
     }
   }
 
   // load extra default plugin given via init options
   try {
-    if (__default_plugin && (strcmp("default", __default_plugin) != 0)) {
-      __plugin_manager->load(__default_plugin);
+    if (default_plugin_ && (strcmp("default", default_plugin_) != 0)) {
+      plugin_manager_->load(default_plugin_);
     }
   } catch (PluginLoadException &e) {
-    if (e.plugin_name() != __default_plugin) {
+    if (e.plugin_name() != default_plugin_) {
       // only print if name is not default, i.e. one of the plugins that
       // the default meta plugin
-      __multi_logger->log_error("FawkesMainThread", "Failed to load default "
+      multi_logger_->log_error("FawkesMainThread", "Failed to load default "
                                 "plugins, exception follows");
-      __multi_logger->log_error("FawkesMainThread", e);
+      multi_logger_->log_error("FawkesMainThread", e);
     }
   }
 
   // if no specific plugins were given to load, load the default plugin
-  if (! __load_plugins) {
+  if (! load_plugins_) {
     try {
-      __plugin_manager->load("default");
+      plugin_manager_->load("default");
     } catch (PluginLoadException &e) {
       if (e.plugin_name() != "default") {
 	// only print if name is not default, i.e. one of the plugins that
 	// the default meta plugin
-	__multi_logger->log_error("FawkesMainThread", "Failed to load default "
+	multi_logger_->log_error("FawkesMainThread", "Failed to load default "
 				  "plugins, exception follows");
-	__multi_logger->log_error("FawkesMainThread", e);
+	multi_logger_->log_error("FawkesMainThread", e);
       }
     } catch (Exception &e) {
-      __multi_logger->log_error("FawkesMainThread", "Failed to load default "
+      multi_logger_->log_error("FawkesMainThread", "Failed to load default "
 				"plugins, exception follows");
-      __multi_logger->log_error("FawkesMainThread", e);
+      multi_logger_->log_error("FawkesMainThread", e);
     }
   }
 
-  if (__init_barrier)  __init_barrier->wait();
+  if (init_barrier_)  init_barrier_->wait();
 }
 
 void
 FawkesMainThread::set_mainloop_thread(Thread *mainloop_thread)
 {
   loopinterrupt_antistarve_mutex->lock();
-  __mainloop_mutex->lock();
-  __mainloop_barrier->interrupt();
-  __mainloop_thread = mainloop_thread;
-  __mainloop_mutex->unlock();
+  mainloop_mutex_->lock();
+  mainloop_barrier_->interrupt();
+  mainloop_thread_ = mainloop_thread;
+  mainloop_mutex_->unlock();
   loopinterrupt_antistarve_mutex->unlock();
 }
 
@@ -301,110 +301,110 @@ FawkesMainThread::set_mainloop_thread(Thread *mainloop_thread)
 void
 FawkesMainThread::loop()
 {
-  if ( ! __thread_manager->timed_threads_exist() ) {
-    __multi_logger->log_debug("FawkesMainThread", "No timed threads exist, waiting");
+  if ( ! thread_manager_->timed_threads_exist() ) {
+    multi_logger_->log_debug("FawkesMainThread", "No timed threads exist, waiting");
     try {
-      __thread_manager->wait_for_timed_threads();
-      __multi_logger->log_debug("FawkesMainThread", "Timed threads have been added, "
+      thread_manager_->wait_for_timed_threads();
+      multi_logger_->log_debug("FawkesMainThread", "Timed threads have been added, "
 				"running main loop now");
     } catch (InterruptedException &e) {
-      __multi_logger->log_debug("FawkesMainThread", "Waiting for timed threads interrupted");
+      multi_logger_->log_debug("FawkesMainThread", "Waiting for timed threads interrupted");
       return;
     }
   }
 
-  __plugin_manager->lock();
+  plugin_manager_->lock();
 
   try {
-    if ( __time_wait ) {
-      __time_wait->mark_start();
+    if ( time_wait_ ) {
+      time_wait_->mark_start();
     }
-    __loop_start->stamp_systime();
+    loop_start_->stamp_systime();
       
     CancelState old_state;
     set_cancel_state(CANCEL_DISABLED, &old_state);
 
-    __mainloop_mutex->lock();
+    mainloop_mutex_->lock();
 
-    if (unlikely(__mainloop_thread != NULL)) {
+    if (unlikely(mainloop_thread_ != NULL)) {
       try {
-	if (likely(__mainloop_thread != NULL)) {
-	  __mainloop_thread->wakeup(__mainloop_barrier);
-	  __mainloop_barrier->wait();
+	if (likely(mainloop_thread_ != NULL)) {
+	  mainloop_thread_->wakeup(mainloop_barrier_);
+	  mainloop_barrier_->wait();
 	}
       } catch (Exception &e) {
-	__multi_logger->log_warn("FawkesMainThread", e);
+	multi_logger_->log_warn("FawkesMainThread", e);
       }
     } else {
-      uint num_hooks = __syncpoints_start_hook.size();
-      if (__syncpoints_end_hook.size() != num_hooks) {
-        __multi_logger->log_error("FawkesMainThread",
+      uint num_hooks = syncpoints_start_hook_.size();
+      if (syncpoints_end_hook_.size() != num_hooks) {
+        multi_logger_->log_error("FawkesMainThread",
           "Hook syncpoints are not initialized properly, not waking up any threads!");
       } else {
         for (uint i = 0; i < num_hooks; i++) {
-          __syncpoints_start_hook[i]->emit("FawkesMainThread");
-          __syncpoints_end_hook[i]->reltime_wait_for_all("FawkesMainThread",
-              0, __max_thread_time_nanosec);
+          syncpoints_start_hook_[i]->emit("FawkesMainThread");
+          syncpoints_end_hook_[i]->reltime_wait_for_all("FawkesMainThread",
+              0, max_thread_time_nanosec_);
         }
       }
     }
-    __mainloop_mutex->unlock();
+    mainloop_mutex_->unlock();
     set_cancel_state(old_state);
 
     test_cancel();
 
-    __thread_manager->try_recover(__recovered_threads);
-    if ( ! __recovered_threads.empty() ) {
+    thread_manager_->try_recover(recovered_threads_);
+    if ( ! recovered_threads_.empty() ) {
       // threads have been recovered!
-      //__multi_logger->log_error(name(), "Threads recovered %zu", __recovered_threads.size());
-      if(__enable_looptime_warnings) {
-	if ( __recovered_threads.size() == 1 ) {
-	  __multi_logger->log_warn("FawkesMainThread", "The thread %s could be "
+      //multi_logger_->log_error(name(), "Threads recovered %zu", recovered_threads_.size());
+      if(enable_looptime_warnings_) {
+	if ( recovered_threads_.size() == 1 ) {
+	  multi_logger_->log_warn("FawkesMainThread", "The thread %s could be "
 				   "recovered and resumes normal operation",
-				   __recovered_threads.front().c_str());
+				   recovered_threads_.front().c_str());
 	} else {
 	  std::string s;
-	  for (std::list<std::string>::iterator i = __recovered_threads.begin();
-	       i != __recovered_threads.end(); ++i) {
+	  for (std::list<std::string>::iterator i = recovered_threads_.begin();
+	       i != recovered_threads_.end(); ++i) {
 	    s += *i + " ";
 	  }
           
-	  __multi_logger->log_warn("FawkesMainThread", "The following threads could be "
+	  multi_logger_->log_warn("FawkesMainThread", "The following threads could be "
 				   "recovered and resumed normal operation: %s", s.c_str());
 	}
       }
-      __recovered_threads.clear();
+      recovered_threads_.clear();
     }
 
-    if (__desired_loop_time_sec > 0) {
-      __loop_end->stamp_systime();
-      float loop_time = *__loop_end - __loop_start;
-      if(__enable_looptime_warnings) {
+    if (desired_loop_time_sec_ > 0) {
+      loop_end_->stamp_systime();
+      float loop_time = *loop_end_ - loop_start_;
+      if(enable_looptime_warnings_) {
         // give some extra 10% to eliminate frequent false warnings due to regular
         // time jitter (TimeWait might not be all that precise)
-	if (loop_time > 1.1 * __desired_loop_time_sec) {
-	  __multi_logger->log_warn("FawkesMainThread", "Loop time exceeded, "
+	if (loop_time > 1.1 * desired_loop_time_sec_) {
+	  multi_logger_->log_warn("FawkesMainThread", "Loop time exceeded, "
 				   "desired: %f sec (%u usec),  actual: %f sec",
-				   __desired_loop_time_sec, __desired_loop_time_usec,
+				   desired_loop_time_sec_, desired_loop_time_usec_,
 				   loop_time);
 	}
       }
     }
 
-    __plugin_manager->unlock();
+    plugin_manager_->unlock();
 
-    if ( __time_wait ) {
-      __time_wait->wait_systime();
+    if ( time_wait_ ) {
+      time_wait_->wait_systime();
     } else {
       yield();
     }
   } catch (Exception &e) {
-    __multi_logger->log_warn("FawkesMainThread",
+    multi_logger_->log_warn("FawkesMainThread",
 			     "Exception caught while executing default main "
 			     "loop, ignoring.");
-    __multi_logger->log_warn("FawkesMainThread", e);
+    multi_logger_->log_warn("FawkesMainThread", e);
   } catch (std::exception &e) {
-    __multi_logger->log_warn("FawkesMainThread",
+    multi_logger_->log_warn("FawkesMainThread",
 			     "STL Exception caught while executing default main "
 			     "loop, ignoring. (what: %s)", e.what());
   }
@@ -419,7 +419,7 @@ FawkesMainThread::loop()
 MultiLogger *
 FawkesMainThread::logger() const
 {
-  return __multi_logger;
+  return multi_logger_;
 }
 
 /** @class FawkesMainThread::Runner <baseapp/main_thread.h>
@@ -435,16 +435,16 @@ FawkesMainThread::logger() const
  */
 FawkesMainThread::Runner::Runner(FawkesMainThread *fmt, bool register_signals)
 {
-  __init_mutex       = new Mutex();
-  __init_running     = true;
-  __init_quit        = false;
-  __sigint_running   = false;
-  __register_signals = register_signals;
+  init_mutex_       = new Mutex();
+  init_running_     = true;
+  init_quit_        = false;
+  sigint_running_   = false;
+  register_signals_ = register_signals;
 
-  __fmt = fmt;
+  fmt_ = fmt;
 
   SignalManager::ignore(SIGPIPE);
-  if (__register_signals) {
+  if (register_signals_) {
     SignalManager::register_handler(SIGINT,  this);
     SignalManager::register_handler(SIGTERM, this);
     SignalManager::register_handler(SIGALRM, this);
@@ -455,28 +455,28 @@ FawkesMainThread::Runner::Runner(FawkesMainThread *fmt, bool register_signals)
 /** Destructor. */
 FawkesMainThread::Runner::~Runner()
 {
-  if (__register_signals) {
+  if (register_signals_) {
     SignalManager::unregister_handler(SIGINT);
     SignalManager::unregister_handler(SIGTERM);
     SignalManager::unregister_handler(SIGALRM);
   }
-  delete __init_mutex;
+  delete init_mutex_;
 }
 
 /** Run main thread. */
 void
 FawkesMainThread::Runner::run()
 {
-  __init_mutex->lock();
-  __init_running = false;
-  if ( ! __init_quit ) {
-    __fmt->full_start();
-    __fmt->logger()->log_info("FawkesMainThread", "Fawkes %s startup complete",
+  init_mutex_->lock();
+  init_running_ = false;
+  if ( ! init_quit_ ) {
+    fmt_->full_start();
+    fmt_->logger()->log_info("FawkesMainThread", "Fawkes %s startup complete",
                               FAWKES_VERSION_STRING);
-    __init_mutex->unlock();
-    __fmt->join();
+    init_mutex_->unlock();
+    fmt_->join();
   } else {
-    __init_mutex->unlock();
+    init_mutex_->unlock();
   }
 }
 
@@ -486,22 +486,22 @@ FawkesMainThread::Runner::run()
 void
 FawkesMainThread::Runner::handle_signal(int signum)
 {
-  if ((signum == SIGINT) && ! __sigint_running) {
-    MutexLocker lock(__init_mutex);
-    if (__init_running) {
-      __init_quit = true;
+  if ((signum == SIGINT) && ! sigint_running_) {
+    MutexLocker lock(init_mutex_);
+    if (init_running_) {
+      init_quit_ = true;
     } else {
-      __fmt->cancel();
+      fmt_->cancel();
     }
-    __sigint_running = true;
+    sigint_running_ = true;
     alarm(3 /* sec */);
   } else if (signum == SIGALRM) {
-    // we could use __fmt->logger()->log_info(), but we prefer direct printf
+    // we could use fmt_->logger()->log_info(), but we prefer direct printf
     // because we're mentioning Ctrl-C only useful on the console anyway
     printf("\nFawkes shutdown and finalization procedure still running.\n"
            "Hit Ctrl-C again to force immediate exit.\n\n");
 
-  } else if ((signum == SIGTERM) || __sigint_running) {
+  } else if ((signum == SIGTERM) || sigint_running_) {
     // we really need to quit
     ::exit(-2);
   }

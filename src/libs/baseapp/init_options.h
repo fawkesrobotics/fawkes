@@ -96,40 +96,40 @@ class InitOptions
   bool  default_signal_handlers() const;
 
  private:
-  char               *__basename;
+  char               *basename_;
 
-  bool                __has_net_tcp_port;
-  unsigned short int  __net_tcp_port;
+  bool                has_net_tcp_port_;
+  unsigned short int  net_tcp_port_;
 
-  bool                __has_load_plugin_list;
-  char               *__load_plugin_list;
-  char               *__default_plugin;
+  bool                has_load_plugin_list_;
+  char               *load_plugin_list_;
+  char               *default_plugin_;
 
-  bool                __has_loggers;
-  char               *__loggers;
-  Logger::LogLevel    __log_level;
+  bool                has_loggers_;
+  char               *loggers_;
+  Logger::LogLevel    log_level_;
 
-  bool                __has_net_service_name;
-  char               *__net_service_name;
+  bool                has_net_service_name_;
+  char               *net_service_name_;
 
-  bool                __has_username;
-  char               *__username;
-  bool                __has_groupname;
-  char               *__groupname;
+  bool                has_username_;
+  char               *username_;
+  bool                has_groupname_;
+  char               *groupname_;
 
-  char               *__config_file;
+  char               *config_file_;
 
-  bool                __daemonize;
-  char               *__daemon_pid_file;
-  bool                __daemonize_kill;
-  bool                __daemonize_status;
+  bool                daemonize_;
+  char               *daemon_pid_file_;
+  bool                daemonize_kill_;
+  bool                daemonize_status_;
 
-  bool                __show_help;
-  bool                __bb_cleanup;
+  bool                show_help_;
+  bool                bb_cleanup_;
 
-  bool                __init_plugin_cache;
-  Module::ModuleFlags __plugin_module_flags;
-  bool                __default_signal_handlers;
+  bool                init_plugin_cache_;
+  Module::ModuleFlags plugin_module_flags_;
+  bool                default_signal_handlers_;
   
 };
 

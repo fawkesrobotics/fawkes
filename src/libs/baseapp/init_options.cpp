@@ -47,31 +47,31 @@ namespace fawkes {
  */
 InitOptions::InitOptions(const char *basename)
 {
-  __basename = strdup(basename);
-  __default_plugin = strdup("default");
-  __has_net_tcp_port = false;
-  __net_tcp_port = 0;
-  __has_loggers = false;
-  __loggers = NULL;
-  __log_level = Logger::LL_DEBUG;
-  __has_net_service_name = false;
-  __net_service_name = NULL;
-  __has_username = false;
-  __username = NULL;
-  __has_groupname = false;
-  __groupname = NULL;
-  __config_file = NULL;
-  __daemonize = false;
-  __daemon_pid_file = NULL;
-  __daemonize_kill = false;
-  __daemonize_status = false;
-  __show_help = false;
-  __bb_cleanup = false;
-  __default_signal_handlers = true;
-  __init_plugin_cache = true;
-  __has_load_plugin_list = false;
-  __load_plugin_list = NULL;
-  __plugin_module_flags = Module::MODULE_FLAGS_DEFAULT;
+  basename_ = strdup(basename);
+  default_plugin_ = strdup("default");
+  has_net_tcp_port_ = false;
+  net_tcp_port_ = 0;
+  has_loggers_ = false;
+  loggers_ = NULL;
+  log_level_ = Logger::LL_DEBUG;
+  has_net_service_name_ = false;
+  net_service_name_ = NULL;
+  has_username_ = false;
+  username_ = NULL;
+  has_groupname_ = false;
+  groupname_ = NULL;
+  config_file_ = NULL;
+  daemonize_ = false;
+  daemon_pid_file_ = NULL;
+  daemonize_kill_ = false;
+  daemonize_status_ = false;
+  show_help_ = false;
+  bb_cleanup_ = false;
+  default_signal_handlers_ = true;
+  init_plugin_cache_ = true;
+  has_load_plugin_list_ = false;
+  load_plugin_list_ = NULL;
+  plugin_module_flags_ = Module::MODULE_FLAGS_DEFAULT;
 }
 
 
@@ -80,60 +80,60 @@ InitOptions::InitOptions(const char *basename)
  */
 InitOptions::InitOptions(const InitOptions &options)
 {
-  __basename = strdup(options.__basename);
-  __default_plugin = strdup(options.__default_plugin);
-  __net_tcp_port = 0;
-  __has_net_tcp_port = options.__has_net_tcp_port;
-  if (__has_net_tcp_port) {
-    __net_tcp_port = options.__net_tcp_port;
+  basename_ = strdup(options.basename_);
+  default_plugin_ = strdup(options.default_plugin_);
+  net_tcp_port_ = 0;
+  has_net_tcp_port_ = options.has_net_tcp_port_;
+  if (has_net_tcp_port_) {
+    net_tcp_port_ = options.net_tcp_port_;
   }
-  __loggers = NULL;
-  __has_loggers = options.__has_loggers;
-  if (__has_loggers) {
-    __loggers = strdup(options.__loggers);
-  }
-
-  __log_level = options.__log_level;
-
-  __net_service_name = NULL;
-  __has_net_service_name = options.__has_net_service_name;
-  if (__has_net_service_name) {
-    __net_service_name = strdup(options.__net_service_name);    
+  loggers_ = NULL;
+  has_loggers_ = options.has_loggers_;
+  if (has_loggers_) {
+    loggers_ = strdup(options.loggers_);
   }
 
-  __username = NULL;
-  __has_username = options.__has_username;
-  if (__has_username) {
-    __username = strdup(options.__username);    
-  }
-  __groupname = NULL;
-  __has_groupname = options.__has_groupname;
-  if (__has_groupname) {
-    __groupname = strdup(options.__groupname);    
+  log_level_ = options.log_level_;
+
+  net_service_name_ = NULL;
+  has_net_service_name_ = options.has_net_service_name_;
+  if (has_net_service_name_) {
+    net_service_name_ = strdup(options.net_service_name_);    
   }
 
-  __config_file = NULL;
-  if (options.__config_file) {
-    __config_file = strdup(options.__config_file);
+  username_ = NULL;
+  has_username_ = options.has_username_;
+  if (has_username_) {
+    username_ = strdup(options.username_);    
   }
-  __daemonize = options.__daemonize;
-  __daemon_pid_file = NULL;
-  if (__daemonize && options.__daemon_pid_file) {
-    __daemon_pid_file = strdup(options.__daemon_pid_file);
-  }
-  __daemonize_kill = options.__daemonize_kill;
-  __daemonize_status = options.__daemonize_status;
-  __show_help = options.__show_help;
-  __bb_cleanup = options.__bb_cleanup;
-  __default_signal_handlers = options.__default_signal_handlers;
-  __init_plugin_cache = options.__init_plugin_cache;
-  __load_plugin_list = NULL;
-  __has_load_plugin_list = options.__has_load_plugin_list;
-  if (__has_load_plugin_list) {
-    __load_plugin_list = strdup(options.__load_plugin_list);
+  groupname_ = NULL;
+  has_groupname_ = options.has_groupname_;
+  if (has_groupname_) {
+    groupname_ = strdup(options.groupname_);    
   }
 
-  __plugin_module_flags = options.__plugin_module_flags;
+  config_file_ = NULL;
+  if (options.config_file_) {
+    config_file_ = strdup(options.config_file_);
+  }
+  daemonize_ = options.daemonize_;
+  daemon_pid_file_ = NULL;
+  if (daemonize_ && options.daemon_pid_file_) {
+    daemon_pid_file_ = strdup(options.daemon_pid_file_);
+  }
+  daemonize_kill_ = options.daemonize_kill_;
+  daemonize_status_ = options.daemonize_status_;
+  show_help_ = options.show_help_;
+  bb_cleanup_ = options.bb_cleanup_;
+  default_signal_handlers_ = options.default_signal_handlers_;
+  init_plugin_cache_ = options.init_plugin_cache_;
+  load_plugin_list_ = NULL;
+  has_load_plugin_list_ = options.has_load_plugin_list_;
+  if (has_load_plugin_list_) {
+    load_plugin_list_ = strdup(options.load_plugin_list_);
+  }
+
+  plugin_module_flags_ = options.plugin_module_flags_;
 }
 
 
@@ -157,31 +157,31 @@ InitOptions::InitOptions(int argc, char **argv)
 
   ArgumentParser *argp = fawkes::runtime::argument_parser;
 
-  __basename = strdup(argp->program_name());
-  __default_plugin = strdup("default");
+  basename_ = strdup(argp->program_name());
+  default_plugin_ = strdup("default");
 
-  __has_net_tcp_port = argp->has_arg("P");
-  if (__has_net_tcp_port) {
-    __net_tcp_port = argp->parse_int("P");
+  has_net_tcp_port_ = argp->has_arg("P");
+  if (has_net_tcp_port_) {
+    net_tcp_port_ = argp->parse_int("P");
   }
-  __has_loggers = argp->has_arg("L");
-  if (__has_loggers) {
-    __loggers = strdup(argp->arg("L"));
+  has_loggers_ = argp->has_arg("L");
+  if (has_loggers_) {
+    loggers_ = strdup(argp->arg("L"));
   }
 
   const char *tmp;
-  __log_level = Logger::LL_INFO;
+  log_level_ = Logger::LL_INFO;
   if ( argp->has_arg("d") ) {
-    __log_level = Logger::LL_DEBUG;
+    log_level_ = Logger::LL_DEBUG;
   } else if ( argp->has_arg("q") ) {
-    __log_level = Logger::LL_WARN;
+    log_level_ = Logger::LL_WARN;
     if ( (tmp = argp->arg("q")) != NULL ) {
       for (unsigned int i = 0; i < strlen(tmp); ++i) {
 	if ( tmp[i] == 'q' ) {
-	  switch (__log_level) {
-	  case Logger::LL_INFO:  __log_level = Logger::LL_WARN; break;
-	  case Logger::LL_WARN:  __log_level = Logger::LL_ERROR; break;
-	  case Logger::LL_ERROR: __log_level = Logger::LL_NONE; break;
+	  switch (log_level_) {
+	  case Logger::LL_INFO:  log_level_ = Logger::LL_WARN; break;
+	  case Logger::LL_WARN:  log_level_ = Logger::LL_ERROR; break;
+	  case Logger::LL_ERROR: log_level_ = Logger::LL_NONE; break;
 	  default: break;
 	  }
 	}
@@ -189,59 +189,59 @@ InitOptions::InitOptions(int argc, char **argv)
     }
   } else if ( (tmp = argp->arg("l")) != NULL ) {
     if ( strcmp(tmp, "debug") == 0 ) {
-      __log_level = Logger::LL_DEBUG;
+      log_level_ = Logger::LL_DEBUG;
     } else if ( strcmp(tmp, "info") == 0 ) {
-      __log_level = Logger::LL_INFO;
+      log_level_ = Logger::LL_INFO;
     } else if ( strcmp(tmp, "warn") == 0 ) {
-      __log_level = Logger::LL_WARN;
+      log_level_ = Logger::LL_WARN;
     } else if ( strcmp(tmp, "error") == 0 ) {
-      __log_level = Logger::LL_ERROR;
+      log_level_ = Logger::LL_ERROR;
     } else if ( strcmp(tmp, "none") == 0 ) {
-      __log_level = Logger::LL_NONE;
+      log_level_ = Logger::LL_NONE;
     }
   }
 
-  __has_net_service_name = argp->has_arg("net-service-name");
-  if (__has_net_service_name) {
-    __net_service_name = strdup(argp->arg("net-service-name"));
+  has_net_service_name_ = argp->has_arg("net-service-name");
+  if (has_net_service_name_) {
+    net_service_name_ = strdup(argp->arg("net-service-name"));
   } else {
-    __net_service_name = NULL;
+    net_service_name_ = NULL;
   }
 
-  __has_username = argp->has_arg("u");
-  if (__has_username) {
-    __username = strdup(argp->arg("u"));
+  has_username_ = argp->has_arg("u");
+  if (has_username_) {
+    username_ = strdup(argp->arg("u"));
   } else {
-    __username = NULL;
+    username_ = NULL;
   }
 
-  __has_groupname = argp->has_arg("u");
-  if (__has_groupname) {
-    __groupname = strdup(argp->arg("u"));
+  has_groupname_ = argp->has_arg("u");
+  if (has_groupname_) {
+    groupname_ = strdup(argp->arg("u"));
   } else {
-    __groupname = NULL;
+    groupname_ = NULL;
   }
 
 
-  __config_file = NULL;
+  config_file_ = NULL;
   if (argp->arg("c")) {
-    __config_file = strdup(argp->arg("c"));
+    config_file_ = strdup(argp->arg("c"));
   }
 
-  __daemonize = argp->has_arg("D");
-  __daemonize_kill = __daemonize && argp->has_arg("k");
-  __daemonize_status = __daemonize && argp->has_arg("s");
-  __daemon_pid_file = NULL;
-  if (__daemonize && argp->arg("D")) {
-    __daemon_pid_file = strdup(argp->arg("D"));
+  daemonize_ = argp->has_arg("D");
+  daemonize_kill_ = daemonize_ && argp->has_arg("k");
+  daemonize_status_ = daemonize_ && argp->has_arg("s");
+  daemon_pid_file_ = NULL;
+  if (daemonize_ && argp->arg("D")) {
+    daemon_pid_file_ = strdup(argp->arg("D"));
   } else {
-    __daemon_pid_file = NULL;
+    daemon_pid_file_ = NULL;
   }
-  __show_help = argp->has_arg("h");
-  __bb_cleanup = argp->has_arg("C");
+  show_help_ = argp->has_arg("h");
+  bb_cleanup_ = argp->has_arg("C");
 
-  __has_load_plugin_list = argp->has_arg("p") || argp->num_items() > 0;
-  if (__has_load_plugin_list) {
+  has_load_plugin_list_ = argp->has_arg("p") || argp->num_items() > 0;
+  if (has_load_plugin_list_) {
     uint len = 0;
     for (uint i = 0; i < argp->items().size(); i++) {
       len += strlen(argp->items()[i]);
@@ -262,29 +262,29 @@ InitOptions::InitOptions(int argc, char **argv)
       sprintf(res, "%s,%s", tmp, argp->items()[i]);
       free(tmp);
     }
-    __load_plugin_list = strdup(res);
+    load_plugin_list_ = strdup(res);
   } else {
-    __load_plugin_list = NULL;
+    load_plugin_list_ = NULL;
   }
 
-  __init_plugin_cache = true;
-  __plugin_module_flags = Module::MODULE_FLAGS_DEFAULT;
-  __default_signal_handlers = true;
+  init_plugin_cache_ = true;
+  plugin_module_flags_ = Module::MODULE_FLAGS_DEFAULT;
+  default_signal_handlers_ = true;
 }
 
 
 /** Destructor. */
 InitOptions::~InitOptions()
 {
-  free(__basename);
-  free(__default_plugin);
-  if (__has_loggers)           free(__loggers);
-  if (__has_net_service_name)  free(__net_service_name);
-  if (__has_username)          free(__username);
-  if (__has_groupname)         free(__groupname);
-  if (__has_load_plugin_list)  free(__load_plugin_list);
-  if (__config_file)           free(__config_file);
-  if (__daemon_pid_file)       free(__daemon_pid_file);
+  free(basename_);
+  free(default_plugin_);
+  if (has_loggers_)           free(loggers_);
+  if (has_net_service_name_)  free(net_service_name_);
+  if (has_username_)          free(username_);
+  if (has_groupname_)         free(groupname_);
+  if (has_load_plugin_list_)  free(load_plugin_list_);
+  if (config_file_)           free(config_file_);
+  if (daemon_pid_file_)       free(daemon_pid_file_);
 }
 
 
@@ -295,91 +295,91 @@ InitOptions::~InitOptions()
 InitOptions &
 InitOptions::operator=(const InitOptions &options)
 {
-  free(__basename);
-  __basename = strdup(options.__basename);
-  free(__default_plugin);
-  __default_plugin = strdup(options.__default_plugin);
-  __net_tcp_port = 0;
-  __has_net_tcp_port = options.__has_net_tcp_port;
-  if (__has_net_tcp_port) {
-    __net_tcp_port = options.__net_tcp_port;
+  free(basename_);
+  basename_ = strdup(options.basename_);
+  free(default_plugin_);
+  default_plugin_ = strdup(options.default_plugin_);
+  net_tcp_port_ = 0;
+  has_net_tcp_port_ = options.has_net_tcp_port_;
+  if (has_net_tcp_port_) {
+    net_tcp_port_ = options.net_tcp_port_;
   }
-  if (__has_loggers) {
-    __has_loggers = false;
-    free(__loggers);
-    __loggers = NULL;
+  if (has_loggers_) {
+    has_loggers_ = false;
+    free(loggers_);
+    loggers_ = NULL;
   }
-  __has_loggers = options.__has_loggers;
-  if (__has_loggers) {
-    __loggers = strdup(options.__loggers);
-  }
-
-  __log_level = options.__log_level;
-
-  if (__has_net_service_name) {
-    __has_net_service_name = false;
-    free(__net_service_name);
-    __net_service_name = NULL;
-  }
-  __has_net_service_name = options.__has_net_service_name;
-  if (__has_net_service_name) {
-    __net_service_name = strdup(options.__net_service_name);    
+  has_loggers_ = options.has_loggers_;
+  if (has_loggers_) {
+    loggers_ = strdup(options.loggers_);
   }
 
-  if (__has_username) {
-    __has_username = false;
-    free(__username);
-    __username = NULL;
+  log_level_ = options.log_level_;
+
+  if (has_net_service_name_) {
+    has_net_service_name_ = false;
+    free(net_service_name_);
+    net_service_name_ = NULL;
   }
-  __has_username = options.__has_username;
-  if (__has_username) {
-    __username = strdup(options.__username);    
+  has_net_service_name_ = options.has_net_service_name_;
+  if (has_net_service_name_) {
+    net_service_name_ = strdup(options.net_service_name_);    
   }
 
-  if (__has_groupname) {
-    __has_groupname = false;
-    free(__groupname);
-    __groupname = NULL;
+  if (has_username_) {
+    has_username_ = false;
+    free(username_);
+    username_ = NULL;
   }
-  __groupname = NULL;
-  __has_groupname = options.__has_groupname;
-  if (__has_groupname) {
-    __groupname = strdup(options.__groupname);    
-  }
-
-  if (__config_file) {
-    free(__config_file);
-    __config_file = NULL;
-  }
-  if (options.__config_file) {
-    __config_file = strdup(options.__config_file);
+  has_username_ = options.has_username_;
+  if (has_username_) {
+    username_ = strdup(options.username_);    
   }
 
-  __daemonize = options.__daemonize;
-  if (__daemon_pid_file) {
-    free(__daemon_pid_file);
-    __daemon_pid_file = NULL;
+  if (has_groupname_) {
+    has_groupname_ = false;
+    free(groupname_);
+    groupname_ = NULL;
   }
-  if (__daemonize && options.__daemon_pid_file) {
-    __daemon_pid_file = strdup(options.__daemon_pid_file);
-  }
-  __daemonize_kill = options.__daemonize_kill;
-  __daemonize_status = options.__daemonize_status;
-  __show_help = options.__show_help;
-  __bb_cleanup = options.__bb_cleanup;
-
-  if (__load_plugin_list) {
-    free(__load_plugin_list);
-    __load_plugin_list = NULL;
-  }
-  __has_load_plugin_list = options.__has_load_plugin_list;
-  if (__has_load_plugin_list) {
-    __load_plugin_list = strdup(options.__load_plugin_list);
+  groupname_ = NULL;
+  has_groupname_ = options.has_groupname_;
+  if (has_groupname_) {
+    groupname_ = strdup(options.groupname_);    
   }
 
-  __init_plugin_cache = options.__init_plugin_cache;
-  __plugin_module_flags = options.__plugin_module_flags;
-  __default_signal_handlers = options.__default_signal_handlers;
+  if (config_file_) {
+    free(config_file_);
+    config_file_ = NULL;
+  }
+  if (options.config_file_) {
+    config_file_ = strdup(options.config_file_);
+  }
+
+  daemonize_ = options.daemonize_;
+  if (daemon_pid_file_) {
+    free(daemon_pid_file_);
+    daemon_pid_file_ = NULL;
+  }
+  if (daemonize_ && options.daemon_pid_file_) {
+    daemon_pid_file_ = strdup(options.daemon_pid_file_);
+  }
+  daemonize_kill_ = options.daemonize_kill_;
+  daemonize_status_ = options.daemonize_status_;
+  show_help_ = options.show_help_;
+  bb_cleanup_ = options.bb_cleanup_;
+
+  if (load_plugin_list_) {
+    free(load_plugin_list_);
+    load_plugin_list_ = NULL;
+  }
+  has_load_plugin_list_ = options.has_load_plugin_list_;
+  if (has_load_plugin_list_) {
+    load_plugin_list_ = strdup(options.load_plugin_list_);
+  }
+
+  init_plugin_cache_ = options.init_plugin_cache_;
+  plugin_module_flags_ = options.plugin_module_flags_;
+  default_signal_handlers_ = options.default_signal_handlers_;
 
   return *this;
 }
@@ -392,8 +392,8 @@ InitOptions::operator=(const InitOptions &options)
 InitOptions &
 InitOptions::default_plugin(const char *default_plugin_)
 {
-  free(__default_plugin);
-  __default_plugin = strdup(default_plugin_);
+  free(default_plugin_);
+  default_plugin_ = strdup(default_plugin_);
   return *this;
 }
 
@@ -405,8 +405,8 @@ InitOptions::default_plugin(const char *default_plugin_)
 InitOptions &
 InitOptions::net_tcp_port(unsigned short int port)
 {
-  __has_net_tcp_port = true;
-  __net_tcp_port = port;
+  has_net_tcp_port_ = true;
+  net_tcp_port_ = port;
   return *this;
 }
 
@@ -417,13 +417,13 @@ InitOptions::net_tcp_port(unsigned short int port)
 InitOptions &
 InitOptions::net_service_name(const char *service_name)
 {
-  if (__has_net_service_name) {
-    __has_net_service_name = false;
-    free(__net_service_name);
+  if (has_net_service_name_) {
+    has_net_service_name_ = false;
+    free(net_service_name_);
   }
   if (service_name) {
-    __has_net_service_name = true;
-    __net_service_name = strdup(service_name);
+    has_net_service_name_ = true;
+    net_service_name_ = strdup(service_name);
   }
   return *this;
 }
@@ -439,11 +439,11 @@ InitOptions &
 InitOptions::daemonize(bool daemonize, bool kill, bool status,
 		       const char *pid_file)
 {
-  __daemonize = daemonize;
-  __daemonize_kill = daemonize && kill;
-  __daemonize_status = daemonize && status;
+  daemonize_ = daemonize;
+  daemonize_kill_ = daemonize && kill;
+  daemonize_status_ = daemonize && status;
   if (daemonize && pid_file) {
-    __daemon_pid_file = strdup(pid_file);
+    daemon_pid_file_ = strdup(pid_file);
   }
   return *this;
 }
@@ -455,13 +455,13 @@ InitOptions::daemonize(bool daemonize, bool kill, bool status,
 InitOptions &
 InitOptions::loggers(const char *loggers)
 {
-  if (__has_loggers) {
-    __has_loggers = false;
-    free(__loggers);
+  if (has_loggers_) {
+    has_loggers_ = false;
+    free(loggers_);
   }
   if (loggers) {
-    __has_loggers = true;
-    __loggers = strdup(loggers);
+    has_loggers_ = true;
+    loggers_ = strdup(loggers);
   }
   return *this;
 }
@@ -473,7 +473,7 @@ InitOptions::loggers(const char *loggers)
 InitOptions &
 InitOptions::log_level(Logger::LogLevel log_level)
 {
-  __log_level = log_level;
+  log_level_ = log_level;
   return *this;
 }
 
@@ -484,7 +484,7 @@ InitOptions::log_level(Logger::LogLevel log_level)
 InitOptions &
 InitOptions::show_help(bool show_help)
 {
-  __show_help = show_help;
+  show_help_ = show_help;
   return *this;
 }
 
@@ -496,7 +496,7 @@ InitOptions::show_help(bool show_help)
 InitOptions &
 InitOptions::init_plugin_cache(bool init_cache)
 {
-  __init_plugin_cache = init_cache;
+  init_plugin_cache_ = init_cache;
   return *this;
 }
 
@@ -507,13 +507,13 @@ InitOptions::init_plugin_cache(bool init_cache)
 InitOptions &
 InitOptions::user(const char *username)
 {
-  if (__has_username) {
-    __has_username = false;
-    free(__username);
+  if (has_username_) {
+    has_username_ = false;
+    free(username_);
   }
   if (username) {
-    __has_username = true;
-    __username = strdup(username);
+    has_username_ = true;
+    username_ = strdup(username);
   }
   return *this;
 }
@@ -526,14 +526,14 @@ InitOptions::user(const char *username)
 InitOptions &
 InitOptions::load_plugins(const char *plugin_list)
 {
-  if (__has_load_plugin_list) {
-    __has_load_plugin_list = false;
-    free(__load_plugin_list);
-    __load_plugin_list = NULL;
+  if (has_load_plugin_list_) {
+    has_load_plugin_list_ = false;
+    free(load_plugin_list_);
+    load_plugin_list_ = NULL;
   }
   if (plugin_list) {
-    __has_load_plugin_list = true;
-    __load_plugin_list = strdup(plugin_list);
+    has_load_plugin_list_ = true;
+    load_plugin_list_ = strdup(plugin_list);
   }
   return *this;
 }
@@ -546,13 +546,13 @@ InitOptions::load_plugins(const char *plugin_list)
 InitOptions &
 InitOptions::group(const char *groupname)
 {
-  if (__has_groupname) {
-    __has_groupname = false;
-    free(__groupname);
+  if (has_groupname_) {
+    has_groupname_ = false;
+    free(groupname_);
   }
   if (groupname) {
-    __has_groupname = true;
-    __groupname = strdup(groupname);
+    has_groupname_ = true;
+    groupname_ = strdup(groupname);
   }
   return *this;
 }
@@ -564,12 +564,12 @@ InitOptions::group(const char *groupname)
 InitOptions &
 InitOptions::config_file(const char *config_file)
 {
-  if (__config_file) {
-    free(__config_file);
-    __config_file = NULL;
+  if (config_file_) {
+    free(config_file_);
+    config_file_ = NULL;
   }
   if (config_file) {
-    __config_file = strdup(config_file);
+    config_file_ = strdup(config_file);
   }
   return *this;
 }
@@ -581,7 +581,7 @@ InitOptions::config_file(const char *config_file)
 InitOptions &
 InitOptions::bb_cleanup(bool bb_cleanup)
 {
-  __bb_cleanup = bb_cleanup;
+  bb_cleanup_ = bb_cleanup;
   return *this;
 }
 
@@ -593,7 +593,7 @@ InitOptions::bb_cleanup(bool bb_cleanup)
 InitOptions &
 InitOptions::plugin_module_flags(Module::ModuleFlags flags)
 {
-  __plugin_module_flags = flags;
+  plugin_module_flags_ = flags;
   return *this;
 }
 
@@ -607,7 +607,7 @@ InitOptions::plugin_module_flags(Module::ModuleFlags flags)
 InitOptions &
 InitOptions::default_signal_handlers(bool enable)
 {
-  __default_signal_handlers = enable;
+  default_signal_handlers_ = enable;
   return *this;
 }
 
@@ -618,7 +618,7 @@ InitOptions::default_signal_handlers(bool enable)
 const char *
 InitOptions::basename() const
 {
-  return __basename;
+  return basename_;
 }
 
 
@@ -632,7 +632,7 @@ InitOptions::basename() const
 const char *
 InitOptions::default_plugin() const
 {
-  return __default_plugin;
+  return default_plugin_;
 }
 
 
@@ -642,7 +642,7 @@ InitOptions::default_plugin() const
 bool
 InitOptions::has_net_tcp_port() const
 {
-  return __has_net_tcp_port;
+  return has_net_tcp_port_;
 }
 
 /** Get Fawkes network TCP port.
@@ -651,7 +651,7 @@ InitOptions::has_net_tcp_port() const
 unsigned short int
 InitOptions::net_tcp_port() const
 {
-  return __net_tcp_port;
+  return net_tcp_port_;
 }
 
 /** Check if network service name has been passed.
@@ -660,7 +660,7 @@ InitOptions::net_tcp_port() const
 bool
 InitOptions::has_net_service_name() const
 {
-  return __has_net_service_name;
+  return has_net_service_name_;
 }
 
 /** Get network service name.
@@ -669,7 +669,7 @@ InitOptions::has_net_service_name() const
 const char *
 InitOptions::net_service_name() const
 {
-  return __net_service_name;
+  return net_service_name_;
 }
 
 /** Check if plugin load list has been set.
@@ -678,7 +678,7 @@ InitOptions::net_service_name() const
 bool
 InitOptions::has_load_plugin_list() const
 {
-  return __has_load_plugin_list;
+  return has_load_plugin_list_;
 }
 
 /** Get plugin load list.
@@ -687,7 +687,7 @@ InitOptions::has_load_plugin_list() const
 const char *
 InitOptions::load_plugin_list() const
 {
-  return __load_plugin_list;
+  return load_plugin_list_;
 }
 
 /** Check if logger string has been passed.
@@ -696,7 +696,7 @@ InitOptions::load_plugin_list() const
 bool
 InitOptions::has_loggers() const
 {
-  return __has_loggers;
+  return has_loggers_;
 }
 
 /** Get logger string.
@@ -705,7 +705,7 @@ InitOptions::has_loggers() const
 const char *
 InitOptions::loggers() const
 {
-  return __loggers;
+  return loggers_;
 }
 
 /** Get log level.
@@ -714,7 +714,7 @@ InitOptions::loggers() const
 Logger::LogLevel
 InitOptions::log_level() const
 {
-  return __log_level;
+  return log_level_;
 }
 
 /** Check if help has been requested.
@@ -723,7 +723,7 @@ InitOptions::log_level() const
 bool
 InitOptions::show_help() const
 {
-  return __show_help;
+  return show_help_;
 }
 
 /** Check if blackboard cleanup has been requested.
@@ -732,7 +732,7 @@ InitOptions::show_help() const
 bool
 InitOptions::bb_cleanup() const
 {
-  return __bb_cleanup;
+  return bb_cleanup_;
 }
 
 
@@ -742,7 +742,7 @@ InitOptions::bb_cleanup() const
 bool
 InitOptions::init_plugin_cache() const
 {
-  return __init_plugin_cache;
+  return init_plugin_cache_;
 }
 
 
@@ -752,7 +752,7 @@ InitOptions::init_plugin_cache() const
 bool
 InitOptions::default_signal_handlers() const
 {
-  return __default_signal_handlers;
+  return default_signal_handlers_;
 }
 
 /** Check if daemonization has been requested.
@@ -761,7 +761,7 @@ InitOptions::default_signal_handlers() const
 bool
 InitOptions::daemonize() const
 {
-  return __daemonize;
+  return daemonize_;
 }
 
 /** Check if killing of daemon has been requested.
@@ -770,7 +770,7 @@ InitOptions::daemonize() const
 bool
 InitOptions::daemonize_kill() const
 {
-  return __daemonize_kill;
+  return daemonize_kill_;
 }
 
 /** Check if status of daemon has been requested.
@@ -779,7 +779,7 @@ InitOptions::daemonize_kill() const
 bool
 InitOptions::daemonize_status() const
 {
-  return __daemonize_status;
+  return daemonize_status_;
 }
 
 
@@ -789,7 +789,7 @@ InitOptions::daemonize_status() const
 const char *
 InitOptions::daemon_pid_file() const
 {
-  return __daemon_pid_file;
+  return daemon_pid_file_;
 }
 
 
@@ -799,7 +799,7 @@ InitOptions::daemon_pid_file() const
 bool
 InitOptions::has_username() const
 {
-  return __has_username;
+  return has_username_;
 }
 
 
@@ -809,7 +809,7 @@ InitOptions::has_username() const
 const char *
 InitOptions::username() const
 {
-  return __username;
+  return username_;
 }
 
 /** Check if group name has been passed.
@@ -818,7 +818,7 @@ InitOptions::username() const
 bool
 InitOptions::has_groupname() const
 {
-  return __has_groupname;
+  return has_groupname_;
 }
 
 /** Get group name to run as.
@@ -827,7 +827,7 @@ InitOptions::has_groupname() const
 const char *
 InitOptions::groupname() const
 {
-  return __groupname;
+  return groupname_;
 }
 
 
@@ -837,7 +837,7 @@ InitOptions::groupname() const
 const char *
 InitOptions::config_file() const
 {
-  return __config_file;
+  return config_file_;
 }
 
 
@@ -847,7 +847,7 @@ InitOptions::config_file() const
 Module::ModuleFlags
 InitOptions::plugin_module_flags() const
 {
-  return __plugin_module_flags;
+  return plugin_module_flags_;
 }
 
 

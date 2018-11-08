@@ -85,12 +85,12 @@ class FawkesMainThread
     void run();
     void handle_signal(int signum);
   private:
-    FawkesMainThread *__fmt;
-    Mutex            *__init_mutex;
-    bool              __init_running;
-    bool              __init_quit;
-    bool              __sigint_running;
-    bool              __register_signals;
+    FawkesMainThread *fmt_;
+    Mutex            *init_mutex_;
+    bool              init_running_;
+    bool              init_quit_;
+    bool              sigint_running_;
+    bool              register_signals_;
   };
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
@@ -102,47 +102,47 @@ class FawkesMainThread
   inline void safe_wake(BlockedTimingAspect::WakeupHook hook, unsigned int timeout_usec)
   {
     try {
-      __thread_manager->wakeup_and_wait(hook, timeout_usec);
+      thread_manager_->wakeup_and_wait(hook, timeout_usec);
     } catch (Exception &e) {
-      if (__enable_looptime_warnings) {
-        //__multi_logger->log_error("FawkesMainThread",
+      if (enable_looptime_warnings_) {
+        //multi_logger_->log_error("FawkesMainThread",
         //                          "Error while processing hook %s, exception follows",
         //                          BlockedTimingAspect::blocked_timing_hook_to_string(hook));
-        __multi_logger->log_error("FawkesMainThread", e);
+        multi_logger_->log_error("FawkesMainThread", e);
       }
 
     }
   }
 
 
-  Configuration        *__config;
-  MultiLogger          *__multi_logger;
-  Clock                *__clock;
-  TimeWait             *__time_wait;
+  Configuration        *config_;
+  MultiLogger          *multi_logger_;
+  Clock                *clock_;
+  TimeWait             *time_wait_;
 
-  Barrier              *__init_barrier;
-  Thread               *__mainloop_thread;
-  Mutex                *__mainloop_mutex;
-  InterruptibleBarrier *__mainloop_barrier;
+  Barrier              *init_barrier_;
+  Thread               *mainloop_thread_;
+  Mutex                *mainloop_mutex_;
+  InterruptibleBarrier *mainloop_barrier_;
 
-  char                 *__default_plugin;
-  char                 *__load_plugins;
+  char                 *default_plugin_;
+  char                 *load_plugins_;
 
-  ThreadManager        *__thread_manager;
-  SyncPointManager     *__syncpoint_manager;
-  PluginManager        *__plugin_manager;
+  ThreadManager        *thread_manager_;
+  SyncPointManager     *syncpoint_manager_;
+  PluginManager        *plugin_manager_;
 
-  std::list<std::string>        __recovered_threads;
-  unsigned int                  __desired_loop_time_usec;
-  float                         __desired_loop_time_sec;
-  unsigned int                  __max_thread_time_usec;
-  unsigned int                  __max_thread_time_nanosec;
-  Time                         *__loop_start;
-  Time                         *__loop_end;
-  bool                          __enable_looptime_warnings;
+  std::list<std::string>        recovered_threads_;
+  unsigned int                  desired_loop_time_usec_;
+  float                         desired_loop_time_sec_;
+  unsigned int                  max_thread_time_usec_;
+  unsigned int                  max_thread_time_nanosec_;
+  Time                         *loop_start_;
+  Time                         *loop_end_;
+  bool                          enable_looptime_warnings_;
 
-  std::vector<RefPtr<SyncPoint> > __syncpoints_start_hook;
-  std::vector<RefPtr<SyncPoint> > __syncpoints_end_hook;
+  std::vector<RefPtr<SyncPoint> > syncpoints_start_hook_;
+  std::vector<RefPtr<SyncPoint> > syncpoints_end_hook_;
 
 };
 
