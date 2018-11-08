@@ -75,4 +75,4 @@ class EclipseAgentThread
 
 };
 
-#endif /* __PLUGINS_ECLIPSE_CLP_ECLIPSE_THREAD_H_ */
+#endif /* PLUGINS_ECLIPSE_CLP_ECLIPSE_THREAD_H__ */

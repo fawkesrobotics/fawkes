@@ -31,4 +31,4 @@ class EclipseCLPPlugin : public fawkes::Plugin
   EclipseCLPPlugin (fawkes::Configuration* config);
 };
 
-#endif /* __PLUGINS_ECLIPSE_CLP_PLUGIN_H_ */
+#endif /* PLUGINS_ECLIPSE_CLP_PLUGIN_H__ */

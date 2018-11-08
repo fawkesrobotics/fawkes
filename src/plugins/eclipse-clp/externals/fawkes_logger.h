@@ -25,4 +25,4 @@
 
 extern "C" int p_log(...);
 
-#endif /* __PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_LOGGER_H_ */
+#endif /* PLUGINS_ECLIPSE_CLP_EXTERNALS_FAWKES_LOGGER_H__ */

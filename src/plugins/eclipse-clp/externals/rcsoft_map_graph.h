@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __ECLIPSE_EXTERNALS_RCSOFT_MAP_GRAPH_H
-#define __ECLIPSE_EXTERNALS_RCSOFT_MAP_GRAPH_H
+#ifndef ECLIPSE_EXTERNALS_RCSOFT_MAP_GRAPH_H_
+#define ECLIPSE_EXTERNALS_RCSOFT_MAP_GRAPH_H_
 
 extern "C" int p_map_graph_load();
 extern "C" int p_is_map_graph_loaded();
@@ -32,5 +32,5 @@ extern "C" int p_map_graph_get_closest_node();
 extern "C" int p_map_graph_search_nodes();
 extern "C" int p_map_graph_get_children();
 
-#endif /* __ECLIPSE_EXTERNALS_BLACKBOARD_H_ */
+#endif /* ECLIPSE_EXTERNALS_BLACKBOARD_H__ */
 

@@ -65,5 +65,5 @@ class AgentControlThread
   std::string 	simulation_shutdown_script_;
 };
 
-#endif /* __PLUGINS_ECLIPSE_CLP_CONTROL_THREAD_H_ */
+#endif /* PLUGINS_ECLIPSE_CLP_CONTROL_THREAD_H__ */
 
