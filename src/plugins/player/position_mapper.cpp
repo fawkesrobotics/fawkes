@@ -42,22 +42,22 @@ PlayerPositionMapper::PlayerPositionMapper(std::string varname,
 					   PlayerCc::Position2dProxy *proxy)
   : PlayerProxyFawkesInterfaceMapper(varname)
 {
-  __interface = interface;
-  __proxy     = proxy;
+  interface_ = interface;
+  proxy_     = proxy;
 }
 
 
 void
 PlayerPositionMapper::sync_player_to_fawkes()
 {
-  if ( __proxy->IsFresh() ) {
-    //printf("Setting %s to (%f, %f, %f)\n", varname().c_str(), __proxy->GetXPos(),
-    //       __proxy->GetYPos(), __proxy->GetYaw());
-    __interface->set_relative_x(__proxy->GetXPos());
-    __interface->set_relative_y(__proxy->GetYPos());
-    __interface->set_relative_z(__proxy->GetYaw());
-    __interface->write();
-    __proxy->NotFresh();
+  if ( proxy_->IsFresh() ) {
+    //printf("Setting %s to (%f, %f, %f)\n", varname().c_str(), proxy_->GetXPos(),
+    //       proxy_->GetYPos(), proxy_->GetYaw());
+    interface_->set_relative_x(proxy_->GetXPos());
+    interface_->set_relative_y(proxy_->GetYPos());
+    interface_->set_relative_z(proxy_->GetYaw());
+    interface_->write();
+    proxy_->NotFresh();
   }
 }
 

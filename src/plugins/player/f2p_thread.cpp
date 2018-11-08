@@ -41,7 +41,7 @@ PlayerF2PThread::PlayerF2PThread(PlayerClientThread *client_thread)
   : Thread("PlayerF2PThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
 {
-  __client_thread = client_thread;
+  client_thread_ = client_thread;
 }
 
 
@@ -60,5 +60,5 @@ PlayerF2PThread::finalize()
 void
 PlayerF2PThread::loop()
 {
-  __client_thread->sync_fawkes_to_player();
+  client_thread_->sync_fawkes_to_player();
 }

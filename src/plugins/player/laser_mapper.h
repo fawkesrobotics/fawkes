@@ -44,11 +44,11 @@ class PlayerLaserMapper : public PlayerProxyFawkesInterfaceMapper
   virtual void sync_player_to_fawkes();
 
  private:
-  fawkes::Laser360Interface  *__interface;
-  PlayerCc::LaserProxy       *__proxy;
+  fawkes::Laser360Interface  *interface_;
+  PlayerCc::LaserProxy       *proxy_;
 
-  bool                        __first_read;
-  unsigned int                __index_offset;
+  bool                        first_read_;
+  unsigned int                index_offset_;
 };
 
 #endif

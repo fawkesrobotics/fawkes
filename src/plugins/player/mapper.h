@@ -37,7 +37,7 @@ class PlayerProxyFawkesInterfaceMapper
   virtual void sync_player_to_fawkes() = 0;
 
  private:
-  std::string __varname;
+  std::string varname_;
 };
 
 #endif

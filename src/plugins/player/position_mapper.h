@@ -44,8 +44,8 @@ class PlayerPositionMapper : public PlayerProxyFawkesInterfaceMapper
   virtual void sync_player_to_fawkes();
 
  private:
-  fawkes::ObjectPositionInterface *__interface;
-  PlayerCc::Position2dProxy       *__proxy;
+  fawkes::ObjectPositionInterface *interface_;
+  PlayerCc::Position2dProxy       *proxy_;
 };
 
 #endif

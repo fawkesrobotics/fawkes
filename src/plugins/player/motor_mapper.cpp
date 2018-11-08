@@ -52,40 +52,40 @@ PlayerMotorPositionMapper::PlayerMotorPositionMapper(std::string varname,
 						     PlayerCc::Position2dProxy *proxy)
   : PlayerProxyFawkesInterfaceMapper(varname)
 {
-  __interface = interface;
-  __proxy     = proxy;
+  interface_ = interface;
+  proxy_     = proxy;
 }
 
 
 void
 PlayerMotorPositionMapper::sync_player_to_fawkes()
 {
-  if ( __proxy->IsFresh() ) {
-    //printf("Setting %s to (%f, %f, %f)\n", varname().c_str(), __proxy->GetXPos(),
-    //       __proxy->GetYPos(), __proxy->GetYaw());
-    __interface->set_odometry_position_x(__proxy->GetXPos());
-    __interface->set_odometry_position_y(__proxy->GetYPos());
-    __interface->set_odometry_orientation(__proxy->GetYaw());
-    __interface->write();
-    __proxy->NotFresh();
+  if ( proxy_->IsFresh() ) {
+    //printf("Setting %s to (%f, %f, %f)\n", varname().c_str(), proxy_->GetXPos(),
+    //       proxy_->GetYPos(), proxy_->GetYaw());
+    interface_->set_odometry_position_x(proxy_->GetXPos());
+    interface_->set_odometry_position_y(proxy_->GetYPos());
+    interface_->set_odometry_orientation(proxy_->GetYaw());
+    interface_->write();
+    proxy_->NotFresh();
   }
 }
 
 void
 PlayerMotorPositionMapper::sync_fawkes_to_player()
 {
-  while ( ! __interface->msgq_empty() ) {
-    if ( __interface->msgq_first_is<MotorInterface::SetMotorStateMessage>() ) {
-      MotorInterface::SetMotorStateMessage *m = __interface->msgq_first<MotorInterface::SetMotorStateMessage>();
-      __proxy->SetMotorEnable(m->motor_state() == MotorInterface::MOTOR_ENABLED);
-    } else if ( __interface->msgq_first_is<MotorInterface::ResetOdometryMessage>() ) {
-      __proxy->ResetOdometry();
-    } else if ( __interface->msgq_first_is<MotorInterface::GotoMessage>() ) {
-      MotorInterface::GotoMessage *m = __interface->msgq_first<MotorInterface::GotoMessage>();
-      __proxy->GoTo(m->x(), m->y(), m->phi());
+  while ( ! interface_->msgq_empty() ) {
+    if ( interface_->msgq_first_is<MotorInterface::SetMotorStateMessage>() ) {
+      MotorInterface::SetMotorStateMessage *m = interface_->msgq_first<MotorInterface::SetMotorStateMessage>();
+      proxy_->SetMotorEnable(m->motor_state() == MotorInterface::MOTOR_ENABLED);
+    } else if ( interface_->msgq_first_is<MotorInterface::ResetOdometryMessage>() ) {
+      proxy_->ResetOdometry();
+    } else if ( interface_->msgq_first_is<MotorInterface::GotoMessage>() ) {
+      MotorInterface::GotoMessage *m = interface_->msgq_first<MotorInterface::GotoMessage>();
+      proxy_->GoTo(m->x(), m->y(), m->phi());
     }
     // all others are silently ignored
 
-    __interface->msgq_pop();
+    interface_->msgq_pop();
   }
 }

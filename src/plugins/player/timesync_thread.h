@@ -45,7 +45,7 @@ class PlayerTimeSyncThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::SimulatorTimeSource   __simts;
+  fawkes::SimulatorTimeSource   simts_;
 
 };
 

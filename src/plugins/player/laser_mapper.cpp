@@ -44,9 +44,9 @@ PlayerLaserMapper::PlayerLaserMapper(std::string varname,
 				     PlayerCc::LaserProxy *proxy)
   : PlayerProxyFawkesInterfaceMapper(varname)
 {
-  __interface  = interface;
-  __proxy      = proxy;
-  __first_read = true;
+  interface_  = interface;
+  proxy_      = proxy;
+  first_read_ = true;
 }
 
 
@@ -54,26 +54,26 @@ void
 PlayerLaserMapper::sync_player_to_fawkes()
 {
   //printf("Laser interface, count: %u, min angle= %f, max angle = %f\n",
-  //	 __proxy->GetCount(), __proxy->GetMinAngle(), __proxy->GetMaxAngle());
+  //	 proxy_->GetCount(), proxy_->GetMinAngle(), proxy_->GetMaxAngle());
 
-  if ( __proxy->GetCount() != 360 )  return;
+  if ( proxy_->GetCount() != 360 )  return;
 
-  if ( __proxy->IsFresh() ) {
+  if ( proxy_->IsFresh() ) {
 
-    if ( __first_read ) {
-      __index_offset = 360 + fawkes::rad2deg(__proxy->GetMinAngle());
-      __first_read = false;
+    if ( first_read_ ) {
+      index_offset_ = 360 + fawkes::rad2deg(proxy_->GetMinAngle());
+      first_read_ = false;
     }
 
-    //printf("Setting %s to (%f, %f, %f)\n", varname().c_str(), __proxy->GetXPos(),
-    //       __proxy->GetYPos(), __proxy->GetYaw());
+    //printf("Setting %s to (%f, %f, %f)\n", varname().c_str(), proxy_->GetXPos(),
+    //       proxy_->GetYPos(), proxy_->GetYaw());
     float distances[360];
     for (int i = 0; i < 360; ++i) {
-      distances[(i + __index_offset) % 360] = (*__proxy)[360 - i];
+      distances[(i + index_offset_) % 360] = (*proxy_)[360 - i];
     }
-    __interface->set_distances(distances);
-    __interface->write();
-    __proxy->NotFresh();
+    interface_->set_distances(distances);
+    interface_->write();
+    proxy_->NotFresh();
   }
 }
 

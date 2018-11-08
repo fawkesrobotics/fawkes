@@ -43,7 +43,7 @@ class PlayerF2PThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  PlayerClientThread *__client_thread;
+  PlayerClientThread *client_thread_;
 };
 
 
