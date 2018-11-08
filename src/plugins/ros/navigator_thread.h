@@ -121,4 +121,4 @@ class RosNavigatorThread
 
 };
 
-#endif /* __ROS_NAVIGATOR_THREAD_H_ */
+#endif /* ROS_NAVIGATOR_THREAD_H__ */

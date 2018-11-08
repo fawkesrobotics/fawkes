@@ -91,7 +91,7 @@ class RosPointCloudThread
     pcl::fromROSMsg(*msg, **pcl);
   }
 
-  PointCloudAdapter *__adapter;
+  PointCloudAdapter *adapter_;
 
   /// @cond INTERNALS
   typedef struct {

@@ -53,7 +53,7 @@ class ROSTalkerPubThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  ros::Publisher __pub;
+  ros::Publisher pub_;
 };
 
 #endif

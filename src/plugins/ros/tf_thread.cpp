@@ -41,17 +41,17 @@ RosTfThread::RosTfThread()
     TransformAspect(TransformAspect::DEFER_PUBLISHER),
     BlackBoardInterfaceListener("RosTfThread")
 {
-  __tf_msg_queue_mutex = new Mutex();
-  __seq_num_mutex = new Mutex();
-  __last_update = new Time();
+  tf_msg_queue_mutex_ = new Mutex();
+  seq_num_mutex_ = new Mutex();
+  last_update_ = new Time();
 }
 
 /** Destructor. */
 RosTfThread::~RosTfThread()
 {
-  delete __tf_msg_queue_mutex;
-  delete __seq_num_mutex;
-  delete __last_update;
+  delete tf_msg_queue_mutex_;
+  delete seq_num_mutex_;
+  delete last_update_;
 }
 
 
@@ -59,36 +59,36 @@ RosTfThread::~RosTfThread()
 void
 RosTfThread::init()
 {
-  __active_queue = 0;
-  __seq_num = 0;
-  __last_update->set_clock(clock);
-  __last_update->set_time(0, 0);
+  active_queue_ = 0;
+  seq_num_ = 0;
+  last_update_->set_clock(clock);
+  last_update_->set_time(0, 0);
 
-  __cfg_use_tf2 = config->get_bool("/ros/tf/use_tf2");
-  __cfg_update_interval = 1.0;
+  cfg_use_tf2_ = config->get_bool("/ros/tf/use_tf2");
+  cfg_update_interval_ = 1.0;
   try  {
-	  __cfg_update_interval = config->get_float("/ros/tf/static-update-interval");
+	  cfg_update_interval_ = config->get_float("/ros/tf/static-update-interval");
   } catch (Exception &e) {} // ignored, use default
 
   // Must do that before registering listener because we might already
   // get events right away
-  if (__cfg_use_tf2) {
+  if (cfg_use_tf2_) {
 #ifndef HAVE_TF2_MSGS
 	  throw Exception("tf2 enabled in config but not available at compile time");
 #else
-	  __sub_tf = rosnode->subscribe("tf", 100, &RosTfThread::tf_message_cb_dynamic, this);
-	  __sub_static_tf = rosnode->subscribe("tf_static", 100, &RosTfThread::tf_message_cb_static, this);
-	  __pub_tf = rosnode->advertise< tf2_msgs::TFMessage >("tf", 100);
-	  __pub_static_tf = rosnode->advertise< tf2_msgs::TFMessage >("tf_static", 100, /* latch */ true);
+	  sub_tf_ = rosnode->subscribe("tf", 100, &RosTfThread::tf_message_cb_dynamic, this);
+	  sub_static_tf_ = rosnode->subscribe("tf_static", 100, &RosTfThread::tf_message_cb_static, this);
+	  pub_tf_ = rosnode->advertise< tf2_msgs::TFMessage >("tf", 100);
+	  pub_static_tf_ = rosnode->advertise< tf2_msgs::TFMessage >("tf_static", 100, /* latch */ true);
 #endif
   } else {
-	  __sub_tf = rosnode->subscribe("tf", 100, &RosTfThread::tf_message_cb, this);
-	  __pub_tf = rosnode->advertise< ::tf::tfMessage >("tf", 100);
+	  sub_tf_ = rosnode->subscribe("tf", 100, &RosTfThread::tf_message_cb, this);
+	  pub_tf_ = rosnode->advertise< ::tf::tfMessage >("tf", 100);
   }
 
-  __tfifs = blackboard->open_multiple_for_reading<TransformInterface>("/tf*");
+  tfifs_ = blackboard->open_multiple_for_reading<TransformInterface>("/tf*");
   std::list<TransformInterface *>::iterator i;
-  for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
+  for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
 	  bbil_add_data_interface(*i);
 	  bbil_add_reader_interface(*i);
 	  bbil_add_writer_interface(*i);
@@ -108,40 +108,40 @@ RosTfThread::finalize()
   blackboard->unregister_listener(this);
   blackboard->unregister_observer(this);
 
-  __sub_tf.shutdown();
-  __pub_tf.shutdown();
+  sub_tf_.shutdown();
+  pub_tf_.shutdown();
 
   std::list<TransformInterface *>::iterator i;
-  for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
+  for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
     blackboard->close(*i);
   }
-  __tfifs.clear();
+  tfifs_.clear();
 }
 
 
 void
 RosTfThread::loop()
 {
-  __tf_msg_queue_mutex->lock();
-  unsigned int queue = __active_queue;
-  __active_queue = 1 - __active_queue;
-  __tf_msg_queue_mutex->unlock();
+  tf_msg_queue_mutex_->lock();
+  unsigned int queue = active_queue_;
+  active_queue_ = 1 - active_queue_;
+  tf_msg_queue_mutex_->unlock();
 
-  if (__cfg_use_tf2) {
+  if (cfg_use_tf2_) {
 #ifdef HAVE_TF2_MSGS
-	  while (! __tf2_msg_queues[queue].empty()) {
-		  const std::pair<bool, tf2_msgs::TFMessage::ConstPtr> &q = __tf2_msg_queues[queue].front();
+	  while (! tf2_msg_queues_[queue].empty()) {
+		  const std::pair<bool, tf2_msgs::TFMessage::ConstPtr> &q = tf2_msg_queues_[queue].front();
 		  const tf2_msgs::TFMessage::ConstPtr &msg = q.second;
 		  const size_t tsize = msg->transforms.size();
 		  for (size_t i = 0; i < tsize; ++i) {
 			  publish_transform_to_fawkes(msg->transforms[i], q.first);
 		  }
-		  __tf2_msg_queues[queue].pop();
+		  tf2_msg_queues_[queue].pop();
 	  }
 #endif
   } else {
-	  while (! __tf_msg_queues[queue].empty()) {
-		  const ::tf::tfMessage::ConstPtr &msg = __tf_msg_queues[queue].front();
+	  while (! tf_msg_queues_[queue].empty()) {
+		  const ::tf::tfMessage::ConstPtr &msg = tf_msg_queues_[queue].front();
 		  const size_t tsize = msg->transforms.size();
 		  for (size_t i = 0; i < tsize; ++i) {
 			  geometry_msgs::TransformStamped ts = msg->transforms[i];
@@ -153,12 +153,12 @@ RosTfThread::loop()
 			  }
 			  publish_transform_to_fawkes(ts);
 		  }
-		  __tf_msg_queues[queue].pop();
+		  tf_msg_queues_[queue].pop();
 	  }
 
 	  fawkes::Time now(clock);
-	  if ((now - __last_update) > __cfg_update_interval) {
-		  __last_update->stamp();
+	  if ((now - last_update_) > cfg_update_interval_) {
+		  last_update_->stamp();
 
 		  publish_static_transforms_to_ros();
 	  }
@@ -174,27 +174,27 @@ RosTfThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
 
   tfif->read();
 
-  if (__cfg_use_tf2 && tfif->is_static_transform()) {
+  if (cfg_use_tf2_ && tfif->is_static_transform()) {
 	  publish_static_transforms_to_ros();
   } else {
-	  if (__cfg_use_tf2) {
+	  if (cfg_use_tf2_) {
 #ifdef HAVE_TF2_MSGS
 		  tf2_msgs::TFMessage tmsg;
 		  tmsg.transforms.push_back(create_transform_stamped(tfif));
-		  __pub_tf.publish(tmsg);
+		  pub_tf_.publish(tmsg);
 #endif
 	  } else {
 		  ::tf::tfMessage tmsg;
 		  if (tfif->is_static_transform()) {
 			  // date time stamps slightly into the future so they are valid
 			  // for longer and need less frequent updates.
-			  fawkes::Time timestamp = fawkes::Time(clock) + (__cfg_update_interval * 1.1);
+			  fawkes::Time timestamp = fawkes::Time(clock) + (cfg_update_interval_ * 1.1);
 
 			  tmsg.transforms.push_back(create_transform_stamped(tfif, &timestamp));
 		  } else {
 			  tmsg.transforms.push_back(create_transform_stamped(tfif));
 		  }
-		  __pub_tf.publish(tmsg);
+		  pub_tf_.publish(tmsg);
 	  }
   }
 }
@@ -203,9 +203,9 @@ RosTfThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
 void
 RosTfThread::bb_interface_created(const char *type, const char *id) throw()
 {
-  if (strncmp(type, "TransformInterface", __INTERFACE_TYPE_SIZE) != 0)  return;
+  if (strncmp(type, "TransformInterface", INTERFACE_TYPE_SIZE_) != 0)  return;
 
-  for (const auto &f : __ros_frames) {
+  for (const auto &f : ros_frames_) {
 	  // ignore interfaces that we publish ourself
 	  if (f == id)  return;
   }
@@ -225,7 +225,7 @@ RosTfThread::bb_interface_created(const char *type, const char *id) throw()
     bbil_add_reader_interface(tfif);
     bbil_add_writer_interface(tfif);
     blackboard->update_listener(this);
-    __tfifs.push_back(tfif);
+    tfifs_.push_back(tfif);
   } catch (Exception &e) {
     blackboard->close(tfif);
     logger->log_warn(name(), "Failed to register for %s:%s: %s", type, id, e.what());
@@ -255,7 +255,7 @@ RosTfThread::conditional_close(Interface *interface) throw()
   if (! tfif) return;
   
   std::list<TransformInterface *>::iterator i;
-  for (i = __tfifs.begin(); i != __tfifs.end(); ++i) {
+  for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
     if (*interface == **i) {
       if (! interface->has_writer() && (interface->num_readers() == 1)) {
         // It's only us
@@ -265,7 +265,7 @@ RosTfThread::conditional_close(Interface *interface) throw()
         bbil_remove_writer_interface(*i);
         blackboard->update_listener(this);
         blackboard->close(*i);
-        __tfifs.erase(i);
+        tfifs_.erase(i);
         break;
       }
     }
@@ -289,9 +289,9 @@ RosTfThread::create_transform_stamped(TransformInterface *tfif, const Time *time
   tr.rotation = r;
 
   geometry_msgs::TransformStamped ts;
-  __seq_num_mutex->lock();
-  ts.header.seq = ++__seq_num;
-  __seq_num_mutex->unlock();
+  seq_num_mutex_->lock();
+  ts.header.seq = ++seq_num_;
+  seq_num_mutex_->unlock();
   ts.header.stamp = ros::Time(time->get_sec(), time->get_nsec());
   ts.header.frame_id = tfif->frame();
   ts.child_frame_id = tfif->child_frame();
@@ -306,32 +306,32 @@ RosTfThread::publish_static_transforms_to_ros()
 	std::list<fawkes::TransformInterface *>::iterator t;
 	fawkes::Time now(clock);
 
-	if (__cfg_use_tf2) {
+	if (cfg_use_tf2_) {
 #ifdef HAVE_TF2_MSGS
 		tf2_msgs::TFMessage tmsg;
-		for (t = __tfifs.begin(); t != __tfifs.end(); ++t) {
+		for (t = tfifs_.begin(); t != tfifs_.end(); ++t) {
 			fawkes::TransformInterface *tfif = *t;
 			tfif->read();
 			if (tfif->is_static_transform()) {
 				tmsg.transforms.push_back(create_transform_stamped(tfif, &now));
 			}
 		}
-		__pub_static_tf.publish(tmsg);
+		pub_static_tf_.publish(tmsg);
 #endif
 	} else {
 		// date time stamps slightly into the future so they are valid
 		// for longer and need less frequent updates.
-		fawkes::Time timestamp = now + (__cfg_update_interval * 1.1);
+		fawkes::Time timestamp = now + (cfg_update_interval_ * 1.1);
 
 		::tf::tfMessage tmsg;
-		for (t = __tfifs.begin(); t != __tfifs.end(); ++t) {
+		for (t = tfifs_.begin(); t != tfifs_.end(); ++t) {
 			fawkes::TransformInterface *tfif = *t;
 			tfif->read();
 			if (tfif->is_static_transform()) {
 				tmsg.transforms.push_back(create_transform_stamped(tfif, &timestamp));
 			}
 		}
-		__pub_tf.publish(tmsg);
+		pub_tf_.publish(tmsg);
 	}
 }
 
@@ -351,11 +351,11 @@ RosTfThread::publish_transform_to_fawkes(const geometry_msgs::TransformStamped &
 
 	if (tf_publishers.find(ts.child_frame_id) == tf_publishers.end()) {
 		try {
-			__ros_frames.push_back(std::string("/tf/") + ts.child_frame_id);
+			ros_frames_.push_back(std::string("/tf/") + ts.child_frame_id);
 			tf_add_publisher("%s", ts.child_frame_id.c_str());
 			tf_publishers[ts.child_frame_id]->send_transform(st, static_tf);
 		} catch (Exception &e) {
-			__ros_frames.pop_back();
+			ros_frames_.pop_back();
 			logger->log_warn(name(), "Failed to create Fawkes transform publisher for frame %s from ROS",
 			                 ts.child_frame_id.c_str());
 			logger->log_warn(name(), e);
@@ -372,7 +372,7 @@ RosTfThread::publish_transform_to_fawkes(const geometry_msgs::TransformStamped &
 void
 RosTfThread::tf_message_cb(const ros::MessageEvent<::tf::tfMessage const> &msg_evt)
 {
-  MutexLocker lock(__tf_msg_queue_mutex);
+  MutexLocker lock(tf_msg_queue_mutex_);
 
   const ::tf::tfMessage::ConstPtr &msg = msg_evt.getConstMessage();
   std::string authority = msg_evt.getPublisherName();
@@ -380,7 +380,7 @@ RosTfThread::tf_message_cb(const ros::MessageEvent<::tf::tfMessage const> &msg_e
   if (authority == "") {
     logger->log_warn(name(), "Message received without callerid");
   } else if (authority != ros::this_node::getName()) {
-    __tf_msg_queues[__active_queue].push(msg);
+    tf_msg_queues_[active_queue_].push(msg);
   }
 }
 
@@ -400,7 +400,7 @@ RosTfThread::tf_message_cb_dynamic(const ros::MessageEvent<tf2_msgs::TFMessage c
 void
 RosTfThread::tf_message_cb(const ros::MessageEvent<tf2_msgs::TFMessage const> &msg_evt, bool static_tf)
 {
-  MutexLocker lock(__tf_msg_queue_mutex);
+  MutexLocker lock(tf_msg_queue_mutex_);
 
   const tf2_msgs::TFMessage::ConstPtr &msg = msg_evt.getConstMessage();
   std::string authority = msg_evt.getPublisherName();
@@ -408,7 +408,7 @@ RosTfThread::tf_message_cb(const ros::MessageEvent<tf2_msgs::TFMessage const> &m
   if (authority == "") {
     logger->log_warn(name(), "Message received without callerid");
   } else if (authority != ros::this_node::getName()) {
-	  __tf2_msg_queues[__active_queue].push(std::make_pair(static_tf, msg));
+	  tf2_msg_queues_[active_queue_].push(std::make_pair(static_tf, msg));
   }
 }
 #endif

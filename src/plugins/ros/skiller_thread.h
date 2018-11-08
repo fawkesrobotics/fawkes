@@ -99,4 +99,4 @@ class RosSkillerThread
   unsigned int loops_waited_;
 };
 
-#endif /* __ROS_SKILLER_THREAD_H_ */
+#endif /* ROS_SKILLER_THREAD_H__ */

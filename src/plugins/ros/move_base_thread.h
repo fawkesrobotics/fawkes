@@ -102,4 +102,4 @@ class RosMoveBaseThread
   unsigned int exec_msgid_;
 };
 
-#endif /* __ROS_NAVIGATOR_THREAD_H_ */
+#endif /* ROS_NAVIGATOR_THREAD_H__ */

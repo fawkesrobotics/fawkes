@@ -40,7 +40,7 @@ class ROSAspectIniFin : public AspectIniFin
   void set_rosnode(LockPtr<ros::NodeHandle> rosnode);
 
  private:
-  LockPtr<ros::NodeHandle> __rosnode;
+  LockPtr<ros::NodeHandle> rosnode_;
 };
 
 } // end namespace fawkes

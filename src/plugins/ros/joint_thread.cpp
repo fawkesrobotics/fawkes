@@ -76,7 +76,7 @@ RosJointThread::finalize()
 void
 RosJointThread::bb_interface_created(const char *type, const char *id) throw()
 {
-  if (strncmp(type, "JointInterface", __INTERFACE_TYPE_SIZE) != 0)  return;
+  if (strncmp(type, "JointInterface", INTERFACE_TYPE_SIZE_) != 0)  return;
   JointInterface *interface;
   try {
     interface = blackboard->open_for_reading<JointInterface>(id);

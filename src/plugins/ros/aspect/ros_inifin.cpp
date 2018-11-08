@@ -50,11 +50,11 @@ ROSAspectIniFin::init(Thread *thread)
 					  "ROSAspect, but RTTI says it "
 					  "has not. ", thread->name());
   }
-  if (! __rosnode) {
+  if (! rosnode_) {
     throw CannotInitializeThreadException("ROS node handle has not been set.");
   }
 
-  ros_thread->init_ROSAspect(__rosnode);
+  ros_thread->init_ROSAspect(rosnode_);
 }
 
 void
@@ -77,7 +77,7 @@ ROSAspectIniFin::finalize(Thread *thread)
 void
 ROSAspectIniFin::set_rosnode(LockPtr<ros::NodeHandle> rosnode)
 {
-  __rosnode = rosnode;
+  rosnode_ = rosnode;
 }
 
 } // end namespace fawkes

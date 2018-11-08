@@ -72,4 +72,4 @@ class RosDynamicReconfigureThread
 
 };
 
-#endif /* __ROS_DYNAMIC_RECONFIGURE_THREAD_H_ */
+#endif /* ROS_DYNAMIC_RECONFIGURE_THREAD_H__ */

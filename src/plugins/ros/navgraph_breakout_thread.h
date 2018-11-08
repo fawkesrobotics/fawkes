@@ -68,4 +68,4 @@ class RosNavgraphBreakoutThread
   bool was_connected_;
 };
 
-#endif /* __ROS_NAVIGATOR_THREAD_H_ */
+#endif /* ROS_NAVIGATOR_THREAD_H__ */

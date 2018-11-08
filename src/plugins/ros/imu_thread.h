@@ -53,4 +53,4 @@ class RosIMUThread
   fawkes::IMUInterface * iface_;
 };
 
-#endif /* __PLUGINS_ROS_IMU_THREAD_H_ */
+#endif /* PLUGINS_ROS_IMU_THREAD_H__ */
