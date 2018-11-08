@@ -53,7 +53,7 @@ class KatanaSensorThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  KatanaActThread *__act_thread;
+  KatanaActThread *act_thread_;
 };
 
 

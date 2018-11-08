@@ -41,12 +41,12 @@ class KatanaMotorControlThread : public KatanaMotionThread
   virtual void run() { Thread::run(); }
 
  private:
-  unsigned int __nr;
-  int __encoder;
-  float __angle;
+  unsigned int nr_;
+  int encoder_;
+  float angle_;
 
-  bool __is_encoder, __is_inc;
-  unsigned int __poll_interval_usec;
+  bool is_encoder_, is_inc_;
+  unsigned int poll_interval_usec_;
 };
 
 

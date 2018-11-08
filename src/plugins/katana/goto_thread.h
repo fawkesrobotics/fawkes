@@ -41,9 +41,9 @@ class KatanaGotoThread : public KatanaMotionThread
  private:
   virtual void run() { Thread::run(); }
 
-  float __x, __y, __z;
-  float __phi, __theta, __psi;
-  unsigned int __poll_interval_usec;
+  float x_, y_, z_;
+  float phi_, theta_, psi_;
+  unsigned int poll_interval_usec_;
 };
 
 

@@ -43,9 +43,9 @@ KatanaSensorAcquisitionThread::KatanaSensorAcquisitionThread(fawkes::RefPtr<fawk
 							     fawkes::Logger *logger)
   : Thread("KatanaSensorAcqusitionThread", Thread::OPMODE_WAITFORWAKEUP)
 {
-  __katana  = katana;
-  __logger  = logger;
-  __enabled = false;
+  katana_  = katana;
+  logger_  = logger;
+  enabled_ = false;
 }
 
 
@@ -60,7 +60,7 @@ void
 KatanaSensorAcquisitionThread::set_enabled(bool enabled)
 {
   loop_mutex->lock();
-  __enabled = enabled;
+  enabled_ = enabled;
   loop_mutex->unlock();
 }
 
@@ -68,11 +68,11 @@ KatanaSensorAcquisitionThread::set_enabled(bool enabled)
 void
 KatanaSensorAcquisitionThread::loop()
 {
-  if (__enabled) {
+  if (enabled_) {
     try {
-      __katana->read_sensor_data();
+      katana_->read_sensor_data();
     } catch (Exception &e) {
-      __logger->log_warn(name(), e.what());
+      logger_->log_warn(name(), e.what());
     }
   }
 }

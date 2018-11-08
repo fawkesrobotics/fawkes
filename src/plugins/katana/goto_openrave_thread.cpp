@@ -84,20 +84,20 @@ KatanaGotoOpenRaveThread::KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::Katana
                                    bool autoload_IK,
                                    bool use_viewer)
   : KatanaMotionThread("KatanaGotoOpenRaveThread", katana, logger),
-  __target_object( "" ),
-  __target_traj( 0 ),
-  __cfg_robot_file( robot_file ),
-  __cfg_arm_model( arm_model ),
-  __cfg_autoload_IK( autoload_IK ),
-  __cfg_use_viewer( use_viewer ),
-  __is_target_object( 0 ),
-  __has_target_quaternion( 0 ),
-  __move_straight( 0 ),
-  __is_arm_extension( 0 ),
-  __plannerparams( "default" ),
-  __plannerparams_straight( "default" ),
+  target_object_( "" ),
+  target_traj_( 0 ),
+  cfg_robot_file_( robot_file ),
+  cfg_arm_model_( arm_model ),
+  cfg_autoload_IK_( autoload_IK ),
+  cfg_use_viewer_( use_viewer ),
+  is_target_object_( 0 ),
+  has_target_quaternion_( 0 ),
+  move_straight_( 0 ),
+  is_arm_extension_( 0 ),
+  plannerparams_( "default" ),
+  plannerparams_straight_( "default" ),
   _openrave( openrave ),
-  __theta_error( 0 )
+  theta_error_( 0 )
 {
 }
 
@@ -114,17 +114,17 @@ void
 KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
                                      float phi, float theta, float psi)
 {
-  __x     = x;
-  __y     = y;
-  __z     = z;
-  __phi   = (phi);
-  __theta = (theta);
-  __psi   = (psi);
+  x_     = x;
+  y_     = y;
+  z_     = z;
+  phi_   = (phi);
+  theta_ = (theta);
+  psi_   = (psi);
 
-  __has_target_quaternion = false;
-  __is_target_object = false;
-  __move_straight = false;
-  __is_arm_extension = false;
+  has_target_quaternion_ = false;
+  is_target_object_ = false;
+  move_straight_ = false;
+  is_arm_extension_ = false;
 }
 
 /** Set target position.
@@ -140,18 +140,18 @@ void
 KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
                                      float quat_x, float quat_y, float quat_z, float quat_w)
 {
-  __x      = x;
-  __y      = y;
-  __z      = z;
-  __quat_x = quat_x;
-  __quat_y = quat_y;
-  __quat_z = quat_z;
-  __quat_w = quat_w;
+  x_      = x;
+  y_      = y;
+  z_      = z;
+  quat_x_ = quat_x;
+  quat_y_ = quat_y;
+  quat_z_ = quat_z;
+  quat_w_ = quat_w;
 
-  __has_target_quaternion = true;
-  __is_target_object = false;
-  __move_straight = false;
-  __is_arm_extension = false;
+  has_target_quaternion_ = true;
+  is_target_object_ = false;
+  move_straight_ = false;
+  is_arm_extension_ = false;
 }
 
 /** Set target position.
@@ -160,9 +160,9 @@ KatanaGotoOpenRaveThread::set_target(float x, float y, float z,
 void
 KatanaGotoOpenRaveThread::set_target(const std::string& object_name, float rot_x)
 {
-  __target_object = object_name;
+  target_object_ = object_name;
 
-  __is_target_object = true;
+  is_target_object_ = true;
 }
 
 /** Set theta error
@@ -171,29 +171,29 @@ KatanaGotoOpenRaveThread::set_target(const std::string& object_name, float rot_x
 void
 KatanaGotoOpenRaveThread::set_theta_error(float error)
 {
-  __theta_error = error;
+  theta_error_ = error;
 }
 
 /** Set if arm should move straight.
  * Make sure to call this after(!) a "set_target" method, as they
- * set "__move_straight" attribute to its default value.
+ * set "move_straight_" attribute to its default value.
  * @param move_straight true, if arm should move straight
  */
 void
 KatanaGotoOpenRaveThread::set_move_straight(bool move_straight)
 {
-  __move_straight = move_straight;
+  move_straight_ = move_straight;
 }
 
 /** Set if target is taken as arm extension.
  * Make sure to call this after(!) a "set_target" method, as they
- * set "__move_straight" attribute to its default value.
+ * set "move_straight_" attribute to its default value.
  * @param arm_extension true, if target is regarded as arm extension
  */
 void
 KatanaGotoOpenRaveThread::set_arm_extension(bool arm_extension)
 {
-  __is_arm_extension = arm_extension;
+  is_arm_extension_ = arm_extension;
 }
 
 /** Set plannerparams.
@@ -204,9 +204,9 @@ void
 KatanaGotoOpenRaveThread::set_plannerparams(std::string& params, bool straight)
 {
   if( straight ) {
-    __plannerparams_straight = params;
+    plannerparams_straight_ = params;
   } else {
-    __plannerparams = params;
+    plannerparams_ = params;
   }
 }
 
@@ -218,9 +218,9 @@ void
 KatanaGotoOpenRaveThread::set_plannerparams(const char* params, bool straight)
 {
   if( straight ) {
-    __plannerparams_straight = params;
+    plannerparams_straight_ = params;
   } else {
-    __plannerparams = params;
+    plannerparams_ = params;
   }
 }
 
@@ -228,49 +228,49 @@ void
 KatanaGotoOpenRaveThread::init()
 {
   try {
-    __OR_robot = _openrave->add_robot(__cfg_robot_file, false);
+    OR_robot_ = _openrave->add_robot(cfg_robot_file_, false);
   } catch (Exception& e) {
-    throw fawkes::Exception("Could not add robot '%s' to openrave environment", __cfg_robot_file.c_str());
+    throw fawkes::Exception("Could not add robot '%s' to openrave environment", cfg_robot_file_.c_str());
   }
 
   try {
     // configure manipulator
     // TODO: from config parameters? neccessary?
-    if( __cfg_arm_model == "5dof" ) {
-      __OR_manip = new OpenRaveManipulatorNeuronicsKatana(5, 5);
-      __OR_manip->add_motor(0,0);
-      __OR_manip->add_motor(1,1);
-      __OR_manip->add_motor(2,2);
-      __OR_manip->add_motor(3,3);
-      __OR_manip->add_motor(4,4);
+    if( cfg_arm_model_ == "5dof" ) {
+      OR_manip_ = new OpenRaveManipulatorNeuronicsKatana(5, 5);
+      OR_manip_->add_motor(0,0);
+      OR_manip_->add_motor(1,1);
+      OR_manip_->add_motor(2,2);
+      OR_manip_->add_motor(3,3);
+      OR_manip_->add_motor(4,4);
 
       // Set manipulator and offsets.
       // offsetZ: katana.kinbody is 0.165 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
       // offsetX: katana.kinbody is setup 0.0725 on +x axis
-      _openrave->set_manipulator(__OR_robot, __OR_manip, 0.f, 0.f, 0.f);
-      __OR_robot->get_robot_ptr()->SetActiveManipulator("arm_kni");
+      _openrave->set_manipulator(OR_robot_, OR_manip_, 0.f, 0.f, 0.f);
+      OR_robot_->get_robot_ptr()->SetActiveManipulator("arm_kni");
 
-      if( __cfg_autoload_IK ) {
-        _openrave->get_environment()->load_IK_solver(__OR_robot, OpenRAVE::IKP_TranslationDirection5D);
+      if( cfg_autoload_IK_ ) {
+        _openrave->get_environment()->load_IK_solver(OR_robot_, OpenRAVE::IKP_TranslationDirection5D);
       }
-    } else if ( __cfg_arm_model == "6dof_dummy" ) {
-      __OR_manip = new OpenRaveManipulatorKatana6M180(6, 5);
-      __OR_manip->add_motor(0,0);
-      __OR_manip->add_motor(1,1);
-      __OR_manip->add_motor(2,2);
-      __OR_manip->add_motor(4,3);
-      __OR_manip->add_motor(5,4);
+    } else if ( cfg_arm_model_ == "6dof_dummy" ) {
+      OR_manip_ = new OpenRaveManipulatorKatana6M180(6, 5);
+      OR_manip_->add_motor(0,0);
+      OR_manip_->add_motor(1,1);
+      OR_manip_->add_motor(2,2);
+      OR_manip_->add_motor(4,3);
+      OR_manip_->add_motor(5,4);
 
       // Set manipulator and offsets.
       // offsetZ: katana.kinbody is 0.165 above ground; coordinate system of real katana has origin in intersection of j1 and j2 (i.e. start of link L2: 0.2015 on z-axis)
       // offsetX: katana.kinbody is setup 0.0725 on +x axis
-      _openrave->set_manipulator(__OR_robot, __OR_manip, 0.f, 0.f, 0.f);
+      _openrave->set_manipulator(OR_robot_, OR_manip_, 0.f, 0.f, 0.f);
 
-      if( __cfg_autoload_IK ) {
-        _openrave->get_environment()->load_IK_solver(__OR_robot, OpenRAVE::IKP_Transform6D);
+      if( cfg_autoload_IK_ ) {
+        _openrave->get_environment()->load_IK_solver(OR_robot_, OpenRAVE::IKP_Transform6D);
       }
     } else {
-      throw fawkes::Exception("Unknown entry for 'arm_model':%s", __cfg_arm_model.c_str());
+      throw fawkes::Exception("Unknown entry for 'arm_model':%s", cfg_arm_model_.c_str());
     }
 
   } catch (Exception& e) {
@@ -278,7 +278,7 @@ KatanaGotoOpenRaveThread::init()
     throw;
   }
 
-  if( __cfg_use_viewer)
+  if( cfg_use_viewer_)
     _openrave->start_viewer();
 }
 
@@ -286,8 +286,8 @@ void
 KatanaGotoOpenRaveThread::finalize()
 {
   _openrave->set_active_robot( NULL );
-  __OR_robot = NULL;
-  __OR_manip = NULL;
+  OR_robot_ = NULL;
+  OR_manip_ = NULL;
 }
 
 void
@@ -306,11 +306,11 @@ KatanaGotoOpenRaveThread::once()
 #endif
 
   // Get trajectories and move katana along them
-  __target_traj = __OR_robot->get_trajectory_device();
+  target_traj_ = OR_robot_->get_trajectory_device();
   Time time_now, time_last = Time();
   try {
     bool final = false;
-    __it = __target_traj->begin();
+    it_ = target_traj_->begin();
     while (!final) {
       time_last.stamp_systime();
       final = move_katana();
@@ -352,7 +352,7 @@ KatanaGotoOpenRaveThread::once()
   // TODO: Check for finished motion
   // Can't use current version like in goto_thread, because target is
   // not set in libkni!  can check endeffector position instead, or
-  // check last angle values from __target_traj with katana-arm values
+  // check last angle values from target_traj_ with katana-arm values
 
   _finished = true;
 }
@@ -373,18 +373,18 @@ KatanaGotoOpenRaveThread::plan_target()
 
   // Set starting point for planner, convert encoder values to angles if necessary
   if( !_katana->joint_angles() ) {
-    encToRad(__motor_encoders, __motor_angles);
+    encToRad(motor_encoders_, motor_angles_);
   }
-  __OR_manip->set_angles_device(__motor_angles);
+  OR_manip_->set_angles_device(motor_angles_);
 
   // Checking if target has IK solution
-  if( __plannerparams.compare("default") == 0 ) {
-    __plannerparams = DEFAULT_PLANNERPARAMS;
+  if( plannerparams_.compare("default") == 0 ) {
+    plannerparams_ = DEFAULT_PLANNERPARAMS;
   }
-  if( __is_target_object) {
-    _logger->log_debug(name(), "Check IK for object (%s)", __target_object.c_str());
+  if( is_target_object_) {
+    _logger->log_debug(name(), "Check IK for object (%s)", target_object_.c_str());
 
-    if( !_openrave->set_target_object(__target_object, __OR_robot) ) {
+    if( !_openrave->set_target_object(target_object_, OR_robot_) ) {
       _logger->log_warn("KatanaGotoThread", "Initiating goto failed, no IK solution found");
       _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
       return false;
@@ -393,31 +393,31 @@ KatanaGotoOpenRaveThread::plan_target()
   else {
     bool success = false;
     try {
-      if( __has_target_quaternion ) {
+      if( has_target_quaternion_ ) {
         _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f,%f)",
-                           __x, __y, __z, __quat_x, __quat_y, __quat_z, __quat_w);
-        success = __OR_robot->set_target_quat(__x, __y, __z, __quat_w, __quat_x, __quat_y, __quat_z);
-      } else if( __move_straight ) {
+                           x_, y_, z_, quat_x_, quat_y_, quat_z_, quat_w_);
+        success = OR_robot_->set_target_quat(x_, y_, z_, quat_w_, quat_x_, quat_y_, quat_z_);
+      } else if( move_straight_ ) {
         _logger->log_debug(name(), "Check IK(%f,%f,%f), straight movement",
-                           __x, __y, __z);
-        if( __is_arm_extension ) {
-          success = __OR_robot->set_target_rel(__x, __y, __z, true);
+                           x_, y_, z_);
+        if( is_arm_extension_ ) {
+          success = OR_robot_->set_target_rel(x_, y_, z_, true);
         } else {
-          success = __OR_robot->set_target_straight(__x, __y, __z);
+          success = OR_robot_->set_target_straight(x_, y_, z_);
         }
-        if( __plannerparams_straight.compare("default") == 0 ) {
-          __plannerparams_straight = DEFAULT_PLANNERPARAMS_STRAIGHT;
+        if( plannerparams_straight_.compare("default") == 0 ) {
+          plannerparams_straight_ = DEFAULT_PLANNERPARAMS_STRAIGHT;
         }
       } else {
         float theta_error = 0.0f;
-        while( !success && (theta_error <= __theta_error)) {
+        while( !success && (theta_error <= theta_error_)) {
           _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
-                             __x, __y, __z, __phi, __theta+theta_error, __psi);
-          success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta+theta_error, __psi);
+                             x_, y_, z_, phi_, theta_+theta_error, psi_);
+          success = OR_robot_->set_target_euler(EULER_ZXZ, x_, y_, z_, phi_, theta_+theta_error, psi_);
           if( !success ) {
             _logger->log_debug(name(), "Check IK(%f,%f,%f  |  %f,%f,%f)",
-                               __x, __y, __z, __phi, __theta-theta_error, __psi);
-            success = __OR_robot->set_target_euler(EULER_ZXZ, __x, __y, __z, __phi, __theta-theta_error, __psi);
+                               x_, y_, z_, phi_, theta_-theta_error, psi_);
+            success = OR_robot_->set_target_euler(EULER_ZXZ, x_, y_, z_, phi_, theta_-theta_error, psi_);
           }
 
           theta_error += 0.01;
@@ -433,16 +433,16 @@ KatanaGotoOpenRaveThread::plan_target()
       return false;
     }
   }
-  if( __move_straight ) {
-    __OR_robot->set_target_plannerparams(__plannerparams_straight);
+  if( move_straight_ ) {
+    OR_robot_->set_target_plannerparams(plannerparams_straight_);
   } else {
-    __OR_robot->set_target_plannerparams(__plannerparams);
+    OR_robot_->set_target_plannerparams(plannerparams_);
   }
 
   // Run planner
   float sampling = 0.04f; //maybe catch from config? or "learning" depending on performance?
   try {
-    _openrave->run_planner(__OR_robot, sampling);
+    _openrave->run_planner(OR_robot_, sampling);
   } catch (fawkes::Exception &e) {
     _logger->log_warn("KatanaGotoThread", "Planner failed (ignoring): %s", e.what());
     _error_code = fawkes::KatanaInterface::ERROR_UNSPECIFIC;
@@ -466,16 +466,16 @@ KatanaGotoOpenRaveThread::update_openrave_data()
 
   // Convert encoder values to angles if necessary
   if( !_katana->joint_angles() ) {
-    encToRad(__motor_encoders, __motor_angles);
+    encToRad(motor_encoders_, motor_angles_);
   }
-  __OR_manip->set_angles_device(__motor_angles);
+  OR_manip_->set_angles_device(motor_angles_);
 
   std::vector<OpenRAVE::dReal> angles;
-  __OR_manip->get_angles(angles);
+  OR_manip_->get_angles(angles);
 
   {
-    OpenRAVE::EnvironmentMutex::scoped_lock lock(__OR_robot->get_robot_ptr()->GetEnv()->GetMutex());
-    __OR_robot->get_robot_ptr()->SetActiveDOFValues(angles);
+    OpenRAVE::EnvironmentMutex::scoped_lock lock(OR_robot_->get_robot_ptr()->GetEnv()->GetMutex());
+    OR_robot_->get_robot_ptr()->SetActiveDOFValues(angles);
   }
 }
 
@@ -489,7 +489,7 @@ KatanaGotoOpenRaveThread::update_motor_data()
 
   // update motors
   while (1) {
-    //usleep(__poll_interval_usec);
+    //usleep(poll_interval_usec_);
     try {
       _katana->read_sensor_data(); // update sensor data
       _katana->read_motor_data(); // update motor data
@@ -509,12 +509,12 @@ KatanaGotoOpenRaveThread::update_motor_data()
   // fetch joint values
   num_errors = 0;
   while (1) {
-    //usleep(__poll_interval_usec);
+    //usleep(poll_interval_usec_);
     try {
       if( _katana->joint_angles()) {
-        _katana->get_angles(__motor_angles, false);    //fetch encoder values, param refreshEncoders=false
+        _katana->get_angles(motor_angles_, false);    //fetch encoder values, param refreshEncoders=false
       } else {
-        _katana->get_encoders(__motor_encoders, false);    //fetch encoder values, param refreshEncoders=false
+        _katana->get_encoders(motor_encoders_, false);    //fetch encoder values, param refreshEncoders=false
       }
     } catch (Exception &e) {
       if (++num_errors <= 10) {
@@ -534,7 +534,7 @@ KatanaGotoOpenRaveThread::update_motor_data()
 
 
 /** Realize next trajectory point.
- * Take the next point from the current trajectory __target_traj, set its
+ * Take the next point from the current trajectory target_traj_, set its
  * joint values and advance the iterator.
  * @return true if the trajectory is finished, i.e. there are no more points
  * left, false otherwise.
@@ -543,14 +543,14 @@ bool
 KatanaGotoOpenRaveThread::move_katana()
 {
   if( _katana->joint_angles() ) {
-    _katana->move_to(*__it, /*blocking*/false);
+    _katana->move_to(*it_, /*blocking*/false);
   } else {
     std::vector<int> enc;
     _katana->get_encoders(enc);
     _katana->move_to(enc, /*blocking*/false);
   }
 
-  return (++__it == __target_traj->end());
+  return (++it_ == target_traj_->end());
 }
 
 #endif

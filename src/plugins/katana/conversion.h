@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_CONVERSION_H
-#define __PLUGINS_KATANA_CONVERSION_H
+#ifndef PLUGINS_KATANA_CONVERSION_H_
+#define PLUGINS_KATANA_CONVERSION_H_
 
 #include <utils/math/angle.h>
 #include <common/MathHelperFunctions.h>

@@ -44,10 +44,10 @@ class KatanaSensorAcquisitionThread : public fawkes::Thread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::RefPtr<fawkes::KatanaController>  __katana;
-  bool                                      __enabled;
+  fawkes::RefPtr<fawkes::KatanaController>  katana_;
+  bool                                      enabled_;
 
-  fawkes::Logger          *__logger;
+  fawkes::Logger          *logger_;
 };
 
 

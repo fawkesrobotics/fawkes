@@ -39,11 +39,11 @@ KatanaSensorThread::KatanaSensorThread(KatanaActThread *act_thread)
   : Thread("KatanaSensorThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
-  __act_thread = act_thread;
+  act_thread_ = act_thread;
 }
 
 void
 KatanaSensorThread::loop()
 {
-  __act_thread->update_sensor_values();
+  act_thread_->update_sensor_values();
 }

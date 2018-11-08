@@ -44,8 +44,8 @@ class KatanaGripperThread : public KatanaMotionThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  gripper_mode_t  __mode;
-  unsigned int    __poll_interval_usec;
+  gripper_mode_t  mode_;
+  unsigned int    poll_interval_usec_;
 };
 
 

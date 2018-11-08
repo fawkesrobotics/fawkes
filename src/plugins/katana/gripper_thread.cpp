@@ -46,8 +46,8 @@ KatanaGripperThread::KatanaGripperThread(fawkes::RefPtr<fawkes::KatanaController
 					 unsigned int poll_interval_ms)
   : KatanaMotionThread("KatanaGripperThread", katana, logger)
 {
-  __mode               = OPEN_GRIPPER;
-  __poll_interval_usec = poll_interval_ms * 1000;
+  mode_               = OPEN_GRIPPER;
+  poll_interval_usec_ = poll_interval_ms * 1000;
 }
 
 
@@ -57,7 +57,7 @@ KatanaGripperThread::KatanaGripperThread(fawkes::RefPtr<fawkes::KatanaController
 void
 KatanaGripperThread::set_mode(gripper_mode_t mode)
 {
-  __mode = mode;
+  mode_ = mode;
 }
 
 
@@ -66,7 +66,7 @@ KatanaGripperThread::once()
 {
   try {
     // non-blocking call
-    if (__mode == CLOSE_GRIPPER) {
+    if (mode_ == CLOSE_GRIPPER) {
       _katana->gripper_close(/* wait */ false);
     } else {
       _katana->gripper_open(/* wait */ false);
@@ -83,7 +83,7 @@ KatanaGripperThread::once()
   bool final = false;
   short num_errors  = 0;
   while ( !final ) {
-    usleep(__poll_interval_usec);
+    usleep(poll_interval_usec_);
     try {
       _katana->read_sensor_data();
       _katana->read_motor_data();

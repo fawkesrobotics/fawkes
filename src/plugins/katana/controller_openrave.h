@@ -87,20 +87,20 @@ class KatanaControllerOpenrave : public KatanaController
   virtual void get_angles(std::vector<float>& to, bool refresh = false);
 
  private:
-  double __x, __y, __z;
-  double __phi, __theta, __psi;
+  double x_, y_, z_;
+  double phi_, theta_, psi_;
 
-  fawkes::OpenRaveConnector* 		__openrave;
-  fawkes::OpenRaveEnvironmentPtr	__OR_env;
-  fawkes::OpenRaveRobotPtr		__OR_robot;
-  fawkes::OpenRaveManipulatorPtr	__OR_manip;
-  OpenRAVE::EnvironmentBasePtr 		__env;
-  OpenRAVE::RobotBasePtr     		__robot;
-  OpenRAVE::RobotBase::ManipulatorPtr   __manip;
+  fawkes::OpenRaveConnector* 		openrave_;
+  fawkes::OpenRaveEnvironmentPtr	OR_env_;
+  fawkes::OpenRaveRobotPtr		OR_robot_;
+  fawkes::OpenRaveManipulatorPtr	OR_manip_;
+  OpenRAVE::EnvironmentBasePtr 		env_;
+  OpenRAVE::RobotBasePtr     		robot_;
+  OpenRAVE::RobotBase::ManipulatorPtr   manip_;
 
-  bool __initialized;
+  bool initialized_;
 
-  std::vector<short>             __active_motors;
+  std::vector<short>             active_motors_;
 
   void update_manipulator();
   void wait_finished();
