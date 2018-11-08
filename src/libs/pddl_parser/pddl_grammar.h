@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PDDL_GRAMMAR_H
-#define __PLUGINS_PDDL_GRAMMAR_H
+#ifndef PLUGINS_PDDL_GRAMMAR_H_
+#define PLUGINS_PDDL_GRAMMAR_H_
 
 #include "pddl_ast.h"
 

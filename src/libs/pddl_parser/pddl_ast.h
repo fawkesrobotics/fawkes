@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PDDL_AST_H
-#define __PLUGINS_PDDL_AST_H
+#ifndef PLUGINS_PDDL_AST_H_
+#define PLUGINS_PDDL_AST_H_
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
