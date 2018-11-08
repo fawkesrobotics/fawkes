@@ -82,33 +82,33 @@ class BBLoggerThread
 
 
  private:
-  fawkes::Interface  *__iface;
+  fawkes::Interface  *iface_;
 
-  unsigned int        __num_data_items;
-  unsigned int        __session_start;
+  unsigned int        num_data_items_;
+  unsigned int        session_start_;
 
-  bool                __enabled;
-  bool                __buffering;
-  bool                __flushing;
-  size_t              __data_size;
-  char               *__scenario;
-  char               *__filename;
-  char               *__logdir;
-  char               *__uid;
-  std::string         __type;
-  std::string         __id;
-  FILE               *__f_data;
+  bool                enabled_;
+  bool                buffering_;
+  bool                flushing_;
+  size_t              data_size_;
+  char               *scenario_;
+  char               *filename_;
+  char               *logdir_;
+  char               *uid_;
+  std::string         type_;
+  std::string         id_;
+  FILE               *f_data_;
 
-  fawkes::Time       *__start;
-  fawkes::Time       *__now;
+  fawkes::Time       *start_;
+  fawkes::Time       *now_;
 
-  bool                __is_master;
-  fawkes::ThreadList  __threads;
-  fawkes::SwitchInterface *__switch_if;
+  bool                is_master_;
+  fawkes::ThreadList  threads_;
+  fawkes::SwitchInterface *switch_if_;
 
-  fawkes::Mutex      *__queue_mutex;
-  unsigned int        __act_queue;
-  fawkes::LockQueue<void *> __queues[2];
+  fawkes::Mutex      *queue_mutex_;
+  unsigned int        act_queue_;
+  fawkes::LockQueue<void *> queues_[2];
 };
 
 

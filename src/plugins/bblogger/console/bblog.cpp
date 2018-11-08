@@ -166,53 +166,53 @@ class BBLogWatcher
 {
  public:
   BBLogWatcher(const char *filename, BBLogFile &file)
-    : __file(file)
+    : file_(file)
   {
-    __quit = false;
-    __fam = new FileAlterationMonitor();
-    __fam->add_listener(this);
-    __fam->watch_file(filename);
+    quit_ = false;
+    fam_ = new FileAlterationMonitor();
+    fam_->add_listener(this);
+    fam_->watch_file(filename);
     SignalManager::register_handler(SIGINT, this);
   }
 
   ~BBLogWatcher() {
     SignalManager::unregister_handler(this);
-    __fam->remove_listener(this);
-    delete __fam;
+    fam_->remove_listener(this);
+    delete fam_;
   }
 
   virtual void fam_event(const char *filename, unsigned int mask)
   {
     if (mask & FAM_DELETE) {
-      __quit = true;
-      __fam->interrupt();
+      quit_ = true;
+      fam_->interrupt();
     } else {
-      unsigned int remaining = __file.remaining_entries();
+      unsigned int remaining = file_.remaining_entries();
       for (unsigned int i = 0; i < remaining; ++i) {
-	__file.read_next();
-	__file.print_entry();
+	file_.read_next();
+	file_.print_entry();
       }
     }
   }
 
   virtual void handle_signal(int signal)
   {
-    __quit = true;
-    __fam->interrupt();
+    quit_ = true;
+    fam_->interrupt();
   }
 
   void run()
   {
-    while (! __quit) {
-      __fam->process_events(-1);
+    while (! quit_) {
+      fam_->process_events(-1);
     }
   }
 
 
  private:
-  bool __quit;
-  FileAlterationMonitor *__fam;
-  BBLogFile &__file;
+  bool quit_;
+  FileAlterationMonitor *fam_;
+  BBLogFile &file_;
 };
 
 int

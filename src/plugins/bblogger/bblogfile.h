@@ -80,7 +80,7 @@ class BBLogFile {
   template <class IT>
     IT *  interface(IT*& iface = 0) const
   {
-    IT *rv = dynamic_cast<IT *>(__interface);
+    IT *rv = dynamic_cast<IT *>(interface_);
     if (rv) {
       iface = rv;
       return rv;
@@ -97,20 +97,20 @@ class BBLogFile {
 
 
  private: // members
-  FILE              *__f;
-  bblog_file_header *__header;
+  FILE              *f_;
+  bblog_file_header *header_;
 
-  void *__ifdata;
+  void *ifdata_;
 
-  char *__filename;
-  char *__scenario;
-  char *__interface_type;
-  char *__interface_id;
+  char *filename_;
+  char *scenario_;
+  char *interface_type_;
+  char *interface_id_;
 
-  fawkes::Interface *__interface;
-  fawkes::BlackBoardInstanceFactory *__instance_factory;
-  fawkes::Time       __start_time;
-  fawkes::Time       __entry_offset;
+  fawkes::Interface *interface_;
+  fawkes::BlackBoardInstanceFactory *instance_factory_;
+  fawkes::Time       start_time_;
+  fawkes::Time       entry_offset_;
 };
 
 
