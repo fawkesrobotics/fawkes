@@ -123,7 +123,7 @@ TEST_F(RobotMemoryTest, UpdateInvalidCaught)
 
 TEST_F(RobotMemoryTest, RemoveInvalidCaught)
 {
-  ASSERT_THROW(robot_memory->remove("{____:4.56!}"), mongo::DBException);
+  ASSERT_THROW(robot_memory->remove("{___:4.56!}"), mongo::DBException);
   ASSERT_THROW(robot_memory->remove("{([})]"), mongo::DBException);
 }
 
