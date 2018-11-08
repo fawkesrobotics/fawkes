@@ -61,7 +61,7 @@ LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const std::string filter_name
                                                    std::vector<LaserDataFilter::Buffer *> &in)
 	: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
-  __logger = logger;
+  logger_ = logger;
 
   regex_t pathre;
   int error = 0;
@@ -92,21 +92,21 @@ LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const std::string filter_name
   entries.sort();
   entries.unique();
 
-  __dead_spots = new unsigned int[entries.size() * 2];
+  dead_spots_ = new unsigned int[entries.size() * 2];
 
   for (std::list<std::string>::iterator i = entries.begin(); i != entries.end(); ++i) {
     std::string path = prefix + *i + "/";
     float start = config->get_float((path + "start").c_str()); 
     float end   = config->get_float((path + "end").c_str()); 
 
-    __logger->log_debug("LaserDeadSpotsDataFilter", "Adding dead range [%3.3f, %3.3f] (%s)",
+    logger_->log_debug("LaserDeadSpotsDataFilter", "Adding dead range [%3.3f, %3.3f] (%s)",
 			start, end, i->c_str());
-    __cfg_dead_spots.push_back(std::make_pair(start, end));
+    cfg_dead_spots_.push_back(std::make_pair(start, end));
   }
 
-  __num_spots = __cfg_dead_spots.size();
+  num_spots_ = cfg_dead_spots_.size();
 
-  if (__num_spots == 0) {
+  if (num_spots_ == 0) {
     throw Exception("Dead spots filter enabled but no calibration data exists. Run fflaser_deadspots.");
   }
 
@@ -115,7 +115,7 @@ LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const std::string filter_name
 
 LaserDeadSpotsDataFilter::~LaserDeadSpotsDataFilter()
 {
-  delete[] __dead_spots;
+  delete[] dead_spots_;
 }
 
 
@@ -135,13 +135,13 @@ LaserDeadSpotsDataFilter::calc_spots()
 
   // need to calculate new beam ranges and allocate different memory segment
   float angle_factor = 360.0 / in_data_size;
-  for (unsigned int i = 0; i < __num_spots; ++i) {
-    __dead_spots[i * 2    ] =
+  for (unsigned int i = 0; i < num_spots_; ++i) {
+    dead_spots_[i * 2    ] =
       std::min(in_data_size - 1,
-	       (unsigned int)ceilf(__cfg_dead_spots[i].first / angle_factor));
-    __dead_spots[i * 2 + 1] =
+	       (unsigned int)ceilf(cfg_dead_spots_[i].first / angle_factor));
+    dead_spots_[i * 2 + 1] =
       std::min(in_data_size - 1,
-	       (unsigned int)ceilf(__cfg_dead_spots[i].second / angle_factor));
+	       (unsigned int)ceilf(cfg_dead_spots_[i].second / angle_factor));
   }
 }
 
@@ -156,9 +156,9 @@ LaserDeadSpotsDataFilter::filter()
     float *outbuf = out[a]->values;
 
     unsigned int start = 0;
-    for (unsigned int i = 0; i < __num_spots; ++i) {
-      const unsigned int spot_start = __dead_spots[i * 2    ];
-      const unsigned int spot_end   = __dead_spots[i * 2 + 1];
+    for (unsigned int i = 0; i < num_spots_; ++i) {
+      const unsigned int spot_start = dead_spots_[i * 2    ];
+      const unsigned int spot_end   = dead_spots_[i * 2 + 1];
       for (unsigned int j = start; j < spot_start; ++j) {
 	outbuf[j] = inbuf[j];
       }

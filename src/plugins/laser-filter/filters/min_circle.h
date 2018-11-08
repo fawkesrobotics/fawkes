@@ -34,7 +34,7 @@ class LaserMinCircleDataFilter : public LaserDataFilter
   void filter();
 
  private:
-  float  __radius;
+  float  radius_;
 };
 
 #endif

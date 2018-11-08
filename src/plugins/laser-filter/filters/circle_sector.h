@@ -35,8 +35,8 @@ class LaserCircleSectorDataFilter : public LaserDataFilter
   void filter();
 
  private:
-  unsigned int __from;
-  unsigned int __to;
+  unsigned int from_;
+  unsigned int to_;
 };
 
 #endif

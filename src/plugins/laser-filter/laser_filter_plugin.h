@@ -36,7 +36,7 @@ class LaserFilterPlugin : public fawkes::Plugin
   ~LaserFilterPlugin();
   
  private:
-  fawkes::Barrier *__barrier;
+  fawkes::Barrier *barrier_;
 };
 
 #endif

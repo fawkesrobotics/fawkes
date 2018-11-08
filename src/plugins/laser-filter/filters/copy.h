@@ -31,4 +31,4 @@ class LaserCopyDataFilter : public LaserDataFilter
     void filter();
 };
 
-#endif /* !__PLUGINS_LASER_FILTER_FILTERS_COPY_H_ */
+#endif /* !PLUGINS_LASER_FILTER_FILTERS_COPY_H__ */

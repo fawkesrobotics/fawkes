@@ -34,7 +34,7 @@ class Laser720to360DataFilter : public LaserDataFilter
   void filter();
 
  private:
-  bool __average;
+  bool average_;
 };
 
 #endif

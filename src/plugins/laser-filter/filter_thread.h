@@ -93,22 +93,22 @@ class LaserFilterThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  std::vector<LaserInterface> __in;
-  std::vector<LaserInterface> __out;
+  std::vector<LaserInterface> in_;
+  std::vector<LaserInterface> out_;
 
-  std::vector<LaserDataFilter::Buffer *>  __in_bufs;
-  std::vector<LaserDataFilter::Buffer *>  __out_bufs;
+  std::vector<LaserDataFilter::Buffer *>  in_bufs_;
+  std::vector<LaserDataFilter::Buffer *>  out_bufs_;
 
-  LaserDataFilter *__filter;
+  LaserDataFilter *filter_;
 
-  std::string      __cfg_name;
-  std::string      __cfg_prefix;
+  std::string      cfg_name_;
+  std::string      cfg_prefix_;
 
-  std::list<LaserFilterThread *>  __wait_threads;
-  bool                            __wait_done;
-  fawkes::Mutex                  *__wait_mutex;
-  fawkes::WaitCondition          *__wait_cond;
-  fawkes::Barrier                *__wait_barrier;
+  std::list<LaserFilterThread *>  wait_threads_;
+  bool                            wait_done_;
+  fawkes::Mutex                  *wait_mutex_;
+  fawkes::WaitCondition          *wait_cond_;
+  fawkes::Barrier                *wait_barrier_;
 };
 
 

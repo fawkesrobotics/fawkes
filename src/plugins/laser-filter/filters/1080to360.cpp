@@ -49,7 +49,7 @@ Laser1080to360DataFilter::Laser1080to360DataFilter(const std::string filter_name
 			    "1080 entries");
   }
   set_out_data_size(360);
-  __average = average;
+  average_ = average;
 }
 
 void
@@ -62,7 +62,7 @@ Laser1080to360DataFilter::filter()
     float *inbuf  = in[a]->values;
     float *outbuf = out[a]->values;
 
-    if (__average) {
+    if (average_) {
       for (unsigned int i = 0; i < 360; ++i) {
 	outbuf[i] = (inbuf[i * 3] + inbuf[i * 2 + 1] + inbuf[i * 2 + 2]) / 2.0;
       }

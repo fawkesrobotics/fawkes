@@ -45,7 +45,7 @@ using namespace fawkes;
 LaserFilterPlugin::LaserFilterPlugin(Configuration *config)
   : Plugin(config)
 {
-  __barrier = NULL;
+  barrier_ = NULL;
 
   std::set<std::string> configs;
   std::set<std::string> ignored_configs;
@@ -180,9 +180,9 @@ LaserFilterPlugin::LaserFilterPlugin(Configuration *config)
     // a "need to wait for done" flag.
     if (has_deps) {
       std::map<std::string, LaserFilterThread *>::iterator t;
-      __barrier = new Barrier(threads.size());
+      barrier_ = new Barrier(threads.size());
       for (t = threads.begin(); t != threads.end(); ++t) {
-	t->second->set_wait_barrier(__barrier);
+	t->second->set_wait_barrier(barrier_);
       }
     }
 
@@ -198,7 +198,7 @@ LaserFilterPlugin::LaserFilterPlugin(Configuration *config)
 
 LaserFilterPlugin::~LaserFilterPlugin()
 {
-  delete __barrier;
+  delete barrier_;
 }
 
 

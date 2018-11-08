@@ -60,8 +60,8 @@ LaserDataFilterCascade::~LaserDataFilterCascade()
 void
 LaserDataFilterCascade::set_out_vector(std::vector<LaserDataFilter::Buffer *> &out)
 {
-  __filters.back()->set_out_vector(out);
-  this->out = __filters.back()->get_out_vector();
+  filters_.back()->set_out_vector(out);
+  this->out = filters_.back()->get_out_vector();
 }
 
 
@@ -71,7 +71,7 @@ LaserDataFilterCascade::set_out_vector(std::vector<LaserDataFilter::Buffer *> &o
 void
 LaserDataFilterCascade::add_filter(LaserDataFilter *filter)
 {
-  __filters.push_back(filter);
+  filters_.push_back(filter);
   out_data_size = filter->get_out_data_size();
   out = filter->get_out_vector();
 }
@@ -83,7 +83,7 @@ LaserDataFilterCascade::add_filter(LaserDataFilter *filter)
 void
 LaserDataFilterCascade::remove_filter(LaserDataFilter *filter)
 {
-  __filters.remove(filter);
+  filters_.remove(filter);
 }
 
 
@@ -91,17 +91,17 @@ LaserDataFilterCascade::remove_filter(LaserDataFilter *filter)
 void
 LaserDataFilterCascade::delete_filters()
 {
-  for (__fit = __filters.begin(); __fit != __filters.end(); ++__fit) {
-    delete *__fit;
+  for (fit_ = filters_.begin(); fit_ != filters_.end(); ++fit_) {
+    delete *fit_;
   }
-  __filters.clear();
+  filters_.clear();
 }
 
 
 void
 LaserDataFilterCascade::filter()
 {
-  for (__fit = __filters.begin(); __fit != __filters.end(); ++__fit) {
-    (*__fit)->filter();
+  for (fit_ = filters_.begin(); fit_ != filters_.end(); ++fit_) {
+    (*fit_)->filter();
   }
 }

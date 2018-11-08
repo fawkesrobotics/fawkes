@@ -93,40 +93,40 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
 			  Laser360Interface *laser360, Laser720Interface *laser720)
     : BlackBoardInterfaceListener("LaserDeadSpotCalibrator")
   {
-    __laser720           = laser720;
-    __laser360           = laser360;
-    __blackboard         = blackboard;
-    __num_spots_expected = num_spots;
-    __num_measurements   = num_measurements;
-    __cur_measurement    = 0;
-    __num_beams          = 0;
-    __margin             = margin;
-    __compare_distance   = compare_distance;
-    __measurements.clear();
-    __num_spots_found    = 0;
+    laser720_           = laser720;
+    laser360_           = laser360;
+    blackboard_         = blackboard;
+    num_spots_expected_ = num_spots;
+    num_measurements_   = num_measurements;
+    cur_measurement_    = 0;
+    num_beams_          = 0;
+    margin_             = margin;
+    compare_distance_   = compare_distance;
+    measurements_.clear();
+    num_spots_found_    = 0;
 
-    if (!__laser720 || ! __laser720->has_writer()) {
-      __lowres_calibrate = true;
-      __num_beams = __laser360->maxlenof_distances();
-      bbil_add_data_interface(__laser360);
+    if (!laser720_ || ! laser720_->has_writer()) {
+      lowres_calibrate_ = true;
+      num_beams_ = laser360_->maxlenof_distances();
+      bbil_add_data_interface(laser360_);
     } else {
-      __lowres_calibrate = false;
-      __num_beams = __laser720->maxlenof_distances();
-      bbil_add_data_interface(__laser720);
+      lowres_calibrate_ = false;
+      num_beams_ = laser720_->maxlenof_distances();
+      bbil_add_data_interface(laser720_);
     }
     std::vector<float> tmp;
-    tmp.resize(__num_measurements, INITIAL_MEASUREMENT);
-    __measurements.resize(__num_beams, tmp);
+    tmp.resize(num_measurements_, INITIAL_MEASUREMENT);
+    measurements_.resize(num_beams_, tmp);
   
-    __blackboard->register_listener(this);
+    blackboard_->register_listener(this);
   }
 
   /** Wait for the calibration to be finished. */
   void
   wait_finished()
   {
-    __start_measuring = true;
-    __finish_waitcond.wait();
+    start_measuring_ = true;
+    finish_waitcond_.wait();
   }
 
   /** Get spots.
@@ -135,7 +135,7 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
   std::vector<std::pair<float, float> >
   get_dead_spots()
   {
-    return __dead_spots;
+    return dead_spots_;
   }
 
   /** Get number of spots.
@@ -144,7 +144,7 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
   unsigned int
   num_detected_spots()
   {
-    return __num_spots_found;
+    return num_spots_found_;
   }
 
  private:
@@ -159,10 +159,10 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
   calculate_medians()
   {
     std::vector<float> rv;
-    rv.resize(__num_beams, INITIAL_MEASUREMENT);
+    rv.resize(num_beams_, INITIAL_MEASUREMENT);
 
-    for (unsigned int i = 0; i < __measurements.size(); ++i) {
-      rv[i] = calculate_median(__measurements[i]);
+    for (unsigned int i = 0; i < measurements_.size(); ++i) {
+      rv[i] = calculate_median(measurements_[i]);
     }
 
     return rv;
@@ -173,7 +173,7 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
   analyze()
   {
     //printf("ANALYZING\n");
-    float angle_factor = 360.0 / __num_beams;
+    float angle_factor = 360.0 / num_beams_;
 
     std::vector<float> medians = calculate_medians();
 
@@ -185,14 +185,14 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
 	continue;
       }
 
-      if (medians[i] < __compare_distance) {
+      if (medians[i] < compare_distance_) {
 	// start of spot, look for end
 	float start_angle = i * angle_factor;
 
 	//printf("Region starting at %f\n", start_angle);
 
 	do {
-	  //printf("Median %u: %f < %f\n", i, medians[i], __compare_distance);
+	  //printf("Median %u: %f < %f\n", i, medians[i], compare_distance_);
 
 	  if ((i + 1) >= medians.size()) {
 	    if (iteration_done) {
@@ -206,11 +206,11 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
 	  } else {
 	    ++i;
 	  }
-	} while ((medians[i] < __compare_distance) && (medians[i] != INITIAL_MEASUREMENT));
-	if (medians[i] >= __compare_distance) {
+	} while ((medians[i] < compare_distance_) && (medians[i] != INITIAL_MEASUREMENT));
+	if (medians[i] >= compare_distance_) {
 	  float end_angle = i * angle_factor;
 	  //printf("Region ends at %f\n", end_angle);
-	  __dead_spots.push_back(std::make_pair(start_angle, end_angle));
+	  dead_spots_.push_back(std::make_pair(start_angle, end_angle));
 	} else {
 	  // did not find end of region
 	  break;
@@ -222,30 +222,30 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
   void
   sort_spots()
   {
-    std::sort(__dead_spots.begin(), __dead_spots.end());
+    std::sort(dead_spots_.begin(), dead_spots_.end());
   }
 
   bool
   merge_region(unsigned int ind1, unsigned int ind2)
   {
-    if (__dead_spots[ind1].second >= __dead_spots[ind2].first) {
+    if (dead_spots_[ind1].second >= dead_spots_[ind2].first) {
       // regions overlap, merge!
-      if (__dead_spots[ind1].first > __dead_spots[ind2].second) {
+      if (dead_spots_[ind1].first > dead_spots_[ind2].second) {
 	// merging would create a region across the discontinuity, do a
 	// split-merge, i.e. join regions to one, but save as two (cf. normalize())
 	//printf("Merging overlapping regions %u [%f, %f] and %u [%f, %f] to [%f, %f]/[%f, %f]\n",
-	//       ind1, __dead_spots[ind1].first, __dead_spots[ind1].second,
-	//       ind2, __dead_spots[ind2].first, __dead_spots[ind2].second,
-	//       __dead_spots[ind1].first, 360., 0., __dead_spots[ind2].second);
-	__dead_spots[ind1].second  = 360.;
-	__dead_spots[ind2].first = 0.;
+	//       ind1, dead_spots_[ind1].first, dead_spots_[ind1].second,
+	//       ind2, dead_spots_[ind2].first, dead_spots_[ind2].second,
+	//       dead_spots_[ind1].first, 360., 0., dead_spots_[ind2].second);
+	dead_spots_[ind1].second  = 360.;
+	dead_spots_[ind2].first = 0.;
       } else {
 	//printf("Merging overlapping regions %u [%f, %f] and %u [%f, %f] to [%f, %f]\n",
-	//       ind1, __dead_spots[ind1].first, __dead_spots[ind1].second,
-	//       ind2, __dead_spots[ind2].first, __dead_spots[ind2].second,
-	//       __dead_spots[ind1].first, __dead_spots[ind2].second);
-	__dead_spots[ind1].second = __dead_spots[ind2].second;
-	__dead_spots.erase(__dead_spots.begin() + ind2);
+	//       ind1, dead_spots_[ind1].first, dead_spots_[ind1].second,
+	//       ind2, dead_spots_[ind2].first, dead_spots_[ind2].second,
+	//       dead_spots_[ind1].first, dead_spots_[ind2].second);
+	dead_spots_[ind1].second = dead_spots_[ind2].second;
+	dead_spots_.erase(dead_spots_.begin() + ind2);
 	return false;
       }
     }
@@ -257,15 +257,15 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
   {
     //printf("MERGING\n");
     unsigned int i = 0;
-    while (i < __dead_spots.size() - 1) {
+    while (i < dead_spots_.size() - 1) {
       //printf("Comparing %u, %u, %f >= %f, %zu\n", i, i+1,
-      //       __dead_spots[i].second, __dead_spots[i+1].first, __dead_spots.size());
+      //       dead_spots_[i].second, dead_spots_[i+1].first, dead_spots_.size());
       if (merge_region(i, i+1))  ++i;
     }
     // now check for posssible merge of first and last region (at the discontinuity
-    unsigned int last = __dead_spots.size() - 1;
-    if ((__dead_spots[last].second >= __dead_spots[0].first) && (__dead_spots[last].second <= __dead_spots[0].second) &&
-	(__dead_spots[0].first >= __dead_spots[last].first - 360) && (__dead_spots[0].second <= __dead_spots[last].second)) {
+    unsigned int last = dead_spots_.size() - 1;
+    if ((dead_spots_[last].second >= dead_spots_[0].first) && (dead_spots_[last].second <= dead_spots_[0].second) &&
+	(dead_spots_[0].first >= dead_spots_[last].first - 360) && (dead_spots_[0].second <= dead_spots_[last].second)) {
       merge_region(last, 0);
     }
   }
@@ -274,20 +274,20 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
   apply_margin()
   {
     //printf("MARGIN\n");
-    if (__margin != 0.0) {
+    if (margin_ != 0.0) {
       // post-process, add margins, possibly causing regions to be merged
       // add margins
-      for (unsigned int i = 0; i != __dead_spots.size(); ++i) {
-	//float before_start = __dead_spots[i].first;
-	//float before_end   = __dead_spots[i].second;
-	__dead_spots[i].first  -= __margin;
-	__dead_spots[i].second += __margin;
-	if (__dead_spots[i].second > 360.0) {
-	  __dead_spots[i].second -= 360.0;
+      for (unsigned int i = 0; i != dead_spots_.size(); ++i) {
+	//float before_start = dead_spots_[i].first;
+	//float before_end   = dead_spots_[i].second;
+	dead_spots_[i].first  -= margin_;
+	dead_spots_[i].second += margin_;
+	if (dead_spots_[i].second > 360.0) {
+	  dead_spots_[i].second -= 360.0;
 	}
 	//printf("Applying margin to spot %i, [%f, %f] -> [%f, %f]\n",
 	//       i, before_start, before_end,
-	//       __dead_spots[i].first, __dead_spots[i].second);
+	//       dead_spots_[i].first, dead_spots_[i].second);
       }
       // look if regions need to be merged
       merge_spots();
@@ -299,31 +299,31 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
   {
     //printf("NORMALIZING\n");
     // normalize
-    for (unsigned int i = 0; i != __dead_spots.size(); ++i) {
-      if (__dead_spots[i].first < 0.) {
+    for (unsigned int i = 0; i != dead_spots_.size(); ++i) {
+      if (dead_spots_[i].first < 0.) {
 	//printf("Normalizing %i start angle %f -> %f\n", i,
-	//       __dead_spots[i].first, 360. + __dead_spots[i].first);
-	__dead_spots[i].first = 360. + __dead_spots[i].first;
+	//       dead_spots_[i].first, 360. + dead_spots_[i].first);
+	dead_spots_[i].first = 360. + dead_spots_[i].first;
       }
-      if (__dead_spots[i].second < 0.) {
+      if (dead_spots_[i].second < 0.) {
 	//printf("Normalizing %i end angle %f -> %f\n", i,
-	//       __dead_spots[i].second, 360. + __dead_spots[i].second);
-	__dead_spots[i].second = 360. + __dead_spots[i].first;
+	//       dead_spots_[i].second, 360. + dead_spots_[i].second);
+	dead_spots_[i].second = 360. + dead_spots_[i].first;
       }
 
-      if (__dead_spots[i].first > __dead_spots[i].second) {
+      if (dead_spots_[i].first > dead_spots_[i].second) {
 	// range over the discontinuity at 0°/360°, split into two regions
-	//printf("Splitting (size %zu) region %i from [%f, %f] ", __dead_spots.size(), i,
-	//       __dead_spots[i].first, __dead_spots[i].second);
-	__dead_spots.resize(__dead_spots.size() + 1);
-	for (int j = __dead_spots.size()-1; j >= (int)i; --j) {
-	  __dead_spots[j+1] = __dead_spots[j];
+	//printf("Splitting (size %zu) region %i from [%f, %f] ", dead_spots_.size(), i,
+	//       dead_spots_[i].first, dead_spots_[i].second);
+	dead_spots_.resize(dead_spots_.size() + 1);
+	for (int j = dead_spots_.size()-1; j >= (int)i; --j) {
+	  dead_spots_[j+1] = dead_spots_[j];
 	}
-	__dead_spots[i+1].first = 0;
-	__dead_spots[i].second  = 360.0;
+	dead_spots_[i+1].first = 0;
+	dead_spots_[i].second  = 360.0;
 
-	//printf("to [%f, %f] and [%f, %f] (size %zu)\n", __dead_spots[i].first, __dead_spots[i].second,
-	//       __dead_spots[i+1].first, __dead_spots[i+1].second, __dead_spots.size());
+	//printf("to [%f, %f] and [%f, %f] (size %zu)\n", dead_spots_[i].first, dead_spots_[i].second,
+	//       dead_spots_[i+1].first, dead_spots_[i+1].second, dead_spots_.size());
       }
     }
     //print_spots();
@@ -335,9 +335,9 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
   void
   print_spots()
   {
-    for (unsigned int i = 0; i != __dead_spots.size(); ++i) {
+    for (unsigned int i = 0; i != dead_spots_.size(); ++i) {
       printf("Spot %u   start: %3.2f   end: %3.2f\n", i,
-	     __dead_spots[i].first, __dead_spots[i].second);
+	     dead_spots_[i].first, dead_spots_[i].second);
     }
   }
 
@@ -346,27 +346,27 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
   {
     analyze();
 
-    if (__dead_spots.size() > 0) {
+    if (dead_spots_.size() > 0) {
       apply_margin();
       print_spots();
 
-      __num_spots_found = __dead_spots.size();
+      num_spots_found_ = dead_spots_.size();
       normalize();
     } else {
-      __num_spots_found = 0;
+      num_spots_found_ = 0;
     }
 
-    if (__num_spots_found != __num_spots_expected) {
+    if (num_spots_found_ != num_spots_expected_) {
       printf("Error, expected %u dead spots, but detected %u.\n",
-	     __num_spots_expected, __num_spots_found);
+	     num_spots_expected_, num_spots_found_);
       print_spots();
     } else {
-      printf("Found expected number of %u dead spots\n", __num_spots_expected);
-      if (__dead_spots.size() > __num_spots_expected) {
+      printf("Found expected number of %u dead spots\n", num_spots_expected_);
+      if (dead_spots_.size() > num_spots_expected_) {
 	printf("Note that more regions will be printed than spots were expected.\n"
 	       "This is due to splitting that occurs around the discontinuity at 0°/360°\n");
       }
-      if (__num_spots_expected > __dead_spots.size()) {
+      if (num_spots_expected_ > dead_spots_.size()) {
 	printf("Note that less regions will be printed than spots were expected.\n"
 	       "This is due to merging that occurred after applying the margin you\n"
 	       "suggested and normalizing the data.\n");
@@ -378,54 +378,54 @@ class LaserDeadSpotCalibrator : public BlackBoardInterfaceListener
   virtual void
   bb_interface_data_changed(Interface *interface) throw()
   {
-    if (! __start_measuring)  return;
+    if (! start_measuring_)  return;
 
-    printf("\r%3u samples remaining...", __num_measurements - __cur_measurement);
+    printf("\r%3u samples remaining...", num_measurements_ - cur_measurement_);
     fflush(stdout);
 
     float *distances = NULL;
     unsigned int num_distances = 0;
-    if (__lowres_calibrate) {
-      __laser360->read();
-      distances     = __laser360->distances();
-      num_distances = __laser360->maxlenof_distances();
+    if (lowres_calibrate_) {
+      laser360_->read();
+      distances     = laser360_->distances();
+      num_distances = laser360_->maxlenof_distances();
     } else {
-      __laser720->read();
-      distances     = __laser720->distances();
-      num_distances = __laser720->maxlenof_distances();
+      laser720_->read();
+      distances     = laser720_->distances();
+      num_distances = laser720_->maxlenof_distances();
     }
 
     for (unsigned int i = 0; i < num_distances; ++i) {
       if (finite(distances[i]) && distances[i] > 1e-6) {
-	__measurements[i][__cur_measurement] = distances[i];
+	measurements_[i][cur_measurement_] = distances[i];
       }
     }
 
-    if (++__cur_measurement >= __num_measurements) {
+    if (++cur_measurement_ >= num_measurements_) {
       printf("\rMeasuring done, post-processing data now.\n");
       process_measurements();
-      __blackboard->unregister_listener(this);
-      __finish_waitcond.wake_all();
+      blackboard_->unregister_listener(this);
+      finish_waitcond_.wake_all();
     }
   }
 
  private:
-  BlackBoard        *__blackboard;
-  Laser360Interface *__laser360;
-  Laser720Interface *__laser720;
-  WaitCondition      __finish_waitcond;
+  BlackBoard        *blackboard_;
+  Laser360Interface *laser360_;
+  Laser720Interface *laser720_;
+  WaitCondition      finish_waitcond_;
 
-  float              __margin;
-  bool               __lowres_calibrate;
-  bool               __start_measuring;
-  unsigned int       __num_spots_expected;
-  unsigned int       __num_beams;
-  unsigned int       __num_measurements;
-  unsigned int       __cur_measurement;
-  unsigned int       __num_spots_found;
-  float              __compare_distance;
-  std::vector<std::vector<float> >      __measurements;
-  std::vector<std::pair<float, float> > __dead_spots;
+  float              margin_;
+  bool               lowres_calibrate_;
+  bool               start_measuring_;
+  unsigned int       num_spots_expected_;
+  unsigned int       num_beams_;
+  unsigned int       num_measurements_;
+  unsigned int       cur_measurement_;
+  unsigned int       num_spots_found_;
+  float              compare_distance_;
+  std::vector<std::vector<float> >      measurements_;
+  std::vector<std::pair<float, float> > dead_spots_;
 };
 
 int
