@@ -70,9 +70,9 @@ class TwoLinesCellRenderer : public Gtk::CellRenderer
 
  private:
 #ifdef GLIBMM_PROPERTIES_ENABLED
-  Glib::Property<Glib::ustring> __property_line1;
-  Glib::Property<Glib::ustring> __property_line2;
-  Glib::Property<bool>          __property_line2_enabled;
+  Glib::Property<Glib::ustring> property_line1_;
+  Glib::Property<Glib::ustring> property_line2_;
+  Glib::Property<bool>          property_line2_enabled_;
 #endif
 };
 

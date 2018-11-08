@@ -78,19 +78,19 @@ class InterfaceChooserDialog
   virtual int init_columns();
   virtual void init_row(Gtk::TreeModel::Row& row, const InterfaceInfo& ii);
 
-  Gtk::TreeView                 __treeview; /**< Tree widget for interfaces. */
-  Glib::RefPtr<Gtk::ListStore>  __model;    /**< Data model of the tree. */
+  Gtk::TreeView                 treeview_; /**< Tree widget for interfaces. */
+  Glib::RefPtr<Gtk::ListStore>  model_;    /**< Data model of the tree. */
 
  private:
   InterfaceChooserDialog(const InterfaceChooserDialog& obj);
   InterfaceChooserDialog& operator=(const InterfaceChooserDialog& obj);
 
-  BlackBoard *__bb;
+  BlackBoard *bb_;
 
-  Gtk::Window         &__parent;
-  Gtk::ScrolledWindow  __scrollwin;
+  Gtk::Window         &parent_;
+  Gtk::ScrolledWindow  scrollwin_;
 
-  const Record* __record; /**< Should only be accessed by record(). */
+  const Record* record_; /**< Should only be accessed by record(). */
 };
 
 } // end of namespace fawkes

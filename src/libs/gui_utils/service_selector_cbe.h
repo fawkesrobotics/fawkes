@@ -96,10 +96,10 @@ class ServiceSelectorCBE
   ServiceModel         *m_service_model;
 
  private:
-   Glib::ustring  __hostname;
-   Glib::ustring  __servicename;
-   unsigned short __port;
+   Glib::ustring  hostname_;
+   Glib::ustring  servicename_;
+   unsigned short port_;
 };
 
 }
-#endif /* __LIBS_GUI_UTILS_SERVICE_SELECTOR_CBE_H_ */
+#endif /* LIBS_GUI_UTILS_SERVICE_SELECTOR_CBE_H__ */

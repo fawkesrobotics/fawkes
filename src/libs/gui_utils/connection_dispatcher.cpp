@@ -40,10 +40,10 @@ namespace fawkes {
  */
 ConnectionDispatcher::ConnectionDispatcher(unsigned int cid)
 {
-  __cid = cid;
-  __client = new FawkesNetworkClient();
-  __client->register_handler(this, __cid);
-  __client_owned = true;
+  cid_ = cid;
+  client_ = new FawkesNetworkClient();
+  client_->register_handler(this, cid_);
+  client_owned_ = true;
 
   connect_signals();
 }
@@ -59,10 +59,10 @@ ConnectionDispatcher::ConnectionDispatcher(unsigned int cid)
 					     unsigned short int port,
 					     unsigned int cid)
 {
-  __cid = cid;
-  __client = new FawkesNetworkClient(hostname, port);
-  __client->register_handler(this, __cid);
-  __client_owned = true;
+  cid_ = cid;
+  client_ = new FawkesNetworkClient(hostname, port);
+  client_->register_handler(this, cid_);
+  client_owned_ = true;
 
   connect_signals();
 }
@@ -77,9 +77,9 @@ ConnectionDispatcher::~ConnectionDispatcher()
 void
 ConnectionDispatcher::connect_signals()
 {
-  __dispatcher_connected.connect(sigc::mem_fun(*this, &ConnectionDispatcher::on_connection_established));
-  __dispatcher_disconnected.connect(sigc::mem_fun(*this, &ConnectionDispatcher::on_connection_died));
-  __dispatcher_message_received.connect(sigc::mem_fun(*this, &ConnectionDispatcher::on_message_received));
+  dispatcher_connected_.connect(sigc::mem_fun(*this, &ConnectionDispatcher::on_connection_established));
+  dispatcher_disconnected_.connect(sigc::mem_fun(*this, &ConnectionDispatcher::on_connection_died));
+  dispatcher_message_received_.connect(sigc::mem_fun(*this, &ConnectionDispatcher::on_message_received));
 }
 
 /** Set component ID.
@@ -92,11 +92,11 @@ ConnectionDispatcher::connect_signals()
 void
 ConnectionDispatcher::set_cid(unsigned int cid)
 {
-  if ( __client ) {
-    __client->deregister_handler(__cid);
-    __client->register_handler(this, cid);
+  if ( client_ ) {
+    client_->deregister_handler(cid_);
+    client_->register_handler(this, cid);
   }
-  __cid = cid;
+  cid_ = cid;
 }
 
 
@@ -109,13 +109,13 @@ ConnectionDispatcher::set_cid(unsigned int cid)
 void
 ConnectionDispatcher::set_client(FawkesNetworkClient *client)
 {
-  if ( __client )  __client->deregister_handler(__cid);
-  if ( __client_owned ) {
-    delete __client;
+  if ( client_ )  client_->deregister_handler(cid_);
+  if ( client_owned_ ) {
+    delete client_;
   }
-  __client_owned = false;
-  __client = client;
-  if ( __client )  __client->register_handler(this, __cid);
+  client_owned_ = false;
+  client_ = client;
+  if ( client_ )  client_->register_handler(this, cid_);
 }
 
 
@@ -125,7 +125,7 @@ ConnectionDispatcher::set_client(FawkesNetworkClient *client)
 FawkesNetworkClient *
 ConnectionDispatcher::get_client()
 {
-  return __client;
+  return client_;
 }
 
 
@@ -135,7 +135,7 @@ ConnectionDispatcher::get_client()
  */
 ConnectionDispatcher::operator bool()
 {
-  return (__client && __client->connected());
+  return (client_ && client_->connected());
 }
 
 
@@ -145,7 +145,7 @@ ConnectionDispatcher::operator bool()
 void
 ConnectionDispatcher::on_connection_established()
 {
-  __signal_connected.emit();
+  signal_connected_.emit();
 }
 
 
@@ -155,7 +155,7 @@ ConnectionDispatcher::on_connection_established()
 void
 ConnectionDispatcher::on_connection_died()
 {
-  __signal_disconnected.emit();
+  signal_disconnected_.emit();
 }
 
 
@@ -165,14 +165,14 @@ ConnectionDispatcher::on_connection_died()
 void
 ConnectionDispatcher::on_message_received()
 {
-  __queue_message_received.lock();
-  while (! __queue_message_received.empty()) {
-    FawkesNetworkMessage *msg = __queue_message_received.front();
-    __signal_message_received.emit(msg);
+  queue_message_received_.lock();
+  while (! queue_message_received_.empty()) {
+    FawkesNetworkMessage *msg = queue_message_received_.front();
+    signal_message_received_.emit(msg);
     msg->unref();
-    __queue_message_received.pop();
+    queue_message_received_.pop();
   }
-  __queue_message_received.unlock();
+  queue_message_received_.unlock();
 }
 
 
@@ -187,22 +187,22 @@ void
 ConnectionDispatcher::inbound_received(FawkesNetworkMessage *m, unsigned int id) throw()
 {
   m->ref();
-  __queue_message_received.push_locked(m);
-  __dispatcher_message_received();
+  queue_message_received_.push_locked(m);
+  dispatcher_message_received_();
 }
 
 
 void
 ConnectionDispatcher::connection_died(unsigned int id) throw()
 {
-  __dispatcher_disconnected();
+  dispatcher_disconnected_();
 }
 
 
 void
 ConnectionDispatcher::connection_established(unsigned int id) throw()
 {
-  __dispatcher_connected();
+  dispatcher_connected_();
 }
 
 
@@ -214,7 +214,7 @@ ConnectionDispatcher::connection_established(unsigned int id) throw()
   sigc::signal<void, FawkesNetworkMessage *>
 ConnectionDispatcher::signal_message_received()
 {
-  return __signal_message_received;
+  return signal_message_received_;
 }
 
 
@@ -225,7 +225,7 @@ ConnectionDispatcher::signal_message_received()
 sigc::signal<void>
 ConnectionDispatcher::signal_connected()
 {
-  return __signal_connected;
+  return signal_connected_;
 }
 
 
@@ -237,7 +237,7 @@ ConnectionDispatcher::signal_connected()
 sigc::signal<void>
 ConnectionDispatcher::signal_disconnected()
 {
-  return __signal_disconnected;
+  return signal_disconnected_;
 }
 
 } // end of namespace fawkes

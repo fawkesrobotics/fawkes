@@ -118,8 +118,8 @@ PluginTreeView::~PluginTreeView()
   }
 
 #ifdef HAVE_GCONFMM
-  if (__gconf) {
-    __gconf->remove_dir(__gconf_prefix);
+  if (gconf_) {
+    gconf_->remove_dir(gconf_prefix_);
   }
 #endif
 }
@@ -142,19 +142,19 @@ void
 PluginTreeView::set_gconf_prefix(Glib::ustring gconf_prefix)
 {
 #ifdef HAVE_GCONFMM
-  if (! __gconf) {
-    __gconf = Gnome::Conf::Client::get_default_client();
+  if (! gconf_) {
+    gconf_ = Gnome::Conf::Client::get_default_client();
   } else {
-    __gconf->remove_dir(__gconf_prefix);
+    gconf_->remove_dir(gconf_prefix_);
   }
 
-  __gconf->add_dir(gconf_prefix);
-  __gconf_prefix = gconf_prefix;
+  gconf_->add_dir(gconf_prefix);
+  gconf_prefix_ = gconf_prefix;
 
-  if (__gconf_connection) {
-    __gconf_connection.disconnect();
+  if (gconf_connection_) {
+    gconf_connection_.disconnect();
   }
-  __gconf_connection = __gconf->signal_value_changed().connect(sigc::hide(sigc::hide(sigc::mem_fun(*this, &PluginTreeView::on_config_changed))));
+  gconf_connection_ = gconf_->signal_value_changed().connect(sigc::hide(sigc::hide(sigc::mem_fun(*this, &PluginTreeView::on_config_changed))));
 
   on_config_changed();
 #endif
@@ -425,9 +425,9 @@ PluginTreeView::append_plugin_column()
 #if GTKMM_MAJOR_VERSION > 2 || ( GTKMM_MAJOR_VERSION == 2 && GTKMM_MINOR_VERSION >= 14 )
   bool description_as_tooltip = false;
 #  ifdef HAVE_GCONFMM
-  if ( __gconf )
+  if ( gconf_ )
   {
-    description_as_tooltip = __gconf->get_bool(__gconf_prefix + "/description_as_tooltip");
+    description_as_tooltip = gconf_->get_bool(gconf_prefix_ + "/description_as_tooltip");
   }
 #  endif
 #endif

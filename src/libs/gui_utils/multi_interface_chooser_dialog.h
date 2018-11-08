@@ -74,8 +74,8 @@ class MultiInterfaceChooserDialog : public InterfaceChooserDialog
 
   void on_load_toggled(const Glib::ustring& path);
 
-  const Record* __record; /**< Should only be accessed by record(). */
-  TypeIdPairSet __loaded_interfaces;
+  const Record* record_; /**< Should only be accessed by record(). */
+  TypeIdPairSet loaded_interfaces_;
 };
 
 } // end of namespace fawkes

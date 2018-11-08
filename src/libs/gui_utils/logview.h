@@ -85,14 +85,14 @@ class LogView
     /// @endcond
   };
 
-  LogRecord __record;
+  LogRecord record_;
 
-  Glib::RefPtr<Gtk::ListStore> __list;
+  Glib::RefPtr<Gtk::ListStore> list_;
 
-  ConnectionDispatcher *__connection_dispatcher;
+  ConnectionDispatcher *connection_dispatcher_;
 
-  bool                  __have_recently_added_path;
-  Gtk::TreeModel::Path  __recently_added_path;
+  bool                  have_recently_added_path_;
+  Gtk::TreeModel::Path  recently_added_path_;
 };
 
 } // end namespace fawkes

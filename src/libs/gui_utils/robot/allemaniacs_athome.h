@@ -37,7 +37,7 @@ class AllemaniACsAtHomeCairoRobotDrawer : public CairoRobotDrawer
 			  const Cairo::RefPtr<Cairo::Context> &cr);
 
  private:
-  bool __laser_at_center;
+  bool laser_at_center_;
 };
 
 }

@@ -36,7 +36,7 @@ namespace fawkes {
  */
 AllemaniACsAtHomeCairoRobotDrawer::AllemaniACsAtHomeCairoRobotDrawer(bool laser_at_center)
 {
-  __laser_at_center = laser_at_center;
+  laser_at_center_ = laser_at_center;
 }
 
 void
@@ -45,7 +45,7 @@ AllemaniACsAtHomeCairoRobotDrawer::draw_robot(Glib::RefPtr<Gdk::Window> &window,
 {
   cr->save();
 
-  if ( __laser_at_center ) {
+  if ( laser_at_center_ ) {
     cr->translate(0, -0.12);
   }
 

@@ -122,4 +122,4 @@ class ServiceModel : public fawkes::ServiceBrowseHandler
  
 }
 
-#endif /* __LIBS_GUI_UTILS_HOST_MODEL_H_ */
+#endif /* LIBS_GUI_UTILS_HOST_MODEL_H__ */

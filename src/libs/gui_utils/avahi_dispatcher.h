@@ -75,20 +75,20 @@ class AvahiDispatcher
   virtual void on_service_removed();
 
  private:
-  Glib::Dispatcher                     __dispatcher_all_for_now;
-  Glib::Dispatcher                     __dispatcher_cache_exhausted;
-  Glib::Dispatcher                     __dispatcher_browse_failed;
-  Glib::Dispatcher                     __dispatcher_service_added;
-  Glib::Dispatcher                     __dispatcher_service_removed;
+  Glib::Dispatcher                     dispatcher_all_for_now_;
+  Glib::Dispatcher                     dispatcher_cache_exhausted_;
+  Glib::Dispatcher                     dispatcher_browse_failed_;
+  Glib::Dispatcher                     dispatcher_service_added_;
+  Glib::Dispatcher                     dispatcher_service_removed_;
 
-  sigc::signal<void>                   __signal_all_for_now;
-  sigc::signal<void>                   __signal_cache_exhausted;
-  sigc::signal<void>                   __signal_browse_failed;
-  sigc::signal<void, NetworkService *> __signal_service_added;
-  sigc::signal<void, NetworkService *> __signal_service_removed;
+  sigc::signal<void>                   signal_all_for_now_;
+  sigc::signal<void>                   signal_cache_exhausted_;
+  sigc::signal<void>                   signal_browse_failed_;
+  sigc::signal<void, NetworkService *> signal_service_added_;
+  sigc::signal<void, NetworkService *> signal_service_removed_;
 
-  LockQueue<NetworkService *>          __queue_service_added;
-  LockQueue<NetworkService *>          __queue_service_removed;
+  LockQueue<NetworkService *>          queue_service_added_;
+  LockQueue<NetworkService *>          queue_service_removed_;
 };
 
 } // end namespace fawkes

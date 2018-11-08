@@ -71,18 +71,18 @@ class ServiceChooserDialog
 
  private:
   void ctor();
-  fawkes::FawkesNetworkClient *__client;
+  fawkes::FawkesNetworkClient *client_;
 
-  Gtk::Window         &__parent;
-  Gtk::TreeView        __treeview;
-  Gtk::Entry           __entry;
-  Gtk::Expander        __expander;
-  Gtk::ScrolledWindow  __scrollwin;
+  Gtk::Window         &parent_;
+  Gtk::TreeView        treeview_;
+  Gtk::Entry           entry_;
+  Gtk::Expander        expander_;
+  Gtk::ScrolledWindow  scrollwin_;
 #ifdef HAVE_GCONFMM
-  Glib::RefPtr<Gnome::Conf::Client> __gconf;
+  Glib::RefPtr<Gnome::Conf::Client> gconf_;
 #endif
 
-  ServiceModel *__service_model;
+  ServiceModel *service_model_;
 };
 
 } // end of namespace fawkes

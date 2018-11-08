@@ -67,19 +67,19 @@ class ConnectionDispatcher
   void connect_signals();
 
  private:
-  unsigned int                                   __cid;
-  FawkesNetworkClient                           *__client;
-  bool                                           __client_owned;
+  unsigned int                                   cid_;
+  FawkesNetworkClient                           *client_;
+  bool                                           client_owned_;
 
-  Glib::Dispatcher                               __dispatcher_connected;
-  Glib::Dispatcher                               __dispatcher_disconnected;
-  Glib::Dispatcher                               __dispatcher_message_received;
+  Glib::Dispatcher                               dispatcher_connected_;
+  Glib::Dispatcher                               dispatcher_disconnected_;
+  Glib::Dispatcher                               dispatcher_message_received_;
 
-  sigc::signal<void>                             __signal_connected;
-  sigc::signal<void>                             __signal_disconnected;
-  sigc::signal<void, FawkesNetworkMessage *>     __signal_message_received;
+  sigc::signal<void>                             signal_connected_;
+  sigc::signal<void>                             signal_disconnected_;
+  sigc::signal<void, FawkesNetworkMessage *>     signal_message_received_;
 
-  LockQueue<FawkesNetworkMessage *>              __queue_message_received;
+  LockQueue<FawkesNetworkMessage *>              queue_message_received_;
 };
 
 }
