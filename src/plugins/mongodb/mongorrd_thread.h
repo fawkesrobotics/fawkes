@@ -65,16 +65,16 @@ class MongoRRDThread
   virtual void config_value_erased(const char *path);
 
  private:
-  fawkes::TimeWait      *__timewait;
+  fawkes::TimeWait      *timewait_;
 
-  fawkes::RRDDefinition *__opcounters_rrd;
-  fawkes::RRDDefinition *__memory_rrd;
-  fawkes::RRDDefinition *__indexes_rrd;
-  fawkes::RRDDefinition *__locks_rrd;
+  fawkes::RRDDefinition *opcounters_rrd_;
+  fawkes::RRDDefinition *memory_rrd_;
+  fawkes::RRDDefinition *indexes_rrd_;
+  fawkes::RRDDefinition *locks_rrd_;
 
-  fawkes::RRDGraphDefinition *__opcounters_graph;
-  fawkes::RRDGraphDefinition *__memory_graph;
-  fawkes::RRDGraphDefinition *__indexes_graph;
+  fawkes::RRDGraphDefinition *opcounters_graph_;
+  fawkes::RRDGraphDefinition *memory_graph_;
+  fawkes::RRDGraphDefinition *indexes_graph_;
 
   /// @cond INTERNALS
   typedef struct {
@@ -89,7 +89,7 @@ class MongoRRDThread
   /// @endcond
 
   typedef std::map<std::string, DbStatsInfo> DbStatsMap;
-  DbStatsMap __dbstats;
+  DbStatsMap dbstats_;
 };
 
 #endif
