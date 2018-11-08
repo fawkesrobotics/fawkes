@@ -36,8 +36,8 @@ class LuaTriggerManager
   void trigger(const char *event, const char *param_format = 0, ...);
 
  private:
-  LuaContext *__lua;;
-  char *__trigger_var;
+  LuaContext *lua_;;
+  char *trigger_var_;
 };
 
 } // end of namespace fawkes

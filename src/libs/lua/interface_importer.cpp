@@ -55,25 +55,25 @@ LuaInterfaceImporter::LuaInterfaceImporter(LuaContext *context,
 					   Configuration *config,
 					   Logger *logger)
 {
-  __context = context;
-  __blackboard = blackboard;
-  __config = config;
-  __logger = logger;
-  __two_stage = false;
-  __context->add_watcher(this);
+  context_ = context;
+  blackboard_ = blackboard;
+  config_ = config;
+  logger_ = logger;
+  two_stage_ = false;
+  context_->add_watcher(this);
 
-  __interfaces_pushed = false;
+  interfaces_pushed_ = false;
 }
 
 
 /** Destructor. */
 LuaInterfaceImporter::~LuaInterfaceImporter()
 {
-  __context->remove_watcher(this);
+  context_->remove_watcher(this);
   close_writing_interfaces();
   close_reading_interfaces();
-  __ext_rifs.clear();
-  __ext_wifs.clear();
+  ext_rifs_.clear();
+  ext_wifs_.clear();
 }
 
 
@@ -85,9 +85,9 @@ LuaInterfaceImporter::~LuaInterfaceImporter()
 void
 LuaInterfaceImporter::open_interfaces(std::string &prefix, InterfaceMap &imap, bool write)
 {
-  if (! __config) throw NullPointerException("Config has not been set");
+  if (! config_) throw NullPointerException("Config has not been set");
 
-  Configuration::ValueIterator *vi = __config->search(prefix.c_str());
+  Configuration::ValueIterator *vi = config_->search(prefix.c_str());
   while (vi->next()) {
     if (strcmp(vi->type(), "string") != 0) {
       TypeMismatchException e("Only values of type string may occur in %s, "
@@ -107,32 +107,32 @@ LuaInterfaceImporter::open_interfaces(std::string &prefix, InterfaceMap &imap, b
     std::string iftype = uid.substr(0, uid.find("::"));
     std::string ifname = uid.substr(uid.find("::") + 2);
 
-    if ( __reading_ifs.find(varname) != __reading_ifs.end() ) {
+    if ( reading_ifs_.find(varname) != reading_ifs_.end() ) {
       delete vi;
       throw Exception("Reading interface with varname %s already opened", varname.c_str());
     }
-    if ( __reading_multi_ifs.find(varname) != __reading_multi_ifs.end() ) {
+    if ( reading_multi_ifs_.find(varname) != reading_multi_ifs_.end() ) {
       delete vi;
       throw Exception("Reading multi interface with varname %s already opened", varname.c_str());
     }
-    if ( __writing_ifs.find(varname) != __writing_ifs.end() ) {
+    if ( writing_ifs_.find(varname) != writing_ifs_.end() ) {
       delete vi;
       throw Exception("Writing interface with varname %s already opened", varname.c_str());
     }
 
 
     if (ifname.find_first_of("*?[") == std::string::npos) {
-      __logger->log_info("LuaInterfaceImporter", "Adding %s interface %s::%s with name %s",
+      logger_->log_info("LuaInterfaceImporter", "Adding %s interface %s::%s with name %s",
 			 write ? "writing" : "reading",
 			 iftype.c_str(), ifname.c_str(), varname.c_str());
       try {
 	Interface *iface;
 	if (write) {
-	  iface = __blackboard->open_for_writing(iftype.c_str(), ifname.c_str());
+	  iface = blackboard_->open_for_writing(iftype.c_str(), ifname.c_str());
 	} else {
-	  iface = __blackboard->open_for_reading(iftype.c_str(), ifname.c_str());
+	  iface = blackboard_->open_for_reading(iftype.c_str(), ifname.c_str());
 	}
-	if (__two_stage) {
+	if (two_stage_) {
 	  iface->resize_buffers(1);
 	}
 	imap[varname] = iface;
@@ -146,16 +146,16 @@ LuaInterfaceImporter::open_interfaces(std::string &prefix, InterfaceMap &imap, b
 	throw Exception("Illegal config entry %s=%s, multiple interfaces can "
 			"only be opened for reading", vi->path(), uid.c_str());
       }
-      __logger->log_info("LuaInterfaceImporter", "Adding multiple %s interfaces %s::%s with in table %s",
+      logger_->log_info("LuaInterfaceImporter", "Adding multiple %s interfaces %s::%s with in table %s",
 			 write ? "writing" : "reading",
 			 iftype.c_str(), ifname.c_str(), varname.c_str());
 
-      std::list<Interface *> interfaces = __blackboard->open_multiple_for_reading(iftype.c_str(), ifname.c_str());
-      __reading_multi_ifs[varname] = interfaces;
+      std::list<Interface *> interfaces = blackboard_->open_multiple_for_reading(iftype.c_str(), ifname.c_str());
+      reading_multi_ifs_[varname] = interfaces;
       InterfaceObserver *observer =
         new InterfaceObserver(this, varname, iftype.c_str(), ifname.c_str());
-      __observers[varname] = observer;
-      __blackboard->register_observer(observer);
+      observers_[varname] = observer;
+      blackboard_->register_observer(observer);
     }
   }
   delete vi;
@@ -168,7 +168,7 @@ LuaInterfaceImporter::open_interfaces(std::string &prefix, InterfaceMap &imap, b
 void
 LuaInterfaceImporter::open_reading_interfaces(std::string &prefix)
 {
-  open_interfaces(prefix, __reading_ifs, /* write */ false);
+  open_interfaces(prefix, reading_ifs_, /* write */ false);
 }
 
 /** Open interfaces for writing.
@@ -177,7 +177,7 @@ LuaInterfaceImporter::open_reading_interfaces(std::string &prefix)
 void
 LuaInterfaceImporter::open_writing_interfaces(std::string &prefix)
 {
-  open_interfaces(prefix, __writing_ifs, /* write */ true);
+  open_interfaces(prefix, writing_ifs_, /* write */ true);
 }
 
 
@@ -194,9 +194,9 @@ void
 LuaInterfaceImporter::add_interface(std::string varname, Interface *interface)
 {
   if ( interface->is_writer() ) {
-    __ext_wifs[varname] = interface;
+    ext_wifs_[varname] = interface;
   } else {
-    __ext_rifs[varname] = interface;
+    ext_rifs_[varname] = interface;
   }
 }
 
@@ -206,24 +206,24 @@ LuaInterfaceImporter::add_observed_interface(std::string varname,
 					     const char *type, const char *id)
 {
   try {
-    if (__reading_multi_ifs.find(varname) == __reading_multi_ifs.end() ) {
+    if (reading_multi_ifs_.find(varname) == reading_multi_ifs_.end() ) {
       throw Exception("Notified about unknown interface varname %s", varname.c_str());
     }
-    Interface *iface = __blackboard->open_for_reading(type, id);
-    __context->add_package((std::string("interfaces.") + iface->type()).c_str());
-    __reading_multi_ifs[varname].push_back(iface);
-    __context->get_global("interfaces");			// it
-    __context->get_field(-1, "reading");			// it rt
-    __context->get_field(-1, varname.c_str());			// it rt vt
-    __context->push_usertype(iface, iface->type(), "fawkes");	// it rt vt iface
-    __context->raw_seti(-2, __reading_multi_ifs[varname].size()); // it rt vt
-    __context->push_usertype(iface, iface->type(), "fawkes");	// it rt vt iface
-    __context->set_field(iface->uid(), -2);			// it rt vt
-    __context->pop(3);						// ---
+    Interface *iface = blackboard_->open_for_reading(type, id);
+    context_->add_package((std::string("interfaces.") + iface->type()).c_str());
+    reading_multi_ifs_[varname].push_back(iface);
+    context_->get_global("interfaces");			// it
+    context_->get_field(-1, "reading");			// it rt
+    context_->get_field(-1, varname.c_str());			// it rt vt
+    context_->push_usertype(iface, iface->type(), "fawkes");	// it rt vt iface
+    context_->raw_seti(-2, reading_multi_ifs_[varname].size()); // it rt vt
+    context_->push_usertype(iface, iface->type(), "fawkes");	// it rt vt iface
+    context_->set_field(iface->uid(), -2);			// it rt vt
+    context_->pop(3);						// ---
  } catch (Exception &e) {
-    __logger->log_warn("LuaInterfaceImporter", "Failed to add observed interface "
+    logger_->log_warn("LuaInterfaceImporter", "Failed to add observed interface "
 		       "%s:%s, exception follows", type, id);
-    __logger->log_warn("LuaInterfaceImporter", e);    
+    logger_->log_warn("LuaInterfaceImporter", e);    
   }
 }
 
@@ -232,23 +232,23 @@ LuaInterfaceImporter::add_observed_interface(std::string varname,
 void
 LuaInterfaceImporter::close_reading_interfaces()
 {
-  for (InterfaceMap::iterator i = __reading_ifs.begin(); i != __reading_ifs.end(); ++i) {
-    __blackboard->close(i->second);
+  for (InterfaceMap::iterator i = reading_ifs_.begin(); i != reading_ifs_.end(); ++i) {
+    blackboard_->close(i->second);
   }
-  __reading_ifs.clear();
+  reading_ifs_.clear();
 
-  for (ObserverMap::iterator o = __observers.begin(); o != __observers.end(); ++o) {
-    __blackboard->unregister_observer(o->second);
+  for (ObserverMap::iterator o = observers_.begin(); o != observers_.end(); ++o) {
+    blackboard_->unregister_observer(o->second);
     delete o->second;
   }
-  __observers.clear();
+  observers_.clear();
 
-  for (InterfaceListMap::iterator i = __reading_multi_ifs.begin(); i != __reading_multi_ifs.end(); ++i) {
+  for (InterfaceListMap::iterator i = reading_multi_ifs_.begin(); i != reading_multi_ifs_.end(); ++i) {
     for (std::list<Interface *>::iterator j = i->second.begin(); j != i->second.end(); ++j) {
-      __blackboard->close(*j);
+      blackboard_->close(*j);
     }
   }
-  __reading_multi_ifs.clear();
+  reading_multi_ifs_.clear();
 }
 
 
@@ -256,10 +256,10 @@ LuaInterfaceImporter::close_reading_interfaces()
 void
 LuaInterfaceImporter::close_writing_interfaces()
 {
-  for (InterfaceMap::iterator i = __writing_ifs.begin(); i != __writing_ifs.end(); ++i) {
-    __blackboard->close(i->second);
+  for (InterfaceMap::iterator i = writing_ifs_.begin(); i != writing_ifs_.end(); ++i) {
+    blackboard_->close(i->second);
   }
-  __writing_ifs.clear();
+  writing_ifs_.clear();
 }
 
 /** Get interface map of reading interfaces.
@@ -268,7 +268,7 @@ LuaInterfaceImporter::close_writing_interfaces()
 LuaInterfaceImporter::InterfaceMap &
 LuaInterfaceImporter::reading_interfaces()
 {
-  return __reading_ifs;
+  return reading_ifs_;
 }
 
 
@@ -278,7 +278,7 @@ LuaInterfaceImporter::reading_interfaces()
 LuaInterfaceImporter::InterfaceMap &
 LuaInterfaceImporter::writing_interfaces()
 {
-  return __writing_ifs;
+  return writing_ifs_;
 }
 
 
@@ -286,7 +286,7 @@ LuaInterfaceImporter::writing_interfaces()
 void
 LuaInterfaceImporter::read()
 {
-  for (InterfaceMap::iterator i = __reading_ifs.begin(); i != __reading_ifs.end(); ++i) {
+  for (InterfaceMap::iterator i = reading_ifs_.begin(); i != reading_ifs_.end(); ++i) {
     i->second->read();
   }
 }
@@ -298,13 +298,13 @@ void
 LuaInterfaceImporter::read_to_buffer()
 {
   InterfaceMap::iterator i;
-  if (! __two_stage) {
-    for (i = __reading_ifs.begin(); i != __reading_ifs.end(); ++i) {
+  if (! two_stage_) {
+    for (i = reading_ifs_.begin(); i != reading_ifs_.end(); ++i) {
       i->second->resize_buffers(1);
     }
-    __two_stage = true;
+    two_stage_ = true;
   }
-  for (i = __reading_ifs.begin(); i != __reading_ifs.end(); ++i) {
+  for (i = reading_ifs_.begin(); i != reading_ifs_.end(); ++i) {
     i->second->copy_shared_to_buffer(0);
   }
 }
@@ -316,12 +316,12 @@ LuaInterfaceImporter::read_to_buffer()
 void
 LuaInterfaceImporter::read_from_buffer()
 {
-  if (! __two_stage) {
+  if (! two_stage_) {
     throw Exception("LuaInterfaceImporter: trying to read buffer witout "
 		    "previous read_to_buffer()");
   }
   InterfaceMap::iterator i;
-  for (i = __reading_ifs.begin(); i != __reading_ifs.end(); ++i) {
+  for (i = reading_ifs_.begin(); i != reading_ifs_.end(); ++i) {
     i->second->read_from_buffer(0);
   }
 }
@@ -330,7 +330,7 @@ LuaInterfaceImporter::read_from_buffer()
 void
 LuaInterfaceImporter::write()
 {
-  for (InterfaceMap::iterator i = __writing_ifs.begin(); i != __writing_ifs.end(); ++i) {
+  for (InterfaceMap::iterator i = writing_ifs_.begin(); i != writing_ifs_.end(); ++i) {
     try {
       i->second->write();
     } catch (Exception &e) {
@@ -387,25 +387,25 @@ LuaInterfaceImporter::push_interfaces(LuaContext *context)
   // it: interface table, rt: reading table, wt: writing table, rtu: rt by uid, wtu: wt by uid
   context->create_table(0, 4);				// it
 
-  context->create_table(0, __reading_ifs.size() + __ext_rifs.size());	// it rt
-  push_interfaces_varname(context, __reading_ifs);	// it rt
-  push_interfaces_varname(context, __ext_rifs);		// it rt
-  push_multi_interfaces_varname(context, __reading_multi_ifs);	// it rt
+  context->create_table(0, reading_ifs_.size() + ext_rifs_.size());	// it rt
+  push_interfaces_varname(context, reading_ifs_);	// it rt
+  push_interfaces_varname(context, ext_rifs_);		// it rt
+  push_multi_interfaces_varname(context, reading_multi_ifs_);	// it rt
   context->set_field("reading");			// it
 
-  context->create_table(0, __reading_ifs.size() + __ext_rifs.size());	// it rtu
-  push_interfaces_uid(context, __reading_ifs);		// it rtu
-  push_interfaces_uid(context, __ext_rifs);		// it rtu
+  context->create_table(0, reading_ifs_.size() + ext_rifs_.size());	// it rtu
+  push_interfaces_uid(context, reading_ifs_);		// it rtu
+  push_interfaces_uid(context, ext_rifs_);		// it rtu
   context->set_field("reading_by_uid");			// it
 
-  context->create_table(0, __writing_ifs.size() + __ext_wifs.size());	// it wt
-  push_interfaces_varname(context, __writing_ifs);		// it wt
-  push_interfaces_varname(context, __ext_wifs);		// it wt
+  context->create_table(0, writing_ifs_.size() + ext_wifs_.size());	// it wt
+  push_interfaces_varname(context, writing_ifs_);		// it wt
+  push_interfaces_varname(context, ext_wifs_);		// it wt
   context->set_field("writing");			// it
 
-  context->create_table(0, __writing_ifs.size());	// it wtu
-  push_interfaces_uid(context, __writing_ifs);		// it wtu
-  push_interfaces_uid(context, __ext_wifs);		// it wtu
+  context->create_table(0, writing_ifs_.size());	// it wtu
+  push_interfaces_uid(context, writing_ifs_);		// it wtu
+  push_interfaces_uid(context, ext_wifs_);		// it wtu
   context->set_field("writing_by_uid");			// it
 
   context->set_global("interfaces");			// ---
@@ -419,8 +419,8 @@ LuaInterfaceImporter::push_interfaces(LuaContext *context)
 void
 LuaInterfaceImporter::push_interfaces()
 {
-  __interfaces_pushed = true;
-  push_interfaces(__context);
+  interfaces_pushed_ = true;
+  push_interfaces(context_);
 }
 
 
@@ -428,12 +428,12 @@ void
 LuaInterfaceImporter::lua_restarted(LuaContext *context)
 {
   try {
-    if ( __interfaces_pushed ) {
+    if ( interfaces_pushed_ ) {
       push_interfaces(context);
     }
   } catch (Exception &e) {
-    __logger->log_warn("LuaInterfaceImporter", "Failed to re-push interfacs, exception follows");
-    __logger->log_warn("LuaInterfaceImporter", e);
+    logger_->log_warn("LuaInterfaceImporter", "Failed to re-push interfacs, exception follows");
+    logger_->log_warn("LuaInterfaceImporter", e);
     throw;
   }
 }
@@ -449,8 +449,8 @@ LuaInterfaceImporter::InterfaceObserver::InterfaceObserver(LuaInterfaceImporter 
 							   std::string varname,
 							   const char *type, const char *id_pattern)
 {
-  __lii = lii;
-  __varname = varname;
+  lii_ = lii;
+  varname_ = varname;
 
   bbio_add_observed_create(type, id_pattern);
 }
@@ -459,7 +459,7 @@ LuaInterfaceImporter::InterfaceObserver::InterfaceObserver(LuaInterfaceImporter 
 void
 LuaInterfaceImporter::InterfaceObserver::bb_interface_created(const char *type, const char *id) throw()
 {
-  __lii->add_observed_interface(__varname, type, id);
+  lii_->add_observed_interface(varname_, type, id);
 }
 
 } // end of namespace fawkes

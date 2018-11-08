@@ -62,15 +62,15 @@ namespace fawkes {
  */
 LuaContext::LuaContext(bool enable_tracebacks)
 {
-  __owns_L = true;
-  __enable_tracebacks = enable_tracebacks;
-  __fam = NULL;
-  __fam_thread = NULL;
+  owns_L_ = true;
+  enable_tracebacks_ = enable_tracebacks;
+  fam_ = NULL;
+  fam_thread_ = NULL;
 
-  __lua_mutex = new Mutex();
+  lua_mutex_ = new Mutex();
 
-  __start_script = NULL;
-  __L = init_state();
+  start_script_ = NULL;
+  L_ = init_state();
 }
 
 /** Wrapper contstructor.
@@ -83,31 +83,31 @@ LuaContext::LuaContext(bool enable_tracebacks)
  */
 LuaContext::LuaContext(lua_State *L)
 {
-  __owns_L = false;
-  __L = L;
-  __lua_mutex = new Mutex();
-  __start_script = NULL;
-  __fam = NULL;
-  __fam_thread = NULL;
+  owns_L_ = false;
+  L_ = L;
+  lua_mutex_ = new Mutex();
+  start_script_ = NULL;
+  fam_ = NULL;
+  fam_thread_ = NULL;
 }
 
 /** Destructor. */
 LuaContext::~LuaContext()
 {
-  __lua_mutex->lock();
+  lua_mutex_->lock();
 
-  if (! __finalize_call.empty())
-	  do_string(__L, "%s", __finalize_call.c_str());
+  if (! finalize_call_.empty())
+	  do_string(L_, "%s", finalize_call_.c_str());
 
-  if (__fam_thread) {
-    __fam_thread->cancel();
-    __fam_thread->join();
-    delete __fam_thread;
+  if (fam_thread_) {
+    fam_thread_->cancel();
+    fam_thread_->join();
+    delete fam_thread_;
   }
-  delete __lua_mutex;
-  if ( __start_script )  free(__start_script);
-  if ( __owns_L) {
-    lua_close(__L);
+  delete lua_mutex_;
+  if ( start_script_ )  free(start_script_);
+  if ( owns_L_) {
+    lua_close(L_);
   }
 }
 
@@ -124,14 +124,14 @@ LuaContext::~LuaContext()
 void
 LuaContext::setup_fam(bool auto_restart, bool conc_thread)
 {
-  __fam = new FileAlterationMonitor();
-  __fam->add_filter("^[^.].*\\.lua$"); 
+  fam_ = new FileAlterationMonitor();
+  fam_->add_filter("^[^.].*\\.lua$"); 
   if (auto_restart) {
-    __fam->add_listener(this);
+    fam_->add_listener(this);
   }
   if (conc_thread) {
-    __fam_thread = new FamThread(__fam);
-    __fam_thread->start();
+    fam_thread_ = new FamThread(fam_);
+    fam_thread_->start();
   }
 }
 
@@ -143,7 +143,7 @@ LuaContext::setup_fam(bool auto_restart, bool conc_thread)
 RefPtr<FileAlterationMonitor>
 LuaContext::get_fam() const
 {
-  return __fam;
+  return fam_;
 }
 
 
@@ -157,68 +157,68 @@ LuaContext::init_state()
   lua_State *L = luaL_newstate();
   luaL_openlibs(L);
 
-  if (__enable_tracebacks) {
+  if (enable_tracebacks_) {
     lua_getglobal(L, "debug");
     lua_getfield(L, -1, "traceback");
     lua_remove(L, -2);
   }
 
   // Add package paths
-  for (__slit = __package_dirs.begin(); __slit != __package_dirs.end(); ++__slit) {
-    do_string(L, "package.path = package.path .. \";%s/?.lua;%s/?/init.lua\"", __slit->c_str(), __slit->c_str());
+  for (slit_ = package_dirs_.begin(); slit_ != package_dirs_.end(); ++slit_) {
+    do_string(L, "package.path = package.path .. \";%s/?.lua;%s/?/init.lua\"", slit_->c_str(), slit_->c_str());
   }
 
-  for (__slit = __cpackage_dirs.begin(); __slit != __cpackage_dirs.end(); ++__slit) {
-    do_string(L, "package.cpath = package.cpath .. \";%s/?.so\"", __slit->c_str());
+  for (slit_ = cpackage_dirs_.begin(); slit_ != cpackage_dirs_.end(); ++slit_) {
+    do_string(L, "package.cpath = package.cpath .. \";%s/?.so\"", slit_->c_str());
   }
 
   // load base packages
-  for (__slit = __packages.begin(); __slit != __packages.end(); ++__slit) {
-    do_string(L, "require(\"%s\")", __slit->c_str());
+  for (slit_ = packages_.begin(); slit_ != packages_.end(); ++slit_) {
+    do_string(L, "require(\"%s\")", slit_->c_str());
   }
 
-  for ( __utit = __usertypes.begin(); __utit != __usertypes.end(); ++__utit) {
-    tolua_pushusertype(L, __utit->second.first, __utit->second.second.c_str());
-    lua_setglobal(L, __utit->first.c_str());
+  for ( utit_ = usertypes_.begin(); utit_ != usertypes_.end(); ++utit_) {
+    tolua_pushusertype(L, utit_->second.first, utit_->second.second.c_str());
+    lua_setglobal(L, utit_->first.c_str());
   }
 
-  for ( __strings_it = __strings.begin(); __strings_it != __strings.end(); ++__strings_it) {
-    lua_pushstring(L, __strings_it->second.c_str());
-    lua_setglobal(L, __strings_it->first.c_str());
+  for ( strings_it_ = strings_.begin(); strings_it_ != strings_.end(); ++strings_it_) {
+    lua_pushstring(L, strings_it_->second.c_str());
+    lua_setglobal(L, strings_it_->first.c_str());
   }
 
-  for ( __booleans_it = __booleans.begin(); __booleans_it != __booleans.end(); ++__booleans_it) {
-    lua_pushboolean(L, __booleans_it->second);
-    lua_setglobal(L, __booleans_it->first.c_str());
+  for ( booleans_it_ = booleans_.begin(); booleans_it_ != booleans_.end(); ++booleans_it_) {
+    lua_pushboolean(L, booleans_it_->second);
+    lua_setglobal(L, booleans_it_->first.c_str());
   }
 
-  for ( __numbers_it = __numbers.begin(); __numbers_it != __numbers.end(); ++__numbers_it) {
-    lua_pushnumber(L, __numbers_it->second);
-    lua_setglobal(L, __numbers_it->first.c_str());
+  for ( numbers_it_ = numbers_.begin(); numbers_it_ != numbers_.end(); ++numbers_it_) {
+    lua_pushnumber(L, numbers_it_->second);
+    lua_setglobal(L, numbers_it_->first.c_str());
   }
 
-  for ( __integers_it = __integers.begin(); __integers_it != __integers.end(); ++__integers_it) {
-    lua_pushinteger(L, __integers_it->second);
-    lua_setglobal(L, __integers_it->first.c_str());
+  for ( integers_it_ = integers_.begin(); integers_it_ != integers_.end(); ++integers_it_) {
+    lua_pushinteger(L, integers_it_->second);
+    lua_setglobal(L, integers_it_->first.c_str());
   }
 
-  for ( __cfuncs_it = __cfuncs.begin(); __cfuncs_it != __cfuncs.end(); ++__cfuncs_it)
+  for ( cfuncs_it_ = cfuncs_.begin(); cfuncs_it_ != cfuncs_.end(); ++cfuncs_it_)
   {
-    lua_pushcfunction(L, __cfuncs_it->second);
-    lua_setglobal(L, __cfuncs_it->first.c_str());
+    lua_pushcfunction(L, cfuncs_it_->second);
+    lua_setglobal(L, cfuncs_it_->first.c_str());
   }
 
   LuaContext *tmpctx = new LuaContext(L);
 
-  MutexLocker(__watchers.mutex());
+  MutexLocker(watchers_.mutex());
   LockList<LuaContextWatcher *>::iterator i;
-  for (i = __watchers.begin(); i != __watchers.end(); ++i) {
+  for (i = watchers_.begin(); i != watchers_.end(); ++i) {
 	  try {
 		  (*i)->lua_restarted(tmpctx);
 	  } catch (...) {
 		  try {
-			  if (! __finalize_call.empty())
-				  do_string(L, "%s", __finalize_call.c_str());
+			  if (! finalize_call_.empty())
+				  do_string(L, "%s", finalize_call_.c_str());
 		  } catch (Exception &e) {} // ignored
 		  
 		  delete tmpctx;
@@ -229,17 +229,17 @@ LuaContext::init_state()
   delete tmpctx;
 
   try {
-	  if ( __start_script ) {
-		  if (access(__start_script, R_OK) == 0) {
+	  if ( start_script_ ) {
+		  if (access(start_script_, R_OK) == 0) {
 			  // it's a file and we can access it, execute it!
-			  do_file(L, __start_script);
+			  do_file(L, start_script_);
 		  } else {
-			  do_string(L, "require(\"%s\")", __start_script);
+			  do_string(L, "require(\"%s\")", start_script_);
 		  }
 	  }
   } catch (...) {
-	  if (! __finalize_call.empty())
-		  do_string(L, "%s", __finalize_call.c_str());
+	  if (! finalize_call_.empty())
+		  do_string(L, "%s", finalize_call_.c_str());
 	  lua_close(L);
     throw;
   }
@@ -262,17 +262,17 @@ LuaContext::init_state()
 void
 LuaContext::set_start_script(const char *start_script)
 {
-  if ( __start_script )  free(__start_script);
+  if ( start_script_ )  free(start_script_);
   if ( start_script ) {
-    __start_script = strdup(start_script);
-    if (access(__start_script, R_OK) == 0) {
+    start_script_ = strdup(start_script);
+    if (access(start_script_, R_OK) == 0) {
       // it's a file and we can access it, execute it!
-      do_file(__start_script);
+      do_file(start_script_);
     } else {
-      do_string("require(\"%s\")", __start_script);
+      do_string("require(\"%s\")", start_script_);
     }
   } else {
-    __start_script = NULL;
+    start_script_ = NULL;
   }
 }
 
@@ -284,35 +284,35 @@ LuaContext::set_start_script(const char *start_script)
 void
 LuaContext::restart()
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
   try {
-	  if (! __finalize_prepare_call.empty())
-		  do_string(__L, "%s", __finalize_prepare_call.c_str());
+	  if (! finalize_prepare_call_.empty())
+		  do_string(L_, "%s", finalize_prepare_call_.c_str());
 	  
 	  lock.unlock();
 	  lua_State *L = init_state();
 	  lock.relock();
-    lua_State *tL = __L;
+    lua_State *tL = L_;
 
     try {
-	    if (! __finalize_call.empty())
-		    do_string(__L, "%s", __finalize_call.c_str());
+	    if (! finalize_call_.empty())
+		    do_string(L_, "%s", finalize_call_.c_str());
     } catch (Exception &e) {
 	    LibLogger::log_warn("LuaContext", "Finalization call on old context failed, "
 	                        "exception follows, ignoring.");
 	    LibLogger::log_warn("LuaContext", e);
     }
 
-    __L = L;
-    if (__owns_L)  lua_close(tL);
-    __owns_L = true;
+    L_ = L;
+    if (owns_L_)  lua_close(tL);
+    owns_L_ = true;
 
   } catch (Exception &e) {
     LibLogger::log_error("LuaContext", "Could not restart Lua instance, an error "
 			 "occured while initializing new state. Keeping old state.");
     LibLogger::log_error("LuaContext", e);
-    if (! __finalize_cancel_call.empty())
-	    do_string(__L, "%s", __finalize_cancel_call.c_str());
+    if (! finalize_cancel_call_.empty())
+	    do_string(L_, "%s", finalize_cancel_call_.c_str());
   }
 }
 
@@ -327,22 +327,22 @@ LuaContext::restart()
 void
 LuaContext::add_package_dir(const char *path, bool prefix)
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
 
   if (prefix) {
-    do_string(__L,
+    do_string(L_,
 	      "package.path = \"%s/?.lua;%s/?/init.lua;\""
 	      ".. package.path", path, path);
 
-    __package_dirs.push_front(path);
+    package_dirs_.push_front(path);
   } else {
-    do_string(__L,
+    do_string(L_,
 	      "package.path = package.path .. "
 	      "\";%s/?.lua;%s/?/init.lua\"", path, path);
 
-    __package_dirs.push_back(path);
+    package_dirs_.push_back(path);
   }
-  if ( __fam )  __fam->watch_dir(path);
+  if ( fam_ )  fam_->watch_dir(path);
 }
 
 
@@ -356,18 +356,18 @@ LuaContext::add_package_dir(const char *path, bool prefix)
 void
 LuaContext::add_cpackage_dir(const char *path, bool prefix)
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
 
   if (prefix) {
-    do_string(__L, "package.cpath = \"%s/?.so;\" .. package.cpath", path);
+    do_string(L_, "package.cpath = \"%s/?.so;\" .. package.cpath", path);
 
-    __cpackage_dirs.push_front(path);
+    cpackage_dirs_.push_front(path);
   } else {
-    do_string(__L, "package.cpath = package.cpath .. \";%s/?.so\"", path);
+    do_string(L_, "package.cpath = package.cpath .. \";%s/?.so\"", path);
 
-    __cpackage_dirs.push_back(path);
+    cpackage_dirs_.push_back(path);
   }
-  if ( __fam )  __fam->watch_dir(path);
+  if ( fam_ )  fam_->watch_dir(path);
 }
 
 
@@ -379,11 +379,11 @@ LuaContext::add_cpackage_dir(const char *path, bool prefix)
 void
 LuaContext::add_package(const char *package)
 {
-  MutexLocker lock(__lua_mutex);
-  if (find(__packages.begin(), __packages.end(), package) == __packages.end()) {
-    do_string(__L, "require(\"%s\")", package);
+  MutexLocker lock(lua_mutex_);
+  if (find(packages_.begin(), packages_.end(), package) == packages_.end()) {
+    do_string(L_, "require(\"%s\")", package);
 
-    __packages.push_back(package);
+    packages_.push_back(package);
   }
 }
 
@@ -396,7 +396,7 @@ LuaContext::add_package(const char *package)
 lua_State *
 LuaContext::get_lua_state()
 {
-  return __L;
+  return L_;
 }
 
 
@@ -404,7 +404,7 @@ LuaContext::get_lua_state()
 void
 LuaContext::lock()
 {
-  __lua_mutex->lock();
+  lua_mutex_->lock();
 }
 
 
@@ -414,7 +414,7 @@ LuaContext::lock()
 bool
 LuaContext::try_lock()
 {
-  return __lua_mutex->try_lock();
+  return lua_mutex_->try_lock();
 }
 
 
@@ -422,7 +422,7 @@ LuaContext::try_lock()
 void
 LuaContext::unlock()
 {
-  __lua_mutex->unlock();
+  lua_mutex_->unlock();
 }
 
 
@@ -432,8 +432,8 @@ LuaContext::unlock()
 void
 LuaContext::do_file(const char *filename)
 {
-  MutexLocker lock(__lua_mutex);
-  do_file(__L, filename);
+  MutexLocker lock(lua_mutex_);
+  do_file(L_, filename);
 }
 
 
@@ -462,7 +462,7 @@ LuaContext::do_file(lua_State *L, const char *filename)
     }
   }
 
-  int errfunc = __enable_tracebacks ? 1 : 0;
+  int errfunc = enable_tracebacks_ ? 1 : 0;
   if ( (err = lua_pcall(L, 0, LUA_MULTRET, errfunc)) != 0 ) {
     // There was an error while executing the initialization file
     errmsg = lua_tostring(L, -1);
@@ -517,7 +517,7 @@ LuaContext::do_string(lua_State *L, const char *format, ...)
     }
   }
 
-  int errfunc = __enable_tracebacks ? 1 : 0;
+  int errfunc = enable_tracebacks_ ? 1 : 0;
   err = lua_pcall(L, 0, LUA_MULTRET, errfunc);
 
   if (err != 0) {
@@ -544,7 +544,7 @@ LuaContext::do_string(lua_State *L, const char *format, ...)
 void
 LuaContext::do_string(const char *format, ...)
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
 
   va_list arg;
   va_start(arg, format);
@@ -558,9 +558,9 @@ LuaContext::do_string(const char *format, ...)
 
   int err = 0;
   std::string errmsg;
-  if ( (err = luaL_loadstring(__L, ss.c_str())) != 0) {
-    errmsg = lua_tostring(__L, -1);
-    lua_pop(__L, 1);
+  if ( (err = luaL_loadstring(L_, ss.c_str())) != 0) {
+    errmsg = lua_tostring(L_, -1);
+    lua_pop(L_, 1);
     switch (err) {
     case LUA_ERRSYNTAX:
 	    throw SyntaxErrorException("Lua syntax error in string %s: %s", ss.c_str(), errmsg.c_str());
@@ -570,12 +570,12 @@ LuaContext::do_string(const char *format, ...)
     }
   }
 
-  int errfunc = __enable_tracebacks ? 1 : 0;
-  err = lua_pcall(__L, 0, LUA_MULTRET, errfunc);
+  int errfunc = enable_tracebacks_ ? 1 : 0;
+  err = lua_pcall(L_, 0, LUA_MULTRET, errfunc);
 
   if (err != 0) {
-	  std::string errmsg = lua_tostring(__L, -1);
-	  lua_pop(__L, 1);
+	  std::string errmsg = lua_tostring(L_, -1);
+	  lua_pop(L_, 1);
 	  switch (err) {
 	  case LUA_ERRRUN:
 		  throw LuaRuntimeException("do_string", errmsg.c_str());
@@ -598,9 +598,9 @@ void
 LuaContext::load_string(const char *s)
 {
   int err;
-  if ( (err = luaL_loadstring(__L, s)) != 0 ) {
-    std::string errmsg = lua_tostring(__L, -1);
-    lua_pop(__L, 1);
+  if ( (err = luaL_loadstring(L_, s)) != 0 ) {
+    std::string errmsg = lua_tostring(L_, -1);
+    lua_pop(L_, 1);
     switch (err) {
     case LUA_ERRSYNTAX:
       throw SyntaxErrorException("Lua syntax error in string '%s': %s",
@@ -626,10 +626,10 @@ void
 LuaContext::pcall(int nargs, int nresults, int errfunc)
 {
   int err = 0;
-  if ( ! errfunc && __enable_tracebacks )  errfunc = 1;
-  if ( (err = lua_pcall(__L, nargs, nresults, errfunc)) != 0 ) {
-    std::string errmsg = lua_tostring(__L, -1);
-    lua_pop(__L, 1);
+  if ( ! errfunc && enable_tracebacks_ )  errfunc = 1;
+  if ( (err = lua_pcall(L_, nargs, nresults, errfunc)) != 0 ) {
+    std::string errmsg = lua_tostring(L_, -1);
+    lua_pop(L_, 1);
     switch (err) {
     case LUA_ERRRUN:
       throw LuaRuntimeException("pcall", errmsg.c_str());
@@ -655,22 +655,22 @@ LuaContext::pcall(int nargs, int nresults, int errfunc)
 void
 LuaContext::assert_unique_name(const char *name, std::string type)
 {
-  if ( (type == "usertype") && (__usertypes.find(name) != __usertypes.end()) ) {
+  if ( (type == "usertype") && (usertypes_.find(name) != usertypes_.end()) ) {
     throw Exception("User type entry already exists for name %s", name);
   }
-  if ( (type == "string") && (__strings.find(name) != __strings.end()) ) {
+  if ( (type == "string") && (strings_.find(name) != strings_.end()) ) {
     throw Exception("String entry already exists for name %s", name);
   }
-  if ( (type == "boolean") && (__booleans.find(name) != __booleans.end()) ) {
+  if ( (type == "boolean") && (booleans_.find(name) != booleans_.end()) ) {
     throw Exception("Boolean entry already exists for name %s", name);
   }
-  if ( (type == "number") && (__numbers.find(name) != __numbers.end()) ) {
+  if ( (type == "number") && (numbers_.find(name) != numbers_.end()) ) {
     throw Exception("Number entry already exists for name %s", name);
   }
-  if ( (type == "integer") && (__integers.find(name) != __integers.end()) ) {
+  if ( (type == "integer") && (integers_.find(name) != integers_.end()) ) {
     throw Exception("Integer entry already exists for name %s", name);
   }
-  if ( (type == "cfunction") && (__cfuncs.find(name) != __cfuncs.end()) ) {
+  if ( (type == "cfunction") && (cfuncs_.find(name) != cfuncs_.end()) ) {
     throw Exception("C function entry already exists for name %s", name);
   }
 }
@@ -686,7 +686,7 @@ void
 LuaContext::set_usertype(const char *name, void *data,
 			  const char *type_name, const char *name_space)
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
 
   std::string type_n = type_name;
   if ( name_space ) {
@@ -695,10 +695,10 @@ LuaContext::set_usertype(const char *name, void *data,
 
   assert_unique_name(name, "usertype");
 
-  __usertypes[name] = std::make_pair(data, type_n);
+  usertypes_[name] = std::make_pair(data, type_n);
 
-  tolua_pushusertype(__L, data, type_n.c_str());
-  lua_setglobal(__L, name);
+  tolua_pushusertype(L_, data, type_n.c_str());
+  lua_setglobal(L_, name);
 }
 
 
@@ -709,13 +709,13 @@ LuaContext::set_usertype(const char *name, void *data,
 void
 LuaContext::set_string(const char *name, const char *value)
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
   assert_unique_name(name, "string");
 
-  __strings[name] = value;
+  strings_[name] = value;
 
-  lua_pushstring(__L, value);
-  lua_setglobal(__L, name);
+  lua_pushstring(L_, value);
+  lua_setglobal(L_, name);
 }
 
 
@@ -726,13 +726,13 @@ LuaContext::set_string(const char *name, const char *value)
 void
 LuaContext::set_boolean(const char *name, bool value)
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
   assert_unique_name(name, "boolean");
 
-  __booleans[name] = value;
+  booleans_[name] = value;
 
-  lua_pushboolean(__L, value ? 1 : 0);
-  lua_setglobal(__L, name);
+  lua_pushboolean(L_, value ? 1 : 0);
+  lua_setglobal(L_, name);
 }
 
 
@@ -743,13 +743,13 @@ LuaContext::set_boolean(const char *name, bool value)
 void
 LuaContext::set_number(const char *name, lua_Number value)
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
   assert_unique_name(name, "number");
 
-  __numbers[name] = value;
+  numbers_[name] = value;
 
-  lua_pushnumber(__L, value);
-  lua_setglobal(__L, name);
+  lua_pushnumber(L_, value);
+  lua_setglobal(L_, name);
 }
 
 
@@ -760,13 +760,13 @@ LuaContext::set_number(const char *name, lua_Number value)
 void
 LuaContext::set_integer(const char *name, lua_Integer value)
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
   assert_unique_name(name, "integer");
 
-  __integers[name] = value;
+  integers_[name] = value;
 
-  lua_pushinteger(__L, value);
-  lua_setglobal(__L, name);
+  lua_pushinteger(L_, value);
+  lua_setglobal(L_, name);
 }
 
 
@@ -777,13 +777,13 @@ LuaContext::set_integer(const char *name, lua_Integer value)
 void
 LuaContext::set_cfunction(const char *name, lua_CFunction f)
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
   assert_unique_name(name, "cfunction");
 
-  __cfuncs[name] = f;
+  cfuncs_[name] = f;
 
-  lua_pushcfunction(__L, f);
-  lua_setglobal(__L, name);
+  lua_pushcfunction(L_, f);
+  lua_setglobal(L_, name);
 }
 
 
@@ -793,8 +793,8 @@ LuaContext::set_cfunction(const char *name, lua_CFunction f)
 void
 LuaContext::push_boolean(bool value)
 {
-  MutexLocker lock(__lua_mutex);
-  lua_pushboolean(__L, value ? 1 : 0);
+  MutexLocker lock(lua_mutex_);
+  lua_pushboolean(L_, value ? 1 : 0);
 }
 
 
@@ -805,10 +805,10 @@ LuaContext::push_boolean(bool value)
 void
 LuaContext::push_fstring(const char *format, ...)
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
   va_list arg;
   va_start(arg, format);
-  lua_pushvfstring(__L, format, arg);
+  lua_pushvfstring(L_, format, arg);
   va_end(arg);
 }
 
@@ -819,8 +819,8 @@ LuaContext::push_fstring(const char *format, ...)
 void
 LuaContext::push_integer(lua_Integer value)
 {
-  MutexLocker lock(__lua_mutex);
-  lua_pushinteger(__L, value);
+  MutexLocker lock(lua_mutex_);
+  lua_pushinteger(L_, value);
 }
 
 
@@ -830,8 +830,8 @@ LuaContext::push_integer(lua_Integer value)
 void
 LuaContext::push_light_user_data(void *p)
 {
-  MutexLocker lock(__lua_mutex);
-  lua_pushlightuserdata(__L, p);
+  MutexLocker lock(lua_mutex_);
+  lua_pushlightuserdata(L_, p);
 }
 
 
@@ -842,8 +842,8 @@ LuaContext::push_light_user_data(void *p)
 void
 LuaContext::push_lstring(const char *s, size_t len)
 {
-  MutexLocker lock(__lua_mutex);
-  lua_pushlstring(__L, s, len);
+  MutexLocker lock(lua_mutex_);
+  lua_pushlstring(L_, s, len);
 }
 
 
@@ -852,8 +852,8 @@ LuaContext::push_lstring(const char *s, size_t len)
 void
 LuaContext::push_nil()
 {
-  MutexLocker lock(__lua_mutex);
-  lua_pushnil(__L);
+  MutexLocker lock(lua_mutex_);
+  lua_pushnil(L_);
 }
 
 
@@ -863,8 +863,8 @@ LuaContext::push_nil()
 void
 LuaContext::push_number(lua_Number value)
 {
-  MutexLocker lock(__lua_mutex);
-  lua_pushnumber(__L, value);
+  MutexLocker lock(lua_mutex_);
+  lua_pushnumber(L_, value);
 }
 
 
@@ -874,8 +874,8 @@ LuaContext::push_number(lua_Number value)
 void
 LuaContext::push_string(const char *value)
 {
-  MutexLocker lock(__lua_mutex);
-  lua_pushstring(__L, value);
+  MutexLocker lock(lua_mutex_);
+  lua_pushstring(L_, value);
 }
 
 
@@ -884,8 +884,8 @@ LuaContext::push_string(const char *value)
 void
 LuaContext::push_thread()
 {
-  MutexLocker lock(__lua_mutex);
-  lua_pushthread(__L);
+  MutexLocker lock(lua_mutex_);
+  lua_pushthread(L_);
 }
 
 
@@ -895,8 +895,8 @@ LuaContext::push_thread()
 void
 LuaContext::push_value(int idx)
 {
-  MutexLocker lock(__lua_mutex);
-  lua_pushvalue(__L, idx);
+  MutexLocker lock(lua_mutex_);
+  lua_pushvalue(L_, idx);
 }
 
 
@@ -908,8 +908,8 @@ LuaContext::push_value(int idx)
 void
 LuaContext::push_vfstring(const char *format, va_list arg)
 {
-  MutexLocker lock(__lua_mutex);
-  lua_pushvfstring(__L, format, arg);
+  MutexLocker lock(lua_mutex_);
+  lua_pushvfstring(L_, format, arg);
 }
 
 
@@ -922,14 +922,14 @@ void
 LuaContext::push_usertype(void *data, const char *type_name,
 			  const char *name_space)
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
 
   std::string type_n = type_name;
   if ( name_space ) {
     type_n = std::string(name_space) + "::" + type_name;
   }
 
-  tolua_pushusertype(__L, data, type_n.c_str());
+  tolua_pushusertype(L_, data, type_n.c_str());
 }
 
 
@@ -939,8 +939,8 @@ LuaContext::push_usertype(void *data, const char *type_name,
 void
 LuaContext::push_cfunction(lua_CFunction f)
 {
-  MutexLocker lock(__lua_mutex);
-  lua_pushcfunction(__L, f);
+  MutexLocker lock(lua_mutex_);
+  lua_pushcfunction(L_, f);
 }
 
 
@@ -951,7 +951,7 @@ LuaContext::push_cfunction(lua_CFunction f)
 std::string
 LuaContext::type_name(int idx)
 {
-	return lua_typename(__L, lua_type(__L, idx));
+	return lua_typename(L_, lua_type(L_, idx));
 }
 
 /** Pop value(s) from stack.
@@ -960,11 +960,11 @@ LuaContext::type_name(int idx)
 void
 LuaContext::pop(int n)
 {
-  MutexLocker lock(__lua_mutex);
-  if (__enable_tracebacks && (n >= stack_size())) {
+  MutexLocker lock(lua_mutex_);
+  if (enable_tracebacks_ && (n >= stack_size())) {
     throw LuaRuntimeException("pop", "Cannot pop traceback function, invalid n");
   }
-  lua_pop(__L, n);
+  lua_pop(L_, n);
 }
 
 /** Remove value from stack.
@@ -973,11 +973,11 @@ LuaContext::pop(int n)
 void
 LuaContext::remove(int idx)
 {
-  MutexLocker lock(__lua_mutex);
-  if (__enable_tracebacks && ((idx == 1) || (idx == -stack_size()))) {
+  MutexLocker lock(lua_mutex_);
+  if (enable_tracebacks_ && ((idx == 1) || (idx == -stack_size()))) {
     throw LuaRuntimeException("pop", "Cannot remove traceback function");
   }
-  lua_remove(__L, idx);
+  lua_remove(L_, idx);
 }
 
 
@@ -987,7 +987,7 @@ LuaContext::remove(int idx)
 int
 LuaContext::stack_size()
 {
-  return lua_gettop(__L);
+  return lua_gettop(L_);
 }
 
 
@@ -998,7 +998,7 @@ LuaContext::stack_size()
 void
 LuaContext::create_table(int narr, int nrec)
 {
-  lua_createtable(__L, narr, nrec);
+  lua_createtable(L_, narr, nrec);
 }
 
 
@@ -1011,7 +1011,7 @@ LuaContext::create_table(int narr, int nrec)
 void
 LuaContext::set_table(int t_index)
 {
-  lua_settable(__L, t_index);
+  lua_settable(L_, t_index);
 }
 
 
@@ -1026,7 +1026,7 @@ LuaContext::set_table(int t_index)
 void
 LuaContext::set_field(const char *key, int t_index)
 {
-  lua_setfield(__L, t_index, key);
+  lua_setfield(L_, t_index, key);
 }
 
 
@@ -1038,7 +1038,7 @@ LuaContext::set_field(const char *key, int t_index)
 void
 LuaContext::set_global(const char *name)
 {
-  lua_setglobal(__L, name);
+  lua_setglobal(L_, name);
 }
 
 
@@ -1052,7 +1052,7 @@ LuaContext::set_global(const char *name)
 void
 LuaContext::get_table(int idx)
 {
-  lua_gettable(__L, idx);
+  lua_gettable(L_, idx);
 }
 
 
@@ -1065,7 +1065,7 @@ LuaContext::get_table(int idx)
 void
 LuaContext::get_field(int idx, const char *k)
 {
-  lua_getfield(__L, idx, k);
+  lua_getfield(L_, idx, k);
 }
 
 
@@ -1076,7 +1076,7 @@ LuaContext::get_field(int idx, const char *k)
 void
 LuaContext::raw_set(int idx)
 {
-  lua_rawset(__L, idx);
+  lua_rawset(L_, idx);
 }
 
 
@@ -1089,7 +1089,7 @@ LuaContext::raw_set(int idx)
 void
 LuaContext::raw_seti(int idx, int n)
 {
-  lua_rawseti(__L, idx, n);
+  lua_rawseti(L_, idx, n);
 }
 
 
@@ -1100,7 +1100,7 @@ LuaContext::raw_seti(int idx, int n)
 void
 LuaContext::raw_get(int idx)
 {
-  lua_rawget(__L, idx);
+  lua_rawget(L_, idx);
 }
 
 
@@ -1112,7 +1112,7 @@ LuaContext::raw_get(int idx)
 void
 LuaContext::raw_geti(int idx, int n)
 {
-  lua_rawgeti(__L, idx, n);
+  lua_rawgeti(L_, idx, n);
 }
 
 
@@ -1122,7 +1122,7 @@ LuaContext::raw_geti(int idx, int n)
 void
 LuaContext::get_global(const char *name)
 {
-  lua_getglobal(__L, name);
+  lua_getglobal(L_, name);
 }
 
 
@@ -1134,17 +1134,17 @@ LuaContext::get_global(const char *name)
 void
 LuaContext::remove_global(const char *name)
 {
-  MutexLocker lock(__lua_mutex);
+  MutexLocker lock(lua_mutex_);
 
-  __usertypes.erase(name);
-  __strings.erase(name);
-  __booleans.erase(name);
-  __numbers.erase(name);
-  __integers.erase(name);
-  __cfuncs.erase(name);
+  usertypes_.erase(name);
+  strings_.erase(name);
+  booleans_.erase(name);
+  numbers_.erase(name);
+  integers_.erase(name);
+  cfuncs_.erase(name);
 
-  lua_pushnil(__L);
-  lua_setglobal(__L, name);
+  lua_pushnil(L_);
+  lua_setglobal(L_, name);
 }
 
 
@@ -1156,7 +1156,7 @@ LuaContext::remove_global(const char *name)
 bool
 LuaContext::table_next(int idx)
 {
-	return lua_next(__L, idx) != 0;
+	return lua_next(L_, idx) != 0;
 }
 
 
@@ -1167,7 +1167,7 @@ LuaContext::table_next(int idx)
 lua_Number
 LuaContext::to_number(int idx)
 {
-  return lua_tonumber(__L, idx);
+  return lua_tonumber(L_, idx);
 }
 
 
@@ -1178,7 +1178,7 @@ LuaContext::to_number(int idx)
 lua_Integer
 LuaContext::to_integer(int idx)
 {
-  return lua_tointeger(__L, idx);
+  return lua_tointeger(L_, idx);
 }
 
 
@@ -1189,7 +1189,7 @@ LuaContext::to_integer(int idx)
 bool
 LuaContext::to_boolean(int idx)
 {
-  return lua_toboolean(__L, idx);
+  return lua_toboolean(L_, idx);
 }
 
 
@@ -1200,7 +1200,7 @@ LuaContext::to_boolean(int idx)
 const char *
 LuaContext::to_string(int idx)
 {
-  return lua_tostring(__L, idx);
+  return lua_tostring(L_, idx);
 }
 
 /** Retrieve stack value as userdata.
@@ -1210,7 +1210,7 @@ LuaContext::to_string(int idx)
 void *
 LuaContext::to_userdata(int idx)
 {
-  return lua_touserdata(__L, idx);
+  return lua_touserdata(L_, idx);
 }
 
 
@@ -1221,7 +1221,7 @@ LuaContext::to_userdata(int idx)
 void *
 LuaContext::to_pointer(int idx)
 {
-	return (void *)lua_topointer(__L, idx);
+	return (void *)lua_topointer(L_, idx);
 }
 
 
@@ -1232,7 +1232,7 @@ LuaContext::to_pointer(int idx)
 void *
 LuaContext::to_usertype(int idx)
 {
-	return tolua_tousertype(__L, idx, 0);
+	return tolua_tousertype(L_, idx, 0);
 }
 
 
@@ -1243,7 +1243,7 @@ LuaContext::to_usertype(int idx)
 bool
 LuaContext::is_boolean(int idx)
 {
-  return lua_isboolean(__L, idx);
+  return lua_isboolean(L_, idx);
 }
 
 
@@ -1254,7 +1254,7 @@ LuaContext::is_boolean(int idx)
 bool
 LuaContext::is_cfunction(int idx)
 {
-  return lua_iscfunction(__L, idx);
+  return lua_iscfunction(L_, idx);
 }
 
 
@@ -1265,7 +1265,7 @@ LuaContext::is_cfunction(int idx)
 bool
 LuaContext::is_function(int idx)
 {
-  return lua_isfunction(__L, idx);
+  return lua_isfunction(L_, idx);
 }
 
 
@@ -1276,7 +1276,7 @@ LuaContext::is_function(int idx)
 bool
 LuaContext::is_light_user_data(int idx)
 {
-  return lua_islightuserdata(__L, idx);
+  return lua_islightuserdata(L_, idx);
 }
 
 
@@ -1287,7 +1287,7 @@ LuaContext::is_light_user_data(int idx)
 bool
 LuaContext::is_nil(int idx)
 {
-  return lua_isnil(__L, idx);
+  return lua_isnil(L_, idx);
 }
 
 
@@ -1298,7 +1298,7 @@ LuaContext::is_nil(int idx)
 bool
 LuaContext::is_number(int idx)
 {
-  return lua_isnumber(__L, idx);
+  return lua_isnumber(L_, idx);
 }
 
 
@@ -1309,7 +1309,7 @@ LuaContext::is_number(int idx)
 bool
 LuaContext::is_string(int idx)
 {
-  return lua_isstring(__L, idx);
+  return lua_isstring(L_, idx);
 }
 
 
@@ -1320,7 +1320,7 @@ LuaContext::is_string(int idx)
 bool
 LuaContext::is_table(int idx)
 {
-  return lua_istable(__L, idx);
+  return lua_istable(L_, idx);
 }
 
 
@@ -1331,7 +1331,7 @@ LuaContext::is_table(int idx)
 bool
 LuaContext::is_thread(int idx)
 {
-  return lua_isthread(__L, idx);
+  return lua_isthread(L_, idx);
 }
 
 
@@ -1342,7 +1342,7 @@ LuaContext::is_thread(int idx)
 size_t
 LuaContext::objlen(int idx)
 {
-  return lua_objlen(__L, idx);
+  return lua_objlen(L_, idx);
 }
 
 
@@ -1359,30 +1359,30 @@ LuaContext::setfenv(int idx)
   // find _ENV
   int n = 0;
   const char *val_name;
-  while ((val_name = lua_getupvalue(__L, idx, ++n)) != NULL) {  // ... env upval
+  while ((val_name = lua_getupvalue(L_, idx, ++n)) != NULL) {  // ... env upval
     if (strcmp(val_name, "_ENV") == 0) {
       // found environment
       break;
     } else {
       // we're not interested, remove value from stack
-      lua_pop(__L, 1);                                          // ... env
+      lua_pop(L_, 1);                                          // ... env
     }
   }
 
   // found an environment
   if (val_name != NULL) {                                       // ... env upval
     // create a new simple up value
-    luaL_loadstring(__L, "");                                   // ... env upval chunk
-    lua_pushvalue(__L, -3);                                     // ... env upval chunk env
-    lua_setupvalue(__L, -2, 1);                                 // ... env upval func
+    luaL_loadstring(L_, "");                                   // ... env upval chunk
+    lua_pushvalue(L_, -3);                                     // ... env upval chunk env
+    lua_setupvalue(L_, -2, 1);                                 // ... env upval func
     int act_idx = idx > 0 ? idx : idx - 2;
-    lua_upvaluejoin(__L, act_idx, n, -1, 1);                        // ... env upval chunk
-    lua_pop(__L, 3);                                            // ...
+    lua_upvaluejoin(L_, act_idx, n, -1, 1);                        // ... env upval chunk
+    lua_pop(L_, 3);                                            // ...
   } else {
     throw Exception("No environment found");
   }
 #else
-  lua_setfenv(__L, idx);
+  lua_setfenv(L_, idx);
 #endif
 }
 
@@ -1392,7 +1392,7 @@ LuaContext::setfenv(int idx)
 void
 LuaContext::add_watcher(fawkes::LuaContextWatcher *watcher)
 {
-  __watchers.push_back_locked(watcher);
+  watchers_.push_back_locked(watcher);
 }
 
 
@@ -1402,7 +1402,7 @@ LuaContext::add_watcher(fawkes::LuaContextWatcher *watcher)
 void
 LuaContext::remove_watcher(fawkes::LuaContextWatcher *watcher)
 {
-  __watchers.remove_locked(watcher);
+  watchers_.remove_locked(watcher);
 }
 
 
@@ -1420,9 +1420,9 @@ void
 LuaContext::set_finalization_calls(std::string finalize, std::string finalize_prepare,
                                    std::string finalize_cancel)
 {
-	__finalize_call = finalize;
-	__finalize_prepare_call = finalize_prepare;
-	__finalize_cancel_call = finalize_cancel;
+	finalize_call_ = finalize;
+	finalize_prepare_call_ = finalize_prepare;
+	finalize_cancel_call_ = finalize_cancel;
 }
 
 
@@ -1432,7 +1432,7 @@ LuaContext::set_finalization_calls(std::string finalize, std::string finalize_pr
 void
 LuaContext::process_fam_events()
 {
-  if ( __fam)  __fam->process_events();
+  if ( fam_)  fam_->process_events();
 }
 
 
