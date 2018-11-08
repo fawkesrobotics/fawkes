@@ -386,14 +386,14 @@ InitOptions::operator=(const InitOptions &options)
 
 
 /** Set additional default plugin name.
- * @param default_plugin_ additional default plugin name
+ * @param default_plugin additional default plugin name
  * @return reference to this instance
  */
 InitOptions &
-InitOptions::default_plugin(const char *default_plugin_)
+InitOptions::default_plugin(const char *default_plugin)
 {
   free(default_plugin_);
-  default_plugin_ = strdup(default_plugin_);
+  default_plugin_ = strdup(default_plugin);
   return *this;
 }
 
