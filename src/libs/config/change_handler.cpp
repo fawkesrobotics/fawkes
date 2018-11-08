@@ -64,7 +64,7 @@ namespace fawkes {
  */
 ConfigurationChangeHandler::ConfigurationChangeHandler(const char *path_prefix)
 {
-  __path_prefix = strdup(path_prefix);
+  path_prefix_ = strdup(path_prefix);
 }
 
 
@@ -72,7 +72,7 @@ ConfigurationChangeHandler::ConfigurationChangeHandler(const char *path_prefix)
 /** Destructor. */
 ConfigurationChangeHandler::~ConfigurationChangeHandler()
 {
-  free(__path_prefix);
+  free(path_prefix_);
 }
 
 
@@ -85,7 +85,7 @@ ConfigurationChangeHandler::~ConfigurationChangeHandler()
 const char *
 ConfigurationChangeHandler::config_monitor_prefix()
 {
-  return __path_prefix;
+  return path_prefix_;
 }
 
 } // end namespace fawkes

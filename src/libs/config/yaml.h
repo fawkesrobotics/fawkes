@@ -198,10 +198,10 @@ class YamlConfiguration
   Mutex *mutex;
 
   typedef std::map<std::string, YAML::Node *> DocMap;
-  mutable DocMap __documents;
+  mutable DocMap documents_;
 
-  char *__sysconfdir;
-  char *__userconfdir;
+  char *sysconfdir_;
+  char *userconfdir_;
 
   FamThread *fam_thread_;
 };

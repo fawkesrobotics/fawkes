@@ -189,15 +189,15 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   FawkesNetworkClient  *c;
   FawkesNetworkMessage *msg;
   Mutex *mutex;
-  bool                  __mirror_init_waiting;
-  InterruptibleBarrier *__mirror_init_barrier;
+  bool                  mirror_init_waiting_;
+  InterruptibleBarrier *mirror_init_barrier_;
 
-  bool __mirror_mode;
-  bool __mirror_mode_before_connection_dead;
-  unsigned int __mirror_timeout_sec;
+  bool mirror_mode_;
+  bool mirror_mode_before_connection_dead_;
+  unsigned int mirror_timeout_sec_;
   MemoryConfiguration *mirror_config;
 
-  bool __connected;
+  bool connected_;
 };
 
 } // end namespace fawkes

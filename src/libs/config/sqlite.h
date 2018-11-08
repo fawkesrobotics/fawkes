@@ -156,8 +156,8 @@ class SQLiteConfiguration : public Configuration
     std::string           get_oldvalue() const;
 
    private:
-    ::sqlite3_stmt *__stmt;
-    void *__p;
+    ::sqlite3_stmt *stmt_;
+    void *p_;
   };
 
   ValueIterator * iterator();
@@ -190,11 +190,11 @@ class SQLiteConfiguration : public Configuration
   bool opened;
   Mutex *mutex;
 
-  char *__sysconfdir;
-  char *__userconfdir;
-  char *__host_file;
-  char *__default_file;
-  char *__default_sql;
+  char *sysconfdir_;
+  char *userconfdir_;
+  char *host_file_;
+  char *default_file_;
+  char *default_sql_;
 };
 
 } // end namespace fawkes

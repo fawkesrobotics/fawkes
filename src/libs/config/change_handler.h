@@ -42,7 +42,7 @@ class ConfigurationChangeHandler
   const char *  config_monitor_prefix();
 
  private:
-  char *__path_prefix;
+  char *path_prefix_;
 
 };
 
