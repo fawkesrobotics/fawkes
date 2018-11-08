@@ -42,34 +42,34 @@ class QaTestWait
 public:
   QaTestWait()
   {
-    __clock = Clock::instance();
-    __until = new Time();
+    clock_ = Clock::instance();
+    until_ = new Time();
   }
 
 
   void mark_start()
   {
-    __clock->get_time(__until);
-    *__until += (long int)30000;
+    clock_->get_time(until_);
+    *until_ += (long int)30000;
   }
 
   void wait()
   {
     Time now;
     printf("Now at %p\n", &now);
-    __clock->get_time(&now);
+    clock_->get_time(&now);
     usleep(0);
-    long int remaining_usec = (*__until - now).in_usec();
+    long int remaining_usec = (*until_ - now).in_usec();
     while ( remaining_usec > 0 ) {
       usleep(remaining_usec);
-      __clock->get_time(&now);
-      remaining_usec = (*__until - now).in_usec();
+      clock_->get_time(&now);
+      remaining_usec = (*until_ - now).in_usec();
       //remaining_usec = 0;
     }
   }
 
-  Clock *__clock;
-  Time  *__until;
+  Clock *clock_;
+  Time  *until_;
 };
 
 class QaSignalHandler : public SignalHandler

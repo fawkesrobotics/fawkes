@@ -97,24 +97,24 @@ class ArgumentParser
   /** Get option string.
    * @return option string used to create instance */
   std::string  get_optstring() const
-  { return __opt_string; }
+  { return opt_string_; }
 
   /** Get long option configuration.
    * @return vector of long options used to create instance */
   std::vector<option> get_long_opts() const
-  { return __long_opts; }
+  { return long_opts_; }
 
  private:
-  std::map<std::string, const char *> __opts;
-  std::map<std::string, const char *> __opts_cit;
-  std::vector< const char * >  __items;
+  std::map<std::string, const char *> opts_;
+  std::map<std::string, const char *> opts_cit_;
+  std::vector< const char * >  items_;
 
-  char *  __program_name;
-  char ** __argv;
-  int     __argc;
+  char *  program_name_;
+  char ** argv_;
+  int     argc_;
 
-  std::string         __opt_string;
-  std::vector<option> __long_opts;
+  std::string         opt_string_;
+  std::vector<option> long_opts_;
 };
 
 } // end namespace fawkes

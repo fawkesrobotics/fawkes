@@ -52,11 +52,11 @@ class ModuleManager {
   void set_open_flags(Module::ModuleFlags open_flags);
 
  private:
-  std::map<std::string, Module * > __modules;
+  std::map<std::string, Module * > modules_;
 
-  const char *__module_base_dir;
-  Mutex *__mutex;
-  Module::ModuleFlags __open_flags;
+  const char *module_base_dir_;
+  Mutex *mutex_;
+  Module::ModuleFlags open_flags_;
 
 };
 

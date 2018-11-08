@@ -86,21 +86,21 @@ class FileAlterationMonitor
   void remove_listener(FamListener *listener);
 
  private:
-  LockList<FamListener *>            __listeners;
-  LockList<FamListener *>::iterator  __lit;
-  LockList<regex_t *>                __regexes;
-  LockList<regex_t *>::iterator      __rxit;
+  LockList<FamListener *>            listeners_;
+  LockList<FamListener *>::iterator  lit_;
+  LockList<regex_t *>                regexes_;
+  LockList<regex_t *>::iterator      rxit_;
 
-  int     __inotify_fd;
-  char   *__inotify_buf;
-  size_t  __inotify_bufsize;
+  int     inotify_fd_;
+  char   *inotify_buf_;
+  size_t  inotify_bufsize_;
 
-  std::map<int, std::string> __inotify_watches;
-  std::map<int, std::string>::iterator __inotify_wit;
+  std::map<int, std::string> inotify_watches_;
+  std::map<int, std::string>::iterator inotify_wit_;
 
-  bool __interrupted;
-  bool __interruptible;
-  int  __pipe_fds[2];
+  bool interrupted_;
+  bool interruptible_;
+  int  pipe_fds_[2];
 };
 
 } // end of namespace fawkes

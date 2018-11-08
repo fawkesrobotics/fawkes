@@ -64,12 +64,12 @@ class SharedMemoryRegistry
   } MemInfo;
   /// @endcond
 
-  bool  __master;
-  int   __shmfd;
-  char *__shm_name;
+  bool  master_;
+  int   shmfd_;
+  char *shm_name_;
 
-  sem_t   *__sem;
-  MemInfo *__meminfo;
+  sem_t   *sem_;
+  MemInfo *meminfo_;
 };
 
 

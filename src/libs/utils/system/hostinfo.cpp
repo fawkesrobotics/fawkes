@@ -50,7 +50,7 @@ HostInfo::HostInfo()
     throw NullPointerException("Could not call uname");
   }
 
-  short__name = NULL;
+  shortname_ = NULL;
   domain_name = NULL;
 
   update();
@@ -61,7 +61,7 @@ HostInfo::HostInfo()
 HostInfo::~HostInfo()
 {
   free(utsname);
-  free(short__name);
+  free(shortname_);
   free(domain_name);
 }
 
@@ -72,8 +72,8 @@ HostInfo::~HostInfo()
 void
 HostInfo::update()
 {
-  if ( short__name != NULL ) {
-    free(short__name);
+  if ( shortname_ != NULL ) {
+    free(shortname_);
   }
   if (domain_name != NULL) {
     free(domain_name);
@@ -81,14 +81,14 @@ HostInfo::update()
 
   char *dot;
   if ( (dot = strchr(utsname->nodename, '.')) == NULL ) {
-    short__name  = strdup(utsname->nodename);
+    shortname_  = strdup(utsname->nodename);
     domain_name = strdup("");
   } else {
     int short_length  = dot - utsname->nodename + 1;
     int domain_length = strlen(utsname->nodename) - short_length + 1;
-    short__name = (char *)malloc(short_length);
-    short__name[short_length - 1] = 0;
-    strncpy(short__name, utsname->nodename, short_length - 1);
+    shortname_ = (char *)malloc(short_length);
+    shortname_[short_length - 1] = 0;
+    strncpy(shortname_, utsname->nodename, short_length - 1);
 
     domain_name = (char *)malloc(domain_length);
     domain_name[domain_length - 1] = 0;
@@ -113,7 +113,7 @@ HostInfo::name()
 const char *
 HostInfo::short_name()
 {
-  return short__name;
+  return shortname_;
 }
 
 

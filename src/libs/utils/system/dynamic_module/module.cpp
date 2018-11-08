@@ -63,13 +63,13 @@ const char * Module::FILE_EXTENSION = SOEXT;
  */
 Module::Module(std::string filename, Module::ModuleFlags flags)
 {
-  __filename = filename;
-  __flags    = flags;
+  filename_ = filename;
+  flags_    = flags;
 
-  __handle         = NULL;
+  handle_         = NULL;
 
-  __is_resident    = false;
-  __ref_count      = 0;
+  is_resident_    = false;
+  ref_count_      = 0;
 }
 
 
@@ -88,11 +88,11 @@ Module::~Module()
 void
 Module::open()
 {
-  if ( __handle != NULL )  return;
+  if ( handle_ != NULL )  return;
 
   // Note: We assume Linux-style shared objects
   std::string full_filename = "";
-  full_filename = __filename;
+  full_filename = filename_;
   //                                                                .   SOEXT
   if ( full_filename.find("." SOEXT, 0) != (full_filename.length() - 1 - strlen(FILE_EXTENSION)) ) {
     // filename has no proper ending
@@ -100,29 +100,29 @@ Module::open()
   }
 
   int tflags = 0;
-  tflags |= ((__flags & MODULE_BIND_LAZY)   != 0) ? RTLD_LAZY : RTLD_NOW;
-  tflags |= ((__flags & MODULE_BIND_NOW)    != 0) ? RTLD_NOW : 0;
-  tflags |= ((__flags & MODULE_BIND_LOCAL)  != 0) ? RTLD_LOCAL : 0;
-  tflags |= ((__flags & MODULE_BIND_GLOBAL) != 0) ? RTLD_GLOBAL : 0;
-  tflags |= ((__flags & MODULE_NODELETE)    != 0) ? RTLD_NODELETE : 0;
+  tflags |= ((flags_ & MODULE_BIND_LAZY)   != 0) ? RTLD_LAZY : RTLD_NOW;
+  tflags |= ((flags_ & MODULE_BIND_NOW)    != 0) ? RTLD_NOW : 0;
+  tflags |= ((flags_ & MODULE_BIND_LOCAL)  != 0) ? RTLD_LOCAL : 0;
+  tflags |= ((flags_ & MODULE_BIND_GLOBAL) != 0) ? RTLD_GLOBAL : 0;
+  tflags |= ((flags_ & MODULE_NODELETE)    != 0) ? RTLD_NODELETE : 0;
 #ifdef linux
-  tflags |= ((__flags & MODULE_BIND_DEEP)   != 0) ? RTLD_DEEPBIND : 0;
+  tflags |= ((flags_ & MODULE_BIND_DEEP)   != 0) ? RTLD_DEEPBIND : 0;
 #endif
 
   if ( full_filename == "") {
-    __handle = dlopen (NULL, tflags);
+    handle_ = dlopen (NULL, tflags);
 
-    __filename    = "main";
-    __is_resident = true;
-    __ref_count   = 1;
+    filename_    = "main";
+    is_resident_ = true;
+    ref_count_   = 1;
   } else {
 
     // check whether we have a readable file right away
     if (File::is_regular(full_filename.c_str())) {
       // ok, try loading the module
-      __handle = dlopen(full_filename.c_str(), tflags);
+      handle_ = dlopen(full_filename.c_str(), tflags);
 
-      if ( NULL == __handle) {
+      if ( NULL == handle_) {
 	const char *err = dlerror();
 	if ( NULL == err ) {
 	  throw ModuleOpenException("dlopen failed with an unknown error");
@@ -132,8 +132,8 @@ Module::open()
 	  throw e;
 	}
       } else {
-	__is_resident = false;
-	__ref_count   = 1;
+	is_resident_ = false;
+	ref_count_   = 1;
       }
     } else {
       ModuleOpenException e("Cannot open module");
@@ -150,16 +150,16 @@ Module::open()
 bool
 Module::close()
 {
-  if ( __handle == NULL )  return true;
+  if ( handle_ == NULL )  return true;
 
-  if ( __ref_count > 0 )  --__ref_count;
+  if ( ref_count_ > 0 )  --ref_count_;
 
-  if ( (__ref_count == 0) && ! __is_resident ) {
-    if ( dlclose(__handle) != 0 ) {
-      __handle = NULL;
+  if ( (ref_count_ == 0) && ! is_resident_ ) {
+    if ( dlclose(handle_) != 0 ) {
+      handle_ = NULL;
       return false;
     }
-    __handle = NULL;
+    handle_ = NULL;
   }
 
   return true;
@@ -170,7 +170,7 @@ Module::close()
 void
 Module::ref()
 {
-  ++__ref_count;
+  ++ref_count_;
 }
 
 
@@ -178,8 +178,8 @@ Module::ref()
 void
 Module::unref()
 {
-  if ( __ref_count > 0 ) {
-    --__ref_count;
+  if ( ref_count_ > 0 ) {
+    --ref_count_;
   }
 }
 
@@ -191,7 +191,7 @@ Module::unref()
 bool
 Module::notref()
 {
-  return (__ref_count == 0);
+  return (ref_count_ == 0);
 }
 
 
@@ -201,7 +201,7 @@ Module::notref()
 unsigned int
 Module::get_ref_count()
 {
-  return __ref_count;
+  return ref_count_;
 }
 
 
@@ -213,7 +213,7 @@ Module::get_ref_count()
 bool
 Module::operator==(const Module &cmod)
 {
-  return (__filename == cmod.__filename);
+  return (filename_ == cmod.filename_);
 }
 
 
@@ -232,11 +232,11 @@ Module::has_symbol(const char *symbol_name)
   if( symbol_name == NULL ) {
     return false;
   }
-  if ( __handle == NULL ) {
+  if ( handle_ == NULL ) {
     return false;
   }
 
-  return ( dlsym( __handle, symbol_name ) != NULL );
+  return ( dlsym( handle_, symbol_name ) != NULL );
 }
 
 
@@ -253,9 +253,9 @@ void *
 Module::get_symbol(const char *symbol_name)
 {
   if( symbol_name == NULL ) return NULL;
-  if ( __handle == NULL ) return NULL;
+  if ( handle_ == NULL ) return NULL;
 
-  return dlsym( __handle, symbol_name );
+  return dlsym( handle_, symbol_name );
 }
 
 
@@ -277,7 +277,7 @@ Module::get_file_extension()
 std::string
 Module::get_filename()
 {
-  return __filename;
+  return filename_;
 }
 
 
@@ -288,11 +288,11 @@ Module::get_filename()
 std::string
 Module::get_base_filename()
 {
-  if ( __filename.find("/", 0) != std::string::npos ) {
-    std::string rv = __filename.substr(__filename.rfind("/", __filename.length()) + 1, __filename.length());
+  if ( filename_.find("/", 0) != std::string::npos ) {
+    std::string rv = filename_.substr(filename_.rfind("/", filename_.length()) + 1, filename_.length());
     return rv;
   } else {
-    return __filename.c_str();
+    return filename_.c_str();
   }
 }
 

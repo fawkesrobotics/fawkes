@@ -44,7 +44,7 @@ class PathParser : public std::vector<std::string>
   void        ctor(const std::string &path);
 
  private:
-  bool __abs_path;
+  bool abs_path_;
 };
 
 } // end namespace fawkes

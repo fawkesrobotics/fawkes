@@ -48,7 +48,7 @@ class HostInfo
 
  private:
   struct ::utsname *utsname;
-  char *short__name;
+  char *shortname_;
   char *domain_name;
 };
 

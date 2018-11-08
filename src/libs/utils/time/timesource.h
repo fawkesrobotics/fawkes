@@ -63,4 +63,4 @@ class TimeSource
 
 } // end namespace fawkes
 
-#endif /*  __UTILS_TIME_TIMESOURCE_H_ */
+#endif /*  UTILS_TIME_TIMESOURCE_H__ */

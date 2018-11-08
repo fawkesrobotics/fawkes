@@ -42,21 +42,21 @@ namespace fawkes {
 ModuleManager::ModuleManager(const char *module_base_dir,
 			     Module::ModuleFlags open_flags)
 {
-  __modules.clear();
-  __module_base_dir = module_base_dir;
-  __mutex = new Mutex();
-  __open_flags = open_flags;
+  modules_.clear();
+  module_base_dir_ = module_base_dir;
+  mutex_ = new Mutex();
+  open_flags_ = open_flags;
 }
 
 /** Destructor. */
 ModuleManager::~ModuleManager()
 {
   std::map<std::string, Module * >::iterator i;
-  for (i = __modules.begin(); i != __modules.end(); ++i) {
+  for (i = modules_.begin(); i != modules_.end(); ++i) {
     delete (*i).second;
   }
-  __modules.clear();
-  delete __mutex;
+  modules_.clear();
+  delete mutex_;
 }
 
 
@@ -66,7 +66,7 @@ ModuleManager::~ModuleManager()
 void
 ModuleManager::set_open_flags(Module::ModuleFlags open_flags)
 {
-  __open_flags = open_flags;
+  open_flags_ = open_flags;
 }
 
 
@@ -83,27 +83,27 @@ ModuleManager::set_open_flags(Module::ModuleFlags open_flags)
 Module *
 ModuleManager::open_module(const char *filename)
 {
-  __mutex->lock();
-  if ( __modules.find(filename) != __modules.end() ) {
-    __modules[filename]->ref();
-    __mutex->unlock();
-    return __modules[filename];
+  mutex_->lock();
+  if ( modules_.find(filename) != modules_.end() ) {
+    modules_[filename]->ref();
+    mutex_->unlock();
+    return modules_[filename];
   } else {
-    Module *module = new Module(std::string(__module_base_dir) + "/" + filename,
-				__open_flags);
+    Module *module = new Module(std::string(module_base_dir_) + "/" + filename,
+				open_flags_);
     try {
       module->open();
       // ref count of module is now 1
-      __modules[module->get_base_filename()] = module;
-      __mutex->unlock();
+      modules_[module->get_base_filename()] = module;
+      mutex_->unlock();
       return module;
     } catch (ModuleOpenException &e) {
       delete module;
-      __mutex->unlock();
+      mutex_->unlock();
       throw;
     }
   }
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -125,15 +125,15 @@ ModuleManager::close_module(Module *module)
 void
 ModuleManager::close_module(const char *filename)
 {
-  __mutex->lock();
-  if ( __modules.find(filename) != __modules.end() ) {
-    __modules[filename]->unref();
-    if (__modules[filename]->notref()) {
-      delete __modules[filename];
-      __modules.erase( filename );
+  mutex_->lock();
+  if ( modules_.find(filename) != modules_.end() ) {
+    modules_[filename]->unref();
+    if (modules_[filename]->notref()) {
+      delete modules_[filename];
+      modules_.erase( filename );
     }
   }
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -149,10 +149,10 @@ ModuleManager::close_module(const char *filename)
 Module *
 ModuleManager::get_module(const char *filename)
 {
-  MutexLocker lock(__mutex);
-  if ( __modules.find(filename) != __modules.end() ) {
-    __modules[filename]->ref();
-    return __modules[filename];
+  MutexLocker lock(mutex_);
+  if ( modules_.find(filename) != modules_.end() ) {
+    modules_[filename]->ref();
+    return modules_[filename];
   } else {
     return NULL;
   }
@@ -168,7 +168,7 @@ ModuleManager::get_module(const char *filename)
 bool
 ModuleManager::module_opened(const char *filename)
 {
-  return ( __modules.find(filename) != __modules.end() );
+  return ( modules_.find(filename) != modules_.end() );
 }
 
   

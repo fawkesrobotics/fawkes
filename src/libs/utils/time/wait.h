@@ -42,11 +42,11 @@ class TimeWait {
   static void wait_systime(long int usec);
 
  private:
-  Clock *__clock;
-  Time  *__until;
-  Time  *__until_systime;
-  Time  *__now;
-  long int __desired_loop_time;
+  Clock *clock_;
+  Time  *until_;
+  Time  *until_systime_;
+  Time  *now_;
+  long int desired_loop_time_;
 };
 
 } // end namespace fawkes

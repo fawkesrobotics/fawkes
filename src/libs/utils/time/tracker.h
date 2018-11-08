@@ -62,16 +62,16 @@ class TimeTracker {
  private:
   timeval start_time;
   timeval last_time;
-  std::vector<std::vector<struct timeval *> >    __class_times;
-  std::vector<std::string>                       __class_names;
-  std::vector<struct timeval *>                  __times;
-  std::map<unsigned int, std::string>            __comments;
-  std::vector<struct timeval *>::iterator        __time_it;
-  std::map<unsigned int, std::string>::iterator  __comment_it;
-  std::string                                    __tracker_comment;
+  std::vector<std::vector<struct timeval *> >    class_times_;
+  std::vector<std::string>                       class_names_;
+  std::vector<struct timeval *>                  times_;
+  std::map<unsigned int, std::string>            comments_;
+  std::vector<struct timeval *>::iterator        time_it_;
+  std::map<unsigned int, std::string>::iterator  comment_it_;
+  std::string                                    tracker_comment_;
 
-  unsigned int __write_cycle;
-  FILE *__timelog;
+  unsigned int write_cycle_;
+  FILE *timelog_;
 };
 
 

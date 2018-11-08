@@ -83,4 +83,4 @@ class Clock
 
 } // end namespace fawkes
 
-#endif /* __UTILS_TIME_CLOCK_H_ */
+#endif /* UTILS_TIME_CLOCK_H__ */

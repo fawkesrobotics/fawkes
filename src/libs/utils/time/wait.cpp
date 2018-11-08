@@ -48,20 +48,20 @@ namespace fawkes {
  */
 TimeWait::TimeWait(Clock *clock, long int desired_loop_time_usec)
 {
-  __desired_loop_time = desired_loop_time_usec;
-  __clock = clock;
-  __until = new Time();
-  __until_systime = new Time();
-  __now = new Time();
+  desired_loop_time_ = desired_loop_time_usec;
+  clock_ = clock;
+  until_ = new Time();
+  until_systime_ = new Time();
+  now_ = new Time();
 }
 
 
 /** Destructor. */
 TimeWait::~TimeWait()
 {
-  delete __until;
-  delete __until_systime;
-  delete __now;
+  delete until_;
+  delete until_systime_;
+  delete now_;
 }
 
 
@@ -69,10 +69,10 @@ TimeWait::~TimeWait()
 void
 TimeWait::mark_start()
 {
-  __clock->get_time(__until);
-  *__until += __desired_loop_time;
-  __clock->get_systime(__until_systime);
-  *__until_systime += __desired_loop_time;
+  clock_->get_time(until_);
+  *until_ += desired_loop_time_;
+  clock_->get_systime(until_systime_);
+  *until_systime_ += desired_loop_time_;
 }
 
 
@@ -80,15 +80,15 @@ TimeWait::mark_start()
 void
 TimeWait::wait()
 {
-  __clock->get_time(__now);
+  clock_->get_time(now_);
   // we want to release run status at least shortly
   usleep(0);
 
-  long int remaining_usec = (*__until - *__now).in_usec();
+  long int remaining_usec = (*until_ - *now_).in_usec();
   while ( remaining_usec > 0 ) {
     usleep(remaining_usec);
-    __clock->get_time(__now);
-    remaining_usec = (*__until - *__now).in_usec();
+    clock_->get_time(now_);
+    remaining_usec = (*until_ - *now_).in_usec();
   }
 }
 
@@ -99,15 +99,15 @@ TimeWait::wait()
 void
 TimeWait::wait_systime()
 {
-  __clock->get_systime(__now);
+  clock_->get_systime(now_);
   // we want to release run status at least shortly
   usleep(0);
 
-  long int remaining_usec = (*__until_systime - *__now).in_usec();
+  long int remaining_usec = (*until_systime_ - *now_).in_usec();
   while ( remaining_usec > 0 ) {
     usleep(remaining_usec);
-    __clock->get_systime(__now);
-    remaining_usec = (*__until_systime - *__now).in_usec();
+    clock_->get_systime(now_);
+    remaining_usec = (*until_systime_ - *now_).in_usec();
   }
 }
 

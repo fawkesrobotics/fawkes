@@ -94,9 +94,9 @@ const unsigned int Time::TIMESTR_SIZE = 26;
  */
 Time::Time()
 {
-  __clock = Clock::instance();
-  __clock->get_time(&__time);
-  __timestr = NULL;
+  clock_ = Clock::instance();
+  clock_->get_time(&time_);
+  timestr_ = NULL;
 }
 
 
@@ -106,10 +106,10 @@ Time::Time()
  */
 Time::Time(const timeval* tv)
 {
-  __time.tv_sec = tv->tv_sec;
-  __time.tv_usec = tv->tv_usec;
-  __clock = Clock::instance();
-  __timestr = NULL;
+  time_.tv_sec = tv->tv_sec;
+  time_.tv_usec = tv->tv_usec;
+  clock_ = Clock::instance();
+  timestr_ = NULL;
 }
 
 
@@ -122,14 +122,14 @@ Time::Time(const timeval* tv)
  */
 Time::Time(long sec, long usec, Clock *clock)
 {
-  __time.tv_sec  = sec;
-  __time.tv_usec = usec;
+  time_.tv_sec  = sec;
+  time_.tv_usec = usec;
   if (clock) {
-    __clock = clock;
+    clock_ = clock;
   } else {
-    __clock = Clock::instance();
+    clock_ = Clock::instance();
   }
-  __timestr = NULL;
+  timestr_ = NULL;
 }
 
 
@@ -142,10 +142,10 @@ Time::Time(long ms)
   time_t sec = (time_t) (ms / 1000.0);
   suseconds_t usec =  (ms % 1000) * 1000;
 
-  __time.tv_sec = sec;
-  __time.tv_usec = usec;
-  __clock = Clock::instance();
-  __timestr = NULL;
+  time_.tv_sec = sec;
+  time_.tv_usec = usec;
+  clock_ = Clock::instance();
+  timestr_ = NULL;
 }
 
 
@@ -158,10 +158,10 @@ Time::Time(double s)
   time_t sec = (time_t) s;
   suseconds_t usec = (suseconds_t)roundf((s - sec) * 1000000.f);
 
-  __time.tv_sec = sec;
-  __time.tv_usec = usec;
-  __clock = Clock::instance();
-  __timestr = NULL;
+  time_.tv_sec = sec;
+  time_.tv_usec = usec;
+  clock_ = Clock::instance();
+  timestr_ = NULL;
 }
 
 
@@ -172,9 +172,9 @@ Time::Time(double s)
  */
 Time::Time(Clock *clock)
 {
-  this->__clock = clock;
-  __clock->get_time(&__time);
-  __timestr = NULL;
+  this->clock_ = clock;
+  clock_->get_time(&time_);
+  timestr_ = NULL;
 }
 
 
@@ -183,14 +183,14 @@ Time::Time(Clock *clock)
  */
 Time::Time(const Time &t)
 {
-  __time.tv_sec  = t.__time.tv_sec;
-  __time.tv_usec = t.__time.tv_usec;
-  __clock        = t.__clock;
-  if (t.__timestr) {
-    __timestr = (char *)malloc(TIMESTR_SIZE);
-    strncpy(__timestr, t.__timestr, TIMESTR_SIZE);
+  time_.tv_sec  = t.time_.tv_sec;
+  time_.tv_usec = t.time_.tv_usec;
+  clock_        = t.clock_;
+  if (t.timestr_) {
+    timestr_ = (char *)malloc(TIMESTR_SIZE);
+    strncpy(timestr_, t.timestr_, TIMESTR_SIZE);
   } else {
-    __timestr = NULL;
+    timestr_ = NULL;
   }
 }
 
@@ -200,14 +200,14 @@ Time::Time(const Time &t)
  */
 Time::Time(const Time *t)
 {
-  __time.tv_sec  = t->__time.tv_sec;
-  __time.tv_usec = t->__time.tv_usec;
-  __clock        = t->__clock;
-  if (t->__timestr) {
-    __timestr = (char *)malloc(TIMESTR_SIZE);
-    strncpy(__timestr, t->__timestr, TIMESTR_SIZE);
+  time_.tv_sec  = t->time_.tv_sec;
+  time_.tv_usec = t->time_.tv_usec;
+  clock_        = t->clock_;
+  if (t->timestr_) {
+    timestr_ = (char *)malloc(TIMESTR_SIZE);
+    strncpy(timestr_, t->timestr_, TIMESTR_SIZE);
   } else {
-    __timestr = NULL;
+    timestr_ = NULL;
   }
 }
 
@@ -215,7 +215,7 @@ Time::Time(const Time *t)
 /** Destructor. */
 Time::~Time()
 {
-  if (__timestr)  free(__timestr);
+  if (timestr_)  free(timestr_);
 }
 
 
@@ -228,7 +228,7 @@ Time::~Time()
 double
 Time::in_sec() const
 {
-  return ((double)__time.tv_sec + (double)__time.tv_usec / 1000000.);
+  return ((double)time_.tv_sec + (double)time_.tv_usec / 1000000.);
 }
 
 
@@ -238,7 +238,7 @@ Time::in_sec() const
 long
 Time::in_msec() const
 {
-  return (__time.tv_sec * 1000 + (long) (__time.tv_usec / 1000));
+  return (time_.tv_sec * 1000 + (long) (time_.tv_usec / 1000));
 }
 
 
@@ -248,7 +248,7 @@ Time::in_msec() const
 long
 Time::in_usec() const
 {
-  return (__time.tv_sec * 1000000 + __time.tv_usec);
+  return (time_.tv_sec * 1000000 + time_.tv_usec);
 }
 
 
@@ -258,8 +258,8 @@ Time::in_usec() const
 void
 Time::set_time(const timeval* tv)
 {
-  __time.tv_sec = tv->tv_sec;
-  __time.tv_usec = tv->tv_usec;
+  time_.tv_sec = tv->tv_sec;
+  time_.tv_usec = tv->tv_usec;
 }
 
 
@@ -270,8 +270,8 @@ Time::set_time(const timeval* tv)
 void
 Time::set_time(long int sec, long int usec)
 {
-  __time.tv_sec  = sec;
-  __time.tv_usec = usec;
+  time_.tv_sec  = sec;
+  time_.tv_usec = usec;
 }
 
 
@@ -281,8 +281,8 @@ Time::set_time(long int sec, long int usec)
 void
 Time::set_time(long ms)
 {
-  __time.tv_sec  = (time_t) (ms / 1000.0);
-  __time.tv_usec = (ms % 1000) * 1000;
+  time_.tv_sec  = (time_t) (ms / 1000.0);
+  time_.tv_usec = (ms % 1000) * 1000;
 }
 
 
@@ -292,8 +292,8 @@ Time::set_time(long ms)
 void
 Time::set_time(double s)
 {
-  __time.tv_sec  = (time_t)floor(s);
-  __time.tv_usec = (suseconds_t)(s - __time.tv_sec) * 1000000;
+  time_.tv_sec  = (time_t)floor(s);
+  time_.tv_usec = (suseconds_t)(s - time_.tv_sec) * 1000000;
 }
 
 /** Set time to given time.
@@ -314,8 +314,8 @@ Time::set_time(const Time &t)
 void
 Time::set_time(const Time *t)
 {
-  __time.tv_sec  = t->__time.tv_sec;
-  __time.tv_usec = t->__time.tv_usec;
+  time_.tv_sec  = t->time_.tv_sec;
+  time_.tv_usec = t->time_.tv_usec;
 }
 
 
@@ -326,7 +326,7 @@ void
 Time::set_clock(Clock *clock)
 {
   if (clock == NULL) throw NullPointerException("Clock may not be NULL");
-  __clock = clock;
+  clock_ = clock;
 }
 
 
@@ -350,15 +350,15 @@ Time
 Time::operator+(const Time& t) const
 {
   Time ret(0,0);
-  if (__time.tv_usec + t.__time.tv_usec >= 1000000)
+  if (time_.tv_usec + t.time_.tv_usec >= 1000000)
   {
-    ret.__time.tv_usec = __time.tv_usec + t.__time.tv_usec - 1000000;
-    ret.__time.tv_sec = __time.tv_sec + t.__time.tv_sec + 1;
+    ret.time_.tv_usec = time_.tv_usec + t.time_.tv_usec - 1000000;
+    ret.time_.tv_sec = time_.tv_sec + t.time_.tv_sec + 1;
   }
   else
   {
-    ret.__time.tv_usec = __time.tv_usec + t.__time.tv_usec;
-    ret.__time.tv_sec = __time.tv_sec + t.__time.tv_sec;
+    ret.time_.tv_usec = time_.tv_usec + t.time_.tv_usec;
+    ret.time_.tv_sec = time_.tv_sec + t.time_.tv_sec;
   }
 
   return ret;
@@ -386,15 +386,15 @@ Time::operator+(const double sec) const
   Time ret(0,0);
   time_t sec_only = (time_t)floor(sec);
   suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
-  if ((__time.tv_usec + usec_only) >= 1000000)
+  if ((time_.tv_usec + usec_only) >= 1000000)
   {
-    ret.__time.tv_usec = __time.tv_usec + usec_only - 1000000;
-    ret.__time.tv_sec = __time.tv_sec + sec_only + 1;
+    ret.time_.tv_usec = time_.tv_usec + usec_only - 1000000;
+    ret.time_.tv_sec = time_.tv_sec + sec_only + 1;
   }
   else
   {
-    ret.__time.tv_usec = __time.tv_usec + usec_only;
-    ret.__time.tv_sec = __time.tv_sec + sec_only;
+    ret.time_.tv_usec = time_.tv_usec + usec_only;
+    ret.time_.tv_sec = time_.tv_sec + sec_only;
   }
 
   return ret;
@@ -409,17 +409,17 @@ Time
 Time::operator+(const long int usec) const
 {
   Time ret(0,0);
-  if ( __time.tv_usec + usec >= 1000000 )
+  if ( time_.tv_usec + usec >= 1000000 )
   {
-    //usec + __time.tv_usec might be more than 1 second
-    long int tmp_usec = __time.tv_usec + usec;
-    ret.__time.tv_usec  = tmp_usec % 1000000;
-    ret.__time.tv_sec   = __time.tv_sec + (tmp_usec / 1000000);
+    //usec + time_.tv_usec might be more than 1 second
+    long int tmp_usec = time_.tv_usec + usec;
+    ret.time_.tv_usec  = tmp_usec % 1000000;
+    ret.time_.tv_sec   = time_.tv_sec + (tmp_usec / 1000000);
   }
   else
   {
-    ret.__time.tv_sec   = __time.tv_sec;
-    ret.__time.tv_usec += usec;
+    ret.time_.tv_sec   = time_.tv_sec;
+    ret.time_.tv_usec += usec;
   }
 
   return ret;
@@ -434,15 +434,15 @@ Time
 Time::operator-(const Time& t) const
 {
   Time ret(0,0);
-  if (__time.tv_usec < t.__time.tv_usec)
+  if (time_.tv_usec < t.time_.tv_usec)
   {
-    ret.__time.tv_usec = 1000000 + __time.tv_usec - t.__time.tv_usec;
-    ret.__time.tv_sec = __time.tv_sec - t.__time.tv_sec - 1;
+    ret.time_.tv_usec = 1000000 + time_.tv_usec - t.time_.tv_usec;
+    ret.time_.tv_sec = time_.tv_sec - t.time_.tv_sec - 1;
   }
   else
   {
-    ret.__time.tv_usec = __time.tv_usec - t.__time.tv_usec;
-    ret.__time.tv_sec = __time.tv_sec - t.__time.tv_sec;
+    ret.time_.tv_usec = time_.tv_usec - t.time_.tv_usec;
+    ret.time_.tv_sec = time_.tv_sec - t.time_.tv_sec;
   }
 
   return ret;
@@ -456,7 +456,7 @@ Time::operator-(const Time& t) const
 double
 Time::operator-(const Time* t) const
 {
-  return time_diff_sec(__time, t->__time);
+  return time_diff_sec(time_, t->time_);
 }
 
 
@@ -470,15 +470,15 @@ Time::operator-(const double sec) const
   Time ret(0,0);
   time_t sec_only = (time_t)floor(sec);
   suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
-  if (__time.tv_usec < usec_only)
+  if (time_.tv_usec < usec_only)
   {
-    ret.__time.tv_usec = 1000000 + __time.tv_usec - usec_only;
-    ret.__time.tv_sec = __time.tv_sec - sec_only - 1;
+    ret.time_.tv_usec = 1000000 + time_.tv_usec - usec_only;
+    ret.time_.tv_sec = time_.tv_sec - sec_only - 1;
   }
   else
   {
-    ret.__time.tv_usec = __time.tv_usec - usec_only;
-    ret.__time.tv_sec = __time.tv_sec - sec_only;
+    ret.time_.tv_usec = time_.tv_usec - usec_only;
+    ret.time_.tv_sec = time_.tv_sec - sec_only;
   }
 
   return ret;
@@ -495,15 +495,15 @@ Time::operator-(const long int usec) const
   Time ret(0,0);
   time_t sec_only = usec / 1000000;
   suseconds_t usec_only = usec % 1000000;
-  if (__time.tv_usec < usec_only)
+  if (time_.tv_usec < usec_only)
   {
-    ret.__time.tv_usec = 1000000 + __time.tv_usec - usec_only;
-    ret.__time.tv_sec = __time.tv_sec - sec_only - 1;
+    ret.time_.tv_usec = 1000000 + time_.tv_usec - usec_only;
+    ret.time_.tv_sec = time_.tv_sec - sec_only - 1;
   }
   else
   {
-    ret.__time.tv_usec = __time.tv_usec - usec_only;
-    ret.__time.tv_sec = __time.tv_sec - sec_only;
+    ret.time_.tv_usec = time_.tv_usec - usec_only;
+    ret.time_.tv_sec = time_.tv_sec - sec_only;
   }
 
   return ret;
@@ -517,15 +517,15 @@ Time::operator-(const long int usec) const
 Time &
 Time::operator+=(const Time& t)
 {
-  if (__time.tv_usec + t.__time.tv_usec >= 1000000)
+  if (time_.tv_usec + t.time_.tv_usec >= 1000000)
   {
-    __time.tv_usec += t.__time.tv_usec - 1000000;
-    __time.tv_sec  += t.__time.tv_sec + 1;
+    time_.tv_usec += t.time_.tv_usec - 1000000;
+    time_.tv_sec  += t.time_.tv_sec + 1;
   }
   else
   {
-    __time.tv_usec += t.__time.tv_usec;
-    __time.tv_sec  += t.__time.tv_sec;
+    time_.tv_usec += t.time_.tv_usec;
+    time_.tv_sec  += t.time_.tv_sec;
   }
 
   return *this;
@@ -539,16 +539,16 @@ Time::operator+=(const Time& t)
 Time &
 Time::operator+=(const long int usec)
 {
-  if ( __time.tv_usec + usec >= 1000000 )
+  if ( time_.tv_usec + usec >= 1000000 )
   {
-    //usec + __time.tv_usec might be more than 1 second
-    long int tmp_usec = __time.tv_usec + usec;
-    __time.tv_usec = tmp_usec % 1000000;
-    __time.tv_sec  += tmp_usec / 1000000;
+    //usec + time_.tv_usec might be more than 1 second
+    long int tmp_usec = time_.tv_usec + usec;
+    time_.tv_usec = tmp_usec % 1000000;
+    time_.tv_sec  += tmp_usec / 1000000;
   }
   else
   {
-    __time.tv_usec += usec;
+    time_.tv_usec += usec;
   }
 
   return *this;
@@ -564,15 +564,15 @@ Time::operator+=(const double sec)
 {
   time_t sec_only = (time_t)floor(sec);
   suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
-  if ((__time.tv_usec + usec_only) >= 1000000)
+  if ((time_.tv_usec + usec_only) >= 1000000)
   {
-    __time.tv_usec += usec_only - 1000000;
-    __time.tv_sec  += sec_only + 1;
+    time_.tv_usec += usec_only - 1000000;
+    time_.tv_sec  += sec_only + 1;
   }
   else
   {
-    __time.tv_usec += usec_only;
-    __time.tv_sec  += sec_only;
+    time_.tv_usec += usec_only;
+    time_.tv_sec  += sec_only;
   }
 
   return *this;
@@ -622,9 +622,9 @@ Time::operator-=(const long int usec)
 Time &
 Time::operator=(const Time &t)
 {
-  __time.tv_sec  = t.__time.tv_sec;
-  __time.tv_usec = t.__time.tv_usec;
-  __clock        = t.__clock;
+  time_.tv_sec  = t.time_.tv_sec;
+  time_.tv_usec = t.time_.tv_usec;
+  clock_        = t.clock_;
   return *this;
 }
 
@@ -636,8 +636,8 @@ Time::operator=(const Time &t)
 bool
 Time::operator==(const Time& t) const
 {
-  return (__time.tv_sec == t.__time.tv_sec) &&
-         (__time.tv_usec == t.__time.tv_usec);
+  return (time_.tv_sec == t.time_.tv_sec) &&
+         (time_.tv_usec == t.time_.tv_usec);
 }
 
 
@@ -648,8 +648,8 @@ Time::operator==(const Time& t) const
 bool
 Time::operator==(const Time* t) const
 {
-  return (__time.tv_sec == t->__time.tv_sec) &&
-         (__time.tv_usec == t->__time.tv_usec);
+  return (time_.tv_sec == t->time_.tv_sec) &&
+         (time_.tv_usec == t->time_.tv_usec);
 }
 
 
@@ -660,8 +660,8 @@ Time::operator==(const Time* t) const
 bool
 Time::operator!=(const Time& t) const
 {
-  return (__time.tv_sec != t.__time.tv_sec) ||
-         (__time.tv_usec != t.__time.tv_usec);
+  return (time_.tv_sec != t.time_.tv_sec) ||
+         (time_.tv_usec != t.time_.tv_usec);
 }
 
 
@@ -672,8 +672,8 @@ Time::operator!=(const Time& t) const
 bool
 Time::operator!=(const Time* t) const
 {
-  return (__time.tv_sec != t->__time.tv_sec) ||
-         (__time.tv_usec != t->__time.tv_usec);
+  return (time_.tv_sec != t->time_.tv_sec) ||
+         (time_.tv_usec != t->time_.tv_usec);
 }
 
 
@@ -684,8 +684,8 @@ Time::operator!=(const Time* t) const
 bool
 Time::operator>(const Time& t) const
 {
-  return (__time.tv_sec > t.__time.tv_sec) ||
-    ((__time.tv_sec == t.__time.tv_sec) && (__time.tv_usec > t.__time.tv_usec));
+  return (time_.tv_sec > t.time_.tv_sec) ||
+    ((time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec > t.time_.tv_usec));
 }
 
 
@@ -696,8 +696,8 @@ Time::operator>(const Time& t) const
 bool
 Time::operator>(const Time* t) const
 {
-  return (__time.tv_sec > t->__time.tv_sec) ||
-    ((__time.tv_sec == t->__time.tv_sec) && (__time.tv_usec > t->__time.tv_usec));
+  return (time_.tv_sec > t->time_.tv_sec) ||
+    ((time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec > t->time_.tv_usec));
 }
 
 
@@ -708,8 +708,8 @@ Time::operator>(const Time* t) const
 bool
 Time::operator>=(const Time& t) const
 {
-  return (__time.tv_sec > t.__time.tv_sec) ||
-    ((__time.tv_sec == t.__time.tv_sec) && (__time.tv_usec >= t.__time.tv_usec));
+  return (time_.tv_sec > t.time_.tv_sec) ||
+    ((time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec >= t.time_.tv_usec));
 }
 
 
@@ -720,8 +720,8 @@ Time::operator>=(const Time& t) const
 bool
 Time::operator>=(const Time* t) const
 {
-  return (__time.tv_sec > t->__time.tv_sec) ||
-    ((__time.tv_sec == t->__time.tv_sec) && (__time.tv_usec >= t->__time.tv_usec));
+  return (time_.tv_sec > t->time_.tv_sec) ||
+    ((time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec >= t->time_.tv_usec));
 }
 
 
@@ -732,8 +732,8 @@ Time::operator>=(const Time* t) const
 bool
 Time::operator<(const Time& t) const
 {
-  return (__time.tv_sec < t.__time.tv_sec) ||
-    ((__time.tv_sec == t.__time.tv_sec) && (__time.tv_usec < t.__time.tv_usec));
+  return (time_.tv_sec < t.time_.tv_sec) ||
+    ((time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec < t.time_.tv_usec));
 }
 
 
@@ -744,8 +744,8 @@ Time::operator<(const Time& t) const
 bool
 Time::operator<(const Time* t) const
 {
-  return (__time.tv_sec < t->__time.tv_sec) ||
-    ((__time.tv_sec == t->__time.tv_sec) && (__time.tv_usec < t->__time.tv_usec));
+  return (time_.tv_sec < t->time_.tv_sec) ||
+    ((time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec < t->time_.tv_usec));
 }
 
 
@@ -756,8 +756,8 @@ Time::operator<(const Time* t) const
 bool
 Time::operator<=(const Time& t) const
 {
-  return (__time.tv_sec < t.__time.tv_sec) ||
-    ((__time.tv_sec == t.__time.tv_sec) && (__time.tv_usec <= t.__time.tv_usec));
+  return (time_.tv_sec < t.time_.tv_sec) ||
+    ((time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec <= t.time_.tv_usec));
 }
 
 
@@ -768,8 +768,8 @@ Time::operator<=(const Time& t) const
 bool
 Time::operator<=(const Time* t) const
 {
-  return (__time.tv_sec < t->__time.tv_sec) ||
-    ((__time.tv_sec == t->__time.tv_sec) && (__time.tv_usec <= t->__time.tv_usec));
+  return (time_.tv_sec < t->time_.tv_sec) ||
+    ((time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec <= t->time_.tv_usec));
 }
 
 
@@ -779,8 +779,8 @@ Time::operator<=(const Time* t) const
 Time &
 Time::stamp()
 {
-  if ( NULL != __clock ) {
-    __clock->get_time(&__time);
+  if ( NULL != clock_ ) {
+    clock_->get_time(&time_);
   } else {
     throw Exception("Clock not set, cannot stamp time");
   }
@@ -796,8 +796,8 @@ Time::stamp()
 Time &
 Time::stamp_systime()
 {
-  if ( NULL != __clock ) {
-    __clock->get_systime(&__time);
+  if ( NULL != clock_ ) {
+    clock_->get_systime(&time_);
   } else {
     throw Exception("Clock not set, cannot stamp time (systime)");
   }
@@ -840,10 +840,10 @@ Time::wait_systime()
 {
   Time until, now;
 
-  __clock->get_systime(until);
+  clock_->get_systime(until);
   until += *this;
 
-  __clock->get_systime(now);
+  clock_->get_systime(now);
 
   // we want to release run status at least shortly
   usleep(0);
@@ -851,7 +851,7 @@ Time::wait_systime()
   long int remaining_usec = (until - now).in_usec();
   while ( remaining_usec > 0 ) {
     usleep(remaining_usec);
-    __clock->get_systime(now);
+    clock_->get_systime(now);
     remaining_usec = (until - now).in_usec();
   }
 }
@@ -869,23 +869,23 @@ const char *
 Time::str(bool utc) const
 {
   // allocate time string if not done yet
-  if ( ! __timestr )  __timestr = (char *)malloc(TIMESTR_SIZE);
+  if ( ! timestr_ )  timestr_ = (char *)malloc(TIMESTR_SIZE);
 
   // heuristic to distinguish times and time ranges
-  if (__time.tv_sec < 1000000000) {
-    snprintf(__timestr, TIMESTR_SIZE, "%li:%li", __time.tv_sec, (long)__time.tv_usec);
+  if (time_.tv_sec < 1000000000) {
+    snprintf(timestr_, TIMESTR_SIZE, "%li:%li", time_.tv_sec, (long)time_.tv_usec);
   } else {
     tm time_tm;
     if ( utc ) {
-      gmtime_r( &(__time.tv_sec), &time_tm );
+      gmtime_r( &(time_.tv_sec), &time_tm );
     } else {
-      localtime_r( &(__time.tv_sec), &time_tm );
+      localtime_r( &(time_.tv_sec), &time_tm );
     }
-    asctime_r(&time_tm, __timestr);
-    __timestr[strlen(__timestr) - 1] = 0;
+    asctime_r(&time_tm, timestr_);
+    timestr_[strlen(timestr_) - 1] = 0;
   }
 
-  return __timestr;
+  return timestr_;
 }
 
 
@@ -898,14 +898,14 @@ void
 Time::str_r(char *s, bool utc)
 {
   // heuristic to distinguish times and time ranges
-  if (__time.tv_sec < 1000000000) {
-    snprintf(s, TIMESTR_SIZE, "%li:%li", __time.tv_sec, (long)__time.tv_usec);
+  if (time_.tv_sec < 1000000000) {
+    snprintf(s, TIMESTR_SIZE, "%li:%li", time_.tv_sec, (long)time_.tv_usec);
   } else {
     tm time_tm;
     if ( utc ) {
-      gmtime_r( &(__time.tv_sec), &time_tm );
+      gmtime_r( &(time_.tv_sec), &time_tm );
     } else {
-      localtime_r( &(__time.tv_sec), &time_tm );
+      localtime_r( &(time_.tv_sec), &time_tm );
     }
     asctime_r(&time_tm, s);
     s[strlen(s) - 1] = 0;

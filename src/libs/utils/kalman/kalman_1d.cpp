@@ -38,10 +38,10 @@ namespace fawkes {
  */
 KalmanFilter1D::KalmanFilter1D(float noise_x, float noise_z, float mu, float sig)
 {
-  __noise_x = noise_x;
-  __noise_z = noise_z;
-  __mu      = mu;
-  __sig     = sig;
+  noise_x_ = noise_x;
+  noise_z_ = noise_z;
+  mu_      = mu;
+  sig_     = sig;
 }
 
 /** Destructor. */
@@ -55,9 +55,9 @@ KalmanFilter1D::~KalmanFilter1D()
 void
 KalmanFilter1D::filter(float observe)
 {
-  float help = __sig*__sig + __noise_x*__noise_x + __noise_z*__noise_z;
-  __mu  = ((__sig*__sig + __noise_x*__noise_x) * observe + __noise_z*__noise_z*__mu) / help;
-  __sig = sqrt( (__sig*__sig + __noise_x*__noise_x)*__noise_z*__noise_z / help );
+  float help = sig_*sig_ + noise_x_*noise_x_ + noise_z_*noise_z_;
+  mu_  = ((sig_*sig_ + noise_x_*noise_x_) * observe + noise_z_*noise_z_*mu_) / help;
+  sig_ = sqrt( (sig_*sig_ + noise_x_*noise_x_)*noise_z_*noise_z_ / help );
 }
 
 
@@ -70,8 +70,8 @@ KalmanFilter1D::filter(float observe)
 void
 KalmanFilter1D::filter(float observe, float& mu, float& sig)
 {
-  mu  = __mu;
-  sig = __sig;
+  mu  = mu_;
+  sig = sig_;
 }
 
 /** Predicts the next position based on the past observations. Equivalent
@@ -106,7 +106,7 @@ KalmanFilter1D::predict(float vel) const
 float
 KalmanFilter1D::predict(float vel, int steps, float noise_z) const
 {
-  return predict(__mu, vel, steps, noise_z);
+  return predict(mu_, vel, steps, noise_z);
 }
 
 /** Predicts the next position based on the past observations.

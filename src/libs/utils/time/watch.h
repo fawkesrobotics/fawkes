@@ -58,4 +58,4 @@ class Watch
 
 } // end namespace fawkes
 
-#endif /*  __UTILS_TIME_WATCH_H_ */
+#endif /*  UTILS_TIME_WATCH_H__ */

@@ -43,7 +43,7 @@
   TRACKER_VARIABLE->ping_abort(c);
 
 #  define TIMETRACK_SCOPE(c)                    \
-  fawkes::ScopedClassItemTracker __tt_scope_sentry(*TRACKER_VARIABLE, c);
+  fawkes::ScopedClassItemTracker tt_scope_sentry_(*TRACKER_VARIABLE, c);
 
 #else
 #  define TIMETRACK_START(c)

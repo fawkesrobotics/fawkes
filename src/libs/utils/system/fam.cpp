@@ -108,43 +108,43 @@ const unsigned int FamListener::FAM_ALL_EVENTS	   = (FAM_ACCESS | FAM_MODIFY | F
  */
 FileAlterationMonitor::FileAlterationMonitor()
 {
-  __inotify_fd      = -1;
-  __inotify_buf     = NULL;
-  __inotify_bufsize = 0;
+  inotify_fd_      = -1;
+  inotify_buf_     = NULL;
+  inotify_bufsize_ = 0;
 
 #ifdef HAVE_INOTIFY
-  if ( (__inotify_fd = inotify_init()) == -1 ) {
+  if ( (inotify_fd_ = inotify_init()) == -1 ) {
     throw Exception(errno, "Failed to initialize inotify");
   }
 
   // from http://www.linuxjournal.com/article/8478
-  __inotify_bufsize = 1024 * (sizeof(struct inotify_event) + 16);
-  __inotify_buf     = (char *)malloc(__inotify_bufsize);
+  inotify_bufsize_ = 1024 * (sizeof(struct inotify_event) + 16);
+  inotify_buf_     = (char *)malloc(inotify_bufsize_);
 #endif
 
-  __interrupted   = false;
-  __interruptible = (pipe(__pipe_fds) == 0);
+  interrupted_   = false;
+  interruptible_ = (pipe(pipe_fds_) == 0);
 
-  __regexes.clear();
+  regexes_.clear();
 }
 
 
 /** Destructor. */
 FileAlterationMonitor::~FileAlterationMonitor()
 {
-  for (__rxit = __regexes.begin(); __rxit != __regexes.end(); ++__rxit) {
-    regfree(*__rxit);
-    free(*__rxit);
+  for (rxit_ = regexes_.begin(); rxit_ != regexes_.end(); ++rxit_) {
+    regfree(*rxit_);
+    free(*rxit_);
   }
 
 #ifdef HAVE_INOTIFY
-  for (__inotify_wit = __inotify_watches.begin(); __inotify_wit != __inotify_watches.end(); ++__inotify_wit) {
-    inotify_rm_watch(__inotify_fd, __inotify_wit->first);
+  for (inotify_wit_ = inotify_watches_.begin(); inotify_wit_ != inotify_watches_.end(); ++inotify_wit_) {
+    inotify_rm_watch(inotify_fd_, inotify_wit_->first);
   }
-  close(__inotify_fd);
-  if ( __inotify_buf ) {
-    free(__inotify_buf);
-    __inotify_buf = NULL;
+  close(inotify_fd_);
+  if ( inotify_buf_ ) {
+    free(inotify_buf_);
+    inotify_buf_ = NULL;
   }
 #endif
 }
@@ -167,8 +167,8 @@ FileAlterationMonitor::watch_dir(const char *dirpath)
   int iw;
 
   //LibLogger::log_debug("FileAlterationMonitor", "Adding watch for %s", dirpath);
-  if ( (iw = inotify_add_watch(__inotify_fd, dirpath, mask)) >= 0) {
-    __inotify_watches[iw] = dirpath;
+  if ( (iw = inotify_add_watch(inotify_fd_, dirpath, mask)) >= 0) {
+    inotify_watches_[iw] = dirpath;
 
     dirent *de;
     while ( (de = readdir(d)) ) {
@@ -210,9 +210,9 @@ FileAlterationMonitor::watch_file(const char *filepath)
   uint32_t mask = IN_MODIFY | IN_MOVE | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF;
   int iw;
 
-  if ( (iw = inotify_add_watch(__inotify_fd, filepath, mask)) >= 0) {
+  if ( (iw = inotify_add_watch(inotify_fd_, filepath, mask)) >= 0) {
     //LibLogger::log_debug("FileAlterationMonitor", "Added watch for %s: %i", filepath, iw);
-    __inotify_watches[iw] = filepath;
+    inotify_watches_[iw] = filepath;
   } else {
     throw Exception("FileAlterationMonitor: cannot add watch for file %s", filepath);
   }
@@ -226,10 +226,10 @@ FileAlterationMonitor::reset()
 {
 #ifdef HAVE_INOTIFY
   std::map<int, std::string>::iterator wit;
-  for (wit = __inotify_watches.begin(); wit != __inotify_watches.end(); ++wit) {
-    inotify_rm_watch(__inotify_fd, wit->first);
+  for (wit = inotify_watches_.begin(); wit != inotify_watches_.end(); ++wit) {
+    inotify_rm_watch(inotify_fd_, wit->first);
   }
-  __inotify_watches.clear();
+  inotify_watches_.clear();
 #endif
 }
 
@@ -256,7 +256,7 @@ FileAlterationMonitor::add_filter(const char *regex)
     free(rx);
     throw Exception("Failed to compile lua file regex: %s", errtmp);
   }
-  __regexes.push_back_locked(rx);
+  regexes_.push_back_locked(rx);
 }
 
 
@@ -266,7 +266,7 @@ FileAlterationMonitor::add_filter(const char *regex)
 void
 FileAlterationMonitor::add_listener(FamListener *listener)
 {
-  __listeners.push_back_locked(listener);
+  listeners_.push_back_locked(listener);
 }
 
 
@@ -276,7 +276,7 @@ FileAlterationMonitor::add_listener(FamListener *listener)
 void
 FileAlterationMonitor::remove_listener(FamListener *listener)
 {
-  __listeners.remove_locked(listener);
+  listeners_.remove_locked(listener);
 }
 
 
@@ -290,14 +290,14 @@ FileAlterationMonitor::process_events(int timeout)
 {
 #ifdef HAVE_INOTIFY
   // Check for inotify events
-  __interrupted = false;
+  interrupted_ = false;
   std::map<std::string, unsigned int> events;
 
   pollfd ipfd[2];
-  ipfd[0].fd = __inotify_fd;
+  ipfd[0].fd = inotify_fd_;
   ipfd[0].events = POLLIN;
   ipfd[0].revents = 0;
-  ipfd[1].fd = __pipe_fds[0];
+  ipfd[1].fd = pipe_fds_[0];
   ipfd[1].events = POLLIN;
   ipfd[1].revents = 0;
   int prv = poll(ipfd, 2, timeout);
@@ -307,22 +307,22 @@ FileAlterationMonitor::process_events(int timeout)
 	//		   "inotify poll failed: %s (%i)",
 	//		   strerror(errno), errno);
     } else {
-      __interrupted = true;
+      interrupted_ = true;
     }
-  } else while ( !__interrupted && (prv > 0) ) {
+  } else while ( !interrupted_ && (prv > 0) ) {
     // Our fd has an event, we can read
     if ( ipfd[0].revents & POLLERR ) {      
       //LibLogger::log_error("FileAlterationMonitor", "inotify poll error");
-    } else if (__interrupted) {
+    } else if (interrupted_) {
       // interrupted
       return;
     } else {
       // must be POLLIN
       int bytes = 0, i = 0;
 
-      if ((bytes = read(__inotify_fd, __inotify_buf, __inotify_bufsize)) != -1) {
-	while (!__interrupted && (i < bytes)) {
-	  struct inotify_event *event = (struct inotify_event *) &__inotify_buf[i];
+      if ((bytes = read(inotify_fd_, inotify_buf_, inotify_bufsize_)) != -1) {
+	while (!interrupted_ && (i < bytes)) {
+	  struct inotify_event *event = (struct inotify_event *) &inotify_buf_[i];
 
 	  if (event->mask & IN_IGNORED) {
 	    i += sizeof(struct inotify_event) + event->len;
@@ -331,9 +331,9 @@ FileAlterationMonitor::process_events(int timeout)
 
 	  bool valid = true;
 	  if (! (event->mask & IN_ISDIR)) {
-	    for (__rxit = __regexes.begin(); __rxit != __regexes.end(); ++__rxit) {
+	    for (rxit_ = regexes_.begin(); rxit_ != regexes_.end(); ++rxit_) {
               if (event->len > 0 &&
-		  (regexec(*__rxit, event->name, 0, NULL, 0) == REG_NOMATCH))
+		  (regexec(*rxit_, event->name, 0, NULL, 0) == REG_NOMATCH))
 	      {
 		valid = false;
 		break;
@@ -343,11 +343,11 @@ FileAlterationMonitor::process_events(int timeout)
 
 	  if ( valid ) {
 	    if (event->len == 0) {
-	      if (__inotify_watches.find(event->wd) != __inotify_watches.end()) {
-		if (events.find(__inotify_watches[event->wd]) != events.end()) {
-		  events[__inotify_watches[event->wd]] |= event->mask;
+	      if (inotify_watches_.find(event->wd) != inotify_watches_.end()) {
+		if (events.find(inotify_watches_[event->wd]) != events.end()) {
+		  events[inotify_watches_[event->wd]] |= event->mask;
 		} else {
-		  events[__inotify_watches[event->wd]]  = event->mask;
+		  events[inotify_watches_[event->wd]]  = event->mask;
 		}
 	      }
 	    } else {
@@ -361,13 +361,13 @@ FileAlterationMonitor::process_events(int timeout)
 
 	  if (event->mask & IN_DELETE_SELF) {
 	    //printf("Watched %s has been deleted", event->name);
-	    __inotify_watches.erase(event->wd);
-	    inotify_rm_watch(__inotify_fd, event->wd);
+	    inotify_watches_.erase(event->wd);
+	    inotify_rm_watch(inotify_fd_, event->wd);
 	  }
 
 	  if (event->mask & IN_CREATE) {
 	    // Check if it is a directory, if it is, watch it
-	    std::string fp = __inotify_watches[event->wd] + "/" + event->name;
+	    std::string fp = inotify_watches_[event->wd] + "/" + event->name;
 	    if (  (event->mask & IN_ISDIR) && (event->name[0] != '.') ) {
 	      /*
 	      LibLogger::log_debug("FileAlterationMonitor",
@@ -399,8 +399,8 @@ FileAlterationMonitor::process_events(int timeout)
   for (e = events.begin(); e != events.end(); ++e) {
     //LibLogger::log_warn("FileAlterationMonitor", "Event %s %x",
     //			e->first.c_str(), e->second);
-    for (__lit = __listeners.begin(); __lit != __listeners.end(); ++__lit) {
-      (*__lit)->fam_event(e->first.c_str(), e->second);
+    for (lit_ = listeners_.begin(); lit_ != listeners_.end(); ++lit_) {
+      (*lit_)->fam_event(e->first.c_str(), e->second);
     }
   }
 
@@ -421,10 +421,10 @@ FileAlterationMonitor::process_events(int timeout)
 void
 FileAlterationMonitor::interrupt()
 {
-  if (__interruptible) {
-    __interrupted = true;
+  if (interruptible_) {
+    interrupted_ = true;
     char tmp = 0;
-    if (write(__pipe_fds[1], &tmp, 1) != 1) {
+    if (write(pipe_fds_[1], &tmp, 1) != 1) {
       throw Exception(errno, "Failed to interrupt file alteration monitor,"
 			     " failed to write to pipe");
     }

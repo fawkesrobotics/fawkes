@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __UTILS_GAZEBO_API_WRAPPERS_H
-#define __UTILS_GAZEBO_API_WRAPPERS_H
+#ifndef UTILS_GAZEBO_API_WRAPPERS_H_
+#define UTILS_GAZEBO_API_WRAPPERS_H_
 
 #include <gazebo/gazebo.hh>
 
@@ -113,4 +113,4 @@ typedef gazebo::math::Vector3 Vector3d;
 
 } // namespace gazebo_wrappers
 
-#endif // __UTILS_GAZEBO_API_WRAPPERS_H
+#endif // UTILS_GAZEBO_API_WRAPPERS_H_

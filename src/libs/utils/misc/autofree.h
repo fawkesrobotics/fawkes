@@ -35,7 +35,7 @@ class MemAutoFree {
   void reset(void *new_ptr);
 
  private:
-  void *__ptr;
+  void *ptr_;
 };
 
 } // end namespace fawkes

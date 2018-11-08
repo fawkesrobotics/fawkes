@@ -106,14 +106,14 @@ class Time
   long   in_msec() const;
   long   in_usec() const;
 
-  const timeval * get_timeval() const { return &__time; }
-  long            get_sec() const  { return __time.tv_sec; }
-  long            get_msec() const { return __time.tv_usec / 1000; }
-  long            get_usec() const { return __time.tv_usec; }
-  long            get_nsec() const { return __time.tv_usec * 1000; }
+  const timeval * get_timeval() const { return &time_; }
+  long            get_sec() const  { return time_.tv_sec; }
+  long            get_msec() const { return time_.tv_usec / 1000; }
+  long            get_usec() const { return time_.tv_usec; }
+  long            get_nsec() const { return time_.tv_usec * 1000; }
   void            get_timestamp(long &sec, long &usec) const
-                  { sec  = __time.tv_sec; usec = __time.tv_usec; }
-  bool            is_zero() const { return (__time.tv_sec == 0) && (__time.tv_usec == 0); }
+                  { sec  = time_.tv_sec; usec = time_.tv_usec; }
+  bool            is_zero() const { return (time_.tv_sec == 0) && (time_.tv_usec == 0); }
 
   void set_time(const timeval* tv);
   void set_time(long int sec, long int usec);
@@ -166,9 +166,9 @@ class Time
   static const unsigned int TIMESTR_SIZE;
 
  private:
-  Clock   *__clock;
-  timeval  __time;
-  mutable char    *__timestr;
+  Clock   *clock_;
+  timeval  time_;
+  mutable char    *timestr_;
 };
 
 extern const Time TIME_MAX;

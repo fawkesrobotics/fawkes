@@ -89,28 +89,28 @@ namespace fawkes {
 ArgumentParser::ArgumentParser(int argc, char **argv,
 			       const char *opt_string, option *long_options)
 {
-  __argc = argc;
-  __argv = argv;
+  argc_ = argc;
+  argv_ = argv;
 
-  __opt_string = opt_string;
+  opt_string_ = opt_string;
 
   if (long_options) {
     option *tmplo = long_options;
     while (tmplo->name != 0) {
-      __long_opts.push_back(*tmplo);
+      long_opts_.push_back(*tmplo);
       tmplo += 1;
     }
   }
 
-  __opts.clear();
-  __items.clear();
+  opts_.clear();
+  items_.clear();
 
 #ifdef _GNU_SOURCE
-  __program_name = strdup(basename( argv[0] ));
+  program_name_ = strdup(basename( argv[0] ));
 #else
   // Non-GNU variants may modify the sting in place
   char *tmp = strdup(argv[0]);
-  __program_name = strdup(basename(tmp));
+  program_name_ = strdup(basename(tmp));
   free(tmp);
 #endif
 
@@ -125,7 +125,7 @@ ArgumentParser::ArgumentParser(int argc, char **argv,
 	throw MissingArgumentException(c);
       }
       sprintf(tmp, "%c", c);
-      __opts[ tmp ] = optarg;
+      opts_[ tmp ] = optarg;
     }
   } else {
     int opt_ind = 0;
@@ -135,19 +135,19 @@ ArgumentParser::ArgumentParser(int argc, char **argv,
 	throw UnknownArgumentException(c);
       } else if (c == 0) {
 	// long options
-	__opts[ long_options[opt_ind].name ] = optarg;
+	opts_[ long_options[opt_ind].name ] = optarg;
       } else {
 	char tmp[2];
 	sprintf(tmp, "%c", c);
-	__opts[ tmp ] = optarg;
+	opts_[ tmp ] = optarg;
       }
     }
   }
 
-  __items.clear();
+  items_.clear();
   int ind = optind;
   while (ind < argc) {
-    __items.push_back( argv[ind++] );
+    items_.push_back( argv[ind++] );
   }
 
 }
@@ -156,8 +156,8 @@ ArgumentParser::ArgumentParser(int argc, char **argv,
 /** Destructor. */
 ArgumentParser::~ArgumentParser()
 {
-  free(__program_name);
-  __opts.clear();
+  free(program_name_);
+  opts_.clear();
 }
 
 
@@ -168,7 +168,7 @@ ArgumentParser::~ArgumentParser()
 bool
 ArgumentParser::has_arg(const char *argn)
 {
-  return (__opts.count((char *)argn) > 0);
+  return (opts_.count((char *)argn) > 0);
 }
 
 
@@ -181,8 +181,8 @@ ArgumentParser::has_arg(const char *argn)
 const char *
 ArgumentParser::arg(const char *argn)
 {
-  if ((__opts.count(argn) > 0) && (__opts[argn] != NULL)) {
-    return __opts[ (char *)argn ];
+  if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
+    return opts_[ (char *)argn ];
   } else {
     return NULL;
   }
@@ -201,8 +201,8 @@ ArgumentParser::arg(const char *argn)
 bool
 ArgumentParser::arg(const char *argn, char **value)
 {
-  if ((__opts.count(argn) > 0) && (__opts[argn] != NULL)) {
-    *value = strdup(__opts[ (char *)argn ]);
+  if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
+    *value = strdup(opts_[ (char *)argn ]);
     return true;
   } else {
     return false;
@@ -231,8 +231,8 @@ bool
 ArgumentParser::parse_hostport(const char *argn, char **host,
 			       unsigned short int *port)
 {
-	if ((__opts.count(argn) > 0) && (__opts[argn] != NULL)) {
-		parse_hostport_s(__opts[ (char *)argn ], host, port);
+	if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
+		parse_hostport_s(opts_[ (char *)argn ], host, port);
 		return true;
 	} else {
 		return false;
@@ -322,7 +322,7 @@ ArgumentParser::parse_hostport_s(const char *s, char **host,
 bool
 ArgumentParser::parse_hostport(const char *argn, std::string &host, unsigned short int &port)
 {
-  if ((__opts.count(argn) == 0) || (__opts[argn] == NULL)) return false;
+  if ((opts_.count(argn) == 0) || (opts_[argn] == NULL)) return false;
 
   char *tmp_host = NULL;
   unsigned short int tmp_port = port;
@@ -369,9 +369,9 @@ ArgumentParser::parse_hostport_s(const char *s, std::string &host, unsigned shor
 long int
 ArgumentParser::parse_int(const char *argn)
 {
-  if ((__opts.count(argn) > 0) && (__opts[argn] != NULL)) {
+  if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
     char *endptr;
-    long int rv = strtol(__opts[argn], &endptr, 10);
+    long int rv = strtol(opts_[argn], &endptr, 10);
     if ( endptr[0] != 0 ) {
       throw IllegalArgumentException("Supplied argument is not of type int");
     }
@@ -393,9 +393,9 @@ ArgumentParser::parse_int(const char *argn)
 double
 ArgumentParser::parse_float(const char *argn)
 {
-  if ((__opts.count(argn) > 0) && (__opts[argn] != NULL)) {
+  if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
     char *endptr;
-    double rv = strtod(__opts[argn], &endptr);
+    double rv = strtod(opts_[argn], &endptr);
     if ( endptr[0] != 0 ) {
       throw IllegalArgumentException("Supplied argument is not of type double");
     }
@@ -417,9 +417,9 @@ ArgumentParser::parse_float(const char *argn)
 long int
 ArgumentParser::parse_item_int(unsigned int index)
 {
-  if (index < __items.size()) {
+  if (index < items_.size()) {
     char *endptr;
-    long int rv = strtol(__items[index], &endptr, 10);
+    long int rv = strtol(items_[index], &endptr, 10);
     if ( endptr[0] != 0 ) {
       throw IllegalArgumentException("Supplied argument is not of type int");
     }
@@ -441,9 +441,9 @@ ArgumentParser::parse_item_int(unsigned int index)
 double
 ArgumentParser::parse_item_float(unsigned int index)
 {
-  if (index < __items.size()) {
+  if (index < items_.size()) {
     char *endptr;
-    double rv = strtod(__items[index], &endptr);
+    double rv = strtod(items_[index], &endptr);
     if ( endptr[0] != 0 ) {
       throw IllegalArgumentException("Supplied argument is not of type double");
     }
@@ -461,7 +461,7 @@ ArgumentParser::parse_item_float(unsigned int index)
 const std::vector< const char* > &
 ArgumentParser::items() const
 {
-  return __items;
+  return items_;
 }
 
 
@@ -471,7 +471,7 @@ ArgumentParser::items() const
 std::vector< const char* >::size_type
 ArgumentParser::num_items() const
 {
-  return __items.size();
+  return items_.size();
 }
 
 
@@ -481,7 +481,7 @@ ArgumentParser::num_items() const
 int
 ArgumentParser::argc() const
 {
-  return __argc;
+  return argc_;
 }
 
 
@@ -491,7 +491,7 @@ ArgumentParser::argc() const
 const char **
 ArgumentParser::argv() const
 {
-  return (const char **)__argv;
+  return (const char **)argv_;
 }
 
 
@@ -501,7 +501,7 @@ ArgumentParser::argv() const
 const char *
 ArgumentParser::program_name() const
 {
-  return __program_name;
+  return program_name_;
 }
 
 

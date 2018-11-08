@@ -38,14 +38,14 @@ namespace fawkes {
  */
 
 /** Check equality of two strings.
- * @param __s1 first string
- * @param __s2 second string
+ * @param s1_ first string
+ * @param s2_ second string
  * @return true, if the strings are equal, false otherwise
  */
 bool
-StringEquality::operator()(const char *__s1, const char *__s2) const
+StringEquality::operator()(const char *s1_, const char *s2_) const
 {
-  return ( strcmp(__s1, __s2) == 0 );
+  return ( strcmp(s1_, s2_) == 0 );
 }
 
 
@@ -61,14 +61,14 @@ StringEquality::operator()(const char *__s1, const char *__s2) const
  */
 
 /** Check equality of two strings.
- * @param __s1 first string
- * @param __s2 second string
- * @return true, if the __s1 < __s2
+ * @param s1_ first string
+ * @param s2_ second string
+ * @return true, if the s1_ < s2_
  */
 bool
-StringLess::operator()(const char *__s1, const char *__s2) const
+StringLess::operator()(const char *s1_, const char *s2_) const
 {
-  return ( strcmp(__s1, __s2) < 0 );
+  return ( strcmp(s1_, s2_) < 0 );
 }
 
 

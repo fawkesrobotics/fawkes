@@ -60,7 +60,7 @@ PathParser::PathParser(const char *path)
 void
 PathParser::ctor(const std::string &path)
 {
-  __abs_path  = false;
+  abs_path_  = false;
 
   char *p = strdup(path.c_str());
   char *saveptr;
@@ -70,7 +70,7 @@ PathParser::ctor(const std::string &path)
     // single string, no slash, does not end with slash
     push_back(p);
   } else {
-    __abs_path = ( r != p );
+    abs_path_ = ( r != p );
 
     while ( r ) {
       if ( strlen(r) > 0 ) {
@@ -100,7 +100,7 @@ PathParser::print_debug()
 std::string
 PathParser::path_as_string()
 {
-  string rv = __abs_path ? "/" : "";
+  string rv = abs_path_ ? "/" : "";
 
   size_type sz = size();
 
@@ -122,7 +122,7 @@ PathParser::path_as_string()
 bool
 PathParser::is_absolute() const
 {
-  return __abs_path;
+  return abs_path_;
 }
 
 } // end namespace fawkes

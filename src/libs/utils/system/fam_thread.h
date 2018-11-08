@@ -42,7 +42,7 @@ class FamThread : public Thread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  RefPtr<FileAlterationMonitor> __fam;
+  RefPtr<FileAlterationMonitor> fam_;
 };
 
 
