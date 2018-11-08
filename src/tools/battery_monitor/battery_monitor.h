@@ -78,4 +78,4 @@ class BatteryMonitor
   fawkes::AvahiThread* m_avahi;
 };
 
-#endif /*  __TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_H_ */
+#endif /*  TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_H__ */

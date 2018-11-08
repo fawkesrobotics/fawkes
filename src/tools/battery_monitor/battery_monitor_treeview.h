@@ -89,4 +89,4 @@ class BatteryMonitorTreeView : public Gtk::TreeView
   std::map< std::string, unsigned int > m_below_threshold_counter;
 };
 
-#endif /* __TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_TREE_VIEW_H_ */
+#endif /* TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_TREE_VIEW_H__ */
