@@ -230,30 +230,30 @@ class DynamixelChain
   bool inline responds_read(unsigned int id)
   {
     
-    return ((__control_table[id][P_RETURN_LEVEL] == SRL_RESPOND_READ) ||
-	    (__control_table[id][P_RETURN_LEVEL] == SRL_RESPOND_ALL));
+    return ((control_table_[id][P_RETURN_LEVEL] == SRL_RESPOND_READ) ||
+	    (control_table_[id][P_RETURN_LEVEL] == SRL_RESPOND_ALL));
   }
 
   bool inline responds_all(unsigned int id)
   {
-    return (__control_table[id][P_RETURN_LEVEL] == SRL_RESPOND_ALL);
+    return (control_table_[id][P_RETURN_LEVEL] == SRL_RESPOND_ALL);
   }
 
-  int           __fd;
-  char         *__device_file;
-  unsigned int  __default_timeout_ms;
-  bool          __enable_echo_fix;
-  bool          __enable_connection_stability;
-  float         __min_voltage;
-  float         __max_voltage;
+  int           fd_;
+  char         *device_file_;
+  unsigned int  default_timeout_ms_;
+  bool          enable_echo_fix_;
+  bool          enable_connection_stability_;
+  float         min_voltage_;
+  float         max_voltage_;
 
-  unsigned char __obuffer[260];
-  unsigned char __ibuffer[260];
+  unsigned char obuffer_[260];
+  unsigned char ibuffer_[260];
 
-  int           __obuffer_length;
-  int           __ibuffer_length;
+  int           obuffer_length_;
+  int           ibuffer_length_;
 
-  char          __control_table[DYNAMIXEL_MAX_NUM_SERVOS][DYNAMIXEL_CONTROL_TABLE_LENGTH];
+  char          control_table_[DYNAMIXEL_MAX_NUM_SERVOS][DYNAMIXEL_CONTROL_TABLE_LENGTH];
 
 };
 
