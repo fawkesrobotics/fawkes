@@ -50,4 +50,4 @@ class PluginGuiGtkWindow : public Gtk::Window
   fawkes::ServiceSelectorCBE *m_service_selector;
 };
 
-#endif /* __TOOLS_PLUGIN_PLUGIN_GUI_PLUGIN_GUI_H_ */
+#endif /* TOOLS_PLUGIN_PLUGIN_GUI_PLUGIN_GUI_H__ */
