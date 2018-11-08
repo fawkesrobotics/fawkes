@@ -72,34 +72,34 @@ SiftppClassifier::SiftppClassifier( const char * object_file,
   : Classifier("SiftppClassifier")
 {
   // params for FastHessian
-  __samplingStep = samplingStep;
-  __octaves = octaves;
-  __levels = levels;
+  samplingStep_ = samplingStep;
+  octaves_ = octaves;
+  levels_ = levels;
   // params for Descriptors
-  __first          = -1 ;
-  __threshold      = 0.04f / __levels / 2.0f ;
-  __edgeThreshold  = 10.0f;
-  __magnif         = magnif;
-  __noorient       = noorient;
-  __unnormalized   = unnormalized;
+  first_          = -1 ;
+  threshold_      = 0.04f / levels_ / 2.0f ;
+  edgeThreshold_  = 10.0f;
+  magnif_         = magnif;
+  noorient_       = noorient;
+  unnormalized_   = unnormalized;
 
   // descriptor vector length
-  __vlen = 128;
+  vlen_ = 128;
 
 
   //#ifdef SIFTPP_TIMETRACKER
-  __tt = new TimeTracker();
-  __loop_count = 0;
-  __ttc_objconv = __tt->add_class("ObjectConvert");
-  __ttc_objfeat = __tt->add_class("ObjectFeatures");
-  __ttc_imgconv = __tt->add_class("ImageConvert");
-  __ttc_imgfeat = __tt->add_class("ImageFeatures");
-  __ttc_matchin = __tt->add_class("Matching");
-  __ttc_roimerg = __tt->add_class("MergeROIs");
+  tt_ = new TimeTracker();
+  loop_count_ = 0;
+  ttc_objconv_ = tt_->add_class("ObjectConvert");
+  ttc_objfeat_ = tt_->add_class("ObjectFeatures");
+  ttc_imgconv_ = tt_->add_class("ImageConvert");
+  ttc_imgfeat_ = tt_->add_class("ImageFeatures");
+  ttc_matchin_ = tt_->add_class("Matching");
+  ttc_roimerg_ = tt_->add_class("MergeROIs");
   //#endif
 
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_start(__ttc_objconv);
+  tt_->ping_start(ttc_objconv_);
   //#endif
   
   PNGReader pngr( object_file );
@@ -120,49 +120,49 @@ SiftppClassifier::SiftppClassifier( const char * object_file,
     }
   }
   // make image
-  __obj_img = new VL::PgmBuffer();
-  __obj_img->width  = lwidth;
-  __obj_img->height = lheight;
-  __obj_img->data   = im_pt;
+  obj_img_ = new VL::PgmBuffer();
+  obj_img_->width  = lwidth;
+  obj_img_->height = lheight;
+  obj_img_->data   = im_pt;
 
-  if ( ! __obj_img ) {
+  if ( ! obj_img_ ) {
     throw Exception("Could not load object file");
   }
 
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_end(__ttc_objconv);
+  tt_->ping_end(ttc_objconv_);
   //#endif
 
   // save object image for debugging
   //
 
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_start(__ttc_objfeat);
+  tt_->ping_start(ttc_objfeat_);
   //#endif
 
   // COMPUTE OBJECT FEATURES
-  __obj_features.clear();
-  //__obj_features.reserve(1000);
-  __obj_num_features = 0;
+  obj_features_.clear();
+  //obj_features_.reserve(1000);
+  obj_num_features_ = 0;
 
-  __sigman = .5 ;
-  __sigma0 = 1.6 * powf(2.0f, 1.0f / __levels) ;
+  sigman_ = .5 ;
+  sigma0_ = 1.6 * powf(2.0f, 1.0f / levels_) ;
 
   std::cout << "SiftppClassifier(ctor): init scalespace" << std::endl;
   // initialize scalespace
-  VL::Sift sift(__obj_img->data, __obj_img->width, __obj_img->height, 
-		__sigman, __sigma0, __octaves, __levels, __first, -1, __levels+1) ;
+  VL::Sift sift(obj_img_->data, obj_img_->width, obj_img_->height, 
+		sigman_, sigma0_, octaves_, levels_, first_, -1, levels_+1) ;
   
   std::cout << "SiftppClassifier(ctor): detect object keypoints" << std::endl;
   // Run SIFTPP detector
-  sift.detectKeypoints(__threshold, __edgeThreshold) ;
+  sift.detectKeypoints(threshold_, edgeThreshold_) ;
   // Number of keypoints
-  __obj_num_features = sift.keypointsEnd() - sift.keypointsBegin();
-  std::cout << "SiftppClassifier(ctor): computed '" << __obj_num_features << "' object-keypoints" << std::endl;
+  obj_num_features_ = sift.keypointsEnd() - sift.keypointsBegin();
+  std::cout << "SiftppClassifier(ctor): computed '" << obj_num_features_ << "' object-keypoints" << std::endl;
 
   // set descriptor options
-  sift.setNormalizeDescriptor( ! __unnormalized ) ;
-  sift.setMagnification( __magnif ) ;
+  sift.setNormalizeDescriptor( ! unnormalized_ ) ;
+  sift.setMagnification( magnif_ ) ;
 
   std::cout << "SiftppClassifier(ctor): run detector, compute ori and des ..." << std::endl;
   // Run detector, compute orientations and descriptors
@@ -178,7 +178,7 @@ SiftppClassifier::SiftppClassifier( const char * object_file,
     // detect orientations
     VL::float_t angles [4] ;
     int nangles ;
-    if( ! __noorient ) {
+    if( ! noorient_ ) {
       nangles = sift.computeKeypointOrientations(angles, *iter) ;
     } else {
       nangles = 1;
@@ -193,24 +193,24 @@ SiftppClassifier::SiftppClassifier( const char * object_file,
       //       out << setprecision(2) << iter->x << ' ' << setprecision(2) << iter->y << ' '
       // 	  << setprecision(2) << iter->sigma << ' ' << setprecision(3) << angles[a] ;
       // compute descriptor
-      feat.descs[a] = new VL::float_t[__vlen];
+      feat.descs[a] = new VL::float_t[vlen_];
       sift.computeKeypointDescriptor(feat.descs[a], *iter, angles[a]) ;
     } // next angle
     //std::cout << "SiftppClassifier(ctor): computed '" << feat.number_of_desc << "' descriptors." << std::endl;
 
     // save feature
-    __obj_features.push_back( feat );
+    obj_features_.push_back( feat );
 
   } // next keypoint
   
-  __obj_num_features = __obj_features.size();
-  if ( ! __obj_num_features > 0 ) {
+  obj_num_features_ = obj_features_.size();
+  if ( ! obj_num_features_ > 0 ) {
     throw Exception("Could not compute object features");
   }
-  std::cout << "SiftppClassifier(ctor): computed '" << __obj_num_features << "' features from object" << std::endl;
+  std::cout << "SiftppClassifier(ctor): computed '" << obj_num_features_ << "' features from object" << std::endl;
 
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_end(__ttc_objfeat);
+  tt_->ping_end(ttc_objfeat_);
   //#endif
 
 }
@@ -220,11 +220,11 @@ SiftppClassifier::SiftppClassifier( const char * object_file,
 SiftppClassifier::~SiftppClassifier()
 {
   //
-  delete __obj_img;
-  __obj_features.clear();
+  delete obj_img_;
+  obj_features_.clear();
   //
-  //delete __image;
-  __img_features.clear();
+  //delete image_;
+  img_features_.clear();
 }
 
 
@@ -232,7 +232,7 @@ std::list< ROI > *
 SiftppClassifier::classify()
 {
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_start(0);
+  tt_->ping_start(0);
   //#endif
 
   // list of ROIs to return
@@ -245,7 +245,7 @@ SiftppClassifier::classify()
   int y_max = 0;
   
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_start(__ttc_imgconv);
+  tt_->ping_start(ttc_imgconv_);
   //#endif
   std::cout << "SiftppClassifier(classify): copy imgdat to SIFTPP Image" << std::endl;
 
@@ -259,43 +259,43 @@ SiftppClassifier::classify()
     }
   }
   // make image
-  __image = new VL::PgmBuffer();
-  __image->width  = _width;
-  __image->height = _height;
-  __image->data   = im_pt;
+  image_ = new VL::PgmBuffer();
+  image_->width  = _width;
+  image_->height = _height;
+  image_->data   = im_pt;
 
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_end(__ttc_imgconv);
+  tt_->ping_end(ttc_imgconv_);
   //#endif
 
   /// Write image to verify correct operation
     // nothing yet
 
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_start(__ttc_imgfeat);
+  tt_->ping_start(ttc_imgfeat_);
   //#endif
 
   // COMPUTE IMAGE FEATURES
-  __img_features.clear();
-  __img_num_features = 0;
-  //__img_features.reserve(1000);
+  img_features_.clear();
+  img_num_features_ = 0;
+  //img_features_.reserve(1000);
 
   std::cout << "SiftppClassifier(classify): init scalespace" << std::endl;
   // initialize scalespace
-  VL::Sift sift(__image->data, __image->width, __image->height, 
-		__sigman, __sigma0, __octaves, __levels, __first, -1, __levels+1) ;
+  VL::Sift sift(image_->data, image_->width, image_->height, 
+		sigman_, sigma0_, octaves_, levels_, first_, -1, levels_+1) ;
   
   std::cout << "SiftppClassifier(classify): detect image keypoints" << std::endl;
   // Run SIFTPP detector
-  sift.detectKeypoints(__threshold, __edgeThreshold) ;
+  sift.detectKeypoints(threshold_, edgeThreshold_) ;
 
   // Number of keypoints
-  __img_num_features = sift.keypointsEnd() - sift.keypointsBegin();
-  std::cout << "SiftppClassifier(classify): Extracted '" << __img_num_features << "' image keypoints" << std::endl;
+  img_num_features_ = sift.keypointsEnd() - sift.keypointsBegin();
+  std::cout << "SiftppClassifier(classify): Extracted '" << img_num_features_ << "' image keypoints" << std::endl;
 
   // set descriptor options
-  sift.setNormalizeDescriptor( ! __unnormalized ) ;
-  sift.setMagnification( __magnif ) ;
+  sift.setNormalizeDescriptor( ! unnormalized_ ) ;
+  sift.setMagnification( magnif_ ) ;
 
   std::cout << "SiftppClassifier(classify): run detector, compute ori and des ..." << std::endl;
   // Run detector, compute orientations and descriptors
@@ -311,7 +311,7 @@ SiftppClassifier::classify()
     // detect orientations
     VL::float_t angles [4] ;
     int nangles ;
-    if( ! __noorient ) {
+    if( ! noorient_ ) {
       nangles = sift.computeKeypointOrientations(angles, *iter) ;
     } else {
       nangles = 1;
@@ -324,39 +324,39 @@ SiftppClassifier::classify()
     // compute descriptors
     for(int a = 0 ; a < nangles ; ++a) {
       // compute descriptor
-      feat.descs[a] = new VL::float_t[__vlen] ;
+      feat.descs[a] = new VL::float_t[vlen_] ;
       sift.computeKeypointDescriptor(feat.descs[a], *iter, angles[a]) ;
     } // next angle
     //std::cout << "SiftppClassifier(classify): computed '" << feat.number_of_desc << "' descriptors." << std::endl;
 
     // save feature
-    __img_features.push_back( feat );
+    img_features_.push_back( feat );
 
   } // next keypoint
 
   // Number of feature
-  __img_num_features = __img_features.size();
+  img_num_features_ = img_features_.size();
 
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_end(__ttc_imgfeat);
+  tt_->ping_end(ttc_imgfeat_);
   //#endif
 
-  std::cout << "SiftppClassifier(classify): Extracted '" << __img_num_features << "' image features" << std::endl;
+  std::cout << "SiftppClassifier(classify): Extracted '" << img_num_features_ << "' image features" << std::endl;
 
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_start(__ttc_matchin);
+  tt_->ping_start(ttc_matchin_);
   //#endif
   std::cout << "SiftppClassifier(classify): matching ..." << std::endl;
 
-  std::vector< int > matches(__obj_features.size());
+  std::vector< int > matches(obj_features_.size());
   int m = 0;
-  for (unsigned i = 0; i < __obj_features.size(); i++) {
-    int match = findMatch(__obj_features[i], __img_features);
+  for (unsigned i = 0; i < obj_features_.size(); i++) {
+    int match = findMatch(obj_features_[i], img_features_);
     matches[i] = match;
     if (match != -1) {
       std::cout << "SiftppClassifier(classify): Matched feature " << i << " in object image with feature " << match << " in image." << std::endl;
       /// adding feature-ROI
-      ROI r( (int)(__img_features[matches[i]].key.x)-5, (int)(__img_features[matches[i]].key.y )-5, 11, 11, _width, _height);
+      ROI r( (int)(img_features_[matches[i]].key.x)-5, (int)(img_features_[matches[i]].key.y )-5, 11, 11, _width, _height);
       rv->push_back(r);
       // increment feature-match-count
       ++m;
@@ -364,25 +364,25 @@ SiftppClassifier::classify()
   }
 
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_end(__ttc_matchin);
+  tt_->ping_end(ttc_matchin_);
   //#endif
-  std::cout << "SiftppClassifier(classify) matched '" << m << "' of '" << __obj_features.size() << "' features in scene." << std::endl;
+  std::cout << "SiftppClassifier(classify) matched '" << m << "' of '" << obj_features_.size() << "' features in scene." << std::endl;
 
   std::cout << "SiftppClassifier(classify): computing ROI" << std::endl;
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_start(__ttc_roimerg);
+  tt_->ping_start(ttc_roimerg_);
   //#endif
   
   for (unsigned i = 0; i < matches.size(); i++) {
     if (matches[i] != -1) {
-      if( (int)__img_features[matches[i]].key.x < x_min )
- 	x_min = (int)__img_features[matches[i]].key.x;
-      if( (int)__img_features[matches[i]].key.y < y_min )
- 	y_min = (int)__img_features[matches[i]].key.y;
-      if( (int)__img_features[matches[i]].key.x > x_max )
- 	x_max = (int)__img_features[matches[i]].key.x;
-      if( (int)__img_features[matches[i]].key.y > y_max )
- 	y_max = (int)__img_features[matches[i]].key.y;
+      if( (int)img_features_[matches[i]].key.x < x_min )
+ 	x_min = (int)img_features_[matches[i]].key.x;
+      if( (int)img_features_[matches[i]].key.y < y_min )
+ 	y_min = (int)img_features_[matches[i]].key.y;
+      if( (int)img_features_[matches[i]].key.x > x_max )
+ 	x_max = (int)img_features_[matches[i]].key.x;
+      if( (int)img_features_[matches[i]].key.y > y_max )
+ 	y_max = (int)img_features_[matches[i]].key.y;
     }
   }
   if( m != 0 ) {
@@ -391,19 +391,19 @@ SiftppClassifier::classify()
   }
   
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_end(__ttc_roimerg);
+  tt_->ping_end(ttc_roimerg_);
   //#endif
 
   //#ifdef SIFTPP_TIMETRACKER
-  __tt->ping_end(0);
+  tt_->ping_end(0);
   //#endif
 
   //#ifdef SIFTPP_TIMETRACKER
   // print timetracker statistics
-  __tt->print_to_stdout();
+  tt_->print_to_stdout();
   //#endif
 
-  delete __image;
+  delete image_;
 
   std::cout << "SiftppClassifier(classify): done ... returning '" << rv->size() << "' ROIs." << std::endl;
   return rv;
@@ -420,7 +420,7 @@ SiftppClassifier::findMatch(const Feature & ip1, const std::vector< Feature > & 
       continue;
     //std::cout << "SiftppClassifier(findMatch): number_of_desc matched!" << std::endl;
     for ( int j = 0; j < ip1.number_of_desc; ++j ) {
-      double d = distSquare(ipts[i].descs[j], ip1.descs[j], __vlen);
+      double d = distSquare(ipts[i].descs[j], ip1.descs[j], vlen_);
       
       if (d < mind) {
 	second = mind;

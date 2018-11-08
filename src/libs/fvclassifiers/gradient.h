@@ -62,4 +62,4 @@ class GradientClassifier: public Classifier
 
 } // end namespace firevision
 
-#endif // __FIREVISION_CLASSIFIERS_GRADIENT_H_
+#endif // FIREVISION_CLASSIFIERS_GRADIENT_H__

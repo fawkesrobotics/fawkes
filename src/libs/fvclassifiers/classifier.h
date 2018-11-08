@@ -53,7 +53,7 @@ class Classifier
   unsigned int   _height;
 
  private:
-  char *__name;
+  char *name_;
 
 };
 

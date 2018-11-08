@@ -113,4 +113,4 @@ class YellowQualifier: public Qualifier
 
 } // end namespace firevision
 
-#endif // __FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_
+#endif // FIREVISION_APPS_NAO_LOC_QUALIFIERS_H__

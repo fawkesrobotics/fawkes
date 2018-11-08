@@ -55,30 +55,30 @@ class SiftClassifier : public Classifier
   
  private:
   
-  const char ** __features_files;
+  const char ** features_files_;
 
-  IplImage *__obj_img;
-  feature *__obj_features;
-  int __obj_num_features;
+  IplImage *obj_img_;
+  feature *obj_features_;
+  int obj_num_features_;
 
-  CvMemStorage *__storage;
-  IplImage *__image;
+  CvMemStorage *storage_;
+  IplImage *image_;
 
-  feature* __img_features;
+  feature* img_features_;
   
-  float __nn_sq_dist_ratio_thr;
-  int __kdtree_bbf_max_nn_chks;
-  int __flags;
+  float nn_sq_dist_ratio_thr_;
+  int kdtree_bbf_max_nn_chks_;
+  int flags_;
 
   //#ifdef FEAT_TIMETRACKER
-  fawkes::TimeTracker *__tt;
-  unsigned int __loop_count;
-  unsigned int __ttc_objconv;
-  unsigned int __ttc_objfeat;
-  unsigned int __ttc_imgconv;
-  unsigned int __ttc_imgfeat;
-  unsigned int __ttc_matchin;
-  unsigned int __ttc_roimerg;
+  fawkes::TimeTracker *tt_;
+  unsigned int loop_count_;
+  unsigned int ttc_objconv_;
+  unsigned int ttc_objfeat_;
+  unsigned int ttc_imgconv_;
+  unsigned int ttc_imgfeat_;
+  unsigned int ttc_matchin_;
+  unsigned int ttc_roimerg_;
   //#endif
 
 };

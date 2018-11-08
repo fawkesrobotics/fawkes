@@ -77,49 +77,49 @@ SiftClassifier::SiftClassifier( const char * object_file,
 				      int kdtree_bbf_max_nn_chks, float nn_sq_dist_ratio_thr, int flags)
   : Classifier("SiftClassifier")
 {
-  __kdtree_bbf_max_nn_chks = kdtree_bbf_max_nn_chks;
-  __nn_sq_dist_ratio_thr = nn_sq_dist_ratio_thr;
-  __flags = flags;
+  kdtree_bbf_max_nn_chks_ = kdtree_bbf_max_nn_chks;
+  nn_sq_dist_ratio_thr_ = nn_sq_dist_ratio_thr;
+  flags_ = flags;
 
 
   //#ifdef SIFT_TIMETRACKER
-  __tt = new TimeTracker();
-  __loop_count = 0;
-  __ttc_objconv = __tt->add_class("ObjectConvert");
-  __ttc_objfeat = __tt->add_class("ObjectFeatures");
-  __ttc_imgconv = __tt->add_class("ImageConvert");
-  __ttc_imgfeat = __tt->add_class("ImageFeatures");
-  __ttc_matchin = __tt->add_class("Matching");
-  __ttc_roimerg = __tt->add_class("MergeROIs");
+  tt_ = new TimeTracker();
+  loop_count_ = 0;
+  ttc_objconv_ = tt_->add_class("ObjectConvert");
+  ttc_objfeat_ = tt_->add_class("ObjectFeatures");
+  ttc_imgconv_ = tt_->add_class("ImageConvert");
+  ttc_imgfeat_ = tt_->add_class("ImageFeatures");
+  ttc_matchin_ = tt_->add_class("Matching");
+  ttc_roimerg_ = tt_->add_class("MergeROIs");
   //#endif
 
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_start(__ttc_objconv);
+  tt_->ping_start(ttc_objconv_);
   //#endif
-  __obj_img = cvLoadImage( object_file, 1 );
-  if ( ! __obj_img ) {
+  obj_img_ = cvLoadImage( object_file, 1 );
+  if ( ! obj_img_ ) {
     throw Exception("Could not load object file");
   }
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_end(__ttc_objconv);
+  tt_->ping_end(ttc_objconv_);
   //#endif
 
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_start(__ttc_objfeat);
+  tt_->ping_start(ttc_objfeat_);
   //#endif
-  __obj_num_features = 0;
-  __obj_num_features = sift_features( __obj_img, &__obj_features );
-  if ( ! __obj_num_features > 0 ) {
+  obj_num_features_ = 0;
+  obj_num_features_ = sift_features( obj_img_, &obj_features_ );
+  if ( ! obj_num_features_ > 0 ) {
     throw Exception("Could not compute object features");
   }
-  std::cout << "SiftClassifier(classify): computed '" << __obj_num_features << "' features from object" << std::endl;
-  //cvReleaseImage(&__obj_img);
+  std::cout << "SiftClassifier(classify): computed '" << obj_num_features_ << "' features from object" << std::endl;
+  //cvReleaseImage(&obj_img_);
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_end(__ttc_objfeat);
+  tt_->ping_end(ttc_objfeat_);
   //#endif
 
   // create space for OpenCV image
-  __image = cvCreateImage(cvSize(pixel_width, pixel_height), IPL_DEPTH_8U, 3);
+  image_ = cvCreateImage(cvSize(pixel_width, pixel_height), IPL_DEPTH_8U, 3);
 
 }
 
@@ -128,8 +128,8 @@ SiftClassifier::SiftClassifier( const char * object_file,
 SiftClassifier::~SiftClassifier()
 {
   //
-  cvReleaseImage(&__obj_img);
-  cvReleaseImage(&__image);
+  cvReleaseImage(&obj_img_);
+  cvReleaseImage(&image_);
 }
 
 
@@ -137,7 +137,7 @@ std::list< ROI > *
 SiftClassifier::classify()
 {
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_start(0);
+  tt_->ping_start(0);
   //#endif
 
   // list of ROIs to return
@@ -161,22 +161,22 @@ SiftClassifier::classify()
   int k, m = 0;
 
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_start(__ttc_imgconv);
+  tt_->ping_start(ttc_imgconv_);
   //#endif
   //std::cout << "SiftClassifier(classify): convert frame to IplImage" << std::endl;
-  convert(YUV422_PLANAR, BGR, _src, (unsigned char *)__image->imageData, _width, _height);
+  convert(YUV422_PLANAR, BGR, _src, (unsigned char *)image_->imageData, _width, _height);
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_end(__ttc_imgconv);
+  tt_->ping_end(ttc_imgconv_);
   //#endif
 
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_start(__ttc_imgfeat);
+  tt_->ping_start(ttc_imgfeat_);
   //#endif
   //std::cout << "SiftClassifier(classify): compute features on current frame " << std::endl;
-  int num_img_ft = sift_features( __image, &__img_features );
-  kd_root = kdtree_build( __img_features, num_img_ft );
+  int num_img_ft = sift_features( image_, &img_features_ );
+  kd_root = kdtree_build( img_features_, num_img_ft );
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_end(__ttc_imgfeat);
+  tt_->ping_end(ttc_imgfeat_);
   //#endif
 
   if( ! kd_root ) {
@@ -184,23 +184,23 @@ SiftClassifier::classify()
   }
 
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_start(__ttc_matchin);
+  tt_->ping_start(ttc_matchin_);
   //#endif
   std::cout << "SiftClassifier(classify): matching ..." << std::endl;
-  for( int i = 0; i < __obj_num_features; ++i ) {
+  for( int i = 0; i < obj_num_features_; ++i ) {
     //std::cout << "SiftClassifier(classify): ... feature '" << i << "'" << std::endl;
-    feat = __obj_features + i;
-    k = kdtree_bbf_knn( kd_root, feat, 2, &nbrs, __kdtree_bbf_max_nn_chks );
+    feat = obj_features_ + i;
+    k = kdtree_bbf_knn( kd_root, feat, 2, &nbrs, kdtree_bbf_max_nn_chks_ );
     if( k == 2 )
       {
  	d0 = descr_dist_sq( feat, nbrs[0] );
  	d1 = descr_dist_sq( feat, nbrs[1] );
- 	if( d0 < d1 * __nn_sq_dist_ratio_thr )
+ 	if( d0 < d1 * nn_sq_dist_ratio_thr_ )
  	  {
  	    pt1 = cvPoint( cvRound( feat->x ), cvRound( feat->y ) );
  	    pt2 = cvPoint( cvRound( nbrs[0]->x ), cvRound( nbrs[0]->y ) );
  	    m++;
- 	    __obj_features[i].fwd_match = nbrs[0];
+ 	    obj_features_[i].fwd_match = nbrs[0];
 	    // save matched feature points
  	    ftpt = cvPoint( cvRound( nbrs[0]->x), cvRound( nbrs[0]->y ) );
 	    ftlist.push_back(ftpt);
@@ -214,11 +214,11 @@ SiftClassifier::classify()
   std::cout << "SiftClassifier(classify): found '" << m << "' matches" << std::endl;
   kdtree_release( kd_root );
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_end(__ttc_matchin);
+  tt_->ping_end(ttc_matchin_);
   //#endif
 
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_start(__ttc_roimerg);
+  tt_->ping_start(ttc_roimerg_);
   //#endif
   std::cout << "SiftClassifier(classify): computing ROI" << std::endl;
   //for ( int i = 0; i < m; ++i) {
@@ -237,15 +237,15 @@ SiftClassifier::classify()
     rv->push_back(r);
   }
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_end(__ttc_roimerg);
+  tt_->ping_end(ttc_roimerg_);
   //#endif
 
   //#ifdef SIFT_TIMETRACKER
-  __tt->ping_end(0);
+  tt_->ping_end(0);
   //#endif
 
   //#ifdef SIFT_TIMETRACKER
-  __tt->print_to_stdout();
+  tt_->print_to_stdout();
   //#endif
 
   std::cout << "SiftClassifier(classify): done ... returning '" << rv->size() << "' ROIs." << std::endl;

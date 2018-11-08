@@ -45,13 +45,13 @@ class FacesClassifier : public Classifier
   virtual std::list< ROI > * classify();
 
  private:
-  CvHaarClassifierCascade *__cascade;
-  CvMemStorage *__storage;
-  IplImage *__image;
-  float __haar_scale_factor;
-  int __min_neighbours;
-  int __flags;
-  bool  __own_image;
+  CvHaarClassifierCascade *cascade_;
+  CvMemStorage *storage_;
+  IplImage *image_;
+  float haar_scale_factor_;
+  int min_neighbours_;
+  int flags_;
+  bool  own_image_;
 };
 
 } // end namespace firevision
