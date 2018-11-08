@@ -48,34 +48,34 @@ YuvViewerGtkWindow::YuvViewerGtkWindow(BaseObjectType* cobject,
 				       const Glib::RefPtr<Gtk::Builder> builder)
   : Gtk::Window(cobject)
 {
-  builder->get_widget("yuv_vp",  __yuv_vp);
-  builder->get_widget("cur_vp",  __cur_vp);
-  builder->get_widget("seg_vp",  __seg_vp);
-  builder->get_widget("y_scale", __y_scale);
-  builder->get_widget("u_value", __u_value);
-  builder->get_widget("v_value", __v_value);
-  builder->get_widget("y_res",   __y_res);
-  builder->get_widget("u_res",   __u_res);
-  builder->get_widget("v_res",   __v_res);
+  builder->get_widget("yuv_vp",  yuv_vp_);
+  builder->get_widget("cur_vp",  cur_vp_);
+  builder->get_widget("seg_vp",  seg_vp_);
+  builder->get_widget("y_scale", y_scale_);
+  builder->get_widget("u_value", u_value_);
+  builder->get_widget("v_value", v_value_);
+  builder->get_widget("y_res",   y_res_);
+  builder->get_widget("u_res",   u_res_);
+  builder->get_widget("v_res",   v_res_);
 
-  __yuv_widget = Gtk::manage(new ImageWidget(256, 256));
-  __cur_widget = Gtk::manage(new ImageWidget( 60, 40));
-  __seg_widget = Gtk::manage(new ImageWidget(256, 256));
+  yuv_widget_ = Gtk::manage(new ImageWidget(256, 256));
+  cur_widget_ = Gtk::manage(new ImageWidget( 60, 40));
+  seg_widget_ = Gtk::manage(new ImageWidget(256, 256));
 
-  __y_scale->signal_value_changed().connect(sigc::mem_fun(*this, &YuvViewerGtkWindow::on_y_value_changed));
-  __y_res->signal_value_changed().connect(sigc::mem_fun(*this, &YuvViewerGtkWindow::on_y_res_changed));
-  __u_res->signal_value_changed().connect(sigc::mem_fun(*this, &YuvViewerGtkWindow::on_uv_res_changed));
-  __v_res->signal_value_changed().connect(sigc::mem_fun(*this, &YuvViewerGtkWindow::on_uv_res_changed));
+  y_scale_->signal_value_changed().connect(sigc::mem_fun(*this, &YuvViewerGtkWindow::on_y_value_changed));
+  y_res_->signal_value_changed().connect(sigc::mem_fun(*this, &YuvViewerGtkWindow::on_y_res_changed));
+  u_res_->signal_value_changed().connect(sigc::mem_fun(*this, &YuvViewerGtkWindow::on_uv_res_changed));
+  v_res_->signal_value_changed().connect(sigc::mem_fun(*this, &YuvViewerGtkWindow::on_uv_res_changed));
 
-  __yuv_vp->signal_button_press_event().connect(sigc::mem_fun(*this, &YuvViewerGtkWindow::on_click_on_yuv));
-  __yuv_vp->signal_motion_notify_event().connect(sigc::mem_fun(*this, &YuvViewerGtkWindow::on_mouse_over_yuv));
-  __yuv_vp->add(*__yuv_widget);
-  __cur_vp->add(*__cur_widget);
-  __seg_vp->add(*__seg_widget);
+  yuv_vp_->signal_button_press_event().connect(sigc::mem_fun(*this, &YuvViewerGtkWindow::on_click_on_yuv));
+  yuv_vp_->signal_motion_notify_event().connect(sigc::mem_fun(*this, &YuvViewerGtkWindow::on_mouse_over_yuv));
+  yuv_vp_->add(*yuv_widget_);
+  cur_vp_->add(*cur_widget_);
+  seg_vp_->add(*seg_widget_);
 
 
-  memset(__cur_buffer + 60 * 40, 128,  60 * 40);
-  memset(__seg_buffer, 128, 256 * 256);
+  memset(cur_buffer_ + 60 * 40, 128,  60 * 40);
+  memset(seg_buffer_, 128, 256 * 256);
   on_y_value_changed();
   on_uv_res_changed();
   calc_seg();
@@ -110,11 +110,11 @@ YuvViewerGtkWindow::on_mouse_over_yuv(GdkEventMotion *event)
   unsigned int u = std::max(0, std::min(255, (int)event->x));
   unsigned int v = 255 - std::max(0, std::min(255, (int)event->y));
 
-  __u_value->set_text(convert_float2str(u, 0));
-  __v_value->set_text(convert_float2str(v, 0));
-  memset(__cur_buffer + 60 * 40, u,  60 * 20);
-  memset(__cur_buffer + 60 * 60, v,  60 * 20);
-  __cur_widget->show(YUV422_PLANAR, __cur_buffer);
+  u_value_->set_text(convert_float2str(u, 0));
+  v_value_->set_text(convert_float2str(v, 0));
+  memset(cur_buffer_ + 60 * 40, u,  60 * 20);
+  memset(cur_buffer_ + 60 * 60, v,  60 * 20);
+  cur_widget_->show(YUV422_PLANAR, cur_buffer_);
 
   return true;
 }
@@ -123,12 +123,12 @@ YuvViewerGtkWindow::on_mouse_over_yuv(GdkEventMotion *event)
 void
 YuvViewerGtkWindow::on_y_value_changed()
 {
-  unsigned int y = round(__y_scale->get_value());
-  memset(__yuv_buffer, y, 256 * 256);
-  memset(__cur_buffer, y, 60 * 40);
+  unsigned int y = round(y_scale_->get_value());
+  memset(yuv_buffer_, y, 256 * 256);
+  memset(cur_buffer_, y, 60 * 40);
 
   Drawer d;
-  d.set_buffer(__yuv_buffer, 256, 256);
+  d.set_buffer(yuv_buffer_, 256, 256);
   d.set_color(YUV_t::black());
   d.draw_line(127, 127, 0, 64);
   d.draw_line(127, 127, 64, 0);
@@ -142,33 +142,33 @@ YuvViewerGtkWindow::on_y_value_changed()
   d.draw_line(127, 128, 0, 192);
   d.draw_line(127, 128, 64, 255);
 
-  __yuv_widget->show(YUV422_PLANAR, __yuv_buffer);
-  __cur_widget->show(YUV422_PLANAR, __cur_buffer);
+  yuv_widget_->show(YUV422_PLANAR, yuv_buffer_);
+  cur_widget_->show(YUV422_PLANAR, cur_buffer_);
 }
 
 
 void
 YuvViewerGtkWindow::on_y_res_changed()
 {
-  unsigned int r = round(__y_res->get_value());
+  unsigned int r = round(y_res_->get_value());
 
   if (r == 0) {
-    __y_scale->set_value(127);
-    __y_scale->set_range(127, 128);
+    y_scale_->set_value(127);
+    y_scale_->set_range(127, 128);
   }
   else {
-    __y_scale->set_range(0, 255);
-    __y_scale->set_increments(255.f / (pow(2, r) - 1), 0);
+    y_scale_->set_range(0, 255);
+    y_scale_->set_increments(255.f / (pow(2, r) - 1), 0);
   }
 }
 
 void
 YuvViewerGtkWindow::on_uv_res_changed()
 {
-  unsigned char *yuv_u = __yuv_buffer + 256 * 256;
+  unsigned char *yuv_u = yuv_buffer_ + 256 * 256;
   unsigned char *yuv_v = yuv_u + 256 * 256 / 2;
-  unsigned int u_div = 256 / (int)pow(2, __u_res->get_value());
-  unsigned int v_div = 256 / (int)pow(2, __v_res->get_value());
+  unsigned int u_div = 256 / (int)pow(2, u_res_->get_value());
+  unsigned int v_div = 256 / (int)pow(2, v_res_->get_value());
 
   for (unsigned int v = 0; v < 256; ++v) {
     memset((yuv_v + v * 128), ((255 - v) / v_div) * v_div, 128);
@@ -206,7 +206,7 @@ void
 YuvViewerGtkWindow::calc_seg()
 {
   YUV_t c;
-  unsigned char *seg_u = __seg_buffer + 256 * 256;
+  unsigned char *seg_u = seg_buffer_ + 256 * 256;
   unsigned char *seg_v = seg_u + 256 * 256 / 2;
 
   float a1 = atan2f(64, 128);
@@ -248,5 +248,5 @@ YuvViewerGtkWindow::calc_seg()
     }
   }
 
-  __seg_widget->show(YUV422_PLANAR, __seg_buffer);
+  seg_widget_->show(YUV422_PLANAR, seg_buffer_);
 }
