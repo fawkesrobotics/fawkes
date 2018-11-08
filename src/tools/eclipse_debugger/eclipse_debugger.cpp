@@ -84,13 +84,13 @@ EclipseDebugger::on_connect()
   try {
     if ( ! bb ) {
       bb           = new RemoteBlackBoard(connection_dispatcher.get_client());
-      __debugger_if = bb->open_for_reading<EclipseDebuggerInterface>("readylog_connect");
+      debugger_if_ = bb->open_for_reading<EclipseDebuggerInterface>("readylog_connect");
       EclipseDebuggerInterface::ConnectionMessage *cm = new EclipseDebuggerInterface::ConnectionMessage();
-      __debugger_if->msgq_enqueue(cm);
+      debugger_if_->msgq_enqueue(cm);
       sleep(1);
-      __debugger_if->read();
-      char* host = __debugger_if->host();
-      unsigned int port = __debugger_if->port();
+      debugger_if_->read();
+      char* host = debugger_if_->host();
+      unsigned int port = debugger_if_->port();
       std::stringstream portstr;
       portstr << port;
       execlp("tktools-clp", "tktools-clp", "-h", host, "-p", portstr.str().c_str(), (char *) 0);

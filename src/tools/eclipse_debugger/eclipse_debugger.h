@@ -52,7 +52,7 @@ class EclipseDebugger : public Gtk::Window
     void close_bb();
     fawkes::BlackBoard *bb;
     
-    fawkes::EclipseDebuggerInterface *__debugger_if;
+    fawkes::EclipseDebuggerInterface *debugger_if_;
     fawkes::ConnectionDispatcher connection_dispatcher;
 
 };
