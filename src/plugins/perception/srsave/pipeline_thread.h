@@ -50,9 +50,9 @@ class FvSrSavePipelineThread
   virtual void loop();
 
  private:
-  firevision::Camera *__cam;
+  firevision::Camera *cam_;
 
-  unsigned int __frame_i;
+  unsigned int frame_i_;
 };
 
-#endif /* __FIREVISION_APPS_SRSAVE_PIPELINE_THREAD_H_ */
+#endif /* FIREVISION_APPS_SRSAVE_PIPELINE_THREAD_H__ */

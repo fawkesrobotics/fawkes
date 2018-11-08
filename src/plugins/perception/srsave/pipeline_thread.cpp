@@ -64,7 +64,7 @@ void
 FvSrSavePipelineThread::init()
 {
   try {
-    __cam = vision_master->register_for_raw_camera("swissranger:any:mode=CARTESIAN_FLOAT", this );
+    cam_ = vision_master->register_for_raw_camera("swissranger:any:mode=CARTESIAN_FLOAT", this );
   } catch (Exception& e) {
     e.append("FvSrSavePipelineThread::init() failed since no camera is specified");
     throw;
@@ -84,18 +84,18 @@ FvSrSavePipelineThread::finalize()
 void
 FvSrSavePipelineThread::loop()
 {
-  __cam->capture();
+  cam_->capture();
 
-  const unsigned int width  = __cam->pixel_width();
-  const unsigned int height = __cam->pixel_height();
+  const unsigned int width  = cam_->pixel_width();
+  const unsigned int height = cam_->pixel_height();
 
-  float *fbuf = (float *)__cam->buffer();
+  float *fbuf = (float *)cam_->buffer();
   float *x = fbuf;
   float *y = x + width * height;
   float *z = y + width * height;
 
   char *filename;
-  if (asprintf(&filename, "swissranger-%05u.pts", __frame_i++) != -1) {
+  if (asprintf(&filename, "swissranger-%05u.pts", frame_i_++) != -1) {
     FILE *f = fopen(filename, "w");
 
     for (unsigned int h = 0; h < height; ++h) {
@@ -112,6 +112,6 @@ FvSrSavePipelineThread::loop()
   }
 
 
-  __cam->dispose_buffer();
+  cam_->dispose_buffer();
 }
 
