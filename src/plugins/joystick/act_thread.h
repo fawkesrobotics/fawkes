@@ -54,9 +54,9 @@ class JoystickActThread
     void process_message(fawkes::Message *msg);
 
    private:    
-    JoystickAcquisitionThread *__aqt;
-    fawkes::JoystickInterface *__joystick_if;
-    bool                       __joystick_connected;
+    JoystickAcquisitionThread *aqt_;
+    fawkes::JoystickInterface *joystick_if_;
+    bool                       joystick_connected_;
   };
  public:
   JoystickActThread(JoystickAcquisitionThread *aqt, JoystickSensorThread *senst);
@@ -69,12 +69,12 @@ class JoystickActThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::JoystickInterface *__joystick_if;
+  fawkes::JoystickInterface *joystick_if_;
 
-  JoystickAcquisitionThread *__aqt;
-  JoystickSensorThread      *__senst;
+  JoystickAcquisitionThread *aqt_;
+  JoystickSensorThread      *senst_;
 
-  MessageProcessor *__msgproc;
+  MessageProcessor *msgproc_;
 };
 
 

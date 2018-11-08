@@ -42,33 +42,33 @@ JoystickSensorThread::JoystickSensorThread(JoystickAcquisitionThread *aqt)
   : Thread("JoystickSensorThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
-  __aqt    = aqt;
+  aqt_    = aqt;
 }
 
 
 void
 JoystickSensorThread::init()
 {
-  __joystick_if = blackboard->open_for_writing<JoystickInterface>("Joystick");
+  joystick_if_ = blackboard->open_for_writing<JoystickInterface>("Joystick");
 }
 
 
 void
 JoystickSensorThread::finalize()
 {
-  blackboard->close(__joystick_if);
+  blackboard->close(joystick_if_);
 }
 
 
 void
 JoystickSensorThread::loop()
 {
-  if ( __aqt->lock_if_new_data() ) {
-    __joystick_if->set_num_axes( __aqt->num_axes() );
-    __joystick_if->set_num_buttons( __aqt->num_buttons() );
-    __joystick_if->set_pressed_buttons( __aqt->pressed_buttons() );
-    __joystick_if->set_axis( __aqt->axis_values() );
-    __joystick_if->write();
-    __aqt->unlock();
+  if ( aqt_->lock_if_new_data() ) {
+    joystick_if_->set_num_axes( aqt_->num_axes() );
+    joystick_if_->set_num_buttons( aqt_->num_buttons() );
+    joystick_if_->set_pressed_buttons( aqt_->pressed_buttons() );
+    joystick_if_->set_axis( aqt_->axis_values() );
+    joystick_if_->write();
+    aqt_->unlock();
   }
 }
