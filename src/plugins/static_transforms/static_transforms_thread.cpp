@@ -179,7 +179,7 @@ StaticTransformsThread::entries_get_from_config()
                               e.transform->child_frame_id.c_str(),
                               v.x(), v.y(), v.z(), q.x(), q.y(), q.z(), q.w());
 
-            __entries.push_back(e);
+            entries_.push_back(e);
             tf_add_publisher("%s", e.transform->child_frame_id.c_str());
           } catch (Exception &e) {
             entries_delete();
@@ -199,11 +199,11 @@ StaticTransformsThread::entries_get_from_config()
     }
   }
   
-  if ( __entries.empty() ) {
+  if ( entries_.empty() ) {
     throw Exception("No transforms configured");
   }
 
-  for (std::list<Entry>::iterator i = __entries.begin(); i != __entries.end(); ++i) {
+  for (std::list<Entry>::iterator i = entries_.begin(); i != entries_.end(); ++i) {
 	  i->transform->stamp.stamp();
 	  tf_publishers[i->transform->child_frame_id]->send_transform(*(i->transform), /* is_static */ true);
   }
@@ -213,12 +213,12 @@ void
 StaticTransformsThread::entries_delete()
 {
   std::list<Entry>::iterator i;
-  for (i = __entries.begin(); i != __entries.end(); ++i) {
+  for (i = entries_.begin(); i != entries_.end(); ++i) {
 	  delete tf_publishers[i->name];
 	  tf_publishers.erase(i->name);
     delete i->transform;
   }
-  __entries.clear();
+  entries_.clear();
 }
 
 void

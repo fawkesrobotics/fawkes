@@ -63,7 +63,7 @@ class StaticTransformsThread
     fawkes::tf::StampedTransform *transform;	/**< Transform. */
   } Entry;
 
-  std::list<Entry> __entries;
+  std::list<Entry> entries_;
 
   void entries_delete();
   void entries_get_from_config();
