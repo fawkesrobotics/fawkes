@@ -43,10 +43,10 @@
 InterfacePseudoMap::InterfacePseudoMap(std::string name, std::string type,
 				       std::string keytype, std::string comment)
 {
-  __name = name;
-  __type = type;
-  __keytype = keytype;
-  __comment = comment;
+  name_ = name;
+  type_ = type;
+  keytype_ = keytype;
+  comment_ = comment;
 }
 
 
@@ -56,7 +56,7 @@ InterfacePseudoMap::InterfacePseudoMap(std::string name, std::string type,
 std::string
 InterfacePseudoMap::getName() const
 {
-  return __name;
+  return name_;
 }
 
 
@@ -66,7 +66,7 @@ InterfacePseudoMap::getName() const
 std::string
 InterfacePseudoMap::getType() const
 {
-    return __type;
+    return type_;
 }
 
 
@@ -76,7 +76,7 @@ InterfacePseudoMap::getType() const
 std::string
 InterfacePseudoMap::getComment() const
 {
-    return __comment;
+    return comment_;
 }
 
 
@@ -86,7 +86,7 @@ InterfacePseudoMap::getComment() const
 std::string
 InterfacePseudoMap::getKeyType() const
 {
-  return __keytype + "_t";
+  return keytype_ + "_t";
 }
 
 
@@ -103,19 +103,19 @@ InterfacePseudoMap::getKeyType() const
 void
 InterfacePseudoMap::valid()
 {
-  if ( (__name.length() == 0) || (__name.find(" ") != std::string::npos) ) {
+  if ( (name_.length() == 0) || (name_.find(" ") != std::string::npos) ) {
     throw InterfaceGeneratorInvalidValueException("name", "string", "name must neither be empty nor contain spaces");
   }
-  if (__type.length() == 0) {
+  if (type_.length() == 0) {
     throw InterfaceGeneratorInvalidValueException("type", "string", "type must not be empty");
   }
-  if ( (__keytype != "int8") && (__keytype != "int16") &&
-       (__keytype != "int32") && (__keytype != "int64") &&
-       (__keytype != "uint8") && (__keytype != "uint16") &&
-       (__keytype != "uint32") && (__keytype != "uint64") ) {
+  if ( (keytype_ != "int8") && (keytype_ != "int16") &&
+       (keytype_ != "int32") && (keytype_ != "int64") &&
+       (keytype_ != "uint8") && (keytype_ != "uint16") &&
+       (keytype_ != "uint32") && (keytype_ != "uint64") ) {
     throw InterfaceGeneratorInvalidValueException("keytype", "string", "Pseudo map keys can only be of a numeric type");
   }
-  if (__keytype.length() == 0) {
+  if (keytype_.length() == 0) {
     throw InterfaceGeneratorInvalidValueException("keytype", "string", "key type must not be empty");
   }
 }
@@ -128,7 +128,7 @@ InterfacePseudoMap::valid()
 void
 InterfacePseudoMap::addRef(std::string fieldname, std::string key)
 {
-  __parefs.push_back(make_pair(fieldname, key));
+  parefs_.push_back(make_pair(fieldname, key));
 }
 
 
@@ -138,5 +138,5 @@ InterfacePseudoMap::addRef(std::string fieldname, std::string key)
 InterfacePseudoMap::RefList &
 InterfacePseudoMap::getRefList()
 {
-  return __parefs;
+  return parefs_;
 }

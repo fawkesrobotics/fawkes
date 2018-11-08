@@ -48,9 +48,9 @@ class InterfaceEnumConstant
 
  private:
 
-  std::string __name;
-  std::string __comment;
-  std::vector<EnumItem> __items;
+  std::string name_;
+  std::string comment_;
+  std::vector<EnumItem> items_;
 };
 
 #endif

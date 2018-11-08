@@ -49,12 +49,12 @@ class InterfacePseudoMap
   RefList &                 getRefList();
 
  private:
-  std::string __name;
-  std::string __type;
-  std::string __comment;
-  std::string __keytype;
+  std::string name_;
+  std::string type_;
+  std::string comment_;
+  std::string keytype_;
 
-  RefList __parefs;
+  RefList parefs_;
 };
 
 #endif
