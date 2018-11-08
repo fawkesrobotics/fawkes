@@ -46,5 +46,5 @@ class FilterHSearch : public Filter
 
 } // end namespace firevision
 
-#endif // __FIREVISION_FILTERS_HOR_SEARCH_H_
+#endif // FIREVISION_FILTERS_HOR_SEARCH_H__
 

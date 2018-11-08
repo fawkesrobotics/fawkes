@@ -189,7 +189,7 @@ FilterLaplace::apply()
 void
 FilterLaplace::calculate_kernel(int *kernel, float sigma, unsigned int size, float scale)
 {
-  //  title "LoGFUNC__________________________________________"
+  //  title "LoGFUNC_________________________________________"
 
   /*
   std::cout.precision( 5 );

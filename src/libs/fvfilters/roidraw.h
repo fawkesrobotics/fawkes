@@ -53,9 +53,9 @@ class FilterROIDraw : public Filter
  private:
   void draw_roi(const ROI *roi);
 
-  const std::list<ROI> *__rois;
-  Drawer *__drawer;
-  border_style_t __border_style;
+  const std::list<ROI> *rois_;
+  Drawer *drawer_;
+  border_style_t border_style_;
 };
 
 } // end namespace firevision

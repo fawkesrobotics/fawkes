@@ -51,4 +51,4 @@ private:
 
 } /* namespace firevision */
 
-#endif /* __FIREVISION_FILTER_COLORTHRESHOLD_H_ */
+#endif /* FIREVISION_FILTER_COLORTHRESHOLD_H__ */

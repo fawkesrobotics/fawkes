@@ -41,23 +41,23 @@ namespace firevision {
  */
 FilterROIDraw::FilterROIDraw(const std::list<ROI> *rois, border_style_t style)
   : Filter("FilterROIDraw"),
-  __rois(rois),
-  __border_style(style)
+  rois_(rois),
+  border_style_(style)
 {
-  __drawer = new Drawer;
+  drawer_ = new Drawer;
 }
 
 /** Destructor */
 FilterROIDraw::~FilterROIDraw() {
-  delete __drawer;
+  delete drawer_;
 }
 
 void
 FilterROIDraw::draw_roi(const ROI *roi)
 {
-  if (__border_style == DASHED_HINT) {
+  if (border_style_ == DASHED_HINT) {
     YUV_t hint_color = ColorObjectMap::get_color(roi->color);
-    __drawer->set_buffer(dst, roi->image_width, roi->image_height);
+    drawer_->set_buffer(dst, roi->image_width, roi->image_height);
     bool draw_black = false;
     fawkes::upoint_t end;
     end.x = std::min(roi->image_width - 1, roi->start.x + roi->width);
@@ -66,23 +66,23 @@ FilterROIDraw::draw_roi(const ROI *roi)
     //Top and bottom line
     for (unsigned int x = roi->start.x; x <= end.x ; ++x) {
       if (!(x % 2)) {
-        __drawer->set_color(draw_black ? YUV_t::black() : hint_color);
+        drawer_->set_color(draw_black ? YUV_t::black() : hint_color);
         draw_black = !draw_black;
       }
 
-      __drawer->color_point(x, roi->start.y);
-      __drawer->color_point(x, end.y);
+      drawer_->color_point(x, roi->start.y);
+      drawer_->color_point(x, end.y);
     }
 
     //Side lines
     for (unsigned int y = roi->start.y; y <= end.y; ++y) {
       if (!(y % 2)) {
-        __drawer->set_color(draw_black ? YUV_t::black() : hint_color);
+        drawer_->set_color(draw_black ? YUV_t::black() : hint_color);
         draw_black = !draw_black;
       }
 
-      __drawer->color_point(roi->start.x, y);
-      __drawer->color_point(end.x, y);
+      drawer_->color_point(roi->start.x, y);
+      drawer_->color_point(end.x, y);
     }
   }
   else {
@@ -123,8 +123,8 @@ FilterROIDraw::apply()
   if ( dst_roi ) {
     draw_roi(dst_roi);
   }
-  if ( __rois ) {
-    for (std::list<ROI>::const_iterator r = __rois->begin(); r != __rois->end(); ++r) {
+  if ( rois_ ) {
+    for (std::list<ROI>::const_iterator r = rois_->begin(); r != rois_->end(); ++r) {
       draw_roi(&(*r));
     }
   }
@@ -139,7 +139,7 @@ FilterROIDraw::apply()
 void
 FilterROIDraw::set_rois(const std::list<ROI> *rois)
 {
-  __rois = rois;
+  rois_ = rois;
 }
 
 
@@ -149,7 +149,7 @@ FilterROIDraw::set_rois(const std::list<ROI> *rois)
 void
 FilterROIDraw::set_style(border_style_t style)
 {
-  __border_style = style;
+  border_style_ = style;
 }
 
 } // end namespace firevision

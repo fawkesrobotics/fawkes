@@ -38,8 +38,8 @@ class FilterRectify : public Filter
   virtual void apply();
 
  private:
-  RectificationInfoBlock *__rib;
-  bool __mark_zeros;
+  RectificationInfoBlock *rib_;
+  bool mark_zeros_;
 };
 
 } // end namespace firevision
