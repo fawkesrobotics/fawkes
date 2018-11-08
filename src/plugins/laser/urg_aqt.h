@@ -52,30 +52,30 @@ class HokuyoUrgAcquisitionThread : public LaserAcquisitionThread
   std::map<std::string, std::string> get_device_info(qrk::UrgCtrl *ctrl);
 
  private:
-  bool __pre_init_done;
-  unsigned int __number_of_values;
-  qrk::UrgCtrl *__ctrl;
-  int           __fd;
+  bool pre_init_done_;
+  unsigned int number_of_values_;
+  qrk::UrgCtrl *ctrl_;
+  int           fd_;
 
-  fawkes::TimeWait *__timer;
+  fawkes::TimeWait *timer_;
 
-  std::string  __cfg_name;
-  std::string  __cfg_prefix;
+  std::string  cfg_name_;
+  std::string  cfg_prefix_;
 
-  std::map<std::string, std::string> __device_info;
+  std::map<std::string, std::string> device_info_;
 
-  std::string  __cfg_device;
-  std::string  __cfg_serial;
-  float        __cfg_time_offset;
+  std::string  cfg_device_;
+  std::string  cfg_serial_;
+  float        cfg_time_offset_;
 
-  unsigned int __first_ray;
-  unsigned int __last_ray;
-  unsigned int __front_ray;
-  unsigned int __slit_division;
-  float        __step_per_angle;
-  float        __angle_per_step;
-  float        __angular_range;
-  long int     __scan_msec;
+  unsigned int first_ray_;
+  unsigned int last_ray_;
+  unsigned int front_ray_;
+  unsigned int slit_division_;
+  float        step_per_angle_;
+  float        angle_per_step_;
+  float        angular_range_;
+  long int     scan_msec_;
 };
 
 

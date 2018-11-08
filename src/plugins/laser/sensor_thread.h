@@ -58,17 +58,17 @@ class LaserSensorThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::Laser360Interface  *__laser360_if;
-  fawkes::Laser720Interface  *__laser720_if;
-  fawkes::Laser1080Interface *__laser1080_if;
+  fawkes::Laser360Interface  *laser360_if_;
+  fawkes::Laser720Interface  *laser720_if_;
+  fawkes::Laser1080Interface *laser1080_if_;
 
-  LaserAcquisitionThread *__aqt;
+  LaserAcquisitionThread *aqt_;
 
-  unsigned int            __num_values;
+  unsigned int            num_values_;
 
-  std::string             __cfg_name;
-  std::string             __cfg_frame;
-  std::string             __cfg_prefix;
+  std::string             cfg_name_;
+  std::string             cfg_frame_;
+  std::string             cfg_prefix_;
 };
 
 

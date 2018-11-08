@@ -62,9 +62,9 @@ HokuyoUrgGbxAcquisitionThread::HokuyoUrgGbxAcquisitionThread(std::string &cfg_na
   : LaserAcquisitionThread("HokuyoUrgGbxAcquisitionThread")
 {
   set_name("HokuyoURG_GBX(%s)", cfg_name.c_str());
-  __pre_init_done = false;
-  __cfg_name   = cfg_name;
-  __cfg_prefix = cfg_prefix;
+  pre_init_done_ = false;
+  cfg_name_   = cfg_name;
+  cfg_prefix_ = cfg_prefix;
 }
 
 
@@ -72,11 +72,11 @@ void
 HokuyoUrgGbxAcquisitionThread::pre_init(fawkes::Configuration *config,
 					fawkes::Logger        *logger)
 {
-  if (__pre_init_done)  return;
+  if (pre_init_done_)  return;
 
-  __number_of_values = _distances_size = 360;
+  number_of_values_ = _distances_size = 360;
 
-  __pre_init_done = true;
+  pre_init_done_ = true;
 }
 
 void
@@ -84,29 +84,29 @@ HokuyoUrgGbxAcquisitionThread::init()
 {
   pre_init(config, logger);
 
-  __cfg_device = config->get_string((__cfg_prefix + "device").c_str());
+  cfg_device_ = config->get_string((cfg_prefix_ + "device").c_str());
 
 #ifdef HAVE_URG_GBX_9_11
-  __laser = new HokuyoLaser();
+  laser_ = new HokuyoLaser();
 #if __cplusplus >= 201103L
-  std::unique_ptr<HokuyoLaser> laser(__laser);
+  std::unique_ptr<HokuyoLaser> laser(laser_);
 #else
-  std::auto_ptr<HokuyoLaser> laser(__laser);
+  std::auto_ptr<HokuyoLaser> laser(laser_);
 #endif
 #else
-  __laser = new Sensor();
+  laser_ = new Sensor();
 #if __cplusplus >= 201103L
-  std::unique_ptr<Sensor> laser(__laser);
+  std::unique_ptr<Sensor> laser(laser_);
 #else
-  std::auto_ptr<Sensor> laser(__laser);
+  std::auto_ptr<Sensor> laser(laser_);
 #endif
 #endif
-  std::string port_options = "type=serial,device=" + __cfg_device + ",timeout=1";
+  std::string port_options = "type=serial,device=" + cfg_device_ + ",timeout=1";
   try {
 #ifdef HAVE_URG_GBX_9_11
-    __laser->Open(port_options);
+    laser_->Open(port_options);
 #else
-    __laser->open(port_options);
+    laser_->open(port_options);
 #endif
   } catch (flexiport::PortException &e) {
     throw Exception("Connecting to URG laser failed: %s", e.what());
@@ -114,30 +114,30 @@ HokuyoUrgGbxAcquisitionThread::init()
 
 #ifdef HAVE_URG_GBX_9_11
   HokuyoSensorInfo info;
-  __laser->GetSensorInfo(&info);
+  laser_->GetSensorInfo(&info);
 
-  __data = new HokuyoData();
-  __first_ray      = info.firstStep;
-  __last_ray       = info.lastStep;
-  __front_ray      = info.frontStep;
+  data_ = new HokuyoData();
+  first_ray_      = info.firstStep;
+  last_ray_       = info.lastStep;
+  front_ray_      = info.frontStep;
 
 #else
   SensorInfo info;
-  __laser->get_sensor_info(info);
-  __data = new ScanData();
+  laser_->get_sensor_info(info);
+  data_ = new ScanData();
 
-  __first_ray      = info.first_step;
-  __last_ray       = info.last_step;
-  __front_ray      = info.front_step;
+  first_ray_      = info.first_step;
+  last_ray_       = info.last_step;
+  front_ray_      = info.front_step;
 #endif
 
-  __slit_division  = info.steps;
-  __num_rays       = __last_ray - __first_ray;
-  __front_idx      = __front_ray - __first_ray;
+  slit_division_  = info.steps;
+  num_rays_       = last_ray_ - first_ray_;
+  front_idx_      = front_ray_ - first_ray_;
 
-  __step_per_angle = __slit_division / 360.;
-  __angle_per_step = 360. / __slit_division;
-  __angular_range  = (__last_ray - __first_ray) * __angle_per_step;
+  step_per_angle_ = slit_division_ / 360.;
+  angle_per_step_ = 360. / slit_division_;
+  angular_range_  = (last_ray_ - first_ray_) * angle_per_step_;
 
   logger->log_info(name(), "VEND: %s", info.vendor.c_str());
   logger->log_info(name(), "PROD: %s", info.product.c_str());
@@ -145,18 +145,18 @@ HokuyoUrgGbxAcquisitionThread::init()
   logger->log_info(name(), "PROT: %s", info.protocol.c_str());
   logger->log_info(name(), "SERI: %s", info.serial.c_str());
   logger->log_info(name(), "Rays range:    %u..%u, front at %u (idx %u), "
-		   "%u rays total", __first_ray, __last_ray, __front_ray,
-		   __front_idx, __num_rays);
-  logger->log_info(name(), "Slit Division: %u", __slit_division);
-  logger->log_info(name(), "Step/Angle:    %f", __step_per_angle);
-  logger->log_info(name(), "Angle/Step:    %f deg", __angle_per_step);
-  logger->log_info(name(), "Angular Range: %f deg", __angular_range);
+		   "%u rays total", first_ray_, last_ray_, front_ray_,
+		   front_idx_, num_rays_);
+  logger->log_info(name(), "Slit Division: %u", slit_division_);
+  logger->log_info(name(), "Step/Angle:    %f", step_per_angle_);
+  logger->log_info(name(), "Angle/Step:    %f deg", angle_per_step_);
+  logger->log_info(name(), "Angular Range: %f deg", angular_range_);
 
-  alloc_distances(__number_of_values);
+  alloc_distances(number_of_values_);
 #ifdef HAVE_URG_GBX_9_11
-  __laser->SetPower(true);
+  laser_->SetPower(true);
 #else
-  __laser->set_power(true);
+  laser_->set_power(true);
 #endif
 
   laser.release();
@@ -171,12 +171,12 @@ HokuyoUrgGbxAcquisitionThread::finalize()
 
   logger->log_debug(name(), "Stopping laser");
 #ifdef HAVE_URG_GBX_9_11
-  __laser->SetPower(false);
+  laser_->SetPower(false);
 #else
-  __laser->set_power(false);
+  laser_->set_power(false);
 #endif
-  delete __laser;
-  delete __data;
+  delete laser_;
+  delete data_;
 }
 
 
@@ -199,10 +199,10 @@ HokuyoUrgGbxAcquisitionThread::loop()
   try {
     // GetNewRanges is causes scans/sec to be halfed
 #ifdef HAVE_URG_GBX_9_11
-    __laser->GetRanges(__data);
+    laser_->GetRanges(data_);
   } catch (HokuyoError &he) {
 #else
-    __laser->get_ranges(*__data);
+    laser_->get_ranges(*data_);
   } catch (BaseError &he) {
 #endif
     logger->log_warn(name(), "Failed to read data: %s", he.what());
@@ -210,9 +210,9 @@ HokuyoUrgGbxAcquisitionThread::loop()
   }
 
 #ifdef HAVE_URG_GBX_9_11
-  const uint32_t *ranges = __data->Ranges();
+  const uint32_t *ranges = data_->Ranges();
 #else
-  const uint32_t *ranges = __data->ranges();
+  const uint32_t *ranges = data_->ranges();
 #endif
 
   _data_mutex->lock();
@@ -220,9 +220,9 @@ HokuyoUrgGbxAcquisitionThread::loop()
   _new_data = true;
   _timestamp->stamp();
   for (unsigned int a = 0; a < 360; ++a) {
-    unsigned int frontrel_idx = __front_idx + roundf(a * __step_per_angle);
-    unsigned int idx = frontrel_idx % __slit_division;
-    if ( idx <= __num_rays ) {
+    unsigned int frontrel_idx = front_idx_ + roundf(a * step_per_angle_);
+    unsigned int idx = frontrel_idx % slit_division_;
+    if ( idx <= num_rays_ ) {
       // div by 1000.f: mm -> m
       _distances[a] = ranges[idx] / 1000.f;
     }

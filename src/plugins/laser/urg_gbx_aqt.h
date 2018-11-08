@@ -53,32 +53,32 @@ class HokuyoUrgGbxAcquisitionThread : public LaserAcquisitionThread
   virtual void loop();
 
  private:
-  bool __pre_init_done;
-  unsigned int __number_of_values;
+  bool pre_init_done_;
+  unsigned int number_of_values_;
 #ifdef HAVE_URG_GBX_9_11
-  hokuyo_aist::HokuyoLaser *__laser;
-  hokuyo_aist::HokuyoData  *__data;
+  hokuyo_aist::HokuyoLaser *laser_;
+  hokuyo_aist::HokuyoData  *data_;
 #else
-  hokuyoaist::Sensor *__laser;
-  hokuyoaist::ScanData  *__data;
+  hokuyoaist::Sensor *laser_;
+  hokuyoaist::ScanData  *data_;
 #endif
 
-  std::string  __cfg_name;
-  std::string  __cfg_prefix;
+  std::string  cfg_name_;
+  std::string  cfg_prefix_;
 
-  std::map<std::string, std::string> __device_info;
+  std::map<std::string, std::string> device_info_;
 
-  std::string  __cfg_device;
+  std::string  cfg_device_;
 
-  unsigned int __first_ray;
-  unsigned int __last_ray;
-  unsigned int __front_ray;
-  unsigned int __front_idx;
-  unsigned int __num_rays;
-  unsigned int __slit_division;
-  float        __step_per_angle;
-  float        __angle_per_step;
-  float        __angular_range;
+  unsigned int first_ray_;
+  unsigned int last_ray_;
+  unsigned int front_ray_;
+  unsigned int front_idx_;
+  unsigned int num_rays_;
+  unsigned int slit_division_;
+  float        step_per_angle_;
+  float        angle_per_step_;
+  float        angular_range_;
 };
 
 
