@@ -66,13 +66,13 @@ class RRDThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::RRDAspectIniFin     __rrd_aspect_inifin;
+  fawkes::RRDAspectIniFin     rrd_aspect_inifin_;
 
-  fawkes::RWLockVector<fawkes::RRDDefinition *>      __rrds;
-  fawkes::RWLockVector<fawkes::RRDGraphDefinition *> __graphs;
+  fawkes::RWLockVector<fawkes::RRDDefinition *>      rrds_;
+  fawkes::RWLockVector<fawkes::RRDGraphDefinition *> graphs_;
 
-  fawkes::TimeWait           *__time_wait;
-  float                       __cfg_graph_interval;
+  fawkes::TimeWait           *time_wait_;
+  float                       cfg_graph_interval_;
 };
 
 #endif

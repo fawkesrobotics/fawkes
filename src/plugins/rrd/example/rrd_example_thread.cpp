@@ -59,8 +59,8 @@ RRDExampleThread::init()
 {
   std::vector<RRDDataSource> rrds;
   rrds.push_back(RRDDataSource("value", RRDDataSource::COUNTER));
-  __test_rrd_def = new RRDDefinition("test", rrds);
-  rrd_manager->add_rrd(__test_rrd_def);
+  test_rrd_def_ = new RRDDefinition("test", rrds);
+  rrd_manager->add_rrd(test_rrd_def_);
 
   std::vector<RRDGraphDataDefinition> defs;
   std::vector<RRDGraphElement> els;
@@ -76,39 +76,39 @@ RRDExampleThread::init()
   els.push_back(RRDGraphGPrint("value", RRDArchive::MAX,
 			       "Maximum\\:%8.2lf %s\\n"));
 
-  __test_graph_def = new RRDGraphDefinition("testgraph", __test_rrd_def,
+  test_graph_def_ = new RRDGraphDefinition("testgraph", test_rrd_def_,
 					    -600, -10, 10,
 					    "Test Value", "Foo", 10,
 					    false, defs, els);
 
-  rrd_manager->add_graph(__test_graph_def);
+  rrd_manager->add_graph(test_graph_def_);
 
-  __loop_count = 0;
-  __counter = 0;
+  loop_count_ = 0;
+  counter_ = 0;
 }
 
 
 void
 RRDExampleThread::finalize()
 {
-  rrd_manager->remove_rrd(__test_rrd_def);
+  rrd_manager->remove_rrd(test_rrd_def_);
 }
 
 
 void
 RRDExampleThread::loop()
 {
-  __loop_count++;
-  if (rand() > RAND_MAX/2) __counter++;
-  if (__loop_count == 10) {
+  loop_count_++;
+  if (rand() > RAND_MAX/2) counter_++;
+  if (loop_count_ == 10) {
     try {
-      logger->log_debug(name(), "Adding data N:%u", __counter);
-      rrd_manager->add_data(__test_rrd_def->get_name(), "N:%u", __counter);
+      logger->log_debug(name(), "Adding data N:%u", counter_);
+      rrd_manager->add_data(test_rrd_def_->get_name(), "N:%u", counter_);
     } catch (Exception &e) {
       logger->log_warn(name(), "Adding data to %s failed, exception follows",
-		       __test_rrd_def->get_name());
+		       test_rrd_def_->get_name());
       logger->log_warn(name(), e);
     }
-    __loop_count = 0;
+    loop_count_ = 0;
   }
 }

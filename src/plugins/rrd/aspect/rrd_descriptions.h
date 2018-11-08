@@ -56,28 +56,28 @@ class RRDDataSource
   const char *  to_string() const;
 
   /** Get name. @return name */
-  const char *  get_name() const { return __name; };
+  const char *  get_name() const { return name_; };
   /** Get type. @return type */
-  Type          get_type() const { return __type; };
+  Type          get_type() const { return type_; };
   /** Get heartbeat. @return heartbeat */
-  unsigned int  get_heartbeat() const { return __heartbeat; };
+  unsigned int  get_heartbeat() const { return heartbeat_; };
   /** Get minimum. @return minimum */
-  float         get_min() const { return __min; };
+  float         get_min() const { return min_; };
   /** Get maximum. @return maximum */
-  float         get_max() const { return __max; };
+  float         get_max() const { return max_; };
   /** Get RPN expression. @return RPN expression */
-  const char *  get_rpn_expression() const { return __rpn_expression; };
+  const char *  get_rpn_expression() const { return rpn_expression_; };
   
 
  private:
-  char          *__name;
-  Type           __type;
-  unsigned int   __heartbeat;
-  float          __min;
-  float          __max;
-  char          *__rpn_expression;
+  char          *name_;
+  Type           type_;
+  unsigned int   heartbeat_;
+  float          min_;
+  float          max_;
+  char          *rpn_expression_;
 
-  mutable char *  __string;
+  mutable char *  string_;
 };
 
 class RRDArchive
@@ -102,21 +102,21 @@ class RRDArchive
   RRDArchive & operator=(const RRDArchive &rra);
 
   /** Get consolidation function type. @return consolidation function type */
-  ConsolidationFunction get_cf() const { return __cf; }
+  ConsolidationFunction get_cf() const { return cf_; }
   /** Get xfiles factor. @return xfiles factor */
-  float get_xff() const { return __xff; }
+  float get_xff() const { return xff_; }
   /** Get number of steps. @return number of steps  */
-  unsigned int get_steps() const { return __steps; }
+  unsigned int get_steps() const { return steps_; }
   /** Get number of rows. @return number of rows  */
-  unsigned int get_rows() const { return __rows; }
+  unsigned int get_rows() const { return rows_; }
 
  private:
-  ConsolidationFunction __cf;
-  float                 __xff;
-  unsigned int          __steps;
-  unsigned int          __rows;
+  ConsolidationFunction cf_;
+  float                 xff_;
+  unsigned int          steps_;
+  unsigned int          rows_;
 
-  mutable char *__string;
+  mutable char *string_;
 };
 
 class RRDDefinition
@@ -139,34 +139,34 @@ class RRDDefinition
   static const std::vector<RRDArchive> get_default_rra();
 
   /** Get name. @return name  */
-  const char *                         get_name() const { return __name; }
+  const char *                         get_name() const { return name_; }
   /** Get step size in sec. @return step size */
-  unsigned int                         get_step_sec() const { return __step_sec; }
+  unsigned int                         get_step_sec() const { return step_sec_; }
   /** Check recreation flag.
    * @return true if files should be overwritte, false otherwise */
-  bool                                 get_recreate() const { return __recreate; }
+  bool                                 get_recreate() const { return recreate_; }
   /** Get data sources. * @return data sources  */
-  const std::vector<RRDDataSource> &   get_ds() const { return __ds; }
+  const std::vector<RRDDataSource> &   get_ds() const { return ds_; }
   /** Get specific data source.
    * @param i index of data source
    * @return data source  */
-  const RRDDataSource &                get_ds(size_t i) const { return __ds[i]; }
+  const RRDDataSource &                get_ds(size_t i) const { return ds_[i]; }
   /** Get RRD archives. @return RRD archive */
-  const std::vector<RRDArchive> &      get_rra() const { return __rra; }
+  const std::vector<RRDArchive> &      get_rra() const { return rra_; }
   /** Get file name. @return file name */
-  const char *                         get_filename() const { return __filename; }
+  const char *                         get_filename() const { return filename_; }
 
   void set_rrd_manager(RRDManager *rrd_manager);
 
  private:
-  char                       *__name;
-  unsigned int                __step_sec;
-  bool                        __recreate;
-  std::vector<RRDDataSource>  __ds;
-  std::vector<RRDArchive>     __rra;
-  char                       *__filename;
+  char                       *name_;
+  unsigned int                step_sec_;
+  bool                        recreate_;
+  std::vector<RRDDataSource>  ds_;
+  std::vector<RRDArchive>     rra_;
+  char                       *filename_;
 
-  RRDManager                 *__rrd_manager;
+  RRDManager                 *rrd_manager_;
 };
 
 class RRDGraphDataDefinition
@@ -182,24 +182,24 @@ class RRDGraphDataDefinition
   const char *  to_string() const;
 
   /** Get name. @return name */
-  const char *           get_name() const { return __name; };
+  const char *           get_name() const { return name_; };
   /** Get RRD definition. @return RRD definition */
-  const RRDDefinition *  get_rrd_def() const { return __rrd_def; };
+  const RRDDefinition *  get_rrd_def() const { return rrd_def_; };
   /** Get data source name. @return data source name */
-  const char *           get_ds_name() const { return __ds_name; };
+  const char *           get_ds_name() const { return ds_name_; };
   /** Get RPN expression. @return RPN expression */
-  const char *           get_rpn_expression() const { return __rpn_expression; };
+  const char *           get_rpn_expression() const { return rpn_expression_; };
   /** Get consolidation function type. @return consolidation function type */
-  RRDArchive::ConsolidationFunction  get_cf() const { return __cf; };
+  RRDArchive::ConsolidationFunction  get_cf() const { return cf_; };
 
  private:
-  char                                    *__name;
-  const RRDDefinition                     *__rrd_def;
-  char                                    *__ds_name;
-  char                                    *__rpn_expression;
-  RRDArchive::ConsolidationFunction        __cf;
+  char                                    *name_;
+  const RRDDefinition                     *rrd_def_;
+  char                                    *ds_name_;
+  char                                    *rpn_expression_;
+  RRDArchive::ConsolidationFunction        cf_;
 
-  mutable char *__string;
+  mutable char *string_;
 };
 
 class RRDGraphElement
@@ -226,18 +226,18 @@ class RRDGraphGPrint : public RRDGraphElement
   virtual const char *  to_string() const;
 
   /** Get definition name. @return definition name */
-  const char *                       get_def_name() const { return __def_name; }
+  const char *                       get_def_name() const { return def_name_; }
   /** Get consolidation function type. @return consolidation function type */
-  RRDArchive::ConsolidationFunction  get_cf() const { return __cf; }
+  RRDArchive::ConsolidationFunction  get_cf() const { return cf_; }
   /** Get format string. @return format string  */
-  const char *                       get_format() const { return __format; }
+  const char *                       get_format() const { return format_; }
   
  private:
-  char                              *__def_name;
-  RRDArchive::ConsolidationFunction  __cf;
-  char                              *__format;
+  char                              *def_name_;
+  RRDArchive::ConsolidationFunction  cf_;
+  char                              *format_;
 
-  mutable char *__string;
+  mutable char *string_;
 };
 
 class RRDGraphLine : public RRDGraphElement
@@ -255,24 +255,24 @@ class RRDGraphLine : public RRDGraphElement
   virtual const char *  to_string() const;
 
   /** Get definition name. @return definition name */
-  const char *  get_def_name() const { return __def_name; }
+  const char *  get_def_name() const { return def_name_; }
   /** Get line width. @return line width */
-  float         get_width() const { return __width; }
+  float         get_width() const { return width_; }
   /** Get color string. @return color string  */
-  const char *  get_color() const { return __color; }
+  const char *  get_color() const { return color_; }
   /** Get legend label. @return legend label */
-  const char *  get_legend() const { return __legend; }
+  const char *  get_legend() const { return legend_; }
   /** Get stacked flag. @return true if line should be stacked, false otherwise. */
-  bool          get_stacked() const { return __stacked; }
+  bool          get_stacked() const { return stacked_; }
 
  private:
-  char        *__def_name;
-  float        __width;
-  char        *__color;
-  char        *__legend;
-  bool         __stacked;
+  char        *def_name_;
+  float        width_;
+  char        *color_;
+  char        *legend_;
+  bool         stacked_;
 
-  mutable char *__string;
+  mutable char *string_;
 };
 
 class RRDGraphArea : public RRDGraphElement
@@ -290,21 +290,21 @@ class RRDGraphArea : public RRDGraphElement
   virtual const char *  to_string() const;
 
   /** Get definition name. @return definition name */
-  const char *  get_def_name() const { return __def_name; }
+  const char *  get_def_name() const { return def_name_; }
   /** Get color string. @return color string  */
-  const char *  get_color() const { return __color; }
+  const char *  get_color() const { return color_; }
   /** Get legend label. @return legend label */
-  const char *  get_legend() const { return __legend; }
+  const char *  get_legend() const { return legend_; }
   /** Get stacked flag. @return true if line should be stacked, false otherwise. */
-  bool          get_stacked() const { return __stacked; }
+  bool          get_stacked() const { return stacked_; }
 
  private:
-  char       *__def_name;
-  char       *__color;
-  char       *__legend;
-  bool        __stacked;
+  char       *def_name_;
+  char       *color_;
+  char       *legend_;
+  bool        stacked_;
 
-  mutable char *__string;
+  mutable char *string_;
 };
 
 class RRDGraphDefinition
@@ -324,56 +324,56 @@ class RRDGraphDefinition
 
   
   /** Get graph definition name. @return graph definition name */
-  const char *  get_name() const { return __name; }
+  const char *  get_name() const { return name_; }
   /** Get RRD definition. @return RRD definition */
-  const RRDDefinition * get_rrd_def() const { return __rrd_def; }
+  const RRDDefinition * get_rrd_def() const { return rrd_def_; }
   /** Get start time. @return start time  */
-  time_t                get_start() const { return __start; }
+  time_t                get_start() const { return start_; }
   /** Get end time. @return end time */
-  time_t                get_end() const { return __end; }
+  time_t                get_end() const { return end_; }
   /** Get step size. @return step size */
-  unsigned int          get_step() const { return __step; }
+  unsigned int          get_step() const { return step_; }
   /** Get title. @return tile */
-  const char *          get_title() const { return __title; }
+  const char *          get_title() const { return title_; }
   /** Get vertical label. @return vertical label */
-  const char *          get_vertical_label() const { return __vertical_label; }
+  const char *          get_vertical_label() const { return vertical_label_; }
   /** Get update interval. @return update interval */
-  unsigned int          get_update_interval() const { return __update_interval; }
+  unsigned int          get_update_interval() const { return update_interval_; }
   /** Get slope moe. @return slope mode  */
-  bool                  get_slope_mode() const { return __slope_mode; }
+  bool                  get_slope_mode() const { return slope_mode_; }
   /** Get definitions. @return definitions  */
-  const std::vector<RRDGraphDataDefinition> & get_defs() const { return __defs; }
+  const std::vector<RRDGraphDataDefinition> & get_defs() const { return defs_; }
   /** Get graph elements. @return graph elements */
   const std::vector<RRDGraphElement *> & get_elements() const
-  { return __elements; }
+  { return elements_; }
   /** Get line width. @return line width.  */
-  unsigned int          get_width() const { return __width; }
+  unsigned int          get_width() const { return width_; }
   /** Get fonts. @return fonts */
-  const std::vector<const char *>  get_fonts() const { return __fonts; }
+  const std::vector<const char *>  get_fonts() const { return fonts_; }
   /** Get filename. @return filename */
-  const char *          get_filename() const { return __filename; }
+  const char *          get_filename() const { return filename_; }
 
  private:
-  char                                *__name;
-  const RRDDefinition                 *__rrd_def;
-  const time_t                         __start;
-  const time_t                         __end;
-  unsigned int                         __step;
-  char                                *__title;
-  char                                *__vertical_label;
-  const unsigned int                   __update_interval;
-  const bool                           __slope_mode;
-  std::vector<RRDGraphDataDefinition>  __defs;
-  std::vector<RRDGraphElement *>       __elements;
-  unsigned int                         __width;
-  char                                *__width_s; 
-  char                                *__start_s; 
-  char                                *__end_s; 
-  char                                *__step_s; 
-  std::vector<const char *>            __fonts;
-  char                                *__filename;
-  mutable size_t                       __argc;
-  mutable const char                 **__argv;
+  char                                *name_;
+  const RRDDefinition                 *rrd_def_;
+  const time_t                         start_;
+  const time_t                         end_;
+  unsigned int                         step_;
+  char                                *title_;
+  char                                *vertical_label_;
+  const unsigned int                   update_interval_;
+  const bool                           slope_mode_;
+  std::vector<RRDGraphDataDefinition>  defs_;
+  std::vector<RRDGraphElement *>       elements_;
+  unsigned int                         width_;
+  char                                *width_s_; 
+  char                                *start_s_; 
+  char                                *end_s_; 
+  char                                *step_s_; 
+  std::vector<const char *>            fonts_;
+  char                                *filename_;
+  mutable size_t                       argc_;
+  mutable const char                 **argv_;
 };
 
 } // end namespace fawkes

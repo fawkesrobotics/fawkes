@@ -41,7 +41,7 @@ class RRDAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  RRDManager *__rrd_manager;
+  RRDManager *rrd_manager_;
 };
 
 } // end namespace fawkes

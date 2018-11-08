@@ -46,7 +46,7 @@ using namespace fawkes;
 /** Constructor. */
 RRDThread::RRDThread()
   : Thread("RRDThread", Thread::OPMODE_CONTINUOUS),
-    AspectProviderAspect(&__rrd_aspect_inifin), __rrd_aspect_inifin(this)
+    AspectProviderAspect(&rrd_aspect_inifin_), rrd_aspect_inifin_(this)
 {
   set_prepfin_conc_loop(true);
 }
@@ -61,28 +61,28 @@ RRDThread::~RRDThread()
 void
 RRDThread::init()
 {
-  __cfg_graph_interval = 30.;
+  cfg_graph_interval_ = 30.;
   try {
-    __cfg_graph_interval = config->get_float("/plugins/rrd/graph_interval");
+    cfg_graph_interval_ = config->get_float("/plugins/rrd/graph_interval");
   } catch (Exception &e) {}
 
-  __time_wait = new TimeWait(clock, time_sec_to_usec(__cfg_graph_interval));
+  time_wait_ = new TimeWait(clock, time_sec_to_usec(cfg_graph_interval_));
 }
 
 
 void
 RRDThread::finalize()
 {
-	delete __time_wait;
+	delete time_wait_;
 }
 
 
 void
 RRDThread::loop()
 {
-  __time_wait->mark_start();
+  time_wait_->mark_start();
   generate_graphs();
-  __time_wait->wait_systime();
+  time_wait_->wait_systime();
 }
 
 
@@ -90,10 +90,10 @@ RRDThread::loop()
 void
 RRDThread::generate_graphs()
 {
-  ScopedRWLock lock(__graphs.rwlock(), ScopedRWLock::LOCK_READ);
+  ScopedRWLock lock(graphs_.rwlock(), ScopedRWLock::LOCK_READ);
 
   std::vector<fawkes::RRDGraphDefinition *>::iterator g;
-  for (g = __graphs.begin(); g != __graphs.end(); ++g) {
+  for (g = graphs_.begin(); g != graphs_.end(); ++g) {
     size_t argc = 0;
     const char **argv = (*g)->get_argv(argc);
 
@@ -169,9 +169,9 @@ RRDThread::add_rrd(RRDDefinition *rrd_def)
     }
   }
 
-  ScopedRWLock lock(__rrds.rwlock());
+  ScopedRWLock lock(rrds_.rwlock());
   RWLockVector<fawkes::RRDDefinition *>::iterator r;
-  for (r = __rrds.begin(); r != __rrds.end(); ++r) {
+  for (r = rrds_.begin(); r != rrds_.end(); ++r) {
     if (strcmp((*r)->get_name(), rrd_def->get_name()) == 0) {
       throw Exception("RRD with name %s has already been registered",
 		      rrd_def->get_name());
@@ -179,29 +179,29 @@ RRDThread::add_rrd(RRDDefinition *rrd_def)
   }
 
   rrd_def->set_rrd_manager(this);
-  __rrds.push_back(rrd_def);
+  rrds_.push_back(rrd_def);
 }
 
 void
 RRDThread::remove_rrd(RRDDefinition *rrd_def)
 {
-  ScopedRWLock rrds_lock(__rrds.rwlock());
+  ScopedRWLock rrds_lock(rrds_.rwlock());
   RWLockVector<fawkes::RRDDefinition *>::iterator r;
-  for (r = __rrds.begin(); r != __rrds.end(); ++r) {
+  for (r = rrds_.begin(); r != rrds_.end(); ++r) {
     if (strcmp((*r)->get_name(), rrd_def->get_name()) == 0) {
-      __rrds.erase(r);
+      rrds_.erase(r);
       break;
     }
   }
 
-  ScopedRWLock graph_lock(__graphs.rwlock());
+  ScopedRWLock graph_lock(graphs_.rwlock());
   bool graphs_modified = false;
   do {
     graphs_modified = false;
     RWLockVector<fawkes::RRDGraphDefinition *>::iterator g;
-    for (g = __graphs.begin(); g != __graphs.end(); ++g) {
+    for (g = graphs_.begin(); g != graphs_.end(); ++g) {
       if (strcmp((*g)->get_rrd_def()->get_name(), rrd_def->get_name()) == 0) {
-	__graphs.erase(g);
+	graphs_.erase(g);
 	graphs_modified = true;
 	break;
       }
@@ -222,24 +222,24 @@ RRDThread::add_graph(RRDGraphDefinition *rrd_graph_def)
   rrd_graph_def->set_filename(filename);
   free(filename);
 
-  ScopedRWLock lock(__graphs.rwlock());
+  ScopedRWLock lock(graphs_.rwlock());
   RWLockVector<fawkes::RRDGraphDefinition *>::iterator g;
-  for (g = __graphs.begin(); g != __graphs.end(); ++g) {
+  for (g = graphs_.begin(); g != graphs_.end(); ++g) {
     if (strcmp((*g)->get_name(), rrd_graph_def->get_name()) == 0) {
       throw Exception("RRD graph with name %s has already been registered",
 		      rrd_graph_def->get_name());
     }
   }
-  __graphs.push_back(rrd_graph_def);
+  graphs_.push_back(rrd_graph_def);
 }
 
 void
 RRDThread::add_data(const char *rrd_name, const char *format, ...)
 {
-  ScopedRWLock lock(__rrds.rwlock(), ScopedRWLock::LOCK_READ);
+  ScopedRWLock lock(rrds_.rwlock(), ScopedRWLock::LOCK_READ);
 
   std::vector<RRDDefinition *>::const_iterator d;
-  for (d = __rrds.begin(); d != __rrds.end(); ++d) {
+  for (d = rrds_.begin(); d != rrds_.end(); ++d) {
     RRDDefinition *rrd_def = *d;
     if (strcmp(rrd_name, rrd_def->get_name()) == 0) {
       char *data;
@@ -283,12 +283,12 @@ RRDThread::add_data(const char *rrd_name, const char *format, ...)
 const fawkes::RWLockVector<RRDDefinition *> &
 RRDThread::get_rrds() const
 {
-  return __rrds;
+  return rrds_;
 }
 
 
 const fawkes::RWLockVector<RRDGraphDefinition *> &
 RRDThread::get_graphs() const
 {
-  return __graphs;
+  return graphs_;
 }

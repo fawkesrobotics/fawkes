@@ -47,11 +47,11 @@ class RRDExampleThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::RRDDefinition      *__test_rrd_def;
-  fawkes::RRDGraphDefinition *__test_graph_def;
+  fawkes::RRDDefinition      *test_rrd_def_;
+  fawkes::RRDGraphDefinition *test_graph_def_;
 
-  unsigned int                __loop_count;
-  unsigned int                __counter;
+  unsigned int                loop_count_;
+  unsigned int                counter_;
 };
 
 #endif
