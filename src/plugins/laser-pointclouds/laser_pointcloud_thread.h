@@ -91,7 +91,7 @@ class LaserPointCloudThread
   } InterfaceCloudMapping;
   /// @endcond
 
-  fawkes::LockList<InterfaceCloudMapping> __mappings;
+  fawkes::LockList<InterfaceCloudMapping> mappings_;
 
   float sin_angles360[360];
   float cos_angles360[360];
