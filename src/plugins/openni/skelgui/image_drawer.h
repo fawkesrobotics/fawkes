@@ -38,8 +38,8 @@ class SkelGuiImageDrawer : public SkelGuiTextureDrawer
   void fill_texture();
 
  private:
-  firevision::Camera  *__cam;
-  unsigned char       *__rgb_buf;
+  firevision::Camera  *cam_;
+  unsigned char       *rgb_buf_;
 };
 
 #endif

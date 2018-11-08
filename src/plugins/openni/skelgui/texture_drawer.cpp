@@ -52,20 +52,20 @@ using namespace firevision;
  * @param height height of visible area
  */
 SkelGuiTextureDrawer::SkelGuiTextureDrawer(unsigned int width, unsigned int height)
-  : __width(width), __height(height),
-    __texture_width(get_closest_power_of_two(__width)),
-    __texture_height(get_closest_power_of_two(__height))
+  : width_(width), height_(height),
+    texture_width_(get_closest_power_of_two(width_)),
+    texture_height_(get_closest_power_of_two(height_))
 {
-  __texture = (unsigned char *)malloc(__texture_width *__texture_height * 3);
-  memset(__texture, 0, __texture_width * __texture_height * 3);
+  texture_ = (unsigned char *)malloc(texture_width_ *texture_height_ * 3);
+  memset(texture_, 0, texture_width_ * texture_height_ * 3);
 
-  __texture_initialized = false;
+  texture_initialized_ = false;
 }
 
 /** Destructor. */
 SkelGuiTextureDrawer::~SkelGuiTextureDrawer()
 {
-  free(__texture);
+  free(texture_);
 }
 
 unsigned int
@@ -80,19 +80,19 @@ SkelGuiTextureDrawer::get_closest_power_of_two(unsigned int n)
 void
 SkelGuiTextureDrawer::init_texture()
 {
-  glGenTextures(1, &__texture_id);
-  glBindTexture(GL_TEXTURE_2D, __texture_id);
+  glGenTextures(1, &texture_id_);
+  glBindTexture(GL_TEXTURE_2D, texture_id_);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-  memset(__texture_coords, 0, sizeof(__texture_coords));
-  __texture_coords[0] = (float)__width  / __texture_width;
-  __texture_coords[1] = (float)__height / __texture_height;
-  __texture_coords[2] = (float)__width  / __texture_width;
-  __texture_coords[7] = (float)__height / __texture_height;
+  memset(texture_coords_, 0, sizeof(texture_coords_));
+  texture_coords_[0] = (float)width_  / texture_width_;
+  texture_coords_[1] = (float)height_ / texture_height_;
+  texture_coords_[2] = (float)width_  / texture_width_;
+  texture_coords_[7] = (float)height_ / texture_height_;
 
-  __texture_initialized = true;
+  texture_initialized_ = true;
 }
 
 
@@ -111,44 +111,44 @@ SkelGuiTextureDrawer::draw_rectangle(float topLeftX, float topLeftY,
 void
 SkelGuiTextureDrawer::draw()
 {
-  if (!__texture_initialized) init_texture();
+  if (!texture_initialized_) init_texture();
 
   fill_texture();
 
-  glBindTexture(GL_TEXTURE_2D, __texture_id);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, __texture_width, __texture_height,
-	       0, GL_RGB, GL_UNSIGNED_BYTE, __texture);
+  glBindTexture(GL_TEXTURE_2D, texture_id_);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture_width_, texture_height_,
+	       0, GL_RGB, GL_UNSIGNED_BYTE, texture_);
 
   // Display the OpenGL texture map
   glColor4f(0.75,0.75,0.75,1);
 
   glEnable(GL_TEXTURE_2D);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  glTexCoordPointer(2, GL_FLOAT, 0, __texture_coords);
-  draw_rectangle(__width, __height, 0, 0);
+  glTexCoordPointer(2, GL_FLOAT, 0, texture_coords_);
+  draw_rectangle(width_, height_, 0, 0);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   glDisable(GL_TEXTURE_2D);
 }
 
 /** Copy an RGB buffer to texture.
- * @param rgb_buf the RGB buffer to copy, it must exactly of dimensions __width
- * and __height.
+ * @param rgb_buf the RGB buffer to copy, it must exactly of dimensions width_
+ * and height_.
  */
 void
 SkelGuiTextureDrawer::copy_rgb_to_texture(const unsigned char *rgb_buf)
 {
-  unsigned char *row = __texture;
-  unsigned char *tex = __texture;
+  unsigned char *row = texture_;
+  unsigned char *tex = texture_;
   const unsigned char *rgb = rgb_buf;
   unsigned int bytes = 0;
-  for (unsigned int h = 0; h < __height; ++h) {
+  for (unsigned int h = 0; h < height_; ++h) {
     tex = row;
-    for (unsigned int w = 0; w < __width; ++w) {
+    for (unsigned int w = 0; w < width_; ++w) {
       *tex++ = *rgb++;
       *tex++ = *rgb++;
       *tex++ = *rgb++;
       ++bytes;
     }
-    row += __texture_width * 3;
+    row += texture_width_ * 3;
   }
 }

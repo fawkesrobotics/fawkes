@@ -40,40 +40,40 @@ namespace fawkes {
  * @param hands hand map for exchange with others
  */
 HandIfObserver::HandIfObserver(BlackBoard *bb, HandMap &hands)
-  : __hands(hands)
+  : hands_(hands)
 {
-  __queue_lock = new Mutex();
-  __bb = bb;
+  queue_lock_ = new Mutex();
+  bb_ = bb;
 
   std::list<ObjectPositionInterface *> hand_ifs =
-    __bb->open_multiple_for_reading<ObjectPositionInterface>("OpenNI Hand *");
+    bb_->open_multiple_for_reading<ObjectPositionInterface>("OpenNI Hand *");
 
   std::list<ObjectPositionInterface *>::iterator i;
   for (i = hand_ifs.begin(); i != hand_ifs.end(); ++i) {
     HandInfo hand;
     hand.hand_if = *i;
-    __hands[hand.hand_if->id()] = hand;
+    hands_[hand.hand_if->id()] = hand;
   }
 
   bbio_add_observed_create("ObjectPositionInterface", "OpenNI Hand *");
-  __bb->register_observer(this);
+  bb_->register_observer(this);
 }
 
 
 /** Destructor. */
 HandIfObserver::~HandIfObserver()
 {
-  __bb->unregister_observer(this);
-  delete __queue_lock;
+  bb_->unregister_observer(this);
+  delete queue_lock_;
 }
 
 void
 HandIfObserver::bb_interface_created(const char *type, const char *id) throw()
 {
-  if (__hands.find(id) == __hands.end()) {
-    __queue_lock->lock();
-    __queues[__active_queue].push(id);
-    __queue_lock->unlock();
+  if (hands_.find(id) == hands_.end()) {
+    queue_lock_->lock();
+    queues_[active_queue_].push(id);
+    queue_lock_->unlock();
   }
 }
 
@@ -83,24 +83,24 @@ HandIfObserver::bb_interface_created(const char *type, const char *id) throw()
 void
 HandIfObserver::process_queue()
 {
-  __queue_lock->lock();
-  unsigned int proc_queue = __active_queue;
-  __active_queue = 1 - __active_queue;
-  __queue_lock->unlock();
-  while (! __queues[proc_queue].empty()) {
-    std::string id = __queues[proc_queue].front();
+  queue_lock_->lock();
+  unsigned int proc_queue = active_queue_;
+  active_queue_ = 1 - active_queue_;
+  queue_lock_->unlock();
+  while (! queues_[proc_queue].empty()) {
+    std::string id = queues_[proc_queue].front();
 
     try {
       HandInfo hand;
-      hand.hand_if = __bb->open_for_reading<ObjectPositionInterface>(id.c_str());
+      hand.hand_if = bb_->open_for_reading<ObjectPositionInterface>(id.c_str());
 
-      __hands[id] = hand;
+      hands_[id] = hand;
     } catch (Exception &e) {
       e.print_trace();
       continue;
     }
 
-    __queues[proc_queue].pop();
+    queues_[proc_queue].pop();
   }
 }
 

@@ -64,16 +64,16 @@ class OpenNiDepthThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  xn::DepthGenerator                  *__depth_gen;
-  xn::DepthMetaData                   *__depth_md;
+  xn::DepthGenerator                  *depth_gen_;
+  xn::DepthMetaData                   *depth_md_;
 
-  firevision::SharedMemoryImageBuffer *__depth_buf;
+  firevision::SharedMemoryImageBuffer *depth_buf_;
 
-  size_t                               __depth_bufsize;
-  unsigned int                         __depth_width;
-  unsigned int                         __depth_height;
+  size_t                               depth_bufsize_;
+  unsigned int                         depth_width_;
+  unsigned int                         depth_height_;
 
-  fawkes::Time 			      *__capture_start;
+  fawkes::Time 			      *capture_start_;
 };
 
 #endif

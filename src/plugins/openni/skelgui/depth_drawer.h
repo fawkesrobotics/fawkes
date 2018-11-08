@@ -41,14 +41,14 @@ class SkelGuiDepthDrawer : public SkelGuiTextureDrawer
   void toggle_show_labels();
 
  private:
-  firevision::Camera  *__depth_cam;
-  firevision::Camera  *__label_cam;
-  unsigned char       *__rgb_buf;
+  firevision::Camera  *depth_cam_;
+  firevision::Camera  *label_cam_;
+  unsigned char       *rgb_buf_;
 
-  const unsigned int   __max_depth;
-  float               *__histogram;
+  const unsigned int   max_depth_;
+  float               *histogram_;
 
-  bool                 __show_labels;
+  bool                 show_labels_;
 };
 
 #endif

@@ -64,12 +64,12 @@ class OpenNiPclOnlyThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  firevision::SharedMemoryImageBuffer *__pcl_buf;
-  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> > __pcl;
+  firevision::SharedMemoryImageBuffer *pcl_buf_;
+  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> > pcl_;
 
-  fawkes::Time __last_capture_time;
-  unsigned int __width;
-  unsigned int __height;
+  fawkes::Time last_capture_time_;
+  unsigned int width_;
+  unsigned int height_;
 };
 
 #endif

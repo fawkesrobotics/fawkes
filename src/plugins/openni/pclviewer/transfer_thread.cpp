@@ -43,16 +43,16 @@ using namespace firevision;
 PclViewerTransferThread::PclViewerTransferThread()
   : Thread("PclViewerTransferThread", Thread::OPMODE_CONTINUOUS)
 {
-  __rwlock = new ReadWriteLock();
+  rwlock_ = new ReadWriteLock();
 }
 
 
 /** Destructor. */
 PclViewerTransferThread::~PclViewerTransferThread()
 {
-  delete __rwlock;
+  delete rwlock_;
   std::map<std::string, unsigned char *>::iterator c;
-  for (c = __buffers.begin(); c != __buffers.end(); ++c) {
+  for (c = buffers_.begin(); c != buffers_.end(); ++c) {
     free(c->second);
   }
 }
@@ -66,7 +66,7 @@ PclViewerTransferThread::~PclViewerTransferThread()
 void
 PclViewerTransferThread::lock_for_read()
 {
-  __rwlock->lock_for_read();
+  rwlock_->lock_for_read();
 }
 
 
@@ -74,7 +74,7 @@ PclViewerTransferThread::lock_for_read()
 void
 PclViewerTransferThread::unlock()
 {
-  __rwlock->unlock();
+  rwlock_->unlock();
 }
 
 
@@ -85,10 +85,10 @@ PclViewerTransferThread::unlock()
 void
 PclViewerTransferThread::add_camera(std::string name, firevision::Camera *cam)
 {
-  __cams[name] = cam;
-  __buffers[name] = malloc_buffer(cam->colorspace(), cam->pixel_width(),
+  cams_[name] = cam;
+  buffers_[name] = malloc_buffer(cam->colorspace(), cam->pixel_width(),
 				  cam->pixel_height());
-  __buffer_sizes[name] = colorspace_buffer_size(cam->colorspace(),
+  buffer_sizes_[name] = colorspace_buffer_size(cam->colorspace(),
 						cam->pixel_width(),
 						cam->pixel_height());
 }
@@ -98,11 +98,11 @@ void
 PclViewerTransferThread::loop()
 {
   std::map<std::string, firevision::Camera *>::iterator c;
-  for (c = __cams.begin(); c != __cams.end(); ++c) {
+  for (c = cams_.begin(); c != cams_.end(); ++c) {
     c->second->capture();
-    __rwlock->lock_for_write();
-    memcpy(__buffers[c->first], c->second->buffer(), __buffer_sizes[c->first]);
-    __rwlock->unlock();
+    rwlock_->lock_for_write();
+    memcpy(buffers_[c->first], c->second->buffer(), buffer_sizes_[c->first]);
+    rwlock_->unlock();
     c->second->dispose_buffer();
   }
 }

@@ -46,11 +46,11 @@ class HandIfObserver : public BlackBoardInterfaceObserver
   void process_queue();
 
  private:
-  HandMap &__hands;
-  BlackBoard *__bb;
-  Mutex *__queue_lock;
-  unsigned int __active_queue;
-  std::queue<std::string> __queues[2];
+  HandMap &hands_;
+  BlackBoard *bb_;
+  Mutex *queue_lock_;
+  unsigned int active_queue_;
+  std::queue<std::string> queues_[2];
 };
 
 } // end namespace fawkes::openni

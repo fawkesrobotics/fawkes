@@ -47,24 +47,24 @@ using namespace firevision;
 SkelGuiImageDrawer::SkelGuiImageDrawer(firevision::Camera *cam)
   : SkelGuiTextureDrawer(cam->pixel_width(), cam->pixel_height())
 {
-  __cam            = cam;
-  __rgb_buf        = malloc_buffer(RGB, __width, __height);
+  cam_            = cam;
+  rgb_buf_        = malloc_buffer(RGB, width_, height_);
 
 }
 
 /** Destructor. */
 SkelGuiImageDrawer::~SkelGuiImageDrawer()
 {
-  free(__rgb_buf);
+  free(rgb_buf_);
 }
 
 /** Fill texture. */
 void
 SkelGuiImageDrawer::fill_texture()
 {
-  __cam->capture();
-  convert(__cam->colorspace(), RGB, __cam->buffer(), __rgb_buf, __width, __height);
-  copy_rgb_to_texture(__rgb_buf);
-  __cam->dispose_buffer();
+  cam_->capture();
+  convert(cam_->colorspace(), RGB, cam_->buffer(), rgb_buf_, width_, height_);
+  copy_rgb_to_texture(rgb_buf_);
+  cam_->dispose_buffer();
 }
 

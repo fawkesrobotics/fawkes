@@ -116,50 +116,50 @@ OpenNiUserTrackerThread::init()
 {
   MutexLocker lock(openni.objmutex_ptr());
 
-  __user_gen = new xn::UserGenerator();
-  std::auto_ptr<xn::UserGenerator> usergen_autoptr(__user_gen);
+  user_gen_ = new xn::UserGenerator();
+  std::auto_ptr<xn::UserGenerator> usergen_autoptr(user_gen_);
 
-  __depth_gen = new xn::DepthGenerator();
-  std::auto_ptr<xn::DepthGenerator> depthgen_autoptr(__depth_gen);
+  depth_gen_ = new xn::DepthGenerator();
+  std::auto_ptr<xn::DepthGenerator> depthgen_autoptr(depth_gen_);
 
   XnStatus st;
 
-  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_DEPTH, __depth_gen);
-  fawkes::openni::setup_map_generator(*__depth_gen, config);
-  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_USER, __user_gen);
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_DEPTH, depth_gen_);
+  fawkes::openni::setup_map_generator(*depth_gen_, config);
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_USER, user_gen_);
 
-  if (!__user_gen->IsCapabilitySupported(XN_CAPABILITY_SKELETON)) {
+  if (!user_gen_->IsCapabilitySupported(XN_CAPABILITY_SKELETON)) {
     throw Exception("User generator does not support skeleton capability");
   }
 
-  __scene_md = new xn::SceneMetaData();
-  std::auto_ptr<xn::SceneMetaData> scenemd_autoptr(__scene_md);
-  if ((st = __user_gen->GetUserPixels(0, *__scene_md)) != XN_STATUS_OK) {
+  scene_md_ = new xn::SceneMetaData();
+  std::auto_ptr<xn::SceneMetaData> scenemd_autoptr(scene_md_);
+  if ((st = user_gen_->GetUserPixels(0, *scene_md_)) != XN_STATUS_OK) {
     throw Exception("Failed to get scene meta data (%s)", xnGetStatusString(st));
   }
 
-  st = __user_gen->RegisterUserCallbacks(cb_new_user, cb_lost_user,
-					 this, __user_cb_handle);
+  st = user_gen_->RegisterUserCallbacks(cb_new_user, cb_lost_user,
+					 this, user_cb_handle_);
   if (st != XN_STATUS_OK) {
     throw Exception("Failed to register user callbacks (%s)",
 		    xnGetStatusString(st));
   }
 
-  __skelcap = new xn::SkeletonCapability(__user_gen->GetSkeletonCap());
+  skelcap_ = new xn::SkeletonCapability(user_gen_->GetSkeletonCap());
 
 #if XN_VERSION_GE(1,3,2,0)
-  st = __skelcap->RegisterToCalibrationStart(cb_calibration_start,
-                                             this, __calib_start_cb_handle);
+  st = skelcap_->RegisterToCalibrationStart(cb_calibration_start,
+                                             this, calib_start_cb_handle_);
   if (st != XN_STATUS_OK) {
     throw Exception("Failed to register calibration start event (%s)",
                     xnGetStatusString(st));
   }
-  st = __skelcap->RegisterToCalibrationComplete(cb_calibration_complete,
-                                                this, __calib_complete_cb_handle);
+  st = skelcap_->RegisterToCalibrationComplete(cb_calibration_complete,
+                                                this, calib_complete_cb_handle_);
 #else
-  st = __skelcap->RegisterCalibrationCallbacks(cb_calibration_start,
+  st = skelcap_->RegisterCalibrationCallbacks(cb_calibration_start,
 					       cb_calibration_end,
-					       this, __calib_cb_handle);
+					       this, calib_cb_handle_);
 #endif
 
   if (st != XN_STATUS_OK) {
@@ -167,44 +167,44 @@ OpenNiUserTrackerThread::init()
                     xnGetStatusString(st));
   }
 
-  __skel_need_calib_pose = __skelcap->NeedPoseForCalibration();
+  skel_need_calib_pose_ = skelcap_->NeedPoseForCalibration();
 
-  if (__skel_need_calib_pose) {
-    if (! __user_gen->IsCapabilitySupported(XN_CAPABILITY_POSE_DETECTION)) {
+  if (skel_need_calib_pose_) {
+    if (! user_gen_->IsCapabilitySupported(XN_CAPABILITY_POSE_DETECTION)) {
       throw Exception("Calibration requires pose, but not supported by node");
     }
-    __skelcap->GetCalibrationPose(__calib_pose_name);
+    skelcap_->GetCalibrationPose(calib_pose_name_);
 
-    xn::PoseDetectionCapability posecap = __user_gen->GetPoseDetectionCap();
+    xn::PoseDetectionCapability posecap = user_gen_->GetPoseDetectionCap();
 
 #if XN_VERSION_GE(1,3,2,0)
     st = posecap.RegisterToPoseDetected(cb_pose_start,
-                                        this, __pose_start_cb_handle);
+                                        this, pose_start_cb_handle_);
     if (st != XN_STATUS_OK) {
       throw Exception("Failed to register pose detect event (%s)",
                       xnGetStatusString(st));
     }
     st = posecap.RegisterToOutOfPose(cb_pose_end,
-                                     this, __pose_end_cb_handle);
+                                     this, pose_end_cb_handle_);
 #else
     st = posecap.RegisterToPoseCallbacks(cb_pose_start, cb_pose_end,
-					   this, __pose_cb_handle);
+					   this, pose_cb_handle_);
 #endif
     if (st != XN_STATUS_OK) {
       throw Exception("Failed to register pose callbacks (%s)", xnGetStatusString(st));
     }
   }
 
-  __skelcap->SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
+  skelcap_->SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
 
-  __depth_gen->StartGenerating();
-  __user_gen->StartGenerating();
+  depth_gen_->StartGenerating();
+  user_gen_->StartGenerating();
 
-  __label_buf = new SharedMemoryImageBuffer("openni-labels", RAW16,
-  					    __scene_md->XRes(),
-					    __scene_md->YRes());
-  __label_bufsize = colorspace_buffer_size(RAW16,
-					   __scene_md->XRes(), __scene_md->YRes());
+  label_buf_ = new SharedMemoryImageBuffer("openni-labels", RAW16,
+  					    scene_md_->XRes(),
+					    scene_md_->YRes());
+  label_bufsize_ = colorspace_buffer_size(RAW16,
+					   scene_md_->XRes(), scene_md_->YRes());
 
   usergen_autoptr.release();
   depthgen_autoptr.release();
@@ -217,13 +217,13 @@ OpenNiUserTrackerThread::finalize()
 {
   // we do not stop generating, we don't know if there is no other plugin
   // using the node.
-  delete __user_gen;
-  delete __scene_md;
-  delete __skelcap;
-  delete __label_buf;
+  delete user_gen_;
+  delete scene_md_;
+  delete skelcap_;
+  delete label_buf_;
 
   UserMap::iterator i;
-  for (i = __users.begin(); i != __users.end(); ++i) {
+  for (i = users_.begin(); i != users_.end(); ++i) {
     blackboard->close(i->second.skel_if);
     blackboard->close(i->second.proj_if);
   }
@@ -236,19 +236,19 @@ OpenNiUserTrackerThread::loop()
   // we do not lock here, we are only operating on our user generator copy
   // and the update happens in a different main loop hook
 
-  if (! __user_gen->IsDataNew())  return;
+  if (! user_gen_->IsDataNew())  return;
 
   UserMap::iterator i;
-  for (i = __users.begin(); i != __users.end(); ++i) {
+  for (i = users_.begin(); i != users_.end(); ++i) {
 
     if (!i->second.valid)  continue;
 
     bool needs_write = false;
 
     HumanSkeletonInterface::State new_state = i->second.skel_if->state();
-    if (__skelcap->IsTracking(i->first)) {
+    if (skelcap_->IsTracking(i->first)) {
       new_state = HumanSkeletonInterface::STATE_TRACKING;
-    } else if (__skelcap->IsCalibrating(i->first)) {
+    } else if (skelcap_->IsCalibrating(i->first)) {
       new_state = HumanSkeletonInterface::STATE_CALIBRATING;
     } else {
       new_state = HumanSkeletonInterface::STATE_DETECTING_POSE;
@@ -284,8 +284,8 @@ OpenNiUserTrackerThread::loop()
     }
   }
 
-  if (__label_buf->num_attached() > 1) {
-    memcpy(__label_buf->buffer(), __scene_md->Data(), __label_bufsize);
+  if (label_buf_->num_attached() > 1) {
+    memcpy(label_buf_->buffer(), scene_md_->Data(), label_bufsize_);
   }
 
 }
@@ -303,7 +303,7 @@ OpenNiUserTrackerThread::loop()
 // translating to Fawkes coordinates, empirically verified
 // permute ori columns to match our coordinate system, empirically verified
 #define SET_JTF(id, joint, joint_name, bbfield)				\
-  st = __skelcap->GetSkeletonJoint(id, joint, jtf);			\
+  st = skelcap_->GetSkeletonJoint(id, joint, jtf);			\
   if (st != XN_STATUS_OK) {						\
     ori[0] = ori[1] = ori[2] = ori[3] = ori[4] = ori[5] = 0.;		\
     ori[6] = ori[7] = ori[8] = ori_confidence = pos_confidence = 0.;	\
@@ -327,7 +327,7 @@ OpenNiUserTrackerThread::loop()
 									\
     XnPoint3D pt;							\
     pt = jtf.position.position;						\
-    __depth_gen->ConvertRealWorldToProjective(1, &pt, &pt);		\
+    depth_gen_->ConvertRealWorldToProjective(1, &pt, &pt);		\
     proj[0] = pt.X;							\
     proj[1] = pt.Y;							\
   }									\
@@ -383,14 +383,14 @@ OpenNiUserTrackerThread::update_com(XnUserID id, UserInfo &user)
   XnStatus st;
   float com[3], com_proj[2];
   com[0] = com[1] = com[2] = com_proj[0] = com_proj[1] = 0.;
-  if ((st = __user_gen->GetCoM(id, compt)) == XN_STATUS_OK) {
+  if ((st = user_gen_->GetCoM(id, compt)) == XN_STATUS_OK) {
 
     // translating to Fawkes coordinates, empirically verified
     com[0] =  compt.Z * 0.001;
     com[1] = -compt.X * 0.001;
     com[2] =  compt.Y * 0.001;
 
-    __depth_gen->ConvertRealWorldToProjective(1, &compt, &compt_proj);
+    depth_gen_->ConvertRealWorldToProjective(1, &compt, &compt_proj);
     com_proj[0] = compt_proj.X;
     com_proj[1] = compt_proj.Y;
   } else {
@@ -423,7 +423,7 @@ OpenNiUserTrackerThread::update_com(XnUserID id, UserInfo &user)
 void
 OpenNiUserTrackerThread::new_user(XnUserID id)
 {
-  if (__users.find(id) != __users.end()) {
+  if (users_.find(id) != users_.end()) {
     logger->log_error(name(), "New user ID %u, interface already exists", id);
   } else {
     char *ifid;
@@ -434,9 +434,9 @@ OpenNiUserTrackerThread::new_user(XnUserID id)
     }
     try {
       logger->log_debug(name(), "Opening interface 'HumanSkeletonInterface::%s'", ifid);
-      __users[id].skel_if = blackboard->open_for_writing<HumanSkeletonInterface>(ifid);
-      __users[id].skel_if->set_user_id(id);
-      __users[id].skel_if->write();
+      users_[id].skel_if = blackboard->open_for_writing<HumanSkeletonInterface>(ifid);
+      users_[id].skel_if->set_user_id(id);
+      users_[id].skel_if->write();
     } catch (Exception &e) {
       logger->log_warn(name(), "Failed to open interface, exception follows");
       logger->log_warn(name(), e);
@@ -444,26 +444,26 @@ OpenNiUserTrackerThread::new_user(XnUserID id)
 
     try {
       logger->log_debug(name(), "Opening interface 'HumanSkeletonProjectionInterface::%s'", ifid);
-      __users[id].proj_if = blackboard->open_for_writing<HumanSkeletonProjectionInterface>(ifid);
+      users_[id].proj_if = blackboard->open_for_writing<HumanSkeletonProjectionInterface>(ifid);
       XnFieldOfView fov;
       XnStatus st;
-      if ((st = __depth_gen->GetFieldOfView(fov)) != XN_STATUS_OK) {
+      if ((st = depth_gen_->GetFieldOfView(fov)) != XN_STATUS_OK) {
         logger->log_error(name(), "Failed to get field of view, ignoring. (%s)",
 			  xnGetStatusString(st));
       } else {
-        __users[id].proj_if->set_horizontal_fov(fov.fHFOV);
-        __users[id].proj_if->set_vertical_fov(fov.fVFOV);
+        users_[id].proj_if->set_horizontal_fov(fov.fHFOV);
+        users_[id].proj_if->set_vertical_fov(fov.fVFOV);
       }
 
       xn::DepthMetaData dmd;
-      __depth_gen->GetMetaData(dmd);
-      __users[id].proj_if->set_res_x(dmd.XRes());
-      __users[id].proj_if->set_res_y(dmd.YRes());
-      __users[id].proj_if->set_max_depth(__depth_gen->GetDeviceMaxDepth());
-      __users[id].proj_if->write();
+      depth_gen_->GetMetaData(dmd);
+      users_[id].proj_if->set_res_x(dmd.XRes());
+      users_[id].proj_if->set_res_y(dmd.YRes());
+      users_[id].proj_if->set_max_depth(depth_gen_->GetDeviceMaxDepth());
+      users_[id].proj_if->write();
     } catch (Exception &e) {
-      blackboard->close(__users[id].proj_if);
-      __users.erase(id);
+      blackboard->close(users_[id].proj_if);
+      users_.erase(id);
       logger->log_warn(name(), "Failed to open interface, exception follows");
       logger->log_warn(name(), e);
     }
@@ -471,12 +471,12 @@ OpenNiUserTrackerThread::new_user(XnUserID id)
     free(ifid);
   }
 
-  __users[id].valid = true;
+  users_[id].valid = true;
 
-  if (__skel_need_calib_pose) {
-    __user_gen->GetPoseDetectionCap().StartPoseDetection(__calib_pose_name, id);
+  if (skel_need_calib_pose_) {
+    user_gen_->GetPoseDetectionCap().StartPoseDetection(calib_pose_name_, id);
   } else {
-    __user_gen->GetSkeletonCap().RequestCalibration(id, TRUE);
+    user_gen_->GetSkeletonCap().RequestCalibration(id, TRUE);
   }
 }
 
@@ -489,20 +489,20 @@ OpenNiUserTrackerThread::new_user(XnUserID id)
 void
 OpenNiUserTrackerThread::lost_user(XnUserID id)
 {
-  if (__users.find(id) == __users.end()) {
+  if (users_.find(id) == users_.end()) {
     logger->log_error(name(), "Lost user ID %u, but interface does not exist", id);
     return;
   }
 
   logger->log_error(name(), "Lost user ID %u, setting interface '%s' to invalid",
-		    id, __users[id].skel_if->uid());
+		    id, users_[id].skel_if->uid());
   // write invalid, a reader might still be open
-  __users[id].skel_if->set_state(HumanSkeletonInterface::STATE_INVALID);
-  __users[id].skel_if->write();
-  __users[id].valid = false;
-  //blackboard->close(__users[id].skel_if);
-  //blackboard->close(__users[id].proj_if);
-  //__users.erase(id);
+  users_[id].skel_if->set_state(HumanSkeletonInterface::STATE_INVALID);
+  users_[id].skel_if->write();
+  users_[id].valid = false;
+  //blackboard->close(users_[id].skel_if);
+  //blackboard->close(users_[id].proj_if);
+  //users_.erase(id);
 }
 
 
@@ -514,7 +514,7 @@ OpenNiUserTrackerThread::lost_user(XnUserID id)
 void
 OpenNiUserTrackerThread::pose_start(XnUserID id, const char *pose_name)
 {
-  if (__users.find(id) == __users.end()) {
+  if (users_.find(id) == users_.end()) {
     logger->log_error(name(), "Pose start for user ID %u, "
 		      "but interface does not exist", id);
     return;
@@ -522,9 +522,9 @@ OpenNiUserTrackerThread::pose_start(XnUserID id, const char *pose_name)
 
   logger->log_info(name(), "Pose %s detected for user %u", pose_name, id);
 
-  __users[id].skel_if->set_pose(pose_name);
-  __user_gen->GetPoseDetectionCap().StopPoseDetection(id);
-  __user_gen->GetSkeletonCap().RequestCalibration(id, TRUE);
+  users_[id].skel_if->set_pose(pose_name);
+  user_gen_->GetPoseDetectionCap().StopPoseDetection(id);
+  user_gen_->GetSkeletonCap().RequestCalibration(id, TRUE);
 }
 
 /** Notify of pose detection end.
@@ -536,13 +536,13 @@ OpenNiUserTrackerThread::pose_start(XnUserID id, const char *pose_name)
 void
 OpenNiUserTrackerThread::pose_end(XnUserID id, const char *pose_name)
 {
-  if (__users.find(id) == __users.end()) {
+  if (users_.find(id) == users_.end()) {
     logger->log_error(name(), "Pose end for user ID %u, "
 		      "but interface does not exist", id);
     return;
   }
 
-  __users[id].skel_if->set_pose("");
+  users_[id].skel_if->set_pose("");
 }
 
 /** Notify of calibration start.
@@ -552,7 +552,7 @@ OpenNiUserTrackerThread::pose_end(XnUserID id, const char *pose_name)
 void
 OpenNiUserTrackerThread::calibration_start(XnUserID id)
 {
-  if (__users.find(id) == __users.end()) {
+  if (users_.find(id) == users_.end()) {
     logger->log_error(name(), "Pose end for user ID %u, "
 		      "but interface does not exist", id);
     return;
@@ -570,24 +570,24 @@ OpenNiUserTrackerThread::calibration_start(XnUserID id)
 void
 OpenNiUserTrackerThread::calibration_end(XnUserID id, bool success)
 {
-  if (__users.find(id) == __users.end()) {
+  if (users_.find(id) == users_.end()) {
     logger->log_error(name(), "Pose end for user ID %u, "
 		      "but interface does not exist", id);
     return;
   }
 
-  __users[id].skel_if->set_pose("");
+  users_[id].skel_if->set_pose("");
 
   if (success) {
     logger->log_info(name(), "Calibration successful for user %u, "
 		     "starting tracking", id);
-    __user_gen->GetSkeletonCap().StartTracking(id);
+    user_gen_->GetSkeletonCap().StartTracking(id);
   } else {
     logger->log_info(name(), "Calibration failed for user %u, restarting", id);
-    if (__skel_need_calib_pose) {
-      __user_gen->GetPoseDetectionCap().StartPoseDetection(__calib_pose_name, id);
+    if (skel_need_calib_pose_) {
+      user_gen_->GetPoseDetectionCap().StartPoseDetection(calib_pose_name_, id);
     } else {
-      __user_gen->GetSkeletonCap().RequestCalibration(id, TRUE);
+      user_gen_->GetSkeletonCap().RequestCalibration(id, TRUE);
     }
   }
 }

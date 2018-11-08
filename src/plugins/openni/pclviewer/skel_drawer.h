@@ -54,10 +54,10 @@ class SkelGuiSkeletonDrawer3D
   void draw_circle(unsigned int id, float *p, float radius);
 
  private:
-  fawkes::openni::UserMap  &__users;
-  fawkes::openni::HandMap  &__hands;
+  fawkes::openni::UserMap  &users_;
+  fawkes::openni::HandMap  &hands_;
 
-  PrintState __print_state;
+  PrintState print_state_;
 };
 
 #endif

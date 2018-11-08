@@ -40,7 +40,7 @@ class OpenNiAspectIniFin : public AspectIniFin
   void set_openni_context(LockPtr<xn::Context> openni_context);
 
  private:
-  LockPtr<xn::Context> __openni_context;
+  LockPtr<xn::Context> openni_context_;
 };
 
 } // end namespace fawkes

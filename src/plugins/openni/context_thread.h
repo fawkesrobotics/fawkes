@@ -68,22 +68,22 @@ class OpenNiContextThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::LockPtr<xn::Context>  __openni;
-  fawkes::OpenNiAspectIniFin    __openni_aspect_inifin;
+  fawkes::LockPtr<xn::Context>  openni_;
+  fawkes::OpenNiAspectIniFin    openni_aspect_inifin_;
 
-  bool         __cfg_run_sensor_server;
-  std::string  __cfg_sensor_bin;
-  pid_t        __sensor_server_pid;
-  xn::Device  *__device;
+  bool         cfg_run_sensor_server_;
+  std::string  cfg_sensor_bin_;
+  pid_t        sensor_server_pid_;
+  xn::Device  *device_;
 
-  int __last_refcount;
+  int last_refcount_;
 
-  fawkes::Time __check_last;
-  fawkes::Time __check_now;
+  fawkes::Time check_last_;
+  fawkes::Time check_now_;
 
-  unsigned int __device_no_data_loops;
+  unsigned int device_no_data_loops_;
 
-  std::map<std::string, unsigned int> __dead_loops;
+  std::map<std::string, unsigned int> dead_loops_;
 };
 
 #endif

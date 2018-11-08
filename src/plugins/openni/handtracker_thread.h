@@ -76,20 +76,20 @@ class OpenNiHandTrackerThread
   typedef std::map<XnUserID, fawkes::ObjectPositionInterface *>  HandMap;
 
  private:
-  xn::HandsGenerator              *__hand_gen;
-  xn::DepthGenerator              *__depth_gen;
-  xn::GestureGenerator            *__gesture_gen;
+  xn::HandsGenerator              *hand_gen_;
+  xn::DepthGenerator              *depth_gen_;
+  xn::GestureGenerator            *gesture_gen_;
 
-  XnCallbackHandle                 __hand_cb_handle;
-  XnCallbackHandle                 __gesture_cb_handle;
+  XnCallbackHandle                 hand_cb_handle_;
+  XnCallbackHandle                 gesture_cb_handle_;
 
-  std::map<std::string, bool>      __enabled_gesture;
+  std::map<std::string, bool>      enabled_gesture_;
 
-  std::map<XnUserID, bool>         __needs_write;
-  HandMap                          __hands;
+  std::map<XnUserID, bool>         needs_write_;
+  HandMap                          hands_;
 
-  unsigned int                     __width;
-  unsigned int                     __height;
+  unsigned int                     width_;
+  unsigned int                     height_;
 };
 
 #endif
