@@ -71,20 +71,20 @@ class XabslEngineThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  xabsl::Engine             *__xe;
-  XabslLoggingErrorHandler  *__xleh;
+  xabsl::Engine             *xe_;
+  XabslLoggingErrorHandler  *xleh_;
 
-  fawkes::Time              *__now;
+  fawkes::Time              *now_;
 
-  fawkes::SkillerInterface        *__skiller_if;
-  fawkes::ObjectPositionInterface *__wm_ball_if;
-  fawkes::ObjectPositionInterface *__wm_ball_w_if;
+  fawkes::SkillerInterface        *skiller_if_;
+  fawkes::ObjectPositionInterface *wm_ball_if_;
+  fawkes::ObjectPositionInterface *wm_ball_w_if_;
 
-  XabslInterfaceFieldWrapper<double, float> *__ball_rx;
-  XabslInterfaceFieldWrapper<double, float> *__ball_ry;
+  XabslInterfaceFieldWrapper<double, float> *ball_rx_;
+  XabslInterfaceFieldWrapper<double, float> *ball_ry_;
 
-  std::map<std::string, XabslSkillWrapper *> __wrappers;
-  std::map<std::string, XabslSkillWrapper *>::iterator __wit;
+  std::map<std::string, XabslSkillWrapper *> wrappers_;
+  std::map<std::string, XabslSkillWrapper *>::iterator wit_;
 };
 
 

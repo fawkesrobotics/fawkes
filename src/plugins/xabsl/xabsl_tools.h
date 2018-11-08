@@ -40,7 +40,7 @@ class XabslLoggingErrorHandler : public xabsl::ErrorHandler
   virtual void printMessage(const char *text);
 
  private:
-  fawkes::Logger *__logger;
+  fawkes::Logger *logger_;
 };
 
 
@@ -62,8 +62,8 @@ class XabslFileInputSource : public xabsl::InputSource
   void omit_comment();
 
  private:
-  char *__filename;
-  FILE *__f;
+  char *filename_;
+  FILE *f_;
 };
 
 #endif

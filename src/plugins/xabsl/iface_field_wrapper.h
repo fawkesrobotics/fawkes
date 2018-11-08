@@ -47,13 +47,13 @@ template <typename XabslType, typename FieldType>
   XabslInterfaceFieldWrapper(fawkes::Interface::interface_fieldtype_t type,
 			     const char *name, FieldType *value)
   {
-    __pointer = new fawkes::InterfaceFieldPointer<FieldType>(type, name, value);
+    pointer_ = new fawkes::InterfaceFieldPointer<FieldType>(type, name, value);
   }
 
   /** Destructor. */
   ~XabslInterfaceFieldWrapper()
   {
-    delete __pointer;
+    delete pointer_;
   }
 
   /** Get name of the field.
@@ -61,7 +61,7 @@ template <typename XabslType, typename FieldType>
    */
   const char * get_name() const
   {
-    return __pointer->get_name();
+    return pointer_->get_name();
   }
 
   /** Get type of the field.
@@ -69,7 +69,7 @@ template <typename XabslType, typename FieldType>
    */
   fawkes::Interface::interface_fieldtype_t  get_type() const
   {
-    return __pointer->get_type();
+    return pointer_->get_type();
   }
 
   /** Get current value.
@@ -77,7 +77,7 @@ template <typename XabslType, typename FieldType>
    */
   XabslType get_value() const
   {
-    return (XabslType)__pointer->get_value();
+    return (XabslType)pointer_->get_value();
   }
 
   /** Set new value.
@@ -85,11 +85,11 @@ template <typename XabslType, typename FieldType>
    */
   void set_value(XabslType new_value)
   {
-    __pointer->set_value((FieldType)new_value);
+    pointer_->set_value((FieldType)new_value);
   }
 
  private:
-  fawkes::InterfaceFieldPointer<FieldType> *__pointer;
+  fawkes::InterfaceFieldPointer<FieldType> *pointer_;
 };
 
 #endif
