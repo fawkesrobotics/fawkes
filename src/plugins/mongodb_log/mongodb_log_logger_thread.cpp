@@ -43,23 +43,23 @@ MongoLogLoggerThread::MongoLogLoggerThread()
     LoggerAspect(this),
     MongoDBAspect("default")
 {
-  __mutex = new Mutex();
+  mutex_ = new Mutex();
 }
 
 
 /** Destructor. */
 MongoLogLoggerThread::~MongoLogLoggerThread()
 {
-  delete __mutex;
+  delete mutex_;
 }
 
 
 void
 MongoLogLoggerThread::init()
 {
-  __collection = "fawkes.msglog";
+  collection_ = "fawkes.msglog";
   try {
-    __collection = config->get_string("/plugins/mongodb/logger_collection");
+    collection_ = config->get_string("/plugins/mongodb/logger_collection");
   } catch (Exception &e) {}
 }
 
@@ -81,7 +81,7 @@ MongoLogLoggerThread::insert_message(LogLevel ll, const char *component,
 				    const char *format, va_list va)
 {
   if (log_level <= ll ) {
-    MutexLocker lock(__mutex);
+    MutexLocker lock(mutex_);
     struct timeval now;
     gettimeofday(&now, NULL);
     Date_t nowd = now.tv_sec * 1000 + now.tv_usec / 1000;
@@ -107,7 +107,7 @@ MongoLogLoggerThread::insert_message(LogLevel ll, const char *component,
     free(msg);
 
     try {
-      mongodb_client->insert(__collection, b.obj());
+      mongodb_client->insert(collection_, b.obj());
     } catch (mongo::DBException &e) {} // ignored
   }
 }
@@ -117,7 +117,7 @@ MongoLogLoggerThread::insert_message(LogLevel ll, const char *component,
 				    Exception &e)
 {
   if (log_level <= ll ) {
-    MutexLocker lock(__mutex);
+    MutexLocker lock(mutex_);
     struct timeval now;
     gettimeofday(&now, NULL);
     Date_t nowd = now.tv_sec * 1000 + now.tv_usec / 1000;
@@ -135,7 +135,7 @@ MongoLogLoggerThread::insert_message(LogLevel ll, const char *component,
       b.appendDate("time", nowd);
       b.append("message", std::string("[EXCEPTION] ") + *i);
       try {
-        mongodb_client->insert(__collection, b.obj());
+        mongodb_client->insert(collection_, b.obj());
       } catch (mongo::DBException &e) {} // ignored
     }
   }
@@ -235,7 +235,7 @@ MongoLogLoggerThread::tlog_insert_message(LogLevel ll, struct timeval *t,
 					 const char *format, va_list va)
 {
   if (log_level <= ll ) {
-    MutexLocker lock(__mutex);
+    MutexLocker lock(mutex_);
     char *msg;
     if (vasprintf(&msg, format, va) == -1) {
       return;
@@ -255,12 +255,12 @@ MongoLogLoggerThread::tlog_insert_message(LogLevel ll, struct timeval *t,
     b.appendDate("time", nowd);
     b.append("message", msg);
     try {
-      mongodb_client->insert(__collection, b.obj());
+      mongodb_client->insert(collection_, b.obj());
     } catch (mongo::DBException &e) {} // ignored
 
     free(msg);
 
-    __mutex->unlock();
+    mutex_->unlock();
   }
 }
 
@@ -269,7 +269,7 @@ MongoLogLoggerThread::tlog_insert_message(LogLevel ll, struct timeval *t,
 					 const char *component, Exception &e)
 {
   if (log_level <= ll ) {
-    MutexLocker lock(__mutex);
+    MutexLocker lock(mutex_);
     Date_t nowd = t->tv_sec * 1000 + t->tv_usec / 1000;
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       BSONObjBuilder b;
@@ -284,7 +284,7 @@ MongoLogLoggerThread::tlog_insert_message(LogLevel ll, struct timeval *t,
       b.appendDate("time", nowd);
       b.append("message", std::string("[EXCEPTION] ") + *i);
       try {
-        mongodb_client->insert(__collection, b.obj());
+        mongodb_client->insert(collection_, b.obj());
       } catch (mongo::DBException &e) {} // ignored
     }
   }

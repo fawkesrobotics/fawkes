@@ -108,8 +108,8 @@ class MongoLogLoggerThread
 			   fawkes::Exception &);
 
  private:
-  std::string    __collection;
-  fawkes::Mutex *__mutex;
+  std::string    collection_;
+  fawkes::Mutex *mutex_;
 };
 
 #endif
