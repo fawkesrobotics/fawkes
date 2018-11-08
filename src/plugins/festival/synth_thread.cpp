@@ -48,19 +48,19 @@ void
 FestivalSynthThread::init()
 {
   try {
-    __cfg_voice = config->get_string("/plugins/festival/voice");
+    cfg_voice_ = config->get_string("/plugins/festival/voice");
   } catch (Exception &e) {
-    __cfg_voice = "";
+    cfg_voice_ = "";
   }
   try {
-    __cfg_extra_code = config->get_string("/plugins/festival/extra_code");
+    cfg_extra_code_ = config->get_string("/plugins/festival/extra_code");
   } catch (Exception &e) {
-    __cfg_extra_code = "";
+    cfg_extra_code_ = "";
   }
 
-  __speechsynth_if = blackboard->open_for_writing<SpeechSynthInterface>("Festival");
+  speechsynth_if_ = blackboard->open_for_writing<SpeechSynthInterface>("Festival");
 
-  bbil_add_message_interface(__speechsynth_if);
+  bbil_add_message_interface(speechsynth_if_);
   blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
 
 }
@@ -69,17 +69,17 @@ FestivalSynthThread::init()
 void FestivalSynthThread::once()
 {
   festival_initialize(/* load init files */ 1, FESTIVAL_HEAP_SIZE);
-  if (__cfg_voice != "") {
-    std::string voice_cmd = "(voice_" + __cfg_voice + ")";
+  if (cfg_voice_ != "") {
+    std::string voice_cmd = "(voice_" + cfg_voice_ + ")";
     if (! festival_eval_command(voice_cmd.c_str())) {
-      logger->log_error(name(), "Failed to load voice %s", __cfg_voice.c_str());
+      logger->log_error(name(), "Failed to load voice %s", cfg_voice_.c_str());
     }
   }
 
-  if (__cfg_extra_code != "") {
-    logger->log_debug(name(), "Executing extra code '%s'", __cfg_extra_code.c_str());
-    if (! festival_eval_command(__cfg_extra_code.c_str())) {
-      logger->log_error(name(), "Failed to execute extra code '%s'", __cfg_extra_code.c_str());
+  if (cfg_extra_code_ != "") {
+    logger->log_debug(name(), "Executing extra code '%s'", cfg_extra_code_.c_str());
+    if (! festival_eval_command(cfg_extra_code_.c_str())) {
+      logger->log_error(name(), "Failed to execute extra code '%s'", cfg_extra_code_.c_str());
     }
   }
 
@@ -91,26 +91,26 @@ FestivalSynthThread::finalize()
 {
   festival_tidy_up();
   blackboard->unregister_listener(this);
-  blackboard->close(__speechsynth_if);
+  blackboard->close(speechsynth_if_);
 }
 
 void
 FestivalSynthThread::loop()
 {
   // wait for message(s) to arrive, could take a (little) while after the wakeup
-  while ( __speechsynth_if->msgq_empty() ) {
+  while ( speechsynth_if_->msgq_empty() ) {
     usleep(100);
   }
 
   // process messages, blocking
-  if ( ! __speechsynth_if->msgq_empty() ) {
-    if ( __speechsynth_if->msgq_first_is<SpeechSynthInterface::SayMessage>() ) {
-      SpeechSynthInterface::SayMessage *msg = __speechsynth_if->msgq_first<SpeechSynthInterface::SayMessage>();
-      __speechsynth_if->set_msgid(msg->id());
+  if ( ! speechsynth_if_->msgq_empty() ) {
+    if ( speechsynth_if_->msgq_first_is<SpeechSynthInterface::SayMessage>() ) {
+      SpeechSynthInterface::SayMessage *msg = speechsynth_if_->msgq_first<SpeechSynthInterface::SayMessage>();
+      speechsynth_if_->set_msgid(msg->id());
       say(msg->text());
     }
 
-    __speechsynth_if->msgq_pop();
+    speechsynth_if_->msgq_pop();
   }
 }
 
@@ -135,10 +135,10 @@ FestivalSynthThread::say(const char *text)
 
   float duration = (float)wave.num_samples() / (float)wave.sample_rate();
 
-  __speechsynth_if->set_text(text);
-  __speechsynth_if->set_final(false);
-  __speechsynth_if->set_duration(duration);
-  __speechsynth_if->write();
+  speechsynth_if_->set_text(text);
+  speechsynth_if_->set_final(false);
+  speechsynth_if_->set_duration(duration);
+  speechsynth_if_->write();
 
   Time start;
   clock->get_systime(start);
@@ -156,6 +156,6 @@ FestivalSynthThread::say(const char *text)
     waittime.wait_systime();
   }
 
-  __speechsynth_if->set_final(true);
-  __speechsynth_if->write();
+  speechsynth_if_->set_final(true);
+  speechsynth_if_->write();
 }

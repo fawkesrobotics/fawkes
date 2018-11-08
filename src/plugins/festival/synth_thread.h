@@ -61,10 +61,10 @@ class FestivalSynthThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::SpeechSynthInterface   *__speechsynth_if;
+  fawkes::SpeechSynthInterface   *speechsynth_if_;
 
-  std::string __cfg_voice;
-  std::string __cfg_extra_code;
+  std::string cfg_voice_;
+  std::string cfg_extra_code_;
 };
 
 
