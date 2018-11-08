@@ -79,7 +79,7 @@ class PluginTool
   fawkes::FawkesNetworkClient *c;
   OperationMode   opmode;
   const char     *plugin_name;
-  const char     *__program_name;
+  const char     *program_name_;
   bool            quit;
 
   bool            list_found;

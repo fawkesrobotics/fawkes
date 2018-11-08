@@ -67,7 +67,7 @@ PluginTool::PluginTool(ArgumentParser *argp, FawkesNetworkClient *c)
     opmode = M_LIST_LOADED;
   }
 
-  __program_name = argp->program_name();
+  program_name_ = argp->program_name();
 
   list_found = false;
 }
@@ -422,7 +422,7 @@ PluginTool:: run()
     break;
 
   default:
-    print_usage(__program_name);
+    print_usage(program_name_);
   }
 
   c->deregister_handler(FAWKES_CID_PLUGINMANAGER);
