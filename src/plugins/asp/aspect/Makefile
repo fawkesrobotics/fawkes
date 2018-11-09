@@ -17,26 +17,16 @@ BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(LIBSRCDIR)/utils/utils.mk
-#include $(BUILDSYSDIR)/asp.mk
+include $(SRCDIR)/../clingo.mk
 
 LIBS_libfawkesaspaspect = stdc++ fawkescore fawkesaspects fawkesutils pthread
 OBJS_libfawkesaspaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_libfawkesaspaspect)
 
-#TODO: export this in .mk and really check
-HAVE_CLINGO = 1
-CFLAGS_CLINGO = -DWITH_THREADS=1 \
-	-I $(HOME)/clingo/libclasp \
-	-I $(HOME)/clingo/libclingo \
-	-I $(HOME)/clingo/libgringo \
-	-I $(HOME)/clingo/liblp \
-	-I $(HOME)/clingo/libprogram_opts
-LDFLAGS_CLINGO = -L$(HOME)/clingo-build/bin -Wl,-rpath=$(HOME)/clingo-build/bin -lclingo
-
 ifeq ($(HAVE_CPP11),1)
   ifeq ($(HAVE_CLINGO),1)
-    CFLAGS  += $(CFLAGS_CLINGO) $(CFLAGS_CPP11)
+    CFLAGS  += $(CFLAGS_CLINGO)  $(CFLAGS_CPP11)
     LDFLAGS += $(LDFLAGS_CLINGO) $(LDFLAGS_CPP11)
 
     LIBS_all = $(LIBDIR)/libfawkesaspaspect.so

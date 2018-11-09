@@ -2,8 +2,8 @@
 #               Makefile Build System for Fawkes: ASP Plugin
 #                            -------------------
 #   Created on Thu Oct 20 15:00:34 2016
-#   Copyright (C) 2016 by Björn Schäpers
-#
+#   Copyright (C) 2016 Björn Schäpers
+#                 2018 Tim Niemueller [www.niemueller.org]
 #*****************************************************************************
 #
 #   This program is free software; you can redistribute it and/or modify
@@ -15,7 +15,7 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-#include $(BUILDSYSDIR)/clips.mk asp.mk?
+include $(SRCDIR)/clingo.mk
 
 LIBS_asp = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		   fawkesinterface fawkesaspaspect
@@ -23,30 +23,14 @@ OBJS_asp = asp_plugin.o asp_thread.o
 
 OBJS_all = $(OBJS_asp)
 
-#TODO: export this in .mk and really check
-HAVE_CLINGO = 1
-CFLAGS_CLINGO = -DWITH_THREADS=1 \
-	-I $(HOME)/clingo/libclasp \
-	-I $(HOME)/clingo/libclingo \
-	-I $(HOME)/clingo/libgringo \
-	-I $(HOME)/clingo/liblp \
-	-I $(HOME)/clingo/libprogram_opts
-LDFLAGS_CLINGO = -L$(HOME)/clingo-build/bin/ -Wl,-rpath=$(HOME)/clingo-build/bin/ -lclingo
-
-# Extra files for system-wide install, i.e., "make install"
-#FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
-#DESTDIR_clips_files = $(EXEC_SHAREDIR)/clips/clips
-
 ifeq ($(HAVE_CPP11),1)
   ifeq ($(HAVE_CLINGO),1)
     PRESUBDIRS += aspect
 
-    CFLAGS  += $(CFLAGS_CLINGO) $(CFLAGS_CPP11)
+    CFLAGS  += $(CFLAGS_CLINGO)  $(CFLAGS_CPP11)
     LDFLAGS += $(LDFLAGS_CLINGO) $(LDFLAGS_CPP11)
 
     PLUGINS_all = $(PLUGINDIR)/asp.so
-
-    INSTALL_extra = asp_files
   else
     WARN_TARGETS += warning_clingo
   endif
