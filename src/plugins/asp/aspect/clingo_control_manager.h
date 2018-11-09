@@ -3,6 +3,7 @@
  *
  *  Created: Thu Oct 27 16:23:32 2016
  *  Copyright  2016  Björn Schäpers
+ *             2018  Tim Niemueller [www.niemueller.org]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -19,38 +20,37 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_ASP_ASPECT_CLINGO_CONTROL_MANAGER_H_
-#define __PLUGINS_ASP_ASPECT_CLINGO_CONTROL_MANAGER_H_
+#ifndef _PLUGINS_ASP_ASPECT_CLINGO_CONTROL_MANAGER_H_
+#define _PLUGINS_ASP_ASPECT_CLINGO_CONTROL_MANAGER_H_
 
 #include <core/utils/lockptr.h>
 
 #include <unordered_map>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ClingoAccess;
 class Logger;
 
 class ClingoControlManager
 {
-	private:
-	Logger *Log;
-	std::unordered_map<std::string, LockPtr<ClingoAccess>> Controls;
-
 	public:
 	ClingoControlManager(void);
 	virtual ~ClingoControlManager(void);
 
-	void setLogger(Logger *logger);
+	void set_logger(Logger *logger);
 
-	LockPtr<ClingoAccess> create_control(const std::string& ctrl_name, const std::string& log_component_name);
+	LockPtr<ClingoAccess> create_control(const std::string& ctrl_name,
+	                                     const std::string& log_component_name);
 	void destroy_control(const std::string& ctrl_name);
 
 	const std::unordered_map<std::string, LockPtr<ClingoAccess>>& controls(void) const;
+
+private:
+	Logger *logger_;
+	std::unordered_map<std::string, LockPtr<ClingoAccess>> controls_;
 };
+
 
 } // end namespace fawkes
 

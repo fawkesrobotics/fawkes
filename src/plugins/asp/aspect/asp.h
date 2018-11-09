@@ -4,7 +4,7 @@
  *
  *  Created: Thu Oct 20 15:49:31 2016
  *  Copyright  2016 Björn Schäpers
- *
+ *             2018 Tim Niemueller [www.niemueller.org]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_ASP_ASPECT_ASP_H_
-#define __PLUGINS_ASP_ASPECT_ASP_H_
+#ifndef _PLUGINS_ASP_ASPECT_ASP_H_
+#define _PLUGINS_ASP_ASPECT_ASP_H_
 
 #include <aspect/aspect.h>
 #include <core/utils/lockptr.h>
@@ -30,28 +30,28 @@
 #include <string>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ClingoAccess;
 
 class ASPAspect : public virtual Aspect
 {
-	private:
-	const std::string ControlName;
-	const std::string LogComponent;
+public:
+	ASPAspect(const std::string&& control_name, const std::string&& log_component = std::string());
+	virtual ~ASPAspect(void);
+
+private:
+	const std::string control_name_;
+	const std::string log_comp_;
 
 	void init_ASPAspect(const LockPtr<ClingoAccess>& clingo);
 	void finalize_ASPAspect(void);
 
 	protected:
-	LockPtr<ClingoAccess> ClingoAcc;
+	LockPtr<ClingoAccess> clingo;
 
-	public:
-	ASPAspect(const std::string&& controlName, const std::string&& logComponent = std::string());
-	virtual ~ASPAspect(void);
-
+	/** Additional access by ASPAspectIniFin
+	 * @relates ASPAspectIniFin
+	 */
 	friend class ASPAspectIniFin;
 };
 

@@ -4,7 +4,7 @@
  *
  *  Created: Thu Oct 20 15:49:31 2016
  *  Copyright  2016 Björn Schäpers
- *
+ *             2018 Tim Niemueller [www.niemueller.org]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,15 +24,12 @@
 #include <core/threading/thread_finalizer.h>
 #include <logging/logger.h>
 
-#include "asp.h"
-#include "asp_inifin.h"
-#include "clingo_access.h"
-#include "clingo_control_manager.h"
+#include <plugins/asp/aspect/asp.h>
+#include <plugins/asp/aspect/asp_inifin.h>
+#include <plugins/asp/aspect/clingo_access.h>
+#include <plugins/asp/aspect/clingo_control_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /**
  * @class ASPAspectIniFin <plugins/asp/aspect/asp_inifin.h>
@@ -40,63 +37,54 @@ namespace fawkes {
  * This initializer/finalizer will provide the ASP node handle to threads with the ASPAspect.
  * @author Björn Schäpers
  *
- * @property ASPAspectIniFin::CtrlMgr
+ * @property ASPAspectIniFin::ctrl_mgr_
  * @brief The control manager.
  */
 
-/**
- * Constructor.
- */
-ASPAspectIniFin::ASPAspectIniFin(void) : AspectIniFin("ASPAspect")
+/** Constructor. */
+ASPAspectIniFin::ASPAspectIniFin() : AspectIniFin("ASPAspect")
 {
-	return;
 }
 
-/**
- * @brief Destructor.
- */
-ASPAspectIniFin::~ASPAspectIniFin(void)
+/** Destructor. */
+ASPAspectIniFin::~ASPAspectIniFin()
 {
-	return;
 }
 
 void
 ASPAspectIniFin::init(Thread *thread)
 {
 	ASPAspect *asp_thread = dynamic_cast<ASPAspect*>(thread);
-	if ( asp_thread == nullptr )
-	{
-	throw CannotInitializeThreadException("Thread '%s' claims to have the ASPAspect, but RTTI says it has not.",
-		thread->name());
-	} //if ( asp_thread == nullptr )
+	if ( asp_thread == nullptr ) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the ASPAspect, "
+		                                      "but RTTI says it has not.",
+		                                      thread->name());
+	}
 
-	asp_thread->init_ASPAspect(CtrlMgr->create_control(asp_thread->ControlName, asp_thread->LogComponent));
-	return;
+	asp_thread->init_ASPAspect(ctrl_mgr_->create_control(asp_thread->control_name_,
+	                                                     asp_thread->log_comp_));
 }
 
 void
 ASPAspectIniFin::finalize(Thread *thread)
 {
 	ASPAspect *asp_thread = dynamic_cast<ASPAspect*>(thread);
-	if ( asp_thread == nullptr )
-	{
-	throw CannotFinalizeThreadException("Thread '%s' claims to have the ASPAspect, but RTTI says it has not.",
-		thread->name());
-	} //if ( asp_thread == nullptr )
+	if ( asp_thread == nullptr ) {
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the ASPAspect, "
+		                                    "but RTTI says it has not.",
+		                                    thread->name());
+	}
 
 	asp_thread->finalize_ASPAspect();
-	return;
 }
 
-/**
- * @brief Sets the control manager.
- * @param[in] ctrlMgr The new control manager.
+/** Sets the control manager.
+ * @param[in] ctrl_mgr The new control manager
  */
 void
-ASPAspectIniFin::setControlManager(const LockPtr<ClingoControlManager>& ctrlMgr)
+ASPAspectIniFin::set_control_manager(const LockPtr<ClingoControlManager>& ctrl_mgr)
 {
-	CtrlMgr = ctrlMgr;
-	return;
+	ctrl_mgr_ = ctrl_mgr;
 }
 
 } // end namespace fawkes

@@ -30,47 +30,43 @@ using namespace fawkes;
  *
  * @author Björn Schäpers
  *
- * @property ASPThread::ASPIniFin
- * @brief The initi-/finalizer for the ASPAspect.
+ * @property ASPThread::asp_inifin_
+ * @brief The initializer/finalizer for the ASPAspect.
  *
- * @property ASPThread::ClingoIniFin
- * @brief The initi-/finalizer for the ClingoManagerAspect.
+ * @property ASPThread::clingo_mgr_inifin_
+ * @brief The initializer/finalizer for the ClingoManagerAspect.
  *
- * @property ASPThread::CtrlMgr
+ * @property ASPThread::control_mgr_
  * @brief The clingo control manager.
  */
 
 /** Constructor. */
-ASPThread::ASPThread(void)
-  : Thread("ASPThread", Thread::OPMODE_WAITFORWAKEUP),
-	AspectProviderAspect([this](void) {
-		std::list<fawkes::AspectIniFin*> ret;
-		ret.emplace_back(&ASPIniFin);
-		ret.emplace_back(&ClingoIniFin);
-		return ret;
-	}()),
-	CtrlMgr(new ClingoControlManager)
+ASPThread::ASPThread()
+: Thread("ASPThread", Thread::OPMODE_WAITFORWAKEUP),
+  AspectProviderAspect([this]() {
+	                       std::list<fawkes::AspectIniFin*> ret;
+	                       ret.emplace_back(&asp_inifin_);
+	                       ret.emplace_back(&clingo_mgr_inifin_);
+	                       return ret;
+                       }()),
+  control_mgr_(new ClingoControlManager)
 {
-	return;
 }
 
 void
-ASPThread::init(void)
+ASPThread::init()
 {
-	CtrlMgr->setLogger(logger);
-	ASPIniFin.setControlManager(CtrlMgr);
-	ClingoIniFin.setControlManager(CtrlMgr);
-	return;
+	control_mgr_->set_logger(logger);
+	asp_inifin_.set_control_manager(control_mgr_);
+	clingo_mgr_inifin_.set_control_manager(control_mgr_);
 }
 
 void
-ASPThread::finalize(void)
+ASPThread::finalize()
 {
-	return;
 }
 
 void
-ASPThread::loop(void)
+ASPThread::loop()
 {
-	return;
 }

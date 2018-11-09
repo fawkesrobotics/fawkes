@@ -3,7 +3,7 @@
  *
  *  Created: Mon Oct 31 13:41:07 2016
  *  Copyright  2016 Björn Schäpers
- *
+ *             2018 Tim Niemueller [www.niemueller.org]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -31,62 +31,53 @@
 
 namespace fawkes {
 
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
-
-/**
- * @brief Helper class to incorporate a bool into a mutex locker and enable RAII on it.
- */
+/** Helper class to incorporate bool into mutex locker with RAII */
 class BoolMutexLocker
 {
-	private:
-	Mutex* const Mut;
-	bool& AssociatedBool;
-	const bool InitialLocked;
-
-	public:
-	BoolMutexLocker(Mutex *mutex, bool& associatedBool) : Mut(mutex),
-	                                                      AssociatedBool(associatedBool),
-	                                                      InitialLocked(associatedBool)
+public:
+	/** Constructor.
+	 * @param mutex mutex to lock
+	 * @param associated_bool associated bool value
+	 */
+	BoolMutexLocker(Mutex *mutex, bool& associated_bool)
+	: mutex_(mutex), bool_(associated_bool), initial_locked_(associated_bool)
 	{
-		if ( !InitialLocked )
-		{
-			Mut->lock();
-			AssociatedBool = true;
-		} //if ( !InitialLocked )
-		return;
+		if (!initial_locked_) {
+			mutex_->lock();
+			bool_ = true;
+		}
 	}
 
+	/** Destructor. */
 	~BoolMutexLocker(void)
 	{
-		if ( InitialLocked != AssociatedBool )
-		{
-			if ( InitialLocked )
-			{
+		if (initial_locked_ != bool_) {
+			if (initial_locked_) {
 				relock();
-			} //if ( InitialLocked )
-			else
-			{
+			} else {
 				unlock();
-			} //else -> if ( InitialLocked )
-		} //if ( InitialLocked != AssociatedBool )
-		return;
+			}
+		}
 	}
 
+	/** Unlock mutex. */
 	void unlock(void)
 	{
-		AssociatedBool = false;
-		Mut->unlock();
-		return;
+		bool_ = false;
+		mutex_->unlock();
 	}
 
+	/** Relock mutex after unlock. */
 	void relock(void)
 	{
-		Mut->lock();
-		AssociatedBool = true;
-		return;
+		mutex_->lock();
+		bool_ = true;
 	}
+
+private:
+	Mutex* const mutex_;
+	bool& bool_;
+	const bool initial_locked_;
 };
 
 /**
@@ -94,96 +85,78 @@ class BoolMutexLocker
  * @brief A wrapper around the clingo control, to control the solving process.
  * @author Björn Schäpers
  *
- * @property ClingoAccess::Log
+ * @property ClingoAccess::logger_
  * @brief The used logger.
  *
- * @property ClingoAccess::LogComponent
+ * @property ClingoAccess::log_comp_
  * @brief The log component.
  *
- * @property ClingoAccess::NumberOfThreads
+ * @property ClingoAccess::num_threads_
  * @brief How many threads Clingo should use for solving.
  *
- * @property ClingoAccess::Splitting
+ * @property ClingoAccess::thread_mode_splitting_
  * @brief Wether splitting should be used.
+ *
+ * @fn bool	ClingoAccess::assign_external(const Clingo::Symbol& atom, const bool value)
+ * @brief Assign external value.
+ * @param atom external atom
+ * @param value value to assign
+ * @return true if external was assigned, false otherwise.
+ *
+ * @fn bool	ClingoAccess::free_external(const Clingo::Symbol& atom)
+ * @brief Release external value.
+ * @param atom external atom
+ * @return true if external was released, false otherwise.
  */
 
 /**
- * @property ClingoAccess::ControlMutex
+ * @property ClingoAccess::control_mutex_
  * @brief The mutex to protect the clingo control.
  *
- * @property ClingoAccess::ControlIsLocked
- * @brief Mark if ControlMutex is locked. (Because we can not ask the mutex and need this information for blocked solving.)
+ * @property ClingoAccess::control_is_locked_
+ * @brief Mark if control_mutex_ is locked. (Because we can not ask the
+ * mutex and need this information for blocked solving.)
  *
- * @property ClingoAccess::Control
+ * @property ClingoAccess::control_
  * @brief The clingo control.
  */
 
 /**
- * @property ClingoAccess::ModelMutex
+ * @property ClingoAccess::model_mutex_
  * @brief The mutex for the model symbols.
  *
- * @property ClingoAccess::ModelSymbols
+ * @property ClingoAccess::model_symbols_
  * @brief The symbols found in the last model.
  *
- * @property ClingoAccess::OldSymbols
+ * @property ClingoAccess::old_symbols_
  * @brief The symbols found in the before last model.
  *
- * @property ClingoAccess::ModelCounter
+ * @property ClingoAccess::model_counter_
  * @brief Counts how many models we have computed for one solving process.
  */
 
 /**
- * @property ClingoAccess::Solving
+ * @property ClingoAccess::solving_
  * @brief Whether the control is in the solving process.
  *
- * @property ClingoAccess::CallbackMutex
+ * @property ClingoAccess::callback_mutex_
  * @brief The mutex to protect the callback vectors.
  *
- * @property ClingoAccess::ModelCallbacks
+ * @property ClingoAccess::model_callbacks_
  * @brief The functions to call on a new model.
  *
- * @property ClingoAccess::FinishCallbacks
+ * @property ClingoAccess::finish_callbacks_
  * @brief The functions to call, when the solving process finished.
  *
- * @property ClingoAccess::GroundCallback
+ * @property ClingoAccess::ground_callback_
  * @brief The callback for the grounding.
  *
- * @property ClingoAccess::AsyncHandle
+ * @property ClingoAccess::async_handle_
  * @brief The handle for the async solving.
- */
-
-/**
- * @enum ClingoAccess::DebugLevel_t
- * @brief An enum to define debug levels. The higher levels include the lower values.
  *
- * @var ClingoAccess::DebugLevel_t::None
- * @brief No debug output at all.
- *
- * @var ClingoAccess::DebugLevel_t::Time
- * @brief Print when starting/finishing grounding/solving for analysis.
- *
- * @var ClingoAccess::DebugLevel_t::Programs
- * @brief Print which programs are grounded.
- *
- * @var ClingoAccess::DebugLevel_t::Models
- * @brief Print new models.
- *
- * @var ClingoAccess::DebugLevel_t::Externals
- * @brief Print assignments and releases of externals.
- *
- * @var ClingoAccess::DebugLevel_t::AllModelSymbols
- * @brief Ignore #show statements and print all symbols of a model.
- *
- * @var ClingoAccess::DebugLevel_t::All
- * @brief Print everything.
- *
- * @var ClingoAccess::DebugLevel_t::EvenClingo
- * @brief Activates the --output-debug=text option for clingo. This produces ALOT of output!
- *
- * @property ClingoAccess::DebugLevel
+ * @property ClingoAccess::debug_level_
  * @brief Which debug outputs should be printed.
  */
-
 
 /**
  * @brief Extracts the symbols from the new model and calls the registered functions.
@@ -191,51 +164,46 @@ class BoolMutexLocker
  * @return If the solving process should compute more models (if there are any).
  */
 bool
-ClingoAccess::on_model(const Clingo::Model& model)
+ClingoAccess::on_model(Clingo::Model& model)
 {
-	MutexLocker locker1(&ModelMutex);
-	ModelSymbols = model.symbols(DebugLevel >= AllModelSymbols ? Clingo::ShowType::All : Clingo::ShowType::Shown);
+	MutexLocker locker1(&model_mutex_);
+	model_symbols_ = model.symbols(debug_level_ >= AllModelSymbols ? Clingo::ShowType::All : Clingo::ShowType::Shown);
 
-	if ( DebugLevel >= Time )
-	{
-		Log->log_info(LogComponent.c_str(), "New %smodel found: #%d", model.optimality_proven() ? "optimal " : "",
-			++ModelCounter);
+	if (debug_level_ >= Time)	{
+		logger_->log_info(log_comp_.c_str(), "New %smodel found: #%d",
+		                  model.optimality_proven() ? "optimal " : "",
+		                  ++model_counter_);
 
-		if ( DebugLevel >= Models )
-		{
-			/* To save (de-)allocations just move found symbols at the end of the vector and move the end iterator to
-			 * the front. After this everything in [begin, end) is in oldSymbols but not in symbols. */
-			auto begin = OldSymbols.begin(), end = OldSymbols.end();
+		if (debug_level_ >= Models)	{
+			/* To save (de-)allocations just move found symbols at the end
+			 * of the vector and move the end iterator to the front. After
+			 * this everything in [begin, end) is in oldSymbols but not in
+			 * symbols. */
+			auto begin = old_symbols_.begin(), end = old_symbols_.end();
 
-			for ( const Clingo::Symbol& symbol : ModelSymbols )
-			{
+			for (const Clingo::Symbol& symbol : model_symbols_)	{
 				auto iter = std::find(begin, end, symbol);
-				if ( iter == end )
-				{
-					Log->log_info(LogComponent.c_str(), "New Symbol: %s", symbol.to_string().c_str());
-				} //if ( iter == end )
-				else
-				{
+				if (iter == end) {
+					logger_->log_info(log_comp_.c_str(), "New Symbol: %s", symbol.to_string().c_str());
+				} else {
 					std::swap(*iter, *--end);
-				} //else -> if ( iter == end )
-			} //for ( const Clingo::Symbol& symbol : ModelSymbols )
+				}
+			}
 
-			for ( ; begin != end; ++begin )
-			{
-				Log->log_info(LogComponent.c_str(), "Symbol removed: %s", begin->to_string().c_str());
-			} //for ( ; begin != end; ++begin )
-		} //if ( DebugLevel >= Models )
-	} //if ( DebugLevel >= Time )
+			for (; begin != end; ++begin) {
+				logger_->log_info(log_comp_.c_str(), "Symbol removed: %s", begin->to_string().c_str());
+			}
+		}
+	}
 
-	OldSymbols = ModelSymbols;
+	old_symbols_ = model_symbols_;
 
 	bool ret = false;
 
-	MutexLocker locker2(&CallbackMutex);
-	for ( const auto& cb : ModelCallbacks )
-	{
+	MutexLocker locker2(&callback_mutex_);
+	for (const auto& cb : model_callbacks_) {
 		ret |= (*cb)();
-	} //for ( const auto& cb : ModelCallbacks )
+	}
 
 	return ret;
 }
@@ -245,31 +213,29 @@ ClingoAccess::on_model(const Clingo::Model& model)
  * @param[in] result The result of the solving process.
  */
 void
-ClingoAccess::on_finish(const Clingo::SolveResult result)
+ClingoAccess::on_finish(Clingo::SolveResult result)
 {
-	if ( DebugLevel >= Time )
-	{
-		Log->log_info(LogComponent.c_str(), "Solving nearly done.");
-	} //if ( DebugLevel >= Time )
+	if (debug_level_ >= Time) {
+		logger_->log_info(log_comp_.c_str(), "Solving nearly done.");
+	}
 
-	BoolMutexLocker locker1(&ControlMutex, ControlIsLocked);
-	MutexLocker locker2(&CallbackMutex);
-	for ( const auto& cb : FinishCallbacks )
-	{
+	BoolMutexLocker locker1(&control_mutex_, control_is_locked_);
+	MutexLocker locker2(&callback_mutex_);
+	for (const auto& cb : finish_callbacks_) {
 		(*cb)(result);
-	} //for ( const auto& cb : FinishCallbacks )
+	}
 
-	std::thread blockingThread([this](void)
-		{
-			AsyncHandle.wait();
-			if ( DebugLevel >= Time )
-			{
-				Log->log_info(LogComponent.c_str(), "Solving done.");
-			} //if ( DebugLevel >= Time )
-			Solving = false;
+	std::thread blocking_thread(
+	  [this](void)
+	  {
+		  async_handle_.wait();
+		  if (debug_level_ >= Time)	{
+				logger_->log_info(log_comp_.c_str(), "Solving done.");
+			}
+			solving_ = false;
 			return;
-		});
-	blockingThread.detach();
+	  });
+	blocking_thread.detach();
 	return;
 }
 
@@ -277,9 +243,9 @@ ClingoAccess::on_finish(const Clingo::SolveResult result)
  * @brief Allocates the control object and initializes the logger.
  */
 void
-ClingoAccess::allocControl()
+ClingoAccess::alloc_control()
 {
-	assert(!Control);
+	assert(!control_);
 
 	/* The arguments to Clingo::Control are given as a Span of const char*, because we need to compose some strings we
 	 * save them as std::string, so we have not to take care about memory leaks. The arguments given to Clingo are saved
@@ -288,59 +254,54 @@ ClingoAccess::allocControl()
 	std::vector<std::string> argumentsString;
 	std::vector<const char*> argumentsChar;
 
-	if ( DebugLevel >= EvenClingo )
-	{
+	if (debug_level_ >= EvenClingo) {
 		argumentsChar.push_back("--output-debug=text");
-	} //if ( DebugLevel >= EvenClingo )
+	}
 
-	if ( NumberOfThreads != 1 )
-	{
+	if (num_threads_ != 1) {
 		std::stringstream s("-t ", std::ios_base::ate | std::ios_base::out);
-		s<<NumberOfThreads<<","<<(Splitting ? "split" : "compete");
+		s<<num_threads_<<","<<(thread_mode_splitting_ ? "split" : "compete");
 		argumentsString.push_back(s.str());
 		argumentsChar.push_back(argumentsString.back().c_str());
-	} //if ( NumberOfThreads != 1 )
+	}
 
-	Control = new Clingo::Control(argumentsChar,
+	control_ = new Clingo::Control(argumentsChar,
 		[this](const Clingo::WarningCode code, char const *msg)
 		{
 			fawkes::Logger::LogLevel level = fawkes::Logger::LL_NONE;
-			switch ( code )
+			switch (code)
 			{
-				case Clingo::WarningCode::AtomUndefined      :
-				case Clingo::WarningCode::OperationUndefined :
-				case Clingo::WarningCode::RuntimeError       : level = fawkes::Logger::LL_ERROR; break;
-				case Clingo::WarningCode::Other              :
-				case Clingo::WarningCode::VariableUnbounded  : level = fawkes::Logger::LL_WARN; break;
-				case Clingo::WarningCode::FileIncluded       :
-				case Clingo::WarningCode::GlobalVariable     : level = fawkes::Logger::LL_INFO; break;
-			} //switch ( code )
-			Log->log(level, LogComponent.c_str(), msg);
+			case Clingo::WarningCode::AtomUndefined      :
+			case Clingo::WarningCode::OperationUndefined :
+			case Clingo::WarningCode::RuntimeError       : level = fawkes::Logger::LL_ERROR; break;
+			case Clingo::WarningCode::Other              :
+			case Clingo::WarningCode::VariableUnbounded  : level = fawkes::Logger::LL_WARN; break;
+			case Clingo::WarningCode::FileIncluded       :
+			case Clingo::WarningCode::GlobalVariable     : level = fawkes::Logger::LL_INFO; break;
+			}
+			logger_->log(level, log_comp_.c_str(), msg);
 			return;
 		}, 100);
 	return;
 }
 
-/**
- * @brief Constructor.
- * @param[in] log The used logger.
- * @param[in] logComponent The logging component.
+/** Constructor.
+ * @param[in] logger The used logger.
+ * @param[in] log_component The logging component.
  */
-ClingoAccess::ClingoAccess(Logger *log, const std::string& logComponent) : Log(log),
-		LogComponent(logComponent.empty() ? "Clingo" : logComponent), NumberOfThreads(1), Splitting(false),
-		ControlIsLocked(false), Control(nullptr), ModelMutex(Mutex::RECURSIVE), Solving(false), DebugLevel(None)
+ClingoAccess::ClingoAccess(Logger *logger, const std::string& log_component)
+: logger_(logger), log_comp_(log_component.empty() ? "Clingo" : log_component), debug_level_(None),
+  num_threads_(1), thread_mode_splitting_(false),
+  control_is_locked_(false), control_(nullptr),
+  model_mutex_(Mutex::RECURSIVE), solving_(false)
 {
-	allocControl();
-	return;
+	alloc_control();
 }
 
-/**
- * @brief The destructor.
- */
+/** Destructor. */
 ClingoAccess::~ClingoAccess(void)
 {
-	delete Control;
-	return;
+	delete control_;
 }
 
 /**
@@ -349,11 +310,10 @@ ClingoAccess::~ClingoAccess(void)
  * @param[in] callback The callback to register.
  */
 void
-ClingoAccess::registerModelCallback(std::shared_ptr<std::function<bool(void)>> callback)
+ClingoAccess::register_model_callback(std::shared_ptr<std::function<bool(void)>> callback)
 {
-	MutexLocker locker(&CallbackMutex);
-	ModelCallbacks.emplace_back(callback);
-	return;
+	MutexLocker locker(&callback_mutex_);
+	model_callbacks_.emplace_back(callback);
 }
 
 /**
@@ -361,11 +321,10 @@ ClingoAccess::registerModelCallback(std::shared_ptr<std::function<bool(void)>> c
  * @param[in] callback The callback to unregister.
  */
 void
-ClingoAccess::unregisterModelCallback(std::shared_ptr<std::function<bool(void)>> callback)
+ClingoAccess::unregister_model_callback(std::shared_ptr<std::function<bool(void)>> callback)
 {
-	MutexLocker locker(&CallbackMutex);
-	ModelCallbacks.erase(std::find(ModelCallbacks.begin(), ModelCallbacks.end(), callback));
-	return;
+	MutexLocker locker(&callback_mutex_);
+	model_callbacks_.erase(std::find(model_callbacks_.begin(), model_callbacks_.end(), callback));
 }
 
 /**
@@ -373,11 +332,10 @@ ClingoAccess::unregisterModelCallback(std::shared_ptr<std::function<bool(void)>>
  * @param[in] callback The callback to register.
  */
 void
-ClingoAccess::registerFinishCallback(std::shared_ptr<std::function<void(Clingo::SolveResult)>> callback)
+ClingoAccess::register_finish_callback(std::shared_ptr<std::function<void(Clingo::SolveResult)>> callback)
 {
-	MutexLocker locker(&CallbackMutex);
-	FinishCallbacks.emplace_back(callback);
-	return;
+	MutexLocker locker(&callback_mutex_);
+	finish_callbacks_.emplace_back(callback);
 }
 
 /**
@@ -385,11 +343,10 @@ ClingoAccess::registerFinishCallback(std::shared_ptr<std::function<void(Clingo::
  * @param[in] callback The callback to unregister.
  */
 void
-ClingoAccess::unregisterFinishCallback(std::shared_ptr<std::function<void(Clingo::SolveResult)>> callback)
+ClingoAccess::unregister_finish_callback(std::shared_ptr<std::function<void(Clingo::SolveResult)>> callback)
 {
-	MutexLocker locker(&CallbackMutex);
-	FinishCallbacks.erase(std::find(FinishCallbacks.begin(), FinishCallbacks.end(), callback));
-	return;
+	MutexLocker locker(&callback_mutex_);
+	finish_callbacks_.erase(std::find(finish_callbacks_.begin(), finish_callbacks_.end(), callback));
 }
 
 /**
@@ -397,20 +354,19 @@ ClingoAccess::unregisterFinishCallback(std::shared_ptr<std::function<void(Clingo
  * @param[in, out] callback The callback, will be moved.
  */
 void
-ClingoAccess::setGroundCallback(Clingo::GroundCallback&& callback)
+ClingoAccess::set_ground_callback(Clingo::GroundCallback&& callback)
 {
-	MutexLocker locker(&CallbackMutex);
-	GroundCallback = std::move(callback);
-	return;
+	MutexLocker locker(&callback_mutex_);
+	ground_callback_ = std::move(callback);
 }
 
-/**
- * @brief Returns whether the solving process is running.
+/** Returns whether the solving process is running.
+ * @return true if currently solving, false otherwise
  */
 bool
 ClingoAccess::solving(void) const noexcept
 {
-	return Solving;
+	return solving_;
 }
 
 /**
@@ -418,218 +374,197 @@ ClingoAccess::solving(void) const noexcept
  * @return If the process is started.
  */
 bool
-ClingoAccess::startSolving(void)
+ClingoAccess::start_solving(void)
 {
-	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
-	if ( Solving )
-	{
+	BoolMutexLocker locker(&control_mutex_, control_is_locked_);
+	if (solving_) {
 		return false;
-	} //if ( Solving )
+	}
+	if (debug_level_ >= Time) {
+		logger_->log_info(log_comp_.c_str(), "Start async solving.");
+	}
 
-	if ( DebugLevel >= Time )
-	{
-		Log->log_info(LogComponent.c_str(), "Start async solving.");
-	} //if ( DebugLevel >= Time )
-	Solving = true;
-	ModelMutex.lock();
-	ModelCounter = 0;
-	ModelMutex.unlock();
-	AsyncHandle = Control->solve({}, this, true, true);
+	solving_ = true;
+	model_mutex_.lock();
+	model_counter_ = 0;
+	model_mutex_.unlock();
+	async_handle_ = control_->solve(Clingo::SymbolicLiteralSpan{}, this, true, true);
 	return true;
 }
 
-/**
- * @brief Starts the solving process, if it isn't already running, in a blocking manner, that means it does not start
- *        the computation in an asynchronous way.
- * @return If the process was started.
+/** Starts the solving process.
+ * If it isn't already running, in a blocking manner, that means it
+ * does not start the computation in an asynchronous way.
+ * @return true, if the process was started
  */
 bool
-ClingoAccess::startSolvingBlocking(void)
+ClingoAccess::start_solving_blocking(void)
 {
-	if ( Solving )
-	{
+	if (solving_) {
 		return false;
-	} //if ( Solving )
+	}
 
-	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
-	if ( DebugLevel >= Time )
-	{
-		Log->log_info(LogComponent.c_str(), "Start sync solving.");
-	} //if ( DebugLevel >= Time )
-	Solving = true;
-	ModelMutex.lock();
-	ModelCounter = 0;
-	ModelMutex.unlock();
-	Control->solve({}, this, false, true);
+	BoolMutexLocker locker(&control_mutex_, control_is_locked_);
+	if (debug_level_ >= Time) {
+		logger_->log_info(log_comp_.c_str(), "Start sync solving.");
+	}
+
+	solving_ = true;
+	model_mutex_.lock();
+	model_counter_ = 0;
+	model_mutex_.unlock();
+	control_->solve(Clingo::SymbolicLiteralSpan{}, this, false, true);
 	return true;
 }
 
-/**
- * @brief Stops the solving process, if it is running.
+/** Stops the solving process, if it is running.
  * @return If it was stopped. (Check solving() for actual state!)
  */
 bool
-ClingoAccess::cancelSolving(void)
+ClingoAccess::cancel_solving(void)
 {
-	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
-	if ( !Solving )
-	{
+	BoolMutexLocker locker(&control_mutex_, control_is_locked_);
+	if (!solving_) {
 		return false;
-	} //if ( !Solving )
+	}
 
-	if ( DebugLevel >= Time )
-	{
-		Log->log_info(LogComponent.c_str(), "Cancel solving.");
-	} //if ( DebugLevel >= Time )
+	if (debug_level_ >= Time) {
+		logger_->log_info(log_comp_.c_str(), "Cancel solving.");
+	}
 
-	Control->interrupt();
+	control_->interrupt();
 	return true;
 }
 
-/**
- * @brief Tries to reset Clingo, that means deletes the control object and creates a new one.
- * @return If it was an success.
+/** Tries to reset Clingo.
+ * That means deletes the control object and creates a new one.
+ * @return true, if successful
  */
 bool
 ClingoAccess::reset(void)
 {
-	if ( Solving )
-	{
-		Log->log_warn(LogComponent.c_str(),
-			"Could not reset while solving. Please try again when the solving is stopped.");
-		cancelSolving();
+	if (solving_) {
+		logger_->log_warn(log_comp_.c_str(),
+		                  "Could not reset while solving. "
+		                  "Please try again when the solving is stopped.");
+		cancel_solving();
 		return false;
-	} //if ( Solving )
-	Log->log_warn(LogComponent.c_str(), "Clingo will be resetted.");
-	delete Control;
-	Control = nullptr;
-	allocControl();
+	}
+	logger_->log_warn(log_comp_.c_str(), "Resetting Clingo");
+	delete control_;
+	control_ = nullptr;
+	alloc_control();
 	return true;
 }
 
-/**
- * @brief Sets the number of threads Clingo should use.
+/** Sets the number of threads Clingo should use.
  * @param[in] threads The number.
- * @param[in] useSPlitting Wether splitting should be used.
+ * @param[in] thread_mode_splitting Wether splitting should be used.
  * @warning This will call reset().
  * @exception Exception If it is called while solving.
  * @exception Exception If it is called with @c threads < 1.
  */
 void
-ClingoAccess::setNumberOfThreads(const int threads, const bool useSplitting)
+ClingoAccess::set_num_threads(const int threads, const bool thread_mode_splitting)
 {
-	if ( Solving )
-	{
+	if (solving_) {
 		throw Exception("Tried to set the number of threads while Clingo was solving.");
-	} //if ( Solving )
-	if ( threads < 1 )
-	{
+	}
+	if (threads < 1) {
 		throw Exception("Tried to set thread count to %d, only values >= 1 are valid.", threads);
-	} //if ( threads < 1 )
-	Log->log_info(LogComponent.c_str(), "Change # of threads for solving from %d to %d and splitting from %s to %s.",
-		NumberOfThreads, threads, Splitting ? "true" : "false", useSplitting ? "true" : "false");
-	NumberOfThreads = threads;
-	Splitting = useSplitting;
+	}
+	logger_->log_info(log_comp_.c_str(), "Change # of threads for solving from %d to %d "
+	                                     "and splitting from %s to %s.",
+	                  num_threads_, threads,
+	                  thread_mode_splitting_ ? "true" : "false",
+	                  thread_mode_splitting ? "true" : "false");
+	num_threads_ = threads;
+	thread_mode_splitting_ = thread_mode_splitting;
 	reset();
 	return;
 }
 
-/**
- * @brief Returns how many threads Clingo should use.
- * @return @link ClingoAccess::NumberOfThreads NumberOfThreads @endlink
+/** Returns how many threads Clingo should use.
+ * @return number of threads
+ * @see ClingoAccess::num_threads_
  */
 int
-ClingoAccess::numberOfThreads(void) const noexcept
+ClingoAccess::num_threads(void) const noexcept
 {
-	return NumberOfThreads;
+	return num_threads_;
 }
 
-/**
- * @brief Returns a copy of the last symbols found.
+/** Returns a copy of the last symbols found.
+ * @return copy of last symbols found
  */
 Clingo::SymbolVector
-ClingoAccess::modelSymbols(void) const
+ClingoAccess::model_symbols(void) const
 {
-	MutexLocker locker(&ModelMutex);
-	return ModelSymbols;
+	MutexLocker locker(&model_mutex_);
+	return model_symbols_;
 }
 
-/**
- * @brief Loads a file in the solver.
+/** Loads a file in the solver.
  * @param[in] path The path of the file.
- * @return If the file was loaded.
+ * @return true, if file was loaded
  */
 bool
-ClingoAccess::loadFile(const std::string& path)
+ClingoAccess::load_file(const std::string& path)
 {
-	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
-	if ( Solving )
-	{
+	BoolMutexLocker locker(&control_mutex_, control_is_locked_);
+	if (solving_) {
 		return false;
-	} //if ( Solving )
+	}
 
-	Log->log_info(LogComponent.c_str(), "Loading file program file %s.", path.c_str());
-	Control->load(path.c_str());
+	logger_->log_info(log_comp_.c_str(), "Loading file program file %s.", path.c_str());
+	control_->load(path.c_str());
 	return true;
 }
 
-/**
- * @brief Grounds a program part.
+/** Grounds a program part.
  * @param[in] parts The parts to ground.
- * @return If the parts could be grounded.
+ * @return true if parts could be grounded
  */
 bool
 ClingoAccess::ground(const Clingo::PartSpan& parts)
 {
-	if ( parts.empty() )
-	{
+	if (parts.empty()) {
 		return true;
-	} //if ( parts.empty() )
+	}
 
-	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
-	if ( Solving )
-	{
+	BoolMutexLocker locker(&control_mutex_, control_is_locked_);
+	if (solving_) {
 		return false;
-	} //if ( Solving )
-
-	if ( DebugLevel >= Time )
-	{
-		Log->log_info(LogComponent.c_str(), "Grounding %zu parts:", parts.size());
-		if ( DebugLevel >= Programs )
-		{
+	}
+	if (debug_level_ >= Time) {
+		logger_->log_info(log_comp_.c_str(), "Grounding %zu parts:", parts.size());
+		if (debug_level_ >= Programs)	{
 			auto i = 0;
-			for ( const Clingo::Part& part : parts )
-			{
+			for (const Clingo::Part& part : parts) {
 				std::string params;
 				bool first = true;
-				for ( const auto& param : part.params() )
-				{
-					if ( first )
-					{
+				for (const auto& param : part.params()) {
+					if (first) {
 						first = false;
-					} //if ( first )
-					else
-					{
+					} else {
 						params += ", ";
-					} //else -> if ( first )
+					}
 					params += param.to_string();
-				} //for ( const auto& param : part.params() )
-				Log->log_info(LogComponent.c_str(), "Part #%d: %s [%s]", ++i, part.name(), params.c_str());
-			} //for ( const auto& part : parts )
-		} //if ( DebugLevel >= Programs )
-	} //if ( DebugLevel >= Time )
+				}
+				logger_->log_info(log_comp_.c_str(), "Part #%d: %s [%s]", ++i, part.name(), params.c_str());
+			}
+		}
+	}
 
-	Control->ground(parts, GroundCallback);
+	control_->ground(parts, ground_callback_);
 
-	if ( DebugLevel >= Time )
-	{
-		Log->log_info(LogComponent.c_str(), "Grounding done.");
-	} //if ( DebugLevel >= Time )
+	if (debug_level_ >= Time) {
+		logger_->log_info(log_comp_.c_str(), "Grounding done.");
+	}
 	return true;
 }
 
-/**
- * @brief Assigns an external value.
+/** Assigns an external value.
  * @param[in] atom The atom to assign.
  * @param[in] value The assigned value.
  * @return If it could be assigned.
@@ -637,49 +572,45 @@ ClingoAccess::ground(const Clingo::PartSpan& parts)
 bool
 ClingoAccess::assign_external(const Clingo::Symbol& atom, const Clingo::TruthValue value)
 {
-	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
-	if ( Solving )
-	{
+	BoolMutexLocker locker(&control_mutex_, control_is_locked_);
+	if (solving_) {
 		return false;
-	} //if ( Solving )
+	}
 
-	if ( DebugLevel >= Externals )
-	{
-		Log->log_info(LogComponent.c_str(), "Assigning %s to %s.", [value](void)
-			{
-				const char *ret = "Unknown Value";
-				switch ( value )
-				{
-					case Clingo::TruthValue::Free  : ret = "Free";  break;
-					case Clingo::TruthValue::True  : ret = "True";  break;
-					case Clingo::TruthValue::False : ret = "False"; break;
-				} //switch ( value )
-				return ret;
-			}(), atom.to_string().c_str());
-	} //if ( DebugLevel >= Externals )
-	Control->assign_external(atom, value);
+	if (debug_level_ >= Externals) {
+		logger_->log_info(log_comp_.c_str(), "Assigning %s to %s.",
+		                  [value](void)
+		                  {
+			                  const char *ret = "Unknown Value";
+			                  switch (value)
+			                  {
+			                  case Clingo::TruthValue::Free  : ret = "Free";  break;
+			                  case Clingo::TruthValue::True  : ret = "True";  break;
+			                  case Clingo::TruthValue::False : ret = "False"; break;
+			                  }
+			                  return ret;
+		                  }(), atom.to_string().c_str());
+	}
+	control_->assign_external(atom, value);
 	return true;
 }
 
-/**
- * @brief Releases an external value.
+/** Releases an external value.
  * @param[in] atom The atom to release.
- * @return If it could be released.
+ * @return true, if it could be released
  */
 bool
 ClingoAccess::release_external(const Clingo::Symbol& atom)
 {
-	BoolMutexLocker locker(&ControlMutex, ControlIsLocked);
-	if ( Solving )
-	{
+	BoolMutexLocker locker(&control_mutex_, control_is_locked_);
+	if (solving_) {
 		return false;
-	} //if ( Solving )
+	}
 
-	if ( DebugLevel >= Externals )
-	{
-		Log->log_info(LogComponent.c_str(), "Releasing %s.", atom.to_string().c_str());
-	} //if ( DebugLevel >= Externals )
-	Control->release_external(atom);
+	if (debug_level_ >= Externals) {
+		logger_->log_info(log_comp_.c_str(), "Releasing %s.", atom.to_string().c_str());
+	}
+	control_->release_external(atom);
 	return true;
 }
 

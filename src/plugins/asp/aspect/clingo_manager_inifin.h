@@ -3,7 +3,7 @@
  *
  *  Created: Sat Oct 29 11:30:07 2016
  *  Copyright  2016 Björn Schäpers
- *
+ *             2018 Tim Niemueller [www.niemueller.org]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -27,17 +27,11 @@
 #include <core/utils/lockptr.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ClingoControlManager;
 
 class ClingoManagerAspectIniFin : public AspectIniFin
 {
-	private:
-	LockPtr<ClingoControlManager> ClingoCtrlMgr;
-
 	public:
 	ClingoManagerAspectIniFin(void);
 	~ClingoManagerAspectIniFin(void);
@@ -45,7 +39,10 @@ class ClingoManagerAspectIniFin : public AspectIniFin
 	void init(Thread *thread) override;
 	void finalize(Thread *thread) override;
 
-	void setControlManager(LockPtr<ClingoControlManager>& clingoCtrlMgr);
+	void set_control_manager(LockPtr<ClingoControlManager>& clingo_ctrl_mgr);
+
+private:
+	LockPtr<ClingoControlManager> clingo_ctrl_mgr_;
 };
 
 } // end namespace fawkes

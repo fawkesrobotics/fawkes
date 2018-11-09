@@ -3,7 +3,7 @@
  *
  *  Created: Sat Oct 29 11:30:07 2016
  *  Copyright  2016 Björn Schäpers
- *
+ *             2018 Tim Niemueller [www.niemueller.org]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,72 +20,62 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "clingo_manager.h"
-#include "clingo_manager_inifin.h"
+#include <plugins/asp/aspect/clingo_manager.h>
+#include <plugins/asp/aspect/clingo_manager_inifin.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /**
  * @class ClingoManagerAspectIniFin <plugins/asp/aspect/clingo_manager_inifin.h>
  * ClingoManagerAspect initializer/finalizer.
  * @author Björn Schäpers
  *
- * @property ClingoManagerAspectIniFin::ClingoCtrlMgr
+ * @property ClingoManagerAspectIniFin::clingo_ctrl_mgr_
  * @brief The Clingo control manager.
  */
 
 /** Constructor. */
-ClingoManagerAspectIniFin::ClingoManagerAspectIniFin(void) : AspectIniFin("ClingoManagerAspect")
+ClingoManagerAspectIniFin::ClingoManagerAspectIniFin(void)
+: AspectIniFin("ClingoManagerAspect")
 {
-	return;
 }
 
 /** Destructor. */
 ClingoManagerAspectIniFin::~ClingoManagerAspectIniFin(void)
 {
-	return;
 }
 
 void
 ClingoManagerAspectIniFin::init(Thread *thread)
 {
 	auto clingo_thread = dynamic_cast<ClingoManagerAspect *>(thread);
-	if ( clingo_thread == nullptr )
-	{
-		throw CannotInitializeThreadException(
-			"Thread '%s' claims to have the ClingoManagerAspect, but RTTI says it has not. ", thread->name());
-	} //if ( clingo_thread == nullptr )
+	if ( clingo_thread == nullptr ) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the ClingoManagerAspect, "
+		                                      "but RTTI says it has not. ", thread->name());
+	}
 
-	clingo_thread->ClingoCtrlMgr = ClingoCtrlMgr;
-	return;
+	clingo_thread->init_ClingoManagerAspect(clingo_ctrl_mgr_);
 }
 
 void
 ClingoManagerAspectIniFin::finalize(Thread *thread)
 {
 	auto clingo_thread = dynamic_cast<ClingoManagerAspect *>(thread);
-	if ( clingo_thread == nullptr )
-	{
-		throw CannotFinalizeThreadException(
-			"Thread '%s' claims to have the ClingoManagerAspect, but RTTI says it has not. ", thread->name());
-	} //if ( clingo_thread == nullptr )
+	if ( clingo_thread == nullptr )	{
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the ClingoManagerAspect, "
+		                                    "but RTTI says it has not. ", thread->name());
+	}
 
-	clingo_thread->ClingoCtrlMgr.clear();
-	return;
+	clingo_thread->finalize_ClingoManagerAspect();
 }
 
-/**
- * Set Clingo control manger.
- * @param[in] clingoCtrlMgr Clingo control manager
+/** Set Clingo control manger.
+ * @param[in] clingo_ctrl_mgr Clingo control manager
  */
 void
-ClingoManagerAspectIniFin::setControlManager(LockPtr<ClingoControlManager>& clingoCtrlMgr)
+ClingoManagerAspectIniFin::set_control_manager(LockPtr<ClingoControlManager>& clingo_ctrl_mgr)
 {
-	ClingoCtrlMgr = clingoCtrlMgr;
-	return;
+	clingo_ctrl_mgr_ = clingo_ctrl_mgr;
 }
 
 } // end namespace fawkes

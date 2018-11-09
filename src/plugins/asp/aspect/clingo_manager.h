@@ -3,7 +3,7 @@
  *
  *  Created: Sat Oct 29 11:30:07 2016
  *  Copyright  2016 Björn Schäpers
- *
+ *             2018 Tim Niemueller [www.niemueller.org]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,29 +20,27 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_ASP_ASPECT_CLINGO_MANAGER_H_
-#define __PLUGINS_ASP_ASPECT_CLINGO_MANAGER_H_
+#ifndef _PLUGINS_ASP_ASPECT_CLINGO_MANAGER_H_
+#define _PLUGINS_ASP_ASPECT_CLINGO_MANAGER_H_
 
 #include <aspect/aspect.h>
 #include <core/utils/lockptr.h>
 
-#include "clingo_control_manager.h"
+#include <plugins/asp/aspect/clingo_control_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ClingoManagerAspect : public virtual Aspect
 {
-	protected:
-	LockPtr<ClingoControlManager> ClingoCtrlMgr;
-
-	public:
+public:
 	ClingoManagerAspect(void);
 	virtual ~ClingoManagerAspect(void);
 
-	friend class ClingoManagerAspectIniFin;
+	void init_ClingoManagerAspect(const LockPtr<ClingoControlManager>& clingo_ctrl_mgr);
+	void finalize_ClingoManagerAspect(void);
+
+protected:
+	LockPtr<ClingoControlManager> clingo_ctrl_mgr;
 };
 
 } // end namespace fawkes

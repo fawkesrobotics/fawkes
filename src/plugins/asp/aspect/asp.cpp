@@ -4,7 +4,7 @@
  *
  *  Created: Thu Oct 20 15:49:31 2016
  *  Copyright  2016 Björn Schäpers
- *
+ *             2018 Tim Niemueller [www.niemueller.org]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,13 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "asp.h"
-#include "clingo_access.h"
+#include <plugins/asp/aspect/asp.h>
+#include <plugins/asp/aspect/clingo_access.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ASPAspect <plugins/asp/aspect/asp.h>
  * Thread aspect to get access to an ASP solver.
@@ -36,33 +33,30 @@ namespace fawkes {
  * @ingroup Aspects
  * @author Björn Schäpers
  *
- * @property ASPAspect::ControlName
+ * @property ASPAspect::control_name_
  * @brief The name for the control in the manager.
  *
- * @property ASPAspect::LogComponent
+ * @property ASPAspect::log_comp_
  * @brief The component for the logger.
  *
- * @property ASPAspect::ClingoAcc
+ * @property ASPAspect::clingo
  * @brief Clingo Control for exclusive usage.
  */
 
 
-/**
- * Constructor.
- * @param[in] controlName The desired control name.
- * @param[in] logComponent The component for the logger.
+/** Constructor.
+ * @param[in] control_name The desired control name.
+ * @param[in] log_component The component for the logger.
  */
-ASPAspect::ASPAspect(const std::string&& controlName, const std::string&& logComponent) :
-	ControlName(std::move(controlName)), LogComponent(std::move(logComponent))
+ASPAspect::ASPAspect(const std::string&& control_name, const std::string&& log_component)
+: control_name_(std::move(control_name)), log_comp_(std::move(log_component))
 {
 	add_aspect("ASPAspect");
-	return;
 }
 
 /** Virtual empty destructor. */
 ASPAspect::~ASPAspect(void)
 {
-	return;
 }
 
 
@@ -74,8 +68,7 @@ ASPAspect::~ASPAspect(void)
 void
 ASPAspect::init_ASPAspect(const LockPtr<ClingoAccess>& clingo)
 {
-	ClingoAcc = clingo;
-	return;
+	this->clingo = clingo;
 }
 
 /** Finalize ASP aspect.
@@ -84,8 +77,7 @@ ASPAspect::init_ASPAspect(const LockPtr<ClingoAccess>& clingo)
 void
 ASPAspect::finalize_ASPAspect(void)
 {
-	ClingoAcc.clear();
-	return;
+	clingo.clear();
 }
 
 } // end namespace fawkes

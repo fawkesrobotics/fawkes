@@ -38,7 +38,6 @@ class ASPPlugin : public fawkes::Plugin
 	ASPPlugin(Configuration *config) : Plugin(config)
 	{
 		thread_list.push_back(new ASPThread());
-		return;
 	}
 };
 

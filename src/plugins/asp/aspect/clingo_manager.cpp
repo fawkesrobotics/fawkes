@@ -3,7 +3,7 @@
  *
  *  Created: Sat Oct 29 11:30:07 2016
  *  Copyright  2016 Björn Schäpers
- *
+ *             2018 Tim Niemueller [www.niemueller.org]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -20,12 +20,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "clingo_manager.h"
+#include <plugins/asp/aspect/clingo_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ClingoManagerAspect <plugins/asp/aspect/clingo_manager.h>
  * Thread aspect to access the Clingo Control manager.
@@ -37,7 +34,7 @@ namespace fawkes {
  * @ingroup Aspects
  * @author Björn Schäpers
  *
- * @property ClingoManagerAspect::ClingoCtrlMgr
+ * @property ClingoManagerAspect::clingo_ctrl_mgr
  * The Clingo control manager.
  */
 
@@ -45,13 +42,30 @@ namespace fawkes {
 ClingoManagerAspect::ClingoManagerAspect(void)
 {
 	add_aspect("ClingoManagerAspect");
-	return;
 }
 
 /** Virtual empty destructor. */
 ClingoManagerAspect::~ClingoManagerAspect(void)
 {
-	return;
+}
+
+/** Init ClingoManagerAspect.
+ * This sets the Clingo Control Manager.
+ * @param[in] clingo_ctrl_mgr The Clingo Control Manager
+ */
+void
+ClingoManagerAspect::init_ClingoManagerAspect(const LockPtr<ClingoControlManager>& clingo_ctrl_mgr)
+{
+	this->clingo_ctrl_mgr = clingo_ctrl_mgr;
+}
+
+/** Finalize ASP aspect.
+ * This clears the Clingo Control.
+ */
+void
+ClingoManagerAspect::finalize_ClingoManagerAspect(void)
+{
+	clingo_ctrl_mgr.clear();
 }
 
 } // end namespace fawkes

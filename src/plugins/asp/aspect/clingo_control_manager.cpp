@@ -3,6 +3,7 @@
  *
  *  Created: Thu Oct 27 16:23:32 2016
  *  Copyright  2016  Björn Schäpers
+ *             2018  Tim Niemueller [www.niemueller.org]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -19,66 +20,59 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include "clingo_access.h"
-#include "clingo_control_manager.h"
+#include <plugins/asp/aspect/clingo_access.h>
+#include <plugins/asp/aspect/clingo_control_manager.h>
 
 #include <core/exception.h>
 #include <logging/logger.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
-/**
- * @class ClingoControlManager <plugins/asp/aspect/clingo_control_manager.h>
- * The Clingo Control Manager creates and maintains Clingo Controls..
+/** @class ClingoControlManager <plugins/asp/aspect/clingo_control_manager.h>
+ * The Clingo Control Manager creates and maintains Clingo Controls.
  * @author Björn Schäpers
  */
 
-/**
- * Constructor.
- */
-ClingoControlManager::ClingoControlManager(void) : Log(nullptr)
+/** Constructor. */
+ClingoControlManager::ClingoControlManager(void)
+: logger_(nullptr)
 {
-	return;
 }
 
 /** Destructor. */
 ClingoControlManager::~ClingoControlManager(void)
 {
-	return;
 }
 
 /**
  * @brief Sets the logger for all Clingo Controls.
  * @param[in] logger The logger.
  */
-void ClingoControlManager::setLogger(Logger *logger)
+void ClingoControlManager::set_logger(Logger *logger)
 {
-	Log = logger;
-	return;
+	logger_ = logger;
 }
 
-/**
- * Create a new control. The control is registered internally under the specified name.
- * It must be destroyed when done with it. Only a single control can be created for a particular control name.
+/** Create a new control.
+ * The control is registered internally under the specified name.  It
+ * must be destroyed when done with it. Only a single control can be
+ * created for a particular control name.
  * @param[in] ctrl_name The Name by which to register the control.
  * @param[in] log_component_name The Prefix for log entries. If empty it will be set to "Clingo".
  * @return A new plain Clingo Control.
  */
-LockPtr<ClingoAccess> ClingoControlManager::create_control(const std::string& ctrl_name,
-		const std::string& log_component_name)
+LockPtr<ClingoAccess>
+ClingoControlManager::create_control(const std::string& ctrl_name,
+                                     const std::string& log_component_name)
 {
-	if ( Controls.count(ctrl_name) != 0 )
-	{
+	if ( controls_.count(ctrl_name) != 0 ) {
 		throw Exception("Clingo Control '%s' already exists!", ctrl_name.c_str());
-	} //if ( Controls.count(ctrl_name) != 0 )
+	}
 
 	Clingo::SymbolSpan s;
-	LockPtr<ClingoAccess> ctrl(new ClingoAccess(Log, log_component_name));
+	LockPtr<ClingoAccess> ctrl(new ClingoAccess(logger_, log_component_name));
 
-	Controls.emplace(ctrl_name, ctrl);
+	controls_.emplace(ctrl_name, ctrl);
 
 	return ctrl;
 }
@@ -91,7 +85,7 @@ LockPtr<ClingoAccess> ClingoControlManager::create_control(const std::string& ct
 void
 ClingoControlManager::destroy_control(const std::string& ctrl_name)
 {
-	Controls.erase(ctrl_name);
+	controls_.erase(ctrl_name);
 	return;
 }
 
@@ -102,7 +96,7 @@ ClingoControlManager::destroy_control(const std::string& ctrl_name)
 const std::unordered_map<std::string, LockPtr<ClingoAccess>>&
 ClingoControlManager::controls(void) const
 {
-	return Controls;
+	return controls_;
 }
 
 } // end namespace fawkes

@@ -4,7 +4,7 @@
  *
  *  Created: Thu Oct 20 15:49:31 2016
  *  Copyright  2016 Björn Schäpers
- *
+ *             2018 Tim Niemueller [www.niemueller.org]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -21,35 +21,32 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_ASP_ASPECT_ASP_INIFIN_H_
-#define __PLUGINS_ASP_ASPECT_ASP_INIFIN_H_
+#ifndef _PLUGINS_ASP_ASPECT_ASP_INIFIN_H_
+#define _PLUGINS_ASP_ASPECT_ASP_INIFIN_H_
 
 #include <aspect/inifins/inifin.h>
 #include <core/utils/lockptr.h>
 
-#include "asp.h"
+#include <plugins/asp/aspect/asp.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ClingoControlManager;
 class Logger;
 
 class ASPAspectIniFin : public AspectIniFin
 {
-	private:
-	LockPtr<ClingoControlManager> CtrlMgr;
-
-	public:
+public:
 	ASPAspectIniFin(void);
 	~ASPAspectIniFin(void);
 
 	void init(Thread *thread) override;
 	void finalize(Thread *thread) override;
 
-	void setControlManager(const LockPtr<ClingoControlManager>& ctrlMgr);
+	void set_control_manager(const LockPtr<ClingoControlManager>& ctrl_mgr);
+
+private:
+	LockPtr<ClingoControlManager> ctrl_mgr_;
 };
 
 } // end namespace fawkes
