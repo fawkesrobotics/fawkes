@@ -1,0 +1,9 @@
+  - label: ":angular: Webview"
+    command: .buildkite/build-webview-frontend
+    plugins:
+      <<: *merged-pr-plugin
+      docker#v2.0.0:
+        <<: *docker-plugin-base
+        volumes:
+          - .:/workdir
+          - /var/lib/buildkite-agent/npm_cacache:/home/builder/.npm/_cacache

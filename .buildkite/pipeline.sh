@@ -38,3 +38,18 @@ set -o pipefail
 
 # Output basic pipeline
 cat $SCRIPT_PATH/pipeline.yml
+
+
+# Build webview, if master or webview branch, or webview files modified
+BUILD_WEBVIEW=
+if [[ ${BUILDKITE_BRANCH:-master} =~ ^(master|.*webview.*)$ ]]; then
+	BUILD_WEBVIEW=1
+fi
+
+if [[ ":$AFFECTED_FILES:" == *":src/plugins/webview/frontend/"*:* ]]; then
+	BUILD_WEBVIEW=1
+fi
+
+if [ -n "$BUILD_WEBVIEW" ]; then
+	cat $SCRIPT_PATH/step-webview.yml
+fi
