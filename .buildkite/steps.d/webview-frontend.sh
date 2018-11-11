@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ############################################################################
-#  Generate build pipeline with conditional steps
+#  Conditional webview frontend build step
 #
-#  Created: Sat Nov 10 21:14:44 2018 +0100
+#  Created: Sun Nov 11 21:49:35 2018 +0100
 #  Copyright  2018  Tim Niemueller [www.niemueller.org]
 ############################################################################
 
@@ -20,29 +20,20 @@
 #  Read the full text in the LICENSE.GPL file in the doc directory.
 
 # Error out on an error in the script
-set -eu
+set -euo pipefail
 
 SCRIPT_PATH=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
-# We need to update the master to determine the merge base
-# For now, trust the post-checkout hook to have done this.
-# git fetch origin master
+# Build webview, if master or webview branch, or webview files modified
+BUILD_WEBVIEW=
+if [[ ${BUILDKITE_BRANCH:-master} =~ ^(master|.*webview.*)$ ]]; then
+	BUILD_WEBVIEW=1
+fi
 
-MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "origin/master") | head -1)
+if [[ ":$AFFECTED_FILES:" == *":src/plugins/webview/frontend/"*:* ]]; then
+	BUILD_WEBVIEW=1
+fi
 
-AFFECTED_FILES=$(git diff --name-only $MERGE_BASE HEAD | paste -sd ":" -)
-
-# Enable pipe errors, cannot enable earlier due to "head -1" above
-set -o pipefail
-
-
-# Output basic pipeline
-cat $SCRIPT_PATH/pipeline.yml
-
-
-# Execute conditional steps, pass along env vars
-export MERGE_BASE
-export AFFECTED_FILES
-for f in $SCRIPT_PATH/steps.d/*.sh; do
-	$f
-done
+if [ -n "$BUILD_WEBVIEW" ]; then
+	cat $SCRIPT_PATH/webview-frontend.yml
+fi
