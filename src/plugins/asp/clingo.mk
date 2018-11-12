@@ -16,24 +16,27 @@
 ifneq ($(CLINGO_DIR),)
   ifneq ($(wildcard $(CLINGO_DIR)/build/bin/libclingo.so),)
     ifneq ($(wildcard $(CLINGO_DIR)/libclingo/clingo/clingocontrol.hh),)
-      HAVE_CLINGO=1
-		else
+      HAVE_CLINGO    = 1
+      CFLAGS_CLINGO  = -DHAVE_CLINGO -DWITH_THREADS=1 \
+        -I$(CLINGO_DIR)/libclasp \
+        -I$(CLINGO_DIR)/libclingo \
+        -I$(CLINGO_DIR)/libgringo \
+        -I$(CLINGO_DIR)/liblp \
+        -I$(CLINGO_DIR)/libprogram_opts
+      LDFLAGS_CLINGO = -L$(CLINGO_DIR)/build/bin/ -Wl,-rpath=$(CLINGO_DIR)/build/bin/ -lclingo
+    else
 			CLINGO_ERROR=Clingo not found
     endif
-	else
+  else
 		CLINGO_ERROR=Clingo lib not found
   endif
 else
-  CLINGO_ERROR=CLINGO_DIR not set
-endif
-
-ifeq ($(HAVE_CLINGO),1)
-	CFLAGS_CLINGO = -DWITH_THREADS=1 \
-		-I $(CLINGO_DIR)/libclasp \
-		-I $(CLINGO_DIR)/libclingo \
-		-I $(CLINGO_DIR)/libgringo \
-		-I $(CLINGO_DIR)/liblp \
-		-I $(CLINGO_DIR)/libprogram_opts
-	LDFLAGS_CLINGO = -L$(CLINGO_DIR)/build/bin/ -Wl,-rpath=$(CLINGO_DIR)/build/bin/ -lclingo
+  ifneq ($(wildcard $(SYSROOT)/usr/include/clingo.hh),)
+    HAVE_CLINGO    = 1
+    CFLAGS_CLINGO  = -DHAVE_CLINGO -DWITH_THREADS=1
+    LDFLAGS_CLINGO = -lclingo
+  else
+    CLINGO_ERROR=Clingo not found and CLINGO_DIR not set
+  endif
 endif
 
