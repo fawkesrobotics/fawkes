@@ -17,8 +17,8 @@ AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: AllDefinitions
 AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: true
-BinPackArguments: true
-BinPackParameters: true
+BinPackArguments: false
+BinPackParameters: false
 BraceWrapping:
   AfterClass:            true
   AfterControlStatement: false
@@ -46,7 +46,7 @@ BreakStringLiterals: true
 ColumnLimit: 100
 CommentPragmas: ''
 CompactNamespaces: false
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 0
 Cpp11BracedListStyle: true
 ContinuationIndentWidth: 2
