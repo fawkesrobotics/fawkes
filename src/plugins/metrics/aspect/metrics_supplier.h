@@ -19,16 +19,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_METRICS_ASPECT_METRICS_SUPPLIER_H_
-#define __PLUGINS_METRICS_ASPECT_METRICS_SUPPLIER_H_
+#ifndef _PLUGINS_METRICS_ASPECT_METRICS_SUPPLIER_H_
+#define _PLUGINS_METRICS_ASPECT_METRICS_SUPPLIER_H_
 
 #include <plugins/metrics/protobuf/metrics.pb.h>
 #include <list>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class MetricsSupplier
 {

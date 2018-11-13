@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTER_FILTERS_CIRCLE_SECTOR_H_
-#define __PLUGINS_LASER_FILTER_FILTERS_CIRCLE_SECTOR_H_
+#ifndef _PLUGINS_LASER_FILTER_FILTERS_CIRCLE_SECTOR_H_
+#define _PLUGINS_LASER_FILTER_FILTERS_CIRCLE_SECTOR_H_
 
 #include "filter.h"
 
@@ -35,8 +35,8 @@ class LaserCircleSectorDataFilter : public LaserDataFilter
   void filter();
 
  private:
-  unsigned int __from;
-  unsigned int __to;
+  unsigned int from_;
+  unsigned int to_;
 };
 
 #endif

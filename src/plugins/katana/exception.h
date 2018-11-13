@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_EXCEPTION_H_
-#define __PLUGINS_KATANA_EXCEPTION_H_
+#ifndef _PLUGINS_KATANA_EXCEPTION_H_
+#define _PLUGINS_KATANA_EXCEPTION_H_
 
 #include <core/exception.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class KatanaNoSolutionException : public Exception {
  public:

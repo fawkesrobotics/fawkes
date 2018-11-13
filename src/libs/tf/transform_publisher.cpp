@@ -59,10 +59,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** @class TransformPublisher <tf/transform_publisher.h>
  * Utility class to send transforms.

@@ -25,9 +25,6 @@
 #include <algorithm>
 
 namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphTimedReservationListNodeConstraint <navgraph/constraints/timed_reservation_list_node_constraint.h>
  * Constraint that holds a list of nodes to block with timeouts.

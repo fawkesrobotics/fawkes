@@ -38,9 +38,6 @@
 #endif
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /// @cond QA
 class PluginLoader::Data
@@ -62,7 +59,7 @@ class PluginLoader::Data
  * @param message message of exception
  */
 PluginLoadException::PluginLoadException(const char *plugin, const char *message)
-  : Exception(), __plugin_name(plugin)
+  : Exception(), plugin_name_(plugin)
 {
   append("Plugin '%s' could not be loaded: %s", plugin, message);
 }
@@ -80,7 +77,7 @@ PluginLoadException::~PluginLoadException() throw()
  */
 PluginLoadException::PluginLoadException(const char *plugin, const char *message,
 					 Exception &e)
-  : Exception(), __plugin_name(plugin)
+  : Exception(), plugin_name_(plugin)
 {
   append("Plugin '%s' could not be loaded: %s", plugin, message);
   copy_messages(e);
@@ -92,7 +89,7 @@ PluginLoadException::PluginLoadException(const char *plugin, const char *message
 std::string
 PluginLoadException::plugin_name() const
 {
-  return __plugin_name;
+  return plugin_name_;
 }
 
 

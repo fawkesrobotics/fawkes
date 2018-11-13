@@ -25,8 +25,8 @@
 #  error "Cannot use Lase EDL driver without libpcan"
 #endif
 
-#ifndef __PLUGINS_LASER_LASE_EDL_AQT_H_
-#define __PLUGINS_LASER_LASE_EDL_AQT_H_
+#ifndef _PLUGINS_LASER_LASE_EDL_AQT_H_
+#define _PLUGINS_LASER_LASE_EDL_AQT_H_
 
 #include "acquisition_thread.h"
 
@@ -174,31 +174,31 @@ class LaseEdlAcquisitionThread : public LaserAcquisitionThread
 
 
  private:
-  HANDLE __handle;
-  bool         __pre_init_done;
+  HANDLE handle_;
+  bool         pre_init_done_;
 
-  std::string  __cfg_name;
-  std::string  __cfg_prefix;
+  std::string  cfg_name_;
+  std::string  cfg_prefix_;
 
-  bool         __cfg_use_default;
-  bool         __cfg_set_default;
-  unsigned int __cfg_rotation_freq;
-  unsigned int __cfg_angle_step;
-  unsigned int __cfg_max_pulse_freq;
-  unsigned int __cfg_profile_format;
-  unsigned int __cfg_can_id;
-  unsigned int __cfg_can_id_resp;
-  unsigned int __cfg_sensor_id;
-  unsigned int __cfg_sensor_id_resp;
-  unsigned int __cfg_interface_type;
-  unsigned int __cfg_btr0btr1;
-  unsigned int __cfg_port;
-  unsigned int __cfg_irq;
-  unsigned int __cfg_num_init_tries;
-  float        __cfg_mount_rotation;
+  bool         cfg_use_default_;
+  bool         cfg_set_default_;
+  unsigned int cfg_rotation_freq_;
+  unsigned int cfg_angle_step_;
+  unsigned int cfg_max_pulse_freq_;
+  unsigned int cfg_profile_format_;
+  unsigned int cfg_can_id_;
+  unsigned int cfg_can_id_resp_;
+  unsigned int cfg_sensor_id_;
+  unsigned int cfg_sensor_id_resp_;
+  unsigned int cfg_interface_type_;
+  unsigned int cfg_btr0btr1_;
+  unsigned int cfg_port_;
+  unsigned int cfg_irq_;
+  unsigned int cfg_num_init_tries_;
+  float        cfg_mount_rotation_;
 
-  unsigned int __min_angle_step;
-  unsigned int __number_of_values;
+  unsigned int min_angle_step_;
+  unsigned int number_of_values_;
   
 };
 

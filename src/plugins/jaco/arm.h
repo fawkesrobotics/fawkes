@@ -20,16 +20,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_ARM_H_
-#define __PLUGINS_JACO_ARM_H_
+#ifndef _PLUGINS_JACO_ARM_H_
+#define _PLUGINS_JACO_ARM_H_
 
 #include <string>
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class JacoArm <plugins/jaco/arm.h>
  * Abstract class for a Kinova Jaco Arm that we want to control.
@@ -124,15 +121,15 @@ class JacoArm
   std::string get_name() const;
 
  protected:
-  std::string __name;        /**< the name of this arm */
-  bool        __initialized; /**< track if the arm has been initialized or not */
+  std::string name_;        /**< the name of this arm */
+  bool        initialized_; /**< track if the arm has been initialized or not */
 };
 
 inline
 std::string
 JacoArm::get_name() const
 {
-  return __name;
+  return name_;
 }
 
 } // end of namespace fawkes

@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_READERS_PNG_H_
-#define __FIREVISION_UTILS_READERS_PNG_H_
+#ifndef _FIREVISION_UTILS_READERS_PNG_H_
+#define _FIREVISION_UTILS_READERS_PNG_H_
 
 #include <fvutils/readers/reader.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class PNGReaderData;
 
@@ -48,7 +45,7 @@ class PNGReader : public Reader {
  private:
   PNGReaderData *  setup_read(const char *filename);
 
-  PNGReaderData *__d;
+  PNGReaderData *d_;
   bool opened;
   unsigned char *buffer;
 };

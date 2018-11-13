@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENRAVE_ASPECT_OPENRAVE_CONNECTOR_H_
-#define __PLUGINS_OPENRAVE_ASPECT_OPENRAVE_CONNECTOR_H_
+#ifndef _PLUGINS_OPENRAVE_ASPECT_OPENRAVE_CONNECTOR_H_
+#define _PLUGINS_OPENRAVE_ASPECT_OPENRAVE_CONNECTOR_H_
 
 #include <string>
 #include <core/utils/refptr.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class OpenRaveEnvironment;
 class OpenRaveRobot;

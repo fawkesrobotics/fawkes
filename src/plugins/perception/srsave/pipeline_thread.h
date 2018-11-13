@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_APPS_SRSAVE_PIPELINE_THREAD_H_
-#define __FIREVISION_APPS_SRSAVE_PIPELINE_THREAD_H_
+#ifndef _FIREVISION_APPS_SRSAVE_PIPELINE_THREAD_H_
+#define _FIREVISION_APPS_SRSAVE_PIPELINE_THREAD_H_
 
 #include <core/threading/thread.h>
 
@@ -50,9 +50,9 @@ class FvSrSavePipelineThread
   virtual void loop();
 
  private:
-  firevision::Camera *__cam;
+  firevision::Camera *cam_;
 
-  unsigned int __frame_i;
+  unsigned int frame_i_;
 };
 
-#endif /* __FIREVISION_APPS_SRSAVE_PIPELINE_THREAD_H_ */
+#endif /* FIREVISION_APPS_SRSAVE_PIPELINE_THREAD_H__ */

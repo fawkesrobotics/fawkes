@@ -43,7 +43,7 @@ using namespace fawkes;
 OpenNiContextThread::OpenNiContextThread()
   : Thread("OpenNiContextThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
-    AspectProviderAspect(&__openni_aspect_inifin)
+    AspectProviderAspect(&openni_aspect_inifin_)
 {
 }
 
@@ -57,34 +57,34 @@ OpenNiContextThread::~OpenNiContextThread()
 void
 OpenNiContextThread::init()
 {
-  __sensor_server_pid = -1;
-  __cfg_run_sensor_server = false;
+  sensor_server_pid_ = -1;
+  cfg_run_sensor_server_ = false;
   try {
-    __cfg_run_sensor_server =
+    cfg_run_sensor_server_ =
       config->get_bool("/plugins/openni/run_sensor_server");
   } catch (Exception &e) {} // ignore and use default
-  if (__cfg_run_sensor_server) {
-    __cfg_sensor_bin = config->get_string("/plugins/openni/sensor_server_bin");
+  if (cfg_run_sensor_server_) {
+    cfg_sensor_bin_ = config->get_string("/plugins/openni/sensor_server_bin");
   }
 
-  __openni = new xn::Context();
+  openni_ = new xn::Context();
 
   XnStatus st;
-  if ((st = __openni->Init()) != XN_STATUS_OK) {
-    __openni.clear();
+  if ((st = openni_->Init()) != XN_STATUS_OK) {
+    openni_.clear();
     throw Exception("Initializing OpenNI failed: %s", xnGetStatusString(st));
   }
 
-  __last_refcount = __openni.refcount();
+  last_refcount_ = openni_.refcount();
 
-  __check_now.set_clock(clock);
-  __check_last.set_clock(clock);
-  __check_last.stamp();
+  check_now_.set_clock(clock);
+  check_last_.set_clock(clock);
+  check_last_.stamp();
 
-  __device_no_data_loops = 0;
-  __openni_aspect_inifin.set_openni_context(__openni);
+  device_no_data_loops_ = 0;
+  openni_aspect_inifin_.set_openni_context(openni_);
 
-  if (__cfg_run_sensor_server) {
+  if (cfg_run_sensor_server_) {
     start_sensor_server();
 
     // We don't want the server to die, we kill it by ourself.
@@ -93,13 +93,13 @@ OpenNiContextThread::init()
     // setting the timeout to 0 to stop the server immediately after
     // it is no longer used does not work.
     xn::NodeInfoList list;
-    if (__openni->EnumerateProductionTrees(XN_NODE_TYPE_DEVICE, NULL, list)
+    if (openni_->EnumerateProductionTrees(XN_NODE_TYPE_DEVICE, NULL, list)
 	== XN_STATUS_OK)
     {
       for (xn::NodeInfoList::Iterator i = list.Begin(); i != list.End(); ++i) {
 	if ((*i).GetDescription().Type == XN_NODE_TYPE_DEVICE) {
-	  __device = new xn::Device();
-	  (*i).GetInstance(*__device);
+	  device_ = new xn::Device();
+	  (*i).GetInstance(*device_);
 	  break;
 	}
       }
@@ -111,18 +111,18 @@ OpenNiContextThread::init()
 void
 OpenNiContextThread::finalize()
 {
-  __openni->StopGeneratingAll();
+  openni_->StopGeneratingAll();
 
 #if XN_VERSION_GE(1,3,2,0)
-  __openni->Release();
+  openni_->Release();
 #else
-  __openni->Shutdown();
+  openni_->Shutdown();
 #endif
-  __openni.clear();
-  __openni_aspect_inifin.set_openni_context(__openni);
+  openni_.clear();
+  openni_aspect_inifin_.set_openni_context(openni_);
 
-  if (__cfg_run_sensor_server) {
-    delete __device;
+  if (cfg_run_sensor_server_) {
+    delete device_;
     stop_sensor_server();
   }
 }
@@ -131,20 +131,20 @@ OpenNiContextThread::finalize()
 void
 OpenNiContextThread::loop()
 {
-  __openni.lock();
-  if (__openni.refcount() != __last_refcount) {
+  openni_.lock();
+  if (openni_.refcount() != last_refcount_) {
     print_nodes();
-    __last_refcount = __openni.refcount();
+    last_refcount_ = openni_.refcount();
   }
-  __openni->WaitNoneUpdateAll();
+  openni_->WaitNoneUpdateAll();
 
-  __check_now.stamp();
-  if ((__check_now - &__check_last) > 5) {
+  check_now_.stamp();
+  if ((check_now_ - &check_last_) > 5) {
     verify_active();
-    __check_last = __check_now;
+    check_last_ = check_now_;
   }
 
-  __openni.unlock();
+  openni_.unlock();
 }
 
 inline const char *
@@ -174,7 +174,7 @@ void
 OpenNiContextThread::print_nodes()
 {
   xn::NodeInfoList nodes;
-  if (__openni->EnumerateExistingNodes(nodes) == XN_STATUS_OK) {
+  if (openni_->EnumerateExistingNodes(nodes) == XN_STATUS_OK) {
     logger->log_info(name(), "Currently existing nodes:");
     for (xn::NodeInfoList::Iterator n = nodes.Begin(); n != nodes.End(); ++n) {
       const XnProductionNodeDescription &pnd = (*n).GetDescription();
@@ -203,7 +203,7 @@ void
 OpenNiContextThread::verify_active()
 {
   xn::NodeInfoList nodes;
-  if (__openni->EnumerateExistingNodes(nodes) == XN_STATUS_OK) {
+  if (openni_->EnumerateExistingNodes(nodes) == XN_STATUS_OK) {
     for (xn::NodeInfoList::Iterator n = nodes.Begin(); n != nodes.End(); ++n) {
       xn::Generator generator;
       bool have_gen = ((*n).GetInstance(generator) == XN_STATUS_OK);
@@ -219,14 +219,14 @@ OpenNiContextThread::verify_active()
             generator.StartGenerating();
 
           } else if (! generator.IsDataNew()) {
-            if (__dead_loops.find((*n).GetInstanceName()) != __dead_loops.end()) {
-              __dead_loops[(*n).GetInstanceName()] += 1;
+            if (dead_loops_.find((*n).GetInstanceName()) != dead_loops_.end()) {
+              dead_loops_[(*n).GetInstanceName()] += 1;
             } else {
-              __dead_loops[(*n).GetInstanceName()]  = 1;
+              dead_loops_[(*n).GetInstanceName()]  = 1;
             }
 
-          } else if (__dead_loops.find((*n).GetInstanceName()) != __dead_loops.end()) {
-            __dead_loops.erase((*n).GetInstanceName());
+          } else if (dead_loops_.find((*n).GetInstanceName()) != dead_loops_.end()) {
+            dead_loops_.erase((*n).GetInstanceName());
           }
 
           /* The following does not work atm because IsDataNew() always reports false.
@@ -237,9 +237,9 @@ OpenNiContextThread::verify_active()
 	} else if (pnd.Type == XN_NODE_TYPE_DEVICE) {
 	  // as an alternative, verify how often it has not been updated
 	  if (generator.IsDataNew()) {
-	    __device_no_data_loops = 0;
+	    device_no_data_loops_ = 0;
 	  } else {
-	    if (++__device_no_data_loops > 10) {
+	    if (++device_no_data_loops_ > 10) {
 	      logger->log_warn(name(), "Device '%s' had no fresh data for long time. "
 			       "Reload maybe necessary.", (*n).GetInstanceName());
 	    }
@@ -257,7 +257,7 @@ OpenNiContextThread::verify_active()
   }
 
   std::map<std::string, unsigned int>::iterator d;
-  for (d = __dead_loops.begin(); d != __dead_loops.end(); ++d) {
+  for (d = dead_loops_.begin(); d != dead_loops_.end(); ++d) {
     if (d->second >= 3) {
       logger->log_warn(name(), "Node '%s' had no fresh data for long time (%u tests)",
                        d->first.c_str(), d->second);
@@ -269,7 +269,7 @@ OpenNiContextThread::verify_active()
 void
 OpenNiContextThread::start_sensor_server()
 {
-  if (__sensor_server_pid != -1) {
+  if (sensor_server_pid_ != -1) {
     throw Exception("Sensor server appears to be already running");
   }
 
@@ -286,44 +286,44 @@ OpenNiContextThread::start_sensor_server()
     fclose(stdout);
     fclose(stdin);
     fclose(stderr);
-    char *argv[] = {(char *)__cfg_sensor_bin.c_str(), NULL};
-    if (execve(__cfg_sensor_bin.c_str(), argv, environ) == -1) {
+    char *argv[] = {(char *)cfg_sensor_bin_.c_str(), NULL};
+    if (execve(cfg_sensor_bin_.c_str(), argv, environ) == -1) {
       throw Exception("Failed to execute %s, exited with %i: %s\n",
-		      __cfg_sensor_bin.c_str(), errno, strerror(errno));
+		      cfg_sensor_bin_.c_str(), errno, strerror(errno));
     }
   }
 
-  __sensor_server_pid = pid;
+  sensor_server_pid_ = pid;
 }
 
 void
 OpenNiContextThread::stop_sensor_server()
 {
-  if (__sensor_server_pid == -1) {
+  if (sensor_server_pid_ == -1) {
     throw Exception("Sensor server appears not to be already running");
   }
 
   logger->log_info(name(), "Stopping XnSensorServer");
-  ::kill(__sensor_server_pid, SIGTERM);
+  ::kill(sensor_server_pid_, SIGTERM);
   for (unsigned int i = 0; i < 200; ++i) {
     usleep(10000);
     int status;
-    int rv = waitpid(__sensor_server_pid, &status, WNOHANG);
+    int rv = waitpid(sensor_server_pid_, &status, WNOHANG);
     if (rv == -1) {
       if (errno == EINTR)  continue;
       if (errno == ECHILD) {
-	__sensor_server_pid = -1;
+	sensor_server_pid_ = -1;
 	break;
       }
     } else if (rv > 0) {
-      __sensor_server_pid = -1;
+      sensor_server_pid_ = -1;
       break;
     }
   }
 
-  if (__sensor_server_pid != -1) {
+  if (sensor_server_pid_ != -1) {
     logger->log_warn(name(), "Killing XnSensorServer");
-    ::kill(__sensor_server_pid, SIGKILL);
-    __sensor_server_pid = -1;
+    ::kill(sensor_server_pid_, SIGKILL);
+    sensor_server_pid_ = -1;
   }
 }

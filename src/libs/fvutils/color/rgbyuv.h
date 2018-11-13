@@ -22,13 +22,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_COLOR_RGBYUV_H
-#define __FIREVISION_UTILS_COLOR_RGBYUV_H
+#ifndef FIREVISION_UTILS_COLOR_RGBYUV_H_
+#define FIREVISION_UTILS_COLOR_RGBYUV_H_
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 #define RGB2YUV(r, g, b, y, u, v) { 				\

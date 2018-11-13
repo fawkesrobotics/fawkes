@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_UTILS_OCCUPANCYGRID_OCCUPANCYGRID_H_
-#define __PLUGINS_COLLI_UTILS_OCCUPANCYGRID_OCCUPANCYGRID_H_
+#ifndef _PLUGINS_COLLI_UTILS_OCCUPANCYGRID_OCCUPANCYGRID_H_
+#define _PLUGINS_COLLI_UTILS_OCCUPANCYGRID_OCCUPANCYGRID_H_
 
 #include "probability.h"
 
@@ -29,9 +29,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Occupancy threshold. */
 const float OCCUPANCY_THRESHOLD = 0.45f;

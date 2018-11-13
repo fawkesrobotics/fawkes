@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_POINTCLOUD_H_
-#define __ASPECT_POINTCLOUD_H_
+#ifndef _ASPECT_POINTCLOUD_H_
+#define _ASPECT_POINTCLOUD_H_
 
 #include <aspect/aspect.h>
 #include <pcl_utils/pointcloud_manager.h>
@@ -33,9 +33,6 @@ namespace pcl {
 }
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class PointCloudAspect : public virtual Aspect
 {

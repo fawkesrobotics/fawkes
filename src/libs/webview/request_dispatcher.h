@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_WEBVIEW_REQUEST_DISPATCHER_H_
-#define __LIBS_WEBVIEW_REQUEST_DISPATCHER_H_
+#ifndef _LIBS_WEBVIEW_REQUEST_DISPATCHER_H_
+#define _LIBS_WEBVIEW_REQUEST_DISPATCHER_H_
 
 #include <utils/time/time.h>
 
@@ -32,9 +32,6 @@
 #include <microhttpd.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class WebRequestProcessor;
 class WebUrlManager;

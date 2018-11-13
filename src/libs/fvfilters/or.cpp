@@ -38,9 +38,6 @@
 #endif
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FilterOr <fvfilters/or.h>
  * Or filter.

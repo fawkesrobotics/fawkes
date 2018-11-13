@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_SERVICE_DISCOVERY_BROWSE_HANDLER_H_
-#define __NETCOMM_SERVICE_DISCOVERY_BROWSE_HANDLER_H_
+#ifndef _NETCOMM_SERVICE_DISCOVERY_BROWSE_HANDLER_H_
+#define _NETCOMM_SERVICE_DISCOVERY_BROWSE_HANDLER_H_
 
 #include <sys/types.h>
 #include <sys/socket.h>

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_ACT_THREAD_H_
-#define __PLUGINS_JACO_ACT_THREAD_H_
+#ifndef _PLUGINS_JACO_ACT_THREAD_H_
+#define _PLUGINS_JACO_ACT_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -57,10 +57,10 @@ class JacoActThread
   bool _is_initializing();
   void _process_msgs();
 
-  fawkes::jaco_arm_t* __arm;
+  fawkes::jaco_arm_t* arm_;
 
-  bool __cfg_auto_init;
-  bool __cfg_auto_calib;
+  bool cfg_auto_init_;
+  bool cfg_auto_calib_;
 };
 
 

@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_RRD_ASPECT_RRD_INIFIN_H_
-#define __PLUGINS_RRD_ASPECT_RRD_INIFIN_H_
+#ifndef _PLUGINS_RRD_ASPECT_RRD_INIFIN_H_
+#define _PLUGINS_RRD_ASPECT_RRD_INIFIN_H_
 
 #include <aspect/inifins/inifin.h>
 
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class RRDManager;
 
@@ -44,7 +41,7 @@ class RRDAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  RRDManager *__rrd_manager;
+  RRDManager *rrd_manager_;
 };
 
 } // end namespace fawkes

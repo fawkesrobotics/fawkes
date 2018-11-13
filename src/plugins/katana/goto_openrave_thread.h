@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_GOTO_OPENRAVE_THREAD_H_
-#define __PLUGINS_KATANA_GOTO_OPENRAVE_THREAD_H_
+#ifndef _PLUGINS_KATANA_GOTO_OPENRAVE_THREAD_H_
+#define _PLUGINS_KATANA_GOTO_OPENRAVE_THREAD_H_
 
 #include "motion_thread.h"
 
@@ -72,34 +72,34 @@ class KatanaGotoOpenRaveThread : public KatanaMotionThread
   static const std::string DEFAULT_PLANNERPARAMS_STRAIGHT;
 
  private:
-  fawkes::OpenRaveRobotPtr        __OR_robot;
-  fawkes::OpenRaveManipulatorPtr  __OR_manip;
+  fawkes::OpenRaveRobotPtr        OR_robot_;
+  fawkes::OpenRaveManipulatorPtr  OR_manip_;
 
-  std::string                                   __target_object;
-  std::vector< std::vector<float> >*            __target_traj;
-  std::vector< std::vector<float> >::iterator   __it;
+  std::string                                   target_object_;
+  std::vector< std::vector<float> >*            target_traj_;
+  std::vector< std::vector<float> >::iterator   it_;
 
-  std::vector< int >    __motor_encoders;
-  std::vector< float >  __motor_angles;
+  std::vector< int >    motor_encoders_;
+  std::vector< float >  motor_angles_;
 
-  const std::string     __cfg_robot_file;
-  const std::string     __cfg_arm_model;
-  bool                  __cfg_autoload_IK;
-  bool                  __cfg_use_viewer;
+  const std::string     cfg_robot_file_;
+  const std::string     cfg_arm_model_;
+  bool                  cfg_autoload_IK_;
+  bool                  cfg_use_viewer_;
 
-  bool                  __is_target_object;
-  bool                  __has_target_quaternion;
-  bool                  __move_straight;
-  bool                  __is_arm_extension;
-  std::string           __plannerparams;
-  std::string           __plannerparams_straight;
+  bool                  is_target_object_;
+  bool                  has_target_quaternion_;
+  bool                  move_straight_;
+  bool                  is_arm_extension_;
+  std::string           plannerparams_;
+  std::string           plannerparams_straight_;
 
   fawkes::OpenRaveConnector*    _openrave;
 
-  float __x, __y, __z;
-  float __phi, __theta, __psi, __theta_error;
-  float __quat_x, __quat_y, __quat_z, __quat_w;
-  unsigned int __poll_interval_usec;
+  float x_, y_, z_;
+  float phi_, theta_, psi_, theta_error_;
+  float quat_x_, quat_y_, quat_z_, quat_w_;
+  unsigned int poll_interval_usec_;
 
 #endif //HAVE_OPENRAVE
 };

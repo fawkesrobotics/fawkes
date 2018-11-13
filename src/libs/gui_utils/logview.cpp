@@ -29,9 +29,6 @@
 #include <gtkmm.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class LogView <gui_utils/logview.h>
@@ -75,13 +72,13 @@ LogView::LogView(BaseObjectType* cobject,
 /** Destructor. */
 LogView::~LogView()
 {
-  FawkesNetworkClient *c = __connection_dispatcher->get_client();
+  FawkesNetworkClient *c = connection_dispatcher_->get_client();
   if (c && c->connected()) {
     FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NETWORKLOGGER,
 							 NetworkLogger::MSGTYPE_UNSUBSCRIBE);
     c->enqueue(msg);
   }
-  delete __connection_dispatcher;
+  delete connection_dispatcher_;
 }
 
 
@@ -89,24 +86,24 @@ LogView::~LogView()
 void
 LogView::ctor(const char *hostname, unsigned short int port)
 {
-  __list = Gtk::ListStore::create(__record);
-  set_model(__list);
-  __have_recently_added_path = false;
+  list_ = Gtk::ListStore::create(record_);
+  set_model(list_);
+  have_recently_added_path_ = false;
 
-  __list->signal_row_inserted().connect(sigc::mem_fun(*this, &LogView::on_row_inserted));
+  list_->signal_row_inserted().connect(sigc::mem_fun(*this, &LogView::on_row_inserted));
   get_selection()->set_mode(Gtk::SELECTION_NONE);
 
   if ( (hostname != NULL) && (port != 0) ) {
-    __connection_dispatcher =
+    connection_dispatcher_ =
       new ConnectionDispatcher(hostname, port, FAWKES_CID_NETWORKLOGGER);
   } else {
-    __connection_dispatcher = new ConnectionDispatcher(FAWKES_CID_NETWORKLOGGER);
+    connection_dispatcher_ = new ConnectionDispatcher(FAWKES_CID_NETWORKLOGGER);
   }
 
-  append_column("Level",     __record.loglevel);
-  append_column("Time",      __record.time);
-  int compcol = append_column("Component", __record.component);
-  int msgcol  = append_column("Message",   __record.message);
+  append_column("Level",     record_.loglevel);
+  append_column("Time",      record_.time);
+  int compcol = append_column("Component", record_.component);
+  int msgcol  = append_column("Message",   record_.message);
 
   // We stored the number of columns, for an index (which starts at 0) we need
   // to subtract 1
@@ -136,18 +133,18 @@ LogView::ctor(const char *hostname, unsigned short int port)
 	text_renderer->property_ellipsize().set_value(Pango::ELLIPSIZE_END);
       }
 
-      (*c)->add_attribute(text_renderer->property_background_gdk(), __record.background);
-      (*c)->add_attribute(text_renderer->property_foreground_gdk(), __record.foreground);
+      (*c)->add_attribute(text_renderer->property_background_gdk(), record_.background);
+      (*c)->add_attribute(text_renderer->property_foreground_gdk(), record_.foreground);
 #else
-      (*c)->add_attribute(*text_renderer, "background-gdk", __record.background);
-      (*c)->add_attribute(*text_renderer, "foreground-gdk", __record.background);
+      (*c)->add_attribute(*text_renderer, "background-gdk", record_.background);
+      (*c)->add_attribute(*text_renderer, "foreground-gdk", record_.background);
 #endif
     }
   }
 
-  __connection_dispatcher->signal_message_received().connect(sigc::mem_fun(*this, &LogView::on_message_received));
-  __connection_dispatcher->signal_connected().connect(sigc::mem_fun(*this, &LogView::on_client_connected));
-  __connection_dispatcher->signal_disconnected().connect(sigc::mem_fun(*this, &LogView::on_client_disconnected));
+  connection_dispatcher_->signal_message_received().connect(sigc::mem_fun(*this, &LogView::on_message_received));
+  connection_dispatcher_->signal_connected().connect(sigc::mem_fun(*this, &LogView::on_client_connected));
+  connection_dispatcher_->signal_disconnected().connect(sigc::mem_fun(*this, &LogView::on_client_disconnected));
 #if GTK_VERSION_LT(3,0)
   signal_expose_event().connect_notify(sigc::mem_fun(*this, &LogView::on_expose_notify));
 #endif
@@ -160,13 +157,13 @@ LogView::ctor(const char *hostname, unsigned short int port)
 void
 LogView::set_client(FawkesNetworkClient *client)
 {
-  FawkesNetworkClient *c = __connection_dispatcher->get_client();
+  FawkesNetworkClient *c = connection_dispatcher_->get_client();
   if (c && c->connected()) {
     FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NETWORKLOGGER,
 							 NetworkLogger::MSGTYPE_UNSUBSCRIBE);
     c->enqueue(msg);
   }
-  __connection_dispatcher->set_client(client);
+  connection_dispatcher_->set_client(client);
   if (client && client->connected()) {
     FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NETWORKLOGGER,
 							 NetworkLogger::MSGTYPE_SUBSCRIBE);
@@ -181,7 +178,7 @@ LogView::set_client(FawkesNetworkClient *client)
 FawkesNetworkClient *
 LogView::get_client()
 {
-  return __connection_dispatcher->get_client();
+  return connection_dispatcher_->get_client();
 }
 
 
@@ -191,7 +188,7 @@ LogView::get_client()
 ConnectionDispatcher *
 LogView::get_connection_dispatcher() const
 {
-  return __connection_dispatcher;
+  return connection_dispatcher_;
 }
 
 
@@ -199,7 +196,7 @@ LogView::get_connection_dispatcher() const
 void
 LogView::clear()
 {
-  __list->clear();
+  list_->clear();
 }
 
 
@@ -218,14 +215,14 @@ LogView::on_row_inserted(const Gtk::TreeModel::Path& path,
   if (! get_visible_range(vstart, vend) ||
       ( prev.prev() &&
 	((vend == prev) ||
-	 (__have_recently_added_path && (__recently_added_path == prev)))) ) {
+	 (have_recently_added_path_ && (recently_added_path_ == prev)))) ) {
     scroll_to_row(path);
 
     // the recently added stuff is required if multiple rows are inserted at
     // a time. In this case the widget wasn't redrawn and get_visible_range() does
     // not give the desired result and we have to "advance" it manually
-    __have_recently_added_path = true;
-    __recently_added_path = path;
+    have_recently_added_path_ = true;
+    recently_added_path_ = path;
   }
 }
 
@@ -233,14 +230,14 @@ LogView::on_row_inserted(const Gtk::TreeModel::Path& path,
 bool
 LogView::on_draw(const Cairo::RefPtr<Cairo::Context> &cr)
 {
-  __have_recently_added_path = false;
+  have_recently_added_path_ = false;
   return Gtk::TreeView::on_draw(cr);
 }
 #else
 void
 LogView::on_expose_notify(GdkEventExpose *event)
 {
-  __have_recently_added_path = false;
+  have_recently_added_path_ = false;
 } 
 #endif
 
@@ -248,7 +245,7 @@ LogView::on_expose_notify(GdkEventExpose *event)
 void
 LogView::on_client_connected()
 {
-  FawkesNetworkClient *c = __connection_dispatcher->get_client();
+  FawkesNetworkClient *c = connection_dispatcher_->get_client();
   if (c && c->connected()) {
     FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_NETWORKLOGGER,
 							 NetworkLogger::MSGTYPE_SUBSCRIBE);
@@ -322,17 +319,17 @@ LogView::append_message(Logger::LogLevel log_level, struct timeval t,
     timestr = time;
   }
 
-  Gtk::TreeModel::Row row  = *__list->append();
-  row[__record.loglevel]   = loglevel;
-  row[__record.time]       = timestr;
-  row[__record.component]  = component;
+  Gtk::TreeModel::Row row  = *list_->append();
+  row[record_.loglevel]   = loglevel;
+  row[record_.time]       = timestr;
+  row[record_.component]  = component;
   if ( is_exception ) {
-    row[__record.message]    = std::string("[EXCEPTION] ") + message;
+    row[record_.message]    = std::string("[EXCEPTION] ") + message;
   } else {
-    row[__record.message]    = message;
+    row[record_.message]    = message;
   }
-  if ( set_foreground )  row[__record.foreground] = color;
-  if ( set_background )  row[__record.background] = color;
+  if ( set_foreground )  row[record_.foreground] = color;
+  if ( set_background )  row[record_.background] = color;
 
   if (time) free(time);
 }

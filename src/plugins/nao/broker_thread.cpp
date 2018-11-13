@@ -44,7 +44,7 @@ using namespace fawkes;
 /** Constructor. */
 NaoQiBrokerThread::NaoQiBrokerThread()
   : Thread("NaoQiBrokerThread", Thread::OPMODE_WAITFORWAKEUP),
-    AspectProviderAspect("NaoQiAspect", &__naoqi_aspect_inifin)
+    AspectProviderAspect("NaoQiAspect", &naoqi_aspect_inifin_)
 {
 }
 
@@ -59,7 +59,7 @@ void
 NaoQiBrokerThread::init()
 {
   if (fawkes::naoqi::broker) {
-    __broker = fawkes::naoqi::broker;
+    broker_ = fawkes::naoqi::broker;
     logger->log_debug(name(), "Using NaoQi Module broker");
   } else {
     throw Exception("NaoQi broker not set, embedding of NaoQi "
@@ -71,27 +71,27 @@ NaoQiBrokerThread::init()
   AL::ALPtr<std::vector<AL::ALModuleInfo> >
     modules(new std::vector<AL::ALModuleInfo>);
 
-  __broker->getModuleList(modules);
+  broker_->getModuleList(modules);
   for (m = modules->begin(); m != modules->end(); ++m) {
     printf("Module: %s @ %s:%i\n", m->name.c_str(), m->ip.c_str(), m->port);
   }
 
   modules->clear();
-  __broker->getGlobalModuleList(modules);
+  broker_->getGlobalModuleList(modules);
   for (m = modules->begin(); m != modules->end(); ++m) {
     printf("Global Module: %s @ %s:%i\n", m->name.c_str(), m->ip.c_str(), m->port);
   }
   */
 
-  __naoqi_aspect_inifin.set_naoqi_broker(__broker);
+  naoqi_aspect_inifin_.set_naoqi_broker(broker_);
 }
 
 
 void
 NaoQiBrokerThread::finalize()
 {
-  __broker.reset();
-  __naoqi_aspect_inifin.set_naoqi_broker(__broker);
+  broker_.reset();
+  naoqi_aspect_inifin_.set_naoqi_broker(broker_);
 }
 
 

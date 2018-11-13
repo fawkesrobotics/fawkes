@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_UTILS_LOCK_LIST_H_
-#define __CORE_UTILS_LOCK_LIST_H_
+#ifndef _CORE_UTILS_LOCK_LIST_H_
+#define _CORE_UTILS_LOCK_LIST_H_
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
@@ -104,7 +104,7 @@ class LockList : public std::list<Type>
    */
   LockList<Type> &  operator=(const std::list<Type> &l);
  private:
-  mutable RefPtr<Mutex> __mutex;
+  mutable RefPtr<Mutex> mutex_;
 
 };
 
@@ -113,13 +113,13 @@ class LockList : public std::list<Type>
 
 template <typename Type>
 LockList<Type>::LockList()
-  : __mutex(new Mutex())
+  : mutex_(new Mutex())
 {}
 
 
 template <typename Type>
 LockList<Type>::LockList(const LockList<Type> &ll)
-  : std::list<Type>::list(ll), __mutex(new Mutex())
+  : std::list<Type>::list(ll), mutex_(new Mutex())
 {}
 
 
@@ -127,7 +127,7 @@ template <typename Type>
 void
 LockList<Type>::lock() const
 {
-  __mutex->lock();
+  mutex_->lock();
 }
 
 
@@ -135,7 +135,7 @@ template <typename Type>
 bool
 LockList<Type>::try_lock() const
 {
-  return __mutex->try_lock();
+  return mutex_->try_lock();
 }
 
 
@@ -143,7 +143,7 @@ template <typename Type>
 void
 LockList<Type>::unlock() const
 {
-  return __mutex->unlock();
+  return mutex_->unlock();
 }
 
 
@@ -151,9 +151,9 @@ template <typename Type>
 void
 LockList<Type>::push_back_locked(const Type& x)
 {
-  __mutex->lock();
+  mutex_->lock();
   std::list<Type>::push_back(x);
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -161,9 +161,9 @@ template <typename Type>
 void
 LockList<Type>::push_front_locked(const Type& x)
 {
-  __mutex->lock();
+  mutex_->lock();
   std::list<Type>::push_front(x);
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -171,9 +171,9 @@ template <typename Type>
 void
 LockList<Type>::remove_locked(const Type& x)
 {
-  __mutex->lock();
+  mutex_->lock();
   std::list<Type>::remove(x);
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -181,7 +181,7 @@ template <typename Type>
 RefPtr<Mutex>
 LockList<Type>::mutex() const
 {
-  return __mutex;
+  return mutex_;
 }
 
 
@@ -189,7 +189,7 @@ template <typename Type>
 LockList<Type> &
 LockList<Type>::operator=(const LockList<Type> &ll)
 {
-  __mutex->lock();
+  mutex_->lock();
   ll.lock();
   this->clear();
   typename LockList<Type>::const_iterator i;
@@ -197,7 +197,7 @@ LockList<Type>::operator=(const LockList<Type> &ll)
     this->push_back(*i);
   }
   ll.unlock();
-  __mutex->unlock();
+  mutex_->unlock();
 
   return *this;
 }
@@ -207,13 +207,13 @@ template <typename Type>
 LockList<Type> &
 LockList<Type>::operator=(const std::list<Type> &l)
 {
-  __mutex->lock();
+  mutex_->lock();
   this->clear();
   typename std::list<Type>::const_iterator i;
   for (i = l.begin(); i != l.end(); ++i) {
     this->push_back(*i);
   }
-  __mutex->unlock();
+  mutex_->unlock();
 
   return *this;
 }

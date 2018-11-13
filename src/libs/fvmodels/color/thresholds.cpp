@@ -29,9 +29,6 @@
 using namespace std;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ColorModelThresholds <fvmodels/color/thresholds.h>
  * Really simple thresholds-based model with some hard-coded thresholds. Was

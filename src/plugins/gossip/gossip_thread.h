@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_GOSSIP_GOSSIP_THREAD_H_
-#define __PLUGINS_GOSSIP_GOSSIP_THREAD_H_
+#ifndef _PLUGINS_GOSSIP_GOSSIP_THREAD_H_
+#define _PLUGINS_GOSSIP_GOSSIP_THREAD_H_
 
 #include <plugins/gossip/aspect/gossip_inifin.h>
 

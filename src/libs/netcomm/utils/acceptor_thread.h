@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_UTILS_ACCEPTOR_THREAD_H_
-#define __NETCOMM_UTILS_ACCEPTOR_THREAD_H_
+#ifndef _NETCOMM_UTILS_ACCEPTOR_THREAD_H_
+#define _NETCOMM_UTILS_ACCEPTOR_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <netcomm/socket/socket.h>
@@ -56,10 +56,10 @@ class NetworkAcceptorThread : public Thread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  unsigned short int        __port;
-  StreamSocket             *__socket;
+  unsigned short int        port_;
+  StreamSocket             *socket_;
 
-  NetworkIncomingConnectionHandler *__handler;
+  NetworkIncomingConnectionHandler *handler_;
 
 };
 

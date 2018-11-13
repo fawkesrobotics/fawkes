@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_COLORMAP_YUVCM_H_
-#define __FIREVISION_FVUTILS_COLORMAP_YUVCM_H_
+#ifndef _FIREVISION_FVUTILS_COLORMAP_YUVCM_H_
+#define _FIREVISION_FVUTILS_COLORMAP_YUVCM_H_
 
 #include <fvutils/colormap/colormap.h>
 
@@ -30,9 +30,6 @@
 #include <fvutils/base/types.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class SharedMemoryLookupTable;
 
@@ -79,24 +76,24 @@ class YuvColormap : public Colormap
 		   const char *shmem_lut_id = 0, bool destroy_on_free = false);
 
 
-  SharedMemoryLookupTable *__shm_lut;
-  unsigned char *__lut;
-  size_t         __lut_size;
+  SharedMemoryLookupTable *shm_lut_;
+  unsigned char *lut_;
+  size_t         lut_size_;
 
-  unsigned int __width;
-  unsigned int __height;
-  unsigned int __depth;
-  unsigned int __depth_div;
-  unsigned int __width_div;
-  unsigned int __height_div;
-  unsigned int __plane_size;
+  unsigned int width_;
+  unsigned int height_;
+  unsigned int depth_;
+  unsigned int depth_div_;
+  unsigned int width_div_;
+  unsigned int height_div_;
+  unsigned int plane_size_;
 };
 
 
 inline color_t
 YuvColormap::determine(unsigned int y, unsigned int u, unsigned int v) const
 {
-  return (color_t) *(__lut + (y / __depth_div) * __plane_size + (v / __height_div) * __width + (u / __width_div));
+  return (color_t) *(lut_ + (y / depth_div_) * plane_size_ + (v / height_div_) * width_ + (u / width_div_));
 }
 
 } // end namespace firevision

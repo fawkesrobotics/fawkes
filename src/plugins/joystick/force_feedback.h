@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JOYSTICK_FORCE_FEEDBACK_H_
-#define __PLUGINS_JOYSTICK_FORCE_FEEDBACK_H_
+#ifndef _PLUGINS_JOYSTICK_FORCE_FEEDBACK_H_
+#define _PLUGINS_JOYSTICK_FORCE_FEEDBACK_H_
 
 #include <stdint.h>
 #include <linux/input.h>
@@ -47,42 +47,42 @@ class JoystickForceFeedback
   void stop_all();
   void stop_rumble();
 
-  bool is_rumbling() { return (__rumble.id != -1); }
-  bool can_rumble()   { return __can_rumble;   }
-  bool can_periodic() { return __can_periodic; }
-  bool can_constant() { return __can_constant; }
-  bool can_spring()   { return __can_spring;   }
-  bool can_friction() { return __can_friction; }
-  bool can_damper()   { return __can_damper;   }
-  bool can_inertia()  { return __can_inertia;  }
-  bool can_ramp()     { return __can_ramp;     }
-  bool can_square()   { return __can_square;   }
-  bool can_triangle() { return __can_triangle; }
-  bool can_sine()     { return __can_sine;     }
-  bool can_saw_up()   { return __can_saw_up;   }
-  bool can_saw_down() { return __can_saw_down; }
-  bool can_custom()   { return __can_custom;   }
+  bool is_rumbling() { return (rumble_.id != -1); }
+  bool can_rumble()   { return can_rumble_;   }
+  bool can_periodic() { return can_periodic_; }
+  bool can_constant() { return can_constant_; }
+  bool can_spring()   { return can_spring_;   }
+  bool can_friction() { return can_friction_; }
+  bool can_damper()   { return can_damper_;   }
+  bool can_inertia()  { return can_inertia_;  }
+  bool can_ramp()     { return can_ramp_;     }
+  bool can_square()   { return can_square_;   }
+  bool can_triangle() { return can_triangle_; }
+  bool can_sine()     { return can_sine_;     }
+  bool can_saw_up()   { return can_saw_up_;   }
+  bool can_saw_down() { return can_saw_down_; }
+  bool can_custom()   { return can_custom_;   }
 
  private:
-  int __fd;
-  struct ff_effect __rumble;
+  int fd_;
+  struct ff_effect rumble_;
 
-  int  __num_effects;
+  int  num_effects_;
 
-  bool __can_rumble;
-  bool __can_periodic;
-  bool __can_constant;
-  bool __can_spring;
-  bool __can_friction;
-  bool __can_damper;
-  bool __can_inertia;
-  bool __can_ramp;
-  bool __can_square;
-  bool __can_triangle;
-  bool __can_sine;
-  bool __can_saw_up;
-  bool __can_saw_down;
-  bool __can_custom;
+  bool can_rumble_;
+  bool can_periodic_;
+  bool can_constant_;
+  bool can_spring_;
+  bool can_friction_;
+  bool can_damper_;
+  bool can_inertia_;
+  bool can_ramp_;
+  bool can_square_;
+  bool can_triangle_;
+  bool can_sine_;
+  bool can_saw_up_;
+  bool can_saw_down_;
+  bool can_custom_;
 
 };
 

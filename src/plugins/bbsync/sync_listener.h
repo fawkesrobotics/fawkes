@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_BBSYNC_SYNC_LISTENER_H_
-#define __PLUGINS_BBSYNC_SYNC_LISTENER_H_
+#ifndef _PLUGINS_BBSYNC_SYNC_LISTENER_H_
+#define _PLUGINS_BBSYNC_SYNC_LISTENER_H_
 
 #include <blackboard/interface_listener.h>
 
@@ -43,13 +43,13 @@ class SyncInterfaceListener
   virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
 
  private:
-  fawkes::Logger     *__logger;
+  fawkes::Logger     *logger_;
 
-  fawkes::Interface  *__writer;
-  fawkes::Interface  *__reader;
+  fawkes::Interface  *writer_;
+  fawkes::Interface  *reader_;
 
-  fawkes::BlackBoard *__writer_bb;
-  fawkes::BlackBoard *__reader_bb;
+  fawkes::BlackBoard *writer_bb_;
+  fawkes::BlackBoard *reader_bb_;
 };
 
 

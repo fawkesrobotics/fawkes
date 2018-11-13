@@ -94,7 +94,7 @@ CppInterfaceGenerator::CppInterfaceGenerator(std::string directory, std::string 
     class_name = interface_name;
   }
 
-  deflector = "__INTERFACES_" + fawkes::StringConversions::to_upper(config_basename) + "_H_";
+  deflector = "_INTERFACES_" + fawkes::StringConversions::to_upper(config_basename) + "_H_";
 }
 
 
@@ -441,7 +441,7 @@ CppInterfaceGenerator::write_create_message_method_cpp(FILE *f)
   bool first = true;
   for (vector<InterfaceMessage>::iterator i = messages.begin(); i != messages.end(); ++i) {
     fprintf(f,
-	    "  %sif ( strncmp(\"%s\", type, __INTERFACE_MESSAGE_TYPE_SIZE) == 0 ) {\n"
+	    "  %sif ( strncmp(\"%s\", type, INTERFACE_MESSAGE_TYPE_SIZE_) == 0 ) {\n"
 	    "    return new %s();\n",
 	    first ? "" : "} else ", i->getName().c_str(), i->getName().c_str());
     first = false;

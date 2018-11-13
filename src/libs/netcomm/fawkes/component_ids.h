@@ -34,8 +34,8 @@
  * where the component is implemented in the tree.
  */
 
-#ifndef __NETCOMM_FAWKES_COMPONENT_IDS_H_
-#define __NETCOMM_FAWKES_COMPONENT_IDS_H_
+#ifndef _NETCOMM_FAWKES_COMPONENT_IDS_H_
+#define _NETCOMM_FAWKES_COMPONENT_IDS_H_
 
 // Never use this CID for any application. It is intended to only observe
 // changes of the connection status.

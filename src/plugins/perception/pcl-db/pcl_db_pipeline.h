@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PERCEPTION_PCL_DB_PCL_DB_PIPELINE_H_
-#define __PLUGINS_PERCEPTION_PCL_DB_PCL_DB_PIPELINE_H_
+#ifndef _PLUGINS_PERCEPTION_PCL_DB_PCL_DB_PIPELINE_H_
+#define _PLUGINS_PERCEPTION_PCL_DB_PCL_DB_PIPELINE_H_
 
 #include "mongodb_tf_transformer.h"
 

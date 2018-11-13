@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_INTERFACE_OBSERVER_H_
-#define __BLACKBOARD_INTERFACE_OBSERVER_H_
+#ifndef _BLACKBOARD_INTERFACE_OBSERVER_H_
+#define _BLACKBOARD_INTERFACE_OBSERVER_H_
 
 #include <core/utils/lock_map.h>
 
@@ -61,9 +61,9 @@ class BlackBoardInterfaceObserver
   ObservedInterfaceLockMap *  bbio_get_observed_destroy() throw();
 
  private:
-  ObservedInterfaceLockMap         __bbio_observed_create;
-  ObservedInterfaceLockMap         __bbio_observed_destroy;
-  ObservedInterfaceLockMapIterator __bbio_iti;
+  ObservedInterfaceLockMap         bbio_observed_create_;
+  ObservedInterfaceLockMap         bbio_observed_destroy_;
+  ObservedInterfaceLockMapIterator bbio_iti_;
 };
 
 } // end namespace fawkes

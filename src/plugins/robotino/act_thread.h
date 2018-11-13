@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROBOTINO_ACT_THREAD_H_
-#define __PLUGINS_ROBOTINO_ACT_THREAD_H_
+#ifndef _PLUGINS_ROBOTINO_ACT_THREAD_H_
+#define _PLUGINS_ROBOTINO_ACT_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>

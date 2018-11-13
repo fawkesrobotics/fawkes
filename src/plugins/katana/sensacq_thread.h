@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_SENSAQT_THREAD_H_
-#define __PLUGINS_KATANA_SENSAQT_THREAD_H_
+#ifndef _PLUGINS_KATANA_SENSAQT_THREAD_H_
+#define _PLUGINS_KATANA_SENSAQT_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <logging/logger.h>
@@ -44,10 +44,10 @@ class KatanaSensorAcquisitionThread : public fawkes::Thread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::RefPtr<fawkes::KatanaController>  __katana;
-  bool                                      __enabled;
+  fawkes::RefPtr<fawkes::KatanaController>  katana_;
+  bool                                      enabled_;
 
-  fawkes::Logger          *__logger;
+  fawkes::Logger          *logger_;
 };
 
 

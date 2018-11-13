@@ -29,9 +29,6 @@
 using fawkes::upoint_t;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class Qualifier qualifiers.h <apps/nao_loc/qualifiers.h>
  * Abstract Qualifier for a single pixel

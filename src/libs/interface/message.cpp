@@ -34,9 +34,6 @@
 #include <unistd.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class Message <interface/message.h>
  * Base class for all messages passed through interfaces in Fawkes BlackBoard.
@@ -66,17 +63,17 @@ namespace fawkes {
  */
 Message::Message(const char *type)
 {
-  __fieldinfo_list = NULL;
+  fieldinfo_list_ = NULL;
 
-  __message_id = 0;
-  __hops       = 0;
-  __enqueued   = false;
-  __num_fields = 0;
+  message_id_ = 0;
+  hops_       = 0;
+  enqueued_   = false;
+  num_fields_ = 0;
   data_ptr     = NULL;
   data_ts      = NULL;
   _sender_id   = 0;
   _type        = strdup(type);
-  __time_enqueued = new Time();
+  time_enqueued_ = new Time();
 
   _transmit_via_iface              = NULL;
   sender_interface_instance_serial = 0;
@@ -96,16 +93,16 @@ Message::Message(const char *type)
  */
 Message::Message(const Message &mesg)
 {
-  __message_id = 0;
-  __hops       = mesg.__hops;
-  __enqueued   = false;
-  __num_fields = mesg.__num_fields;
+  message_id_ = 0;
+  hops_       = mesg.hops_;
+  enqueued_   = false;
+  num_fields_ = mesg.num_fields_;
   data_size    = mesg.data_size;
   data_ptr     = malloc(data_size);
   data_ts      = (message_data_ts_t *)data_ptr;
   _sender_id   = 0;
   _type        = strdup(mesg._type);
-  __time_enqueued = new Time(mesg.__time_enqueued);
+  time_enqueued_ = new Time(mesg.time_enqueued_);
 
   _transmit_via_iface              = NULL;
   sender_interface_instance_serial = 0;
@@ -113,8 +110,8 @@ Message::Message(const Message &mesg)
 
   memcpy(data_ptr, mesg.data_ptr, data_size);
 
-  interface_fieldinfo_t  *info_src  = mesg.__fieldinfo_list;
-  interface_fieldinfo_t **info_dest = &__fieldinfo_list;
+  interface_fieldinfo_t  *info_src  = mesg.fieldinfo_list_;
+  interface_fieldinfo_t **info_dest = &fieldinfo_list_;
   while ( info_src ) {
     interface_fieldinfo_t *new_info = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
     memcpy(new_info, info_src, sizeof(interface_fieldinfo_t));
@@ -138,10 +135,10 @@ Message::Message(const Message &mesg)
  */
 Message::Message(const Message *mesg)
 {
-  __message_id = 0;
-  __hops       = mesg->__hops;
-  __enqueued   = false;
-  __num_fields = mesg->__num_fields;
+  message_id_ = 0;
+  hops_       = mesg->hops_;
+  enqueued_   = false;
+  num_fields_ = mesg->num_fields_;
   data_size    = mesg->data_size;
   data_ptr     = malloc(data_size);
   data_ts      = (message_data_ts_t *)data_ptr;
@@ -150,12 +147,12 @@ Message::Message(const Message *mesg)
   _transmit_via_iface              = NULL;
   sender_interface_instance_serial = 0;
   recipient_interface_mem_serial   = 0;
-  __time_enqueued = new Time(mesg->__time_enqueued);
+  time_enqueued_ = new Time(mesg->time_enqueued_);
 
   memcpy(data_ptr, mesg->data_ptr, data_size);
 
-  interface_fieldinfo_t  *info_src  = mesg->__fieldinfo_list;
-  interface_fieldinfo_t **info_dest = &__fieldinfo_list;
+  interface_fieldinfo_t  *info_src  = mesg->fieldinfo_list_;
+  interface_fieldinfo_t **info_dest = &fieldinfo_list_;
   while ( info_src ) {
     interface_fieldinfo_t *new_info = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
     memcpy(new_info, info_src, sizeof(interface_fieldinfo_t));
@@ -179,13 +176,13 @@ Message::~Message()
 {
   free(_sender_thread_name);
   free(_type);
-  delete __time_enqueued;
+  delete time_enqueued_;
 
-  interface_fieldinfo_t *infol = __fieldinfo_list;
+  interface_fieldinfo_t *infol = fieldinfo_list_;
   while ( infol ) {
-    __fieldinfo_list = __fieldinfo_list->next;
+    fieldinfo_list_ = fieldinfo_list_->next;
     free(infol);
-    infol = __fieldinfo_list;
+    infol = fieldinfo_list_;
   }
 }
 
@@ -196,7 +193,7 @@ Message::~Message()
 unsigned int
 Message::id() const
 {
-  return __message_id;
+  return message_id_;
 }
 
 
@@ -206,7 +203,7 @@ Message::id() const
 unsigned int
 Message::hops() const
 {
-  return __hops;
+  return hops_;
 }
 
 
@@ -216,7 +213,7 @@ Message::hops() const
 void
 Message::set_id(unsigned int message_id)
 {
-  __message_id = message_id;
+  message_id_ = message_id;
 }
 
 
@@ -226,7 +223,7 @@ Message::set_id(unsigned int message_id)
 void
 Message::set_hops(unsigned int hops)
 {
-  __hops=hops;
+  hops_=hops;
 }
 
 
@@ -234,13 +231,13 @@ Message::set_hops(unsigned int hops)
 void
 Message::mark_enqueued()
 {
-  __time_enqueued->stamp();
+  time_enqueued_->stamp();
   long sec = 0, usec = 0;
-  __time_enqueued->get_timestamp(sec, usec);
+  time_enqueued_->get_timestamp(sec, usec);
   data_ts->timestamp_sec  = sec;
   data_ts->timestamp_usec = usec;
 
-  __enqueued = true;
+  enqueued_ = true;
 }
 
 
@@ -250,7 +247,7 @@ Message::mark_enqueued()
 bool
 Message::enqueued() const
 {
-  return __enqueued;
+  return enqueued_;
 }
 
 
@@ -264,7 +261,7 @@ Message::enqueued() const
 const Time *
 Message::time_enqueued() const
 {
-  return __time_enqueued;
+  return time_enqueued_;
 }
 
 
@@ -307,7 +304,7 @@ void
 Message::set_from_chunk(const void *chunk)
 {
   memcpy(data_ptr, chunk, data_size);
-  __time_enqueued->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
+  time_enqueued_->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
 }
 
 
@@ -321,7 +318,7 @@ Message::operator=  (const Message & m)
 {
   if ( data_size == m.data_size ) {
     memcpy(data_ptr, m.data_ptr, data_size);
-    __time_enqueued->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
+    time_enqueued_->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
   }
 
   return *this;
@@ -387,7 +384,7 @@ Message::type() const
 InterfaceFieldIterator
 Message::fields()
 {
-  return InterfaceFieldIterator(_transmit_via_iface, __fieldinfo_list);
+  return InterfaceFieldIterator(_transmit_via_iface, fieldinfo_list_);
 }
 
 
@@ -407,7 +404,7 @@ Message::fields_end()
 unsigned int
 Message::num_fields() const
 {
-  return __num_fields;
+  return num_fields_;
 }
 
 
@@ -437,7 +434,7 @@ Message::add_fieldinfo(interface_fieldtype_t type, const char *name,
 		       size_t length, void *value, const char *enumtype,
 		       const interface_enum_map_t *enum_map)
 {
-  interface_fieldinfo_t *infol = __fieldinfo_list;
+  interface_fieldinfo_t *infol = fieldinfo_list_;
   interface_fieldinfo_t *newinfo = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
 
   newinfo->type     = type;
@@ -450,7 +447,7 @@ Message::add_fieldinfo(interface_fieldtype_t type, const char *name,
 
   if ( infol == NULL ) {
     // first entry
-    __fieldinfo_list = newinfo;
+    fieldinfo_list_ = newinfo;
   } else {
     // append to list
     while ( infol->next != NULL ) {
@@ -459,7 +456,7 @@ Message::add_fieldinfo(interface_fieldtype_t type, const char *name,
     infol->next = newinfo;
   }
 
-  ++__num_fields;
+  ++num_fields_;
 }
 
 

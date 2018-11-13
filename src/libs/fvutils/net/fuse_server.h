@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_SERVER_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_SERVER_H_
+#ifndef _FIREVISION_FVUTILS_NET_FUSE_SERVER_H_
+#define _FIREVISION_FVUTILS_NET_FUSE_SERVER_H_
 
 #include <core/threading/thread.h>
 #include <core/utils/lock_list.h>
@@ -37,9 +37,6 @@ namespace fawkes {
   class NetworkAcceptorThread;
 }
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FuseServerClientThread;
 
@@ -60,14 +57,14 @@ class FuseServer
   virtual void loop();
 
  private:
-  std::vector<fawkes::NetworkAcceptorThread *> __acceptor_threads;
+  std::vector<fawkes::NetworkAcceptorThread *> acceptor_threads_;
 
-  fawkes::LockList<FuseServerClientThread *>  __clients;
-  fawkes::LockList<FuseServerClientThread *>::iterator  __cit;
+  fawkes::LockList<FuseServerClientThread *>  clients_;
+  fawkes::LockList<FuseServerClientThread *>::iterator  cit_;
 
-  fawkes::LockList<FuseServerClientThread *>  __dead_clients;
+  fawkes::LockList<FuseServerClientThread *>  dead_clients_;
 
-  fawkes::ThreadCollector *__thread_collector;
+  fawkes::ThreadCollector *thread_collector_;
 };
 
 } // end namespace firevision

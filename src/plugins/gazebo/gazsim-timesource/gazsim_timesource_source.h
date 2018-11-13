@@ -26,8 +26,8 @@
 
 #include "../msgs/SimTime.pb.h"
 
-#ifndef __GAZEBO_TIMESOURCE_H_
-#define __GAZEBO_TIMESOURCE_H_
+#ifndef _GAZEBO_TIMESOURCE_H_
+#define _GAZEBO_TIMESOURCE_H_
 
 
 typedef const boost::shared_ptr<gazsim_msgs::SimTime const> ConstSimTimePtr;

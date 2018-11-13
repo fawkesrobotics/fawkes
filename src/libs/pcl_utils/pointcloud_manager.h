@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_PCL_UTILS_POINTCLOUD_MANAGER_H_
-#define __LIBS_PCL_UTILS_POINTCLOUD_MANAGER_H_
+#ifndef _LIBS_PCL_UTILS_POINTCLOUD_MANAGER_H_
+#define _LIBS_PCL_UTILS_POINTCLOUD_MANAGER_H_
 
 #include <core/exception.h>
 #include <core/utils/refptr.h>
@@ -43,9 +43,6 @@ namespace pcl {
 }
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class PointCloudManager
 {
@@ -75,7 +72,7 @@ class PointCloudManager
   const pcl_utils::StorageAdapter *  get_storage_adapter(const char *id);
 
  private:
-  fawkes::LockMap<std::string, pcl_utils::StorageAdapter *>  __clouds;
+  fawkes::LockMap<std::string, pcl_utils::StorageAdapter *>  clouds_;
 };
 
 
@@ -84,10 +81,10 @@ void
 PointCloudManager::add_pointcloud(const char *id,
                                   RefPtr<pcl::PointCloud<PointT> > cloud)
 {
-  fawkes::MutexLocker lock(__clouds.mutex());
+  fawkes::MutexLocker lock(clouds_.mutex());
 
-  if (__clouds.find(id) == __clouds.end()) {
-    __clouds[id] = new pcl_utils::PointCloudStorageAdapter<PointT>(cloud);
+  if (clouds_.find(id) == clouds_.end()) {
+    clouds_[id] = new pcl_utils::PointCloudStorageAdapter<PointT>(cloud);
   } else {
     throw Exception("Cloud %s already registered");
   }
@@ -97,18 +94,18 @@ template <typename PointT>
 const RefPtr<const pcl::PointCloud<PointT> >
 PointCloudManager::get_pointcloud(const char *id)
 {
-  fawkes::MutexLocker lock(__clouds.mutex());
+  fawkes::MutexLocker lock(clouds_.mutex());
 
-  if (__clouds.find(id) != __clouds.end()) {
+  if (clouds_.find(id) != clouds_.end()) {
     pcl_utils::PointCloudStorageAdapter<PointT> *pa =
-      dynamic_cast<pcl_utils::PointCloudStorageAdapter<PointT> *>(__clouds[id]);
+      dynamic_cast<pcl_utils::PointCloudStorageAdapter<PointT> *>(clouds_[id]);
 
     if (!pa) {
       // workaround for older compilers
-      if (strcmp(__clouds[id]->get_typename(),
+      if (strcmp(clouds_[id]->get_typename(),
                  typeid(pcl_utils::PointCloudStorageAdapter<PointT> *).name()) == 0)
       {
-        return static_cast<pcl_utils::PointCloudStorageAdapter<PointT> *>(__clouds[id])->cloud;
+        return static_cast<pcl_utils::PointCloudStorageAdapter<PointT> *>(clouds_[id])->cloud;
       }
 
       throw Exception("The desired point cloud is of a different type");

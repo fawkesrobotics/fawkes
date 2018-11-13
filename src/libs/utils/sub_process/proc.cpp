@@ -33,9 +33,6 @@
 #include <string>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SubProcess <libs/utils/sub_process/proc.h>
  * Sub-process execution with stdin/stdout/stderr redirection.

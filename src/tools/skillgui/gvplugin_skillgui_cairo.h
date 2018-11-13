@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_CAIRO_H_
-#define __TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_CAIRO_H_
+#ifndef _TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_CAIRO_H_
+#define _TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_CAIRO_H_
 
 #include <cairomm/cairomm.h>
 #include <gvc.h>

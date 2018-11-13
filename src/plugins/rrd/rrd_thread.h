@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_RRD_RRD_THREAD_H_
-#define __PLUGINS_RRD_RRD_THREAD_H_
+#ifndef _PLUGINS_RRD_RRD_THREAD_H_
+#define _PLUGINS_RRD_RRD_THREAD_H_
 
 #include <plugins/rrd/aspect/rrd_manager.h>
 #include <plugins/rrd/aspect/rrd_inifin.h>
@@ -66,13 +66,13 @@ class RRDThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::RRDAspectIniFin     __rrd_aspect_inifin;
+  fawkes::RRDAspectIniFin     rrd_aspect_inifin_;
 
-  fawkes::RWLockVector<fawkes::RRDDefinition *>      __rrds;
-  fawkes::RWLockVector<fawkes::RRDGraphDefinition *> __graphs;
+  fawkes::RWLockVector<fawkes::RRDDefinition *>      rrds_;
+  fawkes::RWLockVector<fawkes::RRDGraphDefinition *> graphs_;
 
-  fawkes::TimeWait           *__time_wait;
-  float                       __cfg_graph_interval;
+  fawkes::TimeWait           *time_wait_;
+  float                       cfg_graph_interval_;
 };
 
 #endif

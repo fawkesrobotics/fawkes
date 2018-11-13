@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JOYSTICK_SENSOR_THREAD_H_
-#define __PLUGINS_JOYSTICK_SENSOR_THREAD_H_
+#ifndef _PLUGINS_JOYSTICK_SENSOR_THREAD_H_
+#define _PLUGINS_JOYSTICK_SENSOR_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -51,15 +51,15 @@ class JoystickSensorThread
 
   /** Get joystick interface.
    * @return joystick interface */
-  fawkes::JoystickInterface * joystick_interface() const { return __joystick_if; }
+  fawkes::JoystickInterface * joystick_interface() const { return joystick_if_; }
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::JoystickInterface *__joystick_if;
+  fawkes::JoystickInterface *joystick_if_;
 
-  JoystickAcquisitionThread *__aqt;
+  JoystickAcquisitionThread *aqt_;
 };
 
 

@@ -25,9 +25,6 @@
 #include <boost/bind.hpp>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class LogFileDescriptorToLog <logging/fd_redirect.h>
  * Redirect a file descriptor to the log.

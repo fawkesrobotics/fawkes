@@ -59,70 +59,70 @@ class FawkesBeepDaemon
   FawkesBeepDaemon()
     : Thread("FawkesBeepDaemon", Thread::OPMODE_CONTINUOUS)
   {
-    __until     = NULL;
-    __bb        = NULL;
-    __switch_if = NULL;
+    until_     = NULL;
+    bb_        = NULL;
+    switch_if_ = NULL;
   }
 
   virtual void loop()
   {
-    while (! (__bb && __bb->is_alive() && __switch_if->is_valid())) {
-      if (__bb) {
+    while (! (bb_ && bb_->is_alive() && switch_if_->is_valid())) {
+      if (bb_) {
 	printf("Lost connection to blackboard\n");
-	__bb->close(__switch_if);
-	delete __bb;
-	__bb = NULL;
+	bb_->close(switch_if_);
+	delete bb_;
+	bb_ = NULL;
       }
       try {
 	printf("Trying to connect to remote BB...");
-	__bb = new RemoteBlackBoard("localhost", 1910);
-	__switch_if = __bb->open_for_writing<SwitchInterface>("Beep");
+	bb_ = new RemoteBlackBoard("localhost", 1910);
+	switch_if_ = bb_->open_for_writing<SwitchInterface>("Beep");
 	printf("succeeded\n");
       } catch (Exception &e) {
 	printf("failed\n");
-	delete __bb;
-	__bb = NULL;
+	delete bb_;
+	bb_ = NULL;
 	sleep(5);
       }
     }
 
-    if (__until) {
+    if (until_) {
       Time now;
-      if ((now - __until) >= 0) {
-	__beep.beep_off();
-	delete __until;
-	__until = NULL;
+      if ((now - until_) >= 0) {
+	beep_.beep_off();
+	delete until_;
+	until_ = NULL;
       }
     }
 
-    while (! __switch_if->msgq_empty()) {
-      if (  __switch_if->msgq_first_is<SwitchInterface::SetMessage>() ) {
-	SwitchInterface::SetMessage *msg = __switch_if->msgq_first<SwitchInterface::SetMessage>();
+    while (! switch_if_->msgq_empty()) {
+      if (  switch_if_->msgq_first_is<SwitchInterface::SetMessage>() ) {
+	SwitchInterface::SetMessage *msg = switch_if_->msgq_first<SwitchInterface::SetMessage>();
 	if (msg->value() > 0.0) {
-	  __beep.beep_on(msg->value());
+	  beep_.beep_on(msg->value());
 	} else if (msg->is_enabled()) {
-	  __beep.beep_on();
+	  beep_.beep_on();
 	} else {
-	  __beep.beep_off();
+	  beep_.beep_off();
 	}
 
-      } else if (  __switch_if->msgq_first_is<SwitchInterface::EnableDurationMessage>() ) {
+      } else if (  switch_if_->msgq_first_is<SwitchInterface::EnableDurationMessage>() ) {
 	SwitchInterface::EnableDurationMessage *msg =
-	  __switch_if->msgq_first<SwitchInterface::EnableDurationMessage>();
+	  switch_if_->msgq_first<SwitchInterface::EnableDurationMessage>();
 	float duration = fabs(msg->duration());
 	float value    = fabs(msg->value());
 
-	delete __until;
-	__until = new Time();
-	*__until += duration;
-	__beep.beep_on(value);
-      } else if (__switch_if->msgq_first_is<SwitchInterface::EnableSwitchMessage>() ) {
-	__beep.beep_on();
-      } else if (__switch_if->msgq_first_is<SwitchInterface::DisableSwitchMessage>() ) {
-	__beep.beep_off();
+	delete until_;
+	until_ = new Time();
+	*until_ += duration;
+	beep_.beep_on(value);
+      } else if (switch_if_->msgq_first_is<SwitchInterface::EnableSwitchMessage>() ) {
+	beep_.beep_on();
+      } else if (switch_if_->msgq_first_is<SwitchInterface::DisableSwitchMessage>() ) {
+	beep_.beep_off();
       }
       
-      __switch_if->msgq_pop();
+      switch_if_->msgq_pop();
     }
 
     usleep(10000);
@@ -138,11 +138,11 @@ class FawkesBeepDaemon
   }
 
  private:
-  BeepController __beep;
-  BlackBoard *__bb;
-  SwitchInterface *__switch_if;
+  BeepController beep_;
+  BlackBoard *bb_;
+  SwitchInterface *switch_if_;
 
-  Time *__until;
+  Time *until_;
 };
 
 

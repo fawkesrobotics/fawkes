@@ -33,9 +33,6 @@
 #include <cstdio>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FilterRectify <fvfilters/rectify.h>
  * Rectify image.
@@ -55,8 +52,8 @@ namespace firevision {
 FilterRectify::FilterRectify(RectificationInfoBlock *rib, bool mark_zeros)
   : Filter("FilterRectify")
 {
-  __rib = rib;
-  __mark_zeros = mark_zeros;
+  rib_ = rib;
+  mark_zeros_ = mark_zeros;
 }
 
 
@@ -96,7 +93,7 @@ FilterRectify::apply()
 
   unsigned char py1=0, py2=0, pu1=0, pu2=0, pv1=0, pv2=0;
 
-  RectificationLutInfoBlock *rlib = dynamic_cast<RectificationLutInfoBlock *>(__rib);
+  RectificationLutInfoBlock *rlib = dynamic_cast<RectificationLutInfoBlock *>(rib_);
 
   if ( rlib ) {
     if ( (rlib->pixel_width() != dst_roi->image_width) ||
@@ -111,7 +108,7 @@ FilterRectify::apply()
 
     rectinfo_lut_16x16_entry_t *llut = lut;
 
-    if ( __mark_zeros ) {
+    if ( mark_zeros_ ) {
       for (unsigned int h = 0; h < dst_roi->height; ++h) {
 	for (unsigned int w = 0; w < dst_roi->width; w += 2) {
 	  if ( lut->x == 0 && lut->y == 0 ) {
@@ -166,11 +163,11 @@ FilterRectify::apply()
     uint16_t ur1_x = 0, ur1_y = 0,
              ur2_x = 0, ur2_y = 0;
 
-    if (__mark_zeros) {
+    if (mark_zeros_) {
       for (unsigned int h = 0; h < dst_roi->height; ++h) {
 	for (unsigned int w = 0; w < dst_roi->width; w += 2) {
-	  __rib->mapping(w, h, &ur1_x, &ur1_y);
-	  __rib->mapping(w+1, h, &ur2_x, &ur2_y);
+	  rib_->mapping(w, h, &ur1_x, &ur1_y);
+	  rib_->mapping(w+1, h, &ur2_x, &ur2_y);
 
 	  if ( (ur1_x == 0) && (ur1_y == 0) ) {
 	    py1 = YUV422_PLANAR_Y_AT(src[0], src_roi[0]->image_width, w, h);
@@ -197,8 +194,8 @@ FilterRectify::apply()
     } else {
       for (unsigned int h = 0; h < dst_roi->height; ++h) {
 	for (unsigned int w = 0; w < dst_roi->width; w += 2) {
-	  __rib->mapping(w, h, &ur1_x, &ur1_y);
-	  __rib->mapping(w+1, h, &ur2_x, &ur2_y);
+	  rib_->mapping(w, h, &ur1_x, &ur1_y);
+	  rib_->mapping(w+1, h, &ur2_x, &ur2_y);
 
 	  YUV422_PLANAR_YUV(src[0], src_roi[0]->image_width, src_roi[0]->image_height,
 			    ur1_x, ur1_y, py1, pu1, pv1);

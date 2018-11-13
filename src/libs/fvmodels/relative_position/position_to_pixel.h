@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_PIXELFROMPOSITION_H_
-#define __FIREVISION_PIXELFROMPOSITION_H_
+#ifndef _FIREVISION_PIXELFROMPOSITION_H_
+#define _FIREVISION_PIXELFROMPOSITION_H_
 
 #include <tf/transformer.h>
 #include <utils/math/types.h>
@@ -59,4 +59,4 @@ private:
   float         cam_angle_min_vertical_;
 };
 }
-#endif /* __FIREVISION_PIXELFROMPOSITION_H_ */
+#endif /* FIREVISION_PIXELFROMPOSITION_H__ */

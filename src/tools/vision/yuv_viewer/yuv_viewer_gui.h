@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_TOOLS_YUV_VIEWER_LOC_VIEWER_GUI_H_
-#define __FIREVISION_TOOLS_YUV_VIEWER_LOC_VIEWER_GUI_H_
+#ifndef _FIREVISION_TOOLS_YUV_VIEWER_LOC_VIEWER_GUI_H_
+#define _FIREVISION_TOOLS_YUV_VIEWER_LOC_VIEWER_GUI_H_
 
 #define LOC_PLUGIN_NAME       "fvnao_loc"
 #define FUSE_PLUGIN_NAME      "fvfountain"
@@ -52,23 +52,23 @@ private:
 
 private:
   // widgets
-  Gtk::EventBox   *__yuv_vp;
-  Gtk::Viewport   *__cur_vp;
-  Gtk::Viewport   *__seg_vp;
-  Gtk::HScale     *__y_scale;
-  Gtk::Label      *__u_value;
-  Gtk::Label      *__v_value;
-  Gtk::SpinButton *__y_res;
-  Gtk::SpinButton *__u_res;
-  Gtk::SpinButton *__v_res;
+  Gtk::EventBox   *yuv_vp_;
+  Gtk::Viewport   *cur_vp_;
+  Gtk::Viewport   *seg_vp_;
+  Gtk::HScale     *y_scale_;
+  Gtk::Label      *u_value_;
+  Gtk::Label      *v_value_;
+  Gtk::SpinButton *y_res_;
+  Gtk::SpinButton *u_res_;
+  Gtk::SpinButton *v_res_;
 
-  ImageWidget     *__yuv_widget;
-  ImageWidget     *__cur_widget;
-  ImageWidget     *__seg_widget;
+  ImageWidget     *yuv_widget_;
+  ImageWidget     *cur_widget_;
+  ImageWidget     *seg_widget_;
 
-  unsigned char    __yuv_buffer[256 * 256 * 2];
-  unsigned char    __cur_buffer[ 60 *  40 * 2];
-  unsigned char    __seg_buffer[256 * 256 * 2];
+  unsigned char    yuv_buffer_[256 * 256 * 2];
+  unsigned char    cur_buffer_[ 60 *  40 * 2];
+  unsigned char    seg_buffer_[256 * 256 * 2];
 };
 
-#endif /* __FIREVISION_TOOLS_YUV_VIEWER_LOC_VIEWER_GUI_H_ */
+#endif /* FIREVISION_TOOLS_YUV_VIEWER_LOC_VIEWER_GUI_H__ */

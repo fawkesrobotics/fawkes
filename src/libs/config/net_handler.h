@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CONFIG_NET_HANDLER_H_
-#define __CONFIG_NET_HANDLER_H_
+#ifndef _CONFIG_NET_HANDLER_H_
+#define _CONFIG_NET_HANDLER_H_
 
 #include <core/threading/thread.h>
 #include <netcomm/fawkes/handler.h>
@@ -96,12 +96,12 @@ class ConfigNetworkHandler
     return m;
   }
 
-  Configuration                       *__config;
-  FawkesNetworkHub                    *__hub;
-  LockQueue< FawkesNetworkMessage * >  __inbound_queue;
+  Configuration                       *config_;
+  FawkesNetworkHub                    *hub_;
+  LockQueue< FawkesNetworkMessage * >  inbound_queue_;
 
-  LockList< unsigned int >             __subscribers;
-  LockList< unsigned int >::iterator   __sit;
+  LockList< unsigned int >             subscribers_;
+  LockList< unsigned int >::iterator   sit_;
 };
 
 } // end namespace fawkes

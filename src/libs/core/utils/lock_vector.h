@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_UTILS_LOCK_VECTOR_H_
-#define __CORE_UTILS_LOCK_VECTOR_H_
+#ifndef _CORE_UTILS_LOCK_VECTOR_H_
+#define _CORE_UTILS_LOCK_VECTOR_H_
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 template <typename Type>
 class LockVector : public std::vector<Type>
@@ -54,7 +51,7 @@ class LockVector : public std::vector<Type>
   LockVector<Type> &  operator=(const LockVector<Type> &lv);
   LockVector<Type> &  operator=(const std::vector<Type> &v);
  private:
-  mutable RefPtr<Mutex> __mutex;
+  mutable RefPtr<Mutex> mutex_;
 
 };
 
@@ -73,7 +70,7 @@ class LockVector : public std::vector<Type>
 /** Constructor. */
 template <typename Type>
 LockVector<Type>::LockVector()
-  : __mutex(new Mutex())
+  : mutex_(new Mutex())
 {}
 
 
@@ -82,7 +79,7 @@ LockVector<Type>::LockVector()
  */
 template <typename Type>
 LockVector<Type>::LockVector(const LockVector<Type> &lv)
-  : std::vector<Type>::vector(lv), __mutex(new Mutex())
+  : std::vector<Type>::vector(lv), mutex_(new Mutex())
 {}
 
 
@@ -97,7 +94,7 @@ template <typename Type>
 void
 LockVector<Type>::lock() const
 {
-  __mutex->lock();
+  mutex_->lock();
 }
 
 
@@ -108,7 +105,7 @@ template <typename Type>
 bool
 LockVector<Type>::try_lock() const
 {
-  return __mutex->try_lock();
+  return mutex_->try_lock();
 }
 
 
@@ -117,7 +114,7 @@ template <typename Type>
 void
 LockVector<Type>::unlock() const
 {
-  return __mutex->unlock();
+  return mutex_->unlock();
 }
 
 
@@ -128,9 +125,9 @@ template <typename Type>
 void
 LockVector<Type>::push_back_locked(const Type& x)
 {
-  __mutex->lock();
+  mutex_->lock();
   std::vector<Type>::push_back(x);
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -139,9 +136,9 @@ template <typename Type>
 void
 LockVector<Type>::pop_back_locked()
 {
-  __mutex->lock();
+  mutex_->lock();
   std::vector<Type>::pop_back();
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -152,9 +149,9 @@ template <typename Type>
 void
 LockVector<Type>::erase_locked(typename std::vector<Type>::iterator pos)
 {
-  __mutex->lock();
+  mutex_->lock();
   std::vector<Type>::erase(pos);
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 /** Erase given element range with lock protection.
@@ -166,9 +163,9 @@ void
 LockVector<Type>::erase_locked(typename std::vector<Type>::iterator first,
 			       typename std::vector<Type>::iterator last)
 {
-  __mutex->lock();
+  mutex_->lock();
   std::vector<Type>::erase(first, last);
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -180,7 +177,7 @@ template <typename Type>
 RefPtr<Mutex>
 LockVector<Type>::mutex() const
 {
-  return __mutex;
+  return mutex_;
 }
 
 
@@ -194,7 +191,7 @@ template <typename Type>
 LockVector<Type> &
 LockVector<Type>::operator=(const LockVector<Type> &lv)
 {
-  __mutex->lock();
+  mutex_->lock();
   lv.lock();
   this->clear();
   typename LockVector<Type>::const_iterator i;
@@ -202,7 +199,7 @@ LockVector<Type>::operator=(const LockVector<Type> &lv)
     this->push_back(*i);
   }
   lv.unlock();
-  __mutex->unlock();
+  mutex_->unlock();
 
   return *this;
 }
@@ -218,13 +215,13 @@ template <typename Type>
 LockVector<Type> &
 LockVector<Type>::operator=(const std::vector<Type> &v)
 {
-  __mutex->lock();
+  mutex_->lock();
   this->clear();
   typename std::vector<Type>::const_iterator i;
   for (i = v.begin(); i != v.end(); ++i) {
     this->push_back(*i);
   }
-  __mutex->unlock();
+  mutex_->unlock();
 
   return *this;
 }

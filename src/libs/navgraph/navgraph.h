@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_NAVGRAPH_NAVGRAPH_H_
-#define __LIBS_NAVGRAPH_NAVGRAPH_H_
+#ifndef _LIBS_NAVGRAPH_NAVGRAPH_H_
+#define _LIBS_NAVGRAPH_NAVGRAPH_H_
 
 #include <navgraph/navgraph_node.h>
 #include <navgraph/navgraph_edge.h>
@@ -34,14 +34,8 @@
 #include <functional>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 namespace navgraph {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
   typedef
   std::function<float (const fawkes::NavGraphNode &, const fawkes::NavGraphNode &)>
       EstimateFunction;

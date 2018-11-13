@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_IPC_MSG_EXCEPTIONS_H_
-#define __UTILS_IPC_MSG_EXCEPTIONS_H_
+#ifndef _UTILS_IPC_MSG_EXCEPTIONS_H_
+#define _UTILS_IPC_MSG_EXCEPTIONS_H_
 
 #include <core/exception.h>
 

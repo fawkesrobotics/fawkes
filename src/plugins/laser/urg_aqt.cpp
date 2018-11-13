@@ -69,9 +69,9 @@ HokuyoUrgAcquisitionThread::HokuyoUrgAcquisitionThread(std::string &cfg_name,
   : LaserAcquisitionThread("HokuyoUrgAcquisitionThread")
 {
   set_name("HokuyoURG(%s)", cfg_name.c_str());
-  __pre_init_done = false;
-  __cfg_name   = cfg_name;
-  __cfg_prefix = cfg_prefix;
+  pre_init_done_ = false;
+  cfg_name_   = cfg_name;
+  cfg_prefix_ = cfg_prefix;
 }
 
 
@@ -79,11 +79,11 @@ void
 HokuyoUrgAcquisitionThread::pre_init(fawkes::Configuration *config,
 				     fawkes::Logger        *logger)
 {
-  if (__pre_init_done)  return;
+  if (pre_init_done_)  return;
 
-  __number_of_values = _distances_size = 360;
+  number_of_values_ = _distances_size = 360;
 
-  __pre_init_done = true;
+  pre_init_done_ = true;
 }
 
 void
@@ -93,12 +93,12 @@ HokuyoUrgAcquisitionThread::init()
 
 #ifdef HAVE_LIBUDEV
   try {
-    __cfg_device = config->get_string((__cfg_prefix + "device").c_str());
+    cfg_device_ = config->get_string((cfg_prefix_ + "device").c_str());
   } catch (Exception &e) {
     // check if bus/port numbers are given
     try {
-      __cfg_device = "";
-      __cfg_serial = config->get_string((__cfg_prefix + "serial").c_str());
+      cfg_device_ = "";
+      cfg_serial_ = config->get_string((cfg_prefix_ + "serial").c_str());
 
       // try to find device using udev
       struct udev *udev;
@@ -168,8 +168,8 @@ HokuyoUrgAcquisitionThread::init()
           flock(urgfd, LOCK_UN);
 	  close(urgfd);
 
-	  if (devinfo["SERI"] == __cfg_serial) {
-	    __cfg_device = devpath;
+	  if (devinfo["SERI"] == cfg_serial_) {
+	    cfg_device_ = devpath;
 
 	    logger->log_info(
 	      name(), "Matching URG at %s (vendor: %s (%s), "
@@ -190,9 +190,9 @@ HokuyoUrgAcquisitionThread::init()
       udev_enumerate_unref(enumerate);
       udev_unref(udev);
 
-      if (__cfg_device == "") {
+      if (cfg_device_ == "") {
 	throw Exception("No Hokuyo URG with serial %s found",
-			__cfg_serial.c_str());
+			cfg_serial_.c_str());
       }
 
     } catch (Exception &e2) {
@@ -201,96 +201,96 @@ HokuyoUrgAcquisitionThread::init()
     }
   }
 #else
-  __cfg_device = config->get_string((__cfg_prefix + "device").c_str());
+  cfg_device_ = config->get_string((cfg_prefix_ + "device").c_str());
 #endif
 
-  __ctrl = new UrgCtrl();
+  ctrl_ = new UrgCtrl();
 #if __cplusplus >= 201103L
-  std::unique_ptr<UrgCtrl> ctrl(__ctrl);
+  std::unique_ptr<UrgCtrl> ctrl(ctrl_);
 #else
-  std::auto_ptr<UrgCtrl> ctrl(__ctrl);
+  std::auto_ptr<UrgCtrl> ctrl(ctrl_);
 #endif
-  __fd = open(__cfg_device.c_str(), 0, O_RDONLY);
-  if (__fd == -1) {
-    throw Exception(errno, "Failed to open URG device %s", __cfg_device.c_str());
+  fd_ = open(cfg_device_.c_str(), 0, O_RDONLY);
+  if (fd_ == -1) {
+    throw Exception(errno, "Failed to open URG device %s", cfg_device_.c_str());
   }
-  if (flock(__fd, LOCK_EX | LOCK_NB) != 0) {
-    close(__fd);
-    throw Exception("Failed to acquire lock for URG device %s", __cfg_device.c_str());
+  if (flock(fd_, LOCK_EX | LOCK_NB) != 0) {
+    close(fd_);
+    throw Exception("Failed to acquire lock for URG device %s", cfg_device_.c_str());
   }
-  if ( ! __ctrl->connect(__cfg_device.c_str()) ) {
-    close(__fd);
-    flock(__fd, LOCK_UN);
-    throw Exception("Connecting to URG laser failed: %s", __ctrl->what());
+  if ( ! ctrl_->connect(cfg_device_.c_str()) ) {
+    close(fd_);
+    flock(fd_, LOCK_UN);
+    throw Exception("Connecting to URG laser failed: %s", ctrl_->what());
   }
 
-  __ctrl->setCaptureMode(AutoCapture);
-  __device_info = get_device_info(__ctrl);
+  ctrl_->setCaptureMode(AutoCapture);
+  device_info_ = get_device_info(ctrl_);
 
-  if (__device_info.find("PROD") == __device_info.end()) {
-    close(__fd);
-    flock(__fd, LOCK_UN);
+  if (device_info_.find("PROD") == device_info_.end()) {
+    close(fd_);
+    flock(fd_, LOCK_UN);
     throw Exception("Failed to read product info for URG laser");
   }
 
-  logger->log_info(name(), "Using device file %s", __cfg_device.c_str());
+  logger->log_info(name(), "Using device file %s", cfg_device_.c_str());
   std::map<std::string, std::string>::iterator di;
-  for (di = __device_info.begin(); di != __device_info.end(); ++di) {
+  for (di = device_info_.begin(); di != device_info_.end(); ++di) {
     logger->log_info(name(), "%s: %s", di->first.c_str(), di->second.c_str());
   }
 
-  __scan_msec = __ctrl->scanMsec();
+  scan_msec_ = ctrl_->scanMsec();
   float distance_min = 0.;
   float distance_max = 0.;
 
   try {
-    __first_ray     = config->get_uint((__cfg_prefix + "first_ray").c_str());
-    __last_ray      = config->get_uint((__cfg_prefix + "last_ray").c_str());
-    __front_ray     = config->get_uint((__cfg_prefix + "front_ray").c_str());
-    __slit_division = config->get_uint((__cfg_prefix + "slit_division").c_str());
+    first_ray_     = config->get_uint((cfg_prefix_ + "first_ray").c_str());
+    last_ray_      = config->get_uint((cfg_prefix_ + "last_ray").c_str());
+    front_ray_     = config->get_uint((cfg_prefix_ + "front_ray").c_str());
+    slit_division_ = config->get_uint((cfg_prefix_ + "slit_division").c_str());
   } catch (Exception &e) {
     logger->log_info(name(), "No or incomplete config data, reading from device");
     // Get data from device
-    RangeSensorParameter p = __ctrl->parameter();
-    __first_ray     = p.area_min;
-    __last_ray      = p.area_max;
-    __front_ray     = p.area_front;
-    __slit_division = p.area_total;
+    RangeSensorParameter p = ctrl_->parameter();
+    first_ray_     = p.area_min;
+    last_ray_      = p.area_max;
+    front_ray_     = p.area_front;
+    slit_division_ = p.area_total;
     distance_min    = p.distance_min / 1000.;
     distance_max    = p.distance_max / 1000.;
   }
 
-  __step_per_angle = __slit_division / 360.;
-  __angle_per_step = 360. / __slit_division;
-  __angular_range  = (__last_ray - __first_ray) * __angle_per_step;
+  step_per_angle_ = slit_division_ / 360.;
+  angle_per_step_ = 360. / slit_division_;
+  angular_range_  = (last_ray_ - first_ray_) * angle_per_step_;
 
-  logger->log_info(name(), "Time per scan: %li msec", __scan_msec);
+  logger->log_info(name(), "Time per scan: %li msec", scan_msec_);
   logger->log_info(name(), "Rays range:    %u..%u, front at %u",
-		   __first_ray, __last_ray, __front_ray);
-  logger->log_info(name(), "Slit Division: %u", __slit_division);
-  logger->log_info(name(), "Step/Angle:    %f", __step_per_angle);
-  logger->log_info(name(), "Angle/Step:    %f deg", __angle_per_step);
-  logger->log_info(name(), "Angular Range: %f deg", __angular_range);
+		   first_ray_, last_ray_, front_ray_);
+  logger->log_info(name(), "Slit Division: %u", slit_division_);
+  logger->log_info(name(), "Step/Angle:    %f", step_per_angle_);
+  logger->log_info(name(), "Angle/Step:    %f deg", angle_per_step_);
+  logger->log_info(name(), "Angular Range: %f deg", angular_range_);
   logger->log_info(name(), "Min dist:      %f m", distance_min);
   logger->log_info(name(), "Max dist:      %f m", distance_max);
 
 
-  __cfg_time_offset = 0.;
+  cfg_time_offset_ = 0.;
   try {
     float time_factor =
-      config->get_float((__cfg_prefix + "time_offset_scan_time_factor").c_str());
-    __cfg_time_offset = (__scan_msec / -1000.) * time_factor;
+      config->get_float((cfg_prefix_ + "time_offset_scan_time_factor").c_str());
+    cfg_time_offset_ = (scan_msec_ / -1000.) * time_factor;
   } catch (Exception &e) {} // ignored, use default
 
   try {
-    __cfg_time_offset += config->get_float((__cfg_prefix + "time_offset").c_str());
+    cfg_time_offset_ += config->get_float((cfg_prefix_ + "time_offset").c_str());
   } catch (Exception &e) {} // ignored, use default
 
   // that should be 1000 really to convert msec -> usec. But empirically
   // the results are slightly better with 990 as factor.
-  __timer = new TimeWait(clock, __scan_msec * 990);
+  timer_ = new TimeWait(clock, scan_msec_ * 990);
 
-  alloc_distances(__number_of_values);
+  alloc_distances(number_of_values_);
 
   ctrl.release();
 }
@@ -301,13 +301,13 @@ HokuyoUrgAcquisitionThread::finalize()
 {
   free(_distances);
   _distances = NULL;
-  delete __timer;
+  delete timer_;
 
-  __ctrl->stop();
-  delete __ctrl;
+  ctrl_->stop();
+  delete ctrl_;
 
-  close(__fd);
-  flock(__fd, LOCK_UN);
+  close(fd_);
+  flock(fd_, LOCK_UN);
 
   logger->log_debug(name(), "Stopping laser");
 }
@@ -316,21 +316,21 @@ HokuyoUrgAcquisitionThread::finalize()
 void
 HokuyoUrgAcquisitionThread::loop()
 {
-  __timer->mark_start();
+  timer_->mark_start();
 
   std::vector<long> values;
-  int num_values = __ctrl->capture(values);
+  int num_values = ctrl_->capture(values);
   if (num_values > 0) {
     //logger->log_debug(name(), "Captured %i values", num_values);
     _data_mutex->lock();
 
     _new_data = true;
     _timestamp->stamp();
-    *_timestamp += __cfg_time_offset;
+    *_timestamp += cfg_time_offset_;
     for (unsigned int a = 0; a < 360; ++a) {
-      unsigned int front_idx = __front_ray + roundf(a * __step_per_angle);
-      unsigned int idx = front_idx % __slit_division;
-      if ( (idx >= __first_ray) && (idx <= __last_ray) ) {
+      unsigned int front_idx = front_ray_ + roundf(a * step_per_angle_);
+      unsigned int idx = front_idx % slit_division_;
+      if ( (idx >= first_ray_) && (idx <= last_ray_) ) {
         switch (values[idx]) // See the SCIP2.0 reference on page 12, Table 3
         {
         case 0: // Detected object is possibly at 22m
@@ -395,7 +395,7 @@ HokuyoUrgAcquisitionThread::loop()
     //logger->log_warn(name(), "No new scan available, ignoring");
   }
 
-  __timer->wait();
+  timer_->wait();
 }
 
 std::map<std::string, std::string>

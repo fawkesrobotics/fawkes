@@ -43,7 +43,7 @@ JacoInfoThread::JacoInfoThread(const char *name, jaco_arm_t* arm)
   : Thread(name, Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
 {
-  __arm = arm;
+  arm_ = arm;
 }
 
 
@@ -60,36 +60,36 @@ JacoInfoThread::init()
 void
 JacoInfoThread::finalize()
 {
-  __arm = NULL;
+  arm_ = NULL;
 }
 
 void
 JacoInfoThread::loop()
 {
-  if( __arm == NULL || __arm->arm == NULL || __arm->iface == NULL )
+  if( arm_ == NULL || arm_->arm == NULL || arm_->iface == NULL )
     return;
 
-  __arm->iface->set_connected(true);
+  arm_->iface->set_connected(true);
 
   try {
-    if( __arm->iface->is_final() ) {
-      __arm->arm->get_coords(__cpos);
-      __arm->iface->set_x(__cpos.at(0));
-      __arm->iface->set_y(__cpos.at(1));
-      __arm->iface->set_z(__cpos.at(2));
-      __arm->iface->set_euler1(__cpos.at(3));
-      __arm->iface->set_euler2(__cpos.at(4));
-      __arm->iface->set_euler3(__cpos.at(5));
+    if( arm_->iface->is_final() ) {
+      arm_->arm->get_coords(cpos_);
+      arm_->iface->set_x(cpos_.at(0));
+      arm_->iface->set_y(cpos_.at(1));
+      arm_->iface->set_z(cpos_.at(2));
+      arm_->iface->set_euler1(cpos_.at(3));
+      arm_->iface->set_euler2(cpos_.at(4));
+      arm_->iface->set_euler3(cpos_.at(5));
     }
 
-    __arm->arm->get_fingers(__cpos);
-    __arm->iface->set_finger1( std::max(0.f, std::min(60.f, __cpos.at(0))) );
-    __arm->iface->set_finger2( std::max(0.f, std::min(60.f, __cpos.at(1))) );
-    __arm->iface->set_finger3( std::max(0.f, std::min(60.f, __cpos.at(2))) );
+    arm_->arm->get_fingers(cpos_);
+    arm_->iface->set_finger1( std::max(0.f, std::min(60.f, cpos_.at(0))) );
+    arm_->iface->set_finger2( std::max(0.f, std::min(60.f, cpos_.at(1))) );
+    arm_->iface->set_finger3( std::max(0.f, std::min(60.f, cpos_.at(2))) );
 
-    __arm->arm->get_joints(__apos);
-    for(unsigned int i=0; i<__apos.size(); i++) {
-      __arm->iface->set_joints(i, __apos.at(i));
+    arm_->arm->get_joints(apos_);
+    for(unsigned int i=0; i<apos_.size(); i++) {
+      arm_->iface->set_joints(i, apos_.at(i));
     }
 
   } catch(fawkes::Exception &e) {

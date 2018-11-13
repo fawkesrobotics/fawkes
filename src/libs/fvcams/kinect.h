@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CAMS_KINECT_H_
-#define __FIREVISION_CAMS_KINECT_H_
+#ifndef _FIREVISION_CAMS_KINECT_H_
+#define _FIREVISION_CAMS_KINECT_H_
 
 #include "camera.h"
 
 #include <libfreenect.hpp>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class CameraArgumentParser;
 
@@ -103,4 +100,4 @@ class KinectCamera : public Camera
 
 } // end namespace firevision
 
-#endif /* __FIREVISION_CAMS_KINECT_H_ */
+#endif /* FIREVISION_CAMS_KINECT_H__ */

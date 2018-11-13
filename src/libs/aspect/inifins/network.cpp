@@ -28,9 +28,6 @@
 #include <netcomm/utils/resolver.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NetworkAspectIniFin <aspect/inifins/network.h>
  * Initializer/finalizer for the NetworkAspect.
@@ -47,9 +44,9 @@ NetworkAspectIniFin::NetworkAspectIniFin(NetworkNameResolver *nnresolver,
 					 ServiceBrowser *service_browser)
   : AspectIniFin("NetworkAspect")
 {
-  __nnresolver        = nnresolver;
-  __service_publisher = service_publisher;
-  __service_browser   = service_browser;
+  nnresolver_        = nnresolver;
+  service_publisher_ = service_publisher;
+  service_browser_   = service_browser;
 }
 
 
@@ -64,8 +61,8 @@ NetworkAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  network_thread->init_NetworkAspect(__nnresolver,
-				     __service_publisher, __service_browser);
+  network_thread->init_NetworkAspect(nnresolver_,
+				     service_publisher_, service_browser_);
 }
 
 

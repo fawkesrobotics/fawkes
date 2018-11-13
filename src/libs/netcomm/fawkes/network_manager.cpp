@@ -39,9 +39,6 @@
 #include <cstdlib>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FawkesNetworkManager <netcomm/fawkes/network_manager.h>
  * Fawkes Network Manager.
@@ -67,28 +64,28 @@ FawkesNetworkManager::FawkesNetworkManager(ThreadCollector *thread_collector,
                                            unsigned short int fawkes_port,
                                            const char *service_name)
 {
-  __fawkes_port      = fawkes_port;
-  __thread_collector = thread_collector;
-  __fawkes_network_thread = new FawkesNetworkServerThread(enable_ipv4, enable_ipv6,
+  fawkes_port_      = fawkes_port;
+  thread_collector_ = thread_collector;
+  fawkes_network_thread_ = new FawkesNetworkServerThread(enable_ipv4, enable_ipv6,
                                                           listen_ipv4, listen_ipv6,
-                                                          __fawkes_port,
-                                                          __thread_collector);
-  __thread_collector->add(__fawkes_network_thread);
+                                                          fawkes_port_,
+                                                          thread_collector_);
+  thread_collector_->add(fawkes_network_thread_);
 #ifdef HAVE_AVAHI
-  __avahi_thread          = new AvahiThread(enable_ipv4, enable_ipv6);
-  __service_publisher     = __avahi_thread;
-  __service_browser       = __avahi_thread;
-  __thread_collector->add(__avahi_thread);
-  __nnresolver = new NetworkNameResolver(__avahi_thread);
-  NetworkService *fawkes_service = new NetworkService(__nnresolver, service_name,
+  avahi_thread_          = new AvahiThread(enable_ipv4, enable_ipv6);
+  service_publisher_     = avahi_thread_;
+  service_browser_       = avahi_thread_;
+  thread_collector_->add(avahi_thread_);
+  nnresolver_ = new NetworkNameResolver(avahi_thread_);
+  NetworkService *fawkes_service = new NetworkService(nnresolver_, service_name,
 						      "_fawkes._tcp",
-						      __fawkes_port);
-  __avahi_thread->publish_service(fawkes_service);
+						      fawkes_port_);
+  avahi_thread_->publish_service(fawkes_service);
   delete fawkes_service;
 #else
-  __service_publisher = new DummyServicePublisher();
-  __service_browser   = new DummyServiceBrowser();
-  __nnresolver        = new NetworkNameResolver();
+  service_publisher_ = new DummyServicePublisher();
+  service_browser_   = new DummyServiceBrowser();
+  nnresolver_        = new NetworkNameResolver();
 #endif
 }
 
@@ -96,16 +93,16 @@ FawkesNetworkManager::FawkesNetworkManager(ThreadCollector *thread_collector,
 /** Destructor. */
 FawkesNetworkManager::~FawkesNetworkManager()
 {
-  __thread_collector->remove(__fawkes_network_thread);
-  delete __fawkes_network_thread;
+  thread_collector_->remove(fawkes_network_thread_);
+  delete fawkes_network_thread_;
 #ifdef HAVE_AVAHI
-  __thread_collector->remove(__avahi_thread);
-  delete __avahi_thread;
+  thread_collector_->remove(avahi_thread_);
+  delete avahi_thread_;
 #else
-  delete __service_publisher;
-  delete __service_browser;
+  delete service_publisher_;
+  delete service_browser_;
 #endif
-  delete __nnresolver;
+  delete nnresolver_;
 }
 
 
@@ -115,7 +112,7 @@ FawkesNetworkManager::~FawkesNetworkManager()
 FawkesNetworkHub *
 FawkesNetworkManager::hub()
 {
-  return __fawkes_network_thread;
+  return fawkes_network_thread_;
 }
 
 
@@ -125,7 +122,7 @@ FawkesNetworkManager::hub()
 NetworkNameResolver *
 FawkesNetworkManager::nnresolver()
 {
-  return __nnresolver;
+  return nnresolver_;
 }
 
 
@@ -135,7 +132,7 @@ FawkesNetworkManager::nnresolver()
 ServicePublisher *
 FawkesNetworkManager::service_publisher()
 {
-  return __service_publisher;
+  return service_publisher_;
 }
 
 
@@ -145,7 +142,7 @@ FawkesNetworkManager::service_publisher()
 ServiceBrowser *
 FawkesNetworkManager::service_browser()
 {
-  return __service_browser;
+  return service_browser_;
 }
 
 /** Get Fawkes TCP port.
@@ -154,7 +151,7 @@ FawkesNetworkManager::service_browser()
 unsigned short int
 FawkesNetworkManager::fawkes_port() const
 {
-  return __fawkes_port;
+  return fawkes_port_;
 }
 
 

@@ -23,8 +23,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CAMS_DUMMY_CONTROL_H_
-#define __FIREVISION_CAMS_DUMMY_CONTROL_H_
+#ifndef _FIREVISION_CAMS_DUMMY_CONTROL_H_
+#define _FIREVISION_CAMS_DUMMY_CONTROL_H_
 
 #include <fvcams/control/color.h>
 #include <fvcams/control/image.h>
@@ -34,9 +34,6 @@
 #include <fvcams/control/focus.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Plain dummy control.
  * Does nothing, supports nothing. Use to avoid unecessary NULL checks

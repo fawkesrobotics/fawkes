@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_UTILS_RWLOCK_MAP_H_
-#define __CORE_UTILS_RWLOCK_MAP_H_
+#ifndef _CORE_UTILS_RWLOCK_MAP_H_
+#define _CORE_UTILS_RWLOCK_MAP_H_
 
 #include <core/threading/read_write_lock.h>
 #include <core/utils/refptr.h>
@@ -51,7 +51,7 @@ class RWLockMap : public std::map<KeyType, ValueType, LessKey>
   void     erase_locked(const KeyType &key);
 
  private:
-  RefPtr<ReadWriteLock> __rwlock;
+  RefPtr<ReadWriteLock> rwlock_;
 
 };
 
@@ -70,7 +70,7 @@ class RWLockMap : public std::map<KeyType, ValueType, LessKey>
 /** Constructor. */
 template <typename KeyType, typename ValueType, typename LessKey>
 RWLockMap<KeyType, ValueType, LessKey>::RWLockMap()
-  : __rwlock(new ReadWriteLock())
+  : rwlock_(new ReadWriteLock())
 {}
 
 
@@ -79,7 +79,7 @@ RWLockMap<KeyType, ValueType, LessKey>::RWLockMap()
  */
 template <typename KeyType, typename ValueType, typename LessKey>
 RWLockMap<KeyType, ValueType, LessKey>::RWLockMap(const RWLockMap<KeyType, ValueType, LessKey> &lm)
-  : std::map<KeyType, ValueType, LessKey>::map(lm), __rwlock(new ReadWriteLock())
+  : std::map<KeyType, ValueType, LessKey>::map(lm), rwlock_(new ReadWriteLock())
 {}
 
 
@@ -94,7 +94,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 RWLockMap<KeyType, ValueType, LessKey>::lock_for_read()
 {
-  __rwlock->lock_for_read();
+  rwlock_->lock_for_read();
 }
 
 
@@ -103,7 +103,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 RWLockMap<KeyType, ValueType, LessKey>::lock_for_write()
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
 }
 
 
@@ -114,7 +114,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 bool
 RWLockMap<KeyType, ValueType, LessKey>::try_lock_for_read()
 {
-  return __rwlock->try_lock_for_read();
+  return rwlock_->try_lock_for_read();
 }
 
 
@@ -125,7 +125,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 bool
 RWLockMap<KeyType, ValueType, LessKey>::try_lock_for_write()
 {
-  return __rwlock->try_lock_for_write();
+  return rwlock_->try_lock_for_write();
 }
 
 
@@ -134,7 +134,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 RWLockMap<KeyType, ValueType, LessKey>::unlock()
 {
-  return __rwlock->unlock();
+  return rwlock_->unlock();
 }
 
 
@@ -146,9 +146,9 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 RWLockMap<KeyType, ValueType, LessKey>::erase_locked(const KeyType &key)
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
   std::map<KeyType, ValueType, LessKey>::erase(key);
-  __rwlock->unlock();
+  rwlock_->unlock();
 }
 
 
@@ -160,7 +160,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 RefPtr<ReadWriteLock>
 RWLockMap<KeyType, ValueType, LessKey>::rwlock() const
 {
-  return __rwlock;
+  return rwlock_;
 }
 
 

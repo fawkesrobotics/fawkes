@@ -34,9 +34,6 @@
 #include <cstring>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FuseImageContent <fvutils/net/fuse_image_content.h>
  * FUSE image content.
@@ -60,12 +57,12 @@ FuseImageContent::FuseImageContent(uint32_t type,
   _payload_size = payload_size;
   _payload      = payload;
 
-  __header = (FUSE_image_message_header_t *)_payload;
-  __buffer = (unsigned char *)_payload + sizeof(FUSE_image_message_header_t);
-  __capture_time = new fawkes::Time(ntohl(__header->capture_time_sec),
-				    ntohl(__header->capture_time_usec));
+  header_ = (FUSE_image_message_header_t *)_payload;
+  buffer_ = (unsigned char *)_payload + sizeof(FUSE_image_message_header_t);
+  capture_time_ = new fawkes::Time(ntohl(header_->capture_time_sec),
+				    ntohl(header_->capture_time_usec));
 
-  __buffer_size = ntohl(__header->buffer_size);
+  buffer_size_ = ntohl(header_->buffer_size);
 }
 
 
@@ -75,34 +72,34 @@ FuseImageContent::FuseImageContent(uint32_t type,
  */
 FuseImageContent::FuseImageContent(SharedMemoryImageBuffer *b)
 {
-  __buffer_size  = colorspace_buffer_size(b->colorspace(), b->width(), b->height());
-  _payload_size  = __buffer_size + sizeof(FUSE_image_message_header_t);
+  buffer_size_  = colorspace_buffer_size(b->colorspace(), b->width(), b->height());
+  _payload_size  = buffer_size_ + sizeof(FUSE_image_message_header_t);
   _payload = malloc(_payload_size);
 
   if ( _payload == NULL ) {
     throw fawkes::OutOfMemoryException("Cannot allocate FuseImageContent buffer");
   }
 
-  __header = (FUSE_image_message_header_t *)_payload;
-  __buffer = (unsigned char *)_payload + sizeof(FUSE_image_message_header_t);
+  header_ = (FUSE_image_message_header_t *)_payload;
+  buffer_ = (unsigned char *)_payload + sizeof(FUSE_image_message_header_t);
 
-  strncpy(__header->image_id, b->image_id(), IMAGE_ID_MAX_LENGTH-1);
-  __header->format = FUSE_IF_RAW;
-  __header->colorspace = htons(b->colorspace());
-  __header->reserved = 0;
-  __header->width  = htonl(b->width());
-  __header->height = htonl(b->height());
-  __header->buffer_size = htonl(__buffer_size);
+  strncpy(header_->image_id, b->image_id(), IMAGE_ID_MAX_LENGTH-1);
+  header_->format = FUSE_IF_RAW;
+  header_->colorspace = htons(b->colorspace());
+  header_->reserved = 0;
+  header_->width  = htonl(b->width());
+  header_->height = htonl(b->height());
+  header_->buffer_size = htonl(buffer_size_);
 
   long int cts = 0, ctus = 0;
   b->capture_time(&cts, &ctus);
-  __header->capture_time_sec = htonl(cts);
-  __header->capture_time_usec = htonl(ctus);
+  header_->capture_time_sec = htonl(cts);
+  header_->capture_time_usec = htonl(ctus);
 
-  __capture_time = NULL;
+  capture_time_ = NULL;
 
   b->lock_for_read();
-  memcpy(__buffer, b->buffer(), __buffer_size);
+  memcpy(buffer_, b->buffer(), buffer_size_);
   b->unlock();
 }
 
@@ -126,37 +123,37 @@ FuseImageContent::FuseImageContent(FUSE_image_format_t image_format, const char 
 				   long int capture_time_sec,
 				   long int capture_time_usec)
 {
-  __buffer_size  = buffer_size;
-  _payload_size  = __buffer_size + sizeof(FUSE_image_message_header_t);
+  buffer_size_  = buffer_size;
+  _payload_size  = buffer_size_ + sizeof(FUSE_image_message_header_t);
   _payload = malloc(_payload_size);
 
   if ( _payload == NULL ) {
     throw fawkes::OutOfMemoryException("Cannot allocate FuseImageContent buffer");
   }
 
-  __header = (FUSE_image_message_header_t *)_payload;
-  __buffer = (unsigned char *)_payload + sizeof(FUSE_image_message_header_t);
+  header_ = (FUSE_image_message_header_t *)_payload;
+  buffer_ = (unsigned char *)_payload + sizeof(FUSE_image_message_header_t);
 
-  strncpy(__header->image_id, image_id, IMAGE_ID_MAX_LENGTH-1);
-  __header->format = image_format;
-  __header->colorspace = htons(colorspace);
-  __header->reserved = 0;
-  __header->width  = htonl(width);
-  __header->height = htonl(height);
-  __header->buffer_size = htonl(__buffer_size);
-  __header->capture_time_sec = htonl(capture_time_sec);
-  __header->capture_time_usec = htonl(capture_time_usec);
+  strncpy(header_->image_id, image_id, IMAGE_ID_MAX_LENGTH-1);
+  header_->format = image_format;
+  header_->colorspace = htons(colorspace);
+  header_->reserved = 0;
+  header_->width  = htonl(width);
+  header_->height = htonl(height);
+  header_->buffer_size = htonl(buffer_size_);
+  header_->capture_time_sec = htonl(capture_time_sec);
+  header_->capture_time_usec = htonl(capture_time_usec);
 
-  __capture_time = NULL;
+  capture_time_ = NULL;
 
-  memcpy(__buffer, buffer, __buffer_size);
+  memcpy(buffer_, buffer, buffer_size_);
 }
 
 
 /** Destructor. */
 FuseImageContent::~FuseImageContent()
 {
-  delete __capture_time;
+  delete capture_time_;
 }
 
 /** Image buffer.
@@ -165,7 +162,7 @@ FuseImageContent::~FuseImageContent()
 unsigned char *
 FuseImageContent::buffer() const
 {
-  return __buffer;
+  return buffer_;
 }
 
 
@@ -175,7 +172,7 @@ FuseImageContent::buffer() const
 size_t
 FuseImageContent::buffer_size() const
 {
-  return __buffer_size;
+  return buffer_size_;
 }
 
 
@@ -185,7 +182,7 @@ FuseImageContent::buffer_size() const
 unsigned int
 FuseImageContent::pixel_width() const
 {
-  return ntohl(__header->width);
+  return ntohl(header_->width);
 }
 
 
@@ -195,7 +192,7 @@ FuseImageContent::pixel_width() const
 unsigned int
 FuseImageContent::pixel_height() const
 {
-  return ntohl(__header->height);
+  return ntohl(header_->height);
 }
 
 
@@ -205,7 +202,7 @@ FuseImageContent::pixel_height() const
 unsigned int
 FuseImageContent::colorspace() const
 {
-  return ntohs(__header->colorspace);
+  return ntohs(header_->colorspace);
 }
 
 
@@ -215,7 +212,7 @@ FuseImageContent::colorspace() const
 unsigned int
 FuseImageContent::format() const
 {
-  return __header->format;
+  return header_->format;
 }
 
 
@@ -225,11 +222,11 @@ FuseImageContent::format() const
 fawkes::Time *
 FuseImageContent::capture_time() const
 {
-  if ( ! __capture_time ) {
-    __capture_time = new fawkes::Time(ntohl(__header->capture_time_sec),
-				      ntohl(__header->capture_time_usec));
+  if ( ! capture_time_ ) {
+    capture_time_ = new fawkes::Time(ntohl(header_->capture_time_sec),
+				      ntohl(header_->capture_time_usec));
   }
-  return __capture_time;
+  return capture_time_;
 }
 
 void
@@ -252,20 +249,20 @@ FuseImageContent::serialize()
 void
 FuseImageContent::decompress(unsigned char *yuv422_planar_buffer, size_t buffer_size)
 {
-  if ( buffer_size < colorspace_buffer_size(YUV422_PLANAR, ntohs(__header->width),
-					    ntohs(__header->height)) ) {
+  if ( buffer_size < colorspace_buffer_size(YUV422_PLANAR, ntohs(header_->width),
+					    ntohs(header_->height)) ) {
     throw fawkes::IllegalArgumentException("Supplied buffer is too small\n");
   }
-  if ( __header->format != FUSE_IF_JPEG ) {
+  if ( header_->format != FUSE_IF_JPEG ) {
     JpegImageDecompressor *decompressor = new JpegImageDecompressor();
-    decompressor->set_compressed_buffer(__buffer, __buffer_size);
+    decompressor->set_compressed_buffer(buffer_, buffer_size_);
     decompressor->set_decompressed_buffer(yuv422_planar_buffer, buffer_size);
     decompressor->decompress();
     delete decompressor;
   } else {
-    convert((colorspace_t)ntohs(__header->colorspace), YUV422_PLANAR,
-	    __buffer, yuv422_planar_buffer,
-	    ntohs(__header->width), ntohs(__header->height));
+    convert((colorspace_t)ntohs(header_->colorspace), YUV422_PLANAR,
+	    buffer_, yuv422_planar_buffer,
+	    ntohs(header_->width), ntohs(header_->height));
   }
 }
 

@@ -22,16 +22,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_TYPE_H_
-#define __FIREVISION_UTILS_TYPE_H_
+#ifndef _FIREVISION_UTILS_TYPE_H_
+#define _FIREVISION_UTILS_TYPE_H_
 
 #include <utils/math/types.h>
 #include <stdint.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Center in ROI.
  * Must be signed since the center of a ball may be out of the ROI.

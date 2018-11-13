@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_REFBOXCOMM_PROCESSOR_REMOTEBB_H_
-#define __PLUGINS_REFBOXCOMM_PROCESSOR_REMOTEBB_H_
+#ifndef _PLUGINS_REFBOXCOMM_PROCESSOR_REMOTEBB_H_
+#define _PLUGINS_REFBOXCOMM_PROCESSOR_REMOTEBB_H_
 
 #include "processor.h"
 #include "state_handler.h"
@@ -48,18 +48,18 @@ class RemoteBlackBoardRefBoxProcessor : public RefBoxProcessor
   void reconnect();
 
  private:
-  fawkes::Logger     *__logger;
-  fawkes::BlackBoard *__rbb;
+  fawkes::Logger     *logger_;
+  fawkes::BlackBoard *rbb_;
 
-  fawkes::GameStateInterface *__gamestate_if;
+  fawkes::GameStateInterface *gamestate_if_;
 
-  const char *__name;
+  const char *name_;
 
-  char               *__bb_host;
-  unsigned short int  __bb_port;
-  char               *__iface_id;
+  char               *bb_host_;
+  unsigned short int  bb_port_;
+  char               *iface_id_;
 
-  bool __message_shown;
+  bool message_shown_;
 };
 
 #endif

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_THREADING_WAIT_CONDITION_H_
-#define __CORE_THREADING_WAIT_CONDITION_H_
+#ifndef _CORE_THREADING_WAIT_CONDITION_H_
+#define _CORE_THREADING_WAIT_CONDITION_H_
 
 namespace fawkes {
 
@@ -46,9 +46,9 @@ class WaitCondition {
   void wake_all();
 
  private:
-  WaitConditionData *__cond_data;
-  Mutex             *__mutex;
-  bool               __own_mutex;
+  WaitConditionData *cond_data_;
+  Mutex             *mutex_;
+  bool               own_mutex_;
 };
 
 

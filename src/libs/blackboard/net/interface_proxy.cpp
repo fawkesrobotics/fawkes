@@ -58,7 +58,7 @@ BlackBoardInterfaceProxy::BlackBoardInterfaceProxy(FawkesNetworkClient *client,
 						   BlackBoardNotifier *notifier,
 						   Interface *interface, bool writer)
 {
-  __fnc = client;
+  fnc_ = client;
   if ( msg->msgid() != MSG_BB_OPEN_SUCCESS ) {
     throw Exception("Expected open success message");
   }
@@ -66,45 +66,45 @@ BlackBoardInterfaceProxy::BlackBoardInterfaceProxy(FawkesNetworkClient *client,
   void *payload = msg->payload();
   bb_iopensucc_msg_t *osm = (bb_iopensucc_msg_t *)payload;
 
-  __notifier        = notifier;
-  __interface       = interface;
-  __instance_serial = ntohl(osm->serial);
-  __has_writer      = osm->writer_readers & htonl(0x80000000);
-  __num_readers     = ntohl(osm->writer_readers & htonl(0x7FFFFFFF));
-  __data_size       = ntohl(osm->data_size);
-  __clid            = msg->clid();
-  __next_msg_id     = 1;
+  notifier_        = notifier;
+  interface_       = interface;
+  instance_serial_ = ntohl(osm->serial);
+  has_writer_      = osm->writer_readers & htonl(0x80000000);
+  num_readers_     = ntohl(osm->writer_readers & htonl(0x7FFFFFFF));
+  data_size_       = ntohl(osm->data_size);
+  clid_            = msg->clid();
+  next_msg_id_     = 1;
 
-  if ( interface->datasize() != __data_size ) {
+  if ( interface->datasize() != data_size_ ) {
     // Boom, sizes do not match
     throw Exception("Network message does not carry chunk of expected size");
   }
 
-  __rwlock     = new RefCountRWLock();
-  __mem_chunk  = malloc(sizeof(interface_header_t) + __data_size);
-  __data_chunk = (char *)__mem_chunk + sizeof(interface_header_t);
-  memset(__mem_chunk, 0, sizeof(interface_header_t) + __data_size);
-  memcpy(__data_chunk, (char *)payload + sizeof(bb_iopensucc_msg_t), __data_size);
+  rwlock_     = new RefCountRWLock();
+  mem_chunk_  = malloc(sizeof(interface_header_t) + data_size_);
+  data_chunk_ = (char *)mem_chunk_ + sizeof(interface_header_t);
+  memset(mem_chunk_, 0, sizeof(interface_header_t) + data_size_);
+  memcpy(data_chunk_, (char *)payload + sizeof(bb_iopensucc_msg_t), data_size_);
 
-  interface_header_t *ih = (interface_header_t *)__mem_chunk;
+  interface_header_t *ih = (interface_header_t *)mem_chunk_;
 
-  strncpy(ih->type, interface->type(), __INTERFACE_TYPE_SIZE-1);
-  strncpy(ih->id, interface->id(), __INTERFACE_ID_SIZE-1);
-  memcpy(ih->hash, interface->hash(), __INTERFACE_HASH_SIZE);
-  ih->flag_writer_active = (__has_writer ? 1 : 0);
-  ih->num_readers = __num_readers;
+  strncpy(ih->type, interface->type(), INTERFACE_TYPE_SIZE_-1);
+  strncpy(ih->id, interface->id(), INTERFACE_ID_SIZE_-1);
+  memcpy(ih->hash, interface->hash(), INTERFACE_HASH_SIZE_);
+  ih->flag_writer_active = (has_writer_ ? 1 : 0);
+  ih->num_readers = num_readers_;
   ih->refcount = 1;
 
-  interface->set_instance_serial(__instance_serial);
-  interface->set_memory(0, __mem_chunk, __data_chunk);
+  interface->set_instance_serial(instance_serial_);
+  interface->set_memory(0, mem_chunk_, data_chunk_);
   interface->set_mediators(this, this);
-  interface->set_readwrite(writer, __rwlock);
+  interface->set_readwrite(writer, rwlock_);
 }
 
 /** Destructor. */
 BlackBoardInterfaceProxy::~BlackBoardInterfaceProxy()
 {
-  free(__mem_chunk);
+  free(mem_chunk_);
 }
 
 
@@ -122,21 +122,21 @@ BlackBoardInterfaceProxy::process_data_changed(FawkesNetworkMessage *msg)
 
   void *payload = msg->payload();
   bb_idata_msg_t *dm = (bb_idata_msg_t *)payload;
-  if ( ntohl(dm->serial) != __instance_serial ) {
+  if ( ntohl(dm->serial) != instance_serial_ ) {
     LibLogger::log_error("BlackBoardInterfaceProxy", "Serial mismatch, expected %u, "
-			 "but got %u, ignoring.", __instance_serial, ntohl(dm->serial));
+			 "but got %u, ignoring.", instance_serial_, ntohl(dm->serial));
     return;
   }
 
-  if ( ntohl(dm->data_size) != __data_size ) {
+  if ( ntohl(dm->data_size) != data_size_ ) {
     LibLogger::log_error("BlackBoardInterfaceProxy", "Data size mismatch, expected %zu, "
-			 "but got %zu, ignoring.", __data_size, ntohl(dm->data_size));
+			 "but got %zu, ignoring.", data_size_, ntohl(dm->data_size));
     return;
   }
 
-  memcpy(__data_chunk, (char *)payload + sizeof(bb_idata_msg_t), __data_size);
+  memcpy(data_chunk_, (char *)payload + sizeof(bb_idata_msg_t), data_size_);
 
-  __notifier->notify_of_data_change(__interface);
+  notifier_->notify_of_data_change(interface_);
 }
 
 
@@ -154,27 +154,27 @@ BlackBoardInterfaceProxy::process_interface_message(FawkesNetworkMessage *msg)
 
   void *payload = msg->payload();
   bb_imessage_msg_t *mm = (bb_imessage_msg_t *)payload;
-  if ( ntohl(mm->serial) != __instance_serial ) {
+  if ( ntohl(mm->serial) != instance_serial_ ) {
     LibLogger::log_error("BlackBoardInterfaceProxy", "Serial mismatch (msg), expected %u, "
-			 "but got %u, ignoring.", __instance_serial, ntohl(mm->serial));
+			 "but got %u, ignoring.", instance_serial_, ntohl(mm->serial));
     return;
   }
 
-  if ( ! __interface->is_writer() ) {
+  if ( ! interface_->is_writer() ) {
     LibLogger::log_error("BlackBoardInterfaceProxy", "Received interface message, but this"
-			 "is a reading instance (%s), ignoring.", __interface->uid());
+			 "is a reading instance (%s), ignoring.", interface_->uid());
     return;
   }
 
   try {
-    Message *im = __interface->create_message(mm->msg_type);
+    Message *im = interface_->create_message(mm->msg_type);
     im->set_id(ntohl(mm->msgid));
     im->set_hops(ntohl(mm->hops) + 1);
 
     if (im->hops() > 1) {
       LibLogger::log_warn("BlackBoardInterfaceProxy", "Message IDs are not stable across more than one hop, "
 			  "message of type %s for interface %s has %u hops",
-			  im->type(), __interface->uid(), im->hops());
+			  im->type(), interface_->uid(), im->hops());
     }
 
     if ( ntohl(mm->data_size) != im->datasize() ) {
@@ -186,12 +186,12 @@ BlackBoardInterfaceProxy::process_interface_message(FawkesNetworkMessage *msg)
 
     im->set_from_chunk((char *)payload + sizeof(bb_imessage_msg_t));
 
-    if ( __notifier->notify_of_message_received(__interface, im) ) {
-      __interface->msgq_append(im);
+    if ( notifier_->notify_of_message_received(interface_, im) ) {
+      interface_->msgq_append(im);
       im->unref();
     }
   } catch (Exception &e) {
-    e.append("Failed to enqueue interface message for %s, ignoring", __interface->uid());
+    e.append("Failed to enqueue interface message for %s, ignoring", interface_->uid());
     LibLogger::log_error("BlackBoardInterfaceProxy", e);
   }
 }
@@ -203,8 +203,8 @@ BlackBoardInterfaceProxy::process_interface_message(FawkesNetworkMessage *msg)
 void
 BlackBoardInterfaceProxy::reader_added(unsigned int event_serial)
 {
-  ++__num_readers;
-  __notifier->notify_of_reader_added(__interface, event_serial);
+  ++num_readers_;
+  notifier_->notify_of_reader_added(interface_, event_serial);
 }
 
 /** Reader has been removed.
@@ -213,10 +213,10 @@ BlackBoardInterfaceProxy::reader_added(unsigned int event_serial)
 void
 BlackBoardInterfaceProxy::reader_removed(unsigned int event_serial)
 {
-  if ( __num_readers > 0 ) {
-    --__num_readers;
+  if ( num_readers_ > 0 ) {
+    --num_readers_;
   }
-  __notifier->notify_of_reader_removed(__interface, event_serial);
+  notifier_->notify_of_reader_removed(interface_, event_serial);
 }
 
 /** Writer has been added.
@@ -225,8 +225,8 @@ BlackBoardInterfaceProxy::reader_removed(unsigned int event_serial)
 void
 BlackBoardInterfaceProxy::writer_added(unsigned int event_serial)
 {
-  __has_writer = true;
-  __notifier->notify_of_writer_added(__interface, event_serial);
+  has_writer_ = true;
+  notifier_->notify_of_writer_added(interface_, event_serial);
 }
 
 /** Writer has been removed.
@@ -235,8 +235,8 @@ BlackBoardInterfaceProxy::writer_added(unsigned int event_serial)
 void
 BlackBoardInterfaceProxy::writer_removed(unsigned int event_serial)
 {
-  __has_writer = false;
-  __notifier->notify_of_writer_removed(__interface, event_serial);
+  has_writer_ = false;
+  notifier_->notify_of_writer_removed(interface_, event_serial);
 }
 
 
@@ -246,7 +246,7 @@ BlackBoardInterfaceProxy::writer_removed(unsigned int event_serial)
 unsigned int
 BlackBoardInterfaceProxy::serial() const
 {
-  return __instance_serial;
+  return instance_serial_;
 }
 
 
@@ -256,7 +256,7 @@ BlackBoardInterfaceProxy::serial() const
 unsigned int
 BlackBoardInterfaceProxy::clid() const
 {
-  return __instance_serial;
+  return instance_serial_;
 }
 
 /** Get instance serial of interface.
@@ -265,7 +265,7 @@ BlackBoardInterfaceProxy::clid() const
 Interface *
 BlackBoardInterfaceProxy::interface() const
 {
-  return __interface;
+  return interface_;
 }
 
 
@@ -273,13 +273,13 @@ BlackBoardInterfaceProxy::interface() const
 bool
 BlackBoardInterfaceProxy::exists_writer(const Interface *interface) const
 {
-  return __has_writer;
+  return has_writer_;
 }
 
 unsigned int
 BlackBoardInterfaceProxy::num_readers(const Interface *interface) const
 {
-  return __num_readers;
+  return num_readers_;
 }
 
 std::list<std::string>
@@ -307,10 +307,10 @@ BlackBoardInterfaceProxy::notify_of_data_change(const Interface *interface)
   memcpy((char *)payload + sizeof(bb_idata_msg_t), interface->datachunk(),
 	 interface->datasize());
 
-  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(__clid, FAWKES_CID_BLACKBOARD,
+  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(clid_, FAWKES_CID_BLACKBOARD,
 							MSG_BB_DATA_CHANGED,
 							payload, payload_size);
-  __fnc->enqueue(omsg);
+  fnc_->enqueue(omsg);
 }
 
 
@@ -322,20 +322,20 @@ BlackBoardInterfaceProxy::transmit(Message *message)
   size_t payload_size = sizeof(bb_imessage_msg_t) + message->datasize();
   void *payload = calloc(1, payload_size);
   bb_imessage_msg_t *dm = (bb_imessage_msg_t *)payload;
-  dm->serial = htonl(__interface->serial());
+  dm->serial = htonl(interface_->serial());
   unsigned int msgid = next_msg_id();
   dm->msgid  = htonl(msgid);
   dm->hops   = htonl(message->hops());
   message->set_id(msgid);
-  strncpy(dm->msg_type, message->type(), __INTERFACE_MESSAGE_TYPE_SIZE-1);
+  strncpy(dm->msg_type, message->type(), INTERFACE_MESSAGE_TYPE_SIZE_-1);
   dm->data_size = htonl(message->datasize());
   memcpy((char *)payload + sizeof(bb_imessage_msg_t), message->datachunk(),
 	 message->datasize());
 
-  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(__clid, FAWKES_CID_BLACKBOARD,
+  FawkesNetworkMessage *omsg = new FawkesNetworkMessage(clid_, FAWKES_CID_BLACKBOARD,
 							MSG_BB_INTERFACE_MESSAGE,
 							payload, payload_size);
-  __fnc->enqueue(omsg);
+  fnc_->enqueue(omsg);
 }
 
 } // end namespace fawkes

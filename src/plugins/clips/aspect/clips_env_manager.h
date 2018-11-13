@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_ASPECT_CLIPS_ENV_MANAGER_H_
-#define __PLUGINS_CLIPS_ASPECT_CLIPS_ENV_MANAGER_H_
+#ifndef _PLUGINS_CLIPS_ASPECT_CLIPS_ENV_MANAGER_H_
+#define _PLUGINS_CLIPS_ASPECT_CLIPS_ENV_MANAGER_H_
 
 #include <core/utils/lockptr.h>
 #include <string>
@@ -31,9 +31,6 @@
 #include <clipsmm.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Logger;
 class Clock;

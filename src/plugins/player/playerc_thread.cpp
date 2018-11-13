@@ -48,43 +48,43 @@ PlayerClientThread::PlayerClientThread()
   : Thread("PlayerClientThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
-  __client = NULL;
+  client_ = NULL;
 }
 
 
 void
 PlayerClientThread::init()
 {
-  __client = NULL;
+  client_ = NULL;
 
   try {
-    __cfg_player_host = config->get_string("/player/host");
-    __cfg_player_port = config->get_uint("/player/port");
+    cfg_player_host_ = config->get_string("/player/host");
+    cfg_player_port_ = config->get_uint("/player/port");
   } catch (Exception &e) {
     e.append("Could not read all required config values for %s", name());
     throw;
   }
 
   try {
-    __client = new PlayerClient(__cfg_player_host.c_str(), __cfg_player_port);
+    client_ = new PlayerClient(cfg_player_host_.c_str(), cfg_player_port_);
 
-    __client->SetDataMode(PLAYER_DATAMODE_PULL);
-    __client->SetReplaceRule(/* replace */ true);
+    client_->SetDataMode(PLAYER_DATAMODE_PULL);
+    client_->SetReplaceRule(/* replace */ true);
   } catch (PlayerError &pe) {
     finalize();
     throw Exception("Failed to connect to Player. Error was '%s'",
 		    pe.GetErrorStr().c_str());
   }
 
-  __client->RequestDeviceList();
+  client_->RequestDeviceList();
 
   /* shows all available interfaces
-  std::list<playerc_device_info_t> devices = __client->GetDeviceList();
+  std::list<playerc_device_info_t> devices = client_->GetDeviceList();
 
   for (std::list<playerc_device_info_t>::iterator i = devices.begin(); i != devices.end(); ++i) {
     logger->log_debug(name(), "Interface of type %u (%s), index %u, host %u, "
 		      "robot %u, driver %s",
-		      i->addr.interf, __client->LookupName(i->addr.interf).c_str(),
+		      i->addr.interf, client_->LookupName(i->addr.interf).c_str(),
 		      i->addr.index, i->addr.host, i->addr.robot, i->drivername);
   }
   */
@@ -121,7 +121,7 @@ PlayerClientThread::open_fawkes_interfaces()
     try {
       Interface *iface;
       iface = blackboard->open_for_writing(iftype.c_str(), ifname.c_str());
-      __imap[varname] = iface;
+      imap_[varname] = iface;
     } catch (Exception &e) {
       delete vi;
       throw;
@@ -134,17 +134,17 @@ PlayerClientThread::open_fawkes_interfaces()
 void
 PlayerClientThread::open_player_proxies()
 {
-  std::list<playerc_device_info_t> devices = __client->GetDeviceList();
+  std::list<playerc_device_info_t> devices = client_->GetDeviceList();
 
   sockaddr_in *addr;
   socklen_t    addrlen = sizeof(sockaddr_in);
 
-  if ( ! nnresolver->resolve_name_blocking(__cfg_player_host.c_str(), (sockaddr **)&addr, &addrlen) ) {
-    throw Exception("Could not lookup IP of %s (player host)", __cfg_player_host.c_str());
+  if ( ! nnresolver->resolve_name_blocking(cfg_player_host_.c_str(), (sockaddr **)&addr, &addrlen) ) {
+    throw Exception("Could not lookup IP of %s (player host)", cfg_player_host_.c_str());
   }
 
   unsigned int host  = addr->sin_addr.s_addr;
-  unsigned int robot = __cfg_player_port;
+  unsigned int robot = cfg_player_port_;
 
   std::string prefix = "/player/interfaces/player/";
   Configuration::ValueIterator *vi = config->search(prefix.c_str());
@@ -175,26 +175,26 @@ PlayerClientThread::open_player_proxies()
       if ( (i->addr.host == host) &&
 	   (i->addr.robot == robot) &&
 	   (i->addr.index == ifindex) &&
-	   (iftype == __client->LookupName(i->addr.interf)) ) {
+	   (iftype == client_->LookupName(i->addr.interf)) ) {
 	// positive match
 	logger->log_debug(name(), "Opening Player interface of type %u (%s), "
 			  "index %u, host %u, robot %u, driver %s",
-			  i->addr.interf, __client->LookupName(i->addr.interf).c_str(),
+			  i->addr.interf, client_->LookupName(i->addr.interf).c_str(),
 			  i->addr.index, i->addr.host, i->addr.robot, i->drivername);
 
 	if ( iftype == "position2d" ) {
-	  proxy = new Position2dProxy(__client, i->addr.index);
+	  proxy = new Position2dProxy(client_, i->addr.index);
 	} else if ( iftype == "bumper" ) {
-	  proxy = new BumperProxy(__client, i->addr.index);
+	  proxy = new BumperProxy(client_, i->addr.index);
 	} else if ( iftype == "laser" ) {
-	  proxy = new LaserProxy(__client, i->addr.index);
+	  proxy = new LaserProxy(client_, i->addr.index);
 	} else {
 	  logger->log_warn(name(), "Unknown interface type %s, ignoring", iftype.c_str());
 	}
       }
     }
     if ( proxy != NULL ) {
-      __pmap[varname] = proxy;
+      pmap_[varname] = proxy;
     } else {
       logger->log_warn(name(), "No matching interface found for %s=%s:%u, ignoring",
 		       varname.c_str(), iftype.c_str(), ifindex);
@@ -207,21 +207,21 @@ PlayerClientThread::open_player_proxies()
 void
 PlayerClientThread::create_mappers()
 {
-  for (InterfaceMap::iterator i = __imap.begin(); i != __imap.end(); ++i) {
-    if ( __pmap.find(i->first) != __pmap.end() ) {
+  for (InterfaceMap::iterator i = imap_.begin(); i != imap_.end(); ++i) {
+    if ( pmap_.find(i->first) != pmap_.end() ) {
       logger->log_debug(name(), "Creating mapping for %s from %s to %s",
 			i->first.c_str(), i->second->uid(),
-			__pmap[i->first]->GetInterfaceStr().c_str());
-      __mappers.push_back(PlayerMapperFactory::create_mapper(i->first, i->second,
-							     __pmap[i->first]));
+			pmap_[i->first]->GetInterfaceStr().c_str());
+      mappers_.push_back(PlayerMapperFactory::create_mapper(i->first, i->second,
+							     pmap_[i->first]));
     } else {
       throw Exception("No matching proxy found for interface %s (%s)",
 		      i->first.c_str(), i->second->uid());
     }
   }
 
-  for (ProxyMap::iterator p = __pmap.begin(); p != __pmap.end(); ++p) {
-    if ( __imap.find(p->first) == __imap.end() ) {
+  for (ProxyMap::iterator p = pmap_.begin(); p != pmap_.end(); ++p) {
+    if ( imap_.find(p->first) == imap_.end() ) {
       throw Exception("No matching interface found for proxy %s", p->first.c_str());
     }
   }
@@ -231,37 +231,37 @@ PlayerClientThread::create_mappers()
 void
 PlayerClientThread::finalize()
 {
-  for (MapperList::iterator m = __mappers.begin(); m != __mappers.end(); ++m) {
+  for (MapperList::iterator m = mappers_.begin(); m != mappers_.end(); ++m) {
     delete *m;
   }
-  __mappers.clear();
+  mappers_.clear();
   
   close_fawkes_interfaces();
   close_player_proxies();
 
-  delete __client;
+  delete client_;
 }
 
 
 void
 PlayerClientThread::close_fawkes_interfaces()
 {
-  for (InterfaceMap::iterator i = __imap.begin(); i != __imap.end(); ++i) {
+  for (InterfaceMap::iterator i = imap_.begin(); i != imap_.end(); ++i) {
     blackboard->close(i->second);
   }
-  __imap.clear();
+  imap_.clear();
 }
 
 
 void
 PlayerClientThread::close_player_proxies()
 {
-  for (ProxyMap::iterator p = __pmap.begin(); p != __pmap.end(); ++p) {
+  for (ProxyMap::iterator p = pmap_.begin(); p != pmap_.end(); ++p) {
     // dtor is protected, seems to be a Player bug, will discuss upstream
     // this is a memleak atm
     //delete p->second;
   }
-  __pmap.clear();
+  pmap_.clear();
 }
 
 
@@ -274,7 +274,7 @@ PlayerClientThread::sync_fawkes_to_player()
 {
   //logger->log_debug(name(), "Syncing fawkes to player");
   try {
-    for (MapperList::iterator m = __mappers.begin(); m != __mappers.end(); ++m) {
+    for (MapperList::iterator m = mappers_.begin(); m != mappers_.end(); ++m) {
       (*m)->sync_fawkes_to_player();
     }
   } catch (PlayerCc::PlayerError &e) {
@@ -286,11 +286,11 @@ void
 PlayerClientThread::loop()
 {
   try {
-    if ( __client->Peek() ) {
-      __client->Read();
+    if ( client_->Peek() ) {
+      client_->Read();
 
       //logger->log_debug(name(), "Syncing player to fawkes");
-      for (MapperList::iterator m = __mappers.begin(); m != __mappers.end(); ++m) {
+      for (MapperList::iterator m = mappers_.begin(); m != mappers_.end(); ++m) {
 	(*m)->sync_player_to_fawkes();
       }
     } else {

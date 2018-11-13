@@ -59,10 +59,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** @class TransformListener <tf/transform_listener.h>
  * Receive transforms and answer queries.
@@ -123,7 +119,7 @@ TransformListener::~TransformListener()
 void
 TransformListener::bb_interface_created(const char *type, const char *id) throw()
 {
-  if (strncmp(type, "TransformInterface", __INTERFACE_TYPE_SIZE) != 0)  return;
+  if (strncmp(type, "TransformInterface", INTERFACE_TYPE_SIZE_) != 0)  return;
 
   TransformInterface *tfif;
   try {

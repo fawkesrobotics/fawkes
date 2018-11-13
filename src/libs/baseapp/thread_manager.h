@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_BASEAPP_THREAD_MANAGER_H_
-#define __LIBS_BASEAPP_THREAD_MANAGER_H_
+#ifndef _LIBS_BASEAPP_THREAD_MANAGER_H_
+#define _LIBS_BASEAPP_THREAD_MANAGER_H_
 
 #include <core/threading/thread_list.h>
 #include <core/threading/thread_collector.h>
@@ -34,9 +34,6 @@
 #include <list>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 class Mutex;
 class WaitCondition;
 class ThreadInitializer;
@@ -112,21 +109,21 @@ class ThreadManager
     virtual void force_remove(Thread *t);
 
    private:
-    ThreadManager *__parent_manager;
+    ThreadManager *parent_manager_;
   };
 
  private:
-  ThreadInitializer *__initializer;
-  ThreadFinalizer   *__finalizer;
+  ThreadInitializer *initializer_;
+  ThreadFinalizer   *finalizer_;
 
-  LockMap< BlockedTimingAspect::WakeupHook, ThreadList > __threads;
-  LockMap< BlockedTimingAspect::WakeupHook, ThreadList >::iterator __tit;
+  LockMap< BlockedTimingAspect::WakeupHook, ThreadList > threads_;
+  LockMap< BlockedTimingAspect::WakeupHook, ThreadList >::iterator tit_;
 
-  ThreadList     __untimed_threads;
-  WaitCondition *__waitcond_timedthreads;
+  ThreadList     untimed_threads_;
+  WaitCondition *waitcond_timedthreads_;
 
-  ThreadManagerAspectCollector *__aspect_collector;
-  bool __interrupt_timed_thread_wait;
+  ThreadManagerAspectCollector *aspect_collector_;
+  bool interrupt_timed_thread_wait_;
 
 };
 

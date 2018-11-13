@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_SYSTEM_HOSTINFO_H_
-#define __UTILS_SYSTEM_HOSTINFO_H_
+#ifndef _UTILS_SYSTEM_HOSTINFO_H_
+#define _UTILS_SYSTEM_HOSTINFO_H_
 
 struct utsname;
 
@@ -48,7 +48,7 @@ class HostInfo
 
  private:
   struct ::utsname *utsname;
-  char *short__name;
+  char *shortname_;
   char *domain_name;
 };
 

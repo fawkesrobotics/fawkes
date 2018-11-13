@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_DRIVE_REALIZATION_BASE_MOTORINSTRUCT_H_
-#define __PLUGINS_COLLI_DRIVE_REALIZATION_BASE_MOTORINSTRUCT_H_
+#ifndef _PLUGINS_COLLI_DRIVE_REALIZATION_BASE_MOTORINSTRUCT_H_
+#define _PLUGINS_COLLI_DRIVE_REALIZATION_BASE_MOTORINSTRUCT_H_
 
 #include "../common/types.h"
 
@@ -37,9 +37,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BaseMotorInstruct <plugins/colli/drive_realization/base_motor_instruct.h>
  * The Basic of a Motorinstructor.

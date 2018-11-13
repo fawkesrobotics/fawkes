@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_GUI_UTILS_SERVICE_CHOOSER_DIALOG_H_
-#define __LIBS_GUI_UTILS_SERVICE_CHOOSER_DIALOG_H_
+#ifndef _LIBS_GUI_UTILS_SERVICE_CHOOSER_DIALOG_H_
+#define _LIBS_GUI_UTILS_SERVICE_CHOOSER_DIALOG_H_
 
 #include <gui_utils/service_model.h>
 
@@ -71,18 +71,18 @@ class ServiceChooserDialog
 
  private:
   void ctor();
-  fawkes::FawkesNetworkClient *__client;
+  fawkes::FawkesNetworkClient *client_;
 
-  Gtk::Window         &__parent;
-  Gtk::TreeView        __treeview;
-  Gtk::Entry           __entry;
-  Gtk::Expander        __expander;
-  Gtk::ScrolledWindow  __scrollwin;
+  Gtk::Window         &parent_;
+  Gtk::TreeView        treeview_;
+  Gtk::Entry           entry_;
+  Gtk::Expander        expander_;
+  Gtk::ScrolledWindow  scrollwin_;
 #ifdef HAVE_GCONFMM
-  Glib::RefPtr<Gnome::Conf::Client> __gconf;
+  Glib::RefPtr<Gnome::Conf::Client> gconf_;
 #endif
 
-  ServiceModel *__service_model;
+  ServiceModel *service_model_;
 };
 
 } // end of namespace fawkes

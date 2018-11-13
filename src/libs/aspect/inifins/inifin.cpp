@@ -24,9 +24,6 @@
 #include <aspect/inifins/inifin.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class AspectIniFin <aspect/inifins/inifin.h>
  * Aspect initializer/finalizer base class.
@@ -60,7 +57,7 @@ namespace fawkes {
  */
 AspectIniFin::AspectIniFin(const char *aspect_name)
 {
-  __aspect_name = aspect_name;
+  aspect_name_ = aspect_name;
 }
 
 /** Virtual empty destructor. */
@@ -87,7 +84,7 @@ AspectIniFin::prepare_finalize(Thread *thread)
 const char *
 AspectIniFin::get_aspect_name() const
 {
-  return __aspect_name;
+  return aspect_name_;
 }
 
 } // end namespace fawkes

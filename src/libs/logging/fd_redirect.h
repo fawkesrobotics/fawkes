@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LOGGING_FD_REDIRECT_H_
-#define __LOGGING_FD_REDIRECT_H_
+#ifndef _LOGGING_FD_REDIRECT_H_
+#define _LOGGING_FD_REDIRECT_H_
 
 #include <logging/logger.h>
 
@@ -31,9 +31,6 @@
 #include <string>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class LogFileDescriptorToLog {
  public:

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CLASSIFIERS_GRADIENT_H_
-#define __FIREVISION_CLASSIFIERS_GRADIENT_H_
+#ifndef _FIREVISION_CLASSIFIERS_GRADIENT_H_
+#define _FIREVISION_CLASSIFIERS_GRADIENT_H_
 
 #include <fvclassifiers/classifier.h>
 #include <fvclassifiers/qualifiers.h>
@@ -29,9 +29,6 @@
 #include <fvmodels/scanlines/grid.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class GradientClassifier: public Classifier
 {
@@ -65,4 +62,4 @@ class GradientClassifier: public Classifier
 
 } // end namespace firevision
 
-#endif // __FIREVISION_CLASSIFIERS_GRADIENT_H_
+#endif // FIREVISION_CLASSIFIERS_GRADIENT_H__

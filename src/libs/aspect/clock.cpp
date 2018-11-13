@@ -25,9 +25,6 @@
 #include <aspect/clock.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ClockAspect <aspect/clock.h>
  * Thread aspect that allows to obtain the current time from the clock.

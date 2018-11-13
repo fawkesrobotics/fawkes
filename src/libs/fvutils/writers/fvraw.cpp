@@ -33,9 +33,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** File identifier for FvRaw images. */
 const unsigned int FvRawWriter::FILE_IDENTIFIER = 0x17559358; // 16

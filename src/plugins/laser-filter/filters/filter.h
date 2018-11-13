@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTER_FILTER_H_
-#define __PLUGINS_LASER_FILTER_FILTER_H_
+#ifndef _PLUGINS_LASER_FILTER_FILTER_H_
+#define _PLUGINS_LASER_FILTER_FILTER_H_
 
 #include <vector>
 #include <string>
@@ -56,10 +56,10 @@ class LaserDataFilter
   void  set_array_ownership(bool own_in, bool own_out);
   /** Check if input arrays are owned by filter.
    * @return true if arrays are owned by this filter, false otherwise. */
-  bool  owns_in()  const { return __own_in;  };
+  bool  owns_in()  const { return own_in_;  };
   /** Check if output arrays are owned by filter.
    * @return true if arrays are owned by this filter, false otherwise. */
-  bool  owns_out() const { return __own_out; };
+  bool  owns_out() const { return own_out_; };
 
  protected:
   virtual void set_out_data_size(unsigned int data_size);
@@ -76,8 +76,8 @@ class LaserDataFilter
   std::vector<Buffer *>  out;
 
  private:
-  bool __own_in;
-  bool __own_out;
+  bool own_in_;
+  bool own_out_;
 };
 
 

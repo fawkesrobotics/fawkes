@@ -34,9 +34,6 @@
 #include <cstdlib>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SharedMemoryRegistry <utils/ipc/shm_registry.h>
  * Shared memory registry.
@@ -61,79 +58,79 @@ namespace fawkes {
  */
 SharedMemoryRegistry::SharedMemoryRegistry(const char *name)
 {
-  __shm_name = name ? strdup(name) : strdup(DEFAULT_SHM_NAME);
+  shm_name_ = name ? strdup(name) : strdup(DEFAULT_SHM_NAME);
 
-  __sem = sem_open(__shm_name, O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP, 1);
+  sem_ = sem_open(shm_name_, O_CREAT, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP, 1);
 
-  if (__sem == SEM_FAILED) {
-    free(__shm_name);
+  if (sem_ == SEM_FAILED) {
+    free(shm_name_);
     throw Exception(errno, "Failed to init shared memory registry semaphore");
   }
 
-  sem_wait(__sem);
+  sem_wait(sem_);
 
-  __shmfd = shm_open(__shm_name, O_RDWR | O_CREAT | O_EXCL,
+  shmfd_ = shm_open(shm_name_, O_RDWR | O_CREAT | O_EXCL,
                      S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
 
   bool created = false;
 
-  if ((__shmfd < 0) && (errno == EEXIST)) {
-    __shmfd = shm_open(__shm_name, O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+  if ((shmfd_ < 0) && (errno == EEXIST)) {
+    shmfd_ = shm_open(shm_name_, O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
   } else {
-    if (ftruncate(__shmfd, sizeof(MemInfo)) != 0) {
-      close(__shmfd);
-      shm_unlink(__shm_name);
-      sem_post(__sem);
-      sem_close(__sem);
-      sem_unlink(__shm_name);
-      free(__shm_name);
+    if (ftruncate(shmfd_, sizeof(MemInfo)) != 0) {
+      close(shmfd_);
+      shm_unlink(shm_name_);
+      sem_post(sem_);
+      sem_close(sem_);
+      sem_unlink(shm_name_);
+      free(shm_name_);
       throw Exception(errno, "Failed to resize memory for shared memory registry");
     }
 
     created = true;
   }
 
-  if (__shmfd < 0) {
-    sem_post(__sem);
-    sem_close(__sem);
-    sem_unlink(__shm_name);
-    free(__shm_name);
+  if (shmfd_ < 0) {
+    sem_post(sem_);
+    sem_close(sem_);
+    sem_unlink(shm_name_);
+    free(shm_name_);
     throw Exception(errno, "Failed to open shared memory registry");
   }
 
-  __meminfo = (MemInfo *)mmap(NULL, sizeof(MemInfo), PROT_READ | PROT_WRITE,
-			      MAP_SHARED, __shmfd, 0);
-  if (__meminfo == MAP_FAILED) {
-    close(__shmfd);
-    sem_close(__sem);
-    free(__shm_name);
+  meminfo_ = (MemInfo *)mmap(NULL, sizeof(MemInfo), PROT_READ | PROT_WRITE,
+			      MAP_SHARED, shmfd_, 0);
+  if (meminfo_ == MAP_FAILED) {
+    close(shmfd_);
+    sem_close(sem_);
+    free(shm_name_);
     throw Exception(errno, "Failed to mmap shared memory registry");
   }
 
   if (created) {
-    memset(__meminfo, 0, sizeof(MemInfo));
+    memset(meminfo_, 0, sizeof(MemInfo));
   
     for (unsigned int i = 0; i < MAXNUM_SHM_SEGMS; ++i) {
-      __meminfo->segments[i].shmid = -1;
+      meminfo_->segments[i].shmid = -1;
     }
   }
 
-  __master   = created;
+  master_   = created;
 
-  sem_post(__sem);
+  sem_post(sem_);
 }
 
 
 /** Destructor. */
 SharedMemoryRegistry::~SharedMemoryRegistry()
 {
-  close(__shmfd);
-  sem_close(__sem);
-  if (__master) {
-    shm_unlink(__shm_name);
+  close(shmfd_);
+  sem_close(sem_);
+  if (master_) {
+    shm_unlink(shm_name_);
   }
 
-  free(__shm_name);
+  free(shm_name_);
 }
 
 
@@ -155,15 +152,15 @@ SharedMemoryRegistry::get_snapshot() const
 {
   std::list<SharedMemID> rv;
 
-  sem_wait(__sem);
+  sem_wait(sem_);
 
   for (unsigned int i = 0; i < MAXNUM_SHM_SEGMS; ++i) {
-    if (__meminfo->segments[i].shmid > 0) {
-      rv.push_back(__meminfo->segments[i]);
+    if (meminfo_->segments[i].shmid > 0) {
+      rv.push_back(meminfo_->segments[i]);
     }
   }
 
-  sem_post(__sem);
+  sem_post(sem_);
 
   return rv;
 }
@@ -179,18 +176,18 @@ SharedMemoryRegistry::find_segments(const char *magic_token) const
 {
   std::list<SharedMemID> rv;
 
-  sem_wait(__sem);
+  sem_wait(sem_);
 
   for (unsigned int i = 0; i < MAXNUM_SHM_SEGMS; ++i) {
-    if ((__meminfo->segments[i].shmid > 0) &&
-	(strncmp(magic_token, __meminfo->segments[i].magic_token,
+    if ((meminfo_->segments[i].shmid > 0) &&
+	(strncmp(magic_token, meminfo_->segments[i].magic_token,
 		 MAGIC_TOKEN_SIZE) == 0) )
     {
-      rv.push_back(__meminfo->segments[i]);
+      rv.push_back(meminfo_->segments[i]);
     }
   }
 
-  sem_post(__sem);
+  sem_post(sem_);
 
   return rv;
 }
@@ -203,25 +200,25 @@ SharedMemoryRegistry::find_segments(const char *magic_token) const
 void
 SharedMemoryRegistry::add_segment(int shmid, const char *magic_token)
 {
-  sem_wait(__sem);
+  sem_wait(sem_);
 
   bool valid = false;
   for (unsigned int i = 0; i < MAXNUM_SHM_SEGMS; ++i) {
-    if (__meminfo->segments[i].shmid == shmid) {
+    if (meminfo_->segments[i].shmid == shmid) {
       valid = true;
       break;
     }
   }
 
   for (unsigned int i = 0; !valid && i < MAXNUM_SHM_SEGMS; ++i) {
-    if (__meminfo->segments[i].shmid == -1) {
-      __meminfo->segments[i].shmid = shmid;
-      strncpy(__meminfo->segments[i].magic_token, magic_token, MAGIC_TOKEN_SIZE);
+    if (meminfo_->segments[i].shmid == -1) {
+      meminfo_->segments[i].shmid = shmid;
+      strncpy(meminfo_->segments[i].magic_token, magic_token, MAGIC_TOKEN_SIZE);
       valid = true;
     }
   }
 
-  sem_post(__sem);
+  sem_post(sem_);
 
   if (! valid) {
     throw Exception("Maximum number of shared memory segments already registered");
@@ -235,15 +232,15 @@ SharedMemoryRegistry::add_segment(int shmid, const char *magic_token)
 void
 SharedMemoryRegistry::remove_segment(int shmid)
 {
-  sem_wait(__sem);
+  sem_wait(sem_);
 
   for (unsigned int i = 0; i < MAXNUM_SHM_SEGMS; ++i) {
-    if (__meminfo->segments[i].shmid == shmid) {
-      __meminfo->segments[i].shmid = -1;
+    if (meminfo_->segments[i].shmid == shmid) {
+      meminfo_->segments[i].shmid = -1;
     }
   }
 
-  sem_post(__sem);
+  sem_post(sem_);
 }
 
 } // end namespace fawkes

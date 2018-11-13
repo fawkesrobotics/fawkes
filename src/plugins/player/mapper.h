@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PLAYER_MAPPER_H_
-#define __PLUGINS_PLAYER_MAPPER_H_
+#ifndef _PLUGINS_PLAYER_MAPPER_H_
+#define _PLUGINS_PLAYER_MAPPER_H_
 
 #include <string>
 
@@ -37,7 +37,7 @@ class PlayerProxyFawkesInterfaceMapper
   virtual void sync_player_to_fawkes() = 0;
 
  private:
-  std::string __varname;
+  std::string varname_;
 };
 
 #endif

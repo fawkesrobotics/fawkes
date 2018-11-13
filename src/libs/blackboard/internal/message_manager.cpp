@@ -46,8 +46,8 @@ namespace fawkes {
  */
 BlackBoardMessageManager::BlackBoardMessageManager(BlackBoardNotifier *notifier)
 {
-  __im = NULL;
-  __notifier = notifier;
+  im_ = NULL;
+  notifier_ = notifier;
 }
 
 
@@ -60,12 +60,12 @@ BlackBoardMessageManager::~BlackBoardMessageManager()
 void
 BlackBoardMessageManager::transmit(Message *message)
 {
-  if ( __im == NULL ) {
+  if ( im_ == NULL ) {
     throw NullPointerException("InterfaceManager has not been set for MessageManager");
   }
   try {
-    Interface *writer = __im->writer_for_mem_serial(message->recipient());
-    if (__notifier->notify_of_message_received(writer, message)) {
+    Interface *writer = im_->writer_for_mem_serial(message->recipient());
+    if (notifier_->notify_of_message_received(writer, message)) {
       writer->msgq_append(message);
     }
   } catch (BlackBoardNoWritingInstanceException &e) {
@@ -87,7 +87,7 @@ BlackBoardMessageManager::transmit(Message *message)
 void
 BlackBoardMessageManager::set_interface_manager(BlackBoardInterfaceManager *im)
 {
-  __im = im;
+  im_ = im;
 }
 
 } // end namespace fawkes

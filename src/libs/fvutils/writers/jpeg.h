@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_WRITERS_JPEG_H_
-#define __FIREVISION_UTILS_WRITERS_JPEG_H_
+#ifndef _FIREVISION_UTILS_WRITERS_JPEG_H_
+#define _FIREVISION_UTILS_WRITERS_JPEG_H_
 
 #include <fvutils/writers/writer.h>
 
 #include <cstdio>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class JpegWriter : public Writer {
 

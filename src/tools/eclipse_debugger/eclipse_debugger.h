@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_ECLIPSEDEBUGGER_ECLIPSEDEBUGGER_H_
-#define __TOOLS_ECLIPSEDEBUGGER_ECLIPSEDEBUGGER_H_
+#ifndef _TOOLS_ECLIPSEDEBUGGER_ECLIPSEDEBUGGER_H_
+#define _TOOLS_ECLIPSEDEBUGGER_ECLIPSEDEBUGGER_H_
 
 #include <interfaces/EclipseDebuggerInterface.h>
 
@@ -52,7 +52,7 @@ class EclipseDebugger : public Gtk::Window
     void close_bb();
     fawkes::BlackBoard *bb;
     
-    fawkes::EclipseDebuggerInterface *__debugger_if;
+    fawkes::EclipseDebuggerInterface *debugger_if_;
     fawkes::ConnectionDispatcher connection_dispatcher;
 
 };

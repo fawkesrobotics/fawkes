@@ -23,9 +23,6 @@
 #include <algorithm>
 
 namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphPolygonNodeConstraint <navgraph/constraints/polygon_constraint.h>
  * Constraint that blocks nodes inside a polygon.

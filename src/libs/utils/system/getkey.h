@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __UTILS_SYSTEM_GETKEY_H
-#define __UTILS_SYSTEM_GETKEY_H
+#ifndef UTILS_SYSTEM_GETKEY_H_
+#define UTILS_SYSTEM_GETKEY_H_
 
 namespace fawkes {
   char getkey(int timeout_decisecs = 0);

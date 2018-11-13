@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGODB_MONGODB_LOGGER_THREAD_H_
-#define __PLUGINS_MONGODB_MONGODB_LOGGER_THREAD_H_
+#ifndef _PLUGINS_MONGODB_MONGODB_LOGGER_THREAD_H_
+#define _PLUGINS_MONGODB_MONGODB_LOGGER_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
@@ -108,8 +108,8 @@ class MongoLogLoggerThread
 			   fawkes::Exception &);
 
  private:
-  std::string    __collection;
-  fawkes::Mutex *__mutex;
+  std::string    collection_;
+  fawkes::Mutex *mutex_;
 };
 
 #endif

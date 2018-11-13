@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_TOOLS_FIRESTATION_FUSE_TRANSFER_WIDGET_H_
-#define __FIREVISION_TOOLS_FIRESTATION_FUSE_TRANSFER_WIDGET_H_
+#ifndef _FIREVISION_TOOLS_FIRESTATION_FUSE_TRANSFER_WIDGET_H_
+#define _FIREVISION_TOOLS_FIRESTATION_FUSE_TRANSFER_WIDGET_H_
 
 #include <fvutils/net/fuse_client_handler.h>
 #include <core/utils/lock_queue.h>
@@ -154,4 +154,4 @@ class FuseTransferWidget : firevision::FuseClientHandler
   firevision::YuvColormap* m_remote_colormap;
 };
 
-#endif /* __FIREVISION_TOOLS_FIRESTATION_FUSE_TRANSFER_WIDGET_H_ */
+#endif /* FIREVISION_TOOLS_FIRESTATION_FUSE_TRANSFER_WIDGET_H__ */

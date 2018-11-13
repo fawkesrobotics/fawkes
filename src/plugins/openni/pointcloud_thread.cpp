@@ -54,7 +54,7 @@ OpenNiPointCloudThread::OpenNiPointCloudThread(OpenNiImageThread *img_thread)
   : Thread("OpenNiPointCloudThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE)
 {
-  __img_thread = img_thread;
+  img_thread_ = img_thread;
 }
 
 
@@ -69,146 +69,146 @@ OpenNiPointCloudThread::init()
 {
   MutexLocker lock(openni.objmutex_ptr());
 
-  __image_rgb_buf = NULL;
+  image_rgb_buf_ = NULL;
 
-  __depth_gen = new xn::DepthGenerator();
+  depth_gen_ = new xn::DepthGenerator();
 #if __cplusplus >= 201103L
-  std::unique_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
-  std::unique_ptr<xn::ImageGenerator> imagegen_uniqueptr(__image_gen);
+  std::unique_ptr<xn::DepthGenerator> depthgen_uniqueptr(depth_gen_);
+  std::unique_ptr<xn::ImageGenerator> imagegen_uniqueptr(image_gen_);
 #else
-  std::auto_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
-  std::auto_ptr<xn::ImageGenerator> imagegen_uniqueptr(__image_gen);
+  std::auto_ptr<xn::DepthGenerator> depthgen_uniqueptr(depth_gen_);
+  std::auto_ptr<xn::ImageGenerator> imagegen_uniqueptr(image_gen_);
 #endif
 
-  __image_gen = new xn::ImageGenerator();
+  image_gen_ = new xn::ImageGenerator();
 
   XnStatus st;
 
-  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_DEPTH, __depth_gen);
-  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_IMAGE, __image_gen);
-  fawkes::openni::setup_map_generator(*__image_gen, config);
-  fawkes::openni::setup_map_generator(*__depth_gen, config);
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_DEPTH, depth_gen_);
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_IMAGE, image_gen_);
+  fawkes::openni::setup_map_generator(*image_gen_, config);
+  fawkes::openni::setup_map_generator(*depth_gen_, config);
 
-  __depth_md = new xn::DepthMetaData();
-  __depth_gen->GetMetaData(*__depth_md);
+  depth_md_ = new xn::DepthMetaData();
+  depth_gen_->GetMetaData(*depth_md_);
 
-  __cfg_register_depth_image = false;
+  cfg_register_depth_image_ = false;
   try {
-    __cfg_register_depth_image = config->get_bool("/plugins/openni/register_depth_image");
+    cfg_register_depth_image_ = config->get_bool("/plugins/openni/register_depth_image");
   } catch (Exception &e) {}
 
-  __cfg_frame_depth = config->get_string("/plugins/openni/frame/depth");
-  __cfg_frame_image = config->get_string("/plugins/openni/frame/image");
+  cfg_frame_depth_ = config->get_string("/plugins/openni/frame/depth");
+  cfg_frame_image_ = config->get_string("/plugins/openni/frame/image");
 
-  __pcl_xyz_buf = new SharedMemoryImageBuffer("openni-pointcloud-xyz",
+  pcl_xyz_buf_ = new SharedMemoryImageBuffer("openni-pointcloud-xyz",
 					  CARTESIAN_3D_FLOAT,
-					  __depth_md->XRes(), __depth_md->YRes());
+					  depth_md_->XRes(), depth_md_->YRes());
 
-  __pcl_xyz_buf->set_frame_id(__cfg_register_depth_image ? __cfg_frame_image.c_str() : __cfg_frame_depth.c_str());
+  pcl_xyz_buf_->set_frame_id(cfg_register_depth_image_ ? cfg_frame_image_.c_str() : cfg_frame_depth_.c_str());
 
 
-  __pcl_xyzrgb_buf = new SharedMemoryImageBuffer("openni-pointcloud-xyzrgb",
+  pcl_xyzrgb_buf_ = new SharedMemoryImageBuffer("openni-pointcloud-xyzrgb",
                                                  CARTESIAN_3D_FLOAT_RGB,
-                                                 __depth_md->XRes(), __depth_md->YRes());
+                                                 depth_md_->XRes(), depth_md_->YRes());
 
-  __pcl_xyzrgb_buf->set_frame_id(__cfg_register_depth_image ? __cfg_frame_image.c_str() : __cfg_frame_depth.c_str());
+  pcl_xyzrgb_buf_->set_frame_id(cfg_register_depth_image_ ? cfg_frame_image_.c_str() : cfg_frame_depth_.c_str());
 
   // this is magic from ROS openni_device.cpp, reading code from
   // openni-primesense suggests that SXGA is the base configuration
   XnUInt64 zpd; // zero plane distance
-  if ((st = __depth_gen->GetIntProperty("ZPD", zpd)) != XN_STATUS_OK) {
+  if ((st = depth_gen_->GetIntProperty("ZPD", zpd)) != XN_STATUS_OK) {
     throw Exception("Failed to get ZPD: %s", xnGetStatusString(st));
   }
   XnDouble pixel_size; // zero plane pixel size
-  if ((st = __depth_gen->GetRealProperty("ZPPS", pixel_size)) != XN_STATUS_OK) {
+  if ((st = depth_gen_->GetRealProperty("ZPPS", pixel_size)) != XN_STATUS_OK) {
     throw Exception("Failed to get ZPPS: %s", xnGetStatusString(st));
   }
 
-  if ((st = __depth_gen->GetIntProperty("NoSampleValue", __no_sample_value))
+  if ((st = depth_gen_->GetIntProperty("NoSampleValue", no_sample_value_))
       != XN_STATUS_OK)
   {
     throw Exception("Failed to get NoSampleValue: %s", xnGetStatusString(st));
   }
-  if ((st = __depth_gen->GetIntProperty("ShadowValue", __shadow_value))
+  if ((st = depth_gen_->GetIntProperty("ShadowValue", shadow_value_))
       != XN_STATUS_OK)
   {
     throw Exception("Failed to get ShadowValue: %s", xnGetStatusString(st));
   }
 
-  __width  = __depth_md->XRes();
-  __height = __depth_md->YRes();
-  float scale = __width / (float)XN_SXGA_X_RES;
-  if (__cfg_register_depth_image) {
+  width_  = depth_md_->XRes();
+  height_ = depth_md_->YRes();
+  float scale = width_ / (float)XN_SXGA_X_RES;
+  if (cfg_register_depth_image_) {
     // magic number taken from ROS/PCL openni_device.cpp
     const float rgb_focal_length_SXGA = 1050;
-    __focal_length = rgb_focal_length_SXGA * scale;
+    focal_length_ = rgb_focal_length_SXGA * scale;
   } else {
-    __focal_length = ((float)zpd / pixel_size) * scale;
+    focal_length_ = ((float)zpd / pixel_size) * scale;
   }
-  __foc_const = 0.001 / __focal_length;
-  __center_x = (__width  / 2.) - .5f;
-  __center_y = (__height / 2.) - .5f;
+  foc_const_ = 0.001 / focal_length_;
+  center_x_ = (width_  / 2.) - .5f;
+  center_y_ = (height_ / 2.) - .5f;
 
-  __image_gen->StartGenerating();
-  __depth_gen->StartGenerating();
+  image_gen_->StartGenerating();
+  depth_gen_->StartGenerating();
 
-  __capture_start = new Time(clock);
-  __capture_start->stamp_systime();
+  capture_start_ = new Time(clock);
+  capture_start_->stamp_systime();
   // Update once to get timestamp
-  __depth_gen->WaitAndUpdateData();
+  depth_gen_->WaitAndUpdateData();
   // arbitrarily define the zero reference point,
   // we can't get any closer than this
-  *__capture_start -= (long int)__depth_gen->GetTimestamp();
+  *capture_start_ -= (long int)depth_gen_->GetTimestamp();
 
-  __image_gen->WaitAndUpdateData();
+  image_gen_->WaitAndUpdateData();
 
-  if (__cfg_register_depth_image) {
+  if (cfg_register_depth_image_) {
     // RegistrationType should be 2 (software) for Kinect, 1 (hardware) for PS
     // (from ROS openni_camera)
     unsigned short usb_vendor = 0, usb_product = 0;
-    fawkes::openni::get_usb_info(*__depth_gen, usb_vendor, usb_product);
+    fawkes::openni::get_usb_info(*depth_gen_, usb_vendor, usb_product);
 
     if ( (usb_vendor == 0x045e) && (usb_product == 0x02ae) ) {
-      if (__depth_gen->SetIntProperty("RegistrationType", 2) != XN_STATUS_OK) {
+      if (depth_gen_->SetIntProperty("RegistrationType", 2) != XN_STATUS_OK) {
 	throw Exception("Failed to set registration type");
       }
     } else {
-      if (__depth_gen->SetIntProperty("RegistrationType", 1) != XN_STATUS_OK) {
+      if (depth_gen_->SetIntProperty("RegistrationType", 1) != XN_STATUS_OK) {
 	throw Exception("Failed to set registration type");
       }
     }
 
     logger->log_info(name(), "Setting depth alternate viewpoint to image");
-    fawkes::openni::setup_alternate_viewpoint(*__depth_gen, *__image_gen);
+    fawkes::openni::setup_alternate_viewpoint(*depth_gen_, *image_gen_);
   }
 
   // Fails with "Bad Paramter" on OpenNI 1.3.2.1/PS 5.0.3.3
   //logger->log_info(name(), "Setting depth/image synchronization");
-  //fawkes::openni::setup_synchronization(*__depth_gen, *__image_gen);
+  //fawkes::openni::setup_synchronization(*depth_gen_, *image_gen_);
 
 #ifdef HAVE_PCL
-  __cfg_generate_pcl = true;
+  cfg_generate_pcl_ = true;
   try {
-    __cfg_generate_pcl = config->get_bool("/plugins/openni-pointcloud/generate-pcl");
+    cfg_generate_pcl_ = config->get_bool("/plugins/openni-pointcloud/generate-pcl");
   } catch (Exception &e) {}
 
-  if (__cfg_generate_pcl) {
-    __pcl_xyz = new pcl::PointCloud<pcl::PointXYZ>();
-    __pcl_xyz->is_dense = false;
-    __pcl_xyz->width    = __width;
-    __pcl_xyz->height   = __height;
-    __pcl_xyz->points.resize((size_t)__width * (size_t)__height);
-    __pcl_xyz->header.frame_id = __cfg_register_depth_image ? __cfg_frame_image : __cfg_frame_depth;
+  if (cfg_generate_pcl_) {
+    pcl_xyz_ = new pcl::PointCloud<pcl::PointXYZ>();
+    pcl_xyz_->is_dense = false;
+    pcl_xyz_->width    = width_;
+    pcl_xyz_->height   = height_;
+    pcl_xyz_->points.resize((size_t)width_ * (size_t)height_);
+    pcl_xyz_->header.frame_id = cfg_register_depth_image_ ? cfg_frame_image_ : cfg_frame_depth_;
 
-    __pcl_xyzrgb = new pcl::PointCloud<pcl::PointXYZRGB>();
-    __pcl_xyzrgb->is_dense = false;
-    __pcl_xyzrgb->width    = __width;
-    __pcl_xyzrgb->height   = __height;
-    __pcl_xyzrgb->points.resize((size_t)__width * (size_t)__height);
-    __pcl_xyzrgb->header.frame_id = __cfg_register_depth_image ? __cfg_frame_image : __cfg_frame_depth;
+    pcl_xyzrgb_ = new pcl::PointCloud<pcl::PointXYZRGB>();
+    pcl_xyzrgb_->is_dense = false;
+    pcl_xyzrgb_->width    = width_;
+    pcl_xyzrgb_->height   = height_;
+    pcl_xyzrgb_->points.resize((size_t)width_ * (size_t)height_);
+    pcl_xyzrgb_->header.frame_id = cfg_register_depth_image_ ? cfg_frame_image_ : cfg_frame_depth_;
 
-    pcl_manager->add_pointcloud("openni-pointcloud-xyz", __pcl_xyz);
-    pcl_manager->add_pointcloud("openni-pointcloud-xyzrgb", __pcl_xyzrgb);
+    pcl_manager->add_pointcloud("openni-pointcloud-xyz", pcl_xyz_);
+    pcl_manager->add_pointcloud("openni-pointcloud-xyzrgb", pcl_xyzrgb_);
   }
 #endif
 
@@ -227,75 +227,75 @@ OpenNiPointCloudThread::finalize()
 
   // we do not stop generating, we don't know if there is no other plugin
   // using the node.
-  delete __depth_gen;
-  delete __depth_md;
-  delete __pcl_xyz_buf;
-  delete __pcl_xyzrgb_buf;
-  delete __capture_start;
+  delete depth_gen_;
+  delete depth_md_;
+  delete pcl_xyz_buf_;
+  delete pcl_xyzrgb_buf_;
+  delete capture_start_;
 }
 
 
 void
 OpenNiPointCloudThread::fill_xyz_no_pcl(fawkes::Time &ts, const XnDepthPixel * const depth_data)
 {
-  __pcl_xyz_buf->lock_for_write();
-  __pcl_xyz_buf->set_capture_time(&ts);
+  pcl_xyz_buf_->lock_for_write();
+  pcl_xyz_buf_->set_capture_time(&ts);
 
-  pcl_point_t *pclbuf = (pcl_point_t *)__pcl_xyz_buf->buffer();
+  pcl_point_t *pclbuf = (pcl_point_t *)pcl_xyz_buf_->buffer();
 
   unsigned int idx = 0;
-  for (unsigned int h = 0; h < __height; ++h) {
-    for (unsigned int w = 0; w < __width; ++w, ++idx, ++pclbuf) {
+  for (unsigned int h = 0; h < height_; ++h) {
+    for (unsigned int w = 0; w < width_; ++w, ++idx, ++pclbuf) {
       // Check for invalid measurements
       if (depth_data[idx] == 0 ||
-          depth_data[idx] == __no_sample_value ||
-          depth_data[idx] == __shadow_value)
+          depth_data[idx] == no_sample_value_ ||
+          depth_data[idx] == shadow_value_)
       {
         // invalid
         pclbuf->x = pclbuf->y = pclbuf->z = 0.f;
       } else {
         // Fill in XYZ
         pclbuf->x = depth_data[idx] * 0.001f;
-        pclbuf->y = -(w - __center_x) * depth_data[idx] * __foc_const;
-        pclbuf->z = -(h - __center_y) * depth_data[idx] * __foc_const;
+        pclbuf->y = -(w - center_x_) * depth_data[idx] * foc_const_;
+        pclbuf->z = -(h - center_y_) * depth_data[idx] * foc_const_;
       }
     }
   }
 
-  __pcl_xyz_buf->unlock();
+  pcl_xyz_buf_->unlock();
 }
 
 
 void
 OpenNiPointCloudThread::fill_xyzrgb_no_pcl(fawkes::Time &ts, const XnDepthPixel * const depth_data)
 {
-  __pcl_xyzrgb_buf->lock_for_write();
-  __pcl_xyzrgb_buf->set_capture_time(&ts);
+  pcl_xyzrgb_buf_->lock_for_write();
+  pcl_xyzrgb_buf_->set_capture_time(&ts);
 
-  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
+  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)pcl_xyzrgb_buf_->buffer();
 
   unsigned int idx = 0;
-  for (unsigned int h = 0; h < __height; ++h) {
-    for (unsigned int w = 0; w < __width; ++w, ++idx, ++pclbuf_rgb) {
+  for (unsigned int h = 0; h < height_; ++h) {
+    for (unsigned int w = 0; w < width_; ++w, ++idx, ++pclbuf_rgb) {
       // Check for invalid measurements
       if (depth_data[idx] == 0 ||
-          depth_data[idx] == __no_sample_value ||
-          depth_data[idx] == __shadow_value)
+          depth_data[idx] == no_sample_value_ ||
+          depth_data[idx] == shadow_value_)
       {
         // invalid
         pclbuf_rgb->x = pclbuf_rgb->y = pclbuf_rgb->z = 0.f;
       } else {
         // Fill in XYZ
         pclbuf_rgb->x = depth_data[idx] * 0.001f;
-        pclbuf_rgb->y = -(w - __center_x) * depth_data[idx] * __foc_const;
-        pclbuf_rgb->z = -(h - __center_y) * depth_data[idx] * __foc_const;
+        pclbuf_rgb->y = -(w - center_x_) * depth_data[idx] * foc_const_;
+        pclbuf_rgb->z = -(h - center_y_) * depth_data[idx] * foc_const_;
       }
     }
   }
 
   fill_rgb_no_pcl();
 
-  __pcl_xyzrgb_buf->unlock();
+  pcl_xyzrgb_buf_->unlock();
 }
 
 
@@ -303,22 +303,22 @@ void
 OpenNiPointCloudThread::fill_xyz_xyzrgb_no_pcl(fawkes::Time &ts,
                                                const XnDepthPixel * const depth_data)
 {
-  __pcl_xyz_buf->lock_for_write();
-  __pcl_xyz_buf->set_capture_time(&ts);
+  pcl_xyz_buf_->lock_for_write();
+  pcl_xyz_buf_->set_capture_time(&ts);
 
-  __pcl_xyzrgb_buf->lock_for_write();
-  __pcl_xyzrgb_buf->set_capture_time(&ts);
+  pcl_xyzrgb_buf_->lock_for_write();
+  pcl_xyzrgb_buf_->set_capture_time(&ts);
 
-  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
-  pcl_point_t *pclbuf_xyz = (pcl_point_t *)__pcl_xyz_buf->buffer();
+  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)pcl_xyzrgb_buf_->buffer();
+  pcl_point_t *pclbuf_xyz = (pcl_point_t *)pcl_xyz_buf_->buffer();
 
   unsigned int idx = 0;
-  for (unsigned int h = 0; h < __height; ++h) {
-    for (unsigned int w = 0; w < __width; ++w, ++idx, ++pclbuf_rgb, ++pclbuf_xyz) {
+  for (unsigned int h = 0; h < height_; ++h) {
+    for (unsigned int w = 0; w < width_; ++w, ++idx, ++pclbuf_rgb, ++pclbuf_xyz) {
       // Check for invalid measurements
       if (depth_data[idx] == 0 ||
-          depth_data[idx] == __no_sample_value ||
-          depth_data[idx] == __shadow_value)
+          depth_data[idx] == no_sample_value_ ||
+          depth_data[idx] == shadow_value_)
       {
         // invalid
         pclbuf_rgb->x = pclbuf_rgb->y = pclbuf_rgb->z = 0.f;
@@ -326,37 +326,37 @@ OpenNiPointCloudThread::fill_xyz_xyzrgb_no_pcl(fawkes::Time &ts,
       } else {
         // Fill in XYZ
         pclbuf_rgb->x = pclbuf_xyz->x = depth_data[idx] * 0.001f;
-        pclbuf_rgb->y = pclbuf_xyz->y = -(w - __center_x) * depth_data[idx] * __foc_const;
-        pclbuf_rgb->z = pclbuf_xyz->z = -(h - __center_y) * depth_data[idx] * __foc_const;
+        pclbuf_rgb->y = pclbuf_xyz->y = -(w - center_x_) * depth_data[idx] * foc_const_;
+        pclbuf_rgb->z = pclbuf_xyz->z = -(h - center_y_) * depth_data[idx] * foc_const_;
       }
     }
   }
 
   fill_rgb_no_pcl();
 
-  __pcl_xyzrgb_buf->unlock();
-  __pcl_xyz_buf->unlock();
+  pcl_xyzrgb_buf_->unlock();
+  pcl_xyz_buf_->unlock();
 }
 
 
 void
 OpenNiPointCloudThread::fill_rgb_no_pcl()
 {
-  if (! __image_rgb_buf) {
+  if (! image_rgb_buf_) {
     try {
-      __image_rgb_buf = new SharedMemoryImageBuffer("openni-image-rgb");
+      image_rgb_buf_ = new SharedMemoryImageBuffer("openni-image-rgb");
     } catch (Exception &e) {
       logger->log_warn(name(), "Failed to open openni-image-rgb shm image buffer");
       return;
     }
   }
 
-  __img_thread->wait_loop_done();
+  img_thread_->wait_loop_done();
 
-  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
-  RGB_t *imagebuf = (RGB_t *)__image_rgb_buf->buffer();
+  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)pcl_xyzrgb_buf_->buffer();
+  RGB_t *imagebuf = (RGB_t *)image_rgb_buf_->buffer();
 
-  for (unsigned int i = 0; i < __width * __height; ++i) {
+  for (unsigned int i = 0; i < width_ * height_; ++i) {
     pclbuf_rgb->r = imagebuf[i].R;
     pclbuf_rgb->g = imagebuf[i].G;
     pclbuf_rgb->b = imagebuf[i].B;
@@ -369,22 +369,22 @@ OpenNiPointCloudThread::fill_rgb_no_pcl()
 void
 OpenNiPointCloudThread::fill_xyz(fawkes::Time &ts, const XnDepthPixel * const depth_data)
 {
-  pcl::PointCloud<pcl::PointXYZ> &pcl = **__pcl_xyz;
+  pcl::PointCloud<pcl::PointXYZ> &pcl = **pcl_xyz_;
   pcl.header.seq += 1;
-  pcl_utils::set_time(__pcl_xyz, ts);
+  pcl_utils::set_time(pcl_xyz_, ts);
 
-  __pcl_xyz_buf->lock_for_write();
-  __pcl_xyz_buf->set_capture_time(&ts);
+  pcl_xyz_buf_->lock_for_write();
+  pcl_xyz_buf_->set_capture_time(&ts);
 
-  pcl_point_t *pclbuf = (pcl_point_t *)__pcl_xyz_buf->buffer();
+  pcl_point_t *pclbuf = (pcl_point_t *)pcl_xyz_buf_->buffer();
 
   unsigned int idx = 0;
-  for (unsigned int h = 0; h < __height; ++h) {
-    for (unsigned int w = 0; w < __width; ++w, ++idx, ++pclbuf) {
+  for (unsigned int h = 0; h < height_; ++h) {
+    for (unsigned int w = 0; w < width_; ++w, ++idx, ++pclbuf) {
       // Check for invalid measurements
       if (depth_data[idx] == 0 ||
-          depth_data[idx] == __no_sample_value ||
-          depth_data[idx] == __shadow_value)
+          depth_data[idx] == no_sample_value_ ||
+          depth_data[idx] == shadow_value_)
       {
         // invalid
         pclbuf->x = pclbuf->y = pclbuf->z = 0.f;
@@ -392,35 +392,35 @@ OpenNiPointCloudThread::fill_xyz(fawkes::Time &ts, const XnDepthPixel * const de
       } else {
         // Fill in XYZ
         pclbuf->x = pcl.points[idx].x = depth_data[idx] * 0.001f;
-        pclbuf->y = pcl.points[idx].y = -(w - __center_x) * depth_data[idx] * __foc_const;
-        pclbuf->z = pcl.points[idx].z = -(h - __center_y) * depth_data[idx] * __foc_const;
+        pclbuf->y = pcl.points[idx].y = -(w - center_x_) * depth_data[idx] * foc_const_;
+        pclbuf->z = pcl.points[idx].z = -(h - center_y_) * depth_data[idx] * foc_const_;
       }
     }
   }
 
-  __pcl_xyz_buf->unlock();
+  pcl_xyz_buf_->unlock();
 }
 
 
 void
 OpenNiPointCloudThread::fill_xyzrgb(fawkes::Time &ts, const XnDepthPixel * const depth_data)
 {
-  pcl::PointCloud<pcl::PointXYZRGB> &pcl_rgb = **__pcl_xyzrgb;
+  pcl::PointCloud<pcl::PointXYZRGB> &pcl_rgb = **pcl_xyzrgb_;
   pcl_rgb.header.seq += 1;
-  pcl_utils::set_time(__pcl_xyzrgb, ts);
+  pcl_utils::set_time(pcl_xyzrgb_, ts);
 
-  __pcl_xyzrgb_buf->lock_for_write();
-  __pcl_xyzrgb_buf->set_capture_time(&ts);
+  pcl_xyzrgb_buf_->lock_for_write();
+  pcl_xyzrgb_buf_->set_capture_time(&ts);
 
-  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
+  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)pcl_xyzrgb_buf_->buffer();
 
   unsigned int idx = 0;
-  for (unsigned int h = 0; h < __height; ++h) {
-    for (unsigned int w = 0; w < __width; ++w, ++idx, ++pclbuf_rgb) {
+  for (unsigned int h = 0; h < height_; ++h) {
+    for (unsigned int w = 0; w < width_; ++w, ++idx, ++pclbuf_rgb) {
       // Check for invalid measurements
       if (depth_data[idx] == 0 ||
-          depth_data[idx] == __no_sample_value ||
-          depth_data[idx] == __shadow_value)
+          depth_data[idx] == no_sample_value_ ||
+          depth_data[idx] == shadow_value_)
       {
         // invalid
         pclbuf_rgb->x = pclbuf_rgb->y = pclbuf_rgb->z = 0.f;
@@ -428,15 +428,15 @@ OpenNiPointCloudThread::fill_xyzrgb(fawkes::Time &ts, const XnDepthPixel * const
       } else {
         // Fill in XYZ
         pclbuf_rgb->x = pcl_rgb.points[idx].x = depth_data[idx] * 0.001f;
-        pclbuf_rgb->y = pcl_rgb.points[idx].y = -(w - __center_x) * depth_data[idx] * __foc_const;
-        pclbuf_rgb->z = pcl_rgb.points[idx].z = -(h - __center_y) * depth_data[idx] * __foc_const;
+        pclbuf_rgb->y = pcl_rgb.points[idx].y = -(w - center_x_) * depth_data[idx] * foc_const_;
+        pclbuf_rgb->z = pcl_rgb.points[idx].z = -(h - center_y_) * depth_data[idx] * foc_const_;
       }
     }
   }
 
   fill_rgb(pcl_rgb);
 
-  __pcl_xyzrgb_buf->unlock();
+  pcl_xyzrgb_buf_->unlock();
 }
 
 
@@ -444,30 +444,30 @@ void
 OpenNiPointCloudThread::fill_xyz_xyzrgb(fawkes::Time &ts, const XnDepthPixel * const depth_data)
 {
 
-  pcl::PointCloud<pcl::PointXYZRGB> &pcl_rgb = **__pcl_xyzrgb;
+  pcl::PointCloud<pcl::PointXYZRGB> &pcl_rgb = **pcl_xyzrgb_;
   pcl_rgb.header.seq += 1;
-  pcl_utils::set_time(__pcl_xyzrgb, ts);
+  pcl_utils::set_time(pcl_xyzrgb_, ts);
 
-  pcl::PointCloud<pcl::PointXYZ> &pcl_xyz = **__pcl_xyz;
+  pcl::PointCloud<pcl::PointXYZ> &pcl_xyz = **pcl_xyz_;
   pcl_xyz.header.seq += 1;
-  pcl_utils::set_time(__pcl_xyz, ts);
+  pcl_utils::set_time(pcl_xyz_, ts);
 
-  __pcl_xyz_buf->lock_for_write();
-  __pcl_xyz_buf->set_capture_time(&ts);
+  pcl_xyz_buf_->lock_for_write();
+  pcl_xyz_buf_->set_capture_time(&ts);
 
-  __pcl_xyzrgb_buf->lock_for_write();
-  __pcl_xyzrgb_buf->set_capture_time(&ts);
+  pcl_xyzrgb_buf_->lock_for_write();
+  pcl_xyzrgb_buf_->set_capture_time(&ts);
 
-  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
-  pcl_point_t *pclbuf_xyz = (pcl_point_t *)__pcl_xyz_buf->buffer();
+  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)pcl_xyzrgb_buf_->buffer();
+  pcl_point_t *pclbuf_xyz = (pcl_point_t *)pcl_xyz_buf_->buffer();
 
   unsigned int idx = 0;
-  for (unsigned int h = 0; h < __height; ++h) {
-    for (unsigned int w = 0; w < __width; ++w, ++idx, ++pclbuf_rgb, ++pclbuf_xyz) {
+  for (unsigned int h = 0; h < height_; ++h) {
+    for (unsigned int w = 0; w < width_; ++w, ++idx, ++pclbuf_rgb, ++pclbuf_xyz) {
       // Check for invalid measurements
       if (depth_data[idx] == 0 ||
-          depth_data[idx] == __no_sample_value ||
-          depth_data[idx] == __shadow_value)
+          depth_data[idx] == no_sample_value_ ||
+          depth_data[idx] == shadow_value_)
       {
         // invalid
         pclbuf_rgb->x = pclbuf_rgb->y = pclbuf_rgb->z = 0.f;
@@ -480,38 +480,38 @@ OpenNiPointCloudThread::fill_xyz_xyzrgb(fawkes::Time &ts, const XnDepthPixel * c
         pclbuf_rgb->x = pcl_rgb.points[idx].x = pclbuf_xyz->x = pcl_xyz.points[idx].x =
           depth_data[idx] * 0.001f;
         pclbuf_rgb->y = pcl_rgb.points[idx].y = pclbuf_xyz->y = pcl_xyz.points[idx].y =
-          -(w - __center_x) * depth_data[idx] * __foc_const;
+          -(w - center_x_) * depth_data[idx] * foc_const_;
         pclbuf_rgb->z = pcl_rgb.points[idx].z = pclbuf_xyz->z = pcl_xyz.points[idx].z =
-          -(h - __center_y) * depth_data[idx] * __foc_const;
+          -(h - center_y_) * depth_data[idx] * foc_const_;
       }
     }
   }
 
   fill_rgb(pcl_rgb);
 
-  __pcl_xyzrgb_buf->unlock();
-  __pcl_xyz_buf->unlock();
+  pcl_xyzrgb_buf_->unlock();
+  pcl_xyz_buf_->unlock();
 }
 
 
 void
 OpenNiPointCloudThread::fill_rgb(pcl::PointCloud<pcl::PointXYZRGB> &pcl_rgb)
 {
-  if (! __image_rgb_buf) {
+  if (! image_rgb_buf_) {
     try {
-      __image_rgb_buf = new SharedMemoryImageBuffer("openni-image-rgb");
+      image_rgb_buf_ = new SharedMemoryImageBuffer("openni-image-rgb");
     } catch (Exception &e) {
       logger->log_warn(name(), "Failed to open openni-image-rgb shm image buffer");
       return;
     }
   }
 
-  __img_thread->wait_loop_done();
+  img_thread_->wait_loop_done();
 
-  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)__pcl_xyzrgb_buf->buffer();
-  RGB_t *imagebuf = (RGB_t *)__image_rgb_buf->buffer();
+  pcl_point_xyzrgb_t *pclbuf_rgb = (pcl_point_xyzrgb_t *)pcl_xyzrgb_buf_->buffer();
+  RGB_t *imagebuf = (RGB_t *)image_rgb_buf_->buffer();
 
-  for (unsigned int i = 0; i < __width * __height; ++i) {
+  for (unsigned int i = 0; i < width_ * height_; ++i) {
     pclbuf_rgb->r = pcl_rgb.points[i].r = imagebuf[i].R;
     pclbuf_rgb->g = pcl_rgb.points[i].g = imagebuf[i].G;
     pclbuf_rgb->b = pcl_rgb.points[i].b = imagebuf[i].B;
@@ -525,32 +525,32 @@ void
 OpenNiPointCloudThread::loop()
 {
   MutexLocker lock(openni.objmutex_ptr());
-  bool is_data_new = __depth_gen->IsDataNew();
-  __depth_gen->GetMetaData(*__depth_md);
-  const XnDepthPixel * const data = __depth_md->Data();
+  bool is_data_new = depth_gen_->IsDataNew();
+  depth_gen_->GetMetaData(*depth_md_);
+  const XnDepthPixel * const data = depth_md_->Data();
   // experimental: unlock here as we do not invoke any methods anymore
   // since data has been updated earlier in the sensor hook we should be safe
   lock.unlock();
 
-  bool xyz_requested = (__pcl_xyz_buf->num_attached() > 1)
+  bool xyz_requested = (pcl_xyz_buf_->num_attached() > 1)
 #ifdef HAVE_PCL
     // 2 is us and the PCL manager of the PointCloudAspect
-    || (__cfg_generate_pcl && ((__pcl_xyz.use_count() > 2)))
+    || (cfg_generate_pcl_ && ((pcl_xyz_.use_count() > 2)))
 #endif
     ;
-  bool xyzrgb_requested = (__pcl_xyzrgb_buf->num_attached() > 1)
+  bool xyzrgb_requested = (pcl_xyzrgb_buf_->num_attached() > 1)
 #ifdef HAVE_PCL
     // 2 is us and the PCL manager of the PointCloudAspect
-    || (__cfg_generate_pcl && ((__pcl_xyzrgb.use_count() > 2)))
+    || (cfg_generate_pcl_ && ((pcl_xyzrgb_.use_count() > 2)))
 #endif
     ;
 
   if (is_data_new && (xyz_requested || xyzrgb_requested)) {
     // convert depth to points
-    fawkes::Time ts = *__capture_start + (long int)__depth_gen->GetTimestamp();
+    fawkes::Time ts = *capture_start_ + (long int)depth_gen_->GetTimestamp();
   
 #ifdef HAVE_PCL
-    if (__cfg_generate_pcl) {
+    if (cfg_generate_pcl_) {
 
       if (xyz_requested && xyzrgb_requested) {
         fill_xyz_xyzrgb(ts, data);
@@ -574,9 +574,9 @@ OpenNiPointCloudThread::loop()
 #endif
 
     // close rgb image buffer if no longer required
-    if (! xyzrgb_requested && __image_rgb_buf) {
-      delete __image_rgb_buf;
-      __image_rgb_buf = NULL;
+    if (! xyzrgb_requested && image_rgb_buf_) {
+      delete image_rgb_buf_;
+      image_rgb_buf_ = NULL;
     }
   }
 }

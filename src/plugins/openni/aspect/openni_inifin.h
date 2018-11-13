@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_ASPECT_OPENNI_INIFIN_H_
-#define __PLUGINS_OPENNI_ASPECT_OPENNI_INIFIN_H_
+#ifndef _PLUGINS_OPENNI_ASPECT_OPENNI_INIFIN_H_
+#define _PLUGINS_OPENNI_ASPECT_OPENNI_INIFIN_H_
 
 #include <aspect/inifins/inifin.h>
 #include <plugins/openni/aspect/openni.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class OpenNiAspectIniFin : public AspectIniFin
 {
@@ -43,7 +40,7 @@ class OpenNiAspectIniFin : public AspectIniFin
   void set_openni_context(LockPtr<xn::Context> openni_context);
 
  private:
-  LockPtr<xn::Context> __openni_context;
+  LockPtr<xn::Context> openni_context_;
 };
 
 } // end namespace fawkes

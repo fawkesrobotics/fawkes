@@ -354,7 +354,7 @@ BlackboardCLIPSFeature::clips_blackboard_preload(std::string env_name, std::stri
     // no interface of this type registered yet, add deftemplate for it
     Interface *iface = NULL;
     try {
-      iface = blackboard_->open_for_reading(type.c_str(), "__clips_blackboard_preload__");      
+      iface = blackboard_->open_for_reading(type.c_str(), "clips_blackboard_preload___");      
       clips_assert_interface_type(env_name, name, iface, type);
       blackboard_->close(iface);
       interfaces_[env_name].reading.insert(std::make_pair(type, std::list<fawkes::Interface *>()));

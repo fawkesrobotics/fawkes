@@ -56,47 +56,47 @@ class FawkesNetworkServerClientSendThread
 				      FawkesNetworkServerClientThread *parent)
     : Thread("FawkesNetworkServerClientSendThread", Thread::OPMODE_WAITFORWAKEUP)
   {
-    __s = s;
-    __parent = parent;
-    __outbound_mutex    = new Mutex();
-    __outbound_msgqs[0] = new FawkesNetworkMessageQueue();
-    __outbound_msgqs[1] = new FawkesNetworkMessageQueue();
-    __outbound_active   = 0;
-    __outbound_msgq     = __outbound_msgqs[0];
+    s_ = s;
+    parent_ = parent;
+    outbound_mutex_    = new Mutex();
+    outbound_msgqs_[0] = new FawkesNetworkMessageQueue();
+    outbound_msgqs_[1] = new FawkesNetworkMessageQueue();
+    outbound_active_   = 0;
+    outbound_msgq_     = outbound_msgqs_[0];
   }
 
   /** Destructor. */
   ~FawkesNetworkServerClientSendThread()
   {
     for (unsigned int i = 0; i < 2; ++i) {
-      while ( ! __outbound_msgqs[i]->empty() ) {
-	FawkesNetworkMessage *m = __outbound_msgqs[i]->front();
+      while ( ! outbound_msgqs_[i]->empty() ) {
+	FawkesNetworkMessage *m = outbound_msgqs_[i]->front();
 	m->unref();
-	__outbound_msgqs[i]->pop();
+	outbound_msgqs_[i]->pop();
       }
     }
-    delete __outbound_msgqs[0];
-    delete __outbound_msgqs[1];
-    delete __outbound_mutex;
+    delete outbound_msgqs_[0];
+    delete outbound_msgqs_[1];
+    delete outbound_mutex_;
   }
 
   virtual void loop()
   {
-    if ( ! __parent->alive() )  return;
+    if ( ! parent_->alive() )  return;
 
-    while ( __outbound_havemore ) {
-      __outbound_mutex->lock();
-      __outbound_havemore = false;
-      FawkesNetworkMessageQueue *q = __outbound_msgq;
-      __outbound_active = 1 - __outbound_active;
-      __outbound_msgq = __outbound_msgqs[__outbound_active];
-      __outbound_mutex->unlock();
+    while ( outbound_havemore_ ) {
+      outbound_mutex_->lock();
+      outbound_havemore_ = false;
+      FawkesNetworkMessageQueue *q = outbound_msgq_;
+      outbound_active_ = 1 - outbound_active_;
+      outbound_msgq_ = outbound_msgqs_[outbound_active_];
+      outbound_mutex_->unlock();
 
       if ( ! q->empty() ) {
 	try {
-	  FawkesNetworkTransceiver::send(__s, q);
+	  FawkesNetworkTransceiver::send(s_, q);
 	} catch (ConnectionDiedException &e) {
-	  __parent->connection_died();
+	  parent_->connection_died();
 	  exit();
 	}
       }
@@ -113,10 +113,10 @@ class FawkesNetworkServerClientSendThread
    */
   void enqueue(FawkesNetworkMessage *msg)
   {
-    __outbound_mutex->lock();
-    __outbound_msgq->push(msg);
-    __outbound_havemore = true;
-    __outbound_mutex->unlock();
+    outbound_mutex_->lock();
+    outbound_msgq_->push(msg);
+    outbound_havemore_ = true;
+    outbound_mutex_->unlock();
     wakeup();
   }
 
@@ -132,14 +132,14 @@ class FawkesNetworkServerClientSendThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  StreamSocket                    *__s;
-  FawkesNetworkServerClientThread *__parent;
+  StreamSocket                    *s_;
+  FawkesNetworkServerClientThread *parent_;
 
-  Mutex                     *__outbound_mutex;
-  unsigned int               __outbound_active;
-  bool                       __outbound_havemore;
-  FawkesNetworkMessageQueue *__outbound_msgq;
-  FawkesNetworkMessageQueue *__outbound_msgqs[2];
+  Mutex                     *outbound_mutex_;
+  unsigned int               outbound_active_;
+  bool                       outbound_havemore_;
+  FawkesNetworkMessageQueue *outbound_msgq_;
+  FawkesNetworkMessageQueue *outbound_msgqs_[2];
 
 };
 

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_RRD_EXAMPLE_RRD_EXAMPLE_THREAD_H_
-#define __PLUGINS_RRD_EXAMPLE_RRD_EXAMPLE_THREAD_H_
+#ifndef _PLUGINS_RRD_EXAMPLE_RRD_EXAMPLE_THREAD_H_
+#define _PLUGINS_RRD_EXAMPLE_RRD_EXAMPLE_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
@@ -47,11 +47,11 @@ class RRDExampleThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::RRDDefinition      *__test_rrd_def;
-  fawkes::RRDGraphDefinition *__test_graph_def;
+  fawkes::RRDDefinition      *test_rrd_def_;
+  fawkes::RRDGraphDefinition *test_graph_def_;
 
-  unsigned int                __loop_count;
-  unsigned int                __counter;
+  unsigned int                loop_count_;
+  unsigned int                counter_;
 };
 
 #endif

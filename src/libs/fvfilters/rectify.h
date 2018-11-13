@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FILTER_RECTIFY_H_
-#define __FIREVISION_FILTER_RECTIFY_H_
+#ifndef _FIREVISION_FILTER_RECTIFY_H_
+#define _FIREVISION_FILTER_RECTIFY_H_
 
 #include <fvfilters/filter.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class RectificationInfoBlock;
 
@@ -41,8 +38,8 @@ class FilterRectify : public Filter
   virtual void apply();
 
  private:
-  RectificationInfoBlock *__rib;
-  bool __mark_zeros;
+  RectificationInfoBlock *rib_;
+  bool mark_zeros_;
 };
 
 } // end namespace firevision

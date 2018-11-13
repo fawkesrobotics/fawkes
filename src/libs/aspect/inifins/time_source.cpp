@@ -27,9 +27,6 @@
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class TimeSourceAspectIniFin <aspect/inifins/time_source.h>
  * Initializer/finalizer for the TimeSourceAspect.
@@ -42,7 +39,7 @@ namespace fawkes {
 TimeSourceAspectIniFin::TimeSourceAspectIniFin(Clock *clock)
   : AspectIniFin("TimeSourceAspect")
 {
-  __clock = clock;
+  clock_ = clock;
 }
 
 
@@ -58,8 +55,8 @@ TimeSourceAspectIniFin::init(Thread *thread)
   }
 
   try {
-    __timesource_uc.add(timesource_thread->get_timesource());
-    __clock->register_ext_timesource(timesource_thread->get_timesource(),
+    timesource_uc_.add(timesource_thread->get_timesource());
+    clock_->register_ext_timesource(timesource_thread->get_timesource(),
 				     /* make default */ true);
   } catch (Exception &e) {
     throw CannotInitializeThreadException("Thread has TimeSourceAspect but there "
@@ -80,8 +77,8 @@ TimeSourceAspectIniFin::finalize(Thread *thread)
   }
 
   try {
-    __clock->remove_ext_timesource(timesource_thread->get_timesource());
-    __timesource_uc.remove(timesource_thread->get_timesource());
+    clock_->remove_ext_timesource(timesource_thread->get_timesource());
+    timesource_uc_.remove(timesource_thread->get_timesource());
   } catch (Exception &e) {
     CannotFinalizeThreadException ce("Failed to remove time source");
     ce.append(e);

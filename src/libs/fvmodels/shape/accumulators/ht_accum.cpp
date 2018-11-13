@@ -26,9 +26,6 @@
 using namespace std;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 RhtXNode* RhtXNode::reuse_head = NULL;
 RhtYNode* RhtYNode::reuse_head = NULL;

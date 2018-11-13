@@ -45,15 +45,15 @@ namespace fawkes {
  */
 LuaTriggerManager::LuaTriggerManager(LuaContext *lua, const char *trigger_var)
 {
-  __lua         = lua;
-  __trigger_var = strdup(trigger_var);
+  lua_         = lua;
+  trigger_var_ = strdup(trigger_var);
 }
 
 
 /** Destructor. */
 LuaTriggerManager::~LuaTriggerManager()
 {
-  free(__trigger_var);
+  free(trigger_var_);
 }
 
 
@@ -81,10 +81,10 @@ LuaTriggerManager::trigger(const char *event, const char *param_format, ...)
     }
     va_end(args);
 
-    __lua->do_string("%s:trigger(\"%s\", %s)", __trigger_var, event, params);
+    lua_->do_string("%s:trigger(\"%s\", %s)", trigger_var_, event, params);
     free(params);
   } else {
-    __lua->do_string("%s:trigger(\"%s\")", __trigger_var, event);
+    lua_->do_string("%s:trigger(\"%s\")", trigger_var_, event);
   }
 }
 

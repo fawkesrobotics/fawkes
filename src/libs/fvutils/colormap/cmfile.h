@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_COLORMAP_CMFILE_H_
-#define __FIREVISION_FVUTILS_COLORMAP_CMFILE_H_
+#ifndef _FIREVISION_FVUTILS_COLORMAP_CMFILE_H_
+#define _FIREVISION_FVUTILS_COLORMAP_CMFILE_H_
 
 #include <fvutils/fileformat/fvfile.h>
 #include <fvutils/colormap/cmfile_block.h>
@@ -31,9 +31,6 @@
 #include <stdint.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Colormap;
 
@@ -80,7 +77,7 @@ class ColormapFile : public FireVisionDataFile
  private:
   inline void assert_header();
  private:
-  cmfile_header_t  *__header;
+  cmfile_header_t  *header_;
 };
 
 } // end namespace firevision

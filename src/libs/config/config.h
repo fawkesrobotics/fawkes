@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CONFIG_CONFIG_H_
-#define __CONFIG_CONFIG_H_
+#ifndef _CONFIG_CONFIG_H_
+#define _CONFIG_CONFIG_H_
 
 #include <core/exception.h>
 #include <utils/misc/string_compare.h>
@@ -32,9 +32,6 @@
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ConfigurationChangeHandler;
 

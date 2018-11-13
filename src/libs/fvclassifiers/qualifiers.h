@@ -20,16 +20,13 @@
  */
 
 
-#ifndef __FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_
-#define __FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_
+#ifndef _FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_
+#define _FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_
 
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/base/types.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Qualifier
 {
@@ -116,4 +113,4 @@ class YellowQualifier: public Qualifier
 
 } // end namespace firevision
 
-#endif // __FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_
+#endif // FIREVISION_APPS_NAO_LOC_QUALIFIERS_H__

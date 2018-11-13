@@ -34,9 +34,6 @@
 using namespace std;
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class TimeTracker <utils/time/tracker.h>
  * Time tracking utility.
@@ -67,12 +64,12 @@ namespace fawkes {
  */
 TimeTracker::TimeTracker(bool add_default_class)
 {
-  __timelog = NULL;
-  __write_cycle = 0;
+  timelog_ = NULL;
+  write_cycle_ = 0;
   reset();
   if ( add_default_class ) {
-    __class_times.push_back(vector<struct timeval *>());
-    __class_names.push_back("Default");
+    class_times_.push_back(vector<struct timeval *>());
+    class_names_.push_back("Default");
   }
 }
 
@@ -83,14 +80,14 @@ TimeTracker::TimeTracker(bool add_default_class)
  */
 TimeTracker::TimeTracker(const char *filename, bool add_default_class)
 {
-  __write_cycle = 0;
+  write_cycle_ = 0;
   reset();
   if ( add_default_class ) {
-    __class_times.push_back(vector<struct timeval *>());
-    __class_names.push_back("Default");
+    class_times_.push_back(vector<struct timeval *>());
+    class_names_.push_back("Default");
   }
-  __timelog = fopen(filename, "w");
-  if (!__timelog) {
+  timelog_ = fopen(filename, "w");
+  if (!timelog_) {
     throw CouldNotOpenFileException(filename, errno, "Failed to open time log");
   }
 }
@@ -99,12 +96,12 @@ TimeTracker::TimeTracker(const char *filename, bool add_default_class)
 /** Destructor. */
 TimeTracker::~TimeTracker()
 {
-  if (__timelog) {
-    fclose(__timelog);
+  if (timelog_) {
+    fclose(timelog_);
   }
   reset();
-  __class_times.clear();
-  __class_names.clear();
+  class_times_.clear();
+  class_names_.clear();
 }
 
 
@@ -115,15 +112,15 @@ TimeTracker::~TimeTracker()
 void
 TimeTracker::reset(std::string comment)
 {
-  __tracker_comment = comment;
-  for (vector<vector<struct timeval *> >::iterator i = __class_times.begin(); i != __class_times.end(); ++i) {
+  tracker_comment_ = comment;
+  for (vector<vector<struct timeval *> >::iterator i = class_times_.begin(); i != class_times_.end(); ++i) {
     for (vector<struct timeval *>::iterator j = i->begin(); j != i->end(); ++j) {
       free(*j);
     }
     i->clear();
   }
-  __times.clear();
-  __comments.clear();
+  times_.clear();
+  comments_.clear();
   gettimeofday(&start_time, NULL);
   gettimeofday(&last_time, NULL);
 }
@@ -139,9 +136,9 @@ TimeTracker::ping(std::string comment)
 {
   timeval *t = (timeval *)malloc(sizeof(timeval));
   gettimeofday(t, NULL);
-  __times.push_back(t);
+  times_.push_back(t);
   if (!comment.empty()) {
-    __comments[ __times.size() - 1 ] = comment;
+    comments_[ times_.size() - 1 ] = comment;
   }
 }
 
@@ -158,9 +155,9 @@ TimeTracker::add_class(std::string name)
   if ( name == "" ) {
     throw Exception("TimeTracker::add_class(): Class name may not be empty");
   }
-  __class_times.push_back(vector<struct timeval *>());
-  __class_names.push_back(name);
-  return __class_times.size() - 1;
+  class_times_.push_back(vector<struct timeval *>());
+  class_names_.push_back(name);
+  return class_times_.size() - 1;
 }
 
 
@@ -173,13 +170,13 @@ TimeTracker::add_class(std::string name)
 void
 TimeTracker::remove_class(unsigned int cls)
 {
-  if ( cls < __class_names.size() ) {
-    __class_names[cls] = "";
+  if ( cls < class_names_.size() ) {
+    class_names_[cls] = "";
   } else {
-    if ( __class_times.size() == 0 ) {
+    if ( class_times_.size() == 0 ) {
       throw Exception("No classes have been added, cannot delete class %u", cls);
     } else {
-      throw OutOfBoundsException("Invalid class given", cls, 0, __class_times.size()-1);
+      throw OutOfBoundsException("Invalid class given", cls, 0, class_times_.size()-1);
     }
   }
 }
@@ -208,13 +205,13 @@ TimeTracker::ping(unsigned int cls)
   t->tv_sec  = sec;
   t->tv_usec = usec;
 
-  if (cls < __class_times.size()) {
-    __class_times[cls].push_back(t);
+  if (cls < class_times_.size()) {
+    class_times_[cls].push_back(t);
   } else {
-    if ( __class_times.size() == 0 ) {
+    if ( class_times_.size() == 0 ) {
       throw Exception("No classes have been added, cannot track times");
     } else {
-      throw OutOfBoundsException("Invalid class given", cls, 0, __class_times.size()-1);
+      throw OutOfBoundsException("Invalid class given", cls, 0, class_times_.size()-1);
     }
   }
 }
@@ -227,18 +224,18 @@ TimeTracker::ping(unsigned int cls)
 void
 TimeTracker::ping_start(unsigned int cls)
 {
-  if (cls >= __class_times.size()) return;
+  if (cls >= class_times_.size()) return;
 
   timeval *t = (timeval *)malloc(sizeof(timeval));
   gettimeofday(t, NULL);
 
-  if (cls < __class_times.size()) {
-    __class_times[cls].push_back(t);
+  if (cls < class_times_.size()) {
+    class_times_[cls].push_back(t);
   } else {
-    if ( __class_times.size() == 0 ) {
+    if ( class_times_.size() == 0 ) {
       throw Exception("No classes have been added, cannot track times");
     } else {
-      throw OutOfBoundsException("Invalid class given", cls, 0, __class_times.size()-1);
+      throw OutOfBoundsException("Invalid class given", cls, 0, class_times_.size()-1);
     }
   }
 
@@ -253,12 +250,12 @@ TimeTracker::ping_start(unsigned int cls)
 void
 TimeTracker::ping_end(unsigned int cls)
 {
-  if (cls >= __class_times.size()) return;
+  if (cls >= class_times_.size()) return;
 
   timeval t2;
   gettimeofday(&t2, NULL);
 
-  timeval *t1 = __class_times[cls].back();
+  timeval *t1 = class_times_[cls].back();
 
   long sec  = t2.tv_sec - t1->tv_sec;
   long usec = t2.tv_usec - t1->tv_usec;
@@ -281,10 +278,10 @@ TimeTracker::ping_end(unsigned int cls)
 void
 TimeTracker::ping_abort(unsigned int cls)
 {
-  if (cls >= __class_times.size()) return;
+  if (cls >= class_times_.size()) return;
 
-  free(__class_times[cls].back());
-  __class_times[cls].pop_back();
+  free(class_times_[cls].back());
+  class_times_[cls].pop_back();
 }
 
 
@@ -317,7 +314,7 @@ void
 TimeTracker::print_to_stdout()
 {
 
-  if ( ! __times.empty()) {
+  if ( ! times_.empty()) {
     unsigned int i = 0;
     unsigned int j = 0;
     long diff_sec_start = 0;
@@ -339,49 +336,49 @@ TimeTracker::print_to_stdout()
     }
 
     cout << endl << "TimeTracker stats - individual times";
-    if (__tracker_comment.empty()) {
-      cout << " (" << __tracker_comment << ")";
+    if (tracker_comment_.empty()) {
+      cout << " (" << tracker_comment_ << ")";
     }
     cout << endl
 	 << "==================================================================" << endl
 	 << "Initialized: " << time_string << " (" << start_time.tv_sec << ")" << endl << endl;
 
-    for (__time_it = __times.begin(); __time_it != __times.end(); ++__time_it) {
+    for (time_it_ = times_.begin(); time_it_ != times_.end(); ++time_it_) {
       char tmp[10];
       sprintf(tmp, "%3u.", i + 1);
       cout << tmp;
-      if (__comments.count(i) > 0) {
-	cout << "  (" << __comments[i] << ")";
+      if (comments_.count(i) > 0) {
+	cout << "  (" << comments_[i] << ")";
       }
       cout << endl;
 
-      diff_sec_start  = (*__time_it)->tv_sec  - start_time.tv_sec;
-      diff_usec_start = (*__time_it)->tv_usec - start_time.tv_usec;
+      diff_sec_start  = (*time_it_)->tv_sec  - start_time.tv_sec;
+      diff_usec_start = (*time_it_)->tv_usec - start_time.tv_usec;
       if (diff_usec_start < 0) {
 	diff_sec_start -= 1;
 	diff_usec_start = 1000000 + diff_usec_start;
       }
       diff_msec_start = diff_usec_start / 1000.f;
 
-      diff_sec_last  = (*__time_it)->tv_sec  - last_sec;
-      diff_usec_last = (*__time_it)->tv_usec - last_usec;
+      diff_sec_last  = (*time_it_)->tv_sec  - last_sec;
+      diff_usec_last = (*time_it_)->tv_usec - last_usec;
       if (diff_usec_last < 0) {
 	diff_sec_last -= 1;
 	diff_usec_last = 1000000 + diff_usec_last;
       }
       diff_msec_last = diff_usec_last / 1000.f;
 
-      last_sec  = (*__time_it)->tv_sec;
-      last_usec = (*__time_it)->tv_usec;
+      last_sec  = (*time_it_)->tv_sec;
+      last_usec = (*time_it_)->tv_usec;
 
-      ctime_r(&(*__time_it)->tv_sec, time_string);
+      ctime_r(&(*time_it_)->tv_sec, time_string);
       for (j = 26; j > 0; --j) {
 	if (time_string[j] == '\n') {
 	  time_string[j] = 0;
 	  break;
 	}
       }
-      cout << time_string << " (" << (*__time_it)->tv_sec << ")" << endl;
+      cout << time_string << " (" << (*time_it_)->tv_sec << ")" << endl;
       cout << "Diff to start: " << diff_sec_start << " sec and " << diff_usec_start
 	   << " usec  (which are "
 	   << diff_msec_start << " msec)" << endl;
@@ -394,21 +391,21 @@ TimeTracker::print_to_stdout()
   }
 
   cout << endl << "TimeTracker stats - class times";
-  if (!__tracker_comment.empty()) {
-    cout << " (" << __tracker_comment << ")";
+  if (!tracker_comment_.empty()) {
+    cout << " (" << tracker_comment_ << ")";
   }
   cout << endl
        << "==================================================================" << endl;
 
-  vector<vector<struct timeval *> >::iterator it = __class_times.begin();
-  vector<string>::iterator sit = __class_names.begin();
+  vector<vector<struct timeval *> >::iterator it = class_times_.begin();
+  vector<string>::iterator sit = class_names_.begin();
 
   double deviation = 0.f;
   double average = 0.f;
   double average_ms = 0.f;
   double deviation_ms = 0.f;
 
-  for (; (it != __class_times.end()) && (sit != __class_names.end()); ++it, ++sit) {
+  for (; (it != class_times_.end()) && (sit != class_names_.end()); ++it, ++sit) {
     if (sit->empty()) continue;
 
     if (it->size() > 0) {
@@ -441,10 +438,10 @@ TimeTracker::print_to_stdout()
 void
 TimeTracker::print_to_file()
 {
-  if ( ! __timelog)  throw Exception("Time log not opened, use other ctor");
+  if ( ! timelog_)  throw Exception("Time log not opened, use other ctor");
 
-  vector<vector<struct timeval *> >::iterator it = __class_times.begin();
-  vector<string>::iterator sit = __class_names.begin();
+  vector<vector<struct timeval *> >::iterator it = class_times_.begin();
+  vector<string>::iterator sit = class_names_.begin();
 
   double deviation = 0.f;
   double average = 0.f;
@@ -452,18 +449,18 @@ TimeTracker::print_to_file()
   double deviation_ms = 0.f;
   double avgsum = 0.f;
 
-  fprintf(__timelog, "%u ", ++__write_cycle);
-  for (; (it != __class_times.end()) && (sit != __class_names.end()); ++it, ++sit) {
+  fprintf(timelog_, "%u ", ++write_cycle_);
+  for (; (it != class_times_.end()) && (sit != class_names_.end()); ++it, ++sit) {
     if (sit->empty()) continue;
 
     average_and_deviation(*it, average, average_ms, deviation, deviation_ms);
 
     avgsum += average;
-    fprintf(__timelog, "%lf %lf %lf %lf %lf ",
+    fprintf(timelog_, "%lf %lf %lf %lf %lf ",
 	    average, average_ms, avgsum, deviation, deviation_ms);
   }
-  fprintf(__timelog, "\n");
-  fflush(__timelog);
+  fprintf(timelog_, "\n");
+  fflush(timelog_);
 }
 
 /** @class ScopedClassItemTracker "utils/time/tracker.h"

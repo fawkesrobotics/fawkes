@@ -25,9 +25,6 @@
 #include <core/exception.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class WebviewRestApi <webview/rest_api.h>
  * Webview REST API component.

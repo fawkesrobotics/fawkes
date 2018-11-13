@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_FIELD_POINTER_H_
-#define __INTERFACE_FIELD_POINTER_H_
+#ifndef _INTERFACE_FIELD_POINTER_H_
+#define _INTERFACE_FIELD_POINTER_H_
 
 #include <interface/interface.h>
 
@@ -46,9 +46,9 @@ template <typename FieldType>
 			const char *name,
 			FieldType *value)
   {
-    __type       = type;
-    __name       = name;
-    __value      = value;
+    type_       = type;
+    name_       = name;
+    value_      = value;
   }
 
   /** Get the type of the field.
@@ -56,7 +56,7 @@ template <typename FieldType>
    */
   Interface::interface_fieldtype_t get_type() const
   {
-    return __type;
+    return type_;
   }
 
   /** Get name of the field.
@@ -64,7 +64,7 @@ template <typename FieldType>
    */
   const char * get_name() const
   {
-    return __name;
+    return name_;
   }
 
   /** Get current value of the field.
@@ -72,7 +72,7 @@ template <typename FieldType>
    */
   FieldType get_value() const
   {
-    return *__value;
+    return *value_;
   }
 
   /** Set value of the field.
@@ -80,13 +80,13 @@ template <typename FieldType>
    */
   void set_value(FieldType value)
   {
-    *__value = value;
+    *value_ = value;
   }
 
  private:
-  Interface::interface_fieldtype_t  __type;
-  const char                       *__name;
-  volatile FieldType               *__value;
+  Interface::interface_fieldtype_t  type_;
+  const char                       *name_;
+  volatile FieldType               *value_;
 };
 
 } // end namespace fawkes

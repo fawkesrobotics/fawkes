@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_BBSYNC_WRITER_LISTENER_H_
-#define __PLUGINS_BBSYNC_WRITER_LISTENER_H_
+#ifndef _PLUGINS_BBSYNC_WRITER_LISTENER_H_
+#define _PLUGINS_BBSYNC_WRITER_LISTENER_H_
 
 #include <blackboard/interface_listener.h>
 
@@ -49,8 +49,8 @@ class SyncWriterInterfaceListener
 					   unsigned int instance_serial) throw();
 
  private:
-  fawkes::Logger                   *__logger;
-  BlackBoardSynchronizationThread  *__sync_thread;
+  fawkes::Logger                   *logger_;
+  BlackBoardSynchronizationThread  *sync_thread_;
 };
 
 

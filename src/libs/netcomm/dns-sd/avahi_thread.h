@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_DNSSD_AVAHI_THREAD_H_
-#define __NETCOMM_DNSSD_AVAHI_THREAD_H_
+#ifndef _NETCOMM_DNSSD_AVAHI_THREAD_H_
+#define _NETCOMM_DNSSD_AVAHI_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <netcomm/service_discovery/service_publisher.h>
@@ -199,21 +199,21 @@ class AvahiThread
 
   WaitCondition         *init_wc;
 
-  LockMap<NetworkService, AvahiEntryGroup *>           __services;
-  LockMap<NetworkService, AvahiEntryGroup *>::iterator __sit;
-  LockQueue<NetworkService>            __pending_services;
-  LockQueue<NetworkService>            __pending_remove_services;
+  LockMap<NetworkService, AvahiEntryGroup *>           services_;
+  LockMap<NetworkService, AvahiEntryGroup *>::iterator sit_;
+  LockQueue<NetworkService>            pending_services_;
+  LockQueue<NetworkService>            pending_remove_services_;
 
-  LockMap<std::string, std::list<ServiceBrowseHandler *> > __handlers;
-  LockMap<std::string, AvahiServiceBrowser * >             __browsers;
-  LockQueue<std::string> __pending_browsers;
-  LockQueue<std::string> __pending_browser_removes;
+  LockMap<std::string, std::list<ServiceBrowseHandler *> > handlers_;
+  LockMap<std::string, AvahiServiceBrowser * >             browsers_;
+  LockQueue<std::string> pending_browsers_;
+  LockQueue<std::string> pending_browser_removes_;
 
-  LockList<AvahiHostNameResolver *> __running_hostname_resolvers;
-  LockList<AvahiAddressResolver *>  __running_address_resolvers;
+  LockList<AvahiHostNameResolver *> running_hostname_resolvers_;
+  LockList<AvahiAddressResolver *>  running_address_resolvers_;
 
-  LockMap<std::string, AvahiResolverCallbackData * >      __pending_hostname_resolves;
-  LockMap<struct ::sockaddr_storage *, AvahiResolverCallbackData *>  __pending_address_resolves;
+  LockMap<std::string, AvahiResolverCallbackData * >      pending_hostname_resolves_;
+  LockMap<struct ::sockaddr_storage *, AvahiResolverCallbackData *>  pending_address_resolves_;
 };
 
 } // end namespace fawkes

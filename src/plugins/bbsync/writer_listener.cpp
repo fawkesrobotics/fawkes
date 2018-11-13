@@ -46,8 +46,8 @@ SyncWriterInterfaceListener::SyncWriterInterfaceListener(BlackBoardSynchronizati
 							 const char *desc)
   : BlackBoardInterfaceListener("SyncWriterInterfaceListener(%s)", desc)
 {
-  __logger      = logger;
-  __sync_thread = sync_thread;
+  logger_      = logger;
+  sync_thread_ = sync_thread;
 }
 
 
@@ -74,7 +74,7 @@ void
 SyncWriterInterfaceListener::bb_interface_writer_added(fawkes::Interface *interface,
 						       unsigned int instance_serial) throw()
 {
-  __sync_thread->writer_added(interface);
+  sync_thread_->writer_added(interface);
 }
 
 
@@ -82,5 +82,5 @@ void
 SyncWriterInterfaceListener::bb_interface_writer_removed(fawkes::Interface *interface,
 							 unsigned int instance_serial) throw()
 {
-  __sync_thread->writer_removed(interface);
+  sync_thread_->writer_removed(interface);
 }

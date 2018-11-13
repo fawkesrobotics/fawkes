@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_GOSSIP_ASPECT_GOSSIP_INIFIN_H_
-#define __PLUGINS_GOSSIP_ASPECT_GOSSIP_INIFIN_H_
+#ifndef _PLUGINS_GOSSIP_ASPECT_GOSSIP_INIFIN_H_
+#define _PLUGINS_GOSSIP_ASPECT_GOSSIP_INIFIN_H_
 
 #include <aspect/inifins/inifin.h>
 #include <plugins/gossip/aspect/gossip.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class GossipGroupManager;
 

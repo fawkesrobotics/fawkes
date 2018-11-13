@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_NAO_MOTION_THREAD_H_
-#define __PLUGINS_NAO_MOTION_THREAD_H_
+#ifndef _PLUGINS_NAO_MOTION_THREAD_H_
+#define _PLUGINS_NAO_MOTION_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
@@ -84,15 +84,15 @@ class NaoQiMotionThread
 
 
  private:
-  AL::ALPtr<AL::ALMotionProxy> __almotion;
-  AL::ALPtr<AL::ALThreadPool>  __thread_pool;
+  AL::ALPtr<AL::ALMotionProxy> almotion_;
+  AL::ALPtr<AL::ALThreadPool>  thread_pool_;
 
-  fawkes::HumanoidMotionInterface *__hummot_if;
-  fawkes::NaoSensorInterface      *__sensor_if;
+  fawkes::HumanoidMotionInterface *hummot_if_;
+  fawkes::NaoSensorInterface      *sensor_if_;
 
-  int __motion_task_id;
-  int __head_task_id;
-  AL::ALPtr<AL::ALTask>        __motion_task;
+  int motion_task_id_;
+  int head_task_id_;
+  AL::ALPtr<AL::ALTask>        motion_task_;
 };
 
 #endif

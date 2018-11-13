@@ -40,9 +40,6 @@ using namespace fawkes;
 
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 const float RhtCircleModel::RHT_MIN_RADIUS = 40.0;
 const float RhtCircleModel::RHT_MAX_RADIUS = 500.0;

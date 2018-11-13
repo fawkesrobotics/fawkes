@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_SHAPE_HT_LINE_H_
-#define __FIREVISION_MODELS_SHAPE_HT_LINE_H_
+#ifndef _FIREVISION_MODELS_SHAPE_HT_LINE_H_
+#define _FIREVISION_MODELS_SHAPE_HT_LINE_H_
 
 #include <vector>
 #include <iostream>
@@ -34,9 +34,6 @@
 #include <fvmodels/shape/accumulators/ht_accum.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ROI;
 
@@ -94,5 +91,5 @@ class HtLinesModel: public ShapeModel
 
 } // end namespace firevision
 
-#endif // __FIREVISION_MODELS_SHAPE_HT_LINES_H_
+#endif // FIREVISION_MODELS_SHAPE_HT_LINES_H__
 

@@ -20,17 +20,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __UTILS_SYSTEM_FAM_THREAD_H_
-#define __UTILS_SYSTEM_FAM_THREAD_H_
+#ifndef _UTILS_SYSTEM_FAM_THREAD_H_
+#define _UTILS_SYSTEM_FAM_THREAD_H_
 
 #include <core/utils/refptr.h>
 #include <utils/system/fam.h>
 #include <core/threading/thread.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FamThread : public Thread
 {
@@ -45,7 +42,7 @@ class FamThread : public Thread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  RefPtr<FileAlterationMonitor> __fam;
+  RefPtr<FileAlterationMonitor> fam_;
 };
 
 

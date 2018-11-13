@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LOGGING_LOGGER_EMPLOYER_H_
-#define __LOGGING_LOGGER_EMPLOYER_H_
+#ifndef _LOGGING_LOGGER_EMPLOYER_H_
+#define _LOGGING_LOGGER_EMPLOYER_H_
 
 namespace fawkes {
 

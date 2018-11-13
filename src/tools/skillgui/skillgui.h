@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_SKILLGUI_SKILLGUI_H_
-#define __TOOLS_SKILLGUI_SKILLGUI_H_
+#ifndef _TOOLS_SKILLGUI_SKILLGUI_H_
+#define _TOOLS_SKILLGUI_SKILLGUI_H_
 
 #include <gui_utils/connection_dispatcher.h>
 
@@ -91,15 +91,15 @@ class SkillGuiGtkWindow : public Gtk::Window
     Gtk::TreeModelColumn<Glib::ustring> skillstring;
     /// @endcond
   };
-  SkillStringRecord __sks_record;
+  SkillStringRecord sks_record_;
 
 
   fawkes::BlackBoard *bb;
 
   fawkes::ConnectionDispatcher connection_dispatcher;
-  fawkes::InterfaceDispatcher  *__skiller_ifd;
-  fawkes::InterfaceDispatcher  *__skdbg_ifd;
-  fawkes::InterfaceDispatcher  *__agdbg_ifd;
+  fawkes::InterfaceDispatcher  *skiller_ifd_;
+  fawkes::InterfaceDispatcher  *skdbg_ifd_;
+  fawkes::InterfaceDispatcher  *agdbg_ifd_;
 
   Gtk::ToolButton        *tb_connection;
   Gtk::ToolButton        *tb_exit;
@@ -137,10 +137,10 @@ class SkillGuiGtkWindow : public Gtk::Window
   Gtk::ToolButton        *tb_graphdir;
   Gtk::ToggleToolButton  *tb_graphcolored;
 
-  Glib::RefPtr<Gtk::ListStore> __sks_list;
+  Glib::RefPtr<Gtk::ListStore> sks_list_;
 
 #ifdef HAVE_GCONFMM
-  Glib::RefPtr<Gnome::Conf::Client> __gconf;
+  Glib::RefPtr<Gnome::Conf::Client> gconf_;
 #endif
 
 #ifdef USE_PAPYRUS
@@ -149,12 +149,12 @@ class SkillGuiGtkWindow : public Gtk::Window
   SkillGuiGraphDrawingArea *gda;
 #endif
 
-  fawkes::SkillerInterface *__skiller_if;
-  fawkes::SkillerDebugInterface *__skdbg_if;
-  fawkes::SkillerDebugInterface *__agdbg_if;
+  fawkes::SkillerInterface *skiller_if_;
+  fawkes::SkillerDebugInterface *skdbg_if_;
+  fawkes::SkillerDebugInterface *agdbg_if_;
 
-  fawkes::LogView         *__logview;
-  fawkes::PluginTreeView  *__trv_plugins;
+  fawkes::LogView         *logview_;
+  fawkes::PluginTreeView  *trv_plugins_;
 };
 
 #endif

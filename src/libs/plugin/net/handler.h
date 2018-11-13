@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGIN_NET_HANDLER_H_
-#define __PLUGIN_NET_HANDLER_H_
+#ifndef _PLUGIN_NET_HANDLER_H_
+#define _PLUGIN_NET_HANDLER_H_
 
 #include <netcomm/fawkes/handler.h>
 #include <core/threading/thread.h>
@@ -39,9 +39,6 @@
 #include <utility>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ThreadCollector;
 class FawkesNetworkHub;
@@ -86,13 +83,13 @@ class PluginNetworkHandler
  protected: virtual void run() { Thread::run(); }
 
  private:
-  PluginManager     *__manager;
-  FawkesNetworkHub  *__hub;
+  PluginManager     *manager_;
+  FawkesNetworkHub  *hub_;
 
-  LockQueue< FawkesNetworkMessage * > __inbound_queue;
+  LockQueue< FawkesNetworkMessage * > inbound_queue_;
 
-  LockList<unsigned int>           __subscribers;
-  LockList<unsigned int>::iterator __ssit;
+  LockList<unsigned int>           subscribers_;
+  LockList<unsigned int>::iterator ssit_;
 };
 
 } // end namespace fawkes

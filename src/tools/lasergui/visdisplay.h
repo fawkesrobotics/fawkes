@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_LASERGUI_VISDISPLAY_H_
-#define __TOOLS_LASERGUI_VISDISPLAY_H_
+#ifndef _TOOLS_LASERGUI_VISDISPLAY_H_
+#define _TOOLS_LASERGUI_VISDISPLAY_H_
 
 #include <cairomm/context.h>
 #include <string>
@@ -76,10 +76,10 @@ class VisualDisplay2D
 	 unsigned char b = 0, unsigned char a = 0);
     void draw(Cairo::RefPtr<Cairo::Context> &cr);
   private:
-    float __x1;
-    float __y1;
-    float __x2;
-    float __y2;
+    float x1_;
+    float y1_;
+    float x2_;
+    float y2_;
   };
 
   class Rectangle : public Shape {
@@ -91,10 +91,10 @@ class VisualDisplay2D
 	      unsigned char b = 0, unsigned char a = 0);
     void draw(Cairo::RefPtr<Cairo::Context> &cr);
    private:
-    float __x;
-    float __y;
-    float __width;
-    float __height;
+    float x_;
+    float y_;
+    float width_;
+    float height_;
   };
 
   class Circle : public Shape {
@@ -106,9 +106,9 @@ class VisualDisplay2D
 	   unsigned char b = 0, unsigned char a = 0);
     void draw(Cairo::RefPtr<Cairo::Context> &cr);
    private:
-    float __x;
-    float __y;
-    float __radius;
+    float x_;
+    float y_;
+    float radius_;
   };
 
   class Text : public Shape {
@@ -121,17 +121,17 @@ class VisualDisplay2D
 	 unsigned char b = 0, unsigned char a = 0);
     void draw(Cairo::RefPtr<Cairo::Context> &cr);
    private:
-    float __x;
-    float __y;
-    std::string __text;
-    float __size;
-    fawkes::VisualDisplay2DInterface::Anchor __anchor;
+    float x_;
+    float y_;
+    std::string text_;
+    float size_;
+    fawkes::VisualDisplay2DInterface::Anchor anchor_;
   };
 
  private:
-  std::map<unsigned int, Shape *>  __shapes;
-  std::map<unsigned int, Shape *>::iterator  __sit;
-  fawkes::VisualDisplay2DInterface  *__interface;
+  std::map<unsigned int, Shape *>  shapes_;
+  std::map<unsigned int, Shape *>::iterator  sit_;
+  fawkes::VisualDisplay2DInterface  *interface_;
 };
 
 

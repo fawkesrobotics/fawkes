@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __ECLIPSE_EXTERNALS_BLACKBOARD_H_
-#define __ECLIPSE_EXTERNALS_BLACKBOARD_H_
+#ifndef _ECLIPSE_EXTERNALS_BLACKBOARD_H_
+#define _ECLIPSE_EXTERNALS_BLACKBOARD_H_
 
 #include <blackboard/remote.h>
 #include <logging/logger.h>

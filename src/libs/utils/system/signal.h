@@ -25,8 +25,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_SYSTEM_SIGNAL_H_
-#define __UTILS_SYSTEM_SIGNAL_H_
+#ifndef _UTILS_SYSTEM_SIGNAL_H_
+#define _UTILS_SYSTEM_SIGNAL_H_
 
 #include <signal.h>
 
@@ -54,7 +54,7 @@ class SignalManager {
   SignalManager();
   SignalManager(const SignalManager& cc);
 
-  static SignalManager *__instance;
+  static SignalManager *instance_;
 
   // Entry point adapter installed into <sigaction> 
   // (must be a static method or a stand-alone 
@@ -67,7 +67,7 @@ class SignalManager {
   // Table of pointers to concrete <SignalHandler>s
   // registered by applications.  NSIG is the number of 
   // signals defined in <signal.h>.
-  static SignalHandler *  __signal_handlers[NSIG];
+  static SignalHandler *  signal_handlers_[NSIG];
 
 };
 

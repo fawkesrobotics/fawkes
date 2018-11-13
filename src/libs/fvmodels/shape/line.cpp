@@ -29,9 +29,6 @@
 using namespace std;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class LineShape <fvmodels/shape/line.h>
  * Line shape.

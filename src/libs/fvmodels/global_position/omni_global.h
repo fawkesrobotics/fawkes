@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_GLOBAL_POSITION_OMNI_GLOBAL_H_
-#define __FIREVISION_MODELS_GLOBAL_POSITION_OMNI_GLOBAL_H_
+#ifndef _FIREVISION_MODELS_GLOBAL_POSITION_OMNI_GLOBAL_H_
+#define _FIREVISION_MODELS_GLOBAL_POSITION_OMNI_GLOBAL_H_
 
 #include <fvmodels/global_position/globalpositionmodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class MirrorModel;
 

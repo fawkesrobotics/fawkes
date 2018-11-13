@@ -24,9 +24,6 @@
 #include <aspect/mainloop.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class MainLoopAspect <aspect/mainloop.h>
  * Thread aspect that allows to replace the main loop of the main application

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_BLOCKED_TIMING_H_
-#define __ASPECT_BLOCKED_TIMING_H_
+#ifndef _ASPECT_BLOCKED_TIMING_H_
+#define _ASPECT_BLOCKED_TIMING_H_
 
 #include <aspect/aspect.h>
 #include <aspect/syncpoint.h>
@@ -32,9 +32,6 @@
 #include <string>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class BlockedTimingLoopListener
@@ -93,8 +90,8 @@ class BlockedTimingAspect : public SyncPointAspect
   static const std::map<const WakeupHook, const std::string> hook_to_syncpoint;
 
  private:
-  WakeupHook __wakeup_hook;
-  BlockedTimingLoopListener *__loop_listener;
+  WakeupHook wakeup_hook_;
+  BlockedTimingLoopListener *loop_listener_;
 };
 
 } // end namespace fawkes

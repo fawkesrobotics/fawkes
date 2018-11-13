@@ -28,9 +28,6 @@
 #include <fstream>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Read topological map node from YAML iterator.
  * @param n iterator to node representing a topological map graph node

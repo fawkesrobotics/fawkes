@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_GUI_UTILS_MULTI_INTERFACE_CHOOSER_DIALOG_H_
-#define __LIBS_GUI_UTILS_MULTI_INTERFACE_CHOOSER_DIALOG_H_
+#ifndef _LIBS_GUI_UTILS_MULTI_INTERFACE_CHOOSER_DIALOG_H_
+#define _LIBS_GUI_UTILS_MULTI_INTERFACE_CHOOSER_DIALOG_H_
 
 #include <list>
 #include <set>
@@ -74,8 +74,8 @@ class MultiInterfaceChooserDialog : public InterfaceChooserDialog
 
   void on_load_toggled(const Glib::ustring& path);
 
-  const Record* __record; /**< Should only be accessed by record(). */
-  TypeIdPairSet __loaded_interfaces;
+  const Record* record_; /**< Should only be accessed by record(). */
+  TypeIdPairSet loaded_interfaces_;
 };
 
 } // end of namespace fawkes

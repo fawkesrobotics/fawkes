@@ -37,9 +37,6 @@
 #include <unistd.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NetworkNameResolver <netcomm/utils/resolver.h>
  * Network name and address resolver.
@@ -90,14 +87,14 @@ NetworkNameResolver::NetworkNameResolver(AvahiThread *avahi_thread)
 {
   addr2name_cache.clear();
   name2addr_cache.clear();
-  __cache_timeout = 30;
+  cache_timeout_ = 30;
 
   resolver_thread = new NetworkNameResolverThread(this, avahi_thread);
   resolver_thread->start();
   // Wait for thread to start
   usleep(0);
 
-  __host_info = new HostInfo();
+  host_info_ = new HostInfo();
 }
 
 
@@ -108,7 +105,7 @@ NetworkNameResolver::~NetworkNameResolver()
   resolver_thread->cancel();
   resolver_thread->join();
   delete resolver_thread;
-  delete __host_info;
+  delete host_info_;
 }
 
 /** Set cache timeout.
@@ -120,7 +117,7 @@ NetworkNameResolver::~NetworkNameResolver()
 void
 NetworkNameResolver::set_cache_timeout(unsigned int sec)
 {
-  __cache_timeout = sec;
+  cache_timeout_ = sec;
 }
 
 
@@ -130,7 +127,7 @@ NetworkNameResolver::set_cache_timeout(unsigned int sec)
 unsigned int
 NetworkNameResolver::cache_timeout()
 {
-  return __cache_timeout;
+  return cache_timeout_;
 }
 
 
@@ -150,7 +147,7 @@ NetworkNameResolver::flush_cache()
     name2addr_cache.erase(n2acit);
   }
   name2addr_cache.unlock();
-  __host_info->update();
+  host_info_->update();
 
   /* Leads to a segfault, if one element is in the queue it is deleted
    * two times, do not use
@@ -262,7 +259,7 @@ NetworkNameResolver::resolve_address(struct sockaddr *addr, socklen_t addr_len, 
     if ( inet_ntop(AF_INET, &(saddr->sin_addr), tmp, sizeof(tmp)) ) {
       char *n = strdup(tmp);
 
-      addr2name_cache[saddr->sin_addr.s_addr] = std::pair<char *, time_t>(n, time(NULL) + __cache_timeout);
+      addr2name_cache[saddr->sin_addr.s_addr] = std::pair<char *, time_t>(n, time(NULL) + cache_timeout_);
       name = n;
       addr2name_cache.unlock();
     } else {
@@ -311,7 +308,7 @@ NetworkNameResolver::name_resolved(std::string name, struct sockaddr *addr,
     free(n2acit->second.first);
     name2addr_cache.erase(n2acit);
   }
-  name2addr_cache[name] = std::pair<struct sockaddr *, time_t>(addr, time(NULL) + __cache_timeout);
+  name2addr_cache[name] = std::pair<struct sockaddr *, time_t>(addr, time(NULL) + cache_timeout_);
   name2addr_cache.unlock();
 }
 
@@ -328,7 +325,7 @@ NetworkNameResolver::addr_resolved(struct sockaddr *addr,
       // delete old entry
       addr2name_cache.erase(a2ncit);
       addr2name_cache[saddr->sin_addr.s_addr] =
-	      std::make_pair(name, time(NULL) + __cache_timeout);
+	      std::make_pair(name, time(NULL) + cache_timeout_);
     }
   } else {
     if ((a2ncit = addr2name_cache.find( saddr->sin_addr.s_addr )) == addr2name_cache.end() ) {
@@ -360,7 +357,7 @@ NetworkNameResolver::address_resolution_failed(struct sockaddr *addr,
 const char *
 NetworkNameResolver::hostname()
 {
-  return __host_info->name();
+  return host_info_->name();
 }
 
 
@@ -370,7 +367,7 @@ NetworkNameResolver::hostname()
 const char *
 NetworkNameResolver::short_hostname()
 {
-  return __host_info->short_name();
+  return host_info_->short_name();
 }
 
 } // end namespace fawkes

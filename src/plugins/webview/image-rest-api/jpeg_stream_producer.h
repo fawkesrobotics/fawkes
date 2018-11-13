@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_JPEG_STREAM_PRODUCER_H_
-#define __PLUGINS_WEBVIEW_JPEG_STREAM_PRODUCER_H_
+#ifndef _PLUGINS_WEBVIEW_JPEG_STREAM_PRODUCER_H_
+#define _PLUGINS_WEBVIEW_JPEG_STREAM_PRODUCER_H_
 
 #include <core/threading/thread.h>
 #include <core/utils/lock_list.h>
@@ -36,9 +36,6 @@ namespace firevision {
 
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class TimeWait;
 class Mutex;

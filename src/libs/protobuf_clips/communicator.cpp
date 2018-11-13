@@ -50,9 +50,6 @@ using namespace google::protobuf;
 using namespace protobuf_comm;
 
 namespace protobuf_clips {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ClipsProtobufCommunicator <protobuf_clips/communicator.h>
  * CLIPS protobuf integration class.

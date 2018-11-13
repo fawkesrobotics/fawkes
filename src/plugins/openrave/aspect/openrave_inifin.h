@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENRAVE_ASPECT_OPENRAVE_INIFIN_H_
-#define __PLUGINS_OPENRAVE_ASPECT_OPENRAVE_INIFIN_H_
+#ifndef _PLUGINS_OPENRAVE_ASPECT_OPENRAVE_INIFIN_H_
+#define _PLUGINS_OPENRAVE_ASPECT_OPENRAVE_INIFIN_H_
 
 #include <aspect/inifins/inifin.h>
 
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class OpenRaveConnector;
 
@@ -44,7 +41,7 @@ class OpenRaveAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  OpenRaveConnector *__openrave;
+  OpenRaveConnector *openrave_;
 };
 
 } // end namespace fawkes

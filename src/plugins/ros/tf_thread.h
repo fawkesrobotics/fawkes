@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROS_TF_THREAD_H_
-#define __PLUGINS_ROS_TF_THREAD_H_
+#ifndef _PLUGINS_ROS_TF_THREAD_H_
+#define _PLUGINS_ROS_TF_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -95,29 +95,29 @@ class RosTfThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  bool __cfg_use_tf2;
-  float __cfg_update_interval;
+  bool cfg_use_tf2_;
+  float cfg_update_interval_;
 
 
-  std::list<std::string>                  __ros_frames;
-  std::list<fawkes::TransformInterface *> __tfifs;
+  std::list<std::string>                  ros_frames_;
+  std::list<fawkes::TransformInterface *> tfifs_;
 
-  ros::Subscriber __sub_tf;
-  ros::Subscriber __sub_static_tf;
-  ros::Publisher  __pub_tf;
-  ros::Publisher  __pub_static_tf;
+  ros::Subscriber sub_tf_;
+  ros::Subscriber sub_static_tf_;
+  ros::Publisher  pub_tf_;
+  ros::Publisher  pub_static_tf_;
 
-  fawkes::Mutex *__tf_msg_queue_mutex;
-  unsigned int __active_queue;
-  std::queue<::tf::tfMessage::ConstPtr>     __tf_msg_queues[2];
+  fawkes::Mutex *tf_msg_queue_mutex_;
+  unsigned int active_queue_;
+  std::queue<::tf::tfMessage::ConstPtr>     tf_msg_queues_[2];
 #ifdef HAVE_TF2_MSGS
-  std::queue<std::pair<bool, tf2_msgs::TFMessage::ConstPtr> > __tf2_msg_queues[2];
+  std::queue<std::pair<bool, tf2_msgs::TFMessage::ConstPtr> > tf2_msg_queues_[2];
 #endif
 
-  fawkes::Mutex *__seq_num_mutex;
-  unsigned int   __seq_num;
+  fawkes::Mutex *seq_num_mutex_;
+  unsigned int   seq_num_;
 
-  fawkes::Time *__last_update;
+  fawkes::Time *last_update_;
 
 };
 

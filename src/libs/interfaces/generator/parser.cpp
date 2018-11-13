@@ -356,9 +356,9 @@ InterfaceParser::parse()
       throw InterfaceGeneratorInvalidContentException("no name for interface");
     }
     name = attr->get_value();
-    if (name.length() > __INTERFACE_TYPE_SIZE) {
+    if (name.length() > INTERFACE_TYPE_SIZE_) {
       throw InterfaceGeneratorInvalidContentException("Interface name too long, max length is %u",
-						      __INTERFACE_TYPE_SIZE);
+						      INTERFACE_TYPE_SIZE_);
     }
 
     attr = el->get_attribute("author");

@@ -49,8 +49,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBS_TF_TRANSFORM_PUBLISHER_H_
-#define __LIBS_TF_TRANSFORM_PUBLISHER_H_
+#ifndef _LIBS_TF_TRANSFORM_PUBLISHER_H_
+#define _LIBS_TF_TRANSFORM_PUBLISHER_H_
 
 #include <tf/types.h>
 #include <utils/time/time.h>
@@ -62,10 +62,6 @@ namespace fawkes {
   class Mutex;
 
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 class TransformPublisher
 {

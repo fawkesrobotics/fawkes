@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_TREE_VIEW_H_
-#define __TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_TREE_VIEW_H_
+#ifndef _TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_TREE_VIEW_H_
+#define _TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_TREE_VIEW_H_
 
 #include <gtkmm.h>
 
@@ -89,4 +89,4 @@ class BatteryMonitorTreeView : public Gtk::TreeView
   std::map< std::string, unsigned int > m_below_threshold_counter;
 };
 
-#endif /* __TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_TREE_VIEW_H_ */
+#endif /* TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_TREE_VIEW_H__ */

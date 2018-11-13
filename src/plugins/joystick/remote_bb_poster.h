@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JOYSTICK_REMOTE_BB_POSTER_H_
-#define __PLUGINS_JOYSTICK_REMOTE_BB_POSTER_H_
+#ifndef _PLUGINS_JOYSTICK_REMOTE_BB_POSTER_H_
+#define _PLUGINS_JOYSTICK_REMOTE_BB_POSTER_H_
 
 #include "acquisition_thread.h"
 #include <utils/system/argparser.h>
@@ -42,12 +42,12 @@ class JoystickRemoteBlackBoardPoster : public JoystickBlackBoardHandler
   /** Get blackboard.
    * @return blackboard instance
    */
-  fawkes::BlackBoard * blackboard() { return __bb; }
+  fawkes::BlackBoard * blackboard() { return bb_; }
 
   /** Get joystick interface.
    * @return joystick interface
    */
-  fawkes::JoystickInterface * joystick_if() { return __joystick_if; }
+  fawkes::JoystickInterface * joystick_if() { return joystick_if_; }
   
 
   virtual void joystick_changed(unsigned int pressed_buttons, float *axis_values);
@@ -55,10 +55,10 @@ class JoystickRemoteBlackBoardPoster : public JoystickBlackBoardHandler
   virtual void joystick_unplugged();
 
  private:
-  bool __warning_printed;
-  fawkes::BlackBoard *__bb;
-  fawkes::JoystickInterface *__joystick_if;
-  fawkes::Logger *__logger;
+  bool warning_printed_;
+  fawkes::BlackBoard *bb_;
+  fawkes::JoystickInterface *joystick_if_;
+  fawkes::Logger *logger_;
 };
 
 #endif

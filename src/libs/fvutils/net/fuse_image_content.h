@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_IMAGE_CONTENT_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_IMAGE_CONTENT_H_
+#ifndef _FIREVISION_FVUTILS_NET_FUSE_IMAGE_CONTENT_H_
+#define _FIREVISION_FVUTILS_NET_FUSE_IMAGE_CONTENT_H_
 
 #include <fvutils/net/fuse.h>
 #include <fvutils/net/fuse_message_content.h>
@@ -30,9 +30,6 @@
 #include <sys/types.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class SharedMemoryImageBuffer;
 
@@ -62,11 +59,11 @@ class FuseImageContent : public FuseMessageContent
   virtual void     serialize();
 
  private:
-  unsigned char *__buffer;
-  size_t         __buffer_size;
-  FUSE_image_message_header_t *__header;
+  unsigned char *buffer_;
+  size_t         buffer_size_;
+  FUSE_image_message_header_t *header_;
 
-  mutable fawkes::Time  *__capture_time;
+  mutable fawkes::Time  *capture_time_;
 };
 
 } // end namespace firevision

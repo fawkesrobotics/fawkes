@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_MACROS_H_
-#define __CORE_MACROS_H_
+#ifndef _CORE_MACROS_H_
+#define _CORE_MACROS_H_
 
 // from http://blog.rlove.org/2005_10_01_archive.html
 // Note that __GNUC__ is also set appropriately by the Intel compiler

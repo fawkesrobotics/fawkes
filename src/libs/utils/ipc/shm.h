@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_IPC_SHM_H_
-#define __UTILS_IPC_SHM_H_
+#ifndef _UTILS_IPC_SHM_H_
+#define _UTILS_IPC_SHM_H_
 
 // for size_t
 #include <sys/types.h>
@@ -142,16 +142,16 @@ class SharedMemory
     void attach();
     void reset();
 
-    bool                    __initialized;
-    std::list<SharedMemoryRegistry::SharedMemID> __ids;
-    std::list<SharedMemoryRegistry::SharedMemID>::iterator __id_it;
-    int                     __cur_shmid;
-    SharedMemoryHeader     *__header;
-    void                   *__shm_buf;
-    void                   *__data_buf;
-    int                     __semaphore;
-    size_t                  __segmsize;
-    size_t                  __segmnattch;
+    bool                    initialized_;
+    std::list<SharedMemoryRegistry::SharedMemID> ids_;
+    std::list<SharedMemoryRegistry::SharedMemID>::iterator id_it_;
+    int                     cur_shmid_;
+    SharedMemoryHeader     *header_;
+    void                   *shm_buf_;
+    void                   *data_buf_;
+    int                     semaphore_;
+    size_t                  segmsize_;
+    size_t                  segmnattch_;
   };
 
   static SharedMemoryIterator find(const char *magic_token,
@@ -191,18 +191,18 @@ class SharedMemory
 
 
  private:
-  SharedMemoryRegistry *__shm_registry;
-  char *                __registry_name;
+  SharedMemoryRegistry *shm_registry_;
+  char *                registry_name_;
 
-  void          *__shared_mem;
-  int            __shared_mem_id;
-  void          *__shared_mem_upper_bound;
+  void          *shared_mem_;
+  int            shared_mem_id_;
+  void          *shared_mem_upper_bound_;
 
-  bool           __created;
-  SemaphoreSet  *__semset;
+  bool           created_;
+  SemaphoreSet  *semset_;
 
-  bool           __lock_aquired;
-  bool           __write_lock_aquired;
+  bool           lock_aquired_;
+  bool           write_lock_aquired_;
 
 };
 

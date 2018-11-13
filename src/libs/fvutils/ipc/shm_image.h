@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_IPC_SHM_IMAGE_H_
-#define __FIREVISION_FVUTILS_IPC_SHM_IMAGE_H_
+#ifndef _FIREVISION_FVUTILS_IPC_SHM_IMAGE_H_
+#define _FIREVISION_FVUTILS_IPC_SHM_IMAGE_H_
 
 #include <utils/ipc/shm.h>
 #include <utils/ipc/shm_lister.h>
@@ -37,9 +37,6 @@
 #define FIREVISION_SHM_IMAGE_MAGIC_TOKEN "FireVision Image"
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 // Not that there is a relation to ITPimage_packet_header_t
 /** Shared memory header struct for FireVision images. */

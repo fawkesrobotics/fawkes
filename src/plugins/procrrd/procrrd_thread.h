@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PROCRRD_PROCRRD_THREAD_H_
-#define __PLUGINS_PROCRRD_PROCRRD_THREAD_H_
+#ifndef _PLUGINS_PROCRRD_PROCRRD_THREAD_H_
+#define _PLUGINS_PROCRRD_PROCRRD_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
@@ -65,14 +65,14 @@ class ProcRRDThread
   virtual void config_value_erased(const char *path);
 
  private:
-  fawkes::TimeWait      *__timewait;
-  int                    __samplerate;
-  std::string            __netinterface;
-  unsigned long int     *__lastcpu;
+  fawkes::TimeWait      *timewait_;
+  int                    samplerate_;
+  std::string            netinterface_;
+  unsigned long int     *lastcpu_;
 
-  fawkes::RRDGraphDefinition *__net_recv_graph;    
-  fawkes::RRDGraphDefinition *__net_trans_graph;    
-  fawkes::RRDDefinition      *__net_rrd;
+  fawkes::RRDGraphDefinition *net_recv_graph_;    
+  fawkes::RRDGraphDefinition *net_trans_graph_;    
+  fawkes::RRDDefinition      *net_rrd_;
 
   /// @cond INTERNALS
   typedef struct {
@@ -89,7 +89,7 @@ class ProcRRDThread
   /// @endcond
 
   typedef std::map<std::string, ProcessInfo> ProcessMap;
-  ProcessMap __processes;
+  ProcessMap processes_;
 };
 
 #endif

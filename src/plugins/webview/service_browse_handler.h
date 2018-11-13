@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_SERVICE_BROWSER_H_
-#define __PLUGINS_WEBVIEW_SERVICE_BROWSER_H_
+#ifndef _PLUGINS_WEBVIEW_SERVICE_BROWSER_H_
+#define _PLUGINS_WEBVIEW_SERVICE_BROWSER_H_
 
 #include <netcomm/service_discovery/service.h>
 #include <netcomm/service_discovery/browse_handler.h>

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LUA_CONTEXT_H_
-#define __LUA_CONTEXT_H_
+#ifndef _LUA_CONTEXT_H_
+#define _LUA_CONTEXT_H_
 
 #include <lua/exceptions.h>
 #include <core/utils/lock_list.h>
@@ -37,9 +37,6 @@
 #include <string>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class LuaContextWatcher;
 class Mutex;
@@ -160,39 +157,39 @@ class LuaContext : public FamListener
 
  
  private:
-  lua_State *__L;
-  bool       __owns_L;
-  bool       __enable_tracebacks;
+  lua_State *L_;
+  bool       owns_L_;
+  bool       enable_tracebacks_;
 
-  Mutex  *__lua_mutex;
-  char   *__start_script;
+  Mutex  *lua_mutex_;
+  char   *start_script_;
 
-  std::list<std::string>            __package_dirs;
-  std::list<std::string>            __cpackage_dirs;
-  std::list<std::string>            __packages;
-  std::list<std::string>::iterator  __slit;
+  std::list<std::string>            package_dirs_;
+  std::list<std::string>            cpackage_dirs_;
+  std::list<std::string>            packages_;
+  std::list<std::string>::iterator  slit_;
 
-  std::map<std::string, std::pair<void *, std::string> > __usertypes;
-  std::map<std::string, std::pair<void *, std::string> >::iterator __utit;
-  std::map<std::string, std::string>             __strings;
-  std::map<std::string, std::string>::iterator   __strings_it;
-  std::map<std::string, bool>                    __booleans;
-  std::map<std::string, bool>::iterator          __booleans_it;
-  std::map<std::string, lua_Number>              __numbers;
-  std::map<std::string, lua_Number>::iterator    __numbers_it;
-  std::map<std::string, lua_Integer>             __integers;
-  std::map<std::string, lua_Integer>::iterator   __integers_it;
-  std::map<std::string, lua_CFunction>           __cfuncs;
-  std::map<std::string, lua_CFunction>::iterator __cfuncs_it;
+  std::map<std::string, std::pair<void *, std::string> > usertypes_;
+  std::map<std::string, std::pair<void *, std::string> >::iterator utit_;
+  std::map<std::string, std::string>             strings_;
+  std::map<std::string, std::string>::iterator   strings_it_;
+  std::map<std::string, bool>                    booleans_;
+  std::map<std::string, bool>::iterator          booleans_it_;
+  std::map<std::string, lua_Number>              numbers_;
+  std::map<std::string, lua_Number>::iterator    numbers_it_;
+  std::map<std::string, lua_Integer>             integers_;
+  std::map<std::string, lua_Integer>::iterator   integers_it_;
+  std::map<std::string, lua_CFunction>           cfuncs_;
+  std::map<std::string, lua_CFunction>::iterator cfuncs_it_;
 
-  std::string __finalize_call;
-  std::string __finalize_prepare_call;
-  std::string __finalize_cancel_call;
+  std::string finalize_call_;
+  std::string finalize_prepare_call_;
+  std::string finalize_cancel_call_;
   
-  RefPtr<FileAlterationMonitor>  __fam;
-  FamThread                     *__fam_thread;
+  RefPtr<FileAlterationMonitor>  fam_;
+  FamThread                     *fam_thread_;
 
-  LockList<LuaContextWatcher *> __watchers;
+  LockList<LuaContextWatcher *> watchers_;
 
 };
 

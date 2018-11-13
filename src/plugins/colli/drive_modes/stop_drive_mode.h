@@ -20,16 +20,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_STOP_DRIVE_MODE_H_
-#define __PLUGINS_COLLI_STOP_DRIVE_MODE_H_
+#ifndef _PLUGINS_COLLI_STOP_DRIVE_MODE_H_
+#define _PLUGINS_COLLI_STOP_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class StopDriveModule : public AbstractDriveMode
 {

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H_
-#define __FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H_
+#ifndef _FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H_
+#define _FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H_
 
 #define FUSE_PLUGIN_NAME      "fvfountain"
 #define FOUNTAIN_PORT_PATH    "/firevision/fountain/tcp_port"
@@ -62,28 +62,28 @@ private:
 
 private:
   // widgets
-  Gtk::ScrolledWindow     *__image_list_scroll;
-  Gtk::Viewport           *__image_viewport;
-  Gtk::AspectFrame        *__save_box;
-  Gtk::ComboBoxText       *__save_type;
-  Gtk::FileChooserButton  *__save_filechooser;
-  Gtk::CheckButton        *__auto_save;
-  Gtk::Button             *__save_btn;
-  Gtk::Statusbar          *__statusbar;
+  Gtk::ScrolledWindow     *image_list_scroll_;
+  Gtk::Viewport           *image_viewport_;
+  Gtk::AspectFrame        *save_box_;
+  Gtk::ComboBoxText       *save_type_;
+  Gtk::FileChooserButton  *save_filechooser_;
+  Gtk::CheckButton        *auto_save_;
+  Gtk::Button             *save_btn_;
+  Gtk::Statusbar          *statusbar_;
 
-  fawkes::AvahiThread     *__avahi_thread;
-  fawkes::AvahiDispatcher *__avahi_dispatcher;
+  fawkes::AvahiThread     *avahi_thread_;
+  fawkes::AvahiDispatcher *avahi_dispatcher_;
 
-  firevision::FuseImageListWidget     *__img_list_widget;
+  firevision::FuseImageListWidget     *img_list_widget_;
 
-  firevision::ImageWidget             *__img_widget;
-  firevision::NetworkCamera           *__cam;
+  firevision::ImageWidget             *img_widget_;
+  firevision::NetworkCamera           *cam_;
 
 
-  std::map<std::string, std::string> __host_service_map;
+  std::map<std::string, std::string> host_service_map_;
 
-  std::string    __cur_service_name;
-  unsigned int   __img_num;
+  std::string    cur_service_name_;
+  unsigned int   img_num_;
 };
 
-#endif /* __FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H_ */
+#endif /* FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H__ */

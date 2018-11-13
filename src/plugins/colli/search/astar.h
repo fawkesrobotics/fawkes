@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_SEARCH_ASTAR_H_
-#define __PLUGINS_COLLI_SEARCH_ASTAR_H_
+#ifndef _PLUGINS_COLLI_SEARCH_ASTAR_H_
+#define _PLUGINS_COLLI_SEARCH_ASTAR_H_
 
 #include "astar_state.h"
 #include "../common/types.h"
@@ -32,9 +32,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class LaserOccupancyGrid;
 class Logger;

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_MESSAGE_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_MESSAGE_H_
+#ifndef _FIREVISION_FVUTILS_NET_FUSE_MESSAGE_H_
+#define _FIREVISION_FVUTILS_NET_FUSE_MESSAGE_H_
 
 #include <core/utils/refcount.h>
 #include <core/exceptions/software.h>
@@ -32,9 +32,6 @@
 #include <cstring>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FuseMessageContent;
 
@@ -127,7 +124,7 @@ class FuseNetworkMessage : public fawkes::RefCount
   FUSE_message_t _msg;
 
  private:
-  FuseMessageContent *__content;
+  FuseMessageContent *content_;
 };
 
 } // end namespace firevision

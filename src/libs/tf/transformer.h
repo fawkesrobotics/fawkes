@@ -49,18 +49,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBS_TF_TRANSFORMER_H_
-#define __LIBS_TF_TRANSFORMER_H_
+#ifndef _LIBS_TF_TRANSFORMER_H_
+#define _LIBS_TF_TRANSFORMER_H_
 
 #include <tf/buffer_core.h>
 #include <tf/types.h>
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 class TimeCacheInterface;
 typedef std::shared_ptr<TimeCacheInterface> TimeCacheInterfacePtr;

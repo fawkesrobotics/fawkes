@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENPRS_UTILS_OPENPRS_MP_PROXY_H_
-#define __PLUGINS_OPENPRS_UTILS_OPENPRS_MP_PROXY_H_
+#ifndef _PLUGINS_OPENPRS_UTILS_OPENPRS_MP_PROXY_H_
+#define _PLUGINS_OPENPRS_UTILS_OPENPRS_MP_PROXY_H_
 
 #include <core/utils/lockptr.h>
 
@@ -31,9 +31,6 @@
 #include <thread>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Logger;
 

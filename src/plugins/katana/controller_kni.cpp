@@ -29,9 +29,6 @@
 #include <common/MathHelperFunctions.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class KatanaControllerKni <plugins/katana/controller_kni.h>
  * Controller class for a Neuronics Katana, using libkni to interact
@@ -43,23 +40,23 @@ namespace fawkes {
 KatanaControllerKni::KatanaControllerKni()
 {
   // setting default setup values
-  __cfg_device = "/dev/ttyS0";
-  __cfg_kni_conffile = "/etc/kni3/hd300/katana6M180.cfg";
-  __cfg_read_timeout = 100;
-  __cfg_write_timeout = 0;
+  cfg_device_ = "/dev/ttyS0";
+  cfg_kni_conffile_ = "/etc/kni3/hd300/katana6M180.cfg";
+  cfg_read_timeout_ = 100;
+  cfg_write_timeout_ = 0;
 
-  __gripper_last_pos.clear();
-  __gripper_last_pos.resize(2);
+  gripper_last_pos_.clear();
+  gripper_last_pos_.resize(2);
 }
 
 /** Destructor. */
 KatanaControllerKni::~KatanaControllerKni()
 {
   // Setting to NULL also deletes instance (RefPtr)
-  __katana = NULL;
+  katana_ = NULL;
 
-  __device.reset();
-  __protocol.reset();
+  device_.reset();
+  protocol_.reset();
 }
 
 /** Setup parameters needed to initialize Katana arm with libkni.
@@ -72,36 +69,36 @@ void
 KatanaControllerKni::setup(std::string& device, std::string& kni_conffile,
 			   unsigned int read_timeout, unsigned int write_timeout)
 {
-  __cfg_device = device;
-  __cfg_kni_conffile = kni_conffile;
-  __cfg_read_timeout = read_timeout;
-  __cfg_write_timeout = write_timeout;
+  cfg_device_ = device;
+  cfg_kni_conffile_ = kni_conffile;
+  cfg_read_timeout_ = read_timeout;
+  cfg_write_timeout_ = write_timeout;
 }
 
 void
 KatanaControllerKni::init()
 {
   try {
-    TCdlCOMDesc ccd = {0, 57600, 8, 'N', 1, (int)__cfg_read_timeout, (int)__cfg_write_timeout};
-    __device.reset(new CCdlCOM(ccd, __cfg_device.c_str()));
+    TCdlCOMDesc ccd = {0, 57600, 8, 'N', 1, (int)cfg_read_timeout_, (int)cfg_write_timeout_};
+    device_.reset(new CCdlCOM(ccd, cfg_device_.c_str()));
 
-    __protocol.reset(new CCplSerialCRC());
-    __protocol->init(__device.get());
+    protocol_.reset(new CCplSerialCRC());
+    protocol_->init(device_.get());
 
-    __katana = RefPtr<CLMBase>(new CLMBase());
-    __katana->create(__cfg_kni_conffile.c_str(), __protocol.get());
-    __katbase = __katana->GetBase();
-    __sensor_ctrl = &__katbase->GetSCT()->arr[0];
+    katana_ = RefPtr<CLMBase>(new CLMBase());
+    katana_->create(cfg_kni_conffile_.c_str(), protocol_.get());
+    katbase_ = katana_->GetBase();
+    sensor_ctrl_ = &katbase_->GetSCT()->arr[0];
 
-    __katbase->recvECH();
+    katbase_->recvECH();
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
 
   try {
-    __motor_init.resize(__katana->getNumberOfMotors());
-    for(unsigned int i=0; i<__motor_init.size(); i++) {
-      __motor_init.at(i) = *(__katbase->GetMOT()->arr[i].GetInitialParameters());
+    motor_init_.resize(katana_->getNumberOfMotors());
+    for(unsigned int i=0; i<motor_init_.size(); i++) {
+      motor_init_.at(i) = *(katbase_->GetMOT()->arr[i].GetInitialParameters());
     }
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
@@ -112,7 +109,7 @@ void
 KatanaControllerKni::set_max_velocity(unsigned int vel)
 {
   try {
-    __katana->setRobotVelocityLimit((int)vel);
+    katana_->setRobotVelocityLimit((int)vel);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
@@ -122,12 +119,12 @@ KatanaControllerKni::set_max_velocity(unsigned int vel)
 bool
 KatanaControllerKni::final()
 {
-  if( __active_motors.size() < 1 )
+  if( active_motors_.size() < 1 )
     return true;
 
   bool final = true;
-  for(unsigned int i=0; i<__active_motors.size(); i++) {
-    final &= motor_final(__active_motors.at(i));
+  for(unsigned int i=0; i<active_motors_.size(); i++) {
+    final &= motor_final(active_motors_.at(i));
   }
   cleanup_active_motors();
   return final;
@@ -148,7 +145,7 @@ void
 KatanaControllerKni::calibrate()
 {
   try {
-    __katana->calibrate();
+    katana_->calibrate();
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
@@ -158,7 +155,7 @@ void
 KatanaControllerKni::stop()
 {
   try {
-    __katana->freezeRobot();
+    katana_->freezeRobot();
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
@@ -168,7 +165,7 @@ void
 KatanaControllerKni::turn_on()
 {
   try {
-    __katana->switchRobotOn();
+    katana_->switchRobotOn();
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
@@ -178,7 +175,7 @@ void
 KatanaControllerKni::turn_off()
 {
   try {
-    __katana->switchRobotOff();
+    katana_->switchRobotOff();
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
@@ -188,7 +185,7 @@ void
 KatanaControllerKni::read_coordinates(bool refresh)
 {
   try {
-    __katana->getCoordinates(__x, __y, __z, __phi, __theta, __psi, refresh);
+    katana_->getCoordinates(x_, y_, z_, phi_, theta_, psi_, refresh);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
@@ -198,13 +195,13 @@ void
 KatanaControllerKni::read_motor_data()
 {
   try {
-    if( __active_motors.size() == (unsigned short)__katana->getNumberOfMotors() ) {
-      __katbase->recvMPS(); // get position for all motors
-      __katbase->recvGMS(); // get status flags for all motors
+    if( active_motors_.size() == (unsigned short)katana_->getNumberOfMotors() ) {
+      katbase_->recvMPS(); // get position for all motors
+      katbase_->recvGMS(); // get status flags for all motors
     } else {
-      const TKatMOT* mot = __katbase->GetMOT();
-      for(unsigned int i=0; i<__active_motors.size(); i++) {
-        mot->arr[__active_motors.at(i)].recvPVP(); // get position data for motor
+      const TKatMOT* mot = katbase_->GetMOT();
+      for(unsigned int i=0; i<active_motors_.size(); i++) {
+        mot->arr[active_motors_.at(i)].recvPVP(); // get position data for motor
       }
     }
   } catch (/*KNI*/::Exception &e) {
@@ -216,7 +213,7 @@ void
 KatanaControllerKni::read_sensor_data()
 {
   try {
-    __sensor_ctrl->recvDAT();
+    sensor_ctrl_->recvDAT();
   } catch (/*KNI*/::ParameterReadingException &e) {
     throw fawkes::Exception("KNI ParameterReadingException:%s", e.what());
   } catch (/*KNI*/::Exception &e) {
@@ -228,36 +225,36 @@ void
 KatanaControllerKni::gripper_open(bool blocking)
 {
   try {
-    __katana->openGripper(blocking);
+    katana_->openGripper(blocking);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
 
-  __active_motors.clear();
-  __active_motors.resize(1);
-  __active_motors[0] = __katbase->GetMOT()->cnt - 1;
+  active_motors_.clear();
+  active_motors_.resize(1);
+  active_motors_[0] = katbase_->GetMOT()->cnt - 1;
 
-  __gripper_last_pos.clear();
-  __gripper_last_pos[0] = __katbase->GetMOT()->arr[__active_motors[0]].GetPVP()->pos;
-  __gripper_last_pos[1] = 0; //counter
+  gripper_last_pos_.clear();
+  gripper_last_pos_[0] = katbase_->GetMOT()->arr[active_motors_[0]].GetPVP()->pos;
+  gripper_last_pos_[1] = 0; //counter
 }
 
 void
 KatanaControllerKni::gripper_close(bool blocking)
 {
   try {
-    __katana->closeGripper(blocking);
+    katana_->closeGripper(blocking);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
 
-  __active_motors.clear();
-  __active_motors.resize(1);
-  __active_motors[0] = __katbase->GetMOT()->cnt - 1;
+  active_motors_.clear();
+  active_motors_.resize(1);
+  active_motors_[0] = katbase_->GetMOT()->cnt - 1;
 
-  __gripper_last_pos.clear();
-  __gripper_last_pos[0] = __katbase->GetMOT()->arr[__active_motors[0]].GetPVP()->pos;
-  __gripper_last_pos[1] = 0; //counter
+  gripper_last_pos_.clear();
+  gripper_last_pos_[0] = katbase_->GetMOT()->arr[active_motors_[0]].GetPVP()->pos;
+  gripper_last_pos_[1] = 0; //counter
 }
 
 void
@@ -266,7 +263,7 @@ KatanaControllerKni::move_to(float x, float y, float z, float phi, float theta, 
   cleanup_active_motors();
 
   try {
-    __katana->moveRobotTo(__x, __y, __z, __phi, __theta, __psi, blocking);
+    katana_->moveRobotTo(x_, y_, z_, phi_, theta_, psi_, blocking);
   } catch (KNI::NoSolutionException &e) {
     throw fawkes::KatanaNoSolutionException("KNI NoSolutionException:%s", e.what());
   } catch (/*KNI*/::Exception &e) {
@@ -274,7 +271,7 @@ KatanaControllerKni::move_to(float x, float y, float z, float phi, float theta, 
     return;
   }
 
-  for(short i=0; i<__katana->getNumberOfMotors(); ++i) {
+  for(short i=0; i<katana_->getNumberOfMotors(); ++i) {
     add_active_motor(i);
   }
 }
@@ -285,7 +282,7 @@ KatanaControllerKni::move_to(std::vector<int> encoders, bool blocking)
   cleanup_active_motors();
 
   try {
-    __katana->moveRobotToEnc(encoders);
+    katana_->moveRobotToEnc(encoders);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
@@ -302,7 +299,7 @@ KatanaControllerKni::move_to(std::vector<float> angles, bool blocking)
 
   try {
     for(unsigned int i=0; i<angles.size(); i++) {
-      encoders.push_back(KNI_MHF::rad2enc( (double)angles.at(i), __motor_init.at(i).angleOffset, __motor_init.at(i).encodersPerCycle, __motor_init.at(i).encoderOffset, __motor_init.at(i).rotationDirection));
+      encoders.push_back(KNI_MHF::rad2enc( (double)angles.at(i), motor_init_.at(i).angleOffset, motor_init_.at(i).encodersPerCycle, motor_init_.at(i).encoderOffset, motor_init_.at(i).rotationDirection));
     }
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
@@ -320,7 +317,7 @@ KatanaControllerKni::move_motor_to(unsigned short id, int enc, bool blocking)
   cleanup_active_motors();
 
   try {
-    __katana->moveMotorToEnc(id, enc);
+    katana_->moveMotorToEnc(id, enc);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
@@ -337,7 +334,7 @@ KatanaControllerKni::move_motor_to(unsigned short id, float angle, bool blocking
   cleanup_active_motors();
 
   try {
-    __katana->moveMotorTo(id, angle);
+    katana_->moveMotorTo(id, angle);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
@@ -354,7 +351,7 @@ KatanaControllerKni::move_motor_by(unsigned short id, int enc, bool blocking)
   cleanup_active_motors();
 
   try {
-    __katana->moveMotorByEnc(id, enc);
+    katana_->moveMotorByEnc(id, enc);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
@@ -371,7 +368,7 @@ KatanaControllerKni::move_motor_by(unsigned short id, float angle, bool blocking
   cleanup_active_motors();
 
   try {
-    __katana->moveMotorBy(id, angle);
+    katana_->moveMotorBy(id, angle);
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
   }
@@ -384,37 +381,37 @@ KatanaControllerKni::move_motor_by(unsigned short id, float angle, bool blocking
 double
 KatanaControllerKni::x()
 {
-  return __x;
+  return x_;
 }
 
 double
 KatanaControllerKni::y()
 {
-  return __y;
+  return y_;
 }
 
 double
 KatanaControllerKni::z()
 {
-  return __z;
+  return z_;
 }
 
 double
 KatanaControllerKni::phi()
 {
-  return __phi;
+  return phi_;
 }
 
 double
 KatanaControllerKni::theta()
 {
-  return __theta;
+  return theta_;
 }
 
 double
 KatanaControllerKni::psi()
 {
-  return __psi;
+  return psi_;
 }
 
 void
@@ -424,7 +421,7 @@ KatanaControllerKni::get_sensors(std::vector<int>& to, bool refresh)
     read_sensor_data();
 
   try {
-    const TSctDAT *sensor_data = __sensor_ctrl->GetDAT();
+    const TSctDAT *sensor_data = sensor_ctrl_->GetDAT();
 
     const int num_sensors = (size_t)sensor_data->cnt;
     to.clear();
@@ -442,7 +439,7 @@ void
 KatanaControllerKni::get_encoders(std::vector<int>& to, bool refresh)
 {
   try {
-    std::vector<int> encoders = __katana->getRobotEncoders(refresh);
+    std::vector<int> encoders = katana_->getRobotEncoders(refresh);
 
     to.clear();
     to = encoders;
@@ -455,11 +452,11 @@ void
 KatanaControllerKni::get_angles(std::vector<float>& to, bool refresh)
 {
   try {
-    std::vector<int> encoders = __katana->getRobotEncoders(refresh);
+    std::vector<int> encoders = katana_->getRobotEncoders(refresh);
 
     to.clear();
     for(unsigned int i=0; i<encoders.size(); i++) {
-      to.push_back(KNI_MHF::enc2rad( encoders.at(i), __motor_init.at(i).angleOffset, __motor_init.at(i).encodersPerCycle, __motor_init.at(i).encoderOffset, __motor_init.at(i).rotationDirection));
+      to.push_back(KNI_MHF::enc2rad( encoders.at(i), motor_init_.at(i).angleOffset, motor_init_.at(i).encodersPerCycle, motor_init_.at(i).encoderOffset, motor_init_.at(i).rotationDirection));
     }
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
@@ -470,26 +467,26 @@ KatanaControllerKni::get_angles(std::vector<float>& to, bool refresh)
 bool
 KatanaControllerKni::motor_oor(unsigned short id)
 {
-  return id > (unsigned short)__katana->getNumberOfMotors();
+  return id > (unsigned short)katana_->getNumberOfMotors();
 }
 
 bool
 KatanaControllerKni::motor_final(unsigned short id)
 {
-  CMotBase mot = __katbase->GetMOT()->arr[id];
+  CMotBase mot = katbase_->GetMOT()->arr[id];
   if (mot.GetPVP()->msf == MSF_MOTCRASHED)
     throw fawkes::KatanaMotorCrashedException("Motor %u crashed.", id);
 
   // extra check for gripper, consider final if not moved for a while
   unsigned short gripper_not_moved = 0;
-  if (id == __katbase->GetMOT()->cnt - 1) {
-    if (__gripper_last_pos[0] == mot.GetPVP()->pos) {
-      __gripper_last_pos[1] += 1;
+  if (id == katbase_->GetMOT()->cnt - 1) {
+    if (gripper_last_pos_[0] == mot.GetPVP()->pos) {
+      gripper_last_pos_[1] += 1;
     } else {
-      __gripper_last_pos[0] = mot.GetPVP()->pos;
-      __gripper_last_pos[1] = 0;
+      gripper_last_pos_[0] = mot.GetPVP()->pos;
+      gripper_last_pos_[1] = 0;
     }
-    gripper_not_moved = __gripper_last_pos[1];
+    gripper_not_moved = gripper_last_pos_[1];
   }
 
   return (std::abs(mot.GetTPS()->tarpos - mot.GetPVP()->pos) < 10)
@@ -499,9 +496,9 @@ KatanaControllerKni::motor_final(unsigned short id)
 void
 KatanaControllerKni::cleanup_active_motors()
 {
-  for(unsigned int i=0; i<__active_motors.size(); ++i) {
-    if( motor_final(__active_motors.at(i)) ) {
-      __active_motors.erase(__active_motors.begin()+i);
+  for(unsigned int i=0; i<active_motors_.size(); ++i) {
+    if( motor_final(active_motors_.at(i)) ) {
+      active_motors_.erase(active_motors_.begin()+i);
       --i;
     }
   }
@@ -510,12 +507,12 @@ KatanaControllerKni::cleanup_active_motors()
 void
 KatanaControllerKni::add_active_motor(unsigned short id)
 {
-  for(unsigned int i=0; i<__active_motors.size(); ++i) {
-    if( __active_motors.at(i) == id ) {
+  for(unsigned int i=0; i<active_motors_.size(); ++i) {
+    if( active_motors_.at(i) == id ) {
       return;
     }
   }
-  __active_motors.push_back(id);
+  active_motors_.push_back(id);
 }
 
 } // end of namespace fawkes

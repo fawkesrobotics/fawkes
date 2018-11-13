@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_COLOR_CONVERSIONS_H
-#define __FIREVISION_UTILS_COLOR_CONVERSIONS_H
+#ifndef FIREVISION_UTILS_COLOR_CONVERSIONS_H_
+#define FIREVISION_UTILS_COLOR_CONVERSIONS_H_
 
 #include <fvutils/color/yuv.h>
 #include <fvutils/color/rgb.h>
@@ -36,9 +36,6 @@
 #include <cstring>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Convert image from one colorspace to another.
  * This is a convenience method for unified access to all conversion routines

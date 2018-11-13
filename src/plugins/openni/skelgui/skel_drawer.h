@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_SKELGUI_SKEL_DRAWER_H_
-#define __PLUGINS_OPENNI_SKELGUI_SKEL_DRAWER_H_
+#ifndef _PLUGINS_OPENNI_SKELGUI_SKEL_DRAWER_H_
+#define _PLUGINS_OPENNI_SKELGUI_SKEL_DRAWER_H_
 
 #include <plugins/openni/utils/types.h>
 
@@ -54,10 +54,10 @@ class SkelGuiSkeletonDrawer
   void draw_circle(unsigned int id, float *proj, float radius);
 
  private:
-  fawkes::openni::UserMap  &__users;
-  fawkes::openni::HandMap  &__hands;
+  fawkes::openni::UserMap  &users_;
+  fawkes::openni::HandMap  &hands_;
 
-  PrintState __print_state;
+  PrintState print_state_;
 };
 
 #endif

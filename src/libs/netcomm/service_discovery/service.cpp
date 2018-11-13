@@ -36,9 +36,6 @@
 #include <cstdio>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NetworkService <netcomm/service_discovery/service.h>
  * Representation of a service announced or found via service

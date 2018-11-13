@@ -122,7 +122,7 @@ using namespace fawkes;
  */
 JoystickForceFeedback::JoystickForceFeedback(const char *device_name)
 {
-  __fd = -1;
+  fd_ = -1;
 
   DIR *d = opendir("/dev/input");
 
@@ -138,74 +138,74 @@ JoystickForceFeedback::JoystickForceFeedback(const char *device_name)
         continue;
       }
 
-      __fd = open(path, O_RDWR);
-      if (__fd == -1) {
+      fd_ = open(path, O_RDWR);
+      if (fd_ == -1) {
         free(path);
         continue;
       }
       free(path);
 
       char name[256]= "Unknown";
-      if(ioctl(__fd, EVIOCGNAME(sizeof(name)), name) < 0) {
-	close(__fd);
-	__fd = -1;
+      if(ioctl(fd_, EVIOCGNAME(sizeof(name)), name) < 0) {
+	close(fd_);
+	fd_ = -1;
 	continue;
       }
 
       if (strcmp(name, device_name) != 0) {
-	close(__fd);
-	__fd = -1;
+	close(fd_);
+	fd_ = -1;
 	continue;
       }
 
       long features[NBITS(EV_MAX)];
       memset(features, 0, sizeof(features));
-      if (ioctl(__fd, EVIOCGBIT(0, EV_MAX), features) < 0) {
-	close(__fd);
-	__fd = -1;
+      if (ioctl(fd_, EVIOCGBIT(0, EV_MAX), features) < 0) {
+	close(fd_);
+	fd_ = -1;
 	throw Exception("Cannot get feedback feature vector");
       }
 
       if (! test_bit(EV_FF, features)) {
-	close(__fd);
-	__fd = -1;
+	close(fd_);
+	fd_ = -1;
 	throw Exception("Device '%s' does not support force-feedback", device_name);
       }
 
       long ff_features[NBITS(FF_MAX)];
         
       memset(ff_features, 0, sizeof(ff_features));
-      if (ioctl(__fd, EVIOCGBIT(EV_FF, FF_MAX), ff_features) < 0) {
-	close(__fd);
-	__fd = -1;
+      if (ioctl(fd_, EVIOCGBIT(EV_FF, FF_MAX), ff_features) < 0) {
+	close(fd_);
+	fd_ = -1;
 	throw Exception("Cannot get device force feedback feature vector");
       }
 
       long no_ff_features[NBITS(FF_MAX)];
       memset(no_ff_features, 0, sizeof(no_ff_features));
       if (memcmp(ff_features, no_ff_features, sizeof(no_ff_features)) == 0) {
-	close(__fd);
-	__fd = -1;
+	close(fd_);
+	fd_ = -1;
 	throw Exception("Device has no force feedback features");
       }
 
-      __can_rumble   = test_bit(FF_RUMBLE, ff_features);
-      __can_periodic = test_bit(FF_PERIODIC, ff_features);
-      __can_constant = test_bit(FF_CONSTANT, ff_features);
-      __can_spring   = test_bit(FF_SPRING, ff_features);
-      __can_friction = test_bit(FF_FRICTION, ff_features);
-      __can_damper   = test_bit(FF_DAMPER, ff_features);
-      __can_inertia  = test_bit(FF_INERTIA, ff_features);
-      __can_ramp     = test_bit(FF_RAMP, ff_features);
-      __can_square   = test_bit(FF_SQUARE, ff_features);
-      __can_triangle = test_bit(FF_TRIANGLE, ff_features);
-      __can_sine     = test_bit(FF_SINE, ff_features);
-      __can_saw_up   = test_bit(FF_SAW_UP, ff_features);
-      __can_saw_down = test_bit(FF_SAW_DOWN, ff_features);
-      __can_custom   = test_bit(FF_CUSTOM, ff_features);
+      can_rumble_   = test_bit(FF_RUMBLE, ff_features);
+      can_periodic_ = test_bit(FF_PERIODIC, ff_features);
+      can_constant_ = test_bit(FF_CONSTANT, ff_features);
+      can_spring_   = test_bit(FF_SPRING, ff_features);
+      can_friction_ = test_bit(FF_FRICTION, ff_features);
+      can_damper_   = test_bit(FF_DAMPER, ff_features);
+      can_inertia_  = test_bit(FF_INERTIA, ff_features);
+      can_ramp_     = test_bit(FF_RAMP, ff_features);
+      can_square_   = test_bit(FF_SQUARE, ff_features);
+      can_triangle_ = test_bit(FF_TRIANGLE, ff_features);
+      can_sine_     = test_bit(FF_SINE, ff_features);
+      can_saw_up_   = test_bit(FF_SAW_UP, ff_features);
+      can_saw_down_ = test_bit(FF_SAW_DOWN, ff_features);
+      can_custom_   = test_bit(FF_CUSTOM, ff_features);
       
-      if (ioctl(__fd, EVIOCGEFFECTS, &__num_effects) < 0) {
-	__num_effects = 1;
+      if (ioctl(fd_, EVIOCGEFFECTS, &num_effects_) < 0) {
+	num_effects_ = 1;
       }
 
       break;
@@ -214,20 +214,20 @@ JoystickForceFeedback::JoystickForceFeedback(const char *device_name)
 
   closedir(d);
 
-  if (__fd == -1) {
+  if (fd_ == -1) {
     throw Exception("Force feedback joystick '%s' not found", device_name);
   }
 
-  memset(&__rumble, 0, sizeof(__rumble));
-  __rumble.type = FF_RUMBLE;
-  __rumble.id   = -1;
+  memset(&rumble_, 0, sizeof(rumble_));
+  rumble_.type = FF_RUMBLE;
+  rumble_.id   = -1;
 }
 
 
 /** Destructor. */
 JoystickForceFeedback::~JoystickForceFeedback()
 {
-  close(__fd);
+  close(fd_);
 }
 
 
@@ -248,31 +248,31 @@ void
 JoystickForceFeedback::rumble(uint16_t strong_magnitude, uint16_t weak_magnitude,
 			      Direction direction, uint16_t length, uint16_t delay)
 {
-  if ( (__rumble.id == -1) ||
-       (__rumble.u.rumble.strong_magnitude != strong_magnitude) ||
-       (__rumble.u.rumble.weak_magnitude != weak_magnitude) ||
-       (__rumble.direction != direction) ||
-       (__rumble.replay.length != length) ||
-       (__rumble.replay.delay != length) )
+  if ( (rumble_.id == -1) ||
+       (rumble_.u.rumble.strong_magnitude != strong_magnitude) ||
+       (rumble_.u.rumble.weak_magnitude != weak_magnitude) ||
+       (rumble_.direction != direction) ||
+       (rumble_.replay.length != length) ||
+       (rumble_.replay.delay != length) )
   {
     // we need to upload
-    __rumble.u.rumble.strong_magnitude = strong_magnitude;
-    __rumble.u.rumble.weak_magnitude   = weak_magnitude;
-    __rumble.direction = direction;
-    __rumble.replay.length = length;
-    __rumble.replay.delay = delay;
+    rumble_.u.rumble.strong_magnitude = strong_magnitude;
+    rumble_.u.rumble.weak_magnitude   = weak_magnitude;
+    rumble_.direction = direction;
+    rumble_.replay.length = length;
+    rumble_.replay.delay = delay;
 
-    if (ioctl(__fd, EVIOCSFF, &__rumble) < 0) {
+    if (ioctl(fd_, EVIOCSFF, &rumble_) < 0) {
       throw Exception("Failed to upload rumble effect");
     }
   }
 
   struct input_event play;
   play.type  = EV_FF;
-  play.code  = __rumble.id;
+  play.code  = rumble_.id;
   play.value = 1;
 
-  if (write(__fd, &play, sizeof(play)) < 0) {
+  if (write(fd_, &play, sizeof(play)) < 0) {
     throw Exception("Failed to start rumble effect");
   }
 }
@@ -282,11 +282,11 @@ JoystickForceFeedback::rumble(uint16_t strong_magnitude, uint16_t weak_magnitude
 void
 JoystickForceFeedback::stop_rumble()
 {
-  if (__rumble.id != -1) {
-    if (ioctl(__fd, EVIOCRMFF, __rumble.id) < 0) {
+  if (rumble_.id != -1) {
+    if (ioctl(fd_, EVIOCRMFF, rumble_.id) < 0) {
       throw Exception("Failed to stop rumble effect");
     }
-    __rumble.id = -1;
+    rumble_.id = -1;
   }
 }
 

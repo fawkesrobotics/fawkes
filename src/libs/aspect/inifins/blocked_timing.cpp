@@ -26,9 +26,6 @@
 #include <core/macros.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BlockedTimingAspectIniFin <aspect/inifins/blocked_timing.h>
  * Initializer/finalizer for the BlockedTimingAspect.

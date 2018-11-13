@@ -30,10 +30,6 @@
 
 namespace fawkes {
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** @class SkelIfObserver <plugins/openni/utils/skel_if_observer.h>
  * Skeleton interface observer.
@@ -47,13 +43,13 @@ namespace fawkes {
  * @param users user map for exchange with others
  */
 SkelIfObserver::SkelIfObserver(BlackBoard *bb, UserMap &users)
-  : __users(users)
+  : users_(users)
 {
-  __queue_lock = new Mutex();
-  __bb = bb;
+  queue_lock_ = new Mutex();
+  bb_ = bb;
 
   std::list<HumanSkeletonInterface *> skels =
-    __bb->open_multiple_for_reading<HumanSkeletonInterface>("OpenNI Human *");
+    bb_->open_multiple_for_reading<HumanSkeletonInterface>("OpenNI Human *");
 
   std::list<HumanSkeletonProjectionInterface *> projs;
 
@@ -64,30 +60,30 @@ SkelIfObserver::SkelIfObserver(BlackBoard *bb, UserMap &users)
     UserInfo user;
     user.skel_if = *i;
     user.proj_if =
-      __bb->open_for_reading<HumanSkeletonProjectionInterface>(user.skel_if->id());
+      bb_->open_for_reading<HumanSkeletonProjectionInterface>(user.skel_if->id());
 
-    __users[user.skel_if->id()] = user;
+    users_[user.skel_if->id()] = user;
   }
 
   bbio_add_observed_create("HumanSkeletonInterface", "OpenNI Human *");
-  __bb->register_observer(this);
+  bb_->register_observer(this);
 }
 
 
 /** Destructor. */
 SkelIfObserver::~SkelIfObserver()
 {
-  __bb->unregister_observer(this);
-  delete __queue_lock;
+  bb_->unregister_observer(this);
+  delete queue_lock_;
 }
 
 void
 SkelIfObserver::bb_interface_created(const char *type, const char *id) throw()
 {
-  if (__users.find(id) == __users.end()) {
-    __queue_lock->lock();
-    __queues[__active_queue].push(id);
-    __queue_lock->unlock();
+  if (users_.find(id) == users_.end()) {
+    queue_lock_->lock();
+    queues_[active_queue_].push(id);
+    queue_lock_->unlock();
   }
 }
 
@@ -97,32 +93,32 @@ SkelIfObserver::bb_interface_created(const char *type, const char *id) throw()
 void
 SkelIfObserver::process_queue()
 {
-  __queue_lock->lock();
-  unsigned int proc_queue = __active_queue;
-  __active_queue = 1 - __active_queue;
-  __queue_lock->unlock();
-  while (! __queues[proc_queue].empty()) {
-    std::string id = __queues[proc_queue].front();
+  queue_lock_->lock();
+  unsigned int proc_queue = active_queue_;
+  active_queue_ = 1 - active_queue_;
+  queue_lock_->unlock();
+  while (! queues_[proc_queue].empty()) {
+    std::string id = queues_[proc_queue].front();
 
     try {
       UserInfo user;
       printf("Opening %s\n", id.c_str());
-      user.skel_if = __bb->open_for_reading<HumanSkeletonInterface>(id.c_str());
+      user.skel_if = bb_->open_for_reading<HumanSkeletonInterface>(id.c_str());
       try {
 	user.proj_if =
-	  __bb->open_for_reading<HumanSkeletonProjectionInterface>(id.c_str());
+	  bb_->open_for_reading<HumanSkeletonProjectionInterface>(id.c_str());
       } catch (Exception &e) {
-	__bb->close(user.skel_if);
+	bb_->close(user.skel_if);
 	throw;
       }
 
-      __users[id] = user;
+      users_[id] = user;
     } catch (Exception &e) {
       e.print_trace();
       continue;
     }
 
-    __queues[proc_queue].pop();
+    queues_[proc_queue].pop();
   }
 }
 

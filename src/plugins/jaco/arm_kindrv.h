@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_ARM_KINDRV_H_
-#define __PLUGINS_JACO_ARM_KINDRV_H_
+#ifndef _PLUGINS_JACO_ARM_KINDRV_H_
+#define _PLUGINS_JACO_ARM_KINDRV_H_
 
 #include "arm.h"
 #include "types.h"
@@ -31,9 +31,6 @@ namespace KinDrv {
 }
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 //class RefPtr;
 
@@ -63,12 +60,12 @@ class JacoArmKindrv : public JacoArm
   virtual void goto_retract();
 
  private:
-  KinDrv::JacoArm  *__arm;
+  KinDrv::JacoArm  *arm_;
 
-  fawkes::jaco_target_type_t __target_type;
-  bool __final;
+  fawkes::jaco_target_type_t target_type_;
+  bool final_;
 
-  bool __ctrl_ang;
+  bool ctrl_ang_;
 };
 
 

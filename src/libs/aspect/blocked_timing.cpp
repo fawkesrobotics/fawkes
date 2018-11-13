@@ -27,9 +27,6 @@
 
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BlockedTimingAspect <aspect/blocked_timing.h>
  * Thread aspect to use blocked timing.
@@ -58,15 +55,15 @@ BlockedTimingAspect::BlockedTimingAspect(WakeupHook wakeup_hook)
         blocked_timing_hook_to_end_syncpoint(wakeup_hook))
 {
   add_aspect("BlockedTimingAspect");
-  __wakeup_hook = wakeup_hook;
-  __loop_listener = new BlockedTimingLoopListener();
+  wakeup_hook_ = wakeup_hook;
+  loop_listener_ = new BlockedTimingLoopListener();
 }
 
 
 /** Virtual empty destructor. */
 BlockedTimingAspect::~BlockedTimingAspect()
 {
-  delete __loop_listener;
+  delete loop_listener_;
 }
 
 
@@ -77,7 +74,7 @@ BlockedTimingAspect::~BlockedTimingAspect()
 void
 BlockedTimingAspect::init_BlockedTimingAspect(Thread *thread)
 {
-  thread->add_loop_listener(__loop_listener);
+  thread->add_loop_listener(loop_listener_);
   thread->wakeup();
 }
 
@@ -89,7 +86,7 @@ BlockedTimingAspect::init_BlockedTimingAspect(Thread *thread)
 void
 BlockedTimingAspect::finalize_BlockedTimingAspect(Thread *thread)
 {
-  thread->remove_loop_listener(__loop_listener);
+  thread->remove_loop_listener(loop_listener_);
 }
 
 /** Get the wakeup hook.
@@ -100,7 +97,7 @@ BlockedTimingAspect::finalize_BlockedTimingAspect(Thread *thread)
 BlockedTimingAspect::WakeupHook
 BlockedTimingAspect::blockedTimingAspectHook() const
 {
-  return __wakeup_hook;
+  return wakeup_hook_;
 }
 
 /** Get string for wakeup hook.

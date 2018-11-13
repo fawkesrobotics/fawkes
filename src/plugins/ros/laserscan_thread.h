@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROS_LASERSCAN_THREAD_H_
-#define __PLUGINS_ROS_LASERSCAN_THREAD_H_
+#ifndef _PLUGINS_ROS_LASERSCAN_THREAD_H_
+#define _PLUGINS_ROS_LASERSCAN_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -79,11 +79,11 @@ class RosLaserScanThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  std::list<fawkes::Laser360Interface *> __ls360_ifs;
-  std::list<fawkes::Laser720Interface *> __ls720_ifs;
-  std::list<fawkes::Laser1080Interface *> __ls1080_ifs;
+  std::list<fawkes::Laser360Interface *> ls360_ifs_;
+  std::list<fawkes::Laser720Interface *> ls720_ifs_;
+  std::list<fawkes::Laser1080Interface *> ls1080_ifs_;
 
-  ros::Subscriber __sub_ls;
+  ros::Subscriber sub_ls_;
 
   /// @cond INTERNALS
   typedef struct {
@@ -91,16 +91,16 @@ class RosLaserScanThread
     sensor_msgs::LaserScan   msg;
   } PublisherInfo;
   /// @endcond
-  std::map<std::string, PublisherInfo> __pubs;
+  std::map<std::string, PublisherInfo> pubs_;
 
-  fawkes::Mutex *__ls_msg_queue_mutex;
-  unsigned int __active_queue;
-  std::queue<ros::MessageEvent<sensor_msgs::LaserScan const> >   __ls_msg_queues[2];
+  fawkes::Mutex *ls_msg_queue_mutex_;
+  unsigned int active_queue_;
+  std::queue<ros::MessageEvent<sensor_msgs::LaserScan const> >   ls_msg_queues_[2];
 
-  std::map<std::string, fawkes::Laser360Interface *> __ls360_wifs;
+  std::map<std::string, fawkes::Laser360Interface *> ls360_wifs_;
 
-  fawkes::Mutex *__seq_num_mutex;
-  unsigned int   __seq_num;
+  fawkes::Mutex *seq_num_mutex_;
+  unsigned int   seq_num_;
 
 };
 

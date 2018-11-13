@@ -30,9 +30,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ScanlineStar <fvmodels/scanlines/star.h>
  * Star-like arranged scanline points.

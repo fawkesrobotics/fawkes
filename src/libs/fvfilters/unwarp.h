@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FILTER_UNWARP_H_
-#define __FIREVISION_FILTER_UNWARP_H_
+#ifndef _FIREVISION_FILTER_UNWARP_H_
+#define _FIREVISION_FILTER_UNWARP_H_
 
 #include <fvfilters/filter.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class MirrorModel;
 

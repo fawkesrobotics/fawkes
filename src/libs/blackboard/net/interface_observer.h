@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_NET_INTERFACE_OBSERVER_H_
-#define __BLACKBOARD_NET_INTERFACE_OBSERVER_H_
+#ifndef _BLACKBOARD_NET_INTERFACE_OBSERVER_H_
+#define _BLACKBOARD_NET_INTERFACE_OBSERVER_H_
 
 #include <blackboard/interface_observer.h>
 
@@ -45,8 +45,8 @@ class BlackBoardNetHandlerInterfaceObserver
   void send_event(unsigned int msg_id, const char *type, const char *id);
 
  private:
-  BlackBoard       *__blackboard;
-  FawkesNetworkHub *__fnh;
+  BlackBoard       *blackboard_;
+  FawkesNetworkHub *fnh_;
 };
 
 } // end namespace fawkes

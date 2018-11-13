@@ -34,8 +34,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PROTOBUF_COMM_MESSAGE_REGISTER_H_
-#define __PROTOBUF_COMM_MESSAGE_REGISTER_H_
+#ifndef _PROTOBUF_COMM_MESSAGE_REGISTER_H_
+#define _PROTOBUF_COMM_MESSAGE_REGISTER_H_
 
 #include <protobuf_comm/frame_header.h>
 
@@ -62,9 +62,6 @@ namespace google {
 }
 
 namespace protobuf_comm {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class MessageRegister : boost::noncopyable
 {

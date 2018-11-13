@@ -17,9 +17,6 @@
 
 namespace firevision
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ColorModelBlack <fvmodels/color/thresholds_black.h>
  * Detect configurable shades/hues of "black" as a cuboid in YUV space.

@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CLASSIFIERS_CLASSIFIER_H_
-#define __FIREVISION_CLASSIFIERS_CLASSIFIER_H_
+#ifndef _FIREVISION_CLASSIFIERS_CLASSIFIER_H_
+#define _FIREVISION_CLASSIFIERS_CLASSIFIER_H_
 
 #include <fvutils/base/roi.h>
 #include <list>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 typedef std::list<ROI> ROIList;
 
@@ -56,7 +53,7 @@ class Classifier
   unsigned int   _height;
 
  private:
-  char *__name;
+  char *name_;
 
 };
 

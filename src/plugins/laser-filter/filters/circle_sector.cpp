@@ -51,8 +51,8 @@ LaserCircleSectorDataFilter::LaserCircleSectorDataFilter(const std::string filte
                                                          std::vector<LaserDataFilter::Buffer *> &in)
 	: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
-  __from = from;
-  __to   = to;
+  from_ = from;
+  to_   = to;
 }
 
 
@@ -70,15 +70,15 @@ LaserCircleSectorDataFilter::filter()
     float *inbuf  = in[a]->values;
     float *outbuf = out[a]->values;
 
-    if (__from > __to) {
-      for (unsigned int i = __from; i < arrsize; ++i) {
+    if (from_ > to_) {
+      for (unsigned int i = from_; i < arrsize; ++i) {
 	outbuf[i] = inbuf[i];
       }
-      for (unsigned int i = 0; i <= std::min(__to, arrsize-1); ++i) {
+      for (unsigned int i = 0; i <= std::min(to_, arrsize-1); ++i) {
 	outbuf[i] = inbuf[i];
       }
     } else {
-      for (unsigned int i = __from; i <= std::min(__to, arrsize-1); ++i) {
+      for (unsigned int i = from_; i <= std::min(to_, arrsize-1); ++i) {
 	outbuf[i] = inbuf[i];
       }
     }

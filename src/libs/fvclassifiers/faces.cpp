@@ -33,9 +33,6 @@
 #include <opencv/cv.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FacesClassifier <fvclassifiers/faces.h>
  * Faces classifier.
@@ -67,27 +64,27 @@ FacesClassifier::FacesClassifier(const char *haarcascade_file,
 				 float haar_scale_factor, int min_neighbours, int flags)
   : Classifier("FacesClassifier")
 {
-  __haar_scale_factor = haar_scale_factor;
-  __min_neighbours = min_neighbours;
-  __flags = flags;
+  haar_scale_factor_ = haar_scale_factor;
+  min_neighbours_ = min_neighbours;
+  flags_ = flags;
 
-  __cascade = (CvHaarClassifierCascade *) cvLoad(haarcascade_file);
-  if ( ! __cascade ) {
+  cascade_ = (CvHaarClassifierCascade *) cvLoad(haarcascade_file);
+  if ( ! cascade_ ) {
     throw fawkes::Exception("Could not load Haar casca via OpenCV");
   }
 
-  __storage = cvCreateMemStorage(0);
-  if ( ! __storage ) {
-    cvReleaseHaarClassifierCascade(&__cascade);
+  storage_ = cvCreateMemStorage(0);
+  if ( ! storage_ ) {
+    cvReleaseHaarClassifierCascade(&cascade_);
     throw fawkes::Exception("Could not initialize OpenCV memory");
   }
 
   if ( image ) {
-    __image = image;
-    __own_image = false;
+    image_ = image;
+    own_image_ = false;
   } else {
-    __image = cvCreateImage(cvSize(pixel_width, pixel_height), IPL_DEPTH_8U, 3);
-    __own_image = true;
+    image_ = cvCreateImage(cvSize(pixel_width, pixel_height), IPL_DEPTH_8U, 3);
+    own_image_ = true;
   }
 }
 
@@ -95,10 +92,10 @@ FacesClassifier::FacesClassifier(const char *haarcascade_file,
 /** Destructor. */
 FacesClassifier::~FacesClassifier()
 {
-  cvReleaseHaarClassifierCascade(&__cascade);
-  cvReleaseMemStorage(&__storage);
-  if ( __own_image ) {
-    cvReleaseImage(&__image);
+  cvReleaseHaarClassifierCascade(&cascade_);
+  cvReleaseMemStorage(&storage_);
+  if ( own_image_ ) {
+    cvReleaseImage(&image_);
   }
 }
 
@@ -108,12 +105,12 @@ FacesClassifier::classify()
 {
   std::list< ROI > *rv = new std::list< ROI >();
 
-  if ( __own_image ) {
-    IplImageAdapter::convert_image_bgr(_src, __image);
+  if ( own_image_ ) {
+    IplImageAdapter::convert_image_bgr(_src, image_);
   }
 
-  CvSeq *face_seq = cvHaarDetectObjects(__image, __cascade, __storage,
-					__haar_scale_factor, __min_neighbours, __flags);
+  CvSeq *face_seq = cvHaarDetectObjects(image_, cascade_, storage_,
+					haar_scale_factor_, min_neighbours_, flags_);
 
   for ( int i = 0; i < face_seq->total; ++i) {
     CvAvgComp el = *(CvAvgComp*)cvGetSeqElem(face_seq, i);

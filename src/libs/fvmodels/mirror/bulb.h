@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_MIRROR_BULB_H_
-#define __FIREVISION_MODELS_MIRROR_BULB_H_
+#ifndef _FIREVISION_MODELS_MIRROR_BULB_H_
+#define _FIREVISION_MODELS_MIRROR_BULB_H_
 
 #include <fvmodels/mirror/mirrormodel.h>
 
 #include <string>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class SharedMemoryLookupTable;
 class BulbGenerator;

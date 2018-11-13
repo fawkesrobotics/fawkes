@@ -44,9 +44,6 @@
 #include <fnmatch.h>
 
 namespace protobuf_comm {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class MessageRegister <protobuf_comm/message_register.h>

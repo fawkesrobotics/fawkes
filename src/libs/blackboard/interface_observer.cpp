@@ -72,8 +72,8 @@ BlackBoardInterfaceObserver::BlackBoardInterfaceObserver()
 /** Destructor. */
 BlackBoardInterfaceObserver::~BlackBoardInterfaceObserver()
 {
-  __bbio_observed_create.clear();
-  __bbio_observed_destroy.clear();
+  bbio_observed_create_.clear();
+  bbio_observed_destroy_.clear();
 }
 
 
@@ -121,11 +121,11 @@ void
 BlackBoardInterfaceObserver::bbio_add_observed_create(const char *type_pattern,
 						      const char *id_pattern) throw()
 {
-  __bbio_observed_create.lock();
-  __bbio_observed_create[type_pattern].push_back(id_pattern);
-  __bbio_observed_create[type_pattern].sort();
-  __bbio_observed_create[type_pattern].unique();
-  __bbio_observed_create.unlock();
+  bbio_observed_create_.lock();
+  bbio_observed_create_[type_pattern].push_back(id_pattern);
+  bbio_observed_create_[type_pattern].sort();
+  bbio_observed_create_[type_pattern].unique();
+  bbio_observed_create_.unlock();
 }
 
 
@@ -141,11 +141,11 @@ void
 BlackBoardInterfaceObserver::bbio_add_observed_destroy(const char *type_pattern,
 						       const char *id_pattern) throw()
 {
-  __bbio_observed_destroy.lock();
-  __bbio_observed_destroy[type_pattern].push_back(id_pattern);
-  __bbio_observed_destroy[type_pattern].sort();
-  __bbio_observed_destroy[type_pattern].unique();
-  __bbio_observed_destroy.unlock();
+  bbio_observed_destroy_.lock();
+  bbio_observed_destroy_[type_pattern].push_back(id_pattern);
+  bbio_observed_destroy_[type_pattern].sort();
+  bbio_observed_destroy_[type_pattern].unique();
+  bbio_observed_destroy_.unlock();
 }
 
 
@@ -155,7 +155,7 @@ BlackBoardInterfaceObserver::bbio_add_observed_destroy(const char *type_pattern,
 BlackBoardInterfaceObserver::ObservedInterfaceLockMap *
 BlackBoardInterfaceObserver::bbio_get_observed_create() throw()
 {
-  return &__bbio_observed_create;
+  return &bbio_observed_create_;
 }
 
 
@@ -165,7 +165,7 @@ BlackBoardInterfaceObserver::bbio_get_observed_create() throw()
 BlackBoardInterfaceObserver::ObservedInterfaceLockMap *
 BlackBoardInterfaceObserver::bbio_get_observed_destroy() throw()
 {
-  return &__bbio_observed_destroy;
+  return &bbio_observed_destroy_;
 }
 
 

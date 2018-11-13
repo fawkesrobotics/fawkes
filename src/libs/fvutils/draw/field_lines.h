@@ -19,17 +19,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FVUTILS_DRAW_FIELD_LINES_H__
-#define __FVUTILS_DRAW_FIELD_LINES_H__
+#ifndef _FVUTILS_DRAW_FIELD_LINES_H__
+#define _FVUTILS_DRAW_FIELD_LINES_H__
 
 #include <utils/math/types.h>
 #include <list>
 #include <string>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 typedef std::list<fawkes::arc_t> field_circles_t;
 

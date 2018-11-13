@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_INIFINS_VISION_MASTER_H_
-#define __ASPECT_INIFINS_VISION_MASTER_H_
+#ifndef _ASPECT_INIFINS_VISION_MASTER_H_
+#define _ASPECT_INIFINS_VISION_MASTER_H_
 
 #include <aspect/inifins/inifin.h>
 #include <aspect/vision_master.h>
@@ -34,9 +34,6 @@ namespace firevision {
 }
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class VisionMasterAspectIniFin : public AspectIniFin
 {
@@ -53,7 +50,7 @@ class VisionMasterAspectIniFin : public AspectIniFin
   bool can_remove_vision_thread(VisionAspect *thread);
 
  private:
-  OneToManyDependency<VisionMasterAspect, VisionAspect> __vision_dependency;
+  OneToManyDependency<VisionMasterAspect, VisionAspect> vision_dependency_;
 };
 
 } // end namespace fawkes

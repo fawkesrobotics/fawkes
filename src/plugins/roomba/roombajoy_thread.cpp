@@ -61,90 +61,90 @@ RoombaJoystickThread::RoombaJoystickThread()
 void
 RoombaJoystickThread::init()
 {
-  __joy_if = NULL;
-  __roomba500_if = NULL;
+  joy_if_ = NULL;
+  roomba500_if_ = NULL;
 
-  __cfg_but_main_brush = confval(CFG_BUT_MAIN_BRUSH, JoystickInterface::BUTTON_1);
-  __cfg_but_side_brush = confval(CFG_BUT_SIDE_BRUSH, JoystickInterface::BUTTON_2);
-  __cfg_but_vacuuming  = confval(CFG_BUT_VACUUMING,  JoystickInterface::BUTTON_3);
-  __cfg_but_dock       = confval(CFG_BUT_DOCK,       JoystickInterface::BUTTON_4);
-  __cfg_but_spot       = confval(CFG_BUT_SPOT,       JoystickInterface::BUTTON_5);
-  __cfg_but_mode       = confval(CFG_BUT_MODE,       JoystickInterface::BUTTON_6);
+  cfg_but_main_brush_ = confval(CFG_BUT_MAIN_BRUSH, JoystickInterface::BUTTON_1);
+  cfg_but_side_brush_ = confval(CFG_BUT_SIDE_BRUSH, JoystickInterface::BUTTON_2);
+  cfg_but_vacuuming_  = confval(CFG_BUT_VACUUMING,  JoystickInterface::BUTTON_3);
+  cfg_but_dock_       = confval(CFG_BUT_DOCK,       JoystickInterface::BUTTON_4);
+  cfg_but_spot_       = confval(CFG_BUT_SPOT,       JoystickInterface::BUTTON_5);
+  cfg_but_mode_       = confval(CFG_BUT_MODE,       JoystickInterface::BUTTON_6);
 
-  __cfg_axis_forward   = confval(CFG_AXIS_FORWARD,  0);
-  __cfg_axis_sideward  = confval(CFG_AXIS_SIDEWARD, 1);
-  __cfg_axis_speed     = confval(CFG_AXIS_SPEED,    2);
+  cfg_axis_forward_   = confval(CFG_AXIS_FORWARD,  0);
+  cfg_axis_sideward_  = confval(CFG_AXIS_SIDEWARD, 1);
+  cfg_axis_speed_     = confval(CFG_AXIS_SPEED,    2);
 
-  __cfg_min_radius     = config->get_uint(CFG_PREFIX"min_radius");
-  __cfg_max_radius     = config->get_uint(CFG_PREFIX"max_radius");
-  __cfg_max_velocity   = config->get_uint(CFG_PREFIX"max_velocity");
+  cfg_min_radius_     = config->get_uint(CFG_PREFIX"min_radius");
+  cfg_max_radius_     = config->get_uint(CFG_PREFIX"max_radius");
+  cfg_max_velocity_   = config->get_uint(CFG_PREFIX"max_velocity");
 
   try {
-    __roomba500_if = blackboard->open_for_reading<Roomba500Interface>("Roomba 500");
-    __joy_if = blackboard->open_for_reading<JoystickInterface>("Joystick");
+    roomba500_if_ = blackboard->open_for_reading<Roomba500Interface>("Roomba 500");
+    joy_if_ = blackboard->open_for_reading<JoystickInterface>("Joystick");
 
   } catch (Exception &e) {
-    blackboard->close(__roomba500_if);
-    blackboard->close(__joy_if);
+    blackboard->close(roomba500_if_);
+    blackboard->close(joy_if_);
     throw;
   }
 
-  if (__cfg_axis_forward > __joy_if->maxlenof_axis()) {
+  if (cfg_axis_forward_ > joy_if_->maxlenof_axis()) {
     throw Exception("Invalid forward axis value %u, must be smaller than %u",
-		    __cfg_axis_forward, __joy_if->maxlenof_axis());
+		    cfg_axis_forward_, joy_if_->maxlenof_axis());
   }
-  if (__cfg_axis_sideward > __joy_if->maxlenof_axis()) {
+  if (cfg_axis_sideward_ > joy_if_->maxlenof_axis()) {
     throw Exception("Invalid sideward axis value %u, must be smaller than %u",
-		    __cfg_axis_sideward, __joy_if->maxlenof_axis());
+		    cfg_axis_sideward_, joy_if_->maxlenof_axis());
   }
-  if (__cfg_axis_speed > __joy_if->maxlenof_axis()) {
+  if (cfg_axis_speed_ > joy_if_->maxlenof_axis()) {
     logger->log_warn(name(), "Speed axis disabled, setting half max speed.");
   }
 
-  __last_velo = __cfg_max_velocity / 2;
-  __main_brush_enabled = false;
-  __side_brush_enabled = false;
-  __vacuuming_enabled  = false;
+  last_velo_ = cfg_max_velocity_ / 2;
+  main_brush_enabled_ = false;
+  side_brush_enabled_ = false;
+  vacuuming_enabled_  = false;
 
-  __strong_rumble = false;
-  __weak_rumble   = false;
+  strong_rumble_ = false;
+  weak_rumble_   = false;
 }
 
 void
 RoombaJoystickThread::finalize()
 {
-  blackboard->close(__roomba500_if);
-  blackboard->close(__joy_if);
+  blackboard->close(roomba500_if_);
+  blackboard->close(joy_if_);
 }
 
 
 void
 RoombaJoystickThread::loop()
 {
-  __joy_if->read();
-  __roomba500_if->read();
+  joy_if_->read();
+  roomba500_if_->read();
 
-  if (__joy_if->supported_ff_effects() & JoystickInterface::JFF_RUMBLE) {
-    uint16_t mlb = __roomba500_if->light_bump_left();
-    mlb = std::max(mlb, __roomba500_if->light_bump_front_left());
-    mlb = std::max(mlb, __roomba500_if->light_bump_center_left());
-    mlb = std::max(mlb, __roomba500_if->light_bump_center_right());
-    mlb = std::max(mlb, __roomba500_if->light_bump_front_right());
-    mlb = std::max(mlb, __roomba500_if->light_bump_right());
+  if (joy_if_->supported_ff_effects() & JoystickInterface::JFF_RUMBLE) {
+    uint16_t mlb = roomba500_if_->light_bump_left();
+    mlb = std::max(mlb, roomba500_if_->light_bump_front_left());
+    mlb = std::max(mlb, roomba500_if_->light_bump_center_left());
+    mlb = std::max(mlb, roomba500_if_->light_bump_center_right());
+    mlb = std::max(mlb, roomba500_if_->light_bump_front_right());
+    mlb = std::max(mlb, roomba500_if_->light_bump_right());
 
-    if (__roomba500_if->is_bump_left() || __roomba500_if->is_bump_right()) {
-      if (! __weak_rumble) {
+    if (roomba500_if_->is_bump_left() || roomba500_if_->is_bump_right()) {
+      if (! weak_rumble_) {
 	JoystickInterface::StartRumbleMessage *msg =
 	  new JoystickInterface::StartRumbleMessage();
 
 	msg->set_strong_magnitude(0xFFFF);
 	msg->set_weak_magnitude(0x8000);
       
-	__joy_if->msgq_enqueue(msg);
-	__weak_rumble = true;
-	__strong_rumble = false;
+	joy_if_->msgq_enqueue(msg);
+	weak_rumble_ = true;
+	strong_rumble_ = false;
       }
-    } else if ((mlb > 200) && !__strong_rumble) {
+    } else if ((mlb > 200) && !strong_rumble_) {
       JoystickInterface::StartRumbleMessage *msg =
 	new JoystickInterface::StartRumbleMessage();
 
@@ -155,73 +155,73 @@ RoombaJoystickThread::loop()
       msg->set_weak_magnitude((uint16_t)floorf(mf * 0xFFFF));
       if (mf > 0.8) msg->set_strong_magnitude(0x8000);
 
-      __joy_if->msgq_enqueue(msg);
+      joy_if_->msgq_enqueue(msg);
 
-      __weak_rumble = false;
-      __strong_rumble = true;
-    } else if (__weak_rumble || __strong_rumble) {
+      weak_rumble_ = false;
+      strong_rumble_ = true;
+    } else if (weak_rumble_ || strong_rumble_) {
       JoystickInterface::StopRumbleMessage *msg =
 	new JoystickInterface::StopRumbleMessage();
-      __joy_if->msgq_enqueue(msg);
+      joy_if_->msgq_enqueue(msg);
       
-      __weak_rumble = __strong_rumble = false;
+      weak_rumble_ = strong_rumble_ = false;
     }
   }
 
-  if (__joy_if->changed()) {
-    if (__joy_if->num_axes() == 0) {
+  if (joy_if_->changed()) {
+    if (joy_if_->num_axes() == 0) {
       logger->log_debug(name(), "Joystick disconnected, stopping");
       stop();
-    } else if (__joy_if->pressed_buttons()) {
+    } else if (joy_if_->pressed_buttons()) {
 
       bool motor_state = false;
 
-      if (__joy_if->pressed_buttons() & __cfg_but_main_brush) {
+      if (joy_if_->pressed_buttons() & cfg_but_main_brush_) {
 	motor_state = true;
-	__main_brush_enabled = ! __main_brush_enabled;
+	main_brush_enabled_ = ! main_brush_enabled_;
       }
 
-      if (__joy_if->pressed_buttons() & __cfg_but_side_brush) {
+      if (joy_if_->pressed_buttons() & cfg_but_side_brush_) {
 	motor_state = true;
-	__side_brush_enabled = ! __side_brush_enabled;
+	side_brush_enabled_ = ! side_brush_enabled_;
       }
 
-      if (__joy_if->pressed_buttons() & __cfg_but_vacuuming) {
+      if (joy_if_->pressed_buttons() & cfg_but_vacuuming_) {
 	motor_state = true;
-	__vacuuming_enabled  = ! __vacuuming_enabled;
+	vacuuming_enabled_  = ! vacuuming_enabled_;
       }
 
       if (motor_state) {
 	Roomba500Interface::SetMotorsMessage *sm =
 	  new Roomba500Interface::SetMotorsMessage(
-	    __vacuuming_enabled,
-	    __main_brush_enabled ? Roomba500Interface::BRUSHSTATE_FORWARD
+	    vacuuming_enabled_,
+	    main_brush_enabled_ ? Roomba500Interface::BRUSHSTATE_FORWARD
 			         : Roomba500Interface::BRUSHSTATE_OFF,
-	    __side_brush_enabled ? Roomba500Interface::BRUSHSTATE_FORWARD
+	    side_brush_enabled_ ? Roomba500Interface::BRUSHSTATE_FORWARD
 			         : Roomba500Interface::BRUSHSTATE_OFF
 	  );
-	__roomba500_if->msgq_enqueue(sm);
+	roomba500_if_->msgq_enqueue(sm);
       }
 
-      if (__joy_if->pressed_buttons() & __cfg_but_dock) {
+      if (joy_if_->pressed_buttons() & cfg_but_dock_) {
 	Roomba500Interface::DockMessage *dm =
 	  new Roomba500Interface::DockMessage();
-	__roomba500_if->msgq_enqueue(dm);
+	roomba500_if_->msgq_enqueue(dm);
       }
 
-      if (__joy_if->pressed_buttons() & __cfg_but_spot) {
+      if (joy_if_->pressed_buttons() & cfg_but_spot_) {
 	/*
 	Roomba500Interface::DockMessage *dm =
 	  new Roomba500Interface::DockMessage();
-	__roomba500_if->msgq_enqueue(dm);
+	roomba500_if_->msgq_enqueue(dm);
 	*/
       }
 
-      if (__joy_if->pressed_buttons() & __cfg_but_mode) {
+      if (joy_if_->pressed_buttons() & cfg_but_mode_) {
 	Roomba500Interface::SetModeMessage *sm =
 	  new Roomba500Interface::SetModeMessage();
 
-	switch (__roomba500_if->mode()) {
+	switch (roomba500_if_->mode()) {
 	case Roomba500Interface::MODE_PASSIVE:
 	  sm->set_mode(Roomba500Interface::MODE_SAFE); break;
 	case Roomba500Interface::MODE_SAFE:
@@ -231,45 +231,45 @@ RoombaJoystickThread::loop()
 	default:
 	  sm->set_mode(Roomba500Interface::MODE_PASSIVE); break;
 	}
-	__roomba500_if->msgq_enqueue(sm);
+	roomba500_if_->msgq_enqueue(sm);
       }
 
 
-    } else if (__joy_if->axis(__cfg_axis_forward) == 0 &&
-	       __joy_if->axis(__cfg_axis_sideward) == 0) {
+    } else if (joy_if_->axis(cfg_axis_forward_) == 0 &&
+	       joy_if_->axis(cfg_axis_sideward_) == 0) {
       stop();
     } else {
-      float forward  = __joy_if->axis(__cfg_axis_forward) *  __cfg_max_velocity;
-      float sideward = __joy_if->axis(__cfg_axis_sideward);
-      float radius   = copysignf(std::max(__cfg_min_radius,
-                                          (int)(1. - fabsf(sideward)) * __cfg_max_radius),
+      float forward  = joy_if_->axis(cfg_axis_forward_) *  cfg_max_velocity_;
+      float sideward = joy_if_->axis(cfg_axis_sideward_);
+      float radius   = copysignf(std::max(cfg_min_radius_,
+                                          (int)(1. - fabsf(sideward)) * cfg_max_radius_),
                                  sideward);
       float velocity = .5;
-      if (__cfg_axis_speed < __joy_if->maxlenof_axis()) {
-	      velocity = __joy_if->axis(__cfg_axis_speed);
+      if (cfg_axis_speed_ < joy_if_->maxlenof_axis()) {
+	      velocity = joy_if_->axis(cfg_axis_speed_);
       }
 
       int16_t velmm = (int16_t)roundf(forward * velocity);
       int16_t radmm = (int16_t)roundf(radius);
       // special case handling for "turn on place"
-      if (fabsf(__joy_if->axis(__cfg_axis_forward)) < 0.1) {
-	      velmm =  (int16_t)fabs(sideward * velocity) * __cfg_max_velocity;
+      if (fabsf(joy_if_->axis(cfg_axis_forward_)) < 0.1) {
+	      velmm =  (int16_t)fabs(sideward * velocity) * cfg_max_velocity_;
 	      radmm =  (int16_t)copysignf(1, sideward);
       }
 
       /*
       logger->log_debug(name(), "Joystick (%f,%f,%f)  Velo %f/%i  Radius %f/%i",
-			__joy_if->axis(__cfg_axis_forward),
-			__joy_if->axis(__cfg_axis_sideward),
-			__joy_if->axis(__cfg_axis_speed),
+			joy_if_->axis(cfg_axis_forward_),
+			joy_if_->axis(cfg_axis_sideward_),
+			joy_if_->axis(cfg_axis_speed_),
 			velocity, velmm, radius, radmm);
       */
 
-      __last_velo = velmm;
+      last_velo_ = velmm;
 
       Roomba500Interface::DriveMessage *dm =
 	new Roomba500Interface::DriveMessage(velmm, radmm);
-      __roomba500_if->msgq_enqueue(dm);
+      roomba500_if_->msgq_enqueue(dm);
     }
   }
 }
@@ -279,7 +279,7 @@ void
 RoombaJoystickThread::stop()
 {
   Roomba500Interface::StopMessage *sm = new Roomba500Interface::StopMessage();
-  __roomba500_if->msgq_enqueue(sm);
+  roomba500_if_->msgq_enqueue(sm);
 }
 
 

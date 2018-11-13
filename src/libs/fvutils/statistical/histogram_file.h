@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_STATISTICAL_HISTOGRAM_FILE_H_
-#define __FIREVISION_FVUTILS_STATISTICAL_HISTOGRAM_FILE_H_
+#ifndef _FIREVISION_FVUTILS_STATISTICAL_HISTOGRAM_FILE_H_
+#define _FIREVISION_FVUTILS_STATISTICAL_HISTOGRAM_FILE_H_
 
 #define FIREVISION_HISTOGRAM_MAGIC  0xFF04
 #define FIREVISION_HISTOGRAM_CURVER 1
@@ -33,9 +33,6 @@
 #include <map>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class HistogramBlock;
 
@@ -65,4 +62,4 @@ class HistogramFile : public FireVisionDataFile
 
 } // end namespace firevision
 
-#endif /* __FIREVISION_FVUTILS_STATISTICAL_HISTOGRAM_FILE_H_ */
+#endif /* FIREVISION_FVUTILS_STATISTICAL_HISTOGRAM_FILE_H__ */

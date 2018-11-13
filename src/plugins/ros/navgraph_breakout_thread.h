@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
  
-#ifndef __ROS_NAVGRAPH_BREAKOUT_THREAD_H_
-#define __ROS_NAVGRAPH_BREAKOUT_THREAD_H_
+#ifndef _ROS_NAVGRAPH_BREAKOUT_THREAD_H_
+#define _ROS_NAVGRAPH_BREAKOUT_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -68,4 +68,4 @@ class RosNavgraphBreakoutThread
   bool was_connected_;
 };
 
-#endif /* __ROS_NAVIGATOR_THREAD_H_ */
+#endif /* ROS_NAVIGATOR_THREAD_H__ */

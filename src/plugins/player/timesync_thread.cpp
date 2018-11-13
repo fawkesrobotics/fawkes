@@ -39,7 +39,7 @@ using namespace fawkes;
 PlayerTimeSyncThread::PlayerTimeSyncThread()
   : Thread("PlayerTimeSyncThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP)
-    //TimeSourceAspect(&__simts)
+    //TimeSourceAspect(&simts_)
 {
 }
 

@@ -59,8 +59,8 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-SignalManager *  SignalManager::__instance = NULL;
-SignalHandler *  SignalManager::__signal_handlers[NSIG];
+SignalManager *  SignalManager::instance_ = NULL;
+SignalHandler *  SignalManager::signal_handlers_[NSIG];
 
 /** Invalid constructor. */
 SignalManager::SignalManager()
@@ -80,14 +80,14 @@ SignalManager::SignalManager(const SignalManager &cc)
 SignalManager *
 SignalManager::instance()
 {
-  if ( __instance == NULL ) {
-    __instance = new SignalManager();
+  if ( instance_ == NULL ) {
+    instance_ = new SignalManager();
     for (unsigned int i = 0; i < NSIG; ++i) {
-      __signal_handlers[i] = NULL;
+      signal_handlers_[i] = NULL;
     }
   }
 
-  return __instance;
+  return instance_;
 }
 
 
@@ -97,12 +97,12 @@ SignalManager::instance()
 void
 SignalManager::finalize()
 {
-  if ( __instance != NULL ) {
+  if ( instance_ != NULL ) {
     for (unsigned int i = 0; i < NSIG; ++i) {
       restore_default(i);
     }
-    delete __instance;
-    __instance = NULL;
+    delete instance_;
+    instance_ = NULL;
   }
 }
 
@@ -116,8 +116,8 @@ SignalHandler *
 SignalManager::register_handler(int signum, SignalHandler *handler)
 {
   if (signum < NSIG) {
-    SignalHandler *old = __signal_handlers[signum];
-    __signal_handlers[signum] = handler;
+    SignalHandler *old = signal_handlers_[signum];
+    signal_handlers_[signum] = handler;
 
     // Register the <dispatcher> to handle this <signum>.
     struct sigaction sa;
@@ -152,7 +152,7 @@ SignalManager::unregister_handler(SignalHandler *handler)
 {
 
   for (unsigned int i = 0; i < NSIG; ++i) {
-    if ( __signal_handlers[i] == handler ) {
+    if ( signal_handlers_[i] == handler ) {
       restore_default(i);
     }
   }
@@ -163,7 +163,7 @@ void
 SignalManager::restore_default(int signum)
 {
   if (signum < NSIG) {
-    __signal_handlers[signum] = NULL;
+    signal_handlers_[signum] = NULL;
 
     // ignore this signal
     struct sigaction sa;
@@ -182,7 +182,7 @@ void
 SignalManager::ignore(int signum)
 {
   if (signum < NSIG) {
-    __signal_handlers[signum] = NULL;
+    signal_handlers_[signum] = NULL;
 
     // ignore this signal
     struct sigaction sa;
@@ -200,8 +200,8 @@ SignalManager::ignore(int signum)
 void
 SignalManager::dispatcher(int signum)
 {
-  if (__signal_handlers[signum] != NULL) {
-    __signal_handlers[signum]->handle_signal(signum);
+  if (signal_handlers_[signum] != NULL) {
+    signal_handlers_[signum]->handle_signal(signum);
   }
 }
 

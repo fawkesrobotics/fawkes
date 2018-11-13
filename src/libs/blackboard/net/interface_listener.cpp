@@ -65,19 +65,19 @@ BlackBoardNetHandlerInterfaceListener::BlackBoardNetHandlerInterfaceListener(Bla
     bbil_add_message_interface(interface);
   }
 
-  __blackboard = blackboard;
-  __interface = interface;
-  __fnh = hub;
-  __clid = clid;
+  blackboard_ = blackboard;
+  interface_ = interface;
+  fnh_ = hub;
+  clid_ = clid;
 
-  __blackboard->register_listener(this);
+  blackboard_->register_listener(this);
 }
 
 
 /** Destructor. */
 BlackBoardNetHandlerInterfaceListener::~BlackBoardNetHandlerInterfaceListener()
 {
-  __blackboard->unregister_listener(this);
+  blackboard_->unregister_listener(this);
 }
 
 
@@ -96,7 +96,7 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_data_changed(Interface *inte
 	 interface->datasize());
 
   try {
-    __fnh->send(__clid, FAWKES_CID_BLACKBOARD, MSG_BB_DATA_CHANGED, payload, payload_size);
+    fnh_->send(clid_, FAWKES_CID_BLACKBOARD, MSG_BB_DATA_CHANGED, payload, payload_size);
   } catch (Exception &e) {
     LibLogger::log_warn(bbil_name(), "Failed to send BlackBoard data, exception follows");
     LibLogger::log_warn(bbil_name(), e);
@@ -113,7 +113,7 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *
   void *payload = calloc(1, payload_size);
   bb_imessage_msg_t *dm = (bb_imessage_msg_t *)payload;
   dm->serial = htonl(interface->serial());
-  strncpy(dm->msg_type, message->type(), __INTERFACE_MESSAGE_TYPE_SIZE-1);
+  strncpy(dm->msg_type, message->type(), INTERFACE_MESSAGE_TYPE_SIZE_-1);
   dm->data_size = htonl(message->datasize());
   dm->msgid = htonl(message->id());
   dm->hops  = htonl(message->hops());
@@ -121,7 +121,7 @@ BlackBoardNetHandlerInterfaceListener::bb_interface_message_received(Interface *
 	 message->datasize());
 
   try {
-    __fnh->send(__clid, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_MESSAGE, payload, payload_size);
+    fnh_->send(clid_, FAWKES_CID_BLACKBOARD, MSG_BB_INTERFACE_MESSAGE, payload, payload_size);
   } catch (Exception &e) {
     LibLogger::log_warn(bbil_name(), "Failed to send BlackBoard message, exception follows");
     LibLogger::log_warn(bbil_name(), e);
@@ -142,7 +142,7 @@ BlackBoardNetHandlerInterfaceListener::send_event_serial(Interface *interface,
   esm->event_serial = htonl(event_serial);
 
   try {
-    __fnh->send(__clid, FAWKES_CID_BLACKBOARD, msg_id, esm, sizeof(bb_ieventserial_msg_t));  
+    fnh_->send(clid_, FAWKES_CID_BLACKBOARD, msg_id, esm, sizeof(bb_ieventserial_msg_t));  
   } catch (Exception &e) {
     LibLogger::log_warn(bbil_name(), "Failed to send BlackBoard event serial, exception follows");
     LibLogger::log_warn(bbil_name(), e);

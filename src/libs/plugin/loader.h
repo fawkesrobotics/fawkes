@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGIN_LOADER_H_
-#define __PLUGIN_LOADER_H_
+#ifndef _PLUGIN_LOADER_H_
+#define _PLUGIN_LOADER_H_
 
 #include <core/plugin.h>
 #include <core/exception.h>
@@ -30,9 +30,6 @@
 #include <string>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Module;
 class Configuration;
@@ -48,7 +45,7 @@ class PluginLoadException : public Exception
   std::string  plugin_name() const;
 
  private:
-  std::string __plugin_name;
+  std::string plugin_name_;
 };
 
 class PluginUnloadException : public Exception

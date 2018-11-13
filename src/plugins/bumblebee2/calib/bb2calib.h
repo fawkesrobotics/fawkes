@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_BUMBLEBEE2_CALIB_BB2CALIB_H_
-#define __PLUGINS_BUMBLEBEE2_CALIB_BB2CALIB_H_
+#ifndef _PLUGINS_BUMBLEBEE2_CALIB_BB2CALIB_H_
+#define _PLUGINS_BUMBLEBEE2_CALIB_BB2CALIB_H_
 
 #include <gui_utils/connection_dispatcher.h>
 

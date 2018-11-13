@@ -26,9 +26,6 @@
 #include <XnCppWrapper.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenNiAspectIniFin <plugins/openni/aspect/openni_inifin.h>
  * OpenNiAspect initializer/finalizer.
@@ -53,11 +50,11 @@ OpenNiAspectIniFin::init(Thread *thread)
 					  "OpenNiAspect, but RTTI says it "
 					  "has not. ", thread->name());
   }
-  if (! __openni_context) {
+  if (! openni_context_) {
     throw CannotInitializeThreadException("OpenNI context has not been set.");
   }
 
-  openni_thread->init_OpenNiAspect(__openni_context);
+  openni_thread->init_OpenNiAspect(openni_context_);
 }
 
 void
@@ -72,7 +69,7 @@ OpenNiAspectIniFin::finalize(Thread *thread)
 void
 OpenNiAspectIniFin::set_openni_context(LockPtr<xn::Context> openni_context)
 {
-  __openni_context = openni_context;
+  openni_context_ = openni_context;
 }
 
 } // end namespace fawkes

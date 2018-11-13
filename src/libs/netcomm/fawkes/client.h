@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_FAWKES_CLIENT_H_
-#define __NETCOMM_FAWKES_CLIENT_H_
+#ifndef _NETCOMM_FAWKES_CLIENT_H_
+#define _NETCOMM_FAWKES_CLIENT_H_
 
 #include <netcomm/fawkes/message_queue.h>
 #include <netcomm/fawkes/message.h>
@@ -95,26 +95,26 @@ class FawkesNetworkClient
   void set_send_slave_alive();
   void set_recv_slave_alive();
 
-  char *__host;
-  unsigned short int __port;
+  char *host_;
+  unsigned short int port_;
 
   StreamSocket *s;
 
   typedef LockMap<unsigned int, FawkesNetworkClientHandler *> HandlerMap;
   HandlerMap  handlers;
 
-  WaitCondition *__connest_waitcond;
-  Mutex         *__connest_mutex;
-  bool           __connest;
-  bool           __connest_interrupted;
+  WaitCondition *connest_waitcond_;
+  Mutex         *connest_mutex_;
+  bool           connest_;
+  bool           connest_interrupted_;
 
-  Mutex                         *__recv_mutex;
-  WaitCondition                 *__recv_waitcond;
-  std::map<unsigned int, bool>   __recv_received;
-  FawkesNetworkClientRecvThread *__recv_slave;
-  FawkesNetworkClientSendThread *__send_slave;
-  bool                           __recv_slave_alive;
-  bool                           __send_slave_alive;
+  Mutex                         *recv_mutex_;
+  WaitCondition                 *recv_waitcond_;
+  std::map<unsigned int, bool>   recv_received_;
+  FawkesNetworkClientRecvThread *recv_slave_;
+  FawkesNetworkClientSendThread *send_slave_;
+  bool                           recv_slave_alive_;
+  bool                           send_slave_alive_;
 
   bool connection_died_recently;
   Mutex *slave_status_mutex;

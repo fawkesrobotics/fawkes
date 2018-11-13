@@ -151,16 +151,16 @@ using namespace fawkes;
  */
 RobotisRX28::RobotisRX28(const char *device_file, unsigned int default_timeout_ms)
 {
-  __default_timeout_ms = default_timeout_ms;
-  __device_file        = strdup(device_file);
-  __fd                 = -1;
-  __obuffer_length     = 0;
-  __ibuffer_length     = 0;
-  memset(__control_table, 0, RX28_MAX_NUM_SERVOS * RX28_CONTROL_TABLE_LENGTH);
+  default_timeout_ms_ = default_timeout_ms;
+  device_file_        = strdup(device_file);
+  fd_                 = -1;
+  obuffer_length_     = 0;
+  ibuffer_length_     = 0;
+  memset(control_table_, 0, RX28_MAX_NUM_SERVOS * RX28_CONTROL_TABLE_LENGTH);
   try {
     open();
   } catch (Exception &e) {
-    free(__device_file);
+    free(device_file_);
     throw;
   }
 }
@@ -169,7 +169,7 @@ RobotisRX28::RobotisRX28(const char *device_file, unsigned int default_timeout_m
 /** Destructor. */
 RobotisRX28::~RobotisRX28()
 {
-  free(__device_file);
+  free(device_file_);
 }
 
 /** Open serial port. */
@@ -178,16 +178,16 @@ RobotisRX28::open() {
 
   struct termios param;
 
-  __fd = ::open(__device_file, O_NOCTTY | O_RDWR);
-  if (__fd == -1) {
-    throw CouldNotOpenFileException(__device_file, errno, "Cannot open device file");
+  fd_ = ::open(device_file_, O_NOCTTY | O_RDWR);
+  if (fd_ == -1) {
+    throw CouldNotOpenFileException(device_file_, errno, "Cannot open device file");
   }
-  tcflush(__fd, TCIOFLUSH);
+  tcflush(fd_, TCIOFLUSH);
 
-  if (tcgetattr(__fd, &param) == -1) {
+  if (tcgetattr(fd_, &param) == -1) {
     Exception e(errno, "Getting the port parameters failed");
-    ::close(__fd);
-    __fd = -1;
+    ::close(fd_);
+    fd_ = -1;
     throw e;
   }
 
@@ -220,17 +220,17 @@ RobotisRX28::open() {
   param.c_cc[VMIN]  = 1;
   param.c_cc[VTIME] = 0;
     
-  tcflush(__fd, TCIOFLUSH);
+  tcflush(fd_, TCIOFLUSH);
 
-  if (tcsetattr(__fd, TCSANOW, &param) != 0) {
+  if (tcsetattr(fd_, TCSANOW, &param) != 0) {
     Exception e(errno, "Setting the port parameters failed");
-    ::close(__fd);
-    __fd = -1;
+    ::close(fd_);
+    fd_ = -1;
     throw e;
   }
 
   //char junk[1];
-  //read(__fd, junk, 1);
+  //read(fd_, junk, 1);
 
 #ifdef TIMETRACKER_VISCA
   tracker = new TimeTracker();
@@ -249,9 +249,9 @@ RobotisRX28::open() {
 void
 RobotisRX28::close()
 {
-  if (__fd >= 0) {
-    ::close(__fd);
-    __fd = -1;
+  if (fd_ >= 0) {
+    ::close(fd_);
+    fd_ = -1;
   }
 }
 
@@ -287,52 +287,52 @@ RobotisRX28::send(const unsigned char id, const unsigned char instruction,
 		  const unsigned char *params, const unsigned char plength)
 {
   // Byte 0 and 1 must be 0xFF
-  __obuffer[0] = 0xFF;
-  __obuffer[1] = 0xFF;
-  __obuffer[PACKET_OFFSET_ID]     = id;
-  __obuffer[PACKET_OFFSET_LENGTH] = plength+2;
-  __obuffer[PACKET_OFFSET_INST]   = instruction;
+  obuffer_[0] = 0xFF;
+  obuffer_[1] = 0xFF;
+  obuffer_[PACKET_OFFSET_ID]     = id;
+  obuffer_[PACKET_OFFSET_LENGTH] = plength+2;
+  obuffer_[PACKET_OFFSET_INST]   = instruction;
 
   unsigned int checksum = id + plength+2;
 
   for (unsigned char i = 0; i < plength; ++i) {
-    __obuffer[PACKET_OFFSET_PARAM + i] = params[i];
+    obuffer_[PACKET_OFFSET_PARAM + i] = params[i];
     checksum += params[i];
   }
 
   // actually +5, but zero-based array, therefore index 4, but fifth value
-  __obuffer[3 + plength+2] = calc_checksum(id, instruction, params, plength);
-  __obuffer_length = plength+2 + 4 ; // 4 for 0xFF 0xFF ID LENGTH
+  obuffer_[3 + plength+2] = calc_checksum(id, instruction, params, plength);
+  obuffer_length_ = plength+2 + 4 ; // 4 for 0xFF 0xFF ID LENGTH
 
 #ifdef DEBUG_RX28_COMM
   printf("Sending: ");
-  for (int i = 0; i < __obuffer_length; ++i) {
-    printf("%X ", __obuffer[i]);
+  for (int i = 0; i < obuffer_length_; ++i) {
+    printf("%X ", obuffer_[i]);
   }
   printf("\n");
 #endif
 
-  int written = write(__fd, __obuffer, __obuffer_length);
+  int written = write(fd_, obuffer_, obuffer_length_);
   //printf("Wrote %d bytes\n", written);
 
   // For some reason we have to read the shit immediately, although ECHO is off
   int readd = 0;
-  while (readd < __obuffer_length) {
-    readd += read(__fd, __ibuffer + readd, __obuffer_length - readd);
+  while (readd < obuffer_length_) {
+    readd += read(fd_, ibuffer_ + readd, obuffer_length_ - readd);
   }
 #ifdef DEBUG_RX28_COMM
   printf("Read %d junk bytes: ", readd);
   for (int i = 0; i < readd; ++i) {
-    printf("%X ", __ibuffer[i]);
+    printf("%X ", ibuffer_[i]);
   }
   printf("\n");
 #endif
 
   if ( written < 0 ) {
     throw Exception(errno, "Failed to write RX28 packet %x for %x", instruction, id);
-  } else if (written < __obuffer_length) {
+  } else if (written < obuffer_length_) {
     throw Exception("Failed to write RX28 packet %x for %x, only %d of %d bytes sent",
-		    instruction, id, written, __obuffer_length);
+		    instruction, id, written, obuffer_length_);
   }
 }
 
@@ -344,14 +344,14 @@ RobotisRX28::send(const unsigned char id, const unsigned char instruction,
 void
 RobotisRX28::recv(const unsigned char exp_length, unsigned int timeout_ms)
 {
-  timeval timeout = {0, (suseconds_t)(timeout_ms == 0xFFFFFFFF ? __default_timeout_ms : timeout_ms)  * 1000};
+  timeval timeout = {0, (suseconds_t)(timeout_ms == 0xFFFFFFFF ? default_timeout_ms_ : timeout_ms)  * 1000};
 
   fd_set read_fds;
   FD_ZERO(&read_fds);
-  FD_SET(__fd, &read_fds);
+  FD_SET(fd_, &read_fds);
 
   int rv = 0;
-  rv = select(__fd + 1, &read_fds, NULL, NULL, &timeout);
+  rv = select(fd_ + 1, &read_fds, NULL, NULL, &timeout);
 
   if ( rv == -1 ) {
    throw Exception(errno, "Select on FD failed");
@@ -360,7 +360,7 @@ RobotisRX28::recv(const unsigned char exp_length, unsigned int timeout_ms)
     throw TimeoutException("Timeout reached while waiting for incoming RX28 data");
   }
 
-  __ibuffer_length = 0;
+  ibuffer_length_ = 0;
 
   // get octets one by one
   int bytes_read = 0;
@@ -368,56 +368,56 @@ RobotisRX28::recv(const unsigned char exp_length, unsigned int timeout_ms)
 #ifdef DEBUG_RX28_COMM
     printf("Trying to read %d bytes\n", 6 - bytes_read);
 #endif
-    bytes_read += read(__fd, __ibuffer + bytes_read, 6 - bytes_read);
+    bytes_read += read(fd_, ibuffer_ + bytes_read, 6 - bytes_read);
 #ifdef DEBUG_RX28_COMM
     printf("%d bytes read  ", bytes_read);
     for (int i = 0; i < bytes_read; ++i) {
-      printf("%X ", __ibuffer[i]);
+      printf("%X ", ibuffer_[i]);
     }
     printf("\n");
 #endif
   }
-  if ( (__ibuffer[0] != 0xFF) || (__ibuffer[1] != 0xFF) ) {
+  if ( (ibuffer_[0] != 0xFF) || (ibuffer_[1] != 0xFF) ) {
     throw Exception("Packet does not start with 0xFFFF.");
   }
-  if (exp_length != __ibuffer[PACKET_OFFSET_LENGTH] - 2) {
-    tcflush(__fd, TCIFLUSH);
+  if (exp_length != ibuffer_[PACKET_OFFSET_LENGTH] - 2) {
+    tcflush(fd_, TCIFLUSH);
     throw Exception("Wrong packet length, expected %u, got %u",
-		    exp_length,  __ibuffer[PACKET_OFFSET_LENGTH] - 2);
+		    exp_length,  ibuffer_[PACKET_OFFSET_LENGTH] - 2);
   }
-  const unsigned char plength = __ibuffer[PACKET_OFFSET_LENGTH] - 2;
+  const unsigned char plength = ibuffer_[PACKET_OFFSET_LENGTH] - 2;
 #ifdef DEBUG_RX28_COMM
   printf("header read, params have length %d\n", plength);
 #endif
   if (plength > 0) {
     bytes_read = 0;
     while (bytes_read < plength) {
-      bytes_read += read(__fd, &__ibuffer[6] + bytes_read, plength - bytes_read);
+      bytes_read += read(fd_, &ibuffer_[6] + bytes_read, plength - bytes_read);
     }
     if (bytes_read < plength) {
       throw Exception("Failed to read packet data");
     }
   }
 
-  __ibuffer_length = plength+2 + 4;
+  ibuffer_length_ = plength+2 + 4;
 #ifdef DEBUG_RX28_COMM
   printf("Read: ");
-  for (int i = 0; i < __ibuffer_length; ++i) {
-    printf("%X ", __ibuffer[i]);
+  for (int i = 0; i < ibuffer_length_; ++i) {
+    printf("%X ", ibuffer_[i]);
   }
   printf("\n");
 #endif
 
   // verify checksum
-  unsigned char checksum = calc_checksum(__ibuffer[PACKET_OFFSET_ID],
-					 __ibuffer[PACKET_OFFSET_INST],
-					 &__ibuffer[PACKET_OFFSET_PARAM], plength);
-  if (checksum != __ibuffer[plength + 5]) {
+  unsigned char checksum = calc_checksum(ibuffer_[PACKET_OFFSET_ID],
+					 ibuffer_[PACKET_OFFSET_INST],
+					 &ibuffer_[PACKET_OFFSET_PARAM], plength);
+  if (checksum != ibuffer_[plength + 5]) {
     throw Exception("Checksum error while receiving packet, expected %d, got %d",
-		    checksum, __ibuffer[plength + 5]);
+		    checksum, ibuffer_[plength + 5]);
   }
 
-  __ibuffer_length = plength+2 + 4;
+  ibuffer_length_ = plength+2 + 4;
 }
 
 
@@ -428,7 +428,7 @@ bool
 RobotisRX28::data_available()
 {
   int num_bytes = 0;
-  ioctl(__fd, FIONREAD, &num_bytes);
+  ioctl(fd_, FIONREAD, &num_bytes);
   return (num_bytes > 0);
 }
 
@@ -462,7 +462,7 @@ RobotisRX28::discover(unsigned int timeout_ms)
   for (unsigned int i = 0; i < RX28_MAX_NUM_SERVOS; ++i) {
     try {
       recv(0, timeout_ms);
-      rv.push_back(__ibuffer[PACKET_OFFSET_ID]);
+      rv.push_back(ibuffer_[PACKET_OFFSET_ID]);
     } catch (TimeoutException &e) {
       // the first timeout, no more devices can be expected to respond
       break;
@@ -547,11 +547,11 @@ RobotisRX28::finish_read_table_values()
 {
   recv(RX28_CONTROL_TABLE_LENGTH);
 
-  if (__ibuffer_length != 5 + RX28_CONTROL_TABLE_LENGTH + 1) {
-    throw Exception("Input buffer of invalid size: %u vs. %u", __ibuffer_length, 5 + RX28_CONTROL_TABLE_LENGTH + 1);
+  if (ibuffer_length_ != 5 + RX28_CONTROL_TABLE_LENGTH + 1) {
+    throw Exception("Input buffer of invalid size: %u vs. %u", ibuffer_length_, 5 + RX28_CONTROL_TABLE_LENGTH + 1);
   }
-  memcpy(__control_table[__ibuffer[PACKET_OFFSET_ID]],
-	 &__ibuffer[PACKET_OFFSET_PARAM], RX28_CONTROL_TABLE_LENGTH);
+  memcpy(control_table_[ibuffer_[PACKET_OFFSET_ID]],
+	 &ibuffer_[PACKET_OFFSET_PARAM], RX28_CONTROL_TABLE_LENGTH);
 }
 
 
@@ -576,13 +576,13 @@ RobotisRX28::read_table_value(unsigned char id,
   send(id, INST_READ, param, 2);
   recv(read_length);
 
-  if (__ibuffer_length != (5 + read_length + 1)) {
+  if (ibuffer_length_ != (5 + read_length + 1)) {
     throw Exception("Input buffer not of expected size, expected %u, got %u",
-		    (5 + read_length + 1), __ibuffer_length);
+		    (5 + read_length + 1), ibuffer_length_);
   }
 
   for (unsigned int i = 0; i < read_length; ++i) {
-    __control_table[id][addr + i] = __ibuffer[PACKET_OFFSET_PARAM + i];
+    control_table_[id][addr + i] = ibuffer_[PACKET_OFFSET_PARAM + i];
   }
 }
 
@@ -608,12 +608,12 @@ RobotisRX28::write_table_value(unsigned char id, unsigned char addr,
 
     if (id == BROADCAST_ID) {
       for (unsigned int i = 0; i < RX28_MAX_NUM_SERVOS; ++i) {
-	__control_table[i][addr] = param[1];
-	if (double_byte) __control_table[i][addr + 1] = param[2];
+	control_table_[i][addr] = param[1];
+	if (double_byte) control_table_[i][addr + 1] = param[2];
       }
     } else {
-      __control_table[id][addr] = param[1];
-      if (double_byte) __control_table[id][addr + 1] = param[2];
+      control_table_[id][addr] = param[1];
+      if (double_byte) control_table_[id][addr + 1] = param[2];
     }
 
     if ((id != BROADCAST_ID) && responds_all(id))  recv(0);
@@ -646,12 +646,12 @@ RobotisRX28::write_table_values(unsigned char id, unsigned char start_addr,
     if (id == BROADCAST_ID) {
       for (unsigned int i = 0; i < RX28_MAX_NUM_SERVOS; ++i) {
 	for (unsigned int j = 0; j < num_values; ++j) {
-	  __control_table[i][start_addr + j] = values[j];
+	  control_table_[i][start_addr + j] = values[j];
 	}
       }
     } else {
       for (unsigned int j = 0; j < num_values; ++j) {
-	__control_table[id][start_addr + j] = values[j];
+	control_table_[id][start_addr + j] = values[j];
       }
     }
 
@@ -688,8 +688,8 @@ unsigned int
 RobotisRX28::merge_twobyte_value(unsigned int id,
 				 unsigned char ind_l, unsigned char ind_h)
 {
-  unsigned int rv = (__control_table[id][ind_h] & 0xFF) << 8;
-  rv |= __control_table[id][ind_l] & 0xFF;
+  unsigned int rv = (control_table_[id][ind_h] & 0xFF) << 8;
+  rv |= control_table_[id][ind_l] & 0xFF;
   return rv;
 }
 
@@ -711,7 +711,7 @@ RobotisRX28::get_value(unsigned int id, bool refresh,
   if (refresh)  read_table_value(id, ind_l, (ind_h == 0xFFFFFFFF ? 1 : 2));
 
   if (ind_h == 0xFFFFFFFF) {
-    return __control_table[id][ind_l];
+    return control_table_[id][ind_l];
   } else {
     return merge_twobyte_value(id, ind_l, ind_h);
   }

@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_H_
-#define __ASPECT_H_
+#ifndef _ASPECT_H_
+#define _ASPECT_H_
 
 #include <list>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Aspect
 {
@@ -38,7 +35,7 @@ class Aspect
  protected:
   void add_aspect(const char *name);
  private:
-  std::list<const char *> __aspects;
+  std::list<const char *> aspects_;
 };
 
 } // end namespace fawkes

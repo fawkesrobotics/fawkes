@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_NAO_MOTION_STANDUP_TASK_H_
-#define __PLUGINS_NAO_MOTION_STANDUP_TASK_H_
+#ifndef _PLUGINS_NAO_MOTION_STANDUP_TASK_H_
+#define _PLUGINS_NAO_MOTION_STANDUP_TASK_H_
 
 #include <interfaces/HumanoidMotionInterface.h>
 
@@ -45,12 +45,12 @@ class NaoQiMotionStandupTask : public AL::ALTask
   void standup_from_front();
 
  private:
-  AL::ALPtr<AL::ALMotionProxy>  __almotion;
-  fawkes::HumanoidMotionInterface::StandupEnum __from_pos;
+  AL::ALPtr<AL::ALMotionProxy>  almotion_;
+  fawkes::HumanoidMotionInterface::StandupEnum from_pos_;
 
-  float __accel_x;
-  float __accel_y;
-  float __accel_z;
+  float accel_x_;
+  float accel_y_;
+  float accel_z_;
 };
 
 #endif

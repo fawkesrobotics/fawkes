@@ -27,9 +27,6 @@
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class VisionMasterAspectIniFin <aspect/inifins/vision_master.h>
  * Initializer/finalizer for the VisionMasterAspect.
@@ -55,7 +52,7 @@ VisionMasterAspectIniFin::init(Thread *thread)
   }
 
   try {
-    __vision_dependency.add(vision_master_thread);
+    vision_dependency_.add(vision_master_thread);
   } catch (DependencyViolationException &e) {
     CannotInitializeThreadException ce("Dependency violation for "
 				       "VisionMasterAspect detected");
@@ -74,8 +71,8 @@ VisionMasterAspectIniFin::prepare_finalize(Thread *thread)
     return true;
   }
 
-  if ( ! __vision_dependency.can_remove(vision_master_thread) ) {
-    //__logger->log_warn("AspectIniFin", "Cannot remove vision master, there are "
+  if ( ! vision_dependency_.can_remove(vision_master_thread) ) {
+    //logger_->log_warn("AspectIniFin", "Cannot remove vision master, there are "
     //		"still vision threads that depend on it");
     return false;
   }
@@ -95,7 +92,7 @@ VisionMasterAspectIniFin::finalize(Thread *thread)
   }
 
   try {
-    __vision_dependency.remove(vision_master_thread);
+    vision_dependency_.remove(vision_master_thread);
   } catch (DependencyViolationException &e) {
     CannotFinalizeThreadException ce("Dependency violation for "
 				     "VisionMasterAspect detected");
@@ -111,7 +108,7 @@ VisionMasterAspectIniFin::finalize(Thread *thread)
 firevision::VisionMaster *
 VisionMasterAspectIniFin::vision_master()
 {
-  return __vision_dependency.provider()->vision_master();
+  return vision_dependency_.provider()->vision_master();
 }
 
 
@@ -121,7 +118,7 @@ VisionMasterAspectIniFin::vision_master()
 void
 VisionMasterAspectIniFin::add_vision_thread(VisionAspect *thread)
 {
-  __vision_dependency.add(thread);
+  vision_dependency_.add(thread);
 }
 
 /** Remove a vision thread.
@@ -130,7 +127,7 @@ VisionMasterAspectIniFin::add_vision_thread(VisionAspect *thread)
 void
 VisionMasterAspectIniFin::remove_vision_thread(VisionAspect *thread)
 {
-  __vision_dependency.remove(thread);
+  vision_dependency_.remove(thread);
 }
 
 /** Query if vision thread can be removed.
@@ -140,7 +137,7 @@ VisionMasterAspectIniFin::remove_vision_thread(VisionAspect *thread)
 bool
 VisionMasterAspectIniFin::can_remove_vision_thread(VisionAspect *thread)
 {
-  return __vision_dependency.can_remove(thread);
+  return vision_dependency_.can_remove(thread);
 }
 
 

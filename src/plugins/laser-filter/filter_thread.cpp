@@ -71,9 +71,9 @@ LaserFilterThread::LaserFilterThread(std::string &cfg_name,
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
 {
   set_name("LaserFilterThread(%s)", cfg_name.c_str());
-  __cfg_name   = cfg_name;
-  __cfg_prefix = cfg_prefix;
-  __wait_barrier = NULL;
+  cfg_name_   = cfg_name;
+  cfg_prefix_ = cfg_prefix;
+  wait_barrier_ = NULL;
 }
 
 
@@ -81,20 +81,20 @@ void
 LaserFilterThread::init()
 {
   try {
-    open_interfaces(__cfg_prefix + "in/", __in, __in_bufs, false);
-    open_interfaces(__cfg_prefix + "out/", __out, __out_bufs, true);
+    open_interfaces(cfg_prefix_ + "in/", in_, in_bufs_, false);
+    open_interfaces(cfg_prefix_ + "out/", out_, out_bufs_, true);
 
-    if (__in.empty()) {
-      throw Exception("No input interfaces defined for %s", __cfg_name.c_str());
+    if (in_.empty()) {
+      throw Exception("No input interfaces defined for %s", cfg_name_.c_str());
     }
-    if (__out.empty()) {
-      throw Exception("No output interfaces defined for %s", __cfg_name.c_str());
+    if (out_.empty()) {
+      throw Exception("No output interfaces defined for %s", cfg_name_.c_str());
     }
 
 
     std::map<std::string, std::string> filters;
 
-    std::string fpfx = __cfg_prefix + "filters/";
+    std::string fpfx = cfg_prefix_ + "filters/";
 #if __cplusplus >= 201103L
     std::unique_ptr<Configuration::ValueIterator> i(config->search(fpfx.c_str()));
 #else
@@ -116,26 +116,26 @@ LaserFilterThread::init()
       filters[filter_name] = i->get_string();
     }
     if (filters.empty()) {
-      throw Exception("No filters defined for %s", __cfg_name.c_str());
+      throw Exception("No filters defined for %s", cfg_name_.c_str());
     }
 
     if (filters.size() == 1) {
       std::string filter_name = filters.begin()->first;
       logger->log_debug(name(), "Adding filter %s (%s)",
 			filter_name.c_str(), filters[filter_name].c_str());
-      __filter = create_filter(__cfg_name + "/" + filter_name, filters[filter_name], fpfx + filter_name + "/",
-                               __in[0].size, __in_bufs);
+      filter_ = create_filter(cfg_name_ + "/" + filter_name, filters[filter_name], fpfx + filter_name + "/",
+                               in_[0].size, in_bufs_);
     } else {
       LaserDataFilterCascade *cascade =
-	      new LaserDataFilterCascade(__cfg_name, __in[0].size, __in_bufs);
+	      new LaserDataFilterCascade(cfg_name_, in_[0].size, in_bufs_);
       
       try {
 	      std::map<std::string, std::string>::iterator f;
 	      for (f = filters.begin(); f != filters.end(); ++f) {
 		      logger->log_debug(name(), "Adding filter %s (%s) %zu %zu",
-		                        f->first.c_str(), f->second.c_str(), __in_bufs.size(),
+		                        f->first.c_str(), f->second.c_str(), in_bufs_.size(),
 		                        cascade->get_out_vector().size());
-		      cascade->add_filter(create_filter(__cfg_name + "/" + f->first, f->second, fpfx + f->first + "/",
+		      cascade->add_filter(create_filter(cfg_name_ + "/" + f->first, f->second, fpfx + f->first + "/",
 		                                        cascade->get_out_data_size(), cascade->get_out_vector()));
 	      }
       } catch (Exception &e) {
@@ -143,116 +143,116 @@ LaserFilterThread::init()
 	      throw;
       }
 
-      __filter = cascade;
+      filter_ = cascade;
     }
 
-    if (__out[0].size != __filter->get_out_data_size()) {
+    if (out_[0].size != filter_->get_out_data_size()) {
       Exception e("Output interface and filter data size for %s do not match (%u != %u)",
-		  __cfg_name.c_str(), __out[0].size, __filter->get_out_data_size());
-      delete __filter;
+		  cfg_name_.c_str(), out_[0].size, filter_->get_out_data_size());
+      delete filter_;
       throw e;
     }
 
-    __filter->set_out_vector(__out_bufs);
+    filter_->set_out_vector(out_bufs_);
 
   } catch (Exception &e) {
-    for (unsigned int i = 0; i < __in.size(); ++i) {
-      blackboard->close(__in[i].interface);
+    for (unsigned int i = 0; i < in_.size(); ++i) {
+      blackboard->close(in_[i].interface);
     }
-    for (unsigned int i = 0; i < __out.size(); ++i) {
-      blackboard->close(__out[i].interface);
+    for (unsigned int i = 0; i < out_.size(); ++i) {
+      blackboard->close(out_[i].interface);
     }
     throw;
   }
 
   std::list<LaserFilterThread *>::iterator wt;
-  for (wt = __wait_threads.begin(); wt != __wait_threads.end(); ++wt) {
+  for (wt = wait_threads_.begin(); wt != wait_threads_.end(); ++wt) {
     logger->log_debug(name(), "Depending on %s", (*wt)->name());
   }
 
-  __wait_done  = true;
-  __wait_mutex = new Mutex();
-  __wait_cond  = new WaitCondition(__wait_mutex);
+  wait_done_  = true;
+  wait_mutex_ = new Mutex();
+  wait_cond_  = new WaitCondition(wait_mutex_);
 }
 
 
 void
 LaserFilterThread::finalize()
 {
-  delete __filter;
-  delete __wait_cond;
-  delete __wait_mutex;
+  delete filter_;
+  delete wait_cond_;
+  delete wait_mutex_;
 
-  for (unsigned int i = 0; i < __in.size(); ++i) {
-    blackboard->close(__in[i].interface);
+  for (unsigned int i = 0; i < in_.size(); ++i) {
+    blackboard->close(in_[i].interface);
   }
-  __in.clear();
-  for (unsigned int i = 0; i < __out.size(); ++i) {
-    blackboard->close(__out[i].interface);
+  in_.clear();
+  for (unsigned int i = 0; i < out_.size(); ++i) {
+    blackboard->close(out_[i].interface);
   }
-  __out.clear();
+  out_.clear();
 }
 
 void
 LaserFilterThread::loop()
 {
   // Wait for dependencies
-  if (__wait_barrier) {
+  if (wait_barrier_) {
     std::list<LaserFilterThread *>::iterator wt;
-    for (wt = __wait_threads.begin(); wt != __wait_threads.end(); ++wt) {
+    for (wt = wait_threads_.begin(); wt != wait_threads_.end(); ++wt) {
       (*wt)->wait_done();
     }
   }
 
   // Read input interfaces
-  const size_t in_num = __in.size();
+  const size_t in_num = in_.size();
   for (size_t i = 0; i != in_num; ++i) {
-    __in[i].interface->read();
-    if (__in[i].size == 360) {
-      __in_bufs[i]->frame      = __in[i].interface_typed.as360->frame();
-      *__in_bufs[i]->timestamp = __in[i].interface_typed.as360->timestamp();
-    } else if (__in[i].size == 720) {
-      __in_bufs[i]->frame      = __in[i].interface_typed.as720->frame();
-      *__in_bufs[i]->timestamp = __in[i].interface_typed.as720->timestamp();
-    } else if (__in[i].size == 1080) {
-      __in_bufs[i]->frame      = __in[i].interface_typed.as1080->frame();
-      *__in_bufs[i]->timestamp = __in[i].interface_typed.as1080->timestamp();
+    in_[i].interface->read();
+    if (in_[i].size == 360) {
+      in_bufs_[i]->frame      = in_[i].interface_typed.as360->frame();
+      *in_bufs_[i]->timestamp = in_[i].interface_typed.as360->timestamp();
+    } else if (in_[i].size == 720) {
+      in_bufs_[i]->frame      = in_[i].interface_typed.as720->frame();
+      *in_bufs_[i]->timestamp = in_[i].interface_typed.as720->timestamp();
+    } else if (in_[i].size == 1080) {
+      in_bufs_[i]->frame      = in_[i].interface_typed.as1080->frame();
+      *in_bufs_[i]->timestamp = in_[i].interface_typed.as1080->timestamp();
     }
   }
 
   // Filter!
   try {
-    __filter->filter();
+    filter_->filter();
   } catch (Exception &e) {
     logger->log_warn(name(), "Filtering failed, exception follows");
     logger->log_warn(name(), e);
   }
 
   // Write output interfaces
-  const size_t num = __out.size();
+  const size_t num = out_.size();
   for (size_t i = 0; i < num; ++i) {
-    if (__out[i].size == 360) {
-      __out[i].interface_typed.as360->set_timestamp(__out_bufs[i]->timestamp);
-      __out[i].interface_typed.as360->set_frame(__out_bufs[i]->frame.c_str());
-    } else if (__out[i].size == 720) {
-      __out[i].interface_typed.as720->set_timestamp(__out_bufs[i]->timestamp);
-      __out[i].interface_typed.as720->set_frame(__out_bufs[i]->frame.c_str());
-    } else if (__out[i].size == 1080) {
-      __out[i].interface_typed.as1080->set_timestamp(__out_bufs[i]->timestamp);
-      __out[i].interface_typed.as1080->set_frame(__out_bufs[i]->frame.c_str());
+    if (out_[i].size == 360) {
+      out_[i].interface_typed.as360->set_timestamp(out_bufs_[i]->timestamp);
+      out_[i].interface_typed.as360->set_frame(out_bufs_[i]->frame.c_str());
+    } else if (out_[i].size == 720) {
+      out_[i].interface_typed.as720->set_timestamp(out_bufs_[i]->timestamp);
+      out_[i].interface_typed.as720->set_frame(out_bufs_[i]->frame.c_str());
+    } else if (out_[i].size == 1080) {
+      out_[i].interface_typed.as1080->set_timestamp(out_bufs_[i]->timestamp);
+      out_[i].interface_typed.as1080->set_frame(out_bufs_[i]->frame.c_str());
     }
-    __out[i].interface->write();
+    out_[i].interface->write();
   }
 
-  if (__wait_barrier) {
-    __wait_mutex->lock();
-    __wait_done = false;
-    __wait_cond->wake_all();
-    __wait_mutex->unlock();
-    __wait_barrier->wait();
-    __wait_mutex->lock();
-    __wait_done = true;
-    __wait_mutex->unlock();
+  if (wait_barrier_) {
+    wait_mutex_->lock();
+    wait_done_ = false;
+    wait_cond_->wake_all();
+    wait_mutex_->unlock();
+    wait_barrier_->wait();
+    wait_mutex_->lock();
+    wait_done_ = true;
+    wait_mutex_->unlock();
   }
 }
 
@@ -264,12 +264,12 @@ LaserFilterThread::loop()
 void
 LaserFilterThread::wait_done()
 {
-  __wait_mutex->lock();
-  while (__wait_done) {
+  wait_mutex_->lock();
+  while (wait_done_) {
     //logger->log_debug(name(), "%s is waiting", Thread::current_thread()->name());
-    __wait_cond->wait();
+    wait_cond_->wait();
   }
-  __wait_mutex->unlock();
+  wait_mutex_->unlock();
 }
 
 
@@ -329,7 +329,7 @@ LaserFilterThread::open_interfaces(std::string prefix,
       for (unsigned int i = 0; i < ifs.size(); ++i) {
 	if (req_size != ifs[i].size) {
 	  throw Exception("Interfaces of mixed sizes for %s",
-			  __cfg_name.c_str());
+			  cfg_name_.c_str());
 	}
 
 	if (ifs[i].size == 360) {
@@ -529,7 +529,7 @@ LaserFilterThread::create_filter(std::string filter_name,
 void
 LaserFilterThread::set_wait_threads(std::list<LaserFilterThread *> &threads)
 {
-  __wait_threads = threads;
+  wait_threads_ = threads;
 }
 
 
@@ -542,5 +542,5 @@ LaserFilterThread::set_wait_threads(std::list<LaserFilterThread *> &threads)
 void
 LaserFilterThread::set_wait_barrier(fawkes::Barrier *barrier)
 {
-  __wait_barrier = barrier;
+  wait_barrier_ = barrier;
 }

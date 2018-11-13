@@ -20,15 +20,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_UTILS_COLORS_H_
-#define __PLUGINS_OPENNI_UTILS_COLORS_H_
+#ifndef _PLUGINS_OPENNI_UTILS_COLORS_H_
+#define _PLUGINS_OPENNI_UTILS_COLORS_H_
 
 namespace fawkes {
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 extern float USER_COLORS[][3];
 extern unsigned int NUM_USER_COLORS;
 

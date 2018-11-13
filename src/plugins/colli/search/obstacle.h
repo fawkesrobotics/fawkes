@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_SEARCH_OBSTACLE_H_
-#define __PLUGINS_COLLI_SEARCH_OBSTACLE_H_
+#ifndef _PLUGINS_COLLI_SEARCH_OBSTACLE_H_
+#define _PLUGINS_COLLI_SEARCH_OBSTACLE_H_
 
 #include "../common/types.h"
 #include <utils/math/common.h>
@@ -31,9 +31,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ColliFastObstacle <plugins/colli/search/obstacle.h>
  * This is an implementation of a a fast obstacle.

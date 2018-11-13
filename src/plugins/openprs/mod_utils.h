@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENPRS_AGENT_MOD_UTILS_H_
-#define __PLUGINS_OPENPRS_AGENT_MOD_UTILS_H_
+#ifndef _PLUGINS_OPENPRS_AGENT_MOD_UTILS_H_
+#define _PLUGINS_OPENPRS_AGENT_MOD_UTILS_H_
 
 #include <cstdio>
 

@@ -50,17 +50,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBS_TF_UTILS_H_
-#define __LIBS_TF_UTILS_H_
+#ifndef _LIBS_TF_UTILS_H_
+#define _LIBS_TF_UTILS_H_
 
 #include <tf/types.h>
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** Resolve transform name.
  * @param prefix prefix to prepend to frame name

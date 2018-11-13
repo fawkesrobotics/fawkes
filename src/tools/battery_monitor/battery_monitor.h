@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_H_
-#define __TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_H_
+#ifndef _TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_H_
+#define _TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_H_
 
 #include <netcomm/service_discovery/browse_handler.h>
 
@@ -78,4 +78,4 @@ class BatteryMonitor
   fawkes::AvahiThread* m_avahi;
 };
 
-#endif /*  __TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_H_ */
+#endif /*  TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_H__ */

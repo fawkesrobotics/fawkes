@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PANTILT_SONY_EVID100P_THREAD_H_
-#define __PLUGINS_PANTILT_SONY_EVID100P_THREAD_H_
+#ifndef _PLUGINS_PANTILT_SONY_EVID100P_THREAD_H_
+#define _PLUGINS_PANTILT_SONY_EVID100P_THREAD_H_
 
 #include "../act_thread.h"
 
@@ -64,19 +64,19 @@ class PanTiltSonyEviD100PThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::PanTiltInterface *__pantilt_if;
-  fawkes::JointInterface *__panjoint_if;
-  fawkes::JointInterface *__tiltjoint_if;
-  fawkes::CameraControlInterface *__camctrl_if;
-  fawkes::SwitchInterface *__power_if;
+  fawkes::PanTiltInterface *pantilt_if_;
+  fawkes::JointInterface *panjoint_if_;
+  fawkes::JointInterface *tiltjoint_if_;
+  fawkes::CameraControlInterface *camctrl_if_;
+  fawkes::SwitchInterface *power_if_;
 
-  fawkes::RefPtr<SonyEviD100PVisca> __cam;
+  fawkes::RefPtr<SonyEviD100PVisca> cam_;
 
-  std::string  __pantilt_cfg_prefix;
-  std::string  __ptu_cfg_prefix;
-  std::string  __ptu_name;
-  std::string  __cfg_device;
-  unsigned int __cfg_read_timeout_ms;
+  std::string  pantilt_cfg_prefix_;
+  std::string  ptu_cfg_prefix_;
+  std::string  ptu_name_;
+  std::string  cfg_device_;
+  unsigned int cfg_read_timeout_ms_;
 
   class WorkerThread : public fawkes::Thread
   {
@@ -109,48 +109,48 @@ class PanTiltSonyEviD100PThread
     void exec_set_mirror(bool mirror);
 
   private:
-    fawkes::RefPtr<SonyEviD100PVisca>  __cam;
-    fawkes::Logger        *__logger;
+    fawkes::RefPtr<SonyEviD100PVisca>  cam_;
+    fawkes::Logger        *logger_;
 
-    fawkes::Mutex *__power_mutex;
-    bool           __powered;
-    bool           __power_pending;
-    bool           __power_desired;
+    fawkes::Mutex *power_mutex_;
+    bool           powered_;
+    bool           power_pending_;
+    bool           power_desired_;
 
-    float         __pan_min;
-    float         __pan_max;
-    float         __tilt_min;
-    float         __tilt_max;
+    float         pan_min_;
+    float         pan_max_;
+    float         tilt_min_;
+    float         tilt_max_;
 
-    fawkes::Mutex *__move_mutex;
-    bool  __move_pending;
-    float __target_pan;
-    float __target_tilt;
-    bool  __velo_pending;
-    float __pan_vel;
-    float __tilt_vel;
+    fawkes::Mutex *move_mutex_;
+    bool  move_pending_;
+    float target_pan_;
+    float target_tilt_;
+    bool  velo_pending_;
+    float pan_vel_;
+    float tilt_vel_;
 
-    fawkes::Mutex *__zoom_mutex;
-    bool  __zoom_pending;
-    float __target_zoom;
+    fawkes::Mutex *zoom_mutex_;
+    bool  zoom_pending_;
+    float target_zoom_;
 
-    fawkes::Mutex *__effect_mutex;
-    bool  __effect_pending;
-    fawkes::CameraControlInterface::Effect __target_effect;
+    fawkes::Mutex *effect_mutex_;
+    bool  effect_pending_;
+    fawkes::CameraControlInterface::Effect target_effect_;
 
-    fawkes::Mutex *__mirror_mutex;
-    bool  __mirror_pending;
-    bool __target_mirror;
+    fawkes::Mutex *mirror_mutex_;
+    bool  mirror_pending_;
+    bool target_mirror_;
 
-    float __cur_pan;
-    float __cur_tilt;
+    float cur_pan_;
+    float cur_tilt_;
 
-    unsigned int __cur_zoom;
+    unsigned int cur_zoom_;
 
-    bool __fresh_data;
+    bool fresh_data_;
   };
 
-  WorkerThread *__wt;
+  WorkerThread *wt_;
 };
 
 #endif

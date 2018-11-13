@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_VISION_MASTER_H_
-#define __ASPECT_VISION_MASTER_H_
+#ifndef _ASPECT_VISION_MASTER_H_
+#define _ASPECT_VISION_MASTER_H_
 
 #include <aspect/aspect.h>
 
@@ -31,9 +31,6 @@ namespace firevision {
 }
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 class VisionMasterAspect : public virtual Aspect

@@ -40,9 +40,6 @@
 #endif
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FilterDilation <fvfilters/morphology/dilation.h>
  * Morphological dilation.

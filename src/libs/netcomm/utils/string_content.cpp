@@ -43,7 +43,7 @@ namespace fawkes {
  */
 StringContent::StringContent(const char *initial_string)
 {
-  __string_owner = true;
+  string_owner_ = true;
   set_string(initial_string);
 }
 
@@ -58,11 +58,11 @@ StringContent::StringContent(const char *initial_string)
 StringContent::StringContent(unsigned int cid, unsigned int msgid,
 			     void *payload, size_t payload_size)
 {
-  __string_owner = false;
+  string_owner_ = false;
   _payload = payload;
   _payload_size = payload_size;
-  __string = (char *)payload;
-  if ( __string[payload_size - 1] != 0 ) {
+  string_ = (char *)payload;
+  if ( string_[payload_size - 1] != 0 ) {
     // string is not null-terminated, it has not been created with this class, error!
     throw Exception("String content of network message is not null-terminated.");
   }
@@ -72,8 +72,8 @@ StringContent::StringContent(unsigned int cid, unsigned int msgid,
 /** Destructor. */
 StringContent::~StringContent()
 {
-  if ( __string_owner ) {
-    free(__string);
+  if ( string_owner_ ) {
+    free(string_);
   }
 }
 
@@ -85,11 +85,11 @@ StringContent::~StringContent()
 void
 StringContent::set_string(const char *s)
 {
-  if ( __string_owner ) {
-    free(__string);
-    __string = strdup(s);
-    _payload = __string;
-    _payload_size = strlen(__string) + 1;
+  if ( string_owner_ ) {
+    free(string_);
+    string_ = strdup(s);
+    _payload = string_;
+    _payload_size = strlen(string_) + 1;
   } else {
     throw Exception("Cannot set read-only string extracted from network message.");
   }
@@ -102,7 +102,7 @@ StringContent::set_string(const char *s)
 const char *
 StringContent::get_string() const
 {
-  return __string;
+  return string_;
 }
 
 

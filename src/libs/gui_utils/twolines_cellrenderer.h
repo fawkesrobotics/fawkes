@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_GUI_UTILS_TWOLINES_CELLRENDERER_H_
-#define __LIBS_GUI_UTILS_TWOLINES_CELLRENDERER_H_
+#ifndef _LIBS_GUI_UTILS_TWOLINES_CELLRENDERER_H_
+#define _LIBS_GUI_UTILS_TWOLINES_CELLRENDERER_H_
 
 #include <gtkmm.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class TwoLinesCellRenderer : public Gtk::CellRenderer
 {
@@ -73,9 +70,9 @@ class TwoLinesCellRenderer : public Gtk::CellRenderer
 
  private:
 #ifdef GLIBMM_PROPERTIES_ENABLED
-  Glib::Property<Glib::ustring> __property_line1;
-  Glib::Property<Glib::ustring> __property_line2;
-  Glib::Property<bool>          __property_line2_enabled;
+  Glib::Property<Glib::ustring> property_line1_;
+  Glib::Property<Glib::ustring> property_line2_;
+  Glib::Property<bool>          property_line2_enabled_;
 #endif
 };
 

@@ -42,9 +42,6 @@ using namespace boost::asio;
 using namespace boost::system;
 
 namespace protobuf_comm {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ProtobufStreamClient <protobuf_comm/client.h>
  * Stream client for protobuf message transmission.

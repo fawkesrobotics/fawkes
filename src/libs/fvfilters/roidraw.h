@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FILTER_ROIDRAW_H_
-#define __FIREVISION_FILTER_ROIDRAW_H_
+#ifndef _FIREVISION_FILTER_ROIDRAW_H_
+#define _FIREVISION_FILTER_ROIDRAW_H_
 
 #include <fvfilters/filter.h>
 #include <list>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ROI;
 class Drawer;
@@ -56,9 +53,9 @@ class FilterROIDraw : public Filter
  private:
   void draw_roi(const ROI *roi);
 
-  const std::list<ROI> *__rois;
-  Drawer *__drawer;
-  border_style_t __border_style;
+  const std::list<ROI> *rois_;
+  Drawer *drawer_;
+  border_style_t border_style_;
 };
 
 } // end namespace firevision

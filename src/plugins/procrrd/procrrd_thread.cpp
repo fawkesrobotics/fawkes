@@ -57,22 +57,22 @@ ProcRRDThread::~ProcRRDThread()
 void
 ProcRRDThread::init()
 {
-  __samplerate = 10;
+  samplerate_ = 10;
   try {
-    __samplerate = config->get_uint("/plugins/procrrd/samplerate");
+    samplerate_ = config->get_uint("/plugins/procrrd/samplerate");
   } catch (Exception &e) {}
 
-  __timewait = new TimeWait(clock, __samplerate * 1000000);
-  __netinterface = "wlan0";
+  timewait_ = new TimeWait(clock, samplerate_ * 1000000);
+  netinterface_ = "wlan0";
   try {
-    __netinterface = config->get_string("/plugins/procrrd/netinterface");
+    netinterface_ = config->get_string("/plugins/procrrd/netinterface");
   } catch (Exception &e) {}
 
-  __lastcpu = new unsigned long int[11];
-  get_cpu(__lastcpu);
+  lastcpu_ = new unsigned long int[11];
+  get_cpu(lastcpu_);
 
-  __net_recv_graph = NULL;
-  __net_trans_graph = NULL;
+  net_recv_graph_ = NULL;
+  net_trans_graph_ = NULL;
   std::vector<RRDDataSource> rrds;
   // /proc/net/dev
   // use data for net_interface
@@ -88,10 +88,10 @@ ProcRRDThread::init()
   rrds.push_back(RRDDataSource("net_trans_packets", RRDDataSource::COUNTER));
   // Transmit errs
   rrds.push_back(RRDDataSource("net_trans_errors", RRDDataSource::COUNTER));
-  __net_rrd = new RRDDefinition("network", rrds);
+  net_rrd_ = new RRDDefinition("network", rrds);
 
   try {
-    rrd_manager->add_rrd(__net_rrd);
+    rrd_manager->add_rrd(net_rrd_);
   } catch (Exception &e) {
     finalize();
     throw;
@@ -101,11 +101,11 @@ ProcRRDThread::init()
   std::vector<RRDGraphElement *> els;
 
   defs.push_back(RRDGraphDataDefinition("net_recv_bytes", RRDArchive::AVERAGE,
-					__net_rrd));
+					net_rrd_));
   defs.push_back(RRDGraphDataDefinition("net_recv_packets", RRDArchive::AVERAGE,
-					__net_rrd));
+					net_rrd_));
   defs.push_back(RRDGraphDataDefinition("net_recv_errors", RRDArchive::AVERAGE,
-					__net_rrd));
+					net_rrd_));
 
   els.push_back(new RRDGraphLine("net_recv_bytes", 1, "006400", "Bytes"));
   els.push_back(new RRDGraphGPrint("net_recv_bytes", RRDArchive::LAST,
@@ -131,7 +131,7 @@ ProcRRDThread::init()
   els.push_back(new RRDGraphGPrint("net_recv_errors", RRDArchive::MAX,
 				   "Maximum\\:%8.2lf %s\\n"));
 
-  __net_recv_graph = new RRDGraphDefinition("network_recv", __net_rrd,
+  net_recv_graph_ = new RRDGraphDefinition("network_recv", net_rrd_,
 					      "Network Receive", "",
 					      defs, els);
 
@@ -139,11 +139,11 @@ ProcRRDThread::init()
   els.clear();
 
   defs.push_back(RRDGraphDataDefinition("net_trans_bytes", RRDArchive::AVERAGE,
-					__net_rrd));
+					net_rrd_));
   defs.push_back(RRDGraphDataDefinition("net_trans_packets", RRDArchive::AVERAGE,
-					__net_rrd));
+					net_rrd_));
   defs.push_back(RRDGraphDataDefinition("net_trans_errors", RRDArchive::AVERAGE,
-					__net_rrd));
+					net_rrd_));
 
   els.push_back(new RRDGraphLine("net_trans_bytes", 1, "006400", "Bytes"));
   els.push_back(new RRDGraphGPrint("net_trans_bytes", RRDArchive::LAST,
@@ -169,13 +169,13 @@ ProcRRDThread::init()
   els.push_back(new RRDGraphGPrint("net_trans_errors", RRDArchive::MAX,
 				   "Maximum\\:%8.2lf %s\\n"));
 
-  __net_trans_graph = new RRDGraphDefinition("network_trans", __net_rrd,
+  net_trans_graph_ = new RRDGraphDefinition("network_trans", net_rrd_,
 					      "Network Transmit", "",
 					      defs, els);
 
   try {
-    rrd_manager->add_graph(__net_recv_graph);
-    rrd_manager->add_graph(__net_trans_graph);
+    rrd_manager->add_graph(net_recv_graph_);
+    rrd_manager->add_graph(net_trans_graph_);
   } catch (Exception &e) {
     finalize();
     throw;
@@ -216,17 +216,17 @@ ProcRRDThread::init()
   }
 
   std::string p;
-  ProcessMap::iterator pi = __processes.begin();
+  ProcessMap::iterator pi = processes_.begin();
   p = pi->second.name;
   ++pi;
-  for (; pi != __processes.end(); ++pi) {
+  for (; pi != processes_.end(); ++pi) {
     p += ", "+pi->second.name;
   }
 
   
 
   logger->log_info(name(), "ProcRRD logging network interface %s and processes %s with a samplerate of %lu second(s)",
-       __netinterface.c_str(), p.c_str(), __samplerate);
+       netinterface_.c_str(), p.c_str(), samplerate_);
 
   config->add_change_handler(this);
 }
@@ -236,11 +236,11 @@ void
 ProcRRDThread::finalize()
 {
   config->rem_change_handler(this);
-  delete __timewait;
+  delete timewait_;
 
-  rrd_manager->remove_rrd(__net_rrd);
+  rrd_manager->remove_rrd(net_rrd_);
 
-  for (ProcessMap::iterator i = __processes.begin(); i != __processes.end(); ++i) {
+  for (ProcessMap::iterator i = processes_.begin(); i != processes_.end(); ++i) {
     ProcessInfo &info = i->second;
     rrd_manager->remove_rrd(info.rrd);
     delete info.cpu_graph;
@@ -249,17 +249,17 @@ ProcRRDThread::finalize()
     delete info.io_write_graph;
     delete info.rrd;
   }
-  __processes.clear();
+  processes_.clear();
 
-  delete __net_recv_graph;
-  delete __net_trans_graph;
-  delete __net_rrd;
+  delete net_recv_graph_;
+  delete net_trans_graph_;
+  delete net_rrd_;
 }
 
 void
 ProcRRDThread::add_process(const char *path, std::string pid, std::string name)
 {
-  if (__processes.find(path) != __processes.end()) {
+  if (processes_.find(path) != processes_.end()) {
     throw Exception("Process stats for config %s already monitored", path);
   }
   if (pid == "") {
@@ -486,7 +486,7 @@ ProcRRDThread::add_process(const char *path, std::string pid, std::string name)
     rrd_manager->add_graph(info.io_read_graph);
     rrd_manager->add_graph(info.io_write_graph);
 
-    __processes[path] = info;
+    processes_[path] = info;
     logger->log_info(this->name(), "Started monitoring process: %s (PID: %s)",
 		     info.name.c_str(), info.pid.c_str());
   } catch (Exception &e) {
@@ -504,8 +504,8 @@ ProcRRDThread::add_process(const char *path, std::string pid, std::string name)
 void
 ProcRRDThread::remove_process(const char *path)
 {
-  if (__processes.find(path) != __processes.end()) {
-    ProcessInfo &info = __processes[path];
+  if (processes_.find(path) != processes_.end()) {
+    ProcessInfo &info = processes_[path];
     rrd_manager->remove_rrd(info.rrd);
     delete info.cpu_graph;
     delete info.mem_graph;
@@ -515,7 +515,7 @@ ProcRRDThread::remove_process(const char *path)
 
     logger->log_info(name(), "Stopped monitoring process: %s (PID: %s)",
 		     info.name.c_str(), info.pid.c_str());
-    __processes.erase(path);
+    processes_.erase(path);
   }
 }
 
@@ -571,7 +571,7 @@ ProcRRDThread::get_cpu(unsigned long int* cpus)
 void
 ProcRRDThread::loop()
 {
-  __timewait->mark_start();
+  timewait_->mark_start();
   FILE *file;
   file = fopen("/proc/net/dev", "r");
   unsigned long long int recv_bytes, recv_packets, recv_errors, trans_bytes, trans_packets, trans_errors;
@@ -582,7 +582,7 @@ ProcRRDThread::loop()
     char dev[100];
     sscanf(line, "%s", dev);
 
-    if (strncmp(dev, (__netinterface+":").c_str(), __netinterface.length()+1) == 0){
+    if (strncmp(dev, (netinterface_+":").c_str(), netinterface_.length()+1) == 0){
       sscanf(line, "%*s %llu %llu %llu %*u %*u %*u %*u %*u %llu %llu %llu %*u %*u %*u %*u %*u", &recv_bytes, &recv_packets, &recv_errors, &trans_bytes, &trans_packets, &trans_errors);
       break;
     }
@@ -598,7 +598,7 @@ ProcRRDThread::loop()
   unsigned long int *curcpu = new unsigned long int[11];
   get_cpu(curcpu);
 
-  for (ProcessMap::iterator i = __processes.begin(); i != __processes.end(); ++i) {
+  for (ProcessMap::iterator i = processes_.begin(); i != processes_.end(); ++i) {
     file = fopen(("/proc/"+i->second.pid+"/stat").c_str(), "r");
     unsigned long int cpu[3];
     if(file) {
@@ -658,7 +658,7 @@ ProcRRDThread::loop()
     if(file)
       fclose(file);
 
-    if(curcpu[0] < __lastcpu[0] || curcpu[1] < __lastcpu[1] || curcpu[2] < __lastcpu[2] || curcpu[3] < __lastcpu[3] || curcpu[4] < __lastcpu[4] || curcpu[5] < __lastcpu[5] || curcpu[6] < __lastcpu[6] || curcpu[7] < __lastcpu[7] || curcpu[8] < __lastcpu[8] || curcpu[9] < __lastcpu[9] || curcpu[10] < __lastcpu[10] || cpu[0] < i->second.last_cpu[0] || cpu[1] < i->second.last_cpu[1] || cpu[2] < i->second.last_cpu[2]) {
+    if(curcpu[0] < lastcpu_[0] || curcpu[1] < lastcpu_[1] || curcpu[2] < lastcpu_[2] || curcpu[3] < lastcpu_[3] || curcpu[4] < lastcpu_[4] || curcpu[5] < lastcpu_[5] || curcpu[6] < lastcpu_[6] || curcpu[7] < lastcpu_[7] || curcpu[8] < lastcpu_[8] || curcpu[9] < lastcpu_[9] || curcpu[10] < lastcpu_[10] || cpu[0] < i->second.last_cpu[0] || cpu[1] < i->second.last_cpu[1] || cpu[2] < i->second.last_cpu[2]) {
       // value rollover for atleast one value, ignore cpu data
       try {
       	rrd_manager->add_data(i->second.rrd_name.c_str(), "N:U:%ld:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu", threads, vmpeak, vmsize, vmrss, rchar, wchar, syscr, syscw, read_bytes, write_bytes, cancelled_write_bytes);
@@ -668,7 +668,7 @@ ProcRRDThread::loop()
       }
     }
     else {
-      double cpuuse = 100.0 * (double)(cpu[0] - i->second.last_cpu[0]) / (double)(curcpu[0] - __lastcpu[0]);
+      double cpuuse = 100.0 * (double)(cpu[0] - i->second.last_cpu[0]) / (double)(curcpu[0] - lastcpu_[0]);
       try {
       	rrd_manager->add_data(i->second.rrd_name.c_str(), "N:%f:%ld:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu", cpuuse, threads, vmpeak, vmsize, vmrss, rchar, wchar, syscr, syscw, read_bytes, write_bytes, cancelled_write_bytes);
       } catch (Exception &e) {
@@ -680,9 +680,9 @@ ProcRRDThread::loop()
     i->second.last_cpu[0] = cpu[0];
   }
 
-  __lastcpu = curcpu;
+  lastcpu_ = curcpu;
 
-  __timewait->wait_systime();
+  timewait_->wait_systime();
 }
 
 void

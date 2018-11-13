@@ -35,9 +35,6 @@
 #include <cstdlib>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class MultiColorClassifier <fvclassifiers/multi_color.h>
  * Simple multi-color classifier.

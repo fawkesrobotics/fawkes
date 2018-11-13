@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __ROS_SKILLER_THREAD_H_
-#define __ROS_SKILLER_THREAD_H_
+#ifndef _ROS_SKILLER_THREAD_H_
+#define _ROS_SKILLER_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -99,4 +99,4 @@ class RosSkillerThread
   unsigned int loops_waited_;
 };
 
-#endif /* __ROS_SKILLER_THREAD_H_ */
+#endif /* ROS_SKILLER_THREAD_H__ */

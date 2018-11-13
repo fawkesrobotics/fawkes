@@ -26,9 +26,6 @@
 #include <cmath>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NullPointerException <core/exceptions/software.h>
  * A NULL pointer was supplied where not allowed.

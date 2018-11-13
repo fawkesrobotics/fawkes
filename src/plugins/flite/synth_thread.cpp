@@ -52,12 +52,12 @@ FliteSynthThread::FliteSynthThread()
 void
 FliteSynthThread::init()
 {
-  __speechsynth_if = blackboard->open_for_writing<SpeechSynthInterface>("Flite");
-  __voice = register_cmu_us_kal(NULL);
+  speechsynth_if_ = blackboard->open_for_writing<SpeechSynthInterface>("Flite");
+  voice_ = register_cmu_us_kal(NULL);
 
-  __cfg_soundcard = config->get_string("/flite/soundcard");
+  cfg_soundcard_ = config->get_string("/flite/soundcard");
 
-  bbil_add_message_interface(__speechsynth_if);
+  bbil_add_message_interface(speechsynth_if_);
   blackboard->register_listener(this);
 
   say("Speech synth loaded");
@@ -67,29 +67,29 @@ FliteSynthThread::init()
 void
 FliteSynthThread::finalize()
 {
-  unregister_cmu_us_kal(__voice);
+  unregister_cmu_us_kal(voice_);
   blackboard->unregister_listener(this);
-  blackboard->close(__speechsynth_if);
+  blackboard->close(speechsynth_if_);
 }
 
 void
 FliteSynthThread::loop()
 {
   // wait for message(s) to arrive, could take a (little) while after the wakeup
-  while ( __speechsynth_if->msgq_empty() ) {
+  while ( speechsynth_if_->msgq_empty() ) {
     usleep(100);
   }
 
   // process message, blocking
   // only one at a time, loop() will be run as many times as wakeup() was called
-  if ( ! __speechsynth_if->msgq_empty() ) {
-    if ( __speechsynth_if->msgq_first_is<SpeechSynthInterface::SayMessage>() ) {
-      SpeechSynthInterface::SayMessage *msg = __speechsynth_if->msgq_first<SpeechSynthInterface::SayMessage>();
-      __speechsynth_if->set_msgid(msg->id());
+  if ( ! speechsynth_if_->msgq_empty() ) {
+    if ( speechsynth_if_->msgq_first_is<SpeechSynthInterface::SayMessage>() ) {
+      SpeechSynthInterface::SayMessage *msg = speechsynth_if_->msgq_first<SpeechSynthInterface::SayMessage>();
+      speechsynth_if_->set_msgid(msg->id());
       say(msg->text());
     }
 
-    __speechsynth_if->msgq_pop();
+    speechsynth_if_->msgq_pop();
   }
 }
 
@@ -109,19 +109,19 @@ FliteSynthThread::bb_interface_message_received(Interface *interface,
 void
 FliteSynthThread::say(const char *text)
 {
-  cst_wave *wave = flite_text_to_wave(text, __voice);
+  cst_wave *wave = flite_text_to_wave(text, voice_);
   cst_wave_save_riff(wave, "/tmp/test.wav");
 
-  __speechsynth_if->set_text(text);
-  __speechsynth_if->set_final(false);
-  __speechsynth_if->set_duration(get_duration(wave));
-  __speechsynth_if->write();
+  speechsynth_if_->set_text(text);
+  speechsynth_if_->set_final(false);
+  speechsynth_if_->set_duration(get_duration(wave));
+  speechsynth_if_->write();
 
   play_wave(wave);
   delete_wave(wave);
 
-  __speechsynth_if->set_final(true);
-  __speechsynth_if->write();
+  speechsynth_if_->set_final(true);
+  speechsynth_if_->write();
 }
 
 
@@ -141,7 +141,7 @@ FliteSynthThread::play_wave(cst_wave *wave)
   snd_pcm_t *pcm;
   float duration = get_duration(wave);
   int err;
-  if ((err = snd_pcm_open(&pcm, __cfg_soundcard.c_str(), SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
+  if ((err = snd_pcm_open(&pcm, cfg_soundcard_.c_str(), SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
     throw Exception("Failed to open PCM: %s", snd_strerror(err));
   }
   snd_pcm_nonblock(pcm, 0);

@@ -29,9 +29,6 @@
 
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FilterUnwarp <fvfilters/unwarp.h>
  * Create unwarped image with given mirror model.

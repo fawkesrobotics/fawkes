@@ -28,9 +28,6 @@
 #include <cstdlib>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FuseMessageContent <fvutils/net/fuse_message_content.h>
  * FUSE message content.

@@ -34,9 +34,6 @@
 #include <cstdio>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ColormapFile::ColormapBlockVector <fvutils/colormap/cmfile.h>
  * Vector of colormap blocks.
@@ -71,10 +68,10 @@ ColormapFile::ColormapFile(uint16_t depth, uint16_t width, uint16_t height)
 {
   _spec_header      = calloc(1, sizeof(cmfile_header_t));
   _spec_header_size = sizeof(cmfile_header_t);
-  __header = (cmfile_header_t *)_spec_header;
-  __header->depth  = depth;
-  __header->width  = width;
-  __header->height = height;
+  header_ = (cmfile_header_t *)_spec_header;
+  header_->depth  = depth;
+  header_->width  = width;
+  header_->height = height;
 }
 
 /** Constructor.
@@ -83,7 +80,7 @@ ColormapFile::ColormapFile(uint16_t depth, uint16_t width, uint16_t height)
 ColormapFile::ColormapFile()
   : FireVisionDataFile(CMFILE_MAGIC_TOKEN, CMFILE_CUR_VERSION)
 {
-  __header = NULL;
+  header_ = NULL;
 }
 
 
@@ -97,25 +94,25 @@ ColormapFile::ColormapFile()
 void
 ColormapFile::add_colormap(Colormap *colormap)
 {
-  if (! __header) {
+  if (! header_) {
     if ( _spec_header) {
-      __header = (cmfile_header_t *)_spec_header;
+      header_ = (cmfile_header_t *)_spec_header;
     } else {
       _spec_header      = calloc(1, sizeof(cmfile_header_t));
       _spec_header_size = sizeof(cmfile_header_t);
-      __header = (cmfile_header_t *)_spec_header;
-      __header->depth  = colormap->depth();
-      __header->width  = colormap->width();
-      __header->height = colormap->height();
+      header_ = (cmfile_header_t *)_spec_header;
+      header_->depth  = colormap->depth();
+      header_->width  = colormap->width();
+      header_->height = colormap->height();
     }
   }
 
-  if ( (colormap->depth()  != __header->depth) ||
-       (colormap->width()  != __header->width) ||
-       (colormap->height() != __header->height) ) {
+  if ( (colormap->depth()  != header_->depth) ||
+       (colormap->width()  != header_->width) ||
+       (colormap->height() != header_->height) ) {
     throw fawkes::Exception("Colormap dimensions %dx%dx%d do not match expected dimensions %dx%dx%d",
 			    colormap->depth(), colormap->width(), colormap->height(),
-			    __header->depth, __header->width, __header->height);
+			    header_->depth, header_->width, header_->height);
   }
 
   printf("Adding colormap with dimensions %dx%dx%d\n", colormap->width(), colormap->height(), colormap->depth());
@@ -149,11 +146,11 @@ ColormapFile::colormap_blocks()
 void
 ColormapFile::assert_header()
 {
-  if ( ! __header ) {
+  if ( ! header_ ) {
     if (! _spec_header) {
       throw fawkes::Exception("Cannot get header information, invalid ctor used or file not read?");
     }
-    __header = (cmfile_header_t *)_spec_header;
+    header_ = (cmfile_header_t *)_spec_header;
   }
 
 }
@@ -182,8 +179,8 @@ ColormapFile::get_colormap()
 
   // create colormap, throws an exception is depth/num_blocks is invalid
   //printf("File header dimensions: %dx%dx%d\n",
-  //	 __header->depth, __header->width, __header->height);
-  cm = new YuvColormap(__header->depth, __header->width, __header->height);
+  //	 header_->depth, header_->width, header_->height);
+  cm = new YuvColormap(header_->depth, header_->width, header_->height);
 
   unsigned int level = 0;
   for (BlockList::iterator b = bl.begin(); b != bl.end(); ++b) {
@@ -238,7 +235,7 @@ void
 ColormapFile::clear()
 {
   FireVisionDataFile::clear();
-  __header = NULL;
+  header_ = NULL;
 }
 
 
@@ -249,7 +246,7 @@ uint16_t
 ColormapFile::get_depth()
 {
   assert_header();
-  return __header->depth;
+  return header_->depth;
 }
 
 /** Get width of colormap.
@@ -259,7 +256,7 @@ uint16_t
 ColormapFile::get_width()
 {
   assert_header();
-  return __header->width;
+  return header_->width;
 }
 
 /** Get height of colormap.
@@ -269,7 +266,7 @@ uint16_t
 ColormapFile::get_height()
 {
   assert_header();
-  return __header->height;
+  return header_->height;
 }
 
 } // end namespace firevision

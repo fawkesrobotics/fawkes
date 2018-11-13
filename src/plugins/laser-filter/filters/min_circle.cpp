@@ -45,7 +45,7 @@ LaserMinCircleDataFilter::LaserMinCircleDataFilter(const std::string filter_name
                                                    std::vector<LaserDataFilter::Buffer *> &in)
 	: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
-  __radius = radius;
+  radius_ = radius;
 }
 
 
@@ -60,7 +60,7 @@ LaserMinCircleDataFilter::filter()
     float *inbuf  = in[a]->values;
     float *outbuf = out[a]->values;
     for (unsigned int i = 0; i < arrsize; ++i) {
-      if (inbuf[i] < __radius) {
+      if (inbuf[i] < radius_) {
 	      outbuf[i] = std::numeric_limits<float>::quiet_NaN();
       } else {
 	      outbuf[i] = inbuf[i];

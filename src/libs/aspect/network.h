@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_NETWORK_H_
-#define __ASPECT_NETWORK_H_
+#ifndef _ASPECT_NETWORK_H_
+#define _ASPECT_NETWORK_H_
 
 #include <aspect/aspect.h>
 #include <netcomm/service_discovery/service_publisher.h>
@@ -30,9 +30,6 @@
 #include <netcomm/utils/resolver.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class NetworkAspect : public virtual Aspect
 {

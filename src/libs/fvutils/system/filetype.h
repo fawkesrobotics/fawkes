@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_FILETYPE_H_
-#define __FIREVISION_FVUTILS_FILETYPE_H_
+#ifndef _FIREVISION_FVUTILS_FILETYPE_H_
+#define _FIREVISION_FVUTILS_FILETYPE_H_
 
 #include <core/exception.h>
 #include <utils/system/filetype.h>
@@ -32,9 +32,6 @@
 #include <string>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 inline std::string
 fv_filetype_file(const char *filename)

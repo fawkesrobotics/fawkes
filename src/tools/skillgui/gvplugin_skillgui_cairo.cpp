@@ -33,36 +33,36 @@
 
 #define NOEXPORT __attribute__ ((visibility("hidden")))
 
-NOEXPORT SkillGuiCairoRenderInstructor *__sgcri = NULL;
+NOEXPORT SkillGuiCairoRenderInstructor *sgcri_ = NULL;
 
 #if CAIROMM_MAJOR_VERSION > 1 || (CAIROMM_MAJOR_VERSION == 1 && CAIROMM_MINO_VERSION > 8)
-NOEXPORT std::vector<double> __skillgui_cairo_render_dashed;
-NOEXPORT std::vector<double> __skillgui_cairo_render_dotted;
+NOEXPORT std::vector<double> skillgui_cairo_render_dashed_;
+NOEXPORT std::vector<double> skillgui_cairo_render_dotted_;
 #else
-NOEXPORT std::valarray<double> __skillgui_cairo_render_dashed(1);
-NOEXPORT std::valarray<double> __skillgui_cairo_render_dotted(2);
+NOEXPORT std::valarray<double> skillgui_cairo_render_dashed_(1);
+NOEXPORT std::valarray<double> skillgui_cairo_render_dotted_(2);
 #endif
 
 #ifdef USE_GVPLUGIN_TIMETRACKER
-NOEXPORT fawkes::TimeTracker __tt;
-NOEXPORT unsigned int __ttc_page = __tt.add_class("Page");
-NOEXPORT unsigned int __ttc_beginpage = __tt.add_class("Begin Page");
-NOEXPORT unsigned int __ttc_ellipse = __tt.add_class("Ellipse");
-NOEXPORT unsigned int __ttc_bezier = __tt.add_class("Bezier");
-NOEXPORT unsigned int __ttc_polygon = __tt.add_class("Polygon");
-NOEXPORT unsigned int __ttc_polyline = __tt.add_class("Polyline");
-NOEXPORT unsigned int __ttc_text = __tt.add_class("Text");
-NOEXPORT unsigned int __ttc_text_1 = __tt.add_class("Text 1");
-NOEXPORT unsigned int __ttc_text_2 = __tt.add_class("Text 2");
-NOEXPORT unsigned int __ttc_text_3 = __tt.add_class("Text 3");
-NOEXPORT unsigned int __ttc_text_4 = __tt.add_class("Text 4");
-NOEXPORT unsigned int __ttc_text_5 = __tt.add_class("Text 5");
-NOEXPORT unsigned int __tt_count = 0;
-NOEXPORT unsigned int __num_ellipse = 0;
-NOEXPORT unsigned int __num_bezier = 0;
-NOEXPORT unsigned int __num_polygon = 0;
-NOEXPORT unsigned int __num_polyline = 0;
-NOEXPORT unsigned int __num_text = 0;
+NOEXPORT fawkes::TimeTracker tt_;
+NOEXPORT unsigned int ttc_page_ = tt_.add_class("Page");
+NOEXPORT unsigned int ttc_beginpage_ = tt_.add_class("Begin Page");
+NOEXPORT unsigned int ttc_ellipse_ = tt_.add_class("Ellipse");
+NOEXPORT unsigned int ttc_bezier_ = tt_.add_class("Bezier");
+NOEXPORT unsigned int ttc_polygon_ = tt_.add_class("Polygon");
+NOEXPORT unsigned int ttc_polyline_ = tt_.add_class("Polyline");
+NOEXPORT unsigned int ttc_text_ = tt_.add_class("Text");
+NOEXPORT unsigned int ttc_text_1_ = tt_.add_class("Text 1");
+NOEXPORT unsigned int ttc_text_2_ = tt_.add_class("Text 2");
+NOEXPORT unsigned int ttc_text_3_ = tt_.add_class("Text 3");
+NOEXPORT unsigned int ttc_text_4_ = tt_.add_class("Text 4");
+NOEXPORT unsigned int ttc_text_5_ = tt_.add_class("Text 5");
+NOEXPORT unsigned int tt_count_ = 0;
+NOEXPORT unsigned int num_ellipse_ = 0;
+NOEXPORT unsigned int num_bezier_ = 0;
+NOEXPORT unsigned int num_polygon_ = 0;
+NOEXPORT unsigned int num_polyline_ = 0;
+NOEXPORT unsigned int num_text_ = 0;
 #endif
 
 
@@ -133,7 +133,7 @@ skillgui_cairo_device_init(GVJ_t *firstjob)
 static void
 skillgui_cairo_device_finalize(GVJ_t *firstjob)
 {
-  firstjob->context = (void *)__sgcri;
+  firstjob->context = (void *)sgcri_;
   firstjob->external_context = TRUE;
 
   // Render!
@@ -153,9 +153,9 @@ skillgui_cairo_set_penstyle(Cairo::RefPtr<Cairo::Context> cairo, GVJ_t *job)
   obj_state_t *obj = job->obj;
 
   if (obj->pen == PEN_DASHED) {
-    cairo->set_dash(__skillgui_cairo_render_dashed, 0.0);
+    cairo->set_dash(skillgui_cairo_render_dashed_, 0.0);
   } else if (obj->pen == PEN_DOTTED) {
-    cairo->set_dash(__skillgui_cairo_render_dotted, 0.0);
+    cairo->set_dash(skillgui_cairo_render_dotted_, 0.0);
   } else {
 #if CAIROMM_MAJOR_VERSION > 1 || (CAIROMM_MAJOR_VERSION == 1 && CAIROMM_MINO_VERSION > 8)
     std::vector<double> empty;
@@ -172,8 +172,8 @@ static void
 skillgui_cairo_render_begin_page(GVJ_t *job)
 {
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __tt.ping_start(__ttc_page);
-  __tt.ping_start(__ttc_beginpage);
+  tt_.ping_start(ttc_page_);
+  tt_.ping_start(ttc_beginpage_);
 #endif
   SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
 
@@ -235,13 +235,13 @@ skillgui_cairo_render_begin_page(GVJ_t *job)
 
 
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __num_ellipse = 0;
-  __num_bezier = 0;
-  __num_polygon = 0;
-  __num_polyline = 0;
-  __num_text = 0;
+  num_ellipse_ = 0;
+  num_bezier_ = 0;
+  num_polygon_ = 0;
+  num_polyline_ = 0;
+  num_text_ = 0;
 
-  __tt.ping_end(__ttc_beginpage);
+  tt_.ping_end(ttc_beginpage_);
 #endif
 }
 
@@ -251,17 +251,17 @@ skillgui_cairo_render_end_page(GVJ_t * job)
   //SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
   //cri->queue_draw();  
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __tt.ping_end(__ttc_page);
-  if ( ++__tt_count >= 10 ) {
-    __tt_count = 0;
-    __tt.print_to_stdout();
+  tt_.ping_end(ttc_page_);
+  if ( ++tt_count_ >= 10 ) {
+    tt_count_ = 0;
+    tt_.print_to_stdout();
 
     printf("Num Ellipse:   %u\n"
 	   "Num Bezier:    %u\n"
 	   "Num Polygon:   %u\n"
 	   "Num Polyline:  %u\n"
-	   "Num Text:      %u\n", __num_ellipse, __num_bezier,
-	   __num_polygon, __num_polyline, __num_text);
+	   "Num Text:      %u\n", num_ellipse_, num_bezier_,
+	   num_polygon_, num_polyline_, num_text_);
   }
 #endif
 }
@@ -274,8 +274,8 @@ skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
 #endif
 {
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __tt.ping_start(__ttc_text);
-  ++__num_text;
+  tt_.ping_start(ttc_text_);
+  ++num_text_;
 #endif
   SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
   Cairo::RefPtr<Cairo::Context> cairo = cri->get_cairo();
@@ -329,7 +329,7 @@ skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
       offsety = atof(labeloffsety);
     }
   }
-  //__tt.ping_start(__ttc_text_1);
+  //tt_.ping_start(ttc_text_1_);
 
   Cairo::Matrix old_matrix;
   cairo->get_matrix(old_matrix);
@@ -362,9 +362,9 @@ skillgui_cairo_render_textpara(GVJ_t *job, pointf p, textpara_t *para)
 
   cairo->set_matrix(old_matrix);
 
-  //__tt.ping_end(__ttc_text_5);
+  //tt_.ping_end(ttc_text_5_);
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __tt.ping_end(__ttc_text);
+  tt_.ping_end(ttc_text_);
 #endif
 }
 
@@ -372,8 +372,8 @@ static void
 skillgui_cairo_render_ellipse(GVJ_t *job, pointf *A, int filled)
 {
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __tt.ping_start(__ttc_ellipse);
-  ++__num_ellipse;
+  tt_.ping_start(ttc_ellipse_);
+  ++num_ellipse_;
 #endif
   //printf("Render ellipse\n");
   SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
@@ -404,7 +404,7 @@ skillgui_cairo_render_ellipse(GVJ_t *job, pointf *A, int filled)
   cairo->stroke();
 
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __tt.ping_end(__ttc_ellipse);
+  tt_.ping_end(ttc_ellipse_);
 #endif
 }
 
@@ -412,8 +412,8 @@ static void
 skillgui_cairo_render_polygon(GVJ_t *job, pointf *A, int n, int filled)
 {
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __tt.ping_start(__ttc_polygon);
-  ++__num_polygon;
+  tt_.ping_start(ttc_polygon_);
+  ++num_polygon_;
 #endif
   //printf("Polygon\n");
   SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
@@ -444,7 +444,7 @@ skillgui_cairo_render_polygon(GVJ_t *job, pointf *A, int n, int filled)
   cairo->stroke();
 
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __tt.ping_end(__ttc_polygon);
+  tt_.ping_end(ttc_polygon_);
 #endif
 }
 
@@ -453,8 +453,8 @@ skillgui_cairo_render_bezier(GVJ_t * job, pointf * A, int n, int arrow_at_start,
 		int arrow_at_end, int filled)
 {
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __tt.ping_start(__ttc_bezier);
-  ++__num_bezier;
+  tt_.ping_start(ttc_bezier_);
+  ++num_bezier_;
 #endif
   //printf("Bezier\n");
   SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
@@ -475,7 +475,7 @@ skillgui_cairo_render_bezier(GVJ_t * job, pointf * A, int n, int arrow_at_start,
   cairo->stroke();
 
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __tt.ping_end(__ttc_bezier);
+  tt_.ping_end(ttc_bezier_);
 #endif
 }
 
@@ -483,8 +483,8 @@ static void
 skillgui_cairo_render_polyline(GVJ_t * job, pointf * A, int n)
 {
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __tt.ping_start(__ttc_polyline);
-  ++__num_polyline;
+  tt_.ping_start(ttc_polyline_);
+  ++num_polyline_;
 #endif
   //printf("Polyline\n");
   SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
@@ -502,7 +502,7 @@ skillgui_cairo_render_polyline(GVJ_t * job, pointf * A, int n)
   cairo->stroke();
 
 #ifdef USE_GVPLUGIN_TIMETRACKER
-  __tt.ping_end(__ttc_polyline);
+  tt_.ping_end(ttc_polyline_);
 #endif
 }
 
@@ -597,18 +597,18 @@ gvplugin_library_t gvplugin_skillgui_cairo_LTX_library = { (char *)"skillguicair
 void
 gvplugin_skillgui_cairo_setup(GVC_t *gvc, SkillGuiCairoRenderInstructor *sgcri)
 {
-  __sgcri = sgcri;
+  sgcri_ = sgcri;
   gvAddLibrary(gvc, &gvplugin_skillgui_cairo_LTX_library);
 
 #if CAIROMM_MAJOR_VERSION > 1 || (CAIROMM_MAJOR_VERSION == 1 && CAIROMM_MINO_VERSION > 8)
-  __skillgui_cairo_render_dashed.clear();
-  __skillgui_cairo_render_dashed.push_back(6.0);
-  __skillgui_cairo_render_dotted.clear();
-  __skillgui_cairo_render_dotted.push_back(2.0);
-  __skillgui_cairo_render_dotted.push_back(6.0);
+  skillgui_cairo_render_dashed_.clear();
+  skillgui_cairo_render_dashed_.push_back(6.0);
+  skillgui_cairo_render_dotted_.clear();
+  skillgui_cairo_render_dotted_.push_back(2.0);
+  skillgui_cairo_render_dotted_.push_back(6.0);
 #else
-  __skillgui_cairo_render_dashed[0] = 6.0;
-  __skillgui_cairo_render_dotted[0] = 2.0;
-  __skillgui_cairo_render_dotted[1] = 6.0;
+  skillgui_cairo_render_dashed_[0] = 6.0;
+  skillgui_cairo_render_dotted_[0] = 2.0;
+  skillgui_cairo_render_dotted_[1] = 6.0;
 #endif
 }

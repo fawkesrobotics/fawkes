@@ -60,10 +60,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /// @cond INTERNAL
 typedef std::pair<fawkes::Time, CompactFrameID> P_TimeAndFrameID;

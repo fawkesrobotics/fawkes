@@ -23,8 +23,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_HUNGARIAN_METHOD_HUNGARIAN_H_
-#define __UTILS_HUNGARIAN_METHOD_HUNGARIAN_H_
+#ifndef _UTILS_HUNGARIAN_METHOD_HUNGARIAN_H_
+#define _UTILS_HUNGARIAN_METHOD_HUNGARIAN_H_
 
 #define HUNGARIAN_NOT_ASSIGNED 0 
 #define HUNGARIAN_ASSIGNED 1
@@ -33,9 +33,6 @@
 #define HUNGARIAN_MODE_MAXIMIZE_UTIL 1
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /// @cond INTERNAL
 typedef struct {

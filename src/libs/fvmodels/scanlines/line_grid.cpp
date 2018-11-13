@@ -32,9 +32,6 @@
 using fawkes::upoint_t;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ScanlineLineGrid <fvmodels/scanlines/line_grid.h>
  * Grid of scan lines.
@@ -61,8 +58,8 @@ ScanlineLineGrid::ScanlineLineGrid(unsigned int width, unsigned int height,
          unsigned int offset_hor, unsigned int offset_ver,
          ROI* roi, unsigned int gap)
 {
-  __roi = NULL;
-  __next_pixel = gap + 1;
+  roi_ = NULL;
+  next_pixel_ = gap + 1;
   set_grid_params(width, height,
                 offset_hor, offset_ver, roi);
   //reset is done in set_grid_params ()
@@ -72,48 +69,48 @@ ScanlineLineGrid::ScanlineLineGrid(unsigned int width, unsigned int height,
  */
 ScanlineLineGrid::~ScanlineLineGrid()
 {
-  delete __roi;
+  delete roi_;
 }
 
 upoint_t
 ScanlineLineGrid::operator*()
 {
-  return *__cur;
+  return *cur_;
 }
 
 upoint_t*
 ScanlineLineGrid::operator->()
 {
-  return &*__cur;
+  return &*cur_;
 }
 
 void
 ScanlineLineGrid::calc_coords()
 {
-  __point_list.clear();
+  point_list_.clear();
   bool more_to_come = true;
   upoint_t coord;
   unsigned int next_px;
 
-  if (__offset_hor > 0) //horizontal lines
+  if (offset_hor_ > 0) //horizontal lines
   {
     more_to_come = true;
-    next_px = std::min(__next_pixel, __offset_ver ? __offset_ver : __width);
-    coord.x = __roi->start.x;
-    coord.y = __roi->start.y + ((__roi->height - 1) % __offset_hor) / 2; //Center the horizontal lines in the image
-    __point_list.push_back(coord);
+    next_px = std::min(next_pixel_, offset_ver_ ? offset_ver_ : width_);
+    coord.x = roi_->start.x;
+    coord.y = roi_->start.y + ((roi_->height - 1) % offset_hor_) / 2; //Center the horizontal lines in the image
+    point_list_.push_back(coord);
 
     while (more_to_come) {
-      if (coord.x < (__roi->image_width - next_px))
+      if (coord.x < (roi_->image_width - next_px))
       {
         coord.x += next_px;
       }
       else
       {
-        if (coord.y < (__roi->image_height - __offset_hor))
+        if (coord.y < (roi_->image_height - offset_hor_))
         {
-          coord.x = __roi->start.x;
-          coord.y += __offset_hor;
+          coord.x = roi_->start.x;
+          coord.y += offset_hor_;
         }
         else
         {
@@ -121,29 +118,29 @@ ScanlineLineGrid::calc_coords()
         }
       }
 
-      if (more_to_come) __point_list.push_back(coord);
+      if (more_to_come) point_list_.push_back(coord);
     }
   }
 
-  if (__offset_ver > 0) //vertical lines
+  if (offset_ver_ > 0) //vertical lines
   {
     more_to_come = true;
-    next_px = std::min(__next_pixel, __offset_hor ? __offset_hor : __height);
-    coord.x = __roi->start.x + ((__roi->width - 1) % __offset_ver) / 2; //Center the vertical lines in the image
-    coord.y = __roi->start.y;
-    __point_list.push_back(coord);
+    next_px = std::min(next_pixel_, offset_hor_ ? offset_hor_ : height_);
+    coord.x = roi_->start.x + ((roi_->width - 1) % offset_ver_) / 2; //Center the vertical lines in the image
+    coord.y = roi_->start.y;
+    point_list_.push_back(coord);
 
     while (more_to_come) {
-      if (coord.y < (__roi->image_height - next_px))
+      if (coord.y < (roi_->image_height - next_px))
       {
         coord.y += next_px;
       }
       else
       {
-        if (coord.x < (__roi->image_width - __offset_ver))
+        if (coord.x < (roi_->image_width - offset_ver_))
         {
-          coord.x += __offset_ver;
-          coord.y = __roi->start.y;
+          coord.x += offset_ver_;
+          coord.y = roi_->start.y;
         }
         else
         {
@@ -151,7 +148,7 @@ ScanlineLineGrid::calc_coords()
         }
       }
 
-      if (more_to_come) __point_list.push_back(coord);
+      if (more_to_come) point_list_.push_back(coord);
     }
   }
 
@@ -161,30 +158,30 @@ ScanlineLineGrid::calc_coords()
 upoint_t *
 ScanlineLineGrid::operator++()
 {
-  if (__cur != __point_list.end()) ++__cur;
-  return __cur != __point_list.end() ? &*__cur : &__point_list.back();
+  if (cur_ != point_list_.end()) ++cur_;
+  return cur_ != point_list_.end() ? &*cur_ : &point_list_.back();
 }
 
 upoint_t *
 ScanlineLineGrid::operator++(int)
 {
-  if (__cur != __point_list.end()) {
-    upoint_t *res = &*__cur++;
+  if (cur_ != point_list_.end()) {
+    upoint_t *res = &*cur_++;
     return res;
   }
-  else return &__point_list.back();
+  else return &point_list_.back();
 }
 
 bool
 ScanlineLineGrid::finished()
 {
-  return __cur == __point_list.end();
+  return cur_ == point_list_.end();
 }
 
 void
 ScanlineLineGrid::reset()
 {
-  __cur = __point_list.begin();
+  cur_ = point_list_.begin();
 }
 
 const char *
@@ -197,7 +194,7 @@ ScanlineLineGrid::get_name()
 unsigned int
 ScanlineLineGrid::get_margin()
 {
-  return std::max(__offset_ver, __offset_hor);
+  return std::max(offset_ver_, offset_hor_);
 }
 
 
@@ -227,8 +224,8 @@ ScanlineLineGrid::set_pan_tilt(float pan, float tilt)
 void
 ScanlineLineGrid::set_dimensions(unsigned int width, unsigned int height, ROI* roi)
 {
-  __width  = width;
-  __height = height;
+  width_  = width;
+  height_ = height;
 
   set_roi(roi);
 }
@@ -241,20 +238,20 @@ ScanlineLineGrid::set_dimensions(unsigned int width, unsigned int height, ROI* r
 void
 ScanlineLineGrid::set_roi(ROI* roi)
 {
-  delete __roi;
+  delete roi_;
 
-  if (!roi) __roi = new ROI(0, 0, __width, __height, __width, __height);
+  if (!roi) roi_ = new ROI(0, 0, width_, height_, width_, height_);
   else
   {
-    __roi = roi;
+    roi_ = roi;
     //Use roi image width/height as grid boundary
-    __roi->set_image_width(__roi->start.x + __roi->width);
-    __roi->set_image_height(__roi->start.y + __roi->height);
+    roi_->set_image_width(roi_->start.x + roi_->width);
+    roi_->set_image_height(roi_->start.y + roi_->height);
 
-    if (__roi->image_width > __width)
-      throw fawkes::OutOfBoundsException("ScanlineLineGrid: ROI is out of grid bounds!", __roi->image_width, 0, __width);
-    if (__roi->image_height > __height)
-      throw fawkes::OutOfBoundsException("ScanlineLineGrid: ROI is out of grid bounds!", __roi->image_height, 0, __height);
+    if (roi_->image_width > width_)
+      throw fawkes::OutOfBoundsException("ScanlineLineGrid: ROI is out of grid bounds!", roi_->image_width, 0, width_);
+    if (roi_->image_height > height_)
+      throw fawkes::OutOfBoundsException("ScanlineLineGrid: ROI is out of grid bounds!", roi_->image_height, 0, height_);
   }
 
   calc_coords();
@@ -270,8 +267,8 @@ ScanlineLineGrid::set_roi(ROI* roi)
 void
 ScanlineLineGrid::set_offset(unsigned int offset_hor, unsigned int offset_ver)
 {
-  __offset_hor = offset_hor;
-  __offset_ver = offset_ver;
+  offset_hor_ = offset_hor;
+  offset_ver_ = offset_ver;
 
   calc_coords();
 }
@@ -295,8 +292,8 @@ ScanlineLineGrid::set_grid_params(unsigned int width, unsigned int height,
                             unsigned int offset_hor, unsigned int offset_ver,
                             ROI* roi)
 {
-  __offset_hor = offset_hor;
-  __offset_ver = offset_ver;
+  offset_hor_ = offset_hor;
+  offset_ver_ = offset_ver;
 
   set_dimensions(width, height, roi);
 }

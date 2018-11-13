@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_REFBOXCOMM_PROCESSOR_MSL2010_H_
-#define __PLUGINS_REFBOXCOMM_PROCESSOR_MSL2010_H_
+#ifndef _PLUGINS_REFBOXCOMM_PROCESSOR_MSL2010_H_
+#define _PLUGINS_REFBOXCOMM_PROCESSOR_MSL2010_H_
 
 #include "processor.h"
 #include "state_handler.h"
@@ -54,19 +54,19 @@ class Msl2010RefBoxProcessor : public RefBoxProcessor
   void reconnect();
 
  private:
-  fawkes::Logger *__logger;
-  fawkes::MulticastDatagramSocket *__s;
+  fawkes::Logger *logger_;
+  fawkes::MulticastDatagramSocket *s_;
 
-  unsigned int __score_cyan;
-  unsigned int __score_magenta;
+  unsigned int score_cyan_;
+  unsigned int score_magenta_;
 
-  const char *__name;
+  const char *name_;
 
-  bool __quit;
-  bool __connection_died;
+  bool quit_;
+  bool connection_died_;
 
-  char *__refbox_host;
-  unsigned short int __refbox_port;
+  char *refbox_host_;
+  unsigned short int refbox_port_;
 
 
   xmlpp::DomParser *dom;

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_BBLOGGER_LOGREPLAY_THREAD_H_
-#define __PLUGINS_BBLOGGER_LOGREPLAY_THREAD_H_
+#ifndef _PLUGINS_BBLOGGER_LOGREPLAY_THREAD_H_
+#define _PLUGINS_BBLOGGER_LOGREPLAY_THREAD_H_
 
 #include "bblogfile.h"
 
@@ -68,23 +68,23 @@ class BBLogReplayThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  char               *__scenario;
-  char               *__filename;
-  char               *__logdir;
-  char               *__logfile_name;
-  float               __cfg_grace_period;
-  bool                __cfg_non_blocking;
-  bool                __cfg_loop_replay;
+  char               *scenario_;
+  char               *filename_;
+  char               *logdir_;
+  char               *logfile_name_;
+  float               cfg_grace_period_;
+  bool                cfg_non_blocking_;
+  bool                cfg_loop_replay_;
 
-  BBLogFile          *__logfile;
+  BBLogFile          *logfile_;
 
-  fawkes::Time        __last_offset;
-  fawkes::Time        __offsetdiff;
-  fawkes::Time        __loopdiff;
-  fawkes::Time        __waittime;
-  fawkes::Time        __last_loop;
-  fawkes::Time        __now;
-  fawkes::Interface  *__interface;
+  fawkes::Time        last_offset_;
+  fawkes::Time        offsetdiff_;
+  fawkes::Time        loopdiff_;
+  fawkes::Time        waittime_;
+  fawkes::Time        last_loop_;
+  fawkes::Time        now_;
+  fawkes::Interface  *interface_;
 };
 
 

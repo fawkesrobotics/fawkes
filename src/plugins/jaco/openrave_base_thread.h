@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_OPENRAVE_BASE_THREAD_H_
-#define __PLUGINS_JACO_OPENRAVE_BASE_THREAD_H_
+#ifndef _PLUGINS_JACO_OPENRAVE_BASE_THREAD_H_
+#define _PLUGINS_JACO_OPENRAVE_BASE_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
@@ -93,22 +93,22 @@ class JacoOpenraveBaseThread
   /** Use this in inheriting classes for post_init stuff, e.g. env-cloning */
   virtual void _post_init() {}
 
-  fawkes::Mutex *__planning_mutex;      /**< mutex, used to lock when planning. */
+  fawkes::Mutex *planning_mutex_;      /**< mutex, used to lock when planning. */
 
 #ifdef HAVE_OPENRAVE
-  fawkes::jaco_openrave_set_t __viewer_env;
+  fawkes::jaco_openrave_set_t viewer_env_;
 
-  bool          __cfg_OR_use_viewer;
-  std::string   __cfg_OR_robot_file;
-  bool          __cfg_OR_auto_load_ik;
-  float         __cfg_OR_sampling;
-  bool          __cfg_OR_plot_traj_manip;
-  bool          __cfg_OR_plot_traj_joints;
-  bool          __cfg_OR_plot_cur_manip;
-  bool          __cfg_OR_plot_cur_joints;
+  bool          cfg_OR_use_viewer_;
+  std::string   cfg_OR_robot_file_;
+  bool          cfg_OR_auto_load_ik_;
+  float         cfg_OR_sampling_;
+  bool          cfg_OR_plot_traj_manip_;
+  bool          cfg_OR_plot_traj_joints_;
+  bool          cfg_OR_plot_cur_manip_;
+  bool          cfg_OR_plot_cur_joints_;
 
-  std::string   __plannerparams;
-  bool          __plot_current;
+  std::string   plannerparams_;
+  bool          plot_current_;
 #endif
 };
 

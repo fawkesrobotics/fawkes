@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_GRIPPER_THREAD_H_
-#define __PLUGINS_KATANA_GRIPPER_THREAD_H_
+#ifndef _PLUGINS_KATANA_GRIPPER_THREAD_H_
+#define _PLUGINS_KATANA_GRIPPER_THREAD_H_
 
 #include "motion_thread.h"
 
@@ -44,8 +44,8 @@ class KatanaGripperThread : public KatanaMotionThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  gripper_mode_t  __mode;
-  unsigned int    __poll_interval_usec;
+  gripper_mode_t  mode_;
+  unsigned int    poll_interval_usec_;
 };
 
 

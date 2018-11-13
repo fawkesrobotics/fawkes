@@ -25,9 +25,6 @@
 #include <algorithm>
 
 namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphStaticListEdgeConstraint <navgraph/constraints/static_list_edge_constraint.h>
  * Constraint that holds a list of edges to block.

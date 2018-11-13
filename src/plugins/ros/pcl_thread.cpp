@@ -49,8 +49,8 @@ RosPointCloudThread::~RosPointCloudThread()
 void
 RosPointCloudThread::init()
 {
-  //__pubman = new RosPointCloudPublisherManager(rosnode);
-  __adapter = new PointCloudAdapter(pcl_manager, logger);
+  //pubman_ = new RosPointCloudPublisherManager(rosnode);
+  adapter_ = new PointCloudAdapter(pcl_manager, logger);
 
   cfg_ros_research_ival_ = config->get_float("/ros/pcl/ros-search-interval");
 
@@ -73,7 +73,7 @@ RosPointCloudThread::finalize()
   for (std::pair<std::string, ros::Subscriber> item : ros_pointcloud_subs_) {
     item.second.shutdown();
   }
-  delete __adapter;
+  delete adapter_;
 }
 
 
@@ -214,7 +214,7 @@ RosPointCloudThread::fawkes_pointcloud_search()
     unsigned int width, height;
     bool is_dense;
     PointCloudAdapter::V_PointFieldInfo fieldinfo;
-    __adapter->get_info(*p, width, height, frame_id, is_dense, fieldinfo);
+    adapter_->get_info(*p, width, height, frame_id, is_dense, fieldinfo);
     pi.msg.header.frame_id = frame_id;
     pi.msg.width = width;
     pi.msg.height = height;
@@ -245,7 +245,7 @@ RosPointCloudThread::fawkes_pointcloud_publish_to_ros()
       fawkes::Time time;
       fawkes::Time now(time);
       std::string frame_id;
-      __adapter->get_data(p->first, frame_id, width, height, time,
+      adapter_->get_data(p->first, frame_id, width, height, time,
                           &point_data, point_size, num_points);
 
       if (pi.last_sent != time) {
@@ -269,7 +269,7 @@ RosPointCloudThread::fawkes_pointcloud_publish_to_ros()
       }
     } else {
       if (pcl_manager->exists_pointcloud(p->first.c_str())) {
-        __adapter->close(p->first);
+        adapter_->close(p->first);
       }
     }
   }

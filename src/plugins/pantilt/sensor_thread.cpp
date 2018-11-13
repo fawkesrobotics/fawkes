@@ -46,19 +46,19 @@ PanTiltSensorThread::PanTiltSensorThread()
 void
 PanTiltSensorThread::add_act_thread(PanTiltActThread *act_thread)
 {
-  __act_threads.push_back(act_thread);
+  act_threads_.push_back(act_thread);
 }
 
 
 void
 PanTiltSensorThread::loop()
 {
-  for (__ati = __act_threads.begin(); __ati != __act_threads.end(); ++__ati) {
+  for (ati_ = act_threads_.begin(); ati_ != act_threads_.end(); ++ati_) {
     try {
-      (*__ati)->update_sensor_values();
+      (*ati_)->update_sensor_values();
     } catch (Exception &e) {
       logger->log_warn(name(), "Act thread %s threw an exception when updating sensor values",
-		       (*__ati)->name());
+		       (*ati_)->name());
       logger->log_warn(name(), e);
     }
   }

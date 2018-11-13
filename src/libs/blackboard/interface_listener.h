@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_INTERFACE_LISTENER_H_
-#define __BLACKBOARD_INTERFACE_LISTENER_H_
+#ifndef _BLACKBOARD_INTERFACE_LISTENER_H_
+#define _BLACKBOARD_INTERFACE_LISTENER_H_
 
 #include <blackboard/blackboard.h>
 #include <core/utils/lock_queue.h>
@@ -119,13 +119,13 @@ class BlackBoardInterfaceListener
 
 
  private:
-  Mutex *__bbil_queue_mutex;
-  Mutex *__bbil_maps_mutex;
+  Mutex *bbil_queue_mutex_;
+  Mutex *bbil_maps_mutex_;
 
-  InterfaceMaps  __bbil_maps;
-  InterfaceQueue __bbil_queue;
+  InterfaceMaps  bbil_maps_;
+  InterfaceQueue bbil_queue_;
 
-  char *__name;
+  char *name_;
 };
 
 } // end namespace fawkes

@@ -23,9 +23,6 @@
 #include <pcl_utils/pointcloud_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class PointCloudManager <pcl_utils/pointcloud_manager.h>
@@ -56,11 +53,11 @@ PointCloudManager::PointCloudManager()
 PointCloudManager::~PointCloudManager()
 {
   LockMap<std::string, pcl_utils::StorageAdapter *>::iterator c;
-  for (c = __clouds.begin(); c != __clouds.end(); ++c) {
+  for (c = clouds_.begin(); c != clouds_.end(); ++c) {
     delete c->second;
   }
 
-  __clouds.clear();
+  clouds_.clear();
 }
 
 
@@ -70,11 +67,11 @@ PointCloudManager::~PointCloudManager()
 void
 PointCloudManager::remove_pointcloud(const char *id)
 {
-  MutexLocker lock(__clouds.mutex());
+  MutexLocker lock(clouds_.mutex());
 
-  if (__clouds.find(id) != __clouds.end()) {
-    delete __clouds[id];
-    __clouds.erase(id);
+  if (clouds_.find(id) != clouds_.end()) {
+    delete clouds_[id];
+    clouds_.erase(id);
   }
 }
 
@@ -85,9 +82,9 @@ PointCloudManager::remove_pointcloud(const char *id)
 bool
 PointCloudManager::exists_pointcloud(const char *id)
 {
-  MutexLocker lock(__clouds.mutex());
+  MutexLocker lock(clouds_.mutex());
 
-  return (__clouds.find(id) != __clouds.end());
+  return (clouds_.find(id) != clouds_.end());
 }
 
 
@@ -97,12 +94,12 @@ PointCloudManager::exists_pointcloud(const char *id)
 std::vector<std::string>
 PointCloudManager::get_pointcloud_list() const
 {
-  MutexLocker lock(__clouds.mutex());
+  MutexLocker lock(clouds_.mutex());
 
   std::vector<std::string> rv;
   rv.clear();
   LockMap<std::string, pcl_utils::StorageAdapter *>::const_iterator c;
-  for (c = __clouds.begin(); c != __clouds.end(); ++c) {
+  for (c = clouds_.begin(); c != clouds_.end(); ++c) {
     rv.push_back(c->first);
   }
   return rv;
@@ -118,7 +115,7 @@ PointCloudManager::get_pointcloud_list() const
 const fawkes::LockMap<std::string, pcl_utils::StorageAdapter *> &
 PointCloudManager::get_pointclouds() const
 {
-  return __clouds;
+  return clouds_;
 }
 
 
@@ -133,12 +130,12 @@ PointCloudManager::get_pointclouds() const
 const pcl_utils::StorageAdapter *
 PointCloudManager::get_storage_adapter(const char *id)
 {
-  MutexLocker lock(__clouds.mutex());
+  MutexLocker lock(clouds_.mutex());
 
-  if (__clouds.find(id) == __clouds.end()) {
+  if (clouds_.find(id) == clouds_.end()) {
     throw Exception("PointCloud '%s' unknown", id);
   }
-  return __clouds[id];
+  return clouds_[id];
 }
 
 

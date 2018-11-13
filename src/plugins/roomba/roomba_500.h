@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROOMBA_ROOMBA_500_H_
-#define __PLUGINS_ROOMBA_ROOMBA_500_H_
+#ifndef _PLUGINS_ROOMBA_ROOMBA_500_H_
+#define _PLUGINS_ROOMBA_ROOMBA_500_H_
 
 #include <core/plugin.h>
 
@@ -443,23 +443,23 @@ class Roomba500
 
   /** Check if connection has been established.
    * @return true if connection has been established, false otherwise. */
-  bool is_connected() const { return (__fd != -1); }
+  bool is_connected() const { return (fd_ != -1); }
 
   /** Get connection type.
    * @return connection type */
-  ConnectionType  get_connection_type() const { return __conntype; }
+  ConnectionType  get_connection_type() const { return conntype_; }
   /** Get device string.
    * @return device string */
-  const char * get_device() const { return __device; }
+  const char * get_device() const { return device_; }
 
   /** Get current mode.
    * @return current mode. */
-  Mode get_mode() const { return __mode; }
+  Mode get_mode() const { return mode_; }
 
   /** Check if robot is being controlled.
    * @return true if robot is being controlled, false otherwise. */
   bool is_controlled() const
-  { return is_connected() && ( (__mode == MODE_SAFE) || (__mode == MODE_FULL) ); }
+  { return is_connected() && ( (mode_ == MODE_SAFE) || (mode_ == MODE_FULL) ); }
 
   void set_mode(Mode mode);
   void clean();
@@ -489,7 +489,7 @@ class Roomba500
    * @return true if sensor packet is available, false otherwise
    */
   bool has_sensor_packet() const
-  { return __sensor_packet_received; };
+  { return sensor_packet_received_; };
   const SensorPacketGroupAll  get_sensor_packet() const;
 
   void play_fanfare();
@@ -503,36 +503,36 @@ class Roomba500
 
   void assert_control()
   {
-    if ((__mode != MODE_FULL) && (__mode != MODE_SAFE)) {
+    if ((mode_ != MODE_FULL) && (mode_ != MODE_SAFE)) {
       throw fawkes::Exception("Command only available in FULL or SAFE mode.");
     }
   }
   void assert_connected()
-  { if (__mode == MODE_OFF) throw fawkes::Exception("Not connected to robot."); }
+  { if (mode_ == MODE_OFF) throw fawkes::Exception("Not connected to robot."); }
 
  private:
-  ConnectionType        __conntype;
-  unsigned int          __conn_flags;
+  ConnectionType        conntype_;
+  unsigned int          conn_flags_;
 
-  Mode                  __mode;
-  SensorPacketID        __packet_id;
-  unsigned char         __packet_reply_id;
-  unsigned short        __packet_length;
-  bool                  __sensors_enabled;
-  SensorPacketGroupAll  __sensor_packet;
-  bool                  __sensor_packet_received;
-  fawkes::Mutex        *__sensor_mutex;
+  Mode                  mode_;
+  SensorPacketID        packet_id_;
+  unsigned char         packet_reply_id_;
+  unsigned short        packet_length_;
+  bool                  sensors_enabled_;
+  SensorPacketGroupAll  sensor_packet_;
+  bool                  sensor_packet_received_;
+  fawkes::Mutex        *sensor_mutex_;
 
-  char                 *__device;
-  int                   __fd;
-  fawkes::Mutex        *__read_mutex;
-  fawkes::Mutex        *__write_mutex;
+  char                 *device_;
+  int                   fd_;
+  fawkes::Mutex        *read_mutex_;
+  fawkes::Mutex        *write_mutex_;
 
-  unsigned char         __obuffer[16];
-  unsigned char         __ibuffer[82];
+  unsigned char         obuffer_[16];
+  unsigned char         ibuffer_[82];
 
-  int                   __obuffer_length;
-  int                   __ibuffer_length;
+  int                   obuffer_length_;
+  int                   ibuffer_length_;
 };
 
 #endif

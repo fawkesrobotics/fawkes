@@ -23,16 +23,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_UTILS_LOCKPTR_H_
-#define __CORE_UTILS_LOCKPTR_H_
+#ifndef _CORE_UTILS_LOCKPTR_H_
+#define _CORE_UTILS_LOCKPTR_H_
 
 #include <core/utils/refptr.h>
 #include <core/threading/mutex.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** LockPtr<> is a reference-counting shared lockable smartpointer.
  *
@@ -226,7 +223,7 @@ class LockPtr
    * Get reference count. Use this with care, as it may change any time.
    * @return current reference count
    */
-  inline int  refcount() const { return *__ref_count; }
+  inline int  refcount() const { return *ref_count_; }
 
   /** For use only in the internal implementation of sharedptr.
    * Get reference count pointer.
@@ -234,38 +231,38 @@ class LockPtr
    * reference count with this pointer.
    * @return pointer to refcount integer
    */
-  inline int *  refcount_ptr() const { return __ref_count; }
+  inline int *  refcount_ptr() const { return ref_count_; }
 
   /** For use only in the internal implementation of sharedptr.
    * Get reference mutex.
    * @return pointer to refcount mutex
    */
-  inline Mutex *  refmutex_ptr() const { return __ref_mutex; }
+  inline Mutex *  refmutex_ptr() const { return ref_mutex_; }
 
 
   /** Lock access to the encapsulated object. */
-  void lock() const { __obj_mutex->lock(); };
+  void lock() const { obj_mutex_->lock(); };
 
   /** Try to acquire lock for the encapsulated object.
    * @return true if the lock has been acquired, false otherwise
    */
-  bool try_lock() const { return __obj_mutex->try_lock(); }
+  bool try_lock() const { return obj_mutex_->try_lock(); }
 
   /** Unlock object mutex. */
-  void unlock() const { __obj_mutex->unlock(); }
+  void unlock() const { obj_mutex_->unlock(); }
 
   /** Get object mutex.
    * This is the same mutex that is used in the lock(), try_lock(),
    * and unlock() methods.
    * @return object mutex
    */
-  inline Mutex * objmutex_ptr() const { return __obj_mutex; }
+  inline Mutex * objmutex_ptr() const { return obj_mutex_; }
 
 private:
-  T_CppObject   *__cpp_object;
-  mutable Mutex *__obj_mutex;
-  mutable int   *__ref_count;
-  mutable Mutex *__ref_mutex;
+  T_CppObject   *cpp_object_;
+  mutable Mutex *obj_mutex_;
+  mutable int   *ref_count_;
+  mutable Mutex *ref_mutex_;
 };
 
 
@@ -275,49 +272,49 @@ private:
 template <class T_CppObject> inline
 T_CppObject* LockPtr<T_CppObject>::operator->() const
 {
-  return __cpp_object;
+  return cpp_object_;
 }
 
 template <class T_CppObject> inline
 T_CppObject* LockPtr<T_CppObject>::operator*() const
 {
-  return __cpp_object;
+  return cpp_object_;
 }
 
 template <class T_CppObject> inline
 LockPtr<T_CppObject>::LockPtr()
 :
-  __cpp_object(0),
-  __obj_mutex(0),
-  __ref_count(0),
-  __ref_mutex(0)
+  cpp_object_(0),
+  obj_mutex_(0),
+  ref_count_(0),
+  ref_mutex_(0)
 {}
 
 
 template <class T_CppObject> inline
 LockPtr<T_CppObject>::~LockPtr()
 {
-  if(__ref_count && __ref_mutex)
+  if(ref_count_ && ref_mutex_)
   {
-    __ref_mutex->lock();
+    ref_mutex_->lock();
 
-    --(*__ref_count);
+    --(*ref_count_);
 
-    if(*__ref_count == 0)
+    if(*ref_count_ == 0)
     {
-      if(__cpp_object)
+      if(cpp_object_)
       {
-        delete __cpp_object;
-        __cpp_object = 0;
+        delete cpp_object_;
+        cpp_object_ = 0;
       }
 
-      delete __ref_count;
-      delete __ref_mutex;
-      delete __obj_mutex;
-      __ref_count = 0;
-      __ref_mutex = 0;
+      delete ref_count_;
+      delete ref_mutex_;
+      delete obj_mutex_;
+      ref_count_ = 0;
+      ref_mutex_ = 0;
     } else {
-      __ref_mutex->unlock();
+      ref_mutex_->unlock();
     }
   }
 }
@@ -325,17 +322,17 @@ LockPtr<T_CppObject>::~LockPtr()
 
 template <class T_CppObject> inline
 LockPtr<T_CppObject>::LockPtr(T_CppObject* cpp_object, bool recursive_mutex)
-: __cpp_object(cpp_object),
-  __obj_mutex(0),
-  __ref_count(0),
-  __ref_mutex(0)
+: cpp_object_(cpp_object),
+  obj_mutex_(0),
+  ref_count_(0),
+  ref_mutex_(0)
 {
   if(cpp_object)
   {
-    __ref_count = new int;
-    __ref_mutex = new Mutex(Mutex::RECURSIVE);
-    __obj_mutex = new Mutex(recursive_mutex ? Mutex::RECURSIVE : Mutex::NORMAL);
-    *__ref_count = 1; //This will be decremented in the destructor.
+    ref_count_ = new int;
+    ref_mutex_ = new Mutex(Mutex::RECURSIVE);
+    obj_mutex_ = new Mutex(recursive_mutex ? Mutex::RECURSIVE : Mutex::NORMAL);
+    *ref_count_ = 1; //This will be decremented in the destructor.
   }
 }
 
@@ -343,31 +340,31 @@ LockPtr<T_CppObject>::LockPtr(T_CppObject* cpp_object, bool recursive_mutex)
 template <class T_CppObject> inline
 LockPtr<T_CppObject>::LockPtr(T_CppObject* cpp_object, Mutex *objmutex,
 			      int* refcount, Mutex *refmutex)
-: __cpp_object(cpp_object),
-  __obj_mutex(objmutex),
-  __ref_count(refcount),
-  __ref_mutex(refmutex)
+: cpp_object_(cpp_object),
+  obj_mutex_(objmutex),
+  ref_count_(refcount),
+  ref_mutex_(refmutex)
 {
-  if(__cpp_object && __obj_mutex && __ref_count && __ref_mutex) {
-    __ref_mutex->lock();
-    ++(*__ref_count);
-    __ref_mutex->unlock();
+  if(cpp_object_ && obj_mutex_ && ref_count_ && ref_mutex_) {
+    ref_mutex_->lock();
+    ++(*ref_count_);
+    ref_mutex_->unlock();
   }
 }
 
 template <class T_CppObject> inline
 LockPtr<T_CppObject>::LockPtr(const LockPtr<T_CppObject>& src)
 :
-  __cpp_object(src.__cpp_object),
-  __obj_mutex(src.__obj_mutex),
-  __ref_count(src.__ref_count),
-  __ref_mutex(src.__ref_mutex)
+  cpp_object_(src.cpp_object_),
+  obj_mutex_(src.obj_mutex_),
+  ref_count_(src.ref_count_),
+  ref_mutex_(src.ref_mutex_)
 {
-  if(__cpp_object && __obj_mutex && __ref_count && __ref_mutex)
+  if(cpp_object_ && obj_mutex_ && ref_count_ && ref_mutex_)
   {
-    __ref_mutex->lock();
-    ++(*__ref_count);
-    __ref_mutex->unlock();
+    ref_mutex_->lock();
+    ++(*ref_count_);
+    ref_mutex_->unlock();
   }
 }
 
@@ -379,18 +376,18 @@ template <class T_CppObject>
 inline
 LockPtr<T_CppObject>::LockPtr(const LockPtr<T_CastFrom>& src)
 :
-  // A different LockPtr<> will not allow us access to __cpp_object.  We need
+  // A different LockPtr<> will not allow us access to cpp_object_.  We need
   // to add a get_underlying() for this, but that would encourage incorrect
   // use, so we use the less well-known operator->() accessor:
-  __cpp_object(src.operator->()),
-  __obj_mutex(src.objmutex_ptr()),
-  __ref_count(src.refcount_ptr()),
-  __ref_mutex(src.refmutex_ptr())
+  cpp_object_(src.operator->()),
+  obj_mutex_(src.objmutex_ptr()),
+  ref_count_(src.refcount_ptr()),
+  ref_mutex_(src.refmutex_ptr())
 {
-  if(__cpp_object && __obj_mutex && __ref_count && __ref_mutex) {
-    __ref_mutex->lock();
-    ++(*__ref_count);
-    __ref_mutex->unlock();
+  if(cpp_object_ && obj_mutex_ && ref_count_ && ref_mutex_) {
+    ref_mutex_->lock();
+    ++(*ref_count_);
+    ref_mutex_->unlock();
   }
 }
 
@@ -398,20 +395,20 @@ template <class T_CppObject> inline
 void
 LockPtr<T_CppObject>::swap(LockPtr<T_CppObject>& other)
 {
-  T_CppObject *const temp = __cpp_object;
-  int *temp_count         = __ref_count; 
-  Mutex *temp_ref_mutex   = __ref_mutex;
-  Mutex *temp_obj_mutex   = __obj_mutex;
+  T_CppObject *const temp = cpp_object_;
+  int *temp_count         = ref_count_; 
+  Mutex *temp_ref_mutex   = ref_mutex_;
+  Mutex *temp_obj_mutex   = obj_mutex_;
 
-  __cpp_object = other.__cpp_object;
-  __obj_mutex  = other.__obj_mutex;
-  __ref_count  = other.__ref_count;
-  __ref_mutex  = other.__ref_mutex;
+  cpp_object_ = other.cpp_object_;
+  obj_mutex_  = other.obj_mutex_;
+  ref_count_  = other.ref_count_;
+  ref_mutex_  = other.ref_mutex_;
 
-  other.__cpp_object = temp;
-  other.__ref_count  = temp_count;
-  other.__ref_mutex  = temp_ref_mutex;
-  other.__obj_mutex  = temp_obj_mutex;
+  other.cpp_object_ = temp;
+  other.ref_count_  = temp_count;
+  other.ref_mutex_  = temp_ref_mutex;
+  other.obj_mutex_  = temp_obj_mutex;
 }
 
 template <class T_CppObject> inline
@@ -472,20 +469,20 @@ template <class T_CppObject> inline
 bool
 LockPtr<T_CppObject>::operator==(const LockPtr<T_CppObject>& src) const
 {
-  return (__cpp_object == src.__cpp_object);
+  return (cpp_object_ == src.cpp_object_);
 }
 
 template <class T_CppObject> inline
 bool
 LockPtr<T_CppObject>::operator!=(const LockPtr<T_CppObject>& src) const
 {
-  return (__cpp_object != src.__cpp_object);
+  return (cpp_object_ != src.cpp_object_);
 }
 
 template <class T_CppObject> inline
 LockPtr<T_CppObject>::operator bool() const
 {
-  return (__cpp_object != 0);
+  return (cpp_object_ != 0);
 }
 
 template <class T_CppObject> inline

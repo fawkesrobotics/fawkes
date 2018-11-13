@@ -28,9 +28,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class HistogramBlock <fvutils/statistical/histogram_block.h>
  * This class defines a file block for histograms. Additionally, the very basic routines

@@ -20,8 +20,8 @@
  */
 
 
-#ifndef __LIBS_BASEAPP_TIMING_THREAD_H_
-#define __LIBS_BASEAPP_TIMING_THREAD_H_
+#ifndef _LIBS_BASEAPP_TIMING_THREAD_H_
+#define _LIBS_BASEAPP_TIMING_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/syncpoint_manager.h>
@@ -32,9 +32,6 @@
 
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FawkesTimingThread
 : public Thread,
@@ -51,20 +48,20 @@ class FawkesTimingThread
     virtual void finalize();
 
   private:
-    Clock *__clock;
-    Time *__loop_start;
-    Time *__loop_end;
-    float __desired_loop_time_sec;
-    uint __desired_loop_time_usec;
-    float __min_loop_time_sec;
-    uint __min_loop_time_usec;
-    bool __enable_looptime_warnings;
+    Clock *clock_;
+    Time *loop_start_;
+    Time *loop_end_;
+    float desired_loop_time_sec_;
+    uint desired_loop_time_usec_;
+    float min_loop_time_sec_;
+    uint min_loop_time_usec_;
+    bool enable_looptime_warnings_;
 
-    RefPtr<SyncPoint> __syncpoint_loop_start;
-    RefPtr<SyncPoint> __syncpoint_loop_end;
+    RefPtr<SyncPoint> syncpoint_loop_start_;
+    RefPtr<SyncPoint> syncpoint_loop_end_;
 };
 
 
 } // namespace fawkes
 
-#endif // __LIBS_BASEAPP_TIMING_THREAD_H_
+#endif // LIBS_BASEAPP_TIMING_THREAD_H__

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_SCANLINE_LINE_GRID_H_
-#define __FIREVISION_SCANLINE_LINE_GRID_H_
+#ifndef _FIREVISION_SCANLINE_LINE_GRID_H_
+#define _FIREVISION_SCANLINE_LINE_GRID_H_
 
 #include "scanlinemodel.h"
 #include <fvutils/base/types.h>
@@ -31,9 +31,6 @@
 #include <list>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ROI;
 
@@ -68,20 +65,20 @@ class ScanlineLineGrid : public ScanlineModel
   virtual void set_roi(ROI* roi = NULL);
 
  private:
-  unsigned int __width;
-  unsigned int __height;
-  unsigned int __offset_ver;
-  unsigned int __offset_hor;
-  unsigned int __next_pixel;
+  unsigned int width_;
+  unsigned int height_;
+  unsigned int offset_ver_;
+  unsigned int offset_hor_;
+  unsigned int next_pixel_;
 
-  ROI*         __roi;
+  ROI*         roi_;
 
-  point_list_t           __point_list;
-  point_list_t::iterator __cur;
+  point_list_t           point_list_;
+  point_list_t::iterator cur_;
 
   void calc_coords();
 };
 
 } // end namespace firevision
 
-#endif //__FIREVISION_SCANLINE_LINE_GRID_H_
+#endif //FIREVISION_SCANLINE_LINE_GRID_H__

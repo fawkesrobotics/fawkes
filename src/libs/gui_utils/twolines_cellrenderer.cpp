@@ -31,9 +31,6 @@
 #include <cstdio>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class TwoLinesCellRenderer <gui_utils/twolines_cellrenderer.h>
  * Gtk cell renderer for two lines of text in a cell.
@@ -49,9 +46,9 @@ TwoLinesCellRenderer::TwoLinesCellRenderer()
   : Glib::ObjectBase(typeid(TwoLinesCellRenderer)),
     Gtk::CellRenderer()
 #ifdef GLIBMM_PROPERTIES_ENABLED
-    , __property_line1(*this, "line1", "")
-    , __property_line2(*this, "line2", "")
-    , __property_line2_enabled(*this, "line2_enabled", true)
+    , property_line1_(*this, "line1", "")
+    , property_line2_(*this, "line2", "")
+    , property_line2_enabled_(*this, "line2_enabled", true)
 #endif
 {
 }
@@ -69,7 +66,7 @@ TwoLinesCellRenderer::~TwoLinesCellRenderer()
 Glib::PropertyProxy<Glib::ustring>
 TwoLinesCellRenderer::property_line1()
 {
-  return __property_line1.get_proxy();
+  return property_line1_.get_proxy();
 }
 
 
@@ -79,7 +76,7 @@ TwoLinesCellRenderer::property_line1()
 Glib::PropertyProxy<Glib::ustring>
 TwoLinesCellRenderer::property_line2()
 {
-  return __property_line2.get_proxy();
+  return property_line2_.get_proxy();
 }
 
 
@@ -89,7 +86,7 @@ TwoLinesCellRenderer::property_line2()
 Glib::PropertyProxy<bool>
 TwoLinesCellRenderer::property_line2_enabled()
 {
-  return __property_line2_enabled.get_proxy();
+  return property_line2_enabled_.get_proxy();
 }
 #endif
 
@@ -121,15 +118,15 @@ TwoLinesCellRenderer::get_size_vfunc(Gtk::Widget &widget,
 {
 #ifdef GLIBMM_PROPERTIES_ENABLED
   // Compute text width
-  Glib::RefPtr<Pango::Layout> layout_ptr = widget.create_pango_layout(__property_line1);
+  Glib::RefPtr<Pango::Layout> layout_ptr = widget.create_pango_layout(property_line1_);
   Pango::Rectangle rect = layout_ptr->get_pixel_logical_extents();
 	
   int line1_width  = property_xpad() * 2 + rect.get_width();
   int line1_height = property_ypad() * 2 + rect.get_height();
   int line2_height;
 
-  if (__property_line2_enabled.get_value()) {
-    Glib::RefPtr<Pango::Layout> layout2 = widget.create_pango_layout(__property_line2);
+  if (property_line2_enabled_.get_value()) {
+    Glib::RefPtr<Pango::Layout> layout2 = widget.create_pango_layout(property_line2_);
 #if GTK_VERSION_GE(3,0)
     Pango::FontDescription font2("sans 10");
 #else
@@ -241,7 +238,7 @@ TwoLinesCellRenderer::render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
     Glib::RefPtr<Gdk::Window>::cast_dynamic(window);
 #endif
   Glib::RefPtr<Pango::Layout> layout_ptr =
-    widget.create_pango_layout(__property_line1);
+    widget.create_pango_layout(property_line1_);
   Pango::Rectangle rect1 = layout_ptr->get_pixel_logical_extents();
 #if GTK_VERSION_GE(3,0)
   Glib::RefPtr<Gtk::StyleContext> stylecontext = widget.get_style_context();
@@ -259,9 +256,9 @@ TwoLinesCellRenderer::render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
 				   layout_ptr);
 #endif
 
-  if (__property_line2_enabled.get_value()) {
+  if (property_line2_enabled_.get_value()) {
     Glib::RefPtr<Pango::Layout> layout2 =
-      widget.create_pango_layout(__property_line2);
+      widget.create_pango_layout(property_line2_);
 #if GTK_VERSION_GE(3,0)
     Pango::FontDescription font2("sans 10");
 #else

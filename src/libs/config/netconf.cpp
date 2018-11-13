@@ -78,15 +78,15 @@ CannotEnableMirroringException::CannotEnableMirroringException(const char *msg)
 NetworkConfiguration::NetworkConfiguration(FawkesNetworkClient *c,
 					   unsigned int mirror_timeout_sec)
 {
-  __mirror_timeout_sec = mirror_timeout_sec;
+  mirror_timeout_sec_ = mirror_timeout_sec;
   mutex = new Mutex();
   msg = NULL;
-  __mirror_mode = false;
-  __mirror_mode_before_connection_dead = false;
-  __mirror_init_waiting = false;
-  __mirror_init_barrier = new InterruptibleBarrier(2);
+  mirror_mode_ = false;
+  mirror_mode_before_connection_dead_ = false;
+  mirror_init_waiting_ = false;
+  mirror_init_barrier_ = new InterruptibleBarrier(2);
 
-  __connected = c->connected();
+  connected_ = c->connected();
   this->c = c;
   try {
     c->register_handler(this, FAWKES_CID_CONFIGMANAGER);
@@ -105,7 +105,7 @@ NetworkConfiguration::~NetworkConfiguration()
   if (msg != NULL) {
     msg->unref();
   }
-  delete __mirror_init_barrier;
+  delete mirror_init_barrier_;
   delete mutex;
 }
 
@@ -175,7 +175,7 @@ NetworkConfiguration::get_type(const char *path)
 {
   std::string s = "";
   mutex->lock();
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     s = mirror_config->get_type(path);
     mutex->unlock();
   } else {
@@ -231,7 +231,7 @@ NetworkConfiguration::is_list(const char *path)
 void
 NetworkConfiguration::send_get(const char *path, unsigned int msgid, unsigned int expected_reply)
 {
-  if ( ! __connected ) {
+  if ( ! connected_ ) {
     throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
 				  "client connection is not alive");
   }
@@ -265,7 +265,7 @@ NetworkConfiguration::get_float(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_float: "
 			       "Maximum length for path exceeded");
   }
-  if ( ! __connected ) {
+  if ( ! connected_ ) {
     throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
 				  "client connection is not alive");
   }
@@ -273,7 +273,7 @@ NetworkConfiguration::get_float(const char *path)
   float f;
   mutex->lock();
 
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     try {
       f = mirror_config->get_float(path);
     } catch (Exception &e) {
@@ -320,7 +320,7 @@ NetworkConfiguration::get_uint(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_uint: "
 			       "Maximum length for path exceeded");
   }
-  if ( ! __connected ) {
+  if ( ! connected_ ) {
     throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
 				  "client connection is not alive");
   }
@@ -328,7 +328,7 @@ NetworkConfiguration::get_uint(const char *path)
   unsigned int u;
   mutex->lock();
 
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     try {
       u = mirror_config->get_uint(path);
     } catch (Exception &e) {
@@ -375,7 +375,7 @@ NetworkConfiguration::get_int(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_int: "
 			       "Maximum length for path exceeded");
   }
-  if ( ! __connected ) {
+  if ( ! connected_ ) {
     throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
 				  "client connection is not alive");
   }
@@ -383,7 +383,7 @@ NetworkConfiguration::get_int(const char *path)
   int i;
   mutex->lock();
 
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     try {
       i = mirror_config->get_int(path);
     } catch (Exception &e) {
@@ -430,7 +430,7 @@ NetworkConfiguration::get_bool(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_bool: "
 			       "Maximum length for path exceeded");
   }
-  if ( ! __connected ) {
+  if ( ! connected_ ) {
     throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
 				  "client connection is not alive");
   }
@@ -438,7 +438,7 @@ NetworkConfiguration::get_bool(const char *path)
   bool b;
   mutex->lock();
 
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     try {
       b = mirror_config->get_bool(path);
     } catch (Exception &e) {
@@ -485,7 +485,7 @@ NetworkConfiguration::get_string(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_string: "
 			       "Maximum length for path exceeded");
   }
-  if ( ! __connected ) {
+  if ( ! connected_ ) {
     throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
 				  "client connection is not alive");
   }
@@ -493,7 +493,7 @@ NetworkConfiguration::get_string(const char *path)
   std::string s;
   mutex->lock();
 
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     try {
       s = mirror_config->get_string(path);
     } catch (Exception &e) {
@@ -572,7 +572,7 @@ NetworkConfiguration::get_comment(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_comment: "
 			       "Maximum length for path exceeded");
   }
-  if ( ! __connected ) {
+  if ( ! connected_ ) {
     throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
 				  "client connection is not alive");
   }
@@ -580,7 +580,7 @@ NetworkConfiguration::get_comment(const char *path)
   std::string s;
   mutex->lock();
 
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     try {
       s = mirror_config->get_comment(path);
     } catch (Exception &e) {
@@ -622,7 +622,7 @@ NetworkConfiguration::get_default_comment(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_default_comment: "
 			       "Maximum length for path exceeded");
   }
-  if ( ! __connected ) {
+  if ( ! connected_ ) {
     throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
 				  "client connection is not alive");
   }
@@ -630,7 +630,7 @@ NetworkConfiguration::get_default_comment(const char *path)
   std::string s;
   mutex->lock();
 
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     try {
       s = mirror_config->get_default_comment(path);
     } catch (Exception &e) {
@@ -673,7 +673,7 @@ NetworkConfiguration::get_value(const char *path)
     throw OutOfBoundsException("NetworkConfiguration::get_value: "
 			       "Maximum length for path exceeded");
   }
-  if ( ! __connected ) {
+  if ( ! connected_ ) {
     throw ConnectionDiedException("NetworkConfiguration: Cannot send get, "
 				  "client connection is not alive");
   }
@@ -681,7 +681,7 @@ NetworkConfiguration::get_value(const char *path)
   Configuration::ValueIterator *i;
   mutex->lock();
 
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     try {
       i = mirror_config->get_value(path);
     } catch (Exception &e) {
@@ -723,7 +723,7 @@ NetworkConfiguration::set_value_internal(unsigned int msg_type,
     throw OutOfBoundsException("NetworkConfiguration::set_float: "
 			       "Maximum length for path exceeded");
   }
-  if ( ! __connected ) {
+  if ( ! connected_ ) {
     throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
 				  "client connection is not alive");
   }
@@ -740,7 +740,7 @@ NetworkConfiguration::set_value_internal(unsigned int msg_type,
   memcpy(mdata, data, data_size);
 
   c->enqueue_and_wait(omsg);
-  if ( ! __mirror_mode && (msg != NULL) ) {
+  if ( ! mirror_mode_ && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
   }
@@ -919,7 +919,7 @@ NetworkConfiguration::erase_internal(const char *path, bool is_default)
     throw OutOfBoundsException("NetworkConfiguration::erase: "
 			       "Maximum length for path exceeded");
   }
-  if ( ! __connected ) {
+  if ( ! connected_ ) {
     throw ConnectionDiedException("NetworkConfiguration: Cannot set value, "
 				  "client connection is not alive");
   }
@@ -932,7 +932,7 @@ NetworkConfiguration::erase_internal(const char *path, bool is_default)
   m->cp.is_default = is_default ? 1 : 0;
   strncpy(m->cp.path, path, CONFIG_MSG_PATH_LENGTH-1);
   c->enqueue_and_wait(omsg);
-  if ( ! __mirror_mode && (msg != NULL) ) {
+  if ( ! mirror_mode_ && (msg != NULL) ) {
     msg->unref();
     msg = NULL;
   }
@@ -970,7 +970,7 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 {
   if ( m->cid() == FAWKES_CID_CONFIGMANAGER ) {
 	  
-    if ( __mirror_mode ) {
+    if ( mirror_mode_ ) {
       switch (m->msgid()) {
       case MSG_CONFIG_LIST:
 	// put all values into mirror database
@@ -1104,8 +1104,8 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 	  }
 	}
 	// initial answer received -> wake up set_mirror_mode()
-	if (__mirror_init_waiting) {
-	  __mirror_init_barrier->wait();
+	if (mirror_init_waiting_) {
+	  mirror_init_barrier_->wait();
 	}
 	break;
 
@@ -1284,8 +1284,8 @@ NetworkConfiguration::inbound_received(FawkesNetworkMessage *m,
 void
 NetworkConfiguration::connection_died(unsigned int id) throw()
 {
-  __connected = false;
-  __mirror_mode_before_connection_dead = __mirror_mode;
+  connected_ = false;
+  mirror_mode_before_connection_dead_ = mirror_mode_;
   set_mirror_mode(false);
   mutex->unlock(); //Just in case...
 }
@@ -1294,8 +1294,8 @@ NetworkConfiguration::connection_died(unsigned int id) throw()
 void
 NetworkConfiguration::connection_established(unsigned int id) throw()
 {
-  __connected = true;
-  set_mirror_mode(__mirror_mode_before_connection_dead);
+  connected_ = true;
+  set_mirror_mode(mirror_mode_before_connection_dead_);
 }
 
 
@@ -1304,7 +1304,7 @@ NetworkConfiguration::add_change_handler(ConfigurationChangeHandler *h)
 {
   Configuration::add_change_handler(h);
 
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     mirror_config->add_change_handler(h);
   }
 }
@@ -1314,7 +1314,7 @@ void
 NetworkConfiguration::rem_change_handler(ConfigurationChangeHandler *h)
 {
   Configuration::rem_change_handler(h);
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     mirror_config->rem_change_handler(h);
   }
 }
@@ -1327,18 +1327,18 @@ void
 NetworkConfiguration::set_mirror_mode(bool mirror)
 {
   if ( mirror ) {
-    if ( ! __mirror_mode ) {
+    if ( ! mirror_mode_ ) {
 
-      if ( ! __connected ) {
+      if ( ! connected_ ) {
 	throw CannotEnableMirroringException("Client connection is dead");
       }
 
       mirror_config = new MemoryConfiguration();
 
-      __mirror_init_waiting = true;
+      mirror_init_waiting_ = true;
       mutex->lock();
 
-      __mirror_mode = true;
+      mirror_mode_ = true;
 
       // subscribe
       FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
@@ -1346,21 +1346,21 @@ NetworkConfiguration::set_mirror_mode(bool mirror)
       c->enqueue(omsg);
 
       // wait until all data has been received (or timeout)
-      if (! __mirror_init_barrier->wait(__mirror_timeout_sec, 0)) {
+      if (! mirror_init_barrier_->wait(mirror_timeout_sec_, 0)) {
         // timeout
-	__mirror_init_waiting = false;
+	mirror_init_waiting_ = false;
         delete mirror_config;
         mutex->unlock();
         throw CannotEnableMirroringException("Didn't receive data in time");
       }
-      __mirror_init_waiting = false;
+      mirror_init_waiting_ = false;
       mutex->unlock();
     }
   } else {
-    if ( __mirror_mode ) {
-      __mirror_mode = false;
+    if ( mirror_mode_ ) {
+      mirror_mode_ = false;
       // unsubscribe
-      if ( __connected ) {
+      if ( connected_ ) {
 	FawkesNetworkMessage *omsg = new FawkesNetworkMessage(FAWKES_CID_CONFIGMANAGER,
 							      MSG_CONFIG_UNSUBSCRIBE);
 	c->enqueue(omsg);
@@ -1403,7 +1403,7 @@ NetworkConfiguration::try_dump()
 Configuration::ValueIterator *
 NetworkConfiguration::iterator()
 {
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     return mirror_config->iterator();
   } else {
     throw Exception("NetworkConfiguration: Iterating only supported in mirror mode");
@@ -1421,7 +1421,7 @@ NetworkConfiguration::iterator()
 Configuration::ValueIterator *
 NetworkConfiguration::iterator_default()
 {
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     return mirror_config->iterator_default();
   } else {
     throw Exception("NetworkConfiguration: Iterating only supported in mirror mode");
@@ -1439,7 +1439,7 @@ NetworkConfiguration::iterator_default()
 Configuration::ValueIterator *
 NetworkConfiguration::iterator_hostspecific()
 {
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     return mirror_config->iterator_hostspecific();
   } else {
     throw Exception("NetworkConfiguration: Iterating only supported in mirror mode");
@@ -1450,7 +1450,7 @@ NetworkConfiguration::iterator_hostspecific()
 Configuration::ValueIterator *
 NetworkConfiguration::search(const char *path)
 {
-  if ( __mirror_mode ) {
+  if ( mirror_mode_ ) {
     return mirror_config->search(path);
   } else {
     throw Exception("NetworkConfiguration: Searching only supported in mirror mode");

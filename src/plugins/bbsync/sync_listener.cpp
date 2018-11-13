@@ -53,26 +53,26 @@ SyncInterfaceListener::SyncInterfaceListener(fawkes::Logger *logger,
 					     fawkes::BlackBoard *writer_bb)
   : BlackBoardInterfaceListener("SyncInterfaceListener(%s-%s)", writer->uid(), reader->id())
 {
-  __logger    = logger;
-  __reader    = reader;
-  __writer    = writer;
-  __reader_bb = reader_bb;
-  __writer_bb = writer_bb;
+  logger_    = logger;
+  reader_    = reader;
+  writer_    = writer;
+  reader_bb_ = reader_bb;
+  writer_bb_ = writer_bb;
 
-  bbil_add_data_interface(__reader);
-  bbil_add_message_interface(__writer);
-  bb_interface_data_changed(__reader);
+  bbil_add_data_interface(reader_);
+  bbil_add_message_interface(writer_);
+  bb_interface_data_changed(reader_);
 
-  __reader_bb->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
-  __writer_bb->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+  reader_bb_->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
+  writer_bb_->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
 }
 
 
 /** Destructor. */
 SyncInterfaceListener::~SyncInterfaceListener()
 {
-  __reader_bb->unregister_listener(this);
-  __writer_bb->unregister_listener(this);
+  reader_bb_->unregister_listener(this);
+  writer_bb_->unregister_listener(this);
 }
 
 
@@ -81,23 +81,23 @@ SyncInterfaceListener::bb_interface_message_received(Interface *interface,
 						     Message *message) throw()
 {
   try {
-    if ( interface == __writer ) {
-      //__logger->log_debug(bbil_name(), "Forwarding message");
+    if ( interface == writer_ ) {
+      //logger_->log_debug(bbil_name(), "Forwarding message");
       Message *m = message->clone();
       m->set_hops(message->hops());
       m->ref();
-      __reader->msgq_enqueue(m);
+      reader_->msgq_enqueue(m);
       message->set_id(m->id());
       m->unref();
       return false;
     } else {
       // Don't know why we were called, let 'em enqueue
-	__logger->log_error(bbil_name(), "Message received for unknown interface");
+	logger_->log_error(bbil_name(), "Message received for unknown interface");
       return true;
     }
   } catch (Exception &e) {
-      __logger->log_error(bbil_name(), "Exception when message received");
-    __logger->log_error("SyncInterfaceListener", e);
+      logger_->log_error(bbil_name(), "Exception when message received");
+    logger_->log_error("SyncInterfaceListener", e);
     return false;
   }
 }
@@ -107,17 +107,17 @@ void
 SyncInterfaceListener::bb_interface_data_changed(Interface *interface) throw()
 {
   try {
-    if ( interface == __reader ) {
-      //__logger->log_debug(bbil_name(), "Copying data");
-      __reader->read();
-      __writer->copy_values(__reader);
-      __writer->write();
+    if ( interface == reader_ ) {
+      //logger_->log_debug(bbil_name(), "Copying data");
+      reader_->read();
+      writer_->copy_values(reader_);
+      writer_->write();
     } else {
       // Don't know why we were called, let 'em enqueue
-      __logger->log_error(bbil_name(), "Data changed for unknown interface");
+      logger_->log_error(bbil_name(), "Data changed for unknown interface");
     }
   } catch (Exception &e) {
-    __logger->log_error(bbil_name(), "Exception when data changed");
-    __logger->log_error(bbil_name(), e);
+    logger_->log_error(bbil_name(), "Exception when data changed");
+    logger_->log_error(bbil_name(), e);
   }
 }

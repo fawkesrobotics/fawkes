@@ -25,9 +25,6 @@
 #include <netcomm/service_discovery/service.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class AvahiDispatcher <gui_utils/avahi_dispatcher.h>
@@ -40,11 +37,11 @@ namespace fawkes {
 /** Constructor. */
 AvahiDispatcher::AvahiDispatcher()
 {
-  __dispatcher_all_for_now.connect(sigc::mem_fun(*this, &AvahiDispatcher::on_all_for_now));
-  __dispatcher_cache_exhausted.connect(sigc::mem_fun(*this, &AvahiDispatcher::on_cache_exhausted));
-  __dispatcher_browse_failed.connect(sigc::mem_fun(*this, &AvahiDispatcher::on_browse_failed));
-  __dispatcher_service_added.connect(sigc::mem_fun(*this, &AvahiDispatcher::on_service_added));
-  __dispatcher_service_removed.connect(sigc::mem_fun(*this, &AvahiDispatcher::on_service_removed));
+  dispatcher_all_for_now_.connect(sigc::mem_fun(*this, &AvahiDispatcher::on_all_for_now));
+  dispatcher_cache_exhausted_.connect(sigc::mem_fun(*this, &AvahiDispatcher::on_cache_exhausted));
+  dispatcher_browse_failed_.connect(sigc::mem_fun(*this, &AvahiDispatcher::on_browse_failed));
+  dispatcher_service_added_.connect(sigc::mem_fun(*this, &AvahiDispatcher::on_service_added));
+  dispatcher_service_removed_.connect(sigc::mem_fun(*this, &AvahiDispatcher::on_service_removed));
 }
 
 
@@ -54,7 +51,7 @@ AvahiDispatcher::AvahiDispatcher()
 sigc::signal<void>
 AvahiDispatcher::signal_all_for_now()
 {
-  return __signal_all_for_now;
+  return signal_all_for_now_;
 }
 
 
@@ -64,7 +61,7 @@ AvahiDispatcher::signal_all_for_now()
 sigc::signal<void>
 AvahiDispatcher::signal_cache_exhausted()
 {
-  return __signal_cache_exhausted;
+  return signal_cache_exhausted_;
 }
 
 
@@ -74,7 +71,7 @@ AvahiDispatcher::signal_cache_exhausted()
 sigc::signal<void>
 AvahiDispatcher::signal_browse_failed()
 {
-  return __signal_browse_failed;
+  return signal_browse_failed_;
 }
 
 
@@ -84,7 +81,7 @@ AvahiDispatcher::signal_browse_failed()
 sigc::signal<void, NetworkService *>
 AvahiDispatcher::signal_service_added()
 {
-  return __signal_service_added;
+  return signal_service_added_;
 }
 
 
@@ -94,21 +91,21 @@ AvahiDispatcher::signal_service_added()
 sigc::signal<void, NetworkService *>
 AvahiDispatcher::signal_service_removed()
 {
-  return __signal_service_removed;
+  return signal_service_removed_;
 }
 
 
 void
 AvahiDispatcher::all_for_now()
 {
-  __dispatcher_all_for_now();
+  dispatcher_all_for_now_();
 }
 
 
 void
 AvahiDispatcher::cache_exhausted()
 {
-  __dispatcher_cache_exhausted();
+  dispatcher_cache_exhausted_();
 }
 
 
@@ -117,7 +114,7 @@ AvahiDispatcher::browse_failed(const char *name,
 			       const char *type,
 			       const char *domain)
 {
-  __dispatcher_browse_failed();
+  dispatcher_browse_failed_();
 }
 
 
@@ -135,8 +132,8 @@ AvahiDispatcher::service_added(const char *name,
 {
   NetworkService *s = new NetworkService(name, type, domain, host_name, port,
 					 addr, addr_size, txt);
-  __queue_service_added.push_locked(s);
-  __dispatcher_service_added();
+  queue_service_added_.push_locked(s);
+  dispatcher_service_added_();
 }
 
 
@@ -146,53 +143,53 @@ AvahiDispatcher::service_removed(const char *name,
 				 const char *domain)
 {
   NetworkService *s = new NetworkService(name, type, domain);
-  __queue_service_removed.push_locked(s);
-  __dispatcher_service_removed();
+  queue_service_removed_.push_locked(s);
+  dispatcher_service_removed_();
 }
 
 
 void
 AvahiDispatcher::on_all_for_now()
 {
-  __signal_all_for_now.emit();
+  signal_all_for_now_.emit();
 }
 
 void
 AvahiDispatcher::on_cache_exhausted()
 {
-  __signal_cache_exhausted.emit();
+  signal_cache_exhausted_.emit();
 }
 
 void
 AvahiDispatcher::on_browse_failed()
 {
-  __signal_browse_failed.emit();
+  signal_browse_failed_.emit();
 }
 
 void
 AvahiDispatcher::on_service_added()
 {
-  __queue_service_added.lock();
-  while (! __queue_service_added.empty()) {
-    NetworkService *s = __queue_service_added.front();
-    __signal_service_added.emit(s);
+  queue_service_added_.lock();
+  while (! queue_service_added_.empty()) {
+    NetworkService *s = queue_service_added_.front();
+    signal_service_added_.emit(s);
     delete s;
-    __queue_service_added.pop();
+    queue_service_added_.pop();
   }
-  __queue_service_added.unlock();
+  queue_service_added_.unlock();
 }
 
 void
 AvahiDispatcher::on_service_removed()
 {
-  __queue_service_removed.lock();
-  while (! __queue_service_removed.empty()) {
-    NetworkService *s = __queue_service_removed.front();
-    __signal_service_removed.emit(s);
+  queue_service_removed_.lock();
+  while (! queue_service_removed_.empty()) {
+    NetworkService *s = queue_service_removed_.front();
+    signal_service_removed_.emit(s);
     delete s;
-    __queue_service_removed.pop();
+    queue_service_removed_.pop();
   }
-  __queue_service_removed.unlock();
+  queue_service_removed_.unlock();
 }
 
 } // end namespace fawkes

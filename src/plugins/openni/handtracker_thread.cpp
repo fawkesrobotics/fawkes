@@ -102,39 +102,39 @@ OpenNiHandTrackerThread::init()
 {
   MutexLocker lock(openni.objmutex_ptr());
 
-  __hand_gen = new xn::HandsGenerator();
+  hand_gen_ = new xn::HandsGenerator();
 #if __cplusplus >= 201103L
-  std::unique_ptr<xn::HandsGenerator> handgen_uniqueptr(__hand_gen);
-  std::unique_ptr<xn::GestureGenerator> gesturegen_uniqueptr(__gesture_gen);
-  std::unique_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
+  std::unique_ptr<xn::HandsGenerator> handgen_uniqueptr(hand_gen_);
+  std::unique_ptr<xn::GestureGenerator> gesturegen_uniqueptr(gesture_gen_);
+  std::unique_ptr<xn::DepthGenerator> depthgen_uniqueptr(depth_gen_);
 #else
-  std::auto_ptr<xn::HandsGenerator> handgen_uniqueptr(__hand_gen);
-  std::auto_ptr<xn::GestureGenerator> gesturegen_uniqueptr(__gesture_gen);
-  std::auto_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
+  std::auto_ptr<xn::HandsGenerator> handgen_uniqueptr(hand_gen_);
+  std::auto_ptr<xn::GestureGenerator> gesturegen_uniqueptr(gesture_gen_);
+  std::auto_ptr<xn::DepthGenerator> depthgen_uniqueptr(depth_gen_);
 #endif
 
-  __gesture_gen = new xn::GestureGenerator();
-  __depth_gen = new xn::DepthGenerator();
+  gesture_gen_ = new xn::GestureGenerator();
+  depth_gen_ = new xn::DepthGenerator();
 
   XnStatus st;
 
-  fawkes::openni::get_resolution(config, __width, __height);
+  fawkes::openni::get_resolution(config, width_, height_);
 
-  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_HANDS, __hand_gen);
-  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_DEPTH, __depth_gen);
-  //fawkes::openni::setup_map_generator(*__depth_gen, config);
-  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_GESTURE, __gesture_gen);
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_HANDS, hand_gen_);
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_DEPTH, depth_gen_);
+  //fawkes::openni::setup_map_generator(*depth_gen_, config);
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_GESTURE, gesture_gen_);
 
-  st = __hand_gen->RegisterHandCallbacks(cb_hand_create, cb_hand_update,
-					 cb_hand_destroy, this, __hand_cb_handle);
+  st = hand_gen_->RegisterHandCallbacks(cb_hand_create, cb_hand_update,
+					 cb_hand_destroy, this, hand_cb_handle_);
   if (st != XN_STATUS_OK) {
     throw Exception("Failed to register hand callbacks (%s)",
 		    xnGetStatusString(st));
   }
 
-  st = __gesture_gen->RegisterGestureCallbacks(cb_gesture_recognized,
+  st = gesture_gen_->RegisterGestureCallbacks(cb_gesture_recognized,
 					       cb_gesture_progress,
-					       this, __gesture_cb_handle);
+					       this, gesture_cb_handle_);
   if (st != XN_STATUS_OK) {
     throw Exception("Failed to register gesture callbacks (%s)",
 		    xnGetStatusString(st));
@@ -145,7 +145,7 @@ OpenNiHandTrackerThread::init()
   for (unsigned int i = 0; i < num_g; ++i) {
     gest[i] = new XnChar[64];
   }
-  if ((st = __gesture_gen->EnumerateAllGestures(gest, 64, num_g)) != XN_STATUS_OK)
+  if ((st = gesture_gen_->EnumerateAllGestures(gest, 64, num_g)) != XN_STATUS_OK)
   {
     logger->log_warn(name(), "Failed to enumerate gestures: %s",
 		     xnGetStatusString(st));
@@ -160,19 +160,19 @@ OpenNiHandTrackerThread::init()
   }
 
   logger->log_debug(name(), "Enabling gesture 'Wave'");
-  __gesture_gen->AddGesture("Wave", NULL);
-  __enabled_gesture["Wave"] = true;
+  gesture_gen_->AddGesture("Wave", NULL);
+  enabled_gesture_["Wave"] = true;
   logger->log_debug(name(), "Enabling gesture 'Click'");
-  __gesture_gen->AddGesture("Click", NULL);
-  __enabled_gesture["Click"] = true;
+  gesture_gen_->AddGesture("Click", NULL);
+  enabled_gesture_["Click"] = true;
 
-  __hand_gen->StartGenerating();
-  __gesture_gen->StartGenerating();
+  hand_gen_->StartGenerating();
+  gesture_gen_->StartGenerating();
 
   // XnChar tmp[1000];
   // XnUInt64 tmpi;
-  // //  if (__gesture_gen->GetIntProperty("AdaptiveDownscaleClosestVGA", tmpi) != XN_STATUS_OK) {
-  // if ((st = __gesture_gen->GetStringProperty("Resolution", tmp, 1000)) == XN_STATUS_OK) {
+  // //  if (gesture_gen_->GetIntProperty("AdaptiveDownscaleClosestVGA", tmpi) != XN_STATUS_OK) {
+  // if ((st = gesture_gen_->GetStringProperty("Resolution", tmp, 1000)) == XN_STATUS_OK) {
   //   logger->log_debug(name(), "Resolution: %u", tmp);
   // } else {
   //   logger->log_debug(name(), "Failed to get resolution: %s",
@@ -189,38 +189,38 @@ void
 OpenNiHandTrackerThread::finalize()
 {
   HandMap::iterator i;
-  for (i = __hands.begin(); i != __hands.end(); ++i) {
-    __hand_gen->StopTracking(i->first);
+  for (i = hands_.begin(); i != hands_.end(); ++i) {
+    hand_gen_->StopTracking(i->first);
     i->second->set_visible(false);
     i->second->write();
     blackboard->close(i->second);
   }
-  __hands.clear();
+  hands_.clear();
 
   std::map<std::string, bool>::iterator g;
-  for (g = __enabled_gesture.begin(); g != __enabled_gesture.end(); ++g) {
+  for (g = enabled_gesture_.begin(); g != enabled_gesture_.end(); ++g) {
     if (g->second) {
-      __gesture_gen->RemoveGesture(g->first.c_str());
+      gesture_gen_->RemoveGesture(g->first.c_str());
     }
   }
 
   // we do not stop generating, we don't know if there is no other plugin
   // using the node.
-  delete __hand_gen;
-  delete __gesture_gen;
+  delete hand_gen_;
+  delete gesture_gen_;
 }
 
 
 void
 OpenNiHandTrackerThread::loop()
 {
-  if (! __hand_gen->IsDataNew())  return;
+  if (! hand_gen_->IsDataNew())  return;
 
   HandMap::iterator i;
-  for (i = __hands.begin(); i != __hands.end(); ++i) {
-    if (__needs_write[i->first]) {
+  for (i = hands_.begin(); i != hands_.end(); ++i) {
+    if (needs_write_[i->first]) {
       i->second->write();
-      __needs_write[i->first] = false;
+      needs_write_[i->first] = false;
     }
   }
 }
@@ -229,23 +229,23 @@ void
 OpenNiHandTrackerThread::update_hand(XnUserID &user, const XnPoint3D *position)
 {
   // convert to Fawkes coordinates
-  __hands[user]->set_visible(true);
-  __hands[user]->set_relative_x( position->Z * 0.001);
-  __hands[user]->set_relative_y(-position->X * 0.001);
-  __hands[user]->set_relative_z( position->Y * 0.001);
+  hands_[user]->set_visible(true);
+  hands_[user]->set_relative_x( position->Z * 0.001);
+  hands_[user]->set_relative_y(-position->X * 0.001);
+  hands_[user]->set_relative_z( position->Y * 0.001);
 
   XnPoint3D proj;
-  fawkes::openni::world2projection(__depth_gen, 1, position, &proj,
-				   __width, __height);
-  __hands[user]->set_world_x(proj.X);
-  __hands[user]->set_world_y(proj.Y);
-  __hands[user]->set_world_z(user);
+  fawkes::openni::world2projection(depth_gen_, 1, position, &proj,
+				   width_, height_);
+  hands_[user]->set_world_x(proj.X);
+  hands_[user]->set_world_y(proj.Y);
+  hands_[user]->set_world_z(user);
 
-  __needs_write[user] = true;
+  needs_write_[user] = true;
 
   //logger->log_debug(name(), "New hand pos: (%f,%f,%f)",
-  //		    __hands[user]->relative_x(), __hands[user]->relative_y(),
-  //		    __hands[user]->relative_z());
+  //		    hands_[user]->relative_x(), hands_[user]->relative_y(),
+  //		    hands_[user]->relative_z());
 }
 
 
@@ -259,7 +259,7 @@ void
 OpenNiHandTrackerThread::hand_create(XnUserID &user, const XnPoint3D *position,
 				     XnFloat &time)
 {
-  if (__hands.find(user) != __hands.end()) {
+  if (hands_.find(user) != hands_.end()) {
     logger->log_error(name(), "New hand ID %u, but interface already exists", user);
     return;
   }
@@ -273,7 +273,7 @@ OpenNiHandTrackerThread::hand_create(XnUserID &user, const XnPoint3D *position,
   try {
     logger->log_debug(name(), "Opening interface 'ObjectPositionInterface::%s'",
 		      ifid);
-    __hands[user] = blackboard->open_for_writing<ObjectPositionInterface>(ifid);
+    hands_[user] = blackboard->open_for_writing<ObjectPositionInterface>(ifid);
     update_hand(user, position);
   } catch (Exception &e) {
     logger->log_warn(name(), "Failed to open interface, exception follows");
@@ -293,7 +293,7 @@ void
 OpenNiHandTrackerThread::hand_update(XnUserID &user, const XnPoint3D *position,
 				     XnFloat &time)
 {
-  if (__hands.find(user) == __hands.end()) {
+  if (hands_.find(user) == hands_.end()) {
     logger->log_error(name(), "Got update for untracked hand %u", user);
     return;
   }
@@ -310,29 +310,29 @@ OpenNiHandTrackerThread::hand_update(XnUserID &user, const XnPoint3D *position,
 void
 OpenNiHandTrackerThread::hand_destroy(XnUserID &user, XnFloat &time)
 {
-  if (__hands.find(user) == __hands.end()) {
+  if (hands_.find(user) == hands_.end()) {
     logger->log_error(name(), "Got destroy for untracked hand %u", user);
     return;
   }
 
-  //__hand_gen->StopTracking(user);
+  //hand_gen_->StopTracking(user);
 
-  __hands[user]->set_visible(false);
-  __hands[user]->write();
+  hands_[user]->set_visible(false);
+  hands_[user]->write();
 
   logger->log_error(name(), "Lost hand ID %u, closing interface '%s'",
-		    user, __hands[user]->uid());
+		    user, hands_[user]->uid());
 
-  blackboard->close(__hands[user]);
-  __needs_write.erase(user);
-  __hands.erase(user);
+  blackboard->close(hands_[user]);
+  needs_write_.erase(user);
+  hands_.erase(user);
 
   std::map<std::string, bool>::iterator i;
-  for (i = __enabled_gesture.begin(); i != __enabled_gesture.end(); ++i) {
+  for (i = enabled_gesture_.begin(); i != enabled_gesture_.end(); ++i) {
     if (! i->second) {
       logger->log_debug(name(), "Enabling gesture '%s'", i->first.c_str());
       i->second = true;
-      __gesture_gen->AddGesture(i->first.c_str(), NULL);
+      gesture_gen_->AddGesture(i->first.c_str(), NULL);
     }
   }
 }
@@ -352,14 +352,14 @@ OpenNiHandTrackerThread::gesture_recognized(const XnChar *gesture_name,
 		    gesture_name);
 
   std::map<std::string, bool>::iterator i;
-  for (i = __enabled_gesture.begin(); i != __enabled_gesture.end(); ++i) {
+  for (i = enabled_gesture_.begin(); i != enabled_gesture_.end(); ++i) {
     if (i->second) {
       logger->log_debug(name(), "Disabling gesture '%s'", i->first.c_str());
       i->second = false;
-      __gesture_gen->RemoveGesture(i->first.c_str());
+      gesture_gen_->RemoveGesture(i->first.c_str());
     }
   }
-  __hand_gen->StartTracking(*end_position);
+  hand_gen_->StartTracking(*end_position);
 }
 
 

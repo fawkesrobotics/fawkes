@@ -45,23 +45,20 @@
 #include <dirent.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /// @cond INTERNALS
 class plname_eq
 {
 public:
   plname_eq(std::string name) {
-    __name = name;
+    name_ = name;
   }
   bool operator()(Plugin *plugin)
   {
-    return (__name == plugin->name());
+    return (name_ == plugin->name());
   }
 private:
-  std::string __name;
+  std::string name_;
 };
 /// @endcond INTERNALS
 
@@ -91,27 +88,27 @@ PluginManager::PluginManager(ThreadCollector *thread_collector,
 			     bool init_cache)
   : ConfigurationChangeHandler(meta_plugin_prefix)
 {
-  __mutex = new Mutex();
+  mutex_ = new Mutex();
   this->thread_collector = thread_collector;
   plugin_loader = new PluginLoader(PLUGINDIR, config);
   plugin_loader->get_module_manager()->set_open_flags(module_flags);
   next_plugin_id = 1;
-  __config = config;
-  __meta_plugin_prefix = meta_plugin_prefix;
+  config_ = config;
+  meta_plugin_prefix_ = meta_plugin_prefix;
 
   if (init_cache) {
     init_pinfo_cache();
   }
 
-  __config->add_change_handler(this);
+  config_->add_change_handler(this);
 
-  __fam_thread = new FamThread();
+  fam_thread_ = new FamThread();
 #ifdef HAVE_INOTIFY
-  RefPtr<FileAlterationMonitor> fam = __fam_thread->get_fam();
+  RefPtr<FileAlterationMonitor> fam = fam_thread_->get_fam();
   fam->add_filter("^[^.].*\\." SOEXT "$");
   fam->add_listener(this);
   fam->watch_dir(PLUGINDIR);
-  __fam_thread->start();
+  fam_thread_->start();
 #else
   LibLogger::log_warn("PluginManager", "File alteration monitoring not available, "
 					"cannot detect changed plugins on disk.");
@@ -123,14 +120,14 @@ PluginManager::PluginManager(ThreadCollector *thread_collector,
 PluginManager::~PluginManager()
 {
 #ifdef HAVE_INOTIFY
-  __fam_thread->cancel();
-  __fam_thread->join();
+  fam_thread_->cancel();
+  fam_thread_->join();
 #endif
-  delete __fam_thread;
-  __config->rem_change_handler(this);
-  __pinfo_cache.lock();
-  __pinfo_cache.clear();
-  __pinfo_cache.unlock();
+  delete fam_thread_;
+  config_->rem_change_handler(this);
+  pinfo_cache_.lock();
+  pinfo_cache_.clear();
+  pinfo_cache_.unlock();
   // Unload all plugins
   for (rpit = plugins.rbegin(); rpit != plugins.rend(); ++rpit) {
     try {
@@ -146,7 +143,7 @@ PluginManager::~PluginManager()
   plugins.clear();
   plugin_ids.clear();
   delete plugin_loader;
-  delete __mutex;
+  delete mutex_;
 }
 
 
@@ -164,7 +161,7 @@ PluginManager::set_module_flags(Module::ModuleFlags flags)
 void
 PluginManager::init_pinfo_cache()
 {
-  __pinfo_cache.lock();
+  pinfo_cache_.lock();
 
   DIR *plugin_dir;
   struct dirent* dirp;
@@ -180,7 +177,7 @@ PluginManager::init_pinfo_cache()
     std::string plugin_name = std::string(file_name).substr(0, strlen(file_name) - strlen(file_ext));
     if (NULL != pos) {
       try {
-	__pinfo_cache.push_back(make_pair(plugin_name,
+	pinfo_cache_.push_back(make_pair(plugin_name,
 					  plugin_loader->get_description(plugin_name.c_str())));
       } catch (Exception &e) {
 	LibLogger::log_warn("PluginManager", "Could not get description of plugin %s, "
@@ -193,21 +190,21 @@ PluginManager::init_pinfo_cache()
   closedir(plugin_dir);
 
   try {
-    Configuration::ValueIterator *i = __config->search(__meta_plugin_prefix.c_str());
+    Configuration::ValueIterator *i = config_->search(meta_plugin_prefix_.c_str());
     while (i->next()) {
       if (i->is_string()) {
-	std::string p = std::string(i->path()).substr(__meta_plugin_prefix.length());
+	std::string p = std::string(i->path()).substr(meta_plugin_prefix_.length());
 	std::string s = std::string("Meta: ") + i->get_string();
 
-	__pinfo_cache.push_back(make_pair(p, s));
+	pinfo_cache_.push_back(make_pair(p, s));
       }
     }
     delete i;
   } catch (Exception &e) {
   }
 
-  __pinfo_cache.sort();
-  __pinfo_cache.unlock();
+  pinfo_cache_.sort();
+  pinfo_cache_.unlock();
 }
 
 /** Generate list of all available plugins.
@@ -221,7 +218,7 @@ PluginManager::get_available_plugins()
   std::list<std::pair<std::string, std::string> > rv;
 
   std::list<std::pair<std::string, std::string> >::iterator i;
-  for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
+  for (i = pinfo_cache_.begin(); i != pinfo_cache_.end(); ++i) {
     rv.push_back(*i);
   }
 
@@ -241,11 +238,11 @@ PluginManager::get_loaded_plugins()
     rv.push_back((*pit)->name());
   }
   plugins.unlock();
-  __meta_plugins.lock();
-  for (__mpit = __meta_plugins.begin(); __mpit != __meta_plugins.end(); ++__mpit) {
-    rv.push_back(__mpit->first);
+  meta_plugins_.lock();
+  for (mpit_ = meta_plugins_.begin(); mpit_ != meta_plugins_.end(); ++mpit_) {
+    rv.push_back(mpit_->first);
   }
-  __meta_plugins.unlock();
+  meta_plugins_.unlock();
 
   return rv;
 }
@@ -262,7 +259,7 @@ PluginManager::is_loaded(const std::string& plugin_name)
     return true;
   } else {
     // Could still be a meta plugin
-    return (__meta_plugins.find(plugin_name) != __meta_plugins.end());
+    return (meta_plugins_.find(plugin_name) != meta_plugins_.end());
   }
 }
 
@@ -274,8 +271,8 @@ bool
 PluginManager::is_meta_plugin(const std::string& plugin_name)
 {
 	try {
-		std::string meta_plugin_path = __meta_plugin_prefix + plugin_name;
-		return (__config->is_string(meta_plugin_path.c_str()));
+		std::string meta_plugin_path = meta_plugin_prefix_ + plugin_name;
+		return (config_->is_string(meta_plugin_path.c_str()));
 	} catch (ConfigEntryNotFoundException &e) {
 		return false;
 	}
@@ -288,8 +285,8 @@ PluginManager::is_meta_plugin(const std::string& plugin_name)
 std::list<std::string>
 PluginManager::get_meta_plugin_children(const std::string& plugin_name)
 {
-	std::string meta_plugin_path = __meta_plugin_prefix + plugin_name;
-	std::string meta_plugin_str  = __config->get_string(meta_plugin_path.c_str());
+	std::string meta_plugin_path = meta_plugin_prefix_ + plugin_name;
+	std::string meta_plugin_str  = config_->get_string(meta_plugin_path.c_str());
 	return parse_plugin_list(meta_plugin_str.c_str());
 }
 
@@ -345,17 +342,17 @@ PluginManager::load(const std::list<std::string> &plugin_list)
 		if ( i->length() == 0 ) continue;
 
 		bool try_real_plugin = true;
-		if ( __meta_plugins.find(*i) == __meta_plugins.end() ) {
-			std::string meta_plugin = __meta_plugin_prefix + *i;
+		if ( meta_plugins_.find(*i) == meta_plugins_.end() ) {
+			std::string meta_plugin = meta_plugin_prefix_ + *i;
 			bool found_meta = false;
 			std::list<std::string> pset;
 			try {
-				if (__config->is_list(meta_plugin.c_str())) {
-					std::vector<std::string> tmp = __config->get_strings(meta_plugin.c_str());
+				if (config_->is_list(meta_plugin.c_str())) {
+					std::vector<std::string> tmp = config_->get_strings(meta_plugin.c_str());
 					pset.insert(pset.end(), tmp.begin(), tmp.end());
 				}
 				else
-					pset = parse_plugin_list(__config->get_string(meta_plugin.c_str()).c_str());
+					pset = parse_plugin_list(config_->get_string(meta_plugin.c_str()).c_str());
 				found_meta = true;
 			} catch (ConfigEntryNotFoundException &e) {
 				// no meta plugin defined by that name
@@ -368,11 +365,11 @@ PluginManager::load(const std::list<std::string> &plugin_list)
 					throw Exception("Refusing to load an empty meta plugin");
 				}
 				//printf("Going to load meta plugin %s (%s)\n", i->c_str(), pset.c_str());
-				__meta_plugins.lock();
+				meta_plugins_.lock();
 				// Setting has to happen here, so that a meta plugin will not cause an
 				// endless loop if it references itself!
-				__meta_plugins[*i] = pset;
-				__meta_plugins.unlock();
+				meta_plugins_[*i] = pset;
+				meta_plugins_.unlock();
 				try {
 					LibLogger::log_info("PluginManager", "Loading plugins %s for meta plugin %s",
                               str_join(pset.begin(), pset.end(), ",").c_str(), i->c_str());
@@ -381,7 +378,7 @@ PluginManager::load(const std::list<std::string> &plugin_list)
 					notify_loaded(i->c_str());
 				} catch (Exception &e) {
 					e.append("Could not initialize meta plugin %s, aborting loading.", i->c_str());
-					__meta_plugins.erase_locked(*i);
+					meta_plugins_.erase_locked(*i);
 					throw;
 				}
 			
@@ -410,8 +407,8 @@ PluginManager::load(const std::list<std::string> &plugin_list)
 	}
 	plugins.unlock();
       } catch (Exception &e) {
-	MutexLocker lock(__meta_plugins.mutex());
-	if ( __meta_plugins.find(*i) == __meta_plugins.end() ) {
+	MutexLocker lock(meta_plugins_.mutex());
+	if ( meta_plugins_.find(*i) == meta_plugins_.end() ) {
 	  // only throw exception if no meta plugin with that name has
 	  // already been loaded
 	  throw;
@@ -441,10 +438,10 @@ PluginManager::unload(const std::string& plugin_name)
       notify_unloaded(plugin_name.c_str());
       // find all meta plugins that required this module, this can no longer
       // be considered loaded
-      __meta_plugins.lock();
-      __mpit = __meta_plugins.begin();
-      while (__mpit != __meta_plugins.end()) {
-	std::list<std::string> pp = __mpit->second;
+      meta_plugins_.lock();
+      mpit_ = meta_plugins_.begin();
+      while (mpit_ != meta_plugins_.end()) {
+	std::list<std::string> pp = mpit_->second;
 
 	bool erase = false;
 	for (std::list<std::string>::iterator i = pp.begin(); i != pp.end(); ++i) {
@@ -454,31 +451,31 @@ PluginManager::unload(const std::string& plugin_name)
 	  }
 	}
 	if ( erase ) {
-	  LockMap< std::string, std::list<std::string> >::iterator tmp = __mpit;
-	  ++__mpit;
+	  LockMap< std::string, std::list<std::string> >::iterator tmp = mpit_;
+	  ++mpit_;
 	  notify_unloaded(tmp->first.c_str());
-	  __meta_plugins.erase(tmp);
+	  meta_plugins_.erase(tmp);
 	} else {
-	  ++__mpit;
+	  ++mpit_;
 	}
       }
-      __meta_plugins.unlock();
+      meta_plugins_.unlock();
 
     } catch (Exception &e) {
       LibLogger::log_error("PluginManager", "Could not finalize one or more threads of plugin %s, NOT unloading plugin", plugin_name);
       throw;
     }
-  } else if (__meta_plugins.find(plugin_name) != __meta_plugins.end()) {
-    std::list<std::string> pp = __meta_plugins[plugin_name];
+  } else if (meta_plugins_.find(plugin_name) != meta_plugins_.end()) {
+    std::list<std::string> pp = meta_plugins_[plugin_name];
 
     for (std::list<std::string>::reverse_iterator i = pp.rbegin(); i != pp.rend(); ++i) {
       if ( i->length() == 0 ) continue;
       if ((find_if(plugins.begin(), plugins.end(), plname_eq(*i)) == plugins.end())
-	   && (__meta_plugins.find(*i) != __meta_plugins.end()) ) {
+	   && (meta_plugins_.find(*i) != meta_plugins_.end()) ) {
 	continue;
       }
 
-      __meta_plugins.erase_locked(*i);
+      meta_plugins_.erase_locked(*i);
       LibLogger::log_info("PluginManager", "UNloading plugin %s for meta plugin %s",
         i->c_str(), plugin_name);
       unload(i->c_str());
@@ -496,12 +493,12 @@ void
 PluginManager::config_value_changed(const Configuration::ValueIterator *v)
 {
   if (v->is_string()) {
-    __pinfo_cache.lock();
-    std::string p = std::string(v->path()).substr(__meta_plugin_prefix.length());
+    pinfo_cache_.lock();
+    std::string p = std::string(v->path()).substr(meta_plugin_prefix_.length());
     std::string s = std::string("Meta: ") + v->get_string();
     std::list<std::pair<std::string, std::string> >::iterator i;
     bool found = false;
-    for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
+    for (i = pinfo_cache_.begin(); i != pinfo_cache_.end(); ++i) {
       if (p == i->first) {
 	i->second = s;
 	found = true;
@@ -509,9 +506,9 @@ PluginManager::config_value_changed(const Configuration::ValueIterator *v)
       }
     }
     if (! found) {
-      __pinfo_cache.push_back(make_pair(p, s));
+      pinfo_cache_.push_back(make_pair(p, s));
     }
-    __pinfo_cache.unlock();
+    pinfo_cache_.unlock();
   }
 }
 
@@ -523,16 +520,16 @@ PluginManager::config_comment_changed(const Configuration::ValueIterator *v)
 void
 PluginManager::config_value_erased(const char *path)
 {
-  __pinfo_cache.lock();
-  std::string p = std::string(path).substr(__meta_plugin_prefix.length());
+  pinfo_cache_.lock();
+  std::string p = std::string(path).substr(meta_plugin_prefix_.length());
   std::list<std::pair<std::string, std::string> >::iterator i;
-  for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
+  for (i = pinfo_cache_.begin(); i != pinfo_cache_.end(); ++i) {
     if (p == i->first) {
-      __pinfo_cache.erase(i);
+      pinfo_cache_.erase(i);
       break;
     }
   }
-  __pinfo_cache.unlock();
+  pinfo_cache_.unlock();
 }
 
 
@@ -544,14 +541,14 @@ PluginManager::fam_event(const char *filename, unsigned int mask)
   const char *pos = strstr(filename, file_ext);
   std::string p = std::string(filename).substr(0, strlen(filename) - strlen(file_ext));
   if (NULL != pos) {
-    __pinfo_cache.lock();
+    pinfo_cache_.lock();
     bool found = false;
     std::list<std::pair<std::string, std::string> >::iterator i;
-    for (i = __pinfo_cache.begin(); i != __pinfo_cache.end(); ++i) {
+    for (i = pinfo_cache_.begin(); i != pinfo_cache_.end(); ++i) {
       if (p == i->first) {
 	found = true;
 	if ((mask & FAM_DELETE) || (mask & FAM_MOVED_FROM)) {
-	  __pinfo_cache.erase(i);
+	  pinfo_cache_.erase(i);
 	} else {
 	  try {
 	    i->second = plugin_loader->get_description(p.c_str());
@@ -579,7 +576,7 @@ PluginManager::fam_event(const char *filename, unsigned int mask)
 	std::string s = plugin_loader->get_description(p.c_str());
 	LibLogger::log_info("PluginManager", "Reloaded meta-data of %s on file change",
 			    p.c_str());
-	__pinfo_cache.push_back(make_pair(p, s));
+	pinfo_cache_.push_back(make_pair(p, s));
       } catch (Exception &e) {
 	// ignore, all it means is that the file has not been finished writing
 	/*
@@ -591,8 +588,8 @@ PluginManager::fam_event(const char *filename, unsigned int mask)
       }
     }
 
-    __pinfo_cache.sort();
-    __pinfo_cache.unlock();
+    pinfo_cache_.sort();
+    pinfo_cache_.unlock();
   }
 }
 
@@ -604,11 +601,11 @@ PluginManager::fam_event(const char *filename, unsigned int mask)
 void
 PluginManager::add_listener(PluginManagerListener *listener)
 {
-  __listeners.lock();
-  __listeners.push_back(listener);
-  __listeners.sort();
-  __listeners.unique();
-  __listeners.unlock();
+  listeners_.lock();
+  listeners_.push_back(listener);
+  listeners_.sort();
+  listeners_.unique();
+  listeners_.unlock();
 }
 
 /** Remove listener.
@@ -617,39 +614,39 @@ PluginManager::add_listener(PluginManagerListener *listener)
 void
 PluginManager::remove_listener(PluginManagerListener *listener)
 {
-  __listeners.remove_locked(listener);
+  listeners_.remove_locked(listener);
 }
 
 void
 PluginManager::notify_loaded(const char *plugin_name)
 {
-  __listeners.lock();
-  for (__lit = __listeners.begin(); __lit != __listeners.end(); ++__lit) {
+  listeners_.lock();
+  for (lit_ = listeners_.begin(); lit_ != listeners_.end(); ++lit_) {
     try {
-      (*__lit)->plugin_loaded(plugin_name);
+      (*lit_)->plugin_loaded(plugin_name);
     } catch (Exception &e) {
       LibLogger::log_warn("PluginManager", "PluginManagerListener threw exception "
 			  "during notification of plugin loaded, exception follows.");
       LibLogger::log_warn("PluginManager", e);
     }
   }
-  __listeners.unlock();
+  listeners_.unlock();
 }
 
 void
 PluginManager::notify_unloaded(const char *plugin_name)
 {
-  __listeners.lock();
-  for (__lit = __listeners.begin(); __lit != __listeners.end(); ++__lit) {
+  listeners_.lock();
+  for (lit_ = listeners_.begin(); lit_ != listeners_.end(); ++lit_) {
     try {
-      (*__lit)->plugin_unloaded(plugin_name);
+      (*lit_)->plugin_unloaded(plugin_name);
     } catch (Exception &e) {
       LibLogger::log_warn("PluginManager", "PluginManagerListener threw exception "
 			  "during notification of plugin unloaded, exception follows.");
       LibLogger::log_warn("PluginManager", e);
     }
   }
-  __listeners.unlock();
+  listeners_.unlock();
 }
 
 
@@ -661,7 +658,7 @@ PluginManager::notify_unloaded(const char *plugin_name)
 void
 PluginManager::lock()
 {
-  __mutex->lock();
+  mutex_->lock();
 }
 
 
@@ -674,14 +671,14 @@ PluginManager::lock()
 bool
 PluginManager::try_lock()
 {
-  return __mutex->try_lock();
+  return mutex_->try_lock();
 }
 
 /** Unlock plugin manager. */
 void
 PluginManager::unlock()
 {
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 } // end namespace fawkes

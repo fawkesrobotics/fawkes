@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_GENERATOR_H_
-#define __PLUGINS_GENERATOR_H_
+#ifndef _PLUGINS_GENERATOR_H_
+#define _PLUGINS_GENERATOR_H_
 
 #include <vector>
 #include <string>

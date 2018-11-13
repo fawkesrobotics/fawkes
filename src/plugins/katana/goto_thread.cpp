@@ -47,7 +47,7 @@ KatanaGotoThread::KatanaGotoThread(fawkes::RefPtr<fawkes::KatanaController> kata
 				   unsigned int poll_interval_ms)
   : KatanaMotionThread("KatanaGotoThread", katana, logger)
 {
-  __poll_interval_usec = poll_interval_ms * 1000;
+  poll_interval_usec_ = poll_interval_ms * 1000;
 }
 
 
@@ -63,12 +63,12 @@ void
 KatanaGotoThread::set_target(float x, float y, float z,
 			     float phi, float theta, float psi)
 {
-  __x     = x;
-  __y     = y;
-  __z     = z;
-  __phi   = phi;
-  __theta = theta;
-  __psi   = psi;
+  x_     = x;
+  y_     = y;
+  z_     = z;
+  phi_   = phi;
+  theta_ = theta;
+  psi_   = psi;
 }
 
 void
@@ -76,7 +76,7 @@ KatanaGotoThread::once()
 {
   try {
     // non-blocking call
-    _katana->move_to(__x, __y, __z, __phi, __theta, __psi);
+    _katana->move_to(x_, y_, z_, phi_, theta_, psi_);
   } catch (fawkes::KatanaNoSolutionException &e) {
     _logger->log_warn("KatanaGotoThread", "Initiating goto failed (no solution, ignoring): %s", e.what());
     _finished = true;
@@ -93,7 +93,7 @@ KatanaGotoThread::once()
   bool final = false;
   short num_errors  = 0;
   while ( !final ) {
-    usleep(__poll_interval_usec);
+    usleep(poll_interval_usec_);
     try {
       _katana->read_sensor_data();
       _katana->read_motor_data();
@@ -118,7 +118,7 @@ KatanaGotoThread::once()
   }
 
   _logger->log_debug(name(), "Position (%f,%f,%f, %f,%f,%f) reached",
-		       __x, __y, __z, __phi, __theta, __psi);
+		       x_, y_, z_, phi_, theta_, psi_);
 
   _finished = true;
 }

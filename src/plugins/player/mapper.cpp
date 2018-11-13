@@ -46,7 +46,7 @@
  */
 PlayerProxyFawkesInterfaceMapper::PlayerProxyFawkesInterfaceMapper(std::string varname)
 {
-  __varname = varname;
+  varname_ = varname;
 }
 
 
@@ -62,5 +62,5 @@ PlayerProxyFawkesInterfaceMapper::~PlayerProxyFawkesInterfaceMapper()
 std::string
 PlayerProxyFawkesInterfaceMapper::varname() const
 {
-  return __varname;
+  return varname_;
 }

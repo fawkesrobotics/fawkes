@@ -28,9 +28,6 @@
 #include <cmath>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SinusoidalInterpolator <utils/math/interpolation/linear.h>
  * Sinusoidal value interpolator.

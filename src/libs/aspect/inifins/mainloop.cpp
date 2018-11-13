@@ -28,9 +28,6 @@
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class MainLoopAspectIniFin <aspect/inifins/mainloop.h>
  * Initializer/finalizer for the MainLoopAspect.
@@ -45,8 +42,8 @@ MainLoopAspectIniFin::MainLoopAspectIniFin(MainLoopEmployer *employer,
 					   BlockedTimingExecutor *btexec)
   : AspectIniFin("MainLoopAspect")
 {
-  __employer = employer;
-  __btexec   = btexec;
+  employer_ = employer;
+  btexec_   = btexec;
 }
 
 
@@ -67,8 +64,8 @@ MainLoopAspectIniFin::init(Thread *thread)
   }
 
   try {
-    __mainloop_uc.add(mainloop_thread);
-    mainloop_thread->init_MainLoopAspect(__btexec);
+    mainloop_uc_.add(mainloop_thread);
+    mainloop_thread->init_MainLoopAspect(btexec_);
     thread->add_notification_listener(this);
   } catch (Exception &e) {
     CannotInitializeThreadException ce("Main loop thread failed to initialize");
@@ -90,8 +87,8 @@ MainLoopAspectIniFin::finalize(Thread *thread)
   }
 
   try {
-    __employer->set_mainloop_thread(NULL);
-    __mainloop_uc.remove(mainloop_thread);
+    employer_->set_mainloop_thread(NULL);
+    mainloop_uc_.remove(mainloop_thread);
   } catch (Exception &e) {
     CannotFinalizeThreadException ce("Failed to remove time source");
     ce.append(e);
@@ -106,9 +103,9 @@ MainLoopAspectIniFin::thread_started(Thread *thread) throw()
   MainLoopAspect *mainloop_thread;
   if ( (mainloop_thread = dynamic_cast<MainLoopAspect *>(thread)) != NULL ) {
     try {
-      __employer->set_mainloop_thread(thread);
+      employer_->set_mainloop_thread(thread);
     } catch (Exception &e) {
-      //__logger->log_error("AspectIniFin", "Main loop thread started successfully "
+      //logger_->log_error("AspectIniFin", "Main loop thread started successfully "
       //		  "but could not add main loop thread's main loop");
     }
   }
@@ -123,9 +120,9 @@ MainLoopAspectIniFin::thread_init_failed(Thread *thread) throw()
   MainLoopAspect *mainloop_thread;
   if ( (mainloop_thread = dynamic_cast<MainLoopAspect *>(thread)) != NULL ) {
     try {
-      __mainloop_uc.remove(mainloop_thread);
+      mainloop_uc_.remove(mainloop_thread);
     } catch (Exception &e) {
-      //__logger->log_error("AspectIniFin", "Failed to remove main loop from "
+      //logger_->log_error("AspectIniFin", "Failed to remove main loop from "
       //		  "uniqueness constraint on thread init fail of %s",
       //		  thread->name());
     }
@@ -135,10 +132,10 @@ MainLoopAspectIniFin::thread_init_failed(Thread *thread) throw()
     finalize(thread);
   } catch (Exception &e) {
     /*
-    __logger->log_error("AspectIniFin", "Initialization of thread '%s' failed, but "
+    logger_->log_error("AspectIniFin", "Initialization of thread '%s' failed, but "
 			"the thread thread could not be internally finalized",
 			thread->name());
-    __logger->log_error("AspectIniFin", e);
+    logger_->log_error("AspectIniFin", e);
     */
   }
 

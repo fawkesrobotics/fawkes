@@ -38,9 +38,6 @@
 #include <Eigen/Geometry>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 namespace navgraph {
   const char *PROP_ORIENTATION = "orientation";

@@ -21,20 +21,17 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_MESSAGE_H_
-#define __INTERFACE_MESSAGE_H_
+#ifndef _INTERFACE_MESSAGE_H_
+#define _INTERFACE_MESSAGE_H_
 
 #include <interface/field_iterator.h>
 #include <interface/types.h>
 #include <core/utils/refcount.h>
 #include <core/exceptions/software.h>
 
-#define __INTERFACE_MESSAGE_TYPE_SIZE 32
+#define INTERFACE_MESSAGE_TYPE_SIZE_ 32
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Mutex;
 class Interface;
@@ -95,10 +92,10 @@ class Message : public RefCount
     MessageType * as_type();
 
  private: // fields
-  unsigned int  __message_id;
-  unsigned int  __hops;
-  bool          __enqueued;
-  Time         *__time_enqueued;
+  unsigned int  message_id_;
+  unsigned int  hops_;
+  bool          enqueued_;
+  Time         *time_enqueued_;
 
   unsigned int  recipient_interface_mem_serial;  
   unsigned int  sender_interface_instance_serial;  
@@ -109,9 +106,9 @@ class Message : public RefCount
 
   Interface     *_transmit_via_iface;
 
-  interface_fieldinfo_t  *__fieldinfo_list;
+  interface_fieldinfo_t  *fieldinfo_list_;
 
-  unsigned int __num_fields;
+  unsigned int num_fields_;
 
  private: // methods
   void              set_interface(Interface *iface);

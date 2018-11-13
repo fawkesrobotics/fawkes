@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_LASERGUI_LASER_DRAWING_AREA_H_
-#define __TOOLS_LASERGUI_LASER_DRAWING_AREA_H_
+#ifndef _TOOLS_LASERGUI_LASER_DRAWING_AREA_H_
+#define _TOOLS_LASERGUI_LASER_DRAWING_AREA_H_
 
 #include <gtkmm.h>
 #include <list>
@@ -116,35 +116,35 @@ class LaserDrawingArea
 
   bool all_laser_ifs_have_writer() const;
 
-  InterfaceColorPairList               __laser_ifs;
-  fawkes::Laser720Interface           *__laser_segmentation_if;
-  fawkes::SwitchInterface             *__switch_if;
-  fawkes::ObjectPositionInterface     *__target_if;
+  InterfaceColorPairList               laser_ifs_;
+  fawkes::Laser720Interface           *laser_segmentation_if_;
+  fawkes::SwitchInterface             *switch_if_;
+  fawkes::ObjectPositionInterface     *target_if_;
 
-  fawkes::ObjectPositionInterface *__line_if;
+  fawkes::ObjectPositionInterface *line_if_;
 
-  std::list<fawkes::ObjectPositionInterface*>* __l_objpos_if_persons;
-  std::list<fawkes::ObjectPositionInterface*>* __l_objpos_if_legs;
-  std::list<fawkes::ObjectPositionInterface*>* __l_objpos_if_misc;
-  std::list<fawkes::Position2DTrackInterface*>* __l_track_if;
+  std::list<fawkes::ObjectPositionInterface*>* l_objpos_if_persons_;
+  std::list<fawkes::ObjectPositionInterface*>* l_objpos_if_legs_;
+  std::list<fawkes::ObjectPositionInterface*>* l_objpos_if_misc_;
+  std::list<fawkes::Position2DTrackInterface*>* l_track_if_;
 
-  bool                       __connected;
-  draw_mode_t                __draw_mode;
+  bool                       connected_;
+  draw_mode_t                draw_mode_;
 
-  float                      __zoom_factor;
-  unsigned int               __resolution;
-  float                      __rotation;
-  bool                       __break_drawing;
-  bool                       __first_draw;
-  double __last_mouse_x;
-  double __last_mouse_y;
-  double __xc;
-  double __yc;
+  float                      zoom_factor_;
+  unsigned int               resolution_;
+  float                      rotation_;
+  bool                       break_drawing_;
+  bool                       first_draw_;
+  double last_mouse_x_;
+  double last_mouse_y_;
+  double xc_;
+  double yc_;
 
-  fawkes::CairoRobotDrawer  *__robot_drawer;
+  fawkes::CairoRobotDrawer  *robot_drawer_;
 
-  VisualDisplay2D           *__visdisp;
-  fawkes::VisualDisplay2DInterface  *__visdisp_if;
+  VisualDisplay2D           *visdisp_;
+  fawkes::VisualDisplay2DInterface  *visdisp_if_;
 };
 
 #endif

@@ -21,13 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_CAMERA_TRACKER_H_
-#define __FIREVISION_FVUTILS_CAMERA_TRACKER_H_
+#ifndef _FIREVISION_FVUTILS_CAMERA_TRACKER_H_
+#define _FIREVISION_FVUTILS_CAMERA_TRACKER_H_
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class RelativePositionModel;
 

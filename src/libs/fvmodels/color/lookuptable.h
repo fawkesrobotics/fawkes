@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_COLOR_LOOKUPTABLE_H_
-#define __FIREVISION_MODELS_COLOR_LOOKUPTABLE_H_
+#ifndef _FIREVISION_MODELS_COLOR_LOOKUPTABLE_H_
+#define _FIREVISION_MODELS_COLOR_LOOKUPTABLE_H_
 
 #include <fvmodels/color/colormodel.h>
 
@@ -30,9 +30,6 @@
 #include <string>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ColorModelLookupTable : public ColorModel
 {
@@ -61,7 +58,7 @@ class ColorModelLookupTable : public ColorModel
   ColorModelLookupTable &  operator+=(const ColorModelLookupTable &cmlt);
 
  private:
-  YuvColormap *__colormap;
+  YuvColormap *colormap_;
 };
 
 } // end namespace firevision

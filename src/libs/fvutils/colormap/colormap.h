@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_COLORMAP_COLORMAP_H_
-#define __FIREVISION_FVUTILS_COLORMAP_COLORMAP_H_
+#ifndef _FIREVISION_FVUTILS_COLORMAP_COLORMAP_H_
+#define _FIREVISION_FVUTILS_COLORMAP_COLORMAP_H_
 
 #include <fvutils/base/types.h>
 #include <sys/types.h>
 #include <list>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ColormapFileBlock;
 

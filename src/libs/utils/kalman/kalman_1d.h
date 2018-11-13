@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_KALMAN_KALMAN_1D_H_
-#define __UTILS_KALMAN_KALMAN_1D_H_
+#ifndef UTILS_KALMAN_KALMAN_1D_H__
+#define UTILS_KALMAN_KALMAN_1D_H__
 
 namespace fawkes  {
 
@@ -40,10 +40,10 @@ public:
 	float predict(float mu, float vel, int steps, float noise_z) const;
 
 private:
-	float __noise_x;	/**< transition noise */
-	float __noise_z;	/**< "sigma_z", sensor noise */
-	float __mu;		/**< mean "mu" */
-	float __sig;	/**< "sigma_0". sigma ~ standard deviation */
+	float noise_x_;	/**< transition noise */
+	float noise_z_;	/**< "sigma_z", sensor noise */
+	float mu_;		/**< mean "mu" */
+	float sig_;	/**< "sigma_0". sigma ~ standard deviation */
 };
 } // end namespace fawkes
 

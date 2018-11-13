@@ -40,21 +40,21 @@ using namespace firevision;
 FountainThread::FountainThread()
   : Thread("FountainThread", OPMODE_WAITFORWAKEUP)
 {
-  __fuse_server = NULL;
-  __service = NULL;
+  fuse_server_ = NULL;
+  service_ = NULL;
 }
 
 
 /** Destructor. */
 FountainThread::~FountainThread()
 {
-  if ( __fuse_server ) {
-    thread_collector->remove(__fuse_server);
-    delete __fuse_server;
-    __fuse_server = NULL;
+  if ( fuse_server_ ) {
+    thread_collector->remove(fuse_server_);
+    delete fuse_server_;
+    fuse_server_ = NULL;
   }
-  delete __service;
-  __service = NULL;
+  delete service_;
+  service_ = NULL;
 }
 
 
@@ -88,10 +88,10 @@ FountainThread::init()
 	    listen_ipv6 = config->get_string("/network/ipv6/listen");
     } catch (Exception &e) {}  // ignore, we stick with the default
 
-    __fuse_server = new FuseServer(enable_ipv4, enable_ipv6,
+    fuse_server_ = new FuseServer(enable_ipv4, enable_ipv6,
                                    listen_ipv4, listen_ipv6,
                                    port, thread_collector);
-    thread_collector->add(__fuse_server);
+    thread_collector->add(fuse_server_);
   } catch (Exception &e) {
     e.print_trace();
     throw;
@@ -100,21 +100,21 @@ FountainThread::init()
   // Announce service
   std::string sname = "Fountain on ";
   sname += nnresolver->short_hostname();
-  __service = new NetworkService(sname.c_str(), "_fountain._tcp", port);
-  service_publisher->publish_service(__service);
+  service_ = new NetworkService(sname.c_str(), "_fountain._tcp", port);
+  service_publisher->publish_service(service_);
 }
 
 
 void
 FountainThread::finalize()
 {
-  service_publisher->unpublish_service(__service);
+  service_publisher->unpublish_service(service_);
 
-  thread_collector->remove(__fuse_server);
-  delete __fuse_server;
-  __fuse_server = NULL;
-  delete __service;
-  __service = NULL;
+  thread_collector->remove(fuse_server_);
+  delete fuse_server_;
+  fuse_server_ = NULL;
+  delete service_;
+  service_ = NULL;
 }
 
 

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_TTMAINLOOP_THREAD_H_
-#define __PLUGINS_TTMAINLOOP_THREAD_H_
+#ifndef _PLUGINS_TTMAINLOOP_THREAD_H_
+#define _PLUGINS_TTMAINLOOP_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
@@ -54,27 +54,27 @@ class TimeTrackerMainLoopThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  float             __output_interval;
-  fawkes::Time     *__last_outp_time;
-  fawkes::Time     *__now;
+  float             output_interval_;
+  fawkes::Time     *last_outp_time_;
+  fawkes::Time     *now_;
 
-  fawkes::Time                 *__loop_start;
-  fawkes::Time                 *__loop_end;
+  fawkes::Time                 *loop_start_;
+  fawkes::Time                 *loop_end_;
 
-  fawkes::TimeTracker  *__tt;
-  unsigned int  __tt_loopcount;
-  unsigned int  __ttc_pre_loop;
-  unsigned int  __ttc_sensor_acquire;
-  unsigned int  __ttc_sensor_prepare;
-  unsigned int  __ttc_sensor_process;
-  unsigned int  __ttc_worldstate;
-  unsigned int  __ttc_think;
-  unsigned int  __ttc_skill;
-  unsigned int  __ttc_act;
-  unsigned int  __ttc_post_loop;
-  unsigned int  __ttc_netproc;
-  unsigned int  __ttc_full_loop;
-  unsigned int  __ttc_real_loop;
+  fawkes::TimeTracker  *tt_;
+  unsigned int  tt_loopcount_;
+  unsigned int  ttc_pre_loop_;
+  unsigned int  ttc_sensor_acquire_;
+  unsigned int  ttc_sensor_prepare_;
+  unsigned int  ttc_sensor_process_;
+  unsigned int  ttc_worldstate_;
+  unsigned int  ttc_think_;
+  unsigned int  ttc_skill_;
+  unsigned int  ttc_act_;
+  unsigned int  ttc_post_loop_;
+  unsigned int  ttc_netproc_;
+  unsigned int  ttc_full_loop_;
+  unsigned int  ttc_real_loop_;
 
 };
 

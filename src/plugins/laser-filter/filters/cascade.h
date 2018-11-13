@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTER_FILTERS_CASCADE_H_
-#define __PLUGINS_LASER_FILTER_FILTERS_CASCADE_H_
+#ifndef _PLUGINS_LASER_FILTER_FILTERS_CASCADE_H_
+#define _PLUGINS_LASER_FILTER_FILTERS_CASCADE_H_
 
 #include "filter.h"
 
@@ -42,17 +42,17 @@ class LaserDataFilterCascade : public LaserDataFilter
 
   /** Check if filters have been added to the cascade.
    * @return true if filters have been registered, false otherwise */
-  inline bool has_filters() const { return ! __filters.empty(); }
+  inline bool has_filters() const { return ! filters_.empty(); }
 
   void filter();
 
   /** Get filters.
    * @return list of active filters. */
-  const std::list<LaserDataFilter *> &  get_filters() const { return __filters; }
+  const std::list<LaserDataFilter *> &  get_filters() const { return filters_; }
 
  private:
-  std::list<LaserDataFilter *>           __filters;
-  std::list<LaserDataFilter *>::iterator __fit;
+  std::list<LaserDataFilter *>           filters_;
+  std::list<LaserDataFilter *>::iterator fit_;
 };
 
 

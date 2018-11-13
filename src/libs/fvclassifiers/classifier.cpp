@@ -26,9 +26,6 @@
 #include <cstdlib>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class Classifier <fvclassifiers/classifier.h>
  * Classifier to extract regions of interest.
@@ -53,7 +50,7 @@ namespace firevision {
  */
 Classifier::Classifier(const char *name)
 {
-  __name  = strdup(name);
+  name_  = strdup(name);
   _src    = NULL;
   _width  = 0;
   _height = 0;
@@ -63,7 +60,7 @@ Classifier::Classifier(const char *name)
 /** Destructor. */
 Classifier::~Classifier()
 {
-  free(__name);
+  free(name_);
 }
 
 
@@ -90,7 +87,7 @@ Classifier::set_src_buffer(unsigned char *yuv422_planar, unsigned int width,
 const char *
 Classifier::name() const
 {
-  return __name;
+  return name_;
 }
 
 } // end namespace firevision

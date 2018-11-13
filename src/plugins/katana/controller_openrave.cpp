@@ -38,9 +38,6 @@ using namespace OpenRAVE;
 #endif
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class KatanaControllerOpenrave <plugins/katana/controller_kni.h>
  * Controller class for a Neuronics Katana, using libkni to interact
@@ -55,8 +52,8 @@ namespace fawkes {
  */
 KatanaControllerOpenrave::KatanaControllerOpenrave(fawkes::OpenRaveConnector* openrave)
 {
-  __openrave = openrave;
-  __initialized = false;
+  openrave_ = openrave;
+  initialized_ = false;
 }
 
 /** Destructor. */
@@ -64,10 +61,10 @@ KatanaControllerOpenrave::~KatanaControllerOpenrave()
 {
   // Setting to NULL also deletes instance (RefPtr)
 
-  __openrave = NULL;
-  __OR_env   = NULL;
-  __OR_robot = NULL;
-  __OR_manip = NULL;
+  openrave_ = NULL;
+  OR_env_   = NULL;
+  OR_robot_ = NULL;
+  OR_manip_ = NULL;
 }
 
 
@@ -75,20 +72,20 @@ void
 KatanaControllerOpenrave::init()
 {
   try {
-    __OR_env   = __openrave->get_environment();
-    __OR_robot = __openrave->get_active_robot();
+    OR_env_   = openrave_->get_environment();
+    OR_robot_ = openrave_->get_active_robot();
 
-    if( !__OR_robot ) {
+    if( !OR_robot_ ) {
       throw fawkes::Exception("Cannot access OpenRaveRobot in current OpenRaveEnvironment.");
     }
  // TODO: get robot string and name, compare to this!
-// __robot->GetName();
+// robot_->GetName();
 
-    __OR_manip = __OR_robot->get_manipulator();
-    __env = __OR_env->get_env_ptr();
-    __robot = __OR_robot->get_robot_ptr();
-    __manip = __robot->GetActiveManipulator();
-    __initialized = true;
+    OR_manip_ = OR_robot_->get_manipulator();
+    env_ = OR_env_->get_env_ptr();
+    robot_ = OR_robot_->get_robot_ptr();
+    manip_ = robot_->GetActiveManipulator();
+    initialized_ = true;
 
   } catch (OpenRAVE::openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
@@ -100,12 +97,12 @@ KatanaControllerOpenrave::set_max_velocity(unsigned int vel)
 {
   check_init();
   try {
-    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
+    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
     std::vector<dReal> v;
-    __OR_manip->get_angles(v);
+    OR_manip_->get_angles(v);
     v.assign(v.size(), (dReal)(vel / 100.0));
 
-    __robot->SetActiveDOFVelocities(v);
+    robot_->SetActiveDOFVelocities(v);
   } catch( /*OpenRAVE*/::openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
@@ -116,7 +113,7 @@ bool
 KatanaControllerOpenrave::final()
 {
   check_init();
-  return __robot->GetController()->IsDone();
+  return robot_->GetController()->IsDone();
 }
 
 bool
@@ -141,10 +138,10 @@ KatanaControllerOpenrave::stop()
 {
   check_init();
   try {
-    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
+    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
     std::vector<dReal> v;
-    __robot->GetActiveDOFValues(v);
-    __robot->SetActiveDOFValues(v);
+    robot_->GetActiveDOFValues(v);
+    robot_->SetActiveDOFValues(v);
   } catch( /*OpenRAVE*/::openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
@@ -166,21 +163,21 @@ KatanaControllerOpenrave::read_coordinates(bool refresh)
   check_init();
   try {
     update_manipulator();
-    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
-    Transform tf = __manip->GetEndEffectorTransform();
-    __x = tf.trans[0];
-    __y = tf.trans[1];
-    __z = tf.trans[2];
+    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
+    Transform tf = manip_->GetEndEffectorTransform();
+    x_ = tf.trans[0];
+    y_ = tf.trans[1];
+    z_ = tf.trans[2];
     //transform quat to euler.
     TransformMatrix m = matrixFromQuat(tf.rot);
     std::vector<dReal> v;
-    __OR_manip->get_angles_device(v);
-    __phi = v.at(0) - 0.5*M_PI; //phi is directly derivable from joint0
-    __psi = 0.5*M_PI - v.at(4); //psi is directly derivable from joint4
-    __theta = acos(m.m[10]);
+    OR_manip_->get_angles_device(v);
+    phi_ = v.at(0) - 0.5*M_PI; //phi is directly derivable from joint0
+    psi_ = 0.5*M_PI - v.at(4); //psi is directly derivable from joint4
+    theta_ = acos(m.m[10]);
     //theta has correct range from 0-360°, but need to check if sign is also correct. use sinus for that
-    if( asin(m.m[2] / sin(__phi)) < 0.0 )
-      __theta *= -1.0;
+    if( asin(m.m[2] / sin(phi_)) < 0.0 )
+      theta_ *= -1.0;
   } catch( /*OpenRAVE*/::openrave_exception &e ) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
@@ -229,11 +226,11 @@ KatanaControllerOpenrave::move_to(std::vector<float> angles, bool blocking)
   check_init();
   try {
     std::vector<dReal> v;
-    __OR_manip->set_angles_device(angles);
+    OR_manip_->set_angles_device(angles);
 
-    __OR_manip->get_angles(v);
-    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
-    __robot->SetActiveDOFValues(v);
+    OR_manip_->get_angles(v);
+    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
+    robot_->SetActiveDOFValues(v);
     usleep(2000);
   } catch( /*OpenRAVE*/::openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
@@ -256,13 +253,13 @@ KatanaControllerOpenrave::move_motor_to(unsigned short id, float angle, bool blo
   check_init();
   try {
     std::vector<dReal> v;
-    __OR_manip->get_angles_device(v);
+    OR_manip_->get_angles_device(v);
     v.at(id) = (dReal)angle;
-    __OR_manip->set_angles_device(v);
+    OR_manip_->set_angles_device(v);
 
-    __OR_manip->get_angles(v);
-    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
-    __robot->SetActiveDOFValues(v);
+    OR_manip_->get_angles(v);
+    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
+    robot_->SetActiveDOFValues(v);
     usleep(2000);
   } catch( /*OpenRAVE*/::openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
@@ -285,13 +282,13 @@ KatanaControllerOpenrave::move_motor_by(unsigned short id, float angle, bool blo
   check_init();
   try {
     std::vector<dReal> v;
-    __OR_manip->get_angles_device(v);
+    OR_manip_->get_angles_device(v);
     v.at(id) += (dReal)angle;
-    __OR_manip->set_angles_device(v);
+    OR_manip_->set_angles_device(v);
 
-    __OR_manip->get_angles(v);
-    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
-    __robot->SetActiveDOFValues(v);
+    OR_manip_->get_angles(v);
+    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
+    robot_->SetActiveDOFValues(v);
     usleep(2000);
   } catch( /*OpenRAVE*/::openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
@@ -307,37 +304,37 @@ KatanaControllerOpenrave::move_motor_by(unsigned short id, float angle, bool blo
 double
 KatanaControllerOpenrave::x()
 {
-  return __x;
+  return x_;
 }
 
 double
 KatanaControllerOpenrave::y()
 {
-  return __y;
+  return y_;
 }
 
 double
 KatanaControllerOpenrave::z()
 {
-  return __z;
+  return z_;
 }
 
 double
 KatanaControllerOpenrave::phi()
 {
-  return __phi;
+  return phi_;
 }
 
 double
 KatanaControllerOpenrave::theta()
 {
-  return __theta;
+  return theta_;
 }
 
 double
 KatanaControllerOpenrave::psi()
 {
-  return __psi;
+  return psi_;
 }
 
 void
@@ -359,12 +356,12 @@ KatanaControllerOpenrave::get_angles(std::vector<float>& to, bool refresh)
 {
   check_init();
   try {
-    EnvironmentMutex::scoped_lock lock(__env->GetMutex());
+    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
     std::vector<dReal> v;
-    __robot->GetActiveDOFValues(v);
-    __OR_manip->set_angles(v);
+    robot_->GetActiveDOFValues(v);
+    OR_manip_->set_angles(v);
 
-    __OR_manip->get_angles_device(to);
+    OR_manip_->get_angles_device(to);
   } catch( /*OpenRAVE*/::openrave_exception &e) {
     throw fawkes::Exception("OpenRAVE Exception:%s", e.what());
   }
@@ -374,8 +371,8 @@ KatanaControllerOpenrave::get_angles(std::vector<float>& to, bool refresh)
 void
 KatanaControllerOpenrave::update_manipulator()
 {
-  EnvironmentMutex::scoped_lock lock(__env->GetMutex());
-  __manip = __robot->GetActiveManipulator();
+  EnvironmentMutex::scoped_lock lock(env_->GetMutex());
+  manip_ = robot_->GetActiveManipulator();
 }
 
 void
@@ -391,7 +388,7 @@ KatanaControllerOpenrave::motor_oor(unsigned short id)
 {
   check_init();
   std::vector<dReal> v;
-  __OR_manip->get_angles_device(v);
+  OR_manip_->get_angles_device(v);
 
   return id > v.size();
 }
@@ -399,7 +396,7 @@ KatanaControllerOpenrave::motor_oor(unsigned short id)
 void
 KatanaControllerOpenrave::check_init()
 {
-  if( !__initialized ) {
+  if( !initialized_ ) {
     init();
     // init() will throw an exception if it fails
   }

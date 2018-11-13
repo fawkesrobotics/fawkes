@@ -22,15 +22,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_MONO_DRAWER_H_
-#define __FIREVISION_FVUTILS_MONO_DRAWER_H_
+#ifndef _FIREVISION_FVUTILS_MONO_DRAWER_H_
+#define _FIREVISION_FVUTILS_MONO_DRAWER_H_
 
 #include <fvutils/color/yuv.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class MonoDrawer {
 
@@ -58,11 +55,11 @@ class MonoDrawer {
   void set_overlap(bool o);
 
  private:
-  unsigned char  *__buffer;
-  unsigned int    __width;
-  unsigned int    __height;
-  unsigned char   __brightness;
-  bool		  __overlap;
+  unsigned char  *buffer_;
+  unsigned int    width_;
+  unsigned int    height_;
+  unsigned char   brightness_;
+  bool		  overlap_;
 
 };
 

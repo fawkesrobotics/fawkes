@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_ACT_THREAD_H_
-#define __PLUGINS_KATANA_ACT_THREAD_H_
+#ifndef _PLUGINS_KATANA_ACT_THREAD_H_
+#define _PLUGINS_KATANA_ACT_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
@@ -98,59 +98,59 @@ class KatanaActThread
                     unsigned int msgid, const char *logmsg, ...);
 
  private:
-  fawkes::KatanaInterface *__katana_if;
-  std::vector<fawkes::JointInterface*> *__joint_ifs;
+  fawkes::KatanaInterface *katana_if_;
+  std::vector<fawkes::JointInterface*> *joint_ifs_;
 
-  std::string    __cfg_controller;
-  std::string    __cfg_device;
-  std::string    __cfg_kni_conffile;
-  bool           __cfg_auto_calibrate;
-  unsigned int   __cfg_defmax_speed;
-  unsigned int   __cfg_read_timeout;
-  unsigned int   __cfg_write_timeout;
-  unsigned int   __cfg_gripper_pollint;
-  unsigned int   __cfg_goto_pollint;
-  float          __cfg_park_x;
-  float          __cfg_park_y;
-  float          __cfg_park_z;
-  float          __cfg_park_phi;
-  float          __cfg_park_theta;
-  float          __cfg_park_psi;
+  std::string    cfg_controller_;
+  std::string    cfg_device_;
+  std::string    cfg_kni_conffile_;
+  bool           cfg_auto_calibrate_;
+  unsigned int   cfg_defmax_speed_;
+  unsigned int   cfg_read_timeout_;
+  unsigned int   cfg_write_timeout_;
+  unsigned int   cfg_gripper_pollint_;
+  unsigned int   cfg_goto_pollint_;
+  float          cfg_park_x_;
+  float          cfg_park_y_;
+  float          cfg_park_z_;
+  float          cfg_park_phi_;
+  float          cfg_park_theta_;
+  float          cfg_park_psi_;
 
-  float          __cfg_distance_scale;
+  float          cfg_distance_scale_;
 
-  float          __cfg_update_interval;
+  float          cfg_update_interval_;
 
-  std::string    __cfg_frame_kni;
-  std::string    __cfg_frame_gripper;
-  std::string    __cfg_frame_openrave;
+  std::string    cfg_frame_kni_;
+  std::string    cfg_frame_gripper_;
+  std::string    cfg_frame_openrave_;
 
-  bool           __cfg_OR_enabled;
+  bool           cfg_OR_enabled_;
 #ifdef HAVE_OPENRAVE
-  bool           __cfg_OR_use_viewer;
-  bool           __cfg_OR_auto_load_ik;
-  std::string    __cfg_OR_robot_file;
-  std::string    __cfg_OR_arm_model;
+  bool           cfg_OR_use_viewer_;
+  bool           cfg_OR_auto_load_ik_;
+  std::string    cfg_OR_robot_file_;
+  std::string    cfg_OR_arm_model_;
 #endif
 
-  fawkes::RefPtr<KatanaSensorAcquisitionThread> __sensacq_thread;
-  fawkes::RefPtr<KatanaMotionThread>           __actmot_thread;
-  fawkes::RefPtr<KatanaCalibrationThread>      __calib_thread;
-  fawkes::RefPtr<KatanaGotoThread>             __goto_thread;
-  fawkes::RefPtr<KatanaGripperThread>          __gripper_thread;
-  fawkes::RefPtr<KatanaMotorControlThread>     __motor_control_thread;
+  fawkes::RefPtr<KatanaSensorAcquisitionThread> sensacq_thread_;
+  fawkes::RefPtr<KatanaMotionThread>           actmot_thread_;
+  fawkes::RefPtr<KatanaCalibrationThread>      calib_thread_;
+  fawkes::RefPtr<KatanaGotoThread>             goto_thread_;
+  fawkes::RefPtr<KatanaGripperThread>          gripper_thread_;
+  fawkes::RefPtr<KatanaMotorControlThread>     motor_control_thread_;
 #ifdef HAVE_OPENRAVE
-  fawkes::RefPtr<KatanaGotoOpenRaveThread>     __goto_openrave_thread;
+  fawkes::RefPtr<KatanaGotoOpenRaveThread>     goto_openrave_thread_;
 #endif
 
-  fawkes::RefPtr<fawkes::KatanaController>      __katana;
+  fawkes::RefPtr<fawkes::KatanaController>      katana_;
 
-  fawkes::Time                  *__last_update;
+  fawkes::Time                  *last_update_;
 
 #ifdef USE_TIMETRACKER
-  fawkes::RefPtr<fawkes::TimeTracker> __tt;
-  unsigned int __tt_count;
-  unsigned int __ttc_read_sensor;
+  fawkes::RefPtr<fawkes::TimeTracker> tt_;
+  unsigned int tt_count_;
+  unsigned int ttc_read_sensor_;
 #endif
 };
 

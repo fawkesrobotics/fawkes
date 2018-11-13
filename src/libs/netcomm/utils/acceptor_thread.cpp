@@ -47,15 +47,15 @@ NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *h
 					     const char *thread_name)
   : Thread(thread_name)
 {
-  __handler = handler;
-  __port    = port;
+  handler_ = handler;
+  port_    = port;
 
   set_prepfin_conc_loop(true);
 
   try {
-    __socket = new StreamSocket();
-    __socket->bind(__port);
-    __socket->listen();
+    socket_ = new StreamSocket();
+    socket_->bind(port_);
+    socket_->listen();
   } catch (SocketException &e) {
     throw;
   }
@@ -77,19 +77,19 @@ NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *h
                                              const char *thread_name)
   : Thread(thread_name)
 {
-  __handler = handler;
-  __port    = port;
+  handler_ = handler;
+  port_    = port;
 
   set_prepfin_conc_loop(true);
 
   try {
-    __socket = new StreamSocket(addr_type);
+    socket_ = new StreamSocket(addr_type);
     if (listen_addr.empty()) {
-	    __socket->bind(__port);
+	    socket_->bind(port_);
     } else {
-	    __socket->bind(__port, listen_addr.c_str());
+	    socket_->bind(port_, listen_addr.c_str());
     }
-    __socket->listen();
+    socket_->listen();
   } catch (SocketException &e) {
     throw;
   }
@@ -108,14 +108,14 @@ NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *h
 					     const char *thread_name)
   : Thread(thread_name)
 {
-  __handler = handler;
-  __port    = 0;
-  __socket  = socket;
+  handler_ = handler;
+  port_    = 0;
+  socket_  = socket;
 
   set_prepfin_conc_loop(true);
 
   try {
-    __socket->listen();
+    socket_->listen();
   } catch (SocketException &e) {
     throw;
   }
@@ -125,7 +125,7 @@ NetworkAcceptorThread::NetworkAcceptorThread(NetworkIncomingConnectionHandler *h
 /** Destructor. */
 NetworkAcceptorThread::~NetworkAcceptorThread()
 {
-  delete __socket;
+  delete socket_;
 }
 
 
@@ -136,8 +136,8 @@ NetworkAcceptorThread::~NetworkAcceptorThread()
 void
 NetworkAcceptorThread::loop()
 {
-  StreamSocket *s = __socket->accept<StreamSocket>();
-  __handler->add_connection(s);
+  StreamSocket *s = socket_->accept<StreamSocket>();
+  handler_->add_connection(s);
 }
 
 } // end namespace fawkes

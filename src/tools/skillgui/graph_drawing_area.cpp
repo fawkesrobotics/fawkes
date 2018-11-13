@@ -38,72 +38,72 @@ SkillGuiGraphDrawingArea::SkillGuiGraphDrawingArea()
 {
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK);
 
-  __gvc = gvContext();
+  gvc_ = gvContext();
 
-  __graph_fsm = "";
-  __graph = "";
+  graph_fsm_ = "";
+  graph_ = "";
 
-  __bbw = __bbh = __pad_x = __pad_y = 0.0;
-  __translation_x = __translation_y = 0.0;
-  __scale = 1.0;
-  __scale_override = false;
-  __update_graph = true;
-  __recording = false;
+  bbw_ = bbh_ = pad_x_ = pad_y_ = 0.0;
+  translation_x_ = translation_y_ = 0.0;
+  scale_ = 1.0;
+  scale_override_ = false;
+  update_graph_ = true;
+  recording_ = false;
 
-  gvplugin_skillgui_cairo_setup(__gvc, this);
+  gvplugin_skillgui_cairo_setup(gvc_, this);
 
-  __fcd_save = new Gtk::FileChooserDialog("Save Graph",
+  fcd_save_ = new Gtk::FileChooserDialog("Save Graph",
 					  Gtk::FILE_CHOOSER_ACTION_SAVE);
-  __fcd_open = new Gtk::FileChooserDialog("Load Graph",
+  fcd_open_ = new Gtk::FileChooserDialog("Load Graph",
 					  Gtk::FILE_CHOOSER_ACTION_OPEN);
-  __fcd_recording = new Gtk::FileChooserDialog("Recording Directory",
+  fcd_recording_ = new Gtk::FileChooserDialog("Recording Directory",
 						 Gtk::FILE_CHOOSER_ACTION_CREATE_FOLDER);
 
   //Add response buttons the the dialog:
-  __fcd_save->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-  __fcd_save->add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
-  __fcd_open->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-  __fcd_open->add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
-  __fcd_recording->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-  __fcd_recording->add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+  fcd_save_->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  fcd_save_->add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
+  fcd_open_->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  fcd_open_->add_button(Gtk::Stock::SAVE, Gtk::RESPONSE_OK);
+  fcd_recording_->add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+  fcd_recording_->add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
 #if GTK_VERSION_GE(3,0)
-  __filter_pdf = Gtk::FileFilter::create();
-  __filter_svg = Gtk::FileFilter::create();
-  __filter_png = Gtk::FileFilter::create();
-  __filter_dot = Gtk::FileFilter::create();
+  filter_pdf_ = Gtk::FileFilter::create();
+  filter_svg_ = Gtk::FileFilter::create();
+  filter_png_ = Gtk::FileFilter::create();
+  filter_dot_ = Gtk::FileFilter::create();
 #else
-  __filter_pdf = new Gtk::FileFilter();
-  __filter_svg = new Gtk::FileFilter();
-  __filter_png = new Gtk::FileFilter();
-  __filter_dot = new Gtk::FileFilter();
+  filter_pdf_ = new Gtk::FileFilter();
+  filter_svg_ = new Gtk::FileFilter();
+  filter_png_ = new Gtk::FileFilter();
+  filter_dot_ = new Gtk::FileFilter();
 #endif
-  __filter_pdf->set_name("Portable Document Format (PDF)");
-  __filter_pdf->add_pattern("*.pdf");
-  __filter_svg->set_name("Scalable Vector Graphic (SVG)");
-  __filter_svg->add_pattern("*.svg");
-  __filter_png->set_name("Portable Network Graphic (PNG)");
-  __filter_png->add_pattern("*.png");
-  __filter_dot->set_name("DOT Graph");
-  __filter_dot->add_pattern("*.dot");
+  filter_pdf_->set_name("Portable Document Format (PDF)");
+  filter_pdf_->add_pattern("*.pdf");
+  filter_svg_->set_name("Scalable Vector Graphic (SVG)");
+  filter_svg_->add_pattern("*.svg");
+  filter_png_->set_name("Portable Network Graphic (PNG)");
+  filter_png_->add_pattern("*.png");
+  filter_dot_->set_name("DOT Graph");
+  filter_dot_->add_pattern("*.dot");
 #if GTK_VERSION_GE(3,0)
-  __fcd_save->add_filter(__filter_pdf);
-  __fcd_save->add_filter(__filter_svg);
-  __fcd_save->add_filter(__filter_png);
-  __fcd_save->add_filter(__filter_dot);
-  __fcd_save->set_filter(__filter_pdf);
+  fcd_save_->add_filter(filter_pdf_);
+  fcd_save_->add_filter(filter_svg_);
+  fcd_save_->add_filter(filter_png_);
+  fcd_save_->add_filter(filter_dot_);
+  fcd_save_->set_filter(filter_pdf_);
 
-  __fcd_open->add_filter(__filter_dot);
-  __fcd_open->set_filter(__filter_dot);
+  fcd_open_->add_filter(filter_dot_);
+  fcd_open_->set_filter(filter_dot_);
 #else
-  __fcd_save->add_filter(*__filter_pdf);
-  __fcd_save->add_filter(*__filter_svg);
-  __fcd_save->add_filter(*__filter_png);
-  __fcd_save->add_filter(*__filter_dot);
-  __fcd_save->set_filter(*__filter_pdf);
+  fcd_save_->add_filter(*filter_pdf_);
+  fcd_save_->add_filter(*filter_svg_);
+  fcd_save_->add_filter(*filter_png_);
+  fcd_save_->add_filter(*filter_dot_);
+  fcd_save_->set_filter(*filter_pdf_);
 
-  __fcd_open->add_filter(*__filter_dot);
-  __fcd_open->set_filter(*__filter_dot);
+  fcd_open_->add_filter(*filter_dot_);
+  fcd_open_->set_filter(*filter_dot_);
 #endif
 
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK |
@@ -118,21 +118,21 @@ SkillGuiGraphDrawingArea::SkillGuiGraphDrawingArea()
 
 SkillGuiGraphDrawingArea::~SkillGuiGraphDrawingArea()
 {
-  gvFreeContext(__gvc);
-  //delete __fcd;
-  delete __fcd_save;
-  delete __fcd_open;
-  delete __fcd_recording;
+  gvFreeContext(gvc_);
+  //delete fcd_;
+  delete fcd_save_;
+  delete fcd_open_;
+  delete fcd_recording_;
 #if GTK_VERSION_GE(3,0)
-  __filter_pdf.reset();
-  __filter_svg.reset();
-  __filter_png.reset();
-  __filter_dot.reset();
+  filter_pdf_.reset();
+  filter_svg_.reset();
+  filter_png_.reset();
+  filter_dot_.reset();
 #else
-  delete __filter_pdf;
-  delete __filter_svg;
-  delete __filter_png;
-  delete __filter_dot;
+  delete filter_pdf_;
+  delete filter_svg_;
+  delete filter_png_;
+  delete filter_dot_;
 #endif
 }
 
@@ -143,7 +143,7 @@ SkillGuiGraphDrawingArea::~SkillGuiGraphDrawingArea()
 sigc::signal<void>
 SkillGuiGraphDrawingArea::signal_update_disabled()
 {
-  return __signal_update_disabled;
+  return signal_update_disabled_;
 }
 
 
@@ -153,13 +153,13 @@ SkillGuiGraphDrawingArea::signal_update_disabled()
 void
 SkillGuiGraphDrawingArea::set_graph_fsm(std::string fsm_name)
 {
-  if ( __update_graph ) {
-    if ( __graph_fsm != fsm_name ) {
-      __scale_override = false;
+  if ( update_graph_ ) {
+    if ( graph_fsm_ != fsm_name ) {
+      scale_override_ = false;
     }
-    __graph_fsm = fsm_name;
+    graph_fsm_ = fsm_name;
   } else {
-    __nonupd_graph_fsm = fsm_name;
+    nonupd_graph_fsm_ = fsm_name;
   }
 }
 
@@ -170,14 +170,14 @@ SkillGuiGraphDrawingArea::set_graph_fsm(std::string fsm_name)
 void
 SkillGuiGraphDrawingArea::set_graph(std::string graph)
 {
-  if ( __update_graph ) {
-    __graph = graph;
+  if ( update_graph_ ) {
+    graph_ = graph;
     queue_draw();
   } else {
-    __nonupd_graph = graph;
+    nonupd_graph_ = graph;
   }
 
-  if ( __recording ) {
+  if ( recording_ ) {
     char *tmp;
 #if defined(__MACH__) && defined(__APPLE__)
     struct timeval t;
@@ -192,7 +192,7 @@ SkillGuiGraphDrawingArea::set_graph(std::string graph)
       localtime_r(&t.tv_sec, &tms);
 
       if ( asprintf(&tmp, "%s/%s_%04i%02i%02i-%02i%02i%02i.%09li.dot",
-		    __record_directory.c_str(), __graph_fsm.c_str(),
+		    record_directory_.c_str(), graph_fsm_.c_str(),
 		    tms.tm_year + 1900, tms.tm_mon + 1, tms.tm_mday,
 		    tms.tm_hour, tms.tm_min, tms.tm_sec, nsec) != -1)
       {
@@ -217,8 +217,8 @@ SkillGuiGraphDrawingArea::set_graph(std::string graph)
 void
 SkillGuiGraphDrawingArea::set_bb(double bbw, double bbh)
 {
-  __bbw = bbw;
-  __bbh = bbh;
+  bbw_ = bbw;
+  bbh_ = bbh;
 }
 
 
@@ -230,8 +230,8 @@ SkillGuiGraphDrawingArea::set_bb(double bbw, double bbh)
 void
 SkillGuiGraphDrawingArea::set_pad(double pad_x, double pad_y)
 {
-  __pad_x = pad_x;
-  __pad_y = pad_y;
+  pad_x_ = pad_x;
+  pad_y_ = pad_y;
 }
 
 
@@ -243,11 +243,11 @@ SkillGuiGraphDrawingArea::set_pad(double pad_x, double pad_y)
 void
 SkillGuiGraphDrawingArea::get_pad(double &pad_x, double &pad_y)
 {
-  if (__scale_override) {
+  if (scale_override_) {
     pad_x = pad_y = 0;
   } else {
-    pad_x = __pad_x;
-    pad_y = __pad_y;
+    pad_x = pad_x_;
+    pad_y = pad_y_;
   }
 }
 
@@ -260,8 +260,8 @@ SkillGuiGraphDrawingArea::get_pad(double &pad_x, double &pad_y)
 void
 SkillGuiGraphDrawingArea::set_translation(double tx, double ty)
 {
-  __translation_x = tx;
-  __translation_y = ty;
+  translation_x_ = tx;
+  translation_y_ = ty;
 }
 
 
@@ -272,7 +272,7 @@ SkillGuiGraphDrawingArea::set_translation(double tx, double ty)
 void
 SkillGuiGraphDrawingArea::set_scale(double scale)
 {
-  __scale = scale;
+  scale_ = scale;
 }
 
 /** Get scale.
@@ -282,7 +282,7 @@ SkillGuiGraphDrawingArea::set_scale(double scale)
 double
 SkillGuiGraphDrawingArea::get_scale()
 {
-  return __scale;
+  return scale_;
 }
 
 /** Get translation.
@@ -292,8 +292,8 @@ SkillGuiGraphDrawingArea::get_scale()
 void
 SkillGuiGraphDrawingArea::get_translation(double &tx, double &ty)
 {
-  tx = __translation_x;
-  ty = __translation_y;
+  tx = translation_x_;
+  ty = translation_y_;
 }
 
 
@@ -317,10 +317,10 @@ void
 SkillGuiGraphDrawingArea::zoom_in()
 {
   Gtk::Allocation alloc = get_allocation();
-  __scale += 0.1;
-  __scale_override = true;
-  __translation_x = (alloc.get_width()  - __bbw * __scale) / 2.0;
-  __translation_y = (alloc.get_height() - __bbh * __scale) / 2.0 + __bbh * __scale;
+  scale_ += 0.1;
+  scale_override_ = true;
+  translation_x_ = (alloc.get_width()  - bbw_ * scale_) / 2.0;
+  translation_y_ = (alloc.get_height() - bbh_ * scale_) / 2.0 + bbh_ * scale_;
   queue_draw();
 }
 
@@ -330,12 +330,12 @@ SkillGuiGraphDrawingArea::zoom_in()
 void
 SkillGuiGraphDrawingArea::zoom_out()
 {
-  __scale_override = true;
-  if ( __scale > 0.1 ) {
+  scale_override_ = true;
+  if ( scale_ > 0.1 ) {
     Gtk::Allocation alloc = get_allocation();
-    __scale -= 0.1;
-    __translation_x = (alloc.get_width()  - __bbw * __scale) / 2.0;
-    __translation_y = (alloc.get_height() - __bbh * __scale) / 2.0 + __bbh * __scale;
+    scale_ -= 0.1;
+    translation_x_ = (alloc.get_width()  - bbw_ * scale_) / 2.0;
+    translation_y_ = (alloc.get_height() - bbh_ * scale_) / 2.0 + bbh_ * scale_;
     queue_draw();
   }
 }
@@ -347,7 +347,7 @@ SkillGuiGraphDrawingArea::zoom_out()
 void
 SkillGuiGraphDrawingArea::zoom_fit()
 {
-  __scale_override = false;
+  scale_override_ = false;
   queue_draw();
 }
 
@@ -359,10 +359,10 @@ void
 SkillGuiGraphDrawingArea::zoom_reset()
 {
   Gtk::Allocation alloc = get_allocation();
-  __scale = 1.0;
-  __scale_override = true;
-  __translation_x = (alloc.get_width()  - __bbw) / 2.0 + __pad_x;
-  __translation_y = (alloc.get_height() - __bbh) / 2.0 + __bbh - __pad_y;
+  scale_ = 1.0;
+  scale_override_ = true;
+  translation_x_ = (alloc.get_width()  - bbw_) / 2.0 + pad_x_;
+  translation_y_ = (alloc.get_height() - bbh_) / 2.0 + bbh_ - pad_y_;
   queue_draw();
 }
 
@@ -373,7 +373,7 @@ SkillGuiGraphDrawingArea::zoom_reset()
 bool
 SkillGuiGraphDrawingArea::scale_override()
 {
-  return __scale_override;
+  return scale_override_;
 }
 
 
@@ -385,7 +385,7 @@ SkillGuiGraphDrawingArea::scale_override()
 Cairo::RefPtr<Cairo::Context>
 SkillGuiGraphDrawingArea::get_cairo()
 {
-  return __cairo;
+  return cairo_;
 }
 
 
@@ -396,7 +396,7 @@ SkillGuiGraphDrawingArea::get_cairo()
 bool
 SkillGuiGraphDrawingArea::get_update_graph()
 {
-  return __update_graph;
+  return update_graph_;
 }
 
 
@@ -406,15 +406,15 @@ SkillGuiGraphDrawingArea::get_update_graph()
 void
 SkillGuiGraphDrawingArea::set_update_graph(bool update)
 {
-  if (update && ! __update_graph) {
-    if ( __graph_fsm != __nonupd_graph_fsm ) {
-      __scale_override = false;
+  if (update && ! update_graph_) {
+    if ( graph_fsm_ != nonupd_graph_fsm_ ) {
+      scale_override_ = false;
     }
-    __graph     = __nonupd_graph;
-    __graph_fsm = __nonupd_graph_fsm;
+    graph_     = nonupd_graph_;
+    graph_fsm_ = nonupd_graph_fsm_;
     queue_draw();
   }
-  __update_graph = update;
+  update_graph_ = update;
 }
 
 
@@ -423,7 +423,7 @@ SkillGuiGraphDrawingArea::save_dotfile(const char *filename)
 {
   FILE *f = fopen(filename, "w");
   if (f) {
-    if (fwrite(__graph.c_str(), __graph.length(), 1, f) != 1) {
+    if (fwrite(graph_.c_str(), graph_.length(), 1, f) != 1) {
       // bang, ignored
       printf("Failed to write dot file '%s'\n", filename);
     }
@@ -443,17 +443,17 @@ SkillGuiGraphDrawingArea::set_recording(bool recording)
 {
   if (recording) {
     Gtk::Window *w = dynamic_cast<Gtk::Window *>(get_toplevel());
-    __fcd_recording->set_transient_for(*w);
-    int result = __fcd_recording->run();
+    fcd_recording_->set_transient_for(*w);
+    int result = fcd_recording_->run();
     if (result == Gtk::RESPONSE_OK) {
-      __record_directory = __fcd_recording->get_filename();
-      __recording = true;
+      record_directory_ = fcd_recording_->get_filename();
+      recording_ = true;
     }
-    __fcd_recording->hide();
+    fcd_recording_->hide();
   } else {
-    __recording = false;
+    recording_ = false;
   }
-  return __recording;
+  return recording_;
 }
 
 
@@ -462,52 +462,52 @@ void
 SkillGuiGraphDrawingArea::save()
 {
   Gtk::Window *w = dynamic_cast<Gtk::Window *>(get_toplevel());
-  __fcd_save->set_transient_for(*w);
+  fcd_save_->set_transient_for(*w);
 
-  int result = __fcd_save->run();
+  int result = fcd_save_->run();
   if (result == Gtk::RESPONSE_OK) {
 
 #if GTK_VERSION_GE(3,0)
-    Glib::RefPtr<Gtk::FileFilter> f = __fcd_save->get_filter();
+    Glib::RefPtr<Gtk::FileFilter> f = fcd_save_->get_filter();
 #else
-    Gtk::FileFilter *f = __fcd_save->get_filter();
+    Gtk::FileFilter *f = fcd_save_->get_filter();
 #endif
-    std::string filename = __fcd_save->get_filename();
+    std::string filename = fcd_save_->get_filename();
     if (filename != "") {
-      if (f == __filter_dot) {
+      if (f == filter_dot_) {
 	save_dotfile(filename.c_str());
       } else {
 	Cairo::RefPtr<Cairo::Surface> surface;
 
 	bool write_to_png = false;
-	if (f == __filter_pdf) {
-	  surface = Cairo::PdfSurface::create(filename, __bbw, __bbh);
-	} else if (f == __filter_svg) {
-	  surface = Cairo::SvgSurface::create(filename, __bbw, __bbh);
-	} else if (f == __filter_png) {
+	if (f == filter_pdf_) {
+	  surface = Cairo::PdfSurface::create(filename, bbw_, bbh_);
+	} else if (f == filter_svg_) {
+	  surface = Cairo::SvgSurface::create(filename, bbw_, bbh_);
+	} else if (f == filter_png_) {
 	  surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32,
-						(int)ceilf(__bbw),
-						(int)ceilf(__bbh));
+						(int)ceilf(bbw_),
+						(int)ceilf(bbh_));
 	  write_to_png = true;
 	}
 
 	if (surface) {
-	  __cairo = Cairo::Context::create(surface);
+	  cairo_ = Cairo::Context::create(surface);
 	  
-	  bool old_scale_override = __scale_override;
-	  double old_tx = __translation_x;
-	  double old_ty = __translation_y;
-	  double old_scale = __scale;
-	  __translation_x = __pad_x;
-	  __translation_y = __bbh - __pad_y;
-	  __scale = 1.0;
-	  __scale_override = true;
+	  bool old_scale_override = scale_override_;
+	  double old_tx = translation_x_;
+	  double old_ty = translation_y_;
+	  double old_scale = scale_;
+	  translation_x_ = pad_x_;
+	  translation_y_ = bbh_ - pad_y_;
+	  scale_ = 1.0;
+	  scale_override_ = true;
 
-	  Agraph_t *g = agmemread((char *)__graph.c_str());
+	  Agraph_t *g = agmemread((char *)graph_.c_str());
 	  if (g) {
-	    gvLayout(__gvc, g, (char *)"dot");
-	    gvRender(__gvc, g, (char *)"skillguicairo", NULL);
-	    gvFreeLayout(__gvc, g);
+	    gvLayout(gvc_, g, (char *)"dot");
+	    gvRender(gvc_, g, (char *)"skillguicairo", NULL);
+	    gvFreeLayout(gvc_, g);
 	    agclose(g);
 	  }
 
@@ -515,12 +515,12 @@ SkillGuiGraphDrawingArea::save()
 	    surface->write_to_png(filename);
 	  }
 
-	  __cairo.clear();
+	  cairo_.clear();
 
-	  __translation_x = old_tx;
-	  __translation_y = old_ty;
-	  __scale = old_scale;
-	  __scale_override = old_scale_override;
+	  translation_x_ = old_tx;
+	  translation_y_ = old_ty;
+	  scale_ = old_scale;
+	  scale_override_ = old_scale_override;
 	}
       }
 
@@ -533,7 +533,7 @@ SkillGuiGraphDrawingArea::save()
     }
   }
 
-  __fcd_save->hide();
+  fcd_save_->hide();
 }
 
 
@@ -542,31 +542,31 @@ void
 SkillGuiGraphDrawingArea::open()
 {
   Gtk::Window *w = dynamic_cast<Gtk::Window *>(get_toplevel());
-  __fcd_open->set_transient_for(*w);
+  fcd_open_->set_transient_for(*w);
 
-  int result = __fcd_open->run();
+  int result = fcd_open_->run();
   if (result == Gtk::RESPONSE_OK) {
-    __update_graph = false;
-    __graph = "";
-    char *basec = strdup(__fcd_open->get_filename().c_str());
+    update_graph_ = false;
+    graph_ = "";
+    char *basec = strdup(fcd_open_->get_filename().c_str());
     char *basen = basename(basec);
-    __graph_fsm = basen;
+    graph_fsm_ = basen;
     free(basec);
 
-    FILE *f = fopen(__fcd_open->get_filename().c_str(), "r");
+    FILE *f = fopen(fcd_open_->get_filename().c_str(), "r");
     while (! feof(f)) {
       char tmp[4096];
       size_t s;
       if ((s = fread(tmp, 1, 4096, f)) > 0) {
-	__graph.append(tmp, s);
+	graph_.append(tmp, s);
       }
     }
     fclose(f);
-    __signal_update_disabled.emit();
+    signal_update_disabled_.emit();
     queue_draw();
   }
 
-  __fcd_open->hide();
+  fcd_open_->hide();
 }
 
 
@@ -598,22 +598,22 @@ SkillGuiGraphDrawingArea::on_expose_event(GdkEventExpose* event)
     //xc = width / 2;
     //yc = height / 2;
 #if GTK_VERSION_LT(3,0)
-    __cairo = window->create_cairo_context();
+    cairo_ = window->create_cairo_context();
 #else
-    __cairo = cr;
+    cairo_ = cr;
 #endif
-    __cairo->set_source_rgb(1, 1, 1);
-    __cairo->paint();
+    cairo_->set_source_rgb(1, 1, 1);
+    cairo_->paint();
 
-    Agraph_t *g = agmemread((char *)__graph.c_str());
+    Agraph_t *g = agmemread((char *)graph_.c_str());
     if (g) {
-      gvLayout(__gvc, g, (char *)"dot");
-      gvRender(__gvc, g, (char *)"skillguicairo", NULL);
-      gvFreeLayout(__gvc, g);
+      gvLayout(gvc_, g, (char *)"dot");
+      gvRender(gvc_, g, (char *)"skillguicairo", NULL);
+      gvFreeLayout(gvc_, g);
       agclose(g);
     }
 
-    __cairo.clear();
+    cairo_.clear();
   }    
 
   return true;
@@ -642,8 +642,8 @@ SkillGuiGraphDrawingArea::on_scroll_event(GdkEventScroll *event)
 bool
 SkillGuiGraphDrawingArea::on_button_press_event(GdkEventButton *event)
 {
-  __last_mouse_x = event->x;
-  __last_mouse_y = event->y;
+  last_mouse_x_ = event->x;
+  last_mouse_y_ = event->y;
   return true;
 }
 
@@ -655,11 +655,11 @@ SkillGuiGraphDrawingArea::on_button_press_event(GdkEventButton *event)
 bool
 SkillGuiGraphDrawingArea::on_motion_notify_event(GdkEventMotion *event)
 {
-  __scale_override = true;
-  __translation_x -= __last_mouse_x - event->x;
-  __translation_y -= __last_mouse_y - event->y;
-  __last_mouse_x = event->x;
-  __last_mouse_y = event->y;
+  scale_override_ = true;
+  translation_x_ -= last_mouse_x_ - event->x;
+  translation_y_ -= last_mouse_y_ - event->y;
+  last_mouse_x_ = event->x;
+  last_mouse_y_ = event->y;
   queue_draw();
   return true;
 }

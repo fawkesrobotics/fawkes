@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_MAINLOOP_EMPLOYER_H_
-#define __ASPECT_MAINLOOP_EMPLOYER_H_
+#ifndef _ASPECT_MAINLOOP_EMPLOYER_H_
+#define _ASPECT_MAINLOOP_EMPLOYER_H_
 
 namespace fawkes {
 

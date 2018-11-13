@@ -28,9 +28,6 @@
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenRaveAspectIniFin <plugins/openrave/aspect/openrave_inifin.h>
  * OpenRaveAspect initializer/finalizer.
@@ -45,7 +42,7 @@ namespace fawkes {
 OpenRaveAspectIniFin::OpenRaveAspectIniFin(OpenRaveConnector *openrave)
   : AspectIniFin("OpenRaveAspect")
 {
-  __openrave = openrave;
+  openrave_ = openrave;
 }
 
 void
@@ -60,7 +57,7 @@ OpenRaveAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  or_thread->init_OpenRaveAspect(__openrave);
+  or_thread->init_OpenRaveAspect(openrave_);
 }
 
 void

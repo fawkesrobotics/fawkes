@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_TIME_WATCH_H_
-#define __UTILS_TIME_WATCH_H_
+#ifndef _UTILS_TIME_WATCH_H_
+#define _UTILS_TIME_WATCH_H_
 
 #include <utils/time/time.h>
 
@@ -58,4 +58,4 @@ class Watch
 
 } // end namespace fawkes
 
-#endif /*  __UTILS_TIME_WATCH_H_ */
+#endif /*  UTILS_TIME_WATCH_H__ */

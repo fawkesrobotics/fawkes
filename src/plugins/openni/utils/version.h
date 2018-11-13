@@ -20,17 +20,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_UTILS_VERSION_H_
-#define __PLUGINS_OPENNI_UTILS_VERSION_H_
+#ifndef _PLUGINS_OPENNI_UTILS_VERSION_H_
+#define _PLUGINS_OPENNI_UTILS_VERSION_H_
 
 #include <XnVersion.h>
 
 namespace fawkes {
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 #define XN_VERSION_GT(major, minor, micro, build)                       \
   (XN_VERSION > (major*100000000 + minor*1000000 + micro*10000 + build))

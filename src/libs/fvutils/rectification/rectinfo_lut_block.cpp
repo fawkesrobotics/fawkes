@@ -28,9 +28,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class RectificationLutInfoBlock <fvutils/rectification/rectinfo_lut_block.h>
  * Recitification Lookup Table Block.

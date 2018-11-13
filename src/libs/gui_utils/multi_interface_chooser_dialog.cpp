@@ -101,12 +101,12 @@ MultiInterfaceChooserDialog::MultiInterfaceChooserDialog(
     const TypeIdPairList& loaded_interfaces,
     const Glib::ustring& title)
   : InterfaceChooserDialog(parent, title),
-    __record(NULL)
+    record_(NULL)
 {
-  __loaded_interfaces.insert(loaded_interfaces.begin(), loaded_interfaces.end());
-  Glib::RefPtr<Gtk::TreeSelection> treesel = __treeview.get_selection();
-  __treeview.set_reorderable(true);
-  __treeview.set_tooltip_text("Drag the rows to change the painting order.");
+  loaded_interfaces_.insert(loaded_interfaces.begin(), loaded_interfaces.end());
+  Glib::RefPtr<Gtk::TreeSelection> treesel = treeview_.get_selection();
+  treeview_.set_reorderable(true);
+  treeview_.set_tooltip_text("Drag the rows to change the painting order.");
   treesel->set_mode(Gtk::SELECTION_NONE);
   // May *NOT* call init(), because init() calls virtual methods.
 }
@@ -115,8 +115,8 @@ MultiInterfaceChooserDialog::MultiInterfaceChooserDialog(
 /** Destructor. */
 MultiInterfaceChooserDialog::~MultiInterfaceChooserDialog()
 {
-  if (__record) {
-    delete __record;
+  if (record_) {
+    delete record_;
   }
 }
 
@@ -124,7 +124,7 @@ MultiInterfaceChooserDialog::~MultiInterfaceChooserDialog()
 void
 MultiInterfaceChooserDialog::on_load_toggled(const Glib::ustring& path)
 {
-  Gtk::TreeModel::Row row = *__model->get_iter(path);
+  Gtk::TreeModel::Row row = *model_->get_iter(path);
   row[record().load] = !row[record().load];
 }
 
@@ -136,11 +136,11 @@ MultiInterfaceChooserDialog::on_load_toggled(const Glib::ustring& path)
 const MultiInterfaceChooserDialog::Record&
 MultiInterfaceChooserDialog::record() const
 {
-  if (!__record) {
+  if (!record_) {
     MultiInterfaceChooserDialog* this_nonconst = const_cast<MultiInterfaceChooserDialog*>(this);
-    this_nonconst->__record = new Record();
+    this_nonconst->record_ = new Record();
   }
-  return *__record;
+  return *record_;
 }
 
 
@@ -154,12 +154,12 @@ MultiInterfaceChooserDialog::record() const
 int
 MultiInterfaceChooserDialog::init_columns()
 {
-  __treeview.append_column("Load", record().load);
+  treeview_.append_column("Load", record().load);
 
   const int n = InterfaceChooserDialog::init_columns();
 
   Gtk::CellRendererToggle* renderer = dynamic_cast<Gtk::CellRendererToggle*>(
-      __treeview.get_column_cell_renderer(0));
+      treeview_.get_column_cell_renderer(0));
   assert(renderer != NULL);
 
   renderer->set_activatable(true);
@@ -183,8 +183,8 @@ MultiInterfaceChooserDialog::init_row(Gtk::TreeModel::Row& row,
                                       const InterfaceInfo& ii)
 {
   InterfaceChooserDialog::init_row(row, ii);
-  row[record().load] = __loaded_interfaces.find(std::make_pair(ii.type(), ii.id())) !=
-                       __loaded_interfaces.end();
+  row[record().load] = loaded_interfaces_.find(std::make_pair(ii.type(), ii.id())) !=
+                       loaded_interfaces_.end();
 }
 
 
@@ -196,7 +196,7 @@ MultiInterfaceChooserDialog::get_selected_interfaces() const
 {
   TypeIdPairList types_and_ids;
 
-  const Gtk::TreeNodeChildren children = __model->children();
+  const Gtk::TreeNodeChildren children = model_->children();
   for (Gtk::TreeNodeChildren::const_iterator it = children.begin();
        it != children.end(); ++it)
   {
@@ -221,14 +221,14 @@ MultiInterfaceChooserDialog::get_newly_selected_interfaces() const
 {
   TypeIdPairList types_and_ids;
 
-  const Gtk::TreeNodeChildren children = __model->children();
+  const Gtk::TreeNodeChildren children = model_->children();
   for (Gtk::TreeNodeChildren::const_iterator it = children.begin();
        it != children.end(); ++it)
   {
     const Gtk::TreeRow& row = *it;
     if (row[record().load]) {
       TypeIdPair pair = std::make_pair(row[record().type], row[record().id]);
-      if (__loaded_interfaces.find(pair) == __loaded_interfaces.end())
+      if (loaded_interfaces_.find(pair) == loaded_interfaces_.end())
       {
         types_and_ids.push_back(pair);
       }

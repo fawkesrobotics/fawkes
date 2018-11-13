@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FAWKES_CONFIG_MESSAGES_H_
-#define __FAWKES_CONFIG_MESSAGES_H_
+#ifndef _FAWKES_CONFIG_MESSAGES_H_
+#define _FAWKES_CONFIG_MESSAGES_H_
 
 #include <stdint.h>
 #include <netcomm/utils/dynamic_buffer.h>

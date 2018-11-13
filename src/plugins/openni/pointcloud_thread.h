@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_POINTCLOUD_THREAD_H_
-#define __PLUGINS_OPENNI_POINTCLOUD_THREAD_H_
+#ifndef _PLUGINS_OPENNI_POINTCLOUD_THREAD_H_
+#define _PLUGINS_OPENNI_POINTCLOUD_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
@@ -94,39 +94,39 @@ class OpenNiPointCloudThread
 #endif
 
  private:
-  OpenNiImageThread *__img_thread;
+  OpenNiImageThread *img_thread_;
 
-  xn::DepthGenerator  *__depth_gen;
-  xn::ImageGenerator  *__image_gen;
-  xn::DepthMetaData   *__depth_md;
+  xn::DepthGenerator  *depth_gen_;
+  xn::ImageGenerator  *image_gen_;
+  xn::DepthMetaData   *depth_md_;
 
-  bool         __cfg_register_depth_image;
+  bool         cfg_register_depth_image_;
 
-  firevision::SharedMemoryImageBuffer *__pcl_xyz_buf;
-  firevision::SharedMemoryImageBuffer *__pcl_xyzrgb_buf;
+  firevision::SharedMemoryImageBuffer *pcl_xyz_buf_;
+  firevision::SharedMemoryImageBuffer *pcl_xyzrgb_buf_;
 
-  firevision::SharedMemoryImageBuffer *__image_rgb_buf;
+  firevision::SharedMemoryImageBuffer *image_rgb_buf_;
 
-  float        __focal_length;
-  float        __foc_const; // focal length constant used in conversion
-  float        __center_x;
-  float        __center_y;
-  unsigned int __width;
-  unsigned int __height;
+  float        focal_length_;
+  float        foc_const_; // focal length constant used in conversion
+  float        center_x_;
+  float        center_y_;
+  unsigned int width_;
+  unsigned int height_;
 
-  XnUInt64     __no_sample_value;
-  XnUInt64     __shadow_value;
+  XnUInt64     no_sample_value_;
+  XnUInt64     shadow_value_;
 
-  fawkes::Time *__capture_start;
+  fawkes::Time *capture_start_;
 
-  std::string __cfg_frame_depth;
-  std::string __cfg_frame_image;
+  std::string cfg_frame_depth_;
+  std::string cfg_frame_image_;
 
 #ifdef HAVE_PCL
-  bool         __cfg_generate_pcl;
+  bool         cfg_generate_pcl_;
 
-  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> >    __pcl_xyz;
-  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > __pcl_xyzrgb;
+  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> >    pcl_xyz_;
+  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > pcl_xyzrgb_;
 #endif
 };
 

@@ -23,9 +23,6 @@
 #include <list>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 #define REGEX_PARAM "\\?\\(([a-zA-Z0-9_-]+)((\\|/([^/]+)/([^/]+)/)*)\\)(s|S|i|f|y|Y)"
 

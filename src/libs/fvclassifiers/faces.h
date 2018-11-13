@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CLASSIFIERS_FACES_H_
-#define __FIREVISION_CLASSIFIERS_FACES_H_
+#ifndef _FIREVISION_CLASSIFIERS_FACES_H_
+#define _FIREVISION_CLASSIFIERS_FACES_H_
 
 #include <fvclassifiers/classifier.h>
 
@@ -31,9 +31,6 @@ struct CvMemStorage;
 typedef struct _IplImage IplImage;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FacesClassifier : public Classifier
 {
@@ -48,13 +45,13 @@ class FacesClassifier : public Classifier
   virtual std::list< ROI > * classify();
 
  private:
-  CvHaarClassifierCascade *__cascade;
-  CvMemStorage *__storage;
-  IplImage *__image;
-  float __haar_scale_factor;
-  int __min_neighbours;
-  int __flags;
-  bool  __own_image;
+  CvHaarClassifierCascade *cascade_;
+  CvMemStorage *storage_;
+  IplImage *image_;
+  float haar_scale_factor_;
+  int min_neighbours_;
+  int flags_;
+  bool  own_image_;
 };
 
 } // end namespace firevision

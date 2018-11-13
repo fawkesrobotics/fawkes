@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_MAINLOOP_H_
-#define __ASPECT_MAINLOOP_H_
+#ifndef _ASPECT_MAINLOOP_H_
+#define _ASPECT_MAINLOOP_H_
 
 #include <aspect/aspect.h>
 #include <aspect/blocked_timing/executor.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class BlockedTimingExecutor;
 

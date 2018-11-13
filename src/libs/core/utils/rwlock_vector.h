@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_UTILS_RWLOCK_VECTOR_H_
-#define __CORE_UTILS_RWLOCK_VECTOR_H_
+#ifndef _CORE_UTILS_RWLOCK_VECTOR_H_
+#define _CORE_UTILS_RWLOCK_VECTOR_H_
 
 #include <core/threading/read_write_lock.h>
 #include <core/utils/refptr.h>
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 template <typename Type>
 class RWLockVector : public std::vector<Type>
@@ -56,7 +53,7 @@ class RWLockVector : public std::vector<Type>
   RWLockVector<Type> &  operator=(const RWLockVector<Type> &lv);
   RWLockVector<Type> &  operator=(const std::vector<Type> &v);
  private:
-  mutable RefPtr<ReadWriteLock> __rwlock;
+  mutable RefPtr<ReadWriteLock> rwlock_;
 
 };
 
@@ -75,7 +72,7 @@ class RWLockVector : public std::vector<Type>
 /** Constructor. */
 template <typename Type>
 RWLockVector<Type>::RWLockVector()
-  : __rwlock(new ReadWriteLock())
+  : rwlock_(new ReadWriteLock())
 {}
 
 
@@ -84,7 +81,7 @@ RWLockVector<Type>::RWLockVector()
  */
 template <typename Type>
 RWLockVector<Type>::RWLockVector(const RWLockVector<Type> &lv)
-  : std::vector<Type>::vector(lv), __rwlock(new ReadWriteLock())
+  : std::vector<Type>::vector(lv), rwlock_(new ReadWriteLock())
 {}
 
 
@@ -99,7 +96,7 @@ template <typename Type>
 void
 RWLockVector<Type>::lock_for_read() const
 {
-  __rwlock->lock_for_read();
+  rwlock_->lock_for_read();
 }
 
 
@@ -108,7 +105,7 @@ template <typename Type>
 void
 RWLockVector<Type>::lock_for_write() const
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
 }
 
 
@@ -119,7 +116,7 @@ template <typename Type>
 bool
 RWLockVector<Type>::try_lock_for_read() const
 {
-  return __rwlock->try_lock_for_read();
+  return rwlock_->try_lock_for_read();
 }
 
 
@@ -130,7 +127,7 @@ template <typename Type>
 bool
 RWLockVector<Type>::try_lock_for_write() const
 {
-  return __rwlock->try_lock_for_write();
+  return rwlock_->try_lock_for_write();
 }
 
 
@@ -139,7 +136,7 @@ template <typename Type>
 void
 RWLockVector<Type>::unlock() const
 {
-  return __rwlock->unlock();
+  return rwlock_->unlock();
 }
 
 
@@ -150,9 +147,9 @@ template <typename Type>
 void
 RWLockVector<Type>::push_back_locked(const Type& x)
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
   std::vector<Type>::push_back(x);
-  __rwlock->unlock();
+  rwlock_->unlock();
 }
 
 
@@ -161,9 +158,9 @@ template <typename Type>
 void
 RWLockVector<Type>::pop_back_locked()
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
   std::vector<Type>::pop_back();
-  __rwlock->unlock();
+  rwlock_->unlock();
 }
 
 
@@ -174,9 +171,9 @@ template <typename Type>
 void
 RWLockVector<Type>::erase_locked(typename std::vector<Type>::iterator pos)
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
   std::vector<Type>::erase(pos);
-  __rwlock->unlock();
+  rwlock_->unlock();
 }
 
 /** Erase given element range with lock protection.
@@ -188,9 +185,9 @@ void
 RWLockVector<Type>::erase_locked(typename std::vector<Type>::iterator first,
 			       typename std::vector<Type>::iterator last)
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
   std::vector<Type>::erase(first, last);
-  __rwlock->unlock();
+  rwlock_->unlock();
 }
 
 
@@ -201,7 +198,7 @@ template <typename Type>
 RefPtr<ReadWriteLock>
 RWLockVector<Type>::rwlock() const
 {
-  return __rwlock;
+  return rwlock_;
 }
 
 
@@ -215,7 +212,7 @@ template <typename Type>
 RWLockVector<Type> &
 RWLockVector<Type>::operator=(const RWLockVector<Type> &lv)
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
   lv.lock_for_read();
   this->clear();
   typename RWLockVector<Type>::const_iterator i;
@@ -223,7 +220,7 @@ RWLockVector<Type>::operator=(const RWLockVector<Type> &lv)
     this->push_back(*i);
   }
   lv.unlock();
-  __rwlock->unlock();
+  rwlock_->unlock();
 
   return *this;
 }
@@ -239,13 +236,13 @@ template <typename Type>
 RWLockVector<Type> &
 RWLockVector<Type>::operator=(const std::vector<Type> &v)
 {
-  __rwlock->lock_for_write();
+  rwlock_->lock_for_write();
   this->clear();
   typename std::vector<Type>::const_iterator i;
   for (i = v.begin(); i != v.end(); ++i) {
     this->push_back(*i);
   }
-  __rwlock->unlock();
+  rwlock_->unlock();
 
   return *this;
 }

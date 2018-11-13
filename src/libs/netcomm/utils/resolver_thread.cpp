@@ -63,47 +63,47 @@ NetworkNameResolverThread::NetworkNameResolverThread(NetworkNameResolver *resolv
 						     AvahiThread *avahi_thread)
   : Thread("NetworkNameResolverThread", Thread::OPMODE_WAITFORWAKEUP)
 {
-  __resolver = resolver;
-  __addrq_mutex   = new Mutex();
-  __namesq_mutex  = new Mutex();
+  resolver_ = resolver;
+  addrq_mutex_   = new Mutex();
+  namesq_mutex_  = new Mutex();
 
-  __namesq_active = 0;
-  __namesq        = &__namesqs[0];
-  __namesq_proc   = &__namesqs[1];
+  namesq_active_ = 0;
+  namesq_        = &namesqs_[0];
+  namesq_proc_   = &namesqs_[1];
 
-  __addrq_active  = 0;
-  __addrq         = &__addrqs[0];
-  __addrq_proc    = &__addrqs[1];
+  addrq_active_  = 0;
+  addrq_         = &addrqs_[0];
+  addrq_proc_    = &addrqs_[1];
 
 #ifdef HAVE_AVAHI
-  __avahi_thread = avahi_thread;
+  avahi_thread_ = avahi_thread;
 #endif
 }
 
 /** Destructor. */
 NetworkNameResolverThread::~NetworkNameResolverThread()
 {
-  __namesq_mutex->lock();
-  __namesq->clear();
-  __namesq_proc->clear();
-  __namesq_mutex->unlock();
-  __addrq_mutex->lock();
-  while ( ! __addrq->empty() ) {
-    AddrQList::iterator nqit = __addrq->begin();
+  namesq_mutex_->lock();
+  namesq_->clear();
+  namesq_proc_->clear();
+  namesq_mutex_->unlock();
+  addrq_mutex_->lock();
+  while ( ! addrq_->empty() ) {
+    AddrQList::iterator nqit = addrq_->begin();
     free(*nqit);
-    __addrq->erase(nqit);
+    addrq_->erase(nqit);
   }
   // The next operation cannot be locked, but we make the (valid) assumption
   // that the thread is not running when it is destructed, this situation is
   // an error anyway
-  while ( ! __addrq_proc->empty() ) {
-    AddrQList::iterator nqit = __addrq_proc->begin();
+  while ( ! addrq_proc_->empty() ) {
+    AddrQList::iterator nqit = addrq_proc_->begin();
     free(*nqit);
-    __addrq->erase(nqit);
+    addrq_->erase(nqit);
   }
-  __addrq_mutex->unlock();
-  delete __addrq_mutex;
-  delete __namesq_mutex;
+  addrq_mutex_->unlock();
+  delete addrq_mutex_;
+  delete namesq_mutex_;
 }
 
 
@@ -139,8 +139,8 @@ NetworkNameResolverThread::resolve_name_immediately(const std::string &name,
 
 #ifdef HAVE_AVAHI
   // resolve names in .local domain with Avahi if available
-  if ( __avahi_thread && name.find(".local") == name.length() - 6) { // 6 == strlen(".local")
-	  __avahi_thread->resolve_name(name.c_str(), this);          
+  if ( avahi_thread_ && name.find(".local") == name.length() - 6) { // 6 == strlen(".local")
+	  avahi_thread_->resolve_name(name.c_str(), this);          
   /*
   } else {
     printf("NOT ordering avahi_thread lookup\n");
@@ -191,8 +191,8 @@ NetworkNameResolverThread::resolve_address_immediately(struct sockaddr *addr,
   }
 
 #ifdef HAVE_AVAHI
-  if ( __avahi_thread ) {
-    __avahi_thread->resolve_address(addr, addr_len, this);
+  if ( avahi_thread_ ) {
+    avahi_thread_->resolve_address(addr, addr_len, this);
   }
 #endif
 
@@ -208,13 +208,13 @@ NetworkNameResolverThread::resolve_address_immediately(struct sockaddr *addr,
 void
 NetworkNameResolverThread::resolve_name(const std::string &name)
 {
-  __namesq_mutex->lock();
-  if ( __namesq->find(name) == __namesq->end() ) {
-    __namesq->insert(name);
-    __namesq_mutex->unlock();
+  namesq_mutex_->lock();
+  if ( namesq_->find(name) == namesq_->end() ) {
+    namesq_->insert(name);
+    namesq_mutex_->unlock();
     wakeup();
   } else {
-    __namesq_mutex->unlock();
+    namesq_mutex_->unlock();
   }
 }
 
@@ -229,15 +229,15 @@ void
 NetworkNameResolverThread::resolve_address(struct sockaddr *addr, socklen_t addrlen)
 {
 	
-  __addrq_mutex->lock();
-  if ( std::find(__addrq->begin(), __addrq->end(), addr) == __addrq->end() ) {
+  addrq_mutex_->lock();
+  if ( std::find(addrq_->begin(), addrq_->end(), addr) == addrq_->end() ) {
     struct sockaddr *taddr = (struct sockaddr *)malloc(addrlen);
     memcpy(taddr, addr, addrlen);
-    __addrq->push_back(taddr);
-    __addrq_mutex->unlock();
+    addrq_->push_back(taddr);
+    addrq_mutex_->unlock();
     wakeup();
   } else {
-    __addrq_mutex->unlock();
+    addrq_mutex_->unlock();
   }
 }
 
@@ -256,7 +256,7 @@ void
 NetworkNameResolverThread::resolved_name(char *name,
                                          struct sockaddr *addr, socklen_t addrlen)
 {
-  __resolver->name_resolved(name, addr, addrlen);
+  resolver_->name_resolved(name, addr, addrlen);
 }
 
 
@@ -274,7 +274,7 @@ void
 NetworkNameResolverThread::resolved_address(struct sockaddr *addr, socklen_t addrlen,
                                             char *name)
 {
-  __resolver->addr_resolved(addr, addrlen, name, true);
+  resolver_->addr_resolved(addr, addrlen, name, true);
 }
 
 
@@ -288,7 +288,7 @@ NetworkNameResolverThread::resolved_address(struct sockaddr *addr, socklen_t add
 void
 NetworkNameResolverThread::name_resolution_failed(char *name)
 {
-  __resolver->name_resolution_failed(name);
+  resolver_->name_resolution_failed(name);
 }
 
 
@@ -303,7 +303,7 @@ NetworkNameResolverThread::name_resolution_failed(char *name)
 void
 NetworkNameResolverThread::address_resolution_failed(struct sockaddr *addr, socklen_t addrlen)
 {
-  __resolver->address_resolution_failed(addr, addrlen);
+  resolver_->address_resolution_failed(addr, addrlen);
 }
 
 
@@ -313,43 +313,43 @@ NetworkNameResolverThread::address_resolution_failed(struct sockaddr *addr, sock
 void
 NetworkNameResolverThread::loop()
 {
-  __addrq_mutex->lock();
-  __addrq_proc = __addrq;
-  __addrq_active = 1 - __addrq_active;
-  __addrq = &__addrqs[__addrq_active];
-  __addrq_mutex->unlock();
+  addrq_mutex_->lock();
+  addrq_proc_ = addrq_;
+  addrq_active_ = 1 - addrq_active_;
+  addrq_ = &addrqs_[addrq_active_];
+  addrq_mutex_->unlock();
   AddrQList::iterator aqit;
-  while ( ! __addrq_proc->empty() ) {
-    aqit = __addrq_proc->begin();
+  while ( ! addrq_proc_->empty() ) {
+    aqit = addrq_proc_->begin();
     
     std::string name;
     bool  namefound;
 
     if ( resolve_address_immediately(*aqit, name, namefound) ) {
-	    __resolver->addr_resolved(*aqit, sock_addr_size(*aqit), name, namefound);
+	    resolver_->addr_resolved(*aqit, sock_addr_size(*aqit), name, namefound);
     } else {
-      __resolver->address_resolution_failed(*aqit, sock_addr_size(*aqit));
+      resolver_->address_resolution_failed(*aqit, sock_addr_size(*aqit));
     }
-    __addrq_proc->erase(aqit);
+    addrq_proc_->erase(aqit);
   }
 
-  __namesq_mutex->lock();
-  __namesq_proc = __namesq;
-  __namesq_active = 1 - __namesq_active;
-  __namesq = &__namesqs[__namesq_active];
-  __namesq_mutex->unlock();
+  namesq_mutex_->lock();
+  namesq_proc_ = namesq_;
+  namesq_active_ = 1 - namesq_active_;
+  namesq_ = &namesqs_[namesq_active_];
+  namesq_mutex_->unlock();
   NamesQMap::iterator nqit;
-  while ( ! __namesq_proc->empty() ) {
-    nqit = __namesq_proc->begin();
+  while ( ! namesq_proc_->empty() ) {
+    nqit = namesq_proc_->begin();
     struct sockaddr *addr;
     socklen_t addrlen;
 
     if ( resolve_name_immediately(*nqit, &addr, &addrlen) ) {
-      __resolver->name_resolved(*nqit, addr, addrlen);
+      resolver_->name_resolved(*nqit, addr, addrlen);
     } else {
-      __resolver->name_resolution_failed(*nqit);
+      resolver_->name_resolution_failed(*nqit);
     }
-    __namesq_proc->erase(nqit);
+    namesq_proc_->erase(nqit);
   }
 }
 

@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_IMU_IMU_CRUIZCORE_XG1010_H_
-#define __PLUGINS_IMU_IMU_CRUIZCORE_XG1010_H_
+#ifndef _PLUGINS_IMU_IMU_CRUIZCORE_XG1010_H_
+#define _PLUGINS_IMU_IMU_CRUIZCORE_XG1010_H_
 
 #include "acquisition_thread.h"
 #include "imu_cruizcore_xg1010.h"

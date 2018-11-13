@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_BBSYNC_SYNC_THREAD_H_
-#define __PLUGINS_BBSYNC_SYNC_THREAD_H_
+#ifndef _PLUGINS_BBSYNC_SYNC_THREAD_H_
+#define _PLUGINS_BBSYNC_SYNC_THREAD_H_
 
 #include "sync_listener.h"
 #include "writer_listener.h"
@@ -127,26 +127,26 @@ class BlackBoardSynchronizationThread
   void close_interfaces();
 
  private:
-  std::string   __bbsync_cfg_prefix;
-  std::string   __peer_cfg_prefix;
-  std::string   __peer;
+  std::string   bbsync_cfg_prefix_;
+  std::string   peer_cfg_prefix_;
+  std::string   peer_;
 
-  std::string   __host;
-  unsigned int  __port;
+  std::string   host_;
+  unsigned int  port_;
 
-  fawkes::TimeWait    *__timewait;
+  fawkes::TimeWait    *timewait_;
 
-  fawkes::BlackBoard  *__remote_bb;
+  fawkes::BlackBoard  *remote_bb_;
 
-  ComboMap __combos;
+  ComboMap combos_;
 
   // Maps reading -> writing interface
-  InterfaceMap __interfaces;
+  InterfaceMap interfaces_;
   // Maps reading interface -> sync lsitener
-  SyncListenerMap __sync_listeners;
+  SyncListenerMap sync_listeners_;
 
-  SyncWriterInterfaceListener *__wsl_local;
-  SyncWriterInterfaceListener *__wsl_remote;
+  SyncWriterInterfaceListener *wsl_local_;
+  SyncWriterInterfaceListener *wsl_remote_;
 };
 
 

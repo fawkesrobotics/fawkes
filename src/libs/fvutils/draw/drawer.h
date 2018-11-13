@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_DRAWER_H_
-#define __FIREVISION_FVUTILS_DRAWER_H_
+#ifndef _FIREVISION_FVUTILS_DRAWER_H_
+#define _FIREVISION_FVUTILS_DRAWER_H_
 
 #include <fvutils/color/yuv.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Drawer {
 
@@ -59,10 +56,10 @@ class Drawer {
   void set_color(YUV_t color);
 
  private:
-  unsigned char  *__buffer;
-  unsigned int    __width;
-  unsigned int    __height;
-  YUV_t           __color;
+  unsigned char  *buffer_;
+  unsigned int    width_;
+  unsigned int    height_;
+  YUV_t           color_;
 
 };
 

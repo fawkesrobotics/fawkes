@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_NAO_MOTION_KICK_TASK_H_
-#define __PLUGINS_NAO_MOTION_KICK_TASK_H_
+#ifndef _PLUGINS_NAO_MOTION_KICK_TASK_H_
+#define _PLUGINS_NAO_MOTION_KICK_TASK_H_
 
 #include <interfaces/HumanoidMotionInterface.h>
 
@@ -43,9 +43,9 @@ class NaoQiMotionKickTask : public AL::ALTask
   void goto_start_pos(AL::ALValue speed, bool concurrent = false);
 
  private:
-  bool                                     __quit;
-  AL::ALPtr<AL::ALMotionProxy>             __almotion;
-  fawkes::HumanoidMotionInterface::LegEnum __leg;
+  bool                                     quit_;
+  AL::ALPtr<AL::ALMotionProxy>             almotion_;
+  fawkes::HumanoidMotionInterface::LegEnum leg_;
 };
 
 #endif

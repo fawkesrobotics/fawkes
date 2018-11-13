@@ -20,15 +20,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_MATH_LINES_H_
-#define __UTILS_MATH_LINES_H_
+#ifndef _UTILS_MATH_LINES_H_
+#define _UTILS_MATH_LINES_H_
 
 #include <Eigen/Geometry>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Check if two line segments intersect.
  * Line segments only intersect if the intersection point of the lines

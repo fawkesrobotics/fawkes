@@ -26,9 +26,6 @@
 #include <netcomm/fawkes/hub.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FawkesNetworkAspectIniFin <aspect/inifins/fawkes_network.h>
  * Initializer/finalizer for the FawkesNetworkAspect.
@@ -41,7 +38,7 @@ namespace fawkes {
 FawkesNetworkAspectIniFin::FawkesNetworkAspectIniFin(FawkesNetworkHub *hub)
   : AspectIniFin("FawkesNetworkAspect")
 {
-  __hub = hub;
+  hub_ = hub;
 }
 
 
@@ -56,7 +53,7 @@ FawkesNetworkAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  fnet_thread->init_FawkesNetworkAspect(__hub);
+  fnet_thread->init_FawkesNetworkAspect(hub_);
 }
 
 

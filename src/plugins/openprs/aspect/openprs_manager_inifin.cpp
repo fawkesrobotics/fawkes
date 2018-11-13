@@ -26,9 +26,6 @@
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenPRSManagerAspectIniFin <plugins/clips/aspect/clips_feature_inifin.h>
  * OpenPRSManagerAspect initializer/finalizer.

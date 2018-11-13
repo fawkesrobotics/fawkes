@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_H_
-#define __INTERFACE_H_
+#ifndef _INTERFACE_H_
+#define _INTERFACE_H_
 
 #include <interface/message.h>
 #include <interface/message_queue.h>
@@ -29,20 +29,17 @@
 
 #include <cstddef>
 #include <list>
-#define __STD_LIMIT_MACROS
+#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
-#define __INTERFACE_TYPE_SIZE   48
-#define __INTERFACE_ID_SIZE     64
+#define INTERFACE_TYPE_SIZE_   48
+#define INTERFACE_ID_SIZE_     64
 // We use MD5 as interface hash
-#define __INTERFACE_HASH_SIZE   16
+#define INTERFACE_HASH_SIZE_   16
 //  UID is:                                   type  ::   id
-#define __INTERFACE_UID_SIZE __INTERFACE_TYPE_SIZE + 2 + __INTERFACE_ID_SIZE
+#define INTERFACE_UID_SIZE_ INTERFACE_TYPE_SIZE_ + 2 + INTERFACE_ID_SIZE_
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class RefCountRWLock;
 class InterfaceMediator;
@@ -238,44 +235,44 @@ class Interface
 
   inline unsigned int next_msg_id()
   {
-    return (__instance_serial << 16) | ++__next_message_id;
+    return (instance_serial_ << 16) | ++next_message_id_;
   }
 
-  char               __type[__INTERFACE_TYPE_SIZE + 1];
-  char               __id[__INTERFACE_ID_SIZE + 1];
-  char               __uid[__INTERFACE_UID_SIZE + 1];
-  unsigned char      __hash[__INTERFACE_HASH_SIZE];
-  char               __hash_printable[__INTERFACE_HASH_SIZE * 2 + 1];
-  char              *__owner;
+  char               type_[INTERFACE_TYPE_SIZE_ + 1];
+  char               id_[INTERFACE_ID_SIZE_ + 1];
+  char               uid_[INTERFACE_UID_SIZE_ + 1];
+  unsigned char      hash_[INTERFACE_HASH_SIZE_];
+  char               hash_printable_[INTERFACE_HASH_SIZE_ * 2 + 1];
+  char              *owner_;
 
-  unsigned short     __instance_serial;
-  bool               __valid;
+  unsigned short     instance_serial_;
+  bool               valid_;
 
-  void *             __mem_data_ptr;
-  void *             __mem_real_ptr;
-  unsigned int       __mem_serial;
-  bool               __write_access;
+  void *             mem_data_ptr_;
+  void *             mem_real_ptr_;
+  unsigned int       mem_serial_;
+  bool               write_access_;
 
-  void *             __buffers;
-  unsigned int       __num_buffers;
+  void *             buffers_;
+  unsigned int       num_buffers_;
 
-  Mutex             *__data_mutex;
-  RefCountRWLock    *__rwlock;
+  Mutex             *data_mutex_;
+  RefCountRWLock    *rwlock_;
 
-  InterfaceMediator *__interface_mediator;
-  MessageMediator   *__message_mediator;
-  MessageQueue      *__message_queue;
-  unsigned short     __next_message_id;
+  InterfaceMediator *interface_mediator_;
+  MessageMediator   *message_mediator_;
+  MessageQueue      *message_queue_;
+  unsigned short     next_message_id_;
 
-  interface_fieldinfo_t   *__fieldinfo_list;
-  interface_messageinfo_t *__messageinfo_list;
+  interface_fieldinfo_t   *fieldinfo_list_;
+  interface_messageinfo_t *messageinfo_list_;
 
-  unsigned int       __num_fields;
+  unsigned int       num_fields_;
 
-  Clock             *__clock;
-  Time              *__timestamp;
-  Time              *__local_read_timestamp;
-  bool               __auto_timestamping;
+  Clock             *clock_;
+  Time              *timestamp_;
+  Time              *local_read_timestamp_;
+  bool               auto_timestamping_;
 };
 
 
@@ -283,7 +280,7 @@ template <class MessageType>
 MessageType *
 Interface::msgq_first()
 {
-  MessageType *m = dynamic_cast<MessageType *>(__message_queue->first());
+  MessageType *m = dynamic_cast<MessageType *>(message_queue_->first());
   if (m) {
     return m;
   } else {
@@ -305,7 +302,7 @@ template <class MessageType>
 MessageType *
 Interface::msgq_first_safe(MessageType *&msg) throw()
 {
-  msg = dynamic_cast<MessageType *>(__message_queue->first());
+  msg = dynamic_cast<MessageType *>(message_queue_->first());
   return msg;
 }
 
@@ -317,7 +314,7 @@ template <class MessageType>
 bool
 Interface::msgq_first_is()
 {
-  return (dynamic_cast<MessageType *>(__message_queue->first()) != 0);
+  return (dynamic_cast<MessageType *>(message_queue_->first()) != 0);
 }
 
 

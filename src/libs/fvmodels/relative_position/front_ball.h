@@ -24,17 +24,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_RELATIVE_FRONT_BALL_H_
-#define __FIREVISION_MODELS_RELATIVE_FRONT_BALL_H_
+#ifndef _FIREVISION_MODELS_RELATIVE_FRONT_BALL_H_
+#define _FIREVISION_MODELS_RELATIVE_FRONT_BALL_H_
 
 #include <fvmodels/relative_position/relativepositionmodel.h>
 
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FrontBallRelativePos : public RelativePositionModel
 {
@@ -123,5 +120,5 @@ private:
 
 } // end namespace firevision
 
-#endif // __FIREVISION_MODELS_RELPOS_BALL_H_
+#endif // FIREVISION_MODELS_RELPOS_BALL_H__
 

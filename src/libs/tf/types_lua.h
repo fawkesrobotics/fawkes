@@ -20,17 +20,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_TF_TYPES_LUA_H_
-#define __LIBS_TF_TYPES_LUA_H_
+#ifndef _LIBS_TF_TYPES_LUA_H_
+#define _LIBS_TF_TYPES_LUA_H_
 
 #include <tf/types.h>
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 // The following classes are used for better Lua compatibility
 

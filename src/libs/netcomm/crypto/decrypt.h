@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_CRYPTO_DECRYPT_H_
-#define __NETCOMM_CRYPTO_DECRYPT_H_
+#ifndef _NETCOMM_CRYPTO_DECRYPT_H_
+#define _NETCOMM_CRYPTO_DECRYPT_H_
 
 #include <core/exception.h>
 #include <cstddef>

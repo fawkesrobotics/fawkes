@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PANTILT_DIRPERC_DP_THREAD_H_
-#define __PLUGINS_PANTILT_DIRPERC_DP_THREAD_H_
+#ifndef _PLUGINS_PANTILT_DIRPERC_DP_THREAD_H_
+#define _PLUGINS_PANTILT_DIRPERC_DP_THREAD_H_
 
 #include "../act_thread.h"
 
@@ -63,17 +63,17 @@ class PanTiltDirectedPerceptionThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::PanTiltInterface *__pantilt_if;
-  fawkes::JointInterface *__panjoint_if;
-  fawkes::JointInterface *__tiltjoint_if;
+  fawkes::PanTiltInterface *pantilt_if_;
+  fawkes::JointInterface *panjoint_if_;
+  fawkes::JointInterface *tiltjoint_if_;
 
-  fawkes::RefPtr<DirectedPerceptionPTU> __ptu;
+  fawkes::RefPtr<DirectedPerceptionPTU> ptu_;
 
-  std::string  __pantilt_cfg_prefix;
-  std::string  __ptu_cfg_prefix;
-  std::string  __ptu_name;
-  std::string  __cfg_device;
-  unsigned int __cfg_read_timeout_ms;
+  std::string  pantilt_cfg_prefix_;
+  std::string  ptu_cfg_prefix_;
+  std::string  ptu_name_;
+  std::string  cfg_device_;
+  unsigned int cfg_read_timeout_ms_;
 
 
   class WorkerThread : public fawkes::Thread
@@ -96,27 +96,27 @@ class PanTiltDirectedPerceptionThread
     void exec_goto_pantilt(float pan, float tilt);
 
   private:
-    fawkes::RefPtr<DirectedPerceptionPTU>  __ptu;
-    fawkes::Logger                        *__logger;
+    fawkes::RefPtr<DirectedPerceptionPTU>  ptu_;
+    fawkes::Logger                        *logger_;
 
-    float         __pan_min;
-    float         __pan_max;
-    float         __tilt_min;
-    float         __tilt_max;
+    float         pan_min_;
+    float         pan_max_;
+    float         tilt_min_;
+    float         tilt_max_;
 
-    fawkes::Mutex *__move_mutex;
-    bool  __move_pending;
-    float __target_pan;
-    float __target_tilt;
+    fawkes::Mutex *move_mutex_;
+    bool  move_pending_;
+    float target_pan_;
+    float target_tilt_;
 
-    float __cur_pan;
-    float __cur_tilt;
+    float cur_pan_;
+    float cur_tilt_;
 
-    bool  __reset_pending;
-    bool  __fresh_data;
+    bool  reset_pending_;
+    bool  fresh_data_;
   };
 
-  WorkerThread *__wt;
+  WorkerThread *wt_;
 };
 
 #endif

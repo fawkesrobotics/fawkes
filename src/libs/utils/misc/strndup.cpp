@@ -23,7 +23,7 @@
 
 #include <utils/misc/strndup.h>
 
-#ifdef __COMPAT_STRNDUP
+#ifdef COMPAT_STRNDUP_
 char *
 strndup(const char *s, size_t n)
 {

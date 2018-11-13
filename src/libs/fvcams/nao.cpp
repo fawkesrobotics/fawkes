@@ -50,8 +50,8 @@ using namespace fawkes;
 // this is the bare minimum of I2C code required to build this thing without
 // the extended i2c.h header from i2c-tools, copied straight from version 3.0.1.
 
-static inline __s32
-i2c_smbus_access(int file, char read_write, __u8 command,
+static inline s32_
+i2c_smbus_access(int file, char read_write, u8_ command,
                  int size, union i2c_smbus_data *data)
 {
   struct i2c_smbus_ioctl_data args;
@@ -63,8 +63,8 @@ i2c_smbus_access(int file, char read_write, __u8 command,
   return ioctl(file,I2C_SMBUS,&args);
 }
 
-static inline __s32
-i2c_smbus_read_byte_data(int file, __u8 command)
+static inline s32_
+i2c_smbus_read_byte_data(int file, u8_ command)
 {
   union i2c_smbus_data data;
   if (i2c_smbus_access(file,I2C_SMBUS_READ,command,
@@ -74,9 +74,9 @@ i2c_smbus_read_byte_data(int file, __u8 command)
     return 0x0FF & data.byte;
 }
 
-static inline __s32
-i2c_smbus_write_block_data(int file, __u8 command,
-                           __u8 length, __u8 *values)
+static inline s32_
+i2c_smbus_write_block_data(int file, u8_ command,
+                           u8_ length, u8_ *values)
 {
   union i2c_smbus_data data;
   int i;
@@ -93,9 +93,6 @@ i2c_smbus_write_block_data(int file, __u8 command,
 #endif
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NaoCamera <fvcams/nao.h>
  * Video4Linux 2 camera with Nao-specific extensions.
@@ -117,18 +114,18 @@ namespace firevision {
 NaoCamera::NaoCamera(const CameraArgumentParser *cap)
   : V4L2Camera(cap)
 {
-  if (cap->has("i2c_device")) __i2c_device_name = strdup(cap->get("i2c_device").c_str());
+  if (cap->has("i2c_device")) i2c_device_name_ = strdup(cap->get("i2c_device").c_str());
   else throw MissingParameterException("NaoCamera: Missing I2C device");
 
-  __can_switch_cam = false;
-  __cam_id = 2;
+  can_switch_cam_ = false;
+  cam_id_ = 2;
 
   if (cap->has("cam"))
   {
-    if (strcasecmp(cap->get("cam").c_str(), "brow") == 0) __cam_id = 1;
+    if (strcasecmp(cap->get("cam").c_str(), "brow") == 0) cam_id_ = 1;
   }
 
-  int dev = open_dev(__i2c_device_name);
+  int dev = open_dev(i2c_device_name_);
 
   // Get dsPIC version (in order to know Nao version)
   int val = i2c_smbus_read_byte_data(dev, 170);
@@ -139,19 +136,19 @@ NaoCamera::NaoCamera(const CameraArgumentParser *cap)
     close_dev(dev);
     return;
   }
-  __can_switch_cam = true;
-  LibLogger::log_debug("NaoCamera", "Nao V3 found - Trying to switch to camera %d", __cam_id);
+  can_switch_cam_ = true;
+  LibLogger::log_debug("NaoCamera", "Nao V3 found - Trying to switch to camera %d", cam_id_);
 
   val = get_open_cam_id(dev);
 
-  if (val == __cam_id)
+  if (val == cam_id_)
   {
     LibLogger::log_debug("NaoCamera", "Correct camera already chosen");
   }
   else
   {
     // Switch to other camera
-    switch_to_cam_id(dev, __cam_id);
+    switch_to_cam_id(dev, cam_id_);
   }
   close_dev(dev);
 
@@ -162,7 +159,7 @@ NaoCamera::NaoCamera(const CameraArgumentParser *cap)
 
 NaoCamera::~NaoCamera()
 {
-  free(__i2c_device_name);
+  free(i2c_device_name_);
 }
 
 /**
@@ -247,11 +244,11 @@ void NaoCamera::init_cam(const char *cam)
  */
 unsigned char NaoCamera::source()
 {
-  int dev = open_dev(__i2c_device_name);
-  __cam_id = get_open_cam_id(dev);
+  int dev = open_dev(i2c_device_name_);
+  cam_id_ = get_open_cam_id(dev);
   close_dev(dev);
 
-  return static_cast<unsigned char>(__cam_id);
+  return static_cast<unsigned char>(cam_id_);
 }
 
 /**
@@ -263,13 +260,13 @@ unsigned char NaoCamera::source()
  */
 void NaoCamera::set_source(unsigned char source)
 {
-  if (source == __cam_id)
+  if (source == cam_id_)
   {
     LibLogger::log_debug("NaoCamera", "Correct camera already chosen");
     return;
   }
 
-  int dev = open_dev(__i2c_device_name);
+  int dev = open_dev(i2c_device_name_);
   switch_to_cam_id(dev, source);
   close_dev(dev);
   init_cam(_device_name);

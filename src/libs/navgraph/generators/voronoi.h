@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_NAVGRAPH_GENERATOR_VORONOI_H_
-#define __LIBS_NAVGRAPH_GENERATOR_VORONOI_H_
+#ifndef _LIBS_NAVGRAPH_GENERATOR_VORONOI_H_
+#define _LIBS_NAVGRAPH_GENERATOR_VORONOI_H_
 
 #include <navgraph/navgraph.h>
 #include <navgraph/generators/generator.h>
@@ -29,9 +29,6 @@
 #include <utils/math/polygon.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class NavGraphGeneratorVoronoi : public NavGraphGenerator
 {

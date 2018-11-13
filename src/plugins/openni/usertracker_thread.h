@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_USERTRACKER_THREAD_H_
-#define __PLUGINS_OPENNI_USERTRACKER_THREAD_H_
+#ifndef _PLUGINS_OPENNI_USERTRACKER_THREAD_H_
+#define _PLUGINS_OPENNI_USERTRACKER_THREAD_H_
 
 #include "utils/version.h"
 
@@ -87,30 +87,30 @@ class OpenNiUserTrackerThread
   void update_com(XnUserID id, UserInfo &user);
 
  private:
-  xn::UserGenerator               *__user_gen;
-  xn::DepthGenerator              *__depth_gen;
+  xn::UserGenerator               *user_gen_;
+  xn::DepthGenerator              *depth_gen_;
 
-  xn::SceneMetaData               *__scene_md;
-  xn::SkeletonCapability          *__skelcap;
+  xn::SceneMetaData               *scene_md_;
+  xn::SkeletonCapability          *skelcap_;
 
-  XnCallbackHandle                 __user_cb_handle;
+  XnCallbackHandle                 user_cb_handle_;
 #if XN_VERSION_GE(1,3,2,0)
-  XnCallbackHandle                 __pose_start_cb_handle;
-  XnCallbackHandle                 __pose_end_cb_handle;
-  XnCallbackHandle                 __calib_start_cb_handle;
-  XnCallbackHandle                 __calib_complete_cb_handle;
+  XnCallbackHandle                 pose_start_cb_handle_;
+  XnCallbackHandle                 pose_end_cb_handle_;
+  XnCallbackHandle                 calib_start_cb_handle_;
+  XnCallbackHandle                 calib_complete_cb_handle_;
 #else
-  XnCallbackHandle                 __pose_cb_handle;
-  XnCallbackHandle                 __calib_cb_handle;
+  XnCallbackHandle                 pose_cb_handle_;
+  XnCallbackHandle                 calib_cb_handle_;
 #endif
 
-  char                             __calib_pose_name[32];
-  bool                             __skel_need_calib_pose;
+  char                             calib_pose_name_[32];
+  bool                             skel_need_calib_pose_;
 
-  UserMap                          __users;
+  UserMap                          users_;
 
-  firevision::SharedMemoryImageBuffer *__label_buf;
-  size_t                               __label_bufsize;
+  firevision::SharedMemoryImageBuffer *label_buf_;
+  size_t                               label_bufsize_;
 };
 
 #endif

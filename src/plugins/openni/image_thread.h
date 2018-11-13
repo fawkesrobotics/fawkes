@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_IMAGE_THREAD_H_
-#define __PLUGINS_OPENNI_IMAGE_THREAD_H_
+#ifndef _PLUGINS_OPENNI_IMAGE_THREAD_H_
+#define _PLUGINS_OPENNI_IMAGE_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
@@ -64,11 +64,11 @@ class OpenNiImageThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  xn::ImageGenerator                  *__image_gen;
-  xn::ImageMetaData                   *__image_md;
+  xn::ImageGenerator                  *image_gen_;
+  xn::ImageMetaData                   *image_md_;
 
-  firevision::SharedMemoryImageBuffer *__image_buf_yuv;
-  firevision::SharedMemoryImageBuffer *__image_buf_rgb;
+  firevision::SharedMemoryImageBuffer *image_buf_yuv_;
+  firevision::SharedMemoryImageBuffer *image_buf_rgb_;
 
   typedef enum {
     DEBAYER_BILINEAR,
@@ -76,14 +76,14 @@ class OpenNiImageThread
     CONVERT_YUV,
     CONVERT_RGB
   } CopyMode;
-  CopyMode                             __cfg_copy_mode;
+  CopyMode                             cfg_copy_mode_;
 
-  unsigned short int                   __usb_vendor;
-  unsigned short int                   __usb_product;
-  unsigned int                         __image_width;
-  unsigned int                         __image_height;
+  unsigned short int                   usb_vendor_;
+  unsigned short int                   usb_product_;
+  unsigned int                         image_width_;
+  unsigned int                         image_height_;
 
-  fawkes::Time *__capture_start;
+  fawkes::Time *capture_start_;
 };
 
 #endif

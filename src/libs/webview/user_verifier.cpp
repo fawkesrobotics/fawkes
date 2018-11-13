@@ -23,9 +23,6 @@
 #include <webview/user_verifier.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class WebUserVerifier <webview/user_verifier.h>
  * Interface for user verification.

@@ -20,17 +20,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_ADAPTERS_PCL_H
-#define __FIREVISION_UTILS_ADAPTERS_PCL_H
+#ifndef FIREVISION_UTILS_ADAPTERS_PCL_H_
+#define FIREVISION_UTILS_ADAPTERS_PCL_H_
 
 #ifdef HAVE_PCL
 #  include <pcl/point_cloud.h>
 #  include <pcl/point_types.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class SharedMemoryImageBuffer;
 

@@ -148,9 +148,9 @@ LaseEdlAcquisitionThread::LaseEdlAcquisitionThread(std::string &cfg_name,
   : LaserAcquisitionThread("LaseEdlAcquisitionThread")
 {
   set_name("LaseEDL(%s)", cfg_name.c_str());
-  __pre_init_done = false;
-  __cfg_name   = cfg_name;
-  __cfg_prefix = cfg_prefix;
+  pre_init_done_ = false;
+  cfg_name_   = cfg_name;
+  cfg_prefix_ = cfg_prefix;
 }
 
 
@@ -158,62 +158,62 @@ void
 LaseEdlAcquisitionThread::pre_init(fawkes::Configuration *config,
 				   fawkes::Logger        *logger)
 {
-  if (__pre_init_done)  return;
+  if (pre_init_done_)  return;
 
   try {
-    std::string canres  = config->get_string((__cfg_prefix + "canonical_resolution").c_str());
+    std::string canres  = config->get_string((cfg_prefix_ + "canonical_resolution").c_str());
     if (canres == "low") {
-      __cfg_rotation_freq = 20;
-      __cfg_angle_step    = 16;
+      cfg_rotation_freq_ = 20;
+      cfg_angle_step_    = 16;
     } else if (canres == "high") {
-      __cfg_rotation_freq = 15;
-      __cfg_angle_step    =  8;
+      cfg_rotation_freq_ = 15;
+      cfg_angle_step_    =  8;
     } else {
       logger->log_error(name(), "Canonical resolution %s is invalid, must be 'low' "
 			"or 'high', trying to read raw config data");
       throw Exception("");
     }
     logger->log_debug(name(), "Using canonical resolution %s, freq: %u, angle step: %u",
-		      canres.c_str(), __cfg_rotation_freq, __cfg_angle_step);
+		      canres.c_str(), cfg_rotation_freq_, cfg_angle_step_);
   } catch (Exception &e) {
     // exceptions thrown here will propagate
-    __cfg_rotation_freq  = config->get_uint((__cfg_prefix + "rotation_freq").c_str());
-    __cfg_angle_step     = config->get_uint((__cfg_prefix + "angle_step").c_str());
+    cfg_rotation_freq_  = config->get_uint((cfg_prefix_ + "rotation_freq").c_str());
+    cfg_angle_step_     = config->get_uint((cfg_prefix_ + "angle_step").c_str());
   }
 
   try {
-    __cfg_use_default    = config->get_bool((__cfg_prefix + "use_default").c_str());
-    __cfg_set_default    = config->get_bool((__cfg_prefix + "set_default").c_str());
-    __cfg_max_pulse_freq = config->get_uint((__cfg_prefix + "max_pulse_freq").c_str());
-    __cfg_profile_format = config->get_uint((__cfg_prefix + "profile_format").c_str());
-    __cfg_can_id         = config->get_uint((__cfg_prefix + "can_id").c_str());
-    __cfg_can_id_resp    = config->get_uint((__cfg_prefix + "can_id_resp").c_str());
-    __cfg_sensor_id      = config->get_uint((__cfg_prefix + "sensor_id").c_str());
-    __cfg_sensor_id_resp = config->get_uint((__cfg_prefix + "sensor_id_resp").c_str());
-    __cfg_btr0btr1       = config->get_uint((__cfg_prefix + "btr0btr1").c_str());
-    __cfg_port           = config->get_uint((__cfg_prefix + "port").c_str());
-    __cfg_irq            = config->get_uint((__cfg_prefix + "irq").c_str());
-    __cfg_num_init_tries = config->get_uint((__cfg_prefix + "num_init_tries").c_str());
-    __cfg_mount_rotation = config->get_float((__cfg_prefix + "mount_rotation").c_str());
+    cfg_use_default_    = config->get_bool((cfg_prefix_ + "use_default").c_str());
+    cfg_set_default_    = config->get_bool((cfg_prefix_ + "set_default").c_str());
+    cfg_max_pulse_freq_ = config->get_uint((cfg_prefix_ + "max_pulse_freq").c_str());
+    cfg_profile_format_ = config->get_uint((cfg_prefix_ + "profile_format").c_str());
+    cfg_can_id_         = config->get_uint((cfg_prefix_ + "can_id").c_str());
+    cfg_can_id_resp_    = config->get_uint((cfg_prefix_ + "can_id_resp").c_str());
+    cfg_sensor_id_      = config->get_uint((cfg_prefix_ + "sensor_id").c_str());
+    cfg_sensor_id_resp_ = config->get_uint((cfg_prefix_ + "sensor_id_resp").c_str());
+    cfg_btr0btr1_       = config->get_uint((cfg_prefix_ + "btr0btr1").c_str());
+    cfg_port_           = config->get_uint((cfg_prefix_ + "port").c_str());
+    cfg_irq_            = config->get_uint((cfg_prefix_ + "irq").c_str());
+    cfg_num_init_tries_ = config->get_uint((cfg_prefix_ + "num_init_tries").c_str());
+    cfg_mount_rotation_ = config->get_float((cfg_prefix_ + "mount_rotation").c_str());
 
-    __min_angle_step     = calc_angle_step(__cfg_rotation_freq, __cfg_max_pulse_freq);
-    if ( __cfg_angle_step < __min_angle_step ) {
+    min_angle_step_     = calc_angle_step(cfg_rotation_freq_, cfg_max_pulse_freq_);
+    if ( cfg_angle_step_ < min_angle_step_ ) {
       logger->log_warn(name(), "Configured angle step %u less than required minimum "
-		       "of %u, raising to minimum", __cfg_angle_step, __min_angle_step);
-      __cfg_angle_step = __min_angle_step;
+		       "of %u, raising to minimum", cfg_angle_step_, min_angle_step_);
+      cfg_angle_step_ = min_angle_step_;
     }
-    __number_of_values = 16 * 360 / __cfg_angle_step;
+    number_of_values_ = 16 * 360 / cfg_angle_step_;
 
-    if ( (__number_of_values != 360) && (__number_of_values != 720) ) {
+    if ( (number_of_values_ != 360) && (number_of_values_ != 720) ) {
       throw Exception("At the moment only configurations with 360 or 720 "
-		      "laser beams are supported, but %u requested", __number_of_values);
+		      "laser beams are supported, but %u requested", number_of_values_);
     }
 
-    _distances_size = _echoes_size = __number_of_values;
+    _distances_size = _echoes_size = number_of_values_;
 
-    std::string interface_type = config->get_string((__cfg_prefix + "interface_type").c_str());
+    std::string interface_type = config->get_string((cfg_prefix_ + "interface_type").c_str());
     if ( interface_type == "usb" ) {
-      __cfg_interface_type = HW_USB;
+      cfg_interface_type_ = HW_USB;
     } else {
       throw Exception("Unknown interface type %s", interface_type.c_str());
     }
@@ -223,7 +223,7 @@ LaseEdlAcquisitionThread::pre_init(fawkes::Configuration *config,
     throw;
   }
 
-  __pre_init_done = true;
+  pre_init_done_ = true;
 }
 
 void
@@ -233,7 +233,7 @@ LaseEdlAcquisitionThread::init()
 
   init_bus();
 
-  for (unsigned int i = 1; i <= __cfg_num_init_tries; ++i) {
+  for (unsigned int i = 1; i <= cfg_num_init_tries_; ++i) {
 
     try {
       CANCEL_PROFILE();
@@ -245,41 +245,41 @@ LaseEdlAcquisitionThread::init()
       logger->log_debug("LaseEdlAcquisitionThread", "Resetting Laser");
       DO_RESET(RESETLEVEL_HALT_IDLE);
 
-      if ( ! __cfg_use_default ) {
+      if ( ! cfg_use_default_ ) {
 	logger->log_debug("LaseEdlAcquisitionThread", "Setting configuration");
 	// set configuration (rotation and anglestep)
 	SET_CONFIG(CONFIGITEM_GLOBAL, CONFIGDATA_LENGTH_GLOBAL,
-		   __cfg_sensor_id, __cfg_rotation_freq, __cfg_angle_step);
+		   cfg_sensor_id_, cfg_rotation_freq_, cfg_angle_step_);
 
 	// set functions (sector definition)
 	SET_FUNCTION(SECTOR_0, SECTORFUNC_NORMAL_MEASUREMENT,
-		     (16 * 360) - __cfg_angle_step,
-		     __cfg_set_default ? FLASH_YES : FLASH_NO);
+		     (16 * 360) - cfg_angle_step_,
+		     cfg_set_default_ ? FLASH_YES : FLASH_NO);
 	SET_FUNCTION(SECTOR_1, SECTORFUNC_NOT_INITIALIZED, 0,
-		     __cfg_set_default ? FLASH_YES : FLASH_NO);
+		     cfg_set_default_ ? FLASH_YES : FLASH_NO);
       }
 
       logger->log_debug("LaseEdlAcquisitionThread", "Starting rotating");
-      TRANS_ROTATE(__cfg_rotation_freq);
+      TRANS_ROTATE(cfg_rotation_freq_);
       logger->log_debug("LaseEdlAcquisitionThread", "Starting measuring");
       TRANS_MEASURE();
       logger->log_debug("LaseEdlAcquisitionThread", "Enable profile retrieval");
-      GET_PROFILE(PROFILENUM_CONTINUOUS, __cfg_profile_format);
+      GET_PROFILE(PROFILENUM_CONTINUOUS, cfg_profile_format_);
 
       break; // break for loop if initialization was successful
     } catch (Exception &e) {
-      if (i < __cfg_num_init_tries) {
-        logger->log_warn("LaseEdlAcquisitionThread", "Initialization, retrying %d more times", __cfg_num_init_tries - i);
+      if (i < cfg_num_init_tries_) {
+        logger->log_warn("LaseEdlAcquisitionThread", "Initialization, retrying %d more times", cfg_num_init_tries_ - i);
         logger->log_warn("LaseEdlAcquisitionThread", e);
       } else {
-        logger->log_error("LaseEdlAcquisitionThread", "Initialization failed, giving up after %u tries", __cfg_num_init_tries);
+        logger->log_error("LaseEdlAcquisitionThread", "Initialization failed, giving up after %u tries", cfg_num_init_tries_);
         throw;
       }
     }
   }
 
-  _distances  = (float *)malloc(sizeof(float) * __number_of_values);
-  _echoes     = (float *)malloc(sizeof(float) * __number_of_values);
+  _distances  = (float *)malloc(sizeof(float) * number_of_values_);
+  _echoes     = (float *)malloc(sizeof(float) * number_of_values_);
 }
 
 
@@ -355,11 +355,11 @@ LaseEdlAcquisitionThread::init_bus()
     }
   }
 
-  __handle = CAN_Open(__cfg_interface_type, 0, __cfg_port, __cfg_irq);
-  if (__handle == NULL) {
+  handle_ = CAN_Open(cfg_interface_type_, 0, cfg_port_, cfg_irq_);
+  if (handle_ == NULL) {
     throw Exception("Cannot open CAN bus");
   }
-  if (CAN_Init(__handle, __cfg_btr0btr1, CAN_INIT_TYPE_ST) != CAN_ERR_OK) {
+  if (CAN_Init(handle_, cfg_btr0btr1_, CAN_INIT_TYPE_ST) != CAN_ERR_OK) {
     throw Exception("Cannot initialize CAN bus");
   }
 }
@@ -369,7 +369,7 @@ void
 LaseEdlAcquisitionThread::send(WORD *data, int n)
 {
   TPCANMsg msg;
-  msg.ID      = __cfg_can_id;
+  msg.ID      = cfg_can_id_;
   msg.MSGTYPE = MSGTYPE_STANDARD;
   msg.LEN     = 0;
 
@@ -380,7 +380,7 @@ LaseEdlAcquisitionThread::send(WORD *data, int n)
   if (n <= 2) {
     number_of_frames = 1;
     append_to_msg( (WORD)0, &msg);
-    append_to_msg( (WORD)__cfg_sensor_id, &msg);
+    append_to_msg( (WORD)cfg_sensor_id_, &msg);
     if (n >= 1) {
       append_to_msg( data[0], &msg);
     }
@@ -388,7 +388,7 @@ LaseEdlAcquisitionThread::send(WORD *data, int n)
       append_to_msg( data[1], &msg);
     }
     //printf("send (1): "); print_message(&msg);
-    if (CAN_Write( __handle, &msg ) != CAN_ERR_OK) {
+    if (CAN_Write( handle_, &msg ) != CAN_ERR_OK) {
       throw Exception("Laser send() failed (1)");
     }
 
@@ -399,10 +399,10 @@ LaseEdlAcquisitionThread::send(WORD *data, int n)
     }
     append_to_msg( (WORD)0xFFFF, &msg);
     append_to_msg( number_of_frames, &msg);
-    append_to_msg( (WORD)__cfg_sensor_id, &msg);
+    append_to_msg( (WORD)cfg_sensor_id_, &msg);
     append_to_msg( data[send_words++], &msg);
     // printf("send (2): "); print_message(&msg);
-    if (CAN_Write( __handle, &msg ) != CAN_ERR_OK) {
+    if (CAN_Write( handle_, &msg ) != CAN_ERR_OK) {
       throw Exception("Laser send() failed (2)");
     }
 
@@ -413,7 +413,7 @@ LaseEdlAcquisitionThread::send(WORD *data, int n)
       append_to_msg( data[send_words++], &msg);
       append_to_msg( data[send_words++], &msg);
       // printf("send (3): "); print_message(&msg);
-      if (CAN_Write( __handle, &msg ) != CAN_ERR_OK) {
+      if (CAN_Write( handle_, &msg ) != CAN_ERR_OK) {
 	throw Exception("Laser send() failed (3)");
       }
     }
@@ -424,7 +424,7 @@ LaseEdlAcquisitionThread::send(WORD *data, int n)
       append_to_msg( data[send_words++], &msg);
     }
     // printf("send (4): "); print_message(&msg);
-    if (CAN_Write( __handle, &msg ) != CAN_ERR_OK) {
+    if (CAN_Write( handle_, &msg ) != CAN_ERR_OK) {
       throw Exception("Laser send() failed (3)");
     }
   }
@@ -436,11 +436,11 @@ LaseEdlAcquisitionThread::recv(WORD **data, bool allocate)
 {
   TPCANMsg msg;
   // read from CAN BUS
-  if (CAN_Read( __handle, &msg) != CAN_ERR_OK) {
+  if (CAN_Read( handle_, &msg) != CAN_ERR_OK) {
     throw Exception("Laser recv() failed (1)");
   }
   // If msg wasn't send by our laser: ignore it
-  if (msg.ID != __cfg_can_id_resp) {
+  if (msg.ID != cfg_can_id_resp_) {
     logger->log_warn("LaseEdlAcquisitionThread", "CAN ID is not the expected ID, "
 		     "ignoring message");
     return -1;
@@ -456,7 +456,7 @@ LaseEdlAcquisitionThread::recv(WORD **data, bool allocate)
 
   // seek for beginning of a block
   while ((read != 0x0000) && (read != 0xFFFF) ) {
-    if (CAN_Read( __handle, &msg) != CAN_ERR_OK) {
+    if (CAN_Read( handle_, &msg) != CAN_ERR_OK) {
       throw Exception("Laser recv() failed (2)");
     }
     msg_index = 0;
@@ -466,7 +466,7 @@ LaseEdlAcquisitionThread::recv(WORD **data, bool allocate)
   // got legal block: process it
   if (read == 0x0000) { // receiving only one frame
     read = get_word_from_msg( &msg, &msg_index);
-    if (read != __cfg_sensor_id_resp) {
+    if (read != cfg_sensor_id_resp_) {
       logger->log_warn("LaseEdlAcquisitionThread", "Sensor ID is not the expected ID, "
 		       "ignoring message");
       return -1;
@@ -490,7 +490,7 @@ LaseEdlAcquisitionThread::recv(WORD **data, bool allocate)
 
     // get sensor response ID
     read = get_word_from_msg( &msg, &msg_index);
-    if (read != __cfg_sensor_id_resp) {
+    if (read != cfg_sensor_id_resp_) {
       logger->log_warn("LaseEdlAcquisitionThread", "Sensor ID is not the expected ID, "
 		       "ignoring message");
       return -1;
@@ -503,7 +503,7 @@ LaseEdlAcquisitionThread::recv(WORD **data, bool allocate)
     for (WORD f=number_of_incoming_frames-1; f > 0; --f ) {
       msg_index = 0;
 
-      if (CAN_Read( __handle, &msg) != CAN_ERR_OK) {
+      if (CAN_Read( handle_, &msg) != CAN_ERR_OK) {
 	throw Exception("Laser recv() failed (3)");
       }
 
@@ -619,7 +619,7 @@ LaseEdlAcquisitionThread::process_profiles()
 {
   WORD* real_response;
   WORD* expected_response = make_word_array( 2, respcode(CMD_GET_PROFILE),
-					     __cfg_profile_format);
+					     cfg_profile_format_);
   int response_size = recv(&real_response);
   if (response_size == -1) {
     logger->log_warn("LaseEdlAcquisitionThread", "process_profiles(): recv() failed");
@@ -632,18 +632,18 @@ LaseEdlAcquisitionThread::process_profiles()
     return;
   }
   // wrong number of values ?
-  if ( (response_size - 3 != (int)__number_of_values) &&
-       (response_size - 3 != 2 * (int)__number_of_values) ) {
+  if ( (response_size - 3 != (int)number_of_values_) &&
+       (response_size - 3 != 2 * (int)number_of_values_) ) {
     logger->log_warn("LaseEdlAcquisitionThread", "number of received values "
 		     "doesn't match my expectations, recvd %d, expected %d",
-		     response_size - 3, __number_of_values);
+		     response_size - 3, number_of_values_);
     return;
   }
 
   // extract data from response
   register float dist = 0;
   register int echo = 0;
-  register int dist_index = (int)roundf(__cfg_mount_rotation * 16 / __cfg_angle_step);
+  register int dist_index = (int)roundf(cfg_mount_rotation_ * 16 / cfg_angle_step_);
   register int echo_index = dist_index;
 
   _data_mutex->lock();
@@ -651,33 +651,33 @@ LaseEdlAcquisitionThread::process_profiles()
   _timestamp->stamp();
 
   // see which data is requested
-  if (__cfg_profile_format == PROFILEFORMAT_DISTANCE ) {
+  if (cfg_profile_format_ == PROFILEFORMAT_DISTANCE ) {
     // only distances
     for (int i=3; i < response_size; ++i ) {
       dist = ((float)real_response[i]) / DISTANCE_FACTOR;
-      _distances[__number_of_values - dist_index] = dist;
-      if (++dist_index >= (int)__number_of_values) dist_index = 0;
+      _distances[number_of_values_ - dist_index] = dist;
+      if (++dist_index >= (int)number_of_values_) dist_index = 0;
     }
 
-  } else if (__cfg_profile_format == (PROFILEFORMAT_DISTANCE | PROFILEFORMAT_ECHO_AMPLITUDE) ) {
+  } else if (cfg_profile_format_ == (PROFILEFORMAT_DISTANCE | PROFILEFORMAT_ECHO_AMPLITUDE) ) {
     // distances + echos
     for (int i=3; i < response_size; ++i) {
       dist = ((float)real_response[i]) / DISTANCE_FACTOR;
-      _distances[__number_of_values - dist_index] = dist;
-      if (++dist_index >= (int)__number_of_values) dist_index = 0;
+      _distances[number_of_values_ - dist_index] = dist;
+      if (++dist_index >= (int)number_of_values_) dist_index = 0;
       ++i;
       echo = real_response[i];
-      _echoes[__number_of_values - echo_index] = echo;
-      if (++echo_index >= (int)__number_of_values) echo_index = 0;
+      _echoes[number_of_values_ - echo_index] = echo;
+      if (++echo_index >= (int)number_of_values_) echo_index = 0;
     }
 
 
-  } else if (__cfg_profile_format == PROFILEFORMAT_ECHO_AMPLITUDE ) {
+  } else if (cfg_profile_format_ == PROFILEFORMAT_ECHO_AMPLITUDE ) {
     // only echos
     for (int i=3; i < response_size; ++i ) {
       echo = real_response[i];
-      _echoes[__number_of_values - echo_index] = echo;
-      if (++echo_index >= (int)__number_of_values) echo_index = 0;
+      _echoes[number_of_values_ - echo_index] = echo;
+      if (++echo_index >= (int)number_of_values_) echo_index = 0;
     }
   }
 

@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_RRD_ASPECT_RRD_MANAGER_H_
-#define __PLUGINS_RRD_ASPECT_RRD_MANAGER_H_
+#ifndef _PLUGINS_RRD_ASPECT_RRD_MANAGER_H_
+#define _PLUGINS_RRD_ASPECT_RRD_MANAGER_H_
 
 #include <plugins/rrd/aspect/rrd_descriptions.h>
 #include <core/utils/rwlock_vector.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class RRDManager <plugins/rrd/aspect/rrd_manager.h>

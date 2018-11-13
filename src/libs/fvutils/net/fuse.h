@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_H_
+#ifndef _FIREVISION_FVUTILS_NET_FUSE_H_
+#define _FIREVISION_FVUTILS_NET_FUSE_H_
 
 #include <fvutils/color/colorspaces.h>
 #include <stdint.h>
@@ -34,9 +34,6 @@
 #pragma pack(push,4)
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** FUSE version enum. */
 typedef enum {

@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_INIFINS_WEBVIEW_H_
-#define __ASPECT_INIFINS_WEBVIEW_H_
+#ifndef _ASPECT_INIFINS_WEBVIEW_H_
+#define _ASPECT_INIFINS_WEBVIEW_H_
 
 #include <aspect/inifins/inifin.h>
 #include <aspect/webview.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class WebviewAspectIniFin : public AspectIniFin
 {
@@ -42,10 +39,10 @@ class WebviewAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  WebUrlManager *__url_manager;
-  WebNavManager *__nav_manager;
-  WebRequestManager *__request_manager;
-  WebviewRestApiManager *__rest_api_manager;
+  WebUrlManager *url_manager_;
+  WebNavManager *nav_manager_;
+  WebRequestManager *request_manager_;
+  WebviewRestApiManager *rest_api_manager_;
 };
 
 } // end namespace fawkes

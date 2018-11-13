@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CONTROL_SONYEVID100P_H_
-#define __FIREVISION_CONTROL_SONYEVID100P_H_
+#ifndef _FIREVISION_CONTROL_SONYEVID100P_H_
+#define _FIREVISION_CONTROL_SONYEVID100P_H_
 
 #include <fvcams/control/pantilt.h>
 #include <fvcams/control/zoom.h>
 #include <fvcams/control/effect.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class CameraArgumentParser;
 class ViscaControl;

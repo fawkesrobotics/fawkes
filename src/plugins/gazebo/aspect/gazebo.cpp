@@ -25,9 +25,6 @@
 #include <stdio.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class GazeboAspect <plugins/gazebo/aspect/gazebo.h>
  * Thread aspect to get access to a Gazebo node handle.

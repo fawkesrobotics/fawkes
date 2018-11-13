@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_GOTO_THREAD_H_
-#define __PLUGINS_KATANA_GOTO_THREAD_H_
+#ifndef _PLUGINS_KATANA_GOTO_THREAD_H_
+#define _PLUGINS_KATANA_GOTO_THREAD_H_
 
 #include "motion_thread.h"
 
@@ -41,9 +41,9 @@ class KatanaGotoThread : public KatanaMotionThread
  private:
   virtual void run() { Thread::run(); }
 
-  float __x, __y, __z;
-  float __phi, __theta, __psi;
-  unsigned int __poll_interval_usec;
+  float x_, y_, z_;
+  float phi_, theta_, psi_;
+  unsigned int poll_interval_usec_;
 };
 
 

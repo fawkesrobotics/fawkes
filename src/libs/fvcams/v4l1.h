@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CAMS_V4L1_H_
-#define __FIREVISION_CAMS_V4L1_H_
+#ifndef _FIREVISION_CAMS_V4L1_H_
+#define _FIREVISION_CAMS_V4L1_H_
 
 #include <fvcams/camera.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class CameraArgumentParser;
 class V4L1CameraData;
@@ -74,7 +71,7 @@ class V4L1Camera : public Camera
   static const int MMAP = 1;
   static const int READ = 2;
 
-  V4L1CameraData *__data;
+  V4L1CameraData *data_;
 
   bool opened;
   bool started;

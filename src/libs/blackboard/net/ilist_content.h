@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_NET_ILIST_CONTENT_H_
-#define __BLACKBOARD_NET_ILIST_CONTENT_H_
+#ifndef _BLACKBOARD_NET_ILIST_CONTENT_H_
+#define _BLACKBOARD_NET_ILIST_CONTENT_H_
 
 #include <blackboard/net/messages.h>
 #include <netcomm/fawkes/message_content.h>

@@ -25,9 +25,6 @@
 #include <fvcams/control/source.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class CameraControlSource <fvcams/control/source.h>
  * Camera source control interface.

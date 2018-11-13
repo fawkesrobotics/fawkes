@@ -45,15 +45,15 @@ using namespace fawkes;
  */
 XmlRpcRequestProcessor::XmlRpcRequestProcessor(fawkes::Logger *logger)
 {
-  __logger = logger;
-  __xmlrpc_registry = new xmlrpc_c::registry();
+  logger_ = logger;
+  xmlrpc_registry_ = new xmlrpc_c::registry();
 }
 
 
 /** Destructor. */
 XmlRpcRequestProcessor::~XmlRpcRequestProcessor()
 {
-  delete __xmlrpc_registry;
+  delete xmlrpc_registry_;
 }
 
 /** Get XML-RPC registry.
@@ -62,7 +62,7 @@ XmlRpcRequestProcessor::~XmlRpcRequestProcessor()
 xmlrpc_c::registry *
 XmlRpcRequestProcessor::registry()
 {
-  return __xmlrpc_registry;
+  return xmlrpc_registry_;
 }
 
 
@@ -77,8 +77,8 @@ XmlRpcRequestProcessor::process_request(const fawkes::WebRequest *request)
     return new WebErrorPageReply(WebErrorPageReply::HTTP_METHOD_NOT_ALLOWED);
   } else {
     std::string response = "";
-    __xmlrpc_registry->processCall(request->body(), &response);
-    //__logger->log_debug("XmlRpcRequestProcessor", "Call: %s  reponse: %s",
+    xmlrpc_registry_->processCall(request->body(), &response);
+    //logger_->log_debug("XmlRpcRequestProcessor", "Call: %s  reponse: %s",
     //		          request->raw_post_data().c_str(), response.c_str());
     return new StaticWebReply(WebReply::HTTP_OK, response);
   }

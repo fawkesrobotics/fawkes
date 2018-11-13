@@ -51,9 +51,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class Bumblebee2Camera <fvcams/bumblebee2.h>
  * Bumblebee2 camera.
@@ -173,8 +170,8 @@ Bumblebee2Camera::Bumblebee2Camera(const CameraArgumentParser *cap)
     parse_set_shutter(cap->get("shutter").c_str());
   }
 
-  __buffer_deinterlaced = NULL;
-  __buffer_rgb = NULL;
+  buffer_deinterlaced_ = NULL;
+  buffer_rgb_ = NULL;
 }
 
 /** Constructor.
@@ -200,8 +197,8 @@ Bumblebee2Camera::Bumblebee2Camera()
 /** Destructor. */
 Bumblebee2Camera::~Bumblebee2Camera()
 {
-  if (__buffer_deinterlaced != NULL)  free(__buffer_deinterlaced);
-  if (__buffer_rgb != NULL)           free(__buffer_rgb);
+  if (buffer_deinterlaced_ != NULL)  free(buffer_deinterlaced_);
+  if (buffer_rgb_ != NULL)           free(buffer_rgb_);
 }
 
 
@@ -363,11 +360,11 @@ Bumblebee2Camera::open()
   }
 
   size_t buffer_size = (size_t)pixel_width() * (size_t)pixel_height() * 2;
-  __buffer_deinterlaced = (unsigned char *)malloc(buffer_size);
-  __buffer_rgb = malloc_buffer(RGB, pixel_width(), pixel_height() * 2);
-  __buffer = NULL;
+  buffer_deinterlaced_ = (unsigned char *)malloc(buffer_size);
+  buffer_rgb_ = malloc_buffer(RGB, pixel_width(), pixel_height() * 2);
+  buffer_ = NULL;
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+#if BYTE_ORDER_ == LITTLE_ENDIAN_
   dc1394error_t err;
   typedef union {
     uint32_t value;
@@ -402,13 +399,13 @@ Bumblebee2Camera::close()
 {
   if ( _opened ) {
     FirewireCamera::close();  
-    if (__buffer_deinterlaced != NULL) {
-      free(__buffer_deinterlaced);
-      __buffer_deinterlaced = NULL;
+    if (buffer_deinterlaced_ != NULL) {
+      free(buffer_deinterlaced_);
+      buffer_deinterlaced_ = NULL;
     }
-    if (__buffer_rgb != NULL) {
-      free(__buffer_rgb);
-      __buffer_rgb = NULL;
+    if (buffer_rgb_ != NULL) {
+      free(buffer_rgb_);
+      buffer_rgb_ = NULL;
     }
   }
 }
@@ -420,11 +417,11 @@ Bumblebee2Camera::capture()
     FirewireCamera::capture();
   } catch (CaptureException &e) {
     e.append("Bumblebee2Camera::capture: failed to retrieve image");
-    if ( ORIGINAL == __image_num )  __buffer = NULL;
+    if ( ORIGINAL == image_num_ )  buffer_ = NULL;
     throw;
   }
-  if ( ORIGINAL == __image_num ) {
-    __buffer = _frame->image;
+  if ( ORIGINAL == image_num_ ) {
+    buffer_ = _frame->image;
   }
 }
 
@@ -432,18 +429,18 @@ Bumblebee2Camera::capture()
 unsigned char *
 Bumblebee2Camera::buffer()
 {
-  return __buffer;
+  return buffer_;
 }
 
 
 void
 Bumblebee2Camera::set_image_number(unsigned int image_num)
 {
-  __image_num = image_num;
+  image_num_ = image_num;
   switch ( image_num ) {
-  case DEINTERLACED: __buffer = __buffer_deinterlaced; break;
-  case RGB_IMAGE: __buffer = __buffer_rgb; break;
-  default:  __buffer = NULL; break;
+  case DEINTERLACED: buffer_ = buffer_deinterlaced_; break;
+  case RGB_IMAGE: buffer_ = buffer_rgb_; break;
+  default:  buffer_ = NULL; break;
   }
 }
 
@@ -464,7 +461,7 @@ Bumblebee2Camera::is_bumblebee2()
 void
 Bumblebee2Camera::deinterlace_stereo()
 {
-  dc1394_deinterlace_stereo( _frame->image, __buffer_deinterlaced,
+  dc1394_deinterlace_stereo( _frame->image, buffer_deinterlaced_,
 			     pixel_width(), 2 * pixel_height() ); 
 }
 
@@ -477,9 +474,9 @@ Bumblebee2Camera::deinterlace_stereo()
 void
 Bumblebee2Camera::decode_bayer()
 {
-  dc1394_bayer_decoding_8bit( __buffer_deinterlaced, __buffer_rgb,
+  dc1394_bayer_decoding_8bit( buffer_deinterlaced_, buffer_rgb_,
 			      pixel_width(), 2 * pixel_height(), 
-			      __bayer_pattern, DC1394_BAYER_METHOD_NEAREST ); 
+			      bayer_pattern_, DC1394_BAYER_METHOD_NEAREST ); 
 }
 
 
@@ -564,19 +561,19 @@ Bumblebee2Camera::get_bayer_tile()
   default:
   case 0x59595959:	// YYYY
     // no bayer
-    __bayer_pattern = (dc1394color_filter_t) 0;
+    bayer_pattern_ = (dc1394color_filter_t) 0;
     break;
   case 0x52474742:	// RGGB
-    __bayer_pattern = DC1394_COLOR_FILTER_RGGB;
+    bayer_pattern_ = DC1394_COLOR_FILTER_RGGB;
     break;
   case 0x47425247:	// GBRG
-    __bayer_pattern = DC1394_COLOR_FILTER_GBRG;
+    bayer_pattern_ = DC1394_COLOR_FILTER_GBRG;
     break;
   case 0x47524247:	// GRBG
-    __bayer_pattern = DC1394_COLOR_FILTER_GRBG;
+    bayer_pattern_ = DC1394_COLOR_FILTER_GRBG;
     break;
   case 0x42474752:	// BGGR
-    __bayer_pattern = DC1394_COLOR_FILTER_BGGR;
+    bayer_pattern_ = DC1394_COLOR_FILTER_BGGR;
     break;
   }
 }

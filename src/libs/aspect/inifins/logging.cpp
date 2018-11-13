@@ -25,9 +25,6 @@
 #include <aspect/logging.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class LoggingAspectIniFin <aspect/inifins/logging.h>
  * Initializer/finalizer for the LoggingAspect.
@@ -40,7 +37,7 @@ namespace fawkes {
 LoggingAspectIniFin::LoggingAspectIniFin(Logger *logger)
   : AspectIniFin("LoggingAspect")
 {
-  __logger = logger;
+  logger_ = logger;
 }
 
 
@@ -55,7 +52,7 @@ LoggingAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  logging_thread->init_LoggingAspect(__logger);
+  logging_thread->init_LoggingAspect(logger_);
 }
 
 

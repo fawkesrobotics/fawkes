@@ -27,9 +27,6 @@
 #include <plugin/manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class PluginDirectorAspectIniFin <aspect/inifins/plugin_director.h>
  * Initializer/finalizer for the PluginDirectorAspect.
@@ -42,7 +39,7 @@ namespace fawkes {
 PluginDirectorAspectIniFin::PluginDirectorAspectIniFin(PluginManager *manager)
   : AspectIniFin("PluginDirectorAspect")
 {
-  __manager = manager;
+  manager_ = manager;
 }
 
 
@@ -65,7 +62,7 @@ PluginDirectorAspectIniFin::init(Thread *thread)
 					  thread->name());
   }
 
-  plugin_director_thread->init_PluginDirectorAspect(__manager);
+  plugin_director_thread->init_PluginDirectorAspect(manager_);
 }
 
 

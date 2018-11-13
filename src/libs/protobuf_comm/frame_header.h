@@ -34,15 +34,12 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PROTOBUF_COMM_FRAME_HEADER_H_
-#define __PROTOBUF_COMM_FRAME_HEADER_H_
+#ifndef _PROTOBUF_COMM_FRAME_HEADER_H_
+#define _PROTOBUF_COMM_FRAME_HEADER_H_
 
 #include <cstdint>
 
 namespace protobuf_comm {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 #pragma pack(push,4)
 

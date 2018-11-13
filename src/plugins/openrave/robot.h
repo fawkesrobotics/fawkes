@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENRAVE_ROBOT_H
-#define __PLUGINS_OPENRAVE_ROBOT_H
+#ifndef PLUGINS_OPENRAVE_ROBOT_H_
+#define PLUGINS_OPENRAVE_ROBOT_H_
 
 #include "types.h"
 
@@ -29,9 +29,6 @@
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Logger;
 
@@ -102,27 +99,27 @@ class OpenRaveRobot
   OpenRAVE::IkParameterization get_5dof_ikparam(OpenRAVE::Transform& trans);
   bool solve_ik(OpenRAVE::IkFilterOptions filter);
 
-  fawkes::Logger*                 __logger;
+  fawkes::Logger*                 logger_;
 
-  std::string                           __name;
-  std::string                           __name_str;
-  OpenRAVE::RobotBasePtr                __robot;
-  OpenRAVE::RobotBase::ManipulatorPtr   __arm;
-  OpenRaveManipulatorPtr                __manip;
-  target_t                              __target;
+  std::string                           name_;
+  std::string                           name_str_;
+  OpenRAVE::RobotBasePtr                robot_;
+  OpenRAVE::RobotBase::ManipulatorPtr   arm_;
+  OpenRaveManipulatorPtr                manip_;
+  target_t                              target_;
 
 
-  OpenRAVE::ModuleBasePtr               __mod_basemanip;
+  OpenRAVE::ModuleBasePtr               mod_basemanip_;
 
-  OpenRAVE::PlannerBase::PlannerParametersPtr   __planner_params;
-  std::vector< std::vector<OpenRAVE::dReal> >*  __traj;
+  OpenRAVE::PlannerBase::PlannerParametersPtr   planner_params_;
+  std::vector< std::vector<OpenRAVE::dReal> >*  traj_;
 
-  float         __trans_offset_x;
-  float         __trans_offset_y;
-  float         __trans_offset_z;
+  float         trans_offset_x_;
+  float         trans_offset_y_;
+  float         trans_offset_z_;
 
-  bool          __display_planned_movements;
-  bool          __find_best_ik;
+  bool          display_planned_movements_;
+  bool          find_best_ik_;
 };
 
 } // end of namespace fawkes

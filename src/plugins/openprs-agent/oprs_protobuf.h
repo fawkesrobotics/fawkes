@@ -34,8 +34,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __OPENPRS_AGENT_OPRS_PROTOBUF_H_
-#define __OPENPRS_AGENT_OPRS_PROTOBUF_H_
+#ifndef _OPENPRS_AGENT_OPRS_PROTOBUF_H_
+#define _OPENPRS_AGENT_OPRS_PROTOBUF_H_
 
 #include <oprs-type-pub.h>
 #include <oprs-type_f-pub.h>
@@ -53,9 +53,6 @@ namespace protobuf_comm {
 }
 
 namespace oprs_protobuf {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class OpenPRSProtobuf
 {

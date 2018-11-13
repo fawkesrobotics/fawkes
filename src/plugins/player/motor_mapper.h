@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PLAYER_MOTOR_MAPPER_H_
-#define __PLUGINS_PLAYER_MOTOR_MAPPER_H_
+#ifndef _PLUGINS_PLAYER_MOTOR_MAPPER_H_
+#define _PLUGINS_PLAYER_MOTOR_MAPPER_H_
 
 #include "mapper.h"
 
@@ -44,8 +44,8 @@ class PlayerMotorPositionMapper : public PlayerProxyFawkesInterfaceMapper
   virtual void sync_player_to_fawkes();
 
  private:
-  fawkes::MotorInterface     *__interface;
-  PlayerCc::Position2dProxy  *__proxy;
+  fawkes::MotorInterface     *interface_;
+  PlayerCc::Position2dProxy  *proxy_;
 };
 
 #endif

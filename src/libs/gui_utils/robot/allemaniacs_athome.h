@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_GUI_UTILS_ROBOT_ALLEMANIACS_ATHOME_H_
-#define __LIBS_GUI_UTILS_ROBOT_ALLEMANIACS_ATHOME_H_
+#ifndef _LIBS_GUI_UTILS_ROBOT_ALLEMANIACS_ATHOME_H_
+#define _LIBS_GUI_UTILS_ROBOT_ALLEMANIACS_ATHOME_H_
 
 #include <gui_utils/robot/drawer.h>
 
@@ -37,7 +37,7 @@ class AllemaniACsAtHomeCairoRobotDrawer : public CairoRobotDrawer
 			  const Cairo::RefPtr<Cairo::Context> &cr);
 
  private:
-  bool __laser_at_center;
+  bool laser_at_center_;
 };
 
 }

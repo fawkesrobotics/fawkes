@@ -34,8 +34,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PROTOBUF_CLIPS_COMMUNICATOR_H_
-#define __PROTOBUF_CLIPS_COMMUNICATOR_H_
+#ifndef _PROTOBUF_CLIPS_COMMUNICATOR_H_
+#define _PROTOBUF_CLIPS_COMMUNICATOR_H_
 
 #include <list>
 #include <map>
@@ -54,9 +54,6 @@ namespace fawkes {
 }
 
 namespace protobuf_clips {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ClipsProtobufCommunicator
 {

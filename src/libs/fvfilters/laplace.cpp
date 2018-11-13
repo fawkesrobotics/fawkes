@@ -39,9 +39,6 @@
 #endif
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FilterLaplace <fvfilters/laplace.h>
  * Laplacian filter.
@@ -192,7 +189,7 @@ FilterLaplace::apply()
 void
 FilterLaplace::calculate_kernel(int *kernel, float sigma, unsigned int size, float scale)
 {
-  //  title "LoGFUNC__________________________________________"
+  //  title "LoGFUNC_________________________________________"
 
   /*
   std::cout.precision( 5 );

@@ -44,9 +44,9 @@ using namespace fawkes::openni;
  * @param hands map of hands shared with interface observer
  */
 SkelGuiSkeletonDrawer3D::SkelGuiSkeletonDrawer3D(UserMap &users, HandMap &hands)
-  : __users(users), __hands(hands)
+  : users_(users), hands_(hands)
 {
-  __print_state = PRINT_ID_STATE;
+  print_state_ = PRINT_ID_STATE;
 }
 
 void
@@ -101,7 +101,7 @@ SkelGuiSkeletonDrawer3D::draw_user(UserInfo &user)
 void
 SkelGuiSkeletonDrawer3D::draw()
 {
-  for (UserMap::iterator i = __users.begin(); i != __users.end(); ++i) {
+  for (UserMap::iterator i = users_.begin(); i != users_.end(); ++i) {
     i->second.skel_if->read();
     if (i->second.skel_if->state() != HumanSkeletonInterface::STATE_INVALID) {
       glPointSize(10);
@@ -127,7 +127,7 @@ SkelGuiSkeletonDrawer3D::draw()
   /*
   glEnable(GL_LINE_SMOOTH);
   glLineWidth(4);
-  for (HandMap::iterator i = __hands.begin(); i != __hands.end(); ++i) {
+  for (HandMap::iterator i = hands_.begin(); i != hands_.end(); ++i) {
     if (i->second.hand_if->is_visible()) {
       float proj[2] = {i->second.hand_if->world_x(), i->second.hand_if->world_y()};
       draw_circle(i->second.hand_if->world_z(), proj, 10);
@@ -145,10 +145,10 @@ SkelGuiSkeletonDrawer3D::draw()
 void
 SkelGuiSkeletonDrawer3D::toggle_print_state()
 {
-  switch (__print_state) {
-  case PRINT_NONE:      __print_state = PRINT_ID_STATE; break;
-  case PRINT_ID_STATE:  __print_state = PRINT_ID;       break;
-  case PRINT_ID:        __print_state = PRINT_NONE;     break;
+  switch (print_state_) {
+  case PRINT_NONE:      print_state_ = PRINT_ID_STATE; break;
+  case PRINT_ID_STATE:  print_state_ = PRINT_ID;       break;
+  case PRINT_ID:        print_state_ = PRINT_NONE;     break;
   }
 }
 
@@ -177,5 +177,5 @@ SkelGuiSkeletonDrawer3D::draw_circle(unsigned int id, float *p, float radius)
 void
 SkelGuiSkeletonDrawer3D::set_print_state(SkelGuiSkeletonDrawer3D::PrintState state)
 {
-  __print_state = state;
+  print_state_ = state;
 }

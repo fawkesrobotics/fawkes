@@ -20,14 +20,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_SEARCH_ASTAR_STATE_H_
-#define __PLUGINS_COLLI_SEARCH_ASTAR_STATE_H_
+#ifndef _PLUGINS_COLLI_SEARCH_ASTAR_STATE_H_
+#define _PLUGINS_COLLI_SEARCH_ASTAR_STATE_H_
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class AStarState <plugins/colli/search/astar_state.h>
  *  This is the class for an A* State.

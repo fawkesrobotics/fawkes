@@ -83,7 +83,7 @@ RosPosition3DThread::finalize()
 void
 RosPosition3DThread::bb_interface_created(const char *type, const char *id) throw()
 {
-  if (strncmp(type, "Position3DInterface", __INTERFACE_TYPE_SIZE) != 0)  return;
+  if (strncmp(type, "Position3DInterface", INTERFACE_TYPE_SIZE_) != 0)  return;
   Position3DInterface *interface;
   try {
     interface = blackboard->open_for_reading<Position3DInterface>(id);

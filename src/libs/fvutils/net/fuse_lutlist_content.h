@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_LUTLIST_CONTENT_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_LUTLIST_CONTENT_H_
+#ifndef _FIREVISION_FVUTILS_NET_FUSE_LUTLIST_CONTENT_H_
+#define _FIREVISION_FVUTILS_NET_FUSE_LUTLIST_CONTENT_H_
 
 #include <fvutils/net/fuse.h>
 #include <fvutils/net/fuse_message_content.h>
 #include <sys/types.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FuseLutListContent : public FuseMessageContent
 {
@@ -52,8 +49,8 @@ class FuseLutListContent : public FuseMessageContent
   virtual void        serialize();
 
  private:
-  fawkes::DynamicBuffer  *__list;
-  FUSE_lutlist_message_t __lutlist_msg;
+  fawkes::DynamicBuffer  *list_;
+  FUSE_lutlist_message_t lutlist_msg_;
 };
 
 } // end namespace firevision

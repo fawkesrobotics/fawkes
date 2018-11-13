@@ -55,7 +55,7 @@ NaoQiSpeechSynthThread::~NaoQiSpeechSynthThread()
 void
 NaoQiSpeechSynthThread::init()
 {
-  __tts_task_id = -1;
+  tts_task_id_ = -1;
 
   // Is ALTextToSpeech available?
   try {
@@ -70,10 +70,10 @@ NaoQiSpeechSynthThread::init()
 		    e.toString().c_str());
   }
 
-  __altts =
+  altts_ =
     AL::ALPtr<AL::ALTextToSpeechProxy>(new AL::ALTextToSpeechProxy(naoqi_broker));
 
-  __speechsynth_if =
+  speechsynth_if_ =
     blackboard->open_for_writing<SpeechSynthInterface>("NaoQi TTS");
 }
 
@@ -83,10 +83,10 @@ NaoQiSpeechSynthThread::finalize()
 {
   stop_speech();
 
-  blackboard->close(__speechsynth_if);
-  __speechsynth_if = NULL;
+  blackboard->close(speechsynth_if_);
+  speechsynth_if_ = NULL;
 
-  __altts.reset();
+  altts_.reset();
 }
 
 
@@ -94,29 +94,29 @@ NaoQiSpeechSynthThread::finalize()
 void
 NaoQiSpeechSynthThread::stop_speech()
 {
-  if (__tts_task_id != -1) {
-    if (__altts->isRunning(__tts_task_id)) {
-      __altts->stop(__tts_task_id);
+  if (tts_task_id_ != -1) {
+    if (altts_->isRunning(tts_task_id_)) {
+      altts_->stop(tts_task_id_);
     }
-    __tts_task_id = -1;
+    tts_task_id_ = -1;
   }
 }
 
 void
 NaoQiSpeechSynthThread::say(const char *text)
 {
-  __tts_task_id = __altts->say(text);
+  tts_task_id_ = altts_->say(text);
 }
 
 void
 NaoQiSpeechSynthThread::loop()
 {
-  bool working = (__tts_task_id != -1) && __altts->isRunning(__tts_task_id);
+  bool working = (tts_task_id_ != -1) && altts_->isRunning(tts_task_id_);
   if (! working) {
     process_messages();
   }
-  __speechsynth_if->set_final( ! working );
-  __speechsynth_if->write();
+  speechsynth_if_->set_final( ! working );
+  speechsynth_if_->write();
 }
 
 
@@ -125,14 +125,14 @@ void
 NaoQiSpeechSynthThread::process_messages()
 {
   // process bb messages
-  if ( ! __speechsynth_if->msgq_empty() ) {
+  if ( ! speechsynth_if_->msgq_empty() ) {
     if (SpeechSynthInterface::SayMessage *msg =
-	__speechsynth_if->msgq_first_safe(msg))
+	speechsynth_if_->msgq_first_safe(msg))
     {
       say(msg->text());
-      __speechsynth_if->set_msgid(msg->id());
+      speechsynth_if_->set_msgid(msg->id());
     }
 
-    __speechsynth_if->msgq_pop();
+    speechsynth_if_->msgq_pop();
   }
 }

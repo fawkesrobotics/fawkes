@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_TYPES_H__
-#define __INTERFACE_TYPES_H__
+#ifndef _INTERFACE_TYPES_H__
+#define _INTERFACE_TYPES_H__
 
 #include <sys/types.h>
 #include <map>
@@ -65,4 +65,4 @@ struct interface_fieldinfo_t {
 
 }
 
-#endif /* __INTERFACE_TYPES_H__ */
+#endif /* INTERFACE_TYPES_H___ */

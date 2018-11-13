@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_PCL_UTILS_STORAGE_ADAPTER_H_
-#define __LIBS_PCL_UTILS_STORAGE_ADAPTER_H_
+#ifndef _LIBS_PCL_UTILS_STORAGE_ADAPTER_H_
+#define _LIBS_PCL_UTILS_STORAGE_ADAPTER_H_
 
 #include <pcl_utils/utils.h>
 #include <pcl_utils/transforms.h>
@@ -29,10 +29,6 @@
 
 namespace fawkes {
   namespace pcl_utils {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 template <typename PointT>
 class PointCloudStorageAdapter;

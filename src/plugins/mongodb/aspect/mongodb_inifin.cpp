@@ -27,9 +27,6 @@
 #include <cstddef>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class MongoDBAspectIniFin <plugins/mongodb/aspect/mongodb_inifin.h>
  * MongoDBAspect initializer/finalizer.

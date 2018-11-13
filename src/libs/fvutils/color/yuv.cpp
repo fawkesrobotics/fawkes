@@ -27,9 +27,6 @@
 #include <cstring>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 void
 iyu1_to_yuy2(const unsigned char *src, unsigned char *dest, unsigned int width, unsigned int height)

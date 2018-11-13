@@ -27,9 +27,6 @@
 #include <core/exceptions/software.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class CameraControlColor <fvcams/control/color.h>
  * Camera color control interface.

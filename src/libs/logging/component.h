@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_LOGGING_COMPONENT_H_
-#define __UTILS_LOGGING_COMPONENT_H_
+#ifndef _UTILS_LOGGING_COMPONENT_H_
+#define _UTILS_LOGGING_COMPONENT_H_
 
 #include <core/exception.h>
 #include <string>
@@ -56,8 +56,8 @@ class ComponentLogger
   void log_error(Exception &e);
 
  private:
-  Logger *__logger;
-  char *__component;
+  Logger *logger_;
+  char *component_;
 };
 
 

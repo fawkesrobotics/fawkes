@@ -110,14 +110,14 @@ cleanup_mutex(void *arg)
  */
 WaitCondition::WaitCondition(Mutex *mutex)
 {
-  __cond_data   = new WaitConditionData();
-  pthread_cond_init( &(__cond_data->cond), NULL);
+  cond_data_   = new WaitConditionData();
+  pthread_cond_init( &(cond_data_->cond), NULL);
   if (mutex) {
-    __mutex     = mutex;
-    __own_mutex = false;
+    mutex_     = mutex;
+    own_mutex_ = false;
   } else {
-    __mutex     = new Mutex();
-    __own_mutex = true;
+    mutex_     = new Mutex();
+    own_mutex_ = true;
   }
 }
 
@@ -125,10 +125,10 @@ WaitCondition::WaitCondition(Mutex *mutex)
 /** Destructor. */
 WaitCondition::~WaitCondition()
 {
-  pthread_cond_destroy( &(__cond_data->cond) );
-  delete __cond_data;
-  if (__own_mutex) {
-    delete __mutex;
+  pthread_cond_destroy( &(cond_data_->cond) );
+  delete cond_data_;
+  if (own_mutex_) {
+    delete mutex_;
   }
 }
 
@@ -143,14 +143,14 @@ void
 WaitCondition::wait()
 {
   int err;
-  if ( __own_mutex) {
-    __mutex->lock();
-    pthread_cleanup_push(cleanup_mutex, __mutex);
-    err = pthread_cond_wait( &(__cond_data->cond), &(__mutex->mutex_data->mutex) );
-    __mutex->unlock();
+  if ( own_mutex_) {
+    mutex_->lock();
+    pthread_cleanup_push(cleanup_mutex, mutex_);
+    err = pthread_cond_wait( &(cond_data_->cond), &(mutex_->mutex_data->mutex) );
+    mutex_->unlock();
     pthread_cleanup_pop(0);
   } else {
-    err = pthread_cond_wait( &(__cond_data->cond), &(__mutex->mutex_data->mutex) );
+    err = pthread_cond_wait( &(cond_data_->cond), &(mutex_->mutex_data->mutex) );
   }
   if ( err != 0 ) {
     throw Exception(err, "Waiting for wait condition failed");
@@ -176,14 +176,14 @@ WaitCondition::abstimed_wait(long int sec, long int nanosec)
   int err = 0;
   struct timespec ts = { sec, nanosec };
 
-  if ( __own_mutex) {
-    __mutex->lock();
-    pthread_cleanup_push(cleanup_mutex, __mutex);
-    err = pthread_cond_timedwait( &(__cond_data->cond), &(__mutex->mutex_data->mutex), &ts );
-    __mutex->unlock();
+  if ( own_mutex_) {
+    mutex_->lock();
+    pthread_cleanup_push(cleanup_mutex, mutex_);
+    err = pthread_cond_timedwait( &(cond_data_->cond), &(mutex_->mutex_data->mutex), &ts );
+    mutex_->unlock();
     pthread_cleanup_pop(0);
   } else {
-    err = pthread_cond_timedwait( &(__cond_data->cond), &(__mutex->mutex_data->mutex), &ts );
+    err = pthread_cond_timedwait( &(cond_data_->cond), &(mutex_->mutex_data->mutex), &ts );
   }
 
   if ( err == ETIMEDOUT ) {
@@ -239,14 +239,14 @@ WaitCondition::reltimed_wait(unsigned int sec, unsigned int nanosec)
     struct timespec ts = { s, ns };
     long err = 0;
 
-    if ( __own_mutex) {
-      __mutex->lock();
-      pthread_cleanup_push(cleanup_mutex, __mutex);
-      err = pthread_cond_timedwait( &(__cond_data->cond), &(__mutex->mutex_data->mutex), &ts );
-      __mutex->unlock();
+    if ( own_mutex_) {
+      mutex_->lock();
+      pthread_cleanup_push(cleanup_mutex, mutex_);
+      err = pthread_cond_timedwait( &(cond_data_->cond), &(mutex_->mutex_data->mutex), &ts );
+      mutex_->unlock();
       pthread_cleanup_pop(0);
     } else {
-      err = pthread_cond_timedwait( &(__cond_data->cond), &(__mutex->mutex_data->mutex), &ts );
+      err = pthread_cond_timedwait( &(cond_data_->cond), &(mutex_->mutex_data->mutex), &ts );
     }
 
     if ( err == ETIMEDOUT ) {
@@ -273,12 +273,12 @@ WaitCondition::reltimed_wait(unsigned int sec, unsigned int nanosec)
 void
 WaitCondition::wake_one()
 {
-  if (__own_mutex) {  // it's our internal mutex, lock!
-    __mutex->lock();
-    pthread_cond_signal( &(__cond_data->cond) );
-    __mutex->unlock();
+  if (own_mutex_) {  // it's our internal mutex, lock!
+    mutex_->lock();
+    pthread_cond_signal( &(cond_data_->cond) );
+    mutex_->unlock();
   } else {            // it's an external mutex, the user should care
-    pthread_cond_signal( &(__cond_data->cond) );
+    pthread_cond_signal( &(cond_data_->cond) );
   }
 }
 
@@ -294,12 +294,12 @@ WaitCondition::wake_one()
 void
 WaitCondition::wake_all()
 {
-  if (__own_mutex) {  // it's our internal mutex, lock!
-    __mutex->lock();
-    pthread_cond_broadcast( &(__cond_data->cond) );
-    __mutex->unlock();
+  if (own_mutex_) {  // it's our internal mutex, lock!
+    mutex_->lock();
+    pthread_cond_broadcast( &(cond_data_->cond) );
+    mutex_->unlock();
   } else {            // it's an external mutex, the user should care
-    pthread_cond_broadcast( &(__cond_data->cond) );
+    pthread_cond_broadcast( &(cond_data_->cond) );
   }
 }
 

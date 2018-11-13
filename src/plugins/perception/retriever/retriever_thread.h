@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_APPS_RETRIEVER_RETRIEVER_THREAD_H_
-#define __FIREVISION_APPS_RETRIEVER_RETRIEVER_THREAD_H_
+#ifndef _FIREVISION_APPS_RETRIEVER_RETRIEVER_THREAD_H_
+#define _FIREVISION_APPS_RETRIEVER_RETRIEVER_THREAD_H_
 
 #include <core/threading/thread.h>
 
@@ -69,14 +69,14 @@ class FvRetrieverThread
   firevision::Camera *cam;
   firevision::SharedMemoryImageBuffer *shm;
   firevision::SeqWriter *seq_writer;
-  fawkes::TimeTracker *__tt;
-  unsigned int __loop_count;
-  unsigned int __ttc_capture;
-  unsigned int __ttc_memcpy;
-  unsigned int __ttc_dispose;
-  bool __cam_has_timestamp_support;
+  fawkes::TimeTracker *tt_;
+  unsigned int loop_count_;
+  unsigned int ttc_capture_;
+  unsigned int ttc_memcpy_;
+  unsigned int ttc_dispose_;
+  bool cam_has_timestamp_support_;
 
-  firevision::ColorModelLookupTable *__cm;
+  firevision::ColorModelLookupTable *cm_;
 };
 
 

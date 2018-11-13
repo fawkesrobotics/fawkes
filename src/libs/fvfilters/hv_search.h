@@ -22,16 +22,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FILTER_HV_SEARCH_H_
-#define __FIREVISION_FILTER_HV_SEARCH_H_
+#ifndef _FIREVISION_FILTER_HV_SEARCH_H_
+#define _FIREVISION_FILTER_HV_SEARCH_H_
 
 #include <fvfilters/filter.h>
 #include <fvmodels/color/colormodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ColorModel;
 
@@ -50,5 +47,5 @@ class FilterHVSearch : public Filter
 
 } // end namespace firevision
 
-#endif // __FIREVISION_FILTER_HV_SEARCH_H_
+#endif // FIREVISION_FILTER_HV_SEARCH_H__
 

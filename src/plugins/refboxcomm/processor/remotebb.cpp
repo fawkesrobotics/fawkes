@@ -51,22 +51,22 @@ RemoteBlackBoardRefBoxProcessor::RemoteBlackBoardRefBoxProcessor(
 				   const char *bb_host,
 				   unsigned short int bb_port,
 				   const char *iface_id)
-  : __name("RBBRefBoxRep")
+  : name_("RBBRefBoxRep")
 {
-  __logger = logger;
-  __rbb = NULL;
-  __gamestate_if = NULL;
+  logger_ = logger;
+  rbb_ = NULL;
+  gamestate_if_ = NULL;
 
-  __message_shown = false;
+  message_shown_ = false;
 
-  __bb_host  = strdup(bb_host);
-  __bb_port  = bb_port;
-  __iface_id = strdup(iface_id);
+  bb_host_  = strdup(bb_host);
+  bb_port_  = bb_port;
+  iface_id_ = strdup(iface_id);
 
   try {
     reconnect();
   } catch (Exception &e) {
-    __logger->log_warn(__name, "Could not connect to remote blackboard, "
+    logger_->log_warn(name_, "Could not connect to remote blackboard, "
 		       "will keep trying");
   }
 }
@@ -75,11 +75,11 @@ RemoteBlackBoardRefBoxProcessor::RemoteBlackBoardRefBoxProcessor(
 /** Destructor. */
 RemoteBlackBoardRefBoxProcessor::~RemoteBlackBoardRefBoxProcessor()
 {
-  free(__bb_host);
-  free(__iface_id);
-  if (__rbb) {
-    __rbb->close(__gamestate_if);
-    delete __rbb;
+  free(bb_host_);
+  free(iface_id_);
+  if (rbb_) {
+    rbb_->close(gamestate_if_);
+    delete rbb_;
   }
 }
 
@@ -88,20 +88,20 @@ RemoteBlackBoardRefBoxProcessor::~RemoteBlackBoardRefBoxProcessor()
 void
 RemoteBlackBoardRefBoxProcessor::reconnect()
 {
-  if ( __rbb ) {
-    __rbb->close(__gamestate_if);
-    delete __rbb;
+  if ( rbb_ ) {
+    rbb_->close(gamestate_if_);
+    delete rbb_;
   }
-  __rbb = NULL;
+  rbb_ = NULL;
 
-  //  __logger->log_info(__name, "Trying to connect to blackboard at %s:%u",
-  //		     __bb_host, __bb_port);
+  //  logger_->log_info(name_, "Trying to connect to blackboard at %s:%u",
+  //		     bb_host_, bb_port_);
   try {
-    __rbb = new RemoteBlackBoard(__bb_host, __bb_port);
-    __gamestate_if = __rbb->open_for_reading<GameStateInterface>(__iface_id);
+    rbb_ = new RemoteBlackBoard(bb_host_, bb_port_);
+    gamestate_if_ = rbb_->open_for_reading<GameStateInterface>(iface_id_);
   } catch (Exception &e) {
-    delete __rbb;
-    __rbb = NULL;
+    delete rbb_;
+    rbb_ = NULL;
     throw;
   }
 }
@@ -109,21 +109,21 @@ RemoteBlackBoardRefBoxProcessor::reconnect()
 void
 RemoteBlackBoardRefBoxProcessor::refbox_process()
 {
-  if (__rbb && __rbb->is_alive() && __gamestate_if->is_valid()) {
+  if (rbb_ && rbb_->is_alive() && gamestate_if_->is_valid()) {
     try {
-      __gamestate_if->read();
-      _rsh->set_gamestate(__gamestate_if->game_state(),
-			  (worldinfo_gamestate_team_t)__gamestate_if->state_team());
-      _rsh->set_score(__gamestate_if->score_cyan(),
-		      __gamestate_if->score_magenta());
-      _rsh->set_team_goal((worldinfo_gamestate_team_t)__gamestate_if->our_team(),
-			  (worldinfo_gamestate_goalcolor_t)__gamestate_if->our_goal_color());
-      _rsh->set_half((worldinfo_gamestate_half_t)__gamestate_if->half(),
-		     __gamestate_if->is_kickoff());
+      gamestate_if_->read();
+      _rsh->set_gamestate(gamestate_if_->game_state(),
+			  (worldinfo_gamestate_team_t)gamestate_if_->state_team());
+      _rsh->set_score(gamestate_if_->score_cyan(),
+		      gamestate_if_->score_magenta());
+      _rsh->set_team_goal((worldinfo_gamestate_team_t)gamestate_if_->our_team(),
+			  (worldinfo_gamestate_goalcolor_t)gamestate_if_->our_goal_color());
+      _rsh->set_half((worldinfo_gamestate_half_t)gamestate_if_->half(),
+		     gamestate_if_->is_kickoff());
 
     } catch (Exception &e) {
-      __logger->log_warn(__name, "Processing BB data failed, exception follows");
-      __logger->log_warn(__name, e);
+      logger_->log_warn(name_, "Processing BB data failed, exception follows");
+      logger_->log_warn(name_, e);
     }
   }
 }
@@ -131,15 +131,15 @@ RemoteBlackBoardRefBoxProcessor::refbox_process()
 bool
 RemoteBlackBoardRefBoxProcessor::check_connection()
 {
-  if (! (__rbb && __rbb->is_alive() && __gamestate_if->is_valid())) {
+  if (! (rbb_ && rbb_->is_alive() && gamestate_if_->is_valid())) {
     try {
       reconnect();
-      __message_shown = false;
+      message_shown_ = false;
     } catch (Exception &e) {
-      if (! __message_shown) {
-	__logger->log_warn(__name, "Reconnect failed, exception follows");
-	__logger->log_warn(__name, e);
-	__message_shown = true;
+      if (! message_shown_) {
+	logger_->log_warn(name_, "Reconnect failed, exception follows");
+	logger_->log_warn(name_, e);
+	message_shown_ = true;
       }
       return false;
     }

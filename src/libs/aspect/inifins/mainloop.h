@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_INIFINS_MAINLOOP_H_
-#define __ASPECT_INIFINS_MAINLOOP_H_
+#ifndef _ASPECT_INIFINS_MAINLOOP_H_
+#define _ASPECT_INIFINS_MAINLOOP_H_
 
 #include <aspect/inifins/inifin.h>
 #include <aspect/mainloop.h>
@@ -30,9 +30,6 @@
 #include <core/threading/thread_notification_listener.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class MainLoopEmployer;
 class BlockedTimingExecutor;
@@ -52,9 +49,9 @@ class MainLoopAspectIniFin
   virtual bool thread_init_failed(Thread *thread) throw();
 
  private:
-  MainLoopEmployer      *__employer;
-  BlockedTimingExecutor *__btexec;
-  UniquenessConstraint<MainLoopAspect> __mainloop_uc;
+  MainLoopEmployer      *employer_;
+  BlockedTimingExecutor *btexec_;
+  UniquenessConstraint<MainLoopAspect> mainloop_uc_;
 };
 
 } // end namespace fawkes

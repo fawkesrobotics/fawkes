@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_NET_MESSAGES_H_
-#define __BLACKBOARD_NET_MESSAGES_H_
+#ifndef _BLACKBOARD_NET_MESSAGES_H_
+#define _BLACKBOARD_NET_MESSAGES_H_
 
 #include <stdint.h>
 #include <netcomm/utils/dynamic_buffer.h>
@@ -70,23 +70,23 @@ typedef struct {
 
 /** Message to request constrained interface list. */
 typedef struct {
-  char          type_pattern[__INTERFACE_TYPE_SIZE];	/**< type pattern */
-  char          id_pattern[__INTERFACE_ID_SIZE];	/**< ID pattern */
+  char          type_pattern[INTERFACE_TYPE_SIZE_];	/**< type pattern */
+  char          id_pattern[INTERFACE_ID_SIZE_];	/**< ID pattern */
 } bb_ilistreq_msg_t;
 
 /** Message to identify an interface on open. */
 typedef struct {
-  char          type[__INTERFACE_TYPE_SIZE];	/**< interface type name */
-  char          id[__INTERFACE_ID_SIZE];	/**< interface instance ID */
-  unsigned char hash[__INTERFACE_HASH_SIZE];	/**< interface version hash */
+  char          type[INTERFACE_TYPE_SIZE_];	/**< interface type name */
+  char          id[INTERFACE_ID_SIZE_];	/**< interface instance ID */
+  unsigned char hash[INTERFACE_HASH_SIZE_];	/**< interface version hash */
 } bb_iopen_msg_t;
 
 
 /** Message for interface info. */
 typedef struct {
-  char          type[__INTERFACE_TYPE_SIZE];	/**< interface type name */
-  char          id[__INTERFACE_ID_SIZE];	/**< interface instance ID */
-  unsigned char hash[__INTERFACE_HASH_SIZE];	/**< interface version hash */
+  char          type[INTERFACE_TYPE_SIZE_];	/**< interface type name */
+  char          id[INTERFACE_ID_SIZE_];	/**< interface instance ID */
+  unsigned char hash[INTERFACE_HASH_SIZE_];	/**< interface version hash */
   uint32_t      serial;				/**< instance serial to uniquely identify
 						 * this instance (big endian) */
   uint32_t      writer_readers;			/**< combined writer reader
@@ -103,8 +103,8 @@ typedef struct {
  * This message is used for MSG_BB_INTERFACE_CREATED and MSG_BB_INTERFACE_REMOVED.
  */
 typedef struct {
-  char          type[__INTERFACE_TYPE_SIZE];	/**< interface type name */
-  char          id[__INTERFACE_ID_SIZE];	/**< interface instance ID */
+  char          type[INTERFACE_TYPE_SIZE_];	/**< interface type name */
+  char          id[INTERFACE_ID_SIZE_];	/**< interface instance ID */
 } bb_ievent_msg_t;
 
 
@@ -169,7 +169,7 @@ typedef struct {
  */
  typedef struct {
   uint32_t serial;					/**< interface instance serial */
-  char     msg_type[__INTERFACE_MESSAGE_TYPE_SIZE];	/**< message type */
+  char     msg_type[INTERFACE_MESSAGE_TYPE_SIZE_];	/**< message type */
   uint32_t msgid;					/**< message ID */
   uint32_t hops;					/**< number of hops this message already passed */
   uint32_t data_size;					/**< data for message */

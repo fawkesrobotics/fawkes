@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_GUI_UTILS_LOGVIEW_H_
-#define __LIBS_GUI_UTILS_LOGVIEW_H_
+#ifndef _LIBS_GUI_UTILS_LOGVIEW_H_
+#define _LIBS_GUI_UTILS_LOGVIEW_H_
 
 #include <gtkmm.h>
 
 #include <logging/logger.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FawkesNetworkClient;
 class FawkesNetworkMessage;
@@ -88,14 +85,14 @@ class LogView
     /// @endcond
   };
 
-  LogRecord __record;
+  LogRecord record_;
 
-  Glib::RefPtr<Gtk::ListStore> __list;
+  Glib::RefPtr<Gtk::ListStore> list_;
 
-  ConnectionDispatcher *__connection_dispatcher;
+  ConnectionDispatcher *connection_dispatcher_;
 
-  bool                  __have_recently_added_path;
-  Gtk::TreeModel::Path  __recently_added_path;
+  bool                  have_recently_added_path_;
+  Gtk::TreeModel::Path  recently_added_path_;
 };
 
 } // end namespace fawkes

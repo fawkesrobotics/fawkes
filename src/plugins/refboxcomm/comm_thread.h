@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_REFBOXCOMM_COMM_THREAD_H_
-#define __PLUGINS_REFBOXCOMM_COMM_THREAD_H_
+#ifndef _PLUGINS_REFBOXCOMM_COMM_THREAD_H_
+#define _PLUGINS_REFBOXCOMM_COMM_THREAD_H_
 
 #include "processor/state_handler.h"
 
@@ -75,27 +75,27 @@ class RefBoxCommThread
  private: /* methods */
 
  private: /* members */
-  fawkes::GameStateInterface   *__gamestate_if;
+  fawkes::GameStateInterface   *gamestate_if_;
 #ifdef HAVE_SPL
-  fawkes::SoccerPenaltyInterface  *__penalty_if;
+  fawkes::SoccerPenaltyInterface  *penalty_if_;
 #endif
-  RefBoxProcessor              *__refboxproc;
+  RefBoxProcessor              *refboxproc_;
 
-  bool         __gamestate_modified;
-  int          __last_gamestate;
-  fawkes::worldinfo_gamestate_half_t  __last_half;
-  bool __kickoff;
-  unsigned int __last_score_cyan;
-  unsigned int __last_score_magenta;
-  fawkes::worldinfo_gamestate_team_t __our_team;
-  fawkes::worldinfo_gamestate_goalcolor_t __our_goal_color;
-  unsigned int __team_number;
-  unsigned int __player_number;
+  bool         gamestate_modified_;
+  int          last_gamestate_;
+  fawkes::worldinfo_gamestate_half_t  last_half_;
+  bool kickoff_;
+  unsigned int last_score_cyan_;
+  unsigned int last_score_magenta_;
+  fawkes::worldinfo_gamestate_team_t our_team_;
+  fawkes::worldinfo_gamestate_goalcolor_t our_goal_color_;
+  unsigned int team_number_;
+  unsigned int player_number_;
 
-  bool __cfg_beep_on_change;
-  float __cfg_beep_frequency;
-  float __cfg_beep_duration;
-  fawkes::SwitchInterface *__beep_if;
+  bool cfg_beep_on_change_;
+  float cfg_beep_frequency_;
+  float cfg_beep_duration_;
+  fawkes::SwitchInterface *beep_if_;
 };
 
 

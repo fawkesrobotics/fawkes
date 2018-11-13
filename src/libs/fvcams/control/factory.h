@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CAMS_CONTROLFACTORY_H_
-#define __FIREVISION_CAMS_CONTROLFACTORY_H_
+#ifndef _FIREVISION_CAMS_CONTROLFACTORY_H_
+#define _FIREVISION_CAMS_CONTROLFACTORY_H_
 
 #include <core/exception.h>
 #include <core/exceptions/software.h>
@@ -33,9 +33,6 @@
 #include <cstddef>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Camera;
 class CameraArgumentParser;

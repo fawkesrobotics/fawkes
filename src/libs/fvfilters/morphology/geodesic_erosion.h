@@ -22,15 +22,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FILTERS_MORPHOLOGY_GEODESIC_EROSION_H_
-#define __FIREVISION_FILTERS_MORPHOLOGY_GEODESIC_EROSION_H_
+#ifndef _FIREVISION_FILTERS_MORPHOLOGY_GEODESIC_EROSION_H_
+#define _FIREVISION_FILTERS_MORPHOLOGY_GEODESIC_EROSION_H_
 
 #include <fvfilters/morphology/morphologicalfilter.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FilterErosion;
 class FilterMax;

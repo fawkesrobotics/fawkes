@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_POINTCLOUDS_LASER_POINTCLOUD_THREAD_H_
-#define __PLUGINS_LASER_POINTCLOUDS_LASER_POINTCLOUD_THREAD_H_
+#ifndef _PLUGINS_LASER_POINTCLOUDS_LASER_POINTCLOUD_THREAD_H_
+#define _PLUGINS_LASER_POINTCLOUDS_LASER_POINTCLOUD_THREAD_H_
 
 // must be first for reliable ROS detection
 #include <pcl/point_cloud.h>
@@ -91,7 +91,7 @@ class LaserPointCloudThread
   } InterfaceCloudMapping;
   /// @endcond
 
-  fawkes::LockList<InterfaceCloudMapping> __mappings;
+  fawkes::LockList<InterfaceCloudMapping> mappings_;
 
   float sin_angles360[360];
   float cos_angles360[360];

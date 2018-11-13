@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JOYSTICK_ACT_THREAD_H_
-#define __PLUGINS_JOYSTICK_ACT_THREAD_H_
+#ifndef _PLUGINS_JOYSTICK_ACT_THREAD_H_
+#define _PLUGINS_JOYSTICK_ACT_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -54,9 +54,9 @@ class JoystickActThread
     void process_message(fawkes::Message *msg);
 
    private:    
-    JoystickAcquisitionThread *__aqt;
-    fawkes::JoystickInterface *__joystick_if;
-    bool                       __joystick_connected;
+    JoystickAcquisitionThread *aqt_;
+    fawkes::JoystickInterface *joystick_if_;
+    bool                       joystick_connected_;
   };
  public:
   JoystickActThread(JoystickAcquisitionThread *aqt, JoystickSensorThread *senst);
@@ -69,12 +69,12 @@ class JoystickActThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::JoystickInterface *__joystick_if;
+  fawkes::JoystickInterface *joystick_if_;
 
-  JoystickAcquisitionThread *__aqt;
-  JoystickSensorThread      *__senst;
+  JoystickAcquisitionThread *aqt_;
+  JoystickSensorThread      *senst_;
 
-  MessageProcessor *__msgproc;
+  MessageProcessor *msgproc_;
 };
 
 

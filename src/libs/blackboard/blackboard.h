@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_BLACKBOARD_H_
-#define __BLACKBOARD_BLACKBOARD_H_
+#ifndef _BLACKBOARD_BLACKBOARD_H_
+#define _BLACKBOARD_BLACKBOARD_H_
 
 #include <core/exceptions/software.h>
 #include <interface/interface.h>
@@ -31,9 +31,6 @@
 #include <typeinfo>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class BlackBoardInterfaceManager;
 class BlackBoardMemoryManager;
@@ -119,7 +116,7 @@ class BlackBoard
   BlackBoard(bool create_notifier = true);
 
  protected:
-  BlackBoardNotifier *__notifier;	///< Notifier for BB events.
+  BlackBoardNotifier *notifier_;	///< Notifier for BB events.
 };
 
 

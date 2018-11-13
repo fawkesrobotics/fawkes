@@ -26,9 +26,6 @@
 #include <utils/time/clock.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ClockAspectIniFin <aspect/inifins/clock.h>
  * Initializer/finalizer for the ClockAspect.
@@ -41,7 +38,7 @@ namespace fawkes {
 ClockAspectIniFin::ClockAspectIniFin(Clock *clock)
   : AspectIniFin("ClockAspect")
 {
-  __clock = clock;
+  clock_ = clock;
 }
 
 
@@ -56,7 +53,7 @@ ClockAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  clock_thread->init_ClockAspect(__clock);
+  clock_thread->init_ClockAspect(clock_);
 }
 
 

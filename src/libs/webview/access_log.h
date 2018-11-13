@@ -19,15 +19,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_WEBVIEW_ACCESS_LOG_H_
-#define __LIBS_WEBVIEW_ACCESS_LOG_H_
+#ifndef _LIBS_WEBVIEW_ACCESS_LOG_H_
+#define _LIBS_WEBVIEW_ACCESS_LOG_H_
 
 #include <cstdio>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Mutex;
 class WebRequest;

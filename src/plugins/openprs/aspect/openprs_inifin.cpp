@@ -29,9 +29,6 @@
 #include <unistd.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenPRSAspectIniFin <plugins/openprs/aspect/openprs_inifin.h>
  * OpenPRSAspect initializer/finalizer.

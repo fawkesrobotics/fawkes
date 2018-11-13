@@ -30,9 +30,6 @@
 using namespace std;
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class SyncPoint <syncpoint/syncpoint.h>

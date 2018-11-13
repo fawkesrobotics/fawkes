@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_THREADING_THREAD_LIST_H_
-#define __CORE_THREADING_THREAD_LIST_H_
+#ifndef _CORE_THREADING_THREAD_LIST_H_
+#define _CORE_THREADING_THREAD_LIST_H_
 
 #include <core/exception.h>
 #include <core/threading/thread.h>
@@ -121,13 +121,13 @@ class ThreadList : private LockList<Thread *>
   void update_barrier();
 
  private:
-  char                   *__name;
-  bool                    __sealed;
-  Mutex                  *__finalize_mutex;
-  InterruptibleBarrier   *__wnw_barrier;
+  char                   *name_;
+  bool                    sealed_;
+  Mutex                  *finalize_mutex_;
+  InterruptibleBarrier   *wnw_barrier_;
 
-  std::list<std::pair<InterruptibleBarrier *, ThreadList> >  __wnw_bad_barriers;
-  std::list<std::pair<InterruptibleBarrier *, ThreadList> >::iterator __wnw_bbit;
+  std::list<std::pair<InterruptibleBarrier *, ThreadList> >  wnw_bad_barriers_;
+  std::list<std::pair<InterruptibleBarrier *, ThreadList> >::iterator wnw_bbit_;
 };
 
 

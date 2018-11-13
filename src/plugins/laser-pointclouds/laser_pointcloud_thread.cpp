@@ -81,7 +81,7 @@ LaserPointCloudThread::init()
     pcl_manager->add_pointcloud(mapping.id.c_str(), mapping.cloud);
     bbil_add_reader_interface(*i);
     bbil_add_writer_interface(*i);
-    __mappings.push_back(mapping);
+    mappings_.push_back(mapping);
   }
   LockList<Laser720Interface *>::iterator j;
   for (j = l720ifs.begin(); j != l720ifs.end(); ++j) {
@@ -99,7 +99,7 @@ LaserPointCloudThread::init()
     pcl_manager->add_pointcloud(mapping.id.c_str(), mapping.cloud);
     bbil_add_reader_interface(*j);
     bbil_add_writer_interface(*j);
-    __mappings.push_back(mapping);
+    mappings_.push_back(mapping);
   }
 
   LockList<Laser1080Interface *>::iterator k;
@@ -118,7 +118,7 @@ LaserPointCloudThread::init()
     pcl_manager->add_pointcloud(mapping.id.c_str(), mapping.cloud);
     bbil_add_reader_interface(*k);
     bbil_add_writer_interface(*k);
-    __mappings.push_back(mapping);
+    mappings_.push_back(mapping);
   }
 
   blackboard->register_listener(this);
@@ -151,21 +151,21 @@ LaserPointCloudThread::finalize()
   blackboard->unregister_observer(this);
 
   LockList<InterfaceCloudMapping>::iterator m;
-  for (m = __mappings.begin(); m != __mappings.end(); ++m) {
+  for (m = mappings_.begin(); m != mappings_.end(); ++m) {
     blackboard->close(m->interface);
     pcl_manager->remove_pointcloud(m->id.c_str());
   }
-  __mappings.clear();
+  mappings_.clear();
 }
 
 
 void
 LaserPointCloudThread::loop()
 {
-  MutexLocker lock(__mappings.mutex());
+  MutexLocker lock(mappings_.mutex());
 
   LockList<InterfaceCloudMapping>::iterator m;
-  for (m = __mappings.begin(); m != __mappings.end(); ++m) {
+  for (m = mappings_.begin(); m != mappings_.end(); ++m) {
     m->interface->read();
     if (! m->interface->changed()) {
       continue;
@@ -208,7 +208,7 @@ LaserPointCloudThread::bb_interface_created(const char *type, const char *id) th
   mapping.cloud = new pcl::PointCloud<pcl::PointXYZ>();
   mapping.cloud->height = 1;
 
-  if (strncmp(type, "Laser360Interface", __INTERFACE_TYPE_SIZE) == 0) {
+  if (strncmp(type, "Laser360Interface", INTERFACE_TYPE_SIZE_) == 0) {
     Laser360Interface *lif;
     try {
       lif = blackboard->open_for_reading<Laser360Interface>(id);
@@ -233,7 +233,7 @@ LaserPointCloudThread::bb_interface_created(const char *type, const char *id) th
       return;
     }
 
-  } else if (strncmp(type, "Laser720Interface", __INTERFACE_TYPE_SIZE) != 0) {
+  } else if (strncmp(type, "Laser720Interface", INTERFACE_TYPE_SIZE_) != 0) {
     Laser720Interface *lif;
     try {
       lif = blackboard->open_for_reading<Laser720Interface>(id);
@@ -258,7 +258,7 @@ LaserPointCloudThread::bb_interface_created(const char *type, const char *id) th
       return;
     }
 
-  } else if (strncmp(type, "Laser1080Interface", __INTERFACE_TYPE_SIZE) != 0) {
+  } else if (strncmp(type, "Laser1080Interface", INTERFACE_TYPE_SIZE_) != 0) {
     Laser1080Interface *lif;
     try {
       lif = blackboard->open_for_reading<Laser1080Interface>(id);
@@ -303,7 +303,7 @@ LaserPointCloudThread::bb_interface_created(const char *type, const char *id) th
     return;
   }
 
-  __mappings.push_back(mapping);
+  mappings_.push_back(mapping);
 }
 
 void
@@ -330,10 +330,10 @@ LaserPointCloudThread::conditional_close(Interface *interface) throw()
   bool close = false;
   InterfaceCloudMapping mapping;
 
-  MutexLocker lock(__mappings.mutex());
+  MutexLocker lock(mappings_.mutex());
 
   fawkes::LockList<InterfaceCloudMapping>::iterator m;
-  for (m = __mappings.begin(); m != __mappings.end(); ++m) {
+  for (m = mappings_.begin(); m != mappings_.end(); ++m) {
     bool match = ((m->size == 360 && l360if && (*l360if == *m->interface_typed.as360)) ||
                   (m->size == 720 && l720if && (*l720if == *m->interface_typed.as720)) ||
                   (m->size == 1080 && l1080if && (*l1080if == *m->interface_typed.as1080)));
@@ -345,7 +345,7 @@ LaserPointCloudThread::conditional_close(Interface *interface) throw()
         logger->log_info(name(), "Last on %s, closing", m->interface->uid());
 	close = true;
 	mapping = *m;
-	__mappings.erase(m);
+	mappings_.erase(m);
         break;
       }
     }

@@ -20,16 +20,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_DRIVE_REALIZATION_QUADRATIC_MOTORINSTRUCT_H_
-#define __PLUGINS_COLLI_DRIVE_REALIZATION_QUADRATIC_MOTORINSTRUCT_H_
+#ifndef _PLUGINS_COLLI_DRIVE_REALIZATION_QUADRATIC_MOTORINSTRUCT_H_
+#define _PLUGINS_COLLI_DRIVE_REALIZATION_QUADRATIC_MOTORINSTRUCT_H_
 
 #include "base_motor_instruct.h"
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class QuadraticMotorInstruct: public BaseMotorInstruct
 {

@@ -43,7 +43,7 @@ using namespace fawkes;
 /** Constructor. */
 XmlRpcThread::XmlRpcThread()
   : Thread("XmlRpcThread", Thread::OPMODE_CONTINUOUS),
-    LoggerAspect(&__cache_logger)
+    LoggerAspect(&cache_logger_)
 {
   set_prepfin_conc_loop(true);
   
@@ -58,44 +58,44 @@ void
 XmlRpcThread::init()
 {
   try {
-    __custom_server = config->get_bool("/xmlrpc/custom_server");
+    custom_server_ = config->get_bool("/xmlrpc/custom_server");
   } catch (Exception &e) {
-    __custom_server = false;
+    custom_server_ = false;
   }
-  if (__custom_server) {
-    __cfg_port = config->get_uint("/xmlrpc/port");
+  if (custom_server_) {
+    cfg_port_ = config->get_uint("/xmlrpc/port");
   }
 
-  __cache_logger.clear();
+  cache_logger_.clear();
 
-  __processor   = new XmlRpcRequestProcessor(logger);
+  processor_   = new XmlRpcRequestProcessor(logger);
 
-  xmlrpc_c::registry *registry = __processor->registry();
-  __plugin_methods = new XmlRpcPluginMethods(registry, plugin_manager, logger);
-  __log_methods    = new XmlRpcLogMethods(registry, &__cache_logger, logger);
+  xmlrpc_c::registry *registry = processor_->registry();
+  plugin_methods_ = new XmlRpcPluginMethods(registry, plugin_manager, logger);
+  log_methods_    = new XmlRpcLogMethods(registry, &cache_logger_, logger);
 
-  if (__custom_server) {
-    __url_manager = new WebUrlManager();
-    __dispatcher  = new WebRequestDispatcher(__url_manager);
-    __webserver   = new WebServer(__cfg_port, __dispatcher);
+  if (custom_server_) {
+    url_manager_ = new WebUrlManager();
+    dispatcher_  = new WebRequestDispatcher(url_manager_);
+    webserver_   = new WebServer(cfg_port_, dispatcher_);
 
     logger->log_info("XmlRpcThread", "Listening for HTTP connections on port %u",
-		     __cfg_port);
+		     cfg_port_);
 
-    __url_manager->add_handler(WebRequest::METHOD_POST, "/",
-                               std::bind(&XmlRpcRequestProcessor::process_request, __processor,
+    url_manager_->add_handler(WebRequest::METHOD_POST, "/",
+                               std::bind(&XmlRpcRequestProcessor::process_request, processor_,
                                          std::placeholders::_1));
 
-    __xmlrpc_service = new NetworkService(nnresolver, "Fawkes XML-RPC on %h",
-					  "_http._tcp", __cfg_port);
-    __xmlrpc_service->add_txt("fawkesver=%u.%u.%u", FAWKES_VERSION_MAJOR,
+    xmlrpc_service_ = new NetworkService(nnresolver, "Fawkes XML-RPC on %h",
+					  "_http._tcp", cfg_port_);
+    xmlrpc_service_->add_txt("fawkesver=%u.%u.%u", FAWKES_VERSION_MAJOR,
 			      FAWKES_VERSION_MINOR, FAWKES_VERSION_MICRO);
-    service_publisher->publish_service(__xmlrpc_service);
+    service_publisher->publish_service(xmlrpc_service_);
   } else {
     set_opmode(Thread::OPMODE_WAITFORWAKEUP);
     logger->log_info("XmlRpcThread", "Registering as /xmlrpc in webview");
     webview_url_manager->add_handler(WebRequest::METHOD_POST, "/xmlrpc",
-                                     std::bind(&XmlRpcRequestProcessor::process_request, __processor,
+                                     std::bind(&XmlRpcRequestProcessor::process_request, processor_,
                                                std::placeholders::_1));
   }
 
@@ -104,27 +104,27 @@ XmlRpcThread::init()
 void
 XmlRpcThread::finalize()
 {
-  if (__custom_server) {
-    service_publisher->unpublish_service(__xmlrpc_service);
-    delete __xmlrpc_service;
+  if (custom_server_) {
+    service_publisher->unpublish_service(xmlrpc_service_);
+    delete xmlrpc_service_;
 
-    delete __webserver;
-    delete __plugin_methods;
-    delete __log_methods;
-    delete __dispatcher;
-    delete __url_manager;
+    delete webserver_;
+    delete plugin_methods_;
+    delete log_methods_;
+    delete dispatcher_;
+    delete url_manager_;
   } else {
 	  webview_url_manager->remove_handler(WebRequest::METHOD_POST, "/xmlrpc");
   }
-  delete __processor;
+  delete processor_;
 }
 
 
 void
 XmlRpcThread::loop()
 {
-  if (__custom_server) {
-    __webserver->process();
+  if (custom_server_) {
+    webserver_->process();
   } else {
     
   }

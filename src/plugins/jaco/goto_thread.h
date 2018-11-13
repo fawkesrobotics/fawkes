@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_GOTO_THREAD_H_
-#define __PLUGINS_JACO_GOTO_THREAD_H_
+#ifndef _PLUGINS_JACO_GOTO_THREAD_H_
+#define _PLUGINS_JACO_GOTO_THREAD_H_
 
 #include "types.h"
 
@@ -69,15 +69,15 @@ class JacoGotoThread
   void _goto_target();
   void _exec_trajec(fawkes::jaco_trajec_t* trajec);
 
-  fawkes::jaco_arm_t  *__arm;
-  fawkes::Mutex       *__final_mutex;
+  fawkes::jaco_arm_t  *arm_;
+  fawkes::Mutex       *final_mutex_;
 
-  fawkes::RefPtr<fawkes::jaco_target_t> __target;
-  float __finger_last[4]; // 3 positions + 1 counter
+  fawkes::RefPtr<fawkes::jaco_target_t> target_;
+  float finger_last_[4]; // 3 positions + 1 counter
 
-  bool __final;
+  bool final_;
 
-  unsigned int __wait_status_check;
+  unsigned int wait_status_check_;
 
   void _check_final();
 };

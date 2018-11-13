@@ -19,17 +19,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __SYNCPOINT_SYNCPOINT_CALL_STATS_H_
-#define __SYNCPOINT_SYNCPOINT_CALL_STATS_H_
+#ifndef _SYNCPOINT_SYNCPOINT_CALL_STATS_H_
+#define _SYNCPOINT_SYNCPOINT_CALL_STATS_H_
 
 #include <utils/time/time.h>
 
 #include <syncpoint/syncpoint_call.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class SyncPointCallStats {
   public:

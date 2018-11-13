@@ -24,9 +24,6 @@
 #include <fvutils/color/color_object_map.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ColorObjectMap <fvutils/color/color_object_map.h>
  * Color mapping class.
@@ -36,19 +33,19 @@ namespace firevision {
  * @author Christof Rath
  */
 
-/** @var static ColorObjectMap* ColorObjectMap::__singleton
+/** @var static ColorObjectMap* ColorObjectMap::singleton_
  * A singelton instance of ColorObjectMap
  */
-/** @var std::map<hint_t, color_t> ColorObjectMap::__color_for_hint
+/** @var std::map<hint_t, color_t> ColorObjectMap::color_for_hint_
  * A list of color_t with hint_t (ROI's) as index
  */
-/** @var std::map<color_t, hint_t> ColorObjectMap::__hint_for_color
+/** @var std::map<color_t, hint_t> ColorObjectMap::hint_for_color_
  * A list of hint_t (ROI's) with color_t as index
  */
-/** @var color_t ColorObjectMap::__c_other
+/** @var color_t ColorObjectMap::c_other_
  * The default color
  */
-/** @var hint_t ColorObjectMap::__h_unknown
+/** @var hint_t ColorObjectMap::h_unknown_
  * The default hint
  */
 
@@ -70,15 +67,15 @@ namespace firevision {
  */
 
 /** Static initialzer */
-ColorObjectMap* ColorObjectMap::__singleton = new ColorObjectMap();
+ColorObjectMap* ColorObjectMap::singleton_ = new ColorObjectMap();
 
 /** Default Contructor.
  * The constructor is private to implement a singelton pattern
  */
 ColorObjectMap::ColorObjectMap()
 {
-  __c_other   = C_OTHER;
-  __h_unknown = H_UNKNOWN;
+  c_other_   = C_OTHER;
+  h_unknown_ = H_UNKNOWN;
 
   //Standard mapping:
   set_mapping(H_BALL, C_ORANGE);
@@ -146,12 +143,12 @@ void ColorObjectMap::set_mapping(hint_t roi, color_t color)
   if (cur_roi != H_UNKNOWN) //There is a previous mapping -> unlink it
   {
     color_t cur_col = get(roi);
-    __color_for_hint[cur_roi] = C_OTHER;
-    __hint_for_color[cur_col] = H_UNKNOWN;
+    color_for_hint_[cur_roi] = C_OTHER;
+    hint_for_color_[cur_col] = H_UNKNOWN;
   }
 
-  __color_for_hint[roi] = color;
-  __hint_for_color[color] = roi;
+  color_for_hint_[roi] = color;
+  hint_for_color_[color] = roi;
 }
 
 } // end namespace firevision

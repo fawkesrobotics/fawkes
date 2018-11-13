@@ -30,9 +30,6 @@ namespace fawkes {
     class Transformer;
   }
 
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class TransformAspectIniFin <aspect/inifins/tf.h>
  * Initializer/finalizer for the TransformAspect.
@@ -47,8 +44,8 @@ TransformAspectIniFin::TransformAspectIniFin(BlackBoard *blackboard,
                                              tf::Transformer *transformer)
   : AspectIniFin("TransformAspect")
 {
-  __blackboard  = blackboard;
-  __transformer = transformer;
+  blackboard_  = blackboard;
+  transformer_ = transformer;
 }
 
 void
@@ -62,7 +59,7 @@ TransformAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  transform_thread->init_TransformAspect(__blackboard, __transformer, thread->name());
+  transform_thread->init_TransformAspect(blackboard_, transformer_, thread->name());
 }
 
 void

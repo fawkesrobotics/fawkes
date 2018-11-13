@@ -59,9 +59,6 @@ using fawkes::LibLogger;
 #endif 
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /// @cond INTERNALS
 class V4L2CameraData

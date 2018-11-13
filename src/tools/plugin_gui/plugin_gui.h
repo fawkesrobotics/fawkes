@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __TOOLS_PLUGIN_PLUGIN_GUI_PLUGIN_GUI_H_
-#define __TOOLS_PLUGIN_PLUGIN_GUI_PLUGIN_GUI_H_
+#ifndef _TOOLS_PLUGIN_PLUGIN_GUI_PLUGIN_GUI_H_
+#define _TOOLS_PLUGIN_PLUGIN_GUI_PLUGIN_GUI_H_
 
 #include <gtkmm.h>
 
@@ -50,4 +50,4 @@ class PluginGuiGtkWindow : public Gtk::Window
   fawkes::ServiceSelectorCBE *m_service_selector;
 };
 
-#endif /* __TOOLS_PLUGIN_PLUGIN_GUI_PLUGIN_GUI_H_ */
+#endif /* TOOLS_PLUGIN_PLUGIN_GUI_PLUGIN_GUI_H__ */

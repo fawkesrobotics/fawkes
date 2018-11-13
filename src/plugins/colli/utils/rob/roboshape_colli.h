@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_UTILS_ROB_ROBOSHAPE_COLLI_H_
-#define __PLUGINS_COLLI_UTILS_ROB_ROBOSHAPE_COLLI_H_
+#ifndef _PLUGINS_COLLI_UTILS_ROB_ROBOSHAPE_COLLI_H_
+#define _PLUGINS_COLLI_UTILS_ROB_ROBOSHAPE_COLLI_H_
 
 #include "roboshape.h"
 
@@ -32,9 +32,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Logger;
 class Configuration;

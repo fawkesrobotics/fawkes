@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_IPC_DEFS_H_
-#define __FIREVISION_FVUTILS_IPC_DEFS_H_
+#ifndef _FIREVISION_FVUTILS_IPC_DEFS_H_
+#define _FIREVISION_FVUTILS_IPC_DEFS_H_
 
 /** Maximum length of image ID (not including null-termination) */
 #define IMAGE_ID_MAX_LENGTH 32

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_MANAGER_H_
-#define __ASPECT_MANAGER_H_
+#ifndef _ASPECT_MANAGER_H_
+#define _ASPECT_MANAGER_H_
 
 #include <core/threading/thread_initializer.h>
 #include <core/threading/thread_finalizer.h>
@@ -32,9 +32,6 @@
 #include <string>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class BlackBoard;
 class Configuration;
@@ -88,9 +85,9 @@ class AspectManager : public ThreadInitializer, public ThreadFinalizer
 				SyncPointManager *syncpoint_manager);
 
  private:
-  std::map<std::string, AspectIniFin *> __inifins;
-  std::map<std::string, AspectIniFin *> __default_inifins;
-  std::map<std::string, std::list<Thread *> > __threads;
+  std::map<std::string, AspectIniFin *> inifins_;
+  std::map<std::string, AspectIniFin *> default_inifins_;
+  std::map<std::string, std::list<Thread *> > threads_;
 };
 
 

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_RRDWEB_RRDWEB_PROCESSOR_H_
-#define __PLUGINS_RRDWEB_RRDWEB_PROCESSOR_H_
+#ifndef _PLUGINS_RRDWEB_RRDWEB_PROCESSOR_H_
+#define _PLUGINS_RRDWEB_RRDWEB_PROCESSOR_H_
 
 namespace fawkes {
   class RRDManager;
@@ -41,8 +41,8 @@ class RRDWebRequestProcessor
   fawkes::WebReply * process_graph(const fawkes::WebRequest *request);
 
  private:
-  fawkes::RRDManager   *__rrd_man;
-  fawkes::Logger       *__logger;
+  fawkes::RRDManager   *rrd_man_;
+  fawkes::Logger       *logger_;
 };
 
 #endif

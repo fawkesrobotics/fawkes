@@ -45,23 +45,23 @@ XmlRpcPluginMethods::XmlRpcPluginMethods(xmlrpc_c::registry *registry,
 					 fawkes::PluginManager *plugin_manager,
 					 fawkes::Logger *logger)
 {
-  __xmlrpc_registry = registry;
-  __plugin_manager  = plugin_manager;
-  __logger          = logger;
-  __plugin_list     = new plugin_list(plugin_manager);
-  __plugin_load     = new plugin_load(plugin_manager, logger);
-  __plugin_unload   = new plugin_unload(plugin_manager, logger);
-  __xmlrpc_registry->addMethod("plugin.list",   __plugin_list);
-  __xmlrpc_registry->addMethod("plugin.load",   __plugin_load);
-  __xmlrpc_registry->addMethod("plugin.unload", __plugin_unload);
+  xmlrpc_registry_ = registry;
+  plugin_manager_  = plugin_manager;
+  logger_          = logger;
+  plugin_list_     = new plugin_list(plugin_manager);
+  plugin_load_     = new plugin_load(plugin_manager, logger);
+  plugin_unload_   = new plugin_unload(plugin_manager, logger);
+  xmlrpc_registry_->addMethod("plugin.list",   plugin_list_);
+  xmlrpc_registry_->addMethod("plugin.load",   plugin_load_);
+  xmlrpc_registry_->addMethod("plugin.unload", plugin_unload_);
 }
 
 /** Destructor. */
 XmlRpcPluginMethods::~XmlRpcPluginMethods()
 {
-  delete __plugin_list;
-  delete __plugin_load;
-  delete __plugin_unload;
+  delete plugin_list_;
+  delete plugin_load_;
+  delete plugin_unload_;
 }
 
 
@@ -79,7 +79,7 @@ XmlRpcPluginMethods::plugin_list::plugin_list(fawkes::PluginManager *plugin_mana
   _help = "Returns array of plugins. Each entry is a struct consisting of the "
     "entries name, desc, and loaded.";
 
-  __plugin_manager = plugin_manager;
+  plugin_manager_ = plugin_manager;
 }
 
 /** Virtual empty destructor. */
@@ -97,8 +97,8 @@ XmlRpcPluginMethods::plugin_list::execute(xmlrpc_c::paramList const& params,
 {
   std::list<std::pair<std::string, std::string> > available_plugins;
   std::list<std::string> loadedp;
-  available_plugins = __plugin_manager->get_available_plugins();
-  loadedp           = __plugin_manager->get_loaded_plugins();
+  available_plugins = plugin_manager_->get_available_plugins();
+  loadedp           = plugin_manager_->get_loaded_plugins();
 
   loadedp.sort();
   
@@ -134,8 +134,8 @@ XmlRpcPluginMethods::plugin_load::plugin_load(fawkes::PluginManager *plugin_mana
   _signature = "b:s";
   _help = "Load plugin specified as argument, returns true on success, false otherwise.";
 
-  __plugin_manager = plugin_manager;
-  __logger         = logger;
+  plugin_manager_ = plugin_manager;
+  logger_         = logger;
 }
 
 /** Virtual empty destructor. */
@@ -153,11 +153,11 @@ XmlRpcPluginMethods::plugin_load::execute(xmlrpc_c::paramList const& params,
 {
   try {
     std::string plugin_name = params.getString(0);
-    __plugin_manager->load(plugin_name.c_str());
+    plugin_manager_->load(plugin_name.c_str());
   } catch (girerr::error &e) {
     throw xmlrpc_c::fault(e.what(), xmlrpc_c::fault::CODE_UNSPECIFIED);
   } catch (fawkes::Exception &e) {
-    __logger->log_warn("XML-RPC plugin.load", e);
+    logger_->log_warn("XML-RPC plugin.load", e);
     *result = xmlrpc_c::value_boolean(false);
   }
 
@@ -181,8 +181,8 @@ XmlRpcPluginMethods::plugin_unload::plugin_unload(fawkes::PluginManager *plugin_
   _signature = "b:s";
   _help = "Unload plugin specified as argument, returns true on success, false otherwise.";
 
-  __plugin_manager = plugin_manager;
-  __logger         = logger;
+  plugin_manager_ = plugin_manager;
+  logger_         = logger;
 }
 
 /** Virtual empty destructor. */
@@ -200,11 +200,11 @@ XmlRpcPluginMethods::plugin_unload::execute(xmlrpc_c::paramList const& params,
 {
   try {
     std::string plugin_name = params.getString(0);
-    __plugin_manager->unload(plugin_name.c_str());
+    plugin_manager_->unload(plugin_name.c_str());
   } catch (girerr::error &e) {
     throw xmlrpc_c::fault(e.what(), xmlrpc_c::fault::CODE_UNSPECIFIED);
   } catch (fawkes::Exception &e) {
-    __logger->log_warn("XML-RPC plugin.unload", e);
+    logger_->log_warn("XML-RPC plugin.unload", e);
     *result = xmlrpc_c::value_boolean(false);
   }
 

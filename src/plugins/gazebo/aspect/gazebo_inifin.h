@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_GAZEBO_ASPECT_GAZEBO_INIFIN_H_
-#define __PLUGINS_GAZEBO_ASPECT_GAZEBO_INIFIN_H_
+#ifndef _PLUGINS_GAZEBO_ASPECT_GAZEBO_INIFIN_H_
+#define _PLUGINS_GAZEBO_ASPECT_GAZEBO_INIFIN_H_
 
 #include <aspect/inifins/inifin.h>
 #include <plugins/gazebo/aspect/gazebo.h>
@@ -31,9 +31,6 @@
 #include <gazebo/transport/Node.hh>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class GazeboAspectIniFin : public AspectIniFin
 {
@@ -48,8 +45,8 @@ class GazeboAspectIniFin : public AspectIniFin
   void set_gazebo_world_node(gazebo::transport::NodePtr gazebo_world_node);
 
  private:
-  gazebo::transport::NodePtr __gazebonode;
-  gazebo::transport::NodePtr __gazebo_world_node;
+  gazebo::transport::NodePtr gazebonode_;
+  gazebo::transport::NodePtr gazebo_world_node_;
 
 };
 

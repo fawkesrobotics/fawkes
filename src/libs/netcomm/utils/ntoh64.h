@@ -21,34 +21,34 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_UTILS_NTOH64_H_
-#define __NETCOMM_UTILS_NTOH64_H_
+#ifndef _NETCOMM_UTILS_NTOH64_H_
+#define _NETCOMM_UTILS_NTOH64_H_
 
 #include <stdint.h>
 #include <arpa/inet.h>
 
-#define __ntoh64(x) (((uint64_t)(ntohl((uint32_t)(((uint64_t)x << 32) >> 32))) << 32) | \
+#define ntoh64_(x) (((uint64_t)(ntohl((uint32_t)(((uint64_t)x << 32) >> 32))) << 32) | \
 		       (uint32_t)ntohl(((uint32_t)((uint64_t)x >> 32))))
 
-#define __hton64(x) ntohll(x)
+#define hton64_(x) ntohll(x)
 
-#ifdef __OPTIMIZE__
-#  define ntoh64(x) __ntoh64(x)
-#  define hton64(x) __ntoh64(x)
+#ifdef OPTIMIZE___
+#  define ntoh64(x) ntoh64_(x)
+#  define hton64(x) ntoh64_(x)
 #else
 
 inline uint64_t
 ntoh64(uint64_t x)
 {
-  return __ntoh64(x);
+  return ntoh64_(x);
 }
 
 inline uint64_t
 hton64(uint64_t x)
 {
-  return __ntoh64(x);
+  return ntoh64_(x);
 }
 
-#endif // __OPTIMIZE__
+#endif // OPTIMIZE___
 
-#endif // __NETCOMM_UTILS_NTOH64_
+#endif // NETCOMM_UTILS_NTOH64__

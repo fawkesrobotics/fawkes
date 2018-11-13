@@ -45,7 +45,7 @@ using namespace fawkes;
 GazeboNodeThread::GazeboNodeThread()
   : Thread("GazeboNodeThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
-    AspectProviderAspect(&__gazebo_aspect_inifin)
+    AspectProviderAspect(&gazebo_aspect_inifin_)
 {
 }
 
@@ -76,27 +76,27 @@ GazeboNodeThread::init()
   //Initialize Communication nodes:
   //the common one for the robot
   gazebo::transport::NodePtr node(new gazebo::transport::Node());
-  __gazebonode = node;
+  gazebonode_ = node;
   //initialize node (this node only communicates with nodes that were initialized with the same string)
-  __gazebonode->Init(robot_channel.c_str());
-  __gazebo_aspect_inifin.set_gazebonode(__gazebonode);
+  gazebonode_->Init(robot_channel.c_str());
+  gazebo_aspect_inifin_.set_gazebonode(gazebonode_);
   
   //and the node for world change messages
-  __gazebo_world_node = gazebo::transport::NodePtr(new gazebo::transport::Node());
-  __gazebo_world_node->Init(world_name.c_str());
-  __gazebo_aspect_inifin.set_gazebo_world_node(__gazebo_world_node);
+  gazebo_world_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
+  gazebo_world_node_->Init(world_name.c_str());
+  gazebo_aspect_inifin_.set_gazebo_world_node(gazebo_world_node_);
 }
 
 
 void
 GazeboNodeThread::finalize()
 {
-  __gazebonode->Fini();
-  __gazebonode.reset();
-  __gazebo_aspect_inifin.set_gazebonode(__gazebonode);
-  __gazebo_world_node->Fini();
-  __gazebo_world_node.reset();
-  __gazebo_aspect_inifin.set_gazebonode(__gazebo_world_node);
+  gazebonode_->Fini();
+  gazebonode_.reset();
+  gazebo_aspect_inifin_.set_gazebonode(gazebonode_);
+  gazebo_world_node_->Fini();
+  gazebo_world_node_.reset();
+  gazebo_aspect_inifin_.set_gazebonode(gazebo_world_node_);
 }
 
 

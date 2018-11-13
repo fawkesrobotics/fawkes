@@ -25,9 +25,6 @@
 #include <clipsmm.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 /** @class CLIPSFeature <plugins/clips/aspect/clips_feature.h>

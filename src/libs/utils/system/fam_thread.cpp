@@ -25,9 +25,6 @@
 #include <unistd.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FamThread <utils/system/fam_thread.h>
  * FileAlterationMonitor thread wrapper.
@@ -45,9 +42,9 @@ namespace fawkes {
 FamThread::FamThread(RefPtr<FileAlterationMonitor> fam)
   : Thread("FileAlterationMonitorThread", Thread::OPMODE_CONTINUOUS)
 {
-  __fam = fam;
-  if (! __fam) {
-    __fam = RefPtr<FileAlterationMonitor>(new FileAlterationMonitor());
+  fam_ = fam;
+  if (! fam_) {
+    fam_ = RefPtr<FileAlterationMonitor>(new FileAlterationMonitor());
   }
 }
 
@@ -57,14 +54,14 @@ FamThread::FamThread(RefPtr<FileAlterationMonitor> fam)
 RefPtr<FileAlterationMonitor>
 FamThread::get_fam()
 {
-  return __fam;
+  return fam_;
 }
 
 
 void
 FamThread::loop()
 {
-  __fam->process_events(-1);
+  fam_->process_events(-1);
   usleep(0);
 }
 

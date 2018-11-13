@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_MATH_INTERPOLATION_LINEAR_H_
-#define __UTILS_MATH_INTERPOLATION_LINEAR_H_
+#ifndef _UTILS_MATH_INTERPOLATION_LINEAR_H_
+#define _UTILS_MATH_INTERPOLATION_LINEAR_H_
 
 #include <utils/math/interpolation/interpolator.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class LinearInterpolator : public Interpolator
 {

@@ -27,9 +27,6 @@
 #include <cstdlib>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class WebErrorPageReply <webview/error_reply.h>
  * Static error page reply.

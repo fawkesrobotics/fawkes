@@ -24,15 +24,12 @@
 #error "Neither IPP nor OpenCV installed"
 #endif
 
-#ifndef __FIREVISION_FILTER_MORPHOLOGY_MORPHOLOGICAL_H_
-#define __FIREVISION_FILTER_MORPHOLOGY_MORPHOLOGICAL_H_
+#ifndef _FIREVISION_FILTER_MORPHOLOGY_MORPHOLOGICAL_H_
+#define _FIREVISION_FILTER_MORPHOLOGY_MORPHOLOGICAL_H_
 
 #include <fvfilters/filter.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class MorphologicalFilter : public Filter {
  public:

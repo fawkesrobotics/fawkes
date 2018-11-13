@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_SOCKET_DATAGRAM_MULTICAST_H_
-#define __NETCOMM_SOCKET_DATAGRAM_MULTICAST_H_
+#ifndef _NETCOMM_SOCKET_DATAGRAM_MULTICAST_H_
+#define _NETCOMM_SOCKET_DATAGRAM_MULTICAST_H_
 
 #include <netcomm/socket/socket.h>
 #include <netinet/in.h>

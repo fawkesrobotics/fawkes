@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_PCL_UTILS_PCL_ADAPTER_H_
-#define __LIBS_PCL_UTILS_PCL_ADAPTER_H_
+#ifndef _LIBS_PCL_UTILS_PCL_ADAPTER_H_
+#define _LIBS_PCL_UTILS_PCL_ADAPTER_H_
 
 #include <utils/time/time.h>
 
@@ -81,10 +81,10 @@ class PointCloudAdapter
   void close(const std::string &id);
 
  private:
-  fawkes::PointCloudManager *__pcl_manager;
+  fawkes::PointCloudManager *pcl_manager_;
 
   class StorageAdapter;
-  std::map<std::string, StorageAdapter *> __sas;
+  std::map<std::string, StorageAdapter *> sas_;
 };
 
 

@@ -20,16 +20,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_UTILS_STRING_H_
-#define __PLUGINS_UTILS_STRING_H_
+#ifndef _PLUGINS_UTILS_STRING_H_
+#define _PLUGINS_UTILS_STRING_H_
 
 #include <string>
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 std::string command_args_tostring(const char *argv[]);
 std::string envp_tostring(char *envp[]);

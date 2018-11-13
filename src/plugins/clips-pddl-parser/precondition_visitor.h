@@ -18,8 +18,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_PDDL_PARSER_PRECONDITION_VISITOR_H_
-#define __PLUGINS_CLIPS_PDDL_PARSER_PRECONDITION_VISITOR_H_
+#ifndef _PLUGINS_CLIPS_PDDL_PARSER_PRECONDITION_VISITOR_H_
+#define _PLUGINS_CLIPS_PDDL_PARSER_PRECONDITION_VISITOR_H_
 
 #include <pddl_parser/pddl_parser.h>
 
@@ -42,4 +42,4 @@ class PreconditionToCLIPSFactVisitor
 };
 
 
-#endif /* !__PLUGINS_CLIPS_PDDL_PARSER_PRECONDITION_VISITOR_H_ */
+#endif /* !PLUGINS_CLIPS_PDDL_PARSER_PRECONDITION_VISITOR_H__ */

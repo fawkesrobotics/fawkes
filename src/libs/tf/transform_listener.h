@@ -49,8 +49,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBS_TF_TRANSFORM_LISTENER_H_
-#define __LIBS_TF_TRANSFORM_LISTENER_H_
+#ifndef _LIBS_TF_TRANSFORM_LISTENER_H_
+#define _LIBS_TF_TRANSFORM_LISTENER_H_
 
 #include <tf/types.h>
 
@@ -65,10 +65,6 @@ namespace fawkes {
   class TransformInterface;
 
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 class Transformer;
 

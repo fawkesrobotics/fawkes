@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PLAYER_LASER_MAPPER_H_
-#define __PLUGINS_PLAYER_LASER_MAPPER_H_
+#ifndef _PLUGINS_PLAYER_LASER_MAPPER_H_
+#define _PLUGINS_PLAYER_LASER_MAPPER_H_
 
 #include "mapper.h"
 
@@ -44,11 +44,11 @@ class PlayerLaserMapper : public PlayerProxyFawkesInterfaceMapper
   virtual void sync_player_to_fawkes();
 
  private:
-  fawkes::Laser360Interface  *__interface;
-  PlayerCc::LaserProxy       *__proxy;
+  fawkes::Laser360Interface  *interface_;
+  PlayerCc::LaserProxy       *proxy_;
 
-  bool                        __first_read;
-  unsigned int                __index_offset;
+  bool                        first_read_;
+  unsigned int                index_offset_;
 };
 
 #endif

@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_UTILS_ADDR_SIZE_H_
-#define __NETCOMM_UTILS_ADDR_SIZE_H_
+#ifndef _NETCOMM_UTILS_ADDR_SIZE_H_
+#define _NETCOMM_UTILS_ADDR_SIZE_H_
 
 #include <netinet/in.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Get canonical size of sockaddr structure.
  * @param a sockaddr_in or sockaddr_in6 structure with properly set

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_ASSERT_EXCEPTION_H_
-#define __CORE_ASSERT_EXCEPTION_H_
+#ifndef _CORE_ASSERT_EXCEPTION_H_
+#define _CORE_ASSERT_EXCEPTION_H_
 
 #include <core/exception.h>
 

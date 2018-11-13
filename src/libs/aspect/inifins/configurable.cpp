@@ -26,9 +26,6 @@
 #include <config/config.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ConfigurableAspectIniFin <aspect/inifins/configurable.h>
  * Initializer/finalizer for the ConfigurableAspect.
@@ -41,7 +38,7 @@ namespace fawkes {
 ConfigurableAspectIniFin::ConfigurableAspectIniFin(Configuration *config)
   : AspectIniFin("ConfigurableAspect")
 {
-  __config = config;
+  config_ = config;
 }
 
 
@@ -56,7 +53,7 @@ ConfigurableAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  configurable_thread->init_ConfigurableAspect(__config);
+  configurable_thread->init_ConfigurableAspect(config_);
 }
 
 

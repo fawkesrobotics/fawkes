@@ -23,9 +23,6 @@
 #include "dcm_utils.h"
 
 namespace dcm {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 void
 set_value(AL::ALPtr<AL::DCMProxy> &dcm,

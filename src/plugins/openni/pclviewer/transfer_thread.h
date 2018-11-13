@@ -50,11 +50,11 @@ class PclViewerTransferThread : public fawkes::Thread
    * @return buffer that contains a copy of the image
    */
   const unsigned char *  buffer(std::string name)
-  { return __buffers[name]; }
+  { return buffers_[name]; }
 
  private:
-  std::map<std::string, firevision::Camera *> __cams;
-  std::map<std::string, unsigned char *> __buffers;
-  std::map<std::string, size_t> __buffer_sizes;
-  fawkes::ReadWriteLock  *__rwlock;
+  std::map<std::string, firevision::Camera *> cams_;
+  std::map<std::string, unsigned char *> buffers_;
+  std::map<std::string, size_t> buffer_sizes_;
+  fawkes::ReadWriteLock  *rwlock_;
 };

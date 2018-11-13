@@ -39,7 +39,7 @@ RoombaSensorThread::RoombaSensorThread(Roomba500Thread *roomba500_thread)
   : Thread("RoombaSensorThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
-  __roomba500_thread = roomba500_thread;
+  roomba500_thread_ = roomba500_thread;
 }
 
 
@@ -48,10 +48,10 @@ void
 RoombaSensorThread::loop()
 {
   try {
-    __roomba500_thread->write_blackboard();
+    roomba500_thread_->write_blackboard();
   } catch (Exception &e) {
     logger->log_warn(name(), "%s failed to write to BB, exception follows.",
-		     __roomba500_thread->name());
+		     roomba500_thread_->name());
     logger->log_warn(name(), e);
   }
 }

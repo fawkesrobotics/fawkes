@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_SCANLINES_SCANLINEMODEL_H_
-#define __FIREVISION_MODELS_SCANLINES_SCANLINEMODEL_H_
+#ifndef _FIREVISION_MODELS_SCANLINES_SCANLINEMODEL_H_
+#define _FIREVISION_MODELS_SCANLINES_SCANLINEMODEL_H_
 
 
 /* IMPORTANT IMPLEMENTATION NOTE:
@@ -37,9 +37,6 @@
 #include <string>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ScanlineModel <fvmodels/scanlines/scanlinemodel.h>
  * Scanline model interface.

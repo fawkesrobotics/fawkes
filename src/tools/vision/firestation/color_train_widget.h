@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_TOOLS_FIRESTATION_COLOR_TRAIN_WIDGET_H_
-#define __FIREVISION_TOOLS_FIRESTATION_COLOR_TRAIN_WIDGET_H_
+#ifndef _FIREVISION_TOOLS_FIRESTATION_COLOR_TRAIN_WIDGET_H_
+#define _FIREVISION_TOOLS_FIRESTATION_COLOR_TRAIN_WIDGET_H_
 
 #include <fvutils/base/roi.h>
 #include <fvutils/color/colorspaces.h>
@@ -126,4 +126,4 @@ class ColorTrainWidget
   Glib::Dispatcher m_signal_colormap_updated;
 };
 
-#endif /* __FIREVISION_TOOLS_FIRESTATION_COLOR_TRAIN_WIDGET_H_ */
+#endif /* FIREVISION_TOOLS_FIRESTATION_COLOR_TRAIN_WIDGET_H__ */

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_ASPECT_OPENNI_H_
-#define __PLUGINS_OPENNI_ASPECT_OPENNI_H_
+#ifndef _PLUGINS_OPENNI_ASPECT_OPENNI_H_
+#define _PLUGINS_OPENNI_ASPECT_OPENNI_H_
 
 #include <aspect/aspect.h>
 #include <core/utils/lockptr.h>
@@ -32,9 +32,6 @@ namespace xn {
 }
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class OpenNiAspectIniFin;
 

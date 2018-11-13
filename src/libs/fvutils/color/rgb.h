@@ -22,13 +22,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_COLOR_RGB_H
-#define __FIREVISION_UTILS_COLOR_RGB_H
+#ifndef FIREVISION_UTILS_COLOR_RGB_H_
+#define FIREVISION_UTILS_COLOR_RGB_H_
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 #define RGB_PIXEL_SIZE 3
 #define RGB_PIXEL_AT(RGB, width, x, y)    ((RGB_t *)(RGB + ((y) * (width) * RGB_PIXEL_SIZE) + (x) * RGB_PIXEL_SIZE))

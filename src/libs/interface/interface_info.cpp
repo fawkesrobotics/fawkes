@@ -54,16 +54,16 @@ InterfaceInfo::InterfaceInfo(const char *type, const char *id, const unsigned ch
 			     const std::list<std::string> &readers, const std::string &writer,
 			     const Time *timestamp)
 {
-  __type = strndup(type, __INTERFACE_TYPE_SIZE);
-  __id   = strndup(id, __INTERFACE_ID_SIZE);
-  __hash = (unsigned char *)malloc(__INTERFACE_HASH_SIZE);
-  memcpy(__hash, hash, __INTERFACE_HASH_SIZE);
-  __has_writer = has_writer;
-  __num_readers = num_readers;
-  __serial = serial;
-  __timestamp = new Time(timestamp);
-  __readers = readers;
-  __writer = writer;
+  type_ = strndup(type, INTERFACE_TYPE_SIZE_);
+  id_   = strndup(id, INTERFACE_ID_SIZE_);
+  hash_ = (unsigned char *)malloc(INTERFACE_HASH_SIZE_);
+  memcpy(hash_, hash, INTERFACE_HASH_SIZE_);
+  has_writer_ = has_writer;
+  num_readers_ = num_readers;
+  serial_ = serial;
+  timestamp_ = new Time(timestamp);
+  readers_ = readers;
+  writer_ = writer;
 }
 
 
@@ -72,26 +72,26 @@ InterfaceInfo::InterfaceInfo(const char *type, const char *id, const unsigned ch
  */
 InterfaceInfo::InterfaceInfo(const InterfaceInfo &i)
 {
-  __type = strndup(i.__type, __INTERFACE_TYPE_SIZE);
-  __id   = strndup(i.__id, __INTERFACE_ID_SIZE);
-  __hash = (unsigned char *)malloc(__INTERFACE_HASH_SIZE);
-  memcpy(__hash, i.__hash, __INTERFACE_HASH_SIZE);
-  __has_writer = i.__has_writer;
-  __num_readers = i.__num_readers;
-  __serial = i.__serial;
-  __timestamp = new Time(i.__timestamp);
-  __readers = i.__readers;
-  __writer  = i.__writer;
+  type_ = strndup(i.type_, INTERFACE_TYPE_SIZE_);
+  id_   = strndup(i.id_, INTERFACE_ID_SIZE_);
+  hash_ = (unsigned char *)malloc(INTERFACE_HASH_SIZE_);
+  memcpy(hash_, i.hash_, INTERFACE_HASH_SIZE_);
+  has_writer_ = i.has_writer_;
+  num_readers_ = i.num_readers_;
+  serial_ = i.serial_;
+  timestamp_ = new Time(i.timestamp_);
+  readers_ = i.readers_;
+  writer_  = i.writer_;
 }
 
 
 /** Destructor. */
 InterfaceInfo::~InterfaceInfo()
 {
-  free(__type);
-  free(__id);
-  free(__hash);
-  delete __timestamp;
+  free(type_);
+  free(id_);
+  free(hash_);
+  delete timestamp_;
 }
 
 
@@ -102,21 +102,21 @@ InterfaceInfo::~InterfaceInfo()
 InterfaceInfo&
 InterfaceInfo::operator=(const InterfaceInfo &i)
 {
-  free(__type);
-  free(__id);
-  free(__hash);
-  delete __timestamp;
+  free(type_);
+  free(id_);
+  free(hash_);
+  delete timestamp_;
 
-  __type = strndup(i.__type, __INTERFACE_TYPE_SIZE);
-  __id   = strndup(i.__id, __INTERFACE_ID_SIZE);
-  __hash = (unsigned char *)malloc(__INTERFACE_HASH_SIZE);
-  memcpy(__hash, i.__hash, __INTERFACE_HASH_SIZE);
-  __has_writer = i.__has_writer;
-  __num_readers = i.__num_readers;
-  __serial = i.__serial;
-  __timestamp = new Time(i.__timestamp);
-  __readers = i.__readers;
-  __writer  = i.__writer;
+  type_ = strndup(i.type_, INTERFACE_TYPE_SIZE_);
+  id_   = strndup(i.id_, INTERFACE_ID_SIZE_);
+  hash_ = (unsigned char *)malloc(INTERFACE_HASH_SIZE_);
+  memcpy(hash_, i.hash_, INTERFACE_HASH_SIZE_);
+  has_writer_ = i.has_writer_;
+  num_readers_ = i.num_readers_;
+  serial_ = i.serial_;
+  timestamp_ = new Time(i.timestamp_);
+  readers_ = i.readers_;
+  writer_  = i.writer_;
 
   return *this;
 }
@@ -128,7 +128,7 @@ InterfaceInfo::operator=(const InterfaceInfo &i)
 const char *
 InterfaceInfo::type() const
 {
-  return __type;
+  return type_;
 }
 
 
@@ -138,7 +138,7 @@ InterfaceInfo::type() const
 const char *
 InterfaceInfo::id() const
 {
-  return __id;
+  return id_;
 }
 
 
@@ -148,7 +148,7 @@ InterfaceInfo::id() const
 const unsigned char *
 InterfaceInfo::hash() const
 {
-  return __hash;
+  return hash_;
 }
 
 /** Get interface version hash in printable format.
@@ -157,10 +157,10 @@ InterfaceInfo::hash() const
 std::string
 InterfaceInfo::hash_printable() const
 {
-  char phash[__INTERFACE_HASH_SIZE * 2 + 1];
-  phash[__INTERFACE_HASH_SIZE * 2] = 0;
-  for (size_t s = 0; s < __INTERFACE_HASH_SIZE; ++s) {
-    snprintf(&phash[s*2], 3, "%02X", __hash[s]);
+  char phash[INTERFACE_HASH_SIZE_ * 2 + 1];
+  phash[INTERFACE_HASH_SIZE_ * 2] = 0;
+  for (size_t s = 0; s < INTERFACE_HASH_SIZE_; ++s) {
+    snprintf(&phash[s*2], 3, "%02X", hash_[s]);
   }
   return std::string(phash);
 }
@@ -172,7 +172,7 @@ InterfaceInfo::hash_printable() const
 bool
 InterfaceInfo::has_writer() const
 {
-  return __has_writer;
+  return has_writer_;
 }
 
 
@@ -182,7 +182,7 @@ InterfaceInfo::has_writer() const
 unsigned int
 InterfaceInfo::num_readers() const
 {
-  return __num_readers;
+  return num_readers_;
 }
 
 
@@ -192,7 +192,7 @@ InterfaceInfo::num_readers() const
 const std::list<std::string> &
 InterfaceInfo::readers() const
 {
-  return __readers;
+  return readers_;
 }
 
 
@@ -202,7 +202,7 @@ InterfaceInfo::readers() const
 const std::string &
 InterfaceInfo::writer() const
 {
-  return __writer;
+  return writer_;
 }
 
 
@@ -212,7 +212,7 @@ InterfaceInfo::writer() const
 unsigned int
 InterfaceInfo::serial() const
 {
-  return __serial;
+  return serial_;
 }
 
 
@@ -222,7 +222,7 @@ InterfaceInfo::serial() const
 const Time *
 InterfaceInfo::timestamp() const
 {
-  return __timestamp;
+  return timestamp_;
 }
 
 /** < operator
@@ -236,13 +236,13 @@ InterfaceInfo::timestamp() const
 bool
 InterfaceInfo::operator<(const InterfaceInfo &ii) const
 {
-  int td = strncmp(__type, ii.__type, __INTERFACE_TYPE_SIZE);
+  int td = strncmp(type_, ii.type_, INTERFACE_TYPE_SIZE_);
   if ( td < 0 ) {
     return true;
   } else if (td > 0) {
     return false;
   } else {
-    return (strncmp(__id, ii.__id, __INTERFACE_ID_SIZE) < 0);
+    return (strncmp(id_, ii.id_, INTERFACE_ID_SIZE_) < 0);
   }
 }
 

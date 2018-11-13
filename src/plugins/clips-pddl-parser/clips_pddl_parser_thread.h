@@ -18,8 +18,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_PDDL_PARSER_THEAD_H_
-#define __PLUGINS_CLIPS_PDDL_PARSER_THEAD_H_
+#ifndef _PLUGINS_CLIPS_PDDL_PARSER_THEAD_H_
+#define _PLUGINS_CLIPS_PDDL_PARSER_THEAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>
@@ -34,4 +34,4 @@ class ClipsPddlParserThread
     ClipsPddlParserThread();
     //virtual ~ClipsPddlParserThread();
 };
-#endif /* !__PLUGINS_CLIPS_PDDL_PARSER_THEAD_H_ */
+#endif /* !PLUGINS_CLIPS_PDDL_PARSER_THEAD_H__ */

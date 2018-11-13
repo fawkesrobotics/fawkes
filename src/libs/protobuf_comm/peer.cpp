@@ -43,9 +43,6 @@ using namespace boost::asio;
 using namespace boost::system;
 
 namespace protobuf_comm {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ProtobufBroadcastPeer <protobuf_comm/peer.h>
  * Communicate by broadcasting protobuf messages.

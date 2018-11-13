@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_UTILS_TYPES_H_
-#define __PLUGINS_OPENNI_UTILS_TYPES_H_
+#ifndef _PLUGINS_OPENNI_UTILS_TYPES_H_
+#define _PLUGINS_OPENNI_UTILS_TYPES_H_
 
 #include <map>
 #include <string>
@@ -32,10 +32,6 @@ namespace fawkes {
   class ObjectPositionInterface;
 
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** User info to pass to draw_skeletons(). */
 typedef struct {

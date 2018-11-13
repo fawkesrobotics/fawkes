@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JOYSTICK_BB_HANDLER_H_
-#define __PLUGINS_JOYSTICK_BB_HANDLER_H_
+#ifndef _PLUGINS_JOYSTICK_BB_HANDLER_H_
+#define _PLUGINS_JOYSTICK_BB_HANDLER_H_
 
 class JoystickBlackBoardHandler
 {

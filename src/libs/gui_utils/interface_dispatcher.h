@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_GUI_UTILS_INTERFACE_DISPATCHER_H_
-#define __LIBS_GUI_UTILS_INTERFACE_DISPATCHER_H_
+#ifndef _LIBS_GUI_UTILS_INTERFACE_DISPATCHER_H_
+#define _LIBS_GUI_UTILS_INTERFACE_DISPATCHER_H_
 
 #include <cstddef>
 #include <glibmm/dispatcher.h>
@@ -75,28 +75,28 @@ class InterfaceDispatcher
   void setup_signals();
 
  private:
-  bool                                           __message_enqueueing;
+  bool                                           message_enqueueing_;
 
-  Glib::Dispatcher                               __dispatcher_data_changed;
-  Glib::Dispatcher                               __dispatcher_message_received;
-  Glib::Dispatcher                               __dispatcher_writer_added;
-  Glib::Dispatcher                               __dispatcher_writer_removed;
-  Glib::Dispatcher                               __dispatcher_reader_added;
-  Glib::Dispatcher                               __dispatcher_reader_removed;
+  Glib::Dispatcher                               dispatcher_data_changed_;
+  Glib::Dispatcher                               dispatcher_message_received_;
+  Glib::Dispatcher                               dispatcher_writer_added_;
+  Glib::Dispatcher                               dispatcher_writer_removed_;
+  Glib::Dispatcher                               dispatcher_reader_added_;
+  Glib::Dispatcher                               dispatcher_reader_removed_;
 
-  sigc::signal<void, Interface *>                __signal_data_changed;
-  sigc::signal<void, Interface *, Message *>     __signal_message_received;
-  sigc::signal<void, Interface *>                __signal_writer_added;
-  sigc::signal<void, Interface *>                __signal_writer_removed;
-  sigc::signal<void, Interface *>                __signal_reader_added;
-  sigc::signal<void, Interface *>                __signal_reader_removed;
+  sigc::signal<void, Interface *>                signal_data_changed_;
+  sigc::signal<void, Interface *, Message *>     signal_message_received_;
+  sigc::signal<void, Interface *>                signal_writer_added_;
+  sigc::signal<void, Interface *>                signal_writer_removed_;
+  sigc::signal<void, Interface *>                signal_reader_added_;
+  sigc::signal<void, Interface *>                signal_reader_removed_;
 
-  LockQueue<Interface *>                         __queue_data_changed;
-  LockQueue<std::pair<Interface *, Message *> >  __queue_message_received;
-  LockQueue<Interface *>                         __queue_writer_added;
-  LockQueue<Interface *>                         __queue_writer_removed;
-  LockQueue<Interface *>                         __queue_reader_added;
-  LockQueue<Interface *>                         __queue_reader_removed;
+  LockQueue<Interface *>                         queue_data_changed_;
+  LockQueue<std::pair<Interface *, Message *> >  queue_message_received_;
+  LockQueue<Interface *>                         queue_writer_added_;
+  LockQueue<Interface *>                         queue_writer_removed_;
+  LockQueue<Interface *>                         queue_reader_added_;
+  LockQueue<Interface *>                         queue_reader_removed_;
 };
 
 }

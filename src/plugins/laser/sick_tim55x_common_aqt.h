@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_SICK_TIM55X_COMMON_AQT_H_
-#define __PLUGINS_LASER_SICK_TIM55X_COMMON_AQT_H_
+#ifndef _PLUGINS_LASER_SICK_TIM55X_COMMON_AQT_H_
+#define _PLUGINS_LASER_SICK_TIM55X_COMMON_AQT_H_
 
 #include "acquisition_thread.h"
 

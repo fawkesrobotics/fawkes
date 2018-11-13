@@ -29,9 +29,6 @@
 #include <cstdlib>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BlackBoard <blackboard/blackboard.h>
  * The BlackBoard abstract class.
@@ -169,16 +166,16 @@ namespace fawkes {
 BlackBoard::BlackBoard(bool create_notifier)
 {
   if (create_notifier) {
-    __notifier = new BlackBoardNotifier();
+    notifier_ = new BlackBoardNotifier();
   } else {
-    __notifier = NULL;
+    notifier_ = NULL;
   }
 }
 
 /** Destructor. */
 BlackBoard::~BlackBoard()
 {
-  delete __notifier;
+  delete notifier_;
 }
 
 
@@ -190,8 +187,8 @@ void
 BlackBoard::register_listener(BlackBoardInterfaceListener *listener,
                               ListenerRegisterFlag flag)
 {
-  if (! __notifier) throw NullPointerException("BlackBoard initialized without notifier");
-  __notifier->register_listener(listener, flag);
+  if (! notifier_) throw NullPointerException("BlackBoard initialized without notifier");
+  notifier_->register_listener(listener, flag);
 }
 
 
@@ -203,9 +200,9 @@ void
 BlackBoard::update_listener(BlackBoardInterfaceListener *listener,
                             ListenerRegisterFlag flag)
 {
-  if (! __notifier) throw NullPointerException("BlackBoard initialized without notifier");
+  if (! notifier_) throw NullPointerException("BlackBoard initialized without notifier");
   if (! listener)  return;
-  __notifier->update_listener(listener, flag);
+  notifier_->update_listener(listener, flag);
 }
 
 
@@ -217,9 +214,9 @@ BlackBoard::update_listener(BlackBoardInterfaceListener *listener,
 void
 BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
 {
-  if (! __notifier) throw NullPointerException("BlackBoard initialized without notifier");
+  if (! notifier_) throw NullPointerException("BlackBoard initialized without notifier");
   if (! listener) return;
-  __notifier->unregister_listener(listener);
+  notifier_->unregister_listener(listener);
 }
 
 
@@ -229,9 +226,9 @@ BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
 void
 BlackBoard::register_observer(BlackBoardInterfaceObserver *observer)
 {
-  if (! __notifier) throw NullPointerException("BlackBoard initialized without notifier");
+  if (! notifier_) throw NullPointerException("BlackBoard initialized without notifier");
   if (! observer) return;
-  __notifier->register_observer(observer);
+  notifier_->register_observer(observer);
 }
 
 
@@ -243,9 +240,9 @@ BlackBoard::register_observer(BlackBoardInterfaceObserver *observer)
 void
 BlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
 {
-  if (! __notifier) throw NullPointerException("BlackBoard initialized without notifier");
+  if (! notifier_) throw NullPointerException("BlackBoard initialized without notifier");
   if (! observer) return;
-  __notifier->unregister_observer(observer);
+  notifier_->unregister_observer(observer);
 }
 
 

@@ -29,9 +29,6 @@
 #include <algorithm>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphPath <navgraph/navgraph_path.h>
  * Class representing a path for a NavGraph.

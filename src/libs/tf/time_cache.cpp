@@ -55,10 +55,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** @class TransformStorage <tf/time_cache.h>
  * Storage for transforms and their parent.

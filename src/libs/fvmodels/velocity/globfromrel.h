@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_VELOCITY_GLOBALFROMRELATIVE_H_
-#define __FIREVISION_MODELS_VELOCITY_GLOBALFROMRELATIVE_H_
+#ifndef _FIREVISION_MODELS_VELOCITY_GLOBALFROMRELATIVE_H_
+#define _FIREVISION_MODELS_VELOCITY_GLOBALFROMRELATIVE_H_
 
 #include <fvmodels/velocity/velocitymodel.h>
 #include <fvmodels/velocity/relvelo.h>
@@ -32,9 +32,6 @@
 // include <utils/kalman_filter/ckalman_filter_2dim.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class VelocityGlobalFromRelative : public VelocityModel
 {

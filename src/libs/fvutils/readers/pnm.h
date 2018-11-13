@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_READERS_BITMAP_H_
-#define __FIREVISION_UTILS_READERS_BITMAP_H_
+#ifndef _FIREVISION_UTILS_READERS_BITMAP_H_
+#define _FIREVISION_UTILS_READERS_BITMAP_H_
 
 #include <fvutils/readers/reader.h>
 
 #include <cstdio>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class PNMReader : public Reader {
 

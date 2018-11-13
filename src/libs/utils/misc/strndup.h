@@ -21,14 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_MISC_STRNDUP_H_
-#define __UTILS_MISC_STRNDUP_H_
+#ifndef _UTILS_MISC_STRNDUP_H_
+#define _UTILS_MISC_STRNDUP_H_
 
 #include <cstring>
 #include <cstdlib>
 
 #if ! (defined(__USE_XOPEN2K8) || defined(__USE_GNU) || defined(__POSIX_VISIBLE) && __POSIX_VISIBLE >= 200809)
-#define __COMPAT_STRNDUP
+#define COMPAT_STRNDUP_
 
 char * strndup(const char *s, size_t n);
 

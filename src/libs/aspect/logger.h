@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_LOGGER_H_
-#define __ASPECT_LOGGER_H_
+#ifndef _ASPECT_LOGGER_H_
+#define _ASPECT_LOGGER_H_
 
 #include <aspect/aspect.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Logger;
 
@@ -42,7 +39,7 @@ class LoggerAspect : public virtual Aspect
   Logger *  get_logger() const;
 
  private:
-  Logger *__logger;
+  Logger *logger_;
 };
 
 } // end namespace fawkes

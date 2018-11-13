@@ -22,9 +22,6 @@
 #include <syncpoint/syncpoint_call_stats.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SyncPointCallStats <syncpoint/syncpoint_call_stats.h>
  * This class represents call stats of a single component to a single SyncPoint.

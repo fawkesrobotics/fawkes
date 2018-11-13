@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PANTILT_SENSOR_THREAD_H_
-#define __PLUGINS_PANTILT_SENSOR_THREAD_H_
+#ifndef _PLUGINS_PANTILT_SENSOR_THREAD_H_
+#define _PLUGINS_PANTILT_SENSOR_THREAD_H_
 
 #include "sensor_thread.h"
 
@@ -50,8 +50,8 @@ class PanTiltSensorThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  std::list<PanTiltActThread *>           __act_threads;
-  std::list<PanTiltActThread *>::iterator __ati;
+  std::list<PanTiltActThread *>           act_threads_;
+  std::list<PanTiltActThread *>::iterator ati_;
 };
 
 

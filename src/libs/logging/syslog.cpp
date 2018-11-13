@@ -47,7 +47,7 @@ SyslogLogger::SyslogLogger(LogLevel log_level)
 {
   now_s = (struct ::tm *)malloc(sizeof(struct ::tm));
   mutex = new Mutex();
-  __ident = NULL;
+  ident_ = NULL;
   openlog("Fawkes", LOG_CONS | LOG_NDELAY, LOG_USER);
 }
 
@@ -62,11 +62,11 @@ SyslogLogger::SyslogLogger(const char *ident, LogLevel log_level)
   now_s = (struct ::tm *)malloc(sizeof(struct ::tm));
   mutex = new Mutex();
   if (ident == NULL) {
-    __ident = NULL;
+    ident_ = NULL;
     openlog("Fawkes", LOG_CONS | LOG_NDELAY, LOG_USER);
   } else {
-    __ident = strdup(ident);
-    openlog(__ident, LOG_CONS | LOG_NDELAY, LOG_USER);
+    ident_ = strdup(ident);
+    openlog(ident_, LOG_CONS | LOG_NDELAY, LOG_USER);
   }
 }
 
@@ -77,8 +77,8 @@ SyslogLogger::~SyslogLogger()
   free(now_s);
   delete mutex;
   closelog();
-  if (__ident)  free(__ident);
-  __ident = NULL;
+  if (ident_)  free(ident_);
+  ident_ = NULL;
 }
 
 

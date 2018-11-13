@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_METRICS_ASPECT_METRICS_H_
-#define __PLUGINS_METRICS_ASPECT_METRICS_H_
+#ifndef _PLUGINS_METRICS_ASPECT_METRICS_H_
+#define _PLUGINS_METRICS_ASPECT_METRICS_H_
 
 #include <aspect/aspect.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class MetricsAspectIniFin;
 class MetricsSupplier;

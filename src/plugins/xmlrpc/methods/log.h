@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_XMLRPC_METHODS_LOG_H_
-#define __PLUGINS_XMLRPC_METHODS_LOG_H_
+#ifndef _PLUGINS_XMLRPC_METHODS_LOG_H_
+#define _PLUGINS_XMLRPC_METHODS_LOG_H_
 
 #include <xmlrpc-c/registry.hpp>
 
@@ -45,7 +45,7 @@ class XmlRpcLogMethods {
     virtual void execute(xmlrpc_c::paramList const& params,
 			 xmlrpc_c::value *   const  result);
    private:
-    fawkes::CacheLogger *__cache_logger;;
+    fawkes::CacheLogger *cache_logger_;;
   };
 
   class log_get_size : public xmlrpc_c::method {
@@ -55,7 +55,7 @@ class XmlRpcLogMethods {
     virtual void execute(xmlrpc_c::paramList const& params,
 			 xmlrpc_c::value *   const  result);
    private:
-    fawkes::CacheLogger *__cache_logger;;
+    fawkes::CacheLogger *cache_logger_;;
   };
 
   class log_set_size : public xmlrpc_c::method {
@@ -65,7 +65,7 @@ class XmlRpcLogMethods {
     virtual void execute(xmlrpc_c::paramList const& params,
 			 xmlrpc_c::value *   const  result);
    private:
-    fawkes::CacheLogger *__cache_logger;;
+    fawkes::CacheLogger *cache_logger_;;
   };
 
   class log_log : public xmlrpc_c::method {
@@ -75,22 +75,22 @@ class XmlRpcLogMethods {
     virtual void execute(xmlrpc_c::paramList const& params,
 			 xmlrpc_c::value *   const  result);
    private:
-    fawkes::Logger           *__logger;
-    fawkes::Logger::LogLevel  __log_level;
+    fawkes::Logger           *logger_;
+    fawkes::Logger::LogLevel  log_level_;
   };
 
  private:
-  xmlrpc_c::registry *__xmlrpc_registry;
+  xmlrpc_c::registry *xmlrpc_registry_;
 
-  fawkes::Logger        *__logger;
-  fawkes::CacheLogger   *__cache_logger;
-  log_entries           *__log_entries;
-  log_get_size          *__log_get_size;
-  log_set_size          *__log_set_size;
-  log_log               *__log_log_debug;
-  log_log               *__log_log_info;
-  log_log               *__log_log_warn;
-  log_log               *__log_log_error;
+  fawkes::Logger        *logger_;
+  fawkes::CacheLogger   *cache_logger_;
+  log_entries           *log_entries_;
+  log_get_size          *log_get_size_;
+  log_set_size          *log_set_size_;
+  log_log               *log_log_debug_;
+  log_log               *log_log_info_;
+  log_log               *log_log_warn_;
+  log_log               *log_log_error_;
 };
 
 #endif

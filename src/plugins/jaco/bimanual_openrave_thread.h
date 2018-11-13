@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_BIMANUAL_OPENRAVE_THREAD_H_
-#define __PLUGINS_JACO_BIMANUAL_OPENRAVE_THREAD_H_
+#ifndef _PLUGINS_JACO_BIMANUAL_OPENRAVE_THREAD_H_
+#define _PLUGINS_JACO_BIMANUAL_OPENRAVE_THREAD_H_
 
 #include "openrave_base_thread.h"
 
@@ -74,11 +74,11 @@ class JacoBimanualOpenraveThread : public JacoOpenraveBaseThread
   struct {
     arm_struct_t left;
     arm_struct_t right;
-  } __arms;
+  } arms_;
 
 #ifdef HAVE_OPENRAVE
-  fawkes::jaco_openrave_set_t __planner_env;
-  OpenRAVE::ModuleBasePtr __mod_dualmanip;
+  fawkes::jaco_openrave_set_t planner_env_;
+  OpenRAVE::ModuleBasePtr mod_dualmanip_;
 
   std::set<OpenRAVE::KinBody::LinkPtr> links_left_;
   std::set<OpenRAVE::KinBody::LinkPtr> links_right_;

@@ -21,19 +21,16 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_COMPRESSION_JPEG_COMPRESSOR_LIBJPEG_H_
-#define __FIREVISION_UTILS_COMPRESSION_JPEG_COMPRESSOR_LIBJPEG_H_
+#ifndef _FIREVISION_UTILS_COMPRESSION_JPEG_COMPRESSOR_LIBJPEG_H_
+#define _FIREVISION_UTILS_COMPRESSION_JPEG_COMPRESSOR_LIBJPEG_H_
 
-#ifndef __FIREVISION_UTILS_COMPRESSION_JPEG_COMPRESSOR_H_
+#ifndef _FIREVISION_UTILS_COMPRESSION_JPEG_COMPRESSOR_H_
 #  error Do not include jpeg_compressor_libjpeg.h directly, use jpeg_compressor.h
 #endif
 
 #include <fvutils/compression/imagecompressor.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class JpegImageCompressorLibJpeg : public ImageCompressor {
  public:

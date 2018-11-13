@@ -39,9 +39,9 @@ InterfaceEnumConstant::InterfaceEnumConstant(const std::string &name,
 {
   if (!InterfaceChecker::validName(name, reserved_names_interface()))
     throw InterfaceGeneratorReservedIdentifierException("enum constant", name.c_str());
-  __name  = name;
-  __comment = comment;
-  __items.clear();
+  name_  = name;
+  comment_ = comment;
+  items_.clear();
 }
 
 
@@ -51,7 +51,7 @@ InterfaceEnumConstant::InterfaceEnumConstant(const std::string &name,
 const std::string &
 InterfaceEnumConstant::get_name() const
 {
-  return __name;
+  return name_;
 }
 
 
@@ -61,7 +61,7 @@ InterfaceEnumConstant::get_name() const
 const std::string &
 InterfaceEnumConstant::get_comment() const
 {
-  return __comment;
+  return comment_;
 }
 
 
@@ -72,7 +72,7 @@ InterfaceEnumConstant::get_comment() const
 const std::vector<InterfaceEnumConstant::EnumItem> &
 InterfaceEnumConstant::get_items() const
 {
-  return __items;
+  return items_;
 }
 
 
@@ -86,13 +86,13 @@ InterfaceEnumConstant::add_item(std::string name, std::string comment)
   if (!InterfaceChecker::validName(name, reserved_names_interface()))
     throw InterfaceGeneratorReservedIdentifierException("enum item", name.c_str());
   std::vector<EnumItem>::iterator i;
-  for (i = __items.begin(); i != __items.end(); ++i) {
+  for (i = items_.begin(); i != items_.end(); ++i) {
     if (i->name == name) {
       throw InterfaceGeneratorAmbiguousNameException(name.c_str(), "enum item");
     }
   }
   EnumItem p = {name, comment, false, 0};
-  __items.push_back(p);
+  items_.push_back(p);
 }
 
 
@@ -105,11 +105,11 @@ void
 InterfaceEnumConstant::add_item(std::string name, std::string comment, int value)
 {
   std::vector<EnumItem>::iterator i;
-  for (i = __items.begin(); i != __items.end(); ++i) {
+  for (i = items_.begin(); i != items_.end(); ++i) {
     if (i->name == name) {
       throw InterfaceGeneratorAmbiguousNameException(name.c_str(), "enum item");
     }
   }
   EnumItem p = {name, comment, true, value};
-  __items.push_back(p);
+  items_.push_back(p);
 }

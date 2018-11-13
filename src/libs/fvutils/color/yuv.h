@@ -22,13 +22,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_COLOR_YUV_H
-#define __FIREVISION_UTILS_COLOR_YUV_H
+#ifndef FIREVISION_UTILS_COLOR_YUV_H_
+#define FIREVISION_UTILS_COLOR_YUV_H_
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 #define YUV422PA_MACROPIXEL_AT(YUV, width, x, y) ((unsigned char*)YUV + (y)*(width)*2 + ((x)-((x)%2))*2)

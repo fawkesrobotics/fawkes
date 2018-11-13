@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
-#define __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
+#ifndef _FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
+#define _FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
 
 #if !defined(HAVE_IPP) and !defined(HAVE_OPENCV)
 #  error "Neither IPP nor OpenCV are installed."
@@ -184,5 +184,5 @@ class MirrorCalibTool
 
 }
 
-#endif /*  __FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_ */
+#endif /*  FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H__ */
 

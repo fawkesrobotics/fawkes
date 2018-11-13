@@ -24,9 +24,6 @@
 #include <fvstereo/stereo_processor.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class StereoProcessor <fvstereo/stereo_processor.h>
  * Stereo processor interface.

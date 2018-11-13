@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_MSG_REGISTRY_H_
-#define __FIREVISION_UTILS_MSG_REGISTRY_H_
+#ifndef _FIREVISION_UTILS_MSG_REGISTRY_H_
+#define _FIREVISION_UTILS_MSG_REGISTRY_H_
 
 #define FIREVISION_MSGQ_CRUISER             1
 #define FIREVISION_MSGQ_FIELDINFO_FRONT     2

@@ -71,7 +71,7 @@ class PointCloudAdapter::StorageAdapter
  */
 PointCloudAdapter::PointCloudAdapter(PointCloudManager *pcl_manager,
                                            Logger *logger)
-  : __pcl_manager(pcl_manager)
+  : pcl_manager_(pcl_manager)
 {
 }
 
@@ -80,10 +80,10 @@ PointCloudAdapter::PointCloudAdapter(PointCloudManager *pcl_manager,
 PointCloudAdapter::~PointCloudAdapter()
 {
   std::map<std::string, StorageAdapter *>::iterator i;
-  for (i = __sas.begin(); i != __sas.end(); ++i) {
+  for (i = sas_.begin(); i != sas_.end(); ++i) {
     delete i->second;
   }
-  __sas.clear();
+  sas_.clear();
 }
 
 /** Fill information of arbitrary point type.
@@ -141,23 +141,23 @@ PointCloudAdapter::get_info(const std::string &id,
 			    std::string &frame_id, bool &is_dense,
 			    V_PointFieldInfo &pfi)
 {
-  if (__sas.find(id) == __sas.end()) {
-    __sas[id] = new StorageAdapter(__pcl_manager->get_storage_adapter(id.c_str()));
+  if (sas_.find(id) == sas_.end()) {
+    sas_[id] = new StorageAdapter(pcl_manager_->get_storage_adapter(id.c_str()));
   }
 
-  if (__pcl_manager->exists_pointcloud<pcl::PointXYZ>(id.c_str())) {
+  if (pcl_manager_->exists_pointcloud<pcl::PointXYZ>(id.c_str())) {
     const fawkes::RefPtr<const pcl::PointCloud<pcl::PointXYZ> > p =
-      __pcl_manager->get_pointcloud<pcl::PointXYZ>(id.c_str());
+      pcl_manager_->get_pointcloud<pcl::PointXYZ>(id.c_str());
     fill_info(p, width, height, frame_id, is_dense, pfi);
 
-  } else if (__pcl_manager->exists_pointcloud<pcl::PointXYZRGB>(id.c_str())) {
+  } else if (pcl_manager_->exists_pointcloud<pcl::PointXYZRGB>(id.c_str())) {
     const fawkes::RefPtr<const pcl::PointCloud<pcl::PointXYZRGB> > p =
-      __pcl_manager->get_pointcloud<pcl::PointXYZRGB>(id.c_str());
+      pcl_manager_->get_pointcloud<pcl::PointXYZRGB>(id.c_str());
     fill_info(p, width, height, frame_id, is_dense, pfi);
 
-  } else if (__pcl_manager->exists_pointcloud<pcl::PointXYZL>(id.c_str())) {
+  } else if (pcl_manager_->exists_pointcloud<pcl::PointXYZL>(id.c_str())) {
     const fawkes::RefPtr<const pcl::PointCloud<pcl::PointXYZL> > p =
-      __pcl_manager->get_pointcloud<pcl::PointXYZL>(id.c_str());
+      pcl_manager_->get_pointcloud<pcl::PointXYZL>(id.c_str());
     fill_info(p, width, height, frame_id, is_dense, pfi);
 
   } else {
@@ -181,11 +181,11 @@ PointCloudAdapter::get_data(const std::string &id, std::string &frame_id,
                                unsigned int &width, unsigned int &height, fawkes::Time &time,
                                void **data_ptr, size_t &point_size, size_t &num_points)
 {
-  if (__sas.find(id) == __sas.end()) {
-    __sas[id] = new StorageAdapter(__pcl_manager->get_storage_adapter(id.c_str()));
+  if (sas_.find(id) == sas_.end()) {
+    sas_[id] = new StorageAdapter(pcl_manager_->get_storage_adapter(id.c_str()));
   }
 
-  const pcl_utils::StorageAdapter *sa = __sas[id]->a;
+  const pcl_utils::StorageAdapter *sa = sas_[id]->a;
   frame_id = sa->frame_id();
   width  = sa->width();
   height = sa->height();
@@ -225,8 +225,8 @@ PointCloudAdapter::get_data_and_info(const std::string &id, std::string &frame_i
 void
 PointCloudAdapter::close(const std::string &id)
 {
-  if (__sas.find(id) != __sas.end()) {
-    delete __sas[id];
-    __sas.erase(id);
+  if (sas_.find(id) != sas_.end()) {
+    delete sas_[id];
+    sas_.erase(id);
   }
 }

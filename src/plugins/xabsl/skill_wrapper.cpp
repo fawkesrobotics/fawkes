@@ -43,8 +43,8 @@ XabslSkillWrapper::XabslSkillWrapper(const char *name,
 				     ParameterList &params)
   : xabsl::BasicBehavior(name, error_handler)
 {
-  __params  = params;
-  __execute = false;
+  params_  = params;
+  execute_ = false;
 }
 
 
@@ -52,10 +52,10 @@ XabslSkillWrapper::XabslSkillWrapper(const char *name,
 XabslSkillWrapper::~XabslSkillWrapper()
 {
   std::map<std::string, ParameterValueBase *>::iterator i;
-  for (i = __param_values.begin(); i != __param_values.end(); ++i) {
+  for (i = param_values_.begin(); i != param_values_.end(); ++i) {
     delete i->second;
   }
-  __param_values.clear();
+  param_values_.clear();
 }
 
 
@@ -73,16 +73,16 @@ XabslSkillWrapper::name()
 void
 XabslSkillWrapper::registerParameters()
 {
-  for (ParameterList::iterator i = __params.begin(); i != __params.end(); ++i) {
+  for (ParameterList::iterator i = params_.begin(); i != params_.end(); ++i) {
     if ( (i->second == "float") || (i->second == "double") ||
 	 (i->second == "int") || (i->second == "unsigned int") ||
 	 (i->second == "long int") || (i->second == "unsigned long int") ) {
       ParameterValue<double> *pv = new ParameterValue<double>();
-      __param_values[i->first] = pv;
+      param_values_[i->first] = pv;
       parameters->registerDecimal((string(n) + "." + i->first).c_str(), *(pv->get_value_ptr()));
     } else if ( i->second == "bool" ) {
        ParameterValue<bool> *pv = new ParameterValue<bool>();
-      __param_values[i->first] = pv;
+      param_values_[i->first] = pv;
       parameters->registerBoolean((string(n) + "." + i->first).c_str(), *(pv->get_value_ptr()));
     } else {
       throw fawkes::Exception("Unknown parameter type for field %s in skill %s",
@@ -96,7 +96,7 @@ XabslSkillWrapper::registerParameters()
 void
 XabslSkillWrapper::execute()
 {
-  __execute = true;
+  execute_ = true;
 }
 
 
@@ -108,13 +108,13 @@ XabslSkillWrapper::execute()
 std::string
 XabslSkillWrapper::skill_string()
 {
-  if ( __execute ) {
-    __execute = false;
+  if ( execute_ ) {
+    execute_ = false;
 
     std::string rv = std::string(n) + "{";
     std::map<std::string, ParameterValueBase *>::iterator i;
     bool is_first = true;
-    for (i = __param_values.begin(); i != __param_values.end(); ++i) {
+    for (i = param_values_.begin(); i != param_values_.end(); ++i) {
       if ( is_first ) {
 	is_first = false;
       } else {

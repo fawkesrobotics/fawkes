@@ -46,8 +46,8 @@ using namespace fawkes;
 RRDWebRequestProcessor::RRDWebRequestProcessor(fawkes::RRDManager *rrd_manager,
                                                fawkes::Logger *logger)
 {
-  __rrd_man = rrd_manager;
-  __logger  = logger;
+  rrd_man_ = rrd_manager;
+  logger_  = logger;
 }
 
 
@@ -63,7 +63,7 @@ RRDWebRequestProcessor::~RRDWebRequestProcessor()
 WebReply *
 RRDWebRequestProcessor::process_graph(const fawkes::WebRequest *request)
 {
-	const RWLockVector<RRDGraphDefinition *> &graphs(__rrd_man->get_graphs());
+	const RWLockVector<RRDGraphDefinition *> &graphs(rrd_man_->get_graphs());
 	RWLockVector<RRDGraphDefinition *>::const_iterator g;
 
 	ScopedRWLock(graphs.rwlock(), ScopedRWLock::LOCK_READ);
@@ -88,7 +88,7 @@ RRDWebRequestProcessor::process_graph(const fawkes::WebRequest *request)
 WebReply *
 RRDWebRequestProcessor::process_overview()
 {
-	const RWLockVector<RRDGraphDefinition *> &graphs(__rrd_man->get_graphs());
+	const RWLockVector<RRDGraphDefinition *> &graphs(rrd_man_->get_graphs());
 
 	WebPageReply *r = new WebPageReply("RRD Graphs");
 	r->set_html_header("  <link rel=\"stylesheet\" type=\"text/css\" "

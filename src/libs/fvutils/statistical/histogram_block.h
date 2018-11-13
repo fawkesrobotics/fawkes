@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_
-#define __FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_
+#ifndef _FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_
+#define _FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_
 
 #include <fvutils/fileformat/fvfile_block.h>
 #include <fvutils/base/roi.h>
@@ -30,9 +30,6 @@
 
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Header for a histogram block. */
 typedef struct _histogram_block_header_t
@@ -85,4 +82,4 @@ class HistogramBlock : public FireVisionDataFileBlock
 
 } // end namespace firevision
 
-#endif /* __FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_ */
+#endif /* FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H__ */

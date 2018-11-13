@@ -43,9 +43,6 @@
 #include <core/exceptions/software.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class V4LCamera <fvcams/v4l.h>
  * General Video4Linux camera implementation.

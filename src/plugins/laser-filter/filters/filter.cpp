@@ -85,21 +85,21 @@ LaserDataFilter::LaserDataFilter(const std::string filter_name,
     out[i]      = new Buffer(out_data_size);
   }
 
-  __own_in  = false;
-  __own_out = true;
+  own_in_  = false;
+  own_out_ = true;
 }
 
 
 /** Virtual empty destructor. */
 LaserDataFilter::~LaserDataFilter()
 {
-  if (__own_in) {
+  if (own_in_) {
     for (unsigned int i = 0; i < in.size(); ++i) {
       free(in[i]->values);
       delete in[i];
     }
   }
-  if (__own_out) {
+  if (own_out_) {
     for (unsigned int i = 0; i < out.size(); ++i) {
       free(out[i]->values);
       delete out[i];
@@ -133,7 +133,7 @@ LaserDataFilter::set_out_vector(std::vector<Buffer *> &out)
 			    this->out.size(), out.size());
   }
 
-  if (__own_out) {
+  if (own_out_) {
     for (unsigned int i = 0; i < this->out.size(); ++i) {
       free(this->out[i]->values);
       delete this->out[i];
@@ -142,7 +142,7 @@ LaserDataFilter::set_out_vector(std::vector<Buffer *> &out)
   this->out.clear();
 
   this->out = out;
-  __own_out = false;
+  own_out_ = false;
 }
 
 
@@ -157,7 +157,7 @@ void
 LaserDataFilter::set_out_data_size(unsigned int data_size)
 {
   if (out_data_size != data_size) {
-    if (__own_out) {
+    if (own_out_) {
       for (unsigned int i = 0; i < out.size(); ++i) {
 	free(out[i]->values);
 	out[i]->values = (float *)malloc(data_size * sizeof(float));
@@ -215,8 +215,8 @@ LaserDataFilter::copy_to_outbuf(LaserDataFilter::Buffer *outbuf,
 void
 LaserDataFilter::set_array_ownership(bool own_in, bool own_out)
 {
-  __own_in  = own_in;
-  __own_out = own_out;
+  own_in_  = own_in;
+  own_out_ = own_out;
 }
 
 

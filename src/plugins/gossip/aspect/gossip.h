@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_GOSSIP_ASPECT_GOSSIP_H_
-#define __PLUGINS_GOSSIP_ASPECT_GOSSIP_H_
+#ifndef _PLUGINS_GOSSIP_ASPECT_GOSSIP_H_
+#define _PLUGINS_GOSSIP_ASPECT_GOSSIP_H_
 
 #include <aspect/aspect.h>
 #include <core/utils/refptr.h>
@@ -30,9 +30,6 @@
 #include <string>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class GossipGroup;
 class GossipAspectIniFin;

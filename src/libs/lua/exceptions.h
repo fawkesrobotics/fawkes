@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LUA_EXCEPTIONS_H_
-#define __LUA_EXCEPTIONS_H_
+#ifndef _LUA_EXCEPTIONS_H_
+#define _LUA_EXCEPTIONS_H_
 
 #include <core/exception.h>
 

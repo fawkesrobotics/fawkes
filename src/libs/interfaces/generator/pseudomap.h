@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __INTERFACES_GENERATOR_PSEUDOMAP_H_
-#define __INTERFACES_GENERATOR_PSEUDOMAP_H_
+#ifndef _INTERFACES_GENERATOR_PSEUDOMAP_H_
+#define _INTERFACES_GENERATOR_PSEUDOMAP_H_
 
 #include <interfaces/generator/enum_constant.h>
 
@@ -49,12 +49,12 @@ class InterfacePseudoMap
   RefList &                 getRefList();
 
  private:
-  std::string __name;
-  std::string __type;
-  std::string __comment;
-  std::string __keytype;
+  std::string name_;
+  std::string type_;
+  std::string comment_;
+  std::string keytype_;
 
-  RefList __parefs;
+  RefList parefs_;
 };
 
 #endif

@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __SYNCPOINT_SYNCPOINT_H_
-#define __SYNCPOINT_SYNCPOINT_H_
+#ifndef _SYNCPOINT_SYNCPOINT_H_
+#define _SYNCPOINT_SYNCPOINT_H_
 
 #include <interface/interface.h>
 #include <syncpoint/syncpoint_call.h>
@@ -38,9 +38,6 @@
 #include <string>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class SyncPointManager;
 class SyncPoint;

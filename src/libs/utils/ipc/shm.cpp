@@ -258,20 +258,20 @@ SharedMemory::SharedMemory(const char *magic_token,
   _header          = NULL;
   _data_size       = 0;
 
-  __semset         = NULL;
-  __created        = false;
-  __shared_mem     = NULL;
-  __shared_mem_id  = 0;
-  __shared_mem_upper_bound = NULL;
+  semset_         = NULL;
+  created_        = false;
+  shared_mem_     = NULL;
+  shared_mem_id_  = 0;
+  shared_mem_upper_bound_ = NULL;
 
-  __write_lock_aquired     = false;
+  write_lock_aquired_     = false;
 
-  __registry_name     = NULL;
+  registry_name_     = NULL;
 
   if (registry_name) {
-    __registry_name = strdup(registry_name);
+    registry_name_ = strdup(registry_name);
   }
-  __shm_registry = new SharedMemoryRegistry(registry_name);
+  shm_registry_ = new SharedMemoryRegistry(registry_name);
 }
 
 
@@ -295,17 +295,17 @@ SharedMemory::SharedMemory(const SharedMemory &s)
   _header          = s._header->clone();
   _data_size       = 0;
 
-  __semset         = NULL;
-  __created        = false;
-  __shared_mem     = NULL;
-  __shared_mem_id  = 0;
-  __shared_mem_upper_bound = NULL;
+  semset_         = NULL;
+  created_        = false;
+  shared_mem_     = NULL;
+  shared_mem_id_  = 0;
+  shared_mem_upper_bound_ = NULL;
 
-  __write_lock_aquired     = false;
-  if (s.__registry_name) {
-    __registry_name = strdup(s.__registry_name);
+  write_lock_aquired_     = false;
+  if (s.registry_name_) {
+    registry_name_ = strdup(s.registry_name_);
   } else {
-    __registry_name = NULL;
+    registry_name_ = NULL;
   }
 
   try {
@@ -319,7 +319,7 @@ SharedMemory::SharedMemory(const SharedMemory &s)
     throw ShmCouldNotAttachException("Could not attach to created shared memory segment");
   }
 
-  __shm_registry = new SharedMemoryRegistry(__registry_name);
+  shm_registry_ = new SharedMemoryRegistry(registry_name_);
 }
 
 
@@ -368,17 +368,17 @@ SharedMemory::SharedMemory(const char *magic_token,
   _shm_header      = NULL;
   _data_size       = 0;
 
-  __created         = false;
-  __semset          = NULL;
-  __shared_mem     = NULL;
-  __shared_mem_id  = 0;
-  __shared_mem_upper_bound = NULL;
+  created_         = false;
+  semset_          = NULL;
+  shared_mem_     = NULL;
+  shared_mem_id_  = 0;
+  shared_mem_upper_bound_ = NULL;
 
-  __write_lock_aquired     = false;
+  write_lock_aquired_     = false;
 
-  __registry_name = NULL;
+  registry_name_ = NULL;
   if (registry_name) {
-    __registry_name = strdup(registry_name);
+    registry_name_ = strdup(registry_name);
   }
 
   try {
@@ -392,26 +392,26 @@ SharedMemory::SharedMemory(const char *magic_token,
     throw ShmCouldNotAttachException("Could not attach to created shared memory segment");
   }
 
-  __shm_registry = new SharedMemoryRegistry(__registry_name);
+  shm_registry_ = new SharedMemoryRegistry(registry_name_);
 }
 
 
 /** Destructor */
 SharedMemory::~SharedMemory()
 {
-  if ( __semset != NULL ) {
+  if ( semset_ != NULL ) {
     // if we destroy the shared memory region we can as well delete the semaphore,
     // it is not necessary anymore.
-    __semset->set_destroy_on_delete( _destroy_on_delete );
+    semset_->set_destroy_on_delete( _destroy_on_delete );
     if ( _destroy_on_delete && ! _is_read_only ) {
       _shm_header->semaphore = 0;
     }
-    delete __semset;
+    delete semset_;
   }
   delete[] _magic_token;
   free();
-  delete __shm_registry;
-  if (__registry_name)  ::free(__registry_name);
+  delete shm_registry_;
+  if (registry_name_)  ::free(registry_name_);
 }
 
 /** Assignment operator.
@@ -422,19 +422,19 @@ SharedMemory::~SharedMemory()
 SharedMemory&
 SharedMemory::operator=(const SharedMemory &s)
 {
-  if ( __semset != NULL ) {
+  if ( semset_ != NULL ) {
     // if we destroy the shared memory region we can as well delete the semaphore,
     // it is not necessary anymore.
-    __semset->set_destroy_on_delete( _destroy_on_delete );
+    semset_->set_destroy_on_delete( _destroy_on_delete );
     if ( _destroy_on_delete && ! _is_read_only ) {
       _shm_header->semaphore = 0;
     }
-    delete __semset;
+    delete semset_;
   }
   delete[] _magic_token;
   free();
-  delete __shm_registry;
-  if (__registry_name)  ::free(__registry_name);
+  delete shm_registry_;
+  if (registry_name_)  ::free(registry_name_);
 
   _magic_token = new char[MagicTokenSize];
   memset(_magic_token, 0, MagicTokenSize);
@@ -450,17 +450,17 @@ SharedMemory::operator=(const SharedMemory &s)
   _header          = s._header->clone();
   _data_size       = 0;
 
-  __semset         = NULL;
-  __created        = false;
-  __shared_mem     = NULL;
-  __shared_mem_id  = 0;
-  __shared_mem_upper_bound = NULL;
+  semset_         = NULL;
+  created_        = false;
+  shared_mem_     = NULL;
+  shared_mem_id_  = 0;
+  shared_mem_upper_bound_ = NULL;
 
-  __write_lock_aquired     = false;
-  if (s.__registry_name) {
-    __registry_name = strdup(s.__registry_name);
+  write_lock_aquired_     = false;
+  if (s.registry_name_) {
+    registry_name_ = strdup(s.registry_name_);
   } else {
-    __registry_name = NULL;
+    registry_name_ = NULL;
   }
 
   try {
@@ -474,7 +474,7 @@ SharedMemory::operator=(const SharedMemory &s)
     throw ShmCouldNotAttachException("Could not attach to created shared memory segment");
   }
 
-  __shm_registry = new SharedMemoryRegistry(__registry_name);
+  shm_registry_ = new SharedMemoryRegistry(registry_name_);
 
   return *this;
 }
@@ -491,14 +491,14 @@ SharedMemory::free()
   _shm_header = NULL;
   _shm_magic_token = NULL;
 
-  if ((__shared_mem_id != -1) && !_is_read_only && _destroy_on_delete ) {
-    shmctl(__shared_mem_id, IPC_RMID, NULL);
-    __shm_registry->remove_segment(__shared_mem_id);
-    __shared_mem_id = -1;
+  if ((shared_mem_id_ != -1) && !_is_read_only && _destroy_on_delete ) {
+    shmctl(shared_mem_id_, IPC_RMID, NULL);
+    shm_registry_->remove_segment(shared_mem_id_);
+    shared_mem_id_ = -1;
   }
-  if (__shared_mem != NULL) {
-    shmdt(__shared_mem);
-    __shared_mem = NULL;
+  if (shared_mem_ != NULL) {
+    shmdt(shared_mem_);
+    shared_mem_ = NULL;
   }
 }
 
@@ -520,13 +520,13 @@ SharedMemory::attach()
     throw ShmNoHeaderException();
   }
 
-  if ((_memptr != NULL) && (__shared_mem_id != -1)) {
+  if ((_memptr != NULL) && (shared_mem_id_ != -1)) {
     // a memptr has already been attached
     return;
   }
 
   std::list<SharedMemoryRegistry::SharedMemID> segments =
-    __shm_registry->find_segments(_magic_token);
+    shm_registry_->find_segments(_magic_token);
 
 
   std::list<SharedMemoryRegistry::SharedMemID>::iterator s;
@@ -561,12 +561,12 @@ SharedMemory::attach()
 		   (unsigned int)shm_segment.shm_segsz);
 	}
 
-	__shared_mem_id   = s->shmid;
-	__shared_mem      = shm_buf;
-	__shared_mem_upper_bound = (void *)((size_t)__shared_mem + _mem_size);
+	shared_mem_id_   = s->shmid;
+	shared_mem_      = shm_buf;
+	shared_mem_upper_bound_ = (void *)((size_t)shared_mem_ + _mem_size);
 	_shm_upper_bound   = (void *)((size_t)_shm_header->shm_addr + _mem_size);
 	_memptr            = (char *)shm_ptr + _header->size();
-	_shm_offset        = (size_t)__shared_mem - (size_t)_shm_header->shm_addr;
+	_shm_offset        = (size_t)shared_mem_ - (size_t)_shm_header->shm_addr;
 
 	if ( _shm_header->semaphore != 0 ) {
 	    // Houston, we've got a semaphore, open it!
@@ -582,37 +582,37 @@ SharedMemory::attach()
 
   if ((_memptr == NULL) && ! _is_read_only && _should_create) {
     // try to create a new shared memory segment
-    __created = true;
+    created_ = true;
     key_t key = 1;
 
     _data_size = _header->data_size();
     _mem_size  = sizeof(SharedMemory_header_t) + MagicTokenSize + _header->size() + _data_size;
     while ((_memptr == NULL) && (key < INT_MAX)) {
     // no shm segment found, create one
-      __shared_mem_id = shmget(key, _mem_size, IPC_CREAT | IPC_EXCL | 0666);
-      if (__shared_mem_id != -1) {
-	__shared_mem = shmat(__shared_mem_id, NULL, 0);
-	if (__shared_mem != (void *)-1) {
-	  memset(__shared_mem, 0, _mem_size);
+      shared_mem_id_ = shmget(key, _mem_size, IPC_CREAT | IPC_EXCL | 0666);
+      if (shared_mem_id_ != -1) {
+	shared_mem_ = shmat(shared_mem_id_, NULL, 0);
+	if (shared_mem_ != (void *)-1) {
+	  memset(shared_mem_, 0, _mem_size);
 
-	  _shm_magic_token = (char *)__shared_mem;
-	  _shm_header = (SharedMemory_header_t *)((char *)__shared_mem + MagicTokenSize);
-	  _shm_header->shm_addr = __shared_mem;
+	  _shm_magic_token = (char *)shared_mem_;
+	  _shm_header = (SharedMemory_header_t *)((char *)shared_mem_ + MagicTokenSize);
+	  _shm_header->shm_addr = shared_mem_;
 
-	  _memptr     = (char *)__shared_mem + MagicTokenSize
+	  _memptr     = (char *)shared_mem_ + MagicTokenSize
 	                                     + sizeof(SharedMemory_header_t)
                                              + _header->size();
-	  _shm_upper_bound = (void *)((size_t)__shared_mem + _mem_size);
+	  _shm_upper_bound = (void *)((size_t)shared_mem_ + _mem_size);
 	  _shm_offset      = 0;
-	  __shared_mem_upper_bound = _shm_upper_bound;
+	  shared_mem_upper_bound_ = _shm_upper_bound;
 
 	  strncpy(_shm_magic_token, _magic_token, MagicTokenSize);
 
-	  _header->initialize( (char *)__shared_mem + MagicTokenSize
+	  _header->initialize( (char *)shared_mem_ + MagicTokenSize
 			                            + sizeof(SharedMemory_header_t));
 	} else {
 	  // It didn't work out, destroy shared mem and try again
-	  shmctl(__shared_mem_id, IPC_RMID, NULL);
+	  shmctl(shared_mem_id_, IPC_RMID, NULL);
 	  throw ShmCouldNotAttachException("Could not create shared memory segment");
 	}
       } else {
@@ -635,7 +635,7 @@ SharedMemory::attach()
   }
 
   try {
-    __shm_registry->add_segment(__shared_mem_id, _magic_token);
+    shm_registry_->add_segment(shared_mem_id_, _magic_token);
   } catch (Exception &e) {
     free();
     throw;
@@ -703,8 +703,8 @@ SharedMemory::addr(void *ptr) const
 {
   if ( _shm_offset == 0 )  return ptr;
   if ( ptr == NULL) return NULL;
-  if ( (ptr < __shared_mem) ||
-       (ptr >= __shared_mem_upper_bound) ) {
+  if ( (ptr < shared_mem_) ||
+       (ptr >= shared_mem_upper_bound_) ) {
     throw ShmPtrOutOfBoundsException();
   }
   return (void *)((size_t)ptr - _shm_offset);
@@ -734,7 +734,7 @@ SharedMemory::is_read_only() const
 bool
 SharedMemory::is_creator() const
 {
-  return __created;
+  return created_;
 }
 
 /** Get a pointer to the shared memory
@@ -768,7 +768,7 @@ SharedMemory::data_size() const
 int
 SharedMemory::shmem_id() const
 {
-  return __shared_mem_id;
+  return shared_mem_id_;
 }
 
 
@@ -778,7 +778,7 @@ SharedMemory::shmem_id() const
 unsigned int
 SharedMemory::num_attached() const
 {
-  return num_attached(__shared_mem_id);
+  return num_attached(shared_mem_id_);
 }
 
 
@@ -805,7 +805,7 @@ SharedMemory::set(void *memptr)
 bool
 SharedMemory::is_destroyed() const
 {
-  return is_destroyed(__shared_mem_id);
+  return is_destroyed(shared_mem_id_);
 }
 
 
@@ -816,7 +816,7 @@ SharedMemory::is_destroyed() const
 bool
 SharedMemory::is_swapable() const
 {
-  return is_swapable(__shared_mem_id);
+  return is_swapable(shared_mem_id_);
 }
 
 
@@ -847,7 +847,7 @@ SharedMemory::is_valid() const
 bool
 SharedMemory::is_protected() const
 {
-  return (__semset != NULL);
+  return (semset_ != NULL);
 }
 
 
@@ -874,12 +874,12 @@ SharedMemory::set_destroy_on_delete(bool destroy)
 void
 SharedMemory::add_semaphore()
 {
-  if (__semset != NULL)  return;
+  if (semset_ != NULL)  return;
   if (_memptr == NULL) throw Exception("Cannot add semaphore if not attached");
 
   if ( _shm_header->semaphore != 0 ) {
     // a semaphore has been created but not been opened
-    __semset = new SemaphoreSet( _shm_header->semaphore,
+    semset_ = new SemaphoreSet( _shm_header->semaphore,
 				 /* num sems    */ 2,
 				 /* create      */ false,
 				 /* dest on del */ false );
@@ -887,13 +887,13 @@ SharedMemory::add_semaphore()
     // no semaphore exist, create one, but only if shmem is not
     // opened read-only!
     if ( ! _is_read_only) {
-      __semset = new SemaphoreSet( /* num sems    */ 2,
+      semset_ = new SemaphoreSet( /* num sems    */ 2,
 				   /* dest on del */ true );
       // one and only one (writer) may lock the memory
-      __semset->unlock(WRITE_MUTEX_SEM);
+      semset_->unlock(WRITE_MUTEX_SEM);
       // up to MaxNumConcurrentReaders readers can lock the memory
-      __semset->set_value(READ_SEM, MaxNumConcurrentReaders);
-      _shm_header->semaphore = __semset->key();
+      semset_->set_value(READ_SEM, MaxNumConcurrentReaders);
+      _shm_header->semaphore = semset_->key();
     } else {
       throw Exception("Cannot create semaphore for read-only shmem segment");
     }
@@ -911,11 +911,11 @@ SharedMemory::add_semaphore()
 void
 SharedMemory::set_swapable(bool swapable)
 {
-#ifdef __USE_MISC
+#ifdef USE_MISC_
   if (swapable) {
-    shmctl(__shared_mem_id, SHM_UNLOCK, NULL);
+    shmctl(shared_mem_id_, SHM_UNLOCK, NULL);
   } else {
-    shmctl(__shared_mem_id, SHM_LOCK, NULL);
+    shmctl(shared_mem_id_, SHM_LOCK, NULL);
   }
 #endif
 }
@@ -931,12 +931,12 @@ SharedMemory::set_swapable(bool swapable)
 void
 SharedMemory::lock_for_read()
 {
-  if ( __semset == NULL ) {
+  if ( semset_ == NULL ) {
     return;
   }
 
-  __semset->lock(READ_SEM);
-  __lock_aquired = true;
+  semset_->lock(READ_SEM);
+  lock_aquired_ = true;
 }
 
 
@@ -961,10 +961,10 @@ SharedMemory::lock_for_read()
 bool
 SharedMemory::try_lock_for_read()
 {
-  if ( __semset == NULL )  return false;
+  if ( semset_ == NULL )  return false;
   
-  if ( __semset->try_lock(READ_SEM) ) {
-    __lock_aquired = true;
+  if ( semset_->try_lock(READ_SEM) ) {
+    lock_aquired_ = true;
     return true;
   } else {
     return false;
@@ -982,17 +982,17 @@ SharedMemory::try_lock_for_read()
 void
 SharedMemory::lock_for_write()
 {
-  if ( __semset == NULL ) {
+  if ( semset_ == NULL ) {
     return;
   }
 
-  __semset->lock(WRITE_MUTEX_SEM);
+  semset_->lock(WRITE_MUTEX_SEM);
   for ( short i = 0; i < MaxNumConcurrentReaders; ++i) {
-    __semset->lock(READ_SEM);
+    semset_->lock(READ_SEM);
   }
-  __write_lock_aquired = true;
-  __lock_aquired = true;
-  __semset->unlock(WRITE_MUTEX_SEM);
+  write_lock_aquired_ = true;
+  lock_aquired_ = true;
+  semset_->unlock(WRITE_MUTEX_SEM);
 }
 
 
@@ -1017,22 +1017,22 @@ SharedMemory::lock_for_write()
 bool
 SharedMemory::try_lock_for_write()
 {
-  if ( __semset == NULL )  return false;
+  if ( semset_ == NULL )  return false;
 
-  if ( __semset->try_lock(WRITE_MUTEX_SEM) ) {
+  if ( semset_->try_lock(WRITE_MUTEX_SEM) ) {
     for ( short i = 0; i < MaxNumConcurrentReaders; ++i) {
-      if ( ! __semset->try_lock(READ_SEM) ) {
+      if ( ! semset_->try_lock(READ_SEM) ) {
 	// we up to now locked i-1 readers, unlock 'em and fail
 	for (short j = 0; j < i - 1; ++j) {
-	  __semset->unlock(READ_SEM);
+	  semset_->unlock(READ_SEM);
 	}
-	__semset->unlock(WRITE_MUTEX_SEM);
+	semset_->unlock(WRITE_MUTEX_SEM);
 	return false;
       }
     }
-    __lock_aquired = true;
-    __write_lock_aquired = true;
-    __semset->unlock(WRITE_MUTEX_SEM);
+    lock_aquired_ = true;
+    write_lock_aquired_ = true;
+    semset_->unlock(WRITE_MUTEX_SEM);
     return true;
   } else {
     return false;
@@ -1049,15 +1049,15 @@ SharedMemory::try_lock_for_write()
 void
 SharedMemory::unlock()
 {
-  if ( __semset == NULL || ! __lock_aquired )  return;
+  if ( semset_ == NULL || ! lock_aquired_ )  return;
 
-  if ( __write_lock_aquired ) {
+  if ( write_lock_aquired_ ) {
     for ( short i = 0; i < MaxNumConcurrentReaders; ++i) {
-      __semset->unlock(READ_SEM);
+      semset_->unlock(READ_SEM);
     }
-    __write_lock_aquired = false;
+    write_lock_aquired_ = false;
   } else {
-    __semset->unlock(READ_SEM);
+    semset_->unlock(READ_SEM);
   }
 }
 
@@ -1080,7 +1080,7 @@ SharedMemory::is_destroyed(int shm_id)
   if (shmctl(shm_id, IPC_STAT, &shm_segment ) == -1) {
     return true;
   } else {
-#ifdef __USE_MISC
+#ifdef USE_MISC_
     struct ipc_perm *perm = &shm_segment.shm_perm;
     return (perm->mode & SHM_DEST);
 #else
@@ -1098,7 +1098,7 @@ SharedMemory::is_destroyed(int shm_id)
 bool
 SharedMemory::is_swapable(int shm_id)
 {
-#ifdef __USE_MISC
+#ifdef USE_MISC_
   struct shmid_ds  shm_segment;
   struct ipc_perm *perm = &shm_segment.shm_perm;
 
@@ -1334,13 +1334,13 @@ SharedMemory::end()
  */
 SharedMemory::SharedMemoryIterator::SharedMemoryIterator()
 {
-  __id_it       = __ids.end();
-  __cur_shmid   = -1;
-  __header      = NULL;
-  __shm_buf     = NULL;
-  __segmsize    = 0;
-  __segmnattch  = 0;
-  __initialized = true;
+  id_it_       = ids_.end();
+  cur_shmid_   = -1;
+  header_      = NULL;
+  shm_buf_     = NULL;
+  segmsize_    = 0;
+  segmnattch_  = 0;
+  initialized_ = true;
 }
 
 
@@ -1349,24 +1349,24 @@ SharedMemory::SharedMemoryIterator::SharedMemoryIterator()
  */
 SharedMemory::SharedMemoryIterator::SharedMemoryIterator(const SharedMemoryIterator &shmit)
 {
-  __header = shmit.__header->clone();
-  __cur_shmid = shmit.__cur_shmid;
-  __shm_buf = NULL;
-  __segmsize    = 0;
-  __segmnattch  = 0;
-  __ids = shmit.__ids;
-  __initialized = true;
+  header_ = shmit.header_->clone();
+  cur_shmid_ = shmit.cur_shmid_;
+  shm_buf_ = NULL;
+  segmsize_    = 0;
+  segmnattch_  = 0;
+  ids_ = shmit.ids_;
+  initialized_ = true;
 
-  if (shmit.__id_it == shmit.__ids.end()) {
-    __id_it = __ids.end();
+  if (shmit.id_it_ == shmit.ids_.end()) {
+    id_it_ = ids_.end();
   } else {
     std::list<SharedMemoryRegistry::SharedMemID>::iterator s;
-    for (s = __ids.begin(); s != __ids.end(); ++s) {
-      if (s->shmid == shmit.__id_it->shmid) break;
+    for (s = ids_.begin(); s != ids_.end(); ++s) {
+      if (s->shmid == shmit.id_it_->shmid) break;
     }
   }
 
-  if ( shmit.__shm_buf != (void *)-1 ) {
+  if ( shmit.shm_buf_ != (void *)-1 ) {
     // other iterator is attach, attach as well
     try {
       attach();
@@ -1385,13 +1385,13 @@ SharedMemory::SharedMemoryIterator::SharedMemoryIterator(
       std::list<SharedMemoryRegistry::SharedMemID> ids,
       SharedMemoryHeader *header)
 {
-  __header = header->clone();
-  __cur_shmid = -1;
-  __shm_buf = (void *)-1;
-  __segmsize    = 0;
-  __segmnattch  = 0;
-  __ids = ids;
-  __initialized = false;
+  header_ = header->clone();
+  cur_shmid_ = -1;
+  shm_buf_ = (void *)-1;
+  segmsize_    = 0;
+  segmnattch_  = 0;
+  ids_ = ids;
+  initialized_ = false;
 
   // Find first shm segment
   ++(*this);
@@ -1401,10 +1401,10 @@ SharedMemory::SharedMemoryIterator::SharedMemoryIterator(
 /** Destructor. */
 SharedMemory::SharedMemoryIterator::~SharedMemoryIterator()
 {
-  delete __header;
-  if ( __shm_buf != (void *)-1 ) {
-    shmdt(__shm_buf);
-    __shm_buf = (void *)-1;
+  delete header_;
+  if ( shm_buf_ != (void *)-1 ) {
+    shmdt(shm_buf_);
+    shm_buf_ = (void *)-1;
   }
 }
 
@@ -1416,8 +1416,8 @@ SharedMemory::SharedMemoryIterator::attach()
   struct shmid_ds  shm_segment;
 
   // Check if segment exists and get info
-  __cur_shmid = __id_it->shmid;
-  if ( __cur_shmid < 0 ) {
+  cur_shmid_ = id_it_->shmid;
+  if ( cur_shmid_ < 0 ) {
     throw ShmCouldNotAttachException("SharedMemoryIterator could not stat");
   }
 
@@ -1429,19 +1429,19 @@ SharedMemory::SharedMemoryIterator::attach()
   */
 
   // actually attach
-  __shm_buf = shmat(__cur_shmid, NULL, SHM_RDONLY);
-  if (__shm_buf == (void *)-1) {
+  shm_buf_ = shmat(cur_shmid_, NULL, SHM_RDONLY);
+  if (shm_buf_ == (void *)-1) {
     throw ShmCouldNotAttachException("SharedMemoryIterator could not attach");
   }
 
   // do STAT again to get up2date values
-  if (shmctl( __cur_shmid, IPC_STAT, &shm_segment) < 0 ) {
-    shmdt(__shm_buf);
+  if (shmctl( cur_shmid_, IPC_STAT, &shm_segment) < 0 ) {
+    shmdt(shm_buf_);
     throw ShmCouldNotAttachException("SharedMemoryIterator could not stat (2)");
   }
 
-  __segmsize   = shm_segment.shm_segsz;
-  __segmnattch = shm_segment.shm_nattch;
+  segmsize_   = shm_segment.shm_segsz;
+  segmnattch_ = shm_segment.shm_nattch;
 }
 
 
@@ -1449,16 +1449,16 @@ SharedMemory::SharedMemoryIterator::attach()
 void
 SharedMemory::SharedMemoryIterator::reset()
 {
-  if ( __header) __header->reset();
-  if ( __shm_buf != (void *)-1) {
-    shmdt(__shm_buf);
-    __shm_buf = (void *)-1;
+  if ( header_) header_->reset();
+  if ( shm_buf_ != (void *)-1) {
+    shmdt(shm_buf_);
+    shm_buf_ = (void *)-1;
   }
-  __data_buf   = NULL;
-  __semaphore  = -1;
-  __cur_shmid  = -1;
-  __segmsize   = 0;
-  __segmnattch = 0;
+  data_buf_   = NULL;
+  semaphore_  = -1;
+  cur_shmid_  = -1;
+  segmsize_   = 0;
+  segmnattch_ = 0;
 }
 
 
@@ -1470,34 +1470,34 @@ SharedMemory::SharedMemoryIterator::operator++()
 {
   reset();
 
-  if (! __initialized) {
-    __id_it = __ids.begin();
+  if (! initialized_) {
+    id_it_ = ids_.begin();
   }
  
-  if (__id_it == __ids.end())  return *this;
+  if (id_it_ == ids_.end())  return *this;
 
-  if (__initialized)  ++__id_it;
-  else __initialized = true;
+  if (initialized_)  ++id_it_;
+  else initialized_ = true;
 
-  for (; __id_it != __ids.end(); ++__id_it) {
+  for (; id_it_ != ids_.end(); ++id_it_) {
     try {
       attach();
 
-      if (!__header || __header->matches((char *)__shm_buf + MagicTokenSize
+      if (!header_ || header_->matches((char *)shm_buf_ + MagicTokenSize
 					 + sizeof(SharedMemory_header_t)) )
       {
 
 	SharedMemory_header_t *shm_header =
-	  (SharedMemory_header_t *)((char *)__shm_buf + MagicTokenSize);
+	  (SharedMemory_header_t *)((char *)shm_buf_ + MagicTokenSize);
 
 	// Found one!
-	__semaphore = shm_header->semaphore;
-	__data_buf = (char *)__shm_buf + MagicTokenSize
+	semaphore_ = shm_header->semaphore;
+	data_buf_ = (char *)shm_buf_ + MagicTokenSize
 	  + sizeof(SharedMemory_header_t)
-	  + (__header ? __header->size() : 0);
+	  + (header_ ? header_->size() : 0);
 	
-	if ( __header ) {
-	  __header->set((char *)__shm_buf + MagicTokenSize
+	if ( header_ ) {
+	  header_->set((char *)shm_buf_ + MagicTokenSize
 			+ sizeof(SharedMemory_header_t));
 	}
 
@@ -1562,7 +1562,7 @@ SharedMemory::SharedMemoryIterator::operator+=(unsigned int i)
 bool
 SharedMemory::SharedMemoryIterator::operator==(const SharedMemoryIterator & s) const
 {
-  return (__cur_shmid == s.__cur_shmid);
+  return (cur_shmid_ == s.cur_shmid_);
 }
 
 
@@ -1583,7 +1583,7 @@ SharedMemory::SharedMemoryIterator::operator!=(const SharedMemoryIterator & s) c
 const SharedMemoryHeader *
 SharedMemory::SharedMemoryIterator::operator*() const
 {
-  return __header;
+  return header_;
 }
 
 
@@ -1594,24 +1594,24 @@ SharedMemory::SharedMemoryIterator::operator*() const
 SharedMemory::SharedMemoryIterator &
 SharedMemory::SharedMemoryIterator::operator=(const SharedMemoryIterator & shmit)
 {
-  if ( __shm_buf != (void *)-1 ) {
-    shmdt(__shm_buf);
-    __shm_buf = (void *)-1;
+  if ( shm_buf_ != (void *)-1 ) {
+    shmdt(shm_buf_);
+    shm_buf_ = (void *)-1;
   }
-  delete __header;
+  delete header_;
 
-  __header = shmit.__header->clone();
-  __ids    = shmit.__ids;
-  __cur_shmid = shmit.__cur_shmid;
-  __shm_buf = NULL;
+  header_ = shmit.header_->clone();
+  ids_    = shmit.ids_;
+  cur_shmid_ = shmit.cur_shmid_;
+  shm_buf_ = NULL;
 
-  if (shmit.__id_it != shmit.__ids.end()) {
-    for (__id_it = __ids.begin(); __id_it != __ids.end(); ++__id_it) {
-      if (__id_it->shmid == shmit.__id_it->shmid) break;
+  if (shmit.id_it_ != shmit.ids_.end()) {
+    for (id_it_ = ids_.begin(); id_it_ != ids_.end(); ++id_it_) {
+      if (id_it_->shmid == shmit.id_it_->shmid) break;
     }
   }
 
-  if ( shmit.__shm_buf != (void *)-1 ) {
+  if ( shmit.shm_buf_ != (void *)-1 ) {
     // other iterator is attach, attach as well
     attach();
   }
@@ -1626,10 +1626,10 @@ SharedMemory::SharedMemoryIterator::operator=(const SharedMemoryIterator & shmit
 const char *
 SharedMemory::SharedMemoryIterator::magic_token() const
 {
-  if (__id_it == __ids.end()) {
+  if (id_it_ == ids_.end()) {
     return "";
   } else {
-    return __id_it->magic_token;
+    return id_it_->magic_token;
   }
 }
 
@@ -1640,7 +1640,7 @@ SharedMemory::SharedMemoryIterator::magic_token() const
 int
 SharedMemory::SharedMemoryIterator::shmid() const
 {
-  return __cur_shmid;
+  return cur_shmid_;
 }
 
 
@@ -1650,7 +1650,7 @@ SharedMemory::SharedMemoryIterator::shmid() const
 int
 SharedMemory::SharedMemoryIterator::semaphore() const
 {
-  return __semaphore;
+  return semaphore_;
 }
 
 
@@ -1660,7 +1660,7 @@ SharedMemory::SharedMemoryIterator::semaphore() const
 size_t
 SharedMemory::SharedMemoryIterator::segmsize() const
 {
-  return __segmsize;
+  return segmsize_;
 }
 
 
@@ -1670,7 +1670,7 @@ SharedMemory::SharedMemoryIterator::segmsize() const
 size_t
 SharedMemory::SharedMemoryIterator::segmnattch() const
 {
-  return __segmnattch;
+  return segmnattch_;
 }
 
 
@@ -1680,7 +1680,7 @@ SharedMemory::SharedMemoryIterator::segmnattch() const
 void *
 SharedMemory::SharedMemoryIterator::databuf() const
 {
-  return __data_buf;
+  return data_buf_;
 }
 
 } // end namespace fawkes

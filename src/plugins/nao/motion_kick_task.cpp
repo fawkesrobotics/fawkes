@@ -49,9 +49,9 @@ using namespace fawkes;
 NaoQiMotionKickTask::NaoQiMotionKickTask(AL::ALPtr<AL::ALMotionProxy> almotion,
 					 fawkes::HumanoidMotionInterface::LegEnum leg)
 {
-  __quit      = false;
-  __almotion  = almotion;
-  __leg       = leg;
+  quit_      = false;
+  almotion_  = almotion;
+  leg_       = leg;
 
   // ALTask variable to cause auto-destruct when done
   fAutoDelete = true;
@@ -124,9 +124,9 @@ NaoQiMotionKickTask::goto_start_pos(AL::ALValue speed, bool concurrent)
   ALValue names = ALValue::array("LArm", "RArm", "LLeg", "RLeg");
 
   if (concurrent) {
-    __almotion->post.angleInterpolationWithSpeed(names, target_angles, speed);
+    almotion_->post.angleInterpolationWithSpeed(names, target_angles, speed);
   } else {
-    __almotion->angleInterpolationWithSpeed(names, target_angles, speed);
+    almotion_->angleInterpolationWithSpeed(names, target_angles, speed);
   }
 }
 
@@ -139,9 +139,9 @@ NaoQiMotionKickTask::goto_start_pos(AL::ALValue speed, bool concurrent)
 void
 NaoQiMotionKickTask::exitTask()
 {
-  __quit = true;
-  std::vector<std::string> joint_names = __almotion->getJointNames("Body");
-  __almotion->killTasksUsingResources(joint_names);
+  quit_ = true;
+  std::vector<std::string> joint_names = almotion_->getJointNames("Body");
+  almotion_->killTasksUsingResources(joint_names);
   goto_start_pos(0.2, true);
 }
 
@@ -171,7 +171,7 @@ NaoQiMotionKickTask::run()
   float BALANCE_ANKLE_ROLL = 0;
   float STRIKE_OUT_HIP_ROLL = 0;
 
-  if ( __leg == fawkes::HumanoidMotionInterface::LEG_LEFT ) {
+  if ( leg_ == fawkes::HumanoidMotionInterface::LEG_LEFT ) {
     shoot_hip_roll_name = "LHipRoll";
     support_hip_roll_name = "RHipRoll";
     shoot_hip_pitch_name = "LHipPitch";
@@ -184,7 +184,7 @@ NaoQiMotionKickTask::run()
     BALANCE_HIP_ROLL = 20;
     BALANCE_ANKLE_ROLL = -25;
     STRIKE_OUT_HIP_ROLL = 30;
-  } else if (__leg == fawkes::HumanoidMotionInterface::LEG_RIGHT ) {
+  } else if (leg_ == fawkes::HumanoidMotionInterface::LEG_RIGHT ) {
     shoot_hip_roll_name = "RHipRoll";
     support_hip_roll_name = "LHipRoll";
     shoot_hip_pitch_name = "RHipPitch";
@@ -199,7 +199,7 @@ NaoQiMotionKickTask::run()
     STRIKE_OUT_HIP_ROLL = -30;
   }
 
-  if (__quit)  return;
+  if (quit_)  return;
   goto_start_pos(0.2);
 
   ALValue names;
@@ -221,8 +221,8 @@ NaoQiMotionKickTask::run()
       deg2rad(support_ankle_roll), deg2rad(shoot_ankle_roll));
   speed = 0.15;
 
-  //if (__quit)  return;
-  __almotion->angleInterpolationWithSpeed(names, target_angles, speed);
+  //if (quit_)  return;
+  almotion_->angleInterpolationWithSpeed(names, target_angles, speed);
 
   names.clear();
   target_angles.clear();
@@ -240,8 +240,8 @@ NaoQiMotionKickTask::run()
       deg2rad(shoot_ankle_pitch));
   speed = 0.2;
 
-  if (__quit)  return;
-  __almotion->angleInterpolationWithSpeed(names, target_angles, speed);
+  if (quit_)  return;
+  almotion_->angleInterpolationWithSpeed(names, target_angles, speed);
 
   names.clear();
   target_angles.clear();
@@ -257,8 +257,8 @@ NaoQiMotionKickTask::run()
   target_angles = ALValue::array(deg2rad(shoot_hip_pitch), deg2rad(support_hip_pitch));
   speed = 0.1;
 
-  if (__quit)  return;
-  __almotion->angleInterpolationWithSpeed(names, target_angles, speed);
+  if (quit_)  return;
+  almotion_->angleInterpolationWithSpeed(names, target_angles, speed);
 
   names.clear();
   target_angles.clear();
@@ -277,8 +277,8 @@ NaoQiMotionKickTask::run()
   target_angles = ALValue::array(deg2rad(shoot_hip_pitch), deg2rad(support_hip_pitch),
       deg2rad(shoot_knee_pitch), deg2rad(shoot_ankle_pitch));
   speed = 1.0;
-  if (__quit)  return;
-  __almotion->angleInterpolationWithSpeed(names, target_angles, speed);
+  if (quit_)  return;
+  almotion_->angleInterpolationWithSpeed(names, target_angles, speed);
 
   names.clear();
   target_angles.clear();
@@ -294,12 +294,12 @@ NaoQiMotionKickTask::run()
   target_angles = ALValue::array(deg2rad(shoot_hip_pitch), deg2rad(support_hip_pitch));
   speed = 0.1;
 
-  if (__quit)  return;
-  __almotion->angleInterpolationWithSpeed(names, target_angles, speed);
+  if (quit_)  return;
+  almotion_->angleInterpolationWithSpeed(names, target_angles, speed);
 
   //names.clear();
   //target_angles.clear();
 
-  if (__quit)  return;
+  if (quit_)  return;
   goto_start_pos(0.1);
 }

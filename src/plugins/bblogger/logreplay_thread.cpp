@@ -85,17 +85,17 @@ BBLogReplayThread::BBLogReplayThread(const char *logfile_name,
   set_name("BBLogReplayThread(%s)", logfile_name);
   set_prepfin_conc_loop(true);
 
-  __logfile_name= strdup(logfile_name);
-  __logdir      = strdup(logdir);
-  __scenario    = strdup(scenario); // dont need this!?
-  __filename    = NULL;
-  __cfg_grace_period = grace_period;
-  __cfg_loop_replay  = loop_replay;
+  logfile_name_= strdup(logfile_name);
+  logdir_      = strdup(logdir);
+  scenario_    = strdup(scenario); // dont need this!?
+  filename_    = NULL;
+  cfg_grace_period_ = grace_period;
+  cfg_loop_replay_  = loop_replay;
   if (th_opmode == OPMODE_WAITFORWAKEUP) {
-    __cfg_non_blocking = non_blocking;
+    cfg_non_blocking_ = non_blocking;
   } else {
     // would cause busy waiting
-    __cfg_non_blocking = false;
+    cfg_non_blocking_ = false;
   }
 }
 
@@ -103,9 +103,9 @@ BBLogReplayThread::BBLogReplayThread(const char *logfile_name,
 /** Destructor. */
 BBLogReplayThread::~BBLogReplayThread()
 {
-  free(__logfile_name);
-  free(__logdir);
-  free(__scenario);
+  free(logfile_name_);
+  free(logdir_);
+  free(scenario_);
 }
 
 
@@ -114,46 +114,46 @@ BBLogReplayThread::~BBLogReplayThread()
 void
 BBLogReplayThread::init()
 {
-  __logfile = NULL;
-  __interface = NULL;
-  __filename = NULL;
+  logfile_ = NULL;
+  interface_ = NULL;
+  filename_ = NULL;
 
-  if (asprintf(&__filename, "%s/%s", __logdir, __logfile_name) == -1) {
+  if (asprintf(&filename_, "%s/%s", logdir_, logfile_name_) == -1) {
     throw OutOfMemoryException("Cannot re-generate logfile-path");
   }
 
   try {
-    __logfile = new BBLogFile(__filename, true);
+    logfile_ = new BBLogFile(filename_, true);
   } catch (Exception &e) {
     finalize();
     throw;
   }
 
-  if (! __logfile->has_next()) {
+  if (! logfile_->has_next()) {
     finalize();
-    throw Exception("Log file %s does not have any entries", __filename);
+    throw Exception("Log file %s does not have any entries", filename_);
   }
 
-  __interface = blackboard->open_for_writing(__logfile->interface_type(),
-					     __logfile->interface_id());
+  interface_ = blackboard->open_for_writing(logfile_->interface_type(),
+					     logfile_->interface_id());
 
   try {
-    __logfile->set_interface(__interface);
+    logfile_->set_interface(interface_);
   } catch (Exception &e) {
     finalize();
     throw;
   }
 
-  logger->log_info(name(), "Replaying from %s:", __filename);
+  logger->log_info(name(), "Replaying from %s:", filename_);
 }
 
 
 void
 BBLogReplayThread::finalize()
 {
-  delete __logfile;
-  if (__filename)  free(__filename);
-  blackboard->close(__interface);
+  delete logfile_;
+  if (filename_)  free(filename_);
+  blackboard->close(interface_);
 }
 
 
@@ -161,47 +161,47 @@ void
 BBLogReplayThread::once()
 {
   // Write first immediately, skip first offset
-  __logfile->read_next();
-  __interface->write();
-  __last_offset = __logfile->entry_offset();
-  if (__logfile->has_next()) {
-    __logfile->read_next();
-    __offsetdiff  = __logfile->entry_offset() - __last_offset;
-    __last_offset = __logfile->entry_offset();
+  logfile_->read_next();
+  interface_->write();
+  last_offset_ = logfile_->entry_offset();
+  if (logfile_->has_next()) {
+    logfile_->read_next();
+    offsetdiff_  = logfile_->entry_offset() - last_offset_;
+    last_offset_ = logfile_->entry_offset();
   }
-  __last_loop.stamp();
+  last_loop_.stamp();
 }
 
 void
 BBLogReplayThread::loop()
 {
-  if (__logfile->has_next()) {
+  if (logfile_->has_next()) {
 
     // check if there is time left to wait
-    __now.stamp();
-    __loopdiff = __now - __last_loop;
-    if ((__offsetdiff.in_sec() - __loopdiff.in_sec()) > __cfg_grace_period) {
-      if (__cfg_non_blocking) {
+    now_.stamp();
+    loopdiff_ = now_ - last_loop_;
+    if ((offsetdiff_.in_sec() - loopdiff_.in_sec()) > cfg_grace_period_) {
+      if (cfg_non_blocking_) {
 	// need to keep waiting before posting, but in non-blocking mode
 	// just wait for next loop
 	return;
       } else {
-	__waittime = __offsetdiff - __loopdiff;
-	__waittime.wait();
+	waittime_ = offsetdiff_ - loopdiff_;
+	waittime_.wait();
       }
     }
 
-    __interface->write();
-    __logfile->read_next();
+    interface_->write();
+    logfile_->read_next();
 
-    __last_loop.stamp();
-    __offsetdiff  = __logfile->entry_offset() - __last_offset;
-    __last_offset = __logfile->entry_offset();
+    last_loop_.stamp();
+    offsetdiff_  = logfile_->entry_offset() - last_offset_;
+    last_offset_ = logfile_->entry_offset();
 
   } else {
-    if(__cfg_loop_replay){
+    if(cfg_loop_replay_){
       logger->log_info(name(), "replay finished, looping");
-      __logfile->rewind();
+      logfile_->rewind();
     } else {
       if (opmode() == OPMODE_CONTINUOUS) {
 	// block

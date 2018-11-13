@@ -72,30 +72,30 @@ FvAcquisitionThread::FvAcquisitionThread(const char *id,  Camera *camera,
   set_prepfin_conc_loop(true);
   set_name("FvAcquisitionThread::%s", id);
 
-  __image_id      = strdup(id);
+  image_id_      = strdup(id);
 
   vision_threads  = new FvAqtVisionThreads(clock);
   raw_subscriber_thread = NULL;
 
-  __enabled_mutex = new Mutex(Mutex::RECURSIVE);
-  __enabled_waitcond = new WaitCondition(__enabled_mutex);
+  enabled_mutex_ = new Mutex(Mutex::RECURSIVE);
+  enabled_waitcond_ = new WaitCondition(enabled_mutex_);
 
-  __camera        = camera;
-  __width         = __camera->pixel_width();
-  __height        = __camera->pixel_height();
-  __colorspace    = __camera->colorspace();
+  camera_        = camera;
+  width_         = camera_->pixel_width();
+  height_        = camera_->pixel_height();
+  colorspace_    = camera_->colorspace();
 
-  __mode = AqtContinuous;
-  __enabled = false;
+  mode_ = AqtContinuous;
+  enabled_ = false;
 
 #ifdef FVBASE_TIMETRACKER
-  __tt = new TimeTracker();
-  __loop_count = 0;
-  __ttc_capture = __tt->add_class("Capture");
-  __ttc_lock    = __tt->add_class("Lock");
-  __ttc_convert = __tt->add_class("Convert");
-  __ttc_unlock  = __tt->add_class("Unlock");
-  __ttc_dispose = __tt->add_class("Dispose");
+  tt_ = new TimeTracker();
+  loop_count_ = 0;
+  ttc_capture_ = tt_->add_class("Capture");
+  ttc_lock_    = tt_->add_class("Lock");
+  ttc_convert_ = tt_->add_class("Convert");
+  ttc_unlock_  = tt_->add_class("Unlock");
+  ttc_dispose_ = tt_->add_class("Dispose");
 #endif
 }
 
@@ -103,32 +103,32 @@ FvAcquisitionThread::FvAcquisitionThread(const char *id,  Camera *camera,
 /** Destructor. */
 FvAcquisitionThread::~FvAcquisitionThread()
 {
-  __camera->close();
+  camera_->close();
 
-  for (__shmit = __shm.begin(); __shmit != __shm.end(); ++__shmit) {
-    delete __shmit->second;
+  for (shmit_ = shm_.begin(); shmit_ != shm_.end(); ++shmit_) {
+    delete shmit_->second;
   }
-  __shm.clear();
+  shm_.clear();
 
   delete vision_threads;
-  delete __camera;
-  free(__image_id);
-  delete __enabled_waitcond;
-  delete __enabled_mutex;
+  delete camera_;
+  free(image_id_);
+  delete enabled_waitcond_;
+  delete enabled_mutex_;
 }
 
 void
 FvAcquisitionThread::init()
 {
-  logger->log_debug(name(), "Camera opened, w=%u  h=%u  c=%s", __width, __height,
-		    colorspace_to_string(__colorspace));
+  logger->log_debug(name(), "Camera opened, w=%u  h=%u  c=%s", width_, height_,
+		    colorspace_to_string(colorspace_));
 
-  std::string if_id = std::string("Camera ") + __image_id;
-  __enabled_if = blackboard->open_for_writing<SwitchInterface>(if_id.c_str());
-  __enabled_if->set_enabled(__enabled);
-  __enabled_if->write();
+  std::string if_id = std::string("Camera ") + image_id_;
+  enabled_if_ = blackboard->open_for_writing<SwitchInterface>(if_id.c_str());
+  enabled_if_->set_enabled(enabled_);
+  enabled_if_->write();
 
-  bbil_add_message_interface(__enabled_if);
+  bbil_add_message_interface(enabled_if_);
   blackboard->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
 }
 
@@ -137,7 +137,7 @@ void
 FvAcquisitionThread::finalize()
 {
   blackboard->unregister_listener(this);
-  blackboard->close(__enabled_if);
+  blackboard->close(enabled_if_);
 }
 
 
@@ -184,18 +184,18 @@ FvAcquisitionThread::camera_instance(colorspace_t cspace, bool deep_copy)
       // There may be only one
       throw Exception("Only one vision thread may access the raw camera.");
     } else {
-      return __camera;
+      return camera_;
     }
   } else {
     char *tmp =  NULL;
-    if (__shm.find(cspace) == __shm.end()) {
-      if ( asprintf(&tmp, "%s.%zu", __image_id, __shm.size()) == -1) {
+    if (shm_.find(cspace) == shm_.end()) {
+      if ( asprintf(&tmp, "%s.%zu", image_id_, shm_.size()) == -1) {
 	throw OutOfMemoryException("FvAcqThread::camera_instance(): Could not create image ID");
       }
       img_id = tmp;
-      __shm[cspace] = new SharedMemoryImageBuffer(img_id, cspace, __width, __height);
+      shm_[cspace] = new SharedMemoryImageBuffer(img_id, cspace, width_, height_);
     } else {
-      img_id = __shm[cspace]->image_id();
+      img_id = shm_[cspace]->image_id();
     }
 
     SharedMemoryCamera *c = new SharedMemoryCamera(img_id, deep_copy);
@@ -214,7 +214,7 @@ FvAcquisitionThread::camera_instance(colorspace_t cspace, bool deep_copy)
 Camera *
 FvAcquisitionThread::get_camera()
 {
-  return __camera;
+  return camera_;
 }
 
 
@@ -233,7 +233,7 @@ FvAcquisitionThread::set_aqtmode(AqtMode mode)
     //logger->log_info(name(), "Setting CONTINUOUS");
     set_opmode(Thread::OPMODE_CONTINUOUS);
   }
-  __mode = mode;
+  mode_ = mode;
 }
 
 
@@ -246,25 +246,25 @@ FvAcquisitionThread::set_aqtmode(AqtMode mode)
 void
 FvAcquisitionThread::set_enabled(bool enabled)
 {
-  MutexLocker lock(__enabled_mutex);
+  MutexLocker lock(enabled_mutex_);
 
-  if (__enabled && ! enabled) {
+  if (enabled_ && ! enabled) {
     // disabling thread
-    __camera->stop();
-    __enabled_if->set_enabled(false);
-    __enabled_if->write();
+    camera_->stop();
+    enabled_if_->set_enabled(false);
+    enabled_if_->write();
 
-  } else if (! __enabled && enabled) {
+  } else if (! enabled_ && enabled) {
     // enabling thread
-    __camera->start();
-    __enabled_if->set_enabled(true);
-    __enabled_if->write();
+    camera_->start();
+    enabled_if_->set_enabled(true);
+    enabled_if_->write();
 
-    __enabled_waitcond->wake_all();
+    enabled_waitcond_->wake_all();
   } // else not state change
 
   // we can safely do this every time...
-  __enabled = enabled;
+  enabled_ = enabled;
 }
 
 
@@ -274,7 +274,7 @@ FvAcquisitionThread::set_enabled(bool enabled)
 FvAcquisitionThread::AqtMode
 FvAcquisitionThread::aqtmode()
 {
-  return __mode;
+  return mode_;
 }
 
 
@@ -298,21 +298,21 @@ FvAcquisitionThread::set_vt_prepfin_hold(bool hold)
 void
 FvAcquisitionThread::loop()
 {
-  MutexLocker lock(__enabled_mutex);
+  MutexLocker lock(enabled_mutex_);
 
-  while (! __enabled_if->msgq_empty() ) {
-    if (__enabled_if->msgq_first_is<SwitchInterface::EnableSwitchMessage>()) {
+  while (! enabled_if_->msgq_empty() ) {
+    if (enabled_if_->msgq_first_is<SwitchInterface::EnableSwitchMessage>()) {
       // must be re-established
       logger->log_info(name(), "Enabling on blackboard request");
       set_enabled(true);
-    } else if (__enabled_if->msgq_first_is<SwitchInterface::DisableSwitchMessage>()) {
+    } else if (enabled_if_->msgq_first_is<SwitchInterface::DisableSwitchMessage>()) {
       logger->log_info(name(), "Disabling on blackboard request");
       set_enabled(false);
     } else {
       logger->log_warn(name(), "Unhandled message %s ignored",
-		       __enabled_if->msgq_first()->type());
+		       enabled_if_->msgq_first()->type());
     }
-    __enabled_if->msgq_pop();
+    enabled_if_->msgq_pop();
   }
 
   // We disable cancelling here to avoid problems with the write lock
@@ -321,72 +321,72 @@ FvAcquisitionThread::loop()
 
 #ifdef FVBASE_TIMETRACKER
   try {
-    if ( __enabled ) {
-      __tt->ping_start(__ttc_capture);
-      __camera->capture();
-      __tt->ping_end(__ttc_capture);
+    if ( enabled_ ) {
+      tt_->ping_start(ttc_capture_);
+      camera_->capture();
+      tt_->ping_end(ttc_capture_);
 
-      for (__shmit = __shm.begin(); __shmit != __shm.end(); ++__shmit) {
-	if (__shmit->first == CS_UNKNOWN)  continue;
-	__tt->ping_start(__ttc_lock);
-	__shmit->second->lock_for_write();
-	__tt->ping_end(__ttc_lock);
-	__tt->ping_start(__ttc_convert);
-	convert(__colorspace, __shmit->first,
-		__camera->buffer(), __shmit->second->buffer(),
-		__width, __height);
+      for (shmit_ = shm_.begin(); shmit_ != shm_.end(); ++shmit_) {
+	if (shmit_->first == CS_UNKNOWN)  continue;
+	tt_->ping_start(ttc_lock_);
+	shmit_->second->lock_for_write();
+	tt_->ping_end(ttc_lock_);
+	tt_->ping_start(ttc_convert_);
+	convert(colorspace_, shmit_->first,
+		camera_->buffer(), shmit_->second->buffer(),
+		width_, height_);
 	try {
-	  __shmit->second->set_capture_time(__camera->capture_time());
+	  shmit_->second->set_capture_time(camera_->capture_time());
 	} catch (NotImplementedException &e) {
 	  // ignored
 	}
-	__tt->ping_end(__ttc_convert);
-	__tt->ping_start(__ttc_unlock);
-	__shmit->second->unlock();
-	__tt->ping_end(__ttc_unlock);
+	tt_->ping_end(ttc_convert_);
+	tt_->ping_start(ttc_unlock_);
+	shmit_->second->unlock();
+	tt_->ping_end(ttc_unlock_);
       }
     }
   } catch (Exception &e) {
     logger->log_error(name(), "Cannot convert image data");
     logger->log_error(name(), e);
   }
-  if ( __enabled ) {
-    __tt->ping_start(__ttc_dispose);
-    __camera->dispose_buffer();
-    __tt->ping_end(__ttc_dispose);
+  if ( enabled_ ) {
+    tt_->ping_start(ttc_dispose_);
+    camera_->dispose_buffer();
+    tt_->ping_end(ttc_dispose_);
   }
 
-  if ( (++__loop_count % FVBASE_TT_PRINT_INT) == 0 ) {
-    __tt->print_to_stdout();
+  if ( (++loop_count_ % FVBASE_TT_PRINT_INT) == 0 ) {
+    tt_->print_to_stdout();
   }
 
 #else // no time tracking
   try {
-    if ( __enabled ) {
-      __camera->capture();
-      for (__shmit = __shm.begin(); __shmit != __shm.end(); ++__shmit) {
-	if (__shmit->first == CS_UNKNOWN)  continue;
-	__shmit->second->lock_for_write();
-	convert(__colorspace, __shmit->first,
-		__camera->buffer(), __shmit->second->buffer(),
-		__width, __height);
+    if ( enabled_ ) {
+      camera_->capture();
+      for (shmit_ = shm_.begin(); shmit_ != shm_.end(); ++shmit_) {
+	if (shmit_->first == CS_UNKNOWN)  continue;
+	shmit_->second->lock_for_write();
+	convert(colorspace_, shmit_->first,
+		camera_->buffer(), shmit_->second->buffer(),
+		width_, height_);
 	try {
-	  __shmit->second->set_capture_time(__camera->capture_time());
+	  shmit_->second->set_capture_time(camera_->capture_time());
 	} catch (NotImplementedException &e) {
 	  // ignored
 	}
-	__shmit->second->unlock();
+	shmit_->second->unlock();
       }
     }
   } catch (Exception &e) {
     logger->log_error(name(), e);
   }
-  if ( __enabled ) {
-    __camera->dispose_buffer();
+  if ( enabled_ ) {
+    camera_->dispose_buffer();
   }
 #endif
 
-  if ( __mode == AqtCyclic && __enabled ) {
+  if ( mode_ == AqtCyclic && enabled_ ) {
     vision_threads->wakeup_and_wait_cyclic_threads();
   }
 
@@ -394,8 +394,8 @@ FvAcquisitionThread::loop()
   set_cancel_state(old_cancel_state);
 
   // in continuous mode wait for signal if disabled
-  while ( __mode == AqtContinuous && ! __enabled ) {
-    __enabled_waitcond->wait();
+  while ( mode_ == AqtContinuous && ! enabled_ ) {
+    enabled_waitcond_->wait();
   }
 }
 
@@ -404,8 +404,8 @@ FvAcquisitionThread::bb_interface_message_received(Interface *interface,
 						   Message *message) throw()
 {
   // in continuous mode wait for signal if disabled
-  MutexLocker lock(__enabled_mutex);
-  if (__mode == AqtContinuous && ! __enabled) {
+  MutexLocker lock(enabled_mutex_);
+  if (mode_ == AqtContinuous && ! enabled_) {
     if (message->is_of_type<SwitchInterface::EnableSwitchMessage>()) {
       logger->log_info(name(), "Enabling on blackboard request");
       set_enabled(true);

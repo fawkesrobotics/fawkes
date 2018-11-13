@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CONFIG_NETCONF_H_
-#define __CONFIG_NETCONF_H_
+#ifndef _CONFIG_NETCONF_H_
+#define _CONFIG_NETCONF_H_
 
 #include <config/config.h>
 #include <netcomm/fawkes/client_handler.h>
@@ -189,15 +189,15 @@ class NetworkConfiguration : public Configuration, public FawkesNetworkClientHan
   FawkesNetworkClient  *c;
   FawkesNetworkMessage *msg;
   Mutex *mutex;
-  bool                  __mirror_init_waiting;
-  InterruptibleBarrier *__mirror_init_barrier;
+  bool                  mirror_init_waiting_;
+  InterruptibleBarrier *mirror_init_barrier_;
 
-  bool __mirror_mode;
-  bool __mirror_mode_before_connection_dead;
-  unsigned int __mirror_timeout_sec;
+  bool mirror_mode_;
+  bool mirror_mode_before_connection_dead_;
+  unsigned int mirror_timeout_sec_;
   MemoryConfiguration *mirror_config;
 
-  bool __connected;
+  bool connected_;
 };
 
 } // end namespace fawkes

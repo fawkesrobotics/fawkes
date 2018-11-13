@@ -24,9 +24,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class StopDriveModule <plugins/colli/drive_modes/stop_drive_mode.h>
  * Stop-Drive-Module. This module is called, if something goes wrong, or is not recognized.

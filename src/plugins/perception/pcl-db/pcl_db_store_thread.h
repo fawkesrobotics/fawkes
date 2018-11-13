@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PERCEPTION_PCL_DB_STORE_PCL_DB_STORE_THREAD_H_
-#define __PLUGINS_PERCEPTION_PCL_DB_STORE_PCL_DB_STORE_THREAD_H_
+#ifndef _PLUGINS_PERCEPTION_PCL_DB_STORE_PCL_DB_STORE_THREAD_H_
+#define _PLUGINS_PERCEPTION_PCL_DB_STORE_PCL_DB_STORE_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>

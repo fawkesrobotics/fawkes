@@ -49,8 +49,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBS_TF_TIME_CACHE_H_
-#define __LIBS_TF_TIME_CACHE_H_
+#ifndef _LIBS_TF_TIME_CACHE_H_
+#define _LIBS_TF_TIME_CACHE_H_
 
 #include <tf/types.h>
 #include <tf/transform_storage.h>
@@ -61,10 +61,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 typedef std::pair<fawkes::Time, CompactFrameID> P_TimeAndFrameID;
 

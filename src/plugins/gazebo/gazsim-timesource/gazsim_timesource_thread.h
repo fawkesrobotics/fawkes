@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_GAZSIM__TIMESOURCE_THREAD_H_
-#define __PLUGINS_GAZSIM__TIMESOURCE_THREAD_H_
+#ifndef _PLUGINS_GAZSIMTIMESOURCE_THREAD_H__
+#define _PLUGINS_GAZSIMTIMESOURCE_THREAD_H__
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>

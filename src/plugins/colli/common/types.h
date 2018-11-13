@@ -22,15 +22,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_COLLI_TYPES_H_
-#define __PLUGINS_COLLI_TYPES_H_
+#ifndef _PLUGINS_COLLI_TYPES_H_
+#define _PLUGINS_COLLI_TYPES_H_
 
 #include <utils/math/types.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Colli States */
 typedef enum {

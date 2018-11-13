@@ -25,9 +25,6 @@
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NaoQiAspectIniFin <plugins/nao/aspect/naoqi_inifin.h>
  * NaoQiAspect initializer/finalizer.
@@ -52,11 +49,11 @@ NaoQiAspectIniFin::init(Thread *thread)
 					  "NaoQiAspect, but RTTI says it "
 					  "has not. ", thread->name());
   }
-  if (! __naoqi_broker) {
+  if (! naoqi_broker_) {
     throw CannotInitializeThreadException("NaoQi broker has not been set.");
   }
 
-  naoqi_thread->init_NaoQiAspect(__naoqi_broker);
+  naoqi_thread->init_NaoQiAspect(naoqi_broker_);
 }
 
 void
@@ -71,7 +68,7 @@ NaoQiAspectIniFin::finalize(Thread *thread)
 void
 NaoQiAspectIniFin::set_naoqi_broker(AL::ALPtr<AL::ALBroker> naoqi_broker)
 {
-  __naoqi_broker = naoqi_broker;
+  naoqi_broker_ = naoqi_broker;
 }
 
 } // end namespace fawkes

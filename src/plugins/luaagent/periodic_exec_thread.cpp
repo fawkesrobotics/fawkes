@@ -54,7 +54,7 @@ LuaAgentPeriodicExecutionThread::LuaAgentPeriodicExecutionThread()
   : Thread("LuaAgentPeriodicExecutionThread", Thread::OPMODE_WAITFORWAKEUP),
     BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK)
 {
-  __lua = NULL;
+  lua_ = NULL;
 }
 
 
@@ -72,13 +72,13 @@ void
 LuaAgentPeriodicExecutionThread::init_failure_cleanup()
 {
   try {
-    if ( __skiller_if ) {
-      __skiller_if->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
-      blackboard->close(__skiller_if);
+    if ( skiller_if_ ) {
+      skiller_if_->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
+      blackboard->close(skiller_if_);
     }
-    if ( __agdbg_if )   blackboard->close(__agdbg_if);
+    if ( agdbg_if_ )   blackboard->close(agdbg_if_);
 
-    delete __lua_ifi;
+    delete lua_ifi_;
 
   } catch (...) {
     // we really screwed up, can't do anything about it, ignore error, logger is
@@ -94,77 +94,77 @@ void
 LuaAgentPeriodicExecutionThread::init()
 {
   try {
-    __cfg_agent       = config->get_string("/luaagent/agent");
-    __cfg_watch_files = config->get_bool("/luaagent/watch_files");
+    cfg_agent_       = config->get_string("/luaagent/agent");
+    cfg_watch_files_ = config->get_bool("/luaagent/watch_files");
   } catch (Exception &e) {
     e.append("Insufficient configuration for LuaAgent");
     throw;
   }
 
-  logger->log_debug("LuaAgentPeriodicExecutionThread", "Agent: %s", __cfg_agent.c_str());
+  logger->log_debug("LuaAgentPeriodicExecutionThread", "Agent: %s", cfg_agent_.c_str());
 
-  __clog = new ComponentLogger(logger, "LuaAgentLua");
+  clog_ = new ComponentLogger(logger, "LuaAgentLua");
 
-  __lua = NULL;
-  __lua_ifi = NULL;
-  __skiller_if = NULL;
-  __agdbg_if = NULL;
+  lua_ = NULL;
+  lua_ifi_ = NULL;
+  skiller_if_ = NULL;
+  agdbg_if_ = NULL;
 
-  std::string reading_prefix = "/luaagent/interfaces/" + __cfg_agent + "/reading/";
-  std::string writing_prefix = "/luaagent/interfaces/" + __cfg_agent + "/writing/";
+  std::string reading_prefix = "/luaagent/interfaces/" + cfg_agent_ + "/reading/";
+  std::string writing_prefix = "/luaagent/interfaces/" + cfg_agent_ + "/writing/";
 
-  __skiller_if = blackboard->open_for_reading<SkillerInterface>("Skiller");
+  skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");
 
-  __skiller_if->read();
-  if (__skiller_if->exclusive_controller() != 0) {
+  skiller_if_->read();
+  if (skiller_if_->exclusive_controller() != 0) {
     throw Exception("Skiller already has an exclusive controller");
   }
 
-  __skiller_if->msgq_enqueue(new SkillerInterface::AcquireControlMessage());
-  __agdbg_if   = blackboard->open_for_writing<SkillerDebugInterface>("LuaAgent");
+  skiller_if_->msgq_enqueue(new SkillerInterface::AcquireControlMessage());
+  agdbg_if_   = blackboard->open_for_writing<SkillerDebugInterface>("LuaAgent");
 
   try {
-    __lua  = new LuaContext();
-    if (__cfg_watch_files) {
-      __lua->setup_fam(/* auto restart */ true, /* conc thread */ false);
+    lua_  = new LuaContext();
+    if (cfg_watch_files_) {
+      lua_->setup_fam(/* auto restart */ true, /* conc thread */ false);
     }
 
-    __lua_ifi = new LuaInterfaceImporter(__lua, blackboard, config, logger);
-    __lua_ifi->open_reading_interfaces(reading_prefix);
-    __lua_ifi->open_writing_interfaces(writing_prefix);
+    lua_ifi_ = new LuaInterfaceImporter(lua_, blackboard, config, logger);
+    lua_ifi_->open_reading_interfaces(reading_prefix);
+    lua_ifi_->open_writing_interfaces(writing_prefix);
 
-    __lua->add_package_dir(LUADIR);
-    __lua->add_cpackage_dir(LUALIBDIR);
+    lua_->add_package_dir(LUADIR);
+    lua_->add_cpackage_dir(LUALIBDIR);
 
-    __lua->add_package("fawkesutils");
-    __lua->add_package("fawkesconfig");
-    __lua->add_package("fawkeslogging");
-    __lua->add_package("fawkesinterface");
+    lua_->add_package("fawkesutils");
+    lua_->add_package("fawkesconfig");
+    lua_->add_package("fawkeslogging");
+    lua_->add_package("fawkesinterface");
 #ifdef HAVE_TF
-    __lua->add_package("fawkestf");
+    lua_->add_package("fawkestf");
 #endif
 
-    __lua->set_string("AGENT", __cfg_agent.c_str());
-    __lua->set_usertype("config", config, "Configuration", "fawkes");
-    __lua->set_usertype("logger", __clog, "ComponentLogger", "fawkes");
-    __lua->set_usertype("clock", clock, "Clock", "fawkes");
+    lua_->set_string("AGENT", cfg_agent_.c_str());
+    lua_->set_usertype("config", config, "Configuration", "fawkes");
+    lua_->set_usertype("logger", clog_, "ComponentLogger", "fawkes");
+    lua_->set_usertype("clock", clock, "Clock", "fawkes");
 #ifdef HAVE_TF
-    __lua->set_usertype("tf", tf_listener, "Transformer", "fawkes::tf");
+    lua_->set_usertype("tf", tf_listener, "Transformer", "fawkes::tf");
 #endif
 
-    __lua_ifi->add_interface("skiller", __skiller_if);
-    __lua_ifi->add_interface("agdbg", __agdbg_if);
+    lua_ifi_->add_interface("skiller", skiller_if_);
+    lua_ifi_->add_interface("agdbg", agdbg_if_);
 
-    __lua_ifi->push_interfaces();
+    lua_ifi_->push_interfaces();
 
-    __lua->set_start_script(LUADIR"/luaagent/fawkes/start.lua");
+    lua_->set_start_script(LUADIR"/luaagent/fawkes/start.lua");
   } catch (Exception &e) {
     init_failure_cleanup();
     throw;
   }
 
-  __agdbg_if->set_graph("");
-  __agdbg_if->set_graph_fsm(__cfg_agent.c_str());
+  agdbg_if_->set_graph("");
+  agdbg_if_->set_graph_fsm(cfg_agent_.c_str());
 
 }
 
@@ -172,24 +172,24 @@ LuaAgentPeriodicExecutionThread::init()
 void
 LuaAgentPeriodicExecutionThread::finalize()
 {
-  if (__skiller_if->has_writer() ) {
-    __skiller_if->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
+  if (skiller_if_->has_writer() ) {
+    skiller_if_->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
   }
 
-  blackboard->close(__skiller_if);
-  blackboard->close(__agdbg_if);
+  blackboard->close(skiller_if_);
+  blackboard->close(agdbg_if_);
 
-  delete __lua_ifi;
-  delete __lua;
-  delete __clog;
+  delete lua_ifi_;
+  delete lua_;
+  delete clog_;
 }
 
 void
 LuaAgentPeriodicExecutionThread::process_agdbg_messages()
 {
-  while ( ! __agdbg_if->msgq_empty() ) {
-    if (__agdbg_if->msgq_first_is<SkillerDebugInterface::SetGraphDirectionMessage>() ) {
-      SkillerDebugInterface::SetGraphDirectionMessage *m = __agdbg_if->msgq_first<SkillerDebugInterface::SetGraphDirectionMessage>();
+  while ( ! agdbg_if_->msgq_empty() ) {
+    if (agdbg_if_->msgq_first_is<SkillerDebugInterface::SetGraphDirectionMessage>() ) {
+      SkillerDebugInterface::SetGraphDirectionMessage *m = agdbg_if_->msgq_first<SkillerDebugInterface::SetGraphDirectionMessage>();
       try {
 	std::string graphdir = "TB";
 	switch (m->graph_dir()) {
@@ -198,22 +198,22 @@ LuaAgentPeriodicExecutionThread::process_agdbg_messages()
 	case SkillerDebugInterface::GD_RIGHT_LEFT: graphdir = "RL"; break;
 	default: break;
 	}
-	__lua->do_string("agentenv.set_graphdir(\"%s\")", graphdir.c_str());
+	lua_->do_string("agentenv.set_graphdir(\"%s\")", graphdir.c_str());
       } catch (Exception &e) {
 	logger->log_warn("LuaAgentPeriodicExecutionThread", "Failed to set graph direction, exception follows");
 	logger->log_warn("LuaAgentPeriodicExecutionThread", e);
       }
-    } else if (__agdbg_if->msgq_first_is<SkillerDebugInterface::SetGraphColoredMessage>() ) {
-      SkillerDebugInterface::SetGraphColoredMessage *m = __agdbg_if->msgq_first<SkillerDebugInterface::SetGraphColoredMessage>();
+    } else if (agdbg_if_->msgq_first_is<SkillerDebugInterface::SetGraphColoredMessage>() ) {
+      SkillerDebugInterface::SetGraphColoredMessage *m = agdbg_if_->msgq_first<SkillerDebugInterface::SetGraphColoredMessage>();
       try {
-	__lua->do_string("agentenv.set_graph_colored(%s)", m->is_graph_colored() ? "true" : "false");
+	lua_->do_string("agentenv.set_graph_colored(%s)", m->is_graph_colored() ? "true" : "false");
       } catch (Exception &e) {
 	logger->log_warn("LuaAgentPeriodicExecutionThread", "Failed to set graph direction, exception follows");
 	logger->log_warn("LuaAgentPeriodicExecutionThread", e);
       }
     }
 
-    __agdbg_if->msgq_pop();
+    agdbg_if_->msgq_pop();
   }
 }
 
@@ -222,22 +222,22 @@ void
 LuaAgentPeriodicExecutionThread::loop()
 {
 #ifdef HAVE_INOTIFY
-  __lua->process_fam_events();
+  lua_->process_fam_events();
 #endif
 
   process_agdbg_messages();
 
-  __lua_ifi->read();
-  __skiller_if->read();
+  lua_ifi_->read();
+  skiller_if_->read();
 
   try {
     // Stack:
-    __lua->do_string("agentenv.execute()");
+    lua_->do_string("agentenv.execute()");
   } catch (Exception &e) {
     logger->log_error("LuaAgentPeriodicExecutionThread", "Execution of %s.execute() failed, exception follows",
-		      __cfg_agent.c_str());
+		      cfg_agent_.c_str());
     logger->log_error("LuaAgentPeriodicExecutionThread", e);
   }
 
-  __lua_ifi->write();
+  lua_ifi_->write();
 }

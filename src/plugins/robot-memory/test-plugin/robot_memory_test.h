@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROBOT_MEMORY_TEST_H_
-#define __PLUGINS_ROBOT_MEMORY_TEST_H_
+#ifndef _PLUGINS_ROBOT_MEMORY_TEST_H_
+#define _PLUGINS_ROBOT_MEMORY_TEST_H_
 
 #include <gtest/gtest.h>
 #include <blackboard/blackboard.h>

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_XABSL_SKILL_WRAPPER_H_
-#define __PLUGINS_XABSL_SKILL_WRAPPER_H_
+#ifndef _PLUGINS_XABSL_SKILL_WRAPPER_H_
+#define _PLUGINS_XABSL_SKILL_WRAPPER_H_
 
 #include <XabslEngine/XabslBasicBehavior.h>
 
@@ -51,7 +51,7 @@ class XabslSkillWrapper : public xabsl::BasicBehavior
   std::string skill_string();
 
  private:
-  bool __execute;
+  bool execute_;
 
   /// @cond INTERNALS
   class ParameterValueBase
@@ -66,30 +66,30 @@ class XabslSkillWrapper : public xabsl::BasicBehavior
    public:
     ParameterValue()
     {
-      __value = 0;
+      value_ = 0;
     }
 
     T    get_value() const
     {
-      return __value;
+      return value_;
     }
 
     T *  get_value_ptr()
     {
-      return &__value;
+      return &value_;
     }
 
     void set_value(T value)
     {
-      __value = value;
+      value_ = value;
     }
    private:
-    T __value;
+    T value_;
   };
   /// @endcond
 
-  std::map<std::string, ParameterValueBase *> __param_values;
-  ParameterList __params;
+  std::map<std::string, ParameterValueBase *> param_values_;
+  ParameterList params_;
 };
 
 

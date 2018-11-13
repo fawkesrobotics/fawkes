@@ -34,8 +34,8 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __PROTOBUF_COMM_CLIENT_H_
-#define __PROTOBUF_COMM_CLIENT_H_
+#ifndef _PROTOBUF_COMM_CLIENT_H_
+#define _PROTOBUF_COMM_CLIENT_H_
 
 #include <protobuf_comm/frame_header.h>
 #include <protobuf_comm/message_register.h>
@@ -51,9 +51,6 @@
 #include <cstdint>
 
 namespace protobuf_comm {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 
 class ProtobufStreamClient

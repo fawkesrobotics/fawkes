@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_PERCEPTION_PCL_DB_MERGE_MONGODB_TF_TRANSFORMER_H_
-#define __PLUGINS_PERCEPTION_PCL_DB_MERGE_MONGODB_TF_TRANSFORMER_H_
+#ifndef _PLUGINS_PERCEPTION_PCL_DB_MERGE_MONGODB_TF_TRANSFORMER_H_
+#define _PLUGINS_PERCEPTION_PCL_DB_MERGE_MONGODB_TF_TRANSFORMER_H_
 
 #include <tf/types.h>
 #include <tf/transformer.h>
@@ -31,10 +31,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 class MongoDBTransformer
 : public Transformer

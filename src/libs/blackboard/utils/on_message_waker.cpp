@@ -28,9 +28,6 @@
 #include <core/threading/thread.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BlackBoardOnMessageWaker <blackboard/utils/on_message_waker.h>
  * Wake threads on receiving a blackboard message.

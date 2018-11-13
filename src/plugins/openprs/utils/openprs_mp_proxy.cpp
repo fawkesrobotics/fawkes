@@ -37,9 +37,6 @@ namespace OPRS {
 }
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenPRSMessagePasserProxy "openprs_mp_proxy.h"
  * Proxy for the OpenPRS server communication.

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_MESSAGE_QUEUE_H_
-#define __INTERFACE_MESSAGE_QUEUE_H_
+#ifndef _INTERFACE_MESSAGE_QUEUE_H_
+#define _INTERFACE_MESSAGE_QUEUE_H_
 
 #include <core/exception.h>
 #include <core/exceptions/software.h>
@@ -109,9 +109,9 @@ class MessageQueue
  private:
   void remove(msg_list_t *l, msg_list_t *p);
 
-  msg_list_t  *__list;
-  msg_list_t  *__end_el;
-  Mutex       *__mutex;
+  msg_list_t  *list_;
+  msg_list_t  *end_el_;
+  Mutex       *mutex_;
 };
 
 

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CLASSIFIERS_SURF_H_
-#define __FIREVISION_CLASSIFIERS_SURF_H_
+#ifndef _FIREVISION_CLASSIFIERS_SURF_H_
+#define _FIREVISION_CLASSIFIERS_SURF_H_
 
 #ifndef HAVE_SURF
 #  error SURF not available, you may not use the SurfClassifier
@@ -54,9 +54,6 @@ namespace fawkes {
 //typedef struct _IplImage IplImage;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 void saveIpoints(std::string sFileName, const std::vector< surf::Ipoint >& ipts, bool bVerbose, bool bLaplacian, int VLength);
 
@@ -97,7 +94,7 @@ class SurfClassifier : public Classifier
 
  private:
 
-  unsigned int __num_obj; // number of objects
+  unsigned int num_obj_; // number of objects
 
   // Find closest interest point in a list, given one interest point
   int findMatch(const surf::Ipoint& ip1, const std::vector< surf::Ipoint >& ipts);
@@ -106,50 +103,50 @@ class SurfClassifier : public Classifier
   double distSquare(double *v1, double *v2, int n);
 
   // Object objects
-  surf::Image *__obj_img;
-  std::vector<std::vector< surf::Ipoint > > __obj_features;
-  std::vector<std::string> __obj_names;
-  int __obj_num_features;
+  surf::Image *obj_img_;
+  std::vector<std::vector< surf::Ipoint > > obj_features_;
+  std::vector<std::string> obj_names_;
+  int obj_num_features_;
 
   // Image objects
-  surf::Image *__image;
-  std::vector< surf::Ipoint > __img_features;
-  int __img_num_features;
+  surf::Image *image_;
+  std::vector< surf::Ipoint > img_features_;
+  int img_num_features_;
 
   // minimum (absolute) number of features that have to be matched per ROI
-  unsigned int __min_match;
+  unsigned int min_match_;
   // minimum ratio of features per total object-features that have to be matched per ROI
-  float __min_match_ratio;
+  float min_match_ratio_;
 
   // Initial sampling step (default 2)
-  int __samplingStep;
+  int samplingStep_;
   // Number of analysed octaves (default 4)
-  int __octaves;
+  int octaves_;
   // Blob response treshold
-  double __thres;
+  double thres_;
   // Set this flag "true" to double the image size
-  bool __doubleImageSize;
+  bool doubleImageSize_;
   // Initial lobe size, default 3 and 5 (with double image size)
-  int __initLobe;
+  int initLobe_;
   // Upright SURF or rotation invaraiant
-  bool __upright;
+  bool upright_;
   // If the extended flag is turned on, SURF 128 is used
-  bool __extended;
+  bool extended_;
   // Spatial size of the descriptor window (default 4)
-  int __indexSize;
+  int indexSize_;
 
   // Length of descriptor vector
-  int __vlen;
+  int vlen_;
 
   //#ifdef SURF_TIMETRACKER
-  fawkes::TimeTracker *__tt;
-  unsigned int __loop_count;
-  unsigned int __ttc_objconv;
-  unsigned int __ttc_objfeat;
-  unsigned int __ttc_imgconv;
-  unsigned int __ttc_imgfeat;
-  unsigned int __ttc_matchin;
-  unsigned int __ttc_roimerg;
+  fawkes::TimeTracker *tt_;
+  unsigned int loop_count_;
+  unsigned int ttc_objconv_;
+  unsigned int ttc_objfeat_;
+  unsigned int ttc_imgconv_;
+  unsigned int ttc_imgfeat_;
+  unsigned int ttc_matchin_;
+  unsigned int ttc_roimerg_;
   //#endif
 
 };

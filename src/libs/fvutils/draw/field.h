@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FVUTILS_DRAW_FIELD_H_
-#define __FVUTILS_DRAW_FIELD_H_
+#ifndef _FVUTILS_DRAW_FIELD_H_
+#define _FVUTILS_DRAW_FIELD_H_
 
 #include <fvutils/draw/field_lines.h>
 
@@ -29,9 +29,6 @@
 #include <list>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 typedef std::list<fawkes::cart_coord_2d_t> fld_line_points_t;
 
@@ -40,7 +37,7 @@ class Field
 public:
   ~Field();
 
-  const FieldLines& get_lines() const { return *__lines; }
+  const FieldLines& get_lines() const { return *lines_; }
   float get_field_length() const;
   float get_field_width() const;
 
@@ -51,8 +48,8 @@ public:
 private:
   Field(FieldLines *lines, bool manage_lines_memory = true);
 
-  FieldLines  *__lines;
-  bool         __manage_lines_memory;
+  FieldLines  *lines_;
+  bool         manage_lines_memory_;
 };
 
 } // end namespace firevision

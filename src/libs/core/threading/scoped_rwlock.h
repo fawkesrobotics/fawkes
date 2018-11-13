@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_THREADING_SCOPED_RWLOCK_H_
-#define __CORE_THREADING_SCOPED_RWLOCK_H_
+#ifndef _CORE_THREADING_SCOPED_RWLOCK_H_
+#define _CORE_THREADING_SCOPED_RWLOCK_H_
 
 #include <core/utils/refptr.h>
 
@@ -49,10 +49,10 @@ class ScopedRWLock
   void unlock();
 
  private:
-  LockType               __lock_type;
-  bool                   __locked;
-  RefPtr<ReadWriteLock>  __refrwlock;
-  ReadWriteLock         *__rawrwlock;
+  LockType               lock_type_;
+  bool                   locked_;
+  RefPtr<ReadWriteLock>  refrwlock_;
+  ReadWriteLock         *rawrwlock_;
 };
 
 

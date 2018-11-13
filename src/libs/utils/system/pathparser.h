@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_SYSTEM_PATHPARSER_H_
-#define __UTILS_SYSTEM_PATHPARSER_H_
+#ifndef _UTILS_SYSTEM_PATHPARSER_H_
+#define _UTILS_SYSTEM_PATHPARSER_H_
 
 #include <vector>
 #include <string>
@@ -44,7 +44,7 @@ class PathParser : public std::vector<std::string>
   void        ctor(const std::string &path);
 
  private:
-  bool __abs_path;
+  bool abs_path_;
 };
 
 } // end namespace fawkes

@@ -50,14 +50,14 @@ ROSTalkerPubThread::~ROSTalkerPubThread()
 void
 ROSTalkerPubThread::init()
 {
-  __pub = rosnode->advertise<std_msgs::String>("/chatter", 10);
+  pub_ = rosnode->advertise<std_msgs::String>("/chatter", 10);
 }
 
 
 void
 ROSTalkerPubThread::finalize()
 {
-  __pub.shutdown();
+  pub_.shutdown();
 }
 
 
@@ -69,5 +69,5 @@ ROSTalkerPubThread::loop()
   std_msgs::String msg;
   msg.data = std::string("Hello world ") + t.str();
 
-  __pub.publish(msg);
+  pub_.publish(msg);
 }

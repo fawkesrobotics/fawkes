@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PLAYER_F2P_THREAD_H_
-#define __PLUGINS_PLAYER_F2P_THREAD_H_
+#ifndef _PLUGINS_PLAYER_F2P_THREAD_H_
+#define _PLUGINS_PLAYER_F2P_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -43,7 +43,7 @@ class PlayerF2PThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  PlayerClientThread *__client_thread;
+  PlayerClientThread *client_thread_;
 };
 
 

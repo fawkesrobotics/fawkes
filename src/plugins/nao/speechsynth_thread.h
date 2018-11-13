@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_NAO_SPEECHSYNTH_THREAD_H_
-#define __PLUGINS_NAO_SPEECHSYNTH_THREAD_H_
+#ifndef _PLUGINS_NAO_SPEECHSYNTH_THREAD_H_
+#define _PLUGINS_NAO_SPEECHSYNTH_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
@@ -66,11 +66,11 @@ class NaoQiSpeechSynthThread
   void say(const char *text);
 
  private:
-  AL::ALPtr<AL::ALTextToSpeechProxy> __altts;
+  AL::ALPtr<AL::ALTextToSpeechProxy> altts_;
 
-  fawkes::SpeechSynthInterface *__speechsynth_if;
+  fawkes::SpeechSynthInterface *speechsynth_if_;
 
-  int __tts_task_id;
+  int tts_task_id_;
 };
 
 #endif

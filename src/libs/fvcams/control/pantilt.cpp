@@ -25,9 +25,6 @@
 #include <fvcams/control/pantilt.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class CameraControlPanTilt <fvcams/control/pantilt.h>
  * Camera pan/tilt control interface.

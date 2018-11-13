@@ -55,24 +55,24 @@ ConfigNetworkHandler::ConfigNetworkHandler(Configuration *config,
     FawkesNetworkHandler(FAWKES_CID_CONFIGMANAGER),
     ConfigurationChangeHandler("")
 {
-  __config = config;
-  __hub    = hub;
+  config_ = config;
+  hub_    = hub;
 
   start();
 
-  __config->add_change_handler(this);
-  __hub->add_handler( this );
+  config_->add_change_handler(this);
+  hub_->add_handler( this );
 }
 
 
 /** Destructor. */
 ConfigNetworkHandler::~ConfigNetworkHandler()
 {
-  __hub->remove_handler(this);
+  hub_->remove_handler(this);
   cancel();
   join();
-  __config->rem_change_handler(this);
-  __inbound_queue.clear();
+  config_->rem_change_handler(this);
+  inbound_queue_.clear();
 }
 
 
@@ -84,7 +84,7 @@ void
 ConfigNetworkHandler::send_inv_value(unsigned int clid, const char *path)
 {
   config_invval_msg_t *r = prepare_msg<config_invval_msg_t>(path, false);
-  __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INV_VALUE, r, sizeof(config_invval_msg_t));
+  hub_->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INV_VALUE, r, sizeof(config_invval_msg_t));
 }
 
 
@@ -108,7 +108,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       } else {
 	values[0] = i->get_uint();
       }
-      __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE, m, data_size);
+      hub_->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE, m, data_size);
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
 			  "send_value: Value %s could not be sent",
@@ -128,7 +128,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       } else {
 	values[0] = i->get_int();
       }
-      __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE, m, data_size);
+      hub_->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE, m, data_size);
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
 			  "send_value: Value %s could not be sent",
@@ -148,7 +148,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       } else {
 	values[0] = i->get_bool() ? 1 : 0;
       }
-      __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE, m, data_size);
+      hub_->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE, m, data_size);
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
 			  "send_value: Value %s could not be sent",
@@ -168,7 +168,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       } else {
 	values[0] = i->get_float();
       }
-      __hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE, m, data_size);
+      hub_->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE, m, data_size);
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
 			  "send_value: Value %s could not be sent",
@@ -200,7 +200,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 	  tmp += sizeof(config_string_value_t) + sv->s_length + 1;
 	}
 
-	__hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE, m, data_size);
+	hub_->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE, m, data_size);
       } else {
 	std::string s = i->get_string();
 	size_t data_size =
@@ -218,7 +218,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 	sv->s_length = s.length();
 	strcpy(msg_string, s.c_str());
 
-	__hub->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE, m, data_size);
+	hub_->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_STRING_VALUE, m, data_size);
       }
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
@@ -238,35 +238,35 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 void
 ConfigNetworkHandler::loop()
 {
-  while ( ! __inbound_queue.empty() ) {
-    FawkesNetworkMessage *msg = __inbound_queue.front();
+  while ( ! inbound_queue_.empty() ) {
+    FawkesNetworkMessage *msg = inbound_queue_.front();
 
     // printf("Received message of type %u\n", msg->msgid());
 
     if (msg->msgid() == MSG_CONFIG_SUBSCRIBE) {
 
-      __subscribers.push_back_locked(msg->clid());
-      __subscribers.sort();
-      __subscribers.unique();
+      subscribers_.push_back_locked(msg->clid());
+      subscribers_.sort();
+      subscribers_.unique();
 
-      __config->lock();
+      config_->lock();
       ConfigListContent *content = new ConfigListContent();
-      Configuration::ValueIterator *i = __config->iterator();
+      Configuration::ValueIterator *i = config_->iterator();
       while ( i->next() ) {
 	if (i->is_default()) {
 	  content->append(i);
 	}
       }
       delete i;
-      i = __config->iterator();
+      i = config_->iterator();
       while ( i->next() ) {
 	if (! i->is_default()) {
 	  content->append(i);
 	}
       }
       delete i;
-      __hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_LIST, content);
-      __config->unlock();
+      hub_->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_LIST, content);
+      config_->unlock();
 
     } else if (msg->msgid() == MSG_CONFIG_ERASE_VALUE) {
       try {
@@ -276,13 +276,13 @@ ConfigNetworkHandler::loop()
 	memcpy(path, m->cp.path, CONFIG_MSG_PATH_LENGTH);
 
 	if ( m->cp.is_default == 1 ) {
-	  __config->erase_default(path);
+	  config_->erase_default(path);
 	} else {
-	  __config->erase(path);
+	  config_->erase(path);
 	}
 
 	config_value_erased_msg_t *r = prepare_msg<config_value_erased_msg_t>(path, (m->cp.is_default == 1));
-	__hub->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_VALUE_ERASED,
+	hub_->send(msg->clid(), FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_VALUE_ERASED,
 		    r, sizeof(config_value_erased_msg_t));
 
       } catch (Exception &e) {
@@ -314,7 +314,7 @@ ConfigNetworkHandler::loop()
 	case MSG_CONFIG_GET_STRING:
 	case MSG_CONFIG_GET_VALUE:
 	  try {
-	    Configuration::ValueIterator *i = __config->get_value(path);
+	    Configuration::ValueIterator *i = config_->get_value(path);
 	    if ( i->next() ) {
 	      send_value(msg->clid(), i);
 	    } else {
@@ -357,12 +357,12 @@ ConfigNetworkHandler::loop()
 	      for (unsigned int i = 0; i < cd->num_values; ++i) {
 		values[i] = vs[i];
 	      }
-	      __config->set_floats(path, values);
+	      config_->set_floats(path, values);
 	    } else {
 	      if ( msg->msgid() == MSG_CONFIG_SET_FLOAT ) {
-		__config->set_float(path, *vs);
+		config_->set_float(path, *vs);
 	      } else {
-		__config->set_default_float(path, *vs);
+		config_->set_default_float(path, *vs);
 	      }
 	    }
 	    success = true;
@@ -383,12 +383,12 @@ ConfigNetworkHandler::loop()
 	      for (unsigned int i = 0; i < cd->num_values; ++i) {
 		values[i] = vs[i];
 	      }
-	      __config->set_uints(path, values);
+	      config_->set_uints(path, values);
 	    } else {
 	      if ( msg->msgid() == MSG_CONFIG_SET_UINT ) {
-		__config->set_uint(path, *vs);
+		config_->set_uint(path, *vs);
 	      } else {
-		__config->set_default_uint(path, *vs);
+		config_->set_default_uint(path, *vs);
 	      }
 	    }
 	    success = true;
@@ -409,12 +409,12 @@ ConfigNetworkHandler::loop()
 	      for (unsigned int i = 0; i < cd->num_values; ++i) {
 		values[i] = vs[i];
 	      }
-	      __config->set_ints(path, values);
+	      config_->set_ints(path, values);
 	    } else {
 	      if ( msg->msgid() == MSG_CONFIG_SET_INT ) {
-		__config->set_int(path, *vs);
+		config_->set_int(path, *vs);
 	      } else {
-		__config->set_default_int(path, *vs);
+		config_->set_default_int(path, *vs);
 	      }
 	    }
 	    success = true;
@@ -435,12 +435,12 @@ ConfigNetworkHandler::loop()
 	      for (unsigned int i = 0; i < cd->num_values; ++i) {
 		values[i] = (vs[i] != 0);
 	      }
-	      __config->set_bools(path, values);
+	      config_->set_bools(path, values);
 	    } else {
 	      if ( msg->msgid() == MSG_CONFIG_SET_INT ) {
-		__config->set_bool(path, (*vs != 0));
+		config_->set_bool(path, (*vs != 0));
 	      } else {
-		__config->set_default_bool(path, (*vs != 0));
+		config_->set_default_bool(path, (*vs != 0));
 	      }
 	    }
 	    success = true;
@@ -466,15 +466,15 @@ ConfigNetworkHandler::loop()
 		tmp += sizeof(config_string_value_t) + sv->s_length + 1;
 		values[i] = std::string(msg_string, sv->s_length);
 	      }
-	      __config->set_strings(path, values);
+	      config_->set_strings(path, values);
 	    } else {
 	      config_string_value_t *sv = (config_string_value_t *)tmp;
 	      char *msg_string = tmp + sizeof(config_string_value_t);
 	      std::string value = std::string(msg_string, sv->s_length);
 	      if ( msg->msgid() == MSG_CONFIG_SET_INT ) {
-		__config->set_string(path, value);
+		config_->set_string(path, value);
 	      } else {
-		__config->set_default_string(path, value);
+		config_->set_default_string(path, value);
 	      }
 	    }
 	    success = true;
@@ -490,7 +490,7 @@ ConfigNetworkHandler::loop()
 
       if (success) {
 	try {
-	  Configuration::ValueIterator *i = __config->get_value(path);
+	  Configuration::ValueIterator *i = config_->get_value(path);
 	  if ( i->next() ) {
 	    send_value(msg->clid(), i);
 	  } else {
@@ -507,7 +507,7 @@ ConfigNetworkHandler::loop()
 
 
     msg->unref();
-    __inbound_queue.pop_locked();
+    inbound_queue_.pop_locked();
   }
 }
 
@@ -520,7 +520,7 @@ void
 ConfigNetworkHandler::handle_network_message(FawkesNetworkMessage *msg)
 {
   msg->ref();
-  __inbound_queue.push_locked(msg);
+  inbound_queue_.push_locked(msg);
   wakeup();
 }
 
@@ -542,14 +542,14 @@ ConfigNetworkHandler::client_connected(unsigned int clid)
 void
 ConfigNetworkHandler::client_disconnected(unsigned int clid)
 {
-  __subscribers.lock();
-  if (find(__subscribers.begin(), __subscribers.end(), clid) != __subscribers.end()) {
+  subscribers_.lock();
+  if (find(subscribers_.begin(), subscribers_.end(), clid) != subscribers_.end()) {
     LibLogger::log_warn("ConfigNetworkHandler",
 			"Client %u disconnected without closing the config, removing from list of subscribers",
 			clid);
-    __subscribers.remove(clid);
+    subscribers_.remove(clid);
   }
-  __subscribers.unlock();
+  subscribers_.unlock();
 }
 
 
@@ -568,18 +568,18 @@ ConfigNetworkHandler::config_value_changed(const Configuration::ValueIterator *v
 {
   const char *path = v->path();
 
-  __subscribers.lock();
-  for (__sit = __subscribers.begin(); __sit != __subscribers.end(); ++__sit) {
+  subscribers_.lock();
+  for (sit_ = subscribers_.begin(); sit_ != subscribers_.end(); ++sit_) {
     try {
-      send_value(*__sit, v);
+      send_value(*sit_, v);
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
 			  "config_value_changed: Value for %s could not be sent "
-			  "to client %u", path, *__sit);
+			  "to client %u", path, *sit_);
       LibLogger::log_warn("ConfigNetworkHandler", e);
     }
   }
-  __subscribers.unlock();
+  subscribers_.unlock();
 }
 
 
@@ -592,20 +592,20 @@ ConfigNetworkHandler::config_comment_changed(const Configuration::ValueIterator 
 void
 ConfigNetworkHandler::config_value_erased(const char *path)
 {
-  __subscribers.lock();
-  for (__sit = __subscribers.begin(); __sit != __subscribers.end(); ++__sit) {
+  subscribers_.lock();
+  for (sit_ = subscribers_.begin(); sit_ != subscribers_.end(); ++sit_) {
     try {
       config_value_erased_msg_t *r =
 	prepare_msg<config_value_erased_msg_t>(path, false);
-      __hub->send(*__sit, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_VALUE_ERASED,
+      hub_->send(*sit_, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_VALUE_ERASED,
 		  r, sizeof(config_value_erased_msg_t));
     } catch (Exception &e) {
       LibLogger::log_warn("ConfigNetworkHandler",
 			  "configValueErased: Value for %s could not be sent "
-			  "to client %u", path, *__sit);
+			  "to client %u", path, *sit_);
     }
   }
-  __subscribers.unlock();
+  subscribers_.unlock();
 }
 
 } // end namespace fawkes

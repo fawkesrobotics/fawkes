@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PLAYER_PLAYERC_THREAD_H_
-#define __PLUGINS_PLAYER_PLAYERC_THREAD_H_
+#ifndef _PLUGINS_PLAYER_PLAYERC_THREAD_H_
+#define _PLUGINS_PLAYER_PLAYERC_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -85,14 +85,14 @@ class PlayerClientThread
   void close_player_proxies();
 
  private:
-  PlayerCc::PlayerClient    *__client;
+  PlayerCc::PlayerClient    *client_;
 
-  std::string  __cfg_player_host;
-  unsigned int __cfg_player_port;
+  std::string  cfg_player_host_;
+  unsigned int cfg_player_port_;
 
-  InterfaceMap __imap;
-  ProxyMap     __pmap;
-  MapperList   __mappers;
+  InterfaceMap imap_;
+  ProxyMap     pmap_;
+  MapperList   mappers_;
 };
 
 

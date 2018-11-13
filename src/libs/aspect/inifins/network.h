@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_INIFINS_NETWORK_H_
-#define __ASPECT_INIFINS_NETWORK_H_
+#ifndef _ASPECT_INIFINS_NETWORK_H_
+#define _ASPECT_INIFINS_NETWORK_H_
 
 #include <aspect/inifins/inifin.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class NetworkNameResolver;
 class ServicePublisher;
@@ -46,9 +43,9 @@ class NetworkAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  NetworkNameResolver *__nnresolver;
-  ServicePublisher    *__service_publisher;
-  ServiceBrowser      *__service_browser;
+  NetworkNameResolver *nnresolver_;
+  ServicePublisher    *service_publisher_;
+  ServiceBrowser      *service_browser_;
 };
 
 } // end namespace fawkes

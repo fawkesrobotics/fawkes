@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_REMOTE_H_
-#define __BLACKBOARD_REMOTE_H_
+#ifndef _BLACKBOARD_REMOTE_H_
+#define _BLACKBOARD_REMOTE_H_
 
 #include <blackboard/blackboard.h>
 #include <netcomm/fawkes/client_handler.h>
@@ -88,20 +88,20 @@ class RemoteBlackBoard
 
 
  private: /* members */
-  Mutex *__mutex;
-  FawkesNetworkClient  *__fnc;
-  bool                  __fnc_owner;
-  FawkesNetworkMessage *__m;
-  BlackBoardInstanceFactory *__instance_factory;
-  LockMap<unsigned int, BlackBoardInterfaceProxy *> __proxies;
-  LockMap<unsigned int, BlackBoardInterfaceProxy *>::iterator __pit;
-  std::list<BlackBoardInterfaceProxy *> __invalid_proxies;
-  std::list<BlackBoardInterfaceProxy *>::iterator __ipit;
+  Mutex *mutex_;
+  FawkesNetworkClient  *fnc_;
+  bool                  fnc_owner_;
+  FawkesNetworkMessage *m_;
+  BlackBoardInstanceFactory *instance_factory_;
+  LockMap<unsigned int, BlackBoardInterfaceProxy *> proxies_;
+  LockMap<unsigned int, BlackBoardInterfaceProxy *>::iterator pit_;
+  std::list<BlackBoardInterfaceProxy *> invalid_proxies_;
+  std::list<BlackBoardInterfaceProxy *>::iterator ipit_;
 
-  Mutex         *__wait_mutex;
-  WaitCondition *__wait_cond;
+  Mutex         *wait_mutex_;
+  WaitCondition *wait_cond_;
 
-  const char *__inbound_thread;
+  const char *inbound_thread_;
 };
 
 } // end namespace fawkes

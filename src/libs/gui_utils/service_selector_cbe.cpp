@@ -180,8 +180,8 @@ ServiceSelectorCBE::initialize()
   m_dispatcher->signal_connected().connect(sigc::mem_fun(*this, &ServiceSelectorCBE::on_connected));
   m_dispatcher->signal_disconnected().connect(sigc::mem_fun(*this, &ServiceSelectorCBE::on_disconnected));
   
-  __hostname = "";
-  __port = 0;
+  hostname_ = "";
+  port_ = 0;
 }
 
 /** Destructor. */
@@ -207,7 +207,7 @@ ServiceSelectorCBE::get_network_client()
 Glib::ustring
 ServiceSelectorCBE::get_hostname()
 {
-  return __hostname;
+  return hostname_;
 }
 
 /**
@@ -217,7 +217,7 @@ ServiceSelectorCBE::get_hostname()
 Glib::ustring
 ServiceSelectorCBE::get_name()
 {
-  return __servicename;
+  return servicename_;
 }
 
 /**
@@ -227,7 +227,7 @@ ServiceSelectorCBE::get_name()
 unsigned int
 ServiceSelectorCBE::get_port()
 {
-  return __port;
+  return port_;
 }
 
 /** This signal is emitted whenever a network connection is established.
@@ -269,37 +269,37 @@ ServiceSelectorCBE::on_btn_connect_clicked()
     if ( -1 == m_cbe_services->get_active_row_number() )
     {
       Gtk::Entry* entry = m_cbe_services->get_entry();
-      __hostname = entry->get_text();
+      hostname_ = entry->get_text();
 
       Glib::ustring::size_type pos;
-      if ((pos = __hostname.find(':')) != Glib::ustring::npos) 
+      if ((pos = hostname_.find(':')) != Glib::ustring::npos) 
       {
         Glib::ustring host = "";
         unsigned int port = 1234567; //Greater than max port num (i.e. 65535)
-        std::istringstream is(__hostname.replace(pos, 1, " "));
+        std::istringstream is(hostname_.replace(pos, 1, " "));
         is >> host;
         is >> port;
         
         if (port != 1234567 && host.size())
         {
-          __hostname = host;
-          __port = port;
+          hostname_ = host;
+          port_ = port;
         }
       }
-      else __port = 1910;
-      __servicename = __hostname;
+      else port_ = 1910;
+      servicename_ = hostname_;
     }
     else
     {
       Gtk::TreeModel::Row row = *m_cbe_services->get_active();
-      __hostname = row[m_service_model->get_column_record().hostname];
-      __servicename = row[m_service_model->get_column_record().name];
-      __port = row[m_service_model->get_column_record().port];
+      hostname_ = row[m_service_model->get_column_record().hostname];
+      servicename_ = row[m_service_model->get_column_record().name];
+      port_ = row[m_service_model->get_column_record().port];
     }
 
     try
     {
-      client->connect( __hostname.c_str(), __port );
+      client->connect( hostname_.c_str(), port_ );
     }
     catch (Exception& e)
     {
@@ -328,15 +328,15 @@ ServiceSelectorCBE::on_service_selected()
   }
 
   Gtk::TreeModel::Row row = *m_cbe_services->get_active();
-  __hostname = row[m_service_model->get_column_record().hostname];
-  __servicename = row[m_service_model->get_column_record().name];
-  __port = row[m_service_model->get_column_record().port];
+  hostname_ = row[m_service_model->get_column_record().hostname];
+  servicename_ = row[m_service_model->get_column_record().name];
+  port_ = row[m_service_model->get_column_record().port];
 
-  m_cbe_services->get_entry()->set_text(__hostname);
+  m_cbe_services->get_entry()->set_text(hostname_);
 
   try
   {
-    client->connect( __hostname.c_str(), __port );
+    client->connect( hostname_.c_str(), port_ );
   }
   catch (Exception& e)
   {

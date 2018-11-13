@@ -20,17 +20,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_JACO_ARM_DUMMY_H_
-#define __PLUGINS_JACO_ARM_DUMMY_H_
+#ifndef _PLUGINS_JACO_ARM_DUMMY_H_
+#define _PLUGINS_JACO_ARM_DUMMY_H_
 
 #include "arm.h"
 #include "types.h"
 
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 //class RefPtr;
 
@@ -61,12 +58,12 @@ class JacoArmDummy : public JacoArm
 
  private:
 
-  std::vector<float> __coords;
-  std::vector<float> __joints;
-  std::vector<float> __fingers;
+  std::vector<float> coords_;
+  std::vector<float> joints_;
+  std::vector<float> fingers_;
 
-  std::vector<float> __pos_ready;
-  std::vector<float> __pos_retract;
+  std::vector<float> pos_ready_;
+  std::vector<float> pos_retract_;
 
 };
 

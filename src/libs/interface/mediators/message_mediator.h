@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __MESSAGE_MEDIATOR_H_
-#define __MESSAGE_MEDIATOR_H_
+#ifndef _MESSAGE_MEDIATOR_H_
+#define _MESSAGE_MEDIATOR_H_
 
 namespace fawkes {
 

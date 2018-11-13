@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_CONTROLLER_KNI_H_
-#define __PLUGINS_KATANA_CONTROLLER_KNI_H_
+#ifndef _PLUGINS_KATANA_CONTROLLER_KNI_H_
+#define _PLUGINS_KATANA_CONTROLLER_KNI_H_
 
 #include "controller.h"
 
@@ -39,9 +39,6 @@ class CSctBase;
 struct TMotInit;
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 //class RefPtr;
 
@@ -93,28 +90,28 @@ class KatanaControllerKni : public KatanaController
   virtual void get_angles(std::vector<float>& to, bool refresh = false);
 
  private:
-  double __x, __y, __z;
-  double __phi, __theta, __psi;
+  double x_, y_, z_;
+  double phi_, theta_, psi_;
 
-  std::string    __cfg_device;
-  std::string    __cfg_kni_conffile;
-  unsigned int   __cfg_read_timeout;
-  unsigned int   __cfg_write_timeout;
+  std::string    cfg_device_;
+  std::string    cfg_kni_conffile_;
+  unsigned int   cfg_read_timeout_;
+  unsigned int   cfg_write_timeout_;
 
-  fawkes::RefPtr<CLMBase>        __katana;
+  fawkes::RefPtr<CLMBase>        katana_;
 #if __cplusplus >= 201103L
-  std::unique_ptr<CCdlCOM>       __device;
-  std::unique_ptr<CCplSerialCRC> __protocol;
+  std::unique_ptr<CCdlCOM>       device_;
+  std::unique_ptr<CCplSerialCRC> protocol_;
 #else
-  std::auto_ptr<CCdlCOM>         __device;
-  std::auto_ptr<CCplSerialCRC>   __protocol;
+  std::auto_ptr<CCdlCOM>         device_;
+  std::auto_ptr<CCplSerialCRC>   protocol_;
 #endif
-  CKatBase                      *__katbase;
-  CSctBase                      *__sensor_ctrl;
-  std::vector<TMotInit>          __motor_init;
+  CKatBase                      *katbase_;
+  CSctBase                      *sensor_ctrl_;
+  std::vector<TMotInit>          motor_init_;
 
-  std::vector<short>             __active_motors;
-  std::vector<int>               __gripper_last_pos;
+  std::vector<short>             active_motors_;
+  std::vector<int>               gripper_last_pos_;
 
   bool motor_oor(unsigned short id);
   bool motor_final(unsigned short id);

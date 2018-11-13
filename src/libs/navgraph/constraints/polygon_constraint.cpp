@@ -24,9 +24,6 @@
 #include <Eigen/Geometry>
 
 namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphPolygonConstraint <navgraph/constraints/polygon_constraint.h>
  * Constraint that blocks nodes within and edges touching a polygon.

@@ -33,9 +33,6 @@ using namespace std;
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class PikeCamera <fvcams/pike.h>
  * Pike camera.
@@ -112,17 +109,17 @@ typedef struct {
 PikeCamera::PikeCamera(const CameraArgumentParser* cap)
   : FirewireCamera( cap )
 {
-  __aoi_left   = 0;
-  __aoi_top    = 0;
-  __aoi_width  = 0;
-  __aoi_height = 0;
-  __aoi_show_work_area = false;
+  aoi_left_   = 0;
+  aoi_top_    = 0;
+  aoi_width_  = 0;
+  aoi_height_ = 0;
+  aoi_show_work_area_ = false;
 
-  __set_autofnc_aoi = false;
+  set_autofnc_aoi_ = false;
 
   if ( cap->has( "autofnc_aoi" ) )
   {
-    __set_autofnc_aoi = true;
+    set_autofnc_aoi_ = true;
     parse_set_autofnc_aoi( cap->get( "autofnc_aoi" ).c_str() );
   }
 }
@@ -144,8 +141,8 @@ PikeCamera::open()
   if ( !_opened )
   { throw Exception( "PikeCamera::open: FirewireCamera::open dit not succed" ); }
 
-  if ( !set_autofunction_aoi( __aoi_left, __aoi_top, __aoi_width, __aoi_height,
-			      __aoi_show_work_area ) )
+  if ( !set_autofunction_aoi( aoi_left_, aoi_top_, aoi_width_, aoi_height_,
+			      aoi_show_work_area_ ) )
   {
     throw Exception( "PikeCamera::PikeCamera: setting autofnc AOI failed." );
   }
@@ -203,7 +200,7 @@ PikeCamera::set_autofunction_aoi( unsigned int left,
   if ( !_opened )
   { return false; }
 
-  if ( !__set_autofnc_aoi )
+  if ( !set_autofnc_aoi_ )
   { return true; }
 
   avt_autofnc_aoi_t aoi;
@@ -304,20 +301,20 @@ PikeCamera::parse_set_autofnc_aoi( const char* aoi )
   if ( pos == string::npos )
   {
     height = a;
-    __aoi_show_work_area = false;
+    aoi_show_work_area_ = false;
   }
   else
   {
     height = a.substr( 0, pos );
     show = a.substr( pos + 1 );
 
-    __aoi_show_work_area = ( show == "show" ) ? true : false;
+    aoi_show_work_area_ = ( show == "show" ) ? true : false;
   }
 
-  __aoi_left   = atoi( left.c_str() );
-  __aoi_top    = atoi( top.c_str() );
-  __aoi_width  = atoi( width.c_str() );
-  __aoi_height = atoi( height.c_str() );
+  aoi_left_   = atoi( left.c_str() );
+  aoi_top_    = atoi( top.c_str() );
+  aoi_width_  = atoi( width.c_str() );
+  aoi_height_ = atoi( height.c_str() );
 }
 
 } // end namespace firevision

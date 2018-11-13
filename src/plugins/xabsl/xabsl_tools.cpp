@@ -39,7 +39,7 @@
  */
 XabslLoggingErrorHandler::XabslLoggingErrorHandler(fawkes::Logger *logger)
 {
-  __logger = logger;
+  logger_ = logger;
 }
 
 
@@ -49,7 +49,7 @@ XabslLoggingErrorHandler::XabslLoggingErrorHandler(fawkes::Logger *logger)
 void
 XabslLoggingErrorHandler::printError(const char *text)
 {
-  __logger->log_error("XABSL", "%s", text);
+  logger_->log_error("XABSL", "%s", text);
 }
 
 
@@ -59,7 +59,7 @@ XabslLoggingErrorHandler::printError(const char *text)
 void
 XabslLoggingErrorHandler::printMessage(const char *text)
 {
-  __logger->log_info("XABSL", "%s", text);
+  logger_->log_info("XABSL", "%s", text);
 }
 
 
@@ -73,8 +73,8 @@ XabslLoggingErrorHandler::printMessage(const char *text)
  */
 XabslFileInputSource::XabslFileInputSource(const char *filename)
 {
-  __filename = strdup(filename);
-  __f = NULL;
+  filename_ = strdup(filename);
+  f_ = NULL;
 }
 
 
@@ -82,7 +82,7 @@ XabslFileInputSource::XabslFileInputSource(const char *filename)
 XabslFileInputSource::~XabslFileInputSource()
 {
   close();
-  free(__filename);
+  free(filename_);
 }
 
 
@@ -93,8 +93,8 @@ bool
 XabslFileInputSource::open()
 {
   close();
-  __f = fopen(__filename, "r");
-  return (__f != NULL);
+  f_ = fopen(filename_, "r");
+  return (f_ != NULL);
 }
 
 
@@ -102,8 +102,8 @@ XabslFileInputSource::open()
 void
 XabslFileInputSource::close()
 {
-  if ( __f )  fclose(__f);
-  __f = NULL;
+  if ( f_ )  fclose(f_);
+  f_ = NULL;
 }
 
 
@@ -140,9 +140,9 @@ XabslFileInputSource::readString(char *buf, int buf_length)
 void
 XabslFileInputSource::omit_comment()
 {
-  while ( !feof(__f) ) {
+  while ( !feof(f_) ) {
     char c;
-    if (fread(&c, 1, 1, __f)) {
+    if (fread(&c, 1, 1, f_)) {
       if ( c == '\n')  return;
     } else {
       return;
@@ -157,9 +157,9 @@ XabslFileInputSource::omit_comment()
 char
 XabslFileInputSource::read_and_omit_whitespace(bool omit_whitespace)
 {
-  while ( ! feof(__f) ) {
+  while ( ! feof(f_) ) {
     char c;
-    if (fread(&c, 1, 1, __f)) {
+    if (fread(&c, 1, 1, f_)) {
       if ( c == '/' ) {
 	omit_comment();
 	continue;
@@ -187,12 +187,12 @@ XabslFileInputSource::read_and_omit_whitespace(bool omit_whitespace)
 bool
 XabslFileInputSource::read_from_file(char *buf, size_t buf_length)
 {
-  if ( ! __f || feof(__f) )  return false;
+  if ( ! f_ || feof(f_) )  return false;
 
   memset(buf, 0, buf_length);
   size_t cur_length = 0;
   bool is_first = true;
-  while (! feof(__f) && (cur_length < buf_length)) {
+  while (! feof(f_) && (cur_length < buf_length)) {
     char c = read_and_omit_whitespace(is_first);
     is_first = false;
     if (c) {

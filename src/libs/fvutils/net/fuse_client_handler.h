@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_NET_FUSE_CLIENT_HANDLER_H_
-#define __FIREVISION_FVUTILS_NET_FUSE_CLIENT_HANDLER_H_
+#ifndef _FIREVISION_FVUTILS_NET_FUSE_CLIENT_HANDLER_H_
+#define _FIREVISION_FVUTILS_NET_FUSE_CLIENT_HANDLER_H_
 
 #include <fvutils/net/fuse.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FuseNetworkMessage;
 

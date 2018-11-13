@@ -25,9 +25,6 @@
 #include <cstdlib>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class MemAutoFree <utils/misc/autofree.h>
  * Automatically free memory on destruction.
@@ -44,7 +41,7 @@ namespace fawkes {
  */
 MemAutoFree::MemAutoFree(void *ptr)
 {
-  __ptr = ptr;
+  ptr_ = ptr;
 }
 
 
@@ -53,7 +50,7 @@ MemAutoFree::MemAutoFree(void *ptr)
  */
 MemAutoFree::~MemAutoFree()
 {
-  if (__ptr)  free(__ptr);
+  if (ptr_)  free(ptr_);
 }
 
 
@@ -64,7 +61,7 @@ MemAutoFree::~MemAutoFree()
 void
 MemAutoFree::release()
 {
-  __ptr = NULL;
+  ptr_ = NULL;
 }
 
 
@@ -77,9 +74,9 @@ MemAutoFree::release()
 void
 MemAutoFree::reset(void *new_ptr)
 {
-  if (__ptr != new_ptr) {
-    if (__ptr)  free(__ptr);
-    __ptr = new_ptr;
+  if (ptr_ != new_ptr) {
+    if (ptr_)  free(ptr_);
+    ptr_ = new_ptr;
   }
 }
 

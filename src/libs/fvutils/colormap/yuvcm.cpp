@@ -34,9 +34,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class YuvColormap <fvutils/colormap/colormap.h>
  * YUV Colormap.
@@ -104,7 +101,7 @@ YuvColormap::YuvColormap(const char *shmem_lut_id, bool destroy_on_free, unsigne
 YuvColormap::YuvColormap(YuvColormap *cm, const char *shmem_lut_id, bool destroy_on_free)
 {
   constructor(cm->depth(), cm->width(), cm->height(), shmem_lut_id, destroy_on_free);
-  memcpy(__lut, cm->__lut, __lut_size);
+  memcpy(lut_, cm->lut_, lut_size_);
 }
 
 /** Copy constructor.
@@ -115,7 +112,7 @@ YuvColormap::YuvColormap(YuvColormap *cm, const char *shmem_lut_id, bool destroy
 YuvColormap::YuvColormap(const YuvColormap& cm)
 {
   constructor(cm.depth(), cm.width(), cm.height());
-  memcpy(__lut, cm.__lut, __lut_size);
+  memcpy(lut_, cm.lut_, lut_size_);
 }
 
 
@@ -154,66 +151,66 @@ YuvColormap::constructor(unsigned int depth, unsigned int width, unsigned int he
     throw IllegalArgumentException("Height must be of the form d=2^n with n from [1,8]");
   }
 
-  __width  = width;
-  __height = height;
-  __depth  = depth;
-  __depth_div  = 256 / __depth;
-  __width_div  = 256 / __width;
-  __height_div  = 256 / __height;
-  __plane_size = __width * __height;
+  width_  = width;
+  height_ = height;
+  depth_  = depth;
+  depth_div_  = 256 / depth_;
+  width_div_  = 256 / width_;
+  height_div_  = 256 / height_;
+  plane_size_ = width_ * height_;
 
   if ( shmem_lut_id != NULL ) {
-    __shm_lut  = new SharedMemoryLookupTable(shmem_lut_id, __width, __height, __depth, /* bytes p. cell */ 1);
-    __shm_lut->set_destroy_on_delete( destroy_on_free );
-    __lut      = __shm_lut->buffer();
-    __lut_size = __shm_lut->data_size();
+    shm_lut_  = new SharedMemoryLookupTable(shmem_lut_id, width_, height_, depth_, /* bytes p. cell */ 1);
+    shm_lut_->set_destroy_on_delete( destroy_on_free );
+    lut_      = shm_lut_->buffer();
+    lut_size_ = shm_lut_->data_size();
   } else {
-    __shm_lut = NULL;
-    __lut_size = (size_t)__width * (size_t)__height * (size_t)__depth;
-    __lut = (unsigned char *)malloc( __lut_size );
+    shm_lut_ = NULL;
+    lut_size_ = (size_t)width_ * (size_t)height_ * (size_t)depth_;
+    lut_ = (unsigned char *)malloc( lut_size_ );
   }
-  memset(__lut, C_OTHER, __lut_size);
+  memset(lut_, C_OTHER, lut_size_);
 }
 
 
 /** Destructor. */
 YuvColormap::~YuvColormap()
 {
-  if ( __shm_lut ) {
-    delete __shm_lut;
+  if ( shm_lut_ ) {
+    delete shm_lut_;
   } else {
-    free(__lut);
+    free(lut_);
   }
-  __lut = NULL;
-  __lut_size = 0;
+  lut_ = NULL;
+  lut_size_ = 0;
 }
 
 
 void
 YuvColormap::set(unsigned int y, unsigned int u, unsigned int v, color_t c)
 {
-  *(__lut + (y / __depth_div) * __plane_size + (v / __height_div) * __width + (u / __width_div)) = c;
+  *(lut_ + (y / depth_div_) * plane_size_ + (v / height_div_) * width_ + (u / width_div_)) = c;
 }
 
 
 void
 YuvColormap::reset()
 {
-  memset(__lut, C_OTHER, __lut_size);
+  memset(lut_, C_OTHER, lut_size_);
 }
 
 
 void
 YuvColormap::set(unsigned char *buffer)
 {
-  memcpy(__lut, buffer, __lut_size);
+  memcpy(lut_, buffer, lut_size_);
 }
 
 
 size_t
 YuvColormap::size()
 {
-  return __lut_size;
+  return lut_size_;
 }
 
 
@@ -222,7 +219,7 @@ YuvColormap::get_blocks()
 {
   std::list<ColormapFileBlock *> rv;
 
-  for (unsigned int i = 0; i < __depth; ++i) {
+  for (unsigned int i = 0; i < depth_; ++i) {
     ColormapFileYuvBlock *yuvb = new ColormapFileYuvBlock(this, i);
     rv.push_back(yuvb);
   }
@@ -234,7 +231,7 @@ YuvColormap::get_blocks()
 unsigned char *
 YuvColormap::get_buffer() const
 {
-  return __lut;
+  return lut_;
 }
 
 
@@ -247,11 +244,11 @@ YuvColormap::get_buffer() const
 void
 YuvColormap::copy_uvplane(unsigned char *uvplane, unsigned int level)
 {
-  if ( level > __depth ) {
-    throw OutOfBoundsException("YuvColormap::copy_uvplane(): Invalid level", level, 0, __depth);
+  if ( level > depth_ ) {
+    throw OutOfBoundsException("YuvColormap::copy_uvplane(): Invalid level", level, 0, depth_);
   }
 
-  memcpy(__lut + level * __plane_size, uvplane, __plane_size);
+  memcpy(lut_ + level * plane_size_, uvplane, plane_size_);
 }
 
 
@@ -270,14 +267,14 @@ YuvColormap::operator+=(const Colormap & cmlt)
     throw TypeMismatchException("Only YUV colormaps can be added to a YUV colormap");
   }
 
-  if ( (__width != tc->__width) || (__height != tc->__height) || (__depth != tc->__depth) ) {
+  if ( (width_ != tc->width_) || (height_ != tc->height_) || (depth_ != tc->depth_) ) {
     throw TypeMismatchException("YuvColormaps are of different sizes");
   }
 
-  unsigned char *this_lut = __lut;
-  unsigned char *other_lut = tc->__lut;
+  unsigned char *this_lut = lut_;
+  unsigned char *other_lut = tc->lut_;
 
-  for (unsigned int i = 0; i < __plane_size * __depth; ++i) {
+  for (unsigned int i = 0; i < plane_size_ * depth_; ++i) {
     if ( (*this_lut == C_OTHER) || (*this_lut == C_BACKGROUND) ) {
       // can be overridden
       if ( (*other_lut != C_OTHER) && (*other_lut != C_BACKGROUND) ) {
@@ -302,11 +299,11 @@ YuvColormap::operator+=(const Colormap & cmlt)
 Colormap &
 YuvColormap::operator=(const YuvColormap & yuvcm)
 {
-  if ( __lut_size != yuvcm.__lut_size ) {
+  if ( lut_size_ != yuvcm.lut_size_ ) {
     throw TypeMismatchException("Size of colormaps does not match");
   }
 
-  memcpy(__lut, yuvcm.__lut, __lut_size);
+  memcpy(lut_, yuvcm.lut_, lut_size_);
 
   return *this;
 }
@@ -332,21 +329,21 @@ YuvColormap::operator+=(const char *filename)
 unsigned int
 YuvColormap::width() const
 {
-  return __width;
+  return width_;
 }
 
 
 unsigned int
 YuvColormap::height() const
 {
-  return __height;
+  return height_;
 }
 
 
 unsigned int
 YuvColormap::depth() const
 {
-  return __depth;
+  return depth_;
 }
 
 
@@ -363,7 +360,7 @@ YuvColormap::deepness() const
 unsigned int
 YuvColormap::plane_size() const
 {
-  return __plane_size;
+  return plane_size_;
 }
 
 
@@ -374,9 +371,9 @@ YuvColormap::plane_size() const
 void
 YuvColormap::replace_color(color_t from, color_t to)
 {
-  unsigned char *this_lut = __lut;
+  unsigned char *this_lut = lut_;
 
-  for (unsigned int i = 0; i < __plane_size * __depth; ++i, ++this_lut) {
+  for (unsigned int i = 0; i < plane_size_ * depth_; ++i, ++this_lut) {
     if (*this_lut == from)  *this_lut = to;
   }
 }

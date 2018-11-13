@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_BASEAPP_RUN_H_
-#define __LIBS_BASEAPP_RUN_H_
+#ifndef _LIBS_BASEAPP_RUN_H_
+#define _LIBS_BASEAPP_RUN_H_
 
 #include <baseapp/init_options.h>
 
@@ -48,10 +48,6 @@ namespace fawkes {
   }
 
   namespace runtime {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 extern ArgumentParser        *argument_parser;
 extern FawkesMainThread      *main_thread;

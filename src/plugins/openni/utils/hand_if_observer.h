@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_OPENNI_UTILS_HAND_IF_OBSERVER_H_
-#define __PLUGINS_OPENNI_UTILS_HAND_IF_OBSERVER_H_
+#ifndef _PLUGINS_OPENNI_UTILS_HAND_IF_OBSERVER_H_
+#define _PLUGINS_OPENNI_UTILS_HAND_IF_OBSERVER_H_
 
 #include <plugins/openni/utils/types.h>
 #include <blackboard/interface_observer.h>
@@ -34,10 +34,6 @@ namespace fawkes {
   class Mutex;
 
   namespace openni {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 class HandIfObserver : public BlackBoardInterfaceObserver
 {
@@ -50,11 +46,11 @@ class HandIfObserver : public BlackBoardInterfaceObserver
   void process_queue();
 
  private:
-  HandMap &__hands;
-  BlackBoard *__bb;
-  Mutex *__queue_lock;
-  unsigned int __active_queue;
-  std::queue<std::string> __queues[2];
+  HandMap &hands_;
+  BlackBoard *bb_;
+  Mutex *queue_lock_;
+  unsigned int active_queue_;
+  std::queue<std::string> queues_[2];
 };
 
 } // end namespace fawkes::openni

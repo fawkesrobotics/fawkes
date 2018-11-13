@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CLASSIFIERS_SIFTPP_H_
-#define __FIREVISION_CLASSIFIERS_SIFTPP_H_
+#ifndef _FIREVISION_CLASSIFIERS_SIFTPP_H_
+#define _FIREVISION_CLASSIFIERS_SIFTPP_H_
 
 #ifndef HAVE_SIFTPP
 #  error SIFTPP not available, you may not use the SiftppClassifier
@@ -43,9 +43,6 @@ class fawkes::TimeTracker;
 //#endif
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class SiftppClassifier : public Classifier
 {
@@ -79,38 +76,38 @@ class SiftppClassifier : public Classifier
   double distSquare(VL::float_t *v1, VL::float_t *v2, int n);
 
   // Object objects
-  VL::PgmBuffer      *__obj_img;
-  std::vector< Feature > __obj_features;
-  int __obj_num_features;
+  VL::PgmBuffer      *obj_img_;
+  std::vector< Feature > obj_features_;
+  int obj_num_features_;
 
   // Image objects
-  VL::PgmBuffer      *__image;
-  std::vector< Feature > __img_features;
-  int __img_num_features;
+  VL::PgmBuffer      *image_;
+  std::vector< Feature > img_features_;
+  int img_num_features_;
 
   // Initial sampling step (default 2)
-  int __samplingStep;
+  int samplingStep_;
   // Number of analysed octaves (default 4)
-  int __octaves;
+  int octaves_;
   // Number of levels per octave (default 3)
-  int __levels;
+  int levels_;
   // Blob response treshold
-  VL::float_t __threshold;
-  VL::float_t __edgeThreshold;
+  VL::float_t threshold_;
+  VL::float_t edgeThreshold_;
 
-  int   __first;
+  int   first_;
 
-  //  float const __sigman;
-  //  float const __sigma0;
-  float __sigman;
-  float __sigma0;
+  //  float const sigman_;
+  //  float const sigma0_;
+  float sigman_;
+  float sigma0_;
 
   // Keypoint magnification (default 3)
-  float __magnif;
+  float magnif_;
   // Upright SIFTPP or rotation invaraiant
-  int   __noorient;
+  int   noorient_;
   // Normalize decriptors?
-  int   __unnormalized;
+  int   unnormalized_;
 
   // UNUSED
 //   int    stableorder    = 0 ;
@@ -121,17 +118,17 @@ class SiftppClassifier : public Classifier
 //   int    fp             = 0 ;
 
   // Length of descriptor vector
-  int __vlen;
+  int vlen_;
 
   //#ifdef SIFTPP_TIMETRACKER
-  fawkes::TimeTracker *__tt;
-  unsigned int __loop_count;
-  unsigned int __ttc_objconv;
-  unsigned int __ttc_objfeat;
-  unsigned int __ttc_imgconv;
-  unsigned int __ttc_imgfeat;
-  unsigned int __ttc_matchin;
-  unsigned int __ttc_roimerg;
+  fawkes::TimeTracker *tt_;
+  unsigned int loop_count_;
+  unsigned int ttc_objconv_;
+  unsigned int ttc_objfeat_;
+  unsigned int ttc_imgconv_;
+  unsigned int ttc_imgfeat_;
+  unsigned int ttc_matchin_;
+  unsigned int ttc_roimerg_;
   //#endif
 
 };

@@ -27,8 +27,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_COLORMODEL_BAYES_HISTOS_TO_LUT_H_
-#define __FIREVISION_COLORMODEL_BAYES_HISTOS_TO_LUT_H_
+#ifndef _FIREVISION_COLORMODEL_BAYES_HISTOS_TO_LUT_H_
+#define _FIREVISION_COLORMODEL_BAYES_HISTOS_TO_LUT_H_
 
 #include <fvutils/base/roi.h>
 
@@ -36,9 +36,6 @@
 #include <string>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Histogram;
 class YuvColormap;

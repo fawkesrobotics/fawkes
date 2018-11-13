@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CAMS_SWISSRANGER_H_
-#define __FIREVISION_CAMS_SWISSRANGER_H_
+#ifndef _FIREVISION_CAMS_SWISSRANGER_H_
+#define _FIREVISION_CAMS_SWISSRANGER_H_
 
 #include <fvcams/camera.h>
 #include <fvcams/control/focus.h>
@@ -31,9 +31,6 @@
 #include <definesSR.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class CameraArgumentParser;
 
@@ -93,46 +90,46 @@ class SwissRangerCamera
   bool _valid_frame_received;
 
  private:
-  SRCAM __cam;
+  SRCAM cam_;
 
   /** Camera model, used in open to identify the camera,
    * if empty first found camera is used */
-  char *__model;
-  char *__vendor;
-  unsigned int __vendor_id;
-  unsigned int __product_id;
-  unsigned int __serial;
+  char *model_;
+  char *vendor_;
+  unsigned int vendor_id_;
+  unsigned int product_id_;
+  unsigned int serial_;
 
-  mode_t __mode;
-  bool   __set_modfreq;
-  bool   __use_median;
-  bool   __use_denoise;
-  unsigned int __integration_time;
-  unsigned int __amplitude_threshold;
+  mode_t mode_;
+  bool   set_modfreq_;
+  bool   use_median_;
+  bool   use_denoise_;
+  unsigned int integration_time_;
+  unsigned int amplitude_threshold_;
 
-  ModulationFrq __modulation_freq;
+  ModulationFrq modulation_freq_;
 
-  unsigned int __width;
-  unsigned int __height;
+  unsigned int width_;
+  unsigned int height_;
 
-  size_t          __buffer_size;
-  unsigned char  *__buffer;
-  unsigned char  *__gray_buffer;
-  void           *__coord_uint16_buf;
-  float          *__coord_float_buf;
-  double         *__coord_double_buf;
+  size_t          buffer_size_;
+  unsigned char  *buffer_;
+  unsigned char  *gray_buffer_;
+  void           *coord_uint16_buf_;
+  float          *coord_float_buf_;
+  double         *coord_double_buf_;
 
-  short          *__xu;
-  short          *__yu;
-  unsigned short *__zu;
+  short          *xu_;
+  short          *yu_;
+  unsigned short *zu_;
 
-  float          *__xf;
-  float          *__yf;
-  float          *__zf;
+  float          *xf_;
+  float          *yf_;
+  float          *zf_;
 
-  double         *__xd;
-  double         *__yd;
-  double         *__zd;
+  double         *xd_;
+  double         *yd_;
+  double         *zd_;
 
 };
 

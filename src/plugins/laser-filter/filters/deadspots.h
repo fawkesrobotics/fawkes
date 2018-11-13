@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTER_FILTERS_DEADSPOTS_H_
-#define __PLUGINS_LASER_FILTER_FILTERS_DEADSPOTS_H_
+#ifndef _PLUGINS_LASER_FILTER_FILTERS_DEADSPOTS_H_
+#define _PLUGINS_LASER_FILTER_FILTERS_DEADSPOTS_H_
 
 #include "filter.h"
 
@@ -51,11 +51,11 @@ class LaserDeadSpotsDataFilter : public LaserDataFilter
 
 
  private:
-  fawkes::Logger *__logger;
+  fawkes::Logger *logger_;
 
-  unsigned int  __num_spots;
-  unsigned int *__dead_spots;
-  std::vector<std::pair<float, float> > __cfg_dead_spots;
+  unsigned int  num_spots_;
+  unsigned int *dead_spots_;
+  std::vector<std::pair<float, float> > cfg_dead_spots_;
 };
 
 #endif

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ECLIPSE_CLP_PLUGIN_H_
-#define __PLUGINS_ECLIPSE_CLP_PLUGIN_H_
+#ifndef _PLUGINS_ECLIPSE_CLP_PLUGIN_H_
+#define _PLUGINS_ECLIPSE_CLP_PLUGIN_H_
 
 #include <core/plugin.h>
 
@@ -31,4 +31,4 @@ class EclipseCLPPlugin : public fawkes::Plugin
   EclipseCLPPlugin (fawkes::Configuration* config);
 };
 
-#endif /* __PLUGINS_ECLIPSE_CLP_PLUGIN_H_ */
+#endif /* PLUGINS_ECLIPSE_CLP_PLUGIN_H__ */

@@ -26,9 +26,6 @@
 #include <pcl_utils/utils.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class PointCloudAspectIniFin <aspect/inifins/pointcloud.h>
  * Initializer/finalizer for the PointCloudAspect.
@@ -41,7 +38,7 @@ namespace fawkes {
 PointCloudAspectIniFin::PointCloudAspectIniFin(Configuration *config)
   : AspectIniFin("PointCloudAspect")
 {
-  __pcl_manager = new PointCloudManager();
+  pcl_manager_ = new PointCloudManager();
   pcl_utils::shutup_conditional(config);
 }
 
@@ -49,7 +46,7 @@ PointCloudAspectIniFin::PointCloudAspectIniFin(Configuration *config)
 /** Destructor. */
 PointCloudAspectIniFin::~PointCloudAspectIniFin()
 {
-  delete __pcl_manager;
+  delete pcl_manager_;
 }
 
 void
@@ -63,7 +60,7 @@ PointCloudAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  pcl_thread->init_PointCloudAspect(__pcl_manager);
+  pcl_thread->init_PointCloudAspect(pcl_manager_);
 }
 
 void

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LUAAGENT_CONTINUOUS_EXEC_THREAD_H_
-#define __PLUGINS_LUAAGENT_CONTINUOUS_EXEC_THREAD_H_
+#ifndef _PLUGINS_LUAAGENT_CONTINUOUS_EXEC_THREAD_H_
+#define _PLUGINS_LUAAGENT_CONTINUOUS_EXEC_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -90,26 +90,26 @@ class LuaAgentContinuousExecutionThread
 
     /** Check if LuaThread failed.
      * @return true if an error occured, false otherwise. */
-    bool failed() { return __failed; }
+    bool failed() { return failed_; }
    private:
-    fawkes::LuaContext  *__lua;
-    bool __failed;
+    fawkes::LuaContext  *lua_;
+    bool failed_;
   };
 
  private: /* members */
-  fawkes::ComponentLogger *__clog;
+  fawkes::ComponentLogger *clog_;
 
   // config values
-  std::string __cfg_agent;
-  bool        __cfg_watch_files;
+  std::string cfg_agent_;
+  bool        cfg_watch_files_;
 
-  fawkes::SkillerInterface      *__skiller_if;
+  fawkes::SkillerInterface      *skiller_if_;
 
-  fawkes::LuaContext  *__lua;
-  fawkes::LuaInterfaceImporter  *__lua_ifi;
+  fawkes::LuaContext  *lua_;
+  fawkes::LuaInterfaceImporter  *lua_ifi_;
 
-  fawkes::Mutex *__ifi_mutex;
-  LuaThread *__lua_thread;
+  fawkes::Mutex *ifi_mutex_;
+  LuaThread *lua_thread_;
 };
 
 #endif

@@ -27,9 +27,6 @@
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class RRDAspectIniFin <plugins/rrd/aspect/rrd_inifin.h>
  * RRDAspect initializer/finalizer.
@@ -44,7 +41,7 @@ namespace fawkes {
 RRDAspectIniFin::RRDAspectIniFin(RRDManager *rrd_manager)
   : AspectIniFin("RRDAspect")
 {
-  __rrd_manager = rrd_manager;
+  rrd_manager_ = rrd_manager;
 }
 
 void
@@ -58,7 +55,7 @@ RRDAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  rrd_thread->init_RRDAspect(__rrd_manager);
+  rrd_thread->init_RRDAspect(rrd_manager_);
 }
 
 void

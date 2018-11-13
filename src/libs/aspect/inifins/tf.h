@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_INIFINS_TF_H_
-#define __ASPECT_INIFINS_TF_H_
+#ifndef _ASPECT_INIFINS_TF_H_
+#define _ASPECT_INIFINS_TF_H_
 
 #include <aspect/inifins/inifin.h>
 
@@ -30,9 +30,6 @@ namespace fawkes {
     class Transformer;
   }
 
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class BlackBoard;
 
@@ -45,8 +42,8 @@ class TransformAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  BlackBoard      *__blackboard;
-  tf::Transformer *__transformer;
+  BlackBoard      *blackboard_;
+  tf::Transformer *transformer_;
 };
 
 } // end namespace fawkes

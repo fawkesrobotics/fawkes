@@ -25,9 +25,6 @@
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenRaveManipulator <plugins/openrave/manipulator.h>
  * Class containing information about all manipulator motors.
@@ -39,8 +36,8 @@ namespace fawkes {
  * @param count_device number of motors of real device
  */
 OpenRaveManipulator::OpenRaveManipulator(unsigned int count, unsigned int count_device) :
-  __cnt( count ),
-  __cnt_device( count_device )
+  cnt_( count ),
+  cnt_device_( count_device )
 {
 }
 
@@ -62,7 +59,7 @@ OpenRaveManipulator::add_motor(unsigned int number, unsigned int number_device)
   motor.no_device = number_device;
   motor.angle = 0.f;
 
-  __motors.push_back(motor);
+  motors_.push_back(motor);
 }
 
 } // end of namespace fawkes

@@ -26,9 +26,6 @@
 #include <stdio.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class GazeboAspectIniFin <plugins/gazebo/aspect/gazebo_inifin.h>
  * GazeboAspect initializer/finalizer.
@@ -56,11 +53,11 @@ GazeboAspectIniFin::init(Thread *thread)
 					  "GazeboAspect, but RTTI says it "
 					  "has not. ", thread->name());
   }
-  if (! __gazebonode) {
+  if (! gazebonode_) {
     throw CannotInitializeThreadException("Gazebo node handle has not been set.");
   }
 
-  gazebo_thread->init_GazeboAspect(__gazebonode, __gazebo_world_node);
+  gazebo_thread->init_GazeboAspect(gazebonode_, gazebo_world_node_);
 }
 
 /** Finalize
@@ -87,7 +84,7 @@ GazeboAspectIniFin::finalize(Thread *thread)
 void
 GazeboAspectIniFin::set_gazebonode(gazebo::transport::NodePtr gazebonode)
 {
-  __gazebonode = gazebonode;
+  gazebonode_ = gazebonode;
 }
 /** Set the Gazebo node handle to use for aspect initialization.
  * (used for robot independent or world changing communication)
@@ -96,7 +93,7 @@ GazeboAspectIniFin::set_gazebonode(gazebo::transport::NodePtr gazebonode)
 void
 GazeboAspectIniFin::set_gazebo_world_node(gazebo::transport::NodePtr gazebo_world_node)
 {
-  __gazebo_world_node = gazebo_world_node;
+  gazebo_world_node_ = gazebo_world_node;
 }
 
 } // end namespace fawkes

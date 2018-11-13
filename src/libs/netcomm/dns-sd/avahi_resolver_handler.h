@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_DNSSD_AVAHI_RESOLVER_HANDLER_H_
-#define __NETCOMM_DNSSD_AVAHI_RESOLVER_HANDLER_H_
+#ifndef _NETCOMM_DNSSD_AVAHI_RESOLVER_HANDLER_H_
+#define _NETCOMM_DNSSD_AVAHI_RESOLVER_HANDLER_H_
 
 #include <sys/socket.h>
 

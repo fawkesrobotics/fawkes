@@ -20,15 +20,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_NAVGRAPH_GENERATOR_GENERATOR_H_
-#define __LIBS_NAVGRAPH_GENERATOR_GENERATOR_H_
+#ifndef _LIBS_NAVGRAPH_GENERATOR_GENERATOR_H_
+#define _LIBS_NAVGRAPH_GENERATOR_GENERATOR_H_
 
 #include <navgraph/navgraph.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class NavGraphGenerator
 {

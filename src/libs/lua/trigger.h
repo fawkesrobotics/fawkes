@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LUA_TRIGGER_H_
-#define __LUA_TRIGGER_H_
+#ifndef _LUA_TRIGGER_H_
+#define _LUA_TRIGGER_H_
 
 namespace fawkes {
 
@@ -36,8 +36,8 @@ class LuaTriggerManager
   void trigger(const char *event, const char *param_format = 0, ...);
 
  private:
-  LuaContext *__lua;;
-  char *__trigger_var;
+  LuaContext *lua_;;
+  char *trigger_var_;
 };
 
 } // end of namespace fawkes

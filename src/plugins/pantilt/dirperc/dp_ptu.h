@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_PANTILT_DIRPERC_DP_PTU_H_
-#define __PLUGINS_PANTILT_DIRPERC_DP_PTU_H_
+#ifndef _PLUGINS_PANTILT_DIRPERC_DP_PTU_H_
+#define _PLUGINS_PANTILT_DIRPERC_DP_PTU_H_
 
 #define DPPTU_MAX_OBUFFER_SIZE  20
 #define DPPTU_MAX_IBUFFER_SIZE 255
@@ -114,20 +114,20 @@ class DirectedPerceptionPTU
   static const char * DPPTU_ASCII_QUERY;
   static const char * DPPTU_VERSION;
 
-  char         *__device_file;
-  int           __fd;
-  bool          __opened;
-  unsigned int  __timeout_ms;
+  char         *device_file_;
+  int           fd_;
+  bool          opened_;
+  unsigned int  timeout_ms_;
 
-  char          __obuffer[DPPTU_MAX_OBUFFER_SIZE];
-  char          __ibuffer[DPPTU_MAX_IBUFFER_SIZE];
+  char          obuffer_[DPPTU_MAX_OBUFFER_SIZE];
+  char          ibuffer_[DPPTU_MAX_IBUFFER_SIZE];
 
-  int           __pan_resolution;
-  int           __tilt_resolution;
-  int           __pan_upper_limit;
-  int           __pan_lower_limit;
-  int           __tilt_lower_limit;
-  int           __tilt_upper_limit;
+  int           pan_resolution_;
+  int           tilt_resolution_;
+  int           pan_upper_limit_;
+  int           pan_lower_limit_;
+  int           tilt_lower_limit_;
+  int           tilt_upper_limit_;
 
 };
 

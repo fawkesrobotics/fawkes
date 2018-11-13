@@ -252,8 +252,8 @@ AvahiThread::client_callback(AvahiClient *c, AvahiClientState state, void *insta
 void
 AvahiThread::publish_service(NetworkService *service)
 {
-  if ( __services.find(service) == __services.end() ) {
-    __pending_services.push_locked(service);
+  if ( services_.find(service) == services_.end() ) {
+    pending_services_.push_locked(service);
   } else {
     throw Exception("Service already registered");
   }
@@ -265,8 +265,8 @@ AvahiThread::publish_service(NetworkService *service)
 void
 AvahiThread::unpublish_service(NetworkService *service)
 {
-  if ( __services.find(*service) != __services.end() ) {
-    __pending_remove_services.push_locked(service);
+  if ( services_.find(*service) != services_.end() ) {
+    pending_remove_services_.push_locked(service);
   } else {
     throw Exception("Service not registered");
   }
@@ -344,8 +344,8 @@ AvahiThread::create_service(const NetworkService &service, AvahiEntryGroup *exgr
 void
 AvahiThread::recreate_services()
 {
-  for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
-    (*__sit).second = create_service(__sit->first, __sit->second);
+  for (sit_ = services_.begin(); sit_ != services_.end(); ++sit_) {
+    (*sit_).second = create_service(sit_->first, sit_->second);
   }
 }
 
@@ -353,13 +353,13 @@ AvahiThread::recreate_services()
 void
 AvahiThread::create_pending_services()
 {
-  __pending_services.lock();
-  while ( ! __pending_services.empty()) {
-    NetworkService &s = __pending_services.front();
-    __services[s] = create_service(s, NULL);
-    __pending_services.pop();
+  pending_services_.lock();
+  while ( ! pending_services_.empty()) {
+    NetworkService &s = pending_services_.front();
+    services_[s] = create_service(s, NULL);
+    pending_services_.pop();
   }
-  __pending_services.unlock();
+  pending_services_.unlock();
 }
 
 
@@ -368,16 +368,16 @@ AvahiThread::remove_pending_services()
 {
   Thread::CancelState old_state;
   set_cancel_state(CANCEL_DISABLED, &old_state);
-  __pending_remove_services.lock();
-  while ( ! __pending_remove_services.empty()) {
-    NetworkService &s = __pending_remove_services.front();
-    if ( __services.find(s) != __services.end() ) {
-      group_erase(__services[s]);
-      __services.erase_locked(s);
+  pending_remove_services_.lock();
+  while ( ! pending_remove_services_.empty()) {
+    NetworkService &s = pending_remove_services_.front();
+    if ( services_.find(s) != services_.end() ) {
+      group_erase(services_[s]);
+      services_.erase_locked(s);
     }
-    __pending_remove_services.pop();
+    pending_remove_services_.pop();
   }
-  __pending_remove_services.unlock();
+  pending_remove_services_.unlock();
   set_cancel_state(old_state);
 }
 
@@ -409,9 +409,9 @@ AvahiThread::group_erase(AvahiEntryGroup *g)
 void
 AvahiThread::erase_groups()
 {
-  for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
-    if (__sit->second)  group_erase(__sit->second);
-    __sit->second = NULL;
+  for (sit_ = services_.begin(); sit_ != services_.end(); ++sit_) {
+    if (sit_->second)  group_erase(sit_->second);
+    sit_->second = NULL;
   }
 }
 
@@ -419,8 +419,8 @@ AvahiThread::erase_groups()
 void
 AvahiThread::reset_groups()
 {
-  for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
-    group_reset((*__sit).second);
+  for (sit_ = services_.begin(); sit_ != services_.end(); ++sit_) {
+    group_reset((*sit_).second);
   }
 }
 
@@ -429,18 +429,18 @@ AvahiThread::reset_groups()
 void
 AvahiThread::name_collision(AvahiEntryGroup *g)
 {
-  for (__sit = __services.begin(); __sit != __services.end(); ++__sit) {
-    if ( (*__sit).second == g ) {
-      NetworkService service = __sit->first;
+  for (sit_ = services_.begin(); sit_ != services_.end(); ++sit_) {
+    if ( (*sit_).second == g ) {
+      NetworkService service = sit_->first;
       std::string name = service.modified_name() ? service.modified_name() : service.name();
 
       /* A service name collision happened. Let's pick a new name */
-      char *n = avahi_alternative_service_name((*__sit).first.name());
+      char *n = avahi_alternative_service_name((*sit_).first.name());
       service.set_modified_name(n);
       avahi_free(n);
 
-      __pending_remove_services.push_locked(service);
-      __pending_services.push_locked(service);
+      pending_remove_services_.push_locked(service);
+      pending_services_.push_locked(service);
     }
   }
 }
@@ -495,8 +495,8 @@ AvahiThread::entry_group_callback(AvahiEntryGroup *g, AvahiEntryGroupState state
 void
 AvahiThread::watch_service(const char *service_type, ServiceBrowseHandler *h)
 {
-  __handlers[service_type].push_back(h);
-  __pending_browsers.push_locked(service_type);
+  handlers_[service_type].push_back(h);
+  pending_browsers_.push_locked(service_type);
 
   wake_poller();
 }
@@ -511,15 +511,15 @@ AvahiThread::watch_service(const char *service_type, ServiceBrowseHandler *h)
 void
 AvahiThread::unwatch_service(const char *service_type, ServiceBrowseHandler *h)
 {
-  if ( __handlers.find(service_type) != __handlers.end() ) {
-    __handlers[service_type].remove(h);
-    if ( __handlers[service_type].size() == 0 ) {
-      if ( __browsers.find(service_type) != __browsers.end() ) {
-	__pending_browser_removes.push_locked(service_type);
-	//avahi_service_browser_free(__browsers[service_type]);
-	//__browsers.erase(service_type);
+  if ( handlers_.find(service_type) != handlers_.end() ) {
+    handlers_[service_type].remove(h);
+    if ( handlers_[service_type].size() == 0 ) {
+      if ( browsers_.find(service_type) != browsers_.end() ) {
+	pending_browser_removes_.push_locked(service_type);
+	//avahi_service_browser_free(browsers_[service_type]);
+	//browsers_.erase(service_type);
       }
-      __handlers.erase(service_type);
+      handlers_.erase(service_type);
     }
   }
 
@@ -533,7 +533,7 @@ AvahiThread::unwatch_service(const char *service_type, ServiceBrowseHandler *h)
 void
 AvahiThread::create_browser(const char *service_type)
 {
-  if ( __browsers.find(service_type) == __browsers.end() ) {
+  if ( browsers_.find(service_type) == browsers_.end() ) {
     if ( client ) {
       AvahiServiceBrowser *b = avahi_service_browser_new(client, AVAHI_IF_UNSPEC,
                                                          service_protocol, service_type,
@@ -541,10 +541,10 @@ AvahiThread::create_browser(const char *service_type)
                                                          AvahiThread::browse_callback, this);
 
       if ( ! b ) {
-	__handlers[service_type].pop_back();
+	handlers_[service_type].pop_back();
 	throw NullPointerException("Could not instantiate AvahiServiceBrowser");
       }
-      __browsers[service_type] = b;
+      browsers_[service_type] = b;
     }
   }
 }
@@ -557,7 +557,7 @@ void
 AvahiThread::recreate_browsers()
 {
   LockMap< std::string, std::list<ServiceBrowseHandler *> >::iterator i;
-  for (i = __handlers.begin(); i != __handlers.end(); ++i) {
+  for (i = handlers_.begin(); i != handlers_.end(); ++i) {
     create_browser( (*i).first.c_str() );
   }
 }
@@ -566,13 +566,13 @@ AvahiThread::recreate_browsers()
 void
 AvahiThread::create_pending_browsers()
 {
-  __pending_browsers.lock();
-  while ( ! __pending_browsers.empty() ) {
-    //printf("Creating browser for %s\n", __pending_browsers.front().c_str());
-    create_browser(__pending_browsers.front().c_str());
-    __pending_browsers.pop();
+  pending_browsers_.lock();
+  while ( ! pending_browsers_.empty() ) {
+    //printf("Creating browser for %s\n", pending_browsers_.front().c_str());
+    create_browser(pending_browsers_.front().c_str());
+    pending_browsers_.pop();
   }
-  __pending_browsers.unlock();
+  pending_browsers_.unlock();
 }
 
 
@@ -581,14 +581,14 @@ AvahiThread::remove_pending_browsers()
 {
   Thread::CancelState old_state;
   set_cancel_state(CANCEL_DISABLED, &old_state);
-  __pending_browser_removes.lock();
-  while ( ! __pending_browser_removes.empty()) {
-    std::string &s = __pending_browser_removes.front();
-    avahi_service_browser_free(__browsers[s]);
-    __browsers.erase_locked(s);
-    __pending_browser_removes.pop();
+  pending_browser_removes_.lock();
+  while ( ! pending_browser_removes_.empty()) {
+    std::string &s = pending_browser_removes_.front();
+    avahi_service_browser_free(browsers_[s]);
+    browsers_.erase_locked(s);
+    pending_browser_removes_.pop();
   }
-  __pending_browser_removes.unlock();
+  pending_browser_removes_.unlock();
   set_cancel_state(old_state);
 }
 
@@ -598,10 +598,10 @@ void
 AvahiThread::erase_browsers()
 {
   std::map< std::string, AvahiServiceBrowser * >::iterator i;
-  for (i = __browsers.begin(); i != __browsers.end(); ++i) {
+  for (i = browsers_.begin(); i != browsers_.end(); ++i) {
     avahi_service_browser_free((*i).second);
   }
-  __browsers.clear();
+  browsers_.clear();
 }
 
 
@@ -615,9 +615,9 @@ AvahiThread::call_handler_service_removed( const char *name,
 					    const char *type,
 					    const char *domain)
 {
-  if ( __handlers.find(type) != __handlers.end() ) {
+  if ( handlers_.find(type) != handlers_.end() ) {
     std::list<ServiceBrowseHandler *>::iterator i;
-    for ( i = __handlers[type].begin(); i != __handlers[type].end(); ++i) {
+    for ( i = handlers_[type].begin(); i != handlers_[type].end(); ++i) {
       (*i)->service_removed(name, type, domain);
     }
   }
@@ -702,9 +702,9 @@ AvahiThread::call_handler_service_added( const char *name,
     // ignore
     return;
   }
-  if ( __handlers.find(type) != __handlers.end() ) {
+  if ( handlers_.find(type) != handlers_.end() ) {
     std::list<ServiceBrowseHandler *>::iterator i;
-    for ( i = __handlers[type].begin(); i != __handlers[type].end(); ++i) {
+    for ( i = handlers_[type].begin(); i != handlers_[type].end(); ++i) {
 	    (*i)->service_added(name, type, domain, host_name, ifname,
 	                        (struct sockaddr *)s, slen, port, txt, (int)flags);
     }
@@ -723,9 +723,9 @@ AvahiThread::call_handler_failed( const char *name,
 				   const char *type,
 				   const char *domain)
 {
-  if ( __handlers.find(type) != __handlers.end() ) {
+  if ( handlers_.find(type) != handlers_.end() ) {
     std::list<ServiceBrowseHandler *>::iterator i;
-    for ( i = __handlers[type].begin(); i != __handlers[type].end(); ++i) {
+    for ( i = handlers_[type].begin(); i != handlers_[type].end(); ++i) {
       (*i)->browse_failed(name, type, domain);
     }
   }
@@ -738,9 +738,9 @@ AvahiThread::call_handler_failed( const char *name,
 void
 AvahiThread::call_handler_all_for_now(const char *type)
 {
-  if ( __handlers.find(type) != __handlers.end() ) {
+  if ( handlers_.find(type) != handlers_.end() ) {
     std::list<ServiceBrowseHandler *>::iterator i;
-    for ( i = __handlers[type].begin(); i != __handlers[type].end(); ++i) {
+    for ( i = handlers_[type].begin(); i != handlers_[type].end(); ++i) {
       (*i)->all_for_now();
     }
   }
@@ -753,9 +753,9 @@ AvahiThread::call_handler_all_for_now(const char *type)
 void
 AvahiThread::call_handler_cache_exhausted(const char *type)
 {
-  if ( __handlers.find(type) != __handlers.end() ) {
+  if ( handlers_.find(type) != handlers_.end() ) {
     std::list<ServiceBrowseHandler *>::iterator i;
-    for ( i = __handlers[type].begin(); i != __handlers[type].end(); ++i) {
+    for ( i = handlers_[type].begin(); i != handlers_[type].end(); ++i) {
       (*i)->cache_exhausted();
     }
   }
@@ -905,8 +905,8 @@ AvahiThread::resolve_name(const char *name, AvahiResolverHandler *handler)
 {
   AvahiResolverCallbackData *data = new AvahiResolverCallbackData(this, handler);
 
-  if ( __pending_hostname_resolves.find(name) == __pending_hostname_resolves.end()) {
-    __pending_hostname_resolves[name] = data;
+  if ( pending_hostname_resolves_.find(name) == pending_hostname_resolves_.end()) {
+    pending_hostname_resolves_[name] = data;
   }
 
   wake_poller();
@@ -924,7 +924,7 @@ AvahiThread::start_hostname_resolver(const char *name, AvahiResolverCallbackData
 						data) ) == NULL ) {
     throw Exception("Cannot create Avahi name resolver");
   } else {
-    __running_hostname_resolvers.push_back(resolver);
+    running_hostname_resolvers_.push_back(resolver);
   }
 
 }
@@ -934,10 +934,10 @@ void
 AvahiThread::start_hostname_resolvers()
 {
 	LockMap<std::string, AvahiResolverCallbackData * >::iterator phrit;
-  for (phrit = __pending_hostname_resolves.begin(); phrit != __pending_hostname_resolves.end(); ++phrit) {
+  for (phrit = pending_hostname_resolves_.begin(); phrit != pending_hostname_resolves_.end(); ++phrit) {
     start_hostname_resolver(phrit->first.c_str(), phrit->second);
   }
-  __pending_hostname_resolves.clear();
+  pending_hostname_resolves_.clear();
 }
 
 
@@ -946,11 +946,11 @@ AvahiThread::start_address_resolvers()
 {
 	LockMap<struct ::sockaddr_storage *, AvahiResolverCallbackData *>::iterator  parit;
 
-  for (parit = __pending_address_resolves.begin(); parit != __pending_address_resolves.end(); ++parit) {
+  for (parit = pending_address_resolves_.begin(); parit != pending_address_resolves_.end(); ++parit) {
     start_address_resolver(parit->first, parit->second);
     free(parit->first);
   }
-  __pending_address_resolves.clear();
+  pending_address_resolves_.clear();
 }
 
 
@@ -982,7 +982,7 @@ AvahiThread::resolve_address(struct sockaddr *addr, socklen_t addrlen,
   }
   AvahiResolverCallbackData *data = new AvahiResolverCallbackData(this, handler);
 
-  __pending_address_resolves[sstor] = data;
+  pending_address_resolves_[sstor] = data;
   wake_poller();
 }
 
@@ -1011,7 +1011,7 @@ AvahiThread::start_address_resolver(const struct sockaddr_storage *in_addr, Avah
     e.append("Avahi error: %s", avahi_strerror(avahi_client_errno(client)));
     throw e;
   } else {
-    __running_address_resolvers.push_back_locked(resolver);
+    running_address_resolvers_.push_back_locked(resolver);
   }
 }
 
@@ -1023,7 +1023,7 @@ AvahiThread::start_address_resolver(const struct sockaddr_storage *in_addr, Avah
 void
 AvahiThread::remove_hostname_resolver(AvahiHostNameResolver *r)
 {
-  __running_hostname_resolvers.remove_locked(r);
+  running_hostname_resolvers_.remove_locked(r);
 }
 
 
@@ -1034,7 +1034,7 @@ AvahiThread::remove_hostname_resolver(AvahiHostNameResolver *r)
 void
 AvahiThread::remove_address_resolver(AvahiAddressResolver *r)
 {
-  __running_address_resolvers.remove_locked(r);
+  running_address_resolvers_.remove_locked(r);
 }
 
 

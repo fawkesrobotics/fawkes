@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_LOCAL_H_
-#define __BLACKBOARD_LOCAL_H_
+#ifndef _BLACKBOARD_LOCAL_H_
+#define _BLACKBOARD_LOCAL_H_
 
 #include <blackboard/blackboard.h>
 #include <core/exceptions/software.h>
@@ -76,10 +76,10 @@ class LocalBlackBoard : public BlackBoard
   const BlackBoardMemoryManager * memory_manager() const;
 
  private: /* members */
-  BlackBoardInterfaceManager *__im;
-  BlackBoardMemoryManager    *__memmgr;
-  BlackBoardMessageManager   *__msgmgr;
-  BlackBoardNetworkHandler   *__nethandler;
+  BlackBoardInterfaceManager *im_;
+  BlackBoardMemoryManager    *memmgr_;
+  BlackBoardMessageManager   *msgmgr_;
+  BlackBoardNetworkHandler   *nethandler_;
 };
 
 

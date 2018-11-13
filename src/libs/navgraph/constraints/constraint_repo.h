@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __NAVGRAPH_CONSTRAINTS_CONSTRAINT_REPO_H_
-#define __NAVGRAPH_CONSTRAINTS_CONSTRAINT_REPO_H_
+#ifndef _NAVGRAPH_CONSTRAINTS_CONSTRAINT_REPO_H_
+#define _NAVGRAPH_CONSTRAINTS_CONSTRAINT_REPO_H_
 
 #include <navgraph/constraints/node_constraint.h>
 #include <navgraph/constraints/edge_constraint.h>
@@ -34,9 +34,6 @@
 #include <map>
 
 namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class NavGraphConstraintRepo
 {

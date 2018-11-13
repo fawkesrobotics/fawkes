@@ -24,9 +24,6 @@
 #include <aspect/logger.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class LoggerAspect <aspect/logger.h>
  * Thread aspect that allows to provide a logger to Fawkes.
@@ -46,7 +43,7 @@ namespace fawkes {
 LoggerAspect::LoggerAspect(Logger *logger)
 {
   add_aspect("LoggerAspect");
-  __logger = logger;
+  logger_ = logger;
 }
 
 /** Virtual empty destructor. */
@@ -63,7 +60,7 @@ LoggerAspect::~LoggerAspect()
 Logger *
 LoggerAspect::get_logger() const
 {
-  return __logger;
+  return logger_;
 }
 
 } // end namespace fawkes

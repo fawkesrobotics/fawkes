@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGODB_MONGODB_INSTANCE_CONFIG_H_
-#define __PLUGINS_MONGODB_MONGODB_INSTANCE_CONFIG_H_
+#ifndef _PLUGINS_MONGODB_MONGODB_INSTANCE_CONFIG_H_
+#define _PLUGINS_MONGODB_MONGODB_INSTANCE_CONFIG_H_
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>

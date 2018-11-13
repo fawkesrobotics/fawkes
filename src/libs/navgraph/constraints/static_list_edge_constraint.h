@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __NAVGRAPH_CONSTRAINTS_STATIC_LIST_EDGE_CONSTRAINT_H_
-#define __NAVGRAPH_CONSTRAINTS_STATIC_LIST_EDGE_CONSTRAINT_H_
+#ifndef _NAVGRAPH_CONSTRAINTS_STATIC_LIST_EDGE_CONSTRAINT_H_
+#define _NAVGRAPH_CONSTRAINTS_STATIC_LIST_EDGE_CONSTRAINT_H_
 
 #include <navgraph/constraints/edge_constraint.h>
 
@@ -31,9 +31,6 @@
 #include <navgraph/navgraph.h>
 
 namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class NavGraphStaticListEdgeConstraint : public NavGraphEdgeConstraint
 {

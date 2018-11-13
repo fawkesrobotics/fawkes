@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_EXCEPTION_H_
-#define __CORE_EXCEPTION_H_
+#ifndef _CORE_EXCEPTION_H_
+#define _CORE_EXCEPTION_H_
 
 // needed for va_list
 #include <cstdarg>
@@ -111,7 +111,7 @@ class Exception : public std::exception {
   int              _errno;
 
  private:
-  const char *__type_id;
+  const char *type_id_;
 };
 
 

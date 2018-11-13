@@ -41,42 +41,42 @@ using namespace fawkes;
 JoystickRemoteBlackBoardPoster::JoystickRemoteBlackBoardPoster(const char *host,
 							 unsigned short int port,
 							 Logger *logger)
-  : __logger(logger)
+  : logger_(logger)
 {
-  __bb = new RemoteBlackBoard(host, port);
+  bb_ = new RemoteBlackBoard(host, port);
 
-  __joystick_if = __bb->open_for_writing<JoystickInterface>("Joystick");
-  __warning_printed = false;
+  joystick_if_ = bb_->open_for_writing<JoystickInterface>("Joystick");
+  warning_printed_ = false;
 }
 
 /** Destructor. */
 JoystickRemoteBlackBoardPoster::~JoystickRemoteBlackBoardPoster()
 {
-  __bb->close(__joystick_if);
-  delete __bb;
+  bb_->close(joystick_if_);
+  delete bb_;
 }
 
 void
 JoystickRemoteBlackBoardPoster::joystick_changed(unsigned int pressed_buttons,
 						 float *axis_values)
 {
-  if ( ! __bb->is_alive() ) {
-    if ( __bb->try_aliveness_restore() ) {
-      __logger->log_info("Joystick", "Connection re-established, writing data");
-      __warning_printed = false;
+  if ( ! bb_->is_alive() ) {
+    if ( bb_->try_aliveness_restore() ) {
+      logger_->log_info("Joystick", "Connection re-established, writing data");
+      warning_printed_ = false;
     }
   }
   
   try {
-    __joystick_if->set_pressed_buttons(pressed_buttons);
-    __joystick_if->set_axis(axis_values);
-    __joystick_if->write();
+    joystick_if_->set_pressed_buttons(pressed_buttons);
+    joystick_if_->set_axis(axis_values);
+    joystick_if_->write();
   } catch (Exception &e) {
-    if ( ! __warning_printed ) {
+    if ( ! warning_printed_ ) {
       e.print_trace();
-      __logger->log_warn("Joystick", "Lost connection to BlackBoard, "
+      logger_->log_warn("Joystick", "Lost connection to BlackBoard, "
 			 "will try to re-establish");
-      __warning_printed = true;
+      warning_printed_ = true;
     }
   }
 }
@@ -84,15 +84,15 @@ JoystickRemoteBlackBoardPoster::joystick_changed(unsigned int pressed_buttons,
 void
 JoystickRemoteBlackBoardPoster::joystick_plugged(char num_axes, char num_buttons)
 {
-  __joystick_if->set_num_axes( num_axes );
-  __joystick_if->set_num_buttons( num_buttons );
-  __joystick_if->write();
+  joystick_if_->set_num_axes( num_axes );
+  joystick_if_->set_num_buttons( num_buttons );
+  joystick_if_->write();
 }
 
 void
 JoystickRemoteBlackBoardPoster::joystick_unplugged()
 {
-  __joystick_if->set_num_axes( 0 );
-  __joystick_if->set_num_buttons( 0 );
-  __joystick_if->write();
+  joystick_if_->set_num_axes( 0 );
+  joystick_if_->set_num_buttons( 0 );
+  joystick_if_->write();
 }

@@ -24,9 +24,6 @@
 #include <aspect/aspect.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class Aspect <aspect/aspect.h>
  * Fawkes aspect base class.
@@ -51,7 +48,7 @@ namespace fawkes {
 void
 Aspect::add_aspect(const char *name)
 {
-  __aspects.push_back(name);
+  aspects_.push_back(name);
 }
 
 
@@ -61,7 +58,7 @@ Aspect::add_aspect(const char *name)
 const std::list<const char *> &
 Aspect::get_aspects() const
 {
-  return __aspects;
+  return aspects_;
 }
 
 

@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_ASPECT_PROVIDER_H_
-#define __ASPECT_ASPECT_PROVIDER_H_
+#ifndef _ASPECT_ASPECT_PROVIDER_H_
+#define _ASPECT_ASPECT_PROVIDER_H_
 
 #include <aspect/aspect.h>
 
 #include <list>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class AspectIniFin;
 
@@ -45,7 +42,7 @@ class AspectProviderAspect : public virtual Aspect
   const std::list<AspectIniFin *> &  aspect_provider_aspects() const;
 
  private:
-  std::list<AspectIniFin *> __aspect_provider_aspects;
+  std::list<AspectIniFin *> aspect_provider_aspects_;
 };
 
 } // end namespace fawkes

@@ -74,10 +74,6 @@ namespace fawkes {
 
 namespace kdl_parser {
 
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 
 /** Constructs a KDL tree from a file, given the file name

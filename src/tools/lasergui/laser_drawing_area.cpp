@@ -54,25 +54,25 @@ LaserDrawingArea::LaserDrawingArea(BaseObjectType* cobject,
 				   const Glib::RefPtr<Gtk::Builder> &builder)
   : Gtk::DrawingArea(cobject)
 {
-  __draw_mode = MODE_LINES;
-  __zoom_factor = 50;
-  __l_objpos_if_persons = NULL;
-  __l_objpos_if_legs = NULL;
-  __l_objpos_if_misc = NULL;
-  __laser_segmentation_if = NULL;
-  __l_track_if = NULL;
-  __target_if = NULL;
-  __switch_if = NULL;
-  __line_if   = NULL;
-  __visdisp_if = NULL;
-  __robot_drawer = NULL;
-  __resolution = 1;
-  __rotation = 0;
-  __break_drawing = false;
-  __first_draw = true;
-  __connected = false;
+  draw_mode_ = MODE_LINES;
+  zoom_factor_ = 50;
+  l_objpos_if_persons_ = NULL;
+  l_objpos_if_legs_ = NULL;
+  l_objpos_if_misc_ = NULL;
+  laser_segmentation_if_ = NULL;
+  l_track_if_ = NULL;
+  target_if_ = NULL;
+  switch_if_ = NULL;
+  line_if_   = NULL;
+  visdisp_if_ = NULL;
+  robot_drawer_ = NULL;
+  resolution_ = 1;
+  rotation_ = 0;
+  break_drawing_ = false;
+  first_draw_ = true;
+  connected_ = false;
 
-  __visdisp = new VisualDisplay2D();
+  visdisp_ = new VisualDisplay2D();
 
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK |
 	     Gdk::BUTTON_PRESS_MASK );
@@ -88,23 +88,23 @@ LaserDrawingArea::LaserDrawingArea(BaseObjectType* cobject,
 /** Constructor. */
 LaserDrawingArea::LaserDrawingArea()
 {
-  __draw_mode = MODE_LINES;
-  __zoom_factor = 50;
-  __l_objpos_if_persons = NULL;
-  __l_objpos_if_legs = NULL;
-  __l_objpos_if_misc = NULL;
-  __laser_segmentation_if = NULL;
-  __l_track_if = NULL;
-  __target_if = NULL;
-  __switch_if = NULL;
-  __line_if   = NULL;
-  __visdisp_if = NULL;
-  __robot_drawer = NULL;
-  __resolution = 1;
-  __rotation = 0;
-  __break_drawing = false;
+  draw_mode_ = MODE_LINES;
+  zoom_factor_ = 50;
+  l_objpos_if_persons_ = NULL;
+  l_objpos_if_legs_ = NULL;
+  l_objpos_if_misc_ = NULL;
+  laser_segmentation_if_ = NULL;
+  l_track_if_ = NULL;
+  target_if_ = NULL;
+  switch_if_ = NULL;
+  line_if_   = NULL;
+  visdisp_if_ = NULL;
+  robot_drawer_ = NULL;
+  resolution_ = 1;
+  rotation_ = 0;
+  break_drawing_ = false;
 
-  __visdisp = new VisualDisplay2D();
+  visdisp_ = new VisualDisplay2D();
 
   add_events(Gdk::SCROLL_MASK | Gdk::BUTTON_MOTION_MASK);
 
@@ -119,7 +119,7 @@ LaserDrawingArea::LaserDrawingArea()
 /** Destructor. */
 LaserDrawingArea::~LaserDrawingArea()
 {
-  delete __visdisp;
+  delete visdisp_;
 }
 
 /** Set ObjectPosition interfaces.
@@ -139,13 +139,13 @@ LaserDrawingArea::set_objpos_if(std::list<fawkes::ObjectPositionInterface*>* l_o
 				std::list<fawkes::Position2DTrackInterface*>* l_track_if,
 				fawkes::ObjectPositionInterface* target_if,
 				fawkes::SwitchInterface* switch_if){
-  __l_objpos_if_persons = l_objpos_if_persons;
-  __l_objpos_if_legs = l_objpos_if_legs;
-  __l_objpos_if_misc = l_objpos_if_misc;
-  __laser_segmentation_if=laser_segmentation_if;
-  __l_track_if = l_track_if;
-  __target_if = target_if;
-  __switch_if = switch_if;
+  l_objpos_if_persons_ = l_objpos_if_persons;
+  l_objpos_if_legs_ = l_objpos_if_legs;
+  l_objpos_if_misc_ = l_objpos_if_misc;
+  laser_segmentation_if_=laser_segmentation_if;
+  l_track_if_ = l_track_if;
+  target_if_ = target_if;
+  switch_if_ = switch_if;
 }
 
 /** Set connection status.
@@ -154,7 +154,7 @@ LaserDrawingArea::set_objpos_if(std::list<fawkes::ObjectPositionInterface*>* l_o
 void
 LaserDrawingArea::set_connected(bool connected)
 {
-  __connected = connected;
+  connected_ = connected;
   queue_draw();
 }
 
@@ -185,7 +185,7 @@ LaserDrawingArea::set_connected(bool connected)
 void
 LaserDrawingArea::set_laser_ifs(const std::list<fawkes::Interface*>& ifs)
 {
-  __laser_ifs.clear();
+  laser_ifs_.clear();
   unsigned char color_counter = 0;
   unsigned char intensity = 255;
   for (std::list<fawkes::Interface*>::const_iterator it = ifs.begin();
@@ -198,7 +198,7 @@ LaserDrawingArea::set_laser_ifs(const std::list<fawkes::Interface*>& ifs)
     c.g = ((color_counter & 0x2) != 0) ? intensity : 0;
     c.b = ((color_counter & 0x4) != 0) ? intensity : 0;
     const InterfaceColorPair p = std::make_pair(*it, c);
-    __laser_ifs.push_back(p);
+    laser_ifs_.push_back(p);
     ++color_counter;
   }
   queue_draw();
@@ -209,22 +209,22 @@ LaserDrawingArea::set_laser_ifs(const std::list<fawkes::Interface*>& ifs)
 void
 LaserDrawingArea::reset_laser_ifs()
 {
-  __laser_ifs.clear();
-  __l_objpos_if_persons = NULL;
-  __l_objpos_if_legs = NULL;
-  __l_objpos_if_misc = NULL;
-  __laser_segmentation_if = NULL;
-  __l_track_if = NULL;
-  __target_if = NULL;
-  __switch_if = NULL;
+  laser_ifs_.clear();
+  l_objpos_if_persons_ = NULL;
+  l_objpos_if_legs_ = NULL;
+  l_objpos_if_misc_ = NULL;
+  laser_segmentation_if_ = NULL;
+  l_track_if_ = NULL;
+  target_if_ = NULL;
+  switch_if_ = NULL;
 
   Gtk::Allocation allocation = get_allocation();
   const int width  = allocation.get_width();
   const int height = allocation.get_height();
 
-  __xc = width / 2;
-  __yc = height / 2;
-  __zoom_factor = 50;
+  xc_ = width / 2;
+  yc_ = height / 2;
+  zoom_factor_ = 50;
   queue_draw();
 }
 
@@ -234,7 +234,7 @@ LaserDrawingArea::reset_laser_ifs()
 void
 LaserDrawingArea::set_line_if(ObjectPositionInterface *line_if)
 {
-  __line_if = line_if;
+  line_if_ = line_if;
 }
 
 
@@ -244,8 +244,8 @@ LaserDrawingArea::set_line_if(ObjectPositionInterface *line_if)
 void
 LaserDrawingArea::set_visdisp_if(VisualDisplay2DInterface *visdisp_if)
 {
-  __visdisp_if = visdisp_if;
-  __visdisp->set_interface(__visdisp_if);
+  visdisp_if_ = visdisp_if;
+  visdisp_->set_interface(visdisp_if_);
 }
 
 
@@ -255,7 +255,7 @@ LaserDrawingArea::set_visdisp_if(VisualDisplay2DInterface *visdisp_if)
 void
 LaserDrawingArea::set_robot_drawer(fawkes::CairoRobotDrawer *robot_drawer)
 {
-  __robot_drawer = robot_drawer;
+  robot_drawer_ = robot_drawer;
 }
 
 /** Set resolution.
@@ -265,7 +265,7 @@ LaserDrawingArea::set_robot_drawer(fawkes::CairoRobotDrawer *robot_drawer)
 void
 LaserDrawingArea::set_resolution(unsigned int resolution)
 {
-  __resolution = resolution;
+  resolution_ = resolution;
 }
 
 
@@ -275,7 +275,7 @@ LaserDrawingArea::set_resolution(unsigned int resolution)
 void
 LaserDrawingArea::set_draw_mode(draw_mode_t mode)
 {
-  __draw_mode = mode;
+  draw_mode_ = mode;
   queue_draw();
 }
 
@@ -285,7 +285,7 @@ LaserDrawingArea::set_draw_mode(draw_mode_t mode)
 void
 LaserDrawingArea::zoom_in()
 {
-  __zoom_factor += 20;
+  zoom_factor_ += 20;
   queue_draw();
 }
 
@@ -295,10 +295,10 @@ LaserDrawingArea::zoom_in()
 void
 LaserDrawingArea::zoom_out()
 {
-  if ( __zoom_factor > 20 ) {
-    __zoom_factor -= 20;
+  if ( zoom_factor_ > 20 ) {
+    zoom_factor_ -= 20;
   } else {
-    __zoom_factor = 1;
+    zoom_factor_ = 1;
   }
   queue_draw();
 }
@@ -310,15 +310,15 @@ LaserDrawingArea::zoom_out()
 void
 LaserDrawingArea::set_rotation(float rot_rad)
 {
-  __rotation = rot_rad;
+  rotation_ = rot_rad;
 }
 
 
 bool
 LaserDrawingArea::all_laser_ifs_have_writer() const
 {
-  for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
-       it != __laser_ifs.end(); ++it) {
+  for (std::list<InterfaceColorPair>::const_iterator it = laser_ifs_.begin();
+       it != laser_ifs_.end(); ++it) {
     fawkes::Interface* itf = it->first;
     if (!itf->has_writer()) {
       return false;
@@ -349,15 +349,15 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
   if(window) {
     Gtk::Allocation allocation = get_allocation();
 
-    if(__first_draw)
+    if(first_draw_)
     {
-      __first_draw = false;
+      first_draw_ = false;
       const int width = allocation.get_width();
       const int height = allocation.get_height();
     
       // coordinates for the center of the window
-      __xc = width / 2;
-      __yc = height / 2;
+      xc_ = width / 2;
+      yc_ = height / 2;
     }
 #if GTK_VERSION_LT(3,0)
     Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
@@ -378,12 +378,12 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
     cr->set_source_rgb(0, 0, 0);
     //cr->set_source_rgba(0,0,0,1);
 
-    //    __last_xc += __translation_x;
-    //    __last_yc += __translation_y;
-    cr->translate(__xc, __yc);
+    //    last_xc_ += translation_x_;
+    //    last_yc_ += translation_y_;
+    cr->translate(xc_, yc_);
   
     cr->save();
-    if (! __connected) {
+    if (! connected_) {
       Cairo::TextExtents te;
       std::string t = "Not connected to BlackBoard";
       cr->set_source_rgb(1, 0, 0);
@@ -391,7 +391,7 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
       cr->get_text_extents(t, te);
       cr->move_to(- te.width / 2, -te.height / 2);
       cr->show_text(t);
-    } else if ( __laser_ifs.empty() ) {
+    } else if ( laser_ifs_.empty() ) {
       Cairo::TextExtents te;
       std::string t = "No interface opened";
       cr->set_source_rgb(1, 0, 0);
@@ -402,8 +402,8 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
     } else if (! all_laser_ifs_have_writer() ) {
       Cairo::TextExtents te;
       std::string t = "No writer for ";
-      for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
-           it != __laser_ifs.end(); ++it) {
+      for (std::list<InterfaceColorPair>::const_iterator it = laser_ifs_.begin();
+           it != laser_ifs_.end(); ++it) {
         fawkes::Interface* itf = it->first;
         if (!itf->has_writer()) {
           t += itf->uid();
@@ -416,16 +416,16 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
       cr->move_to(- te.width / 2, -te.height / 2);
       cr->show_text(t);
     } else {
-      if (! __break_drawing) {
-        for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
-             it != __laser_ifs.end(); ++it) {
+      if (! break_drawing_) {
+        for (std::list<InterfaceColorPair>::const_iterator it = laser_ifs_.begin();
+             it != laser_ifs_.end(); ++it) {
           fawkes::Interface* laser_if = it->first;
           laser_if->read();
         }
       }
 
-      for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
-           it != __laser_ifs.end(); ++it) {
+      for (std::list<InterfaceColorPair>::const_iterator it = laser_ifs_.begin();
+           it != laser_ifs_.end(); ++it) {
         const fawkes::Interface* laser_if = it->first;
         const Color& color = it->second;
         cr->save();
@@ -433,9 +433,9 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
         draw_beams(laser_if, window, cr);
         cr->restore();
       }
-      if (__robot_drawer)  __robot_drawer->draw_robot(window, cr);
-      for (std::list<InterfaceColorPair>::const_iterator it = __laser_ifs.begin();
-           it != __laser_ifs.end(); ++it) {
+      if (robot_drawer_)  robot_drawer_->draw_robot(window, cr);
+      for (std::list<InterfaceColorPair>::const_iterator it = laser_ifs_.begin();
+           it != laser_ifs_.end(); ++it) {
         const fawkes::Interface* laser_if = it->first;
         const Color& color = it->second;
         cr->save();
@@ -445,27 +445,27 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
       }
       draw_persons_legs(window, cr);
 
-      if(__switch_if != NULL && __switch_if->has_writer()){
+      if(switch_if_ != NULL && switch_if_->has_writer()){
 	SwitchInterface::EnableSwitchMessage *esm = new SwitchInterface::EnableSwitchMessage();
-	__switch_if->msgq_enqueue(esm);
+	switch_if_->msgq_enqueue(esm);
       }
     }
     cr->restore();
 
     cr->save();
-    cr->rotate(0.5 * M_PI + __rotation);
-    cr->scale(-__zoom_factor, __zoom_factor);
-    cr->set_line_width(1. / __zoom_factor);
-    if (__visdisp_if) {
-      __visdisp->process_messages();
-      __visdisp->draw(cr);
+    cr->rotate(0.5 * M_PI + rotation_);
+    cr->scale(-zoom_factor_, zoom_factor_);
+    cr->set_line_width(1. / zoom_factor_);
+    if (visdisp_if_) {
+      visdisp_->process_messages();
+      visdisp_->draw(cr);
     }
 
     const float radius = 0.01;
-    if (__line_if) {
-      __line_if->read();
-      if (__line_if->has_writer() &&
-	  __line_if->is_valid() && __line_if->is_visible()) {
+    if (line_if_) {
+      line_if_->read();
+      if (line_if_->has_writer() &&
+	  line_if_->is_valid() && line_if_->is_visible()) {
 
 	cr->set_source_rgb(1, 0, 0);
 	/*
@@ -473,12 +473,12 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
 	dashes[0] = 0.1;
 	cr->set_dash(dashes, 0);
 	*/
-	cr->rectangle(__line_if->world_x() - radius * 0.5, __line_if->world_y() - radius * 0.5, radius, radius);
-	cr->rectangle(__line_if->relative_x() - radius * 0.5, __line_if->relative_y() - radius * 0.5, radius, radius);
+	cr->rectangle(line_if_->world_x() - radius * 0.5, line_if_->world_y() - radius * 0.5, radius, radius);
+	cr->rectangle(line_if_->relative_x() - radius * 0.5, line_if_->relative_y() - radius * 0.5, radius, radius);
 	cr->fill_preserve();
 	cr->stroke();
-	cr->move_to(__line_if->world_x(), __line_if->world_y());
-	cr->line_to(__line_if->relative_x(), __line_if->relative_y());
+	cr->move_to(line_if_->world_x(), line_if_->world_y());
+	cr->line_to(line_if_->relative_x(), line_if_->relative_y());
 	cr->stroke();
       }
     }
@@ -554,14 +554,14 @@ LaserDrawingArea::draw_beams(const fawkes::Interface *itf,
     distances = revdists;
   }
 
-  cr->scale(__zoom_factor, __zoom_factor);
-  cr->rotate(__rotation);
-  cr->set_line_width(1. / __zoom_factor);
+  cr->scale(zoom_factor_, zoom_factor_);
+  cr->rotate(rotation_);
+  cr->set_line_width(1. / zoom_factor_);
 
   draw_scalebox(window, cr);
 
-  if ( __draw_mode == MODE_LINES ) {
-    for (size_t i = 0; i < nd; i += __resolution) {
+  if ( draw_mode_ == MODE_LINES ) {
+    for (size_t i = 0; i < nd; i += resolution_) {
       if ( distances[i] == 0 || ! std::isfinite(distances[i]) )  continue;
       const float anglerad = deg2rad(i * nd_factor);
       cr->move_to(0, 0);
@@ -569,9 +569,9 @@ LaserDrawingArea::draw_beams(const fawkes::Interface *itf,
 		  distances[i] * -cos(anglerad));
     }
     cr->stroke();
-  } else if ( __draw_mode == MODE_POINTS ) {
-    const float radius = 4 / __zoom_factor;
-    for (size_t i = 0; i < nd; i += __resolution) {
+  } else if ( draw_mode_ == MODE_POINTS ) {
+    const float radius = 4 / zoom_factor_;
+    for (size_t i = 0; i < nd; i += resolution_) {
       if ( distances[i] == 0 )  continue;
       float anglerad = deg2rad(i * nd_factor);
       float x = distances[i] *  sin(anglerad);
@@ -585,7 +585,7 @@ LaserDrawingArea::draw_beams(const fawkes::Interface *itf,
     cr->stroke();
   } else {
     cr->move_to(0, - distances[0]);
-    for (size_t i = __resolution; i <= nd + __resolution; i += __resolution) {
+    for (size_t i = resolution_; i <= nd + resolution_; i += resolution_) {
       if ( distances[i] == 0 )  continue;
       const float anglerad    = normalize_rad(deg2rad(i * nd_factor));
       cr->line_to(distances[i % nd] *  sin(anglerad),
@@ -611,12 +611,12 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
   std::list<ObjectPositionInterface*>::iterator objpos_if_itt;;
 
   cr->save();
-  if (__l_objpos_if_persons) {
+  if (l_objpos_if_persons_) {
     cr->set_source_rgb(0,0,1);
-    for( objpos_if_itt = __l_objpos_if_persons->begin(); 
-	 objpos_if_itt != __l_objpos_if_persons->end()  && (*objpos_if_itt)->has_writer();
+    for( objpos_if_itt = l_objpos_if_persons_->begin(); 
+	 objpos_if_itt != l_objpos_if_persons_->end()  && (*objpos_if_itt)->has_writer();
 	 objpos_if_itt++ ) {
-      if(!__break_drawing)
+      if(!break_drawing_)
 	(*objpos_if_itt)->read();
       if ((*objpos_if_itt)->is_valid()){
 	std::pair<float,float> pos = transform_coords_from_fawkes((*objpos_if_itt)->relative_x(), (*objpos_if_itt)->relative_y());
@@ -630,12 +630,12 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
     cr->stroke();
   }
 
-  if (__l_objpos_if_legs) {
+  if (l_objpos_if_legs_) {
     cr->set_source_rgb(0,1,0);
-    for( objpos_if_itt = __l_objpos_if_legs->begin(); 
-	 objpos_if_itt != __l_objpos_if_legs->end() && (*objpos_if_itt)->has_writer() ; 
+    for( objpos_if_itt = l_objpos_if_legs_->begin(); 
+	 objpos_if_itt != l_objpos_if_legs_->end() && (*objpos_if_itt)->has_writer() ; 
 	 objpos_if_itt++ ) {
-      if(!__break_drawing)
+      if(!break_drawing_)
 	(*objpos_if_itt)->read();
       if ((*objpos_if_itt)->is_valid()){
 	std::pair<float,float> pos = transform_coords_from_fawkes((*objpos_if_itt)->relative_x(), (*objpos_if_itt)->relative_y());
@@ -648,12 +648,12 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
     cr->stroke();
   }
   
-  if (__l_objpos_if_misc) {
+  if (l_objpos_if_misc_) {
     cr->set_source_rgb(0,1,1);
-    for( objpos_if_itt = __l_objpos_if_misc->begin(); 
-	 objpos_if_itt != __l_objpos_if_misc->end() && (*objpos_if_itt)->has_writer() ; 
+    for( objpos_if_itt = l_objpos_if_misc_->begin(); 
+	 objpos_if_itt != l_objpos_if_misc_->end() && (*objpos_if_itt)->has_writer() ; 
 	 objpos_if_itt++ ) {
-      if(!__break_drawing)
+      if(!break_drawing_)
 	(*objpos_if_itt)->read();
       if ((*objpos_if_itt)->is_valid()){
 	//      switch( (*objpos_if_itt)->object_type() ){
@@ -714,7 +714,7 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
   float delta = 0.25;
 
 
-  if (__l_track_if) {
+  if (l_track_if_) {
 
     std::list<Position2DTrackInterface*>::iterator track_if_itt;;  
     const float radius (0.1);
@@ -731,10 +731,10 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
 #ifdef LASERGUI_DEBUG_PRINT_TRACKS
     printf("\n\n################################\n");
 #endif
-    for( track_if_itt = __l_track_if->begin(); 
-	 track_if_itt != __l_track_if->end() && (*track_if_itt)->has_writer();) {
+    for( track_if_itt = l_track_if_->begin(); 
+	 track_if_itt != l_track_if_->end() && (*track_if_itt)->has_writer();) {
       bool b_compound_track(false);
-      if(!__break_drawing)
+      if(!break_drawing_)
 	(*track_if_itt)->read();
       if ((*track_if_itt)->is_valid()){
 	x_positions1=(*track_if_itt)->track_x_positions();
@@ -743,8 +743,8 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
 	track_length1 = (*track_if_itt)->length();
 	id = (*track_if_itt)->track_id();
 	++track_if_itt;
-	if( track_if_itt != __l_track_if->end() && (*track_if_itt)->has_writer()){
-	  if(!__break_drawing)
+	if( track_if_itt != l_track_if_->end() && (*track_if_itt)->has_writer()){
+	  if(!break_drawing_)
 	    (*track_if_itt)->read();
 	  if( (*track_if_itt)->is_valid() && (*track_if_itt)->track_id()==id ){
 	    b_compound_track = true;
@@ -793,7 +793,7 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
 	  //cr->move_to(pos.first - radius, pos.second);
 	  //	  cr->arc(pos.first, pos.second, radius, 0, 2*M_PI);
 	  cr->line_to(pos.first, pos.second);
-	  //	cr->rectangle(x_positions[i], y_positions[i], 4 / __zoom_factor, 4 / __zoom_factor);
+	  //	cr->rectangle(x_positions[i], y_positions[i], 4 / zoom_factor_, 4 / zoom_factor_);
 	
 	  //	std::string t = StringConversions::toString(id) + "-" + StringConversions::toString(timestamps[i]);
 	  std::string t = StringConversions::to_string(timestamps1[i]);
@@ -850,11 +850,11 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
   }
   
   /*  DRAW TARGET */
-  if(__target_if && __target_if->has_writer()){
-    __target_if->read();
-    if(__target_if->is_valid()){
+  if(target_if_ && target_if_->has_writer()){
+    target_if_->read();
+    if(target_if_->is_valid()){
       cr->set_source_rgb(1,0,0);
-      std::pair<float,float> pos = transform_coords_from_fawkes(__target_if->relative_x(), __target_if->relative_y());
+      std::pair<float,float> pos = transform_coords_from_fawkes(target_if_->relative_x(), target_if_->relative_y());
       float x=pos.first;
       float y=pos.second;
       float radius = 0.1;
@@ -904,7 +904,7 @@ LaserDrawingArea::draw_segments(const fawkes::Interface* itf,
                                 Glib::RefPtr<Gdk::Window> &window,
 				const Cairo::RefPtr<Cairo::Context> &cr)
 {
-  size_t nd = __laser_segmentation_if->maxlenof_distances();
+  size_t nd = laser_segmentation_if_->maxlenof_distances();
   const float nd_factor = 360.0 / nd;
 
   float *distances;
@@ -923,16 +923,16 @@ LaserDrawingArea::draw_segments(const fawkes::Interface* itf,
 
   cr->save();
   /* DRAW SEGMENTS (draw the segment interiors again with other color*/
-  if( __laser_segmentation_if && __laser_segmentation_if->has_writer()){
-    if(!__break_drawing)
-      __laser_segmentation_if->read();
-    float * segmentations = __laser_segmentation_if->distances();
-    size_t nd = __laser_segmentation_if->maxlenof_distances();
+  if( laser_segmentation_if_ && laser_segmentation_if_->has_writer()){
+    if(!break_drawing_)
+      laser_segmentation_if_->read();
+    float * segmentations = laser_segmentation_if_->distances();
+    size_t nd = laser_segmentation_if_->maxlenof_distances();
     //	cr->set_source_rgba(0,0,0,0.5);
     cr->set_source_rgb(1,1,0);
 
-    if ( __draw_mode == MODE_POINTS ) {
-      for (size_t i = 0; i < nd; i += __resolution) {
+    if ( draw_mode_ == MODE_POINTS ) {
+      for (size_t i = 0; i < nd; i += resolution_) {
 	if( segmentations[i]==0) continue;  // dont draw the segment borders
 	if ( distances[i] == 0 || ! std::isfinite(distances[i]))  continue;
 	float anglerad = deg2rad(i * nd_factor);
@@ -941,9 +941,9 @@ LaserDrawingArea::draw_segments(const fawkes::Interface* itf,
 		    distances[i] * -cos(anglerad));
       }
       cr->stroke();
-    } else {//if ( __draw_mode == MODE_LINES ) {
-      float radius = 4 / __zoom_factor;
-      for (size_t i = 0; i < nd; i += __resolution) {
+    } else {//if ( draw_mode_ == MODE_LINES ) {
+      float radius = 4 / zoom_factor_;
+      for (size_t i = 0; i < nd; i += resolution_) {
 	if( segmentations[i]==0) continue;  // dont draw the segment borders
 	if ( distances[i] == 0 )  continue;
 	float anglerad = deg2rad(i * nd_factor);
@@ -959,7 +959,7 @@ LaserDrawingArea::draw_segments(const fawkes::Interface* itf,
     } 
     /*else {
       cr->move_to(0, - distances[0]);
-      for (size_t i = __resolution; i <= nd + __resolution; i += __resolution) {
+      for (size_t i = resolution_; i <= nd + resolution_; i += resolution_) {
       if ( distances[i] == 0 )  continue;
       float anglerad    = deg2rad(i % 360);
       cr->line_to(distances[i % 360] *  sin(anglerad),
@@ -992,7 +992,7 @@ LaserDrawingArea::on_scroll_event(GdkEventScroll *event)
 void
 LaserDrawingArea::toggle_break_drawing()
 {
-  __break_drawing = ! __break_drawing;
+  break_drawing_ = ! break_drawing_;
 }
 
 
@@ -1003,17 +1003,17 @@ LaserDrawingArea::toggle_break_drawing()
 bool
 LaserDrawingArea::on_button_press_event(GdkEventButton *event)
 {
-  __last_mouse_x = event->x;
-  __last_mouse_y = event->y;
+  last_mouse_x_ = event->x;
+  last_mouse_y_ = event->y;
 
   double user_x = event->x;
   double user_y = event->y;
   Glib::RefPtr<Gdk::Window> window = get_window();
   Cairo::RefPtr<Cairo::Context> cr = window->create_cairo_context();
   cr->save();
-  cr->translate(__xc, __yc);
-  cr->rotate(0.5 * M_PI + __rotation);
-  cr->scale(-__zoom_factor, __zoom_factor);
+  cr->translate(xc_, yc_);
+  cr->rotate(0.5 * M_PI + rotation_);
+  cr->scale(-zoom_factor_, zoom_factor_);
   cr->device_to_user(user_x, user_y);
   printf("Clicked at (%.3lf, %.3lf)\n", user_x, user_y);
   cr->restore();
@@ -1028,13 +1028,13 @@ LaserDrawingArea::on_button_press_event(GdkEventButton *event)
 bool
 LaserDrawingArea::on_motion_notify_event(GdkEventMotion *event)
 {
-  //  d__translation_x -= __last_mouse_x - event->x;
-  //  double __translation_y -= __last_mouse_y - event->y;
-  __xc -= __last_mouse_x - event->x;
-  __yc -= __last_mouse_y - event->y;
+  //  dtranslation_x_ -= last_mouse_x_ - event->x;
+  //  double translation_y_ -= last_mouse_y_ - event->y;
+  xc_ -= last_mouse_x_ - event->x;
+  yc_ -= last_mouse_y_ - event->y;
 
-  __last_mouse_x = event->x;
-  __last_mouse_y = event->y;
+  last_mouse_x_ = event->x;
+  last_mouse_y_ = event->y;
   queue_draw();
   return true;
 }

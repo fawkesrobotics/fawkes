@@ -25,8 +25,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_COLOR_THRESHOLD_H_
-#define __FIREVISION_UTILS_COLOR_THRESHOLD_H_
+#ifndef _FIREVISION_UTILS_COLOR_THRESHOLD_H_
+#define _FIREVISION_UTILS_COLOR_THRESHOLD_H_
 
 #include <cmath>
 #include <sys/types.h>
@@ -74,4 +74,4 @@ inline bool is_similar_y(int y, int u, int v,
 }
 }
 
-#endif /* __FIREVISION_UTILS_COLOR_THRESHOLD_H_ */
+#endif /* FIREVISION_UTILS_COLOR_THRESHOLD_H__ */

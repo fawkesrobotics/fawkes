@@ -51,9 +51,6 @@ typedef Traits_2::Curve_2                               Curve_2;
 
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphGeneratorGrid <navgraph/generators/grid.h>
  * Generate navgraph using a Grid diagram.

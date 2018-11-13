@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVWIDGETS_IMAGE_DISPLAY_H_
-#define __FIREVISION_FVWIDGETS_IMAGE_DISPLAY_H_
+#ifndef _FIREVISION_FVWIDGETS_IMAGE_DISPLAY_H_
+#define _FIREVISION_FVWIDGETS_IMAGE_DISPLAY_H_
 
 #include <fvutils/color/colorspaces.h>
 
@@ -31,9 +31,6 @@ typedef struct SDL_Overlay SDL_Overlay;
 typedef struct SDL_Rect    SDL_Rect;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ImageDisplay
 {

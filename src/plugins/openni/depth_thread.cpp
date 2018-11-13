@@ -59,39 +59,39 @@ OpenNiDepthThread::init()
 {
   MutexLocker lock(openni.objmutex_ptr());
 
-  __depth_gen = new xn::DepthGenerator();
+  depth_gen_ = new xn::DepthGenerator();
 #if __cplusplus >= 201103L
-  std::unique_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
+  std::unique_ptr<xn::DepthGenerator> depthgen_uniqueptr(depth_gen_);
 #else
-  std::auto_ptr<xn::DepthGenerator> depthgen_uniqueptr(__depth_gen);
+  std::auto_ptr<xn::DepthGenerator> depthgen_uniqueptr(depth_gen_);
 #endif
 
   XnStatus st;
 
-  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_DEPTH, __depth_gen);
-  fawkes::openni::setup_map_generator(*__depth_gen, config);
+  fawkes::openni::find_or_create_node(openni, XN_NODE_TYPE_DEPTH, depth_gen_);
+  fawkes::openni::setup_map_generator(*depth_gen_, config);
 
-  __depth_md = new xn::DepthMetaData();
+  depth_md_ = new xn::DepthMetaData();
 
-  __depth_gen->GetMetaData(*__depth_md);
+  depth_gen_->GetMetaData(*depth_md_);
 
-  __depth_width  = __depth_md->XRes();
-  __depth_height = __depth_md->YRes();
+  depth_width_  = depth_md_->XRes();
+  depth_height_ = depth_md_->YRes();
 
-  __depth_buf = new SharedMemoryImageBuffer("openni-depth", RAW16,
-  					    __depth_md->XRes(), __depth_md->YRes());
-  __depth_bufsize = colorspace_buffer_size(RAW16,
-					   __depth_md->XRes(), __depth_md->YRes());
+  depth_buf_ = new SharedMemoryImageBuffer("openni-depth", RAW16,
+  					    depth_md_->XRes(), depth_md_->YRes());
+  depth_bufsize_ = colorspace_buffer_size(RAW16,
+					   depth_md_->XRes(), depth_md_->YRes());
 
-  __depth_gen->StartGenerating();
+  depth_gen_->StartGenerating();
 
-  __capture_start = new Time(clock);
-  __capture_start->stamp_systime();
+  capture_start_ = new Time(clock);
+  capture_start_->stamp_systime();
   // Update once to get timestamp
-  __depth_gen->WaitAndUpdateData();
+  depth_gen_->WaitAndUpdateData();
   // arbitrarily define the zero reference point,
   // we can't get any closer than this
-  *__capture_start -= (long int)__depth_gen->GetTimestamp();
+  *capture_start_ -= (long int)depth_gen_->GetTimestamp();
   
   
   depthgen_uniqueptr.release();
@@ -103,10 +103,10 @@ OpenNiDepthThread::finalize()
 {
   // we do not stop generating, we don't know if there is no other plugin
   // using the node.
-  delete __depth_gen;
-  delete __depth_md;
-  delete __depth_buf;
-  delete __capture_start;
+  delete depth_gen_;
+  delete depth_md_;
+  delete depth_buf_;
+  delete capture_start_;
 }
 
 
@@ -114,15 +114,15 @@ void
 OpenNiDepthThread::loop()
 {
   MutexLocker lock(openni.objmutex_ptr());
-  bool is_depth_new = __depth_gen->IsDataNew();
-  __depth_gen->GetMetaData(*__depth_md);
-  const XnDepthPixel * const depth_data = __depth_md->Data();
-  fawkes::Time ts = *__capture_start + (long int)__depth_gen->GetTimestamp();
+  bool is_depth_new = depth_gen_->IsDataNew();
+  depth_gen_->GetMetaData(*depth_md_);
+  const XnDepthPixel * const depth_data = depth_md_->Data();
+  fawkes::Time ts = *capture_start_ + (long int)depth_gen_->GetTimestamp();
   lock.unlock();
 
-  if (is_depth_new && (__depth_buf->num_attached() > 1)) {
-    memcpy(__depth_buf->buffer(), depth_data, __depth_bufsize);
+  if (is_depth_new && (depth_buf_->num_attached() > 1)) {
+    memcpy(depth_buf_->buffer(), depth_data, depth_bufsize_);
   }
 
-  __depth_buf->set_capture_time(&ts);
+  depth_buf_->set_capture_time(&ts);
 }

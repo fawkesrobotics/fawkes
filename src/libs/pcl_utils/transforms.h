@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LIBS_PCL_UTILS_TRANSFORMS_H_
-#define __LIBS_PCL_UTILS_TRANSFORMS_H_
+#ifndef _LIBS_PCL_UTILS_TRANSFORMS_H_
+#define _LIBS_PCL_UTILS_TRANSFORMS_H_
 
 #include <tf/types.h>
 #include <tf/transformer.h>
@@ -32,10 +32,6 @@
 
 namespace fawkes {
   namespace pcl_utils {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** Apply a rigid transform.
  * @param cloud_in the input point cloud

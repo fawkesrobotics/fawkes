@@ -18,8 +18,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROBOTINO_DIRECT_COM_MESSAGE_H_
-#define __PLUGINS_ROBOTINO_DIRECT_COM_MESSAGE_H_
+#ifndef _PLUGINS_ROBOTINO_DIRECT_COM_MESSAGE_H_
+#define _PLUGINS_ROBOTINO_DIRECT_COM_MESSAGE_H_
 
 #include <core/exception.h>
 

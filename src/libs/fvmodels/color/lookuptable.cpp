@@ -45,9 +45,6 @@ using namespace std;
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ColorModelLookupTable <fvmodels/color/lookuptable.h>
  * Color model based on a lookup table.
@@ -63,7 +60,7 @@ namespace firevision {
  */
 ColorModelLookupTable::ColorModelLookupTable(YuvColormap *colormap)
 {
-  __colormap = colormap;
+  colormap_ = colormap;
 }
 
 /** Create a lookup table with given dimensions using shared memory
@@ -72,7 +69,7 @@ ColorModelLookupTable::ColorModelLookupTable(YuvColormap *colormap)
  */
 ColorModelLookupTable::ColorModelLookupTable(const char *lut_id, bool destroy_on_free)
 {
-  __colormap = new YuvColormap(lut_id, destroy_on_free);
+  colormap_ = new YuvColormap(lut_id, destroy_on_free);
 }
 
 
@@ -84,7 +81,7 @@ ColorModelLookupTable::ColorModelLookupTable(const char *lut_id, bool destroy_on
 ColorModelLookupTable::ColorModelLookupTable(unsigned int depth,
 					     const char *lut_id, bool destroy_on_free)
 {
-  __colormap = new YuvColormap(lut_id, destroy_on_free, depth);
+  colormap_ = new YuvColormap(lut_id, destroy_on_free, depth);
 }
 
 
@@ -104,7 +101,7 @@ ColorModelLookupTable::ColorModelLookupTable(const char *file,
     delete tcm;
     throw TypeMismatchException("File does not contain a YUV colormap");
   }
-  __colormap = new YuvColormap(tycm, lut_id, destroy_on_free);
+  colormap_ = new YuvColormap(tycm, lut_id, destroy_on_free);
   delete tcm;
 }
 
@@ -117,8 +114,8 @@ ColorModelLookupTable::ColorModelLookupTable(const char *file)
   ColormapFile cmf;
   cmf.read(file);
   Colormap *tcm = cmf.get_colormap();
-  __colormap = dynamic_cast<YuvColormap *>(tcm);
-  if ( ! __colormap ) {
+  colormap_ = dynamic_cast<YuvColormap *>(tcm);
+  if ( ! colormap_ ) {
     delete tcm;
     throw TypeMismatchException("File does not contain a YUV colormap");
   }
@@ -128,13 +125,13 @@ ColorModelLookupTable::ColorModelLookupTable(const char *file)
 /** Destructor. */
 ColorModelLookupTable::~ColorModelLookupTable()
 {
-  delete __colormap;
+  delete colormap_;
 }
 
 color_t
 ColorModelLookupTable::determine(unsigned int y, unsigned int u, unsigned int v) const
 {
-  return __colormap->determine(y, u, v);
+  return colormap_->determine(y, u, v);
 }
 
 const char *
@@ -149,7 +146,7 @@ ColorModelLookupTable::get_name()
 YuvColormap *
 ColorModelLookupTable::get_colormap() const
 {
-  return __colormap;
+  return colormap_;
 }
 
 
@@ -160,7 +157,7 @@ ColorModelLookupTable::get_colormap() const
 void
 ColorModelLookupTable::set_colormap(const YuvColormap &yuvcm)
 {
-  *__colormap = yuvcm;
+  *colormap_ = yuvcm;
 }
 
 
@@ -178,7 +175,7 @@ ColorModelLookupTable::load(const char *filename)
     delete tcm;
     throw TypeMismatchException("File does not contain a YUV colormap");
   }
-  *__colormap = *tycm;
+  *colormap_ = *tycm;
   delete tcm;
 }
 
@@ -191,7 +188,7 @@ ColorModelLookupTable::load(const char *filename)
 ColorModelLookupTable &
 ColorModelLookupTable::operator+=(const ColorModelLookupTable &cmlt)
 {
-  *__colormap += *(cmlt.__colormap);
+  *colormap_ += *(cmlt.colormap_);
   return *this;
 }
 
@@ -200,7 +197,7 @@ ColorModelLookupTable::operator+=(const ColorModelLookupTable &cmlt)
 void
 ColorModelLookupTable::reset()
 {
-  __colormap->reset();
+  colormap_->reset();
 }
 
 /** Compose filename.

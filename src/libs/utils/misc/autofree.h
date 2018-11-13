@@ -21,13 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_MISC_AUTOFREE_H_
-#define __UTILS_MISC_AUTOFREE_H_
+#ifndef _UTILS_MISC_AUTOFREE_H_
+#define _UTILS_MISC_AUTOFREE_H_
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class MemAutoFree {
  public:
@@ -38,7 +35,7 @@ class MemAutoFree {
   void reset(void *new_ptr);
 
  private:
-  void *__ptr;
+  void *ptr_;
 };
 
 } // end namespace fawkes

@@ -51,9 +51,6 @@ using namespace google::protobuf;
 using namespace protobuf_comm;
 
 namespace oprs_protobuf {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenPRSProtobuf "oprs_protobuf.h"
  * OpenPRS protobuf integration class.

@@ -206,10 +206,10 @@ SQLiteConfiguration::SQLiteConfiguration()
   opened = false;
   mutex = new Mutex();
 
-  __sysconfdir   = NULL;
-  __userconfdir  = NULL;
-  __default_file = NULL;
-  __default_sql  = NULL;
+  sysconfdir_   = NULL;
+  userconfdir_  = NULL;
+  default_file_ = NULL;
+  default_sql_  = NULL;
 
 }
 
@@ -228,19 +228,19 @@ SQLiteConfiguration::SQLiteConfiguration(const char *sysconfdir,
   opened = false;
   mutex = new Mutex();
 
-  __sysconfdir   = strdup(sysconfdir);
-  __default_file = NULL;
-  __default_sql  = NULL;
+  sysconfdir_   = strdup(sysconfdir);
+  default_file_ = NULL;
+  default_sql_  = NULL;
 
   if (userconfdir != NULL) {
-    __userconfdir  = strdup(userconfdir);
+    userconfdir_  = strdup(userconfdir);
   } else {
     const char *homedir = getenv("HOME");
     if (homedir == NULL) {
-      __userconfdir = strdup(sysconfdir);
+      userconfdir_ = strdup(sysconfdir);
     } else {
-      if (asprintf(&__userconfdir, "%s/%s", homedir, USERDIR) == -1) {
-	__userconfdir = strdup(sysconfdir);
+      if (asprintf(&userconfdir_, "%s/%s", homedir, USERDIR) == -1) {
+	userconfdir_ = strdup(sysconfdir);
       }
     }
   }
@@ -257,11 +257,11 @@ SQLiteConfiguration::~SQLiteConfiguration()
     }
   }
 
-  if (__host_file)    free(__host_file);
-  if (__default_file) free(__default_file);
-  if (__default_sql)  free(__default_sql);
-  if (__sysconfdir)   free(__sysconfdir);
-  if (__userconfdir)  free(__userconfdir);
+  if (host_file_)    free(host_file_);
+  if (default_file_) free(default_file_);
+  if (default_sql_)  free(default_sql_);
+  if (sysconfdir_)   free(sysconfdir_);
+  if (userconfdir_)  free(userconfdir_);
   delete mutex;
 }
 
@@ -392,11 +392,11 @@ SQLiteConfiguration::dump(::sqlite3 *tdb, const char *dumpfile)
 void
 SQLiteConfiguration::try_dump()
 {
-  if ( __default_sql ) {
+  if ( default_sql_ ) {
     sqlite3 *tdb;
-    if ( sqlite3_open(__default_file, &tdb) == SQLITE_OK ) {
+    if ( sqlite3_open(default_file_, &tdb) == SQLITE_OK ) {
       try {
-	dump(tdb, __default_sql);
+	dump(tdb, default_sql_);
 	sqlite3_close(tdb);
       } catch (Exception &e) {
 	sqlite3_close(tdb);
@@ -586,18 +586,18 @@ SQLiteConfiguration::load(const char *file_path)
 {
   mutex->lock();
 
-  if (__default_file) free(__default_file);
-  if (__default_sql)  free(__default_sql);
-  __default_file = NULL;
-  __default_sql  = NULL;
+  if (default_file_) free(default_file_);
+  if (default_sql_)  free(default_sql_);
+  default_file_ = NULL;
+  default_sql_  = NULL;
 
-  const char *try_paths[] = {__sysconfdir, __userconfdir};
+  const char *try_paths[] = {sysconfdir_, userconfdir_};
   int try_paths_len = 2;
 
   char *host_name = NULL;
 
   if (strcmp(file_path, ":memory:") == 0) {
-    __host_file = strdup(":memory:");
+    host_file_ = strdup(":memory:");
 
     if (sqlite3_open(file_path, &db) != SQLITE_OK) {
       CouldNotOpenConfigException ce(sqlite3_errmsg(db));
@@ -616,7 +616,7 @@ SQLiteConfiguration::load(const char *file_path)
       char *path;
       if (asprintf(&path, "%s/%s", try_paths[i], host_name) != -1) {
 	if (sqlite3_open(path, &db) == SQLITE_OK) {
-	  __host_file = path;
+	  host_file_ = path;
 	  break;
 	} else {
 	  free(path);
@@ -625,7 +625,7 @@ SQLiteConfiguration::load(const char *file_path)
     }
   }
 
-  if (__host_file == NULL) {
+  if (host_file_ == NULL) {
     CouldNotOpenConfigException ce(sqlite3_errmsg(db));
     ce.append("Failed to open host db (paths)");
     if (host_name) free(host_name);
@@ -644,18 +644,18 @@ SQLiteConfiguration::load(const char *file_path)
       if (host_name)  free(host_name);
       throw;
     }
-    __default_file = strdup(":memory:");
+    default_file_ = strdup(":memory:");
   } else {
     if (file_path[0] == '/') {
       // absolute path, take as is
-      __default_sql = strdup(file_path);
+      default_sql_ = strdup(file_path);
     } else {
       // try sysconfdir and userconfdir
       for (int i = 0; i < try_paths_len; ++i) {
 	char *path;
 	if (asprintf(&path, "%s/%s", try_paths[i], file_path) != -1) {
 	  if (access(path, F_OK | R_OK) == 0) {
-	    __default_sql = path;
+	    default_sql_ = path;
 	    break;
 	  } else {
 	    free(path);
@@ -682,7 +682,7 @@ SQLiteConfiguration::load(const char *file_path)
     if (defaults_db[0] == '/') {
       try {
 	attach_default(defaults_db);
-	__default_file = defaults_db;
+	default_file_ = defaults_db;
       } catch (...) {
 	if (host_name)  free(host_name);
 	free(defaults_db);
@@ -695,7 +695,7 @@ SQLiteConfiguration::load(const char *file_path)
 	if (asprintf(&path, "%s/%s", try_paths[i], defaults_db) != -1) {
 	  try {
 	    attach_default(path);
-	    __default_file = path;
+	    default_file_ = path;
 	    break;
 	  } catch (CouldNotOpenConfigException &e) {
 	    free(path);
@@ -705,7 +705,7 @@ SQLiteConfiguration::load(const char *file_path)
     }
     free(defaults_db);
 
-    if (__default_file == NULL) {
+    if (default_file_ == NULL) {
       if (host_name)  free(host_name);
       throw CouldNotOpenConfigException("Could not create default filename");
     }
@@ -713,7 +713,7 @@ SQLiteConfiguration::load(const char *file_path)
 
   init_dbs();
 
-  if ( __default_sql )  import_default(__default_sql);
+  if ( default_sql_ )  import_default(default_sql_);
   if (host_name)  free(host_name);
 
   opened = true;
@@ -2030,20 +2030,20 @@ SQLiteConfiguration::search(const char *path)
  */
 SQLiteConfiguration::SQLiteValueIterator::SQLiteValueIterator(::sqlite3_stmt *stmt, void *p)
 {
-  __stmt = stmt;
-  __p = p;
+  stmt_ = stmt;
+  p_ = p;
 }
 
 
 /** Destructor. */
 SQLiteConfiguration::SQLiteValueIterator::~SQLiteValueIterator()
 {
-  if ( __stmt != NULL ) {
-    sqlite3_finalize(__stmt);
-    __stmt = NULL;
+  if ( stmt_ != NULL ) {
+    sqlite3_finalize(stmt_);
+    stmt_ = NULL;
   }
-  if ( __p != NULL ) {
-    free(__p);
+  if ( p_ != NULL ) {
+    free(p_);
   }
 }
 
@@ -2055,13 +2055,13 @@ SQLiteConfiguration::SQLiteValueIterator::~SQLiteValueIterator()
 bool
 SQLiteConfiguration::SQLiteValueIterator::next()
 {
-  if ( __stmt == NULL) return false;
+  if ( stmt_ == NULL) return false;
 
-  if (sqlite3_step(__stmt) == SQLITE_ROW ) {
+  if (sqlite3_step(stmt_) == SQLITE_ROW ) {
     return true;
   } else {
-    sqlite3_finalize(__stmt);
-    __stmt = NULL;
+    sqlite3_finalize(stmt_);
+    stmt_ = NULL;
     return false;
   }
 }
@@ -2074,7 +2074,7 @@ SQLiteConfiguration::SQLiteValueIterator::next()
 bool
 SQLiteConfiguration::SQLiteValueIterator::valid() const
 {
-  return ( __stmt != NULL);
+  return ( stmt_ != NULL);
 }
 
 
@@ -2084,7 +2084,7 @@ SQLiteConfiguration::SQLiteValueIterator::valid() const
 const char *
 SQLiteConfiguration::SQLiteValueIterator::path() const
 {
-  return (const char *)sqlite3_column_text(__stmt, 0);
+  return (const char *)sqlite3_column_text(stmt_, 0);
 }
 
 
@@ -2094,41 +2094,41 @@ SQLiteConfiguration::SQLiteValueIterator::path() const
 const char *
 SQLiteConfiguration::SQLiteValueIterator::type() const
 {
-  return (const char *)sqlite3_column_text(__stmt, 1);
+  return (const char *)sqlite3_column_text(stmt_, 1);
 }
 
 
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_float() const
 {
-  return (strcmp("float", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
+  return (strcmp("float", (const char *)sqlite3_column_text(stmt_, 1)) == 0);
 }
 
 
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_uint() const
 {
-  return (strcmp("unsigned int", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
+  return (strcmp("unsigned int", (const char *)sqlite3_column_text(stmt_, 1)) == 0);
 }
 
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_int() const
 {
-  return (strcmp("int", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
+  return (strcmp("int", (const char *)sqlite3_column_text(stmt_, 1)) == 0);
 }
 
 
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_bool() const
 {
-  return (strcmp("bool", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
+  return (strcmp("bool", (const char *)sqlite3_column_text(stmt_, 1)) == 0);
 }
 
 
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_string() const
 {
-  return (strcmp("string", (const char *)sqlite3_column_text(__stmt, 1)) == 0);
+  return (strcmp("string", (const char *)sqlite3_column_text(stmt_, 1)) == 0);
 }
 
 bool
@@ -2147,7 +2147,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_list_size() const
 bool
 SQLiteConfiguration::SQLiteValueIterator::is_default() const
 {
-  return (sqlite3_column_int(__stmt, 4) == 1);
+  return (sqlite3_column_int(stmt_, 4) == 1);
 }
 
 
@@ -2157,7 +2157,7 @@ SQLiteConfiguration::SQLiteValueIterator::is_default() const
 float
 SQLiteConfiguration::SQLiteValueIterator::get_float() const
 {
-  return (float)sqlite3_column_double(__stmt, 2);
+  return (float)sqlite3_column_double(stmt_, 2);
 }
 
 
@@ -2167,7 +2167,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_float() const
 unsigned int
 SQLiteConfiguration::SQLiteValueIterator::get_uint() const
 {
-  int i = sqlite3_column_int(__stmt, 2);
+  int i = sqlite3_column_int(stmt_, 2);
   if( i < 0 ) {
     return 0;
   } else {
@@ -2182,7 +2182,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_uint() const
 int
 SQLiteConfiguration::SQLiteValueIterator::get_int() const
 {
-  return sqlite3_column_int(__stmt, 2);
+  return sqlite3_column_int(stmt_, 2);
 }
 
 /** Get bool value.
@@ -2191,7 +2191,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_int() const
 bool
 SQLiteConfiguration::SQLiteValueIterator::get_bool() const
 {
-  return (sqlite3_column_int(__stmt, 2) != 0);
+  return (sqlite3_column_int(stmt_, 2) != 0);
 }
 
 /** Get string value.
@@ -2200,7 +2200,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_bool() const
 std::string
 SQLiteConfiguration::SQLiteValueIterator::get_string() const
 {
-  return (const char *)sqlite3_column_text(__stmt, 2);
+  return (const char *)sqlite3_column_text(stmt_, 2);
 }
 
 
@@ -2240,7 +2240,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_strings() const
 std::string
 SQLiteConfiguration::SQLiteValueIterator::get_as_string() const
 {
-  return (const char *)sqlite3_column_text(__stmt, 2);
+  return (const char *)sqlite3_column_text(stmt_, 2);
 }
 
 /** Get comment.
@@ -2249,7 +2249,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_as_string() const
 std::string
 SQLiteConfiguration::SQLiteValueIterator::get_comment() const
 {
-  const char *c = (const char *)sqlite3_column_text(__stmt, 3);
+  const char *c = (const char *)sqlite3_column_text(stmt_, 3);
   return c ? c : "";
 }
 
@@ -2262,7 +2262,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_comment() const
 std::string
 SQLiteConfiguration::SQLiteValueIterator::get_modtype() const
 {
-  const char *c = (const char *)sqlite3_column_text(__stmt, 4);
+  const char *c = (const char *)sqlite3_column_text(stmt_, 4);
   return c ? c : "";
 }
 
@@ -2278,7 +2278,7 @@ SQLiteConfiguration::SQLiteValueIterator::get_modtype() const
 std::string
 SQLiteConfiguration::SQLiteValueIterator::get_oldvalue() const
 {
-  const char *c = (const char *)sqlite3_column_text(__stmt, 5);
+  const char *c = (const char *)sqlite3_column_text(stmt_, 5);
   return c ? c : "";
 }
 

@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_H_
-#define __UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_H_
+#ifndef _UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_H_
+#define _UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_H_
 
 #include <core/exception.h>
 #include <string>
@@ -114,11 +114,11 @@ class Module {
  private:
   static const char *FILE_EXTENSION;
 
-  void *       __handle;
-  std::string  __filename;
-  ModuleFlags  __flags;
-  bool         __is_resident;
-  unsigned int __ref_count;
+  void *       handle_;
+  std::string  filename_;
+  ModuleFlags  flags_;
+  bool         is_resident_;
+  unsigned int ref_count_;
 };
 
 

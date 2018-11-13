@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CLASSIFIERS_MULTI_COLOR_H_
-#define __FIREVISION_CLASSIFIERS_MULTI_COLOR_H_
+#ifndef _FIREVISION_CLASSIFIERS_MULTI_COLOR_H_
+#define _FIREVISION_CLASSIFIERS_MULTI_COLOR_H_
 
 #include <fvclassifiers/classifier.h>
 #include <fvutils/base/types.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ScanlineModel;
 class ColorModel;

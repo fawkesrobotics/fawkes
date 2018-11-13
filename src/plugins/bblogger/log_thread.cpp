@@ -83,30 +83,30 @@ BBLoggerThread::BBLoggerThread(const char *iface_uid,
   set_coalesce_wakeups(true);
   set_name("BBLoggerThread(%s)", iface_uid);
 
-  __buffering   = buffering;
-  __flushing    = flushing;
-  __uid         = strdup(iface_uid);
-  __logdir      = strdup(logdir);
-  __scenario    = strdup(scenario);
-  __start       = new Time(start_time);
-  __filename    = NULL;
-  __queue_mutex = new Mutex();
-  __data_size   = 0;
-  __is_master   = false;
-  __enabled     = true;
+  buffering_   = buffering;
+  flushing_    = flushing;
+  uid_         = strdup(iface_uid);
+  logdir_      = strdup(logdir);
+  scenario_    = strdup(scenario);
+  start_       = new Time(start_time);
+  filename_    = NULL;
+  queue_mutex_ = new Mutex();
+  data_size_   = 0;
+  is_master_   = false;
+  enabled_     = true;
 
-  __now = NULL;
+  now_ = NULL;
 
   // Parse UID
-  Interface::parse_uid(__uid, __type, __id);
+  Interface::parse_uid(uid_, type_, id_);
 
   char date[21];
   Time now;
   struct tm *tmp = localtime(&(now.get_timeval()->tv_sec));
   strftime(date, 21, "%F-%H-%M-%S", tmp);
 
-  if (asprintf(&__filename, "%s/%s-%s-%s-%s.log", LOGDIR, __scenario,
-	       __type.c_str(), __id.c_str(), date) == -1) {
+  if (asprintf(&filename_, "%s/%s-%s-%s-%s.log", LOGDIR, scenario_,
+	       type_.c_str(), id_.c_str(), date) == -1) {
     throw OutOfMemoryException("Cannot generate log name");
   }
 }
@@ -115,79 +115,79 @@ BBLoggerThread::BBLoggerThread(const char *iface_uid,
 /** Destructor. */
 BBLoggerThread::~BBLoggerThread()
 {
-  free(__uid);
-  free(__logdir);
-  free(__scenario);
-  free(__filename);
-  delete __queue_mutex;
-  delete __start;
+  free(uid_);
+  free(logdir_);
+  free(scenario_);
+  free(filename_);
+  delete queue_mutex_;
+  delete start_;
 }
 
 
 void
 BBLoggerThread::init()
 {
-  __queues[0].clear();
-  __queues[1].clear();
-  __act_queue = 0;
+  queues_[0].clear();
+  queues_[1].clear();
+  act_queue_ = 0;
 
-  __queue_mutex = new Mutex();
-  __data_size   = 0;
+  queue_mutex_ = new Mutex();
+  data_size_   = 0;
 
-  __now = NULL;
-  __num_data_items = 0;
-  __session_start  = 0;
+  now_ = NULL;
+  num_data_items_ = 0;
+  session_start_  = 0;
 
   // use open because fopen does not provide O_CREAT | O_EXCL
   // open read/write because of usage of mmap
   mode_t m = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-  int fd   = open(__filename, O_RDWR | O_CREAT | O_EXCL, m);
+  int fd   = open(filename_, O_RDWR | O_CREAT | O_EXCL, m);
   if ( ! fd ) {
-    throw CouldNotOpenFileException(__filename, errno, "Failed to open log 1");
+    throw CouldNotOpenFileException(filename_, errno, "Failed to open log 1");
   } else {
-    __f_data = fdopen(fd, "w+");
-    if ( ! __f_data ) {
-      throw CouldNotOpenFileException(__filename, errno, "Failed to open log 2");
+    f_data_ = fdopen(fd, "w+");
+    if ( ! f_data_ ) {
+      throw CouldNotOpenFileException(filename_, errno, "Failed to open log 2");
     }
   }
 
   try {
-    __iface = blackboard->open_for_reading(__type.c_str(), __id.c_str());
-    __data_size = __iface->datasize();
+    iface_ = blackboard->open_for_reading(type_.c_str(), id_.c_str());
+    data_size_ = iface_->datasize();
   } catch (Exception &e) {
-    fclose(__f_data);
+    fclose(f_data_);
     throw;
   }
 
   try {
     write_header();
   } catch (FileWriteException &e) {
-    blackboard->close(__iface);
-    fclose(__f_data);
+    blackboard->close(iface_);
+    fclose(f_data_);
     throw;
   }
 
-  __now = new Time(clock);
+  now_ = new Time(clock);
 
-  if (__is_master) {
+  if (is_master_) {
     try {
-      __switch_if = blackboard->open_for_writing<SwitchInterface>("BBLogger");
-      __switch_if->set_enabled(__enabled);
-      __switch_if->write();
-      bbil_add_message_interface(__switch_if);
+      switch_if_ = blackboard->open_for_writing<SwitchInterface>("BBLogger");
+      switch_if_->set_enabled(enabled_);
+      switch_if_->write();
+      bbil_add_message_interface(switch_if_);
     } catch (Exception &e) {
-      fclose(__f_data);
+      fclose(f_data_);
       throw;
     }
   }
 
-  bbil_add_data_interface(__iface);
-  bbil_add_writer_interface(__iface);
+  bbil_add_data_interface(iface_);
+  bbil_add_writer_interface(iface_);
 
   blackboard->register_listener(this);
 
-  logger->log_info(name(), "Logging %s to %s%s", __iface->uid(), __filename,
-		   __is_master ? " as master" : "");
+  logger->log_info(name(), "Logging %s to %s%s", iface_->uid(), filename_,
+		   is_master_ ? " as master" : "");
 }
 
 
@@ -195,20 +195,20 @@ void
 BBLoggerThread::finalize()
 {
   blackboard->unregister_listener(this);
-  if (__is_master) {
-    blackboard->close(__switch_if);
+  if (is_master_) {
+    blackboard->close(switch_if_);
   }
   update_header();
-  fclose(__f_data);
+  fclose(f_data_);
   for (unsigned int q = 0; q < 2; ++q) {
-    while (!__queues[q].empty()) {
-      void *t = __queues[q].front();
+    while (!queues_[q].empty()) {
+      void *t = queues_[q].front();
       free(t);
-      __queues[q].pop();
+      queues_[q].pop();
     }
   }
-  delete __now;
-  __now = NULL;
+  delete now_;
+  now_ = NULL;
 }
 
 
@@ -219,7 +219,7 @@ BBLoggerThread::finalize()
 const char *
 BBLoggerThread::get_filename() const
 {
-  return __filename;
+  return filename_;
 }
 
 
@@ -229,17 +229,17 @@ BBLoggerThread::get_filename() const
 void
 BBLoggerThread::set_enabled(bool enabled)
 {
-  if (enabled && !__enabled) {
+  if (enabled && !enabled_) {
     logger->log_info(name(), "Logging enabled");
-    __session_start = __num_data_items;
-  } else if (!enabled && __enabled) {
+    session_start_ = num_data_items_;
+  } else if (!enabled && enabled_) {
     logger->log_info(name(), "Logging disabled (wrote %u entries), flushing",
-		     (__num_data_items - __session_start));
+		     (num_data_items_ - session_start_));
     update_header();
-    fflush(__f_data);
+    fflush(f_data_);
   }
 
-  __enabled = enabled;
+  enabled_ = enabled;
 }
 
 
@@ -252,8 +252,8 @@ BBLoggerThread::set_enabled(bool enabled)
 void
 BBLoggerThread::set_threadlist(fawkes::ThreadList &thread_list)
 {
-  __is_master = true;
-  __threads   = thread_list;
+  is_master_ = true;
+  threads_   = thread_list;
 }
 
 void
@@ -263,25 +263,25 @@ BBLoggerThread::write_header()
   memset(&header, 0, sizeof(header));
   header.file_magic   = htonl(BBLOGGER_FILE_MAGIC);
   header.file_version = htonl(BBLOGGER_FILE_VERSION);
-#if __BYTE_ORDER == __BIG_ENDIAN
+#if BYTE_ORDER_ == BIG_ENDIAN_
   header.endianess = BBLOG_BIG_ENDIAN;
 #else
   header.endianess = BBLOG_LITTLE_ENDIAN;
 #endif
-  header.num_data_items = __num_data_items;
-  strncpy(header.scenario, (const char *)__scenario, BBLOG_SCENARIO_SIZE-1);
-  strncpy(header.interface_type, __iface->type(), BBLOG_INTERFACE_TYPE_SIZE-1);
-  strncpy(header.interface_id, __iface->id(), BBLOG_INTERFACE_ID_SIZE-1);
-  memcpy(header.interface_hash, __iface->hash(), BBLOG_INTERFACE_HASH_SIZE);
-  header.data_size = __iface->datasize();
+  header.num_data_items = num_data_items_;
+  strncpy(header.scenario, (const char *)scenario_, BBLOG_SCENARIO_SIZE-1);
+  strncpy(header.interface_type, iface_->type(), BBLOG_INTERFACE_TYPE_SIZE-1);
+  strncpy(header.interface_id, iface_->id(), BBLOG_INTERFACE_ID_SIZE-1);
+  memcpy(header.interface_hash, iface_->hash(), BBLOG_INTERFACE_HASH_SIZE);
+  header.data_size = iface_->datasize();
   long start_time_sec, start_time_usec;
-  __start->get_timestamp(start_time_sec, start_time_usec);
+  start_->get_timestamp(start_time_sec, start_time_usec);
   header.start_time_sec  = start_time_sec;
   header.start_time_usec = start_time_usec;
-  if (fwrite(&header, sizeof(header), 1, __f_data) != 1) {
-    throw FileWriteException(__filename, "Failed to write header");
+  if (fwrite(&header, sizeof(header), 1, f_data_) != 1) {
+    throw FileWriteException(filename_, "Failed to write header");
   }
-  fflush(__f_data);
+  fflush(f_data_);
 }
 
 /** Updates the num_data_items field in the header. */
@@ -291,14 +291,14 @@ BBLoggerThread::update_header()
   // write updated num_data_items field
 #if _POSIX_MAPPED_FILES
   void *h = mmap(NULL, sizeof(bblog_file_header), PROT_WRITE, MAP_SHARED,
-		 fileno(__f_data), 0);
+		 fileno(f_data_), 0);
   if (h == MAP_FAILED) {
     logger->log_warn(name(), "Failed to mmap log (%s), "
 		     "not updating number of data items",
 		     strerror(errno));
   } else {
     bblog_file_header *header = (bblog_file_header *)h;
-    header->num_data_items = __num_data_items;
+    header->num_data_items = num_data_items_;
     munmap(h, sizeof(bblog_file_header));
   }
 #else
@@ -311,16 +311,16 @@ void
 BBLoggerThread::write_chunk(const void *chunk)
 {
   bblog_entry_header ehead;
-  __now->stamp();
-  Time d = *__now - *__start;
+  now_->stamp();
+  Time d = *now_ - *start_;
   long rel_time_sec, rel_time_usec;
   d.get_timestamp(rel_time_sec, rel_time_usec);
   ehead.rel_time_sec  = rel_time_sec;
   ehead.rel_time_usec = rel_time_usec;
-  if ( (fwrite(&ehead, sizeof(ehead), 1, __f_data) == 1) &&
-       (fwrite(chunk, __data_size, 1, __f_data) == 1) ) {
-    if (__flushing)  fflush(__f_data);
-    __num_data_items += 1;
+  if ( (fwrite(&ehead, sizeof(ehead), 1, f_data_) == 1) &&
+       (fwrite(chunk, data_size_, 1, f_data_) == 1) ) {
+    if (flushing_)  fflush(f_data_);
+    num_data_items_ += 1;
   } else {
     logger->log_warn(name(), "Failed to write chunk");
   }
@@ -330,11 +330,11 @@ BBLoggerThread::write_chunk(const void *chunk)
 void
 BBLoggerThread::loop()
 {
-  unsigned int write_queue = __act_queue;
-  __queue_mutex->lock();
-  __act_queue = 1 - __act_queue;
-  __queue_mutex->unlock();
-  LockQueue<void *> &queue = __queues[write_queue];
+  unsigned int write_queue = act_queue_;
+  queue_mutex_->lock();
+  act_queue_ = 1 - act_queue_;
+  queue_mutex_->unlock();
+  LockQueue<void *> &queue = queues_[write_queue];
   //logger->log_debug(name(), "Writing %zu entries", queue.size());
   while (! queue.empty() ) {
     void *c = queue.front();
@@ -361,13 +361,13 @@ BBLoggerThread::bb_interface_message_received(Interface *interface,
 		      message->type(), interface->uid());
   }
 
-  for (ThreadList::iterator i = __threads.begin(); i != __threads.end(); ++i) {
+  for (ThreadList::iterator i = threads_.begin(); i != threads_.end(); ++i) {
     BBLoggerThread *bblt = dynamic_cast<BBLoggerThread *>(*i);
     bblt->set_enabled(enabled);
   }
 
-  __switch_if->set_enabled(__enabled);
-  __switch_if->write();
+  switch_if_->set_enabled(enabled_);
+  switch_if_->write();
 
   return false;
 }
@@ -376,22 +376,22 @@ BBLoggerThread::bb_interface_message_received(Interface *interface,
 void
 BBLoggerThread::bb_interface_data_changed(Interface *interface) throw()
 {
-  if (!__enabled)  return;
+  if (!enabled_)  return;
 
   try {
-    __iface->read();
+    iface_->read();
 
-    if ( __buffering ) {
-      void *c = malloc(__iface->datasize());
-      memcpy(c, __iface->datachunk(), __iface->datasize());
-      __queue_mutex->lock();
-      __queues[__act_queue].push_locked(c);
-      __queue_mutex->unlock();
+    if ( buffering_ ) {
+      void *c = malloc(iface_->datasize());
+      memcpy(c, iface_->datachunk(), iface_->datasize());
+      queue_mutex_->lock();
+      queues_[act_queue_].push_locked(c);
+      queue_mutex_->unlock();
       wakeup();
     } else {
-      __queue_mutex->lock();
-      write_chunk(__iface->datachunk());
-      __queue_mutex->unlock();
+      queue_mutex_->lock();
+      write_chunk(iface_->datachunk());
+      queue_mutex_->unlock();
     }
 
   } catch (Exception &e) {
@@ -404,7 +404,7 @@ void
 BBLoggerThread::bb_interface_writer_added(Interface *interface,
 					  unsigned int instance_serial) throw()
 {
-  __session_start = __num_data_items;
+  session_start_ = num_data_items_;
 }
 
 void
@@ -412,7 +412,7 @@ BBLoggerThread::bb_interface_writer_removed(Interface *interface,
 					    unsigned int instance_serial) throw()
 {
   logger->log_info(name(), "Writer removed (wrote %u entries), flushing",
-		   (__num_data_items - __session_start));
+		   (num_data_items_ - session_start_));
   update_header();
-  fflush(__f_data);
+  fflush(f_data_);
 }

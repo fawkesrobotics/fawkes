@@ -23,8 +23,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_UTILS_REFPTR_H_
-#define __CORE_UTILS_REFPTR_H_
+#ifndef _CORE_UTILS_REFPTR_H_
+#define _CORE_UTILS_REFPTR_H_
 
 #include <core/threading/mutex.h>
 
@@ -221,24 +221,24 @@ class RefPtr
    * reference count with this pointer.
    * @return pointer to refcount integer
    */
-  inline int *  refcount_ptr() const { return __ref_count; }
+  inline int *  refcount_ptr() const { return ref_count_; }
 
   /** Get current reference count.
    * @return current number of owners referencing this RefPtr.
    */
-  inline int use_count() const { return *__ref_count; }
+  inline int use_count() const { return *ref_count_; }
 
   /** For use only in the internal implementation of sharedptr.
    * Get reference mutex.
    * @return pointer to refcount mutex
    */
-  inline Mutex *  refmutex_ptr() const { return __ref_mutex; }
+  inline Mutex *  refmutex_ptr() const { return ref_mutex_; }
 
 private:
 
-  T_CppObject   *__cpp_object;
-  mutable int   *__ref_count;
-  mutable Mutex *__ref_mutex;
+  T_CppObject   *cpp_object_;
+  mutable int   *ref_count_;
+  mutable Mutex *ref_mutex_;
 
 };
 
@@ -249,47 +249,47 @@ private:
 template <class T_CppObject> inline
 T_CppObject* RefPtr<T_CppObject>::operator->() const
 {
-  return __cpp_object;
+  return cpp_object_;
 }
 
 
 template <class T_CppObject> inline
 T_CppObject* RefPtr<T_CppObject>::operator*() const
 {
-  return __cpp_object;
+  return cpp_object_;
 }
 
 template <class T_CppObject> inline
 RefPtr<T_CppObject>::RefPtr()
 :
-  __cpp_object(0),
-  __ref_count(0),
-  __ref_mutex(0)
+  cpp_object_(0),
+  ref_count_(0),
+  ref_mutex_(0)
 {}
 
 template <class T_CppObject> inline
 RefPtr<T_CppObject>::~RefPtr()
 {
-  if(__ref_count && __ref_mutex)
+  if(ref_count_ && ref_mutex_)
   {
-    __ref_mutex->lock();
+    ref_mutex_->lock();
 
-    --(*__ref_count);
+    --(*ref_count_);
 
-    if(*__ref_count == 0)
+    if(*ref_count_ == 0)
     {
-      if(__cpp_object)
+      if(cpp_object_)
       {
-        delete __cpp_object;
-        __cpp_object = 0;
+        delete cpp_object_;
+        cpp_object_ = 0;
       }
 
-      delete __ref_count;
-      delete __ref_mutex;
-      __ref_count = 0;
-      __ref_mutex = 0;
+      delete ref_count_;
+      delete ref_mutex_;
+      ref_count_ = 0;
+      ref_mutex_ = 0;
     } else {
-      __ref_mutex->unlock();
+      ref_mutex_->unlock();
     }
   }
 }
@@ -298,15 +298,15 @@ RefPtr<T_CppObject>::~RefPtr()
 template <class T_CppObject> inline
 RefPtr<T_CppObject>::RefPtr(T_CppObject* cpp_object)
 :
-  __cpp_object(cpp_object),
-  __ref_count(0),
-  __ref_mutex(0)
+  cpp_object_(cpp_object),
+  ref_count_(0),
+  ref_mutex_(0)
 {
   if(cpp_object)
   {
-    __ref_count = new int;
-    __ref_mutex = new Mutex();
-    *__ref_count = 1; //This will be decremented in the destructor.
+    ref_count_ = new int;
+    ref_mutex_ = new Mutex();
+    *ref_count_ = 1; //This will be decremented in the destructor.
   }
 }
 
@@ -314,29 +314,29 @@ RefPtr<T_CppObject>::RefPtr(T_CppObject* cpp_object)
 template <class T_CppObject> inline
   RefPtr<T_CppObject>::RefPtr(T_CppObject* cpp_object, int* refcount, Mutex *refmutex)
 :
-  __cpp_object(cpp_object),
-  __ref_count(refcount),
-  __ref_mutex(refmutex)
+  cpp_object_(cpp_object),
+  ref_count_(refcount),
+  ref_mutex_(refmutex)
 {
-  if(__cpp_object && __ref_count && __ref_mutex) {
-    __ref_mutex->lock();
-    ++(*__ref_count);
-    __ref_mutex->unlock();
+  if(cpp_object_ && ref_count_ && ref_mutex_) {
+    ref_mutex_->lock();
+    ++(*ref_count_);
+    ref_mutex_->unlock();
   }
 }
 
 template <class T_CppObject> inline
 RefPtr<T_CppObject>::RefPtr(const RefPtr<T_CppObject>& src)
 :
-  __cpp_object (src.__cpp_object),
-  __ref_count(src.__ref_count),
-  __ref_mutex(src.__ref_mutex)
+  cpp_object_ (src.cpp_object_),
+  ref_count_(src.ref_count_),
+  ref_mutex_(src.ref_mutex_)
 {
-  if(__cpp_object && __ref_count && __ref_mutex)
+  if(cpp_object_ && ref_count_ && ref_mutex_)
   {
-    __ref_mutex->lock();
-    ++(*__ref_count);
-    __ref_mutex->unlock();
+    ref_mutex_->lock();
+    ++(*ref_count_);
+    ref_mutex_->unlock();
   }
 }
 
@@ -348,17 +348,17 @@ template <class T_CppObject>
 inline
 RefPtr<T_CppObject>::RefPtr(const RefPtr<T_CastFrom>& src)
 :
-  // A different RefPtr<> will not allow us access to __cpp_object.  We need
+  // A different RefPtr<> will not allow us access to cpp_object_.  We need
   // to add a get_underlying() for this, but that would encourage incorrect
   // use, so we use the less well-known operator->() accessor:
-  __cpp_object (src.operator->()),
-  __ref_count(src.refcount_ptr()),
-  __ref_mutex(src.refmutex_ptr())
+  cpp_object_ (src.operator->()),
+  ref_count_(src.refcount_ptr()),
+  ref_mutex_(src.refmutex_ptr())
 {
-  if(__cpp_object && __ref_count && __ref_mutex) {
-    __ref_mutex->lock();
-    ++(*__ref_count);
-    __ref_mutex->unlock();
+  if(cpp_object_ && ref_count_ && ref_mutex_) {
+    ref_mutex_->lock();
+    ++(*ref_count_);
+    ref_mutex_->unlock();
   }
 }
 
@@ -366,17 +366,17 @@ template <class T_CppObject> inline
 void
 RefPtr<T_CppObject>::swap(RefPtr<T_CppObject>& other)
 {
-  T_CppObject *const temp = __cpp_object;
-  int *temp_count         = __ref_count; 
-  Mutex *temp_mutex       = __ref_mutex;
+  T_CppObject *const temp = cpp_object_;
+  int *temp_count         = ref_count_; 
+  Mutex *temp_mutex       = ref_mutex_;
 
-  __cpp_object = other.__cpp_object;
-  __ref_count  = other.__ref_count;
-  __ref_mutex  = other.__ref_mutex;
+  cpp_object_ = other.cpp_object_;
+  ref_count_  = other.ref_count_;
+  ref_mutex_  = other.ref_mutex_;
 
-  other.__cpp_object = temp;
-  other.__ref_count  = temp_count;
-  other.__ref_mutex  = temp_mutex;
+  other.cpp_object_ = temp;
+  other.ref_count_  = temp_count;
+  other.ref_mutex_  = temp_mutex;
 }
 
 template <class T_CppObject> inline
@@ -437,20 +437,20 @@ template <class T_CppObject> inline
 bool
 RefPtr<T_CppObject>::operator==(const RefPtr<T_CppObject>& src) const
 {
-  return (__cpp_object == src.__cpp_object);
+  return (cpp_object_ == src.cpp_object_);
 }
 
 template <class T_CppObject> inline
 bool
 RefPtr<T_CppObject>::operator!=(const RefPtr<T_CppObject>& src) const
 {
-  return (__cpp_object != src.__cpp_object);
+  return (cpp_object_ != src.cpp_object_);
 }
 
 template <class T_CppObject> inline
 RefPtr<T_CppObject>::operator bool() const
 {
-  return (__cpp_object != 0);
+  return (cpp_object_ != 0);
 }
 
 template <class T_CppObject> inline

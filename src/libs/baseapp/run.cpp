@@ -67,10 +67,6 @@
 
 namespace fawkes {
   namespace runtime {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 ArgumentParser            * argument_parser = NULL;
 FawkesMainThread          * main_thread = NULL;

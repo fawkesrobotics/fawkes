@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __INTERFACE_INTERFACE_INFO_H_
-#define __INTERFACE_INTERFACE_INFO_H_
+#ifndef _INTERFACE_INTERFACE_INFO_H_
+#define _INTERFACE_INTERFACE_INFO_H_
 
 #include <list>
 #include <string>
@@ -56,15 +56,15 @@ class InterfaceInfo
   bool operator<(const InterfaceInfo &ii) const;
 
  private:
-  char          *__type;
-  char          *__id;
-  unsigned char *__hash;
-  bool           __has_writer;
-  unsigned int   __num_readers;
-  unsigned int   __serial;
-  Time          *__timestamp;
-  std::list<std::string> __readers;
-  std::string    __writer;
+  char          *type_;
+  char          *id_;
+  unsigned char *hash_;
+  bool           has_writer_;
+  unsigned int   num_readers_;
+  unsigned int   serial_;
+  Time          *timestamp_;
+  std::list<std::string> readers_;
+  std::string    writer_;
 };
 
 

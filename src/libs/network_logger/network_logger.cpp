@@ -87,10 +87,10 @@ NetworkLogger::send_message(Logger::LogLevel level, struct timeval *t,
 									 is_exception,
 									 format, va);
 
-  for ( __ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
+  for ( ssit_ = subscribers_.begin(); ssit_ != subscribers_.end(); ++ssit_) {
     NetworkLoggerMessageContent *content_copy = new NetworkLoggerMessageContent(content);
     try {
-      hub->send(*__ssit, FAWKES_CID_NETWORKLOGGER, MSGTYPE_LOGMESSAGE, content_copy);
+      hub->send(*ssit_, FAWKES_CID_NETWORKLOGGER, MSGTYPE_LOGMESSAGE, content_copy);
     } catch (Exception &e) {
       // Boom, can't do anything about it, logging could cause infinite loop...
     }
@@ -116,10 +116,10 @@ NetworkLogger::send_message(Logger::LogLevel level, struct timeval *t,
 									 is_exception,
 									 message);
   
-  for ( __ssit = __subscribers.begin(); __ssit != __subscribers.end(); ++__ssit) {
+  for ( ssit_ = subscribers_.begin(); ssit_ != subscribers_.end(); ++ssit_) {
     NetworkLoggerMessageContent *content_copy = new NetworkLoggerMessageContent(content);
     try {
-      hub->send(*__ssit, FAWKES_CID_NETWORKLOGGER, MSGTYPE_LOGMESSAGE, content_copy);
+      hub->send(*ssit_, FAWKES_CID_NETWORKLOGGER, MSGTYPE_LOGMESSAGE, content_copy);
     } catch (Exception &e) {
       // Boom, can't do anything about it, logging could cause infinite loop...
     }
@@ -132,10 +132,10 @@ NetworkLogger::send_message(Logger::LogLevel level, struct timeval *t,
 void
 NetworkLogger::vlog_debug(const char *component, const char *format, va_list va)
 {
-  if ((log_level <= LL_DEBUG) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_DEBUG) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     send_message(LL_DEBUG, NULL, component, /* exception? */ false, format, va);
-    __subscribers.unlock();
+    subscribers_.unlock();
   }
 }
 
@@ -143,10 +143,10 @@ NetworkLogger::vlog_debug(const char *component, const char *format, va_list va)
 void
 NetworkLogger::vlog_info(const char *component, const char *format, va_list va)
 {
-  if ((log_level <= LL_INFO) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_INFO) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     send_message(LL_INFO, NULL, component, /* exception? */ false, format, va);
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
@@ -154,10 +154,10 @@ NetworkLogger::vlog_info(const char *component, const char *format, va_list va)
 void
 NetworkLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
-  if ((log_level <= LL_WARN) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_WARN) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     send_message(LL_WARN, NULL, component, /* exception? */ false, format, va);
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
@@ -165,10 +165,10 @@ NetworkLogger::vlog_warn(const char *component, const char *format, va_list va)
 void
 NetworkLogger::vlog_error(const char *component, const char *format, va_list va)
 {
-  if ((log_level <= LL_ERROR) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_ERROR) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     send_message(LL_ERROR, NULL, component, /* exception? */ false, format, va);
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
@@ -216,24 +216,24 @@ NetworkLogger::log_error(const char *component, const char *format, ...)
 void
 NetworkLogger::log_debug(const char *component, Exception &e)
 {
-  if ((log_level <= LL_DEBUG) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_DEBUG) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       send_message(LL_DEBUG, NULL, component, /* exception? */ true, *i);
     } 
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
 void
 NetworkLogger::log_info(const char *component, Exception &e)
 {
-  if ((log_level <= LL_INFO) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_INFO) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       send_message(LL_INFO, NULL, component, /* exception? */ true, *i);
     } 
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
@@ -241,12 +241,12 @@ NetworkLogger::log_info(const char *component, Exception &e)
 void
 NetworkLogger::log_warn(const char *component, Exception &e)
 {
-  if ((log_level <= LL_WARN) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_WARN) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       send_message(LL_WARN, NULL, component, /* exception? */ true, *i);
     } 
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
@@ -254,12 +254,12 @@ NetworkLogger::log_warn(const char *component, Exception &e)
 void
 NetworkLogger::log_error(const char *component, Exception &e)
 {
-  if ((log_level <= LL_ERROR) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_ERROR) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       send_message(LL_ERROR, NULL, component, /* exception? */ true, *i);
     }
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
@@ -270,10 +270,10 @@ void
 NetworkLogger::vtlog_debug(struct timeval *t, const char *component,
 			   const char *format, va_list va)
 {
-  if ((log_level <= LL_DEBUG) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_DEBUG) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     send_message(LL_DEBUG, t, component, /* exception? */ false, format, va);
-    __subscribers.unlock();
+    subscribers_.unlock();
   }
 }
 
@@ -281,10 +281,10 @@ NetworkLogger::vtlog_debug(struct timeval *t, const char *component,
 void
 NetworkLogger::vtlog_info(struct timeval *t, const char *component, const char *format, va_list va)
 {
-  if ((log_level <= LL_INFO) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_INFO) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     send_message(LL_INFO, t, component, /* exception? */ false, format, va);
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
@@ -292,10 +292,10 @@ NetworkLogger::vtlog_info(struct timeval *t, const char *component, const char *
 void
 NetworkLogger::vtlog_warn(struct timeval *t, const char *component, const char *format, va_list va)
 {
-  if ((log_level <= LL_WARN) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_WARN) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     send_message(LL_WARN, t, component, /* exception? */ false, format, va);
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
@@ -303,10 +303,10 @@ NetworkLogger::vtlog_warn(struct timeval *t, const char *component, const char *
 void
 NetworkLogger::vtlog_error(struct timeval *t, const char *component, const char *format, va_list va)
 {
-  if ((log_level <= LL_ERROR) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_ERROR) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     send_message(LL_ERROR, t, component, /* exception? */ false, format, va);
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
@@ -354,24 +354,24 @@ NetworkLogger::tlog_error(struct timeval *t, const char *component, const char *
 void
 NetworkLogger::tlog_debug(struct timeval *t, const char *component, Exception &e)
 {
-  if ((log_level <= LL_DEBUG) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_DEBUG) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       send_message(LL_DEBUG, t, component, /* exception? */ true, *i);
     } 
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
 void
 NetworkLogger::tlog_info(struct timeval *t, const char *component, Exception &e)
 {
-  if ((log_level <= LL_INFO) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_INFO) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       send_message(LL_INFO, t, component, /* exception? */ true, *i);
     } 
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
@@ -379,12 +379,12 @@ NetworkLogger::tlog_info(struct timeval *t, const char *component, Exception &e)
 void
 NetworkLogger::tlog_warn(struct timeval *t, const char *component, Exception &e)
 {
-  if ((log_level <= LL_WARN) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_WARN) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       send_message(LL_WARN, t, component, /* exception? */ true, *i);
     } 
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
@@ -392,12 +392,12 @@ NetworkLogger::tlog_warn(struct timeval *t, const char *component, Exception &e)
 void
 NetworkLogger::tlog_error(struct timeval *t, const char *component, Exception &e)
 {
-  if ((log_level <= LL_ERROR) && (! __subscribers.empty()) ) {
-    __subscribers.lock();
+  if ((log_level <= LL_ERROR) && (! subscribers_.empty()) ) {
+    subscribers_.lock();
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
       send_message(LL_ERROR, t, component, /* exception? */ true, *i);
     } 
-   __subscribers.unlock();
+   subscribers_.unlock();
   }
 }
 
@@ -407,11 +407,11 @@ NetworkLogger::handle_network_message(FawkesNetworkMessage *msg)
 {
   if ( (msg->cid() == FAWKES_CID_NETWORKLOGGER) &&
        (msg->msgid() == MSGTYPE_SUBSCRIBE) ) {
-    __subscribers.lock();
-    __subscribers.push_back(msg->clid());
-    __subscribers.sort();
-    __subscribers.unique();
-    __subscribers.unlock();
+    subscribers_.lock();
+    subscribers_.push_back(msg->clid());
+    subscribers_.sort();
+    subscribers_.unique();
+    subscribers_.unlock();
   }
 }
 
@@ -424,7 +424,7 @@ NetworkLogger::client_connected(unsigned int clid)
 void
 NetworkLogger::client_disconnected(unsigned int clid)
 {
-  __subscribers.remove_locked(clid);
+  subscribers_.remove_locked(clid);
 }
 
 
@@ -455,7 +455,7 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_le
   if ( (tmplen = vasprintf(&tmp, format, va)) != -1 ) {
     _payload_size = sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + tmplen + 2;
     _payload = calloc(1, _payload_size);
-    __own_payload = true;
+    own_payload_ = true;
     header = (NetworkLogger::network_logger_header_t *)_payload;
     header->log_level    = log_level;
     header->exception    = is_exception ? 1 : 0;
@@ -463,8 +463,8 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_le
     header->time_usec    = htonl(t->tv_usec);
     copy_payload(sizeof(NetworkLogger::network_logger_header_t), component, strlen(component));
     copy_payload(sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + 1, tmp, tmplen);
-    __component = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
-    __message   = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + 1;
+    component_ = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
+    message_   = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + 1;
     free(tmp);
   }
 }
@@ -485,7 +485,7 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_le
 {
   _payload_size = sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + strlen(message) + 2;
   _payload = calloc(1, _payload_size);
-  __own_payload = true;
+  own_payload_ = true;
   header = (NetworkLogger::network_logger_header_t *)_payload;
   header->log_level    = log_level;
   header->exception    = is_exception ? 1 : 0;
@@ -493,8 +493,8 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(Logger::LogLevel log_le
   header->time_usec    = htonl(t->tv_usec);
   copy_payload(sizeof(NetworkLogger::network_logger_header_t), component, strlen(component));
   copy_payload(sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + 1, message, strlen(message));
-  __component = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
-  __message   = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + 1;
+  component_ = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
+  message_   = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t) + strlen(component) + 1;
 }
 
 
@@ -505,11 +505,11 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(const NetworkLoggerMess
 {
   _payload_size = content->_payload_size;
   _payload = malloc(_payload_size);
-  __own_payload = true;
+  own_payload_ = true;
   memcpy(_payload, content->_payload, _payload_size);
   header = (NetworkLogger::network_logger_header_t *)_payload;
-  __component = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
-  __message   = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t) + strlen(__component) + 1;
+  component_ = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
+  message_   = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t) + strlen(component_) + 1;
 }
 
 
@@ -530,16 +530,16 @@ NetworkLoggerMessageContent::NetworkLoggerMessageContent(unsigned int component_
 
   _payload = payload;
   _payload_size = payload_size;
-  __own_payload = false;
+  own_payload_ = false;
   header = (NetworkLogger::network_logger_header_t *)_payload;
-  __component = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
-  __message   = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t) + strlen(__component) + 1;
+  component_ = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t);
+  message_   = (char *)_payload + sizeof(NetworkLogger::network_logger_header_t) + strlen(component_) + 1;
 }
 
 /** Destructor. */
 NetworkLoggerMessageContent::~NetworkLoggerMessageContent()
 {
-  if (__own_payload)  free(_payload);
+  if (own_payload_)  free(_payload);
 }
 
 /** Get time.
@@ -561,7 +561,7 @@ NetworkLoggerMessageContent::get_time() const
 const char *
 NetworkLoggerMessageContent::get_component() const
 {
-  return __component;
+  return component_;
 }
 
 
@@ -571,7 +571,7 @@ NetworkLoggerMessageContent::get_component() const
 const char *
 NetworkLoggerMessageContent::get_message() const
 {
-  return __message;
+  return message_;
 }
 
 

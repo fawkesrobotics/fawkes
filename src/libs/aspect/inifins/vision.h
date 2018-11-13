@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_INIFINS_VISION_H_
-#define __ASPECT_INIFINS_VISION_H_
+#ifndef _ASPECT_INIFINS_VISION_H_
+#define _ASPECT_INIFINS_VISION_H_
 
 #include <aspect/inifins/inifin.h>
 #include <aspect/vision.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class VisionMasterAspectIniFin;
 
@@ -43,7 +40,7 @@ class VisionAspectIniFin : public AspectIniFin
   virtual bool prepare_finalize(Thread *thread);
 
  private:
-  VisionMasterAspectIniFin *__master_inifin;
+  VisionMasterAspectIniFin *master_inifin_;
 };
 
 } // end namespace fawkes

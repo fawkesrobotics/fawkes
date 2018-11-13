@@ -26,9 +26,6 @@
 #include <core/exception.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OpenPRSAspect <plugins/openprs/aspect/openprs.h>
  * OpenPRS kernel creation and communication aspect.

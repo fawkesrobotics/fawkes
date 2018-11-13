@@ -27,9 +27,6 @@
 #include <blackboard/ownership.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BlackBoardAspectIniFin <aspect/inifins/blackboard.h>
  * Initializer/finalizer for the BlackBoardAspect.
@@ -42,7 +39,7 @@ namespace fawkes {
 BlackBoardAspectIniFin::BlackBoardAspectIniFin(BlackBoard *blackboard)
   : AspectIniFin("BlackBoardAspect")
 {
-  __blackboard = blackboard;
+  blackboard_ = blackboard;
 }
 
 void
@@ -58,10 +55,10 @@ BlackBoardAspectIniFin::init(Thread *thread)
 
   BlackBoard *bb;
   if (blackboard_thread->blackboard_owner_name_) {
-    bb = new BlackBoardWithOwnership(__blackboard,
+    bb = new BlackBoardWithOwnership(blackboard_,
 				     blackboard_thread->blackboard_owner_name_);
   } else {
-    bb = new BlackBoardWithOwnership(__blackboard, thread->name());
+    bb = new BlackBoardWithOwnership(blackboard_, thread->name());
   }
 
   blackboard_thread->init_BlackBoardAspect(bb);

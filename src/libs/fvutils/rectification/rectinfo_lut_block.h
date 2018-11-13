@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_RECTIFICATION_RECTINFO_LUT_BLOCK_H_
-#define __FIREVISION_FVUTILS_RECTIFICATION_RECTINFO_LUT_BLOCK_H_
+#ifndef _FIREVISION_FVUTILS_RECTIFICATION_RECTINFO_LUT_BLOCK_H_
+#define _FIREVISION_FVUTILS_RECTIFICATION_RECTINFO_LUT_BLOCK_H_
 
 #include <fvutils/rectification/rectinfo_block.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class RectificationLutInfoBlock : public RectificationInfoBlock
 {

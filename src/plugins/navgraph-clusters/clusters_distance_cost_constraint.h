@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __NAVGRAPH_CLUSTERS_CLUSTERS_DISTANCE_COST_CONSTRAINT_H_
-#define __NAVGRAPH_CLUSTERS_CLUSTERS_DISTANCE_COST_CONSTRAINT_H_
+#ifndef _NAVGRAPH_CLUSTERS_CLUSTERS_DISTANCE_COST_CONSTRAINT_H_
+#define _NAVGRAPH_CLUSTERS_CLUSTERS_DISTANCE_COST_CONSTRAINT_H_
 
 #include <navgraph/constraints/edge_cost_constraint.h>
 

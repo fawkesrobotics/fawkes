@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_MATH_POLYGON_H_
-#define __UTILS_MATH_POLYGON_H_
+#ifndef _UTILS_MATH_POLYGON_H_
+#define _UTILS_MATH_POLYGON_H_
 
 #include <Eigen/Core>
 #include <Eigen/StdVector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Polygon as a vector of 2D points. */
 typedef std::vector<Eigen::Vector2f, Eigen::aligned_allocator<Eigen::Vector2f> > Polygon2D;

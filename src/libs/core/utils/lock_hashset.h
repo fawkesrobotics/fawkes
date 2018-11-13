@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_UTILS_LOCK_HASHSET_H_
-#define __CORE_UTILS_LOCK_HASHSET_H_
+#ifndef _CORE_UTILS_LOCK_HASHSET_H_
+#define _CORE_UTILS_LOCK_HASHSET_H_
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
@@ -30,7 +30,7 @@
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
 #  include <unordered_set>
 #  include <functional>
-#elif __GLIBCXX__ > 20080305
+#elif GLIBCXX___ > 20080305
 #  include <tr1/unordered_set>
 #else
 #  include <ext/hash_set>
@@ -44,14 +44,14 @@ template <class KeyType,
           class HashFunction = std::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType> >
 class LockHashSet : public std::unordered_set<KeyType, HashFunction, EqualKey>
-#elif __GLIBCXX__ > 20080305
+#elif GLIBCXX___ > 20080305
           class HashFunction = std::tr1::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType> >
 class LockHashSet : public std::tr1::unordered_set<KeyType, HashFunction, EqualKey>
 #else
-          class HashFunction = __gnu_cxx::hash<KeyType>,
+          class HashFunction = gnu_cxx_::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType> >
-class LockHashSet : public __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>
+class LockHashSet : public gnu_cxx_::hash_set<KeyType, HashFunction, EqualKey>
 #endif
 {
  public:
@@ -70,7 +70,7 @@ class LockHashSet : public __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>
   operator=(const LockHashSet<KeyType, HashFunction, EqualKey> &ll);
 
  private:
-  mutable RefPtr<Mutex> __mutex;
+  mutable RefPtr<Mutex> mutex_;
 
 };
 
@@ -89,7 +89,7 @@ class LockHashSet : public __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>
 /** Constructor. */
 template <class KeyType, class HashFunction, class EqualKey>
 LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet()
-  : __mutex(new Mutex())
+  : mutex_(new Mutex())
 {}
 
 
@@ -100,12 +100,12 @@ template <class KeyType, class HashFunction, class EqualKey>
 LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet(const LockHashSet<KeyType, HashFunction, EqualKey> &lh)
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
   : std::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh),
-#elif __GLIBCXX__ > 20080305
+#elif GLIBCXX___ > 20080305
   : std::tr1::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh),
 #else
-  : __gnu_cxx::hash_set<KeyType, HashFunction, EqualKey>::hash_set(lh),
+  : gnu_cxx_::hash_set<KeyType, HashFunction, EqualKey>::hash_set(lh),
 #endif
-    __mutex(new Mutex())
+    mutex_(new Mutex())
 {}
 
 
@@ -120,7 +120,7 @@ template <class KeyType, class HashFunction, class EqualKey>
 void
 LockHashSet<KeyType, HashFunction, EqualKey>::lock() const
 {
-  __mutex->lock();
+  mutex_->lock();
 }
 
 
@@ -131,7 +131,7 @@ template <class KeyType, class HashFunction, class EqualKey>
 bool
 LockHashSet<KeyType, HashFunction, EqualKey>::try_lock() const
 {
-  return __mutex->try_lock();
+  return mutex_->try_lock();
 }
 
 
@@ -140,7 +140,7 @@ template <class KeyType, class HashFunction, class EqualKey>
 void
 LockHashSet<KeyType, HashFunction, EqualKey>::unlock() const
 {
-  return __mutex->unlock();
+  return mutex_->unlock();
 }
 
 
@@ -151,9 +151,9 @@ template <class KeyType, class HashFunction, class EqualKey>
 void
 LockHashSet<KeyType, HashFunction, EqualKey>::insert_locked(const KeyType& x)
 {
-  __mutex->lock();
+  mutex_->lock();
   insert(x);
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -165,7 +165,7 @@ template <typename KeyType, class HashFunction, class EqualKey>
 RefPtr<Mutex>
 LockHashSet<KeyType, HashFunction, EqualKey>::mutex() const
 {
-  return __mutex;
+  return mutex_;
 }
 
 /** Copy values from another LockHashSet.
@@ -179,7 +179,7 @@ LockHashSet<KeyType, HashFunction, EqualKey> &
 LockHashSet<KeyType, HashFunction, EqualKey>::operator=(
   const LockHashSet<KeyType, HashFunction, EqualKey> &ll)
 {
-  __mutex->lock();
+  mutex_->lock();
   ll.lock();
   this->clear();
   typename LockHashSet<KeyType, HashFunction, EqualKey>::const_iterator i;
@@ -187,7 +187,7 @@ LockHashSet<KeyType, HashFunction, EqualKey>::operator=(
     this->insert(*i);
   }
   ll.unlock();
-  __mutex->unlock();
+  mutex_->unlock();
 
   return *this;
 }

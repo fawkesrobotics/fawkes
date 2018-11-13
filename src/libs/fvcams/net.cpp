@@ -41,9 +41,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NetworkCamera <fvcams/net.h>
  * Network camera.
@@ -65,26 +62,26 @@ NetworkCamera::NetworkCamera(const char *host, unsigned short port, bool jpeg)
   if ( host == NULL ) {
     throw NullPointerException("NetworkCamera: host must not be NULL");
   }
-  __image_id = 0;
-  __host = strdup(host);
-  __port = port;
-  __get_jpeg = jpeg;
+  image_id_ = 0;
+  host_ = strdup(host);
+  port_ = port;
+  get_jpeg_ = jpeg;
 
-  __connected       = false;
-  __opened          = false;
-  __local_version   = 0;
-  __remote_version  = 0;
-  __decompressor    = NULL;
-  __decompressed_buffer = NULL;
-  __last_width = 0;
-  __last_height = 0;
-  __fuse_image = NULL;
-  __fuse_message = NULL;
-  __fuse_imageinfo = NULL;
+  connected_       = false;
+  opened_          = false;
+  local_version_   = 0;
+  remote_version_  = 0;
+  decompressor_    = NULL;
+  decompressed_buffer_ = NULL;
+  last_width_ = 0;
+  last_height_ = 0;
+  fuse_image_ = NULL;
+  fuse_message_ = NULL;
+  fuse_imageinfo_ = NULL;
 
-  __fusec = new FuseClient(__host, __port, this);
-  if ( __get_jpeg ) {
-    __decompressor = new JpegImageDecompressor();
+  fusec_ = new FuseClient(host_, port_, this);
+  if ( get_jpeg_ ) {
+    decompressor_ = new JpegImageDecompressor();
   }
 }
 
@@ -104,26 +101,26 @@ NetworkCamera::NetworkCamera(const char *host, unsigned short port, const char *
   if ( host == NULL ) {
     throw NullPointerException("NetworkCamera: host must not be NULL");
   }
-  __image_id = strdup(image_id);
-  __host = strdup(host);
-  __port = port;
-  __get_jpeg = jpeg;
+  image_id_ = strdup(image_id);
+  host_ = strdup(host);
+  port_ = port;
+  get_jpeg_ = jpeg;
 
-  __connected       = false;
-  __opened          = false;
-  __local_version   = 0;
-  __remote_version  = 0;
-  __decompressor    = NULL;
-  __decompressed_buffer = NULL;
-  __last_width = 0;
-  __last_height = 0;
-  __fuse_image = NULL;
-  __fuse_message = NULL;
-  __fuse_imageinfo = NULL;
+  connected_       = false;
+  opened_          = false;
+  local_version_   = 0;
+  remote_version_  = 0;
+  decompressor_    = NULL;
+  decompressed_buffer_ = NULL;
+  last_width_ = 0;
+  last_height_ = 0;
+  fuse_image_ = NULL;
+  fuse_message_ = NULL;
+  fuse_imageinfo_ = NULL;
 
-  __fusec = new FuseClient(__host, __port, this);
-  if ( __get_jpeg ) {
-    __decompressor = new JpegImageDecompressor();
+  fusec_ = new FuseClient(host_, port_, this);
+  if ( get_jpeg_ ) {
+    decompressor_ = new JpegImageDecompressor();
   }
 }
 
@@ -140,42 +137,42 @@ NetworkCamera::NetworkCamera(const char *host, unsigned short port, const char *
 NetworkCamera::NetworkCamera(const CameraArgumentParser *cap)
 {
   if ( cap->has("image") ) {
-    __image_id = strdup(cap->get("image").c_str());
+    image_id_ = strdup(cap->get("image").c_str());
   } else {
     throw NullPointerException("image parameter must be set");
   }
   if ( cap->has("host") ) {
-    __host = strdup(cap->get("host").c_str());
+    host_ = strdup(cap->get("host").c_str());
   } else {
-    __host = strdup("localhost");
+    host_ = strdup("localhost");
   }
   if ( cap->has("port") ) {
     int i = atoi(cap->get("port").c_str());
     if ( (i < 0) || (i >= 0xFFFF) ) {
       throw IllegalArgumentException("Port must be in the range 0-65535");
     }
-    __port = (unsigned int)i;
+    port_ = (unsigned int)i;
   } else {
-    __port = 2208;
+    port_ = 2208;
   }
 
-  __get_jpeg = ( cap->has("jpeg") && (cap->get("jpeg") == "true"));
+  get_jpeg_ = ( cap->has("jpeg") && (cap->get("jpeg") == "true"));
 
-  __connected       = false;
-  __opened          = false;
-  __local_version   = 0;
-  __remote_version  = 0;
-  __decompressor    = NULL;
-  __decompressed_buffer = NULL;
-  __last_width = 0;
-  __last_height = 0;
-  __fuse_image = NULL;
-  __fuse_message = NULL;
-  __fuse_imageinfo = NULL;
+  connected_       = false;
+  opened_          = false;
+  local_version_   = 0;
+  remote_version_  = 0;
+  decompressor_    = NULL;
+  decompressed_buffer_ = NULL;
+  last_width_ = 0;
+  last_height_ = 0;
+  fuse_image_ = NULL;
+  fuse_message_ = NULL;
+  fuse_imageinfo_ = NULL;
 
-  __fusec = new FuseClient(__host, __port, this);
-  if ( __get_jpeg ) {
-    __decompressor = new JpegImageDecompressor();
+  fusec_ = new FuseClient(host_, port_, this);
+  if ( get_jpeg_ ) {
+    decompressor_ = new JpegImageDecompressor();
   }
 }
 
@@ -184,47 +181,47 @@ NetworkCamera::NetworkCamera(const CameraArgumentParser *cap)
 NetworkCamera::~NetworkCamera()
 {
   close();
-  delete __fusec;
-  free(__host);
-  free(__image_id);
-  if ( __decompressed_buffer != NULL) free(__decompressed_buffer);
-  delete __decompressor;
+  delete fusec_;
+  free(host_);
+  free(image_id_);
+  if ( decompressed_buffer_ != NULL) free(decompressed_buffer_);
+  delete decompressor_;
 }
 
 
 void
 NetworkCamera::open()
 {
-  if ( __opened )  return;
+  if ( opened_ )  return;
 
-  __fusec->connect();
-  __fusec->start();
-  __fusec->wait_greeting();
+  fusec_->connect();
+  fusec_->start();
+  fusec_->wait_greeting();
 
-  if ( __image_id) {
+  if ( image_id_) {
     FUSE_imagedesc_message_t *imagedesc = (FUSE_imagedesc_message_t *)calloc(1, sizeof(FUSE_imagedesc_message_t));
-    strncpy(imagedesc->image_id, __image_id, IMAGE_ID_MAX_LENGTH-1);
-    __fusec->enqueue_and_wait(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
+    strncpy(imagedesc->image_id, image_id_, IMAGE_ID_MAX_LENGTH-1);
+    fusec_->enqueue_and_wait(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
 
-    if ( ! __fuse_imageinfo ) {
+    if ( ! fuse_imageinfo_ ) {
       throw Exception("Could not receive image info. Image not available?");
     }
   }
 
-  __opened = true;
+  opened_ = true;
 }
 
 
 void
 NetworkCamera::start()
 {
-  __started = true;
+  started_ = true;
 }
 
 void
 NetworkCamera::stop()
 {
-  __started = false;
+  started_ = false;
 }
 
 
@@ -237,42 +234,42 @@ NetworkCamera::print_info()
 void
 NetworkCamera::capture()
 {
-  if (! __connected) {
+  if (! connected_) {
     throw CaptureException("Capture failed, not connected");
   }
-  if ( __fuse_image ) {
+  if ( fuse_image_ ) {
     throw CaptureException("You must dispose the buffer before fetching a new image");
   }
-  if ( !__image_id ) {
+  if ( !image_id_ ) {
     throw CaptureException("You must specify an image id");
   }
 
   FUSE_imagereq_message_t *irm = (FUSE_imagereq_message_t *)malloc(sizeof(FUSE_imagereq_message_t));
   memset(irm, 0, sizeof(FUSE_imagereq_message_t));
-  strncpy(irm->image_id, __image_id, IMAGE_ID_MAX_LENGTH-1);
-  irm->format = (__get_jpeg ? FUSE_IF_JPEG : FUSE_IF_RAW);
-  __fusec->enqueue_and_wait(FUSE_MT_GET_IMAGE, irm, sizeof(FUSE_imagereq_message_t));
+  strncpy(irm->image_id, image_id_, IMAGE_ID_MAX_LENGTH-1);
+  irm->format = (get_jpeg_ ? FUSE_IF_JPEG : FUSE_IF_RAW);
+  fusec_->enqueue_and_wait(FUSE_MT_GET_IMAGE, irm, sizeof(FUSE_imagereq_message_t));
 
-  if (! __connected) {
+  if (! connected_) {
     throw CaptureException("Capture failed, connection died while waiting for image");
   }
-  if ( ! __fuse_image ) {
+  if ( ! fuse_image_ ) {
     throw CaptureException("Fetching the image failed, no image received");
   }
 
-  if ( __get_jpeg ) {
-    if ( (__fuse_image->pixel_width() != __last_width) ||
-	 (__fuse_image->pixel_height() != __last_height) ) {
-      if (__decompressed_buffer != NULL ) {
-	free(__decompressed_buffer);
+  if ( get_jpeg_ ) {
+    if ( (fuse_image_->pixel_width() != last_width_) ||
+	 (fuse_image_->pixel_height() != last_height_) ) {
+      if (decompressed_buffer_ != NULL ) {
+	free(decompressed_buffer_);
       }
-      size_t buffer_size = colorspace_buffer_size(YUV422_PLANAR, __fuse_image->pixel_width(),
-						  __fuse_image->pixel_height());
-      __decompressed_buffer = (unsigned char *)malloc(buffer_size);
-      __decompressor->set_decompressed_buffer(__decompressed_buffer, buffer_size);
+      size_t buffer_size = colorspace_buffer_size(YUV422_PLANAR, fuse_image_->pixel_width(),
+						  fuse_image_->pixel_height());
+      decompressed_buffer_ = (unsigned char *)malloc(buffer_size);
+      decompressor_->set_decompressed_buffer(decompressed_buffer_, buffer_size);
     }
-    __decompressor->set_compressed_buffer(__fuse_image->buffer(), __fuse_image->buffer_size());
-    __decompressor->decompress();
+    decompressor_->set_compressed_buffer(fuse_image_->buffer(), fuse_image_->buffer_size());
+    decompressor_->decompress();
   }
 }
 
@@ -280,11 +277,11 @@ NetworkCamera::capture()
 unsigned char *
 NetworkCamera::buffer()
 {
-  if (__get_jpeg) {
-    return __decompressed_buffer;
+  if (get_jpeg_) {
+    return decompressed_buffer_;
   } else {
-    if ( __fuse_image ) {
-      return __fuse_image->buffer();
+    if ( fuse_image_ ) {
+      return fuse_image_->buffer();
     } else {
       return NULL;
     }
@@ -294,15 +291,15 @@ NetworkCamera::buffer()
 unsigned int
 NetworkCamera::buffer_size()
 {
-  if ( __get_jpeg ) {
+  if ( get_jpeg_ ) {
     return colorspace_buffer_size(YUV422_PLANAR, pixel_width(), pixel_height());
   } else {
-    if (! __fuse_image) {
+    if (! fuse_image_) {
       return 0;
     } else {
-      return colorspace_buffer_size((colorspace_t)__fuse_image->colorspace(),
-				    __fuse_image->pixel_width(),
-				    __fuse_image->pixel_height());
+      return colorspace_buffer_size((colorspace_t)fuse_image_->colorspace(),
+				    fuse_image_->pixel_width(),
+				    fuse_image_->pixel_height());
     }
   }
 }
@@ -311,37 +308,37 @@ void
 NetworkCamera::close()
 {
   dispose_buffer();
-  if ( __started ) {
+  if ( started_ ) {
     stop();
   }
-  if ( __fuse_imageinfo ) {
-    free(__fuse_imageinfo);
-    __fuse_imageinfo = NULL;
+  if ( fuse_imageinfo_ ) {
+    free(fuse_imageinfo_);
+    fuse_imageinfo_ = NULL;
   }
-  if ( __opened ) {
-    __fusec->disconnect();
-    __fusec->cancel();
-    __fusec->join();
-    __opened = false;
+  if ( opened_ ) {
+    fusec_->disconnect();
+    fusec_->cancel();
+    fusec_->join();
+    opened_ = false;
   }
 }
 
 void
 NetworkCamera::dispose_buffer()
 {
-  delete __fuse_image;
-  __fuse_image = NULL;
-  if ( __fuse_message ) {
-    __fuse_message->unref();
-    __fuse_message = NULL;
+  delete fuse_image_;
+  fuse_image_ = NULL;
+  if ( fuse_message_ ) {
+    fuse_message_->unref();
+    fuse_message_ = NULL;
   }
 }
 
 unsigned int
 NetworkCamera::pixel_width()
 {
-  if ( __fuse_imageinfo ) {
-    return ntohl(__fuse_imageinfo->width);
+  if ( fuse_imageinfo_ ) {
+    return ntohl(fuse_imageinfo_->width);
   } else {
     throw NullPointerException("No valid image info received");
   }
@@ -350,8 +347,8 @@ NetworkCamera::pixel_width()
 unsigned int
 NetworkCamera::pixel_height()
 {
-  if ( __fuse_imageinfo ) {
-    return ntohl(__fuse_imageinfo->height);
+  if ( fuse_imageinfo_ ) {
+    return ntohl(fuse_imageinfo_->height);
   } else {
     throw NullPointerException("No valid image info received");
   }
@@ -360,8 +357,8 @@ NetworkCamera::pixel_height()
 fawkes::Time *
 NetworkCamera::capture_time()
 {
-  if ( __fuse_image ) {
-    return __fuse_image->capture_time();
+  if ( fuse_image_ ) {
+    return fuse_image_->capture_time();
   } else {
     throw NullPointerException("No valid image exists");
   }  
@@ -370,7 +367,7 @@ NetworkCamera::capture_time()
 void
 NetworkCamera::flush()
 {
-  if (! __connected)  return;
+  if (! connected_)  return;
   dispose_buffer();
 }
 
@@ -378,7 +375,7 @@ NetworkCamera::flush()
 bool
 NetworkCamera::ready()
 {
-  return __connected;
+  return connected_;
 }
 
 
@@ -388,13 +385,13 @@ NetworkCamera::ready()
 void
 NetworkCamera::set_image_id(const char *image_id)
 {
-  __image_id = strdup(image_id);
+  image_id_ = strdup(image_id);
 
   FUSE_imagedesc_message_t *imagedesc = (FUSE_imagedesc_message_t *)calloc(1, sizeof(FUSE_imagedesc_message_t));
-  strncpy(imagedesc->image_id, __image_id, IMAGE_ID_MAX_LENGTH-1);
-  __fusec->enqueue_and_wait(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
+  strncpy(imagedesc->image_id, image_id_, IMAGE_ID_MAX_LENGTH-1);
+  fusec_->enqueue_and_wait(FUSE_MT_GET_IMAGE_INFO, imagedesc, sizeof(FUSE_imagedesc_message_t));
 
-  if ( ! __fuse_imageinfo ) {
+  if ( ! fuse_imageinfo_ ) {
     throw Exception("Could not received image info. Image not available?");
   }
 }
@@ -410,11 +407,11 @@ NetworkCamera::set_image_number(unsigned int n)
 colorspace_t
 NetworkCamera::colorspace()
 {
-  if ( __get_jpeg ) {
+  if ( get_jpeg_ ) {
     return YUV422_PLANAR;
   } else {
-    if ( __fuse_imageinfo ) {
-      return (colorspace_t)ntohs(__fuse_imageinfo->colorspace);
+    if ( fuse_imageinfo_ ) {
+      return (colorspace_t)ntohs(fuse_imageinfo_->colorspace);
     } else {
       return CS_UNKNOWN;
     }
@@ -428,15 +425,15 @@ NetworkCamera::colorspace()
 std::vector<FUSE_imageinfo_t>&
 NetworkCamera::image_list()
 {
-  __image_list.clear();
+  image_list_.clear();
 
-  if (! __connected) {
+  if (! connected_) {
     throw CaptureException("Capture failed, not connected");
   }
 
-  __fusec->enqueue_and_wait(FUSE_MT_GET_IMAGE_LIST);
+  fusec_->enqueue_and_wait(FUSE_MT_GET_IMAGE_LIST);
 
-  return __image_list;
+  return image_list_;
 }
 
 
@@ -444,22 +441,22 @@ void
 NetworkCamera::fuse_invalid_server_version(uint32_t local_version,
 					   uint32_t remote_version) throw()
 {
-  __local_version  = local_version;
-  __remote_version = remote_version;
+  local_version_  = local_version;
+  remote_version_ = remote_version;
 }
 
 
 void
 NetworkCamera::fuse_connection_established() throw()
 {
-  __connected = true;
+  connected_ = true;
 }
 
 
 void
 NetworkCamera::fuse_connection_died() throw()
 {
-  __connected = false;
+  connected_ = false;
 }
 
 
@@ -470,36 +467,36 @@ NetworkCamera::fuse_inbound_received(FuseNetworkMessage *m) throw()
 
   case FUSE_MT_IMAGE:
     try {
-      __fuse_image = m->msgc<FuseImageContent>();
-      if ( __fuse_image ) {
-	__fuse_message = m;
-	__fuse_message->ref();
+      fuse_image_ = m->msgc<FuseImageContent>();
+      if ( fuse_image_ ) {
+	fuse_message_ = m;
+	fuse_message_->ref();
       }
     } catch (Exception &e) {
-      __fuse_image = NULL;
-      __fuse_message = NULL;
+      fuse_image_ = NULL;
+      fuse_message_ = NULL;
     }
     break;
 
 
   case FUSE_MT_IMAGE_INFO:
     try {
-      __fuse_imageinfo = m->msg_copy<FUSE_imageinfo_t>();
+      fuse_imageinfo_ = m->msg_copy<FUSE_imageinfo_t>();
     } catch (Exception &e) {
-      __fuse_imageinfo = NULL;
+      fuse_imageinfo_ = NULL;
     }
     break;
 
   case FUSE_MT_IMAGE_INFO_FAILED:
-    __fuse_imageinfo = NULL;
+    fuse_imageinfo_ = NULL;
     break;
 
   case FUSE_MT_GET_IMAGE_FAILED:
-    if ( __fuse_message ) {
-      __fuse_message->unref();
+    if ( fuse_message_ ) {
+      fuse_message_->unref();
     }
-    __fuse_message = NULL;
-    __fuse_image = NULL;
+    fuse_message_ = NULL;
+    fuse_image_ = NULL;
     break;
 
   case FUSE_MT_IMAGE_LIST:
@@ -514,7 +511,7 @@ NetworkCamera::fuse_inbound_received(FuseNetworkMessage *m) throw()
 	  ii.width = ntohl(iip->width);
 	  ii.height = ntohl(iip->height);
 	  ii.buffer_size = ntohl(iip->buffer_size);
-	  __image_list.push_back(ii);
+	  image_list_.push_back(ii);
 	}
       }
     }

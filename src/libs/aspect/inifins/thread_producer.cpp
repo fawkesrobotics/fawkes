@@ -26,9 +26,6 @@
 #include <core/threading/thread_collector.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ThreadProducerAspectIniFin <aspect/inifins/thread_producer.h>
  * Initializer/finalizer for the ThreadProducerAspect.
@@ -41,7 +38,7 @@ namespace fawkes {
 ThreadProducerAspectIniFin::ThreadProducerAspectIniFin(ThreadCollector *collector)
   : AspectIniFin("ThreadProducerAspect")
 {
-  __collector = collector;
+  collector_ = collector;
 }
 
 
@@ -56,7 +53,7 @@ ThreadProducerAspectIniFin::init(Thread *thread)
 					  "has not. ", thread->name());
   }
 
-  thread_producer_thread->init_ThreadProducerAspect(__collector);
+  thread_producer_thread->init_ThreadProducerAspect(collector_);
 }
 
 

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_FILEFORMAT_FVFILE_H_
-#define __FIREVISION_FVUTILS_FILEFORMAT_FVFILE_H_
+#ifndef _FIREVISION_FVUTILS_FILEFORMAT_FVFILE_H_
+#define _FIREVISION_FVUTILS_FILEFORMAT_FVFILE_H_
 
 #include <fvutils/fileformat/fvff.h>
 #include <fvutils/fileformat/fvfile_block.h>
@@ -30,9 +30,6 @@
 #include <list>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FireVisionDataFile
 {
@@ -69,16 +66,16 @@ class FireVisionDataFile
   size_t        _spec_header_size;
 
  private:
-  fvff_header_t       *__header;
-  BlockList            __blocks;
-  BlockList::iterator  __bi;
+  fvff_header_t       *header_;
+  BlockList            blocks_;
+  BlockList::iterator  bi_;
 
-  unsigned int  __magic_token;
-  unsigned int  __version;
+  unsigned int  magic_token_;
+  unsigned int  version_;
 
-  char *        __comment;
+  char *        comment_;
 
-  bool          __owns_blocks;
+  bool          owns_blocks_;
 };
 
 } // end namespace firevision

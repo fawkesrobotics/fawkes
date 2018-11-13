@@ -105,17 +105,17 @@ const unsigned int Visca::MAX_TILT_SPEED        = 0x14;
  */
 Visca::Visca(const char *device_file, unsigned int def_timeout_ms, bool blocking)
 {
-  __inquire            = VISCA_RUNINQ_NONE;
-  __device_file        = strdup(device_file);
-  __blocking           = blocking;
-  __opened             = false;
-  __default_timeout_ms = def_timeout_ms;
-  __pan_speed          = MAX_PAN_SPEED;
-  __tilt_speed         = MAX_TILT_SPEED;
+  inquire_            = VISCA_RUNINQ_NONE;
+  device_file_        = strdup(device_file);
+  blocking_           = blocking;
+  opened_             = false;
+  default_timeout_ms_ = def_timeout_ms;
+  pan_speed_          = MAX_PAN_SPEED;
+  tilt_speed_         = MAX_TILT_SPEED;
 
   for (unsigned int i = 0; i < NONBLOCKING_NUM; ++i) {
-    __nonblocking_sockets[i] = 0;
-    __nonblocking_running[i] = false;
+    nonblocking_sockets_[i] = 0;
+    nonblocking_running_[i] = false;
   }
 
   open();
@@ -129,7 +129,7 @@ Visca::Visca(const char *device_file, unsigned int def_timeout_ms, bool blocking
 Visca::~Visca()
 {
   close();
-  free(__device_file);
+  free(device_file_);
 }
 
 
@@ -139,14 +139,14 @@ Visca::open() {
 
   struct termios param;
 
-  __fd = ::open(__device_file, O_RDWR);
-  if (! __fd) {
+  fd_ = ::open(device_file_, O_RDWR);
+  if (! fd_) {
     throw ViscaException("Cannot open device", errno);
   }
 
-  if (tcgetattr(__fd, &param) == -1) {
+  if (tcgetattr(fd_, &param) == -1) {
     ViscaException ve("Getting the port parameters failed", errno);
-    ::close(__fd);
+    ::close(fd_);
     throw ve;
   }
 
@@ -176,8 +176,8 @@ Visca::open() {
   param.c_lflag |= IEXTEN;
   param.c_oflag &= ~OPOST;  //enable raw output
     
-  //tcflow (__fd, TCOON);
-  //tcflow (__fd, TCION);
+  //tcflow (fd_, TCOON);
+  //tcflow (fd_, TCION);
 
   // number of data bits: 8
   param.c_cflag &= ~CS5 & ~CS6 & ~CS7 & ~CS8;
@@ -190,23 +190,23 @@ Visca::open() {
   // stop bits: 1
   param.c_cflag &= ~CSTOPB;
 
-  if (tcsetattr(__fd, TCSANOW, &param) != 0) {
+  if (tcsetattr(fd_, TCSANOW, &param) != 0) {
     ViscaException ve("Setting the port parameters failed", errno);
-    ::close(__fd);
+    ::close(fd_);
     throw ve;
   }
 
-  __opened = true;
+  opened_ = true;
   // Choose first camera by default
-  __sender    = VISCA_BUS_0;
-  __recipient = VISCA_BUS_1;
+  sender_    = VISCA_BUS_0;
+  recipient_ = VISCA_BUS_1;
 
 #ifdef TIMETRACKER_VISCA
-  __tt = new TimeTracker();
-  __ttc_pantilt_get_send = __tt->addClass("getPanTilt: send");
-  __ttc_pantilt_get_read = __tt->addClass("getPanTilt: read");
-  __ttc_pantilt_get_handle = __tt->addClass("getPanTilt: handling responses");
-  __ttc_pantilt_get_interpret = __tt->addClass("getPanTilt: interpreting");
+  tt_ = new TimeTracker();
+  ttc_pantilt_get_send_ = tt_->addClass("getPanTilt: send");
+  ttc_pantilt_get_read_ = tt_->addClass("getPanTilt: read");
+  ttc_pantilt_get_handle_ = tt_->addClass("getPanTilt: handling responses");
+  ttc_pantilt_get_interpret_ = tt_->addClass("getPanTilt: interpreting");
 #endif
 }
 
@@ -215,9 +215,9 @@ Visca::open() {
 void
 Visca::close()
 {
-  if (__opened) {
-    __opened = false;
-    ::close(__fd);
+  if (opened_) {
+    opened_ = false;
+    ::close(fd_);
   }
 }
 
@@ -226,21 +226,21 @@ Visca::close()
 void
 Visca::set_address()
 {
-  unsigned char recp_backup = __recipient;
-  __recipient = VISCA_BUS_BROADCAST;
-  __obuffer[1] = 0x30;
-  __obuffer[2] = 0x01;
-  __obuffer_length = 2;
+  unsigned char recp_backup = recipient_;
+  recipient_ = VISCA_BUS_BROADCAST;
+  obuffer_[1] = 0x30;
+  obuffer_[2] = 0x01;
+  obuffer_length_ = 2;
 
   try {
     send();
     recv();
   } catch (ViscaException &e) {
-    __recipient = recp_backup;
+    recipient_ = recp_backup;
     throw;
   }
 
-  __recipient = recp_backup;
+  recipient_ = recp_backup;
 }
 
 
@@ -248,12 +248,12 @@ Visca::set_address()
 void
 Visca::clear()
 {
-  if (!__opened)  throw ViscaException("Serial port not open");
+  if (!opened_)  throw ViscaException("Serial port not open");
 
-  __obuffer[1] = 0x01;
-  __obuffer[2] = 0x00;
-  __obuffer[3] = 0x01;
-  __obuffer_length = 3;
+  obuffer_[1] = 0x01;
+  obuffer_[2] = 0x00;
+  obuffer_[3] = 0x01;
+  obuffer_length_ = 3;
 
   try {
     send();
@@ -269,23 +269,23 @@ Visca::clear()
 void
 Visca::send()
 {
-  if (!__opened)  throw ViscaException("Serial port not open");
+  if (!opened_)  throw ViscaException("Serial port not open");
 
   // Set first bit to 1
-  __obuffer[0] =  0x80;
-  __obuffer[0] |= (__sender << 4);
-  __obuffer[0] |= __recipient;
+  obuffer_[0] =  0x80;
+  obuffer_[0] |= (sender_ << 4);
+  obuffer_[0] |= recipient_;
 
-  __obuffer[++__obuffer_length] = VISCA_TERMINATOR;
-  ++__obuffer_length;
+  obuffer_[++obuffer_length_] = VISCA_TERMINATOR;
+  ++obuffer_length_;
 
-  int written = write(__fd, __obuffer, __obuffer_length);
+  int written = write(fd_, obuffer_, obuffer_length_);
   //printf("Visca sent: ");
-  //for (int i = 0; i < __obuffer_length; ++i) {
-  //  printf("%02X", __obuffer[i]);
+  //for (int i = 0; i < obuffer_length_; ++i) {
+  //  printf("%02X", obuffer_[i]);
   //}
   //printf("\n");
-  if (written < __obuffer_length) {
+  if (written < obuffer_length_) {
     throw ViscaException("Not all bytes send");
   }
 }
@@ -298,7 +298,7 @@ bool
 Visca::data_available()
 {
   int num_bytes = 0;
-  ioctl(__fd, FIONREAD, &num_bytes);
+  ioctl(fd_, FIONREAD, &num_bytes);
   return (num_bytes > 0);
 }
 
@@ -309,7 +309,7 @@ Visca::data_available()
 void
 Visca::recv(unsigned int timeout_ms)
 {
-  if (timeout_ms == 0xFFFFFFFF) timeout_ms = __default_timeout_ms;
+  if (timeout_ms == 0xFFFFFFFF) timeout_ms = default_timeout_ms_;
   try {
     recv_packet(timeout_ms);
   } catch (ViscaException &e) {
@@ -318,7 +318,7 @@ Visca::recv(unsigned int timeout_ms)
   }
 
   // Get type of message
-  unsigned char type = __ibuffer[1] & 0xF0;
+  unsigned char type = ibuffer_[1] & 0xF0;
   while (type == VISCA_RESPONSE_ACK) {
     try {
       recv_packet(timeout_ms);
@@ -326,7 +326,7 @@ Visca::recv(unsigned int timeout_ms)
       e.append("Receiving failed, recv_packet() call 2 failed");
       throw;
     }
-    type = __ibuffer[1] & 0xF0;
+    type = ibuffer_[1] & 0xF0;
   }
 
   switch (type) {
@@ -349,28 +349,28 @@ void
 Visca::recv_ack(unsigned int *socket)
 {
   try {
-    recv_packet(__default_timeout_ms);
+    recv_packet(default_timeout_ms_);
   } catch (ViscaException &e) {
     throw ViscaException("recv_ack(): recv_packet() failed");
   }
 
   // Get type of message
-  unsigned char type = __ibuffer[1] & 0xF0;
+  unsigned char type = ibuffer_[1] & 0xF0;
   while (type != VISCA_RESPONSE_ACK) {
 
     try {
       handle_response();
-      recv_packet(__default_timeout_ms);
+      recv_packet(default_timeout_ms_);
     } catch (ViscaException &e) {
       e.append("Handling message of type %u failed", type);
       throw;
     }
-    type = __ibuffer[1] & 0xF0;
+    type = ibuffer_[1] & 0xF0;
   }
 
   // Got an ack now
   if (socket != NULL) {
-    *socket = __ibuffer[1] & 0x0F;
+    *socket = ibuffer_[1] & 0x0F;
   }
 
 }
@@ -400,9 +400,9 @@ void
 Visca::finish_nonblocking( unsigned int socket )
 {
   for (unsigned int i = 0; i < NONBLOCKING_NUM; ++i) {
-    if (__nonblocking_sockets[i] == socket) {
-      __nonblocking_sockets[i] = 0;
-      __nonblocking_running[i] = false;
+    if (nonblocking_sockets_[i] == socket) {
+      nonblocking_sockets_[i] = 0;
+      nonblocking_running_[i] = false;
       return;
     }
   }
@@ -421,7 +421,7 @@ Visca::is_nonblocking_finished(unsigned int item) const
   if (item >= NONBLOCKING_NUM) {
     throw ViscaException("Invalid item number");
   }
-  return ! __nonblocking_running[item];
+  return ! nonblocking_running_[item];
 }
 
 
@@ -432,7 +432,7 @@ Visca::send_with_reply()
   try {
     send();
 
-    if (__obuffer[1] == VISCA_COMMAND) {
+    if (obuffer_[1] == VISCA_COMMAND) {
       // do not catch timeouts here, we expect them to be on time
       recv_ack();
       bool rcvd = false;
@@ -465,10 +465,10 @@ Visca::recv_packet(unsigned int timeout_ms)
 
   fd_set read_fds;
   FD_ZERO(&read_fds);
-  FD_SET(__fd, &read_fds);
+  FD_SET(fd_, &read_fds);
 
   int rv = 0;
-  rv = select(__fd + 1, &read_fds, NULL, NULL, &timeout);
+  rv = select(fd_ + 1, &read_fds, NULL, NULL, &timeout);
 
   if ( rv == -1 ) {
     throw fawkes::Exception(errno, "Select on FD failed");
@@ -477,23 +477,23 @@ Visca::recv_packet(unsigned int timeout_ms)
   }
 
   // get octets one by one
-  if (read(__fd, __ibuffer, 1) != 1) {
+  if (read(fd_, ibuffer_, 1) != 1) {
     throw fawkes::Exception(errno, "Visca reading packet byte failed (1)");
   }
 
   size_t pos = 0;
-  while (__ibuffer[pos] != VISCA_TERMINATOR && (pos < sizeof(__ibuffer)-1)) {
-    if (read(__fd, &__ibuffer[++pos], 1) != 1) {
+  while (ibuffer_[pos] != VISCA_TERMINATOR && (pos < sizeof(ibuffer_)-1)) {
+    if (read(fd_, &ibuffer_[++pos], 1) != 1) {
       
 
       throw fawkes::Exception(errno, "Visca reading packet byte failed (2)");
     }
     usleep(0);
   }
-  __ibuffer_length = pos + 1;
+  ibuffer_length_ = pos + 1;
   //printf("Visca read: ");
-  //for (int i = 0; i < __ibuffer_length; ++i) {
-  //  printf("%02X", __ibuffer[i]);
+  //for (int i = 0; i < ibuffer_length_; ++i) {
+  //  printf("%02X", ibuffer_[i]);
   //}
   //printf("\n");
 }
@@ -504,8 +504,8 @@ Visca::recv_packet(unsigned int timeout_ms)
 void
 Visca::handle_response()
 {
-  unsigned int type = __ibuffer[1] & 0xF0;
-  unsigned int socket = __ibuffer[1] & 0x0F;
+  unsigned int type = ibuffer_[1] & 0xF0;
+  unsigned int socket = ibuffer_[1] & 0x0F;
 
   if (socket == 0) {
     // This is an inquire response, do NOT handle!
@@ -516,14 +516,14 @@ Visca::handle_response()
   if ( type == VISCA_RESPONSE_COMPLETED ) {
     // Command has been finished
     try {
-      finish_nonblocking( __ibuffer[1] & 0x0F );
+      finish_nonblocking( ibuffer_[1] & 0x0F );
     } catch (ViscaException &e) {
       // Ignore, happens sometimes without effect
       // e.append("handle_response() failed, could not finish non-blocking");
       // throw;
     }
   } else if ( type == VISCA_RESPONSE_ERROR ) {
-    finish_nonblocking( __ibuffer[1] & 0x0F );
+    finish_nonblocking( ibuffer_[1] & 0x0F );
     //throw ViscaException("handle_response(): got an error message from camera");
   } else {
     // ignore
@@ -543,8 +543,8 @@ Visca::cancel_command( unsigned int socket )
 {
   unsigned char cancel_socket = socket & 0x0000000F;
 
-  __obuffer[1] = VISCA_CANCEL | cancel_socket;
-  __obuffer_length = 1;
+  obuffer_[1] = VISCA_CANCEL | cancel_socket;
+  obuffer_length_ = 1;
 
   try {
     send_with_reply();
@@ -553,9 +553,9 @@ Visca::cancel_command( unsigned int socket )
     throw;
   }
 
-  if (  ((__ibuffer[1] & 0xF0) == VISCA_RESPONSE_ERROR) &&
-	((__ibuffer[1] & 0x0F) == cancel_socket) &&
-	((__ibuffer[2] == VISCA_ERROR_CANCELLED)) ) {
+  if (  ((ibuffer_[1] & 0xF0) == VISCA_RESPONSE_ERROR) &&
+	((ibuffer_[1] & 0x0F) == cancel_socket) &&
+	((ibuffer_[2] == VISCA_ERROR_CANCELLED)) ) {
     return;
   } else {
     throw ViscaException("Command could not be cancelled");
@@ -568,7 +568,7 @@ void
 Visca::process()
 {
 
-  __inquire = VISCA_RUNINQ_NONE;
+  inquire_ = VISCA_RUNINQ_NONE;
 
   while (data_available()) {
     try {
@@ -588,11 +588,11 @@ Visca::process()
 void
 Visca::set_power(bool powered)
 {
-  __obuffer[1] = VISCA_COMMAND;
-  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
-  __obuffer[3] = VISCA_POWER;
-  __obuffer[4] = powered ? VISCA_POWER_ON : VISCA_POWER_OFF;
-  __obuffer_length = 4;
+  obuffer_[1] = VISCA_COMMAND;
+  obuffer_[2] = VISCA_CATEGORY_CAMERA1;
+  obuffer_[3] = VISCA_POWER;
+  obuffer_[4] = powered ? VISCA_POWER_ON : VISCA_POWER_OFF;
+  obuffer_length_ = 4;
 
   try {
     send_with_reply();
@@ -609,10 +609,10 @@ Visca::set_power(bool powered)
 bool
 Visca::is_powered()
 {
-  __obuffer[1] = VISCA_INQUIRY;
-  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
-  __obuffer[3] = VISCA_POWER;
-  __obuffer_length = 3;
+  obuffer_[1] = VISCA_INQUIRY;
+  obuffer_[2] = VISCA_CATEGORY_CAMERA1;
+  obuffer_[3] = VISCA_POWER;
+  obuffer_length_ = 3;
 
   try {
     send_with_reply();
@@ -621,9 +621,9 @@ Visca::is_powered()
     throw;
   }
 
-  // Extract information from __ibuffer
-  if ( __ibuffer[1] == VISCA_RESPONSE_COMPLETED ) {
-    return (__ibuffer[2] == VISCA_POWER_ON);
+  // Extract information from ibuffer_
+  if ( ibuffer_[1] == VISCA_RESPONSE_COMPLETED ) {
+    return (ibuffer_[2] == VISCA_POWER_ON);
   } else {
     throw ViscaException("is_powered(): inquiry failed, response code not VISCA_RESPONSE_COMPLETED");
   }
@@ -641,42 +641,42 @@ Visca::set_pan_tilt(int pan, int tilt)
   // we do not to check for blocking, could not be called at
   // the same time if blocking...
   /*
-  if ( __nonblocking_running[ NONBLOCKING_PANTILT] ) {
+  if ( nonblocking_running_[ NONBLOCKING_PANTILT] ) {
     cout << "Cancelling old setPanTilt" << endl;
-    if (cancel_command( __nonblocking_sockets[ NONBLOCKING_PANTILT ] ) != VISCA_SUCCESS) {
+    if (cancel_command( nonblocking_sockets_[ NONBLOCKING_PANTILT ] ) != VISCA_SUCCESS) {
       cout << "Visca: Could not cancel old non-blocking pan/tilt command. Not setting new pan/tilt." << endl;
       return VISCA_E_CANCEL;
     }
-    __nonblocking_running[ NONBLOCKING_PANTILT ] = false;
+    nonblocking_running_[ NONBLOCKING_PANTILT ] = false;
   }
   */
 
   unsigned short int tilt_val = 0 + tilt;
   unsigned short int pan_val  = 0 + pan;
 
-  __obuffer[1] = VISCA_COMMAND;
-  __obuffer[2] = VISCA_CATEGORY_PAN_TILTER;
-  __obuffer[3] = VISCA_PT_ABSOLUTE_POSITION;
-  __obuffer[4] = __pan_speed;
-  __obuffer[5] = __tilt_speed;
+  obuffer_[1] = VISCA_COMMAND;
+  obuffer_[2] = VISCA_CATEGORY_PAN_TILTER;
+  obuffer_[3] = VISCA_PT_ABSOLUTE_POSITION;
+  obuffer_[4] = pan_speed_;
+  obuffer_[5] = tilt_speed_;
 
   // pan
-  __obuffer[6] = (pan_val & 0xf000) >> 12;
-  __obuffer[7] = (pan_val & 0x0f00) >>  8;
-  __obuffer[8] = (pan_val & 0x00f0) >>  4;
-  __obuffer[9] = (pan_val & 0x000f);
+  obuffer_[6] = (pan_val & 0xf000) >> 12;
+  obuffer_[7] = (pan_val & 0x0f00) >>  8;
+  obuffer_[8] = (pan_val & 0x00f0) >>  4;
+  obuffer_[9] = (pan_val & 0x000f);
   // tilt
-  __obuffer[10] = (tilt_val & 0xf000) >> 12;
-  __obuffer[11] = (tilt_val & 0x0f00) >> 8;
-  __obuffer[12] = (tilt_val & 0x00f0) >> 4;
-  __obuffer[13] = (tilt_val & 0x000f);
+  obuffer_[10] = (tilt_val & 0xf000) >> 12;
+  obuffer_[11] = (tilt_val & 0x0f00) >> 8;
+  obuffer_[12] = (tilt_val & 0x00f0) >> 4;
+  obuffer_[13] = (tilt_val & 0x000f);
 
-  __obuffer_length = 13;
+  obuffer_length_ = 13;
 
   try {
-    if (! __blocking) {
-      __nonblocking_running[ NONBLOCKING_PANTILT ] = true;
-      send_nonblocking( &(__nonblocking_sockets[ NONBLOCKING_PANTILT ]) );
+    if (! blocking_) {
+      nonblocking_running_[ NONBLOCKING_PANTILT ] = true;
+      send_nonblocking( &(nonblocking_sockets_[ NONBLOCKING_PANTILT ]) );
     } else {
       send_with_reply();
     }
@@ -702,8 +702,8 @@ Visca::set_pan_tilt_speed(unsigned char pan_speed, unsigned char tilt_speed)
     throw fawkes::Exception("Tilt speed too hight, max: %u  des: %u", MAX_TILT_SPEED, tilt_speed);
   }
 
-  __pan_speed  = pan_speed;
-  __tilt_speed = tilt_speed;
+  pan_speed_  = pan_speed;
+  tilt_speed_ = tilt_speed;
 }
 
 
@@ -714,8 +714,8 @@ Visca::set_pan_tilt_speed(unsigned char pan_speed, unsigned char tilt_speed)
 void
 Visca::get_pan_tilt_speed(unsigned char &pan_speed, unsigned char &tilt_speed)
 {
-  pan_speed  = __pan_speed;
-  tilt_speed = __tilt_speed;
+  pan_speed  = pan_speed_;
+  tilt_speed = tilt_speed_;
 }
 
 /** Initiate a pan/tilt request, but do not wait for the reply. */
@@ -723,14 +723,14 @@ void
 Visca::start_get_pan_tilt()
 {
 
-  if ( __inquire )  throw ViscaInquiryRunningException();
+  if ( inquire_ )  throw ViscaInquiryRunningException();
 
-  __inquire = VISCA_RUNINQ_PANTILT;
+  inquire_ = VISCA_RUNINQ_PANTILT;
 
-  __obuffer[1] = VISCA_INQUIRY;
-  __obuffer[2] = VISCA_CATEGORY_PAN_TILTER;
-  __obuffer[3] = VISCA_PT_POSITION_INQ;
-  __obuffer_length = 3;
+  obuffer_[1] = VISCA_INQUIRY;
+  obuffer_[2] = VISCA_CATEGORY_PAN_TILTER;
+  obuffer_[3] = VISCA_PT_POSITION_INQ;
+  obuffer_length_ = 3;
 
   try {
     send();
@@ -752,12 +752,12 @@ void
 Visca::get_pan_tilt(int &pan, int &tilt)
 {
 
-  if ( __inquire ) {
-    if ( __inquire != VISCA_RUNINQ_PANTILT ) {
+  if ( inquire_ ) {
+    if ( inquire_ != VISCA_RUNINQ_PANTILT ) {
       throw ViscaException("Inquiry running, but it is not a pan/tilt inquiry");
     } else {
 #ifdef TIMETRACKER_VISCA
-      __tt->ping_start( __ttc_pantilt_get_read );
+      tt_->ping_start( ttc_pantilt_get_read_ );
 #endif
       try {
 	recv();
@@ -766,24 +766,24 @@ Visca::get_pan_tilt(int &pan, int &tilt)
 	// Ignore
       }
 #ifdef TIMETRACKER_VISCA
-      __tt->ping_end( __ttc_pantilt_get_read );
+      tt_->ping_end( ttc_pantilt_get_read_ );
 #endif
     }
   } else {
 
-    __obuffer[1] = VISCA_INQUIRY;
-    __obuffer[2] = VISCA_CATEGORY_PAN_TILTER;
-    __obuffer[3] = VISCA_PT_POSITION_INQ;
-    __obuffer_length = 3;
+    obuffer_[1] = VISCA_INQUIRY;
+    obuffer_[2] = VISCA_CATEGORY_PAN_TILTER;
+    obuffer_[3] = VISCA_PT_POSITION_INQ;
+    obuffer_length_ = 3;
 
     try {
 #ifdef TIMETRACKER_VISCA
-      __tt->ping_start( __ttc_pantilt_get_send );
+      tt_->ping_start( ttc_pantilt_get_send_ );
       send();
-      __tt->ping_end( __ttc_pantilt_get_send );
-      __tt->ping_start( __ttc_pantilt_get_read );
+      tt_->ping_end( ttc_pantilt_get_send_ );
+      tt_->ping_start( ttc_pantilt_get_read_ );
       recv();
-      __tt->ping_end( __ttc_pantilt_get_read );
+      tt_->ping_end( ttc_pantilt_get_read_ );
 #else
       send_with_reply();
 #endif
@@ -793,10 +793,10 @@ Visca::get_pan_tilt(int &pan, int &tilt)
   }
 
 #ifdef TIMETRACKER_VISCA
-  __tt->ping_start( __ttc_pantilt_get_handle );
+  tt_->ping_start( ttc_pantilt_get_handle_ );
 #endif
 
-  while (__ibuffer[1] != VISCA_RESPONSE_COMPLETED) {
+  while (ibuffer_[1] != VISCA_RESPONSE_COMPLETED) {
     // inquire return from socket 0, so this may occur if there
     // are other responses waiting, handle them...
     try {
@@ -808,25 +808,25 @@ Visca::get_pan_tilt(int &pan, int &tilt)
   }
 
 #ifdef TIMETRACKER_VISCA
-  __tt->ping_end( __ttc_pantilt_get_handle );
-  __tt->ping_start( __ttc_pantilt_get_interpret );
+  tt_->ping_end( ttc_pantilt_get_handle_ );
+  tt_->ping_start( ttc_pantilt_get_interpret_ );
 #endif
 
 
-  // Extract information from __ibuffer
-  if ( __ibuffer[1] == VISCA_RESPONSE_COMPLETED ) {
+  // Extract information from ibuffer_
+  if ( ibuffer_[1] == VISCA_RESPONSE_COMPLETED ) {
     unsigned short int pan_val = 0;
     unsigned short int tilt_val = 0;
 
-    pan_val |= (__ibuffer[2] & 0x0F) << 12;
-    pan_val |= (__ibuffer[3] & 0x0F) << 8;
-    pan_val |= (__ibuffer[4] & 0x0F) << 4;
-    pan_val |= (__ibuffer[5] & 0x0F);
+    pan_val |= (ibuffer_[2] & 0x0F) << 12;
+    pan_val |= (ibuffer_[3] & 0x0F) << 8;
+    pan_val |= (ibuffer_[4] & 0x0F) << 4;
+    pan_val |= (ibuffer_[5] & 0x0F);
 
-    tilt_val |= (__ibuffer[6] & 0x0F) << 12;
-    tilt_val |= (__ibuffer[7] & 0x0F) << 8;
-    tilt_val |= (__ibuffer[8] & 0x0F) << 4;
-    tilt_val |= (__ibuffer[9] & 0x0F);
+    tilt_val |= (ibuffer_[6] & 0x0F) << 12;
+    tilt_val |= (ibuffer_[7] & 0x0F) << 8;
+    tilt_val |= (ibuffer_[8] & 0x0F) << 4;
+    tilt_val |= (ibuffer_[9] & 0x0F);
 
     if (pan_val < 0x8000) {
       // The value must be positive
@@ -848,11 +848,11 @@ Visca::get_pan_tilt(int &pan, int &tilt)
     throw ViscaException("getPanTilt(): Wrong response received");
   }
 #ifdef TIMETRACKER_VISCA
-  __tt->ping_end( __ttc_pantilt_get_interpret );
-  __tt->print_to_stdout();
+  tt_->ping_end( ttc_pantilt_get_interpret_ );
+  tt_->print_to_stdout();
 #endif
 
-  __inquire = VISCA_RUNINQ_NONE;
+  inquire_ = VISCA_RUNINQ_NONE;
 }
 
 
@@ -860,25 +860,25 @@ Visca::get_pan_tilt(int &pan, int &tilt)
 void
 Visca::reset_pan_tilt_limit()
 {
-  __obuffer[1] = VISCA_COMMAND;
-  __obuffer[2] = VISCA_CATEGORY_PAN_TILTER;
-  __obuffer[3] = VISCA_PT_LIMITSET;
-  __obuffer[3] = VISCA_PT_LIMITSET_CLEAR;
-  __obuffer[4] = VISCA_PT_LIMITSET_SET_UR;
-  __obuffer[5] = 0x07;
-  __obuffer[6] = 0x0F;
-  __obuffer[7] = 0x0F;
-  __obuffer[8] = 0x0F;
-  __obuffer[9] = 0x07;
-  __obuffer[10] = 0x0F;
-  __obuffer[11] = 0x0F;
-  __obuffer[12] = 0x0F;
-  __obuffer_length = 12;
+  obuffer_[1] = VISCA_COMMAND;
+  obuffer_[2] = VISCA_CATEGORY_PAN_TILTER;
+  obuffer_[3] = VISCA_PT_LIMITSET;
+  obuffer_[3] = VISCA_PT_LIMITSET_CLEAR;
+  obuffer_[4] = VISCA_PT_LIMITSET_SET_UR;
+  obuffer_[5] = 0x07;
+  obuffer_[6] = 0x0F;
+  obuffer_[7] = 0x0F;
+  obuffer_[8] = 0x0F;
+  obuffer_[9] = 0x07;
+  obuffer_[10] = 0x0F;
+  obuffer_[11] = 0x0F;
+  obuffer_[12] = 0x0F;
+  obuffer_length_ = 12;
 
   try {
     send_with_reply();
 
-    __obuffer[4] = VISCA_PT_LIMITSET_SET_DL;
+    obuffer_[4] = VISCA_PT_LIMITSET_SET_DL;
 
     send_with_reply();
   } catch (ViscaException &e) {
@@ -898,37 +898,37 @@ void
 Visca::set_pan_tilt_limit(int pan_left, int pan_right, int tilt_up, int tilt_down)
 {
   try {
-    __obuffer[1] = VISCA_COMMAND;
-    __obuffer[2] = VISCA_CATEGORY_PAN_TILTER;
-    __obuffer[3] = VISCA_PT_LIMITSET;
-    __obuffer[3] = VISCA_PT_LIMITSET_SET;
-    __obuffer[4] = VISCA_PT_LIMITSET_SET_UR;
+    obuffer_[1] = VISCA_COMMAND;
+    obuffer_[2] = VISCA_CATEGORY_PAN_TILTER;
+    obuffer_[3] = VISCA_PT_LIMITSET;
+    obuffer_[3] = VISCA_PT_LIMITSET_SET;
+    obuffer_[4] = VISCA_PT_LIMITSET_SET_UR;
     // pan
-    __obuffer[5] = (pan_right & 0xf000) >> 12;
-    __obuffer[6] = (pan_right & 0x0f00) >>  8;
-    __obuffer[7] = (pan_right & 0x00f0) >>  4;
-    __obuffer[8] = (pan_right & 0x000f);
+    obuffer_[5] = (pan_right & 0xf000) >> 12;
+    obuffer_[6] = (pan_right & 0x0f00) >>  8;
+    obuffer_[7] = (pan_right & 0x00f0) >>  4;
+    obuffer_[8] = (pan_right & 0x000f);
     // tilt
-    __obuffer[9] = (tilt_up & 0xf000) >> 12;
-    __obuffer[10] = (tilt_up & 0x0f00) >>  8;
-    __obuffer[11] = (tilt_up & 0x00f0) >>  4;
-    __obuffer[12] = (tilt_up & 0x000f);
+    obuffer_[9] = (tilt_up & 0xf000) >> 12;
+    obuffer_[10] = (tilt_up & 0x0f00) >>  8;
+    obuffer_[11] = (tilt_up & 0x00f0) >>  4;
+    obuffer_[12] = (tilt_up & 0x000f);
 
-    __obuffer_length = 12;
+    obuffer_length_ = 12;
 
     send_with_reply();
 
-    __obuffer[4] = VISCA_PT_LIMITSET_SET_DL;
+    obuffer_[4] = VISCA_PT_LIMITSET_SET_DL;
     // pan
-    __obuffer[5] = (pan_left & 0xf000) >> 12;
-    __obuffer[6] = (pan_left & 0x0f00) >>  8;
-    __obuffer[7] = (pan_left & 0x00f0) >>  4;
-    __obuffer[8] = (pan_left & 0x000f);
+    obuffer_[5] = (pan_left & 0xf000) >> 12;
+    obuffer_[6] = (pan_left & 0x0f00) >>  8;
+    obuffer_[7] = (pan_left & 0x00f0) >>  4;
+    obuffer_[8] = (pan_left & 0x000f);
     // tilt
-    __obuffer[9] = (tilt_down & 0xf000) >> 12;
-    __obuffer[10] = (tilt_down & 0x0f00) >>  8;
-    __obuffer[11] = (tilt_down & 0x00f0) >>  4;
-    __obuffer[12] = (tilt_down & 0x000f);
+    obuffer_[9] = (tilt_down & 0xf000) >> 12;
+    obuffer_[10] = (tilt_down & 0x0f00) >>  8;
+    obuffer_[11] = (tilt_down & 0x00f0) >>  4;
+    obuffer_[12] = (tilt_down & 0x000f);
 
     send_with_reply();
   } catch (ViscaException &e) {
@@ -942,10 +942,10 @@ Visca::set_pan_tilt_limit(int pan_left, int pan_right, int tilt_up, int tilt_dow
 void
 Visca::reset_pan_tilt()
 {
-  __obuffer[1] = VISCA_COMMAND;
-  __obuffer[2] = VISCA_CATEGORY_PAN_TILTER;
-  __obuffer[3] = VISCA_PT_HOME;
-  __obuffer_length = 3;
+  obuffer_[1] = VISCA_COMMAND;
+  obuffer_[2] = VISCA_CATEGORY_PAN_TILTER;
+  obuffer_[3] = VISCA_PT_HOME;
+  obuffer_length_ = 3;
 
   try {
     send_with_reply();
@@ -960,11 +960,11 @@ Visca::reset_pan_tilt()
 void
 Visca::reset_zoom()
 {
-  __obuffer[1] = VISCA_COMMAND;
-  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
-  __obuffer[3] = VISCA_ZOOM;
-  __obuffer[4] = VISCA_ZOOM_STOP;
-  __obuffer_length = 4;
+  obuffer_[1] = VISCA_COMMAND;
+  obuffer_[2] = VISCA_CATEGORY_CAMERA1;
+  obuffer_[3] = VISCA_ZOOM;
+  obuffer_[4] = VISCA_ZOOM_STOP;
+  obuffer_length_ = 4;
 
   try {
     send_with_reply();
@@ -981,13 +981,13 @@ Visca::reset_zoom()
 void
 Visca::set_zoom_speed_tele(unsigned int speed)
 {
-  __obuffer[1] = VISCA_COMMAND;
-  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
-  __obuffer[3] = VISCA_ZOOM;
-  __obuffer[4] = VISCA_ZOOM_TELE_SPEED;
+  obuffer_[1] = VISCA_COMMAND;
+  obuffer_[2] = VISCA_CATEGORY_CAMERA1;
+  obuffer_[3] = VISCA_ZOOM;
+  obuffer_[4] = VISCA_ZOOM_TELE_SPEED;
   // zoom speed
-  __obuffer[5] = (speed & 0x000f) | 0x0020;
-  __obuffer_length = 5;
+  obuffer_[5] = (speed & 0x000f) | 0x0020;
+  obuffer_length_ = 5;
 
   try {
     send_with_reply();
@@ -1004,13 +1004,13 @@ Visca::set_zoom_speed_tele(unsigned int speed)
 void
 Visca::set_zoom_speed_wide(unsigned int speed)
 {
-  __obuffer[1] = VISCA_COMMAND;
-  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
-  __obuffer[3] = VISCA_ZOOM;
-  __obuffer[4] = VISCA_ZOOM_WIDE_SPEED;
+  obuffer_[1] = VISCA_COMMAND;
+  obuffer_[2] = VISCA_CATEGORY_CAMERA1;
+  obuffer_[3] = VISCA_ZOOM;
+  obuffer_[4] = VISCA_ZOOM_WIDE_SPEED;
   // zoom speed
-  __obuffer[5] = (speed & 0x000f) | 0x0020;
-  __obuffer_length = 5;
+  obuffer_[5] = (speed & 0x000f) | 0x0020;
+  obuffer_length_ = 5;
 
   try {
     send_with_reply();
@@ -1027,21 +1027,21 @@ Visca::set_zoom_speed_wide(unsigned int speed)
 void
 Visca::set_zoom(unsigned int zoom)
 {
-  __obuffer[1] = VISCA_COMMAND;
-  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
-  __obuffer[3] = VISCA_ZOOM_VALUE;
+  obuffer_[1] = VISCA_COMMAND;
+  obuffer_[2] = VISCA_CATEGORY_CAMERA1;
+  obuffer_[3] = VISCA_ZOOM_VALUE;
   // zoom
-  __obuffer[4] = (zoom & 0xf000) >> 12;
-  __obuffer[5] = (zoom & 0x0f00) >>  8;
-  __obuffer[6] = (zoom & 0x00f0) >>  4;
-  __obuffer[7] = (zoom & 0x000f);
+  obuffer_[4] = (zoom & 0xf000) >> 12;
+  obuffer_[5] = (zoom & 0x0f00) >>  8;
+  obuffer_[6] = (zoom & 0x00f0) >>  4;
+  obuffer_[7] = (zoom & 0x000f);
 
-  __obuffer_length = 7;
+  obuffer_length_ = 7;
 
   try {
-    if (! __blocking) {
-      __nonblocking_running[ NONBLOCKING_ZOOM ] = true;
-      send_nonblocking( &(__nonblocking_sockets[ NONBLOCKING_ZOOM ]) );
+    if (! blocking_) {
+      nonblocking_running_[ NONBLOCKING_ZOOM ] = true;
+      send_nonblocking( &(nonblocking_sockets_[ NONBLOCKING_ZOOM ]) );
     } else {
       send_with_reply();
     }
@@ -1058,10 +1058,10 @@ Visca::set_zoom(unsigned int zoom)
 void
 Visca::get_zoom(unsigned int &zoom)
 {
-  __obuffer[1] = VISCA_INQUIRY;
-  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
-  __obuffer[3] = VISCA_ZOOM_VALUE;
-  __obuffer_length = 3;
+  obuffer_[1] = VISCA_INQUIRY;
+  obuffer_[2] = VISCA_CATEGORY_CAMERA1;
+  obuffer_[3] = VISCA_ZOOM_VALUE;
+  obuffer_length_ = 3;
 
   try {
     send_with_reply();
@@ -1070,14 +1070,14 @@ Visca::get_zoom(unsigned int &zoom)
     throw;
   }
 
-  // Extract information from __ibuffer
-  if ( __ibuffer[1] == VISCA_RESPONSE_COMPLETED ) {
+  // Extract information from ibuffer_
+  if ( ibuffer_[1] == VISCA_RESPONSE_COMPLETED ) {
     unsigned short int zoom_val = 0;
 
-    zoom_val |= (__ibuffer[2] & 0x0F) << 12;
-    zoom_val |= (__ibuffer[3] & 0x0F) << 8;
-    zoom_val |= (__ibuffer[4] & 0x0F) << 4;
-    zoom_val |= (__ibuffer[5] & 0x0F);
+    zoom_val |= (ibuffer_[2] & 0x0F) << 12;
+    zoom_val |= (ibuffer_[3] & 0x0F) << 8;
+    zoom_val |= (ibuffer_[4] & 0x0F) << 4;
+    zoom_val |= (ibuffer_[5] & 0x0F);
 
     zoom = zoom_val;
   } else {
@@ -1093,15 +1093,15 @@ Visca::get_zoom(unsigned int &zoom)
 void
 Visca::set_zoom_digital_enabled(bool enabled)
 {
-  __obuffer[1] = VISCA_COMMAND;
-  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
-  __obuffer[3] = VISCA_DZOOM;
+  obuffer_[1] = VISCA_COMMAND;
+  obuffer_[2] = VISCA_CATEGORY_CAMERA1;
+  obuffer_[3] = VISCA_DZOOM;
   if (enabled) {
-    __obuffer[4] = VISCA_DZOOM_ON;
+    obuffer_[4] = VISCA_DZOOM_ON;
   } else {
-    __obuffer[4] = VISCA_DZOOM_OFF;
+    obuffer_[4] = VISCA_DZOOM_OFF;
   }
-  __obuffer_length = 4;
+  obuffer_length_ = 4;
 
   try {
     send_with_reply();
@@ -1118,11 +1118,11 @@ Visca::set_zoom_digital_enabled(bool enabled)
 void
 Visca::apply_effect(unsigned char filter)
 {
-  __obuffer[1] = VISCA_COMMAND;
-  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
-  __obuffer[3] = VISCA_PICTURE_EFFECT;
-  __obuffer[4] = filter;
-  __obuffer_length = 4;
+  obuffer_[1] = VISCA_COMMAND;
+  obuffer_[2] = VISCA_CATEGORY_CAMERA1;
+  obuffer_[3] = VISCA_PICTURE_EFFECT;
+  obuffer_[4] = filter;
+  obuffer_length_ = 4;
 
   try {
     send_with_reply();
@@ -1256,10 +1256,10 @@ Visca::apply_effect_stretch()
 unsigned int
 Visca::get_white_balance_mode()
 {
-  __obuffer[1] = VISCA_INQUIRY;
-  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
-  __obuffer[3] = VISCA_WB;
-  __obuffer_length = 3;
+  obuffer_[1] = VISCA_INQUIRY;
+  obuffer_[2] = VISCA_CATEGORY_CAMERA1;
+  obuffer_[3] = VISCA_WB;
+  obuffer_length_ = 3;
 
   try {
     send_with_reply();
@@ -1268,7 +1268,7 @@ Visca::get_white_balance_mode()
     throw;
   }
 
-  while (__ibuffer[1] != VISCA_RESPONSE_COMPLETED) {
+  while (ibuffer_[1] != VISCA_RESPONSE_COMPLETED) {
     // inquire return from socket 0, so this may occur if there
     // are other responses waiting, handle them...
     try {
@@ -1280,9 +1280,9 @@ Visca::get_white_balance_mode()
     }
   }
 
-  // Extract information from __ibuffer
-  if ( __ibuffer[1] == VISCA_RESPONSE_COMPLETED ) {
-    return __ibuffer[2];
+  // Extract information from ibuffer_
+  if ( ibuffer_[1] == VISCA_RESPONSE_COMPLETED ) {
+    return ibuffer_[2];
   } else {
     throw ViscaException("Did not get 'request completed' response");
   }
@@ -1296,11 +1296,11 @@ Visca::get_white_balance_mode()
 void
 Visca::set_mirror(bool mirror)
 {
-  __obuffer[1] = VISCA_COMMAND;
-  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
-  __obuffer[3] = VISCA_MIRROR;
-  __obuffer[4] = mirror ? VISCA_MIRROR_ON : VISCA_MIRROR_OFF;
-  __obuffer_length = 4;
+  obuffer_[1] = VISCA_COMMAND;
+  obuffer_[2] = VISCA_CATEGORY_CAMERA1;
+  obuffer_[3] = VISCA_MIRROR;
+  obuffer_[4] = mirror ? VISCA_MIRROR_ON : VISCA_MIRROR_OFF;
+  obuffer_length_ = 4;
 
   try {
     send_with_reply();
@@ -1316,10 +1316,10 @@ Visca::set_mirror(bool mirror)
 bool
 Visca::get_mirror()
 {
-  __obuffer[1] = VISCA_INQUIRY;
-  __obuffer[2] = VISCA_CATEGORY_CAMERA1;
-  __obuffer[3] = VISCA_MIRROR;
-  __obuffer_length = 3;
+  obuffer_[1] = VISCA_INQUIRY;
+  obuffer_[2] = VISCA_CATEGORY_CAMERA1;
+  obuffer_[3] = VISCA_MIRROR;
+  obuffer_length_ = 3;
 
   try {
     send_with_reply();
@@ -1328,9 +1328,9 @@ Visca::get_mirror()
     throw;
   }
 
-  // Extract information from __ibuffer
-  if ( __ibuffer[1] == VISCA_RESPONSE_COMPLETED ) {
-    return (__ibuffer[2] != 0);
+  // Extract information from ibuffer_
+  if ( ibuffer_[1] == VISCA_RESPONSE_COMPLETED ) {
+    return (ibuffer_[2] != 0);
   } else {
     throw ViscaException("Failed to get mirror data: zoom inquiry failed, "
 			 "response code not VISCA_RESPONSE_COMPLETED");

@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __LIBS_GUI_UTILS_SERVICE_SELECTOR_CBE_H_
-#define __LIBS_GUI_UTILS_SERVICE_SELECTOR_CBE_H_
+#ifndef _LIBS_GUI_UTILS_SERVICE_SELECTOR_CBE_H_
+#define _LIBS_GUI_UTILS_SERVICE_SELECTOR_CBE_H_
 
 #include <netcomm/fawkes/client_handler.h>
 
@@ -33,9 +33,6 @@
 #endif
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class FawkesNetworkClient;
 class ServiceModel;
@@ -99,10 +96,10 @@ class ServiceSelectorCBE
   ServiceModel         *m_service_model;
 
  private:
-   Glib::ustring  __hostname;
-   Glib::ustring  __servicename;
-   unsigned short __port;
+   Glib::ustring  hostname_;
+   Glib::ustring  servicename_;
+   unsigned short port_;
 };
 
 }
-#endif /* __LIBS_GUI_UTILS_SERVICE_SELECTOR_CBE_H_ */
+#endif /* LIBS_GUI_UTILS_SERVICE_SELECTOR_CBE_H__ */

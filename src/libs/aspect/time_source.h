@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_TIME_SOURCE_H_
-#define __ASPECT_TIME_SOURCE_H_
+#ifndef _ASPECT_TIME_SOURCE_H_
+#define _ASPECT_TIME_SOURCE_H_
 
 #include <aspect/aspect.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class TimeSource;
 
@@ -42,7 +39,7 @@ class TimeSourceAspect : public virtual Aspect
   TimeSource *  get_timesource() const;
 
  private:
-  TimeSource *__time_source;
+  TimeSource *time_source_;
 };
 
 } // end namespace fawkes

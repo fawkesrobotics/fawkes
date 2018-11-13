@@ -25,9 +25,6 @@
 #include <ros/node_handle.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class ROSAspect <plugins/ros/aspect/ros.h>
  * Thread aspect to get access to a ROS node handle.

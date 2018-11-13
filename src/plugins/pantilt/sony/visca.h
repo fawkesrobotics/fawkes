@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_PANTILT_SONY_VISCA_H_
-#define __PLUGINS_PANTILT_SONY_VISCA_H_
+#ifndef _PLUGINS_PANTILT_SONY_VISCA_H_
+#define _PLUGINS_PANTILT_SONY_VISCA_H_
 
 #include <core/exception.h>
 
@@ -398,34 +398,34 @@ class Visca {
   void         handle_response();
   void         finish_nonblocking(unsigned int socket);
 
-  char         *__device_file;
-  int           __fd;
-  bool          __opened;
-  unsigned int  __default_timeout_ms;
+  char         *device_file_;
+  int           fd_;
+  bool          opened_;
+  unsigned int  default_timeout_ms_;
 
-  unsigned int  __inquire;
+  unsigned int  inquire_;
 
-  unsigned char __recipient;
-  unsigned char __sender;
+  unsigned char recipient_;
+  unsigned char sender_;
 
-  unsigned char __obuffer[16];
-  unsigned char __ibuffer[1024];
-  int           __obuffer_length;
-  int           __ibuffer_length;
+  unsigned char obuffer_[16];
+  unsigned char ibuffer_[1024];
+  int           obuffer_length_;
+  int           ibuffer_length_;
 
-  bool          __blocking;
-  bool          __nonblocking_running[2];
-  unsigned int  __nonblocking_sockets[2];
+  bool          blocking_;
+  bool          nonblocking_running_[2];
+  unsigned int  nonblocking_sockets_[2];
 
-  unsigned char __pan_speed;
-  unsigned char __tilt_speed;
+  unsigned char pan_speed_;
+  unsigned char tilt_speed_;
 
 #ifdef TIMETRACKER_VISCA
-  fawkes::TimeTracker *__tt;
-  unsigned int         __ttc_pantilt_get_send;
-  unsigned int         __ttc_pantilt_get_read;
-  unsigned int         __ttc_pantilt_get_handle;
-  unsigned int         __ttc_pantilt_get_interpret;
+  fawkes::TimeTracker *tt_;
+  unsigned int         ttc_pantilt_get_send_;
+  unsigned int         ttc_pantilt_get_read_;
+  unsigned int         ttc_pantilt_get_handle_;
+  unsigned int         ttc_pantilt_get_interpret_;
 #endif
 
 };

@@ -19,15 +19,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __ASPECT_INIFINS_SYNCPOINT_H_
-#define __ASPECT_INIFINS_SYNCPOINT_H_
+#ifndef _ASPECT_INIFINS_SYNCPOINT_H_
+#define _ASPECT_INIFINS_SYNCPOINT_H_
 
 #include <aspect/inifins/inifin.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class SyncPointManager;
 
@@ -40,7 +37,7 @@ class SyncPointAspectIniFin : public AspectIniFin
     virtual void finalize(Thread *thread);
 
   private:
-    SyncPointManager *__syncpoint_manager;
+    SyncPointManager *syncpoint_manager_;
 };
 
 } // end namespace fawkes

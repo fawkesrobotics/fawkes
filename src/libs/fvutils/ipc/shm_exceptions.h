@@ -22,15 +22,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_IPC_SHM_EXCEPTIONS_H_
-#define __FIREVISION_FVUTILS_IPC_SHM_EXCEPTIONS_H_
+#ifndef _FIREVISION_FVUTILS_IPC_SHM_EXCEPTIONS_H_
+#define _FIREVISION_FVUTILS_IPC_SHM_EXCEPTIONS_H_
 
 #include <core/exception.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Throw if an inconsistent image was found. */
 class InconsistentImageException : public fawkes::Exception {

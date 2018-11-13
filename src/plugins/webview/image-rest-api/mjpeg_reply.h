@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_WEBVIEW_MJPEG_REPLY_H_
-#define __PLUGINS_WEBVIEW_MJPEG_REPLY_H_
+#ifndef _PLUGINS_WEBVIEW_MJPEG_REPLY_H_
+#define _PLUGINS_WEBVIEW_MJPEG_REPLY_H_
 
 #include "jpeg_stream_producer.h"
 
@@ -31,9 +31,6 @@
 #include <cstdio>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class DynamicMJPEGStreamWebReply
 : public DynamicWebReply,

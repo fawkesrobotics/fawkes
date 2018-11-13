@@ -21,13 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __BLACKBOARD_INSTANCE_FACTORY_H_
-#define __BLACKBOARD_INSTANCE_FACTORY_H_
+#ifndef _BLACKBOARD_INSTANCE_FACTORY_H_
+#define _BLACKBOARD_INSTANCE_FACTORY_H_
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Interface;
 class Module;
@@ -44,7 +41,7 @@ class BlackBoardInstanceFactory
   void         delete_interface_instance(Interface *interface);
 
  private:
-  ModuleManager  *__mm;
+  ModuleManager  *mm_;
 };
 
 } // end namespace fawkes

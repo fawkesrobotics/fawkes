@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_NAO_DCM_THREAD_H_
-#define __PLUGINS_NAO_DCM_THREAD_H_
+#ifndef _PLUGINS_NAO_DCM_THREAD_H_
+#define _PLUGINS_NAO_DCM_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/clock.h>
@@ -86,31 +86,31 @@ class NaoQiDCMThread
   int ultrasonic_value(fawkes::NaoSensorInterface::UltrasonicDirection direction);
 
   class HighFreqThread;
-  HighFreqThread *__highfreq_thread;
+  HighFreqThread *highfreq_thread_;
 
  private:
-  AL::ALPtr<AL::DCMProxy> __dcm;
-  AL::ALPtr<AL::ALMotionProxy> __almotion;
-  AL::ALPtr<AL::ALMemoryFastAccess> __memfa;
-  bool __robocup_version;
+  AL::ALPtr<AL::DCMProxy> dcm_;
+  AL::ALPtr<AL::ALMotionProxy> almotion_;
+  AL::ALPtr<AL::ALMemoryFastAccess> memfa_;
+  bool robocup_version_;
 
-  AL::ALProcessSignals::ProcessSignalConnection __dcm_sigconn;
+  AL::ALProcessSignals::ProcessSignalConnection dcm_sigconn_;
 
-  int                       __dcm_time;
-  fawkes::LockVector<float> __values;
+  int                       dcm_time_;
+  fawkes::LockVector<float> values_;
 
-  fawkes::NaoJointPositionInterface   *__joint_pos_highfreq_if;
-  fawkes::NaoJointPositionInterface   *__joint_pos_if;
-  fawkes::NaoJointStiffnessInterface  *__joint_stiffness_highfreq_if;
-  fawkes::NaoJointStiffnessInterface  *__joint_stiffness_if;
-  fawkes::NaoSensorInterface          *__sensor_highfreq_if;
-  fawkes::NaoSensorInterface          *__sensor_if;
+  fawkes::NaoJointPositionInterface   *joint_pos_highfreq_if_;
+  fawkes::NaoJointPositionInterface   *joint_pos_if_;
+  fawkes::NaoJointStiffnessInterface  *joint_stiffness_highfreq_if_;
+  fawkes::NaoJointStiffnessInterface  *joint_stiffness_if_;
+  fawkes::NaoSensorInterface          *sensor_highfreq_if_;
+  fawkes::NaoSensorInterface          *sensor_if_;
 
-  uint8_t                                      __robot_version[4];
-  fawkes::NaoJointPositionInterface::RobotType __robot_type;
-  int                                          __usboard_version;
+  uint8_t                                      robot_version_[4];
+  fawkes::NaoJointPositionInterface::RobotType robot_type_;
+  int                                          usboard_version_;
 
-  AL::ALValue __alljoint_names;
+  AL::ALValue alljoint_names_;
 };
 
 #endif

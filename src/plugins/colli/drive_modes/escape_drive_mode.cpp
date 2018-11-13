@@ -27,9 +27,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class EscapeDriveModule <plugins/colli/drive_modes/escape_drive_mode.h>
  * Class Escape-Drive-Module. This module is called, if an escape is neccessary.

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CONFIG_YAML_H_
-#define __CONFIG_YAML_H_
+#ifndef _CONFIG_YAML_H_
+#define _CONFIG_YAML_H_
 
 #include <config/config.h>
 #include <utils/system/fam.h>
@@ -198,10 +198,10 @@ class YamlConfiguration
   Mutex *mutex;
 
   typedef std::map<std::string, YAML::Node *> DocMap;
-  mutable DocMap __documents;
+  mutable DocMap documents_;
 
-  char *__sysconfdir;
-  char *__userconfdir;
+  char *sysconfdir_;
+  char *userconfdir_;
 
   FamThread *fam_thread_;
 };

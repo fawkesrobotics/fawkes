@@ -49,8 +49,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __LIBS_TF_TYPES_H_
-#define __LIBS_TF_TYPES_H_
+#ifndef _LIBS_TF_TYPES_H_
+#define _LIBS_TF_TYPES_H_
 
 #ifndef HAVE_TF
 #  error HAVE_TF not defined, forgot CFLAGS_TF in Makefile or bullet no installed?
@@ -69,10 +69,6 @@
 
 namespace fawkes {
   namespace tf {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 /** Scalar datatype. */
 typedef btScalar Scalar;

@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_INIFINS_TIMESOURCE_H_
-#define __ASPECT_INIFINS_TIMESOURCE_H_
+#ifndef _ASPECT_INIFINS_TIMESOURCE_H_
+#define _ASPECT_INIFINS_TIMESOURCE_H_
 
 #include <aspect/inifins/inifin.h>
 #include <utils/constraints/unique.h>
 #include <aspect/time_source.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Clock;
 
@@ -44,8 +41,8 @@ class TimeSourceAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  Clock *__clock;
-  UniquenessConstraint<TimeSource> __timesource_uc;
+  Clock *clock_;
+  UniquenessConstraint<TimeSource> timesource_uc_;
 };
 
 } // end namespace fawkes

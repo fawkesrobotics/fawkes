@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_MODELS_SCANLINES_STAR_H_
-#define __FIREVISION_MODELS_SCANLINES_STAR_H_
+#ifndef _FIREVISION_MODELS_SCANLINES_STAR_H_
+#define _FIREVISION_MODELS_SCANLINES_STAR_H_
 
 #include <fvmodels/scanlines/scanlinemodel.h>
 #include <vector>
 #include <map>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ScanlineStar : public ScanlineModel
 {
@@ -99,4 +96,4 @@ class ScanlineStar : public ScanlineModel
 
 } // end namespace firevision
 
-#endif /* __FIREVISION_MODELS_SCANLINES_STAR_H_ */
+#endif /* FIREVISION_MODELS_SCANLINES_STAR_H__ */

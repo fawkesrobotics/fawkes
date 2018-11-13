@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_LOGGING_CACHE_H_
-#define __UTILS_LOGGING_CACHE_H_
+#ifndef _UTILS_LOGGING_CACHE_H_
+#define _UTILS_LOGGING_CACHE_H_
 
 #include <logging/logger.h>
 #include <ctime>
@@ -31,9 +31,6 @@
 #include <list>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Mutex;
 
@@ -114,9 +111,9 @@ class CacheLogger : public Logger
   struct ::tm  *now_s;
   Mutex        *mutex;
 
-  std::list<CacheEntry> __messages;
-  unsigned int  __num_entries;
-  unsigned int  __max_num_entries;
+  std::list<CacheEntry> messages_;
+  unsigned int  num_entries_;
+  unsigned int  max_num_entries_;
 
 };
 

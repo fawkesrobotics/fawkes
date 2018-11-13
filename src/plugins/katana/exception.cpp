@@ -26,9 +26,6 @@
 #include <cmath>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class KatanaNoSolutionException <plugins/katana/exception.h>
  * No joint configuration for desired target found.

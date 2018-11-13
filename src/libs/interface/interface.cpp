@@ -230,57 +230,57 @@ InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
 /** Constructor */
 Interface::Interface()
 {
-  __write_access = false;
-  __rwlock = NULL;
-  __valid = true;
-  __next_message_id = 0;
-  __num_fields = 0;
-  __fieldinfo_list   = NULL;
-  __messageinfo_list = NULL;
-  __clock = Clock::instance();
-  __timestamp = new Time(0, 0);
-  __local_read_timestamp = new Time(0, 0);
-  __auto_timestamping = true;
-  __owner = strdup("?");
+  write_access_ = false;
+  rwlock_ = NULL;
+  valid_ = true;
+  next_message_id_ = 0;
+  num_fields_ = 0;
+  fieldinfo_list_   = NULL;
+  messageinfo_list_ = NULL;
+  clock_ = Clock::instance();
+  timestamp_ = new Time(0, 0);
+  local_read_timestamp_ = new Time(0, 0);
+  auto_timestamping_ = true;
+  owner_ = strdup("?");
   data_changed = false;
-  memset(__hash, 0, __INTERFACE_HASH_SIZE);
-  memset(__hash_printable, 0, __INTERFACE_HASH_SIZE * 2 + 1);
+  memset(hash_, 0, INTERFACE_HASH_SIZE_);
+  memset(hash_printable_, 0, INTERFACE_HASH_SIZE_ * 2 + 1);
 
   data_ptr  = NULL;
   data_size = 0;
 
-  __buffers = NULL;
-  __num_buffers = 0;
+  buffers_ = NULL;
+  num_buffers_ = 0;
 
-  __message_queue = new MessageQueue();
-  __data_mutex = new Mutex();
+  message_queue_ = new MessageQueue();
+  data_mutex_ = new Mutex();
 }
 
 
 /** Destructor */
 Interface::~Interface()
 {
-  if ( __rwlock) __rwlock->unref();
-  delete __data_mutex;
-  delete __message_queue;
-  if (__buffers)  free(__buffers);
+  if ( rwlock_) rwlock_->unref();
+  delete data_mutex_;
+  delete message_queue_;
+  if (buffers_)  free(buffers_);
   // free fieldinfo list
-  interface_fieldinfo_t *finfol = __fieldinfo_list;
+  interface_fieldinfo_t *finfol = fieldinfo_list_;
   while ( finfol ) {
-    __fieldinfo_list = __fieldinfo_list->next;
+    fieldinfo_list_ = fieldinfo_list_->next;
     free(finfol);
-    finfol = __fieldinfo_list;
+    finfol = fieldinfo_list_;
   }
   // free messageinfo list
-  interface_messageinfo_t *minfol = __messageinfo_list;
+  interface_messageinfo_t *minfol = messageinfo_list_;
   while ( minfol ) {
-    __messageinfo_list = __messageinfo_list->next;
+    messageinfo_list_ = messageinfo_list_->next;
     free(minfol);
-    minfol = __messageinfo_list;
+    minfol = messageinfo_list_;
   }
-  delete __timestamp;
-  delete __local_read_timestamp;
-  if (__owner) free(__owner);
+  delete timestamp_;
+  delete local_read_timestamp_;
+  if (owner_) free(owner_);
 }
 
 /** Get interface hash.
@@ -293,7 +293,7 @@ Interface::~Interface()
 const unsigned char *
 Interface::hash() const
 {
-  return __hash;
+  return hash_;
 }
 
 
@@ -303,7 +303,7 @@ Interface::hash() const
 const char *
 Interface::hash_printable() const
 {
-  return __hash_printable;
+  return hash_printable_;
 }
 
 
@@ -313,9 +313,9 @@ Interface::hash_printable() const
 void
 Interface::set_hash(unsigned char *ihash)
 {
-  memcpy(__hash, ihash, __INTERFACE_HASH_SIZE);
-  for (size_t s = 0; s < __INTERFACE_HASH_SIZE; ++s) {
-    snprintf(&__hash_printable[s*2], 3, "%02X", __hash[s]);
+  memcpy(hash_, ihash, INTERFACE_HASH_SIZE_);
+  for (size_t s = 0; s < INTERFACE_HASH_SIZE_; ++s) {
+    snprintf(&hash_printable_[s*2], 3, "%02X", hash_[s]);
   }
 }
 
@@ -336,7 +336,7 @@ Interface::add_fieldinfo(interface_fieldtype_t type, const char *name,
 			 size_t length, void *value, const char *enumtype,
 			 const interface_enum_map_t *enum_map)
 {
-  interface_fieldinfo_t *infol = __fieldinfo_list;
+  interface_fieldinfo_t *infol = fieldinfo_list_;
   interface_fieldinfo_t *newinfo =
     (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
 
@@ -350,7 +350,7 @@ Interface::add_fieldinfo(interface_fieldtype_t type, const char *name,
 
   if ( infol == NULL ) {
     // first entry
-    __fieldinfo_list = newinfo;
+    fieldinfo_list_ = newinfo;
   } else {
     // append to list
     while ( infol->next != NULL ) {
@@ -359,7 +359,7 @@ Interface::add_fieldinfo(interface_fieldtype_t type, const char *name,
     infol->next = newinfo;
   }
 
-  ++__num_fields;
+  ++num_fields_;
 }
 
 
@@ -372,7 +372,7 @@ Interface::add_fieldinfo(interface_fieldtype_t type, const char *name,
 void
 Interface::add_messageinfo(const char *type)
 {
-  interface_messageinfo_t *infol = __messageinfo_list;
+  interface_messageinfo_t *infol = messageinfo_list_;
   interface_messageinfo_t *newinfo =
     (interface_messageinfo_t *)malloc(sizeof(interface_messageinfo_t));
 
@@ -381,7 +381,7 @@ Interface::add_messageinfo(const char *type)
 
   if ( infol == NULL ) {
     // first entry
-    __messageinfo_list = newinfo;
+    messageinfo_list_ = newinfo;
   } else {
     // append to list
     while ( infol->next != NULL ) {
@@ -400,7 +400,7 @@ std::list<const char *>
 Interface::get_message_types()
 {
   std::list<const char *> types;
-  interface_messageinfo_t *cur = __messageinfo_list;
+  interface_messageinfo_t *cur = messageinfo_list_;
 
   while ( cur != NULL ) {
     types.push_back(cur->type);
@@ -418,7 +418,7 @@ Interface::get_message_types()
 size_t
 Interface::hash_size() const
 {
-  return __INTERFACE_HASH_SIZE;
+  return INTERFACE_HASH_SIZE_;
 }
 
 
@@ -439,7 +439,7 @@ Interface::datachunk() const
 bool
 Interface::is_writer() const
 {
-  return __write_access;
+  return write_access_;
 }
 
 
@@ -453,9 +453,9 @@ Interface::is_writer() const
 void
 Interface::set_validity(bool valid)
 {
-  __rwlock->lock_for_write();
-  __valid = valid;
-  __rwlock->unlock();
+  rwlock_->lock_for_write();
+  valid_ = valid;
+  rwlock_->unlock();
 }
 
 
@@ -465,7 +465,7 @@ Interface::set_validity(bool valid)
 bool
 Interface::is_valid() const
 {
-  return __valid;
+  return valid_;
 }
 
 
@@ -476,19 +476,19 @@ Interface::is_valid() const
 void
 Interface::read()
 {
-  __rwlock->lock_for_read();
-  __data_mutex->lock();
-  if ( __valid ) {
-    memcpy(data_ptr, __mem_data_ptr, data_size);
-    *__local_read_timestamp = *__timestamp;
-    __timestamp->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
+  rwlock_->lock_for_read();
+  data_mutex_->lock();
+  if ( valid_ ) {
+    memcpy(data_ptr, mem_data_ptr_, data_size);
+    *local_read_timestamp_ = *timestamp_;
+    timestamp_->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
   } else {
-    __data_mutex->unlock();
-    __rwlock->unlock();
+    data_mutex_->unlock();
+    rwlock_->unlock();
     throw InterfaceInvalidException(this, "read()");
   }
-  __data_mutex->unlock();
-  __rwlock->unlock();
+  data_mutex_->unlock();
+  rwlock_->unlock();
 }
 
 
@@ -499,31 +499,31 @@ Interface::read()
 void
 Interface::write()
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot write.");
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_, "Cannot write.");
   }
 
-  __rwlock->lock_for_write();
-  __data_mutex->lock();
-  if ( __valid ) {
+  rwlock_->lock_for_write();
+  data_mutex_->lock();
+  if ( valid_ ) {
     if (data_changed) {
-      if (__auto_timestamping)  __timestamp->stamp();
+      if (auto_timestamping_)  timestamp_->stamp();
       long sec = 0, usec = 0;
-      __timestamp->get_timestamp(sec, usec);
+      timestamp_->get_timestamp(sec, usec);
       data_ts->timestamp_sec  = sec;
       data_ts->timestamp_usec = usec;
       data_changed = false;
     }
-    memcpy(__mem_data_ptr, data_ptr, data_size);
+    memcpy(mem_data_ptr_, data_ptr, data_size);
   } else {
-    __data_mutex->unlock();
-    __rwlock->unlock();
+    data_mutex_->unlock();
+    rwlock_->unlock();
     throw InterfaceInvalidException(this, "write()");
   }
-  __data_mutex->unlock();
-  __rwlock->unlock();
+  data_mutex_->unlock();
+  rwlock_->unlock();
 
-  __interface_mediator->notify_of_data_change(this);
+  interface_mediator_->notify_of_data_change(this);
 }
 
 
@@ -539,20 +539,20 @@ Interface::datasize() const
 
 /** Set type, ID and UID.
  * Sets type and ID, UID is generated automatically as Type::ID.
- * @param type string, a maximum of __INTERFACE_TYPE_SIZE bytes are copied
- * @param ID string, a maximum of __INTERFACE_ID_SIZE bytes are copied
+ * @param type string, a maximum of INTERFACE_TYPE_SIZE_ bytes are copied
+ * @param ID string, a maximum of INTERFACE_ID_SIZE_ bytes are copied
  */
 void
 Interface::set_type_id(const char *type, const char *id)
 {
-  strncpy(__type, type, __INTERFACE_TYPE_SIZE);
-  strncpy(__id, id, __INTERFACE_ID_SIZE);
-  snprintf(__uid, __INTERFACE_UID_SIZE + 1, "%s::%s", __type, __id);
+  strncpy(type_, type, INTERFACE_TYPE_SIZE_);
+  strncpy(id_, id, INTERFACE_ID_SIZE_);
+  snprintf(uid_, INTERFACE_UID_SIZE_ + 1, "%s::%s", type_, id_);
   // Enforce null-terminated strings. If the input was not properly
   // null-terminated, this truncated the last character of the string.
-  __type[__INTERFACE_TYPE_SIZE] = 0;
-  __id[__INTERFACE_ID_SIZE] = 0;
-  __uid[__INTERFACE_UID_SIZE] = 0;
+  type_[INTERFACE_TYPE_SIZE_] = 0;
+  id_[INTERFACE_ID_SIZE_] = 0;
+  uid_[INTERFACE_UID_SIZE_] = 0;
 }
 
 
@@ -562,7 +562,7 @@ Interface::set_type_id(const char *type, const char *id)
 void
 Interface::set_instance_serial(unsigned short instance_serial)
 {
-  __instance_serial = instance_serial;
+  instance_serial_ = instance_serial;
 }
 
 
@@ -574,8 +574,8 @@ void
 Interface::set_mediators(InterfaceMediator *iface_mediator,
 			 MessageMediator *msg_mediator)
 {
-  __interface_mediator = iface_mediator;
-  __message_mediator   = msg_mediator;
+  interface_mediator_ = iface_mediator;
+  message_mediator_   = msg_mediator;
 }
 
 
@@ -587,9 +587,9 @@ Interface::set_mediators(InterfaceMediator *iface_mediator,
 void
 Interface::set_memory(unsigned int serial, void *real_ptr, void *data_ptr)
 {
-  __mem_serial   = serial;
-  __mem_real_ptr = real_ptr;
-  __mem_data_ptr = data_ptr;
+  mem_serial_   = serial;
+  mem_real_ptr_ = real_ptr;
+  mem_data_ptr_ = data_ptr;
 }
 
 
@@ -600,8 +600,8 @@ Interface::set_memory(unsigned int serial, void *real_ptr, void *data_ptr)
 void
 Interface::set_readwrite(bool write_access, RefCountRWLock *rwlock)
 {
-  __write_access = write_access;
-  __rwlock       = rwlock;
+  write_access_ = write_access;
+  rwlock_       = rwlock;
 }
 
 
@@ -611,9 +611,9 @@ Interface::set_readwrite(bool write_access, RefCountRWLock *rwlock)
 void
 Interface::set_owner(const char *owner)
 {
-  if (__owner) free(__owner);
-  __owner = NULL;
-  if (owner) __owner = strdup(owner);
+  if (owner_) free(owner_);
+  owner_ = NULL;
+  if (owner) owner_ = strdup(owner);
 }
 
 /** Check equality of two interfaces.
@@ -630,8 +630,8 @@ Interface::set_owner(const char *owner)
 bool
 Interface::operator==(Interface &comp) const
 {
-  return ( (strncmp(__type, comp.__type, sizeof(__type)) == 0) &&
-	   (strncmp(__id, comp.__id, sizeof(__id)) == 0) );
+  return ( (strncmp(type_, comp.type_, sizeof(type_)) == 0) &&
+	   (strncmp(id_, comp.id_, sizeof(id_)) == 0) );
 }
 
 
@@ -642,7 +642,7 @@ Interface::operator==(Interface &comp) const
 bool
 Interface::oftype(const char *interface_type) const
 {
-  return (strncmp(this->__type, interface_type, sizeof(this->__type)) == 0);
+  return (strncmp(this->type_, interface_type, sizeof(this->type_)) == 0);
 }
 
 
@@ -652,7 +652,7 @@ Interface::oftype(const char *interface_type) const
 const char *
 Interface::type() const
 {
-  return __type;
+  return type_;
 }
 
 
@@ -662,7 +662,7 @@ Interface::type() const
 const char *
 Interface::id() const
 {
-  return __id;
+  return id_;
 }
 
 
@@ -674,7 +674,7 @@ Interface::id() const
 const char *
 Interface::owner() const
 {
-  return __owner;
+  return owner_;
 }
 
 /** Get unique identifier of interface.
@@ -688,7 +688,7 @@ Interface::owner() const
 const char *
 Interface::uid() const
 {
-  return __uid;
+  return uid_;
 }
 
 
@@ -698,7 +698,7 @@ Interface::uid() const
 unsigned short
 Interface::serial() const
 {
-  return __instance_serial;
+  return instance_serial_;
 }
 
 
@@ -708,7 +708,7 @@ Interface::serial() const
 unsigned int
 Interface::mem_serial() const
 {
-  return __mem_serial;
+  return mem_serial_;
 }
 
 
@@ -719,7 +719,7 @@ Interface::mem_serial() const
 const Time *
 Interface::timestamp() const
 {
-  return __timestamp;
+  return timestamp_;
 }
 
 
@@ -730,15 +730,15 @@ Interface::timestamp() const
 void
 Interface::set_timestamp(const Time *t)
 {
-  if (__auto_timestamping) throw Exception("Auto timestamping enabled, cannot "
+  if (auto_timestamping_) throw Exception("Auto timestamping enabled, cannot "
 					    "set explicit timestamp");
-  if (!__write_access) throw Exception("Timestamp can only be set on writing "
+  if (!write_access_) throw Exception("Timestamp can only be set on writing "
 				       "instance");
 
   if (t) {
-    *__timestamp = t;
+    *timestamp_ = t;
   } else {
-    __timestamp->stamp();
+    timestamp_->stamp();
   }
   data_changed = true;
 }
@@ -750,8 +750,8 @@ Interface::set_timestamp(const Time *t)
 void
 Interface::set_clock(Clock *clock)
 {
-  __clock = clock;
-  __timestamp->set_clock(clock);
+  clock_ = clock;
+  timestamp_->set_clock(clock);
 }
 
 
@@ -761,7 +761,7 @@ Interface::set_clock(Clock *clock)
 void
 Interface::set_auto_timestamping(bool enabled)
 {
-  __auto_timestamping = enabled;
+  auto_timestamping_ = enabled;
 }
 
 
@@ -797,10 +797,10 @@ Interface::mark_data_changed()
 bool
 Interface::changed() const
 {
-	if (__write_access) {
+	if (write_access_) {
 		return data_changed;
 	} else {
-		return (*__timestamp != __local_read_timestamp);
+		return (*timestamp_ != local_read_timestamp_);
 	}
 }
 
@@ -835,7 +835,7 @@ Interface::set_from_chunk(void *chunk)
 bool
 Interface::has_writer() const
 {
-  return __interface_mediator->exists_writer(this);
+  return interface_mediator_->exists_writer(this);
 }
 
 
@@ -864,7 +864,7 @@ Interface::has_writer() const
 unsigned int
 Interface::num_readers() const
 {
-  return __interface_mediator->num_readers(this);
+  return interface_mediator_->num_readers(this);
 }
 
 
@@ -875,7 +875,7 @@ Interface::num_readers() const
 std::string
 Interface::writer() const
 {
-  return __interface_mediator->writer(this);
+  return interface_mediator_->writer(this);
 }
 
 
@@ -885,7 +885,7 @@ Interface::writer() const
 std::list<std::string>
 Interface::readers() const
 {
-  return __interface_mediator->readers(this);
+  return interface_mediator_->readers(this);
 }
 
 
@@ -904,15 +904,15 @@ Interface::readers() const
 unsigned int
 Interface::msgq_enqueue(Message *message)
 {
-  if ( __write_access ) {
-    throw InterfaceMessageEnqueueException(__type, __id);
+  if ( write_access_ ) {
+    throw InterfaceMessageEnqueueException(type_, id_);
   }
   
   if ( message_valid(message) ) {
     message->set_interface(this);
     message->set_id(next_msg_id());
     // transmit might change the message id!
-    __message_mediator->transmit(message);
+    message_mediator_->transmit(message);
     unsigned int msgid = message->id();
     message->unref();
     return msgid;
@@ -943,8 +943,8 @@ Interface::msgq_enqueue(Message *message)
 unsigned int
 Interface::msgq_enqueue_copy(Message *message)
 {
-  if ( __write_access ) {
-    throw InterfaceMessageEnqueueException(__type, __id);
+  if ( write_access_ ) {
+    throw InterfaceMessageEnqueueException(type_, id_);
   }
   if ( message == NULL ) {
     throw NullPointerException("Message may not be NULL");
@@ -954,7 +954,7 @@ Interface::msgq_enqueue_copy(Message *message)
     Message *mcopy = message->clone();
     mcopy->set_interface(this);
     mcopy->set_id(next_msg_id());
-    __message_mediator->transmit(mcopy);
+    message_mediator_->transmit(mcopy);
     unsigned int msgid = mcopy->id();
     mcopy->unref();
     message->set_id(msgid);
@@ -977,13 +977,13 @@ Interface::msgq_enqueue_copy(Message *message)
 void
 Interface::msgq_append(Message *message)
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_, "Cannot work on message queue on "
 					"reading instance of an interface (append).");
   }
 
   message->ref();
-  __message_queue->append(message);
+  message_queue_->append(message);
 }
 
 
@@ -1000,12 +1000,12 @@ Interface::msgq_append(Message *message)
 void
 Interface::msgq_remove(Message *message)
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_, "Cannot work on message queue on "
 					"reading instance of an interface (remove msg).");
   }
 
-  return __message_queue->remove(message);
+  return message_queue_->remove(message);
 }
 
 
@@ -1017,12 +1017,12 @@ Interface::msgq_remove(Message *message)
 void
 Interface::msgq_remove(unsigned int message_id)
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_, "Cannot work on message queue on "
 					"reading instance of an interface (remove id).");
   }
 
-  return __message_queue->remove(message_id);
+  return message_queue_->remove(message_id);
 }
 
 
@@ -1033,12 +1033,12 @@ Interface::msgq_remove(unsigned int message_id)
 unsigned int
 Interface::msgq_size()
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_, "Cannot work on message queue on "
 					"reading instance of an interface (size).");
   }
 
-  return __message_queue->size();
+  return message_queue_->size();
 }
 
 
@@ -1049,12 +1049,12 @@ Interface::msgq_size()
 bool
 Interface::msgq_empty()
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_, "Cannot work on message queue on "
 					"reading instance of an interface (empty).");
   }
 
-  return __message_queue->empty();
+  return message_queue_->empty();
 }
 
 
@@ -1065,12 +1065,12 @@ Interface::msgq_empty()
 void
 Interface::msgq_flush()
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_, "Cannot work on message queue on "
 					"reading instance of an interface (flush).");
   }
 
-  __message_queue->flush();
+  message_queue_->flush();
 }
 
 
@@ -1083,12 +1083,12 @@ Interface::msgq_flush()
 void
 Interface::msgq_lock()
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_, "Cannot work on message queue on "
 					"reading instance of an interface (lock).");
   }
 
-  __message_queue->lock();
+  message_queue_->lock();
 }
 
 
@@ -1103,14 +1103,14 @@ Interface::msgq_lock()
 bool
 Interface::msgq_try_lock()
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id,
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_,
 					"Cannot work on message queue on "
 					"reading instance of an interface "
 					"(msgq_try_lock).");
   }
 
-  return __message_queue->try_lock();
+  return message_queue_->try_lock();
 }
 
 
@@ -1121,12 +1121,12 @@ Interface::msgq_try_lock()
 void
 Interface::msgq_unlock()
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_, "Cannot work on message queue on "
 					"reading instance of an interface (unlock).");
   }
 
-  __message_queue->unlock();
+  message_queue_->unlock();
 }
 
 /** Get start iterator for message queue.
@@ -1141,12 +1141,12 @@ Interface::msgq_unlock()
 MessageQueue::MessageIterator
 Interface::msgq_begin()
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_, "Cannot work on message queue on "
 					"reading instance of an interface (begin).");
   }
 
-  return __message_queue->begin();
+  return message_queue_->begin();
 }
 
 
@@ -1162,13 +1162,13 @@ Interface::msgq_begin()
 MessageQueue::MessageIterator
 Interface::msgq_end()
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id,
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_,
 					"Cannot work on message queue on "
 					"reading instance of an interface (end).");
   }
 
-  return __message_queue->end();
+  return message_queue_->end();
 }
 
 
@@ -1181,11 +1181,11 @@ Interface::msgq_end()
 Message *
 Interface::msgq_first()
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_, "Cannot work on message queue on "
 					"reading instance of an interface (first).");
   }
-  return __message_queue->first();
+  return message_queue_->first();
 }
 
 /** Erase first message from queue.
@@ -1194,12 +1194,12 @@ Interface::msgq_first()
 void
 Interface::msgq_pop()
 {
-  if ( ! __write_access ) {
-    throw InterfaceWriteDeniedException(__type, __id, "Cannot work on message queue on "
+  if ( ! write_access_ ) {
+    throw InterfaceWriteDeniedException(type_, id_, "Cannot work on message queue on "
 					"reading instance of an interface (pop).");
   }
 
-  __message_queue->pop();
+  message_queue_->pop();
 }
 
 
@@ -1209,7 +1209,7 @@ Interface::msgq_pop()
 InterfaceFieldIterator
 Interface::fields()
 {
-  return InterfaceFieldIterator(this, __fieldinfo_list);
+  return InterfaceFieldIterator(this, fieldinfo_list_);
 }
 
 
@@ -1229,7 +1229,7 @@ Interface::fields_end()
 unsigned int
 Interface::num_fields()
 {
-  return __num_fields;
+  return num_fields_;
 }
 
 
@@ -1242,24 +1242,24 @@ Interface::num_fields()
 void
 Interface::resize_buffers(unsigned int num_buffers)
 {
-  __data_mutex->lock();
+  data_mutex_->lock();
   if (num_buffers == 0) {
-    if (__buffers != NULL) {
-      free(__buffers);
-      __buffers = NULL;
-      __num_buffers = 0;
+    if (buffers_ != NULL) {
+      free(buffers_);
+      buffers_ = NULL;
+      num_buffers_ = 0;
     }
   } else {
-    void *tmp = realloc(__buffers, (size_t)num_buffers * data_size);
+    void *tmp = realloc(buffers_, (size_t)num_buffers * data_size);
     if (tmp == NULL) {
-      __data_mutex->unlock();
-      throw Exception(errno, "Resizing buffers for interface %s failed", __uid);
+      data_mutex_->unlock();
+      throw Exception(errno, "Resizing buffers for interface %s failed", uid_);
     } else {
-      __buffers     = tmp;
-      __num_buffers = num_buffers;
+      buffers_     = tmp;
+      num_buffers_ = num_buffers;
     }
   }
-  __data_mutex->unlock();
+  data_mutex_->unlock();
 }
 
 
@@ -1269,7 +1269,7 @@ Interface::resize_buffers(unsigned int num_buffers)
 unsigned int
 Interface::num_buffers() const
 {
-  return __num_buffers;
+  return num_buffers_;
 }
 
 
@@ -1279,26 +1279,26 @@ Interface::num_buffers() const
 void
 Interface::copy_shared_to_buffer(unsigned int buffer)
 {
-  if (buffer >= __num_buffers) {
+  if (buffer >= num_buffers_) {
     throw OutOfBoundsException("Buffer ID out of bounds",
-			       buffer, 0, __num_buffers);
+			       buffer, 0, num_buffers_);
   }
 
 
-  __rwlock->lock_for_read();
-  __data_mutex->lock();
+  rwlock_->lock_for_read();
+  data_mutex_->lock();
 
-  void *buf = (char *)__buffers + buffer * data_size;
+  void *buf = (char *)buffers_ + buffer * data_size;
 
-  if ( __valid ) {
-    memcpy(buf, __mem_data_ptr, data_size);
+  if ( valid_ ) {
+    memcpy(buf, mem_data_ptr_, data_size);
   } else {
-    __data_mutex->unlock();
-    __rwlock->unlock();
+    data_mutex_->unlock();
+    rwlock_->unlock();
     throw InterfaceInvalidException(this, "copy_shared_to_buffer()");
   }
-  __data_mutex->unlock();
-  __rwlock->unlock();
+  data_mutex_->unlock();
+  rwlock_->unlock();
 }
 
 
@@ -1308,16 +1308,16 @@ Interface::copy_shared_to_buffer(unsigned int buffer)
 void
 Interface::copy_private_to_buffer(unsigned int buffer)
 {
-  if (buffer >= __num_buffers) {
+  if (buffer >= num_buffers_) {
     throw OutOfBoundsException("Buffer ID out of bounds",
-			       buffer, 0, __num_buffers);
+			       buffer, 0, num_buffers_);
   }
 
 
-  __data_mutex->lock();
-  void *buf = (char *)__buffers + buffer * data_size;
+  data_mutex_->lock();
+  void *buf = (char *)buffers_ + buffer * data_size;
   memcpy(buf, data_ptr, data_size);
-  __data_mutex->unlock();
+  data_mutex_->unlock();
 }
 
 
@@ -1328,18 +1328,18 @@ Interface::copy_private_to_buffer(unsigned int buffer)
 void
 Interface::read_from_buffer(unsigned int buffer)
 {
-  if (buffer >= __num_buffers) {
+  if (buffer >= num_buffers_) {
     throw OutOfBoundsException("Buffer ID out of bounds",
-			       buffer, 0, __num_buffers);
+			       buffer, 0, num_buffers_);
   }
 
-  __data_mutex->lock();
-  void *buf = (char *)__buffers + buffer * data_size;
+  data_mutex_->lock();
+  void *buf = (char *)buffers_ + buffer * data_size;
   memcpy(data_ptr, buf, data_size);
-  *__local_read_timestamp = *__timestamp;
-  __timestamp->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
+  *local_read_timestamp_ = *timestamp_;
+  timestamp_->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
 
-  __data_mutex->unlock();
+  data_mutex_->unlock();
 }
 
 
@@ -1352,15 +1352,15 @@ Interface::read_from_buffer(unsigned int buffer)
 int
 Interface::compare_buffers(unsigned int buffer)
 {
-  if (buffer >= __num_buffers) {
+  if (buffer >= num_buffers_) {
     throw OutOfBoundsException("Buffer ID out of bounds",
-			       buffer, 0, __num_buffers);
+			       buffer, 0, num_buffers_);
   }
 
-  __data_mutex->lock();
-  void *buf = (char *)__buffers + buffer * data_size;
+  data_mutex_->lock();
+  void *buf = (char *)buffers_ + buffer * data_size;
   int rv = memcmp(buf, data_ptr, data_size);
-  __data_mutex->unlock();
+  data_mutex_->unlock();
 
   return rv;
 }
@@ -1373,14 +1373,14 @@ Interface::compare_buffers(unsigned int buffer)
 Time
 Interface::buffer_timestamp(unsigned int buffer)
 {
-  if (buffer >= __num_buffers) {
+  if (buffer >= num_buffers_) {
     throw OutOfBoundsException("Buffer ID out of bounds",
-			       buffer, 0, __num_buffers);
+			       buffer, 0, num_buffers_);
   }
 
 
-  MutexLocker lock(__data_mutex);
-  void *buf = (char *)__buffers + buffer * data_size;
+  MutexLocker lock(data_mutex_);
+  void *buf = (char *)buffers_ + buffer * data_size;
   interface_data_ts_t *buf_ts = (interface_data_ts_t *)buf;
   return Time(buf_ts->timestamp_sec, buf_ts->timestamp_usec);
 }
@@ -1394,16 +1394,16 @@ Interface::buffer_timestamp(unsigned int buffer)
 void
 Interface::buffer_timestamp(unsigned int buffer, Time *timestamp)
 {
-  if (buffer >= __num_buffers) {
+  if (buffer >= num_buffers_) {
     throw OutOfBoundsException("Buffer ID out of bounds",
-			       buffer, 0, __num_buffers);
+			       buffer, 0, num_buffers_);
   }
   if (timestamp == NULL) {
-    throw NullPointerException("%s.buffer_timestamp: timestamp cannot be null", __uid);
+    throw NullPointerException("%s.buffer_timestamp: timestamp cannot be null", uid_);
   }
 
-  MutexLocker lock(__data_mutex);
-  void *buf = (char *)__buffers + buffer * data_size;
+  MutexLocker lock(data_mutex_);
+  void *buf = (char *)buffers_ + buffer * data_size;
   interface_data_ts_t *buf_ts = (interface_data_ts_t *)buf;
   timestamp->set_time(buf_ts->timestamp_sec, buf_ts->timestamp_usec);
 }
@@ -1425,8 +1425,8 @@ Interface::parse_uid(const char *uid, std::string &type, std::string &id)
 #define str(s) #s
 #define xstr(s) str(s)
   if ((ec = regcomp(&re,
-		    "^([a-zA-Z0-9]{1," xstr(__INTERFACE_TYPE_SIZE) "})::"
-		    "([a-zA-Z0-9 _/\\.-]{1," xstr(__INTERFACE_ID_SIZE) "})$",
+		    "^([a-zA-Z0-9]{1," xstr(INTERFACE_TYPE_SIZE_) "})::"
+		    "([a-zA-Z0-9 _/\\.-]{1," xstr(INTERFACE_ID_SIZE_) "})$",
 		    REG_EXTENDED)) != 0) {
     char errbuf[1024];
     regerror(ec, &re, errbuf, 1024);

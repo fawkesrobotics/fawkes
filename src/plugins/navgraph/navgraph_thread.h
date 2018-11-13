@@ -18,8 +18,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_NAVGRAPH_NAVGRAPH_THREAD_H_
-#define __PLUGINS_NAVGRAPH_NAVGRAPH_THREAD_H_
+#ifndef _PLUGINS_NAVGRAPH_NAVGRAPH_THREAD_H_
+#define _PLUGINS_NAVGRAPH_NAVGRAPH_THREAD_H_
 
 #ifdef HAVE_VISUALIZATION
 #  include "visualization_thread.h"

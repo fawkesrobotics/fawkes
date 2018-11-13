@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGIN_NET_MESSAGES_H_
-#define __PLUGIN_NET_MESSAGES_H_
+#ifndef _PLUGIN_NET_MESSAGES_H_
+#define _PLUGIN_NET_MESSAGES_H_
 
 #include <netcomm/utils/dynamic_buffer.h>
 

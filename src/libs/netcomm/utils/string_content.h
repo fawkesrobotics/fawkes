@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_UTILS_STRING_CONTENT_H_
-#define __NETCOMM_UTILS_STRING_CONTENT_H_
+#ifndef _NETCOMM_UTILS_STRING_CONTENT_H_
+#define _NETCOMM_UTILS_STRING_CONTENT_H_
 
 #include <netcomm/fawkes/message_content.h>
 #include <sys/types.h>
@@ -43,8 +43,8 @@ class StringContent : public FawkesNetworkMessageContent
   virtual void  serialize();
 
  private:
-  bool    __string_owner;
-  char *  __string;
+  bool    string_owner_;
+  char *  string_;
 
 };
 

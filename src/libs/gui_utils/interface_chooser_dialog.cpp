@@ -33,9 +33,6 @@
 #include <cstring>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Default title of interface chooser dialogs. */
 const char* const InterfaceChooserDialog::DEFAULT_TITLE = "Select Interfaces";
@@ -104,8 +101,8 @@ InterfaceChooserDialog::create(
 InterfaceChooserDialog::InterfaceChooserDialog(Gtk::Window& parent,
 					       const Glib::ustring& title)
   : Gtk::Dialog(title, parent, /* modal */ true),
-    __parent(parent),
-    __record(NULL)
+    parent_(parent),
+    record_(NULL)
 {
   // May *NOT* call init(), because init() calls virtual methods.
 }
@@ -129,32 +126,32 @@ InterfaceChooserDialog::init(BlackBoard *blackboard,
                              const char *type_pattern,
                              const char *id_pattern)
 {
-  __model = Gtk::ListStore::create(record());
+  model_ = Gtk::ListStore::create(record());
 
   set_default_size(360, 240);
 
-  __treeview.set_model(__model);
+  treeview_.set_model(model_);
   init_columns();
-  __scrollwin.add(__treeview);
-  __scrollwin.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-  __treeview.show();
+  scrollwin_.add(treeview_);
+  scrollwin_.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+  treeview_.show();
 
   Gtk::Box *vbox = get_vbox();
-  vbox->pack_start(__scrollwin);
-  __scrollwin.show();
+  vbox->pack_start(scrollwin_);
+  scrollwin_.show();
 
   add_button(Gtk::Stock::CANCEL, 0);
   add_button(Gtk::Stock::OK, 1);
 
   set_default_response(1);
 
-  __treeview.signal_row_activated().connect(sigc::bind(sigc::hide<0>(sigc::hide<0>(sigc::mem_fun(*this, &InterfaceChooserDialog::response))), 1));
+  treeview_.signal_row_activated().connect(sigc::bind(sigc::hide<0>(sigc::hide<0>(sigc::mem_fun(*this, &InterfaceChooserDialog::response))), 1));
 
-  __bb = blackboard;
+  bb_ = blackboard;
 
-  InterfaceInfoList *infl = __bb->list(type_pattern, id_pattern);
+  InterfaceInfoList *infl = bb_->list(type_pattern, id_pattern);
   for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i) {
-    Gtk::TreeModel::Row row = *__model->append();
+    Gtk::TreeModel::Row row = *model_->append();
     init_row(row, *i);
   }
   delete infl;
@@ -164,8 +161,8 @@ InterfaceChooserDialog::init(BlackBoard *blackboard,
 /** Destructor. */
 InterfaceChooserDialog::~InterfaceChooserDialog()
 {
-  if (__record) {
-    delete __record;
+  if (record_) {
+    delete record_;
   }
 }
 
@@ -177,11 +174,11 @@ InterfaceChooserDialog::~InterfaceChooserDialog()
 const InterfaceChooserDialog::Record&
 InterfaceChooserDialog::record() const
 {
-  if (!__record) {
+  if (!record_) {
     InterfaceChooserDialog* this_nonconst = const_cast<InterfaceChooserDialog*>(this);
-    this_nonconst->__record = new Record();
+    this_nonconst->record_ = new Record();
   }
-  return *__record;
+  return *record_;
 }
 
 
@@ -195,10 +192,10 @@ InterfaceChooserDialog::record() const
 int
 InterfaceChooserDialog::init_columns()
 {
-  __treeview.append_column("Type", record().type);
-  __treeview.append_column("ID", record().id);
-  __treeview.append_column("Writer?", record().has_writer);
-  __treeview.append_column("Readers", record().num_readers);
+  treeview_.append_column("Type", record().type);
+  treeview_.append_column("ID", record().id);
+  treeview_.append_column("Writer?", record().has_writer);
+  treeview_.append_column("Readers", record().num_readers);
   return 4;
 }
 
@@ -234,7 +231,7 @@ void
 InterfaceChooserDialog::get_selected_interface(Glib::ustring &type,
 					       Glib::ustring &id)
 {
-  const Glib::RefPtr<Gtk::TreeSelection> treesel = __treeview.get_selection();
+  const Glib::RefPtr<Gtk::TreeSelection> treesel = treeview_.get_selection();
   const Gtk::TreeModel::iterator iter = treesel->get_selected();
   if (iter) {
     const Gtk::TreeModel::Row row = *iter;
@@ -259,17 +256,17 @@ InterfaceChooserDialog::get_selected_interface(Glib::ustring &type,
 fawkes::Interface *
 InterfaceChooserDialog::run_and_open_for_reading()
 {
-  if (__bb->is_alive()) throw Exception("BlackBoard is not alive");
+  if (bb_->is_alive()) throw Exception("BlackBoard is not alive");
 
   if ( run() ) {
     try {
       Glib::ustring type;
       Glib::ustring id;
 
-      return __bb->open_for_reading(type.c_str(), id.c_str());
+      return bb_->open_for_reading(type.c_str(), id.c_str());
     } catch (Exception &e) {
       Glib::ustring message = *(e.begin());
-      Gtk::MessageDialog md(__parent, message, /* markup */ false,
+      Gtk::MessageDialog md(parent_, message, /* markup */ false,
 			    Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
 			    /* modal */ true);
       md.set_title("Opening Interface failed");

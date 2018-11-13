@@ -25,9 +25,6 @@
 #include <fvutils/color/rgb.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Convert RGB to RGB with alpha values.
  * This is plain C code without special optimizations.

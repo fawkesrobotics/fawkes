@@ -24,9 +24,6 @@
 #include <syncpoint/syncpoint_manager.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class SyncPointAspectIniFin <aspect/inifins/syncpoint.h>
  * Initializer/finalizer for the SyncPointAspect
@@ -39,7 +36,7 @@ namespace fawkes {
 SyncPointAspectIniFin::SyncPointAspectIniFin(SyncPointManager *syncpoint_manager)
 : AspectIniFin("SyncPointAspect")
 {
-  __syncpoint_manager = syncpoint_manager;
+  syncpoint_manager_ = syncpoint_manager;
 }
 
 void
@@ -53,7 +50,7 @@ SyncPointAspectIniFin::init(Thread *thread)
         "has not. ", thread->name());
   }
 
-  syncpoint_thread->init_SyncPointAspect(thread, __syncpoint_manager);
+  syncpoint_thread->init_SyncPointAspect(thread, syncpoint_manager_);
 
 }
 
@@ -68,7 +65,7 @@ SyncPointAspectIniFin::finalize(Thread *thread)
         "has not. ", thread->name());
   }
 
-  syncpoint_thread->finalize_SyncPointAspect(thread, __syncpoint_manager);
+  syncpoint_thread->finalize_SyncPointAspect(thread, syncpoint_manager_);
 
 }
 

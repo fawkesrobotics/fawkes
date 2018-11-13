@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_INIFINS_LOGGER_H_
-#define __ASPECT_INIFINS_LOGGER_H_
+#ifndef _ASPECT_INIFINS_LOGGER_H_
+#define _ASPECT_INIFINS_LOGGER_H_
 
 #include <aspect/inifins/inifin.h>
 #include <aspect/logger.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class LoggerEmployer;
 
@@ -43,7 +40,7 @@ class LoggerAspectIniFin : public AspectIniFin
   virtual void finalize(Thread *thread);
 
  private:
-  LoggerEmployer      *__employer;
+  LoggerEmployer      *employer_;
 };
 
 } // end namespace fawkes

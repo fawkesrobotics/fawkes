@@ -68,22 +68,22 @@ BBLogFile::BBLogFile(const char *filename, fawkes::Interface *interface,
   ctor(filename, do_sanity_check);
 
   if (interface) {
-    __instance_factory = NULL;
-    __interface = interface;
-    if ((strcmp(__interface->type(), __interface_type) != 0) ||
-	(strcmp(__interface->id(), __interface_id) != 0)) {
-      fclose(__f);
-      free(__filename);
-      free(__scenario);
-      free(__interface_type);
-      free(__interface_id);
+    instance_factory_ = NULL;
+    interface_ = interface;
+    if ((strcmp(interface_->type(), interface_type_) != 0) ||
+	(strcmp(interface_->id(), interface_id_) != 0)) {
+      fclose(f_);
+      free(filename_);
+      free(scenario_);
+      free(interface_type_);
+      free(interface_id_);
       throw Exception("Interface UID %s does not match expected %s:%s",
-		      __interface->uid(), __interface_type, __interface_id);
+		      interface_->uid(), interface_type_, interface_id_);
     }
   } else {
-    __instance_factory = new BlackBoardInstanceFactory();
-    __interface = __instance_factory->new_interface_instance(__interface_type,
-							     __interface_id);
+    instance_factory_ = new BlackBoardInstanceFactory();
+    interface_ = instance_factory_->new_interface_instance(interface_type_,
+							     interface_id_);
   }
 }
 
@@ -102,54 +102,54 @@ BBLogFile::BBLogFile(const char *filename, bool do_sanity_check)
 {
   ctor(filename, do_sanity_check);
 
-  __instance_factory = NULL;
-  __interface        = NULL;
+  instance_factory_ = NULL;
+  interface_        = NULL;
 }
 
 
 void
 BBLogFile::ctor(const char *filename, bool do_sanity_check)
 {
-  __f = fopen(filename, "r");
-  if (!__f) {
+  f_ = fopen(filename, "r");
+  if (!f_) {
     throw CouldNotOpenFileException(filename, errno);
   }
 
-  __filename = strdup(filename);
-  __header   = (bblog_file_header *)malloc(sizeof(bblog_file_header));
+  filename_ = strdup(filename);
+  header_   = (bblog_file_header *)malloc(sizeof(bblog_file_header));
 
   try {
     read_file_header();
     if (do_sanity_check)  sanity_check();
   } catch (Exception &e) {
-    free(__filename);
-    free(__scenario);
-    free(__interface_type);
-    free(__interface_id);
-    fclose(__f);
+    free(filename_);
+    free(scenario_);
+    free(interface_type_);
+    free(interface_id_);
+    fclose(f_);
     throw;
   }
 
-  __ifdata = malloc(__header->data_size);
+  ifdata_ = malloc(header_->data_size);
 }
 
 /** Destructor. */
 BBLogFile::~BBLogFile()
 {
-  if (__instance_factory) {
-    __instance_factory->delete_interface_instance(__interface);
-    delete __instance_factory;
+  if (instance_factory_) {
+    instance_factory_->delete_interface_instance(interface_);
+    delete instance_factory_;
   }
 
-  fclose(__f);
+  fclose(f_);
 
-  free(__filename);
-  free(__scenario);
-  free(__interface_type);
-  free(__interface_id);
+  free(filename_);
+  free(scenario_);
+  free(interface_type_);
+  free(interface_id_);
 
-  free(__header);
-  free(__ifdata);
+  free(header_);
+  free(ifdata_);
 }
 
 
@@ -159,13 +159,13 @@ BBLogFile::read_file_header()
 {
   uint32_t magic;
   uint32_t version;
-  if ((fread(&magic, sizeof(uint32_t), 1, __f) == 1) &&
-      (fread(&version, sizeof(uint32_t), 1, __f) == 1) ) {
+  if ((fread(&magic, sizeof(uint32_t), 1, f_) == 1) &&
+      (fread(&version, sizeof(uint32_t), 1, f_) == 1) ) {
     if ( (ntohl(magic) == BBLOGGER_FILE_MAGIC) &&
 	 (ntohl(version) == BBLOGGER_FILE_VERSION) ) {
-      ::rewind(__f);
-      if (fread(__header, sizeof(bblog_file_header), 1, __f) != 1) {
-	throw FileReadException(__filename, errno, "Failed to read file header");
+      ::rewind(f_);
+      if (fread(header_, sizeof(bblog_file_header), 1, f_) != 1) {
+	throw FileReadException(filename_, errno, "Failed to read file header");
       }
     } else {
       throw Exception("File magic/version %X/%u does not match (expected %X/%u)",
@@ -173,14 +173,14 @@ BBLogFile::read_file_header()
 		      BBLOGGER_FILE_VERSION, BBLOGGER_FILE_MAGIC);
     }
   } else {
-    throw Exception(__filename, errno, "Failed to read magic/version from file");
+    throw Exception(filename_, errno, "Failed to read magic/version from file");
   }
 
-  __scenario = strndup(__header->scenario, BBLOG_SCENARIO_SIZE);
-  __interface_type = strndup(__header->interface_type, BBLOG_INTERFACE_TYPE_SIZE);
-  __interface_id = strndup(__header->interface_id, BBLOG_INTERFACE_ID_SIZE);
+  scenario_ = strndup(header_->scenario, BBLOG_SCENARIO_SIZE);
+  interface_type_ = strndup(header_->interface_type, BBLOG_INTERFACE_TYPE_SIZE);
+  interface_id_ = strndup(header_->interface_id, BBLOG_INTERFACE_ID_SIZE);
 
-  __start_time.set_time(__header->start_time_sec, __header->start_time_usec);
+  start_time_.set_time(header_->start_time_sec, header_->start_time_usec);
 }
 
 
@@ -194,37 +194,37 @@ BBLogFile::read_file_header()
 void
 BBLogFile::sanity_check()
 {
-  if (__header->num_data_items == 0) {
-    Exception e("File %s does not specify number of data items", __filename);
+  if (header_->num_data_items == 0) {
+    Exception e("File %s does not specify number of data items", filename_);
     e.set_type_id("bblogfile-num-items-zero");
     throw e;
   }
 
   struct stat fs;
-  if (fstat(fileno(__f), &fs) != 0) {
-    Exception e(errno, "Failed to stat file %s", __filename);
+  if (fstat(fileno(f_), &fs) != 0) {
+    Exception e(errno, "Failed to stat file %s", filename_);
     e.set_type_id("bblogfile-stat-failed");
     throw e;
   }
 
   long int expected_size = sizeof(bblog_file_header)
-    + (size_t)__header->num_data_items * __header->data_size
-    + (size_t)__header->num_data_items * sizeof(bblog_entry_header);
+    + (size_t)header_->num_data_items * header_->data_size
+    + (size_t)header_->num_data_items * sizeof(bblog_entry_header);
   if (expected_size != fs.st_size) {
     Exception e("Size of file %s does not match expectation "
 		"(actual: %li, actual: %li)",
-		__filename, expected_size, (long int)fs.st_size);
+		filename_, expected_size, (long int)fs.st_size);
     e.set_type_id("bblogfile-file-size-mismatch");
     throw e;
   }
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-  if (__header->endianess == 1)
+#if BYTE_ORDER_ == LITTLE_ENDIAN_
+  if (header_->endianess == 1)
 #else
-  if (__header->endianess == 0)
+  if (header_->endianess == 0)
 #endif
   {
-    Exception e("File %s has incompatible endianess", __filename);
+    Exception e("File %s has incompatible endianess", filename_);
     e.set_type_id("bblogfile-endianess-mismatch");
     throw e;
   }
@@ -237,9 +237,9 @@ void
 BBLogFile::read_index(unsigned int index)
 {
   long offset = sizeof(bblog_file_header)
-    + (sizeof(bblog_entry_header) + __header->data_size) * index;
+    + (sizeof(bblog_entry_header) + header_->data_size) * index;
 
-  if (fseek(__f, offset, SEEK_SET) != 0) {
+  if (fseek(f_, offset, SEEK_SET) != 0) {
     throw Exception(errno, "Cannot seek to index %u", index);
   }
 
@@ -253,10 +253,10 @@ BBLogFile::read_index(unsigned int index)
 void
 BBLogFile::rewind()
 {
-  if (fseek(__f, sizeof(bblog_file_header), SEEK_SET) != 0) {
+  if (fseek(f_, sizeof(bblog_file_header), SEEK_SET) != 0) {
     throw Exception(errno, "Cannot reset file");
   }
-  __entry_offset.set_time(0, 0);
+  entry_offset_.set_time(0, 0);
 }
 
 
@@ -267,11 +267,11 @@ bool
 BBLogFile::has_next()
 {
   // we always re-test to support continuous file watching
-  clearerr(__f);
-  if (getc(__f) == EOF) {
+  clearerr(f_);
+  if (getc(f_) == EOF) {
     return false;
   } else {
-    fseek(__f, -1, SEEK_CUR);
+    fseek(f_, -1, SEEK_CUR);
     return true;
   }
 }
@@ -285,10 +285,10 @@ BBLogFile::read_next()
 {
   bblog_entry_header entryh;
 
-  if ( (fread(&entryh, sizeof(bblog_entry_header), 1, __f) == 1) &&
-       (fread(__ifdata, __header->data_size, 1, __f) == 1) ) {
-    __entry_offset.set_time(entryh.rel_time_sec, entryh.rel_time_usec);
-    __interface->set_from_chunk(__ifdata);
+  if ( (fread(&entryh, sizeof(bblog_entry_header), 1, f_) == 1) &&
+       (fread(ifdata_, header_->data_size, 1, f_) == 1) ) {
+    entry_offset_.set_time(entryh.rel_time_sec, entryh.rel_time_usec);
+    interface_->set_from_chunk(ifdata_);
   } else {
     throw Exception("Cannot read interface data");
   }
@@ -305,7 +305,7 @@ BBLogFile::set_num_entries(size_t num_entries)
 {
 #if _POSIX_MAPPED_FILES
   void *h = mmap(NULL, sizeof(bblog_file_header), PROT_WRITE, MAP_SHARED,
-		   fileno(__f), 0);
+		   fileno(f_), 0);
   if (h == MAP_FAILED) {
     throw Exception(errno, "Failed to mmap log, not updating number of data items");
   } else {
@@ -338,33 +338,33 @@ BBLogFile::repair_file(const char *filename)
 void
 BBLogFile::repair()
 {
-  FILE *f = freopen(__filename, "r+", __f);
+  FILE *f = freopen(filename_, "r+", f_);
   if (! f) {
-    throw Exception("Reopening file %s with new mode failed", __filename);
+    throw Exception("Reopening file %s with new mode failed", filename_);
   }
-  __f = f;
+  f_ = f;
 
   bool repair_done = false;
 
   Exception success("Successfully repaired file");
   success.set_type_id("repair-success");
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-  if (__header->endianess == 1)
+#if BYTE_ORDER_ == LITTLE_ENDIAN_
+  if (header_->endianess == 1)
 #else
-  if (__header->endianess == 0)
+  if (header_->endianess == 0)
 #endif
   {
     throw Exception("File %s has incompatible endianess. Cannot repair.",
-		    __filename);
+		    filename_);
   }
 
   struct stat fs;
-  if (fstat(fileno(__f), &fs) != 0) {
-    throw Exception(errno, "Failed to stat file %s", __filename);
+  if (fstat(fileno(f_), &fs) != 0) {
+    throw Exception(errno, "Failed to stat file %s", filename_);
   }
 
-  size_t entry_size = sizeof(bblog_entry_header) + __header->data_size;
+  size_t entry_size = sizeof(bblog_entry_header) + header_->data_size;
   size_t all_entries_size = fs.st_size - sizeof(bblog_file_header);
   size_t num_entries = all_entries_size / entry_size;
   size_t extra_bytes = all_entries_size % entry_size;
@@ -372,34 +372,34 @@ BBLogFile::repair()
   if (extra_bytes != 0) {
     success.append("FIXING: errorneous bytes at end of file, "
 		   "truncating by %zu b", extra_bytes);
-    if (ftruncate(fileno(__f), fs.st_size - extra_bytes) == -1) {
-      throw Exception(errno, "Failed to truncate file %s", __filename);
+    if (ftruncate(fileno(f_), fs.st_size - extra_bytes) == -1) {
+      throw Exception(errno, "Failed to truncate file %s", filename_);
     }
     all_entries_size -= extra_bytes;
     extra_bytes = 0;
-    if (fstat(fileno(__f), &fs) != 0) {
+    if (fstat(fileno(f_), &fs) != 0) {
       throw Exception(errno, "Failed to update information of file %s "
-		      "after truncate", __filename);
+		      "after truncate", filename_);
     }
     repair_done = true;
   }
-  if (__header->num_data_items == 0) {
+  if (header_->num_data_items == 0) {
     success.append("FIXING: header of file %s has 0 data items, setting to %zu.",
-		   __filename, num_entries);
+		   filename_, num_entries);
     set_num_entries(num_entries);
     repair_done = true;
-  } else if (__header->num_data_items != num_entries) {
+  } else if (header_->num_data_items != num_entries) {
     success.append("FIXING: header has %u data items, but expecting %zu, setting",
-		   __header->num_data_items, num_entries);
+		   header_->num_data_items, num_entries);
     set_num_entries(num_entries);
     repair_done = true;
   }
 
-  f = freopen(__filename, "r", __f);
+  f = freopen(filename_, "r", f_);
   if (! f) {
-    throw Exception("Reopening file %s with read-only mode failed", __filename);
+    throw Exception("Reopening file %s with read-only mode failed", filename_);
   }
-  __f = f;
+  f_ = f;
 
   if (repair_done) {
     throw success;
@@ -417,11 +417,11 @@ BBLogFile::print_info(const char *line_prefix, FILE *outf)
   char interface_hash[BBLOG_INTERFACE_HASH_SIZE * 2 + 1];
 
   for (unsigned int i = 0; i < BBLOG_INTERFACE_HASH_SIZE; ++i) {
-    snprintf(&interface_hash[i*2], 3, "%02X", __header->interface_hash[i]);
+    snprintf(&interface_hash[i*2], 3, "%02X", header_->interface_hash[i]);
   }
 
   struct stat fs;
-  if (fstat(fileno(__f), &fs) != 0) {
+  if (fstat(fileno(f_), &fs) != 0) {
     throw Exception(errno, "Failed to get stat file");
   }
 
@@ -433,14 +433,14 @@ BBLogFile::print_info(const char *line_prefix, FILE *outf)
 	  "%sScenario:   %s\n"
 	  "%sInterface:  %s::%s (%s)\n"
 	  "%sStart time: %s\n",
-	  line_prefix, ntohl(__header->file_version),
-	  (__header->endianess == 1) ? "Big" : "Little",
-	  line_prefix, __header->num_data_items, __header->data_size,
+	  line_prefix, ntohl(header_->file_version),
+	  (header_->endianess == 1) ? "Big" : "Little",
+	  line_prefix, header_->num_data_items, header_->data_size,
 	  line_prefix, sizeof(bblog_file_header), (long int)fs.st_size,
 	  line_prefix,
-	  line_prefix, __scenario,
-	  line_prefix, __interface_type, __interface_id, interface_hash,
-	  line_prefix, __start_time.str());
+	  line_prefix, scenario_,
+	  line_prefix, interface_type_, interface_id_, interface_hash,
+	  line_prefix, start_time_.str());
 
 }
 
@@ -452,10 +452,10 @@ BBLogFile::print_info(const char *line_prefix, FILE *outf)
 void
 BBLogFile::print_entry(FILE *outf)
 {
-  fprintf(outf, "Time Offset: %f\n", __entry_offset.in_sec());
+  fprintf(outf, "Time Offset: %f\n", entry_offset_.in_sec());
 
   InterfaceFieldIterator i;
-  for (i = __interface->fields(); i != __interface->fields_end(); ++i) {
+  for (i = interface_->fields(); i != interface_->fields_end(); ++i) {
     char *typesize;
     if (i.get_length() > 1) {
       if (asprintf(&typesize, "%s[%zu]", i.get_typename(), i.get_length()) == -1) {
@@ -479,7 +479,7 @@ BBLogFile::print_entry(FILE *outf)
 fawkes::Interface *
 BBLogFile::interface()
 {
-  return __interface;
+  return interface_;
 }
 
 
@@ -490,16 +490,16 @@ BBLogFile::interface()
 void
 BBLogFile::set_interface(fawkes::Interface *interface)
 {
-  if ( (strcmp(interface->type(), __interface_type) == 0) &&
-       (strcmp(interface->id(), __interface_id) == 0) &&
-       (memcmp(interface->hash(), __header->interface_hash,
-	       __INTERFACE_HASH_SIZE) == 0) ) {
-    if (__instance_factory) {
-      __instance_factory->delete_interface_instance(__interface);
-      delete __instance_factory;
-      __instance_factory = NULL;
+  if ( (strcmp(interface->type(), interface_type_) == 0) &&
+       (strcmp(interface->id(), interface_id_) == 0) &&
+       (memcmp(interface->hash(), header_->interface_hash,
+	       INTERFACE_HASH_SIZE_) == 0) ) {
+    if (instance_factory_) {
+      instance_factory_->delete_interface_instance(interface_);
+      delete instance_factory_;
+      instance_factory_ = NULL;
     }
-    __interface = interface;
+    interface_ = interface;
   } else {
     throw TypeMismatchException("Interfaces incompatible");
   }
@@ -513,7 +513,7 @@ BBLogFile::set_interface(fawkes::Interface *interface)
 const fawkes::Time &
 BBLogFile::entry_offset() const
 {
-  return __entry_offset;
+  return entry_offset_;
 }
 
 
@@ -523,7 +523,7 @@ BBLogFile::entry_offset() const
 uint32_t
 BBLogFile::file_version() const
 {
-  return ntohl(__header->file_version);
+  return ntohl(header_->file_version);
 }
 
 
@@ -533,7 +533,7 @@ BBLogFile::file_version() const
 bool
 BBLogFile::is_big_endian() const
 {
-  return (__header->endianess == 1);
+  return (header_->endianess == 1);
 }
 
 /** Get number of data items in file.
@@ -542,7 +542,7 @@ BBLogFile::is_big_endian() const
 uint32_t
 BBLogFile::num_data_items() const
 {
-  return __header->num_data_items;
+  return header_->num_data_items;
 }
 
 
@@ -552,7 +552,7 @@ BBLogFile::num_data_items() const
 const char *
 BBLogFile::scenario() const
 {
-  return __scenario;
+  return scenario_;
 }
 
 
@@ -562,7 +562,7 @@ BBLogFile::scenario() const
 const char *
 BBLogFile::interface_type() const
 {
-  return __interface_type;
+  return interface_type_;
 }
 
 
@@ -572,7 +572,7 @@ BBLogFile::interface_type() const
 const char *
 BBLogFile::interface_id() const
 {
-  return __interface_id;
+  return interface_id_;
 }
 
 
@@ -583,7 +583,7 @@ BBLogFile::interface_id() const
 unsigned char *
 BBLogFile::interface_hash() const
 {
-  return __header->interface_hash;
+  return header_->interface_hash;
 }
 
 
@@ -593,7 +593,7 @@ BBLogFile::interface_hash() const
 uint32_t
 BBLogFile::data_size()
 {
-  return __header->data_size;
+  return header_->data_size;
 }
 
 
@@ -603,7 +603,7 @@ BBLogFile::data_size()
 fawkes::Time &
 BBLogFile::start_time()
 {
-  return __start_time;
+  return start_time_;
 }
 
 
@@ -614,13 +614,13 @@ unsigned int
 BBLogFile::remaining_entries()
 {
   // we make this so "complicated" to be able to use it from a FAM handler
-  size_t entry_size = sizeof(bblog_entry_header) + __header->data_size;
-  long   curpos     = ftell(__f);
+  size_t entry_size = sizeof(bblog_entry_header) + header_->data_size;
+  long   curpos     = ftell(f_);
   size_t fsize      = file_size();
   ssize_t sizediff  = fsize - curpos;
 
   if (sizediff < 0) {
-    throw Exception("File %s shrank while reading it", __filename);
+    throw Exception("File %s shrank while reading it", filename_);
   }
 
   return sizediff / entry_size;
@@ -633,8 +633,8 @@ size_t
 BBLogFile::file_size() const
 {
   struct stat fs;
-  if (fstat(fileno(__f), &fs) != 0) {
-    Exception e(errno, "Failed to stat file %s", __filename);
+  if (fstat(fileno(f_), &fs) != 0) {
+    Exception e(errno, "Failed to stat file %s", filename_);
     e.set_type_id("bblogfile-stat-failed");
     throw e;
   }

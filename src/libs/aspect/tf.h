@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_TF_H_
-#define __ASPECT_TF_H_
+#ifndef _ASPECT_TF_H_
+#define _ASPECT_TF_H_
 
 #ifndef HAVE_TF
 #  error TF not available. Forgot to add CFLAGS_TF?
@@ -35,9 +35,6 @@ namespace fawkes {
 
   class BlackBoard;
 
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class TransformAspect : public virtual Aspect
 {
@@ -73,9 +70,9 @@ class TransformAspect : public virtual Aspect
   std::map<std::string, tf::TransformPublisher *>  tf_publishers;
 
  private:
-  Mode  __tf_aspect_mode;
-  char *__tf_aspect_frame_id;
-  BlackBoard *__tf_aspect_blackboard;
+  Mode  tf_aspect_mode_;
+  char *tf_aspect_frame_id_;
+  BlackBoard *tf_aspect_blackboard_;
 };
 
 } // end namespace fawkes

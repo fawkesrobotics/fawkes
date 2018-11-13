@@ -35,9 +35,6 @@ using namespace std;
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Maximum pan. */
 const int   SonyEviD100PControl::MAX_PAN       =  1440;
@@ -390,13 +387,13 @@ SonyEviD100PControl::set_zoom_digital_enabled(bool enabled)
 
 
 bool
-SonyEviD100PControl::supports_effect(unsigned int __effect)
+SonyEviD100PControl::supports_effect(unsigned int effect_)
 {
-  if ( __effect == EFFECT_NONE ) {
+  if ( effect_ == EFFECT_NONE ) {
     return true;
   }
 
-  switch (__effect) {
+  switch (effect_) {
   case EFFECT_PASTEL:
   case EFFECT_NEGATIVE:
   case EFFECT_SEPIA:
@@ -414,13 +411,13 @@ SonyEviD100PControl::supports_effect(unsigned int __effect)
 
 
 void
-SonyEviD100PControl::set_effect(unsigned int __effect)
+SonyEviD100PControl::set_effect(unsigned int effect_)
 {
-  this->_effect = __effect;
-  if ( __effect == EFFECT_NONE ) {
+  this->_effect = effect_;
+  if ( effect_ == EFFECT_NONE ) {
     visca->resetEffect();
   }
-  switch (__effect) {
+  switch (effect_) {
   case EFFECT_PASTEL:
     visca->applyEffectPastel();
     break;

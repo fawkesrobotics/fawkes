@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_REALSENSETHREAD_H_
-#define __PLUGINS_REALSENSETHREAD_H_
+#ifndef _PLUGINS_REALSENSETHREAD_H_
+#define _PLUGINS_REALSENSETHREAD_H_
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_IPC_SHM_REGISTRY_H_
-#define __UTILS_IPC_SHM_REGISTRY_H_
+#ifndef _UTILS_IPC_SHM_REGISTRY_H_
+#define _UTILS_IPC_SHM_REGISTRY_H_
 
 #include <semaphore.h>
 #include <list>
@@ -33,9 +33,6 @@
 #define USER_SHM_NAME "/fawkes-shmem-registry-%s"
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class SharedMemoryRegistry
 {
@@ -67,12 +64,12 @@ class SharedMemoryRegistry
   } MemInfo;
   /// @endcond
 
-  bool  __master;
-  int   __shmfd;
-  char *__shm_name;
+  bool  master_;
+  int   shmfd_;
+  char *shm_name_;
 
-  sem_t   *__sem;
-  MemInfo *__meminfo;
+  sem_t   *sem_;
+  MemInfo *meminfo_;
 };
 
 

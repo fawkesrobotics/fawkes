@@ -35,9 +35,6 @@
 using namespace firevision;
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class WebviewJpegStreamProducer::Buffer "jpeg_stream_producer.h"
  * Image buffer passed to stream subscribers.

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_MONGODB_ASPECT_MONGODB_CONNCREATOR_H_
-#define __PLUGINS_MONGODB_ASPECT_MONGODB_CONNCREATOR_H_
+#ifndef _PLUGINS_MONGODB_ASPECT_MONGODB_CONNCREATOR_H_
+#define _PLUGINS_MONGODB_ASPECT_MONGODB_CONNCREATOR_H_
 
 #include <string>
 
@@ -30,9 +30,6 @@ namespace mongo {
 }
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class MongoDBConnCreator <plugins/mongodb/aspect/mongodb_conncreator.h>
  * Interface for a MongoDB connection creator.

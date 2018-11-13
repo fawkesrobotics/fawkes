@@ -46,9 +46,6 @@
 #include <yaml-cpp/exceptions.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 #define YAML_FILE_REGEX "^[a-zA-Z0-9_-]+\\.yaml$"
 
@@ -318,8 +315,8 @@ YamlConfiguration::YamlConfiguration()
 	write_pending_ = false;
 	write_pending_mutex_ = new Mutex();
 
-	__sysconfdir   = NULL;
-	__userconfdir  = NULL;
+	sysconfdir_   = NULL;
+	userconfdir_  = NULL;
 }
 
 /** Constructor.
@@ -339,17 +336,17 @@ YamlConfiguration::YamlConfiguration(const char *sysconfdir,
 	write_pending_ = false;
 	write_pending_mutex_ = new Mutex();
 
-	__sysconfdir   = strdup(sysconfdir);
+	sysconfdir_   = strdup(sysconfdir);
 
 	if (userconfdir != NULL) {
-		__userconfdir  = strdup(userconfdir);
+		userconfdir_  = strdup(userconfdir);
 	} else {
 		const char *homedir = getenv("HOME");
 		if (homedir == NULL) {
-			__userconfdir = strdup(sysconfdir);
+			userconfdir_ = strdup(sysconfdir);
 		} else {
-			if (asprintf(&__userconfdir, "%s/%s", homedir, USERDIR) == -1) {
-				__userconfdir = strdup(sysconfdir);
+			if (asprintf(&userconfdir_, "%s/%s", homedir, USERDIR) == -1) {
+				userconfdir_ = strdup(sysconfdir);
 			}
 		}
 	}
@@ -368,8 +365,8 @@ YamlConfiguration::~YamlConfiguration()
 		delete fam_thread_;
 	}
 
-	if (__sysconfdir)   free(__sysconfdir);
-	if (__userconfdir)  free(__userconfdir);
+	if (sysconfdir_)   free(sysconfdir_);
+	if (userconfdir_)  free(userconfdir_);
 	delete mutex;
 	delete write_pending_mutex_;
 }
@@ -388,7 +385,7 @@ YamlConfiguration::load(const char *file_path)
 		filename = file_path;
 	} else {
 
-		const char *try_paths[] = {__userconfdir, __sysconfdir};
+		const char *try_paths[] = {userconfdir_, sysconfdir_};
 		int try_paths_len = 2;
 
 
@@ -405,7 +402,7 @@ YamlConfiguration::load(const char *file_path)
 		}
 		if (filename == "") {
 			throw Exception("YamlConfig: cannot find configuration file %s/%s or %s/%s",
-			                __userconfdir, file_path, __sysconfdir, file_path);
+			                userconfdir_, file_path, sysconfdir_, file_path);
 		}
 	}
 

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROS_TALKERPUB_THREAD_H_
-#define __PLUGINS_ROS_TALKERPUB_THREAD_H_
+#ifndef _PLUGINS_ROS_TALKERPUB_THREAD_H_
+#define _PLUGINS_ROS_TALKERPUB_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
@@ -53,7 +53,7 @@ class ROSTalkerPubThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  ros::Publisher __pub;
+  ros::Publisher pub_;
 };
 
 #endif

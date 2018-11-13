@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CAMS_NET_H_
-#define __FIREVISION_CAMS_NET_H_
+#ifndef _FIREVISION_CAMS_NET_H_
+#define _FIREVISION_CAMS_NET_H_
 
 #include <fvcams/camera.h>
 #include <fvutils/net/fuse_client_handler.h>
 #include <vector>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class CameraArgumentParser;
 class FuseClient;
@@ -81,30 +78,30 @@ class NetworkCamera : public Camera, public FuseClientHandler
   virtual void fuse_inbound_received(FuseNetworkMessage *m) throw();
 
  private:
-  bool __started;
-  bool __opened;
+  bool started_;
+  bool opened_;
 
-  bool         __connected;
-  unsigned int __local_version;
-  unsigned int __remote_version;
+  bool         connected_;
+  unsigned int local_version_;
+  unsigned int remote_version_;
 
-  char               *__host;
-  unsigned short      __port;
-  char               *__image_id;
+  char               *host_;
+  unsigned short      port_;
+  char               *image_id_;
 
-  bool __get_jpeg;
-  JpegImageDecompressor *__decompressor;
-  unsigned char      *__decompressed_buffer;
-  unsigned int        __last_width;
-  unsigned int        __last_height;
+  bool get_jpeg_;
+  JpegImageDecompressor *decompressor_;
+  unsigned char      *decompressed_buffer_;
+  unsigned int        last_width_;
+  unsigned int        last_height_;
 
-  FuseClient         *__fusec;
-  FuseImageContent   *__fuse_image;
-  FuseNetworkMessage *__fuse_message;
+  FuseClient         *fusec_;
+  FuseImageContent   *fuse_image_;
+  FuseNetworkMessage *fuse_message_;
 
-  FUSE_imageinfo_t   *__fuse_imageinfo;
+  FUSE_imageinfo_t   *fuse_imageinfo_;
 
-  std::vector<FUSE_imageinfo_t> __image_list;
+  std::vector<FUSE_imageinfo_t> image_list_;
 };
 
 } // end namespace firevision

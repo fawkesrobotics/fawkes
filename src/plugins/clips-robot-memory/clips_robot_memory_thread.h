@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_CLIPS_ROBOT_MEMORYTHREAD_H_
-#define __PLUGINS_CLIPS_ROBOT_MEMORYTHREAD_H_
+#ifndef _PLUGINS_CLIPS_ROBOT_MEMORYTHREAD_H_
+#define _PLUGINS_CLIPS_ROBOT_MEMORYTHREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/logging.h>

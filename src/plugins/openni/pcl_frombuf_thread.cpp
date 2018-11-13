@@ -58,20 +58,20 @@ OpenNiPclOnlyThread::~OpenNiPclOnlyThread()
 void
 OpenNiPclOnlyThread::init()
 {
-  __pcl_buf = new SharedMemoryImageBuffer("openni-pointcloud");
+  pcl_buf_ = new SharedMemoryImageBuffer("openni-pointcloud");
 
 
-  __width  = __pcl_buf->width();
-  __height = __pcl_buf->height();
+  width_  = pcl_buf_->width();
+  height_ = pcl_buf_->height();
 
-  __pcl = new pcl::PointCloud<pcl::PointXYZ>();
-  __pcl->is_dense = false;
-  __pcl->width    = __width;
-  __pcl->height   = __height;
-  __pcl->points.resize((size_t)__width * (size_t)__height);
-  __pcl->header.frame_id = config->get_string("/plugins/openni/frame/depth");
+  pcl_ = new pcl::PointCloud<pcl::PointXYZ>();
+  pcl_->is_dense = false;
+  pcl_->width    = width_;
+  pcl_->height   = height_;
+  pcl_->points.resize((size_t)width_ * (size_t)height_);
+  pcl_->header.frame_id = config->get_string("/plugins/openni/frame/depth");
 
-  pcl_manager->add_pointcloud("openni-pointcloud", __pcl);
+  pcl_manager->add_pointcloud("openni-pointcloud", pcl_);
 }
 
 
@@ -80,30 +80,30 @@ OpenNiPclOnlyThread::finalize()
 {
   pcl_manager->remove_pointcloud("openni-pointcloud");
 
-  delete __pcl_buf;
+  delete pcl_buf_;
 }
 
 
 void
 OpenNiPclOnlyThread::loop()
 {
-  if ((__pcl_buf->num_attached() > 1) || (__pcl.use_count() > 1))
+  if ((pcl_buf_->num_attached() > 1) || (pcl_.use_count() > 1))
   {
-    __pcl_buf->lock_for_read();
-    fawkes::Time capture_time = __pcl_buf->capture_time();
+    pcl_buf_->lock_for_read();
+    fawkes::Time capture_time = pcl_buf_->capture_time();
 
-    if (__last_capture_time != capture_time) {
-      __last_capture_time = capture_time;
+    if (last_capture_time_ != capture_time) {
+      last_capture_time_ = capture_time;
 
-      pcl_point_t *pclbuf = (pcl_point_t *)__pcl_buf->buffer();
+      pcl_point_t *pclbuf = (pcl_point_t *)pcl_buf_->buffer();
 
-      pcl::PointCloud<pcl::PointXYZ> &pcl = **__pcl;
+      pcl::PointCloud<pcl::PointXYZ> &pcl = **pcl_;
       pcl.header.seq += 1;
-      pcl_utils::set_time(__pcl, capture_time);
+      pcl_utils::set_time(pcl_, capture_time);
 
       unsigned int idx = 0;
-      for (unsigned int h = 0; h < __height; ++h) {
-        for (unsigned int w = 0; w < __width; ++w, ++idx, ++pclbuf) {
+      for (unsigned int h = 0; h < height_; ++h) {
+        for (unsigned int w = 0; w < width_; ++w, ++idx, ++pclbuf) {
           // Fill in XYZ
           pcl.points[idx].x = pclbuf->x;
           pcl.points[idx].y = pclbuf->y;
@@ -112,6 +112,6 @@ OpenNiPclOnlyThread::loop()
       }
     }
 
-    __pcl_buf->unlock();
+    pcl_buf_->unlock();
   }
 }

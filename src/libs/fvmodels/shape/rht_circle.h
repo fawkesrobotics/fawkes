@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_RHT_CIRCLE_H_
-#define __FIREVISION_RHT_CIRCLE_H_
+#ifndef _FIREVISION_RHT_CIRCLE_H_
+#define _FIREVISION_RHT_CIRCLE_H_
 
 #include <vector>
 #include <iostream>
@@ -34,9 +34,6 @@
 #include <fvmodels/shape/accumulators/ht_accum.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ROI;
 
@@ -69,5 +66,5 @@ class RhtCircleModel: public ShapeModel
 
 } // end namespace firevision
 
-#endif // __FIREVISION_RHT_CIRCLE_H_
+#endif // FIREVISION_RHT_CIRCLE_H__
 

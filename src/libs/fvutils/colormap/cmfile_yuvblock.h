@@ -21,15 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_COLORMAP_CMFILE_YUVBLOCK_H_
-#define __FIREVISION_FVUTILS_COLORMAP_CMFILE_YUVBLOCK_H_
+#ifndef _FIREVISION_FVUTILS_COLORMAP_CMFILE_YUVBLOCK_H_
+#define _FIREVISION_FVUTILS_COLORMAP_CMFILE_YUVBLOCK_H_
 
 #include <fvutils/colormap/cmfile_block.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class YuvColormap;
 
@@ -53,9 +50,9 @@ class ColormapFileYuvBlock : public ColormapFileBlock
 
  private:
 
-  YuvColormap  *__cm;
-  unsigned int  __level;
-  cmfile_yuvblock_header_t *__header;
+  YuvColormap  *cm_;
+  unsigned int  level_;
+  cmfile_yuvblock_header_t *header_;
 };
 
 } // end namespace firevision

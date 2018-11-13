@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PERCEPTION_BUMBLEBEE2_BUMBLEBEE2_THREAD_H_
-#define __PLUGINS_PERCEPTION_BUMBLEBEE2_BUMBLEBEE2_THREAD_H_
+#ifndef _PLUGINS_PERCEPTION_BUMBLEBEE2_BUMBLEBEE2_THREAD_H_
+#define _PLUGINS_PERCEPTION_BUMBLEBEE2_BUMBLEBEE2_THREAD_H_
 
 // must be first for reliable ROS detection
 #include <pcl/point_cloud.h>

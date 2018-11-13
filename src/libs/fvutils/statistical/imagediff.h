@@ -22,15 +22,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_STATISTICAL_IMAGEDIFF_H_
-#define __FIREVISION_FVUTILS_STATISTICAL_IMAGEDIFF_H_
+#ifndef _FIREVISION_FVUTILS_STATISTICAL_IMAGEDIFF_H_
+#define _FIREVISION_FVUTILS_STATISTICAL_IMAGEDIFF_H_
 
 #include <fvmodels/scanlines/scanlinemodel.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ImageDiff {
  public:

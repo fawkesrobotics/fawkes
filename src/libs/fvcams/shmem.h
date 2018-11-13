@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CAMS_SHMEM_H_
-#define __FIREVISION_CAMS_SHMEM_H_
+#ifndef _FIREVISION_CAMS_SHMEM_H_
+#define _FIREVISION_CAMS_SHMEM_H_
 
 #include <fvcams/camera.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/ipc/shm_image.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class CameraArgumentParser;
 
@@ -76,15 +73,15 @@ class SharedMemoryCamera : public Camera
  private:
   void init();
 
-  bool          __deep_copy;
-  bool          __opened;
-  char *        __image_id;
+  bool          deep_copy_;
+  bool          opened_;
+  char *        image_id_;
 
-  SharedMemoryImageBuffer  *__shm_buffer;
+  SharedMemoryImageBuffer  *shm_buffer_;
 
-  unsigned char *__deep_buffer;
+  unsigned char *deep_buffer_;
 
-  fawkes::Time *__capture_time;
+  fawkes::Time *capture_time_;
 };
 
 } // end namespace firevision

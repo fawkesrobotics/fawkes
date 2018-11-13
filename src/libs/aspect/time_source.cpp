@@ -25,9 +25,6 @@
 #include <aspect/time_source.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class TimeSourceAspect <aspect/time_source.h>
  * Thread aspect that allows to provide a time source to the Fawkes clock.
@@ -48,7 +45,7 @@ namespace fawkes {
 TimeSourceAspect::TimeSourceAspect(TimeSource *timesource)
 {
   add_aspect("TimeSourceAspect");
-  __time_source = timesource;
+  time_source_ = timesource;
 }
 
 /** Virtual empty destructor. */
@@ -65,7 +62,7 @@ TimeSourceAspect::~TimeSourceAspect()
 TimeSource *
 TimeSourceAspect::get_timesource() const
 {
-  return __time_source;
+  return time_source_;
 }
 
 } // end namespace fawkes

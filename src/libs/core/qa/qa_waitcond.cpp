@@ -46,35 +46,35 @@ class ExampleWaitCondThread : public Thread
 			WaitCondition *waitcond, unsigned int sleep_time)
     : Thread(tname.c_str(), Thread::OPMODE_CONTINUOUS)
   {
-    __mode       = mode;
-    __waitcond   = waitcond;
-    __sleep_time = sleep_time;
+    mode_       = mode;
+    waitcond_   = waitcond;
+    sleep_time_ = sleep_time;
   }
 
   virtual void loop()
   {
-    if ( __mode == WAITER ) {
-      usleep( __sleep_time );
+    if ( mode_ == WAITER ) {
+      usleep( sleep_time_ );
       cout << name() << ": Waiting for waker" << endl;
       try {
-	__waitcond->wait();
+	waitcond_->wait();
 	cout << name() << ": Woken up" << endl;
       } catch (Exception &e) {
 	cout << name() << ": EXCEPTION" << endl;
 	e.print_trace();
       }
     } else { // WAKER
-      usleep( __sleep_time );
+      usleep( sleep_time_ );
       cout << name() << ": Waking waiter" << endl;
-      __waitcond->wake_all();
+      waitcond_->wake_all();
       cout << name() << ": Woke waiter" << endl;
     }
   }
 
  private:
-  threadmode_t   __mode;
-  WaitCondition *__waitcond;
-  unsigned int   __sleep_time;
+  threadmode_t   mode_;
+  WaitCondition *waitcond_;
+  unsigned int   sleep_time_;
 
 };
 

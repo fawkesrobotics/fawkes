@@ -22,9 +22,6 @@
 #include <navgraph/constraints/edge_constraint.h>
 
 namespace fawkes{
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class NavGraphEdgeConstraint <navgraph/constraints/edge_constraint.h>
  * Constraint that can be queried to check if an edge is blocked.

@@ -27,9 +27,6 @@
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class GossipAspectIniFin <plugins/gossip/aspect/gossip_inifin.h>
  * GossipAspect initializer/finalizer.

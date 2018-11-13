@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_MATH_PROBDIST_H_
-#define __UTILS_MATH_PROBDIST_H_
+#ifndef _UTILS_MATH_PROBDIST_H_
+#define _UTILS_MATH_PROBDIST_H_
 
 #include <cmath>
 
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** The normal distribution
  * @param diff the differance: (x - mu) for the mean mu and the randomvariable x

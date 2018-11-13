@@ -30,5 +30,5 @@ class BeepController
   void beep_off();
 
  private:
-  bool __disable_beeping;
+  bool disable_beeping_;
 };

@@ -59,11 +59,11 @@ MongoRRDThread::~MongoRRDThread()
 void
 MongoRRDThread::init()
 {
-  __timewait = new TimeWait(clock, 10 * 1000000);
+  timewait_ = new TimeWait(clock, 10 * 1000000);
 
-  __opcounters_graph = NULL;
-  __memory_graph = NULL;
-  __indexes_graph = NULL;
+  opcounters_graph_ = NULL;
+  memory_graph_ = NULL;
+  indexes_graph_ = NULL;
 
   std::vector<RRDDataSource> rrds;
   rrds.push_back(RRDDataSource("insert",  RRDDataSource::COUNTER));
@@ -72,31 +72,31 @@ MongoRRDThread::init()
   rrds.push_back(RRDDataSource("delete",  RRDDataSource::COUNTER));
   rrds.push_back(RRDDataSource("getmore", RRDDataSource::COUNTER));
   rrds.push_back(RRDDataSource("command", RRDDataSource::COUNTER));
-  __opcounters_rrd = new RRDDefinition("opcounters", rrds);
+  opcounters_rrd_ = new RRDDefinition("opcounters", rrds);
 
   rrds.clear();
   rrds.push_back(RRDDataSource("resident", RRDDataSource::GAUGE));
   rrds.push_back(RRDDataSource("virtual", RRDDataSource::GAUGE));
   rrds.push_back(RRDDataSource("mapped", RRDDataSource::GAUGE));
-  __memory_rrd = new RRDDefinition("memory", rrds);
+  memory_rrd_ = new RRDDefinition("memory", rrds);
 
   rrds.clear();
   rrds.push_back(RRDDataSource("accesses", RRDDataSource::COUNTER));
   rrds.push_back(RRDDataSource("hits", RRDDataSource::COUNTER));
   rrds.push_back(RRDDataSource("misses", RRDDataSource::COUNTER));
   rrds.push_back(RRDDataSource("resets", RRDDataSource::COUNTER));
-  __indexes_rrd = new RRDDefinition("indexes", rrds);
+  indexes_rrd_ = new RRDDefinition("indexes", rrds);
 
   rrds.clear();
   rrds.push_back(RRDDataSource("locktime", RRDDataSource::COUNTER));
-  __locks_rrd = new RRDDefinition("locks", rrds);
+  locks_rrd_ = new RRDDefinition("locks", rrds);
 
 
   try {
-    rrd_manager->add_rrd(__opcounters_rrd);
-    rrd_manager->add_rrd(__memory_rrd);
-    rrd_manager->add_rrd(__indexes_rrd);
-    rrd_manager->add_rrd(__locks_rrd);
+    rrd_manager->add_rrd(opcounters_rrd_);
+    rrd_manager->add_rrd(memory_rrd_);
+    rrd_manager->add_rrd(indexes_rrd_);
+    rrd_manager->add_rrd(locks_rrd_);
   } catch (Exception &e) {
     finalize();
     throw;
@@ -107,17 +107,17 @@ MongoRRDThread::init()
   std::vector<RRDGraphElement *> els;
 
   defs.push_back(RRDGraphDataDefinition("insert", RRDArchive::AVERAGE,
-					__opcounters_rrd));
+					opcounters_rrd_));
   defs.push_back(RRDGraphDataDefinition("query", RRDArchive::AVERAGE,
-					__opcounters_rrd));
+					opcounters_rrd_));
   defs.push_back(RRDGraphDataDefinition("update", RRDArchive::AVERAGE,
-					__opcounters_rrd));
+					opcounters_rrd_));
   defs.push_back(RRDGraphDataDefinition("delete", RRDArchive::AVERAGE,
-					__opcounters_rrd));
+					opcounters_rrd_));
   defs.push_back(RRDGraphDataDefinition("getmore", RRDArchive::AVERAGE,
-					__opcounters_rrd));
+					opcounters_rrd_));
   defs.push_back(RRDGraphDataDefinition("command", RRDArchive::AVERAGE,
-					__opcounters_rrd));
+					opcounters_rrd_));
   
   els.push_back(new RRDGraphLine("insert", 1, "FF7200", "Inserts"));
   els.push_back(new RRDGraphGPrint("insert", RRDArchive::LAST,
@@ -167,18 +167,18 @@ MongoRRDThread::init()
   els.push_back(new RRDGraphGPrint("command", RRDArchive::MAX,
 				   "Maximum\\:%8.2lf %s\\n"));
 
-  __opcounters_graph = new RRDGraphDefinition("opcounters", __opcounters_rrd,
+  opcounters_graph_ = new RRDGraphDefinition("opcounters", opcounters_rrd_,
 					      "MongoDB Op Counters", "Ops/sec",
 					      defs, els);
 
 
   defs.clear(); els.clear();
   defs.push_back(RRDGraphDataDefinition("rawresident", RRDArchive::AVERAGE,
-					__memory_rrd, "resident"));
+					memory_rrd_, "resident"));
   defs.push_back(RRDGraphDataDefinition("rawvirtual", RRDArchive::AVERAGE,
-					__memory_rrd, "virtual"));
+					memory_rrd_, "virtual"));
   defs.push_back(RRDGraphDataDefinition("rawmapped", RRDArchive::AVERAGE,
-					__memory_rrd, "mapped"));
+					memory_rrd_, "mapped"));
   defs.push_back(RRDGraphDataDefinition("resident", "rawresident,1048576,*"));
   defs.push_back(RRDGraphDataDefinition("virtual", "rawvirtual,1048576,*"));
   defs.push_back(RRDGraphDataDefinition("mapped", "rawmapped,1048576,*"));
@@ -207,19 +207,19 @@ MongoRRDThread::init()
   els.push_back(new RRDGraphGPrint("resident", RRDArchive::MAX,
 				   "Maximum\\:%8.2lf %s\\n"));
 
-  __memory_graph = new RRDGraphDefinition("memory", __memory_rrd,
+  memory_graph_ = new RRDGraphDefinition("memory", memory_rrd_,
 					  "MongoDB Memory Usage", "MB",
 					  defs, els);
 
   defs.clear(); els.clear();
   defs.push_back(RRDGraphDataDefinition("accesses", RRDArchive::AVERAGE,
-					__indexes_rrd));
+					indexes_rrd_));
   defs.push_back(RRDGraphDataDefinition("hits", RRDArchive::AVERAGE,
-					__indexes_rrd));
+					indexes_rrd_));
   defs.push_back(RRDGraphDataDefinition("misses", RRDArchive::AVERAGE,
-					__indexes_rrd));
+					indexes_rrd_));
   defs.push_back(RRDGraphDataDefinition("resets", RRDArchive::AVERAGE,
-					__indexes_rrd));
+					indexes_rrd_));
   
   els.push_back(new RRDGraphLine("accesses", 1, "FF7200", "Accesses"));
   els.push_back(new RRDGraphGPrint("accesses", RRDArchive::LAST,
@@ -253,14 +253,14 @@ MongoRRDThread::init()
   els.push_back(new RRDGraphGPrint("resets", RRDArchive::MAX,
 				   "Maximum\\:%8.2lf %s\\n"));
 
-  __indexes_graph = new RRDGraphDefinition("indexes", __indexes_rrd,
+  indexes_graph_ = new RRDGraphDefinition("indexes", indexes_rrd_,
 					    "MongoDB Indexes", "",
 					    defs, els);
 
   try {
-    rrd_manager->add_graph(__opcounters_graph);
-    rrd_manager->add_graph(__memory_graph);
-    rrd_manager->add_graph(__indexes_graph);
+    rrd_manager->add_graph(opcounters_graph_);
+    rrd_manager->add_graph(memory_graph_);
+    rrd_manager->add_graph(indexes_graph_);
   } catch (Exception &e) {
     finalize();
     throw;
@@ -301,14 +301,14 @@ void
 MongoRRDThread::finalize()
 {
   config->rem_change_handler(this);
-  delete __timewait;
+  delete timewait_;
 
-  rrd_manager->remove_rrd(__opcounters_rrd);
-  rrd_manager->remove_rrd(__memory_rrd);
-  rrd_manager->remove_rrd(__indexes_rrd);
-  rrd_manager->remove_rrd(__locks_rrd);
+  rrd_manager->remove_rrd(opcounters_rrd_);
+  rrd_manager->remove_rrd(memory_rrd_);
+  rrd_manager->remove_rrd(indexes_rrd_);
+  rrd_manager->remove_rrd(locks_rrd_);
 
-  for (DbStatsMap::iterator i = __dbstats.begin(); i != __dbstats.end(); ++i) {
+  for (DbStatsMap::iterator i = dbstats_.begin(); i != dbstats_.end(); ++i) {
     DbStatsInfo &info = i->second;
     rrd_manager->remove_rrd(info.rrd);
     delete info.graph1;
@@ -316,22 +316,22 @@ MongoRRDThread::finalize()
     delete info.graph3;
     delete info.rrd;
   }
-  __dbstats.clear();
+  dbstats_.clear();
 
-  delete __opcounters_graph;
-  delete __memory_graph;
-  delete __indexes_graph;
+  delete opcounters_graph_;
+  delete memory_graph_;
+  delete indexes_graph_;
 
-  delete __opcounters_rrd;
-  delete __memory_rrd;
-  delete __indexes_rrd;
-  delete __locks_rrd;
+  delete opcounters_rrd_;
+  delete memory_rrd_;
+  delete indexes_rrd_;
+  delete locks_rrd_;
 }
 
 void
 MongoRRDThread::add_dbstats(const char *path, std::string dbname)
 {
-  if (__dbstats.find(path) != __dbstats.end()) {
+  if (dbstats_.find(path) != dbstats_.end()) {
     throw Exception("Database stats for config %s already monitored", path);
   }
 
@@ -475,7 +475,7 @@ MongoRRDThread::add_dbstats(const char *path, std::string dbname)
     rrd_manager->add_graph(info.graph2);
     rrd_manager->add_graph(info.graph3);
 
-    __dbstats[dbname] = info;
+    dbstats_[dbname] = info;
     logger->log_info(name(), "Started monitoring MongoDB %s",
 		     info.db_name.c_str());
   } catch (Exception &e) {
@@ -492,8 +492,8 @@ MongoRRDThread::add_dbstats(const char *path, std::string dbname)
 void
 MongoRRDThread::remove_dbstats(const char *path)
 {
-  if (__dbstats.find(path) != __dbstats.end()) {
-    DbStatsInfo &info = __dbstats[path];
+  if (dbstats_.find(path) != dbstats_.end()) {
+    DbStatsInfo &info = dbstats_[path];
     rrd_manager->remove_rrd(info.rrd);
     delete info.graph1;
     delete info.graph2;
@@ -502,7 +502,7 @@ MongoRRDThread::remove_dbstats(const char *path)
 
     logger->log_info(name(), "Stopped monitoring MongoDB %s",
 		     info.db_name.c_str());
-    __dbstats.erase(path);
+    dbstats_.erase(path);
   }
 }
 
@@ -510,7 +510,7 @@ MongoRRDThread::remove_dbstats(const char *path)
 void
 MongoRRDThread::loop()
 {
-  __timewait->mark_start();
+  timewait_->mark_start();
 
   try {
     BSONObj reply;
@@ -563,7 +563,7 @@ MongoRRDThread::loop()
 	logger->log_warn(name(), e);
       }
 
-      for (DbStatsMap::iterator i = __dbstats.begin(); i != __dbstats.end(); ++i) {
+      for (DbStatsMap::iterator i = dbstats_.begin(); i != dbstats_.end(); ++i) {
 	BSONObj dbstats;
 	if (mongodb_client->simpleCommand(i->second.db_name, &dbstats, "dbStats"))
 	{
@@ -618,7 +618,7 @@ MongoRRDThread::loop()
     logger->log_warn(name(), "Failed to update MongoDB RRD: %s", e.what());
   }
 
-  __timewait->wait_systime();
+  timewait_->wait_systime();
 }
 
 void

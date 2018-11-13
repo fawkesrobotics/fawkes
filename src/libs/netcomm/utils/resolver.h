@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __NETCOMM_UTILS_RESOLVER_H_
-#define __NETCOMM_UTILS_RESOLVER_H_
+#ifndef _NETCOMM_UTILS_RESOLVER_H_
+#define _NETCOMM_UTILS_RESOLVER_H_
 
 #include <core/utils/lock_hashmap.h>
 #include <core/utils/lock_map.h>
@@ -37,9 +37,6 @@
 #include <utility>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class AvahiThread;
 class NetworkNameResolverThread;
@@ -72,8 +69,8 @@ class NetworkNameResolver
 
  private:
   NetworkNameResolverThread *resolver_thread;
-  HostInfo *__host_info;
-  unsigned int __cache_timeout;
+  HostInfo *host_info_;
+  unsigned int cache_timeout_;
 
   LockHashMap<uint32_t, std::pair<std::string, time_t> >          addr2name_cache;
   LockHashMap<std::string, std::pair<struct sockaddr *, time_t> > name2addr_cache;

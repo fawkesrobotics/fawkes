@@ -19,8 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
  
-#ifndef __ROS_DYNAMIC_RECONFIGURE_THREAD_H_
-#define __ROS_DYNAMIC_RECONFIGURE_THREAD_H_
+#ifndef _ROS_DYNAMIC_RECONFIGURE_THREAD_H_
+#define _ROS_DYNAMIC_RECONFIGURE_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -72,4 +72,4 @@ class RosDynamicReconfigureThread
 
 };
 
-#endif /* __ROS_DYNAMIC_RECONFIGURE_THREAD_H_ */
+#endif /* ROS_DYNAMIC_RECONFIGURE_THREAD_H__ */

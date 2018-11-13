@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_FVUTILS_IPC_SHM_LUT_H_
-#define __FIREVISION_FVUTILS_IPC_SHM_LUT_H_
+#ifndef _FIREVISION_FVUTILS_IPC_SHM_LUT_H_
+#define _FIREVISION_FVUTILS_IPC_SHM_LUT_H_
 
 #include <utils/ipc/shm.h>
 #include <utils/ipc/shm_lister.h>
@@ -33,9 +33,6 @@
 #define FIREVISION_SHM_LUT_MAGIC_TOKEN "FireVision LUT"
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** Shared memory lookup table header struct. */
 typedef struct {
@@ -85,13 +82,13 @@ class SharedMemoryLookupTableHeader : public fawkes::SharedMemoryHeader
   SharedMemoryLookupTable_header_t * raw_header();
 
  private:
-  SharedMemoryLookupTable_header_t *__header;
+  SharedMemoryLookupTable_header_t *header_;
 
-  char          *__lut_id;
-  unsigned int   __width;
-  unsigned int   __height;
-  unsigned int   __depth;
-  unsigned int   __bytes_per_cell;
+  char          *lut_id_;
+  unsigned int   width_;
+  unsigned int   height_;
+  unsigned int   depth_;
+  unsigned int   bytes_per_cell_;
 };
 
 class SharedMemoryLookupTableLister : public fawkes::SharedMemoryLister
@@ -142,14 +139,14 @@ class SharedMemoryLookupTable : public fawkes::SharedMemory
 		   unsigned int bytes_per_cell,
 		   bool is_read_only);
 
-  SharedMemoryLookupTableHeader    *__priv_header;
-  SharedMemoryLookupTable_header_t *__raw_header;
+  SharedMemoryLookupTableHeader    *priv_header_;
+  SharedMemoryLookupTable_header_t *raw_header_;
 
-  char          *__lut_id;
-  unsigned int   __width;
-  unsigned int   __height;
-  unsigned int   __depth;
-  unsigned int   __bytes_per_cell;
+  char          *lut_id_;
+  unsigned int   width_;
+  unsigned int   height_;
+  unsigned int   depth_;
+  unsigned int   bytes_per_cell_;
 
 };
 

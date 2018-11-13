@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_RRD_ASPECT_RRD_H_
-#define __PLUGINS_RRD_ASPECT_RRD_H_
+#ifndef _PLUGINS_RRD_ASPECT_RRD_H_
+#define _PLUGINS_RRD_ASPECT_RRD_H_
 
 #include <aspect/aspect.h>
 #include <plugins/rrd/aspect/rrd_manager.h>
 #include <plugins/rrd/aspect/rrd_descriptions.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class RRDAspectIniFin;
 

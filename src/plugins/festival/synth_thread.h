@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_FESTIVAL_SYNTH_THREAD_H_
-#define __PLUGINS_FESTIVAL_SYNTH_THREAD_H_
+#ifndef _PLUGINS_FESTIVAL_SYNTH_THREAD_H_
+#define _PLUGINS_FESTIVAL_SYNTH_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -61,10 +61,10 @@ class FestivalSynthThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::SpeechSynthInterface   *__speechsynth_if;
+  fawkes::SpeechSynthInterface   *speechsynth_if_;
 
-  std::string __cfg_voice;
-  std::string __cfg_extra_code;
+  std::string cfg_voice_;
+  std::string cfg_extra_code_;
 };
 
 

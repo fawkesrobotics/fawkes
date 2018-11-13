@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_THREAD_PRODUCER_H_
-#define __ASPECT_THREAD_PRODUCER_H_
+#ifndef _ASPECT_THREAD_PRODUCER_H_
+#define _ASPECT_THREAD_PRODUCER_H_
 
 #include <aspect/aspect.h>
 #include <core/threading/thread_collector.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class ThreadProducerAspect : public virtual Aspect
 {

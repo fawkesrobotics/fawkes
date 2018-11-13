@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_STEREO_TRICLOPS_H_
-#define __FIREVISION_STEREO_TRICLOPS_H_
+#ifndef _FIREVISION_STEREO_TRICLOPS_H_
+#define _FIREVISION_STEREO_TRICLOPS_H_
 
 #include <fvstereo/stereo_processor.h>
 #include <sys/types.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Bumblebee2Camera;
 class Camera;

@@ -24,9 +24,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class OccupancyGrid <plugins/colli/utils/occupancygrid/occupancygrid.h>
  * Occupancy Grid class for general use. Many derivated classes

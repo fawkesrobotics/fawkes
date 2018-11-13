@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_MANAGER_H_
-#define __UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_MANAGER_H_
+#ifndef _UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_MANAGER_H_
+#define _UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_MANAGER_H_
 
 #include <map>
 #include <string>
@@ -30,9 +30,6 @@
 #include <utils/system/dynamic_module/module.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Module;
 class Mutex;
@@ -55,11 +52,11 @@ class ModuleManager {
   void set_open_flags(Module::ModuleFlags open_flags);
 
  private:
-  std::map<std::string, Module * > __modules;
+  std::map<std::string, Module * > modules_;
 
-  const char *__module_base_dir;
-  Mutex *__mutex;
-  Module::ModuleFlags __open_flags;
+  const char *module_base_dir_;
+  Mutex *mutex_;
+  Module::ModuleFlags open_flags_;
 
 };
 

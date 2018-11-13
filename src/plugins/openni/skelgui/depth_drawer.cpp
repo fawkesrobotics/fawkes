@@ -52,20 +52,20 @@ SkelGuiDepthDrawer::SkelGuiDepthDrawer(firevision::Camera *depth_cam,
 				       firevision::Camera *label_cam,
 				       unsigned int max_depth)
   : SkelGuiTextureDrawer(depth_cam->pixel_width(), depth_cam->pixel_height()),
-    __max_depth(max_depth)
+    max_depth_(max_depth)
 {
-  __depth_cam      = depth_cam;
-  __label_cam      = label_cam;
-  __rgb_buf        = malloc_buffer(RGB, __width, __height);
-  __histogram      = (float *)malloc(__max_depth * sizeof(float));
-  __show_labels    = true;
+  depth_cam_      = depth_cam;
+  label_cam_      = label_cam;
+  rgb_buf_        = malloc_buffer(RGB, width_, height_);
+  histogram_      = (float *)malloc(max_depth_ * sizeof(float));
+  show_labels_    = true;
 }
 
 /** Destructor. */
 SkelGuiDepthDrawer::~SkelGuiDepthDrawer()
 {
-  free(__rgb_buf);
-  free(__histogram);
+  free(rgb_buf_);
+  free(histogram_);
 }
 
 /** Toggle label state.
@@ -74,7 +74,7 @@ SkelGuiDepthDrawer::~SkelGuiDepthDrawer()
 void
 SkelGuiDepthDrawer::toggle_show_labels()
 {
-  __show_labels = ! __show_labels;
+  show_labels_ = ! show_labels_;
 }
 
 /** Fill texture. */
@@ -82,68 +82,68 @@ void
 SkelGuiDepthDrawer::fill_texture()
 {
   try {
-    __depth_cam->capture();
+    depth_cam_->capture();
   } catch (Exception &e) {
     printf("Capturing depth image failed, exception follows\n");
     e.print_trace();
     throw;
   }
 
-  uint16_t *depth = (uint16_t *)__depth_cam->buffer();
+  uint16_t *depth = (uint16_t *)depth_cam_->buffer();
   unsigned int num_points = 0;
-  memset(__histogram, 0, __max_depth * sizeof(float));
+  memset(histogram_, 0, max_depth_ * sizeof(float));
 
   // base histogram
-  for (unsigned int i = 0; i < __width * __height; ++i) {
+  for (unsigned int i = 0; i < width_ * height_; ++i) {
     if (depth[i] != 0) {
-      ++__histogram[depth[i]];
+      ++histogram_[depth[i]];
       ++num_points;
     }
   }
 
   // accumulative histogram
-  for (unsigned int i = 1; i < __max_depth; ++i) {
-    __histogram[i] += __histogram[i-1];
+  for (unsigned int i = 1; i < max_depth_; ++i) {
+    histogram_[i] += histogram_[i-1];
   }
 
   // set gray value in histogram
   if (num_points > 0) {
-    for (unsigned int i = 1; i < __max_depth; ++i) {
-      __histogram[i] = truncf(256. * (1.f - (__histogram[i] / num_points)));
+    for (unsigned int i = 1; i < max_depth_; ++i) {
+      histogram_[i] = truncf(256. * (1.f - (histogram_[i] / num_points)));
     }
   }
 
-  if (__label_cam) {
+  if (label_cam_) {
     try {
-      __label_cam->capture();
+      label_cam_->capture();
     } catch (Exception &e) {
       printf("Capturing label image failed, exception follows\n");
       e.print_trace();
       throw;
     }
-    uint16_t *l = (uint16_t *)__label_cam->buffer();
+    uint16_t *l = (uint16_t *)label_cam_->buffer();
     uint16_t *d = depth;
-    unsigned char *r = __rgb_buf;
-    for (unsigned int i = 0; i < __width * __height; ++i, ++l, ++d, r += 3) {
+    unsigned char *r = rgb_buf_;
+    for (unsigned int i = 0; i < width_ * height_; ++i, ++l, ++d, r += 3) {
       r[0] = 0; r[1] = 0; r[2] = 0;
       unsigned int color = *l % NUM_USER_COLORS;
-      if (!__show_labels || (*l == 0)) color = NUM_USER_COLORS;
+      if (!show_labels_ || (*l == 0)) color = NUM_USER_COLORS;
 
       if (*d != 0) {
-	float hv = __histogram[*d];
+	float hv = histogram_[*d];
 	r[0] = hv * USER_COLORS[color][0];
 	r[1] = hv * USER_COLORS[color][1];
 	r[2] = hv * USER_COLORS[color][2];
       }
     }
-    __label_cam->dispose_buffer();
+    label_cam_->dispose_buffer();
   } else {
     uint16_t *d = depth;
-    unsigned char *r = __rgb_buf;
-    for (unsigned int i = 0; i < __width * __height; ++i, ++d, r += 3) {
+    unsigned char *r = rgb_buf_;
+    for (unsigned int i = 0; i < width_ * height_; ++i, ++d, r += 3) {
       r[0] = 0; r[1] = 0; r[2] = 0;
       if (*d != 0) {
-	float hv = __histogram[*d];
+	float hv = histogram_[*d];
 	r[0] = hv;
 	r[1] = hv;
 	r[2] = hv;
@@ -151,8 +151,8 @@ SkelGuiDepthDrawer::fill_texture()
     }
   }
 
-  copy_rgb_to_texture(__rgb_buf);
+  copy_rgb_to_texture(rgb_buf_);
 
-  __depth_cam->dispose_buffer();
+  depth_cam_->dispose_buffer();
 }
 

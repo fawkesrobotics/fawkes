@@ -48,9 +48,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class FuseServerClientThread <fvutils/net/fuse_server_client_thread.h>
  * FUSE Server Client Thread.
@@ -68,52 +65,52 @@ namespace firevision {
 FuseServerClientThread::FuseServerClientThread(FuseServer *fuse_server, StreamSocket *s)
   : Thread("FuseServerClientThread")
 {
-  __fuse_server = fuse_server;
-  __socket = s;
-  __jpeg_compressor = NULL;
+  fuse_server_ = fuse_server;
+  socket_ = s;
+  jpeg_compressor_ = NULL;
 
-  __inbound_queue  = new FuseNetworkMessageQueue();
-  __outbound_queue  = new FuseNetworkMessageQueue();
+  inbound_queue_  = new FuseNetworkMessageQueue();
+  outbound_queue_  = new FuseNetworkMessageQueue();
 
   FUSE_greeting_message_t *greetmsg = (FUSE_greeting_message_t *)malloc(sizeof(FUSE_greeting_message_t));
   greetmsg->version = htonl(FUSE_CURRENT_VERSION);
-  __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_GREETING,
+  outbound_queue_->push(new FuseNetworkMessage(FUSE_MT_GREETING,
 						greetmsg, sizeof(FUSE_greeting_message_t)));
 
-  __alive = true;
+  alive_ = true;
 }
 
 
 /** Destructor. */
 FuseServerClientThread::~FuseServerClientThread()
 {
-  delete __socket;
-  delete __jpeg_compressor;
+  delete socket_;
+  delete jpeg_compressor_;
 
-  for (__bit = __buffers.begin(); __bit != __buffers.end(); ++__bit) {
-    delete __bit->second;
+  for (bit_ = buffers_.begin(); bit_ != buffers_.end(); ++bit_) {
+    delete bit_->second;
   }
-  __buffers.clear();
+  buffers_.clear();
 
-  for (__lit = __luts.begin(); __lit != __luts.end(); ++__lit ) {
-    delete __lit->second;
+  for (lit_ = luts_.begin(); lit_ != luts_.end(); ++lit_ ) {
+    delete lit_->second;
   }
-  __luts.clear();
+  luts_.clear();
 
-  while ( ! __inbound_queue->empty() ) {
-    FuseNetworkMessage *m = __inbound_queue->front();
+  while ( ! inbound_queue_->empty() ) {
+    FuseNetworkMessage *m = inbound_queue_->front();
     m->unref();
-    __inbound_queue->pop();
+    inbound_queue_->pop();
   }
 
-  while ( ! __outbound_queue->empty() ) {
-    FuseNetworkMessage *m = __outbound_queue->front();
+  while ( ! outbound_queue_->empty() ) {
+    FuseNetworkMessage *m = outbound_queue_->front();
     m->unref();
-    __outbound_queue->pop();
+    outbound_queue_->pop();
   }
 
-  delete __inbound_queue;
-  delete __outbound_queue;
+  delete inbound_queue_;
+  delete outbound_queue_;
 }
 
 
@@ -121,12 +118,12 @@ FuseServerClientThread::~FuseServerClientThread()
 void
 FuseServerClientThread::send()
 {
-  if ( ! __outbound_queue->empty() ) {
+  if ( ! outbound_queue_->empty() ) {
     try {
-      FuseNetworkTransceiver::send(__socket, __outbound_queue);
+      FuseNetworkTransceiver::send(socket_, outbound_queue_);
     } catch (Exception &e) {
-      __fuse_server->connection_died(this);
-      __alive = false;
+      fuse_server_->connection_died(this);
+      alive_ = false;
     }
   }
 }
@@ -140,11 +137,11 @@ void
 FuseServerClientThread::recv()
 {
   try {
-    FuseNetworkTransceiver::recv(__socket, __inbound_queue);
+    FuseNetworkTransceiver::recv(socket_, inbound_queue_);
   } catch (ConnectionDiedException &e) {
-    __socket->close();
-    __fuse_server->connection_died(this);
-    __alive = false;
+    socket_->close();
+    fuse_server_->connection_died(this);
+    alive_ = false;
   }
 }
 
@@ -169,17 +166,17 @@ FuseServerClientThread::get_shmimgbuf(const char *id)
   tmp_image_id[IMAGE_ID_MAX_LENGTH] = 0;
   strncpy(tmp_image_id, id, IMAGE_ID_MAX_LENGTH);
 
-  if ( (__bit = __buffers.find( tmp_image_id )) == __buffers.end() ) {
+  if ( (bit_ = buffers_.find( tmp_image_id )) == buffers_.end() ) {
     // the buffer has not yet been opened
     try {
       SharedMemoryImageBuffer *b = new SharedMemoryImageBuffer(tmp_image_id);
-      __buffers[tmp_image_id] = b;
+      buffers_[tmp_image_id] = b;
       return b;
     } catch (Exception &e) {
       throw;
     }
   } else {
-    return __bit->second;
+    return bit_->second;
   }
 }
 
@@ -199,39 +196,39 @@ FuseServerClientThread::process_getimage_message(FuseNetworkMessage *m)
     FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_GET_IMAGE_FAILED,
 						    m->payload(), m->payload_size(),
 						    /* copy payload */ true);
-    __outbound_queue->push(nm);
+    outbound_queue_->push(nm);
     return;
   }
 
   if ( irm->format == FUSE_IF_RAW ) {
     FuseImageContent *im = new FuseImageContent(b);
-    __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
+    outbound_queue_->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
   } else if ( irm->format == FUSE_IF_JPEG ) {
-    if ( ! __jpeg_compressor) {
-      __jpeg_compressor = new JpegImageCompressor();
-      __jpeg_compressor->set_compression_destination(ImageCompressor::COMP_DEST_MEM);
+    if ( ! jpeg_compressor_) {
+      jpeg_compressor_ = new JpegImageCompressor();
+      jpeg_compressor_->set_compression_destination(ImageCompressor::COMP_DEST_MEM);
     }
     b->lock_for_read();
-    __jpeg_compressor->set_image_dimensions(b->width(), b->height());
-    __jpeg_compressor->set_image_buffer(b->colorspace(), b->buffer());
-    unsigned char *compressed_buffer = (unsigned char *)malloc(__jpeg_compressor->recommended_compressed_buffer_size());
-    __jpeg_compressor->set_destination_buffer(compressed_buffer, __jpeg_compressor->recommended_compressed_buffer_size());
-    __jpeg_compressor->compress();
+    jpeg_compressor_->set_image_dimensions(b->width(), b->height());
+    jpeg_compressor_->set_image_buffer(b->colorspace(), b->buffer());
+    unsigned char *compressed_buffer = (unsigned char *)malloc(jpeg_compressor_->recommended_compressed_buffer_size());
+    jpeg_compressor_->set_destination_buffer(compressed_buffer, jpeg_compressor_->recommended_compressed_buffer_size());
+    jpeg_compressor_->compress();
     b->unlock();
-    size_t compressed_buffer_size = __jpeg_compressor->compressed_size();
+    size_t compressed_buffer_size = jpeg_compressor_->compressed_size();
     long int sec = 0, usec = 0;
     b->capture_time(&sec, &usec);
     FuseImageContent *im = new FuseImageContent(FUSE_IF_JPEG, b->image_id(),
 						compressed_buffer, compressed_buffer_size,
 						CS_UNKNOWN, b->width(), b->height(),
 						sec, usec);
-    __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
+    outbound_queue_->push(new FuseNetworkMessage(FUSE_MT_IMAGE, im));
     free(compressed_buffer);
   } else {
     FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_GET_IMAGE_FAILED,
 						    m->payload(), m->payload_size(),
 						    /* copy payload */ true);
-    __outbound_queue->push(nm);
+    outbound_queue_->push(nm);
   }
 }
 
@@ -257,12 +254,12 @@ FuseServerClientThread::process_getimageinfo_message(FuseNetworkMessage *m)
 
     FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_IMAGE_INFO,
 						    ii, sizeof(FUSE_imageinfo_t));
-    __outbound_queue->push(nm);
+    outbound_queue_->push(nm);
   } catch (Exception &e) {
     FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_GET_IMAGE_FAILED,
 						    m->payload(), m->payload_size(),
 						    /* copy payload */ true);
-    __outbound_queue->push(nm);
+    outbound_queue_->push(nm);
   }
 }
 
@@ -279,22 +276,22 @@ FuseServerClientThread::process_getlut_message(FuseNetworkMessage *m)
   tmp_lut_id[LUT_ID_MAX_LENGTH] = 0;
   strncpy(tmp_lut_id, idm->lut_id, LUT_ID_MAX_LENGTH);
 
-  if ( (__lit = __luts.find( tmp_lut_id )) != __luts.end() ) {
+  if ( (lit_ = luts_.find( tmp_lut_id )) != luts_.end() ) {
     // the buffer had already be opened
-    FuseLutContent *lm = new FuseLutContent(__lit->second);
-    __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_LUT, lm));
+    FuseLutContent *lm = new FuseLutContent(lit_->second);
+    outbound_queue_->push(new FuseNetworkMessage(FUSE_MT_LUT, lm));
   } else {
     try {
       SharedMemoryLookupTable *b = new SharedMemoryLookupTable(tmp_lut_id);
-      __luts[tmp_lut_id] = b;
+      luts_[tmp_lut_id] = b;
       FuseLutContent *lm = new FuseLutContent(b);
-      __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_LUT, lm));
+      outbound_queue_->push(new FuseNetworkMessage(FUSE_MT_LUT, lm));
     } catch (Exception &e) {
       // could not open the shared memory segment for some reason, send failure
       FuseNetworkMessage *nm = new FuseNetworkMessage(FUSE_MT_GET_LUT_FAILED,
 						      m->payload(), m->payload_size(),
 						      /* copy payload */ true);
-      __outbound_queue->push(nm);
+      outbound_queue_->push(nm);
     }
   }
 }
@@ -312,15 +309,15 @@ FuseServerClientThread::process_setlut_message(FuseNetworkMessage *m)
   // Currently we expect colormaps, so make sure we get sensible dimensions
 
   SharedMemoryLookupTable *b;
-  if ( (__lit = __luts.find( lc->lut_id() )) != __luts.end() ) {
+  if ( (lit_ = luts_.find( lc->lut_id() )) != luts_.end() ) {
     // the buffer had already been opened
-    b = __lit->second;
+    b = lit_->second;
   } else {
     try {
       b = new SharedMemoryLookupTable(lc->lut_id(), /* read only */ false);
-      __luts[lc->lut_id()] = b;
+      luts_[lc->lut_id()] = b;
     } catch (Exception &e) {
-      __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_SET_LUT_FAILED,
+      outbound_queue_->push(new FuseNetworkMessage(FUSE_MT_SET_LUT_FAILED,
 						    reply, sizeof(FUSE_lutdesc_message_t)));
       e.append("Cannot open shared memory lookup table %s", lc->lut_id());
       LibLogger::log_warn("FuseServerClientThread", e);
@@ -333,7 +330,7 @@ FuseServerClientThread::process_setlut_message(FuseNetworkMessage *m)
        (b->height() != lc->height()) ||
        (b->depth() != lc->depth())   ||
        (b->bytes_per_cell() != lc->bytes_per_cell()) ) {
-    __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_SET_LUT_FAILED,
+    outbound_queue_->push(new FuseNetworkMessage(FUSE_MT_SET_LUT_FAILED,
 						  reply, sizeof(FUSE_lutdesc_message_t)));
     LibLogger::log_warn("FuseServerClientThread", "LUT upload: dimensions do not match. "
 			"Existing (%u,%u,%u,%u) != uploaded (%u,%u,%u,%u)",
@@ -341,7 +338,7 @@ FuseServerClientThread::process_setlut_message(FuseNetworkMessage *m)
 			lc->width(), lc->height(), lc->depth(), lc->bytes_per_cell());
   } else {
     b->set(lc->buffer());
-    __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_SET_LUT_SUCCEEDED,
+    outbound_queue_->push(new FuseNetworkMessage(FUSE_MT_SET_LUT_SUCCEEDED,
 						  reply, sizeof(FUSE_lutdesc_message_t)));
   }
 
@@ -372,7 +369,7 @@ FuseServerClientThread::process_getimagelist_message(FuseNetworkMessage *m)
 
   delete h;
 
-  __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_IMAGE_LIST, ilm));
+  outbound_queue_->push(new FuseNetworkMessage(FUSE_MT_IMAGE_LIST, ilm));
 }
 
 
@@ -399,7 +396,7 @@ FuseServerClientThread::process_getlutlist_message(FuseNetworkMessage *m)
 
   delete h;
 
-  __outbound_queue->push(new FuseNetworkMessage(FUSE_MT_LUT_LIST, llm));
+  outbound_queue_->push(new FuseNetworkMessage(FUSE_MT_LUT_LIST, llm));
 }
 
 
@@ -407,9 +404,9 @@ FuseServerClientThread::process_getlutlist_message(FuseNetworkMessage *m)
 void
 FuseServerClientThread::process_inbound()
 {
-  __inbound_queue->lock();
-  while ( ! __inbound_queue->empty() ) {
-    FuseNetworkMessage *m = __inbound_queue->front();
+  inbound_queue_->lock();
+  while ( ! inbound_queue_->empty() ) {
+    FuseNetworkMessage *m = inbound_queue_->front();
 
     try {
       switch (m->type()) {
@@ -440,28 +437,28 @@ FuseServerClientThread::process_inbound()
     } catch (Exception &e) {
       e.append("FUSE protocol error");
       LibLogger::log_warn("FuseServerClientThread", e);
-      __fuse_server->connection_died(this);
-      __alive = false;
+      fuse_server_->connection_died(this);
+      alive_ = false;
     }
 
     m->unref();
-    __inbound_queue->pop();
+    inbound_queue_->pop();
   }
-  __inbound_queue->unlock();
+  inbound_queue_->unlock();
 }
 
 
 void
 FuseServerClientThread::loop()
 {
-  if ( ! __alive ) {
+  if ( ! alive_ ) {
     usleep(10000);
     return;
   }
 
   short p = 0;
   try {
-    p = __socket->poll(10); // block for up to 10 ms
+    p = socket_->poll(10); // block for up to 10 ms
   } catch (InterruptedException &e) {
     // we just ignore this and try it again
     return;
@@ -470,8 +467,8 @@ FuseServerClientThread::loop()
   if ( (p & Socket::POLL_ERR) ||
        (p & Socket::POLL_HUP) ||
        (p & Socket::POLL_RDHUP)) {
-    __fuse_server->connection_died(this);
-    __alive = false;
+    fuse_server_->connection_died(this);
+    alive_ = false;
   } else if ( p & Socket::POLL_IN ) {
     try {
       // Data can be read
@@ -479,12 +476,12 @@ FuseServerClientThread::loop()
       process_inbound();
     }
     catch (...) {
-      __fuse_server->connection_died(this);
-      __alive = false;
+      fuse_server_->connection_died(this);
+      alive_ = false;
     }
   }
 
-  if ( __alive ) {
+  if ( alive_ ) {
     send();
   }
 }

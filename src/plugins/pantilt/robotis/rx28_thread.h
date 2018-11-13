@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_PANTILT_ROBOTIS_RX28_THREAD_H_
-#define __PLUGINS_PANTILT_ROBOTIS_RX28_THREAD_H_
+#ifndef _PLUGINS_PANTILT_ROBOTIS_RX28_THREAD_H_
+#define _PLUGINS_PANTILT_ROBOTIS_RX28_THREAD_H_
 
 #include "../act_thread.h"
 
@@ -74,50 +74,50 @@ class PanTiltRX28Thread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  fawkes::PanTiltInterface *__pantilt_if;
-  fawkes::LedInterface     *__led_if;
-  fawkes::JointInterface   *__panjoint_if;
-  fawkes::JointInterface   *__tiltjoint_if;
+  fawkes::PanTiltInterface *pantilt_if_;
+  fawkes::LedInterface     *led_if_;
+  fawkes::JointInterface   *panjoint_if_;
+  fawkes::JointInterface   *tiltjoint_if_;
 
-  fawkes::RefPtr<RobotisRX28> __rx28;
+  fawkes::RefPtr<RobotisRX28> rx28_;
 
-  std::string  __pantilt_cfg_prefix;
-  std::string  __ptu_cfg_prefix;
-  std::string  __ptu_name;
-  std::string  __cfg_device;
-  unsigned int __cfg_read_timeout_ms;
-  unsigned int __cfg_disc_timeout_ms;
-  unsigned int __cfg_pan_servo_id;
-  unsigned int __cfg_tilt_servo_id;
-  bool         __cfg_goto_zero_start;
-  bool         __cfg_turn_off;
-  unsigned int __cfg_cw_compl_margin;
-  unsigned int __cfg_ccw_compl_margin;
-  unsigned int __cfg_cw_compl_slope;
-  unsigned int __cfg_ccw_compl_slope;
-  float        __cfg_pan_min;
-  float        __cfg_pan_max;
-  float        __cfg_tilt_min;
-  float        __cfg_tilt_max;
-  float        __cfg_pan_margin;
-  float        __cfg_tilt_margin;
-  float        __cfg_pan_offset;
-  float        __cfg_tilt_offset;
-  float        __cfg_pan_start;
-  float        __cfg_tilt_start;
+  std::string  pantilt_cfg_prefix_;
+  std::string  ptu_cfg_prefix_;
+  std::string  ptu_name_;
+  std::string  cfg_device_;
+  unsigned int cfg_read_timeout_ms_;
+  unsigned int cfg_disc_timeout_ms_;
+  unsigned int cfg_pan_servo_id_;
+  unsigned int cfg_tilt_servo_id_;
+  bool         cfg_goto_zero_start_;
+  bool         cfg_turn_off_;
+  unsigned int cfg_cw_compl_margin_;
+  unsigned int cfg_ccw_compl_margin_;
+  unsigned int cfg_cw_compl_slope_;
+  unsigned int cfg_ccw_compl_slope_;
+  float        cfg_pan_min_;
+  float        cfg_pan_max_;
+  float        cfg_tilt_min_;
+  float        cfg_tilt_max_;
+  float        cfg_pan_margin_;
+  float        cfg_tilt_margin_;
+  float        cfg_pan_offset_;
+  float        cfg_tilt_offset_;
+  float        cfg_pan_start_;
+  float        cfg_tilt_start_;
 #ifdef HAVE_TF
-  std::string  __cfg_base_frame;
-  std::string  __cfg_pan_link;
-  std::string  __cfg_tilt_link;
+  std::string  cfg_base_frame_;
+  std::string  cfg_pan_link_;
+  std::string  cfg_tilt_link_;
 
-  fawkes::tf::Vector3  __translation_pan;
-  fawkes::tf::Vector3  __translation_tilt;
+  fawkes::tf::Vector3  translation_pan_;
+  fawkes::tf::Vector3  translation_tilt_;
 
-  bool         __cfg_publish_transforms;
+  bool         cfg_publish_transforms_;
 #endif
 
-  float         __last_pan;
-  float         __last_tilt;
+  float         last_pan_;
+  float         last_tilt_;
 
   class WorkerThread : public fawkes::Thread
   {
@@ -153,44 +153,44 @@ class PanTiltRX28Thread
     void exec_goto_pantilt(float pan, float tilt);
 
   private:
-    fawkes::ReadWriteLock       *__rx28_rwlock;
-    fawkes::RefPtr<RobotisRX28>  __rx28;
-    fawkes::Logger              *__logger;
-    fawkes::WaitCondition       *__update_waitcond;
+    fawkes::ReadWriteLock       *rx28_rwlock_;
+    fawkes::RefPtr<RobotisRX28>  rx28_;
+    fawkes::Logger              *logger_;
+    fawkes::WaitCondition       *update_waitcond_;
 
-    unsigned char __pan_servo_id;
-    unsigned char __tilt_servo_id;
+    unsigned char pan_servo_id_;
+    unsigned char tilt_servo_id_;
 
-    float         __pan_min;
-    float         __pan_max;
-    float         __tilt_min;
-    float         __tilt_max;
-    float         __pan_offset;
-    float         __tilt_offset;
-    float         __max_pan_speed;
-    float         __max_tilt_speed;
-    float         __pan_margin;
-    float         __tilt_margin;
+    float         pan_min_;
+    float         pan_max_;
+    float         tilt_min_;
+    float         tilt_max_;
+    float         pan_offset_;
+    float         tilt_offset_;
+    float         max_pan_speed_;
+    float         max_tilt_speed_;
+    float         pan_margin_;
+    float         tilt_margin_;
 
-    fawkes::ReadWriteLock *__value_rwlock;
-    bool  __move_pending;
-    float __target_pan;
-    float __target_tilt;
-    bool  __enable;
-    bool  __disable;
-    bool  __velo_pending;
-    unsigned int __pan_vel;
-    unsigned int __tilt_vel;
-    bool  __led_enable;
-    bool  __led_disable;
-    fawkes::Time  __pantilt_time;
+    fawkes::ReadWriteLock *value_rwlock_;
+    bool  move_pending_;
+    float target_pan_;
+    float target_tilt_;
+    bool  enable_;
+    bool  disable_;
+    bool  velo_pending_;
+    unsigned int pan_vel_;
+    unsigned int tilt_vel_;
+    bool  led_enable_;
+    bool  led_disable_;
+    fawkes::Time  pantilt_time_;
 
-    bool __fresh_data;
-    fawkes::Mutex *__fresh_data_mutex;
+    bool fresh_data_;
+    fawkes::Mutex *fresh_data_mutex_;
 
   };
 
-  WorkerThread *__wt;
+  WorkerThread *wt_;
 };
 
 #endif

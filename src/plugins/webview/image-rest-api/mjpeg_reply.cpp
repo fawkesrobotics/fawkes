@@ -34,9 +34,6 @@
 using namespace firevision;
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class DynamicMJPEGStreamWebReply <webview/file_reply.h>
  * Dynamic raw file transfer reply.

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __PLUGINS_METRICS_ASPECT_METRICS_INIFIN_H_
-#define __PLUGINS_METRICS_ASPECT_METRICS_INIFIN_H_
+#ifndef _PLUGINS_METRICS_ASPECT_METRICS_INIFIN_H_
+#define _PLUGINS_METRICS_ASPECT_METRICS_INIFIN_H_
 
 #include <aspect/inifins/inifin.h>
 #include <plugins/metrics/aspect/metrics.h>
@@ -30,9 +30,6 @@
 #include <core/utils/lockptr.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class Logger;
 class MetricsManager;

@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_LASER_FILTER_LASER_FILTER_PLUGIN_H_
-#define __PLUGINS_LASER_FILTER_LASER_FILTER_PLUGIN_H_
+#ifndef _PLUGINS_LASER_FILTER_LASER_FILTER_PLUGIN_H_
+#define _PLUGINS_LASER_FILTER_LASER_FILTER_PLUGIN_H_
 
 #include <core/plugin.h>
 
@@ -36,7 +36,7 @@ class LaserFilterPlugin : public fawkes::Plugin
   ~LaserFilterPlugin();
   
  private:
-  fawkes::Barrier *__barrier;
+  fawkes::Barrier *barrier_;
 };
 
 #endif

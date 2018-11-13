@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __CORE_UTILS_LOCK_MULTIMAP_H_
-#define __CORE_UTILS_LOCK_MULTIMAP_H_
+#ifndef _CORE_UTILS_LOCK_MULTIMAP_H_
+#define _CORE_UTILS_LOCK_MULTIMAP_H_
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
@@ -55,7 +55,7 @@ class LockMultiMap : public std::multimap<KeyType, ValueType, LessKey>
   operator=(const std::map<KeyType, ValueType, LessKey> &l);
 
  private:
-  mutable RefPtr<Mutex>  __mutex;
+  mutable RefPtr<Mutex>  mutex_;
 
 };
 
@@ -74,7 +74,7 @@ class LockMultiMap : public std::multimap<KeyType, ValueType, LessKey>
 /** Constructor. */
 template <typename KeyType, typename ValueType, typename LessKey>
 LockMultiMap<KeyType, ValueType, LessKey>::LockMultiMap()
-  : __mutex(new Mutex())
+  : mutex_(new Mutex())
 {}
 
 
@@ -84,7 +84,7 @@ LockMultiMap<KeyType, ValueType, LessKey>::LockMultiMap()
 template <typename KeyType, typename ValueType, typename LessKey>
 LockMultiMap<KeyType, ValueType, LessKey>::LockMultiMap(const LockMultiMap<KeyType, ValueType, LessKey> &lm)
   : std::map<KeyType, ValueType, LessKey>::map(lm),
-    __mutex(new Mutex())
+    mutex_(new Mutex())
 {}
 
 
@@ -99,7 +99,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 LockMultiMap<KeyType, ValueType, LessKey>::lock() const
 {
-  __mutex->lock();
+  mutex_->lock();
 }
 
 
@@ -110,7 +110,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 bool
 LockMultiMap<KeyType, ValueType, LessKey>::try_lock() const
 {
-  return __mutex->try_lock();
+  return mutex_->try_lock();
 }
 
 
@@ -119,7 +119,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 LockMultiMap<KeyType, ValueType, LessKey>::unlock() const
 {
-  return __mutex->unlock();
+  return mutex_->unlock();
 }
 
 
@@ -131,9 +131,9 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 LockMultiMap<KeyType, ValueType, LessKey>::erase_locked(const KeyType &key)
 {
-  __mutex->lock();
+  mutex_->lock();
   std::map<KeyType, ValueType, LessKey>::erase(key);
-  __mutex->unlock();
+  mutex_->unlock();
 }
 
 
@@ -145,7 +145,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 RefPtr<Mutex>
 LockMultiMap<KeyType, ValueType, LessKey>::mutex() const
 {
-  return __mutex;
+  return mutex_;
 }
 
 
@@ -160,7 +160,7 @@ template <typename KeyType, typename ValueType, typename LessKey>
 LockMultiMap<KeyType, ValueType, LessKey> &
 LockMultiMap<KeyType, ValueType, LessKey>::operator=(const LockMultiMap<KeyType, ValueType, LessKey> &ll)
 {
-  __mutex->lock();
+  mutex_->lock();
   ll.lock();
   this->clear();
   typename LockMultiMap<KeyType, ValueType, LessKey>::const_iterator i;
@@ -168,7 +168,7 @@ LockMultiMap<KeyType, ValueType, LessKey>::operator=(const LockMultiMap<KeyType,
     this->insert(*i);
   }
   ll.unlock();
-  __mutex->unlock();
+  mutex_->unlock();
 
   return *this;
 }
@@ -184,13 +184,13 @@ template <typename KeyType, typename ValueType, typename LessKey>
 LockMultiMap<KeyType, ValueType, LessKey> &
 LockMultiMap<KeyType, ValueType, LessKey>::operator=(const std::map<KeyType, ValueType, LessKey> &l)
 {
-  __mutex->lock();
+  mutex_->lock();
   this->clear();
   typename std::map<KeyType, ValueType, LessKey>::const_iterator i;
   for (i = l.begin(); i != l.end(); ++i) {
     this->insert(*i);
   }
-  __mutex->unlock();
+  mutex_->unlock();
 
   return *this;
 }

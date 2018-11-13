@@ -29,9 +29,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 void
 convert_buffer_to_pcl(const SharedMemoryImageBuffer *buffer,

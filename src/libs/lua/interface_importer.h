@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __LUA_INTERFACEIMPORTER_H_
-#define __LUA_INTERFACEIMPORTER_H_
+#ifndef _LUA_INTERFACEIMPORTER_H_
+#define _LUA_INTERFACEIMPORTER_H_
 
 #include <lua/context_watcher.h>
 
@@ -32,9 +32,6 @@
 #include <list>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class BlackBoard;
 class Configuration;
@@ -54,8 +51,8 @@ class LuaInterfaceImporter : public LuaContextWatcher
     virtual void bb_interface_created(const char *type, const char *id) throw();
 
    private:
-    LuaInterfaceImporter *__lii;
-    std::string           __varname;
+    LuaInterfaceImporter *lii_;
+    std::string           varname_;
   };
 
   typedef fawkes::LockMap<std::string, InterfaceObserver *>  ObserverMap;
@@ -66,7 +63,7 @@ class LuaInterfaceImporter : public LuaContextWatcher
   /** Map of varname to list of interfaces */
   typedef fawkes::LockMap<std::string, std::list<fawkes::Interface *> >  InterfaceListMap;
 
-  LuaInterfaceImporter(LuaContext *__context, BlackBoard *blackboard,
+  LuaInterfaceImporter(LuaContext *context_, BlackBoard *blackboard,
 		       Configuration *config, Logger *logger);
   ~LuaInterfaceImporter();
 
@@ -102,22 +99,22 @@ class LuaInterfaceImporter : public LuaContextWatcher
 			      const char *type, const char *id);
 
  private:
-  LuaContext    *__context;
-  BlackBoard    *__blackboard;
-  Configuration *__config;
-  Logger        *__logger;
+  LuaContext    *context_;
+  BlackBoard    *blackboard_;
+  Configuration *config_;
+  Logger        *logger_;
 
-  bool              __two_stage;
+  bool              two_stage_;
 
-  InterfaceMap      __reading_ifs;
-  InterfaceListMap  __reading_multi_ifs;
-  InterfaceMap      __writing_ifs;
-  ObserverMap       __observers;
+  InterfaceMap      reading_ifs_;
+  InterfaceListMap  reading_multi_ifs_;
+  InterfaceMap      writing_ifs_;
+  ObserverMap       observers_;
 
-  InterfaceMap      __ext_rifs;
-  InterfaceMap      __ext_wifs;
+  InterfaceMap      ext_rifs_;
+  InterfaceMap      ext_wifs_;
 
-  bool           __interfaces_pushed;
+  bool           interfaces_pushed_;
 };
 
 } // end of namespace fawkes

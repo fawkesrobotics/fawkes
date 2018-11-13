@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_CAMS_NAO_H_
-#define __FIREVISION_CAMS_NAO_H_
+#ifndef _FIREVISION_CAMS_NAO_H_
+#define _FIREVISION_CAMS_NAO_H_
 
 #include <fvcams/v4l2.h>
 
@@ -37,9 +37,6 @@
 #define I2C_SLAVE 0x0703
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class CameraArgumentParser;
 
@@ -64,12 +61,12 @@ class NaoCamera :
   static void init_cam(const char *cam);
 
  private:
-  char *__i2c_device_name; ///< I2C device file descriptor
-  int   __cam_id;          ///< ID of the Camera to be used
-  bool  __can_switch_cam;  ///< Needs to be Nao V3 for camera switching
+  char *i2c_device_name_; ///< I2C device file descriptor
+  int   cam_id_;          ///< ID of the Camera to be used
+  bool  can_switch_cam_;  ///< Needs to be Nao V3 for camera switching
 };
 
 } // end namespace firevision
 
-#endif //__FIREVISION_CAMS_V4L2_H_
+#endif //FIREVISION_CAMS_V4L2_H__
 

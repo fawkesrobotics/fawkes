@@ -21,17 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __ASPECT_INIFINS_INIFIN_H_
-#define __ASPECT_INIFINS_INIFIN_H_
+#ifndef _ASPECT_INIFINS_INIFIN_H_
+#define _ASPECT_INIFINS_INIFIN_H_
 
 #include <core/threading/thread.h>
 #include <core/threading/thread_initializer.h>
 #include <core/threading/thread_finalizer.h>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class AspectIniFin
 {
@@ -46,7 +43,7 @@ class AspectIniFin
   const char * get_aspect_name() const;
 
  private:
-  const char *__aspect_name;
+  const char *aspect_name_;
 };
 
 } // end namespace fawkes

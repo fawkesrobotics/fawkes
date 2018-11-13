@@ -28,9 +28,6 @@
 using namespace fawkes;
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class HistogramFile <fvutils/statistical/histogram_file.h>
  * A fileformat for histograms. Such a file might contain multiple histograms, each for a

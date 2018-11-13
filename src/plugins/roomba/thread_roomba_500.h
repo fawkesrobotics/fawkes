@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROOMBA_THREAD_ROOMBA_500_H_
-#define __PLUGINS_ROOMBA_THREAD_ROOMBA_500_H_
+#ifndef _PLUGINS_ROOMBA_THREAD_ROOMBA_500_H_
+#define _PLUGINS_ROOMBA_THREAD_ROOMBA_500_H_
 
 #include "roomba_500.h"
 
@@ -68,42 +68,42 @@ class Roomba500Thread
   void set_mode(Roomba500::Mode mode);
 
  private:
-  fawkes::LedInterface       *__led_if_debris;
-  fawkes::LedInterface       *__led_if_spot;
-  fawkes::LedInterface       *__led_if_dock;
-  fawkes::LedInterface       *__led_if_check_robot;
-  fawkes::LedInterface       *__led_if_clean_color;
-  fawkes::LedInterface       *__led_if_clean_intensity;
-  fawkes::SwitchInterface    *__switch_if_vacuuming;
-  fawkes::SwitchInterface    *__switch_if_but_clean;
-  fawkes::SwitchInterface    *__switch_if_but_spot;
-  fawkes::SwitchInterface    *__switch_if_but_dock;
-  fawkes::SwitchInterface    *__switch_if_but_minute;
-  fawkes::SwitchInterface    *__switch_if_but_hour;
-  fawkes::SwitchInterface    *__switch_if_but_day;
-  fawkes::SwitchInterface    *__switch_if_but_schedule;
-  fawkes::SwitchInterface    *__switch_if_but_clock;
-  //fawkes::MotorInterface     *__motor_if;
-  fawkes::BatteryInterface   *__battery_if;
-  fawkes::Roomba500Interface *__roomba500_if;
+  fawkes::LedInterface       *led_if_debris_;
+  fawkes::LedInterface       *led_if_spot_;
+  fawkes::LedInterface       *led_if_dock_;
+  fawkes::LedInterface       *led_if_check_robot_;
+  fawkes::LedInterface       *led_if_clean_color_;
+  fawkes::LedInterface       *led_if_clean_intensity_;
+  fawkes::SwitchInterface    *switch_if_vacuuming_;
+  fawkes::SwitchInterface    *switch_if_but_clean_;
+  fawkes::SwitchInterface    *switch_if_but_spot_;
+  fawkes::SwitchInterface    *switch_if_but_dock_;
+  fawkes::SwitchInterface    *switch_if_but_minute_;
+  fawkes::SwitchInterface    *switch_if_but_hour_;
+  fawkes::SwitchInterface    *switch_if_but_day_;
+  fawkes::SwitchInterface    *switch_if_but_schedule_;
+  fawkes::SwitchInterface    *switch_if_but_clock_;
+  //fawkes::MotorInterface     *motor_if_;
+  fawkes::BatteryInterface   *battery_if_;
+  fawkes::Roomba500Interface *roomba500_if_;
 
-  fawkes::RefPtr<Roomba500>   __roomba;
+  fawkes::RefPtr<Roomba500>   roomba_;
 
-  std::string  __cfg_conntype;
-  std::string  __cfg_mode;
-  std::string  __cfg_device;
-  std::string  __cfg_bttype;
-  bool         __cfg_btsave;
-  bool         __cfg_btfast;
-  bool         __cfg_query_mode;
-  bool         __cfg_play_fanfare;
+  std::string  cfg_conntype_;
+  std::string  cfg_mode_;
+  std::string  cfg_device_;
+  std::string  cfg_bttype_;
+  bool         cfg_btsave_;
+  bool         cfg_btfast_;
+  bool         cfg_query_mode_;
+  bool         cfg_play_fanfare_;
 
-  unsigned int __greeting_loop_count;
+  unsigned int greeting_loop_count_;
 
-  int          __battery_percent;
+  int          battery_percent_;
 
   class WorkerThread;
-  WorkerThread *__wt;
+  WorkerThread *wt_;
 };
 
 #endif

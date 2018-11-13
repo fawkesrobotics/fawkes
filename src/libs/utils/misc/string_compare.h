@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __UTILS_MISC_STRING_COMPARE_H_
-#define __UTILS_MISC_STRING_COMPARE_H_
+#ifndef _UTILS_MISC_STRING_COMPARE_H_
+#define _UTILS_MISC_STRING_COMPARE_H_
 
 namespace fawkes {
 
@@ -30,13 +30,13 @@ namespace fawkes {
 class StringEquality
 {
  public:
-  bool operator()(const char *__s1, const char *__s2) const;
+  bool operator()(const char *s1_, const char *s2_) const;
 };
 
 class StringLess
 {
  public:
-  bool operator()(const char *__s1, const char *__s2) const;
+  bool operator()(const char *s1_, const char *s2_) const;
 };
 
 

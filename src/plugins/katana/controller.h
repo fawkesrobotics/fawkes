@@ -20,15 +20,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_KATANA_CONTROLLER_H_
-#define __PLUGINS_KATANA_CONTROLLER_H_
+#ifndef _PLUGINS_KATANA_CONTROLLER_H_
+#define _PLUGINS_KATANA_CONTROLLER_H_
 
 #include <vector>
 
 namespace fawkes {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class KatanaController <plugins/katana/controller.h>
  * Abstract class for a Neuronics Katana controller.

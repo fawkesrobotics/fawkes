@@ -26,9 +26,6 @@
 
 namespace fawkes
 {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 /** @class BiwardDriveModule <plugins/colli/drive_modes/biward_drive_mode.h>
  * This is the SlowBiward drive-module. It is inherited from  the abstract drive mode

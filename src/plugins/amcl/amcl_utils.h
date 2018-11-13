@@ -18,8 +18,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_AMCL_AMCL_UTILS_H_
-#define __PLUGINS_AMCL_AMCL_UTILS_H_
+#ifndef _PLUGINS_AMCL_AMCL_UTILS_H_
+#define _PLUGINS_AMCL_AMCL_UTILS_H_
 
 #include "map/map.h"
 
@@ -33,10 +33,6 @@ namespace fawkes {
   class Configuration;
 
   namespace amcl {
-#if 0 /* just to make Emacs auto-indent happy */
-  }
-}
-#endif
 
 map_t *
 read_map(const char *map_file,

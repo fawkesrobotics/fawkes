@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __INTERFACES_GENERATOR_ENUM_CONSTANT_H_
-#define __INTERFACES_GENERATOR_ENUM_CONSTANT_H_
+#ifndef _INTERFACES_GENERATOR_ENUM_CONSTANT_H_
+#define _INTERFACES_GENERATOR_ENUM_CONSTANT_H_
 
 #include <string>
 #include <vector>
@@ -48,9 +48,9 @@ class InterfaceEnumConstant
 
  private:
 
-  std::string __name;
-  std::string __comment;
-  std::vector<EnumItem> __items;
+  std::string name_;
+  std::string comment_;
+  std::vector<EnumItem> items_;
 };
 
 #endif

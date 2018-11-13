@@ -65,9 +65,9 @@ class FireVisionNetworkTool
    */
   FireVisionNetworkTool(ArgumentParser *argp)
   {
-    __argp = argp;
-    __exploring = false;
-    __explore_waitcond = NULL;
+    argp_ = argp;
+    exploring_ = false;
+    explore_waitcond_ = NULL;
   }
 
   void
@@ -99,12 +99,12 @@ class FireVisionNetworkTool
       try {
 	FuseImageContent *ic = m->msgc<FuseImageContent>();
 	if ( ic->format() == FUSE_IF_RAW ) {
-	  FvRawWriter *w = new FvRawWriter(__file, ic->pixel_width(), ic->pixel_height(),
+	  FvRawWriter *w = new FvRawWriter(file_, ic->pixel_width(), ic->pixel_height(),
 					   (colorspace_t)ic->colorspace(), ic->buffer());
 	  w->write();
 	  delete w;
 	} else if ( ic->format() == FUSE_IF_JPEG ) {
-	  FILE *f = fopen(__file, "w");
+	  FILE *f = fopen(file_, "w");
 	  if (fwrite(ic->buffer(), ic->buffer_size(), 1, f) == 0) {
 	    printf("Failed to write data to file");
 	  }
@@ -117,7 +117,7 @@ class FireVisionNetworkTool
 	printf("Received message cannot be casted to FuseImageMessage\n");
 	e.print_trace();
       }
-      __client->cancel();
+      client_->cancel();
       break;
     case FUSE_MT_IMAGE_LIST:
       try {
@@ -163,7 +163,7 @@ class FireVisionNetworkTool
 	printf("Received message cannot be casted to FuseImageListMessage\n");
 	e.print_trace();
       }
-      __client->cancel();
+      client_->cancel();
       break;
 
     case FUSE_MT_LUT:
@@ -183,7 +183,7 @@ class FireVisionNetworkTool
 	    yuvcm.set(lc->buffer());
 	    ColormapFile cmf;
 	    cmf.add_colormap(&yuvcm);
-	    cmf.write(__file);
+	    cmf.write(file_);
 	  } catch (Exception &e) {
 	    e.append("Failed to save colormap");
 	    e.print_trace();
@@ -194,7 +194,7 @@ class FireVisionNetworkTool
 	printf("Received message cannot be casted to FuseLutMessage\n");
 	e.print_trace();
       }
-      __client->cancel();
+      client_->cancel();
       break;
 
     case FUSE_MT_SET_LUT_SUCCEEDED:
@@ -204,7 +204,7 @@ class FireVisionNetworkTool
 	lut_id[LUT_ID_MAX_LENGTH] = 0;
 	strncpy(lut_id, lutdesc->lut_id, LUT_ID_MAX_LENGTH);
 	printf("LUT %s has been uploaded successfully.\n", lut_id);
-	__client->cancel();
+	client_->cancel();
       }
       break;
 
@@ -215,13 +215,13 @@ class FireVisionNetworkTool
 	lut_id[LUT_ID_MAX_LENGTH] = 0;
 	strncpy(lut_id, lutdesc->lut_id, LUT_ID_MAX_LENGTH);
 	printf("LUT upload of %s has failed.\n", lut_id);
-	__client->cancel();
+	client_->cancel();
       }
       break;
 
     default:
       printf("Unhandled message of type %u received\n", m->type());
-      __client->cancel();
+      client_->cancel();
       break;
     }
   }
@@ -230,9 +230,9 @@ class FireVisionNetworkTool
   virtual void all_for_now()
   {
     printf("All for now\n");
-    __explore_mutex->lock();
-    __explore_waitcond->wake_all();
-    __explore_mutex->unlock();
+    explore_mutex_->lock();
+    explore_waitcond_->wake_all();
+    explore_mutex_->unlock();
   }
 
   virtual void cache_exhausted()
@@ -271,13 +271,13 @@ class FireVisionNetworkTool
     printf("Found %s%s%s (%s/%s on %hu), querying\n",
 	   c_blue, name, c_normal, host_name, addrp, port);
 
-    __client = new FuseClient(host_name, port, this);
-    __client->connect();
-    __client->start();
-    __client->wait_greeting();
+    client_ = new FuseClient(host_name, port, this);
+    client_->connect();
+    client_->start();
+    client_->wait_greeting();
     show_all();
-    __client->join();
-    delete __client;
+    client_->join();
+    delete client_;
 
     printf("\n");
   }
@@ -305,7 +305,7 @@ class FireVisionNetworkTool
 	   "                 and the id, the port is optional and defaults to 5000\n"
 	   "                 Depending on the operation id is the image or the LUT ID\n"
 	   "  file           File to write incoming data to or to read data to send from\n",
-	   __argp->program_name());
+	   argp_->program_name());
   }
 
 
@@ -320,7 +320,7 @@ class FireVisionNetworkTool
     memset(idm, 0, sizeof(FUSE_imagereq_message_t));
     strncpy(idm->image_id, image_id, IMAGE_ID_MAX_LENGTH-1);
     idm->format = (jpeg ? FUSE_IF_JPEG : FUSE_IF_RAW);
-    __client->enqueue(FUSE_MT_GET_IMAGE, idm, sizeof(FUSE_imagereq_message_t));
+    client_->enqueue(FUSE_MT_GET_IMAGE, idm, sizeof(FUSE_imagereq_message_t));
   }
 
   /** Request LUT.
@@ -332,7 +332,7 @@ class FireVisionNetworkTool
     FUSE_lutdesc_message_t *ldm = (FUSE_lutdesc_message_t *)malloc(sizeof(FUSE_lutdesc_message_t));
     memset(ldm, 0, sizeof(FUSE_lutdesc_message_t));
     strncpy(ldm->lut_id, lut_id, LUT_ID_MAX_LENGTH-1);
-    __client->enqueue(FUSE_MT_GET_LUT, ldm, sizeof(FUSE_lutdesc_message_t));
+    client_->enqueue(FUSE_MT_GET_LUT, ldm, sizeof(FUSE_lutdesc_message_t));
   }
 
   /** Upload LUT.
@@ -342,22 +342,22 @@ class FireVisionNetworkTool
   set_colormap(const char *lut_id)
   {
     ColormapFile cmf;
-    cmf.read(__file);
+    cmf.read(file_);
     Colormap *cm = cmf.get_colormap();
     FuseLutContent *lc = new FuseLutContent(lut_id, cm->get_buffer(),
 					    cm->width(), cm->height(), cm->depth(),
 					    /* bytes per cell */ 1);
     delete cm;
 
-    __client->enqueue(new FuseNetworkMessage(FUSE_MT_SET_LUT, lc));
+    client_->enqueue(new FuseNetworkMessage(FUSE_MT_SET_LUT, lc));
   }
 
   /** Show all images and LUTs. */
   void
   show_all()
   {
-    __client->enqueue(FUSE_MT_GET_IMAGE_LIST);
-    __client->enqueue(FUSE_MT_GET_LUT_LIST);
+    client_->enqueue(FUSE_MT_GET_IMAGE_LIST);
+    client_->enqueue(FUSE_MT_GET_LUT_LIST);
   }
 
   /** Explore network.
@@ -369,24 +369,24 @@ class FireVisionNetworkTool
   explore_network()
   {
 #ifdef HAVE_AVAHI
-    __exploring = true;
-    __explore_mutex = new Mutex();
-    __explore_waitcond = new WaitCondition(__explore_mutex);
+    exploring_ = true;
+    explore_mutex_ = new Mutex();
+    explore_waitcond_ = new WaitCondition(explore_mutex_);
 
-    __explore_mutex->lock();
+    explore_mutex_->lock();
 
-    __avahi_thread = new AvahiThread();
-    __avahi_thread->start();
+    avahi_thread_ = new AvahiThread();
+    avahi_thread_->start();
 
-    __avahi_thread->watch_service("_fountain._tcp", this);
+    avahi_thread_->watch_service("_fountain._tcp", this);
 
-    __explore_waitcond->wait();
-    delete __explore_waitcond;
-    __explore_mutex->unlock();
-    delete __explore_mutex;
-    __avahi_thread->cancel();
-    __avahi_thread->join();
-    delete __avahi_thread;
+    explore_waitcond_->wait();
+    delete explore_waitcond_;
+    explore_mutex_->unlock();
+    delete explore_mutex_;
+    avahi_thread_->cancel();
+    avahi_thread_->join();
+    delete avahi_thread_;
 #else
     printf("\nExploration is not available because Avahi support is missing. "
 	   "Install avahi-devel and recompile.\n\n");
@@ -397,13 +397,13 @@ class FireVisionNetworkTool
   void
   run()
   {
-    if ( __argp->has_arg("h") ) {
+    if ( argp_->has_arg("h") ) {
       print_usage();
       exit(0);
     } else {
       char *net_string;
-      if ( __argp->has_arg("n") ) {
-	net_string = strdup(__argp->arg("n"));
+      if ( argp_->has_arg("n") ) {
+	net_string = strdup(argp_->arg("n"));
       } else {
 	net_string = strdup("localhost");
       }
@@ -428,14 +428,14 @@ class FireVisionNetworkTool
 	}
       }
 
-      if (__argp->has_arg("i") || __argp->has_arg("j") ||
-	  __argp->has_arg("c") || __argp->has_arg("C")) {
-	if ( __argp->num_items() == 0 ) {
+      if (argp_->has_arg("i") || argp_->has_arg("j") ||
+	  argp_->has_arg("c") || argp_->has_arg("C")) {
+	if ( argp_->num_items() == 0 ) {
 	  print_usage();
 	  printf("\nFile name missing\n\n");
 	  exit(1);
 	} else {
-	  __file = __argp->items()[0];
+	  file_ = argp_->items()[0];
 	}
 
 	if (id == NULL) {
@@ -445,33 +445,33 @@ class FireVisionNetworkTool
 	}
       }
 
-      if ( ! __argp->has_arg("e") ) {
-	__client = new FuseClient(host, port_num, this);
-	__client->connect();
-	__client->start();
-	__client->wait_greeting();
+      if ( ! argp_->has_arg("e") ) {
+	client_ = new FuseClient(host, port_num, this);
+	client_->connect();
+	client_->start();
+	client_->wait_greeting();
       }
 
-      if ( __argp->has_arg("i") ) {
+      if ( argp_->has_arg("i") ) {
 	get_image(id, /* JPEG? */ false);
-      } else if ( __argp->has_arg("j") ) {
+      } else if ( argp_->has_arg("j") ) {
 	get_image(id, /* JPEG? */ true);
-      } else if ( __argp->has_arg("c") ) {
+      } else if ( argp_->has_arg("c") ) {
 	get_colormap(id);
-      } else if ( __argp->has_arg("C") ) {
+      } else if ( argp_->has_arg("C") ) {
 	set_colormap(id);
-      } else if ( __argp->has_arg("s") ) {
+      } else if ( argp_->has_arg("s") ) {
 	show_all();
-      } else if ( __argp->has_arg("e") ) {
+      } else if ( argp_->has_arg("e") ) {
 	explore_network();
       } else {
 	print_usage();
-	__client->cancel();
+	client_->cancel();
       }
 
-      if ( ! __argp->has_arg("e") ) {
-	__client->join();
-	delete __client;
+      if ( ! argp_->has_arg("e") ) {
+	client_->join();
+	delete client_;
       }
 
       free(net_string);
@@ -479,17 +479,17 @@ class FireVisionNetworkTool
   }
 
 private:
-  ArgumentParser *__argp;
-  FuseClient     *__client;
+  ArgumentParser *argp_;
+  FuseClient     *client_;
 
-  const char     *__file;
+  const char     *file_;
 
-  bool            __exploring;
-  Mutex          *__explore_mutex;
-  WaitCondition  *__explore_waitcond;
+  bool            exploring_;
+  Mutex          *explore_mutex_;
+  WaitCondition  *explore_waitcond_;
 
 #ifdef HAVE_AVAHI
-  AvahiThread    *__avahi_thread;
+  AvahiThread    *avahi_thread_;
 #endif
 };
 

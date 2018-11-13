@@ -22,15 +22,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#ifndef __FIREVISION_UTILS_SCALERS_LOSSY_H_
-#define __FIREVISION_UTILS_SCALERS_LOSSY_H_
+#ifndef _FIREVISION_UTILS_SCALERS_LOSSY_H_
+#define _FIREVISION_UTILS_SCALERS_LOSSY_H_
 
 #include <fvutils/scalers/scaler.h>
 
 namespace firevision {
-#if 0 /* just to make Emacs auto-indent happy */
-}
-#endif
 
 class LossyScaler : public Scaler {
 

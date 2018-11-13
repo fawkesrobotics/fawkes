@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef __PLUGINS_ROOMBA_SENSOR_THREAD_H_
-#define __PLUGINS_ROOMBA_SENSOR_THREAD_H_
+#ifndef _PLUGINS_ROOMBA_SENSOR_THREAD_H_
+#define _PLUGINS_ROOMBA_SENSOR_THREAD_H_
 
 #include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
@@ -43,7 +43,7 @@ class RoombaSensorThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  Roomba500Thread *__roomba500_thread;
+  Roomba500Thread *roomba500_thread_;
 };
 
 
