@@ -35,7 +35,7 @@ class ASPPlugin : public fawkes::Plugin
 	/** Constructor.
 	 * @param config Fawkes configuration
 	 */
-	ASPPlugin(Configuration *config) : Plugin(config)
+	explicit ASPPlugin(Configuration *config) : Plugin(config)
 	{
 		thread_list.push_back(new ASPThread());
 	}
