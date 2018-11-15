@@ -103,8 +103,7 @@ class RosNavigatorThread
   dynamic_reconfigure::Config dynreconf_conf;
 
   std::string cfg_dynreconf_path_;
-  std::string cfg_dynreconf_x_vel_name_;
-  std::string cfg_dynreconf_y_vel_name_;
+  std::string cfg_dynreconf_trans_vel_name_;
   std::string cfg_dynreconf_rot_vel_name_;
 
   std::string cfg_fixed_frame_;
