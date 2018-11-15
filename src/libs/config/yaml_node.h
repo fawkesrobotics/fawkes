@@ -165,9 +165,8 @@ namespace yaml_utils {
 	{
 		std::stringstream stream(input);
 		stream.unsetf(std::ios::dec);
-		if((stream >> rhs) && (stream >> std::ws).eof())
+		if((stream >> rhs) && (stream >> std::ws).eof()) {
 			return true;
-		else {
 		}
 		if(std::numeric_limits<T>::has_infinity) {
 			if(YAML::conversion::IsInfinity(input) || YAML::conversion::IsNegativeInfinity(input) )
