@@ -28,7 +28,10 @@ SCRIPT_PATH=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 # For now, trust the post-checkout hook to have done this.
 # git fetch origin master
 
-MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "origin/master") | head -1)
+MERGE_BASE=$(diff --old-line-format='' --new-line-format='' \
+             <(git rev-list --first-parent "HEAD") \
+             <(git rev-list --first-parent "origin/master") \
+             | head -1)
 
 AFFECTED_FILES=$(git diff --name-only $MERGE_BASE HEAD | paste -sd ":" -)
 
