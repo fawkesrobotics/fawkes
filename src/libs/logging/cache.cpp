@@ -174,13 +174,13 @@ CacheLogger::push_message(LogLevel ll, const char *component, Exception &e)
     }
 
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      CacheEntry e;
-      e.log_level = ll;
-      e.component = component;
-      e.time      = now;
-      e.timestr   = timestr;
-      e.message   = std::string("[EXCEPTION] ") + *i;
-      messages_.push_front(e);
+      CacheEntry ce;
+      ce.log_level = ll;
+      ce.component = component;
+      ce.time      = now;
+      ce.timestr   = timestr;
+      ce.message   = std::string("[EXCEPTION] ") + *i;
+      messages_.push_front(ce);
       ++num_entries_;
     }
 
@@ -327,13 +327,13 @@ CacheLogger::tlog_push_message(LogLevel ll, struct timeval *t, const char *compo
       return;
     }
     for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
-      CacheEntry e;
-      e.log_level = ll;
-      e.component = component;
-      e.time      = *t;
-      e.timestr   = timestr;
-      e.message   = std::string("[EXCEPTION] ") + *i;
-      messages_.push_front(e);
+      CacheEntry ce;
+      ce.log_level = ll;
+      ce.component = component;
+      ce.time      = *t;
+      ce.timestr   = timestr;
+      ce.message   = std::string("[EXCEPTION] ") + *i;
+      messages_.push_front(ce);
       ++num_entries_;
     }
 
