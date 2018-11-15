@@ -20,12 +20,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#ifndef _FIREVISION_FILTER_MORPHOLOGY_MORPHOLOGICAL_H_
+#define _FIREVISION_FILTER_MORPHOLOGY_MORPHOLOGICAL_H_
+
 #if ! (defined(HAVE_IPP) || defined(HAVE_OPENCV))
 #error "Neither IPP nor OpenCV installed"
 #endif
-
-#ifndef _FIREVISION_FILTER_MORPHOLOGY_MORPHOLOGICAL_H_
-#define _FIREVISION_FILTER_MORPHOLOGY_MORPHOLOGICAL_H_
 
 #include <fvfilters/filter.h>
 

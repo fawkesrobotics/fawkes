@@ -290,8 +290,8 @@ MessageRegister::serialize(uint16_t component_id, uint16_t msg_type,
   try {
     serialized = msg.SerializeToString(&data);
   } catch (google::protobuf::FatalException &e) {
-    std::string msg = std::string("Failed to serialize message: ") + e.what();
-    throw std::runtime_error(msg);
+    std::string error_msg = std::string("Failed to serialize message: ") + e.what();
+    throw std::runtime_error(error_msg);
   }
 #else
   // No exceptions in earlier versions

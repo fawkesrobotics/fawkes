@@ -182,6 +182,7 @@ OpenNiImageThread::finalize()
   delete image_md_;
   delete image_buf_yuv_;
   delete image_buf_rgb_;
+  delete capture_start_;
 }
 
 

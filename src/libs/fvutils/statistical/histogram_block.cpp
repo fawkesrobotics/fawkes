@@ -44,9 +44,9 @@ namespace firevision {
  * @param depth the depth of the histogram
  */
 HistogramBlock::HistogramBlock(histogram_block_type_t type, hint_t object_type,
-			       uint16_t width, uint16_t height, uint16_t depth)
-  : FireVisionDataFileBlock(type, width * height * depth * sizeof(uint32_t), 
-			    sizeof(histogram_block_header_t))
+                               uint16_t width, uint16_t height, uint16_t depth)
+: FireVisionDataFileBlock(type, (size_t) width * height * depth * sizeof(uint32_t), 
+                          sizeof(histogram_block_header_t))
 {
   _block_header = (histogram_block_header_t*) _spec_header;
   _block_header->width = width;

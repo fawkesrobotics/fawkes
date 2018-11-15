@@ -742,14 +742,14 @@ FirewireCamera::parse_set_focus(const char *focus)
     _auto_focus = false;
   } else {
     char *endptr = NULL;
-    long int focus = strtol(f.c_str(), &endptr, 10);
+    long int focus_value = strtol(f.c_str(), &endptr, 10);
     if ( endptr[0] != 0 ) {
       throw TypeMismatchException("Focus value is invalid. String to int conversion failed");
     } else if ( focus < 0 ) {
-      throw OutOfBoundsException("'Focus value < 0", focus, 0, 0xFFFFFFFF);
+      throw OutOfBoundsException("'Focus value < 0", focus_value, 0, 0xFFFFFFFF);
     }
     _auto_focus = false;
-    _focus = focus;
+    _focus = focus_value;
     _do_set_focus = true;
   }
 }

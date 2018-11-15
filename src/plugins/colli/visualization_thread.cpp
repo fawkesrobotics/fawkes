@@ -124,8 +124,8 @@ ColliVisualizationThread::loop()
   for( unsigned int i=0; i<360; ++i ) {
     float len = roboshape_->get_robot_length_for_rad( rad );
     geometry_msgs::Point p;
-    p.x = len * cosf(rad);
-    p.y = len * sinf(rad);
+    p.x = (double)len * cosf(rad);
+    p.y = (double)len * sinf(rad);
     p.z = 0;
     grid.cells.push_back(p);
     rad += radinc;
@@ -145,8 +145,8 @@ ColliVisualizationThread::loop()
   for( int y=0; y < occ_grid_->get_height(); ++y ) {
     for( int x=0; x < occ_grid_->get_width(); ++x ) {
       geometry_msgs::Point p;
-      p.x =  (float)(x - gridpos_laser.x) * grid.cell_width;
-      p.y =  (float)(y - gridpos_laser.y) * grid.cell_height;
+      p.x =  (double)(x - gridpos_laser.x) * grid.cell_width;
+      p.y =  (double)(y - gridpos_laser.y) * grid.cell_height;
       p.z = 0;
 
       prob = occ_grid_->get_prob(x,y);
@@ -180,8 +180,8 @@ ColliVisualizationThread::loop()
   point_t gridpos_robo = search_->get_robot_position();
   for( std::vector<point_t>::iterator it=plan->begin(); it!=plan->end(); ++it ) {
     geometry_msgs::Point p;
-    p.x =  (float)((*it).x - gridpos_robo.x) * grid.cell_width;
-    p.y =  (float)((*it).y - gridpos_robo.y) * grid.cell_height;
+    p.x =  (double)((*it).x - gridpos_robo.x) * grid.cell_width;
+    p.y =  (double)((*it).y - gridpos_robo.y) * grid.cell_height;
     p.z = 0;
     grid.cells.push_back( p );
   }

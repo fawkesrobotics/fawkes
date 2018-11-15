@@ -154,14 +154,14 @@ ProtobufStreamServer::Session::handle_write(const boost::system::error_code& err
   if (! error) {
     std::lock_guard<std::mutex> lock(outbound_mutex_);
     if (! outbound_queue_.empty()) {
-      QueueEntry *entry = outbound_queue_.front();
+      QueueEntry *front_entry = outbound_queue_.front();
       outbound_queue_.pop();
-      boost::asio::async_write(socket_, entry->buffers,
+      boost::asio::async_write(socket_, front_entry->buffers,
 			       boost::bind(&ProtobufStreamServer::Session::handle_write,
 					   shared_from_this(),
 					   boost::asio::placeholders::error,
 					   boost::asio::placeholders::bytes_transferred,
-					   entry));
+					   front_entry));
     } else {
       outbound_active_ = false;
     }

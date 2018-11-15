@@ -107,8 +107,8 @@ Circle::fitCircle (vector< upoint_t > &points)
         center.y = (float)( (   + A00 * b1 * A22 + b0 * A12 * A20 + A02 * A10 * b2
                                 - A00 * A12 * b2 - b0 * A10 * A22 - A02 * b1 * A20 ) / delta);
         radius = (float)sqrtf( ( + A00 * A11 * b2 + A01 * b1 * A20 + b0 * A10 * A21
-                                - A00 * b1 * A21 - A01 * A10 * b2 - b0 * A11 * A20 ) / delta
-                                + center.x * center.x + center.y * center.y);
+                                 - A00 * b1 * A21 - A01 * A10 * b2 - b0 * A11 * A20 ) / delta
+                               + (double) center.x * center.x + (double) center.y * center.y);
         count = points.size();
 }
 

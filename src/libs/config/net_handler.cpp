@@ -103,10 +103,10 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       void *m = prepare_value_msg<uint32_t>(i->path(), i->is_default(), i->is_list(),
 					    num_values, data_size, (void**)&values);
       if (i->is_list()) {
-	std::vector<unsigned int> c_values = i->get_uints();
-	for (uint16_t i = 0; i < num_values; ++i)  values[0] = c_values[0];
+        std::vector<unsigned int> c_values = i->get_uints();
+        for (uint16_t j = 0; j < num_values; ++j)  values[j] = c_values[j];
       } else {
-	values[0] = i->get_uint();
+        values[0] = i->get_uint();
       }
       hub_->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_UINT_VALUE, m, data_size);
     } catch (Exception &e) {
@@ -123,10 +123,10 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       void *m = prepare_value_msg<int32_t>(i->path(), i->is_default(), i->is_list(),
 					    num_values, data_size, (void**)&values);
       if (i->is_list()) {
-	std::vector<int> c_values = i->get_ints();
-	for (uint16_t i = 0; i < num_values; ++i)  values[0] = c_values[0];
+        std::vector<int> c_values = i->get_ints();
+        for (uint16_t j = 0; j < num_values; ++i)  values[j] = c_values[j];
       } else {
-	values[0] = i->get_int();
+        values[0] = i->get_int();
       }
       hub_->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_INT_VALUE, m, data_size);
     } catch (Exception &e) {
@@ -143,10 +143,10 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       void *m = prepare_value_msg<int32_t>(i->path(), i->is_default(), i->is_list(),
 					    num_values, data_size, (void**)&values);
       if (i->is_list()) {
-	std::vector<bool> c_values = i->get_bools();
-	for (uint16_t i = 0; i < num_values; ++i)  values[0] = (c_values[0] ? 1 : 0);
+        std::vector<bool> c_values = i->get_bools();
+        for (uint16_t j = 0; j < num_values; ++j)  values[j] = (c_values[j] ? 1 : 0);
       } else {
-	values[0] = i->get_bool() ? 1 : 0;
+        values[0] = i->get_bool() ? 1 : 0;
       }
       hub_->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_BOOL_VALUE, m, data_size);
     } catch (Exception &e) {
@@ -163,10 +163,10 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
       void *m = prepare_value_msg<float>(i->path(), i->is_default(), i->is_list(), num_values,
 					 data_size, (void**)&values);
       if (i->is_list()) {
-	std::vector<float> c_values = i->get_floats();
-	for (uint16_t i = 0; i < num_values; ++i)  values[0] = c_values[0];
+        std::vector<float> c_values = i->get_floats();
+        for (uint16_t j = 0; j < num_values; ++j)  values[j] = c_values[j];
       } else {
-	values[0] = i->get_float();
+        values[0] = i->get_float();
       }
       hub_->send(clid, FAWKES_CID_CONFIGMANAGER, MSG_CONFIG_FLOAT_VALUE, m, data_size);
     } catch (Exception &e) {
@@ -192,11 +192,11 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 	cd->num_values = s.size();
 
 	char *tmp = ((char *)m + sizeof(config_descriptor_t));
-	for (unsigned int i = 0; i < s.size(); ++i) {
+	for (unsigned int j = 0; j < s.size(); ++j) {
 	  config_string_value_t *sv = (config_string_value_t *)tmp;
 	  char *msg_string = tmp + sizeof(config_string_value_t);
-	  sv->s_length = s[i].length();
-	  strcpy(msg_string, s[i].c_str());
+	  sv->s_length = s[j].length();
+	  strcpy(msg_string, s[j].c_str());
 	  tmp += sizeof(config_string_value_t) + sv->s_length + 1;
 	}
 

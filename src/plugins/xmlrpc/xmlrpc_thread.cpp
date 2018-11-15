@@ -125,7 +125,5 @@ XmlRpcThread::loop()
 {
   if (custom_server_) {
     webserver_->process();
-  } else {
-    
   }
 }

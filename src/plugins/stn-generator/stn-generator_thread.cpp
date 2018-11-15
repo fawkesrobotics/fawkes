@@ -120,8 +120,11 @@ StnGeneratorThread::loop()
   }
   stn_->generate();
   if ( cfg_draw_graph_ ) {
-    //FIXME this throws an out_of_range exception in larger graphs
-    stn_->drawGraph();
+	  try {
+		  stn_->drawGraph();
+	  } catch (std::out_of_range &e) {
+		  logger->log_warn(name(), "Failed to draw graph: %s", e.what());
+	  }
   }
   logger->log_info(name(), "STN Generation finished.");
 

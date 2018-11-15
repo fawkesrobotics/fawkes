@@ -253,7 +253,7 @@ RoombaJoystickThread::loop()
       int16_t radmm = (int16_t)roundf(radius);
       // special case handling for "turn on place"
       if (fabsf(joy_if_->axis(cfg_axis_forward_)) < 0.1) {
-	      velmm =  (int16_t)fabs(sideward * velocity) * cfg_max_velocity_;
+	      velmm =  (int16_t)((double)fabsf(sideward * velocity) * cfg_max_velocity_);
 	      radmm =  (int16_t)copysignf(1, sideward);
       }
 

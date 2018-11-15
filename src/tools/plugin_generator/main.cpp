@@ -56,8 +56,7 @@ generate_plugin(std::string author_name, std::string plugin_name, std::string de
 bool
 plugin_name_valid(std::string plugin_name){
   for (char& c : plugin_name){
-    if (isalpha(c) || c == '-' || c == '_') {
-    } else {
+    if (! isalpha(c) && c != '-' && c != '_') {
       return false;
     }
   }
