@@ -143,7 +143,6 @@ LaserPlugin::LaserPlugin(Configuration *config)
 
   if ( thread_list.empty() ) {
     throw Exception("No laser devices configured, aborting");
-  } else {
   }
 }
 
