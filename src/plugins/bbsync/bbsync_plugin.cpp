@@ -78,7 +78,6 @@ BlackBoardSynchronizationPlugin::BlackBoardSynchronizationPlugin(Configuration *
 
   if ( thread_list.empty() ) {
     throw Exception("No synchronization peers configured, aborting");
-  } else {
   }
 }
 
