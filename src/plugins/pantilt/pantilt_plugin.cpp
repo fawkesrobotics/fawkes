@@ -93,7 +93,6 @@ PanTiltPlugin::PanTiltPlugin(Configuration *config)
 
   if ( thread_list.empty() ) {
     throw Exception("No synchronization peers configured, aborting");
-  } else {
   }
   thread_list.push_back(sensor_thread);
 }
