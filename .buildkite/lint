@@ -41,10 +41,9 @@ MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --fir
 error_exit () {
 	MSG="$@"
 	if [ -n "${BUILDKITE:-}" ]; then
-		buildkite-agent annotate --context ctx-creator --style warning "$MSG"
-	else
-		print_fail "lint" "$MSG"
+		buildkite-agent annotate --context buildfail --style error "$MSG"
 	fi
+	print_fail "lint" "$MSG"
 	exit 1
 }
 
