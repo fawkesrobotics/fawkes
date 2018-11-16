@@ -32,6 +32,10 @@ set -eu
 # Enable debug output, only enable temporarily, rather verbose
 #set -x
 
+# We need to update the master to determine the merge base
+# For now, trust the post-checkout hook to have done this.
+# git fetch origin master
+
 MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "origin/master") | head -1)
 
 error_exit () {

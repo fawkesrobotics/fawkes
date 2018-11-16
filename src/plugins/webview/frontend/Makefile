@@ -17,8 +17,9 @@ BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-NG_CLI=$(shell type -p ng)
-NPM=$(shell type -p npm)
+NG_CLI = $(shell type -p ng)
+NPM    = $(shell type -p npm)
+NG_BUILD_FLAGS ?= --prod --build-optimizer
 
 ifneq ($(NG_CLI),)
   ifneq ($(NPM),)
@@ -34,7 +35,7 @@ endif
 
 dist/index.html: $(SRCS_FRONTEND) $(SRCDIR)/node_modules
 	$(SILENT) echo -e "$(INDENT_PRINT)[Angular] $(TBOLDGRAY)Webview Frontend$(TNORMAL)"
-	$(SILENT)ng build --prod --build-optimizer
+	$(SILENT)ng build $(NG_BUILD_FLAGS)
 
 $(SRCDIR)/node_modules:
 	$(SILENT) echo -e "$(INDENT_PRINT)[npm] $(TBOLDGRAY)Installing dependencies via npm$(TNORMAL)"
