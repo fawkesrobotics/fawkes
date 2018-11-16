@@ -41,10 +41,9 @@ MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --fir
 error_exit () {
 	MSG="$@"
 	if [ -n "${BUILDKITE:-}" ]; then
-		buildkite-agent annotate --context ctx-creator --style warning "$MSG"
-	else
-		print_fail "lint" "$MSG"
+		buildkite-agent annotate --context buildfail --style error "$MSG"
 	fi
+	print_fail "lint" "$MSG"
 	exit 1
 }
 
@@ -130,26 +129,30 @@ check_branch_name () {
 
 	BRANCH_OK=false
 
-	OIFS=$IFS
-	IFS=","
-	set -f
-	declare -a BRANCHES=(${AUTHOR_BRANCHES[$AUTHOR_INDEX]})
-	for ((i=0; i<${#BRANCHES[@]}; i++)); do
-		BRANCHES[$i]=${BRANCHES[$i]//@/${AUTHOR_GITHUB[$AUTHOR_INDEX]}}
-	done
-	IFS=$OIFS
+	if [ "${BUILDKITE_BRANCH:-}" == "master" ]; then
+		BRANCK_OK=true
+	else
+		OIFS=$IFS
+		IFS=","
+		set -f
+		declare -a BRANCHES=(${AUTHOR_BRANCHES[$AUTHOR_INDEX]})
+		for ((i=0; i<${#BRANCHES[@]}; i++)); do
+			BRANCHES[$i]=${BRANCHES[$i]//@/${AUTHOR_GITHUB[$AUTHOR_INDEX]}}
+		done
+		IFS=$OIFS
 
-	for ((i=0; i<${#BRANCHES[@]}; i++)); do
-		B=${BRANCHES[$i]}
-		case "${BUILDKITE_BRANCH-}" in ($B)
-			BRANCH_OK=true;
-			break;
-			;;
-		esac
-	done
+		for ((i=0; i<${#BRANCHES[@]}; i++)); do
+			B=${BRANCHES[$i]}
+			case "${BUILDKITE_BRANCH-}" in ($B)
+				BRANCH_OK=true;
+				break;
+				;;
+			esac
+		done
+	fi
 
 	if [ "$BRANCH_OK" != "true" ]; then
-		error_exit "Disallowed branch name '${BUILDKITE_BRANCH-}' (must match one of '${AUTHOR_BRANCHES[$AUTHOR_INDEX]}')"
+		error_exit "Disallowed branch name '${BUILDKITE_BRANCH-}' (must match '${AUTHOR_BRANCHES[$AUTHOR_INDEX]}')"
 	fi
 	set +f
 }
@@ -237,7 +240,25 @@ check_commit_authors () {
 
 check_gitlint ()
 {
-	gitlint --commits "$MERGE_BASE..HEAD" || error_exit "Gitlint reported errors"
+	GITLINT_OUTPUT=$(gitlint --commits "$MERGE_BASE..HEAD" 2>&1 | tee /dev/stderr ) || {
+		GITLINT_ERROR=$?
+		if [ -n "${BUILDKITE:-}" ]; then
+			URL_PREFIX=
+			if [[ "${BUILDKITE_REPO:-}" =~ ^(https://|git@)github.com(/|:)([^/]+/[^/.]+) ]]; then
+				URL_PREFIX="https://github.com/${BASH_REMATCH[3]}/commit"
+			fi
+
+			{
+				echo "#### Gitlint Error";
+				sed <<<"$GITLINT_OUTPUT" \
+						-E \
+						-e 's/^([^:]+): ([^:]+): "(.+)"$/- Line \1: *\2*\n```\n\3\n```/g' \
+						-e "s|^Commit ([0-9a-fA-F]+):$|*Commit [\1]($URL_PREFIX\/\1):*|g"
+			} | buildkite-agent annotate --context gitlint --style error
+		fi
+		print_fail "Gitlint exited with errors. See log."
+		exit $GITLINT_ERROR
+	}
 }
 
 
