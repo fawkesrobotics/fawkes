@@ -11,6 +11,7 @@ docker-plugin-base: &docker-plugin-base
   debug: true
   workdir: /workdir
   volumes: [".:/workdir"]
+  environment: ["BUILDKITE"]
 
 steps:
   - label: ":memo: Linter"
@@ -20,6 +21,7 @@ steps:
       docker#v2.0.0:
         <<: *docker-plugin-base
         environment:
+          - BUILDKITE
           - BUILDKITE_REPO
           - BUILDKITE_BRANCH
           - BUILDKITE_BUILD_CREATOR
