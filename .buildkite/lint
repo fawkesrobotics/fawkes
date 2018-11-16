@@ -130,7 +130,7 @@ check_branch_name () {
 	BRANCH_OK=false
 
 	if [ "${BUILDKITE_BRANCH:-}" == "master" ]; then
-		BRANCK_OK=true
+		BRANCH_OK=true
 	else
 		OIFS=$IFS
 		IFS=","
