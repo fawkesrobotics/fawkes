@@ -22,3 +22,9 @@ Robotino, Nao, or Roomba are supported out-of-the-box. Fawkes also integrates wi
 frameworks like ROS or Player and integrates third party software like MongoDB, Prometheus, CLIPS,
 or OpenNI. By using ideas from aspect-oriented programming, and run-time requirement assertion by
 the framework, it is easy to access these resources with only a few lines of code.
+
+- [Installing Fawkes](https://trac.fawkesrobotics.org/wiki/InstallingFawkes)
+- [Getting Started](https://trac.fawkesrobotics.org/wiki/GettingStartedGuide)
+- [Plugins](https://trac.fawkesrobotics.org/wiki/Plugins)
+- [Configuration](https://trac.fawkesrobotics.org/wiki/Configuration)
+- [Wiki](https://trac.fawkesrobotics.org)
