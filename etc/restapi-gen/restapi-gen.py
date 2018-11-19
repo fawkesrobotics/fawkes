@@ -246,7 +246,7 @@ if __name__ == '__main__':
 
 	jinja = jinja2.Environment(loader=jinja2.FileSystemLoader(args.template_dir),
 	                           extensions=[RaiseExtension],
-	                           autoescape=False,
+	                           autoescape=True,
 	                           line_statement_prefix = '%');
 
 	jinja.filters['reftype']          = filter_reftype
