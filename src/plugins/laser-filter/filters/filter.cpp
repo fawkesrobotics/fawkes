@@ -95,13 +95,11 @@ LaserDataFilter::~LaserDataFilter()
 {
   if (own_in_) {
     for (unsigned int i = 0; i < in.size(); ++i) {
-      free(in[i]->values);
       delete in[i];
     }
   }
   if (own_out_) {
     for (unsigned int i = 0; i < out.size(); ++i) {
-      free(out[i]->values);
       delete out[i];
     }
   }
@@ -135,7 +133,6 @@ LaserDataFilter::set_out_vector(std::vector<Buffer *> &out)
 
   if (own_out_) {
     for (unsigned int i = 0; i < this->out.size(); ++i) {
-      free(this->out[i]->values);
       delete this->out[i];
     }
   }
@@ -159,8 +156,7 @@ LaserDataFilter::set_out_data_size(unsigned int data_size)
   if (out_data_size != data_size) {
     if (own_out_) {
       for (unsigned int i = 0; i < out.size(); ++i) {
-	free(out[i]->values);
-	out[i]->values = (float *)malloc(data_size * sizeof(float));
+	      out[i]->resize(data_size);
       }
     }
   }
@@ -241,4 +237,20 @@ LaserDataFilter::Buffer::~Buffer()
   if (values) {
 	  free(values);
   }
+}
+
+/** Resize buffer size.
+ * Free data array and create a new one. All values are invalidated.
+ * @param num_values if not zero allocates the values arrays with the
+ */
+void
+LaserDataFilter::Buffer::resize(unsigned int num_values)
+{
+	if (values) {
+		free(values);
+		values = NULL;
+	}
+	if (num_values > 0) {
+		values = (float *)malloc(num_values * sizeof(float));
+	}
 }
