@@ -27,10 +27,10 @@ Array<{{ type(property['items']) }}>
 % for propname, p in schema['properties'].items()
 %   if 'enum' in p
   // tslint:disable-next-line:max-line-length
-  export type {{ propname | capitalize }}Enum = {{ p['enum'] | map('quote') | join(' | ') }};
+  export type {{ propname | capitalize }}Enum = {{ p['enum'] | map('quote') | join(' | ') | safe }};
   export const {{ propname | capitalize }}Enum = {
 %     for e in p.enum
-    {{ e | sanitize }}: {{ e|quote }} as {{ propname | capitalize }}Enum{% if not loop.last %},{% endif %}
+    {{ e | sanitize }}: {{ e|quote|safe }} as {{ propname | capitalize }}Enum{% if not loop.last %},{% endif %}
 %     endfor
   };
 %   endif
