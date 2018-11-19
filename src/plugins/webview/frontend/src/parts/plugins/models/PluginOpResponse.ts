@@ -24,6 +24,7 @@ export interface PluginOpResponse {
 export namespace PluginOpResponse {
   export const API_VERSION = 'v1beta1';
 
+  // tslint:disable-next-line:max-line-length
   export type StateEnum = 'LOADED' | 'AVAILABLE' | 'UNLOADED' | 'ERROR';
   export const StateEnum = {
     LOADED: 'LOADED' as StateEnum,

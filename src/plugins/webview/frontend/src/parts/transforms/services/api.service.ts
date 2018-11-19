@@ -26,13 +26,16 @@ export class TransformsApiService {
               private http: HttpClient) {}
 
   public get_graph(pretty?: boolean): Observable<TransformsGraph> {
+    // tslint:disable-next-line:prefer-const
     let params = new HttpParams();
     if (pretty) {
       params = params.set('pretty', pretty.toString());
     }
+    // tslint:disable-next-line:prefer-const
     let headers = new HttpHeaders();
 
     headers = headers.set('Accept', 'application/json');
+    // tslint:disable-next-line:max-line-length
     return this.http.get<TransformsGraph>(`${this.backend.url_for('api')}/transforms/graph`,
       { headers: headers, params: params,
         observe: 'body', responseType: 'json' });

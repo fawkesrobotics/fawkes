@@ -26,13 +26,16 @@ export class ImageApiService {
               private http: HttpClient) {}
 
   public list_images(pretty?: boolean): Observable<ImageInfo[]> {
+    // tslint:disable-next-line:prefer-const
     let params = new HttpParams();
     if (pretty) {
       params = params.set('pretty', pretty.toString());
     }
+    // tslint:disable-next-line:prefer-const
     let headers = new HttpHeaders();
 
     headers = headers.set('Accept', 'application/json');
+    // tslint:disable-next-line:max-line-length
     return this.http.get<ImageInfo[]>(`${this.backend.url_for('api')}/images`,
       { headers: headers, params: params,
         observe: 'body', responseType: 'json' });
@@ -42,12 +45,15 @@ export class ImageApiService {
     if (id === null || id === undefined) {
       throw new Error('Required parameter id is null or undefined (get_image)');
     }
+    // tslint:disable-next-line:prefer-const
     let params = new HttpParams();
     if (pretty) {
       params = params.set('pretty', pretty.toString());
     }
-    const headers = new HttpHeaders();
+    // tslint:disable-next-line:prefer-const
+    let headers = new HttpHeaders();
 
+    // tslint:disable-next-line:max-line-length
     return this.http.get(`${this.backend.url_for('api')}/images/${encodeURIComponent(String(id))}`,
       { headers: headers, params: params,
         observe: 'response', responseType: 'text' });
