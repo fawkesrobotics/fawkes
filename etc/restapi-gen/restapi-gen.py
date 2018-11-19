@@ -274,7 +274,7 @@ if __name__ == '__main__':
 		              "name": '.'.join(fname_p[:-2])})
 
 	specfile = open(args.api, "r")
-	spec = yaml.load(specfile)
+	spec = yaml.safe_load(specfile)
 
 
 	for f in files:
