@@ -1,0 +1,7 @@
+# Configuration for remark-lint
+# https://github.com/remarkjs/remark-lint
+# This is based on remark-preset-lint-recommended.
+# SPDX-License-Identifier: GPL-2.0-or-later
+plugins:
+  - remark-preset-lint-recommended
+  - ["remark-lint-list-item-indent", "space"]
