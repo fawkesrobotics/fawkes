@@ -131,7 +131,7 @@ int main( int argc, char** argv )
 	  
 	  if ( max > num_neighbours * 0.1 && max_color != C_OTHER )
 	  {
-	    printf("max=%d  max_color=%d  num_neighbours=%d\n", max, max_color, num_neighbours);
+	    printf("max=%u  max_color=%d  num_neighbours=%u\n", max, max_color, num_neighbours);
  	    cmpp->set( y, w, h, max_color );
 	  }
 	}  // h
