@@ -38,10 +38,9 @@ namespace fawkes {
 
 /** Constructor. */
 KatanaControllerKni::KatanaControllerKni()
+: cfg_device_("/dev/ttyS0"),
+  cfg_kni_conffile_("/etc/kni3/hd300/katana6M180.cfg")
 {
-  // setting default setup values
-  cfg_device_ = "/dev/ttyS0";
-  cfg_kni_conffile_ = "/etc/kni3/hd300/katana6M180.cfg";
   cfg_read_timeout_ = 100;
   cfg_write_timeout_ = 0;
 
