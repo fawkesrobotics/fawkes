@@ -756,7 +756,7 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
 	  }
 	}
 #ifdef LASERGUI_DEBUG_PRINT_TRACKS
-	printf("\n    trackid %d\n", id);
+	printf("\n    trackid %u\n", id);
 #endif
 	unsigned int i(0);
 	unsigned int j(0);
