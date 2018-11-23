@@ -1402,21 +1402,22 @@ Firestation::on_service_removed( NetworkService* service )
   const char* type   = service->type();
   const char* domain = service->domain();
 
-  Gtk::TreeModel::Children children = m_fuse_tree_store->children();
-  Gtk::TreeModel::iterator rit;
-  for (rit = children.begin(); rit != children.end(); ++rit)
-    {
-      Glib::ustring n = (*rit)[m_fuse_columns.m_service_name];
-      Glib::ustring t = (*rit)[m_fuse_columns.m_service_type];
-      Glib::ustring d = (*rit)[m_fuse_columns.m_service_domain];
+  Gtk::TreeModel::iterator rit = m_fuse_tree_store->children().begin();
+  while (rit != m_fuse_tree_store->children().end())
+  {
+	  Glib::ustring n = (*rit)[m_fuse_columns.m_service_name];
+	  Glib::ustring t = (*rit)[m_fuse_columns.m_service_type];
+	  Glib::ustring d = (*rit)[m_fuse_columns.m_service_domain];
 
-      if ( strcmp( n.c_str(), name) == 0 &&
-	   strcmp( t.c_str(), type) == 0 &&
-	   strcmp( d.c_str(), domain) == 0 )
-	{
-	  m_fuse_tree_store->erase(rit);
-	}
-    }
+	  if (strcmp( n.c_str(), name) == 0 &&
+	      strcmp( t.c_str(), type) == 0 &&
+	      strcmp( d.c_str(), domain) == 0)
+	  {
+		  rit = m_fuse_tree_store->erase(rit);
+	  } else {
+		  ++rit;
+	  }
+  }
 
   m_ftw->remove_fountain_service(name);
   m_filw->remove_fountain_service(name);
