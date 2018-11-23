@@ -623,7 +623,7 @@ OpenPRSProtobuf::oprs_pb_add_list(void *msgptr, std::string field_name, Term *va
 {
   std::shared_ptr<google::protobuf::Message> *m =
     static_cast<std::shared_ptr<google::protobuf::Message> *>(msgptr);
-  if (!(m || *m)) return;
+  if (!(m && *m)) return;
 
   const Descriptor *desc       = (*m)->GetDescriptor();
   const FieldDescriptor *field = desc->FindFieldByName(field_name);
@@ -802,7 +802,7 @@ OpenPRSProtobuf::oprs_pb_send(long int client_id, void *msgptr)
 {
   std::shared_ptr<google::protobuf::Message> *m =
     static_cast<std::shared_ptr<google::protobuf::Message> *>(msgptr);
-  if (!(m || *m)) {
+  if (!(m && *m)) {
     //logger_->log_warn("RefBox", "Cannot send to %li: invalid message", client_id);
     return;
   }
@@ -846,7 +846,7 @@ OpenPRSProtobuf::oprs_pb_broadcast(long int peer_id, void *msgptr)
 {
   std::shared_ptr<google::protobuf::Message> *m =
     static_cast<std::shared_ptr<google::protobuf::Message> *>(msgptr);
-  if (!(m || *m)) {
+  if (!(m && *m)) {
     fprintf(stderr, "Cannot send broadcast: invalid message");
     return;
   }
@@ -902,7 +902,7 @@ OpenPRSProtobuf::oprs_pb_field_list(void *msgptr, std::string field_name)
 {
   std::shared_ptr<google::protobuf::Message> *m =
     static_cast<std::shared_ptr<google::protobuf::Message> *>(msgptr);
-  if (!(m || *m)) return build_id(declare_atom("INVALID-MESSAGE"));
+  if (!(m && *m)) return build_id(declare_atom("INVALID-MESSAGE"));
 
   const Descriptor *desc       = (*m)->GetDescriptor();
   const FieldDescriptor *field = desc->FindFieldByName(field_name);
@@ -986,7 +986,7 @@ OpenPRSProtobuf::oprs_pb_field_is_list(void *msgptr, std::string field_name)
 {
   std::shared_ptr<google::protobuf::Message> *m =
     static_cast<std::shared_ptr<google::protobuf::Message> *>(msgptr);
-  if (!(m || *m)) return false;
+  if (!(m && *m)) return false;
 
   const Descriptor *desc       = (*m)->GetDescriptor();
   const FieldDescriptor *field = desc->FindFieldByName(field_name);
