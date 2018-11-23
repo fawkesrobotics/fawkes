@@ -302,7 +302,7 @@ SickTiM55xCommonAcquisitionThread::parse_datagram(const unsigned char *datagram,
 
   // 22: Scaling offset (00000000) -- always 0
   // 23: Starting angle (FFF92230)
-  int starting_angle_val = -1;
+  unsigned int starting_angle_val = 0;
   sscanf(fields[23].c_str(), "%x", &starting_angle_val);
   float angle_min = (starting_angle_val / 10000.0) / 180.0 * M_PI - M_PI / 2;
 
