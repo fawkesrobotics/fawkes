@@ -118,7 +118,12 @@ DirectRobotinoComMessage::DirectRobotinoComMessage(const unsigned char *msg, siz
 	size_t escaped_consumed = unescape_data();
 
 	if (escaped_consumed < msg_size) {
+		unsigned char *old_data = escaped_data_;
 		escaped_data_ = (unsigned char *)realloc(escaped_data_, escaped_consumed);
+		if (!escaped_data_) {
+			free(old_data);
+			throw Exception("Failed to allocate more memory");
+		}
 		escaped_data_size_ = escaped_consumed;
 	}
 
@@ -205,7 +210,12 @@ DirectRobotinoComMessage::inc_payload_by(uint16_t count)
 
 	if (payload_size_ + count >= data_size_ - MSG_METADATA_SIZE) {
 		// need to realloc for more data
+		unsigned char *old_data = data_;
 		data_ = (unsigned char *)realloc(data_, data_size_ + 128);
+		if (!data_) {
+			free(old_data);
+			throw Exception("Failed to allocate more memory");
+		}
 	}
 	payload_size_ += count;
 	cur_cmd_[1] += count;
@@ -753,7 +763,12 @@ DirectRobotinoComMessage::unescape_data()
 	}
 
 	if (data_size_ < 3) {
+		unsigned char *old_data = data_;
 		data_ = (unsigned char *)realloc(data_, 3);
+		if (!data_) {
+			free(old_data);
+			throw Exception("Failed to allocate more memory");
+		}
 		data_[0] = MSG_HEAD;
 	}
 	// +1: HEAD
@@ -761,7 +776,12 @@ DirectRobotinoComMessage::unescape_data()
 	size_t unescaped_size = parse_uint16(&data_[1]) + 2; // +2: checksum
 
 	if (data_size_ < unescaped_size + 3) {
+		unsigned char *old_data = data_;
 		data_ = (unsigned char *)realloc(data_, unescaped_size + 3); // +3: HEAD, LENGTH
+		if (!data_) {
+			free(old_data);
+			throw Exception("Failed to allocate more memory");
+		}
 		data_size_ = unescaped_size + 3;
 	}
 	payload_size_ = unescaped_size - 2; // -2: no checksum
