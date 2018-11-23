@@ -225,8 +225,9 @@ ProcRRDThread::init()
 
   
 
-  logger->log_info(name(), "ProcRRD logging network interface %s and processes %s with a samplerate of %lu second(s)",
-       netinterface_.c_str(), p.c_str(), samplerate_);
+  logger->log_info(name(), "ProcRRD logging network interface %s and "
+                           "processes %s with a samplerate of %d second(s)",
+                   netinterface_.c_str(), p.c_str(), samplerate_);
 
   config->add_change_handler(this);
 }
@@ -531,18 +532,19 @@ ProcRRDThread::get_process_id(const char *process)
   // Open /proc/ directory
 	dir_p = opendir("/proc/");
   // Reading /proc/ entries
-	while(NULL != (dir_entry_p = readdir(dir_p))) {
+	while (NULL != (dir_entry_p = readdir(dir_p))) {
 		// Checking for numbered directories
 		if (strspn(dir_entry_p->d_name, "0123456789") == strlen(dir_entry_p->d_name)) {
       std::string f = "/proc/" + std::string(dir_entry_p->d_name) + "/status";
       // open /proc/PID/status
       file = fopen(f.c_str(), "r");
       char name[256];
-      if(file) {
-        fscanf(file, "Name: %s", name);
+      if (file) {
+        fscanf(file, "Name: %255s", name);
         fclose(file);
       }
-      if(strcmp(process, name) == 0) {
+      name[0] = '\0';
+      if (strcmp(process, name) == 0) {
         result = std::string(dir_entry_p->d_name);
 	      closedir(dir_p);
 	      return result;
@@ -580,14 +582,14 @@ ProcRRDThread::loop()
   while (file && fgets(line, 1024, file) != NULL){
     // sscanf the device to get rid of leading whitespaces
     char dev[100];
-    sscanf(line, "%s", dev);
+    sscanf(line, "%99s", dev);
 
     if (strncmp(dev, (netinterface_+":").c_str(), netinterface_.length()+1) == 0){
       sscanf(line, "%*s %llu %llu %llu %*u %*u %*u %*u %*u %llu %llu %llu %*u %*u %*u %*u %*u", &recv_bytes, &recv_packets, &recv_errors, &trans_bytes, &trans_packets, &trans_errors);
       break;
     }
   }
-  fclose(file);
+  if (file) fclose(file);
   try {
   	rrd_manager->add_data("network", "N:%llu:%llu:%llu:%llu:%llu:%llu", recv_bytes, recv_packets, recv_errors, trans_bytes, trans_packets, trans_errors);
   } catch (Exception &e) {
