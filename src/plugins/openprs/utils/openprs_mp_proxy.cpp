@@ -98,6 +98,7 @@ OpenPRSMessagePasserProxy::Mapping::Mapping(boost::asio::io_service &io_service,
 					    fawkes::Logger *logger)
   : io_service_(io_service), resolver_(io_service_),
     server_host_(mp_host), server_port_(mp_port), logger_(logger),
+    server_in_reg_reply_(0), server_in_str_len_(0), client_in_msg_type_(0),
     client_socket(io_service_), server_socket(io_service_)
 {
 }
