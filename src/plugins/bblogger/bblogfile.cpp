@@ -71,14 +71,17 @@ BBLogFile::BBLogFile(const char *filename, fawkes::Interface *interface,
     instance_factory_ = NULL;
     interface_ = interface;
     if ((strcmp(interface_->type(), interface_type_) != 0) ||
-	(strcmp(interface_->id(), interface_id_) != 0)) {
+        (strcmp(interface_->id(), interface_id_) != 0))
+    {
       fclose(f_);
       free(filename_);
       free(scenario_);
+      std::string interface_type(interface_type_);
+      std::string interface_id(interface_id_);
       free(interface_type_);
       free(interface_id_);
       throw Exception("Interface UID %s does not match expected %s:%s",
-		      interface_->uid(), interface_type_, interface_id_);
+                      interface_->uid(), interface_type.c_str(), interface_id.c_str());
     }
   } else {
     instance_factory_ = new BlackBoardInstanceFactory();
