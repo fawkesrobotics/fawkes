@@ -56,6 +56,15 @@ AMCLLaser::AMCLLaser(size_t max_beams, map_t* map) : AMCLSensor()
   this->max_beams = max_beams;
   this->map = map;
 
+  this->model_type = LASER_MODEL_BEAM;
+  this->z_hit = .95;
+  this->z_short = .05;
+  this->z_max = .05;
+  this->z_rand = .05;
+  this->sigma_hit = .2;
+  this->lambda_short = .1;
+  this->chi_outlier = 0.0;
+
   return;
 }
 

@@ -68,6 +68,13 @@ angle_diff(double a, double b)
 AMCLOdom::AMCLOdom() : AMCLSensor()
 {
   this->time = 0.0;
+
+  this->model_type = ODOM_MODEL_OMNI;
+  this->alpha1 = 5;
+  this->alpha2 = 5;
+  this->alpha3 = .6;
+  this->alpha4 = .6;
+  this->alpha5 = .6;
 }
 
 void
