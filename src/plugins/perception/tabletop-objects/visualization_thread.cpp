@@ -691,15 +691,15 @@ TabletopVisualizationThread::triangulate_hull()
 
   qh_triangulate();
 
-  int num_facets = qh num_facets;
+  int q_num_facets = qh num_facets;
 
-  table_triangle_vertices_.resize(num_facets * dim);
+  table_triangle_vertices_.resize(q_num_facets * dim);
   facetT *facet;
   size_t i = 0;
   FORALLfacets
   {
-    vertexT *vertex;
-    int vertex_n, vertex_i;
+	  vertexT *vertex = NULL;
+    int vertex_n, vertex_i = 0;
     FOREACHvertex_i_(facet->vertices)
     {
       table_triangle_vertices_[i + vertex_i][0] = vertex->point[0];
