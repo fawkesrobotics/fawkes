@@ -136,6 +136,7 @@ OpenPRSServerProxy::transmit_command_f(const std::string &recipient, const char 
 
   char *msg;
   if (vasprintf(&msg, format, arg) == -1) {
+	  va_end(arg);
     throw OutOfMemoryException("Cannot format OpenPRS client command string");
   }
   va_end(arg);

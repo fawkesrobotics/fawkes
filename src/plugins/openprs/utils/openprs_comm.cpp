@@ -166,6 +166,7 @@ OpenPRSComm::send_message_f(const std::string &recipient, const char *format, ..
   va_start(arg, format);
   char *msg;
   if (vasprintf(&msg, format, arg) == -1) {
+	  va_end(arg);
     throw OutOfMemoryException("Cannot format OpenPRS client command string");
   }
   va_end(arg);
@@ -184,6 +185,7 @@ OpenPRSComm::broadcast_message_f(const char *format, ...)
   va_start(arg, format);
   char *msg;
   if (vasprintf(&msg, format, arg) == -1) {
+	  va_end(arg);
     throw OutOfMemoryException("Cannot format OpenPRS client command string");
   }
   va_end(arg);
@@ -208,6 +210,7 @@ OpenPRSComm::multicast_message_f(const std::vector<std::string> &recipients, con
   va_start(arg, format);
   char *msg;
   if (vasprintf(&msg, format, arg) == -1) {
+	  va_end(arg);
     throw OutOfMemoryException("Cannot format OpenPRS client command string");
   }
   va_end(arg);
