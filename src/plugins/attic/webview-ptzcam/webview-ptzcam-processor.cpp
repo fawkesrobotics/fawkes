@@ -482,6 +482,7 @@ WebviewPtzCamRequestProcessor::process_effect(const fawkes::WebRequest *request)
 		StaticWebReply *r = new StaticWebReply(WebReply::HTTP_OK);
 		r->add_header("Content-type", "text/plain");
 		r->append_body("FAIL UNKNOWN EFFECT %s\n", effect_str.c_str());
+		delete setmsg;
 		return r;
 	}
 
