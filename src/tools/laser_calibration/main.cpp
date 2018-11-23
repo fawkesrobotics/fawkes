@@ -221,5 +221,11 @@ main(int argc, char **argv)
     time_offset_back_calibration.calibrate();
   }
 
+  delete tf_listener;
+  delete transformer;
+  delete netconf;
+  delete blackboard;
+  delete client;
+
   return 0;
 }
