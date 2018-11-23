@@ -140,7 +140,7 @@ RosImagesThread::update_images()
         topic_name.replace(pos, 1, "_");
       }
 
-      PublisherInfo &pubinfo = pubs_[*i];
+      PublisherInfo pubinfo;
       pubinfo.pub = it_->advertise(topic_name, 1);
       pubinfo.img = new SharedMemoryImageBuffer(i->c_str());
 
@@ -150,6 +150,8 @@ RosImagesThread::update_images()
       pubinfo.msg.encoding        = sensor_msgs::image_encodings::RGB8;
       pubinfo.msg.step            = pubinfo.msg.width * 3; // for RGB
       pubinfo.msg.data.resize(colorspace_buffer_size(RGB, pubinfo.msg.width, pubinfo.msg.height));
+
+      pubs_[*i] = pubinfo;
     }
   }
 }
