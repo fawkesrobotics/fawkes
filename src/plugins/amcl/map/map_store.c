@@ -66,6 +66,7 @@ int map_load_occ(map_t *map, const char *filename, double scale, int negate)
   if ((fscanf(file, "%2s \n", magic) != 1) || (strcmp(magic, "P5") != 0))
   {
     fprintf(stderr, "incorrect image format; must be PGM/binary");
+    fclose(file);
     return -1;
   }
 
@@ -78,6 +79,7 @@ int map_load_occ(map_t *map, const char *filename, double scale, int negate)
   if(fscanf(file, " %d %d \n %d \n", &width, &height, &depth) != 3)
   {
     fprintf(stderr, "Failed ot read image dimensions");
+    fclose(file);
     return -1;
   }
 
@@ -94,6 +96,7 @@ int map_load_occ(map_t *map, const char *filename, double scale, int negate)
     if (width != map->size_x || height != map->size_y)
     {
       //PLAYER_ERROR("map dimensions are inconsistent with prior map dimensions");
+      fclose(file);
       return -1;
     }
   }
