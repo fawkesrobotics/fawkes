@@ -405,6 +405,7 @@ PanTiltSonyEviD100PThread::WorkerThread::WorkerThread(std::string ptu_name,
   effect_pending_   = false;
 
   powered_          = cam_->is_powered();
+  power_desired_    = powered_;
 }
 
 
