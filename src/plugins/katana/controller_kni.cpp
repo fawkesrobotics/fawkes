@@ -47,6 +47,9 @@ KatanaControllerKni::KatanaControllerKni()
 
   gripper_last_pos_.clear();
   gripper_last_pos_.resize(2);
+
+  x_ = y_ = z_ = 0.;
+  phi_ = theta_ = psi_ = 0.;
 }
 
 /** Destructor. */
