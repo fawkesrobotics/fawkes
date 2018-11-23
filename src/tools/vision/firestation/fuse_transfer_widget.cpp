@@ -377,7 +377,7 @@ FuseTransferWidget::upload_lut()
   unsigned int port = (*i)[m_lut_record.port];
   Glib::ustring lut_id = (*i)[m_lut_record.lut_id];
 
-  printf("sending lut to %s:%d id %s\n", hostname.c_str(), port, lut_id.c_str());
+  printf("sending lut to %s:%u id %s\n", hostname.c_str(), port, lut_id.c_str());
 
   FuseLutContent* lut_content = new FuseLutContent( lut_id.c_str(), 
 						    m_local_colormap->get_buffer(),
