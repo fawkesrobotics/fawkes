@@ -879,8 +879,8 @@ NaoQiDCMThread::process_messages()
 
 
 void
-NaoQiDCMThread::send_commands(unsigned int servos, std::string what,
-			      float value, int time_offset)
+NaoQiDCMThread::send_commands(unsigned int servos, const std::string& what,
+                              float value, int time_offset)
 {
   /*
   almotion_->wbEnable(false);
@@ -908,8 +908,8 @@ NaoQiDCMThread::send_commands(unsigned int servos, std::string what,
 }
 
 void
-NaoQiDCMThread::send_command(std::string name, float value,
-                             std::string kind, int time_offset)
+NaoQiDCMThread::send_command(const std::string& name, float value,
+                             const std::string& kind, int time_offset)
 {
   AL::ALValue cmd;
 
