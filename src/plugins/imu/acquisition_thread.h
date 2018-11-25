@@ -45,7 +45,7 @@ class IMUAcquisitionThread
 {
  public:
   IMUAcquisitionThread(const char *thread_name, bool continuous,
-		       std::string &cfg_name, std::string &cfg_prefix);
+                       const std::string& cfg_name, const std::string& cfg_prefix);
   virtual ~IMUAcquisitionThread();
 
   bool lock_if_new_data();
