@@ -495,7 +495,7 @@ DynamixelChain::data_available()
  * @return list of detected servo IDs
  */
 DynamixelChain::DeviceList
-DynamixelChain::discover(unsigned int timeout_ms, const std::vector<unsigned int> servos)
+DynamixelChain::discover(unsigned int timeout_ms, const std::vector<unsigned int>& servos)
 {
   DeviceList rv;
   if (servos.size() == 0) {
