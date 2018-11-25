@@ -73,7 +73,7 @@ class BlackboardRestApi
 	InterfaceInfo gen_interface_info(const fawkes::InterfaceInfo &ii);
 	InterfaceData gen_interface_data(fawkes::Interface *iface, bool pretty);
 
-	std::string generate_graph(std::string for_owner = "");
+	std::string generate_graph(const std::string& for_owner = "");
 
  private:
 	fawkes::WebviewRestApi        *rest_api_;
