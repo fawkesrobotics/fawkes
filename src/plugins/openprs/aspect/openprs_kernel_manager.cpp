@@ -148,8 +148,8 @@ OpenPRSKernelManager::create_kernel(const std::string &kernel_name, bool use_xop
   const char *envp[envp_v.size() + 1];
   for (unsigned int i = 0; i < envp_v.size(); ++i) {
     envp[i] = envp_v[i].c_str();
-    if (envp_v[i].find("OPRS_DATA_PATH=") == 0) {
-      logger_->log_info("OpenPRSKernelMgr", "%s data path: %s", kernel_name.c_str(), envp[i]);
+    if (envp_v[i].compare(0, 15, "OPRS_DATA_PATH=") == 0) {
+	    logger_->log_info("OpenPRSKernelMgr", "%s data path: %s", kernel_name.c_str(), envp[i]);
     }
   }
   envp[envp_v.size()] = NULL;
