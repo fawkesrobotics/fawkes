@@ -38,8 +38,8 @@ class SkillGuiGraphViewport : public Papyrus::Gtk::Viewport
   ~SkillGuiGraphViewport();
 
   void set_gvjob(GVJ_t *job);
-  void set_graph_fsm(std::string fsm_name);
-  void set_graph(std::string graph);
+  void set_graph_fsm(const std::string& fsm_name);
+  void set_graph(const std::string& graph);
 
   bool get_update_graph();
   void set_update_graph(bool update);
