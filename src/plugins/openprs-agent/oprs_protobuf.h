@@ -116,17 +116,20 @@ class OpenPRSProtobuf
   void          oprs_pb_enable_server(int port);
   void          oprs_pb_disable_server();
 
-  Term *         oprs_pb_peer_create(std::string host, int port);
-  Term *         oprs_pb_peer_create_local(std::string host,
-					   int send_port, int recv_port);
-  Term *         oprs_pb_peer_create_crypto(std::string host, int port,
-					    std::string crypto_key = "", std::string cipher = "");
-  Term *         oprs_pb_peer_create_local_crypto(std::string host,
-						  int send_port, int recv_port,
-						  std::string crypto_key = "", std::string cipher = "");
-  void          oprs_pb_peer_destroy(long int peer_id);
-  void          oprs_pb_peer_setup_crypto(long int peer_id,
-					  std::string crypto_key, std::string cipher);
+  Term *         oprs_pb_peer_create(const std::string& host, int port);
+  Term *         oprs_pb_peer_create_local(const std::string& host,
+                                           int send_port, int recv_port);
+	Term *         oprs_pb_peer_create_crypto(const std::string& host, int port,
+	                                          const std::string& crypto_key = "",
+	                                          const std::string& cipher = "");
+  Term *         oprs_pb_peer_create_local_crypto(const std::string& host,
+                                                  int send_port, int recv_port,
+                                                  const std::string& crypto_key = "",
+                                                  const std::string& cipher = "");
+	void          oprs_pb_peer_destroy(long int peer_id);
+	void          oprs_pb_peer_setup_crypto(long int peer_id,
+	                                        const std::string& crypto_key,
+	                                        const std::string& cipher);
 
   bool          oprs_pb_events_pending();
   void          oprs_pb_process();
@@ -157,21 +160,22 @@ class OpenPRSProtobuf
 		       uint16_t component_id, uint16_t msg_type,
 		       std::shared_ptr<google::protobuf::Message> msg);
   void handle_peer_recv_error(long int peer_id, boost::asio::ip::udp::endpoint &endpoint, std::string msg);
-  void handle_peer_send_error(long int peer_id, std::string msg);
+  void handle_peer_send_error(long int peer_id, const std::string& msg);
 
   void handle_client_connected(long int client_id);
   void handle_client_disconnected(long int client_id,
 				    const boost::system::error_code &error);
   void handle_client_msg(long int client_id,
-			 uint16_t comp_id, uint16_t msg_type,
-			 std::shared_ptr<google::protobuf::Message> msg);
+                         uint16_t comp_id, uint16_t msg_type,
+                         std::shared_ptr<google::protobuf::Message> msg);
   void handle_client_receive_fail(long int client_id,
-				  uint16_t comp_id, uint16_t msg_type, std::string msg);
+                                  uint16_t comp_id, uint16_t msg_type,
+                                  const std::string& msg);
   void oprs_assert_message(std::string &endpoint_host, unsigned short endpoint_port,
-			   uint16_t comp_id, uint16_t msg_type,
-			   std::shared_ptr<google::protobuf::Message> &msg,
-			   OpenPRSProtobuf::ClientType ct,
-			   unsigned int client_id);
+                           uint16_t comp_id, uint16_t msg_type,
+                           std::shared_ptr<google::protobuf::Message> &msg,
+                           OpenPRSProtobuf::ClientType ct,
+                           unsigned int client_id);
   void oprs_assert_server_client_event(long int client_id,
 				       std::string &host, unsigned short port, bool connect);
   void oprs_assert_client_event(long int client_id, bool connect);

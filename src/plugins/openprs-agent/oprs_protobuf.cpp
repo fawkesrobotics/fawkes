@@ -124,8 +124,10 @@ OpenPRSProtobuf::oprs_pb_disable_server()
  * @return peer identifier
  */
 Term *
-OpenPRSProtobuf::oprs_pb_peer_create_local_crypto(std::string address, int send_port, int recv_port,
-						  std::string crypto_key, std::string cipher)
+OpenPRSProtobuf::oprs_pb_peer_create_local_crypto(const std::string& address,
+                                                  int send_port, int recv_port,
+                                                  const std::string& crypto_key,
+                                                  const std::string& cipher)
 {
   if (recv_port <= 0)  recv_port = send_port;
 
@@ -162,8 +164,9 @@ OpenPRSProtobuf::oprs_pb_peer_create_local_crypto(std::string address, int send_
  * @return peer identifier
  */
 Term *
-OpenPRSProtobuf::oprs_pb_peer_create_crypto(std::string address, int port,
-						       std::string crypto_key, std::string cipher)
+OpenPRSProtobuf::oprs_pb_peer_create_crypto(const std::string& address, int port,
+                                            const std::string& crypto_key,
+                                            const std::string& cipher)
 {
   return oprs_pb_peer_create_local_crypto(address, port, port, crypto_key, cipher);
 }
@@ -174,7 +177,7 @@ OpenPRSProtobuf::oprs_pb_peer_create_crypto(std::string address, int port,
  * @return peer identifier
  */
 Term *
-OpenPRSProtobuf::oprs_pb_peer_create(std::string address, int port)
+OpenPRSProtobuf::oprs_pb_peer_create(const std::string& address, int port)
 {
   return oprs_pb_peer_create_local_crypto(address, port, port);
 }
@@ -186,8 +189,8 @@ OpenPRSProtobuf::oprs_pb_peer_create(std::string address, int port)
  * @return peer identifier
  */
 Term *
-OpenPRSProtobuf::oprs_pb_peer_create_local(std::string address, int send_port,
-						      int recv_port)
+OpenPRSProtobuf::oprs_pb_peer_create_local(const std::string& address,
+                                           int send_port, int recv_port)
 {
   return oprs_pb_peer_create_local_crypto(address, send_port, recv_port);
 }
@@ -213,7 +216,8 @@ OpenPRSProtobuf::oprs_pb_peer_destroy(long int peer_id)
  */
 void
 OpenPRSProtobuf::oprs_pb_peer_setup_crypto(long int peer_id,
-						      std::string crypto_key, std::string cipher)
+                                           const std::string& crypto_key,
+                                           const std::string& cipher)
 {
   if (peers_.find(peer_id) != peers_.end()) {
     peers_[peer_id]->setup_crypto(crypto_key, cipher);
@@ -1231,7 +1235,7 @@ OpenPRSProtobuf::handle_peer_recv_error(long int peer_id,
  * @param msg error message
  */
 void
-OpenPRSProtobuf::handle_peer_send_error(long int peer_id, std::string msg)
+OpenPRSProtobuf::handle_peer_send_error(long int peer_id, const std::string& msg)
 {
   //logger_->log_warn("RefBox", "Failed to send peer message: %s", msg.c_str());
 }
@@ -1261,7 +1265,8 @@ OpenPRSProtobuf::handle_client_msg(long int client_id,
 
 void
 OpenPRSProtobuf::handle_client_receive_fail(long int client_id,
-						      uint16_t comp_id, uint16_t msg_type, std::string msg)
+                                            uint16_t comp_id, uint16_t msg_type,
+                                            const std::string& msg)
 {
   /*
   oprs_->assert_fact_f("(protobuf-receive-failed (client-id %li) (rcvd-via STREAM) "
