@@ -37,7 +37,7 @@ class MongoDBTransformer
 {
  public:
   MongoDBTransformer(mongo::DBClientBase *mongodb_client,
-		     std::string database_name, bool ensure_index = true);
+                     const std::string& database_name, bool ensure_index = true);
   virtual ~MongoDBTransformer();
 
   /** Restore transforms from database.

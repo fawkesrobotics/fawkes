@@ -107,7 +107,7 @@ PointCloudDBStoreThread::loop()
     std::string collection = database + ".";
     if (msg_collection == "") {
       collection += "pcls";
-    } else if (msg_collection.find("fs.") == 0) {
+    } else if (msg_collection.compare(0, 3, "fs.") == 0) {
       errmsg = "Passed in collection uses GridFS namespace";
       store  = false;
     } else {
