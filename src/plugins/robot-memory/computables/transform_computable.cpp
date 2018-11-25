@@ -1,6 +1,5 @@
 /***************************************************************************
  *  transform_computable.cpp - Computable for doing transforms
- *    
  *
  *  Created: 4:11:27 PM 2016
  *  Copyright  2016  Frederik Zwilling
@@ -29,14 +28,16 @@ using namespace mongo;
  * @author Frederik Zwilling
  */
 
-/**
- * Constructor for Transform computable with objects of thread aspects
+/** Constructor for Transform computable with objects of thread aspects.
  * @param robot_memory Robot Memory
  * @param tf Transform
  * @param logger Logger
  * @param config Configuration
  */
-TransformComputable::TransformComputable(RobotMemory* robot_memory, fawkes::tf::Transformer* tf, fawkes::Logger* logger, fawkes::Configuration* config)
+TransformComputable::TransformComputable(RobotMemory* robot_memory,
+                                         fawkes::tf::Transformer* tf,
+                                         fawkes::Logger* logger,
+                                         fawkes::Configuration* config)
 {
   robot_memory_ = robot_memory;
   tf_ = tf;
@@ -62,7 +63,9 @@ TransformComputable::~TransformComputable()
   }
 }
 
-std::list<mongo::BSONObj> TransformComputable::compute_transform(mongo::BSONObj query, std::string collection)
+std::list<mongo::BSONObj>
+TransformComputable::compute_transform(const mongo::BSONObj& query,
+                                       const std::string& collection)
 {
   //get positions in other frames
   BSONObjBuilder query_other_frames;

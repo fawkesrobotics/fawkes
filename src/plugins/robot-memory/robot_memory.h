@@ -53,24 +53,28 @@ class RobotMemory
     virtual ~RobotMemory();
 
     //robot memory functions
-    QResCursor query(mongo::Query query, std::string collection = "");
-    mongo::BSONObj aggregate(std::vector<mongo::BSONObj> pipeline, std::string collection = "");
-    int insert(mongo::BSONObj obj, std::string collection = "");
-    int insert(std::vector<mongo::BSONObj> v_obj, std::string collection = "");
-    int insert(std::string obj_str, std::string collection = "");
-    int update(mongo::Query query, mongo::BSONObj update, std::string collection = "", bool upsert = false);
-    int update(mongo::Query query, std::string update_str, std::string collection = "", bool upsert = false);
+    QResCursor query(mongo::Query query, const std::string& collection = "");
+    mongo::BSONObj aggregate(const std::vector<mongo::BSONObj>& pipeline,
+                             const std::string& collection = "");
+    int insert(mongo::BSONObj obj, const std::string& collection = "");
+    int insert(std::vector<mongo::BSONObj> v_obj, const std::string& collection = "");
+    int insert(const std::string& obj_str, const std::string& collection = "");
+    int update(mongo::Query query, mongo::BSONObj update,
+               const std::string& collection = "", bool upsert = false);
+    int update(mongo::Query query, const std::string& update_str,
+               const std::string& collection = "", bool upsert = false);
     mongo::BSONObj find_one_and_update(const mongo::BSONObj& filter, const mongo::BSONObj& update,
-                                       std::string collection, bool upsert = false, bool return_new = true);
-    int remove(mongo::Query query, std::string collection = "");
-    mongo::BSONObj mapreduce(mongo::Query query, std::string collection,
-                             std::string js_map_fun, std::string js_reduce_fun);
-    QResCursor aggregate(mongo::BSONObj pipeline, std::string collection = "");
-    int drop_collection(std::string collection);
+                                       const std::string& collection,
+                                       bool upsert = false, bool return_new = true);
+    int remove(mongo::Query query, const std::string& collection = "");
+    mongo::BSONObj mapreduce(mongo::Query query, const std::string& collection,
+                             const std::string& js_map_fun, const std::string& js_reduce_fun);
+    QResCursor aggregate(mongo::BSONObj pipeline, const std::string& collection = "");
+    int drop_collection(const std::string& collection);
     int clear_memory();
-    int restore_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
-    int dump_collection(std::string collection, std::string directory = "@CONFDIR@/robot-memory");
-    int create_index(mongo::BSONObj keys, std::string collection = "", bool unique = false);
+    int restore_collection(const std::string& collection, const std::string& directory = "@CONFDIR@/robot-memory");
+    int dump_collection(const std::string& collection, const std::string& directory = "@CONFDIR@/robot-memory");
+    int create_index(mongo::BSONObj keys, const std::string& collection = "", bool unique = false);
 
     //bool semaphore_create(const std::string& name, unsigned int value);
     //bool semaphore_acquire(const std::string& name, unsigned int v = 1);
@@ -79,9 +83,9 @@ class RobotMemory
     bool mutex_create(const std::string& name);
     bool mutex_destroy(const std::string& name);
     bool mutex_try_lock(const std::string& name, bool force = false);
-    bool mutex_try_lock(const std::string& name, std::string identity, bool force = false);
-    bool mutex_unlock(const std::string& name, std::string identity);
-    bool mutex_renew_lock(const std::string& name, std::string identity);
+    bool mutex_try_lock(const std::string& name, const std::string& identity, bool force = false);
+    bool mutex_unlock(const std::string& name, const std::string& identity);
+    bool mutex_renew_lock(const std::string& name, const std::string& identity);
     bool mutex_expire_locks(float max_age_sec);
 
     /**
@@ -93,7 +97,7 @@ class RobotMemory
      * @return Trigger object pointer, save it to remove the trigger later
      */
     template<typename T>
-    EventTrigger* register_trigger(mongo::Query query, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj)
+    EventTrigger* register_trigger(mongo::Query query, const std::string& collection, void(T::*callback)(mongo::BSONObj), T *_obj)
     {
       check_collection_name(collection);
       return trigger_manager_->register_trigger(query, collection, callback, _obj);
@@ -107,7 +111,7 @@ class RobotMemory
      * @return Trigger object pointer, save it to remove the trigger later
      */
     template<typename T>
-    EventTrigger* register_trigger(std::string query_str, std::string collection, void(T::*callback)(mongo::BSONObj), T *_obj)
+    EventTrigger* register_trigger(const std::string& query_str, const std::string& collection, void(T::*callback)(mongo::BSONObj), T *_obj)
     {
       check_collection_name(collection);
       return register_trigger(mongo::fromjson(query_str), collection, callback, _obj);
@@ -126,7 +130,9 @@ class RobotMemory
      * @return Computable Object pointer used for removing it
      */
     template<typename T>
-    Computable* register_computable(mongo::Query query_to_compute, std::string collection, std::list<mongo::BSONObj>(T::*compute_func)(mongo::BSONObj, std::string), T *obj, double caching_time = 0.0, int priority = 0)
+    Computable* register_computable(const mongo::Query& query_to_compute,
+                                    const std::string& collection,
+                                    std::list<mongo::BSONObj>(T::*compute_func)(const mongo::BSONObj&, const std::string&), T *obj, double caching_time = 0.0, int priority = 0)
     {
       check_collection_name(collection);
       return computables_manager_->register_computable(query_to_compute, collection, compute_func, obj, caching_time, priority);
@@ -160,19 +166,23 @@ class RobotMemory
     void init();
     void loop();
 
-    void log(std::string what, std::string level = "info");
-    void log_deb(std::string what, std::string level = "info");
-    void log(mongo::Query query, std::string what, std::string level = "info");
-    void log(mongo::BSONObj obj, std::string what, std::string level = "info");
-    void log_deb(mongo::Query query, std::string what, std::string level = "info");
-    void log_deb(mongo::BSONObj obj, std::string what, std::string level = "info");
+    void log(const std::string& what, const std::string& level = "info");
+    void log_deb(const std::string& what, const std::string& level = "info");
+    void log(const mongo::Query& query, const std::string& what,
+             const std::string& level = "info");
+    void log(const mongo::BSONObj& obj, const std::string& what,
+             const std::string& level = "info");
+    void log_deb(const mongo::Query& query, const std::string& what,
+                 const std::string& level = "info");
+    void log_deb(const mongo::BSONObj& obj, const std::string& what,
+                 const std::string& level = "info");
 
-    void set_fields(mongo::BSONObj &obj, std::string what);
-    void set_fields(mongo::Query &q, std::string what);
-    void remove_field(mongo::Query &q, std::string what);
+    void set_fields(mongo::BSONObj &obj, const std::string& what);
+    void set_fields(mongo::Query &q, const std::string& what);
+    void remove_field(mongo::Query &q, const std::string& what);
 
-    void check_collection_name(std::string &collection);
-    mongo::DBClientBase* get_mongodb_client(std::string &collection);
+    std::string check_collection_name(const std::string& collection);
+    mongo::DBClientBase* get_mongodb_client(const std::string& collection);
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_ROBOT_MEMORY_H_ */

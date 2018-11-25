@@ -55,7 +55,8 @@ BlackboardComputable::~BlackboardComputable()
   robot_memory_->remove_computable(computable);
 }
 
-std::list<mongo::BSONObj> BlackboardComputable::compute_interfaces(mongo::BSONObj query, std::string collection)
+std::list<mongo::BSONObj> BlackboardComputable::compute_interfaces(const mongo::BSONObj& query,
+                                                                   const std::string& collection)
 {
   std::list<mongo::BSONObj> res;
   std::string type = query.getField("interface").String();

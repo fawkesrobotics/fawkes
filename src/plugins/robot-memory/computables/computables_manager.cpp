@@ -41,16 +41,16 @@ using namespace mongo;
  * @param clock Clock
  */
 ComputablesManager::ComputablesManager(fawkes::Logger* logger, fawkes::Configuration* config,
-  RobotMemory* robot_memory, fawkes::Clock* clock)
+                                       RobotMemory* robot_memory, fawkes::Clock* clock)
+:  logger_(logger),
+  config_(config),
+  robot_memory_(robot_memory),
+  clock_(clock),
+  matching_test_collection_("robmem.computables_matching")
 {
-  logger_ = logger;
-  config_ = config;
-  robot_memory_ = robot_memory;
-  clock_ = clock;
-
-  matching_test_collection_ = "robmem.computables_matching";
   try {
-    matching_test_collection_ = config_->get_string("/plugins/robot-memory/database") + ".computables_matching";
+	  matching_test_collection_ =
+	    config_->get_string("/plugins/robot-memory/database") + ".computables_matching";
   } catch (Exception &e) {}
 
   srand(time(NULL));

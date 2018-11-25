@@ -1,7 +1,6 @@
 /***************************************************************************
  *  transform_computable.h - Computable for doing transforms
  *    
- *
  *  Created: 4:11:27 PM 2016
  *  Copyright  2016  Frederik Zwilling
  ****************************************************************************/
@@ -31,11 +30,15 @@
 class TransformComputable
 {
   public:
-    TransformComputable(RobotMemory* robot_memory, fawkes::tf::Transformer* tf, fawkes::Logger* logger, fawkes::Configuration* config);
+    TransformComputable(RobotMemory* robot_memory,
+                        fawkes::tf::Transformer* tf,
+                        fawkes::Logger* logger,
+                        fawkes::Configuration* config);
     virtual ~TransformComputable();
 
   private:
-    std::list<mongo::BSONObj> compute_transform(mongo::BSONObj query, std::string collection);
+    std::list<mongo::BSONObj> compute_transform(const mongo::BSONObj& query,
+                                                const std::string& collection);
 
     RobotMemory* robot_memory_;
     fawkes::Logger* logger_;
