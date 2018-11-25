@@ -41,14 +41,15 @@ namespace fawkes {
 class KatanaGotoOpenRaveThread : public KatanaMotionThread
 {
 #ifdef HAVE_OPENRAVE
-
- public:
-  KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::KatanaController> katana, fawkes::Logger *logger, fawkes::OpenRaveConnector* openrave,
-		   unsigned int poll_interval_ms,
-                   std::string robot_file,
-                   std::string arm_model,
-                   bool autoload_IK,
-                   bool use_viewer);
+public:
+	KatanaGotoOpenRaveThread(fawkes::RefPtr<fawkes::KatanaController> katana,
+	                         fawkes::Logger *logger,
+	                         fawkes::OpenRaveConnector* openrave,
+	                         unsigned int poll_interval_ms,
+	                         const std::string& robot_file,
+	                         const std::string& arm_model,
+	                         bool autoload_IK,
+	                         bool use_viewer);
 
   virtual void once();
   virtual void init();
