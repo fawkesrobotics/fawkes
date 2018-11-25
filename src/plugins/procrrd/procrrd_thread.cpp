@@ -258,7 +258,7 @@ ProcRRDThread::finalize()
 }
 
 void
-ProcRRDThread::add_process(const char *path, std::string pid, std::string name)
+ProcRRDThread::add_process(const char *path, const std::string& pid, const std::string& name)
 {
   if (processes_.find(path) != processes_.end()) {
     throw Exception("Process stats for config %s already monitored", path);

@@ -54,7 +54,7 @@ class ProcRRDThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  void add_process(const char *path, std::string pid, std::string name);
+  void add_process(const char *path, const std::string& pid, const std::string& name);
   void remove_process(const char *path);
   std::string get_process_id(const char *process);
   void get_cpu(unsigned long int* cpus);
