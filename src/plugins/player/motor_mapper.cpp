@@ -47,9 +47,9 @@ using namespace fawkes;
  * @param interface Fawkes interface instance
  * @param proxy Player proxy instance
  */
-PlayerMotorPositionMapper::PlayerMotorPositionMapper(std::string varname,
-						     fawkes::MotorInterface *interface,
-						     PlayerCc::Position2dProxy *proxy)
+PlayerMotorPositionMapper::PlayerMotorPositionMapper(const std::string& varname,
+                                                     fawkes::MotorInterface *interface,
+                                                     PlayerCc::Position2dProxy *proxy)
   : PlayerProxyFawkesInterfaceMapper(varname)
 {
   interface_ = interface;

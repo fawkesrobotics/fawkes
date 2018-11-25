@@ -4,7 +4,6 @@
  *
  *  Created: Tue Sep 30 00:53:38 2008
  *  Copyright  2006-2008  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -37,10 +36,10 @@
  * @param interface Fawkes interface instance
  * @param proxy Player proxy instance
  */
-PlayerPositionMapper::PlayerPositionMapper(std::string varname,
-					   fawkes::ObjectPositionInterface *interface,
-					   PlayerCc::Position2dProxy *proxy)
-  : PlayerProxyFawkesInterfaceMapper(varname)
+PlayerPositionMapper::PlayerPositionMapper(const std::string& varname,
+                                           fawkes::ObjectPositionInterface *interface,
+                                           PlayerCc::Position2dProxy *proxy)
+: PlayerProxyFawkesInterfaceMapper(varname)
 {
   interface_ = interface;
   proxy_     = proxy;

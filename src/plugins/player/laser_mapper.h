@@ -36,9 +36,9 @@ namespace PlayerCc {
 class PlayerLaserMapper : public PlayerProxyFawkesInterfaceMapper
 {
  public:
-  PlayerLaserMapper(std::string varname,
-		    fawkes::Laser360Interface *interface,
-		    PlayerCc::LaserProxy *proxy);
+  PlayerLaserMapper(const std::string& varname,
+                    fawkes::Laser360Interface *interface,
+                    PlayerCc::LaserProxy *proxy);
 
   virtual void sync_fawkes_to_player();
   virtual void sync_player_to_fawkes();

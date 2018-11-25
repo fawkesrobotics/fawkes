@@ -39,10 +39,10 @@
  * @param interface Fawkes interface instance
  * @param proxy Player proxy instance
  */
-PlayerLaserMapper::PlayerLaserMapper(std::string varname,
-				     fawkes::Laser360Interface *interface,
-				     PlayerCc::LaserProxy *proxy)
-  : PlayerProxyFawkesInterfaceMapper(varname)
+PlayerLaserMapper::PlayerLaserMapper(const std::string& varname,
+                                     fawkes::Laser360Interface *interface,
+                                     PlayerCc::LaserProxy *proxy)
+: PlayerProxyFawkesInterfaceMapper(varname)
 {
   interface_  = interface;
   proxy_      = proxy;
