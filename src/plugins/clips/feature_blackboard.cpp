@@ -759,7 +759,7 @@ BlackboardCLIPSFeature::clips_blackboard_create_msg(const std::string& env_name,
   //check if message type exists
   std::list<const char *> available_types = (*i)->get_message_types();
   bool type_exists = false;
-  for(std::list<const char *>::iterator it = available_types.begin(); it != available_types.end() && !type_exists; it++){
+  for(std::list<const char *>::iterator it = available_types.begin(); it != available_types.end() && !type_exists; ++it){
     if(std::string(*it).compare(msg_type) == 0){
       type_exists = true;
     }
@@ -792,7 +792,7 @@ BlackboardCLIPSFeature::clips_blackboard_list_msg_fields(const std::string& env_
   const int field_count  = (*m)->num_fields();  
   CLIPS::Values field_names(field_count);
   int i = 0;
-  for(InterfaceFieldIterator it = (*m)->fields(); it != (*m)->fields_end(); it++){
+  for(InterfaceFieldIterator it = (*m)->fields(); it != (*m)->fields_end(); ++it){
     field_names[i].set(it.get_name(), true);
     logger_->log_info(("BBCLIPS|" + env_name).c_str(), "Message has field %s", it.get_name());
     i++;
