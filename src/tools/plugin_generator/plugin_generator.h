@@ -31,11 +31,10 @@
 class PluginGenerator
 {
  public:
-  PluginGenerator(std::string directory,
-			std::string author,
-			std::string year, std::string creation_date,
-			std::string plugin_name, std::string description
-			);
+  PluginGenerator(const std::string& directory,
+                  const std::string& author,
+                  const std::string& year, const std::string& creation_date,
+                  const std::string& plugin_name, const std::string& description);
   ~PluginGenerator();
 
   void write_thread_h(FILE *f);
@@ -51,6 +50,9 @@ class PluginGenerator
 
  private:
   std::string _dir;
+  std::string _author;
+  std::string _year;
+  std::string _creation_date;
   std::string _plugin_name;
   std::string _plugin_name_underscore;
   std::string _class_name_thread;
@@ -61,9 +63,6 @@ class PluginGenerator
   std::string _filename_plugin_cpp;
   std::string _filename_makefile;
   std::string _deflector;
-  std::string _author;
-  std::string _year;
-  std::string _creation_date;
 };
 
 
