@@ -372,7 +372,7 @@ std::string
 LaserPointCloudThread::interface_to_pcl_name(const char *interface_id)
 {
   std::string rv = interface_id;
-  if (rv.find("Laser ") == 0) {
+  if (rv.compare(0, 6, "Laser ") == 0) {
     // starts with "Laser ", remove it
     rv = rv.substr(strlen("Laser "));
   }
