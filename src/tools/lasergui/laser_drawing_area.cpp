@@ -614,9 +614,10 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
   if (l_objpos_if_persons_) {
     cr->set_source_rgb(0,0,1);
     for( objpos_if_itt = l_objpos_if_persons_->begin(); 
-	 objpos_if_itt != l_objpos_if_persons_->end()  && (*objpos_if_itt)->has_writer();
-	 objpos_if_itt++ ) {
-      if(!break_drawing_)
+         objpos_if_itt != l_objpos_if_persons_->end()  && (*objpos_if_itt)->has_writer();
+         ++objpos_if_itt )
+    {
+	    if(!break_drawing_)
 	(*objpos_if_itt)->read();
       if ((*objpos_if_itt)->is_valid()){
 	std::pair<float,float> pos = transform_coords_from_fawkes((*objpos_if_itt)->relative_x(), (*objpos_if_itt)->relative_y());

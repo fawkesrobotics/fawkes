@@ -340,13 +340,13 @@ VisualDisplay2D::Circle::draw(Cairo::RefPtr<Cairo::Context> &cr)
  * @param b blue part of RGBA color
  * @param a alpha part of RGBA color
  */
-VisualDisplay2D::Text::Text(float x, float y, std::string text,
-			    fawkes::VisualDisplay2DInterface::Anchor anchor,
-			    float size,
-			    unsigned int id, unsigned int owner,
-			    unsigned char r, unsigned char g,
-			    unsigned char b, unsigned char a)
-  : Shape(id, owner, fawkes::VisualDisplay2DInterface::LS_SOLID, r, g, b, a)
+VisualDisplay2D::Text::Text(float x, float y, const std::string& text,
+                            fawkes::VisualDisplay2DInterface::Anchor anchor,
+                            float size,
+                            unsigned int id, unsigned int owner,
+                            unsigned char r, unsigned char g,
+                            unsigned char b, unsigned char a)
+: Shape(id, owner, fawkes::VisualDisplay2DInterface::LS_SOLID, r, g, b, a)
 {
   x_      = x;
   y_      = y;

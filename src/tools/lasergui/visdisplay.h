@@ -100,11 +100,12 @@ class VisualDisplay2D
   class Circle : public Shape {
    public:
     Circle(float x, float y, float radius,
-	   unsigned int id, unsigned int owner,
-	   fawkes::VisualDisplay2DInterface::LineStyle line_style = fawkes::VisualDisplay2DInterface::LS_SOLID,
-	   unsigned char r = 0, unsigned char g = 0,
-	   unsigned char b = 0, unsigned char a = 0);
-    void draw(Cairo::RefPtr<Cairo::Context> &cr);
+           unsigned int id, unsigned int owner,
+           fawkes::VisualDisplay2DInterface::LineStyle line_style =
+           fawkes::VisualDisplay2DInterface::LS_SOLID,
+           unsigned char r = 0, unsigned char g = 0,
+           unsigned char b = 0, unsigned char a = 0);
+	  void draw(Cairo::RefPtr<Cairo::Context> &cr);
    private:
     float x_;
     float y_;
@@ -113,13 +114,13 @@ class VisualDisplay2D
 
   class Text : public Shape {
    public:
-    Text(float x, float y, std::string text,
-	 fawkes::VisualDisplay2DInterface::Anchor anchor,
-	 float size,
-	 unsigned int id, unsigned int owner,
-	 unsigned char r = 0, unsigned char g = 0,
-	 unsigned char b = 0, unsigned char a = 0);
-    void draw(Cairo::RefPtr<Cairo::Context> &cr);
+    Text(float x, float y, const std::string& text,
+         fawkes::VisualDisplay2DInterface::Anchor anchor,
+         float size,
+         unsigned int id, unsigned int owner,
+         unsigned char r = 0, unsigned char g = 0,
+         unsigned char b = 0, unsigned char a = 0);
+	  void draw(Cairo::RefPtr<Cairo::Context> &cr);
    private:
     float x_;
     float y_;
