@@ -1,12 +1,10 @@
 
 /***************************************************************************
- *  clips_robot_memory_thread.cpp - CLIPS feature for accessing the robot memory
+ *  clips_robot_memory_thread.cpp - CLIPS feature to access the robot memory
  *
- *  Plugin created: Mon Aug 29 15:41:47 2016
-
- *  Copyright  2016  Frederik Zwilling
- *             2013  Tim Niemueller [www.niemueller.de]
- *
+ *  Created: Mon Aug 29 15:41:47 2016
+ *  Copyright  2016       Frederik Zwilling
+ *             2013-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -28,13 +26,15 @@
 using namespace fawkes;
 
 /** @class ClipsRobotMemoryThread 'clips_robot_memory_thread.h' 
- * CLIPS feature to access the robot memory
+ * CLIPS feature to access the robot memory.
+ * MongoDB access through CLIPS first appeared in the RCLL referee box.
+ * @author Tim Niemueller
  * @author Frederik Zwilling
  */
 
 ClipsRobotMemoryThread::ClipsRobotMemoryThread()
- : Thread("ClipsRobotMemoryThread", Thread::OPMODE_WAITFORWAKEUP),
-   CLIPSFeature("robot_memory"), CLIPSFeatureAspect(this)
+: Thread("ClipsRobotMemoryThread", Thread::OPMODE_WAITFORWAKEUP),
+  CLIPSFeature("robot_memory"), CLIPSFeatureAspect(this)
 {
 }
 
@@ -52,7 +52,7 @@ void
 ClipsRobotMemoryThread::finalize()
 {
   envs_.clear();
-  for(ClipsRmTrigger* trigger : clips_triggers_)
+  for (ClipsRmTrigger* trigger : clips_triggers_)
   {
     delete trigger;
   }
@@ -529,7 +529,7 @@ ClipsRobotMemoryThread::clips_robotmemory_remove(std::string collection, void *b
 }
 
 CLIPS::Value
-ClipsRobotMemoryThread::clips_robotmemory_query(std::string collection, void *bson)
+ClipsRobotMemoryThread::clips_robotmemory_query(const std::string& collection, void *bson)
 {
   return clips_robotmemory_query_sort(collection, bson, NULL);
 }
