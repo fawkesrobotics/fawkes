@@ -53,7 +53,7 @@ class NavGraphVisualizationThread
   void set_constraint_repo(fawkes::LockPtr<fawkes::NavGraphConstraintRepo> &crepo);
 
   void set_traversal(fawkes::NavGraphPath::Traversal &traversal);
-  void set_current_edge(std::string from, std::string to);
+  void set_current_edge(const std::string& from, const std::string& to);
   void reset_plan();
 
   virtual void graph_changed() throw();
