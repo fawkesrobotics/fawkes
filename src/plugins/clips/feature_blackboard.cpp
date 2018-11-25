@@ -221,7 +221,7 @@ BlackboardCLIPSFeature::clips_context_destroyed(const std::string &env_name)
 
 
 void
-BlackboardCLIPSFeature::clips_blackboard_enable_time_read(std::string env_name)
+BlackboardCLIPSFeature::clips_blackboard_enable_time_read(const std::string& env_name)
 {
   if (envs_.find(env_name) == envs_.end()) {
     logger_->log_warn(("BBCLIPS|" + env_name).c_str(),
@@ -244,8 +244,10 @@ BlackboardCLIPSFeature::clips_blackboard_enable_time_read(std::string env_name)
 
 
 bool
-BlackboardCLIPSFeature::clips_assert_interface_type(std::string &env_name, std::string &log_name,
-						    fawkes::Interface *iface, std::string &type)
+BlackboardCLIPSFeature::clips_assert_interface_type(const std::string& env_name,
+                                                    const std::string& log_name,
+                                                    fawkes::Interface *iface,
+                                                    const std::string& type)
 {
   std::string deftemplate =
     "(deftemplate " + type + "\n" +
@@ -338,7 +340,7 @@ BlackboardCLIPSFeature::clips_assert_interface_type(std::string &env_name, std::
 
 
 void
-BlackboardCLIPSFeature::clips_blackboard_preload(std::string env_name, std::string type)
+BlackboardCLIPSFeature::clips_blackboard_preload(const std::string& env_name, const std::string& type)
 {
   std::string name = "BBCLIPS|" + env_name;
 
@@ -369,9 +371,10 @@ BlackboardCLIPSFeature::clips_blackboard_preload(std::string env_name, std::stri
 
 
 void
-BlackboardCLIPSFeature::clips_blackboard_open_interface(std::string env_name,
-							std::string type, std::string id,
-							bool writing)
+BlackboardCLIPSFeature::clips_blackboard_open_interface(const std::string& env_name,
+                                                        const std::string& type,
+                                                        const std::string& id,
+                                                        bool writing)
 {
 	std::string name  = "BBCLIPS|" + env_name;
 	std::string owner = "CLIPS:" + env_name;
@@ -448,23 +451,26 @@ BlackboardCLIPSFeature::clips_blackboard_open_interface(std::string env_name,
 
 
 void
-BlackboardCLIPSFeature::clips_blackboard_open_interface_reading(std::string env_name,
-								std::string type, std::string id)
+BlackboardCLIPSFeature::clips_blackboard_open_interface_reading(const std::string& env_name,
+                                                                const std::string& type,
+                                                                const std::string& id)
 {
   clips_blackboard_open_interface(env_name, type, id, /* writing */ false);
 }
 
 void
-BlackboardCLIPSFeature::clips_blackboard_open_interface_writing(std::string env_name,
-								std::string type, std::string id)
+BlackboardCLIPSFeature::clips_blackboard_open_interface_writing(const std::string& env_name,
+                                                                const std::string& type,
+                                                                const std::string& id)
 {
   clips_blackboard_open_interface(env_name, type, id, /* writing */ true);
 }
 
 
 void
-BlackboardCLIPSFeature::clips_blackboard_close_interface(std::string env_name,
-							 std::string type, std::string id)
+BlackboardCLIPSFeature::clips_blackboard_close_interface(const std::string& env_name,
+                                                         const std::string& type,
+                                                         const std::string& id)
 {
   std::string name = "BBCLIPS|" + env_name;
 
@@ -499,7 +505,7 @@ BlackboardCLIPSFeature::clips_blackboard_close_interface(std::string env_name,
 }
 
 void
-BlackboardCLIPSFeature::clips_blackboard_read(std::string env_name)
+BlackboardCLIPSFeature::clips_blackboard_read(const std::string& env_name)
 {
   // no interfaces registered, that's fine
   if (interfaces_.find(env_name) == interfaces_.end())  return;
@@ -575,7 +581,7 @@ BlackboardCLIPSFeature::clips_blackboard_read(std::string env_name)
 
 
 void
-BlackboardCLIPSFeature::clips_blackboard_write(std::string env_name, std::string uid)
+BlackboardCLIPSFeature::clips_blackboard_write(const std::string& env_name, const std::string& uid)
 {
   // no interfaces registered, that's fine
   if (interfaces_.find(env_name) == interfaces_.end())  return;
@@ -608,7 +614,7 @@ BlackboardCLIPSFeature::clips_blackboard_write(std::string env_name, std::string
 }
 
 void
-BlackboardCLIPSFeature::clips_blackboard_get_info(std::string env_name)
+BlackboardCLIPSFeature::clips_blackboard_get_info(const std::string& env_name)
 {
   if (envs_.find(env_name) == envs_.end()) {
     // Environment not registered, big bug
@@ -645,8 +651,8 @@ BlackboardCLIPSFeature::clips_blackboard_get_info(std::string env_name)
 
 
 void
-BlackboardCLIPSFeature::clips_blackboard_set(std::string env_name, std::string uid,
-					     std::string field, CLIPS::Value value)
+BlackboardCLIPSFeature::clips_blackboard_set(const std::string& env_name, const std::string& uid,
+					     const std::string& field, CLIPS::Value value)
 {
   // no interfaces registered, that's fine
   if (interfaces_.find(env_name) == interfaces_.end())  return;
@@ -680,9 +686,9 @@ BlackboardCLIPSFeature::clips_blackboard_set(std::string env_name, std::string u
 }
 
 void
-BlackboardCLIPSFeature::clips_blackboard_set_multifield(std::string env_name,
-							std::string uid,
-							std::string field,
+BlackboardCLIPSFeature::clips_blackboard_set_multifield(const std::string& env_name,
+							const std::string& uid,
+							const std::string& field,
 							CLIPS::Values values)
 {
   // no interfaces registered, that's fine
@@ -717,8 +723,8 @@ BlackboardCLIPSFeature::clips_blackboard_set_multifield(std::string env_name,
 }
 
 CLIPS::Value
-BlackboardCLIPSFeature::clips_blackboard_create_msg(std::string env_name, std::string uid,
-						    std::string msg_type)
+BlackboardCLIPSFeature::clips_blackboard_create_msg(const std::string& env_name, const std::string& uid,
+						    const std::string& msg_type)
 {
   // no interfaces registered, that's fine
   if (interfaces_.find(env_name) == interfaces_.end()){
@@ -774,7 +780,7 @@ BlackboardCLIPSFeature::clips_blackboard_create_msg(std::string env_name, std::s
 }
 
 CLIPS::Values
-BlackboardCLIPSFeature::clips_blackboard_list_msg_fields(std::string env_name, void *msgptr)
+BlackboardCLIPSFeature::clips_blackboard_list_msg_fields(const std::string& env_name, void *msgptr)
 {
   std::shared_ptr<Message> *m =
     static_cast<std::shared_ptr<Message> *>(msgptr);
@@ -796,7 +802,7 @@ BlackboardCLIPSFeature::clips_blackboard_list_msg_fields(std::string env_name, v
 
 
 void
-BlackboardCLIPSFeature::clips_blackboard_set_msg_field(std::string env_name, void *msgptr, std::string field_name, CLIPS::Value value)
+BlackboardCLIPSFeature::clips_blackboard_set_msg_field(const std::string& env_name, void *msgptr, const std::string& field_name, CLIPS::Value value)
 {
   std::shared_ptr<Message> *m =
     static_cast<std::shared_ptr<Message> *>(msgptr);
@@ -814,7 +820,7 @@ BlackboardCLIPSFeature::clips_blackboard_set_msg_field(std::string env_name, voi
 
 
 void
-BlackboardCLIPSFeature::clips_blackboard_set_msg_multifield(std::string env_name, void *msgptr, std::string field_name, CLIPS::Values values)
+BlackboardCLIPSFeature::clips_blackboard_set_msg_multifield(const std::string& env_name, void *msgptr, const std::string& field_name, CLIPS::Values values)
 {
   std::shared_ptr<Message> *m =
     static_cast<std::shared_ptr<Message> *>(msgptr);
@@ -832,7 +838,7 @@ BlackboardCLIPSFeature::clips_blackboard_set_msg_multifield(std::string env_name
 
 
 CLIPS::Value
-BlackboardCLIPSFeature::clips_blackboard_send_msg(std::string env_name, void *msgptr)
+BlackboardCLIPSFeature::clips_blackboard_send_msg(const std::string& env_name, void *msgptr)
 {
   std::shared_ptr<Message> *m =
     static_cast<std::shared_ptr<Message> *>(msgptr);
@@ -878,7 +884,7 @@ BlackboardCLIPSFeature::clips_blackboard_send_msg(std::string env_name, void *ms
 bool
 BlackboardCLIPSFeature::set_multifield(InterfaceFieldIterator fit_begin,
 				  InterfaceFieldIterator fit_end,
-				  std::string env_name, std::string field,
+				  const std::string& env_name, const std::string& field,
 				  CLIPS::Values values)
 {
   //find field and check for length of the interface array/multifield
@@ -916,9 +922,9 @@ BlackboardCLIPSFeature::set_multifield(InterfaceFieldIterator fit_begin,
  */
 bool
 BlackboardCLIPSFeature::set_field(InterfaceFieldIterator fit_begin,
-				  InterfaceFieldIterator fit_end,
-				  std::string env_name, std::string field,
-				  CLIPS::Value value, int index)
+                                  InterfaceFieldIterator fit_end,
+                                  const std::string& env_name, const std::string& field,
+                                  CLIPS::Value value, int index)
 {
   InterfaceFieldIterator fit;
   for (fit = fit_begin; fit != fit_end; ++fit) {
