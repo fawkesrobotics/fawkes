@@ -33,9 +33,9 @@
  * @param in vector of input arrays
  */
 
-LaserCopyDataFilter::LaserCopyDataFilter(const std::string filter_name, uint
-    in_data_size, std::vector<Buffer *> &in)
-  : LaserDataFilter(filter_name, in_data_size, in, in.size())
+LaserCopyDataFilter::LaserCopyDataFilter(const std::string& filter_name, uint
+                                         in_data_size, std::vector<Buffer *> &in)
+: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {}
 
 void

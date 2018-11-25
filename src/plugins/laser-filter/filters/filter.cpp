@@ -74,7 +74,7 @@
  * @param in vector of input arrays
  * @param out_size number of value arrays to generate in out vector
  */
-LaserDataFilter::LaserDataFilter(const std::string filter_name,
+LaserDataFilter::LaserDataFilter(const std::string& filter_name,
                                  unsigned int in_data_size,
                                  std::vector<Buffer *> &in, unsigned int out_size)
 	: filter_name(filter_name), out_data_size(in_data_size), // yes, in_data_size!

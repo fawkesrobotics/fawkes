@@ -43,7 +43,7 @@ class LaserDataFilter
     fawkes::Time *timestamp;	///< timestamp of data
   };
 
-  LaserDataFilter(const std::string filter_name,
+  LaserDataFilter(const std::string& filter_name,
                   unsigned int in_data_size,
                   std::vector<Buffer *> &in, unsigned int out_size);
   virtual ~LaserDataFilter();

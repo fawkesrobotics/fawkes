@@ -39,7 +39,7 @@
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-Laser720to360DataFilter::Laser720to360DataFilter(const std::string filter_name,
+Laser720to360DataFilter::Laser720to360DataFilter(const std::string& filter_name,
                                                  bool average,
                                                  unsigned int in_data_size,
                                                  std::vector<LaserDataFilter::Buffer *> &in)

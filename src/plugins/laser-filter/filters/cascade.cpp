@@ -33,7 +33,7 @@
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserDataFilterCascade::LaserDataFilterCascade(const std::string filter_name,
+LaserDataFilterCascade::LaserDataFilterCascade(const std::string& filter_name,
                                                unsigned int in_data_size,
                                                std::vector<Buffer *> &in)
 	: LaserDataFilter(filter_name, in_data_size, in, 0)

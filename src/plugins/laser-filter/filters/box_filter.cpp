@@ -5,7 +5,6 @@
  *  Created: Fri Jul 17 20:38:14 2015
  *  Copyright  2006-2015  Tim Niemueller [www.niemueller.de]
  *                  2015  Tobias Neumann
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -47,7 +46,7 @@ using namespace fawkes;
  * @param logger to access the Logger aspect
  * @param blackboard to open the LaserBoxFilterInterface for writing
  */
-LaserBoxFilterDataFilter::LaserBoxFilterDataFilter(const std::string filter_name,
+LaserBoxFilterDataFilter::LaserBoxFilterDataFilter(const std::string& filter_name,
                                                    unsigned int in_data_size,
                                                    std::vector<LaserDataFilter::Buffer *> &in,
                                                    fawkes::tf::Transformer *tf_listener,
@@ -84,7 +83,8 @@ LaserBoxFilterDataFilter::point_in_rectangle(float x, float y)
 
   bool is_in_rect = false;
 
-  for (std::vector<Box>::iterator it = boxes_.begin(); is_in_rect == false && it != boxes_.end(); it++) {
+  std::vector<Box>::iterator it;
+  for (it = boxes_.begin(); is_in_rect == false && it != boxes_.end(); ++it) {
     Vector AB = d_vec(it->a, it->b);
     Vector AM = d_vec(it->a, point);
     Vector BC = d_vec(it->b, it->c);

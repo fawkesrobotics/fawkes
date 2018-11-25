@@ -28,7 +28,7 @@
 class LaserCircleSectorDataFilter : public LaserDataFilter
 {
  public:
-	LaserCircleSectorDataFilter(const std::string filter_name,
+	LaserCircleSectorDataFilter(const std::string& filter_name,
 	                            unsigned int from, unsigned int to,
 	                            unsigned int data_size, std::vector<LaserDataFilter::Buffer *> &in);
 

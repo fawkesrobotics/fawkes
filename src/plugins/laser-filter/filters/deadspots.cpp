@@ -53,10 +53,10 @@ using namespace fawkes;
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const std::string filter_name,
+LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const std::string& filter_name,
                                                    fawkes::Configuration *config,
                                                    fawkes::Logger *logger,
-                                                   std::string prefix,
+                                                   const std::string& prefix,
                                                    unsigned int in_data_size,
                                                    std::vector<LaserDataFilter::Buffer *> &in)
 	: LaserDataFilter(filter_name, in_data_size, in, in.size())

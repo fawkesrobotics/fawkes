@@ -54,20 +54,19 @@ using namespace fawkes;
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserProjectionDataFilter::LaserProjectionDataFilter(
-    const std::string filter_name,
-    tf::Transformer *tf,
-    std::string target_frame,
-    float not_from_x, float not_to_x,
-    float not_from_y, float not_to_y,
-    float only_from_z, float only_to_z,
-    unsigned int in_data_size,
-    std::vector<LaserDataFilter::Buffer *> &in)
-	: LaserDataFilter(filter_name, in_data_size, in, in.size()),
-    tf_(tf), target_frame_(target_frame),
-    not_from_x_(not_from_x), not_to_x_(not_to_x),
-    not_from_y_(not_from_y), not_to_y_(not_to_y),
-    only_from_z_(only_from_z), only_to_z_(only_to_z)
+LaserProjectionDataFilter::LaserProjectionDataFilter(const std::string& filter_name,
+                                                     tf::Transformer *tf,
+                                                     std::string target_frame,
+                                                     float not_from_x, float not_to_x,
+                                                     float not_from_y, float not_to_y,
+                                                     float only_from_z, float only_to_z,
+                                                     unsigned int in_data_size,
+                                                     std::vector<LaserDataFilter::Buffer *> &in)
+: LaserDataFilter(filter_name, in_data_size, in, in.size()),
+  tf_(tf), target_frame_(target_frame),
+  not_from_x_(not_from_x), not_to_x_(not_to_x),
+  not_from_y_(not_from_y), not_to_y_(not_to_y),
+  only_from_z_(only_from_z), only_to_z_(only_to_z)
 {
   // Generate lookup tables for sin and cos
   for (unsigned int i = 0; i < 360; ++i) {
