@@ -276,7 +276,8 @@ RosPointCloudThread::fawkes_pointcloud_publish_to_ros()
 }
 
 void
-RosPointCloudThread::ros_pointcloud_on_data_msg(const sensor_msgs::PointCloud2ConstPtr &msg, const std::string topic_name)
+RosPointCloudThread::ros_pointcloud_on_data_msg(const sensor_msgs::PointCloud2ConstPtr &msg,
+                                                const std::string& topic_name)
 {
   // if this is the first time, I need the meta infos, what point-type is send
   if ( ! pcl_manager->exists_pointcloud( topic_name.c_str() ) ) {

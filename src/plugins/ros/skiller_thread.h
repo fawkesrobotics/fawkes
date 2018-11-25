@@ -73,7 +73,7 @@ class RosSkillerThread
   void message_cb(const std_msgs::String::ConstPtr & goal);
 
   void stop();
-  fawkes_msgs::ExecSkillResult   create_result(std::string errmsg);
+  fawkes_msgs::ExecSkillResult   create_result(const std::string& errmsg);
   fawkes_msgs::ExecSkillFeedback create_feedback();
 
   bool assure_control();

@@ -56,18 +56,20 @@ class RosDynamicReconfigureThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-
   // set methods for dynamic reconfiguration of different types
-  bool set_dynreconf_value(const std::string& service, const std::string& parameter, const std::string value);
-  bool set_dynreconf_value(const std::string& service, const std::string& parameter, const bool value);
-  bool set_dynreconf_value(const std::string& service, const std::string& parameter, const int value);
-  bool set_dynreconf_value(const std::string& service, const std::string& parameter, const double value);
+  bool set_dynreconf_value(const std::string& service, const std::string& parameter,
+                           const std::string& value);
+  bool set_dynreconf_value(const std::string& service, const std::string& parameter,
+                           const bool value);
+  bool set_dynreconf_value(const std::string& service, const std::string& parameter,
+                           const int value);
+  bool set_dynreconf_value(const std::string& service, const std::string& parameter,
+                           const double value);
 
   // method for resetting the dynamic reconfigure interface
   void reset_dynamic_reconfigure_interface();
 
  private:
-
   fawkes::DynamicReconfigureInterface *dynrec_if_;
 
 };

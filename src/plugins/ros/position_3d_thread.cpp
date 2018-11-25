@@ -58,7 +58,7 @@ RosPosition3DThread::init()
   ros_pub_ = rosnode->advertise<fawkes_msgs::Position3D>(cfg_ros_topic_, 100);
   // check for open Position3DInterfaces
   ifs_ = blackboard->open_multiple_for_reading<Position3DInterface>();
-  for (std::list<Position3DInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); it++) {
+  for (std::list<Position3DInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); ++it) {
     bbil_add_data_interface(*it);
   }
   // watch for creation of new Position3DInterfaces
