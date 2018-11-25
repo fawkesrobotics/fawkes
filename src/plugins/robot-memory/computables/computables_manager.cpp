@@ -67,7 +67,7 @@ ComputablesManager::~ComputablesManager()
  */
 void ComputablesManager::remove_computable(Computable* computable)
 {
-  for(std::list<Computable*>::iterator it = computables.begin(); it != computables.end(); it++)
+  for(std::list<Computable*>::iterator it = computables.begin(); it != computables.end(); ++it)
   {
     if((*it) == computable)
     {
@@ -109,7 +109,7 @@ bool ComputablesManager::check_and_compute(mongo::Query query, std::string colle
     if(collection == (*it)->get_collection() &&  robot_memory_->query((*it)->get_query(), current_test_collection)->more())
     {
       std::list<BSONObj> computed_docs_list = (*it)->compute(query.obj);
-      if(computed_docs_list.size() > 0)
+      if(! computed_docs_list.empty())
       {
         //move list into vector
         std::vector<BSONObj> computed_docs_vector{ std::make_move_iterator(std::begin(computed_docs_list)),
