@@ -37,18 +37,18 @@ namespace stn {
  * @param logger The logger to log to.
  */
 Stn::Stn(fawkes::Logger* logger)
+: logger_(logger)
 {
-  logger_ = logger;
 }
 
 /** Constructor.
  * @param logger The logger to log to.
  * @param classic_dom_path The path to the domain file to write to.
  */
-Stn::Stn(fawkes::Logger* logger, std::string classic_dom_path)
+Stn::Stn(fawkes::Logger* logger, const std::string& classic_dom_path)
+: logger_(logger),
+  classic_dom_path_(classic_dom_path)
 {
-  logger_ = logger;
-  classic_dom_path_ = classic_dom_path;
   gen_classic_dom_ = true;
 }
 
@@ -71,7 +71,7 @@ Stn::add_domain_action(const DomainAction& action)
  * @param params The parameters of the action.
  */
 void
-Stn::add_plan_action(std::string name, std::string params)
+Stn::add_plan_action(const std::string& name, const std::string& params)
 {
   plan_actions_.push_back(plan_action{name, params});
 }
@@ -91,7 +91,7 @@ Stn::set_initial_state(const StnAction& action)
  * @param pddl_problem_string the PDDL rpboelm as (unparsed) string.
  */
 void
-Stn::read_initial_state(std::string pddl_problem_string)
+Stn::read_initial_state(const std::string& pddl_problem_string)
 {
   pddl_parser::PddlParser parser;
   pddl_parser::Problem prob = parser.parseProblem(pddl_problem_string);
@@ -130,7 +130,7 @@ Stn::read_initial_state(std::string pddl_problem_string)
  * @param pddl_domain_string the PDDL domain as (unparsed) string.
  */
 void
-Stn::set_pddl_domain(std::string pddl_domain_string)
+Stn::set_pddl_domain(const std::string& pddl_domain_string)
 {
   pddl_parser::PddlParser parser;
   pddl_parser::Domain dom = parser.parseDomain(pddl_domain_string);
@@ -245,7 +245,7 @@ Stn::generate()
   }
 
   std::vector<Predicate> predicates;
-  for ( std::vector<StnAction>::iterator it = stn_actions_.begin(); it != stn_actions_.end(); it++ ) {
+  for ( std::vector<StnAction>::iterator it = stn_actions_.begin(); it != stn_actions_.end(); ++it ) {
     // add conditional edges
     for ( auto const &cond_action : it->condActionIds()) {
       std::pair<StnAction,StnAction> edge(findActionById(cond_action), findActionById(it->id()));
@@ -396,24 +396,24 @@ Stn::findActionById(size_t id)
 }
 
 void
-Stn::log_warn(std::string s)
+Stn::log_warn(const std::string& s)
 {
   log(s, LogLevel::WARN);
 }
 
 void
-Stn::log_info(std::string s)
+Stn::log_info(const std::string& s)
 {
   log(s, LogLevel::INFO);
 }
 
 void
-Stn::log_debug(std::string s)
+Stn::log_debug(const std::string& s)
 {
   log(s, LogLevel::DEBUG);
 }
 void
-Stn::log(std::string s, Stn::LogLevel log_level)
+Stn::log(const std::string& s, Stn::LogLevel log_level)
 {
   std::string name = "STN";
   switch (log_level) {
@@ -431,7 +431,7 @@ Stn::log(std::string s, Stn::LogLevel log_level)
 
 void
 Stn::generate_classic_pddl_domain(pddl_parser::Domain *dom,
-    std::string classic_dom_path)
+                                  const std::string& classic_dom_path)
 {
   log_info("Writing domain to " + classic_dom_path);
   std::ofstream out(classic_dom_path);
