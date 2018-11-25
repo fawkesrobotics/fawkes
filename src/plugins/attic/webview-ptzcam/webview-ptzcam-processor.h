@@ -39,11 +39,12 @@ namespace fawkes {
 class WebviewPtzCamRequestProcessor
 {
  public:
-  WebviewPtzCamRequestProcessor(std::string image_id, std::string pantilt_id,
-                                std::string camctrl_id, std::string power_id, std::string camera_id,
+  WebviewPtzCamRequestProcessor(const std::string& image_id, const std::string& pantilt_id,
+                                const std::string& camctrl_id, const std::string& power_id,
+                                const std::string& camera_id,
                                 float pan_increment, float tilt_increment, unsigned int zoom_increment,
                                 float post_powerup_time,
-                                std::map<std::string, std::tuple<std::string, float, float, unsigned int>> presets,
+                                const std::map<std::string, std::tuple<std::string, float, float, unsigned int>>& presets,
                                 fawkes::BlackBoard *blackboard, fawkes::Logger *logger);
 
   ~WebviewPtzCamRequestProcessor();

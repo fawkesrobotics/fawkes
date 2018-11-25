@@ -61,22 +61,22 @@ using namespace fawkes;
  * @param logger logger to report problems
  */
 WebviewPtzCamRequestProcessor::WebviewPtzCamRequestProcessor(
-  std::string image_id,
-  std::string pantilt_id, std::string camctrl_id,
-  std::string power_id, std::string camera_id,
+  const std::string& image_id,
+  const std::string& pantilt_id, const std::string& camctrl_id,
+  const std::string& power_id, const std::string& camera_id,
   float pan_increment, float tilt_increment,
   unsigned int zoom_increment, float post_powerup_time,
-  std::map<std::string, std::tuple<std::string, float, float, unsigned int>> presets,
+  const std::map<std::string, std::tuple<std::string, float, float, unsigned int>>& presets,
   fawkes::BlackBoard *blackboard, fawkes::Logger *logger)
+: logger_(logger),
+  blackboard_(blackboard),
+  image_id_(image_id),
+  presets_(presets),
+  pan_increment_(pan_increment),
+  tilt_increment_(tilt_increment),
+  zoom_increment_(zoom_increment)
 {
-  logger_            = logger;
-  blackboard_        = blackboard;
-  image_id_          = image_id;
-  pan_increment_     = pan_increment;
-  tilt_increment_    = tilt_increment;
-  zoom_increment_    = zoom_increment;
   post_powerup_time_ = (long int)roundf(fabs(post_powerup_time) * 1000000);
-  presets_           = presets;
 
   ptu_if_         = blackboard->open_for_reading<PanTiltInterface>(pantilt_id.c_str());
   camctrl_if_     = blackboard->open_for_reading<CameraControlInterface>(camctrl_id.c_str());
