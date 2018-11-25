@@ -150,7 +150,7 @@ TabletopVisualizationThread::loop()
   visualization_msgs::MarkerArray m;
 
   unsigned int idnum = 0;
-  for (M_Vector4f::iterator it = centroids_.begin(); it != centroids_.end(); it++) {
+  for (M_Vector4f::iterator it = centroids_.begin(); it != centroids_.end(); ++it) {
     try {
 
       /*
