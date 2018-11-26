@@ -53,7 +53,8 @@ FvRetrieverThread::FvRetrieverThread(const std::string& camera_string,
   VisionAspect(VisionAspect::CYCLIC),
   cfg_name_ (cfg_name),
   cfg_prefix_(cfg_prefix),
-  camera_string_(camera_string)
+  camera_string_(camera_string),
+  cap_time_(NULL)
 {
   set_name("FvRetrieverThread_%s", cfg_name_.c_str());
   seq_writer = NULL;
