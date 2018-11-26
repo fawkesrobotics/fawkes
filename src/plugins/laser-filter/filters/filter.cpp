@@ -221,12 +221,25 @@ LaserDataFilter::set_array_ownership(bool own_in, bool own_out)
  * given number of elements
  */
 LaserDataFilter::Buffer::Buffer(size_t num_values)
-: values(NULL)
+: values(NULL), num_values_(num_values)
 {
-  if (num_values > 0) {
-    values = (float *)malloc(num_values * sizeof(float));
+  if (num_values_ > 0) {
+    values = (float *)malloc(num_values_ * sizeof(float));
   }
   timestamp = new fawkes::Time(0,0);
+}
+
+/** Copy constructor.
+ * @param other instance to copy from
+ */
+LaserDataFilter::Buffer::Buffer(const Buffer& other)
+: values(NULL), timestamp(new fawkes::Time(other.timestamp))
+{
+	num_values_ = other.num_values_;
+  if (num_values_ > 0) {
+    values = (float *)malloc(num_values_ * sizeof(float));
+    memcpy(values, other.values, num_values_ * sizeof(float));
+  }
 }
 
 
@@ -239,6 +252,23 @@ LaserDataFilter::Buffer::~Buffer()
   }
 }
 
+/** Assignment operator.
+ * @param other instance to copy from
+ * @return reference to this instance
+ */
+LaserDataFilter::Buffer&
+LaserDataFilter::Buffer::operator=(const Buffer& other)
+{
+	resize(other.num_values_);
+	if (num_values_ > 0) {
+	  memcpy(values, other.values, num_values_ * sizeof(float));
+  }
+	*timestamp = *other.timestamp;
+
+  return *this;
+}
+
+
 /** Resize buffer size.
  * Free data array and create a new one. All values are invalidated.
  * @param num_values if not zero allocates the values arrays with the
@@ -246,11 +276,14 @@ LaserDataFilter::Buffer::~Buffer()
 void
 LaserDataFilter::Buffer::resize(unsigned int num_values)
 {
-	if (values) {
-		free(values);
-		values = NULL;
-	}
-	if (num_values > 0) {
-		values = (float *)malloc(num_values * sizeof(float));
+	if (num_values != num_values_) {
+		if (values) {
+			free(values);
+			values = NULL;
+		}
+		num_values_ = num_values;
+		if (num_values_ > 0) {
+			values = (float *)malloc(num_values_ * sizeof(float));
+		}
 	}
 }

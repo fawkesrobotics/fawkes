@@ -35,12 +35,16 @@ class LaserDataFilter
   class Buffer {
    public:
     Buffer(size_t num_values = 0);
+    Buffer(const Buffer& other);
     ~Buffer();
+    Buffer& operator=(const Buffer& other);
 	  void resize(unsigned int num_values);
 	  std::string   name; ///< name of the input buffer
     std::string   frame;		///< reference coordinate frame ID
     float        *values;	///< values
     fawkes::Time *timestamp;	///< timestamp of data
+  private:
+	  unsigned int num_values_;
   };
 
   LaserDataFilter(const std::string& filter_name,

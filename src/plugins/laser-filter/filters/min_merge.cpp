@@ -46,7 +46,8 @@ LaserMinMergeDataFilter::LaserMinMergeDataFilter(const std::string& filter_name,
                                                  std::vector<LaserDataFilter::Buffer *> &in)
 : LaserDataFilter(filter_name, in_data_size, in, 1),
   logger(logger),
-  timestamp_selection_method_(TIMESTAMP_LATEST)
+  timestamp_selection_method_(TIMESTAMP_LATEST),
+  timestamp_index_(0)
 {
 }
 
