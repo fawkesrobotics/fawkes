@@ -194,8 +194,8 @@ PointCloudDBROSCommThread::merge_cb(fawkes_msgs::MergePointClouds::Request  &req
   size_t num_timestamps = mm->maxlenof_timestamps();
   std::vector<int64_t> timestamps(num_timestamps, 0);
   for (size_t i = 0; i < req.timestamps.size(); ++i) {
-    timestamps[i] = (int64_t)req.timestamps[i].sec * 1000L
-      + (int64_t)req.timestamps[i].nsec / 1000000L;
+    timestamps[i] = (int64_t)req.timestamps[i].data.sec * 1000L
+      + (int64_t)req.timestamps[i].data.nsec / 1000000L;
   }
   sort(timestamps.begin(), timestamps.begin() + req.timestamps.size());
   mm->set_timestamps(&timestamps[0]);
