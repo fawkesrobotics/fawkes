@@ -42,11 +42,12 @@
 PlayerLaserMapper::PlayerLaserMapper(const std::string& varname,
                                      fawkes::Laser360Interface *interface,
                                      PlayerCc::LaserProxy *proxy)
-: PlayerProxyFawkesInterfaceMapper(varname)
+: PlayerProxyFawkesInterfaceMapper(varname),
+  interface_(interface),
+  proxy_(proxy),
+  first_read_(true),
+  index_offset_(0)
 {
-  interface_  = interface;
-  proxy_      = proxy;
-  first_read_ = true;
 }
 
 
