@@ -54,6 +54,8 @@ extern "C" {
 #endif
 }
 
+#include <cassert>
+
 #define CFG_PREFIX "/perception/tabletop-objects/"
 #define CFG_PREFIX_VIS "/perception/tabletop-objects/visualization/"
 
@@ -695,13 +697,15 @@ TabletopVisualizationThread::triangulate_hull()
 
   table_triangle_vertices_.resize(q_num_facets * dim);
   facetT *facet;
-  size_t i = 0;
+  int i = 0;
   FORALLfacets
   {
 	  vertexT *vertex = NULL;
-    int vertex_n, vertex_i = 0;
+    int vertex_n = 0, vertex_i = 0;
     FOREACHvertex_i_(facet->vertices)
     {
+	    assert(vertex);
+	    assert(i + vertex_i < vertex_n);
       table_triangle_vertices_[i + vertex_i][0] = vertex->point[0];
       table_triangle_vertices_[i + vertex_i][1] = vertex->point[1];
       table_triangle_vertices_[i + vertex_i][2] = vertex->point[2];
