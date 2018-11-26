@@ -29,7 +29,7 @@ OBJS_pcl_db_roscomm = pcl_db_roscomm_plugin.o pcl_db_roscomm_thread.o
 
 OBJS_all    = $(OBJS_pcl_db_roscomm)
 
-REQUIRED_ROS_PKGS = hybris_c1_msgs pcl_conversions
+REQUIRED_ROS_PKGS = fawkes_msgs pcl_conversions
 
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
@@ -65,7 +65,7 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS) $(WARN_TARGETS_BOOST)
 
-.PHONY: warning_ros warning_hybris_c1_msgs
+.PHONY: warning_ros warning_fawkes_msgs
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting pcl-db-roscomm$(TNORMAL) (ROS not found)"
 warning_pcl:

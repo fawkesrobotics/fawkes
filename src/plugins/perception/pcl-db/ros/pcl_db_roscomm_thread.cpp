@@ -3,7 +3,7 @@
  *  pcl_db_merge_roscomm_thread.cpp - ROS communication for pcl-db-merge
  *
  *  Created: Thu Dec 06 13:54:45 2012
- *  Copyright  2012  Tim Niemueller [www.niemueller.de]
+ *  Copyright  2012-2018  Tim Niemueller [www.niemueller.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -32,7 +32,6 @@
 #include <pcl/pcl_config.h>
 #if PCL_VERSION_COMPARE(>=,1,7,0)
 #  include <pcl/PCLPointCloud2.h>
-#  include <pcl/common/conversions.h>
 #  include <pcl_conversions/pcl_conversions.h>
 #endif
 
@@ -169,8 +168,8 @@ PointCloudDBROSCommThread::loop()
 }
 
 bool
-PointCloudDBROSCommThread::merge_cb(hybris_c1_msgs::MergePointClouds::Request  &req,
-				    hybris_c1_msgs::MergePointClouds::Response &resp)
+PointCloudDBROSCommThread::merge_cb(fawkes_msgs::MergePointClouds::Request  &req,
+                                    fawkes_msgs::MergePointClouds::Response &resp)
 {
   PclDatabaseMergeInterface::MergeMessage *mm =
     new PclDatabaseMergeInterface::MergeMessage();
@@ -224,8 +223,8 @@ PointCloudDBROSCommThread::merge_cb(hybris_c1_msgs::MergePointClouds::Request  &
 
 
 bool
-PointCloudDBROSCommThread::retrieve_cb(hybris_c1_msgs::RetrievePointCloud::Request  &req,
-				       hybris_c1_msgs::RetrievePointCloud::Response &resp)
+PointCloudDBROSCommThread::retrieve_cb(fawkes_msgs::RetrievePointCloud::Request  &req,
+                                       fawkes_msgs::RetrievePointCloud::Response &resp)
 {
   PclDatabaseRetrieveInterface::RetrieveMessage *mm =
     new PclDatabaseRetrieveInterface::RetrieveMessage();
@@ -233,8 +232,8 @@ PointCloudDBROSCommThread::retrieve_cb(hybris_c1_msgs::RetrievePointCloud::Reque
   int64_t timestamp = (int64_t)req.timestamp.sec * 1000L
     + (int64_t)req.timestamp.nsec / 1000000L;
 
-  logger->log_info(name(), "Restoring %lli from %s.%s", timestamp,
-		   req.database.c_str(), req.collection.c_str());
+  logger->log_info(name(), "Restoring %li from %s.%s", timestamp,
+                   req.database.c_str(), req.collection.c_str());
 
   mm->set_timestamp(timestamp);
   mm->set_database(req.database.c_str());
@@ -263,8 +262,8 @@ PointCloudDBROSCommThread::retrieve_cb(hybris_c1_msgs::RetrievePointCloud::Reque
 
 
 bool
-PointCloudDBROSCommThread::store_cb(hybris_c1_msgs::StorePointCloud::Request  &req,
-				    hybris_c1_msgs::StorePointCloud::Response &resp)
+PointCloudDBROSCommThread::store_cb(fawkes_msgs::StorePointCloud::Request  &req,
+                                    fawkes_msgs::StorePointCloud::Response &resp)
 {
 #if PCL_VERSION_COMPARE(>=,1,7,0)
   PclDatabaseStoreInterface::StoreMessage *mm =
@@ -332,8 +331,8 @@ PointCloudDBROSCommThread::store_cb(hybris_c1_msgs::StorePointCloud::Request  &r
 
 
 bool
-PointCloudDBROSCommThread::record_cb(hybris_c1_msgs::RecordData::Request  &req,
-				     hybris_c1_msgs::RecordData::Response &resp)
+PointCloudDBROSCommThread::record_cb(fawkes_msgs::RecordData::Request  &req,
+                                     fawkes_msgs::RecordData::Response &resp)
 {
   logger->log_info(name(), "Recording ordered for %f sec", req.range.toSec());
   ros::Time begin = ros::Time::now();
