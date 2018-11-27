@@ -270,7 +270,7 @@ SelectDriveMode::update( bool escape )
   if ( escape == true ) {
     if( escape_flag_ == 0
      && if_motor_->des_vx() != 0.f
-     && if_motor_->des_vx() != 0.f
+     && if_motor_->des_vy() != 0.f
      && if_motor_->des_omega() != 0.f ) {
       desired_mode = NavigatorInterface::MovingNotAllowed;
       // we have not yet stopped!
