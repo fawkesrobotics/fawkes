@@ -420,7 +420,7 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
   } else if (message->is_of_type<NavGraphGeneratorInterface::AddObstacleMessage>()) {
     NavGraphGeneratorInterface::AddObstacleMessage *msg =
       message->as_type<NavGraphGeneratorInterface::AddObstacleMessage>();
-    if (std::isfinite(msg->x()) && std::isfinite(msg->x())) {
+    if (std::isfinite(msg->x()) && std::isfinite(msg->y())) {
       obstacles_[msg->name()] = cart_coord_2d_t(msg->x(), msg->y());
     } else {
       logger->log_error(name(), "Received non-finite obstacle (%.2f,%.2f), ignoring",
