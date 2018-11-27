@@ -71,7 +71,9 @@ SelectDriveMode::SelectDriveMode( MotorInterface* motor,
    escape_flag_( 0 ) // no escaping at the beginning
 {
   logger_->log_debug("SelectDriveMode", "(Constructor): Entering");
+
   drive_modes_.clear();
+  proposed_.x = proposed_.y = proposed_.rot = 0.f;
 
   std::string drive_restriction = config->get_string("/plugins/colli/drive_mode/restriction");
 
