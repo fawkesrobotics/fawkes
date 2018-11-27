@@ -38,7 +38,7 @@ function parse_yaml {
 
 _fawkes()
 {
-  local cur prev pprev opts base
+  local cur prev pprev opts
   cur="${COMP_WORDS[COMP_CWORD]}"
   prev="${COMP_WORDS[COMP_CWORD-1]}"
   pprev=${COMP_WORDS[COMP_CWORD-2]}
