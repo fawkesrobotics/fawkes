@@ -931,7 +931,6 @@ OpenPRSProtobuf::oprs_pb_field_list(void *msgptr, std::string field_name)
     case FieldDescriptor::TYPE_FLOAT:
       tl = build_term_list(tl, build_float(refl->GetRepeatedFloat(**m, field, i)));
       break;
-      break;
     case FieldDescriptor::TYPE_UINT64:
     case FieldDescriptor::TYPE_FIXED64:
       tl = build_term_list(tl, build_long_long(refl->GetRepeatedUInt64(**m, field, i)));
