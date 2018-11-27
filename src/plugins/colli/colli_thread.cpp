@@ -671,21 +671,15 @@ ColliThread::initialize_modules()
   try {
     // BEFORE DRIVE MODE: the motorinstruction set
     if ( cfg_motor_instruct_mode_ == fawkes::colli_motor_instruct_mode_t::linear ) {
-      motor_instruct_ = (BaseMotorInstruct *)new LinearMotorInstruct( if_motor_,
-                                                                      frequency_,
-                                                                      logger,
-                                                                      config );
+      motor_instruct_ = new LinearMotorInstruct(if_motor_, frequency_,
+                                                logger, config);
     } else if ( cfg_motor_instruct_mode_ == fawkes::colli_motor_instruct_mode_t::quadratic ) {
-      motor_instruct_ = (BaseMotorInstruct *)new QuadraticMotorInstruct( if_motor_,
-                                                                         frequency_,
-                                                                         logger,
-                                                                         config );
+	    motor_instruct_ = new QuadraticMotorInstruct(if_motor_, frequency_,
+	                                                 logger, config);
     } else {
       logger->log_error(name(), "Motor instruct not implemented, use linear");
-      motor_instruct_ = (BaseMotorInstruct *)new LinearMotorInstruct( if_motor_,
-                                                                      frequency_,
-                                                                      logger,
-                                                                      config );
+      motor_instruct_ = new LinearMotorInstruct(if_motor_, frequency_,
+                                                 logger, config);
     }
   } catch(Exception &e) {
     logger->log_error(name(), "Could not create MotorInstruct (%s", e.what_no_backtrace());
@@ -695,10 +689,8 @@ ColliThread::initialize_modules()
   }
 
   try {
-    emergency_motor_instruct_ = (BaseMotorInstruct *)new EmergencyMotorInstruct( if_motor_,
-                                                                                 frequency_,
-                                                                                 logger,
-                                                                                 config );
+    emergency_motor_instruct_ = new EmergencyMotorInstruct(if_motor_, frequency_,
+                                                           logger, config);
   } catch(Exception &e) {
     logger->log_error(name(), "Could not create EmergencyMotorInstruct (%s", e.what_no_backtrace());
     delete occ_grid_;
@@ -709,7 +701,8 @@ ColliThread::initialize_modules()
 
   try {
     // AFTER MOTOR INSTRUCT: the motor propose values object
-    select_drive_mode_ = new SelectDriveMode( if_motor_, if_colli_target_, logger, config, cfg_escape_mode_ );
+    select_drive_mode_ = new SelectDriveMode(if_motor_, if_colli_target_,
+                                             logger, config, cfg_escape_mode_);
   } catch(Exception &e) {
     logger->log_error(name(), "Could not create SelectDriveMode (%s", e.what_no_backtrace());
     delete occ_grid_;
