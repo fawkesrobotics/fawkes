@@ -50,6 +50,7 @@ class RaiseExtension(Extension):
             [], [], [], lineno=lineno
         )
 
+    @classmethod
     def _raise(self, msg, caller):
         raise TemplateRuntimeError(msg)
 
@@ -204,7 +205,7 @@ def filter_path_substargs(path, op, replacement_pattern):
 			if p['in'] == 'path':
 				replace_by = replacement_pattern.replace('$$', filter_sanitize(p['name']))
 				path = re.sub('\{%s\+?\}' % p['name'], replace_by, path)
-	return path	
+	return path
 
 def filter_regex_replace(value='', pattern='', replacement=''):
     _re = re.compile(pattern)
@@ -293,30 +294,30 @@ if __name__ == '__main__':
 				if not args.quiet:
 					print("%s" % f['filename'])
 
-				vars = {
+				template_vars = {
 					"spec": spec,
 					"name": name,
 					"schema": schema,
 					"all_schemas": schemas
 				}
 
-				res = template.render(vars)
+				res = template.render(template_vars)
 				write_file(f, res)
 
 		elif f['type'] == "api":
-			vars = {
+			template_vars = {
 				"spec": spec,
 				"name": filter_sanitize(spec['info']['title']),
 				"all_schemas": schemas
 			}
 
-			f['filename'] = "%s/%sApiService.%s" % (args.output_dir, vars['name'], f['suffix'])
+			f['filename'] = "%s/%sApiService.%s" % (args.output_dir, template_vars['name'], f['suffix'])
 
 			if not args.quiet:
 				print("%s" % f['filename'])
 
 			try:
-				res = template.render(vars)
+				res = template.render(template_vars)
 				write_file(f, res)
 			except TemplateRuntimeError as err:
 				print("Template error in %s: %s" % (f['file'], err))
