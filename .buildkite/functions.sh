@@ -263,8 +263,8 @@ print_sechead()
 		local SECHEAD={$1:-}
 		local HALF_WIDTH_L=$(((64-${#SECHEAD})/2))
 		local HALF_WIDTH_R=$HALF_WIDTH_L
-		if (( ( $HALF_WIDTH_L * 2 + ${#SECHEAD} ) < 64 )); then
-				HALF_WIDTH_R=$(( $HALF_WIDTH_R + 1 ))
+		if (( ( HALF_WIDTH_L * 2 + ${#SECHEAD} ) < 64 )); then
+				HALF_WIDTH_R=$(( HALF_WIDTH_R + 1 ))
 		fi
 	  
 		echo -e "\n"
