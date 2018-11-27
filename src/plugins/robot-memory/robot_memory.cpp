@@ -58,8 +58,8 @@ using namespace fawkes;
  * @param blackboard Fawkes blackboard
  */
 RobotMemory::RobotMemory(fawkes::Configuration* config, fawkes::Logger* logger,
-   fawkes::Clock* clock, fawkes::MongoDBConnCreator* mongo_connection_manager,
-   fawkes::BlackBoard* blackboard)
+                         fawkes::Clock* clock, fawkes::MongoDBConnCreator* mongo_connection_manager,
+                         fawkes::BlackBoard* blackboard)
 {
   mutex_ = new Mutex();
   config_ = config;
@@ -67,6 +67,8 @@ RobotMemory::RobotMemory(fawkes::Configuration* config, fawkes::Logger* logger,
   clock_ = clock;
   mongo_connection_manager_ = mongo_connection_manager;
   blackboard_ = blackboard;
+  mongodb_client_local_ = nullptr;
+  mongodb_client_distributed_ = nullptr;
   debug_ = false;
 }
 
@@ -728,7 +730,7 @@ std::string
 RobotMemory::check_collection_name(const std::string &collection)
 {
   std::string coll{collection.empty() ? default_collection_ : collection};
-  if (database_name_ != "robmem" && coll.find("robmem.") == std::string::npos)
+  if (database_name_ != "robmem" && coll.compare(0, 7, "robmem.") != 0)
   {
     //change used database name (e.g. for the case of multiple simulated dababases)
     coll.replace(0, 6, database_name_);
