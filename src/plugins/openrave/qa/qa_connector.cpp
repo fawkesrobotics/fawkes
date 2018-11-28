@@ -37,7 +37,7 @@ using namespace std;
 void
 printVector(vector<float> v)
 {
-  printf("## size:%u \n", v.size());
+  printf("## size:%zu \n", v.size());
   for(unsigned int i=0; i<v.size(); i++)
   {
     printf("## %u:)%f \n", i, v[i]);

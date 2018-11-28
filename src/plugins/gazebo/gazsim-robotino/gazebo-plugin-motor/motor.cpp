@@ -30,6 +30,7 @@ using namespace gazebo;
 GZ_REGISTER_MODEL_PLUGIN(Motor)
 
 Motor::Motor()
+: vx_(0), vy_(0), vomega_(0)
 {
 }
 

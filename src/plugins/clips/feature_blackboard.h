@@ -70,45 +70,45 @@ class BlackboardCLIPSFeature : public fawkes::CLIPSFeature
   std::map<fawkes::Message*, fawkes::Interface*> interface_of_msg_;
 
  private: // methods
-  void clips_blackboard_open_interface(std::string env_name,
-				       std::string type, std::string id,
-				       bool writing);
-  void clips_blackboard_open_interface_reading(std::string env_name,
-					       std::string type, std::string id);
-  void clips_blackboard_open_interface_writing(std::string env_name,
-					       std::string type, std::string id);
-  void clips_blackboard_close_interface(std::string env_name,
-					std::string type, std::string id);
-  void clips_blackboard_read(std::string env_name);
-  void clips_blackboard_write(std::string env_name, std::string uid);
+  void clips_blackboard_open_interface(const std::string& env_name,
+                                       const std::string& type, const std::string& id,
+                                       bool writing);
+  void clips_blackboard_open_interface_reading(const std::string& env_name,
+                                               const std::string& type, const std::string& id);
+  void clips_blackboard_open_interface_writing(const std::string& env_name,
+                                               const std::string& type, const std::string& id);
+  void clips_blackboard_close_interface(const std::string& env_name,
+                                        const std::string& type, const std::string& id);
+  void clips_blackboard_read(const std::string& env_name);
+  void clips_blackboard_write(const std::string& env_name, const std::string& uid);
 
-  void clips_blackboard_enable_time_read(std::string env_name);
-  void clips_blackboard_get_info(std::string env_name);
-  bool clips_assert_interface_type(std::string &env_name, std::string &log_name,
-				   fawkes::Interface *iface, std::string &type);
-  void clips_blackboard_preload(std::string env_name, std::string type);
-  void clips_blackboard_set(std::string env_name, std::string uid,
-			    std::string field, CLIPS::Value value);
-  void clips_blackboard_set_multifield(std::string env_name, std::string uid,
-			    std::string field, CLIPS::Values values);
-  CLIPS::Value clips_blackboard_create_msg(std::string env_name, std::string uid,
-					   std::string msg_type);
-  CLIPS::Values clips_blackboard_list_msg_fields(std::string env_name, void *msgptr);
+  void clips_blackboard_enable_time_read(const std::string& env_name);
+  void clips_blackboard_get_info(const std::string& env_name);
+  bool clips_assert_interface_type(const std::string& env_name, const std::string& log_name,
+                                   fawkes::Interface *iface, const std::string& type);
+  void clips_blackboard_preload(const std::string& env_name, const std::string& type);
+  void clips_blackboard_set(const std::string& env_name, const std::string& uid,
+                            const std::string& field, CLIPS::Value value);
+  void clips_blackboard_set_multifield(const std::string& env_name, const std::string& uid,
+                                       const std::string& field, CLIPS::Values values);
+  CLIPS::Value clips_blackboard_create_msg(const std::string& env_name, const std::string& uid,
+                                           const std::string& msg_type);
+  CLIPS::Values clips_blackboard_list_msg_fields(const std::string& env_name, void *msgptr);
 
-  void clips_blackboard_set_msg_field(std::string env_name, void *msgptr,
-				      std::string field_name, CLIPS::Value value);
-  void clips_blackboard_set_msg_multifield(std::string env_name, void *msgptr,
-				      std::string field_name, CLIPS::Values values);
-  CLIPS::Value clips_blackboard_send_msg(std::string env_name, void *msgptr);
+  void clips_blackboard_set_msg_field(const std::string& env_name, void *msgptr,
+                                      const std::string& field_name, CLIPS::Value value);
+  void clips_blackboard_set_msg_multifield(const std::string& env_name, void *msgptr,
+                                           const std::string& field_name, CLIPS::Values values);
+  CLIPS::Value clips_blackboard_send_msg(const std::string& env_name, void *msgptr);
 
   //helper
   bool set_field(fawkes::InterfaceFieldIterator fit_begin,
-		 fawkes::InterfaceFieldIterator fit_end,
-		 std::string env_name, std::string field, CLIPS::Value value,
-		 int index = 0);
+                 fawkes::InterfaceFieldIterator fit_end,
+                 const std::string& env_name, const std::string& field, CLIPS::Value value,
+                 int index = 0);
   bool set_multifield(fawkes::InterfaceFieldIterator fit_begin,
-		 fawkes::InterfaceFieldIterator fit_end,
-		 std::string env_name, std::string field, CLIPS::Values values);
+                      fawkes::InterfaceFieldIterator fit_end,
+                      const std::string& env_name, const std::string& field, CLIPS::Values values);
 };
 
 #endif

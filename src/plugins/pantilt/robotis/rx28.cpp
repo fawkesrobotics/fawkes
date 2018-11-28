@@ -163,6 +163,12 @@ RobotisRX28::RobotisRX28(const char *device_file, unsigned int default_timeout_m
     free(device_file_);
     throw;
   }
+  for (size_t i = 0; i < sizeof(obuffer_) / sizeof(obuffer_[0]); ++i) {
+	  obuffer_[i] = 0;
+  }
+  for (size_t i = 0; i < sizeof(ibuffer_) / sizeof(ibuffer_[0]); ++i) {
+	  ibuffer_[i] = 0;
+  }
 }
 
 

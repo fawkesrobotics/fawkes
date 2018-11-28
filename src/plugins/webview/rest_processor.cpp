@@ -50,16 +50,13 @@ using namespace fawkes;
 WebviewRESTRequestProcessor::WebviewRESTRequestProcessor(fawkes::WebUrlManager *url_manager,
                                                          fawkes::WebviewRestApiManager *api_mgr,
                                                          fawkes::Logger *logger)
+: url_mgr_(url_manager),
+  api_mgr_(api_mgr),
+  logger_(logger),
+  methods_{WebRequest::METHOD_GET, WebRequest::METHOD_POST,
+           WebRequest::METHOD_PUT, WebRequest::METHOD_DELETE,
+           WebRequest::METHOD_PATCH}
 {
-  logger_  = logger;
-  api_mgr_ = api_mgr;
-  url_mgr_ = url_manager;
-
-  methods_ = {
-	  WebRequest::METHOD_GET, WebRequest::METHOD_POST,
-	  WebRequest::METHOD_PUT, WebRequest::METHOD_DELETE,
-	  WebRequest::METHOD_PATCH};
-
   for (const auto &method : methods_) {
 	  url_mgr_->add_handler(method, "/api/{rest_url*}",
 	                        std::bind(&WebviewRESTRequestProcessor::process_request, this,

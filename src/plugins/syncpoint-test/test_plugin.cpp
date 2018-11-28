@@ -55,7 +55,8 @@ class SyncPointTestPlugin : public fawkes::Plugin
       };
 
       for (std::vector<BlockedTimingAspect::WakeupHook>::iterator it = hooks.begin();
-          it != hooks.end(); it++) {
+           it != hooks.end(); ++it)
+      {
         std::string name = "SyncPointTestThread-";
         std::string hook_name = BlockedTimingAspect::blocked_timing_hook_to_string(*it);
         std::transform(hook_name.begin(), hook_name.end(), hook_name.begin(), ::tolower);
@@ -65,6 +66,6 @@ class SyncPointTestPlugin : public fawkes::Plugin
   }
 };
 
-PLUGIN_DESCRIPTION("Plugin to test SyncPoints and the BlockedTimingAspect")
+PLUGIN_DESCRIPTION("Test SyncPoints and BlockedTimingAspect")
 EXPORT_PLUGIN(SyncPointTestPlugin)
 

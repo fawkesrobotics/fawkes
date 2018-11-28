@@ -38,11 +38,11 @@
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserMaxCircleDataFilter::LaserMaxCircleDataFilter(const std::string filter_name,
+LaserMaxCircleDataFilter::LaserMaxCircleDataFilter(const std::string& filter_name,
                                                    float radius,
                                                    unsigned int in_data_size,
                                                    std::vector<LaserDataFilter::Buffer *> &in)
-	: LaserDataFilter(filter_name, in_data_size, in, in.size())
+: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
   radius_ = radius;
 }

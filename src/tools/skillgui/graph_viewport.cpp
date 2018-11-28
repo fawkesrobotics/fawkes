@@ -113,7 +113,7 @@ SkillGuiGraphViewport::set_gvjob(GVJ_t *job)
  * @param fsm_name name of FSM the graph belongs to
  */
 void
-SkillGuiGraphViewport::set_graph_fsm(std::string fsm_name)
+SkillGuiGraphViewport::set_graph_fsm(const std::string& fsm_name)
 {
   if ( graph_fsm_ != fsm_name ) {
     translator_->set_translate(0, 0);
@@ -126,7 +126,7 @@ SkillGuiGraphViewport::set_graph_fsm(std::string fsm_name)
  * @param graph string representation of the current graph in the dot language.
  */
 void
-SkillGuiGraphViewport::set_graph(std::string graph)
+SkillGuiGraphViewport::set_graph(const std::string& graph)
 {
   graph_ = graph;
 }

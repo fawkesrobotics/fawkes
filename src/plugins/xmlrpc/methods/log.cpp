@@ -69,7 +69,7 @@ XmlRpcLogMethods::~XmlRpcLogMethods()
   delete log_log_debug_;
   delete log_log_info_;
   delete log_log_warn_;
-  delete log_log_debug_;
+  delete log_log_error_;
 }
 
 

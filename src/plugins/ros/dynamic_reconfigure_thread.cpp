@@ -132,7 +132,8 @@ RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service,
  */
 bool
 RosDynamicReconfigureThread::set_dynreconf_value(const std::string& service,
-                                                 const std::string& parameter, const std::string value)
+                                                 const std::string& parameter,
+                                                 const std::string& value)
 {
   dynamic_reconfigure::StrParameter dynreconf_str_param;
   dynamic_reconfigure::Config dynreconf_conf;

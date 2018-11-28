@@ -98,13 +98,13 @@ using namespace fawkes;
  * @param cfg_prefix configuration path prefix
  */
 IMUAcquisitionThread::IMUAcquisitionThread(const char *thread_name, bool continuous,
-					   std::string &cfg_name, std::string &cfg_prefix)
-  : Thread(thread_name, Thread::OPMODE_CONTINUOUS)
+                                           const std::string& cfg_name,
+                                           const std::string& cfg_prefix)
+: Thread(thread_name, Thread::OPMODE_CONTINUOUS),
+  cfg_name_      (cfg_name),
+  cfg_prefix_    (cfg_prefix),
+  cfg_continuous_(continuous)
 {
-  cfg_name_       = cfg_name;
-  cfg_prefix_     = cfg_prefix;
-  cfg_continuous_ = continuous;
-
   data_mutex_ = new Mutex();
   timestamp_  = new Time();
   new_data_   = false;

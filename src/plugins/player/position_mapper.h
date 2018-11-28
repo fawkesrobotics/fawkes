@@ -36,9 +36,9 @@ namespace PlayerCc {
 class PlayerPositionMapper : public PlayerProxyFawkesInterfaceMapper
 {
  public:
-  PlayerPositionMapper(std::string varname,
-		       fawkes::ObjectPositionInterface *interface,
-		       PlayerCc::Position2dProxy *proxy);
+  PlayerPositionMapper(const std::string& varname,
+                       fawkes::ObjectPositionInterface *interface,
+                       PlayerCc::Position2dProxy *proxy);
 
   virtual void sync_fawkes_to_player();
   virtual void sync_player_to_fawkes();

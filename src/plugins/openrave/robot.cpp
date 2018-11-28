@@ -55,11 +55,19 @@ OpenRaveRobot::OpenRaveRobot(fawkes::Logger* logger) :
  * @param env pointer to OpenRaveEnvironment object
  * @param logger pointer to fawkes logger
  */
-OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnvironmentPtr& env, fawkes::Logger* logger) :
-  logger_( logger ),
-  name_( "" ),
-  manip_( 0 ),
-  find_best_ik_( 1 )
+OpenRaveRobot::OpenRaveRobot(const std::string& filename,
+                             fawkes::OpenRaveEnvironmentPtr& env,
+                             fawkes::Logger* logger)
+: logger_(logger),
+  name_(""),
+  name_str_(""),
+  manip_(0),
+  target_(TARGET_NONE),
+  find_best_ik_(1),
+  trans_offset_x_(0),
+  trans_offset_y_(0),
+  trans_offset_z_(0),
+  display_planned_movements_(false)
 {
   init();
   this->load(filename, env);
@@ -70,8 +78,8 @@ OpenRaveRobot::OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnviro
  * @param new_env Pointer to the new OpenRaveEnvironment. We need this to set robot_
  *  to the correct robot in the new OpenRAVE-environment.
  */
-OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnvironmentPtr& new_env) :
-  logger_( src.logger_ ),
+OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnvironmentPtr& new_env)
+: logger_( src.logger_ ),
   name_( src.name_ ),
   find_best_ik_( src.find_best_ik_ )
 {
@@ -88,11 +96,13 @@ OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnv
   robot_ = new_env->get_env_ptr()->GetRobot( name );
 
   if(!robot_)
-    throw fawkes::IllegalArgumentException("%s: Robot '%s' could not be loaded. Check name.", this->name(), name.c_str());
+    throw fawkes::IllegalArgumentException("%s: Robot '%s' could not be loaded. "
+                                           "Check name.", this->name(), name.c_str());
 
   build_name_str();
-  if(logger_)
+  if (logger_) {
     logger_->log_debug(this->name(), "Robot loaded.");
+  }
 
   // Initialize robot
   set_ready();
@@ -109,8 +119,9 @@ OpenRaveRobot::OpenRaveRobot(const OpenRaveRobot& src, const fawkes::OpenRaveEnv
   target_.manip = manip_->copy();
   display_planned_movements_ = false;
 
-  if(logger_)
+  if (logger_) {
     logger_->log_debug(this->name(), "Robot '%s' cloned.", name.c_str());
+  }
 }
 
 /** Destructor */

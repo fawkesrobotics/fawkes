@@ -115,7 +115,7 @@ void RobotStatePublisherThread::init()
 
   // check for open JointInterfaces
   std::list<fawkes::JointInterface *> ifs = blackboard->open_multiple_for_reading<JointInterface>();
-  for (std::list<JointInterface *>::iterator it = ifs.begin(); it != ifs.end(); it++) {
+  for (std::list<JointInterface *>::iterator it = ifs.begin(); it != ifs.end(); ++it) {
     if (joint_is_in_model((*it)->id())) {
       logger->log_debug(name(), "Found joint information for %s", (*it)->id());
       unknown_segments.erase((*it)->id());
@@ -129,7 +129,8 @@ void RobotStatePublisherThread::init()
     }
   }
   for (map<string, SegmentPair>::const_iterator it = unknown_segments.begin();
-      it != unknown_segments.end(); it++) {
+       it != unknown_segments.end(); ++it)
+  {
     logger->log_warn(name(), "No information for joint %s available", it->first.c_str());
   }
   // watch for creation of new JointInterfaces
@@ -144,7 +145,7 @@ void RobotStatePublisherThread::finalize()
 {
   blackboard->unregister_listener(this);
   blackboard->unregister_observer(this);
-  for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); it++) {
+  for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); ++it) {
     blackboard->close(*it);
   }
 }
@@ -161,7 +162,7 @@ void RobotStatePublisherThread::add_children(const KDL::SegmentMap::const_iterat
   const std::string& root = segment->second.segment.getName();
 
   const std::vector<KDL::SegmentMap::const_iterator>& children = segment->second.children;
-  for (unsigned int i=0; i<children.size(); i++){
+  for (unsigned int i=0; i<children.size(); ++i){
     const KDL::Segment& child = children[i]->second.segment;
     SegmentPair s(children[i]->second.segment, root, child.getName());
     if (child.getJoint().getType() == KDL::Joint::None){
@@ -185,14 +186,16 @@ void RobotStatePublisherThread::publish_fixed_transforms()
   tf_transform.stamp = now + cfg_postdate_to_future_;  // future publish
 
   // loop over all fixed segments
-  for (map<string, SegmentPair>::const_iterator seg=segments_fixed_.begin(); seg != segments_fixed_.end(); seg++){
+  for (map<string, SegmentPair>::const_iterator seg=segments_fixed_.begin(); seg != segments_fixed_.end(); ++seg)
+  {
     transform_kdl_to_tf(seg->second.segment.pose(0), tf_transform);
     tf_transform.frame_id = seg->second.root;
     tf_transform.child_frame_id = seg->second.tip;
     tf_transforms.push_back(tf_transform);
   }
   for (std::vector<tf::StampedTransform>::const_iterator it = tf_transforms.begin();
-      it != tf_transforms.end(); it++) {
+       it != tf_transforms.end(); ++it)
+  {
     tf_publisher->send_transform(*it);
   }
 }

@@ -58,7 +58,7 @@ class LaserBoxFilterDataFilter : public LaserDataFilter,
 
  public:
 
-  LaserBoxFilterDataFilter(const std::string filter_name,
+  LaserBoxFilterDataFilter(const std::string& filter_name,
                            unsigned int in_data_size,
                            std::vector<LaserDataFilter::Buffer *> &in,
                            fawkes::tf::Transformer * tf_listener,

@@ -44,7 +44,7 @@ TrackedLineInfo::TrackedLineInfo(
     float cfg_switch_tolerance,
     unsigned int cfg_moving_avg_len,
     fawkes::Logger *logger,
-    string plugin_name)
+    const string &plugin_name)
 : interface_idx(-1),
   visibility_history(0),
   transformer(tfer),

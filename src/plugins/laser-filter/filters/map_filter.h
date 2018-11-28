@@ -44,8 +44,7 @@ class LaserMapFilterDataFilter : public LaserDataFilter
   float                   cfg_occupied_thresh_;
 
  public:
-
-  LaserMapFilterDataFilter(const std::string filter_name,
+  LaserMapFilterDataFilter(const std::string& filter_name,
                            unsigned int in_data_size,
                            std::vector<LaserDataFilter::Buffer *> &in,
                            fawkes::tf::Transformer * tf_listener,

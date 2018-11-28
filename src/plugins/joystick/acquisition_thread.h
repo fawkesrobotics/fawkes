@@ -72,7 +72,7 @@ class JoystickAcquisitionThread
  protected: virtual void run() { Thread::run(); }
 
  private:
-  void init(std::string device_file, bool allow_open_fail = false);
+  void init(const std::string& device_file, bool allow_open_fail = false);
   void open_joystick();
   void open_forcefeedback();
   

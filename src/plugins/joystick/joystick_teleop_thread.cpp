@@ -185,7 +185,7 @@ JoystickTeleOpThread::is_area_free(float theta)
 	if (! laser_if_)  return true;
 
   min_distance_ = FLT_MAX;
-  for (int i = (-1)*cfg_collision_safety_angle_; i <= (int)cfg_collision_safety_angle_; ++i)
+  for (int i = (-1)*(int)cfg_collision_safety_angle_; i <= (int)cfg_collision_safety_angle_; ++i)
   {
     int angle = ((int)theta) + i;
     if (angle < 0)

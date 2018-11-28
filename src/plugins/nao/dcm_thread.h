@@ -4,7 +4,6 @@
  *
  *  Created: Tue May 31 14:59:30 2011
  *  Copyright  2006-2011  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -71,17 +70,17 @@ class NaoQiDCMThread
  private:
   void dcm_callback();
   void read_values();
-  void update_interfaces(fawkes::NaoJointPositionInterface *joint_pos_if,
-			 fawkes::NaoJointStiffnessInterface *joint_stiffness_if,
-			 fawkes::NaoSensorInterface *sensor_if);
+	void update_interfaces(fawkes::NaoJointPositionInterface *joint_pos_if,
+	                       fawkes::NaoJointStiffnessInterface *joint_stiffness_if,
+	                       fawkes::NaoSensorInterface *sensor_if);
   void process_messages();
   std::vector<std::string> parse_servo_bitfield(unsigned int servos);
 
 
-  void send_commands(unsigned int servos, std::string what,
-		     float value, int time_offset);
-  void send_command(std::string name, float value,
-                    std::string kind, int time_offset);
+  void send_commands(unsigned int servos, const std::string& what,
+                     float value, int time_offset);
+  void send_command(const std::string& name, float value,
+                    const std::string& kind, int time_offset);
 
   int ultrasonic_value(fawkes::NaoSensorInterface::UltrasonicDirection direction);
 

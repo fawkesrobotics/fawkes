@@ -81,8 +81,8 @@ class CLIPSRedefineWarningLogger
   void log(const char *str)
   {
     if (strcmp(str, "\n") == 0) {
-      if (buffer_.find("Redefining ") == 0) {
-	logger_->log_error(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
+      if (buffer_.compare(0, 11, "Redefining ") == 0) {
+        logger_->log_error(component_ ? component_ : "CLIPS", "%s", buffer_.c_str());
       }
 
       buffer_.clear();

@@ -208,7 +208,7 @@ JoystickAcquisitionThread::open_forcefeedback()
 }
 
 void
-JoystickAcquisitionThread::init(std::string device_file, bool allow_open_fail)
+JoystickAcquisitionThread::init(const std::string& device_file, bool allow_open_fail)
 {
 	fd_ = -1;
 	connected_ = false;

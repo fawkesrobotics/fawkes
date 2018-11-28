@@ -329,7 +329,7 @@ BlackboardRestApi::cb_get_interface_data(WebviewRestParams& params)
 
 
 std::string
-BlackboardRestApi::generate_graph(std::string for_owner)
+BlackboardRestApi::generate_graph(const std::string& for_owner)
 {
 	InterfaceInfoList *iil = blackboard->list_all();
 	iil->sort();

@@ -48,8 +48,8 @@ class SkillGuiGraphDrawingArea
   void zoom_fit();
   void zoom_reset();
 
-  void set_graph_fsm(std::string fsm_name);
-  void set_graph(std::string graph);
+  void set_graph_fsm(const std::string& fsm_name);
+  void set_graph(const std::string& graph);
 
   void   set_bb(double bbw, double bbh);
   void   set_pad(double pad_x, double pad_y);

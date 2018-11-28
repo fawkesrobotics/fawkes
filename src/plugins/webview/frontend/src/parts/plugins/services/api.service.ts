@@ -28,13 +28,16 @@ export class PluginApiService {
               private http: HttpClient) {}
 
   public list_plugins(pretty?: boolean): Observable<Plugin[]> {
+    // tslint:disable-next-line:prefer-const
     let params = new HttpParams();
     if (pretty) {
       params = params.set('pretty', pretty.toString());
     }
+    // tslint:disable-next-line:prefer-const
     let headers = new HttpHeaders();
 
     headers = headers.set('Accept', 'application/json');
+    // tslint:disable-next-line:max-line-length
     return this.http.get<Plugin[]>(`${this.backend.url_for('api')}/plugins`,
       { headers: headers, params: params,
         observe: 'body', responseType: 'json' });
@@ -44,13 +47,16 @@ export class PluginApiService {
     if (name === null || name === undefined) {
       throw new Error('Required parameter name is null or undefined (get_plugin)');
     }
+    // tslint:disable-next-line:prefer-const
     let params = new HttpParams();
     if (pretty) {
       params = params.set('pretty', pretty.toString());
     }
+    // tslint:disable-next-line:prefer-const
     let headers = new HttpHeaders();
 
     headers = headers.set('Accept', 'application/json');
+    // tslint:disable-next-line:max-line-length
     return this.http.get<Plugin>(`${this.backend.url_for('api')}/plugins/${encodeURIComponent(String(name))}`,
       { headers: headers, params: params,
         observe: 'body', responseType: 'json' });
@@ -63,13 +69,16 @@ export class PluginApiService {
     if (operation === null || operation === undefined) {
       throw new Error('Required parameter operation is null or undefined (set_plugin_state)');
     }
+    // tslint:disable-next-line:prefer-const
     let params = new HttpParams();
     if (pretty) {
       params = params.set('pretty', pretty.toString());
     }
+    // tslint:disable-next-line:prefer-const
     let headers = new HttpHeaders();
 
     headers = headers.set('Accept', 'application/json');
+    // tslint:disable-next-line:max-line-length
     return this.http.put<PluginOpResponse>(`${this.backend.url_for('api')}/plugins/${encodeURIComponent(String(name))}`, operation,
       { headers: headers, params: params,
         observe: 'body', responseType: 'json' });

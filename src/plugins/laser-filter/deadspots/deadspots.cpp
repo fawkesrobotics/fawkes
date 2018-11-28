@@ -56,8 +56,8 @@ print_usage(const char *program_name)
   printf("Usage: %s [-h] [-r host[:port]] <num_spots> <config_prefix>\n"
 	 " -h              This help message\n"
 	 " -r host[:port]  Remote host (and optionally port) to connect to\n"
-	 " -n <NUM>        Number of measurements to use, defaults to %u\n"
-	 " -w <SEC>        Wait time in seconds, defaults to %u\n"
+	 " -n <NUM>        Number of measurements to use, defaults to %d\n"
+	 " -w <SEC>        Wait time in seconds, defaults to %d\n"
 	 " -c <DIST>       Compare distance in m, defaults to %f\n"
 	 " -m <MARGIN_DEG> Margin in degree to add around dead spot regions\n"
 	 " -d              Dry-run, do not save results to configuration\n"
@@ -462,7 +462,7 @@ main(int argc, char **argv)
       print_usage(argp.program_name());
       return -4;
     } else if (wait_time > MAX_WAIT_TIME) {
-      printf("Wait time of more than %u seconds are nonsense, aborting.\n\n", MAX_WAIT_TIME);
+      printf("Wait time of more than %d seconds are nonsense, aborting.\n\n", MAX_WAIT_TIME);
       print_usage(argp.program_name());
       return -4;
     }

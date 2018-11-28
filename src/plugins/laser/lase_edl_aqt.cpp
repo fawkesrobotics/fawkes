@@ -619,24 +619,31 @@ LaseEdlAcquisitionThread::process_profiles()
 {
   WORD* real_response;
   WORD* expected_response = make_word_array( 2, respcode(CMD_GET_PROFILE),
-					     cfg_profile_format_);
+                                             cfg_profile_format_);
   int response_size = recv(&real_response);
   if (response_size == -1) {
     logger->log_warn("LaseEdlAcquisitionThread", "process_profiles(): recv() failed");
+    free(expected_response);
     return;
   }
 
   // wrong answer ?
   if (! compare_word_arrays( 2, real_response, expected_response )) {
     logger->log_warn("LaseEdlAcquisitionThread", "process_profiles(): Invalid response received");
+    free(expected_response);
+    free(real_response);
     return;
   }
   // wrong number of values ?
   if ( (response_size - 3 != (int)number_of_values_) &&
-       (response_size - 3 != 2 * (int)number_of_values_) ) {
-    logger->log_warn("LaseEdlAcquisitionThread", "number of received values "
-		     "doesn't match my expectations, recvd %d, expected %d",
-		     response_size - 3, number_of_values_);
+       (response_size - 3 != 2 * (int)number_of_values_) )
+  {
+    logger->log_warn("LaseEdlAcquisitionThread",
+                     "number of received values "
+                     "doesn't match my expectations, recvd %d, expected %d",
+                     response_size - 3, number_of_values_);
+    free(expected_response);
+    free(real_response);
     return;
   }
 
@@ -683,8 +690,8 @@ LaseEdlAcquisitionThread::process_profiles()
 
   _data_mutex->unlock();
 
-  free( real_response );
-  free( expected_response );
+  free(real_response);
+  free(expected_response);
 }
 
 

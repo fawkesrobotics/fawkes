@@ -34,11 +34,15 @@
 class BlackboardComputable
 {
   public:
-    BlackboardComputable(RobotMemory* robot_memory, fawkes::BlackBoard* blackboard, fawkes::Logger* logger, fawkes::Configuration* config);
+    BlackboardComputable(RobotMemory* robot_memory,
+                         fawkes::BlackBoard* blackboard,
+                         fawkes::Logger* logger,
+                         fawkes::Configuration* config);
     virtual ~BlackboardComputable();
 
   private:
-    std::list<mongo::BSONObj> compute_interfaces(mongo::BSONObj query, std::string collection);
+    std::list<mongo::BSONObj> compute_interfaces(const mongo::BSONObj& query,
+                                                 const std::string& collection);
 
     RobotMemory* robot_memory_;
     fawkes::BlackBoard* blackboard_;

@@ -30,6 +30,7 @@ using namespace gazebo;
 GZ_REGISTER_MODEL_PLUGIN(Gyro)
 
 Gyro::Gyro()
+: last_sent_time_(0.0), send_interval_(0.0)
 {
 }
 

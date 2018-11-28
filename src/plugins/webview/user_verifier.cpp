@@ -68,7 +68,7 @@ WebviewUserVerifier::verify_user(const char *user, const char *password) throw()
     std::string userpath = std::string("/webview/users/") + user;
     std::string confpass = config->get_string(userpath.c_str());
 
-    if (confpass.find("!cleartext!") == 0) {
+    if (confpass.compare(0, 11, "!cleartext!") == 0) {
       return (confpass.substr(11) == password);
     }
 

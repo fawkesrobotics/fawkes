@@ -39,8 +39,13 @@ namespace stn {
 class DomainAction {
 
  public:
-  DomainAction(std::string name, std::vector<std::string> params, std::vector<Predicate> preconds, std::vector<Predicate> effects,
-      int duration = 0, std::vector<std::string> cond_breakups = {}, std::vector<std::string> temp_breakups = {});
+  DomainAction(const std::string& name,
+               const std::vector<std::string>& params,
+               const std::vector<Predicate>& preconds,
+               const std::vector<Predicate>& effects,
+               int duration = 0,
+               const std::vector<std::string>& cond_breakups = {},
+               const std::vector<std::string>& temp_breakups = {});
   virtual ~DomainAction(){ };
 
   const std::string getName();

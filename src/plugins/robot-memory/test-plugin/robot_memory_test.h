@@ -109,7 +109,8 @@ class TestComputable
      * @param collection Corresponding collection
      * @return Computed docs
      */
-    std::list<mongo::BSONObj> compute(mongo::BSONObj query, std::string collection)
+    std::list<mongo::BSONObj> compute(const mongo::BSONObj& query,
+                                      const std::string& collection)
     {
       std::list<mongo::BSONObj> res;
       res.push_back(mongo::fromjson("{computed:true, result:'this is computed'}"));
@@ -121,7 +122,8 @@ class TestComputable
      * @param collection Corresponding collection
      * @return Computed docs
      */
-    std::list<mongo::BSONObj> compute_sum(mongo::BSONObj query, std::string collection)
+    std::list<mongo::BSONObj> compute_sum(const mongo::BSONObj& query,
+                                          const std::string& collection)
     {
       std::list<mongo::BSONObj> res;
       int x = query.getField("x").Int();
@@ -139,7 +141,8 @@ class TestComputable
      * @param collection Corresponding collection
      * @return Computed docs
      */
-    std::list<mongo::BSONObj> compute_multiple(mongo::BSONObj query, std::string collection)
+    std::list<mongo::BSONObj> compute_multiple(const mongo::BSONObj& query,
+                                               const std::string& collection)
     {
       std::list<mongo::BSONObj> res;
       res.push_back(mongo::fromjson("{compute:'multiple', count:1}"));

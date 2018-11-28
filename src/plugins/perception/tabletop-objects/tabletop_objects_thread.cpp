@@ -323,7 +323,7 @@ TabletopObjectsThread::finalize()
 
   blackboard->close(table_pos_if_);
   blackboard->close(switch_if_);
-  for (PosIfsVector::iterator it = pos_ifs_.begin(); it != pos_ifs_.end(); it++) {
+  for (PosIfsVector::iterator it = pos_ifs_.begin(); it != pos_ifs_.end(); ++it) {
     blackboard->close(*it);
   }
   pos_ifs_.clear();
@@ -1135,8 +1135,9 @@ TabletopObjectsThread::loop()
 
   // age all old centroids
   for (OldCentroidVector::iterator it = old_centroids_.begin();
-      it != old_centroids_.end(); it++) {
-    it->increment_age();
+       it != old_centroids_.end(); ++it)
+  {
+	  it->increment_age();
   }
   // delete centroids which are older than cfg_centroid_max_age_
   delete_old_centroids(old_centroids_, cfg_centroid_max_age_);
@@ -1153,7 +1154,7 @@ TabletopObjectsThread::loop()
   }
 
   // set positions of all visible centroids
-  for (CentroidMap::iterator it = centroids_.begin(); it != centroids_.end(); it++) {
+  for (CentroidMap::iterator it = centroids_.begin(); it != centroids_.end(); ++it) {
     set_position(pos_ifs_[it->first], true, it->second);
   }
 
@@ -1672,7 +1673,7 @@ void TabletopObjectsThread::delete_near_centroids(CentroidMap reference,
           centroids.begin(),
           centroids.end(),
           [&](const OldCentroid &old)->bool {
-            for (CentroidMap::const_iterator it = reference.begin(); it != reference.end(); it++) {
+            for (CentroidMap::const_iterator it = reference.begin(); it != reference.end(); ++it) {
               if (pcl::distances::l2(it->second, old.get_centroid()) < min_distance) {
                 free_ids_.push_back(old.get_id());
                 return true;
@@ -1702,10 +1703,10 @@ TabletopObjectsThread::remove_high_centroids(Eigen::Vector4f table_centroid,
           free_ids_.push_back(it->first);
           centroids.erase(it++);
         } else
-          it++;
+          ++it;
       } catch (tf::TransformException &e) {
         // simply keep the centroid if we can't transform it
-        it++;
+        ++it;
       }
     }
   } catch (tf::TransformException &e) {
@@ -1914,7 +1915,8 @@ TabletopObjectsThread::track_objects(
     for (int row = 0; row < hp.num_rows; row++) { // new centroids
       unsigned int col = 0;
       for (CentroidMap::iterator col_it = centroids_.begin();
-          col_it != centroids_.end(); col_it++, col++) { // old centroids
+           col_it != centroids_.end(); ++col_it, ++col)
+      { // old centroids
         double distance = pcl::distances::l2(new_centroids[row],
             col_it->second);
         hp.cost[row][col] = (int) (distance * 1000);

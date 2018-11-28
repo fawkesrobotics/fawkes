@@ -113,7 +113,8 @@ ActionSkillMapping::ActionSkillMapping(std::map<std::string, std::string> &mappi
  * @param skill_string_template substitutation template
  */
 void
-ActionSkillMapping::add_mapping(std::string action_name, std::string skill_string_template)
+ActionSkillMapping::add_mapping(const std::string& action_name,
+                                const std::string& skill_string_template)
 {
 	mappings_[action_name] = skill_string_template;
 }
@@ -123,7 +124,7 @@ ActionSkillMapping::add_mapping(std::string action_name, std::string skill_strin
  * @return true if mapping exists, false otherwise
  */
 bool
-ActionSkillMapping::has_mapping(std::string &action_name) const
+ActionSkillMapping::has_mapping(const std::string &action_name) const
 {
 	return (mappings_.find(action_name) != mappings_.end());
 }

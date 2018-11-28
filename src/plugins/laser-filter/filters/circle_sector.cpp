@@ -44,7 +44,7 @@ using namespace fawkes;
  * @param in_data_size number of entries in value arrays
  * @param in vector of input arrays
  */
-LaserCircleSectorDataFilter::LaserCircleSectorDataFilter(const std::string filter_name,
+LaserCircleSectorDataFilter::LaserCircleSectorDataFilter(const std::string& filter_name,
                                                          unsigned int from,
                                                          unsigned int to,
                                                          unsigned int in_data_size,

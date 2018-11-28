@@ -35,10 +35,10 @@ class EclipsePath
  public:
   static void create_initial_object();
   static EclipsePath* instance();
-  void add_path(std::string path);
-  void add_path_check(std::string path);
-  std::string locate_file(std::string filename);
-  void add_regex(boost::regex re, std::string str);
+  void add_path(const std::string& path);
+  void add_path_check(const std::string& path);
+  std::string locate_file(const std::string& filename);
+  void add_regex(boost::regex re, const std::string& str);
   void apply_regexes();
   void print_all_paths();
 

@@ -438,7 +438,6 @@ func_blackboard_value(TermList terms)
   int i = 1;
   while (i < l_length(dlist->u.l_list) - 1) {
     Term *t1 = get_term_from_l_car(l_nth(dlist->u.l_list, i));
-    t1 = t1;
     if (t1->type == STRING) {             
       char* searched = t1->u.string;
       if (strcmp(pattern, searched) == 0) {

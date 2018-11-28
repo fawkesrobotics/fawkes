@@ -266,7 +266,6 @@ LaserOccupancyGrid::validate_old_laser_points(cart_coord_2d_t pos_robot, cart_co
 
   // distances from robot to new and old laser-points (i.e. length of v_new and v_old)
   float d_new = sqrt(v_new.x*v_new.x + v_new.y*v_new.y);
-  float d_old = 0.f;
 
   // angle between the two vectors v_new and v_old. Use to determine whether they
   // belong to the same laser-beam
@@ -281,7 +280,7 @@ LaserOccupancyGrid::validate_old_laser_points(cart_coord_2d_t pos_robot, cart_co
     v_old.y = (*it).coord.y - pos_robot.y;
 
     // need to calculate distance here, needed for angle calculation
-    d_old = sqrt(v_old.x*v_old.x + v_old.y*v_old.y);
+    float d_old = sqrt(v_old.x*v_old.x + v_old.y*v_old.y);
 
     // we already have the distances, so already make the distance-check here
     if( d_new <= d_old + obstacle_distance_ ) {
@@ -475,31 +474,29 @@ LaserOccupancyGrid::integrate_old_readings( int midX, int midY, float inc, float
       //         rad2deg(angle_to_old_reading) ) );
 
 
-      bool SollEintragen = true;
+      //bool SollEintragen = true;
 
       // do not insert if current reading at that angle deviates more than 30cm from old reading
       // TODO. make those 30cm configurable
       //if ( sqr( m_pLaser->GetReadingLength( number_of_old_reading ) - 0.3 ) > sqr_distance_to_old_reading )
       //  SollEintragen = false;
 
-      if ( SollEintragen == true ) {
-        int posX = midX + (int)((newpos_x*100.f) / ((float)cell_height_ ));
-        int posY = midY + (int)((newpos_y*100.f) / ((float)cell_width_ ));
-        if( posX > 4 && posX < height_-5
-         && posY > 4 && posY < width_-5 )
-          {
-          old_readings.push_back( old_readings_[i] );
+      //if ( SollEintragen == true ) {
+      int posX = midX + (int)((newpos_x*100.f) / ((float)cell_height_ ));
+      int posY = midY + (int)((newpos_y*100.f) / ((float)cell_width_ ));
+      if( posX > 4 && posX < height_-5 && posY > 4 && posY < width_-5 )
+      {
+	      old_readings.push_back( old_readings_[i] );
 
-          // 25 cm's in my opinion, that are here: 0.25*100/cell_width_
-          //int size = (int)(((0.25f+inc)*100.f)/(float)cell_width_);
-          float width = robo_shape_->get_complete_width_y();
-          width = std::max( 4.f, ((width + inc)*100.f)/cell_width_ );
-          float height = robo_shape_->get_complete_width_x();
-          height = std::max( 4.f, ((height + inc)*100.f)/cell_height_ );
-          integrate_obstacle( posX, posY, width, height );
-        }
+	      // 25 cm's in my opinion, that are here: 0.25*100/cell_width_
+	      //int size = (int)(((0.25f+inc)*100.f)/(float)cell_width_);
+	      float width = robo_shape_->get_complete_width_y();
+	      width = std::max( 4.f, ((width + inc)*100.f)/cell_width_ );
+	      float height = robo_shape_->get_complete_width_x();
+	      height = std::max( 4.f, ((height + inc)*100.f)/cell_height_ );
+	      integrate_obstacle( posX, posY, width, height );
       }
-
+      //}
     }
   }
 
@@ -540,12 +537,10 @@ LaserOccupancyGrid::integrate_new_readings( int midX, int midY, float inc, float
       posY = midY + (int)((point.y*100.f) / ((float)cell_width_ ));
 
       if ( !( posX <= 5 || posX >= height_-6 || posY <= 5 || posY >= width_-6 ) ) {
-        float width = 0.f;
-        width = robo_shape_->get_complete_width_y();
-        width = std::max( 4.f, ((width + inc)*100.f)/cell_width_ );
+	      float width = robo_shape_->get_complete_width_y();
+	      width = std::max( 4.f, ((width + inc)*100.f)/cell_width_ );
 
-        float height = 0.f;
-        height = robo_shape_->get_complete_width_x();
+        float height = robo_shape_->get_complete_width_x();
         height = std::max( 4.f, ((height + inc)*100.f)/cell_height_ );
 
         integrate_obstacle( posX, posY, width, height );
@@ -562,9 +557,6 @@ LaserOccupancyGrid::integrate_obstacle( int x, int y, int width, int height )
 {
   std::vector< int > fast_obstacle = obstacle_map->get_obstacle( width, height, cfg_obstacle_inc_ );
 
-  int posX = 0;
-  int posY = 0;
-
   // i = x offset, i+1 = y offset, i+2 is cost
   for( unsigned int i = 0; i < fast_obstacle.size(); i+=3 ) {
     /* On the laser-points, we draw obstacles based on base_link. The obstacle has the robot-shape,
@@ -572,8 +564,8 @@ LaserOccupancyGrid::integrate_obstacle( int x, int y, int width, int height )
      * point onto the laser-point on the grid. That's the same as adding the center_to_base_offset
      * to the calculated position of the obstacle-center ("x + fast_obstacle[i]" and "y" respectively).
      */
-    posX = x + fast_obstacle[i]   + offset_base_.x;
-    posY = y + fast_obstacle[i+1] + offset_base_.y;
+    int posX = x + fast_obstacle[i]   + offset_base_.x;
+    int posY = y + fast_obstacle[i+1] + offset_base_.y;
 
     if( (posX > 0) && (posX < height_)
      && (posY > 0) && (posY < width_)

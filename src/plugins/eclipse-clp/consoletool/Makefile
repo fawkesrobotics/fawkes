@@ -15,7 +15,7 @@
 
 BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(BASEDIR)/fawkes/src/plugins/skiller/skiller.mk
+include $(FAWKES_BASEDIR)/src/plugins/skiller/skiller.mk
 
 LIBS_skilltester = stdc++ fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
 		fawkesinterface \
@@ -23,7 +23,7 @@ LIBS_skilltester = stdc++ fawkescore fawkesutils fawkesnetcomm fawkesblackboard 
 		TestInterface
 OBJS_skilltester = skilltester.o
 
-OBJS_all =	$(OBJS_skillet)
+OBJS_all =	$(OBJS_skilltester)
 
 ifeq ($(HAVE_READLINE),1)
   BINS_all =	$(BINDIR)/skilltester

@@ -228,9 +228,10 @@ MongoLogImagesThread::update_images()
         pos = pos + 1;
       }
 
-      ImageInfo &imginfo = imgs_[*i];
+      ImageInfo imginfo;
       imginfo.topic_name = topic_name;
       imginfo.img = new SharedMemoryImageBuffer(i->c_str());
+      imgs_[*i] = imginfo;
     }
   }
 }

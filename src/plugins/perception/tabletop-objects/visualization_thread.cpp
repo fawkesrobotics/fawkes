@@ -54,6 +54,8 @@ extern "C" {
 #endif
 }
 
+#include <cassert>
+
 #define CFG_PREFIX "/perception/tabletop-objects/"
 #define CFG_PREFIX_VIS "/perception/tabletop-objects/visualization/"
 
@@ -150,7 +152,7 @@ TabletopVisualizationThread::loop()
   visualization_msgs::MarkerArray m;
 
   unsigned int idnum = 0;
-  for (M_Vector4f::iterator it = centroids_.begin(); it != centroids_.end(); it++) {
+  for (M_Vector4f::iterator it = centroids_.begin(); it != centroids_.end(); ++it) {
     try {
 
       /*
@@ -691,17 +693,19 @@ TabletopVisualizationThread::triangulate_hull()
 
   qh_triangulate();
 
-  int num_facets = qh num_facets;
+  int q_num_facets = qh num_facets;
 
-  table_triangle_vertices_.resize(num_facets * dim);
+  table_triangle_vertices_.resize(q_num_facets * dim);
   facetT *facet;
-  size_t i = 0;
+  int i = 0;
   FORALLfacets
   {
-    vertexT *vertex;
-    int vertex_n, vertex_i;
+	  vertexT *vertex = NULL;
+    int vertex_n = 0, vertex_i = 0;
     FOREACHvertex_i_(facet->vertices)
     {
+	    assert(vertex);
+	    assert(i + vertex_i < vertex_n);
       table_triangle_vertices_[i + vertex_i][0] = vertex->point[0];
       table_triangle_vertices_[i + vertex_i][1] = vertex->point[1];
       table_triangle_vertices_[i + vertex_i][2] = vertex->point[2];

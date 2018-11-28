@@ -78,7 +78,7 @@ public:
       float cfg_switch_tolerance,
       unsigned int cfg_moving_avg_len,
       fawkes::Logger *logger,
-      std::string plugin_name);
+      const std::string &plugin_name);
 
   btScalar distance(const LineInfo &linfo) const;
   void update(LineInfo &new_linfo);

@@ -51,7 +51,7 @@ RosJointThread::init()
   ros_pub_ = rosnode->advertise<sensor_msgs::JointState>("/joints", 100);
   // check for open JointInterfaces
   ifs_ = blackboard->open_multiple_for_reading<JointInterface>();
-  for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); it++) {
+  for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); ++it) {
     bbil_add_data_interface(*it);
   }
   // watch for creation of new JointInterfaces

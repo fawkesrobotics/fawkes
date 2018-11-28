@@ -47,27 +47,26 @@ using namespace std;
  * @param plugin_name Name of the plugin
  * @param description Plugin description
  */
-PluginGenerator::PluginGenerator(std::string directory,
-                                 std::string author,
-                                 std::string year, std::string creation_date,
-                                 std::string plugin_name, std::string description
-                                 )
+PluginGenerator::PluginGenerator(const std::string& directory,
+                                 const std::string& author,
+                                 const std::string& year, const std::string& creation_date,
+                                 const std::string& plugin_name, const std::string& description)
+: _dir(directory),
+  _author(author),
+  _year(year),
+  _creation_date(creation_date),
+  _plugin_name(plugin_name),
+  _description(description)
 {
-  _dir    = directory;
-  if ( _dir.find_last_of("/") != (_dir.length() - 1) ) {
-    _dir += "/";
-  }
-  _author = author;
-  _year   = year;
-  _creation_date = creation_date;
-  _description = description;
+	if ( _dir.find_last_of("/") != (_dir.length() - 1) ) {
+		_dir += "/";
+	}
 
-  _filename_thread_cpp = plugin_name + "_thread.cpp";
-  _filename_thread_h   = plugin_name + "_thread.h";
-  _filename_plugin_cpp = plugin_name + "_plugin.cpp";
-  _filename_makefile   = "Makefile";
+	_filename_thread_cpp = plugin_name + "_thread.cpp";
+	_filename_thread_h   = plugin_name + "_thread.h";
+	_filename_plugin_cpp = plugin_name + "_plugin.cpp";
+	_filename_makefile   = "Makefile";
 
-  _plugin_name = plugin_name;
   _plugin_name_underscore = replace_dash_w_undescore(_plugin_name);
 
   _class_name_thread = format_class_name(_plugin_name_underscore, "Thread");

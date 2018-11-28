@@ -44,9 +44,9 @@
 /** Constructor.
  * @param varname variable name
  */
-PlayerProxyFawkesInterfaceMapper::PlayerProxyFawkesInterfaceMapper(std::string varname)
+PlayerProxyFawkesInterfaceMapper::PlayerProxyFawkesInterfaceMapper(const std::string& varname)
+: varname_(varname)
 {
-  varname_ = varname;
 }
 
 

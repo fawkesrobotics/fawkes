@@ -47,14 +47,15 @@ using namespace firevision;
  * memory image segment ID (retriever_[ID]).
  * @param cfg_prefix configuration prefix path
  */
-FvRetrieverThread::FvRetrieverThread(std::string camera_string,
-                                     std::string cfg_name, std::string cfg_prefix)
-  : Thread("FvRetrieverThread", Thread::OPMODE_WAITFORWAKEUP),
-    VisionAspect(VisionAspect::CYCLIC)
+FvRetrieverThread::FvRetrieverThread(const std::string& camera_string,
+                                     const std::string& cfg_name, const std::string& cfg_prefix)
+: Thread("FvRetrieverThread", Thread::OPMODE_WAITFORWAKEUP),
+  VisionAspect(VisionAspect::CYCLIC),
+  cfg_name_ (cfg_name),
+  cfg_prefix_(cfg_prefix),
+  camera_string_(camera_string),
+  cap_time_(NULL)
 {
-  cfg_name_ = cfg_name;
-  cfg_prefix_ = cfg_prefix;
-  camera_string_ = camera_string;
   set_name("FvRetrieverThread_%s", cfg_name_.c_str());
   seq_writer = NULL;
 }

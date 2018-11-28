@@ -44,8 +44,8 @@ namespace fawkes {
  * @param ensure_index if true ensures that the required index on timestamps exists
  */
 MongoDBTransformer::MongoDBTransformer(mongo::DBClientBase *mongodb_client,
-				       std::string database_name, bool ensure_index)
-  : mongodb_client_(mongodb_client), database_(database_name)
+                                       const std::string& database_name, bool ensure_index)
+: mongodb_client_(mongodb_client), database_(database_name)
 {
   if (ensure_index) {
 #ifdef HAVE_MONGODB_VERSION_H

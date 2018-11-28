@@ -43,13 +43,13 @@
  * @param config to access the Configuration aspect
  * @param logger to access the Logger aspect
  */
-LaserMapFilterDataFilter::LaserMapFilterDataFilter(const std::string filter_name,
+LaserMapFilterDataFilter::LaserMapFilterDataFilter(const std::string& filter_name,
                                                    unsigned int in_data_size,
                                                    std::vector<LaserDataFilter::Buffer *> &in,
                                                    fawkes::tf::Transformer *tf_listener,
                                                    fawkes::Configuration *config,
                                                    fawkes::Logger *logger)
-	: LaserDataFilter(filter_name, in_data_size, in, 1)
+: LaserDataFilter(filter_name, in_data_size, in, 1)
 {
   tf_listener_ = tf_listener;
   config_ = config;

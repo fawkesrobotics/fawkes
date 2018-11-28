@@ -175,8 +175,8 @@ main( int argc, char **argv )
 	  int x = event.button.x;
 	  int y = event.button.y;
 
-	  printf("YUV: %i %u %u\n", yuvspace->get_brightness(),
-		 x / 2, y / 2);
+	  printf("YUV: %i %i %i\n", yuvspace->get_brightness(),
+	         x / 2, y / 2);
 	}
 	break;
 

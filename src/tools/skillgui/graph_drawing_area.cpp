@@ -151,7 +151,7 @@ SkillGuiGraphDrawingArea::signal_update_disabled()
  * @param fsm_name name of FSM the graph belongs to
  */
 void
-SkillGuiGraphDrawingArea::set_graph_fsm(std::string fsm_name)
+SkillGuiGraphDrawingArea::set_graph_fsm(const std::string& fsm_name)
 {
   if ( update_graph_ ) {
     if ( graph_fsm_ != fsm_name ) {
@@ -168,7 +168,7 @@ SkillGuiGraphDrawingArea::set_graph_fsm(std::string fsm_name)
  * @param graph string representation of the current graph in the dot language.
  */
 void
-SkillGuiGraphDrawingArea::set_graph(std::string graph)
+SkillGuiGraphDrawingArea::set_graph(const std::string& graph)
 {
   if ( update_graph_ ) {
     graph_ = graph;

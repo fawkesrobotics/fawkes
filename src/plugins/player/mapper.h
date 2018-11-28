@@ -28,7 +28,7 @@
 class PlayerProxyFawkesInterfaceMapper
 {
  public:
-  PlayerProxyFawkesInterfaceMapper(std::string varname);
+  PlayerProxyFawkesInterfaceMapper(const std::string& varname);
   virtual ~PlayerProxyFawkesInterfaceMapper();
 
   std::string varname() const;

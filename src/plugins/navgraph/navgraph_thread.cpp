@@ -448,7 +448,7 @@ NavGraphThread::load_graph(std::string filename)
 }
 
 bool
-NavGraphThread::generate_plan(std::string goal_name)
+NavGraphThread::generate_plan(const std::string& goal_name)
 {
 	if (! tf_listener->transform_origin(cfg_base_frame_, cfg_global_frame_, pose_)) {
 		logger->log_warn(name(),
@@ -527,7 +527,7 @@ NavGraphThread::generate_plan(std::string goal_name)
 }
 
 bool
-NavGraphThread::generate_plan(std::string goal_name, float ori)
+NavGraphThread::generate_plan(const std::string& goal_name, float ori)
 {
 	if (generate_plan(goal_name)) {
 

@@ -66,9 +66,6 @@ class AMCLSensor
   // filter has been updated.
   public: virtual bool UpdateSensor(pf_t *pf, AMCLSensorData *data);
 
-  // Flag is true if this is the action sensor
-  public: bool is_action;
-
   // Action pose (action sensors only)
   public: pf_vector_t pose;
 

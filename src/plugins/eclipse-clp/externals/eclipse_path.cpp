@@ -86,7 +86,7 @@ EclipsePath::add_path(std::string path)
  * @param path The path to be added.
  */
 void
-EclipsePath::add_path_check(std::string path)
+EclipsePath::add_path_check(const std::string& path)
 {
   instance()->add_path(path);
   instance()->apply_regexes();
@@ -97,7 +97,7 @@ EclipsePath::add_path_check(std::string path)
  * @return path to the file
  */
 std::string
-EclipsePath::locate_file(std::string filename)
+EclipsePath::locate_file(const std::string& filename)
 {
   if (paths.empty()){
     return "";
@@ -160,9 +160,9 @@ EclipsePath::print_all_paths()
  * @param str the string by which each instanstance of the regex will be replaced
  */
 void
-EclipsePath::add_regex(boost::regex re, std::string str)
+EclipsePath::add_regex(boost::regex re, const std::string& str)
 {
-  regexes.insert( std::pair<boost::regex,std::string>(re, str) );
+  regexes.insert(std::make_pair(re, str));
 }
 
 /** Wrapper method for external ECLiPSe-clp.

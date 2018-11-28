@@ -37,17 +37,21 @@ namespace stn {
  * @param cond_breakups A list of conditional breakups
  * @param temp_breakups A list of temporal breakups
  */
-DomainAction::DomainAction(std::string name, std::vector<std::string> params, std::vector<Predicate> preconds,
-    std::vector<Predicate> effects, int duration,
-    std::vector<std::string> cond_breakups, std::vector<std::string> temp_breakups)
+DomainAction::DomainAction(const std::string& name,
+                           const std::vector<std::string>& params,
+                           const std::vector<Predicate>& preconds,
+                           const std::vector<Predicate>& effects,
+                           int duration,
+                           const std::vector<std::string>& cond_breakups,
+                           const std::vector<std::string>& temp_breakups)
+: name_(name),
+  params_(params),
+  preconds_(preconds),
+  effects_(effects),
+  duration_(duration),
+  cond_breakups_(cond_breakups),
+  temp_breakups_(temp_breakups)
 {
-  name_ = name;
-  params_ = params;
-  preconds_ = preconds;
-  effects_ = effects;
-  duration_ = duration;
-  cond_breakups_ = cond_breakups;
-  temp_breakups_ = temp_breakups;
 }
 
 /** Print a DomainAction.
@@ -135,7 +139,7 @@ DomainAction::generateStnAction(std::string name, std::string params)
     for ( std::string attr : pred.attrs() ) { 
       std::string opt;
       // check if attribute is a constant or variable (latter starting with ?)
-      if (attr.find("?") == 0) {
+      if (attr[0] == '?') {
         if ( params_map.find(attr) == params_map.end() ) {
           std::cout << "err, could not find attribute for precondition: " << attr << std::endl;
         }

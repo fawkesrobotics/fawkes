@@ -1000,7 +1000,7 @@ Firestation::image_click(GdkEventButton* event)
 			     image_x,
 			     image_y,
 			     y, u, v );
-	  printf( "Y=%d  U=%d  Y=%d @ (%d, %d)\n",
+	  printf( "Y=%u  U=%u  Y=%u @ (%u, %u)\n",
 		  (unsigned int) y, (unsigned int) u, (unsigned int) v,
 		  image_x, image_y );
 	}
@@ -1018,7 +1018,7 @@ Firestation::image_click(GdkEventButton* event)
           m_calib_tool->set_center(image_x, image_y);
           m_btn_mc_set_center->set_active(false);
           mc_draw_line();
-          printf("Setting center to %d, %d\n", image_x, image_y);
+          printf("Setting center to %u, %u\n", image_x, image_y);
         } else {
           printf("Using center to %d, %d\n", m_calib_tool->center_x(), m_calib_tool->center_y());
           m_calib_tool->next_step();
@@ -1042,7 +1042,7 @@ Firestation::image_click(GdkEventButton* event)
 	float phi;
 	m_calib_tool->eval(image_x, image_y, &dist, &phi);
         phi = normalize_mirror_rad(phi);
-        printf("(%d, %d) = POLAR(%.2f deg, %.2f meters)\n",
+        printf("(%u, %u) = POLAR(%.2f deg, %.2f meters)\n",
             image_x, image_y,
             rad2deg(phi), dist);
         //printf("Distance: %2f\t Phi: %2f\n", dist, phi);
@@ -1402,21 +1402,22 @@ Firestation::on_service_removed( NetworkService* service )
   const char* type   = service->type();
   const char* domain = service->domain();
 
-  Gtk::TreeModel::Children children = m_fuse_tree_store->children();
-  Gtk::TreeModel::iterator rit;
-  for (rit = children.begin(); rit != children.end(); ++rit)
-    {
-      Glib::ustring n = (*rit)[m_fuse_columns.m_service_name];
-      Glib::ustring t = (*rit)[m_fuse_columns.m_service_type];
-      Glib::ustring d = (*rit)[m_fuse_columns.m_service_domain];
+  Gtk::TreeModel::iterator rit = m_fuse_tree_store->children().begin();
+  while (rit != m_fuse_tree_store->children().end())
+  {
+	  Glib::ustring n = (*rit)[m_fuse_columns.m_service_name];
+	  Glib::ustring t = (*rit)[m_fuse_columns.m_service_type];
+	  Glib::ustring d = (*rit)[m_fuse_columns.m_service_domain];
 
-      if ( strcmp( n.c_str(), name) == 0 &&
-	   strcmp( t.c_str(), type) == 0 &&
-	   strcmp( d.c_str(), domain) == 0 )
-	{
-	  m_fuse_tree_store->erase(rit);
-	}
-    }
+	  if (strcmp( n.c_str(), name) == 0 &&
+	      strcmp( t.c_str(), type) == 0 &&
+	      strcmp( d.c_str(), domain) == 0)
+	  {
+		  rit = m_fuse_tree_store->erase(rit);
+	  } else {
+		  ++rit;
+	  }
+  }
 
   m_ftw->remove_fountain_service(name);
   m_filw->remove_fountain_service(name);

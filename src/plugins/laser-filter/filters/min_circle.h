@@ -28,7 +28,7 @@
 class LaserMinCircleDataFilter : public LaserDataFilter
 {
  public:
-	LaserMinCircleDataFilter(const std::string filter_name, float radius,
+	LaserMinCircleDataFilter(const std::string& filter_name, float radius,
                            unsigned int data_size, std::vector<LaserDataFilter::Buffer *> &in);
 
   void filter();

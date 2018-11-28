@@ -574,7 +574,7 @@ Roomba500Thread::write_blackboard()
     if (roomba_->is_controlled()) {
       if (charge != battery_percent_) {
 	char digits[4];
-	snprintf(digits, 4, "%u%%", charge);
+	snprintf(digits, 4, "%d%%", charge);
 	roomba_->set_digit_leds(digits);
 	battery_percent_ = charge;
       }

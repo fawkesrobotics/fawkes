@@ -71,7 +71,9 @@ SelectDriveMode::SelectDriveMode( MotorInterface* motor,
    escape_flag_( 0 ) // no escaping at the beginning
 {
   logger_->log_debug("SelectDriveMode", "(Constructor): Entering");
+
   drive_modes_.clear();
+  proposed_.x = proposed_.y = proposed_.rot = 0.f;
 
   std::string drive_restriction = config->get_string("/plugins/colli/drive_mode/restriction");
 
@@ -86,7 +88,7 @@ SelectDriveMode::SelectDriveMode( MotorInterface* motor,
   logger_->log_debug("SelectDriveMode", "(Constructor): Creating Drive Mode Objects");
 
   // Add generic drive modes
-  drive_modes_.push_back( (AbstractDriveMode *)new StopDriveModule(logger_, config_) );
+  drive_modes_.push_back(new StopDriveModule(logger_, config_));
 
   // Add specific drive modes
   if ( drive_restriction_ == colli_drive_restriction_t::omnidirectional ) {
@@ -113,24 +115,24 @@ SelectDriveMode::load_drive_modes_differential()
 {
   // escape drive mode
   if (cfg_escape_mode_ == colli_escape_mode_t::potential_field) {
-    drive_modes_.push_back( (AbstractDriveMode *)new EscapePotentialFieldDriveModule( logger_, config_) );
+	  drive_modes_.push_back(new EscapePotentialFieldDriveModule(logger_, config_));
   } else if (cfg_escape_mode_ == colli_escape_mode_t::basic) {
-    drive_modes_.push_back( (AbstractDriveMode *)new EscapeDriveModule( logger_, config_) );
+	  drive_modes_.push_back(new EscapeDriveModule(logger_, config_));
   } else {
     logger_->log_error("SelectDriveMode", "Unknown escape drive mode. Using basic as default");
-    drive_modes_.push_back( (AbstractDriveMode *)new EscapeDriveModule( logger_, config_) );
+    drive_modes_.push_back(new EscapeDriveModule(logger_, config_));
   }
 
   // forward drive mode (have to remember for biward driving!
   ForwardDriveModule* forward = new ForwardDriveModule(logger_, config_);
-  drive_modes_.push_back( (AbstractDriveMode *)forward );
+  drive_modes_.push_back(forward);
 
   // backward drive mode (have to remember for biward driving!
   BackwardDriveModule* backward = new BackwardDriveModule(logger_, config_);
-  drive_modes_.push_back( (AbstractDriveMode *)backward );
+  drive_modes_.push_back(backward);
 
   // biward drive mode (takes both forward and backward drive modes as argument!
-  drive_modes_.push_back( (AbstractDriveMode *)new BiwardDriveModule(forward, backward, logger_, config_) );
+  drive_modes_.push_back(new BiwardDriveModule(forward, backward, logger_, config_));
 }
 
 
@@ -139,17 +141,18 @@ SelectDriveMode::load_drive_modes_omnidirectional()
 {
   // escape drive mode
   if (cfg_escape_mode_ == colli_escape_mode_t::potential_field) {
-    drive_modes_.push_back( (AbstractDriveMode *)new EscapePotentialFieldOmniDriveModule( logger_, config_) );
+	  drive_modes_.push_back(new EscapePotentialFieldOmniDriveModule(logger_, config_));
   } else if (cfg_escape_mode_ == colli_escape_mode_t::basic) {
      // CAUTION: This is an differential drive mode!
-    drive_modes_.push_back( (AbstractDriveMode *)new EscapeDriveModule( logger_, config_) );
+	  drive_modes_.push_back(new EscapeDriveModule(logger_, config_));
   } else {
-    logger_->log_error("SelectDriveMode", "Unknown escape drive mode. Using potential field omni as default");
-    drive_modes_.push_back( (AbstractDriveMode *)new EscapePotentialFieldOmniDriveModule( logger_, config_) );
+    logger_->log_error("SelectDriveMode", "Unknown escape drive mode. "
+                                          "Using potential field omni as default");
+    drive_modes_.push_back(new EscapePotentialFieldOmniDriveModule(logger_, config_));
   }
 
   ForwardOmniDriveModule* forward = new ForwardOmniDriveModule(logger_, config_);
-  drive_modes_.push_back( (AbstractDriveMode *)forward );
+  drive_modes_.push_back(forward);
 }
 
 
@@ -215,8 +218,9 @@ SelectDriveMode::set_grid_information( LaserOccupancyGrid* occ_grid, int robo_x,
   for ( unsigned int i = 0; i < drive_modes_.size(); i++ ) {
     // drive mode checking
     if ( drive_modes_[i]->get_drive_mode_name() == NavigatorInterface::ESCAPE ) {
-      ((EscapePotentialFieldDriveModule*)drive_modes_[i])->set_grid_information( occ_grid, robo_x, robo_y );
-
+	    EscapePotentialFieldDriveModule* dm =
+	      static_cast<EscapePotentialFieldDriveModule*>(drive_modes_[i]);
+	    dm->set_grid_information( occ_grid, robo_x, robo_y );
       return;
     }
   }
@@ -234,8 +238,9 @@ SelectDriveMode::set_laser_data( std::vector<polar_coord_2d_t>& laser_points )
   for ( unsigned int i = 0; i < drive_modes_.size(); i++ ) {
     // drive mode checking
     if ( drive_modes_[i]->get_drive_mode_name() == NavigatorInterface::ESCAPE ) {
-      ((EscapeDriveModule*)drive_modes_[i])->set_laser_data( laser_points );
-
+	    EscapeDriveModule* dm =
+	      static_cast<EscapeDriveModule*>(drive_modes_[i]);
+	    dm->set_laser_data( laser_points );
       return;
     }
   }
@@ -265,7 +270,7 @@ SelectDriveMode::update( bool escape )
   if ( escape == true ) {
     if( escape_flag_ == 0
      && if_motor_->des_vx() != 0.f
-     && if_motor_->des_vx() != 0.f
+     && if_motor_->des_vy() != 0.f
      && if_motor_->des_omega() != 0.f ) {
       desired_mode = NavigatorInterface::MovingNotAllowed;
       // we have not yet stopped!

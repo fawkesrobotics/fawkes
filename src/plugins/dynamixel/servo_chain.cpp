@@ -152,7 +152,11 @@ using namespace fawkes;
  * @param min_voltage minimum voltage to assume safe operation
  * @param max_voltage maximum voltage to assume safe operation
  */
-DynamixelChain::DynamixelChain(const char *device_file, unsigned int default_timeout_ms, bool enable_echo_fix, bool enable_connection_stability, float min_voltage, float max_voltage)
+DynamixelChain::DynamixelChain(const char *device_file,
+                               unsigned int default_timeout_ms,
+                               bool enable_echo_fix,
+                               bool enable_connection_stability,
+                               float min_voltage, float max_voltage)
 {
   default_timeout_ms_          = default_timeout_ms;
   device_file_                 = strdup(device_file);
@@ -169,6 +173,12 @@ DynamixelChain::DynamixelChain(const char *device_file, unsigned int default_tim
   } catch (Exception &e) {
     free(device_file_);
     throw;
+  }
+  for (size_t i = 0; i < sizeof(obuffer_) / sizeof(obuffer_[0]); ++i) {
+	  obuffer_[i] = 0;
+  }
+  for (size_t i = 0; i < sizeof(ibuffer_) / sizeof(ibuffer_[0]); ++i) {
+	  ibuffer_[i] = 0;
   }
 }
 
@@ -485,7 +495,7 @@ DynamixelChain::data_available()
  * @return list of detected servo IDs
  */
 DynamixelChain::DeviceList
-DynamixelChain::discover(unsigned int timeout_ms, const std::vector<unsigned int> servos)
+DynamixelChain::discover(unsigned int timeout_ms, const std::vector<unsigned int>& servos)
 {
   DeviceList rv;
   if (servos.size() == 0) {

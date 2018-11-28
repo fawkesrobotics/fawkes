@@ -355,7 +355,7 @@ public:
       printf("Cluster %u  size: %zu  color %u, %u, %u\n",
              ++i, it->indices.size(), r, g, b);
       std::vector<int>::const_iterator pit;
-      for (pit = it->indices.begin (); pit != it->indices.end(); pit++) {
+      for (pit = it->indices.begin (); pit != it->indices.end(); ++pit) {
         cloud_objs_->points[*pit].r = r;
         cloud_objs_->points[*pit].g = g;
         cloud_objs_->points[*pit].b = b;

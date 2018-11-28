@@ -105,8 +105,8 @@ RealsenseThread::loop()
         it->x = depth_point[0];
         it->y = depth_point[1];
         it->z = depth_point[2];
-        image++;
-        it++;
+        ++image;
+        ++it;
       }
     }
     pcl_utils::set_time(realsense_depth_refptr_, fawkes::Time(clock));

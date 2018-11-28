@@ -63,11 +63,11 @@ WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(fawkes::WebUrlManag
                                                              const std::string& catchall_file,
                                                              const std::string& mime_file,
                                                              fawkes::Logger *logger)
+: logger_(logger),
+  url_manager_(url_manager),
+  base_url_(base_url),
+	catchall_file_(catchall_file)
 {
-  logger_         = logger;
-  url_manager_    = url_manager;
-  base_url_       = base_url;
-
   if(htdocs_dirs.size() <= 0) {
     throw Exception(errno, "htdocs_dirs is empty");
   }
@@ -80,7 +80,6 @@ WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(fawkes::WebUrlManag
     }
   }
 
-  catchall_file_  = catchall_file;
   //logger_->log_debug("WebStaticReqProc", "Catch-all file: %s", catchall_file_.c_str());
 
   read_mime_database(mime_file);

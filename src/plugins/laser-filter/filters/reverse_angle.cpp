@@ -42,10 +42,10 @@
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserReverseAngleDataFilter::LaserReverseAngleDataFilter(const std::string filter_name,
+LaserReverseAngleDataFilter::LaserReverseAngleDataFilter(const std::string& filter_name,
                                                          unsigned int in_data_size,
                                                          std::vector<LaserDataFilter::Buffer *> &in)
-	: LaserDataFilter(filter_name, in_data_size, in, in.size())
+: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
 }
 

@@ -139,7 +139,7 @@ RosSkillerThread::message_cb(const std_msgs::String::ConstPtr & goal)
 }
 
 fawkes_msgs::ExecSkillResult
-RosSkillerThread::create_result(std::string errmsg)
+RosSkillerThread::create_result(const std::string& errmsg)
 {
   fawkes_msgs::ExecSkillResult result;
   result.errmsg = errmsg;

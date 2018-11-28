@@ -48,15 +48,15 @@ StnAction::StnAction(const std::string& name, const std::vector<Predicate>& prec
                      size_t duration,
                      const std::vector<std::string>& cond_breakups,
                      const std::vector<std::string>& temp_breakups)
+: name_(name),
+  preconds_(preconds),
+  effects_(effects),
+  opts_(opts),
+  duration_(duration),
+  cond_breakups_(cond_breakups),
+  temp_breakups_(temp_breakups)
 {
   id_ = ++count;
-  name_ = name;
-  preconds_ = preconds;
-  effects_ = effects;
-  opts_ = opts;
-  duration_ = duration;
-  cond_breakups_ = cond_breakups;
-  temp_breakups_ = temp_breakups;
 }
 
 /** Print relevant information about the StnAction.

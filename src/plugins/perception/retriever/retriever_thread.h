@@ -50,7 +50,9 @@ class FvRetrieverThread
   public fawkes::ClockAspect
 {
  public:
-  FvRetrieverThread(std::string camera_string, std::string cfg_name, std::string cfg_prefix);
+  FvRetrieverThread(const std::string& camera_string,
+                    const std::string& cfg_name,
+                    const std::string& cfg_prefix);
   virtual ~FvRetrieverThread();
 
   virtual void init();

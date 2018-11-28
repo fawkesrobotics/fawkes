@@ -156,7 +156,7 @@ NavGraphVisualizationThread::reset_plan()
  * @param to node name of the target node
  */
 void
-NavGraphVisualizationThread::set_current_edge(std::string from, std::string to)
+NavGraphVisualizationThread::set_current_edge(const std::string& from, const std::string& to)
 {
   if (plan_from_ != from || plan_to_ != to) {
     plan_from_ = from;
