@@ -30,6 +30,7 @@ export class PrometheusStatComponent implements AfterViewInit, OnInit, OnDestroy
 
   value = '';
   css_class = '';
+  tooltip = '';
 
   private backend_subscription = null;
 
@@ -80,6 +81,7 @@ export class PrometheusStatComponent implements AfterViewInit, OnInit, OnDestroy
           if (obj.status === 'success' && obj.data.result.length > 0) {
             const v = parseFloat(obj.data.result[0].value[1]) * this.factor;
             this.value = `${v.toFixed(this.decimals)} ${this.unit}`;
+            this.tooltip = '';
             if (this.thresholds.length > 0) {
               if (this.thresholds.length === 4) {
                 if (v < this.thresholds[0]) {
@@ -118,12 +120,24 @@ export class PrometheusStatComponent implements AfterViewInit, OnInit, OnDestroy
             this.css_class = 'promstat-red';
           } else if (obj.data.result.length === 0) {
             this.value = 'N/A';
+            this.tooltip = 'No Results';
             this.css_class = 'promstat-orange';
           } else {
-            this.value = `N/A (${obj.message || '?'})`;
+            this.value = 'N/A';
+            this.tooltip = `${obj.message || '?'})`;
             this.css_class = 'promstat-red';
           }
-        });
+        },
+        (err) => {
+          this.value = 'N/A';
+          if (err.status == 0) {
+            this.tooltip = 'Failed to connect to Prometheus';
+          } else {
+            this.tooltip = err.message;
+          }
+          this.css_class = 'promstat-red';
+        },
+        () => {});
   }
 
   format_bytes(value: number) {
