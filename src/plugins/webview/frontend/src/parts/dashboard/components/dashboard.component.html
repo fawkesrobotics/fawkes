@@ -2,6 +2,11 @@
  Copyright  2018  Tim Niemueller <niemueller@kbsg.rwth-aachen.de>
  License: Apache 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 -->
+<div class="ff-hfill ff-bg-warning dashboard-large"
+		 *ngIf="charts.length == 0 && stats.length == 0"
+		 fxLayout="row" fxLayoutAlign="center">
+	No dashboard configuration received.
+</div>
 <div fxLayout="row wrap" fxLayoutAlign="space-between">
 	<ng-container *ngIf="charts.length > 0">
 		<mat-card *ngFor="let c of charts"
