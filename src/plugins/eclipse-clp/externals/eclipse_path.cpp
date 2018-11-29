@@ -76,7 +76,7 @@ EclipsePath* EclipsePath::instance()
  * @param path The path to be added.
  */
 void
-EclipsePath::add_path(std::string path)
+EclipsePath::add_path(const std::string &path)
 {
   paths.push_back(path);
 }
