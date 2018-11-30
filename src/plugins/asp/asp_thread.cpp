@@ -43,12 +43,7 @@ using namespace fawkes;
 /** Constructor. */
 ASPThread::ASPThread()
 : Thread("ASPThread", Thread::OPMODE_WAITFORWAKEUP),
-  AspectProviderAspect([this]() {
-	                       std::list<fawkes::AspectIniFin*> ret;
-	                       ret.emplace_back(&asp_inifin_);
-	                       ret.emplace_back(&clingo_mgr_inifin_);
-	                       return ret;
-                       }()),
+  AspectProviderAspect({&asp_inifin_, &clingo_mgr_inifin_}),
   control_mgr_(new ClingoControlManager)
 {
 }
