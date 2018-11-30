@@ -41,14 +41,14 @@ public:
 	/** Debug levels, higher levels include the lower values. */
 	enum DebugLevel_t
 	{
-	 None = 0,              ///< No debug output at all.
-	 Time = 10,             ///< Print when starting/finishing grounding/solving for analysis.
-	 Programs = 20,         ///< Print which programs are grounded.
-	 Externals = 30,        ///< Print assignments and releases of externals.
-	 Models = 40,           ///< Print new models.
-	 AllModelSymbols = 50,  ///< Ignore '\#show' statements and print all symbols of a model.
-	 All,                   ///< Print everything.
-	 EvenClingo             ///< Activates the --output-debug=text option for clingo.
+	 ASP_DBG_NONE = 0,                ///< No debug output at all.
+	 ASP_DBG_TIME = 10,               ///< Print when starting/finishing grounding/solving for analysis.
+	 ASP_DBG_PROGRAMS = 20,           ///< Print which programs are grounded.
+	 ASP_DBG_EXTERNALS = 30,          ///< Print assignments and releases of externals.
+	 ASP_DBG_MODELS = 40,             ///< Print new models.
+	 ASP_DBG_ALL_MODEL_SYMBOLS = 50,  ///< Ignore '\#show' statements and print all symbols of a model.
+	 ASP_DBG_ALL,                     ///< Print everything.
+	 ASP_DBG_EVEN_CLINGO              ///< Activates the --output-debug=text option for clingo.
 	};
 
 	ClingoAccess(Logger *logger, const std::string& log_component);

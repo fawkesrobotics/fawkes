@@ -83,6 +83,11 @@ private:
 /**
  * @class ClingoAccess
  * @brief A wrapper around the clingo control, to control the solving process.
+ * This class provides access to the Clingo solver. Callbacks can be used for
+ * automated notification on specific events, such if a model has been found.
+ * It provides a high-level interface to the solver, i.e., to configure, start,
+ * or cancel the solving process. It also supports assigning and releasing
+ * externals.
  * @author Björn Schäpers
  *
  * @property ClingoAccess::logger_
@@ -167,14 +172,17 @@ bool
 ClingoAccess::on_model(Clingo::Model& model)
 {
 	MutexLocker locker1(&model_mutex_);
-	model_symbols_ = model.symbols(debug_level_ >= AllModelSymbols ? Clingo::ShowType::All : Clingo::ShowType::Shown);
+	model_symbols_ =
+	  model.symbols(debug_level_ >= ASP_DBG_ALL_MODEL_SYMBOLS
+	                ? Clingo::ShowType::All
+	                : Clingo::ShowType::Shown);
 
-	if (debug_level_ >= Time)	{
+	if (debug_level_ >= ASP_DBG_TIME)	{
 		logger_->log_info(log_comp_.c_str(), "New %smodel found: #%d",
 		                  model.optimality_proven() ? "optimal " : "",
 		                  ++model_counter_);
 
-		if (debug_level_ >= Models)	{
+		if (debug_level_ >= ASP_DBG_MODELS)	{
 			/* To save (de-)allocations just move found symbols at the end
 			 * of the vector and move the end iterator to the front. After
 			 * this everything in [begin, end) is in oldSymbols but not in
@@ -215,7 +223,7 @@ ClingoAccess::on_model(Clingo::Model& model)
 void
 ClingoAccess::on_finish(Clingo::SolveResult result)
 {
-	if (debug_level_ >= Time) {
+	if (debug_level_ >= ASP_DBG_TIME) {
 		logger_->log_info(log_comp_.c_str(), "Solving nearly done.");
 	}
 
@@ -229,7 +237,7 @@ ClingoAccess::on_finish(Clingo::SolveResult result)
 	  [this](void)
 	  {
 		  async_handle_.wait();
-		  if (debug_level_ >= Time)	{
+		  if (debug_level_ >= ASP_DBG_TIME)	{
 				logger_->log_info(log_comp_.c_str(), "Solving done.");
 			}
 			solving_ = false;
@@ -254,7 +262,7 @@ ClingoAccess::alloc_control()
 	std::vector<std::string> argumentsString;
 	std::vector<const char*> argumentsChar;
 
-	if (debug_level_ >= EvenClingo) {
+	if (debug_level_ >= ASP_DBG_EVEN_CLINGO) {
 		argumentsChar.push_back("--output-debug=text");
 	}
 
@@ -290,7 +298,8 @@ ClingoAccess::alloc_control()
  * @param[in] log_component The logging component.
  */
 ClingoAccess::ClingoAccess(Logger *logger, const std::string& log_component)
-: logger_(logger), log_comp_(log_component.empty() ? "Clingo" : log_component), debug_level_(None),
+: logger_(logger), log_comp_(log_component.empty() ? "Clingo" : log_component),
+  debug_level_(ASP_DBG_NONE),
   num_threads_(1), thread_mode_splitting_(false),
   control_is_locked_(false), control_(nullptr),
   model_mutex_(Mutex::RECURSIVE), solving_(false)
@@ -380,7 +389,7 @@ ClingoAccess::start_solving(void)
 	if (solving_) {
 		return false;
 	}
-	if (debug_level_ >= Time) {
+	if (debug_level_ >= ASP_DBG_TIME) {
 		logger_->log_info(log_comp_.c_str(), "Start async solving.");
 	}
 
@@ -405,7 +414,7 @@ ClingoAccess::start_solving_blocking(void)
 	}
 
 	BoolMutexLocker locker(&control_mutex_, control_is_locked_);
-	if (debug_level_ >= Time) {
+	if (debug_level_ >= ASP_DBG_TIME) {
 		logger_->log_info(log_comp_.c_str(), "Start sync solving.");
 	}
 
@@ -428,7 +437,7 @@ ClingoAccess::cancel_solving(void)
 		return false;
 	}
 
-	if (debug_level_ >= Time) {
+	if (debug_level_ >= ASP_DBG_TIME) {
 		logger_->log_info(log_comp_.c_str(), "Cancel solving.");
 	}
 
@@ -536,9 +545,9 @@ ClingoAccess::ground(const Clingo::PartSpan& parts)
 	if (solving_) {
 		return false;
 	}
-	if (debug_level_ >= Time) {
+	if (debug_level_ >= ASP_DBG_TIME) {
 		logger_->log_info(log_comp_.c_str(), "Grounding %zu parts:", parts.size());
-		if (debug_level_ >= Programs)	{
+		if (debug_level_ >= ASP_DBG_PROGRAMS)	{
 			auto i = 0;
 			for (const Clingo::Part& part : parts) {
 				std::string params;
@@ -558,7 +567,7 @@ ClingoAccess::ground(const Clingo::PartSpan& parts)
 
 	control_->ground(parts, ground_callback_);
 
-	if (debug_level_ >= Time) {
+	if (debug_level_ >= ASP_DBG_TIME) {
 		logger_->log_info(log_comp_.c_str(), "Grounding done.");
 	}
 	return true;
@@ -577,7 +586,7 @@ ClingoAccess::assign_external(const Clingo::Symbol& atom, const Clingo::TruthVal
 		return false;
 	}
 
-	if (debug_level_ >= Externals) {
+	if (debug_level_ >= ASP_DBG_EXTERNALS) {
 		logger_->log_info(log_comp_.c_str(), "Assigning %s to %s.",
 		                  [value](void)
 		                  {
@@ -607,7 +616,7 @@ ClingoAccess::release_external(const Clingo::Symbol& atom)
 		return false;
 	}
 
-	if (debug_level_ >= Externals) {
+	if (debug_level_ >= ASP_DBG_EXTERNALS) {
 		logger_->log_info(log_comp_.c_str(), "Releasing %s.", atom.to_string().c_str());
 	}
 	control_->release_external(atom);
