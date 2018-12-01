@@ -80,15 +80,6 @@ ProtobufCommPlexilAdapter::initialize()
 	config_  = reinterpret_cast<fawkes::Configuration *>(m_execInterface.getProperty("::Fawkes::Config"));
 	clock_   = reinterpret_cast<fawkes::Clock *>(m_execInterface.getProperty("::Fawkes::Clock"));
 
-	std::string cfg_prefix;
-	try {
-		std::string cfg_spec = config_->get_string("/plexil/spec");
-		cfg_prefix = "/plexil/" + cfg_spec + "/";
-	} catch (fawkes::Exception &e) {
-		logger_->log_error("PlexilProtobuf", "Failed to read config: %s", e.what_no_backtrace());
-		return false;
-	}
-
 	std::string cfg_proto_dir = get_xml_config_value(getXml(), "protos");
 	replace_tokens(cfg_proto_dir);
 
