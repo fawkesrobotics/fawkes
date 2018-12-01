@@ -302,8 +302,9 @@ SickTiM55xCommonAcquisitionThread::parse_datagram(const unsigned char *datagram,
 
   // 22: Scaling offset (00000000) -- always 0
   // 23: Starting angle (FFF92230)
-  unsigned int starting_angle_val = 0;
-  sscanf(fields[23].c_str(), "%x", &starting_angle_val);
+  unsigned int starting_angle_hexval = 0;
+  sscanf(fields[23].c_str(), "%x", &starting_angle_hexval);
+  int starting_angle_val = static_cast<int>(starting_angle_hexval);
   float angle_min = (starting_angle_val / 10000.0) / 180.0 * M_PI - M_PI / 2;
 
   // 24: Angular step width (2710)
