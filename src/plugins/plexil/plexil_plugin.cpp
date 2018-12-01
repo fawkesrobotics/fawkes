@@ -34,7 +34,7 @@ public:
 	/** Constructor.
 	 * @param config Fawkes configuration
 	 */
-	PlexilExecutivePlugin(Configuration *config) : Plugin(config)
+	explicit PlexilExecutivePlugin(Configuration *config) : Plugin(config)
 	{
 		thread_list.push_back(new PlexilExecutiveThread());
 	}
