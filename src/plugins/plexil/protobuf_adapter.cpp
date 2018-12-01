@@ -360,7 +360,8 @@ ProtobufCommPlexilAdapter::remove_recipient(const std::string& msg_type,
 {
 	std::lock_guard<std::mutex> lock(queue_mutex_);
 	queue_entry& q = get_queue(msg_type);
-	std::remove(q.recipients.begin(), q.recipients.end(), cmd);	
+	q.recipients.erase(std::remove(q.recipients.begin(), q.recipients.end(), cmd),
+	                   q.recipients.end());
 }
 
 void
@@ -387,7 +388,8 @@ ProtobufCommPlexilAdapter::release_message(const std::string& msg_id)
 		std::string msg_type{msg_id.substr(0, colon_pos)};
 		queue_entry& q = get_queue(msg_type);
 
-		std::remove(q.messages.begin(), q.messages.end(), msg_id);
+		q.messages.erase(std::remove(q.messages.begin(), q.messages.end(), msg_id),
+		                 q.messages.end());
 		messages_.erase(msg_id);
 	}
 }
@@ -493,10 +495,7 @@ ProtobufCommPlexilAdapter::pb_destroy(PLEXIL::Command* cmd)
 	args[0].getValue(msg_id);
 
 	std::lock_guard<std::mutex> lock(queue_mutex_);
-
-	if (messages_.find(msg_id) != messages_.end()) {
-		messages_.erase(msg_id);
-	}
+	messages_.erase(msg_id);
 }
 
 static std::pair<std::string, long int>
@@ -1541,9 +1540,8 @@ ProtobufCommPlexilAdapter::pb_peer_destroy(PLEXIL::Command* cmd)
 	int peer_id;
 	args[0].getValue(peer_id);
 
-	if (peers_.find(peer_id) != peers_.end()) {
-    peers_.erase(peer_id);
-  }
+	peers_.erase(peer_id);
+
 	m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
 	m_execInterface.notifyOfExternalEvent();
 }

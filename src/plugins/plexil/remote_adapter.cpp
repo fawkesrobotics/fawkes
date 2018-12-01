@@ -84,8 +84,8 @@ FawkesRemotePlexilAdapter::initialize()
 {
 	std::string cfg_host;
 	int         cfg_port;
-	bool        cfg_navgraph_allow_multi = true;
-	
+	bool        cfg_navgraph_allow_multi;
+
 	clock_   = Clock::instance();
 	logger_  = std::make_unique<fawkes::ConsoleLogger>();
 
