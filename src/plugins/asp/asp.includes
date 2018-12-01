@@ -1,0 +1,8 @@
+../../libs
+../../../../src/libs
+.
+~/clingo/libclasp
+~/clingo/libclingo
+~/clingo/libgringo
+~/clingo/liblp
+~/clingo/libprogram_opts
