@@ -561,13 +561,17 @@ ProcRRDThread::get_cpu(unsigned long int* cpus)
 {
   FILE *file;
   file = fopen("/proc/stat", "r");
-  int i = 0;
-  i = fscanf(file, "cpu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu", cpus+1, cpus+2, cpus+3, cpus+4, cpus+5, cpus+6, cpus+7, cpus+8, cpus+9, cpus+10);
-  cpus[0] = 0;
-  for(int j=1; j<=i; j++)
-    cpus[0] += cpus[j];
+  if (file) {
+	  int i = 0;
+	  i = fscanf(file, "cpu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
+	             cpus+1, cpus+2, cpus+3, cpus+4, cpus+5, cpus+6, cpus+7, cpus+8, cpus+9, cpus+10);
+	  cpus[0] = 0;
+	  for (int j=1; j<=i; j++) {
+		  cpus[0] += cpus[j];
+	  }
 
-  fclose(file);
+	  fclose(file);
+  }
 }
 
 void
@@ -591,7 +595,9 @@ ProcRRDThread::loop()
   }
   if (file) fclose(file);
   try {
-  	rrd_manager->add_data("network", "N:%llu:%llu:%llu:%llu:%llu:%llu", recv_bytes, recv_packets, recv_errors, trans_bytes, trans_packets, trans_errors);
+	  rrd_manager->add_data("network", "N:%llu:%llu:%llu:%llu:%llu:%llu",
+	                        recv_bytes, recv_packets, recv_errors,
+	                        trans_bytes, trans_packets, trans_errors);
   } catch (Exception &e) {
   	logger->log_warn(name(), "Failed to update network RRD, exception follows");
   	logger->log_warn(name(), e);
@@ -628,7 +634,7 @@ ProcRRDThread::loop()
         break;
       }
     }
-    fclose(file);
+    if (file)  fclose(file);
     file = fopen(("/proc/"+i->second.pid+"/io").c_str(), "r");
     unsigned long long int rchar, wchar, syscr, syscw, read_bytes, write_bytes, cancelled_write_bytes;
     rchar = wchar = syscr = syscw = read_bytes = write_bytes = cancelled_write_bytes = 0;
