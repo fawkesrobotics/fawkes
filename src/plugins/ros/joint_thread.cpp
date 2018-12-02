@@ -67,7 +67,7 @@ RosJointThread::finalize()
 {
   blackboard->unregister_listener(this);
   blackboard->unregister_observer(this);
-  for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); it++) {
+  for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); ++it) {
     blackboard->close(*it);
   }
   ros_pub_.shutdown();
