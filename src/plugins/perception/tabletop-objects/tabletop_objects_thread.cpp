@@ -1384,7 +1384,7 @@ pcl_utils::transform_pointcloud(cfg_base_frame_, *single_cluster,
   else {
     logger->log_info(name(), "No clustered points found");
     // save all centroids to old centroids
-    for (CentroidMap::iterator it = centroids_.begin(); it != centroids_.end(); it++) {
+    for (CentroidMap::iterator it = centroids_.begin(); it != centroids_.end(); ++it) {
       old_centroids_.push_back(OldCentroid(it->first, it->second));
     }
   }
@@ -1941,7 +1941,8 @@ TabletopObjectsThread::track_objects(
         bool assigned = false;
         // first, check if there is an old centroid close enough
         for (OldCentroidVector::iterator it = old_centroids_.begin();
-            it != old_centroids_.end(); it++) {
+             it != old_centroids_.end(); ++it)
+        {
           if (pcl::distances::l2(new_centroids[row], it->get_centroid())
               <= cfg_centroid_max_distance_) {
             id = it->get_id();

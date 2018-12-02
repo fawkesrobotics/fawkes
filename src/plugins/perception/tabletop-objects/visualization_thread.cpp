@@ -696,10 +696,11 @@ TabletopVisualizationThread::triangulate_hull()
   int q_num_facets = qh num_facets;
 
   table_triangle_vertices_.resize(q_num_facets * dim);
-  facetT *facet;
+  facetT *facet = NULL;
   int i = 0;
   FORALLfacets
   {
+	  assert(facet);
 	  vertexT *vertex = NULL;
     int vertex_n = 0, vertex_i = 0;
     FOREACHvertex_i_(facet->vertices)
