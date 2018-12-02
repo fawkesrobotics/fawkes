@@ -205,7 +205,7 @@ LaserPointCloudThread::bb_interface_created(const char *type, const char *id) th
 {
   InterfaceCloudMapping mapping;
   mapping.id = interface_to_pcl_name(id);
-  mapping.cloud = new pcl::PointCloud<pcl::PointXYZ>();
+  mapping.cloud = RefPtr<pcl::PointCloud<pcl::PointXYZ>>(new pcl::PointCloud<pcl::PointXYZ>);
   mapping.cloud->height = 1;
 
   if (strncmp(type, "Laser360Interface", INTERFACE_TYPE_SIZE_) == 0) {
@@ -213,7 +213,6 @@ LaserPointCloudThread::bb_interface_created(const char *type, const char *id) th
     try {
       lif = blackboard->open_for_reading<Laser360Interface>(id);
     } catch (Exception &e) {
-      // ignored
       logger->log_warn(name(), "Failed to open %s:%s: %s", type, id, e.what());
       return;
     }
@@ -238,7 +237,6 @@ LaserPointCloudThread::bb_interface_created(const char *type, const char *id) th
     try {
       lif = blackboard->open_for_reading<Laser720Interface>(id);
     } catch (Exception &e) {
-      // ignored
       logger->log_warn(name(), "Failed to open %s:%s: %s", type, id, e.what());
       return;
     }
@@ -263,7 +261,6 @@ LaserPointCloudThread::bb_interface_created(const char *type, const char *id) th
     try {
       lif = blackboard->open_for_reading<Laser1080Interface>(id);
     } catch (Exception &e) {
-      // ignored
       logger->log_warn(name(), "Failed to open %s:%s: %s", type, id, e.what());
       return;
     }
