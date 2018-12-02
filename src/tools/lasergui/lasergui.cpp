@@ -433,29 +433,37 @@ class LaserGuiGtkWindow : public Gtk::Window
       std::list<ObjectPositionInterface*>::iterator objpos_if_itt;
       std::list<Position2DTrackInterface*>::iterator track_if_itt;
       if (l_objpos_if_persons_) {
-	for( objpos_if_itt = l_objpos_if_persons_->begin(); objpos_if_itt != l_objpos_if_persons_->end(); objpos_if_itt++ ) {
-	  bb_->close(*objpos_if_itt);
-	}
-	l_objpos_if_persons_->clear();
+	      for (objpos_if_itt = l_objpos_if_persons_->begin();
+	           objpos_if_itt != l_objpos_if_persons_->end(); ++objpos_if_itt)
+	      {
+		      bb_->close(*objpos_if_itt);
+	      }
+	      l_objpos_if_persons_->clear();
       }
       if (l_objpos_if_legs_) {
-	for( objpos_if_itt = l_objpos_if_legs_->begin(); objpos_if_itt != l_objpos_if_legs_->end(); objpos_if_itt++ ) {
-	  bb_->close(*objpos_if_itt);
-	}
-	l_objpos_if_legs_->clear();
+	      for (objpos_if_itt = l_objpos_if_legs_->begin();
+	           objpos_if_itt != l_objpos_if_legs_->end(); ++objpos_if_itt)
+	      {
+		      bb_->close(*objpos_if_itt);
+	      }
+	      l_objpos_if_legs_->clear();
       }
       if (l_objpos_if_misc_) {
-	for( objpos_if_itt = l_objpos_if_misc_->begin(); objpos_if_itt != l_objpos_if_misc_->end(); objpos_if_itt++ ) {
-	  bb_->close(*objpos_if_itt);
-	}
-	l_objpos_if_misc_->clear();
+	      for (objpos_if_itt = l_objpos_if_misc_->begin();
+	           objpos_if_itt != l_objpos_if_misc_->end(); ++objpos_if_itt)
+	      {
+		      bb_->close(*objpos_if_itt);
+	      }
+	      l_objpos_if_misc_->clear();
       }
 
       if (l_track_if_) {
-	for( track_if_itt = l_track_if_->begin(); track_if_itt != l_track_if_->end(); track_if_itt++ ) {
-	  bb_->close(*track_if_itt);
-	}
-	l_track_if_->clear();
+	      for (track_if_itt = l_track_if_->begin();
+	           track_if_itt != l_track_if_->end(); ++track_if_itt)
+	      {
+		      bb_->close(*track_if_itt);
+	      }
+	      l_track_if_->clear();
       }
       
       laser_segmentation_if_ = NULL;
@@ -466,7 +474,8 @@ class LaserGuiGtkWindow : public Gtk::Window
       l_objpos_if_misc_ = NULL;
       l_track_if_ = NULL;
 
-      area_->set_objpos_if(l_objpos_if_persons_,l_objpos_if_legs_,l_objpos_if_misc_,laser_segmentation_if_, l_track_if_, target_if_,switch_if_);
+      area_->set_objpos_if(l_objpos_if_persons_, l_objpos_if_legs_, l_objpos_if_misc_,
+                           laser_segmentation_if_, l_track_if_, target_if_, switch_if_);
 
     } else {
       unsigned int num_opens = 3

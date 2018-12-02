@@ -633,17 +633,21 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
 
   if (l_objpos_if_legs_) {
     cr->set_source_rgb(0,1,0);
-    for( objpos_if_itt = l_objpos_if_legs_->begin(); 
-	 objpos_if_itt != l_objpos_if_legs_->end() && (*objpos_if_itt)->has_writer() ; 
-	 objpos_if_itt++ ) {
-      if(!break_drawing_)
-	(*objpos_if_itt)->read();
-      if ((*objpos_if_itt)->is_valid()){
-	std::pair<float,float> pos = transform_coords_from_fawkes((*objpos_if_itt)->relative_x(), (*objpos_if_itt)->relative_y());
-	float x=pos.first;
-	float y=pos.second;
-	cr->move_to(x, y);
-	cr->arc(x, y, 0.1, 0, 2*M_PI);
+    for (objpos_if_itt = l_objpos_if_legs_->begin();
+         objpos_if_itt != l_objpos_if_legs_->end() && (*objpos_if_itt)->has_writer();
+         ++objpos_if_itt)
+    {
+	    if (!break_drawing_) {
+		    (*objpos_if_itt)->read();
+	    }
+	    if ((*objpos_if_itt)->is_valid()){
+		    std::pair<float,float> pos =
+		      transform_coords_from_fawkes((*objpos_if_itt)->relative_x(),
+		                                   (*objpos_if_itt)->relative_y());
+		    float x=pos.first;
+		    float y=pos.second;
+		    cr->move_to(x, y);
+		    cr->arc(x, y, 0.1, 0, 2*M_PI);
       }
     }
     cr->stroke();

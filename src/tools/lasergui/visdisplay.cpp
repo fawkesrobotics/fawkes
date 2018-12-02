@@ -346,13 +346,9 @@ VisualDisplay2D::Text::Text(float x, float y, const std::string& text,
                             unsigned int id, unsigned int owner,
                             unsigned char r, unsigned char g,
                             unsigned char b, unsigned char a)
-: Shape(id, owner, fawkes::VisualDisplay2DInterface::LS_SOLID, r, g, b, a)
+: Shape(id, owner, fawkes::VisualDisplay2DInterface::LS_SOLID, r, g, b, a),
+  x_(x), y_(y), text_(text), size_(size), anchor_(anchor)
 {
-  x_      = x;
-  y_      = y;
-  text_   = text;
-  size_   = size;
-  anchor_ = anchor;
 }
 
 
