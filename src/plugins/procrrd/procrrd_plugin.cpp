@@ -35,7 +35,7 @@ class ProcRRDPlugin : public fawkes::Plugin
 /** Constructor.
  * @param config Fawkes configuration
  */
-  ProcRRDPlugin(Configuration *config) : Plugin(config)
+  explicit ProcRRDPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new ProcRRDThread());
   }
