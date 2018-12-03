@@ -34,7 +34,7 @@ class GazsimTimesourcePlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  GazsimTimesourcePlugin(Configuration *config) : Plugin(config)
+  explicit GazsimTimesourcePlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new GazsimTimesourceThread());
   }
