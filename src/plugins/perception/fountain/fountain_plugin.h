@@ -28,7 +28,7 @@
 class FvFountainPlugin : public fawkes::Plugin
 {
  public:
-  FvFountainPlugin(fawkes::Configuration *config);
+  explicit FvFountainPlugin(fawkes::Configuration *config);
 };
 
 #endif
