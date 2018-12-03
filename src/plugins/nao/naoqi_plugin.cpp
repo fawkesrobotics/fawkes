@@ -38,7 +38,7 @@ class NaoQiPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  NaoQiPlugin(Configuration *config)
+  explicit NaoQiPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new NaoQiBrokerThread());
