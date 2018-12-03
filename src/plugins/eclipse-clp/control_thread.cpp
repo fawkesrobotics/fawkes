@@ -140,11 +140,14 @@ AgentControlThread::loop()
     {
       if ( m_exit_iface->msgq_first_is< ExitSimulationInterface::ExitSimulationMessage >() )
       {
-	  logger->log_info(name(), "shutting down: %s%s", fawkes_path_.c_str(), simulation_shutdown_script_.c_str());
-	  std::string command = fawkes_path_ + simulation_shutdown_script_;
-	  int schnurz = system(command.c_str());
-	  //just avoid warning that the return value of system() is ignored
-	  schnurz++;
+	      logger->log_info(name(), "shutting down: %s%s",
+	                       fawkes_path_.c_str(), simulation_shutdown_script_.c_str());
+	      std::string command = fawkes_path_ + simulation_shutdown_script_;
+	      int cmd_rv = system(command.c_str());
+	      if (cmd_rv != 0) {
+		      logger->log_warn(name(), "Failed to execute '%s'. Return value %d",
+		                       command.c_str(), cmd_rv);
+	      }
       }
       m_exit_iface->msgq_pop();
     }
