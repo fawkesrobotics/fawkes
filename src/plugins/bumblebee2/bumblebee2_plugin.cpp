@@ -35,7 +35,7 @@ class Bumblebee2Plugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  Bumblebee2Plugin(Configuration *config)
+  explicit Bumblebee2Plugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new Bumblebee2Thread());
