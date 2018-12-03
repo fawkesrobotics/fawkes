@@ -34,7 +34,7 @@ class NavGraphInteractivePlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  NavGraphInteractivePlugin(Configuration *config)
+  explicit NavGraphInteractivePlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new NavGraphInteractiveThread());
