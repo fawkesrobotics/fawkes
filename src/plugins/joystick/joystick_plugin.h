@@ -28,7 +28,7 @@
 class JoystickPlugin : public fawkes::Plugin
 {
  public:
-  JoystickPlugin(fawkes::Configuration *config);
+  explicit JoystickPlugin(fawkes::Configuration *config);
 };
 
 #endif
