@@ -38,7 +38,7 @@ class OpenNiDataPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  OpenNiDataPlugin(Configuration *config) : Plugin(config)
+  explicit OpenNiDataPlugin(Configuration *config) : Plugin(config)
   {
     OpenNiImageThread *img_thread = new OpenNiImageThread();
     thread_list.push_back(img_thread);
