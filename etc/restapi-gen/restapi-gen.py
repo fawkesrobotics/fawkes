@@ -109,10 +109,10 @@ def filter_prefix(value, prefix):
 		rv += prefix + l
 	return rv
 
-def recursive_transitive_types(types, type, all_schemas):
-	if type in types: return
-	types.add(type)
-	if type in all_schemas:
+def recursive_transitive_types(types, type_name, all_schemas):
+	if type_name in types: return
+	types.add(type_name)
+	if type_name in all_schemas:
 		for n, s in all_schemas.items():
 			if n not in types:
 				if 'allOf' in s:
@@ -123,9 +123,9 @@ def recursive_transitive_types(types, type, all_schemas):
 								recursive_transitive_types(types, n, all_schemas)
 	return types
 
-def filter_transitive_types(type, all_schemas):
+def filter_transitive_types(type_name, all_schemas):
 	types = set()
-	recursive_transitive_types(types, type, all_schemas)
+	recursive_transitive_types(types, type_name, all_schemas)
 	return sorted(types)
 
 def filter_path_reftypes(spec):
