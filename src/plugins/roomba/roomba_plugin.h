@@ -28,7 +28,7 @@
 class RoombaPlugin : public fawkes::Plugin
 {
  public:
-  RoombaPlugin(fawkes::Configuration *config);
+  explicit RoombaPlugin(fawkes::Configuration *config);
 };
 
 #endif
