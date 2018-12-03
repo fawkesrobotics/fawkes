@@ -35,7 +35,7 @@ class RobotinoIrPclPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RobotinoIrPclPlugin(Configuration *config)
+  explicit RobotinoIrPclPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RobotinoIrPclThread());
