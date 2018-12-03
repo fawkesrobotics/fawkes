@@ -36,7 +36,7 @@ class OpenNiUserTrackerPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  OpenNiUserTrackerPlugin(Configuration *config) : Plugin(config)
+  explicit OpenNiUserTrackerPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new OpenNiUserTrackerThread());
   }
