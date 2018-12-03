@@ -36,7 +36,7 @@ public:
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RobotStatePublisherPlugin(Configuration *config)
+  explicit RobotStatePublisherPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RobotStatePublisherThread());
