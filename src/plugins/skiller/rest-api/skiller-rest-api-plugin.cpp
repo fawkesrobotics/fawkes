@@ -34,7 +34,7 @@ class SkillerRestApiPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  SkillerRestApiPlugin(Configuration *config) : Plugin(config)
+  explicit SkillerRestApiPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new SkillerRestApi());
   }
