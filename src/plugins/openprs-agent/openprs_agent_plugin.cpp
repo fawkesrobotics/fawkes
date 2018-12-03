@@ -34,7 +34,7 @@ class OpenPRSAgentPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  OpenPRSAgentPlugin(Configuration *config) : Plugin(config)
+  explicit OpenPRSAgentPlugin(Configuration *config) : Plugin(config)
   {
     OpenPRSAspect::Mode mode = OpenPRSAspect::OPRS;
     bool gdb_delay = false;
