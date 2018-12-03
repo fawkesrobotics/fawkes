@@ -33,7 +33,7 @@ class ClipsTFPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  ClipsTFPlugin(Configuration *config) : Plugin(config)
+  explicit ClipsTFPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new ClipsTFThread());
   }
