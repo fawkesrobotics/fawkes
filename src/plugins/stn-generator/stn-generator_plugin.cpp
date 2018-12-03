@@ -35,7 +35,7 @@ class StnGeneratorPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fakwes configuration
    */
-  StnGeneratorPlugin(Configuration *config)
+  explicit StnGeneratorPlugin(Configuration *config)
      : Plugin(config)
   {
      thread_list.push_back(new StnGeneratorThread());
