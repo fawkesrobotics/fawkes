@@ -35,7 +35,7 @@ class ClipsPddlParserPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  ClipsPddlParserPlugin(Configuration *config) : Plugin(config)
+  explicit ClipsPddlParserPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new ClipsPddlParserThread());
   }
