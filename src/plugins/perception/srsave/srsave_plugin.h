@@ -28,7 +28,7 @@
 class FvSrSavePlugin : public fawkes::Plugin
 {
  public:
-  FvSrSavePlugin(fawkes::Configuration *config);
+  explicit FvSrSavePlugin(fawkes::Configuration *config);
 };
 
 #endif
