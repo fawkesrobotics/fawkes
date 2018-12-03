@@ -34,7 +34,7 @@ class RosIMUPlugin
    /** Constructor.
     * @param config Fawkes configuration
     */
-   RosIMUPlugin(Configuration *config)
+   explicit RosIMUPlugin(Configuration *config)
      : Plugin(config)
    {
      thread_list.push_back(new RosIMUThread());
