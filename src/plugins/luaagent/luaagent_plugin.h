@@ -28,7 +28,7 @@
 class LuaAgentPlugin : public fawkes::Plugin
 {
  public:
-  LuaAgentPlugin(fawkes::Configuration *config);
+  explicit LuaAgentPlugin(fawkes::Configuration *config);
 };
 
 #endif
