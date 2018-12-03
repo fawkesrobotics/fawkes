@@ -37,7 +37,7 @@ class PddlRobotMemoryPlugin : public fawkes::Plugin
   /** Constructor
    * @param config Fakwes configuration
    */
-  PddlRobotMemoryPlugin(Configuration *config)
+  explicit PddlRobotMemoryPlugin(Configuration *config)
      : Plugin(config)
   {
      thread_list.push_back(new PddlRobotMemoryThread());
