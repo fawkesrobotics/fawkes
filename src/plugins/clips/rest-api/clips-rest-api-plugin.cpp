@@ -34,7 +34,7 @@ class ClipsRestApiPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  ClipsRestApiPlugin(Configuration *config) : Plugin(config)
+  explicit ClipsRestApiPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new ClipsRestApi());
   }
