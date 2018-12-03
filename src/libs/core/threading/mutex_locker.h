@@ -35,6 +35,7 @@ class MutexLocker
  public:
   MutexLocker(RefPtr<Mutex> mutex, bool initially_lock = true);
   MutexLocker(Mutex *mutex, bool initially_lock = true);
+  MutexLocker(Mutex &mutex, bool initially_lock = true);
   ~MutexLocker();
 
   void relock();

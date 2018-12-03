@@ -111,6 +111,19 @@ MutexLocker::MutexLocker(Mutex *mutex, bool initially_lock)
   locked_ = initially_lock;
 }
 
+/** Constructor.
+ * @param mutex Mutex to lock/unlock appropriately.
+ * @param initially_lock true to lock the mutex in the constructor, false to not lock
+ */
+MutexLocker::MutexLocker(Mutex &mutex, bool initially_lock)
+{
+  rawmutex_ = &mutex;
+  if ( initially_lock ) {
+    rawmutex_->lock();
+  }
+  locked_ = initially_lock;
+}
+
 
 /** Destructor */
 MutexLocker::~MutexLocker()
