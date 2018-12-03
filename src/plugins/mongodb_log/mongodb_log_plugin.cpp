@@ -40,7 +40,7 @@ class MongoLogPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  MongoLogPlugin(Configuration *config) : Plugin(config)
+  explicit MongoLogPlugin(Configuration *config) : Plugin(config)
   {
     bool enable_bb = true;
     try {
