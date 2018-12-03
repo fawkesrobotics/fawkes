@@ -35,7 +35,7 @@ class RosImagesPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RosImagesPlugin(Configuration *config)
+  explicit RosImagesPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RosImagesThread());
