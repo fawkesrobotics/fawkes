@@ -36,7 +36,7 @@ class GazsimLaserPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  GazsimLaserPlugin(Configuration *config)
+  explicit GazsimLaserPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new LaserSimThread());
