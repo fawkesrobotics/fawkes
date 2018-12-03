@@ -35,7 +35,7 @@ class NavGraphClustersPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  NavGraphClustersPlugin(Configuration *config)
+  explicit NavGraphClustersPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new NavGraphClustersThread());
