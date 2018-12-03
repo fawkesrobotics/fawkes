@@ -33,7 +33,7 @@ class RosNavigatorPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RosNavigatorPlugin(Configuration *config)
+  explicit RosNavigatorPlugin(Configuration *config)
     : Plugin(config)
   {
     std::string prefix = "/ros/navigator";
