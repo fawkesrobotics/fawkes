@@ -35,7 +35,7 @@ class TestPlugin : public Plugin {
   /** Constructor, prints out info message
    * @param config configuration instance
    */
-  TestPlugin(Configuration *config) : Plugin(config)
+  explicit TestPlugin(Configuration *config) : Plugin(config)
   {
     printf("TestPlugin constructor called\n");
   }
