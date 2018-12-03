@@ -28,7 +28,7 @@
 class ROSTalkerPubPlugin : public fawkes::Plugin
 {
  public:
-  ROSTalkerPubPlugin(fawkes::Configuration *config);
+  explicit ROSTalkerPubPlugin(fawkes::Configuration *config);
 };
 
 #endif
