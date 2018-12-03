@@ -37,7 +37,7 @@ class GazsimLocalizationPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  GazsimLocalizationPlugin(Configuration *config)
+  explicit GazsimLocalizationPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new LocalizationSimThread());
