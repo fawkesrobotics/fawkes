@@ -36,7 +36,7 @@ class CLIPSPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  CLIPSPlugin(Configuration *config) : Plugin(config)
+  explicit CLIPSPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new CLIPSThread());
   }
