@@ -28,7 +28,7 @@
 class RRDExamplePlugin : public fawkes::Plugin
 {
  public:
-  RRDExamplePlugin(fawkes::Configuration *config);
+  explicit RRDExamplePlugin(fawkes::Configuration *config);
 };
 
 #endif
