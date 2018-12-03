@@ -34,7 +34,7 @@ class ClipsAgentPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  ClipsAgentPlugin(Configuration *config) : Plugin(config)
+  explicit ClipsAgentPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new ClipsAgentThread());
   }
