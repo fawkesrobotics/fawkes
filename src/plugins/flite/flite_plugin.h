@@ -28,7 +28,7 @@
 class FlitePlugin : public fawkes::Plugin
 {
  public:
-  FlitePlugin(fawkes::Configuration *config);
+  explicit FlitePlugin(fawkes::Configuration *config);
 };
 
 #endif
