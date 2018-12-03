@@ -36,7 +36,7 @@ class GazsimCommPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  GazsimCommPlugin(Configuration *config) : Plugin(config)
+  explicit GazsimCommPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new GazsimCommThread());
   }
