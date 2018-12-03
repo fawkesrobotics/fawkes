@@ -38,7 +38,7 @@ class RobotMemoryPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RobotMemoryPlugin(Configuration *config) : Plugin(config)
+  explicit RobotMemoryPlugin(Configuration *config) : Plugin(config)
   {
 	  thread_list.push_back(new RobotMemoryThread());
   }
