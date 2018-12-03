@@ -36,7 +36,7 @@ class NaoQiMotionPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  NaoQiMotionPlugin(Configuration *config)
+  explicit NaoQiMotionPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new NaoQiMotionThread());
