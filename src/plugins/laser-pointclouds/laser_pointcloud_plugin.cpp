@@ -35,7 +35,7 @@ class LaserPointCloudPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  LaserPointCloudPlugin(Configuration *config)
+  explicit LaserPointCloudPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new LaserPointCloudThread());
