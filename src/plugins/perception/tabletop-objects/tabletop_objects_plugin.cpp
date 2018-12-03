@@ -38,7 +38,7 @@ class TabletopObjectsPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  TabletopObjectsPlugin(Configuration *config)
+  explicit TabletopObjectsPlugin(Configuration *config)
     : Plugin(config)
   {
     TabletopObjectsThread *tabobjthr = new TabletopObjectsThread();
