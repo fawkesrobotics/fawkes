@@ -33,7 +33,7 @@ class RosMoveBasePlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RosMoveBasePlugin(Configuration *config)
+  explicit RosMoveBasePlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RosMoveBaseThread());
