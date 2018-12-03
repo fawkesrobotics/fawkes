@@ -28,7 +28,7 @@
 class XabslPlugin : public fawkes::Plugin
 {
  public:
-  XabslPlugin(fawkes::Configuration *config);
+  explicit XabslPlugin(fawkes::Configuration *config);
 };
 
 #endif
