@@ -34,7 +34,7 @@ class ClipsNavGraphPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  ClipsNavGraphPlugin(Configuration *config) : Plugin(config)
+  explicit ClipsNavGraphPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new ClipsNavGraphThread());
   }
