@@ -28,7 +28,7 @@
 class BlackBoardLoggerPlugin : public fawkes::Plugin
 {
  public:
-  BlackBoardLoggerPlugin(fawkes::Configuration *config);
+  explicit BlackBoardLoggerPlugin(fawkes::Configuration *config);
 };
 
 #endif
