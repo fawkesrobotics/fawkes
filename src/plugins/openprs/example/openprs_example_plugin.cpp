@@ -34,7 +34,7 @@ class OpenPRSExamplePlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  OpenPRSExamplePlugin(Configuration *config) : Plugin(config)
+  explicit OpenPRSExamplePlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new OpenPRSExampleThread());
   }
