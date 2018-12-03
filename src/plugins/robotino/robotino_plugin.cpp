@@ -42,7 +42,7 @@ public:
 	/** Constructor.
 	 * @param config Fawkes configuration
 	 */
-	RobotinoPlugin(Configuration *config)
+	explicit RobotinoPlugin(Configuration *config)
 		: Plugin(config)
 	{
 		std::string cfg_driver = config->get_string("/hardware/robotino/driver");
