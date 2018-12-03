@@ -34,7 +34,7 @@ class OpenNiPclOnlyPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  OpenNiPclOnlyPlugin(Configuration *config)
+  explicit OpenNiPclOnlyPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new OpenNiPclOnlyThread());
