@@ -34,7 +34,7 @@ class ClipsProtobufPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  ClipsProtobufPlugin(Configuration *config) : Plugin(config)
+  explicit ClipsProtobufPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new ClipsProtobufThread());
   }
