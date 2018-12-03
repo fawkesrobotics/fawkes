@@ -28,7 +28,7 @@
 class PanTiltPlugin : public fawkes::Plugin
 {
  public:
-  PanTiltPlugin(fawkes::Configuration *config);
+  explicit PanTiltPlugin(fawkes::Configuration *config);
 };
 
 #endif
