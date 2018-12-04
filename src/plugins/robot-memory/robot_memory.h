@@ -26,6 +26,8 @@
 #include <aspect/logging.h>
 #include <aspect/blackboard.h>
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
+#include <core/threading/mutex.h>
+
 #include <memory>
 #include <vector>
 
@@ -34,7 +36,6 @@
 #include "computables/computables_manager.h"
 
 namespace fawkes {
-  class Mutex;
   class RobotMemoryInterface;
 }
 
@@ -153,7 +154,7 @@ class RobotMemory
     std::string database_name_;
     std::string default_collection_;
     bool debug_;
-    fawkes::Mutex *mutex_;
+    fawkes::Mutex mutex_;
     fawkes::RobotMemoryInterface* rm_if_;
     EventTriggerManager* trigger_manager_;
     ComputablesManager* computables_manager_;
