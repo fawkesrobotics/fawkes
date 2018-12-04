@@ -41,7 +41,10 @@ class LaserDeadSpotsDataFilter : public LaserDataFilter
                            fawkes::Configuration *config, fawkes::Logger *logger,
                            const std::string& prefix,
                            unsigned int data_size, std::vector<LaserDataFilter::Buffer *> &in);
+  LaserDeadSpotsDataFilter(const LaserDeadSpotsDataFilter &other);
   ~LaserDeadSpotsDataFilter();
+
+  LaserDeadSpotsDataFilter& operator=(const LaserDeadSpotsDataFilter &other);
 
   void filter();
 
@@ -55,6 +58,7 @@ class LaserDeadSpotsDataFilter : public LaserDataFilter
 
   unsigned int  num_spots_;
   unsigned int *dead_spots_;
+  unsigned int  dead_spots_size_;
   std::vector<std::pair<float, float> > cfg_dead_spots_;
 };
 
