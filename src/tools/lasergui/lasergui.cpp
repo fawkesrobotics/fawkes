@@ -519,9 +519,8 @@ class LaserGuiGtkWindow : public Gtk::Window
 	pgb_ltopen_->set_fraction(++opened * step_fraction);
 	while (Gtk::Main::events_pending()) Gtk::Main::iteration();
       }
-      Position2DTrackInterface* new_track_if;
       for (int i=1; i <= MAX_TRACKINTERFACES; ++i){
-	new_track_if = bb_->open_for_reading<Position2DTrackInterface>((std::string("legtracker Track") + StringConversions::to_string(i)).c_str());
+	Position2DTrackInterface *new_track_if = bb_->open_for_reading<Position2DTrackInterface>((std::string("legtracker Track") + StringConversions::to_string(i)).c_str());
 	l_track_if_->push_back( new_track_if );
 	pgb_ltopen_->set_fraction(++opened * step_fraction);
 	while (Gtk::Main::events_pending()) Gtk::Main::iteration();
