@@ -35,20 +35,23 @@ else
   WARN_TARGETS += warning_libxmlpp
 endif
 
-# SPL can always be built
-CFLAGS += -DHAVE_SPL
-LIBS_refboxcomm += SoccerPenaltyInterface
-OBJS_refboxcomm += processor/spl.o
+ifeq ($(HAVE_CPP11),1)
+  CFLAGS += -DHAVE_SPL
+  LIBS_refboxcomm += SoccerPenaltyInterface
+  OBJS_refboxcomm += processor/spl.o
+else
+  WARN_TARGETS += warning_spl_cpp11
+endif
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
 all: $(WARN_TARGETS)
   endif
-.PHONY: warning_libxmlpp warning_spl
+.PHONY: warning_libxmlpp warning_spl_cpp11
 warning_libxmlpp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting MSL2010 support$(TNORMAL) (libxml++[-devel] not installed)"
-
+warning_sbl_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Omitting SPL support$(TNORMAL) (C++11 not available)"
 endif
-
 
 include $(BUILDSYSDIR)/base.mk

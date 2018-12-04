@@ -30,6 +30,7 @@
 #include <cstdlib>
 #include <stdint.h>
 #include <map>
+#include <memory>
 
 namespace fawkes {
   class Logger;
@@ -91,8 +92,8 @@ class SplRefBoxProcessor : public RefBoxProcessor
   void process_struct(spl_gamecontrol_t *msg);
 
  private:
-  fawkes::DatagramSocket *s_;
-  fawkes::Logger         *logger_;
+	std::shared_ptr<fawkes::DatagramSocket> s_;
+  fawkes::Logger *logger_;
 
   bool quit_;
 
