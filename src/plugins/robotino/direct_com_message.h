@@ -154,7 +154,10 @@ class DirectRobotinoComMessage
 	DirectRobotinoComMessage();
 	DirectRobotinoComMessage(command_id_t cmdid);
 	DirectRobotinoComMessage(const unsigned char *msg, size_t msg_size);
+	DirectRobotinoComMessage(const DirectRobotinoComMessage& other);
 	virtual ~DirectRobotinoComMessage();
+
+	DirectRobotinoComMessage& operator=(const DirectRobotinoComMessage& other);
 
 	void add_command(command_id_t cmdid);
 	void add_int8(int8_t value);
