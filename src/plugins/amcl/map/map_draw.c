@@ -52,7 +52,6 @@ void map_draw_occ(map_t *map, rtk_fig_t *fig)
   int col;
   map_cell_t *cell;
   uint16_t *image;
-  uint16_t *pixel;
 
   image = malloc(map->size_x * map->size_y * sizeof(image[0]));
 
@@ -61,8 +60,8 @@ void map_draw_occ(map_t *map, rtk_fig_t *fig)
   {
     for (i =  0; i < map->size_x; i++)
     {
+      uint16_t *pixel = image + (j * map->size_x + i);
       cell = map->cells + MAP_INDEX(map, i, j);
-      pixel = image + (j * map->size_x + i);
 
       col = 127 - 127 * cell->occ_state;
       *pixel = RTK_RGB16(col, col, col);
@@ -123,7 +122,6 @@ void map_draw_wifi(map_t *map, rtk_fig_t *fig, int index)
   int level, col;
   map_cell_t *cell;
   uint16_t *image, *mask;
-  uint16_t *ipix, *mpix;
 
   image = malloc(map->size_x * map->size_y * sizeof(image[0]));
   mask = malloc(map->size_x * map->size_y * sizeof(mask[0]));
@@ -133,9 +131,9 @@ void map_draw_wifi(map_t *map, rtk_fig_t *fig, int index)
   {
     for (i =  0; i < map->size_x; i++)
     {
+      uint16_t *ipix = image + (j * map->size_x + i);
+      uint16_t *mpix = mask + (j * map->size_x + i);
       cell = map->cells + MAP_INDEX(map, i, j);
-      ipix = image + (j * map->size_x + i);
-      mpix = mask + (j * map->size_x + i);
 
       level = cell->wifi_levels[index];
 

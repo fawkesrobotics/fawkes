@@ -50,7 +50,6 @@ double map_calc_range(map_t *map, double ox, double oy, double oa, double max_ra
   int x,y;
   int xstep, ystep;
   char steep;
-  int tmp;
   int deltax, deltay, error, deltaerr;
 
   x0 = MAP_GXWX(map,ox);
@@ -66,7 +65,7 @@ double map_calc_range(map_t *map, double ox, double oy, double oa, double max_ra
 
   if(steep)
   {
-    tmp = x0;
+    int tmp = x0;
     x0 = y0;
     y0 = tmp;
 

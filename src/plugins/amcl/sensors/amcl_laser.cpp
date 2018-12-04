@@ -128,44 +128,33 @@ bool AMCLLaser::UpdateSensor(pf_t *pf, AMCLSensorData *data)
 // Determine the probability for the given pose
 double AMCLLaser::BeamModel(AMCLLaserData *data, pf_sample_set_t* set)
 {
-  AMCLLaser *self;
-  int i, j, step;
-  double z, pz;
-  double p;
-  double map_range;
-  double obs_range, obs_bearing;
-  double total_weight;
-  pf_sample_t *sample;
-  pf_vector_t pose;
-
-  self = (AMCLLaser*) data->sensor;
-
-  total_weight = 0.0;
+  AMCLLaser *self = static_cast<AMCLLaser*>(data->sensor);
+  double total_weight = 0.0;
 
   // Compute the sample weights
-  for (j = 0; j < set->sample_count; j++)
+  for (int j = 0; j < set->sample_count; j++)
   {
-    sample = set->samples + j;
-    pose = sample->pose;
+    pf_sample_t *sample = set->samples + j;
+    pf_vector_t  pose{sample->pose};
 
     // Take account of the laser pose relative to the robot
     pose = pf_vector_coord_add(self->laser_pose, pose);
 
-    p = 1.0;
+    double p = 1.0;
 
-    step = (data->range_count - 1) / (self->max_beams - 1);
-    for (i = 0; i < data->range_count; i += step)
+    int step = (data->range_count - 1) / (self->max_beams - 1);
+    for (int i = 0; i < data->range_count; i += step)
     {
-      obs_range = data->ranges[i][0];
-      obs_bearing = data->ranges[i][1];
+      double obs_range = data->ranges[i][0];
+      double obs_bearing = data->ranges[i][1];
 
       // Compute the range according to the map
-      map_range = map_calc_range(self->map, pose.v[0], pose.v[1],
-                                 pose.v[2] + obs_bearing, data->range_max);
-      pz = 0.0;
+      double map_range = map_calc_range(self->map, pose.v[0], pose.v[1],
+                                        pose.v[2] + obs_bearing, data->range_max);
+      double pz = 0.0;
 
       // Part 1: good, but noisy, hit
-      z = obs_range - map_range;
+      double z = obs_range - map_range;
       pz += self->z_hit * exp(-(z * z) / (2 * self->sigma_hit * self->sigma_hit));
 
       // Part 2: short reading from unexpected obstacle (e.g., a person)

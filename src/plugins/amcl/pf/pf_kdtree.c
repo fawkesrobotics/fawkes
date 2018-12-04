@@ -415,7 +415,6 @@ void pf_kdtree_cluster_node(pf_kdtree_t *self, pf_kdtree_node_t *node, int depth
 {
   int i;
   int nkey[3];
-  pf_kdtree_node_t *nnode;
 
   for (i = 0; i < 3 * 3 * 3; i++)
   {
@@ -423,7 +422,7 @@ void pf_kdtree_cluster_node(pf_kdtree_t *self, pf_kdtree_node_t *node, int depth
     nkey[1] = node->key[1] + ((i % 9) / 3) - 1;
     nkey[2] = node->key[2] + ((i % 9) % 3) - 1;
 
-    nnode = pf_kdtree_find_node(self, self->root, nkey);
+    pf_kdtree_node_t *nnode = pf_kdtree_find_node(self, self->root, nkey);
     if (nnode == NULL)
       continue;
 
@@ -463,13 +462,11 @@ void pf_kdtree_draw(pf_kdtree_t *self, rtk_fig_t *fig)
 // Recursively draw nodes
 void pf_kdtree_draw_node(pf_kdtree_t *self, pf_kdtree_node_t *node, rtk_fig_t *fig)
 {
-  double ox, oy;
-  char text[64];
-
   if (node->leaf)
   {
-    ox = (node->key[0] + 0.5) * self->size[0];
-    oy = (node->key[1] + 0.5) * self->size[1];
+    double ox = (node->key[0] + 0.5) * self->size[0];
+    double oy = (node->key[1] + 0.5) * self->size[1];
+    char text[64];
 
     rtk_fig_rectangle(fig, ox, oy, 0.0, self->size[0], self->size[1], 0);
 

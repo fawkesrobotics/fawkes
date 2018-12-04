@@ -47,7 +47,7 @@ static void tred2(double V[n][n], double d[n], double e[n]) {
 //  Fortran subroutine in EISPACK.
 
   int i,j,k;
-  double f,g,h,hh;
+  double f,g,hh;
   for (j = 0; j < n; j++) {
     d[j] = V[n-1][j];
   }
@@ -129,7 +129,7 @@ static void tred2(double V[n][n], double d[n], double e[n]) {
   for (i = 0; i < n-1; i++) {
     V[n-1][i] = V[i][i];
     V[i][i] = 1.0;
-    h = d[i+1];
+    double h = d[i+1];
     if (h != 0.0) {
       for (k = 0; k <= i; k++) {
         d[k] = V[k][i+1] / h;
@@ -165,7 +165,7 @@ static void tql2(double V[n][n], double d[n], double e[n]) {
 //  Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
 //  Fortran subroutine in EISPACK.
 
-  int i,j,m,l,k;
+  int i,j,l,k;
   double g,p,r,dl1,h,f,tst1,eps;
   double c,c2,c3,el1,s,s2;
 
@@ -182,7 +182,7 @@ static void tql2(double V[n][n], double d[n], double e[n]) {
     // Find small subdiagonal element
 
     tst1 = MAX(tst1,fabs(d[l]) + fabs(e[l]));
-    m = l;
+    int m = l;
     while (m < n) {
       if (fabs(e[m]) <= eps*tst1) {
         break;
@@ -194,9 +194,9 @@ static void tql2(double V[n][n], double d[n], double e[n]) {
     // otherwise, iterate.
 
     if (m > l) {
-      int iter = 0;
+      //int iter = 0;
       do {
-        iter = iter + 1;  // (Could check iteration count here.)
+        //iter = iter + 1;  // (Could check iteration count here.)
 
         // Compute implicit shift
 
