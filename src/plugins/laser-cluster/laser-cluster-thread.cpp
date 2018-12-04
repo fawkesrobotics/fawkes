@@ -452,13 +452,14 @@ LaserClusterThread::loop()
 
     //logger->log_info(name(), "Found %zu clusters", cluster_indices.size());
 
-    unsigned int i = 0;
+    //unsigned int i = 0;
     for (auto cluster : cluster_indices) {
       //Eigen::Vector4f centroid;
       //pcl::compute3DCentroid(*noline_cloud, cluster.indices, centroid);
 
       //logger->log_info(name(), "  Cluster %u with %zu points at (%f, %f, %f)",
       //	         i, cluster.indices.size(), centroid.x(), centroid.y(), centroid.z());
+      //++i;
 
       // color points of cluster
       for (auto ci : cluster.indices) {
@@ -467,8 +468,6 @@ LaserClusterThread::loop()
 	out_point.g = ignored_cluster_color[1];;
 	out_point.b = ignored_cluster_color[2];;
       }
-
-      ++i;
     }
 
   } else {
