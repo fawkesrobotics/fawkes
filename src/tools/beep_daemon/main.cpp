@@ -251,19 +251,8 @@ main(int argc, char **argv)
 {
   ArgumentParser *argp = new ArgumentParser(argc, argv, "hD::ks");
 
-  // default user/group
-  const char *user  = NULL;
-  const char *group = NULL;
-  if (argp->has_arg("u")) {
-    user = argp->arg("u");
-  }
-  if (argp->has_arg("g")) {
-    group = argp->arg("g");
-  }
-
 #ifdef HAVE_LIBDAEMON
   pid_t pid;
-  int ret;
 
   if ( argp->has_arg("D") ) {
     // Set identification string for the daemon for both syslog and PID file
@@ -282,6 +271,7 @@ main(int argc, char **argv)
       }
 
       // Kill daemon with SIGINT
+      int ret;
       if ((ret = daemon_pid_file_kill_wait(SIGINT, 5)) < 0) {
 	daemon_log(LOG_WARNING, "Failed to kill daemon");
       }

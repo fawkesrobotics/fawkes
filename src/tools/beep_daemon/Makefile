@@ -27,7 +27,7 @@ else
   WARN_TARGETS += warning_libdaemon
 endif
 
-LIBS_ffbeepd = fawkescore fawkesutils fawkesblackboard SwitchInterface
+LIBS_ffbeepd = fawkescore fawkesutils fawkesblackboard fawkesinterface SwitchInterface
 OBJS_ffbeepd = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all =	$(OBJS_ffbeepd)
