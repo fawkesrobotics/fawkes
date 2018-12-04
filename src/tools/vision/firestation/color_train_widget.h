@@ -28,6 +28,8 @@
 
 #include <gtkmm.h>
 
+#include <memory>
+
 class ColormapViewerWidget;
 namespace firevision {
   class BayesColormapGenerator;
@@ -92,8 +94,8 @@ class ColorTrainWidget
   void reset_gui();
 
   firevision::BayesColormapGenerator* m_generator;
-  firevision::Zauberstab* m_zauberstab;
-  ColormapViewerWidget* m_cvw;
+	std::shared_ptr<firevision::Zauberstab> m_zauberstab;
+	std::shared_ptr<ColormapViewerWidget> m_cvw;
 
   firevision::hint_t m_fg_object;
 

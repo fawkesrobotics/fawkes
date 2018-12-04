@@ -40,15 +40,19 @@ OBJS_firestation = color_train_widget.o         \
 		   main.o
 OBJS_all += $(OBJS_firestation)
 
-ifeq ($(HAVE_GUI)$(HAVE_AVAHI),11)
+ifeq ($(HAVE_GUI)$(HAVE_AVAHI)$(HAVE_CPP11),111)
   BINS_gui += $(BINDIR)/firestation
   INST_RESDIRS = guis/firestation
   MANPAGES_gui += $(MANDIR)/man1/firestation.1
 else
   ifneq ($(HAVE_AVAHI),1)
     WARN_TARGETS += warning_avahi
-  else
+  endif
+  ifneq ($(HAVE_GUI),1)
     WARN_TARGETS += warning_guilibs
+  endif
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
   endif
 endif
 
@@ -62,9 +66,11 @@ ifeq ($(OBJSSUBMAKE),1)
 gui: $(WARN_TARGETS)
   endif
 
-.PHONY: warning_guilibs warning_avahi
+.PHONY: warning_guilibs warning_avahi warning_cpp11
 warning_guilibs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building firestation$(TNORMAL) $(GUI_ERROR)";
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building firestation$(TNORMAL) (C++11 not available)";
 warning_avahi:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building firestation$(TNORMAL) (Avahi not installed)";
 endif

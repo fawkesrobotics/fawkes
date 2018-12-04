@@ -76,11 +76,10 @@ FuseTransferWidget::~FuseTransferWidget()
   delete m_local_colormap_viewer;
   delete m_remote_colormap_viewer;
 
-  FuseClient* c;
   m_new_clients.lock();
   while (m_new_clients.size() != 0)
     {
-      c = m_new_clients.front().client;
+      FuseClient* c = m_new_clients.front().client;
       m_new_clients.pop();
       c->disconnect();
       c->cancel();

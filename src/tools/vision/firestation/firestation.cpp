@@ -616,7 +616,6 @@ Firestation::open_folder()
 void
 Firestation::open_shm()
 {
-  unsigned int num_buffers = 0;
   SharedMemory::SharedMemoryIterator shmit;
   SharedMemoryImageBufferHeader* h = new SharedMemoryImageBufferHeader;
   shmit = SharedMemory::find(FIREVISION_SHM_IMAGE_MAGIC_TOKEN, h);
@@ -628,6 +627,7 @@ Firestation::open_shm()
     }
   else
     {
+	    unsigned int num_buffers = 0;
       m_shm_list_store->clear();
 
       while ( shmit != SharedMemory::end() )
