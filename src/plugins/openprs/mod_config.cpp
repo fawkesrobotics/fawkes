@@ -52,12 +52,8 @@ action_config_load(TermList terms)
   while (v->next()) {
     TermList tl = sl_make_slist();
     tl = build_term_list(tl, build_string(v->path()));
-    
 
-    std::string type = "";
-    std::string value = v->get_as_string();
-
-    if      (v->is_uint()) {
+    if (v->is_uint()) {
       tl = build_term_list(tl, build_id(declare_atom("UINT")));
       if (v->is_list()) {
 	TermList ll = sl_make_slist();
