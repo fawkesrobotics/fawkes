@@ -376,7 +376,7 @@ BBLogFile::repair()
     if (ftruncate(fileno(f_), fs.st_size - extra_bytes) == -1) {
       throw Exception(errno, "Failed to truncate file %s", filename_);
     }
-    all_entries_size -= extra_bytes;
+    //all_entries_size -= extra_bytes;
     extra_bytes = 0;
     if (fstat(fileno(f_), &fs) != 0) {
       throw Exception(errno, "Failed to update information of file %s "
