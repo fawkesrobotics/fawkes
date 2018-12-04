@@ -49,23 +49,22 @@ using namespace firevision;
  * @param max_depth maximum depth value to expect
  */
 SkelGuiDepthDrawer::SkelGuiDepthDrawer(firevision::Camera *depth_cam,
-				       firevision::Camera *label_cam,
-				       unsigned int max_depth)
-  : SkelGuiTextureDrawer(depth_cam->pixel_width(), depth_cam->pixel_height()),
-    max_depth_(max_depth)
+                                       firevision::Camera *label_cam,
+                                       unsigned int max_depth)
+: SkelGuiTextureDrawer(depth_cam->pixel_width(), depth_cam->pixel_height()),
+  depth_cam_(depth_cam), label_cam_(label_cam),
+  rgb_buf_raii_(malloc_buffer(RGB, width_, height_)),
+  rgb_buf_((unsigned char *)*rgb_buf_raii_),
+  max_depth_(max_depth),
+  histogram_raii_(malloc(max_depth_ * sizeof(float))),
+  histogram_((float *)*histogram_raii_),
+  show_labels_(true)
 {
-  depth_cam_      = depth_cam;
-  label_cam_      = label_cam;
-  rgb_buf_        = malloc_buffer(RGB, width_, height_);
-  histogram_      = (float *)malloc(max_depth_ * sizeof(float));
-  show_labels_    = true;
 }
 
 /** Destructor. */
 SkelGuiDepthDrawer::~SkelGuiDepthDrawer()
 {
-  free(rgb_buf_);
-  free(histogram_);
 }
 
 /** Toggle label state.

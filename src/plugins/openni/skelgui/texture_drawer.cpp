@@ -54,9 +54,10 @@ using namespace firevision;
 SkelGuiTextureDrawer::SkelGuiTextureDrawer(unsigned int width, unsigned int height)
   : width_(width), height_(height),
     texture_width_(get_closest_power_of_two(width_)),
-    texture_height_(get_closest_power_of_two(height_))
+    texture_height_(get_closest_power_of_two(height_)),
+    texture_raii_(malloc(texture_width_ *texture_height_ * 3))
 {
-  texture_ = (unsigned char *)malloc(texture_width_ *texture_height_ * 3);
+	texture_ = (unsigned char *)*texture_raii_;
   memset(texture_, 0, texture_width_ * texture_height_ * 3);
 
   texture_initialized_ = false;
@@ -65,7 +66,6 @@ SkelGuiTextureDrawer::SkelGuiTextureDrawer(unsigned int width, unsigned int heig
 /** Destructor. */
 SkelGuiTextureDrawer::~SkelGuiTextureDrawer()
 {
-  free(texture_);
 }
 
 unsigned int
@@ -140,14 +140,12 @@ SkelGuiTextureDrawer::copy_rgb_to_texture(const unsigned char *rgb_buf)
   unsigned char *row = texture_;
   unsigned char *tex = texture_;
   const unsigned char *rgb = rgb_buf;
-  unsigned int bytes = 0;
   for (unsigned int h = 0; h < height_; ++h) {
     tex = row;
     for (unsigned int w = 0; w < width_; ++w) {
       *tex++ = *rgb++;
       *tex++ = *rgb++;
       *tex++ = *rgb++;
-      ++bytes;
     }
     row += texture_width_ * 3;
   }

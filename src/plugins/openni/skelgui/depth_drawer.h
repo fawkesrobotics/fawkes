@@ -25,6 +25,8 @@
 
 #include "texture_drawer.h"
 
+#include <utils/misc/autofree.h>
+
 namespace firevision {
   class Camera;
 }
@@ -33,8 +35,8 @@ class SkelGuiDepthDrawer : public SkelGuiTextureDrawer
 {
  public:
   SkelGuiDepthDrawer(firevision::Camera *depth_cam, firevision::Camera *label_cam,
-		     unsigned int max_depth);
-  ~SkelGuiDepthDrawer();
+                     unsigned int max_depth);
+	~SkelGuiDepthDrawer();
 
   virtual void fill_texture();
 
@@ -43,9 +45,12 @@ class SkelGuiDepthDrawer : public SkelGuiTextureDrawer
  private:
   firevision::Camera  *depth_cam_;
   firevision::Camera  *label_cam_;
+
+	fawkes::MemAutoFree  rgb_buf_raii_;
   unsigned char       *rgb_buf_;
 
   const unsigned int   max_depth_;
+	fawkes::MemAutoFree  histogram_raii_;
   float               *histogram_;
 
   bool                 show_labels_;
