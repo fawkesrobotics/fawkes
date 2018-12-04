@@ -93,11 +93,6 @@ create_value(std::unique_ptr<fawkes::Configuration::ValueIterator> &i,
 			for (const auto &ivsv : ivs) {
 				v.PushBack(rapidjson::Value(ivsv).Move(), a);
 			}
-		} else if (i->is_int()) {
-			std::vector<int> ivs = i->get_ints();
-			for (const auto &ivsv : ivs) {
-				v.PushBack(rapidjson::Value(ivsv).Move(), a);
-			}
 		} else if (i->is_bool()) {
 			std::vector<bool> ivs = i->get_bools();
 			for (const auto &ivsv : ivs) {

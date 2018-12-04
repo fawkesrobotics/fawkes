@@ -68,12 +68,12 @@ WebviewStaticRequestProcessor::WebviewStaticRequestProcessor(fawkes::WebUrlManag
   base_url_(base_url),
 	catchall_file_(catchall_file)
 {
-  if(htdocs_dirs.size() <= 0) {
-    throw Exception(errno, "htdocs_dirs is empty");
+	if (htdocs_dirs.empty()) {
+		throw Exception(errno, "htdocs_dirs is empty");
   }
-  for(const auto &h : htdocs_dirs) {
-    char htdocs_rp[PATH_MAX];
-    if (realpath(h.c_str(), htdocs_rp) != NULL) {
+	for (const auto &h : htdocs_dirs) {
+		char htdocs_rp[PATH_MAX];
+		if (realpath(h.c_str(), htdocs_rp) != NULL) {
 	    htdocs_dirs_.push_back(htdocs_rp);
     } else {
 	    throw Exception(errno, "Failed to resolve htdocs path '%s'", h.c_str());
