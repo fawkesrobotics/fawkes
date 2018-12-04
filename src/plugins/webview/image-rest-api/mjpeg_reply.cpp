@@ -46,7 +46,7 @@ namespace fawkes {
  * @param stream_producer stream producer to query for JPEG buffers
  */
 DynamicMJPEGStreamWebReply::DynamicMJPEGStreamWebReply(std::shared_ptr<WebviewJpegStreamProducer> stream_producer)
-  : DynamicWebReply(WebReply::HTTP_OK)
+: DynamicWebReply(WebReply::HTTP_OK)
 {
   next_buffer_mutex_ = new fawkes::Mutex();
   next_buffer_waitcond_ = new fawkes::WaitCondition(next_buffer_mutex_);
@@ -57,12 +57,44 @@ DynamicMJPEGStreamWebReply::DynamicMJPEGStreamWebReply(std::shared_ptr<WebviewJp
   stream_producer_->add_subscriber(this);
 }
 
+/** Copy Constructor.
+ * @param other instance to copy from
+ */
+DynamicMJPEGStreamWebReply::DynamicMJPEGStreamWebReply(const DynamicMJPEGStreamWebReply &other)
+: DynamicWebReply(WebReply::HTTP_OK)
+{
+  next_buffer_mutex_ = new fawkes::Mutex();
+  next_buffer_waitcond_ = new fawkes::WaitCondition(next_buffer_mutex_);
+  next_frame_ = other.next_frame_;
+
+  add_header("Content-type", "multipart/x-mixed-replace;boundary=MJPEG-next-frame");
+  stream_producer_ = other.stream_producer_;
+  stream_producer_->add_subscriber(this);
+}
+
 /** Destructor. */
 DynamicMJPEGStreamWebReply::~DynamicMJPEGStreamWebReply()
 {
   stream_producer_->remove_subscriber(this);
   delete next_buffer_mutex_;
   delete next_buffer_waitcond_;
+}
+
+/** Assignment operator.
+ * @param other instance to copy from
+ * @return reference to this instance
+ */
+DynamicMJPEGStreamWebReply&
+DynamicMJPEGStreamWebReply::operator=(const DynamicMJPEGStreamWebReply &other)
+{
+  stream_producer_->remove_subscriber(this);
+  next_frame_ = other.next_frame_;
+
+  add_header("Content-type", "multipart/x-mixed-replace;boundary=MJPEG-next-frame");
+  stream_producer_ = other.stream_producer_;
+  stream_producer_->add_subscriber(this);
+
+  return *this;
 }
 
 size_t
