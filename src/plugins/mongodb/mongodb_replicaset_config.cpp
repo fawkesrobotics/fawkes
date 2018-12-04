@@ -304,7 +304,7 @@ MongoDBReplicaSetConfig::rs_status(mongo::BSONObj &reply)
 						case 3: // RECOVERING
 						case 5: // STARTUP2
 						case 9: // ROLLBACK
-							self_status = MongoDBManagedReplicaSetInterface::INITIALIZING;    break;
+							self_status = MongoDBManagedReplicaSetInterface::INITIALIZING;
 							break;
 						case 7: self_status = MongoDBManagedReplicaSetInterface::ARBITER;   break;
 						default: self_status = MongoDBManagedReplicaSetInterface::ERROR;    break;
