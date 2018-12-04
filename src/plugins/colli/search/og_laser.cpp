@@ -114,13 +114,13 @@ LaserOccupancyGrid::LaserOccupancyGrid(Laser360Interface * laser, Logger* logger
 
   if_laser_->resize_buffers( if_buffer_size_ );
 
-  robo_shape_ = new RoboShapeColli( (cfg_prefix + "roboshape/").c_str(), logger, config );
+  robo_shape_.reset(new RoboShapeColli((cfg_prefix + "roboshape/").c_str(), logger, config));
   old_readings_.clear();
   init_grid();
 
   logger->log_debug("LaserOccupancyGrid", "Generating obstacle map");
   bool obstacle_shape = robo_shape_->is_angular_robot() && ! cfg_force_elipse_obstacle_;
-  obstacle_map = new ColliObstacleMap(cell_costs_, obstacle_shape);
+  obstacle_map_.reset(new ColliObstacleMap(cell_costs_, obstacle_shape));
   logger->log_debug("LaserOccupancyGrid", "Generating obstacle map done");
 
   laser_pos_ = point_t(0,0);
@@ -140,8 +140,8 @@ LaserOccupancyGrid::LaserOccupancyGrid(Laser360Interface * laser, Logger* logger
 /** Descturctor. */
 LaserOccupancyGrid::~LaserOccupancyGrid()
 {
-  delete robo_shape_;
-  delete obstacle_map;
+  robo_shape_.reset();
+  obstacle_map_.reset();
 }
 
 /** Reset all old readings and forget about the world state! */
@@ -555,7 +555,7 @@ LaserOccupancyGrid::integrate_new_readings( int midX, int midY, float inc, float
 void
 LaserOccupancyGrid::integrate_obstacle( int x, int y, int width, int height )
 {
-  std::vector< int > fast_obstacle = obstacle_map->get_obstacle( width, height, cfg_obstacle_inc_ );
+  std::vector< int > fast_obstacle = obstacle_map_->get_obstacle( width, height, cfg_obstacle_inc_ );
 
   // i = x offset, i+1 = y offset, i+2 is cost
   for( unsigned int i = 0; i < fast_obstacle.size(); i+=3 ) {

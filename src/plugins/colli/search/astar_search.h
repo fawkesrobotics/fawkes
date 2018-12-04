@@ -26,6 +26,7 @@
 #include "abstract_search.h"
 
 #include <vector>
+#include <memory>
 
 namespace fawkes
 {
@@ -44,7 +45,7 @@ typedef struct point_struct point_t;
 class Search: public AbstractSearch
 {
  public:
-  Search( LaserOccupancyGrid * occ_grid , Logger* logger, Configuration* config);
+  Search(LaserOccupancyGrid* occ_grid , Logger* logger, Configuration* config);
   virtual ~Search();
 
   ///\brief update complete plan things
@@ -74,7 +75,7 @@ class Search: public AbstractSearch
   bool is_obstacle_between( const point_t &a, const point_t &b, const int maxcount );
 
 
-  AStarColli * astar_;              /**< the A* search algorithm */
+  std::unique_ptr<AStarColli> astar_;              /**< the A* search algorithm */
   std::vector< point_t > plan_; /**< the local representation of the plan */
 
   point_t robo_position_, target_position_;

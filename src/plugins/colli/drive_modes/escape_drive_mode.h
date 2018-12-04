@@ -29,6 +29,7 @@
 #include <utils/math/types.h>
 
 #include <vector>
+#include <memory>
 
 namespace fawkes
 {
@@ -48,7 +49,7 @@ class EscapeDriveModule : public AbstractDriveMode
  private:
   std::vector<polar_coord_2d_t> laser_points_;
 
-  RoboShapeColli*  robo_shape_;
+  std::unique_ptr<RoboShapeColli>  robo_shape_;
 
   /// Readings without robolength in it
   std::vector< float > readings_normalized_;
