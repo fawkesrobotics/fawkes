@@ -293,7 +293,7 @@ Bumblebee2Thread::init()
 			"be no larger than image width or height");
       }
 
-      if( cfg_bm_num_disparities_ <= 0 || cfg_bm_num_disparities_ % 16 != 0 ) {
+      if( cfg_bm_num_disparities_ == 0 || cfg_bm_num_disparities_ % 16 != 0 ) {
 	throw Exception("Number of disparities must be positive and divisble by 16");
       }
     } catch (Exception &e) {
