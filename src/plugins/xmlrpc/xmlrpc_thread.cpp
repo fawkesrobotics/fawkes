@@ -70,7 +70,7 @@ XmlRpcThread::init()
 
   processor_   = new XmlRpcRequestProcessor(logger);
 
-  xmlrpc_c::registry *registry = processor_->registry();
+  std::shared_ptr<xmlrpc_c::registry> registry = processor_->registry();
   plugin_methods_ = new XmlRpcPluginMethods(registry, plugin_manager, logger);
   log_methods_    = new XmlRpcLogMethods(registry, &cache_logger_, logger);
 

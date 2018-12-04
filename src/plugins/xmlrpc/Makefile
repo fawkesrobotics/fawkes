@@ -33,7 +33,13 @@ else
   WARN_TARGETS += warning_libxmlrpcpp
 endif
 
-ifeq ($(HAVE_LIBMICROHTTPD)$(HAVE_LIBXMLRPCPP),11)
+ifeq ($(HAVE_CPP11),1)
+  CFLAGS  += $(CFLAGS_CPP11)
+else
+  WARN_TARGETS += warning_cpp11
+endif
+
+ifeq ($(HAVE_LIBMICROHTTPD)$(HAVE_LIBXMLRPCPP)$(HAVE_CPP11),111)
   LIBS_xmlrpc = fawkescore fawkesutils fawkesaspects fawkeswebview fawkesnetcomm \
 		fawkesplugin fawkeslogging
   OBJS_xmlrpc = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))
@@ -46,11 +52,13 @@ ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
 all: $(WARN_TARGETS)
   endif
-.PHONY: warning_libmicrohttpd warning_libxmlrpcpp
+.PHONY: warning_libmicrohttpd warning_libxmlrpcpp warning_cpp11
 warning_libmicrohttpd:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting xmlrpc plugin$(TNORMAL) (libmicrohttpd not installed)"
 warning_libxmlrpcpp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting xmlrpc plugin$(TNORMAL) (xmlrpc-c-c++ not installed)"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting xmlrpc plugin$(TNORMAL) (C++11 not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

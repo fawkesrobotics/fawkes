@@ -32,9 +32,9 @@ namespace fawkes {
 
 class XmlRpcPluginMethods {
  public:
-  XmlRpcPluginMethods(xmlrpc_c::registry *registry,
-		      fawkes::PluginManager *plugin_manager,
-		      fawkes::Logger *logger);
+	XmlRpcPluginMethods(std::shared_ptr<xmlrpc_c::registry> registry,
+	                    fawkes::PluginManager *plugin_manager,
+	                    fawkes::Logger *logger);
   ~XmlRpcPluginMethods();
 
   class plugin_list : public xmlrpc_c::method {
@@ -70,13 +70,13 @@ class XmlRpcPluginMethods {
   };
 
  private:
-  xmlrpc_c::registry *xmlrpc_registry_;
+	std::shared_ptr<xmlrpc_c::registry> xmlrpc_registry_;
 
   fawkes::PluginManager *plugin_manager_;
   fawkes::Logger        *logger_;
-  plugin_list           *plugin_list_;
-  plugin_load           *plugin_load_;
-  plugin_unload         *plugin_unload_;
+	std::unique_ptr<plugin_list>    plugin_list_;
+	std::unique_ptr<plugin_load>    plugin_load_;
+	std::unique_ptr<plugin_unload>  plugin_unload_;
 };
 
 #endif

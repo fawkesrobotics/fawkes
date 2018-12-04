@@ -41,27 +41,27 @@
  * @param plugin_manager plugin manager used for listing, loading and unloading plugins
  * @param logger logger to output informational and error messages
  */
-XmlRpcPluginMethods::XmlRpcPluginMethods(xmlrpc_c::registry *registry,
-					 fawkes::PluginManager *plugin_manager,
-					 fawkes::Logger *logger)
+XmlRpcPluginMethods::XmlRpcPluginMethods(std::shared_ptr<xmlrpc_c::registry> registry,
+                                         fawkes::PluginManager *plugin_manager,
+                                         fawkes::Logger *logger)
 {
   xmlrpc_registry_ = registry;
   plugin_manager_  = plugin_manager;
   logger_          = logger;
-  plugin_list_     = new plugin_list(plugin_manager);
-  plugin_load_     = new plugin_load(plugin_manager, logger);
-  plugin_unload_   = new plugin_unload(plugin_manager, logger);
-  xmlrpc_registry_->addMethod("plugin.list",   plugin_list_);
-  xmlrpc_registry_->addMethod("plugin.load",   plugin_load_);
-  xmlrpc_registry_->addMethod("plugin.unload", plugin_unload_);
+  plugin_list_.reset(new plugin_list(plugin_manager));
+  plugin_load_.reset(new plugin_load(plugin_manager, logger));
+  plugin_unload_.reset(new plugin_unload(plugin_manager, logger));
+  xmlrpc_registry_->addMethod("plugin.list",   &*plugin_list_);
+  xmlrpc_registry_->addMethod("plugin.load",   &*plugin_load_);
+  xmlrpc_registry_->addMethod("plugin.unload", &*plugin_unload_);
 }
 
 /** Destructor. */
 XmlRpcPluginMethods::~XmlRpcPluginMethods()
 {
-  delete plugin_list_;
-  delete plugin_load_;
-  delete plugin_unload_;
+	plugin_list_.reset();
+  plugin_load_.reset();
+  plugin_unload_.reset();
 }
 
 
