@@ -175,7 +175,7 @@ skillgui_cairo_render_begin_page(GVJ_t *job)
   tt_.ping_start(ttc_page_);
   tt_.ping_start(ttc_beginpage_);
 #endif
-  SkillGuiCairoRenderInstructor *cri = (SkillGuiCairoRenderInstructor *)job->context;
+  SkillGuiCairoRenderInstructor *cri = static_cast<SkillGuiCairoRenderInstructor *>(job->context);
 
   float bbwidth  = job->bb.UR.x - job->bb.LL.x;
   float bbheight = job->bb.UR.y - job->bb.LL.y;

@@ -130,7 +130,7 @@ skillgui_render_begin_page(GVJ_t *job)
   tt_.ping_start(ttc_page_);
   tt_.ping_start(ttc_beginpage_);
 #endif
-  SkillGuiGraphViewport *gvp = (SkillGuiGraphViewport *)job->context;
+  SkillGuiGraphViewport *gvp = static_cast<SkillGuiGraphViewport *>(job->context);
   gvp->clear();
   Gtk::Allocation alloc = sggvp_->get_allocation();
   float bbwidth  = job->bb.UR.x - job->bb.LL.x;
