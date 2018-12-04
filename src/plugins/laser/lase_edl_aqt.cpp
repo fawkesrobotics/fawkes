@@ -373,7 +373,6 @@ LaseEdlAcquisitionThread::send(WORD *data, int n)
   msg.MSGTYPE = MSGTYPE_STANDARD;
   msg.LEN     = 0;
 
-  int send_words = 0;
   WORD number_of_frames = 0;
 
   // special case for less or equal two words 
@@ -393,6 +392,7 @@ LaseEdlAcquisitionThread::send(WORD *data, int n)
     }
 
   } else { // more than 2 words
+	  int sent_words = 0;
     number_of_frames = ((n - 1) / 3) + 1;
     if ((n-1) % 3 != 0) {
       ++number_of_frames;
@@ -400,7 +400,7 @@ LaseEdlAcquisitionThread::send(WORD *data, int n)
     append_to_msg( (WORD)0xFFFF, &msg);
     append_to_msg( number_of_frames, &msg);
     append_to_msg( (WORD)cfg_sensor_id_, &msg);
-    append_to_msg( data[send_words++], &msg);
+    append_to_msg( data[sent_words++], &msg);
     // printf("send (2): "); print_message(&msg);
     if (CAN_Write( handle_, &msg ) != CAN_ERR_OK) {
       throw Exception("Laser send() failed (2)");
@@ -409,9 +409,9 @@ LaseEdlAcquisitionThread::send(WORD *data, int n)
     for (WORD f=number_of_frames-1; f > 1; --f ) {
       msg.LEN = 0;
       append_to_msg( f, &msg);
-      append_to_msg( data[send_words++], &msg);
-      append_to_msg( data[send_words++], &msg);
-      append_to_msg( data[send_words++], &msg);
+      append_to_msg( data[sent_words++], &msg);
+      append_to_msg( data[sent_words++], &msg);
+      append_to_msg( data[sent_words++], &msg);
       // printf("send (3): "); print_message(&msg);
       if (CAN_Write( handle_, &msg ) != CAN_ERR_OK) {
 	throw Exception("Laser send() failed (3)");
@@ -420,8 +420,8 @@ LaseEdlAcquisitionThread::send(WORD *data, int n)
     // last frame
     msg.LEN = 0;
     append_to_msg( (WORD)0x0001, &msg);
-    for (int i=send_words; i < n; i++) {
-      append_to_msg( data[send_words++], &msg);
+    for (int i=sent_words; i < n; i++) {
+      append_to_msg( data[sent_words++], &msg);
     }
     // printf("send (4): "); print_message(&msg);
     if (CAN_Write( handle_, &msg ) != CAN_ERR_OK) {
@@ -702,7 +702,7 @@ LaseEdlAcquisitionThread::send_and_check(WORD *command_data, int command_length,
 {
   bool keep_response = (real_response != NULL);
   WORD **response;
-  WORD *local_response;
+  WORD *local_response = NULL;
   if (keep_response) {
     response = real_response;
   } else {

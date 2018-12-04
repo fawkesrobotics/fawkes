@@ -104,7 +104,6 @@ HokuyoUrgAcquisitionThread::init()
       struct udev *udev;
       struct udev_enumerate *enumerate;
       struct udev_list_entry *devices, *dev_list_entry;
-      struct udev_device *dev, *usb_device;
       udev = udev_new();
       if (!udev) {
 	throw Exception("HokuyoURG: Failed to initialize udev for "
@@ -119,6 +118,7 @@ HokuyoUrgAcquisitionThread::init()
       udev_list_entry_foreach(dev_list_entry, devices) {
 
 	const char *path;
+	struct udev_device *dev, *usb_device;
 
 	path = udev_list_entry_get_name(dev_list_entry);
 	dev = udev_device_new_from_syspath(udev, path);
