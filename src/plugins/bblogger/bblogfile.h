@@ -28,6 +28,7 @@
 #include <core/exceptions/software.h>
 #include <utils/time/time.h>
 
+#include <memory>
 #include <cstdio>
 
 namespace fawkes {
@@ -108,7 +109,7 @@ class BBLogFile {
   char *interface_id_;
 
   fawkes::Interface *interface_;
-  fawkes::BlackBoardInstanceFactory *instance_factory_;
+	std::unique_ptr<fawkes::BlackBoardInstanceFactory> instance_factory_;
   fawkes::Time       start_time_;
   fawkes::Time       entry_offset_;
 };
