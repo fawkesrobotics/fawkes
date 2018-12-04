@@ -45,7 +45,7 @@ NOSOVER_openprs_mod_navgraph = 1
 FILES_openprs_files   = $(subst $(SRCDIR)/,,$(wildcard $(addprefix $(SRCDIR)/data/,*.opf *.inc *.sym)))
 DESTDIR_openprs_files = $(EXEC_SHAREDIR)/openprs/openprs-agent
 
-ifeq ($(HAVE_OPENPRS),1)
+ifeq ($(HAVE_OPENPRS)$(HAVE_CPP11),11)
   CFLAGS  += $(CFLAGS_OPENPRS)
   LDFLAGS += $(LDFLAGS_OPENPRS)
 
@@ -68,15 +68,22 @@ ifeq ($(HAVE_OPENPRS),1)
 
 	INSTALL_extra = openprs_files
 else
-  WARN_TARGETS += warning_openprs
+  ifneq ($(HAVE_OPENPRS),1)
+    WARN_TARGETS += warning_openprs
+  endif
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_openprs
+.PHONY: warning_openprs warning_cpp11
 warning_openprs:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS agent plugin$(TNORMAL) ($(OPENPRS_ERROR))"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenPRS agent plugin$(TNORMAL) (C++11 not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
