@@ -260,7 +260,6 @@ main(int argc, char **argv)
 
 #ifdef HAVE_LIBDAEMON
   pid_t dpid;
-  int ret;
 
   char *daemon_ident = NULL;
 
@@ -290,6 +289,7 @@ main(int argc, char **argv)
       }
 
       // Kill daemon with SIGINT
+      int ret;
       if ((ret = daemon_pid_file_kill_wait(SIGINT, 5)) < 0) {
 	daemon_log(LOG_WARNING, "Failed to kill watchdog daemon for %s",
 		   argv[prog_start]);

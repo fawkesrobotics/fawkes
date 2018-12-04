@@ -17,6 +17,15 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
+# Check for availability of libdaemon
+HAVE_LIBDAEMON = $(if $(shell $(PKGCONFIG) --exists 'libdaemon'; echo $${?/1/}),1,0)
+ifeq ($(HAVE_LIBDAEMON),1)
+  CFLAGS  += -DHAVE_LIBDAEMON $(shell $(PKGCONFIG) --cflags 'libdaemon')
+  LDFLAGS += $(shell $(PKGCONFIG) --libs 'libdaemon')
+else
+  WARN_TARGETS += warning_libdaemon
+endif
+
 LIBS_ffwatchdog = stdc++ fawkescore
 OBJS_ffwatchdog = ffwatchdog.o
 
