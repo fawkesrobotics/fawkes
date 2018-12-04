@@ -97,7 +97,6 @@ ForwardDriveModule::forward_translation( float dist_to_target, float dist_to_fro
     return 0.f;
   }
 
-  float des_trans = 0.f;
   /*
   if ( fabs( des_rot ) >= 0.0 && fabs( des_rot ) <= 1.0 )
     des_trans = lin_interpol( fabs( des_rot ), 1.0, 0.0, 0.7, max_trans_+0.1 );
@@ -110,7 +109,7 @@ ForwardDriveModule::forward_translation( float dist_to_target, float dist_to_fro
    * lies ahead, i.e. rotation is low, we can drive faster. If the rotation needs
    * to be high to reach the target, we assume that it is better to drive slower.
    */
-  des_trans = lin_interpol( fabs(des_rot), 0.f, M_PI_2, max_trans_, 0.f);
+  float des_trans = lin_interpol( fabs(des_rot), 0.f, M_PI_2, max_trans_, 0.f);
 
   // OLD STUFF!!!
   //   // check stopping on target and compare distances with choosen velocities

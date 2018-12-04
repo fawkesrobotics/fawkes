@@ -364,12 +364,11 @@ AStarColli::remove_target_from_obstacle( int target_x, int target_y, int step_x,
   // search algorithm by gridfilling
   AStarState * child;
   AStarState * father;
-  int key;
 
   while ( !(open_list_.empty()) && (astar_state_count_ < max_states_ - 6) ) {
     father = open_list_.top();
     open_list_.pop();
-    key = calculate_key( father->x_, father->y_ );
+    int key = calculate_key( father->x_, father->y_ );
 
     if ( closed_list_.find( key ) == closed_list_.end() ) {
       closed_list_[key] = key;
