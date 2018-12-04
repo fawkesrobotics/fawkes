@@ -45,34 +45,80 @@ class CellData
 
 class CachedDistanceMap
 {
-  public:
-    CachedDistanceMap(double scale, double max_dist) : 
-      distances_(NULL), scale_(scale), max_dist_(max_dist) 
+public:
+  CachedDistanceMap(double scale, double max_dist) : 
+  distances_(NULL), scale_(scale), max_dist_(max_dist) 
+  {
+    cell_radius_ = max_dist / scale;
+    distances_ = new double *[cell_radius_+2];
+    for(int i=0; i<=cell_radius_+1; i++)
     {
-      cell_radius_ = max_dist / scale;
-      distances_ = new double *[cell_radius_+2];
+      distances_[i] = new double[cell_radius_+2];
+      for(int j=0; j<=cell_radius_+1; j++)
+      {
+        distances_[i][j] = sqrt(i*i + j*j);
+      }
+    }
+  }
+
+  CachedDistanceMap(const CachedDistanceMap &other)
+  : distances_(NULL), scale_(other.scale_), max_dist_(other.max_dist_) 
+  {
+    cell_radius_ = other.cell_radius_;
+    distances_ = new double *[cell_radius_+2];
+    for(int i=0; i<=cell_radius_+1; i++)
+    {
+      distances_[i] = new double[cell_radius_+2];
+      for(int j=0; j<=cell_radius_+1; j++)
+      {
+        distances_[i][j] = other.distances_[i][j];
+      }
+    }
+  }
+
+
+  ~CachedDistanceMap()
+  {
+    if(distances_)
+    {
       for(int i=0; i<=cell_radius_+1; i++)
-      {
-	distances_[i] = new double[cell_radius_+2];
-        for(int j=0; j<=cell_radius_+1; j++)
-	{
-	  distances_[i][j] = sqrt(i*i + j*j);
-	}
-      }
+        delete[] distances_[i];
+      delete[] distances_;
     }
-    ~CachedDistanceMap()
+  }
+
+  CachedDistanceMap&
+  operator=(const CachedDistanceMap &other)
+  {
+    if(distances_)
     {
-      if(distances_)
+      for(int i=0; i<=cell_radius_+1; i++)
+        delete[] distances_[i];
+      delete[] distances_;
+    }
+
+    distances_ = NULL;
+    scale_     = other.scale_;
+    max_dist_  = other.max_dist_;
+
+    cell_radius_ = other.cell_radius_;
+    distances_ = new double *[cell_radius_+2];
+    for(int i=0; i<=cell_radius_+1; i++)
+    {
+      distances_[i] = new double[cell_radius_+2];
+      for(int j=0; j<=cell_radius_+1; j++)
       {
-	for(int i=0; i<=cell_radius_+1; i++)
-	  delete[] distances_[i];
-	delete[] distances_;
+        distances_[i][j] = other.distances_[i][j];
       }
     }
-    double** distances_;
-    double scale_;
-    double max_dist_;
-    int cell_radius_;
+
+    return *this;
+  }
+
+  double** distances_;
+  double scale_;
+  double max_dist_;
+  int cell_radius_;
 };
 
 
