@@ -270,7 +270,6 @@ KatanaControllerKni::move_to(float x, float y, float z, float phi, float theta, 
     throw fawkes::KatanaNoSolutionException("KNI NoSolutionException:%s", e.what());
   } catch (/*KNI*/::Exception &e) {
     throw fawkes::Exception("KNI Exception:%s", e.what());
-    return;
   }
 
   for(short i=0; i<katana_->getNumberOfMotors(); ++i) {

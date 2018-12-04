@@ -440,8 +440,8 @@ KatanaGotoOpenRaveThread::plan_target()
   }
 
   // Run planner
-  float sampling = 0.04f; //maybe catch from config? or "learning" depending on performance?
   try {
+	  float sampling = 0.04f; //maybe catch from config? or "learning" depending on performance?
     _openrave->run_planner(OR_robot_, sampling);
   } catch (fawkes::Exception &e) {
     _logger->log_warn("KatanaGotoThread", "Planner failed (ignoring): %s", e.what());
