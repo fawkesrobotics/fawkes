@@ -26,6 +26,8 @@
 #include "arm.h"
 #include "types.h"
 
+#include <memory>
+
 namespace KinDrv {
   class JacoArm;
 }
@@ -60,7 +62,7 @@ class JacoArmKindrv : public JacoArm
   virtual void goto_retract();
 
  private:
-  KinDrv::JacoArm  *arm_;
+	std::unique_ptr<KinDrv::JacoArm> arm_;
 
   fawkes::jaco_target_type_t target_type_;
   bool final_;
