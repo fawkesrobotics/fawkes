@@ -24,10 +24,12 @@
 #define _FIREVISION_APPS_BASE_AQT_VISION_THREADS_H_
 
 #include <core/threading/thread_list.h>
+#include <utils/time/time.h>
+
+#include <memory>
 
 namespace fawkes {
   class Clock;
-  class Time;
   class Barrier;
 }
 
@@ -60,14 +62,14 @@ class FvAqtVisionThreads
   bool  has_waiting_thread(fawkes::Thread *t);
 
  private:
-  fawkes::ThreadList  *running_threads_cyclic;
-  fawkes::ThreadList  *running_threads_cont;
-  fawkes::ThreadList  *waiting_threads;
+  fawkes::ThreadList  running_threads_cyclic;
+  fawkes::ThreadList  running_threads_cont;
+  fawkes::ThreadList  waiting_threads;
 
-  fawkes::Barrier     *cyclic_barrier;
+	std::unique_ptr<fawkes::Barrier> cyclic_barrier;
 
   fawkes::Clock *clock;
-  fawkes::Time  *_empty_time;
+  fawkes::Time  _empty_time;
 };
 
 #endif
