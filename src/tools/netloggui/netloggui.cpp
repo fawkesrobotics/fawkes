@@ -87,14 +87,14 @@ NetLogGuiGtkWindow::on_connection_clicked()
 {
   ServiceChooserDialog ssd(*this);
   if (ssd.run() ) {
-    struct sockaddr_in saddr;
-    socklen_t saddr_size = sizeof(struct sockaddr_in);
-    Glib::ustring name, hostname;
-    unsigned short int port = 1910;
-    std::list<std::string> txt;
     int page = -1;
 
     try {
+	    Glib::ustring name, hostname;
+	    std::list<std::string> txt;
+	    unsigned short int port = 1910;
+	    struct sockaddr_in saddr;
+	    socklen_t saddr_size = sizeof(struct sockaddr_in);
       ssd.get_selected_service (name, hostname, port);
       ssd.get_raw_address((struct sockaddr *)&saddr, saddr_size);
       NetworkService *service = new NetworkService(name.c_str(), "_fawkes._tcp", "",
