@@ -140,8 +140,11 @@ main(int argc, char **argv)
     exit(0);
   } else if ( argp.has_arg("n") ) {
     char *net_string = strdup(argp.arg("n"));
-    char *image_id = NULL, *host = NULL, *port = NULL, *save_ptr = NULL;
-    int port_num = 2208;
+    char *image_id;
+    char *host = NULL;
+    char *port = NULL;
+    char *save_ptr = NULL;
+    int   port_num = 2208;
     char *hostport;
 
     hostport = strtok_r(net_string, "/", &save_ptr);
