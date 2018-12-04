@@ -24,12 +24,10 @@
 #define _PLUGINS_ROOMBA_ROOMBA_500_H_
 
 #include <core/plugin.h>
+#include <core/threading/mutex.h>
 
-#include <stdint.h>
-
-namespace fawkes {
-  class Mutex;
-}
+#include <cstdint>
+#include <string>
 
 class Roomba500
 {
@@ -450,7 +448,7 @@ class Roomba500
   ConnectionType  get_connection_type() const { return conntype_; }
   /** Get device string.
    * @return device string */
-  const char * get_device() const { return device_; }
+	std::string get_device() const { return device_; }
 
   /** Get current mode.
    * @return current mode. */
@@ -521,12 +519,12 @@ class Roomba500
   bool                  sensors_enabled_;
   SensorPacketGroupAll  sensor_packet_;
   bool                  sensor_packet_received_;
-  fawkes::Mutex        *sensor_mutex_;
+  mutable fawkes::Mutex sensor_mutex_;
 
-  char                 *device_;
+	std::string           device_;
   int                   fd_;
-  fawkes::Mutex        *read_mutex_;
-  fawkes::Mutex        *write_mutex_;
+  fawkes::Mutex         read_mutex_;
+  fawkes::Mutex         write_mutex_;
 
   unsigned char         obuffer_[16];
   unsigned char         ibuffer_[82];

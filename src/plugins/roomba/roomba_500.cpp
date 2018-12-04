@@ -23,7 +23,6 @@
 #include "roomba_500.h"
 
 #include <core/exceptions/system.h>
-#include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 
 #include <cstring>
@@ -239,7 +238,8 @@ typedef struct {
  * @param flags ConnectionFlags constants, joined with bit-wise "or" (|).
  */
 Roomba500::Roomba500(Roomba500::ConnectionType conntype, const char *device,
-		     unsigned int flags)
+                     unsigned int flags)
+: device_(device)
 {
   conntype_   = conntype;
   conn_flags_ = flags;
@@ -253,21 +253,7 @@ Roomba500::Roomba500(Roomba500::ConnectionType conntype, const char *device,
   packet_id_ = SENSPACK_GROUP_ALL;
   sensors_enabled_ = false;
 
-  device_ = strdup(device);
-
-  sensor_mutex_ = new Mutex();
-  read_mutex_   = new Mutex();
-  write_mutex_  = new Mutex();
-
-  try {
-    open();
-  } catch (Exception &e) {
-    free(device_);
-    delete write_mutex_;
-    delete read_mutex_;
-    delete sensor_mutex_;
-    throw;
-  }
+  open();
 }
 
 
@@ -275,10 +261,6 @@ Roomba500::Roomba500(Roomba500::ConnectionType conntype, const char *device,
 Roomba500::~Roomba500()
 {
   close();
-  free(device_);
-  delete write_mutex_;
-  delete read_mutex_;
-  delete sensor_mutex_;
 }
 
 
@@ -289,9 +271,9 @@ Roomba500::open()
   if (conntype_ == CONNTYPE_SERIAL) {
     struct termios param;
 
-    fd_ = ::open(device_, O_NOCTTY | O_RDWR);
+    fd_ = ::open(device_.c_str(), O_NOCTTY | O_RDWR);
     if (fd_ == -1) {
-      throw CouldNotOpenFileException(device_, errno, "Cannot open device file");
+      throw CouldNotOpenFileException(device_.c_str(), errno, "Cannot open device file");
     }
 
     if (tcgetattr(fd_, &param) == -1) {
@@ -367,7 +349,7 @@ Roomba500::open()
     flags = IREQ_CACHE_FLUSH;
     ii = (inquiry_info*)malloc(max_rsp * sizeof(inquiry_info));
 
-    if (strcmp(device_, "") == 0) {
+    if (device_.empty()) {
       // we simply guess from the device class
 
       num_rsp = hci_inquiry(dev_id, len, max_rsp, NULL, &ii, flags);
@@ -409,20 +391,19 @@ Roomba500::open()
 	    // found a device which is likely a 
 	    ba2str(&(ii+i)->bdaddr, addrstr);
 	    //printf("found A: %s  %s\n", addrstr, name);
-	    free(device_);
-	    device_ = strdup(addrstr);
+	    device_ = addrstr;
 	    bacpy(&baddr, &(ii+i)->bdaddr);
 	    break;
 	  }
 	}
       }
     } else {
-      bool is_bdaddr = (bachk(device_) == 0);
+	    bool is_bdaddr = (bachk(device_.c_str()) == 0);
 
       if (is_bdaddr) {
 	//printf("Match by bdaddr\n");
 
-	str2ba(device_, &baddr);
+	str2ba(device_.c_str(), &baddr);
 	ba2str(&baddr, addrstr);
 
 	//printf("found B: %s  %s\n", addrstr, name);
@@ -443,11 +424,10 @@ Roomba500::open()
 	  {
 	    strcpy(name, "[unknown]");
 	  }
-	  if (fnmatch(device_, name, FNM_NOESCAPE) == 0) {
+	  if (fnmatch(device_.c_str(), name, FNM_NOESCAPE) == 0) {
 	    // found the device
 	    //printf("found C: %s  %s\n", addrstr, name);
-	    free(device_);
-	    device_ = strdup(addrstr);
+	    device_ = addrstr;
 	    bacpy(&baddr, &(ii+i)->bdaddr);
 	    break;
 	  }
@@ -679,25 +659,25 @@ Roomba500::read_sensors()
   }
 
   bool done = false;
-  unsigned int skipped = 0;
+  //unsigned int skipped = 0;
   while (!done) {
     ibuffer_length_ = 0;
 
     recv(ibuffer_length_, 1);
     if (ibuffer_[0] != 19) {
-      ++skipped;
+	    //++skipped;
       continue;
     }
 
     recv(ibuffer_length_, 1);
     if (ibuffer_[1] != packet_length_ + 1) {
-      ++skipped;
+	    //++skipped;
       continue;
     }
 
     recv(ibuffer_length_, 1);
     if (ibuffer_[2] != packet_id_) {
-      ++skipped;
+	    //++skipped;
       continue;
     }
 
@@ -713,10 +693,10 @@ Roomba500::read_sensors()
     if ((sum & 0xFF) != 0) {
       sensor_packet_received_ = false;
     } else {
-      sensor_mutex_->lock();
+      sensor_mutex_.lock();
       memcpy(&sensor_packet_, &ibuffer_[3], sizeof(SensorPacketGroupAll));
       sensor_packet_received_ = true;
-      sensor_mutex_->unlock();
+      sensor_mutex_.unlock();
     }
 
     done = true;
@@ -790,13 +770,13 @@ Roomba500::query_sensors()
   sensor_packet_received_ = true;
 
 
-  read_mutex_->lock();
+  read_mutex_.lock();
   recv(0, packet_length_);
-  read_mutex_->unlock();
+  read_mutex_.unlock();
 
-  sensor_mutex_->lock();
+  sensor_mutex_.lock();
   memcpy(&sensor_packet_, ibuffer_, sizeof(SensorPacketGroupAll));
-  sensor_mutex_->unlock();
+  sensor_mutex_.unlock();
 }
 
 
