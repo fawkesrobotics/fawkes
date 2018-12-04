@@ -69,8 +69,9 @@ class SkillShellThread : public Thread, public FawkesNetworkClientHandler
   /** Constructor.
    * @param argp argument parser
    */
-  SkillShellThread(ArgumentParser *argp)
-    : Thread("SkillShellThread", Thread::OPMODE_CONTINUOUS)
+	explicit
+	SkillShellThread(ArgumentParser *argp)
+	: Thread("SkillShellThread", Thread::OPMODE_CONTINUOUS)
   {
     this->argp = argp;
     prompt = "-# ";
@@ -132,7 +133,7 @@ class SkillShellThread : public Thread, public FawkesNetworkClientHandler
       }
 
       if ( argp->num_items() > 0 ) {
-	std::string sks = "";
+	std::string sks;
 	const std::vector< const char * > & items = argp->items();
 
 	std::vector< const char * >::const_iterator i = items.begin();
@@ -149,9 +150,7 @@ class SkillShellThread : public Thread, public FawkesNetworkClientHandler
 	usleep(100000);
 	exit();
       } else {
-	char *line = NULL;
-
-	line = readline(prompt);
+	char *line = readline(prompt);
 	if ( line ) {
 	  if (strcmp(line, "") != 0) {
 
