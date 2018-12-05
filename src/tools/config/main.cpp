@@ -23,6 +23,8 @@
 #include <netcomm/fawkes/client.h>
 #include <config/netconf.h>
 #include <config/change_handler.h>
+#include <config/sqlite.h>
+#include <config/yaml.h>
 #include <utils/system/argparser.h>
 #include <utils/system/signal.h>
 
@@ -30,6 +32,8 @@
 #include <cstring>
 #include <cstdlib>
 #include <cstdio>
+#include <fnmatch.h>
+#include <unistd.h>
 
 using namespace fawkes;
 
@@ -89,7 +93,11 @@ class ConfigChangeWatcherTool
   run()
   {
     while ( ! quit ) {
-      c->wait(FAWKES_CID_CONFIGMANAGER);
+	    if (c) {
+		    c->wait(FAWKES_CID_CONFIGMANAGER);
+	    } else {
+		    usleep(500000);
+	    }
     }
   }
 
@@ -229,11 +237,15 @@ print_usage(const char *program_name)
 	    << "    Erase default value for given path from config" << std::endl << std::endl
 	    << "and options is none, one or more of the following:" << std::endl << std::endl
 	    << "  -c   Show comments (only available with list and watch cmd)" << std::endl
-	    << "  -a   Show all values, even double if default and host-specific " << std::endl
-	    << "       values exist (only available with list)" << std::endl
-	    << "  -q   Quiet. Only show important output, suitable for parsing. " << std::endl
+	    << "  -a   Show all values, even double if default and host-specific" << std::endl
+	    << "       values exist (only available with list and -r)" << std::endl
+	    << "  -q   Quiet. Only show important output, suitable for parsing." << std::endl
 	    << "       (not supported for all commands yet) " << std::endl
-	    << "  -r host[:port]  Remote host (and optionally port) to connect to\n" << std::endl
+      << std::endl
+	    << "You may use one of the following options where to retrieve the config from." << std::endl
+	    << "The default is '-r localhost'.\n" << std::endl
+	    << "  -r host[:port]  Remote host (and optionally port) to connect to" << std::endl
+	    << "  -f file         Config file (relative to CONFDIR) to load" << std::endl
 	    << std::endl;
 }
 
@@ -244,7 +256,7 @@ print_usage(const char *program_name)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "+hcar:q");
+  ArgumentParser argp(argc, argv, "+hcar:qf:");
 
   if ( argp.has_arg("h") ) {
     print_usage(argv[0]);
@@ -257,6 +269,11 @@ main(int argc, char **argv)
     argp.parse_hostport("r", host, port);
   }
 
+  std::string config_file;
+  if (argp.has_arg("f")) {
+	  config_file = argp.arg("f");
+  }
+  
   bool quiet;
   if ( argp.has_arg("q") ) {
     quiet = true;
@@ -264,16 +281,32 @@ main(int argc, char **argv)
     quiet = false;
   }
 
-  FawkesNetworkClient *c = new FawkesNetworkClient(host.c_str(), port);
-  try {
-    c->connect();
-  } catch( Exception &e ) {
-    printf("Could not connect to host: %s\n", host.c_str());
-    exit(1);
+  FawkesNetworkClient  *c = NULL;
+  NetworkConfiguration *netconf = NULL;
+  Configuration        *config;
+
+  if (config_file.empty()) {
+	  c = new FawkesNetworkClient(host.c_str(), port);
+	  try {
+		  c->connect();
+	  } catch( Exception &e ) {
+		  printf("Could not connect to host: %s\n", host.c_str());
+		  exit(1);
+	  }
+
+	  netconf = new NetworkConfiguration(c);
+	  config  = netconf;
+  } else {
+	  if (fnmatch("*.sql", config_file.c_str(), FNM_PATHNAME) == 0)
+	  {
+		  config = new SQLiteConfiguration(CONFDIR);
+	  } else {
+		  config = new YamlConfiguration(CONFDIR);
+	  }
+
+	  config->load(config_file.c_str());
   }
-
-  NetworkConfiguration *netconf = new NetworkConfiguration(c);
-
+  
   const std::vector< const char* > & args = argp.items();
 
   if ( args.size() == 0) {
@@ -285,7 +318,7 @@ main(int argc, char **argv)
       if( ! quiet ) {
 	printf("Requesting value %s\n", args[1]);
       }
-      Configuration::ValueIterator *i = netconf->get_value(args[1]);
+      Configuration::ValueIterator *i = config->get_value(args[1]);
       if ( i->next() ) {
 	if( quiet ) {
 	  print_value(i);
@@ -306,7 +339,7 @@ main(int argc, char **argv)
     if (args.size() >= 3) {
       // we have at least "set path value"
       printf("Requesting old value for %s\n", args[1]);
-      Configuration::ValueIterator *i = netconf->get_value(args[1]);
+      Configuration::ValueIterator *i = config->get_value(args[1]);
       print_header();
       printf("OLD:\n");
       if ( i->next() ) {
@@ -338,9 +371,9 @@ main(int argc, char **argv)
 	    printf("ERROR: '%s' is not a float\n", args[2]);
 	  } else {
 	    if ( ! set_def ) {
-	      netconf->set_float(args[1], f);
+	      config->set_float(args[1], f);
 	    } else {
-	      netconf->set_default_float(args[1], f);
+	      config->set_default_float(args[1], f);
 	    }
 	  }
 	} else if ( (desired_type == "unsigned int") || (desired_type == "uint") ) {
@@ -350,9 +383,9 @@ main(int argc, char **argv)
 	    printf("ERROR: '%s' is not an unsigned int\n", args[2]);
 	  } else {
 	    if ( ! set_def ) {
-	      netconf->set_uint(args[1], li);
+	      config->set_uint(args[1], li);
 	    } else {
-	      netconf->set_default_uint(args[1], li);
+	      config->set_default_uint(args[1], li);
 	    }
 	  }
 	} else if ( desired_type == "int" ) {
@@ -362,9 +395,9 @@ main(int argc, char **argv)
 	    printf("ERROR: '%s' is not an int\n", args[2]);
 	  } else {
 	    if ( ! set_def ) {
-	      netconf->set_int(args[1], li);
+	      config->set_int(args[1], li);
 	    } else {
-	      netconf->set_default_int(args[1], li);
+	      config->set_default_int(args[1], li);
 	    }
 	  }
 	} else if ( desired_type == "bool" ) {
@@ -381,16 +414,16 @@ main(int argc, char **argv)
 	  }
 	  if (valid) {
 	    if ( ! set_def ) {
-	      netconf->set_bool(args[1], b);
+	      config->set_bool(args[1], b);
 	    } else {
-	      netconf->set_default_bool(args[1], b);
+	      config->set_default_bool(args[1], b);
 	    }
 	  }
 	} else if ( desired_type == "string" ) {
 	  if ( ! set_def ) {
-	    netconf->set_string(args[1], args[2]);
+	    config->set_string(args[1], args[2]);
 	  } else {
-	    netconf->set_default_string(args[1], args[2]);
+	    config->set_default_string(args[1], args[2]);
 	  }
 	} else {
 	  printf("Invalid type: %s\n", desired_type.c_str());
@@ -399,7 +432,7 @@ main(int argc, char **argv)
 	delete i;
 
 	printf("NEW:\n");
-	i = netconf->get_value(args[1]);
+	i = config->get_value(args[1]);
 	if ( i->next() ) {
 	  print_line(i);
 	} else {
@@ -418,9 +451,9 @@ main(int argc, char **argv)
       // we have at least "set_comment path value"
 
       if ( ! set_def ) {
-	netconf->set_comment(args[1], args[2]);
+	config->set_comment(args[1], args[2]);
       } else {
-	netconf->set_default_comment(args[1], args[2]);
+	config->set_default_comment(args[1], args[2]);
       }
 
     } else {
@@ -431,7 +464,7 @@ main(int argc, char **argv)
     if (args.size() == 2) {
       printf("Erasing %svalue %s\n", (erase_def ? "default " : ""), args[1]);
       bool found = false;
-      Configuration::ValueIterator *i = netconf->get_value(args[1]);
+      Configuration::ValueIterator *i = config->get_value(args[1]);
       if ( i->next() ) {
 	print_header();
 	print_line(i);
@@ -442,11 +475,11 @@ main(int argc, char **argv)
       delete i;
       if ( found ) {
 	if ( erase_def ) {
-	  netconf->erase_default(args[1]);
+	  config->erase_default(args[1]);
 	} else {
-	  netconf->erase(args[1]);
+	  config->erase(args[1]);
 	}
-	i = netconf->get_value(args[1]);
+	i = config->get_value(args[1]);
 	if ( i->next() ) {
 	  printf("Failed to erase %s (default vs. non-default?)\n", args[1]);
 	} else {
@@ -459,69 +492,75 @@ main(int argc, char **argv)
       printf("You must supply path argument\n");
     }
   } else if (strcmp("watch", args[0]) == 0) {
-    try {
-      netconf->set_mirror_mode(true);
-    } catch (Exception &e) {
-      e.print_trace();
-      return -1;
-    }
+	  if (netconf) {
+		  try {
+			  netconf->set_mirror_mode(true);
+		  } catch (Exception &e) {
+			  e.print_trace();
+			  return -1;
+		  }
+	  }
     print_header();
-    netconf->lock();
-    Configuration::ValueIterator *i = netconf->iterator();
+    config->lock();
+    Configuration::ValueIterator *i = config->iterator();
     while ( i->next() ) {
       print_line(i, argp.has_arg("c"));
     }
     delete i;
-    netconf->unlock();
+    config->unlock();
     printf("------------------------------------------------------------------------------------\n");
     printf("Modifications since watching:\n");
     printf("------------------------------------------------------------------------------------\n");
-    ConfigChangeWatcherTool ccwt(netconf, c);
+    ConfigChangeWatcherTool ccwt(config, c);
     ccwt.run();
   } else if (strcmp("list", args[0]) == 0) {
-    printf("Transmitting config from host... ");
-    fflush(stdout);
-    try {
-      netconf->set_mirror_mode(true);
-    } catch (Exception &e) {
-      e.print_trace();
-      return -1;
+	  if (netconf) {
+		  try {
+			  printf("Transmitting config from host... ");
+		    fflush(stdout);
+		    netconf->set_mirror_mode(true);
+		    printf("done\n");
+	    } catch (Exception &e) {
+		    printf("failed\n");
+		    e.print_trace();
+		    return -1;
+	    }
     }
-    netconf->lock();
-    printf("done\n");
+    config->lock();
     print_header();
     bool show_comments = argp.has_arg("c");
-    if (argp.has_arg("a")) {
+    if (argp.has_arg("a") && netconf) {
       printf("DEFAULT ENTRIES\n");
       Configuration::ValueIterator *i = netconf->iterator_default();
       while ( i->next() ) {
-	print_line(i, show_comments);
+	      print_line(i, show_comments);
       }
       delete i;
       printf("HOST-SPECIFIC ENTRIES\n");
       i = netconf->iterator_hostspecific();
       while ( i->next() ) {
-	print_line(i, show_comments);
+	      print_line(i, show_comments);
       }
       delete i;
     } else {
-      Configuration::ValueIterator *i = netconf->iterator();
+      Configuration::ValueIterator *i = config->iterator();
       while ( i->next() ) {
 	print_line(i, show_comments);
       }
       delete i;
     }
-    netconf->unlock();
+    config->unlock();
   }
 
   if( ! quiet ) {
     printf("Cleaning up... ");
   }
   fflush(stdout);
-  delete netconf;
-  c->disconnect();
-
-  delete c;
+  delete config;
+  if (c) {
+	  c->disconnect();
+	  delete c;
+  }
   if( ! quiet ) {
     printf("done\n");
   }
