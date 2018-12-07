@@ -24,7 +24,6 @@
 #ifndef _PLUGIN_MANAGER_H_
 #define _PLUGIN_MANAGER_H_
 
-#include <netcomm/fawkes/handler.h>
 #include <core/utils/lock_list.h>
 #include <core/utils/lock_map.h>
 #include <config/change_handler.h>

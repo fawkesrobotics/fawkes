@@ -30,13 +30,10 @@
 #include <config/config.h>
 #include <utils/time/clock.h>
 #include <utils/time/wait.h>
-#include <netcomm/fawkes/network_manager.h>
-#include <blackboard/local.h>
 
 #include <aspect/manager.h>
 #include <plugin/manager.h>
 #include <plugin/loader.h>
-#include <plugin/net/handler.h>
 
 #include <cstdio>
 #include <cstring>

@@ -28,25 +28,35 @@
 
 #include <core/threading/thread.h>
 
-#include <blackboard/local.h>
+#ifdef HAVE_BLACKBOARD
+#  include <blackboard/local.h>
+#endif
 #include <config/sqlite.h>
 #include <config/yaml.h>
-#include <config/net_handler.h>
+#ifdef HAVE_CONFIG_NETWORK_HANDLER
+#  include <config/net_handler.h>
+#endif
 #include <utils/ipc/shm.h>
 #include <utils/system/argparser.h>
 #include <logging/multi.h>
 #include <logging/console.h>
 #include <logging/liblogger.h>
 #include <logging/factory.h>
-#include <network_logger/network_logger.h>
+#ifdef HAVE_NETWORK_LOGGER
+#  include <network_logger/network_logger.h>
+#endif
 #ifdef HAVE_LOGGING_FD_REDIRECT
 #  include <logging/fd_redirect.h>
 #endif
 #include <utils/time/clock.h>
 #include <utils/time/time.h>
-#include <netcomm/fawkes/network_manager.h>
+#ifdef HAVE_NETWORK_MANAGER
+#  include <netcomm/fawkes/network_manager.h>
+#endif
 #include <plugin/manager.h>
-#include <plugin/net/handler.h>
+#ifdef HAVE_PLUGIN_NETWORK_HANDLER
+#  include <plugin/net/handler.h>
+#endif
 #include <aspect/manager.h>
 #include <syncpoint/syncpoint_manager.h>
 #ifdef HAVE_TF
@@ -66,7 +76,11 @@
 #include <fnmatch.h>
 
 namespace fawkes {
-  namespace runtime {
+
+class BlackBoard;
+class FawkesNetworkManager;
+
+namespace runtime {
 
 ArgumentParser            * argument_parser = NULL;
 FawkesMainThread          * main_thread = NULL;
@@ -342,6 +356,7 @@ init(const InitOptions& options, int & retval)
 	  logger->log_info("FawkesMainThread", "Listening on IPv6 address %s", listen_ipv4.c_str());
   }
   
+#ifdef HAVE_BLACKBOARD
   // *** Setup blackboard
   std::string bb_magic_token = "";
   unsigned int bb_size = 2097152;
@@ -363,7 +378,7 @@ init(const InitOptions& options, int & retval)
   // Cleanup stale BlackBoard shared memory segments if requested
   if ( options.bb_cleanup()) {
     LocalBlackBoard::cleanup(bb_magic_token.c_str(),
-			     /* output with lister? */ true);
+                             /* output with lister? */ true);
     SharedMemoryRegistry::cleanup();
   }
 
@@ -374,6 +389,7 @@ init(const InitOptions& options, int & retval)
     lbb = new LocalBlackBoard(bb_size, bb_magic_token.c_str());
   }
   blackboard = lbb;
+#endif
 
 #ifdef HAVE_TF
   tf_transformer     = new tf::Transformer();
@@ -389,26 +405,34 @@ init(const InitOptions& options, int & retval)
 					 "/fawkes/meta_plugins/",
 					 options.plugin_module_flags(),
 					 options.init_plugin_cache());
+#ifdef HAVE_NETWORK_MANAGER
   network_manager    = new FawkesNetworkManager(thread_manager,
                                                 enable_ipv4, enable_ipv6,
                                                 listen_ipv4, listen_ipv6,
                                                 net_tcp_port,
                                                 net_service_name.c_str());
+#  ifdef HAVE_CONFIG_NETWORK_HANDLER
   nethandler_config  = new ConfigNetworkHandler(config,
-						network_manager->hub());
-
+                                                network_manager->hub());
+#  endif
+#  ifdef HAVE_PLUGIN_NETWORK_HANDLER
   nethandler_plugin  = new PluginNetworkHandler(plugin_manager,
-						network_manager->hub());
+                                                network_manager->hub());
   nethandler_plugin->start();
-
+#  endif
+#  ifdef HAVE_NETWORK_LOGGER
   network_logger = new NetworkLogger(network_manager->hub(),
-				     logger->loglevel());
+                                     logger->loglevel());
   logger->add_logger(network_logger);
+#  endif
+#endif
 
   clock = Clock::instance();
   start_time = new Time(clock);
 
+#if defined(HAVE_NETWORK_MANAGER) && defined(HAVE_BLACKBOARD)
   lbb->start_nethandler(network_manager->hub());
+#endif
 
 
   // *** Create main thread, but do not start, yet
@@ -420,16 +444,24 @@ init(const InitOptions& options, int & retval)
                                              options.default_plugin());
 
   aspect_manager->register_default_inifins(blackboard,
-					   thread_manager->aspect_collector(),
-					   config, logger, clock,
-					   network_manager->hub(),
-					   main_thread, logger,
-					   thread_manager,
-					   network_manager->nnresolver(),
-					   network_manager->service_publisher(),
-					   network_manager->service_browser(),
-					   plugin_manager, tf_transformer,
-					   syncpoint_manager);
+                                           thread_manager->aspect_collector(),
+                                           config, logger, clock,
+#ifdef HAVE_NETWORK_MANAGER
+                                           network_manager->hub(),
+#else
+                                           NULL,
+#endif
+                                           main_thread, logger,
+                                           thread_manager,
+#ifdef HAVE_NETWORK_MANAGER
+                                           network_manager->nnresolver(),
+                                           network_manager->service_publisher(),
+                                           network_manager->service_browser(),
+#else
+                                           NULL, NULL, NULL,
+#endif
+                                           plugin_manager, tf_transformer,
+                                           syncpoint_manager);
 
   retval = 0;
   return true;
@@ -442,31 +474,43 @@ cleanup()
     fawkes::daemon::cleanup();
   }
 
+#ifdef HAVE_PLUGIN_NETWORK_HANDLER
   if (nethandler_plugin) {
     nethandler_plugin->cancel();
     nethandler_plugin->join();
   }
+#endif
 
+#ifdef HAVE_NETWORK_LOGGER
   if (logger) {
     // Must delete network logger first since network manager
     // has to die before the LibLogger is finalized.
     logger->remove_logger(network_logger);
     delete network_logger;
   }
+#endif
 
+#ifdef HAVE_CONFIG_NETWORK_HANDLER
   delete nethandler_config;
+#endif
+#ifdef HAVE_PLUGIN_NETWORK_HANDLER
   delete nethandler_plugin;
+#endif
   delete plugin_manager;
   delete main_thread;
 #ifdef HAVE_TF
   delete tf_listener;
   delete tf_transformer;
 #endif
+#ifdef HAVE_BLACKBOARD
   delete blackboard;
+#endif
   delete config;
   delete argument_parser;
   delete init_options;
+#ifdef HAVE_NETWORK_MANAGER
   delete network_manager;
+#endif
   delete thread_manager;
   delete aspect_manager;
   delete shm_registry;
