@@ -30,10 +30,10 @@
 #include <aspect/pointcloud.h>
 #include <plugins/ros/aspect/ros.h>
 
-#include <hybris_c1_msgs/MergePointClouds.h>
-#include <hybris_c1_msgs/RetrievePointCloud.h>
-#include <hybris_c1_msgs/StorePointCloud.h>
-#include <hybris_c1_msgs/RecordData.h>
+#include <fawkes_msgs/MergePointClouds.h>
+#include <fawkes_msgs/RetrievePointCloud.h>
+#include <fawkes_msgs/StorePointCloud.h>
+#include <fawkes_msgs/RecordData.h>
 
 namespace fawkes {
   class PclDatabaseMergeInterface;
@@ -65,14 +65,14 @@ class PointCloudDBROSCommThread
   virtual void finalize();
 
  private:
-  bool merge_cb(hybris_c1_msgs::MergePointClouds::Request  &req,
-		hybris_c1_msgs::MergePointClouds::Response &resp);
-  bool retrieve_cb(hybris_c1_msgs::RetrievePointCloud::Request  &req,
-		   hybris_c1_msgs::RetrievePointCloud::Response &resp);
-  bool store_cb(hybris_c1_msgs::StorePointCloud::Request  &req,
-		hybris_c1_msgs::StorePointCloud::Response &resp);
-  bool record_cb(hybris_c1_msgs::RecordData::Request  &req,
-		 hybris_c1_msgs::RecordData::Response &resp);
+  bool merge_cb(fawkes_msgs::MergePointClouds::Request  &req,
+                fawkes_msgs::MergePointClouds::Response &resp);
+  bool retrieve_cb(fawkes_msgs::RetrievePointCloud::Request  &req,
+                   fawkes_msgs::RetrievePointCloud::Response &resp);
+  bool store_cb(fawkes_msgs::StorePointCloud::Request  &req,
+                fawkes_msgs::StorePointCloud::Response &resp);
+  bool record_cb(fawkes_msgs::RecordData::Request  &req,
+                 fawkes_msgs::RecordData::Response &resp);
 
 
  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
