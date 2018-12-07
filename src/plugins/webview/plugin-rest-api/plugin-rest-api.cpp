@@ -102,7 +102,7 @@ PluginRestApi::cb_list_plugins()
 }
 
 PluginOpResponse
-PluginRestApi::cb_set_plugin_state(PluginOpRequest request, WebviewRestParams &params)
+PluginRestApi::cb_set_plugin_state(PluginOpRequest &request, WebviewRestParams &params)
 {
 	std::string plugin = params.path_arg("name");
 

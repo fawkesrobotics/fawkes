@@ -257,7 +257,7 @@ class WebviewRestApi
 	template <class O, class I>
 	void
 	add_handler(WebRequest::Method method, std::string path,
-		            std::function<O (I, WebviewRestParams &)> handler)
+		            std::function<O (I &, WebviewRestParams &)> handler)
 	{
 		add_handler(method, path,
 		            [this, handler](const std::string &body, WebviewRestParams& m)

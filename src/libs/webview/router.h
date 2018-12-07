@@ -54,7 +54,7 @@ class WebviewRouter
 	find_handler(const WebRequest *request, std::map<std::string, std::string>& path_args)
 	{
 		auto ri = std::find_if(routes_.begin(), routes_.end(),
-		                       [this, &path_args, request](auto r) -> bool {
+		                       [this, &path_args, request](auto &r) -> bool {
 			                       //printf("Comparing %s to %s\n", request->url().c_str(), std::get<2>(r).c_str());
 			                       return (std::get<1>(r) == request->method() &&
 			                               this->path_match(request->url(), std::get<3>(r), path_args));
@@ -78,7 +78,7 @@ class WebviewRouter
 	             std::map<std::string, std::string>& path_args)
 	{
 		auto ri = std::find_if(routes_.begin(), routes_.end(),
-		                       [this, &path_args, &method, &path](auto r) -> bool {
+		                       [this, &path_args, &method, &path](auto &r) -> bool {
 			                       return (std::get<1>(r) == method &&
 			                               this->path_match(path, std::get<3>(r), path_args));
 		                       });
@@ -103,7 +103,7 @@ class WebviewRouter
 	add(WebRequest::Method method, const std::string &path, T handler, int weight)
 	{
 		auto ri = std::find_if(routes_.begin(), routes_.end(),
-		                       [this, method, &path, &weight](auto r) -> bool {
+		                       [this, method, &path, &weight](auto &r) -> bool {
 			                       return (std::get<0>(r) == weight &&
 			                               std::get<1>(r) == method &&
 			                               std::get<2>(r) == path);
@@ -139,7 +139,7 @@ class WebviewRouter
 	remove(WebRequest::Method method, const std::string &path)
 	{
 		auto ri = std::find_if(routes_.begin(), routes_.end(),
-		                       [this, method, &path](auto r) -> bool {
+		                       [this, method, &path](auto &r) -> bool {
 			                       return (std::get<1>(r) == method &&
 			                               std::get<2>(r) == path);
 		                       });

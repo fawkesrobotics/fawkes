@@ -52,7 +52,7 @@ class PluginRestApi
 
  private:
 	WebviewRestArray<::Plugin> cb_list_plugins();
-	PluginOpResponse cb_set_plugin_state(PluginOpRequest request,
+	PluginOpResponse cb_set_plugin_state(PluginOpRequest &request,
 	                                     fawkes::WebviewRestParams &params);
 
  private:
