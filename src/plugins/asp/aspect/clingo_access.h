@@ -92,6 +92,9 @@ public:
 	bool assign_external(const Clingo::Symbol& atom, const Clingo::TruthValue value);
 	bool release_external(const Clingo::Symbol& atom);
 
+	DebugLevel_t debug_level() const;
+	void         set_debug_level(DebugLevel_t log_level);
+
 private:
 	bool on_model(Clingo::Model& model) override;
 	void on_finish(Clingo::SolveResult result) override;
