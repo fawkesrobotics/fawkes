@@ -337,7 +337,11 @@ main(int argc, char **argv)
 	  print_line(i);
 	}
       } else {
-	printf("No such value found!\n");
+	      if (!quiet) {
+		      printf("No such value found!\n");
+	      }
+	      delete i;
+	      return -2;
       }
       delete i;
     } else {
