@@ -189,7 +189,17 @@ void
 print_value(Configuration::ValueIterator *i, bool show_comment = false)
 {
   if ( i->is_list()) {
-    printf("%-14s\n", "LIST");
+    if ( i->is_uint() ) {
+	    for (const auto &v : i->get_uints())  printf("%u\n", v);
+    } else if ( i->is_int() ) {
+	    for (const auto &v : i->get_ints())  printf("%d\n", v);
+    } else if ( i->is_bool() ) {
+	    for (const auto &v : i->get_bools())  printf("%s\n", v ? "true" : "false");
+    } else if ( i->is_float() ) {
+	    for (const auto &v : i->get_floats())  printf("%f\n", v);
+    } else if ( i->is_string() ) {
+	    for (const auto &v : i->get_strings())  printf("%s\n", v.c_str());
+    }
   } else {
     if ( i->is_uint() ) {
       printf("%-14u\n", i->get_uint());
