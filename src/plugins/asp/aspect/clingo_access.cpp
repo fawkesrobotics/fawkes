@@ -503,6 +503,25 @@ ClingoAccess::num_threads(void) const noexcept
 	return num_threads_;
 }
 
+
+/** Get current debug level.
+ * @return current debug level
+ */
+ClingoAccess::DebugLevel_t
+ClingoAccess::debug_level() const
+{
+	return debug_level_.load();
+}
+
+/** Set debug level.
+ * @param log_level new debug level
+ */
+void
+ClingoAccess::set_debug_level(ClingoAccess::DebugLevel_t log_level)
+{
+	return debug_level_.store(log_level);
+}
+
 /** Returns a copy of the last symbols found.
  * @return copy of last symbols found
  */
