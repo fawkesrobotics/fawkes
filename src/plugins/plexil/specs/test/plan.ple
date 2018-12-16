@@ -3,117 +3,16 @@
 Command pprint(...);
 Command print(...);
 Command log_error(...);
+Command log_info(...);
 Command skill_call(...);
 Boolean Command say(String text);
-Boolean Command goto(String place);
-Integer Command pb_peer_create_local(String address, Integer send_port, Integer recv_port);
-String  Command pb_create(String msg_type);
-        Command pb_set_value(String msg_id, String field, Any value);
-Integer Command pb_get_int(String msg_id, String field);
-Real    Command pb_get_real(String msg_id, String field);
-Boolean Command pb_get_bool(String msg_id, String field);
-String  Command pb_get_string(String msg_id, String field);
-String  Command pb_tostring(String msg_id);
-        Command pb_broadcast(Integer peer_id, String msg_id);
-// ###  State declarations ###
-Boolean Lookup protobuf_incoming;
 Real    Lookup time;
 
 HelloWorld:
 {
-  String places[6] = #("C-BS-I" "C-CS1-I" "C-CS2-I" "C-RS1-I" "C-RS2-I" "C-DS");
-	Boolean continue = true;    // Repeat the HandleCommand node
-	Integer public_peer_id;
-
-	/*
-  Print: { pprint ("Hello World"); }
-  Log: { log_error ("Hello World"); }
+  Print: { pprint("Hello World"); }
+  Log: { log_error("Hello World"); }
   Delay1: Wait 2.0;
-  Say:
-	{
-		Boolean result;
-		EndCondition isKnown(result);
-		PostCondition result;
-    result = say("Hello World. This is a test with a longer sentence to make it actually wait some time.");
-	}
-	*/
-
-	/*
-	Say: SynchronousCommand say("This is a longer test sentence. Hello World. This is a test with a longer sentence to make it actually wait some time.");
-
-  for (Integer i = 0; i < arraySize(places); i + 1)
-  {
-		Goto: SynchronousCommand goto(places[i]);
-  }
-		*/
-
-  Setup:
-	{
-	  public_peer_id = pb_peer_create_local("127.0.0.1", 4445, 4444);
-	}
-
-	Run:
-	Concurrence
-	{
-		Integer seq = 0;
-
-		HandleCommand:
-		{
-			RepeatCondition continue;
-
-			ReceiveCommand:
-			OnCommand "llsf_msgs.BeaconSignal" (String msg_id, String from_host, Integer from_port, Real time_received)
-			{
-				pprint("Got", msg_id, from_host, from_port, time_received);
-			}
-		}
-
-/*
-		SendBeacon:
-		{
-			RepeatCondition continue;
-			SendMessage:
-			{
-				String msgid;
-				String msgstr;
-				Real now;
-				Integer now_sec;
-				Integer now_nsec;
-				String team_name;
-				Real   test_real;
-
-				now = Lookup(time, 1);
-				now_sec  = real_to_int(floor(now));
-				now_nsec = real_to_int(floor((now - now_sec) * 1000000000));
- 				seq = seq + 1;
-
-				msgid = pb_create("llsf_msgs.BeaconSignal");
-				pb_set_value(msgid, "number", 1);
-				pb_set_value(msgid, "seq", seq);
-				pb_set_value(msgid, "time.sec", now_sec);
-				pb_set_value(msgid, "time.nsec", now_nsec);
-				pb_set_value(msgid, "team_name", "Carologistics");
-				pb_set_value(msgid, "peer_name", "Plexil-1");
-				pb_set_value(msgid, "team_color", "CYAN");
-				pb_set_value(msgid, "test_val[]", 1.0);
-				pb_set_value(msgid, "test_val[]", 2.0);
-				pb_set_value(msgid, "test_val[0]", 3.0);
-				pb_set_value(msgid, "test_time[0].sec", now_sec);
-				pb_set_value(msgid, "test_time[0].nsec", now_nsec);
-				pb_set_value(msgid, "test_time[0].foo[]", 5.0);
-				pb_set_value(msgid, "test_time[0].foo[]", 6.0);
-				msgstr = pb_tostring(msgid);
-				pprint("Created message", msgid, msgstr);
-
-				team_name = pb_get_string(msgid, "team_name");
-				test_real = pb_get_real(msgid, "test_time[0].foo[1]");
-				pprint("Name:", team_name, test_real);
-
-				pb_broadcast(public_peer_id, msgid);
-			}
-
-			Wait 2.0;
-		}
-	*/
-	}
+  Say: SynchronousCommand say("Hello World");
+  SayComplete: { log_info("Say call completed"); }
 }
