@@ -100,9 +100,9 @@ plexil:
       - type: FawkesTimeAdapter
       - type: FawkesLoggingAdapter
       - type: BehaviorEngineAdapter
-      - type: ProtobufCommAdapter
-        attr:
-          protos: "@BASEDIR@/src/plugins/plexil/specs/test/msgs"
+      #- type: ProtobufCommAdapter
+      #  attr:
+      #    protos: "@BASEDIR@/src/plugins/plexil/specs/test/msgs"
       - type: GlobalState
         verbatim-args:
           - tag: DefaultLookupAdapter
