@@ -118,3 +118,59 @@ webview:
   explicit-404:
     - /metrics
     - /xmlrpc
+
+  # Dashboard configuration
+  # The dashboard is the front page. It supports showing charts and
+  # stats gathered via prometheus. The following is a basic set which
+  # works out-of-the-box on machines running prometheus, node_exporter,
+  # process-exporter, and mongodb-exporter.
+  dashboard:
+    charts:
+      - name: CPU
+        query: avg without (cpu)(irate(node_cpu{job="node",instance="localhost:9100",mode!="idle"}[5m]))
+        legend_format: ((mode))
+        y_tick_format: ".0%"
+        y_min: 0.0
+        y_max: 1.0
+      - name: Memory
+        query: namedprocess_namegroup_memory_bytes{memtype="resident"}
+        legend_format: ((groupname))
+        y_tick_format: bytes
+      - name: Per Thread CPU
+        query: sum by (threadname)(irate(namedprocess_namegroup_thread_cpu_seconds_total{groupname="fawkes",instance="localhost:9256",job="proc"}[5m]))
+        legend_format: ((threadname))
+        y_tick_format: ".1%"
+      - name: Network Traffic
+        queries:
+          - irate(node_network_receive_bytes{device="enp0s25"}[1m])
+          - irate(node_network_transmit_bytes{device="enp0s25"}[1m])
+        legend_formats:
+          - ((device)) read
+          - ((device)) write
+        y_tick_format: bytes/s
+      - name: MongoDB Operations
+        query: rate(mongodb_op_counters_total{}[1m])
+        legend_format: ((type))
+        remove_all_zero: false
+
+    stats:
+      - name: NTP Offset
+        unit: ms
+        factor: 1000
+        thresholds: [-10, -3, 3, 10]
+        query: 'node_ntp_offset_seconds{instance="localhost:9100"}'
+      - name: Mem Avail
+        unit: GB
+        divisor: 1073741824
+        thresholds: [3, 1]
+        query: 'node_memory_MemAvailable_bytes{instance="localhost:9100"}'
+      - name: SSD Avail
+        unit: GB
+        divisor: 1073741824
+        thresholds: [20, 10]
+        query: 'node_filesystem_avail_bytes{instance="localhost:9100",mountpoint="/"}'
+      - name: Swap Used
+        unit: '%'
+        factor: 100
+        thresholds: [10, 50]
+        query: '(node_memory_SwapTotal_bytes{instance="localhost:9100"} - node_memory_SwapFree_bytes{instance="localhost:9100"})/node_memory_SwapTotal_bytes{instance="localhost:9100"}'

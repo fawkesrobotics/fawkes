@@ -8,7 +8,7 @@
 	<mat-card-content class="promstat-card-content">
 		<div class="promstat-panel">
 			<div class="promstat-value">
-				<span [ngClass]="css_class">{{value}}</span>
+				<span [ngClass]="css_class" [matTooltip]="tooltip">{{value}}</span>
 			</div>
 		</div>
 	</mat-card-content>

@@ -21,21 +21,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loading = false;
   zero_message = 'No facts received.';
 
-  query_cpu =
-    'avg without (cpu)(irate(node_cpu_seconds_total{job="node",instance="localhost:9100",mode!="idle"}[5m]))';
-
-  query_threads = 'sum by (threadname)(irate(namedprocess_namegroup_thread_cpu_seconds_total{groupname="fawkes",' +
-    'instance="localhost:9256",job="proc"}[5m]))';
-
-  query_mem = 'namedprocess_namegroup_memory_bytes{memtype="resident"}';
-
-  query_ntp_offset = 'node_ntp_offset_seconds{instance="localhost:9100"}';
-  query_mem_avail = 'node_memory_MemAvailable_bytes{instance="localhost:9100"}';
-  query_ssd_avail = 'node_filesystem_avail_bytes{instance="localhost:9100",mountpoint="/"}';
-  query_swap_used = '(node_memory_SwapTotal_bytes{instance="localhost:9100"}-' +
-    'node_memory_SwapFree_bytes{instance="localhost:9100"})/node_memory_SwapTotal_bytes{instance="localhost:9100"}';
-
   charts = [];
+  stats  = [];
 
   constructor(private backendcfg: BackendConfigurationService,
               private config: ConfigurationService) {}
@@ -44,15 +31,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.backend_subscription = this.backendcfg.backend_changed.subscribe((b) => { this.refresh(); });
     this.config.get('/webview/dashboard')
       .subscribe(conf => {
-        if ('webview' in conf &&
-            'dashboard' in conf['webview'] &&
-            'charts' in conf['webview']['dashboard']) {
-          this.charts = Object.values(conf['webview']['dashboard']['charts']);
-          this.charts.forEach(c => {
-            if (! ('remove_all_zero' in c)) {
-              c.remove_all_zero = true;
-            }
-          });
+        if ('webview' in conf && 'dashboard' in conf['webview']) {
+
+          if ('charts' in conf['webview']['dashboard']) {
+            this.charts = Object.values(conf['webview']['dashboard']['charts']);
+            this.charts.forEach(c => {
+              if (! ('remove_all_zero' in c)) {
+                c.remove_all_zero = true;
+              }
+            });
+          }
+          if ('stats' in conf['webview']['dashboard']) {
+            this.stats = Object.values(conf['webview']['dashboard']['stats']);
+            this.stats.forEach(s => {
+              if ('divisor' in s) {
+                s.factor = 1. / s.divisor;
+              }
+              console.log("Stat " + s.name);
+              console.log("Query " + s.query);
+              console.log("Factor " + s.factor);
+              console.log("thresholds " + s.thresholds);
+              console.log("thresholds type " + typeof s.thresholds);
+              console.log("thresholds test " + Array.from(s.thresholds));
+              console.log("Unit " + s.unit);
+            });
+          }
         }
       });
   }
