@@ -921,12 +921,12 @@ p_bb_observe_pattern()
   char *type_pattern, *id_pattern;
   if (EC_succeed != EC_arg(1).is_string(&type_pattern)) {
     EclExternalBlackBoard::logger()->log_error(
-          EclExternalBlackBoard::name(), "%s: First argument must be a string.", func___);
+          EclExternalBlackBoard::name(), "%s: First argument must be a string.", __func__);
     return EC_fail;
   }
   if (EC_succeed != EC_arg(2).is_string(&id_pattern)) {
     EclExternalBlackBoard::logger()->log_error(
-          EclExternalBlackBoard::name(), "%s: Second argument must be a string.", func___);
+          EclExternalBlackBoard::name(), "%s: Second argument must be a string.", __func__);
     return EC_fail;
   }
 
@@ -941,12 +941,12 @@ p_bb_listen_for_change()
   char *type, *id;
   if (EC_succeed != EC_arg(1).is_string(&type)) {
     EclExternalBlackBoard::logger()->log_error(
-          EclExternalBlackBoard::name(), "%s: First argument must be a string.", func___);
+          EclExternalBlackBoard::name(), "%s: First argument must be a string.", __func__);
     return EC_fail;
   }
   if (EC_succeed != EC_arg(2).is_string(&id)) {
     EclExternalBlackBoard::logger()->log_error(
-          EclExternalBlackBoard::name(), "%s: Second argument must be a string.", func___);
+          EclExternalBlackBoard::name(), "%s: Second argument must be a string.", __func__);
     return EC_fail;
   }
 
@@ -958,7 +958,7 @@ p_bb_listen_for_change()
 
   if (iface_it == interfaces.end()) {
     EclExternalBlackBoard::logger()->log_error(
-          EclExternalBlackBoard::name(), "%s: Interface %s has not been opened.", func___, uid.c_str());
+          EclExternalBlackBoard::name(), "%s: Interface %s has not been opened.", __func__, uid.c_str());
     return EC_fail;
   }
 
