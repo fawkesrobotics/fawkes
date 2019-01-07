@@ -35,5 +35,5 @@ if [[ ":$AFFECTED_FILES:" == *":src/plugins/webview/frontend/"*:* ]]; then
 fi
 
 if [ -n "$BUILD_WEBVIEW" ]; then
-	cat $SCRIPT_PATH/webview-frontend.yml
+	cat $SCRIPT_PATH/10-webview-frontend.yml
 fi
