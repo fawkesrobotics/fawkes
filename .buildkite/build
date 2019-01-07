@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ############################################################################
 #  Build script, will (usually) be executed in Docker container

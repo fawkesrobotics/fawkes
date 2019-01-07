@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ############################################################################
 #  Webview frontend build script, will be executed in Docker container

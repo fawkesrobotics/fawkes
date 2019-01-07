@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ############################################################################
 #  Generate build pipeline with conditional steps

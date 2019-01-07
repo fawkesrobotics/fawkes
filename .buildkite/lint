@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ############################################################################
 #  Lint script to check some basic things on the relevant commits
