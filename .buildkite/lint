@@ -277,5 +277,5 @@ echo "-> Running gitlint to check commit messages"
 check_gitlint
 
 echo "-> Running 'make check'"
-make check
+gmake check
 

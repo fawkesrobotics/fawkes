@@ -27,5 +27,4 @@ source /etc/profile
 set -euo pipefail
 
 # Build software
-make -j$(nproc) all gui
-
+gmake -j$(nproc) all gui
