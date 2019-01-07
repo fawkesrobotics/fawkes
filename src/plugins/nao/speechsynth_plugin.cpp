@@ -36,7 +36,7 @@ class NaoQiSpeechSynthPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  NaoQiSpeechSynthPlugin(Configuration *config)
+  explicit NaoQiSpeechSynthPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new NaoQiSpeechSynthThread());

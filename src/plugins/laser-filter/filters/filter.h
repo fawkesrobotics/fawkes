@@ -49,7 +49,7 @@ class LaserDataFilter
 
   LaserDataFilter(const std::string& filter_name,
                   unsigned int in_data_size,
-                  std::vector<Buffer *> &in, unsigned int out_size);
+                  const std::vector<Buffer *> &in, unsigned int out_size);
   virtual ~LaserDataFilter();
 
   virtual std::vector<Buffer *>  & get_out_vector();
@@ -74,9 +74,9 @@ class LaserDataFilter
 
 
  protected:
-  const std::string    filter_name;
-  unsigned int         out_data_size;
-  unsigned int         in_data_size;
+  std::string            filter_name;
+  unsigned int           out_data_size;
+  unsigned int           in_data_size;
   std::vector<Buffer *>  in;
   std::vector<Buffer *>  out;
 

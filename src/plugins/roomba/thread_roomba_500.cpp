@@ -315,8 +315,8 @@ Roomba500Thread::init()
 
     if (cfg_btsave_) {
       logger->log_debug(name(), "Saving Bluetooth address %s. Will be used for "
-			"next connection.", roomba_->get_device());
-      config->set_string("/hardware/roomba/btaddr", roomba_->get_device());
+                                "next connection.", roomba_->get_device().c_str());
+      config->set_string("/hardware/roomba/btaddr", roomba_->get_device().c_str());
     }
 
     roomba_->set_mode(mode);

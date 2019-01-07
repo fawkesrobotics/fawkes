@@ -35,7 +35,7 @@ class MapLaserGenPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  MapLaserGenPlugin(Configuration *config)
+  explicit MapLaserGenPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new MapLaserGenThread());

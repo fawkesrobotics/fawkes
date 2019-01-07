@@ -41,7 +41,7 @@ class IMUPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  IMUPlugin(Configuration *config)
+  explicit IMUPlugin(Configuration *config)
     : Plugin(config)
   {
     std::set<std::string> configs;

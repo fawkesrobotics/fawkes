@@ -35,7 +35,7 @@ class PointCloudDBROSCommPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  PointCloudDBROSCommPlugin(Configuration *config)
+  explicit PointCloudDBROSCommPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new PointCloudDBROSCommThread());

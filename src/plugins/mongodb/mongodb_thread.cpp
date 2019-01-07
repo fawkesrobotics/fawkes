@@ -166,7 +166,6 @@ MongoDBThread::init_replicaset_configs()
 	std::string bootstrap_prefix     = "/plugins/mongodb/replica-sets/bootstrap-mongodb/";
 	std::string bootstrap_client_cfg = config->get_string(bootstrap_prefix + "client");
 	std::string bootstrap_database   = config->get_string(bootstrap_prefix + "database");
-	std::string bootstrap_collection = config->get_string(bootstrap_prefix + "collection");
 
 	std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
 	while (i->next()) {

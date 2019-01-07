@@ -35,7 +35,7 @@ class RosPointCloudPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RosPointCloudPlugin(Configuration *config)
+  explicit RosPointCloudPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RosPointCloudThread());

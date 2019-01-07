@@ -33,7 +33,7 @@ class RosSkillerPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RosSkillerPlugin(Configuration *config)
+  explicit RosSkillerPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RosSkillerThread());

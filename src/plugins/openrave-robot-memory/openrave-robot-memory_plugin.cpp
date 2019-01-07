@@ -35,7 +35,7 @@ class OpenraveRobotMemoryPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fakwes configuration
    */
-  OpenraveRobotMemoryPlugin(Configuration *config)
+  explicit OpenraveRobotMemoryPlugin(Configuration *config)
      : Plugin(config)
   {
      thread_list.push_back(new OpenraveRobotMemoryThread());

@@ -92,7 +92,8 @@ LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const std::string& filter_nam
   entries.sort();
   entries.unique();
 
-  dead_spots_ = new unsigned int[entries.size() * 2];
+  dead_spots_size_ = entries.size() * 2;
+  dead_spots_ = new unsigned int[dead_spots_size_];
 
   for (std::list<std::string>::iterator i = entries.begin(); i != entries.end(); ++i) {
     std::string path = prefix + *i + "/";
@@ -113,9 +114,52 @@ LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const std::string& filter_nam
   calc_spots();
 }
 
+
+/** Constructor.
+ * @param other instance to copy from
+ */
+LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const LaserDeadSpotsDataFilter &other)
+: LaserDataFilter(other.filter_name, other.in_data_size, other.in, other.in.size())
+{
+	logger_ = other.logger_;
+
+	cfg_dead_spots_ = other.cfg_dead_spots_;
+	num_spots_ = other.num_spots_;
+	dead_spots_size_ = other.dead_spots_size_;
+	dead_spots_ = new unsigned int[dead_spots_size_];
+	for (unsigned int i = 0; i < dead_spots_size_; ++i) {
+		dead_spots_[i] = other.dead_spots_[i];
+	}
+}
+
 LaserDeadSpotsDataFilter::~LaserDeadSpotsDataFilter()
 {
   delete[] dead_spots_;
+}
+
+/** Assignment operator
+ * @param other instance to copy from
+ * @return reference to this instance
+ */
+LaserDeadSpotsDataFilter&
+LaserDeadSpotsDataFilter::operator=(const LaserDeadSpotsDataFilter &other)
+{
+	delete[] dead_spots_;
+
+	filter_name = other.filter_name;
+	in_data_size = other.in_data_size;
+	in = other.in;
+	logger_ = other.logger_;
+
+	cfg_dead_spots_ = other.cfg_dead_spots_;
+	num_spots_ = other.num_spots_;
+	dead_spots_size_ = other.dead_spots_size_;
+	dead_spots_ = new unsigned int[dead_spots_size_];
+	for (unsigned int i = 0; i < dead_spots_size_; ++i) {
+		dead_spots_[i] = other.dead_spots_[i];
+	}
+
+	return *this;
 }
 
 

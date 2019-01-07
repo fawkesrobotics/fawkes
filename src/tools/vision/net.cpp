@@ -63,7 +63,7 @@ class FireVisionNetworkTool
   /** Constructor.
    * @param argp argument parser
    */
-  FireVisionNetworkTool(ArgumentParser *argp)
+  explicit FireVisionNetworkTool(ArgumentParser *argp)
   {
     argp_ = argp;
     exploring_ = false;
@@ -407,7 +407,10 @@ class FireVisionNetworkTool
       } else {
 	net_string = strdup("localhost");
       }
-      char *id = NULL, *host = NULL, *port = NULL, *save_ptr = NULL;
+      char *id;
+      char *host = NULL;
+      char *port = NULL;
+      char *save_ptr = NULL;
       int port_num = 2208;
       char *hostport;
       

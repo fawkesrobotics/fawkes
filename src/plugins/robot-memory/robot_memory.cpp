@@ -61,7 +61,6 @@ RobotMemory::RobotMemory(fawkes::Configuration* config, fawkes::Logger* logger,
                          fawkes::Clock* clock, fawkes::MongoDBConnCreator* mongo_connection_manager,
                          fawkes::BlackBoard* blackboard)
 {
-  mutex_ = new Mutex();
   config_ = config;
   logger_ = logger;
   clock_ = clock;
@@ -76,7 +75,6 @@ RobotMemory::~RobotMemory()
 {
   mongo_connection_manager_->delete_client(mongodb_client_local_);
   mongo_connection_manager_->delete_client(mongodb_client_distributed_);
-  delete mutex_;
   delete trigger_manager_;
   blackboard_->close(rm_if_);
 }

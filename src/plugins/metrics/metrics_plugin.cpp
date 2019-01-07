@@ -34,7 +34,7 @@ class MetricsPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  MetricsPlugin(Configuration *config)
+  explicit MetricsPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new MetricsThread());

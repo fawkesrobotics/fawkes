@@ -34,7 +34,7 @@ public:
 	/** Constructor.
 	 * @param config Fawkes configuration
 	 */
-	ClipsExecutivePlugin(Configuration *config) : Plugin(config)
+	explicit ClipsExecutivePlugin(Configuration *config) : Plugin(config)
 	{
 		thread_list.push_back(new ClipsExecutiveThread());
 	}

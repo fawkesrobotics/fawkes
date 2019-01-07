@@ -156,8 +156,8 @@ main(int argc, char **argv)
 
   // printf("%lu images to convert\n", files.size());
 
-  unsigned int in = 0;
   try {
+	  unsigned int in = 0;
     for (list<string>::iterator f = files.begin(); f != files.end(); ++f) {
       FvRawReader *fvraw = new FvRawReader((dirname + "/" + (*f)).c_str());
       printf("%4u Converting %s (%s)  ", ++in, (dirname + "/" + (*f)).c_str(),

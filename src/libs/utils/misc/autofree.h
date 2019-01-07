@@ -34,6 +34,8 @@ class MemAutoFree {
   void release();
   void reset(void *new_ptr);
 
+	void * operator*() const;
+
  private:
   void *ptr_;
 };

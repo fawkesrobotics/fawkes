@@ -41,7 +41,7 @@ set_value(AL::ALPtr<AL::DCMProxy> &dcm,
 
 std::vector<std::string>
 get_devices(AL::ALPtr<AL::DCMProxy> &dcm, AL::ALPtr<AL::ALMemoryProxy> &almem,
-            std::string type)
+            const std::string &type)
 {
   AL::ALValue names = almem->getDataListName();
   std::string subd_prefix = dcm->getPrefix()[0];

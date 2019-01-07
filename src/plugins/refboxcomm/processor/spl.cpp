@@ -118,7 +118,7 @@ SplRefBoxProcessor::SplRefBoxProcessor(fawkes::Logger *logger,
   team_number_ = team_number;
   logger_ = logger;
   quit_ = false;
-  s_ = new DatagramSocket(Socket::IPv4, 0.0000000001);
+  s_.reset(new DatagramSocket(Socket::IPv4, 0.0000000001));
   s_->bind(broadcast_port);
 
   penalty_ = SPL_PENALTY_NONE;
@@ -129,7 +129,7 @@ SplRefBoxProcessor::SplRefBoxProcessor(fawkes::Logger *logger,
 SplRefBoxProcessor::~SplRefBoxProcessor()
 {
   s_->close();
-  delete s_;
+  s_.reset();
 }
 
 

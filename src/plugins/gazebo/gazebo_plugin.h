@@ -28,7 +28,7 @@
 class GazeboPlugin : public fawkes::Plugin
 {
  public:
-  GazeboPlugin(fawkes::Configuration *config);
+  explicit GazeboPlugin(fawkes::Configuration *config);
 };
 
 #endif

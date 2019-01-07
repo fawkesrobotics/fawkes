@@ -482,7 +482,7 @@ Visca::recv_packet(unsigned int timeout_ms)
   }
 
   size_t pos = 0;
-  while (ibuffer_[pos] != VISCA_TERMINATOR && (pos < sizeof(ibuffer_)-1)) {
+  while ((pos < sizeof(ibuffer_)-1) && ibuffer_[pos] != VISCA_TERMINATOR) {
     if (read(fd_, &ibuffer_[++pos], 1) != 1) {
       
 

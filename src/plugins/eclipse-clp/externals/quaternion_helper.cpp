@@ -38,7 +38,6 @@ using namespace fawkes;
 int
 p_get_yaw()
 {
-    int res;
     double quad[4];
     EC_word list(EC_arg(1));
     EC_word head, tail;
@@ -47,7 +46,7 @@ p_get_yaw()
     }
     for (int i=0 ; list.is_list(head,tail) == EC_succeed and i < 4; list=tail, i++)
     {
-        res = head.is_double(&quad[i]);
+        int res = head.is_double(&quad[i]);
         if (res != EC_succeed){
             printf( "p_get_yaw(): quaternion is not a list of 4 doubles/floats\n" );
             return EC_fail;

@@ -35,7 +35,7 @@ class RobotinoRosJointsPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RobotinoRosJointsPlugin(Configuration *config)
+  explicit RobotinoRosJointsPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RobotinoRosJointsThread());

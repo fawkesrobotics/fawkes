@@ -34,7 +34,7 @@ class GossipExampleSenderPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  GossipExampleSenderPlugin(Configuration *config) : Plugin(config)
+  explicit GossipExampleSenderPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new GossipExampleSenderThread());
   }

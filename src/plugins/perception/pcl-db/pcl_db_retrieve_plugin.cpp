@@ -35,7 +35,7 @@ class PointCloudDBRetrievePlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  PointCloudDBRetrievePlugin(Configuration *config)
+  explicit PointCloudDBRetrievePlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new PointCloudDBRetrieveThread());

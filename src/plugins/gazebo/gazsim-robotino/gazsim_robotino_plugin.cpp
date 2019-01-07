@@ -36,7 +36,7 @@ class GazsimRobotinoPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  GazsimRobotinoPlugin(Configuration *config)
+  explicit GazsimRobotinoPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RobotinoSimThread());

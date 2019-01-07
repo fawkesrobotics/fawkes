@@ -33,7 +33,7 @@ class RosNavgraphBreakoutPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RosNavgraphBreakoutPlugin(Configuration *config)
+  explicit RosNavgraphBreakoutPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RosNavgraphBreakoutThread());

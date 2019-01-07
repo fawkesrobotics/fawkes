@@ -4,7 +4,6 @@
  *
  *  Created: Mon Dec 15 15:40:36 2008
  *  Copyright  2008-2009  Tim Niemueller [www.niemueller.de]
- *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -330,8 +329,8 @@ SkillGuiGraphViewport::save()
     Cairo::RefPtr<Cairo::Surface> surface;
 
     std::string filename = fcd_->get_filename();
-    bool write_to_png = false;
-    if (filename != "") {
+    if (! filename.empty()) {
+	    bool write_to_png = false;
       Gtk::FileFilter *f = fcd_->get_filter();
       if (f->get_name().find("PDF") != Glib::ustring::npos) {
 	surface = Cairo::PdfSurface::create(filename, bbw_, bbh_);

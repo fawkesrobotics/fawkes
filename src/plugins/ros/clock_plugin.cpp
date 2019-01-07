@@ -34,7 +34,7 @@ class RosClockPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RosClockPlugin(Configuration *config)
+  explicit RosClockPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RosClockThread());

@@ -42,17 +42,16 @@ EscapeDriveModule::EscapeDriveModule( Logger* logger, Configuration* config )
 {
   drive_mode_ = NavigatorInterface::ESCAPE;
 
-  max_trans_ = config_->get_float( "/plugins/colli/drive_mode/escape/max_trans" );
-  max_rot_    = config_->get_float( "/plugins/colli/drive_mode/escape/max_rot" );
+  max_trans_ = config_->get_float("/plugins/colli/drive_mode/escape/max_trans");
+  max_rot_    = config_->get_float("/plugins/colli/drive_mode/escape/max_rot");
 
-  robo_shape_ = new RoboShapeColli( "/plugins/colli/roboshape/", logger, config, 2 );
+  robo_shape_.reset(new RoboShapeColli("/plugins/colli/roboshape/", logger, config, 2));
 }
 
 
 /** Destructor. Destruct your local values here. */
 EscapeDriveModule::~EscapeDriveModule()
 {
-	delete robo_shape_;
 }
 
 

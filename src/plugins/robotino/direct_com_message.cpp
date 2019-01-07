@@ -88,6 +88,29 @@ DirectRobotinoComMessage::DirectRobotinoComMessage()
 	ctor();
 }
 
+/** Copy Constructor.
+ * @param other instance to copy from
+ */
+DirectRobotinoComMessage::DirectRobotinoComMessage(const DirectRobotinoComMessage& other)
+{
+	mode_ = other.mode_;
+
+	payload_size_ = other.payload_size_;
+	data_size_ = other.data_size_;
+	data_ = (unsigned char *)malloc(data_size_);
+	memcpy(data_, other.data_, data_size_);
+	cur_data_ = other.cur_data_;
+	cur_cmd_ = other.cur_cmd_;
+
+	if (other.escaped_data_) {
+		escaped_data_size_ = other.escaped_data_size_;
+		escaped_data_ = (unsigned char *)malloc(escaped_data_size_);
+		memcpy(escaped_data_, other.escaped_data_, escaped_data_size_);
+	} else {
+		escaped_data_ = NULL;
+	}
+}
+
 
 /** Constructor for initial command.
  * Create message for writing and add command for given message ID.
@@ -157,6 +180,37 @@ DirectRobotinoComMessage::~DirectRobotinoComMessage()
 }
 
 
+/** Assignment operator.
+ * @param other instance to copy from
+ * @return reference to this instance
+ */
+DirectRobotinoComMessage&
+DirectRobotinoComMessage::operator=(const DirectRobotinoComMessage& other)
+{
+	::free(data_);
+	if (escaped_data_)  ::free(escaped_data_);
+
+	mode_ = other.mode_;
+
+	payload_size_ = other.payload_size_;
+	data_size_ = other.data_size_;
+	data_ = (unsigned char *)malloc(data_size_);
+	memcpy(data_, other.data_, data_size_);
+	cur_data_ = other.cur_data_;
+	cur_cmd_ = other.cur_cmd_;
+
+	if (other.escaped_data_) {
+		escaped_data_size_ = other.escaped_data_size_;
+		escaped_data_ = (unsigned char *)malloc(escaped_data_size_);
+		memcpy(escaped_data_, other.escaped_data_, escaped_data_size_);
+	} else {
+		escaped_data_ = NULL;
+	}
+
+	return *this;
+}
+
+
 /** Assert a given message mode.
  * @param mode mode
  * @throw Exception on mode mismatch
@@ -211,7 +265,8 @@ DirectRobotinoComMessage::inc_payload_by(uint16_t count)
 	if (payload_size_ + count >= data_size_ - MSG_METADATA_SIZE) {
 		// need to realloc for more data
 		unsigned char *old_data = data_;
-		data_ = (unsigned char *)realloc(data_, data_size_ + 128);
+		data_size_ += 128;
+		data_ = (unsigned char *)realloc(data_, data_size_);
 		if (!data_) {
 			free(old_data);
 			throw Exception("Failed to allocate more memory");

@@ -37,7 +37,7 @@ class GazsimDepthcamPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  GazsimDepthcamPlugin(Configuration *config)
+  explicit GazsimDepthcamPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new DepthcamSimThread());

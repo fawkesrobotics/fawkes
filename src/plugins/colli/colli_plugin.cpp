@@ -39,7 +39,7 @@ public:
   /** Constructor.
    * @param config The fawkes configuration
    */
-  ColliPlugin(Configuration *config)
+  explicit ColliPlugin(Configuration *config)
       : Plugin(config)
   {
     ColliThread* colli_thread = new ColliThread();

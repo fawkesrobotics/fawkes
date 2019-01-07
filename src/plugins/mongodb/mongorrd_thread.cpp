@@ -567,11 +567,11 @@ MongoRRDThread::loop()
 	BSONObj dbstats;
 	if (mongodb_client->simpleCommand(i->second.db_name, &dbstats, "dbStats"))
 	{
-	  long int collections, objects, numExtents, indexes, dataSize,
-	    storageSize, indexSize, fileSize;
-	  double avgObjSize;
-
 	  try {
+		  long int collections, objects, numExtents, indexes, dataSize,
+		    storageSize, indexSize, fileSize;
+		  double avgObjSize;
+
 	    collections = dbstats["collections"].numberLong();
 	    objects     = dbstats["objects"].numberLong();
 	    avgObjSize  = dbstats["avgObjSize"].Double();

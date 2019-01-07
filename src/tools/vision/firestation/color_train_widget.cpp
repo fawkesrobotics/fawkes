@@ -52,8 +52,8 @@ using namespace firevision;
 ColorTrainWidget::ColorTrainWidget(Gtk::Window* parent)
 {
   m_generator = 0;
-  m_zauberstab = new Zauberstab();
-  m_cvw = new ColormapViewerWidget();
+  m_zauberstab.reset(new Zauberstab());
+  m_cvw.reset(new ColormapViewerWidget());
 
   m_src_buffer = 0;
   m_draw_buffer = 0;
@@ -78,9 +78,7 @@ ColorTrainWidget::ColorTrainWidget(Gtk::Window* parent)
 /** Destructor. */
 ColorTrainWidget::~ColorTrainWidget()
 {
-  delete m_cvw;
   delete m_generator;
-  delete m_zauberstab;
 }
 
 /** Set the current foreground object.
@@ -387,8 +385,9 @@ ColorTrainWidget::load_histograms()
      case (Gtk::RESPONSE_OK):
        {
 	 std::string filename = m_fcd_filechooser->get_filename();
-	 if (!m_generator)
-	   { m_generator = new BayesColormapGenerator(); }
+	 if (!m_generator) {
+		 m_generator = new BayesColormapGenerator();
+	 }
 	 m_generator->load_histograms( filename.c_str() );
 	 m_generator->calc();
 	 m_signal_colormap_updated();

@@ -37,7 +37,7 @@ class ClipsRobotMemoryPlugin : public fawkes::Plugin
   /** Constructor
    * @param config Fakwes configuration
    */
-  ClipsRobotMemoryPlugin(Configuration *config)
+  explicit ClipsRobotMemoryPlugin(Configuration *config)
      : Plugin(config)
   {
      thread_list.push_back(new ClipsRobotMemoryThread());

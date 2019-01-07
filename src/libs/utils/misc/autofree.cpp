@@ -81,4 +81,13 @@ MemAutoFree::reset(void *new_ptr)
 }
 
 
+/** Access memory pointer.
+ * @return pointer to memory, maybe NULL
+ */
+void *
+MemAutoFree::operator*() const
+{
+	return ptr_;
+}
+
 } // end namespace fawkes

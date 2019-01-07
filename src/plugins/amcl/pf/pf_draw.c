@@ -54,20 +54,18 @@ void pf_draw_statistics(pf_t *pf, rtk_fig_t *fig);
 void pf_draw_samples(pf_t *pf, rtk_fig_t *fig, int max_samples)
 {
   int i;
-  double px, py, pa;
   pf_sample_set_t *set;
-  pf_sample_t *sample;
 
   set = pf->sets + pf->current_set;
   max_samples = MIN(max_samples, set->sample_count);
 
   for (i = 0; i < max_samples; i++)
   {
-    sample = set->samples + i;
+    pf_sample_t *sample = set->samples + i;
 
-    px = sample->pose.v[0];
-    py = sample->pose.v[1];
-    pa = sample->pose.v[2];
+    double px = sample->pose.v[0];
+    double py = sample->pose.v[1];
+    double pa = sample->pose.v[2];
 
     //printf("%f %f\n", px, py);
 
@@ -119,7 +117,7 @@ void pf_draw_cluster_stats(pf_t *pf, rtk_fig_t *fig)
   pf_vector_t mean;
   pf_matrix_t cov;
   pf_matrix_t r, d;
-  double weight, o, d1, d2;
+  double o, d1, d2;
 
   set = pf->sets + pf->current_set;
 
@@ -127,7 +125,7 @@ void pf_draw_cluster_stats(pf_t *pf, rtk_fig_t *fig)
   {
     cluster = set->clusters + i;
 
-    weight = cluster->weight;
+    //weight = cluster->weight;
     mean = cluster->mean;
     cov = cluster->cov;
 

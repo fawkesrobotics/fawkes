@@ -117,17 +117,10 @@ BlackBoardLogReplayPlugin::BlackBoardLogReplayPlugin(Configuration *config)
 
       printf("Log name: %s  log_prefix: %s\n", log_name.c_str(), log_prefix.c_str());
 
-      std::string log_file = "";
       bool loop_replay     = scenario_loop_replay;
       bool non_blocking    = scenario_non_blocking;
       float grace_period   = scenario_grace_period;
-      std::string hook_str = "";
-
-      try {
-	log_file = config->get_string((log_prefix + "file").c_str());
-      } catch (Exception &e) {
-	throw;
-      }
+      std::string hook_str;
 
       try {
 	loop_replay = config->get_bool((log_prefix + "loop").c_str());

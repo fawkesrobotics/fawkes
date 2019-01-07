@@ -38,7 +38,10 @@ class DynamicMJPEGStreamWebReply
 {
  public:
 	DynamicMJPEGStreamWebReply(std::shared_ptr<WebviewJpegStreamProducer> stream_producer);
+	DynamicMJPEGStreamWebReply(const DynamicMJPEGStreamWebReply &other);
   virtual ~DynamicMJPEGStreamWebReply();
+
+	DynamicMJPEGStreamWebReply& operator=(const DynamicMJPEGStreamWebReply &other);
 
   virtual size_t size();
   virtual size_t next_chunk(size_t pos, char *buffer, size_t buf_max_size);

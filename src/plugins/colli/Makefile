@@ -62,20 +62,27 @@ ifeq ($(ENABLE_VISUAL_DEBUGGING),1)
   LDFLAGS += $(call boost-lib-ldflags,thread)
 endif
 
-ifeq ($(HAVE_TF),1)
+ifeq ($(HAVE_TF)$(HAVE_CPP11),11)
   CFLAGS += $(CFLAGS_TF)
   LDFLAGS += $(LDFLAGS_TF)
   PLUGINS_all = $(PLUGINDIR)/colli.$(SOEXT)
   OBJS_all    = $(OBJS_colli)
 else
-  WARN_TARGETS += warning_tf
+  ifneq ($(HAVE_TF),1)
+    WARN_TARGETS += warning_tf
+  endif
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_tf warning_ros warning_visualization_msgs warning_nav_msgs
+.PHONY: warning_tf warning_cpp11 warning_ros warning_visualization_msgs warning_nav_msgs
 warning_tf:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Colli Plugin$(TNORMAL) (C++11 not available)"
+warning_cpp11:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Colli Plugin$(TNORMAL) (fawkestf not available)"
 warning_ros:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting visual debugging$(TNORMAL) (ROS not available)"

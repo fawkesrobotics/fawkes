@@ -95,10 +95,9 @@ BatteryMonitor::service_added( const char* name,
 			       std::list<std::string>& txt,
 			       int flags )
 {
-  string host( host_name );
-  string service( name );
-  m_services[ service ] = host_name;
-  m_trv_battery->add_host( host_name );
+	string service(name);
+  m_services[service] = host_name;
+  m_trv_battery->add_host(host_name);
 }
 
 void

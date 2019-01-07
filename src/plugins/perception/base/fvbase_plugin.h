@@ -28,7 +28,7 @@
 class FvBasePlugin : public fawkes::Plugin
 {
  public:
-  FvBasePlugin(fawkes::Configuration *config);
+  explicit FvBasePlugin(fawkes::Configuration *config);
 };
 
 #endif

@@ -50,7 +50,7 @@ class DomainAction {
 
   const std::string getName();
   const std::vector<std::string> params();
-  StnAction generateStnAction(std::string name, std::string params);
+  StnAction generateStnAction(const std::string& name, const std::string& params);
 
  private:
   friend std::ostream& operator<<(std::ostream&, const DomainAction&);

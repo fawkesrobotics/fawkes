@@ -37,7 +37,7 @@ class RobotMemoryTestPlugin : public fawkes::Plugin
   /** Constructor
    * @param config Fakwes configuration
    */
-  RobotMemoryTestPlugin(Configuration *config)
+  explicit RobotMemoryTestPlugin(Configuration *config)
      : Plugin(config)
   {
      thread_list.push_back(new RobotMemoryTestThread());

@@ -76,9 +76,9 @@
  */
 LaserDataFilter::LaserDataFilter(const std::string& filter_name,
                                  unsigned int in_data_size,
-                                 std::vector<Buffer *> &in, unsigned int out_size)
-	: filter_name(filter_name), out_data_size(in_data_size), // yes, in_data_size!
-	  in_data_size(in_data_size), in(in)
+                                 const std::vector<Buffer *> &in, unsigned int out_size)
+: filter_name(filter_name), out_data_size(in_data_size), // yes, in_data_size!
+  in_data_size(in_data_size), in(in)
 {
   if (out_size > 0)  out.resize(out_size);
   for (unsigned int i = 0; i < out_size; ++i) {

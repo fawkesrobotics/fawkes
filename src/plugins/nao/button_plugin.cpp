@@ -35,7 +35,7 @@ class NaoQiButtonPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  NaoQiButtonPlugin(Configuration *config)
+  explicit NaoQiButtonPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new NaoQiButtonThread());

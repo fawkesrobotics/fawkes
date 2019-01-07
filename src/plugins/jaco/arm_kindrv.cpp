@@ -44,39 +44,35 @@ namespace fawkes {
 JacoArmKindrv::JacoArmKindrv(const char *name)
 {
   // take the first arm we can connect to
-  arm_ = new KinDrv::JacoArm();
+	arm_.reset(new KinDrv::JacoArm);
   name_ = arm_->get_client_config(true).name;
   // trim tailing whitespaces
   name_.erase(name_.find_last_not_of(" ")+1);
 
   std::string found_names = "'" + name_ + "'";
 
-  if( name!=NULL ) {
+  if (name != NULL) {
     // Check all connected arms until the right one is found.
-    std::vector<KinDrv::JacoArm*> arms;
-    while( name_.compare(name)!=0 ) {
-      arms.push_back(arm_);
+    std::vector<std::unique_ptr<KinDrv::JacoArm>> arms;
+    while (name_.compare(name) != 0) {
+      arms.push_back(std::move(arm_));
       try {
-        arm_ = new KinDrv::JacoArm();
+        arm_.reset(new KinDrv::JacoArm);
         name_ = arm_->get_client_config(true).name;
         name_.erase(name_.find_last_not_of(" ")+1);
         found_names += ", '" + name_ + "'";
       } catch(KinDrvException& e) {
-        // don't throw yet, we need to delete the occupied arms first.
-        arm_ = NULL;
+        // don't throw yet, print helpful error below
+        arm_.reset();
         break;
       }
     }
-
-    for(unsigned int i=0; i<arms.size(); ++i) {
-      delete arms[i];
-      arms[i] = NULL;
-    }
+    arms.clear();
   }
 
-  if( arm_==NULL )
-  {
-    throw fawkes::Exception("Could not connect to Jaco arm '%s' with libkindrv. But I found the following arms: %s", name, found_names.c_str());
+  if (!arm_) {
+    throw fawkes::Exception("Could not connect to Jaco arm '%s' with libkindrv. "
+                            "But I found the following arms: %s", name, found_names.c_str());
   }
 
   initialized_ = false;
@@ -87,7 +83,6 @@ JacoArmKindrv::JacoArmKindrv(const char *name)
 /** Destructor. */
 JacoArmKindrv::~JacoArmKindrv()
 {
-  delete(arm_);
 }
 
 void

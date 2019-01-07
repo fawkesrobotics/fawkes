@@ -35,7 +35,7 @@ class RosTfPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RosTfPlugin(Configuration *config)
+  explicit RosTfPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RosTfThread());

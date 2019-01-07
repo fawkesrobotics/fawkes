@@ -35,7 +35,7 @@ class PointCloudDBMergePlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  PointCloudDBMergePlugin(Configuration *config)
+  explicit PointCloudDBMergePlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new PointCloudDBMergeThread());

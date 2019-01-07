@@ -35,7 +35,7 @@ class LaserLinesPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  LaserLinesPlugin(Configuration *config)
+  explicit LaserLinesPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new LaserLinesThread());

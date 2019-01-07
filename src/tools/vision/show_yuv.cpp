@@ -42,6 +42,7 @@ class YUVSpaceDemo
   /** Constructor.
    * @param yuv_buffer YUV422_PLANAR encoded buffer.
    */
+  explicit
   YUVSpaceDemo(unsigned char *yuv_buffer)
   {
     brightness = 128;

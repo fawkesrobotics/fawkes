@@ -190,7 +190,7 @@ LaserDrawingArea::set_laser_ifs(const std::list<fawkes::Interface*>& ifs)
   unsigned char intensity = 255;
   for (std::list<fawkes::Interface*>::const_iterator it = ifs.begin();
        it != ifs.end(); ++it) {
-    if ((color_counter & 0x1 & 0x2 & 0x4) != 0) {
+    if ((color_counter & 0x7) != 0) {
       intensity /= 2;
     }
     Color c;
@@ -354,7 +354,7 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
       first_draw_ = false;
       const int width = allocation.get_width();
       const int height = allocation.get_height();
-    
+
       // coordinates for the center of the window
       xc_ = width / 2;
       yc_ = height / 2;
@@ -381,7 +381,7 @@ LaserDrawingArea::on_expose_event(GdkEventExpose* event)
     //    last_xc_ += translation_x_;
     //    last_yc_ += translation_y_;
     cr->translate(xc_, yc_);
-  
+
     cr->save();
     if (! connected_) {
       Cairo::TextExtents te;
@@ -613,7 +613,7 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
   cr->save();
   if (l_objpos_if_persons_) {
     cr->set_source_rgb(0,0,1);
-    for( objpos_if_itt = l_objpos_if_persons_->begin(); 
+    for( objpos_if_itt = l_objpos_if_persons_->begin();
          objpos_if_itt != l_objpos_if_persons_->end()  && (*objpos_if_itt)->has_writer();
          ++objpos_if_itt )
     {
@@ -633,26 +633,30 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
 
   if (l_objpos_if_legs_) {
     cr->set_source_rgb(0,1,0);
-    for( objpos_if_itt = l_objpos_if_legs_->begin(); 
-	 objpos_if_itt != l_objpos_if_legs_->end() && (*objpos_if_itt)->has_writer() ; 
-	 objpos_if_itt++ ) {
-      if(!break_drawing_)
-	(*objpos_if_itt)->read();
-      if ((*objpos_if_itt)->is_valid()){
-	std::pair<float,float> pos = transform_coords_from_fawkes((*objpos_if_itt)->relative_x(), (*objpos_if_itt)->relative_y());
-	float x=pos.first;
-	float y=pos.second;
-	cr->move_to(x, y);
-	cr->arc(x, y, 0.1, 0, 2*M_PI);
+    for (objpos_if_itt = l_objpos_if_legs_->begin();
+         objpos_if_itt != l_objpos_if_legs_->end() && (*objpos_if_itt)->has_writer();
+         ++objpos_if_itt)
+    {
+	    if (!break_drawing_) {
+		    (*objpos_if_itt)->read();
+	    }
+	    if ((*objpos_if_itt)->is_valid()){
+		    std::pair<float,float> pos =
+		      transform_coords_from_fawkes((*objpos_if_itt)->relative_x(),
+		                                   (*objpos_if_itt)->relative_y());
+		    float x=pos.first;
+		    float y=pos.second;
+		    cr->move_to(x, y);
+		    cr->arc(x, y, 0.1, 0, 2*M_PI);
       }
     }
     cr->stroke();
   }
-  
+
   if (l_objpos_if_misc_) {
     cr->set_source_rgb(0,1,1);
-    for( objpos_if_itt = l_objpos_if_misc_->begin(); 
-	 objpos_if_itt != l_objpos_if_misc_->end() && (*objpos_if_itt)->has_writer() ; 
+    for( objpos_if_itt = l_objpos_if_misc_->begin();
+	 objpos_if_itt != l_objpos_if_misc_->end() && (*objpos_if_itt)->has_writer() ;
 	 objpos_if_itt++ ) {
       if(!break_drawing_)
 	(*objpos_if_itt)->read();
@@ -687,7 +691,7 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
 	  cr->move_to(begin_x, begin_y);
 	  cr->show_text(t);
 	  //	  cr->set_source_rgb(0,0,1);
-	
+
 	  //	break;
 	  //      case ObjectPositionInterface::TYPE_LINE:
 	}else if((*objpos_if_itt)->object_type()==ObjectPositionInterface::TYPE_LINE){
@@ -711,13 +715,10 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
 
   float r,g,b;
   r=g=b=0.0;
-  int color_it=0;
-  float delta = 0.25;
-
 
   if (l_track_if_) {
 
-    std::list<Position2DTrackInterface*>::iterator track_if_itt;;  
+    std::list<Position2DTrackInterface*>::iterator track_if_itt;;
     const float radius (0.1);
     float* x_positions1;
     float* y_positions1;
@@ -728,128 +729,131 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
     unsigned int track_length2 = 0;
     int* timestamps2 = NULL;
     unsigned int id;
+    int color_it=0;
+    float delta = 0.25;
     cr->set_font_size(0.03);
 #ifdef LASERGUI_DEBUG_PRINT_TRACKS
     printf("\n\n################################\n");
 #endif
-    for( track_if_itt = l_track_if_->begin(); 
-	 track_if_itt != l_track_if_->end() && (*track_if_itt)->has_writer();) {
-      bool b_compound_track(false);
-      if(!break_drawing_)
-	(*track_if_itt)->read();
+    for(track_if_itt = l_track_if_->begin();
+        track_if_itt != l_track_if_->end() && (*track_if_itt)->has_writer();)
+    {
+	    if (!break_drawing_) {
+	      (*track_if_itt)->read();
+	    }
       if ((*track_if_itt)->is_valid()){
-	x_positions1=(*track_if_itt)->track_x_positions();
-	y_positions1=(*track_if_itt)->track_y_positions();
-	timestamps1=(*track_if_itt)->track_timestamps();
-	track_length1 = (*track_if_itt)->length();
-	id = (*track_if_itt)->track_id();
-	++track_if_itt;
-	if( track_if_itt != l_track_if_->end() && (*track_if_itt)->has_writer()){
-	  if(!break_drawing_)
-	    (*track_if_itt)->read();
-	  if( (*track_if_itt)->is_valid() && (*track_if_itt)->track_id()==id ){
-	    b_compound_track = true;
-	    x_positions2=(*track_if_itt)->track_x_positions();
-	    y_positions2=(*track_if_itt)->track_y_positions();
-	    timestamps2=(*track_if_itt)->track_timestamps();
-	    track_length2 = (*track_if_itt)->length();
-	    ++track_if_itt;
-	  }
-	}
+	      bool b_compound_track = false;
+	      x_positions1=(*track_if_itt)->track_x_positions();
+	      y_positions1=(*track_if_itt)->track_y_positions();
+	      timestamps1=(*track_if_itt)->track_timestamps();
+	      track_length1 = (*track_if_itt)->length();
+	      id = (*track_if_itt)->track_id();
+	      ++track_if_itt;
+	      if (track_if_itt != l_track_if_->end() && (*track_if_itt)->has_writer()) {
+		      if(!break_drawing_)
+			      (*track_if_itt)->read();
+		      if ((*track_if_itt)->is_valid() && (*track_if_itt)->track_id()==id) {
+			      b_compound_track = true;
+			      x_positions2=(*track_if_itt)->track_x_positions();
+			      y_positions2=(*track_if_itt)->track_y_positions();
+			      timestamps2=(*track_if_itt)->track_timestamps();
+			      track_length2 = (*track_if_itt)->length();
+			      ++track_if_itt;
+		      }
+	      }
 #ifdef LASERGUI_DEBUG_PRINT_TRACKS
-	printf("\n    trackid %u\n", id);
+	      printf("\n    trackid %u\n", id);
 #endif
-	unsigned int i(0);
-	unsigned int j(0);
-	float x = x_positions1[i];
-	float y = y_positions1[i];
-	if(b_compound_track){
-	  while(j+1 < track_length2 && timestamps2[j] < timestamps1[i]){
-	    ++j;
-	  }
-	  if(timestamps2[j] == timestamps1[i]){
-	    x += x_positions2[i];
-	    x /= 2;
-	    y += y_positions2[i];
-	    y /=2;
-	  }
-	}
-	std::pair<float,float> pos = transform_coords_from_fawkes(x,y);
-	cr->move_to(pos.first,pos.second);
-	for (; i < track_length1; ++i){
-	  x = x_positions1[i];
-	  y = y_positions1[i];
-	  if(b_compound_track){
-	    while(j+1 < track_length2 && timestamps2[j] < timestamps1[i]){
-	      ++j;
-	    }
-	    if(timestamps2[j] == timestamps1[i]){
-	      x += x_positions2[i];
-	      x /= 2;
-	      y += y_positions2[i];
-	      y /=2;
-	    }
-	  }
-	  std::pair<float,float> pos = transform_coords_from_fawkes(x,y);
-	  //cr->move_to(pos.first - radius, pos.second);
-	  //	  cr->arc(pos.first, pos.second, radius, 0, 2*M_PI);
-	  cr->line_to(pos.first, pos.second);
-	  //	cr->rectangle(x_positions[i], y_positions[i], 4 / zoom_factor_, 4 / zoom_factor_);
-	
-	  //	std::string t = StringConversions::toString(id) + "-" + StringConversions::toString(timestamps[i]);
-	  std::string t = StringConversions::to_string(timestamps1[i]);
-	  //      cr->move_to(begin_x, begin_y);
-	  cr->show_text(t);
-	  cr->move_to(pos.first, pos.second);
+	      unsigned int i(0);
+	      unsigned int j(0);
+	      float x = x_positions1[i];
+	      float y = y_positions1[i];
+	      if (b_compound_track){
+		      while (j+1 < track_length2 && timestamps2[j] < timestamps1[i]){
+			      ++j;
+		      }
+		      if (timestamps2[j] == timestamps1[i]){
+			      x += x_positions2[i];
+			      x /= 2;
+			      y += y_positions2[i];
+			      y /=2;
+		      }
+	      }
+	      std::pair<float,float> pos = transform_coords_from_fawkes(x,y);
+	      cr->move_to(pos.first,pos.second);
+	      for (; i < track_length1; ++i){
+		      x = x_positions1[i];
+		      y = y_positions1[i];
+		      if (b_compound_track){
+			      while (j+1 < track_length2 && timestamps2[j] < timestamps1[i]){
+				      ++j;
+			      }
+			      if (timestamps2[j] == timestamps1[i]){
+				      x += x_positions2[i];
+				      x /= 2;
+				      y += y_positions2[i];
+				      y /=2;
+			      }
+		      }
+		      std::pair<float,float> pos = transform_coords_from_fawkes(x,y);
+		      //cr->move_to(pos.first - radius, pos.second);
+		      //	  cr->arc(pos.first, pos.second, radius, 0, 2*M_PI);
+		      cr->line_to(pos.first, pos.second);
+		      //	cr->rectangle(x_positions[i], y_positions[i], 4 / zoom_factor_, 4 / zoom_factor_);
+
+		      //	std::string t = StringConversions::toString(id) + "-" + StringConversions::toString(timestamps[i]);
+		      std::string t = StringConversions::to_string(timestamps1[i]);
+		      //      cr->move_to(begin_x, begin_y);
+		      cr->show_text(t);
+		      cr->move_to(pos.first, pos.second);
 #ifdef LASERGUI_DEBUG_PRINT_TRACKS
-	  printf("( %f,%f,[%d] )", pos.first, pos.second, timestamps1[i] );
+		      printf("( %f,%f,[%d] )", pos.first, pos.second, timestamps1[i] );
 #endif
-	}
+	      }
 
-	// chose color    
-	if (div(color_it,3).rem == 0) r+= delta;
-	if (div(color_it,3).rem == 1) g+= delta;
-	if (div(color_it,3).rem == 2) b+= delta;
-	cr->set_source_rgb(r,g,b);
-	color_it++;
+	      // chose color
+	      if (div(color_it,3).rem == 0) r+= delta;
+	      if (div(color_it,3).rem == 1) g+= delta;
+	      if (div(color_it,3).rem == 2) b+= delta;
+	      cr->set_source_rgb(r,g,b);
+	      color_it++;
 
-	cr->stroke();
-	
-	
-	i = std::max(0, (int) track_length1 - CFG_PRINT_NR_TRACKELEMENTS);
-	j = 0;
-	for (; i < track_length1; ++i){
-	  x = x_positions1[i];
-	  y = y_positions1[i];
-	  if(b_compound_track){
-	    while(j+1 < track_length2 && timestamps2[j] < timestamps1[i]){
-	      ++j;
-	    }
-	  }
-	  
-	  std::pair<float,float> pos = transform_coords_from_fawkes(x_positions1[i],y_positions1[i]);
-	  cr->move_to(pos.first - radius, pos.second);
-	  cr->arc(pos.first, pos.second, radius, 0, 2*M_PI);
-	  
-	  if(b_compound_track && timestamps2[j] == timestamps1[i]){
-	    cr->move_to(pos.first, pos.second);
-	    
-	    std::pair<float,float> pos = transform_coords_from_fawkes(x_positions2[j],y_positions2[j]);
-	    cr->line_to(pos.first, pos.second);
-	    cr->move_to(pos.first - radius, pos.second);
-	    cr->arc(pos.first, pos.second, radius, 0, 2*M_PI);
-	  }
-	}
-	cr->set_source_rgb(0,0,1);
-	cr->stroke();
-	
-      }
-      else{
-	break;
+	      cr->stroke();
+
+
+	      i = std::max(0, (int) track_length1 - CFG_PRINT_NR_TRACKELEMENTS);
+	      j = 0;
+	      for (; i < track_length1; ++i) {
+		      x = x_positions1[i];
+		      y = y_positions1[i];
+		      if (b_compound_track){
+			      while (j+1 < track_length2 && timestamps2[j] < timestamps1[i]) {
+				      ++j;
+			      }
+		      }
+
+		      std::pair<float,float> pos = transform_coords_from_fawkes(x_positions1[i],y_positions1[i]);
+		      cr->move_to(pos.first - radius, pos.second);
+		      cr->arc(pos.first, pos.second, radius, 0, 2*M_PI);
+
+		      if (b_compound_track && timestamps2[j] == timestamps1[i]) {
+			      cr->move_to(pos.first, pos.second);
+
+			      std::pair<float,float> pos = transform_coords_from_fawkes(x_positions2[j],y_positions2[j]);
+			      cr->line_to(pos.first, pos.second);
+			      cr->move_to(pos.first - radius, pos.second);
+			      cr->arc(pos.first, pos.second, radius, 0, 2*M_PI);
+		      }
+	      }
+	      cr->set_source_rgb(0,0,1);
+	      cr->stroke();
+
+      } else {
+	      break;
       }
     }
   }
-  
+
   /*  DRAW TARGET */
   if(target_if_ && target_if_->has_writer()){
     target_if_->read();
@@ -876,7 +880,7 @@ LaserDrawingArea::draw_persons_legs(Glib::RefPtr<Gdk::Window> &window,
   r=g=b=0.0;
   float delta = 0.2;
   for (int i = 0; i< 15 ; i++){
-    
+
     if (div(i,3).rem == 0) r+= delta;
     if (div(i,3).rem == 1) g+= delta;
     if (div(i,3).rem == 2) b+= delta;
@@ -957,7 +961,7 @@ LaserDrawingArea::draw_segments(const fawkes::Interface* itf,
       }
       cr->fill_preserve();
       cr->stroke();
-    } 
+    }
     /*else {
       cr->move_to(0, - distances[0]);
       for (size_t i = resolution_; i <= nd + resolution_; i += resolution_) {
@@ -1045,7 +1049,7 @@ LaserDrawingArea::on_motion_notify_event(GdkEventMotion *event)
 /**
  * Transform a position from the fawkes coordinate system to the Cairo
  * coordinate system.
- * @param p_x input x 
+ * @param p_x input x
  * @param p_y input y
  * @return the transformed position
  */

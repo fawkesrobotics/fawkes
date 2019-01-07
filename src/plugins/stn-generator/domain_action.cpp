@@ -112,7 +112,7 @@ DomainAction::params()
  * @return The generated StnAction.
  */
 StnAction
-DomainAction::generateStnAction(std::string name, std::string params)
+DomainAction::generateStnAction(const std::string& name, const std::string& params)
 {
   std::cout << "Generating StnAction " << name << " with params " << params << std::endl;
 

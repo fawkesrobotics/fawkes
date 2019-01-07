@@ -23,6 +23,8 @@
 #ifndef _PLUGINS_OPENNI_SKELGUI_TEXTURE_DRAWER_H_
 #define _PLUGINS_OPENNI_SKELGUI_TEXTURE_DRAWER_H_
 
+#include <utils/misc/autofree.h>
+
 namespace firevision {
   class Camera;
 }
@@ -48,15 +50,16 @@ class SkelGuiTextureDrawer
 		      float bottomRightX, float bottomRightY);
 
  protected:
-  unsigned char       *texture_;	/**< Texture buffer. */
-
   const unsigned int   width_;		/**< Width of visible area from texture */
   const unsigned int   height_;	/**< Height of visible area from texture */
 
   const unsigned int   texture_width_;	/**< Real texture width */
   const unsigned int   texture_height_;		/**< Real texture height */
 
+  unsigned char       *texture_;	/**< Texture buffer. */
+
  private:
+	fawkes::MemAutoFree  texture_raii_;
   bool                 texture_initialized_;
   unsigned int         texture_id_;
   float                texture_coords_[8];

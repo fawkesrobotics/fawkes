@@ -33,9 +33,9 @@ namespace fawkes {
 
 class XmlRpcLogMethods {
  public:
-  XmlRpcLogMethods(xmlrpc_c::registry *registry,
-		   fawkes::CacheLogger *cache_logger,
-		   fawkes::Logger *logger);
+  XmlRpcLogMethods(std::shared_ptr<xmlrpc_c::registry> registry,
+                   fawkes::CacheLogger *cache_logger,
+                   fawkes::Logger *logger);
   ~XmlRpcLogMethods();
 
   class log_entries : public xmlrpc_c::method {
@@ -80,17 +80,17 @@ class XmlRpcLogMethods {
   };
 
  private:
-  xmlrpc_c::registry *xmlrpc_registry_;
+  std::shared_ptr<xmlrpc_c::registry> xmlrpc_registry_;
 
   fawkes::Logger        *logger_;
   fawkes::CacheLogger   *cache_logger_;
-  log_entries           *log_entries_;
-  log_get_size          *log_get_size_;
-  log_set_size          *log_set_size_;
-  log_log               *log_log_debug_;
-  log_log               *log_log_info_;
-  log_log               *log_log_warn_;
-  log_log               *log_log_error_;
+	std::unique_ptr<log_entries>   log_entries_;
+	std::unique_ptr<log_get_size>  log_get_size_;
+	std::unique_ptr<log_set_size>  log_set_size_;
+	std::unique_ptr<log_log>       log_log_debug_;
+	std::unique_ptr<log_log>       log_log_info_;
+	std::unique_ptr<log_log>       log_log_warn_;
+	std::unique_ptr<log_log>       log_log_error_;
 };
 
 #endif

@@ -68,7 +68,6 @@ BBLogFile::BBLogFile(const char *filename, fawkes::Interface *interface,
   ctor(filename, do_sanity_check);
 
   if (interface) {
-    instance_factory_ = NULL;
     interface_ = interface;
     if ((strcmp(interface_->type(), interface_type_) != 0) ||
         (strcmp(interface_->id(), interface_id_) != 0))
@@ -84,9 +83,9 @@ BBLogFile::BBLogFile(const char *filename, fawkes::Interface *interface,
                       interface_->uid(), interface_type.c_str(), interface_id.c_str());
     }
   } else {
-    instance_factory_ = new BlackBoardInstanceFactory();
+	  instance_factory_.reset(new BlackBoardInstanceFactory());
     interface_ = instance_factory_->new_interface_instance(interface_type_,
-							     interface_id_);
+                                                           interface_id_);
   }
 }
 
@@ -105,7 +104,6 @@ BBLogFile::BBLogFile(const char *filename, bool do_sanity_check)
 {
   ctor(filename, do_sanity_check);
 
-  instance_factory_ = NULL;
   interface_        = NULL;
 }
 
@@ -141,7 +139,7 @@ BBLogFile::~BBLogFile()
 {
   if (instance_factory_) {
     instance_factory_->delete_interface_instance(interface_);
-    delete instance_factory_;
+    instance_factory_.reset();
   }
 
   fclose(f_);
@@ -378,7 +376,7 @@ BBLogFile::repair()
     if (ftruncate(fileno(f_), fs.st_size - extra_bytes) == -1) {
       throw Exception(errno, "Failed to truncate file %s", filename_);
     }
-    all_entries_size -= extra_bytes;
+    //all_entries_size -= extra_bytes;
     extra_bytes = 0;
     if (fstat(fileno(f_), &fs) != 0) {
       throw Exception(errno, "Failed to update information of file %s "
@@ -499,8 +497,7 @@ BBLogFile::set_interface(fawkes::Interface *interface)
 	       INTERFACE_HASH_SIZE_) == 0) ) {
     if (instance_factory_) {
       instance_factory_->delete_interface_instance(interface_);
-      delete instance_factory_;
-      instance_factory_ = NULL;
+      instance_factory_.reset();
     }
     interface_ = interface;
   } else {

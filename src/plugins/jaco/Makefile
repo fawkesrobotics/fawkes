@@ -24,7 +24,7 @@ PRESUBDIRS = interfaces
 LIBS_jaco = fawkescore fawkesaspects fawkesblackboard fawkesutils fawkesinterface JacoInterface JacoBimanualInterface m pthread
 OBJS_jaco = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
-ifeq ($(HAVE_LIBKINDRV),1)
+ifeq ($(HAVE_LIBKINDRV)$(HAVE_CPP11),11)
   CFLAGS  += $(CFLAGS_LIBKINDRV)
   LDFLAGS += $(LDFLAGS_LIBKINDRV)
   PLUGINS_all = $(PLUGINDIR)/jaco.so
@@ -36,7 +36,12 @@ ifeq ($(HAVE_LIBKINDRV),1)
     WARN_TARGETS += warning_openrave
   endif
 else
-  WARN_TARGETS += warning_libkindrv
+  ifneq ($(HAVE_LIBKINDRV),1)
+    WARN_TARGETS += warning_libkindrv
+  endif
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
 endif
 
 OBJS_all    = $(OBJS_jaco)
@@ -44,11 +49,11 @@ OBJS_all    = $(OBJS_jaco)
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_libkindrv
+.PHONY: warning_libkindrv warning_cpp11 warning_openrave
 warning_libkindrv:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Jaco Plugin$(TNORMAL) (libkindrv not found)"
-
-.PHONY: warning_openrave
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Jaco Plugin$(TNORMAL) (C++11 not available)"
 warning_openrave:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting OpenRAVE support for Jaco Plugin$(TNORMAL) (openrave plugin not available)"
 endif

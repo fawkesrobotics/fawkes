@@ -210,9 +210,8 @@ PddlPlannerThread::dbmp_planner()
     action a;
     cur_pos = action_str.find(" ", cur_pos + 1);
     a.name = StringConversions::to_lower(action_str.substr(0, cur_pos));
-    size_t word_start;
     while (cur_pos != std::string::npos) {
-      word_start = cur_pos + 1;
+      size_t word_start = cur_pos + 1;
       cur_pos = action_str.find(" ", word_start);
       a.args.push_back(action_str.substr(word_start, cur_pos - word_start));
     }

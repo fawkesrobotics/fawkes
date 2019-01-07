@@ -93,17 +93,16 @@ class CLIPSLogger
 class CLIPSContextMaintainer {
  public:
   CLIPSContextMaintainer(Logger *logger, const char *log_component_name)
+  : logger(logger, log_component_name)
   {
-    this->logger = new CLIPSLogger(logger, log_component_name);
   }
 
   ~CLIPSContextMaintainer()
   {
-    delete logger;
   }
 
  public:
-  CLIPSLogger *logger;
+  CLIPSLogger logger;
 };
 
 
@@ -204,7 +203,7 @@ CLIPSEnvManager::new_env(const std::string &log_component_name)
                             /* getc */   NULL,
                             /* ungetc */ NULL,
                             log_router_exit,
-                            cm->logger);
+                            &cm->logger);
 
     // restore old action
     sigaction(SIGINT, &oldact, NULL);
@@ -465,11 +464,7 @@ CLIPSEnvManager::remove_features(const std::list<CLIPSFeature *> &features)
   // of threads is forced.
   //assert_can_remove_features(features);
   for (auto feat : features) {
-    const std::string &feature_name = feat->clips_feature_name;
-
-    if (features_.find(feature_name) != features_.end()) {
-      features_.erase(feature_name);
-    }
+    features_.erase(feat->clips_feature_name);
   }
 }
 

@@ -30,6 +30,7 @@
 #include <utils/math/types.h>
 #include <utils/time/time.h>
 #include <string>
+#include <memory>
 
 #include <tf/transformer.h>
 
@@ -114,8 +115,8 @@ class LaserOccupancyGrid : public OccupancyGrid
 
   Logger* logger_;
   Laser360Interface* if_laser_;
-  RoboShapeColli*    robo_shape_; /**< my roboshape */
-  ColliObstacleMap*  obstacle_map;  /**< fast obstacle map */
+  std::shared_ptr<RoboShapeColli>    robo_shape_; /**< my roboshape */
+  std::shared_ptr<ColliObstacleMap>  obstacle_map_;  /**< fast obstacle map */
 
   std::vector< LaserPoint > new_readings_;
   std::vector< LaserPoint > old_readings_; /**< readings history */

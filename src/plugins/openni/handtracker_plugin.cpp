@@ -36,7 +36,7 @@ class OpenNiHandTrackerPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  OpenNiHandTrackerPlugin(Configuration *config) : Plugin(config)
+  explicit OpenNiHandTrackerPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new OpenNiHandTrackerThread());
   }

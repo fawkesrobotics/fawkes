@@ -37,7 +37,7 @@ class GazsimWebcamPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  GazsimWebcamPlugin(Configuration *config)
+  explicit GazsimWebcamPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new WebcamSimThread());

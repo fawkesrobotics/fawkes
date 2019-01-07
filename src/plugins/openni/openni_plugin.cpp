@@ -36,7 +36,7 @@ class OpenNiPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  OpenNiPlugin(Configuration *config) : Plugin(config)
+  explicit OpenNiPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new OpenNiContextThread());
   }

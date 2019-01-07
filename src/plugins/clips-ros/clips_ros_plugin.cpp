@@ -34,7 +34,7 @@ class ClipsROSPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  ClipsROSPlugin(Configuration *config) : Plugin(config)
+  explicit ClipsROSPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new ClipsROSThread());
   }

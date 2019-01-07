@@ -132,12 +132,12 @@ void
 SickTiM55xUSBAcquisitionThread::loop()
 {
   int actual_length = 0;
-  size_t recv_buf_size = 32*1024;
-  unsigned char recv_buf[recv_buf_size];
 
   if (usb_device_handle_) {
     MutexLocker lock(usb_mutex_);
     int usb_rv = 0;
+    size_t recv_buf_size = 32*1024;
+    unsigned char recv_buf[recv_buf_size];
     usb_rv = libusb_bulk_transfer(usb_device_handle_, (1 | LIBUSB_ENDPOINT_IN),
 				  recv_buf, recv_buf_size - 1, &actual_length,
 				  USB_TIMEOUT);

@@ -25,6 +25,7 @@
 
 #include <map>
 #include <string>
+#include <memory>
 
 namespace xmlrpc_c {
   class registry;
@@ -44,11 +45,11 @@ class XmlRpcRequestProcessor
 
   fawkes::WebReply * process_request(const fawkes::WebRequest *request);
 
-  xmlrpc_c::registry *  registry();
+	std::shared_ptr<xmlrpc_c::registry>  registry();
 
  private:
-  fawkes::Logger       *logger_;
-  xmlrpc_c::registry   *xmlrpc_registry_;
+  fawkes::Logger                      *logger_;
+	std::shared_ptr<xmlrpc_c::registry>  xmlrpc_registry_;
 };
 
 #endif

@@ -36,7 +36,7 @@ class RealsensePlugin : public fawkes::Plugin
   /** Constructor
    * @param config Fakwes configuration
    */
-  RealsensePlugin(Configuration *config)
+  explicit RealsensePlugin(Configuration *config)
      : Plugin(config)
   {
      thread_list.push_back(new RealsenseThread());

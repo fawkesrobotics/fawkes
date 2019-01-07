@@ -28,7 +28,7 @@
 class TimeTrackerMainLoopPlugin : public fawkes::Plugin
 {
  public:
-  TimeTrackerMainLoopPlugin(fawkes::Configuration *config);
+  explicit TimeTrackerMainLoopPlugin(fawkes::Configuration *config);
 };
 
 #endif

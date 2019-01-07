@@ -65,9 +65,8 @@ namespace oprs_protobuf {
  * @param proto_path proto path passed to a newly instantiated message register
  */
 OpenPRSProtobuf::OpenPRSProtobuf(std::vector<std::string> &proto_path)
-  : server_(NULL), next_client_id_(0)
+: message_register_(new MessageRegister(proto_path)), server_(NULL), next_client_id_(0)
 {
-  message_register_ = new MessageRegister(proto_path);
 }
 
 
@@ -79,8 +78,8 @@ OpenPRSProtobuf::~OpenPRSProtobuf()
   }
   clients_.clear();
 
-  delete message_register_;
   delete server_;
+  message_register_.reset();
 }
 
 
@@ -91,7 +90,7 @@ void
 OpenPRSProtobuf::oprs_pb_enable_server(int port)
 {
   if ((port > 0) && ! server_) {
-    server_ = new protobuf_comm::ProtobufStreamServer(port, message_register_);
+    server_ = new protobuf_comm::ProtobufStreamServer(port, &*message_register_);
 
     server_->signal_connected()
       .connect(boost::bind(&OpenPRSProtobuf::handle_server_client_connected, this, _1, _2));
@@ -134,7 +133,7 @@ OpenPRSProtobuf::oprs_pb_peer_create_local_crypto(const std::string& address,
   if (send_port > 0) {
     protobuf_comm::ProtobufBroadcastPeer *peer =
       new protobuf_comm::ProtobufBroadcastPeer(address, send_port, recv_port,
-					       message_register_, crypto_key, cipher);
+                                               &*message_register_, crypto_key, cipher);
 
     long int peer_id;
     {
@@ -772,7 +771,7 @@ OpenPRSProtobuf::oprs_pb_client_connect(std::string host, int port)
 {
   if (port <= 0) return build_nil();
 
-  ProtobufStreamClient *client = new ProtobufStreamClient(message_register_);
+  ProtobufStreamClient *client = new ProtobufStreamClient(&*message_register_);
 
   long int client_id;
   {

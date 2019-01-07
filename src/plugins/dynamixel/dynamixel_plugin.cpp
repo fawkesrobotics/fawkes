@@ -38,7 +38,7 @@ class DynamixelPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  DynamixelPlugin(Configuration *config)
+  explicit DynamixelPlugin(Configuration *config)
     : Plugin(config)
   {
     DynamixelSensorThread *sensor_thread = new DynamixelSensorThread();

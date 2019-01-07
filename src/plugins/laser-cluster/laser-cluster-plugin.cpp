@@ -35,7 +35,7 @@ class LaserClusterPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  LaserClusterPlugin(Configuration *config)
+  explicit LaserClusterPlugin(Configuration *config)
     : Plugin(config)
   {
 

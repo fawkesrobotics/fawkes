@@ -35,7 +35,7 @@ class NavGraphStaticConstraintsPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  NavGraphStaticConstraintsPlugin(Configuration *config)
+  explicit NavGraphStaticConstraintsPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new NavGraphStaticConstraintsThread());

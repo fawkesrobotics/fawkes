@@ -580,7 +580,6 @@ JacoBimanualOpenraveThread::_solve_multi_ik(vector<float> &left, vector<float> &
     // save state of robot
     RobotBase::RobotStateSaver robot_saver(robot);
 
-    vector<KinBody::LinkPtr> all_links = robot->GetLinks();
     // Find IK solutions for left arm
     // Disable all links of right manipulator
     for( set<KinBody::LinkPtr>::iterator body=links_right_.begin(); body!=links_right_.end(); ++body) {

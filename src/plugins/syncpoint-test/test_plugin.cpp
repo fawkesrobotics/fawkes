@@ -35,7 +35,7 @@ class SyncPointTestPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-    SyncPointTestPlugin(Configuration *config)
+    explicit SyncPointTestPlugin(Configuration *config)
     : Plugin(config)
   {
       std::vector<BlockedTimingAspect::WakeupHook> hooks;

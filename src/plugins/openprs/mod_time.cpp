@@ -127,8 +127,7 @@ pred_time_neq(TermList terms)
 	 (t1_sec->u.intval != t2_sec->u.intval) || (t1_sec->u.intval == t2_sec->u.intval && t1_usec->u.intval != t2_usec->u.intval) ? "YES" : "NO");
   */
 
-  if ((t1_sec->u.intval != t2_sec->u.intval) ||
-      (t1_sec->u.intval == t2_sec->u.intval && t1_usec->u.intval != t2_usec->u.intval))
+  if (t1_sec->u.intval != t2_sec->u.intval || t1_usec->u.intval != t2_usec->u.intval)
   {
     return TRUE;
   } else {

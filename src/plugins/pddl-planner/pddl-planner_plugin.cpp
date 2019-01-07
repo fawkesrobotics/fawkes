@@ -35,7 +35,7 @@ class PddlPlannerPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fakwes configuration
    */
-  PddlPlannerPlugin(Configuration *config)
+  explicit PddlPlannerPlugin(Configuration *config)
      : Plugin(config)
   {
      thread_list.push_back(new PddlPlannerThread());

@@ -34,7 +34,7 @@ class RosPosition3DPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RosPosition3DPlugin(Configuration *config)
+  explicit RosPosition3DPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RosPosition3DThread());

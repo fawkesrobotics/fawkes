@@ -28,7 +28,7 @@
 class FestivalPlugin : public fawkes::Plugin
 {
  public:
-  FestivalPlugin(fawkes::Configuration *config);
+  explicit FestivalPlugin(fawkes::Configuration *config);
 };
 
 #endif

@@ -33,7 +33,7 @@ class RosDynamicReconfigurePlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RosDynamicReconfigurePlugin(Configuration *config)
+  explicit RosDynamicReconfigurePlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RosDynamicReconfigureThread());

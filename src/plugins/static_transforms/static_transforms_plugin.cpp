@@ -35,7 +35,7 @@ class StaticTransformsPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  StaticTransformsPlugin(Configuration *config)
+  explicit StaticTransformsPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new StaticTransformsThread());

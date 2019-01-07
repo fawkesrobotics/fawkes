@@ -28,7 +28,7 @@
 class ROSPlugin : public fawkes::Plugin
 {
  public:
-  ROSPlugin(fawkes::Configuration *config);
+  explicit ROSPlugin(fawkes::Configuration *config);
 };
 
 #endif

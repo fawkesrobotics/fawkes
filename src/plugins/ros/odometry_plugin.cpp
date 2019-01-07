@@ -32,7 +32,7 @@ class ROSOdometryPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  ROSOdometryPlugin(Configuration *config)
+  explicit ROSOdometryPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new ROSOdometryThread());

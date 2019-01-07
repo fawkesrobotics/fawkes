@@ -348,7 +348,7 @@ JoystickTeleOpThread::loop()
     runstop_pressed_ = false;
     stop();
   } else if (joystick_if_->pressed_buttons() != cfg_runstop_enable_buttons_ &&
-             joystick_if_->pressed_buttons() != cfg_runstop_enable_buttons_)
+             joystick_if_->pressed_buttons() != cfg_runstop_disable_buttons_)
   {
 	  runstop_pressed_ = false;
   }

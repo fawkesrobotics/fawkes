@@ -42,6 +42,7 @@
 
 #include <list>
 #include <map>
+#include <memory>
 
 #include <protobuf_comm/server.h>
 #include <core/threading/mutex.h>
@@ -181,8 +182,8 @@ class OpenPRSProtobuf
   void oprs_assert_client_event(long int client_id, bool connect);
 
  private:
-  protobuf_comm::MessageRegister       *message_register_;
-  protobuf_comm::ProtobufStreamServer  *server_;
+	std::shared_ptr<protobuf_comm::MessageRegister> message_register_;
+  protobuf_comm::ProtobufStreamServer *server_;
 
   boost::signals2::signal<void (protobuf_comm::ProtobufStreamServer::ClientID,
 				std::shared_ptr<google::protobuf::Message>)> sig_server_sent_;

@@ -34,7 +34,7 @@ class WebviewPtzCamPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  WebviewPtzCamPlugin(Configuration *config) : Plugin(config)
+  explicit WebviewPtzCamPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new WebviewPtzCamThread());
   }

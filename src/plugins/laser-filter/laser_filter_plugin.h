@@ -32,7 +32,7 @@ namespace fawkes {
 class LaserFilterPlugin : public fawkes::Plugin
 {
  public:
-  LaserFilterPlugin(fawkes::Configuration *config);
+  explicit LaserFilterPlugin(fawkes::Configuration *config);
   ~LaserFilterPlugin();
   
  private:

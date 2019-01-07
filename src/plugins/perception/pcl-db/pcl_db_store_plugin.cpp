@@ -35,7 +35,7 @@ class PointCloudDBStorePlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  PointCloudDBStorePlugin(Configuration *config)
+  explicit PointCloudDBStorePlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new PointCloudDBStoreThread());

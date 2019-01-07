@@ -37,7 +37,7 @@ class NavGraphGeneratorPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  NavGraphGeneratorPlugin(Configuration *config)
+  explicit NavGraphGeneratorPlugin(Configuration *config)
     : Plugin(config)
   {
 #ifdef HAVE_VISUALIZATION

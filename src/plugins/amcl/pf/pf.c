@@ -139,7 +139,6 @@ void pf_init(pf_t *pf, pf_vector_t *mean, pf_matrix_t *cov)
 {
   int i;
   pf_sample_set_t *set;
-  pf_sample_t *sample;
   pf_pdf_gaussian_t *pdf;
   
   set = pf->sets + pf->current_set;
@@ -154,7 +153,7 @@ void pf_init(pf_t *pf, pf_vector_t *mean, pf_matrix_t *cov)
   // Compute the new sample poses
   for (i = 0; i < set->sample_count; i++)
   {
-    sample = set->samples + i;
+    pf_sample_t *sample = set->samples + i;
     sample->weight = 1.0 / pf->max_samples;
     sample->pose = pf_pdf_gaussian_sample(pdf);
 
@@ -435,8 +434,7 @@ int pf_resample_limit(pf_t *pf, int k)
 // Re-compute the cluster statistics for a sample set
 void pf_cluster_stats(pf_t *pf, pf_sample_set_t *set)
 {
-  int i, j, k, cidx;
-  pf_sample_t *sample;
+  int i, j, k;
   pf_cluster_t *cluster;
   
   // Workspace
@@ -479,12 +477,12 @@ void pf_cluster_stats(pf_t *pf, pf_sample_set_t *set)
   // Compute cluster stats
   for (i = 0; i < set->sample_count; i++)
   {
-    sample = set->samples + i;
+    pf_sample_t *sample = set->samples + i;
 
     //printf("%d %f %f %f\n", i, sample->pose.v[0], sample->pose.v[1], sample->pose.v[2]);
 
     // Get the cluster label for this sample
-    cidx = pf_kdtree_get_cluster(set->kdtree, sample->pose);
+    int cidx = pf_kdtree_get_cluster(set->kdtree, sample->pose);
     assert(cidx >= 0);
     if (cidx >= set->cluster_max_count)
       continue;

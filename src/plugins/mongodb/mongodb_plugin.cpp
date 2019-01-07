@@ -38,7 +38,7 @@ class MongoDBPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  MongoDBPlugin(Configuration *config) : Plugin(config)
+  explicit MongoDBPlugin(Configuration *config) : Plugin(config)
   {
     thread_list.push_back(new MongoDBThread());
   }

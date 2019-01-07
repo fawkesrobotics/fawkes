@@ -352,8 +352,8 @@ void
 init(ArgumentParser &argp)
 {
   std::string host = "localhost";
-  unsigned short int port = 1910;
   if ( argp.has_arg("r") ) {
+	  unsigned short int port = 1910;
     argp.parse_hostport("r", host, port);
 
     printf("Connecting to %s:%u\n", host.c_str(), port);
@@ -377,9 +377,8 @@ init(ArgumentParser &argp)
   }
 
   std::string fvhost = host;
-  unsigned short int fvport = 2208;
-
   if (argp.has_arg("n")) {
+	  unsigned short int fvport = 2208;
     argp.parse_hostport("n", fvhost, fvport);
     g_pcl_cam = new NetworkCamera(fvhost.c_str(), fvport, "openni-pointcloud-xyz");
     g_pcl_cam->open();

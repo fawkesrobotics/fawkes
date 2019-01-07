@@ -37,39 +37,32 @@ using namespace fawkes;
  * @param cache_logger cache logger to access recent log messages
  * @param logger logger to output messages
  */
-XmlRpcLogMethods::XmlRpcLogMethods(xmlrpc_c::registry *registry,
-				   fawkes::CacheLogger *cache_logger,
-				   fawkes::Logger *logger)
+XmlRpcLogMethods::XmlRpcLogMethods(std::shared_ptr<xmlrpc_c::registry> registry,
+                                   fawkes::CacheLogger *cache_logger,
+                                   fawkes::Logger *logger)
 {
   xmlrpc_registry_ = registry;
   cache_logger_    = cache_logger;
   logger_          = logger;
-  log_entries_     = new log_entries(cache_logger);
-  log_get_size_    = new log_get_size(cache_logger);
-  log_set_size_    = new log_set_size(cache_logger);
-  log_log_debug_   = new log_log(logger, fawkes::Logger::LL_DEBUG);
-  log_log_info_    = new log_log(logger, fawkes::Logger::LL_INFO);
-  log_log_warn_    = new log_log(logger, fawkes::Logger::LL_WARN);
-  log_log_error_   = new log_log(logger, fawkes::Logger::LL_ERROR);
-  xmlrpc_registry_->addMethod("log.entries",   log_entries_);
-  xmlrpc_registry_->addMethod("log.get_size",  log_get_size_);
-  xmlrpc_registry_->addMethod("log.set_size",  log_set_size_);
-  xmlrpc_registry_->addMethod("log.log_debug", log_log_debug_);
-  xmlrpc_registry_->addMethod("log.log_info",  log_log_info_);
-  xmlrpc_registry_->addMethod("log.log_warn",  log_log_warn_);
-  xmlrpc_registry_->addMethod("log.log_error", log_log_error_);
+  log_entries_.reset(new log_entries(cache_logger));
+  log_get_size_.reset(new log_get_size(cache_logger));
+  log_set_size_.reset(new log_set_size(cache_logger));
+  log_log_debug_.reset(new log_log(logger, fawkes::Logger::LL_DEBUG));
+  log_log_info_.reset(new log_log(logger, fawkes::Logger::LL_INFO));
+  log_log_warn_.reset(new log_log(logger, fawkes::Logger::LL_WARN));
+  log_log_error_.reset(new log_log(logger, fawkes::Logger::LL_ERROR));
+  xmlrpc_registry_->addMethod("log.entries",   &*log_entries_);
+  xmlrpc_registry_->addMethod("log.get_size",  &*log_get_size_);
+  xmlrpc_registry_->addMethod("log.set_size",  &*log_set_size_);
+  xmlrpc_registry_->addMethod("log.log_debug", &*log_log_debug_);
+  xmlrpc_registry_->addMethod("log.log_info",  &*log_log_info_);
+  xmlrpc_registry_->addMethod("log.log_warn",  &*log_log_warn_);
+  xmlrpc_registry_->addMethod("log.log_error", &*log_log_error_);
 }
 
 /** Destructor. */
 XmlRpcLogMethods::~XmlRpcLogMethods()
 {
-  delete log_entries_;
-  delete log_get_size_;
-  delete log_set_size_;
-  delete log_log_debug_;
-  delete log_log_info_;
-  delete log_log_warn_;
-  delete log_log_error_;
 }
 
 

@@ -35,7 +35,7 @@ class RosLaserScanPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  RosLaserScanPlugin(Configuration *config)
+  explicit RosLaserScanPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new RosLaserScanThread());

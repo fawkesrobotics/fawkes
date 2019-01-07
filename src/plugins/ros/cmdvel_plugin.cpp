@@ -32,7 +32,7 @@ class ROSCmdVelPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  ROSCmdVelPlugin(Configuration *config)
+  explicit ROSCmdVelPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new ROSCmdVelThread());

@@ -54,7 +54,6 @@ JacoOpenraveBaseThread::JacoOpenraveBaseThread(const char *name)
 {
 #ifdef HAVE_OPENRAVE
   cfg_OR_auto_load_ik_ = false;
-  plannerparams_ = "";
   plot_current_ = false;
 #endif
 }

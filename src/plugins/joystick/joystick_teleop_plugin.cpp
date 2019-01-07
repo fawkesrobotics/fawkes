@@ -34,7 +34,7 @@ class JoystickTeleOpPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  JoystickTeleOpPlugin(Configuration *config)
+  explicit JoystickTeleOpPlugin(Configuration *config)
     : Plugin(config)
   {
     thread_list.push_back(new JoystickTeleOpThread());

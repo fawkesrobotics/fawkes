@@ -39,7 +39,7 @@ class AmclPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  AmclPlugin(Configuration *config)
+  explicit AmclPlugin(Configuration *config)
     : Plugin(config)
   {
 #ifdef HAVE_ROS

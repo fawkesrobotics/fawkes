@@ -20,21 +20,32 @@ include $(BASEDIR)/etc/buildsys/config.mk
 SUBDIRS=console
 
 LIBS_bblogger = fawkescore fawkesutils fawkesaspects fawkesinterface \
-		fawkesblackboard SwitchInterface
+	              fawkesblackboard SwitchInterface
 OBJS_bblogger = bblogger_plugin.o log_thread.o
 
 
 LIBS_bblogreplay = fawkescore fawkesutils fawkesaspects fawkesinterface \
-		   fawkesblackboard
+	                 fawkesblackboard
 OBJS_bblogreplay = bblogreplay_plugin.o		\
 		   logreplay_thread.o		\
 		   logreplay_bt_thread.o	\
 		   bblogfile.o
 
-
 OBJS_all    = $(OBJS_bblogger) $(OBJS_bblogreplay)
-PLUGINS_all = $(PLUGINDIR)/bblogger.so \
-	      $(PLUGINDIR)/bblogreplay.so
+
+ifeq ($(HAVE_CPP11),1)
+  PLUGINS_all = $(PLUGINDIR)/bblogger.so \
+	              $(PLUGINDIR)/bblogreplay.so
+else
+  WARN_TARGETS += warning_cpp11
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+
+.PHONY: warning_cpp11
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting bblogger plugin$(TNORMAL) (C++11 not available)"
+endif
 
 include $(BUILDSYSDIR)/base.mk
-
