@@ -45,7 +45,7 @@ class SemaphoreSetData
   int     num_sems;
 };
 
-#ifdef _SEM_SEMUN_UNDEFINED
+#if defined(_SEM_SEMUN_UNDEFINED) || defined(__FreeBSD__)
 union semun
 {
   int val;                   /* value for SETVAL */
