@@ -202,7 +202,7 @@ WebviewStaticRequestProcessor::process_request(const fawkes::WebRequest *request
 	} catch (CouldNotOpenFileException &e) {
 		std::string catchall_file;
 		try {
-			catchall_file = std::move(find_file("/" + catchall_file_));
+			catchall_file = find_file("/" + catchall_file_);
 		} catch (Exception &e) {} // ignore, serve 404
 
 		if (catchall_file.empty()) {
