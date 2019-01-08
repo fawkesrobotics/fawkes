@@ -35,6 +35,10 @@ SkillCall::SkillCall(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+SkillCall::~SkillCall()
+{
+}
+
 std::string
 SkillCall::to_json(bool pretty) const
 {

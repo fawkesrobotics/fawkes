@@ -41,6 +41,9 @@ class SkillCall
 	 */
 	SkillCall(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~SkillCall();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

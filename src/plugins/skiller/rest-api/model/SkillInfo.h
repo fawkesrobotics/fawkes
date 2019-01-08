@@ -41,6 +41,9 @@ class SkillInfo
 	 */
 	SkillInfo(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~SkillInfo();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
