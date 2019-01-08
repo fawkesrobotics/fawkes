@@ -18,14 +18,21 @@ include $(LIBSRCDIR)/pddl_parser/pddl_parser.mk
 include $(FAWKES_BASEDIR)/src/plugins/mongodb/mongodb.mk
 
 LIBS_stn_generator = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
-                      fawkesblackboard fawkesinterface fawkespddl_parser \
-                      gvc cgraph
+                      fawkesblackboard fawkesinterface fawkespddl_parser
 
 OBJS_stn_generator = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all = $(OBJS_stn_generator)
 
-ifeq ($(HAVE_PDDL_PARSER)$(HAVE_MONGODB),11)
+ifneq ($(PKGCONFIG),)
+  HAVE_GRAPHVIZ    = $(if $(shell $(PKGCONFIG) --exists 'libgvc'; echo $${?/1/}),1,0)
+  CFLAGS_GRAPHVIZ  = $(shell $(PKGCONFIG) --cflags 'libgvc') -DWITH_CODEGENS
+  LDFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --libs 'libgvc')
+endif
+
+ifeq ($(HAVE_PDDL_PARSER)$(HAVE_MONGODB)$(HAVE_GRAPHVIZ),111)
+  CFLAGS  += $(CFLAGS_MONGODB)  $(CFLAGS_GRAPHVIZ)
+  LDFLAGS += $(LDFLAGS_MONGODB) $(LDFLAGS_GRAPHVIZ)
   PLUGINS_all = $(PLUGINDIR)/stn-generator.$(SOEXT)
 else
   ifneq ($(HAVE_PDDL_PARSER),1)
@@ -34,16 +41,21 @@ else
   ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS += warning_mongodb
   endif
+  ifneq ($(HAVE_GRAPHVIZ),1)
+    WARN_TARGETS += warning_graphviz
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_pddl_parser warning_mongodb
+.PHONY: warning_pddl_parser warning_mongodb warning_graphviz
 warning_pddl_parser:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting STN plugin$(TNORMAL) (pddl_parser not available)"
 warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting STN plugin$(TNORMAL) (mongo-cxx-driver not available)"
+warning_graphviz:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting STN plugin$(TNORMAL) (graphviz not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
