@@ -28,9 +28,8 @@ OBJS_robot_memory_test = robot_memory_test_plugin.o robot_memory_test_thread.o r
 OBJS_all = $(OBJS_robot_memory_test)
 
 ifeq ($(HAVE_ROBOT_MEMORY)$(HAVE_GTEST)$(HAVE_CPP11),111)
-  CFLAGS += $(CFLAGS_GTEST)
-  CFLAGS += $(CFLAGS_CPP11)
-  LDFLAGS += $(LDFLAGS_GTEST)
+  CFLAGS += $(CFLAGS_GTEST) $(CFLAGS_CPP11) $(CFLAGS_MONGODB)
+  LDFLAGS += $(LDFLAGS_GTEST) $(LDFLAGS_MONGODB)
   PLUGINS_all = $(PLUGINDIR)/robot_memory_test.$(SOEXT)
 else
   ifneq ($(HAVE_ROBOT_MEMORY),1)
