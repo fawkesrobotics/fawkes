@@ -47,6 +47,11 @@ ifeq ($(call clang_atleast_version,5,0),1)
   HAVE_CPP17=1
   CFLAGS_CPP17=-std=c++17
 endif
+ifeq ($(call clang_atleast_version,6,0),1)
+  # The default for Clang 6.0 6 is C++14
+  # Reset CPP11 flag to avoid downgrade to C++11.
+  CFLAGS_CPP11=
+endif
 
 CFLAGS_MTUNE_NATIVE=-march=native -mtune=native
 ifeq ($(OS),FreeBSD)
