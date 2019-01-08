@@ -462,7 +462,8 @@ PluginManager::unload(const std::string& plugin_name)
       meta_plugins_.unlock();
 
     } catch (Exception &e) {
-      LibLogger::log_error("PluginManager", "Could not finalize one or more threads of plugin %s, NOT unloading plugin", plugin_name);
+      LibLogger::log_error("PluginManager", "Could not finalize one or more threads "
+                           "of plugin %s, NOT unloading plugin", plugin_name.c_str());
       throw;
     }
   } else if (meta_plugins_.find(plugin_name) != meta_plugins_.end()) {
@@ -477,7 +478,7 @@ PluginManager::unload(const std::string& plugin_name)
 
       meta_plugins_.erase_locked(*i);
       LibLogger::log_info("PluginManager", "UNloading plugin %s for meta plugin %s",
-        i->c_str(), plugin_name);
+													i->c_str(), plugin_name.c_str());
       unload(i->c_str());
     }
   }
