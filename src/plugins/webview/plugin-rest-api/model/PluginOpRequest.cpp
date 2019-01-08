@@ -34,6 +34,10 @@ PluginOpRequest::PluginOpRequest(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+PluginOpRequest::~PluginOpRequest()
+{
+}
+
 std::string
 PluginOpRequest::to_json(bool pretty) const
 {
@@ -71,11 +75,6 @@ PluginOpRequest::to_json_value(rapidjson::Document& d, rapidjson::Value& v) cons
 		v_apiVersion.SetString(*apiVersion_, allocator);
 		v.AddMember("apiVersion", v_apiVersion, allocator);
 	}
-	if (type_) {
-		rapidjson::Value v_type;
-		v_type.SetString(*type_, allocator);
-		v.AddMember("type", v_type, allocator);
-	}
 	if (desired_state_) {
 		rapidjson::Value v_desired_state;
 		v_desired_state.SetString(*desired_state_, allocator);
@@ -101,9 +100,6 @@ PluginOpRequest::from_json_value(const rapidjson::Value& d)
 	}
 	if (d.HasMember("apiVersion") && d["apiVersion"].IsString()) {
 		apiVersion_ = d["apiVersion"].GetString();
-	}
-	if (d.HasMember("type") && d["type"].IsString()) {
-		type_ = d["type"].GetString();
 	}
 	if (d.HasMember("desired_state") && d["desired_state"].IsString()) {
 		desired_state_ = d["desired_state"].GetString();

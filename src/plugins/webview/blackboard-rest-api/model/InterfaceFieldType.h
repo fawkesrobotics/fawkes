@@ -40,6 +40,9 @@ class InterfaceFieldType
 	 */
 	InterfaceFieldType(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~InterfaceFieldType();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

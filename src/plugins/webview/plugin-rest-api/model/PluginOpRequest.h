@@ -40,6 +40,9 @@ class PluginOpRequest
 	 */
 	PluginOpRequest(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~PluginOpRequest();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
@@ -115,22 +118,6 @@ class PluginOpRequest
 	{
 		apiVersion_ = apiVersion;
 	}
-  /** Get type value.
-   * @return type value
-   */
-	std::optional<std::string>
- type() const
-	{
-		return type_;
-	}
-
-	/** Set type value.
-	 * @param type new value
-	 */
-	void set_type(const std::string& type)
-	{
-		type_ = type;
-	}
   /** Get desired_state value.
    * @return desired_state value
    */
@@ -152,8 +139,6 @@ class PluginOpRequest
  kind_;
 	std::optional<std::string>
  apiVersion_;
-	std::optional<std::string>
- type_;
 	std::optional<std::string>
  desired_state_;
 

@@ -42,6 +42,9 @@ class InterfaceInfo
 	 */
 	InterfaceInfo(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~InterfaceInfo();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

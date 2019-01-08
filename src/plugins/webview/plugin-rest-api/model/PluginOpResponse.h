@@ -40,6 +40,9 @@ class PluginOpResponse
 	 */
 	PluginOpResponse(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~PluginOpResponse();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

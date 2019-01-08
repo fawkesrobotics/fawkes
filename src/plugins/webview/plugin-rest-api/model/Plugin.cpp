@@ -34,6 +34,10 @@ Plugin::Plugin(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+Plugin::~Plugin()
+{
+}
+
 std::string
 Plugin::to_json(bool pretty) const
 {
@@ -136,8 +140,8 @@ Plugin::from_json_value(const rapidjson::Value& d)
 		meta_children_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			meta_children_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 	if (d.HasMember("is_loaded") && d["is_loaded"].IsBool()) {
 		is_loaded_ = d["is_loaded"].GetBool();
 	}

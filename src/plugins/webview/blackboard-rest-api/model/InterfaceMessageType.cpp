@@ -34,6 +34,10 @@ InterfaceMessageType::InterfaceMessageType(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+InterfaceMessageType::~InterfaceMessageType()
+{
+}
+
 std::string
 InterfaceMessageType::to_json(bool pretty) const
 {
@@ -101,8 +105,8 @@ InterfaceMessageType::from_json_value(const rapidjson::Value& d)
 			std::shared_ptr<InterfaceFieldType> nv{new InterfaceFieldType()};
 			nv->from_json_value(v);
 			fields_.push_back(std::move(nv));
-		}	
-	}	
+		}
+	}
 
 }
 

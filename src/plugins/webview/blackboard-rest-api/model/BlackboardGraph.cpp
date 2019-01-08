@@ -34,6 +34,10 @@ BlackboardGraph::BlackboardGraph(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+BlackboardGraph::~BlackboardGraph()
+{
+}
+
 std::string
 BlackboardGraph::to_json(bool pretty) const
 {

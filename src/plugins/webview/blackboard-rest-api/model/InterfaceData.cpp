@@ -34,6 +34,10 @@ InterfaceData::InterfaceData(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+InterfaceData::~InterfaceData()
+{
+}
+
 std::string
 InterfaceData::to_json(bool pretty) const
 {
@@ -139,8 +143,8 @@ InterfaceData::from_json_value(const rapidjson::Value& d)
 		readers_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			readers_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 	if (d.HasMember("data") && d["data"].IsObject()) {
 		std::shared_ptr<rapidjson::Document> d_data =
 		  std::make_shared<rapidjson::Document>();
