@@ -34,6 +34,10 @@ PlanAction::PlanAction(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+PlanAction::~PlanAction()
+{
+}
+
 std::string
 PlanAction::to_json(bool pretty) const
 {

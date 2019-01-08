@@ -34,6 +34,10 @@ DomainOperatorParameter::DomainOperatorParameter(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+DomainOperatorParameter::~DomainOperatorParameter()
+{
+}
+
 std::string
 DomainOperatorParameter::to_json(bool pretty) const
 {

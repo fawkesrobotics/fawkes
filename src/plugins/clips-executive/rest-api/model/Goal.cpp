@@ -34,6 +34,10 @@ Goal::Goal(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+Goal::~Goal()
+{
+}
+
 std::string
 Goal::to_json(bool pretty) const
 {

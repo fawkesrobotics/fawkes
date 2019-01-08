@@ -34,6 +34,10 @@ Plan::Plan(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+Plan::~Plan()
+{
+}
+
 std::string
 Plan::to_json(bool pretty) const
 {

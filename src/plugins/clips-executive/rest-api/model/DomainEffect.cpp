@@ -34,6 +34,10 @@ DomainEffect::DomainEffect(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+DomainEffect::~DomainEffect()
+{
+}
+
 std::string
 DomainEffect::to_json(bool pretty) const
 {

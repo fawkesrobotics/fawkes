@@ -40,6 +40,9 @@ class DomainOperatorParameter
 	 */
 	DomainOperatorParameter(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~DomainOperatorParameter();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

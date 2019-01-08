@@ -34,6 +34,10 @@ DomainPreconditionCompound::DomainPreconditionCompound(const rapidjson::Value& v
 	from_json_value(v);
 }
 
+DomainPreconditionCompound::~DomainPreconditionCompound()
+{
+}
+
 std::string
 DomainPreconditionCompound::to_json(bool pretty) const
 {

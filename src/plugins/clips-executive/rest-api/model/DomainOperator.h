@@ -41,6 +41,9 @@ class DomainOperator
 	 */
 	DomainOperator(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~DomainOperator();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
