@@ -1307,7 +1307,7 @@ DynamixelChain::set_torque_enabled(unsigned char id, bool enabled )
  * @param num_servos number of servos to set, maximum is 120
  */
 void
-DynamixelChain::set_torques_enabled(bool enabled, unsigned char num_servos, ...)
+DynamixelChain::set_torques_enabled(bool enabled, unsigned int num_servos, ...)
 {
   if (num_servos > 120) {
     // not enough space for everything in the parameters..
