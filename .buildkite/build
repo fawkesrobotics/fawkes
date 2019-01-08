@@ -26,5 +26,14 @@ source /etc/profile
 # Error out on any error in the script, pipes etc.
 set -euo pipefail
 
+NPROC=1
+if type -p nproc >/dev/null; then
+	# Linux
+	NPROC=$(nproc)
+elif sysctl -n hw.ncpu >/dev/null 2>&1; then
+	# FreeBSD
+	NPROC=$(sysctl -n hw.ncpu)
+fi
+
 # Build software
-gmake -j$(nproc) all gui
+gmake -j${NPROC} all gui
