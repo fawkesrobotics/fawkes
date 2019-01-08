@@ -29,7 +29,6 @@
 
 #include <cstddef>
 #include <list>
-#define __STDC_LIMIT_MACROS
 #include <stdint.h>
 
 #define INTERFACE_TYPE_SIZE_   48
