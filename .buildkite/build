@@ -26,6 +26,7 @@ source /etc/profile
 # Error out on any error in the script, pipes etc.
 set -euo pipefail
 
+# Determine number of available CPU cores
 NPROC=1
 if type -p nproc >/dev/null; then
 	# Linux
@@ -35,5 +36,12 @@ elif sysctl -n hw.ncpu >/dev/null 2>&1; then
 	NPROC=$(sysctl -n hw.ncpu)
 fi
 
+# Determine GNU Make executable
+MAKE=make
+if type -p gmake >/dev/null; then
+	MAKE=gmake
+fi
+
 # Build software
-gmake -j${NPROC} all gui
+$MAKE -j$NPROC all gui
+
