@@ -31,6 +31,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <string>
+#include <unistd.h>
 
 namespace fawkes {
 
@@ -232,7 +233,15 @@ SubProcess::run_proc(const char *file, const char *argv[], const char *envp[],
     close(pipe_stdout[1]);
     close(pipe_stderr[1]);
 
+#ifdef __FreeBSD__
+    if (envp) {
+      execve(file, (char * const *)argv, (char * const *)envp);
+    } else {
+      execv(file, (char * const *)argv);
+    }
+#else
     execvpe(file, (char * const *)argv, envp ? (char * const *)envp : environ);
+#endif
 
     // execvpe only returns on error, which is when we should exit
     perror("Failed to execute command");
