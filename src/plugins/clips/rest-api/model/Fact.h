@@ -41,6 +41,9 @@ class Fact
 	 */
 	Fact(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~Fact();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

@@ -34,6 +34,10 @@ Environment::Environment(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+Environment::~Environment()
+{
+}
+
 std::string
 Environment::to_json(bool pretty) const
 {
