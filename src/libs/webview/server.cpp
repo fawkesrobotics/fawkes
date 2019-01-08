@@ -77,8 +77,8 @@ WebServer::setup_tls(const char *key_pem_filepath, const char *cert_pem_filepath
                      const char *cipher_suite)
 {
 	tls_enabled_  = true;
-	tls_key_mem_  = std::move(read_file(key_pem_filepath));
-	tls_cert_mem_ = std::move(read_file(cert_pem_filepath));
+	tls_key_mem_  = read_file(key_pem_filepath);
+	tls_cert_mem_ = read_file(cert_pem_filepath);
   if (cipher_suite == NULL) {
 	  tls_cipher_suite_ = WEBVIEW_DEFAULT_CIPHERS;
   } else {
