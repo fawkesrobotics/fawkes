@@ -445,8 +445,8 @@ Roomba500Thread::loop()
 	roomba500_if_->msgq_first(msg);
 
       Roomba500::Mode mode = roomba_->get_mode();
-      char color     =   0;
-      char intensity = 255;
+      unsigned char color     =   0;
+      unsigned char intensity = 255;
 
       switch (msg->mode()) {
       case Roomba500Interface::MODE_OFF:
@@ -716,8 +716,8 @@ Roomba500Thread::write_blackboard()
 void
 Roomba500Thread::set_mode(Roomba500::Mode mode)
 {
-  char color     =   0;
-  char intensity = 255;
+  unsigned char color     =   0;
+  unsigned char intensity = 255;
 
   switch (mode) {
   case Roomba500::MODE_OFF:     intensity =   0; break;
