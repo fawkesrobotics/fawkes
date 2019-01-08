@@ -166,6 +166,10 @@
 	from_json_value(v);
 }
 
+{{ name }}::~{{ name }}()
+{
+}
+
 std::string
 {{ name }}::to_json(bool pretty) const
 {

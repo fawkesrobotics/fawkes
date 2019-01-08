@@ -131,6 +131,9 @@ class {{ name }}
 	 */
 	{{ name }}(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~{{ name }}();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
