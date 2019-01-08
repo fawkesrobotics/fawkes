@@ -162,7 +162,7 @@ void RobotMemory::loop()
  */
 QResCursor RobotMemory::query(Query query, const std::string& collection)
 {
-  std::string coll{std::move(check_collection_name(collection))};
+  std::string coll{check_collection_name(collection)};
   mongo::DBClientBase* mongodb_client = get_mongodb_client(coll);
   log_deb(std::string("Executing Query "+ query.toString() +" on collection "+coll));
 
@@ -197,7 +197,7 @@ QResCursor RobotMemory::query(Query query, const std::string& collection)
 mongo::BSONObj
 RobotMemory::aggregate(const std::vector<mongo::BSONObj>& pipeline, const std::string& collection)
 {
-  std::string coll{std::move(check_collection_name(collection))};
+  std::string coll{check_collection_name(collection)};
   mongo::DBClientBase* mongodb_client = get_mongodb_client(coll);
   log_deb(std::string("Executing Aggregation on collection "+coll));
 
@@ -517,7 +517,7 @@ int RobotMemory::clear_memory()
  */
 int RobotMemory::restore_collection(const std::string& collection, const std::string& directory)
 {
-  std::string coll{std::move(check_collection_name(collection))};
+  std::string coll{check_collection_name(collection)};
   drop_collection(coll);
 
   //lock (mongo_client not thread safe)

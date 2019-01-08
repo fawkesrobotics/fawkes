@@ -56,7 +56,7 @@ EventTriggerManager::EventTriggerManager(Logger* logger, Configuration* config,
   // create connections to running mongod instances because only there
   std::string local_db = config_->get_string("/plugins/robot-memory/database");
   dbnames_local_.push_back(local_db);
-  dbnames_distributed_ = std::move(config_->get_strings("/plugins/robot-memory/distributed-db-names"));
+  dbnames_distributed_ = config_->get_strings("/plugins/robot-memory/distributed-db-names");
 
   mutex_ = new Mutex();
 
