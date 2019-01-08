@@ -745,7 +745,7 @@ FirewireCamera::parse_set_focus(const char *focus)
     long int focus_value = strtol(f.c_str(), &endptr, 10);
     if ( endptr[0] != 0 ) {
       throw TypeMismatchException("Focus value is invalid. String to int conversion failed");
-    } else if ( focus < 0 ) {
+    } else if ( focus_value < 0 ) {
       throw OutOfBoundsException("'Focus value < 0", focus_value, 0, 0xFFFFFFFF);
     }
     _auto_focus = false;
