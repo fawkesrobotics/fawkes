@@ -397,7 +397,6 @@ MongoDBReplicaSetConfig::rs_monitor(const mongo::BSONObj &status_reply)
 			std::chrono::time_point<std::chrono::high_resolution_clock>
 				last_heartbeat_rcvd(std::chrono::milliseconds(m["lastHeartbeatRecv"].date()));
 			auto now = std::chrono::high_resolution_clock::now();
-			auto diff_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_heartbeat_rcvd);
 			if ( (m["health"].numberInt() != 1) || (now - last_heartbeat_rcvd) > 15s) {
 				//logger->log_info(name(), "Reply: %s", status_reply.jsonString(mongo::Strict, true).c_str());
 				unresponsive.insert(m["name"].str());
