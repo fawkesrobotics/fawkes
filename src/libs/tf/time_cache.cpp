@@ -155,6 +155,10 @@ TimeCache::TimeCache(float max_storage_time)
 : max_storage_time_(max_storage_time)
 {}
 
+/** Destructor. */
+TimeCache::~TimeCache()
+{
+}
 
 /** Create extrapolation error string.
  * @param t0 requested time

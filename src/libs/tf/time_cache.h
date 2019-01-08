@@ -103,8 +103,9 @@ class TimeCache : public TimeCacheInterface
   static const int64_t DEFAULT_MAX_STORAGE_TIME = 1ULL * 1000000000LL; //!< default value of 10 seconds storage
   
   TimeCache(float max_storage_time = DEFAULT_MAX_STORAGE_TIME);
+  virtual ~TimeCache();
 
-	virtual TimeCacheInterfacePtr clone(const fawkes::Time &look_back_until = fawkes::Time(0,0)) const;
+  virtual TimeCacheInterfacePtr clone(const fawkes::Time &look_back_until = fawkes::Time(0,0)) const;
   virtual bool get_data(fawkes::Time time, TransformStorage & data_out,
                         std::string* error_str = 0);
   virtual bool insert_data(const TransformStorage& new_data);
@@ -139,6 +140,7 @@ class StaticCache : public TimeCacheInterface
 {
  public:
 	StaticCache();
+	virtual ~StaticCache();
 	
 	virtual TimeCacheInterfacePtr clone(const fawkes::Time &look_back_until = fawkes::Time(0,0)) const;
 	virtual bool get_data(fawkes::Time time, TransformStorage & data_out,
