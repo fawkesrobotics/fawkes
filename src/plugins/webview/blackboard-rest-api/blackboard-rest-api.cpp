@@ -211,7 +211,7 @@ gen_field_value(fawkes::InterfaceFieldIterator& i,
 		case IFT_DOUBLE: value.SetDouble(i.get_double()); break;
 		case IFT_BYTE:   value.SetUint(i.get_byte());     break;
 		case IFT_STRING:
-			[[fallthrough]]
+			[[fallthrough]];
 		case IFT_ENUM:
 			value.SetString(std::string(i.get_value_string()), allocator);
 		}
