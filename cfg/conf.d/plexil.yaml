@@ -136,13 +136,13 @@ plexil:
     # cf. http://plexil.sourceforge.net/wiki/index.php/Interface_Configuration_File
     # The configuration supports the same structure as above for adapters.
     # Cf. there for possible values. Some examples are given below.
-    # listeners:
-    #   # This enables using the Plexil viewer
-    #   - type: LuvListener
-    #     attr:
-    #       Port: 49100
-    #       HostName: 127.0.0.1
-    #       Blocking: true
+    listeners:
+      # This enables using the Plexil viewer
+      - type: LuvListener
+        attr:
+          Port: 49100
+          HostName: 127.0.0.1
+          Blocking: false
     #   # The PlanDebugListener outputs as "Node:clock", make sure to enable it in Debug.cfg
     #   - type: PlanDebugListener
 
