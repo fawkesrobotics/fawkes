@@ -260,7 +260,7 @@ NavGraphThread::loop()
 
     } else if (pp_nav_if_->msgq_first_is<NavigatorInterface::PlaceGotoMessage>()) {
       NavigatorInterface::PlaceGotoMessage *msg = pp_nav_if_->msgq_first(msg);
-      logger->log_info(name(), "goto '%s'", msg->place());
+      logger->log_info(name(), "Goal '%s'", msg->place());
 
       pp_nav_if_->set_msgid(msg->id());
       if (generate_plan(msg->place())) {
@@ -336,7 +336,7 @@ NavGraphThread::loop()
       }
 
     } else if (node_reached()) {
-      logger->log_info(name(), "Node '%s' has been reached",
+      logger->log_debug(name(), "Node '%s' has been reached",
 		       traversal_.current().name().c_str());
       last_node_ = traversal_.current().name();
       if (traversal_.last()) {
@@ -353,7 +353,7 @@ NavGraphThread::loop()
 	publish_path();
 
         try {
-          logger->log_info(name(), "Sending next goal %s after node reached",
+          logger->log_debug(name(), "Sending next goal %s after node reached",
 			   traversal_.current().name().c_str());
           send_next_goal();
         } catch (Exception &e) {
@@ -363,7 +363,7 @@ NavGraphThread::loop()
       }
 
     } else if ((shortcut_to = shortcut_possible()) > 0) {
-      logger->log_info(name(), "Shortcut posible, jumping from '%s' to '%s'",
+      logger->log_info(name(), "Shortcut possible, jumping from '%s' to '%s'",
 		       traversal_.current().name().c_str(),
 		       traversal_.path().nodes()[shortcut_to].name().c_str());
 
@@ -371,7 +371,7 @@ NavGraphThread::loop()
 
       if (traversal_.remaining() > 0) {
         try {
-          logger->log_info(name(), "Sending next goal after taking a shortcut");
+          logger->log_debug(name(), "Sending next goal after taking a shortcut");
           send_next_goal();
         } catch (Exception &e) {
           logger->log_warn(name(), "Failed to send next goal (shortcut)");
@@ -687,7 +687,7 @@ NavGraphThread::start_plan()
     for (unsigned int i = 1; i < path_.size(); ++i) {
       m += " - " + path_.nodes()[i].name();
     }
-    logger->log_info(name(), "Starting route: %s", m.c_str());
+    logger->log_info(name(), "Route: %s", m.c_str());
 #ifdef HAVE_VISUALIZATION
     if (vt_) {
       vt_->set_traversal(traversal_);
@@ -705,7 +705,7 @@ NavGraphThread::start_plan()
     pp_nav_if_->set_dest_y(final_target.y());
 
     try {
-      logger->log_info(name(), "Sending next goal on plan start");
+      logger->log_debug(name(), "Sending next goal on plan start");
       send_next_goal();
     } catch (Exception &e) {
       logger->log_warn(name(), "Failed to send next goal (start plan)");

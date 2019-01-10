@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<Interfaces>
+	<!-- In an external configuration, FawkesRemoteAdapter *has* to come first! -->
+	<Adapter AdapterType="FawkesRemoteAdapter" LibPath="../../lib/plexil/FawkesRemoteAdapter.so">
+    <Parameter key="host">127.0.0.1</Parameter>
+    <Parameter key="port">1910</Parameter>
+		<Parameter key="navgraph_filename">example.yaml</Parameter>
+		<Parameter key="navgraph_allow_multi">true</Parameter>
+  </Adapter>
+	<Adapter AdapterType="ThreadName" LibPath="../../lib/plexil/ThreadName.so" name="PlexilExecutive" />
+	<Adapter AdapterType="FawkesTimeAdapter" LibPath="../../lib/plexil/FawkesTimeAdapter.so" />
+	<Adapter AdapterType="FawkesLoggingAdapter" LibPath="../../lib/plexil/FawkesLoggingAdapter.so" />
+	<Adapter AdapterType="FawkesConfigurationAdapter" LibPath="../../lib/plexil/FawkesConfigurationAdapter.so" />
+	<Adapter AdapterType="BehaviorEngineAdapter" LibPath="../../lib/plexil/BehaviorEngineAdapter.so" />
+	<!--
+	<Adapter AdapterType="ProtobufCommAdapter" LibPath="../../lib/plexil/ProtobufCommAdapter.so"
+	         protos="@BASEDIR@/src/plugins/plexil/specs/test/msgs" />
+	-->
+	<Adapter AdapterType="GlobalState" LibPath="../../lib/plexil/GlobalState.so">
+		<DefaultLookupAdapter/>
+	</Adapter>
+	<Adapter AdapterType="NavGraphAdapter" LibPath="../../lib/plexil/NavGraphAdapter.so" />
+	<Listener ListenerType="LuvListener" Blocking="false" HostName="127.0.0.1" Port="49100" />
+</Interfaces>

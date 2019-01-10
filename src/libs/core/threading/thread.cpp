@@ -1358,6 +1358,46 @@ Thread::current_thread_id()
 }
 
 
+/** Get the name of the current thread.
+ * This will first check if this is a Thread instance, and if so call
+ * name() to determine the name. Otherwise, it will check if a
+ * system-specific name can be retrieved. If this is not the case,
+ * returns an empty string.
+ * @return name of thread if it cannot be determined, empty string otherwise
+ */
+std::string
+Thread::current_thread_name()
+{
+	Thread *t = Thread::current_thread_noexc();
+  if ( t ) {
+	  return t->name();
+  } else {
+	  char name[16];
+	  if (pthread_getname_np(pthread_self(), name, 16) == 0) {
+		  return name;
+	  }
+  }
+
+  return "";
+}
+
+/** Set the name of the current thread.
+ * This will first check if this is a Thread instance, and if so call
+ * set_name() to set the name. Otherwise, it will check if a
+ * system-specific name can be set.
+ * @param thread_name thread name to set
+ */
+void
+Thread::current_thread_name(const std::string& thread_name)
+{
+	Thread *t = Thread::current_thread_noexc();
+  if ( t ) {
+	  return t->set_name("%s", thread_name.c_str());
+  } else {
+	  pthread_setname_np(pthread_self(), thread_name.c_str());
+  }
+}
+
 /** Get the Thread instance of the currently running thread.
  * This will return the Thread instance of the thread in which's context this method was
  * called.

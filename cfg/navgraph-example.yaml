@@ -1,0 +1,67 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,navgraph/
+---
+graph-name: Example
+root: Origin
+
+default-properties:
+    # Max. distance between actual and target positions to deem the target
+    # reached. This value is for intermediate nodes on a path; m
+    # The value can be overwritten per node in the graph file.
+    - travel_tolerance: 0.7
+
+    # Max. distance between actual and target positions to deem the target
+    # reached. This value is for the last node on a path; m
+    # The value can be overwritten per node in the graph file.
+    - target_tolerance: 0.7
+
+    # Max. distance between actual and target orientation to deem the target
+    # reached. This value is for the last node on a path; rad
+    - orientation_tolerance: 0.6
+
+    # When following a plan the robot will check all upcoming nodes if they
+    # are close to the robot within this tolerance. If so, they take a shortcut
+    # and will go to the node in the plan after the shortcut node.
+    # This is potentially dangerous depending on the graph and navigator as it
+    # might violate the typical graph constraint of only having direct-line-of-tavel
+    # connections. The value can be overidden with a node property of the same name; m
+    - shortcut_tolerance: 1.2
+
+    # Example for some custom, domain-specific default property
+    - custom_value: 0.45
+
+nodes:
+  - name: Origin
+    pos: [0.0, 0.0]
+
+  - name: M1
+    pos: [1.0, 1.0]
+    properties:
+      - orientation: -1.57
+      # The following could be added to enforce stricter tolerances
+      #- travel_tolerance: 0.1
+      #- orientation_tolerance: 0.1
+
+  - name: M2
+    pos: [2.0, 2.0]
+    properties:
+      - orientation: 0.0
+
+  - name: M3
+    pos: [1.0, 3.0]
+    properties:
+      - orientation: 0.0
+
+  - name: Ins
+    pos: [0.85, 2.4]
+    properties:
+      - orientation: 2.8
+
+# Possible directional tags:
+# !bidir (bidirectional, default), !dir (directed)
+connections:
+  - [Origin, M1]
+  - [Ins, M1]
+  - [M1, M2]
+  - !dir [M2, M3]
+  - !dir [M3, M1]

@@ -1,0 +1,18 @@
+
+// ###  Command declarations ###
+Command pprint(...);
+Command print(...);
+Command log_error(...);
+Command log_info(...);
+Command skill_call(...);
+Boolean Command say(String text);
+Real    Lookup time;
+
+HelloWorld:
+{
+  Print: { pprint("Hello World"); }
+  Log: { log_error("Hello World"); }
+  Delay1: Wait 2.0;
+  Say: SynchronousCommand say("Hello World");
+  SayComplete: { log_info("Say call completed"); }
+}

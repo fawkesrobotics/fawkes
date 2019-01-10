@@ -76,7 +76,7 @@ ifneq ($(PKGCONFIG),)
     endif
     ifneq ($(HAVE_OPENPRS_BOOST_LIBS),1)
       OPENPRS_ERROR += Boost libraries missing
-      $(foreach l,$(OPENPRS_REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_openprs_boost_$l))
+      OPENPRS_WARN_TARGETS_BOOST = $(foreach l,$(OPENPRS_REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_openprs_boost_$l))
     endif
   endif
 else
