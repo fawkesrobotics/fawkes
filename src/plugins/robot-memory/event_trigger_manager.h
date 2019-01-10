@@ -22,7 +22,6 @@
 #ifndef FAWKES_SRC_PLUGINS_ROBOT_MEMORY_EVENT_TRIGGER_MANAGER_H_
 #define FAWKES_SRC_PLUGINS_ROBOT_MEMORY_EVENT_TRIGGER_MANAGER_H_
 
-#include <mongo/client/dbclient.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
@@ -32,6 +31,10 @@
 #include <plugin/loader.h>
 #include <core/threading/mutex_locker.h>
 
+namespace mongo {
+	class DBClientBase;
+	class DBClientCursor;
+}
 
 ///typedef for shorter type description
 typedef std::unique_ptr<mongo::DBClientCursor> QResCursor;

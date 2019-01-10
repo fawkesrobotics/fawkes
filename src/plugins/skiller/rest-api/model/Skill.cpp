@@ -35,6 +35,10 @@ Skill::Skill(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+Skill::~Skill()
+{
+}
+
 std::string
 Skill::to_json(bool pretty) const
 {

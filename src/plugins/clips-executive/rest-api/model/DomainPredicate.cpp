@@ -34,6 +34,10 @@ DomainPredicate::DomainPredicate(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+DomainPredicate::~DomainPredicate()
+{
+}
+
 std::string
 DomainPredicate::to_json(bool pretty) const
 {

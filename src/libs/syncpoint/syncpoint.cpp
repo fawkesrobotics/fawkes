@@ -26,6 +26,7 @@
 #include <utils/time/time.h>
 
 #include <string.h>
+#include <pthread.h>
 
 using namespace std;
 
@@ -560,7 +561,7 @@ SyncPoint::watcher_is_waiting(std::string watcher, WakeupType type) const
       return watchers_wait_for_all_.count(watcher);
     default:
       throw Exception("Unknown watch type %u for syncpoint %s",
-                      type, identifier_);
+                      type, identifier_.c_str());
   }
 }
 

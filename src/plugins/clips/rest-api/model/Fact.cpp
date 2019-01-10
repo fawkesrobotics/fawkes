@@ -34,6 +34,10 @@ Fact::Fact(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+Fact::~Fact()
+{
+}
+
 std::string
 Fact::to_json(bool pretty) const
 {
@@ -133,8 +137,8 @@ Fact::from_json_value(const rapidjson::Value& d)
 			std::shared_ptr<SlotValue> nv{new SlotValue()};
 			nv->from_json_value(v);
 			slots_.push_back(std::move(nv));
-		}	
-	}	
+		}
+	}
 
 }
 

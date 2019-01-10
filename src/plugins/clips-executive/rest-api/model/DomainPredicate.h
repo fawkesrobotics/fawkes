@@ -40,6 +40,9 @@ class DomainPredicate
 	 */
 	DomainPredicate(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~DomainPredicate();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

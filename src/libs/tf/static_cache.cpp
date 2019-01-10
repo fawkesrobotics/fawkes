@@ -67,6 +67,11 @@ StaticCache::StaticCache()
 {
 }
 
+/** Destructor . */
+StaticCache::~StaticCache()
+{
+}
+
 /** Create a copy of this time cache.
  * @param look_back_until Ignored for static caches
  * @return shared pointer to copy of this time cache

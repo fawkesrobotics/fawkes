@@ -192,8 +192,6 @@ SickTiM55xEthernetAcquisitionThread::open_device()
 
     deadline_.expires_from_now(boost::posix_time::seconds(5));
 
-    boost::system::error_code ec;
-
     for (; iter != boost::asio::ip::tcp::resolver::iterator(); ++iter) {
       socket_.close();
       ec_ = boost::asio::error::would_block;

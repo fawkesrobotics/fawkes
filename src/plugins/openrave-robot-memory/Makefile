@@ -27,7 +27,8 @@ OBJS_openrave_robot_memory = openrave-robot-memory_plugin.o openrave-robot-memor
 OBJS_all = $(OBJS_openrave_robot_memory)
 
 ifeq ($(HAVE_CPP11)$(HAVE_ROBOT_MEMORY),11)
-  CFLAGS  += $(CFLAGS_CPP11)
+  CFLAGS  += $(CFLAGS_CPP11) $(CFLAGS_MONGODB)
+  LDFLAGS += $(LDFLAGS_MONGODB)
   PLUGINS_all = $(PLUGINDIR)/openrave-robot-memory.$(SOEXT)
 else
   ifneq ($(HAVE_ROBOT_MEMORY),1)

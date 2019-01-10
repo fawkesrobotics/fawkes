@@ -34,6 +34,10 @@ ImageInfo::ImageInfo(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+ImageInfo::~ImageInfo()
+{
+}
+
 std::string
 ImageInfo::to_json(bool pretty) const
 {
@@ -75,11 +79,6 @@ ImageInfo::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		rapidjson::Value v_id;
 		v_id.SetString(*id_, allocator);
 		v.AddMember("id", v_id, allocator);
-	}
-	if (type_) {
-		rapidjson::Value v_type;
-		v_type.SetString(*type_, allocator);
-		v.AddMember("type", v_type, allocator);
 	}
 	if (colorspace_) {
 		rapidjson::Value v_colorspace;
@@ -129,9 +128,6 @@ ImageInfo::from_json_value(const rapidjson::Value& d)
 	}
 	if (d.HasMember("id") && d["id"].IsString()) {
 		id_ = d["id"].GetString();
-	}
-	if (d.HasMember("type") && d["type"].IsString()) {
-		type_ = d["type"].GetString();
 	}
 	if (d.HasMember("colorspace") && d["colorspace"].IsString()) {
 		colorspace_ = d["colorspace"].GetString();

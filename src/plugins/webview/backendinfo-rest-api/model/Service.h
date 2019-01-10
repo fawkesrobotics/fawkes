@@ -40,6 +40,9 @@ class Service
 	 */
 	Service(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~Service();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

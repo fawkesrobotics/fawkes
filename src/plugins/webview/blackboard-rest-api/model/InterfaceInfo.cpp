@@ -34,6 +34,10 @@ InterfaceInfo::InterfaceInfo(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+InterfaceInfo::~InterfaceInfo()
+{
+}
+
 std::string
 InterfaceInfo::to_json(bool pretty) const
 {
@@ -155,8 +159,8 @@ InterfaceInfo::from_json_value(const rapidjson::Value& d)
 		readers_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			readers_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 	if (d.HasMember("fields") && d["fields"].IsArray()) {
 		const rapidjson::Value& a = d["fields"];
 		fields_ = std::vector<std::shared_ptr<InterfaceFieldType>>{};
@@ -166,8 +170,8 @@ InterfaceInfo::from_json_value(const rapidjson::Value& d)
 			std::shared_ptr<InterfaceFieldType> nv{new InterfaceFieldType()};
 			nv->from_json_value(v);
 			fields_.push_back(std::move(nv));
-		}	
-	}	
+		}
+	}
 	if (d.HasMember("message_types") && d["message_types"].IsArray()) {
 		const rapidjson::Value& a = d["message_types"];
 		message_types_ = std::vector<std::shared_ptr<InterfaceMessageType>>{};
@@ -177,8 +181,8 @@ InterfaceInfo::from_json_value(const rapidjson::Value& d)
 			std::shared_ptr<InterfaceMessageType> nv{new InterfaceMessageType()};
 			nv->from_json_value(v);
 			message_types_.push_back(std::move(nv));
-		}	
-	}	
+		}
+	}
 
 }
 

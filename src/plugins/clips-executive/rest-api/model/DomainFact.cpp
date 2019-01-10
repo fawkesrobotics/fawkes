@@ -34,6 +34,10 @@ DomainFact::DomainFact(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+DomainFact::~DomainFact()
+{
+}
+
 std::string
 DomainFact::to_json(bool pretty) const
 {

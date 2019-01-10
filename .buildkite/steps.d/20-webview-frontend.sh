@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 ############################################################################
-#  Webview frontend build script, will be executed in Docker container
+#  Conditional webview frontend build step
 #
-#  Created: Thu Oct 11 21:59:26 2018 +0200
+#  Created: Sun Nov 11 21:49:35 2018 +0100
 #  Copyright  2018  Tim Niemueller [www.niemueller.org]
 ############################################################################
 
@@ -19,18 +19,21 @@
 #
 #  Read the full text in the LICENSE.GPL file in the doc directory.
 
-
-# Source standard environment, may setup ccache if available
-source /etc/profile
-
-# Error out on any error in the script, pipes etc.
+# Error out on an error in the script
 set -euo pipefail
 
-# Get Angular CLI
-echo 'prefix = ~/.npm' > ~/.npmrc
-npm install --global @angular/cli
-export PATH=$PATH:$HOME/.npm/bin
+SCRIPT_PATH=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
-# Build webview frontend (also calls npm install)
-cd src/plugins/webview/frontend
-make NG_BUILD_FLAGS=""
+# Build webview, if master or webview branch, or webview files modified
+BUILD_WEBVIEW=
+if [[ ${BUILDKITE_BRANCH:-master} =~ ^(master|.*webview.*)$ ]]; then
+	BUILD_WEBVIEW=1
+fi
+
+if [[ ":$AFFECTED_FILES:" == *":src/plugins/webview/frontend/"*:* ]]; then
+	BUILD_WEBVIEW=1
+fi
+
+if [ -n "$BUILD_WEBVIEW" ]; then
+	cat $SCRIPT_PATH/10-webview-frontend.yml
+fi

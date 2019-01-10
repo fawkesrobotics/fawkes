@@ -31,12 +31,15 @@
 #include <memory>
 #include <vector>
 
-#include <mongo/client/dbclient.h>
 #include "event_trigger_manager.h"
 #include "computables/computables_manager.h"
 
 namespace fawkes {
   class RobotMemoryInterface;
+}
+namespace mongo {
+	class DBClientBase;
+	class DBClientCursor;
 }
 
 ///typedef for shorter type description

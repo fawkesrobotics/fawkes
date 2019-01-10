@@ -29,8 +29,8 @@ OBJS_pddl_planner = pddl-planner_plugin.o pddl-planner_thread.o
 OBJS_all = $(OBJS_pddl_planner)
 
 ifeq ($(HAVE_CPP11)$(HAVE_MONGODB),11)
-  CFLAGS  += $(CFLAGS_CPP11)
-  LDFLAGS += $(LDFLAGS_CTEMPLATE)
+  CFLAGS  += $(CFLAGS_CPP11) $(CFLAGS_MONGODB)
+  LDFLAGS += $(LDFLAGS_CTEMPLATE) $(LDFLAGS_MONGODB)
   PLUGINS_all = $(PLUGINDIR)/pddl-planner.$(SOEXT)
 else
   ifneq ($(HAVE_CPP11),1)

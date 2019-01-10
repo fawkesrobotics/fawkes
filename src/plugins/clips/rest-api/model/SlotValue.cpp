@@ -34,6 +34,10 @@ SlotValue::SlotValue(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+SlotValue::~SlotValue()
+{
+}
+
 std::string
 SlotValue::to_json(bool pretty) const
 {
@@ -115,8 +119,8 @@ SlotValue::from_json_value(const rapidjson::Value& d)
 		values_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			values_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 
 }
 

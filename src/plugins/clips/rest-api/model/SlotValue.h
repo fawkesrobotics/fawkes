@@ -40,6 +40,9 @@ class SlotValue
 	 */
 	SlotValue(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~SlotValue();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

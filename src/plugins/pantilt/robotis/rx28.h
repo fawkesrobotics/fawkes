@@ -117,7 +117,7 @@ class RobotisRX28
   void          set_alarm_led(unsigned char id, unsigned char alarm_led);
   void          set_alarm_shutdown(unsigned char id, unsigned char alarm_shutdown);
   void          set_torque_enabled(unsigned char id, bool enabled);
-  void          set_torques_enabled(bool enabled, unsigned char num_servos, ...);
+  void          set_torques_enabled(bool enabled, unsigned int num_servos, ...);
   void          set_led_enabled(unsigned char id, bool enabled);
   void          set_compliance_values(unsigned char id,
 				      unsigned char cw_margin, unsigned char cw_slope,

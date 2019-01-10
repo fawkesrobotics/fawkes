@@ -47,7 +47,6 @@ class BlackboardComputable
     RobotMemory* robot_memory_;
     fawkes::BlackBoard* blackboard_;
     fawkes::Logger* logger_;
-    const char* name_ = "RobotMemory BlackoardComputable";
     Computable* computable;
     mongo::BSONArray get_interface_fields(fawkes::InterfaceFieldIterator it);
 };

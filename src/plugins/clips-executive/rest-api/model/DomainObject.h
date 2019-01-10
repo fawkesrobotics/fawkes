@@ -40,6 +40,9 @@ class DomainObject
 	 */
 	DomainObject(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~DomainObject();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

@@ -34,6 +34,10 @@ InterfaceFieldType::InterfaceFieldType(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+InterfaceFieldType::~InterfaceFieldType()
+{
+}
+
 std::string
 InterfaceFieldType::to_json(bool pretty) const
 {
@@ -115,8 +119,8 @@ InterfaceFieldType::from_json_value(const rapidjson::Value& d)
 		enums_.reserve(a.Size());
 		for (auto& v : a.GetArray()) {
 			enums_.push_back(v.GetString());
-		}	
-	}	
+		}
+	}
 
 }
 

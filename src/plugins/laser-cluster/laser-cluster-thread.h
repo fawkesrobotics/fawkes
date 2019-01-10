@@ -117,8 +117,6 @@ class LaserClusterThread
   std::string  cfg_prefix_;
 
   bool         cfg_line_removal_;
-  float        cfg_depth_filter_min_x_;
-  float        cfg_depth_filter_max_x_;
   unsigned int cfg_segm_max_iterations_;
   float        cfg_segm_distance_threshold_;
   unsigned int cfg_segm_min_inliers_;

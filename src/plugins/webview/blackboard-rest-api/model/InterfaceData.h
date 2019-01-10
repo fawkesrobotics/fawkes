@@ -40,6 +40,9 @@ class InterfaceData
 	 */
 	InterfaceData(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~InterfaceData();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

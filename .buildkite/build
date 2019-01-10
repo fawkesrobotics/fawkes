@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ############################################################################
 #  Build script, will (usually) be executed in Docker container
@@ -26,6 +26,22 @@ source /etc/profile
 # Error out on any error in the script, pipes etc.
 set -euo pipefail
 
+# Determine number of available CPU cores
+NPROC=1
+if type -p nproc >/dev/null; then
+	# Linux
+	NPROC=$(nproc)
+elif sysctl -n hw.ncpu >/dev/null 2>&1; then
+	# FreeBSD
+	NPROC=$(sysctl -n hw.ncpu)
+fi
+
+# Determine GNU Make executable
+MAKE=make
+if type -p gmake >/dev/null; then
+	MAKE=gmake
+fi
+
 # Build software
-make -j$(nproc) all gui
+$MAKE -j$NPROC all gui
 

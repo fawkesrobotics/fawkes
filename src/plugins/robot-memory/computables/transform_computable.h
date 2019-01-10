@@ -43,7 +43,6 @@ class TransformComputable
     RobotMemory* robot_memory_;
     fawkes::Logger* logger_;
     fawkes::tf::Transformer* tf_;
-    const char* name_ = "RobotMemory TransformComputable";
     std::vector<Computable*>  computables;
     fawkes::Configuration* config_;
 };

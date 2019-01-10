@@ -34,6 +34,10 @@ Service::Service(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+Service::~Service()
+{
+}
+
 std::string
 Service::to_json(bool pretty) const
 {

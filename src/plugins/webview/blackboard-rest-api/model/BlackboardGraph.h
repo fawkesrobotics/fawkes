@@ -40,6 +40,9 @@ class BlackboardGraph
 	 */
 	BlackboardGraph(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~BlackboardGraph();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

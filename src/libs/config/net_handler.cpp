@@ -124,7 +124,7 @@ ConfigNetworkHandler::send_value(unsigned int clid, const Configuration::ValueIt
 					    num_values, data_size, (void**)&values);
       if (i->is_list()) {
         std::vector<int> c_values = i->get_ints();
-        for (uint16_t j = 0; j < num_values; ++i)  values[j] = c_values[j];
+        for (uint16_t j = 0; j < num_values; ++j)  values[j] = c_values[j];
       } else {
         values[0] = i->get_int();
       }

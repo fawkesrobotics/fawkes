@@ -1063,7 +1063,8 @@ TabletopObjectsThread::loop()
   pcl::ConditionAnd<PointType>::Ptr
     above_cond(new pcl::ConditionAnd<PointType>());
   above_cond->addComparison(above_comp);
-  pcl::ConditionalRemoval<PointType> above_condrem(above_cond);
+  pcl::ConditionalRemoval<PointType> above_condrem;
+  above_condrem.setCondition(above_cond);
   above_condrem.setInputCloud(cloud_filt_);
   cloud_above_.reset(new Cloud());
   above_condrem.filter(*cloud_above_);
@@ -1089,7 +1090,8 @@ TabletopObjectsThread::loop()
   polygon_cond->addComparison(inpoly_comp);
 
   // build the filter
-  pcl::ConditionalRemoval<PointType> condrem(polygon_cond);
+  pcl::ConditionalRemoval<PointType> condrem;
+  condrem.setCondition(polygon_cond);
   condrem.setInputCloud(cloud_above_);
   //condrem.setKeepOrganized(true);
   cloud_objs_.reset(new Cloud());

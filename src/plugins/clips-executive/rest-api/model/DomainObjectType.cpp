@@ -34,6 +34,10 @@ DomainObjectType::DomainObjectType(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+DomainObjectType::~DomainObjectType()
+{
+}
+
 std::string
 DomainObjectType::to_json(bool pretty) const
 {

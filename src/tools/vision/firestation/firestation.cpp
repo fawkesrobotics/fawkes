@@ -991,9 +991,9 @@ Firestation::image_click(GdkEventButton* event)
     case MODE_VIEWER:
       if (m_img_src != SRC_NONE)
 	{
-	  register unsigned char y;
-	  register unsigned char u;
-	  register unsigned char v;
+	  unsigned char y;
+	  unsigned char u;
+	  unsigned char v;
 	  YUV422_PLANAR_YUV( m_yuv_orig_buffer,
 			     m_img_width,
 			     m_img_height,

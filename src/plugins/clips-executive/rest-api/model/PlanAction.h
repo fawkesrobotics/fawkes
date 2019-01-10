@@ -43,6 +43,9 @@ class PlanAction
 	 */
 	PlanAction(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~PlanAction();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

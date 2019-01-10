@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ############################################################################
-#  Conditional webview frontend build step
+#  Conditional FreeBSD build step
 #
-#  Created: Sun Nov 11 21:49:35 2018 +0100
+#  Created: Mon Jan 07 18:54:45 2019 +0100
 #  Copyright  2018  Tim Niemueller [www.niemueller.org]
 ############################################################################
 
@@ -24,16 +24,21 @@ set -euo pipefail
 
 SCRIPT_PATH=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
-# Build webview, if master or webview branch, or webview files modified
-BUILD_WEBVIEW=
-if [[ ${BUILDKITE_BRANCH:-master} =~ ^(master|.*webview.*)$ ]]; then
-	BUILD_WEBVIEW=1
+# Allow skipping FreeBSD altogether, e.g., in domain repos
+if [ -n "${SKIP_FREEBSD:-}" ]; then
+	exit 0
 fi
 
-if [[ ":$AFFECTED_FILES:" == *":src/plugins/webview/frontend/"*:* ]]; then
-	BUILD_WEBVIEW=1
+# Build FreeBSD, if master or freebsd branch, or for pull request
+BUILD_FREEBSD=
+if [[ ${BUILDKITE_BRANCH:-master} =~ ^(master|.*freebsd.*)$ ]]; then
+	BUILD_FREEBSD=1
 fi
 
-if [ -n "$BUILD_WEBVIEW" ]; then
-	cat $SCRIPT_PATH/webview-frontend.yml
+if [[ "$BUILDKITE_PULL_REQUEST" != "false" ]]; then
+	BUILD_FREEBSD=1
+fi
+
+if [ -n "$BUILD_FREEBSD" ]; then
+	cat $SCRIPT_PATH/10-freebsd.yml
 fi

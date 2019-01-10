@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <yaml-cpp/traits.h>
 #include <limits>
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <regex>

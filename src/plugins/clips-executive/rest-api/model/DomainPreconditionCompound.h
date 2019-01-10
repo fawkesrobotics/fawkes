@@ -42,6 +42,9 @@ class DomainPreconditionCompound
 	 */
 	DomainPreconditionCompound(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~DomainPreconditionCompound();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

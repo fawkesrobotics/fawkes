@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ############################################################################
 #  Lint script to check some basic things on the relevant commits
@@ -36,7 +36,13 @@ set -eu
 # For now, trust the post-checkout hook to have done this.
 # git fetch origin master
 
-MERGE_BASE=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "origin/master") | head -1)
+# We rely on GNU diffutils here, therefore apply heuristics to find it
+DIFF=diff
+if type -p gdiff >/dev/null; then
+	DIFF=gdiff
+fi
+
+MERGE_BASE=$($DIFF --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "origin/master") | head -1)
 
 error_exit () {
 	MSG="$@"
@@ -277,5 +283,5 @@ echo "-> Running gitlint to check commit messages"
 check_gitlint
 
 echo "-> Running 'make check'"
-make check
+gmake check
 

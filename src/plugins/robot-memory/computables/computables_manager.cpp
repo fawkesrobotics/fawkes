@@ -35,17 +35,13 @@ using namespace mongo;
 
 /**
  * Constructor for class managing computables with refereces to plugin objects
- * @param logger Logger
  * @param config Configuration
  * @param robot_memory Robot Memory
- * @param clock Clock
  */
-ComputablesManager::ComputablesManager(fawkes::Logger* logger, fawkes::Configuration* config,
-                                       RobotMemory* robot_memory, fawkes::Clock* clock)
-:  logger_(logger),
-  config_(config),
+ComputablesManager::ComputablesManager(fawkes::Configuration* config,
+                                       RobotMemory* robot_memory)
+: config_(config),
   robot_memory_(robot_memory),
-  clock_(clock),
   matching_test_collection_("robmem.computables_matching")
 {
   try {

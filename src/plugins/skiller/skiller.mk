@@ -17,7 +17,7 @@ ifneq ($(wildcard /usr/include/sys/inotify.h),)
   HAVE_INOTIFY=1
 endif
 
-ifneq ($(wildcard /usr/include/readline/readline.h),)
+ifneq ($(wildcard /usr/include/readline/readline.h /usr/local/include/readline/readline.h),)
   HAVE_READLINE=1
 endif
 

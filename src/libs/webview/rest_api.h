@@ -231,7 +231,7 @@ class WebviewRestApi
 	                 std::function<std::unique_ptr<WebReply> (WebviewRestParams &)> handler)
 	{
 		add_handler(method, path,
-		            [this, handler](const std::string &body, WebviewRestParams& m)
+		            [handler](const std::string &body, WebviewRestParams& m)
 		            -> std::unique_ptr<WebReply>
 		            {
 			            try {

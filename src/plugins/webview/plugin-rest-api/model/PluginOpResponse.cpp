@@ -34,6 +34,10 @@ PluginOpResponse::PluginOpResponse(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+PluginOpResponse::~PluginOpResponse()
+{
+}
+
 std::string
 PluginOpResponse::to_json(bool pretty) const
 {

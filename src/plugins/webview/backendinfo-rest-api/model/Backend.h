@@ -41,6 +41,9 @@ class Backend
 	 */
 	Backend(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~Backend();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

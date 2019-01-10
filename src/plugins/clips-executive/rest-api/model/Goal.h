@@ -40,6 +40,9 @@ class Goal
 	 */
 	Goal(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~Goal();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */

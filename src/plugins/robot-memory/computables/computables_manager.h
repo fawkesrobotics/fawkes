@@ -38,8 +38,8 @@ class RobotMemory;
 class ComputablesManager
 {
   public:
-    ComputablesManager(fawkes::Logger* logger, fawkes::Configuration* config,
-      RobotMemory* robot_memory, fawkes::Clock* clock);
+    ComputablesManager(fawkes::Configuration* config,
+                       RobotMemory* robot_memory);
     virtual ~ComputablesManager();
 
     bool check_and_compute(mongo::Query query, std::string collection);
@@ -72,10 +72,8 @@ class ComputablesManager
 
   private:
     std::string name = "RobotMemory ComputablesManager";
-    fawkes::Logger* logger_;
     fawkes::Configuration* config_;
     RobotMemory* robot_memory_;
-    fawkes::Clock* clock_;
 
     std::list<Computable*> computables;
     std::string matching_test_collection_;

@@ -40,6 +40,9 @@ class ImageInfo
 	 */
 	ImageInfo(const rapidjson::Value& v);
 
+	/** Destructor. */
+	virtual ~ImageInfo();
+
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
@@ -131,22 +134,6 @@ class ImageInfo
 	{
 		id_ = id;
 	}
-  /** Get type value.
-   * @return type value
-   */
-	std::optional<std::string>
- type() const
-	{
-		return type_;
-	}
-
-	/** Set type value.
-	 * @param type new value
-	 */
-	void set_type(const std::string& type)
-	{
-		type_ = type;
-	}
   /** Get colorspace value.
    * @return colorspace value
    */
@@ -234,8 +221,6 @@ class ImageInfo
  apiVersion_;
 	std::optional<std::string>
  id_;
-	std::optional<std::string>
- type_;
 	std::optional<std::string>
  colorspace_;
 	std::optional<std::string>

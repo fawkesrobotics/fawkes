@@ -34,6 +34,10 @@ Backend::Backend(const rapidjson::Value& v)
 	from_json_value(v);
 }
 
+Backend::~Backend()
+{
+}
+
 std::string
 Backend::to_json(bool pretty) const
 {
@@ -133,8 +137,8 @@ Backend::from_json_value(const rapidjson::Value& d)
 			std::shared_ptr<Service> nv{new Service()};
 			nv->from_json_value(v);
 			services_.push_back(std::move(nv));
-		}	
-	}	
+		}
+	}
 
 }
 
