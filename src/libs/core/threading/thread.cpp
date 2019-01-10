@@ -1371,11 +1371,13 @@ Thread::current_thread_name()
 	Thread *t = Thread::current_thread_noexc();
   if ( t ) {
 	  return t->name();
+#if defined(_GNU_SOURCE) && defined(GLIBC___) && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
   } else {
 	  char name[16];
 	  if (pthread_getname_np(pthread_self(), name, 16) == 0) {
 		  return name;
 	  }
+#endif
   }
 
   return "";
@@ -1393,8 +1395,10 @@ Thread::current_thread_name(const std::string& thread_name)
 	Thread *t = Thread::current_thread_noexc();
   if ( t ) {
 	  return t->set_name("%s", thread_name.c_str());
+#if defined(_GNU_SOURCE) && defined(GLIBC___) && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
   } else {
 	  pthread_setname_np(pthread_self(), thread_name.c_str());
+#endif
   }
 }
 
