@@ -22,6 +22,9 @@
 #include <gtest/gtest.h>
 
 #include <pthread.h>
+#ifdef __FreeBSD__
+#  include <pthread_np.h>
+#endif
 #include <unistd.h>
 #include <time.h>
 

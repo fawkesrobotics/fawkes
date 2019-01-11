@@ -27,7 +27,11 @@ OBJS_all    = $(OBJS_gtest_circular_buffer) $(OBJS_gtest_wait_condition)
 
 ifeq ($(HAVE_GTEST),1)
   CFLAGS += $(CFLAGS_GTEST)
-  CFLAGS += -Wno-unused-but-set-variable
+  ifeq ($(CC),clang)
+    CFLAGS += -Wno-unused-variable
+  else
+    CFLAGS += -Wno-unused-but-set-variable
+  endif
   LDFLAGS += $(LDFLAGS_GTEST)
   LIBS_test = $(LIBDIR)/test/circular_buffer.so
   BINS_test = $(BINDIR)/gtest_circular_buffer
