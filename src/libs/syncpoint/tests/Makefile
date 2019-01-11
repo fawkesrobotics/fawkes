@@ -17,12 +17,16 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gtest.mk
 
-CFLAGS += -Wno-unused-but-set-variable -Wno-unused-variable
 LIBS_gtest_syncpoint += stdc++ fawkescore fawkesutils fawkessyncpoint pthread \
                         fawkeslogging
 
 OBJS_gtest_syncpoint += test_syncpoint.o
 OBJS_all = $(OBJS_gtest_syncpoint)
+
+CFLAGS += -Wno-unused-variable
+ifneq ($(CC),clang)
+  CFLAGS += -Wno-unused-but-set-variable
+endif
 
 ifeq ($(HAVE_GTEST)$(HAVE_CPP11),11)
   CFLAGS += $(CFLAGS_GTEST) $(CFLAGS_CPP11)
