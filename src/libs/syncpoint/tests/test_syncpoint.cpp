@@ -386,11 +386,12 @@ struct waiter_thread_params {
 void * start_waiter_thread(void * data) {
   waiter_thread_params *params = (waiter_thread_params *)data;
   string component = params->component;
-  if (component == "") {
-    char *comp;
-    asprintf(&comp, "component %u", params->thread_nr);
-    component = comp;
-    free(comp);
+  if (component.empty()) {
+	  char *comp;
+    if (asprintf(&comp, "component %u", params->thread_nr) != -1) {
+	    component = comp;
+	    free(comp);
+    }
   }
   RefPtr<SyncPoint> sp = params->manager->get_syncpoint(component, params->sp_identifier);
   for (uint i = 0; i < params->num_wait_calls; i++) {
@@ -582,9 +583,11 @@ TEST_F(SyncBarrierTest, MultipleRegisterCalls)
 void * start_barrier_waiter_thread(void * data) {
   waiter_thread_params *params = (waiter_thread_params *)data;
   char *comp;
-  asprintf(&comp, "component %u", params->thread_nr);
-  string component = comp;
-  free(comp);
+  string component{"component ?"};
+  if (asprintf(&comp, "component %u", params->thread_nr) != -1) {
+	  component = comp;
+	  free(comp);
+  }
   RefPtr<SyncPoint> sp;
   sp = params->manager->get_syncpoint(component, params->sp_identifier);
   for (uint i = 0; i < params->num_wait_calls; i++) {
@@ -597,10 +600,12 @@ void * start_barrier_waiter_thread(void * data) {
 /** get a SyncBarrier, register as emitter and emit */
 void * start_barrier_emitter_thread(void * data) {
   waiter_thread_params *params = (waiter_thread_params *)data;
+  string component{"emitter ?"};
   char *comp;
-  asprintf(&comp, "emitter %u", params->thread_nr);
-  string component = comp;
-  free(comp);
+  if (asprintf(&comp, "emitter %u", params->thread_nr) != -1) {
+	  component = comp;
+	  free(comp);
+  }
   RefPtr<SyncPoint> sp;
   EXPECT_NO_THROW(sp = params->manager->get_syncpoint(component, params->sp_identifier));
   sp->register_emitter(component);
