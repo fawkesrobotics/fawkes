@@ -19,13 +19,13 @@
 #
 #  Read the full text in the LICENSE.GPL file in the doc directory.
 
-# Source standard environment, may setup ccache if available
-source /etc/profile
+SCRIPT_PATH=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
+
+# Source standard environment
+source $SCRIPT_PATH/environment.sh
 
 # Error out on any error in the script, pipes etc.
 set -euo pipefail
 
 # Run tests
-make test
-
-# Add more tests here if they don't run with make test
+$MAKE test
