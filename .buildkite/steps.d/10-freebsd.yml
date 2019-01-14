@@ -1,6 +1,8 @@
   - label: ":freebsd: FreeBSD"
     agents:
       queue: freebsd
-    command: .buildkite/build
+    command:
+      - .buildkite/build
+      - .buildkite/test
     plugins:
       <<: *merged-pr-plugin
