@@ -15,15 +15,16 @@
 
 BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BASEDIR)/etc/buildsys/gtest.mk
 include $(BASEDIR)/src/libs/kdl_parser/kdl_parser.mk
 
-LIBS_gtest_kdlparser += stdc++ fawkeskdl_parser gtest gtest_main pthread
+LIBS_gtest_kdlparser += stdc++ fawkeskdl_parser
 
 OBJS_gtest_kdlparser += test_kdlparser.o
 OBJS_all    = $(OBJS_gtest_kdlparser)
 ifeq ($(HAVE_KDLPARSER),1)
-  CFLAGS += $(CFLAGS_KDLPARSER)
-  LDFLAGS += $(LDFLAGS_KDLPARSER)
+  CFLAGS  += $(CFLAGS_KDLPARSER)  $(CFLAGS_GTEST)
+  LDFLAGS += $(LDFLAGS_KDLPARSER) $(LDFLAGS_GTEST)
   BINS_test		= $(BINDIR)/gtest_kdlparser
 endif
 
