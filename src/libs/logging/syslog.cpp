@@ -25,6 +25,7 @@
 #include <logging/syslog.h>
 
 #include <syslog.h>
+#include <sys/syslog.h>
 #include <cstdlib>
 #include <sys/time.h>
 #include <ctime>
