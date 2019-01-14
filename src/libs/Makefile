@@ -20,7 +20,8 @@ include $(BUILDSYSDIR)/fvconf.mk
 SUBDIRS = core utils interface netcomm blackboard interfaces config logging tf \
 	  plugin lua aspect network_logger webview gui_utils baseapp navgraph \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
-	  kdl_parser protobuf_comm protobuf_clips pcl_utils pddl_parser syncpoint
+	  kdl_parser protobuf_comm protobuf_clips pcl_utils pddl_parser syncpoint \
+	  googletest
 
 ifeq ($(HAVE_SIFT),1)
   SUBDIRS += extlib/sift
@@ -38,6 +39,7 @@ endif
 
 # Explicit dependencies, this is needed to have make bail out if there is any
 # error. This is also necessary for working parallel build (i.e. for dual core)
+core: googletest
 utils: core logging
 interface: core utils
 blackboard: core utils interface netcomm logging
@@ -67,7 +69,7 @@ protobuf_clips: core logging protobuf_comm
 pcl_utils: core tf
 kdl_parser: core
 pddl_parser: core
-syncpoint: core logging utils
+syncpoint: core googletest logging utils
 
 include $(BUILDSYSDIR)/rules.mk
 include $(LIBSRCDIR)/extlibs.mk
