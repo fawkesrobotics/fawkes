@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 ############################################################################
-#  Build script, will (usually) be executed in Docker container
+#  Build script environment
 #
-#  Created: Wed Sep 26 14:19:27 2018 +0200
-#  Copyright  2018  Tim Niemueller [www.niemueller.org]
+#  Created: Mon Jan 14 16:38:21 2019 +0100
+#  Copyright  2018-2019  Tim Niemueller [www.niemueller.org]
 ############################################################################
 
 #  This program is free software; you can redistribute it and/or modify
@@ -19,13 +19,23 @@
 #
 #  Read the full text in the LICENSE.GPL file in the doc directory.
 
-SCRIPT_PATH=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
-# Source standard environment
-source $SCRIPT_PATH/environment.sh
+# Source standard environment, may setup ccache if available
+source /etc/profile
 
-# Error out on any error in the script, pipes etc.
-set -euo pipefail
+# Determine number of available CPU cores
+NPROC=1
+if type -p nproc >/dev/null; then
+	# Linux
+	NPROC=$(nproc)
+elif sysctl -n hw.ncpu >/dev/null 2>&1; then
+	# FreeBSD
+	NPROC=$(sysctl -n hw.ncpu)
+fi
 
-# Build software
-$MAKE -j$NPROC all gui
+# Determine GNU Make executable
+MAKE=make
+if type -p gmake >/dev/null; then
+	MAKE=gmake
+fi
+
