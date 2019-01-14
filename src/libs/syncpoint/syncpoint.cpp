@@ -65,6 +65,7 @@ SyncPoint::SyncPoint(string identifier, MultiLogger *logger,
       creation_time_(Time()),
       mutex_(new Mutex()),
       mutex_next_wait_(new Mutex()),
+      cond_next_wait_(new WaitCondition(mutex_next_wait_)),
       mutex_wait_for_one_(new Mutex()),
       cond_wait_for_one_(new WaitCondition(mutex_wait_for_one_)),
       mutex_wait_for_all_(new Mutex()),
@@ -156,7 +157,11 @@ SyncPoint::emit(const std::string & component)
 void
 SyncPoint::emit(const std::string & component, bool remove_from_pending)
 {
-  mutex_next_wait_->stopby();
+  mutex_next_wait_->lock();
+  if (!emit_locker_.empty()) {
+    cond_next_wait_->wait();
+  }
+  mutex_next_wait_->unlock();
   MutexLocker ml(mutex_);
   if (!watchers_.count(component)) {
     throw SyncPointNonWatcherCalledEmitException(component.c_str(),
@@ -289,10 +294,12 @@ SyncPoint::wait(const std::string & component,
    */
   Time start;
   mutex_cond->lock();
+  mutex_next_wait_->lock();
   if (emit_locker_ == component) {
-    mutex_next_wait_->unlock();
     emit_locker_ = "";
+    cond_next_wait_->wake_all();
   }
+  mutex_next_wait_->unlock();
   if (need_to_wait) {
     if (type == WAIT_FOR_ONE) {
       ml.unlock();
@@ -416,13 +423,15 @@ void
 SyncPoint::lock_until_next_wait(const string & component)
 {
   MutexLocker ml(mutex_);
-  if (mutex_next_wait_->try_lock()) {
+  mutex_next_wait_->lock();
+  if (emit_locker_.empty()) {
     emit_locker_ = component;
   } else {
     logger_->log_warn("SyncPoints", "%s tried to call lock_until_next_wait, "
-        "but another component already did the same. Ignoring.",
-        component.c_str());
+        "but %s already did the same. Ignoring.",
+        component.c_str(), emit_locker_.c_str());
   }
+  mutex_next_wait_->unlock();
 }
 
 /** Register an emitter. A thread can only emit the barrier if it has been

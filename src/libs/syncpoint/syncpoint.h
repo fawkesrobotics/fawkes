@@ -136,6 +136,8 @@ class SyncPoint
     Mutex *mutex_;
     /** Mutex used to allow lock_until_next_wait */
     Mutex *mutex_next_wait_;
+    /** WaitCondition used for lock_until_next_wait */
+    WaitCondition *cond_next_wait_;
     /** Mutex used for cond_wait_for_one_ */
     Mutex *mutex_wait_for_one_;
     /** WaitCondition which is used for wait_for_one() */
