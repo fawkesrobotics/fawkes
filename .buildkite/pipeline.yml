@@ -6,7 +6,7 @@ merged-pr-plugin: &merged-pr-plugin
     mode: checkout
 
 docker-plugin-base: &docker-plugin-base
-  image: fawkesrobotics/fawkes-builder:fedora28-kinetic
+  image: fawkesrobotics/fawkes-builder:fedora29-kinetic
   always-pull: true
   debug: true
   workdir: /workdir
