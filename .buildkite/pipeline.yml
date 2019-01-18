@@ -18,7 +18,7 @@ steps:
     command: .buildkite/lint
     plugins:
       <<: *merged-pr-plugin
-      docker#v2.0.0:
+      docker#v2.2.0:
         <<: *docker-plugin-base
         environment:
           - BUILDKITE
@@ -35,7 +35,7 @@ steps:
     command: .buildkite/build
     plugins:
       <<: *merged-pr-plugin
-      docker#v2.0.0:
+      docker#v2.2.0:
         <<: *docker-plugin-base
         volumes:
           - .:/workdir
@@ -45,7 +45,7 @@ steps:
     command: .buildkite/build
     plugins:
       <<: *merged-pr-plugin
-      docker#v2.0.0:
+      docker#v2.2.0:
         <<: *docker-plugin-base
         image: fawkesrobotics/fawkes-builder:ubuntu1804-melodic
         volumes:
