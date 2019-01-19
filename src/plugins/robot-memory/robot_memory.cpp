@@ -162,12 +162,11 @@ void RobotMemory::loop()
  */
 QResCursor RobotMemory::query(Query query, const std::string& collection)
 {
-  std::string coll{check_collection_name(collection)};
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(coll);
-  log_deb(std::string("Executing Query "+ query.toString() +" on collection "+coll));
+  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
+  log_deb(std::string("Executing Query "+ query.toString() +" on collection "+collection));
 
   //check if computation on demand is necessary and execute Computables
-  computables_manager_->check_and_compute(query, coll);
+  computables_manager_->check_and_compute(query, collection);
 
   //lock (mongo_client not thread safe)
   MutexLocker lock(mutex_);
@@ -179,6 +178,9 @@ QResCursor RobotMemory::query(Query query, const std::string& collection)
   QResCursor cursor;
   try{
     cursor = mongodb_client->query(collection, query);
+    if(cursor == 0) {
+      logger_->log_error(name_,"Connection failed %s",collection.c_str());
+    }
   } catch (DBException &e) {
     std::string error = std::string("Error for query ")
       + query.toString() + "\n Exception: " + e.toString();
@@ -197,9 +199,8 @@ QResCursor RobotMemory::query(Query query, const std::string& collection)
 mongo::BSONObj
 RobotMemory::aggregate(const std::vector<mongo::BSONObj>& pipeline, const std::string& collection)
 {
-  std::string coll{check_collection_name(collection)};
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(coll);
-  log_deb(std::string("Executing Aggregation on collection "+coll));
+  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
+  log_deb(std::string("Executing Aggregation on collection "+collection));
 
   //TODO: check if computation on demand is necessary and execute Computables
   // that might be complicated because you need to build a query to check against from the fields mentioned in the different parts of the pipeline
@@ -211,14 +212,14 @@ RobotMemory::aggregate(const std::vector<mongo::BSONObj>& pipeline, const std::s
   //actually execute aggregation as command (in more modern mongo-cxx versions there should be an easier way with a proper aggregate function)
   BSONObj res;
   //get db and collection name
-  size_t point_pos = coll.find(".");
+  size_t point_pos = collection.find(".");
   if(point_pos == std::string::npos)
   {
-    logger_->log_error(name_, "Collection %s needs to start with 'dbname.'", coll.c_str());
+    logger_->log_error(name_, "Collection %s needs to start with 'dbname.'", collection.c_str());
     return fromjson("{}");
   }
-  std::string db = coll.substr(0, point_pos);
-  std::string col = coll.substr(point_pos+1);
+  std::string db = collection.substr(0, point_pos);
+  std::string col = collection.substr(point_pos+1);
   try{
     mongodb_client->runCommand(db, BSON("aggregate" << col  << "pipeline" << pipeline), res);
   } catch (DBException &e) {
@@ -238,7 +239,6 @@ RobotMemory::aggregate(const std::vector<mongo::BSONObj>& pipeline, const std::s
  */
 int RobotMemory::insert(mongo::BSONObj obj, const std::string& collection)
 {
-  check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
 
   log_deb(std::string("Inserting "+ obj.toString() + " into collection " + collection));
@@ -268,7 +268,6 @@ int RobotMemory::insert(mongo::BSONObj obj, const std::string& collection)
 int
 RobotMemory::create_index(mongo::BSONObj obj, const std::string& collection, bool unique)
 {
-  check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
 
   log_deb(std::string("Creating index "+ obj.toString() + " on collection " + collection));
@@ -298,7 +297,6 @@ RobotMemory::create_index(mongo::BSONObj obj, const std::string& collection, boo
  */
 int RobotMemory::insert(std::vector<mongo::BSONObj> v_obj, const std::string& collection)
 {
-  check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
 
   std::string insert_string = "[";
@@ -347,7 +345,6 @@ int RobotMemory::insert(const std::string& obj_str, const std::string& collectio
  */
 int RobotMemory::update(mongo::Query query, mongo::BSONObj update, const std::string& collection, bool upsert)
 {
-  check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
   log_deb(std::string("Executing Update "+update.toString()+" for query "+query.toString()+" on collection "+ collection));
 
@@ -392,7 +389,6 @@ mongo::BSONObj
 RobotMemory::find_one_and_update(const mongo::BSONObj& filter, const mongo::BSONObj& update,
                                  const std::string& collection, bool upsert, bool return_new)
 {
-  check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
 
   log_deb(std::string("Executing findOneAndUpdate "+update.toString()+
@@ -420,7 +416,6 @@ RobotMemory::find_one_and_update(const mongo::BSONObj& filter, const mongo::BSON
  */
 int RobotMemory::remove(mongo::Query query, const std::string& collection)
 {
-  check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
   log_deb(std::string("Executing Remove "+query.toString()+" on collection "+collection));
 
@@ -448,7 +443,6 @@ int RobotMemory::remove(mongo::Query query, const std::string& collection)
  */
 mongo::BSONObj RobotMemory::mapreduce(mongo::Query query, const std::string& collection, const std::string& js_map_fun, const std::string& js_reduce_fun)
 {
-  check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
   MutexLocker lock(mutex_);
   log_deb(std::string("Executing MapReduce "+query.toString()+" on collection "+collection+
@@ -464,7 +458,6 @@ mongo::BSONObj RobotMemory::mapreduce(mongo::Query query, const std::string& col
  */
 QResCursor RobotMemory::aggregate(mongo::BSONObj pipeline, const std::string& collection)
 {
-  check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
   MutexLocker lock(mutex_);
   log_deb(std::string("Executing Aggregation pipeline: "+pipeline.toString() +" on collection "+collection));
@@ -488,7 +481,6 @@ QResCursor RobotMemory::aggregate(mongo::BSONObj pipeline, const std::string& co
  */
 int RobotMemory::drop_collection(const std::string& collection)
 {
-  check_collection_name(collection);
   mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
   MutexLocker lock(mutex_);
   log_deb("Dropping collection " + collection);
@@ -517,7 +509,7 @@ int RobotMemory::clear_memory()
  */
 int RobotMemory::restore_collection(const std::string& collection, const std::string& directory)
 {
-  std::string coll{check_collection_name(collection)};
+  std::string coll{std::move(collection)};
   drop_collection(coll);
 
   //lock (mongo_client not thread safe)
@@ -532,7 +524,7 @@ int RobotMemory::restore_collection(const std::string& collection, const std::st
   }
   std::string path = StringConversions::resolve_path(directory) + "/"
                      + coll.replace(coll.find("."),1,"/") + ".bson";
-  log_deb(std::string("Restore collection " + coll + " from " + path), "warn");
+  log_deb(std::string("Restore collection " + collection + " from " + path), "warn");
 
   //call mongorestore from folder with initial restores
   std::string command = "/usr/bin/mongorestore --dir " + path
@@ -574,7 +566,6 @@ int RobotMemory::restore_collection(const std::string& collection, const std::st
  */
 int RobotMemory::dump_collection(const std::string& collection, const std::string& directory)
 {
-  check_collection_name(collection);
 
   //lock (mongo_client not thread safe)
    MutexLocker lock(mutex_);
@@ -721,20 +712,6 @@ RobotMemory::remove_field(mongo::Query &q, const std::string& what)
   q = Query(b.obj());
 }
 
-/**
- * Check if collection name is valid and correct it if necessary
- */
-std::string
-RobotMemory::check_collection_name(const std::string &collection)
-{
-  std::string coll{collection.empty() ? default_collection_ : collection};
-  if (database_name_ != "robmem" && coll.compare(0, 7, "robmem.") != 0)
-  {
-    //change used database name (e.g. for the case of multiple simulated dababases)
-    coll.replace(0, 6, database_name_);
-  }
-  return coll;
-}
 
 /**
  * Get the mongodb client associated with the collection (eighter the local or distributed one)
