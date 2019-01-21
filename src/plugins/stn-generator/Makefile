@@ -22,7 +22,8 @@ LIBS_stn_generator = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
 
 OBJS_stn_generator = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all = $(OBJS_stn_generator)
+OBJS_all    = $(OBJS_stn_generator)
+PLUGINS_all = $(PLUGINDIR)/stn-generator.$(SOEXT)
 
 ifneq ($(PKGCONFIG),)
   HAVE_GRAPHVIZ    = $(if $(shell $(PKGCONFIG) --exists 'libgvc'; echo $${?/1/}),1,0)
@@ -33,7 +34,7 @@ endif
 ifeq ($(HAVE_PDDL_PARSER)$(HAVE_MONGODB)$(HAVE_GRAPHVIZ),111)
   CFLAGS  += $(CFLAGS_MONGODB)  $(CFLAGS_GRAPHVIZ)
   LDFLAGS += $(LDFLAGS_MONGODB) $(LDFLAGS_GRAPHVIZ)
-  PLUGINS_all = $(PLUGINDIR)/stn-generator.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_PDDL_PARSER),1)
     WARN_TARGETS += warning_pddl_parser
