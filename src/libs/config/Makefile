@@ -26,9 +26,9 @@ else
   else
     CFLAGS  += $(CFLAGS_SQLITE) $(CFLAGS_YAMLCPP)
     LDFLAGS += $(LDFLAGS_SQLITE) $(LDFLAGS_YAMLCPP)
-    LIBS_all  = $(LIBDIR)/libfawkesconfig.so
+    LIBS_build = $(LIBDIR)/libfawkesconfig.so
     ifeq ($(HAVE_TOLUA),1)
-      LIBS_all += $(LUALIBDIR)/fawkesconfig.so
+      LIBS_build += $(LUALIBDIR)/fawkesconfig.so
       TARGETS_all += $(SRCDIR)/fawkesconfig_tolua.cpp
     endif
   endif
@@ -56,6 +56,7 @@ LIBS_lua_fawkesconfig = fawkescore fawkesconfig $(TOLUA_LIBS)
 OBJS_lua_fawkesconfig = fawkesconfig_tolua.o
 
 OBJS_all = $(OBJS_libfawkesconfig) $(OBJS_lua_fawkesconfig)
+LIBS_all = $(LIBDIR)/libfawkesconfig.so $(LUALIBDIR)/fawkesconfig.so
 
 $(LUALIBDIR)/fawkesconfig.so: | $(LIBDIR)/libfawkesconfig.so
 
