@@ -21,8 +21,10 @@ LIBS_fflaser_deadspots = stdc++ m fawkescore fawkesutils fawkesnetcomm \
 			 Laser360Interface Laser720Interface
 OBJS_fflaser_deadspots = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
-BINS_all = $(BINDIR)/fflaser_deadspots
 OBJS_all = $(OBJS_fflaser_deadspots)
+BINS_all = $(BINDIR)/fflaser_deadspots
 MANPAGES_all = $(MANDIR)/man1/fflaser_deadspots.1
+
+BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk

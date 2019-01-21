@@ -39,6 +39,7 @@ OBJS_laser_filter = $(filter-out deadspots/% $(FILTER_OUT),$(patsubst %.cpp,%.o,
 OBJS_all = $(OBJS_laser_filter)
 
 PLUGINS_all = $(PLUGINDIR)/laser-filter.so
+PLUGINS_build=$(PLUGINS_all)
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
