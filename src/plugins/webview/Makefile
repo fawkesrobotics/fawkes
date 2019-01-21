@@ -33,15 +33,18 @@ endif
 REQ_BOOST_LIBS = filesystem
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
+LIBS_webview = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+               fawkesinterface fawkeswebview fawkesplugin fawkesnetcomm \
+               fawkeslogging
+OBJS_webview = webview_plugin.o webview_thread.o \
+               service_browse_handler.o user_verifier.o \
+               static_processor.o rest_processor.o
+
+OBJS_all    = $(OBJS_webview)
+PLUGINS_all = $(PLUGINDIR)/webview.so
 
 ifeq ($(HAVE_BOOST_LIBS)$(HAVE_LIBMICROHTTPD),11)
-  LIBS_webview = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-     fawkesinterface fawkeswebview fawkesplugin fawkesnetcomm \
-     fawkeslogging
-  OBJS_webview = webview_plugin.o webview_thread.o \
-                 service_browse_handler.o user_verifier.o \
-                 static_processor.o rest_processor.o
-  PLUGINS_all = $(PLUGINDIR)/webview.so
+  PLUGINS_build = $(PLUGINS_all)
   INST_RESDIRS = webview
 
   CFLAGS  += $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
@@ -88,8 +91,6 @@ ifeq ($(HAVE_BOOST_LIBS)$(HAVE_LIBMICROHTTPD),11)
   else
     WARN_TARGETS += warning_rapidjson
   endif
-
-  OBJS_all = $(OBJS_webview)
 
 else
   ifneq ($(HAVE_LIBMICROHTTPD),1)
