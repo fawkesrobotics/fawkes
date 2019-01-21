@@ -27,10 +27,11 @@ LIBS_dynamixel = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 OBJS_dynamixel = dynamixel_plugin.o act_thread.o sensor_thread.o \
 		     servo_chain.o driver_thread.o
 
-OBJS_all = $(OBJS_dynamixel)
+OBJS_all    = $(OBJS_dynamixel)
+PLUGINS_all = $(PLUGINDIR)/dynamixel.$(SOEXT)
 
 ifeq ($(HAVE_CPP11_RANGE_FOR),1)
-  PLUGINS_all = $(PLUGINDIR)/dynamixel.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_cpp11_range_for
 endif
