@@ -18,8 +18,9 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_qa_bblogger_produce = fawkescore fawkesutils fawkesblackboard TestInterface
 OBJS_qa_bblogger_produce = qa_bblogger_produce.o
-BINS_all = $(BINDIR)/qa_bblogger_produce
 
 OBJS_all = $(OBJS_qa_bblogger_produce)
+BINS_all = $(BINDIR)/qa_bblogger_produce
+BINS_BUILD = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
