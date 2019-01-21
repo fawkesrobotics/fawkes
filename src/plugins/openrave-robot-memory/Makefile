@@ -19,17 +19,19 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/robot-memory/robot_memory.mk
 
 LIBS_openrave_robot_memory = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
-                      fawkesblackboard fawkesinterface fawkesrobotmemory \
-                      OpenraveRobotMemoryInterface
+                             fawkesblackboard fawkesinterface fawkesrobotmemory \
+                             OpenraveRobotMemoryInterface
 
-OBJS_openrave_robot_memory = openrave-robot-memory_plugin.o openrave-robot-memory_thread.o
+OBJS_openrave_robot_memory = openrave-robot-memory_plugin.o \
+                             openrave-robot-memory_thread.o
 
-OBJS_all = $(OBJS_openrave_robot_memory)
+OBJS_all    = $(OBJS_openrave_robot_memory)
+PLUGINS_all = $(PLUGINDIR)/openrave-robot-memory.$(SOEXT)
 
 ifeq ($(HAVE_CPP11)$(HAVE_ROBOT_MEMORY),11)
   CFLAGS  += $(CFLAGS_CPP11) $(CFLAGS_MONGODB)
   LDFLAGS += $(LDFLAGS_MONGODB)
-  PLUGINS_all = $(PLUGINDIR)/openrave-robot-memory.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_ROBOT_MEMORY),1)
     WARN_TARGETS += warning_robot_memory
