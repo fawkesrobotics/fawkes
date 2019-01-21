@@ -18,13 +18,17 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/download.mk
 
+LDFLAGS += $(LDFLAGS_FLITE) $(LDFLAGS_ALSA)
+CFLAGS  += $(CFLAGS_FLITE)  $(CFLAGS_ALSA)
+LIBS_flite = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
+             fawkesinterface SpeechSynthInterface flite flite_cmu_us_kal
+OBJS_flite = $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp)))
+
+OBJS_all    = $(OBJS_flite)
+PLUGINS_all = $(PLUGINDIR)/flite.so
+
 ifeq ($(HAVE_FLITE)$(HAVE_ALSA),11)
-  LDFLAGS += $(LDFLAGS_FLITE) $(LDFLAGS_ALSA)
-  CFLAGS  += $(CFLAGS_FLITE)  $(CFLAGS_ALSA)
-  LIBS_flite = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	       fawkesinterface SpeechSynthInterface flite flite_cmu_us_kal
-  OBJS_flite = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
-  PLUGINS_all = $(PLUGINDIR)/flite.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_FLITE),1)
     WARN_TARGETS += warning_flite
@@ -33,8 +37,6 @@ else
     WARN_TARGETS += warning_alsa
   endif
 endif
-
-OBJS_all = $(OBJS_flite)
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
