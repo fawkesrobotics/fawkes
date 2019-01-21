@@ -20,18 +20,21 @@ include $(BUILDSYSDIR)/clips.mk
 include $(BASEDIR)/src/plugins/robot-memory/robot_memory.mk
 
 LIBS_clips_robot_memory = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
-                      fawkesblackboard fawkesinterface fawkesclipsaspect \
-                      fawkesrobotmemory
+                          fawkesblackboard fawkesinterface fawkesclipsaspect \
+                          fawkesrobotmemory
 
-OBJS_clips_robot_memory = clips_robot_memory_plugin.o clips_robot_memory_thread.o clips_rm_trigger.o
+OBJS_clips_robot_memory = clips_robot_memory_plugin.o \
+                          clips_robot_memory_thread.o \
+                          clips_rm_trigger.o
 
-OBJS_all = $(OBJS_clips_robot_memory)
+OBJS_all    = $(OBJS_clips_robot_memory)
+PLUGINS_all = $(PLUGINDIR)/clips_robot_memory.$(SOEXT)
 
 ifeq ($(HAVE_CPP11)$(HAVE_CLIPS)$(HAVE_ROBOT_MEMORY),111)
   CFLAGS  += $(CFLAGS_CLIPS) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_CLIPS)
-  
-  PLUGINS_all = $(PLUGINDIR)/clips_robot_memory.$(SOEXT)
+
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS += warning_cpp11
