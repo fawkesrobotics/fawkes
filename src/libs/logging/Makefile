@@ -18,10 +18,11 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/lua.mk
 include $(BUILDSYSDIR)/boost.mk
 
-LIBS_all  = $(LIBDIR)/libfawkeslogging.so
+LIBS_all   = $(LIBDIR)/libfawkeslogging.so $(LUALIBDIR)/fawkeslogging.so
+LIBS_build = $(LIBDIR)/libfawkeslogging.so
 
 ifeq ($(HAVE_TOLUA),1)
-  LIBS_all += $(LUALIBDIR)/fawkeslogging.so
+  LIBS_build += $(LUALIBDIR)/fawkeslogging.so
   TARGETS_all += $(SRCDIR)/fawkeslogging_tolua.cpp
 endif
 
