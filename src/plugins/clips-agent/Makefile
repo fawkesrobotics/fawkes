@@ -23,7 +23,8 @@ LIBS_clips_agent = \
 	SkillerInterface SwitchInterface
 OBJS_clips_agent = clips_agent_plugin.o clips_agent_thread.o
 
-OBJS_all = $(OBJS_clips_agent)
+OBJS_all    = $(OBJS_clips_agent)
+PLUGINS_all = $(PLUGINDIR)/clips-agent.so
 
 # Extra files for system-wide install, i.e., "make install"
 FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
@@ -33,7 +34,7 @@ ifeq ($(HAVE_CLIPS),1)
   CFLAGS  += $(CFLAGS_CLIPS)
   LDFLAGS += $(LDFLAGS_CLIPS)
 
-  PLUGINS_all = $(PLUGINDIR)/clips-agent.so
+  PLUGINS_build = $(PLUGINS_all)
 
 	INSTALL_extra = clips_files
 else
