@@ -26,10 +26,11 @@ CFLAGS += $(CFLAGS_LUA)
 LDFLAGS_libfawkeslua += $(LDFLAGS_LUA)
 
 OBJS_all = $(OBJS_libfawkeslua)
+LIBS_all = $(LIBDIR)/libfawkeslua.so
 
 ifeq ($(HAVE_LUA),1)
   ifeq ($(HAVE_TOLUA),1)
-    LIBS_all = $(LIBDIR)/libfawkeslua.so
+    LIBS_build = $(LIBS_all)
   else
     WARN_TARGETS += warning_tolua
   endif
@@ -48,6 +49,4 @@ warning_tolua:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Fawkes Lua integration$(TNORMAL) (tolua++[-devel] not installed)"
 endif
 
-
 include $(BUILDSYSDIR)/base.mk
-
