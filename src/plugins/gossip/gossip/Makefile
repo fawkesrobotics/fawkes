@@ -25,6 +25,7 @@ LIBS_libfawkesgossip = \
 OBJS_libfawkesgossip = gossip_group.o gossip_group_manager.o
 
 OBJS_all = $(OBJS_libfawkesgossip)
+LIBS_all = $(LIBDIR)/libfawkesgossip.$(SOEXT)
 
 REQ_BOOST_LIBS = asio signals2 system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
@@ -35,7 +36,7 @@ ifeq ($(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),11)
   LDFLAGS += $(LDFLAGS_PROTOBUF) \
 	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
-  LIBS_all = $(LIBDIR)/libfawkesgossip.$(SOEXT)
+  LIBS_build = $(LIBS_all)
 else
   ifneq ($(HAVE_PROTOBUF),1)
     WARN_TARGETS += warning_protobuf
