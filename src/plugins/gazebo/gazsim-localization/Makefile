@@ -31,6 +31,7 @@ LIBS_gazsim_localization = fawkescore fawkesutils fawkesaspects fvutils \
 OBJS_gazsim_localization = gazsim_localization_plugin.o gazsim_localization_thread.o
 
 OBJS_all    = $(OBJS_gazsim_localization)
+PLUGINS_all = $(PLUGINDIR)/gazsim-localization.so
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_TF),111)
   CFLAGS  += $(CFLAGS_TF)
@@ -38,7 +39,7 @@ ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_TF),111)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
   LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system) -lboost_system
 
-  PLUGINS_all = $(PLUGINDIR)/gazsim-localization.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo
