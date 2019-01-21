@@ -65,7 +65,14 @@ else
 endif
 
 OBJS_all = $(OBJS_openni) $(OBJS_openni_usertracker) $(OBJS_openni_data) \
-	   $(OBJS_openni_handtracker) $(OBJS_openni_pcl_frombuf)
+           $(OBJS_openni_handtracker) $(OBJS_openni_pcl_frombuf)
+
+PLUGINS_base = $(PLUGINDIR)/openni.$(SOEXT) \
+               $(PLUGINDIR)/openni-usertracker.$(SOEXT) \
+               $(PLUGINDIR)/openni-handtracker.$(SOEXT) \
+               $(PLUGINDIR)/openni-data.$(SOEXT)
+PLUGINS_pcl  = $(PLUGINDIR)/openni-pcl-frombuf.$(SOEXT)
+PLUGINS_all  = $(PLUGINS_base) $(PLUGINS_pcl)
 
 # Ordering constraints
 utils: interfaces
@@ -78,13 +85,11 @@ ifeq ($(HAVE_OPENNI),1)
 
   CFLAGS  += $(CFLAGS_OPENNI) -Wno-deprecated-declarations
   LDFLAGS += $(LDFLAGS_OPENNI)
-  PLUGINS_all = $(PLUGINDIR)/openni.$(SOEXT) \
-		$(PLUGINDIR)/openni-usertracker.$(SOEXT) \
-		$(PLUGINDIR)/openni-handtracker.$(SOEXT) \
-		$(PLUGINDIR)/openni-data.$(SOEXT)
+
+  PLUGINS_build = $(PLUGINS_base)
 
   ifeq ($(HAVE_PCL),1)
-    PLUGINS_all += $(PLUGINDIR)/openni-pcl-frombuf.$(SOEXT)
+    PLUGINS_build += $(PLUGINS_pcl)
   endif
 else
   WARN_TARGETS += warning_openni
