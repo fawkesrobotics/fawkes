@@ -25,10 +25,11 @@ LDFLAGS += $(LDFLAGS_ROS)
 LIBS_libfawkesrosaspect = stdc++ fawkescore fawkesaspects fawkesutils
 OBJS_libfawkesrosaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all    = $(OBJS_libfawkesrosaspect)
+OBJS_all = $(OBJS_libfawkesrosaspect)
+LIBS_all = $(LIBDIR)/libfawkesrosaspect.so
 
 ifeq ($(HAVE_ROS),1)
-  LIBS_all = $(LIBDIR)/libfawkesrosaspect.so
+  LIBS_build = $(LIBS_all)
 else
   WARN_TARGETS += warning_ros
 endif
