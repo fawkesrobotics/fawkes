@@ -55,6 +55,7 @@ INST_HDRS_SUBDIR_libfawkesaspects = aspect
 
 OBJS_all = $(OBJS_libfawkesaspects)
 LIBS_all  = $(LIBDIR)/libfawkesaspects.so
+LIBS_build = $(LIBS_all)
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
