@@ -71,6 +71,7 @@ ifneq ($(INTERFACES_all),)
 	$(eval INTERFACES_TOUCH            += $(SRCDIR)/$(OBJDIR)/$I.touch)	\
 	$(eval INTERFACES_OBJS             += $I.o)				\
 	$(eval LIBS_all                    += $$(IFACEDIR)/lib$I.so)		\
+	$(eval LIBS_build                  += $$(IFACEDIR)/lib$I.so)		\
 										\
 	$(eval TOLUA_ALL                   += $(I).tolua)			\
 	$(eval TOLUA_SRCS                  += $(I)_tolua.cpp)			\
@@ -81,7 +82,8 @@ ifneq ($(INTERFACES_all),)
 	$(eval TOLUA_$(I)                   = $(I).tolua)			\
 	$(eval TOLUA_PKGPREFIX_$(I)         = interfaces_)			\
 	$(eval OBJS_all                    += $(I)_tolua.o)			\
-	$(eval LIBS_all_tolua              += $$(LUALIBDIR)/interfaces/$(I).so)	\
+	$(eval LIBS_all                    += $$(LUALIBDIR)/interfaces/$(I).so)	\
+	$(eval LIBS_build_tolua            += $$(LUALIBDIR)/interfaces/$(I).so)	\
   )
 
   ifeq ($(IFACESRCDIR),$(SRCDIR))
@@ -121,17 +123,17 @@ error_ifacegen:
 
 endif # OBJSSUBMAKE != 1
 
-ifneq ($(PLUGINS_all),)
-$(PLUGINS_all:%.so=%.$(SOEXT)): | $(INTERFACES_LIBS:%.so=%.$(SOEXT))
+ifneq ($(PLUGINS_build),)
+$(PLUGINS_build:%.so=%.$(SOEXT)): | $(INTERFACES_LIBS:%.so=%.$(SOEXT))
 endif
-ifneq ($(filter-out $(BINDIR)/ffifacegen,$(BINS_all)),)
-$(BINS_all): | $(INTERFACES_LIBS)
+ifneq ($(filter-out $(BINDIR)/ffifacegen,$(BINS_build)),)
+$(BINS_build): | $(INTERFACES_LIBS)
 endif
 
 ifeq ($(HAVE_TOLUA),1)
-  LIBS_all += $(LIBS_all_tolua)
+  LIBS_build += $(LIBS_build_tolua)
 
-$(LIBS_all_tolua): $(LUALIBDIR)/interfaces/%.$(SOEXT): | $(IFACEDIR)/lib%.$(SOEXT)
+$(LIBS_build_tolua): $(LUALIBDIR)/interfaces/%.$(SOEXT): | $(IFACEDIR)/lib%.$(SOEXT)
 
 else
 all: warning_tolua_wrapper
