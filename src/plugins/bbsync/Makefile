@@ -22,6 +22,7 @@ OBJS_bbsync = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpa
 
 OBJS_all    = $(OBJS_bbsync)
 PLUGINS_all = $(PLUGINDIR)/bbsync.so
+PLUGINS_build = $(PLUGINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 
