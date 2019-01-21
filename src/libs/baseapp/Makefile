@@ -85,6 +85,7 @@ HDRS_libfawkesbaseapp = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 
 OBJS_all = $(OBJS_libfawkesbaseapp)
 LIBS_all  = $(LIBDIR)/libfawkesbaseapp.so
+LIBS_build = $(LIBS_all)
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
