@@ -19,24 +19,27 @@ include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_laser_calibration = stdc++ m fawkescore fawkesutils fawkesblackboard \
-		fawkesconfig fawkesinterface fawkesnetcomm fawkestf fawkespcl_utils \
-		Laser360Interface Laser720Interface Laser1080Interface MotorInterface
+                         fawkesconfig fawkesinterface fawkesnetcomm fawkestf \
+                         fawkespcl_utils Laser360Interface Laser720Interface \
+                         Laser1080Interface MotorInterface
 
 OBJS_laser_calibration = laser_calibration.o main.o \
                          roll_calibration.o pitch_calibration.o \
                          yaw_calibration.o time_offset_calibration.o
+
 OBJS_all = $(OBJS_laser_calibration)
+BINS_all = $(BINDIR)/laser_calibration
 
 REQUIRED_PCL_LIBS = common filters registration
 
 ifeq ($(HAVE_TF),1)
   ifeq ($(HAVE_PCL),1)
     ifeq ($(call pcl-have-libs,$(REQUIRED_PCL_LIBS)),1)
-      CFLAGS += $(CFLAGS_PCL) $(call pcl-libs-cflags,$(REQUIRED_PCL_LIBS)) \
+      CFLAGS  = $(CFLAGS_PCL) $(call pcl-libs-cflags,$(REQUIRED_PCL_LIBS)) \
                 $(CFLAGS_TF)
-      LDFLAGS += $(LDFLAGS_PCL) $(call pcl-libs-ldflags,$(REQUIRED_PCL_LIBS)) \
-                 $(LDFLAGS_TF)
-      BINS_all += $(BINDIR)/laser_calibration
+      LDFLAGS = $(LDFLAGS_PCL) $(call pcl-libs-ldflags,$(REQUIRED_PCL_LIBS)) \
+                $(LDFLAGS_TF)
+      BINS_build = $(BINS_all)
     else
       WARN_TARGETS += warning_pcl_libs
     endif
