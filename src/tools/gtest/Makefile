@@ -23,15 +23,17 @@ LIBS_gtest_fawkes += stdc++ fawkescore fawkesutils fawkesblackboard fawkesnetcom
 	fawkesconfig fawkesplugin fawkesaspects fawkesbaseapp
 OBJS_gtest_fawkes += gtest_fawkes.o
 
-OBJS_all    = $(OBJS_gtest_fawkes)
+OBJS_all = $(OBJS_gtest_fawkes)
+LIBS_all = $(LIBDIR)/test/fawkes.so
+BINS_all = $(BINDIR)/gtest_fawkes
 
 ifeq ($(HAVE_GTEST)$(HAVE_CPP11),11)
   CFLAGS += $(CFLAGS_GTEST)
   CFLAGS += -Wno-unused-but-set-variable
   CFLAGS += $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_GTEST)
-  LIBS_test = $(LIBDIR)/test/fawkes.so
-  BINS_test = $(BINDIR)/gtest_fawkes
+  LIBS_test = $(LIBS_all)
+  BINS_test = $(BINS_all)
 else
   WARN_TARGETS += warning_gtest
 endif
