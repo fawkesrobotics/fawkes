@@ -25,6 +25,7 @@ HDRS_libfawkescore = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.
 
 OBJS_all = $(OBJS_libfawkescore)
 LIBS_all = $(LIBDIR)/libfawkescore.so
+LIBS_build = $(LIBS_all)
 
 ifeq ($(OS),FreeBSD)
   ifneq ($(wildcard /usr/local/include/execinfo.h),)
