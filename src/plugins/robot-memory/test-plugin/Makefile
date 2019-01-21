@@ -20,17 +20,19 @@ include $(BASEDIR)/etc/buildsys/gtest.mk
 include $(BASEDIR)/src/plugins/robot-memory/robot_memory.mk
 
 LIBS_robot_memory_test = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
-                      fawkesblackboard fawkesinterface fawkesrobotmemory \
-                      Position3DInterface
+                         fawkesblackboard fawkesinterface fawkesrobotmemory \
+                         Position3DInterface
 
 OBJS_robot_memory_test = robot_memory_test_plugin.o robot_memory_test_thread.o robot_memory_test.o
 
-OBJS_all = $(OBJS_robot_memory_test)
+OBJS_all    = $(OBJS_robot_memory_test)
+PLUGINS_all = $(PLUGINDIR)/robot_memory_test.$(SOEXT)
 
 ifeq ($(HAVE_ROBOT_MEMORY)$(HAVE_GTEST)$(HAVE_CPP11),111)
   CFLAGS += $(CFLAGS_GTEST) $(CFLAGS_CPP11) $(CFLAGS_MONGODB)
   LDFLAGS += $(LDFLAGS_GTEST) $(LDFLAGS_MONGODB)
-  PLUGINS_all = $(PLUGINDIR)/robot_memory_test.$(SOEXT)
+
+  LIBS_build = $(LIBS_all)
 else
   ifneq ($(HAVE_ROBOT_MEMORY),1)
     WARN_TARGETS += warning_robot_memory

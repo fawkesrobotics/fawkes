@@ -28,11 +28,13 @@ OBJS_robot_memory = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(
 OBJS_robot_memory += $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/computables/*.cpp)))))
 
 OBJS_all    = $(OBJS_robot_memory)
+PLUGINS_all = $(PLUGINDIR)/robot-memory.so
 
 ifeq ($(HAVE_ROBOT_MEMORY)$(HAVE_CPP11),11)
   CFLAGS += $(CFLAGS_ROBOT_MEMORY) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_ROBOT_MEMORY)
-  PLUGINS_all = $(PLUGINDIR)/robot-memory.so
+
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS += warning_mongodb
