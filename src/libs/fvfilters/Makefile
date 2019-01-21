@@ -46,6 +46,7 @@ HDRS_libfvfilters = nothing.h $(patsubst %.o,%.h,$(OBJS_libfvfilters))
 
 OBJS_all = $(OBJS_libfvfilters)
 LIBS_all = $(LIBDIR)/libfvfilters.so
+LIBS_build = $(LIBS_all)
 
 ifeq ($(OBJSSUBMAKE),1)
 .PHONY: print_unsupported
