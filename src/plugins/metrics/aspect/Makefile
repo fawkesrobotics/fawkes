@@ -20,10 +20,11 @@ include $(BASEDIR)/etc/buildsys/config.mk
 LIBS_libfawkesmetricsaspect = stdc++ fawkescore fawkesaspects
 OBJS_libfawkesmetricsaspect = metrics.o metrics_supplier.o metrics_inifin.o metrics_manager.o
 
-OBJS_all    = $(OBJS_libfawkesmetricsaspect)
+OBJS_all = $(OBJS_libfawkesmetricsaspect)
+LIBS_all = $(LIBDIR)/libfawkesmetricsaspect.so
 
 ifeq ($(HAVE_CPP14),1)
-	LIBS_all = $(LIBDIR)/libfawkesmetricsaspect.so
+  LIBS_build = $(LIBS_all)
 else
 	WARN_TARGETS += warning_cpp14
 endif
