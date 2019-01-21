@@ -40,6 +40,13 @@ LIBS_robotino_ros_joints = m fawkescore fawkesutils fawkesaspects \
 			   RobotinoSensorInterface
 OBJS_robotino_ros_joints = robotino_ros_joints_plugin.o ros_joints_thread.o
 
+OBJS_all = $(OBJS_robotino) \
+           $(OBJS_robotino_ir_pcl) \
+           $(OBJS_robotino_ros_joints)
+
+PLUGINS_all = $(PLUGINDIR)/robotino.$(SOEXT) \
+              $(PLUGINDIR)/robotino-ir-pcl.$(SOEXT) \
+              $(PLUGINDIR)/robotino-ros-joints.$(SOEXT)
 
 ifeq ($(HAVE_OPENROBOTINO),1)
   CFLAGS  += -DHAVE_OPENROBOTINO $(CFLAGS_OPENROBOTINO)
@@ -87,14 +94,14 @@ ifneq ($(HAVE_OPENROBOTINO)$(HAVE_ROBOTINO_DIRECT),)
       LIBS_robotino    += fawkestf
     endif
 
-    PLUGINS_all = $(PLUGINDIR)/robotino.so
+    PLUGINS_build = $(PLUGINDIR)/robotino.so
 
     ifeq ($(HAVE_PCL),1)
       CFLAGS_robotino_ir_pcl_plugin = $(CFLAGS) $(CFLAGS_PCL) $(CFLAGS_TF)
       CFLAGS_ir_pcl_thread = $(CFLAGS_robotino_ir_pcl_plugin)
       LDFLAGS_robotino_ir_pcl += $(LDFLAGS_PCL) $(LDFLAGS_TF)
 
-      PLUGINS_all += $(PLUGINDIR)/robotino-ir-pcl.$(SOEXT)
+      PLUGINS_build += $(PLUGINDIR)/robotino-ir-pcl.$(SOEXT)
     else
       WARN_TARGETS += warning_pcl
     endif
@@ -111,16 +118,13 @@ ifeq ($(HAVE_ROS),1)
     CFLAGS_robotino_ros_joints_plugin = $(CFLAGS_ros_joints_thread)
     LDFLAGS_robotino_ros_joints      += $(LDFLAGS_ROS) $(call ros-pkg-lflags,sensor_msgs)
 
-    PLUGINS_all += $(PLUGINDIR)/robotino-ros-joints.$(SOEXT)
+    PLUGINS_build += $(PLUGINDIR)/robotino-ros-joints.$(SOEXT)
   else
     WARN_TARGETS += warning_sensor_msgs
   endif
 else
   WARN_TARGETS += warning_ros
 endif
-
-OBJS_all = $(OBJS_robotino) $(OBJS_robotino_ir_pcl) \
-	   $(OBJS_robotino_ros_joints)
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
