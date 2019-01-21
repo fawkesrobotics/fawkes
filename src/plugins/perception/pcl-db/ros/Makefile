@@ -28,6 +28,7 @@ LIBS_pcl_db_roscomm = fawkescore fawkesaspects fawkesblackboard fawkesinterface 
 OBJS_pcl_db_roscomm = pcl_db_roscomm_plugin.o pcl_db_roscomm_thread.o
 
 OBJS_all    = $(OBJS_pcl_db_roscomm)
+PLUGINS_all = $(PLUGINDIR)/pcl-db-roscomm.so
 
 REQUIRED_ROS_PKGS = fawkes_msgs pcl_conversions
 
@@ -43,7 +44,7 @@ ifeq ($(HAVE_ROS)$(HAVE_PCL)$(HAVE_TF)$(HAVE_BOOST_LIBS),1111)
 	       $(call ros-pkgs-lflags,$(REQUIRED_ROS_PKGS)) \
 	       $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
-    PLUGINS_all = $(PLUGINDIR)/pcl-db-roscomm.so
+    PLUGINS_build = $(PLUGINS_all)
   else
     WARN_TARGETS += warning_ros_pkgs
   endif
