@@ -23,19 +23,21 @@ include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 PRESUBDIRS = aspect msgs
 
 SUBDIRS = gazsim-robotino gazsim-laser gazsim-localization gazsim-comm \
-	  gazsim-vis-localization gazsim-webcam gazsim-timesource \
-	  gazsim-depthcam
+          gazsim-vis-localization gazsim-webcam gazsim-timesource \
+          gazsim-depthcam
 
-LIBS_gazebo = fawkescore fawkesaspects fawkesgazeboaspect
+LIBS_gazebo = m fawkescore fawkesaspects fawkesgazeboaspect
 OBJS_gazebo = gazebo_plugin.o node_thread.o
 
 OBJS_all    = $(OBJS_gazebo)
+PLUGINS_all = $(PLUGINDIR)/gazebo.$(SOEXT)
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(call boost-have-libs,system),111)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
-  LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system)
+  LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) \
+             $(call boost-libs-ldflags,system)
 
-  PLUGINS_all = $(PLUGINDIR)/gazebo.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo
