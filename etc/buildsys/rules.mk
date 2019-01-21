@@ -99,9 +99,9 @@ UNLISTED_libs = $(strip $(filter-out $(LIBS_all:%.so=%.$(SOEXT)),$(LIBS_build:%.
 UNLISTED_plugins = $(strip $(filter-out $(PLUGINS_all:%.so=%.$(SOEXT)),$(PLUGINS_build:%.so=%.$(SOEXT))))
 UNLISTED_all = $(strip $(UNLISTED_bins) $(UNLISTED_libs) $(UNLISTED_plugins))
 
-all: $(if $(UNLISTED_all),error_unlisted,presubdirs $(PLUGINS_build:%.so=%.$(SOEXT)) $(LIBS_build:%.so=%.$(SOEXT)) $(BINS_build) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) subdirs | silent-nothing-to-do-all)
-gui: $(if $(UNLISTED_all),error_unlisted,presubdirs $(LIBS_gui:%.so=%.$(SOEXT)) $(PLUGINS_gui:%.so=%.$(SOEXT)) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) subdirs | silent-nothing-to-do-gui)
-test: $(if $(UNLISTED_all),error_unlisted,presubdirs $(LIBS_test:%.so=%.$(SOEXT)) $(PLUGINS_test:%.so=%.$(SOEXT)) $(BINS_test) $(TARGETS_test) exec_test subdirs | silent-nothing-to-do-test)
+all: $(if $(UNLISTED_all),error_unlisted,presubdirs $(PLUGINS_build:%.so=%.$(SOEXT)) $(LIBS_build:%.so=%.$(SOEXT)) $(BINS_build) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) stats subdirs | silent-nothing-to-do-all)
+gui: $(if $(UNLISTED_all),error_unlisted,presubdirs $(LIBS_gui:%.so=%.$(SOEXT)) $(PLUGINS_gui:%.so=%.$(SOEXT)) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) stats-gui subdirs | silent-nothing-to-do-gui)
+test: $(if $(UNLISTED_all),error_unlisted,presubdirs $(LIBS_test:%.so=%.$(SOEXT)) $(PLUGINS_test:%.so=%.$(SOEXT)) $(BINS_test) $(TARGETS_test) exec_test stats-test subdirs | silent-nothing-to-do-test)
 uncolored-all: all
 uncolored-gui: gui
 uncolored-test: test
@@ -316,6 +316,9 @@ $(LIBDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 	$(SILENT) ln -fs $(@F).$(SOVER_$(call nametr,$*)) $@; \
 	ln -fs $(@F).$(SOVER_$(call nametr,$*)) $@.$(firstword $(call split,.,$(SOVER_$(call nametr,$*)))); \
 	)
+
+### Include build statistics script
+include $(BUILDSYSDIR)/stats.mk
 
 ### Check if there are special additions
 ifneq ($(wildcard $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk),)
