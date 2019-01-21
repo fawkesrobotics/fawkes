@@ -17,11 +17,12 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_ffptu = stdc++ fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
-		fawkesinterface PanTiltInterface
+             fawkesinterface PanTiltInterface
 OBJS_ffptu = ffptu.o ../robotis/rx28.o
 
-OBJS_all =	$(OBJS_ffptu)
-BINS_all = $(BINDIR)/ffptu 
+OBJS_all = $(OBJS_ffptu)
+BINS_all = $(BINDIR)/ffptu
+BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 
