@@ -22,6 +22,7 @@ LIBS_asp = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 OBJS_asp = asp_plugin.o asp_thread.o
 
 OBJS_all = $(OBJS_asp)
+PLUGINS_all = $(PLUGINDIR)/asp.so
 
 ifeq ($(HAVE_CPP11),1)
   ifeq ($(HAVE_CLINGO),1)
@@ -30,7 +31,7 @@ ifeq ($(HAVE_CPP11),1)
     CFLAGS  += $(CFLAGS_CLINGO)  $(CFLAGS_CPP11)
     LDFLAGS += $(LDFLAGS_CLINGO) $(LDFLAGS_CPP11)
 
-    PLUGINS_all = $(PLUGINDIR)/asp.so
+    PLUGINS_build = $(PLUGINS_all)
   else
     WARN_TARGETS += warning_clingo
   endif
