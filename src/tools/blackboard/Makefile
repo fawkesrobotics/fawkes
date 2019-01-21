@@ -27,9 +27,10 @@ LIBS_bb_meminfo = fawkescore fawkesutils fawkesconfig fawkesblackboard
 OBJS_bb_meminfo = bb_meminfo.o
 
 OBJS_all = $(OBJS_bb_cleanup) $(OBJS_bb_list) $(OBJS_bb_meminfo)
-BINS_all =	$(BINDIR)/bb_cleanup	\
-		$(BINDIR)/bb_list	\
-		$(BINDIR)/bb_meminfo
+BINS_all = $(BINDIR)/bb_cleanup	\
+           $(BINDIR)/bb_list	\
+           $(BINDIR)/bb_meminfo
+BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 
