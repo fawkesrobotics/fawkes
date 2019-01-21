@@ -23,7 +23,8 @@ LIBS_clips_navgraph = fawkescore fawkesutils fawkesaspects \
 		      fawkesnavgraph
 OBJS_clips_navgraph = clips_navgraph_plugin.o clips_navgraph_thread.o
 
-OBJS_all = $(OBJS_clips_navgraph)
+OBJS_all    = $(OBJS_clips_navgraph)
+PLUGINS_all = $(PLUGINDIR)/clips-navgraph.$(SOEXT)
 
 # Extra files for system-wide install, i.e., "make install"
 FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
@@ -33,7 +34,7 @@ ifeq ($(HAVE_CPP11)$(HAVE_CLIPS)$(HAVE_NAVGRAPH),111)
   CFLAGS  += $(CFLAGS_CLIPS) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_CLIPS)
 
-  PLUGINS_all = $(PLUGINDIR)/clips-navgraph.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 
 	INSTALL_extra = clips_files
 else
