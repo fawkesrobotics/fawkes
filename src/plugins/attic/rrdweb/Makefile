@@ -23,9 +23,10 @@ LIBS_rrdweb = fawkescore fawkesaspects fawkesutils fawkesrrdaspect fawkeswebview
 OBJS_rrdweb = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_rrdweb)
+PLUGINS_all = $(PLUGINDIR)/rrdweb.so
 
 ifeq ($(HAVE_RRD)$(HAVE_WEBVIEW),11)
-  PLUGINS_all = $(PLUGINDIR)/rrdweb.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_RRD),1)
     WARN_TARGETS += warning_rrd
