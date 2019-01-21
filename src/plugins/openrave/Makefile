@@ -21,29 +21,37 @@ include $(LIBSRCDIR)/utils/utils.mk
 
 PRESUBDIRS = aspect interfaces
 
-LIBS_openrave = m fawkescore fawkesaspects fawkesutils fawkesblackboard fawkesopenrave fawkesopenraveaspect fawkesinterface OpenRaveInterface $(LIBS_OPENRAVE)
+LIBS_openrave = m fawkescore fawkesaspects fawkesutils fawkesblackboard \
+                fawkesopenrave fawkesopenraveaspect fawkesinterface \
+                OpenRaveInterface $(LIBS_OPENRAVE)
 OBJS_openrave = openrave_plugin.o openrave_thread.o message_handler_thread.o
 
 LIBS_libfawkesopenrave = m fawkescore fawkesutils $(LIBS_OPENRAVE)
-OBJS_libfawkesopenrave = environment.o robot.o manipulator.o manipulators/katana6M180.o manipulators/neuronics_katana.o manipulators/kinova_jaco.o
+OBJS_libfawkesopenrave = environment.o robot.o manipulator.o \
+                         manipulators/katana6M180.o \
+                         manipulators/neuronics_katana.o \
+                         manipulators/kinova_jaco.o
 
 OBJS_all    = $(OBJS_openrave) $(OBJS_libfawkesopenrave)
+LIBS_all    = $(LIBDIR)/libfawkesopenrave.so
+PLUGINS_all = $(PLUGINDIR)/openrave.so
 
-ifneq ($(HAVE_PYTHON),1)
-  WARN_TARGETS += warning_python
-endif
-ifneq ($(HAVE_OPENRAVE),1)
-  WARN_TARGETS += warning_openrave
-endif
-ifneq ($(HAVE_BOOST_THREAD),1)
-  WARN_TARGETS += warning_boost_thread
-endif
-
-ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
+ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON)$(HAVE_BOOST_THREAD),111)
   CFLAGS  += $(CFLAGS_OPENRAVE) $(CFLAGS_PYTHON)
   LDFLAGS += $(LDFLAGS_OPENRAVE) $(LDFLAGS_PYTHON)
-  PLUGINS_all = $(PLUGINDIR)/openrave.so
-  LIBS_all = $(LIBDIR)/libfawkesopenrave.so
+
+  LIBS_build = $(LIBS_all)
+  PLUGINS_build = $(PLUGINS_all)
+else
+  ifneq ($(HAVE_PYTHON),1)
+    WARN_TARGETS += warning_python
+  endif
+  ifneq ($(HAVE_OPENRAVE),1)
+    WARN_TARGETS += warning_openrave
+  endif
+  ifneq ($(HAVE_BOOST_THREAD),1)
+    WARN_TARGETS += warning_boost_thread
+  endif
 endif
 
 $(PLUGINDIR)/openrave.$(SOEXT): | $(LIBDIR)/libfawkesopenrave.$(SOEXT)
