@@ -26,11 +26,12 @@ LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
 LIBS_fvyuv_viewer = fawkescore fvutils fvwidgets
-OBJS_fvyuv_viewer = $(patsubst %.cpp,%.o,$(patsubst cox/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
-OBJS_all += $(OBJS_fvyuv_viewer)
+OBJS_fvyuv_viewer = $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp)))
+OBJS_all = $(OBJS_fvyuv_viewer)
+BINS_all = $(BINDIR)/fvyuv_viewer
 
 ifeq ($(HAVE_GUI),1)
-  BINS_gui += $(BINDIR)/fvyuv_viewer
+  BINS_gui = $(BINS_all)
   INST_RESDIRS = guis/yuv_viewer
 else
   WARN_TARGETS += warning_guilibs
