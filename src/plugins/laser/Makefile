@@ -25,6 +25,8 @@ OBJS_laser = laser_plugin.o acquisition_thread.o sensor_thread.o
 CFLAGS  += $(CFLAGS_LIBUDEV)
 LDFLAGS += $(LDFLAGS_LIBUDEV)
 
+PLUGINS_all = $(PLUGINDIR)/laser.so
+
 ifeq ($(HAVE_LIBPCAN),1)
   OBJS_laser += lase_edl_aqt.o
   LIBS_laser += $(LIBS_LIBPCAN)
@@ -69,7 +71,7 @@ else
 endif
 
 ifneq ($(HAVE_LIBPCAN)$(HAVE_URG)$(HAVE_URG_GBX)$(HAVE_LIBUSB),0000)
-  PLUGINS_all = $(PLUGINDIR)/laser.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_nolib
 endif
