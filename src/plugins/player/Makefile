@@ -25,20 +25,21 @@ ifeq ($(CC),clang)
   CFLAGS += "-Wno-\#warnings"
 endif
 
+LDFLAGS += $(LDFLAGS_PLAYERCC)
+CFLAGS  += $(CFLAGS_PLAYERCC)
+LIBS_player = fawkescore fawkesutils fawkesaspects fawkesblackboard \
+              fawkesinterface fawkesnetcomm \
+              Laser360Interface MotorInterface ObjectPositionInterface
+OBJS_player = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
+
+OBJS_all    = $(OBJS_player)
+PLUGINS_all = $(PLUGINDIR)/player.so
 
 ifeq ($(HAVE_PLAYERCC),1)
-  LDFLAGS += $(LDFLAGS_PLAYERCC)
-  CFLAGS  += $(CFLAGS_PLAYERCC)
-  LIBS_player = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-		fawkesinterface fawkesnetcomm \
-		Laser360Interface MotorInterface ObjectPositionInterface
-  OBJS_player = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
-  PLUGINS_all = $(PLUGINDIR)/player.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_playercc
 endif
-
-OBJS_all = $(OBJS_player)
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
