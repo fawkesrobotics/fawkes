@@ -17,12 +17,13 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_ffswitch = stdc++ fawkescore fawkesutils fawkesnetcomm fawkesblackboard	\
-		fawkesinterface SwitchInterface
+LIBS_ffswitch = stdc++ fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
+                fawkesinterface SwitchInterface
 OBJS_ffswitch = main.o
 
-OBJS_all     =	$(OBJS_ffswitch)
-BINS_all     =	$(BINDIR)/ffswitch
-MANPAGES_all =	$(MANDIR)/man1/ffswitch.1
+OBJS_all     = $(OBJS_ffswitch)
+BINS_all     = $(BINDIR)/ffswitch
+BINS_build   = $(BINS_all)
+MANPAGES_all = $(MANDIR)/man1/ffswitch.1
 
 include $(BUILDSYSDIR)/base.mk
