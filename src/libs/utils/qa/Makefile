@@ -84,11 +84,15 @@ BINS_all =	$(BINDIR)/qa_utils_plugin		\
 		$(BINDIR)/qa_utils_filetype		\
 		$(BINDIR)/qa_utils_rcsoft_graph
 
+BINS_BUILD = $(BINS_all)
+BINS_all += $(BINDIR)/qa_utils_ipc_shmem_lowlevel
+
 ifeq ($(OS),Linux)
-  BINS_all += $(BINDIR)/qa_utils_ipc_shmem_lowlevel
+  BINS_build += $(BINDIR)/qa_utils_ipc_shmem_lowlevel
 endif
 
 PLUGINS_all =	$(PLUGINDIR)/test_plugin.so
+PLUGINS_build = $(PLUGINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 
