@@ -26,7 +26,8 @@ CFLAGS  += $(CFLAGS_CPP11)
 
 OBJS_imu = imu_plugin.o acquisition_thread.o sensor_thread.o
 
-OBJS_all = $(OBJS_imu)
+OBJS_all    = $(OBJS_imu)
+PLUGINS_all = $(PLUGINDIR)/imu.so
 
 ifeq ($(HAVE_CRUIZCORE),1)
   OBJS_imu += imu_cruizcore_xg1010.o
@@ -40,7 +41,7 @@ else
 endif
 
 ifneq ($(HAVE_CRUIZCORE),)
-  PLUGINS_all = $(PLUGINDIR)/imu.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_nolib
 endif
