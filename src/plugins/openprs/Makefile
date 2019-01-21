@@ -39,6 +39,12 @@ OBJS_all = $(OBJS_openprs) $(OBJS_openprs_mod_utils) \
 	   $(OBJS_openprs_mod_time) $(OBJS_openprs_mod_blackboard) \
 	   $(OBJS_openprs_mod_config)
 
+PLUGINS_all = $(PLUGINDIR)/openprs.so
+LIBS_all   += $(OPENPRS_MOD_DIR)/mod_utils.so \
+              $(OPENPRS_MOD_DIR)/mod_time.so \
+              $(OPENPRS_MOD_DIR)/mod_blackboard.so \
+              $(OPENPRS_MOD_DIR)/mod_config.so
+
 INST_LIB_SUBDIR_openprs_mod_utils = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_time = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_blackboard = $(FFLIBSUBDIR)
@@ -72,11 +78,8 @@ ifeq ($(HAVE_OPENPRS),1)
   ALLOW_UNDEF_openprs_mod_blackboard = 1
   ALLOW_UNDEF_openprs_mod_config = 1
 
-  PLUGINS_all = $(PLUGINDIR)/openprs.so
-  LIBS_all   += $(OPENPRS_MOD_DIR)/mod_utils.so \
-		$(OPENPRS_MOD_DIR)/mod_time.so \
-		$(OPENPRS_MOD_DIR)/mod_blackboard.so \
-		$(OPENPRS_MOD_DIR)/mod_config.so
+  LIBS_build = $(LIBS_all)
+  PLUGINS_build = $(PLUGINS_all)
 
 	INSTALL_extra = openprs_files
 else
