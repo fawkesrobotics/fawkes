@@ -50,25 +50,27 @@ LIBS_qa_bb_objpos = fawkescore fawkesblackboard fawkesinterface ObjectPositionIn
 			fawkesutils fawkesnetcomm fawkeslogging
 OBJS_qa_bb_objpos = qa_bb_objpos.o
 
-OBJS_all =	$(OBJS_qa_bb_memmgr) 		\
-		$(OBJS_qa_bb_interface)		\
-		$(OBJS_qa_bb_buffers)		\
-		$(OBJS_qa_bb_messaging)		\
-		$(OBJS_qa_bb_openall)		\
-		$(OBJS_qa_bb_notify)		\
-		$(OBJS_qa_bb_listall)		\
-		$(OBJS_qa_bb_remote)		\
-		$(OBJS_qa_bb_objpos)
+OBJS_all =	$(OBJS_qa_bb_memmgr)       \
+            $(OBJS_qa_bb_interface)    \
+            $(OBJS_qa_bb_buffers)      \
+            $(OBJS_qa_bb_messaging)    \
+            $(OBJS_qa_bb_openall)      \
+            $(OBJS_qa_bb_notify)       \
+            $(OBJS_qa_bb_listall)      \
+            $(OBJS_qa_bb_remote)       \
+            $(OBJS_qa_bb_objpos)
 
-BINS_all =	$(BINDIR)/qa_bb_memmgr		\
-		$(BINDIR)/qa_bb_interface	\
-		$(BINDIR)/qa_bb_buffers		\
-		$(BINDIR)/qa_bb_messaging	\
-		$(BINDIR)/qa_bb_notify		\
-		$(BINDIR)/qa_bb_openall		\
-		$(BINDIR)/qa_bb_listall		\
-		$(BINDIR)/qa_bb_remote		\
-		$(BINDIR)/qa_bb_objpos
+BINS_all =	$(BINDIR)/qa_bb_memmgr     \
+            $(BINDIR)/qa_bb_interface	 \
+            $(BINDIR)/qa_bb_buffers    \
+            $(BINDIR)/qa_bb_messaging	 \
+            $(BINDIR)/qa_bb_notify     \
+            $(BINDIR)/qa_bb_openall    \
+            $(BINDIR)/qa_bb_listall    \
+            $(BINDIR)/qa_bb_remote     \
+            $(BINDIR)/qa_bb_objpos
+
+BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 
