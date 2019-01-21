@@ -24,10 +24,11 @@ LIBS_libfawkesnavgraphaspect = fawkescore fawkesaspects fawkesutils \
 			       fawkesnavgraph
 OBJS_libfawkesnavgraphaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all    = $(OBJS_libfawkesnavgraphaspect)
+OBJS_all = $(OBJS_libfawkesnavgraphaspect)
+LIBS_all = $(LIBDIR)/libfawkesnavgraphaspect.$(SOEXT)
 
 ifeq ($(HAVE_CPP11),1)
-  LIBS_all = $(LIBDIR)/libfawkesnavgraphaspect.$(SOEXT)
+  LIBS_build = $(LIBS_all)
 else
   ifneq ($(HAVE_TF),1)
     WARN_TARGETS = warning_tf

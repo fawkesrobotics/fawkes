@@ -33,17 +33,19 @@ LIBS_lua_fawkesnavgraph = fawkescore fawkesutils fawkesnavgraph $(TOLUA_LIBS)
 OBJS_lua_fawkesnavgraph = fawkesnavgraph_tolua.o
 
 OBJS_all = $(OBJS_libfawkesnavgraph) $(OBJS_lua_fawkesnavgraph)
+LIBS_all = $(LIBDIR)/libfawkesnavgraph.$(SOEXT) \
+           $(LUALIBDIR)/fawkesnavgraph.$(SOEXT)
 
 ifeq ($(HAVE_NAVGRAPH),1)
   CFLAGS  += $(CFLAGS_NAVGRAPH)  $(CFLAGS_EIGEN3)  $(CFLAGS_YAMLCPP)
   LDFLAGS += $(LDFLAGS_NAVGRAPH) $(LDFLAGS_EIGEN3) $(LDFLAGS_YAMLCPP)
 
-  LIBS_all  += $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
+  LIBS_build += $(LIBDIR)/libfawkesnavgraph.$(SOEXT)
 
   SUBDIRS = aspect generators
 
   ifeq ($(HAVE_TOLUA),1)
-    LIBS_all += $(LUALIBDIR)/fawkesnavgraph.$(SOEXT)
+    LIBS_build  += $(LUALIBDIR)/fawkesnavgraph.$(SOEXT)
     TARGETS_all += $(SRCDIR)/fawkesnavgraph_tolua.cpp
   else
     WARN_TARGETS += warning_tolua_wrapper

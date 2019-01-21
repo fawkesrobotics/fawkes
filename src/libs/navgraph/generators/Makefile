@@ -25,12 +25,13 @@ LIBS_libfawkesnavgraphgenerators = fawkescore fawkesaspects fawkesutils \
 				   fawkesnavgraph
 OBJS_libfawkesnavgraphgenerators = generator.o voronoi.o grid.o
 
-OBJS_all    = $(OBJS_libfawkesnavgraphgenerators)
+OBJS_all = $(OBJS_libfawkesnavgraphgenerators)
+LIBS_all = $(LIBDIR)/libfawkesnavgraphgenerators.$(SOEXT)
 
 ifeq ($(HAVE_NAVGRAPH)$(HAVE_CGAL)$(HAVE_EIGEN3),111)
   CFLAGS  += $(CFLAGS_NAVGRAPH)  $(CFLAGS_CGAL)  $(CFLAGS_EIGEN3)
   LDFLAGS += $(LDFLAGS_NAVGRAPH) $(LDFLAGS_CGAL) $(LDFLAGS_EIGEN3)
-  LIBS_all = $(LIBDIR)/libfawkesnavgraphgenerators.$(SOEXT)
+  LIBS_build = $(LIBS_all)
 else
   ifneq ($(HAVE_NAVGRAPH),1)
     WARN_TARGETS += warning_navgraph
