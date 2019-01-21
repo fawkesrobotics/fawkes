@@ -23,12 +23,14 @@ LIBS_gtest_syncpoint += stdc++ fawkescore fawkesutils fawkessyncpoint pthread \
 
 OBJS_gtest_syncpoint += test_syncpoint.o
 OBJS_all = $(OBJS_gtest_syncpoint)
+LIBS_all = $(LIBDIR)/test/syncpoint.so
+BINS_all = $(BINDIR)/gtest_syncpoint
 
 ifeq ($(HAVE_GTEST)$(HAVE_CPP11),11)
   CFLAGS += $(CFLAGS_GTEST) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_GTEST)
-  LIBS_test = $(LIBDIR)/test/syncpoint.so
-  BINS_test = $(BINDIR)/gtest_syncpoint
+  LIBS_test = $(LIBS_all)
+  BINS_test = $(BINS_all)
 endif
 
 include $(BUILDSYSDIR)/base.mk
