@@ -24,15 +24,16 @@ include $(BUILDSYSDIR)/protobuf.mk
 
 SUBDIRS = gazebo-plugin-motor gazebo-plugin-gyro
 
-LIBS_gazsim_robotino = fawkescore fawkesutils fawkesaspects fvutils \
-		fawkestf fawkesinterface fawkesblackboard \
-		BatteryInterface RobotinoSensorInterface MotorInterface \
-		Position3DInterface IMUInterface SwitchInterface \
-		fawkesgazeboaspect gazsim_msgs \
+LIBS_gazsim_robotino = m fawkescore fawkesutils fawkesaspects fvutils \
+                       fawkestf fawkesinterface fawkesblackboard \
+                       BatteryInterface RobotinoSensorInterface MotorInterface \
+                       Position3DInterface IMUInterface SwitchInterface \
+                       fawkesgazeboaspect gazsim_msgs \
 
 OBJS_gazsim_robotino = gazsim_robotino_plugin.o gazsim_robotino_thread.o
 
 OBJS_all    = $(OBJS_gazsim_robotino)
+PLUGINS_all = $(PLUGINDIR)/gazsim-robotino.so
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_TF),111)
   CFLAGS  += $(CFLAGS_TF)
@@ -40,7 +41,7 @@ ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_TF),111)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
   LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system) -lboost_system
 
-  PLUGINS_all = $(PLUGINDIR)/gazsim-robotino.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo
