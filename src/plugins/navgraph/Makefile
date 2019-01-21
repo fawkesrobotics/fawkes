@@ -21,14 +21,14 @@ include $(BUILDCONFDIR)/navgraph/navgraph.mk
 
 ENABLE_VISUALIZATION = 1
 
-
 CFLAGS += $(CFLAGS_CPP11)
 
 LIBS_navgraph = m fawkescore fawkesutils fawkesaspects fawkesinterface \
-		fawkesblackboard fawkesnavgraph \
-		NavigatorInterface NavPathInterface
+                fawkesblackboard fawkesnavgraph \
+                NavigatorInterface NavPathInterface
 OBJS_navgraph = navgraph_plugin.o navgraph_thread.o
 OBJS_all    = $(OBJS_navgraph)
+PLUGINS_all = $(PLUGINDIR)/navgraph.$(SOEXT)
 
 ifeq ($(HAVE_CPP11)$(HAVE_TF)$(HAVE_NAVGRAPH),111)
   CFLAGS_navgraph_thread  = $(CFLAGS) $(CFLAGS_TF)
@@ -36,7 +36,7 @@ ifeq ($(HAVE_CPP11)$(HAVE_TF)$(HAVE_NAVGRAPH),111)
   LDFLAGS_navgraph       += $(LDFLAGS_TF)
   LIBS_navgraph          += fawkestf fawkesnavgraphaspect
 
-  PLUGINS_all = $(PLUGINDIR)/navgraph.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 
   SUBDIRS = static-constraints
 
