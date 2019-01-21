@@ -77,24 +77,28 @@ LIBS_libfawkesnaoqi_motion_utils = alcore alcommon alvalue
 OBJS_libfawkesnaoqi_motion_utils = motion_utils.o
 
 OBJS_all = $(OBJS_naoqi) $(OBJS_libnaofawkes) $(OBJS_libfawkesnaoqibroker) \
-	$(OBJS_libfawkesnaoqi_dcm_utils) $(OBJS_libfawkesnaoqi_motion_utils)\
-	$(OBJS_naoqi_motion) $(OBJS_naoqi_speechsynth) $(OBJS_naoqi_leds) \
-	$(OBJS_naoqi_buttons)
+           $(OBJS_libfawkesnaoqi_dcm_utils) $(OBJS_libfawkesnaoqi_motion_utils)\
+           $(OBJS_naoqi_motion) $(OBJS_naoqi_speechsynth) $(OBJS_naoqi_leds) \
+           $(OBJS_naoqi_buttons)
+
+LIBS_all    = $(LIBDIR)/libfawkesnaoqibroker.so \
+              $(LIBDIR)/libfawkesnaoqi_dcm_utils.so \
+              $(LIBDIR)/libfawkesnaoqi_motion_utils.so \
+              $(LIBDIR)/libnaofawkes.so
+PLUGINS_all = $(PLUGINDIR)/naoqi.so \
+              $(PLUGINDIR)/naoqi-motion.so \
+              $(PLUGINDIR)/naoqi-speechsynth.so \
+              $(PLUGINDIR)/naoqi-leds.so \
+              $(PLUGINDIR)/naoqi-buttons.so
 
 ifeq ($(HAVE_NAOQI),1)
   PRESUBDIRS += aspect
 
   CFLAGS  += $(CFLAGS_NAOQI)
   LDFLAGS += $(LDFLAGS_NAOQI)
-  PLUGINS_all = $(PLUGINDIR)/naoqi.so $(PLUGINDIR)/naoqi-motion.so \
-		$(PLUGINDIR)/naoqi-speechsynth.so \
-		$(PLUGINDIR)/naoqi-leds.so \
-		$(PLUGINDIR)/naoqi-buttons.so
-  LIBS_all = $(LIBDIR)/libfawkesnaoqibroker.so \
-	     $(LIBDIR)/libfawkesnaoqi_dcm_utils.so \
-	     $(LIBDIR)/libfawkesnaoqi_motion_utils.so \
-	     $(LIBDIR)/libnaofawkes.so
 
+	LIBS_build = $(LIBS_all)
+  PLUGINS_build = $(PLUGINS_all)
   TARGETS_all = info_naoqiroot
 else
   WARN_TARGETS += warning_naoqi
