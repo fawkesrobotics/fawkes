@@ -21,11 +21,11 @@ include $(BUILDSYSDIR)/libxmlpp.mk
 LIBS_refboxcomm = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		  fawkesinterface fawkesnetcomm \
 		  GameStateInterface SwitchInterface
-OBJS_refboxcomm = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp)))) \
-		  processor/processor.o processor/state_handler.o \
-		  processor/remotebb.o
-OBJS_all = $(OBJS_refboxcomm)
+OBJS_refboxcomm = $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))) \
+                  processor/processor.o processor/state_handler.o processor/remotebb.o
+OBJS_all    = $(OBJS_refboxcomm)
 PLUGINS_all = $(PLUGINDIR)/refboxcomm.so
+PLUGINS_build = $(PLUGINS_all)
 
 ifeq ($(HAVE_LIBXMLPP),1)
   CFLAGS  += -DHAVE_MSL2010 $(CFLAGS_LIBXMLPP)
