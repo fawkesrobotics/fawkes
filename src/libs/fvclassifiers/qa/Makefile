@@ -44,20 +44,23 @@ CFLAGS_qa_siftppclassifier += $(CFLAGS_SIFTPP)
 
 OBJS_all = $(OBJS_fv_qa_facesclassifier) $(OBJS_fv_qa_siftclassifier) $(OBJS_fv_qa_surfclassifier) $(OBJS_fv_qa_siftppclassifier)
 
+BINS_all = $(BINDIR)/fv_qa_facesclassifier $(BINDIR)/fv_qa_siftclassifier \
+           $(BINDIR)/fv_qa_surfclassifier $(BINDIR)/fv_qa_siftppclassifier
+
 ifeq ($(HAVE_OPENCV),1)
-  BINS_all = $(BINDIR)/fv_qa_facesclassifier
+  BINS_build = $(BINDIR)/fv_qa_facesclassifier
 endif
 
 ifeq ($(HAVE_SIFT),1)
-  BINS_all += $(BINDIR)/fv_qa_siftclassifier
+  BINS_build += $(BINDIR)/fv_qa_siftclassifier
 endif
 
 ifeq ($(HAVE_SURF),1)
-  BINS_all += $(BINDIR)/fv_qa_surfclassifier
+  BINS_build += $(BINDIR)/fv_qa_surfclassifier
 endif
 
 ifeq ($(HAVE_SIFTPP),1)
-  BINS_all += $(BINDIR)/fv_qa_siftppclassifier
+  BINS_build += $(BINDIR)/fv_qa_siftppclassifier
 endif
 
 include $(BUILDSYSDIR)/base.mk
