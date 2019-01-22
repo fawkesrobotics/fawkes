@@ -260,7 +260,7 @@ ifeq ($(HAVE_ROS),1)
       WARN_TARGETS += warning_navigator_tf
     endif
   else
-    WARN_TARGETS += $(addprefix warning_,$(call ros-missing-pkgs move_base_msgs dynamic_reconfigure actionlib))
+    WARN_TARGETS += $(addprefix warning_,$(call ros-missing-pkgs,move_base_msgs dynamic_reconfigure actionlib))
   endif
   ifeq ($(call ros-have-pkg,sensor_msgs),1)
     CFLAGS_joint_thread = $(CFLAGS) $(call ros-pkg-cflags,sensor_msgs)
