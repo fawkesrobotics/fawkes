@@ -31,7 +31,7 @@ set -euo pipefail
 
 STATSFILE=$(realpath $SCRIPT_PATH/../../buildstats.db)
 
-LABEL=$(emoji_html_img "${BUILDKITE_LABEL:-:question: Unknown}")
+LABEL=$(emoji_html_img "${BUILDKITE_LABEL:-:question: Unknown System}")
 
 if [ ! -f $STATSFILE ]; then
 	echo No build stats have been generated on $LABEL

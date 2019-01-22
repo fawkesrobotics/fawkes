@@ -11,7 +11,7 @@ docker-plugin-base: &docker-plugin-base
   debug: true
   workdir: /workdir
   volumes: [".:/workdir"]
-  environment: ["BUILDKITE"]
+  environment: ["BUILDKITE", "BUILDKITE_LABEL"]
 
 steps:
   - label: ":memo: Linter"
@@ -24,6 +24,7 @@ steps:
           - BUILDKITE
           - BUILDKITE_REPO
           - BUILDKITE_BRANCH
+          - BUILDKITE_LABEL
           - BUILDKITE_BUILD_CREATOR
           - BUILDKITE_BUILD_CREATOR_EMAIL
           # the following is set by the agent environment (ansible)
