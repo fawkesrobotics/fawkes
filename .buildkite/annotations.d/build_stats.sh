@@ -70,7 +70,7 @@ else
 	BINS_skipped=$(sqlite3 $STATSFILE 'SELECT item FROM buildstats WHERE type="bin" AND state="skipped"')
 
 	cat <<-EOM
-	<h4>$LABEL Build Stats</h4>
+	<h4>$LABEL Build Coverage</h4>
 	<div class="flex">
 	  <div class="p1 flex-auto">
 	    <div class="my1 h4 text-info"><strong>Libraries</strong></div>
