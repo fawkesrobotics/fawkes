@@ -19,7 +19,6 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/robot-memory/robot_memory.mk
 
 PRESUBDIRS = interfaces aspect
-SUBDIRS = test-plugin
 
 LIBS_robot_memory = fawkescore fawkesaspects fawkesblackboard fawkesinterface \
 		fawkesutils fawkeslogging fawkesmongodbaspect fvutils \
