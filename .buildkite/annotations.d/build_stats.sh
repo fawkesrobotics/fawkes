@@ -71,61 +71,63 @@ else
 
 	cat <<-EOM
 	<h4>$LABEL Build Stats</h4>
-	<div class="clearfix">
-	  <div class="mb2 col col-4">
+	<div class="flex">
+	  <div class="p1 flex-auto">
 	    <div class="my1 h4 text-info"><strong>Libraries</strong></div>
 	    <div class="">
 	      <span class="$LIBS_color"><big><big>$LIBS_ratio</big></big>%</span><br>
 	      Built $LIBS_built of $LIBS_total
 	    </div>
+	EOM
+	if (( $LIBS_total - $LIBS_built > 0 )); then
+		cat <<-EOM
+		    <details class="mt1">
+		      <summary>Skipped Libraries</summary>
+		      <ul>
+		$(for c in $LIBS_skipped; do echo "        <li>$c</li>"; done)
+		      </ul>
+		    </details>
+		EOM
+	fi
+	cat <<-EOM
 	  </div>
-	  <div class="mb2 col col-4">
+	  <div class="p1 flex-auto">
 	    <div class="my1 h4 text-info"><strong>Plugins</strong></div>
 	    <div class="">
 	      <span class="$PLUGINS_color"><big><big>$PLUGINS_ratio</big></big>%</span><br>
 	      Built $PLUGINS_built of $PLUGINS_total
 	    </div>
+	EOM
+	if (( $PLUGINS_total - $PLUGINS_built > 0 )); then
+		cat <<-EOM
+		    <details class="mt1">
+		      <summary>Skipped Plugins</summary>
+		      <ul>
+		$(for c in $PLUGINS_skipped; do echo "        <li>$c</li>"; done)
+		      </ul>
+		    </details>
+		EOM
+	fi
+	cat <<-EOM
 	  </div>
-	  <div class="mb2 col col-4">
+	  <div class="p1 flex-auto">
 	    <div class="my1 h4 text-info"><strong>Executables</strong></div>
 	    <div class="">
 	      <span class="$BINS_color"><big><big>$BINS_ratio</big></big>%</span><br>
 	      Built $BINS_built of $BINS_total
 	    </div>
-	  </div>
 	EOM
-
-	if (( $LIBS_total - $LIBS_built > 0 )); then
-		cat <<-EOM
-		  <details class="mt1">
-		    <summary>Skipped Libraries</summary>
-		    <ul>
-		$(for c in $LIBS_skipped; do echo "      <li>$c</li>"; done)
-		    </ul>
-		  </details>
-		EOM
-	fi
-	if (( $PLUGINS_total - $PLUGINS_built > 0 )); then
-		cat <<-EOM
-		  <details class="mt1">
-		    <summary>Skipped Plugins</summary>
-		    <ul>
-		$(for c in $PLUGINS_skipped; do echo "      <li>$c</li>"; done)
-		    </ul>
-		  </details>
-		EOM
-	fi
 	if (( $BINS_total - $BINS_built > 0 )); then
 		cat <<-EOM
-		  <details class="mt1">
-		    <summary>Skipped Executables</summary>
-		    <ul>
-		$(for c in $BINS_skipped; do echo "      <li>$c</li>"; done)
-		    </ul>
-		  </details>
+		    <details class="mt1">
+		      <summary>Skipped Executables</summary>
+		      <ul>
+		$(for c in $BINS_skipped; do echo "        <li>$c</li>"; done)
+		      </ul>
+		    </details>
 		EOM
 	fi
 
+	echo "  </div>"
 	echo "</div>"
-	echo "<hr>"
 fi
