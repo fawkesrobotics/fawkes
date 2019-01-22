@@ -43,5 +43,4 @@ if type -p gmake >/dev/null; then
 fi
 
 # Build software
-$MAKE -j$NPROC all gui
-
+$MAKE -j$NPROC all gui BUILDSTATS=1
