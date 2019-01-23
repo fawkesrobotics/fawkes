@@ -17,6 +17,8 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(SRCDIR)/clingo.mk
 
+PRESUBDIRS = aspect
+
 LIBS_asp = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		   fawkesinterface fawkesaspaspect
 OBJS_asp = asp_plugin.o asp_thread.o
@@ -26,8 +28,6 @@ PLUGINS_all = $(PLUGINDIR)/asp.so
 
 ifeq ($(HAVE_CPP11),1)
   ifeq ($(HAVE_CLINGO),1)
-    PRESUBDIRS += aspect
-
     CFLAGS  += $(CFLAGS_CLINGO)  $(CFLAGS_CPP11)
     LDFLAGS += $(LDFLAGS_CLINGO) $(LDFLAGS_CPP11)
 
