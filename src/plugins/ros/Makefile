@@ -20,6 +20,8 @@ include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDSYSDIR)/boost.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
+PRESUBDIRS = aspect
+
 LIBS_ros = fawkescore fawkesutils fawkesaspects fawkesblackboard \
            fawkesinterface fawkesrosaspect
 OBJS_ros = ros_plugin.o node_thread.o
@@ -123,8 +125,6 @@ ifneq ($(PKGCONFIG),)
 endif
 
 ifeq ($(HAVE_ROS),1)
-  PRESUBDIRS += aspect
-
   CFLAGS  += $(CFLAGS_ROS) -Wno-unknown-pragmas -Wno-deprecated-declarations
   LDFLAGS += $(LDFLAGS_ROS)
 
