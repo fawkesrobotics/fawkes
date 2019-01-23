@@ -17,6 +17,9 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/clips.mk
 
+PRESUBDIRS = aspect
+SUBDIRS = rest-api
+
 LIBS_clips = fawkescore fawkesutils fawkesaspects fawkesblackboard \
            fawkesinterface fawkesclipsaspect
 OBJS_clips = clips_plugin.o clips_thread.o \
@@ -37,9 +40,6 @@ endif
 
 ifneq ($(GCC_TOO_OLD),1)
   ifeq ($(HAVE_CLIPS),1)
-    PRESUBDIRS += aspect
-		SUBDIRS += rest-api
-
     CFLAGS  += $(CFLAGS_CLIPS)
     LDFLAGS += $(LDFLAGS_CLIPS)
 
