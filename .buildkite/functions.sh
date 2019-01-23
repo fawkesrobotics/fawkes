@@ -352,10 +352,3 @@ patch_check_needs_clean_all()
 
 		return 1
 }
-
-emoji_html_img()
-{
-	local S=$1
-	#echo $S | sed -E 's|:([^:]+):|<img src="https://buildkiteassets.com/emojis/img-buildkite-64/\1.png" class="emoji">|g'
-	echo $S | sed -E 's|:([^:]+): ?||g'
-}
