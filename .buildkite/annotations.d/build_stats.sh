@@ -40,7 +40,7 @@ else
 	             'SELECT count(*) FROM buildstats WHERE type="lib" AND state="built"'); \
 	LIBS_total=$(sqlite3 $STATSFILE \
 	             'SELECT count(*) FROM buildstats WHERE type="lib"'); \
-	LIBS_ratio=$(( $LIBS_built * 100 / $LIBS_total )); \
+	LIBS_ratio=$(( LIBS_built * 100 / LIBS_total )); \
 	LIBS_color=$(if [ -n "${BUILD_STATS_NO_COLOR:-}" ]; then echo "text-muted"; \
 	             elif [ $LIBS_ratio -ge 90 ]; then echo "text-success"; \
 	             elif [ $LIBS_ratio -ge 80 ]; then echo -e "text-warning"; \
@@ -51,7 +51,7 @@ else
 	                'SELECT count(*) FROM buildstats WHERE type="plugin" AND state="built"'); \
 	PLUGINS_total=$(sqlite3 $STATSFILE \
 	                'SELECT count(*) FROM buildstats WHERE type="plugin"'); \
-	PLUGINS_ratio=$(( $PLUGINS_built * 100 / $PLUGINS_total )); \
+	PLUGINS_ratio=$(( PLUGINS_built * 100 / PLUGINS_total )); \
 	PLUGINS_color=$(if [ -n "${BUILD_STATS_NO_COLOR:-}" ]; then echo "text-muted"; \
 	                elif [ $PLUGINS_ratio -ge 90 ]; then echo "text-success"; \
 	                elif [ $PLUGINS_ratio -ge 80 ]; then echo -e "text-warning"; \
@@ -62,7 +62,7 @@ else
 	             'SELECT count(*) FROM buildstats WHERE type="bin" AND state="built"'); \
 	BINS_total=$(sqlite3 $STATSFILE \
 	             'SELECT count(*) FROM buildstats WHERE type="bin"'); \
-	BINS_ratio=$(( $BINS_built * 100 / $BINS_total )); \
+	BINS_ratio=$(( BINS_built * 100 / BINS_total )); \
 	BINS_color=$(if [ -n "${BUILD_STATS_NO_COLOR:-}" ]; then echo "text-muted"; \
 	             elif [ $BINS_ratio -ge 90 ]; then echo "text-success"; \
 	             elif [ $BINS_ratio -ge 80 ]; then echo -e "text-warning"; \
@@ -79,7 +79,7 @@ else
 	      Built $LIBS_built of $LIBS_total
 	    </div>
 	EOM
-	if (( $LIBS_total - $LIBS_built > 0 )); then
+	if (( LIBS_total - LIBS_built > 0 )); then
 		cat <<-EOM
 		    <details class="mt1">
 		      <summary>Skipped Libraries</summary>
@@ -98,7 +98,7 @@ else
 	      Built $PLUGINS_built of $PLUGINS_total
 	    </div>
 	EOM
-	if (( $PLUGINS_total - $PLUGINS_built > 0 )); then
+	if (( PLUGINS_total - PLUGINS_built > 0 )); then
 		cat <<-EOM
 		    <details class="mt1">
 		      <summary>Skipped Plugins</summary>
@@ -117,7 +117,7 @@ else
 	      Built $BINS_built of $BINS_total
 	    </div>
 	EOM
-	if (( $BINS_total - $BINS_built > 0 )); then
+	if (( BINS_total - BINS_built > 0 )); then
 		cat <<-EOM
 		    <details class="mt1">
 		      <summary>Skipped Executables</summary>
