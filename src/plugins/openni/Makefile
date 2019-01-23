@@ -18,31 +18,30 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
-
-PRESUBDIRS = interfaces utils
+PRESUBDIRS = interfaces utils aspect
 SUBDIRS = skelgui pclviewer
 
 LIBS_openni = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-	      fawkesinterface fawkesopenniaspect
+              fawkesinterface fawkesopenniaspect
 OBJS_openni = openni_plugin.o context_thread.o
 
 LIBS_openni_usertracker = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-			  fawkesinterface fawkesopenniaspect fawkesopenni_utils \
-			  fvutils \
-			  HumanSkeletonInterface HumanSkeletonProjectionInterface
+                          fawkesinterface fawkesopenniaspect fawkesopenni_utils \
+                          fvutils \
+                          HumanSkeletonInterface HumanSkeletonProjectionInterface
 OBJS_openni_usertracker = usertracker_plugin.o usertracker_thread.o
 
 LIBS_openni_data = fawkescore fawkesutils fawkesaspects  fawkesopenniaspect \
-		    fvutils fawkesopenni_utils fawkestf
+                   fvutils fawkesopenni_utils fawkestf
 OBJS_openni_data = data_plugin.o image_thread.o depth_thread.o pointcloud_thread.o
 
 LIBS_openni_pcl_frombuf = fawkescore fawkesutils fawkesaspects  fawkesopenniaspect \
-			 fvutils fawkesopenni_utils
+                          fvutils fawkesopenni_utils
 OBJS_openni_pcl_frombuf = pcl_frombuf_plugin.o pcl_frombuf_thread.o
 
 LIBS_openni_handtracker = fawkescore fawkesutils fawkesaspects fawkesblackboard \
-			  fawkesinterface fawkesopenniaspect fawkesopenni_utils \
-			  fvutils ObjectPositionInterface
+                          fawkesinterface fawkesopenniaspect fawkesopenni_utils \
+                          fvutils ObjectPositionInterface
 OBJS_openni_handtracker = handtracker_plugin.o handtracker_thread.o
 
 ifeq ($(HAVE_PCL)$(HAVE_TF),11)
@@ -81,8 +80,6 @@ pclviewer: utils
 
 
 ifeq ($(HAVE_OPENNI),1)
-  PRESUBDIRS += aspect
-
   CFLAGS  += $(CFLAGS_OPENNI) -Wno-deprecated-declarations
   LDFLAGS += $(LDFLAGS_OPENNI)
 
