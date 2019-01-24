@@ -28,29 +28,29 @@ LIBS_qa_bb_buffers = TestInterface fawkescore fawkesblackboard fawkesinterface
 OBJS_qa_bb_buffers = qa_bb_buffers.o
 
 LIBS_qa_bb_messaging = TestInterface fawkescore fawkesblackboard fawkesinterface \
-			fawkesutils
+                       fawkesutils
 OBJS_qa_bb_messaging = qa_bb_messaging.o
 
 LIBS_qa_bb_openall = TestInterface fawkescore fawkesblackboard fawkesinterface \
-			fawkesutils fawkeslogging
+                     fawkesutils fawkeslogging
 OBJS_qa_bb_openall = qa_bb_openall.o
 
 LIBS_qa_bb_notify = TestInterface fawkescore fawkesblackboard fawkesinterface \
-			fawkesutils fawkeslogging
+                    fawkesutils fawkeslogging
 OBJS_qa_bb_notify = qa_bb_notify.o
 
 LIBS_qa_bb_listall = TestInterface fawkescore fawkesblackboard fawkesinterface
 OBJS_qa_bb_listall = qa_bb_listall.o
 
 LIBS_qa_bb_remote = TestInterface fawkescore fawkesblackboard fawkesinterface \
-			fawkesutils fawkesnetcomm
+                    fawkesutils fawkesnetcomm
 OBJS_qa_bb_remote = qa_bb_remote.o
 
 LIBS_qa_bb_objpos = fawkescore fawkesblackboard fawkesinterface ObjectPositionInterface \
-			fawkesutils fawkesnetcomm fawkeslogging
+                    fawkesutils fawkesnetcomm fawkeslogging
 OBJS_qa_bb_objpos = qa_bb_objpos.o
 
-OBJS_all =	$(OBJS_qa_bb_memmgr)       \
+OBJS_all =  $(OBJS_qa_bb_memmgr)       \
             $(OBJS_qa_bb_interface)    \
             $(OBJS_qa_bb_buffers)      \
             $(OBJS_qa_bb_messaging)    \
@@ -60,10 +60,10 @@ OBJS_all =	$(OBJS_qa_bb_memmgr)       \
             $(OBJS_qa_bb_remote)       \
             $(OBJS_qa_bb_objpos)
 
-BINS_all =	$(BINDIR)/qa_bb_memmgr     \
-            $(BINDIR)/qa_bb_interface	 \
+BINS_all =  $(BINDIR)/qa_bb_memmgr     \
+            $(BINDIR)/qa_bb_interface  \
             $(BINDIR)/qa_bb_buffers    \
-            $(BINDIR)/qa_bb_messaging	 \
+            $(BINDIR)/qa_bb_messaging  \
             $(BINDIR)/qa_bb_notify     \
             $(BINDIR)/qa_bb_openall    \
             $(BINDIR)/qa_bb_listall    \
