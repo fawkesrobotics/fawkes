@@ -20,7 +20,7 @@ endif
 ifndef __buildsys_stats_mk_
 __buildsys_stats_mk_ := 1
 
-SQLITE = sqlite3 -batch -init <(echo .timeout 5000)
+SQLITE = sqlite3 -batch -init <(echo .timeout 10000)
 
 .PHONY: stats stats-gui stats-test
 
