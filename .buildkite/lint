@@ -42,7 +42,10 @@ if type -p gdiff >/dev/null; then
 	DIFF=gdiff
 fi
 
-MERGE_BASE=$($DIFF --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "origin/master") | head -1)
+MERGE_BASE=$($DIFF --old-line-format='' --new-line-format='' \
+             <(git rev-list --first-parent "HEAD") \
+             <(git rev-list --first-parent "origin/master") \
+             | head -1)
 
 error_exit () {
 	MSG="$@"
