@@ -260,6 +260,8 @@ check_gitlint ()
 			echo "#### Detected Gitlint Errors"
 			for r in $(git rev-list $MERGE_BASE..HEAD); do
 				if [ -s gitlint-$r.txt ]; then
+					>&2 echo Commit $r
+					>&2 cat gitlint-$r.txt
 					echo "- In [commit $r]($URL_PREFIX/$r)"
 					sed gitlint-$r.txt -E \
 							-e 's/^([^:]+): ([^:]+): "(.+)"$/  - Line \1: *\2*\n    ```\n    \3\n    ```/g'
