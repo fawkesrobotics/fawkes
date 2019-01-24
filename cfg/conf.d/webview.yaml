@@ -46,7 +46,7 @@ webview:
       # Allow all access, sets header to '*'
       all: true
       # Allow access only from specific domains
-      #origins: ["http://localhost:4200"]
+      # origins: ["http://localhost:4200"]
 
     # time to allow clients to cache our response
     max-age: 86400
@@ -81,7 +81,7 @@ webview:
   #   jpeg-vflip: true/false
   # J is the JPEG quality balancing file size and quality, range 1-100,
   #   depends on actual compressor used
-  #   For libjpeg 70 or 80 are good values, for MMAL (Raspberry Pi) 5-10 are fine
+  #   For libjpeg 70-80 are good values, for MMAL (Raspberry Pi) 5-10 are fine
   # F Number of frames per second for MJPEG-streams
   # Vertical flipping can be enabled, e.g. for ceiling cameras
   images:
@@ -125,6 +125,7 @@ webview:
   # works out-of-the-box on machines running prometheus, node_exporter,
   # process-exporter, and mongodb-exporter.
   dashboard:
+    # yamllint disable rule:line-length
     charts:
       - name: CPU
         query: avg without (cpu)(irate(node_cpu{job="node",instance="localhost:9100",mode!="idle"}[5m]))
@@ -174,3 +175,5 @@ webview:
         factor: 100
         thresholds: [10, 50]
         query: '(node_memory_SwapTotal_bytes{instance="localhost:9100"} - node_memory_SwapFree_bytes{instance="localhost:9100"})/node_memory_SwapTotal_bytes{instance="localhost:9100"}'
+
+        # yamllint enable rule:line-length

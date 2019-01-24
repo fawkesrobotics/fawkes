@@ -5,10 +5,9 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/gazsim
 ---
 gazsim:
   world-name: "LLSF"
-  #default robot name
+  # default robot name
   robot-name: ""
 
-  
   topics:
     gps: "~/gazsim/gps/"
     laser: "~/hokuyo/link/laser/scan"
@@ -21,13 +20,13 @@ gazsim:
     message: "~/RobotinoSim/String/"
 
   laser:
-    max_range: 5.5 
+    max_range: 5.5
     interface-id: "Laser urg"
     frame-id: !frame base_laser
 
   webcam:
     # list of ids for all cameras to simulate
-    # for each id you need to add entries to the following fields 
+    # for each id you need to add entries to the following fields
     shm-image-ids: ["light_front", "gazsim_puck"]
     topic-suffixes:
       light_front: "/carologistics-robotino-3/webcam/link/webcam_sensor/image"
@@ -47,7 +46,7 @@ gazsim:
     gyro-delay: 0.2
     infrared-sensor-index: 8
 
-    motor:    
+    motor:
       # does the odometry change if the robotino drives against an obstacle?
       slippery-wheels-enabled: true
       slippery-wheels-threshold: 0.8
@@ -56,12 +55,12 @@ gazsim:
 
   comm:
     package-loss: 0.1
-    #all peers which need the comm plugin
+    # all peers which need the comm plugin
     # write down as follows:
     # adrresses:  ["address_1", "address_2", ...]
     # send-ports: [send_port_1, send_port_2, ...]
     # revc-ports: [recv_port_1, recv_port_2, ...]
-    addresses:  []
+    addresses: []
     send-ports: []
     recv-ports: []
   visualization:
@@ -69,9 +68,9 @@ gazsim:
     location-textures: "model://label/materials/textures"
     label-arrow-name: "label/arrowredup"
     localization:
-      #parent model::link to attach visuals on
+      # parent model::link to attach visuals on
       parent-name: "ground_plane::link"
-      update-rate: 5.0 #in Hz
+      update-rate: 5.0  # in Hz
       label-size: 0.3
       label-height: 0.9
 

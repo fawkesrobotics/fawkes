@@ -31,7 +31,8 @@ fawkes/bblogreplay:
   # Non-blocking replay in blocked timing mode by default?
   non_blocking: false
 
-  # Grace period for differences in offset and elapsed time to still allow replay
+  # Grace period for differences in offset and elapsed time
+  # to still allow replay
   grace_period: 0.001
 
   qatest:

@@ -36,7 +36,8 @@ ros:
 
   pcl:
     # The time interval which is used to search for new pointclouds in ROS.
-    # This is the maximum time until a pointcloud from ROS is visible and usable in FAWKES
+    # This is the maximum time until a pointcloud from ROS is visible and usable
+    # in Fawkes.
     ros-search-interval: 2.
 
   tf:

@@ -25,6 +25,6 @@ plugins/robot-memory:
       priority: 10
       caching-time: 0.3
     transform:
-      collections: ['robmem.blackboard','robmem.transform','robmem.test']
+      collections: ['robmem.blackboard', 'robmem.transform', 'robmem.test']
       priority: -10
       caching-time: 0.3

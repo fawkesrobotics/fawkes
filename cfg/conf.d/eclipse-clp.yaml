@@ -4,9 +4,12 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/eclipse-clp
 ---
 eclipse-clp:
-  agent: skillexec #name of the ECLiPSe module in which the agent is stored (needs to be placed in plugins/eclipse-clp/interpreter/)
-  
-  #Basedirectory of ECLiPSe
+
+  # name of the ECLiPSe module in which the agent is stored (needs to be placed
+  # in plugins/eclipse-clp/interpreter/)
+  agent: skillexec
+
+  # Base directory of ECLiPSe
   eclipse_dir: /usr/lib64/eclipse-clp-6.1-164-x86_64/
 
   # List of directories to search for included files and modules
@@ -16,13 +19,15 @@ eclipse-clp:
               "@BASEDIR@/src/agents/@AGENT@/"]
 
   gazebo:
-    allow-shutdown: True
+    allow-shutdown: true
     fawkes-path: "~/fawkes_clean/fawkes-athome/"
     simulation-shutdown-script: "bin/gazsim.bash -x kill"
 
   elevator:
-    use_graph: False
+    use_graph: false
+
   skillexec:
-    use_graph: False
+    use_graph: false
+
   indi_elevator:
-    use_graph: False
+    use_graph: false

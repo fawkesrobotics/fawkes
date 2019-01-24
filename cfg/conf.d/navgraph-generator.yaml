@@ -8,7 +8,7 @@ navgraph-generator:
   map:
     # Line segmentation uses 2 * map-resolution for max inter-sample
     # distance as well as max support distance.
-    
+
     # Maximum number of iterations to perform for line segmentation
     line_segmentation_max_iterations: 250
 
@@ -26,7 +26,7 @@ navgraph-generator:
     # must at least remain after clustering of the original line.
     line_cluster_tolerance: 0.2
     line_cluster_quota: 0.1
-  
+
     # Minimum and maximum length of line to consider it. Ignored if less
     # than zero.
     # Note: we use the cell centers for line detection. That means
@@ -51,7 +51,7 @@ navgraph-generator:
 
 
   # Save a generated navgraph automatically to disk.
-  
+
   # This can be enabled, e.g., for later debugging or during automated
   # experiments.
   save-to-file:

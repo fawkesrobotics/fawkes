@@ -73,15 +73,15 @@ clips-executive:
         # and blackboard-init.clp.
         stage-1:
           - name: pddl-parser
-          #- name: pddl-planner
-          #  feature-request: false
-          #  files: ["pddl-init.clp"]
-          #- name: navgraph
-          #- name: robmem-wait
-          #  feature-request: false
-          #  files: ["BATCH|robmem-wait-init.clp"]
-          #  wait-for: robmem-initialized
-          #- name: robot_memory
+          # - name: pddl-planner
+          #   feature-request: false
+          #   files: ["pddl-init.clp"]
+          # - name: navgraph
+          # - name: robmem-wait
+          #   feature-request: false
+          #   files: ["BATCH|robmem-wait-init.clp"]
+          #   wait-for: robmem-initialized
+          # - name: robot_memory
 
         # stage-2 is domain-independent CX initialization
         # It contains a set of fixed items loaded. Custom extensions may
@@ -113,10 +113,10 @@ clips-executive:
           - name: state-estimation
             file: test-scenario/state-estimation.clp
           - name: worldmodel
-            #files: [wm-robmem-sync.clp, test-scenario/worldmodel-facts.clp]
+            # files: [wm-robmem-sync.clp, test-scenario/worldmodel-facts.clp]
             files: [test-scenario/worldmodel-facts.clp]
-          #- name: coordination
-          #  file: coordination-mutex.clp
+          # - name: coordination
+          #   file: coordination-mutex.clp
           - name: goal-reasoner
             files:
               - test-scenario/goal-reasoner.clp
@@ -134,7 +134,7 @@ clips-executive:
             files:
               - skills-actions.clp
               - test-scenario/print-action.clp
-              #- lock-actions.clp
+              # - lock-actions.clp
           - name: execution-monitoring
             file: test-scenario/execution-monitoring.clp
 
@@ -147,48 +147,50 @@ clips-executive:
         say-cleanup: say{text="Cleaning up", wait=true}
 
       # Map domain predicate names to world model fact IDs
-      #wm-remap:
-        #facts:
-          # Map the prefix, i.e., replace the path by /domain/fact and
-          # keep the last element of the path.
-          # Example: /wm/foo -> domain predicate foo
-          # Arguments must be compatible (same names and accepted values).
-          # State as a list of world model fact IDs
-          #id-prefix:
-          #  - /wm/foo
-          #  - /wm/bar
-          # Full mapping from domain predicate name to world model fact
-          # ID path (without arguments).
-          # Example: said -> /wm/spoken
-          # Arguments must be compatible (same names and accepted values).
-          # State as map from predicate names to world model fact ID
-          # path.
-          #name-id:
-          #  said: /wm/spoken
-        #objects:
-          # Map the prefix, i.e., replace the path by /domain/fact and
-          # keep the last element of the path.
-          # Example: /wm/foo -> domain predicate foo
-          #id-prefix:
-          #  - /wm/sometype
-          #  - /wm/anothertype
-          # Full mapping from domain predicate name to world model fact
-          # ID path (without arguments).
-          # Example: objecttype -> /wm/differentobjects
-          # path.
-          #name-id:
-          #  objecttype: /wm/differentobjects
+      # wm-remap:
+      #   facts:
+      #     # Map the prefix, i.e., replace the path by /domain/fact and
+      #     # keep the last element of the path.
+      #     # Example: /wm/foo -> domain predicate foo
+      #     # Arguments must be compatible (same names and accepted values).
+      #     # State as a list of world model fact IDs
+      #     id-prefix:
+      #      - /wm/foo
+      #      - /wm/bar
+      #     # Full mapping from domain predicate name to world model fact
+      #     # ID path (without arguments).
+      #     # Example: said -> /wm/spoken
+      #     # Arguments must be compatible (same names and accepted values).
+      #     # State as map from predicate names to world model fact ID
+      #     # path.
+      #     name-id:
+      #      said: /wm/spoken
+      #   objects:
+      #     # Map the prefix, i.e., replace the path by /domain/fact and
+      #     # keep the last element of the path.
+      #     # Example: /wm/foo -> domain predicate foo
+      #     id-prefix:
+      #      - /wm/sometype
+      #      - /wm/anothertype
+      #     # Full mapping from domain predicate name to world model fact
+      #     # ID path (without arguments).
+      #     # Example: objecttype -> /wm/differentobjects
+      #     # path.
+      #     name-id:
+      #      objecttype: /wm/differentobjects
 
       # Interface _types_ mentioned in the following list will be pre-loaded,
-      # i.e., the fact templates will be created in stage2, before user-specified
-      # code is loaded. That avoid the necessity of splitting interface opening
-      # and processing in user code.
-      #blackboard-preload: ["Position3DInterface"]
+      # i.e., the fact templates will be created in stage2, before
+      # user-specified code is loaded. That avoid the necessity of splitting
+      # interface opening and processing in user code.
+      # blackboard-preload: ["Position3DInterface"]
 
       # Values in the parameters subtree will be added to the "/config" tree
       # in the world model facts. Everything up until and including /parameters/
       # in the configuration path is removed.
-      # Example: /clips-executive/specs/test/parameters/home-pos -> /config/home-pos
+
+      # Example: /clips-executive/specs/test/parameters/home-pos ->
+      # /config/home-pos
       parameters:
         coordination:
           mutex:
@@ -201,7 +203,9 @@ clips-executive:
       goal-reasoner: test-scenario-pddl/goal-reasoner.clp
       goal-expander: test-scenario-pddl/goal-expander-pddl.clp
       action-selection: test-scenario-pddl/action-selection.clp
-      action-execution: ["skills-actions.clp", "test-scenario-pddl/print-action.clp"]
+      action-execution:
+        - "skills-actions.clp"
+        - "test-scenario-pddl/print-action.clp"
       execution-monitoring: test-scenario-pddl/execution-monitoring.clp
       state-estimation: test-scenario-pddl/state-estimation.clp
 

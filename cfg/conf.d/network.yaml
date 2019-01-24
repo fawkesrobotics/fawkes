@@ -12,11 +12,11 @@ network:
   # for connections from the local host only
   ipv4:
     enable: true
-    #listen: !ipv4 127.0.0.1
+    # listen: !ipv4 127.0.0.1
 
   ipv6:
     enable: true
-    #listen: !ipv6 "::1"
+    # listen: !ipv6 "::1"
 
   # Fawkes protocol specific settings
   fawkes:
@@ -26,4 +26,3 @@ network:
     # Name for Fawkes service, announced via Avahi,
     # %h is replaced by short hostname
     service_name: "Fawkes on %h"
-

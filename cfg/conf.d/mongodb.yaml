@@ -47,7 +47,7 @@ plugins/mongodb:
       name: robot-memory-distributed
       hosts:
         - localhost:27022
-      
+
   # The following defines the mongod instances you want
   # the mongodb plugin to run
   instances:
@@ -60,11 +60,11 @@ plugins/mongodb:
       # The following arguments must not be added, they are either configured
       # through other config values, or they interfere with our rs handling.
       # --port, --dbpath, --fork, --logappend, --logpath, --replSet,
-      #--oplogSize, --master, --slave, --source, --only
+      # --oplogSize, --master, --slave, --source, --only
       # You may even reference environment variables in this string, e.g.,
       # $MY_VARIABLE. Use with caution. See "man wordexp" on specifics.
       # Sub-commands have been *disabled*.
-      #args: --bind_ip 0.0.0.0 -vvvvv
+      # args: --bind_ip 0.0.0.0 -vvvvv
       data-path: /tmp/mongodb-local
       log:
         path: /tmp/mongodb-local.log
@@ -74,12 +74,12 @@ plugins/mongodb:
       enabled: false
       termination-grace-period: 15
       clear-data-on-termination: true
-      #port: 27021
+      # port: 27021
       port: 27022
-      #data-path: /tmp/mongodb-rs0
+      # data-path: /tmp/mongodb-rs0
       data-path: /tmp/mongodb-rs0-2
       log:
-        #path: /tmp/mongodb-rs0.log
+        # path: /tmp/mongodb-rs0.log
         path: /tmp/mongodb-rs0-2.log
         append: true
       replica-set: rs0

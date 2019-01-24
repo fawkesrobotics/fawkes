@@ -58,9 +58,11 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/pantilt
     # Maximum tilt for RX28 PTU
     tilt_max: 1.6
 
-    # Tolerance between desired and actual pan value to consider RX28 PTU motion finished; rad
+    # Tolerance between desired and actual pan value to consider RX28 PTU motion
+    # finished; rad
     pan_margin: 0.1
-    # Tolerance between desired and actual tilt value to consider RX28 PTU motion finished; rad
+    # Tolerance between desired and actual tilt value to consider RX28 PTU
+    # motion finished; rad
     tilt_margin: 0.1
 
     # Frame ID base string;
