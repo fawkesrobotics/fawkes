@@ -352,3 +352,27 @@ patch_check_needs_clean_all()
 
 		return 1
 }
+
+# Determine number of available CPU cores
+num_proc()
+{
+	local NPROC=1
+	if type -p nproc >/dev/null; then
+		# Linux
+		NPROC=$(nproc)
+	elif sysctl -n hw.ncpu >/dev/null 2>&1; then
+		# FreeBSD
+		NPROC=$(sysctl -n hw.ncpu)
+	fi
+	echo $NPROC
+}
+
+# Determine GNU Make executable
+find_gmake()
+{
+	MAKE=make
+	if type -p gmake >/dev/null; then
+		MAKE=gmake
+	fi
+	echo $MAKE
+}

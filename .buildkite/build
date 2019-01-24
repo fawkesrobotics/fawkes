@@ -19,28 +19,19 @@
 #
 #  Read the full text in the LICENSE.GPL file in the doc directory.
 
+SCRIPT_PATH=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 
 # Source standard environment, may setup ccache if available
 source /etc/profile
 
+# Utility functions
+source $SCRIPT_PATH/functions.sh
+
 # Error out on any error in the script, pipes etc.
 set -euo pipefail
 
-# Determine number of available CPU cores
-NPROC=1
-if type -p nproc >/dev/null; then
-	# Linux
-	NPROC=$(nproc)
-elif sysctl -n hw.ncpu >/dev/null 2>&1; then
-	# FreeBSD
-	NPROC=$(sysctl -n hw.ncpu)
-fi
-
-# Determine GNU Make executable
-MAKE=make
-if type -p gmake >/dev/null; then
-	MAKE=gmake
-fi
+NPROC=$(num_proc)
+MAKE=$(find_gmake)
 
 # Build software
 $MAKE -j$NPROC all gui BUILDSTATS=1
