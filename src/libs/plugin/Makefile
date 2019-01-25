@@ -30,9 +30,10 @@ OBJS_libfawkesplugin =	$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,
 HDRS_libfawkesplugin = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h))
 
 OBJS_all = $(OBJS_libfawkesplugin)
+LIBS_all = $(LIBDIR)/libfawkesplugin.so
 
 ifeq ($(HAVE_LIBELF),1)
-  LIBS_all  = $(LIBDIR)/libfawkesplugin.so
+  LIBS_build = $(LIBS_all)
 endif
 
 ifeq ($(OBJSSUBMAKE),1)

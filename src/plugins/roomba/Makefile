@@ -37,9 +37,9 @@ else
   WARN_TARGETS += warning_bluez
 endif
 
+OBJS_all    = $(OBJS_roomba) $(OBJS_roombajoy)
 PLUGINS_all = $(PLUGINDIR)/roomba.so $(PLUGINDIR)/roombajoy.so
-
-OBJS_all = $(OBJS_roomba) $(OBJS_roombajoy)
+PLUGINS_build = $(PLUGINS_all)
 
 INTERFACES_all = $(notdir $(patsubst %.xml,%,$(wildcard $(SRCDIR)/*.xml)))
 include $(BUILDSYSDIR)/interface.mk

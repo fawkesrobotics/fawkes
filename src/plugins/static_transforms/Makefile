@@ -22,11 +22,12 @@ LIBS_static_transforms = fawkescore fawkesutils fawkesaspects fawkesinterface \
 OBJS_static_transforms = static_transforms_plugin.o static_transforms_thread.o
 
 OBJS_all    = $(OBJS_static_transforms)
+PLUGINS_all = $(PLUGINDIR)/static-transforms.so
 
 ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_TF)
   LDFLAGS += $(LDFLAGS_TF)
-  PLUGINS_all = $(PLUGINDIR)/static-transforms.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_tf
 endif

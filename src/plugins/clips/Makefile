@@ -17,12 +17,16 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/clips.mk
 
+PRESUBDIRS = aspect
+SUBDIRS = rest-api
+
 LIBS_clips = fawkescore fawkesutils fawkesaspects fawkesblackboard \
            fawkesinterface fawkesclipsaspect
 OBJS_clips = clips_plugin.o clips_thread.o \
 	     feature_blackboard.o feature_config.o feature_redefine_warning.o
 
-OBJS_all = $(OBJS_clips)
+OBJS_all    = $(OBJS_clips)
+PLUGINS_all = $(PLUGINDIR)/clips.so
 
 # Extra files for system-wide install, i.e., "make install"
 FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
@@ -36,13 +40,10 @@ endif
 
 ifneq ($(GCC_TOO_OLD),1)
   ifeq ($(HAVE_CLIPS),1)
-    PRESUBDIRS += aspect
-		SUBDIRS += rest-api
-
     CFLAGS  += $(CFLAGS_CLIPS)
     LDFLAGS += $(LDFLAGS_CLIPS)
 
-    PLUGINS_all = $(PLUGINDIR)/clips.so
+    PLUGINS_build = $(PLUGINS_all)
 
 		INSTALL_extra = clips_files
 else

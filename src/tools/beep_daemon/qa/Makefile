@@ -18,8 +18,9 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_qa_remote_beep = fawkescore fawkesutils fawkesblackboard SwitchInterface
 OBJS_qa_remote_beep = qa_remote_beep.o
-BINS_all = $(BINDIR)/qa_remote_beep
 
 OBJS_all = $(OBJS_qa_remote_beep)
+BINS_all = $(BINDIR)/qa_remote_beep
+BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk

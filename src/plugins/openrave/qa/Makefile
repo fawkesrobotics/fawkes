@@ -23,16 +23,16 @@ CFLAGS  += $(shell openrave-config --cflags-only-I) -Wno-deprecated -Wno-depreca
 LDFLAGS += $(shell openrave-config --libs-core)
 
 OBJS_all = 	$(OBJS_qa_or_env) \
-		$(OBJS_qa_or_manip) \
-		$(OBJS_qa_or_robot) \
-		$(OBJS_qa_or_modules)
-
+            $(OBJS_qa_or_manip) \
+            $(OBJS_qa_or_robot) \
+            $(OBJS_qa_or_modules)
 
 BINS_all = 	$(BINDIR)/qa_or_env \
-		$(BINDIR)/qa_or_manip \
-		$(BINDIR)/qa_or_robot \
-		$(BINDIR)/qa_or_modules
+            $(BINDIR)/qa_or_manip \
+            $(BINDIR)/qa_or_robot \
+            $(BINDIR)/qa_or_modules
 
+BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

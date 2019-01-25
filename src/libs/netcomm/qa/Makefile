@@ -23,21 +23,33 @@ include ../netcomm.mk
 endif
 
 CFLAGS  = $(CFLAGS_AVAHI)  -g
-LDFALGS = $(LDFLAGS_AVAHI)
+LDFLAGS = $(LDFLAGS_AVAHI)
+
+BINS_all +=	$(BINDIR)/qa_netcomm_avahi_publisher \
+            $(BINDIR)/qa_netcomm_avahi_browser \
+            $(BINDIR)/qa_netcomm_avahi_resolver \
+            $(BINDIR)/qa_netcomm_socket_typeof \
+            $(BINDIR)/qa_netcomm_socket_stream \
+            $(BINDIR)/qa_netcomm_socket_datagram \
+            $(BINDIR)/qa_netcomm_socket_datagram_multicast \
+            $(BINDIR)/qa_netcomm_socket_datagram_broadcast \
+            $(BINDIR)/qa_netcomm_worldinfo \
+            $(BINDIR)/qa_netcomm_worldinfo_encryption \
+            $(BINDIR)/qa_netcomm_worldinfo_msgsizes \
+            $(BINDIR)/qa_netcomm_resolver \
+            $(BINDIR)/qa_netcomm_dynamic_buffer
 
 ifeq ($(HAVE_AVAHI),1)
-LIBS_qa_netcomm_avahi_publisher = fawkesnetcomm fawkesutils
-OBJS_qa_netcomm_avahi_publisher = qa_avahi_publisher.o
+  LIBS_qa_netcomm_avahi_publisher = fawkesnetcomm fawkesutils
+  OBJS_qa_netcomm_avahi_publisher = qa_avahi_publisher.o
 
-LIBS_qa_netcomm_avahi_browser = fawkesnetcomm fawkesutils
-OBJS_qa_netcomm_avahi_browser = qa_avahi_browser.o
+  LIBS_qa_netcomm_avahi_browser = fawkesnetcomm fawkesutils
+  OBJS_qa_netcomm_avahi_browser = qa_avahi_browser.o
 
-LIBS_qa_netcomm_avahi_resolver = fawkesnetcomm fawkesutils
-OBJS_qa_netcomm_avahi_resolver = qa_avahi_resolver.o
+  LIBS_qa_netcomm_avahi_resolver = fawkesnetcomm fawkesutils
+  OBJS_qa_netcomm_avahi_resolver = qa_avahi_resolver.o
 
-BINS_all +=	$(BINDIR)/qa_netcomm_avahi_publisher		\
-		$(BINDIR)/qa_netcomm_avahi_browser		\
-		$(BINDIR)/qa_netcomm_avahi_resolver
+  BINS_build +=	$(filter qt_netcomm_avahi_%,$(BINS_all))
 endif
 
 LIBS_qa_netcomm_socket_typeof = fawkesnetcomm
@@ -70,30 +82,20 @@ OBJS_qa_netcomm_resolver = qa_resolver.o
 LIBS_qa_netcomm_dynamic_buffer = fawkesnetcomm fawkesutils
 OBJS_qa_netcomm_dynamic_buffer = qa_dynamic_buffer.o
 
-OBJS_all =	$(OBJS_qa_netcomm_avahi_publisher)		\
-		$(OBJS_qa_netcomm_avahi_browser)		\
-		$(OBJS_qa_netcomm_avahi_resolver)		\
-		$(OBJS_qa_netcomm_socket_typeof)		\
-		$(OBJS_qa_netcomm_socket_stream)		\
-		$(OBJS_qa_netcomm_socket_datagram)		\
-		$(OBJS_qa_netcomm_socket_datagram_multicast)	\
-		$(OBJS_qa_netcomm_socket_datagram_broadcast)	\
-		$(OBJS_qa_netcomm_worldinfo)			\
-		$(OBJS_qa_netcomm_worldinfo_encryption)		\
-		$(OBJS_qa_netcomm_worldinfo_msgsizes)		\
-		$(OBJS_qa_netcomm_resolver)			\
-		$(OBJS_qa_netcomm_dynamic_buffer)
+OBJS_all = $(OBJS_qa_netcomm_avahi_publisher) \
+           $(OBJS_qa_netcomm_avahi_browser) \
+           $(OBJS_qa_netcomm_avahi_resolver) \
+           $(OBJS_qa_netcomm_socket_typeof) \
+           $(OBJS_qa_netcomm_socket_stream) \
+           $(OBJS_qa_netcomm_socket_datagram) \
+           $(OBJS_qa_netcomm_socket_datagram_multicast) \
+           $(OBJS_qa_netcomm_socket_datagram_broadcast) \
+           $(OBJS_qa_netcomm_worldinfo) \
+           $(OBJS_qa_netcomm_worldinfo_encryption) \
+           $(OBJS_qa_netcomm_worldinfo_msgsizes) \
+           $(OBJS_qa_netcomm_resolver) \
+           $(OBJS_qa_netcomm_dynamic_buffer)
 
-BINS_all +=	$(BINDIR)/qa_netcomm_socket_typeof		\
-		$(BINDIR)/qa_netcomm_socket_stream		\
-		$(BINDIR)/qa_netcomm_socket_datagram		\
-		$(BINDIR)/qa_netcomm_socket_datagram_multicast	\
-		$(BINDIR)/qa_netcomm_socket_datagram_broadcast	\
-		$(BINDIR)/qa_netcomm_worldinfo			\
-		$(BINDIR)/qa_netcomm_worldinfo_encryption	\
-		$(BINDIR)/qa_netcomm_worldinfo_msgsizes		\
-		$(BINDIR)/qa_netcomm_resolver			\
-		$(BINDIR)/qa_netcomm_dynamic_buffer
+BINS_build +=	$(filter-out qt_netcomm_avahi_%,$(BINS_all))
 
 include $(BUILDSYSDIR)/base.mk
-

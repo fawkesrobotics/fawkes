@@ -18,17 +18,17 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 include $(BUILDSYSDIR)/ros.mk
 
-CFLAGS += $(CFLAGS_CPP11)
-
 LIBS_navgraph_static_constraints = fawkescore fawkesutils fawkesnavgraph fawkesaspects \
-				fawkesnavgraphaspect
+                                   fawkesnavgraphaspect
 OBJS_navgraph_static_constraints = navgraph_stconstr_plugin.o navgraph_stconstr_thread.o
 OBJS_all    = $(OBJS_navgraph_static_constraints)
+PLUGINS_all = $(PLUGINDIR)/navgraph-static-constraints.$(SOEXT)
 
 ifeq ($(HAVE_CPP11),1)
-  LIBS_navgraph      += fawkestf fawkesnavgraphaspect
+  CFLAGS += $(CFLAGS_CPP11)
+  LIBS_navgraph += fawkestf fawkesnavgraphaspect
 
-  PLUGINS_all = $(PLUGINDIR)/navgraph-static-constraints.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS = warning_cpp11

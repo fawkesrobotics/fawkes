@@ -22,8 +22,8 @@ LIBS_libfawkesmongodbaspect = fawkescore fawkesaspects
 OBJS_libfawkesmongodbaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_libfawkesmongodbaspect)
-
-LIBS_all = $(LIBDIR)/libfawkesmongodbaspect.so
+LIBS_all    = $(LIBDIR)/libfawkesmongodbaspect.so
+LIBS_build  = $(LIBS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

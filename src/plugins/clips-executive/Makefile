@@ -24,7 +24,8 @@ LIBS_clips_executive = \
         fawkesinterface fawkesclipsaspect
 OBJS_clips_executive = clips_executive_plugin.o clips_executive_thread.o
 
-OBJS_all = $(OBJS_clips_executive)
+OBJS_all    = $(OBJS_clips_executive)
+PLUGINS_all = $(PLUGINDIR)/clips-executive.so
 
 # Extra files for system-wide install, i.e., "make install"
 FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
@@ -34,7 +35,7 @@ ifeq ($(HAVE_CLIPS),1)
   CFLAGS  += $(CFLAGS_CLIPS)
   LDFLAGS += $(LDFLAGS_CLIPS)
 
-  PLUGINS_all = $(PLUGINDIR)/clips-executive.so
+  PLUGINS_build = $(PLUGINS_all)
 
 	INSTALL_extra = clips_files
 else

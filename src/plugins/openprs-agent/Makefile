@@ -34,6 +34,12 @@ OBJS_openprs_mod_navgraph = mod_navgraph.o
 OBJS_all = $(OBJS_openprs_agent) $(OBJS_openprs_mod_skiller) \
 	   $(OBJS_openprs_mod_protobuf) $(OBJS_openprs_mod_navgraph)
 
+PLUGINS_all = $(PLUGINDIR)/openprs-agent.so
+
+LIBS_all   += $(OPENPRS_MOD_DIR)/mod_skiller.so \
+              $(OPENPRS_MOD_DIR)/mod_protobuf.so \
+              $(OPENPRS_MOD_DIR)/mod_navgraph.so
+
 INST_LIB_SUBDIR_openprs_mod_skiller  = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_protobuf = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_navgraph = $(FFLIBSUBDIR)
@@ -61,10 +67,8 @@ ifeq ($(HAVE_OPENPRS)$(HAVE_CPP11),11)
   ALLOW_UNDEF_openprs_mod_protobuf = 1
   ALLOW_UNDEF_openprs_mod_navgraph = 1
 
-  PLUGINS_all = $(PLUGINDIR)/openprs-agent.so
-  LIBS_all   += $(OPENPRS_MOD_DIR)/mod_skiller.so \
-		$(OPENPRS_MOD_DIR)/mod_protobuf.so \
-		$(OPENPRS_MOD_DIR)/mod_navgraph.so
+  LIBS_build = $(LIBS_all)
+  PLUGINS_build = $(PLUGINS_all)
 
 	INSTALL_extra = openprs_files
 else

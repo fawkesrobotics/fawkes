@@ -22,12 +22,14 @@ include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 LIBS_libfawkesrobotmemory = fawkescore fawkesaspects fawkesutils
 OBJS_libfawkesrobotmemory = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all    = $(OBJS_libfawkesrobotmemory)
+OBJS_all = $(OBJS_libfawkesrobotmemory)
+LIBS_all = $(LIBDIR)/libfawkesrobotmemory.so
 
 ifeq ($(HAVE_MONGODB),1)
   CFLAGS  += $(CFLAGS_MONGODB)
   LDFLAGS += $(LDFLAGS_MONGODB)
-  LIBS_all = $(LIBDIR)/libfawkesrobotmemory.so
+
+  LIBS_build = $(LIBS_all)
 else
   ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS += warning_mongodb

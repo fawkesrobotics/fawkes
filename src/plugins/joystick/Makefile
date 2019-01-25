@@ -37,14 +37,19 @@ OBJS_joystick_teleop = joystick_teleop_plugin.o joystick_teleop_thread.o
 
 OBJS_all = $(OBJS_joystick) $(OBJS_ffjoystick) $(OBJS_ffkbjoystick) $(OBJS_joystick_teleop) 
 
-BINS_all     += $(BINDIR)/ffkbjoystick
-PLUGINS_all  += $(PLUGINDIR)/joystick-teleop.so
-MANPAGES_all += $(MANDIR)/man1/ffkbjoystick.1
+BINS_all     = $(BINDIR)/ffkbjoystick \
+               $(BINDIR)/ffjoystick
+PLUGINS_all  = $(PLUGINDIR)/joystick.so \
+               $(PLUGINDIR)/joystick-teleop.so
+MANPAGES_all = $(MANDIR)/man1/ffkbjoystick.1
+
+BINS_build    = $(BINDIR)/ffkbjoystick
+PLUGINS_build = $(PLUGINDIR)/joystick-teleop.so
 
 ifeq ($(OS),Linux)
-  BINS_all     += $(BINDIR)/ffjoystick
-  PLUGINS_all  += $(PLUGINDIR)/joystick.so
-  MANPAGES_all += $(MANDIR)/man1/ffjoystick.1
+  BINS_build    += $(BINDIR)/ffjoystick
+  PLUGINS_build += $(PLUGINDIR)/joystick.so
+  MANPAGES_all  += $(MANDIR)/man1/ffjoystick.1
 else
   WARN_TARGETS += warning_onlylinux
 endif

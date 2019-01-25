@@ -18,8 +18,9 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_qa_player_setmotor = fawkescore fawkesutils fawkesblackboard MotorInterface
 OBJS_qa_player_setmotor = qa_player_setmotor.o
-BINS_all = $(BINDIR)/qa_player_setmotor
 
 OBJS_all = $(OBJS_qa_player_setmotor)
+BINS_all = $(BINDIR)/qa_player_setmotor
+BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk

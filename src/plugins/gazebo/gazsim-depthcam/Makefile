@@ -23,20 +23,22 @@ include $(BUILDSYSDIR)/protobuf.mk
 # include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 include $(BUILDSYSDIR)/pcl.mk
 
-LIBS_gazsim_depthcam = fawkescore fawkesutils fawkesaspects fvutils \
-	       fawkestf fawkesinterface fawkesblackboard \
-	       fawkesgazeboaspect
+LIBS_gazsim_depthcam = m fawkescore fawkesutils fawkesaspects fvutils \
+                       fawkestf fawkesinterface fawkesblackboard \
+                       fawkesgazeboaspect
 OBJS_gazsim_depthcam = gazsim_depthcam_plugin.o gazsim_depthcam_thread.o
 
 OBJS_all    = $(OBJS_gazsim_depthcam)
+PLUGINS_all = $(PLUGINDIR)/gazsim-depthcam.so
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_TF)$(HAVE_PCL),1111)
   CFLAGS  += $(CFLAGS_TF)
   LDFLAGS += $(LDFLAGS_TF)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF) $(CFLAGS_PCL)
-  LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) $(LDFLAGS_PCL) -lm $(call boost-libs-ldflags,system) -lboost_system
+  LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) $(LDFLAGS_PCL) \
+             $(call boost-libs-ldflags,system)
 
-  PLUGINS_all = $(PLUGINDIR)/gazsim-depthcam.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo

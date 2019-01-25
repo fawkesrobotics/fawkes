@@ -22,26 +22,26 @@ include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
 include $(BUILDSYSDIR)/protobuf.mk
 # include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
-
 CFLAGS += $(CFLAGS_CPP11)
 
 LIBS_gazsim_timesource = m fawkescore fawkesutils fawkesaspects fawkesgazeboaspect gazsim_msgs
 OBJS_gazsim_timesource = gazsim_timesource_source.o gazsim_timesource_plugin.o gazsim_timesource_thread.o
 
-OBJS_all = $(OBJS_gazsim_timesource)
+OBJS_all    = $(OBJS_gazsim_timesource)
+PLUGINS_all = $(PLUGINDIR)/gazsim-timesource.so
 
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),111)
   CFLAGS  += $(CFLAGS_PROTOBUF) \
-	     $(call boost-libs-cflags,$(REQ_BOOST_LIBS)) \
-	     $(CFLAGS_GAZEBO)
+             $(call boost-libs-cflags,$(REQ_BOOST_LIBS)) \
+             $(CFLAGS_GAZEBO)
   LDFLAGS += $(LDFLAGS_PROTOBUF) \
-	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS)) \
-	     $(LDFLAGS_GAZEBO)
+             $(call boost-libs-ldflags,$(REQ_BOOST_LIBS)) \
+             $(LDFLAGS_GAZEBO)
 
-  PLUGINS_all = $(PLUGINDIR)/gazsim-timesource.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo

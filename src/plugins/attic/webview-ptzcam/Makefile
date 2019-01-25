@@ -26,13 +26,14 @@ LIBS_webview_ptzcam = m \
 OBJS_webview_ptzcam = webview-ptzcam-plugin.o webview-ptzcam-thread.o \
 		     webview-ptzcam-processor.o
 
-OBJS_all = $(OBJS_webview_ptzcam)
+OBJS_all    = $(OBJS_webview_ptzcam)
+PLUGINS_all = $(PLUGINDIR)/webview-ptzcam.$(SOEXT)
 
 ifeq ($(HAVE_WEBVIEW),1)
   CFLAGS  += $(CFLAGS_WEBVIEW)
   LDFLAGS += $(LDFLAGS_WEBVIEW)
 
-  PLUGINS_all = $(PLUGINDIR)/webview-ptzcam.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_WEBVIEW),1)
     WARN_TARGETS += warning_webview

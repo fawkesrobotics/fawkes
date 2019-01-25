@@ -53,6 +53,7 @@ BINS_all =	$(BINDIR)/qa_core_mutex_count		\
 		$(BINDIR)/qa_core_barrier		\
 		$(BINDIR)/qa_core_exception		\
 		$(BINDIR)/qa_core_mutex_sync
+BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

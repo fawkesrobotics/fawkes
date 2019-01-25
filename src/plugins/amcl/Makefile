@@ -46,9 +46,15 @@ LIBS_map_lasergen = fawkescore fawkesutils fawkesaspects fawkesinterface \
 		    fawkes_amcl_map fawkes_amcl_utils
 OBJS_map_lasergen = map_lasergen_plugin.o map_lasergen_thread.o
 
-OBJS_all    = $(OBJS_amcl) $(OBJS_map_lasergen) $(OBJS_libfawkes_amcl_pf) \
-	      $(OBJS_libfawkes_amcl_map) $(OBJS_libfawkes_amcl_sensors) \
-	      $(OBJS_libfawkes_amcl_utils)
+OBJS_all   = $(OBJS_amcl) $(OBJS_map_lasergen) $(OBJS_libfawkes_amcl_pf) \
+             $(OBJS_libfawkes_amcl_map) $(OBJS_libfawkes_amcl_sensors) \
+             $(OBJS_libfawkes_amcl_utils)
+LIBS_all    = $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) \
+              $(LIBDIR)/libfawkes_amcl_map.$(SOEXT) \
+              $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) \
+              $(LIBDIR)/libfawkes_amcl_utils.$(SOEXT)
+PLUGINS_all = $(PLUGINDIR)/amcl.$(SOEXT) \
+              $(PLUGINDIR)/map-lasergen.$(SOEXT) 
 
 # throw exceptions instead of aborting
 CFLAGS += -DUSE_ASSERT_EXCEPTION -DUSE_MAP_PUB
@@ -75,8 +81,8 @@ ifeq ($(HAVE_TF),1)
           $(call ros-pkg-lflags,geometry_msgs) \
           $(call ros-pkg-lflags,nav_msgs)
         LIBS_amcl += fawkesrosaspect
-	OBJS_amcl += ros_thread.o
-	CFLAGS_ros_thread = $(CFLAGS_amcl_thread)
+        OBJS_amcl += ros_thread.o
+        CFLAGS_ros_thread = $(CFLAGS_amcl_thread)
       else
         WARN_TARGET += warning_nav_msgs
       endif
@@ -87,15 +93,11 @@ ifeq ($(HAVE_TF),1)
     WARN_TARGET += warning_ros
   endif
 
-  PLUGINS_all = $(PLUGINDIR)/amcl.$(SOEXT)
-  LIBS_all    = $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) \
-	        $(LIBDIR)/libfawkes_amcl_map.$(SOEXT) \
-	        $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) \
-		$(LIBDIR)/libfawkes_amcl_utils.$(SOEXT)
-
+  PLUGINS_build = $(PLUGINDIR)/amcl.$(SOEXT)
+  LIBS_build    = $(LIBS_all)
 
   ifeq ($(HAVE_CPP11),1)
-    PLUGINS_all += $(PLUGINDIR)/map-lasergen.$(SOEXT) 
+    PLUGINS_build += $(PLUGINDIR)/map-lasergen.$(SOEXT) 
   else
     WARN_TARGETS += warning_cpp11
   endif
@@ -106,8 +108,8 @@ endif
 
 # Ordering constraints
 $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT): | $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) $(LIBDIR)/libfawkes_amcl_map.$(SOEXT)
-$(PLUGINS_all) $(LIBDIR)/libfawkes_amcl_utils.$(SOEXT): | $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) $(LIBDIR)/libfawkes_amcl_map.$(SOEXT)
-$(PLUGINS_all): | $(LIBDIR)/libfawkes_amcl_utils.$(SOEXT)
+$(PLUGINS_build) $(LIBDIR)/libfawkes_amcl_utils.$(SOEXT): | $(LIBDIR)/libfawkes_amcl_sensors.$(SOEXT) $(LIBDIR)/libfawkes_amcl_pf.$(SOEXT) $(LIBDIR)/libfawkes_amcl_map.$(SOEXT)
+$(PLUGINS_build): | $(LIBDIR)/libfawkes_amcl_utils.$(SOEXT)
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)

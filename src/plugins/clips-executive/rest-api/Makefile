@@ -24,13 +24,14 @@ LIBS_clips_executive_rest_api = \
 OBJS_clips_executive_rest_api = clips-executive-rest-api-plugin.o clips-executive-rest-api.o \
   $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/model/*.cpp))))
 
-OBJS_all = $(OBJS_clips_executive_rest_api)
+OBJS_all    = $(OBJS_clips_executive_rest_api)
+PLUGINS_all = $(PLUGINDIR)/clips-executive-rest-api.$(SOEXT)
 
 ifeq ($(HAVE_CPP17)$(HAVE_WEBVIEW)$(HAVE_CLIPS)$(HAVE_RAPIDJSON),1111)
   CFLAGS  += $(CFLAGS_WEBVIEW)  $(CFLAGS_CLIPS)  $(CFLAGS_RAPIDJSON)  $(CFLAGS_CPP17)
   LDFLAGS += $(LDFLAGS_WEBVIEW) $(LDFLAGS_CLIPS) $(LDFLAGS_RAPIDJSON) 
 
-  PLUGINS_all = $(PLUGINDIR)/clips-executive-rest-api.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 
   WEBVIEW_FRONTEND_PART=clips-executive
 else

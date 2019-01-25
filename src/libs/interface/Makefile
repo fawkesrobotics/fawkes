@@ -29,9 +29,10 @@ LIBS_lua_fawkesinterface = fawkescore fawkesinterface $(TOLUA_LIBS)
 OBJS_lua_fawkesinterface = fawkesinterface_tolua.o
 
 OBJS_all = $(OBJS_libfawkesinterface) $(OBJS_lua_fawkesinterface) $(SRCDIR)/interface_tolua.cpp
-LIBS_all = $(LIBDIR)/libfawkesinterface.so
+LIBS_all = $(LIBDIR)/libfawkesinterface.so $(LUALIBDIR)/fawkesinterface.so
+LIBS_build = $(LIBDIR)/libfawkesinterface.so
 ifeq ($(HAVE_TOLUA),1)
-  LIBS_all += $(LUALIBDIR)/fawkesinterface.so
+  LIBS_build += $(LUALIBDIR)/fawkesinterface.so
   TARGETS_all += $(SRCDIR)/fawkesinterface_tolua.cpp
 else
   all: warning_tolua_wrapper

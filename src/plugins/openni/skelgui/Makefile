@@ -26,12 +26,13 @@ OBJS_ffskelgui = main.o skel_drawer.o texture_drawer.o \
 		 image_drawer.o depth_drawer.o
 
 OBJS_all = $(OBJS_ffskelgui)
+BINS_all = $(BINDIR)/ffskelgui
 
 CFLAGS  += $(CFLAGS_GL) $(CFLAGS_GLUT)
 LDFLAGS += $(LDFLAGS_GL) $(LDFLAGS_GLUT)
 
 ifeq ($(HAVE_GL)$(HAVE_GLUT),11)
-  BINS_gui = $(BINDIR)/ffskelgui
+  BINS_gui = $(BINS_all)
 else
   WARN_TARGETS += warning_opengl
 endif

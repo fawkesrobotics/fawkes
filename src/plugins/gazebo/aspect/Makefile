@@ -27,10 +27,11 @@ LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,s
 LIBS_libfawkesgazeboaspect = stdc++ fawkescore fawkesaspects fawkesutils
 OBJS_libfawkesgazeboaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all    = $(OBJS_libfawkesgazeboaspect)
+OBJS_all = $(OBJS_libfawkesgazeboaspect)
+LIBS_all = $(LIBDIR)/libfawkesgazeboaspect.so
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(call boost-have-libs,system),111)
-  LIBS_all = $(LIBDIR)/libfawkesgazeboaspect.so
+  LIBS_build = $(LIBS_all)
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo

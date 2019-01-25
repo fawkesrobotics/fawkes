@@ -27,9 +27,10 @@ OBJS_libfawkesguiutils = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)
 HDRS_libfawkesguiutils = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h))
 
 OBJS_all = $(OBJS_libfawkesguiutils)
+LIBS_all = $(LIBDIR)/libfawkesguiutils.so
 
 ifeq ($(HAVE_GUI),1)
-  LIBS_gui  = $(LIBDIR)/libfawkesguiutils.so
+  LIBS_gui  = $(LIBS_all)
 else
   WARN_TARGETS += warning_guiutils
 endif

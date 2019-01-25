@@ -38,5 +38,7 @@ BINS_all = $(BINDIR)/qa_config_sqlite 				\
 	$(BINDIR)/qa_config_net_list_content
 #	$(BINDIR)/qa_config_change_handler
 
+BINS_build = $(BINS_all)
+
 include $(BUILDSYSDIR)/base.mk
 

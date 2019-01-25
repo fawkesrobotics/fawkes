@@ -42,6 +42,7 @@ LIBS_laser_cluster = fawkescore fawkesutils fawkesaspects fvutils fawkesbaseapp 
 OBJS_laser_cluster = laser-cluster-plugin.o laser-cluster-thread.o
 
 OBJS_all    = $(OBJS_laser_cluster)
+PLUGINS_all = $(PLUGINDIR)/laser-cluster.$(SOEXT)
 
 ifneq ($(GCC_TOO_OLD),1)
   ifeq ($(HAVE_PCL)$(HAVE_TF),11)
@@ -53,7 +54,7 @@ ifneq ($(GCC_TOO_OLD),1)
       LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL) \
 	         $(call pcl-libs-ldflags,$(REQUIRED_PCL_LIBS))
 
-      PLUGINS_all = $(PLUGINDIR)/laser-cluster.$(SOEXT)
+      PLUGINS_build = $(PLUGINS_all)
     else
       WARN_TARGETS += warning_pcl_components
     endif

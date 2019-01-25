@@ -27,15 +27,16 @@ HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 LIBS_libfawkesgossipaspect = stdc++ fawkescore fawkesaspects fawkesutils fawkesgossip
 OBJS_libfawkesgossipaspect = gossip.o gossip_inifin.o
 
-OBJS_all    = $(OBJS_libfawkesgossipaspect)
+OBJS_all = $(OBJS_libfawkesgossipaspect)
+LIBS_all = $(LIBDIR)/libfawkesgossipaspect.$(SOEXT)
 
 ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),111)
   CFLAGS  += $(CFLAGS_PROTOBUF) \
-	     $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
+             $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
   LDFLAGS += $(LDFLAGS_PROTOBUF) \
-	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
+             $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
-  LIBS_all = $(LIBDIR)/libfawkesgossipaspect.$(SOEXT)
+  LIBS_build = $(LIBS_all)
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS += warning_cpp11

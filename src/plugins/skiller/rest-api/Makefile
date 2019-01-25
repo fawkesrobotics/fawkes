@@ -23,13 +23,14 @@ LIBS_skiller_rest_api = \
 OBJS_skiller_rest_api = skiller-rest-api-plugin.o skiller-rest-api.o \
   $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/model/*.cpp))))
 
-OBJS_all = $(OBJS_skiller_rest_api)
+OBJS_all    = $(OBJS_skiller_rest_api)
+PLUGINS_all = $(PLUGINDIR)/skiller-rest-api.$(SOEXT)
 
 ifeq ($(HAVE_CPP17)$(HAVE_WEBVIEW)$(HAVE_RAPIDJSON),111)
   CFLAGS  += $(CFLAGS_WEBVIEW)  $(CFLAGS_RAPIDJSON)  $(CFLAGS_CPP17)
   LDFLAGS += $(LDFLAGS_WEBVIEW) $(LDFLAGS_RAPIDJSON) 
 
-  PLUGINS_all = $(PLUGINDIR)/skiller-rest-api.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 
   WEBVIEW_FRONTEND_PART=skiller
 else

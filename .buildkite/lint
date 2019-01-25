@@ -246,25 +246,33 @@ check_commit_authors () {
 
 check_gitlint ()
 {
-	GITLINT_OUTPUT=$(gitlint --commits "$MERGE_BASE..HEAD" 2>&1 | tee /dev/stderr ) || {
-		GITLINT_ERROR=$?
-		if [ -n "${BUILDKITE:-}" ]; then
-			URL_PREFIX=
-			if [[ "${BUILDKITE_REPO:-}" =~ ^(https://|git@)github.com(/|:)([^/]+/[^/.]+) ]]; then
-				URL_PREFIX="https://github.com/${BASH_REMATCH[3]}/commit"
-			fi
-
-			{
-				echo "#### Gitlint Error";
-				sed <<<"$GITLINT_OUTPUT" \
-						-E \
-						-e 's/^([^:]+): ([^:]+): "(.+)"$/- Line \1: *\2*\n```\n\3\n```/g' \
-						-e "s|^Commit ([0-9a-fA-F]+):$|*Commit [\1]($URL_PREFIX\/\1):*|g"
-			} | buildkite-agent annotate --context gitlint --style error
+	local NPROC=$(num_proc)
+	local GITLINT_ERROR=0
+	git rev-list $MERGE_BASE..HEAD | \
+	  xargs -n1 -P $NPROC -I@ -- sh -c "git log -1 --pretty=%B @ | gitlint >gitlint-@.txt 2>&1" ||\
+	GITLINT_ERROR=$?
+	if [ $GITLINT_ERROR -ne 0 ]; then
+		URL_PREFIX=
+		if [[ "${BUILDKITE_REPO:-}" =~ ^(https://|git@)github.com(/|:)([^/]+/[^/.]+) ]]; then
+			URL_PREFIX="https://github.com/${BASH_REMATCH[3]}/commit"
 		fi
+		{
+			echo "#### Detected Gitlint Errors"
+			for r in $(git rev-list $MERGE_BASE..HEAD); do
+				if [ -s gitlint-$r.txt ]; then
+					>&2 echo Commit $r
+					>&2 cat gitlint-$r.txt
+					echo "- In [commit $r]($URL_PREFIX/$r)"
+					sed gitlint-$r.txt -E \
+							-e 's/^([^:]+): ([^:]+): "(.+)"$/  - Line \1: *\2*\n    ```\n    \3\n    ```/g'
+				fi
+				rm -f gitlint-$r.txt
+			done
+		} | buildkite-agent annotate --context gitlint --style error
 		print_fail "Gitlint exited with errors. See log."
 		exit $GITLINT_ERROR
-	}
+	fi
+	rm -f gitlint-*.txt
 }
 
 

@@ -37,9 +37,7 @@ ifneq ($(PKGCONFIG),)
     HAVE_OPENRAVE = 0
   endif
 
-  ifeq ($(HAVE_OPENRAVE),1)
-    HAVE_PYTHON := $(if $(shell $(PKGCONFIG) --exists 'python'; echo $${?/1/}),1,0)
-  endif
+  HAVE_PYTHON := $(if $(shell $(PKGCONFIG) --exists 'python2'; echo $${?/1/}),1,0)
 endif
 
 ifeq ($(HAVE_OPENRAVE),1)
@@ -54,6 +52,6 @@ ifeq ($(HAVE_OPENRAVE),1)
 endif
 
 ifeq ($(HAVE_PYTHON),1)
-  CFLAGS_PYTHON    = -DHAVE_PYTHON $(shell $(PKGCONFIG) --cflags 'python')
-  LDFLAGS_PYTHON   = $(shell $(PKGCONFIG) --libs 'python')
+  CFLAGS_PYTHON    = -DHAVE_PYTHON $(shell $(PKGCONFIG) --cflags 'python2')
+  LDFLAGS_PYTHON   = $(shell $(PKGCONFIG) --libs 'python2')
 endif

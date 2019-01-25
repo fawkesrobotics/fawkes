@@ -23,10 +23,11 @@ LIBS_skilltester = stdc++ fawkescore fawkesutils fawkesnetcomm fawkesblackboard 
 		TestInterface
 OBJS_skilltester = skilltester.o
 
-OBJS_all =	$(OBJS_skilltester)
+OBJS_all = $(OBJS_skilltester)
+BINS_all = $(BINDIR)/skilltester
 
 ifeq ($(HAVE_READLINE),1)
-  BINS_all =	$(BINDIR)/skilltester
+  BINS_build = $(BINS_all)
   MANPAGES_all = $(MANDIR)/man1/skilltester.1
 else
   WARN_TARGETS += warning_readline

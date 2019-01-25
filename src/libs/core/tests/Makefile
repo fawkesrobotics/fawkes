@@ -29,10 +29,12 @@ ifeq ($(HAVE_GTEST),1)
   CFLAGS += $(CFLAGS_GTEST)
   CFLAGS += -Wno-unused-but-set-variable
   LDFLAGS += $(LDFLAGS_GTEST)
-  LIBS_test = $(LIBDIR)/test/circular_buffer.so
-  BINS_test = $(BINDIR)/gtest_circular_buffer
-  LIBS_test += $(LIBDIR)/test/wait_condition.so
-  BINS_test += $(BINDIR)/gtest_wait_condition
+  LIBS_test = $(LIBDIR)/test/circular_buffer.so \
+              $(LIBDIR)/test/wait_condition.so
+  BINS_test = $(BINDIR)/gtest_circular_buffer \
+              $(BINDIR)/gtest_wait_condition
+  LIBS_all = $(LIBS_test)
+  BINS_all = $(BINS_test)
 else
   WARN_TARGETS += warning_gtest
 endif

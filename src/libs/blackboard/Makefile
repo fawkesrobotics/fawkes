@@ -27,11 +27,13 @@ LDFLAGS_lua_fawkesblackboard = $(LDFLAGS_LUA)
 LIBS_lua_fawkesblackboard = fawkescore fawkesutils fawkesblackboard $(TOLUA_LIBS)
 OBJS_lua_fawkesblackboard = fawkesblackboard_tolua.o
 
-OBJS_all =	$(OBJS_libfawkesblackboard) $(OBJS_lua_fawkesblackboard)
-LIBS_all =	$(LIBDIR)/libfawkesblackboard.$(SOEXT)
+OBJS_all   =	$(OBJS_libfawkesblackboard) $(OBJS_lua_fawkesblackboard)
+LIBS_all   =	$(LIBDIR)/libfawkesblackboard.$(SOEXT) \
+              $(LUALIBDIR)/fawkesblackboard.$(SOEXT)
+LIBS_build =	$(LIBDIR)/libfawkesblackboard.$(SOEXT)
 
 ifeq ($(HAVE_TOLUA),1)
-  LIBS_all += $(LUALIBDIR)/fawkesblackboard.$(SOEXT)
+  LIBS_build  += $(LUALIBDIR)/fawkesblackboard.$(SOEXT)
   TARGETS_all += $(SRCDIR)/fawkesblackboard_tolua.cpp
 else
   WARN_TARGETS += warning_tolua_wrapper

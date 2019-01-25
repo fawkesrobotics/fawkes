@@ -25,10 +25,11 @@ LDFLAGS += $(LDFLAGS_NAOQI)
 LIBS_libfawkesnaoqiaspect = stdc++ fawkescore fawkesaspects fawkesutils
 OBJS_libfawkesnaoqiaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all    = $(OBJS_libfawkesnaoqiaspect)
+OBJS_all = $(OBJS_libfawkesnaoqiaspect)
+LIBS_all = $(LIBDIR)/libfawkesnaoqiaspect.so
 
 ifeq ($(HAVE_NAOQI),1)
-  LIBS_all = $(LIBDIR)/libfawkesnaoqiaspect.so
+  LIBS_build = $(LIBS_all)
 else
   WARN_TARGETS += warning_naoqi
 endif

@@ -22,13 +22,14 @@ LIBS_libfawkesopenprsaspect = stdc++ fawkescore fawkesaspects fawkesutils \
 			      fawkesopenprsutils
 OBJS_libfawkesopenprsaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all    = $(OBJS_libfawkesopenprsaspect)
+OBJS_all = $(OBJS_libfawkesopenprsaspect)
+LIBS_all = $(LIBDIR)/libfawkesopenprsaspect.so
 
 ifeq ($(HAVE_OPENPRS),1)
   CFLAGS  += $(CFLAGS_OPENPRS)  $(CFLAGS_OPENPRS_MP)
   LDFLAGS += $(LDFLAGS_OPENPRS) $(LDFLAGS_OPENPRS_MP)
 
-  LIBS_all = $(LIBDIR)/libfawkesopenprsaspect.so
+  LIBS_build = $(LIBS_all)
 else
   WARN_TARGETS += warning_openprs
 endif

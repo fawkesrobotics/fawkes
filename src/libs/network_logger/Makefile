@@ -16,13 +16,13 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_all  = $(LIBDIR)/libfawkesnetworklogger.so
-
 LIBS_libfawkesnetworklogger = stdc++ pthread fawkescore fawkeslogging fawkesnetcomm
 OBJS_libfawkesnetworklogger = network_logger.o
 HDRS_libfawkesnetworklogger = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 
 OBJS_all = $(OBJS_libfawkesnetworklogger)
+LIBS_all = $(LIBDIR)/libfawkesnetworklogger.so
+LIBS_build = $(LIBS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

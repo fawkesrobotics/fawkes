@@ -22,12 +22,12 @@ LIBS_tf_example = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 OBJS_tf_example = tf_example_plugin.o tf_example_thread.o
 
 OBJS_all    = $(OBJS_tf_example)
-
+PLUGINS_all = $(PLUGINDIR)/tf_example.so
 
 ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_TF)
   LDFLAGS += $(LDFLAGS_TF)
-  PLUGINS_all = $(PLUGINDIR)/tf_example.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_tf
 endif

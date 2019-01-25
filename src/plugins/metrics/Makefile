@@ -29,11 +29,13 @@ LIBS_metrics = fawkescore fawkesutils fawkesaspects	\
 
 OBJS_metrics = metrics_plugin.o metrics_thread.o metrics_processor.o
 OBJS_all    = $(OBJS_metrics)
+PLUGINS_all = $(PLUGINDIR)/metrics.$(SOEXT)
 
 ifeq ($(HAVE_WEBVIEW)$(HAVE_CPP11)$(HAVE_PROTOBUF),111)
-  PLUGINS_all = $(PLUGINDIR)/metrics.$(SOEXT)
   CFLAGS  += $(CFLAGS_CPP11) $(CFLAGS_PROTOBUF)
   LDFLAGS += $(LDFLAGS_PROTOBUF)
+
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS = warning_cpp11

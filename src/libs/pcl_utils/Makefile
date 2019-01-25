@@ -22,11 +22,12 @@ OBJS_libfawkespcl_utils = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR
 HDRS_libfawkespcl_utils = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h  $(SRCDIR)/*/*/*.h ))
 
 OBJS_all = $(OBJS_libfawkespcl_utils)
+LIBS_all = $(LIBDIR)/libfawkespcl_utils.$(SOEXT)
 
 ifeq ($(HAVE_PCL)$(HAVE_TF),11)
   CFLAGS  += $(CFLAGS_PCL) $(CFLAGS_TF)
   LDFLAGS += $(LDFLAGS_PCL) $(LDFLAGS_TF)
-  LIBS_all = $(LIBDIR)/libfawkespcl_utils.$(SOEXT)
+  LIBS_build = $(LIBS_all)
 else
   ifneq ($(HAVE_PCL),1)
     WARN_TARGETS += warning_pcl

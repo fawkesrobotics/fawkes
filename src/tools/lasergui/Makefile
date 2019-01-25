@@ -41,9 +41,10 @@ else
 endif
 OBJS_fflasergui += laser_drawing_area.o visdisplay.o
 OBJS_all = $(OBJS_fflasergui)
+BINS_all = $(BINDIR)/fflasergui
 
 ifeq ($(BUILD_LASERGUI),1)
-  BINS_gui = $(BINDIR)/fflasergui
+  BINS_gui = $(BINS_all)
   INST_RESDIRS = guis/lasergui
   MANPAGES_gui = $(MANDIR)/man1/fflasergui.1
 else

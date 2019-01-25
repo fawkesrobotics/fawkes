@@ -38,11 +38,12 @@ LIBS_fv_qa_erode := fvutils fvwidgets fvfilters fvcams fawkesutils
 
 
 OBJS_all = $(OBJS_fv_qa_sobel) $(OBJS_fv_qa_gauss) $(OBJS_fv_qa_sharpen) \
-	   $(OBJS_fv_qa_erode)
+           $(OBJS_fv_qa_erode)
+BINS_all = $(BINDIR)/fv_qa_sobel $(BINDIR)/fv_qa_gauss \
+           $(BINDIR)/fv_qa_sharpen $(BINDIR)/fv_qa_erode
 
 ifneq ($(HAVE_OPENCV)$(HAVE_IPP),00)
-  BINS_all = $(BINDIR)/fv_qa_sobel $(BINDIR)/fv_qa_gauss \
-	      $(BINDIR)/fv_qa_sharpen $(BINDIR)/fv_qa_erode
+  BINS_build = $(BINS_all)
 endif
 
 include $(BUILDSYSDIR)/base.mk

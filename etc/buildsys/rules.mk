@@ -78,7 +78,7 @@ ifeq ($(findstring test,$(MAKECMDGOALS)),test)
 endif
 
 # If SOVER for lib was not set (SOVER_libname empty), set it to DEFAULT_SOVER
-$(foreach L,$(LIBS_all:$(LIBDIR)/%.so=%) $(LIBS_gui:$(LIBDIR)/%.so=%) $(LIBS_test:$(LIBDIR)/%.so=%),$(if $(SOVER_$(subst /,_,$L)),,$(eval SOVER_$(subst /,_,$L) = $(DEFAULT_SOVER))))
+$(foreach L,$(LIBS_all:$(LIBDIR)/%.so=%),$(if $(SOVER_$(subst /,_,$L)),,$(eval SOVER_$(subst /,_,$L) = $(DEFAULT_SOVER))))
 
 ifdef __buildsys_lua_mk_
 # Lua libraries do not set an SOVER, it's not checked anyway
@@ -93,9 +93,15 @@ endif
 ifeq ($(MAKELEVEL),1)
   EXTRA_ALL = $(LIBS_gui) $(PLUGINS_gui) $(BINS_gui) $(TARGETS_gui) $(MANPAGES_gui)
 endif
-all: presubdirs $(LIBS_all:%.so=%.$(SOEXT)) $(PLUGINS_all:%.so=%.$(SOEXT)) $(BINS_all) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) subdirs | silent-nothing-to-do-all
-gui: presubdirs $(LIBS_gui:%.so=%.$(SOEXT)) $(PLUGINS_gui:%.so=%.$(SOEXT)) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) subdirs | silent-nothing-to-do-gui
-test: presubdirs $(LIBS_test:%.so=%.$(SOEXT)) $(PLUGINS_test:%.so=%.$(SOEXT)) $(BINS_test) $(TARGETS_test) exec_test subdirs | silent-nothing-to-do-test
+
+UNLISTED_bins = $(strip $(filter-out $(BINS_all),$(BINS_build)))
+UNLISTED_libs = $(strip $(filter-out $(LIBS_all:%.so=%.$(SOEXT)),$(LIBS_build:%.so=%.$(SOEXT))))
+UNLISTED_plugins = $(strip $(filter-out $(PLUGINS_all:%.so=%.$(SOEXT)),$(PLUGINS_build:%.so=%.$(SOEXT))))
+UNLISTED_all = $(strip $(UNLISTED_bins) $(UNLISTED_libs) $(UNLISTED_plugins))
+
+all: $(if $(UNLISTED_all),error_unlisted,presubdirs $(PLUGINS_build:%.so=%.$(SOEXT)) $(LIBS_build:%.so=%.$(SOEXT)) $(BINS_build) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) stats subdirs | silent-nothing-to-do-all)
+gui: $(if $(UNLISTED_all),error_unlisted,presubdirs $(LIBS_gui:%.so=%.$(SOEXT)) $(PLUGINS_gui:%.so=%.$(SOEXT)) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) stats-gui subdirs | silent-nothing-to-do-gui)
+test: $(if $(UNLISTED_all),error_unlisted,presubdirs $(LIBS_test:%.so=%.$(SOEXT)) $(PLUGINS_test:%.so=%.$(SOEXT)) $(BINS_test) $(TARGETS_test) exec_test stats-test subdirs | silent-nothing-to-do-test)
 uncolored-all: all
 uncolored-gui: gui
 uncolored-test: test
@@ -113,6 +119,19 @@ silent-nothing-to-do-gui:
 silent-nothing-to-do-test:
 	$(SILENTSYMB)if [ -z "$(BUILT_PARTS)" ]; then echo -e "$(INDENT_PRINT)--- Nothing to do in $(TBOLDGRAY)$(PARENTDIR)$(TNORMAL) for target$(if $(subst 1,,$(words $(MAKECMDGOALS))),s) $(TBOLDGRAY)$(MAKECMDGOALS)$(TNORMAL)"; fi
 	$(eval BUILT_PARTS += $@)
+
+.PHONY: error_unlisted
+error_unlisted:
+ifneq ($(UNLISTED_bins),)
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Unlisted binaries: $(TNORMAL)$(TBOLDRED)$(UNLISTED_bins:$(BINDIR)/%=%)$(TNORMAL)"
+endif
+ifneq ($(UNLISTED_libs),)
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Unlisted libraries: $(TNORMAL)$(TBOLDRED)$(UNLISTED_libs:$(LIBDIR)/%=%)$(TNORMAL)"
+endif
+ifneq ($(UNLISTED_plugins),)
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Unlisted plugins: $(TNORMAL)$(TBOLDRED)$(UNLISTED_plugins:$(PLUGINDIR)/%.$(SOEXT)=%)$(TNORMAL)"
+endif
+	$(SILENT)exit 9
 
 .PHONY: clean
 clean: presubdirs subdirs
@@ -140,7 +159,7 @@ clean: presubdirs subdirs
 presubdirs: $(PRESUBDIRS)
 subdirs: $(SUBDIRS)
 
-SUBDIRS_DEPS = $(foreach goal,$(filter-out clean,$(MAKECMDGOALS)), \
+SUBDIRS_DEPS = $(foreach goal,$(subst all,build,$(filter-out clean,$(MAKECMDGOALS))), \
 	$(LIBS_$(goal)) $(PLUGINS_$(goal)) $(BINS_$(goal)) $(MANPAGES_$(goal)) $(TARGETS_$(goal)))
 ifeq ($(findstring all,$(MAKECMDGOALS)),all)
   SUBDIRS_DEPS += $(EXTRA_ALL)
@@ -190,7 +209,7 @@ ifdef OBJS_all
     endif
   endif
 else
-  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all)$(LIBS_gui)$(PLUGINS_gui)$(BINS_gui)$(LIBS_test)$(PLUGINS_test)$(BINS_test),)
+  ifneq ($(LIBS_all)$(PLUGINS_all)$(BINS_all),)
     ifneq ($(DISABLE_OBJS_all_WARNING),1)
       $(warning OBJS_all is not set. This is probably a bug. If you intended this set DISABLE_OBJS_all_WARNING to 1 to get rid of this warning.)
     endif
@@ -218,6 +237,7 @@ endif
 	rm -f $(DEPFILE).td
 
 %.o: %.c
+	$(eval BUILT_PARTS += $@)
 	$(SILENT) mkdir -p $(DEPDIR)
 	$(SILENT) mkdir -p $(@D)
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[ C ] $(PARENTDIR)$(TBOLDGRAY)$(subst $(SRCDIR)/,,$<)$(TNORMAL)"
@@ -235,6 +255,7 @@ moc_%.cpp: %.h
 	$(SILENT) $(MOC) $(MOC_FLAGS) -p "../$(subst ..,__,$(@D))" $< -o $(subst ..,__,$@)
 
 $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
+	$(eval BUILT_PARTS += $@)
 	$(SILENT) mkdir -p $(@D)
 	$(SILENT)if type -P $(ASCIIDOC_A2X) >/dev/null 2>&1; then \
 	echo -e "$(INDENT_PRINT)[MAN] $(PARENTDIR): $(TBOLDGREEN)$(subst $(abspath $(TOP_BASEDIR))/,,$(abspath $(dir $@)))/$*$(TNORMAL)"; \
@@ -295,6 +316,9 @@ $(LIBDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 	$(SILENT) ln -fs $(@F).$(SOVER_$(call nametr,$*)) $@; \
 	ln -fs $(@F).$(SOVER_$(call nametr,$*)) $@.$(firstword $(call split,.,$(SOVER_$(call nametr,$*)))); \
 	)
+
+### Include build statistics script
+include $(BUILDSYSDIR)/stats.mk
 
 ### Check if there are special additions
 ifneq ($(wildcard $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk),)

@@ -29,6 +29,7 @@ OBJS_fvsrsave = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(real
 
 OBJS_all    = $(OBJS_fvsrsave)
 PLUGINS_all = $(PLUGINDIR)/fvsrsave.so
+PLUGINS_build = $(PLUGINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

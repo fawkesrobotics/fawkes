@@ -24,16 +24,18 @@ include $(BUILDCONFDIR)/kdl_parser/kdl_parser.mk
 LIBS_robot_state_publisher = fawkescore fawkesutils fawkesaspects fawkestf \
                              fawkesblackboard fawkesinterface JointInterface fawkeskdl_parser
 OBJS_robot_state_publisher = robot_state_publisher_plugin.o robot_state_publisher_thread.o
-OBJS_all = $(OBJS_robot_state_publisher)
+
+OBJS_all    = $(OBJS_robot_state_publisher)
+PLUGINS_all = $(PLUGINDIR)/robot-state-publisher.so
 
 HAVE_KDL = $(if $(shell $(PKGCONFIG) --exists 'orocos-kdl'; echo $${?/1/}),1,0)
 
 ifeq ($(HAVE_KDLPARSER)$(HAVE_EIGEN3),11)
   ifeq ($(HAVE_TF),1)
-    PLUGINS_all = $(PLUGINDIR)/robot-state-publisher.so
-    CFLAGS += $(CFLAGS_TF) $(CFLAGS_KDLPARSER) $(CFLAGS_EIGEN3)
+    CFLAGS  += $(CFLAGS_TF)  $(CFLAGS_KDLPARSER)  $(CFLAGS_EIGEN3)
     LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_KDLPARSER) $(LDFLAGS_EIGEN3) \
-      $(call boost-lib-lflags,scoped_ptr)
+               $(call boost-lib-lflags,scoped_ptr)
+    PLUGINS_build = $(PLUGINS_all)
   else
     WARN_TARGETS += warning_tf
   endif

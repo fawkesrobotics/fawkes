@@ -95,6 +95,7 @@ HDRS_libfvutils := $(filter-out $(patsubst %.o,%.h,$(FILTER_OUT)),$(patsubst qa/
 
 OBJS_all = $(OBJS_libfvutils)
 LIBS_all = $(LIBDIR)/libfvutils.so
+LIBS_build = $(LIBS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

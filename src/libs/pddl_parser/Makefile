@@ -21,10 +21,11 @@ LIBS_libfawkespddl_parser = fawkescore
 OBJS_libfawkespddl_parser = $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))
 HDRS_libfawkespddl_parser = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 
-OBJS_all += $(OBJS_libfawkespddl_parser)
+OBJS_all = $(OBJS_libfawkespddl_parser)
+LIBS_all = $(LIBDIR)/libfawkespddl_parser.so
 
 ifeq ($(HAVE_BOOST),1)
-  LIBS_all += $(LIBDIR)/libfawkespddl_parser.so
+  LIBS_build = $(LIBS_all)
 else
   WARN_TARGETS += warning_boost
 endif

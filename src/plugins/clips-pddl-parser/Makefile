@@ -23,13 +23,14 @@ OBJS_clips_pddl_parser = clips_pddl_parser_plugin.o clips_pddl_parser_thread.o \
 												 clips_pddl_parser_feature.o \
 												 precondition_visitor.o effect_visitor.o
 
-OBJS_all = $(OBJS_clips_pddl_parser)
+OBJS_all    = $(OBJS_clips_pddl_parser)
+PLUGINS_all = $(PLUGINDIR)/clips-pddl-parser.$(SOEXT)
 
 ifeq ($(HAVE_CLIPS),1)
   CFLAGS += $(CFLAGS_CLIPS)
   LDFLAGS += $(LDFLAGS_CLIPS)
 
-  PLUGINS_all = $(PLUGINDIR)/clips-pddl-parser.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_clips
 endif

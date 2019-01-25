@@ -18,21 +18,22 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/interface.mk
 
+CFLAGS += $(CFLAGS_LIBXMLPP) $(CFLAGS_LIBCRYPTO)
+CFLAGS += -Wno-mismatched-tags -Wno-inconsistent-missing-override
+LDFLAGS_ffifacegen = $(LDFLAGS_LIBXMLPP) $(LDFLAGS_LIBCRYPTO)
+LIBS_ffifacegen = stdc++ fawkescore fawkesutils
+
+OBJS_ffifacegen = constant.o cpp_generator.o digest.o		\
+                  enum_constant.o field.o pseudomap.o main.o	\
+                  message.o parser.o tolua_generator.o	\
+                  checker.o
+
+OBJS_all     = $(OBJS_ffifacegen)
+BINS_all     = $(BINDIR)/ffifacegen
+
 ifeq ($(HAVE_INTERFACE_GENERATOR),1)
-  CFLAGS += $(CFLAGS_LIBXMLPP) $(CFLAGS_LIBCRYPTO)
-  CFLAGS += -Wno-mismatched-tags -Wno-inconsistent-missing-override
-  LDFLAGS_ffifacegen = $(LDFLAGS_LIBXMLPP) $(LDFLAGS_LIBCRYPTO)
-  LIBS_ffifacegen = stdc++ fawkescore fawkesutils
-
-  OBJS_ffifacegen = constant.o cpp_generator.o digest.o		\
-		    enum_constant.o field.o pseudomap.o main.o	\
-		    message.o parser.o tolua_generator.o	\
-		    checker.o
-
-  OBJS_all     += $(OBJS_ffifacegen)
-  BINS_all     += $(BINDIR)/ffifacegen
-  MANPAGES_all += $(MANDIR)/man1/ffifacegen.1
-
+  BINS_build = $(BINS_all)
+  MANPAGES_all = $(MANDIR)/man1/ffifacegen.1
 else
   ifneq ($(HAVE_LIBXMLPP),1)
     WARN_TARGETS += warning_libxmlpp

@@ -51,10 +51,11 @@ else
 endif
 
 
-OBJS_all = $(OBJS_eclipse_clp)
+OBJS_all    = $(OBJS_eclipse_clp)
+PLUGINS_all = $(PLUGINDIR)/eclipse-clp.so
 
 ifeq ($(HAVE_ECLIPSE)$(HAVE_BOOST_LIBS),11)
-  PLUGINS_all = $(PLUGINDIR)/eclipse-clp.so
+  PLUGINS_build = $(PLUGINS_all)
 
   CFLAGS  += $(ECLIPSE_CFLAGS)  $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
   LDFLAGS += $(ECLIPSE_LDFLAGS) $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))

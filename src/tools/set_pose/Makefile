@@ -21,13 +21,14 @@ LIBS_ffset_pose = fawkescore fawkesutils fawkesinterface \
 	    fawkesblackboard fawkesnetcomm fawkesconfig \
 	    LocalizationInterface
 OBJS_ffset_pose = ffset_pose.o
-OBJS_all    = $(OBJS_ffset_pose)
+OBJS_all = $(OBJS_ffset_pose)
+BINS_all = $(BINDIR)/ffset_pose
 
 ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_TF)
   LDFLAGS += $(LDFLAGS_TF)
 
-  BINS_all     = $(BINDIR)/ffset_pose
+  BINS_build   = $(BINS_all)
   MANPAGES_all = $(MANDIR)/man1/ffset_pose.1
 else
   ifneq ($(HAVE_TF),1)

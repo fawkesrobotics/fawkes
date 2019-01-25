@@ -56,24 +56,27 @@ LIBS_fv_qa_createimage := fvutils
 #endif
 
 OBJS_all += $(OBJS_fv_qa_camargp)		\
-	    $(OBJS_fv_qa_jpegbm)		\
-	    $(OBJS_fv_qa_shmimg)		\
-	    $(OBJS_fv_qa_shmlut)		\
-	    $(OBJS_fv_qa_rectlut)		\
-	    $(OBJS_fv_qa_fuse)			\
-	    $(OBJS_fv_qa_createimage)		\
-	    $(OBJS_fv_qa_colormap)
+            $(OBJS_fv_qa_jpegbm)		\
+            $(OBJS_fv_qa_shmimg)		\
+            $(OBJS_fv_qa_shmlut)		\
+            $(OBJS_fv_qa_rectlut)		\
+            $(OBJS_fv_qa_fuse)			\
+            $(OBJS_fv_qa_createimage)		\
+            $(OBJS_fv_qa_colormap)
 
+BINS_cons += $(BINDIR)/fv_qa_camargp		\
+            $(BINDIR)/fv_qa_jpegbm		\
+            $(BINDIR)/fv_qa_shmimg		\
+            $(BINDIR)/fv_qa_shmlut		\
+            $(BINDIR)/fv_qa_rectlut		\
+            $(BINDIR)/fv_qa_fuse		\
+            $(BINDIR)/fv_qa_createimage \
+            $(BINDIR)/fv_qa_colormap
 
-BINS_all += $(BINDIR)/fv_qa_camargp		\
-	    $(BINDIR)/fv_qa_jpegbm		\
-	    $(BINDIR)/fv_qa_shmimg		\
-	    $(BINDIR)/fv_qa_shmlut		\
-	    $(BINDIR)/fv_qa_rectlut		\
-	    $(BINDIR)/fv_qa_fuse		\
-	    $(BINDIR)/fv_qa_createimage
-
+BINS_build = $(BINS_cons)
 BINS_gui += $(BINDIR)/fv_qa_colormap
+
+BINS_all = $(BINS_cons) $(BINS_gui)
 
 include $(BUILDSYSDIR)/base.mk
 

@@ -23,19 +23,21 @@ include $(BUILDSYSDIR)/protobuf.mk
 GAZEBO_LIBDIR = $(LIBDIR)/gazebo
 LIBDIRS_BASE += $(GAZEBO_LIBDIR)
 
-LIBS_gazebo_libgyro = gazsim_msgs
+LIBS_gazebo_libgyro = m gazsim_msgs
 OBJS_gazebo_libgyro = gyro.o
 
 INST_LIB_SUBDIR_gazebo_libgyro = $(FFLIBSUBDIR)
 NOSOVER_gazebo_libgyro=1
 
-OBJS_all    = $(OBJS_gazebo_libgyro)
+OBJS_all = $(OBJS_gazebo_libgyro)
+LIBS_all = $(LIBDIR)/gazebo/libgyro.so
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF),11)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
-  LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system) -lboost_system
+  LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) \
+             $(call boost-libs-ldflags,system)
 
-  LIBS_all = $(LIBDIR)/gazebo/libgyro.so
+  LIBS_build = $(LIBS_all)
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo

@@ -23,6 +23,8 @@ OBJS_qa_evid100p := qa_evid100p.o ../sony/visca.o ../sony/evid100p.o
 LIBS_qa_evid100p := m fawkescore fawkesutils
 
 OBJS_all = $(OBJS_qa_rx28ptu) $(OBJS_qa_evid100p)
-BINS_all = $(BINDIR)/qa_rx28ptu $(BINDIR)/qa_evid100p
+BINS_all = $(BINDIR)/qa_rx28ptu \
+           $(BINDIR)/qa_evid100p
+BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk

@@ -20,6 +20,8 @@ include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDSYSDIR)/boost.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
+PRESUBDIRS = aspect
+
 LIBS_ros = fawkescore fawkesutils fawkesaspects fawkesblackboard \
            fawkesinterface fawkesrosaspect
 OBJS_ros = ros_plugin.o node_thread.o
@@ -93,27 +95,44 @@ LIBS_ros_imu = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 OBJS_ros_imu = imu_plugin.o imu_thread.o
 
 OBJS_all = $(OBJS_ros) $(OBJS_ros_talkerpub) $(OBJS_ros_tf) \
-	   $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
-	   $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint) \
-	   $(OBJS_ros_robot_description) $(OBJS_ros_move_base) \
-	   $(OBJS_ros_skiller) $(OBJS_ros_clock) $(OBJS_ros_position_3d) \
-	   $(OBJS_ros_dynamic_reconfigure) $(OBJS_ros_imu) $(OBJS_ros_navgraph_breakout)
+           $(OBJS_ros_pcl) $(OBJS_ros_images) $(OBJS_ros_laserscan) $(OBJS_ros_odometry) \
+           $(OBJS_ros_cmdvel) $(OBJS_ros_navigator) $(OBJS_ros_joint) \
+           $(OBJS_ros_robot_description) $(OBJS_ros_move_base) \
+           $(OBJS_ros_skiller) $(OBJS_ros_clock) $(OBJS_ros_position_3d) \
+           $(OBJS_ros_dynamic_reconfigure) $(OBJS_ros_imu) $(OBJS_ros_navgraph_breakout)
+
+PLUGINS_all = $(PLUGINDIR)/ros.so \
+              $(PLUGINDIR)/ros-talkerpub.so \
+              $(PLUGINDIR)/ros-tf.so \
+              $(PLUGINDIR)/ros-pcl.so \
+              $(PLUGINDIR)/ros-images.so \
+              $(PLUGINDIR)/ros-laserscan.so \
+              $(PLUGINDIR)/ros-imu.so \
+              $(PLUGINDIR)/ros-odometry.so \
+              $(PLUGINDIR)/ros-cmdvel.so \
+              $(PLUGINDIR)/ros-dynamic_reconfigure.so \
+              $(PLUGINDIR)/ros-navigator.so \
+              $(PLUGINDIR)/ros-move-base.so \
+              $(PLUGINDIR)/ros-joint.so \
+              $(PLUGINDIR)/ros-position-3d.so \
+              $(PLUGINDIR)/ros-navgraph-breakout.so \
+              $(PLUGINDIR)/ros-clock.so \
+              $(PLUGINDIR)/ros-robot-description.so \
+              $(PLUGINDIR)/ros-skiller.so
 
 ifneq ($(PKGCONFIG),)
   HAVE_TINYXML = $(if $(shell $(PKGCONFIG) --exists 'tinyxml'; echo $${?/1/}),1,0)
 endif
 
 ifeq ($(HAVE_ROS),1)
-  PRESUBDIRS += aspect
-
   CFLAGS  += $(CFLAGS_ROS) -Wno-unknown-pragmas -Wno-deprecated-declarations
   LDFLAGS += $(LDFLAGS_ROS)
 
   CFLAGS_talkerpub_thread += $(call ros-pkg-cflags,std_msgs) $(CFLAGS)
   LDFLAGS_ros_talkerpub += $(LDFLAGS) $(call ros-pkg-lflags,std_msgs)
 
-  PLUGINS_all = $(PLUGINDIR)/ros.so \
-		$(PLUGINDIR)/ros-talkerpub.so
+  PLUGINS_build = $(PLUGINDIR)/ros.so \
+                  $(PLUGINDIR)/ros-talkerpub.so
 
   ifeq ($(call ros-have-pkg,tf),1)
     ifeq ($(HAVE_TF),1)
@@ -121,7 +140,7 @@ ifeq ($(HAVE_ROS),1)
 			  $(call ros-pkg-cflags,tf) -Wno-strict-aliasing
       CFLAGS_tf_plugin = $(CFLAGS_tf_thread)
       LDFLAGS_ros_tf += $(LDFLAGS_TF)  $(patsubst %bullet/lib,,$(call ros-pkg-lflags,tf))
-      PLUGINS_all += $(PLUGINDIR)/ros-tf.so
+      PLUGINS_build += $(PLUGINDIR)/ros-tf.so
 
       ifeq ($(call ros-have-pkg,tf2_msgs),1)
         CFLAGS_tf_thread += -DHAVE_TF2_MSGS $(call ros-pkg-cflags,tf2_msgs)
@@ -144,7 +163,7 @@ ifeq ($(HAVE_ROS),1)
 			     $(CFLAGS_TF) $(CFLAGS_PCL) $(CFLAGS)
         CFLAGS_pcl_plugin = $(CFLAGS_pcl_thread) $(CFLAGS)
         LDFLAGS_ros_pcl += $(LDFLAGS_PCL) $(LDFLAGS_TF) $(call ros-pkg-lflags,sensor_msgs)
-        PLUGINS_all += $(PLUGINDIR)/ros-pcl.so
+        PLUGINS_build += $(PLUGINDIR)/ros-pcl.so
       else
         WARN_TARGETS += warning_pcl_conversions
       endif
@@ -158,7 +177,7 @@ ifeq ($(HAVE_ROS),1)
           CFLAGS_image_thread += $(call ros-pkg-cflags,image_transport) $(CFLAGS)
           CFLAGS_image_plugin = $(CFLAGS_image_thread)
           LDFLAGS_ros_images += $(call ros-pkg-lflags,image_transport)
-          PLUGINS_all += $(PLUGINDIR)/ros-images.so
+          PLUGINS_build += $(PLUGINDIR)/ros-images.so
         else
           WARN_TARGETS += warning_tinyxml
         endif
@@ -172,12 +191,12 @@ ifeq ($(HAVE_ROS),1)
     CFLAGS_laserscan_thread += $(call ros-pkg-cflags,sensor_msgs) $(CFLAGS)
     CFLAGS_laserscan_plugin = $(CFLAGS_laserscan_thread) $(CFLAGS)
     LDFLAGS_ros_laserscan += $(call ros-pkg-lflags,sensor_msgs)
-    PLUGINS_all += $(PLUGINDIR)/ros-laserscan.so
+    PLUGINS_build += $(PLUGINDIR)/ros-laserscan.so
 
     CFLAGS_imu_thread += $(call ros-pkg-cflags,sensor_msgs) $(CFLAGS)
     CFLAGS_imu_plugin = $(CFLAGS_imu_thread)
     LDFLAGS_ros_imu += $(call ros-pkg-lflags,sensor_msgs)
-    PLUGINS_all += $(PLUGINDIR)/ros-imu.so
+    PLUGINS_build += $(PLUGINDIR)/ros-imu.so
   else
     WARN_TARGETS += warning_rospcl warning_images warning_laserscan warning_imu
   endif
@@ -187,7 +206,7 @@ ifeq ($(HAVE_ROS),1)
       CFLAGS_odometry_thread += $(call ros-pkg-cflags,nav_msgs) $(CFLAGS) $(CFLAGS_TF)
       CFLAGS_odometry_plugin = $(CFLAGS_odometry_thread)
       LDFLAGS_ros_odometry += $(call ros-pkg-lflags,nav_msgs) $(LDFLAGS_TF)
-      PLUGINS_all += $(PLUGINDIR)/ros-odometry.so
+      PLUGINS_build += $(PLUGINDIR)/ros-odometry.so
     else
       WARN_TARGETS += warning_odometry
     endif
@@ -199,7 +218,7 @@ ifeq ($(HAVE_ROS),1)
     CFLAGS_cmdvel_thread += $(call ros-pkg-cflags,geometry_msgs) $(CFLAGS) $(CFLAGS_TF)
     CFLAGS_cmdvel_plugin = $(CFLAGS_cmdvel_thread)
     LDFLAGS_ros_cmdvel += $(call ros-pkg-lflags,geometry_msgs) $(LDFLAGS_TF)
-    PLUGINS_all += $(PLUGINDIR)/ros-cmdvel.so
+    PLUGINS_build += $(PLUGINDIR)/ros-cmdvel.so
   else
     WARN_TARGETS += warning_geometry_msgs
   endif
@@ -213,7 +232,7 @@ ifeq ($(HAVE_ROS),1)
                                         $(call boost-lib-ldflags,system) \
                                         $(call ros-pkg-lflags,dynamic_reconfigure) \
                                         $(LDFLAGS_TF)
-    PLUGINS_all += $(PLUGINDIR)/ros-dynamic_reconfigure.so
+    PLUGINS_build += $(PLUGINDIR)/ros-dynamic_reconfigure.so
   else
     WARN_TARGETS += warning_dynamic_reconfigure
   endif
@@ -236,18 +255,18 @@ ifeq ($(HAVE_ROS),1)
                                $(call boost-libs-ldflags,thread system) -lpthread \
                                $(LDFLAGS_TF)
 
-      PLUGINS_all += $(PLUGINDIR)/ros-navigator.so $(PLUGINDIR)/ros-move-base.so
+      PLUGINS_build += $(PLUGINDIR)/ros-navigator.so $(PLUGINDIR)/ros-move-base.so
     else
       WARN_TARGETS += warning_navigator_tf
     endif
   else
-    WARN_TARGETS += $(addprefix warning_,$(call ros-missing-pkgs move_base_msgs dynamic_reconfigure actionlib))
+    WARN_TARGETS += $(addprefix warning_,$(call ros-missing-pkgs,move_base_msgs dynamic_reconfigure actionlib))
   endif
   ifeq ($(call ros-have-pkg,sensor_msgs),1)
     CFLAGS_joint_thread = $(CFLAGS) $(call ros-pkg-cflags,sensor_msgs)
     CFLAGS_joint_plugin = $(CFLAGS_joint_thread)
     LDFLAGS_ros_joint += $(call ros-pkg-lflags,sensor_msgs)
-    PLUGINS_all += $(PLUGINDIR)/ros-joint.so
+    PLUGINS_build += $(PLUGINDIR)/ros-joint.so
   else
     WARN_TARGETS += warning_sensor_msgs
   endif
@@ -255,12 +274,12 @@ ifeq ($(HAVE_ROS),1)
     CFLAGS_position_3d_thread += $(CFLAGS) $(call ros-pkg-cflags,fawkes_msgs)
     CFLAGS_position_3d_plugin = $(CFLAGS_position_3d_thread)
     LDFLAGS_ros_position_3d += $(call ros-pkg-lflags,fawkes_msgs)
-    PLUGINS_all += $(PLUGINDIR)/ros-position-3d.so
+    PLUGINS_build += $(PLUGINDIR)/ros-position-3d.so
 
     CFLAGS_navgraph_breakout_thread += $(CFLAGS) $(call ros-pkg-cflags,fawkes_msgs)
     CFLAGS_navgraph_breakout_plugin = $(CFLAGS_navgraph_breakout_thread)
     LDFLAGS_ros_navgraph_breakout += $(call ros-pkg-lflags,fawkes_msgs)
-    PLUGINS_all += $(PLUGINDIR)/ros-navgraph-breakout.so
+    PLUGINS_build += $(PLUGINDIR)/ros-navgraph-breakout.so
   else
     WARN_TARGETS += warning_fawkes_msgs
   endif
@@ -269,12 +288,12 @@ ifeq ($(HAVE_ROS),1)
     CFLAGS_clock_thread += $(call ros-pkg-cflags,rosgraph_msgs) $(CFLAGS)
     CFLAGS_clock_plugin = $(CFLAGS_clock_thread)
     LDFLAGS_ros_clock += $(LDFLAGS) $(call ros-pkg-lflags,rosgraph_msgs)
-    PLUGINS_all += $(PLUGINDIR)/ros-clock.so
+    PLUGINS_build += $(PLUGINDIR)/ros-clock.so
   else
     WARN_TARGETS += warning_rosgraph_msgs
   endif
 
-  PLUGINS_all += $(PLUGINDIR)/ros-robot-description.so
+  PLUGINS_build += $(PLUGINDIR)/ros-robot-description.so
 
   ifeq ($(call ros-have-pkg,fawkes_msgs),1)
     ifeq ($(call ros-have-pkg,actionlib),1)
@@ -289,7 +308,7 @@ ifeq ($(HAVE_ROS),1)
       $(call boost-lib-ldflags,thread) \
       $(call boost-lib-ldflags,system) \
       $(LDFLAGS) -lpthread
-      PLUGINS_all += $(PLUGINDIR)/ros-skiller.so
+      PLUGINS_build += $(PLUGINDIR)/ros-skiller.so
     else
       WARN_TARGETS += warning_actionlib      
     endif

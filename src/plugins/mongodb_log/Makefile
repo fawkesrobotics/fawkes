@@ -31,11 +31,12 @@ CFLAGS  += $(CFLAGS_MONGODB)
 LDFLAGS += $(LDFLAGS_MONGODB)
 
 OBJS_all    = $(OBJS_mongodb_log)
+PLUGINS_all = $(PLUGINDIR)/mongodb-log.so
 
 ifeq ($(HAVE_MONGODB)$(HAVE_PCL)$(HAVE_TF),111)
   CFLAGS += $(CFLAGS_PCL) $(CFLAGS_TF) $(CFLAGS_MONGODB)
   LDFLAGS += $(LDFLAGS_PCL) $(LDFLAGS_TF) $(LDFLAGS_MONGODB)
-  PLUGINS_all = $(PLUGINDIR)/mongodb-log.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS += warning_mongodb

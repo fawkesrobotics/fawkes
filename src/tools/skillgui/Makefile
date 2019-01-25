@@ -85,9 +85,10 @@ LIBS_skillgui_batch_render = stdc++ m fawkescore fawkesutils
 OBJS_skillgui_batch_render = batch_render.o gvplugin_skillgui_cairo.o
 
 OBJS_all = $(OBJS_skillgui) $(OBJS_skillgui_batch_render)
+BINS_all = $(BINDIR)/skillgui $(BINDIR)/skillgui_batch_render
 
 ifeq ($(HAVE_GUI)$(HAVE_GRAPHVIZ),11)
-  BINS_gui = $(BINDIR)/skillgui $(BINDIR)/skillgui_batch_render
+  BINS_gui = $(BINS_all)
   INST_RESDIRS = guis/skillgui
   MANPAGES_all = $(MANDIR)/man1/skillgui.1 $(MANDIR)/man1/skillgui_batch_render.1
 else

@@ -24,6 +24,9 @@ LIBS_katana = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkestf \
 	      fawkesinterface KatanaInterface JointInterface
 OBJS_katana = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 
+OBJS_all    = $(OBJS_katana)
+PLUGINS_all = $(PLUGINDIR)/katana.so
+
 #CFLAGS += -DUSE_TIMETRACKER
 
 ifneq ($(PKGCONFIG),)
@@ -53,8 +56,10 @@ ifeq ($(HAVE_LIBKNI)$(HAVE_TF),11)
   # KNI uses std::auto_ptr which is deprecated in C++11
   # Ignore this warning here as we won't fix KNI for this
   CFLAGS_controller_kni = $(CFLAGS) -Wno-deprecated-declarations
-  PLUGINS_all = $(PLUGINDIR)/katana.so
-  ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
+
+  PLUGINS_build = $(PLUGINS_all)
+
+ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
     LIBS_katana += fawkesopenrave fawkesopenraveaspect
     CFLAGS  += $(CFLAGS_OPENRAVE)
     LDFLAGS += $(LDFLAGS_OPENRAVE)
@@ -62,8 +67,6 @@ ifeq ($(HAVE_LIBKNI)$(HAVE_TF),11)
     WARN_TARGETS += warning_openrave
   endif
 endif
-
-OBJS_all = $(OBJS_katana)
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)

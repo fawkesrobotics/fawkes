@@ -29,9 +29,10 @@ endif
 LIBS_ffwatchdog = stdc++ fawkescore
 OBJS_ffwatchdog = ffwatchdog.o
 
-OBJS_all     =	$(OBJS_ffwatchdog)
-BINS_all     =	$(BINDIR)/ffwatchdog
-MANPAGES_all =	$(MANDIR)/man1/ffwatchdog.1
+OBJS_all     = $(OBJS_ffwatchdog)
+BINS_all     = $(BINDIR)/ffwatchdog
+BINS_build   = $(BINS_all)
+MANPAGES_all = $(MANDIR)/man1/ffwatchdog.1
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)

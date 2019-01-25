@@ -27,7 +27,8 @@ LIBS_gossip = \
 	fawkesgossip fawkesgossipaspect
 OBJS_gossip = gossip_plugin.o gossip_thread.o
 
-OBJS_all = $(OBJS_gossip)
+OBJS_all    = $(OBJS_gossip)
+PLUGINS_all = $(PLUGINDIR)/gossip.so
 
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
@@ -38,7 +39,7 @@ ifeq ($(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),11)
   LDFLAGS += $(LDFLAGS_PROTOBUF) \
 	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
-  PLUGINS_all = $(PLUGINDIR)/gossip.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_PROTOBUF),1)
     WARN_TARGETS += warning_protobuf

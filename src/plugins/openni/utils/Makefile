@@ -33,10 +33,12 @@ OBJS_libfawkesopenni_utils = setup.o conversions.o
 
 
 OBJS_all = $(OBJS_libfawkesopenni_utils) $(OBJS_libfawkesopenni_client_utils)
-LIBS_all = $(LIBDIR)/libfawkesopenni_client_utils.so
+LIBS_all = $(LIBDIR)/libfawkesopenni_client_utils.so \
+           $(LIBDIR)/libfawkesopenni_utils.so
+LIBS_build = $(LIBDIR)/libfawkesopenni_client_utils.so
 
 ifeq ($(HAVE_OPENNI),1)
-  LIBS_all += $(LIBDIR)/libfawkesopenni_utils.so
+  LIBS_build += $(LIBDIR)/libfawkesopenni_utils.so
 else
   WARN_TARGETS += warning_openni
 endif

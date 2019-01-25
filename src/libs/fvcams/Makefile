@@ -124,6 +124,7 @@ HDRS_libfvcams = $(patsubst %.o,%.h,$(OBJS_libfvcams))
 
 OBJS_all = $(OBJS_libfvcams)
 LIBS_all = $(LIBDIR)/libfvcams.so
+LIBS_build = $(LIBS_all)
 
 # Use . instead of nothing here in this pattern because we already included
 # the config in fvconf.mk and thus SRCDIR is set!

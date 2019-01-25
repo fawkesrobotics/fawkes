@@ -28,18 +28,20 @@ LIBS_gex_receiver = \
 	fawkesgossip fawkesgossipaspect gossip_example_msgs
 OBJS_gex_receiver = gex_receiver_plugin.o gex_receiver_thread.o
 
-OBJS_all = $(OBJS_gex_sender) $(OBJS_gex_receiver)
+OBJS_all    = $(OBJS_gex_sender) $(OBJS_gex_receiver)
+PLUGINS_all = $(PLUGINDIR)/gex-sender.$(SOEXT) \
+              $(PLUGINDIR)/gex-receiver.$(SOEXT)
 
 REQ_BOOST_LIBS = system signals2
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
 ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),111)
   CFLAGS  += $(CFLAGS_PROTOBUF) $(CFLAGS_CPP11) \
-	     $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
+             $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
   LDFLAGS += $(LDFLAGS_PROTOBUF) \
-	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
+             $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
-  PLUGINS_all = $(PLUGINDIR)/gex-sender.$(SOEXT) $(PLUGINDIR)/gex-receiver.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS += warning_cpp11

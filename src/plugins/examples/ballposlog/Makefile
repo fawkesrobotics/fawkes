@@ -21,6 +21,7 @@ OBJS_ballposlog = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(re
 
 OBJS_all    = $(OBJS_ballposlog)
 PLUGINS_all = $(PLUGINDIR)/ballposlog.so
+PLUGINS_build = $(PLUGINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

@@ -18,11 +18,12 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_ffbblog = stdc++ fawkescore fawkesutils fawkesblackboard fawkesinterface \
-	       SwitchInterface
+               SwitchInterface
 OBJS_ffbblog = bblog.o ../bblogfile.o
 
-OBJS_all =	$(OBJS_ffbblog)
-BINS_all =	$(BINDIR)/ffbblog
+OBJS_all = $(OBJS_ffbblog)
+BINS_all = $(BINDIR)/ffbblog
+BINS_build = $(BINS_all)
 MANPAGES_all =  $(MANDIR)/man1/ffbblog.1
 
 include $(BUILDSYSDIR)/base.mk

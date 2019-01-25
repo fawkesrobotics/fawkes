@@ -29,9 +29,10 @@ OBJS_ffbatterymon = 	main.o				\
 			battery_monitor_treeview.o	\
 			battery_monitor.o
 OBJS_all = $(OBJS_ffbatterymon)
+BINS_all = $(BINDIR)/ffbatterymon
 
 ifeq ($(HAVE_GUI),1)
-  BINS_gui = $(BINDIR)/ffbatterymon
+  BINS_gui = $(BINS_all)
   INST_RESDIRS = guis/battery_monitor
   MANPAGES_gui = $(MANDIR)/man1/ffbatterymon.1
 else

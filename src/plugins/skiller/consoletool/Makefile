@@ -23,14 +23,15 @@ LIBS_skillet = stdc++ fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
 		SkillerInterface
 OBJS_skillet = skillet.o
 
-OBJS_all =	$(OBJS_skillet)
+OBJS_all = $(OBJS_skillet)
+BINS_all = $(BINDIR)/skillet
 
 ifeq ($(HAVE_READLINE),1)
   ifeq ($(HAVE_TERMCAP),1)
     CFLAGS += $(CFLAGS_TERMCAP)
     LDFLAGS += $(LDFLAGS_TERMCAP)
   endif
-  BINS_all =	$(BINDIR)/skillet
+  BINS_build   = $(BINS_all)
   MANPAGES_all = $(MANDIR)/man1/skillet.1
 else
   WARN_TARGETS += warning_readline

@@ -30,11 +30,12 @@ LIBS_luaagent = fawkescore fawkesutils fawkesaspects fawkeslua fawkesblackboard 
 		fawkesinterface fawkeslogging SkillerInterface SkillerDebugInterface
 OBJS_luaagent = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all      = $(OBJS_luaagent)
+OBJS_all    = $(OBJS_luaagent)
+PLUGINS_all = $(PLUGINDIR)/luaagent.so
 
 ifeq ($(HAVE_LUA),1)
   ifeq ($(HAVE_TOLUA),1)
-    PLUGINS_all = $(PLUGINDIR)/luaagent.so
+    PLUGINS_build = $(PLUGINS_all)
   else
     WARN_TARGETS += warning_tolua
   endif

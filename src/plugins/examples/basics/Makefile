@@ -23,9 +23,11 @@ LIBS_example_plugin_netping = fawkescore fawkesutils fawkesnetcomm
 OBJS_example_plugin_netping = example_plugin_netping.o
 
 OBJS_all    = $(OBJS_example)		\
-	      $(OBJS_example_plugin_netping)
+              $(OBJS_example_plugin_netping)
 BINS_all    = $(BINDIR)/example_plugin_netping
 PLUGINS_all = $(PLUGINDIR)/example.so
+PLUGINS_build = $(PLUGINS_all)
+BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

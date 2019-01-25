@@ -20,8 +20,9 @@ include $(BASEDIR)/etc/buildsys/config.mk
 LIBS_ffconfig = stdc++ fawkescore fawkesutils fawkesconfig fawkesnetcomm
 OBJS_ffconfig = main.o
 
-OBJS_all     =	$(OBJS_ffconfig)
-BINS_all     =	$(BINDIR)/ffconfig
-MANPAGES_all =	$(MANDIR)/man1/ffconfig.1
+OBJS_all     = $(OBJS_ffconfig)
+BINS_all     = $(BINDIR)/ffconfig
+BINS_build   = $(BINS_all)
+MANPAGES_all = $(MANDIR)/man1/ffconfig.1
 
 include $(BUILDSYSDIR)/base.mk

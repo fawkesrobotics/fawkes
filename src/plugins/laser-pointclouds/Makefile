@@ -24,7 +24,8 @@ LIBS_laser_pointclouds = m fawkescore fawkesutils fawkesaspects fawkesblackboard
 
 OBJS_laser_pointclouds = laser_pointcloud_plugin.o laser_pointcloud_thread.o
 
-OBJS_all = $(OBJS_laser_pointclouds)
+OBJS_all    = $(OBJS_laser_pointclouds)
+PLUGINS_all = $(PLUGINDIR)/laser-pointclouds.so
 
 ifeq ($(HAVE_PCL)$(HAVE_TF),11)
   # disable deprecated warnings because glibmm uses deprecated dynamic exception
@@ -32,7 +33,7 @@ ifeq ($(HAVE_PCL)$(HAVE_TF),11)
   CFLAGS  += $(CFLAGS_PCL) $(CFLAGS_TF) -Wno-unknown-pragmas -Wno-deprecated
   LDFLAGS += $(LDFLAGS_PCL) $(LDFLAGS_TF)
 
-  PLUGINS_all = $(PLUGINDIR)/laser-pointclouds.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_PCL),1)
     WARN_TARGETS += warning_pcl

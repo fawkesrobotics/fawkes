@@ -26,7 +26,8 @@ LIBS_clips_ros = fawkescore fawkesutils fawkesaspects fawkesclipsaspect \
 		 fawkesrosaspect
 OBJS_clips_ros = clips_ros_plugin.o clips_ros_thread.o
 
-OBJS_all = $(OBJS_clips_ros)
+OBJS_all    = $(OBJS_clips_ros)
+PLUGINS_all = $(PLUGINDIR)/clips-ros.$(SOEXT)
 
 # Extra files for system-wide install, i.e., "make install"
 FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
@@ -42,7 +43,7 @@ ifeq ($(HAVE_CPP11)$(HAVE_ROS)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS)$(call ros-have-pkg
     CFLAGS += -DHAVE_NEW_ROS_XMLRPCPP_PATH
   endif
 
-  PLUGINS_all = $(PLUGINDIR)/clips-ros.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 
 	INSTALL_extra = clips_files
 else

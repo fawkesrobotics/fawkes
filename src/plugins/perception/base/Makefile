@@ -33,6 +33,7 @@ OBJS_fvbase = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpa
 
 OBJS_all    = $(OBJS_fvbase)
 PLUGINS_all = $(PLUGINDIR)/fvbase.so
+PLUGINS_build = $(PLUGINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 
