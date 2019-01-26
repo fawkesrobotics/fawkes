@@ -315,4 +315,4 @@ echo "-> Running yamllint on configuration files"
 check_yamllint
 
 echo "-> Running 'make check'"
-gmake check
+gmake check YAMLLINT=0
