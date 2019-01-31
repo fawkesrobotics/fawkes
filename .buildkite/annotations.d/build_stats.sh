@@ -29,7 +29,15 @@ source $SCRIPT_PATH/../functions.sh
 # Error out on any error in the script, pipes etc.
 set -euo pipefail
 
-STATSFILE=$(realpath $SCRIPT_PATH/../../buildstats.db)
+BASEDIR=$(realpath $SCRIPT_PATH/../..)
+if [ -e "$(realpath $BASEDIR/../.gitmodules)" -a \
+     -e "$(realpath $BASEDIR/../fawkes)" ];
+then
+	# this fawkes instance is indeed a sub-module!:
+	BASEDIR=$(realpath $BASEDIR/..)
+fi
+	
+STATSFILE=$(realpath $BASEDIR/buildstats.db)
 
 LABEL=${BUILDKITE_LABEL:-:question: Unknown System}
 
