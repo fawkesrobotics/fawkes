@@ -132,7 +132,7 @@ clips-executive:
           - name: action-selection
             files:
               - action-selection/sequential.clp
-              #- action-selection/temporal.clp
+              - action-selection/temporal.clp
           - name: action-execution
             files:
               - skills-actions.clp
