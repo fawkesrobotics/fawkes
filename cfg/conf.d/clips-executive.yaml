@@ -128,8 +128,11 @@ clips-executive:
           - name: plans
             files:
               - test-scenario/plans/talk-plan.clp
+              # - test-scenario/plans/talk-plan-temporal.clp
           - name: action-selection
-            file: test-scenario/action-selection.clp
+            files:
+              - action-selection/sequential.clp
+              #- action-selection/temporal.clp
           - name: action-execution
             files:
               - skills-actions.clp
