@@ -4,7 +4,7 @@
 	=>
 	(bind ?plan-id (sym-cat ?goal-id -PLAN))
 	(assert
-		(plan (id ?plan-id) (goal-id ?goal-id))
+		(plan (id ?plan-id) (goal-id ?goal-id) (type SEQUENTIAL))
 		(plan-action (id 10) (goal-id ?goal-id) (plan-id ?plan-id)
                  (duration 4.0)
 		             (action-name say-hello)

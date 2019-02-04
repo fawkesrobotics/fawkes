@@ -1,10 +1,10 @@
 
-(defrule plan-talk-expand
+(defrule plan-talk-expand-temporal
   ?g <- (goal (mode SELECTED) (id ?goal-id) (class TALK))
   =>
   (bind ?plan-id (sym-cat ?goal-id -PLAN))
   (assert
-    (plan (id ?plan-id) (goal-id ?goal-id))
+    (plan (id ?plan-id) (goal-id ?goal-id) (type TEMPORAL))
     (plan-action (id 10) (goal-id ?goal-id) (plan-id ?plan-id)
                  (duration 4.0) (dispatch-time 0.0)
                  (action-name say-hello)
