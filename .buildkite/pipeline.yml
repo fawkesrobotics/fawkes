@@ -9,8 +9,6 @@ docker-plugin-base: &docker-plugin-base
   image: fawkesrobotics/fawkes-builder:fedora29-kinetic
   always-pull: true
   debug: true
-  workdir: /workdir
-  volumes: [".:/workdir"]
   environment: ["BUILDKITE", "BUILDKITE_LABEL"]
 
 steps:
@@ -18,7 +16,7 @@ steps:
     command: .buildkite/lint
     plugins:
       <<: *merged-pr-plugin
-      docker#v2.2.0:
+      docker#v3.0.1:
         <<: *docker-plugin-base
         environment:
           - BUILDKITE
@@ -38,10 +36,9 @@ steps:
       - .buildkite/annotate
     plugins:
       <<: *merged-pr-plugin
-      docker#v2.2.0:
+      docker#v3.0.1:
         <<: *docker-plugin-base
         volumes:
-          - .:/workdir
           - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
 
   - label: ":ubuntu: Ubuntu"
@@ -50,10 +47,9 @@ steps:
       - .buildkite/annotate
     plugins:
       <<: *merged-pr-plugin
-      docker#v2.2.0:
+      docker#v3.0.1:
         <<: *docker-plugin-base
         image: fawkesrobotics/fawkes-builder:ubuntu1804-melodic
         volumes:
-          - .:/workdir
           - /var/lib/buildkite-agent/ccache_ubuntu:/var/cache/ccache
 

@@ -2,8 +2,7 @@
     command: .buildkite/build-webview-frontend
     plugins:
       <<: *merged-pr-plugin
-      docker#v2.2.0:
+      docker#v3.0.1:
         <<: *docker-plugin-base
         volumes:
-          - .:/workdir
           - /var/lib/buildkite-agent/npm_cacache:/home/builder/.npm/_cacache
