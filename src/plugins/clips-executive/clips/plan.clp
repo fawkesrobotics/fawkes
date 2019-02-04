@@ -11,6 +11,7 @@
 	(slot id (type SYMBOL))
 	(slot goal-id (type SYMBOL))
 	(slot cost (type FLOAT))
+	(multislot start-time (type INTEGER) (cardinality 2 2) (default 0 0))
 )
 
 ; TODO: Rename slots
