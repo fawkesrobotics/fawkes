@@ -8,7 +8,7 @@
 ;---------------------------------------------------------------------------
 
 (defrule action-selection-temporal-zerotime
-  (goal (id ?goal-id) (mode DISPATCHED))
+  (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
   ?p <- (plan (id ?plan-id) (goal-id ?goal-id) (start-time 0 0))
  =>
   (modify ?p (start-time (now)))
@@ -16,7 +16,7 @@
 
 (defrule action-selection-temporal-select
   (time $?now)
-  (goal (id ?goal-id) (mode DISPATCHED))
+  (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
   (plan (id ?plan-id) (goal-id ?goal-id) (start-time $?start-time))
   ?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
                       (state FORMULATED) (executable TRUE)
@@ -26,7 +26,7 @@
 )
 
 (defrule action-selection-temporal-done
-  ?g <- (goal (id ?goal-id) (mode DISPATCHED))
+  ?g <- (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
   (plan (id ?plan-id) (goal-id ?goal-id))
   (not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (state ~FINAL)))
  =>
@@ -34,7 +34,7 @@
 )
 
 (defrule action-selection-temporal-failed
-  ?g <- (goal (id ?goal-id) (mode DISPATCHED))
+  ?g <- (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
   (plan (id ?plan-id) (goal-id ?goal-id))
   (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (state FAILED))
  =>

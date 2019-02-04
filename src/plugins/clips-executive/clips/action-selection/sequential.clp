@@ -8,7 +8,7 @@
 ;---------------------------------------------------------------------------
 
 (defrule action-selection-sequential-select
-  (goal (id ?goal-id) (mode DISPATCHED))
+  (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
   (plan (id ?plan-id) (goal-id ?goal-id))
   ?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
                       (state FORMULATED) (executable TRUE))
@@ -19,7 +19,7 @@
 )
 
 (defrule action-selection-sequential-done
-  ?g <- (goal (id ?goal-id) (mode DISPATCHED))
+  ?g <- (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
   (plan (id ?plan-id) (goal-id ?goal-id))
   (not (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (state ~FINAL)))
  =>
@@ -27,7 +27,7 @@
 )
 
 (defrule action-selection-sequential-failed
-  ?g <- (goal (id ?goal-id) (mode DISPATCHED))
+  ?g <- (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
   (plan (id ?plan-id) (goal-id ?goal-id))
   (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (state FAILED))
  =>
