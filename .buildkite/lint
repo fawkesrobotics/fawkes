@@ -287,11 +287,10 @@ check_yamllint()
 		>&2 cat <<< $YAMLLINT_OUTPUT
 
 		{
-			#echo "<h4>Detected yamllint Errors</h4>"
-			#echo '<code><pre class="term">'
-			#echo -e $YAMLLINT_OUTPUT
-			#echo '</pre></code>'
-			echo "Detected yamllint errors, see log."
+			echo "#### Detected yamllint Errors"
+			echo '```terminal'
+			echo -e $YAMLLINT_OUTPUT
+			echo '```'
 		} | buildkite-agent annotate --context yamllint --style error
 		exit $YAMLLINT_ERROR
 	fi
