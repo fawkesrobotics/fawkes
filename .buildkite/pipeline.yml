@@ -15,18 +15,18 @@ steps:
   - label: ":memo: Linter"
     command: .buildkite/lint
     plugins:
-      <<: *merged-pr-plugin
-      docker#v3.0.1:
-        <<: *docker-plugin-base
-        environment:
-          - BUILDKITE
-          - BUILDKITE_REPO
-          - BUILDKITE_BRANCH
-          - BUILDKITE_LABEL
-          - BUILDKITE_BUILD_CREATOR
-          - BUILDKITE_BUILD_CREATOR_EMAIL
-          # the following is set by the agent environment (ansible)
-          - SSH_DEPLOY_PRIVKEY_COMMITTERS
+      - *merged-pr-plugin
+      - docker#v3.0.1:
+          <<: *docker-plugin-base
+          environment:
+            - BUILDKITE
+            - BUILDKITE_REPO
+            - BUILDKITE_BRANCH
+            - BUILDKITE_LABEL
+            - BUILDKITE_BUILD_CREATOR
+            - BUILDKITE_BUILD_CREATOR_EMAIL
+            # the following is set by the agent environment (ansible)
+            - SSH_DEPLOY_PRIVKEY_COMMITTERS
 
   - wait
 
@@ -35,21 +35,21 @@ steps:
       - .buildkite/build
       - .buildkite/annotate
     plugins:
-      <<: *merged-pr-plugin
-      docker#v3.0.1:
-        <<: *docker-plugin-base
-        volumes:
-          - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
+      - *merged-pr-plugin
+      - docker#v3.0.1:
+          <<: *docker-plugin-base
+          volumes:
+            - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
 
   - label: ":ubuntu: Ubuntu"
     command:
       - .buildkite/build
       - .buildkite/annotate
     plugins:
-      <<: *merged-pr-plugin
-      docker#v3.0.1:
-        <<: *docker-plugin-base
-        image: fawkesrobotics/fawkes-builder:ubuntu1804-melodic
-        volumes:
-          - /var/lib/buildkite-agent/ccache_ubuntu:/var/cache/ccache
+      - *merged-pr-plugin
+      - docker#v3.0.1:
+          <<: *docker-plugin-base
+          image: fawkesrobotics/fawkes-builder:ubuntu1804-melodic
+          volumes:
+            - /var/lib/buildkite-agent/ccache_ubuntu:/var/cache/ccache
 
