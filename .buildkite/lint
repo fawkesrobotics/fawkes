@@ -289,7 +289,7 @@ check_yamllint()
 		{
 			echo "#### Detected yamllint Errors"
 			echo '```terminal'
-			echo -e $YAMLLINT_OUTPUT
+			cat <<< $YAMLLINT_OUTPUT
 			echo '```'
 		} | buildkite-agent annotate --context yamllint --style error
 		exit $YAMLLINT_ERROR
