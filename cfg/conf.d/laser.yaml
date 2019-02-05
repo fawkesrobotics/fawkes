@@ -16,10 +16,10 @@ hardware/laser:
     # Device file
     device: /dev/ttyACM0
 
-    # Date back the data timestamp by the time it takes to acquire a single
-    # scan times the given factor. A factor of 1.0 will thus subtract one
-    # scan time from the time after completing the scan, defaults to 0.0 (no offset)
-    #time_offset_scan_time_factor: 0.0
+    # Date back the data timestamp by the time it takes to acquire a single scan
+    # times the given factor. A factor of 1.0 will thus subtract one scan time
+    # from the time after completing the scan, defaults to 0.0 (no offset)
+    # time_offset_scan_time_factor: 0.0
 
     # Date back time by a fixed time in seconds, defaults to 0.0 (no offset).
     # This setting is added in addition to time_offset_scan_time_factor.
@@ -30,7 +30,7 @@ hardware/laser:
     # Enable this configuration?
     active: false
 
-    # Configuration is for Hokuyo URG laser range finder using the Gearbox library
+    # Hokuyo URG laser range finder using the Gearbox library
     type: urg_gbx
 
     # Device file
@@ -59,7 +59,8 @@ hardware/laser:
     # Store default settings in flash?
     set_default: false
 
-    # Canonical resolution, if set overrides rotation_freq and angle_step; one of low (1 deg, 20 Hz) or high (0/5 deg, 15 Hz)
+    # Canonical resolution, if set overrides rotation_freq and angle_step; one
+    # of low (1 deg, 20 Hz) or high (0/5 deg, 15 Hz)
     canonical_resolution: high
 
     # Maximum rotation frequency; Hz
@@ -101,7 +102,8 @@ hardware/laser:
     # Rotation of the laser towards front; degree
     mount_rotation: 180
 
-    # If true, the fflaser_calibrate tool must be used to gain information about dead spots, which are then extracted with a filter
+    # If true, the fflaser_calibrate tool must be used to gain information about
+    # dead spots, which are then extracted with a filter
     use_dead_spots_filter: false
 
   tim55x-usb:
@@ -112,7 +114,7 @@ hardware/laser:
     type: TiM55x-USB
 
     # Device file
-    #serial: 14200190
+    # serial: 14200190
 
     # Frame ID
     frame: !frame base_laser
@@ -120,7 +122,7 @@ hardware/laser:
     # Offset added to measurement timestamp in interface. Can be used to
     # account for latencies.
     # time_offset: -0.001
-    
+
   tim55x-ethernet:
     # Enable this configuration?
     active: false

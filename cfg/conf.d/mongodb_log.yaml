@@ -22,7 +22,6 @@ plugins/mongodb-log:
   # in time to a single document.
   enable-transforms: true
 
-  
   pointclouds:
     # GridFS chunk size for point clouds, 2 MB
     chunk-size: 2097152
@@ -37,7 +36,7 @@ plugins/mongodb-log:
     # a longer per-write time, it avoids the problem that there are
     # sometimes long flushing delays
     flush-after-write: true
-    
+
     # Interval in which to store point clouds; sec
     storage-interval: 0.5
 
@@ -61,12 +60,10 @@ plugins/mongodb-log:
     # logging, the latter causes logging of everything in the blackboard
     includes: ["*"]
     excludes: []
- 
 
   transforms:
     collection: tf
-    
+
     # Interval to store at a time, if 0 copy everything currently held by
     # transformer; sec
     storage-interval: 2.0
-

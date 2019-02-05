@@ -7,7 +7,7 @@ plugins/laser-filter:
   tim5xx-min-sector:
 
     # URG input interface
-    #in/urg: Laser360Interface::Laser urg
+    # in/urg: Laser360Interface::Laser urg
     in/sick-tim55x: Laser1080Interface::Laser tim55x-usb
 
     # URG filtered output interface
@@ -15,7 +15,8 @@ plugins/laser-filter:
 
     filters:
       1-min:
-        # Threshold for minimum value to get rid of erroneous beams on most black surfaces
+        # Threshold for minimum value to get rid of erroneous beams on most
+        # black surfaces
         type: min_circle
 
         # Radius of minimum length; m

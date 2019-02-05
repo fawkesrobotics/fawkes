@@ -24,7 +24,7 @@ fawkes:
 
     # Uncomment the following to get a debug log file each time you
     # run fawkes independent of the log level.
-    #loggers: console;file/debug:debug.log
+    # loggers: console;file/debug:debug.log
 
     # Enable to redirect stderr to the log. If you have mis-behaving
     # third-party code this can come in handy to keep records of what's

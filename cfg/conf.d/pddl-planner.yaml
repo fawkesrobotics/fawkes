@@ -11,14 +11,18 @@ plugins/pddl-planner:
 
   # Domain and problem description and location
   # Folder path needs a trailing /
-  description-folder: "@BASEDIR@/src/plugins/clips-executive/clips/test-scenario-pddl/"
+  description-folder: >
+    "@BASEDIR@/src/plugins/clips-executive/clips/test-scenario-pddl/"
   domain-description: domain.pddl
   problem-description: problem.pddl
   # File for intermediate results from planners
   result-file: results.txt
 
   # optional search options for fd planner
-  fd-search-opts: --heuristic "hff=ff()" --heuristic "hcea=cea()" --search "lazy_greedy([hff, hcea], preferred=[hff, hcea])"
+  fd-search-opts: >
+    --heuristic "hff=ff()"
+    --heuristic "hcea=cea()"
+    --search "lazy_greedy([hff, hcea], preferred=[hff, hcea])"
 
   # mongodb collection for robot-memory
   collection: robmem.pddl-plan

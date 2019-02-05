@@ -22,20 +22,23 @@ perception/tabletop-objects:
   # Segmentation distance threshold; m
   table_segmentation_distance_threshold: 0.022
 
-  # Minimum size of fraction of points that must be inliers to consider a table; 0.0..1.0
+  # Minimum size of fraction of points that must be inliers to consider a table;
+  # 0.0..1.0
   table_segmentation_inlier_quota: 0.12
 
   # Table downsampling leaf size; m
   # This is directly related to table_cluster_tolerance
   table_downsample_leaf_size: 0.04
-  
+
   # Max clustering inter-point distance tolerance for table cluster; m
   table_cluster_tolerance: 0.044
 
-  # Quota of (voxelized) plane points which must be in the table cluster to accept it
+  # Quota of (voxelized) plane points which must be in the table cluster to
+  # accept it
   table_min_cluster_quota: 0.5
-  
-  # Maximum angle between Z axis and table normal, takes normal direction into account; rad
+
+  # Maximum angle between Z axis and table normal, takes normal direction into
+  # account; rad
   max_z_angle_deviation: 0.1
 
   # Minimum required height of table; m
@@ -52,7 +55,7 @@ perception/tabletop-objects:
   # object clustering. Disable the table model if you expect not to stand on the
   # long side of the table.
   table_model_enable: false
-  
+
   # Table model width, i.e. if the robot is standing in front of the
   # longer edge of the table the distance between the close and the far edge; m
   table_model_width: 0.8
@@ -76,26 +79,30 @@ perception/tabletop-objects:
   # The frame in which the result should be published; frame
   result_frame: !frame base_link
 
-  # Show the frustrum according to configured horizontal and vertical viewing angle.
+  # Show the frustrum according to configured horizontal and vertical viewing
+  # angle.
   visualization/show_frustrum: true
 
   # Show text with convex hull vertex IDs?
   visualization/show_convex_hull_vertices: true
 
-  # Show highlighted hull lines to understand edge selection? Otherwise plain hull is shown.
+  # Show highlighted hull lines to understand edge selection? Otherwise plain
+  # hull is shown.
   visualization/show_convex_hull_line_highlighting: true
 
   # Show text with convex hull vertex IDs?
   visualization/show_convex_hull_vertex_ids: true
 
-  # Time to show marker elements when not updated. Useful to still analyze
-  # the seen after program has been terminated; sec
+  # Time to show marker elements when not updated. Useful to still analyze the
+  # seen after program has been terminated; sec
   visualization/display_duration: 120
 
-  # Horizontal viewing angle of the camera, used for frustrum, value is for Kinect; deg
+  # Horizontal viewing angle of the camera, used for frustrum, value is for
+  # Kinect; deg
   horizontal_viewing_angle: 57.0
 
-  # Vertical viewing angle of the camera, used for frustrum, value is for Kinect; deg
+  # Vertical viewing angle of the camera, used for frustrum, value is for
+  # Kinect; deg
   vertical_viewing_angle: 43.0
 
   # max number of loops a centroid is saved
@@ -104,7 +111,8 @@ perception/tabletop-objects:
   # max distance an old centroid may have moved
   centroid_max_distance: 0.041
 
-  # min distance between two centroids, old centroids will be deleted if they are closer
+  # min distance between two centroids, old centroids will be deleted if they
+  # are closer
   centroid_min_distance: 0.01
 
   # max height of a centroid relative to the table

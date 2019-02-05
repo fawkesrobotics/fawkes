@@ -4,18 +4,18 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/tabletop-objects
 ---
 perception/pcl-db:
-  # mongodb-log database from which to read data 
+  # mongodb-log database from which to read data
   database-name: pcl-db
 
   # Maximum age of point clouds restored from database; sec
   pcl-age-tolerance: 5.0
 
   # Transform range to restore from database. Must be a list of two elements.
-  # From the time instructed via the blackboard the values are added to determine
-  # the start and end times of the range; sec
-  # Note that if you use the specialized transform logger of mongodb-log you
-  # should set the values to minus and plus double the storage interval, e.g.
-  # if the storage interval is 5 sec, set the range to [-10, 10].
+  # From the time instructed via the blackboard the values are added to
+  # determine the start and end times of the range; sec Note that if you use the
+  # specialized transform logger of mongodb-log you should set the values to
+  # minus and plus double the storage interval, e.g.  if the storage interval is
+  # 5 sec, set the range to [-10, 10].
   transform-range: [-4.0, 4.0]
 
 perception/pcl-db-merge:
@@ -40,7 +40,7 @@ perception/pcl-db-merge:
   passthrough-filter:
     axis: z
     limits: [0.5, 1.2]
-  
+
   # Voxel grid leaf size for downsampling; m
   downsample-leaf-size: 0.01
 
@@ -61,9 +61,9 @@ perception/pcl-db-merge:
     # The three convergence/abortion criteria
     # Maximum number of iterations of ICP alignment
     max-iterations: 200
-    # Transformation epsilon criterion to assume alignment convergence 
+    # Transformation epsilon criterion to assume alignment convergence
     transformation-epsilon: 1e-7
-    # Euclidean fitness epsilon criterion to assume alignment convergence 
+    # Euclidean fitness epsilon criterion to assume alignment convergence
     euclidean-fitness-epsilon: 1e7
 
 
@@ -89,4 +89,3 @@ perception/pcl-db-retrieve:
 
 perception/pcl-db-roscomm:
   store-pcl-id: pcl-db-store
-

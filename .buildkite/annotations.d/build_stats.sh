@@ -49,10 +49,10 @@ else
 	LIBS_total=$(sqlite3 $STATSFILE \
 	             'SELECT count(*) FROM buildstats WHERE type="lib"'); \
 	LIBS_ratio=$(( LIBS_built * 100 / LIBS_total )); \
-	LIBS_color=$(if [ -n "${BUILD_STATS_NO_COLOR:-}" ]; then echo "text-muted"; \
-	             elif [ $LIBS_ratio -ge 90 ]; then echo "text-success"; \
-	             elif [ $LIBS_ratio -ge 80 ]; then echo -e "text-warning"; \
-	             else echo -e "text-danger"; fi)
+	LIBS_color=$(if [ -n "${BUILD_STATS_NO_COLOR:-}" ]; then echo "gray"; \
+	             elif [ $LIBS_ratio -ge 90 ]; then echo "green"; \
+	             elif [ $LIBS_ratio -ge 80 ]; then echo -e "orange"; \
+	             else echo -e "red"; fi)
 	LIBS_skipped=$(sqlite3 $STATSFILE 'SELECT item FROM buildstats WHERE type="lib" AND state="skipped"')
 
 	PLUGINS_built=$(sqlite3 $STATSFILE \
@@ -60,10 +60,10 @@ else
 	PLUGINS_total=$(sqlite3 $STATSFILE \
 	                'SELECT count(*) FROM buildstats WHERE type="plugin"'); \
 	PLUGINS_ratio=$(( PLUGINS_built * 100 / PLUGINS_total )); \
-	PLUGINS_color=$(if [ -n "${BUILD_STATS_NO_COLOR:-}" ]; then echo "text-muted"; \
-	                elif [ $PLUGINS_ratio -ge 90 ]; then echo "text-success"; \
-	                elif [ $PLUGINS_ratio -ge 80 ]; then echo -e "text-warning"; \
-	                else echo -e "text-danger"; fi)
+	PLUGINS_color=$(if [ -n "${BUILD_STATS_NO_COLOR:-}" ]; then echo "gray"; \
+	                elif [ $PLUGINS_ratio -ge 90 ]; then echo "green"; \
+	                elif [ $PLUGINS_ratio -ge 80 ]; then echo -e "orange"; \
+	                else echo -e "red"; fi)
 	PLUGINS_skipped=$(sqlite3 $STATSFILE 'SELECT item FROM buildstats WHERE type="plugin" AND state="skipped"')
 
 	BINS_built=$(sqlite3 $STATSFILE \
@@ -71,19 +71,19 @@ else
 	BINS_total=$(sqlite3 $STATSFILE \
 	             'SELECT count(*) FROM buildstats WHERE type="bin"'); \
 	BINS_ratio=$(( BINS_built * 100 / BINS_total )); \
-	BINS_color=$(if [ -n "${BUILD_STATS_NO_COLOR:-}" ]; then echo "text-muted"; \
-	             elif [ $BINS_ratio -ge 90 ]; then echo "text-success"; \
-	             elif [ $BINS_ratio -ge 80 ]; then echo -e "text-warning"; \
-	             else echo -e "text-danger"; fi)
+	BINS_color=$(if [ -n "${BUILD_STATS_NO_COLOR:-}" ]; then echo "gray"; \
+	             elif [ $BINS_ratio -ge 90 ]; then echo "green"; \
+	             elif [ $BINS_ratio -ge 80 ]; then echo -e "orange"; \
+	             else echo -e "red"; fi)
 	BINS_skipped=$(sqlite3 $STATSFILE 'SELECT item FROM buildstats WHERE type="bin" AND state="skipped"')
 
 	cat <<-EOM
 	<h4>$LABEL Build Coverage</h4>
 	<div class="flex">
-	  <div class="p1 flex-auto">
-	    <div class="my1 h4 text-info"><strong>Libraries</strong></div>
-	    <div class="">
-	      <span class="$LIBS_color"><big><big>$LIBS_ratio</big></big>%</span><br>
+	  <div class="p1 col-4">
+	    <div class="my1 h4 blue bold">Libraries</div>
+	    <div>
+	      <span class="$LIBS_color bold"><big><big>$LIBS_ratio</big></big>%</span><br>
 	      Built $LIBS_built of $LIBS_total
 	    </div>
 	EOM
@@ -99,10 +99,10 @@ else
 	fi
 	cat <<-EOM
 	  </div>
-	  <div class="p1 flex-auto">
-	    <div class="my1 h4 text-info"><strong>Plugins</strong></div>
-	    <div class="">
-	      <span class="$PLUGINS_color"><big><big>$PLUGINS_ratio</big></big>%</span><br>
+	  <div class="p1 col-4">
+	    <div class="my1 h4 blue bold">Plugins</div>
+	    <div>
+	      <span class="$PLUGINS_color bold"><big><big>$PLUGINS_ratio</big></big>%</span><br>
 	      Built $PLUGINS_built of $PLUGINS_total
 	    </div>
 	EOM
@@ -118,10 +118,10 @@ else
 	fi
 	cat <<-EOM
 	  </div>
-	  <div class="p1 flex-auto">
-	    <div class="my1 h4 text-info"><strong>Executables</strong></div>
-	    <div class="">
-	      <span class="$BINS_color"><big><big>$BINS_ratio</big></big>%</span><br>
+	  <div class="p1 col-4">
+	    <div class="my1 h4 blue bold">Executables</div>
+	    <div>
+	      <span class="$BINS_color bold"><big><big>$BINS_ratio</big></big>%</span><br>
 	      Built $BINS_built of $BINS_total
 	    </div>
 	EOM

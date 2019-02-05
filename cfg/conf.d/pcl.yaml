@@ -7,4 +7,3 @@ pcl:
 
   # Set to true to make PCL quiet and remove all direct messages by PCL.
   shutup: false
-

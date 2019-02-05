@@ -20,8 +20,8 @@ openprs:
     # Hostname where the message passer can be reached. Warning,
     # OpenPRS is quite picky about the hostname. Set this only
     # if you run mp-oprs yourself on a _remote_ host.
-    #hostname: some.remote-host.com
-    
+    # hostname: some.remote-host.com
+
     # The TCP port that mp-oprs listens on for connections.
     # If mp-oprs is started by Fawkes it will be instructed to
     # listen on that port. If disabled, this is where we expect
@@ -51,7 +51,7 @@ openprs:
     # Hostname where the oprs-server can be reached. Warning,
     # OpenPRS is quite picky about the hostname. Set this only
     # if you run oprs-server yourself on a _remote_ host.
-    #hostname: some.remote-host.com
+    # hostname: some.remote-host.com
 
     # The TCP port that oprs-server listens on for connections.
     # If oprs-server is started by Fawkes it will be instructed to
@@ -84,4 +84,3 @@ openprs:
     # multiple robot instances for simulation on a single machine.
     # The timeout is given in seconds.
     start-timeout: 30.0
-

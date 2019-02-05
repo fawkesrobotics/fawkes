@@ -42,7 +42,10 @@ if type -p gdiff >/dev/null; then
 	DIFF=gdiff
 fi
 
-MERGE_BASE=$($DIFF --old-line-format='' --new-line-format='' <(git rev-list --first-parent "HEAD") <(git rev-list --first-parent "origin/master") | head -1)
+MERGE_BASE=$($DIFF --old-line-format='' --new-line-format='' \
+             <(git rev-list --first-parent "HEAD") \
+             <(git rev-list --first-parent "origin/master") \
+             | head -1)
 
 error_exit () {
 	MSG="$@"
@@ -275,6 +278,23 @@ check_gitlint ()
 	rm -f gitlint-*.txt
 }
 
+check_yamllint()
+{
+	YAMLLINT_ERROR=0
+	YAMLLINT_OUTPUT=$(yamllint -s -f colored cfg/config.yaml cfg/conf.d/) || YAMLLINT_ERROR=$?
+	if [ $YAMLLINT_ERROR -ne 0 ]; then
+		# Print error to log
+		>&2 cat <<< $YAMLLINT_OUTPUT
+
+		{
+			echo "#### Detected yamllint Errors"
+			echo '```terminal'
+			cat <<< $YAMLLINT_OUTPUT
+			echo '```'
+		} | buildkite-agent annotate --context yamllint --style error
+		exit $YAMLLINT_ERROR
+	fi
+}
 
 ### Main Program
 
@@ -290,6 +310,8 @@ check_commit_authors
 echo "-> Running gitlint to check commit messages"
 check_gitlint
 
-echo "-> Running 'make check'"
-gmake check
+echo "-> Running yamllint on configuration files"
+check_yamllint
 
+echo "-> Running 'make check'"
+gmake check YAMLLINT=0

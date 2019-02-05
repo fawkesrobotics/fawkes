@@ -42,7 +42,7 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
     # jstest /dev/input/js0
     # (replace the device path with the device_file configured above)
     # Then move the axis you want to use and note and set its index here
-    axis_forward:  1
+    axis_forward: 1
     axis_sideward: 0
     axis_rotation: 3
 
@@ -53,7 +53,7 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
     # commands are executed. As soon as they are released the robot stops.
     # At least one of the two methods must be configured, or the robot
     # won't move at all.
-    
+
     # Deadman axis
     # Configure an axis and a threshold. For a negative threshold,
     # movement is allowed if the axis value is less than the given value.
@@ -117,9 +117,9 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
         max_vy: 1.0
         max_omega: 2.36
 
-  # This feature stops the robot from moving forward if an obstacle is
-  # detected up front.
-  # A laser must be present for this feature to work.
+    # This feature stops the robot from moving forward if an obstacle is
+    # detected up front.
+    # A laser must be present for this feature to work.
     collision_safety:
       # True to enable collision safety feature.
       enabled: true
@@ -131,7 +131,6 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/joystick
       # Given in degrees to the left and right from the front
       # i.e. 20 degrees will have an complete opening angle of 41 degrees
       angle: 20
-  
 
     # Interface ID for MotorInterface to send TransRotMessages to.
     motor_interface_id: Motor
