@@ -75,7 +75,7 @@ else
 	  <div class="p1 col-4">
 	    <div class="my1 h4 blue bold">Libraries</div>
 	    <div>
-	      <span class="$LIBS_color"><big><big>$LIBS_ratio</big></big>%</span><br>
+	      <span class="$LIBS_color bold"><big><big>$LIBS_ratio</big></big>%</span><br>
 	      Built $LIBS_built of $LIBS_total
 	    </div>
 	EOM
@@ -94,7 +94,7 @@ else
 	  <div class="p1 col-4">
 	    <div class="my1 h4 blue bold">Plugins</div>
 	    <div>
-	      <span class="$PLUGINS_color"><big><big>$PLUGINS_ratio</big></big>%</span><br>
+	      <span class="$PLUGINS_color bold"><big><big>$PLUGINS_ratio</big></big>%</span><br>
 	      Built $PLUGINS_built of $PLUGINS_total
 	    </div>
 	EOM
@@ -113,7 +113,7 @@ else
 	  <div class="p1 col-4">
 	    <div class="my1 h4 blue bold">Executables</div>
 	    <div>
-	      <span class="$BINS_color"><big><big>$BINS_ratio</big></big>%</span><br>
+	      <span class="$BINS_color bold"><big><big>$BINS_ratio</big></big>%</span><br>
 	      Built $BINS_built of $BINS_total
 	    </div>
 	EOM
