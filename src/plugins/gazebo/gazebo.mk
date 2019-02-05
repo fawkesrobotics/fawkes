@@ -13,6 +13,8 @@
 #
 #*****************************************************************************
 
+include $(BUILDSYSDIR)/boost.mk
+
 ifndef __buildsys_config_mk_
 $(error config.mk must be included before gazebo.mk)
 endif
@@ -23,6 +25,7 @@ __buildsys_gazebo_mk_ := 1
 
 ifneq ($(PKGCONFIG),)
   HAVE_GAZEBO   = $(if $(shell $(PKGCONFIG) --atleast-version=1.0.1 'gazebo'; echo $${?/1/}),1,0)
+  HAVE_GAZEBO_96 = $(if $(shell $(PKGCONFIG) --atleast-version=9.6.0 'gazebo'; echo $${?/1/}),1,0)
 endif
 
 ifeq ($(HAVE_GAZEBO),1)
@@ -31,6 +34,10 @@ ifeq ($(HAVE_GAZEBO),1)
   CFLAGS_GAZEBO  = -DHAVE_GAZEBO $(shell $(PKGCONFIG) --cflags 'gazebo') \
                    -Wno-deprecated-declarations
   LDFLAGS_GAZEBO = $(shell $(PKGCONFIG) --libs 'gazebo') -ldl
+
+  ifeq ($(HAVE_GAZEBO_96)$(boost-have-lib system),11)
+    LDFLAGS_GAZEBO += $(boost-lib-ldflags system)
+  endif
 
   # if ffmpeg is installed, gazebo may have been compiled with support for it
   #   # hence check for headers and add the respective include directories
