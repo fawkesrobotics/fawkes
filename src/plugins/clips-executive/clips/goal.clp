@@ -201,6 +201,7 @@
 )
 
 (defrule goal-cleanup-plans
+	(confval (path "/clips-executive/automatic-goal-retraction") (type BOOL) (value TRUE))
 	?g <- (goal (id ?id) (mode RETRACTED))
 	(exists (plan (goal-id ?id)))
 	=>
