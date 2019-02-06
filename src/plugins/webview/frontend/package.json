@@ -33,7 +33,7 @@
     "ngx-store": "^2.1.0",
     "rxjs": "^6.3.3",
     "tslib": "^1.9.3",
-    "viz.js": "^2.1.2",
+    "viz.js": "^1.8.2",
     "zone.js": "^0.8.26"
   },
   "devDependencies": {
