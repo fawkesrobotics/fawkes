@@ -5,4 +5,4 @@
       - docker#v3.0.1:
           <<: *docker-plugin-base
           volumes:
-            - /var/lib/buildkite-agent/npm_cacache:/home/builder/.npm/_cacache
+            - /var/lib/buildkite-agent/npm_cache:/home/builder/.npm
