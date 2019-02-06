@@ -352,13 +352,13 @@
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   (plan-action (action-name ?op) (goal-id ?g) (plan-id ?p) (id ?action-id)
-    (state FORMULATED|PENDING|WAITING))
+               (state FORMULATED|PENDING|WAITING))
   ?precond <- (domain-precondition
                 (name ?precond-name)
                 (part-of ?op)
                 (grounded FALSE))
   (not (domain-precondition (name ?precond-name) (goal-id ?g) (plan-id ?p)
-        (grounded-with ?action-id) (grounded TRUE)))
+                            (grounded-with ?action-id) (grounded TRUE)))
 =>
   (duplicate ?precond
     (goal-id ?g) (plan-id ?p) (grounded-with ?action-id)
@@ -868,8 +868,23 @@
                           (action-name ?op) (executable FALSE))
   (domain-precondition (plan-id ?p) (goal-id ?g) (grounded-with ?action-id)
                        (part-of ?op)  (is-satisfied TRUE))
-=>
+ =>
   (modify ?action (executable TRUE))
+)
+
+(defrule domain-check-if-action-is-no-longer-executable
+  "If the precondition of an action is not satisfied (anymore),
+   the action is not executable."
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
+
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
+  ?action <- (plan-action (id ?action-id) (goal-id ?g) (plan-id ?p)
+                          (action-name ?op) (executable TRUE))
+  (domain-precondition (plan-id ?p) (goal-id ?g) (grounded-with ?action-id)
+                       (part-of ?op)  (is-satisfied FALSE))
+ =>
+  (modify ?action (executable FALSE))
 )
 
 (defrule domain-check-if-action-is-executable-without-precondition
