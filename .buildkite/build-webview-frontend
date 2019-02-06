@@ -28,8 +28,6 @@ set -euo pipefail
 
 # Get Angular CLI
 echo 'prefix = ~/.npm' > ~/.npmrc
-npm install --global @angular/cli
-export PATH=$PATH:$HOME/.npm/bin
 
 cd src/plugins/webview/frontend
 
@@ -37,5 +35,5 @@ cd src/plugins/webview/frontend
 npm ci
 
 # Build frontend
-make NG_BUILD_FLAGS="--source-map=false"
+npm run ci-build
 
