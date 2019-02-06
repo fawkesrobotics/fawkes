@@ -26,7 +26,7 @@ export interface PlanAction {
   param_values: Array<string>;
   duration?: number;
   dispatch_time?: number;
-  status: PlanAction.StatusEnum;
+  state: PlanAction.StateEnum;
   executable: boolean;
   _operator?: DomainOperator;
   preconditions: Array<DomainPrecondition | DomainPreconditionAtom | DomainPreconditionCompound>;
@@ -37,18 +37,18 @@ export namespace PlanAction {
   export const API_VERSION = 'v1beta1';
 
   // tslint:disable-next-line:max-line-length
-  export type StatusEnum = 'FORMULATED' | 'PENDING' | 'WAITING' | 'RUNNING' | 'EXECUTION-SUCCEEDED' | 'SENSED-EFFECTS-WAIT' | 'SENSED-EFFECTS-HOLD' | 'EFFECTS-APPLIED' | 'FINAL' | 'EXECUTION-FAILED' | 'FAILED';
-  export const StatusEnum = {
-    FORMULATED: 'FORMULATED' as StatusEnum,
-    PENDING: 'PENDING' as StatusEnum,
-    WAITING: 'WAITING' as StatusEnum,
-    RUNNING: 'RUNNING' as StatusEnum,
-    EXECUTION_SUCCEEDED: 'EXECUTION-SUCCEEDED' as StatusEnum,
-    SENSED_EFFECTS_WAIT: 'SENSED-EFFECTS-WAIT' as StatusEnum,
-    SENSED_EFFECTS_HOLD: 'SENSED-EFFECTS-HOLD' as StatusEnum,
-    EFFECTS_APPLIED: 'EFFECTS-APPLIED' as StatusEnum,
-    FINAL: 'FINAL' as StatusEnum,
-    EXECUTION_FAILED: 'EXECUTION-FAILED' as StatusEnum,
-    FAILED: 'FAILED' as StatusEnum
+  export type StateEnum = 'FORMULATED' | 'PENDING' | 'WAITING' | 'RUNNING' | 'EXECUTION-SUCCEEDED' | 'SENSED-EFFECTS-WAIT' | 'SENSED-EFFECTS-HOLD' | 'EFFECTS-APPLIED' | 'FINAL' | 'EXECUTION-FAILED' | 'FAILED';
+  export const StateEnum = {
+    FORMULATED: 'FORMULATED' as StateEnum,
+    PENDING: 'PENDING' as StateEnum,
+    WAITING: 'WAITING' as StateEnum,
+    RUNNING: 'RUNNING' as StateEnum,
+    EXECUTION_SUCCEEDED: 'EXECUTION-SUCCEEDED' as StateEnum,
+    SENSED_EFFECTS_WAIT: 'SENSED-EFFECTS-WAIT' as StateEnum,
+    SENSED_EFFECTS_HOLD: 'SENSED-EFFECTS-HOLD' as StateEnum,
+    EFFECTS_APPLIED: 'EFFECTS-APPLIED' as StateEnum,
+    FINAL: 'FINAL' as StateEnum,
+    EXECUTION_FAILED: 'EXECUTION-FAILED' as StateEnum,
+    FAILED: 'FAILED' as StateEnum
   };
 }
