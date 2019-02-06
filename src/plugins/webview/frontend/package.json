@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --prod",
+    "build": "ng build --prod --build-optimizer --source-map=false",
     "ci-build": "ng build --source-map=false",
     "test": "ng test",
     "lint": "ng lint",
