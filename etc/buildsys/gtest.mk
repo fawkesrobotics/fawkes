@@ -29,7 +29,7 @@ ifeq ($(HAVE_GTEST_HDR),1)
   HAVE_GTEST_MAIN = $(if $(shell ldconfig -p | grep libgtest_main\\.$(SOEXT)),1,)
   ifeq ($(HAVE_GTEST_LIB)$(HAVE_GTEST_MAIN),11)
     HAVE_GTEST = 1
-    LDFLAGS_GTEST += -pthread -lgtest
+    LDFLAGS_GTEST += -pthread -lgtest -lgtest_main
   else
     # this may be a system that does not have a precompiled lib, e.g., Ubuntu
     ifneq ($(wildcard $(LIBDIR)/libfawkesgtest.$(SOEXT)),)
