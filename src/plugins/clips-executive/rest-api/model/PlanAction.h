@@ -217,21 +217,21 @@ class PlanAction
 	{
 		dispatch_time_ = dispatch_time;
 	}
-  /** Get status value.
-   * @return status value
+  /** Get state value.
+   * @return state value
    */
 	std::optional<std::string>
- status() const
+ state() const
 	{
-		return status_;
+		return state_;
 	}
 
-	/** Set status value.
-	 * @param status new value
+	/** Set state value.
+	 * @param state new value
 	 */
-	void set_status(const std::string& status)
+	void set_state(const std::string& state)
 	{
-		status_ = status;
+		state_ = state;
 	}
   /** Get executable value.
    * @return executable value
@@ -359,7 +359,7 @@ class PlanAction
 	std::optional<float>
  dispatch_time_;
 	std::optional<std::string>
- status_;
+ state_;
 	std::optional<bool>
  executable_;
 	std::shared_ptr<DomainOperator>
