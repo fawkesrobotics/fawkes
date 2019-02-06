@@ -169,8 +169,11 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
               for (let i = 0; i < this.plans.length; ++i) {
                 this.plans[i].actions = plans[i].actions;
                 this.plans[i].actions.length = plans[i].actions.length;
-                if (this.plans[i].actions[this.plans[i].actions.length - 1].status === 'FINAL' &&
-                    this.goal.mode !== 'FINISHED' && this.goal.mode !== 'EVALUATED') {
+                if (this.plans[i].actions[this.plans[i].actions.length - 1].state === 'FINAL' &&
+                    this.goal.mode !== 'FINISHED' &&
+                    this.goal.mode !== 'EVALUATED' &&
+                    this.goal.mode !== 'RETRACTED')
+                {
                   need_refresh_goal = true;
                 }
               }
