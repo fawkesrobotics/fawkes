@@ -31,6 +31,11 @@ echo 'prefix = ~/.npm' > ~/.npmrc
 npm install --global @angular/cli
 export PATH=$PATH:$HOME/.npm/bin
 
-# Build webview frontend (also calls npm install)
 cd src/plugins/webview/frontend
+
+# Install deps with faster CI sub-command
+npm ci
+
+# Build frontend
 make NG_BUILD_FLAGS="--source-map=false"
+
