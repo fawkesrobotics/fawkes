@@ -181,6 +181,13 @@
 	)
 )
 
+(defrule goal-print-error
+  (goal (id ?id) (mode RETRACTED) (outcome FAILED)
+        (class ?class) (error $?error&:(> (length$ ?error) 0)) (message ?msg&~""))
+ =>
+  (printout error "Goal " ?id " (" ?class ") failed: " ?msg " " ?error crlf)
+)
+
 (defrule goal-retract
 	(confval (path "/clips-executive/automatic-goal-retraction") (type BOOL) (value TRUE))
 	?g <- (goal (id ?id) (mode RETRACTED) (parent ?parent) (acquired-resources))
@@ -188,7 +195,7 @@
 	; MAINTAIN goal, i.e., it is never RETRACTED itself.
 	(or (goal (id ?id) (parent nil))
 	    (goal (id ?parent) (type MAINTAIN)))
-	=>
+ =>
 	(printout t "Retracting goal " ?id crlf)
 	(goal-retract-goal-tree ?id)
 )
