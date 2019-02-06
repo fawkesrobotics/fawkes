@@ -33,4 +33,4 @@ export PATH=$PATH:$HOME/.npm/bin
 
 # Build webview frontend (also calls npm install)
 cd src/plugins/webview/frontend
-make NG_BUILD_FLAGS=""
+make NG_BUILD_FLAGS="--source-map=false"
