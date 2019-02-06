@@ -19,7 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 NG_CLI = $(shell type -p ng)
 NPM    = $(shell type -p npm)
-NG_BUILD_FLAGS ?= --prod --build-optimizer
+NG_BUILD_FLAGS ?= --prod --build-optimizer --source-map=false
 
 ifneq ($(NG_CLI),)
   ifneq ($(NPM),)
