@@ -582,6 +582,7 @@
   (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
                 (name ?pn)
+                (part-of ?op)
                 (type conjunction)
                 (goal-id ?g)
                 (plan-id ?p)
@@ -596,6 +597,11 @@
         (goal-id ?g) (plan-id ?p)
         (part-of ?pn) (grounded TRUE)
         (grounded-with ?action-id) (is-satisfied FALSE)))
+
+  ; ensure that we have grounded all related atomic preconditions before
+  (forall (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded FALSE))
+    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE))
+  )
 =>
   (modify ?precond (is-satisfied TRUE))
 )
@@ -608,6 +614,7 @@
   (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
                 (name ?pn)
+                (part-of ?op)
                 (type conjunction)
                 (goal-id ?g)
                 (plan-id ?p)
@@ -625,6 +632,11 @@
         (grounded-with ?action-id) (is-satisfied FALSE)
       )
   )
+
+  ; ensure that we have grounded all related atomic preconditions before
+  (forall (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded FALSE))
+    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE))
+  )
 =>
   (modify ?precond (is-satisfied FALSE))
 )
@@ -634,6 +646,7 @@
    satisfied."
   ?precond <- (domain-precondition
                 (name ?pn)
+                (part-of ?op)
                 (type disjunction)
                 (goal-id ?g)
                 (plan-id ?p)
@@ -649,7 +662,12 @@
         (part-of ?pn) (grounded TRUE)
         (grounded-with ?action-id) (is-satisfied TRUE))
   )
-=>
+
+  ; ensure that we have grounded all related atomic preconditions before
+  (forall (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded FALSE))
+    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE))
+  )
+ =>
   (modify ?precond (is-satisfied TRUE))
 )
 
@@ -658,6 +676,7 @@
    set it to not satisfied."
   ?precond <- (domain-precondition
                 (name ?pn)
+                (part-of ?op)
                 (type disjunction)
                 (goal-id ?g)
                 (plan-id ?p)
@@ -674,6 +693,11 @@
           (part-of ?pn) (grounded TRUE)
           (grounded-with ?action-id) (is-satisfied TRUE))
     )
+  )
+
+  ; ensure that we have grounded all related atomic preconditions before
+  (forall (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded FALSE))
+    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE))
   )
 =>
   (modify ?precond (is-satisfied FALSE))
