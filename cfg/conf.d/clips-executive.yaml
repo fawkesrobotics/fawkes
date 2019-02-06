@@ -139,7 +139,10 @@ clips-executive:
               - test-scenario/print-action.clp
               # - lock-actions.clp
           - name: execution-monitoring
-            file: test-scenario/execution-monitoring.clp
+            files:
+              - execmon/stalled-sequential-plan.clp
+              - execmon/stalled-action.clp
+              - test-scenario/execution-monitoring.clp
 
       # Map plan actions to skill strings, used by skill action execution
       action-mapping:
