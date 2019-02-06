@@ -29,7 +29,11 @@
 (defrule action-selection-sequential-failed
   ?g <- (goal (id ?goal-id) (mode DISPATCHED) (committed-to ?plan-id))
   (plan (id ?plan-id) (goal-id ?goal-id) (type SEQUENTIAL))
-  (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (state FAILED))
+  (plan-action (goal-id ?goal-id) (plan-id ?plan-id)
+               (action-name ?action-name) (state FAILED)
+               (error-msg ?msg))
  =>
-  (modify ?g (mode FINISHED) (outcome FAILED))
+  (modify ?g (mode FINISHED) (outcome FAILED)
+          (error ACTION-FAILED)
+          (message (str-cat "Action " ?action-name " failed: " ?msg)))
 )
