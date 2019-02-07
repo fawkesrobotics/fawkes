@@ -22,11 +22,18 @@ __buildsys_gtest_mk_ := 1
 
 __GTEST_INCLUDE_PATHS=/usr/include /usr/local/include
 
+ifeq ($(OS),Linux)
+  ldconfig-have-lib = $(shell ldconfig -p | grep $1)
+endif
+ifeq ($(OS),FreeBSD)
+  ldconfig-have-lib = $(shell ldconfig -r | grep $1)
+endif
+
 HAVE_GTEST_HDR = $(if $(wildcard $(addsuffix /gtest/gtest.h,$(__GTEST_INCLUDE_PATHS))),1)
 ifeq ($(HAVE_GTEST_HDR),1)
   # check if library is available
-  HAVE_GTEST_LIB = $(if $(shell ldconfig -p | grep libgtest\\.$(SOEXT)),1,)
-  HAVE_GTEST_MAIN = $(if $(shell ldconfig -p | grep libgtest_main\\.$(SOEXT)),1,)
+  HAVE_GTEST_LIB = $(if $(call ldconfig-have-lib,libgtest\\.$(SOEXT)),1,)
+  HAVE_GTEST_MAIN = $(if $(call ldconfig-have-lib,libgtest_main\\.$(SOEXT)),1,)
   ifeq ($(HAVE_GTEST_LIB)$(HAVE_GTEST_MAIN),11)
     HAVE_GTEST = 1
     LDFLAGS_GTEST += -pthread -lgtest -lgtest_main
