@@ -37,6 +37,7 @@ LIBS_navgraph_generator = fawkescore fawkesutils fawkesaspects	\
 			  NavGraphGeneratorInterface
 OBJS_navgraph_generator = navgraph_generator_plugin.o navgraph_generator_thread.o
 OBJS_all    = $(OBJS_navgraph_generator)
+PLUGINS_all = $(PLUGINDIR)/navgraph-generator.$(SOEXT)
 
 HAVE_PCL_COMPONENTS=$(call pcl-have-libs,$(REQUIRED_PCL_LIBS))
 
@@ -48,13 +49,13 @@ ifeq ($(HAVE_NAVGRAPH)$(HAVE_CPP11)$(HAVE_PCL)$(HAVE_TF)$(HAVE_CGAL),11111)
   LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL) \
 	     $(call pcl-libs-ldflags,$(REQUIRED_PCL_LIBS))
 
-  PLUGINS_all = $(PLUGINDIR)/navgraph-generator.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 
   ifeq ($(USE_VISUALIZATION),1)
     ifeq ($(HAVE_ROS),1)
       ifeq ($(call ros-have-pkg,visualization_msgs),1)
         LIBS_navgraph_generator += fawkesrosaspect
-	OBJS_navgraph_generator += visualization_thread.o
+        OBJS_navgraph_generator += visualization_thread.o
         CFLAGS  += -DHAVE_VISUALIZATION $(CFLAGS_ROS) \
 	           $(call ros-pkg-cflags,visualization_msgs)
         LDFLAGS += $(LDFLAGS_ROS) $(call ros-pkg-lflags,visualization_msgs)

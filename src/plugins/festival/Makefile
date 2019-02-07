@@ -16,18 +16,20 @@
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
+LDFLAGS += $(LDFLAGS_FESTIVAL)
+CFLAGS  += $(CFLAGS_FESTIVAL)
+LIBS_festival = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkesinterface \
+                SpeechSynthInterface $(LIBS_FESTIVAL)
+OBJS_festival = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
+
+OBJS_all    = $(OBJS_festival)
+PLUGINS_all = $(PLUGINDIR)/festival.so
+
 ifeq ($(HAVE_FESTIVAL),1)
-  LDFLAGS += $(LDFLAGS_FESTIVAL)
-  CFLAGS  += $(CFLAGS_FESTIVAL)
-  LIBS_festival = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkesinterface \
-		  SpeechSynthInterface $(LIBS_FESTIVAL)
-  OBJS_festival = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
-  PLUGINS_all = $(PLUGINDIR)/festival.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_festival
 endif
-
-OBJS_all = $(OBJS_festival)
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)

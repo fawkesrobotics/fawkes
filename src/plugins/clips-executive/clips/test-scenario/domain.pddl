@@ -49,7 +49,7 @@
 	)
   (:action say-hello-again
     :parameters (?name - name)
-    :precondition (not (said ?name hello))
+    :precondition (said ?name hello)
     :effect (and (said ?name hello) (not (spoken once)))
   )
 	;(:action print

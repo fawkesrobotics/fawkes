@@ -14,13 +14,13 @@ hardware/imu:
     # blackboard as soon as it is available, otherwise only once per
     # loop during the sensor hook
     continuous: false
-    
+
     # Configuration is for CruizCore Gyro
     type: CruizCore-XG1010
 
     # Coordinate frame at which origin the IMU is positioned
     frame: !frame imu
-    
+
     # Device file
     device: /dev/ttyUSB0
 

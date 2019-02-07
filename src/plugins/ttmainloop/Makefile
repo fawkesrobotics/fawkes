@@ -22,6 +22,7 @@ OBJS_ttmainloop = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(re
 
 OBJS_all    = $(OBJS_ttmainloop)
 PLUGINS_all = $(PLUGINDIR)/ttmainloop.so
+PLUGINS_build = $(PLUGINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

@@ -17,9 +17,12 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/openprs.mk
 
+PRESUBDIRS = utils aspect
+SUBDIRS    = example
+
 LIBS_openprs = fawkescore fawkesutils fawkesaspects fawkesblackboard \
                fawkesinterface fawkesopenprsaspect fawkesopenprsutils \
-	       fawkesbaseapp fawkesnetcomm
+               fawkesbaseapp fawkesnetcomm
 OBJS_openprs = openprs_plugin.o openprs_thread.o
 
 LIBS_openprs_mod_utils = fawkescore fawkesutils
@@ -29,7 +32,7 @@ LIBS_openprs_mod_time = fawkescore fawkesutils
 OBJS_openprs_mod_time = mod_time.o
 
 LIBS_openprs_mod_blackboard = fawkescore fawkesutils fawkesblackboard \
-			      fawkesinterface
+                              fawkesinterface
 OBJS_openprs_mod_blackboard = mod_blackboard.o
 
 LIBS_openprs_mod_config = fawkescore fawkesutils fawkesconfig fawkesnetcomm
@@ -38,6 +41,12 @@ OBJS_openprs_mod_config = mod_config.o
 OBJS_all = $(OBJS_openprs) $(OBJS_openprs_mod_utils) \
 	   $(OBJS_openprs_mod_time) $(OBJS_openprs_mod_blackboard) \
 	   $(OBJS_openprs_mod_config)
+
+PLUGINS_all = $(PLUGINDIR)/openprs.so
+LIBS_all   += $(OPENPRS_MOD_DIR)/mod_utils.so \
+              $(OPENPRS_MOD_DIR)/mod_time.so \
+              $(OPENPRS_MOD_DIR)/mod_blackboard.so \
+              $(OPENPRS_MOD_DIR)/mod_config.so
 
 INST_LIB_SUBDIR_openprs_mod_utils = $(FFLIBSUBDIR)
 INST_LIB_SUBDIR_openprs_mod_time = $(FFLIBSUBDIR)
@@ -53,9 +62,6 @@ FILES_openprs_files   = $(subst $(SRCDIR)/,,$(wildcard $(addprefix $(SRCDIR)/dat
 DESTDIR_openprs_files = $(EXEC_SHAREDIR)/openprs/data
 
 ifeq ($(HAVE_OPENPRS),1)
-  PRESUBDIRS += utils aspect
-  SUBDIRS    += example
-
   CFLAGS  += $(CFLAGS_OPENPRS)  $(CFLAGS_OPENPRS_MP) 
   LDFLAGS += $(LDFLAGS_OPENPRS) $(LDFLAGS_OPENPRS_MP)
 
@@ -72,11 +78,8 @@ ifeq ($(HAVE_OPENPRS),1)
   ALLOW_UNDEF_openprs_mod_blackboard = 1
   ALLOW_UNDEF_openprs_mod_config = 1
 
-  PLUGINS_all = $(PLUGINDIR)/openprs.so
-  LIBS_all   += $(OPENPRS_MOD_DIR)/mod_utils.so \
-		$(OPENPRS_MOD_DIR)/mod_time.so \
-		$(OPENPRS_MOD_DIR)/mod_blackboard.so \
-		$(OPENPRS_MOD_DIR)/mod_config.so
+  LIBS_build = $(LIBS_all)
+  PLUGINS_build = $(PLUGINS_all)
 
 	INSTALL_extra = openprs_files
 else

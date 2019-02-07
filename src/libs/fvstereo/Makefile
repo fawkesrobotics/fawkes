@@ -50,6 +50,7 @@ HDRS_libfvstereo  = $(patsubst %.o,%.h,$(OBJS_libfvstereo))
 
 OBJS_all = $(OBJS_libfvstereo)
 LIBS_all = $(LIBDIR)/libfvstereo.so
+LIBS_build = $(LIBS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

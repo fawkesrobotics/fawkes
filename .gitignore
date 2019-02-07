@@ -48,6 +48,7 @@
 .*.swp
 .*.swo
 
-# Log files
+# Log and stats files
 *.log
+/buildstats.db
 

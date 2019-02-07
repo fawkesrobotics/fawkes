@@ -25,7 +25,8 @@ LDFLAGS += $(LDFLAGS_CLIPS)
 LIBS_libfawkesclipsaspect = stdc++ fawkescore fawkesaspects fawkesutils
 OBJS_libfawkesclipsaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all    = $(OBJS_libfawkesclipsaspect)
+OBJS_all = $(OBJS_libfawkesclipsaspect)
+LIBS_all = $(LIBDIR)/libfawkesclipsaspect.so
 
 ifeq ($(CC),gcc)
   ifneq ($(call gcc_atleast_version,4,6),1)
@@ -35,7 +36,7 @@ endif
 
 ifneq ($(GCC_TOO_OLD),1)
   ifeq ($(HAVE_CLIPS),1)
-    LIBS_all = $(LIBDIR)/libfawkesclipsaspect.so
+    LIBS_build = $(LIBS_all)
   else
     WARN_TARGETS += warning_clips
   endif

@@ -21,13 +21,14 @@ LIBS_openprs_example = fawkescore fawkesutils fawkesaspects fawkesblackboard \
                        fawkesinterface fawkesopenprsaspect fawkesopenprsutils
 OBJS_openprs_example = openprs_example_plugin.o openprs_example_thread.o
 
-OBJS_all = $(OBJS_openprs_example)
+OBJS_all    = $(OBJS_openprs_example)
+PLUGINS_all = $(PLUGINDIR)/openprs-example.so
 
 ifeq ($(HAVE_OPENPRS),1)
   CFLAGS  += $(CFLAGS_OPENPRS)
   LDFLAGS += $(LDFLAGS_OPENPRS)
 
-  PLUGINS_all = $(PLUGINDIR)/openprs-example.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_openprs
 endif

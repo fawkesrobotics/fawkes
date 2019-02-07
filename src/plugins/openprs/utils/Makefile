@@ -29,13 +29,14 @@ endif
 LIBS_libfawkesopenprsutils = stdc++ pthread fawkescore fawkesutils
 OBJS_libfawkesopenprsutils = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all    = $(OBJS_libfawkesopenprsutils)
+OBJS_all = $(OBJS_libfawkesopenprsutils)
+LIBS_all = $(LIBDIR)/libfawkesopenprsutils.so
 
 ifeq ($(HAVE_OPENPRS),1)
   CFLAGS  += $(CFLAGS_OPENPRS)  $(CFLAGS_OPENPRS_MP)  $(CFLAGS_LIBDAEMON)
   LDFLAGS += $(LDFLAGS_OPENPRS) $(LDFLAGS_OPENPRS_MP) $(LDFLAGS_LIBDAEMON)
 
-  LIBS_all = $(LIBDIR)/libfawkesopenprsutils.so
+  LIBS_build = $(LIBS_all)
 else
   WARN_TARGETS += warning_openprs
 endif

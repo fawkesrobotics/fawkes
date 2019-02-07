@@ -26,12 +26,13 @@ LIBDIRS  = $(VISION_LIBDIRS)
 LIBS     = $(VISION_LIBS)
 
 LIBS_fvfuseviewer = stdc++ fawkescore fawkesnetcomm fawkesplugin fawkesutils \
-		    fawkesguiutils fvwidgets fvcams
-OBJS_fvfuseviewer = $(patsubst %.cpp,%.o,$(patsubst cox/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
-OBJS_all += $(OBJS_fvfuseviewer)
+                    fawkesguiutils fvwidgets fvcams
+OBJS_fvfuseviewer = $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp)))
+OBJS_all = $(OBJS_fvfuseviewer)
+BINS_all = $(BINDIR)/fvfuseviewer
 
 ifeq ($(HAVE_GUI),1)
-  BINS_gui += $(BINDIR)/fvfuseviewer
+  BINS_gui = $(BINS_all)
   INST_RESDIRS = guis/fuse_viewer
   MANPAGES_all += $(MANDIR)/man1/fvfuseviewer.1
 else

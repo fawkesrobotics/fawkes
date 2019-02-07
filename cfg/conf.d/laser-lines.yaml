@@ -33,7 +33,7 @@ laser-lines:
   # must at least remain after clustering of the original line.
   line_cluster_tolerance: 0.2
   line_cluster_quota: 0.1
-  
+
   # Minimum and maximum length of line to consider it. Ignored if less
   # than zero.
   line_min_length: 0.8
@@ -43,7 +43,7 @@ laser-lines:
   # the reference frame origin to consider it. Ignored if less than zero.
   line_min_dist: 0.1
   line_max_dist: -1
-  
+
   # The frame in which the result should be published; frame
   result_frame: !frame base_link
 
@@ -51,8 +51,8 @@ laser-lines:
 
   # input laser cloud
   input_cloud: lase_edl-360
-  #input_cloud: Line-Sector
-  
+  # input_cloud: Line-Sector
+
   # average the laser lines
   moving_avg_enabled: true
   # The size (number of elements) of the moving average window

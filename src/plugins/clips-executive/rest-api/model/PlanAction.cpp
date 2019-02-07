@@ -103,10 +103,10 @@ PlanAction::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_dispatch_time.SetFloat(*dispatch_time_);
 		v.AddMember("dispatch-time", v_dispatch_time, allocator);
 	}
-	if (status_) {
-		rapidjson::Value v_status;
-		v_status.SetString(*status_, allocator);
-		v.AddMember("status", v_status, allocator);
+	if (state_) {
+		rapidjson::Value v_state;
+		v_state.SetString(*state_, allocator);
+		v.AddMember("state", v_state, allocator);
 	}
 	if (executable_) {
 		rapidjson::Value v_executable;
@@ -176,8 +176,8 @@ PlanAction::from_json_value(const rapidjson::Value& d)
 	if (d.HasMember("dispatch-time") && d["dispatch-time"].IsFloat()) {
 		dispatch_time_ = d["dispatch-time"].GetFloat();
 	}
-	if (d.HasMember("status") && d["status"].IsString()) {
-		status_ = d["status"].GetString();
+	if (d.HasMember("state") && d["state"].IsString()) {
+		state_ = d["state"].GetString();
 	}
 	if (d.HasMember("executable") && d["executable"].IsBool()) {
 		executable_ = d["executable"].GetBool();
@@ -220,7 +220,7 @@ PlanAction::validate(bool subcall) const
 	if (! apiVersion_)  missing.push_back("apiVersion");
 	if (! id_)  missing.push_back("id");
 	if (! operator_name_)  missing.push_back("operator-name");
-	if (! status_)  missing.push_back("status");
+	if (! state_)  missing.push_back("state");
 	if (! executable_)  missing.push_back("executable");
 	for (size_t i = 0; i < preconditions_.size(); ++i) {
 		if (! preconditions_[i]) {

@@ -27,9 +27,10 @@ LIBS_ffnaogui = fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
 		HumanoidMotionInterface NavigatorInterface SwitchInterface m
 OBJS_ffnaogui = main.o naogui.o
 OBJS_all = $(OBJS_ffnaogui)
+BINS_all = $(BINDIR)/ffnaogui
 
 ifeq ($(HAVE_GTKMM),1)
-  BINS_gui = $(BINDIR)/ffnaogui
+  BINS_gui = $(BINS_all)
 else
   WARN_TARGETS += warning_naogui
 endif

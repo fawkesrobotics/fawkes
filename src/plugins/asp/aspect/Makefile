@@ -22,14 +22,15 @@ include $(SRCDIR)/../clingo.mk
 LIBS_libfawkesaspaspect = stdc++ fawkescore fawkesaspects fawkesutils pthread
 OBJS_libfawkesaspaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all    = $(OBJS_libfawkesaspaspect)
+OBJS_all = $(OBJS_libfawkesaspaspect)
+LIBS_all = $(LIBDIR)/libfawkesaspaspect.so
 
 ifeq ($(HAVE_CPP11),1)
   ifeq ($(HAVE_CLINGO),1)
     CFLAGS  += $(CFLAGS_CLINGO)  $(CFLAGS_CPP11)
     LDFLAGS += $(LDFLAGS_CLINGO) $(LDFLAGS_CPP11)
 
-    LIBS_all = $(LIBDIR)/libfawkesaspaspect.so
+    LIBS_build = $(LIBS_all)
   else
     WARN_TARGETS += warning_clingo
   endif

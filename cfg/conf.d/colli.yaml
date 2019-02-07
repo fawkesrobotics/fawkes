@@ -1,15 +1,17 @@
 %YAML 1.2
 %TAG ! tag:fawkesrobotics.org,cfg/
-
+---
 plugins/colli:
 
-  # Frequency in Hz of how often calli is called (deprecated; this is defined by fawkes main loop)
+  # Frequency in Hz of how often calli is called (deprecated; this is defined by
+  # fawkes main loop)
   frequency: 10
 
   # The maximum robot increasement of laser readings
   max_robo_increase: 0.04
 
-  # If you want to visualize the data continuously and not just when colli receives a new target, set this to true
+  # If you want to visualize the data continuously and not just when colli
+  # receives a new target, set this to true
   visualize_idle: false
 
   # This disables/enales the (spam-) debug msgs
@@ -30,7 +32,8 @@ plugins/colli:
   # Default escaping behaviour (just enabled/disabled)
   escaping_enabled: true
 
-  # Default behaviour, deciding if colli should stop at target (not used in implementation atm though)
+  # Default behaviour, deciding if colli should stop at target (not used in
+  # implementation atm though)
   stop_at_target: true
 
   # Behaviour, deciding how/when colli should adjust orientation
@@ -41,24 +44,28 @@ plugins/colli:
   # The minimum rotation speed (in rad/s). Used for rotating at target
   min_rot: 0.1
 
-  # The minimum distance to target, such that colli decides to drive straight to target.
-  # This is the lowest threshold, anything below this and the colli won't move. This will also
-  # be used to check whether the colli has reached its target position.
+  # The minimum distance to target, such that colli decides to drive straight to
+  # target.  This is the lowest threshold, anything below this and the colli
+  # won't move. This will also be used to check whether the colli has reached
+  # its target position.
   min_drive_distance: 0.1
 
-  # The minimum distance to target in long distance, such that colli decides to drive straight to target.
+  # The minimum distance to target in long distance, such that colli decides to
+  # drive straight to target.
   min_long_dist_drive: 0.15
 
-  # The minimum distance to target in long distance, such that colli drives to a pre-position AND orients
-  # towards the target, so that the robot can approach the target with the front.
+  # The minimum distance to target in long distance, such that colli drives to a
+  # pre-position AND orients towards the target, so that the robot can approach
+  # the target with the front.
   min_long_dist_prepos: 2.1
 
-  # The minimum orientation difference, such that colli rotates when robot is at target position(in rad)
-  # No translation is executed at this point anymore.
+  # The minimum orientation difference, such that colli rotates when robot is at
+  # target position(in rad) No translation is executed at this point anymore.
   min_rot_distance: 0.1
 
-  # If the target is "far" away (>= min_drive_rot_distance), we approach a pre-position to
-  #  already adjust the orientation a little. This defines the distance to that pre-position.
+  # If the target is "far" away (>= min_drive_rot_distance), we approach a
+  # pre-position to already adjust the orientation a little. This defines the
+  # distance to that pre-position.
   pre_position_distance: 0.8
 
   interface:
@@ -70,8 +77,10 @@ plugins/colli:
     laser: Laser laser merged
     # ID of colli target interface
     colli: Colli target
-    # Maximum age (in seconds) of data for reading interfaces. If data is older than this, the colli_thread
-    #  assumes that there main_loop is delayed => abort movement
+
+    # Maximum age (in seconds) of data for reading interfaces. If data is older
+    # than this, the colli_thread assumes that there main_loop is delayed =>
+    # abort movement
     read_timeout: 0.5
 
   frame:
@@ -95,8 +104,8 @@ plugins/colli:
     cell_height: 5
 
   motor_instruct:
-    #set the used motor instruct. This sets the calculation for acc and dec.
-    #You can choose between linear or quadratic
+    # set the used motor instruct. This sets the calculation for acc and dec.
+    # You can choose between linear or quadratic
     mode: "linear"
 
     # Translation acceleration/deceleration
@@ -116,7 +125,9 @@ plugins/colli:
     threshold_velocity: 0.2
     # max velocity if emergency stop triggers
     max_vel: 0.2
-    # number of beams that are used to check for distance (beams in directions of robot)
+
+    # number of beams that are used to check for distance (beams in directions
+    # of robot)
     beams_used: 11
 
   drive_mode:
@@ -126,7 +137,8 @@ plugins/colli:
     # Default drive mode. It's an enum, see NavigatorInterface for details.
     default: "Forward"
 
-    # Default drive mode for escaping. You can choose between potential_field and basic
+    # Default drive mode for escaping. You can choose between potential_field
+    # and basic
     default_escape: "potential_field"
 
     normal:
@@ -139,16 +151,21 @@ plugins/colli:
       max_trans: 0.3
       max_rot: 0.8
 
-    # Modifies the values used to calculate when to start breaking to stop at the target
+    # Modifies the values used to calculate when to start breaking to stop at
+    # the target
     stopping_adjustment:
-      # Add this distance to the calculated distance required for stopping stop, given the current speed.
-      # Higher values mean "stop earlier". Might cause bocking if too high.
+
+      # Add this distance to the calculated distance required for stopping stop,
+      # given the current speed.  Higher values mean "stop earlier". Might cause
+      # bocking if too high.
       distance_addition: 0.0
-      # This value is multiplied with the expected deceleration per loop. Should relate to how
-      #  much the speed actually drops compared to what is desired. So use a value in [0..1], anything
-      #  higher will be cropped to 1.
-      # Lower values mean "breaking effect is delayed more" (or "only x% of deceleration is actually
-      #  noticable in 1 iteration"), so it will "stop earlier".
+
+      # This value is multiplied with the expected deceleration per loop. Should
+      # relate to how much the speed actually drops compared to what is
+      # desired. So use a value in [0..1], anything higher will be cropped to
+      # 1. Lower values mean "breaking effect is delayed more" (or "only x% of
+      # deceleration is actually noticable in 1 iteration"), so it will "stop
+      # earlier".
       deceleration_factor: 1.0
 
   roboshape:
@@ -184,7 +201,8 @@ plugins/colli:
 
 
   laser_occupancy_grid:
-    # This is the distance in which laser readings are ignored for putting a new obstacle into the grid
+    # This is the distance in which laser readings are ignored for putting a new
+    # obstacle into the grid
     distance_account: 0.1
 
     # Define if elipse obsticles shoudl be used with angular robots
@@ -192,19 +210,22 @@ plugins/colli:
 
     history:
       # the history vector size with number of saved elements
-      # Note: This is the initial size. If the history grows bigger, elements have to be appended
-      #  and this costs time. But to many elements result in page faults ;-)
+      # Note: This is the initial size. If the history grows bigger, elements
+      # have to be appended and this costs time. But to many elements result in
+      # page faults ;-)
       initial_size: 500
 
-      # the max time difference of the laser reading history for the search in seconds
+      # the max time difference of the laser reading history for the search in
+      # seconds
       max_length: 6.0
 
-      # the min time difference of the laser reading history for the search in seconds
+      # the min time difference of the laser reading history for the search in
+      # seconds
       min_length: 1.5
 
-      # this enables the compare between old and new laser readings.
-      # if this is enabled, the colli checks if new obstacles can see through old obstacles,
-      # if this is the case, the old obstacles are deleted
+      # this enables the compare between old and new laser readings. If this is
+      # enabled, the colli checks if new obstacles can see through old
+      # obstacles, if this is the case, the old obstacles are deleted
       delete_invisible_old_obstacles:
         enable: true
 
@@ -235,7 +256,8 @@ plugins/colli:
       # The more states the better the search, but the slower the algorithm
       max_states: 15000
 
-    # the line search is executed after a-star and searches for a obstacle free line
+    # the line search is executed after a-star and searches for a obstacle free
+    # lin
     line:
       # this are the maximum allowed costs on this line
       cost_max: 5

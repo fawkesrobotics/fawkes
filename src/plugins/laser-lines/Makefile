@@ -42,6 +42,7 @@ LIBS_laser_lines = fawkescore fawkesutils fawkesaspects fvutils fawkesbaseapp \
 OBJS_laser_lines = laser-lines-plugin.o laser-lines-thread.o  line_info.o
 
 OBJS_all    = $(OBJS_laser_lines)
+PLUGINS_all = $(PLUGINDIR)/laser-lines.$(SOEXT)
 
 ifneq ($(GCC_TOO_OLD),1)
   ifeq ($(HAVE_PCL)$(HAVE_TF),11)
@@ -62,7 +63,7 @@ ifneq ($(GCC_TOO_OLD),1)
         endif
       endif
 
-      PLUGINS_all = $(PLUGINDIR)/laser-lines.$(SOEXT)
+      PLUGINS_build = $(PLUGINS_all)
     else
       WARN_TARGETS += warning_pcl_components
     endif

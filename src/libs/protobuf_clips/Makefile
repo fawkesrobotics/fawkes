@@ -27,6 +27,7 @@ OBJS_libfawkes_protobuf_clips = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(
 HDRS_libfawkes_protobuf_clips = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 
 OBJS_all = $(OBJS_libfawkes_protobuf_clips)
+LIBS_all = $(LIBDIR)/libfawkes_protobuf_clips.so
 
 ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS),1111)
   CFLAGS  += $(CFLAGS_PROTOBUF)  $(CFLAGS_CLIPS) $(CFLAGS_CPP11) \
@@ -34,7 +35,7 @@ ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_CLIPS)$(HAVE_BOOST_LIBS),1111)
   LDFLAGS += $(LDFLAGS_PROTOBUF) $(LDFLAGS_CLIPS) \
 	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
-  LIBS_all  = $(LIBDIR)/libfawkes_protobuf_clips.so
+  LIBS_build = $(LIBS_all)
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS += warning_cpp11

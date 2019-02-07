@@ -32,10 +32,11 @@ OBJS_bblogreplay = bblogreplay_plugin.o		\
 		   bblogfile.o
 
 OBJS_all    = $(OBJS_bblogger) $(OBJS_bblogreplay)
+PLUGINS_all = $(PLUGINDIR)/bblogger.so \
+              $(PLUGINDIR)/bblogreplay.so
 
 ifeq ($(HAVE_CPP11),1)
-  PLUGINS_all = $(PLUGINDIR)/bblogger.so \
-	              $(PLUGINDIR)/bblogreplay.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_cpp11
 endif

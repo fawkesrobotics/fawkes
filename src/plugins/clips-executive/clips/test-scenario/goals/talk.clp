@@ -1,9 +1,10 @@
 
 ; #  Commit to goal (we "intend" it)
 (defrule talk-goal-commit
-	?g <- (goal (parent ?id) (class TALK) (mode EXPANDED))
+	?g <- (goal (id ?goal-id) (parent ?id) (class TALK) (mode EXPANDED))
+	(plan (id ?plan-id) (goal-id ?goal-id))
 	=>
-	(modify ?g (mode COMMITTED))
+	(modify ?g (mode COMMITTED) (committed-to ?plan-id))
 )
 
 ; #  Dispatch goal (action selection and execution now kick in)

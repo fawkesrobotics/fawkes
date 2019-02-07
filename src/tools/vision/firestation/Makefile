@@ -33,15 +33,16 @@ LIBS_firestation = stdc++ m fawkescore fawkesutils fvutils \
 ifeq ($(HAVE_BULB_CREATOR),1)
   LIBS_firestation += fvbulbcalib
 endif
-OBJS_firestation = color_train_widget.o         \
-		   fuse_transfer_widget.o	\
-		   colormap_viewer_widget.o	\
-	           firestation.o		\
-		   main.o
-OBJS_all += $(OBJS_firestation)
+OBJS_firestation = color_train_widget.o \
+                   fuse_transfer_widget.o \
+                   colormap_viewer_widget.o \
+                   firestation.o \
+                   main.o
+OBJS_all = $(OBJS_firestation)
+BINS_all = $(BINDIR)/firestation
 
 ifeq ($(HAVE_GUI)$(HAVE_AVAHI)$(HAVE_CPP11),111)
-  BINS_gui += $(BINDIR)/firestation
+  BINS_gui = $(BINS_all)
   INST_RESDIRS = guis/firestation
   MANPAGES_gui += $(MANDIR)/man1/firestation.1
 else

@@ -4,5 +4,8 @@
     command:
       - .buildkite/build
       - .buildkite/test
+      - .buildkite/annotate
+    env:
+      BUILD_STATS_NO_COLOR: "1"
     plugins:
-      <<: *merged-pr-plugin
+      - *merged-pr-plugin

@@ -39,14 +39,17 @@ else
   WARN_TARGETS += warning_cpp11
 endif
 
+LIBS_xmlrpc = fawkescore fawkesutils fawkesaspects fawkeswebview fawkesnetcomm \
+              fawkesplugin fawkeslogging
+OBJS_xmlrpc = $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp)))
+
+OBJS_all    = $(OBJS_xmlrpc)
+PLUGINS_all = $(PLUGINDIR)/xmlrpc.so
+
 ifeq ($(HAVE_LIBMICROHTTPD)$(HAVE_LIBXMLRPCPP)$(HAVE_CPP11),111)
-  LIBS_xmlrpc = fawkescore fawkesutils fawkesaspects fawkeswebview fawkesnetcomm \
-		fawkesplugin fawkeslogging
-  OBJS_xmlrpc = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))
-  PLUGINS_all = $(PLUGINDIR)/xmlrpc.so
+  PLUGINS_build = $(PLUGINS_all)
 endif
 
-OBJS_all = $(OBJS_xmlrpc)
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)

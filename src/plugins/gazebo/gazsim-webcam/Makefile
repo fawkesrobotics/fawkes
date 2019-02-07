@@ -22,20 +22,22 @@ include $(BASEDIR)/src/plugins/gazebo/gazebo.mk
 include $(BUILDSYSDIR)/protobuf.mk
 # include $(BASEDIR)/src/plugins/gazebo/protobuf.mk
 
-LIBS_gazsim_webcam = fawkescore fawkesutils fawkesaspects fvutils \
+LIBS_gazsim_webcam = m fawkescore fawkesutils fawkesaspects fvutils \
 	       fawkestf fawkesinterface fawkesblackboard \
 	       fawkesgazeboaspect
 OBJS_gazsim_webcam = gazsim_webcam_plugin.o gazsim_webcam_thread.o gazsim_webcam.o
 
 OBJS_all    = $(OBJS_gazsim_webcam)
+PLUGINS_all = $(PLUGINDIR)/gazsim-webcam.so
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_TF),111)
   CFLAGS  += $(CFLAGS_TF)
   LDFLAGS += $(LDFLAGS_TF)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
-  LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system) -lboost_system
+  LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) \
+             $(call boost-libs-ldflags,system)
 
-  PLUGINS_all = $(PLUGINDIR)/gazsim-webcam.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo

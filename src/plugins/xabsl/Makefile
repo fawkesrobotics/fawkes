@@ -50,10 +50,14 @@ XABSL_SOURCES=Action Agent BooleanExpression DecimalExpression Engine \
 	      Symbols Tools
 OBJS_libxabsl = $(addprefix XABSL/Xabsl/XabslEngine/Xabsl,$(addsuffix .o,$(XABSL_SOURCES)))
 LIBS_all = $(LIBDIR)/libxabsl.so
+LIBS_build = $(LIBS_all)
 
 LIBS_xabsl = xabsl ObjectPositionInterface SkillerInterface
 OBJS_xabsl = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 PLUGINS_all = $(PLUGINDIR)/xabsl.so
+PLUGINS_build = $(PLUGINS_all)
+
+OBJS_all = $(OBJS_libxabsl) $(OBJS_xabsl) $(XABSL_intermediate)
 
 XABSL_intermediate = $(XABSLDIR)/agent.xabslc
 TARGETS_all += $(XABSL_intermediate)
@@ -68,8 +72,6 @@ clean-xabsl:
 	$(SILENT)rm -rf $(XABSLDIR)/*.xabslc $(XABSLDIR)/*.dump
 clean: clean-xabsl
 
-$(PLUGINS_all): | $(LIBS_all)
-
-OBJS_all = $(OBJS_libxabsl) $(OBJS_xabsl) $(XABSL_intermediate)
+$(PLUGINS_build): | $(LIBS_build)
 
 include $(BUILDSYSDIR)/base.mk

@@ -41,6 +41,7 @@ CFLAGS  += $(CFLAGS_MONGODB) $(CFLAGS_CPP11)
 LDFLAGS += $(LDFLAGS_MONGODB)
 
 OBJS_all    = $(OBJS_mongodb) $(OBJS_mongodb_rrd)
+PLUGINS_all = $(PLUGINDIR)/mongodb.$(SOEXT) $(PLUGINDIR)/mongodb-rrd.$(SOEXT)
 
 HAVE_MONGODB_REQ_BOOST_LIBS = $(call boost-have-libs,$(MONGODB_REQ_BOOST_LIBS))
 ifeq ($(HAVE_MONGODB_REQ_BOOST_LIBS),1)
@@ -49,7 +50,7 @@ ifeq ($(HAVE_MONGODB_REQ_BOOST_LIBS),1)
 endif
 
 ifeq ($(HAVE_MONGODB)$(HAVE_CPP14)$(HAVE_MONGODB_REQ_BOOST_LIBS),111)
-  PLUGINS_all = $(PLUGINDIR)/mongodb.$(SOEXT) $(PLUGINDIR)/mongodb-rrd.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS += warning_mongodb

@@ -493,7 +493,7 @@ ClipsExecutiveRestApi::gen_plan(const PlanKey &plan_key,
 			for (const auto& pv : get_values(pai, "param-values")) {
 				pa->addto_param_values(std::move(pv));
 			}
-			pa->set_status(get_value<std::string>(pai, "status"));
+			pa->set_state(get_value<std::string>(pai, "state"));
 			pa->set_executable(get_value<bool>(pai, "executable"));
 			pa->set_duration(get_value<double>(pai, "duration"));
 			pa->set_dispatch_time(get_value<double>(pai, "dispatch-time"));

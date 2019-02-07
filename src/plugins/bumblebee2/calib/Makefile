@@ -21,13 +21,14 @@ CFLAGS  += $(CFLAGS_GUI)
 LDFLAGS += $(LDFLAGS_GUI)
 
 LIBS_ffbb2calib = fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
-		  fawkesguiutils fawkesinterface fvutils fvcams \
-		  OpenCVStereoParamsInterface
+                  fawkesguiutils fawkesinterface fvutils fvcams \
+                  OpenCVStereoParamsInterface
 OBJS_ffbb2calib = main.o bb2calib.o
 OBJS_all = $(OBJS_ffbb2calib)
+BINS_all = $(BINDIR)/ffbb2calib
 
 ifeq ($(HAVE_GTKMM),1)
-  BINS_gui = $(BINDIR)/ffbb2calib
+  BINS_gui = $(BINS_all)
 else
   WARN_TARGETS += warning_gui
 endif

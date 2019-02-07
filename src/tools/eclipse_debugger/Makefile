@@ -31,7 +31,6 @@ ifneq ($(PKGCONFIG),)
     GUI_ERROR += (graphviz not installed)
   endif
 
-  
   ifeq ($(HAVE_GRAPHVIZ),1)
     CFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --cflags 'libgvc') -DWITH_CODEGENS
     LDFLAGS_GRAPHVIZ = $(shell $(PKGCONFIG) --libs 'libgvc')
@@ -46,9 +45,10 @@ LIBS_ffeclipse_debugger = stdc++ m fawkescore fawkesutils fawkesnetcomm fawkesbl
 OBJS_ffeclipse_debugger = main.o eclipse_debugger.o
 
 OBJS_all = $(OBJS_ffeclipse_debugger)
+BINS_all = $(BINDIR)/ffeclipse-debugger 
 
 ifeq ($(HAVE_GUI),1)
-  BINS_gui = $(BINDIR)/ffeclipse-debugger 
+  BINS_gui = $(BINS_all)
 else
   WARN_TARGETS += warning_eclipsedebugger
 endif

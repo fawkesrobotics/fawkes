@@ -25,11 +25,11 @@ else
 endif
 
 LIBS_ffgenplugin = stdc++ fawkescore fawkesutils
-
 OBJS_ffgenplugin = plugin_generator.o main.o
 
-OBJS_all     += $(OBJS_ffgenplugin)
-BINS_all     += $(BINDIR)/ffgenplugin
+OBJS_all     = $(OBJS_ffgenplugin)
+BINS_all     = $(BINDIR)/ffgenplugin
+BINS_build   = $(BINS_all)
 MANPAGES_all = $(MANDIR)/man1/ffgenplugin.1
 
 ifeq ($(OBJSSUBMAKE),1)

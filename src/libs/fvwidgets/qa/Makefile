@@ -28,9 +28,10 @@ OBJS_fv_qa_image_display := qa_image_display.o
 LIBS_fv_qa_image_display := fvwidgets
 
 OBJS_all = $(OBJS_fv_qa_image_display)
+BINS_all = $(BINDIR)/fv_qa_image_display
 
 ifeq ($(HAVE_SDL),1)
-  BINS_all = $(BINDIR)/fv_qa_image_display
+  BINS_build = $(BINS_all)
   CFLAGS  += $(shell $(PKGCONFIG) --cflags 'sdl')
   LDFLAGS += $(shell $(PKGCONFIG) --libs 'sdl')
 else

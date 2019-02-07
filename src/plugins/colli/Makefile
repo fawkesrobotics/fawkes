@@ -30,6 +30,9 @@ LIBS_colli = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkestf \
 
 OBJS_colli = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(foreach d,$(UTILS),$(SRCDIR)/$d/*.cpp )))))
 
+OBJS_all    = $(OBJS_colli)
+PLUGINS_all = $(PLUGINDIR)/colli.$(SOEXT)
+
 ifeq ($(HAVE_ROS),1)
   CFLAGS  += $(CFLAGS_ROS) -DHAVE_ROS
   LDFLAGS += $(LDFLAGS_ROS)
@@ -65,8 +68,7 @@ endif
 ifeq ($(HAVE_TF)$(HAVE_CPP11),11)
   CFLAGS += $(CFLAGS_TF)
   LDFLAGS += $(LDFLAGS_TF)
-  PLUGINS_all = $(PLUGINDIR)/colli.$(SOEXT)
-  OBJS_all    = $(OBJS_colli)
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_TF),1)
     WARN_TARGETS += warning_tf

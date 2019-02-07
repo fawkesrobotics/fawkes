@@ -18,7 +18,7 @@ webview/ptzcam:
   # mirrored and pan/tilt values will be inverted. Note that vflipping
   # of the image must be configured in /webview/images
   ceiling-mount: true
-  
+
   # Increment for pan and tilt for the respective buttons. The values are
   # scaled with the inverse of the zoom factor for fine grained control
   pan-increment: 0.2
@@ -30,7 +30,7 @@ webview/ptzcam:
   # String name for the webview nav tab entry
   nav-entry: SkyCam
 
-  #Loop interval in which to check for inactivity
+  # Loop interval in which to check for inactivity
   loop-interval: 5.0
 
   # After which time to consider the web interface inactive if no

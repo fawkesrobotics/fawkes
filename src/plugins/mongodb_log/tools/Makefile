@@ -32,13 +32,14 @@ endif
 CFLAGS  += $(CFLAGS_MONGODB)
 LDFLAGS += $(LDFLAGS_MONGODB)
 
-OBJS_all    = $(OBJS_ffmongodb_save_imgs)
+OBJS_all = $(OBJS_ffmongodb_save_imgs)
+BINS_all = $(BINDIR)/ffmongodb-save-imgs
 
 ifeq ($(HAVE_MONGODB),1)
   CFLAGS_ffmongodb_save_imgs  = $(CFLAGS) $(CFLAGS_MONGODB) -Wno-deprecated
   LDFLAGS_ffmongodb_save_imgs = $(LDFLAGS) $(LDFLAGS_MONGODB)
-  BINS_all = $(BINDIR)/ffmongodb-save-imgs
-  MANPAGES_all =  $(MANDIR)/man1/ffmongodb-save-imgs.1
+  BINS_build   = $(BINS_all)
+  MANPAGES_all = $(MANDIR)/man1/ffmongodb-save-imgs.1
 else
   WARN_TARGETS += warning_mongodb
 endif

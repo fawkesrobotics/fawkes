@@ -19,9 +19,14 @@ endif
 ifndef __buildsys_config_mk_
 $(error config.mk must be included before check.mk)
 endif
+ifndef __buildsys_root_yamllint_mk_
+$(error yamllint.mk must be included before check.mk)
+endif
 
 ifndef __buildsys_root_check_mk_
 __buildsys_root_check_mk_ := 1
+
+YAMLLINT ?= 1
 
 .PHONY: license-check
 license-check:
@@ -67,8 +72,7 @@ check-parallel:
 	fi
 
 .PHONY: check
-check: quickdoc license-check
+check: quickdoc $(if $(subst 0,,$(YAMLLINT)),yamllint) license-check
 
 
 endif # __buildsys_root_check_mk_
-

@@ -34,8 +34,9 @@ LIBS_pantilt = m fawkescore fawkesutils fawkesaspects fawkesblackboard \
 	       CameraControlInterface SwitchInterface
 OBJS_pantilt = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp $(foreach d,$(DRIVERS),$(SRCDIR)/$d/*.cpp )))))
 
+OBJS_all    = $(OBJS_pantilt)
 PLUGINS_all = $(PLUGINDIR)/pantilt.so
-OBJS_all = $(OBJS_pantilt)
+PLUGINS_build = $(PLUGINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

@@ -28,9 +28,12 @@ set -euo pipefail
 
 # Get Angular CLI
 echo 'prefix = ~/.npm' > ~/.npmrc
-npm install --global @angular/cli
-export PATH=$PATH:$HOME/.npm/bin
 
-# Build webview frontend (also calls npm install)
 cd src/plugins/webview/frontend
-make NG_BUILD_FLAGS=""
+
+# Install deps with faster CI sub-command
+npm ci
+
+# Build frontend
+npm run ci-build
+

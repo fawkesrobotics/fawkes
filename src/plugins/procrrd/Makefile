@@ -21,8 +21,9 @@ include $(LIBSRCDIR)/utils/utils.mk
 LIBS_procrrd = fawkescore fawkesutils fawkesaspects fawkesconfig fawkesrrdaspect
 OBJS_procrrd = procrrd_plugin.o procrrd_thread.o
 
-OBJS_all    = $(OBJS_sysrrd)
+OBJS_all    = $(OBJS_procrrd)
 PLUGINS_all = $(PLUGINDIR)/procrrd.$(SOEXT)
+PLUGINS_build = $(PLUGINS_all)
 
 ifneq ($(OS),Linux)
   WARN_TARGETS += warning_onlylinux

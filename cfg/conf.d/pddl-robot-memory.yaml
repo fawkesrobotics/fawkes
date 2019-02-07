@@ -4,16 +4,19 @@
 doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/pddl-robot-memory
 ---
 plugins/pddl-robot-memory:
-
   # Which collection contains the worldmodel
   collection: "robmem.clipswm"
+
   # Where is the problem file to use as teplate (in src/agents)
-  input-problem-description: clips-executive/test-scenario-pddl/problem-template.pddl
+  input-problem-description: >
+    clips-executive/test-scenario-pddl/problem-template.pddl
+
   # Where to put the generated problem file (in src/agents)
-  output-problem-description: clips-executive/test-scenario-pddl/problem.pddl
+  output-problem-description: >
+    clips-executive/test-scenario-pddl/problem.pddl
 
   # Interface used to start generation with message and show when its final
   interface-name: "pddl-gen"
 
-  #do you want to generate the pddl when the plugin is initialized?
+  # do you want to generate the pddl when the plugin is initialized?
   generate-on-init: false

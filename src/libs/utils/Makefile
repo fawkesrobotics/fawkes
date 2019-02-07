@@ -54,23 +54,31 @@ else
 endif
 
 OBJS_all = $(OBJS_libfawkesutils) $(OBJS_lua_fawkesutils)
+LIBS_all = $(LIBDIR)/libfawkesutils.so \
+           $(LUALIBDIR)/fawkesutils.so
 
-ifeq ($(HAVE_TOLUA)$(HAVE_CPP11)$(HAVE_BOOST_LIBS),111)
+ifeq ($(HAVE_CPP11)$(HAVE_BOOST_LIBS),11)
   CFLAGS += $(CFLAGS_CPP11) $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
-  LIBS_all += $(LUALIBDIR)/fawkesutils.so
+  LIBS_build += $(LUALIBDIR)/fawkesutils.so
   LDFLAGS += $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
-  LIBS_all  += $(LIBDIR)/libfawkesutils.so
-  TARGETS_all += $(SRCDIR)/fawkesutils_tolua.cpp
+  ifeq ($(HAVE_TOLUA),1)
+    LIBS_build  += $(LIBDIR)/libfawkesutils.so
+    TARGETS_all += $(SRCDIR)/fawkesutils_tolua.cpp
+  endif
 else
+  LIBS_skipped = fawkesutils
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS += warning_cpp11
+		LIBS_skipped += ",no C++11"
   endif
   ifneq ($(HAVE_TOLUA),1)
     WARN_TARGETS += warning_tolua_wrapper
+		LIBS_skipped += ",no tolua++"
   endif
   ifneq ($(HAVE_BOOST_LIBS),1)
     WARN_TARGETS_BOOST = $(foreach l,$(REQ_BOOST_LIBS),$(if $(call boost-have-lib,$l),, warning_boost_$l))
+		LIBS_skipped += ",no Boost"
   endif
 endif
 

@@ -21,7 +21,8 @@ hardware/robotino:
   # without waiting between receive calls
   cycle-time: 5
 
-  # Time threshold after all motor velocities are set to zero if no new messages arrived inbetween
+  # Time threshold after all motor velocities are set to zero if no new messages
+  # arrived inbetween
   deadman_time_threshold: 0.5
 
   openrobotino:
@@ -79,7 +80,7 @@ hardware/robotino:
     acceleration-limits: [-11500, 11500]
 
     rpm-max: 3000
-  
+
   drive:
     layout:
       # Distance from Robotino center to wheel center in meters
@@ -106,14 +107,14 @@ hardware/robotino:
     estop_enabled: true
 
   gyro:
-    # Enable Gyro publishing? This creates an IMUInterface and publishes
-    # the gyro data if available via OpenRobotino. If enabled and the gyro
-    # is not available, properly writes "-1 invalid indicator" (cf. IMUInterface)
-    # If disabled, no interface will be opened and written. Recommended if you
-    # intend to use the imu plugin for gyro access
-    # If you enable this, you should also set the odometry mode to copy
+    # Enable Gyro publishing? This creates an IMUInterface and publishes the
+    # gyro data if available via OpenRobotino. If enabled and the gyro is not
+    # available, properly writes "-1 invalid indicator" (cf. IMUInterface) If
+    # disabled, no interface will be opened and written. Recommended if you
+    # intend to use the imu plugin for gyro access If you enable this, you
+    # should also set the odometry mode to copy
     enable: true
-    
+
     # Gyro coordinate frame
     frame: !frame gyro
 
@@ -127,7 +128,7 @@ hardware/robotino:
     # robotino plugin and instead use the imu plugin with the gyro connected
     # directly to the Fawkes machine.
     mode: calc
-    #mode: copy
+    # mode: copy
 
     # Odom TF offset. This time is added to the current time when the
     # odometry <- base_link TF is published
@@ -165,5 +166,5 @@ hardware/robotino:
     # application below the set-point when the over current flag had
     # been set
     # Currently not implemented
-    #current-max: 1
-    #current-max-time: 400
+    # current-max: 1
+    # current-max-time: 400

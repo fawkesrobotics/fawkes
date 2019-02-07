@@ -13,47 +13,47 @@ plexil:
 
       enable: true
       markers:
-        #- :Node:transition
-        #- :Node:outcome
-        #- :Node:clock
-        #- :Node:deactivatePair
-        #- :Node:activatePair
-        #- :Node:times
-        #- :Node:getDestState
-        #- :Node:createCommand
-        #- :Node:findVariable
-        #- :Node:createDeclaredVars
-        #- :Node:getVarsFromInterface
-        #- :Node
+        # - :Node:transition
+        # - :Node:outcome
+        # - :Node:clock
+        # - :Node:deactivatePair
+        # - :Node:activatePair
+        # - :Node:times
+        # - :Node:getDestState
+        # - :Node:createCommand
+        # - :Node:findVariable
+        # - :Node:createDeclaredVars
+        # - :Node:getVarsFromInterface
+        # - :Node
 
-        #- :AdapterFactory
-        #- :DynamicLoader
-        #- :ExecApplication
-        #- :ExecListenerFactory
-        #- :ExecListenerFilterFactory
-        #- :InterfaceManager
-        #- :InterfaceAdapter
-        #- :LuvListener
-        #- :UdpAdapter
+        # - :AdapterFactory
+        # - :DynamicLoader
+        # - :ExecApplication
+        # - :ExecListenerFactory
+        # - :ExecListenerFilterFactory
+        # - :InterfaceManager
+        # - :InterfaceAdapter
+        # - :LuvListener
+        # - :UdpAdapter
         - :ProtobufCommAdapter
 
-        #- :ExpressionFactory:registerFactory
-        #- :Expression
-        #- :IdTable
-        #- :ConstRealVariable
-        #- :RealVariable
-        #- :BinaryExpression
-        #- :Test
-        #- :StateCache
-        #- :InternalCondition
+        # - :ExpressionFactory:registerFactory
+        # - :Expression
+        # - :IdTable
+        # - :ConstRealVariable
+        # - :RealVariable
+        # - :BinaryExpression
+        # - :Test
+        # - :StateCache
+        # - :InternalCondition
 
-        #- :PlexilExec
-        #- :PlexilExec:planVerbose
-        #- :PlexilExec:step
-        #- :PlexilExec:printPlan
-        #- :PlexilExec:cycle
-        #- :PlexilExec:handleConditionsChanged
-        #- :PlexilExec:addToResourceContention
+        # - :PlexilExec
+        # - :PlexilExec:planVerbose
+        # - :PlexilExec:step
+        # - :PlexilExec:printPlan
+        # - :PlexilExec:cycle
+        # - :PlexilExec:handleConditionsChanged
+        # - :PlexilExec:addToResourceContention
 
 
     # Adpater configuration
@@ -90,7 +90,8 @@ plexil:
     #   - text (optional): added to the text section of the tag
     #   - attr: attributes added to the XML tag.
     # verbatim-xml:
-    #   Partial XML document which will be inserted as children in the adapter tag.
+    #   Partial XML document which will be inserted as children in the adapter
+    #   tag.
     adapters:
       # Do not use Utility, use FawkesLogging instead!
       # Do not use OSNativeTime, use FawkesTime instead!
@@ -100,9 +101,9 @@ plexil:
       - type: FawkesTimeAdapter
       - type: FawkesLoggingAdapter
       - type: BehaviorEngineAdapter
-      #- type: ProtobufCommAdapter
-      #  attr:
-      #    protos: "@BASEDIR@/src/plugins/plexil/specs/test/msgs"
+      # - type: ProtobufCommAdapter
+      #   attr:
+      #     protos: "@BASEDIR@/src/plugins/plexil/specs/test/msgs"
       - type: GlobalState
         verbatim-args:
           - tag: DefaultLookupAdapter
@@ -119,8 +120,10 @@ plexil:
       #       <Parameter type="bool" bytes="1" desc="send ack flag"/>
       #       <Parameter type="int" bytes="4" desc="num_widgets"/>
       #       <Parameter type="float" bytes="4" desc="arg4"/>
-      #       <Parameter type="int-array" elements="3" bytes="2" desc="16 bit ints"/>
-      #       <Parameter type="float-array" elements="3" bytes="4" desc="32 bit floats"/>
+      #       <Parameter type="int-array" elements="3" bytes="2"
+      #                  desc="16 bit ints"/>
+      #       <Parameter type="float-array" elements="3" bytes="4"
+      #                  desc="32 bit floats"/>
       #       <Parameter type="bool-array" elements="3" bytes="1"/>
       #       <Parameter type="string-array" elements="3" bytes="3"/>
       #     </Message>
@@ -130,10 +133,12 @@ plexil:
       #     <Message name="quit_msg" local_port="8387" peer_port="8387">
       #       <Parameter type="string" bytes="4"/>
       #     </Message>
+      # yamllint enable-rule line-length
 
     # A Listener is an object that reports on node state transitions
     # in the plan, and other execution events.
-    # cf. http://plexil.sourceforge.net/wiki/index.php/Interface_Configuration_File
+    # cf.
+    # http://plexil.sourceforge.net/wiki/index.php/Interface_Configuration_File
     # The configuration supports the same structure as above for adapters.
     # Cf. there for possible values. Some examples are given below.
     listeners:
@@ -143,7 +148,8 @@ plexil:
           Port: 49100
           HostName: 127.0.0.1
           Blocking: false
-    #   # The PlanDebugListener outputs as "Node:clock", make sure to enable it in Debug.cfg
+    #   # The PlanDebugListener outputs as "Node:clock", make sure to enable it
+    #   # in Debug.cfg
     #   - type: PlanDebugListener
 
     # The Behavior Engine adapter provides a generic skill_call, which can
@@ -153,12 +159,12 @@ plexil:
     #
     # However, it may be desirable to have more descriptive names. This is
     # possible with the following configuration. Then, the adapter will register
-    # itself for commands with each of the given names and perform the appropriate
-    # mapping.
+    # itself for commands with each of the given names and perform the
+    # appropriate mapping.
     skills:
       # Allows for a declaration as say(String text)
-      # Note that the order of the arguments is important and must match the order
-      # of the arguments in the Plexil declaration!
+      # Note that the order of the arguments is important and must match the
+      # order of the arguments in the Plexil declaration!
       - name: say
         args:
           - type: String
@@ -183,7 +189,7 @@ plexil:
       plx: plan.plx
 
       # Extra lib path to search for (Plexil) libraries
-      #lib-path: ["@BASEDIR@/src/plexil/specs/common-libs"]
+      # lib-path: ["@BASEDIR@/src/plexil/specs/common-libs"]
 
       compilation:
         enable: true
@@ -192,6 +198,7 @@ plexil:
         # compile if PLX does exist or PLE has been modified after PLX.
         force: false
 
+    # yamllint disable rule:comments-indentation
     # Global states are variables that can be accessed using a Lookup.
     # They allow to share information across libraries, can reduce the
     # number of parameteres passed around, and enables waiting for
@@ -201,6 +208,7 @@ plexil:
     # created on the first set operation. However, you can still declare
     # them here to enforce a specific type (especially useful when
     # changing the type of a global).
-    #global-states:
+    # global-states:
     #  - name: team_name
     #    type: String
+    # yamllint enable rule:comments-indentation

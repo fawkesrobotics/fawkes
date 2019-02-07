@@ -23,9 +23,10 @@ LIBS_rrdexample = fawkescore fawkesaspects fawkesutils fawkesrrdaspect
 OBJS_rrdexample = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_rrdexample)
+PLUGINS_all = $(PLUGINDIR)/rrdexample.so
 
 ifeq ($(HAVE_RRD),1)
-  PLUGINS_all = $(PLUGINDIR)/rrdexample.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_rrd
 endif

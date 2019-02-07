@@ -45,12 +45,13 @@ else
   WARN_TARGETS += warning_navgraph
 endif
 
-OBJS_skiller = $(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp))))))
+OBJS_skiller = $(filter-out $(FILTER_OUT),$(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 OBJS_all    = $(OBJS_skiller)
+PLUGINS_all = $(PLUGINDIR)/skiller.so
 
 ifeq ($(HAVE_LUA),1)
   ifeq ($(HAVE_TOLUA),1)
-    PLUGINS_all = $(PLUGINDIR)/skiller.so
+    PLUGINS_build = $(PLUGINS_all)
   else
     WARN_TARGETS += warning_tolua
   endif

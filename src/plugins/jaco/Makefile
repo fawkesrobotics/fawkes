@@ -21,13 +21,19 @@ include $(BASEDIR)/src/plugins/openrave/openrave.mk
 
 PRESUBDIRS = interfaces
 
-LIBS_jaco = fawkescore fawkesaspects fawkesblackboard fawkesutils fawkesinterface JacoInterface JacoBimanualInterface m pthread
-OBJS_jaco = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
+LIBS_jaco = m pthread fawkescore fawkesaspects fawkesblackboard fawkesutils \
+            fawkesinterface JacoInterface JacoBimanualInterface
+OBJS_jaco = $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp)))
+
+OBJS_all    = $(OBJS_jaco)
+PLUGINS_all = $(PLUGINDIR)/jaco.so
 
 ifeq ($(HAVE_LIBKINDRV)$(HAVE_CPP11),11)
   CFLAGS  += $(CFLAGS_LIBKINDRV)
   LDFLAGS += $(LDFLAGS_LIBKINDRV)
-  PLUGINS_all = $(PLUGINDIR)/jaco.so
+
+  PLUGINS_build = $(PLUGINS_all)
+
   ifeq ($(HAVE_OPENRAVE)$(HAVE_PYTHON),11)
     LIBS_jaco += fawkesopenrave fawkesopenraveaspect
     CFLAGS += $(CFLAGS_OPENRAVE)
@@ -44,7 +50,6 @@ else
   endif
 endif
 
-OBJS_all    = $(OBJS_jaco)
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)

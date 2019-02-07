@@ -25,6 +25,7 @@ LIBS_navgraph_interactive = fawkescore fawkesutils fawkesaspects fawkesinterface
 			    NavigatorInterface
 OBJS_navgraph_interactive = navgraph_interactive_plugin.o navgraph_interactive_thread.o
 OBJS_all    = $(OBJS_navgraph_interactive)
+PLUGINS_all = $(PLUGINDIR)/navgraph-interactive.$(SOEXT)
 
 _REQ_ROS_PKGS=visualization_msgs interactive_markers
 
@@ -38,7 +39,7 @@ ifeq ($(HAVE_NAVGRAPH)$(HAVE_TF)$(HAVE_ROS)$(HAVE_ROS_PKGS),1111)
   LDFLAGS = $(LDFLAGS_TF) $(LDFLAGS_NAVGRAPH) $(LDFLAGS_ROS) \
 	    $(call ros-pkgs-lflags,$(_REQ_ROS_PKGS))
 
-  PLUGINS_all = $(PLUGINDIR)/navgraph-interactive.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_NAVGRAPH),1)
     WARN_TARGETS += warning_navgraph

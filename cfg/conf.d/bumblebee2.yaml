@@ -35,7 +35,7 @@ bumblebee2:
     # averaging window size: 5x5..21x21, only for bm
     pre-filter-size: 15
 
-    # the output of pre-filtering is clipped by [- pre-filter-cap,pre-filter-cap]
+    # output of pre-filtering is clipped by [- pre-filter-cap, pre-filter-cap]
     pre-filter-cap: 15
 
     # *** correspondence using Sum of Absolute Difference (SAD)
@@ -60,7 +60,7 @@ bumblebee2:
 
     # disparity variation window
     speckle-window-size: 32
-    
+
     # acceptable range of variation in window
     speckle-range: 32
 
@@ -84,4 +84,3 @@ bumblebee2:
     # left-right disparity check. Set it to non-positive value to
     # disable the check, only sgbm
     sgbm-disp12-max-diff: 1
-

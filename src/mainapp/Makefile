@@ -31,6 +31,7 @@ OBJS_fawkes = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpa
 OBJS_all     = $(OBJS_fawkes)
 BINS_all     = $(BINDIR)/fawkes
 MANPAGES_all = $(MANDIR)/man8/fawkes.8
+BINS_build   = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

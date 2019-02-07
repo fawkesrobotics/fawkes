@@ -33,11 +33,12 @@ LIBS_bumblebee2 = fawkescore fawkesutils fawkesaspects fvutils fvcams \
 OBJS_bumblebee2 = bumblebee2_plugin.o bumblebee2_thread.o
 
 OBJS_all    = $(OBJS_bumblebee2)
+PLUGINS_all = $(PLUGINDIR)/bumblebee2.$(SOEXT)
 
 ifeq ($(HAVE_PCL)$(HAVE_TF)$(HAVE_TRICLOPS)$(HAVE_OPENCV),1111)
   CFLAGS  += $(CFLAGS_TF) $(CFLAGS_PCL) $(CFLAGS_TRICLOPS) $(CFLAGS_OPENCV)
   LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL) $(LDFLAGS_TRICLOPS)
-  PLUGINS_all = $(PLUGINDIR)/bumblebee2.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_PCL),1)
     WARN_TARGETS += warning_pcl

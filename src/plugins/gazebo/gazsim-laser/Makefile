@@ -29,6 +29,7 @@ LIBS_gazsim_laser = fawkescore fawkesutils fawkesaspects fvutils \
 OBJS_gazsim_laser = gazsim_laser_plugin.o gazsim_laser_thread.o
 
 OBJS_all    = $(OBJS_gazsim_laser)
+PLUGINS_all = $(PLUGINDIR)/gazsim-laser.so
 
 ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_TF),111)
   CFLAGS  += $(CFLAGS_TF)
@@ -36,7 +37,7 @@ ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_TF),111)
   CFLAGS  += $(CFLAGS_GAZEBO) $(CFLAGS_PROTOBUF)
   LDFLAGS += $(LDFLAGS_GAZEBO) $(LDFLAGS_PROTOBUF) -lm $(call boost-libs-ldflags,system) -lboost_system
 
-  PLUGINS_all = $(PLUGINDIR)/gazsim-laser.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo

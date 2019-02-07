@@ -7,4 +7,3 @@ fawkes/meta_plugins:
 
   # Meta plugin with useful base plugins for the Robotino
   robotino_default: robotino,joystick,robotino-joystick,webview
-

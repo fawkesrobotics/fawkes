@@ -17,20 +17,21 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
+LIBS_ffbeepd = fawkescore fawkesutils fawkesblackboard fawkesinterface SwitchInterface
+OBJS_ffbeepd = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+
+OBJS_all = $(OBJS_ffbeepd)
+BINS_all = $(BINDIR)/ffbeepd
+
 # Check for availability of libdaemon
 HAVE_LIBDAEMON = $(if $(shell $(PKGCONFIG) --exists 'libdaemon'; echo $${?/1/}),1,0)
 ifeq ($(HAVE_LIBDAEMON),1)
   CFLAGS  += -DHAVE_LIBDAEMON $(shell $(PKGCONFIG) --cflags 'libdaemon')
   LDFLAGS += $(shell $(PKGCONFIG) --libs 'libdaemon')
-  BINS_all =	$(BINDIR)/ffbeepd
+  BINS_build = $(BINS_all)
 else
   WARN_TARGETS += warning_libdaemon
 endif
-
-LIBS_ffbeepd = fawkescore fawkesutils fawkesblackboard fawkesinterface SwitchInterface
-OBJS_ffbeepd = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
-
-OBJS_all =	$(OBJS_ffbeepd)
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)

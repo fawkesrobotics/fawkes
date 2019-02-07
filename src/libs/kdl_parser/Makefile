@@ -23,13 +23,15 @@ OBJS_libfawkeskdl_parser = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDI
 HDRS_libfawkeskdl_parser = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h))
 
 OBJS_all = $(OBJS_libfawkeskdl_parser)
+LIBS_all = $(LIBDIR)/libfawkeskdl_parser.so
+
 ifeq ($(HAVE_KDLPARSER)$(HAVE_EIGEN3),11)
   CFLAGS  += $(CFLAGS_KDLPARSER) $(CFLAGS_EIGEN3)
   ifeq ($(HAVE_CPP11),1)
     CFLAGS += $(CFLAGS_CPP11)
   endif
   LDFLAGS += $(LDFLAGS_KDLPARSER) $(LDFLAGS_EIGEN3)
-  LIBS_all = $(LIBDIR)/libfawkeskdl_parser.so
+  LIBS_build = $(LIBS_all)
 else
   ifneq ($(HAVE_KDL),1)
     WARN_TARGETS += warning_kdl
@@ -59,4 +61,3 @@ warning_tinyxml:
 endif
 
 include $(BUILDSYSDIR)/base.mk
-	

@@ -25,10 +25,11 @@ LDFLAGS += $(LDFLAGS_OPENNI)
 LIBS_libfawkesopenniaspect = stdc++ fawkescore fawkesaspects fawkesutils
 OBJS_libfawkesopenniaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
-OBJS_all    = $(OBJS_libfawkesopenniaspect)
+OBJS_all = $(OBJS_libfawkesopenniaspect)
+LIBS_all = $(LIBDIR)/libfawkesopenniaspect.so
 
 ifeq ($(HAVE_OPENNI),1)
-  LIBS_all = $(LIBDIR)/libfawkesopenniaspect.so
+  LIBS_build  = $(LIBS_all)
 else
   WARN_TARGETS += warning_openni
 endif

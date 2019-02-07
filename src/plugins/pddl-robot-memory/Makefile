@@ -22,19 +22,19 @@ include $(BASEDIR)/src/plugins/pddl-robot-memory/ctemplate.mk
 PRESUBDIRS = interfaces
 
 LIBS_pddl_robot_memory = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
-                      fawkesblackboard fawkesinterface fawkesrobotmemory \
-                      PddlGenInterface
+                         fawkesblackboard fawkesinterface fawkesrobotmemory \
+                         PddlGenInterface
 
 OBJS_pddl_robot_memory = pddl_robot_memory_plugin.o pddl_robot_memory_thread.o
 
-
-OBJS_all = $(OBJS_pddl_robot_memory)
+OBJS_all   = $(OBJS_pddl_robot_memory)
+PLUGINS_all = $(PLUGINDIR)/pddl-robot-memory.$(SOEXT)	  
 
 ifeq ($(HAVE_CPP11)$(HAVE_ROBOT_MEMORY)$(HAVE_CTEMPLATE),111)
   CFLAGS  += $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_CTEMPLATE)
 
-  PLUGINS_all = $(PLUGINDIR)/pddl-robot-memory.$(SOEXT)	  
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS += warning_cpp11

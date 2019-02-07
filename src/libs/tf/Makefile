@@ -16,8 +16,6 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/lua.mk
 
-FILTER_OUT=%_tolua.o
-
 LIBS_libfawkestf = fawkescore fawkesutils fawkesblackboard fawkesinterface \
 	                 TransformInterface
 OBJS_libfawkestf = buffer_core.o time_cache.o static_cache.o exceptions.o \
@@ -31,14 +29,16 @@ LIBS_lua_fawkestf = fawkescore fawkesutils fawkestf $(TOLUA_LIBS)
 OBJS_lua_fawkestf = fawkestf_tolua.o
 
 OBJS_all = $(OBJS_libfawkestf) $(OBJS_lua_fawkestf)
+LIBS_all = $(LIBDIR)/libfawkestf.so \
+           $(LUALIBDIR)/fawkestf.so
 
 ifeq ($(HAVE_TF),1)
   CFLAGS  += $(CFLAGS_TF) -O2
   LDFLAGS += $(LDFLAGS_TF)
-  LIBS_all = $(LIBDIR)/libfawkestf.so
+  LIBS_build = $(LIBDIR)/libfawkestf.so
 
   ifeq ($(HAVE_TOLUA),1)
-    LIBS_all += $(LUALIBDIR)/fawkestf.so
+    LIBS_build += $(LUALIBDIR)/fawkestf.so
     TARGETS_all += $(SRCDIR)/fawkestf_tolua.cpp
   else
     WARN_TARGETS += warning_tolua_wrapper

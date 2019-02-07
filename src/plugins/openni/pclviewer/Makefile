@@ -25,12 +25,13 @@ OBJS_ffpclviewer = pclviewer.o trackball.o skel_drawer.o \
 		   transfer_thread.o
 
 OBJS_all = $(OBJS_ffpclviewer)
+BINS_all = $(BINDIR)/ffpclviewer
 
 CFLAGS  += $(CFLAGS_GL) $(CFLAGS_GLU) $(CFLAGS_GLUT)
 LDFLAGS += $(LDFLAGS_GL) $(LDFLAGS_GLU) $(LDFLAGS_GLUT)
 
 ifeq ($(HAVE_GL)$(HAVE_GLU)$(HAVE_GLUT),111)
-  BINS_gui = $(BINDIR)/ffpclviewer
+  BINS_gui = $(BINS_all)
 else
   WARN_TARGETS += warning_opengl
 endif

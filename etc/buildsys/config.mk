@@ -130,6 +130,7 @@ endif
 
 VPATH = $(SRCDIR)
 DEPFILE = $(DEPDIR)/$(subst ._,,$(subst /,_,$(subst ..,__,$(subst ./,,$(*D))))_)$(*F)
+STATSFILE = $(abspath $(TOP_BASEDIR)/buildstats.db)
 
 ### Programs used, no trivial stuff like ln, rm, ls as per Makefile manual
 CC = gcc

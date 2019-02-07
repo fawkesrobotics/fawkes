@@ -39,12 +39,13 @@ OBJS_libfawkes_protobuf_comm = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(S
 HDRS_libfawkes_protobuf_comm = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h $(SRCDIR)/*/*/*.h))
 
 OBJS_all = $(OBJS_libfawkes_protobuf_comm)
+LIBS_all = $(LIBDIR)/libfawkes_protobuf_comm.so
 
 ifeq ($(HAVE_CPP11)$(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),111)
   CFLAGS  += $(CFLAGS_PROTOBUF) $(call boost-libs-cflags,$(REQ_BOOST_LIBS)) $(CFLAGS_CPP11) $(CFLAGS_LIBCRYPTO)
   LDFLAGS += $(LDFLAGS_PROTOBUF) $(call boost-libs-ldflags,$(REQ_BOOST_LIBS)) $(LDFLAGS_LIBCRYPTO)
 
-  LIBS_all  = $(LIBDIR)/libfawkes_protobuf_comm.so
+  LIBS_build  = $(LIBS_all)
 else
   ifneq ($(HAVE_PROTOBUF),1)
     WARN_TARGETS += warning_protobuf

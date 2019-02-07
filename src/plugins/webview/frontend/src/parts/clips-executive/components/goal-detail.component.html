@@ -215,11 +215,11 @@
 								</mat-cell>
 							</ng-container>
 
-							<!-- Action status -->
-							<ng-container matColumnDef="status">
-								<mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+							<!-- Action state -->
+							<ng-container matColumnDef="state">
+								<mat-header-cell *matHeaderCellDef>State</mat-header-cell>
 								<mat-cell *matCellDef="let action">
-									{{ action.status }}
+									{{ action.state }}
 								</mat-cell>
 							</ng-container>
 
@@ -236,7 +236,7 @@
 
 							<mat-header-row *matHeaderRowDef="displayedPlanActionColumns"></mat-header-row>
 							<mat-row *matRowDef="let row; columns: displayedPlanActionColumns; let action"
-											 [ngClass]="action_status_classes(action)">
+											 [ngClass]="action_state_classes(action)">
 							</mat-row>
 						</mat-table>
 					</mat-tab>

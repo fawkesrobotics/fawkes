@@ -28,9 +28,10 @@ navgraph:
   # to switch.
   replan_cost_factor: 1.5
 
-  # Update the visualization at this interval. This will trigger a compuation
-  # of all constraints and if any change occurs the graph will be published
-  # again. This is done whether the robot is currently driving or standing still.
+  # Update the visualization at this interval. This will trigger a compuation of
+  # all constraints and if any change occurs the graph will be published
+  # again. This is done whether the robot is currently driving or standing
+  # still.
   visualization_interval: 0.5
 
   # Time to keep moving after the target tolerance has been reached; sec
@@ -111,4 +112,3 @@ navgraph:
   # Publishing of usable data structures to ROS
   ros-publishing:
     enable: true
-

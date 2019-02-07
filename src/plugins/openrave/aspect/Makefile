@@ -22,8 +22,8 @@ LIBS_libfawkesopenraveaspect = stdc++ fawkescore fawkesaspects fawkesutils
 OBJS_libfawkesopenraveaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all    = $(OBJS_libfawkesopenraveaspect)
-
 LIBS_all = $(LIBDIR)/libfawkesopenraveaspect.so
+LIBS_build = $(LIBS_all)
 
 include $(BUILDSYSDIR)/base.mk
 

@@ -21,8 +21,9 @@ LIBS_fflogview = stdc++ fawkescore fawkesutils fawkesnetcomm fawkeslogging \
                  fawkesnetworklogger
 OBJS_fflogview = main.o
 
-OBJS_all     =	$(OBJS_fflogview)
-BINS_all     =	$(BINDIR)/fflogview
-MANPAGES_all =	$(MANDIR)/man1/fflogview.1
+OBJS_all     = $(OBJS_fflogview)
+BINS_all     = $(BINDIR)/fflogview
+BINS_build   = $(BINS_all)
+MANPAGES_all = $(MANDIR)/man1/fflogview.1
 
 include $(BUILDSYSDIR)/base.mk

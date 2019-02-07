@@ -447,7 +447,7 @@ export class GoalListComponent implements OnInit, OnDestroy, AfterViewInit {
             if (a.preconditions && a.preconditions.length > 0) {
               prec_string = this.format_precondition(a.preconditions[0]);
             }
-            switch (a.status) {
+            switch (a.state) {
               case 'WAITING':
               case 'EXECUTION-SUCCEEDED':
               case 'SENSED-EFFECTS-WAIT':

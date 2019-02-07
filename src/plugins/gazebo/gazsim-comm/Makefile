@@ -25,10 +25,12 @@ include $(BUILDSYSDIR)/protobuf.mk
 
 CFLAGS += $(CFLAGS_CPP11)
 
-LIBS_gazsim_comm = fawkescore fawkesutils fawkesaspects fawkes_protobuf_comm fawkesgazeboaspect gazsim_msgs 
+LIBS_gazsim_comm = fawkescore fawkesutils fawkesaspects fawkes_protobuf_comm \
+                   fawkesgazeboaspect gazsim_msgs 
 OBJS_gazsim_comm = gazsim_comm_plugin.o gazsim_comm_thread.o
 
-OBJS_all = $(OBJS_gazsim_comm)
+OBJS_all    = $(OBJS_gazsim_comm)
+PLUGINS_all = $(PLUGINDIR)/gazsim-comm.so
 
 REQ_BOOST_LIBS = system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
@@ -39,7 +41,7 @@ ifeq ($(HAVE_GAZEBO)$(HAVE_PROTOBUF)$(HAVE_BOOST_LIBS),111)
   LDFLAGS += $(LDFLAGS_PROTOBUF) \
 	     $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
-  PLUGINS_all = $(PLUGINDIR)/gazsim-comm.so
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_GAZEBO),1)
     WARN_TARGETS += warning_gazebo

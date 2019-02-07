@@ -35,6 +35,7 @@ ifeq ($(HAVE_PROTOBUF),1)
 	$(eval PROTOBUF_HDRS             += $(SRCDIR)/$P.pb.h)			\
 	$(eval PROTOBUF_LIBS             += $(PROTOBUF_LIBDIR)/lib$P.$(SOEXT))	\
 	$(eval LIBS_all                  += $(PROTOBUF_LIBDIR)/lib$P.$(SOEXT))	\
+	$(eval LIBS_build                += $(PROTOBUF_LIBDIR)/lib$P.$(SOEXT))	\
 	$(eval CLEAN_FILES               += $P.pb.h $P.pb.cpp)			\
 	, \
 	$(eval LDFLAGS_protobuf_lib$P     = $(LDFLAGS_PROTOBUF) -lfawkesutils)	\
@@ -48,6 +49,7 @@ ifeq ($(HAVE_PROTOBUF),1)
 	$(eval PROTOBUF_LIBS             += $(PROTOBUF_LIBDIR)/lib$P.$(SOEXT))	\
 	$(eval OBJS_lib$P.$(SOEXT)	  = $(MSGS_$P:%=%.pb.o))		\
 	$(eval LIBS_all                  += $(PROTOBUF_LIBDIR)/lib$P.$(SOEXT))	\
+	$(eval LIBS_build                += $(PROTOBUF_LIBDIR)/lib$P.$(SOEXT))	\
 	$(eval CLEAN_FILES               += $(MSGS_$P:%=%.pb.h) 		\
 					    $(MSGS_$P:%=%.pb.cpp))		\
 	)\
@@ -90,11 +92,11 @@ $(PROTOBUF_LIBDIR)/lib%_msgs.so: $$(patsubst %.proto,%.pb.o,$$(MSGS_$$(call name
 	$(SILENT)echo $@ from $@
 
 
-ifneq ($(PLUGINS_all),)
-$(PLUGINS_all:%.$(SOEXT)=%.$(SOEXT)): | $(PROTOBUF_LIBS:%.$(SOEXT)=%.$(SOEXT))
+ifneq ($(PLUGINS_build),)
+$(PLUGINS_build:%.$(SOEXT)=%.$(SOEXT)): | $(PROTOBUF_LIBS:%.$(SOEXT)=%.$(SOEXT))
 endif
-ifneq ($(BINS_all),)
-$(BINS_all): | $(PROTOBUF_LIBS)
+ifneq ($(BINS_build),)
+$(BINS_build): | $(PROTOBUF_LIBS)
 endif
 
 else # HAVE_PROTOBUF != 1

@@ -22,20 +22,22 @@ include $(BUILDSYSDIR)/eigen3.mk
 CFLAGS += $(CFLAGS_CPP11)
 
 LIBS_navgraph_clusters = fawkescore fawkesutils fawkesaspects fawkesinterface \
-		fawkesblackboard fawkestf \
-		fawkesnavgraph fawkesnavgraphaspect \
-		Position3DInterface
+                         fawkesblackboard fawkestf \
+                         fawkesnavgraph fawkesnavgraphaspect \
+                         Position3DInterface
 OBJS_navgraph_clusters = navgraph_clusters_plugin.o navgraph_clusters_thread.o \
-			 clusters_block_constraint.o \
-			 clusters_static_cost_constraint.o \
-			 clusters_distance_cost_constraint.o
+                         clusters_block_constraint.o \
+                         clusters_static_cost_constraint.o \
+                         clusters_distance_cost_constraint.o
+
 OBJS_all    = $(OBJS_navgraph_clusters)
+PLUGINS_all = $(PLUGINDIR)/navgraph-clusters.$(SOEXT)
 
 ifeq ($(HAVE_CPP11)$(HAVE_TF)$(HAVE_EIGEN3)$(HAVE_NAVGRAPH),1111)
   CFLAGS  += $(CFLAGS_TF)  $(CFLAGS_EIGEN3)
   LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_EIGEN3)
 
-  PLUGINS_all = $(PLUGINDIR)/navgraph-clusters.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS = warning_cpp11

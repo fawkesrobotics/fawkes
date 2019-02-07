@@ -49,6 +49,7 @@ LIBS_tabletop_objects_standalone = fawkescore fvutils fvcams fawkesutils
 OBJS_tabletop_objects_standalone = tabletop_objects_standalone.o
 
 OBJS_all    = $(OBJS_tabletop_objects) $(OBJS_tabletop_objects_standalone)
+PLUGINS_all = $(PLUGINDIR)/tabletop-objects.$(SOEXT)
 
 ifneq ($(CC)$(GCC_TOO_OLD),gcc1)
   ifeq ($(HAVE_PCL)$(HAVE_TF),11)
@@ -60,7 +61,7 @@ ifneq ($(CC)$(GCC_TOO_OLD),gcc1)
       LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL) \
 	         $(call pcl-libs-ldflags,$(REQUIRED_PCL_LIBS))
 
-      PLUGINS_all = $(PLUGINDIR)/tabletop-objects.$(SOEXT)
+      PLUGINS_build = $(PLUGINS_all)
     else
       WARN_TARGETS += warning_pcl_components
     endif

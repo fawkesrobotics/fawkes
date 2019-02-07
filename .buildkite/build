@@ -24,8 +24,11 @@ SCRIPT_PATH=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
 # Source standard environment
 source $SCRIPT_PATH/environment.sh
 
+# Utility functions
+source $SCRIPT_PATH/functions.sh
+
 # Error out on any error in the script, pipes etc.
 set -euo pipefail
 
 # Build software
-$MAKE -j$NPROC all gui
+$MAKE -j$NPROC all gui BUILDSTATS=1

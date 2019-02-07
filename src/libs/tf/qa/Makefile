@@ -24,5 +24,6 @@ OBJS_qa_tf_transformer = qa_tf_transformer.o
 
 OBJS_all = $(OBJS_qa_tf_transformer)
 BINS_all = $(BINDIR)/qa_tf_transformer
+BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk

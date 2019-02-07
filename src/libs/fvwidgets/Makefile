@@ -25,8 +25,10 @@ INCDIRS  += $(VISION_INCDIRS)
 LIBDIRS  += $(VISION_LIBDIRS)
 LIBS     += $(VISION_LIBS)
 
+LIBS_all  = $(LIBDIR)/libfvwidgets.so
+
 ifeq ($(HAVE_GUI),1)
-  LIBS_gui = $(LIBDIR)/libfvwidgets.so
+  LIBS_gui = $(LIBS_all)
   CFLAGS  += $(CFLAGS_GUI)
   LDFLAGS += $(LDFLAGS_GUI)
   ifeq ($(HAVE_SDL),1)

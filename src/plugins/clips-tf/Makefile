@@ -22,13 +22,14 @@ LIBS_clips_tf = fawkescore fawkesutils fawkesaspects \
 		fawkesclipsaspect fawkestf
 OBJS_clips_tf = clips_tf_plugin.o clips_tf_thread.o
 
-OBJS_all = $(OBJS_clips_tf)
+OBJS_all    = $(OBJS_clips_tf)
+PLUGINS_all = $(PLUGINDIR)/clips-tf.$(SOEXT)
 
 ifeq ($(HAVE_CPP11)$(HAVE_CLIPS)$(HAVE_TF),111)
   CFLAGS  += $(CFLAGS_CLIPS)  $(CFLAGS_TF) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_CLIPS) $(LDFLAGS_TF)
 
-  PLUGINS_all = $(PLUGINDIR)/clips-tf.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_CPP11),1)
     WARN_TARGETS += warning_cpp11

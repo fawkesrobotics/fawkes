@@ -22,8 +22,8 @@ LIBS_qa_interface_msgq = fawkescore fawkesutils TestInterface
 OBJS_qa_interface_msgq = qa_interface_msgq.o
 
 OBJS_all =	$(OBJS_qa_interface_msgq)
-
 BINS_all =	$(BINDIR)/qa_interface_msgq
+BINS_build = $(BINS_all)
 
 include $(BUILDSYSDIR)/base.mk
 
