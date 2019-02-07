@@ -121,6 +121,26 @@
 	(slot outcome (type SYMBOL)
 	              (allowed-values UNKNOWN COMPLETED FAILED REJECTED))
 
+	; In case of a disturbance, give machine-readable information.
+	; This field may contain a number of disturbances and are meant to
+	; inform, e.g., the goal reasoner or some execution monitoring entity,
+	; possibly to take corrective action or even abort a goal.
+	; Warnings MUST always start with a symbol identifying the warning,
+	; e.g., ACTION-OVERTIME, and may be followed by an arbitrary number
+	; of additional values specifying the warning closer, e.g., to
+	; indicate that a move operation took too long, the warning could
+	; be (ACTION-OVERTIME 20 move), to indicate that the action with
+	; the ID 20 in the committed plan using the operator `move` took
+	; too long. A warning may appear more than once, e.g., to indicate
+	; multiple overtime situations in the executed plan.
+	; The intention is to easily allow for the occurrence of any
+	; warning of a specified type, but also to acquire more information
+	; by components which are able to handle a *specific* warning.
+	; This means that we do not strive for a generic warning processing
+	; (other than "there is any warning") and therefore we do not introduce
+	; a separator in-between warnings.
+	(multislot warning)
+
 	; In case of an error, give machine-readable information about the
 	; error. The first entry in the field MUST be a symbol identifying
 	; the general reason of the error, e.g., SKILL-FAILED. The intention
