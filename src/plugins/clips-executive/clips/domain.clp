@@ -600,7 +600,7 @@
 
   ; ensure that we have grounded all related atomic preconditions before
   (forall (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded FALSE))
-    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE))
+    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE) (grounded-with ?action-id))
   )
 =>
   (modify ?precond (is-satisfied TRUE))
@@ -635,7 +635,7 @@
 
   ; ensure that we have grounded all related atomic preconditions before
   (forall (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded FALSE))
-    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE))
+    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE) (grounded-with ?action-id))
   )
 =>
   (modify ?precond (is-satisfied FALSE))
@@ -665,7 +665,7 @@
 
   ; ensure that we have grounded all related atomic preconditions before
   (forall (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded FALSE))
-    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE))
+    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE) (grounded-with ?action-id))
   )
  =>
   (modify ?precond (is-satisfied TRUE))
@@ -697,7 +697,7 @@
 
   ; ensure that we have grounded all related atomic preconditions before
   (forall (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded FALSE))
-    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE))
+    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE) (grounded-with ?action-id))
   )
 =>
   (modify ?precond (is-satisfied FALSE))
