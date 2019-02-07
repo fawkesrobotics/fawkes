@@ -22,7 +22,7 @@
                       (state FORMULATED) (executable TRUE)
                       (dispatch-time ?dt&:(timeout ?now ?start-time ?dt)))
  =>
-  (modify ?pa (state PENDING))
+  (modify ?pa (state PENDING) (start-time ?now))
 )
 
 (defrule action-selection-temporal-done
