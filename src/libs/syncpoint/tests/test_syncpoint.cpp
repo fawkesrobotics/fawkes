@@ -1325,7 +1325,7 @@ TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
   wait_for_one_params.thread_nr = 2;
   wait_for_one_params.num_wait_calls = 1;
   wait_for_one_params.timeout_sec = 0;
-  wait_for_one_params.timeout_nsec = 500000;
+  wait_for_one_params.timeout_nsec = 10000000;
   wait_for_one_params.status = PENDING;
   wait_for_one_params.sp_identifier = sp_identifier;
   pthread_create(&wait_for_one_thread, &attrs, start_waiter_thread,
@@ -1347,8 +1347,7 @@ TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
     EXPECT_TRUE(wait_for_running(&params[i]));
   }
   EXPECT_EQ(RUNNING, wait_for_one_params.status);
-  EXPECT_TRUE(wait_for_finished(&wait_for_one_params,
-        2 * wait_for_one_params.timeout_sec, 2 * wait_for_one_params.timeout_nsec));
+  EXPECT_TRUE(wait_for_finished(&wait_for_one_params));
   for (uint i = 0; i < num_threads; i++) {
     EXPECT_EQ(RUNNING, params[i].status);
   }
