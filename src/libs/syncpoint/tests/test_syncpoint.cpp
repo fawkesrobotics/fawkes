@@ -557,7 +557,7 @@ TEST_F(SyncPointManagerTest, ParallelWaitsReturn)
   sp->register_emitter(component);
   for (uint i = 0; i < num_wait_calls; i++) {
     sp->emit(component);
-    usleep(1000);
+    usleep(10000);
   }
 
   for (uint i = 0; i < num_threads; i++) {
