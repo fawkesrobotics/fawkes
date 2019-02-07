@@ -373,7 +373,7 @@ components:
         - id
         - operator-name
         - param-values
-        - status
+        - state
         - executable
         - preconditions
         - effects
@@ -398,7 +398,7 @@ components:
         dispatch-time:
           type: number
           format: float
-        status:
+        state:
           type: string
           format: symbol
           enum: ["FORMULATED", "PENDING", "WAITING", "RUNNING",

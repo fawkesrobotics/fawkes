@@ -17,28 +17,22 @@ BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-NG_CLI = $(shell type -p ng)
-NPM    = $(shell type -p npm)
-NG_BUILD_FLAGS ?= --prod --build-optimizer
+NPM = $(shell type -p npm)
 
-ifneq ($(NG_CLI),)
-  ifneq ($(NPM),)
-		TARGETS_all += dist/index.html
+ifneq ($(NPM),)
+  TARGETS_all += dist/index.html
 
-		SRCS_FRONTEND = $(shell find $(SRCDIR)/src/ -regex '.*\.\(html\|ts\|json\|js\|scss\)')
+  SRCS_FRONTEND = $(shell find $(SRCDIR)/src/ -regex '.*\.\(html\|ts\|json\|js\|scss\)')
 else
-    WARN_TARGETS += warning_npm
-  endif
-else
-    WARN_TARGETS += warning_ng_cli
+  WARN_TARGETS += warning_npm
 endif
 
 dist/index.html: $(SRCS_FRONTEND) $(SRCDIR)/node_modules
-	$(SILENT) echo -e "$(INDENT_PRINT)[Angular] $(TBOLDGRAY)Webview Frontend$(TNORMAL)"
-	$(SILENT)ng build $(NG_BUILD_FLAGS)
+	$(SILENT)echo -e "$(INDENT_PRINT)[Angular] $(TBOLDGRAY)Webview Frontend$(TNORMAL)"
+	$(SILENT)npm run build
 
 $(SRCDIR)/node_modules:
-	$(SILENT) echo -e "$(INDENT_PRINT)[npm] $(TBOLDGRAY)Installing dependencies via npm$(TNORMAL)"
+	$(SILENT)echo -e "$(INDENT_PRINT)[npm] $(TBOLDGRAY)Installing dependencies via npm$(TNORMAL)"
 	$(SILENT)npm install
 
 deploy: $(RESDIR)/webview/index.html
@@ -64,11 +58,9 @@ ifeq ($(OBJSSUBMAKE),1)
 ifneq ($(WARN_TARGETS),)
 all: $(WARN_TARGETS)
   endif
-.PHONY: warning_npm warning_ng_cli
+.PHONY: warning_npm
 warning_npm:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build webview frontend$(TNORMAL) (npm not found)"
-warning_ng_cli:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build webview frontend$(TNORMAL) (Angular CLI ng not found)"
 endif
 
 include $(BUILDSYSDIR)/rules.mk

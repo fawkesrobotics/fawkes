@@ -45,7 +45,7 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
   auto_refresh_subscription = null;
   auto_refresh_tries = 0;
 
-  displayedPlanActionColumns = [ 'operator_name', 'params', 'status', 'executable', 'preconditions' ];
+  displayedPlanActionColumns = [ 'operator_name', 'params', 'state', 'executable', 'preconditions' ];
 
   ngOnInit() {
     this.refresh_domain();
@@ -169,8 +169,11 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
               for (let i = 0; i < this.plans.length; ++i) {
                 this.plans[i].actions = plans[i].actions;
                 this.plans[i].actions.length = plans[i].actions.length;
-                if (this.plans[i].actions[this.plans[i].actions.length - 1].status === 'FINAL' &&
-                    this.goal.mode !== 'FINISHED' && this.goal.mode !== 'EVALUATED') {
+                if (this.plans[i].actions[this.plans[i].actions.length - 1].state === 'FINAL' &&
+                    this.goal.mode !== 'FINISHED' &&
+                    this.goal.mode !== 'EVALUATED' &&
+                    this.goal.mode !== 'RETRACTED')
+                {
                   need_refresh_goal = true;
                 }
               }
@@ -209,13 +212,13 @@ export class GoalDetailComponent implements OnInit, OnDestroy {
     return domain.operators.find(op => op.name === name);
   }
 
-  action_status_classes(action: PlanAction) {
+  action_state_classes(action: PlanAction) {
     return {
       'ff-bg-warning':    ['WAITING', 'EXECUTION-SUCCEEDED', 'SENSED-EFFECTS-WAIT',
-                           'SENSED-EFFECTS-HOLD', 'EFFECTS-APPLIED'].includes(action.status),
-      'ff-bg-background': action.status === 'RUNNING',
-      'ff-bg-error':    ['EXECUTION-FAILED', 'FAILED'].includes(action.status),
-      'ff-bg-success':    action.status === 'FINAL'
+                           'SENSED-EFFECTS-HOLD', 'EFFECTS-APPLIED'].includes(action.state),
+      'ff-bg-background': action.state === 'RUNNING',
+      'ff-bg-error':    ['EXECUTION-FAILED', 'FAILED'].includes(action.state),
+      'ff-bg-success':    action.state === 'FINAL'
     };
   }
 
