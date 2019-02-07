@@ -13,7 +13,7 @@
    strict assumption that a plan will always immediately advance, that is,
    once an action has finished, the next one is immediately started.
    This is in line with PDDL plan execution semantics, where actions fully
-   describe the development of predicates. This assumption is voilated,
+   describe the development of predicates. This assumption is violated,
    for example, if the execution should wait for preconditions to be
    fulfilled, e.g., in the presence of sensed predicates which may change
    due to exogenous events. In this case, a more lenient or specific
