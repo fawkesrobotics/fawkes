@@ -163,7 +163,7 @@ pthread_tryjoin_np(pthread_t thread, void **retval)
   ts.tv_sec += 1;
   struct timeval add_tv;
   add_tv.tv_sec = 0;
-  add_tv.tv_usec = 100000;
+  add_tv.tv_usec = 10000;
   timeradd(&tv, &add_tv, &tv);
   TIMEVAL_TO_TIMESPEC(&tv, &ts);
   int rv = pthread_timedjoin_np(thread, retval, &ts);
