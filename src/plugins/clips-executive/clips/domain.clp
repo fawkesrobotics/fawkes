@@ -352,13 +352,13 @@
   (goal (id ?g))
   (plan (id ?p) (goal-id ?g))
   (plan-action (action-name ?op) (goal-id ?g) (plan-id ?p) (id ?action-id)
-    (state FORMULATED|PENDING|WAITING))
+               (state FORMULATED|PENDING|WAITING))
   ?precond <- (domain-precondition
                 (name ?precond-name)
                 (part-of ?op)
                 (grounded FALSE))
   (not (domain-precondition (name ?precond-name) (goal-id ?g) (plan-id ?p)
-        (grounded-with ?action-id) (grounded TRUE)))
+                            (grounded-with ?action-id) (grounded TRUE)))
 =>
   (duplicate ?precond
     (goal-id ?g) (plan-id ?p) (grounded-with ?action-id)
@@ -582,6 +582,7 @@
   (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
                 (name ?pn)
+                (part-of ?op)
                 (type conjunction)
                 (goal-id ?g)
                 (plan-id ?p)
@@ -596,6 +597,11 @@
         (goal-id ?g) (plan-id ?p)
         (part-of ?pn) (grounded TRUE)
         (grounded-with ?action-id) (is-satisfied FALSE)))
+
+  ; ensure that we have grounded all related atomic preconditions before
+  (forall (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded FALSE))
+    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE) (grounded-with ?action-id))
+  )
 =>
   (modify ?precond (is-satisfied TRUE))
 )
@@ -608,6 +614,7 @@
   (plan (id ?p) (goal-id ?g))
   ?precond <- (domain-precondition
                 (name ?pn)
+                (part-of ?op)
                 (type conjunction)
                 (goal-id ?g)
                 (plan-id ?p)
@@ -625,6 +632,11 @@
         (grounded-with ?action-id) (is-satisfied FALSE)
       )
   )
+
+  ; ensure that we have grounded all related atomic preconditions before
+  (forall (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded FALSE))
+    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE) (grounded-with ?action-id))
+  )
 =>
   (modify ?precond (is-satisfied FALSE))
 )
@@ -634,6 +646,7 @@
    satisfied."
   ?precond <- (domain-precondition
                 (name ?pn)
+                (part-of ?op)
                 (type disjunction)
                 (goal-id ?g)
                 (plan-id ?p)
@@ -649,7 +662,12 @@
         (part-of ?pn) (grounded TRUE)
         (grounded-with ?action-id) (is-satisfied TRUE))
   )
-=>
+
+  ; ensure that we have grounded all related atomic preconditions before
+  (forall (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded FALSE))
+    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE) (grounded-with ?action-id))
+  )
+ =>
   (modify ?precond (is-satisfied TRUE))
 )
 
@@ -658,6 +676,7 @@
    set it to not satisfied."
   ?precond <- (domain-precondition
                 (name ?pn)
+                (part-of ?op)
                 (type disjunction)
                 (goal-id ?g)
                 (plan-id ?p)
@@ -674,6 +693,11 @@
           (part-of ?pn) (grounded TRUE)
           (grounded-with ?action-id) (is-satisfied TRUE))
     )
+  )
+
+  ; ensure that we have grounded all related atomic preconditions before
+  (forall (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded FALSE))
+    (domain-atomic-precondition (operator ?op) (part-of ?pn) (name ?apname) (grounded TRUE) (grounded-with ?action-id))
   )
 =>
   (modify ?precond (is-satisfied FALSE))
@@ -868,8 +892,23 @@
                           (action-name ?op) (executable FALSE))
   (domain-precondition (plan-id ?p) (goal-id ?g) (grounded-with ?action-id)
                        (part-of ?op)  (is-satisfied TRUE))
-=>
+ =>
   (modify ?action (executable TRUE))
+)
+
+(defrule domain-check-if-action-is-no-longer-executable
+  "If the precondition of an action is not satisfied (anymore),
+   the action is not executable."
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
+
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
+  ?action <- (plan-action (id ?action-id) (goal-id ?g) (plan-id ?p)
+                          (action-name ?op) (executable TRUE))
+  (domain-precondition (plan-id ?p) (goal-id ?g) (grounded-with ?action-id)
+                       (part-of ?op)  (is-satisfied FALSE))
+ =>
+  (modify ?action (executable FALSE))
 )
 
 (defrule domain-check-if-action-is-executable-without-precondition
