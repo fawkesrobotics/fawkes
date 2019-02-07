@@ -24,6 +24,7 @@
 
   ; We do have at least one action which is still to be executed
   (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
+               (action-name ?action-name)
                (state FORMULATED) (executable FALSE))
 
   ; There is no other FORMULATED action which comes earlier
@@ -36,5 +37,7 @@
  =>
   (modify ?g (mode FINISHED) (outcome FAILED)
              (error STALLED-NONE-EXECUTABLE)
-             (message "No action of the plan was executable"))
+             (message (str-cat "Action " ?action-name
+                               " (goal " ?goal-id ", plan " ?plan-id ", action " ?id ")"
+                               " not executable, but next in sequence")))
 )
