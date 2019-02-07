@@ -41,6 +41,8 @@
 #include <logging/cache.h>
 
 #include <core/utils/refptr.h>
+#include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 #include <core/threading/wait_condition.h>
 
 using namespace fawkes;
@@ -418,15 +420,20 @@ struct waiter_thread_params {
     uint timeout_nsec = 0;
     /** current status of the thread */
     atomic<ThreadStatus> status;
+    /** Mutex to protect cond_running */
+    Mutex mutex_running;
     /** WaitCondition to indicate that the thread is running */
-    WaitCondition cond_running;
+    WaitCondition cond_running = WaitCondition(&mutex_running);
+    /** Mutex to protect cond_finished */
+    Mutex mutex_finished;
     /** WaitCondition to indicate that the thread has finished */
-    WaitCondition cond_finished;
+    WaitCondition cond_finished = WaitCondition(&mutex_finished);
 };
 
 /** Helper function to wait for a thread to be running */
 bool wait_for_running(waiter_thread_params *params, long int sec = 1, long int nanosec = 0)
 {
+  MutexLocker ml(params->mutex_running);
   if (params->status == RUNNING) {
     return true;
   } else {
@@ -437,6 +444,7 @@ bool wait_for_running(waiter_thread_params *params, long int sec = 1, long int n
 /** Helper function to wait for a thread to be finished */
 bool wait_for_finished(waiter_thread_params *params, long int sec = 1, long int nanosec = 0)
 {
+  MutexLocker ml(params->mutex_finished);
   if (params->status == FINISHED) {
     return true;
   } else {
@@ -457,13 +465,17 @@ void * start_waiter_thread(void * data) {
   }
   RefPtr<SyncPoint> sp = params->manager->get_syncpoint(component, params->sp_identifier);
   params->status = RUNNING;
+  params->mutex_running.lock();
   params->cond_running.wake_all();
+  params->mutex_running.unlock();
   for (uint i = 0; i < params->num_wait_calls; i++) {
     sp->wait(component, SyncPoint::WAIT_FOR_ONE, params->timeout_sec,
         params->timeout_nsec);
   }
   params->status = FINISHED;
+  params->mutex_finished.lock();
   params->cond_finished.wake_all();
+  params->mutex_finished.unlock();
   pthread_exit(NULL);
 }
 
@@ -667,13 +679,17 @@ void * start_barrier_waiter_thread(void * data) {
   RefPtr<SyncPoint> sp;
   sp = params->manager->get_syncpoint(component, params->sp_identifier);
   params->status = RUNNING;
+  params->mutex_running.lock();
   params->cond_running.wake_all();
+  params->mutex_running.unlock();
   for (uint i = 0; i < params->num_wait_calls; i++) {
     sp->wait(component, SyncPoint::WAIT_FOR_ALL, params->timeout_sec,
         params->timeout_nsec);
   }
   params->status = FINISHED;
+  params->mutex_finished.lock();
   params->cond_finished.wake_all();
+  params->mutex_finished.unlock();
   pthread_exit(NULL);
 }
 
@@ -1107,8 +1123,10 @@ struct emitter_thread_data {
     std::string name;
     std::string sp_name;
     atomic<ThreadStatus> status;
-    WaitCondition cond_running;
-    WaitCondition cond_finished;
+    Mutex mutex_running;
+    WaitCondition cond_running = WaitCondition(&mutex_running);
+    Mutex mutex_finished;
+    WaitCondition cond_finished = WaitCondition(&mutex_finished);
 };
 /// @endcond
 
@@ -1117,12 +1135,16 @@ void * call_emit(void * data)
 {
   emitter_thread_data * tdata = (emitter_thread_data *) data;
   tdata->status = RUNNING;
+  tdata->mutex_running.lock();
   tdata->cond_running.wake_all();
+  tdata->mutex_running.unlock();
   RefPtr<SyncPoint> sp = tdata->manager->get_syncpoint(tdata->name, tdata->sp_name);
   sp->register_emitter(tdata->name);
   sp->emit(tdata->name);
   tdata->status = FINISHED;
+  tdata->mutex_finished.lock();
   tdata->cond_finished.wake_all();
+  tdata->mutex_finished.unlock();
   return NULL;
 }
 
@@ -1142,12 +1164,16 @@ TEST_F(SyncPointManagerTest, LockUntilNextWaitTest)
   usleep(500000);
 
   EXPECT_EQ(RUNNING, emitter_params->status);
+  emitter_params->mutex_finished.lock();
   EXPECT_FALSE(emitter_params->cond_finished.reltimed_wait(0, 100000));
+  emitter_params->mutex_finished.unlock();
 
   pthread_t waiter_thread;
   pthread_create(&waiter_thread, NULL, call_wait, (void *) *sp);
 
+  emitter_params->mutex_finished.lock();
   ASSERT_TRUE(emitter_params->status == FINISHED || emitter_params->cond_finished.reltimed_wait(1, 0));
+  emitter_params->mutex_finished.unlock();
   pthread_join(thread, NULL);
   pthread_join(waiter_thread, NULL);
   delete emitter_params;
@@ -1193,7 +1219,9 @@ TEST_F(SyncPointManagerTest, LockUntilNextWaitWaiterComesFirstTest)
   pthread_create(&waiter_thread, NULL, call_wait_for_all, (void *) *sp);
 
   for (uint i = 0; i < num_emitters; i++) {
+    params[i]->mutex_finished.lock();
     ASSERT_TRUE(params[i]->status == FINISHED || params[i]->cond_finished.reltimed_wait(1, 0));
+    params[i]->mutex_finished.unlock();
     pthread_join(emitter_thread[i], NULL);
     delete params[i];
   }
