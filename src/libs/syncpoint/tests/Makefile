@@ -33,6 +33,22 @@ ifeq ($(HAVE_GTEST)$(HAVE_CPP11),11)
   LDFLAGS += $(LDFLAGS_GTEST)
   LIBS_test = $(LIBDIR)/test/syncpoint.so
   BINS_test = $(BINDIR)/gtest_syncpoint
+else
+  ifneq ($(HAVE_GTEST),1)
+    WARN_TARGETS += warning_gtest
+  endif
+  ifneq ($(HAVE_CPP11),1)
+    WARN_TARGETS += warning_cpp11
+  endif
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+test: $(WARN_TARGETS)
+.PHONY: $(WARN_TARGETS)
+warning_gtest:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build syncpoint tests$(TNORMAL) (gtest not found)"
+warning_cpp11:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build syncpoint tests$(TNORMAL) (C++11 not supported)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
