@@ -28,4 +28,4 @@ source $SCRIPT_PATH/environment.sh
 set -euo pipefail
 
 # Run tests
-$MAKE test
+$MAKE -j$NPROC test
