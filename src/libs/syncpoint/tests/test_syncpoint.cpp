@@ -1330,6 +1330,7 @@ TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
   wait_for_one_params.sp_identifier = sp_identifier;
   pthread_create(&wait_for_one_thread, &attrs, start_waiter_thread,
     &wait_for_one_params);
+  EXPECT_TRUE(wait_for_running(&wait_for_one_params));
   uint num_threads = 2;
   pthread_t threads[num_threads];
   waiter_thread_params params[num_threads];
