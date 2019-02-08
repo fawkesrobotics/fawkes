@@ -575,6 +575,7 @@ TEST_F(SyncPointManagerTest, ParallelWaitsReturn)
 
   for (uint i = 0; i < num_threads; i++) {
     ASSERT_TRUE(wait_for_finished(params[i]));
+    pthread_join(threads[i], NULL);
     delete params[i];
   }
 }
@@ -1018,6 +1019,10 @@ TEST_F(SyncPointManagerTest, OneEmitterRegistersForMultipleSyncPointsHierarchyTe
   ASSERT_TRUE(wait_for_finished(params2, 0, 10 * pow(10, 6)));
   ASSERT_TRUE(wait_for_finished(params3, 0, 10 * pow(10, 6)));
 
+  pthread_join(pthread1, NULL);
+  pthread_join(pthread2, NULL);
+  pthread_join(pthread3, NULL);
+
   sp2->unregister_emitter(id_emitter);
   EXPECT_EQ(1, sp1->get_emitters().count(id_emitter));
   EXPECT_EQ(0, sp2->get_emitters().count(id_emitter));
@@ -1270,7 +1275,7 @@ TEST_F(SyncPointManagerTest, WaitersAreAlwaysReleasedSimultaneouslyTest)
   sp->emit("emitter2");
   usleep(10000);
   for (uint i = 0; i < num_threads; i++) {
-    EXPECT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+    ASSERT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
   }
 }
 
@@ -1371,7 +1376,7 @@ TEST_F(SyncPointManagerTest, MultipleWaitsWithoutEmitters)
   pthread_create(&waiter_thread, &attrs, start_barrier_waiter_thread,
     &thread_params);
   usleep(10000);
-  EXPECT_EQ(0, pthread_tryjoin_np(waiter_thread, NULL));
+  ASSERT_EQ(0, pthread_tryjoin_np(waiter_thread, NULL));
 }
 
 TEST_F(SyncPointManagerTest, ReleaseOfEmitterThrowsException)
