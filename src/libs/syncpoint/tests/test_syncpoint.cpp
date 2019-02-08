@@ -633,6 +633,7 @@ TEST_F(SyncPointManagerTest, SyncPointHierarchy)
   for (uint i = 0; i < num_threads; i++) {
     EXPECT_TRUE(wait_for_running(params[i]));
   }
+  usleep(10000);
   RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter", "/test/topic/sp");
   sp->register_emitter("emitter");
   sp->emit("emitter");
@@ -811,14 +812,16 @@ TEST_F(SyncBarrierTest, WaitForAllEmitters)
     EXPECT_EQ(EBUSY, pthread_tryjoin_np(waiter_threads[i], NULL));
   }
 
+  usleep(10000);
   em1.emit();
 
-  usleep(1000);
   for (uint i = 0; i < num_waiter_threads; i++) {
     EXPECT_EQ(RUNNING, params[i]->status);
   }
 
+  usleep(10000);
   em1.emit();
+  usleep(10000);
   em2.emit();
 
   for (uint i = 0; i < num_waiter_threads; i++) {
@@ -879,6 +882,7 @@ TEST_F(SyncBarrierTest, BarriersAreIndependent)
     EXPECT_TRUE(wait_for_running(params2[i]));
   }
 
+  usleep(10000);
   em1.emit();
 
   for (uint i = 0; i < num_waiter_threads; i++) {
@@ -891,6 +895,7 @@ TEST_F(SyncBarrierTest, BarriersAreIndependent)
     EXPECT_EQ(RUNNING, params2[i]->status);
   }
 
+  usleep(10000);
   em2.emit();
 
   for (uint i = 0; i < num_waiter_threads; i++) {
@@ -930,11 +935,13 @@ TEST_F(SyncBarrierTest, SyncBarrierHierarchy)
   for (uint i = 0; i < num_threads; i++) {
     ASSERT_EQ(RUNNING, params[i]->status);
   }
+  usleep(10000);
   em1.emit();
   usleep(1000);
   for (uint i = 0; i < num_threads; i++) {
     ASSERT_EQ(RUNNING, params[i]->status);
   }
+  usleep(10000);
   em2.emit();
   /* The first waiters should be unblocked */
   for (uint i = 0; i < num_threads - 2 ; i++) {
@@ -1009,12 +1016,15 @@ TEST_F(SyncPointManagerTest, OneEmitterRegistersForMultipleSyncPointsHierarchyTe
   EXPECT_TRUE(wait_for_running(params2));
   EXPECT_TRUE(wait_for_running(params3));
 
+  usleep(10000);
   sp1->emit(id_emitter);
+
   ASSERT_TRUE(wait_for_finished(params1));
   ASSERT_FALSE(wait_for_finished(params2, 0, 10 * pow(10, 6)));
   // this should be waiting as the component has registered twice for '/test'
   // and thus should emit '/test' also twice (by hierarchical emit calls)
   ASSERT_FALSE(wait_for_finished(params3, 0, 10 * pow(10, 6)));
+  usleep(10000);
   sp2->emit(id_emitter);
   ASSERT_TRUE(wait_for_finished(params2, 0, 10 * pow(10, 6)));
   ASSERT_TRUE(wait_for_finished(params3, 0, 10 * pow(10, 6)));
@@ -1037,6 +1047,7 @@ TEST_F(SyncPointManagerTest, OneEmitterRegistersForMultipleSyncPointsHierarchyTe
   ASSERT_TRUE(wait_for_finished(params2));
   ASSERT_FALSE(wait_for_finished(params3));
 
+  usleep(10000);
   sp1->emit(id_emitter);
   ASSERT_TRUE(wait_for_finished(params1));
   ASSERT_TRUE(wait_for_finished(params3));
@@ -1085,13 +1096,16 @@ TEST_F(SyncPointManagerTest, EmitterEmitsSameSyncPointTwiceTest)
 
   EXPECT_FALSE(wait_for_finished(params1));
 
+  usleep(10000);
   sp1->emit("emitter");
 
   EXPECT_FALSE(wait_for_finished(params1));
 
+  usleep(10000);
   sp1->emit("emitter");
   EXPECT_FALSE(wait_for_finished(params1));
 
+  usleep(10000);
   sp2->emit("emitter");
   ASSERT_TRUE(wait_for_finished(params1));
   pthread_join(pthread1, NULL);
