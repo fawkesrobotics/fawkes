@@ -54,7 +54,8 @@ $(SRCDIR)/gtest: /usr/src/googletest/googletest/include/gtest
 $(LIBDIR)/libfawkesgtest_main.$(SOEXT): | $(LIBDIR)/libfawkesgtest.$(SOEXT)
 
 ifeq ($(DISTRO),ubuntu)
-  LIBS_all  = $(LIBDIR)/libfawkesgtest.$(SOEXT) $(LIBDIR)/libfawkesgtest_main.$(SOEXT)
+  LIBS_all   = $(LIBDIR)/libfawkesgtest.$(SOEXT) $(LIBDIR)/libfawkesgtest_main.$(SOEXT)
+  LIBS_build = $(LIBS_all)
 else
   INFO_TARGETS += info_sysgtest
 endif
