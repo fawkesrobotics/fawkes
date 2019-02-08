@@ -545,8 +545,8 @@ TEST_F(SyncPointManagerTest, ParallelWaitCalls)
 TEST_F(SyncPointManagerTest, ParallelWaitsReturn)
 {
 
-  uint num_threads = 50;
-  uint num_wait_calls = 10;
+  uint num_threads = 10;
+  uint num_wait_calls = 5;
   pthread_t threads[num_threads];
   waiter_thread_params *params[num_threads];
   string sp_identifier = "/test/sp1";
@@ -569,7 +569,7 @@ TEST_F(SyncPointManagerTest, ParallelWaitsReturn)
   sp->register_emitter(component);
   for (uint i = 0; i < num_wait_calls; i++) {
     sp->emit(component);
-    usleep(10000);
+    usleep(20000);
   }
 
   for (uint i = 0; i < num_threads; i++) {
