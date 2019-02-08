@@ -563,6 +563,7 @@ SyncPoint::get_emit_calls() const {
 bool
 SyncPoint::watcher_is_waiting(std::string watcher, WakeupType type) const
 {
+  MutexLocker ml(mutex_);
   switch (type) {
     case SyncPoint::WAIT_FOR_ONE:
       return watchers_wait_for_one_.count(watcher);
