@@ -32,6 +32,7 @@
 
 #include <atomic>
 #include <string>
+#include <cmath>
 
 #include <libs/syncpoint/syncpoint.h>
 #include <libs/syncpoint/syncpoint_manager.h>
@@ -644,7 +645,7 @@ TEST_F(SyncPointManagerTest, SyncPointHierarchy)
 
   /* The last waiter should still wait */
   pthread_t last_thread = threads[num_threads-1];
-  EXPECT_FALSE(wait_for_finished(params[num_threads-1], 0, 1000));
+  EXPECT_FALSE(wait_for_finished(params[num_threads-1], 0, pow(10, 6)));
   pthread_cancel(last_thread);
   ASSERT_EQ(0, pthread_join(last_thread, NULL));
 }
@@ -1008,14 +1009,14 @@ TEST_F(SyncPointManagerTest, OneEmitterRegistersForMultipleSyncPointsHierarchyTe
   EXPECT_TRUE(wait_for_running(params3));
 
   sp1->emit(id_emitter);
-  ASSERT_TRUE(wait_for_finished(params1, 0, 200000));
-  ASSERT_FALSE(wait_for_finished(params2, 0, 200000));
+  ASSERT_TRUE(wait_for_finished(params1));
+  ASSERT_FALSE(wait_for_finished(params2, 0, 10 * pow(10, 6)));
   // this should be waiting as the component has registered twice for '/test'
   // and thus should emit '/test' also twice (by hierarchical emit calls)
-  ASSERT_FALSE(wait_for_finished(params3, 0, 200000));
+  ASSERT_FALSE(wait_for_finished(params3, 0, 10 * pow(10, 6)));
   sp2->emit(id_emitter);
-  ASSERT_TRUE(wait_for_finished(params2, 0, 200000));
-  ASSERT_TRUE(wait_for_finished(params3, 0, 200000));
+  ASSERT_TRUE(wait_for_finished(params2, 0, 10 * pow(10, 6)));
+  ASSERT_TRUE(wait_for_finished(params3, 0, 10 * pow(10, 6)));
 
   sp2->unregister_emitter(id_emitter);
   EXPECT_EQ(1, sp1->get_emitters().count(id_emitter));
@@ -1302,7 +1303,7 @@ TEST_F(SyncPointManagerTest, WaitersTimeoutSimultaneousReleaseTest)
     EXPECT_TRUE(wait_for_running(&params[i]));
   }
   wait_for_finished(&params[0], params[0].timeout_sec, params[0].timeout_nsec);
-  wait_for_finished(&params[1], 0, 10000);
+  wait_for_finished(&params[1], 0, pow(10, 6));
   for (uint i = 0; i < num_threads; i++) {
     pthread_join(threads[i], NULL);
   }
@@ -1325,7 +1326,7 @@ TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
   wait_for_one_params.thread_nr = 2;
   wait_for_one_params.num_wait_calls = 1;
   wait_for_one_params.timeout_sec = 0;
-  wait_for_one_params.timeout_nsec = 10000000;
+  wait_for_one_params.timeout_nsec = 10 * pow(10, 6);
   wait_for_one_params.status = PENDING;
   wait_for_one_params.sp_identifier = sp_identifier;
   pthread_create(&wait_for_one_thread, &attrs, start_waiter_thread,
@@ -1411,5 +1412,5 @@ TEST_F(SyncPointManagerTest, ReleaseBarrierWaiter)
   ASSERT_TRUE(sp->watcher_is_waiting("component 1", SyncPoint::WAIT_FOR_ALL));
   manager->release_syncpoint("component 1", sp);
   sp = manager->get_syncpoint("component 1", "/test");
-  EXPECT_NO_THROW(sp->reltime_wait_for_all("component 1", 0, 1000000));
+  EXPECT_NO_THROW(sp->reltime_wait_for_all("component 1", 0, pow(10, 6)));
 }
