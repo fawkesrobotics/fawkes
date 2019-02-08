@@ -23,12 +23,13 @@ LIBS_cedar = \
 OBJS_cedar = cedar_plugin.o cedar_thread.o plugin_director_thread.o
 
 OBJS_all = $(OBJS_cedar)
+PLUGINS_all = $(PLUGINDIR)/cedar.$(SOEXT)
 
 ifeq ($(HAVE_CLIPS),1)
   CFLAGS  += $(CFLAGS_CLIPS)
   LDFLAGS += $(LDFLAGS_CLIPS)
 
-  PLUGINS_all = $(PLUGINDIR)/cedar.$(SOEXT)
+  PLUGINS_build = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_clips
 endif
