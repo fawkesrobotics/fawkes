@@ -86,11 +86,6 @@ endif
 ifeq ($(HAVE_SHMEM_CAM),1)
   OBJS_libfvcams += shmem.o
 endif
-ifeq ($(HAVE_SWISSRANGER_CAM),1)
-  OBJS_libfvcams += swissranger.o
-  CFLAGS  += $(CFLAGS_SWISSRANGER)
-  LDFLAGS += $(LDFLAGS_SWISSRANGER)
-endif
 ifeq ($(HAVE_LIBV4L2),1)
   CFLAGS  += $(CFLAGS_LIBV4L2)
   LDFLAGS += $(LDFLAGS_LIBV4L2)
