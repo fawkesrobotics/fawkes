@@ -1021,9 +1021,9 @@ TEST_F(SyncPointManagerTest, OneEmitterRegistersForMultipleSyncPointsHierarchyTe
   ASSERT_TRUE(wait_for_running(params1));
   ASSERT_TRUE(wait_for_running(params3));
 
-  ASSERT_FALSE(wait_for_finished(params1));
+  ASSERT_FALSE(wait_for_finished(params1, 0, 10 * pow(10, 6)));
   ASSERT_TRUE(wait_for_finished(params2));
-  ASSERT_FALSE(wait_for_finished(params3));
+  ASSERT_FALSE(wait_for_finished(params3, 0, 10 * pow(10, 6)));
 
   sp1->emit(id_emitter);
   ASSERT_TRUE(wait_for_finished(params1));
@@ -1072,14 +1072,14 @@ TEST_F(SyncPointManagerTest, EmitterEmitsSameSyncPointTwiceTest)
   pthread_t pthread1;
   pthread_create(&pthread1, &attrs, start_waiter_thread, params1);
 
-  EXPECT_FALSE(wait_for_finished(params1));
+  EXPECT_FALSE(wait_for_finished(params1, 0, 10 * pow(10, 6)));
 
   sp1->emit("emitter");
 
-  EXPECT_FALSE(wait_for_finished(params1));
+  EXPECT_FALSE(wait_for_finished(params1, 0, 10 * pow(10, 6)));
 
   sp1->emit("emitter");
-  EXPECT_FALSE(wait_for_finished(params1));
+  EXPECT_FALSE(wait_for_finished(params1, 0, 10 * pow(10, 6)));
 
   sp2->emit("emitter");
   ASSERT_TRUE(wait_for_finished(params1));
@@ -1106,7 +1106,6 @@ TEST_F(SyncPointManagerTest, RelTimeWaitTest)
   params.sp_identifier = "/test/sp1";
   pthread_create(&thread, NULL, start_waiter_thread, &params);
   ASSERT_TRUE(wait_for_finished(&params));
-  ASSERT_EQ(0, pthread_tryjoin_np(thread, NULL));
   /* The SyncPoint should have logged the error */
   ASSERT_GT(cache_logger_->get_messages().size(), 0);
 
@@ -1300,8 +1299,8 @@ TEST_F(SyncPointManagerTest, WaitersTimeoutSimultaneousReleaseTest)
     params[i].manager = manager;
     params[i].thread_nr = i;
     params[i].num_wait_calls = 1;
-    params[i].timeout_sec = 1;
-    params[i].timeout_nsec = 0;
+    params[i].timeout_sec = 0;
+    params[i].timeout_nsec = 100 * pow(10, 6);
     params[i].sp_identifier = sp_identifier;
   }
   pthread_create(&threads[0], &attrs, start_waiter_thread, &params[0]);
@@ -1330,6 +1329,8 @@ TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
   RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter1", "/test");
   sp->register_emitter("emitter1");
   string sp_identifier = "/test";
+  uint num_threads = 2;
+  Barrier * barrier = new Barrier(num_threads + 2);
   pthread_t wait_for_one_thread;
   waiter_thread_params wait_for_one_params;
   wait_for_one_params.component = "wait_for_one";
@@ -1338,13 +1339,12 @@ TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
   wait_for_one_params.thread_nr = 2;
   wait_for_one_params.num_wait_calls = 1;
   wait_for_one_params.timeout_sec = 0;
-  wait_for_one_params.timeout_nsec = 10 * pow(10, 6);
+  wait_for_one_params.timeout_nsec = 1 * pow(10, 6);
   wait_for_one_params.status = PENDING;
   wait_for_one_params.sp_identifier = sp_identifier;
+  wait_for_one_params.start_barrier = barrier;
   pthread_create(&wait_for_one_thread, &attrs, start_waiter_thread,
     &wait_for_one_params);
-  EXPECT_TRUE(wait_for_running(&wait_for_one_params));
-  uint num_threads = 2;
   pthread_t threads[num_threads];
   waiter_thread_params params[num_threads];
   for (uint i = 0; i < num_threads; i++) {
@@ -1353,21 +1353,23 @@ TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
     params[i].manager = manager;
     params[i].thread_nr = i;
     params[i].num_wait_calls = 1;
-    params[i].timeout_sec = 1;
+    params[i].timeout_sec = 0;
+    params[i].timeout_nsec = 100 * pow(10, 6);
     params[i].sp_identifier = sp_identifier;
-    pthread_create(&threads[i], &attrs, start_waiter_thread,
-      &params[i]);
+    params[i].start_barrier = barrier;
+    pthread_create(&threads[i], &attrs, start_waiter_thread, &params[i]);
   }
+  barrier->wait();
+  EXPECT_TRUE(wait_for_running(&wait_for_one_params));
   for (uint i = 0; i < num_threads; i++) {
     EXPECT_TRUE(wait_for_running(&params[i]));
   }
-  EXPECT_EQ(RUNNING, wait_for_one_params.status);
   EXPECT_TRUE(wait_for_finished(&wait_for_one_params));
   for (uint i = 0; i < num_threads; i++) {
     EXPECT_EQ(RUNNING, params[i].status);
   }
   for (uint i = 0; i < num_threads; i++) {
-    EXPECT_TRUE(wait_for_finished(&params[i], 2 * params[i].timeout_sec, 2 * params[i].timeout_nsec));
+    EXPECT_TRUE(wait_for_finished(&params[i], params[i].timeout_sec, params[i].timeout_nsec));
     pthread_join(threads[i], NULL);
   }
   pthread_join(wait_for_one_thread, NULL);
