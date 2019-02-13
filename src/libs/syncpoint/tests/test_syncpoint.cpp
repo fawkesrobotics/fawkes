@@ -376,27 +376,6 @@ TEST_F(SyncPointManagerTest, SyncPointComponentRegistersForMultipleSyncPoints)
       << ", but should be!";
 }
 
-// helper function used for testing wait()
-void * call_wait(void *data)
-{
-  SyncPoint * sp = (SyncPoint *)(data);
-  sp->wait("component");
-  return NULL;
-}
-
-TEST_F(SyncPointManagerTest, MultipleWaits)
-{
-  RefPtr<SyncPoint> sp_ref = manager->get_syncpoint("component", "/test/sp1");
-  SyncPoint * sp = *sp_ref;
-  pthread_t thread1;
-  pthread_create(&thread1, &attrs, call_wait, (void *)sp);
-  // make sure the other thread is first
-  usleep(10000);
-  ASSERT_THROW(sp_ref->wait("component"), SyncPointMultipleWaitCallsException);
-  pthread_cancel(thread1);
-  pthread_join(thread1, NULL);
-}
-
 enum ThreadStatus {
   PENDING,
   RUNNING,
@@ -482,6 +461,23 @@ void * start_waiter_thread(void * data) {
   params->mutex_finished.unlock();
   pthread_exit(NULL);
 }
+
+TEST_F(SyncPointManagerTest, MultipleWaits)
+{
+  RefPtr<SyncPoint> sp_ref = manager->get_syncpoint("component", "/test/sp1");
+  pthread_t thread1;
+  waiter_thread_params params;
+  params.component = "component";
+  params.manager = manager;
+  params.num_wait_calls = 1;
+  params.sp_identifier = "/test/sp1";
+  pthread_create(&thread1, &attrs, start_waiter_thread, &params);
+  wait_for_running(&params);
+  ASSERT_THROW(sp_ref->wait("component"), SyncPointMultipleWaitCallsException);
+  pthread_cancel(thread1);
+  pthread_join(thread1, NULL);
+}
+
 
 /** Create multiple threads which will all call get_syncpoint
  *  for the same SyncPoint. Do not wait for the SyncPoint but return
@@ -1183,7 +1179,12 @@ TEST_F(SyncPointManagerTest, LockUntilNextWaitTest)
   emitter_params->mutex_finished.unlock();
 
   pthread_t waiter_thread;
-  pthread_create(&waiter_thread, NULL, call_wait, (void *) *sp);
+  waiter_thread_params waiter_params;
+  waiter_params.manager = manager;
+  waiter_params.component = "component";
+  waiter_params.num_wait_calls = 1;
+  waiter_params.sp_identifier = "/test";
+  pthread_create(&waiter_thread, NULL, start_waiter_thread, &waiter_params);
 
   emitter_params->mutex_finished.lock();
   ASSERT_TRUE(emitter_params->status == FINISHED || emitter_params->cond_finished.reltimed_wait(1, 0));
