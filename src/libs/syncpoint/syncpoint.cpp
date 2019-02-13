@@ -269,12 +269,17 @@ SyncPoint::wait(const std::string & component,
     throw SyncPointInvalidTypeException();
   }
 
+  Time start;
+  mutex_cond->lock();
+
   // check if calling component is registered for this SyncPoint
   if (!watchers_.count(component)) {
+    mutex_cond->unlock();
     throw SyncPointNonWatcherCalledWaitException(component.c_str(), get_identifier().c_str());
   }
   // check if calling component is not already waiting
   if (watchers->count(component)) {
+    mutex_cond->unlock();
     throw SyncPointMultipleWaitCallsException(component.c_str(), get_identifier().c_str());
   }
 
@@ -287,13 +292,6 @@ SyncPoint::wait(const std::string & component,
     watchers->insert(component);
   }
 
-  /* Check if emitters are currently waiting for this component.
-   * If so, wake them up *after* locking the WaitCondition's mutex.
-   * Only this way we can guarantee that this component will certainly call
-   * wait before the emitters emit
-   */
-  Time start;
-  mutex_cond->lock();
   mutex_next_wait_->lock();
   if (emit_locker_ == component) {
     emit_locker_ = "";
@@ -563,12 +561,15 @@ SyncPoint::get_emit_calls() const {
 bool
 SyncPoint::watcher_is_waiting(std::string watcher, WakeupType type) const
 {
-  MutexLocker ml(mutex_);
   switch (type) {
-    case SyncPoint::WAIT_FOR_ONE:
+    case SyncPoint::WAIT_FOR_ONE: {
+      MutexLocker ml(*mutex_wait_for_one_);
       return watchers_wait_for_one_.count(watcher);
-    case SyncPoint::WAIT_FOR_ALL:
+    }
+    case SyncPoint::WAIT_FOR_ALL: {
+      MutexLocker ml(*mutex_wait_for_all_);
       return watchers_wait_for_all_.count(watcher);
+    }
     default:
       throw Exception("Unknown watch type %u for syncpoint %s",
                       type, identifier_.c_str());
