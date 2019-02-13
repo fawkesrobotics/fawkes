@@ -637,7 +637,6 @@ TEST_F(SyncPointManagerTest, SyncPointHierarchy)
   for (uint i = 0; i < num_threads; i++) {
     EXPECT_TRUE(wait_for_running(params[i]));
   }
-  usleep(10000);
   RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter", "/test/topic/sp");
   sp->register_emitter("emitter");
   sp->emit("emitter");
@@ -785,20 +784,14 @@ TEST_F(SyncBarrierTest, WaitForAllEmitters)
   for (uint i = 0; i < num_waiter_threads; i++) {
     EXPECT_TRUE(wait_for_running(params[i]));
   }
-  for (uint i = 0; i < num_waiter_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(waiter_threads[i], NULL));
-  }
 
-  usleep(10000);
   em1.emit();
 
   for (uint i = 0; i < num_waiter_threads; i++) {
     EXPECT_EQ(RUNNING, params[i]->status);
   }
 
-  usleep(10000);
   em1.emit();
-  usleep(10000);
   em2.emit();
 
   for (uint i = 0; i < num_waiter_threads; i++) {
@@ -863,7 +856,6 @@ TEST_F(SyncBarrierTest, BarriersAreIndependent)
     EXPECT_TRUE(wait_for_running(params2[i]));
   }
 
-  usleep(10000);
   em1.emit();
 
   for (uint i = 0; i < num_waiter_threads; i++) {
@@ -876,7 +868,6 @@ TEST_F(SyncBarrierTest, BarriersAreIndependent)
     EXPECT_EQ(RUNNING, params2[i]->status);
   }
 
-  usleep(10000);
   em2.emit();
 
   for (uint i = 0; i < num_waiter_threads; i++) {
@@ -919,15 +910,13 @@ TEST_F(SyncBarrierTest, SyncBarrierHierarchy)
   delete barrier;
 
   for (uint i = 0; i < num_threads; i++) {
-    ASSERT_EQ(RUNNING, params[i]->status);
+    EXPECT_TRUE(wait_for_running(params[i]));
   }
-  usleep(10000);
+
   em1.emit();
-  usleep(1000);
   for (uint i = 0; i < num_threads; i++) {
     ASSERT_EQ(RUNNING, params[i]->status);
   }
-  usleep(10000);
   em2.emit();
   /* The first waiters should be unblocked */
   for (uint i = 0; i < num_threads - 2 ; i++) {
@@ -1005,7 +994,6 @@ TEST_F(SyncPointManagerTest, OneEmitterRegistersForMultipleSyncPointsHierarchyTe
   EXPECT_TRUE(wait_for_running(params2));
   EXPECT_TRUE(wait_for_running(params3));
 
-  usleep(10000);
   sp1->emit(id_emitter);
 
   ASSERT_TRUE(wait_for_finished(params1));
@@ -1013,7 +1001,6 @@ TEST_F(SyncPointManagerTest, OneEmitterRegistersForMultipleSyncPointsHierarchyTe
   // this should be waiting as the component has registered twice for '/test'
   // and thus should emit '/test' also twice (by hierarchical emit calls)
   ASSERT_FALSE(wait_for_finished(params3, 0, 10 * pow(10, 6)));
-  usleep(10000);
   sp2->emit(id_emitter);
   ASSERT_TRUE(wait_for_finished(params2, 0, 10 * pow(10, 6)));
   ASSERT_TRUE(wait_for_finished(params3, 0, 10 * pow(10, 6)));
@@ -1031,12 +1018,13 @@ TEST_F(SyncPointManagerTest, OneEmitterRegistersForMultipleSyncPointsHierarchyTe
   pthread_create(&pthread2, &attrs, start_waiter_thread, params2);
   pthread_create(&pthread3, &attrs, start_waiter_thread, params3);
 
-  usleep(1000);
+  ASSERT_TRUE(wait_for_running(params1));
+  ASSERT_TRUE(wait_for_running(params3));
+
   ASSERT_FALSE(wait_for_finished(params1));
   ASSERT_TRUE(wait_for_finished(params2));
   ASSERT_FALSE(wait_for_finished(params3));
 
-  usleep(10000);
   sp1->emit(id_emitter);
   ASSERT_TRUE(wait_for_finished(params1));
   ASSERT_TRUE(wait_for_finished(params3));
@@ -1086,16 +1074,13 @@ TEST_F(SyncPointManagerTest, EmitterEmitsSameSyncPointTwiceTest)
 
   EXPECT_FALSE(wait_for_finished(params1));
 
-  usleep(10000);
   sp1->emit("emitter");
 
   EXPECT_FALSE(wait_for_finished(params1));
 
-  usleep(10000);
   sp1->emit("emitter");
   EXPECT_FALSE(wait_for_finished(params1));
 
-  usleep(10000);
   sp2->emit("emitter");
   ASSERT_TRUE(wait_for_finished(params1));
   pthread_join(pthread1, NULL);
@@ -1104,14 +1089,6 @@ TEST_F(SyncPointManagerTest, EmitterEmitsSameSyncPointTwiceTest)
 }
 
 
-/** helper function used for testing reltime_wait() */
-void * call_timed_wait(void *data)
-{
-  SyncPoint * sp = (SyncPoint *)(data);
-  sp->reltime_wait_for_all("waiter", 0, 100000);
-  return NULL;
-}
-
 /** Test if the component returns when using reltime_wait */
 TEST_F(SyncPointManagerTest, RelTimeWaitTest)
 {
@@ -1119,8 +1096,16 @@ TEST_F(SyncPointManagerTest, RelTimeWaitTest)
   manager->get_syncpoint("waiter", "/test/sp1");
   sp1->register_emitter("emitter");
   pthread_t thread;
-  pthread_create(&thread, NULL, call_timed_wait, (void *) *sp1);
-  usleep(500000);
+  waiter_thread_params params;
+  params.manager = manager;
+  params.type = SyncPoint::WAIT_FOR_ALL;
+  params.num_wait_calls = 1;
+  params.timeout_sec = 0;
+  params.timeout_nsec = 100000;
+  params.component = "waiter";
+  params.sp_identifier = "/test/sp1";
+  pthread_create(&thread, NULL, start_waiter_thread, &params);
+  ASSERT_TRUE(wait_for_finished(&params));
   ASSERT_EQ(0, pthread_tryjoin_np(thread, NULL));
   /* The SyncPoint should have logged the error */
   ASSERT_GT(cache_logger_->get_messages().size(), 0);
@@ -1171,9 +1156,11 @@ TEST_F(SyncPointManagerTest, LockUntilNextWaitTest)
   emitter_params->sp_name = "/test";
   pthread_create(&thread, NULL, call_emit, (void *) emitter_params);
 
-  usleep(500000);
-
-  EXPECT_EQ(RUNNING, emitter_params->status);
+  emitter_params->mutex_running.lock();
+  if (emitter_params->status != RUNNING) {
+    ASSERT_TRUE(emitter_params->cond_running.reltimed_wait(1, 0));
+  }
+  emitter_params->mutex_running.unlock();
   emitter_params->mutex_finished.lock();
   EXPECT_FALSE(emitter_params->cond_finished.reltimed_wait(0, 100000));
   emitter_params->mutex_finished.unlock();
@@ -1224,14 +1211,23 @@ TEST_F(SyncPointManagerTest, LockUntilNextWaitWaiterComesFirstTest)
     pthread_create(&emitter_thread[i], NULL, call_emit, (void *) params[i]);
   }
 
-  usleep(500000);
-
   for (uint i = 0; i < num_emitters; i++) {
-    EXPECT_EQ(RUNNING, params[i]->status);
+    params[i]->mutex_running.lock();
+    if (params[i]->status != RUNNING) {
+      ASSERT_TRUE(params[i]->cond_running.reltimed_wait(1, 0));
+    }
+    params[i]->mutex_running.unlock();
   }
 
   pthread_t waiter_thread;
-  pthread_create(&waiter_thread, NULL, call_wait_for_all, (void *) *sp);
+  waiter_thread_params thread_params;
+  thread_params.component = "waiter";
+  thread_params.type = SyncPoint::WAIT_FOR_ALL;
+  thread_params.manager = manager;
+  thread_params.thread_nr = 1;
+  thread_params.num_wait_calls = 1;
+  thread_params.sp_identifier = "/test";
+  pthread_create(&waiter_thread, &attrs, start_waiter_thread, &thread_params);
 
   for (uint i = 0; i < num_emitters; i++) {
     params[i]->mutex_finished.lock();
@@ -1272,21 +1268,17 @@ TEST_F(SyncPointManagerTest, WaitersAreAlwaysReleasedSimultaneouslyTest)
     params[i].sp_identifier = sp_identifier;
   }
   pthread_create(&threads[0], &attrs, start_waiter_thread, &params[0]);
-  pthread_yield();
-  usleep(10000);
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[0], NULL));
+  ASSERT_FALSE(wait_for_finished(&params[0], 0, 10 * pow(10, 6)));
   sp->emit("emitter1");
-  usleep(10000);
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[0], NULL));
+  ASSERT_FALSE(wait_for_finished(&params[0], 0, 10 * pow(10, 6)));
   pthread_create(&threads[1], &attrs, start_waiter_thread, &params[1]);
-  usleep(10000);
   for (uint i = 0; i < num_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+    ASSERT_FALSE(wait_for_finished(&params[i], 0, 10 * pow(10, 6)));
   }
   sp->emit("emitter2");
-  usleep(10000);
   for (uint i = 0; i < num_threads; i++) {
-    ASSERT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+    ASSERT_TRUE(wait_for_finished(&params[i]));
+    pthread_join(threads[i], NULL);
   }
 }
 
@@ -1394,8 +1386,8 @@ TEST_F(SyncPointManagerTest, MultipleWaitsWithoutEmitters)
   thread_params.sp_identifier = "/test";
   pthread_create(&waiter_thread, &attrs, start_waiter_thread,
     &thread_params);
-  usleep(10000);
-  ASSERT_EQ(0, pthread_tryjoin_np(waiter_thread, NULL));
+  ASSERT_TRUE(wait_for_finished(&thread_params));
+  pthread_join(waiter_thread, NULL);
 }
 
 TEST_F(SyncPointManagerTest, ReleaseOfEmitterThrowsException)
