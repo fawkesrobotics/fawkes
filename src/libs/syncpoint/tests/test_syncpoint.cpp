@@ -42,6 +42,7 @@
 #include <logging/cache.h>
 
 #include <core/utils/refptr.h>
+#include <core/threading/barrier.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 #include <core/threading/wait_condition.h>
@@ -429,6 +430,8 @@ struct waiter_thread_params {
     Mutex mutex_finished;
     /** WaitCondition to indicate that the thread has finished */
     WaitCondition cond_finished = WaitCondition(&mutex_finished);
+    /** Barrier for startup synchronization. */
+    Barrier *  start_barrier = nullptr;
 };
 
 /** Helper function to wait for a thread to be running */
@@ -682,6 +685,9 @@ void * start_barrier_waiter_thread(void * data) {
   RefPtr<SyncPoint> sp;
   sp = params->manager->get_syncpoint(component, params->sp_identifier);
   params->status = RUNNING;
+  if (params->start_barrier) {
+    params->start_barrier->wait();
+  }
   params->mutex_running.lock();
   params->cond_running.wake_all();
   params->mutex_running.unlock();
@@ -921,16 +927,19 @@ TEST_F(SyncBarrierTest, SyncBarrierHierarchy)
   uint num_threads = identifiers.size();
   pthread_t threads[num_threads];
   waiter_thread_params *params[num_threads];
+  Barrier *barrier = new Barrier(num_threads + 1);
   for (uint i = 0; i < num_threads; i++) {
     params[i] = new waiter_thread_params();
     params[i]->manager = manager;
     params[i]->thread_nr = i;
     params[i]->num_wait_calls = 1;
     params[i]->sp_identifier = identifiers.at(i);
+    params[i]->start_barrier = barrier;
     pthread_create(&threads[i], &attrs, start_barrier_waiter_thread, params[i]);
   }
 
-  usleep(1000);
+  barrier->wait();
+  delete barrier;
 
   for (uint i = 0; i < num_threads; i++) {
     ASSERT_EQ(RUNNING, params[i]->status);
