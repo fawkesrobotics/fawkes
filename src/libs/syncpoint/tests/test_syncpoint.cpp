@@ -161,11 +161,10 @@ pthread_tryjoin_np(pthread_t thread, void **retval)
   }
   struct timeval tv;
   TIMESPEC_TO_TIMEVAL(&tv, &ts);
-  // give the thread 10ms to terminate
-  ts.tv_sec += 1;
+  // give the thread 100ms to terminate
   struct timeval add_tv;
   add_tv.tv_sec = 0;
-  add_tv.tv_usec = 10000;
+  add_tv.tv_usec = 100000;
   timeradd(&tv, &add_tv, &tv);
   TIMEVAL_TO_TIMESPEC(&tv, &ts);
   int rv = pthread_timedjoin_np(thread, retval, &ts);
