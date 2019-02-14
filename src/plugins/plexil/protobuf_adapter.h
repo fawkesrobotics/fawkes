@@ -88,6 +88,7 @@ private:
 	std::string gen_msgid(const std::string& msg_type);
 	void add_message(const std::string& msg_type, message_meta&& msg);
 	void release_message(const std::string& msg_id);
+	std::shared_ptr<google::protobuf::Message> get_message(const std::string& msg_id);
 
 	void proc_queue(const std::string& msg_type);
 	queue_entry& get_queue(const std::string& msg_type);

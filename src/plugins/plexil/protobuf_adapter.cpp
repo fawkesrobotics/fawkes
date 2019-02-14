@@ -253,6 +253,8 @@ ProtobufCommPlexilAdapter::proc_get_param_command(PLEXIL::Command* cmd)
 		return;
 	}
 
+	std::lock_guard<std::mutex> lock(queue_mutex_);
+
 	if (messages_.find(msg_id) == messages_.end()) {
 		warn("ProtobufCommAdapter:GetParameter: message ID not in queued messages");
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
@@ -394,6 +396,19 @@ ProtobufCommPlexilAdapter::release_message(const std::string& msg_id)
 	}
 }
 
+std::shared_ptr<google::protobuf::Message>
+ProtobufCommPlexilAdapter::get_message(const std::string& msg_id)
+{
+	std::shared_ptr<google::protobuf::Message> m;
+
+	std::lock_guard<std::mutex> lock(queue_mutex_);
+
+	if (messages_.find(msg_id) != messages_.end()) {
+		m = messages_[msg_id].message;
+	}
+	return m;
+}
+
 std::string
 ProtobufCommPlexilAdapter::gen_msgid(const std::string& msg_type)
 {
@@ -463,8 +478,11 @@ ProtobufCommPlexilAdapter::pb_create(PLEXIL::Command* cmd)
       .from_port     = 0,
       .message       = std::shared_ptr<google::protobuf::Message>(m)
     };
-    
-    messages_[msg_id] = std::move(msgmeta);
+
+    {
+	    std::lock_guard<std::mutex> lock(queue_mutex_);
+	    messages_[msg_id] = std::move(msgmeta);
+    }
 
     m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(msg_id));
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
@@ -629,16 +647,14 @@ ProtobufCommPlexilAdapter::pb_set_value(PLEXIL::Command* cmd)
 	args[1].getValue(field_name);
 	value = args[2];
 
-	if (messages_.find(msg_id) == messages_.end()) {
+	std::shared_ptr<google::protobuf::Message> m = get_message(msg_id);
+	if (!m) {
 		warn("ProtobufCommAdapter:pb_set_value:"
 		     << " Unknown message " << msg_id);
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
-
-	message_meta &msgmeta = messages_[msg_id];
-	std::shared_ptr<google::protobuf::Message> m = msgmeta.message;
 
   const FieldDescriptor *field = nullptr;
   google::protobuf::Message *msg= m.get();
@@ -936,16 +952,14 @@ ProtobufCommPlexilAdapter::pb_get_value(PLEXIL::Command* cmd, PLEXIL::ValueType 
 	args[0].getValue(msg_id);
 	args[1].getValue(field_name);
 
-	if (messages_.find(msg_id) == messages_.end()) {
+	std::shared_ptr<google::protobuf::Message> m = get_message(msg_id);
+	if (!m) {
 		warn("ProtobufCommAdapter:pb_get_value:"
 		     << " Unknown message " << msg_id);
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
-
-	message_meta &msgmeta = messages_[msg_id];
-	std::shared_ptr<google::protobuf::Message> m = msgmeta.message;
 
   const FieldDescriptor *field = nullptr;
   google::protobuf::Message *msg= m.get();
@@ -1174,16 +1188,14 @@ ProtobufCommPlexilAdapter::pb_get_length(PLEXIL::Command* cmd)
 	args[0].getValue(msg_id);
 	args[1].getValue(field_name);
 
-	if (messages_.find(msg_id) == messages_.end()) {
+	std::shared_ptr<google::protobuf::Message> m = get_message(msg_id);
+	if (!m) {
 		warn("ProtobufCommAdapter:pb_get_length:"
 		     << " Unknown message " << msg_id);
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
-
-	message_meta &msgmeta = messages_[msg_id];
-	std::shared_ptr<google::protobuf::Message> m = msgmeta.message;
 
   const FieldDescriptor *field = nullptr;
   google::protobuf::Message *msg= m.get();
@@ -1238,16 +1250,14 @@ ProtobufCommPlexilAdapter::pb_has_field(PLEXIL::Command* cmd)
 	args[0].getValue(msg_id);
 	args[1].getValue(field_name);
 
-	if (messages_.find(msg_id) == messages_.end()) {
+	std::shared_ptr<google::protobuf::Message> m = get_message(msg_id);
+	if (!m) {
 		warn("ProtobufCommAdapter:pb_has_field:"
 		     << " Unknown message " << msg_id);
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
-
-	message_meta &msgmeta = messages_[msg_id];
-	std::shared_ptr<google::protobuf::Message> m = msgmeta.message;
 
   const FieldDescriptor *field = nullptr;
   google::protobuf::Message *msg= m.get();
@@ -1291,16 +1301,14 @@ ProtobufCommPlexilAdapter::pb_tostring(PLEXIL::Command* cmd)
 	std::string   msg_id;
 	args[0].getValue(msg_id);
 
-	if (messages_.find(msg_id) == messages_.end()) {
+	std::shared_ptr<google::protobuf::Message> m = get_message(msg_id);
+	if (!m) {
 		warn("ProtobufCommAdapter:pb_tostring:"
 		     << " Unknown message " << msg_id);
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
-
-	message_meta &msgmeta = messages_[msg_id];
-	std::shared_ptr<google::protobuf::Message> m = msgmeta.message;
 
 	m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(m->DebugString()));
 	m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
@@ -1334,16 +1342,14 @@ ProtobufCommPlexilAdapter::pb_broadcast(PLEXIL::Command* cmd)
 		return;
 	}
 
-	if (messages_.find(msg_id) == messages_.end()) {
+	std::shared_ptr<google::protobuf::Message> m = get_message(msg_id);
+	if (!m) {
 		warn("ProtobufCommAdapter:pb_broadcast:"
 		     << " Unknown message " << msg_id);
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
-
-	message_meta &msgmeta = messages_[msg_id];
-	std::shared_ptr<google::protobuf::Message> m = msgmeta.message;
 
 	std::lock_guard<std::mutex> lock(map_mutex_);
 
@@ -1370,7 +1376,10 @@ ProtobufCommPlexilAdapter::pb_broadcast(PLEXIL::Command* cmd)
 		return;
   }
 
-  messages_.erase(msg_id);
+  {
+	  std::lock_guard<std::mutex> lock(queue_mutex_);
+	  messages_.erase(msg_id);
+  }
 
   m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
   m_execInterface.notifyOfExternalEvent();
