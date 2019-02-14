@@ -32,10 +32,12 @@ elif sysctl -n hw.ncpu >/dev/null 2>&1; then
 	# FreeBSD
 	NPROC=$(sysctl -n hw.ncpu)
 fi
+export NPROC
 
 # Determine GNU Make executable
 MAKE=make
 if type -p gmake >/dev/null; then
 	MAKE=gmake
 fi
+export MAKE
 
