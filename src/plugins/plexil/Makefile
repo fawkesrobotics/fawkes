@@ -20,7 +20,7 @@ include $(BUILDSYSDIR)/boost.mk
 include $(BUILDSYSDIR)/protobuf.mk
 include $(LIBSRCDIR)/navgraph/navgraph.mk
 
-PLEXIL_REQ_BOOST_LIBS = system filesystem
+PLEXIL_REQ_BOOST_LIBS = system filesystem interprocess/sync/file_lock
 HAVE_PLEXIL_BOOST_LIBS = $(call boost-have-libs,$(OPENPRS_REQ_BOOST_LIBS))
 
 LIBS_plexil = \
