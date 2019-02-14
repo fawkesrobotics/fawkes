@@ -34,7 +34,7 @@ class CedarPlugin : public fawkes::Plugin
   /** Constructor.
    * @param config Fawkes configuration
    */
-  CedarPlugin(Configuration *config) : Plugin(config)
+  explicit CedarPlugin(Configuration *config) : Plugin(config)
   {
     CedarPluginDirectorThread *pdt = new CedarPluginDirectorThread();
     thread_list.push_back(pdt);
