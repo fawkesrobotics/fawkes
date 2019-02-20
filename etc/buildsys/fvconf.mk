@@ -21,7 +21,7 @@ $(error config.mk must be included before fvconf.mk)
 endif
 
 CAMS=LEUTRON FIREWIRE FILELOADER NETWORK SHMEM V4L V4L1 V4L2 BUMBLEBEE2 NAO \
-     SWISSRANGER PIKE
+     PIKE
 CTRLS=EVID100P DPPTU
 
 FVCONFDIR           = $(EXEC_CONFDIR)/firevision
@@ -134,16 +134,6 @@ endif
 ifeq ($(HAVE_LIBUSB),1)
   CFLAGS_LIBUSB  = -DHAVE_LIBUSB $(shell $(PKGCONFIG) --cflags 'libusb')
   LDFLAGS_LIBUSB = $(shell $(PKGCONFIG) --libs 'libusb')
-endif
-
-# Check for SwissRanger library
-ifneq ($(wildcard $(realpath $(SYSROOT)/usr/include/libMesaSR.h)),)
-  ifeq ($(HAVE_LIBUSB),1)
-    HAVE_SWISSRANGER_CAM   = 1
-    VISION_CAM_LIBS       += mesasr
-    CFLAGS_SWISSRANGER     = $(CFLAGS_LIBUSB)
-    LDFLAGS_SWISSRANGER    = $(LDFLAGS_LIBUSB)
-  endif
 endif
 
 # Check if we have PGR Triclops SDK, build Bumblebee2 if we have it

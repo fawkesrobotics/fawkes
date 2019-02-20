@@ -38,9 +38,6 @@ OBJS_fvshmem = shmem.o
 LIBS_fvlistfwcams = $(VISION_CAM_LIBS) stdc++ fawkesutils fvcams
 OBJS_fvlistfwcams = listfwcams.o
 
-LIBS_fvlistsrcams = $(VISION_CAM_LIBS) stdc++ fawkesutils fvcams
-OBJS_fvlistsrcams = listsrcams.o
-
 CFLAGS_converter = $(CFLAGS_LIBPNG)
 LIBS_fvconverter = stdc++ fawkescore fawkesutils fvutils fvcams
 OBJS_fvconverter = converter.o
@@ -91,7 +88,7 @@ OBJS_all     = $(OBJS_fvshmem) $(OBJS_fvlistfwcams) $(OBJS_fvstereodecoder) \
                $(OBJS_fvconverter) $(OBJS_fvtricalcdisp) $(OBJS_fvbb2gettric) \
                $(OBJS_fvbb2info) $(OBJS_fvbb2rectlut) $(OBJS_fvviewer) \
                $(OBJS_fvshowyuv) $(OBJS_fvnet) $(OBJS_fvcmpp) \
-               $(OBJS_fvlistsrcams) $(OBJS_fvscaled_viewer)
+               $(OBJS_fvscaled_viewer)
 BINS_base    = $(BINDIR)/fvshmem \
                $(BINDIR)/fvcmpp \
                $(BINDIR)/fvnet \
@@ -99,10 +96,9 @@ BINS_base    = $(BINDIR)/fvshmem \
                $(BINDIR)/fvconverter
 BINS_guis    = $(BINDIR)/fvviewer $(BINDIR)/fvshowyuv $(BINDIR)/fvscaled_viewer
 BINS_fwcam   = $(BINDIR)/fvlistfwcams
-BINS_srcam   = $(BINDIR)/fvlistsrcams
 BINS_bb2     = $(BINDIR)/fvbb2gettric $(BINDIR)/fvstereodecoder $(BINDIR)/fvbb2info
 BINS_tric    = $(BINDIR)/fvtricalcdisp
-BINS_all     = $(BINS_base) $(BINS_tric) $(BINS_fwcam) $(BINS_srcam) $(BINS_bb2) $(BINS_guis)
+BINS_all     = $(BINS_base) $(BINS_tric) $(BINS_fwcam) $(BINS_bb2) $(BINS_guis)
 BINS_build   = $(BINS_base)
 MANPAGES_all = $(MANDIR)/man1/fvshmem.1 $(MANDIR)/man1/fvcmpp.1 \
                $(MANDIR)/man1/fvnet.1 $(MANDIR)/man1/fvbb2rectlut.1 \
@@ -125,14 +121,6 @@ ifeq ($(HAVE_FIREWIRE_CAM),1)
 else
   ifneq ($(realpath $(SRCDIR)/listfwcams.cpp),)
     WARN_TARGETS += warning_listfwcams
-  endif
-endif
-
-ifeq ($(HAVE_SWISSRANGER_CAM),1)
-  BINS_build += $(BINS_srcam)
-else
-  ifneq ($(realpath $(SRCDIR)/listsrcams.cpp),)
-    WARN_TARGETS += warning_listsrcams
   endif
 endif
 
@@ -176,9 +164,6 @@ gui: $(WARN_TARGETS_GUI)
 .PHONY: $(WARN_TARGETS)
 warning_listfwcams:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building listfwcams$(TNORMAL) (no Firewire camera support)";
-warning_listsrcams:
-	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building listsrcams$(TNORMAL) (no SwissRanger camera support)";
-warning_stereodecoder:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building stereodecoder$(TNORMAL) (no Bumblebee2 camera support)";
 warning_tricalcdisp:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)Not building fvtricalcdisp$(TNORMAL) (no Triclops SDK support)";

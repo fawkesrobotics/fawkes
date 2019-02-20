@@ -54,9 +54,6 @@
 #ifdef HAVE_BUMBLEBEE2_CAM
 #include <fvcams/bumblebee2.h>
 #endif
-#ifdef HAVE_SWISSRANGER_CAM
-#include <fvcams/swissranger.h>
-#endif
 #ifdef HAVE_PIKE_CAM
 #include <fvcams/pike.h>
 #endif
@@ -182,11 +179,7 @@ CameraFactory::instance(const CameraArgumentParser *cap)
 
   // ######
   if ( cap->cam_type() == "swissranger" ) {
-#ifdef HAVE_SWISSRANGER_CAM
-    c = new SwissRangerCamera(cap);
-#else
-    throw UnknownCameraTypeException("No SwissRanger support at compile time");
-#endif
+    throw UnknownCameraTypeException("SwissRanger support has been removed permanently");
   }
 
   // ######
