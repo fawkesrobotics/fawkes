@@ -1236,7 +1236,8 @@ TEST_F(SyncPointManagerTest, LockUntilNextWaitWaiterComesFirstTest)
     delete params[i];
   }
 
-  ASSERT_EQ(0, pthread_tryjoin_np(waiter_thread, NULL));
+  ASSERT_TRUE(wait_for_finished(&thread_params));
+  pthread_join(waiter_thread, NULL);
 }
 
 /** Test whether all waiters are always released at the same time, even if one
