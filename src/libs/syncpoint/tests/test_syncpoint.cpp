@@ -1340,7 +1340,7 @@ TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
   wait_for_one_params.thread_nr = 2;
   wait_for_one_params.num_wait_calls = 1;
   wait_for_one_params.timeout_sec = 0;
-  wait_for_one_params.timeout_nsec = 1 * pow(10, 6);
+  wait_for_one_params.timeout_nsec = 100 * pow(10, 6);
   wait_for_one_params.status = PENDING;
   wait_for_one_params.sp_identifier = sp_identifier;
   wait_for_one_params.start_barrier = barrier;
@@ -1354,8 +1354,8 @@ TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
     params[i].manager = manager;
     params[i].thread_nr = i;
     params[i].num_wait_calls = 1;
-    params[i].timeout_sec = 0;
-    params[i].timeout_nsec = 100 * pow(10, 6);
+    params[i].timeout_sec = 1;
+    params[i].timeout_nsec = 0;
     params[i].sp_identifier = sp_identifier;
     params[i].start_barrier = barrier;
     pthread_create(&threads[i], &attrs, start_waiter_thread, &params[i]);
