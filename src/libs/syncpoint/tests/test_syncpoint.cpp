@@ -151,31 +151,6 @@ protected:
   }
 };
 
-#ifdef __FreeBSD__
-static int
-pthread_tryjoin_np(pthread_t thread, void **retval)
-{
-  struct timespec ts;
-  if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
-    return EINVAL;
-  }
-  struct timeval tv;
-  TIMESPEC_TO_TIMEVAL(&tv, &ts);
-  // give the thread 100ms to terminate
-  struct timeval add_tv;
-  add_tv.tv_sec = 0;
-  add_tv.tv_usec = 100000;
-  timeradd(&tv, &add_tv, &tv);
-  TIMEVAL_TO_TIMESPEC(&tv, &ts);
-  int rv = pthread_timedjoin_np(thread, retval, &ts);
-  if (rv == ETIMEDOUT) {
-    return EBUSY;
-  } else {
-    return rv;
-  }
-}
-#endif
-
 TEST_F(SyncPointTest, CreateSyncPoint)
 {
   ASSERT_TRUE(*sp1 != NULL);
