@@ -72,7 +72,7 @@ KatanaSensorAcquisitionThread::loop()
     try {
       katana_->read_sensor_data();
     } catch (Exception &e) {
-      logger_->log_warn(name(), e.what());
+      logger_->log_warn(name(), "Exception while reading sensor data: %s", e.what());
     }
   }
 }
