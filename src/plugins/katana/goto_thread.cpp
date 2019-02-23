@@ -111,7 +111,7 @@ KatanaGotoThread::once()
     try {
       final = _katana->final();
     } catch (fawkes::KatanaMotorCrashedException &e) {
-      _logger->log_warn("KatanaMotorControlTrhead", e.what());
+      _logger->log_warn("KatanaMotorControlTrhead", "Motor crashed: %s", e.what());
       _error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
       break;
     }
