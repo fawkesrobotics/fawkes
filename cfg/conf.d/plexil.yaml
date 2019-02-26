@@ -36,6 +36,7 @@ plexil:
         # - :LuvListener
         # - :UdpAdapter
         - :ProtobufCommAdapter
+        # - :BlackboardAdapter
 
         # - :ExpressionFactory:registerFactory
         # - :Expression
@@ -100,6 +101,7 @@ plexil:
           name: PlexilExecutive
       - type: FawkesTimeAdapter
       - type: FawkesLoggingAdapter
+      - type: FawkesBlackboardAdapter
       - type: BehaviorEngineAdapter
       # - type: ProtobufCommAdapter
       #   attr:
