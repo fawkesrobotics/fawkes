@@ -33,8 +33,6 @@ HelloWorld:
   Say: SynchronousCommand say("Hello World");
   SayComplete: { log_info("Say call completed"); }
 
-  // Uncomment the following to enable the blackboard test
-  /*
   BBTest:
   {
     Print1: { pprint("BBTest, consider enabling BlackboardAdapter markers"); }
@@ -50,9 +48,11 @@ HelloWorld:
     running = true;
     WaitChanged:
     {
-      StartCondition Lookup(BB_changed("SpeechSynthInterface::Flite"));
+      String text;
+      StartCondition running && Lookup(BB_changed("SpeechSynthInterface::Flite"));
       RepeatCondition running;
-      pprint("Interface changed");
+      text = Lookup(BB_string("SpeechSynthInterface::Flite", "text"));
+      pprint("Interface changed, text: " + text);
       BB_print("SpeechSynthInterface::Flite");
     }
     CallSkill:
@@ -62,5 +62,6 @@ HelloWorld:
       running = false;
     }
   }
-  */
+
+  BB_close("SpeechSynthInterface::Flite");
 }
