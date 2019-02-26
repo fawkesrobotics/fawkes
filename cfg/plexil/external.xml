@@ -11,6 +11,7 @@
 	<Adapter AdapterType="FawkesTimeAdapter" LibPath="../../lib/plexil/FawkesTimeAdapter.so" />
 	<Adapter AdapterType="FawkesLoggingAdapter" LibPath="../../lib/plexil/FawkesLoggingAdapter.so" />
 	<Adapter AdapterType="FawkesConfigurationAdapter" LibPath="../../lib/plexil/FawkesConfigurationAdapter.so" />
+	<Adapter AdapterType="FawkesBlackboardAdapter" LibPath="../../lib/plexil/FawkesBackboardAdapter.so" />
 	<Adapter AdapterType="BehaviorEngineAdapter" LibPath="../../lib/plexil/BehaviorEngineAdapter.so" />
 	<!--
 	<Adapter AdapterType="ProtobufCommAdapter" LibPath="../../lib/plexil/ProtobufCommAdapter.so"
