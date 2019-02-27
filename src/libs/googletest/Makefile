@@ -44,7 +44,8 @@ $(SRCDIR)/src/%.h: /usr/src/googletest/googletest/src/%.h
 	$(SILENT)mkdir -p $(@D)
 	$(SILENT)cp -af $< $@
 
-$(OBJS_all): | $(SRCDIR)/gtest $(addprefix $(SRCDIR)/,$(SRCS_libfawkesgtest) $(SRCS_libfawkesgtest_main))
+$(OBJS_all): | $(SRCDIR)/gtest
+$(OBJS_all): %.o: $(SRCDIR)/%.cpp
 
 $(SRCDIR)/gtest: /usr/src/googletest/googletest/include/gtest
 	$(eval BUILT_PARTS += $@)
