@@ -1,10 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 ############################################################################
-#  Build script, will (usually) be executed in Docker container
+#  Script to run all tests
 #
-#  Created: Wed Sep 26 14:19:27 2018 +0200
-#  Copyright  2018  Tim Niemueller [www.niemueller.org]
+#  Created: Tue Oct 30 22:28:42 2018 -0700
+#  Copyright  2018  Till Hofmann
 ############################################################################
 
 #  This program is free software; you can redistribute it and/or modify
@@ -27,5 +27,5 @@ source $SCRIPT_PATH/environment.sh
 # Error out on any error in the script, pipes etc.
 set -euo pipefail
 
-# Build software
-$MAKE -j$NPROC all gui BUILDSTATS=1
+# Run tests
+$MAKE -j$NPROC test

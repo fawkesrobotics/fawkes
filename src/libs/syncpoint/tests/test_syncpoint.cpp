@@ -22,11 +22,17 @@
 #include <gtest/gtest.h>
 
 #include <pthread.h>
+#ifdef __FreeBSD__
+#  include <pthread_np.h>
+#endif
 #include <errno.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/time.h>
 
+#include <atomic>
 #include <string>
+#include <cmath>
 
 #include <libs/syncpoint/syncpoint.h>
 #include <libs/syncpoint/syncpoint_manager.h>
@@ -36,6 +42,10 @@
 #include <logging/cache.h>
 
 #include <core/utils/refptr.h>
+#include <core/threading/barrier.h>
+#include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
+#include <core/threading/wait_condition.h>
 
 using namespace fawkes;
 using namespace std;
@@ -341,27 +351,11 @@ TEST_F(SyncPointManagerTest, SyncPointComponentRegistersForMultipleSyncPoints)
       << ", but should be!";
 }
 
-// helper function used for testing wait()
-void * call_wait(void *data)
-{
-  SyncPoint * sp = (SyncPoint *)(data);
-  sp->wait("component");
-  return NULL;
-}
-
-TEST_F(SyncPointManagerTest, MultipleWaits)
-{
-  RefPtr<SyncPoint> sp_ref = manager->get_syncpoint("component", "/test/sp1");
-  SyncPoint * sp = *sp_ref;
-  pthread_t thread1;
-  pthread_create(&thread1, &attrs, call_wait, (void *)sp);
-  // make sure the other thread is first
-  usleep(10000);
-  ASSERT_THROW(sp_ref->wait("component"), SyncPointMultipleWaitCallsException);
-  pthread_cancel(thread1);
-  pthread_join(thread1, NULL);
-}
-
+enum ThreadStatus {
+  PENDING,
+  RUNNING,
+  FINISHED
+};
 
 /** struct used for multithreading tests */
 struct waiter_thread_params {
@@ -369,6 +363,8 @@ struct waiter_thread_params {
     RefPtr<SyncPointManager> manager;
     /** Thread number */
     uint thread_nr = 0;
+    /** Wait type */
+    SyncPoint::WakeupType type = SyncPoint::WAIT_FOR_ONE;
     /** Number of wait calls the thread should make */
     uint num_wait_calls;
     /** Name of the SyncPoint */
@@ -379,26 +375,84 @@ struct waiter_thread_params {
     uint timeout_sec = 0;
     /** timeout in nsec */
     uint timeout_nsec = 0;
+    /** current status of the thread */
+    atomic<ThreadStatus> status;
+    /** Mutex to protect cond_running */
+    Mutex mutex_running;
+    /** WaitCondition to indicate that the thread is running */
+    WaitCondition cond_running = WaitCondition(&mutex_running);
+    /** Mutex to protect cond_finished */
+    Mutex mutex_finished;
+    /** WaitCondition to indicate that the thread has finished */
+    WaitCondition cond_finished = WaitCondition(&mutex_finished);
+    /** Barrier for startup synchronization. */
+    Barrier *  start_barrier = nullptr;
 };
 
+/** Helper function to wait for a thread to be running */
+bool wait_for_running(waiter_thread_params *params, long int sec = 1, long int nanosec = 0)
+{
+  RefPtr<SyncPoint> sp = params->manager->get_syncpoint("test_runner", params->sp_identifier);
+  const int wait_time_us = 1000;
+  for (uint i = 0; i < (sec * pow(10,9) + nanosec) / (wait_time_us * pow(10,3)); i++) {
+    if (sp->watcher_is_waiting(params->component, params->type)) {
+      return true;
+    }
+    usleep(wait_time_us);
+  }
+  return false;
+}
+
+/** Helper function to wait for a thread to be finished */
+bool wait_for_finished(waiter_thread_params *params, long int sec = 1, long int nanosec = 0)
+{
+  MutexLocker ml(params->mutex_finished);
+  if (params->status == FINISHED) {
+    return true;
+  } else {
+    return params->cond_finished.reltimed_wait(sec, nanosec);
+  }
+}
 
 /** get a SyncPoint and wait for it */
 void * start_waiter_thread(void * data) {
   waiter_thread_params *params = (waiter_thread_params *)data;
   string component = params->component;
-  if (component == "") {
-    char *comp;
-    asprintf(&comp, "component %u", params->thread_nr);
-    component = comp;
-    free(comp);
-  }
   RefPtr<SyncPoint> sp = params->manager->get_syncpoint(component, params->sp_identifier);
+  params->status = RUNNING;
+  if (params->start_barrier) {
+    params->start_barrier->wait();
+  }
+  params->mutex_running.lock();
+  params->cond_running.wake_all();
+  params->mutex_running.unlock();
   for (uint i = 0; i < params->num_wait_calls; i++) {
-    sp->wait(component, SyncPoint::WAIT_FOR_ONE, params->timeout_sec,
+    sp->wait(component, params->type, params->timeout_sec,
         params->timeout_nsec);
   }
+  params->status = FINISHED;
+  params->mutex_finished.lock();
+  params->cond_finished.wake_all();
+  params->mutex_finished.unlock();
   pthread_exit(NULL);
 }
+
+TEST_F(SyncPointManagerTest, MultipleWaits)
+{
+  RefPtr<SyncPoint> sp_ref = manager->get_syncpoint("component", "/test/sp1");
+  pthread_t thread1;
+  waiter_thread_params params;
+  params.component = "component";
+  params.manager = manager;
+  params.num_wait_calls = 1;
+  params.sp_identifier = "/test/sp1";
+  pthread_create(&thread1, &attrs, start_waiter_thread, &params);
+  wait_for_running(&params);
+  ASSERT_THROW(sp_ref->wait("component"), SyncPointMultipleWaitCallsException);
+  pthread_cancel(thread1);
+  pthread_join(thread1, NULL);
+}
+
 
 /** Create multiple threads which will all call get_syncpoint
  *  for the same SyncPoint. Do not wait for the SyncPoint but return
@@ -412,6 +466,7 @@ TEST_F(SyncPointManagerTest, MultipleManagerRequests)
   string sp_identifier = "/test/sp1";
   for (uint i = 0; i < num_threads; i++) {
     params[i] = new waiter_thread_params();
+    params[i]->component = "component " + to_string(i);
     params[i]->manager = manager;
     params[i]->thread_nr = i;
     params[i]->num_wait_calls = 0;
@@ -441,6 +496,7 @@ TEST_F(SyncPointManagerTest, ParallelWaitCalls)
   string sp_identifier = "/test/sp1";
   for (uint i = 0; i < num_threads; i++) {
     params[i] = new waiter_thread_params();
+    params[i]->component = "component " + to_string(i);
     params[i]->manager = manager;
     params[i]->thread_nr = i;
     params[i]->num_wait_calls = num_wait_calls;
@@ -450,7 +506,9 @@ TEST_F(SyncPointManagerTest, ParallelWaitCalls)
     ASSERT_LE(manager->get_syncpoints().size(), 3u);
   }
 
-  usleep(10000);
+  for (uint i = 0; i < num_threads; i++) {
+    EXPECT_TRUE(wait_for_running(params[i]));
+  }
   for (uint i = 0; i < num_threads; i++) {
     pthread_cancel(threads[i]);
     ASSERT_EQ(0,pthread_join(threads[i], NULL));
@@ -464,19 +522,24 @@ TEST_F(SyncPointManagerTest, ParallelWaitCalls)
 TEST_F(SyncPointManagerTest, ParallelWaitsReturn)
 {
 
-  uint num_threads = 50;
-  uint num_wait_calls = 10;
+  uint num_threads = 10;
+  uint num_wait_calls = 5;
   pthread_t threads[num_threads];
   waiter_thread_params *params[num_threads];
   string sp_identifier = "/test/sp1";
   for (uint i = 0; i < num_threads; i++) {
     params[i] = new waiter_thread_params();
+    params[i]->component = "component " + to_string(i);
     params[i]->manager = manager;
     params[i]->thread_nr = i;
     params[i]->num_wait_calls = num_wait_calls;
     params[i]->sp_identifier = sp_identifier;
     pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
-    usleep(10000);
+    pthread_yield();
+  }
+
+  for (uint i = 0; i < num_threads; i++) {
+    EXPECT_TRUE(wait_for_running(params[i]));
   }
 
   string component = "emitter";
@@ -484,12 +547,12 @@ TEST_F(SyncPointManagerTest, ParallelWaitsReturn)
   sp->register_emitter(component);
   for (uint i = 0; i < num_wait_calls; i++) {
     sp->emit(component);
-    usleep(10000);
+    usleep(20000);
   }
 
-  sleep(1);
   for (uint i = 0; i < num_threads; i++) {
-    ASSERT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+    ASSERT_TRUE(wait_for_finished(params[i]));
+    pthread_join(threads[i], NULL);
     delete params[i];
   }
 }
@@ -504,6 +567,7 @@ TEST_F(SyncPointManagerTest, WaitDoesNotReturnImmediately)
   waiter_thread_params *params[num_threads];
   for (uint i = 0; i < num_threads; i++) {
     params[i] = new waiter_thread_params();
+    params[i]->component = "component " + to_string(i);
     params[i]->manager = manager;
     params[i]->thread_nr = i;
     params[i]->num_wait_calls = 1;
@@ -511,9 +575,12 @@ TEST_F(SyncPointManagerTest, WaitDoesNotReturnImmediately)
     pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
   }
 
-  sleep(1);
   for (uint i = 0; i < num_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+    EXPECT_TRUE(wait_for_running(params[i]));
+  }
+
+  for (uint i = 0; i < num_threads; i++) {
+    EXPECT_EQ(RUNNING, params[i]->status);
     pthread_cancel(threads[i]);
     ASSERT_EQ(0, pthread_join(threads[i], NULL));
     delete params[i];
@@ -534,6 +601,7 @@ TEST_F(SyncPointManagerTest, SyncPointHierarchy)
   waiter_thread_params *params[num_threads];
   for (uint i = 0; i < num_threads; i++) {
     params[i] = new waiter_thread_params();
+    params[i]->component = "component " + to_string(i);
     params[i]->manager = manager;
     params[i]->thread_nr = i;
     params[i]->num_wait_calls = 1;
@@ -541,21 +609,23 @@ TEST_F(SyncPointManagerTest, SyncPointHierarchy)
     pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
   }
 
-  usleep(10000);
+  for (uint i = 0; i < num_threads; i++) {
+    EXPECT_TRUE(wait_for_running(params[i]));
+  }
   RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter", "/test/topic/sp");
   sp->register_emitter("emitter");
   sp->emit("emitter");
-  usleep(10000);
 
   /* The first waiters should be unblocked */
   for (uint i = 0; i < num_threads - 1 ; i++) {
-    ASSERT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+    ASSERT_TRUE(wait_for_finished(params[i]));
+    pthread_join(threads[i], NULL);
     delete params[i];
   }
 
   /* The last waiter should still wait */
   pthread_t last_thread = threads[num_threads-1];
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(last_thread, NULL));
+  EXPECT_FALSE(wait_for_finished(params[num_threads-1], 0, pow(10, 6)));
   pthread_cancel(last_thread);
   ASSERT_EQ(0, pthread_join(last_thread, NULL));
 }
@@ -578,29 +648,10 @@ TEST_F(SyncBarrierTest, MultipleRegisterCalls)
   EXPECT_NO_THROW(barrier->register_emitter(component));
 }
 
-/** get a SyncBarrier and wait for it */
-void * start_barrier_waiter_thread(void * data) {
-  waiter_thread_params *params = (waiter_thread_params *)data;
-  char *comp;
-  asprintf(&comp, "component %u", params->thread_nr);
-  string component = comp;
-  free(comp);
-  RefPtr<SyncPoint> sp;
-  sp = params->manager->get_syncpoint(component, params->sp_identifier);
-  for (uint i = 0; i < params->num_wait_calls; i++) {
-    sp->wait(component, SyncPoint::WAIT_FOR_ALL, params->timeout_sec,
-        params->timeout_nsec);
-  }
-  pthread_exit(NULL);
-}
-
 /** get a SyncBarrier, register as emitter and emit */
 void * start_barrier_emitter_thread(void * data) {
   waiter_thread_params *params = (waiter_thread_params *)data;
-  char *comp;
-  asprintf(&comp, "emitter %u", params->thread_nr);
-  string component = comp;
-  free(comp);
+  string component = "emitter " + to_string(params->thread_nr);
   RefPtr<SyncPoint> sp;
   EXPECT_NO_THROW(sp = params->manager->get_syncpoint(component, params->sp_identifier));
   sp->register_emitter(component);
@@ -657,15 +708,17 @@ TEST_F(SyncBarrierTest,WaitWithNoRegisteredEmitter)
   waiter_thread_params *params[num_waiter_threads];
   for (uint i = 0; i < num_waiter_threads; i++) {
     params[i] = new waiter_thread_params();
+    params[i]->type = SyncPoint::WAIT_FOR_ALL;
+    params[i]->component = "component " + to_string(i);
     params[i]->manager = manager;
     params[i]->thread_nr = i;
     params[i]->num_wait_calls = num_wait_calls;
     params[i]->sp_identifier = barrier_id;
-    pthread_create(&waiter_threads[i], &attrs, start_barrier_waiter_thread, params[i]);
-    usleep(10000);
+    pthread_create(&waiter_threads[i], &attrs, start_waiter_thread, params[i]);
   }
   for (uint i = 0; i < num_waiter_threads; i++) {
-    ASSERT_EQ(0, pthread_tryjoin_np(waiter_threads[i], NULL));
+    ASSERT_TRUE(wait_for_finished(params[i]));
+    pthread_join(waiter_threads[i], NULL);
     delete params[i];
   }
 }
@@ -694,33 +747,31 @@ TEST_F(SyncBarrierTest, WaitForAllEmitters)
   waiter_thread_params *params[num_waiter_threads];
   for (uint i = 0; i < num_waiter_threads; i++) {
     params[i] = new waiter_thread_params();
+    params[i]->component = "component " + to_string(i);
+    params[i]->type = SyncPoint::WAIT_FOR_ALL;
     params[i]->manager = manager;
     params[i]->thread_nr = i;
     params[i]->num_wait_calls = num_wait_calls;
     params[i]->sp_identifier = barrier_id;
-    pthread_create(&waiter_threads[i], &attrs, start_barrier_waiter_thread, params[i]);
-    usleep(10000);
+    pthread_create(&waiter_threads[i], &attrs, start_waiter_thread, params[i]);
   }
 
-  sleep(1);
   for (uint i = 0; i < num_waiter_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(waiter_threads[i], NULL));
+    EXPECT_TRUE(wait_for_running(params[i]));
   }
 
   em1.emit();
 
-  sleep(1);
   for (uint i = 0; i < num_waiter_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(waiter_threads[i], NULL));
+    EXPECT_EQ(RUNNING, params[i]->status);
   }
 
   em1.emit();
-
   em2.emit();
 
-  sleep(1);
   for (uint i = 0; i < num_waiter_threads; i++) {
-    ASSERT_EQ(0, pthread_tryjoin_np(waiter_threads[i], NULL));
+    ASSERT_TRUE(wait_for_finished(params[i]));
+    pthread_join(waiter_threads[i], NULL);
     delete params[i];
   }
 }
@@ -748,54 +799,55 @@ TEST_F(SyncBarrierTest, BarriersAreIndependent)
   waiter_thread_params *params1[num_waiter_threads];
   for (uint i = 0; i < num_waiter_threads; i++) {
     params1[i] = new waiter_thread_params();
+    params1[i]->component = "component " + to_string(i);
+    params1[i]->type = SyncPoint::WAIT_FOR_ALL;
     params1[i]->manager = manager;
     params1[i]->thread_nr = i;
     params1[i]->num_wait_calls = num_wait_calls;
     params1[i]->sp_identifier = barrier1_id;
-    pthread_create(&waiter_threads1[i], &attrs, start_barrier_waiter_thread,
+    pthread_create(&waiter_threads1[i], &attrs, start_waiter_thread,
       params1[i]);
-    usleep(10000);
   }
 
   pthread_t waiter_threads2[num_waiter_threads];
   waiter_thread_params *params2[num_waiter_threads];
   for (uint i = 0; i < num_waiter_threads; i++) {
     params2[i] = new waiter_thread_params();
+    params2[i]->component = "component " + to_string(i);
+    params2[i]->type = SyncPoint::WAIT_FOR_ALL;
     params2[i]->manager = manager;
     params2[i]->thread_nr = num_waiter_threads + i;
     params2[i]->num_wait_calls = num_wait_calls;
     params2[i]->sp_identifier = barrier2_id;
-    pthread_create(&waiter_threads2[i], &attrs, start_barrier_waiter_thread,
+    pthread_create(&waiter_threads2[i], &attrs, start_waiter_thread,
       params2[i]);
-    usleep(10000);
-  }
-
-  sleep(1);
-  for (uint i = 0; i < num_waiter_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(waiter_threads1[i], NULL));
   }
 
   for (uint i = 0; i < num_waiter_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(waiter_threads2[i], NULL));
+    EXPECT_TRUE(wait_for_running(params1[i]));
+  }
+
+  for (uint i = 0; i < num_waiter_threads; i++) {
+    EXPECT_TRUE(wait_for_running(params2[i]));
   }
 
   em1.emit();
 
-  sleep(1);
   for (uint i = 0; i < num_waiter_threads; i++) {
-    ASSERT_EQ(0, pthread_tryjoin_np(waiter_threads1[i], NULL));
+    ASSERT_TRUE(wait_for_finished(params1[i]));
+    pthread_join(waiter_threads1[i], NULL);
     delete params1[i];
   }
 
   for (uint i = 0; i < num_waiter_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(waiter_threads2[i], NULL));
+    EXPECT_EQ(RUNNING, params2[i]->status);
   }
 
   em2.emit();
 
-  sleep(1);
   for (uint i = 0; i < num_waiter_threads; i++) {
-    ASSERT_EQ(0, pthread_tryjoin_np(waiter_threads2[i], NULL));
+    ASSERT_TRUE(wait_for_finished(params2[i]));
+    pthread_join(waiter_threads2[i], NULL);
     delete params2[i];
   }
 }
@@ -816,35 +868,40 @@ TEST_F(SyncBarrierTest, SyncBarrierHierarchy)
   uint num_threads = identifiers.size();
   pthread_t threads[num_threads];
   waiter_thread_params *params[num_threads];
+  Barrier *barrier = new Barrier(num_threads + 1);
   for (uint i = 0; i < num_threads; i++) {
     params[i] = new waiter_thread_params();
+    params[i]->component = "component " + to_string(i);
+    params[i]->type = SyncPoint::WAIT_FOR_ALL;
     params[i]->manager = manager;
     params[i]->thread_nr = i;
     params[i]->num_wait_calls = 1;
     params[i]->sp_identifier = identifiers.at(i);
-    pthread_create(&threads[i], &attrs, start_barrier_waiter_thread, params[i]);
+    params[i]->start_barrier = barrier;
+    pthread_create(&threads[i], &attrs, start_waiter_thread, params[i]);
   }
 
-  usleep(10000);
+  barrier->wait();
+  delete barrier;
 
   for (uint i = 0; i < num_threads; i++) {
-    ASSERT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+    EXPECT_TRUE(wait_for_running(params[i]));
   }
+
   em1.emit();
-  usleep(10000);
   for (uint i = 0; i < num_threads; i++) {
-    ASSERT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+    ASSERT_EQ(RUNNING, params[i]->status);
   }
   em2.emit();
-  usleep(10000);
   /* The first waiters should be unblocked */
   for (uint i = 0; i < num_threads - 2 ; i++) {
-    ASSERT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+    ASSERT_TRUE(wait_for_finished(params[i]));
+    pthread_join(threads[i], NULL);
     delete params[i];
   }
   /* The last two waiters should still be waiting */
   for (uint i = num_threads - 2; i < num_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+    EXPECT_EQ(RUNNING, params[i]->status);
     pthread_cancel(threads[i]);
     ASSERT_EQ(0, pthread_join(threads[i], NULL));
     delete params[i];
@@ -884,59 +941,71 @@ TEST_F(SyncPointManagerTest, OneEmitterRegistersForMultipleSyncPointsHierarchyTe
   waiter_thread_params *params1 = new waiter_thread_params();
   params1->manager = manager;
   params1->component = id_waiter1;
+  params1->type = SyncPoint::WAIT_FOR_ALL;
   params1->num_wait_calls = 1;
   params1->sp_identifier = id_sp1;
 
   waiter_thread_params *params2 = new waiter_thread_params();
   params2->manager = manager;
   params2->component = id_waiter2;
+  params2->type = SyncPoint::WAIT_FOR_ALL;
   params2->num_wait_calls = 1;
   params2->sp_identifier = id_sp2;
 
   waiter_thread_params *params3 = new waiter_thread_params();
   params3->manager = manager;
   params3->component = id_waiter3;
+  params3->type = SyncPoint::WAIT_FOR_ALL;
   params3->num_wait_calls = 1;
   params3->sp_identifier = id_sp_pred;
 
   pthread_t pthread1;
-  pthread_create(&pthread1, &attrs, start_barrier_waiter_thread, params1);
+  pthread_create(&pthread1, &attrs, start_waiter_thread, params1);
   pthread_t pthread2;
-  pthread_create(&pthread2, &attrs, start_barrier_waiter_thread, params2);
+  pthread_create(&pthread2, &attrs, start_waiter_thread, params2);
   pthread_t pthread3;
-  pthread_create(&pthread3, &attrs, start_barrier_waiter_thread, params3);
+  pthread_create(&pthread3, &attrs, start_waiter_thread, params3);
+  EXPECT_TRUE(wait_for_running(params1));
+  EXPECT_TRUE(wait_for_running(params2));
+  EXPECT_TRUE(wait_for_running(params3));
 
-  usleep(10000);
   sp1->emit(id_emitter);
-  usleep(10000);
-  ASSERT_EQ(0, pthread_tryjoin_np(pthread1, NULL));
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread2, NULL));
-  // this should be EBUSY as the component has registered twice for '/test'
+
+  ASSERT_TRUE(wait_for_finished(params1));
+  ASSERT_FALSE(wait_for_finished(params2, 0, 10 * pow(10, 6)));
+  // this should be waiting as the component has registered twice for '/test'
   // and thus should emit '/test' also twice (by hierarchical emit calls)
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread3, NULL));
+  ASSERT_FALSE(wait_for_finished(params3, 0, 10 * pow(10, 6)));
   sp2->emit(id_emitter);
-  usleep(10000);
-  ASSERT_EQ(0, pthread_tryjoin_np(pthread2, NULL));
-  ASSERT_EQ(0, pthread_tryjoin_np(pthread3, NULL));
+  ASSERT_TRUE(wait_for_finished(params2, 0, 10 * pow(10, 6)));
+  ASSERT_TRUE(wait_for_finished(params3, 0, 10 * pow(10, 6)));
+
+  pthread_join(pthread1, NULL);
+  pthread_join(pthread2, NULL);
+  pthread_join(pthread3, NULL);
 
   sp2->unregister_emitter(id_emitter);
   EXPECT_EQ(1, sp1->get_emitters().count(id_emitter));
   EXPECT_EQ(0, sp2->get_emitters().count(id_emitter));
   EXPECT_EQ(1, pred->get_emitters().count(id_emitter));
 
-  pthread_create(&pthread1, &attrs, start_barrier_waiter_thread, params1);
-  pthread_create(&pthread2, &attrs, start_barrier_waiter_thread, params2);
-  pthread_create(&pthread3, &attrs, start_barrier_waiter_thread, params3);
+  pthread_create(&pthread1, &attrs, start_waiter_thread, params1);
+  pthread_create(&pthread2, &attrs, start_waiter_thread, params2);
+  pthread_create(&pthread3, &attrs, start_waiter_thread, params3);
 
-  usleep(10000);
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread1, NULL));
-  ASSERT_EQ(0, pthread_tryjoin_np(pthread2, NULL));
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread3, NULL));
+  ASSERT_TRUE(wait_for_running(params1));
+  ASSERT_TRUE(wait_for_running(params3));
+
+  ASSERT_FALSE(wait_for_finished(params1, 0, 10 * pow(10, 6)));
+  ASSERT_TRUE(wait_for_finished(params2));
+  ASSERT_FALSE(wait_for_finished(params3, 0, 10 * pow(10, 6)));
 
   sp1->emit(id_emitter);
-  usleep(10000);
-  ASSERT_EQ(0, pthread_tryjoin_np(pthread1, NULL));
-  ASSERT_EQ(0, pthread_tryjoin_np(pthread3, NULL));
+  ASSERT_TRUE(wait_for_finished(params1));
+  ASSERT_TRUE(wait_for_finished(params3));
+  pthread_join(pthread1, NULL);
+  pthread_join(pthread2, NULL);
+  pthread_join(pthread3, NULL);
   delete params1;
   delete params2;
   delete params3;
@@ -971,38 +1040,29 @@ TEST_F(SyncPointManagerTest, EmitterEmitsSameSyncPointTwiceTest)
   waiter_thread_params *params1 = new waiter_thread_params();
   params1->manager = manager;
   params1->component = "waiter";
+  params1->type = SyncPoint::WAIT_FOR_ALL;
   params1->num_wait_calls = 1;
   params1->sp_identifier = "/test";
 
   pthread_t pthread1;
-  pthread_create(&pthread1, &attrs, start_barrier_waiter_thread, params1);
+  pthread_create(&pthread1, &attrs, start_waiter_thread, params1);
 
-  usleep(10000);
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread1, NULL));
-
-  sp1->emit("emitter");
-  usleep(10000);
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread1, NULL));
+  EXPECT_FALSE(wait_for_finished(params1, 0, 10 * pow(10, 6)));
 
   sp1->emit("emitter");
-  usleep(10000);
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(pthread1, NULL));
+
+  EXPECT_FALSE(wait_for_finished(params1, 0, 10 * pow(10, 6)));
+
+  sp1->emit("emitter");
+  EXPECT_FALSE(wait_for_finished(params1, 0, 10 * pow(10, 6)));
 
   sp2->emit("emitter");
-  usleep(10000);
-  ASSERT_EQ(0, pthread_tryjoin_np(pthread1, NULL));
+  ASSERT_TRUE(wait_for_finished(params1));
+  pthread_join(pthread1, NULL);
 
   delete params1;
 }
 
-
-/** helper function used for testing reltime_wait() */
-void * call_timed_wait(void *data)
-{
-  SyncPoint * sp = (SyncPoint *)(data);
-  sp->reltime_wait_for_all("waiter", 0, 1000000);
-  return NULL;
-}
 
 /** Test if the component returns when using reltime_wait */
 TEST_F(SyncPointManagerTest, RelTimeWaitTest)
@@ -1011,9 +1071,16 @@ TEST_F(SyncPointManagerTest, RelTimeWaitTest)
   manager->get_syncpoint("waiter", "/test/sp1");
   sp1->register_emitter("emitter");
   pthread_t thread;
-  pthread_create(&thread, NULL, call_timed_wait, (void *) *sp1);
-  usleep(2000000);
-  ASSERT_EQ(0, pthread_tryjoin_np(thread, NULL));
+  waiter_thread_params params;
+  params.manager = manager;
+  params.type = SyncPoint::WAIT_FOR_ALL;
+  params.num_wait_calls = 1;
+  params.timeout_sec = 0;
+  params.timeout_nsec = 100000;
+  params.component = "waiter";
+  params.sp_identifier = "/test/sp1";
+  pthread_create(&thread, NULL, start_waiter_thread, &params);
+  ASSERT_TRUE(wait_for_finished(&params));
   /* The SyncPoint should have logged the error */
   ASSERT_GT(cache_logger_->get_messages().size(), 0);
 
@@ -1024,6 +1091,11 @@ struct emitter_thread_data {
     RefPtr<SyncPointManager> manager;
     std::string name;
     std::string sp_name;
+    atomic<ThreadStatus> status;
+    Mutex mutex_running;
+    WaitCondition cond_running = WaitCondition(&mutex_running);
+    Mutex mutex_finished;
+    WaitCondition cond_finished = WaitCondition(&mutex_finished);
 };
 /// @endcond
 
@@ -1031,9 +1103,17 @@ struct emitter_thread_data {
 void * call_emit(void * data)
 {
   emitter_thread_data * tdata = (emitter_thread_data *) data;
+  tdata->status = RUNNING;
+  tdata->mutex_running.lock();
+  tdata->cond_running.wake_all();
+  tdata->mutex_running.unlock();
   RefPtr<SyncPoint> sp = tdata->manager->get_syncpoint(tdata->name, tdata->sp_name);
   sp->register_emitter(tdata->name);
   sp->emit(tdata->name);
+  tdata->status = FINISHED;
+  tdata->mutex_finished.lock();
+  tdata->cond_finished.wake_all();
+  tdata->mutex_finished.unlock();
   return NULL;
 }
 
@@ -1050,18 +1130,28 @@ TEST_F(SyncPointManagerTest, LockUntilNextWaitTest)
   emitter_params->sp_name = "/test";
   pthread_create(&thread, NULL, call_emit, (void *) emitter_params);
 
-  usleep(2000000);
-
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(thread, NULL));
+  emitter_params->mutex_running.lock();
+  if (emitter_params->status != RUNNING) {
+    ASSERT_TRUE(emitter_params->cond_running.reltimed_wait(1, 0));
+  }
+  emitter_params->mutex_running.unlock();
+  emitter_params->mutex_finished.lock();
+  EXPECT_FALSE(emitter_params->cond_finished.reltimed_wait(0, 100000));
+  emitter_params->mutex_finished.unlock();
 
   pthread_t waiter_thread;
-  pthread_create(&waiter_thread, NULL, call_wait, (void *) *sp);
+  waiter_thread_params waiter_params;
+  waiter_params.manager = manager;
+  waiter_params.component = "component";
+  waiter_params.num_wait_calls = 1;
+  waiter_params.sp_identifier = "/test";
+  pthread_create(&waiter_thread, NULL, start_waiter_thread, &waiter_params);
 
-  usleep(2000000);
-
-  ASSERT_EQ(0, pthread_tryjoin_np(thread, NULL));
-  ASSERT_EQ(0, pthread_tryjoin_np(waiter_thread, NULL));
-
+  emitter_params->mutex_finished.lock();
+  ASSERT_TRUE(emitter_params->status == FINISHED || emitter_params->cond_finished.reltimed_wait(1, 0));
+  emitter_params->mutex_finished.unlock();
+  pthread_join(thread, NULL);
+  pthread_join(waiter_thread, NULL);
   delete emitter_params;
 }
 
@@ -1095,23 +1185,34 @@ TEST_F(SyncPointManagerTest, LockUntilNextWaitWaiterComesFirstTest)
     pthread_create(&emitter_thread[i], NULL, call_emit, (void *) params[i]);
   }
 
-  usleep(2000000);
-
   for (uint i = 0; i < num_emitters; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(emitter_thread[i], NULL));
+    params[i]->mutex_running.lock();
+    if (params[i]->status != RUNNING) {
+      ASSERT_TRUE(params[i]->cond_running.reltimed_wait(1, 0));
+    }
+    params[i]->mutex_running.unlock();
   }
 
   pthread_t waiter_thread;
-  pthread_create(&waiter_thread, NULL, call_wait_for_all, (void *) *sp);
-
-  usleep(2000000);
+  waiter_thread_params thread_params;
+  thread_params.component = "waiter";
+  thread_params.type = SyncPoint::WAIT_FOR_ALL;
+  thread_params.manager = manager;
+  thread_params.thread_nr = 1;
+  thread_params.num_wait_calls = 1;
+  thread_params.sp_identifier = "/test";
+  pthread_create(&waiter_thread, &attrs, start_waiter_thread, &thread_params);
 
   for (uint i = 0; i < num_emitters; i++) {
-    ASSERT_EQ(0, pthread_tryjoin_np(emitter_thread[i], NULL));
+    params[i]->mutex_finished.lock();
+    ASSERT_TRUE(params[i]->status == FINISHED || params[i]->cond_finished.reltimed_wait(1, 0));
+    params[i]->mutex_finished.unlock();
+    pthread_join(emitter_thread[i], NULL);
     delete params[i];
   }
 
-  ASSERT_EQ(0, pthread_tryjoin_np(waiter_thread, NULL));
+  ASSERT_TRUE(wait_for_finished(&thread_params));
+  pthread_join(waiter_thread, NULL);
 }
 
 /** Test whether all waiters are always released at the same time, even if one
@@ -1134,27 +1235,25 @@ TEST_F(SyncPointManagerTest, WaitersAreAlwaysReleasedSimultaneouslyTest)
   pthread_t threads[num_threads];
   waiter_thread_params params[num_threads];
   for (uint i = 0; i < num_threads; i++) {
+    params[i].component = "component " + to_string(i);
     params[i].manager = manager;
+    params[i].type = SyncPoint::WAIT_FOR_ALL;
     params[i].thread_nr = i;
     params[i].num_wait_calls = 1;
     params[i].sp_identifier = sp_identifier;
   }
-  pthread_create(&threads[0], &attrs, start_barrier_waiter_thread, &params[0]);
-  pthread_yield();
-  usleep(10000);
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[0], NULL));
+  pthread_create(&threads[0], &attrs, start_waiter_thread, &params[0]);
+  ASSERT_FALSE(wait_for_finished(&params[0], 0, 10 * pow(10, 6)));
   sp->emit("emitter1");
-  usleep(10000);
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[0], NULL));
-  pthread_create(&threads[1], &attrs, start_barrier_waiter_thread, &params[1]);
-  usleep(10000);
+  ASSERT_FALSE(wait_for_finished(&params[0], 0, 10 * pow(10, 6)));
+  pthread_create(&threads[1], &attrs, start_waiter_thread, &params[1]);
   for (uint i = 0; i < num_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+    ASSERT_FALSE(wait_for_finished(&params[i], 0, 10 * pow(10, 6)));
   }
   sp->emit("emitter2");
-  usleep(10000);
   for (uint i = 0; i < num_threads; i++) {
-    EXPECT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+    ASSERT_TRUE(wait_for_finished(&params[i]));
+    pthread_join(threads[i], NULL);
   }
 }
 
@@ -1171,25 +1270,27 @@ TEST_F(SyncPointManagerTest, WaitersTimeoutSimultaneousReleaseTest)
   string sp_identifier = "/test";
   waiter_thread_params params[num_threads];
   for (uint i = 0; i < num_threads; i++) {
+    params[i].component = "component " + to_string(i);
+    params[i].type = SyncPoint::WAIT_FOR_ALL;
     params[i].manager = manager;
     params[i].thread_nr = i;
     params[i].num_wait_calls = 1;
-    params[i].timeout_sec = 1;
+    params[i].timeout_sec = 0;
+    params[i].timeout_nsec = 100 * pow(10, 6);
     params[i].sp_identifier = sp_identifier;
   }
-  pthread_create(&threads[0], &attrs, start_barrier_waiter_thread, &params[0]);
-  pthread_yield();
-  usleep(10000);
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[0], NULL));
+  pthread_create(&threads[0], &attrs, start_waiter_thread, &params[0]);
+  EXPECT_TRUE(wait_for_running(&params[0]));
   params[1].timeout_sec = 5;
-  pthread_create(&threads[1], &attrs, start_barrier_waiter_thread, &params[1]);
-  usleep(10000);
+  params[1].timeout_nsec = 0;
+  pthread_create(&threads[1], &attrs, start_waiter_thread, &params[1]);
   for (uint i = 0; i < num_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+    EXPECT_TRUE(wait_for_running(&params[i]));
   }
-  sleep(2);
+  wait_for_finished(&params[0], params[0].timeout_sec, params[0].timeout_nsec);
+  wait_for_finished(&params[1], 0, pow(10, 6));
   for (uint i = 0; i < num_threads; i++) {
-    EXPECT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+    pthread_join(threads[i], NULL);
   }
 }
 
@@ -1204,42 +1305,50 @@ TEST_F(SyncPointManagerTest, WaitForOneSeparateTimeoutTest)
   RefPtr<SyncPoint> sp = manager->get_syncpoint("emitter1", "/test");
   sp->register_emitter("emitter1");
   string sp_identifier = "/test";
+  uint num_threads = 2;
+  Barrier * barrier = new Barrier(num_threads + 2);
   pthread_t wait_for_one_thread;
   waiter_thread_params wait_for_one_params;
+  wait_for_one_params.component = "wait_for_one";
+  wait_for_one_params.type = SyncPoint::WAIT_FOR_ONE;
   wait_for_one_params.manager = manager;
   wait_for_one_params.thread_nr = 2;
   wait_for_one_params.num_wait_calls = 1;
   wait_for_one_params.timeout_sec = 0;
-  wait_for_one_params.timeout_nsec = 1000000;
+  wait_for_one_params.timeout_nsec = 100 * pow(10, 6);
+  wait_for_one_params.status = PENDING;
   wait_for_one_params.sp_identifier = sp_identifier;
+  wait_for_one_params.start_barrier = barrier;
   pthread_create(&wait_for_one_thread, &attrs, start_waiter_thread,
     &wait_for_one_params);
-  uint num_threads = 2;
   pthread_t threads[num_threads];
   waiter_thread_params params[num_threads];
   for (uint i = 0; i < num_threads; i++) {
+    params[i].component = "component " + to_string(i);
+    params[i].type = SyncPoint::WAIT_FOR_ALL;
     params[i].manager = manager;
     params[i].thread_nr = i;
     params[i].num_wait_calls = 1;
     params[i].timeout_sec = 1;
+    params[i].timeout_nsec = 0;
     params[i].sp_identifier = sp_identifier;
-    pthread_create(&threads[i], &attrs, start_barrier_waiter_thread,
-      &params[i]);
+    params[i].start_barrier = barrier;
+    pthread_create(&threads[i], &attrs, start_waiter_thread, &params[i]);
   }
-  usleep(10);
+  barrier->wait();
+  EXPECT_TRUE(wait_for_running(&wait_for_one_params));
   for (uint i = 0; i < num_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+    EXPECT_TRUE(wait_for_running(&params[i]));
   }
-  EXPECT_EQ(EBUSY, pthread_tryjoin_np(wait_for_one_thread, NULL));
-  usleep(2 * (uint)(wait_for_one_params.timeout_nsec / 1000));
-  EXPECT_EQ(0, pthread_tryjoin_np(wait_for_one_thread, NULL));
+  EXPECT_TRUE(wait_for_finished(&wait_for_one_params));
   for (uint i = 0; i < num_threads; i++) {
-    EXPECT_EQ(EBUSY, pthread_tryjoin_np(threads[i], NULL));
+    EXPECT_EQ(RUNNING, params[i].status);
   }
-  sleep(params[0].timeout_sec);
   for (uint i = 0; i < num_threads; i++) {
-    EXPECT_EQ(0, pthread_tryjoin_np(threads[i], NULL));
+    EXPECT_TRUE(wait_for_finished(&params[i], params[i].timeout_sec, params[i].timeout_nsec));
+    pthread_join(threads[i], NULL);
   }
+  pthread_join(wait_for_one_thread, NULL);
 }
 
 TEST_F(SyncPointManagerTest, MultipleWaitsWithoutEmitters)
@@ -1247,14 +1356,16 @@ TEST_F(SyncPointManagerTest, MultipleWaitsWithoutEmitters)
   RefPtr<SyncPoint> sp = manager->get_syncpoint("waiter", "/test");
   pthread_t waiter_thread;
   waiter_thread_params thread_params;
+  thread_params.component = "waiter";
+  thread_params.type = SyncPoint::WAIT_FOR_ALL;
   thread_params.manager = manager;
   thread_params.thread_nr = 1;
   thread_params.num_wait_calls = 2;
   thread_params.sp_identifier = "/test";
-  pthread_create(&waiter_thread, &attrs, start_barrier_waiter_thread,
+  pthread_create(&waiter_thread, &attrs, start_waiter_thread,
     &thread_params);
-  usleep(10000);
-  EXPECT_EQ(0, pthread_tryjoin_np(waiter_thread, NULL));
+  ASSERT_TRUE(wait_for_finished(&thread_params));
+  pthread_join(waiter_thread, NULL);
 }
 
 TEST_F(SyncPointManagerTest, ReleaseOfEmitterThrowsException)
@@ -1280,20 +1391,20 @@ TEST_F(SyncPointManagerTest, ReleaseBarrierWaiter)
   sp->register_emitter("emitter");
   pthread_t waiter_thread;
   waiter_thread_params thread_params;
+  thread_params.component = "component 1";
+  thread_params.type = SyncPoint::WAIT_FOR_ALL;
   thread_params.manager = manager;
   thread_params.thread_nr = 1;
   thread_params.num_wait_calls = 1;
   thread_params.sp_identifier = "/test";
-  thread_params.component = "waiter";
   thread_params.timeout_sec = 2;
-  pthread_create(&waiter_thread, &attrs, start_barrier_waiter_thread,
-    &thread_params);
-  usleep(10000);
+  pthread_create(&waiter_thread, &attrs, start_waiter_thread, &thread_params);
+  EXPECT_TRUE(wait_for_running(&thread_params));
   ASSERT_TRUE(sp->watcher_is_waiting("component 1", SyncPoint::WAIT_FOR_ALL));
   pthread_cancel(waiter_thread);
   pthread_join(waiter_thread, NULL);
   ASSERT_TRUE(sp->watcher_is_waiting("component 1", SyncPoint::WAIT_FOR_ALL));
   manager->release_syncpoint("component 1", sp);
   sp = manager->get_syncpoint("component 1", "/test");
-  EXPECT_NO_THROW(sp->reltime_wait_for_all("component 1", 0, 1000000));
+  EXPECT_NO_THROW(sp->reltime_wait_for_all("component 1", 0, pow(10, 6)));
 }

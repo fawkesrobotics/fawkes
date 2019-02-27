@@ -230,7 +230,8 @@ endif
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[C++] $(PARENTDIR)$(TBOLDGRAY)$(subst $(SRCDIR)/,,$<)$(TNORMAL)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
 	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(if $(CFLAGS_$(subst /,_,$*)),$(CFLAGS_$(subst /,_,$*)),$(CFLAGS))  \
-	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
+	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -I$(SRCDIR) \
+	-c -o $(subst ..,__,$@) $(if $(wildcard $(SRCDIR)/$<),$(SRCDIR)/$<,$<)
 	$(SILENT)sed -e '/^[^:]*\//! s/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(DEPFILE).td > $(DEPFILE).d; \
 	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e 's/^ *//' \
 	    -e '/^$$/ d' -e 's/$$/ :/' < $(DEPFILE).td >> $(DEPFILE).d; \
@@ -243,7 +244,8 @@ endif
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[ C ] $(PARENTDIR)$(TBOLDGRAY)$(subst $(SRCDIR)/,,$<)$(TNORMAL)"
 	$(SILENT) mkdir -p $(dir $(subst ..,__,$@))
 	$(SILENT) $(CC) -MD -MF $(DEPFILE).td $(CFLAGS_BASE) $(if $(CFLAGS_$*),$(CFLAGS_$*),$(CFLAGS)) \
-	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) -c -o $(subst ..,__,$@) $<
+	$(addprefix -I,$(INCS_$*)) $(addprefix -I,$(INCDIRS)) \
+	-c -o $(subst ..,__,$@) $(if $(wildcard $(SRCDIR)/$<),$(SRCDIR)/$<,$<)
 	$(SILENT)sed -e '/^[^:]*\//! s/^\([^:]\+\): \(.*\)$$/$(subst /,\/,$(@D))\/\1: \2/' < $(DEPFILE).td > $(DEPFILE).d; \
 	sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' -e 's/^ *//' \
 	    -e '/^$$/ d' -e 's/$$/ :/' < $(DEPFILE).td >> $(DEPFILE).d; \

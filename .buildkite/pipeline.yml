@@ -33,6 +33,7 @@ steps:
   - label: ":fedora: Fedora"
     command:
       - .buildkite/build
+      - .buildkite/test
       - .buildkite/annotate
     plugins:
       - *merged-pr-plugin
@@ -44,6 +45,7 @@ steps:
   - label: ":ubuntu: Ubuntu"
     command:
       - .buildkite/build
+      - .buildkite/test
       - .buildkite/annotate
     plugins:
       - *merged-pr-plugin
