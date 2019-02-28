@@ -30,14 +30,12 @@ CLEAN_FILES=XABSL
 all:
 
 ifeq ($(OBJSSUBMAKE),1)
-all: get-xabsl
 
 download-xabsl:
 	$(SILENT)cd $(SRCDIR); \
 	$(download-files)
 
-.PHONY: get-xabsl
-get-xabsl: $(if $(wildcard $(addprefix $(SRCDIR)/,$(notdir $(URLS_xabsl)))),,download-xabsl)
+$(SRCDIR)/XABSL: $(if $(wildcard $(SRCDIR)/$(XABSL_FILE)),,download-xabsl)
 	$(SILENT)if [ ! -d $(SRCDIR)/XABSL ]; then \
 		cd $(SRCDIR); \
 		echo -e "$(INDENT_PRINT)--- Unpacking $(XABSL_FILE)"; \
@@ -63,6 +61,8 @@ OBJS_all = $(OBJS_libxabsl) $(OBJS_xabsl) $(XABSL_intermediate)
 
 XABSL_intermediate = $(XABSLDIR)/agent.xabslc
 TARGETS_all += $(XABSL_intermediate)
+
+$(addprefix XABSL/Xabsl/XabslEngine/Xabsl,$(addsuffix .cpp,$(XABSL_SOURCES))): | $(SRCDIR)/XABSL
 
 %.xabslc: %.xabsl
 	$(SILENT)touch $(SRCDIR)/XABSL/Xabsl/compiler/timestamp
