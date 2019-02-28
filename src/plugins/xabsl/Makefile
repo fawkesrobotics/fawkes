@@ -23,7 +23,7 @@ CFLAGS = -I$(SRCDIR)/XABSL/Xabsl -DXABSLDIR=\"$(XABSLDIR)/\"
 XABSL_FILE_STEM = XABSL-Soccer
 XABSL_FILE = $(XABSL_FILE_STEM).zip
 URL_BASE=https://files.fawkesrobotics.org/projects/xabsl
-URLS_xabsl = $(addprefix $(URL_BASE)/,$(XABSL_FILE) $(XABSL_FILE_STEM).patch)
+URLS_xabsl = $(URL_BASE)/$(XABSL_FILE)
 
 all:
 
