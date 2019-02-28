@@ -389,11 +389,11 @@
 
 (defrule mutex-lock-auto-renew-done-but-lock-open
 	?mf <- (mutex (name ?name) (state OPEN)
-	              (request RENEW-LOCK) (response ACQUIRED)
+	              (request RENEW-LOCK) (response ACQUIRED|REJECTED)
 	              (pending-requests AUTO-RENEW-PROC $?pending-requests))
   =>
-  (printout error "Renewed " ?name " but lock has expired in the meantime. "
-                  "LOST LOCK!" crlf)
+  (printout error "Received response to renewal request for " ?name
+                  " but lock has expired in the meantime. " crlf)
   (modify ?mf (request NONE) (response NONE) (pending-requests ?pending-requests))
 )
 
