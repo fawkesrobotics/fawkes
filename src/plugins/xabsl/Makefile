@@ -25,6 +25,8 @@ XABSL_FILE = $(XABSL_FILE_STEM).zip
 URL_BASE=https://files.fawkesrobotics.org/projects/xabsl
 URLS_xabsl = $(URL_BASE)/$(XABSL_FILE)
 
+CLEAN_FILES=XABSL
+
 all:
 
 ifeq ($(OBJSSUBMAKE),1)
