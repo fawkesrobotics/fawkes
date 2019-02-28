@@ -42,6 +42,9 @@ $(SRCDIR)/XABSL: $(if $(wildcard $(SRCDIR)/$(XABSL_FILE)),,download-xabsl)
 		unzip -q -d $(SRCDIR)/XABSL $(XABSL_FILE); \
 		echo -e "$(INDENT_PRINT)--- Patching XABSL lib for Fawkes compatibility"; \
 		patch -s -d $(SRCDIR)/XABSL -p1 < $(SRCDIR)/$(XABSL_FILE_STEM).patch; \
+		if type -p dos2unix >/dev/null 2>&1; then \
+			dos2unix -q -k -o $(SRCDIR)/XABSL/Xabsl/compiler/xabsl.rb; \
+		fi; \
 	fi
 endif
 
