@@ -22,8 +22,8 @@ XABSLDIR=$(abspath $(SRCDIR)/xabsl-code/)
 CFLAGS = -I$(SRCDIR)/XABSL/Xabsl -DXABSLDIR=\"$(XABSLDIR)/\"
 XABSL_FILE_STEM = XABSL-Soccer
 XABSL_FILE = $(XABSL_FILE_STEM).zip
-URLS_xabsl = http://robocup.rwth-aachen.de/files/sourcecode/$(XABSL_FILE) \
-	     http://robocup.rwth-aachen.de/files/sourcecode/$(XABSL_FILE_STEM).patch
+URL_BASE=https://files.fawkesrobotics.org/projects/xabsl
+URLS_xabsl = $(addprefix $(URL_BASE)/,$(XABSL_FILE) $(XABSL_FILE_STEM).patch)
 
 all:
 
