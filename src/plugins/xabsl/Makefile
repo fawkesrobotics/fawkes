@@ -2,7 +2,7 @@
 #            Makefile Build System for Fawkes: XABSL Plugin
 #                            -------------------
 #   Created on Wed Aug 06 14:24:52 2008
-#   Copyright (C) 2006-2008 by Tim Niemueller, AllemaniACs RoboCup Team
+#   Copyright (C) 2006-2019 by Tim Niemueller [www.niemueller.org]
 #
 #*****************************************************************************
 #
@@ -51,16 +51,16 @@ endif
 XABSL_SOURCES=Action Agent BooleanExpression DecimalExpression Engine \
 	      EnumeratedExpression Option Parameters State Statement \
 	      Symbols Tools
-OBJS_libxabsl = $(addprefix XABSL/Xabsl/XabslEngine/Xabsl,$(addsuffix .o,$(XABSL_SOURCES)))
-LIBS_all = $(LIBDIR)/libxabsl.so
+OBJS_libfawkesxabsl = $(addprefix XABSL/Xabsl/XabslEngine/Xabsl,$(addsuffix .o,$(XABSL_SOURCES)))
+LIBS_all = $(LIBDIR)/libfawkesxabsl.so
 LIBS_build = $(LIBS_all)
 
-LIBS_xabsl = xabsl ObjectPositionInterface SkillerInterface
+LIBS_xabsl = fawkesxabsl ObjectPositionInterface SkillerInterface
 OBJS_xabsl = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))))
 PLUGINS_all = $(PLUGINDIR)/xabsl.so
 PLUGINS_build = $(PLUGINS_all)
 
-OBJS_all = $(OBJS_libxabsl) $(OBJS_xabsl) $(XABSL_intermediate)
+OBJS_all = $(OBJS_libfawkesxabsl) $(OBJS_xabsl) $(XABSL_intermediate)
 
 XABSL_intermediate = $(XABSLDIR)/agent.xabslc
 TARGETS_all += $(XABSL_intermediate)
