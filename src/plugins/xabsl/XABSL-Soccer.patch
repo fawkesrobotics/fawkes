@@ -303,7 +303,8 @@ diff -urN XABSL/Xabsl/compiler/xabsl.rb my-XABSL/Xabsl/compiler/xabsl.rb
 -require 'win32/registry'
 +#require 'win32/registry'
  require 'vcproj'
- require 'ftools'
+-require 'ftools'
++require 'fileutils'
  
 @@ -137,11 +137,11 @@
  					out << "#{option_symbol.identifier} #{option_symbol.value_symbols.size}"
@@ -922,7 +923,7 @@ diff -urN XABSL/XabslExampleAgentTeam/MyBasicBehaviors.cpp my-XABSL/XabslExample
 +++ my-XABSL/XabslExampleAgentTeam/MyBasicBehaviors.cpp	2018-05-29 23:23:13.906907767 +0200
 @@ -6,6 +6,7 @@
      
-       author: Martin Lötzsch
+       author: Martin LÃ¶tzsch
  ===========================================================================*/
 +/// @cond XABSL
  
@@ -976,7 +977,7 @@ diff -urN XABSL/XabslExampleAgentTeam/WorldState.cpp my-XABSL/XabslExampleAgentT
 +++ my-XABSL/XabslExampleAgentTeam/WorldState.cpp	2018-05-29 23:23:13.907907776 +0200
 @@ -6,6 +6,7 @@
      
-       author: Martin Lötzsch
+       author: Martin LÃ¶tzsch
  ===========================================================================*/
 +/// @cond XABSL
  
