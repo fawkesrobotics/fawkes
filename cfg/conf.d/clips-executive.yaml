@@ -142,6 +142,8 @@ clips-executive:
             files:
               - execmon/stalled-sequential-plan.clp
               - execmon/stalled-action.clp
+              - execmon/temporal-missed-dispatch.clp
+              - execmon/temporal-over-duration.clp
               - test-scenario/execution-monitoring.clp
 
       # Map plan actions to skill strings, used by skill action execution
