@@ -25,6 +25,7 @@
 #define _INTERFACE_FIELD_POINTER_H_
 
 #include <interface/interface.h>
+#include <interface/types.h>
 
 namespace fawkes {
 
@@ -42,7 +43,7 @@ template <typename FieldType>
    * @param name name of the field
    * @param value pointer to the value of the field
    */
-  InterfaceFieldPointer(Interface::interface_fieldtype_t type,
+  InterfaceFieldPointer(interface_fieldtype_t type,
 			const char *name,
 			FieldType *value)
   {
@@ -54,7 +55,7 @@ template <typename FieldType>
   /** Get the type of the field.
    * @return type of the field
    */
-  Interface::interface_fieldtype_t get_type() const
+  interface_fieldtype_t get_type() const
   {
     return type_;
   }
@@ -84,7 +85,7 @@ template <typename FieldType>
   }
 
  private:
-  Interface::interface_fieldtype_t  type_;
+  interface_fieldtype_t             type_;
   const char                       *name_;
   volatile FieldType               *value_;
 };

@@ -28,6 +28,7 @@ module(..., fawkes.modinit.register_all);
 --skillenv.use_skill("skills.generic.goto")
 skillenv.use_skill("skills.generic.say")
 skillenv.use_skill("skills.generic.fake_goto")
+skillenv.use_skill("skills.generic.fake_relgoto")
 
 if _G.HAVE_ROS then
    local action_skill = require("skiller.ros.action_skill")
