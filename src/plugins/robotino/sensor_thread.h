@@ -23,12 +23,12 @@
 #ifndef _PLUGINS_ROBOTINO_SENSOR_THREAD_H_
 #define _PLUGINS_ROBOTINO_SENSOR_THREAD_H_
 
-#include <core/threading/thread.h>
+#include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
-#include <aspect/blackboard.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 #include <string>
 #include <vector>
@@ -37,22 +37,21 @@ class RobotinoComThread;
 class RobotinoActThread;
 
 namespace fawkes {
-	class BatteryInterface;
-	class RobotinoSensorInterface;
-	class IMUInterface;
-}
+class BatteryInterface;
+class RobotinoSensorInterface;
+class IMUInterface;
+} // namespace fawkes
 
-
-class RobotinoSensorThread
-: public fawkes::Thread,
-	public fawkes::BlockedTimingAspect,
-	public fawkes::LoggingAspect,
-	public fawkes::ClockAspect,
-	public fawkes::ConfigurableAspect,
-	public fawkes::BlackBoardAspect
+class RobotinoSensorThread : public fawkes::Thread,
+                             public fawkes::BlockedTimingAspect,
+                             public fawkes::LoggingAspect,
+                             public fawkes::ClockAspect,
+                             public fawkes::ConfigurableAspect,
+                             public fawkes::BlackBoardAspect
 {
 	friend RobotinoActThread;
- public:
+
+public:
 	RobotinoSensorThread(RobotinoComThread *com_thread);
 
 	virtual void init();
@@ -60,27 +59,29 @@ class RobotinoSensorThread
 	virtual void finalize();
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private: // methods
+private: // methods
 	void process_sensor_msgs();
 	void update_distances(float *voltages);
 
 	// Voltage to distance data points
-	static const std::vector<std::pair<double, double> > voltage_to_dist_dps_;
+	static const std::vector<std::pair<double, double>> voltage_to_dist_dps_;
 
-
- private: // members
+private: // members
 	RobotinoComThread *com_;
 
-	bool            cfg_enable_gyro_;
-	std::string     cfg_imu_iface_id_;
+	bool        cfg_enable_gyro_;
+	std::string cfg_imu_iface_id_;
 
-	fawkes::BatteryInterface        *batt_if_;
+	fawkes::BatteryInterface *       batt_if_;
 	fawkes::RobotinoSensorInterface *sens_if_;
-	fawkes::IMUInterface            *imu_if_;
-
+	fawkes::IMUInterface *           imu_if_;
 };
-
 
 #endif

@@ -23,48 +23,49 @@
 #ifndef _PLUGINS_ROBOTINO_IR_PCL_THREAD_H_
 #define _PLUGINS_ROBOTINO_IR_PCL_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <aspect/pointcloud.h>
-#include <pcl_utils/utils.h>
-
+#include <core/threading/thread.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-
+#include <pcl_utils/utils.h>
 
 namespace fawkes {
-  class RobotinoSensorInterface;
+class RobotinoSensorInterface;
 }
 
-class RobotinoIrPclThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::PointCloudAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect
+class RobotinoIrPclThread : public fawkes::Thread,
+                            public fawkes::BlockedTimingAspect,
+                            public fawkes::BlackBoardAspect,
+                            public fawkes::PointCloudAspect,
+                            public fawkes::LoggingAspect,
+                            public fawkes::ConfigurableAspect
 {
- public:
-  RobotinoIrPclThread();
+public:
+	RobotinoIrPclThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private: // members
-  fawkes::RobotinoSensorInterface *sens_if_;
+private: // members
+	fawkes::RobotinoSensorInterface *sens_if_;
 
-  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> > pcl_xyz_;
+	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ>> pcl_xyz_;
 
-  float *angle_sines_;
-  float *angle_cosines_;
+	float *angle_sines_;
+	float *angle_cosines_;
 };
-
 
 #endif

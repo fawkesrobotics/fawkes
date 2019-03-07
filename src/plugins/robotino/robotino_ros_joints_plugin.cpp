@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "ros_joints_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,15 +31,14 @@ using namespace fawkes;
  */
 class RobotinoRosJointsPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit RobotinoRosJointsPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new RobotinoRosJointsThread());
-  }
+	explicit RobotinoRosJointsPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RobotinoRosJointsThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Publish Robotino joint info via ROS (for model)")

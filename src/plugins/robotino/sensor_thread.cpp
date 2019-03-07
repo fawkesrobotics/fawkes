@@ -20,11 +20,12 @@
  */
 
 #include "sensor_thread.h"
+
 #include "com_thread.h"
 
 #include <interfaces/BatteryInterface.h>
-#include <interfaces/RobotinoSensorInterface.h>
 #include <interfaces/IMUInterface.h>
+#include <interfaces/RobotinoSensorInterface.h>
 
 using namespace fawkes;
 
@@ -36,34 +37,40 @@ using namespace fawkes;
  */
 
 /// taken from Robotino API2 DistanceSensorImpl.hpp
-const std::vector<std::pair<double, double> > VOLTAGE_TO_DIST_DPS =
-	{
-		{0.3 , 0.41},	{0.39, 0.35},	{0.41, 0.30},	{0.5 , 0.25},	{0.75, 0.18},
-		{0.8 , 0.16},	{0.95, 0.14},	{1.05, 0.12},	{1.3 , 0.10},	{1.4 , 0.09},
-		{1.55, 0.08},	{1.8 , 0.07},	{2.35, 0.05},	{2.55, 0.04}
-	};
-
+const std::vector<std::pair<double, double>> VOLTAGE_TO_DIST_DPS = {{0.3, 0.41},
+                                                                    {0.39, 0.35},
+                                                                    {0.41, 0.30},
+                                                                    {0.5, 0.25},
+                                                                    {0.75, 0.18},
+                                                                    {0.8, 0.16},
+                                                                    {0.95, 0.14},
+                                                                    {1.05, 0.12},
+                                                                    {1.3, 0.10},
+                                                                    {1.4, 0.09},
+                                                                    {1.55, 0.08},
+                                                                    {1.8, 0.07},
+                                                                    {2.35, 0.05},
+                                                                    {2.55, 0.04}};
 
 /** Constructor.
  * @param com_thread communication thread to trigger for writing data
  */
 RobotinoSensorThread::RobotinoSensorThread(RobotinoComThread *com_thread)
-	: Thread("RobotinoSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-	  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
+: Thread("RobotinoSensorThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
 	com_ = com_thread;
 }
 
-
 void
 RobotinoSensorThread::init()
 {
-	cfg_enable_gyro_ = config->get_bool("/hardware/robotino/gyro/enable");
+	cfg_enable_gyro_  = config->get_bool("/hardware/robotino/gyro/enable");
 	cfg_imu_iface_id_ = config->get_string("/hardware/robotino/gyro/interface_id");
 
 	batt_if_ = NULL;
 	sens_if_ = NULL;
-	imu_if_ = NULL;
+	imu_if_  = NULL;
 
 	batt_if_ = blackboard->open_for_writing<BatteryInterface>("Robotino");
 	sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
@@ -72,7 +79,6 @@ RobotinoSensorThread::init()
 		imu_if_ = blackboard->open_for_writing<IMUInterface>(cfg_imu_iface_id_.c_str());
 	}
 }
-
 
 void
 RobotinoSensorThread::finalize()
@@ -99,12 +105,12 @@ RobotinoSensorThread::loop()
 		sens_if_->set_analog_in(data.analog_in);
 		update_distances(data.ir_voltages);
 		sens_if_->write();
-		
+
 		batt_if_->set_voltage(data.bat_voltage);
 		batt_if_->set_current(data.bat_current);
 		batt_if_->set_absolute_soc(data.bat_absolute_soc);
 		batt_if_->write();
-		
+
 		if (cfg_enable_gyro_) {
 			if (data.imu_enabled) {
 				imu_if_->set_angular_velocity(data.imu_angular_velocity);
@@ -115,7 +121,7 @@ RobotinoSensorThread::loop()
 				if (fabs(data.imu_angular_velocity[0] + 1.) > 0.00001) {
 					imu_if_->set_linear_acceleration(0, -1.);
 					imu_if_->set_angular_velocity(0, -1.);
-					imu_if_->set_angular_velocity(2,  0.);
+					imu_if_->set_angular_velocity(2, 0.);
 					imu_if_->set_orientation(0, -1.);
 					imu_if_->write();
 				}
@@ -124,19 +130,16 @@ RobotinoSensorThread::loop()
 	}
 }
 
-
 void
 RobotinoSensorThread::process_sensor_msgs()
 {
 	// process command messages
-	while (! sens_if_->msgq_empty()) {
+	while (!sens_if_->msgq_empty()) {
 		if (RobotinoSensorInterface::SetBumperEStopEnabledMessage *msg =
-		    sens_if_->msgq_first_safe(msg))
-		{
+		      sens_if_->msgq_first_safe(msg)) {
 			com_->set_bumper_estop_enabled(msg->is_enabled());
 		} else if (RobotinoSensorInterface::SetDigitalOutputMessage *msg =
-		    sens_if_->msgq_first_safe(msg))
-		{
+		             sens_if_->msgq_first_safe(msg)) {
 			try {
 				com_->set_digital_output(msg->digital_out(), msg->is_enabled());
 			} catch (Exception &e) {
@@ -150,7 +153,7 @@ RobotinoSensorThread::process_sensor_msgs()
 void
 RobotinoSensorThread::update_distances(float *voltages)
 {
-	float dist_m[NUM_IR_SENSORS];
+	float        dist_m[NUM_IR_SENSORS];
 	const size_t num_dps = VOLTAGE_TO_DIST_DPS.size();
 
 	for (int i = 0; i < NUM_IR_SENSORS; ++i) {
@@ -168,17 +171,17 @@ RobotinoSensorThread::update_distances(float *voltages)
 			//    m = dd/dv, x = voltage - lv and b = ld.
 			// cf. http://www.acroname.com/robotics/info/articles/irlinear/irlinear.html
 
-			const double lv = VOLTAGE_TO_DIST_DPS[j  ].first;
-			const double rv = VOLTAGE_TO_DIST_DPS[j+1].first;
+			const double lv = VOLTAGE_TO_DIST_DPS[j].first;
+			const double rv = VOLTAGE_TO_DIST_DPS[j + 1].first;
 
 			if ((voltages[i] >= lv) && (voltages[i] < rv)) {
-				const double ld = VOLTAGE_TO_DIST_DPS[j  ].second;
-				const double rd = VOLTAGE_TO_DIST_DPS[j+1].second;
+				const double ld = VOLTAGE_TO_DIST_DPS[j].second;
+				const double rd = VOLTAGE_TO_DIST_DPS[j + 1].second;
 
 				double dv = rv - lv;
 				double dd = rd - ld;
 
-				// Linear interpolation between 
+				// Linear interpolation between
 				dist_m[i] = (dd / dv) * (voltages[i] - lv) + ld;
 				break;
 			}

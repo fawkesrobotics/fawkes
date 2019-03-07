@@ -23,6 +23,7 @@
 #include "ir_pcl_thread.h"
 
 #include <interfaces/RobotinoSensorInterface.h>
+
 #include <limits>
 
 using namespace fawkes;
@@ -36,72 +37,70 @@ using namespace fawkes;
 
 /** Constructor. */
 RobotinoIrPclThread::RobotinoIrPclThread()
-  : Thread("RobotinoIrPclThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE)
+: Thread("RobotinoIrPclThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE)
 {
 }
-
 
 void
 RobotinoIrPclThread::init()
 {
-  sens_if_ = blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
+	sens_if_ = blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
 
-  sens_if_->read();
+	sens_if_->read();
 
-  pcl_xyz_ = new pcl::PointCloud<pcl::PointXYZ>();
-  pcl_xyz_->is_dense = false;
-  pcl_xyz_->width    = sens_if_->maxlenof_distance();
-  pcl_xyz_->height   = 1;
-  pcl_xyz_->points.resize((size_t)pcl_xyz_->width * (size_t)pcl_xyz_->height);
-  pcl_xyz_->header.frame_id = config->get_string("/hardware/robotino/base_frame");
+	pcl_xyz_           = new pcl::PointCloud<pcl::PointXYZ>();
+	pcl_xyz_->is_dense = false;
+	pcl_xyz_->width    = sens_if_->maxlenof_distance();
+	pcl_xyz_->height   = 1;
+	pcl_xyz_->points.resize((size_t)pcl_xyz_->width * (size_t)pcl_xyz_->height);
+	pcl_xyz_->header.frame_id = config->get_string("/hardware/robotino/base_frame");
 
-  pcl_manager->add_pointcloud("robotino-ir", pcl_xyz_);
+	pcl_manager->add_pointcloud("robotino-ir", pcl_xyz_);
 
-  float angle_offset = (2 * M_PI) / pcl_xyz_->width;
-  angle_sines_   = new float[pcl_xyz_->width];
-  angle_cosines_ = new float[pcl_xyz_->width];
-  for (unsigned int i = 0; i < pcl_xyz_->width; ++i) {
-    angle_sines_[i]   = sinf(angle_offset * i);
-    angle_cosines_[i] = cosf(angle_offset * i);
-  }
+	float angle_offset = (2 * M_PI) / pcl_xyz_->width;
+	angle_sines_       = new float[pcl_xyz_->width];
+	angle_cosines_     = new float[pcl_xyz_->width];
+	for (unsigned int i = 0; i < pcl_xyz_->width; ++i) {
+		angle_sines_[i]   = sinf(angle_offset * i);
+		angle_cosines_[i] = cosf(angle_offset * i);
+	}
 }
-
 
 void
 RobotinoIrPclThread::finalize()
 {
-  pcl_manager->remove_pointcloud("robotino-ir");
-  blackboard->close(sens_if_);
+	pcl_manager->remove_pointcloud("robotino-ir");
+	blackboard->close(sens_if_);
 
-  delete[] angle_sines_;
-  delete[] angle_cosines_;
+	delete[] angle_sines_;
+	delete[] angle_cosines_;
 }
 
 void
 RobotinoIrPclThread::loop()
 {
-  // update sensor values in interface
-  sens_if_->read();
+	// update sensor values in interface
+	sens_if_->read();
 
-  if (sens_if_->changed()) {
-    const Time *ct = sens_if_->timestamp();
-    const float *distances = sens_if_->distance();
+	if (sens_if_->changed()) {
+		const Time * ct        = sens_if_->timestamp();
+		const float *distances = sens_if_->distance();
 
-    pcl::PointCloud<pcl::PointXYZ> &pcl = **pcl_xyz_;
-    pcl.header.seq += 1;
+		pcl::PointCloud<pcl::PointXYZ> &pcl = **pcl_xyz_;
+		pcl.header.seq += 1;
 
-    pcl_utils::set_time(pcl_xyz_, *ct);
+		pcl_utils::set_time(pcl_xyz_, *ct);
 
-    for (unsigned int i = 0; i < pcl_xyz_->width; ++i) {
-      if (distances[i] == 0.) {
-        pcl.points[i].x = pcl.points[i].y = pcl.points[i].z =
-          std::numeric_limits<float>::quiet_NaN();
-      } else {
-        pcl.points[i].x = (distances[i] + 0.2) * angle_cosines_[i];
-        pcl.points[i].y = (distances[i] + 0.2) * angle_sines_[i];
-        pcl.points[i].z = 0.025; // 2.5 cm above ground
-      }
-    }
-  }
+		for (unsigned int i = 0; i < pcl_xyz_->width; ++i) {
+			if (distances[i] == 0.) {
+				pcl.points[i].x = pcl.points[i].y = pcl.points[i].z =
+				  std::numeric_limits<float>::quiet_NaN();
+			} else {
+				pcl.points[i].x = (distances[i] + 0.2) * angle_cosines_[i];
+				pcl.points[i].y = (distances[i] + 0.2) * angle_sines_[i];
+				pcl.points[i].z = 0.025; // 2.5 cm above ground
+			}
+		}
+	}
 }

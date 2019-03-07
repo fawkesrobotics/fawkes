@@ -89,13 +89,22 @@ using namespace fawkes;
 
 /** Constructor. */
 RobotinoComThread::SensorData::SensorData()
-	: seq(0), mot_velocity{0,0,0}, mot_position{0,0,0}, mot_current{0.,0.,0.},
-	  bumper(false), bumper_estop_enabled(false), digital_in{0,0,0,0,0,0,0,0},
-	  digital_out{0,0,0,0,0,0,0,0},
-	  analog_in{0.,0.,0.,0.,0.,0.,0.,0.}, bat_voltage(0.), bat_current(0.),
-	  imu_enabled(false), imu_orientation{0.,0.,0.,0.}, imu_angular_velocity{0.,0.,0.},
-	  imu_angular_velocity_covariance{0.,0.,0.,0.,0.,0.,0.,0.,0.},
-	  ir_voltages{0.,0.,0.,0.,0.,0.,0.,0.,0.}
+: seq(0),
+  mot_velocity{0, 0, 0},
+  mot_position{0, 0, 0},
+  mot_current{0., 0., 0.},
+  bumper(false),
+  bumper_estop_enabled(false),
+  digital_in{0, 0, 0, 0, 0, 0, 0, 0},
+  digital_out{0, 0, 0, 0, 0, 0, 0, 0},
+  analog_in{0., 0., 0., 0., 0., 0., 0., 0.},
+  bat_voltage(0.),
+  bat_current(0.),
+  imu_enabled(false),
+  imu_orientation{0., 0., 0., 0.},
+  imu_angular_velocity{0., 0., 0.},
+  imu_angular_velocity_covariance{0., 0., 0., 0., 0., 0., 0., 0., 0.},
+  ir_voltages{0., 0., 0., 0., 0., 0., 0., 0., 0.}
 {
 }
 
@@ -105,15 +114,15 @@ RobotinoComThread::SensorData::SensorData()
 RobotinoComThread::RobotinoComThread(const char *thread_name)
 : Thread(thread_name, Thread::OPMODE_CONTINUOUS)
 {
-	data_mutex_  = new Mutex();
-	new_data_    = false;
+	data_mutex_ = new Mutex();
+	new_data_   = false;
 
-	vel_mutex_ = new Mutex();
+	vel_mutex_       = new Mutex();
 	vel_last_update_ = new Time();
-	vel_last_zero_ = false;
-	des_vx_    = 0.;
-	des_vy_    = 0.;
-	des_omega_ = 0.;
+	vel_last_zero_   = false;
+	des_vx_          = 0.;
+	des_vy_          = 0.;
+	des_omega_       = 0.;
 
 	set_vx_    = 0.;
 	set_vy_    = 0.;
@@ -121,7 +130,7 @@ RobotinoComThread::RobotinoComThread(const char *thread_name)
 
 	cfg_rb_   = 0.;
 	cfg_rw_   = 0.;
-	cfg_gear_ = 0.;	
+	cfg_gear_ = 0.;
 
 	cfg_trans_accel_ = 0.;
 	cfg_trans_decel_ = 0.;
@@ -129,11 +138,10 @@ RobotinoComThread::RobotinoComThread(const char *thread_name)
 	cfg_rot_decel_   = 0.;
 
 #ifdef USE_VELOCITY_RECORDING
-	f_ = fopen("comdata.csv", "w");
+	f_     = fopen("comdata.csv", "w");
 	start_ = new Time();
 #endif
 }
-
 
 /** Destructor. */
 RobotinoComThread::~RobotinoComThread()
@@ -147,7 +155,6 @@ RobotinoComThread::~RobotinoComThread()
 #endif
 }
 
-
 /** Get all current sensor data.
  * @param sensor_data upon return (true) contains the latest available
  * sensor data
@@ -160,13 +167,12 @@ RobotinoComThread::get_data(SensorData &sensor_data)
 	MutexLocker lock(data_mutex_);
 	if (new_data_) {
 		sensor_data = data_;
-		new_data_ = false;
+		new_data_   = false;
 		return true;
 	} else {
 		return false;
 	}
 }
-
 
 /** Set omni drive layout parameters.
  * @param rb Distance from Robotino center to wheel center in meters
@@ -178,9 +184,8 @@ RobotinoComThread::set_drive_layout(float rb, float rw, float gear)
 {
 	cfg_rb_   = rb;
 	cfg_rw_   = rw;
-	cfg_gear_ = gear;	
+	cfg_gear_ = gear;
 }
-
 
 /** Set the omni drive limits.
  * @param trans_accel maximum acceleration in translation
@@ -189,14 +194,16 @@ RobotinoComThread::set_drive_layout(float rb, float rw, float gear)
  * @param rot_decel maximum deceleration in rotation
  */
 void
-RobotinoComThread::set_drive_limits(float trans_accel, float trans_decel, float rot_accel, float rot_decel)
+RobotinoComThread::set_drive_limits(float trans_accel,
+                                    float trans_decel,
+                                    float rot_accel,
+                                    float rot_decel)
 {
 	cfg_trans_accel_ = trans_accel;
 	cfg_trans_decel_ = trans_decel;
 	cfg_rot_accel_   = rot_accel;
 	cfg_rot_decel_   = rot_decel;
 }
-
 
 /** Set desired velocities.
  * @param vx desired velocity in base_link frame X direction ("forward")
@@ -211,7 +218,6 @@ RobotinoComThread::set_desired_vel(float vx, float vy, float omega)
 	des_omega_ = omega;
 }
 
-
 /** Update velocity values.
  * This method must be called periodically while driving to update the controller.
  * @return true if the method must be called again, false otherwise
@@ -221,8 +227,8 @@ RobotinoComThread::update_velocities()
 {
 	bool set_speed = false;
 
-	Time now(clock);
-	float diff_sec = now - vel_last_update_;
+	Time  now(clock);
+	float diff_sec    = now - vel_last_update_;
 	*vel_last_update_ = now;
 
 	set_vx_    = update_speed(des_vx_, set_vx_, cfg_trans_accel_, cfg_trans_decel_, diff_sec);
@@ -237,12 +243,12 @@ RobotinoComThread::update_velocities()
 	*/
 
 	if (set_vx_ == 0.0 && set_vy_ == 0.0 && set_omega_ == 0.0) {
-		if (! vel_last_zero_) {
-			set_speed = true;
+		if (!vel_last_zero_) {
+			set_speed      = true;
 			vel_last_zero_ = true;
 		}
 	} else {
-		set_speed = true;
+		set_speed      = true;
 		vel_last_zero_ = false;
 	}
 
@@ -253,17 +259,23 @@ RobotinoComThread::update_velocities()
 
 #ifdef USE_VELOCITY_RECORDING
 		{
-			Time now(clock);
+			Time  now(clock);
 			float time_diff = now - start_;
-	
-			fprintf(f_, "%f\t%f\t%f\t%f\t%f\t%f\t%f\n", time_diff,
-			        des_vx_, set_vx_, des_vy_, set_vy_, des_omega_, set_omega_);
+
+			fprintf(f_,
+			        "%f\t%f\t%f\t%f\t%f\t%f\t%f\n",
+			        time_diff,
+			        des_vx_,
+			        set_vx_,
+			        des_vy_,
+			        set_vy_,
+			        des_omega_,
+			        set_omega_);
 		}
 #endif
-
 	}
 
-	return ! vel_last_zero_;
+	return !vel_last_zero_;
 }
 
 float
@@ -281,7 +293,7 @@ RobotinoComThread::update_speed(float des, float set, float accel, float decel, 
 
 	} else if (des <= 0 && set > 0) {
 		const float decrement = std::copysign(decel, set) * diff_sec;
-		if (des < set - decrement ) {
+		if (des < set - decrement) {
 			//logger->log_debug(name(), "    Case 1c  %f  %f  %f", decrement, decel, diff_sec);
 			set -= decrement;
 		} else {
@@ -296,7 +308,7 @@ RobotinoComThread::update_speed(float des, float set, float accel, float decel, 
 			set += increment;
 		} else {
 			//logger->log_debug(name(), "    Case 2b");
-			set  = des;
+			set = des;
 		}
 	} else if (fabs(des) < fabs(set)) {
 		const float decrement = std::copysign(decel, des) * diff_sec;
@@ -305,7 +317,7 @@ RobotinoComThread::update_speed(float des, float set, float accel, float decel, 
 			set -= decrement;
 		} else {
 			//logger->log_debug(name(), "    Case 3b");
-			set  = des;
+			set = des;
 		}
 	}
 
@@ -346,23 +358,23 @@ RobotinoComThread::update_speed(float des, float set, float accel, float decel, 
 //ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 //OF THE POSSIBILITY OF SUCH DAMAGE.
 void
-RobotinoComThread::project( float* m1, float* m2, float* m3, float vx, float vy, float omega ) const
+RobotinoComThread::project(float *m1, float *m2, float *m3, float vx, float vy, float omega) const
 {
 	//Projection matrix
-	static const double v0[2] = { -0.5 * sqrt( 3.0 ),  0.5 };
-	static const double v1[2] = {  0.0              , -1.0 };
-	static const double v2[2] = {  0.5 * sqrt( 3.0 ),  0.5 };
+	static const double v0[2] = {-0.5 * sqrt(3.0), 0.5};
+	static const double v1[2] = {0.0, -1.0};
+	static const double v2[2] = {0.5 * sqrt(3.0), 0.5};
 
 	//Scale omega with the radius of the robot
-	double vOmegaScaled = cfg_rb_ * (double)omega ;
+	double vOmegaScaled = cfg_rb_ * (double)omega;
 
 	//Convert from m/s to RPM
-	const double k = 60.0 * cfg_gear_ / ( 2.0 * M_PI * cfg_rw_ );
+	const double k = 60.0 * cfg_gear_ / (2.0 * M_PI * cfg_rw_);
 
 	//Compute the desired velocity
-	*m1 = static_cast<float>( ( v0[0] * (double)vx + v0[1] * (double)vy + vOmegaScaled ) * k );
-	*m2 = static_cast<float>( ( v1[0] * (double)vx + v1[1] * (double)vy + vOmegaScaled ) * k );
-	*m3 = static_cast<float>( ( v2[0] * (double)vx + v2[1] * (double)vy + vOmegaScaled ) * k );
+	*m1 = static_cast<float>((v0[0] * (double)vx + v0[1] * (double)vy + vOmegaScaled) * k);
+	*m2 = static_cast<float>((v1[0] * (double)vx + v1[1] * (double)vy + vOmegaScaled) * k);
+	*m3 = static_cast<float>((v2[0] * (double)vx + v2[1] * (double)vy + vOmegaScaled) * k);
 }
 
 /** Project single motor speeds to velocity in cartesian coordinates.
@@ -379,15 +391,16 @@ RobotinoComThread::project( float* m1, float* m2, float* m3, float vx, float vy,
  * @throws		RobotinoException if no valid drive layout parameters are available.
  */
 void
-RobotinoComThread::unproject( float* vx, float* vy, float* omega, float m1, float m2, float m3 ) const
+RobotinoComThread::unproject(float *vx, float *vy, float *omega, float m1, float m2, float m3) const
 {
 	//Convert from RPM to mm/s
-	const double k = 60.0 * cfg_gear_ / ( 2.0 * M_PI * cfg_rw_ );
+	const double k = 60.0 * cfg_gear_ / (2.0 * M_PI * cfg_rw_);
 
-	*vx = static_cast<float>( ( (double)m3 - (double)m1 ) / sqrt( 3.0 ) / k );
-	*vy = static_cast<float>( 2.0 / 3.0 * ( (double)m1 + 0.5 * ( (double)m3 - (double)m1 ) - (double)m2 ) / k );
+	*vx = static_cast<float>(((double)m3 - (double)m1) / sqrt(3.0) / k);
+	*vy =
+	  static_cast<float>(2.0 / 3.0 * ((double)m1 + 0.5 * ((double)m3 - (double)m1) - (double)m2) / k);
 
 	double vw = (double)*vy + (double)m2 / k;
 
-	*omega = static_cast<float>( vw / cfg_rb_ );
+	*omega = static_cast<float>(vw / cfg_rb_);
 }
