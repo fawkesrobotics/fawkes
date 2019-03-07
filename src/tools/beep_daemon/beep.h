@@ -23,12 +23,12 @@
 
 class BeepController
 {
- public:
-  BeepController();
+public:
+	BeepController();
 
-  void beep_on(float freq = 1000);
-  void beep_off();
+	void beep_on(float freq = 1000);
+	void beep_off();
 
- private:
-  bool disable_beeping_;
+private:
+	bool disable_beeping_;
 };

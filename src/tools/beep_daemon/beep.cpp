@@ -23,16 +23,16 @@
 
 #include "beep.h"
 
-#include <cstdio>
-#include <cerrno>
-#include <termios.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <cstring>
-#include <sys/ioctl.h>
 #include <linux/kd.h>
-#include <unistd.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
 
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
+#include <fcntl.h>
+#include <termios.h>
+#include <unistd.h>
 
 /* From console_ioctl man page, explained in the beep too by
  * Johnathan Nightingale:
@@ -57,7 +57,7 @@
 /** Constructor. */
 BeepController::BeepController()
 {
-  disable_beeping_ = false;
+	disable_beeping_ = false;
 }
 
 /** Enable beeping.
@@ -66,44 +66,45 @@ BeepController::BeepController()
 void
 BeepController::beep_on(float freq)
 {
-  if (disable_beeping_)  return;
-    
-  int beep_fd = open(CONSOLE_FILE, O_WRONLY);
-  if (beep_fd == -1) {
-    char errstr[1024];
-    strerror_r(errno, errstr, sizeof(errstr));
-    //logger->log_warn(name(), "Could not open console (%s). "
-    //		     "Disabling warning beeps.", errstr);
-    disable_beeping_ = true;
-  } else {
-    if (ioctl(beep_fd, KIOCSOUND, (int)(CLOCK_TICK_RATE/freq)) < 0) {
-      //logger->log_warn(name(), "Starting to beep failed. Disabling warning beeps.");
-      disable_beeping_ = true;
-    }
-    close(beep_fd);
-  }
-}
+	if (disable_beeping_)
+		return;
 
+	int beep_fd = open(CONSOLE_FILE, O_WRONLY);
+	if (beep_fd == -1) {
+		char errstr[1024];
+		strerror_r(errno, errstr, sizeof(errstr));
+		//logger->log_warn(name(), "Could not open console (%s). "
+		//		     "Disabling warning beeps.", errstr);
+		disable_beeping_ = true;
+	} else {
+		if (ioctl(beep_fd, KIOCSOUND, (int)(CLOCK_TICK_RATE / freq)) < 0) {
+			//logger->log_warn(name(), "Starting to beep failed. Disabling warning beeps.");
+			disable_beeping_ = true;
+		}
+		close(beep_fd);
+	}
+}
 
 /** Disable beeping. */
 void
 BeepController::beep_off()
 {
-  if (disable_beeping_)  return;
+	if (disable_beeping_)
+		return;
 
-  int beep_fd = open(CONSOLE_FILE, O_WRONLY);
-  if (beep_fd == -1) {
-    char errstr[1024];
-    strerror_r(errno, errstr, sizeof(errstr));
-    //logger->log_warn(name(), "Could not open console (%s) [stop]. "
-    //		     "Disabling warning beeps.", errstr);
-    disable_beeping_ = true;
-  } else {
-    if (ioctl(beep_fd, KIOCSOUND, 0) < 0) {
-      //logger->log_warn(name(), "Stopping beeping failed. "
-      //	       "Disabling warning beeps.");
-      disable_beeping_ = true;
-    }
-    close(beep_fd);
-  }
+	int beep_fd = open(CONSOLE_FILE, O_WRONLY);
+	if (beep_fd == -1) {
+		char errstr[1024];
+		strerror_r(errno, errstr, sizeof(errstr));
+		//logger->log_warn(name(), "Could not open console (%s) [stop]. "
+		//		     "Disabling warning beeps.", errstr);
+		disable_beeping_ = true;
+	} else {
+		if (ioctl(beep_fd, KIOCSOUND, 0) < 0) {
+			//logger->log_warn(name(), "Stopping beeping failed. "
+			//	       "Disabling warning beeps.");
+			disable_beeping_ = true;
+		}
+		close(beep_fd);
+	}
 }
