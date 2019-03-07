@@ -23,80 +23,79 @@
 #define _PLUGINS_PERCEPTION_TABLETOP_OBJECTS_VISUALIZATION_THREAD_H_
 
 #ifndef HAVE_VISUAL_DEBUGGING
-#  error TabletopVisualizationThread was disabled by build flags
+#	error TabletopVisualizationThread was disabled by build flags
 #endif
 
 #include "visualization_thread_base.h"
 
-#include <core/threading/thread.h>
-#include <core/threading/mutex.h>
-#include <aspect/tf.h>
 #include <aspect/configurable.h>
+#include <aspect/tf.h>
+#include <core/threading/mutex.h>
+#include <core/threading/thread.h>
 #include <plugins/ros/aspect/ros.h>
 
 namespace ros {
-  class Publisher;
+class Publisher;
 }
 
-class TabletopVisualizationThread
-: public TabletopVisualizationThreadBase,
-  public fawkes::Thread,
-  public fawkes::TransformAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ROSAspect
+class TabletopVisualizationThread : public TabletopVisualizationThreadBase,
+                                    public fawkes::Thread,
+                                    public fawkes::TransformAspect,
+                                    public fawkes::ConfigurableAspect,
+                                    public fawkes::ROSAspect
 {
- public:
-  TabletopVisualizationThread();
+public:
+	TabletopVisualizationThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  virtual void visualize(const std::string &frame_id,
-                         Eigen::Vector4f &table_centroid,
-                         Eigen::Vector4f &normal,
-                         V_Vector4f &table_hull_vertices,
-                         V_Vector4f &table_model_vertices,
-                         V_Vector4f &good_table_hull_edges,
-                         M_Vector4f &centroids,
-                         M_Vector4f &cylinder_params,
-                         std::map<unsigned int, double> &obj_confidence,
-                         std::map<unsigned int, signed int>& best_obj_guess) throw();
+	virtual void visualize(const std::string &                 frame_id,
+	                       Eigen::Vector4f &                   table_centroid,
+	                       Eigen::Vector4f &                   normal,
+	                       V_Vector4f &                        table_hull_vertices,
+	                       V_Vector4f &                        table_model_vertices,
+	                       V_Vector4f &                        good_table_hull_edges,
+	                       M_Vector4f &                        centroids,
+	                       M_Vector4f &                        cylinder_params,
+	                       std::map<unsigned int, double> &    obj_confidence,
+	                       std::map<unsigned int, signed int> &best_obj_guess) throw();
 
- private:
-  void triangulate_hull();
+private:
+	void triangulate_hull();
 
- private:
-  fawkes::Mutex mutex_;
-  std::string frame_id_;
-  Eigen::Vector4f table_centroid_;
-  Eigen::Vector4f normal_;
-  V_Vector4f table_hull_vertices_;
-  V_Vector4f table_model_vertices_;
-  V_Vector4f good_table_hull_edges_;
-  V_Vector4f table_triangle_vertices_;
-  M_Vector4f centroids_;
-  M_Vector4f cylinder_params_;
-  std::map<unsigned int, double> obj_confidence_;
-  std::map<unsigned int, signed int> best_obj_guess_;
-  ros::Publisher *vispub_;
+private:
+	fawkes::Mutex                      mutex_;
+	std::string                        frame_id_;
+	Eigen::Vector4f                    table_centroid_;
+	Eigen::Vector4f                    normal_;
+	V_Vector4f                         table_hull_vertices_;
+	V_Vector4f                         table_model_vertices_;
+	V_Vector4f                         good_table_hull_edges_;
+	V_Vector4f                         table_triangle_vertices_;
+	M_Vector4f                         centroids_;
+	M_Vector4f                         cylinder_params_;
+	std::map<unsigned int, double>     obj_confidence_;
+	std::map<unsigned int, signed int> best_obj_guess_;
+	ros::Publisher *                   vispub_;
 #ifdef USE_POSEPUB
-  ros::Publisher *posepub_;
+	ros::Publisher *posepub_;
 #endif
-  size_t last_id_num_;
+	size_t last_id_num_;
 
-  bool         cfg_show_frustrum_;
-  float        cfg_horizontal_va_;
-  float        cfg_vertical_va_;
-  bool         cfg_show_cvxhull_vertices_;
-  bool         cfg_show_cvxhull_line_highlighting_;
-  bool         cfg_show_cvxhull_vertex_ids_;
-  unsigned int cfg_duration_;
-  bool         cfg_cylinder_fitting_;
-  std::string  cfg_base_frame_;
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	bool         cfg_show_frustrum_;
+	float        cfg_horizontal_va_;
+	float        cfg_vertical_va_;
+	bool         cfg_show_cvxhull_vertices_;
+	bool         cfg_show_cvxhull_line_highlighting_;
+	bool         cfg_show_cvxhull_vertex_ids_;
+	unsigned int cfg_duration_;
+	bool         cfg_cylinder_fitting_;
+	std::string  cfg_base_frame_;
+
+public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 };
-
 
 #endif

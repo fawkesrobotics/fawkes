@@ -23,38 +23,40 @@
 #define _PLUGINS_PERCEPTION_TABLETOP_OBJECTS_VISUALIZATION_BASE_H_
 
 #ifndef HAVE_VISUAL_DEBUGGING
-#  error TabletopVisualizationThread was disabled by build flags
+#	error TabletopVisualizationThread was disabled by build flags
 #endif
+
+#include <utils/time/time.h>
 
 #include <Eigen/Core>
 #include <Eigen/StdVector>
-#include <utils/time/time.h>
-
 #include <map>
 
 class TabletopVisualizationThreadBase
 {
- public:
-  /** Aligned vector of vectors/points. */
-  typedef std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f> > V_Vector4f;
-  /** aligned map of vectors. */
-  typedef std::map<unsigned int, Eigen::Vector4f, std::less<unsigned int>,
-        Eigen::aligned_allocator<std::pair<const unsigned int, Eigen::Vector4f>>>
-        M_Vector4f;
-  // Eigen::aligned_allocator<Eigen::Vector4f> 
+public:
+	/** Aligned vector of vectors/points. */
+	typedef std::vector<Eigen::Vector4f, Eigen::aligned_allocator<Eigen::Vector4f>> V_Vector4f;
+	/** aligned map of vectors. */
+	typedef std::map<unsigned int,
+	                 Eigen::Vector4f,
+	                 std::less<unsigned int>,
+	                 Eigen::aligned_allocator<std::pair<const unsigned int, Eigen::Vector4f>>>
+	  M_Vector4f;
+	// Eigen::aligned_allocator<Eigen::Vector4f>
 
-  virtual ~TabletopVisualizationThreadBase();
+	virtual ~TabletopVisualizationThreadBase();
 
-  virtual void visualize(const std::string &frame_id,
-                         Eigen::Vector4f &table_centroid,
-                         Eigen::Vector4f &normal,
-                         V_Vector4f &table_hull_vertices,
-                         V_Vector4f &table_model_vertices,
-                         V_Vector4f &good_table_hull_edges,
-                         M_Vector4f &centroids,
-                         M_Vector4f &cylinder_params,
-                         std::map<unsigned int, double> &obj_confidence,
-                         std::map<unsigned int, signed int>& best_obj_guess) throw() = 0;
+	virtual void visualize(const std::string &                 frame_id,
+	                       Eigen::Vector4f &                   table_centroid,
+	                       Eigen::Vector4f &                   normal,
+	                       V_Vector4f &                        table_hull_vertices,
+	                       V_Vector4f &                        table_model_vertices,
+	                       V_Vector4f &                        good_table_hull_edges,
+	                       M_Vector4f &                        centroids,
+	                       M_Vector4f &                        cylinder_params,
+	                       std::map<unsigned int, double> &    obj_confidence,
+	                       std::map<unsigned int, signed int> &best_obj_guess) throw() = 0;
 };
 
 #endif

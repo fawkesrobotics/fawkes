@@ -20,11 +20,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "tabletop_objects_thread.h"
+
+#include <core/plugin.h>
 #ifdef HAVE_VISUAL_DEBUGGING
-#  include "visualization_thread.h"
+#	include "visualization_thread.h"
 #endif
 
 using namespace fawkes;
@@ -34,21 +34,20 @@ using namespace fawkes;
  */
 class TabletopObjectsPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit TabletopObjectsPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    TabletopObjectsThread *tabobjthr = new TabletopObjectsThread();
-    thread_list.push_back(tabobjthr);
+	explicit TabletopObjectsPlugin(Configuration *config) : Plugin(config)
+	{
+		TabletopObjectsThread *tabobjthr = new TabletopObjectsThread();
+		thread_list.push_back(tabobjthr);
 #ifdef HAVE_VISUAL_DEBUGGING
-    TabletopVisualizationThread *visthr = new TabletopVisualizationThread();
-    tabobjthr->set_visualization_thread(visthr);
-    thread_list.push_back(visthr);
+		TabletopVisualizationThread *visthr = new TabletopVisualizationThread();
+		tabobjthr->set_visualization_thread(visthr);
+		thread_list.push_back(visthr);
 #endif
-  }
+	}
 };
 
 PLUGIN_DESCRIPTION("Detect objects on tabletop using PCL")
