@@ -23,28 +23,29 @@
 #define FAWKES_SRC_PLUGINS_ROBOT_MEMORY_EVENT_TRIGGER_H_
 
 #include <mongo/client/dbclient.h>
+
 #include <boost/function.hpp>
 
 ///typedef for shorter type description
 typedef std::unique_ptr<mongo::DBClientCursor> QResCursor;
 
-
 class EventTrigger
 {
-  /// Information access for Manager
-  friend class EventTriggerManager;
+	/// Information access for Manager
+	friend class EventTriggerManager;
 
-  public:
-    EventTrigger(mongo::Query oplog_query, const std::string &ns,
-                 const boost::function<void (mongo::BSONObj)> &callback);
-    virtual ~EventTrigger();
+public:
+	EventTrigger(mongo::Query                                 oplog_query,
+	             const std::string &                          ns,
+	             const boost::function<void(mongo::BSONObj)> &callback);
+	virtual ~EventTrigger();
 
-  private:
-    mongo::Query oplog_query;
-    std::string ns;
-    std::string ns_db;
-    QResCursor oplog_cursor;
-    boost::function<void (mongo::BSONObj)> callback;
+private:
+	mongo::Query                          oplog_query;
+	std::string                           ns;
+	std::string                           ns_db;
+	QResCursor                            oplog_cursor;
+	boost::function<void(mongo::BSONObj)> callback;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_EVENT_TRIGGER_H_ */

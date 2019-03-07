@@ -20,10 +20,11 @@
  */
 
 #include "robot_memory_thread.h"
-#include <string>
-#include <logging/console.h>
 
 #include <core/plugin.h>
+#include <logging/console.h>
+
+#include <string>
 
 using namespace fawkes;
 
@@ -34,16 +35,15 @@ using namespace fawkes;
  */
 class RobotMemoryPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit RobotMemoryPlugin(Configuration *config) : Plugin(config)
-  {
-	  thread_list.push_back(new RobotMemoryThread());
-  }
+	explicit RobotMemoryPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RobotMemoryThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("Robot Memory based on MongoDB")
 EXPORT_PLUGIN(RobotMemoryPlugin)

@@ -22,8 +22,9 @@
  */
 
 #include "robot_memory_test_thread.h"
-#include <core/exception.h>
+
 #include <baseapp/run.h>
+#include <core/exception.h>
 #include <gtest/gtest.h>
 
 using namespace fawkes;
@@ -34,34 +35,32 @@ using namespace fawkes;
  */
 
 RobotMemoryTestThread::RobotMemoryTestThread()
- : Thread("RobotMemoryTestThread", Thread::OPMODE_WAITFORWAKEUP),
-             BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL) 
+: Thread("RobotMemoryTestThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL)
 {
 }
 
 void
 RobotMemoryTestThread::init()
 {
-  //prepare tests
-  logger->log_warn(name(), "Preparing tests");
-  test_env_ = new RobotMemoryTestEnvironment(robot_memory, blackboard);
-  ::testing::AddGlobalTestEnvironment((testing::Environment*) test_env_);
-
+	//prepare tests
+	logger->log_warn(name(), "Preparing tests");
+	test_env_ = new RobotMemoryTestEnvironment(robot_memory, blackboard);
+	::testing::AddGlobalTestEnvironment((testing::Environment *)test_env_);
 }
 
 void
 RobotMemoryTestThread::loop()
 {
-  logger->log_warn(name(), "Starting tests");
-  test_result_ = RUN_ALL_TESTS();
-  usleep(100000);
-  logger->log_warn(name(), "Finished tests with, quitting as intended...");
-  //stop fawkes to finish the testing run
-  fawkes::runtime::quit();
+	logger->log_warn(name(), "Starting tests");
+	test_result_ = RUN_ALL_TESTS();
+	usleep(100000);
+	logger->log_warn(name(), "Finished tests with, quitting as intended...");
+	//stop fawkes to finish the testing run
+	fawkes::runtime::quit();
 }
 
 void
 RobotMemoryTestThread::finalize()
 {
 }
-

@@ -28,8 +28,8 @@
 #include <utils/misc/string_split.h>
 #include <utils/system/hostinfo.h>
 
-#include <string>
 #include <chrono>
+#include <string>
 #include <thread>
 
 // from MongoDB
@@ -57,101 +57,111 @@ using namespace fawkes;
  * @param mongo_connection_manager MongoDBConnCreator to create client connections to the shared and local db
  * @param blackboard Fawkes blackboard
  */
-RobotMemory::RobotMemory(fawkes::Configuration* config, fawkes::Logger* logger,
-                         fawkes::Clock* clock, fawkes::MongoDBConnCreator* mongo_connection_manager,
-                         fawkes::BlackBoard* blackboard)
+RobotMemory::RobotMemory(fawkes::Configuration *     config,
+                         fawkes::Logger *            logger,
+                         fawkes::Clock *             clock,
+                         fawkes::MongoDBConnCreator *mongo_connection_manager,
+                         fawkes::BlackBoard *        blackboard)
 {
-  config_ = config;
-  logger_ = logger;
-  clock_ = clock;
-  mongo_connection_manager_ = mongo_connection_manager;
-  blackboard_ = blackboard;
-  mongodb_client_local_ = nullptr;
-  mongodb_client_distributed_ = nullptr;
-  debug_ = false;
+	config_                     = config;
+	logger_                     = logger;
+	clock_                      = clock;
+	mongo_connection_manager_   = mongo_connection_manager;
+	blackboard_                 = blackboard;
+	mongodb_client_local_       = nullptr;
+	mongodb_client_distributed_ = nullptr;
+	debug_                      = false;
 }
 
 RobotMemory::~RobotMemory()
 {
-  mongo_connection_manager_->delete_client(mongodb_client_local_);
-  mongo_connection_manager_->delete_client(mongodb_client_distributed_);
-  delete trigger_manager_;
-  blackboard_->close(rm_if_);
+	mongo_connection_manager_->delete_client(mongodb_client_local_);
+	mongo_connection_manager_->delete_client(mongodb_client_distributed_);
+	delete trigger_manager_;
+	blackboard_->close(rm_if_);
 }
 
-void RobotMemory::init()
+void
+RobotMemory::init()
 {
-  //load config values
-  log("Started RobotMemory");
-  default_collection_ = "robmem.test";
-  try {
-    default_collection_ = config_->get_string("/plugins/robot-memory/default-collection");
-  } catch (Exception &e) {}
-  try {
-    debug_ = config_->get_bool("/plugins/robot-memory/more-debug-output");
-  } catch (Exception &e) {}
-  database_name_ = "robmem";
-  try {
-    database_name_ = config_->get_string("/plugins/robot-memory/database");
-  } catch (Exception &e) {}
-  distributed_dbs_ = config_->get_strings("/plugins/robot-memory/distributed-db-names");
-  cfg_startup_grace_period_ = 10;
-  try {
-    cfg_startup_grace_period_ = config_->get_uint("/plugins/robot-memory/startup-grace-period");
-  } catch (Exception &e) {} // ignored, use default
+	//load config values
+	log("Started RobotMemory");
+	default_collection_ = "robmem.test";
+	try {
+		default_collection_ = config_->get_string("/plugins/robot-memory/default-collection");
+	} catch (Exception &e) {
+	}
+	try {
+		debug_ = config_->get_bool("/plugins/robot-memory/more-debug-output");
+	} catch (Exception &e) {
+	}
+	database_name_ = "robmem";
+	try {
+		database_name_ = config_->get_string("/plugins/robot-memory/database");
+	} catch (Exception &e) {
+	}
+	distributed_dbs_          = config_->get_strings("/plugins/robot-memory/distributed-db-names");
+	cfg_startup_grace_period_ = 10;
+	try {
+		cfg_startup_grace_period_ = config_->get_uint("/plugins/robot-memory/startup-grace-period");
+	} catch (Exception &e) {
+	} // ignored, use default
 
-  cfg_coord_database_ = config_->get_string("/plugins/robot-memory/coordination/database");
-  cfg_coord_mutex_collection_ = config_->get_string("/plugins/robot-memory/coordination/mutex-collection");
-  cfg_coord_mutex_collection_ = cfg_coord_database_ + "." + cfg_coord_mutex_collection_;
+	cfg_coord_database_ = config_->get_string("/plugins/robot-memory/coordination/database");
+	cfg_coord_mutex_collection_ =
+	  config_->get_string("/plugins/robot-memory/coordination/mutex-collection");
+	cfg_coord_mutex_collection_ = cfg_coord_database_ + "." + cfg_coord_mutex_collection_;
 
-  using namespace std::chrono_literals;
-  
-  //initiate mongodb connections:
-  log("Connect to local mongod");
-  unsigned int startup_tries = 0;
-  for (; startup_tries < cfg_startup_grace_period_ * 2; ++startup_tries) {
-    try {
-      mongodb_client_local_ = mongo_connection_manager_->create_client("robot-memory-local");
-      break;
-    } catch (fawkes::Exception &e) {
-      logger_->log_info(name_, "Waiting for local");
-      std::this_thread::sleep_for(500ms);
-    }
-  }
+	using namespace std::chrono_literals;
 
-  if (config_->exists("/plugins/mongodb/clients/robot-memory-distributed/enabled") &&
-      config_->get_bool("/plugins/mongodb/clients/robot-memory-distributed/enabled"))
-  {
-    distributed_ = true;
-    log("Connect to distributed mongod");
-    for (startup_tries = 0; startup_tries < cfg_startup_grace_period_ * 2; ++startup_tries) {
-      try {
-        mongodb_client_distributed_ = mongo_connection_manager_->create_client("robot-memory-distributed");
-        break;
-      } catch (fawkes::Exception &e) {
-        logger_->log_info(name_, "Waiting for distributed");
-        std::this_thread::sleep_for(500ms);
-      }
-    }
-  }
+	//initiate mongodb connections:
+	log("Connect to local mongod");
+	unsigned int startup_tries = 0;
+	for (; startup_tries < cfg_startup_grace_period_ * 2; ++startup_tries) {
+		try {
+			mongodb_client_local_ = mongo_connection_manager_->create_client("robot-memory-local");
+			break;
+		} catch (fawkes::Exception &e) {
+			logger_->log_info(name_, "Waiting for local");
+			std::this_thread::sleep_for(500ms);
+		}
+	}
 
-  //init blackboard interface
-  rm_if_ = blackboard_->open_for_writing<RobotMemoryInterface>(config_->get_string("/plugins/robot-memory/interface-name").c_str());
-  rm_if_->set_error("");
-  rm_if_->set_result("");
-  rm_if_->write();
+	if (config_->exists("/plugins/mongodb/clients/robot-memory-distributed/enabled")
+	    && config_->get_bool("/plugins/mongodb/clients/robot-memory-distributed/enabled")) {
+		distributed_ = true;
+		log("Connect to distributed mongod");
+		for (startup_tries = 0; startup_tries < cfg_startup_grace_period_ * 2; ++startup_tries) {
+			try {
+				mongodb_client_distributed_ =
+				  mongo_connection_manager_->create_client("robot-memory-distributed");
+				break;
+			} catch (fawkes::Exception &e) {
+				logger_->log_info(name_, "Waiting for distributed");
+				std::this_thread::sleep_for(500ms);
+			}
+		}
+	}
 
-  //Setup event trigger and computables manager
-  trigger_manager_ = new EventTriggerManager(logger_, config_, mongo_connection_manager_);
-  computables_manager_ = new ComputablesManager(config_, this);
+	//init blackboard interface
+	rm_if_ = blackboard_->open_for_writing<RobotMemoryInterface>(
+	  config_->get_string("/plugins/robot-memory/interface-name").c_str());
+	rm_if_->set_error("");
+	rm_if_->set_result("");
+	rm_if_->write();
 
-  log_deb("Initialized RobotMemory");
+	//Setup event trigger and computables manager
+	trigger_manager_     = new EventTriggerManager(logger_, config_, mongo_connection_manager_);
+	computables_manager_ = new ComputablesManager(config_, this);
+
+	log_deb("Initialized RobotMemory");
 }
 
-void RobotMemory::loop()
+void
+RobotMemory::loop()
 {
-  trigger_manager_->check_events();
-  computables_manager_->cleanup_computed_docs();
+	trigger_manager_->check_events();
+	computables_manager_->cleanup_computed_docs();
 }
 
 /**
@@ -160,34 +170,35 @@ void RobotMemory::loop()
  * @param collection The database and collection to query as string (e.g. robmem.worldmodel)
  * @return Cursor to get the documents from, NULL for invalid query
  */
-QResCursor RobotMemory::query(Query query, const std::string& collection)
+QResCursor
+RobotMemory::query(Query query, const std::string &collection)
 {
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
-  log_deb(std::string("Executing Query "+ query.toString() +" on collection "+collection));
+	mongo::DBClientBase *mongodb_client = get_mongodb_client(collection);
+	log_deb(std::string("Executing Query " + query.toString() + " on collection " + collection));
 
-  //check if computation on demand is necessary and execute Computables
-  computables_manager_->check_and_compute(query, collection);
+	//check if computation on demand is necessary and execute Computables
+	computables_manager_->check_and_compute(query, collection);
 
-  //lock (mongo_client not thread safe)
-  MutexLocker lock(mutex_);
+	//lock (mongo_client not thread safe)
+	MutexLocker lock(mutex_);
 
-  //set read preference of query to nearest to read from the local replica set member first
-  query.readPref(ReadPreference_Nearest, BSONArray());
+	//set read preference of query to nearest to read from the local replica set member first
+	query.readPref(ReadPreference_Nearest, BSONArray());
 
-  //actually execute query
-  QResCursor cursor;
-  try{
-    cursor = mongodb_client->query(collection, query);
-    if(cursor == 0) {
-      logger_->log_error(name_,"Connection failed %s",collection.c_str());
-    }
-  } catch (DBException &e) {
-    std::string error = std::string("Error for query ")
-      + query.toString() + "\n Exception: " + e.toString();
-    log(error, "error");
-    return NULL;
-  }
-  return cursor;
+	//actually execute query
+	QResCursor cursor;
+	try {
+		cursor = mongodb_client->query(collection, query);
+		if (cursor == 0) {
+			logger_->log_error(name_, "Connection failed %s", collection.c_str());
+		}
+	} catch (DBException &e) {
+		std::string error =
+		  std::string("Error for query ") + query.toString() + "\n Exception: " + e.toString();
+		log(error, "error");
+		return NULL;
+	}
+	return cursor;
 }
 
 /**
@@ -197,38 +208,36 @@ QResCursor RobotMemory::query(Query query, const std::string& collection)
  * @return Result object
  */
 mongo::BSONObj
-RobotMemory::aggregate(const std::vector<mongo::BSONObj>& pipeline, const std::string& collection)
+RobotMemory::aggregate(const std::vector<mongo::BSONObj> &pipeline, const std::string &collection)
 {
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
-  log_deb(std::string("Executing Aggregation on collection "+collection));
+	mongo::DBClientBase *mongodb_client = get_mongodb_client(collection);
+	log_deb(std::string("Executing Aggregation on collection " + collection));
 
-  //TODO: check if computation on demand is necessary and execute Computables
-  // that might be complicated because you need to build a query to check against from the fields mentioned in the different parts of the pipeline
-  // A possible solution might be forcing the user to define the $match oject seperately and using it as query to check computables
+	//TODO: check if computation on demand is necessary and execute Computables
+	// that might be complicated because you need to build a query to check against from the fields mentioned in the different parts of the pipeline
+	// A possible solution might be forcing the user to define the $match oject seperately and using it as query to check computables
 
-  //lock (mongo_client not thread safe)
-  MutexLocker lock(mutex_);
+	//lock (mongo_client not thread safe)
+	MutexLocker lock(mutex_);
 
-  //actually execute aggregation as command (in more modern mongo-cxx versions there should be an easier way with a proper aggregate function)
-  BSONObj res;
-  //get db and collection name
-  size_t point_pos = collection.find(".");
-  if(point_pos == std::string::npos)
-  {
-    logger_->log_error(name_, "Collection %s needs to start with 'dbname.'", collection.c_str());
-    return fromjson("{}");
-  }
-  std::string db = collection.substr(0, point_pos);
-  std::string col = collection.substr(point_pos+1);
-  try{
-    mongodb_client->runCommand(db, BSON("aggregate" << col  << "pipeline" << pipeline), res);
-  } catch (DBException &e) {
-    std::string error = std::string("Error for aggregation ")
-      + "\n Exception: " + e.toString();
-    log(error, "error");
-    return fromjson("{}");
-  }
-  return res;
+	//actually execute aggregation as command (in more modern mongo-cxx versions there should be an easier way with a proper aggregate function)
+	BSONObj res;
+	//get db and collection name
+	size_t point_pos = collection.find(".");
+	if (point_pos == std::string::npos) {
+		logger_->log_error(name_, "Collection %s needs to start with 'dbname.'", collection.c_str());
+		return fromjson("{}");
+	}
+	std::string db  = collection.substr(0, point_pos);
+	std::string col = collection.substr(point_pos + 1);
+	try {
+		mongodb_client->runCommand(db, BSON("aggregate" << col << "pipeline" << pipeline), res);
+	} catch (DBException &e) {
+		std::string error = std::string("Error for aggregation ") + "\n Exception: " + e.toString();
+		log(error, "error");
+		return fromjson("{}");
+	}
+	return res;
 }
 
 /**
@@ -237,26 +246,26 @@ RobotMemory::aggregate(const std::vector<mongo::BSONObj>& pipeline, const std::s
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
  * @return 1: Success 0: Error
  */
-int RobotMemory::insert(mongo::BSONObj obj, const std::string& collection)
+int
+RobotMemory::insert(mongo::BSONObj obj, const std::string &collection)
 {
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
+	mongo::DBClientBase *mongodb_client = get_mongodb_client(collection);
 
-  log_deb(std::string("Inserting "+ obj.toString() + " into collection " + collection));
+	log_deb(std::string("Inserting " + obj.toString() + " into collection " + collection));
 
-  //lock (mongo_client not thread safe)
-  MutexLocker lock(mutex_);
+	//lock (mongo_client not thread safe)
+	MutexLocker lock(mutex_);
 
-  //actually execute insert
-  try{
-    mongodb_client->insert(collection, obj);
-  } catch (DBException &e) {
-    std::string error = "Error for insert " + obj.toString()
-        + "\n Exception: " + e.toString();
-    log_deb(error, "error");
-    return 0;
-  }
-  //return success
-  return 1;
+	//actually execute insert
+	try {
+		mongodb_client->insert(collection, obj);
+	} catch (DBException &e) {
+		std::string error = "Error for insert " + obj.toString() + "\n Exception: " + e.toString();
+		log_deb(error, "error");
+		return 0;
+	}
+	//return success
+	return 1;
 }
 
 /** Create an index on a collection.
@@ -266,28 +275,27 @@ int RobotMemory::insert(mongo::BSONObj obj, const std::string& collection)
  * @return 1: Success 0: Error
  */
 int
-RobotMemory::create_index(mongo::BSONObj obj, const std::string& collection, bool unique)
+RobotMemory::create_index(mongo::BSONObj obj, const std::string &collection, bool unique)
 {
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
+	mongo::DBClientBase *mongodb_client = get_mongodb_client(collection);
 
-  log_deb(std::string("Creating index "+ obj.toString() + " on collection " + collection));
+	log_deb(std::string("Creating index " + obj.toString() + " on collection " + collection));
 
-  //lock (mongo_client not thread safe)
-  MutexLocker lock(mutex_);
+	//lock (mongo_client not thread safe)
+	MutexLocker lock(mutex_);
 
-  //actually execute insert
-  try{
-    mongodb_client->createIndex(collection, mongo::IndexSpec().addKeys(obj).unique(unique));
-  } catch (DBException &e) {
-    std::string error = "Error when creating index " + obj.toString()
-      + "\n Exception: " + e.toString();
-    log_deb(error, "error");
-    return 0;
-  }
-  //return success
-  return 1;
+	//actually execute insert
+	try {
+		mongodb_client->createIndex(collection, mongo::IndexSpec().addKeys(obj).unique(unique));
+	} catch (DBException &e) {
+		std::string error =
+		  "Error when creating index " + obj.toString() + "\n Exception: " + e.toString();
+		log_deb(error, "error");
+		return 0;
+	}
+	//return success
+	return 1;
 }
-
 
 /**
  * Inserts all document of a vector into the robot memory
@@ -295,33 +303,33 @@ RobotMemory::create_index(mongo::BSONObj obj, const std::string& collection, boo
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
  * @return 1: Success 0: Error
  */
-int RobotMemory::insert(std::vector<mongo::BSONObj> v_obj, const std::string& collection)
+int
+RobotMemory::insert(std::vector<mongo::BSONObj> v_obj, const std::string &collection)
 {
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
+	mongo::DBClientBase *mongodb_client = get_mongodb_client(collection);
 
-  std::string insert_string = "[";
-  for(BSONObj obj : v_obj)
-  {
-    insert_string += obj.toString() + ",\n";
-  }
-  insert_string += "]";
+	std::string insert_string = "[";
+	for (BSONObj obj : v_obj) {
+		insert_string += obj.toString() + ",\n";
+	}
+	insert_string += "]";
 
-  log_deb(std::string("Inserting vector of documents " + insert_string+  " into collection " + collection));
+	log_deb(std::string("Inserting vector of documents " + insert_string + " into collection "
+	                    + collection));
 
-  //lock (mongo_client not thread safe)
-  MutexLocker lock(mutex_);
+	//lock (mongo_client not thread safe)
+	MutexLocker lock(mutex_);
 
-  //actually execute insert
-  try{
-    mongodb_client->insert(collection, v_obj);
-  } catch (DBException &e) {
-    std::string error = "Error for insert " + insert_string
-        + "\n Exception: " + e.toString();
-    log_deb(error, "error");
-    return 0;
-  }
-  //return success
-  return 1;
+	//actually execute insert
+	try {
+		mongodb_client->insert(collection, v_obj);
+	} catch (DBException &e) {
+		std::string error = "Error for insert " + insert_string + "\n Exception: " + e.toString();
+		log_deb(error, "error");
+		return 0;
+	}
+	//return success
+	return 1;
 }
 
 /**
@@ -330,9 +338,10 @@ int RobotMemory::insert(std::vector<mongo::BSONObj> v_obj, const std::string& co
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
  * @return 1: Success 0: Error
  */
-int RobotMemory::insert(const std::string& obj_str, const std::string& collection)
+int
+RobotMemory::insert(const std::string &obj_str, const std::string &collection)
 {
-  return insert(fromjson(obj_str), collection);
+	return insert(fromjson(obj_str), collection);
 }
 
 /**
@@ -343,23 +352,30 @@ int RobotMemory::insert(const std::string& obj_str, const std::string& collectio
  * @param upsert Should the update document be inserted if the query returns no documents?
  * @return 1: Success 0: Error
  */
-int RobotMemory::update(mongo::Query query, mongo::BSONObj update, const std::string& collection, bool upsert)
+int
+RobotMemory::update(mongo::Query       query,
+                    mongo::BSONObj     update,
+                    const std::string &collection,
+                    bool               upsert)
 {
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
-  log_deb(std::string("Executing Update "+update.toString()+" for query "+query.toString()+" on collection "+ collection));
+	mongo::DBClientBase *mongodb_client = get_mongodb_client(collection);
+	log_deb(std::string("Executing Update " + update.toString() + " for query " + query.toString()
+	                    + " on collection " + collection));
 
-  //lock (mongo_client not thread safe)
-  MutexLocker lock(mutex_);
+	//lock (mongo_client not thread safe)
+	MutexLocker lock(mutex_);
 
-  //actually execute update
-  try{
-    mongodb_client->update(collection, query, update, upsert);
-  } catch (DBException &e) {
-    log_deb(std::string("Error for update "+update.toString()+" for query "+query.toString()+"\n Exception: "+e.toString()), "error");
-    return 0;
-  }
-  //return success
-  return 1;
+	//actually execute update
+	try {
+		mongodb_client->update(collection, query, update, upsert);
+	} catch (DBException &e) {
+		log_deb(std::string("Error for update " + update.toString() + " for query " + query.toString()
+		                    + "\n Exception: " + e.toString()),
+		        "error");
+		return 0;
+	}
+	//return success
+	return 1;
 }
 
 /**
@@ -370,11 +386,14 @@ int RobotMemory::update(mongo::Query query, mongo::BSONObj update, const std::st
  * @param upsert Should the update document be inserted if the query returns no documents?
  * @return 1: Success 0: Error
  */
-int RobotMemory::update(mongo::Query query, const std::string& update_str, const std::string& collection, bool upsert)
+int
+RobotMemory::update(mongo::Query       query,
+                    const std::string &update_str,
+                    const std::string &collection,
+                    bool               upsert)
 {
-  return update(query, fromjson(update_str), collection, upsert);
+	return update(query, fromjson(update_str), collection, upsert);
 }
-
 
 /** Atomically update and retrieve document.
  * @param filter The filter defining the document to update.
@@ -386,26 +405,29 @@ int RobotMemory::update(mongo::Query query, const std::string& update_str, const
  * @return document, depending on @p return_new either before or after the udpate has been applied.
  */
 mongo::BSONObj
-RobotMemory::find_one_and_update(const mongo::BSONObj& filter, const mongo::BSONObj& update,
-                                 const std::string& collection, bool upsert, bool return_new)
+RobotMemory::find_one_and_update(const mongo::BSONObj &filter,
+                                 const mongo::BSONObj &update,
+                                 const std::string &   collection,
+                                 bool                  upsert,
+                                 bool                  return_new)
 {
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
+	mongo::DBClientBase *mongodb_client = get_mongodb_client(collection);
 
-  log_deb(std::string("Executing findOneAndUpdate "+update.toString()+
-                      " for filter "+filter.toString()+" on collection "+ collection));
+	log_deb(std::string("Executing findOneAndUpdate " + update.toString() + " for filter "
+	                    + filter.toString() + " on collection " + collection));
 
-  MutexLocker lock(mutex_);
+	MutexLocker lock(mutex_);
 
-  try{
-    return mongodb_client->findAndModify(collection, filter, update, upsert, return_new);
-  } catch (DBException &e) {
-    std::string error = "Error for update "+update.toString()+" for query "+
-      filter.toString()+"\n Exception: "+e.toString();
-    log_deb(error, "error");
-    BSONObjBuilder b;
-    b.append("error", error);
-    return b.obj();
-  }
+	try {
+		return mongodb_client->findAndModify(collection, filter, update, upsert, return_new);
+	} catch (DBException &e) {
+		std::string error = "Error for update " + update.toString() + " for query " + filter.toString()
+		                    + "\n Exception: " + e.toString();
+		log_deb(error, "error");
+		BSONObjBuilder b;
+		b.append("error", error);
+		return b.obj();
+	}
 }
 
 /**
@@ -414,23 +436,25 @@ RobotMemory::find_one_and_update(const mongo::BSONObj& filter, const mongo::BSON
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
  * @return 1: Success 0: Error
  */
-int RobotMemory::remove(mongo::Query query, const std::string& collection)
+int
+RobotMemory::remove(mongo::Query query, const std::string &collection)
 {
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
-  log_deb(std::string("Executing Remove "+query.toString()+" on collection "+collection));
+	mongo::DBClientBase *mongodb_client = get_mongodb_client(collection);
+	log_deb(std::string("Executing Remove " + query.toString() + " on collection " + collection));
 
-  //lock (mongo_client not thread safe)
-  MutexLocker lock(mutex_);
+	//lock (mongo_client not thread safe)
+	MutexLocker lock(mutex_);
 
-  //actually execute remove
-  try{
-    mongodb_client->remove(collection, query);
-  } catch (DBException &e) {
-    log_deb(std::string("Error for query "+query.toString()+"\n Exception: "+e.toString()), "error");
-    return 0;
-  }
-  //return success
-  return 1;
+	//actually execute remove
+	try {
+		mongodb_client->remove(collection, query);
+	} catch (DBException &e) {
+		log_deb(std::string("Error for query " + query.toString() + "\n Exception: " + e.toString()),
+		        "error");
+		return 0;
+	}
+	//return success
+	return 1;
 }
 
 /**
@@ -441,13 +465,17 @@ int RobotMemory::remove(mongo::Query query, const std::string& collection)
  * @param js_reduce_fun Reduce function in JavaScript as string
  * @return BSONObj containing the result
  */
-mongo::BSONObj RobotMemory::mapreduce(mongo::Query query, const std::string& collection, const std::string& js_map_fun, const std::string& js_reduce_fun)
+mongo::BSONObj
+RobotMemory::mapreduce(mongo::Query       query,
+                       const std::string &collection,
+                       const std::string &js_map_fun,
+                       const std::string &js_reduce_fun)
 {
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
-  MutexLocker lock(mutex_);
-  log_deb(std::string("Executing MapReduce "+query.toString()+" on collection "+collection+
-    " map: " + js_map_fun + " reduce: " + js_reduce_fun));
-  return mongodb_client->mapreduce(collection, js_map_fun, js_reduce_fun, query);
+	mongo::DBClientBase *mongodb_client = get_mongodb_client(collection);
+	MutexLocker          lock(mutex_);
+	log_deb(std::string("Executing MapReduce " + query.toString() + " on collection " + collection
+	                    + " map: " + js_map_fun + " reduce: " + js_reduce_fun));
+	return mongodb_client->mapreduce(collection, js_map_fun, js_reduce_fun, query);
 }
 
 /**
@@ -456,22 +484,24 @@ mongo::BSONObj RobotMemory::mapreduce(mongo::Query query, const std::string& col
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
  * @return Cursor to get the documents from, NULL for invalid pipeline
  */
-QResCursor RobotMemory::aggregate(mongo::BSONObj pipeline, const std::string& collection)
+QResCursor
+RobotMemory::aggregate(mongo::BSONObj pipeline, const std::string &collection)
 {
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
-  MutexLocker lock(mutex_);
-  log_deb(std::string("Executing Aggregation pipeline: "+pipeline.toString() +" on collection "+collection));
+	mongo::DBClientBase *mongodb_client = get_mongodb_client(collection);
+	MutexLocker          lock(mutex_);
+	log_deb(std::string("Executing Aggregation pipeline: " + pipeline.toString() + " on collection "
+	                    + collection));
 
-  QResCursor cursor;
-  try{
-    cursor = mongodb_client->aggregate(collection, pipeline);
-  } catch (DBException &e) {
-    std::string error = std::string("Error for query ")
-      + pipeline.toString() + "\n Exception: " + e.toString();
-    log(error, "error");
-    return NULL;
-  }
-  return cursor;
+	QResCursor cursor;
+	try {
+		cursor = mongodb_client->aggregate(collection, pipeline);
+	} catch (DBException &e) {
+		std::string error =
+		  std::string("Error for query ") + pipeline.toString() + "\n Exception: " + e.toString();
+		log(error, "error");
+		return NULL;
+	}
+	return cursor;
 }
 
 /**
@@ -479,26 +509,28 @@ QResCursor RobotMemory::aggregate(mongo::BSONObj pipeline, const std::string& co
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
  * @return 1: Success 0: Error
  */
-int RobotMemory::drop_collection(const std::string& collection)
+int
+RobotMemory::drop_collection(const std::string &collection)
 {
-  mongo::DBClientBase* mongodb_client = get_mongodb_client(collection);
-  MutexLocker lock(mutex_);
-  log_deb("Dropping collection " + collection);
-  return mongodb_client->dropCollection(collection);
+	mongo::DBClientBase *mongodb_client = get_mongodb_client(collection);
+	MutexLocker          lock(mutex_);
+	log_deb("Dropping collection " + collection);
+	return mongodb_client->dropCollection(collection);
 }
 
 /**
  * Remove the whole database of the robot memory and all documents inside
  * @return 1: Success 0: Error
  */
-int RobotMemory::clear_memory()
+int
+RobotMemory::clear_memory()
 {
-  //lock (mongo_client not thread safe)
-  MutexLocker lock(mutex_);
+	//lock (mongo_client not thread safe)
+	MutexLocker lock(mutex_);
 
-  log_deb("Clearing whole robot memory");
-  mongodb_client_local_->dropDatabase(database_name_);
-  return 1;
+	log_deb("Clearing whole robot memory");
+	mongodb_client_local_->dropDatabase(database_name_);
+	return 1;
 }
 
 /**
@@ -507,55 +539,50 @@ int RobotMemory::clear_memory()
  * @param directory Directory of the dump
  * @return 1: Success 0: Error
  */
-int RobotMemory::restore_collection(const std::string& collection, const std::string& directory)
+int
+RobotMemory::restore_collection(const std::string &collection, const std::string &directory)
 {
-  std::string coll{std::move(collection)};
-  drop_collection(coll);
+	std::string coll{std::move(collection)};
+	drop_collection(coll);
 
-  //lock (mongo_client not thread safe)
-   MutexLocker lock(mutex_);
+	//lock (mongo_client not thread safe)
+	MutexLocker lock(mutex_);
 
-  //resolve path to restore
-  if(coll.find(".") == std::string::npos)
-  {
-    log(std::string("Unable to restore collection" + coll), "error");
-    log(std::string("Specify collection like 'db.collection'"), "error");
-    return 0;
-  }
-  std::string path = StringConversions::resolve_path(directory) + "/"
-                     + coll.replace(coll.find("."),1,"/") + ".bson";
-  log_deb(std::string("Restore collection " + collection + " from " + path), "warn");
+	//resolve path to restore
+	if (coll.find(".") == std::string::npos) {
+		log(std::string("Unable to restore collection" + coll), "error");
+		log(std::string("Specify collection like 'db.collection'"), "error");
+		return 0;
+	}
+	std::string path = StringConversions::resolve_path(directory) + "/"
+	                   + coll.replace(coll.find("."), 1, "/") + ".bson";
+	log_deb(std::string("Restore collection " + collection + " from " + path), "warn");
 
-  //call mongorestore from folder with initial restores
-  std::string command = "/usr/bin/mongorestore --dir " + path
-      + " --host=127.0.0.1 --quiet";
-  log_deb(std::string("Restore command: " + command), "warn");
-  FILE *bash_output = popen(command.c_str(), "r");
+	//call mongorestore from folder with initial restores
+	std::string command = "/usr/bin/mongorestore --dir " + path + " --host=127.0.0.1 --quiet";
+	log_deb(std::string("Restore command: " + command), "warn");
+	FILE *bash_output = popen(command.c_str(), "r");
 
-  //check if output is ok
-  if(!bash_output)
-  {
-    log(std::string("Unable to restore collection" + coll), "error");
-    return 0;
-  }
-  std::string output_string = "";
-  char buffer[100];
-  while (!feof(bash_output) )
-  {
-    if (fgets(buffer, 100, bash_output) == NULL)
-    {
-      break;
-    }
-    output_string += buffer;
-  }
-  pclose(bash_output);
-  if(output_string.find("Failed") != std::string::npos)
-  {
-    log(std::string("Unable to restore collection" + coll), "error");
-    log_deb(output_string, "error");
-    return 0;
-  }
-  return 1;
+	//check if output is ok
+	if (!bash_output) {
+		log(std::string("Unable to restore collection" + coll), "error");
+		return 0;
+	}
+	std::string output_string = "";
+	char        buffer[100];
+	while (!feof(bash_output)) {
+		if (fgets(buffer, 100, bash_output) == NULL) {
+			break;
+		}
+		output_string += buffer;
+	}
+	pclose(bash_output);
+	if (output_string.find("Failed") != std::string::npos) {
+		log(std::string("Unable to restore collection" + coll), "error");
+		log_deb(output_string, "error");
+		return 0;
+	}
+	return 1;
 }
 
 /**
@@ -564,196 +591,186 @@ int RobotMemory::restore_collection(const std::string& collection, const std::st
  * @param directory Directory to dump the collection to
  * @return 1: Success 0: Error
  */
-int RobotMemory::dump_collection(const std::string& collection, const std::string& directory)
+int
+RobotMemory::dump_collection(const std::string &collection, const std::string &directory)
 {
+	//lock (mongo_client not thread safe)
+	MutexLocker lock(mutex_);
 
-  //lock (mongo_client not thread safe)
-   MutexLocker lock(mutex_);
+	//resolve path to dump to
+	if (collection.find(".") == std::string::npos) {
+		log(std::string("Unable to dump collection" + collection), "error");
+		log(std::string("Specify collection like 'db.collection'"), "error");
+		return 0;
+	}
+	std::string path = StringConversions::resolve_path(directory);
+	log_deb(std::string("Dump collection " + collection + " into " + path), "warn");
 
-  //resolve path to dump to
-  if(collection.find(".") == std::string::npos)
-  {
-    log(std::string("Unable to dump collection" + collection), "error");
-    log(std::string("Specify collection like 'db.collection'"), "error");
-    return 0;
-  }
-  std::string path = StringConversions::resolve_path(directory);
-  log_deb(std::string("Dump collection " + collection + " into " + path), "warn");
-
-  //call mongorestore from folder with initial restores
-  std::vector<std::string> split = str_split(collection, '.');
-  std::string command = "/usr/bin/mongodump --out=" + path + " --db=" + split[0]
-    + " --collection=" + split[1] + " --host=127.0.0.1 --quiet";
-  log_deb(std::string("Dump command: " + command), "warn");
-  FILE *bash_output = popen(command.c_str(), "r");
-  //check if output is ok
-  if(!bash_output)
-  {
-    log(std::string("Unable to dump collection" + collection), "error");
-    return 0;
-  }
-  std::string output_string = "";
-  char buffer[100];
-  while (!feof(bash_output) )
-  {
-    if (fgets(buffer, 100, bash_output) == NULL)
-    {
-      break;
-    }
-    output_string += buffer;
-  }
-  pclose(bash_output);
-  if(output_string.find("Failed") != std::string::npos)
-  {
-    log(std::string("Unable to dump collection" + collection), "error");
-    log_deb(output_string, "error");
-    return 0;
-  }
-  return 1;
+	//call mongorestore from folder with initial restores
+	std::vector<std::string> split   = str_split(collection, '.');
+	std::string              command = "/usr/bin/mongodump --out=" + path + " --db=" + split[0]
+	                      + " --collection=" + split[1] + " --host=127.0.0.1 --quiet";
+	log_deb(std::string("Dump command: " + command), "warn");
+	FILE *bash_output = popen(command.c_str(), "r");
+	//check if output is ok
+	if (!bash_output) {
+		log(std::string("Unable to dump collection" + collection), "error");
+		return 0;
+	}
+	std::string output_string = "";
+	char        buffer[100];
+	while (!feof(bash_output)) {
+		if (fgets(buffer, 100, bash_output) == NULL) {
+			break;
+		}
+		output_string += buffer;
+	}
+	pclose(bash_output);
+	if (output_string.find("Failed") != std::string::npos) {
+		log(std::string("Unable to dump collection" + collection), "error");
+		log_deb(output_string, "error");
+		return 0;
+	}
+	return 1;
 }
 
 void
-RobotMemory::log(const std::string& what, const std::string& info)
+RobotMemory::log(const std::string &what, const std::string &info)
 {
-  if(!info.compare("error"))
-      logger_->log_error(name_, "%s", what.c_str());
-  else if(!info.compare("warn"))
-    logger_->log_warn(name_, "%s", what.c_str());
-  else if(!info.compare("debug"))
-    logger_->log_debug(name_, "%s", what.c_str());
-  else
-    logger_->log_info(name_, "%s", what.c_str());
+	if (!info.compare("error"))
+		logger_->log_error(name_, "%s", what.c_str());
+	else if (!info.compare("warn"))
+		logger_->log_warn(name_, "%s", what.c_str());
+	else if (!info.compare("debug"))
+		logger_->log_debug(name_, "%s", what.c_str());
+	else
+		logger_->log_info(name_, "%s", what.c_str());
 }
 
 void
-RobotMemory::log_deb(const std::string& what, const std::string& level)
+RobotMemory::log_deb(const std::string &what, const std::string &level)
 {
-  if (debug_) {
-    log(what, level);
-  }
+	if (debug_) {
+		log(what, level);
+	}
 }
 
 void
-RobotMemory::log_deb(const mongo::Query& query, const std::string& what, const std::string& level)
+RobotMemory::log_deb(const mongo::Query &query, const std::string &what, const std::string &level)
 {
-  if (debug_) {
-    log(query, what, level);
-  }
+	if (debug_) {
+		log(query, what, level);
+	}
 }
 
 void
-RobotMemory::log(const mongo::Query& query, const std::string& what, const std::string& level)
+RobotMemory::log(const mongo::Query &query, const std::string &what, const std::string &level)
 {
-  std::string output = what
-    + "\nFilter: " + query.getFilter().toString()
-    + "\nModifiers: " + query.getModifiers().toString()
-    + "\nSort: " + query.getSort().toString()
-    + "\nHint: " + query.getHint().toString()
-    + "\nReadPref: " + query.getReadPref().toString();
-  log(output, level);
+	std::string output =
+	  what + "\nFilter: " + query.getFilter().toString()
+	  + "\nModifiers: " + query.getModifiers().toString() + "\nSort: " + query.getSort().toString()
+	  + "\nHint: " + query.getHint().toString() + "\nReadPref: " + query.getReadPref().toString();
+	log(output, level);
 }
 
 void
-RobotMemory::log_deb(const mongo::BSONObj& obj, const std::string& what, const std::string& level)
+RobotMemory::log_deb(const mongo::BSONObj &obj, const std::string &what, const std::string &level)
 {
-  log(obj, what, level);
+	log(obj, what, level);
 }
 
 void
-RobotMemory::log(const mongo::BSONObj& obj, const std::string& what, const std::string& level)
+RobotMemory::log(const mongo::BSONObj &obj, const std::string &what, const std::string &level)
 {
-  std::string output = what
-    + "\nObject: " + obj.toString();
-  log(output, level);
+	std::string output = what + "\nObject: " + obj.toString();
+	log(output, level);
 }
 
 void
-RobotMemory::set_fields(mongo::BSONObj &obj, const std::string& what)
+RobotMemory::set_fields(mongo::BSONObj &obj, const std::string &what)
 {
-  BSONObjBuilder b;
-  b.appendElements(obj);
-  b.appendElements(fromjson(what));
-  //override
-  obj = b.obj();
+	BSONObjBuilder b;
+	b.appendElements(obj);
+	b.appendElements(fromjson(what));
+	//override
+	obj = b.obj();
 }
 
 void
-RobotMemory::set_fields(mongo::Query &q, const std::string& what)
+RobotMemory::set_fields(mongo::Query &q, const std::string &what)
 {
-  BSONObjBuilder b;
-  b.appendElements(q.getFilter());
-  b.appendElements(fromjson(what));
+	BSONObjBuilder b;
+	b.appendElements(q.getFilter());
+	b.appendElements(fromjson(what));
 
-  //the following is not yet kept in the query:
-  // + "\nFilter: " + query.getFilter().toString()
-  // + "\nModifiers: " + query.getModifiers().toString()
-  // + "\nSort: " + query.getSort().toString()
-  // + "\nHint: " + query.getHint().toString()
-  // + "\nReadPref: " + query.getReadPref().toString();
+	//the following is not yet kept in the query:
+	// + "\nFilter: " + query.getFilter().toString()
+	// + "\nModifiers: " + query.getModifiers().toString()
+	// + "\nSort: " + query.getSort().toString()
+	// + "\nHint: " + query.getHint().toString()
+	// + "\nReadPref: " + query.getReadPref().toString();
 
-  //override
-  q = Query(b.obj());
+	//override
+	q = Query(b.obj());
 }
 
 void
-RobotMemory::remove_field(mongo::Query &q, const std::string& what)
+RobotMemory::remove_field(mongo::Query &q, const std::string &what)
 {
-  BSONObjBuilder b;
-  b.appendElements(q.getFilter().removeField(what));
+	BSONObjBuilder b;
+	b.appendElements(q.getFilter().removeField(what));
 
-  //the following is not yet kept in the query:
-  // + "\nFilter: " + query.getFilter().toString()
-  // + "\nModifiers: " + query.getModifiers().toString()
-  // + "\nSort: " + query.getSort().toString()
-  // + "\nHint: " + query.getHint().toString()
-  // + "\nReadPref: " + query.getReadPref().toString();
+	//the following is not yet kept in the query:
+	// + "\nFilter: " + query.getFilter().toString()
+	// + "\nModifiers: " + query.getModifiers().toString()
+	// + "\nSort: " + query.getSort().toString()
+	// + "\nHint: " + query.getHint().toString()
+	// + "\nReadPref: " + query.getReadPref().toString();
 
-  //override
-  q = Query(b.obj());
+	//override
+	q = Query(b.obj());
 }
-
 
 /**
  * Get the mongodb client associated with the collection (eighter the local or distributed one)
  */
-mongo::DBClientBase*
-RobotMemory::get_mongodb_client(const std::string& collection)
+mongo::DBClientBase *
+RobotMemory::get_mongodb_client(const std::string &collection)
 {
-  if(!distributed_)
-  {
-      return mongodb_client_local_;
-  }
-  //get db name of collection
-  size_t point_pos = collection.find(".");
-  if(point_pos == collection.npos)
-  {
-    logger_->log_error(name_, "Collection %s needs to start with 'dbname.'", collection.c_str());
-    return mongodb_client_local_;
-  }
-  std::string db = collection.substr(0, point_pos);
-  if(std::find(distributed_dbs_.begin(), distributed_dbs_.end(), db) != distributed_dbs_.end())
-  {
-    return mongodb_client_distributed_;
-  }
-  return mongodb_client_local_;
+	if (!distributed_) {
+		return mongodb_client_local_;
+	}
+	//get db name of collection
+	size_t point_pos = collection.find(".");
+	if (point_pos == collection.npos) {
+		logger_->log_error(name_, "Collection %s needs to start with 'dbname.'", collection.c_str());
+		return mongodb_client_local_;
+	}
+	std::string db = collection.substr(0, point_pos);
+	if (std::find(distributed_dbs_.begin(), distributed_dbs_.end(), db) != distributed_dbs_.end()) {
+		return mongodb_client_distributed_;
+	}
+	return mongodb_client_local_;
 }
 
 /**
  * Remove a previously registered trigger
  * @param trigger Pointer to the trigger to remove
  */
-void RobotMemory::remove_trigger(EventTrigger* trigger)
+void
+RobotMemory::remove_trigger(EventTrigger *trigger)
 {
-  trigger_manager_->remove_trigger(trigger);
+	trigger_manager_->remove_trigger(trigger);
 }
 
 /**
  * Remove previously registered computable
  * @param computable The computable to remove
  */
-void RobotMemory::remove_computable(Computable* computable)
+void
+RobotMemory::remove_computable(Computable *computable)
 {
-  computables_manager_->remove_computable(computable);
+	computables_manager_->remove_computable(computable);
 }
 
 /** Explicitly create a mutex.
@@ -765,18 +782,20 @@ void RobotMemory::remove_computable(Computable* computable)
  * @return true if operation was successful, false on failure
  */
 bool
-RobotMemory::mutex_create(const std::string& name)
+RobotMemory::mutex_create(const std::string &name)
 {
 	mongo::DBClientInterface *client =
-		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+	  distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
 	mongo::BSONObjBuilder insert_doc;
 	insert_doc.append("$currentDate", BSON("lock-time" << true));
 	insert_doc.append("_id", name);
 	insert_doc.append("locked", false);
 	try {
 		MutexLocker lock(mutex_);
-		client->insert(cfg_coord_mutex_collection_, insert_doc.obj(),
-		               0, &mongo::WriteConcern::majority);
+		client->insert(cfg_coord_mutex_collection_,
+		               insert_doc.obj(),
+		               0,
+		               &mongo::WriteConcern::majority);
 		return true;
 	} catch (mongo::DBException &e) {
 		logger_->log_info(name_, "Failed to create mutex %s: %s", name.c_str(), e.what());
@@ -791,15 +810,14 @@ RobotMemory::mutex_create(const std::string& name)
  * @return true if operation was successful, false on failure
  */
 bool
-RobotMemory::mutex_destroy(const std::string& name)
+RobotMemory::mutex_destroy(const std::string &name)
 {
 	mongo::DBClientInterface *client =
-		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+	  distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
 	mongo::BSONObj destroy_doc{BSON("_id" << name)};
 	try {
 		MutexLocker lock(mutex_);
-		client->remove(cfg_coord_mutex_collection_, destroy_doc,
-		               true, &mongo::WriteConcern::majority);
+		client->remove(cfg_coord_mutex_collection_, destroy_doc, true, &mongo::WriteConcern::majority);
 		return true;
 	} catch (mongo::DBException &e) {
 		logger_->log_info(name_, "Failed to destroy mutex %s: %s", name.c_str(), e.what());
@@ -819,11 +837,9 @@ RobotMemory::mutex_destroy(const std::string& name)
  * @return true if operation was successful, false on failure
  */
 bool
-RobotMemory::mutex_try_lock(const std::string& name,
-                            const std::string& identity, bool force)
+RobotMemory::mutex_try_lock(const std::string &name, const std::string &identity, bool force)
 {
-	mongo::DBClientBase *client =
-		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+	mongo::DBClientBase *client = distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
 
 	std::string locked_by{identity};
 	if (identity.empty()) {
@@ -834,7 +850,7 @@ RobotMemory::mutex_try_lock(const std::string& name,
 	// here we can add an $or to implement lock timeouts
 	mongo::BSONObjBuilder filter_doc;
 	filter_doc.append("_id", name);
-	if (! force) {
+	if (!force) {
 		filter_doc.append("locked", false);
 	}
 
@@ -847,15 +863,17 @@ RobotMemory::mutex_try_lock(const std::string& name,
 
 	try {
 		MutexLocker lock(mutex_);
-		BSONObj new_doc =
-			client->findAndModify(cfg_coord_mutex_collection_,
-			                      filter_doc.obj(), update_doc.obj(),
-			                      /* upsert */ true, /* return new */ true,
-			                      /* sort */ BSONObj(), /* fields */ BSONObj(),
-			                      &mongo::WriteConcern::majority);
+		BSONObj     new_doc = client->findAndModify(cfg_coord_mutex_collection_,
+                                            filter_doc.obj(),
+                                            update_doc.obj(),
+                                            /* upsert */ true,
+                                            /* return new */ true,
+                                            /* sort */ BSONObj(),
+                                            /* fields */ BSONObj(),
+                                            &mongo::WriteConcern::majority);
 
-		return (new_doc.getField("locked-by").String() == locked_by &&
-		        new_doc.getField("locked").Bool());
+		return (new_doc.getField("locked-by").String() == locked_by
+		        && new_doc.getField("locked").Bool());
 
 	} catch (mongo::OperationException &e) {
 		logger_->log_error(name_, "Mongo OperationException: %s", e.what());
@@ -865,10 +883,8 @@ RobotMemory::mutex_try_lock(const std::string& name,
 			check_doc.append("locked", true);
 			check_doc.append("locked-by", locked_by);
 			MutexLocker lock(mutex_);
-			BSONObj res_doc  =
-			  client->findOne(cfg_coord_mutex_collection_, check_doc.obj());
-			logger_->log_info(name_,
-			                  "Checking whether mutex was acquired succeeded");
+			BSONObj     res_doc = client->findOne(cfg_coord_mutex_collection_, check_doc.obj());
+			logger_->log_info(name_, "Checking whether mutex was acquired succeeded");
 			if (!res_doc.isEmpty()) {
 				logger_->log_warn(name_,
 				                  "Exception during try-lock for %s, "
@@ -902,7 +918,7 @@ RobotMemory::mutex_try_lock(const std::string& name,
  * @return true if operation was successful, false on failure
  */
 bool
-RobotMemory::mutex_try_lock(const std::string& name, bool force)
+RobotMemory::mutex_try_lock(const std::string &name, bool force)
 {
 	return mutex_try_lock(name, "", force);
 }
@@ -913,11 +929,9 @@ RobotMemory::mutex_try_lock(const std::string& name, bool force)
  * @return true if operation was successful, false on failure
  */
 bool
-RobotMemory::mutex_unlock(const std::string& name,
-                          const std::string& identity)
+RobotMemory::mutex_unlock(const std::string &name, const std::string &identity)
 {
-	mongo::DBClientBase *client =
-		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+	mongo::DBClientBase *client = distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
 
 	std::string locked_by{identity};
 	if (identity.empty()) {
@@ -928,25 +942,25 @@ RobotMemory::mutex_unlock(const std::string& name,
 	// here we can add an $or to implement lock timeouts
 	mongo::BSONObj filter_doc{BSON("_id" << name << "locked-by" << locked_by)};
 
-	mongo::BSONObj update_doc{BSON("$set" << BSON("locked" << false) <<
-	                               "$unset" << BSON("locked-by" << true <<
-	                                                "lock-time" << true))};
+	mongo::BSONObj update_doc{BSON("$set" << BSON("locked" << false) << "$unset"
+	                                      << BSON("locked-by" << true << "lock-time" << true))};
 
 	try {
 		MutexLocker lock(mutex_);
-		BSONObj new_doc =
-			client->findAndModify(cfg_coord_mutex_collection_,
-			                      filter_doc, update_doc,
-			                      /* upsert */ true, /* return new */ true,
-			                      /* sort */ BSONObj(), /* fields */ BSONObj(),
-			                      &mongo::WriteConcern::majority);
+		BSONObj     new_doc = client->findAndModify(cfg_coord_mutex_collection_,
+                                            filter_doc,
+                                            update_doc,
+                                            /* upsert */ true,
+                                            /* return new */ true,
+                                            /* sort */ BSONObj(),
+                                            /* fields */ BSONObj(),
+                                            &mongo::WriteConcern::majority);
 
 		return true;
 	} catch (mongo::OperationException &e) {
 		return false;
 	}
 }
-
 
 /** Renew a mutex.
  * Renewing means updating the lock timestamp to the current time to
@@ -958,11 +972,9 @@ RobotMemory::mutex_unlock(const std::string& name,
  * @return true if operation was successful, false on failure
  */
 bool
-RobotMemory::mutex_renew_lock(const std::string& name,
-                              const std::string& identity)
+RobotMemory::mutex_renew_lock(const std::string &name, const std::string &identity)
 {
-	mongo::DBClientBase *client =
-		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+	mongo::DBClientBase *client = distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
 
 	std::string locked_by{identity};
 	if (identity.empty()) {
@@ -971,9 +983,7 @@ RobotMemory::mutex_renew_lock(const std::string& name,
 	}
 
 	// here we can add an $or to implement lock timeouts
-	mongo::BSONObj filter_doc{BSON("_id" << name <<
-	                               "locked" << true <<
-	                               "locked-by" << locked_by)};
+	mongo::BSONObj filter_doc{BSON("_id" << name << "locked" << true << "locked-by" << locked_by)};
 
 	// we set all data, even the data which is not actually modified, to
 	// make it easier to process the update in triggers.
@@ -986,21 +996,21 @@ RobotMemory::mutex_renew_lock(const std::string& name,
 
 	try {
 		MutexLocker lock(mutex_);
-		BSONObj new_doc =
-			client->findAndModify(cfg_coord_mutex_collection_,
-			                      filter_doc, update_doc.obj(),
-			                      /* upsert */ false, /* return new */ true,
-			                      /* sort */ BSONObj(), /* fields */ BSONObj(),
-			                      &mongo::WriteConcern::majority);
+		BSONObj     new_doc = client->findAndModify(cfg_coord_mutex_collection_,
+                                            filter_doc,
+                                            update_doc.obj(),
+                                            /* upsert */ false,
+                                            /* return new */ true,
+                                            /* sort */ BSONObj(),
+                                            /* fields */ BSONObj(),
+                                            &mongo::WriteConcern::majority);
 
 		return true;
 	} catch (mongo::OperationException &e) {
-		logger_->log_warn(name_, "Renewing lock on mutex %s failed: %s",
-		                  name.c_str(), e.what());
+		logger_->log_warn(name_, "Renewing lock on mutex %s failed: %s", name.c_str(), e.what());
 		return false;
 	}
 }
-
 
 /** Setup time-to-live index for mutexes.
  * Setting up a time-to-live index for mutexes enables automatic
@@ -1016,22 +1026,20 @@ RobotMemory::mutex_renew_lock(const std::string& name,
 bool
 RobotMemory::mutex_setup_ttl(float max_age_sec)
 {
-  MutexLocker lock(mutex_);
+	MutexLocker lock(mutex_);
 
-	mongo::DBClientBase *client =
-		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+	mongo::DBClientBase *client = distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
 
 	BSONObj keys = BSON("lock-time" << true);
 
 	try {
-		client->createIndex(cfg_coord_mutex_collection_, mongo::IndexSpec()
-		                    .addKeys(keys)
-		                    .expireAfterSeconds(max_age_sec));
-  } catch (DBException &e) {
+		client->createIndex(cfg_coord_mutex_collection_,
+		                    mongo::IndexSpec().addKeys(keys).expireAfterSeconds(max_age_sec));
+	} catch (DBException &e) {
 		logger_->log_warn(name_, "Creating TTL index failed: %s", e.what());
-	  return false;
-  }
-  return true;
+		return false;
+	}
+	return true;
 }
 
 /** Expire old locks on mutexes.
@@ -1043,22 +1051,21 @@ RobotMemory::mutex_setup_ttl(float max_age_sec)
 bool
 RobotMemory::mutex_expire_locks(float max_age_sec)
 {
-	mongo::DBClientBase *client =
-		distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
+	mongo::DBClientBase *client = distributed_ ? mongodb_client_distributed_ : mongodb_client_local_;
 
-	using std::chrono::milliseconds;
 	using std::chrono::high_resolution_clock;
+	using std::chrono::milliseconds;
 	using std::chrono::time_point;
 	using std::chrono::time_point_cast;
 
-	auto max_age_ms = milliseconds(static_cast<unsigned long int>(std::floor(max_age_sec*1000)));
+	auto max_age_ms = milliseconds(static_cast<unsigned long int>(std::floor(max_age_sec * 1000)));
 	time_point<high_resolution_clock, milliseconds> expire_before =
-		time_point_cast<milliseconds>(high_resolution_clock::now()) - max_age_ms;
-	mongo::Date_t	expire_before_mdb(expire_before.time_since_epoch().count());
+	  time_point_cast<milliseconds>(high_resolution_clock::now()) - max_age_ms;
+	mongo::Date_t expire_before_mdb(expire_before.time_since_epoch().count());
 
 	// here we can add an $or to implement lock timeouts
-	mongo::BSONObj filter_doc{BSON("locked" << true <<
-	                               "lock-time" << mongo::LT << expire_before_mdb)};
+	mongo::BSONObj filter_doc{
+	  BSON("locked" << true << "lock-time" << mongo::LT << expire_before_mdb)};
 
 	mongo::BSONObjBuilder update_doc;
 	mongo::BSONObjBuilder update_set;
@@ -1068,8 +1075,11 @@ RobotMemory::mutex_expire_locks(float max_age_sec)
 
 	try {
 		MutexLocker lock(mutex_);
-		client->update(cfg_coord_mutex_collection_, filter_doc, update_doc.obj(),
-		               /* upsert */ false, /* multi */ true,
+		client->update(cfg_coord_mutex_collection_,
+		               filter_doc,
+		               update_doc.obj(),
+		               /* upsert */ false,
+		               /* multi */ true,
 		               &mongo::WriteConcern::majority);
 
 		return true;
