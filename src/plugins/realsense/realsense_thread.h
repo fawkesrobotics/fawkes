@@ -24,87 +24,87 @@
 #ifndef _PLUGINS_REALSENSETHREAD_H_
 #define _PLUGINS_REALSENSETHREAD_H_
 
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <aspect/pointcloud.h>
+#include <core/threading/thread.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/blackboard.h>
-#include <aspect/configurable.h>
-#include <aspect/pointcloud.h>
-#include <aspect/clock.h>
-
 #ifdef HAVE_REALSENSE1
-#include <librealsense1/rs.hpp>
+#	include <librealsense1/rs.hpp>
 #else
-#include <librealsense/rs.hpp>
+#	include <librealsense/rs.hpp>
 #endif
 
 #include <string>
 
 namespace fawkes {
-  class SwitchInterface;
+class SwitchInterface;
 }
 
-class RealsenseThread 
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::PointCloudAspect,
-  public fawkes::ClockAspect
+class RealsenseThread : public fawkes::Thread,
+                        public fawkes::BlockedTimingAspect,
+                        public fawkes::LoggingAspect,
+                        public fawkes::ConfigurableAspect,
+                        public fawkes::BlackBoardAspect,
+                        public fawkes::PointCloudAspect,
+                        public fawkes::ClockAspect
 {
+public:
+	RealsenseThread();
 
- public:
-  RealsenseThread();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+private:
+	bool       connect_and_start_camera();
+	rs_device *get_camera();
+	void       enable_depth_stream();
+	void       log_error();
+	void       log_depths(const uint16_t *image);
+	void       fill_pointcloud();
+	void       stop_camera();
 
- private:
-  bool connect_and_start_camera();
-  rs_device* get_camera();
-  void enable_depth_stream();
-  void log_error();
-  void log_depths(const uint16_t * image);
-  void fill_pointcloud();
-  void stop_camera();
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
-  protected: virtual void run() { Thread::run(); }
+protected:
+	bool read_switch();
 
- protected:
-  bool read_switch();
+private:
+	fawkes::SwitchInterface *switch_if_;
+	bool                     cfg_use_switch_;
 
- private:
-  fawkes::SwitchInterface *switch_if_;
-  bool cfg_use_switch_;
+	typedef pcl::PointXYZ              PointType;
+	typedef pcl::PointCloud<PointType> Cloud;
 
-  typedef pcl::PointXYZ PointType;
-  typedef pcl::PointCloud<PointType> Cloud;
+	typedef Cloud::Ptr      CloudPtr;
+	typedef Cloud::ConstPtr CloudConstPtr;
 
-  typedef Cloud::Ptr CloudPtr;
-  typedef Cloud::ConstPtr CloudConstPtr;
+	fawkes::RefPtr<Cloud> realsense_depth_refptr_;
+	CloudPtr              realsense_depth_;
 
-  fawkes::RefPtr<Cloud> realsense_depth_refptr_;
-  CloudPtr realsense_depth_;
-
-  rs_error *rs_error_ = 0;
-  rs_context *rs_context_;
-  rs_device *rs_device_;
-  rs_intrinsics z_intrinsic_;
-  rs_stream rs_stream_type_;
-  int num_of_cameras_;
-  float camera_scale_;
-  std::string frame_id_;
-  std::string pcl_id_;
-  bool camera_started_ = false;
-  int laser_power_;
-
+	rs_error *    rs_error_ = 0;
+	rs_context *  rs_context_;
+	rs_device *   rs_device_;
+	rs_intrinsics z_intrinsic_;
+	rs_stream     rs_stream_type_;
+	int           num_of_cameras_;
+	float         camera_scale_;
+	std::string   frame_id_;
+	std::string   pcl_id_;
+	bool          camera_started_ = false;
+	int           laser_power_;
 };
-
 
 #endif
