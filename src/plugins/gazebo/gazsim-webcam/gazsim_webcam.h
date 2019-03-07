@@ -21,54 +21,53 @@
 #ifndef _PLUGINS_GAZSIM_WEBCAM_H_
 #define _PLUGINS_GAZSIM_WEBCAM_H_
 
-#include <core/threading/thread.h>
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/blackboard.h>
-#include <aspect/blocked_timing.h>
-#include <plugins/gazebo/aspect/gazebo.h>
-#include <string.h>
 #include <config/config.h>
-
+#include <core/threading/thread.h>
 #include <fvutils/ipc/shm_image.h>
+#include <plugins/gazebo/aspect/gazebo.h>
+
 #include <boost/circular_buffer.hpp>
+#include <string.h>
 
 //from Gazebo
-#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/msgs/MessageTypes.hh>
+#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/transport/transport.hh>
-
 
 class GazsimWebcam
 {
- public:
-  GazsimWebcam(std::string shm_id,
-	       gazebo::transport::NodePtr gazebo_world_node,
-	       fawkes::Configuration* config);
-  ~GazsimWebcam();
+public:
+	GazsimWebcam(std::string                shm_id,
+	             gazebo::transport::NodePtr gazebo_world_node,
+	             fawkes::Configuration *    config);
+	~GazsimWebcam();
 
- private:  
-  //Subscriber to receive webcam data from gazebo
-  gazebo::transport::SubscriberPtr webcam_sub_;
+private:
+	//Subscriber to receive webcam data from gazebo
+	gazebo::transport::SubscriberPtr webcam_sub_;
 
-  //handler function for incoming webcam data messages
-  void on_webcam_data_msg(ConstImageStampedPtr &msg);
+	//handler function for incoming webcam data messages
+	void on_webcam_data_msg(ConstImageStampedPtr &msg);
 
-  //shared memory buffer
-  firevision::SharedMemoryImageBuffer *shm_buffer_;
-  //reference to the buffer of shm_buffer_
-  unsigned char *buffer_;
+	//shared memory buffer
+	firevision::SharedMemoryImageBuffer *shm_buffer_;
+	//reference to the buffer of shm_buffer_
+	unsigned char *buffer_;
 
-  //config values
-  //topic name of the gazebo message publisher
-  std::string topic_name_;
-  double width_, height_;
-  //id of the shared memory object
-  std::string shm_id_;
-  std::string frame_;
-  firevision::colorspace_t format_from_;
-  firevision::colorspace_t format_to_;
+	//config values
+	//topic name of the gazebo message publisher
+	std::string topic_name_;
+	double      width_, height_;
+	//id of the shared memory object
+	std::string              shm_id_;
+	std::string              frame_;
+	firevision::colorspace_t format_from_;
+	firevision::colorspace_t format_to_;
 };
 
 #endif
