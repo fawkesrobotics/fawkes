@@ -24,8 +24,8 @@
 #ifndef PLUGINS_KATANA_CONVERSION_H_
 #define PLUGINS_KATANA_CONVERSION_H_
 
-#include <utils/math/angle.h>
 #include <common/MathHelperFunctions.h>
+#include <utils/math/angle.h>
 
 #include <vector>
 using namespace KNI_MHF;
@@ -37,15 +37,15 @@ namespace fawkes {
  * @param enc vector to be filled with encoder values
  */
 inline void
-radToEnc(std::vector<float>& rad, std::vector<int>& enc)
+radToEnc(std::vector<float> &rad, std::vector<int> &enc)
 {
-  enc.clear();
+	enc.clear();
 
-  enc.push_back(rad2enc(rad[0], deg2rad(  6.65f),  51200,  31000,  1));
-  enc.push_back(rad2enc(rad[1], deg2rad(124.25f),  94976, -31000,  1));
-  enc.push_back(rad2enc(rad[2], deg2rad( 52.70f),  81408, -31000, -1));
-  enc.push_back(rad2enc(rad[3], deg2rad( 63.50f),  51200,  31000,  1));
-  enc.push_back(rad2enc(rad[4], deg2rad(  8.50f),  51200,  31000,  1));
+	enc.push_back(rad2enc(rad[0], deg2rad(6.65f), 51200, 31000, 1));
+	enc.push_back(rad2enc(rad[1], deg2rad(124.25f), 94976, -31000, 1));
+	enc.push_back(rad2enc(rad[2], deg2rad(52.70f), 81408, -31000, -1));
+	enc.push_back(rad2enc(rad[3], deg2rad(63.50f), 51200, 31000, 1));
+	enc.push_back(rad2enc(rad[4], deg2rad(8.50f), 51200, 31000, 1));
 }
 
 /** Convert encoder vaulues of katana arm to radian angles.
@@ -53,15 +53,15 @@ radToEnc(std::vector<float>& rad, std::vector<int>& enc)
  * @param rad vector to be filled with angle values
  */
 inline void
-encToRad(std::vector<int>& enc, std::vector<float>& rad)
+encToRad(std::vector<int> &enc, std::vector<float> &rad)
 {
-  rad.clear();
+	rad.clear();
 
-  rad.push_back(enc2rad(enc[0], deg2rad(  6.65f),  51200,  31000,  1));
-  rad.push_back(enc2rad(enc[1], deg2rad(124.25f),  94976, -31000,  1));
-  rad.push_back(enc2rad(enc[2], deg2rad( 52.70f),  81408, -31000, -1));
-  rad.push_back(enc2rad(enc[3], deg2rad( 63.50f),  51200,  31000,  1));
-  rad.push_back(enc2rad(enc[4], deg2rad(  8.50f),  51200,  31000,  1));
+	rad.push_back(enc2rad(enc[0], deg2rad(6.65f), 51200, 31000, 1));
+	rad.push_back(enc2rad(enc[1], deg2rad(124.25f), 94976, -31000, 1));
+	rad.push_back(enc2rad(enc[2], deg2rad(52.70f), 81408, -31000, -1));
+	rad.push_back(enc2rad(enc[3], deg2rad(63.50f), 51200, 31000, 1));
+	rad.push_back(enc2rad(enc[4], deg2rad(8.50f), 51200, 31000, 1));
 }
 
 } // end namespace fawkes

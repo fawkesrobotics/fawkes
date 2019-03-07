@@ -33,75 +33,73 @@ namespace fawkes {
  */
 class KatanaController
 {
- public:
-  /** Virtual empty destructor. */
-  virtual ~KatanaController() {}
+public:
+	/** Virtual empty destructor. */
+	virtual ~KatanaController()
+	{
+	}
 
-  // setup
-  /** Initialize controller */
-  virtual void init() = 0;
+	// setup
+	/** Initialize controller */
+	virtual void init() = 0;
 
-  /** Set maximum velocity.
+	/** Set maximum velocity.
   * @param vel velocity
   */
-  virtual void set_max_velocity(unsigned int vel) = 0;
+	virtual void set_max_velocity(unsigned int vel) = 0;
 
-
-
-  // status checking
-  /** Check if movement is final.
+	// status checking
+	/** Check if movement is final.
   * @return movement is final
   */
-  virtual bool final() = 0;
+	virtual bool final() = 0;
 
-  /** Check if controller provides joint angle values.
+	/** Check if controller provides joint angle values.
   * @return can get angle values
   */
-  virtual bool joint_angles() = 0;
+	virtual bool joint_angles() = 0;
 
-  /** Check if controller provides joint encoder values.
+	/** Check if controller provides joint encoder values.
   * @return can get encoder values
   */
-  virtual bool joint_encoders() = 0;
+	virtual bool joint_encoders() = 0;
 
+	// commands
+	/** Calibrate the arm. */
+	virtual void calibrate() = 0;
 
+	/** Turn on arm/motors. */
+	virtual void turn_on() = 0;
 
-  // commands
-  /** Calibrate the arm. */
-  virtual void calibrate() = 0;
+	/** Turn off arm/motors. */
+	virtual void turn_off() = 0;
 
-  /** Turn on arm/motors. */
-  virtual void turn_on() = 0;
+	/** Stop movement immediately. */
+	virtual void stop() = 0;
 
-  /** Turn off arm/motors. */
-  virtual void turn_off() = 0;
-
-  /** Stop movement immediately. */
-  virtual void stop() = 0;
-
-  /** Store current coordinates of endeeffctor.
+	/** Store current coordinates of endeeffctor.
   * @param refresh fetch new joint data from device (update data in controller library).
   * No need to set to 'true' if 'read_motor_data()' is being called regularly.
   */
-  virtual void read_coordinates(bool refresh = false) = 0;
+	virtual void read_coordinates(bool refresh = false) = 0;
 
-  /** Read motor data of currently active joints from device into controller libray. */
-  virtual void read_motor_data() = 0;
+	/** Read motor data of currently active joints from device into controller libray. */
+	virtual void read_motor_data() = 0;
 
-  /** Read all sensor data from device into controller libray. */
-  virtual void read_sensor_data() = 0;
+	/** Read all sensor data from device into controller libray. */
+	virtual void read_sensor_data() = 0;
 
-  /** Open Gripper.
+	/** Open Gripper.
   * @param blocking Is this a blocking call?
   */
-  virtual void gripper_open(bool blocking = false) = 0;
+	virtual void gripper_open(bool blocking = false) = 0;
 
-  /** Close Gripper.
+	/** Close Gripper.
   * @param blocking Is this a blocking call?
   */
-  virtual void gripper_close(bool blocking = false) = 0;
+	virtual void gripper_close(bool blocking = false) = 0;
 
-  /** Move endeffctor to given coordinates.
+	/** Move endeffctor to given coordinates.
   * @param x translation on x-axis.
   * @param y translation on y-axis.
   * @param z translation on z-axis.
@@ -110,114 +108,109 @@ class KatanaController
   * @param psi 3rd rotation of euler-ZXZ-rotation
   * @param blocking Is this a blocking call?
   */
-  virtual void move_to(float x, float y, float z, float phi, float theta, float psi, bool blocking = false) = 0;
+	virtual void
+	move_to(float x, float y, float z, float phi, float theta, float psi, bool blocking = false) = 0;
 
-  /** Move joints to encoder values.
+	/** Move joints to encoder values.
   * @param encoders vector containing encoder values for all joints.
   * @param blocking Is this a blocking call?
   */
-  virtual void move_to(std::vector<int> encoders, bool blocking = false) = 0;
+	virtual void move_to(std::vector<int> encoders, bool blocking = false) = 0;
 
-  /** Move joints to angle values.
+	/** Move joints to angle values.
   * @param angles vector containing angle values for all joints.
   * @param blocking Is this a blocking call?
   */
-  virtual void move_to(std::vector<float> angles, bool blocking = false) = 0;
+	virtual void move_to(std::vector<float> angles, bool blocking = false) = 0;
 
-  /** Move single joint/motor to encoder value.
+	/** Move single joint/motor to encoder value.
   * @param id id of the joint/motor.
   * @param enc target encoder value.
   * @param blocking Is this a blocking call?
   */
-  virtual void move_motor_to(unsigned short id, int enc, bool blocking = false) = 0;
+	virtual void move_motor_to(unsigned short id, int enc, bool blocking = false) = 0;
 
-  /** Move single joint/motor to angle value.
+	/** Move single joint/motor to angle value.
   * @param id id of the joint/motor.
   * @param angle target angle value.
   * @param blocking Is this a blocking call?
   */
-  virtual void move_motor_to(unsigned short id, float angle, bool blocking = false) = 0;
+	virtual void move_motor_to(unsigned short id, float angle, bool blocking = false) = 0;
 
-  /** Move single joint/motor by encoder value (i.e. increase/decrease).
+	/** Move single joint/motor by encoder value (i.e. increase/decrease).
   * @param id id of the joint/motor.
   * @param enc increase/decrease by encoder value.
   * @param blocking Is this a blocking call?
   */
-  virtual void move_motor_by(unsigned short id, int enc, bool blocking = false) = 0;
+	virtual void move_motor_by(unsigned short id, int enc, bool blocking = false) = 0;
 
-  /** Move single joint/motor by angle value (i.e. increase/decrease).
+	/** Move single joint/motor by angle value (i.e. increase/decrease).
   * @param id id of the joint/motor.
   * @param angle increase/decrease by angle value.
   * @param blocking Is this a blocking call?
   */
-  virtual void move_motor_by(unsigned short id, float angle, bool blocking = false) = 0;
+	virtual void move_motor_by(unsigned short id, float angle, bool blocking = false) = 0;
 
-
-
-
-  // getters
-  /** Get x-coordinate of latest endeffector position.
+	// getters
+	/** Get x-coordinate of latest endeffector position.
    * Call 'read_coordinates()' to read latest position.
    * @return x-coordinate
    */
-  virtual double x() = 0;
+	virtual double x() = 0;
 
-  /** Get y-coordinate of latest endeffector position.
+	/** Get y-coordinate of latest endeffector position.
    * Call 'read_coordinates()' to read latest position.
    * @return y-coordinate
    */
-  virtual double y() = 0;
+	virtual double y() = 0;
 
-  /** Get z-coordinate of latest endeffector position.
+	/** Get z-coordinate of latest endeffector position.
    * Call 'read_coordinates()' to read latest position.
    * @return z-coordinate
    */
-  virtual double z() = 0;
+	virtual double z() = 0;
 
-  /** Get x-coordinate of latest endeffector position.
+	/** Get x-coordinate of latest endeffector position.
    * Call 'read_coordinates()' to read latest position.
    * @return x-coordinate
    */
 
-  /** Get phi-rotation of latest endeffector orientation.
+	/** Get phi-rotation of latest endeffector orientation.
    * Call 'read_coordinates()' to read latest orientation.
    * @return phi-rotation (1st rotation of euler-ZXZ-rotation)
    */
-  virtual double phi() = 0;
+	virtual double phi() = 0;
 
-  /** Get theta-rotation of latest endeffector orientation.
+	/** Get theta-rotation of latest endeffector orientation.
    * Call 'read_coordinates()' to read latest orientation.
    * @return theta-rotation (2nd rotation of euler-ZXZ-rotation)
    */
-  virtual double theta() = 0;
+	virtual double theta() = 0;
 
-  /** Get psi-rotation of latest endeffector orientation.
+	/** Get psi-rotation of latest endeffector orientation.
    * Call 'read_coordinates()' to read latest orientation.
    * @return psi-rotation (3rd rotation of euler-ZXZ-rotation)
    */
-  virtual double psi() = 0;
+	virtual double psi() = 0;
 
-  /** Get sensor values.
+	/** Get sensor values.
    * @param to vector to be filled with all available sensor values.
    * @param refresh refresh sensor data (call 'read_sensor_data')?
    */
-  virtual void get_sensors(std::vector<int>& to, bool refresh = false) = 0;
+	virtual void get_sensors(std::vector<int> &to, bool refresh = false) = 0;
 
-  /** Get encoder values of joints/motors.
+	/** Get encoder values of joints/motors.
    * @param to vector to be filled with encoder values for active joints.
    * @param refresh refresh joints/motors data (call 'read_motor_data')?
    */
-  virtual void get_encoders(std::vector<int>& to, bool refresh = false) = 0;
+	virtual void get_encoders(std::vector<int> &to, bool refresh = false) = 0;
 
-  /** Get angle values of joints/motors.
+	/** Get angle values of joints/motors.
    * @param to vector to be filled with angle values for active joints.
    * @param refresh refresh joints/motors data (call 'read_motor_data')?
    */
-  virtual void get_angles(std::vector<float>& to, bool refresh = false) = 0;
-
-
+	virtual void get_angles(std::vector<float> &to, bool refresh = false) = 0;
 };
-
 
 } // end of namespace fawkes
 

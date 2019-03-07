@@ -25,36 +25,39 @@
 
 #include "act_thread.h"
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <core/utils/refptr.h>
 
-#include <string>
 #include <memory>
+#include <string>
 
 namespace fawkes {
-  class KatanaInterface;
+class KatanaInterface;
 }
 
-class KatanaSensorThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect
+class KatanaSensorThread : public fawkes::Thread,
+                           public fawkes::BlockedTimingAspect,
+                           public fawkes::LoggingAspect,
+                           public fawkes::ConfigurableAspect
 {
- public:
-  KatanaSensorThread(KatanaActThread *act_thread);
+public:
+	KatanaSensorThread(KatanaActThread *act_thread);
 
-  virtual void loop();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  KatanaActThread *act_thread_;
+private:
+	KatanaActThread *act_thread_;
 };
-
 
 #endif
