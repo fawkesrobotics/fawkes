@@ -33,15 +33,14 @@ class OpenPRSManagerAspectIniFin;
 
 class OpenPRSManagerAspect : public virtual Aspect
 {
-  friend OpenPRSManagerAspectIniFin;
+	friend OpenPRSManagerAspectIniFin;
 
- public:
-  OpenPRSManagerAspect();
-  virtual ~OpenPRSManagerAspect();
+public:
+	OpenPRSManagerAspect();
+	virtual ~OpenPRSManagerAspect();
 
- protected:
-  LockPtr<OpenPRSKernelManager> openprs_kernel_mgr;
-
+protected:
+	LockPtr<OpenPRSKernelManager> openprs_kernel_mgr;
 };
 
 } // end namespace fawkes

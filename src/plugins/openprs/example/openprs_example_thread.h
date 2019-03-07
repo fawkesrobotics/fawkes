@@ -23,34 +23,36 @@
 #ifndef _PLUGINS_OPENPRS_EXAMPLE_OPENPRS_EXAMPLE_THREAD_H_
 #define _PLUGINS_OPENPRS_EXAMPLE_OPENPRS_EXAMPLE_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/openprs/aspect/openprs.h>
 
 #include <string>
 
-class OpenPRSExampleThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::OpenPRSAspect
+class OpenPRSExampleThread : public fawkes::Thread,
+                             public fawkes::LoggingAspect,
+                             public fawkes::BlockedTimingAspect,
+                             public fawkes::OpenPRSAspect
 {
- public:
-  OpenPRSExampleThread();
-  virtual ~OpenPRSExampleThread();
+public:
+	OpenPRSExampleThread();
+	virtual ~OpenPRSExampleThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private: // methods
-
- private: // members
-
+private: // methods
+private: // members
 };
 
 #endif
