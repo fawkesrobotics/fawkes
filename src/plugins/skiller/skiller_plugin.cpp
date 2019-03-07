@@ -21,9 +21,10 @@
  */
 
 #include "skiller_plugin.h"
+
 #include "exec_thread.h"
 #ifdef HAVE_NAVGRAPH
- #include "skiller_navgraph_feature.h"
+#	include "skiller_navgraph_feature.h"
 #endif
 
 using namespace fawkes;
@@ -40,27 +41,26 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-SkillerPlugin::SkillerPlugin(Configuration *config)
-  : Plugin(config)
+SkillerPlugin::SkillerPlugin(Configuration *config) : Plugin(config)
 {
 #ifdef HAVE_NAVGRAPH
-  bool navgraph_enable = false;
-  try {
-    navgraph_enable = config->get_bool("/skiller/features/navgraph/enable");
-  } catch (Exception &e) {} // ignore, use default
+	bool navgraph_enable = false;
+	try {
+		navgraph_enable = config->get_bool("/skiller/features/navgraph/enable");
+	} catch (Exception &e) {
+	} // ignore, use default
 #endif
 
-  SkillerExecutionThread *exec_thread = new SkillerExecutionThread();
+	SkillerExecutionThread *exec_thread = new SkillerExecutionThread();
 #ifdef HAVE_NAVGRAPH
-  if (navgraph_enable) {
-    SkillerNavGraphFeature *navgraph_feature = new SkillerNavGraphFeature();
-    exec_thread->add_skiller_feature(navgraph_feature);
-    thread_list.push_back(navgraph_feature);
-  }
+	if (navgraph_enable) {
+		SkillerNavGraphFeature *navgraph_feature = new SkillerNavGraphFeature();
+		exec_thread->add_skiller_feature(navgraph_feature);
+		thread_list.push_back(navgraph_feature);
+	}
 #endif
-  thread_list.push_back(exec_thread);
+	thread_list.push_back(exec_thread);
 }
-
 
 PLUGIN_DESCRIPTION("Lua-based Behavior Engine")
 EXPORT_PLUGIN(SkillerPlugin)
