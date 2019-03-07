@@ -26,66 +26,80 @@
 #include "openrave_base_thread.h"
 
 #ifdef HAVE_OPENRAVE
- #include <openrave/openrave.h>
+#	include <openrave/openrave.h>
 #endif
 
 #include <string>
 
 class JacoBimanualOpenraveThread : public JacoOpenraveBaseThread
 {
- public:
-  JacoBimanualOpenraveThread(fawkes::jaco_dual_arm_t *arms);
+public:
+	JacoBimanualOpenraveThread(fawkes::jaco_dual_arm_t *arms);
 
-  virtual void loop();
-  virtual void finalize();
+	virtual void loop();
+	virtual void finalize();
 
-  virtual void update_openrave();
-  virtual void plot_first();
+	virtual void update_openrave();
+	virtual void plot_first();
 
-  virtual bool add_target(float l_x, float l_y, float l_z, float l_e1, float l_e2, float l_e3,
-                          float r_x, float r_y, float r_z, float r_e1, float r_e2, float r_e3);
+	virtual bool add_target(float l_x,
+	                        float l_y,
+	                        float l_z,
+	                        float l_e1,
+	                        float l_e2,
+	                        float l_e3,
+	                        float r_x,
+	                        float r_y,
+	                        float r_z,
+	                        float r_e1,
+	                        float r_e2,
+	                        float r_e3);
 
-  virtual void set_constrained(bool enable);
+	virtual void set_constrained(bool enable);
 
- protected:
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
-  virtual void run() { Thread::run(); }
+protected:
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void _init();
-  void _load_robot();
-  void _init_dualmanipulation();
+private:
+	void _init();
+	void _load_robot();
+	void _init_dualmanipulation();
 
-  void _set_trajec_state(fawkes::jaco_trajec_state_t state);
-  void _copy_env();
-  bool _solve_multi_ik(std::vector<float> &left,
-                       std::vector<float> &right);
-  bool _plan_path();
+	void _set_trajec_state(fawkes::jaco_trajec_state_t state);
+	void _copy_env();
+	bool _solve_multi_ik(std::vector<float> &left, std::vector<float> &right);
+	bool _plan_path();
 
-  typedef struct arm_struct {
-    fawkes::jaco_arm_t                    *arm;
+	typedef struct arm_struct
+	{
+		fawkes::jaco_arm_t *arm;
 #ifdef HAVE_OPENRAVE
-    std::string                           manipname;
-    OpenRAVE::RobotBase::ManipulatorPtr   manip;
-    fawkes::RefPtr<fawkes::jaco_target_t> target;
+		std::string                           manipname;
+		OpenRAVE::RobotBase::ManipulatorPtr   manip;
+		fawkes::RefPtr<fawkes::jaco_target_t> target;
 #endif
-  } arm_struct_t;
+	} arm_struct_t;
 
-  struct {
-    arm_struct_t left;
-    arm_struct_t right;
-  } arms_;
+	struct
+	{
+		arm_struct_t left;
+		arm_struct_t right;
+	} arms_;
 
 #ifdef HAVE_OPENRAVE
-  fawkes::jaco_openrave_set_t planner_env_;
-  OpenRAVE::ModuleBasePtr mod_dualmanip_;
+	fawkes::jaco_openrave_set_t planner_env_;
+	OpenRAVE::ModuleBasePtr     mod_dualmanip_;
 
-  std::set<OpenRAVE::KinBody::LinkPtr> links_left_;
-  std::set<OpenRAVE::KinBody::LinkPtr> links_right_;
+	std::set<OpenRAVE::KinBody::LinkPtr> links_left_;
+	std::set<OpenRAVE::KinBody::LinkPtr> links_right_;
 #endif
 
-  bool __constrained;
+	bool __constrained;
 };
-
 
 #endif

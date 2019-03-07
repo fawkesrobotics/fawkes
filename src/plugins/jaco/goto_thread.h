@@ -25,62 +25,81 @@
 
 #include "types.h"
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 #include <string>
 #include <vector>
 
 namespace fawkes {
-  class Mutex;
+class Mutex;
 }
 
-class JacoGotoThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+class JacoGotoThread : public fawkes::Thread,
+                       public fawkes::LoggingAspect,
+                       public fawkes::ConfigurableAspect,
+                       public fawkes::BlackBoardAspect
 {
- public:
-  JacoGotoThread(const char *name, fawkes::jaco_arm_t* arm);
-  virtual ~JacoGotoThread();
+public:
+	JacoGotoThread(const char *name, fawkes::jaco_arm_t *arm);
+	virtual ~JacoGotoThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  virtual bool final();
+	virtual bool final();
 
-  virtual void set_target(float x, float y, float z, float e1, float e2, float e3, float f1=0.f, float f2=0.f, float f3=0.f);
-  virtual void set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, float f1=0.f, float f2=0.f, float f3=0.f);
-  virtual void move_gripper(float f1, float f2, float f3);
+	virtual void set_target(float x,
+	                        float y,
+	                        float z,
+	                        float e1,
+	                        float e2,
+	                        float e3,
+	                        float f1 = 0.f,
+	                        float f2 = 0.f,
+	                        float f3 = 0.f);
+	virtual void set_target_ang(float j1,
+	                            float j2,
+	                            float j3,
+	                            float j4,
+	                            float j5,
+	                            float j6,
+	                            float f1 = 0.f,
+	                            float f2 = 0.f,
+	                            float f3 = 0.f);
+	virtual void move_gripper(float f1, float f2, float f3);
 
-  virtual void pos_ready();
-  virtual void pos_retract();
+	virtual void pos_ready();
+	virtual void pos_retract();
 
-  virtual void stop();
+	virtual void stop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void _goto_target();
-  void _exec_trajec(fawkes::jaco_trajec_t* trajec);
+private:
+	void _goto_target();
+	void _exec_trajec(fawkes::jaco_trajec_t *trajec);
 
-  fawkes::jaco_arm_t  *arm_;
-  fawkes::Mutex       *final_mutex_;
+	fawkes::jaco_arm_t *arm_;
+	fawkes::Mutex *     final_mutex_;
 
-  fawkes::RefPtr<fawkes::jaco_target_t> target_;
-  float finger_last_[4]; // 3 positions + 1 counter
+	fawkes::RefPtr<fawkes::jaco_target_t> target_;
+	float                                 finger_last_[4]; // 3 positions + 1 counter
 
-  bool final_;
+	bool final_;
 
-  unsigned int wait_status_check_;
+	unsigned int wait_status_check_;
 
-  void _check_final();
+	void _check_final();
 };
-
 
 #endif

@@ -23,45 +23,47 @@
 #ifndef _PLUGINS_JACO_ACT_THREAD_H_
 #define _PLUGINS_JACO_ACT_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  typedef struct jaco_arm_struct jaco_arm_t;
+typedef struct jaco_arm_struct jaco_arm_t;
 }
 
-class JacoActThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+class JacoActThread : public fawkes::Thread,
+                      public fawkes::BlockedTimingAspect,
+                      public fawkes::LoggingAspect,
+                      public fawkes::ConfigurableAspect,
+                      public fawkes::BlackBoardAspect
 {
- public:
-  JacoActThread(const char *name, fawkes::jaco_arm_t* arm);
-  virtual ~JacoActThread();
+public:
+	JacoActThread(const char *name, fawkes::jaco_arm_t *arm);
+	virtual ~JacoActThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+private:
+	void _initialize();
+	bool _is_initializing();
+	void _process_msgs();
 
- private:
-  void _initialize();
-  bool _is_initializing();
-  void _process_msgs();
+	fawkes::jaco_arm_t *arm_;
 
-  fawkes::jaco_arm_t* arm_;
-
-  bool cfg_auto_init_;
-  bool cfg_auto_calib_;
+	bool cfg_auto_init_;
+	bool cfg_auto_calib_;
 };
-
 
 #endif
