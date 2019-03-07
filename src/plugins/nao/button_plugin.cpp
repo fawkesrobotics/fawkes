@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "button_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,15 +31,14 @@ using namespace fawkes;
  */
 class NaoQiButtonPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit NaoQiButtonPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new NaoQiButtonThread());
-  }
+	explicit NaoQiButtonPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new NaoQiButtonThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("NaoQi button provider")

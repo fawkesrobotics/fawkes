@@ -23,29 +23,28 @@
 #ifndef _PLUGINS_NAO_MOTION_KICK_TASK_H_
 #define _PLUGINS_NAO_MOTION_KICK_TASK_H_
 
-#include <interfaces/HumanoidMotionInterface.h>
-
-#include <althread/altask.h>
-#include <alproxies/almotionproxy.h>
 #include <alcore/alptr.h>
+#include <alproxies/almotionproxy.h>
+#include <althread/altask.h>
+#include <interfaces/HumanoidMotionInterface.h>
 
 class NaoQiMotionKickTask : public AL::ALTask
 {
- public:
-  NaoQiMotionKickTask(AL::ALPtr<AL::ALMotionProxy> almotion,
-		      fawkes::HumanoidMotionInterface::LegEnum leg);
-  virtual ~NaoQiMotionKickTask();
+public:
+	NaoQiMotionKickTask(AL::ALPtr<AL::ALMotionProxy>             almotion,
+	                    fawkes::HumanoidMotionInterface::LegEnum leg);
+	virtual ~NaoQiMotionKickTask();
 
-  virtual void exitTask();
-  virtual void run();
+	virtual void exitTask();
+	virtual void run();
 
- private: /* methods */
-  void goto_start_pos(AL::ALValue speed, bool concurrent = false);
+private: /* methods */
+	void goto_start_pos(AL::ALValue speed, bool concurrent = false);
 
- private:
-  bool                                     quit_;
-  AL::ALPtr<AL::ALMotionProxy>             almotion_;
-  fawkes::HumanoidMotionInterface::LegEnum leg_;
+private:
+	bool                                     quit_;
+	AL::ALPtr<AL::ALMotionProxy>             almotion_;
+	fawkes::HumanoidMotionInterface::LegEnum leg_;
 };
 
 #endif

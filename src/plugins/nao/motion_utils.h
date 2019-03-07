@@ -26,43 +26,70 @@
 #include <alcore/alptr.h>
 #include <alproxies/almotionproxy.h>
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace motion {
 
-void
-fix_angles(AL::ALPtr<AL::ALMotionProxy> &almotion);
+void fix_angles(AL::ALPtr<AL::ALMotionProxy> &almotion);
 
-void
-move_joints(AL::ALPtr<AL::ALMotionProxy> &almotion,
-            float head_yaw, float head_pitch,
-            float l_shoulder_pitch, float l_shoulder_roll,
-            float l_elbow_yaw, float l_elbow_roll,
-            float l_wrist_yaw, float l_hand,
-            float l_hip_yaw_pitch, float l_hip_roll, float l_hip_pitch,
-            float l_knee_pitch, float l_ankle_pitch, float l_ankle_roll,
-            float r_shoulder_pitch, float r_shoulder_roll,
-            float r_elbow_yaw, float r_elbow_roll,
-            float r_wrist_yaw, float r_hand,
-            float r_hip_yaw_pitch, float r_hip_roll, float r_hip_pitch,
-            float r_knee_pitch, float r_ankle_pitch, float r_ankle_roll,
-            float speed);
+void move_joints(AL::ALPtr<AL::ALMotionProxy> &almotion,
+                 float                         head_yaw,
+                 float                         head_pitch,
+                 float                         l_shoulder_pitch,
+                 float                         l_shoulder_roll,
+                 float                         l_elbow_yaw,
+                 float                         l_elbow_roll,
+                 float                         l_wrist_yaw,
+                 float                         l_hand,
+                 float                         l_hip_yaw_pitch,
+                 float                         l_hip_roll,
+                 float                         l_hip_pitch,
+                 float                         l_knee_pitch,
+                 float                         l_ankle_pitch,
+                 float                         l_ankle_roll,
+                 float                         r_shoulder_pitch,
+                 float                         r_shoulder_roll,
+                 float                         r_elbow_yaw,
+                 float                         r_elbow_roll,
+                 float                         r_wrist_yaw,
+                 float                         r_hand,
+                 float                         r_hip_yaw_pitch,
+                 float                         r_hip_roll,
+                 float                         r_hip_pitch,
+                 float                         r_knee_pitch,
+                 float                         r_ankle_pitch,
+                 float                         r_ankle_roll,
+                 float                         speed);
 
-int
-timed_move_joints(AL::ALPtr<AL::ALMotionProxy> &almotion,
-                  float head_yaw, float head_pitch,
-                  float l_shoulder_pitch, float l_shoulder_roll,
-                  float l_elbow_yaw, float l_elbow_roll,
-                  float l_wrist_yaw, float l_hand,
-                  float l_hip_yaw_pitch, float l_hip_roll, float l_hip_pitch,
-                  float l_knee_pitch, float l_ankle_pitch, float l_ankle_roll,
-                  float r_shoulder_pitch, float r_shoulder_roll,
-                  float r_elbow_yaw, float r_elbow_roll,
-                  float r_wrist_yaw, float r_hand,
-                  float r_hip_yaw_pitch, float r_hip_roll, float r_hip_pitch,
-                  float r_knee_pitch, float r_ankle_pitch, float r_ankle_roll,
-                  float time_sec);
+int timed_move_joints(AL::ALPtr<AL::ALMotionProxy> &almotion,
+                      float                         head_yaw,
+                      float                         head_pitch,
+                      float                         l_shoulder_pitch,
+                      float                         l_shoulder_roll,
+                      float                         l_elbow_yaw,
+                      float                         l_elbow_roll,
+                      float                         l_wrist_yaw,
+                      float                         l_hand,
+                      float                         l_hip_yaw_pitch,
+                      float                         l_hip_roll,
+                      float                         l_hip_pitch,
+                      float                         l_knee_pitch,
+                      float                         l_ankle_pitch,
+                      float                         l_ankle_roll,
+                      float                         r_shoulder_pitch,
+                      float                         r_shoulder_roll,
+                      float                         r_elbow_yaw,
+                      float                         r_elbow_roll,
+                      float                         r_wrist_yaw,
+                      float                         r_hand,
+                      float                         r_hip_yaw_pitch,
+                      float                         r_hip_roll,
+                      float                         r_hip_pitch,
+                      float                         r_knee_pitch,
+                      float                         r_ankle_pitch,
+                      float                         r_ankle_roll,
+                      float                         time_sec);
 
 } // end of namespace motion
 

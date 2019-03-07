@@ -24,9 +24,9 @@
 #ifndef _PLUGINS_NAO_ASPECT_NAOQI_H_
 #define _PLUGINS_NAO_ASPECT_NAOQI_H_
 
-#include <aspect/aspect.h>
-#include <alcore/alptr.h>
 #include <alcommon/albroker.h>
+#include <alcore/alptr.h>
+#include <aspect/aspect.h>
 
 namespace fawkes {
 
@@ -34,17 +34,17 @@ class NaoQiAspectIniFin;
 
 class NaoQiAspect : public virtual Aspect
 {
-  friend NaoQiAspectIniFin;
+	friend NaoQiAspectIniFin;
 
- public:
-  NaoQiAspect();
-  virtual ~NaoQiAspect();
+public:
+	NaoQiAspect();
+	virtual ~NaoQiAspect();
 
- protected:
-  AL::ALPtr<AL::ALBroker>  naoqi_broker;
+protected:
+	AL::ALPtr<AL::ALBroker> naoqi_broker;
 
- private:
-  void init_NaoQiAspect(AL::ALPtr<AL::ALBroker> naoqi_broker);
+private:
+	void init_NaoQiAspect(AL::ALPtr<AL::ALBroker> naoqi_broker);
 };
 
 } // end namespace fawkes

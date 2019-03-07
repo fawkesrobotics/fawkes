@@ -23,54 +23,58 @@
 #ifndef _PLUGINS_NAO_SPEECHSYNTH_THREAD_H_
 #define _PLUGINS_NAO_SPEECHSYNTH_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/clock.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/nao/aspect/naoqi.h>
 
 #include <vector>
 
 namespace AL {
-  class ALTextToSpeechProxy;
+class ALTextToSpeechProxy;
 }
 namespace fawkes {
-  class SpeechSynthInterface;
+class SpeechSynthInterface;
 }
 
-class NaoQiSpeechSynthThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::NaoQiAspect
+class NaoQiSpeechSynthThread : public fawkes::Thread,
+                               public fawkes::LoggingAspect,
+                               public fawkes::ConfigurableAspect,
+                               public fawkes::ClockAspect,
+                               public fawkes::BlackBoardAspect,
+                               public fawkes::BlockedTimingAspect,
+                               public fawkes::NaoQiAspect
 {
- public:
-  NaoQiSpeechSynthThread();
-  virtual ~NaoQiSpeechSynthThread();
+public:
+	NaoQiSpeechSynthThread();
+	virtual ~NaoQiSpeechSynthThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void stop_speech();
-  void process_messages();
-  void say(const char *text);
+private:
+	void stop_speech();
+	void process_messages();
+	void say(const char *text);
 
- private:
-  AL::ALPtr<AL::ALTextToSpeechProxy> altts_;
+private:
+	AL::ALPtr<AL::ALTextToSpeechProxy> altts_;
 
-  fawkes::SpeechSynthInterface *speechsynth_if_;
+	fawkes::SpeechSynthInterface *speechsynth_if_;
 
-  int tts_task_id_;
+	int tts_task_id_;
 };
 
 #endif

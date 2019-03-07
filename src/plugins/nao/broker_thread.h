@@ -23,38 +23,40 @@
 #ifndef _PLUGINS_NAO_BROKER_THREAD_H_
 #define _PLUGINS_NAO_BROKER_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/clock.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
+#include <alcommon/albroker.h>
+#include <alcore/alptr.h>
 #include <aspect/aspect_provider.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/nao/aspect/naoqi_inifin.h>
 
-#include <alcore/alptr.h>
-#include <alcommon/albroker.h>
-
-class NaoQiBrokerThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::AspectProviderAspect
+class NaoQiBrokerThread : public fawkes::Thread,
+                          public fawkes::LoggingAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::ClockAspect,
+                          public fawkes::AspectProviderAspect
 {
- public:
-  NaoQiBrokerThread();
-  virtual ~NaoQiBrokerThread();
+public:
+	NaoQiBrokerThread();
+	virtual ~NaoQiBrokerThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  AL::ALPtr<AL::ALBroker>      broker_;
-  fawkes::NaoQiAspectIniFin    naoqi_aspect_inifin_;
-
+private:
+	AL::ALPtr<AL::ALBroker>   broker_;
+	fawkes::NaoQiAspectIniFin naoqi_aspect_inifin_;
 };
 
 #endif

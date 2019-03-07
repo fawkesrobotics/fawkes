@@ -23,8 +23,8 @@
 #ifndef _PLUGINS_NAO_NAOQI_BROKER_H_
 #define _PLUGINS_NAO_NAOQI_BROKER_H_
 
-#include <alcore/alptr.h>
 #include <alcommon/albroker.h>
+#include <alcore/alptr.h>
 
 /* This is a hack to achieve the following: when the nao plugin is loaded,
  * we want to get access to the main broker for shared access within Fawkes.
@@ -35,9 +35,9 @@
  * the NaoQi module to the Fawkes plugin.
  */
 namespace fawkes {
-  namespace naoqi {
-    extern AL::ALPtr<AL::ALBroker> broker;
-  }
+namespace naoqi {
+extern AL::ALPtr<AL::ALBroker> broker;
 }
+} // namespace fawkes
 
 #endif

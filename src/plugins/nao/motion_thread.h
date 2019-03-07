@@ -23,76 +23,92 @@
 #ifndef _PLUGINS_NAO_MOTION_THREAD_H_
 #define _PLUGINS_NAO_MOTION_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/clock.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/nao/aspect/naoqi.h>
 
 #include <vector>
 
 namespace AL {
-  class ALMotionProxy;
-  class ALTask;
-}
+class ALMotionProxy;
+class ALTask;
+} // namespace AL
 namespace fawkes {
-  class HumanoidMotionInterface;
-  class NaoSensorInterface;
-}
+class HumanoidMotionInterface;
+class NaoSensorInterface;
+} // namespace fawkes
 
-class NaoQiMotionThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::NaoQiAspect
+class NaoQiMotionThread : public fawkes::Thread,
+                          public fawkes::LoggingAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::ClockAspect,
+                          public fawkes::BlackBoardAspect,
+                          public fawkes::BlockedTimingAspect,
+                          public fawkes::NaoQiAspect
 {
- public:
-  NaoQiMotionThread();
-  virtual ~NaoQiMotionThread();
+public:
+	NaoQiMotionThread();
+	virtual ~NaoQiMotionThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void stop_motion();
-  void process_messages();
-  void fix_angles();
+private:
+	void stop_motion();
+	void process_messages();
+	void fix_angles();
 
-  void goto_body_angles(float head_yaw, float head_pitch,
-			float l_shoulder_pitch, float l_shoulder_roll,
-			float l_elbow_yaw, float l_elbow_roll,
-			float l_wrist_yaw, float l_hand,
-			float l_hip_yaw_pitch, float l_hip_roll,
-			float l_hip_pitch, float l_knee_pitch,
-			float l_ankle_pitch, float l_ankle_roll,
-			float r_shoulder_pitch, float r_shoulder_roll,
-			float r_elbow_yaw, float r_elbow_roll,
-			float r_wrist_yaw, float r_hand,
-			float r_hip_yaw_pitch, float r_hip_roll,
-			float r_hip_pitch, float r_knee_pitch,
-			float r_ankle_pitch, float r_ankle_roll,
-			float time_sec);
+	void goto_body_angles(float head_yaw,
+	                      float head_pitch,
+	                      float l_shoulder_pitch,
+	                      float l_shoulder_roll,
+	                      float l_elbow_yaw,
+	                      float l_elbow_roll,
+	                      float l_wrist_yaw,
+	                      float l_hand,
+	                      float l_hip_yaw_pitch,
+	                      float l_hip_roll,
+	                      float l_hip_pitch,
+	                      float l_knee_pitch,
+	                      float l_ankle_pitch,
+	                      float l_ankle_roll,
+	                      float r_shoulder_pitch,
+	                      float r_shoulder_roll,
+	                      float r_elbow_yaw,
+	                      float r_elbow_roll,
+	                      float r_wrist_yaw,
+	                      float r_hand,
+	                      float r_hip_yaw_pitch,
+	                      float r_hip_roll,
+	                      float r_hip_pitch,
+	                      float r_knee_pitch,
+	                      float r_ankle_pitch,
+	                      float r_ankle_roll,
+	                      float time_sec);
 
+private:
+	AL::ALPtr<AL::ALMotionProxy> almotion_;
+	AL::ALPtr<AL::ALThreadPool>  thread_pool_;
 
- private:
-  AL::ALPtr<AL::ALMotionProxy> almotion_;
-  AL::ALPtr<AL::ALThreadPool>  thread_pool_;
+	fawkes::HumanoidMotionInterface *hummot_if_;
+	fawkes::NaoSensorInterface *     sensor_if_;
 
-  fawkes::HumanoidMotionInterface *hummot_if_;
-  fawkes::NaoSensorInterface      *sensor_if_;
-
-  int motion_task_id_;
-  int head_task_id_;
-  AL::ALPtr<AL::ALTask>        motion_task_;
+	int                   motion_task_id_;
+	int                   head_task_id_;
+	AL::ALPtr<AL::ALTask> motion_task_;
 };
 
 #endif

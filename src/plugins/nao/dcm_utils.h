@@ -24,22 +24,23 @@
 #define _PLUGINS_NAO_DCM_UTILS_H_
 
 #include <alcore/alptr.h>
-#include <alproxies/dcmproxy.h>
 #include <alproxies/almemoryproxy.h>
+#include <alproxies/dcmproxy.h>
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace dcm {
 
-void
-set_value(AL::ALPtr<AL::DCMProxy> &dcm,
-          const std::string &device, const std::string &kind,
-          float value, int time);
+void set_value(AL::ALPtr<AL::DCMProxy> &dcm,
+               const std::string &      device,
+               const std::string &      kind,
+               float                    value,
+               int                      time);
 
-std::vector<std::string>
-get_devices(AL::ALPtr<AL::DCMProxy> &dcm, AL::ALPtr<AL::ALMemoryProxy> &almem,
-            const std::string &type);
+std::vector<std::string> get_devices(AL::ALPtr<AL::DCMProxy> &     dcm,
+                                     AL::ALPtr<AL::ALMemoryProxy> &almem,
+                                     const std::string &           type);
 
 } // end of namespace dcm
 

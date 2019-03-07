@@ -26,43 +26,48 @@ namespace dcm {
 
 void
 set_value(AL::ALPtr<AL::DCMProxy> &dcm,
-          const std::string &device, const std::string &kind,
-          float value, int time)
+          const std::string &      device,
+          const std::string &      kind,
+          float                    value,
+          int                      time)
 {
-  AL::ALValue cmd, actcmd, actpos;
+	AL::ALValue cmd, actcmd, actpos;
 
-  cmd.arrayPush(device); cmd.arrayPush(kind);
-  actpos.arrayPush(value); actpos.arrayPush(time);
-  actcmd.arrayPush(actpos); cmd.arrayPush(actcmd);
+	cmd.arrayPush(device);
+	cmd.arrayPush(kind);
+	actpos.arrayPush(value);
+	actpos.arrayPush(time);
+	actcmd.arrayPush(actpos);
+	cmd.arrayPush(actcmd);
 
-  dcm->set(cmd);
+	dcm->set(cmd);
 }
 
-
 std::vector<std::string>
-get_devices(AL::ALPtr<AL::DCMProxy> &dcm, AL::ALPtr<AL::ALMemoryProxy> &almem,
-            const std::string &type)
+get_devices(AL::ALPtr<AL::DCMProxy> &     dcm,
+            AL::ALPtr<AL::ALMemoryProxy> &almem,
+            const std::string &           type)
 {
-  AL::ALValue names = almem->getDataListName();
-  std::string subd_prefix = dcm->getPrefix()[0];
+	AL::ALValue names       = almem->getDataListName();
+	std::string subd_prefix = dcm->getPrefix()[0];
 
-  std::vector<std::string> rv;
+	std::vector<std::string> rv;
 
-  // Walk sub-device tree and extract joints
-  for (unsigned int i = 0; i < names.getSize(); ++i) {
-    std::string name = names[i];
-    if ( name.compare(0, subd_prefix.length(), subd_prefix) == 0 ) {
-      if ( name.compare(name.length() - 5, 5, "/Type") == 0 ) {
-	std::string dtype = almem->getData(name, 0);
-	std::string base_path = name.substr(0, name.length() - 5);
-	if ( dtype == type ) {
-          rv.push_back(base_path);
-        }
-      }
-    }
-  }
+	// Walk sub-device tree and extract joints
+	for (unsigned int i = 0; i < names.getSize(); ++i) {
+		std::string name = names[i];
+		if (name.compare(0, subd_prefix.length(), subd_prefix) == 0) {
+			if (name.compare(name.length() - 5, 5, "/Type") == 0) {
+				std::string dtype     = almem->getData(name, 0);
+				std::string base_path = name.substr(0, name.length() - 5);
+				if (dtype == type) {
+					rv.push_back(base_path);
+				}
+			}
+		}
+	}
 
-  return rv;
+	return rv;
 }
 
 } // end of namespace dcm

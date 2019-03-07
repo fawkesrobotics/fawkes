@@ -21,15 +21,16 @@
  */
 
 #include "broker_thread.h"
+
 #include "naoqi_broker.h"
+
+#include <alcommon/albrokermanager.h>
+#include <alcore/alerror.h>
+#include <sys/wait.h>
 
 #include <cerrno>
 #include <csignal>
 #include <unistd.h>
-#include <sys/wait.h>
-
-#include <alcommon/albrokermanager.h>
-#include <alcore/alerror.h>
 
 using namespace fawkes;
 
@@ -43,30 +44,28 @@ using namespace fawkes;
 
 /** Constructor. */
 NaoQiBrokerThread::NaoQiBrokerThread()
-  : Thread("NaoQiBrokerThread", Thread::OPMODE_WAITFORWAKEUP),
-    AspectProviderAspect("NaoQiAspect", &naoqi_aspect_inifin_)
+: Thread("NaoQiBrokerThread", Thread::OPMODE_WAITFORWAKEUP),
+  AspectProviderAspect("NaoQiAspect", &naoqi_aspect_inifin_)
 {
 }
-
 
 /** Destructor. */
 NaoQiBrokerThread::~NaoQiBrokerThread()
 {
 }
 
-
 void
 NaoQiBrokerThread::init()
 {
-  if (fawkes::naoqi::broker) {
-    broker_ = fawkes::naoqi::broker;
-    logger->log_debug(name(), "Using NaoQi Module broker");
-  } else {
-    throw Exception("NaoQi broker not set, embedding of NaoQi "
-		    "not implemented, yet");
-  }
+	if (fawkes::naoqi::broker) {
+		broker_ = fawkes::naoqi::broker;
+		logger->log_debug(name(), "Using NaoQi Module broker");
+	} else {
+		throw Exception("NaoQi broker not set, embedding of NaoQi "
+		                "not implemented, yet");
+	}
 
-  /*
+	/*
   std::vector<AL::ALModuleInfo>::iterator m;
   AL::ALPtr<std::vector<AL::ALModuleInfo> >
     modules(new std::vector<AL::ALModuleInfo>);
@@ -83,17 +82,15 @@ NaoQiBrokerThread::init()
   }
   */
 
-  naoqi_aspect_inifin_.set_naoqi_broker(broker_);
+	naoqi_aspect_inifin_.set_naoqi_broker(broker_);
 }
-
 
 void
 NaoQiBrokerThread::finalize()
 {
-  broker_.reset();
-  naoqi_aspect_inifin_.set_naoqi_broker(broker_);
+	broker_.reset();
+	naoqi_aspect_inifin_.set_naoqi_broker(broker_);
 }
-
 
 void
 NaoQiBrokerThread::loop()

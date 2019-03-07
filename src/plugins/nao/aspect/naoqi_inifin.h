@@ -31,16 +31,16 @@ namespace fawkes {
 
 class NaoQiAspectIniFin : public AspectIniFin
 {
- public:
-  NaoQiAspectIniFin();
+public:
+	NaoQiAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
-  void set_naoqi_broker(AL::ALPtr<AL::ALBroker> naoqi_broker);
+	void set_naoqi_broker(AL::ALPtr<AL::ALBroker> naoqi_broker);
 
- private:
-  AL::ALPtr<AL::ALBroker> naoqi_broker_;
+private:
+	AL::ALPtr<AL::ALBroker> naoqi_broker_;
 };
 
 } // end namespace fawkes

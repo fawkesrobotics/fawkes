@@ -41,15 +41,13 @@ namespace fawkes {
 /** Constructor. */
 NaoQiAspect::NaoQiAspect()
 {
-  add_aspect("NaoQiAspect");
+	add_aspect("NaoQiAspect");
 }
-
 
 /** Virtual empty destructor. */
 NaoQiAspect::~NaoQiAspect()
 {
 }
-
 
 /** Init OpenNI aspect.
  * This set the OpenNI context.
@@ -60,7 +58,7 @@ NaoQiAspect::~NaoQiAspect()
 void
 NaoQiAspect::init_NaoQiAspect(AL::ALPtr<AL::ALBroker> naoqi_broker)
 {
-  this->naoqi_broker = naoqi_broker;
+	this->naoqi_broker = naoqi_broker;
 }
 
 } // end namespace fawkes
