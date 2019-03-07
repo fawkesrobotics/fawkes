@@ -21,6 +21,7 @@
  */
 
 #include "blackboard_adapter.h"
+
 #include "utils.h"
 
 #include <utils/misc/string_conversions.h>
@@ -29,11 +30,11 @@
 #include <AdapterConfiguration.hh>
 #include <AdapterExecInterface.hh>
 #include <AdapterFactory.hh>
-#include <State.hh>
+#include <CachedValue.hh>
 #include <Command.hh>
 #include <Error.hh>
+#include <State.hh>
 #include <StateCacheEntry.hh>
-#include <CachedValue.hh>
 
 using namespace fawkes;
 
@@ -45,9 +46,8 @@ using namespace fawkes;
 /** Constructor.
  * @param execInterface Reference to the parent AdapterExecInterface object.
  */
-BlackboardPlexilAdapter::BlackboardPlexilAdapter(PLEXIL::AdapterExecInterface& execInterface)
-: InterfaceAdapter(execInterface),
-  BlackBoardInterfaceListener("PlexilBB")
+BlackboardPlexilAdapter::BlackboardPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface)
+: InterfaceAdapter(execInterface), BlackBoardInterfaceListener("PlexilBB")
 {
 }
 
@@ -56,10 +56,9 @@ BlackboardPlexilAdapter::BlackboardPlexilAdapter(PLEXIL::AdapterExecInterface& e
  * @param xml A const reference to the XML element describing this adapter
  * @note The instance maintains a shared pointer to the XML.
  */
-BlackboardPlexilAdapter::BlackboardPlexilAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-                                                 pugi::xml_node const xml)
-: InterfaceAdapter(execInterface, xml),
-  BlackBoardInterfaceListener("PlexilBB")
+BlackboardPlexilAdapter::BlackboardPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface,
+                                                 pugi::xml_node const          xml)
+: InterfaceAdapter(execInterface, xml), BlackBoardInterfaceListener("PlexilBB")
 {
 }
 
@@ -68,35 +67,39 @@ BlackboardPlexilAdapter::~BlackboardPlexilAdapter()
 {
 }
 
-
 /** Initialize adapter.
  * @return true if initialization was successful, false otherwise.
  */
 bool
 BlackboardPlexilAdapter::initialize()
 {
-	logger_  = reinterpret_cast<fawkes::Logger *>(m_execInterface.getProperty("::Fawkes::Logger"));
+	logger_ = reinterpret_cast<fawkes::Logger *>(m_execInterface.getProperty("::Fawkes::Logger"));
 	blackboard_ =
 	  reinterpret_cast<fawkes::BlackBoard *>(m_execInterface.getProperty("::Fawkes::BlackBoard"));
 
 	namespace p = std::placeholders;
-	commands_ = {
-	  {"BB_open_for_reading",  std::bind(&BlackboardPlexilAdapter::bb_open_for_reading, this, p::_1)},
-	  {"BB_close",  std::bind(&BlackboardPlexilAdapter::bb_close, this, p::_1)},
-	  {"BB_read",  std::bind(&BlackboardPlexilAdapter::bb_read, this, p::_1)},
-	  {"BB_read_all",  std::bind(&BlackboardPlexilAdapter::bb_read_all, this, p::_1)},
-	  {"BB_print",  std::bind(&BlackboardPlexilAdapter::bb_print, this, p::_1)}
-	};
+	commands_   = {{"BB_open_for_reading",
+                std::bind(&BlackboardPlexilAdapter::bb_open_for_reading, this, p::_1)},
+               {"BB_close", std::bind(&BlackboardPlexilAdapter::bb_close, this, p::_1)},
+               {"BB_read", std::bind(&BlackboardPlexilAdapter::bb_read, this, p::_1)},
+               {"BB_read_all", std::bind(&BlackboardPlexilAdapter::bb_read_all, this, p::_1)},
+               {"BB_print", std::bind(&BlackboardPlexilAdapter::bb_print, this, p::_1)}};
 
-	std::vector<std::string> lookups = { "BB_changed", "BB_int", "BB_real", "BB_bool",
-	                                     "BB_string", "BB_field_length",
-	                                     "BB_int_at", "BB_real_at", "BB_bool_at" };
+	std::vector<std::string> lookups = {"BB_changed",
+	                                    "BB_int",
+	                                    "BB_real",
+	                                    "BB_bool",
+	                                    "BB_string",
+	                                    "BB_field_length",
+	                                    "BB_int_at",
+	                                    "BB_real_at",
+	                                    "BB_bool_at"};
 
-	for (const auto &c: commands_) {
+	for (const auto &c : commands_) {
 		PLEXIL::g_configuration->registerCommandInterface(c.first, this);
 	}
 
-	for (const auto &l: lookups) {
+	for (const auto &l : lookups) {
 		PLEXIL::g_configuration->registerLookupInterface(l, this);
 	}
 
@@ -104,7 +107,6 @@ BlackboardPlexilAdapter::initialize()
 
 	return true;
 }
-
 
 /** Start adapter.
  * @return true if starting was successful, false otherwise.
@@ -115,7 +117,6 @@ BlackboardPlexilAdapter::start()
 	return true;
 }
 
-
 /** Stop adapter.
  * @return true if successful, false otherwise.
  */
@@ -124,7 +125,6 @@ BlackboardPlexilAdapter::stop()
 {
 	return true;
 }
-
 
 /** Reset adapter.
  * @return true if successful, false otherwise.
@@ -143,7 +143,7 @@ BlackboardPlexilAdapter::shutdown()
 {
 	blackboard_->unregister_listener(this);
 
-	for (const auto& if_entry: ifs_read_) {
+	for (const auto &if_entry : ifs_read_) {
 		debugMsg("BlackboardAdapter:close",
 		         "Closing " << if_entry.second->type() << "::" << if_entry.second->id());
 		blackboard_->close(if_entry.second);
@@ -161,7 +161,7 @@ BlackboardPlexilAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCach
 {
 	std::vector<PLEXIL::Value> const &params = state.parameters();
 	if (state.name() == "BB_changed") {
-		if (! verify_args(params, "BlackboardAdapter:BB_changed", {{"uid", PLEXIL::STRING_TYPE}})) {
+		if (!verify_args(params, "BlackboardAdapter:BB_changed", {{"uid", PLEXIL::STRING_TYPE}})) {
 			cache_entry.setUnknown();
 			return;
 		}
@@ -170,43 +170,40 @@ BlackboardPlexilAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCach
 
 		std::unique_lock<std::mutex> lock(ifs_read_mutex_);
 		if (ifs_read_.find(uid) == ifs_read_.end()) {
-			logger_->log_warn("PlexilBB", "BB_changed: unknown interface %s, forgot to open?",
+			logger_->log_warn("PlexilBB",
+			                  "BB_changed: unknown interface %s, forgot to open?",
 			                  uid.c_str());
 			cache_entry.setUnknown();
 			return;
 		}
 		cache_entry.update(ifs_read_[uid]->changed());
-	} else if (state.name() == "BB_int" || state.name() == "BB_int_at" ||
-	           state.name() == "BB_real" || state.name() == "BB_real_at" ||
-	           state.name() == "BB_bool" || state.name() == "BB_bool_at" ||
-	           state.name() == "BB_string" || state.name() == "BB_field_length")
-	{
+	} else if (state.name() == "BB_int" || state.name() == "BB_int_at" || state.name() == "BB_real"
+	           || state.name() == "BB_real_at" || state.name() == "BB_bool"
+	           || state.name() == "BB_bool_at" || state.name() == "BB_string"
+	           || state.name() == "BB_field_length") {
 		bool is_indexed_version = false;
-		if (state.name() == "BB_int" || state.name() == "BB_real" ||
-		    state.name() == "BB_bool" || state.name() == "BB_string" ||
-		    state.name() == "BB_field_length")
-		{
-			if (! verify_args(params, "BlackboardAdapter:"+state.name(),
-			                  {{"uid", PLEXIL::STRING_TYPE},
-			                   {"field", PLEXIL::STRING_TYPE}}))
-			{
+		if (state.name() == "BB_int" || state.name() == "BB_real" || state.name() == "BB_bool"
+		    || state.name() == "BB_string" || state.name() == "BB_field_length") {
+			if (!verify_args(params,
+			                 "BlackboardAdapter:" + state.name(),
+			                 {{"uid", PLEXIL::STRING_TYPE}, {"field", PLEXIL::STRING_TYPE}})) {
 				cache_entry.setUnknown();
 				return;
 			}
 		} else {
 			is_indexed_version = true;
-			if (! verify_args(params, "BlackboardAdapter:"+state.name(),
-			                  {{"uid", PLEXIL::STRING_TYPE},
-			                   {"field", PLEXIL::STRING_TYPE},
-			                   {"index", PLEXIL::INTEGER_TYPE}}))
-			{
+			if (!verify_args(params,
+			                 "BlackboardAdapter:" + state.name(),
+			                 {{"uid", PLEXIL::STRING_TYPE},
+			                  {"field", PLEXIL::STRING_TYPE},
+			                  {"index", PLEXIL::INTEGER_TYPE}})) {
 				cache_entry.setUnknown();
 				return;
 			}
 		}
 		std::string uid;
 		std::string field;
-		int index = 0;
+		int         index = 0;
 		params[0].getValue(uid);
 		params[1].getValue(field);
 
@@ -216,8 +213,10 @@ BlackboardPlexilAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCach
 
 		std::unique_lock<std::mutex> lock(ifs_read_mutex_);
 		if (ifs_read_.find(uid) == ifs_read_.end()) {
-			logger_->log_warn("PlexilBB", "%s: unknown interface %s, forgot to open?",
-			                  state.name().c_str(), uid.c_str());
+			logger_->log_warn("PlexilBB",
+			                  "%s: unknown interface %s, forgot to open?",
+			                  state.name().c_str(),
+			                  uid.c_str());
 			cache_entry.setUnknown();
 			return;
 		}
@@ -225,25 +224,28 @@ BlackboardPlexilAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCach
 		if (state.name().compare(0, 6, "BB_int") == 0) {
 			for (auto f = ifs_read_[uid]->fields(); f != ifs_read_[uid]->fields_end(); ++f) {
 				if (field == f.get_name()) {
-					found = true;
-					bool valid = true;
+					found                 = true;
+					bool            valid = true;
 					PLEXIL::Integer value;
 					switch (f.get_type()) {
-					case IFT_INT8:   value = f.get_int8(index);    break;
-					case IFT_UINT8:  value = f.get_uint8(index);   break;
-					case IFT_INT16:  value = f.get_int16(index);   break;
-					case IFT_UINT16: value = f.get_uint16(index);  break;
-					case IFT_INT32:  value = f.get_int32(index);   break;
-					case IFT_UINT32: value = f.get_uint32(index);  break;
-					case IFT_INT64:  value = f.get_int64(index);   break;
-					case IFT_UINT64: value = f.get_uint64(index);  break;
+					case IFT_INT8: value = f.get_int8(index); break;
+					case IFT_UINT8: value = f.get_uint8(index); break;
+					case IFT_INT16: value = f.get_int16(index); break;
+					case IFT_UINT16: value = f.get_uint16(index); break;
+					case IFT_INT32: value = f.get_int32(index); break;
+					case IFT_UINT32: value = f.get_uint32(index); break;
+					case IFT_INT64: value = f.get_int64(index); break;
+					case IFT_UINT64: value = f.get_uint64(index); break;
 					default: valid = false; break;
 					}
 					if (valid) {
 						cache_entry.update(value);
 					} else {
-						logger_->log_warn("PlexilBB", "BB_int: field '%s' of %s of type %s",
-						                  field.c_str(), uid.c_str(), f.get_typename());
+						logger_->log_warn("PlexilBB",
+						                  "BB_int: field '%s' of %s of type %s",
+						                  field.c_str(),
+						                  uid.c_str(),
+						                  f.get_typename());
 						cache_entry.setUnknown();
 					}
 				}
@@ -252,27 +254,30 @@ BlackboardPlexilAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCach
 		} else if (state.name().compare(0, 7, "BB_real") == 0) {
 			for (auto f = ifs_read_[uid]->fields(); f != ifs_read_[uid]->fields_end(); ++f) {
 				if (field == f.get_name()) {
-					found = true;
-					bool valid = true;
+					found              = true;
+					bool         valid = true;
 					PLEXIL::Real value;
 					switch (f.get_type()) {
-					case IFT_FLOAT:  value = f.get_float(index);   break;
-					case IFT_DOUBLE: value = f.get_double(index);  break;
-					case IFT_INT8:   value = f.get_int8(index);    break;
-					case IFT_UINT8:  value = f.get_uint8(index);   break;
-					case IFT_INT16:  value = f.get_int16(index);   break;
-					case IFT_UINT16: value = f.get_uint16(index);  break;
-					case IFT_INT32:  value = f.get_int32(index);   break;
-					case IFT_UINT32: value = f.get_uint32(index);  break;
-					case IFT_INT64:  value = f.get_int64(index);   break;
-					case IFT_UINT64: value = f.get_uint64(index);  break;
+					case IFT_FLOAT: value = f.get_float(index); break;
+					case IFT_DOUBLE: value = f.get_double(index); break;
+					case IFT_INT8: value = f.get_int8(index); break;
+					case IFT_UINT8: value = f.get_uint8(index); break;
+					case IFT_INT16: value = f.get_int16(index); break;
+					case IFT_UINT16: value = f.get_uint16(index); break;
+					case IFT_INT32: value = f.get_int32(index); break;
+					case IFT_UINT32: value = f.get_uint32(index); break;
+					case IFT_INT64: value = f.get_int64(index); break;
+					case IFT_UINT64: value = f.get_uint64(index); break;
 					default: valid = false; break;
 					}
 					if (valid) {
 						cache_entry.update(value);
 					} else {
-						logger_->log_warn("PlexilBB", "BB_int: field %s of %s of type %s",
-						                  field.c_str(), uid.c_str(), f.get_typename());
+						logger_->log_warn("PlexilBB",
+						                  "BB_int: field %s of %s of type %s",
+						                  field.c_str(),
+						                  uid.c_str(),
+						                  f.get_typename());
 						cache_entry.setUnknown();
 					}
 				}
@@ -287,8 +292,11 @@ BlackboardPlexilAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCach
 						value = f.get_bool(index);
 						cache_entry.update(value);
 					} else {
-						logger_->log_warn("PlexilBB", "BB_int: field %s of %s of type %s",
-						                  field.c_str(), uid.c_str(), f.get_typename());
+						logger_->log_warn("PlexilBB",
+						                  "BB_int: field %s of %s of type %s",
+						                  field.c_str(),
+						                  uid.c_str(),
+						                  f.get_typename());
 						cache_entry.setUnknown();
 					}
 				}
@@ -315,32 +323,32 @@ BlackboardPlexilAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCach
 				break;
 			}
 		}
-		if (! found) {
-			logger_->log_warn("PlexilBB", "%s: unknown field '%s' for interface %s",
-			                  state.name().c_str(), field.c_str(), uid.c_str());
+		if (!found) {
+			logger_->log_warn("PlexilBB",
+			                  "%s: unknown field '%s' for interface %s",
+			                  state.name().c_str(),
+			                  field.c_str(),
+			                  uid.c_str());
 			cache_entry.setUnknown();
 			return;
 		}
 
 	} else {
-		logger_->log_warn("PlexilBB", "unknown lookup '%s'",
-		                  state.name().c_str());
+		logger_->log_warn("PlexilBB", "unknown lookup '%s'", state.name().c_str());
 		cache_entry.setUnknown();
 		return;
 	}
 }
 
-
 /** Subscribe to updates for given state.
  * @param state state variable to subscribe for
  */
 void
-BlackboardPlexilAdapter::subscribe(const PLEXIL::State& state)
+BlackboardPlexilAdapter::subscribe(const PLEXIL::State &state)
 {
 	std::vector<PLEXIL::Value> const &params = state.parameters();
 	if (params.size() == 0 || params[0].valueType() != PLEXIL::STRING_TYPE) {
-		logger_->log_error("PlexilBB", "Invalid asynchronous lookup for %s",
-		                   state.name().c_str());
+		logger_->log_error("PlexilBB", "Invalid asynchronous lookup for %s", state.name().c_str());
 		return;
 	}
 	std::string uid;
@@ -348,8 +356,10 @@ BlackboardPlexilAdapter::subscribe(const PLEXIL::State& state)
 
 	std::unique_lock<std::mutex> lock(ifs_read_mutex_);
 	if (ifs_read_.find(uid) == ifs_read_.end()) {
-		logger_->log_warn("PlexilBB", "Invalid asynchronous lookup %s for unknown interface %s",
-		                  state.name().c_str(), uid.c_str());
+		logger_->log_warn("PlexilBB",
+		                  "Invalid asynchronous lookup %s for unknown interface %s",
+		                  state.name().c_str(),
+		                  uid.c_str());
 	} else {
 		if (subscribed_states_.count(uid) == 0) {
 			//logger_->log_debug("PlexilBB", "Updating listener for %s", uid.c_str());
@@ -366,12 +376,11 @@ BlackboardPlexilAdapter::subscribe(const PLEXIL::State& state)
  * @param state state variable to unsubscribe from
  */
 void
-BlackboardPlexilAdapter::unsubscribe(const PLEXIL::State& state)
+BlackboardPlexilAdapter::unsubscribe(const PLEXIL::State &state)
 {
 	std::vector<PLEXIL::Value> const &params = state.parameters();
 	if (params.size() == 0 || params[0].valueType() != PLEXIL::STRING_TYPE) {
-		logger_->log_error("PlexilBB", "Invalid asynchronous lookup for %s",
-		                   state.name().c_str());
+		logger_->log_error("PlexilBB", "Invalid asynchronous lookup for %s", state.name().c_str());
 		return;
 	}
 	std::string uid;
@@ -379,8 +388,11 @@ BlackboardPlexilAdapter::unsubscribe(const PLEXIL::State& state)
 
 	std::unique_lock<std::mutex> lock(ifs_read_mutex_);
 	if (ifs_read_.find(uid) == ifs_read_.end()) {
-		logger_->log_warn("PlexilBB", "Invalid lookup %s unsubscribe for "
-		                  "unknown interface %s", state.name().c_str(), uid.c_str());
+		logger_->log_warn("PlexilBB",
+		                  "Invalid lookup %s unsubscribe for "
+		                  "unknown interface %s",
+		                  state.name().c_str(),
+		                  uid.c_str());
 	} else {
 		//logger_->log_debug("PlexilBB", "Unsubscribe for %s", state.toString().c_str());
 		debugMsg("BlackboardAdapter:unsubscribe", "Unsubscribe for " << state.toString());
@@ -420,12 +432,11 @@ BlackboardPlexilAdapter::bb_interface_data_changed(fawkes::Interface *interface)
 	m_execInterface.notifyOfExternalEvent();
 }
 
-
 /** Perform given command.
  * @param cmd command to execute
  */
 void
-BlackboardPlexilAdapter::executeCommand(PLEXIL::Command* cmd)
+BlackboardPlexilAdapter::executeCommand(PLEXIL::Command *cmd)
 {
 	std::string const &name = cmd->getName();
 
@@ -434,20 +445,20 @@ BlackboardPlexilAdapter::executeCommand(PLEXIL::Command* cmd)
 		c->second(cmd);
 	} else {
 		warn("NavGraphAdapter:executeCommand: called for unknown"
-		     " command " << name);
+		     " command "
+		     << name);
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 	}
 }
 
 void
-BlackboardPlexilAdapter::bb_open_for_reading(PLEXIL::Command* cmd)
+BlackboardPlexilAdapter::bb_open_for_reading(PLEXIL::Command *cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "BlackboardAdapter:bb_open_for_reading",
-	                  {{"type", PLEXIL::STRING_TYPE},
-	                   {"id", PLEXIL::STRING_TYPE}}))
-	{
+	if (!verify_args(args,
+	                 "BlackboardAdapter:bb_open_for_reading",
+	                 {{"type", PLEXIL::STRING_TYPE}, {"id", PLEXIL::STRING_TYPE}})) {
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
@@ -468,11 +479,14 @@ BlackboardPlexilAdapter::bb_open_for_reading(PLEXIL::Command* cmd)
 			ifs_read_[uid] = blackboard_->open_for_reading(if_type.c_str(), if_id.c_str());
 			PLEXIL::g_configuration->registerLookupInterface(uid + ".changed", this);
 		} catch (Exception &e) {
-			logger_->log_warn("PlexilBB", "Failed to open interface %s:%s: %s",
-			                  if_type.c_str(), if_id.c_str(), e.what_no_backtrace());
+			logger_->log_warn("PlexilBB",
+			                  "Failed to open interface %s:%s: %s",
+			                  if_type.c_str(),
+			                  if_id.c_str(),
+			                  e.what_no_backtrace());
 			m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 			m_execInterface.notifyOfExternalEvent();
-			return;		
+			return;
 		}
 	}
 
@@ -482,12 +496,10 @@ BlackboardPlexilAdapter::bb_open_for_reading(PLEXIL::Command* cmd)
 }
 
 void
-BlackboardPlexilAdapter::bb_close(PLEXIL::Command* cmd)
+BlackboardPlexilAdapter::bb_close(PLEXIL::Command *cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "BlackboardAdapter:bb_close",
-	                  {{"uid", PLEXIL::STRING_TYPE}}))
-	{
+	if (!verify_args(args, "BlackboardAdapter:bb_close", {{"uid", PLEXIL::STRING_TYPE}})) {
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
@@ -501,8 +513,7 @@ BlackboardPlexilAdapter::bb_close(PLEXIL::Command* cmd)
 
 	std::unique_lock<std::mutex> lock(ifs_read_mutex_);
 	if (ifs_read_.find(uid) == ifs_read_.end()) {
-		logger_->log_warn("PlexilBB", "Interface '%s' has not been opened",
-		                  uid.c_str());
+		logger_->log_warn("PlexilBB", "Interface '%s' has not been opened", uid.c_str());
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
@@ -510,18 +521,16 @@ BlackboardPlexilAdapter::bb_close(PLEXIL::Command* cmd)
 
 	blackboard_->close(ifs_read_[uid]);
 	ifs_read_.erase(uid);
-	
+
 	m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
 	m_execInterface.notifyOfExternalEvent();
 }
 
 void
-BlackboardPlexilAdapter::bb_read(PLEXIL::Command* cmd)
+BlackboardPlexilAdapter::bb_read(PLEXIL::Command *cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "BlackboardAdapter:bb_read",
-	                  {{"uid", PLEXIL::STRING_TYPE}}))
-	{
+	if (!verify_args(args, "BlackboardAdapter:bb_read", {{"uid", PLEXIL::STRING_TYPE}})) {
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
@@ -535,41 +544,38 @@ BlackboardPlexilAdapter::bb_read(PLEXIL::Command* cmd)
 
 	std::unique_lock<std::mutex> lock(ifs_read_mutex_);
 	if (ifs_read_.find(uid) == ifs_read_.end()) {
-		logger_->log_warn("PlexilBB", "Interface '%s' has not been opened for reading",
-		                  uid.c_str());
+		logger_->log_warn("PlexilBB", "Interface '%s' has not been opened for reading", uid.c_str());
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
 
 	ifs_read_[uid]->read();
-	
+
 	m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
 	m_execInterface.notifyOfExternalEvent();
 }
 
 void
-BlackboardPlexilAdapter::bb_read_all(PLEXIL::Command* cmd)
+BlackboardPlexilAdapter::bb_read_all(PLEXIL::Command *cmd)
 {
 	//logger_->log_debug("PlexilBB", "Reading all interfaces");
 	debugMsg("BlackboardAdapter:read", "Reading all interfaces");
 
 	std::unique_lock<std::mutex> lock(ifs_read_mutex_);
-	for (auto & i : ifs_read_) {
+	for (auto &i : ifs_read_) {
 		i.second->read();
 	}
-	
+
 	m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
 	m_execInterface.notifyOfExternalEvent();
 }
 
 void
-BlackboardPlexilAdapter::bb_print(PLEXIL::Command* cmd)
+BlackboardPlexilAdapter::bb_print(PLEXIL::Command *cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "BlackboardAdapter:bb_print",
-	                  {{"uid", PLEXIL::STRING_TYPE}}))
-	{
+	if (!verify_args(args, "BlackboardAdapter:bb_print", {{"uid", PLEXIL::STRING_TYPE}})) {
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
@@ -580,8 +586,7 @@ BlackboardPlexilAdapter::bb_print(PLEXIL::Command* cmd)
 
 	std::unique_lock<std::mutex> lock(ifs_read_mutex_);
 	if (ifs_read_.find(uid) == ifs_read_.end()) {
-		logger_->log_warn("PlexilBB", "Interface '%s' has not been opened for reading",
-		                  uid.c_str());
+		logger_->log_warn("PlexilBB", "Interface '%s' has not been opened for reading", uid.c_str());
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
@@ -593,17 +598,15 @@ BlackboardPlexilAdapter::bb_print(PLEXIL::Command* cmd)
 		i->read();
 		const Time *t = i->timestamp();
 
-		std::string fact = std::string("(bb-data \"type\" \"") + i->type() + "\"" +
-		                   " \"id\" \"" + i->id() + "\"" +
-		                   " \"time\" " + StringConversions::to_string(t->get_sec()) + " "
-		                   + StringConversions::to_string(t->get_usec()) + ""
-		                   + " (. ";
+		std::string fact = std::string("(bb-data \"type\" \"") + i->type() + "\"" + " \"id\" \""
+		                   + i->id() + "\"" + " \"time\" " + StringConversions::to_string(t->get_sec())
+		                   + " " + StringConversions::to_string(t->get_usec()) + "" + " (. ";
 
 		InterfaceFieldIterator f, f_end = i->fields_end();
 		for (f = i->fields(); f != f_end; ++f) {
 			std::string value;
 			if (f.get_type() == IFT_STRING) {
-				value = f.get_value_string();
+				value                      = f.get_value_string();
 				std::string::size_type pos = 0;
 				while ((pos = value.find("\"", pos)) != std::string::npos) {
 					value.replace(pos, 1, "\\\"");
@@ -628,19 +631,23 @@ BlackboardPlexilAdapter::bb_print(PLEXIL::Command* cmd)
 		fact += " .))";
 		logger_->log_info("PlexilBB", "%s", fact.c_str());
 	} catch (Exception &e) {
-		logger_->log_warn("PlexilBB", "Failed to print interface '%s': %s",
-		                  uid.c_str(), e.what_no_backtrace());
+		logger_->log_warn("PlexilBB",
+		                  "Failed to print interface '%s': %s",
+		                  uid.c_str(),
+		                  e.what_no_backtrace());
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
-  }
+	}
 
 	m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
 	m_execInterface.notifyOfExternalEvent();
 }
 
 extern "C" {
-	void initFawkesBlackboardAdapter() {
-		REGISTER_ADAPTER(BlackboardPlexilAdapter, "FawkesBlackboardAdapter");
-	}
+void
+initFawkesBlackboardAdapter()
+{
+	REGISTER_ADAPTER(BlackboardPlexilAdapter, "FawkesBlackboardAdapter");
+}
 }

@@ -27,24 +27,21 @@
 
 #include <InterfaceAdapter.hh>
 #include <Value.hh>
-
-#include <memory>
 #include <functional>
+#include <memory>
 #include <set>
 
 /** Interface adapter to provide logging facilities. */
-class GlobalStatePlexilAdapter
-	: public PLEXIL::InterfaceAdapter
+class GlobalStatePlexilAdapter : public PLEXIL::InterfaceAdapter
 {
 public:
-	GlobalStatePlexilAdapter(PLEXIL::AdapterExecInterface& execInterface);
-	GlobalStatePlexilAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-	                         pugi::xml_node const xml);
+	GlobalStatePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface);
+	GlobalStatePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	GlobalStatePlexilAdapter() = delete;
+	GlobalStatePlexilAdapter()                                 = delete;
 	GlobalStatePlexilAdapter(const GlobalStatePlexilAdapter &) = delete;
-	GlobalStatePlexilAdapter & operator=(const GlobalStatePlexilAdapter &) = delete;
+	GlobalStatePlexilAdapter &operator=(const GlobalStatePlexilAdapter &) = delete;
 	/// @endcond
 
 	virtual ~GlobalStatePlexilAdapter();
@@ -55,33 +52,32 @@ public:
 	virtual bool reset();
 	virtual bool shutdown();
 
-	virtual void subscribe(const PLEXIL::State& state);
-	virtual void unsubscribe(const PLEXIL::State& state);
+	virtual void subscribe(const PLEXIL::State &state);
+	virtual void unsubscribe(const PLEXIL::State &state);
 
 	virtual void executeCommand(PLEXIL::Command *cmd);
-  virtual void invokeAbort(PLEXIL::Command *cmd);
+	virtual void invokeAbort(PLEXIL::Command *cmd);
 
 	virtual void lookupNow(PLEXIL::State const &state, PLEXIL::StateCacheEntry &cache_entry);
-	
-private:
-	void global_set_value(PLEXIL::Command* cmd, PLEXIL::ValueType value_type);
-	void global_print_all(PLEXIL::Command* cmd);
 
 private:
-	fawkes::Configuration *     config_;
-	fawkes::Logger *            logger_;
+	void global_set_value(PLEXIL::Command *cmd, PLEXIL::ValueType value_type);
+	void global_print_all(PLEXIL::Command *cmd);
+
+private:
+	fawkes::Configuration *config_;
+	fawkes::Logger *       logger_;
 
 	bool cfg_default_adapter_;
-	
-	std::map<std::string, std::function<void (PLEXIL::Command*)>> commands_;
+
+	std::map<std::string, std::function<void(PLEXIL::Command *)>> commands_;
 
 	std::map<PLEXIL::State, std::pair<PLEXIL::ValueType, PLEXIL::Value>> values_;
-	std::set<PLEXIL::State> subscribed_states_;
-
+	std::set<PLEXIL::State>                                              subscribed_states_;
 };
 
 extern "C" {
-  void initGlobalState();
+void initGlobalState();
 }
 
 #endif

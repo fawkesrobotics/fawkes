@@ -25,32 +25,30 @@
 
 #include "timer_thread.h"
 
-#include <TimeAdapter.hh>
-
 #include <utils/time/clock.h>
+
+#include <TimeAdapter.hh>
 
 /**
  * @brief An interface adapter using standard POSIX time facilities
  *        to implement LookupNow and LookupOnChange.
  */
-class ClockPlexilTimeAdapter
-	: public PLEXIL::TimeAdapter,
-	  public PlexilTimerThread::CallbackListener
+class ClockPlexilTimeAdapter : public PLEXIL::TimeAdapter,
+                               public PlexilTimerThread::CallbackListener
 {
 public:
-	ClockPlexilTimeAdapter(PLEXIL::AdapterExecInterface& execInterface);
-	ClockPlexilTimeAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-	                       pugi::xml_node const xml);
+	ClockPlexilTimeAdapter(PLEXIL::AdapterExecInterface &execInterface);
+	ClockPlexilTimeAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	ClockPlexilTimeAdapter() = delete;
+	ClockPlexilTimeAdapter()                               = delete;
 	ClockPlexilTimeAdapter(const ClockPlexilTimeAdapter &) = delete;
-	ClockPlexilTimeAdapter & operator=(const ClockPlexilTimeAdapter &) = delete;
+	ClockPlexilTimeAdapter &operator=(const ClockPlexilTimeAdapter &) = delete;
 	/// @endcond
 
 	virtual ~ClockPlexilTimeAdapter();
-	
-	double getCurrentTime() throw (PLEXIL::InterfaceError);
+
+	double getCurrentTime() throw(PLEXIL::InterfaceError);
 
 	virtual bool initialize();
 	virtual bool start();
@@ -59,21 +57,20 @@ public:
 	virtual bool shutdown();
 
 	virtual void lookupNow(PLEXIL::State const &state, PLEXIL::StateCacheEntry &cacheEntry);
-	virtual void subscribe(const PLEXIL::State& state);
-	virtual void unsubscribe(const PLEXIL::State& state);
-	virtual void setThresholds(const PLEXIL::State& state, double hi, double lo);
-	virtual void setThresholds(const PLEXIL::State& state, int32_t hi, int32_t lo);
+	virtual void subscribe(const PLEXIL::State &state);
+	virtual void unsubscribe(const PLEXIL::State &state);
+	virtual void setThresholds(const PLEXIL::State &state, double hi, double lo);
+	virtual void setThresholds(const PLEXIL::State &state, int32_t hi, int32_t lo);
 
 	virtual void timer_event();
 
 private:
-	fawkes::Clock *clock_;
+	fawkes::Clock *    clock_;
 	PlexilTimerThread *timer_;
-	
 };
 
 extern "C" {
-  void initFawkesTimeAdapter();
+void initFawkesTimeAdapter();
 }
 
 #endif

@@ -23,28 +23,26 @@
 
 #include "utils.h"
 
-#include <core/threading/mutex_locker.h>
-#include <navgraph/navgraph.h>
-#include <logging/console.h>
 #include <blackboard/remote.h>
 #include <config/netconf.h>
-#include <utils/time/clock.h>
-#include <netcomm/fawkes/client.h>
+#include <core/threading/mutex_locker.h>
+#include <logging/console.h>
+#include <navgraph/navgraph.h>
 #include <navgraph/yaml_navgraph.h>
+#include <netcomm/fawkes/client.h>
 #include <utils/system/fam.h>
+#include <utils/time/clock.h>
 
-#include <InterfaceManager.hh>
 #include <AdapterConfiguration.hh>
 #include <AdapterExecInterface.hh>
 #include <AdapterFactory.hh>
 #include <Command.hh>
 #include <Error.hh>
-
+#include <InterfaceManager.hh>
 #include <boost/filesystem.hpp>
 
 using namespace fawkes;
 namespace fs = boost::filesystem;
-
 
 /** @class FawkesRemotePlexilAdapter "remote_adapter.h"
  * Plexil adapter to provide access to the FawkesRemote.
@@ -54,7 +52,7 @@ namespace fs = boost::filesystem;
 /** Constructor.
  * @param execInterface Reference to the parent AdapterExecInterface object.
  */
-FawkesRemotePlexilAdapter::FawkesRemotePlexilAdapter(PLEXIL::AdapterExecInterface& execInterface)
+FawkesRemotePlexilAdapter::FawkesRemotePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface)
 : InterfaceAdapter(execInterface)
 {
 }
@@ -64,8 +62,8 @@ FawkesRemotePlexilAdapter::FawkesRemotePlexilAdapter(PLEXIL::AdapterExecInterfac
  * @param xml A const reference to the XML element describing this adapter
  * @note The instance maintains a shared pointer to the XML.
  */
-FawkesRemotePlexilAdapter::FawkesRemotePlexilAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-                                                     pugi::xml_node const xml)
+FawkesRemotePlexilAdapter::FawkesRemotePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface,
+                                                     pugi::xml_node const          xml)
 : InterfaceAdapter(execInterface, xml)
 {
 }
@@ -74,7 +72,6 @@ FawkesRemotePlexilAdapter::FawkesRemotePlexilAdapter(PLEXIL::AdapterExecInterfac
 FawkesRemotePlexilAdapter::~FawkesRemotePlexilAdapter()
 {
 }
-
 
 /** Initialize adapter.
  * @return true if initialization was successful, false otherwise.
@@ -86,8 +83,8 @@ FawkesRemotePlexilAdapter::initialize()
 	int         cfg_port;
 	bool        cfg_navgraph_allow_multi;
 
-	clock_   = Clock::instance();
-	logger_  = std::make_unique<fawkes::ConsoleLogger>();
+	clock_  = Clock::instance();
+	logger_ = std::make_unique<fawkes::ConsoleLogger>();
 
 	cfg_host = get_xml_config_value(getXml(), "host");
 	cfg_port = std::stoi(get_xml_config_value(getXml(), "port"));
@@ -95,20 +92,19 @@ FawkesRemotePlexilAdapter::initialize()
 	cfg_navgraph_filename_   = get_xml_config_value(getXml(), "navgraph_filename");
 	cfg_navgraph_allow_multi = get_xml_config_value(getXml(), "navgraph_allow_multi") == "true";
 
-	client_  = std::make_unique<fawkes::FawkesNetworkClient>(cfg_host.c_str(), cfg_port);
+	client_ = std::make_unique<fawkes::FawkesNetworkClient>(cfg_host.c_str(), cfg_port);
 
 	try {
 		logger_->log_info("FawkesRemote", "Connecting to Fawkes at %s:%i", cfg_host.c_str(), cfg_port);
 		client_->connect();
 	} catch (Exception &e) {
-		warn("FawkesRemoteAdapter:initialize: failed to connect to Fawkes: "
-		     << e.what_no_backtrace());
+		warn("FawkesRemoteAdapter:initialize: failed to connect to Fawkes: " << e.what_no_backtrace());
 		return false;
 	}
 
 	logger_->log_info("FawkesRemote", "Mirroring configuration");
-	config_  = std::make_unique<fawkes::NetworkConfiguration>(client_.get());
-  config_->set_mirror_mode(true);
+	config_ = std::make_unique<fawkes::NetworkConfiguration>(client_.get());
+	config_->set_mirror_mode(true);
 
 	logger_->log_info("FawkesRemote", "Accessing blackboard");
 	blackboard_ = std::make_unique<fawkes::RemoteBlackBoard>(client_.get());
@@ -117,7 +113,7 @@ FawkesRemotePlexilAdapter::initialize()
 		cfg_navgraph_filename_ = std::string(CONFDIR) + "/" + cfg_navgraph_filename_;
 	}
 	fs::path p(cfg_navgraph_filename_);
-	p = fs::absolute(p);
+	p                      = fs::absolute(p);
 	cfg_navgraph_filename_ = p.string();
 	logger_->log_info("FawkesRemote", "Loading navgraph file %s", cfg_navgraph_filename_.c_str());
 	navgraph_ = load_yaml_navgraph(cfg_navgraph_filename_, cfg_navgraph_allow_multi);
@@ -129,14 +125,15 @@ FawkesRemotePlexilAdapter::initialize()
 	navgraph_fam_->add_listener(this);
 
 	navgraph_fam_thread_ = std::thread([this]() {
-		                                   while (true) {
-			                                   std::unique_lock<std::mutex> lock(this->navgraph_fam_mutex_);
-			                                   if (! this->navgraph_fam_) break;
-			                                   lock.unlock();
-			                                   using namespace std::chrono_literals;
-			                                   std::this_thread::sleep_for(1s);
-		                                   }
-	                                   });
+		while (true) {
+			std::unique_lock<std::mutex> lock(this->navgraph_fam_mutex_);
+			if (!this->navgraph_fam_)
+				break;
+			lock.unlock();
+			using namespace std::chrono_literals;
+			std::this_thread::sleep_for(1s);
+		}
+	});
 
 	m_execInterface.setProperty("::Fawkes::Config", config_.get());
 	m_execInterface.setProperty("::Fawkes::Clock", clock_);
@@ -146,7 +143,6 @@ FawkesRemotePlexilAdapter::initialize()
 
 	return true;
 }
-
 
 void
 FawkesRemotePlexilAdapter::fam_event(const char *filename, unsigned int mask)
@@ -188,7 +184,6 @@ FawkesRemotePlexilAdapter::fam_event(const char *filename, unsigned int mask)
 	}
 }
 
-
 /** Start adapter.
  * @return true if starting was successful, false otherwise.
  */
@@ -198,7 +193,6 @@ FawkesRemotePlexilAdapter::start()
 	return true;
 }
 
-
 /** Stop adapter.
  * @return true if successful, false otherwise.
  */
@@ -207,7 +201,6 @@ FawkesRemotePlexilAdapter::stop()
 {
 	return true;
 }
-
 
 /** Reset adapter.
  * @return true if successful, false otherwise.
@@ -234,12 +227,11 @@ FawkesRemotePlexilAdapter::shutdown()
 	return true;
 }
 
-
 /** Perform given command.
  * @param cmd command to execute
  */
 void
-FawkesRemotePlexilAdapter::executeCommand(PLEXIL::Command* cmd)
+FawkesRemotePlexilAdapter::executeCommand(PLEXIL::Command *cmd)
 {
 	/*
 	std::string const &name = cmd->getName();
@@ -256,7 +248,6 @@ FawkesRemotePlexilAdapter::executeCommand(PLEXIL::Command* cmd)
 	*/
 }
 
-
 /** Abort currently running execution.
  * @param cmd command to abort
  */
@@ -265,9 +256,10 @@ FawkesRemotePlexilAdapter::invokeAbort(PLEXIL::Command *cmd)
 {
 }
 
-
 extern "C" {
-	void initFawkesRemoteAdapter() {
-		REGISTER_ADAPTER(FawkesRemotePlexilAdapter, "FawkesRemoteAdapter");
-	}
+void
+initFawkesRemoteAdapter()
+{
+	REGISTER_ADAPTER(FawkesRemotePlexilAdapter, "FawkesRemoteAdapter");
+}
 }

@@ -33,15 +33,13 @@ using namespace fawkes;
  */
 
 /** Constructor. */
-PlexilTimerThread::PlexilTimerThread()
-: Thread("PlexilTimerThread", Thread::OPMODE_WAITFORWAKEUP)
+PlexilTimerThread::PlexilTimerThread() : Thread("PlexilTimerThread", Thread::OPMODE_WAITFORWAKEUP)
 {
-	mutex_ = new Mutex();
+	mutex_    = new Mutex();
 	waitcond_ = new WaitCondition(mutex_);
-	aborted_ = false;
+	aborted_  = false;
 	queued_wait_until_.set_time(0, 0);
 }
-
 
 /** Empty destructor. */
 PlexilTimerThread::~PlexilTimerThread()
@@ -53,16 +51,16 @@ PlexilTimerThread::loop()
 {
 	fawkes::MutexLocker lock(mutex_);
 
-	while (! queued_wait_until_.is_zero()) {
-		aborted_ = false;
-		bool woken = false;
+	while (!queued_wait_until_.is_zero()) {
+		aborted_           = false;
+		bool         woken = false;
 		fawkes::Time wait_until{queued_wait_until_};
 		queued_wait_until_.set_time(0, 0);
 
 		do {
 			woken = waitcond_->abstimed_wait(wait_until.get_sec(), wait_until.get_nsec());
-		} while (woken && ! aborted_);
-		if (! aborted_) {
+		} while (woken && !aborted_);
+		if (!aborted_) {
 			lock.unlock();
 			listener_->timer_event();
 		}
@@ -79,19 +77,18 @@ void
 PlexilTimerThread::start_timer(CallbackListener *listener, const fawkes::Time &wait_until)
 {
 	fawkes::MutexLocker lock(mutex_);
-	fawkes::Time now(Clock::instance());
+	fawkes::Time        now(Clock::instance());
 	if (waiting()) {
 		queued_wait_until_ = wait_until;
-		listener_ = listener;
+		listener_          = listener;
 		wakeup();
 	} else {
 		// timer running, abort
 		queued_wait_until_ = wait_until;
-		aborted_ = true;
+		aborted_           = true;
 		waitcond_->wake_all();
 	}
 }
-
 
 /** Abort a currently running timer. */
 void

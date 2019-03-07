@@ -29,7 +29,6 @@
 #include <Command.hh>
 #include <InterfaceManager.hh>
 #include <StateCacheEntry.hh>
-
 #include <limits>
 
 using namespace fawkes;
@@ -42,7 +41,7 @@ using namespace fawkes;
 /** Constructor.
  * @param execInterface Reference to the parent AdapterExecInterface object.
  */
-ConfigurationPlexilAdapter::ConfigurationPlexilAdapter(PLEXIL::AdapterExecInterface& execInterface)
+ConfigurationPlexilAdapter::ConfigurationPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface)
 : InterfaceAdapter(execInterface)
 {
 }
@@ -52,8 +51,8 @@ ConfigurationPlexilAdapter::ConfigurationPlexilAdapter(PLEXIL::AdapterExecInterf
  * @param xml A const reference to the XML element describing this adapter
  * @note The instance maintains a shared pointer to the XML.
  */
-ConfigurationPlexilAdapter::ConfigurationPlexilAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-                                                       pugi::xml_node const xml)
+ConfigurationPlexilAdapter::ConfigurationPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface,
+                                                       pugi::xml_node const          xml)
 : InterfaceAdapter(execInterface, xml)
 {
 }
@@ -63,44 +62,51 @@ ConfigurationPlexilAdapter::~ConfigurationPlexilAdapter()
 {
 }
 
-
 /** Initialize adapter.
  * @return true if initialization was successful, false otherwise.
  */
 bool
 ConfigurationPlexilAdapter::initialize()
 {
-	logger_  = reinterpret_cast<fawkes::Logger *>(m_execInterface.getProperty("::Fawkes::Logger"));
-	config_  = reinterpret_cast<fawkes::Configuration *>(m_execInterface.getProperty("::Fawkes::Config"));
+	logger_ = reinterpret_cast<fawkes::Logger *>(m_execInterface.getProperty("::Fawkes::Logger"));
+	config_ =
+	  reinterpret_cast<fawkes::Configuration *>(m_execInterface.getProperty("::Fawkes::Config"));
 
 	namespace p = std::placeholders;
-	commands_ = {
-	  {"config_get_int_or_default",    std::bind(&ConfigurationPlexilAdapter::config_get_value_or_default,
-	                                             this, p::_1, PLEXIL::INTEGER_TYPE)},
-	  {"config_get_real_or_default",   std::bind(&ConfigurationPlexilAdapter::config_get_value_or_default,
-	                                             this, p::_1, PLEXIL::REAL_TYPE)},
-	  {"config_get_bool_or_default",   std::bind(&ConfigurationPlexilAdapter::config_get_value_or_default,
-	                                             this, p::_1, PLEXIL::BOOLEAN_TYPE)},
-	  {"config_get_string_or_default", std::bind(&ConfigurationPlexilAdapter::config_get_value_or_default,
-	                                             this, p::_1, PLEXIL::STRING_TYPE)},
-	  {"config_get_int",               std::bind(&ConfigurationPlexilAdapter::config_get_value,
-	                                             this, p::_1, PLEXIL::INTEGER_TYPE)},
-	  {"config_get_real",              std::bind(&ConfigurationPlexilAdapter::config_get_value,
-	                                             this, p::_1, PLEXIL::REAL_TYPE)},
-	  {"config_get_bool",              std::bind(&ConfigurationPlexilAdapter::config_get_value,
-	                                             this, p::_1, PLEXIL::BOOLEAN_TYPE)},
-	  {"config_get_string",            std::bind(&ConfigurationPlexilAdapter::config_get_value,
-	                                             this, p::_1, PLEXIL::STRING_TYPE)},
-	  {"config_exists",                std::bind(&ConfigurationPlexilAdapter::config_exists, this, p::_1)},
-	};
+	commands_   = {
+    {"config_get_int_or_default",
+     std::bind(&ConfigurationPlexilAdapter::config_get_value_or_default,
+               this,
+               p::_1,
+               PLEXIL::INTEGER_TYPE)},
+    {"config_get_real_or_default",
+     std::bind(
+       &ConfigurationPlexilAdapter::config_get_value_or_default, this, p::_1, PLEXIL::REAL_TYPE)},
+    {"config_get_bool_or_default",
+     std::bind(&ConfigurationPlexilAdapter::config_get_value_or_default,
+               this,
+               p::_1,
+               PLEXIL::BOOLEAN_TYPE)},
+    {"config_get_string_or_default",
+     std::bind(
+       &ConfigurationPlexilAdapter::config_get_value_or_default, this, p::_1, PLEXIL::STRING_TYPE)},
+    {"config_get_int",
+     std::bind(&ConfigurationPlexilAdapter::config_get_value, this, p::_1, PLEXIL::INTEGER_TYPE)},
+    {"config_get_real",
+     std::bind(&ConfigurationPlexilAdapter::config_get_value, this, p::_1, PLEXIL::REAL_TYPE)},
+    {"config_get_bool",
+     std::bind(&ConfigurationPlexilAdapter::config_get_value, this, p::_1, PLEXIL::BOOLEAN_TYPE)},
+    {"config_get_string",
+     std::bind(&ConfigurationPlexilAdapter::config_get_value, this, p::_1, PLEXIL::STRING_TYPE)},
+    {"config_exists", std::bind(&ConfigurationPlexilAdapter::config_exists, this, p::_1)},
+  };
 
-	for (const auto &c: commands_) {
+	for (const auto &c : commands_) {
 		PLEXIL::g_configuration->registerCommandInterface(c.first, this);
 	}
 
 	return true;
 }
-
 
 /** Start adapter.
  * @return true if starting was successful, false otherwise.
@@ -111,7 +117,6 @@ ConfigurationPlexilAdapter::start()
 	return true;
 }
 
-
 /** Stop adapter.
  * @return true if successful, false otherwise.
  */
@@ -120,7 +125,6 @@ ConfigurationPlexilAdapter::stop()
 {
 	return true;
 }
-
 
 /** Reset adapter.
  * @return true if successful, false otherwise.
@@ -144,7 +148,7 @@ ConfigurationPlexilAdapter::shutdown()
  * @param cmd command to execute
  */
 void
-ConfigurationPlexilAdapter::executeCommand(PLEXIL::Command* cmd)
+ConfigurationPlexilAdapter::executeCommand(PLEXIL::Command *cmd)
 {
 	std::string const &name = cmd->getName();
 
@@ -153,12 +157,12 @@ ConfigurationPlexilAdapter::executeCommand(PLEXIL::Command* cmd)
 		c->second(cmd);
 	} else {
 		warn("ConfigCommAdapter:executeCommand: called for unknown"
-		     " command " << name);
+		     " command "
+		     << name);
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 	}
 }
-
 
 /** Abort currently running execution.
  * @param cmd command to abort
@@ -170,75 +174,67 @@ ConfigurationPlexilAdapter::invokeAbort(PLEXIL::Command *cmd)
 	m_execInterface.notifyOfExternalEvent();
 }
 
-
 void
-ConfigurationPlexilAdapter::config_get_value_or_default(PLEXIL::Command* cmd, PLEXIL::ValueType value_type)
+ConfigurationPlexilAdapter::config_get_value_or_default(PLEXIL::Command * cmd,
+                                                        PLEXIL::ValueType value_type)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "ConfigCommAdapter:config_get_value_or_default",
-	                  {{"path", PLEXIL::STRING_TYPE},
-	                   {"default", value_type}}))
-	{
+	if (!verify_args(args,
+	                 "ConfigCommAdapter:config_get_value_or_default",
+	                 {{"path", PLEXIL::STRING_TYPE}, {"default", value_type}})) {
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
 
-	std::string   path;
+	std::string path;
 	args[0].getValue(path);
 
 	try {
 		switch (value_type) {
-		case PLEXIL::STRING_TYPE:
-			{
-				std::string default_value;
-				args[1].getValue(default_value);
-				std::string v = config_->get_string_or_default(path.c_str(), default_value);
-				m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
-			}
-			break;
+		case PLEXIL::STRING_TYPE: {
+			std::string default_value;
+			args[1].getValue(default_value);
+			std::string v = config_->get_string_or_default(path.c_str(), default_value);
+			m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
+		} break;
 
-		case PLEXIL::REAL_TYPE:
-			{
-				double default_value;
-				args[1].getValue(default_value);
+		case PLEXIL::REAL_TYPE: {
+			double default_value;
+			args[1].getValue(default_value);
 
-				double v = default_value;
-				// do not use "or_default" here since it can only represent float
-				try {
-					v = config_->get_float(path.c_str());
-				} catch (Exception &e) {} // ignored, use default
-				m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
-			}
-			break;
+			double v = default_value;
+			// do not use "or_default" here since it can only represent float
+			try {
+				v = config_->get_float(path.c_str());
+			} catch (Exception &e) {
+			} // ignored, use default
+			m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
+		} break;
 
-		case PLEXIL::BOOLEAN_TYPE:
-			{
-				bool default_value;
-				args[1].getValue(default_value);
-				bool v = config_->get_bool_or_default(path.c_str(), default_value);
-				m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
-			}
-			break;
+		case PLEXIL::BOOLEAN_TYPE: {
+			bool default_value;
+			args[1].getValue(default_value);
+			bool v = config_->get_bool_or_default(path.c_str(), default_value);
+			m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
+		} break;
 
-		case PLEXIL::INTEGER_TYPE:
-			{
-				int default_value;
-				args[1].getValue(default_value);
-				if (config_->is_uint(path.c_str())) {
-					unsigned int uv = config_->get_uint(path.c_str());
-					if (uv > std::numeric_limits<int>::max()) {
-						warn("ConfigCommAdapter:config_get_value_or_default:"
-						     << " Unsigned integer too large to store in int (" << uv << ")");
-						m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
-						m_execInterface.notifyOfExternalEvent();
-						return;
-					}
+		case PLEXIL::INTEGER_TYPE: {
+			int default_value;
+			args[1].getValue(default_value);
+			if (config_->is_uint(path.c_str())) {
+				unsigned int uv = config_->get_uint(path.c_str());
+				if (uv > std::numeric_limits<int>::max()) {
+					warn("ConfigCommAdapter:config_get_value_or_default:"
+					     << " Unsigned integer too large to store in int (" << uv << ")");
+					m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
+					m_execInterface.notifyOfExternalEvent();
+					return;
 				}
-				int v = config_->get_int_or_default(path.c_str(), default_value);
-				m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
 			}
-		break;
+			int v = config_->get_int_or_default(path.c_str(), default_value);
+			m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
+		} break;
 
 		default:
 			// this would only occur when misconfiguring in initialize()
@@ -254,69 +250,58 @@ ConfigurationPlexilAdapter::config_get_value_or_default(PLEXIL::Command* cmd, PL
 
 	} catch (Exception &e) {
 		warn("ConfigCommAdapter:config_get_value_or_default:"
-		     << " Failed to get value " << path << " as " << PLEXIL::valueTypeName(value_type)
-		     << ": " << e.what_no_backtrace());
+		     << " Failed to get value " << path << " as " << PLEXIL::valueTypeName(value_type) << ": "
+		     << e.what_no_backtrace());
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
 }
 
-
 void
-ConfigurationPlexilAdapter::config_get_value(PLEXIL::Command* cmd, PLEXIL::ValueType value_type)
+ConfigurationPlexilAdapter::config_get_value(PLEXIL::Command *cmd, PLEXIL::ValueType value_type)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "ConfigCommAdapter:config_get_value",
-	                  {{"path", PLEXIL::STRING_TYPE}}))
-	{
+	if (!verify_args(args, "ConfigCommAdapter:config_get_value", {{"path", PLEXIL::STRING_TYPE}})) {
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
 
-	std::string   path;
+	std::string path;
 	args[0].getValue(path);
 
 	try {
 		switch (value_type) {
-		case PLEXIL::STRING_TYPE:
-			{
-				std::string v = config_->get_string(path.c_str());
-				m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
-			}
-			break;
+		case PLEXIL::STRING_TYPE: {
+			std::string v = config_->get_string(path.c_str());
+			m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
+		} break;
 
-		case PLEXIL::REAL_TYPE:
-			{
-				float v = config_->get_float(path.c_str());
-				m_execInterface.handleCommandReturn(cmd, PLEXIL::Value((double)v));
-			}
-			break;
+		case PLEXIL::REAL_TYPE: {
+			float v = config_->get_float(path.c_str());
+			m_execInterface.handleCommandReturn(cmd, PLEXIL::Value((double)v));
+		} break;
 
-		case PLEXIL::BOOLEAN_TYPE:
-		{
+		case PLEXIL::BOOLEAN_TYPE: {
 			bool v = config_->get_bool(path.c_str());
 			m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
-		}
-		break;
+		} break;
 
-		case PLEXIL::INTEGER_TYPE:
-			{
-				if (config_->is_uint(path.c_str())) {
-					unsigned int uv = config_->get_uint(path.c_str());
-					if (uv > std::numeric_limits<int>::max()) {
-						warn("ConfigCommAdapter:config_get_value:"
-						     << " Unsigned integer too large to store in int (" << uv << ")");
-						m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
-						m_execInterface.notifyOfExternalEvent();
-						return;
-					}
+		case PLEXIL::INTEGER_TYPE: {
+			if (config_->is_uint(path.c_str())) {
+				unsigned int uv = config_->get_uint(path.c_str());
+				if (uv > std::numeric_limits<int>::max()) {
+					warn("ConfigCommAdapter:config_get_value:"
+					     << " Unsigned integer too large to store in int (" << uv << ")");
+					m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
+					m_execInterface.notifyOfExternalEvent();
+					return;
 				}
-				int v = config_->get_int(path.c_str());
-				m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
 			}
-			break;
+			int v = config_->get_int(path.c_str());
+			m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(v));
+		} break;
 
 		default:
 			// this would only occur when misconfiguring in initialize()
@@ -332,8 +317,8 @@ ConfigurationPlexilAdapter::config_get_value(PLEXIL::Command* cmd, PLEXIL::Value
 
 	} catch (Exception &e) {
 		warn("ConfigCommAdapter:config_get_value:"
-		     << " Failed to get value " << path << " as " << PLEXIL::valueTypeName(value_type)
-		     << ": " << e.what_no_backtrace());
+		     << " Failed to get value " << path << " as " << PLEXIL::valueTypeName(value_type) << ": "
+		     << e.what_no_backtrace());
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
@@ -341,20 +326,18 @@ ConfigurationPlexilAdapter::config_get_value(PLEXIL::Command* cmd, PLEXIL::Value
 }
 
 void
-ConfigurationPlexilAdapter::config_exists(PLEXIL::Command* cmd)
+ConfigurationPlexilAdapter::config_exists(PLEXIL::Command *cmd)
 {
 	std::vector<PLEXIL::Value> const &args = cmd->getArgValues();
-	if (! verify_args(args, "ConfigCommAdapter:config_exists",
-	                  {{"path", PLEXIL::STRING_TYPE}}))
-	{
+	if (!verify_args(args, "ConfigCommAdapter:config_exists", {{"path", PLEXIL::STRING_TYPE}})) {
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.notifyOfExternalEvent();
 		return;
 	}
 
-	std::string   path;
+	std::string path;
 	args[0].getValue(path);
-	
+
 	try {
 		m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(config_->exists(path.c_str())));
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
@@ -369,7 +352,9 @@ ConfigurationPlexilAdapter::config_exists(PLEXIL::Command* cmd)
 }
 
 extern "C" {
-	void initFawkesConfigurationAdapter() {
-		REGISTER_ADAPTER(ConfigurationPlexilAdapter, "FawkesConfigurationAdapter");
-	}
+void
+initFawkesConfigurationAdapter()
+{
+	REGISTER_ADAPTER(ConfigurationPlexilAdapter, "FawkesConfigurationAdapter");
+}
 }

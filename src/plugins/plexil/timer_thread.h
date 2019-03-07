@@ -22,20 +22,20 @@
 #ifndef __PLUGINS_PLEXIL_TIMER_THREAD_H_
 #define __PLUGINS_PLEXIL_TIMER_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/clock.h>
+#include <core/threading/thread.h>
 
-class PlexilTimerThread
-	: public fawkes::Thread
+class PlexilTimerThread : public fawkes::Thread
 {
- public:
+public:
 	PlexilTimerThread();
 	virtual ~PlexilTimerThread();
 
 	virtual void loop();
 
 	/** Callback listener pure virtual class. */
-	class CallbackListener {
+	class CallbackListener
+	{
 	public:
 		/** Called for timer events. */
 		virtual void timer_event() = 0;
@@ -45,15 +45,20 @@ class PlexilTimerThread
 	void abort_timer();
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-	fawkes::Mutex *         mutex_;
-	fawkes::WaitCondition * waitcond_;
+private:
+	fawkes::Mutex *        mutex_;
+	fawkes::WaitCondition *waitcond_;
 
-	CallbackListener *      listener_;
-	fawkes::Time            queued_wait_until_;
-	bool                    aborted_;
+	CallbackListener *listener_;
+	fawkes::Time      queued_wait_until_;
+	bool              aborted_;
 };
 
 #endif

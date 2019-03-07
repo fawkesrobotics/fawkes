@@ -22,42 +22,40 @@
 #ifndef __PLUGINS_PLEXIL_BLACKBOARD_ADAPTER_H_
 #define __PLUGINS_PLEXIL_BLACKBOARD_ADAPTER_H_
 
-#include <logging/logger.h>
 #include <blackboard/blackboard.h>
 #include <blackboard/interface_listener.h>
+#include <logging/logger.h>
 
 #include <InterfaceAdapter.hh>
 #include <Value.hh>
-
-#include <map>
-#include <string>
-#include <mutex>
 #include <functional>
+#include <map>
+#include <mutex>
+#include <string>
 
 namespace fawkes {
-  class Interface;
+class Interface;
 }
 
 /**
  * @brief An interface adapter using standard POSIX time facilities
  *        to implement LookupNow and LookupOnChange.
  */
-class BlackboardPlexilAdapter
-	: public PLEXIL::InterfaceAdapter, public fawkes::BlackBoardInterfaceListener
+class BlackboardPlexilAdapter : public PLEXIL::InterfaceAdapter,
+                                public fawkes::BlackBoardInterfaceListener
 {
 public:
-	BlackboardPlexilAdapter(PLEXIL::AdapterExecInterface& execInterface);
-	BlackboardPlexilAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-	                            pugi::xml_node const xml);
+	BlackboardPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface);
+	BlackboardPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	BlackboardPlexilAdapter() = delete;
+	BlackboardPlexilAdapter()                                = delete;
 	BlackboardPlexilAdapter(const BlackboardPlexilAdapter &) = delete;
-	BlackboardPlexilAdapter & operator=(const BlackboardPlexilAdapter &) = delete;
+	BlackboardPlexilAdapter &operator=(const BlackboardPlexilAdapter &) = delete;
 	/// @endcond
 
 	virtual ~BlackboardPlexilAdapter();
-	
+
 	virtual bool initialize();
 	virtual bool start();
 	virtual bool stop();
@@ -66,35 +64,34 @@ public:
 
 	virtual void lookupNow(PLEXIL::State const &state, PLEXIL::StateCacheEntry &cacheEntry);
 
-	virtual void subscribe(const PLEXIL::State& state);
-	virtual void unsubscribe(const PLEXIL::State& state);
+	virtual void subscribe(const PLEXIL::State &state);
+	virtual void unsubscribe(const PLEXIL::State &state);
 
 	virtual void executeCommand(PLEXIL::Command *cmd);
 
 private:
 	virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
 
-	void bb_open_for_reading(PLEXIL::Command* cmd);
-	void bb_close(PLEXIL::Command* cmd);
-	void bb_read(PLEXIL::Command* cmd);
-	void bb_read_all(PLEXIL::Command* cmd);
-	void bb_print(PLEXIL::Command* cmd);
+	void bb_open_for_reading(PLEXIL::Command *cmd);
+	void bb_close(PLEXIL::Command *cmd);
+	void bb_read(PLEXIL::Command *cmd);
+	void bb_read_all(PLEXIL::Command *cmd);
+	void bb_print(PLEXIL::Command *cmd);
 
 private:
-	fawkes::Logger *      logger_;
-	fawkes::BlackBoard *  blackboard_;
+	fawkes::Logger *    logger_;
+	fawkes::BlackBoard *blackboard_;
 
-	std::mutex ifs_read_mutex_;
-	std::map<std::string, fawkes::Interface*> ifs_read_;
+	std::mutex                                 ifs_read_mutex_;
+	std::map<std::string, fawkes::Interface *> ifs_read_;
 
-	std::map<std::string, std::function<void (PLEXIL::Command*)>> commands_;
+	std::map<std::string, std::function<void(PLEXIL::Command *)>> commands_;
 
 	std::multimap<std::string, PLEXIL::State> subscribed_states_;
-
 };
 
 extern "C" {
-  void initFawkesBlackboardAdapter();
+void initFawkesBlackboardAdapter();
 }
 
 #endif

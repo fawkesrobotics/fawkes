@@ -22,23 +22,21 @@
 #ifndef __PLUGINS_PLEXIL_UTILS_H_
 #define __PLUGINS_PLEXIL_UTILS_H_
 
-#include <Error.hh>
 #include <Debug.hh>
+#include <Error.hh>
 #include <Value.hh>
-
-#include <string>
-#include <map>
-#include <vector>
 #include <cstring>
+#include <map>
+#include <string>
+#include <vector>
 
 inline void
 replace_tokens(std::string &s)
 {
-	std::map<std::string, std::string> tokens =
-	  {{"@CFGDIR@", CONFDIR},
-	   {"@BASEDIR@", BASEDIR},
-	   {"@FAWKES_BASEDIR@", FAWKES_BASEDIR},
-	   {"@RESDIR@", RESDIR}};
+	std::map<std::string, std::string> tokens = {{"@CFGDIR@", CONFDIR},
+	                                             {"@BASEDIR@", BASEDIR},
+	                                             {"@FAWKES_BASEDIR@", FAWKES_BASEDIR},
+	                                             {"@RESDIR@", RESDIR}};
 
 	for (const auto &token : tokens) {
 		std::string::size_type pos;
@@ -49,7 +47,8 @@ replace_tokens(std::string &s)
 }
 
 inline bool
-verify_args(const std::vector<PLEXIL::Value> &args, const std::string& func,
+verify_args(const std::vector<PLEXIL::Value> &                            args,
+            const std::string &                                           func,
             const std::vector<std::pair<std::string, PLEXIL::ValueType>> &types)
 {
 	if (args.size() != types.size()) {
@@ -61,19 +60,19 @@ verify_args(const std::vector<PLEXIL::Value> &args, const std::string& func,
 	}
 	for (size_t i = 0; i < args.size(); ++i) {
 		// Treat UNKNOWN_TYPE as "any type and we don't care/inspect later"
-		if (types[i].second == PLEXIL::UNKNOWN_TYPE) continue;
+		if (types[i].second == PLEXIL::UNKNOWN_TYPE)
+			continue;
 
 		if (args[i].valueType() != types[i].second) {
 			warn(func << ":"
-			     << "Command argument " << i << "(" << types[i].first << ") expected to be of type "
-			     << PLEXIL::valueTypeName(types[i].second) << ", but is of type "
-			     << PLEXIL::valueTypeName(args[i].valueType()));
+			          << "Command argument " << i << "(" << types[i].first << ") expected to be of type "
+			          << PLEXIL::valueTypeName(types[i].second) << ", but is of type "
+			          << PLEXIL::valueTypeName(args[i].valueType()));
 			return false;
 		}
 	}
 	return true;
 }
-
 
 /** Get configuration value from XML adapter config.
  * Value name can either reference an attribute name, or a <Parameter> tag with
@@ -83,7 +82,7 @@ verify_args(const std::vector<PLEXIL::Value> &args, const std::string& func,
  * @return value as string
  */
 inline std::string
-get_xml_config_value(const pugi::xml_node& config, const std::string& name)
+get_xml_config_value(const pugi::xml_node &config, const std::string &name)
 {
 	pugi::xml_attribute xml_attr = config.attribute(name.c_str());
 	if (xml_attr) {

@@ -22,41 +22,39 @@
 #ifndef __PLUGINS_PLEXIL_PLEXIL_THREAD_H_
 #define __PLUGINS_PLEXIL_PLEXIL_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/clock.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #ifdef HAVE_NAVGRAPH
-#  include <core/utils/lockptr.h>
-#  include <navgraph/navgraph.h>
-#  include <aspect/thread_producer.h>
+#	include <aspect/thread_producer.h>
+#	include <core/utils/lockptr.h>
+#	include <navgraph/navgraph.h>
 #endif
 #include <utils/time/time.h>
 
-#include <memory>
-#include <fstream>
-
 #include <AdapterFactory.hh>
+#include <fstream>
+#include <memory>
 
 namespace PLEXIL {
-  class ExecApplication;
+class ExecApplication;
 }
 
 class PlexilLogStreamBuffer;
 class PlexilNavgraphAccessThread;
 
-class PlexilExecutiveThread
-: public fawkes::Thread,
-	public fawkes::LoggingAspect,
-	public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
+class PlexilExecutiveThread : public fawkes::Thread,
+                              public fawkes::LoggingAspect,
+                              public fawkes::ConfigurableAspect,
+                              public fawkes::ClockAspect,
 #ifdef HAVE_NAVGRAPH
-  public fawkes::ThreadProducerAspect,
+                              public fawkes::ThreadProducerAspect,
 #endif
-  public fawkes::BlackBoardAspect
+                              public fawkes::BlackBoardAspect
 {
- public:
+public:
 	PlexilExecutiveThread();
 	virtual ~PlexilExecutiveThread();
 
@@ -67,36 +65,44 @@ class PlexilExecutiveThread
 	virtual void finalize();
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
 private:
 	/// @cond INTERNAL
 	//  Data structure for config parse result
-	struct plexil_interface_config {
-		std::string type;
+	struct plexil_interface_config
+	{
+		std::string                        type;
 		std::map<std::string, std::string> attr;
 		std::map<std::string, std::string> args;
 
-		struct verbatim_arg {
-			std::string tag;
-			bool        has_text;
-			std::string text;
+		struct verbatim_arg
+		{
+			std::string                        tag;
+			bool                               has_text;
+			std::string                        text;
 			std::map<std::string, std::string> attr;
 		};
 		std::map<std::string, verbatim_arg> verbatim_args;
-		pugi::xml_document verbatim;
+		pugi::xml_document                  verbatim;
 	};
 	/// @endcond
 
 	std::map<std::string, plexil_interface_config>
-	read_plexil_interface_configs(const std::string& config_prefix);
-	void add_plexil_interface_configs(pugi::xml_node &parent,
-	                                  const std::map<std::string,
-	                                  PlexilExecutiveThread::plexil_interface_config> &configs,
-	                                  const char* tag_name, const char* type_attr_name);
-	void plexil_compile(const std::string& ple_file);
+	     read_plexil_interface_configs(const std::string &config_prefix);
+	void add_plexil_interface_configs(
+	  pugi::xml_node &                                                             parent,
+	  const std::map<std::string, PlexilExecutiveThread::plexil_interface_config> &configs,
+	  const char *                                                                 tag_name,
+	  const char *                                                                 type_attr_name);
+	void plexil_compile(const std::string &ple_file);
 
- private:
+private:
 	std::string              cfg_spec_;
 	std::string              cfg_plan_plx_;
 	std::vector<std::string> cfg_plan_ple_;
@@ -106,15 +112,14 @@ private:
 	std::unique_ptr<PLEXIL::ExecApplication> plexil_;
 
 #ifdef HAVE_NAVGRAPH
-	PlexilNavgraphAccessThread *                                  navgraph_access_thread_;
-	fawkes::LockPtr<fawkes::NavGraph>                             navgraph_;
+	PlexilNavgraphAccessThread *      navgraph_access_thread_;
+	fawkes::LockPtr<fawkes::NavGraph> navgraph_;
 #endif
 
 	std::shared_ptr<PlexilLogStreamBuffer> log_buffer_;
 	std::shared_ptr<std::ostream>          log_stream_;
 
 	std::shared_ptr<pugi::xml_document> plan_plx_;
-	
 };
 
 #endif

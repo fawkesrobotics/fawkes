@@ -27,11 +27,9 @@
 #include <AdapterExecInterface.hh>
 #include <AdapterFactory.hh>
 #include <Command.hh>
-
 #include <algorithm>
 
 using namespace fawkes;
-
 
 /** @class BehaviorEnginePlexilAdapter "be_adapter.h"
  * Plexil adapter to provide access to the Behavior Engine.
@@ -41,9 +39,9 @@ using namespace fawkes;
 /** Constructor.
  * @param execInterface Reference to the parent AdapterExecInterface object.
  */
-BehaviorEnginePlexilAdapter::BehaviorEnginePlexilAdapter(PLEXIL::AdapterExecInterface& execInterface)
-: InterfaceAdapter(execInterface),
-  BlackBoardInterfaceListener("PlexilBE")
+BehaviorEnginePlexilAdapter::BehaviorEnginePlexilAdapter(
+  PLEXIL::AdapterExecInterface &execInterface)
+: InterfaceAdapter(execInterface), BlackBoardInterfaceListener("PlexilBE")
 {
 }
 
@@ -52,10 +50,10 @@ BehaviorEnginePlexilAdapter::BehaviorEnginePlexilAdapter(PLEXIL::AdapterExecInte
  * @param xml A const reference to the XML element describing this adapter
  * @note The instance maintains a shared pointer to the XML.
  */
-BehaviorEnginePlexilAdapter::BehaviorEnginePlexilAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-                                                         pugi::xml_node const xml)
-: InterfaceAdapter(execInterface, xml),
-  BlackBoardInterfaceListener("PlexilBE")
+BehaviorEnginePlexilAdapter::BehaviorEnginePlexilAdapter(
+  PLEXIL::AdapterExecInterface &execInterface,
+  pugi::xml_node const          xml)
+: InterfaceAdapter(execInterface, xml), BlackBoardInterfaceListener("PlexilBE")
 {
 }
 
@@ -64,21 +62,22 @@ BehaviorEnginePlexilAdapter::~BehaviorEnginePlexilAdapter()
 {
 }
 
-
 /** Initialize adapter.
  * @return true if initialization was successful, false otherwise.
  */
 bool
 BehaviorEnginePlexilAdapter::initialize()
 {
-	logger_     = reinterpret_cast<fawkes::Logger *>(m_execInterface.getProperty("::Fawkes::Logger"));
-	blackboard_ = reinterpret_cast<fawkes::BlackBoard *>(m_execInterface.getProperty("::Fawkes::BlackBoard"));
-	config_     = reinterpret_cast<fawkes::Configuration *>(m_execInterface.getProperty("::Fawkes::Config"));
+	logger_ = reinterpret_cast<fawkes::Logger *>(m_execInterface.getProperty("::Fawkes::Logger"));
+	blackboard_ =
+	  reinterpret_cast<fawkes::BlackBoard *>(m_execInterface.getProperty("::Fawkes::BlackBoard"));
+	config_ =
+	  reinterpret_cast<fawkes::Configuration *>(m_execInterface.getProperty("::Fawkes::Config"));
 
 	std::string cfg_prefix;
 	try {
 		std::string cfg_spec = config_->get_string("/plexil/spec");
-		cfg_prefix = "/plexil/" + cfg_spec + "/";
+		cfg_prefix           = "/plexil/" + cfg_spec + "/";
 	} catch (fawkes::Exception &e) {
 		logger_->log_error("PlexilBE", "Failed to read config: %s", e.what_no_backtrace());
 		return false;
@@ -88,9 +87,8 @@ BehaviorEnginePlexilAdapter::initialize()
 	current_cmd_ = nullptr;
 
 	// Parse adapter configurations
-	std::string skills_config_prefix = cfg_prefix + "skills/";
-	std::unique_ptr<Configuration::ValueIterator>
-	  cfg_item{config_->search(skills_config_prefix)};
+	std::string                                   skills_config_prefix = cfg_prefix + "skills/";
+	std::unique_ptr<Configuration::ValueIterator> cfg_item{config_->search(skills_config_prefix)};
 	while (cfg_item->next()) {
 		std::string path = cfg_item->path();
 
@@ -98,9 +96,9 @@ BehaviorEnginePlexilAdapter::initialize()
 		std::string::size_type slash_pos = path.find("/", start_pos + 1);
 		if (slash_pos != std::string::npos) {
 			std::string id = path.substr(start_pos, slash_pos - start_pos);
-	
-			start_pos = slash_pos + 1;
-			slash_pos = path.find("/", start_pos);
+
+			start_pos        = slash_pos + 1;
+			slash_pos        = path.find("/", start_pos);
 			std::string what = path.substr(start_pos, slash_pos - start_pos);
 
 			if (what == "name") {
@@ -108,19 +106,19 @@ BehaviorEnginePlexilAdapter::initialize()
 			} else if (what == "template") {
 				cfg_skills_[id].template_str = cfg_item->get_string();
 			} else if (what == "args") {
-				start_pos = slash_pos + 1;
-				slash_pos = path.find("/", start_pos);
+				start_pos      = slash_pos + 1;
+				slash_pos      = path.find("/", start_pos);
 				size_t args_id = stoi(path.substr(start_pos, slash_pos - start_pos));
 
 				// since we do get the values in order, this keeps or grows size only
 				cfg_skills_[id].args.resize(args_id + 1);
 
-				start_pos = slash_pos + 1;
-				slash_pos = path.find("/", start_pos);
+				start_pos             = slash_pos + 1;
+				slash_pos             = path.find("/", start_pos);
 				std::string args_what = path.substr(start_pos, slash_pos - start_pos);
 
 				if (args_what == "type") {
-					std::string type_str = cfg_item->get_as_string();
+					std::string type_str               = cfg_item->get_as_string();
 					cfg_skills_[id].args[args_id].type = PLEXIL::UNKNOWN_TYPE;
 					if (type_str == "String") {
 						cfg_skills_[id].args[args_id].type = PLEXIL::STRING_TYPE;
@@ -131,8 +129,10 @@ BehaviorEnginePlexilAdapter::initialize()
 					} else if (type_str == "Boolean") {
 						cfg_skills_[id].args[args_id].type = PLEXIL::BOOLEAN_TYPE;
 					} else {
-						logger_->log_warn("PlexilBE", "Invalid argument type '%s' for '%s'",
-						                  type_str.c_str(), cfg_skills_[id].name.c_str());
+						logger_->log_warn("PlexilBE",
+						                  "Invalid argument type '%s' for '%s'",
+						                  type_str.c_str(),
+						                  cfg_skills_[id].name.c_str());
 					}
 				} else if (args_what == "name") {
 					cfg_skills_[id].args[args_id].name = cfg_item->get_as_string();
@@ -144,14 +144,14 @@ BehaviorEnginePlexilAdapter::initialize()
 	PLEXIL::g_configuration->registerCommandInterface("skill_call", this);
 
 	std::map<std::string, std::string> mapping;
-	
+
 	logger_->log_debug("PlexilBE", "Skills");
 	for (const auto &skill_entry : cfg_skills_) {
 		const auto &skill = skill_entry.second;
-		std::string line = "- " + skill.name + " (";
-		bool first = true;
+		std::string line  = "- " + skill.name + " (";
+		bool        first = true;
 		for (const auto &arg : skill.args) {
-			if (! first) {
+			if (!first) {
 				line += ", ";
 			} else {
 				first = false;
@@ -170,7 +170,6 @@ BehaviorEnginePlexilAdapter::initialize()
 	return true;
 }
 
-
 /** Start adapter.
  * @return true if starting was successful, false otherwise.
  */
@@ -183,13 +182,12 @@ BehaviorEnginePlexilAdapter::start()
 		bbil_add_data_interface(skiller_if_);
 		blackboard_->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
 	} catch (Exception &e) {
-		logger_->log_error("PlexilBE", "Failed to open skiller interface: %s",
-		                   e.what_no_backtrace());
+		logger_->log_error("PlexilBE", "Failed to open skiller interface: %s", e.what_no_backtrace());
 		return false;
 	}
 
 	skiller_if_->read();
-	if (! skiller_if_->has_writer()) {
+	if (!skiller_if_->has_writer()) {
 		logger_->log_error("PlexilBE", "No writer for skiller interface");
 		return false;
 	}
@@ -201,7 +199,6 @@ BehaviorEnginePlexilAdapter::start()
 	return true;
 }
 
-
 /** Stop adapter.
  * @return true if successful, false otherwise.
  */
@@ -210,7 +207,6 @@ BehaviorEnginePlexilAdapter::stop()
 {
 	return true;
 }
-
 
 /** Reset adapter.
  * @return true if successful, false otherwise.
@@ -233,26 +229,27 @@ BehaviorEnginePlexilAdapter::shutdown()
 }
 
 std::string
-BehaviorEnginePlexilAdapter::format_skillstring(const std::vector<PLEXIL::Value>& values)
+BehaviorEnginePlexilAdapter::format_skillstring(const std::vector<PLEXIL::Value> &values)
 {
 	std::string rv;
 	if (values.size() % 2 == 0) {
-		logger_->log_warn("PlexilBE", "Malformed skill call, must be 'skillname argname0 argvalue1...'");
+		logger_->log_warn("PlexilBE",
+		                  "Malformed skill call, must be 'skillname argname0 argvalue1...'");
 	} else if (values.size() > 0) {
-		rv = values[0].valueToString() + "{";
+		rv         = values[0].valueToString() + "{";
 		bool first = true;
 		for (size_t i = 1; i < values.size() - 1; i += 2) {
-			if (! first) {
+			if (!first) {
 				rv += ", ";
 			} else {
 				first = false;
 			}
 
 			rv += values[i].valueToString() + "=";
-			if (values[i+1].valueType() == PLEXIL::STRING_TYPE) {
-				rv += "\"" + values[i+1].valueToString() + "\"";
+			if (values[i + 1].valueType() == PLEXIL::STRING_TYPE) {
+				rv += "\"" + values[i + 1].valueToString() + "\"";
 			} else {
-				rv += values[i+1].valueToString();
+				rv += values[i + 1].valueToString();
 			}
 		}
 		rv += "}";
@@ -261,27 +258,31 @@ BehaviorEnginePlexilAdapter::format_skillstring(const std::vector<PLEXIL::Value>
 	return rv;
 }
 
-
 std::string
-BehaviorEnginePlexilAdapter::map_skillstring(const std::string& name,
-                                             const skill_config& skill_config,
-                                             const std::vector<PLEXIL::Value>& values)
+BehaviorEnginePlexilAdapter::map_skillstring(const std::string &               name,
+                                             const skill_config &              skill_config,
+                                             const std::vector<PLEXIL::Value> &values)
 {
 	if (skill_config.args.size() != values.size()) {
-		logger_->log_warn("PlexilBE", "Arguments for '%s' do not match spec (got %zu, expected %zu)",
-		                  name.c_str(), skill_config.args.size(), values.size());
+		logger_->log_warn("PlexilBE",
+		                  "Arguments for '%s' do not match spec (got %zu, expected %zu)",
+		                  name.c_str(),
+		                  skill_config.args.size(),
+		                  values.size());
 		return "";
 	}
 	for (size_t i = 0; i < skill_config.args.size(); ++i) {
 		if (skill_config.args[i].type != values[i].valueType()) {
-			logger_->log_warn("PlexilBE", "Arguments type mismatch for '%s' of '%s' (got %s, expected %s)",
-			                  skill_config.args[i].name.c_str(), name.c_str(),
+			logger_->log_warn("PlexilBE",
+			                  "Arguments type mismatch for '%s' of '%s' (got %s, expected %s)",
+			                  skill_config.args[i].name.c_str(),
+			                  name.c_str(),
 			                  PLEXIL::valueTypeName(values[i].valueType()).c_str(),
 			                  PLEXIL::valueTypeName(skill_config.args[i].type).c_str());
 			return "";
 		}
 	}
-	if (! action_skill_mapping_->has_mapping(name)) {
+	if (!action_skill_mapping_->has_mapping(name)) {
 		logger_->log_warn("PlexilBE", "No mapping for action '%s' known", name.c_str());
 		return "";
 	}
@@ -308,7 +309,7 @@ BehaviorEnginePlexilAdapter::map_skillstring(const std::string& name,
 }
 
 void
-BehaviorEnginePlexilAdapter::call_skill(const std::string& skill_string, PLEXIL::Command* cmd)
+BehaviorEnginePlexilAdapter::call_skill(const std::string &skill_string, PLEXIL::Command *cmd)
 {
 	logger_->log_info("PlexilBE", "Executing skill '%s'", skill_string.c_str());
 	SkillerInterface::ExecSkillMessage *msg =
@@ -328,23 +329,22 @@ BehaviorEnginePlexilAdapter::call_skill(const std::string& skill_string, PLEXIL:
  * @param cmd command to execute
  */
 void
-BehaviorEnginePlexilAdapter::executeCommand(PLEXIL::Command* cmd)
+BehaviorEnginePlexilAdapter::executeCommand(PLEXIL::Command *cmd)
 {
 	std::lock_guard<std::mutex> lock(exec_mutex_);
-	
+
 	if (cmd->getName() == "skill_call") {
 		std::string skill_string = format_skillstring(cmd->getArgValues());
 		call_skill(skill_string, cmd);
-    m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SENT_TO_SYSTEM);
+		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SENT_TO_SYSTEM);
 	} else {
 		std::string name = cmd->getName();
-		auto skill_entry = std::find_if(cfg_skills_.begin(), cfg_skills_.end(),
-		                                [&name](const auto &e) {
-			                                return e.second.name == name;
-		                                });
+		auto skill_entry = std::find_if(cfg_skills_.begin(), cfg_skills_.end(), [&name](const auto &e) {
+			return e.second.name == name;
+		});
 		if (skill_entry != cfg_skills_.end()) {
 			std::string skill_string = map_skillstring(name, skill_entry->second, cmd->getArgValues());
-			if (! skill_string.empty()) {
+			if (!skill_string.empty()) {
 				call_skill(skill_string, cmd);
 				m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SENT_TO_SYSTEM);
 			} else {
@@ -359,7 +359,6 @@ BehaviorEnginePlexilAdapter::executeCommand(PLEXIL::Command* cmd)
 	m_execInterface.notifyOfExternalEvent();
 }
 
-
 /** Abort currently running execution.
  * @param cmd command to abort
  */
@@ -370,7 +369,8 @@ BehaviorEnginePlexilAdapter::invokeAbort(PLEXIL::Command *cmd)
 	if (current_cmd_) {
 		try {
 			skiller_if_->msgq_enqueue(new SkillerInterface::StopExecMessage());
-		} catch (Exception &e) {}
+		} catch (Exception &e) {
+		}
 		current_cmd_ = nullptr;
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_FAILED);
 		m_execInterface.handleCommandAbortAck(cmd, false);
@@ -408,7 +408,9 @@ BehaviorEnginePlexilAdapter::bb_interface_data_changed(fawkes::Interface *interf
 }
 
 extern "C" {
-	void initBehaviorEngineAdapter() {
-		REGISTER_ADAPTER(BehaviorEnginePlexilAdapter, "BehaviorEngineAdapter");
-	}
+void
+initBehaviorEngineAdapter()
+{
+	REGISTER_ADAPTER(BehaviorEnginePlexilAdapter, "BehaviorEngineAdapter");
+}
 }

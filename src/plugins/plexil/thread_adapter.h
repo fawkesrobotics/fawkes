@@ -23,22 +23,21 @@
 #ifndef __PLUGINS_PLEXIL_THREAD_ADAPTER_H_
 #define __PLUGINS_PLEXIL_THREAD_ADAPTER_H_
 
-#include <InterfaceAdapter.hh>
-
 #include <logging/logger.h>
 
+#include <InterfaceAdapter.hh>
+
 /** Interface adapter to set thread name. */
-class ThreadNamePlexilAdapter	: public PLEXIL::InterfaceAdapter
+class ThreadNamePlexilAdapter : public PLEXIL::InterfaceAdapter
 {
 public:
-	ThreadNamePlexilAdapter(PLEXIL::AdapterExecInterface& execInterface);
-	ThreadNamePlexilAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-	                     pugi::xml_node const xml);
+	ThreadNamePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface);
+	ThreadNamePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	ThreadNamePlexilAdapter() = delete;
+	ThreadNamePlexilAdapter()                                = delete;
 	ThreadNamePlexilAdapter(const ThreadNamePlexilAdapter &) = delete;
-	ThreadNamePlexilAdapter & operator=(const ThreadNamePlexilAdapter &) = delete;
+	ThreadNamePlexilAdapter &operator=(const ThreadNamePlexilAdapter &) = delete;
 	/// @endcond
 
 	virtual ~ThreadNamePlexilAdapter();
@@ -48,11 +47,10 @@ public:
 	virtual bool stop();
 	virtual bool reset();
 	virtual bool shutdown();
-	
 };
 
 extern "C" {
-  void initThreadName();
+void initThreadName();
 }
 
 #endif
