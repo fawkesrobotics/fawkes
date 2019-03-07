@@ -25,40 +25,39 @@
 #define _FIREVISION_MODELS_COLOR_LOOKUPTABLE_H_
 
 #include <fvmodels/color/colormodel.h>
-
 #include <fvutils/colormap/yuvcm.h>
+
 #include <string>
 
 namespace firevision {
 
 class ColorModelLookupTable : public ColorModel
 {
- public:
+public:
+	ColorModelLookupTable(YuvColormap *colormap);
+	ColorModelLookupTable(const char *file);
+	ColorModelLookupTable(const char *file, const char *lut_id, bool destroy_on_free = false);
+	ColorModelLookupTable(unsigned int depth, const char *lut_id, bool destroy_on_free);
+	ColorModelLookupTable(const char *lut_id, bool destroy_on_free);
 
-  ColorModelLookupTable(YuvColormap *colormap);
-  ColorModelLookupTable(const char *file);
-  ColorModelLookupTable(const char *file, const char *lut_id, bool destroy_on_free = false);
-  ColorModelLookupTable(unsigned int depth, const char *lut_id, bool destroy_on_free);
-  ColorModelLookupTable(const char *lut_id, bool destroy_on_free);
+	virtual ~ColorModelLookupTable();
 
-  virtual ~ColorModelLookupTable();
+	virtual color_t determine(unsigned int y, unsigned int u, unsigned int v) const;
 
-  virtual color_t determine(unsigned int y, unsigned int u, unsigned int v) const;
+	const char * get_name();
+	YuvColormap *get_colormap() const;
 
-  const char *   get_name();
-  YuvColormap *  get_colormap() const;
+	void load(const char *filename);
 
-  void load(const char *filename);
+	void set_colormap(const YuvColormap &yuvcm);
 
-  void set_colormap(const YuvColormap &yuvcm);
+	void               reset();
+	static std::string compose_filename(const std::string format);
 
-  void reset();
-  static std::string compose_filename(const std::string format);
+	ColorModelLookupTable &operator+=(const ColorModelLookupTable &cmlt);
 
-  ColorModelLookupTable &  operator+=(const ColorModelLookupTable &cmlt);
-
- private:
-  YuvColormap *colormap_;
+private:
+	YuvColormap *colormap_;
 };
 
 } // end namespace firevision

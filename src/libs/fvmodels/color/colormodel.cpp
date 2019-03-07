@@ -23,6 +23,7 @@
 
 #include <fvmodels/color/colormodel.h>
 #include <fvutils/color/color_object_map.h>
+
 #include <cstring>
 
 namespace firevision {
@@ -47,12 +48,10 @@ namespace firevision {
  * @author Tim Niemueller
  */
 
-
 /** Virtual empty destructor. */
 ColorModel::~ColorModel()
 {
 }
-
 
 /** Create image from color model.
  * Create image from color model, useful for debugging and analysing.
@@ -69,28 +68,28 @@ ColorModel::~ColorModel()
 void
 ColorModel::uv_to_image(unsigned char *yuv422_planar_buffer, unsigned int y)
 {
-  unsigned char *yp = yuv422_planar_buffer;
-  unsigned char *up = YUV422_PLANAR_U_PLANE(yuv422_planar_buffer, 512, 512);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(yuv422_planar_buffer, 512, 512);
+	unsigned char *yp = yuv422_planar_buffer;
+	unsigned char *up = YUV422_PLANAR_U_PLANE(yuv422_planar_buffer, 512, 512);
+	unsigned char *vp = YUV422_PLANAR_V_PLANE(yuv422_planar_buffer, 512, 512);
 
-  YUV_t c;
-  for (unsigned int v = 256; v > 0 ; --v) {
-    for (unsigned int u = 0; u < 256; ++u) {
-      c = ColorObjectMap::get_color(determine(y, u, v));
+	YUV_t c;
+	for (unsigned int v = 256; v > 0; --v) {
+		for (unsigned int u = 0; u < 256; ++u) {
+			c = ColorObjectMap::get_color(determine(y, u, v));
 
-      *yp++ = c.Y;
-      *yp++ = c.Y;
-      *up++ = c.U;
-      *vp++ = c.V;
-    }
-    // Double line
-    memcpy(yp, (yp - 512), 512);
-    yp += 512;
-    memcpy(up, (up - 256), 256);
-    memcpy(vp, (vp - 256), 256);
-    up += 256;
-    vp += 256;
-  }
+			*yp++ = c.Y;
+			*yp++ = c.Y;
+			*up++ = c.U;
+			*vp++ = c.V;
+		}
+		// Double line
+		memcpy(yp, (yp - 512), 512);
+		yp += 512;
+		memcpy(up, (up - 256), 256);
+		memcpy(vp, (vp - 256), 256);
+		up += 256;
+		vp += 256;
+	}
 }
 
 } // end namespace firevision

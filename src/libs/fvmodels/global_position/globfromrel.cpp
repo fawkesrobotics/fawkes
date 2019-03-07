@@ -23,9 +23,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cmath>
 #include <fvmodels/global_position/globfromrel.h>
 #include <fvmodels/relative_position/relativepositionmodel.h>
+
+#include <cmath>
 
 namespace firevision {
 
@@ -37,47 +38,42 @@ namespace firevision {
 /** Constructor.
  * @param model relative position model for the ball.
  */
-GlobalFromRelativePos::GlobalFromRelativePos(RelativePositionModel* model)
+GlobalFromRelativePos::GlobalFromRelativePos(RelativePositionModel *model)
 {
-  m_pRelaModel	= model;
-  m_fPosX       = 0.0f;
-  m_fPosY       = 0.0f;
-  m_fPhi        = 0.0f;
+	m_pRelaModel = model;
+	m_fPosX      = 0.0f;
+	m_fPosY      = 0.0f;
+	m_fPhi       = 0.0f;
 }
-
 
 void
 GlobalFromRelativePos::set_robot_position(float x, float y, float ori)
 {
-  m_fPosX = x;
-  m_fPosY = y;
-  m_fPhi  = ori;
+	m_fPosX = x;
+	m_fPosY = y;
+	m_fPhi  = ori;
 }
-
 
 void
 GlobalFromRelativePos::set_position_in_image(unsigned int x, unsigned int y)
 {
 }
 
-
 void
 GlobalFromRelativePos::calc()
 {
 }
 
-
 bool
 GlobalFromRelativePos::is_pos_valid() const
 {
-  return m_pRelaModel->is_pos_valid();
+	return m_pRelaModel->is_pos_valid();
 }
-
 
 float
 GlobalFromRelativePos::get_x() const
 {
-  /*
+	/*
   cout << " DETAILS of \"getX()\"" << endl
        << "   Formula: " << endl
        << "     ( relX * cos(phi) -" << endl
@@ -90,16 +86,13 @@ GlobalFromRelativePos::get_x() const
        << "       " << m_pRelaModel->getY() * sin(m_fPhi) << ")   ) + " << m_fPosX << endl 
        << "  ---> " << (m_pRelaModel->getX() * cos(m_fPhi) - m_pRelaModel->getY() * sin(m_fPhi)) + m_fPosX << flush;
   */
-  return (   m_pRelaModel->get_x() * cos(m_fPhi)
-	   - m_pRelaModel->get_y() * sin(m_fPhi) )
-         + m_fPosX;
+	return (m_pRelaModel->get_x() * cos(m_fPhi) - m_pRelaModel->get_y() * sin(m_fPhi)) + m_fPosX;
 }
-
 
 float
 GlobalFromRelativePos::get_y() const
 {
-  /*
+	/*
   cout << " DETAILS of \"getY()\"" << endl
        << "   Formula: " << endl
        << "     ( relX * sin(phi) -" << endl
@@ -112,9 +105,7 @@ GlobalFromRelativePos::get_y() const
        << "       " << m_pRelaModel->getY() * cos(m_fPhi) << ")   ) + " << m_fPosY << endl 
        << "  ---> " << (m_pRelaModel->getX() * sin(m_fPhi) + m_pRelaModel->getY() * cos(m_fPhi)) + m_fPosY << flush;
   */
-  return (   m_pRelaModel->get_x() * sin(m_fPhi)
-	   + m_pRelaModel->get_y() * cos(m_fPhi) )
-         + m_fPosY;
+	return (m_pRelaModel->get_x() * sin(m_fPhi) + m_pRelaModel->get_y() * cos(m_fPhi)) + m_fPosY;
 }
 
 } // end namespace firevision

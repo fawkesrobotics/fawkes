@@ -30,17 +30,14 @@ namespace firevision {
 
 class ColorModel
 {
- public:
-  virtual ~ColorModel();
+public:
+	virtual ~ColorModel();
 
-  virtual color_t       determine(unsigned int y,
-				  unsigned int u,
-				  unsigned int v) const  = 0;
+	virtual color_t determine(unsigned int y, unsigned int u, unsigned int v) const = 0;
 
-  virtual const char *  get_name()                        = 0;
+	virtual const char *get_name() = 0;
 
-  virtual void uv_to_image(unsigned char *yuv422_planar_buffer, unsigned int y);
-
+	virtual void uv_to_image(unsigned char *yuv422_planar_buffer, unsigned int y);
 };
 
 } // end namespace firevision

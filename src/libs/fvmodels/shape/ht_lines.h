@@ -25,26 +25,26 @@
 #ifndef _FIREVISION_MODELS_SHAPE_HT_LINE_H_
 #define _FIREVISION_MODELS_SHAPE_HT_LINE_H_
 
-#include <vector>
-#include <iostream>
-#include <cmath>
-
-#include <fvutils/base/types.h>
-#include <fvmodels/shape/line.h>
 #include <fvmodels/shape/accumulators/ht_accum.h>
+#include <fvmodels/shape/line.h>
+#include <fvutils/base/types.h>
+
+#include <cmath>
+#include <iostream>
+#include <vector>
 
 namespace firevision {
 
 class ROI;
 
-class HtLinesModel: public ShapeModel
+class HtLinesModel : public ShapeModel
 {
- private:
-  std::vector<LineShape> m_Lines;
-  RhtAccumulator accumulator;
+private:
+	std::vector<LineShape> m_Lines;
+	RhtAccumulator         accumulator;
 
- public:
-  /** Creates a new HtLinesModel instance
+public:
+	/** Creates a new HtLinesModel instance
    * @param nr_candidates the nr of candidates that is considered per pixel (the hole angle
    *                      range is devided in this many parts/lines
    * @param angle_from The angle to start the candidates from, given in rad, 0 is straight up
@@ -60,36 +60,42 @@ class HtLinesModel: public ShapeModel
    *                  is considered to be a line. The number may actually be higher if min_votes_ratio
    *                  is set too high (set min_votes_ration to 0 to use only min_votes)
    */
-  HtLinesModel(unsigned int nr_candidates = 40, float angle_from = 0, float angle_range= 2 * M_PI, int r_scale = 1, float min_votes_ratio = 0.2f, int min_votes = -1);
-  virtual ~HtLinesModel(void);
+	HtLinesModel(unsigned int nr_candidates   = 40,
+	             float        angle_from      = 0,
+	             float        angle_range     = 2 * M_PI,
+	             int          r_scale         = 1,
+	             float        min_votes_ratio = 0.2f,
+	             int          min_votes       = -1);
+	virtual ~HtLinesModel(void);
 
-  std::string	getName(void) const {return std::string("RhtLinesModel");}
-  int		parseImage(unsigned char* buffer, ROI *roi);
-  int		getShapeCount(void) const;
-  LineShape*    getShape(int id) const;
-  LineShape*	getMostLikelyShape(void) const;
-  std::vector< LineShape > * getShapes();
-  
- private:
+	std::string
+	getName(void) const
+	{
+		return std::string("RhtLinesModel");
+	}
+	int                     parseImage(unsigned char *buffer, ROI *roi);
+	int                     getShapeCount(void) const;
+	LineShape *             getShape(int id) const;
+	LineShape *             getMostLikelyShape(void) const;
+	std::vector<LineShape> *getShapes();
 
-  unsigned int  RHT_NR_CANDIDATES;
-  float         RHT_ANGLE_INCREMENT;
-  float         RHT_ANGLE_FROM;
-  float         RHT_ANGLE_RANGE;
-  
-  // The following constants are used for RHT accumulator precision
-  int           RHT_R_SCALE;
-  //const int             RHT_PHI_SCALE   = 8;
+private:
+	unsigned int RHT_NR_CANDIDATES;
+	float        RHT_ANGLE_INCREMENT;
+	float        RHT_ANGLE_FROM;
+	float        RHT_ANGLE_RANGE;
 
-  int           RHT_MIN_VOTES;
-  float         RHT_MIN_VOTES_RATIO;
+	// The following constants are used for RHT accumulator precision
+	int RHT_R_SCALE;
+	//const int             RHT_PHI_SCALE   = 8;
 
-  unsigned int  roi_width;
-  unsigned int  roi_height;
+	int   RHT_MIN_VOTES;
+	float RHT_MIN_VOTES_RATIO;
 
+	unsigned int roi_width;
+	unsigned int roi_height;
 };
 
 } // end namespace firevision
 
 #endif // FIREVISION_MODELS_SHAPE_HT_LINES_H__
-

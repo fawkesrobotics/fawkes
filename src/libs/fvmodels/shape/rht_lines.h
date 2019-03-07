@@ -25,26 +25,26 @@
 #ifndef _FIREVISION_MODELS_SHAPE_RHT_LINE_H_
 #define _FIREVISION_MODELS_SHAPE_RHT_LINE_H_
 
-#include <vector>
-#include <iostream>
-#include <cmath>
-
-#include <fvutils/base/types.h>
-#include <fvmodels/shape/line.h>
 #include <fvmodels/shape/accumulators/ht_accum.h>
+#include <fvmodels/shape/line.h>
+#include <fvutils/base/types.h>
+
+#include <cmath>
+#include <iostream>
+#include <vector>
 
 namespace firevision {
 
 class ROI;
 
-class RhtLinesModel: public ShapeModel
+class RhtLinesModel : public ShapeModel
 {
- private:
-  std::vector<LineShape> m_Lines;
-  RhtAccumulator accumulator;
+private:
+	std::vector<LineShape> m_Lines;
+	RhtAccumulator         accumulator;
 
- public:
-  /** Creates a new RhtLinesModel instance
+public:
+	/** Creates a new RhtLinesModel instance
    * @param max_time the maximum runtime of a single parseImage call in seconds,
    *                     if you set max_iter to a small number this time may not
    *                     be used completely
@@ -65,45 +65,53 @@ class RhtLinesModel: public ShapeModel
    *                  is considered to be a line. The number may actually be higher if min_votes_ratio
    *                  is set too high (set min_votes_ration to 0 to use only min_votes)
    */
-  RhtLinesModel(float max_time = 0.005, int max_iter = 1000, unsigned int nr_candidates = 40, float angle_from = 0, float angle_range= 2 * M_PI, int r_scale = 1, float min_votes_ratio = 0.2f, int min_votes = -1);
-  virtual ~RhtLinesModel(void);
+	RhtLinesModel(float        max_time        = 0.005,
+	              int          max_iter        = 1000,
+	              unsigned int nr_candidates   = 40,
+	              float        angle_from      = 0,
+	              float        angle_range     = 2 * M_PI,
+	              int          r_scale         = 1,
+	              float        min_votes_ratio = 0.2f,
+	              int          min_votes       = -1);
+	virtual ~RhtLinesModel(void);
 
-  std::string	getName(void) const {return std::string("RhtLinesModel");}
-  int		parseImage(unsigned char* buffer, ROI *roi);
-  int		getShapeCount(void) const;
-  LineShape*         getShape(int id) const;
-  LineShape*	        getMostLikelyShape(void) const;
-  std::vector< LineShape > * getShapes();
-  
- private:
-  // The following constants are used as stopping criteria
-  float         RHT_MAX_TIME;
-  int	        RHT_MAX_ITER;
+	std::string
+	getName(void) const
+	{
+		return std::string("RhtLinesModel");
+	}
+	int                     parseImage(unsigned char *buffer, ROI *roi);
+	int                     getShapeCount(void) const;
+	LineShape *             getShape(int id) const;
+	LineShape *             getMostLikelyShape(void) const;
+	std::vector<LineShape> *getShapes();
 
-  unsigned int  RHT_NR_CANDIDATES;
-  float         RHT_ANGLE_INCREMENT;
-  float         RHT_ANGLE_FROM;
-  float         RHT_ANGLE_RANGE;
-  
-  // The following constants are used for RHT accumulator precision
-  int           RHT_R_SCALE;
-  //const int             RHT_PHI_SCALE   = 8;
+private:
+	// The following constants are used as stopping criteria
+	float RHT_MAX_TIME;
+	int   RHT_MAX_ITER;
 
-  int           RHT_MIN_VOTES;
-  float         RHT_MIN_VOTES_RATIO;
+	unsigned int RHT_NR_CANDIDATES;
+	float        RHT_ANGLE_INCREMENT;
+	float        RHT_ANGLE_FROM;
+	float        RHT_ANGLE_RANGE;
 
-  unsigned int  roi_width;
-  unsigned int  roi_height;
+	// The following constants are used for RHT accumulator precision
+	int RHT_R_SCALE;
+	//const int             RHT_PHI_SCALE   = 8;
 
+	int   RHT_MIN_VOTES;
+	float RHT_MIN_VOTES_RATIO;
 
-  int                    diff_sec;
-  int                    diff_usec;
+	unsigned int roi_width;
+	unsigned int roi_height;
 
-  float                  f_diff_sec;
+	int diff_sec;
+	int diff_usec;
 
+	float f_diff_sec;
 };
 
 } // end namespace firevision
 
 #endif // FIREVISION_MODELS_SHAPE_RHT_LINES_H__
-

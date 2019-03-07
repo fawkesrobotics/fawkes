@@ -22,20 +22,20 @@ namespace firevision {
 
 class ColorModelBlack : public ColorModel
 {
- private:
-  unsigned int y_thresh_, u_thresh_, v_thresh_;
-  unsigned int ref_u_, ref_v_;
- public:
+private:
+	unsigned int y_thresh_, u_thresh_, v_thresh_;
+	unsigned int ref_u_, ref_v_;
 
-  ColorModelBlack(unsigned int y_thresh = 30, unsigned int u_thresh = 30, unsigned int v_thresh = 30,
-    unsigned int ref_u = 128, unsigned int ref_v = 128);
+public:
+	ColorModelBlack(unsigned int y_thresh = 30,
+	                unsigned int u_thresh = 30,
+	                unsigned int v_thresh = 30,
+	                unsigned int ref_u    = 128,
+	                unsigned int ref_v    = 128);
 
-  color_t       determine(unsigned int y,
-			  unsigned int u,
-			  unsigned int v) const;
+	color_t determine(unsigned int y, unsigned int u, unsigned int v) const;
 
-  const char *  get_name();
-
+	const char *get_name();
 };
 
 } // end namespace firevision

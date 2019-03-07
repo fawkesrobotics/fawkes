@@ -23,9 +23,10 @@
  */
 
 #include <core/exception.h>
-#include <cmath>
 #include <fvmodels/velocity/globfromrel.h>
 #include <utils/time/time.h>
+
+#include <cmath>
 
 // #include "utils/system/console_colors.h"
 // #include "utils/system/time.h"
@@ -43,26 +44,27 @@ namespace firevision {
  * @param rel_velo_model relative velocity model
  * @param rel_pos_model relative position model
  */
-VelocityGlobalFromRelative::VelocityGlobalFromRelative(VelocityModel *rel_velo_model,
-						       RelativePositionModel *rel_pos_model)
+VelocityGlobalFromRelative::VelocityGlobalFromRelative(VelocityModel *        rel_velo_model,
+                                                       RelativePositionModel *rel_pos_model)
 {
-  this->relative_velocity = rel_velo_model;
-  this->relative_position = rel_pos_model;
+	this->relative_velocity = rel_velo_model;
+	this->relative_position = rel_pos_model;
 
-  if ( rel_velo_model->getCoordinateSystem() != COORDSYS_ROBOT_CART ) {
-    /*
+	if (rel_velo_model->getCoordinateSystem() != COORDSYS_ROBOT_CART) {
+		/*
     cout << cblue << "VelocityGlobalFromRelative::Constructor: " << cred
 	 << "Given velocity model does not return robot-centric cartesian coordinates. WILL NOT WORK!"
 	 << cnormal << endl;
     */
-    throw Exception("Given velocity model does not return robot-centric cartesian coordinates. WILL NOT WORK!");
-  }
+		throw Exception(
+		  "Given velocity model does not return robot-centric cartesian coordinates. WILL NOT WORK!");
+	}
 
-  robot_ori = robot_poseage = 0.f;
+	robot_ori = robot_poseage = 0.f;
 
-  velocity_x = velocity_y = 0.f;
+	velocity_x = velocity_y = 0.f;
 
-  /*
+	/*
   // initial variance for ball pos kf
   kalman_filter = new kalmanFilter2Dim();
   CMatrix<float> initialStateVarianceBall(2,2);
@@ -84,28 +86,24 @@ VelocityGlobalFromRelative::VelocityGlobalFromRelative(VelocityModel *rel_velo_m
   */
 }
 
-
 /** Destructor. */
 VelocityGlobalFromRelative::~VelocityGlobalFromRelative()
 {
 }
-
 
 void
 VelocityGlobalFromRelative::setPanTilt(float pan, float tilt)
 {
 }
 
-
 void
 VelocityGlobalFromRelative::setRobotPosition(float x, float y, float ori, timeval t)
 {
-  timeval now;
-  gettimeofday(&now, 0);
-  robot_ori     = ori;
-  robot_poseage = time_diff_sec(now, t);
+	timeval now;
+	gettimeofday(&now, 0);
+	robot_ori     = ori;
+	robot_poseage = time_diff_sec(now, t);
 }
-
 
 void
 VelocityGlobalFromRelative::setRobotVelocity(float rel_vel_x, float rel_vel_y, timeval t)
@@ -117,91 +115,78 @@ VelocityGlobalFromRelative::setTime(timeval t)
 {
 }
 
-
 void
 VelocityGlobalFromRelative::setTimeNow()
 {
 }
 
-
 void
 VelocityGlobalFromRelative::getTime(long int *sec, long int *usec)
 {
-  *sec  = 0;
-  *usec = 0;
+	*sec  = 0;
+	*usec = 0;
 }
-
 
 void
 VelocityGlobalFromRelative::getVelocity(float *vel_x, float *vel_y)
 {
-  if (vel_x != 0) {
-    *vel_x = velocity_x;
-  }
-  if (vel_y != 0) {
-    *vel_y = velocity_y;
-  }
+	if (vel_x != 0) {
+		*vel_x = velocity_x;
+	}
+	if (vel_y != 0) {
+		*vel_y = velocity_y;
+	}
 }
-
 
 float
 VelocityGlobalFromRelative::getVelocityX()
 {
-  return velocity_x;
+	return velocity_x;
 }
-
 
 float
 VelocityGlobalFromRelative::getVelocityY()
 {
-  return velocity_y;
+	return velocity_y;
 }
-
-
 
 void
 VelocityGlobalFromRelative::calc()
 {
-  
-  relative_velocity->getVelocity( &rel_vel_x, &rel_vel_y );
-  sin_ori   = sin( robot_ori );
-  cos_ori   = cos( robot_ori );
-  rel_dist  = relative_position->get_distance();
+	relative_velocity->getVelocity(&rel_vel_x, &rel_vel_y);
+	sin_ori  = sin(robot_ori);
+	cos_ori  = cos(robot_ori);
+	rel_dist = relative_position->get_distance();
 
-  velocity_x = rel_vel_x * cos_ori - rel_vel_y * sin_ori;
-  velocity_y = rel_vel_x * sin_ori + rel_vel_y * cos_ori;
-    
-  // applyKalmanFilter();
+	velocity_x = rel_vel_x * cos_ori - rel_vel_y * sin_ori;
+	velocity_y = rel_vel_x * sin_ori + rel_vel_y * cos_ori;
 
+	// applyKalmanFilter();
 }
-
 
 void
 VelocityGlobalFromRelative::reset()
 {
-  // kalman_filter->reset();
-  avg_vx_sum = 0.f;
-  avg_vx_num = 0;
-  avg_vy_sum = 0.f;
-  avg_vy_num = 0;
-  velocity_x = 0.f;
-  velocity_y = 0.f;
+	// kalman_filter->reset();
+	avg_vx_sum = 0.f;
+	avg_vx_num = 0;
+	avg_vy_sum = 0.f;
+	avg_vy_num = 0;
+	velocity_x = 0.f;
+	velocity_y = 0.f;
 }
-
 
 const char *
 VelocityGlobalFromRelative::getName() const
 {
-  return "VelocityModel::VelocityGlobalFromRelative";
+	return "VelocityModel::VelocityGlobalFromRelative";
 }
-
 
 coordsys_type_t
 VelocityGlobalFromRelative::getCoordinateSystem()
 {
-  return COORDSYS_WORLD_CART;
+	return COORDSYS_WORLD_CART;
 }
-
 
 /*
 void

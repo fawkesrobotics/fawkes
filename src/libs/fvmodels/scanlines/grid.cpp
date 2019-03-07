@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvmodels/scanlines/grid.h>
 #include <core/exceptions/software.h>
+#include <fvmodels/scanlines/grid.h>
 
 #include <cstring>
 
@@ -45,161 +45,149 @@ namespace firevision {
  *            will be from 0,0 to width,height).
  * @param horizontal_grid if true x will be increased before y
  */
-ScanlineGrid::ScanlineGrid(unsigned int width, unsigned int height,
-         unsigned int offset_x, unsigned int offset_y,
-         ROI* roi, bool horizontal_grid)
+ScanlineGrid::ScanlineGrid(unsigned int width,
+                           unsigned int height,
+                           unsigned int offset_x,
+                           unsigned int offset_y,
+                           ROI *        roi,
+                           bool         horizontal_grid)
 {
-  this->roi = NULL;
-  setGridParams(width, height,
-                offset_x, offset_y,
-                roi, horizontal_grid);
-  //reset is done in setGridParams ()
+	this->roi = NULL;
+	setGridParams(width, height, offset_x, offset_y, roi, horizontal_grid);
+	//reset is done in setGridParams ()
 }
 
 /** Destructor
  */
 ScanlineGrid::~ScanlineGrid()
 {
-  delete this->roi;
+	delete this->roi;
 }
 
-upoint_t
-ScanlineGrid::operator*()
+upoint_t ScanlineGrid::operator*()
 {
-  return coord;
+	return coord;
 }
 
-upoint_t*
-ScanlineGrid::operator->()
+upoint_t *ScanlineGrid::operator->()
 {
-  return &coord;
+	return &coord;
 }
 
 void
 ScanlineGrid::calc_next_coord()
 {
-  if (finished())
-    return;
+	if (finished())
+		return;
 
-  if (horizontal_grid)
-  {
-    if (static_cast<int>(coord.x) < static_cast<int>(roi->image_width - offset_x))
-    {
-      coord.x += offset_x;
-    }
-    else
-    {
-      if (static_cast<int>(coord.y) < static_cast<int>(roi->image_height - offset_y))
-      {
-        coord.x = roi->start.x;
-        coord.y += offset_y;
-      }
-      else
-      {
-        more_to_come = false;
-      }
-    }
-  }
-  else // vertical grid
-  {
-    if (static_cast<int>(coord.y) < static_cast<int>(roi->image_height - offset_y))
-    {
-      coord.y += offset_y;
-    }
-    else
-    {
-      if (static_cast<int>(coord.x) < static_cast<int>(roi->image_width - offset_x))
-      {
-        coord.x += offset_x;
-        coord.y = roi->start.y;
-      }
-      else
-      {
-        more_to_come = false;
-      }
-    }
-  }
+	if (horizontal_grid) {
+		if (static_cast<int>(coord.x) < static_cast<int>(roi->image_width - offset_x)) {
+			coord.x += offset_x;
+		} else {
+			if (static_cast<int>(coord.y) < static_cast<int>(roi->image_height - offset_y)) {
+				coord.x = roi->start.x;
+				coord.y += offset_y;
+			} else {
+				more_to_come = false;
+			}
+		}
+	} else // vertical grid
+	{
+		if (static_cast<int>(coord.y) < static_cast<int>(roi->image_height - offset_y)) {
+			coord.y += offset_y;
+		} else {
+			if (static_cast<int>(coord.x) < static_cast<int>(roi->image_width - offset_x)) {
+				coord.x += offset_x;
+				coord.y = roi->start.y;
+			} else {
+				more_to_come = false;
+			}
+		}
+	}
 }
 
 upoint_t *
 ScanlineGrid::operator++()
 {
-  calc_next_coord();
-  return &coord;
+	calc_next_coord();
+	return &coord;
 }
 
 upoint_t *
 ScanlineGrid::operator++(int)
 {
-  memcpy(&tmp_coord, &coord, sizeof(upoint_t));
-  calc_next_coord();
-  return &tmp_coord;
+	memcpy(&tmp_coord, &coord, sizeof(upoint_t));
+	calc_next_coord();
+	return &tmp_coord;
 }
 
 bool
 ScanlineGrid::finished()
 {
-  return !more_to_come;
+	return !more_to_come;
 }
 
 void
 ScanlineGrid::reset()
 {
-  coord.x = roi->start.x;
-  coord.y = roi->start.y;
+	coord.x = roi->start.x;
+	coord.y = roi->start.y;
 
-  more_to_come = true;
+	more_to_come = true;
 }
 
 const char *
 ScanlineGrid::get_name()
 {
-  return "ScanlineModel::Grid";
+	return "ScanlineModel::Grid";
 }
-
 
 unsigned int
 ScanlineGrid::get_margin()
 {
-  return (offset_x > offset_y) ? offset_x : offset_y;
+	return (offset_x > offset_y) ? offset_x : offset_y;
 }
-
 
 void
 ScanlineGrid::set_robot_pose(float x, float y, float ori)
 {
-  // ignored
+	// ignored
 }
-
 
 void
 ScanlineGrid::set_pan_tilt(float pan, float tilt)
 {
-  // ignored
+	// ignored
 }
 
 void
 ScanlineGrid::set_roi(ROI *roi)
 {
-  if (!roi) this->roi = new ROI(0, 0, this->width, this->height, this->width, this->height);
-  else
-  {
-    if (!this->roi) {
-      this->roi = new ROI(roi);
-    } else {
-      *(this->roi) = *roi;
-    }
-    //Use roi's image width/height as grid boundary (to simplify the "exceeds-boundaries"-test)
-    this->roi->image_width  = this->roi->start.x + this->roi->width;
-    this->roi->image_height = this->roi->start.y + this->roi->height;
+	if (!roi)
+		this->roi = new ROI(0, 0, this->width, this->height, this->width, this->height);
+	else {
+		if (!this->roi) {
+			this->roi = new ROI(roi);
+		} else {
+			*(this->roi) = *roi;
+		}
+		//Use roi's image width/height as grid boundary (to simplify the "exceeds-boundaries"-test)
+		this->roi->image_width  = this->roi->start.x + this->roi->width;
+		this->roi->image_height = this->roi->start.y + this->roi->height;
 
-    if (this->roi->image_width > this->width)
-      throw fawkes::OutOfBoundsException("ScanlineGrid: ROI is out of grid bounds!", this->roi->image_width, 0, this->width);
-    if (this->roi->image_height > this->height)
-      throw fawkes::OutOfBoundsException("ScanlineGrid: ROI is out of grid bounds!", this->roi->image_height, 0, this->height);
-  }
+		if (this->roi->image_width > this->width)
+			throw fawkes::OutOfBoundsException("ScanlineGrid: ROI is out of grid bounds!",
+			                                   this->roi->image_width,
+			                                   0,
+			                                   this->width);
+		if (this->roi->image_height > this->height)
+			throw fawkes::OutOfBoundsException("ScanlineGrid: ROI is out of grid bounds!",
+			                                   this->roi->image_height,
+			                                   0,
+			                                   this->height);
+	}
 
-  reset();
+	reset();
 }
 
 /** Set dimensions.
@@ -211,14 +199,13 @@ ScanlineGrid::set_roi(ROI *roi)
  *            ScanlineGrid!
  */
 void
-ScanlineGrid::setDimensions(unsigned int width, unsigned int height, ROI* roi)
+ScanlineGrid::setDimensions(unsigned int width, unsigned int height, ROI *roi)
 {
-  this->width  = width;
-  this->height = height;
+	this->width  = width;
+	this->height = height;
 
-  set_roi(roi);
+	set_roi(roi);
 }
-
 
 /** Set offset.
  * Set X and Y offset by which the pointer in the grid is advanced. Implicitly resets the grid.
@@ -228,12 +215,11 @@ ScanlineGrid::setDimensions(unsigned int width, unsigned int height, ROI* roi)
 void
 ScanlineGrid::setOffset(unsigned int offset_x, unsigned int offset_y)
 {
-  this->offset_x = offset_x;
-  this->offset_y = offset_y;
+	this->offset_x = offset_x;
+	this->offset_y = offset_y;
 
-  reset();
+	reset();
 }
-
 
 /** Set all grid parameters.
  * Set width, height, X and Y offset by which the pointer in the grid is advanced.
@@ -248,14 +234,17 @@ ScanlineGrid::setOffset(unsigned int offset_x, unsigned int offset_y)
  * @param horizontal_grid if true x will be increased before y
  */
 void
-ScanlineGrid::setGridParams(unsigned int width, unsigned int height,
-                            unsigned int offset_x, unsigned int offset_y,
-                            ROI* roi, bool horizontal_grid)
+ScanlineGrid::setGridParams(unsigned int width,
+                            unsigned int height,
+                            unsigned int offset_x,
+                            unsigned int offset_y,
+                            ROI *        roi,
+                            bool         horizontal_grid)
 {
-  this->horizontal_grid = horizontal_grid;
+	this->horizontal_grid = horizontal_grid;
 
-  setDimensions(width, height, roi);
-  setOffset (offset_x, offset_y);
+	setDimensions(width, height, roi);
+	setOffset(offset_x, offset_y);
 }
 
 } // end namespace firevision

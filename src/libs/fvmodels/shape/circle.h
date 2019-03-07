@@ -25,13 +25,13 @@
 #ifndef _FIREVISION_MODELS_SHAPE_CIRCLE_H_
 #define _FIREVISION_MODELS_SHAPE_CIRCLE_H_
 
-#include <vector>
-#include <iostream>
-
-#include <utils/math/types.h>
-#include <fvutils/base/types.h>
-#include <fvutils/base/roi.h>
 #include <fvmodels/shape/shapemodel.h>
+#include <fvutils/base/roi.h>
+#include <fvutils/base/types.h>
+#include <utils/math/types.h>
+
+#include <iostream>
+#include <vector>
 
 namespace firevision {
 
@@ -41,27 +41,26 @@ const unsigned int TBY_CIRCLE_RADIUS_MIN = 2;
 
 class Circle : public Shape
 {
- public:
-  Circle();
-  Circle(const center_in_roi_t& c, float r, int n = 0);
+public:
+	Circle();
+	Circle(const center_in_roi_t &c, float r, int n = 0);
 
-  void printToStream(std::ostream &stream);
+	void printToStream(std::ostream &stream);
 
-  void setMargin( unsigned int margin );
-  bool isClose( unsigned int in_roi_x, unsigned int in_roi_y );
+	void setMargin(unsigned int margin);
+	bool isClose(unsigned int in_roi_x, unsigned int in_roi_y);
 
-  void fitCircle(std::vector< fawkes::upoint_t >& points);
+	void fitCircle(std::vector<fawkes::upoint_t> &points);
 
- public:
-  /** Center of object in ROI */
-  center_in_roi_t center;
-  /** Radius of object */
-  float     radius;
-  /** Number of pixels */
-  int     count;
-  /** Margin around shape */
-  unsigned int          margin;
-
+public:
+	/** Center of object in ROI */
+	center_in_roi_t center;
+	/** Radius of object */
+	float radius;
+	/** Number of pixels */
+	int count;
+	/** Margin around shape */
+	unsigned int margin;
 };
 
 } // end namespace firevision

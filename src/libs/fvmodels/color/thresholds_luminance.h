@@ -35,23 +35,20 @@ namespace firevision {
    and that (0, 0) is at the lower left corner. */
 
 // 2/3 * 255
-#define THRESHOLD_WHITE_Y_LOW     170
-
+#define THRESHOLD_WHITE_Y_LOW 170
 
 class ColorModelLuminance : public ColorModel
 {
- public:
-  ColorModelLuminance(const unsigned int threshold_white_low = THRESHOLD_WHITE_Y_LOW);
+public:
+	ColorModelLuminance(const unsigned int threshold_white_low = THRESHOLD_WHITE_Y_LOW);
 
-  color_t       determine(unsigned int y,
-			  unsigned int u,
-			  unsigned int v) const;
+	color_t determine(unsigned int y, unsigned int u, unsigned int v) const;
 
-  const char *  get_name();
-  void          print_thresholds();
- private:
-  unsigned int threshold_white_low_;
+	const char *get_name();
+	void        print_thresholds();
 
+private:
+	unsigned int threshold_white_low_;
 };
 
 } // end namespace firevision

@@ -22,7 +22,7 @@
  *
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
-                                                                                
+
 #ifndef _FIREVISION_MODELS_GLOBAL_POSITION_GLOBFROMREL_H_
 #define _FIREVISION_MODELS_GLOBAL_POSITION_GLOBFROMREL_H_
 
@@ -34,23 +34,22 @@ class RelativePositionModel;
 
 class GlobalFromRelativePos : public GlobalPositionModel
 {
- public:
-  GlobalFromRelativePos(RelativePositionModel* model);
-  virtual void	set_robot_position(float x, float y, float ori);
-  virtual void  set_position_in_image(unsigned int x, unsigned int y);
-  virtual float	get_x(void) const;
-  virtual float	get_y(void) const;
+public:
+	GlobalFromRelativePos(RelativePositionModel *model);
+	virtual void  set_robot_position(float x, float y, float ori);
+	virtual void  set_position_in_image(unsigned int x, unsigned int y);
+	virtual float get_x(void) const;
+	virtual float get_y(void) const;
 
-  virtual void  calc();
+	virtual void calc();
 
-  virtual bool  is_pos_valid() const;
+	virtual bool is_pos_valid() const;
 
- private:
-  RelativePositionModel *m_pRelaModel;
-  float	                 m_fPosX;
-  float			 m_fPosY;
-  float			 m_fPhi;
-
+private:
+	RelativePositionModel *m_pRelaModel;
+	float                  m_fPosX;
+	float                  m_fPosY;
+	float                  m_fPhi;
 };
 
 } // end namespace firevision

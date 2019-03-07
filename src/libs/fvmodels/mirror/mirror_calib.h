@@ -25,164 +25,176 @@
 #define _FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H_
 
 #if !defined(HAVE_IPP) and !defined(HAVE_OPENCV)
-#  error "Neither IPP nor OpenCV are installed."
+#	error "Neither IPP nor OpenCV are installed."
 #endif
 
-#include <utils/math/angle.h>
-#include <fvutils/base/types.h>
-
 #include <fvmodels/mirror/bulb.h>
+#include <fvutils/base/types.h>
+#include <utils/math/angle.h>
 
-#include <iostream>
-#include <vector>
-#include <map>
 #include <cassert>
+#include <iostream>
+#include <map>
+#include <vector>
 
 namespace firevision {
 
 class MirrorCalibTool
 {
- public:
-  static void draw_line(unsigned char* yuv_buffer, double angle_deg,
-                        int center_x, int center_y, int width, int height);
-  void draw_mark_lines(unsigned char* yuv_buffer);
-  static void draw_crosshair(unsigned char* yuv_buffer, int center_x,
-                             int center_y, int width, int height);
+public:
+	static void draw_line(unsigned char *yuv_buffer,
+	                      double         angle_deg,
+	                      int            center_x,
+	                      int            center_y,
+	                      int            width,
+	                      int            height);
+	void        draw_mark_lines(unsigned char *yuv_buffer);
+	static void
+	draw_crosshair(unsigned char *yuv_buffer, int center_x, int center_y, int width, int height);
 
-  MirrorCalibTool();
-  ~MirrorCalibTool();
+	MirrorCalibTool();
+	~MirrorCalibTool();
 
-  void load_mask(const char* mask_file_name);
-  void push_back(const unsigned char* yuv_buffer,
-                 size_t buflen,
-                 int width,
-                 int height,
-                 double ori);
-  void abort();
-  void next_step();
-  const unsigned char* get_last_yuv_buffer() const;
-  const char* get_state_description() const;
+	void load_mask(const char *mask_file_name);
+	void push_back(const unsigned char *yuv_buffer, size_t buflen, int width, int height, double ori);
+	void abort();
+	void next_step();
+	const unsigned char *get_last_yuv_buffer() const;
+	const char *         get_state_description() const;
 
-  /** Sets preliminary center point.
+	/** Sets preliminary center point.
    * @param x X-coordinate
    * @param y Y-coordinate  */
-  inline void set_center(int x, int y) { 
-    img_center_x_ = x;
-    img_center_y_ = y;
-  }
+	inline void
+	set_center(int x, int y)
+	{
+		img_center_x_ = x;
+		img_center_y_ = y;
+	}
 
-  /** Center X accessor.
+	/** Center X accessor.
    * @return center X value  */
-  inline int center_x() const { return img_center_x_; }
-  /** Center Y accessor.
+	inline int
+	center_x() const
+	{
+		return img_center_x_;
+	}
+	/** Center Y accessor.
    * @return center Y value  */
-  inline int center_y() const { return img_center_y_; }
+	inline int
+	center_y() const
+	{
+		return img_center_y_;
+	}
 
-  void eval(unsigned int x,
-            unsigned int y,
-            float* x_ret,
-            float* y_ret);
-  
-  void load(const char* filename);
-  void save(const char* filename);
+	void eval(unsigned int x, unsigned int y, float *x_ret, float *y_ret);
 
- private:
-  class ConvexPolygon;
-  class StepResult;
-  typedef std::vector<StepResult> StepResultList;
-  class Point;
-  class PixelPoint;
-  class CartesianPoint;
-  class CartesianImage;
-  class Hole;
-  class Image;
-  typedef std::vector<Hole> HoleList;
-  typedef double PolarAngle;
-  typedef int PolarRadius;
-  typedef int RealDistance;
-  typedef std::vector<PolarRadius> MarkList;
-  typedef std::map<PolarAngle, MarkList> MarkMap;
-  typedef std::pair<PolarAngle, PolarAngle> PolarAnglePair;
-  typedef std::vector<Image> ImageList;
+	void load(const char *filename);
+	void save(const char *filename);
 
-  class ConvexPolygon : public std::vector<PixelPoint> {
-   public:
-    ConvexPolygon();
-    bool contains(const CartesianImage& img, const CartesianPoint& r) const;
-    bool contains(const PixelPoint& r) const;
-  };
+private:
+	class ConvexPolygon;
+	class StepResult;
+	typedef std::vector<StepResult> StepResultList;
+	class Point;
+	class PixelPoint;
+	class CartesianPoint;
+	class CartesianImage;
+	class Hole;
+	class Image;
+	typedef std::vector<Hole>                 HoleList;
+	typedef double                            PolarAngle;
+	typedef int                               PolarRadius;
+	typedef int                               RealDistance;
+	typedef std::vector<PolarRadius>          MarkList;
+	typedef std::map<PolarAngle, MarkList>    MarkMap;
+	typedef std::pair<PolarAngle, PolarAngle> PolarAnglePair;
+	typedef std::vector<Image>                ImageList;
 
-  enum StepName { SHARPENING, EDGE_DETECTION, COMBINATION, CENTERING,
-                  PRE_MARKING, FINAL_MARKING, DONE };
-  /// @cond INTERNALS
-  struct CalibrationState {
-    StepName              step;
-    ImageList::size_type  image_index;
-    bool                  centering_done;
-    CalibrationState()
-    : step(SHARPENING), image_index(0), centering_done(false) {};
-  };
-  /// @endcond
+	class ConvexPolygon : public std::vector<PixelPoint>
+	{
+	public:
+		ConvexPolygon();
+		bool contains(const CartesianImage &img, const CartesianPoint &r) const;
+		bool contains(const PixelPoint &r) const;
+	};
 
-  void goto_next_state();
-  void set_last_yuv_buffer(const unsigned char* last_buf);
-  void draw_center(StepResult& result);
+	enum StepName {
+		SHARPENING,
+		EDGE_DETECTION,
+		COMBINATION,
+		CENTERING,
+		PRE_MARKING,
+		FINAL_MARKING,
+		DONE
+	};
+	/// @cond INTERNALS
+	struct CalibrationState
+	{
+		StepName             step;
+		ImageList::size_type image_index;
+		bool                 centering_done;
+		CalibrationState() : step(SHARPENING), image_index(0), centering_done(false){};
+	};
+	/// @endcond
 
+	void goto_next_state();
+	void set_last_yuv_buffer(const unsigned char *last_buf);
+	void draw_center(StepResult &result);
 
-  static PolarAngle relativeOrientationToImageRotation(PolarAngle ori);
-  static PolarAngle imageRotationToRelativeOrientation(PolarAngle ori);
+	static PolarAngle relativeOrientationToImageRotation(PolarAngle ori);
+	static PolarAngle imageRotationToRelativeOrientation(PolarAngle ori);
 
-  static void apply_sobel(unsigned char* src, unsigned char* dst,
-                          int widt, int height,
-                          orientation_t ori);
-  static void apply_sharpen(unsigned char* src, unsigned char* dst,
-                            int widt, int height);
-  static void apply_median(unsigned char* src, unsigned char* dst,
-                           int widt, int height, int i);
-  static void apply_min(unsigned char* src, unsigned char* dst,
-                        int widt, int height);
-  static void apply_or(unsigned char* src1, unsigned char* src2,
-                       unsigned char* dst, int widt, int height);
-  static void make_contrast(unsigned char* buf, size_t buflen);
-  static void make_grayscale(unsigned char* buf, size_t buflen);
-  static MirrorCalibTool::MarkList premark(const StepResult& prev, const unsigned char* yuv_mask,
-                          StepResult& result, PolarAngle phi,
-                          const PixelPoint& center);
-  static MirrorCalibTool::MarkList premark(const ConvexPolygon& polygon, const StepResult& prev,
-                          const unsigned char* yuv_mask, StepResult& result,
-                          PolarAngle phi, const PixelPoint& center);
-  static HoleList search_holes(const MarkList& premarks);
-  static HoleList filter_biggest_holes(const HoleList& holes, unsigned int n);
-  static MarkList determine_marks(const HoleList& holes);
-  static MarkList mark(const MarkList& premarks, const unsigned char* yuv_mask,
-                       StepResult& result, PolarAngle phi,
-                       const PixelPoint& center);
+	static void
+	            apply_sobel(unsigned char *src, unsigned char *dst, int widt, int height, orientation_t ori);
+	static void apply_sharpen(unsigned char *src, unsigned char *dst, int widt, int height);
+	static void apply_median(unsigned char *src, unsigned char *dst, int widt, int height, int i);
+	static void apply_min(unsigned char *src, unsigned char *dst, int widt, int height);
+	static void
+	                                 apply_or(unsigned char *src1, unsigned char *src2, unsigned char *dst, int widt, int height);
+	static void                      make_contrast(unsigned char *buf, size_t buflen);
+	static void                      make_grayscale(unsigned char *buf, size_t buflen);
+	static MirrorCalibTool::MarkList premark(const StepResult &   prev,
+	                                         const unsigned char *yuv_mask,
+	                                         StepResult &         result,
+	                                         PolarAngle           phi,
+	                                         const PixelPoint &   center);
+	static MirrorCalibTool::MarkList premark(const ConvexPolygon &polygon,
+	                                         const StepResult &   prev,
+	                                         const unsigned char *yuv_mask,
+	                                         StepResult &         result,
+	                                         PolarAngle           phi,
+	                                         const PixelPoint &   center);
+	static HoleList                  search_holes(const MarkList &premarks);
+	static HoleList                  filter_biggest_holes(const HoleList &holes, unsigned int n);
+	static MarkList                  determine_marks(const HoleList &holes);
+	static MarkList                  mark(const MarkList &     premarks,
+	                                      const unsigned char *yuv_mask,
+	                                      StepResult &         result,
+	                                      PolarAngle           phi,
+	                                      const PixelPoint &   center);
 
-  static PixelPoint calculate_center(const ImageList& images);
-  static RealDistance calculate_real_distance(int n);
-  static PolarAnglePair find_nearest_neighbors(PolarAngle angle,
-                                               const MarkMap& mark_map);
-  static RealDistance interpolate(PolarRadius radius, const MarkList& marks);
-  static Bulb generate(int width, int height,
-                       const PixelPoint& center,
-                       const MarkMap& mark_map);
+	static PixelPoint     calculate_center(const ImageList &images);
+	static RealDistance   calculate_real_distance(int n);
+	static PolarAnglePair find_nearest_neighbors(PolarAngle angle, const MarkMap &mark_map);
+	static RealDistance   interpolate(PolarRadius radius, const MarkList &marks);
+	static Bulb generate(int width, int height, const PixelPoint &center, const MarkMap &mark_map);
 
-  unsigned char*   img_yuv_buffer_;
-  int              img_center_x_;
-  int              img_center_y_;
-  unsigned char*   img_yuv_mask_;
+	unsigned char *img_yuv_buffer_;
+	int            img_center_x_;
+	int            img_center_y_;
+	unsigned char *img_yuv_mask_;
 
-  ImageList        source_images_;
-  CalibrationState state_;
-  MarkList         premarks_;
-  MarkMap          mark_map_; /** orientations wrt robot (i.e. Y axis) */
-  
-  const unsigned char* last_yuv_buffer_;
+	ImageList        source_images_;
+	CalibrationState state_;
+	MarkList         premarks_;
+	MarkMap          mark_map_; /** orientations wrt robot (i.e. Y axis) */
 
-  Bulb* bulb_;
+	const unsigned char *last_yuv_buffer_;
+
+	Bulb *bulb_;
 };
 
-}
+} // namespace firevision
 
 #endif /*  FIREVISION_MODELS_MIRROR_MIRROR_CALIB_H__ */
-

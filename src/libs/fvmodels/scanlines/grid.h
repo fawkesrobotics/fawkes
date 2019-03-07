@@ -32,49 +32,53 @@ namespace firevision {
 
 class ScanlineGrid : public ScanlineModel
 {
+public:
+	ScanlineGrid(unsigned int width,
+	             unsigned int height,
+	             unsigned int offset_x,
+	             unsigned int offset_y,
+	             ROI *        roi             = NULL,
+	             bool         horizontal_grid = true);
+	virtual ~ScanlineGrid();
 
- public:
+	fawkes::upoint_t  operator*();
+	fawkes::upoint_t *operator->();
+	fawkes::upoint_t *operator++();
+	fawkes::upoint_t *operator++(int);
 
-        ScanlineGrid(unsigned int width, unsigned int height,
-               unsigned int offset_x, unsigned int offset_y,
-               ROI* roi = NULL, bool horizontal_grid = true);
-        virtual ~ScanlineGrid();
+	bool         finished();
+	void         reset();
+	const char * get_name();
+	unsigned int get_margin();
 
-  fawkes::upoint_t    operator*();
-  fawkes::upoint_t *  operator->();
-  fawkes::upoint_t *  operator++();
-  fawkes::upoint_t *  operator++(int);
+	virtual void set_robot_pose(float x, float y, float ori);
+	virtual void set_pan_tilt(float pan, float tilt);
+	virtual void set_roi(ROI *roi = NULL);
 
-  bool          finished();
-  void          reset();
-  const char *  get_name();
-  unsigned int  get_margin();
+	void setDimensions(unsigned int width, unsigned int height, ROI *roi = NULL);
+	void setOffset(unsigned int offset_x, unsigned int offset_y);
+	void setGridParams(unsigned int width,
+	                   unsigned int height,
+	                   unsigned int offset_x,
+	                   unsigned int offset_y,
+	                   ROI *        roi             = NULL,
+	                   bool         horizontal_grid = true);
 
-  virtual void  set_robot_pose(float x, float y, float ori);
-  virtual void  set_pan_tilt(float pan, float tilt);
-  virtual void  set_roi(ROI* roi = NULL);
+private:
+	unsigned int width;
+	unsigned int height;
+	unsigned int offset_x;
+	unsigned int offset_y;
 
-  void setDimensions(unsigned int width, unsigned int height, ROI* roi = NULL);
-  void setOffset(unsigned int offset_x, unsigned int offset_y);
-  void setGridParams(unsigned int width, unsigned int height,
-                     unsigned int offset_x, unsigned int offset_y,
-                     ROI* roi = NULL, bool horizontal_grid = true);
+	ROI *roi;
 
- private:
-  unsigned int width;
-  unsigned int height;
-  unsigned int offset_x;
-  unsigned int offset_y;
+	bool horizontal_grid;
+	bool more_to_come;
 
-  ROI* roi;
+	fawkes::upoint_t coord;
+	fawkes::upoint_t tmp_coord;
 
-  bool horizontal_grid;
-  bool more_to_come;
-
-  fawkes::upoint_t coord;
-  fawkes::upoint_t tmp_coord;
-
-  void calc_next_coord();
+	void calc_next_coord();
 };
 
 } // end namespace firevision

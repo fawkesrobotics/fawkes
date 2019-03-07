@@ -47,7 +47,6 @@ Shape::~Shape()
 {
 }
 
-
 /** @class ShapeModel <fvmodels/shape/shapemodel.h>
  * Shape model interface.
  *

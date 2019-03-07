@@ -30,36 +30,38 @@ namespace firevision {
 
 class MirrorModel
 {
- public:
+public:
+	virtual ~MirrorModel();
 
-  virtual ~MirrorModel();
+	virtual void warp2unwarp(unsigned int  warp_x,
+	                         unsigned int  warp_y,
+	                         unsigned int *unwarp_x,
+	                         unsigned int *unwarp_y) = 0;
 
-  virtual void warp2unwarp(unsigned int warp_x, unsigned int warp_y,
-                           unsigned int *unwarp_x, unsigned int *unwarp_y)     = 0;
+	virtual void unwarp2warp(unsigned int  unwarp_x,
+	                         unsigned int  unwarp_y,
+	                         unsigned int *warp_x,
+	                         unsigned int *warp_y) = 0;
 
-  virtual void unwarp2warp(unsigned int unwarp_x, unsigned int unwarp_y,
-                           unsigned int *warp_x, unsigned int *warp_y)         = 0;
+	virtual const char *getName() = 0;
 
-  virtual const char * getName()                                               = 0;
+	virtual fawkes::polar_coord_2d_t getWorldPointRelative(unsigned int image_x,
+	                                                       unsigned int image_y) const = 0;
 
+	virtual fawkes::cart_coord_2d_t getWorldPointGlobal(unsigned int image_x,
+	                                                    unsigned int image_y,
+	                                                    float        pose_x,
+	                                                    float        pose_y,
+	                                                    float        pose_ori) const = 0;
 
-  virtual fawkes::polar_coord_2d_t getWorldPointRelative(unsigned int image_x,
-                                                         unsigned int image_y) const = 0;
+	virtual void reset() = 0;
 
-  virtual fawkes::cart_coord_2d_t getWorldPointGlobal(unsigned int image_x,
-                                                      unsigned int image_y,
-                                                      float pose_x, float pose_y,
-                                                      float pose_ori) const    = 0;
+	virtual fawkes::upoint_t getCenter() const                                     = 0;
+	virtual void             setCenter(unsigned int image_x, unsigned int image_y) = 0;
+	virtual void             setOrientation(float angle)                           = 0;
+	virtual float            getOrientation() const                                = 0;
 
-  virtual void reset()                                                         = 0;
-
-  virtual fawkes::upoint_t getCenter() const                                    = 0;
-  virtual void setCenter(unsigned int image_x, unsigned int image_y  )         = 0;
-  virtual void setOrientation(float angle)                                     = 0;
-  virtual float getOrientation() const                                         = 0;
-
-  virtual bool isValidPoint(unsigned int image_x, unsigned int image_y ) const = 0;
-
+	virtual bool isValidPoint(unsigned int image_x, unsigned int image_y) const = 0;
 };
 
 } // end namespace firevision

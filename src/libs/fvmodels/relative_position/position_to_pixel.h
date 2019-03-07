@@ -33,30 +33,38 @@ namespace firevision {
 class PositionToPixel
 {
 public:
-  PositionToPixel(  fawkes::tf::Transformer* tf, std::string cam_frame,
-                  float cam_aperture_x, float cam_aperture_y,
-                  unsigned int cam_width_x, unsigned int cam_height_y, float cam_angle_y = 0 );
+	PositionToPixel(fawkes::tf::Transformer *tf,
+	                std::string              cam_frame,
+	                float                    cam_aperture_x,
+	                float                    cam_aperture_y,
+	                unsigned int             cam_width_x,
+	                unsigned int             cam_height_y,
+	                float                    cam_angle_y = 0);
 
-  fawkes::upoint_t get_pixel_position(fawkes::cart_coord_3d_t& position, std::string& frame, const fawkes::Time& time);
-  fawkes::point_t get_pixel_position_unchecked(fawkes::cart_coord_3d_t& position, std::string& frame, const fawkes::Time& time);
+	fawkes::upoint_t get_pixel_position(fawkes::cart_coord_3d_t &position,
+	                                    std::string &            frame,
+	                                    const fawkes::Time &     time);
+	fawkes::point_t  get_pixel_position_unchecked(fawkes::cart_coord_3d_t &position,
+	                                              std::string &            frame,
+	                                              const fawkes::Time &     time);
 
 private:
-  std::string cam_frame_;
-  fawkes::tf::Transformer* tf_listener;
+	std::string              cam_frame_;
+	fawkes::tf::Transformer *tf_listener;
 
-  float         cam_aperture_horizontal_;
-  float         cam_aperture_vertical_;
-  float         cam_angle_y_;
-  unsigned int  cam_resolution_x_;
-  unsigned int  cam_resolution_y_;
+	float        cam_aperture_horizontal_;
+	float        cam_aperture_vertical_;
+	float        cam_angle_y_;
+	unsigned int cam_resolution_x_;
+	unsigned int cam_resolution_y_;
 
-  float         cam_pixel_per_angle_horizontal_;
-  float         cam_pixel_per_angle_vertical_;
+	float cam_pixel_per_angle_horizontal_;
+	float cam_pixel_per_angle_vertical_;
 
-  float         cam_angle_max_horizontal_;
-  float         cam_angle_min_horizontal_;
-  float         cam_angle_max_vertical_;
-  float         cam_angle_min_vertical_;
+	float cam_angle_max_horizontal_;
+	float cam_angle_min_horizontal_;
+	float cam_angle_max_vertical_;
+	float cam_angle_min_vertical_;
 };
-}
+} // namespace firevision
 #endif /* FIREVISION_PIXELFROMPOSITION_H__ */

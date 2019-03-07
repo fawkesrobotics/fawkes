@@ -24,8 +24,8 @@
 #ifndef _FIREVISION_MODELS_SHAPE_ACCUMULATORS_FIT_ACCUM_H_
 #define _FIREVISION_MODELS_SHAPE_ACCUMULATORS_FIT_ACCUM_H_
 
-#include <utils/math/types.h>
 #include <fvutils/base/types.h>
+#include <utils/math/types.h>
 
 namespace firevision {
 
@@ -34,26 +34,26 @@ class Circle;
 class FitAccum
 {
 private:
-  static const float TOO_SMALL_DELTA;
+	static const float TOO_SMALL_DELTA;
 
 private:
-  int count;
-  float A00, A01, A02;
-  float A10, A11, A12;
-  float A20, A21, A22;
+	int   count;
+	float A00, A01, A02;
+	float A10, A11, A12;
+	float A20, A21, A22;
 
-  float  b0,  b1,  b2;
+	float b0, b1, b2;
 
 public:
-  FitAccum(void);
-  ~FitAccum(void);
+	FitAccum(void);
+	~FitAccum(void);
 
-  void reset(void);
-  void addPoint(const fawkes::upoint_t&);    // add a point
-  void removePoint(const fawkes::upoint_t&); // remove a point
+	void reset(void);
+	void addPoint(const fawkes::upoint_t &);    // add a point
+	void removePoint(const fawkes::upoint_t &); // remove a point
 
-  int getCount(void) const;
-  Circle* getCircle(void) const;
+	int     getCount(void) const;
+	Circle *getCircle(void) const;
 };
 
 } // end namespace firevision

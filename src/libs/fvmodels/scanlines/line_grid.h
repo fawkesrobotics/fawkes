@@ -25,6 +25,7 @@
 #define _FIREVISION_SCANLINE_LINE_GRID_H_
 
 #include "scanlinemodel.h"
+
 #include <fvutils/base/types.h>
 #include <fvutils/color/yuv.h>
 
@@ -36,47 +37,53 @@ class ROI;
 
 class ScanlineLineGrid : public ScanlineModel
 {
- private:
-  typedef std::list<fawkes::upoint_t> point_list_t;
+private:
+	typedef std::list<fawkes::upoint_t> point_list_t;
 
- public:
-  ScanlineLineGrid(unsigned int width, unsigned int height,
-                   unsigned int offset_hor, unsigned int offset_ver,
-                   ROI* roi = NULL, unsigned int gap = 0);
-  virtual ~ScanlineLineGrid();
+public:
+	ScanlineLineGrid(unsigned int width,
+	                 unsigned int height,
+	                 unsigned int offset_hor,
+	                 unsigned int offset_ver,
+	                 ROI *        roi = NULL,
+	                 unsigned int gap = 0);
+	virtual ~ScanlineLineGrid();
 
-  fawkes::upoint_t operator*();
-  fawkes::upoint_t * operator->();
-  fawkes::upoint_t * operator++();
-  fawkes::upoint_t * operator++(int);
+	fawkes::upoint_t  operator*();
+	fawkes::upoint_t *operator->();
+	fawkes::upoint_t *operator++();
+	fawkes::upoint_t *operator++(int);
 
-  bool finished();
-  void reset();
-  const char * get_name();
-  unsigned int get_margin();
+	bool         finished();
+	void         reset();
+	const char * get_name();
+	unsigned int get_margin();
 
-  virtual void set_robot_pose(float x, float y, float ori);
-  virtual void set_pan_tilt(float pan, float tilt);
+	virtual void set_robot_pose(float x, float y, float ori);
+	virtual void set_pan_tilt(float pan, float tilt);
 
-  virtual void set_dimensions(unsigned int width, unsigned int height, ROI* roi = NULL);
-  virtual void set_offset(unsigned int offset_x, unsigned int offset_y);
-  virtual void set_grid_params(unsigned int width, unsigned int height,
-                             unsigned int offset_hor, unsigned int offset_ver, ROI* roi = NULL);
-  virtual void set_roi(ROI* roi = NULL);
+	virtual void set_dimensions(unsigned int width, unsigned int height, ROI *roi = NULL);
+	virtual void set_offset(unsigned int offset_x, unsigned int offset_y);
+	virtual void set_grid_params(unsigned int width,
+	                             unsigned int height,
+	                             unsigned int offset_hor,
+	                             unsigned int offset_ver,
+	                             ROI *        roi = NULL);
+	virtual void set_roi(ROI *roi = NULL);
 
- private:
-  unsigned int width_;
-  unsigned int height_;
-  unsigned int offset_ver_;
-  unsigned int offset_hor_;
-  unsigned int next_pixel_;
+private:
+	unsigned int width_;
+	unsigned int height_;
+	unsigned int offset_ver_;
+	unsigned int offset_hor_;
+	unsigned int next_pixel_;
 
-  ROI*         roi_;
+	ROI *roi_;
 
-  point_list_t           point_list_;
-  point_list_t::iterator cur_;
+	point_list_t           point_list_;
+	point_list_t::iterator cur_;
 
-  void calc_coords();
+	void calc_coords();
 };
 
 } // end namespace firevision

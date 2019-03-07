@@ -35,90 +35,91 @@ namespace firevision {
 
 class FrontBallRelativePos : public RelativePositionModel
 {
- public:
-  FrontBallRelativePos(unsigned int image_width, unsigned int image_height,
-		       float camera_height,
-		       float camera_offset_x, float camera_offset_y,
-		       float camera_ori,
-		       float horizontal_angle, float vertical_angle,
-		       float ball_circumference
-		       );
+public:
+	FrontBallRelativePos(unsigned int image_width,
+	                     unsigned int image_height,
+	                     float        camera_height,
+	                     float        camera_offset_x,
+	                     float        camera_offset_y,
+	                     float        camera_ori,
+	                     float        horizontal_angle,
+	                     float        vertical_angle,
+	                     float        ball_circumference);
 
-  virtual const char *	get_name() const;
-  virtual void		set_radius(float r);
-  virtual void		set_center(float x, float y);
-  virtual void		set_center(const center_in_roi_t& c);
+	virtual const char *get_name() const;
+	virtual void        set_radius(float r);
+	virtual void        set_center(float x, float y);
+	virtual void        set_center(const center_in_roi_t &c);
 
-  virtual void		set_pan_tilt(float pan = 0.0f, float tilt = 0.0f);
-  virtual void          get_pan_tilt(float *pan, float *tilt) const;
+	virtual void set_pan_tilt(float pan = 0.0f, float tilt = 0.0f);
+	virtual void get_pan_tilt(float *pan, float *tilt) const;
 
-  virtual void          set_horizontal_angle(float angle_deg);
-  virtual void          set_vertical_angle(float angle_deg);
+	virtual void set_horizontal_angle(float angle_deg);
+	virtual void set_vertical_angle(float angle_deg);
 
-  virtual float		get_distance() const;
-  virtual float		get_x() const;
-  virtual float		get_y() const;
-  virtual float		get_bearing() const;
-  virtual float		get_slope() const;
-  virtual float         get_radius() const;
+	virtual float get_distance() const;
+	virtual float get_x() const;
+	virtual float get_y() const;
+	virtual float get_bearing() const;
+	virtual float get_slope() const;
+	virtual float get_radius() const;
 
-  virtual void          calc();
-  virtual void          calc_unfiltered();
-  virtual void          reset();
+	virtual void calc();
+	virtual void calc_unfiltered();
+	virtual void reset();
 
-  virtual bool          is_pos_valid() const;
+	virtual bool is_pos_valid() const;
 
 private:
-  float                 DEFAULT_X_VARIANCE;
-  float                 DEFAULT_Y_VARIANCE;
+	float DEFAULT_X_VARIANCE;
+	float DEFAULT_Y_VARIANCE;
 
-  float	                m_fPanRadPerPixel;
-  float	                m_fTiltRadPerPixel;
-  float	                m_fBallRadius;        // in meter
+	float m_fPanRadPerPixel;
+	float m_fTiltRadPerPixel;
+	float m_fBallRadius; // in meter
 
-  float			m_fRadius;
-  center_in_roi_t       m_cirtCenter;
-  float			m_fPan;
-  float			m_fTilt;
+	float           m_fRadius;
+	center_in_roi_t m_cirtCenter;
+	float           m_fPan;
+	float           m_fTilt;
 
-  float                 horizontal_angle;
-  float                 vertical_angle;
+	float horizontal_angle;
+	float vertical_angle;
 
-  unsigned int          image_width;
-  unsigned int          image_height;
+	unsigned int image_width;
+	unsigned int image_height;
 
-  float                 camera_height;
-  float                 camera_offset_x;
-  float                 camera_offset_y;
-  float                 camera_orientation;
+	float camera_height;
+	float camera_offset_x;
+	float camera_offset_y;
+	float camera_orientation;
 
-  float                 ball_circumference;
+	float ball_circumference;
 
-  bool                  last_available;
-  float                 ball_x;
-  float                 ball_y;
-  float                 bearing;
-  float                 slope;
-  float                 distance_ball_motor;
-  float                 distance_ball_cam;
+	bool  last_available;
+	float ball_x;
+	float ball_y;
+	float bearing;
+	float slope;
+	float distance_ball_motor;
+	float distance_ball_cam;
 
-  float                 avg_x;
-  float                 avg_y;
-  float                 avg_x_sum;
-  float                 avg_y_sum;
-  unsigned int          avg_x_num;
-  unsigned int          avg_y_num;
+	float        avg_x;
+	float        avg_y;
+	float        avg_x_sum;
+	float        avg_y_sum;
+	unsigned int avg_x_num;
+	unsigned int avg_y_num;
 
-  float                 var_proc_x;
-  float                 var_proc_y;
-  float                 var_meas_x;
-  float                 var_meas_y;
-  // kalmanFilter2Dim     *kalman_filter;
+	float var_proc_x;
+	float var_proc_y;
+	float var_meas_x;
+	float var_meas_y;
+	// kalmanFilter2Dim     *kalman_filter;
 
-  // void                  applyKalmanFilter();
+	// void                  applyKalmanFilter();
 };
 
 } // end namespace firevision
 
 #endif // FIREVISION_MODELS_RELPOS_BALL_H__
-

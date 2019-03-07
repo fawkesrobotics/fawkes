@@ -25,46 +25,49 @@
 #ifndef _FIREVISION_RHT_CIRCLE_H_
 #define _FIREVISION_RHT_CIRCLE_H_
 
-#include <vector>
-#include <iostream>
-
-#include <utils/math/types.h>
-#include <fvutils/base/types.h>
-#include <fvmodels/shape/circle.h>
 #include <fvmodels/shape/accumulators/ht_accum.h>
+#include <fvmodels/shape/circle.h>
+#include <fvutils/base/types.h>
+#include <utils/math/types.h>
+
+#include <iostream>
+#include <vector>
 
 namespace firevision {
 
 class ROI;
 
-class RhtCircleModel: public ShapeModel
+class RhtCircleModel : public ShapeModel
 {
- private:
-  std::vector<Circle> m_Circles;
-  RhtAccumulator accumulator;
-  static const float RHT_MIN_RADIUS;
-  static const float RHT_MAX_RADIUS;
+private:
+	std::vector<Circle> m_Circles;
+	RhtAccumulator      accumulator;
+	static const float  RHT_MIN_RADIUS;
+	static const float  RHT_MAX_RADIUS;
 
- public:
-  RhtCircleModel(void);
-  virtual ~RhtCircleModel(void);
+public:
+	RhtCircleModel(void);
+	virtual ~RhtCircleModel(void);
 
-  std::string   getName(void) const {return std::string("RhtCircleModel");}
-  int           parseImage(unsigned char* buffer, ROI *roi);
-  int           getShapeCount(void) const;
-  Circle*       getShape(int id) const;
-  Circle*       getMostLikelyShape(void) const;
+	std::string
+	getName(void) const
+	{
+		return std::string("RhtCircleModel");
+	}
+	int     parseImage(unsigned char *buffer, ROI *roi);
+	int     getShapeCount(void) const;
+	Circle *getShape(int id) const;
+	Circle *getMostLikelyShape(void) const;
 
- private:
-  void          calcCircle(     // for calculating circles from 3 points
-                           const fawkes::upoint_t& p1,
-                           const fawkes::upoint_t& p2,
-                           const fawkes::upoint_t& p3,
-                           center_in_roi_t& center,
-                           float& radius);
+private:
+	void calcCircle( // for calculating circles from 3 points
+	  const fawkes::upoint_t &p1,
+	  const fawkes::upoint_t &p2,
+	  const fawkes::upoint_t &p3,
+	  center_in_roi_t &       center,
+	  float &                 radius);
 };
 
 } // end namespace firevision
 
 #endif // FIREVISION_RHT_CIRCLE_H__
-

@@ -31,59 +31,63 @@ namespace firevision {
 
 class ScanlineRadial : public ScanlineModel
 {
+public:
+	ScanlineRadial(unsigned int width,
+	               unsigned int height,
+	               unsigned int center_x,
+	               unsigned int center_y,
+	               unsigned int radius_increment,
+	               unsigned int step,
+	               unsigned int max_radius  = 0,
+	               unsigned int dead_radius = 0);
 
- public:
+	fawkes::upoint_t  operator*();
+	fawkes::upoint_t *operator->();
+	fawkes::upoint_t *operator++();
+	fawkes::upoint_t *operator++(int);
 
-  ScanlineRadial(unsigned int width, unsigned int height,
-     unsigned int center_x, unsigned int center_y,
-     unsigned int radius_increment, unsigned int step,
-     unsigned int max_radius = 0, unsigned int dead_radius = 0
-     );
+	bool         finished();
+	void         reset();
+	const char * get_name();
+	unsigned int get_margin();
 
-  fawkes::upoint_t    operator*();
-  fawkes::upoint_t *  operator->();
-  fawkes::upoint_t *  operator++();
-  fawkes::upoint_t *  operator++(int);
+	virtual void
+	set_robot_pose(float x, float y, float ori)
+	{
+	}
+	virtual void
+	set_pan_tilt(float pan, float tilt)
+	{
+	}
 
-  bool          finished();
-  void          reset();
-  const char *  get_name();
-  unsigned int  get_margin();
+	void set_center(unsigned int center_x, unsigned int center_y);
+	void set_radius(unsigned int dead_radius, unsigned int max_radius);
 
-  virtual void  set_robot_pose(float x, float y, float ori) {}
-  virtual void  set_pan_tilt(float pan, float tilt) {}
+private:
+	void simpleBubbleSort(unsigned int array[], unsigned int num_elements);
 
-  void set_center(unsigned int center_x, unsigned int center_y);
-  void set_radius(unsigned int dead_radius, unsigned int max_radius);
+	unsigned int width;
+	unsigned int height;
+	unsigned int center_x;
+	unsigned int center_y;
+	unsigned int radius_increment;
+	unsigned int step;
+	unsigned int current_radius;
+	unsigned int max_radius;
+	unsigned int dead_radius;
+	bool         auto_max_radius;
 
+	fawkes::upoint_t coord;
+	fawkes::upoint_t tmp_coord;
 
- private:
+	unsigned int sector;
 
-  void simpleBubbleSort(unsigned int array[], unsigned int num_elements);
+	bool done;
 
-  unsigned int width;
-  unsigned int height;
-  unsigned int center_x;
-  unsigned int center_y;
-  unsigned int radius_increment;
-  unsigned int step;
-  unsigned int current_radius;
-  unsigned int max_radius;
-  unsigned int dead_radius;
-  bool         auto_max_radius;
-
-  fawkes::upoint_t coord;
-  fawkes::upoint_t tmp_coord;
-
-  unsigned int sector;
-
-  bool done;
-
-  int x;
-  int y;
-  int tmp_x;
-  int tmp_y;
-
+	int x;
+	int y;
+	int tmp_x;
+	int tmp_y;
 };
 
 } // end namespace firevision

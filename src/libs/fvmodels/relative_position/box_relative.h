@@ -33,70 +33,72 @@ namespace firevision {
 
 class BoxRelative : public RelativePositionModel
 {
- public:
-  BoxRelative(unsigned int image_width, unsigned int image_height,
-	      float camera_height,
-	      float camera_offset_x, float camera_offset_y,
-	      float camera_ori,
-	      float horizontal_angle, float vertical_angle
-	      );
+public:
+	BoxRelative(unsigned int image_width,
+	            unsigned int image_height,
+	            float        camera_height,
+	            float        camera_offset_x,
+	            float        camera_offset_y,
+	            float        camera_ori,
+	            float        horizontal_angle,
+	            float        vertical_angle);
 
-  virtual const char *	get_name() const;
-  virtual void		set_center(float x, float y);
-  virtual void		set_center(const center_in_roi_t& c);
-  virtual void          set_radius(float r);
+	virtual const char *get_name() const;
+	virtual void        set_center(float x, float y);
+	virtual void        set_center(const center_in_roi_t &c);
+	virtual void        set_radius(float r);
 
-  virtual void		set_pan_tilt(float pan = 0.0f, float tilt = 0.0f);
-  virtual void          get_pan_tilt(float *pan, float *tilt) const;
+	virtual void set_pan_tilt(float pan = 0.0f, float tilt = 0.0f);
+	virtual void get_pan_tilt(float *pan, float *tilt) const;
 
-  virtual void          set_horizontal_angle(float angle_deg);
-  virtual void          set_vertical_angle(float angle_deg);
+	virtual void set_horizontal_angle(float angle_deg);
+	virtual void set_vertical_angle(float angle_deg);
 
-  virtual float		get_distance() const;
+	virtual float get_distance() const;
 
-  virtual float		get_x() const;
-  virtual float		get_y() const;
+	virtual float get_x() const;
+	virtual float get_y() const;
 
-  virtual float		get_bearing() const;
-  virtual float		get_slope() const;
+	virtual float get_bearing() const;
+	virtual float get_slope() const;
 
-  virtual void          calc();
-  virtual void          calc_unfiltered();
-  virtual void          reset();
+	virtual void calc();
+	virtual void calc_unfiltered();
+	virtual void reset();
 
-  virtual bool          is_pos_valid() const;
+	virtual bool is_pos_valid() const;
 
 private:
-  float                 DEFAULT_X_VARIANCE;
-  float                 DEFAULT_Y_VARIANCE;
+	float DEFAULT_X_VARIANCE;
+	float DEFAULT_Y_VARIANCE;
 
-  float	                pan_rad_per_pixel;
-  float	                tilt_rad_per_pixel;
+	float pan_rad_per_pixel;
+	float tilt_rad_per_pixel;
 
-  center_in_roi_t       center;
-  float			pan;
-  float			tilt;
+	center_in_roi_t center;
+	float           pan;
+	float           tilt;
 
-  float                 horizontal_angle;
-  float                 vertical_angle;
+	float horizontal_angle;
+	float vertical_angle;
 
-  unsigned int          image_width;
-  unsigned int          image_height;
+	unsigned int image_width;
+	unsigned int image_height;
 
-  float                 camera_height;
-  float                 camera_offset_x;
-  float                 camera_offset_y;
-  float                 camera_orientation;
+	float camera_height;
+	float camera_offset_x;
+	float camera_offset_y;
+	float camera_orientation;
 
-  bool                  last_available;
-  float                 box_x;
-  float                 box_y;
-  float                 bearing;
-  float                 slope;
-  float                 distance_box_motor;
-  float                 distance_box_cam;
+	bool  last_available;
+	float box_x;
+	float box_y;
+	float bearing;
+	float slope;
+	float distance_box_motor;
+	float distance_box_cam;
 
-  /*
+	/*
   float                 var_proc_x;
   float                 var_proc_y;
   float                 var_meas_x;
@@ -110,4 +112,3 @@ private:
 } // end namespace firevision
 
 #endif // FIREVISION_MODELS_RELPOS_BOX_H__
-
