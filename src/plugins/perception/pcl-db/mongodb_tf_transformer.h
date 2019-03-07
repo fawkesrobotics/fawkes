@@ -22,42 +22,43 @@
 #ifndef _PLUGINS_PERCEPTION_PCL_DB_MERGE_MONGODB_TF_TRANSFORMER_H_
 #define _PLUGINS_PERCEPTION_PCL_DB_MERGE_MONGODB_TF_TRANSFORMER_H_
 
-#include <tf/types.h>
-#include <tf/transformer.h>
-
 #include <mongo/client/dbclient.h>
+#include <tf/transformer.h>
+#include <tf/types.h>
 
 #include <string>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
-class MongoDBTransformer
-: public Transformer
+class MongoDBTransformer : public Transformer
 {
- public:
-  MongoDBTransformer(mongo::DBClientBase *mongodb_client,
-                     const std::string& database_name, bool ensure_index = true);
-  virtual ~MongoDBTransformer();
+public:
+	MongoDBTransformer(mongo::DBClientBase *mongodb_client,
+	                   const std::string &  database_name,
+	                   bool                 ensure_index = true);
+	virtual ~MongoDBTransformer();
 
-  /** Restore transforms from database.
+	/** Restore transforms from database.
    * @param start start time of range to restore
    * @param end end time of range to restore
    */
-  void restore(fawkes::Time &start, fawkes::Time &end)
-  { fawkes::Time no_new_start(0,0); restore(start, end, no_new_start); }
+	void
+	restore(fawkes::Time &start, fawkes::Time &end)
+	{
+		fawkes::Time no_new_start(0, 0);
+		restore(start, end, no_new_start);
+	}
 
-  void restore(fawkes::Time &start, fawkes::Time &end, fawkes::Time &new_start);
-  void restore(long long start_msec, long long end_msec,
-	       long long new_start_msec = 0);
+	void restore(fawkes::Time &start, fawkes::Time &end, fawkes::Time &new_start);
+	void restore(long long start_msec, long long end_msec, long long new_start_msec = 0);
 
- private:
-  void restore_tf_doc(mongo::BSONObj &doc,
-		      long long start_msec, long long new_start_msec);
+private:
+	void restore_tf_doc(mongo::BSONObj &doc, long long start_msec, long long new_start_msec);
 
- private:
-  mongo::DBClientBase *mongodb_client_;
-  std::string database_;
+private:
+	mongo::DBClientBase *mongodb_client_;
+	std::string          database_;
 };
 
 } // end namespace tf

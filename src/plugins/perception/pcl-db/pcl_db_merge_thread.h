@@ -24,61 +24,62 @@
 
 #include "pcl_db_merge_pipeline.h"
 
-#include <core/threading/thread.h>
+#include <aspect/blackboard.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/blackboard.h>
 #include <aspect/pointcloud.h>
 #include <aspect/tf.h>
+#include <core/threading/thread.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 #include <plugins/mongodb/aspect/mongodb.h>
 
-#include <pcl/point_types.h>
-#include <pcl/point_cloud.h>
-
 namespace fawkes {
-  class PclDatabaseMergeInterface;
-  class BlackBoardOnMessageWaker;
+class PclDatabaseMergeInterface;
+class BlackBoardOnMessageWaker;
 #ifdef USE_TIMETRACKER
-  class TimeTracker;
+class TimeTracker;
 #endif
-}
+} // namespace fawkes
 
-
-class PointCloudDBMergeThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::MongoDBAspect,
-  public fawkes::TransformAspect,
-  public fawkes::PointCloudAspect
+class PointCloudDBMergeThread : public fawkes::Thread,
+                                public fawkes::ClockAspect,
+                                public fawkes::LoggingAspect,
+                                public fawkes::ConfigurableAspect,
+                                public fawkes::BlackBoardAspect,
+                                public fawkes::MongoDBAspect,
+                                public fawkes::TransformAspect,
+                                public fawkes::PointCloudAspect
 {
- public:
-  PointCloudDBMergeThread();
-  virtual ~PointCloudDBMergeThread();
+public:
+	PointCloudDBMergeThread();
+	virtual ~PointCloudDBMergeThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+private: // members
+	fawkes::PclDatabaseMergeInterface *merge_if_;
+	fawkes::BlackBoardOnMessageWaker * msg_waker_;
 
- private: // members
-  fawkes::PclDatabaseMergeInterface *merge_if_;
-  fawkes::BlackBoardOnMessageWaker  *msg_waker_;
+	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB>> foutput_;
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr            output_;
 
-  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > foutput_;
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_;
+	std::string cfg_database_;
+	std::string cfg_output_id_;
 
-  std::string cfg_database_;
-  std::string cfg_output_id_;
-
-  PointCloudDBMergePipeline<pcl::PointXYZ>     *pl_xyz_;
-  PointCloudDBMergePipeline<pcl::PointXYZRGB>  *pl_xyzrgb_;
+	PointCloudDBMergePipeline<pcl::PointXYZ> *   pl_xyz_;
+	PointCloudDBMergePipeline<pcl::PointXYZRGB> *pl_xyzrgb_;
 };
 
 #endif

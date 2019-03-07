@@ -24,62 +24,63 @@
 
 #include "pcl_db_retrieve_pipeline.h"
 
-#include <core/threading/thread.h>
+#include <aspect/blackboard.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/blackboard.h>
 #include <aspect/pointcloud.h>
 #include <aspect/tf.h>
+#include <core/threading/thread.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 #include <plugins/mongodb/aspect/mongodb.h>
 
-#include <pcl/point_types.h>
-#include <pcl/point_cloud.h>
-
 namespace fawkes {
-  class PclDatabaseRetrieveInterface;
-  class BlackBoardOnMessageWaker;
-}
+class PclDatabaseRetrieveInterface;
+class BlackBoardOnMessageWaker;
+} // namespace fawkes
 
-
-class PointCloudDBRetrieveThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::MongoDBAspect,
-  public fawkes::TransformAspect,
-  public fawkes::PointCloudAspect
+class PointCloudDBRetrieveThread : public fawkes::Thread,
+                                   public fawkes::ClockAspect,
+                                   public fawkes::LoggingAspect,
+                                   public fawkes::ConfigurableAspect,
+                                   public fawkes::BlackBoardAspect,
+                                   public fawkes::MongoDBAspect,
+                                   public fawkes::TransformAspect,
+                                   public fawkes::PointCloudAspect
 {
- public:
-  PointCloudDBRetrieveThread();
-  virtual ~PointCloudDBRetrieveThread();
+public:
+	PointCloudDBRetrieveThread();
+	virtual ~PointCloudDBRetrieveThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+private: // members
+	fawkes::PclDatabaseRetrieveInterface *retrieve_if_;
+	fawkes::BlackBoardOnMessageWaker *    msg_waker_;
 
- private: // members
-  fawkes::PclDatabaseRetrieveInterface *retrieve_if_;
-  fawkes::BlackBoardOnMessageWaker     *msg_waker_;
+	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB>> foutput_;
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr            output_;
 
-  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > foutput_;
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr output_;
+	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB>> foriginal_;
+	pcl::PointCloud<pcl::PointXYZRGB>::Ptr            original_;
 
-  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > foriginal_;
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr original_;
+	std::string cfg_database_;
+	std::string cfg_output_id_;
+	std::string cfg_original_id_;
 
-  std::string cfg_database_;
-  std::string cfg_output_id_;
-  std::string cfg_original_id_;
-
-  PointCloudDBRetrievePipeline<pcl::PointXYZ>     *pl_xyz_;
-  PointCloudDBRetrievePipeline<pcl::PointXYZRGB>  *pl_xyzrgb_;
+	PointCloudDBRetrievePipeline<pcl::PointXYZ> *   pl_xyz_;
+	PointCloudDBRetrievePipeline<pcl::PointXYZRGB> *pl_xyzrgb_;
 };
 
 #endif

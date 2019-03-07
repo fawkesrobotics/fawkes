@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "pcl_db_store_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,15 +31,14 @@ using namespace fawkes;
  */
 class PointCloudDBStorePlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit PointCloudDBStorePlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new PointCloudDBStoreThread());
-  }
+	explicit PointCloudDBStorePlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new PointCloudDBStoreThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Store point clouds to MongoDB on call")

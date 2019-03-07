@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "pcl_db_roscomm_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,17 +31,15 @@ using namespace fawkes;
  */
 class PointCloudDBROSCommPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit PointCloudDBROSCommPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new PointCloudDBROSCommThread());
-  }
+	explicit PointCloudDBROSCommPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new PointCloudDBROSCommThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("ROS communication for pcl-db plugins")
 EXPORT_PLUGIN(PointCloudDBROSCommPlugin)
-
