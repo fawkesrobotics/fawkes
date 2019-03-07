@@ -21,6 +21,7 @@
  */
 
 #include "festival_plugin.h"
+
 #include "synth_thread.h"
 
 using namespace fawkes;
@@ -35,13 +36,10 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-FestivalPlugin::FestivalPlugin(Configuration *config)
-  : Plugin(config)
+FestivalPlugin::FestivalPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new FestivalSynthThread());
+	thread_list.push_back(new FestivalSynthThread());
 }
-
 
 PLUGIN_DESCRIPTION("Festival speech synthesis integration")
 EXPORT_PLUGIN(FestivalPlugin)
-
