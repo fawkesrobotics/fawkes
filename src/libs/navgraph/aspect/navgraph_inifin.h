@@ -33,17 +33,16 @@ class NavGraph;
 
 class NavGraphAspectIniFin : public AspectIniFin
 {
- public:
-  NavGraphAspectIniFin();
+public:
+	NavGraphAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
-  void set_navgraph(LockPtr<NavGraph> &navgraph);
+	void set_navgraph(LockPtr<NavGraph> &navgraph);
 
- private:
-  LockPtr<NavGraph> navgraph_;
-
+private:
+	LockPtr<NavGraph> navgraph_;
 };
 
 } // end namespace fawkes

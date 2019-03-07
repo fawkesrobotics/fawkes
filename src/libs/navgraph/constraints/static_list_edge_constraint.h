@@ -24,41 +24,37 @@
 #define _NAVGRAPH_CONSTRAINTS_STATIC_LIST_EDGE_CONSTRAINT_H_
 
 #include <navgraph/constraints/edge_constraint.h>
-
-#include <vector>
-#include <string>
-
 #include <navgraph/navgraph.h>
 
-namespace fawkes{
+#include <string>
+#include <vector>
+
+namespace fawkes {
 
 class NavGraphStaticListEdgeConstraint : public NavGraphEdgeConstraint
 {
- public:
-  NavGraphStaticListEdgeConstraint(std::string name);
+public:
+	NavGraphStaticListEdgeConstraint(std::string name);
 
-  NavGraphStaticListEdgeConstraint(std::string name,
-				   std::vector<fawkes::NavGraphEdge> &edge_list);
+	NavGraphStaticListEdgeConstraint(std::string name, std::vector<fawkes::NavGraphEdge> &edge_list);
 
-  virtual ~NavGraphStaticListEdgeConstraint();
+	virtual ~NavGraphStaticListEdgeConstraint();
 
-  const std::vector<fawkes::NavGraphEdge> &  edge_list() const;
+	const std::vector<fawkes::NavGraphEdge> &edge_list() const;
 
-  void add_edge(const fawkes::NavGraphEdge &edge);
-  void add_edges(const std::vector<fawkes::NavGraphEdge> &edges);
-  void remove_edge(const fawkes::NavGraphEdge &edge);
-  void clear_edges();
-  bool has_edge(const fawkes::NavGraphEdge &edge);
+	void add_edge(const fawkes::NavGraphEdge &edge);
+	void add_edges(const std::vector<fawkes::NavGraphEdge> &edges);
+	void remove_edge(const fawkes::NavGraphEdge &edge);
+	void clear_edges();
+	bool has_edge(const fawkes::NavGraphEdge &edge);
 
-  virtual bool compute(void) throw();
+	virtual bool compute(void) throw();
 
-  virtual bool blocks(const fawkes::NavGraphNode &from,
-		      const fawkes::NavGraphNode &to) throw();
+	virtual bool blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) throw();
 
- private:
-  std::vector<fawkes::NavGraphEdge> edge_list_;
-  bool modified_;
-
+private:
+	std::vector<fawkes::NavGraphEdge> edge_list_;
+	bool                              modified_;
 };
 
 } // end namespace fawkes

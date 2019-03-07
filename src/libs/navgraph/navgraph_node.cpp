@@ -30,11 +30,9 @@ namespace fawkes {
  */
 
 /** Constructor for invalid node. */
-NavGraphNode::NavGraphNode()
-  : unconnected_(false)
+NavGraphNode::NavGraphNode() : unconnected_(false)
 {
 }
-
 
 /** Constructor.
  * @param name name of the node
@@ -42,30 +40,29 @@ NavGraphNode::NavGraphNode()
  * @param y y coordinate in global frame of node
  * @param properties properties for the new node
  */
-NavGraphNode::NavGraphNode(const std::string &name, float x, float y,
-			   std::map<std::string, std::string> properties)
-  : unconnected_(false)
+NavGraphNode::NavGraphNode(const std::string &                name,
+                           float                              x,
+                           float                              y,
+                           std::map<std::string, std::string> properties)
+: unconnected_(false)
 {
-  name_ = name;
-  x_ = x;
-  y_ = y;
-  properties_ = properties;
+	name_       = name;
+	x_          = x;
+	y_          = y;
+	properties_ = properties;
 }
-
 
 /** Constructor.
  * @param name name of the node
  * @param x x coordinate in global frame of node
  * @param y y coordinate in global frame of node
  */
-NavGraphNode::NavGraphNode(const std::string &name, float x, float y)
-  : unconnected_(false)
+NavGraphNode::NavGraphNode(const std::string &name, float x, float y) : unconnected_(false)
 {
-  name_ = name;
-  x_ = x;
-  y_ = y;
+	name_ = name;
+	x_    = x;
+	y_    = y;
 }
-
 
 /** Set X position.
  * @param x X coordinate in global frame for node.
@@ -73,7 +70,7 @@ NavGraphNode::NavGraphNode(const std::string &name, float x, float y)
 void
 NavGraphNode::set_x(float x)
 {
-  x_ = x;
+	x_ = x;
 }
 
 /** Set Y position.
@@ -82,9 +79,8 @@ NavGraphNode::set_x(float x)
 void
 NavGraphNode::set_y(float y)
 {
-  y_ = y;
+	y_ = y;
 }
-
 
 /** Set name of node.
  * @param name new name for node
@@ -92,7 +88,7 @@ NavGraphNode::set_y(float y)
 void
 NavGraphNode::set_name(const std::string &name)
 {
-  name_ = name;
+	name_ = name;
 }
 
 /** Set unconnected state of the node.
@@ -107,9 +103,8 @@ NavGraphNode::set_name(const std::string &name)
 void
 NavGraphNode::set_unconnected(bool unconnected)
 {
-  unconnected_ = unconnected;
+	unconnected_ = unconnected;
 }
-
 
 /** Get specified property as string.
  * @param prop property key
@@ -118,14 +113,13 @@ NavGraphNode::set_unconnected(bool unconnected)
 std::string
 NavGraphNode::property(const std::string &prop) const
 {
-  std::map<std::string, std::string>::const_iterator p;
-  if ((p = properties_.find(prop)) != properties_.end()) {
-    return p->second;
-  } else {
-    return "";
-  }
+	std::map<std::string, std::string>::const_iterator p;
+	if ((p = properties_.find(prop)) != properties_.end()) {
+		return p->second;
+	} else {
+		return "";
+	}
 }
-
 
 /** Overwrite properties with given ones.
  * @param properties map of properties to set
@@ -133,9 +127,8 @@ NavGraphNode::property(const std::string &prop) const
 void
 NavGraphNode::set_properties(const std::map<std::string, std::string> &properties)
 {
-  properties_ = properties;
+	properties_ = properties;
 }
-
 
 /** Set property.
  * @param property property key
@@ -144,9 +137,8 @@ NavGraphNode::set_properties(const std::map<std::string, std::string> &propertie
 void
 NavGraphNode::set_property(const std::string &property, const std::string &value)
 {
-  properties_[property] = value;
+	properties_[property] = value;
 }
-
 
 /** Set property.
  * @param property property key
@@ -155,7 +147,7 @@ NavGraphNode::set_property(const std::string &property, const std::string &value
 void
 NavGraphNode::set_property(const std::string &property, float value)
 {
-  properties_[property] = StringConversions::to_string(value);
+	properties_[property] = StringConversions::to_string(value);
 }
 
 /** Set property.
@@ -165,7 +157,7 @@ NavGraphNode::set_property(const std::string &property, float value)
 void
 NavGraphNode::set_property(const std::string &property, int value)
 {
-  properties_[property] = StringConversions::to_string(value);
+	properties_[property] = StringConversions::to_string(value);
 }
 
 /** Set property.
@@ -175,9 +167,8 @@ NavGraphNode::set_property(const std::string &property, int value)
 void
 NavGraphNode::set_property(const std::string &property, bool value)
 {
-  properties_[property] = value ? "true" : "false";
+	properties_[property] = value ? "true" : "false";
 }
-
 
 /** Set directly reachable nodes of node.
  * @param reachable_nodes vector of directly reachable nodes
@@ -185,7 +176,7 @@ NavGraphNode::set_property(const std::string &property, bool value)
 void
 NavGraphNode::set_reachable_nodes(std::vector<std::string> reachable_nodes)
 {
-  reachable_nodes_ = reachable_nodes;
+	reachable_nodes_ = reachable_nodes;
 }
 
 } // end of namespace fawkes

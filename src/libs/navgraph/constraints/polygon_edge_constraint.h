@@ -23,28 +23,25 @@
 
 #include <navgraph/constraints/edge_constraint.h>
 #include <navgraph/constraints/polygon_constraint.h>
-
-#include <vector>
-#include <string>
-
 #include <navgraph/navgraph.h>
 
-namespace fawkes{
+#include <string>
+#include <vector>
 
-class NavGraphPolygonEdgeConstraint
-: public NavGraphEdgeConstraint,
-  public NavGraphPolygonConstraint
+namespace fawkes {
+
+class NavGraphPolygonEdgeConstraint : public NavGraphEdgeConstraint,
+                                      public NavGraphPolygonConstraint
 {
- public:
-  NavGraphPolygonEdgeConstraint(const std::string &name);
-  NavGraphPolygonEdgeConstraint(const std::string &name, const Polygon &polygon);
+public:
+	NavGraphPolygonEdgeConstraint(const std::string &name);
+	NavGraphPolygonEdgeConstraint(const std::string &name, const Polygon &polygon);
 
-  virtual ~NavGraphPolygonEdgeConstraint();
+	virtual ~NavGraphPolygonEdgeConstraint();
 
-  virtual bool compute(void) throw();
+	virtual bool compute(void) throw();
 
-  virtual bool blocks(const fawkes::NavGraphNode &from,
-		      const fawkes::NavGraphNode &to) throw();
+	virtual bool blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) throw();
 };
 
 } // end namespace fawkes

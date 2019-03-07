@@ -34,14 +34,14 @@ class NavGraphAspectIniFin;
 
 class NavGraphAspect : public virtual Aspect
 {
-  friend NavGraphAspectIniFin;
+	friend NavGraphAspectIniFin;
 
- public:
-  NavGraphAspect();
-  virtual ~NavGraphAspect();
+public:
+	NavGraphAspect();
+	virtual ~NavGraphAspect();
 
- protected:
-  fawkes::LockPtr<NavGraph> navgraph;
+protected:
+	fawkes::LockPtr<NavGraph> navgraph;
 };
 
 } // end namespace fawkes

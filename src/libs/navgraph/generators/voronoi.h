@@ -23,16 +23,15 @@
 #ifndef _LIBS_NAVGRAPH_GENERATOR_VORONOI_H_
 #define _LIBS_NAVGRAPH_GENERATOR_VORONOI_H_
 
-#include <navgraph/navgraph.h>
 #include <navgraph/generators/generator.h>
-
+#include <navgraph/navgraph.h>
 #include <utils/math/polygon.h>
 
 namespace fawkes {
 
 class NavGraphGeneratorVoronoi : public NavGraphGenerator
 {
- public:
+public:
 	NavGraphGeneratorVoronoi();
 	virtual ~NavGraphGeneratorVoronoi();
 
@@ -42,10 +41,13 @@ class NavGraphGeneratorVoronoi : public NavGraphGenerator
 	 * @return list of polygons, each polygon contains the vertices of a
 	 * bounded face of the Voronoi diagram.
 	 */
-	const std::list<Polygon2D> &  face_polygons() const
-	{ return polygons_; }
+	const std::list<Polygon2D> &
+	face_polygons() const
+	{
+		return polygons_;
+	}
 
- private:
+private:
 	std::list<Polygon2D> polygons_;
 };
 

@@ -24,41 +24,41 @@
 #define _NAVGRAPH_CONSTRAINTS_STATIC_LIST_NODE_CONSTRAINT_H_
 
 #include <navgraph/constraints/node_constraint.h>
-
-#include <vector>
-#include <string>
-
 #include <navgraph/navgraph.h>
 
-namespace fawkes{
+#include <string>
+#include <vector>
+
+namespace fawkes {
 
 class NavGraphStaticListNodeConstraint : public NavGraphNodeConstraint
 {
- public:
-  NavGraphStaticListNodeConstraint(std::string name);
+public:
+	NavGraphStaticListNodeConstraint(std::string name);
 
-  NavGraphStaticListNodeConstraint(std::string name,
-				   std::vector<fawkes::NavGraphNode> &node_list);
+	NavGraphStaticListNodeConstraint(std::string name, std::vector<fawkes::NavGraphNode> &node_list);
 
-  virtual ~NavGraphStaticListNodeConstraint();
+	virtual ~NavGraphStaticListNodeConstraint();
 
-  const std::vector<fawkes::NavGraphNode> &  node_list() const;
+	const std::vector<fawkes::NavGraphNode> &node_list() const;
 
-  void add_node(const fawkes::NavGraphNode &node);
-  void add_nodes(const std::vector<fawkes::NavGraphNode> &nodes);
-  void remove_node(const fawkes::NavGraphNode &node);
-  void clear_nodes();
-  bool has_node(const fawkes::NavGraphNode &node);
+	void add_node(const fawkes::NavGraphNode &node);
+	void add_nodes(const std::vector<fawkes::NavGraphNode> &nodes);
+	void remove_node(const fawkes::NavGraphNode &node);
+	void clear_nodes();
+	bool has_node(const fawkes::NavGraphNode &node);
 
-  virtual bool compute(void) throw();
+	virtual bool compute(void) throw();
 
-  virtual bool blocks(const fawkes::NavGraphNode &node) throw()
-  { return has_node(node); }
+	virtual bool
+	blocks(const fawkes::NavGraphNode &node) throw()
+	{
+		return has_node(node);
+	}
 
- protected:
-  std::vector<fawkes::NavGraphNode> node_list_;	///< Node list
-  bool modified_;	///< Set to true if changes are made to the constraint.
-
+protected:
+	std::vector<fawkes::NavGraphNode> node_list_; ///< Node list
+	bool modified_; ///< Set to true if changes are made to the constraint.
 };
 
 } // end namespace fawkes
