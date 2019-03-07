@@ -21,10 +21,11 @@
  */
 
 #include "rrdweb_thread.h"
+
 #include "rrdweb_processor.h"
 
-#include <webview/url_manager.h>
 #include <webview/nav_manager.h>
+#include <webview/url_manager.h>
 
 #include <functional>
 
@@ -41,43 +42,41 @@ using namespace fawkes;
  */
 
 /** Constructor. */
-RRDWebThread::RRDWebThread()
-  : Thread("RRDWebThread", Thread::OPMODE_WAITFORWAKEUP)
+RRDWebThread::RRDWebThread() : Thread("RRDWebThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
-
 
 /** Destructor. */
 RRDWebThread::~RRDWebThread()
 {
 }
 
-
 void
 RRDWebThread::init()
 {
-  processor_  = new RRDWebRequestProcessor(rrd_manager, logger);
-  webview_url_manager->add_handler(WebRequest::METHOD_GET, "/rrd/graph/{graph}",
-                                   std::bind(&RRDWebRequestProcessor::process_graph, processor_,
-                                             std::placeholders::_1));
-  webview_url_manager->add_handler(WebRequest::METHOD_GET, "/rrd/?",
-                                   std::bind(&RRDWebRequestProcessor::process_overview, processor_));
-  webview_nav_manager->add_nav_entry(RRD_URL_PREFIX, "RRD Graphs");
+	processor_ = new RRDWebRequestProcessor(rrd_manager, logger);
+	webview_url_manager->add_handler(WebRequest::METHOD_GET,
+	                                 "/rrd/graph/{graph}",
+	                                 std::bind(&RRDWebRequestProcessor::process_graph,
+	                                           processor_,
+	                                           std::placeholders::_1));
+	webview_url_manager->add_handler(WebRequest::METHOD_GET,
+	                                 "/rrd/?",
+	                                 std::bind(&RRDWebRequestProcessor::process_overview,
+	                                           processor_));
+	webview_nav_manager->add_nav_entry(RRD_URL_PREFIX, "RRD Graphs");
 }
-
 
 void
 RRDWebThread::finalize()
 {
 	webview_url_manager->remove_handler(WebRequest::METHOD_GET, "/rrd/graph/{graph}");
 	webview_url_manager->remove_handler(WebRequest::METHOD_GET, "/rrd/?");
-  webview_nav_manager->remove_nav_entry(RRD_URL_PREFIX);
-  delete processor_;
+	webview_nav_manager->remove_nav_entry(RRD_URL_PREFIX);
+	delete processor_;
 }
-
 
 void
 RRDWebThread::loop()
 {
 }
-

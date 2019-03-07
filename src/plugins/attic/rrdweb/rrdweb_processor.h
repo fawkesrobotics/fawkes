@@ -24,25 +24,25 @@
 #define _PLUGINS_RRDWEB_RRDWEB_PROCESSOR_H_
 
 namespace fawkes {
-  class RRDManager;
-  class Logger;
-  class WebReply;
-  class WebRequest;
-}
+class RRDManager;
+class Logger;
+class WebReply;
+class WebRequest;
+} // namespace fawkes
 
 class RRDWebRequestProcessor
 {
- public:
+public:
 	RRDWebRequestProcessor(fawkes::RRDManager *rrd_manager, fawkes::Logger *logger);
 
-  virtual ~RRDWebRequestProcessor();
+	virtual ~RRDWebRequestProcessor();
 
-  fawkes::WebReply * process_overview();
-  fawkes::WebReply * process_graph(const fawkes::WebRequest *request);
+	fawkes::WebReply *process_overview();
+	fawkes::WebReply *process_graph(const fawkes::WebRequest *request);
 
- private:
-  fawkes::RRDManager   *rrd_man_;
-  fawkes::Logger       *logger_;
+private:
+	fawkes::RRDManager *rrd_man_;
+	fawkes::Logger *    logger_;
 };
 
 #endif

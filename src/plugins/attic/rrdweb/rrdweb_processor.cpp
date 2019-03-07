@@ -21,12 +21,13 @@
  */
 
 #include "rrdweb_processor.h"
-#include <plugins/rrd/aspect/rrd_manager.h>
-#include <core/threading/scoped_rwlock.h>
+
 #include <core/exception.h>
-#include <webview/page_reply.h>
-#include <webview/file_reply.h>
+#include <core/threading/scoped_rwlock.h>
+#include <plugins/rrd/aspect/rrd_manager.h>
 #include <webview/error_reply.h>
+#include <webview/file_reply.h>
+#include <webview/page_reply.h>
 #include <webview/request.h>
 
 #include <cstring>
@@ -44,12 +45,11 @@ using namespace fawkes;
  * @param logger logger to report problems
  */
 RRDWebRequestProcessor::RRDWebRequestProcessor(fawkes::RRDManager *rrd_manager,
-                                               fawkes::Logger *logger)
+                                               fawkes::Logger *    logger)
 {
-  rrd_man_ = rrd_manager;
-  logger_  = logger;
+	rrd_man_ = rrd_manager;
+	logger_  = logger;
 }
-
 
 /** Destructor. */
 RRDWebRequestProcessor::~RRDWebRequestProcessor()
@@ -63,7 +63,7 @@ RRDWebRequestProcessor::~RRDWebRequestProcessor()
 WebReply *
 RRDWebRequestProcessor::process_graph(const fawkes::WebRequest *request)
 {
-	const RWLockVector<RRDGraphDefinition *> &graphs(rrd_man_->get_graphs());
+	const RWLockVector<RRDGraphDefinition *> &         graphs(rrd_man_->get_graphs());
 	RWLockVector<RRDGraphDefinition *>::const_iterator g;
 
 	ScopedRWLock(graphs.rwlock(), ScopedRWLock::LOCK_READ);
@@ -98,11 +98,13 @@ RRDWebRequestProcessor::process_overview()
 	unsigned int i = 0;
 	*r += "<table class=\"rrdgrid\">";
 	for (auto g : graphs) {
-		if ((i % 2) == 0) *r += "  <tr>";
+		if ((i % 2) == 0)
+			*r += "  <tr>";
 		r->append_body("<td class=\"%s\"><img src=\"/rrd/graph/%s\" /></td>",
 		               ((i % 2) == 0) ? "left" : "right",
 		               g->get_name());
-		if ((i++ % 2) == 1) *r += "  </tr>\n";
+		if ((i++ % 2) == 1)
+			*r += "  </tr>\n";
 	}
 	*r += "</table>";
 
