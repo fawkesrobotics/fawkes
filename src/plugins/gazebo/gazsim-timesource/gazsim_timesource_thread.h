@@ -23,47 +23,46 @@
 #ifndef _PLUGINS_GAZSIMTIMESOURCE_THREAD_H__
 #define _PLUGINS_GAZSIMTIMESOURCE_THREAD_H__
 
-#include <core/threading/thread.h>
-#include <aspect/clock.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
+#include "../msgs/SimTime.pb.h"
+#include "gazsim_timesource_source.h"
+
 #include <aspect/blocked_timing.h>
-#include <boost/asio.hpp>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <google/protobuf/message.h>
-#include <gazebo/physics/physics.hh>
 #include <plugins/gazebo/aspect/gazebo.h>
 
-#include "gazsim_timesource_source.h"
-#include "../msgs/SimTime.pb.h"
+#include <boost/asio.hpp>
+#include <gazebo/physics/physics.hh>
 
 typedef const boost::shared_ptr<gazsim_msgs::SimTime const> ConstSimTimePtr;
 
-class GazsimTimesourceThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::GazeboAspect
+class GazsimTimesourceThread : public fawkes::Thread,
+                               public fawkes::ClockAspect,
+                               public fawkes::BlockedTimingAspect,
+                               public fawkes::ConfigurableAspect,
+                               public fawkes::LoggingAspect,
+                               public fawkes::GazeboAspect
 {
- public:
-  GazsimTimesourceThread();
-  ~GazsimTimesourceThread();
+public:
+	GazsimTimesourceThread();
+	~GazsimTimesourceThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- private:
-  //Timesource to give the fawkes clock
-  fawkes::GazsimTimesource* time_source_;
+private:
+	//Timesource to give the fawkes clock
+	fawkes::GazsimTimesource *time_source_;
 
-  //subscriber to get time msgs from
-  gazebo::transport::SubscriberPtr time_sync_sub_;
+	//subscriber to get time msgs from
+	gazebo::transport::SubscriberPtr time_sync_sub_;
 
-  //handler
-  void on_time_sync_msg(ConstSimTimePtr &msg);
-
+	//handler
+	void on_time_sync_msg(ConstSimTimePtr &msg);
 };
 
 #endif
