@@ -14,9 +14,9 @@
 #include "ImageInfo.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ ImageInfo::ImageInfo(const std::string &json)
 	from_json(json);
 }
 
-ImageInfo::ImageInfo(const rapidjson::Value& v)
+ImageInfo::ImageInfo(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ ImageInfo::to_json(bool pretty) const
 }
 
 void
-ImageInfo::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+ImageInfo::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -105,7 +105,6 @@ ImageInfo::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_mem_size.SetInt64(*mem_size_);
 		v.AddMember("mem_size", v_mem_size, allocator);
 	}
-
 }
 
 void
@@ -118,7 +117,7 @@ ImageInfo::from_json(const std::string &json)
 }
 
 void
-ImageInfo::from_json_value(const rapidjson::Value& d)
+ImageInfo::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -144,30 +143,35 @@ ImageInfo::from_json_value(const rapidjson::Value& d)
 	if (d.HasMember("mem_size") && d["mem_size"].IsInt64()) {
 		mem_size_ = d["mem_size"].GetInt64();
 	}
-
 }
 
 void
 ImageInfo::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! id_)  missing.push_back("id");
-	if (! colorspace_)  missing.push_back("colorspace");
-	if (! frame_)  missing.push_back("frame");
-	if (! width_)  missing.push_back("width");
-	if (! height_)  missing.push_back("height");
-	if (! mem_size_)  missing.push_back("mem_size");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!id_)
+		missing.push_back("id");
+	if (!colorspace_)
+		missing.push_back("colorspace");
+	if (!frame_)
+		missing.push_back("frame");
+	if (!width_)
+		missing.push_back("width");
+	if (!height_)
+		missing.push_back("height");
+	if (!mem_size_)
+		missing.push_back("mem_size");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "ImageInfo is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "ImageInfo is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

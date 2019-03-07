@@ -26,20 +26,20 @@
 #include <webview/user_verifier.h>
 
 namespace fawkes {
-  class Configuration;
-  class Logger;
-}
+class Configuration;
+class Logger;
+} // namespace fawkes
 
 class WebviewUserVerifier : public fawkes::WebUserVerifier
 {
- public:
-  WebviewUserVerifier(fawkes::Configuration *config, fawkes::Logger *logger);
-  virtual ~WebviewUserVerifier();
+public:
+	WebviewUserVerifier(fawkes::Configuration *config, fawkes::Logger *logger);
+	virtual ~WebviewUserVerifier();
 
-  virtual bool verify_user(const char *user, const char *password) throw();
+	virtual bool verify_user(const char *user, const char *password) throw();
 
- private:
-  fawkes::Configuration *config;
+private:
+	fawkes::Configuration *config;
 };
 
 #endif

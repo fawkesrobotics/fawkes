@@ -24,10 +24,9 @@
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 #include <core/threading/wait_condition.h>
-
 #include <fvcams/shmem.h>
-#include <fvutils/compression/jpeg_compressor.h>
 #include <fvutils/color/conversions.h>
+#include <fvutils/compression/jpeg_compressor.h>
 #include <utils/time/wait.h>
 
 #include <cstdlib>
@@ -45,16 +44,15 @@ namespace fawkes {
  * @param size size in bytes of @p data
  */
 WebviewJpegStreamProducer::Buffer::Buffer(unsigned char *data, size_t size)
-  : data_(data), size_(size)
+: data_(data), size_(size)
 {
 }
 
 /** Destructor. */
 WebviewJpegStreamProducer::Buffer::~Buffer()
 {
-  free(data_);
+	free(data_);
 }
-
 
 /** @class WebviewJpegStreamProducer::Subscriber "jpeg_stream_producer.h"
  * JPEG stream subscriber.
@@ -83,28 +81,30 @@ WebviewJpegStreamProducer::Subscriber::~Subscriber()
  * @param fps frames per second to achieve
  * @param vflip true to enable vertical flipping, false to disable
  */
-WebviewJpegStreamProducer::WebviewJpegStreamProducer(const std::string & image_id,
-						     unsigned int quality, float fps, bool vflip)
-  : Thread("WebviewJpegStreamProducer", Thread::OPMODE_WAITFORWAKEUP)
+WebviewJpegStreamProducer::WebviewJpegStreamProducer(const std::string &image_id,
+                                                     unsigned int       quality,
+                                                     float              fps,
+                                                     bool               vflip)
+: Thread("WebviewJpegStreamProducer", Thread::OPMODE_WAITFORWAKEUP)
 {
-  set_coalesce_wakeups(true);
-  set_prepfin_conc_loop(true);
-  set_name("WebviewJpegStreamProducer[%s]", image_id.c_str());
+	set_coalesce_wakeups(true);
+	set_prepfin_conc_loop(true);
+	set_name("WebviewJpegStreamProducer[%s]", image_id.c_str());
 
-  last_buf_mutex_ = new Mutex();
-  last_buf_waitcond_ = new WaitCondition(last_buf_mutex_);
+	last_buf_mutex_    = new Mutex();
+	last_buf_waitcond_ = new WaitCondition(last_buf_mutex_);
 
-  quality_  = quality;
-  image_id_ = image_id;
-  fps_      = fps;
-  vflip_    = vflip;
+	quality_  = quality;
+	image_id_ = image_id;
+	fps_      = fps;
+	vflip_    = vflip;
 }
 
 /** Destructor. */
 WebviewJpegStreamProducer::~WebviewJpegStreamProducer()
 {
-  delete last_buf_mutex_;
-  delete last_buf_waitcond_;
+	delete last_buf_mutex_;
+	delete last_buf_waitcond_;
 }
 
 /** Add a subscriber.
@@ -114,12 +114,12 @@ WebviewJpegStreamProducer::~WebviewJpegStreamProducer()
 void
 WebviewJpegStreamProducer::add_subscriber(Subscriber *subscriber)
 {
-  subs_.lock();
-  subs_.push_back(subscriber);
-  subs_.sort();
-  subs_.unique();
-  subs_.unlock();
-  wakeup();
+	subs_.lock();
+	subs_.push_back(subscriber);
+	subs_.sort();
+	subs_.unique();
+	subs_.unlock();
+	wakeup();
 }
 
 /** Remove a subscriber.
@@ -128,11 +128,10 @@ WebviewJpegStreamProducer::add_subscriber(Subscriber *subscriber)
 void
 WebviewJpegStreamProducer::remove_subscriber(Subscriber *subscriber)
 {
-  subs_.lock();
-  subs_.remove(subscriber);
-  subs_.unlock();
+	subs_.lock();
+	subs_.remove(subscriber);
+	subs_.unlock();
 }
-
 
 /** Blocks caller until new thread is available.
  * @return newest available buffer once it becomes available
@@ -140,87 +139,88 @@ WebviewJpegStreamProducer::remove_subscriber(Subscriber *subscriber)
 std::shared_ptr<WebviewJpegStreamProducer::Buffer>
 WebviewJpegStreamProducer::wait_for_next_frame()
 {
-  MutexLocker lock(last_buf_mutex_);
-  wakeup();
-  while (! last_buf_) {
-    last_buf_waitcond_->wait();
-  }
-  return last_buf_;
+	MutexLocker lock(last_buf_mutex_);
+	wakeup();
+	while (!last_buf_) {
+		last_buf_waitcond_->wait();
+	}
+	return last_buf_;
 }
 
 void
 WebviewJpegStreamProducer::init()
 {
-  cam_  = new SharedMemoryCamera(image_id_.c_str(), /* deep copy */ false);
-  jpeg_ = new JpegImageCompressor(quality_);
-  jpeg_->set_image_dimensions(cam_->pixel_width(), cam_->pixel_height());
-  jpeg_->set_compression_destination(ImageCompressor::COMP_DEST_MEM);
-  if (jpeg_->supports_vflip())  jpeg_->set_vflip(vflip_);
+	cam_  = new SharedMemoryCamera(image_id_.c_str(), /* deep copy */ false);
+	jpeg_ = new JpegImageCompressor(quality_);
+	jpeg_->set_image_dimensions(cam_->pixel_width(), cam_->pixel_height());
+	jpeg_->set_compression_destination(ImageCompressor::COMP_DEST_MEM);
+	if (jpeg_->supports_vflip())
+		jpeg_->set_vflip(vflip_);
 
-  in_buffer_ = malloc_buffer(YUV422_PLANAR,
-			     cam_->pixel_width(), cam_->pixel_height());
-  jpeg_->set_image_buffer(YUV422_PLANAR, in_buffer_);
+	in_buffer_ = malloc_buffer(YUV422_PLANAR, cam_->pixel_width(), cam_->pixel_height());
+	jpeg_->set_image_buffer(YUV422_PLANAR, in_buffer_);
 
-  long int loop_time = (long int)roundf((1. / fps_) * 1000000.);
-  timewait_ = new TimeWait(clock, loop_time);
+	long int loop_time = (long int)roundf((1. / fps_) * 1000000.);
+	timewait_          = new TimeWait(clock, loop_time);
 }
 
 void
 WebviewJpegStreamProducer::loop()
 {
-  last_buf_mutex_->lock();
-  last_buf_.reset();
-  last_buf_mutex_->unlock();
+	last_buf_mutex_->lock();
+	last_buf_.reset();
+	last_buf_mutex_->unlock();
 
-  timewait_->mark_start();
+	timewait_->mark_start();
 
-  size_t size = jpeg_->recommended_compressed_buffer_size();
-  unsigned char *buffer = (unsigned char *)malloc(size);
-  jpeg_->set_destination_buffer(buffer, size);
+	size_t         size   = jpeg_->recommended_compressed_buffer_size();
+	unsigned char *buffer = (unsigned char *)malloc(size);
+	jpeg_->set_destination_buffer(buffer, size);
 
-  cam_->lock_for_read();
-  cam_->capture();
-  firevision::convert(cam_->colorspace(), YUV422_PLANAR,
-		      cam_->buffer(), in_buffer_,
-		      cam_->pixel_width(), cam_->pixel_height());
-  jpeg_->compress();
-  cam_->dispose_buffer();
-  cam_->unlock();
+	cam_->lock_for_read();
+	cam_->capture();
+	firevision::convert(cam_->colorspace(),
+	                    YUV422_PLANAR,
+	                    cam_->buffer(),
+	                    in_buffer_,
+	                    cam_->pixel_width(),
+	                    cam_->pixel_height());
+	jpeg_->compress();
+	cam_->dispose_buffer();
+	cam_->unlock();
 
-  std::shared_ptr<Buffer> shared_buf =
-	  std::make_shared<Buffer>(buffer, jpeg_->compressed_size());
-  subs_.lock();
+	std::shared_ptr<Buffer> shared_buf = std::make_shared<Buffer>(buffer, jpeg_->compressed_size());
+	subs_.lock();
 #if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100) > 40600
-  for (auto &s : subs_) {
+	for (auto &s : subs_) {
 #else
-    fawkes::LockList<Subscriber *>::iterator si;
-  for (si = subs_.begin(); si != subs_.end(); ++si) {
-    Subscriber *s = *si;
+	fawkes::LockList<Subscriber *>::iterator si;
+	for (si = subs_.begin(); si != subs_.end(); ++si) {
+		Subscriber *s = *si;
 #endif
-    s->handle_buffer(shared_buf);
-  }
-  bool go_on = ! subs_.empty();
-  subs_.unlock();
+		s->handle_buffer(shared_buf);
+	}
+	bool go_on = !subs_.empty();
+	subs_.unlock();
 
-  last_buf_mutex_->lock();
-  last_buf_ = shared_buf;
-  last_buf_waitcond_->wake_all();
-  last_buf_mutex_->unlock();
+	last_buf_mutex_->lock();
+	last_buf_ = shared_buf;
+	last_buf_waitcond_->wake_all();
+	last_buf_mutex_->unlock();
 
-  if (go_on) {
-    timewait_->wait_systime();
-    wakeup();
-  }
+	if (go_on) {
+		timewait_->wait_systime();
+		wakeup();
+	}
 }
 
 void
 WebviewJpegStreamProducer::finalize()
 {
-  delete jpeg_;
-  delete cam_;
-  delete timewait_;
-  free(in_buffer_);
+	delete jpeg_;
+	delete cam_;
+	delete timewait_;
+	free(in_buffer_);
 }
 
 } // end namespace fawkes
-

@@ -14,9 +14,9 @@
 #include "BlackboardGraph.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ BlackboardGraph::BlackboardGraph(const std::string &json)
 	from_json(json);
 }
 
-BlackboardGraph::BlackboardGraph(const rapidjson::Value& v)
+BlackboardGraph::BlackboardGraph(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ BlackboardGraph::to_json(bool pretty) const
 }
 
 void
-BlackboardGraph::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+BlackboardGraph::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -80,7 +80,6 @@ BlackboardGraph::to_json_value(rapidjson::Document& d, rapidjson::Value& v) cons
 		v_dotgraph.SetString(*dotgraph_, allocator);
 		v.AddMember("dotgraph", v_dotgraph, allocator);
 	}
-
 }
 
 void
@@ -93,7 +92,7 @@ BlackboardGraph::from_json(const std::string &json)
 }
 
 void
-BlackboardGraph::from_json_value(const rapidjson::Value& d)
+BlackboardGraph::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -104,25 +103,25 @@ BlackboardGraph::from_json_value(const rapidjson::Value& d)
 	if (d.HasMember("dotgraph") && d["dotgraph"].IsString()) {
 		dotgraph_ = d["dotgraph"].GetString();
 	}
-
 }
 
 void
 BlackboardGraph::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! dotgraph_)  missing.push_back("dotgraph");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!dotgraph_)
+		missing.push_back("dotgraph");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "BlackboardGraph is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "BlackboardGraph is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

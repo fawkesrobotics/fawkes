@@ -16,19 +16,17 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/fwd.h>
 
-#include <string>
 #include <cstdint>
-#include <vector>
 #include <memory>
 #include <optional>
-
-
+#include <string>
+#include <vector>
 
 /** ImageInfo representation for JSON transfer. */
 class ImageInfo
 
 {
- public:
+public:
 	/** Constructor. */
 	ImageInfo();
 	/** Constructor from JSON.
@@ -38,7 +36,7 @@ class ImageInfo
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	ImageInfo(const rapidjson::Value& v);
+	ImageInfo(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~ImageInfo();
@@ -46,9 +44,10 @@ class ImageInfo
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -60,19 +59,19 @@ class ImageInfo
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -85,12 +84,12 @@ class ImageInfo
 	virtual void validate(bool subcall = false) const;
 
 	// Schema: ImageInfo
- public:
-  /** Get kind value.
+public:
+	/** Get kind value.
    * @return kind value
    */
 	std::optional<std::string>
- kind() const
+	kind() const
 	{
 		return kind_;
 	}
@@ -98,15 +97,16 @@ class ImageInfo
 	/** Set kind value.
 	 * @param kind new value
 	 */
-	void set_kind(const std::string& kind)
+	void
+	set_kind(const std::string &kind)
 	{
 		kind_ = kind;
 	}
-  /** Get apiVersion value.
+	/** Get apiVersion value.
    * @return apiVersion value
    */
 	std::optional<std::string>
- apiVersion() const
+	apiVersion() const
 	{
 		return apiVersion_;
 	}
@@ -114,15 +114,16 @@ class ImageInfo
 	/** Set apiVersion value.
 	 * @param apiVersion new value
 	 */
-	void set_apiVersion(const std::string& apiVersion)
+	void
+	set_apiVersion(const std::string &apiVersion)
 	{
 		apiVersion_ = apiVersion;
 	}
-  /** Get id value.
+	/** Get id value.
    * @return id value
    */
 	std::optional<std::string>
- id() const
+	id() const
 	{
 		return id_;
 	}
@@ -130,15 +131,16 @@ class ImageInfo
 	/** Set id value.
 	 * @param id new value
 	 */
-	void set_id(const std::string& id)
+	void
+	set_id(const std::string &id)
 	{
 		id_ = id;
 	}
-  /** Get colorspace value.
+	/** Get colorspace value.
    * @return colorspace value
    */
 	std::optional<std::string>
- colorspace() const
+	colorspace() const
 	{
 		return colorspace_;
 	}
@@ -146,15 +148,16 @@ class ImageInfo
 	/** Set colorspace value.
 	 * @param colorspace new value
 	 */
-	void set_colorspace(const std::string& colorspace)
+	void
+	set_colorspace(const std::string &colorspace)
 	{
 		colorspace_ = colorspace;
 	}
-  /** Get frame value.
+	/** Get frame value.
    * @return frame value
    */
 	std::optional<std::string>
- frame() const
+	frame() const
 	{
 		return frame_;
 	}
@@ -162,15 +165,16 @@ class ImageInfo
 	/** Set frame value.
 	 * @param frame new value
 	 */
-	void set_frame(const std::string& frame)
+	void
+	set_frame(const std::string &frame)
 	{
 		frame_ = frame;
 	}
-  /** Get width value.
+	/** Get width value.
    * @return width value
    */
 	std::optional<int64_t>
- width() const
+	width() const
 	{
 		return width_;
 	}
@@ -178,15 +182,16 @@ class ImageInfo
 	/** Set width value.
 	 * @param width new value
 	 */
-	void set_width(const int64_t& width)
+	void
+	set_width(const int64_t &width)
 	{
 		width_ = width;
 	}
-  /** Get height value.
+	/** Get height value.
    * @return height value
    */
 	std::optional<int64_t>
- height() const
+	height() const
 	{
 		return height_;
 	}
@@ -194,15 +199,16 @@ class ImageInfo
 	/** Set height value.
 	 * @param height new value
 	 */
-	void set_height(const int64_t& height)
+	void
+	set_height(const int64_t &height)
 	{
 		height_ = height;
 	}
-  /** Get mem_size value.
+	/** Get mem_size value.
    * @return mem_size value
    */
 	std::optional<int64_t>
- mem_size() const
+	mem_size() const
 	{
 		return mem_size_;
 	}
@@ -210,26 +216,19 @@ class ImageInfo
 	/** Set mem_size value.
 	 * @param mem_size new value
 	 */
-	void set_mem_size(const int64_t& mem_size)
+	void
+	set_mem_size(const int64_t &mem_size)
 	{
 		mem_size_ = mem_size;
 	}
- private:
-	std::optional<std::string>
- kind_;
-	std::optional<std::string>
- apiVersion_;
-	std::optional<std::string>
- id_;
-	std::optional<std::string>
- colorspace_;
-	std::optional<std::string>
- frame_;
-	std::optional<int64_t>
- width_;
-	std::optional<int64_t>
- height_;
-	std::optional<int64_t>
- mem_size_;
 
+private:
+	std::optional<std::string> kind_;
+	std::optional<std::string> apiVersion_;
+	std::optional<std::string> id_;
+	std::optional<std::string> colorspace_;
+	std::optional<std::string> frame_;
+	std::optional<int64_t>     width_;
+	std::optional<int64_t>     height_;
+	std::optional<int64_t>     mem_size_;
 };
