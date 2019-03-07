@@ -22,35 +22,37 @@
 #ifndef _PLUGINS_MONGODB_MONGODB_INSTANCE_CONFIG_H_
 #define _PLUGINS_MONGODB_MONGODB_INSTANCE_CONFIG_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
 #include <aspect/clock.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 namespace fawkes {
-	class Configuration;
-	class Logger;
-	class SubProcess;
-	class TimeWait;
-}
+class Configuration;
+class Logger;
+class SubProcess;
+class TimeWait;
+} // namespace fawkes
 
 /** Client configuration. */
-class MongoDBInstanceConfig
-: public fawkes::Thread,
-	public fawkes::LoggingAspect,
-	public fawkes::ClockAspect
+class MongoDBInstanceConfig : public fawkes::Thread,
+                              public fawkes::LoggingAspect,
+                              public fawkes::ClockAspect
 {
- public:
-	MongoDBInstanceConfig(fawkes::Configuration *config,
-	                      std::string cfgname, std::string prefix);
+public:
+	MongoDBInstanceConfig(fawkes::Configuration *config, std::string cfgname, std::string prefix);
 
 	/** Check if configuration is enabled.
 	 * @return true if configuration is enabled, false otherwise
 	 */
-	bool is_enabled() const { return enabled_; }
+	bool
+	is_enabled() const
+	{
+		return enabled_;
+	}
 
 	virtual void init();
 	virtual void loop();
@@ -58,15 +60,15 @@ class MongoDBInstanceConfig
 
 	void start_mongod();
 	void kill_mongod(bool clear_data);
-	
-	std::string command_line() const;
+
+	std::string  command_line() const;
 	unsigned int termination_grace_period() const;
 
- private:
+private:
 	bool check_alive();
 
- private:
-	bool         enabled_;
+private:
+	bool enabled_;
 
 	std::string  config_name_;
 	unsigned int startup_grace_period_;
@@ -80,12 +82,12 @@ class MongoDBInstanceConfig
 	std::string  replica_set_;
 	unsigned int oplog_size_;
 
-	bool running_;
-	std::vector<std::string> argv_;
+	bool                                running_;
+	std::vector<std::string>            argv_;
 	std::shared_ptr<fawkes::SubProcess> proc_;
-	std::string command_line_;
+	std::string                         command_line_;
 
-  fawkes::TimeWait *timewait_;
+	fawkes::TimeWait *timewait_;
 };
 
 #endif

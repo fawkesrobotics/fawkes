@@ -22,37 +22,36 @@
 #ifndef _PLUGINS_MONGODB_MONGODB_THREAD_H_
 #define _PLUGINS_MONGODB_MONGODB_THREAD_H_
 
+#include <aspect/aspect_provider.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <aspect/thread_producer.h>
+#include <core/threading/thread.h>
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
 #include <plugins/mongodb/aspect/mongodb_inifin.h>
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
-#include <aspect/aspect_provider.h>
-#include <aspect/thread_producer.h>
 
 // from MongoDB
 #include <mongo/client/dbclient.h>
 
-#include <vector>
 #include <list>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 
 class MongoDBClientConfig;
 class MongoDBInstanceConfig;
 class MongoDBReplicaSetConfig;
 
-class MongoDBThread
-: public fawkes::Thread,
-	public fawkes::LoggingAspect,
-	public fawkes::ConfigurableAspect,
-	public fawkes::ClockAspect,
-	public fawkes::AspectProviderAspect,
-	public fawkes::ThreadProducerAspect,
-	public fawkes::MongoDBConnCreator
+class MongoDBThread : public fawkes::Thread,
+                      public fawkes::LoggingAspect,
+                      public fawkes::ConfigurableAspect,
+                      public fawkes::ClockAspect,
+                      public fawkes::AspectProviderAspect,
+                      public fawkes::ThreadProducerAspect,
+                      public fawkes::MongoDBConnCreator
 {
- public:
+public:
 	MongoDBThread();
 	virtual ~MongoDBThread();
 
@@ -60,23 +59,28 @@ class MongoDBThread
 	virtual void loop();
 	virtual void finalize();
 
-	virtual mongo::DBClientBase *  create_client(const std::string &config_name = "");
-	virtual void delete_client(mongo::DBClientBase *client);
+	virtual mongo::DBClientBase *create_client(const std::string &config_name = "");
+	virtual void                 delete_client(mongo::DBClientBase *client);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
+private:
 	void init_client_configs();
 	void init_instance_configs();
 	void init_replicaset_configs();
 
- private:
-	std::map<std::string, std::shared_ptr<MongoDBClientConfig>> client_configs_;
-	std::map<std::string, std::shared_ptr<MongoDBInstanceConfig>> instance_configs_;
+private:
+	std::map<std::string, std::shared_ptr<MongoDBClientConfig>>     client_configs_;
+	std::map<std::string, std::shared_ptr<MongoDBInstanceConfig>>   instance_configs_;
 	std::map<std::string, std::shared_ptr<MongoDBReplicaSetConfig>> replicaset_configs_;
 
-	fawkes::MongoDBAspectIniFin     mongodb_aspect_inifin_;
+	fawkes::MongoDBAspectIniFin mongodb_aspect_inifin_;
 };
 
 #endif

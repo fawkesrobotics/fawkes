@@ -33,13 +33,13 @@ class MongoDBConnCreator;
 
 class MongoDBAspectIniFin : public AspectIniFin
 {
- public:
+public:
 	MongoDBAspectIniFin(MongoDBConnCreator *conn_creator);
 
 	virtual void init(Thread *thread);
 	virtual void finalize(Thread *thread);
 
- private:
+private:
 	MongoDBConnCreator *conn_creator_;
 };
 

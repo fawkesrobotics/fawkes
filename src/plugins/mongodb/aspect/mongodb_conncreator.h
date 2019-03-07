@@ -26,7 +26,7 @@
 #include <string>
 
 namespace mongo {
-	class DBClientBase;
+class DBClientBase;
 }
 
 namespace fawkes {
@@ -37,7 +37,7 @@ namespace fawkes {
  */
 class MongoDBConnCreator
 {
- public:
+public:
 	/** Create a new MongoDB client.
 	 * @param config_name MongoDB client configuration name for the desired
 	 * connection. May be empty in which case the default configuration is used.
@@ -45,7 +45,7 @@ class MongoDBConnCreator
 	 * @exception thrown if the initialization fails or the configuration for
 	 * the given name does not exist.
 	 */
-	virtual mongo::DBClientBase *  create_client(const std::string &config_name = "") = 0;
+	virtual mongo::DBClientBase *create_client(const std::string &config_name = "") = 0;
 
 	/** Delete a client.
 	 * @param client client to delete

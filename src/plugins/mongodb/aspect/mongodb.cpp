@@ -73,13 +73,11 @@ MongoDBAspect::MongoDBAspect()
 	add_aspect("MongoDBAspect");
 }
 
-
 /** Virtual empty destructor. */
 MongoDBAspect::~MongoDBAspect()
 {
 	mongodb_config_name_.clear();
 }
-
 
 /** Init MongoDB aspect.
  * This set the MongoDB client to access MongoDB.
@@ -90,7 +88,7 @@ MongoDBAspect::~MongoDBAspect()
  */
 void
 MongoDBAspect::init_MongoDBAspect(mongo::DBClientBase *mongodb_client,
-                                  MongoDBConnCreator *mongodb_connmgr)
+                                  MongoDBConnCreator * mongodb_connmgr)
 {
 	this->mongodb_client  = mongodb_client;
 	this->mongodb_connmgr = mongodb_connmgr;
