@@ -24,61 +24,64 @@
 #ifndef _PLUGINS_PDDL_PLANNER_THREAD_H_
 #define _PLUGINS_PDDL_PLANNER_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <blackboard/interface_listener.h>
+#include <core/threading/thread.h>
 #include <interfaces/PddlPlannerInterface.h>
 #include <plugins/robot-memory/aspect/robot_memory_aspect.h>
-#include <blackboard/interface_listener.h>
 
-class PddlPlannerThread 
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::RobotMemoryAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlackBoardInterfaceListener
+class PddlPlannerThread : public fawkes::Thread,
+                          public fawkes::LoggingAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::RobotMemoryAspect,
+                          public fawkes::BlackBoardAspect,
+                          public fawkes::BlackBoardInterfaceListener
 {
+public:
+	PddlPlannerThread();
 
- public:
-  PddlPlannerThread();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
-  protected: virtual void run() { Thread::run(); }
+private:
+	struct action
+	{
+		std::string              name;
+		std::vector<std::string> args;
+	};
+	fawkes::PddlPlannerInterface *plan_if_;
+	std::string                   cfg_descripton_path_;
+	std::string                   cfg_result_path_;
+	std::string                   cfg_domain_path_;
+	std::string                   cfg_problem_path_;
+	std::string                   cfg_fd_options_;
+	std::string                   cfg_collection_;
 
- private:
-  struct action {
-    std::string name;
-    std::vector<std::string> args;
-  };
-  fawkes::PddlPlannerInterface *plan_if_;
-	std::string cfg_descripton_path_;
-	std::string cfg_result_path_;
-	std::string cfg_domain_path_;
-	std::string cfg_problem_path_;
-	std::string cfg_fd_options_;
-  std::string cfg_collection_;
+	std::vector<action> action_list_;
 
-  std::vector<action> action_list_;
+	std::function<void()> planner_;
 
-  std::function<void()> planner_;
-
-  void ff_planner();
-  void fd_planner();
-  void dbmp_planner();
-  mongo::BSONObj BSONFromActionList();
-  static size_t find_nth_space(const std::string& s, size_t nth);
-  void print_action_list();
-	std::string run_planner(std::string command);
-  virtual bool bb_interface_message_received(fawkes::Interface *interface,
-                                             fawkes::Message *message) throw();
+	void           ff_planner();
+	void           fd_planner();
+	void           dbmp_planner();
+	mongo::BSONObj BSONFromActionList();
+	static size_t  find_nth_space(const std::string &s, size_t nth);
+	void           print_action_list();
+	std::string    run_planner(std::string command);
+	virtual bool   bb_interface_message_received(fawkes::Interface *interface,
+	                                             fawkes::Message *  message) throw();
 };
-
 
 #endif
