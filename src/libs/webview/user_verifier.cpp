@@ -44,5 +44,4 @@ WebUserVerifier::~WebUserVerifier()
 {
 }
 
-
 } // end namespace fawkes

@@ -20,13 +20,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <webview/nav_manager.h>
+#include <core/exception.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
-#include <core/exception.h>
+#include <webview/nav_manager.h>
 
 namespace fawkes {
-
 
 /** @class WebNavManager <webview/nav_manager.h>
  * Manage visible navigation entries.
@@ -38,16 +37,14 @@ namespace fawkes {
 /** Constructor. */
 WebNavManager::WebNavManager()
 {
-  mutex_ = new Mutex();
+	mutex_ = new Mutex();
 }
-
 
 /** Destructor. */
 WebNavManager::~WebNavManager()
 {
-  delete mutex_;
+	delete mutex_;
 }
-
 
 /** Add a navigation entry.
  * @param baseurl URL for the navigation target
@@ -57,14 +54,12 @@ WebNavManager::~WebNavManager()
 void
 WebNavManager::add_nav_entry(std::string baseurl, std::string name)
 {
-  MutexLocker lock(mutex_);
-  if (nav_entries_.find(baseurl) != nav_entries_.end()) {
-    throw Exception("Navigation entry for %s has already been added",
-		    baseurl.c_str());
-  }
-  nav_entries_[baseurl] = name;
+	MutexLocker lock(mutex_);
+	if (nav_entries_.find(baseurl) != nav_entries_.end()) {
+		throw Exception("Navigation entry for %s has already been added", baseurl.c_str());
+	}
+	nav_entries_[baseurl] = name;
 }
-
 
 /** Remove a navigation entry.
  * @param baseurl URL for which to remove the navigation entry.
@@ -72,8 +67,8 @@ WebNavManager::add_nav_entry(std::string baseurl, std::string name)
 void
 WebNavManager::remove_nav_entry(std::string baseurl)
 {
-  MutexLocker lock(mutex_);
-  nav_entries_.erase(baseurl);
+	MutexLocker lock(mutex_);
+	nav_entries_.erase(baseurl);
 }
 
 } // end namespace fawkes

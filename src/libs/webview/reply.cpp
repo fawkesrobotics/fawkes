@@ -20,12 +20,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <core/exception.h>
 #include <webview/reply.h>
 
-#include <core/exception.h>
-#include <cstdlib>
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
 
 namespace fawkes {
 
@@ -50,7 +50,6 @@ no_caching(WebReply *reply)
 	return reply;
 }
 
-
 /** @class WebReply <webview/reply.h>
  * Basic web reply.
  * The base class for all web replies. Though the WebRequestDispatcher expects
@@ -66,18 +65,16 @@ bool WebReply::caching_default_ = true;
  */
 WebReply::WebReply(Code code)
 {
-  code_ = code;
-  request_ = NULL;
+	code_    = code;
+	request_ = NULL;
 
-  caching_ = caching_default_;
+	caching_ = caching_default_;
 }
-
 
 /** Destructor. */
 WebReply::~WebReply()
 {
 }
-
 
 /** Enable or disable caching default for replies.
  * This static setting controls whether following replies will allow
@@ -88,7 +85,7 @@ WebReply::~WebReply()
 void
 WebReply::set_caching_default(bool caching)
 {
-  caching_default_ = caching;
+	caching_default_ = caching;
 }
 
 /** Enable or disable caching for this specific reply.
@@ -97,9 +94,8 @@ WebReply::set_caching_default(bool caching)
 void
 WebReply::set_caching(bool caching)
 {
-  caching_ = caching;
+	caching_ = caching;
 }
-
 
 /** Get response code.
  * @return HTTP response code
@@ -107,7 +103,7 @@ WebReply::set_caching(bool caching)
 WebReply::Code
 WebReply::code() const
 {
-  return code_;
+	return code_;
 }
 
 /** Set response code.
@@ -124,33 +120,31 @@ WebReply::set_code(WebReply::Code code)
  * @param content content of the header field
  */
 void
-WebReply::add_header(const std::string& header, const std::string& content)
+WebReply::add_header(const std::string &header, const std::string &content)
 {
-  headers_[header] = content;
+	headers_[header] = content;
 }
-
 
 /** Add a HTTP header.
  * @param header_string header string of the format "Key: Value".
  */
 void
-WebReply::add_header(const std::string& header_string)
+WebReply::add_header(const std::string &header_string)
 {
-  std::string::size_type pos;
-  if ((pos = header_string.find(":")) != std::string::npos) {
-    std::string header = header_string.substr(0, pos);
-    std::string content;
-    if (header_string[pos+1] == ' ') {
-      content = header_string.substr(pos+2);
-    } else {
-      content = header_string.substr(pos+1);
-    }
-    headers_[header] = content;
-  } else {
-    throw Exception("Invalid header '%s'", header_string.c_str());
-  }
+	std::string::size_type pos;
+	if ((pos = header_string.find(":")) != std::string::npos) {
+		std::string header = header_string.substr(0, pos);
+		std::string content;
+		if (header_string[pos + 1] == ' ') {
+			content = header_string.substr(pos + 2);
+		} else {
+			content = header_string.substr(pos + 1);
+		}
+		headers_[header] = content;
+	} else {
+		throw Exception("Invalid header '%s'", header_string.c_str());
+	}
 }
-
 
 /** get headers.
  * @return map of header name/content pairs.
@@ -158,9 +152,8 @@ WebReply::add_header(const std::string& header_string)
 const WebReply::HeaderMap &
 WebReply::headers() const
 {
-  return headers_;
+	return headers_;
 }
-
 
 /** Get associated request.
  * This is only valid after set_request() has been called.
@@ -169,9 +162,8 @@ WebReply::headers() const
 WebRequest *
 WebReply::get_request() const
 {
-  return request_;
+	return request_;
 }
-
 
 /** Set associated request.
  * @param request associated request
@@ -179,7 +171,7 @@ WebReply::get_request() const
 void
 WebReply::set_request(WebRequest *request)
 {
-  request_ = request;
+	request_ = request;
 }
 
 /** Called just before the reply is sent.
@@ -188,10 +180,10 @@ WebReply::set_request(WebRequest *request)
 void
 WebReply::pack_caching()
 {
-  if (! caching_) {
-    // Headers to disable caching
-    headers_["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0";
-  }
+	if (!caching_) {
+		// Headers to disable caching
+		headers_["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0";
+	}
 }
 
 /** @class DynamicWebReply <webview/reply.h>
@@ -221,11 +213,9 @@ WebReply::pack_caching()
 /** Constructor.
  * @param code HTTP response code
  */
-DynamicWebReply::DynamicWebReply(Code code)
-  : WebReply(code)
+DynamicWebReply::DynamicWebReply(Code code) : WebReply(code)
 {
 }
-
 
 /** Chunksize.
  * The size that a single chunk should have. A sub-class may override this if a
@@ -235,10 +225,9 @@ DynamicWebReply::DynamicWebReply(Code code)
 size_t
 DynamicWebReply::chunk_size()
 {
-  // use 32k chunks by default
-  return 32 * 1024;
+	// use 32k chunks by default
+	return 32 * 1024;
 }
-
 
 /** @class StaticWebReply <webview/reply.h>
  * Static web reply.
@@ -251,12 +240,10 @@ DynamicWebReply::chunk_size()
  * @param code HTTP response code
  * @param body optional initial body
  */
-StaticWebReply::StaticWebReply(Code code, std::string body)
-  : WebReply(code)
+StaticWebReply::StaticWebReply(Code code, std::string body) : WebReply(code)
 {
-  _body = body;
+	_body = body;
 }
-
 
 /** Append to body.
  * @param format format of the text to append. Supports the same format as
@@ -265,14 +252,14 @@ StaticWebReply::StaticWebReply(Code code, std::string body)
 void
 StaticWebReply::append_body(const char *format, ...)
 {
-  va_list args;
-  va_start(args, format);
-  char *s;
-  if ( vasprintf(&s, format, args) != -1 ) {
-    _body += s;
-    free(s);
-  }
-  va_end(args);
+	va_list args;
+	va_start(args, format);
+	char *s;
+	if (vasprintf(&s, format, args) != -1) {
+		_body += s;
+		free(s);
+	}
+	va_end(args);
 }
 
 /** Append string to body.
@@ -284,7 +271,6 @@ StaticWebReply::append_body(const std::string &s)
 	_body += s;
 }
 
-
 /** Append simple text line.
  * @param text text to append to body
  * @return reference to this instance
@@ -292,10 +278,9 @@ StaticWebReply::append_body(const std::string &s)
 StaticWebReply &
 StaticWebReply::operator+=(std::string text)
 {
-  _body += text;
-  return *this;
+	_body += text;
+	return *this;
 }
-
 
 /** Get body.
  * @return reference to body.
@@ -303,9 +288,8 @@ StaticWebReply::operator+=(std::string text)
 const std::string &
 StaticWebReply::body()
 {
-  return _body;
+	return _body;
 }
-
 
 /** Get length of body.
  * @return body length
@@ -313,9 +297,8 @@ StaticWebReply::body()
 std::string::size_type
 StaticWebReply::body_length()
 {
-  return _body.length();
+	return _body.length();
 }
-
 
 /** Pack the data.
  * This method is called just before the reply is sent.

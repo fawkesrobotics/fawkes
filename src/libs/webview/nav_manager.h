@@ -32,24 +32,32 @@ class Mutex;
 
 class WebNavManager
 {
- public:
-  /** Navigation map type, mapping URLs to labels. */
-  typedef std::map<std::string, std::string> NavMap;
+public:
+	/** Navigation map type, mapping URLs to labels. */
+	typedef std::map<std::string, std::string> NavMap;
 
-  WebNavManager();
-  ~WebNavManager();
+	WebNavManager();
+	~WebNavManager();
 
-  void add_nav_entry(std::string baseurl, std::string name);
-  void remove_nav_entry(std::string baseurl);
+	void add_nav_entry(std::string baseurl, std::string name);
+	void remove_nav_entry(std::string baseurl);
 
-  /** Get navigation entries. @return navigation entries map. */
-  const NavMap & get_nav_entries() const { return nav_entries_; }
-  /** Get mutex for navigation entries. @return mutex for navigation entries. */
-  Mutex *  mutex() { return mutex_; }
+	/** Get navigation entries. @return navigation entries map. */
+	const NavMap &
+	get_nav_entries() const
+	{
+		return nav_entries_;
+	}
+	/** Get mutex for navigation entries. @return mutex for navigation entries. */
+	Mutex *
+	mutex()
+	{
+		return mutex_;
+	}
 
- private:
-  Mutex                                        *mutex_;
-  NavMap nav_entries_;
+private:
+	Mutex *mutex_;
+	NavMap nav_entries_;
 };
 
 } // end namespace fawkes

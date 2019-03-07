@@ -20,14 +20,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <webview/rest_api_manager.h>
-#include <webview/rest_api.h>
+#include <core/exception.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
-#include <core/exception.h>
+#include <webview/rest_api.h>
+#include <webview/rest_api_manager.h>
 
 namespace fawkes {
-
 
 /** @class WebviewRestApiManager <webview/url_manager.h>
  * Manage URL mappings.
@@ -41,12 +40,10 @@ WebviewRestApiManager::WebviewRestApiManager()
 {
 }
 
-
 /** Destructor. */
 WebviewRestApiManager::~WebviewRestApiManager()
 {
 }
-
 
 /** Add a REST API.
  * @param api REST api handler
@@ -56,14 +53,12 @@ WebviewRestApiManager::~WebviewRestApiManager()
 void
 WebviewRestApiManager::register_api(WebviewRestApi *api)
 {
-  MutexLocker lock(&mutex_);
-  if (apis_.find(api->name()) != apis_.end()) {
-	  throw Exception("A REST API for %s has already been registered",
-	                  api->name().c_str());
-  }
-  apis_[api->name()] = api;
+	MutexLocker lock(&mutex_);
+	if (apis_.find(api->name()) != apis_.end()) {
+		throw Exception("A REST API for %s has already been registered", api->name().c_str());
+	}
+	apis_[api->name()] = api;
 }
-
 
 /** Remove a request processor.
  * @param api REST api handler
@@ -71,8 +66,8 @@ WebviewRestApiManager::register_api(WebviewRestApi *api)
 void
 WebviewRestApiManager::unregister_api(WebviewRestApi *api)
 {
-  MutexLocker lock(&mutex_);
-  apis_.erase(api->name());
+	MutexLocker lock(&mutex_);
+	apis_.erase(api->name());
 }
 
 /** Find API by name.
@@ -91,7 +86,6 @@ WebviewRestApiManager::get_api(std::string &name)
 	return apis_[name];
 }
 
-
 /** Get internal mutex.
  * Use this mutex to guard find_processor() and a following invocation of
  * a found processor against changes due to registering/unregistering of
@@ -101,7 +95,7 @@ WebviewRestApiManager::get_api(std::string &name)
 Mutex &
 WebviewRestApiManager::mutex()
 {
-  return mutex_;
+	return mutex_;
 }
 
 } // end namespace fawkes

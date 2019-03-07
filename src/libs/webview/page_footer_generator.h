@@ -29,9 +29,9 @@ namespace fawkes {
 
 class WebPageFooterGenerator
 {
- public:
-  virtual ~WebPageFooterGenerator();
-  virtual std::string html_footer() = 0;
+public:
+	virtual ~WebPageFooterGenerator();
+	virtual std::string html_footer() = 0;
 };
 
 } // end namespace fawkes

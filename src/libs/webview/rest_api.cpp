@@ -19,10 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <core/exception.h>
 #include <webview/rest_api.h>
 #include <webview/router.h>
-
-#include <core/exception.h>
 
 namespace fawkes {
 
@@ -40,7 +39,10 @@ namespace fawkes {
  * @param logger logger for informative output
  */
 WebviewRestApi::WebviewRestApi(const std::string &name, fawkes::Logger *logger)
-	: name_(name), logger_(logger), pretty_json_(false), router_{std::make_shared<WebviewRouter<Handler>>()}
+: name_(name),
+  logger_(logger),
+  pretty_json_(false),
+  router_{std::make_shared<WebviewRouter<Handler>>()}
 {
 }
 
@@ -59,11 +61,11 @@ WebviewRestApi::name() const
  * @return reply
  */
 WebReply *
-WebviewRestApi::process_request(const WebRequest *request, const std::string & rest_url)
+WebviewRestApi::process_request(const WebRequest *request, const std::string &rest_url)
 {
 	try {
 		std::map<std::string, std::string> path_args;
-		Handler handler = router_->find_handler(request->method(), rest_url, path_args);
+		Handler           handler = router_->find_handler(request->method(), rest_url, path_args);
 		WebviewRestParams params;
 		params.set_path_args(std::move(path_args));
 		params.set_query_args(request->get_values());
@@ -73,7 +75,6 @@ WebviewRestApi::process_request(const WebRequest *request, const std::string & r
 		return NULL;
 	}
 }
-
 
 /** Add handler function.
  * @param method HTTP method to react to
@@ -94,5 +95,5 @@ WebviewRestApi::set_pretty_json(bool pretty)
 {
 	pretty_json_ = pretty;
 }
-	
+
 } // end of namespace fawkes

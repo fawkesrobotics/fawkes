@@ -29,8 +29,8 @@ namespace fawkes {
 
 class WebErrorPageReply : public WebPageReply
 {
- public:
-  WebErrorPageReply(Code error_code, const char *format = NULL, ...);
+public:
+	WebErrorPageReply(Code error_code, const char *format = NULL, ...);
 };
 
 } // end namespace fawkes

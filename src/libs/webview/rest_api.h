@@ -22,40 +22,41 @@
 #ifndef _LIBS_WEBVIEW_REST_API_H_
 #define _LIBS_WEBVIEW_REST_API_H_
 
-#include <webview/request.h>
-#include <webview/reply.h>
-
 #include <core/exception.h>
 #include <logging/logger.h>
 #include <utils/misc/string_split.h>
+#include <webview/reply.h>
+#include <webview/request.h>
 
-#include <vector>
-#include <string>
-#include <memory>
-#include <map>
-#include <functional>
 #include <algorithm>
+#include <functional>
+#include <map>
+#include <memory>
 #include <regex>
+#include <string>
+#include <vector>
 
 namespace fawkes {
 
-template <typename T> class WebviewRouter;
+template <typename T>
+class WebviewRouter;
 
 /** REST reply via Webview.
  * @author Tim Niemueller
  */
 class WebviewRestReply : public StaticWebReply
 {
- public:
+public:
 	/** Constructor.
 	 * @param code HTTP response code
 	 * @param body body of reply, usually a JSON document.
 	 * @param content_type content type of reply, defaults to application/json.
 	 * When sending text error messages, set to text/plain.
 	 */
- WebviewRestReply(WebReply::Code code, const std::string &body = "",
-                  const std::string &content_type = "application/json")
-		: StaticWebReply(code, body)
+	WebviewRestReply(WebReply::Code     code,
+	                 const std::string &body         = "",
+	                 const std::string &content_type = "application/json")
+	: StaticWebReply(code, body)
 	{
 		add_header("Content-type", content_type);
 	}
@@ -68,14 +69,13 @@ class WebviewRestReply : public StaticWebReply
  */
 class WebviewRestException : public fawkes::Exception
 {
- public:
+public:
 	/** Constructor.
 	 * @param code HTTP response code
 	 * @param format format string for error message (cf. printf)
 	 */
-	explicit
-	WebviewRestException(WebReply::Code code, const char *format, ...)
-		: Exception(), code_(code), content_type_("text/plain")
+	explicit WebviewRestException(WebReply::Code code, const char *format, ...)
+	: Exception(), code_(code), content_type_("text/plain")
 	{
 		va_list va;
 		va_start(va, format);
@@ -88,19 +88,18 @@ class WebviewRestException : public fawkes::Exception
 	 * @param o Object to convert to JSON
 	 * @param pretty true to enable pretty printing of the JSON input
 	 */
-	template<typename T,
-		typename = std::enable_if_t<std::is_class<T>::value>>
-	WebviewRestException(WebReply::Code code, const T& o,
-		                     bool pretty = false)
-	 : Exception(), code_(code), content_type_("application/json")
+	template <typename T, typename = std::enable_if_t<std::is_class<T>::value>>
+	WebviewRestException(WebReply::Code code, const T &o, bool pretty = false)
+	: Exception(), code_(code), content_type_("application/json")
 	{
-		append("%s", o.to_json(pretty).c_str());	
+		append("%s", o.to_json(pretty).c_str());
 	}
 
 	/** Get HTTP response code.
 	 * @return HTTP response code
 	 */
-	WebReply::Code code()
+	WebReply::Code
+	code()
 	{
 		return code_;
 	}
@@ -109,13 +108,14 @@ class WebviewRestException : public fawkes::Exception
 	 * @return HTTP content type
 	 */
 	const std::string &
-	content_type() const {
+	content_type() const
+	{
 		return content_type_;
 	}
 
- private:
+private:
 	WebReply::Code code_;
-	std::string content_type_;
+	std::string    content_type_;
 };
 
 /** REST parameters to pass to handlers.
@@ -125,10 +125,12 @@ class WebviewRestParams
 {
 	/// REST API can call private methods.
 	friend class WebviewRestApi;
- public:
+
+public:
 	/** Constructor. */
-	WebviewRestParams()
-		: pretty_json_(false) {}
+	WebviewRestParams() : pretty_json_(false)
+	{
+	}
 
 	/** Get a path argument.
 	 * Retrieves a named argument that was a token in the
@@ -136,7 +138,8 @@ class WebviewRestParams
 	 * @param what what to retrieve
 	 * @return item passed in URL or empty string
 	 */
-	std::string path_arg(const std::string& what)
+	std::string
+	path_arg(const std::string &what)
 	{
 		if (path_args_.find(what) != path_args_.end()) {
 			return path_args_[what];
@@ -151,7 +154,8 @@ class WebviewRestParams
 	 * @param what what to retrieve
 	 * @return item passed in URL or empty string
 	 */
-	std::string query_arg(const std::string& what)
+	std::string
+	query_arg(const std::string &what)
 	{
 		if (query_args_.find(what) != query_args_.end()) {
 			return query_args_[what];
@@ -166,7 +170,8 @@ class WebviewRestParams
 	 * @param what what to check
 	 * @return true if the argument exists (with any value), false otherwise
 	 */
-	bool has_query_arg(const std::string& what)
+	bool
+	has_query_arg(const std::string &what)
 	{
 		return (query_args_.find(what) != query_args_.end());
 	}
@@ -174,7 +179,8 @@ class WebviewRestParams
 	/** Is pretty-printed JSON enabled?
 	 * @return true true to request enabling pretty mode
 	 */
-	bool pretty_json()
+	bool
+	pretty_json()
 	{
 		return pretty_json_;
 	}
@@ -184,24 +190,27 @@ class WebviewRestParams
 	 * interface and classes which support the "pretty" flag.
 	 * @param pretty true to enable, false to disable
 	 */
-	void set_pretty_json(bool pretty)
+	void
+	set_pretty_json(bool pretty)
 	{
 		pretty_json_ = pretty;
 	}
 
- private:
-	void set_path_args(std::map<std::string, std::string>&& args)
+private:
+	void
+	set_path_args(std::map<std::string, std::string> &&args)
 	{
 		path_args_ = std::move(args);
 	}
 
-	void set_query_args(const std::map<std::string, std::string>& args)
+	void
+	set_query_args(const std::map<std::string, std::string> &args)
 	{
 		query_args_ = args;
 	}
 
- private:
-	bool pretty_json_;
+private:
+	bool                               pretty_json_;
 	std::map<std::string, std::string> path_args_;
 	std::map<std::string, std::string> query_args_;
 };
@@ -210,15 +219,15 @@ class Logger;
 
 class WebviewRestApi
 {
- public:
+public:
 	WebviewRestApi(const std::string &name, fawkes::Logger *logger);
 
 	/** REST API call handler function type. */
-	typedef std::function<std::unique_ptr<WebReply> (std::string, WebviewRestParams&)> Handler;
+	typedef std::function<std::unique_ptr<WebReply>(std::string, WebviewRestParams &)> Handler;
 
-	const std::string & 	name() const;
-	void add_handler(WebRequest::Method method, std::string path, Handler handler);
-	void set_pretty_json(bool pretty);
+	const std::string &name() const;
+	void               add_handler(WebRequest::Method method, std::string path, Handler handler);
+	void               set_pretty_json(bool pretty);
 
 	/** Add simple handler.
 	 * For a handler that does not require input parameters and that outputs
@@ -227,21 +236,24 @@ class WebviewRestApi
 	 * @param path path (after component base path) to react to
 	 * @param handler handler function
 	 */
-	void add_handler(WebRequest::Method method, std::string path,
-	                 std::function<std::unique_ptr<WebReply> (WebviewRestParams &)> handler)
+	void
+	add_handler(WebRequest::Method                                            method,
+	            std::string                                                   path,
+	            std::function<std::unique_ptr<WebReply>(WebviewRestParams &)> handler)
 	{
-		add_handler(method, path,
-		            [handler](const std::string &body, WebviewRestParams& m)
-		            -> std::unique_ptr<WebReply>
-		            {
+		add_handler(method,
+		            path,
+		            [handler](const std::string &body,
+		                      WebviewRestParams &m) -> std::unique_ptr<WebReply> {
 			            try {
 				            return handler(m);
 			            } catch (WebviewRestException &e) {
-				            return std::make_unique<WebviewRestReply>
-					            (e.code(), e.what_no_backtrace(), e.content_type());
+				            return std::make_unique<WebviewRestReply>(e.code(),
+				                                                      e.what_no_backtrace(),
+				                                                      e.content_type());
 			            } catch (Exception &e) {
-				            auto r = std::make_unique<WebviewRestReply>
-					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
+				            auto r =
+				              std::make_unique<WebviewRestReply>(WebReply::HTTP_INTERNAL_SERVER_ERROR);
 				            r->append_body("Execution failed: %s", e.what_no_backtrace());
 				            r->add_header("Content-type", "text/plain");
 				            return r;
@@ -256,13 +268,14 @@ class WebviewRestApi
 	 */
 	template <class O, class I>
 	void
-	add_handler(WebRequest::Method method, std::string path,
-		            std::function<O (I &, WebviewRestParams &)> handler)
+	add_handler(WebRequest::Method                         method,
+	            std::string                                path,
+	            std::function<O(I &, WebviewRestParams &)> handler)
 	{
-		add_handler(method, path,
-		            [this, handler](const std::string &body, WebviewRestParams& m)
-		            -> std::unique_ptr<WebReply>
-		            {
+		add_handler(method,
+		            path,
+		            [this, handler](const std::string &body,
+		                            WebviewRestParams &m) -> std::unique_ptr<WebReply> {
 			            I input;
 			            input.from_json(body);
 			            try {
@@ -275,14 +288,16 @@ class WebviewRestApi
 				            if (m.has_query_arg("pretty")) {
 					            m.set_pretty_json(true);
 				            }
-				            return std::make_unique<WebviewRestReply>
-					            (WebReply::HTTP_OK, output.to_json(pretty_json_ || m.pretty_json()));
+				            return std::make_unique<WebviewRestReply>(WebReply::HTTP_OK,
+				                                                      output.to_json(pretty_json_
+				                                                                     || m.pretty_json()));
 			            } catch (WebviewRestException &e) {
-				            return std::make_unique<WebviewRestReply>
-					            (e.code(), e.what_no_backtrace(), e.content_type());
+				            return std::make_unique<WebviewRestReply>(e.code(),
+				                                                      e.what_no_backtrace(),
+				                                                      e.content_type());
 			            } catch (Exception &e) {
-				            auto r = std::make_unique<WebviewRestReply>
-					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
+				            auto r =
+				              std::make_unique<WebviewRestReply>(WebReply::HTTP_INTERNAL_SERVER_ERROR);
 				            r->append_body("Execution failed: %s", e.what_no_backtrace());
 				            r->add_header("Content-type", "text/plain");
 				            return r;
@@ -296,23 +311,26 @@ class WebviewRestApi
 	 * @param handler handler function
 	 */
 	template <class I>
-	void add_handler(WebRequest::Method method, std::string path,
-	                 std::function<std::unique_ptr<WebReply> (I, WebviewRestParams &)> handler)
+	void
+	add_handler(WebRequest::Method                                               method,
+	            std::string                                                      path,
+	            std::function<std::unique_ptr<WebReply>(I, WebviewRestParams &)> handler)
 	{
-		add_handler(method, path,
-		            [this, handler](const std::string &body, WebviewRestParams& m)
-		            -> std::unique_ptr<WebReply>
-		            {
+		add_handler(method,
+		            path,
+		            [this, handler](const std::string &body,
+		                            WebviewRestParams &m) -> std::unique_ptr<WebReply> {
 			            I input;
 			            input.from_json(body);
 			            try {
 				            return handler(std::forward<I>(input), m);
 			            } catch (WebviewRestException &e) {
-				            return std::make_unique<WebviewRestReply>
-					            (e.code(), e.what_no_backtrace(), e.content_type());
+				            return std::make_unique<WebviewRestReply>(e.code(),
+				                                                      e.what_no_backtrace(),
+				                                                      e.content_type());
 			            } catch (Exception &e) {
-				            auto r = std::make_unique<WebviewRestReply>
-					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
+				            auto r =
+				              std::make_unique<WebviewRestReply>(WebReply::HTTP_INTERNAL_SERVER_ERROR);
 				            r->append_body("Execution failed: %s", e.what_no_backtrace());
 				            r->add_header("Content-type", "text/plain");
 				            return r;
@@ -326,13 +344,15 @@ class WebviewRestApi
 	 * @param handler handler function
 	 */
 	template <class O>
-	void add_handler(WebRequest::Method method, std::string path,
-	                 std::function<O (WebviewRestParams &)> handler)
+	void
+	add_handler(WebRequest::Method                    method,
+	            std::string                           path,
+	            std::function<O(WebviewRestParams &)> handler)
 	{
-		add_handler(method, path,
-		            [this, handler](const std::string &body, WebviewRestParams& m)
-		            -> std::unique_ptr<WebReply>
-		            {
+		add_handler(method,
+		            path,
+		            [this, handler](const std::string &body,
+		                            WebviewRestParams &m) -> std::unique_ptr<WebReply> {
 			            try {
 				            O output{handler(m)};
 				            try {
@@ -343,14 +363,16 @@ class WebviewRestApi
 				            if (m.has_query_arg("pretty")) {
 					            m.set_pretty_json(true);
 				            }
-				            return std::make_unique<WebviewRestReply>
-					            (WebReply::HTTP_OK, output.to_json(pretty_json_ || m.pretty_json()));
+				            return std::make_unique<WebviewRestReply>(WebReply::HTTP_OK,
+				                                                      output.to_json(pretty_json_
+				                                                                     || m.pretty_json()));
 			            } catch (WebviewRestException &e) {
-				            return std::make_unique<WebviewRestReply>
-					            (e.code(), e.what_no_backtrace(), e.content_type());
+				            return std::make_unique<WebviewRestReply>(e.code(),
+				                                                      e.what_no_backtrace(),
+				                                                      e.content_type());
 			            } catch (Exception &e) {
-				            auto r = std::make_unique<WebviewRestReply>
-					            (WebReply::HTTP_INTERNAL_SERVER_ERROR);
+				            auto r =
+				              std::make_unique<WebviewRestReply>(WebReply::HTTP_INTERNAL_SERVER_ERROR);
 				            r->append_body("Execution failed: %s", e.what_no_backtrace());
 				            r->add_header("Content-type", "text/plain");
 				            return r;
@@ -358,16 +380,15 @@ class WebviewRestApi
 		            });
 	}
 
-	WebReply *
-		process_request(const WebRequest *request, const std::string &rest_url);
+	WebReply *process_request(const WebRequest *request, const std::string &rest_url);
 
- private:
-	std::string     name_;
-	fawkes::Logger *logger_;
-	bool            pretty_json_;
+private:
+	std::string                             name_;
+	fawkes::Logger *                        logger_;
+	bool                                    pretty_json_;
 	std::shared_ptr<WebviewRouter<Handler>> router_;
 };
 
-}
+} // namespace fawkes
 
 #endif

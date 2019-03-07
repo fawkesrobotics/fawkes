@@ -31,17 +31,17 @@ class WebRequest;
 
 class WebviewAccessLog
 {
- public:
-  WebviewAccessLog(const char *filename);
-  ~WebviewAccessLog();
+public:
+	WebviewAccessLog(const char *filename);
+	~WebviewAccessLog();
 
-  void log(const WebRequest *request);
+	void log(const WebRequest *request);
 
- private:
-  Mutex *mutex_;
-  FILE  *logfile_;
+private:
+	Mutex *mutex_;
+	FILE * logfile_;
 };
 
-}
+} // namespace fawkes
 
 #endif
