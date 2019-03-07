@@ -22,14 +22,13 @@
 
 #include "string.h"
 
-#include <list>
-#include <tuple>
-#include <string>
 #include <cstring>
+#include <list>
+#include <string>
+#include <tuple>
 #include <vector>
 
 namespace fawkes {
-
 
 /** Convert command args to string.
  * @param argv arguments, assumed to be standard args as passed to programs,
@@ -39,14 +38,14 @@ namespace fawkes {
 std::string
 command_args_tostring(const char *argv[])
 {
-  std::string command = "";
-  for (int i = 0; argv[i]; ++i) {
-    if (i > 0)  command += " ";
-    command += argv[i];
-  }
-  return command;
+	std::string command = "";
+	for (int i = 0; argv[i]; ++i) {
+		if (i > 0)
+			command += " ";
+		command += argv[i];
+	}
+	return command;
 }
-
 
 /** Convert environment to string.
  * This simply creates a string with semi-colon separated environment elements.
@@ -57,14 +56,14 @@ command_args_tostring(const char *argv[])
 std::string
 envp_tostring(char *envp[])
 {
-  std::string environment = "";
-  for (int i = 0; envp[i]; ++i) {
-    if (i > 0)  environment += "; ";
-    environment += envp[i];
-  }
-  return environment;
+	std::string environment = "";
+	for (int i = 0; envp[i]; ++i) {
+		if (i > 0)
+			environment += "; ";
+		environment += envp[i];
+	}
+	return environment;
 }
-
 
 /** Copy an environment and extend certain paths.
  * This will create a vector which comprises the environment in @p environ.
@@ -83,55 +82,53 @@ envp_tostring(char *envp[])
 std::vector<std::string>
 envp_copy_expand(char *environ[], const char *path_ext[])
 {
-  std::list<std::tuple<std::string, std::string, bool>> path_ext_m;
-  for (size_t i = 0; path_ext[i] && path_ext[i+1]; i += 2) {
-    std::string match = std::string(path_ext[i]) + "=";
-    path_ext_m.push_back(std::make_tuple(match, std::string(path_ext[i+1]), false));
-  }
-
-  unsigned int extra_ent = 0;
-
-  size_t environ_length = 0;
-  for (size_t i = 0; environ[i]; ++i) {
-    ++environ_length;
-    std::string ev = environ[i];
-    for (auto &m : path_ext_m) {
-      if (ev.find(std::get<0>(m)) == 0) {
-	std::get<2>(m) = true;
-	++extra_ent;
-	break;
-      }
-    }
-  }
-
-  size_t envp_length = environ_length + extra_ent;
-  std::vector<std::string> envp(envp_length);
-  for (size_t i = 0; environ[i]; ++i) {
-    std::string ev(environ[i]);
-    for (auto m : path_ext_m) {
-      if (ev.find(std::get<0>(m)) == 0) {
-	// modify
-	if (ev[ev.length()-1] == ':') {
-	  ev += std::get<1>(m) + ":";
-	} else {
-	  ev += ":" + std::get<1>(m);
+	std::list<std::tuple<std::string, std::string, bool>> path_ext_m;
+	for (size_t i = 0; path_ext[i] && path_ext[i + 1]; i += 2) {
+		std::string match = std::string(path_ext[i]) + "=";
+		path_ext_m.push_back(std::make_tuple(match, std::string(path_ext[i + 1]), false));
 	}
-      }
-    }
-    envp[i] = ev;
-  }
 
-  unsigned int extra_ind = 0;
-  for (auto m : path_ext_m) {
-    if (! std::get<2>(m)) {
-      std::string ev = std::get<0>(m) + std::get<1>(m) + ":";
-      envp[envp_length - extra_ent + extra_ind++] = ev;
-    }
-  }
+	unsigned int extra_ent = 0;
 
-  return envp;
+	size_t environ_length = 0;
+	for (size_t i = 0; environ[i]; ++i) {
+		++environ_length;
+		std::string ev = environ[i];
+		for (auto &m : path_ext_m) {
+			if (ev.find(std::get<0>(m)) == 0) {
+				std::get<2>(m) = true;
+				++extra_ent;
+				break;
+			}
+		}
+	}
+
+	size_t                   envp_length = environ_length + extra_ent;
+	std::vector<std::string> envp(envp_length);
+	for (size_t i = 0; environ[i]; ++i) {
+		std::string ev(environ[i]);
+		for (auto m : path_ext_m) {
+			if (ev.find(std::get<0>(m)) == 0) {
+				// modify
+				if (ev[ev.length() - 1] == ':') {
+					ev += std::get<1>(m) + ":";
+				} else {
+					ev += ":" + std::get<1>(m);
+				}
+			}
+		}
+		envp[i] = ev;
+	}
+
+	unsigned int extra_ind = 0;
+	for (auto m : path_ext_m) {
+		if (!std::get<2>(m)) {
+			std::string ev                              = std::get<0>(m) + std::get<1>(m) + ":";
+			envp[envp_length - extra_ent + extra_ind++] = ev;
+		}
+	}
+
+	return envp;
 }
 
 } // end namespace fawkes
-
-

@@ -26,7 +26,6 @@
 
 namespace fawkes {
 
-
 /** @class BinomialCoefficient <utils/math/binomial_coefficient.h>
  *  Contains method to compute the binomial coefficient.
  * 
@@ -35,31 +34,29 @@ namespace fawkes {
 
 class BinomialCoefficient
 {
- public:
-  /** Calculates the binomial coefficient.
+public:
+	/** Calculates the binomial coefficient.
    * @param n upper value
    * @param k lower value
    * @return the binomial coefficient of n and k
    */
-  static inline unsigned int binoc(unsigned int n, unsigned int k)
-  {
-    unsigned int result;
-    if(k == 0)
-      return 1;
-    if(2 * k > n)
-      result = binoc(n, n - k);
-    else
-    {
-      result = n;
-      for(unsigned int i = 2; i <= k; i++)
-      {
-	result = result * ((n + 1 - i) / i);
-      }
-    }
-    return result;
-  }
+	static inline unsigned int
+	binoc(unsigned int n, unsigned int k)
+	{
+		unsigned int result;
+		if (k == 0)
+			return 1;
+		if (2 * k > n)
+			result = binoc(n, n - k);
+		else {
+			result = n;
+			for (unsigned int i = 2; i <= k; i++) {
+				result = result * ((n + 1 - i) / i);
+			}
+		}
+		return result;
+	}
 };
-
 
 } // end namespace fawkes
 

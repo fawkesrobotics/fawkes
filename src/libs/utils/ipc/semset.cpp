@@ -21,42 +21,38 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/ipc/semset.h>
-#include <utils/ipc/sem_exceptions.h>
 #include <core/exceptions/system.h>
-
-#include <errno.h>
-
-#include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
+#include <sys/types.h>
+#include <utils/ipc/sem_exceptions.h>
+#include <utils/ipc/semset.h>
+
+#include <errno.h>
 #include <limits.h>
 
 namespace fawkes {
 
-
 /// @cond INTERNALS
 class SemaphoreSetData
 {
- public:
-  key_t   key;
-  int     semid;
-  int     semflg;
-  int     num_sems;
+public:
+	key_t key;
+	int   semid;
+	int   semflg;
+	int   num_sems;
 };
 
 #if defined(_SEM_SEMUN_UNDEFINED) || defined(__FreeBSD__)
-union semun
-{
-  int val;                   /* value for SETVAL */
-  struct semid_ds *buf;      /* buffer for IPC_STAT & IPC_SET */
-  unsigned short int *array; /* array for GETALL & SETALL */
-  struct seminfo *buf_;     /* buffer for IPC_INFO */
+union semun {
+	int                 val;   /* value for SETVAL */
+	struct semid_ds *   buf;   /* buffer for IPC_STAT & IPC_SET */
+	unsigned short int *array; /* array for GETALL & SETALL */
+	struct seminfo *    buf_;  /* buffer for IPC_INFO */
 };
 #endif
 
 /// @endcond
-
 
 /** @class SemaphoreSet utils/ipc/semset.h
  * IPC semaphore set.
@@ -86,7 +82,6 @@ union semun
  * Destroy this semaphore on delete?
  */
 
-
 /** Constructor.
  * Creates a new semaphore set. Will try to open the semaphore if it does
  * exist. Tries to create if create is assured.
@@ -99,29 +94,29 @@ union semun
  *                          is deleted.
  * @param create If true semaphore set is created if it does not exist.
  */
-SemaphoreSet::SemaphoreSet(const char *path, char id,
-			   int num_sems,
-			   bool create, bool destroy_on_delete)
+SemaphoreSet::SemaphoreSet(const char *path,
+                           char        id,
+                           int         num_sems,
+                           bool        create,
+                           bool        destroy_on_delete)
 {
-  data = new SemaphoreSetData();
+	data = new SemaphoreSetData();
 
-  if ( num_sems < 0 ) {
-    num_sems = - num_sems;
-  }
+	if (num_sems < 0) {
+		num_sems = -num_sems;
+	}
 
-  this->destroy_on_delete = destroy_on_delete;
-  data->num_sems = num_sems;
+	this->destroy_on_delete = destroy_on_delete;
+	data->num_sems          = num_sems;
 
-  data->semflg = 0666;
-  if (create) {
-    data->semflg |= IPC_CREAT;
-  }
+	data->semflg = 0666;
+	if (create) {
+		data->semflg |= IPC_CREAT;
+	}
 
-  data->key   = ftok(path, id);
-  data->semid = semget(data->key, num_sems, data->semflg);
-
+	data->key   = ftok(path, id);
+	data->semid = semget(data->key, num_sems, data->semflg);
 }
-
 
 /** Constructor.
  * Creates a new semaphore set. Will try to open the semaphore if it does
@@ -134,32 +129,29 @@ SemaphoreSet::SemaphoreSet(const char *path, char id,
  *                          is deleted.
  * @param create If true semaphore set is created if it does not exist.
  */
-SemaphoreSet::SemaphoreSet(int key,
-			   int num_sems,
-			   bool create, bool destroy_on_delete)
+SemaphoreSet::SemaphoreSet(int key, int num_sems, bool create, bool destroy_on_delete)
 {
-  data = new SemaphoreSetData();
+	data = new SemaphoreSetData();
 
-  if ( num_sems < 0 ) {
-    num_sems = - num_sems;
-  }
+	if (num_sems < 0) {
+		num_sems = -num_sems;
+	}
 
-  this->destroy_on_delete = destroy_on_delete;
-  data->num_sems = num_sems;
+	this->destroy_on_delete = destroy_on_delete;
+	data->num_sems          = num_sems;
 
-  data->semflg = 0666;
-  if (create) {
-    data->semflg |= IPC_CREAT;
-  }
+	data->semflg = 0666;
+	if (create) {
+		data->semflg |= IPC_CREAT;
+	}
 
-  data->key   = key;
-  data->semid = semget(data->key, num_sems, data->semflg);
+	data->key   = key;
+	data->semid = semget(data->key, num_sems, data->semflg);
 
-  if ( data->semid == -1 ) {
-    throw Exception(errno, "Creating the semaphore set failed, maybe key does not exist");
-  }
+	if (data->semid == -1) {
+		throw Exception(errno, "Creating the semaphore set failed, maybe key does not exist");
+	}
 }
-
 
 /** Constructor.
  * Creates a new semaphore set with a new ID supplied by the system. The
@@ -170,41 +162,38 @@ SemaphoreSet::SemaphoreSet(int key,
  * @param destroy_on_delete If true semaphore set is destroyed if instance
  *                          is deleted.
  */
-SemaphoreSet::SemaphoreSet(int num_sems,
-			   bool destroy_on_delete)
+SemaphoreSet::SemaphoreSet(int num_sems, bool destroy_on_delete)
 {
-  data = new SemaphoreSetData();
+	data = new SemaphoreSetData();
 
-  if ( num_sems < 0 ) {
-    num_sems = - num_sems;
-  }
+	if (num_sems < 0) {
+		num_sems = -num_sems;
+	}
 
-  this->destroy_on_delete = destroy_on_delete;
-  data->num_sems = num_sems;
+	this->destroy_on_delete = destroy_on_delete;
+	data->num_sems          = num_sems;
 
-  data->semflg = 0666;
-  data->semflg |= IPC_CREAT;
-  data->semflg |= IPC_EXCL;  
+	data->semflg = 0666;
+	data->semflg |= IPC_CREAT;
+	data->semflg |= IPC_EXCL;
 
-  for (data->key = 1; data->key < INT_MAX; data->key++) {
-    data->semid = semget(data->key, num_sems, data->semflg);
-    if ( data->semid != -1 ) {
-      // valid semaphore found
-      break;
-    }
-  }
+	for (data->key = 1; data->key < INT_MAX; data->key++) {
+		data->semid = semget(data->key, num_sems, data->semflg);
+		if (data->semid != -1) {
+			// valid semaphore found
+			break;
+		}
+	}
 }
-
 
 /** Destructor */
 SemaphoreSet::~SemaphoreSet()
 {
-  if ((data->semid != -1) && destroy_on_delete) {
-    semctl(data->semid, 0, IPC_RMID, 0);
-  }
-  delete data;
+	if ((data->semid != -1) && destroy_on_delete) {
+		semctl(data->semid, 0, IPC_RMID, 0);
+	}
+	delete data;
 }
-
 
 /** Check if the semaphore set is valid.
  * If the queue could not be opened yet (for example if you gave create=false to the
@@ -215,32 +204,32 @@ SemaphoreSet::~SemaphoreSet()
 bool
 SemaphoreSet::valid()
 {
-  if (data->semid == -1) {
-    data->semid = semget(data->key, data->num_sems, data->semflg);
-    if (data->semid == -1) {
-      return false;
-    } else {
-      struct semid_ds semds;
-      union semun s;
-      s.buf = &semds;
-      if (semctl(data->semid, 0, IPC_STAT, s) != -1) {
-	return true;
-      } else {
-	data->semid = -1;
-	return false;
-      }
-    }
-  } else {
-    struct semid_ds semds;
-    union semun s;
-    s.buf = &semds;
-    if (semctl(data->semid, 0, IPC_STAT, s) != -1) {
-      return true;
-    } else {
-      data->semid = -1;
-      return false;
-    }
-  }
+	if (data->semid == -1) {
+		data->semid = semget(data->key, data->num_sems, data->semflg);
+		if (data->semid == -1) {
+			return false;
+		} else {
+			struct semid_ds semds;
+			union semun     s;
+			s.buf = &semds;
+			if (semctl(data->semid, 0, IPC_STAT, s) != -1) {
+				return true;
+			} else {
+				data->semid = -1;
+				return false;
+			}
+		}
+	} else {
+		struct semid_ds semds;
+		union semun     s;
+		s.buf = &semds;
+		if (semctl(data->semid, 0, IPC_STAT, s) != -1) {
+			return true;
+		} else {
+			data->semid = -1;
+			return false;
+		}
+	}
 }
 
 /** Lock resources on the semaphore set.
@@ -254,18 +243,20 @@ SemaphoreSet::valid()
 void
 SemaphoreSet::lock(unsigned short sem_num, short num)
 {
-  if ( data->semid == -1 )  throw SemInvalidException();
+	if (data->semid == -1)
+		throw SemInvalidException();
 
-  struct sembuf sop;
-  sop.sem_num = sem_num;
-  sop.sem_op  = (short)((num <= 0) ? num : -num);
-  sop.sem_flg = 0;
-  if ( semop(data->semid, &sop, 1) != 0 ) {
-    if ( errno == EINTR ) throw InterruptedException();
-    else                  throw SemCannotLockException();
-  }
+	struct sembuf sop;
+	sop.sem_num = sem_num;
+	sop.sem_op  = (short)((num <= 0) ? num : -num);
+	sop.sem_flg = 0;
+	if (semop(data->semid, &sop, 1) != 0) {
+		if (errno == EINTR)
+			throw InterruptedException();
+		else
+			throw SemCannotLockException();
+	}
 }
-
 
 /** Try to lock resources on the semaphore set.
  * @param sem_num The semaphore number in the set
@@ -278,24 +269,24 @@ SemaphoreSet::lock(unsigned short sem_num, short num)
 bool
 SemaphoreSet::try_lock(unsigned short sem_num, short num)
 {
-  if ( data->semid == -1 )  throw SemInvalidException();
+	if (data->semid == -1)
+		throw SemInvalidException();
 
-  struct sembuf sop;
-  sop.sem_num = sem_num;
-  sop.sem_op  = (short)((num <= 0) ? num : -num);
-  sop.sem_flg = IPC_NOWAIT;
-  if ( semop(data->semid, &sop, 1) != 0 ) {
-    if (errno == EAGAIN) {
-      return false;
-    } else if ( errno == EINTR ) {
-      throw InterruptedException();
-    } else {
-      throw SemCannotLockException();
-    }
-  }
-  return true;
+	struct sembuf sop;
+	sop.sem_num = sem_num;
+	sop.sem_op  = (short)((num <= 0) ? num : -num);
+	sop.sem_flg = IPC_NOWAIT;
+	if (semop(data->semid, &sop, 1) != 0) {
+		if (errno == EAGAIN) {
+			return false;
+		} else if (errno == EINTR) {
+			throw InterruptedException();
+		} else {
+			throw SemCannotLockException();
+		}
+	}
+	return true;
 }
-
 
 /** Unlock resources on the semaphore set.
  * @param sem_num The semaphore number in the set
@@ -307,18 +298,20 @@ SemaphoreSet::try_lock(unsigned short sem_num, short num)
 void
 SemaphoreSet::unlock(unsigned short sem_num, short num)
 {
-  if ( data->semid == -1 )  throw SemInvalidException();
+	if (data->semid == -1)
+		throw SemInvalidException();
 
-  struct sembuf sop;
-  sop.sem_num = sem_num;
-  sop.sem_op  = (short)((num >= 0) ? num : -num);
-  sop.sem_flg = 0;
-  if ( semop(data->semid, &sop, 1) != 0 ) {
-    if ( errno == EINTR ) throw InterruptedException();
-    else                  throw SemCannotUnlockException();
-  }
+	struct sembuf sop;
+	sop.sem_num = sem_num;
+	sop.sem_op  = (short)((num >= 0) ? num : -num);
+	sop.sem_flg = 0;
+	if (semop(data->semid, &sop, 1) != 0) {
+		if (errno == EINTR)
+			throw InterruptedException();
+		else
+			throw SemCannotUnlockException();
+	}
 }
-
 
 /** Set the semaphore value.
  * @param sem_num The semaphore number in the set
@@ -328,16 +321,16 @@ SemaphoreSet::unlock(unsigned short sem_num, short num)
 void
 SemaphoreSet::set_value(int sem_num, int val)
 {
-  if ( data->semid == -1 )  throw SemInvalidException();
+	if (data->semid == -1)
+		throw SemInvalidException();
 
-  union semun s;
-  s.val = val;
+	union semun s;
+	s.val = val;
 
-  if ( semctl(data->semid, sem_num, SETVAL, s) == -1 ) {
-    throw SemCannotSetValException();
-  }
+	if (semctl(data->semid, sem_num, SETVAL, s) == -1) {
+		throw SemCannotSetValException();
+	}
 }
-
 
 /** Get the semaphore value.
  * @param sem_num The semaphore number in the set
@@ -347,11 +340,11 @@ SemaphoreSet::set_value(int sem_num, int val)
 int
 SemaphoreSet::get_value(int sem_num)
 {
-  if ( data->semid == -1 )  throw SemInvalidException();
+	if (data->semid == -1)
+		throw SemInvalidException();
 
-  return ( semctl(data->semid, sem_num, GETVAL, 0) != 0 );
+	return (semctl(data->semid, sem_num, GETVAL, 0) != 0);
 }
-
 
 /** Get key of semaphore.
  * @return Key of semaphore as listed by ipcs.
@@ -359,9 +352,8 @@ SemaphoreSet::get_value(int sem_num)
 int
 SemaphoreSet::key()
 {
-  return data->key;
+	return data->key;
 }
-
 
 /** Set if semaphore set should be destroyed on delete.
  * If this is set to true the semaphore set is destroyed from the system if this
@@ -372,9 +364,8 @@ SemaphoreSet::key()
 void
 SemaphoreSet::set_destroy_on_delete(bool destroy)
 {
-  destroy_on_delete = destroy;
+	destroy_on_delete = destroy;
 }
-
 
 /* ==================================================================
  * STATICs
@@ -389,21 +380,20 @@ SemaphoreSet::set_destroy_on_delete(bool destroy)
 int
 SemaphoreSet::free_key()
 {
-  bool found = false;
-  int key;
-  int semid;
-  for (key = 1; key < INT_MAX; ++key) {
-    semid = semget(key, 1, IPC_CREAT | IPC_EXCL);
-    if ( semid != -1 ) {
-      // valid semaphore found
-      semctl(semid, 0, IPC_RMID, 0);
-      found = true;
-      break;
-    }
-  }
-  return (found ? key : 0);
+	bool found = false;
+	int  key;
+	int  semid;
+	for (key = 1; key < INT_MAX; ++key) {
+		semid = semget(key, 1, IPC_CREAT | IPC_EXCL);
+		if (semid != -1) {
+			// valid semaphore found
+			semctl(semid, 0, IPC_RMID, 0);
+			found = true;
+			break;
+		}
+	}
+	return (found ? key : 0);
 }
-
 
 /** Destroy a semaphore set.
  * Destroy the semaphore denoted by key. No tests are done if some other
@@ -413,10 +403,10 @@ SemaphoreSet::free_key()
 void
 SemaphoreSet::destroy(int key)
 {
-  int semid = semget(key, 0, 0);
-  if ( semid == -1 ) return;
-  semctl(semid, 0, IPC_RMID, 0);
+	int semid = semget(key, 0, 0);
+	if (semid == -1)
+		return;
+	semctl(semid, 0, IPC_RMID, 0);
 }
-
 
 } // end namespace fawkes

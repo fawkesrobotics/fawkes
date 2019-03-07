@@ -24,15 +24,15 @@
 // Do not include in api reference
 ///@cond QA
 
-#include <utils/ipc/semset.h>
-
-#include <signal.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <utils/ipc/semset.h>
+
 #include <iostream>
+#include <signal.h>
 
 #define FATHER_LOCK 0
-#define CHILD_LOCK  1
+#define CHILD_LOCK 1
 
 using namespace std;
 using namespace fawkes;
@@ -42,84 +42,82 @@ bool quit;
 void
 signal_handler(int signum)
 {
-  cout << "Signal handler called" << endl;
-  quit = true;
+	cout << "Signal handler called" << endl;
+	quit = true;
 }
 
 int
-main( int argc, char **argv )
+main(int argc, char **argv)
 {
-  quit = false;
-  signal(SIGINT, signal_handler);
+	quit = false;
+	signal(SIGINT, signal_handler);
 
-  pid_t child_pid;
+	pid_t child_pid;
 
-  if ((child_pid = fork()) == 0) {
-    // child
+	if ((child_pid = fork()) == 0) {
+		// child
 
-    SemaphoreSet *s2 = new SemaphoreSet(".", 'A', 2, false, false);
+		SemaphoreSet *s2 = new SemaphoreSet(".", 'A', 2, false, false);
 
-    while ( !s2->valid() ) {
-      // wait for father to open up semaphore, could also set create to true
-      // in constructor call
-      usleep(100000);
-    }
+		while (!s2->valid()) {
+			// wait for father to open up semaphore, could also set create to true
+			// in constructor call
+			usleep(100000);
+		}
 
-    while ( ! quit ) {
+		while (!quit) {
+			cout << "Child: Unlocking child lock" << endl;
+			s2->unlock(CHILD_LOCK);
 
-      cout << "Child: Unlocking child lock" << endl;
-      s2->unlock(CHILD_LOCK);
+			cout << "Child: Waiting for father lock to become ready" << endl;
+			s2->lock(FATHER_LOCK);
+			cout << "Child: Father lock aquired, unlocking" << endl;
+			s2->unlock(FATHER_LOCK);
 
-      cout << "Child: Waiting for father lock to become ready" << endl;
-      s2->lock(FATHER_LOCK);
-      cout << "Child: Father lock aquired, unlocking" << endl;
-      s2->unlock(FATHER_LOCK);
+			cout << "Child: Sleeping" << endl;
+			usleep(521342);
+			cout << "Child: Locking child lock" << endl;
+			s2->lock(CHILD_LOCK);
+			cout << "Child: Sleeping again" << endl;
+			usleep(12323);
+		}
 
-      cout << "Child: Sleeping" << endl;
-      usleep(521342);
-      cout << "Child: Locking child lock" << endl;
-      s2->lock(CHILD_LOCK);
-      cout << "Child: Sleeping again" << endl;
-      usleep(12323);
-    }
-    
-    cout << "Child: Destroying s2" << endl;
-    delete s2;
+		cout << "Child: Destroying s2" << endl;
+		delete s2;
 
-  } else {
-    // father
+	} else {
+		// father
 
-    // Will be used by father
-    // Semaphore set with two semaphores, but zero at the beginning
-    SemaphoreSet *s1 = new SemaphoreSet(".", 'A', 2, true, true);
+		// Will be used by father
+		// Semaphore set with two semaphores, but zero at the beginning
+		SemaphoreSet *s1 = new SemaphoreSet(".", 'A', 2, true, true);
 
-    while ( ! quit ) {
-      cout << "Father: Unlocking father lock" << endl;
-      s1->unlock(FATHER_LOCK);
+		while (!quit) {
+			cout << "Father: Unlocking father lock" << endl;
+			s1->unlock(FATHER_LOCK);
 
-      cout << "Father: Waiting for child lock to become ready" << endl;
-      s1->lock(CHILD_LOCK);
-      cout << "Father: Child lock aquired, unlocking" << endl;
-      s1->unlock(CHILD_LOCK);
+			cout << "Father: Waiting for child lock to become ready" << endl;
+			s1->lock(CHILD_LOCK);
+			cout << "Father: Child lock aquired, unlocking" << endl;
+			s1->unlock(CHILD_LOCK);
 
-      cout << "Father: Sleeping" << endl;
-      usleep(821342);
-      cout << "Father: Locking father lock" << endl;
-      s1->lock(FATHER_LOCK);
-      cout << "Father: again" << endl;
-      usleep(52323);
-    }
+			cout << "Father: Sleeping" << endl;
+			usleep(821342);
+			cout << "Father: Locking father lock" << endl;
+			s1->lock(FATHER_LOCK);
+			cout << "Father: again" << endl;
+			usleep(52323);
+		}
 
-    cout << "Father: Waiting for child to exit" << endl;
-    int status;
-    waitpid(child_pid, &status, 0);
+		cout << "Father: Waiting for child to exit" << endl;
+		int status;
+		waitpid(child_pid, &status, 0);
 
-    cout << "Father: Destroying s1" << endl;
-    delete s1;
-  }
+		cout << "Father: Destroying s1" << endl;
+		delete s1;
+	}
 
-  return 0;
+	return 0;
 }
-
 
 /// @endcond

@@ -30,30 +30,30 @@ namespace fawkes {
 
 class Watch
 {
- public:
-  Watch(Clock *clock);
-  virtual ~Watch();
+public:
+	Watch(Clock *clock);
+	virtual ~Watch();
 
-  void start(Time* t = 0);
-  void stop(Time* t = 0);
-  void pause(Time* t = 0);
-  void reset();
+	void start(Time *t = 0);
+	void stop(Time *t = 0);
+	void pause(Time *t = 0);
+	void reset();
 
-  Time watch_time();
-  Time clock_time();
+	Time watch_time();
+	Time clock_time();
 
- private:
-  Time watch_start;
-  Time watch_stop;
+private:
+	Time watch_start;
+	Time watch_stop;
 
-  Time pause_start;
-  Time pause_stop;
-  Time pause_time;
+	Time pause_start;
+	Time pause_stop;
+	Time pause_time;
 
-  Clock* clock;
+	Clock *clock;
 
-  bool is_running;
-  bool is_paused;
+	bool is_running;
+	bool is_paused;
 };
 
 } // end namespace fawkes

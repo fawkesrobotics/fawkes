@@ -34,10 +34,8 @@ namespace fawkes {
 /** Constructor.
  * @param msg message
  */
-DependencyViolationException::DependencyViolationException(const char *msg)
-  : Exception(msg)
+DependencyViolationException::DependencyViolationException(const char *msg) : Exception(msg)
 {
 }
-
 
 } // end namespace fawkes

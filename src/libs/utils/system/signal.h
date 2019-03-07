@@ -32,43 +32,44 @@
 
 namespace fawkes {
 
-class SignalHandler {
- public:
-  virtual ~SignalHandler() {}
-  virtual void handle_signal(int signal)   = 0;
+class SignalHandler
+{
+public:
+	virtual ~SignalHandler()
+	{
+	}
+	virtual void handle_signal(int signal) = 0;
 };
 
+class SignalManager
+{
+public:
+	static SignalManager *instance();
+	static void           finalize();
+	static SignalHandler *register_handler(int signum, SignalHandler *handler);
+	static void           unregister_handler(int signum);
+	static void           unregister_handler(SignalHandler *handler);
+	static void           ignore(int signum);
 
-class SignalManager {
+private:
+	// Guard constructors, make sure we are a singleton
+	SignalManager();
+	SignalManager(const SignalManager &cc);
 
- public:
-  static SignalManager *  instance();
-  static void             finalize();
-  static SignalHandler *  register_handler(int signum, SignalHandler *handler);
-  static void             unregister_handler(int signum);
-  static void             unregister_handler(SignalHandler *handler);
-  static void             ignore(int signum);
+	static SignalManager *instance_;
 
- private:
-  // Guard constructors, make sure we are a singleton
-  SignalManager();
-  SignalManager(const SignalManager& cc);
+	// Entry point adapter installed into <sigaction>
+	// (must be a static method or a stand-alone
+	// extern "C" function).
+	static void dispatcher(int signum);
 
-  static SignalManager *instance_;
+	// restores default signal handler, called by unregister_*
+	static void restore_default(int signum);
 
-  // Entry point adapter installed into <sigaction> 
-  // (must be a static method or a stand-alone 
-  // extern "C" function).
-  static void dispatcher (int signum);
-
-  // restores default signal handler, called by unregister_*
-  static void restore_default(int signum);
-
-  // Table of pointers to concrete <SignalHandler>s
-  // registered by applications.  NSIG is the number of 
-  // signals defined in <signal.h>.
-  static SignalHandler *  signal_handlers_[NSIG];
-
+	// Table of pointers to concrete <SignalHandler>s
+	// registered by applications.  NSIG is the number of
+	// signals defined in <signal.h>.
+	static SignalHandler *signal_handlers_[NSIG];
 };
 
 } // end namespace fawkes

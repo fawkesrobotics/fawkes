@@ -24,27 +24,27 @@
 #ifndef _UTILS_SYSTEM_PATHPARSER_H_
 #define _UTILS_SYSTEM_PATHPARSER_H_
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace fawkes {
 
 class PathParser : public std::vector<std::string>
 {
- public:
-  PathParser(std::string &path);
-  PathParser(const char *path);
+public:
+	PathParser(std::string &path);
+	PathParser(const char *path);
 
-  void        print_debug();
-  std::string path_as_string();
+	void        print_debug();
+	std::string path_as_string();
 
-  bool        is_absolute() const;
+	bool is_absolute() const;
 
- private:
-  void        ctor(const std::string &path);
+private:
+	void ctor(const std::string &path);
 
- private:
-  bool abs_path_;
+private:
+	bool abs_path_;
 };
 
 } // end namespace fawkes

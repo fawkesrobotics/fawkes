@@ -28,13 +28,11 @@
 
 namespace fawkes {
 
-
 class DependencyViolationException : public Exception
 {
- public:
-  DependencyViolationException(const char *msg);
+public:
+	DependencyViolationException(const char *msg);
 };
-
 
 } // end namespace fawkes
 

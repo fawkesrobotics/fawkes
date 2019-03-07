@@ -33,12 +33,11 @@ namespace fawkes {
  * @return area of triangle
  */
 double
-triangle_area(const Eigen::Vector2f &p0, const Eigen::Vector2f &p1,
-              const Eigen::Vector2f &p2)
+triangle_area(const Eigen::Vector2f &p0, const Eigen::Vector2f &p1, const Eigen::Vector2f &p2)
 {
-	return 1.f/2.f*(-p1[1]*p2[0] + p0[1]*(-p1[0] + p2[0]) + p0[0]*(p1[1] - p2[1]) + p1[0]*p2[1]);
+	return 1.f / 2.f
+	       * (-p1[1] * p2[0] + p0[1] * (-p1[0] + p2[0]) + p0[0] * (p1[1] - p2[1]) + p1[0] * p2[1]);
 }
-
 
 /** Check if a triangle contains a point.
  * A point is also considered to be contained if it is on the boundary
@@ -50,20 +49,24 @@ triangle_area(const Eigen::Vector2f &p0, const Eigen::Vector2f &p1,
  * @return true if the point is within or on the triangle boundaries
  */
 bool
-triangle_contains(const Eigen::Vector2f &p0, const Eigen::Vector2f &p1,
-                  const Eigen::Vector2f &p2, const Eigen::Vector2f &p)
+triangle_contains(const Eigen::Vector2f &p0,
+                  const Eigen::Vector2f &p1,
+                  const Eigen::Vector2f &p2,
+                  const Eigen::Vector2f &p)
 {
 	double area_2 = 2. * triangle_area(p0, p1, p2);
 
 	double s =
-		1./area_2*(p0[1]*p2[0] - p0[0]*p2[1] + (p2[1] - p0[1])*p[0] + (p0[0] - p2[0])*p[1]);
-	if (s < 0)  return false;
+	  1. / area_2 * (p0[1] * p2[0] - p0[0] * p2[1] + (p2[1] - p0[1]) * p[0] + (p0[0] - p2[0]) * p[1]);
+	if (s < 0)
+		return false;
 
 	double t =
-		1./area_2*(p0[0]*p1[1] - p0[1]*p1[0] + (p0[1] - p1[1])*p[0] + (p1[0] - p0[0])*p[1]);
-	if (t < 0)  return false;
+	  1. / area_2 * (p0[0] * p1[1] - p0[1] * p1[0] + (p0[1] - p1[1]) * p[0] + (p1[0] - p0[0]) * p[1]);
+	if (t < 0)
+		return false;
 
-	return s+t <= 1.;
+	return s + t <= 1.;
 }
 
 } // end namespace fawkes

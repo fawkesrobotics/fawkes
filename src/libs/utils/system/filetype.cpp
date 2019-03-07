@@ -21,15 +21,16 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/system/filetype.h>
 #include <core/exception.h>
+#include <utils/system/filetype.h>
 
 #ifdef HAVE_LIBMAGIC
-#  include <magic.h>
+#	include <magic.h>
 #endif
 
-#include <cstdio>
 #include <sys/types.h>
+
+#include <cstdio>
 #include <unistd.h>
 
 namespace fawkes {
@@ -43,30 +44,29 @@ namespace fawkes {
 std::string
 filetype_file(const char *filename)
 {
-  std::string rv;
+	std::string rv;
 
 #ifdef HAVE_LIBMAGIC
-  magic_t m = magic_open( MAGIC_ERROR );
-  magic_load( m, NULL );
+	magic_t m = magic_open(MAGIC_ERROR);
+	magic_load(m, NULL);
 
-  const char * res = magic_file( m, filename );
-  if ( res == NULL ) {
-    fawkes::Exception e("Failed to determine file type of %s: %s", filename, magic_error(m));
-    magic_close(m);
-    throw e;
-  }
+	const char *res = magic_file(m, filename);
+	if (res == NULL) {
+		fawkes::Exception e("Failed to determine file type of %s: %s", filename, magic_error(m));
+		magic_close(m);
+		throw e;
+	}
 
-  rv = res;
-  magic_close( m );
+	rv = res;
+	magic_close(m);
 #else
-  throw fawkes::Exception("Failed to determine file type of %s "
-			  "(libmagic not available at compile time)",
-			  filename);
+	throw fawkes::Exception("Failed to determine file type of %s "
+	                        "(libmagic not available at compile time)",
+	                        filename);
 #endif
 
-  return rv;
+	return rv;
 }
-
 
 /** Get filetype of file given by file descriptor.
  * Returns a long decriptive string of the filetype, similar to the file
@@ -79,29 +79,28 @@ filetype_file(const char *filename)
 std::string
 filetype_file(int fd)
 {
-  std::string rv;
+	std::string rv;
 
 #ifdef HAVE_LIBMAGIC
-  magic_t m = magic_open( MAGIC_ERROR );
-  magic_load( m, NULL );
+	magic_t m = magic_open(MAGIC_ERROR);
+	magic_load(m, NULL);
 
-  const char * res = magic_descriptor( m, fd );
-  if ( res == NULL ) {
-    fawkes::Exception e("Failed to determine file type of descriptor: %s", magic_error(m));
-    magic_close(m);
-    throw e;
-  }
+	const char *res = magic_descriptor(m, fd);
+	if (res == NULL) {
+		fawkes::Exception e("Failed to determine file type of descriptor: %s", magic_error(m));
+		magic_close(m);
+		throw e;
+	}
 
-  rv = res;
-  magic_close( m );
+	rv = res;
+	magic_close(m);
 #else
-  throw fawkes::Exception("Failed to determine file type "
-			  "(libmagic not available at compile time)");
+	throw fawkes::Exception("Failed to determine file type "
+	                        "(libmagic not available at compile time)");
 #endif
 
-  return rv;
+	return rv;
 }
-
 
 /** Get mime-type of file.
  * This function gives a brief mime-type for the given file.
@@ -111,36 +110,35 @@ filetype_file(int fd)
 std::string
 mimetype_file(const char *filename)
 {
-  std::string rv;
+	std::string rv;
 
 #ifdef HAVE_LIBMAGIC
-#  ifdef MAGIC_MIME_TYPE
-  magic_t m = magic_open( MAGIC_ERROR | MAGIC_MIME_TYPE );
-#  else
-  magic_t m = magic_open( MAGIC_ERROR | MAGIC_MIME );
-#  endif
-  magic_load( m, NULL );
+#	ifdef MAGIC_MIME_TYPE
+	magic_t m = magic_open(MAGIC_ERROR | MAGIC_MIME_TYPE);
+#	else
+	magic_t m = magic_open(MAGIC_ERROR | MAGIC_MIME);
+#	endif
+	magic_load(m, NULL);
 
-  const char * res = magic_file( m, filename );
-  if ( res == NULL ) {
-    fawkes::Exception e("Failed to determine mime type of %s: %s", filename, magic_error(m));
-    magic_close(m);
-    throw e;
-  }
+	const char *res = magic_file(m, filename);
+	if (res == NULL) {
+		fawkes::Exception e("Failed to determine mime type of %s: %s", filename, magic_error(m));
+		magic_close(m);
+		throw e;
+	}
 
-  rv = res;
-#  ifndef MAGIC_MIME_TYPE
-  rv = rv.substr(0, rv.find(","));
-#  endif
-  magic_close(m);
+	rv = res;
+#	ifndef MAGIC_MIME_TYPE
+	rv = rv.substr(0, rv.find(","));
+#	endif
+	magic_close(m);
 #else
-  throw fawkes::Exception("Failed to determine file type of %s "
-			  "(libmagic not available at compile time)",
-			  filename);
+	throw fawkes::Exception("Failed to determine file type of %s "
+	                        "(libmagic not available at compile time)",
+	                        filename);
 #endif
-  return rv;
+	return rv;
 }
-
 
 /** Get mime-type of file given by file descriptor.
  * This function gives a brief mime-type for the given file.
@@ -152,34 +150,33 @@ mimetype_file(const char *filename)
 std::string
 mimetype_file(int fd)
 {
-  std::string rv;
+	std::string rv;
 
 #ifdef HAVE_LIBMAGIC
-#  ifdef MAGIC_MIME_TYPE
-  magic_t m = magic_open( MAGIC_ERROR | MAGIC_MIME_TYPE );
-#  else
-  magic_t m = magic_open( MAGIC_ERROR | MAGIC_MIME );
-#  endif
-  magic_load( m, NULL );
+#	ifdef MAGIC_MIME_TYPE
+	magic_t m = magic_open(MAGIC_ERROR | MAGIC_MIME_TYPE);
+#	else
+	magic_t m = magic_open(MAGIC_ERROR | MAGIC_MIME);
+#	endif
+	magic_load(m, NULL);
 
-  const char * res = magic_descriptor( m, fd );
-  if ( res == NULL ) {
-    fawkes::Exception e("Failed to determine mime type of descriptor: %s", magic_error(m));
-    magic_close(m);
-    throw e;
-  }
+	const char *res = magic_descriptor(m, fd);
+	if (res == NULL) {
+		fawkes::Exception e("Failed to determine mime type of descriptor: %s", magic_error(m));
+		magic_close(m);
+		throw e;
+	}
 
-  rv = res;
-#  ifndef MAGIC_MIME_TYPE
-  rv = rv.substr(0, rv.find(","));
-#  endif
-  magic_close(m);
+	rv = res;
+#	ifndef MAGIC_MIME_TYPE
+	rv = rv.substr(0, rv.find(","));
+#	endif
+	magic_close(m);
 #else
-  throw fawkes::Exception("Failed to determine file type "
-			  "(libmagic not available at compile time)");
+	throw fawkes::Exception("Failed to determine file type "
+	                        "(libmagic not available at compile time)");
 #endif
-  return rv;
+	return rv;
 }
 
 } // end namespace fawkes
-

@@ -24,40 +24,39 @@
 #ifndef _UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_MANAGER_H_
 #define _UTILS_SYSTEM_DYNAMIC_MODULE_MODULE_MANAGER_H_
 
+#include <utils/system/dynamic_module/module.h>
+
 #include <map>
 #include <string>
-
-#include <utils/system/dynamic_module/module.h>
 
 namespace fawkes {
 
 class Module;
 class Mutex;
 
-class ModuleManager {
- public:
+class ModuleManager
+{
+public:
+	ModuleManager(const char *        module_base_dir,
+	              Module::ModuleFlags open_flags = Module::MODULE_FLAGS_DEFAULT);
+	virtual ~ModuleManager();
 
-  ModuleManager(const char *module_base_dir,
-		Module::ModuleFlags open_flags = Module::MODULE_FLAGS_DEFAULT);
-  virtual ~ModuleManager();
+	virtual Module *open_module(const char *filename);
+	virtual void    close_module(Module *module);
+	virtual void    close_module(const char *filename);
+	virtual bool    module_opened(const char *filename);
+	virtual Module *get_module(const char *filename);
 
-  virtual Module *  open_module(const char *filename);
-  virtual void      close_module(Module *module);
-  virtual void      close_module(const char *filename);
-  virtual bool      module_opened(const char *filename);
-  virtual Module *  get_module(const char *filename);
+	virtual const char *get_module_file_extension();
 
-  virtual const char * get_module_file_extension();
+	void set_open_flags(Module::ModuleFlags open_flags);
 
-  void set_open_flags(Module::ModuleFlags open_flags);
+private:
+	std::map<std::string, Module *> modules_;
 
- private:
-  std::map<std::string, Module * > modules_;
-
-  const char *module_base_dir_;
-  Mutex *mutex_;
-  Module::ModuleFlags open_flags_;
-
+	const char *        module_base_dir_;
+	Mutex *             mutex_;
+	Module::ModuleFlags open_flags_;
 };
 
 } // end namespace fawkes

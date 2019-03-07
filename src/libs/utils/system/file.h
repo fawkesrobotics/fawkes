@@ -26,42 +26,43 @@
 #define _UTILS_SYSTEM_FILE_H_
 
 #include <core/exception.h>
+
 #include <cstdio>
 
 namespace fawkes {
 
-class UnableToOpenFileException : public Exception {
- public:
-  UnableToOpenFileException(const char *filename, int error);
+class UnableToOpenFileException : public Exception
+{
+public:
+	UnableToOpenFileException(const char *filename, int error);
 };
 
-class File {
- public:
-
-  /** What to do when a file with the same name
+class File
+{
+public:
+	/** What to do when a file with the same name
    * already exists 
    */
-  typedef enum {
-    OVERWRITE,		/**< overwrite the existing file */
-    APPEND,		/**< append data at the end of the existing file */
-    ADD_SUFFIX		/**< add a suffix (starting with ".1") to the given filename */
-  } FileOpenMethod;
+	typedef enum {
+		OVERWRITE, /**< overwrite the existing file */
+		APPEND,    /**< append data at the end of the existing file */
+		ADD_SUFFIX /**< add a suffix (starting with ".1") to the given filename */
+	} FileOpenMethod;
 
-  File(const char *filename, FileOpenMethod method = APPEND);
-  ~File();
+	File(const char *filename, FileOpenMethod method = APPEND);
+	~File();
 
-  FILE *        stream() const;
-  const char *  filename() const;
+	FILE *      stream() const;
+	const char *filename() const;
 
-  static bool   exists(const char *filename);
-  static bool   is_regular(const char *filename);
+	static bool exists(const char *filename);
+	static bool is_regular(const char *filename);
 
- private:
-  int fd;
-  FILE *fp;
-  char *fn;
+private:
+	int   fd;
+	FILE *fp;
+	char *fn;
 };
-
 
 } // end namespace fawkes
 

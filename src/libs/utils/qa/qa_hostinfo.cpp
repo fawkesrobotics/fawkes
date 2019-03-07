@@ -25,6 +25,7 @@
 ///@cond QA
 
 #include <utils/system/hostinfo.h>
+
 #include <cstdio>
 
 using namespace fawkes;
@@ -32,19 +33,24 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  HostInfo h;
+	HostInfo h;
 
-  printf("Hostname:       %s\n"
-	 "Short hostname: %s\n"
-	 "Domain name:    %s\n"
-	 "Architecture:   %s\n"
-	 "Sys Name:       %s\n"
-	 "Sys Release:    %s\n"
-	 "Sys Version:    %s\n",
-	 h.name(), h.short_name(), h.domain(), h.arch(),
-	 h.sys_name(), h.sys_release(), h.sys_version());
+	printf("Hostname:       %s\n"
+	       "Short hostname: %s\n"
+	       "Domain name:    %s\n"
+	       "Architecture:   %s\n"
+	       "Sys Name:       %s\n"
+	       "Sys Release:    %s\n"
+	       "Sys Version:    %s\n",
+	       h.name(),
+	       h.short_name(),
+	       h.domain(),
+	       h.arch(),
+	       h.sys_name(),
+	       h.sys_release(),
+	       h.sys_version());
 
-  return 0;
+	return 0;
 }
 
 /// @endcond

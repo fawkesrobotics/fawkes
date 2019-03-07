@@ -24,8 +24,8 @@
 #ifndef _UTILS_MATH_COMMON_H_
 #define _UTILS_MATH_COMMON_H_
 
-#include <limits>
 #include <cmath>
+#include <limits>
 
 namespace fawkes {
 
@@ -36,7 +36,7 @@ namespace fawkes {
 inline double
 sqr(double x)
 {
-  return (x*x);
+	return (x * x);
 }
 
 /** Fast square multiplication.
@@ -46,7 +46,7 @@ sqr(double x)
 inline float
 sqr(float x)
 {
-  return (x*x);
+	return (x * x);
 }
 
 /** Fast square multiplication.
@@ -56,7 +56,7 @@ sqr(float x)
 inline int
 sqr(int x)
 {
-  return (x*x);
+	return (x * x);
 }
 
 /** Fast square multiplication.
@@ -66,7 +66,7 @@ sqr(int x)
 inline unsigned long
 sqr(unsigned long x)
 {
-  return (x*x);
+	return (x * x);
 }
 
 /** Get distance of two points.
@@ -81,7 +81,7 @@ sqr(unsigned long x)
 inline float
 point_dist(float x1, float y1, float x2, float y2)
 {
-  return sqrtf(powf(x1 - x2, 2) + powf(y1 - y2, 2));
+	return sqrtf(powf(x1 - x2, 2) + powf(y1 - y2, 2));
 }
 
 /** Check if two points are different with regard to a given threshold.
@@ -99,7 +99,7 @@ point_dist(float x1, float y1, float x2, float y2)
 inline bool
 points_different(float x1, float y1, float x2, float y2, float threshold = 1e-4)
 {
-  return sqrtf(powf(x1 - x2, 2) + powf(y1 - y2, 2)) >= threshold;
+	return sqrtf(powf(x1 - x2, 2) + powf(y1 - y2, 2)) >= threshold;
 }
 
 } // end namespace fawkes

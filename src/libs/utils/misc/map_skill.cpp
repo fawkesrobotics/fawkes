@@ -93,7 +93,6 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor. */
 ActionSkillMapping::ActionSkillMapping()
 {
@@ -103,18 +102,17 @@ ActionSkillMapping::ActionSkillMapping()
  * @param mappings initial mapping
  */
 ActionSkillMapping::ActionSkillMapping(std::map<std::string, std::string> &mappings)
-	: mappings_(mappings)
+: mappings_(mappings)
 {
 }
-
 
 /** Add another mapping.
  * @param action_name name of action to map
  * @param skill_string_template substitutation template
  */
 void
-ActionSkillMapping::add_mapping(const std::string& action_name,
-                                const std::string& skill_string_template)
+ActionSkillMapping::add_mapping(const std::string &action_name,
+                                const std::string &skill_string_template)
 {
 	mappings_[action_name] = skill_string_template;
 }
@@ -138,17 +136,18 @@ ActionSkillMapping::has_mapping(const std::string &action_name) const
  * @return The skill string of the mapped action, or an empty string in case of an error.
  */
 std::string
-ActionSkillMapping::map_skill(const std::string &name,
+ActionSkillMapping::map_skill(const std::string &                       name,
                               const std::map<std::string, std::string> &params,
-                              std::multimap<std::string, std::string> &messages) const
+                              std::multimap<std::string, std::string> & messages) const
 {
 	std::string rv;
 
 	auto mapping = mappings_.find(name);
-	if (mapping == mappings_.end())  return "";
+	if (mapping == mappings_.end())
+		return "";
 	std::string remainder = mapping->second;
 
-	std::regex re(REGEX_PARAM);
+	std::regex  re(REGEX_PARAM);
 	std::smatch m;
 	while (std::regex_search(remainder, m, re)) {
 		bool found = false;
@@ -158,66 +157,64 @@ ActionSkillMapping::map_skill(const std::string &name,
 				found = true;
 				rv += m.prefix();
 
-				if (! m[2].str().empty()) {
-					std::string rstr = m[2].str();
+				if (!m[2].str().empty()) {
+					std::string            rstr = m[2].str();
 					std::list<std::string> rlst;
 					std::string::size_type rpos = 0, fpos = 0;
 					while ((fpos = rstr.find('|', rpos)) != std::string::npos) {
-						std::string substr = rstr.substr(rpos, fpos-rpos);
-						if (! substr.empty())  rlst.push_back(substr);
+						std::string substr = rstr.substr(rpos, fpos - rpos);
+						if (!substr.empty())
+							rlst.push_back(substr);
 						rpos = fpos + 1;
 					}
 					rstr = rstr.substr(rpos);
-					if (! rstr.empty())  rlst.push_back(rstr);
-						
+					if (!rstr.empty())
+						rlst.push_back(rstr);
+
 					for (const auto &r : rlst) {
-						if (r.size() > 2 && r[0] == '/' && r[r.size()-1] == '/') {
+						if (r.size() > 2 && r[0] == '/' && r[r.size() - 1] == '/') {
 							std::string::size_type slash_pos = r.find('/', 1);
 							if (slash_pos != std::string::npos && slash_pos < (r.size() - 1)) {
 								std::string r_match = r.substr(1, slash_pos - 1);
 								std::string r_repl  = r.substr(slash_pos + 1, (r.size() - slash_pos - 2));
-								std::regex user_regex(r_match, std::regex::ECMAScript|std::regex::icase);
+								std::regex  user_regex(r_match, std::regex::ECMAScript | std::regex::icase);
 								value = std::regex_replace(value, user_regex, r_repl);
 							} else {
-								messages.insert(std::make_pair("WARN", " regex '" + r + "' missing mid slash, ignoring"));
+								messages.insert(
+								  std::make_pair("WARN", " regex '" + r + "' missing mid slash, ignoring"));
 							}
 						} else {
-							messages.insert(std::make_pair("WARN", "regex '" + r + "' missing start/end slashes, ignoring"));
+							messages.insert(
+							  std::make_pair("WARN", "regex '" + r + "' missing start/end slashes, ignoring"));
 						}
 					}
 				}
 
 				switch (m[6].str()[0]) {
 				case 's': rv += "\"" + value + "\""; break;
-				case 'S':
-					{
-						std::string uc = value;
-						std::transform(uc.begin(), uc.end(), uc.begin(), ::toupper);
-						rv += "\"" + uc + "\"";
-					}
-					break;
+				case 'S': {
+					std::string uc = value;
+					std::transform(uc.begin(), uc.end(), uc.begin(), ::toupper);
+					rv += "\"" + uc + "\"";
+				} break;
 				case 'y': rv += value; break;
-				case 'Y':
-					{
-						std::string uc = value;
-						std::transform(uc.begin(), uc.end(), uc.begin(), ::toupper);
-						rv += uc;
-					}
-					break;
-				case 'i':
-					try {
-						rv += std::to_string(std::stol(value));
+				case 'Y': {
+					std::string uc = value;
+					std::transform(uc.begin(), uc.end(), uc.begin(), ::toupper);
+					rv += uc;
+				} break;
+				case 'i': try { rv += std::to_string(std::stol(value));
 					} catch (std::invalid_argument &e) {
-						messages.insert(std::make_pair("ERROR", "Failed to convert '" + value + "' to integer: " + e.what()));
+						messages.insert(
+						  std::make_pair("ERROR", "Failed to convert '" + value + "' to integer: " + e.what()));
 						return "";
 					}
 					break;
-							
-				case 'f':
-					try {
-						rv += std::to_string(std::stod(value));
+
+				case 'f': try { rv += std::to_string(std::stod(value));
 					} catch (std::invalid_argument &e) {
-						messages.insert(std::make_pair("ERROR", "Failed to convert '" + value + "' to float: " + e.what()));
+						messages.insert(
+						  std::make_pair("ERROR", "Failed to convert '" + value + "' to float: " + e.what()));
 						return "";
 					}
 					break;
@@ -225,17 +222,18 @@ ActionSkillMapping::map_skill(const std::string &name,
 				break;
 			}
 		}
-		if (! found) {
-			messages.insert(std::make_pair("ERROR", "No value for parameter '" +
-			                               m[1].str() + "' of action '" + name + "' given"));
+		if (!found) {
+			messages.insert(std::make_pair("ERROR",
+			                               "No value for parameter '" + m[1].str() + "' of action '"
+			                                 + name + "' given"));
 			return "";
 		}
 
 		remainder = m.suffix();
 	}
 	rv += remainder;
-		
+
 	return rv;
 }
 
-}
+} // namespace fawkes

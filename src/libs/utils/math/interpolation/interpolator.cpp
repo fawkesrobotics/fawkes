@@ -49,4 +49,3 @@ Interpolator::~Interpolator()
 }
 
 } // end namespace fawkes
-

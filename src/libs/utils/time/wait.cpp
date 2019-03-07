@@ -21,12 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/time/wait.h>
-#include <utils/time/time.h>
 #include <utils/time/clock.h>
+#include <utils/time/time.h>
+#include <utils/time/wait.h>
 
-#include <unistd.h>
 #include <cstdlib>
+#include <unistd.h>
 
 namespace fawkes {
 
@@ -48,50 +48,46 @@ namespace fawkes {
  */
 TimeWait::TimeWait(Clock *clock, long int desired_loop_time_usec)
 {
-  desired_loop_time_ = desired_loop_time_usec;
-  clock_ = clock;
-  until_ = new Time();
-  until_systime_ = new Time();
-  now_ = new Time();
+	desired_loop_time_ = desired_loop_time_usec;
+	clock_             = clock;
+	until_             = new Time();
+	until_systime_     = new Time();
+	now_               = new Time();
 }
-
 
 /** Destructor. */
 TimeWait::~TimeWait()
 {
-  delete until_;
-  delete until_systime_;
-  delete now_;
+	delete until_;
+	delete until_systime_;
+	delete now_;
 }
-
 
 /** Mark start of loop. */
 void
 TimeWait::mark_start()
 {
-  clock_->get_time(until_);
-  *until_ += desired_loop_time_;
-  clock_->get_systime(until_systime_);
-  *until_systime_ += desired_loop_time_;
+	clock_->get_time(until_);
+	*until_ += desired_loop_time_;
+	clock_->get_systime(until_systime_);
+	*until_systime_ += desired_loop_time_;
 }
-
 
 /** Wait until minimum loop time has been reached. */
 void
 TimeWait::wait()
 {
-  clock_->get_time(now_);
-  // we want to release run status at least shortly
-  usleep(0);
+	clock_->get_time(now_);
+	// we want to release run status at least shortly
+	usleep(0);
 
-  long int remaining_usec = (*until_ - *now_).in_usec();
-  while ( remaining_usec > 0 ) {
-    usleep(remaining_usec);
-    clock_->get_time(now_);
-    remaining_usec = (*until_ - *now_).in_usec();
-  }
+	long int remaining_usec = (*until_ - *now_).in_usec();
+	while (remaining_usec > 0) {
+		usleep(remaining_usec);
+		clock_->get_time(now_);
+		remaining_usec = (*until_ - *now_).in_usec();
+	}
 }
-
 
 /** Wait until minimum loop time has been reached in real time.
  * This uses the system time and not an external time source if defined.
@@ -99,18 +95,17 @@ TimeWait::wait()
 void
 TimeWait::wait_systime()
 {
-  clock_->get_systime(now_);
-  // we want to release run status at least shortly
-  usleep(0);
+	clock_->get_systime(now_);
+	// we want to release run status at least shortly
+	usleep(0);
 
-  long int remaining_usec = (*until_systime_ - *now_).in_usec();
-  while ( remaining_usec > 0 ) {
-    usleep(remaining_usec);
-    clock_->get_systime(now_);
-    remaining_usec = (*until_systime_ - *now_).in_usec();
-  }
+	long int remaining_usec = (*until_systime_ - *now_).in_usec();
+	while (remaining_usec > 0) {
+		usleep(remaining_usec);
+		clock_->get_systime(now_);
+		remaining_usec = (*until_systime_ - *now_).in_usec();
+	}
 }
-
 
 /** Wait at least usec microseconds.
  * Think of this as an uninterruptible usleep(). This method will not return before
@@ -121,14 +116,15 @@ TimeWait::wait_systime()
 void
 TimeWait::wait_systime(long int usec)
 {
-  if ( usec < 0 ) return;
-  struct timeval start, now;
-  long int remaining_usec = usec;
-  gettimeofday(&start, NULL);
-  do {
-    usleep(remaining_usec);
-    gettimeofday(&now, NULL);
-  } while ((remaining_usec = usec - time_diff_usec(now, start)) > 0);
+	if (usec < 0)
+		return;
+	struct timeval start, now;
+	long int       remaining_usec = usec;
+	gettimeofday(&start, NULL);
+	do {
+		usleep(remaining_usec);
+		gettimeofday(&now, NULL);
+	} while ((remaining_usec = usec - time_diff_usec(now, start)) > 0);
 }
 
 /** Wait at least usec microseconds.
@@ -142,15 +138,16 @@ TimeWait::wait_systime(long int usec)
 void
 TimeWait::wait(long int usec)
 {
-  if ( usec < 0 ) return;
-  Clock *clock = Clock::instance();
-  struct timeval start, now;
-  long int remaining_usec = usec;
-  clock->get_time(&start);
-  do {
-    usleep(remaining_usec);
-    clock->get_time(&now);
-  } while ((remaining_usec = usec - time_diff_usec(now, start)) > 0);
+	if (usec < 0)
+		return;
+	Clock *        clock = Clock::instance();
+	struct timeval start, now;
+	long int       remaining_usec = usec;
+	clock->get_time(&start);
+	do {
+		usleep(remaining_usec);
+		clock->get_time(&now);
+	} while ((remaining_usec = usec - time_diff_usec(now, start)) > 0);
 }
 
 } // end namespace fawkes

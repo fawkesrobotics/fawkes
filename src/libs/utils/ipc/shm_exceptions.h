@@ -29,54 +29,47 @@
 
 namespace fawkes {
 
-
 class ShmCouldNotAttachException : public Exception
 {
- public:
-  ShmCouldNotAttachException(const char *msg);
+public:
+	ShmCouldNotAttachException(const char *msg);
 };
-
 
 class ShmNoHeaderException : public Exception
 {
- public:
-  ShmNoHeaderException();
+public:
+	ShmNoHeaderException();
 };
-
 
 class ShmInconsistentSegmentSizeException : public Exception
 {
- public:
-  ShmInconsistentSegmentSizeException(unsigned int desired_mem, unsigned int act_mem);
+public:
+	ShmInconsistentSegmentSizeException(unsigned int desired_mem, unsigned int act_mem);
 };
-
 
 class ShmDoesNotExistException : public Exception
 {
- public:
-  ShmDoesNotExistException();
+public:
+	ShmDoesNotExistException();
 };
-
 
 class ShmCouldNotAttachAddrDepException : public Exception
 {
- public:
-  ShmCouldNotAttachAddrDepException();
+public:
+	ShmCouldNotAttachAddrDepException();
 };
-
 
 class ShmAddrOutOfBoundsException : public Exception
 {
- public:
-  ShmAddrOutOfBoundsException();
+public:
+	ShmAddrOutOfBoundsException();
 };
 
 class ShmPtrOutOfBoundsException : public Exception
 {
- public:
-  ShmPtrOutOfBoundsException();
+public:
+	ShmPtrOutOfBoundsException();
 };
-
 
 } // end namespace fawkes
 

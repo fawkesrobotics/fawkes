@@ -26,7 +26,6 @@
 
 #include <cmath>
 
-
 namespace fawkes {
 
 /** The normal distribution
@@ -34,13 +33,13 @@ namespace fawkes {
  * @param sigma the variance
  * @return probability in normal distribution
  */
-inline float gauss( const float diff, 
-		    const float sigma = 1.0 )
+inline float
+gauss(const float diff, const float sigma = 1.0)
 {
-  return sigma==0.0 ? (diff==0.0? 1.0 : 0.0) : (1.0 / sqrtf(2.0 * M_PI)) * 1/sigma * expf( -0.5 * ( (diff*diff) / (sigma*sigma))) ;  
-} 
-
-
+	return sigma == 0.0
+	         ? (diff == 0.0 ? 1.0 : 0.0)
+	         : (1.0 / sqrtf(2.0 * M_PI)) * 1 / sigma * expf(-0.5 * ((diff * diff) / (sigma * sigma)));
+}
 
 /** Computes the intersection integral of two gaussians given
  * @param mu1 mean of first gaussian
@@ -50,17 +49,18 @@ inline float gauss( const float diff,
  * @param step discretization steps for the integral computation
  * @return computed integral
  */
-inline float intersection_integral_oftwo_gaussians(float mu1,float sigma1, float mu2, float sigma2, float step){
-  float begin=std::max(mu1-3*sigma1, mu2-3*sigma2);
-  float end=std::min(mu1+3*sigma1, mu2+3*sigma2);
-  float integral=0;
-  for (float i=begin;i<end; i+=step){
-    integral+=std::min(gauss(mu1-i,sigma1), gauss(mu2-i,sigma2));
-  }
-  integral*=step;
-  return integral;
+inline float
+intersection_integral_oftwo_gaussians(float mu1, float sigma1, float mu2, float sigma2, float step)
+{
+	float begin    = std::max(mu1 - 3 * sigma1, mu2 - 3 * sigma2);
+	float end      = std::min(mu1 + 3 * sigma1, mu2 + 3 * sigma2);
+	float integral = 0;
+	for (float i = begin; i < end; i += step) {
+		integral += std::min(gauss(mu1 - i, sigma1), gauss(mu2 - i, sigma2));
+	}
+	integral *= step;
+	return integral;
 }
-
 
 } // end namespace fawkes
 

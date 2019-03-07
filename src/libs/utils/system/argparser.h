@@ -25,96 +25,97 @@
 #define _UTILS_SYSTEM_ARGPARSER_H_
 
 #include <core/exception.h>
-
 #include <utils/misc/string_compare.h>
-#include <vector>
-#include <map>
-#include <string>
 
 #include <getopt.h>
-
+#include <map>
+#include <string>
+#include <vector>
 
 namespace fawkes {
 
 /** Thrown if unknown argument was supplied */
 class UnknownArgumentException : public Exception
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param c Unknown option character
    */
-  UnknownArgumentException(char c) : Exception()
-  {
-    append("Unknown option '%c'", c);
-  }
+	UnknownArgumentException(char c) : Exception()
+	{
+		append("Unknown option '%c'", c);
+	}
 };
 
 /** Thrown if required argument was missing. */
 class MissingArgumentException : public Exception
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param c option with missing argument
    */
-  MissingArgumentException(char c) : Exception()
-  {
-    append("Option '%c' requires an argument", c);
-  }
+	MissingArgumentException(char c) : Exception()
+	{
+		append("Option '%c' requires an argument", c);
+	}
 };
-
 
 class ArgumentParser
 {
- public:
-  ArgumentParser(int argc, char **argv,
-		 const char *opt_string, option *long_options = NULL);
-  ~ArgumentParser();
+public:
+	ArgumentParser(int argc, char **argv, const char *opt_string, option *long_options = NULL);
+	~ArgumentParser();
 
-  bool         has_arg(const char *argn);
-  const char * arg(const char *argn);
-  bool         arg(const char *argn, char **value);
-  const char * program_name() const;
+	bool        has_arg(const char *argn);
+	const char *arg(const char *argn);
+	bool        arg(const char *argn, char **value);
+	const char *program_name() const;
 
-  bool         parse_hostport(const char *argn, char **host, unsigned short int *port);
-  bool         parse_hostport(const char *argn, std::string &host, unsigned short int &port);
+	bool parse_hostport(const char *argn, char **host, unsigned short int *port);
+	bool parse_hostport(const char *argn, std::string &host, unsigned short int &port);
 
-  static void  parse_hostport_s(const char *s, char **host, unsigned short int *port);
-  static void  parse_hostport_s(const char *s, std::string &host, unsigned short int &port);
-  
-  long int     parse_int(const char *argn);
-  double       parse_float(const char *argn);
+	static void parse_hostport_s(const char *s, char **host, unsigned short int *port);
+	static void parse_hostport_s(const char *s, std::string &host, unsigned short int &port);
 
-  long int     parse_item_int(unsigned int index);
-  double       parse_item_float(unsigned int index);
+	long int parse_int(const char *argn);
+	double   parse_float(const char *argn);
 
-  const std::vector< const char * > &    items() const;
-  std::vector< const char * >::size_type num_items() const;
+	long int parse_item_int(unsigned int index);
+	double   parse_item_float(unsigned int index);
 
+	const std::vector<const char *> &    items() const;
+	std::vector<const char *>::size_type num_items() const;
 
-  int            argc() const;
-  const char **  argv() const;
+	int          argc() const;
+	const char **argv() const;
 
-  /** Get option string.
+	/** Get option string.
    * @return option string used to create instance */
-  std::string  get_optstring() const
-  { return opt_string_; }
+	std::string
+	get_optstring() const
+	{
+		return opt_string_;
+	}
 
-  /** Get long option configuration.
+	/** Get long option configuration.
    * @return vector of long options used to create instance */
-  std::vector<option> get_long_opts() const
-  { return long_opts_; }
+	std::vector<option>
+	get_long_opts() const
+	{
+		return long_opts_;
+	}
 
- private:
-  std::map<std::string, const char *> opts_;
-  std::map<std::string, const char *> opts_cit_;
-  std::vector< const char * >  items_;
+private:
+	std::map<std::string, const char *> opts_;
+	std::map<std::string, const char *> opts_cit_;
+	std::vector<const char *>           items_;
 
-  char *  program_name_;
-  char ** argv_;
-  int     argc_;
+	char * program_name_;
+	char **argv_;
+	int    argc_;
 
-  std::string         opt_string_;
-  std::vector<option> long_opts_;
+	std::string         opt_string_;
+	std::vector<option> long_opts_;
 };
 
 } // end namespace fawkes

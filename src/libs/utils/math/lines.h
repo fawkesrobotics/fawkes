@@ -37,64 +37,70 @@ namespace fawkes {
  * @return true if the lines intersect, false otherwise
  */
 bool
-line_segm_intersect(const Eigen::Vector2f l1_from, const Eigen::Vector2f l1_to,
-		    const Eigen::Vector2f l2_from, const Eigen::Vector2f l2_to)
+line_segm_intersect(const Eigen::Vector2f l1_from,
+                    const Eigen::Vector2f l1_to,
+                    const Eigen::Vector2f l2_from,
+                    const Eigen::Vector2f l2_to)
 {
-  const Eigen::ParametrizedLine<float, 2>
-    edge_seg(Eigen::ParametrizedLine<float, 2>::Through(l1_from, l1_to));
+	const Eigen::ParametrizedLine<float, 2> edge_seg(
+	  Eigen::ParametrizedLine<float, 2>::Through(l1_from, l1_to));
 
-  const Eigen::ParametrizedLine<float, 2>
-    line_seg(Eigen::ParametrizedLine<float, 2>::Through(l2_from, l2_to));
+	const Eigen::ParametrizedLine<float, 2> line_seg(
+	  Eigen::ParametrizedLine<float, 2>::Through(l2_from, l2_to));
 
-  float k = edge_seg.direction().dot(line_seg.direction());
-  if (std::abs(k - 1.0) < std::numeric_limits<double>::epsilon()) {
-    // lines are collinear, check overlap
+	float k = edge_seg.direction().dot(line_seg.direction());
+	if (std::abs(k - 1.0) < std::numeric_limits<double>::epsilon()) {
+		// lines are collinear, check overlap
 
-    // lines are actually parallel with a non-zero distance
-    if (edge_seg.distance(l2_from) > std::numeric_limits<float>::epsilon())  return false;
+		// lines are actually parallel with a non-zero distance
+		if (edge_seg.distance(l2_from) > std::numeric_limits<float>::epsilon())
+			return false;
 
-    // Check if l2_from or l2_to is in the edge line segment
-    Eigen::Vector2f dir = l1_to - l1_from;
-    float dir_sn = dir.squaredNorm();
-    float k = dir.dot(l2_from - l1_from) / dir_sn;
-    if (k >= 0. && k <= 1.)  return true;
+		// Check if l2_from or l2_to is in the edge line segment
+		Eigen::Vector2f dir    = l1_to - l1_from;
+		float           dir_sn = dir.squaredNorm();
+		float           k      = dir.dot(l2_from - l1_from) / dir_sn;
+		if (k >= 0. && k <= 1.)
+			return true;
 
-    k = dir.dot(l2_to - l1_from) / dir_sn;
-    if (k >= 0. && k <= 1.)  return true;
+		k = dir.dot(l2_to - l1_from) / dir_sn;
+		if (k >= 0. && k <= 1.)
+			return true;
 
-    // Check if the edge end points are in the l2_from--l2_to line segment
-    dir = l2_to - l2_from;
-    dir_sn = dir.squaredNorm();
-    k = dir.dot(l1_from - l2_from) / dir_sn;
-    if (k >= 0. && k <= 1.)  return true;
+		// Check if the edge end points are in the l2_from--l2_to line segment
+		dir    = l2_to - l2_from;
+		dir_sn = dir.squaredNorm();
+		k      = dir.dot(l1_from - l2_from) / dir_sn;
+		if (k >= 0. && k <= 1.)
+			return true;
 
-    k = dir.dot(l1_to - l2_from) / dir_sn;
-    if (k >= 0. && k <= 1.)  return true;
+		k = dir.dot(l1_to - l2_from) / dir_sn;
+		if (k >= 0. && k <= 1.)
+			return true;
 
-    // collinear, but not overlapping
-    return false;
+		// collinear, but not overlapping
+		return false;
 
-  } else {
-    const float ipar =
-      edge_seg.intersection(Eigen::Hyperplane<float, 2>(line_seg));
+	} else {
+		const float ipar = edge_seg.intersection(Eigen::Hyperplane<float, 2>(line_seg));
 
-    if (std::isfinite(ipar)) {
-#if EIGEN_VERSION_AT_LEAST(3,2,0)
-      const Eigen::Vector2f ip(edge_seg.pointAt(ipar));
+		if (std::isfinite(ipar)) {
+#if EIGEN_VERSION_AT_LEAST(3, 2, 0)
+			const Eigen::Vector2f ip(edge_seg.pointAt(ipar));
 #else
-      const Eigen::Vector2f ip(edge_seg.origin() + (edge_seg.direction()*ipar));
+			const Eigen::Vector2f ip(edge_seg.origin() + (edge_seg.direction() * ipar));
 #endif
-      // check if the intersection point is on the line segments
-      Eigen::Vector2f dir_edge = l1_to - l1_from;
-      Eigen::Vector2f dir_line = l2_to - l2_from;
-      float k_edge = dir_edge.dot(ip - l1_from) / dir_edge.squaredNorm();
-      float k_line = dir_line.dot(ip - l2_from) / dir_line.squaredNorm();
-      return (k_edge >= 0. && k_edge <= 1. && k_line >= 0. && k_line <= 1.);
+			// check if the intersection point is on the line segments
+			Eigen::Vector2f dir_edge = l1_to - l1_from;
+			Eigen::Vector2f dir_line = l2_to - l2_from;
+			float           k_edge   = dir_edge.dot(ip - l1_from) / dir_edge.squaredNorm();
+			float           k_line   = dir_line.dot(ip - l2_from) / dir_line.squaredNorm();
+			return (k_edge >= 0. && k_edge <= 1. && k_line >= 0. && k_line <= 1.);
 
-    } else {
-      return false;
-    }
-  }
+		} else {
+			return false;
+		}
+	}
 }
 
 /** Get line segment intersection point.
@@ -108,78 +114,79 @@ line_segm_intersect(const Eigen::Vector2f l1_from, const Eigen::Vector2f l1_to,
  * no intersection point exists.
  */
 Eigen::Vector2f
-line_segm_intersection(const Eigen::Vector2f l1_from, const Eigen::Vector2f l1_to,
-		       const Eigen::Vector2f l2_from, const Eigen::Vector2f l2_to)
+line_segm_intersection(const Eigen::Vector2f l1_from,
+                       const Eigen::Vector2f l1_to,
+                       const Eigen::Vector2f l2_from,
+                       const Eigen::Vector2f l2_to)
 {
-  const Eigen::ParametrizedLine<float, 2>
-    edge_seg(Eigen::ParametrizedLine<float, 2>::Through(l1_from, l1_to));
+	const Eigen::ParametrizedLine<float, 2> edge_seg(
+	  Eigen::ParametrizedLine<float, 2>::Through(l1_from, l1_to));
 
-  const Eigen::ParametrizedLine<float, 2>
-    line_seg(Eigen::ParametrizedLine<float, 2>::Through(l2_from, l2_to));
+	const Eigen::ParametrizedLine<float, 2> line_seg(
+	  Eigen::ParametrizedLine<float, 2>::Through(l2_from, l2_to));
 
-  float k = edge_seg.direction().dot(line_seg.direction());
-  if (std::abs(k - 1.0) < std::numeric_limits<double>::epsilon()) {
-    // lines are collinear, check overlap
+	float k = edge_seg.direction().dot(line_seg.direction());
+	if (std::abs(k - 1.0) < std::numeric_limits<double>::epsilon()) {
+		// lines are collinear, check overlap
 
-    // lines are actually parallel with a non-zero distance
-    if (edge_seg.distance(l2_from) > std::numeric_limits<float>::epsilon())
-      return Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(),
-			     std::numeric_limits<float>::quiet_NaN());
+		// lines are actually parallel with a non-zero distance
+		if (edge_seg.distance(l2_from) > std::numeric_limits<float>::epsilon())
+			return Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(),
+			                       std::numeric_limits<float>::quiet_NaN());
 
+		// Check if l2_from or l2_to is in the edge line segment
+		Eigen::Vector2f dir    = l1_to - l1_from;
+		float           dir_sn = dir.squaredNorm();
+		float           k      = dir.dot(l2_from - l1_from) / dir_sn;
+		if (k >= 0. && k <= 1.)
+			return l2_from;
 
-    // Check if l2_from or l2_to is in the edge line segment
-    Eigen::Vector2f dir = l1_to - l1_from;
-    float dir_sn = dir.squaredNorm();
-    float k = dir.dot(l2_from - l1_from) / dir_sn;
-    if (k >= 0. && k <= 1.)  return l2_from;
+		k = dir.dot(l2_to - l1_from) / dir_sn;
+		if (k >= 0. && k <= 1.)
+			return l2_to;
 
-    k = dir.dot(l2_to - l1_from) / dir_sn;
-    if (k >= 0. && k <= 1.)  return l2_to;
+		// Check if the edge end points are in the l2_from--l2_to line segment
+		dir    = l2_to - l2_from;
+		dir_sn = dir.squaredNorm();
+		k      = dir.dot(l1_from - l2_from) / dir_sn;
+		if (k >= 0. && k <= 1.)
+			return l1_from;
 
-    // Check if the edge end points are in the l2_from--l2_to line segment
-    dir = l2_to - l2_from;
-    dir_sn = dir.squaredNorm();
-    k = dir.dot(l1_from - l2_from) / dir_sn;
-    if (k >= 0. && k <= 1.)  return l1_from;
+		k = dir.dot(l1_to - l2_from) / dir_sn;
+		if (k >= 0. && k <= 1.)
+			return l1_to;
 
-    k = dir.dot(l1_to - l2_from) / dir_sn;
-    if (k >= 0. && k <= 1.)  return l1_to;
+		// collinear, but not overlapping
+		return Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(),
+		                       std::numeric_limits<float>::quiet_NaN());
 
-    // collinear, but not overlapping
-    return Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(),
-			   std::numeric_limits<float>::quiet_NaN());
+	} else {
+		const float ipar = edge_seg.intersection(Eigen::Hyperplane<float, 2>(line_seg));
 
-  } else {
-    const float ipar =
-      edge_seg.intersection(Eigen::Hyperplane<float, 2>(line_seg));
-
-    if (std::isfinite(ipar)) {
-#if EIGEN_VERSION_AT_LEAST(3,2,0)
-      const Eigen::Vector2f ip(edge_seg.pointAt(ipar));
+		if (std::isfinite(ipar)) {
+#if EIGEN_VERSION_AT_LEAST(3, 2, 0)
+			const Eigen::Vector2f ip(edge_seg.pointAt(ipar));
 #else
-      const Eigen::Vector2f ip(edge_seg.origin() + (edge_seg.direction()*ipar));
+			const Eigen::Vector2f ip(edge_seg.origin() + (edge_seg.direction() * ipar));
 #endif
-      // check if the intersection point is on the line segments
-      Eigen::Vector2f dir_edge = l1_to - l1_from;
-      Eigen::Vector2f dir_line = l2_to - l2_from;
-      float k_edge = dir_edge.dot(ip - l1_from) / dir_edge.squaredNorm();
-      float k_line = dir_line.dot(ip - l2_from) / dir_line.squaredNorm();
-      if (k_edge >= 0. && k_edge <= 1. && k_line >= 0. && k_line <= 1.) {
-	return ip;
-      } else {
-	return Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(),
-			       std::numeric_limits<float>::quiet_NaN());
-      }
+			// check if the intersection point is on the line segments
+			Eigen::Vector2f dir_edge = l1_to - l1_from;
+			Eigen::Vector2f dir_line = l2_to - l2_from;
+			float           k_edge   = dir_edge.dot(ip - l1_from) / dir_edge.squaredNorm();
+			float           k_line   = dir_line.dot(ip - l2_from) / dir_line.squaredNorm();
+			if (k_edge >= 0. && k_edge <= 1. && k_line >= 0. && k_line <= 1.) {
+				return ip;
+			} else {
+				return Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(),
+				                       std::numeric_limits<float>::quiet_NaN());
+			}
 
-
-    } else {
-      return Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(),
-			     std::numeric_limits<float>::quiet_NaN());
-    }
-  }
-
+		} else {
+			return Eigen::Vector2f(std::numeric_limits<float>::quiet_NaN(),
+			                       std::numeric_limits<float>::quiet_NaN());
+		}
+	}
 }
-
 
 } // end namespace fawkes
 

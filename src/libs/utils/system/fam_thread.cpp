@@ -40,12 +40,12 @@ namespace fawkes {
  * one is instantiated by the FamThread instance.
  */
 FamThread::FamThread(RefPtr<FileAlterationMonitor> fam)
-  : Thread("FileAlterationMonitorThread", Thread::OPMODE_CONTINUOUS)
+: Thread("FileAlterationMonitorThread", Thread::OPMODE_CONTINUOUS)
 {
-  fam_ = fam;
-  if (! fam_) {
-    fam_ = RefPtr<FileAlterationMonitor>(new FileAlterationMonitor());
-  }
+	fam_ = fam;
+	if (!fam_) {
+		fam_ = RefPtr<FileAlterationMonitor>(new FileAlterationMonitor());
+	}
 }
 
 /** Get FileAlterationMonitor.
@@ -54,15 +54,14 @@ FamThread::FamThread(RefPtr<FileAlterationMonitor> fam)
 RefPtr<FileAlterationMonitor>
 FamThread::get_fam()
 {
-  return fam_;
+	return fam_;
 }
-
 
 void
 FamThread::loop()
 {
-  fam_->process_events(-1);
-  usleep(0);
+	fam_->process_events(-1);
+	usleep(0);
 }
 
 } // end of namespace fawkes

@@ -30,11 +30,9 @@ namespace fawkes {
 
 class SinusoidalInterpolator : public Interpolator
 {
- public:
-  virtual float interpolate(float t_current, float t_end, float t_step,
-			    float v_start, float v_end);
+public:
+	virtual float interpolate(float t_current, float t_end, float t_step, float v_start, float v_end);
 };
-
 
 } // end namespace fawkes
 

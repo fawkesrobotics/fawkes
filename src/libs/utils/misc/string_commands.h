@@ -28,9 +28,9 @@
 
 namespace fawkes {
 
-std::string command_args_tostring(const char *argv[]);
-std::string envp_tostring(char *envp[]);
-std::vector<std::string>  envp_copy_expand(char *environ[], const char *path_ext[]);
+std::string              command_args_tostring(const char *argv[]);
+std::string              envp_tostring(char *envp[]);
+std::vector<std::string> envp_copy_expand(char *environ[], const char *path_ext[]);
 
 } // end namespace fawkes
 

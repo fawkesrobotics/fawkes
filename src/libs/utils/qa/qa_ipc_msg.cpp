@@ -27,48 +27,47 @@
 #include <utils/ipc/msg.h>
 
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
 #define QA_MTYPE 1
 
 using namespace fawkes;
 
-typedef struct {
-  long mtype;
-  char msg[20];
+typedef struct
+{
+	long mtype;
+	char msg[20];
 } simple_msg_t;
 
 int
-main( int argc, char **argv )
+main(int argc, char **argv)
 {
-  // Create message queue, destroy on delete
-  IPCMessageQueue *m1 = new IPCMessageQueue(".", 'A', true, true);
+	// Create message queue, destroy on delete
+	IPCMessageQueue *m1 = new IPCMessageQueue(".", 'A', true, true);
 
-  // Open, do not create, do not destroy
-  IPCMessageQueue *m2 = new IPCMessageQueue(".", 'A', false, false);
+	// Open, do not create, do not destroy
+	IPCMessageQueue *m2 = new IPCMessageQueue(".", 'A', false, false);
 
-  for (unsigned int i = 0; i < 10; ++i) {
-    simple_msg_t smsg;
-    simple_msg_t rmsg;
-    memset(&smsg, 0, sizeof(smsg));
-    memset(&rmsg, 0, sizeof(rmsg));
+	for (unsigned int i = 0; i < 10; ++i) {
+		simple_msg_t smsg;
+		simple_msg_t rmsg;
+		memset(&smsg, 0, sizeof(smsg));
+		memset(&rmsg, 0, sizeof(rmsg));
 
-    smsg.mtype = QA_MTYPE;
-    sprintf(smsg.msg, "%u", i);
+		smsg.mtype = QA_MTYPE;
+		sprintf(smsg.msg, "%u", i);
 
-    m1->send((IPCMessageQueue::MessageStruct *)&smsg, sizeof(smsg));
-    m2->recv(QA_MTYPE, (IPCMessageQueue::MessageStruct *)&rmsg, sizeof(rmsg));
+		m1->send((IPCMessageQueue::MessageStruct *)&smsg, sizeof(smsg));
+		m2->recv(QA_MTYPE, (IPCMessageQueue::MessageStruct *)&rmsg, sizeof(rmsg));
 
-    printf("Sent: %s     Received: %s\n", smsg.msg, rmsg.msg);
-  }
+		printf("Sent: %s     Received: %s\n", smsg.msg, rmsg.msg);
+	}
 
-  delete m2;
-  delete m1;
+	delete m2;
+	delete m1;
 
-  return 0;
+	return 0;
 }
-
-
 
 /// @endcond

@@ -26,19 +26,17 @@
 
 namespace fawkes {
 
-
 class StringEquality
 {
- public:
-  bool operator()(const char *s1_, const char *s2_) const;
+public:
+	bool operator()(const char *s1_, const char *s2_) const;
 };
 
 class StringLess
 {
- public:
-  bool operator()(const char *s1_, const char *s2_) const;
+public:
+	bool operator()(const char *s1_, const char *s2_) const;
 };
-
 
 } // end namespace fawkes
 

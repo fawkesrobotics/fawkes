@@ -33,52 +33,51 @@ class TimeSource;
 
 class Clock
 {
- public:
+public:
+	/** Select the time source. */
+	typedef enum {
+		DEFAULT,  /**< select the default time source */
+		REALTIME, /**< select the system time source */
+		EXTERNAL  /**< select the external time source */
+	} TimesourceSelector;
 
-  /** Select the time source. */
-  typedef enum {
-    DEFAULT,		/**< select the default time source */
-    REALTIME,		/**< select the system time source */
-    EXTERNAL   		/**< select the external time source */
-  } TimesourceSelector;
+	virtual ~Clock();
 
-  virtual ~Clock();
-  
-  static Clock * instance();
-  static void    finalize();
+	static Clock *instance();
+	static void   finalize();
 
-  void register_ext_timesource(TimeSource* ts, bool make_default = false);
-  void set_ext_default_timesource(bool ext_is_default);
-  bool is_ext_default_timesource() const;
-  bool has_ext_timesource() const;
-  Time ext_to_realtime(const Time& t);
-  Time native_to_time(const Time &t);
-  void remove_ext_timesource(TimeSource *ts = 0);
+	void register_ext_timesource(TimeSource *ts, bool make_default = false);
+	void set_ext_default_timesource(bool ext_is_default);
+	bool is_ext_default_timesource() const;
+	bool has_ext_timesource() const;
+	Time ext_to_realtime(const Time &t);
+	Time native_to_time(const Time &t);
+	void remove_ext_timesource(TimeSource *ts = 0);
 
-  void get_time(struct timeval *tv) const;
-  void get_time(struct timeval *tv, TimesourceSelector sel) const;
+	void get_time(struct timeval *tv) const;
+	void get_time(struct timeval *tv, TimesourceSelector sel) const;
 
-  void get_time(Time &time) const;
-  void get_time(Time &time, TimesourceSelector sel) const;
+	void get_time(Time &time) const;
+	void get_time(Time &time, TimesourceSelector sel) const;
 
-  void get_time(Time *time) const;
-  void get_time(Time *time, TimesourceSelector sel) const;
+	void get_time(Time *time) const;
+	void get_time(Time *time, TimesourceSelector sel) const;
 
-  void get_systime(struct timeval *tv) const;
-  void get_systime(Time &time) const;
-  void get_systime(Time *time) const;
+	void get_systime(struct timeval *tv) const;
+	void get_systime(Time &time) const;
+	void get_systime(Time *time) const;
 
-  Time  now() const;
-  float elapsed(Time *t) const;
-  float sys_elapsed(Time *t) const;
+	Time  now() const;
+	float elapsed(Time *t) const;
+	float sys_elapsed(Time *t) const;
 
- private:
-  Clock();
+private:
+	Clock();
 
-  TimeSource *ext_timesource;
-  bool ext_default;
+	TimeSource *ext_timesource;
+	bool        ext_default;
 
-  static Clock* _instance;
+	static Clock *_instance;
 };
 
 } // end namespace fawkes

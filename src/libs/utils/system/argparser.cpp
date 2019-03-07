@@ -21,12 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/system/argparser.h>
 #include <core/exceptions/software.h>
-#include <libgen.h>
+#include <utils/system/argparser.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <libgen.h>
 #include <string>
 
 namespace fawkes {
@@ -79,87 +80,82 @@ namespace fawkes {
  * be retrieved via items().
  */
 
-
 /** Constructor
  * @param argc argument count.
  * @param argv argument vector
  * @param opt_string option string, see ArgumentParser
  * @param long_options long options, see ArgumentParser
  */
-ArgumentParser::ArgumentParser(int argc, char **argv,
-			       const char *opt_string, option *long_options)
+ArgumentParser::ArgumentParser(int argc, char **argv, const char *opt_string, option *long_options)
 {
-  argc_ = argc;
-  argv_ = argv;
+	argc_ = argc;
+	argv_ = argv;
 
-  opt_string_ = opt_string;
+	opt_string_ = opt_string;
 
-  if (long_options) {
-    option *tmplo = long_options;
-    while (tmplo->name != 0) {
-      long_opts_.push_back(*tmplo);
-      tmplo += 1;
-    }
-  }
+	if (long_options) {
+		option *tmplo = long_options;
+		while (tmplo->name != 0) {
+			long_opts_.push_back(*tmplo);
+			tmplo += 1;
+		}
+	}
 
-  opts_.clear();
-  items_.clear();
+	opts_.clear();
+	items_.clear();
 
 #ifdef _GNU_SOURCE
-  program_name_ = strdup(basename( argv[0] ));
+	program_name_ = strdup(basename(argv[0]));
 #else
-  // Non-GNU variants may modify the sting in place
-  char *tmp = strdup(argv[0]);
-  program_name_ = strdup(basename(tmp));
-  free(tmp);
+	// Non-GNU variants may modify the sting in place
+	char *tmp     = strdup(argv[0]);
+	program_name_ = strdup(basename(tmp));
+	free(tmp);
 #endif
 
-  if (long_options == NULL) {
-    int c ;
-    char tmp[2];
+	if (long_options == NULL) {
+		int  c;
+		char tmp[2];
 
-    while ((c = getopt(argc, argv, opt_string)) != -1) {
-      if (c == '?') {
-	throw UnknownArgumentException(c);
-      } else if (c == ':') {
-	throw MissingArgumentException(c);
-      }
-      sprintf(tmp, "%c", c);
-      opts_[ tmp ] = optarg;
-    }
-  } else {
-    int opt_ind = 0;
-    int c;
-    while ((c = getopt_long(argc, argv, opt_string, long_options, &opt_ind)) != -1) {
-      if (c == '?') {
-	throw UnknownArgumentException(c);
-      } else if (c == 0) {
-	// long options
-	opts_[ long_options[opt_ind].name ] = optarg;
-      } else {
-	char tmp[2];
-	sprintf(tmp, "%c", c);
-	opts_[ tmp ] = optarg;
-      }
-    }
-  }
+		while ((c = getopt(argc, argv, opt_string)) != -1) {
+			if (c == '?') {
+				throw UnknownArgumentException(c);
+			} else if (c == ':') {
+				throw MissingArgumentException(c);
+			}
+			sprintf(tmp, "%c", c);
+			opts_[tmp] = optarg;
+		}
+	} else {
+		int opt_ind = 0;
+		int c;
+		while ((c = getopt_long(argc, argv, opt_string, long_options, &opt_ind)) != -1) {
+			if (c == '?') {
+				throw UnknownArgumentException(c);
+			} else if (c == 0) {
+				// long options
+				opts_[long_options[opt_ind].name] = optarg;
+			} else {
+				char tmp[2];
+				sprintf(tmp, "%c", c);
+				opts_[tmp] = optarg;
+			}
+		}
+	}
 
-  items_.clear();
-  int ind = optind;
-  while (ind < argc) {
-    items_.push_back( argv[ind++] );
-  }
-
+	items_.clear();
+	int ind = optind;
+	while (ind < argc) {
+		items_.push_back(argv[ind++]);
+	}
 }
-
 
 /** Destructor. */
 ArgumentParser::~ArgumentParser()
 {
-  free(program_name_);
-  opts_.clear();
+	free(program_name_);
+	opts_.clear();
 }
-
 
 /** Check if argument has been supplied.
  * @param argn argument name to check for
@@ -168,9 +164,8 @@ ArgumentParser::~ArgumentParser()
 bool
 ArgumentParser::has_arg(const char *argn)
 {
-  return (opts_.count((char *)argn) > 0);
+	return (opts_.count((char *)argn) > 0);
 }
-
 
 /** Get argument value.
  * Use this method to get the value supplied to the given option.
@@ -181,13 +176,12 @@ ArgumentParser::has_arg(const char *argn)
 const char *
 ArgumentParser::arg(const char *argn)
 {
-  if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
-    return opts_[ (char *)argn ];
-  } else {
-    return NULL;
-  }
+	if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
+		return opts_[(char *)argn];
+	} else {
+		return NULL;
+	}
 }
-
 
 /** Get argument while checking availability.
  * The argument will be a newly allocated copy of the string. You have to
@@ -201,14 +195,13 @@ ArgumentParser::arg(const char *argn)
 bool
 ArgumentParser::arg(const char *argn, char **value)
 {
-  if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
-    *value = strdup(opts_[ (char *)argn ]);
-    return true;
-  } else {
-    return false;
-  }
+	if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
+		*value = strdup(opts_[(char *)argn]);
+		return true;
+	} else {
+		return false;
+	}
 }
-
 
 /** Parse host:port string.
  * The value referenced by the given argn is parsed for the pattern "host:port".
@@ -228,15 +221,14 @@ ArgumentParser::arg(const char *argn, char **value)
  * @exception OutOfBoundsException thrown if port is not in the range [0..65535]
  */
 bool
-ArgumentParser::parse_hostport(const char *argn, char **host,
-			       unsigned short int *port)
+ArgumentParser::parse_hostport(const char *argn, char **host, unsigned short int *port)
 {
 	if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
-		parse_hostport_s(opts_[ (char *)argn ], host, port);
+		parse_hostport_s(opts_[(char *)argn], host, port);
 		return true;
 	} else {
 		return false;
-  }
+	}
 }
 
 /** Parse host:port string.
@@ -257,22 +249,21 @@ ArgumentParser::parse_hostport(const char *argn, char **host,
  * @exception Exception thrown on parsing error
  */
 void
-ArgumentParser::parse_hostport_s(const char *s, char **host,
-                                 unsigned short int *port)
+ArgumentParser::parse_hostport_s(const char *s, char **host, unsigned short int *port)
 {
-	std::string tmp = s;
-	size_t num_colons = 0;
-	std::string::size_type idx = 0;
+	std::string            tmp        = s;
+	size_t                 num_colons = 0;
+	std::string::size_type idx        = 0;
 	while ((idx = tmp.find(':', idx)) != std::string::npos) {
 		idx += 1;
 		num_colons += 1;
 	}
 
 	if (num_colons == 1) {
-		idx = tmp.find(':');
+		idx   = tmp.find(':');
 		*host = strdup(tmp.substr(0, idx).c_str());
-		if (! tmp.substr(idx+1).empty()) {
-			*port = atoi(tmp.substr(idx+1).c_str());
+		if (!tmp.substr(idx + 1).empty()) {
+			*port = atoi(tmp.substr(idx + 1).c_str());
 		}
 	} else if (num_colons > 1) {
 		// IPv6
@@ -286,7 +277,8 @@ ArgumentParser::parse_hostport_s(const char *s, char **host,
 				if (tmp[closing_idx + 1] != ':') {
 					throw Exception("Expected colon after closing IPv6 address bracket");
 				} else if (closing_idx > tmp.length() - 3) {
-					throw Exception("Malformed IPv6 address with port, not enough characters after closing bracket");
+					throw Exception(
+					  "Malformed IPv6 address with port, not enough characters after closing bracket");
 				} else {
 					*host = strdup(tmp.substr(1, closing_idx - 1).c_str());
 					*port = atoi(tmp.substr(closing_idx + 2).c_str());
@@ -305,7 +297,6 @@ ArgumentParser::parse_hostport_s(const char *s, char **host,
 	}
 }
 
-
 /** Parse host:port string.
  * The value referenced by the given argn is parsed for the pattern "host:port". If the
  * string does not match this pattern an exception is thrown.
@@ -322,16 +313,17 @@ ArgumentParser::parse_hostport_s(const char *s, char **host,
 bool
 ArgumentParser::parse_hostport(const char *argn, std::string &host, unsigned short int &port)
 {
-  if ((opts_.count(argn) == 0) || (opts_[argn] == NULL)) return false;
+	if ((opts_.count(argn) == 0) || (opts_[argn] == NULL))
+		return false;
 
-  char *tmp_host = NULL;
-  unsigned short int tmp_port = port;
-  if (parse_hostport(argn, &tmp_host, &tmp_port)) {
-	  host = tmp_host;
-	  port = tmp_port;
-	  return true;
-  }
-  return false;
+	char *             tmp_host = NULL;
+	unsigned short int tmp_port = port;
+	if (parse_hostport(argn, &tmp_host, &tmp_port)) {
+		host = tmp_host;
+		port = tmp_port;
+		return true;
+	}
+	return false;
 }
 
 /** Parse host:port string.
@@ -350,13 +342,12 @@ ArgumentParser::parse_hostport(const char *argn, std::string &host, unsigned sho
 void
 ArgumentParser::parse_hostport_s(const char *s, std::string &host, unsigned short int &port)
 {
-  char *tmp_host = NULL;
-  unsigned short int tmp_port = port;
-  parse_hostport_s(s, &tmp_host, &tmp_port);
-  host = tmp_host;
-  port = tmp_port;
+	char *             tmp_host = NULL;
+	unsigned short int tmp_port = port;
+	parse_hostport_s(s, &tmp_host, &tmp_port);
+	host = tmp_host;
+	port = tmp_port;
 }
-
 
 /** Parse argument as integer.
  * Converts the value of the given argument to an integer.
@@ -369,18 +360,17 @@ ArgumentParser::parse_hostport_s(const char *s, std::string &host, unsigned shor
 long int
 ArgumentParser::parse_int(const char *argn)
 {
-  if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
-    char *endptr;
-    long int rv = strtol(opts_[argn], &endptr, 10);
-    if ( endptr[0] != 0 ) {
-      throw IllegalArgumentException("Supplied argument is not of type int");
-    }
-    return rv;
-  } else {
-    throw Exception("Value for '%s' not available", argn);
-  }
+	if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
+		char *   endptr;
+		long int rv = strtol(opts_[argn], &endptr, 10);
+		if (endptr[0] != 0) {
+			throw IllegalArgumentException("Supplied argument is not of type int");
+		}
+		return rv;
+	} else {
+		throw Exception("Value for '%s' not available", argn);
+	}
 }
-
 
 /** Parse argument as double.
  * Converts the value of the given argument to a double.
@@ -393,18 +383,17 @@ ArgumentParser::parse_int(const char *argn)
 double
 ArgumentParser::parse_float(const char *argn)
 {
-  if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
-    char *endptr;
-    double rv = strtod(opts_[argn], &endptr);
-    if ( endptr[0] != 0 ) {
-      throw IllegalArgumentException("Supplied argument is not of type double");
-    }
-    return rv;
-  } else {
-    throw Exception("Value for '%s' not available", argn);
-  }
+	if ((opts_.count(argn) > 0) && (opts_[argn] != NULL)) {
+		char * endptr;
+		double rv = strtod(opts_[argn], &endptr);
+		if (endptr[0] != 0) {
+			throw IllegalArgumentException("Supplied argument is not of type double");
+		}
+		return rv;
+	} else {
+		throw Exception("Value for '%s' not available", argn);
+	}
 }
-
 
 /** Parse item as integer.
  * Converts the value of the given item to an integer.
@@ -417,18 +406,17 @@ ArgumentParser::parse_float(const char *argn)
 long int
 ArgumentParser::parse_item_int(unsigned int index)
 {
-  if (index < items_.size()) {
-    char *endptr;
-    long int rv = strtol(items_[index], &endptr, 10);
-    if ( endptr[0] != 0 ) {
-      throw IllegalArgumentException("Supplied argument is not of type int");
-    }
-    return rv;
-  } else {
-    throw Exception("Value for item %u not available", index);
-  }
+	if (index < items_.size()) {
+		char *   endptr;
+		long int rv = strtol(items_[index], &endptr, 10);
+		if (endptr[0] != 0) {
+			throw IllegalArgumentException("Supplied argument is not of type int");
+		}
+		return rv;
+	} else {
+		throw Exception("Value for item %u not available", index);
+	}
 }
-
 
 /** Parse item as double.
  * Converts the value of the given item to a double.
@@ -441,39 +429,36 @@ ArgumentParser::parse_item_int(unsigned int index)
 double
 ArgumentParser::parse_item_float(unsigned int index)
 {
-  if (index < items_.size()) {
-    char *endptr;
-    double rv = strtod(items_[index], &endptr);
-    if ( endptr[0] != 0 ) {
-      throw IllegalArgumentException("Supplied argument is not of type double");
-    }
-    return rv;
-  } else {
-    throw Exception("Value for item %u not available", index);
-  }
+	if (index < items_.size()) {
+		char * endptr;
+		double rv = strtod(items_[index], &endptr);
+		if (endptr[0] != 0) {
+			throw IllegalArgumentException("Supplied argument is not of type double");
+		}
+		return rv;
+	} else {
+		throw Exception("Value for item %u not available", index);
+	}
 }
-
 
 /** Get non-option items.
  * @return pointer to vector of pointer to non-argument values. Handled internally,
  * do not free or delete!
  */
-const std::vector< const char* > &
+const std::vector<const char *> &
 ArgumentParser::items() const
 {
-  return items_;
+	return items_;
 }
-
 
 /** Get number of non-option items.
  * @return number of non-opt items.
  */
-std::vector< const char* >::size_type
+std::vector<const char *>::size_type
 ArgumentParser::num_items() const
 {
-  return items_.size();
+	return items_.size();
 }
-
 
 /** Get number of arguments.
  * @return number of arguments
@@ -481,9 +466,8 @@ ArgumentParser::num_items() const
 int
 ArgumentParser::argc() const
 {
-  return argc_;
+	return argc_;
 }
-
 
 /** Program argument array as supplied to constructor.
  * @return argument array.
@@ -491,9 +475,8 @@ ArgumentParser::argc() const
 const char **
 ArgumentParser::argv() const
 {
-  return (const char **)argv_;
+	return (const char **)argv_;
 }
-
 
 /** Get name of program.
  * @return the name of the program (argv[0] of argument vector supplied to constructor).
@@ -501,8 +484,7 @@ ArgumentParser::argv() const
 const char *
 ArgumentParser::program_name() const
 {
-  return program_name_;
+	return program_name_;
 }
-
 
 } // end namespace fawkes
