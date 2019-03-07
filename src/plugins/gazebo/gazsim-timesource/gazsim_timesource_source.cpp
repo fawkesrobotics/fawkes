@@ -28,19 +28,18 @@ using namespace fawkes;
  * Constructor
  * @param clock pointer to fawkes clock
  */
-GazsimTimesource::GazsimTimesource(Clock* clock)
+GazsimTimesource::GazsimTimesource(Clock *clock)
 {
-  clock_ = clock;
+	clock_ = clock;
 
-  last_sim_time_ = get_system_time();
-  last_real_time_factor_ = 1.0;
-  clock_->get_systime(&last_sys_recv_time_);
-  //registration will be done by plugin
+	last_sim_time_         = get_system_time();
+	last_real_time_factor_ = 1.0;
+	clock_->get_systime(&last_sys_recv_time_);
+	//registration will be done by plugin
 }
 
 GazsimTimesource::~GazsimTimesource()
 {
-
 }
 
 /**
@@ -49,52 +48,54 @@ GazsimTimesource::~GazsimTimesource()
  * @param tv timeinterval
  */
 void
-GazsimTimesource::get_time(timeval* tv) const
+GazsimTimesource::get_time(timeval *tv) const
 {
-  //I do not use the Time - operator here because this would recursively call get_time
-  timeval now = get_system_time();
-  timeval interval = subtract(now, last_sys_recv_time_);  
+	//I do not use the Time - operator here because this would recursively call get_time
+	timeval now      = get_system_time();
+	timeval interval = subtract(now, last_sys_recv_time_);
 
-  //doing this: timeval estimated_sim_interval = interval * last_real_time_factor_;
-  timeval estimated_sim_interval;
-  estimated_sim_interval.tv_usec = last_real_time_factor_ * (interval.tv_sec * 1000000  + interval.tv_usec);
-  estimated_sim_interval.tv_sec = estimated_sim_interval.tv_usec / 1000000;
-  estimated_sim_interval.tv_usec -= estimated_sim_interval.tv_sec * 1000000;
+	//doing this: timeval estimated_sim_interval = interval * last_real_time_factor_;
+	timeval estimated_sim_interval;
+	estimated_sim_interval.tv_usec =
+	  last_real_time_factor_ * (interval.tv_sec * 1000000 + interval.tv_usec);
+	estimated_sim_interval.tv_sec = estimated_sim_interval.tv_usec / 1000000;
+	estimated_sim_interval.tv_usec -= estimated_sim_interval.tv_sec * 1000000;
 
-  timeval estimated_sim_now = add(last_sim_time_, estimated_sim_interval);
+	timeval estimated_sim_now = add(last_sim_time_, estimated_sim_interval);
 
-  //return
-  *tv =  estimated_sim_now;
+	//return
+	*tv = estimated_sim_now;
 }
 
 timeval
-GazsimTimesource::conv_to_realtime(const timeval* tv) const
+GazsimTimesource::conv_to_realtime(const timeval *tv) const
 {
-  timeval interval = subtract(*tv, last_sim_time_);
+	timeval interval = subtract(*tv, last_sim_time_);
 
-  //doing this: timeval est_real_interval = interval / last_real_time_factor_;
-  timeval est_real_interval;
-  est_real_interval.tv_usec = (interval.tv_sec * 1000000  + interval.tv_usec) / last_real_time_factor_;
-  est_real_interval.tv_sec = est_real_interval.tv_usec / 1000000;
-  est_real_interval.tv_usec -= est_real_interval.tv_sec * 1000000;
+	//doing this: timeval est_real_interval = interval / last_real_time_factor_;
+	timeval est_real_interval;
+	est_real_interval.tv_usec =
+	  (interval.tv_sec * 1000000 + interval.tv_usec) / last_real_time_factor_;
+	est_real_interval.tv_sec = est_real_interval.tv_usec / 1000000;
+	est_real_interval.tv_usec -= est_real_interval.tv_sec * 1000000;
 
-  timeval result = add(last_sys_recv_time_, est_real_interval);
-  return result;
+	timeval result = add(last_sys_recv_time_, est_real_interval);
+	return result;
 }
 
 timeval
-GazsimTimesource::conv_native_to_exttime(const timeval* tv) const
+GazsimTimesource::conv_native_to_exttime(const timeval *tv) const
 {
-  timeval t_offset    = subtract(*tv, last_native_sim_time_);
-  double  offset      = t_offset.tv_sec + t_offset.tv_usec / 1000000.f;
-  long    offset_sec  = ::ceil(offset);
-  long    offset_usec = ::round(offset - offset_sec) * 1000000;
+	timeval t_offset    = subtract(*tv, last_native_sim_time_);
+	double  offset      = t_offset.tv_sec + t_offset.tv_usec / 1000000.f;
+	long    offset_sec  = ::ceil(offset);
+	long    offset_usec = ::round(offset - offset_sec) * 1000000;
 
-  timeval rv;
-  rv.tv_sec  = last_sim_time_.tv_sec  + offset_sec;
-  rv.tv_usec = last_sim_time_.tv_usec + offset_usec;
+	timeval rv;
+	rv.tv_sec  = last_sim_time_.tv_sec + offset_sec;
+	rv.tv_usec = last_sim_time_.tv_usec + offset_usec;
 
-  return rv;
+	return rv;
 }
 
 /** store data from gazebo time message
@@ -103,49 +104,45 @@ GazsimTimesource::conv_native_to_exttime(const timeval* tv) const
 void
 GazsimTimesource::on_time_sync_msg(ConstSimTimePtr &msg)
 {
-  //we do not want to correct time back
-  get_time(&last_sim_time_);
-  last_real_time_factor_ = msg->real_time_factor();
-  clock_->get_systime(&last_sys_recv_time_);
-  last_native_sim_time_.tv_sec  = msg->sim_time_sec();
-  last_native_sim_time_.tv_usec = msg->sim_time_nsec() / 1000;
+	//we do not want to correct time back
+	get_time(&last_sim_time_);
+	last_real_time_factor_ = msg->real_time_factor();
+	clock_->get_systime(&last_sys_recv_time_);
+	last_native_sim_time_.tv_sec  = msg->sim_time_sec();
+	last_native_sim_time_.tv_usec = msg->sim_time_nsec() / 1000;
 }
 
 timeval
 GazsimTimesource::get_system_time() const
 {
-  timeval now_timeval;
-  gettimeofday(&now_timeval,NULL);
-  return now_timeval;
+	timeval now_timeval;
+	gettimeofday(&now_timeval, NULL);
+	return now_timeval;
 }
 
 timeval
 GazsimTimesource::add(timeval a, timeval b) const
 {
-  timeval res;
-  res.tv_sec = a.tv_sec + b.tv_sec;
-  res.tv_usec = a.tv_usec + b.tv_usec;
-  if(res.tv_usec > 1000000)
-  {
-    res.tv_usec -= 1000000;
-    res.tv_sec++;
-  }
-  return res;
+	timeval res;
+	res.tv_sec  = a.tv_sec + b.tv_sec;
+	res.tv_usec = a.tv_usec + b.tv_usec;
+	if (res.tv_usec > 1000000) {
+		res.tv_usec -= 1000000;
+		res.tv_sec++;
+	}
+	return res;
 }
 
 timeval
 GazsimTimesource::subtract(timeval a, timeval b) const
 {
-  timeval res;
-  res.tv_sec = a.tv_sec - b.tv_sec;
-  if(a.tv_usec >= b.tv_usec)
-  {
-    res.tv_usec = a.tv_usec - b.tv_usec;
-  }
-  else
-  {
-    res.tv_usec = 1000000 + a.tv_usec - b.tv_usec;
-    res.tv_sec--;
-  }
-  return res;
+	timeval res;
+	res.tv_sec = a.tv_sec - b.tv_sec;
+	if (a.tv_usec >= b.tv_usec) {
+		res.tv_usec = a.tv_usec - b.tv_usec;
+	} else {
+		res.tv_usec = 1000000 + a.tv_usec - b.tv_usec;
+		res.tv_sec--;
+	}
+	return res;
 }

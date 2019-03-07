@@ -30,8 +30,8 @@ using namespace fawkes;
  */
 
 GazsimTimesourceThread::GazsimTimesourceThread()
-  : Thread("GazsimTimesourceThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
+: Thread("GazsimTimesourceThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
 {
 }
 
@@ -39,39 +39,42 @@ GazsimTimesourceThread::~GazsimTimesourceThread()
 {
 }
 
-
-void GazsimTimesourceThread::init()
+void
+GazsimTimesourceThread::init()
 {
-  logger->log_info(name(), "GazsimTimesource initializing");
+	logger->log_info(name(), "GazsimTimesource initializing");
 
-  //Create Subscriber
-  time_sync_sub_ = gazebo_world_node->Subscribe(config->get_string("/gazsim/topics/time"), &GazsimTimesourceThread::on_time_sync_msg, this);
+	//Create Subscriber
+	time_sync_sub_ = gazebo_world_node->Subscribe(config->get_string("/gazsim/topics/time"),
+	                                              &GazsimTimesourceThread::on_time_sync_msg,
+	                                              this);
 
-  //Create Time Source
-  time_source_ = new GazsimTimesource(clock);
+	//Create Time Source
+	time_source_ = new GazsimTimesource(clock);
 
-  //register timesource and make it default
-  clock->register_ext_timesource(time_source_, true);
+	//register timesource and make it default
+	clock->register_ext_timesource(time_source_, true);
 }
 
-
-void GazsimTimesourceThread::finalize()
+void
+GazsimTimesourceThread::finalize()
 {
-  //remove time source
-  clock->remove_ext_timesource(time_source_);
-  delete time_source_;
+	//remove time source
+	clock->remove_ext_timesource(time_source_);
+	delete time_source_;
 }
 
-
-void GazsimTimesourceThread::loop()
+void
+GazsimTimesourceThread::loop()
 {
-  //nothing interesting
+	//nothing interesting
 }
 
-void GazsimTimesourceThread::on_time_sync_msg(ConstSimTimePtr &msg)
+void
+GazsimTimesourceThread::on_time_sync_msg(ConstSimTimePtr &msg)
 {
-  // logger->log_info(name(), "Got Simulation Time");
-  
-  //provide time source with newest message
-  time_source_->on_time_sync_msg(msg);
+	// logger->log_info(name(), "Got Simulation Time");
+
+	//provide time source with newest message
+	time_source_->on_time_sync_msg(msg);
 }

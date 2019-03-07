@@ -21,6 +21,7 @@
  */
 
 #include "gazsim_timesource_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -30,16 +31,15 @@ using namespace fawkes;
  */
 class GazsimTimesourcePlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit GazsimTimesourcePlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new GazsimTimesourceThread());
-  }
+	explicit GazsimTimesourcePlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new GazsimTimesourceThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("Provides Gazebo simulation-time")
 EXPORT_PLUGIN(GazsimTimesourcePlugin)

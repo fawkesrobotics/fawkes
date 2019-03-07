@@ -20,55 +20,53 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <boost/asio.hpp>
-#include <utils/time/timesource.h>
-#include <utils/time/clock.h>
-
 #include "../msgs/SimTime.pb.h"
 
-#ifndef _GAZEBO_TIMESOURCE_H_
-#define _GAZEBO_TIMESOURCE_H_
+#include <utils/time/clock.h>
+#include <utils/time/timesource.h>
 
+#include <boost/asio.hpp>
+
+#ifndef _GAZEBO_TIMESOURCE_H_
+#	define _GAZEBO_TIMESOURCE_H_
 
 typedef const boost::shared_ptr<gazsim_msgs::SimTime const> ConstSimTimePtr;
 
-namespace fawkes
-{
-  /** @class GazsimTimesource
+namespace fawkes {
+/** @class GazsimTimesource
    * This time-source provides the simulation time from Gazebo in Fawkes
    * @author Frederik Zwilling
    */
-  class GazsimTimesource : public TimeSource
-  {
-  public:
-    //Constructor
-    GazsimTimesource(Clock* clock);
-    ///Destructor
-   ~GazsimTimesource();
+class GazsimTimesource : public TimeSource
+{
+public:
+	//Constructor
+	GazsimTimesource(Clock *clock);
+	///Destructor
+	~GazsimTimesource();
 
-    virtual void get_time(timeval* tv) const;
-    virtual timeval conv_to_realtime(const timeval* tv) const;
-    virtual timeval conv_native_to_exttime(const timeval* tv) const;
+	virtual void    get_time(timeval *tv) const;
+	virtual timeval conv_to_realtime(const timeval *tv) const;
+	virtual timeval conv_native_to_exttime(const timeval *tv) const;
 
-    /// store data from gazebo time message
-    void on_time_sync_msg(ConstSimTimePtr &msg);
+	/// store data from gazebo time message
+	void on_time_sync_msg(ConstSimTimePtr &msg);
 
-  private:
-    timeval get_system_time() const;
-    timeval add(timeval a, timeval b) const;
-    timeval subtract(timeval a, timeval b) const;
+private:
+	timeval get_system_time() const;
+	timeval add(timeval a, timeval b) const;
+	timeval subtract(timeval a, timeval b) const;
 
-  private:
-    Clock* clock_;
+private:
+	Clock *clock_;
 
-    //from last msg all in sec
-    timeval last_sim_time_;
-    timeval last_sys_recv_time_;
-    double  last_real_time_factor_;
-    timeval last_native_sim_time_;
+	//from last msg all in sec
+	timeval last_sim_time_;
+	timeval last_sys_recv_time_;
+	double  last_real_time_factor_;
+	timeval last_native_sim_time_;
+};
 
-  };
-
-}
+} // namespace fawkes
 
 #endif
