@@ -26,35 +26,38 @@
 #include <string>
 
 namespace fawkes {
-  class ReadWriteLock;
+class ReadWriteLock;
 }
 
 namespace firevision {
-  class Camera;
+class Camera;
 }
 
 class PclViewerTransferThread : public fawkes::Thread
 {
- public:
-  PclViewerTransferThread();
-  ~PclViewerTransferThread();
+public:
+	PclViewerTransferThread();
+	~PclViewerTransferThread();
 
-  void loop();
+	void loop();
 
-  void lock_for_read();
-  void unlock();
-  void add_camera(std::string name, firevision::Camera *cam);
+	void lock_for_read();
+	void unlock();
+	void add_camera(std::string name, firevision::Camera *cam);
 
-  /** Get buffer for specified camera.
+	/** Get buffer for specified camera.
    * @param name the name passed to add_camera.
    * @return buffer that contains a copy of the image
    */
-  const unsigned char *  buffer(std::string name)
-  { return buffers_[name]; }
+	const unsigned char *
+	buffer(std::string name)
+	{
+		return buffers_[name];
+	}
 
- private:
-  std::map<std::string, firevision::Camera *> cams_;
-  std::map<std::string, unsigned char *> buffers_;
-  std::map<std::string, size_t> buffer_sizes_;
-  fawkes::ReadWriteLock  *rwlock_;
+private:
+	std::map<std::string, firevision::Camera *> cams_;
+	std::map<std::string, unsigned char *>      buffers_;
+	std::map<std::string, size_t>               buffer_sizes_;
+	fawkes::ReadWriteLock *                     rwlock_;
 };

@@ -21,13 +21,13 @@
  */
 
 #include "skel_drawer.h"
-#include <plugins/openni/utils/colors.h>
 
+#include <GL/glut.h>
+#include <plugins/openni/utils/colors.h>
 #include <utils/math/angle.h>
 
-#include <cstring>
 #include <cstdio>
-#include <GL/glut.h>
+#include <cstring>
 
 using namespace fawkes;
 using namespace fawkes::openni;
@@ -44,87 +44,87 @@ using namespace fawkes::openni;
  * @param hands map of hands shared with interface observer
  */
 SkelGuiSkeletonDrawer3D::SkelGuiSkeletonDrawer3D(UserMap &users, HandMap &hands)
-  : users_(users), hands_(hands)
+: users_(users), hands_(hands)
 {
-  print_state_ = PRINT_ID_STATE;
+	print_state_ = PRINT_ID_STATE;
 }
 
 void
-SkelGuiSkeletonDrawer3D::draw_limb(float *p1, float conf1,
-				 float *p2, float conf2)
+SkelGuiSkeletonDrawer3D::draw_limb(float *p1, float conf1, float *p2, float conf2)
 {
-  if (conf1 < 0.5 || conf2 < 0.5)  return;
+	if (conf1 < 0.5 || conf2 < 0.5)
+		return;
 
-  //printf("Drawing from (%f,%f,%f) -> (%f,%f,%f)\n",
-  //	 p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
-  glVertex4f(p1[0], p1[1], p1[2], 1);
-  glVertex4f(p2[0], p2[1], p2[2], 1);
+	//printf("Drawing from (%f,%f,%f) -> (%f,%f,%f)\n",
+	//	 p1[0], p1[1], p1[2], p2[0], p2[1], p2[2]);
+	glVertex4f(p1[0], p1[1], p1[2], 1);
+	glVertex4f(p2[0], p2[1], p2[2], 1);
 }
 
-#define DRAW_LIMB(user, joint1, joint2)					\
-  draw_limb(user.skel_if->pos_##joint1(),				\
-            user.skel_if->pos_##joint1##_confidence(),			\
-	    user.skel_if->pos_##joint2(),				\
-	    user.skel_if->pos_##joint2##_confidence());
+#define DRAW_LIMB(user, joint1, joint2)                \
+	draw_limb(user.skel_if->pos_##joint1(),              \
+	          user.skel_if->pos_##joint1##_confidence(), \
+	          user.skel_if->pos_##joint2(),              \
+	          user.skel_if->pos_##joint2##_confidence());
 
 void
 SkelGuiSkeletonDrawer3D::draw_user(UserInfo &user)
 {
-  if (user.skel_if->state() != HumanSkeletonInterface::STATE_TRACKING)  return;
+	if (user.skel_if->state() != HumanSkeletonInterface::STATE_TRACKING)
+		return;
 
-  DRAW_LIMB(user, head, neck);
-  
-  DRAW_LIMB(user, neck, left_shoulder);
-  DRAW_LIMB(user, left_shoulder, left_elbow);
-  DRAW_LIMB(user, left_elbow, left_hand);
-  
-  DRAW_LIMB(user, neck, right_shoulder);
-  DRAW_LIMB(user, right_shoulder, right_elbow);
-  DRAW_LIMB(user, right_elbow, right_hand);
+	DRAW_LIMB(user, head, neck);
 
-  DRAW_LIMB(user, left_shoulder, torso);
-  DRAW_LIMB(user, right_shoulder, torso);
+	DRAW_LIMB(user, neck, left_shoulder);
+	DRAW_LIMB(user, left_shoulder, left_elbow);
+	DRAW_LIMB(user, left_elbow, left_hand);
 
-  DRAW_LIMB(user, torso, left_hip);
-  DRAW_LIMB(user, left_hip, left_knee);
-  DRAW_LIMB(user, left_knee, left_foot);
+	DRAW_LIMB(user, neck, right_shoulder);
+	DRAW_LIMB(user, right_shoulder, right_elbow);
+	DRAW_LIMB(user, right_elbow, right_hand);
 
-  DRAW_LIMB(user, torso, right_hip);
-  DRAW_LIMB(user, right_hip, right_knee);
-  DRAW_LIMB(user, right_knee, right_foot);
+	DRAW_LIMB(user, left_shoulder, torso);
+	DRAW_LIMB(user, right_shoulder, torso);
 
-  DRAW_LIMB(user, left_hip, right_hip);
+	DRAW_LIMB(user, torso, left_hip);
+	DRAW_LIMB(user, left_hip, left_knee);
+	DRAW_LIMB(user, left_knee, left_foot);
 
+	DRAW_LIMB(user, torso, right_hip);
+	DRAW_LIMB(user, right_hip, right_knee);
+	DRAW_LIMB(user, right_knee, right_foot);
+
+	DRAW_LIMB(user, left_hip, right_hip);
 }
 
 /** Draw skeletons. */
 void
 SkelGuiSkeletonDrawer3D::draw()
 {
-  for (UserMap::iterator i = users_.begin(); i != users_.end(); ++i) {
-    i->second.skel_if->read();
-    if (i->second.skel_if->state() != HumanSkeletonInterface::STATE_INVALID) {
-      glPointSize(10);
-      glBegin(GL_POINTS);
-      glColor4f(1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][0],
-		1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][1],
-		1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][2],
-		1);
-      float *com = i->second.skel_if->com();
-      glVertex4f(com[0], com[1], com[2], 1.0);
-      glEnd();
-      glPointSize(1);
+	for (UserMap::iterator i = users_.begin(); i != users_.end(); ++i) {
+		i->second.skel_if->read();
+		if (i->second.skel_if->state() != HumanSkeletonInterface::STATE_INVALID) {
+			glPointSize(10);
+			glBegin(GL_POINTS);
+			glColor4f(1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][0],
+			          1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][1],
+			          1 - USER_COLORS[i->second.skel_if->user_id() % NUM_USER_COLORS][2],
+			          1);
+			float *com = i->second.skel_if->com();
+			glVertex4f(com[0], com[1], com[2], 1.0);
+			glEnd();
+			glPointSize(1);
 
-      glLineWidth(3);
-      glBegin(GL_LINES);
-      draw_user(i->second);
-      glColor4f(1, 1, 1, 1);
-      glEnd();
-      glLineWidth(1);
-    }
-  }
+			glLineWidth(3);
+			glBegin(GL_LINES);
+			draw_user(i->second);
+			glColor4f(1, 1, 1, 1);
+			glEnd();
+			glLineWidth(1);
+		}
+	}
 
-  /*
+	/*
   glEnable(GL_LINE_SMOOTH);
   glLineWidth(4);
   for (HandMap::iterator i = hands_.begin(); i != hands_.end(); ++i) {
@@ -145,31 +145,30 @@ SkelGuiSkeletonDrawer3D::draw()
 void
 SkelGuiSkeletonDrawer3D::toggle_print_state()
 {
-  switch (print_state_) {
-  case PRINT_NONE:      print_state_ = PRINT_ID_STATE; break;
-  case PRINT_ID_STATE:  print_state_ = PRINT_ID;       break;
-  case PRINT_ID:        print_state_ = PRINT_NONE;     break;
-  }
+	switch (print_state_) {
+	case PRINT_NONE: print_state_ = PRINT_ID_STATE; break;
+	case PRINT_ID_STATE: print_state_ = PRINT_ID; break;
+	case PRINT_ID: print_state_ = PRINT_NONE; break;
+	}
 }
-
 
 void
 SkelGuiSkeletonDrawer3D::draw_circle(unsigned int id, float *p, float radius)
 {
-  glBegin(GL_LINE_LOOP);
-  glVertex3f(p[0], p[1], p[2]);
-  glColor4f(1 - USER_COLORS[id % NUM_USER_COLORS][0],
-	    1 - USER_COLORS[id % NUM_USER_COLORS][1],
-	    1 - USER_COLORS[id % NUM_USER_COLORS][2],
-	    1);
-  for (int i=0; i < 360; ++i) {
-    float rad = deg2rad(i);;
-    glVertex3f( p[0] + cos(rad) * radius, p[1] + sin(rad) * radius, p[2]);
-  }
-  glColor4f(1, 1, 1, 1);
-  glEnd();
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(p[0], p[1], p[2]);
+	glColor4f(1 - USER_COLORS[id % NUM_USER_COLORS][0],
+	          1 - USER_COLORS[id % NUM_USER_COLORS][1],
+	          1 - USER_COLORS[id % NUM_USER_COLORS][2],
+	          1);
+	for (int i = 0; i < 360; ++i) {
+		float rad = deg2rad(i);
+		;
+		glVertex3f(p[0] + cos(rad) * radius, p[1] + sin(rad) * radius, p[2]);
+	}
+	glColor4f(1, 1, 1, 1);
+	glEnd();
 }
-
 
 /** Set print state.
  * @param state new print state
@@ -177,5 +176,5 @@ SkelGuiSkeletonDrawer3D::draw_circle(unsigned int id, float *p, float radius)
 void
 SkelGuiSkeletonDrawer3D::set_print_state(SkelGuiSkeletonDrawer3D::PrintState state)
 {
-  print_state_ = state;
+	print_state_ = state;
 }
