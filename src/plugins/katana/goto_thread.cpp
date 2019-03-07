@@ -22,6 +22,7 @@
  */
 
 #include "goto_thread.h"
+
 #include "controller.h"
 #include "exception.h"
 
@@ -43,13 +44,12 @@
  * final position has been reached
  */
 KatanaGotoThread::KatanaGotoThread(fawkes::RefPtr<fawkes::KatanaController> katana,
-				   fawkes::Logger *logger,
-				   unsigned int poll_interval_ms)
-  : KatanaMotionThread("KatanaGotoThread", katana, logger)
+                                   fawkes::Logger *                         logger,
+                                   unsigned int                             poll_interval_ms)
+: KatanaMotionThread("KatanaGotoThread", katana, logger)
 {
-  poll_interval_usec_ = poll_interval_ms * 1000;
+	poll_interval_usec_ = poll_interval_ms * 1000;
 }
-
 
 /** Set target position.
  * @param x X coordinate relative to base
@@ -60,65 +60,67 @@ KatanaGotoThread::KatanaGotoThread(fawkes::RefPtr<fawkes::KatanaController> kata
  * @param psi Psi Euler angle of tool
  */
 void
-KatanaGotoThread::set_target(float x, float y, float z,
-			     float phi, float theta, float psi)
+KatanaGotoThread::set_target(float x, float y, float z, float phi, float theta, float psi)
 {
-  x_     = x;
-  y_     = y;
-  z_     = z;
-  phi_   = phi;
-  theta_ = theta;
-  psi_   = psi;
+	x_     = x;
+	y_     = y;
+	z_     = z;
+	phi_   = phi;
+	theta_ = theta;
+	psi_   = psi;
 }
 
 void
 KatanaGotoThread::once()
 {
-  try {
-    // non-blocking call
-    _katana->move_to(x_, y_, z_, phi_, theta_, psi_);
-  } catch (fawkes::KatanaNoSolutionException &e) {
-    _logger->log_warn("KatanaGotoThread", "Initiating goto failed (no solution, ignoring): %s", e.what());
-    _finished = true;
-    _error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
-    return;
-  } catch (fawkes::Exception &e) {
-    _logger->log_warn("KatanaGotoThread", "Initiating goto failed (ignoring): %s", e.what());
-    _finished = true;
-    _error_code = fawkes::KatanaInterface::ERROR_CMD_START_FAILED;
-    return;
-  }
+	try {
+		// non-blocking call
+		_katana->move_to(x_, y_, z_, phi_, theta_, psi_);
+	} catch (fawkes::KatanaNoSolutionException &e) {
+		_logger->log_warn("KatanaGotoThread",
+		                  "Initiating goto failed (no solution, ignoring): %s",
+		                  e.what());
+		_finished   = true;
+		_error_code = fawkes::KatanaInterface::ERROR_NO_SOLUTION;
+		return;
+	} catch (fawkes::Exception &e) {
+		_logger->log_warn("KatanaGotoThread", "Initiating goto failed (ignoring): %s", e.what());
+		_finished   = true;
+		_error_code = fawkes::KatanaInterface::ERROR_CMD_START_FAILED;
+		return;
+	}
 
- // check if final
-  bool final = false;
-  short num_errors  = 0;
-  while ( !final ) {
-    usleep(poll_interval_usec_);
-    try {
-      _katana->read_sensor_data();
-      _katana->read_motor_data();
-    } catch (fawkes::Exception &e) {
-      if (++num_errors <= 10) {
-        _logger->log_warn("KatanaMotorControlThread", "Reading sensor/motor data failed, retrying");
-        continue;
-      } else {
-        _logger->log_warn("KatanaMotorControlThread", "Receiving sensor/motor data failed too often, aborting");
-        _error_code = fawkes::KatanaInterface::ERROR_COMMUNICATION;
-        break;
-      }
-    }
+	// check if final
+	bool  final      = false;
+	short num_errors = 0;
+	while (!final) {
+		usleep(poll_interval_usec_);
+		try {
+			_katana->read_sensor_data();
+			_katana->read_motor_data();
+		} catch (fawkes::Exception &e) {
+			if (++num_errors <= 10) {
+				_logger->log_warn("KatanaMotorControlThread", "Reading sensor/motor data failed, retrying");
+				continue;
+			} else {
+				_logger->log_warn("KatanaMotorControlThread",
+				                  "Receiving sensor/motor data failed too often, aborting");
+				_error_code = fawkes::KatanaInterface::ERROR_COMMUNICATION;
+				break;
+			}
+		}
 
-    try {
-      final = _katana->final();
-    } catch (fawkes::KatanaMotorCrashedException &e) {
-      _logger->log_warn("KatanaMotorControlTrhead", "Motor crashed: %s", e.what());
-      _error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
-      break;
-    }
-  }
+		try {
+			final = _katana->final();
+		} catch (fawkes::KatanaMotorCrashedException &e) {
+			_logger->log_warn("KatanaMotorControlTrhead", "Motor crashed: %s", e.what());
+			_error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
+			break;
+		}
+	}
 
-  _logger->log_debug(name(), "Position (%f,%f,%f, %f,%f,%f) reached",
-		       x_, y_, z_, phi_, theta_, psi_);
+	_logger->log_debug(
+	  name(), "Position (%f,%f,%f, %f,%f,%f) reached", x_, y_, z_, phi_, theta_, psi_);
 
-  _finished = true;
+	_finished = true;
 }

@@ -22,6 +22,7 @@
  */
 
 #include "calib_thread.h"
+
 #include "controller.h"
 
 #include <interfaces/KatanaInterface.h>
@@ -38,20 +39,20 @@
  * @param logger logger
  */
 KatanaCalibrationThread::KatanaCalibrationThread(fawkes::RefPtr<fawkes::KatanaController> katana,
-						 fawkes::Logger *logger)
-  : KatanaMotionThread("KatanaCalibrationThread", katana, logger)
+                                                 fawkes::Logger *                         logger)
+: KatanaMotionThread("KatanaCalibrationThread", katana, logger)
 {
 }
 
 void
 KatanaCalibrationThread::once()
 {
-  try {
-    _katana->calibrate();
-    _logger->log_debug(name(), "Calibration successful");
-  } catch (fawkes::Exception &e) {
-    _logger->log_warn(name(), "Calibration failed (ignoring error): %s", e.what());
-    _error_code = fawkes::KatanaInterface::ERROR_CMD_START_FAILED;
-  }
-  _finished = true;
+	try {
+		_katana->calibrate();
+		_logger->log_debug(name(), "Calibration successful");
+	} catch (fawkes::Exception &e) {
+		_logger->log_warn(name(), "Calibration failed (ignoring error): %s", e.what());
+		_error_code = fawkes::KatanaInterface::ERROR_CMD_START_FAILED;
+	}
+	_finished = true;
 }

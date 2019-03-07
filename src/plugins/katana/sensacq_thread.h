@@ -24,31 +24,35 @@
 #define _PLUGINS_KATANA_SENSAQT_THREAD_H_
 
 #include <core/threading/thread.h>
-#include <logging/logger.h>
 #include <core/utils/refptr.h>
+#include <logging/logger.h>
 
 namespace fawkes {
-  class KatanaController;
+class KatanaController;
 }
 
 class KatanaSensorAcquisitionThread : public fawkes::Thread
 {
- public:
-  KatanaSensorAcquisitionThread(fawkes::RefPtr<fawkes::KatanaController> katana,
-				fawkes::Logger *logger);
+public:
+	KatanaSensorAcquisitionThread(fawkes::RefPtr<fawkes::KatanaController> katana,
+	                              fawkes::Logger *                         logger);
 
-  void set_enabled(bool enabled);
-  virtual void loop();
+	void         set_enabled(bool enabled);
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  fawkes::RefPtr<fawkes::KatanaController>  katana_;
-  bool                                      enabled_;
+private:
+	fawkes::RefPtr<fawkes::KatanaController> katana_;
+	bool                                     enabled_;
 
-  fawkes::Logger          *logger_;
+	fawkes::Logger *logger_;
 };
-
 
 #endif

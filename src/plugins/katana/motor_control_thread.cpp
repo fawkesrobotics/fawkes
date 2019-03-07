@@ -21,6 +21,7 @@
  */
 
 #include "motor_control_thread.h"
+
 #include "controller.h"
 #include "exception.h"
 
@@ -42,13 +43,12 @@
  * final position has been reached
  */
 KatanaMotorControlThread::KatanaMotorControlThread(fawkes::RefPtr<fawkes::KatanaController> katana,
-				   fawkes::Logger *logger,
-				   unsigned int poll_interval_ms)
-  : KatanaMotionThread("KatanaMotorControlThread", katana, logger)
+                                                   fawkes::Logger *                         logger,
+                                                   unsigned int poll_interval_ms)
+: KatanaMotionThread("KatanaMotorControlThread", katana, logger)
 {
-  poll_interval_usec_ = poll_interval_ms * 1000;
+	poll_interval_usec_ = poll_interval_ms * 1000;
 }
-
 
 /** Set target encoder value
  * @param nr number of motor
@@ -58,11 +58,11 @@ KatanaMotorControlThread::KatanaMotorControlThread(fawkes::RefPtr<fawkes::Katana
 void
 KatanaMotorControlThread::set_encoder(unsigned int nr, int value, bool inc)
 {
-  nr_	    = nr;
-  encoder_ = value;
+	nr_      = nr;
+	encoder_ = value;
 
-  is_encoder_ = true;
-  is_inc_ = inc;
+	is_encoder_ = true;
+	is_inc_     = inc;
 }
 
 /** Set target angle value
@@ -73,72 +73,75 @@ KatanaMotorControlThread::set_encoder(unsigned int nr, int value, bool inc)
 void
 KatanaMotorControlThread::set_angle(unsigned int nr, float value, bool inc)
 {
-  nr_	    = nr;
-  angle_ = value;
+	nr_    = nr;
+	angle_ = value;
 
-  is_encoder_ = false;
-  is_inc_ = inc;
+	is_encoder_ = false;
+	is_inc_     = inc;
 }
-
 
 void
 KatanaMotorControlThread::once()
 {
-  try {
-    // non-blocking call to KNI
-    if( is_encoder_ ) {
-      if( is_inc_ )
+	try {
+		// non-blocking call to KNI
+		if (is_encoder_) {
+			if (is_inc_)
 
-        _katana->move_motor_by(nr_, encoder_);
-      else
-        _katana->move_motor_to(nr_, encoder_);
-    } else {
-      if( is_inc_ )
-        _katana->move_motor_by(nr_, angle_);
-      else
-        _katana->move_motor_to(nr_, angle_);
-    }
-  } catch (fawkes::KatanaOutOfRangeException &e) {
-    _logger->log_warn("KatanaMotorControlThread", "Motor %u out of range. Ex%s", nr_, e.what());
-    _finished = true;
-    _error_code = fawkes::KatanaInterface::ERROR_UNSPECIFIC;
-    return;
-  } catch (fawkes::Exception &e) {
-    _logger->log_warn("KatanaMotorControlThread", "Moving motor %u failed (ignoring): %s", nr_, e.what());
-    _finished = true;
-    _error_code = fawkes::KatanaInterface::ERROR_CMD_START_FAILED;
-    return;
-  }
+				_katana->move_motor_by(nr_, encoder_);
+			else
+				_katana->move_motor_to(nr_, encoder_);
+		} else {
+			if (is_inc_)
+				_katana->move_motor_by(nr_, angle_);
+			else
+				_katana->move_motor_to(nr_, angle_);
+		}
+	} catch (fawkes::KatanaOutOfRangeException &e) {
+		_logger->log_warn("KatanaMotorControlThread", "Motor %u out of range. Ex%s", nr_, e.what());
+		_finished   = true;
+		_error_code = fawkes::KatanaInterface::ERROR_UNSPECIFIC;
+		return;
+	} catch (fawkes::Exception &e) {
+		_logger->log_warn("KatanaMotorControlThread",
+		                  "Moving motor %u failed (ignoring): %s",
+		                  nr_,
+		                  e.what());
+		_finished   = true;
+		_error_code = fawkes::KatanaInterface::ERROR_CMD_START_FAILED;
+		return;
+	}
 
-  // check if final
-  bool final = false;
-  short num_errors  = 0;
-  while ( !final ) {
-    usleep(poll_interval_usec_);
-    try {
-      _katana->read_sensor_data();
-      _katana->read_motor_data();
-    } catch (fawkes::Exception &e) {
-      if (++num_errors <= 10) {
-        _logger->log_warn("KatanaMotorControlThread", "Reading sensor/motor data failed, retrying");
-        continue;
-      } else {
-        _logger->log_warn("KatanaMotorControlThread", "Receiving sensor/motor data failed too often, aborting");
-        _error_code = fawkes::KatanaInterface::ERROR_COMMUNICATION;
-        break;
-      }
-    }
+	// check if final
+	bool  final      = false;
+	short num_errors = 0;
+	while (!final) {
+		usleep(poll_interval_usec_);
+		try {
+			_katana->read_sensor_data();
+			_katana->read_motor_data();
+		} catch (fawkes::Exception &e) {
+			if (++num_errors <= 10) {
+				_logger->log_warn("KatanaMotorControlThread", "Reading sensor/motor data failed, retrying");
+				continue;
+			} else {
+				_logger->log_warn("KatanaMotorControlThread",
+				                  "Receiving sensor/motor data failed too often, aborting");
+				_error_code = fawkes::KatanaInterface::ERROR_COMMUNICATION;
+				break;
+			}
+		}
 
-    try {
-      final = _katana->final();
-    } catch (fawkes::KatanaMotorCrashedException &e) {
-      _logger->log_warn("KatanaMotorControlThread", "Motor crashed: %s", e.what());
-      _error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
-      break;
-    }
-  }
+		try {
+			final = _katana->final();
+		} catch (fawkes::KatanaMotorCrashedException &e) {
+			_logger->log_warn("KatanaMotorControlThread", "Motor crashed: %s", e.what());
+			_error_code = fawkes::KatanaInterface::ERROR_MOTOR_CRASHED;
+			break;
+		}
+	}
 
-  _logger->log_debug(name(), "Successfully moved motor %u", nr_);
+	_logger->log_debug(name(), "Successfully moved motor %u", nr_);
 
-  _finished = true;
+	_finished = true;
 }

@@ -21,6 +21,7 @@
  */
 
 #include "katana_plugin.h"
+
 #include "act_thread.h"
 #include "sensor_thread.h"
 
@@ -35,14 +36,12 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-KatanaPlugin::KatanaPlugin(Configuration *config)
-  : Plugin(config)
+KatanaPlugin::KatanaPlugin(Configuration *config) : Plugin(config)
 {
-  KatanaActThread *act_thread = new KatanaActThread();
-  thread_list.push_back(act_thread);
-  thread_list.push_back(new KatanaSensorThread(act_thread));
+	KatanaActThread *act_thread = new KatanaActThread();
+	thread_list.push_back(act_thread);
+	thread_list.push_back(new KatanaSensorThread(act_thread));
 }
-
 
 PLUGIN_DESCRIPTION("Run Neuronics' Katana arm with Fawkes.")
 EXPORT_PLUGIN(KatanaPlugin)

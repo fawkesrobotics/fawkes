@@ -21,6 +21,7 @@
  */
 
 #include "sensacq_thread.h"
+
 #include "controller.h"
 
 #include <cstdlib>
@@ -39,15 +40,15 @@ using namespace fawkes;
  * @param katana katana controller base class
  * @param logger logger
  */
-KatanaSensorAcquisitionThread::KatanaSensorAcquisitionThread(fawkes::RefPtr<fawkes::KatanaController> katana,
-							     fawkes::Logger *logger)
-  : Thread("KatanaSensorAcqusitionThread", Thread::OPMODE_WAITFORWAKEUP)
+KatanaSensorAcquisitionThread::KatanaSensorAcquisitionThread(
+  fawkes::RefPtr<fawkes::KatanaController> katana,
+  fawkes::Logger *                         logger)
+: Thread("KatanaSensorAcqusitionThread", Thread::OPMODE_WAITFORWAKEUP)
 {
-  katana_  = katana;
-  logger_  = logger;
-  enabled_ = false;
+	katana_  = katana;
+	logger_  = logger;
+	enabled_ = false;
 }
-
 
 /** Set whether data acquisition is enabled or not.
  * In general the thread should only be woken up if sensor data can be acquired.
@@ -59,20 +60,19 @@ KatanaSensorAcquisitionThread::KatanaSensorAcquisitionThread(fawkes::RefPtr<fawk
 void
 KatanaSensorAcquisitionThread::set_enabled(bool enabled)
 {
-  loop_mutex->lock();
-  enabled_ = enabled;
-  loop_mutex->unlock();
+	loop_mutex->lock();
+	enabled_ = enabled;
+	loop_mutex->unlock();
 }
-
 
 void
 KatanaSensorAcquisitionThread::loop()
 {
-  if (enabled_) {
-    try {
-      katana_->read_sensor_data();
-    } catch (Exception &e) {
-      logger_->log_warn(name(), "Exception while reading sensor data: %s", e.what());
-    }
-  }
+	if (enabled_) {
+		try {
+			katana_->read_sensor_data();
+		} catch (Exception &e) {
+			logger_->log_warn(name(), "Exception while reading sensor data: %s", e.what());
+		}
+	}
 }

@@ -27,14 +27,18 @@
 
 class KatanaCalibrationThread : public KatanaMotionThread
 {
- public:
-  KatanaCalibrationThread(fawkes::RefPtr<fawkes::KatanaController> katana, fawkes::Logger *logger);
+public:
+	KatanaCalibrationThread(fawkes::RefPtr<fawkes::KatanaController> katana, fawkes::Logger *logger);
 
-  virtual void once();
+	virtual void once();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 };
-
 
 #endif

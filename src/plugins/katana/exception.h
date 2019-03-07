@@ -28,25 +28,28 @@
 
 namespace fawkes {
 
-class KatanaNoSolutionException : public Exception {
- public:
-  KatanaNoSolutionException(const char *format, ...) throw();
+class KatanaNoSolutionException : public Exception
+{
+public:
+	KatanaNoSolutionException(const char *format, ...) throw();
 };
 
-
-class KatanaOutOfRangeException : public Exception {
- public:
-  KatanaOutOfRangeException(const char *format, ...) throw();
+class KatanaOutOfRangeException : public Exception
+{
+public:
+	KatanaOutOfRangeException(const char *format, ...) throw();
 };
 
-class KatanaMotorCrashedException : public Exception {
- public:
-  KatanaMotorCrashedException(const char *format, ...) throw();
+class KatanaMotorCrashedException : public Exception
+{
+public:
+	KatanaMotorCrashedException(const char *format, ...) throw();
 };
 
-class KatanaUnsupportedException : public Exception {
- public:
-  KatanaUnsupportedException(const char *format, ...) throw();
+class KatanaUnsupportedException : public Exception
+{
+public:
+	KatanaUnsupportedException(const char *format, ...) throw();
 };
 
 } // end namespace fawkes
