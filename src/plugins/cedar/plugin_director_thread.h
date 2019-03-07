@@ -22,34 +22,43 @@
 #ifndef __PLUGINS_CEDAR_PLUGIN_DIRECTOR_THREAD_H_
 #define __PLUGINS_CEDAR_PLUGIN_DIRECTOR_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/plugin_director.h>
+#include <core/threading/thread.h>
 
 #include <list>
 #include <string>
 
-class CedarPluginDirectorThread
-: public fawkes::Thread,
-  public fawkes::PluginDirectorAspect
+class CedarPluginDirectorThread : public fawkes::Thread, public fawkes::PluginDirectorAspect
 {
- /** Cedar thread can access private API. */
- friend class CedarThread;
- public:
-  CedarPluginDirectorThread();
-  virtual ~CedarPluginDirectorThread();
+	/** Cedar thread can access private API. */
+	friend class CedarThread;
 
-  virtual void loop();
+public:
+	CedarPluginDirectorThread();
+	virtual ~CedarPluginDirectorThread();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	virtual void loop();
 
- private:
-  std::list<std::string> get_loaded_plugins()
-  { return plugin_manager->get_loaded_plugins(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
-  std::list<std::pair<std::string, std::string> >  get_available_plugins()
-  { return plugin_manager->get_available_plugins(); }
+private:
+	std::list<std::string>
+	get_loaded_plugins()
+	{
+		return plugin_manager->get_loaded_plugins();
+	}
 
+	std::list<std::pair<std::string, std::string>>
+	get_available_plugins()
+	{
+		return plugin_manager->get_available_plugins();
+	}
 };
 
 #endif

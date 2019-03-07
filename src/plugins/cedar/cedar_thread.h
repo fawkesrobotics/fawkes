@@ -22,47 +22,50 @@
 #ifndef __PLUGINS_CEDAR_CEDAR_THREAD_H_
 #define __PLUGINS_CEDAR_CEDAR_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
-#include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips.h>
 #include <utils/time/time.h>
 
 #include <clipsmm.h>
-
 #include <map>
 #include <string>
 
 class CedarPluginDirectorThread;
 
-class CedarThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::CLIPSAspect
+class CedarThread : public fawkes::Thread,
+                    public fawkes::BlockedTimingAspect,
+                    public fawkes::LoggingAspect,
+                    public fawkes::BlackBoardAspect,
+                    public fawkes::ConfigurableAspect,
+                    public fawkes::ClockAspect,
+                    public fawkes::CLIPSAspect
 {
- public:
-  CedarThread(CedarPluginDirectorThread *pdt);
-  virtual ~CedarThread();
+public:
+	CedarThread(CedarPluginDirectorThread *pdt);
+	virtual ~CedarThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void clips_get_plugin_info();
+private:
+	void clips_get_plugin_info();
 
- private:
-  CedarPluginDirectorThread *pdt_;
+private:
+	CedarPluginDirectorThread *pdt_;
 };
 
 #endif

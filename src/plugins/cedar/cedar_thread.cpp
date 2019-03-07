@@ -20,6 +20,7 @@
  */
 
 #include "cedar_thread.h"
+
 #include "plugin_director_thread.h"
 
 #include <core/threading/mutex_locker.h>
@@ -35,83 +36,76 @@ using namespace fawkes;
  * @param pdt plugin director thread to use for Fawkes info
  */
 CedarThread::CedarThread(CedarPluginDirectorThread *pdt)
-  : Thread("CedarThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK),
-    CLIPSAspect("cedar", "CEDAR")
+: Thread("CedarThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK),
+  CLIPSAspect("cedar", "CEDAR")
 {
-  pdt_ = pdt;
+	pdt_ = pdt;
 }
-
 
 /** Destructor. */
 CedarThread::~CedarThread()
 {
 }
 
-
 void
 CedarThread::init()
 {
-  clips->evaluate(std::string("(path-add-subst \"@BASEDIR@\" \"") + BASEDIR + "\")");
-  clips->evaluate(std::string("(path-add-subst \"@FAWKES_BASEDIR@\" \"") +
-		  FAWKES_BASEDIR + "\")");
-  clips->evaluate(std::string("(path-add-subst \"@RESDIR@\" \"") + RESDIR + "\")");
-  clips->evaluate(std::string("(path-add-subst \"@CONFDIR@\" \"") + CONFDIR + "\")");
+	clips->evaluate(std::string("(path-add-subst \"@BASEDIR@\" \"") + BASEDIR + "\")");
+	clips->evaluate(std::string("(path-add-subst \"@FAWKES_BASEDIR@\" \"") + FAWKES_BASEDIR + "\")");
+	clips->evaluate(std::string("(path-add-subst \"@RESDIR@\" \"") + RESDIR + "\")");
+	clips->evaluate(std::string("(path-add-subst \"@CONFDIR@\" \"") + CONFDIR + "\")");
 
-  clips->evaluate(std::string("(path-add \"") + SRCDIR + "/clips/\")");
-  clips->evaluate(std::string("(path-add \"") + CONFDIR + "/cedar/\")");
+	clips->evaluate(std::string("(path-add \"") + SRCDIR + "/clips/\")");
+	clips->evaluate(std::string("(path-add \"") + CONFDIR + "/cedar/\")");
 
-  clips->evaluate("(ff-feature-request \"config\")");
+	clips->evaluate("(ff-feature-request \"config\")");
 
-  bool use_fawkes = false;
-  try {
-    use_fawkes = config->get_bool("/cedar/use-fawkes");
-  } catch (Exception &e) {} // ignored, use default
+	bool use_fawkes = false;
+	try {
+		use_fawkes = config->get_bool("/cedar/use-fawkes");
+	} catch (Exception &e) {
+	} // ignored, use default
 
-  if (use_fawkes) {
-    clips->add_function("fawkes-get-plugin-info",
-      sigc::slot<void>(
-          sigc::mem_fun(*this, &CedarThread::clips_get_plugin_info)
-      )
-    );
-  }
+	if (use_fawkes) {
+		clips->add_function("fawkes-get-plugin-info",
+		                    sigc::slot<void>(
+		                      sigc::mem_fun(*this, &CedarThread::clips_get_plugin_info)));
+	}
 
-  clips->batch_evaluate(SRCDIR"/clips/cedar.clp");
-  clips->assert_fact("(cedar-init)");
-  clips->refresh_agenda();
-  clips->run();
+	clips->batch_evaluate(SRCDIR "/clips/cedar.clp");
+	clips->assert_fact("(cedar-init)");
+	clips->refresh_agenda();
+	clips->run();
 }
-
 
 void
 CedarThread::finalize()
 {
 }
 
-
 void
 CedarThread::loop()
 {
-  MutexLocker lock(clips.objmutex_ptr());
-  clips->assert_fact("(time (now))");
-  clips->refresh_agenda();
-  clips->run();
+	MutexLocker lock(clips.objmutex_ptr());
+	clips->assert_fact("(time (now))");
+	clips->refresh_agenda();
+	clips->run();
 }
-
 
 void
 CedarThread::clips_get_plugin_info()
 {
-  std::list<std::string> loaded = pdt_->get_loaded_plugins();
-  std::list<std::pair<std::string, std::string> > available =
-    pdt_->get_available_plugins();
+	std::list<std::string>                         loaded    = pdt_->get_loaded_plugins();
+	std::list<std::pair<std::string, std::string>> available = pdt_->get_available_plugins();
 
-  MutexLocker lock(clips.objmutex_ptr());
-  
-  for (auto p : available) {
-    bool is_loaded = (std::find(loaded.begin(), loaded.end(), p.first) != loaded.end());
-    
-    clips->assert_fact_f("(fawkes-plugin (name \"%s\") (state %s))",
-			 p.first.c_str(), is_loaded ? "LOADED" : "AVAILABLE");
-  }
+	MutexLocker lock(clips.objmutex_ptr());
+
+	for (auto p : available) {
+		bool is_loaded = (std::find(loaded.begin(), loaded.end(), p.first) != loaded.end());
+
+		clips->assert_fact_f("(fawkes-plugin (name \"%s\") (state %s))",
+		                     p.first.c_str(),
+		                     is_loaded ? "LOADED" : "AVAILABLE");
+	}
 }
