@@ -23,57 +23,59 @@
 #ifndef _PLUGINS_CLIPS_ROS_CLIPS_ROS_THREAD_H_
 #define _PLUGINS_CLIPS_ROS_CLIPS_ROS_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips_feature.h>
 #include <plugins/ros/aspect/ros.h>
 
 #include <clipsmm.h>
-
 #include <map>
 #include <string>
 
-
-class ClipsROSThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ROSAspect,
-  public fawkes::CLIPSFeature,
-  public fawkes::CLIPSFeatureAspect
+class ClipsROSThread : public fawkes::Thread,
+                       public fawkes::LoggingAspect,
+                       public fawkes::ConfigurableAspect,
+                       public fawkes::ROSAspect,
+                       public fawkes::CLIPSFeature,
+                       public fawkes::CLIPSFeatureAspect
 {
- public:
-  ClipsROSThread();
-  virtual ~ClipsROSThread();
+public:
+	ClipsROSThread();
+	virtual ~ClipsROSThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  // for CLIPSFeature
-  virtual void clips_context_init(const std::string &env_name,
-				  fawkes::LockPtr<CLIPS::Environment> &clips);
-  virtual void clips_context_destroyed(const std::string &env_name);
+	// for CLIPSFeature
+	virtual void clips_context_init(const std::string &                  env_name,
+	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_destroyed(const std::string &env_name);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private: // members
-  std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+private: // members
+	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 
- private: // methods
-  class RosNodeInfo {
-   public:
-    std::list<std::string> published;
-    std::list<std::string> subscribed;
-    std::list<std::string> services;
-  };
+private: // methods
+	class RosNodeInfo
+	{
+	public:
+		std::list<std::string> published;
+		std::list<std::string> subscribed;
+		std::list<std::string> services;
+	};
 
-  void clips_ros_get_nodes(std::string env_name);
-  void clips_ros_get_topics(std::string env_name);
-  void clips_ros_get_topic_connections(std::string env_name);
-
+	void clips_ros_get_nodes(std::string env_name);
+	void clips_ros_get_topics(std::string env_name);
+	void clips_ros_get_topic_connections(std::string env_name);
 };
 
 #endif

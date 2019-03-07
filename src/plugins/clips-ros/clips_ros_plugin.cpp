@@ -21,6 +21,7 @@
  */
 
 #include "clips_ros_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -30,16 +31,15 @@ using namespace fawkes;
  */
 class ClipsROSPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit ClipsROSPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new ClipsROSThread());
-  }
+	explicit ClipsROSPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new ClipsROSThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("ROS integration for CLIPS")
 EXPORT_PLUGIN(ClipsROSPlugin)
