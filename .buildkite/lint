@@ -171,11 +171,11 @@ check_commit_authors () {
 	git_repo_clone "$(git config --get remote.origin.url)" ".barerepo" "--reference . --bare"
 	pushd .barerepo >/dev/null
 
-	OTHER_BRANCHES=$(git for-each-ref --format='%(refname)' refs/heads/ | grep -F -v "refs/heads/${BUILDKITE_BRANCH-}")
+	OTHER_BRANCHES=$(git for-each-ref --format='%(refname)' refs/heads/ | grep -F -v "refs/heads/${BUILDKITE_BRANCH:-}" || :)
 
 	OIFSN=$IFS
 	IFS=$'\n'
-	git rev-parse --not $OTHER_BRANCHES |
+	git rev-parse ${OTHER_BRANCHES:+--not "$OTHER_BRANCHES" } |
 	git rev-list --stdin $MERGE_BASE..HEAD |
 	while read onerev
 	do
