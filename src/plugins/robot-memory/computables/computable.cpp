@@ -20,6 +20,7 @@
  */
 
 #include "computable.h"
+
 #include <chrono>
 
 using namespace mongo;
@@ -38,14 +39,19 @@ using namespace mongo;
  * @param caching_time How long should computed results for a query be cached and be used for identical queries in that time?
  * @param priority Computable priority ordering the evaluation
  */
-Computable::Computable(Query query_to_compute, std::string collection, const boost::function<std::list<BSONObj> (BSONObj, std::string)> &compute_function, double caching_time, int priority)
+Computable::Computable(
+  Query                                                            query_to_compute,
+  std::string                                                      collection,
+  const boost::function<std::list<BSONObj>(BSONObj, std::string)> &compute_function,
+  double                                                           caching_time,
+  int                                                              priority)
 {
-  this->compute_function = compute_function;
-  this->query_to_compute = query_to_compute;
-  this->collection = collection;
-  //convert caching time to milliseconds
-  this->caching_time = (int) (caching_time * 1000.0);
-  this->priority = priority;
+	this->compute_function = compute_function;
+	this->query_to_compute = query_to_compute;
+	this->collection       = collection;
+	//convert caching time to milliseconds
+	this->caching_time = (int)(caching_time * 1000.0);
+	this->priority     = priority;
 }
 
 Computable::~Computable()
@@ -57,54 +63,54 @@ Computable::~Computable()
  * @param query The query demanding the computable information
  * @return Documents to insert extended with computable meta information (e.g. caching time)
  */
-std::list<BSONObj> Computable::compute(BSONObj query)
+std::list<BSONObj>
+Computable::compute(BSONObj query)
 {
-  // use provided function to compute demanded documents
-  std::list<BSONObj> docs = compute_function(query, collection);
-  long long milliseconds_since_epoch =
-      std::chrono::system_clock::now().time_since_epoch() /
-      std::chrono::milliseconds(1);
-  long long cached_until = milliseconds_since_epoch + caching_time;
-  //add metainformation for each document
-  for(BSONObj &obj : docs)
-  {
-    BSONObjBuilder info_b;
-    info_b.append("computed", true);
-    info_b.append("cached_until", cached_until);
-    BSONObjBuilder obj_b;
-    obj_b.appendElements(obj);
-    obj_b.append("_robmem_info", info_b.obj());
-    //override
-    obj = obj_b.obj();
-  }
-  return docs;
+	// use provided function to compute demanded documents
+	std::list<BSONObj> docs = compute_function(query, collection);
+	long long          milliseconds_since_epoch =
+	  std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
+	long long cached_until = milliseconds_since_epoch + caching_time;
+	//add metainformation for each document
+	for (BSONObj &obj : docs) {
+		BSONObjBuilder info_b;
+		info_b.append("computed", true);
+		info_b.append("cached_until", cached_until);
+		BSONObjBuilder obj_b;
+		obj_b.appendElements(obj);
+		obj_b.append("_robmem_info", info_b.obj());
+		//override
+		obj = obj_b.obj();
+	}
+	return docs;
 }
 
 /**
  * Gets the query that defines what information is computed by the Computable
  * @return The query
  */
-mongo::Query Computable::get_query()
+mongo::Query
+Computable::get_query()
 {
-  return query_to_compute;
+	return query_to_compute;
 }
 
 /**
  * Gets the collection the computable adds information to
  * @return The query
  */
-std::string Computable::get_collection()
+std::string
+Computable::get_collection()
 {
-  return collection;
+	return collection;
 }
 
 /**
  * Gets the priority of the computable
  * @return The query
  */
-int Computable::get_priority()
+int
+Computable::get_priority()
 {
-  return priority;
+	return priority;
 }
-
-

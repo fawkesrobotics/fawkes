@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "robot_memory_test_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -33,15 +33,14 @@ using namespace fawkes;
  */
 class RobotMemoryTestPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor
+public:
+	/** Constructor
    * @param config Fakwes configuration
    */
-  explicit RobotMemoryTestPlugin(Configuration *config)
-     : Plugin(config)
-  {
-     thread_list.push_back(new RobotMemoryTestThread());
-  }
+	explicit RobotMemoryTestPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RobotMemoryTestThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("gtests for the RobotMemory")

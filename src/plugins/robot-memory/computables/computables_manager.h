@@ -22,31 +22,32 @@
 #ifndef FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLES_COMPUTABLES_MANAGER_H_
 #define FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLES_COMPUTABLES_MANAGER_H_
 
-#include <mongo/client/dbclient.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
 #include "computable.h"
+
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <mongo/client/dbclient.h>
+
 #include <boost/bind.hpp>
-#include <utility>
 #include <map>
 #include <tuple>
+#include <utility>
 
 //forward declaration
 class RobotMemory;
 
 class ComputablesManager
 {
-  public:
-    ComputablesManager(fawkes::Configuration* config,
-                       RobotMemory* robot_memory);
-    virtual ~ComputablesManager();
+public:
+	ComputablesManager(fawkes::Configuration *config, RobotMemory *robot_memory);
+	virtual ~ComputablesManager();
 
-    bool check_and_compute(mongo::Query query, std::string collection);
-    void remove_computable(Computable* computable);
-    void cleanup_computed_docs();
+	bool check_and_compute(mongo::Query query, std::string collection);
+	void remove_computable(Computable *computable);
+	void cleanup_computed_docs();
 
-    /**
+	/**
      * Registers a Computable which provides information in the robot memory that is computed on demand.
      * @param query_to_compute Query describing what the function computes. Yor computable is called when an new query matches query_to_compute.
      * @param collection db.collection to fill with computed information
@@ -56,29 +57,35 @@ class ComputablesManager
      * @param priority Computable priority ordering the evaluation
      * @return Computable Object pointer used for removing it
      */
-    template<typename T>
-    Computable* register_computable(const mongo::Query& query_to_compute,
-                                    const std::string& collection,
-                                    std::list<mongo::BSONObj>(T::*compute_func)(const mongo::BSONObj&, const std::string&), T *obj, double caching_time = 0.0, int priority = 0)
-    {
-      Computable* comp = new Computable(query_to_compute, collection, boost::bind(compute_func, obj, _1, _2), caching_time, priority);
-      //sort it into the right position
-      std::list<Computable*>::iterator pos = computables.begin();
-      while(pos != computables.end() && priority < (*pos)->get_priority())
-        pos++;
-      computables.insert(pos, comp);
-      return comp;
-    }
+	template <typename T>
+	Computable *
+	register_computable(const mongo::Query &query_to_compute,
+	                    const std::string & collection,
+	                    std::list<mongo::BSONObj> (T::*compute_func)(const mongo::BSONObj &,
+	                                                                 const std::string &),
+	                    T *    obj,
+	                    double caching_time = 0.0,
+	                    int    priority     = 0)
+	{
+		Computable *comp = new Computable(
+		  query_to_compute, collection, boost::bind(compute_func, obj, _1, _2), caching_time, priority);
+		//sort it into the right position
+		std::list<Computable *>::iterator pos = computables.begin();
+		while (pos != computables.end() && priority < (*pos)->get_priority())
+			pos++;
+		computables.insert(pos, comp);
+		return comp;
+	}
 
-  private:
-    std::string name = "RobotMemory ComputablesManager";
-    fawkes::Configuration* config_;
-    RobotMemory* robot_memory_;
+private:
+	std::string            name = "RobotMemory ComputablesManager";
+	fawkes::Configuration *config_;
+	RobotMemory *          robot_memory_;
 
-    std::list<Computable*> computables;
-    std::string matching_test_collection_;
-    //cached querries as ((collection, querry), cached_until)
-    std::map<std::tuple<std::string, std::string>, long long> cached_querries_;
+	std::list<Computable *> computables;
+	std::string             matching_test_collection_;
+	//cached querries as ((collection, querry), cached_until)
+	std::map<std::tuple<std::string, std::string>, long long> cached_querries_;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLES_COMPUTABLES_MANAGER_H_ */

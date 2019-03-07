@@ -20,8 +20,7 @@
  */
 #include "robot_memory_inifin.h"
 
-namespace fawkes
-{
+namespace fawkes {
 
 /** @class RobotMemoryIniFin robot_memory_inifin.cpp
  * RobotMemoryAspect initializer/finalizer.
@@ -30,9 +29,9 @@ namespace fawkes
  * @author Frederik Zwilling
  */
 
-RobotMemoryIniFin::RobotMemoryIniFin()
-: AspectIniFin("RobotMemoryAspect")
-{}
+RobotMemoryIniFin::RobotMemoryIniFin() : AspectIniFin("RobotMemoryAspect")
+{
+}
 
 /** Initialize
  * @param thread thread
@@ -40,18 +39,19 @@ RobotMemoryIniFin::RobotMemoryIniFin()
 void
 RobotMemoryIniFin::init(Thread *thread)
 {
-  RobotMemoryAspect *robot_memory_thread;
-  robot_memory_thread = dynamic_cast<RobotMemoryAspect *>(thread);
-  if (robot_memory_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-            "RobotMemoryAspect, but RTTI says it "
-            "has not. ", thread->name());
-  }
-  if (! robot_memory_) {
-    throw CannotInitializeThreadException("robot_memory object has not been set.");
-  }
+	RobotMemoryAspect *robot_memory_thread;
+	robot_memory_thread = dynamic_cast<RobotMemoryAspect *>(thread);
+	if (robot_memory_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "RobotMemoryAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
+	if (!robot_memory_) {
+		throw CannotInitializeThreadException("robot_memory object has not been set.");
+	}
 
-  robot_memory_thread->init_RobotMemoryAspect(robot_memory_);
+	robot_memory_thread->init_RobotMemoryAspect(robot_memory_);
 }
 
 /** Finilize
@@ -60,14 +60,15 @@ RobotMemoryIniFin::init(Thread *thread)
 void
 RobotMemoryIniFin::finalize(Thread *thread)
 {
-  RobotMemoryAspect *robot_memory_thread;
-  robot_memory_thread = dynamic_cast<RobotMemoryAspect *>(thread);
-  if (robot_memory_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-            "RobotMemoryAspect, but RTTI says it "
-            "has not. ", thread->name());
-  }
-  robot_memory_thread->finalize_RobotMemoryAspect();
+	RobotMemoryAspect *robot_memory_thread;
+	robot_memory_thread = dynamic_cast<RobotMemoryAspect *>(thread);
+	if (robot_memory_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "RobotMemoryAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
+	robot_memory_thread->finalize_RobotMemoryAspect();
 }
 
 /**
@@ -75,9 +76,9 @@ RobotMemoryIniFin::finalize(Thread *thread)
  * @param robot_memory Robot Memory
  */
 void
-RobotMemoryIniFin::set_robot_memory(RobotMemory* robot_memory)
+RobotMemoryIniFin::set_robot_memory(RobotMemory *robot_memory)
 {
-  robot_memory_ = robot_memory;
+	robot_memory_ = robot_memory;
 }
 
 } /* namespace fawkes */

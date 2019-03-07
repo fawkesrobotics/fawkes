@@ -22,29 +22,29 @@
 #define FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLES_TRANSFORM_COMPUTABLE_H_
 
 #include "../robot_memory.h"
+
 #include <aspect/logging.h>
 #include <aspect/tf.h>
 #include <config/config.h>
 
-
 class TransformComputable
 {
-  public:
-    TransformComputable(RobotMemory* robot_memory,
-                        fawkes::tf::Transformer* tf,
-                        fawkes::Logger* logger,
-                        fawkes::Configuration* config);
-    virtual ~TransformComputable();
+public:
+	TransformComputable(RobotMemory *            robot_memory,
+	                    fawkes::tf::Transformer *tf,
+	                    fawkes::Logger *         logger,
+	                    fawkes::Configuration *  config);
+	virtual ~TransformComputable();
 
-  private:
-    std::list<mongo::BSONObj> compute_transform(const mongo::BSONObj& query,
-                                                const std::string& collection);
+private:
+	std::list<mongo::BSONObj> compute_transform(const mongo::BSONObj &query,
+	                                            const std::string &   collection);
 
-    RobotMemory* robot_memory_;
-    fawkes::Logger* logger_;
-    fawkes::tf::Transformer* tf_;
-    std::vector<Computable*>  computables;
-    fawkes::Configuration* config_;
+	RobotMemory *             robot_memory_;
+	fawkes::Logger *          logger_;
+	fawkes::tf::Transformer * tf_;
+	std::vector<Computable *> computables;
+	fawkes::Configuration *   config_;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLES_TRANSFORM_COMPUTABLE_H_ */

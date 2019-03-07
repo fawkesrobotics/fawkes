@@ -21,34 +21,33 @@
 #ifndef FAWKES_SRC_PLUGINS_ROBOT_MEMORY_ASPECT_ROBOT_MEMORY_ASPECT_H_
 #define FAWKES_SRC_PLUGINS_ROBOT_MEMORY_ASPECT_ROBOT_MEMORY_ASPECT_H_
 
-#include <aspect/aspect.h>
 #include "../robot_memory.h"
 
+#include <aspect/aspect.h>
 
-namespace fawkes
-{
+namespace fawkes {
 
 /*
  *
  */
 class RobotMemoryAspect : public virtual Aspect
 {
-  /// Access for RobotMemoryIniFin to set and finalize robot_memory
-  friend class RobotMemoryIniFin;
+	/// Access for RobotMemoryIniFin to set and finalize robot_memory
+	friend class RobotMemoryIniFin;
 
-  public:
-    RobotMemoryAspect();
-    virtual ~RobotMemoryAspect();
+public:
+	RobotMemoryAspect();
+	virtual ~RobotMemoryAspect();
 
-  protected:
-    /**
+protected:
+	/**
      * RobotMemory object for storing and querying information
      */
-    RobotMemory* robot_memory;
+	RobotMemory *robot_memory;
 
-  private:
-   void init_RobotMemoryAspect(RobotMemory* robot_memory);
-   void finalize_RobotMemoryAspect();
+private:
+	void init_RobotMemoryAspect(RobotMemory *robot_memory);
+	void finalize_RobotMemoryAspect();
 };
 
 } /* namespace fawkes */
