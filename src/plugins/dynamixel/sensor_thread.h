@@ -24,31 +24,34 @@
 
 #include "sensor_thread.h"
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 class DynamixelDriverThread;
 
-class DynamixelSensorThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect
+class DynamixelSensorThread : public fawkes::Thread,
+                              public fawkes::BlockedTimingAspect,
+                              public fawkes::LoggingAspect,
+                              public fawkes::ConfigurableAspect
 {
- public:
-  DynamixelSensorThread();
-  virtual void loop();
+public:
+	DynamixelSensorThread();
+	virtual void loop();
 
-  void add_driver_thread(DynamixelDriverThread *drv_thread);
+	void add_driver_thread(DynamixelDriverThread *drv_thread);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  std::list<DynamixelDriverThread *> driver_threads_;
+private:
+	std::list<DynamixelDriverThread *> driver_threads_;
 };
-
 
 #endif

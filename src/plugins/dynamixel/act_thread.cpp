@@ -20,6 +20,7 @@
  */
 
 #include "act_thread.h"
+
 #include "driver_thread.h"
 
 using namespace fawkes;
@@ -34,18 +35,17 @@ using namespace fawkes;
 
 /** Constructor. */
 DynamixelActThread::DynamixelActThread()
-  : Thread("DynamixelActThread", Thread::OPMODE_CONTINUOUS),
-    SyncPointAspect(SyncPoint::WAIT_FOR_ALL, "/sensors/acquire", "/act/exec/end")
+: Thread("DynamixelActThread", Thread::OPMODE_CONTINUOUS),
+  SyncPointAspect(SyncPoint::WAIT_FOR_ALL, "/sensors/acquire", "/act/exec/end")
 {
 }
-
 
 void
 DynamixelActThread::loop()
 {
-  for (auto &d : driver_threads_) {
-    d->exec_act();
-  }
+	for (auto &d : driver_threads_) {
+		d->exec_act();
+	}
 }
 
 /** Add a driver thread to wake in ACT hook.
@@ -54,5 +54,5 @@ DynamixelActThread::loop()
 void
 DynamixelActThread::add_driver_thread(DynamixelDriverThread *drv_thread)
 {
-  driver_threads_.push_back(drv_thread);
+	driver_threads_.push_back(drv_thread);
 }

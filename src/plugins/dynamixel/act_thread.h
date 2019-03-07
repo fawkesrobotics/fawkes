@@ -22,32 +22,34 @@
 #ifndef _PLUGINS_DYNAMIXEL_ACT_THREAD_H_
 #define _PLUGINS_DYNAMIXEL_ACT_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 class DynamixelDriverThread;
 
-class DynamixelActThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::SyncPointAspect
+class DynamixelActThread : public fawkes::Thread,
+                           public fawkes::LoggingAspect,
+                           public fawkes::ConfigurableAspect,
+                           public fawkes::SyncPointAspect
 {
- public:
-  DynamixelActThread();
-  virtual void loop();
+public:
+	DynamixelActThread();
+	virtual void loop();
 
-  void add_driver_thread(DynamixelDriverThread *drv_thread);
+	void add_driver_thread(DynamixelDriverThread *drv_thread);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  std::list<DynamixelDriverThread *> driver_threads_;
-
+private:
+	std::list<DynamixelDriverThread *> driver_threads_;
 };
-
 
 #endif
