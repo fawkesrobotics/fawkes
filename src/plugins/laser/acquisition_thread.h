@@ -23,62 +23,63 @@
 #ifndef _PLUGINS_LASER_ACQUISITION_THREAD_H_
 #define _PLUGINS_LASER_ACQUISITION_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  class Mutex;
-  class Configuration;
-  class Logger;
-  class Time;
-}
+class Mutex;
+class Configuration;
+class Logger;
+class Time;
+} // namespace fawkes
 
-class LaserAcquisitionThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect
+class LaserAcquisitionThread : public fawkes::Thread,
+                               public fawkes::LoggingAspect,
+                               public fawkes::ConfigurableAspect,
+                               public fawkes::ClockAspect
 {
- public:
-  LaserAcquisitionThread(const char *thread_name);
-  virtual ~LaserAcquisitionThread();
+public:
+	LaserAcquisitionThread(const char *thread_name);
+	virtual ~LaserAcquisitionThread();
 
-  bool lock_if_new_data();
-  void unlock();
+	bool lock_if_new_data();
+	void unlock();
 
-  virtual void   pre_init(fawkes::Configuration *config,
-			  fawkes::Logger *logger) = 0;
+	virtual void pre_init(fawkes::Configuration *config, fawkes::Logger *logger) = 0;
 
-  const float *  get_distance_data();
-  const float *  get_echo_data();
-  const fawkes::Time *   get_timestamp();
+	const float *       get_distance_data();
+	const float *       get_echo_data();
+	const fawkes::Time *get_timestamp();
 
-  unsigned int   get_distance_data_size();
-  unsigned int   get_echo_data_size();
+	unsigned int get_distance_data_size();
+	unsigned int get_echo_data_size();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- protected:
-  void alloc_distances(unsigned int num_distances);
-  void alloc_echoes(unsigned int num_echoes);
-  void reset_distances();
-  void reset_echoes();
+protected:
+	void alloc_distances(unsigned int num_distances);
+	void alloc_echoes(unsigned int num_echoes);
+	void reset_distances();
+	void reset_echoes();
 
- protected:
-  fawkes::Mutex    *_data_mutex;
-  fawkes::Time     *_timestamp;
+protected:
+	fawkes::Mutex *_data_mutex;
+	fawkes::Time * _timestamp;
 
-  bool    _new_data;
-  float  *_distances;
-  float  *_echoes;
+	bool   _new_data;
+	float *_distances;
+	float *_echoes;
 
-  unsigned int  _distances_size;
-  unsigned int  _echoes_size;
-
+	unsigned int _distances_size;
+	unsigned int _echoes_size;
 };
-
 
 #endif

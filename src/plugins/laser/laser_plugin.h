@@ -27,8 +27,8 @@
 
 class LaserPlugin : public fawkes::Plugin
 {
- public:
-  explicit LaserPlugin(fawkes::Configuration *config);
+public:
+	explicit LaserPlugin(fawkes::Configuration *config);
 };
 
 #endif

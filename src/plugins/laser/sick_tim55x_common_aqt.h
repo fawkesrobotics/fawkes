@@ -27,55 +27,53 @@
 
 #include <config/change_handler.h>
 
-#include <string>
 #include <map>
+#include <string>
 
 namespace fawkes {
-  class Mutex;
+class Mutex;
 }
 
-class SickTiM55xCommonAcquisitionThread
-: public LaserAcquisitionThread,
-  public fawkes::ConfigurationChangeHandler
+class SickTiM55xCommonAcquisitionThread : public LaserAcquisitionThread,
+                                          public fawkes::ConfigurationChangeHandler
 {
- public:
-  SickTiM55xCommonAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
-  virtual ~SickTiM55xCommonAcquisitionThread();
+public:
+	SickTiM55xCommonAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
+	virtual ~SickTiM55xCommonAcquisitionThread();
 
-  // from LaserAcquisitionThread
-  virtual void pre_init(fawkes::Configuration *config, fawkes::Logger *logger);
+	// from LaserAcquisitionThread
+	virtual void pre_init(fawkes::Configuration *config, fawkes::Logger *logger);
 
-  void read_common_config();
+	void read_common_config();
 
- protected:
-  void init_device();
-  void resync();
-  void parse_datagram(const unsigned char *datagram, size_t datagram_length);
+protected:
+	void init_device();
+	void resync();
+	void parse_datagram(const unsigned char *datagram, size_t datagram_length);
 
-  virtual void send_with_reply(const char *request, std::string *reply = NULL) = 0;
-  virtual void open_device() = 0;
-  virtual void close_device() = 0;
-  virtual void flush_device() = 0;
+	virtual void send_with_reply(const char *request, std::string *reply = NULL) = 0;
+	virtual void open_device()                                                   = 0;
+	virtual void close_device()                                                  = 0;
+	virtual void flush_device()                                                  = 0;
 
 private:
-  virtual void config_tag_changed(const char *new_tag) { };
-  virtual void config_comment_changed(const fawkes::Configuration::ValueIterator *v) { };
-  virtual void config_value_changed(const fawkes::Configuration::ValueIterator *v);
-  virtual void config_value_erased(const char *path);
+	virtual void config_tag_changed(const char *new_tag){};
+	virtual void config_comment_changed(const fawkes::Configuration::ValueIterator *v){};
+	virtual void config_value_changed(const fawkes::Configuration::ValueIterator *v);
+	virtual void config_value_erased(const char *path);
 
- private:
-  bool pre_init_done_;
-  float        cfg_time_offset_;
+private:
+	bool  pre_init_done_;
+	float cfg_time_offset_;
 
- protected:
-  std::string  cfg_name_;
-  std::string  cfg_prefix_;
+protected:
+	std::string cfg_name_;
+	std::string cfg_prefix_;
 
-  std::string  dev_model_;
+	std::string dev_model_;
 
- private:
-  unsigned int expected_num_data_;
+private:
+	unsigned int expected_num_data_;
 };
-
 
 #endif
