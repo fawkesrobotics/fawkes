@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  digest.h - Interface digest generator
  *
@@ -23,22 +23,21 @@
 #ifndef _INTERFACES_GENERATOR_DIGEST_H_
 #define _INTERFACES_GENERATOR_DIGEST_H_
 
-#include <string>
 #include <cstddef>
+#include <string>
 
 class InterfaceDigest
 {
- public:
-  InterfaceDigest(std::string config_filename);
-  ~InterfaceDigest();
+public:
+	InterfaceDigest(std::string config_filename);
+	~InterfaceDigest();
 
-  const unsigned char * get_hash();
-  size_t                get_hash_size();
+	const unsigned char *get_hash();
+	size_t               get_hash_size();
 
- private:
-  unsigned char *digest;
-  size_t         digest_size;
+private:
+	unsigned char *digest;
+	size_t         digest_size;
 };
-
 
 #endif

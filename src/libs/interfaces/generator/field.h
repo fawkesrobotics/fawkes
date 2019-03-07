@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  field.h - Interface generator field representation
  *
@@ -23,64 +23,62 @@
 #ifndef _INTERFACES_GENERATOR_FIELD_H_
 #define _INTERFACES_GENERATOR_FIELD_H_
 
+#include <interfaces/generator/enum_constant.h>
+
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
-
-#include <interfaces/generator/enum_constant.h>
 
 class InterfaceField
 {
- public:
-  InterfaceField(std::vector<InterfaceEnumConstant> *enum_constants = NULL);
+public:
+	InterfaceField(std::vector<InterfaceEnumConstant> *enum_constants = NULL);
 
-  void setComment(const std::string &comment);
-  void setName(const std::string &name);
-  void setType(const std::string &type);
-  bool isEnumType() const;
-  void setLength(const std::string &length);
-  void setFlags(const std::vector<std::string> &flags);
-  void setValidFor(const std::string &validfor);
-  void setDefaultValue(const std::string &default_value);
+	void setComment(const std::string &comment);
+	void setName(const std::string &name);
+	void setType(const std::string &type);
+	bool isEnumType() const;
+	void setLength(const std::string &length);
+	void setFlags(const std::vector<std::string> &flags);
+	void setValidFor(const std::string &validfor);
+	void setDefaultValue(const std::string &default_value);
 
-  void setAttribute(const std::string &attr_name, const std::string &attr_value);
+	void setAttribute(const std::string &attr_name, const std::string &attr_value);
 
-  void valid(const std::set<std::string> &reserved_names);
+	void valid(const std::set<std::string> &reserved_names);
 
-  std::string               getName() const;
-  std::string               getComment() const;
-  std::string               getType() const;
-  std::string               getAccessType() const;
-  std::string               getStructType() const;
-  std::string               getPlainAccessType() const;
-  std::string               getLength() const;
-  unsigned int              getLengthValue() const;
-  std::vector<std::string>  getFlags() const;
-  std::string               getValidFor() const;
-  std::string               getDefaultValue() const;
+	std::string              getName() const;
+	std::string              getComment() const;
+	std::string              getType() const;
+	std::string              getAccessType() const;
+	std::string              getStructType() const;
+	std::string              getPlainAccessType() const;
+	std::string              getLength() const;
+	unsigned int             getLengthValue() const;
+	std::vector<std::string> getFlags() const;
+	std::string              getValidFor() const;
+	std::string              getDefaultValue() const;
 
-  const std::vector<InterfaceEnumConstant> *  getEnumConstants() const;
-  const InterfaceEnumConstant &               getEnumConstant(const std::string &name) const;
+	const std::vector<InterfaceEnumConstant> *getEnumConstants() const;
+	const InterfaceEnumConstant &             getEnumConstant(const std::string &name) const;
 
-  bool operator< (const InterfaceField &f) const;
+	bool operator<(const InterfaceField &f) const;
 
- private:
-  void tokenize(const std::string&   str,
-		std::vector<std::string>& tokens,
-		const std::string&   delimiters = " ");
+private:
+	void tokenize(const std::string &       str,
+	              std::vector<std::string> &tokens,
+	              const std::string &       delimiters = " ");
 
-
-  std::string name;
-  std::string type;
-  bool        is_enum_type;
-  std::string comment;
-  std::string length;
-  unsigned int length_value;
-  std::string validfor;
-  std::string default_value;
-  std::vector<std::string> flags;
-  std::vector<InterfaceEnumConstant> *enum_constants;
-
+	std::string                         name;
+	std::string                         type;
+	bool                                is_enum_type;
+	std::string                         comment;
+	std::string                         length;
+	unsigned int                        length_value;
+	std::string                         validfor;
+	std::string                         default_value;
+	std::vector<std::string>            flags;
+	std::vector<InterfaceEnumConstant> *enum_constants;
 };
 
 #endif

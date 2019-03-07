@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  pseudomap.cpp - Interface generator pseudo representation
  *
@@ -20,12 +20,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <interfaces/generator/pseudomap.h>
 #include <interfaces/generator/checker.h>
 #include <interfaces/generator/exceptions.h>
+#include <interfaces/generator/pseudomap.h>
 
 #include <cstdlib>
-
 
 /** @class InterfacePseudoMap "pseudomap.h"
  * Interface generator internal representation of a pseudo map as parsed from
@@ -33,22 +32,22 @@
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param name name of the pseudo map
  * @param type type of the values in the map
  * @param keytype type of the keys
  * @param comment comment of the pseudo map
  */
-InterfacePseudoMap::InterfacePseudoMap(std::string name, std::string type,
-				       std::string keytype, std::string comment)
+InterfacePseudoMap::InterfacePseudoMap(std::string name,
+                                       std::string type,
+                                       std::string keytype,
+                                       std::string comment)
 {
-  name_ = name;
-  type_ = type;
-  keytype_ = keytype;
-  comment_ = comment;
+	name_    = name;
+	type_    = type;
+	keytype_ = keytype;
+	comment_ = comment;
 }
-
 
 /** Get name of field.
  * @return name of field.
@@ -56,9 +55,8 @@ InterfacePseudoMap::InterfacePseudoMap(std::string name, std::string type,
 std::string
 InterfacePseudoMap::getName() const
 {
-  return name_;
+	return name_;
 }
-
 
 /** Get type of field.
  * @return type of field.
@@ -66,9 +64,8 @@ InterfacePseudoMap::getName() const
 std::string
 InterfacePseudoMap::getType() const
 {
-    return type_;
+	return type_;
 }
-
 
 /** Get comment of field.
  * @return comment of field.
@@ -76,9 +73,8 @@ InterfacePseudoMap::getType() const
 std::string
 InterfacePseudoMap::getComment() const
 {
-    return comment_;
+	return comment_;
 }
-
 
 /** Get type of key value.
  * @return type of key
@@ -86,10 +82,8 @@ InterfacePseudoMap::getComment() const
 std::string
 InterfacePseudoMap::getKeyType() const
 {
-  return keytype_ + "_t";
+	return keytype_ + "_t";
 }
-
-
 
 /** Assert validity.
  * Calling valid() acts like an assertion. An Exception is thrown if something is wrong.
@@ -103,23 +97,27 @@ InterfacePseudoMap::getKeyType() const
 void
 InterfacePseudoMap::valid()
 {
-  if ( (name_.length() == 0) || (name_.find(" ") != std::string::npos) ) {
-    throw InterfaceGeneratorInvalidValueException("name", "string", "name must neither be empty nor contain spaces");
-  }
-  if (type_.length() == 0) {
-    throw InterfaceGeneratorInvalidValueException("type", "string", "type must not be empty");
-  }
-  if ( (keytype_ != "int8") && (keytype_ != "int16") &&
-       (keytype_ != "int32") && (keytype_ != "int64") &&
-       (keytype_ != "uint8") && (keytype_ != "uint16") &&
-       (keytype_ != "uint32") && (keytype_ != "uint64") ) {
-    throw InterfaceGeneratorInvalidValueException("keytype", "string", "Pseudo map keys can only be of a numeric type");
-  }
-  if (keytype_.length() == 0) {
-    throw InterfaceGeneratorInvalidValueException("keytype", "string", "key type must not be empty");
-  }
+	if ((name_.length() == 0) || (name_.find(" ") != std::string::npos)) {
+		throw InterfaceGeneratorInvalidValueException("name",
+		                                              "string",
+		                                              "name must neither be empty nor contain spaces");
+	}
+	if (type_.length() == 0) {
+		throw InterfaceGeneratorInvalidValueException("type", "string", "type must not be empty");
+	}
+	if ((keytype_ != "int8") && (keytype_ != "int16") && (keytype_ != "int32")
+	    && (keytype_ != "int64") && (keytype_ != "uint8") && (keytype_ != "uint16")
+	    && (keytype_ != "uint32") && (keytype_ != "uint64")) {
+		throw InterfaceGeneratorInvalidValueException("keytype",
+		                                              "string",
+		                                              "Pseudo map keys can only be of a numeric type");
+	}
+	if (keytype_.length() == 0) {
+		throw InterfaceGeneratorInvalidValueException("keytype",
+		                                              "string",
+		                                              "key type must not be empty");
+	}
 }
-
 
 /** Add reference.
  * @param fieldname name of the field that is referenced
@@ -128,9 +126,8 @@ InterfacePseudoMap::valid()
 void
 InterfacePseudoMap::addRef(std::string fieldname, std::string key)
 {
-  parefs_.push_back(make_pair(fieldname, key));
+	parefs_.push_back(make_pair(fieldname, key));
 }
-
 
 /** Get reference list.
  * @return reference list
@@ -138,5 +135,5 @@ InterfacePseudoMap::addRef(std::string fieldname, std::string key)
 InterfacePseudoMap::RefList &
 InterfacePseudoMap::getRefList()
 {
-  return parefs_;
+	return parefs_;
 }

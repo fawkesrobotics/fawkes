@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  message.h - Interface generator message representation
  *
@@ -30,20 +30,18 @@
 
 class InterfaceMessage
 {
- public:
-  InterfaceMessage(const std::string &name, const std::string &comment);
+public:
+	InterfaceMessage(const std::string &name, const std::string &comment);
 
-  std::string getName();
-  std::string getComment();
-  void setFields(const std::vector<InterfaceField> &fields);
-  std::vector<InterfaceField> getFields();
+	std::string                 getName();
+	std::string                 getComment();
+	void                        setFields(const std::vector<InterfaceField> &fields);
+	std::vector<InterfaceField> getFields();
 
- private:
-  std::string name;
-  std::string comment;
-  std::vector<InterfaceField> fields;
+private:
+	std::string                 name;
+	std::string                 comment;
+	std::vector<InterfaceField> fields;
 };
-
-
 
 #endif

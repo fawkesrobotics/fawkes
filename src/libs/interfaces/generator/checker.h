@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  type_checker.h - Interface generator type checker
  *
@@ -25,18 +25,19 @@
 
 #define __STDC_LIMIT_MACROS
 
+#include <interfaces/generator/enum_constant.h>
+
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
-
-#include <interfaces/generator/enum_constant.h>
 
 class InterfaceChecker
 {
- public:
-  static bool validType(const std::string &type, std::vector<InterfaceEnumConstant> *enum_constants = 0);
-  static bool validValue(const std::string &type, const std::string &value);
-  static bool validName(const std::string &name, const std::set<std::string> &reserved_names);
+public:
+	static bool validType(const std::string &                 type,
+	                      std::vector<InterfaceEnumConstant> *enum_constants = 0);
+	static bool validValue(const std::string &type, const std::string &value);
+	static bool validName(const std::string &name, const std::set<std::string> &reserved_names);
 };
 
 const std::set<std::string> reserved_names_interface();

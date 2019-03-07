@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  message.cpp - Interface generator message representation
  *
@@ -20,9 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <interfaces/generator/message.h>
 #include <interfaces/generator/exceptions.h>
-
+#include <interfaces/generator/message.h>
 
 /** @class InterfaceMessage message.h <interfaces/generator/message.h>
  * Interface generator internal representation of a message as parsed from
@@ -35,15 +34,14 @@
  */
 InterfaceMessage::InterfaceMessage(const std::string &name, const std::string &comment)
 {
-  if ( name.find("Message") != std::string::npos )  {
-    this->name = name;
-  } else {
-    this->name = name + "Message";
-  }
-  this->comment = comment;
-  fields.clear();
+	if (name.find("Message") != std::string::npos) {
+		this->name = name;
+	} else {
+		this->name = name + "Message";
+	}
+	this->comment = comment;
+	fields.clear();
 }
-
 
 /** Get name of message.
  * @return name of message.
@@ -51,9 +49,8 @@ InterfaceMessage::InterfaceMessage(const std::string &name, const std::string &c
 std::string
 InterfaceMessage::getName()
 {
-  return name;
+	return name;
 }
-
 
 /** Get comment of message.
  * @return comment of message.
@@ -61,9 +58,8 @@ InterfaceMessage::getName()
 std::string
 InterfaceMessage::getComment()
 {
-  return comment;
+	return comment;
 }
-
 
 /** Set fields of message.
  * @param fields fields of message.
@@ -71,9 +67,8 @@ InterfaceMessage::getComment()
 void
 InterfaceMessage::setFields(const std::vector<InterfaceField> &fields)
 {
-  this->fields = fields;
+	this->fields = fields;
 }
-
 
 /** Get fields of message.
  * @return fields of message.
@@ -81,5 +76,5 @@ InterfaceMessage::setFields(const std::vector<InterfaceField> &fields)
 std::vector<InterfaceField>
 InterfaceMessage::getFields()
 {
-  return fields;
+	return fields;
 }

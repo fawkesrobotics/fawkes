@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  tolua_generator.h - ToLua++ Interface generator
  *
@@ -23,76 +23,78 @@
 #ifndef _INTERFACES_GENERATOR_TOLUA_GENERATOR_H_
 #define _INTERFACES_GENERATOR_TOLUA_GENERATOR_H_
 
-#include "field.h"
 #include "constant.h"
 #include "enum_constant.h"
+#include "field.h"
 #include "message.h"
 #include "pseudomap.h"
 
-#include <vector>
-#include <string>
 #include <stdio.h>
+#include <string>
+#include <vector>
 
 class ToLuaInterfaceGenerator
 {
- public:
-  ToLuaInterfaceGenerator(std::string directory, std::string interface_name,
-			  std::string config_basename, std::string author,
-			  std::string year, std::string creation_date,
-			  std::string data_comment,
-			  const unsigned char *hash, size_t hash_size,
-			  const std::vector<InterfaceConstant> &constants,
-			  const std::vector<InterfaceEnumConstant> &enum_constants,
-			  const std::vector<InterfaceField> &data_fields,
-			  const std::vector<InterfacePseudoMap> &pseudo_maps,
-			  const std::vector<InterfaceMessage> &messages
-			  );
-  ~ToLuaInterfaceGenerator();
+public:
+	ToLuaInterfaceGenerator(std::string                               directory,
+	                        std::string                               interface_name,
+	                        std::string                               config_basename,
+	                        std::string                               author,
+	                        std::string                               year,
+	                        std::string                               creation_date,
+	                        std::string                               data_comment,
+	                        const unsigned char *                     hash,
+	                        size_t                                    hash_size,
+	                        const std::vector<InterfaceConstant> &    constants,
+	                        const std::vector<InterfaceEnumConstant> &enum_constants,
+	                        const std::vector<InterfaceField> &       data_fields,
+	                        const std::vector<InterfacePseudoMap> &   pseudo_maps,
+	                        const std::vector<InterfaceMessage> &     messages);
+	~ToLuaInterfaceGenerator();
 
-  void write_toluaf(FILE *f);
+	void write_toluaf(FILE *f);
 
-  void write_header(FILE *f, std::string filename);
-  void write_constants_h(FILE *f);
-  void write_messages_h(FILE *f);
-  void write_message_superclass_h(FILE *f);
-  void write_superclass_h(FILE *f);
-  void write_lua_code(FILE *f, std::string classname);
-  void write_methods_h(FILE *f,
-		       std::string /* indent space */ is,
-		       std::vector<InterfaceField> fields);
-  void write_methods_h(FILE *f, std::string /* indent space */ is,
-		       std::vector<InterfaceField> fields,
-		       std::vector<InterfacePseudoMap> pseudo_maps);
-  void write_message_ctor_dtor_h(FILE *f, std::string /* indent space */ is,
-				 std::string classname,
-				 std::vector<InterfaceField> fields);
-  void write_ctor_dtor_h(FILE *f, std::string /* indent space */ is,
-			 std::string classname);
+	void write_header(FILE *f, std::string filename);
+	void write_constants_h(FILE *f);
+	void write_messages_h(FILE *f);
+	void write_message_superclass_h(FILE *f);
+	void write_superclass_h(FILE *f);
+	void write_lua_code(FILE *f, std::string classname);
+	void
+	     write_methods_h(FILE *f, std::string /* indent space */ is, std::vector<InterfaceField> fields);
+	void write_methods_h(FILE *                          f,
+	                     std::string /* indent space */  is,
+	                     std::vector<InterfaceField>     fields,
+	                     std::vector<InterfacePseudoMap> pseudo_maps);
+	void write_message_ctor_dtor_h(FILE *                         f,
+	                               std::string /* indent space */ is,
+	                               std::string                    classname,
+	                               std::vector<InterfaceField>    fields);
+	void write_ctor_dtor_h(FILE *f, std::string /* indent space */ is, std::string classname);
 
-  void generate();
+	void generate();
 
-  const char * convert_type(std::string c_type);
+	const char *convert_type(std::string c_type);
 
- private:
-  std::vector<InterfaceConstant>     constants;
-  std::vector<InterfaceEnumConstant> enum_constants;
-  std::vector<InterfaceField>        data_fields;
-  std::vector<InterfacePseudoMap>    pseudo_maps;
-  std::vector<InterfaceMessage>      messages;
+private:
+	std::vector<InterfaceConstant>     constants;
+	std::vector<InterfaceEnumConstant> enum_constants;
+	std::vector<InterfaceField>        data_fields;
+	std::vector<InterfacePseudoMap>    pseudo_maps;
+	std::vector<InterfaceMessage>      messages;
 
-  std::string dir;
-  std::string filename_tolua;
-  std::string filename_h;
-  std::string class_name;
-  std::string gendate;
-  std::string author;
-  std::string year;
-  std::string creation_date;
-  std::string data_comment;
+	std::string dir;
+	std::string filename_tolua;
+	std::string filename_h;
+	std::string class_name;
+	std::string gendate;
+	std::string author;
+	std::string year;
+	std::string creation_date;
+	std::string data_comment;
 
-  const unsigned char *hash;
-  size_t hash_size;
+	const unsigned char *hash;
+	size_t               hash_size;
 };
-
 
 #endif
