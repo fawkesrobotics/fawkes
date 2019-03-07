@@ -23,40 +23,42 @@
 #ifndef _PLUGINS_GOSSIP_GOSSIP_THREAD_H_
 #define _PLUGINS_GOSSIP_GOSSIP_THREAD_H_
 
-#include <plugins/gossip/aspect/gossip_inifin.h>
-
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/network.h>
 #include <aspect/aspect_provider.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <aspect/network.h>
+#include <core/threading/thread.h>
+#include <plugins/gossip/aspect/gossip_inifin.h>
 
 #include <memory>
 
-class GossipThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::AspectProviderAspect,
-  public fawkes::NetworkAspect
+class GossipThread : public fawkes::Thread,
+                     public fawkes::LoggingAspect,
+                     public fawkes::ConfigurableAspect,
+                     public fawkes::AspectProviderAspect,
+                     public fawkes::NetworkAspect
 {
- public:
-  GossipThread();
-  virtual ~GossipThread();
+public:
+	GossipThread();
+	virtual ~GossipThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  std::string cfg_service_name_;
+private:
+	std::string cfg_service_name_;
 
-  std::shared_ptr<fawkes::GossipGroupManager>  group_mgr_;
-  fawkes::GossipAspectIniFin                   gossip_aspect_inifin_;
-
+	std::shared_ptr<fawkes::GossipGroupManager> group_mgr_;
+	fawkes::GossipAspectIniFin                  gossip_aspect_inifin_;
 };
 
 #endif

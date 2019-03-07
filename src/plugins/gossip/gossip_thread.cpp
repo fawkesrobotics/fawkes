@@ -36,113 +36,106 @@ using namespace fawkes;
 
 /** Constructor. */
 GossipThread::GossipThread()
-  : Thread("GossipThread", Thread::OPMODE_WAITFORWAKEUP),
-    AspectProviderAspect(&gossip_aspect_inifin_)
+: Thread("GossipThread", Thread::OPMODE_WAITFORWAKEUP), AspectProviderAspect(&gossip_aspect_inifin_)
 {
 }
-
 
 /** Destructor. */
 GossipThread::~GossipThread()
 {
 }
 
-
 void
 GossipThread::init()
 {
-  cfg_service_name_ = config->get_string(CFG_PREFIX"name");
+	cfg_service_name_ = config->get_string(CFG_PREFIX "name");
 
-  // gather static group configurations
-  std::map<std::string, GossipGroupConfiguration> groups;
-  std::set<std::string> ignored_groups;
+	// gather static group configurations
+	std::map<std::string, GossipGroupConfiguration> groups;
+	std::set<std::string>                           ignored_groups;
 
-  std::string prefix = CFG_PREFIX"groups/";
+	std::string prefix = CFG_PREFIX "groups/";
 
-  std::shared_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
-  while (i->next()) {
-    std::string cfg_name = std::string(i->path()).substr(prefix.length());
-    cfg_name = cfg_name.substr(0, cfg_name.find("/"));
+	std::shared_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+	while (i->next()) {
+		std::string cfg_name = std::string(i->path()).substr(prefix.length());
+		cfg_name             = cfg_name.substr(0, cfg_name.find("/"));
 
-    if ( (groups.find(cfg_name) == groups.end()) &&
-	 (ignored_groups.find(cfg_name) == ignored_groups.end()) ) {
+		if ((groups.find(cfg_name) == groups.end())
+		    && (ignored_groups.find(cfg_name) == ignored_groups.end())) {
+			std::string cfg_prefix = prefix + cfg_name + "/";
 
-      std::string cfg_prefix = prefix + cfg_name + "/";
+			bool active = true;
+			try {
+				active = config->get_bool((cfg_prefix + "active").c_str());
+			} catch (Exception &e) {
+			} // ignored, assume enabled
 
-      bool active = true;
-      try {
-	active = config->get_bool((cfg_prefix + "active").c_str());
-      } catch (Exception &e) {} // ignored, assume enabled
+			try {
+				if (active) {
+					std::string addr = config->get_string((cfg_prefix + "broadcast-address").c_str());
 
-      try {
-	if (active) {
-	  std::string  addr = config->get_string((cfg_prefix + "broadcast-address").c_str());
+					if (config->exists((cfg_prefix + "broadcast-send-port").c_str())
+					    && config->exists((cfg_prefix + "broadcast-recv-port").c_str())) {
+						unsigned int send_port = config->get_uint((cfg_prefix + "broadcast-send-port").c_str());
+						unsigned int recv_port = config->get_uint((cfg_prefix + "broadcast-recv-port").c_str());
 
-	  if (config->exists((cfg_prefix + "broadcast-send-port").c_str()) &&
-	      config->exists((cfg_prefix + "broadcast-recv-port").c_str()) )
-	  {
-	    unsigned int send_port =
-	      config->get_uint((cfg_prefix + "broadcast-send-port").c_str());
-	    unsigned int recv_port =
-	      config->get_uint((cfg_prefix + "broadcast-recv-port").c_str());
+						if (send_port > 0xFFFF) {
+							throw Exception("Port number too high: %u > %u", send_port, 0xFFFF);
+						}
+						if (recv_port > 0xFFFF) {
+							throw Exception("Port number too high: %u > %u", recv_port, 0xFFFF);
+						}
+						groups[cfg_name] = GossipGroupConfiguration(cfg_name, addr, send_port, recv_port);
 
-	    if (send_port > 0xFFFF) {
-	      throw Exception("Port number too high: %u > %u", send_port, 0xFFFF);
-	    }
-	    if (recv_port > 0xFFFF) {
-	      throw Exception("Port number too high: %u > %u", recv_port, 0xFFFF);
-	    }
-	    groups[cfg_name] = GossipGroupConfiguration(cfg_name, addr, send_port, recv_port);
+					} else {
+						unsigned int port = config->get_uint((cfg_prefix + "broadcast-port").c_str());
 
-	  } else {
-	    unsigned int port = config->get_uint((cfg_prefix + "broadcast-port").c_str());
+						if (port > 0xFFFF) {
+							throw Exception("Port number too high: %u > %u", port, 0xFFFF);
+						}
 
-	    if (port > 0xFFFF) {
-	      throw Exception("Port number too high: %u > %u", port, 0xFFFF);
-	    }
+						groups[cfg_name] = GossipGroupConfiguration(cfg_name, addr, port);
+					}
 
-	    groups[cfg_name] = GossipGroupConfiguration(cfg_name, addr, port);
-	  }
+					try {
+						groups[cfg_name].crypto_key =
+						  config->get_string((cfg_prefix + "encryption-key").c_str());
+						try {
+							groups[cfg_name].crypto_cipher =
+							  config->get_string((cfg_prefix + "encryption-cipher").c_str());
+						} catch (Exception &e) {
+							// ignore, use default
+							groups[cfg_name].crypto_cipher = "aes-128-ecb";
+						}
+						logger->log_debug(name(),
+						                  "Setup encryption of type %s for group '%s'",
+						                  groups[cfg_name].crypto_cipher.c_str(),
+						                  cfg_name.c_str());
+					} catch (Exception &e) {
+					} // ignored, no encryption
 
-	  try {
-	    groups[cfg_name].crypto_key =
-	      config->get_string((cfg_prefix + "encryption-key").c_str());
-	    try {
-	      groups[cfg_name].crypto_cipher =
-		config->get_string((cfg_prefix + "encryption-cipher").c_str());
-	    } catch (Exception &e) {
-	      // ignore, use default
-	      groups[cfg_name].crypto_cipher = "aes-128-ecb";
-	    }
-	    logger->log_debug(name(), "Setup encryption of type %s for group '%s'",
-			      groups[cfg_name].crypto_cipher.c_str(), cfg_name.c_str());
-	  } catch (Exception &e) {} // ignored, no encryption
-
-	} else {
-	  //printf("Ignoring laser config %s\n", cfg_name.c_str());
-	  ignored_groups.insert(cfg_name);
+				} else {
+					//printf("Ignoring laser config %s\n", cfg_name.c_str());
+					ignored_groups.insert(cfg_name);
+				}
+			} catch (Exception &e) {
+				throw;
+			}
+		}
 	}
-      } catch(Exception &e) {
-	throw;
-      }
-    }
-  }
 
-  group_mgr_ =
-    std::shared_ptr<GossipGroupManager>(new GossipGroupManager(cfg_service_name_,
-							     service_publisher,
-							     groups));
-  gossip_aspect_inifin_.set_manager(group_mgr_.get());
+	group_mgr_ = std::shared_ptr<GossipGroupManager>(
+	  new GossipGroupManager(cfg_service_name_, service_publisher, groups));
+	gossip_aspect_inifin_.set_manager(group_mgr_.get());
 }
-
 
 void
 GossipThread::finalize()
 {
-  gossip_aspect_inifin_.set_manager(NULL);
-  group_mgr_.reset();
+	gossip_aspect_inifin_.set_manager(NULL);
+	group_mgr_.reset();
 }
-
 
 void
 GossipThread::loop()

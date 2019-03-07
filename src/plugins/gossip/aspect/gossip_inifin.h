@@ -33,17 +33,17 @@ class GossipGroupManager;
 
 class GossipAspectIniFin : public AspectIniFin
 {
- public:
-  GossipAspectIniFin();
-  ~GossipAspectIniFin();
+public:
+	GossipAspectIniFin();
+	~GossipAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
-  void set_manager(GossipGroupManager *gossip_group_mgr);
+	void set_manager(GossipGroupManager *gossip_group_mgr);
 
- private:
-  GossipGroupManager *gossip_group_mgr_;
+private:
+	GossipGroupManager *gossip_group_mgr_;
 };
 
 } // end namespace fawkes

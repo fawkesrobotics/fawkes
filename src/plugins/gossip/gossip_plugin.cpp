@@ -21,6 +21,7 @@
  */
 
 #include "gossip_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -30,16 +31,15 @@ using namespace fawkes;
  */
 class GossipPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit GossipPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new GossipThread());
-  }
+	explicit GossipPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new GossipThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("Robot Group Communication")
 EXPORT_PLUGIN(GossipPlugin)

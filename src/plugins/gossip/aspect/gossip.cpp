@@ -42,17 +42,14 @@ namespace fawkes {
 /** Constructor.
  * @param group_name Gossip group to join and communicate with.
  */
-GossipAspect::GossipAspect(const char *group_name)
-  : GossipAspect_group_name_(group_name)
+GossipAspect::GossipAspect(const char *group_name) : GossipAspect_group_name_(group_name)
 {
-  add_aspect("GossipAspect");
+	add_aspect("GossipAspect");
 }
-
 
 /** Virtual empty destructor. */
 GossipAspect::~GossipAspect()
 {
 }
-
 
 } // end namespace fawkes

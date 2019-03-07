@@ -36,17 +36,17 @@ class GossipAspectIniFin;
 
 class GossipAspect : public virtual Aspect
 {
- friend GossipAspectIniFin;
+	friend GossipAspectIniFin;
 
- public:
-  GossipAspect(const char *group_name);
-  virtual ~GossipAspect();
+public:
+	GossipAspect(const char *group_name);
+	virtual ~GossipAspect();
 
- protected:
-  RefPtr<GossipGroup> gossip_group;
+protected:
+	RefPtr<GossipGroup> gossip_group;
 
- private:
-  const std::string GossipAspect_group_name_;
+private:
+	const std::string GossipAspect_group_name_;
 };
 
 } // end namespace fawkes

@@ -21,10 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/gossip/aspect/gossip_inifin.h>
-#include <plugins/gossip/gossip/gossip_group_manager.h>
-#include <plugins/gossip/gossip/gossip_group.h>
 #include <core/threading/thread_finalizer.h>
+#include <plugins/gossip/aspect/gossip_inifin.h>
+#include <plugins/gossip/gossip/gossip_group.h>
+#include <plugins/gossip/gossip/gossip_group_manager.h>
 
 namespace fawkes {
 
@@ -36,8 +36,7 @@ namespace fawkes {
  */
 
 /** Constructor. */
-GossipAspectIniFin::GossipAspectIniFin()
-  : AspectIniFin("GossipAspect")
+GossipAspectIniFin::GossipAspectIniFin() : AspectIniFin("GossipAspect")
 {
 }
 
@@ -46,40 +45,38 @@ GossipAspectIniFin::~GossipAspectIniFin()
 {
 }
 
-
-
 void
 GossipAspectIniFin::init(Thread *thread)
 {
-  GossipAspect *gossip_thread;
-  gossip_thread = dynamic_cast<GossipAspect *>(thread);
-  if (gossip_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "GossipAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
-  
-  RefPtr<GossipGroup> group =
-    gossip_group_mgr_->join_group(gossip_thread->GossipAspect_group_name_);
+	GossipAspect *gossip_thread;
+	gossip_thread = dynamic_cast<GossipAspect *>(thread);
+	if (gossip_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "GossipAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  gossip_thread->gossip_group = group;
+	RefPtr<GossipGroup> group =
+	  gossip_group_mgr_->join_group(gossip_thread->GossipAspect_group_name_);
+
+	gossip_thread->gossip_group = group;
 }
 
 void
 GossipAspectIniFin::finalize(Thread *thread)
 {
-  GossipAspect *gossip_thread;
-  gossip_thread = dynamic_cast<GossipAspect *>(thread);
-  if (gossip_thread == NULL) {
-    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
-					"GossipAspect, but RTTI says it "
-					"has not. ", thread->name());
-  }
+	GossipAspect *gossip_thread;
+	gossip_thread = dynamic_cast<GossipAspect *>(thread);
+	if (gossip_thread == NULL) {
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+		                                    "GossipAspect, but RTTI says it "
+		                                    "has not. ",
+		                                    thread->name());
+	}
 
-  gossip_group_mgr_->leave_group(gossip_thread->gossip_group);
+	gossip_group_mgr_->leave_group(gossip_thread->gossip_group);
 }
-
-
 
 /** Set gossip group manger.
  * @param gossip_group_mgr Gossip group manager
@@ -87,7 +84,7 @@ GossipAspectIniFin::finalize(Thread *thread)
 void
 GossipAspectIniFin::set_manager(GossipGroupManager *gossip_group_mgr)
 {
-  gossip_group_mgr_ = gossip_group_mgr;
+	gossip_group_mgr_ = gossip_group_mgr;
 }
 
 } // end namespace fawkes

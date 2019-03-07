@@ -22,38 +22,41 @@
 #ifndef _PLUGINS_GOSSIP_EXAMPLE_GEX_SENDER_THREAD_H_
 #define _PLUGINS_GOSSIP_EXAMPLE_GEX_SENDER_THREAD_H_
 
-#include <plugins/gossip/aspect/gossip.h>
-
-#include <core/threading/thread.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/logging.h>
-#include <aspect/blocked_timing.h>
+#include <core/threading/thread.h>
+#include <plugins/gossip/aspect/gossip.h>
 
 namespace fawkes {
-  class Time;
+class Time;
 }
 
-class GossipExampleSenderThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::GossipAspect
+class GossipExampleSenderThread : public fawkes::Thread,
+                                  public fawkes::ClockAspect,
+                                  public fawkes::LoggingAspect,
+                                  public fawkes::BlockedTimingAspect,
+                                  public fawkes::GossipAspect
 {
- public:
-  GossipExampleSenderThread();
-  virtual ~GossipExampleSenderThread();
+public:
+	GossipExampleSenderThread();
+	virtual ~GossipExampleSenderThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  fawkes::Time *last_sent_;
-  unsigned int  counter_;
+private:
+	fawkes::Time *last_sent_;
+	unsigned int  counter_;
 };
 
 #endif

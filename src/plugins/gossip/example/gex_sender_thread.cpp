@@ -20,9 +20,10 @@
  */
 
 #include "gex_sender_thread.h"
-#include <plugins/gossip/gossip/gossip_group.h>
 
 #include "TestMessage.pb.h"
+
+#include <plugins/gossip/gossip/gossip_group.h>
 
 using namespace fawkes;
 
@@ -33,47 +34,43 @@ using namespace fawkes;
 
 /** Constructor. */
 GossipExampleSenderThread::GossipExampleSenderThread()
-  : Thread("GossipExampleSenderThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
-    GossipAspect("example")
+: Thread("GossipExampleSenderThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
+  GossipAspect("example")
 {
 }
-
 
 /** Destructor. */
 GossipExampleSenderThread::~GossipExampleSenderThread()
 {
 }
 
-
 void
 GossipExampleSenderThread::init()
 {
-  last_sent_ = new Time(clock);
-  counter_   = 0;
+	last_sent_ = new Time(clock);
+	counter_   = 0;
 }
-
 
 void
 GossipExampleSenderThread::finalize()
 {
-  delete last_sent_;
+	delete last_sent_;
 }
-
 
 void
 GossipExampleSenderThread::loop()
 {
-  fawkes::Time now(clock);
-  if (now - last_sent_ >= 2.0) {
-    *last_sent_ = now;
+	fawkes::Time now(clock);
+	if (now - last_sent_ >= 2.0) {
+		*last_sent_ = now;
 
-    logger->log_debug(name(), "Sending");
+		logger->log_debug(name(), "Sending");
 
-    gossip_example::TestMessage m;
-    m.set_counter(++counter_);
-    m.set_sec(now.get_sec());
-    m.set_nsec(now.get_nsec());
-    gossip_group->broadcast(m);
-  }
+		gossip_example::TestMessage m;
+		m.set_counter(++counter_);
+		m.set_sec(now.get_sec());
+		m.set_nsec(now.get_nsec());
+		gossip_group->broadcast(m);
+	}
 }

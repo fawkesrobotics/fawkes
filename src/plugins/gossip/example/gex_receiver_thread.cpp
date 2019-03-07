@@ -32,48 +32,42 @@ using namespace fawkes;
 
 /** Constructor. */
 GossipExampleReceiverThread::GossipExampleReceiverThread()
-  : Thread("GossipExampleReceiverThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
-    GossipAspect("example")
+: Thread("GossipExampleReceiverThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT),
+  GossipAspect("example")
 {
 }
-
 
 /** Destructor. */
 GossipExampleReceiverThread::~GossipExampleReceiverThread()
 {
 }
 
-
 void
 GossipExampleReceiverThread::init()
 {
-  try {
-    gossip_group->message_register().add_message_type<gossip_example::TestMessage>();
-  } catch (std::runtime_error &e) {} // ignore, probably already added
+	try {
+		gossip_group->message_register().add_message_type<gossip_example::TestMessage>();
+	} catch (std::runtime_error &e) {
+	} // ignore, probably already added
 
-  sig_rcvd_conn_ =
-    gossip_group->signal_received()
-    .connect(boost::bind(&GossipExampleReceiverThread::handle_peer_msg, this, _1, _2, _3, _4));
+	sig_rcvd_conn_ = gossip_group->signal_received().connect(
+	  boost::bind(&GossipExampleReceiverThread::handle_peer_msg, this, _1, _2, _3, _4));
 
-  sig_recv_error_conn_ =
-    gossip_group->signal_recv_error()
-    .connect(boost::bind(&GossipExampleReceiverThread::handle_peer_recv_error, this, _1, _2));
+	sig_recv_error_conn_ = gossip_group->signal_recv_error().connect(
+	  boost::bind(&GossipExampleReceiverThread::handle_peer_recv_error, this, _1, _2));
 
-  sig_send_error_conn_ =
-    gossip_group->signal_send_error()
-    .connect(boost::bind(&GossipExampleReceiverThread::handle_peer_send_error, this, _1));
+	sig_send_error_conn_ = gossip_group->signal_send_error().connect(
+	  boost::bind(&GossipExampleReceiverThread::handle_peer_send_error, this, _1));
 }
-
 
 void
 GossipExampleReceiverThread::finalize()
 {
-  sig_rcvd_conn_.disconnect();
-  sig_recv_error_conn_.disconnect();
-  sig_send_error_conn_.disconnect();
+	sig_rcvd_conn_.disconnect();
+	sig_recv_error_conn_.disconnect();
+	sig_send_error_conn_.disconnect();
 }
-
 
 void
 GossipExampleReceiverThread::loop()
@@ -82,23 +76,24 @@ GossipExampleReceiverThread::loop()
 
 void
 GossipExampleReceiverThread::handle_peer_msg(boost::asio::ip::udp::endpoint &endpoint,
-					     uint16_t component_id, uint16_t msg_type,
-					     std::shared_ptr<google::protobuf::Message> msg)
+                                             uint16_t                        component_id,
+                                             uint16_t                        msg_type,
+                                             std::shared_ptr<google::protobuf::Message> msg)
 {
-  if (component_id == gossip_example::TestMessage::COMP_ID &&
-      msg_type == gossip_example::TestMessage::MSG_TYPE)
-  {
-    std::shared_ptr<gossip_example::TestMessage> tm =
-      std::dynamic_pointer_cast<gossip_example::TestMessage>(msg);
-    if (tm) {
-      logger->log_info(name(), "Received message with counter %u", tm->counter());
-    } else {
-      logger->log_warn(name(), "Message with proper component_id and msg_type, but no conversion. "
-		       " Wrong component ID/message type to C++ type mapping?");
-    }
-  } else {
-    logger->log_warn(name(), "Unknown message received: %u:%u", component_id, msg_type);
-  }
+	if (component_id == gossip_example::TestMessage::COMP_ID
+	    && msg_type == gossip_example::TestMessage::MSG_TYPE) {
+		std::shared_ptr<gossip_example::TestMessage> tm =
+		  std::dynamic_pointer_cast<gossip_example::TestMessage>(msg);
+		if (tm) {
+			logger->log_info(name(), "Received message with counter %u", tm->counter());
+		} else {
+			logger->log_warn(name(),
+			                 "Message with proper component_id and msg_type, but no conversion. "
+			                 " Wrong component ID/message type to C++ type mapping?");
+		}
+	} else {
+		logger->log_warn(name(), "Unknown message received: %u:%u", component_id, msg_type);
+	}
 }
 
 /** Handle error during peer message processing.
@@ -107,10 +102,13 @@ GossipExampleReceiverThread::handle_peer_msg(boost::asio::ip::udp::endpoint &end
  */
 void
 GossipExampleReceiverThread::handle_peer_recv_error(boost::asio::ip::udp::endpoint &endpoint,
-						    std::string msg)
+                                                    std::string                     msg)
 {
-  logger->log_warn(name(), "Failed to receive peer message from %s:%u: %s",
-		   endpoint.address().to_string().c_str(), endpoint.port(), msg.c_str());
+	logger->log_warn(name(),
+	                 "Failed to receive peer message from %s:%u: %s",
+	                 endpoint.address().to_string().c_str(),
+	                 endpoint.port(),
+	                 msg.c_str());
 }
 
 /** Handle error during peer message processing.
@@ -119,6 +117,5 @@ GossipExampleReceiverThread::handle_peer_recv_error(boost::asio::ip::udp::endpoi
 void
 GossipExampleReceiverThread::handle_peer_send_error(std::string msg)
 {
-  logger->log_warn(name(), "Failed to send peer message: %s", msg.c_str());
+	logger->log_warn(name(), "Failed to send peer message: %s", msg.c_str());
 }
-
