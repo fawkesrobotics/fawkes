@@ -36,28 +36,27 @@
  * @param interface Fawkes interface instance
  * @param proxy Player proxy instance
  */
-PlayerPositionMapper::PlayerPositionMapper(const std::string& varname,
+PlayerPositionMapper::PlayerPositionMapper(const std::string &              varname,
                                            fawkes::ObjectPositionInterface *interface,
-                                           PlayerCc::Position2dProxy *proxy)
+                                           PlayerCc::Position2dProxy *      proxy)
 : PlayerProxyFawkesInterfaceMapper(varname)
 {
-  interface_ = interface;
-  proxy_     = proxy;
+	interface_ = interface;
+	proxy_     = proxy;
 }
-
 
 void
 PlayerPositionMapper::sync_player_to_fawkes()
 {
-  if ( proxy_->IsFresh() ) {
-    //printf("Setting %s to (%f, %f, %f)\n", varname().c_str(), proxy_->GetXPos(),
-    //       proxy_->GetYPos(), proxy_->GetYaw());
-    interface_->set_relative_x(proxy_->GetXPos());
-    interface_->set_relative_y(proxy_->GetYPos());
-    interface_->set_relative_z(proxy_->GetYaw());
-    interface_->write();
-    proxy_->NotFresh();
-  }
+	if (proxy_->IsFresh()) {
+		//printf("Setting %s to (%f, %f, %f)\n", varname().c_str(), proxy_->GetXPos(),
+		//       proxy_->GetYPos(), proxy_->GetYaw());
+		interface_->set_relative_x(proxy_->GetXPos());
+		interface_->set_relative_y(proxy_->GetYPos());
+		interface_->set_relative_z(proxy_->GetYaw());
+		interface_->write();
+		proxy_->NotFresh();
+	}
 }
 
 void

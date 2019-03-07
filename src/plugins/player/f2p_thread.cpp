@@ -21,6 +21,7 @@
  */
 
 #include "f2p_thread.h"
+
 #include "playerc_thread.h"
 
 using namespace fawkes;
@@ -32,33 +33,29 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param client_thread PlayerClientThread to use for syncing Fawkes interfaces
  * to Player proxies.
  */
 PlayerF2PThread::PlayerF2PThread(PlayerClientThread *client_thread)
-  : Thread("PlayerF2PThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
+: Thread("PlayerF2PThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
 {
-  client_thread_ = client_thread;
+	client_thread_ = client_thread;
 }
-
 
 void
 PlayerF2PThread::init()
 {
 }
 
-
 void
 PlayerF2PThread::finalize()
 {
 }
 
-
 void
 PlayerF2PThread::loop()
 {
-  client_thread_->sync_fawkes_to_player();
+	client_thread_->sync_fawkes_to_player();
 }

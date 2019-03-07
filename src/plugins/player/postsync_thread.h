@@ -23,23 +23,25 @@
 #ifndef _PLUGINS_PLAYER_POSTSYNC_THREAD_H_
 #define _PLUGINS_PLAYER_POSTSYNC_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
+#include <core/threading/thread.h>
 
-class PlayerPostSyncThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect
+class PlayerPostSyncThread : public fawkes::Thread, public fawkes::BlockedTimingAspect
 {
- public:
-  PlayerPostSyncThread();
+public:
+	PlayerPostSyncThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 };
-
 
 #endif

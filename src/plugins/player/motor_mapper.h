@@ -26,26 +26,26 @@
 #include "mapper.h"
 
 namespace fawkes {
-  class MotorInterface;
+class MotorInterface;
 }
 
 namespace PlayerCc {
-  class Position2dProxy;
+class Position2dProxy;
 }
 
 class PlayerMotorPositionMapper : public PlayerProxyFawkesInterfaceMapper
 {
- public:
-	PlayerMotorPositionMapper(const std::string& varname,
-	                          fawkes::MotorInterface *interface,
+public:
+	PlayerMotorPositionMapper(const std::string &        varname,
+	                          fawkes::MotorInterface *   interface,
 	                          PlayerCc::Position2dProxy *proxy);
 
-  virtual void sync_fawkes_to_player();
-  virtual void sync_player_to_fawkes();
+	virtual void sync_fawkes_to_player();
+	virtual void sync_player_to_fawkes();
 
- private:
-  fawkes::MotorInterface     *interface_;
-  PlayerCc::Position2dProxy  *proxy_;
+private:
+	fawkes::MotorInterface *   interface_;
+	PlayerCc::Position2dProxy *proxy_;
 };
 
 #endif

@@ -23,34 +23,36 @@
 #include <blackboard/remote.h>
 #include <interfaces/MotorInterface.h>
 
-#include <unistd.h>
 #include <cstdio>
+#include <unistd.h>
 
 using namespace fawkes;
 
 int
 main(int argc, char **argv)
 {
-  BlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
+	BlackBoard *bb = new RemoteBlackBoard("localhost", 1910);
 
-  MotorInterface *motor = bb->open_for_reading<MotorInterface>("Player Motor");
-  motor->read();
+	MotorInterface *motor = bb->open_for_reading<MotorInterface>("Player Motor");
+	motor->read();
 
-  printf("Motor x=%f   y=%f   z=%f\n",
-	 motor->odometry_position_x(), motor->odometry_position_y(),
-	 motor->odometry_orientation());
+	printf("Motor x=%f   y=%f   z=%f\n",
+	       motor->odometry_position_x(),
+	       motor->odometry_position_y(),
+	       motor->odometry_orientation());
 
-  printf("Setting relative (2, 0, 0), this is (%f, %f, %f) global\n",
-	 motor->odometry_position_x() + 2, motor->odometry_position_y(),
-	 motor->odometry_orientation());
+	printf("Setting relative (2, 0, 0), this is (%f, %f, %f) global\n",
+	       motor->odometry_position_x() + 2,
+	       motor->odometry_position_y(),
+	       motor->odometry_orientation());
 
-  motor->msgq_enqueue(new MotorInterface::GotoMessage(motor->odometry_position_x() + 2,
-						      motor->odometry_position_y(),
-						      motor->odometry_orientation(),
-						      1 /* sec */));
+	motor->msgq_enqueue(new MotorInterface::GotoMessage(motor->odometry_position_x() + 2,
+	                                                    motor->odometry_position_y(),
+	                                                    motor->odometry_orientation(),
+	                                                    1 /* sec */));
 
-  bb->close(motor);
+	bb->close(motor);
 
-  delete bb;
-  return 0;
+	delete bb;
+	return 0;
 }

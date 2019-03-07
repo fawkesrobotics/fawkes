@@ -23,77 +23,80 @@
 #ifndef _PLUGINS_PLAYER_PLAYERC_THREAD_H_
 #define _PLUGINS_PLAYER_PLAYERC_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <aspect/network.h>
+#include <core/threading/thread.h>
 
-#include <string>
-#include <map>
 #include <list>
+#include <map>
+#include <string>
 
 namespace PlayerCc {
-  class PlayerClient;
-  class ClientProxy;
-}
+class PlayerClient;
+class ClientProxy;
+} // namespace PlayerCc
 
 namespace fawkes {
-  class ObjectPositionInterface;
+class ObjectPositionInterface;
 }
 
 class PlayerProxyFawkesInterfaceMapper;
 
-class PlayerClientThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::NetworkAspect
+class PlayerClientThread : public fawkes::Thread,
+                           public fawkes::BlockedTimingAspect,
+                           public fawkes::LoggingAspect,
+                           public fawkes::ConfigurableAspect,
+                           public fawkes::ClockAspect,
+                           public fawkes::BlackBoardAspect,
+                           public fawkes::NetworkAspect
 {
- public:
-  /** Map for Fawkes interfaces. */
-  typedef std::map<std::string, fawkes::Interface *>      InterfaceMap;
+public:
+	/** Map for Fawkes interfaces. */
+	typedef std::map<std::string, fawkes::Interface *> InterfaceMap;
 
-  /** Map for Player interfaces. */
-  typedef std::map<std::string, PlayerCc::ClientProxy *>  ProxyMap;
+	/** Map for Player interfaces. */
+	typedef std::map<std::string, PlayerCc::ClientProxy *> ProxyMap;
 
-  /** Map for proxy-interface mappers. */
-  typedef std::list<PlayerProxyFawkesInterfaceMapper *>   MapperList;
+	/** Map for proxy-interface mappers. */
+	typedef std::list<PlayerProxyFawkesInterfaceMapper *> MapperList;
 
-  PlayerClientThread();
+	PlayerClientThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  void sync_fawkes_to_player();
+	void sync_fawkes_to_player();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void open_fawkes_interfaces();
-  void open_player_proxies();
-  void create_mappers();
+private:
+	void open_fawkes_interfaces();
+	void open_player_proxies();
+	void create_mappers();
 
-  void close_fawkes_interfaces();
-  void close_player_proxies();
+	void close_fawkes_interfaces();
+	void close_player_proxies();
 
- private:
-  PlayerCc::PlayerClient    *client_;
+private:
+	PlayerCc::PlayerClient *client_;
 
-  std::string  cfg_player_host_;
-  unsigned int cfg_player_port_;
+	std::string  cfg_player_host_;
+	unsigned int cfg_player_port_;
 
-  InterfaceMap imap_;
-  ProxyMap     pmap_;
-  MapperList   mappers_;
+	InterfaceMap imap_;
+	ProxyMap     pmap_;
+	MapperList   mappers_;
 };
-
 
 #endif

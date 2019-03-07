@@ -27,17 +27,17 @@
 
 class PlayerProxyFawkesInterfaceMapper
 {
- public:
-  PlayerProxyFawkesInterfaceMapper(const std::string& varname);
-  virtual ~PlayerProxyFawkesInterfaceMapper();
+public:
+	PlayerProxyFawkesInterfaceMapper(const std::string &varname);
+	virtual ~PlayerProxyFawkesInterfaceMapper();
 
-  std::string varname() const;
+	std::string varname() const;
 
-  virtual void sync_fawkes_to_player() = 0;
-  virtual void sync_player_to_fawkes() = 0;
+	virtual void sync_fawkes_to_player() = 0;
+	virtual void sync_player_to_fawkes() = 0;
 
- private:
-  std::string varname_;
+private:
+	std::string varname_;
 };
 
 #endif

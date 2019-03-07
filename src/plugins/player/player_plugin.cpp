@@ -20,12 +20,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/player/player_plugin.h>
-
-#include "playerc_thread.h"
 #include "f2p_thread.h"
-#include "timesync_thread.h"
+#include "playerc_thread.h"
 #include "postsync_thread.h"
+#include "timesync_thread.h"
+
+#include <plugins/player/player_plugin.h>
 
 using namespace fawkes;
 
@@ -39,17 +39,14 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-PlayerPlugin::PlayerPlugin(Configuration *config)
-  : Plugin(config)
+PlayerPlugin::PlayerPlugin(Configuration *config) : Plugin(config)
 {
-  PlayerClientThread *pct = new PlayerClientThread();
-  thread_list.push_back(pct);
-  thread_list.push_back(new PlayerF2PThread(pct));
-  thread_list.push_back(new PlayerTimeSyncThread());
-  thread_list.push_back(new PlayerPostSyncThread());
+	PlayerClientThread *pct = new PlayerClientThread();
+	thread_list.push_back(pct);
+	thread_list.push_back(new PlayerF2PThread(pct));
+	thread_list.push_back(new PlayerTimeSyncThread());
+	thread_list.push_back(new PlayerPostSyncThread());
 }
-
 
 EXPORT_PLUGIN(PlayerPlugin)
 PLUGIN_DESCRIPTION("Player framework adapter")
-
