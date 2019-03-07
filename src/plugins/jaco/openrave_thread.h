@@ -26,8 +26,8 @@
 #include "openrave_base_thread.h"
 
 #ifdef HAVE_OPENRAVE
- #include <plugins/openrave/aspect/openrave.h>
- #include <openrave/openrave.h>
+#	include <openrave/openrave.h>
+#	include <plugins/openrave/aspect/openrave.h>
 #endif
 
 #include <string>
@@ -35,51 +35,59 @@
 
 class JacoOpenraveThread : public JacoOpenraveBaseThread
 {
- public:
-  JacoOpenraveThread(const char *name, fawkes::jaco_arm_t* arm, bool load_robot=true);
+public:
+	JacoOpenraveThread(const char *name, fawkes::jaco_arm_t *arm, bool load_robot = true);
 
-  virtual void loop();
-  virtual void finalize();
+	virtual void loop();
+	virtual void finalize();
 
-  virtual void update_openrave();
-  virtual void plot_first();
+	virtual void update_openrave();
+	virtual void plot_first();
 
-  virtual bool add_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true);
-  virtual bool add_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, bool plan=true);
-  virtual bool set_target(float x, float y, float z, float e1, float e2, float e3, bool plan=true);
-  virtual bool set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, bool plan=true);
+	virtual bool
+	add_target(float x, float y, float z, float e1, float e2, float e3, bool plan = true);
+	virtual bool
+	add_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, bool plan = true);
+	virtual bool
+	set_target(float x, float y, float z, float e1, float e2, float e3, bool plan = true);
+	virtual bool
+	set_target_ang(float j1, float j2, float j3, float j4, float j5, float j6, bool plan = true);
 
- protected:
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
-  virtual void run() { Thread::run(); }
+protected:
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void _init();
-  void _load_robot();
-  void _post_init();
+private:
+	void _init();
+	void _load_robot();
+	void _post_init();
 
-  void _plan_path(fawkes::RefPtr<fawkes::jaco_target_t> &from, fawkes::RefPtr<fawkes::jaco_target_t> &to);
+	void _plan_path(fawkes::RefPtr<fawkes::jaco_target_t> &from,
+	                fawkes::RefPtr<fawkes::jaco_target_t> &to);
 
-  fawkes::jaco_arm_t  *arm_;
+	fawkes::jaco_arm_t *arm_;
 
-  std::string cfg_manipname_;
-  bool        load_robot_;
+	std::string cfg_manipname_;
+	bool        load_robot_;
 
 #ifdef HAVE_OPENRAVE
-  fawkes::jaco_openrave_set_t planner_env_;
+	fawkes::jaco_openrave_set_t planner_env_;
 
-  OpenRAVE::RobotBasePtr              robot_;
-  OpenRAVE::RobotBase::ManipulatorPtr manip_;
-  std::vector<OpenRAVE::dReal>        joints_;
+	OpenRAVE::RobotBasePtr              robot_;
+	OpenRAVE::RobotBase::ManipulatorPtr manip_;
+	std::vector<OpenRAVE::dReal>        joints_;
 
-  std::vector<OpenRAVE::GraphHandlePtr> graph_handle_;
-  std::vector<OpenRAVE::GraphHandlePtr> graph_current_;
+	std::vector<OpenRAVE::GraphHandlePtr> graph_handle_;
+	std::vector<OpenRAVE::GraphHandlePtr> graph_current_;
 
-  std::vector<OpenRAVE::KinBody::LinkPtr> links_;
+	std::vector<OpenRAVE::KinBody::LinkPtr> links_;
 
-  bool plotted_current_;   // keep track of plotting
+	bool plotted_current_; // keep track of plotting
 #endif
 };
-
 
 #endif

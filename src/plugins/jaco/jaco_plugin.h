@@ -27,8 +27,8 @@
 
 class JacoPlugin : public fawkes::Plugin
 {
- public:
-  explicit JacoPlugin(fawkes::Configuration *config);
+public:
+	explicit JacoPlugin(fawkes::Configuration *config);
 };
 
 #endif

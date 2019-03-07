@@ -23,94 +23,106 @@
 #ifndef _PLUGINS_JACO_OPENRAVE_BASE_THREAD_H_
 #define _PLUGINS_JACO_OPENRAVE_BASE_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #ifdef HAVE_OPENRAVE
- #include <plugins/openrave/aspect/openrave.h>
+#	include <plugins/openrave/aspect/openrave.h>
 #endif
-
-#include <core/utils/refptr.h>
 
 #include "types.h"
 
-#include <string>
+#include <core/utils/refptr.h>
+
 #include <list>
+#include <string>
 #include <vector>
 
 namespace fawkes {
-  class Mutex;
+class Mutex;
 
 #ifdef HAVE_OPENRAVE
-  typedef struct {
-    OpenRaveEnvironmentPtr env;
-    OpenRaveRobotPtr       robot;
-    OpenRaveManipulatorPtr manip;
-  } jaco_openrave_set_t;
-#endif
-}
-
-class JacoOpenraveBaseThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-#ifdef HAVE_OPENRAVE
-  public fawkes::OpenRaveAspect,
-#endif
-  public fawkes::BlackBoardAspect
+typedef struct
 {
- public:
-  JacoOpenraveBaseThread(const char *name);
-  virtual ~JacoOpenraveBaseThread();
+	OpenRaveEnvironmentPtr env;
+	OpenRaveRobotPtr       robot;
+	OpenRaveManipulatorPtr manip;
+} jaco_openrave_set_t;
+#endif
+} // namespace fawkes
 
-  void init();
-  virtual void finalize();
+class JacoOpenraveBaseThread : public fawkes::Thread,
+                               public fawkes::LoggingAspect,
+                               public fawkes::ConfigurableAspect,
+#ifdef HAVE_OPENRAVE
+                               public fawkes::OpenRaveAspect,
+#endif
+                               public fawkes::BlackBoardAspect
+{
+public:
+	JacoOpenraveBaseThread(const char *name);
+	virtual ~JacoOpenraveBaseThread();
 
-  virtual void set_plannerparams(const std::string &params);
-  virtual void set_plannerparams(const char* params);
+	void         init();
+	virtual void finalize();
 
-  /** Update the openrave environment to represent the current situation.
+	virtual void set_plannerparams(const std::string &params);
+	virtual void set_plannerparams(const char *params);
+
+	/** Update the openrave environment to represent the current situation.
    * This includes updating the model and plotting current positions.
    */
-  virtual void update_openrave() = 0;
+	virtual void update_openrave() = 0;
 
-  /** Plot the first target of the target_queue, if it is a trajectory. */
-  virtual void plot_first() = 0;
+	/** Plot the first target of the target_queue, if it is a trajectory. */
+	virtual void plot_first() = 0;
 
-  virtual void plot_current(bool enable);
+	virtual void plot_current(bool enable);
 
- protected:
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
-  virtual void run() { Thread::run(); }
+protected:
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
-  /** Use this in inheriting classes for additiona initializations. */
-  virtual void _init() {}
+	/** Use this in inheriting classes for additiona initializations. */
+	virtual void
+	_init()
+	{
+	}
 
-  /** Use this in inheriting classes to load the OpenRaveRobot */
-  virtual void _load_robot() {}
+	/** Use this in inheriting classes to load the OpenRaveRobot */
+	virtual void
+	_load_robot()
+	{
+	}
 
-  /** Use this in inheriting classes for post_init stuff, e.g. env-cloning */
-  virtual void _post_init() {}
+	/** Use this in inheriting classes for post_init stuff, e.g. env-cloning */
+	virtual void
+	_post_init()
+	{
+	}
 
-  fawkes::Mutex *planning_mutex_;      /**< mutex, used to lock when planning. */
+	fawkes::Mutex *planning_mutex_; /**< mutex, used to lock when planning. */
 
 #ifdef HAVE_OPENRAVE
-  fawkes::jaco_openrave_set_t viewer_env_;
+	fawkes::jaco_openrave_set_t viewer_env_;
 
-  bool          cfg_OR_use_viewer_;
-  std::string   cfg_OR_robot_file_;
-  bool          cfg_OR_auto_load_ik_;
-  float         cfg_OR_sampling_;
-  bool          cfg_OR_plot_traj_manip_;
-  bool          cfg_OR_plot_traj_joints_;
-  bool          cfg_OR_plot_cur_manip_;
-  bool          cfg_OR_plot_cur_joints_;
+	bool        cfg_OR_use_viewer_;
+	std::string cfg_OR_robot_file_;
+	bool        cfg_OR_auto_load_ik_;
+	float       cfg_OR_sampling_;
+	bool        cfg_OR_plot_traj_manip_;
+	bool        cfg_OR_plot_traj_joints_;
+	bool        cfg_OR_plot_cur_manip_;
+	bool        cfg_OR_plot_cur_joints_;
 
-  std::string   plannerparams_;
-  bool          plot_current_;
+	std::string plannerparams_;
+	bool        plot_current_;
 #endif
 };
-
 
 #endif
