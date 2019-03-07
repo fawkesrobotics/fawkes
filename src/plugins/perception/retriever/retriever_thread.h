@@ -23,63 +23,65 @@
 #ifndef _FIREVISION_APPS_RETRIEVER_RETRIEVER_THREAD_H_
 #define _FIREVISION_APPS_RETRIEVER_RETRIEVER_THREAD_H_
 
-#include <core/threading/thread.h>
-
+#include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/clock.h>
 #include <aspect/vision.h>
+#include <core/threading/thread.h>
 
 #include <string>
 
 namespace fawkes {
-  class TimeTracker;
+class TimeTracker;
 }
 namespace firevision {
-  class Camera;
-  class SharedMemoryImageBuffer;
-  class SeqWriter;
-  class ColorModelLookupTable;
-}
+class Camera;
+class SharedMemoryImageBuffer;
+class SeqWriter;
+class ColorModelLookupTable;
+} // namespace firevision
 
-class FvRetrieverThread
-: public fawkes::Thread,
-  public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::VisionAspect,
-  public fawkes::ClockAspect
+class FvRetrieverThread : public fawkes::Thread,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::VisionAspect,
+                          public fawkes::ClockAspect
 {
- public:
-  FvRetrieverThread(const std::string& camera_string,
-                    const std::string& cfg_name,
-                    const std::string& cfg_prefix);
-  virtual ~FvRetrieverThread();
+public:
+	FvRetrieverThread(const std::string &camera_string,
+	                  const std::string &cfg_name,
+	                  const std::string &cfg_prefix);
+	virtual ~FvRetrieverThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  std::string cfg_name_;
-  std::string cfg_prefix_;
-  std::string camera_string_;
-  fawkes::Time *cap_time_;
+private:
+	std::string   cfg_name_;
+	std::string   cfg_prefix_;
+	std::string   camera_string_;
+	fawkes::Time *cap_time_;
 
-  firevision::Camera *cam;
-  firevision::SharedMemoryImageBuffer *shm;
-  firevision::SeqWriter *seq_writer;
-  fawkes::TimeTracker *tt_;
-  unsigned int loop_count_;
-  unsigned int ttc_capture_;
-  unsigned int ttc_memcpy_;
-  unsigned int ttc_dispose_;
-  bool cam_has_timestamp_support_;
+	firevision::Camera *                 cam;
+	firevision::SharedMemoryImageBuffer *shm;
+	firevision::SeqWriter *              seq_writer;
+	fawkes::TimeTracker *                tt_;
+	unsigned int                         loop_count_;
+	unsigned int                         ttc_capture_;
+	unsigned int                         ttc_memcpy_;
+	unsigned int                         ttc_dispose_;
+	bool                                 cam_has_timestamp_support_;
 
-  firevision::ColorModelLookupTable *cm_;
+	firevision::ColorModelLookupTable *cm_;
 };
-
 
 #endif

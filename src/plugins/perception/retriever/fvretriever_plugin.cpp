@@ -21,6 +21,7 @@
  */
 
 #include "fvretriever_plugin.h"
+
 #include "retriever_thread.h"
 
 #include <core/exceptions/software.h>
@@ -41,49 +42,44 @@ using namespace firevision;
 /** Constructor.
  * @param config Fawkes configuration
  */
-FvRetrieverPlugin::FvRetrieverPlugin(Configuration *config)
-  : Plugin(config)
+FvRetrieverPlugin::FvRetrieverPlugin(Configuration *config) : Plugin(config)
 {
+	std::set<std::string> configs;
+	std::set<std::string> ignored_configs;
 
-  std::set<std::string> configs;
-  std::set<std::string> ignored_configs;
+	std::string prefix = "/firevision/retriever/camera/";
 
-  std::string prefix = "/firevision/retriever/camera/";
+	Configuration::ValueIterator *vi = config->search(prefix.c_str());
+	while (vi->next()) {
+		std::string cfg_name = std::string(vi->path()).substr(prefix.length());
+		cfg_name             = cfg_name.substr(0, cfg_name.find("/"));
 
-  Configuration::ValueIterator *vi = config->search(prefix.c_str());
-  while (vi->next()) {
+		if ((configs.find(cfg_name) == configs.end())
+		    && (ignored_configs.find(cfg_name) == ignored_configs.end())) {
+			std::string cfg_prefix = prefix + cfg_name + "/";
 
-    std::string cfg_name = std::string(vi->path()).substr(prefix.length());
-    cfg_name = cfg_name.substr(0, cfg_name.find("/"));
+			bool active = true;
+			try {
+				active = config->get_bool((cfg_prefix + "active").c_str());
+			} catch (Exception &e) {
+			} // ignored, assume enabled
+			std::string cam_string = config->get_string((cfg_prefix + "string").c_str());
 
-    if ( (configs.find(cfg_name) == configs.end()) &&
-	 (ignored_configs.find(cfg_name) == ignored_configs.end()) )
-    {
-      std::string cfg_prefix = prefix + cfg_name + "/";
+			if (active) {
+				thread_list.push_back(new FvRetrieverThread(cam_string, cfg_name, cfg_prefix));
+				configs.insert(cfg_name);
+			} else {
+				//printf("Ignoring retriever config %s\n", cfg_name.c_str());
+				ignored_configs.insert(cfg_name);
+			}
+		}
+	}
 
-      bool active = true;
-      try {
-	active = config->get_bool((cfg_prefix + "active").c_str());
-      } catch (Exception &e) {} // ignored, assume enabled
-      std::string cam_string = config->get_string((cfg_prefix + "string").c_str());
+	delete vi;
 
-      if (active) {
-        thread_list.push_back(new FvRetrieverThread(cam_string,
-                                                    cfg_name, cfg_prefix));
-        configs.insert(cfg_name);
-      } else {
-        //printf("Ignoring retriever config %s\n", cfg_name.c_str());
-        ignored_configs.insert(cfg_name);
-      }
-    }
-  }
-
-  delete vi;
-
-  if ( thread_list.empty() ) {
-    throw Exception("No cameras have been set for fvretriever");
-  }
-
+	if (thread_list.empty()) {
+		throw Exception("No cameras have been set for fvretriever");
+	}
 }
 
 PLUGIN_DESCRIPTION("Reads images from cameras and stores them in shared memory")
