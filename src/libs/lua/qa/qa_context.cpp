@@ -25,6 +25,7 @@
 ///@cond QA
 
 #include <lua/context.h>
+
 #include <cstdio>
 
 using namespace fawkes;
@@ -32,10 +33,9 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  LuaContext lua;
+	LuaContext lua;
 
-
-  return 0;
+	return 0;
 }
 
 /// @endcond

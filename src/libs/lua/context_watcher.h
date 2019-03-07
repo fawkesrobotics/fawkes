@@ -29,12 +29,11 @@ namespace fawkes {
 
 class LuaContextWatcher
 {
- public:
-  virtual ~LuaContextWatcher();
+public:
+	virtual ~LuaContextWatcher();
 
-  virtual void lua_restarted(LuaContext *context) = 0;
+	virtual void lua_restarted(LuaContext *context) = 0;
 };
-
 
 } // end of namespace fawkes
 

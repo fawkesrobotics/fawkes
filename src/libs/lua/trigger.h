@@ -29,15 +29,16 @@ class LuaContext;
 
 class LuaTriggerManager
 {
- public:
-  LuaTriggerManager(LuaContext *lua, const char *trigger_var);
-  ~LuaTriggerManager();
+public:
+	LuaTriggerManager(LuaContext *lua, const char *trigger_var);
+	~LuaTriggerManager();
 
-  void trigger(const char *event, const char *param_format = 0, ...);
+	void trigger(const char *event, const char *param_format = 0, ...);
 
- private:
-  LuaContext *lua_;;
-  char *trigger_var_;
+private:
+	LuaContext *lua_;
+	;
+	char *trigger_var_;
 };
 
 } // end of namespace fawkes

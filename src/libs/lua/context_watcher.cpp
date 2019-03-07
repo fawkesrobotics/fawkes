@@ -47,5 +47,4 @@ LuaContextWatcher::~LuaContextWatcher()
 {
 }
 
-
 } // end of namespace fawkes

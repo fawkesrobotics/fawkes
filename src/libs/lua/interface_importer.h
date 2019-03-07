@@ -23,13 +23,12 @@
 #ifndef _LUA_INTERFACEIMPORTER_H_
 #define _LUA_INTERFACEIMPORTER_H_
 
+#include <blackboard/interface_observer.h>
+#include <core/utils/lock_map.h>
 #include <lua/context_watcher.h>
 
-#include <core/utils/lock_map.h>
-#include <blackboard/interface_observer.h>
-
-#include <string>
 #include <list>
+#include <string>
 
 namespace fawkes {
 
@@ -41,80 +40,82 @@ class LuaContext;
 
 class LuaInterfaceImporter : public LuaContextWatcher
 {
+	class InterfaceObserver : public BlackBoardInterfaceObserver
+	{
+	public:
+		InterfaceObserver(LuaInterfaceImporter *lii,
+		                  std::string           varname,
+		                  const char *          type,
+		                  const char *          id_pattern);
 
-  class InterfaceObserver : public BlackBoardInterfaceObserver
-  {
-   public:
-    InterfaceObserver(LuaInterfaceImporter *lii, std::string varname,
-		      const char *type, const char *id_pattern);
+		virtual void bb_interface_created(const char *type, const char *id) throw();
 
-    virtual void bb_interface_created(const char *type, const char *id) throw();
+	private:
+		LuaInterfaceImporter *lii_;
+		std::string           varname_;
+	};
 
-   private:
-    LuaInterfaceImporter *lii_;
-    std::string           varname_;
-  };
+	typedef fawkes::LockMap<std::string, InterfaceObserver *> ObserverMap;
 
-  typedef fawkes::LockMap<std::string, InterfaceObserver *>  ObserverMap;
+public:
+	/** Map of varname to interface instance. */
+	typedef fawkes::LockMap<std::string, fawkes::Interface *> InterfaceMap;
+	/** Map of varname to list of interfaces */
+	typedef fawkes::LockMap<std::string, std::list<fawkes::Interface *>> InterfaceListMap;
 
- public:
-  /** Map of varname to interface instance. */
-  typedef fawkes::LockMap<std::string, fawkes::Interface *>  InterfaceMap;
-  /** Map of varname to list of interfaces */
-  typedef fawkes::LockMap<std::string, std::list<fawkes::Interface *> >  InterfaceListMap;
+	LuaInterfaceImporter(LuaContext *   context_,
+	                     BlackBoard *   blackboard,
+	                     Configuration *config,
+	                     Logger *       logger);
+	~LuaInterfaceImporter();
 
-  LuaInterfaceImporter(LuaContext *context_, BlackBoard *blackboard,
-		       Configuration *config, Logger *logger);
-  ~LuaInterfaceImporter();
+	void open_reading_interfaces(std::string &prefix);
+	void open_writing_interfaces(std::string &prefix);
 
-  void open_reading_interfaces(std::string &prefix);
-  void open_writing_interfaces(std::string &prefix);
+	void add_interface(std::string varname, Interface *interface);
 
-  void add_interface(std::string varname, Interface *interface);
+	void close_reading_interfaces();
+	void close_writing_interfaces();
 
-  void close_reading_interfaces();
-  void close_writing_interfaces();
+	LuaInterfaceImporter::InterfaceMap &writing_interfaces();
+	LuaInterfaceImporter::InterfaceMap &reading_interfaces();
 
-  LuaInterfaceImporter::InterfaceMap & writing_interfaces();
-  LuaInterfaceImporter::InterfaceMap & reading_interfaces();
+	void push_interfaces();
 
-  void push_interfaces();
+	void read_to_buffer();
+	void read_from_buffer();
 
-  void read_to_buffer();
-  void read_from_buffer();
+	void read();
+	void write();
 
-  void read();
-  void write();
+	void lua_restarted(LuaContext *context);
 
-  void lua_restarted(LuaContext *context);
+private:
+	void open_interfaces(std::string &prefix, InterfaceMap &imap, bool write);
+	void push_interfaces(LuaContext *context);
+	void push_interfaces_varname(LuaContext *context, InterfaceMap &imap);
+	void push_interfaces_uid(LuaContext *context, InterfaceMap &imap);
+	void push_multi_interfaces_varname(LuaContext *context, InterfaceListMap &imap);
 
- private:
-  void open_interfaces(std::string &prefix, InterfaceMap &imap, bool write);
-  void push_interfaces(LuaContext *context);
-  void push_interfaces_varname(LuaContext *context, InterfaceMap &imap);
-  void push_interfaces_uid(LuaContext *context, InterfaceMap &imap);
-  void push_multi_interfaces_varname(LuaContext *context, InterfaceListMap &imap);
+	void add_observed_interface(std::string varname, const char *type, const char *id);
 
-  void add_observed_interface(std::string varname,
-			      const char *type, const char *id);
+private:
+	LuaContext *   context_;
+	BlackBoard *   blackboard_;
+	Configuration *config_;
+	Logger *       logger_;
 
- private:
-  LuaContext    *context_;
-  BlackBoard    *blackboard_;
-  Configuration *config_;
-  Logger        *logger_;
+	bool two_stage_;
 
-  bool              two_stage_;
+	InterfaceMap     reading_ifs_;
+	InterfaceListMap reading_multi_ifs_;
+	InterfaceMap     writing_ifs_;
+	ObserverMap      observers_;
 
-  InterfaceMap      reading_ifs_;
-  InterfaceListMap  reading_multi_ifs_;
-  InterfaceMap      writing_ifs_;
-  ObserverMap       observers_;
+	InterfaceMap ext_rifs_;
+	InterfaceMap ext_wifs_;
 
-  InterfaceMap      ext_rifs_;
-  InterfaceMap      ext_wifs_;
-
-  bool           interfaces_pushed_;
+	bool interfaces_pushed_;
 };
 
 } // end of namespace fawkes

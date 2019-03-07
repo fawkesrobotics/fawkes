@@ -20,14 +20,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <lua/trigger.h>
-#include <lua/context.h>
-
 #include <core/exceptions/system.h>
+#include <lua/context.h>
+#include <lua/trigger.h>
 
-#include <cstring>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 namespace fawkes {
 
@@ -45,17 +44,15 @@ namespace fawkes {
  */
 LuaTriggerManager::LuaTriggerManager(LuaContext *lua, const char *trigger_var)
 {
-  lua_         = lua;
-  trigger_var_ = strdup(trigger_var);
+	lua_         = lua;
+	trigger_var_ = strdup(trigger_var);
 }
-
 
 /** Destructor. */
 LuaTriggerManager::~LuaTriggerManager()
 {
-  free(trigger_var_);
+	free(trigger_var_);
 }
-
 
 /** Cause a trigger event.
  * @param event name of the event to trigger
@@ -72,20 +69,20 @@ LuaTriggerManager::~LuaTriggerManager()
 void
 LuaTriggerManager::trigger(const char *event, const char *param_format, ...)
 {
-  va_list args;
-  char *params = NULL;
-  if ( param_format ) {
-    va_start(args, param_format);
-    if (vasprintf(&params, param_format, args) == -1) {
-      throw OutOfMemoryException("Lua trigger: Could not allocate param string");
-    }
-    va_end(args);
+	va_list args;
+	char *  params = NULL;
+	if (param_format) {
+		va_start(args, param_format);
+		if (vasprintf(&params, param_format, args) == -1) {
+			throw OutOfMemoryException("Lua trigger: Could not allocate param string");
+		}
+		va_end(args);
 
-    lua_->do_string("%s:trigger(\"%s\", %s)", trigger_var_, event, params);
-    free(params);
-  } else {
-    lua_->do_string("%s:trigger(\"%s\")", trigger_var_, event);
-  }
+		lua_->do_string("%s:trigger(\"%s\", %s)", trigger_var_, event, params);
+		free(params);
+	} else {
+		lua_->do_string("%s:trigger(\"%s\")", trigger_var_, event);
+	}
 }
 
 } // end of namespace fawkes
