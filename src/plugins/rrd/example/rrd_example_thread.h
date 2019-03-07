@@ -23,35 +23,39 @@
 #ifndef _PLUGINS_RRD_EXAMPLE_RRD_EXAMPLE_THREAD_H_
 #define _PLUGINS_RRD_EXAMPLE_RRD_EXAMPLE_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/rrd/aspect/rrd.h>
 #include <plugins/rrd/aspect/rrd_descriptions.h>
 
-class RRDExampleThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::RRDAspect
+class RRDExampleThread : public fawkes::Thread,
+                         public fawkes::LoggingAspect,
+                         public fawkes::BlockedTimingAspect,
+                         public fawkes::RRDAspect
 {
- public:
-  RRDExampleThread();
-  virtual ~RRDExampleThread();
+public:
+	RRDExampleThread();
+	virtual ~RRDExampleThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  fawkes::RRDDefinition      *test_rrd_def_;
-  fawkes::RRDGraphDefinition *test_graph_def_;
+private:
+	fawkes::RRDDefinition *     test_rrd_def_;
+	fawkes::RRDGraphDefinition *test_graph_def_;
 
-  unsigned int                loop_count_;
-  unsigned int                counter_;
+	unsigned int loop_count_;
+	unsigned int counter_;
 };
 
 #endif

@@ -21,10 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/rrd/aspect/rrd_inifin.h>
-#include <plugins/rrd/aspect/rrd.h>
-#include <plugins/rrd/aspect/rrd_manager.h>
 #include <core/threading/thread_finalizer.h>
+#include <plugins/rrd/aspect/rrd.h>
+#include <plugins/rrd/aspect/rrd_inifin.h>
+#include <plugins/rrd/aspect/rrd_manager.h>
 
 namespace fawkes {
 
@@ -38,31 +38,29 @@ namespace fawkes {
 /** Constructor.
  * @param rrd_manager RRD manager to pass on to threads
  */
-RRDAspectIniFin::RRDAspectIniFin(RRDManager *rrd_manager)
-  : AspectIniFin("RRDAspect")
+RRDAspectIniFin::RRDAspectIniFin(RRDManager *rrd_manager) : AspectIniFin("RRDAspect")
 {
-  rrd_manager_ = rrd_manager;
+	rrd_manager_ = rrd_manager;
 }
 
 void
 RRDAspectIniFin::init(Thread *thread)
 {
-  RRDAspect *rrd_thread;
-  rrd_thread = dynamic_cast<RRDAspect *>(thread);
-  if (rrd_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "RRDAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	RRDAspect *rrd_thread;
+	rrd_thread = dynamic_cast<RRDAspect *>(thread);
+	if (rrd_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "RRDAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  rrd_thread->init_RRDAspect(rrd_manager_);
+	rrd_thread->init_RRDAspect(rrd_manager_);
 }
 
 void
 RRDAspectIniFin::finalize(Thread *thread)
 {
 }
-
-
 
 } // end namespace fawkes

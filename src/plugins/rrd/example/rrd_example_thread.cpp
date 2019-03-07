@@ -23,12 +23,13 @@
 #include "rrd_example_thread.h"
 
 #include <core/exceptions/system.h>
+#include <plugins/rrd/aspect/rrd_manager.h>
 #include <utils/misc/string_conversions.h>
 #include <utils/system/file.h>
-#include <plugins/rrd/aspect/rrd_manager.h>
+
+#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
-#include <cstdarg>
 #include <rrd.h>
 
 using namespace fawkes;
@@ -42,73 +43,65 @@ using namespace fawkes;
 
 /** Constructor. */
 RRDExampleThread::RRDExampleThread()
-  : Thread("RRDExampleThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+: Thread("RRDExampleThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
 }
-
 
 /** Destructor. */
 RRDExampleThread::~RRDExampleThread()
 {
 }
 
-
 void
 RRDExampleThread::init()
 {
-  std::vector<RRDDataSource> rrds;
-  rrds.push_back(RRDDataSource("value", RRDDataSource::COUNTER));
-  test_rrd_def_ = new RRDDefinition("test", rrds);
-  rrd_manager->add_rrd(test_rrd_def_);
+	std::vector<RRDDataSource> rrds;
+	rrds.push_back(RRDDataSource("value", RRDDataSource::COUNTER));
+	test_rrd_def_ = new RRDDefinition("test", rrds);
+	rrd_manager->add_rrd(test_rrd_def_);
 
-  std::vector<RRDGraphDataDefinition> defs;
-  std::vector<RRDGraphElement> els;
+	std::vector<RRDGraphDataDefinition> defs;
+	std::vector<RRDGraphElement>        els;
 
-  defs.push_back(RRDGraphDataDefinition("value", RRDArchive::AVERAGE,
-					_test_rrd_def));
-  
-  els.push_back(RRDGraphLine("value", 1, "FF0000", "Value", false));
-  els.push_back(RRDGraphGPrint("value", RRDArchive::LAST,
-			       "Current\\:%8.2lf %s"));
-  els.push_back(RRDGraphGPrint("value", RRDArchive::AVERAGE,
-			       "Average\\:%8.2lf %s"));
-  els.push_back(RRDGraphGPrint("value", RRDArchive::MAX,
-			       "Maximum\\:%8.2lf %s\\n"));
+	defs.push_back(RRDGraphDataDefinition("value", RRDArchive::AVERAGE, _test_rrd_def));
 
-  test_graph_def_ = new RRDGraphDefinition("testgraph", test_rrd_def_,
-					    -600, -10, 10,
-					    "Test Value", "Foo", 10,
-					    false, defs, els);
+	els.push_back(RRDGraphLine("value", 1, "FF0000", "Value", false));
+	els.push_back(RRDGraphGPrint("value", RRDArchive::LAST, "Current\\:%8.2lf %s"));
+	els.push_back(RRDGraphGPrint("value", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(RRDGraphGPrint("value", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  rrd_manager->add_graph(test_graph_def_);
+	test_graph_def_ = new RRDGraphDefinition(
+	  "testgraph", test_rrd_def_, -600, -10, 10, "Test Value", "Foo", 10, false, defs, els);
 
-  loop_count_ = 0;
-  counter_ = 0;
+	rrd_manager->add_graph(test_graph_def_);
+
+	loop_count_ = 0;
+	counter_    = 0;
 }
-
 
 void
 RRDExampleThread::finalize()
 {
-  rrd_manager->remove_rrd(test_rrd_def_);
+	rrd_manager->remove_rrd(test_rrd_def_);
 }
-
 
 void
 RRDExampleThread::loop()
 {
-  loop_count_++;
-  if (rand() > RAND_MAX/2) counter_++;
-  if (loop_count_ == 10) {
-    try {
-      logger->log_debug(name(), "Adding data N:%u", counter_);
-      rrd_manager->add_data(test_rrd_def_->get_name(), "N:%u", counter_);
-    } catch (Exception &e) {
-      logger->log_warn(name(), "Adding data to %s failed, exception follows",
-		       test_rrd_def_->get_name());
-      logger->log_warn(name(), e);
-    }
-    loop_count_ = 0;
-  }
+	loop_count_++;
+	if (rand() > RAND_MAX / 2)
+		counter_++;
+	if (loop_count_ == 10) {
+		try {
+			logger->log_debug(name(), "Adding data N:%u", counter_);
+			rrd_manager->add_data(test_rrd_def_->get_name(), "N:%u", counter_);
+		} catch (Exception &e) {
+			logger->log_warn(name(),
+			                 "Adding data to %s failed, exception follows",
+			                 test_rrd_def_->get_name());
+			logger->log_warn(name(), e);
+		}
+		loop_count_ = 0;
+	}
 }

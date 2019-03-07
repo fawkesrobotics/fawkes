@@ -42,15 +42,13 @@ namespace fawkes {
 /** Constructor. */
 RRDAspect::RRDAspect()
 {
-  add_aspect("RRDAspect");
+	add_aspect("RRDAspect");
 }
-
 
 /** Virtual empty destructor. */
 RRDAspect::~RRDAspect()
 {
 }
-
 
 /** Init RRD aspect.
  * This set the RRD manager to access RRDs.
@@ -61,7 +59,7 @@ RRDAspect::~RRDAspect()
 void
 RRDAspect::init_RRDAspect(RRDManager *rrd_manager)
 {
-  this->rrd_manager = rrd_manager;
+	this->rrd_manager = rrd_manager;
 }
 
 } // end namespace fawkes

@@ -27,8 +27,8 @@
 
 class RRDPlugin : public fawkes::Plugin
 {
- public:
-  explicit RRDPlugin(fawkes::Configuration *config);
+public:
+	explicit RRDPlugin(fawkes::Configuration *config);
 };
 
 #endif
