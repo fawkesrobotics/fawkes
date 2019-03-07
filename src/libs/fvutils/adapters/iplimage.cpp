@@ -22,10 +22,10 @@
  */
 
 #include <fvutils/adapters/iplimage.h>
-
 #include <fvutils/color/conversions.h>
-#include <cstddef>
 #include <opencv/cv.h>
+
+#include <cstddef>
 
 namespace firevision {
 
@@ -40,26 +40,22 @@ namespace firevision {
  * @param image IplImage the result will be written to in BGR notation
  */
 void
-IplImageAdapter::convert_image_bgr(unsigned char *buffer,
-				   IplImage *image)
+IplImageAdapter::convert_image_bgr(unsigned char *buffer, IplImage *image)
 {
-  convert(YUV422_PLANAR, BGR, buffer, (unsigned char *)image->imageData,
-	  image->width, image->height);
+	convert(
+	  YUV422_PLANAR, BGR, buffer, (unsigned char *)image->imageData, image->width, image->height);
 }
-
 
 /** Convert image from IplImage into buffer.
  * @param image IplImage with BGR notation
  * @param buffer YUV422_PLANAR of the same size to write the converted IplImage
  */
 void
-IplImageAdapter::convert_image_yuv422_planar(IplImage *image, 
-				   unsigned char *buffer)
+IplImageAdapter::convert_image_yuv422_planar(IplImage *image, unsigned char *buffer)
 {
-  convert(BGR, YUV422_PLANAR, (unsigned char *)image->imageData, buffer,
-	  image->width, image->height);
+	convert(
+	  BGR, YUV422_PLANAR, (unsigned char *)image->imageData, buffer, image->width, image->height);
 }
-
 
 /* Creates a new IplImage for a ROI.
  * This will create a new IplImage with the size of the ROI and convert the data of the

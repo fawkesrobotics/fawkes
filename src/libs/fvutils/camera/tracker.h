@@ -28,46 +28,45 @@ namespace firevision {
 
 class RelativePositionModel;
 
-class CameraTracker {
+class CameraTracker
+{
+public:
+	CameraTracker(RelativePositionModel *relative_position_model,
+	              float                  camera_height,
+	              float                  camera_ori_deg);
 
- public:
-  CameraTracker(RelativePositionModel *relative_position_model,
-		float camera_height,
-                float camera_ori_deg );
+	~CameraTracker();
 
-  ~CameraTracker();
+	void calc();
 
-  void  calc();
+	float get_new_pan();
+	float get_new_tilt();
 
-  float get_new_pan();
-  float get_new_tilt();
+	void set_mode(unsigned int mode);
+	void set_relative_position_model(RelativePositionModel *rpm);
+	void set_robot_position(float x, float y, float ori);
+	void set_world_point(float x, float y);
 
-  void  set_mode(unsigned int mode);
-  void  set_relative_position_model(RelativePositionModel *rpm);
-  void  set_robot_position(float x, float y, float ori);
-  void  set_world_point(float x, float y);
+	static const unsigned int MODE_MODEL;
+	static const unsigned int MODE_WORLD;
 
-  static const unsigned int MODE_MODEL;
-  static const unsigned int MODE_WORLD;
+private:
+	RelativePositionModel *rpm;
 
- private:
+	float camera_height;
+	float camera_orientation;
 
-  RelativePositionModel *rpm;
+	float new_pan;
+	float new_tilt;
 
-  float  camera_height;
-  float  camera_orientation;
+	float robot_x;
+	float robot_y;
+	float robot_ori;
 
-  float  new_pan;
-  float  new_tilt;
+	float world_x;
+	float world_y;
 
-  float  robot_x;
-  float  robot_y;
-  float  robot_ori;
-
-  float  world_x;
-  float  world_y;
-
-  unsigned int mode;
+	unsigned int mode;
 };
 
 } // end namespace firevision

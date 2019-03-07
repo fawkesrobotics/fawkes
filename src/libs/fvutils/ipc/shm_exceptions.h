@@ -30,24 +30,27 @@
 namespace firevision {
 
 /** Throw if an inconsistent image was found. */
-class InconsistentImageException : public fawkes::Exception {
- public:
-  /** Constructor.
+class InconsistentImageException : public fawkes::Exception
+{
+public:
+	/** Constructor.
    * @param msg additional message
    */
-  InconsistentImageException(const char *msg)
-    : fawkes::Exception(msg)  {}
+	InconsistentImageException(const char *msg) : fawkes::Exception(msg)
+	{
+	}
 };
 
-
 /** Throw if an inconsistent LUT was found. */
-class InconsistentLUTException : public fawkes::Exception {
- public:
-  /** Constructor.
+class InconsistentLUTException : public fawkes::Exception
+{
+public:
+	/** Constructor.
    * @param msg additional message
    */
-  InconsistentLUTException(const char *msg)
-    : fawkes::Exception(msg)  {}
+	InconsistentLUTException(const char *msg) : fawkes::Exception(msg)
+	{
+	}
 };
 
 } // end namespace firevision

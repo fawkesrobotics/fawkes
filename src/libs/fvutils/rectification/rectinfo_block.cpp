@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/rectification/rectinfo_block.h>
-#include <core/exceptions/system.h>
 #include <core/exceptions/software.h>
+#include <core/exceptions/system.h>
+#include <fvutils/rectification/rectinfo_block.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -45,8 +45,6 @@ namespace firevision {
  * This is a pointer to the content-specific block header for rectification info blocks.
  */
 
-
-
 /** @fn void RectificationInfoBlock::mapping(uint16_t x, uint16_t y, uint16_t *to_x, uint16_t *to_y) = 0
  * Get mapping (to_x, to_y) for (x, y).
  * This can be used as a general method to access the RectificationInfoBlock mapping.
@@ -58,7 +56,6 @@ namespace firevision {
  * @param to_x Upon return contains the X pixel coordinate of the unrectified image
  * @param to_y Upon return contains the Y pixel coordinate of the unrectified image
  */
-
 
 /** Recommended constructor.
  * With this constructor a chunk of memory is allocated that is sufficient
@@ -73,19 +70,20 @@ namespace firevision {
  * the type agnostic block header.
  */
 RectificationInfoBlock::RectificationInfoBlock(uint8_t block_type,
-					       uint8_t camera,
-					       size_t block_data_size)
-  : FireVisionDataFileBlock(block_type, block_data_size, sizeof(rectinfo_block_header_t))
+                                               uint8_t camera,
+                                               size_t  block_data_size)
+: FireVisionDataFileBlock(block_type, block_data_size, sizeof(rectinfo_block_header_t))
 {
-  if ( _data_size > UINT32_MAX ) {
-    throw fawkes::OutOfBoundsException("RectInfoBlock: block_data_size is too large",
-				       block_data_size, 0, UINT32_MAX);
-  }
+	if (_data_size > UINT32_MAX) {
+		throw fawkes::OutOfBoundsException("RectInfoBlock: block_data_size is too large",
+		                                   block_data_size,
+		                                   0,
+		                                   UINT32_MAX);
+	}
 
-  _block_header = (rectinfo_block_header_t *)_spec_header;
-  _block_header->camera = camera;
+	_block_header         = (rectinfo_block_header_t *)_spec_header;
+	_block_header->camera = camera;
 }
-
 
 /** Copy constructor.
  * Copies data from the given FireVisionDataFileBlock. It is assumed that this
@@ -94,20 +92,18 @@ RectificationInfoBlock::RectificationInfoBlock(uint8_t block_type,
  * @param block FireVision data file block
  */
 RectificationInfoBlock::RectificationInfoBlock(FireVisionDataFileBlock *block)
-  : FireVisionDataFileBlock(block)
+: FireVisionDataFileBlock(block)
 {
-  _block_header = (rectinfo_block_header_t *)_spec_header;
+	_block_header = (rectinfo_block_header_t *)_spec_header;
 }
-
 
 /** Destructor.
  * Destructs the chunk, if and only if _free_block_chunk is true.
  */
 RectificationInfoBlock::~RectificationInfoBlock()
 {
-  _block_header = NULL;
+	_block_header = NULL;
 }
-
 
 /** Get block camera identifier.
  * @return camera identifier
@@ -116,10 +112,10 @@ RectificationInfoBlock::~RectificationInfoBlock()
 uint8_t
 RectificationInfoBlock::camera() const
 {
-  if ( _block_header == NULL ) {
-    throw fawkes::NullPointerException("No memory chunk loaded for rectinfo block");
-  }
-  return _block_header->camera;
+	if (_block_header == NULL) {
+		throw fawkes::NullPointerException("No memory chunk loaded for rectinfo block");
+	}
+	return _block_header->camera;
 }
 
 } // end namespace firevision

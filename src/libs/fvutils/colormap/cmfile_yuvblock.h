@@ -30,29 +30,29 @@ namespace firevision {
 
 class YuvColormap;
 
-#pragma pack(push,4)
+#pragma pack(push, 4)
 /** Block header for a YUV block in a ColormapFile. */
-typedef struct {
-  char      range_from;	/**< Y range from */
-  char      range_to;	/**< Y range to */
-  uint16_t  reserved;	/**< reserved for future use, padding */
+typedef struct
+{
+	char     range_from; /**< Y range from */
+	char     range_to;   /**< Y range to */
+	uint16_t reserved;   /**< reserved for future use, padding */
 } cmfile_yuvblock_header_t;
 #pragma pack(pop)
 
 class ColormapFileYuvBlock : public ColormapFileBlock
 {
- public:
-  ColormapFileYuvBlock(YuvColormap *cm, unsigned int level = 0);
-  ColormapFileYuvBlock(FireVisionDataFileBlock *block);
+public:
+	ColormapFileYuvBlock(YuvColormap *cm, unsigned int level = 0);
+	ColormapFileYuvBlock(FireVisionDataFileBlock *block);
 
-  unsigned int range_from() const;
-  unsigned int range_to() const;
+	unsigned int range_from() const;
+	unsigned int range_to() const;
 
- private:
-
-  YuvColormap  *cm_;
-  unsigned int  level_;
-  cmfile_yuvblock_header_t *header_;
+private:
+	YuvColormap *             cm_;
+	unsigned int              level_;
+	cmfile_yuvblock_header_t *header_;
 };
 
 } // end namespace firevision

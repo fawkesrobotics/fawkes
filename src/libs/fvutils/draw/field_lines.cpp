@@ -20,15 +20,16 @@
  */
 
 #include "field_lines.h"
-#include <fvutils/draw/drawer.h>
+
 #include <core/exceptions/software.h>
+#include <fvutils/draw/drawer.h>
 
 #include <cmath>
 
 using fawkes::cart_coord_2d_t;
 using fawkes::field_line_t;
-using std::min;
 using std::max;
+using std::min;
 
 namespace firevision {
 
@@ -85,14 +86,16 @@ namespace firevision {
  * @param field_width  Width of the soccer field [m]
  * @param line_width   Width of a single line [m]
  */
-FieldLines::FieldLines(std::string field_name, float field_length, float field_width, float line_width):
-  std::list<field_line_t>(),
-  _field_name(field_name)
+FieldLines::FieldLines(std::string field_name,
+                       float       field_length,
+                       float       field_width,
+                       float       line_width)
+: std::list<field_line_t>(), _field_name(field_name)
 {
-  _field_length = field_length;
-  _field_width  = field_width;
-  _line_width   = line_width;
-  _field_offsets.x = 12345;
+	_field_length    = field_length;
+	_field_width     = field_width;
+	_line_width      = line_width;
+	_field_offsets.x = 12345;
 }
 
 /**
@@ -109,18 +112,17 @@ FieldLines::~FieldLines()
 float
 FieldLines::get_line_width() const
 {
-  return _line_width;
+	return _line_width;
 }
 
 /** Returns the field name
  * @return The field name
  */
-const std::string&
+const std::string &
 FieldLines::get_name() const
 {
-  return _field_name;
+	return _field_name;
 }
-
 
 /**
  * Calculates the field's offsets
@@ -128,34 +130,32 @@ FieldLines::get_name() const
 void
 FieldLines::calc_offsets()
 {
-  cart_coord_2d_t mins(0, 0);
-  cart_coord_2d_t maxs(0, 0);
+	cart_coord_2d_t mins(0, 0);
+	cart_coord_2d_t maxs(0, 0);
 
-  float f;
+	float f;
 
-  for (FieldLines::iterator it = begin(); it != end(); ++it) {
-    //x-Axis
-    f = min(it->start.x, it->end.x);
-    if (f < mins.x) mins.x = f;
-    f = max(it->start.x, it->end.x);
-    if (f > maxs.x) maxs.x = f;
+	for (FieldLines::iterator it = begin(); it != end(); ++it) {
+		//x-Axis
+		f = min(it->start.x, it->end.x);
+		if (f < mins.x)
+			mins.x = f;
+		f = max(it->start.x, it->end.x);
+		if (f > maxs.x)
+			maxs.x = f;
 
-    //y-Axis
-    f = min(it->start.y, it->end.y);
-    if (f < mins.y) mins.y = f;
-    f = max(it->start.y, it->end.y);
-    if (f > maxs.y) maxs.y = f;
-  }
+		//y-Axis
+		f = min(it->start.y, it->end.y);
+		if (f < mins.y)
+			mins.y = f;
+		f = max(it->start.y, it->end.y);
+		if (f > maxs.y)
+			maxs.y = f;
+	}
 
-  _field_offsets.x = -(mins.x + maxs.x) / 2.f;
-  _field_offsets.y = -(mins.y + maxs.y) / 2.f;
+	_field_offsets.x = -(mins.x + maxs.x) / 2.f;
+	_field_offsets.y = -(mins.y + maxs.y) / 2.f;
 }
-
-
-
-
-
-
 
 /** @class FieldLines6x4 field_lines.h <firevision/apps/nao_loc/field_lines.cpp/field_lines.h>
  * This class implements the 6 by 4 meter SPL field according to the 2008 roules
@@ -168,11 +168,11 @@ FieldLines::calc_offsets()
  * @param length of the soccer field
  * @param width of the soccer field
  */
-FieldLines6x4::FieldLines6x4(float length, float width):
-  FieldLines("FieldLines6x4", length, width, 0.05f)
+FieldLines6x4::FieldLines6x4(float length, float width)
+: FieldLines("FieldLines6x4", length, width, 0.05f)
 {
-  init();
-  calc_offsets();
+	init();
+	calc_offsets();
 }
 
 FieldLines6x4::~FieldLines6x4()
@@ -182,46 +182,39 @@ FieldLines6x4::~FieldLines6x4()
 void
 FieldLines6x4::init()
 {
-  //opponent goal line (corner to corner)
-  push_back(field_line_t(3.f, 2.f, 3.f, -2.f));
-  //opponent hor penalty area line
-  push_back(field_line_t(2.4f, 1.5f, 2.4f, -1.5f));
-  //opponent vert penalty area lines
-  push_back(field_line_t(3.f,  1.5f, 2.4f,  1.5f));
-  push_back(field_line_t(3.f, -1.5f, 2.4f, -1.5f));
+	//opponent goal line (corner to corner)
+	push_back(field_line_t(3.f, 2.f, 3.f, -2.f));
+	//opponent hor penalty area line
+	push_back(field_line_t(2.4f, 1.5f, 2.4f, -1.5f));
+	//opponent vert penalty area lines
+	push_back(field_line_t(3.f, 1.5f, 2.4f, 1.5f));
+	push_back(field_line_t(3.f, -1.5f, 2.4f, -1.5f));
 
-  //opponent penalty point
-  push_back(field_line_t(1.2f,  0.05f, 1.2f, -0.05f));
-  push_back(field_line_t(1.15f, 0.f,   1.25f, 0.f));
+	//opponent penalty point
+	push_back(field_line_t(1.2f, 0.05f, 1.2f, -0.05f));
+	push_back(field_line_t(1.15f, 0.f, 1.25f, 0.f));
 
-  //center line
-  push_back(field_line_t(0.f, 2.f, 0.f, -2.f));
-  //side lines
-  push_back(field_line_t(3.f,  2.f, -3.f,  2.f));
-  push_back(field_line_t(3.f, -2.f, -3.f, -2.f));
+	//center line
+	push_back(field_line_t(0.f, 2.f, 0.f, -2.f));
+	//side lines
+	push_back(field_line_t(3.f, 2.f, -3.f, 2.f));
+	push_back(field_line_t(3.f, -2.f, -3.f, -2.f));
 
-  //center circle (approximated by 12 lines from )
-  _field_circles.push_back(fawkes::arc_t(0.6f, 0.f, 0.f));
+	//center circle (approximated by 12 lines from )
+	_field_circles.push_back(fawkes::arc_t(0.6f, 0.f, 0.f));
 
-  //own goal line (corner to corner)
-  push_back(field_line_t(-3.f, 2.f, -3.f, -2.f));
-  //own hor penalty area line
-  push_back(field_line_t(-2.4f, 1.5f, -2.4f, -1.5f));
-  //own vert penalty area lines
-  push_back(field_line_t(-3.f,  1.5f, -2.4f,  1.5f));
-  push_back(field_line_t(-3.f, -1.5f, -2.4f, -1.5f));
+	//own goal line (corner to corner)
+	push_back(field_line_t(-3.f, 2.f, -3.f, -2.f));
+	//own hor penalty area line
+	push_back(field_line_t(-2.4f, 1.5f, -2.4f, -1.5f));
+	//own vert penalty area lines
+	push_back(field_line_t(-3.f, 1.5f, -2.4f, 1.5f));
+	push_back(field_line_t(-3.f, -1.5f, -2.4f, -1.5f));
 
-  //own penalty point
-  push_back(field_line_t(-1.2f,  0.05f, -1.2f, -0.05f));
-  push_back(field_line_t(-1.15f, 0.f,   -1.25f, 0.f));
+	//own penalty point
+	push_back(field_line_t(-1.2f, 0.05f, -1.2f, -0.05f));
+	push_back(field_line_t(-1.15f, 0.f, -1.25f, 0.f));
 }
-
-
-
-
-
-
-
 
 /** @class FieldLinesCityTower field_lines.h <firevision/apps/nao_loc/field_lines.cpp/field_lines.h>
  * This class implements the test field in Graz, Austria at the CityTower.
@@ -235,11 +228,11 @@ FieldLines6x4::init()
  * @param length of the soccer field
  * @param width of the soccer field
  */
-FieldLinesCityTower::FieldLinesCityTower(float length, float width):
-  FieldLines("FieldLinesCityTower", length, width, 0.09f)
+FieldLinesCityTower::FieldLinesCityTower(float length, float width)
+: FieldLines("FieldLinesCityTower", length, width, 0.09f)
 {
-  init();
-  calc_offsets();
+	init();
+	calc_offsets();
 }
 
 FieldLinesCityTower::~FieldLinesCityTower()
@@ -249,24 +242,24 @@ FieldLinesCityTower::~FieldLinesCityTower()
 void
 FieldLinesCityTower::init()
 {
-  //opponent goal line (corner to corner)
-  push_back(field_line_t(4.97f, 2.455f, 4.97f, -2.455f));
-  //opponent hor penalty area line
-  push_back(field_line_t(3.82f, 1.49f, 3.82f, -1.49f));
-  //opponent vert penalty area lines
-  push_back(field_line_t(4.97f,  1.49f, 3.82f,  1.49f));
-  push_back(field_line_t(4.97f, -1.49f, 3.82f, -1.49f));
+	//opponent goal line (corner to corner)
+	push_back(field_line_t(4.97f, 2.455f, 4.97f, -2.455f));
+	//opponent hor penalty area line
+	push_back(field_line_t(3.82f, 1.49f, 3.82f, -1.49f));
+	//opponent vert penalty area lines
+	push_back(field_line_t(4.97f, 1.49f, 3.82f, 1.49f));
+	push_back(field_line_t(4.97f, -1.49f, 3.82f, -1.49f));
 
-  //center line
-  push_back(field_line_t(0.f, 2.455f, 0.f, -2.455f));
-  //side lines
-  push_back(field_line_t(4.97f,  2.455f, -1.44f,  2.455f));
-  push_back(field_line_t(4.97f, -2.455f, -1.44f, -2.455f));
+	//center line
+	push_back(field_line_t(0.f, 2.455f, 0.f, -2.455f));
+	//side lines
+	push_back(field_line_t(4.97f, 2.455f, -1.44f, 2.455f));
+	push_back(field_line_t(4.97f, -2.455f, -1.44f, -2.455f));
 
-  //center circle (approximated by 12 lines from )
-  _field_circles.push_back(fawkes::arc_t(1.1f, 0.f, 0.f));
+	//center circle (approximated by 12 lines from )
+	_field_circles.push_back(fawkes::arc_t(1.1f, 0.f, 0.f));
 
-/* Not Available...
+	/* Not Available...
   //own goal line (corner to corner)
   push_back(field_line_t(-2.975f, 1.975f, -2.975f, -1.975f));
   //own hor penalty area line
@@ -276,14 +269,6 @@ FieldLinesCityTower::init()
   push_back(field_line_t(-2.975f, -0.975f, -2.425f, -0.975f));
 */
 }
-
-
-
-
-
-
-
-
 
 /** @class FieldLinesCityTowerSeminar field_lines.h <firevision/apps/nao_loc/field_lines.cpp/field_lines.h>
  * This class implements the test field in Graz, Austria at the CityTower.
@@ -297,11 +282,11 @@ FieldLinesCityTower::init()
  * @param length of the soccer field
  * @param width of the soccer field
  */
-FieldLinesCityTowerSeminar::FieldLinesCityTowerSeminar(float length, float width):
-  FieldLines("FieldLinesCityTowerSeminar", length, width, 0.05f)
+FieldLinesCityTowerSeminar::FieldLinesCityTowerSeminar(float length, float width)
+: FieldLines("FieldLinesCityTowerSeminar", length, width, 0.05f)
 {
-  init();
-  calc_offsets();
+	init();
+	calc_offsets();
 }
 
 FieldLinesCityTowerSeminar::~FieldLinesCityTowerSeminar()
@@ -311,40 +296,38 @@ FieldLinesCityTowerSeminar::~FieldLinesCityTowerSeminar()
 void
 FieldLinesCityTowerSeminar::init()
 {
-  //opponent goal line (corner to corner)
-  push_back(field_line_t(2.725f, 1.825f, 2.725f, -1.825f));
-  //opponent hor penalty area line
-  push_back(field_line_t(2.125f, 1.5f, 2.125f, -1.5f));
-  //opponent vert penalty area lines
-  push_back(field_line_t(2.725f,  1.5f, 2.125f,  1.5f));
-  push_back(field_line_t(2.725f, -1.5f, 2.125f, -1.5f));
+	//opponent goal line (corner to corner)
+	push_back(field_line_t(2.725f, 1.825f, 2.725f, -1.825f));
+	//opponent hor penalty area line
+	push_back(field_line_t(2.125f, 1.5f, 2.125f, -1.5f));
+	//opponent vert penalty area lines
+	push_back(field_line_t(2.725f, 1.5f, 2.125f, 1.5f));
+	push_back(field_line_t(2.725f, -1.5f, 2.125f, -1.5f));
 
-  //opponent penalty point
-  push_back(field_line_t(0.925f, 0.05f, 0.925f, -0.05f));
-  push_back(field_line_t(0.875f, 0.f,   0.975f,  0.f));
+	//opponent penalty point
+	push_back(field_line_t(0.925f, 0.05f, 0.925f, -0.05f));
+	push_back(field_line_t(0.875f, 0.f, 0.975f, 0.f));
 
-  //center line
-  push_back(field_line_t(0.f, 1.825f, 0.f, -1.825f));
-  //side lines
-  push_back(field_line_t(2.725f,  1.825f, -2.725f,  1.825f));
-  push_back(field_line_t(2.725f, -1.825f, -2.725f, -1.825f));
+	//center line
+	push_back(field_line_t(0.f, 1.825f, 0.f, -1.825f));
+	//side lines
+	push_back(field_line_t(2.725f, 1.825f, -2.725f, 1.825f));
+	push_back(field_line_t(2.725f, -1.825f, -2.725f, -1.825f));
 
-  //center circle (approximated by 12 lines from )
-  _field_circles.push_back(fawkes::arc_t(0.57f, 0.f, 0.f));
+	//center circle (approximated by 12 lines from )
+	_field_circles.push_back(fawkes::arc_t(0.57f, 0.f, 0.f));
 
+	//own goal line (corner to corner)
+	push_back(field_line_t(-2.725f, 1.825f, -2.725f, -1.825f));
+	//own hor penalty area line
+	push_back(field_line_t(-2.125f, 1.5f, -2.125f, -1.5f));
+	//own vert penalty area lines
+	push_back(field_line_t(-2.725f, 1.5f, -2.125f, 1.5f));
+	push_back(field_line_t(-2.725f, -1.5f, -2.125f, -1.5f));
 
-  //own goal line (corner to corner)
-  push_back(field_line_t(-2.725f, 1.825f, -2.725f, -1.825f));
-  //own hor penalty area line
-  push_back(field_line_t(-2.125f, 1.5f, -2.125f, -1.5f));
-  //own vert penalty area lines
-  push_back(field_line_t(-2.725f,  1.5f, -2.125f,  1.5f));
-  push_back(field_line_t(-2.725f, -1.5f, -2.125f, -1.5f));
-
-  //own penalty point
-  push_back(field_line_t(-0.925f, 0.05f, -0.925f, -0.05f));
-  push_back(field_line_t(-0.875f, 0.f,   -0.975f,  0.f));
+	//own penalty point
+	push_back(field_line_t(-0.925f, 0.05f, -0.925f, -0.05f));
+	push_back(field_line_t(-0.875f, 0.f, -0.975f, 0.f));
 }
-
 
 } // end namespace firevision

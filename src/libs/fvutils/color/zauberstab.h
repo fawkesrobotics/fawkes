@@ -32,15 +32,15 @@
 
 #include <vector>
 
-
 namespace firevision {
 
 /** a "slice" is a row of consecutive pixels
    (horizontal) */
-struct ZSlice {
-  int leftX;	/**< left X */
-  int rightX;	/**< right X */
-  int y;	/**< Y value */
+struct ZSlice
+{
+	int leftX;  /**< left X */
+	int rightX; /**< right X */
+	int y;      /**< Y value */
 };
 
 /** a region is a stack of slices,
@@ -52,53 +52,51 @@ struct ZSlice {
 
 /** a region is a stack of slices,
    together with the y-position of the slice at the top */
-class ZRegion {
-	public:
-		std::vector<ZSlice*> *slices;	/**< slices */
-		int topSliceY;		/**< top slice Y */
-		
-		ZRegion();
-		virtual ~ZRegion();
-		void clear();
+class ZRegion
+{
+public:
+	std::vector<ZSlice *> *slices;    /**< slices */
+	int                    topSliceY; /**< top slice Y */
+
+	ZRegion();
+	virtual ~ZRegion();
+	void clear();
 };
 
-class Zauberstab {
- public:
-  Zauberstab();
-  ~Zauberstab();
+class Zauberstab
+{
+public:
+	Zauberstab();
+	~Zauberstab();
 
-  void setThreshold(unsigned int t);
-  unsigned int getThreshold();
-  void setBuffer(unsigned char *b, unsigned int w, unsigned int h);
-  void findRegion(unsigned int seedX, unsigned int seedY);
-  void addRegion(unsigned int seedX, unsigned int seedY);
-  void addRegion(ZRegion *region2);
-  void deleteRegion();
-  void deleteRegion(unsigned int seedX, unsigned int seedY);
-  void deleteRegion(ZRegion *region2);
-  bool isEmptyRegion();
+	void         setThreshold(unsigned int t);
+	unsigned int getThreshold();
+	void         setBuffer(unsigned char *b, unsigned int w, unsigned int h);
+	void         findRegion(unsigned int seedX, unsigned int seedY);
+	void         addRegion(unsigned int seedX, unsigned int seedY);
+	void         addRegion(ZRegion *region2);
+	void         deleteRegion();
+	void         deleteRegion(unsigned int seedX, unsigned int seedY);
+	void         deleteRegion(ZRegion *region2);
+	bool         isEmptyRegion();
 
-  ZRegion * getRegion() const;
-  std::vector< fawkes::rectangle_t >  getSelection();
+	ZRegion *                        getRegion() const;
+	std::vector<fawkes::rectangle_t> getSelection();
 
- private:
-  unsigned int threshold;
-  ZRegion *region;
-  unsigned char *buffer;
-  unsigned int width;
-  unsigned int height;
+private:
+	unsigned int   threshold;
+	ZRegion *      region;
+	unsigned char *buffer;
+	unsigned int   width;
+	unsigned int   height;
 
-  ZRegion* privFindRegion(unsigned int seedX, unsigned int seedY);
-  ZSlice* findSlice(unsigned int x, unsigned int y, 
-                    unsigned int vSeed, int uSeed = -1);
-  bool isSimilarV(unsigned int v1, unsigned int v2);
-  bool isSimilarU(unsigned int u1, unsigned int u2);
-  bool isSimilarUV(unsigned int u1, unsigned int u2,
-                   unsigned int v1, unsigned int v2);
+	ZRegion *privFindRegion(unsigned int seedX, unsigned int seedY);
+	ZSlice * findSlice(unsigned int x, unsigned int y, unsigned int vSeed, int uSeed = -1);
+	bool     isSimilarV(unsigned int v1, unsigned int v2);
+	bool     isSimilarU(unsigned int u1, unsigned int u2);
+	bool     isSimilarUV(unsigned int u1, unsigned int u2, unsigned int v1, unsigned int v2);
 };
 
 } // end namespace firevision
 
-
 #endif
-

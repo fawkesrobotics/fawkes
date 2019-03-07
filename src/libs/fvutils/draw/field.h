@@ -25,8 +25,8 @@
 
 #include <fvutils/draw/field_lines.h>
 
-#include <string>
 #include <list>
+#include <string>
 
 namespace firevision {
 
@@ -35,21 +35,25 @@ typedef std::list<fawkes::cart_coord_2d_t> fld_line_points_t;
 class Field
 {
 public:
-  ~Field();
+	~Field();
 
-  const FieldLines& get_lines() const { return *lines_; }
-  float get_field_length() const;
-  float get_field_width() const;
+	const FieldLines &
+	get_lines() const
+	{
+		return *lines_;
+	}
+	float get_field_length() const;
+	float get_field_width() const;
 
-  void print(bool in_mm) const;
+	void print(bool in_mm) const;
 
-  static Field* field_for_name(std::string field_name, float field_length, float field_width);
+	static Field *field_for_name(std::string field_name, float field_length, float field_width);
 
 private:
-  Field(FieldLines *lines, bool manage_lines_memory = true);
+	Field(FieldLines *lines, bool manage_lines_memory = true);
 
-  FieldLines  *lines_;
-  bool         manage_lines_memory_;
+	FieldLines *lines_;
+	bool        manage_lines_memory_;
 };
 
 } // end namespace firevision

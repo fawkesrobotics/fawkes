@@ -24,10 +24,11 @@
 #ifndef _FIREVISION_FVUTILS_NET_FUSE_MESSAGE_H_
 #define _FIREVISION_FVUTILS_NET_FUSE_MESSAGE_H_
 
-#include <core/utils/refcount.h>
 #include <core/exceptions/software.h>
+#include <core/utils/refcount.h>
 #include <fvutils/net/fuse.h>
 #include <sys/types.h>
+
 #include <cstdlib>
 #include <cstring>
 
@@ -37,59 +38,62 @@ class FuseMessageContent;
 
 class FuseNetworkMessage : public fawkes::RefCount
 {
- public:
-  FuseNetworkMessage();
-  FuseNetworkMessage(FUSE_message_t *msg);
-  FuseNetworkMessage(FUSE_message_type_t type, void *payload, size_t payload_size,
-		     bool copy_payload = false);
-  FuseNetworkMessage(FUSE_message_type_t type, FuseMessageContent *content);
-  FuseNetworkMessage(FUSE_message_type_t type);
-  ~FuseNetworkMessage();
+public:
+	FuseNetworkMessage();
+	FuseNetworkMessage(FUSE_message_t *msg);
+	FuseNetworkMessage(FUSE_message_type_t type,
+	                   void *              payload,
+	                   size_t              payload_size,
+	                   bool                copy_payload = false);
+	FuseNetworkMessage(FUSE_message_type_t type, FuseMessageContent *content);
+	FuseNetworkMessage(FUSE_message_type_t type);
+	~FuseNetworkMessage();
 
-  uint32_t  type() const;
-  size_t    payload_size() const;
-  void *    payload() const;
+	uint32_t type() const;
+	size_t   payload_size() const;
+	void *   payload() const;
 
-  const FUSE_message_t &  fmsg() const;
+	const FUSE_message_t &fmsg() const;
 
-  /** Get correctly casted payload.
+	/** Get correctly casted payload.
    * Use this method to cast the payload to a specific type. The size is
    * check as a sanity check and a TypeMismatchException is thrown if the
    * size does not match.
    * @return casted message
    * @exception TypeMismatchException payload size does not match requested type
    */
-  template <typename MT>
-    MT *
-    msg() const
-    {
-      if ( payload_size() != sizeof(MT) ) {
-	throw fawkes::TypeMismatchException("FawkesNetworkMessage: message has incorrect size for this type");
-      }
-      return (MT *)(_msg.payload);
-    }
+	template <typename MT>
+	MT *
+	msg() const
+	{
+		if (payload_size() != sizeof(MT)) {
+			throw fawkes::TypeMismatchException(
+			  "FawkesNetworkMessage: message has incorrect size for this type");
+		}
+		return (MT *)(_msg.payload);
+	}
 
-
-  /** Get copy of correctly casted payload.
+	/** Get copy of correctly casted payload.
    * Use this method to cast the payload to a specific type. The size is
    * check as a sanity check and a TypeMismatchException is thrown if the
    * size does not match.
    * @return copy of casted message
    * @exception TypeMismatchException payload size does not match requested type
    */
-  template <typename MT>
-    MT *
-    msg_copy() const
-    {
-      if ( payload_size() != sizeof(MT) ) {
-	throw fawkes::TypeMismatchException("FawkesNetworkMessage: message has incorrect size for this type");
-      }
-      void *tmp = malloc(sizeof(MT));
-      memcpy(tmp, _msg.payload, sizeof(MT));
-      return (MT *)tmp;
-    }
+	template <typename MT>
+	MT *
+	msg_copy() const
+	{
+		if (payload_size() != sizeof(MT)) {
+			throw fawkes::TypeMismatchException(
+			  "FawkesNetworkMessage: message has incorrect size for this type");
+		}
+		void *tmp = malloc(sizeof(MT));
+		memcpy(tmp, _msg.payload, sizeof(MT));
+		return (MT *)tmp;
+	}
 
-  /** Get correctly parsed output.
+	/** Get correctly parsed output.
    * Use this method to cast the payload to a specific complex type. You can use this
    * routine to parse complex messages that are derived from FuseComplexMessageContent.
    * Note that the class must provide a constructor that takes three parameters: The
@@ -99,32 +103,32 @@ class FuseNetworkMessage : public fawkes::RefCount
    * @return casted message
    * @exception TypeMismatchException payload size does not match requested type
    */
-  template <typename MT>
-    MT *
-    msgc() const
-    {
-      try {
-	MT *m = new MT(type(), _msg.payload, payload_size());
-	return m;
-      } catch (fawkes::Exception &e) {
-	throw;
-      } catch (...) {
-	throw fawkes::Exception("Unknown exception caught while parsing complex network message");
-      }
-    }
+	template <typename MT>
+	MT *
+	msgc() const
+	{
+		try {
+			MT *m = new MT(type(), _msg.payload, payload_size());
+			return m;
+		} catch (fawkes::Exception &e) {
+			throw;
+		} catch (...) {
+			throw fawkes::Exception("Unknown exception caught while parsing complex network message");
+		}
+	}
 
-  void pack();
+	void pack();
 
-  void set_payload(void *payload, size_t payload_size);
-  void set(FUSE_message_t &msg);
-  //void set_content(FuseComplexMessageContent *content);
+	void set_payload(void *payload, size_t payload_size);
+	void set(FUSE_message_t &msg);
+	//void set_content(FuseComplexMessageContent *content);
 
- protected:
-  /** Internal message. Fill in derivatives. */
-  FUSE_message_t _msg;
+protected:
+	/** Internal message. Fill in derivatives. */
+	FUSE_message_t _msg;
 
- private:
-  FuseMessageContent *content_;
+private:
+	FuseMessageContent *content_;
 };
 
 } // end namespace firevision

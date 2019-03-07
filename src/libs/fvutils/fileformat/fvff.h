@@ -24,10 +24,10 @@
 #ifndef _FIREVISION_FVUTILS_FILEFORMAT_FVFF_H_
 #define _FIREVISION_FVUTILS_FILEFORMAT_FVFF_H_
 
-#pragma pack(push,4)
+#pragma pack(push, 4)
 
 #ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS
+#	define __STDC_LIMIT_MACROS
 #endif
 #include <stdint.h>
 
@@ -51,18 +51,18 @@ namespace firevision {
  * Directly following the header is the content specific header. It has to be exactly
  * the size given in spec_head_size.
  */
-typedef struct _fvff_header_t {
-  uint16_t magic_token;		/**< magic token */
-  uint16_t version    :  4;	/**< version of the data file, this header defines version 1 */
-  uint16_t endianess  :  1;	/**< endianess of the file, 0 means little endian, 1 means big endian */
-  uint16_t reserved   : 11;	/**< reserved for future use */
-  uint16_t num_blocks;		/**< number of rectification info blocks in this file */
-  uint32_t spec_head_size;	/**< data specific header size */
-  uint64_t created_sec;		/**< creation unix timestamp, seconds */
-  uint64_t created_usec;	/**< creation unix timestamp, useconds */
-  char     comment[FVFF_COMMENT_SIZE];	/**< optional comment */
+typedef struct _fvff_header_t
+{
+	uint16_t magic_token;    /**< magic token */
+	uint16_t version : 4;    /**< version of the data file, this header defines version 1 */
+	uint16_t endianess : 1;  /**< endianess of the file, 0 means little endian, 1 means big endian */
+	uint16_t reserved : 11;  /**< reserved for future use */
+	uint16_t num_blocks;     /**< number of rectification info blocks in this file */
+	uint32_t spec_head_size; /**< data specific header size */
+	uint64_t created_sec;    /**< creation unix timestamp, seconds */
+	uint64_t created_usec;   /**< creation unix timestamp, useconds */
+	char     comment[FVFF_COMMENT_SIZE]; /**< optional comment */
 } fvff_header_t;
-
 
 /** Block header.
  * Each block in a FvFF file has a block header. This header defines only the basic
@@ -70,14 +70,14 @@ typedef struct _fvff_header_t {
  * Directly following the header is the content specific block header. The size has to
  * be set in spec_head_size.
  */
-typedef struct _fvff_block_header_t {
-  uint32_t type;		/**< The type of the block, content-specific */
-  uint32_t size;		/**< size in bytes of this block, does not include any headers */
-  uint32_t spec_head_size;	/**< the size of the following content specific block header */
+typedef struct _fvff_block_header_t
+{
+	uint32_t type;           /**< The type of the block, content-specific */
+	uint32_t size;           /**< size in bytes of this block, does not include any headers */
+	uint32_t spec_head_size; /**< the size of the following content specific block header */
 } fvff_block_header_t;
 
 } // end namespace firevision
-
 
 #pragma pack(pop)
 #endif

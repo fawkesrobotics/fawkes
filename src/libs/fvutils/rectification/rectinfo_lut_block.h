@@ -30,25 +30,21 @@ namespace firevision {
 
 class RectificationLutInfoBlock : public RectificationInfoBlock
 {
- public:
-  RectificationLutInfoBlock(uint16_t width, uint16_t height,
-			    uint8_t camera);
-  RectificationLutInfoBlock(FireVisionDataFileBlock *block);
+public:
+	RectificationLutInfoBlock(uint16_t width, uint16_t height, uint8_t camera);
+	RectificationLutInfoBlock(FireVisionDataFileBlock *block);
 
-  void set_mapping(uint16_t x, uint16_t y,
-		   uint16_t to_x, uint16_t to_y);
-  virtual void mapping(uint16_t x, uint16_t y,
-		       uint16_t *to_x, uint16_t *to_y);
+	void         set_mapping(uint16_t x, uint16_t y, uint16_t to_x, uint16_t to_y);
+	virtual void mapping(uint16_t x, uint16_t y, uint16_t *to_x, uint16_t *to_y);
 
-  uint16_t pixel_width();
-  uint16_t pixel_height();
+	uint16_t pixel_width();
+	uint16_t pixel_height();
 
-  rectinfo_lut_16x16_entry_t *  lut_data();
-  
- private:
-  rectinfo_lut_16x16_block_header_t *_lut_block_header;
-  rectinfo_lut_16x16_entry_t        *_lut_data;
+	rectinfo_lut_16x16_entry_t *lut_data();
 
+private:
+	rectinfo_lut_16x16_block_header_t *_lut_block_header;
+	rectinfo_lut_16x16_entry_t *       _lut_data;
 };
 
 } // end namespace firevision

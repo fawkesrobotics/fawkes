@@ -67,25 +67,25 @@ namespace firevision {
  */
 
 /** Static initialzer */
-ColorObjectMap* ColorObjectMap::singleton_ = new ColorObjectMap();
+ColorObjectMap *ColorObjectMap::singleton_ = new ColorObjectMap();
 
 /** Default Contructor.
  * The constructor is private to implement a singelton pattern
  */
 ColorObjectMap::ColorObjectMap()
 {
-  c_other_   = C_OTHER;
-  h_unknown_ = H_UNKNOWN;
+	c_other_   = C_OTHER;
+	h_unknown_ = H_UNKNOWN;
 
-  //Standard mapping:
-  set_mapping(H_BALL, C_ORANGE);
-  set_mapping(H_ROBOT, C_BLACK);
-  set_mapping(H_ROBOT_OPP, C_RED);
-  set_mapping(H_FIELD, C_GREEN);
-  set_mapping(H_GOAL_YELLOW, C_YELLOW);
-  set_mapping(H_GOAL_BLUE, C_CYAN);
-  set_mapping(H_LINE, C_WHITE);
-  set_mapping(H_BACKGROUND, C_BACKGROUND);
+	//Standard mapping:
+	set_mapping(H_BALL, C_ORANGE);
+	set_mapping(H_ROBOT, C_BLACK);
+	set_mapping(H_ROBOT_OPP, C_RED);
+	set_mapping(H_FIELD, C_GREEN);
+	set_mapping(H_GOAL_YELLOW, C_YELLOW);
+	set_mapping(H_GOAL_BLUE, C_CYAN);
+	set_mapping(H_LINE, C_WHITE);
+	set_mapping(H_BACKGROUND, C_BACKGROUND);
 }
 
 /** Destructor */
@@ -97,39 +97,31 @@ ColorObjectMap::~ColorObjectMap()
  * @param color a color_t value (@see color_t enumeration)
  * @return a corresponding YUV color
  */
-YUV_t ColorObjectMap::get_color(color_t color)
+YUV_t
+ColorObjectMap::get_color(color_t color)
 {
-  switch (color) {
-    case C_ORANGE:
-      return YUV_t::orange();
+	switch (color) {
+	case C_ORANGE: return YUV_t::orange();
 
-    case C_MAGENTA:
-      return YUV_t::magenta();
+	case C_MAGENTA: return YUV_t::magenta();
 
-    case C_CYAN:
-      return YUV_t::cyan();
+	case C_CYAN: return YUV_t::cyan();
 
-    case C_BLUE:
-      return YUV_t::blue();
+	case C_BLUE: return YUV_t::blue();
 
-    case C_YELLOW:
-      return YUV_t::yellow();
+	case C_YELLOW: return YUV_t::yellow();
 
-    case C_GREEN:
-      return YUV_t::green();
+	case C_GREEN: return YUV_t::green();
 
-    case C_WHITE:
-      return YUV_t::white();
+	case C_WHITE: return YUV_t::white();
 
-    case C_RED:
-      return YUV_t::red();
+	case C_RED: return YUV_t::red();
 
-    case C_BLACK:
-      return YUV_t::black();
+	case C_BLACK: return YUV_t::black();
 
-    default: //also C_BACKGROUND
-      return YUV_t::gray();
-  }
+	default: //also C_BACKGROUND
+		return YUV_t::gray();
+	}
 }
 
 /** Mapping setter.
@@ -137,18 +129,19 @@ YUV_t ColorObjectMap::get_color(color_t color)
  * @param roi region of interest (@see hint_t enumeration)
  * @param color matching color_t value (@see color_t enumeration)
  */
-void ColorObjectMap::set_mapping(hint_t roi, color_t color)
+void
+ColorObjectMap::set_mapping(hint_t roi, color_t color)
 {
-  hint_t cur_roi = get(color);
-  if (cur_roi != H_UNKNOWN) //There is a previous mapping -> unlink it
-  {
-    color_t cur_col = get(roi);
-    color_for_hint_[cur_roi] = C_OTHER;
-    hint_for_color_[cur_col] = H_UNKNOWN;
-  }
+	hint_t cur_roi = get(color);
+	if (cur_roi != H_UNKNOWN) //There is a previous mapping -> unlink it
+	{
+		color_t cur_col          = get(roi);
+		color_for_hint_[cur_roi] = C_OTHER;
+		hint_for_color_[cur_col] = H_UNKNOWN;
+	}
 
-  color_for_hint_[roi] = color;
-  hint_for_color_[color] = roi;
+	color_for_hint_[roi]   = color;
+	hint_for_color_[color] = roi;
 }
 
 } // end namespace firevision

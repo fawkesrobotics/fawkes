@@ -26,7 +26,6 @@
 #ifndef _FIREVISION_FVUTILS_WRITERS_PNM_H_
 #define _FIREVISION_FVUTILS_WRITERS_PNM_H_
 
-
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/writers/writer.h>
 
@@ -34,37 +33,35 @@ namespace firevision {
 
 /** PNM subtype. */
 typedef enum {
-  PNM_PBM,		/**< PBM, B/W */
-  PNM_PBM_ASCII,	/**< PBM, B/W, ASCII */
-  PNM_PGM,		/**< PGM, grey */
-  PNM_PGM_ASCII,	/**< PGM, grey, ASCII */
-  PNM_PPM,		/**< PPM, color */
-  PNM_PPM_ASCII		/**< PPM, color, ASCII */
+	PNM_PBM,       /**< PBM, B/W */
+	PNM_PBM_ASCII, /**< PBM, B/W, ASCII */
+	PNM_PGM,       /**< PGM, grey */
+	PNM_PGM_ASCII, /**< PGM, grey, ASCII */
+	PNM_PPM,       /**< PPM, color */
+	PNM_PPM_ASCII  /**< PPM, color, ASCII */
 } PNMFormat;
-
 
 class PNMWriter : public Writer
 {
- public:
-  PNMWriter(PNMFormat format);
-  PNMWriter(PNMFormat format, const char *filename, unsigned int width, unsigned int height);
+public:
+	PNMWriter(PNMFormat format);
+	PNMWriter(PNMFormat format, const char *filename, unsigned int width, unsigned int height);
 
-  virtual void set_buffer(colorspace_t cspace, unsigned char *buffer);
-  virtual void write();
+	virtual void set_buffer(colorspace_t cspace, unsigned char *buffer);
+	virtual void write();
 
- private:
+private:
+	unsigned int calc_buffer_size();
 
-  unsigned int calc_buffer_size();
+	unsigned int write_header(bool simulate = false);
+	const char * format2string(PNMFormat format);
 
-  unsigned int write_header(bool simulate = false);
-  const char * format2string(PNMFormat format);
-
-  PNMFormat      format;
-  unsigned int   buffer_size;
-  unsigned char *buffer;
-  unsigned char *buffer_start;
-  unsigned int   width;
-  unsigned int   height;
+	PNMFormat      format;
+	unsigned int   buffer_size;
+	unsigned char *buffer;
+	unsigned char *buffer_start;
+	unsigned int   width;
+	unsigned int   height;
 };
 
 } // end namespace firevision

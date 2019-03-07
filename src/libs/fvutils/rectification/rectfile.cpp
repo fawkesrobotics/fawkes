@@ -21,19 +21,18 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/rectification/rectinfo.h>
+#include <core/exceptions/system.h>
 #include <fvutils/rectification/rectfile.h>
+#include <fvutils/rectification/rectinfo.h>
 #include <fvutils/rectification/rectinfo_block.h>
 #include <fvutils/rectification/rectinfo_lut_block.h>
-
-#include <core/exceptions/system.h>
+#include <netinet/in.h>
 #include <utils/misc/strndup.h>
 
-#include <cstring>
 #include <cstdio>
-#include <errno.h>
-#include <netinet/in.h>
 #include <cstdlib>
+#include <cstring>
+#include <errno.h>
 
 namespace firevision {
 
@@ -56,45 +55,42 @@ namespace firevision {
  * @param model String with the model name of the camera
  */
 RectificationInfoFile::RectificationInfoFile(uint64_t cam_guid, const char *model)
-  : FireVisionDataFile(FIREVISION_RECTINFO_MAGIC, FIREVISION_RECTINFO_CURVER)
+: FireVisionDataFile(FIREVISION_RECTINFO_MAGIC, FIREVISION_RECTINFO_CURVER)
 {
-  _spec_header      = calloc(1, sizeof(rectinfo_header_t));
-  _spec_header_size = sizeof(rectinfo_header_t);
-  _header = (rectinfo_header_t *)_spec_header;
+	_spec_header      = calloc(1, sizeof(rectinfo_header_t));
+	_spec_header_size = sizeof(rectinfo_header_t);
+	_header           = (rectinfo_header_t *)_spec_header;
 
-  _cam_guid = cam_guid;
-  _model = strdup(model);
+	_cam_guid = cam_guid;
+	_model    = strdup(model);
 
-  strncpy(_header->camera_model, _model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH-1);
-  _header->guid = _cam_guid;
+	strncpy(_header->camera_model, _model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH - 1);
+	_header->guid = _cam_guid;
 }
-
 
 /** Constructor.
  * This constructor may only be used for reading files, as the GUID of the camera
  * is invalid for writing.
  */
 RectificationInfoFile::RectificationInfoFile()
-  : FireVisionDataFile(FIREVISION_RECTINFO_MAGIC, FIREVISION_RECTINFO_CURVER)
+: FireVisionDataFile(FIREVISION_RECTINFO_MAGIC, FIREVISION_RECTINFO_CURVER)
 {
-  _spec_header      = calloc(1, sizeof(rectinfo_header_t));
-  _spec_header_size = sizeof(rectinfo_header_t);
-  _header = (rectinfo_header_t *)_spec_header;
+	_spec_header      = calloc(1, sizeof(rectinfo_header_t));
+	_spec_header_size = sizeof(rectinfo_header_t);
+	_header           = (rectinfo_header_t *)_spec_header;
 
-  _cam_guid = 0;
-  _model = strdup("");
+	_cam_guid = 0;
+	_model    = strdup("");
 
-  strncpy(_header->camera_model, _model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH-1);
-  _header->guid = _cam_guid;
+	strncpy(_header->camera_model, _model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH - 1);
+	_header->guid = _cam_guid;
 }
-
 
 /** Destructor. */
 RectificationInfoFile::~RectificationInfoFile()
 {
-  free(_model);
+	free(_model);
 }
-
 
 /** Get the GUID of camera.
  * @return GUID of the camera this rectification info file belongs to.
@@ -102,9 +98,8 @@ RectificationInfoFile::~RectificationInfoFile()
 uint64_t
 RectificationInfoFile::guid()
 {
-  return _header->guid;
+	return _header->guid;
 }
-
 
 /** Get the model of the camera.
  * @return string with the camera's model name
@@ -112,9 +107,8 @@ RectificationInfoFile::guid()
 const char *
 RectificationInfoFile::model()
 {
-  return _model;
+	return _model;
 }
-
 
 /** Add a rectification info block.
  * This instance takes over ownership of the rectinfo block. This means that the
@@ -124,9 +118,8 @@ RectificationInfoFile::model()
 void
 RectificationInfoFile::add_rectinfo_block(RectificationInfoBlock *block)
 {
-  add_block(block);
+	add_block(block);
 }
-
 
 /** Get all rectification info blocks.
  * @return reference to internal vector of rectinfo blocks.
@@ -134,40 +127,39 @@ RectificationInfoFile::add_rectinfo_block(RectificationInfoBlock *block)
 RectificationInfoFile::RectInfoBlockVector *
 RectificationInfoFile::rectinfo_blocks()
 {
-  FireVisionDataFile::BlockList &b = blocks();
-  printf("Processing blocks: %zu\n", b.size());
-  RectInfoBlockVector *rv = new RectInfoBlockVector();
-  for (std::list<FireVisionDataFileBlock *>::iterator i = b.begin(); i != b.end(); ++i) {
-    printf("Processing block\n");
-    if ((*i)->type() == FIREVISION_RECTINFO_TYPE_LUT_16x16) {
-      printf("Pushing lut block\n");
-      RectificationLutInfoBlock *libl = new RectificationLutInfoBlock(*i);
-      rv->push_back(libl);
-    }
-  }
+	FireVisionDataFile::BlockList &b = blocks();
+	printf("Processing blocks: %zu\n", b.size());
+	RectInfoBlockVector *rv = new RectInfoBlockVector();
+	for (std::list<FireVisionDataFileBlock *>::iterator i = b.begin(); i != b.end(); ++i) {
+		printf("Processing block\n");
+		if ((*i)->type() == FIREVISION_RECTINFO_TYPE_LUT_16x16) {
+			printf("Pushing lut block\n");
+			RectificationLutInfoBlock *libl = new RectificationLutInfoBlock(*i);
+			rv->push_back(libl);
+		}
+	}
 
-  return rv;
+	return rv;
 }
-
 
 void
 RectificationInfoFile::read(const char *filename)
 {
-  FireVisionDataFile::read(filename);
+	FireVisionDataFile::read(filename);
 
-  _header = (rectinfo_header_t *)_spec_header;
+	_header = (rectinfo_header_t *)_spec_header;
 
-  if (_model) free(_model);
-  _model    = strndup(_header->camera_model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH);
-  _cam_guid = _header->guid;
+	if (_model)
+		free(_model);
+	_model    = strndup(_header->camera_model, FIREVISION_RECTINFO_CAMERA_MODEL_MAXLENGTH);
+	_cam_guid = _header->guid;
 }
-
 
 RectificationInfoFile::RectInfoBlockVector::~RectInfoBlockVector()
 {
-  for (iterator i = begin(); i != end(); ++i) {
-    delete *i;
-  }
+	for (iterator i = begin(); i != end(); ++i) {
+		delete *i;
+	}
 }
 
 } // end namespace firevision

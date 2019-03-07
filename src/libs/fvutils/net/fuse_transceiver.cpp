@@ -21,13 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/net/fuse_transceiver.h>
-#include <fvutils/net/fuse_message_queue.h>
 #include <fvutils/net/fuse_message.h>
+#include <fvutils/net/fuse_message_queue.h>
+#include <fvutils/net/fuse_transceiver.h>
 #include <netcomm/socket/stream.h>
 #include <netcomm/utils/exceptions.h>
-
 #include <netinet/in.h>
+
 #include <cstdlib>
 
 using namespace fawkes;
@@ -53,25 +53,24 @@ namespace firevision {
 void
 FuseNetworkTransceiver::send(StreamSocket *s, FuseNetworkMessageQueue *msgq)
 {
-  msgq->lock();
-  try {
-    while ( ! msgq->empty() ) {
-      FuseNetworkMessage *m = msgq->front();
-      m->pack();
-      const FUSE_message_t &f = m->fmsg();
-      unsigned int payload_size = m->payload_size();
-      s->write(&(f.header), sizeof(f.header));
-      s->write(f.payload, payload_size);
-      m->unref();
-      msgq->pop();
-    }
-  } catch (SocketException &e) {
-    msgq->unlock();
-    throw ConnectionDiedException("Write failed");
-  }
-  msgq->unlock();
+	msgq->lock();
+	try {
+		while (!msgq->empty()) {
+			FuseNetworkMessage *m = msgq->front();
+			m->pack();
+			const FUSE_message_t &f            = m->fmsg();
+			unsigned int          payload_size = m->payload_size();
+			s->write(&(f.header), sizeof(f.header));
+			s->write(f.payload, payload_size);
+			m->unref();
+			msgq->pop();
+		}
+	} catch (SocketException &e) {
+		msgq->unlock();
+		throw ConnectionDiedException("Write failed");
+	}
+	msgq->unlock();
 }
-
 
 /** Receive data.
  * This method receives all messages currently available from the network, or
@@ -86,37 +85,37 @@ FuseNetworkTransceiver::send(StreamSocket *s, FuseNetworkMessageQueue *msgq)
  * operation since for any error the conncetion is considered dead.
  */
 void
-FuseNetworkTransceiver::recv(StreamSocket *s, FuseNetworkMessageQueue *msgq,
-			     unsigned int max_num_msgs)
+FuseNetworkTransceiver::recv(StreamSocket *           s,
+                             FuseNetworkMessageQueue *msgq,
+                             unsigned int             max_num_msgs)
 {
-  msgq->lock();
+	msgq->lock();
 
-  try {
-    unsigned int num_msgs = 0;
-    do {
-      FUSE_message_t msg;
-      s->read(&(msg.header), sizeof(msg.header));
+	try {
+		unsigned int num_msgs = 0;
+		do {
+			FUSE_message_t msg;
+			s->read(&(msg.header), sizeof(msg.header));
 
-      unsigned int payload_size = ntohl(msg.header.payload_size);
+			unsigned int payload_size = ntohl(msg.header.payload_size);
 
-      if ( payload_size > 0 ) {
+			if (payload_size > 0) {
+				msg.payload = malloc(payload_size);
+				s->read(msg.payload, payload_size);
+			} else {
+				msg.payload = NULL;
+			}
 
-	msg.payload = malloc(payload_size);
-	s->read(msg.payload, payload_size);
-      } else {
-	msg.payload = NULL;
-      }
+			FuseNetworkMessage *m = new FuseNetworkMessage(&msg);
+			msgq->push(m);
 
-      FuseNetworkMessage *m = new FuseNetworkMessage(&msg);
-      msgq->push(m);
-
-      ++num_msgs;
-    } while ( s->available() && (num_msgs < max_num_msgs) );
-  } catch (SocketException &e) {
-    msgq->unlock();
-    throw ConnectionDiedException("Read failed");
-  }
-  msgq->unlock();
+			++num_msgs;
+		} while (s->available() && (num_msgs < max_num_msgs));
+	} catch (SocketException &e) {
+		msgq->unlock();
+		throw ConnectionDiedException("Read failed");
+	}
+	msgq->unlock();
 }
 
 } // end namespace firevision

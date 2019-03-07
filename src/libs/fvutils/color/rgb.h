@@ -28,49 +28,85 @@
 namespace firevision {
 
 #define RGB_PIXEL_SIZE 3
-#define RGB_PIXEL_AT(RGB, width, x, y)    ((RGB_t *)(RGB + ((y) * (width) * RGB_PIXEL_SIZE) + (x) * RGB_PIXEL_SIZE))
-#define RGB_CLEAR_PIXEL(RGB, width, x, y) memset(RGB + ((y) * (width) * RGB_PIXEL_SIZE) + (x) * RGB_PIXEL_SIZE, 0, RGB_PIXEL_SIZE);
-#define RGB_RED_AT(RGB, width, x, y)      (RGB_PIXEL_AT(RGB, (width), (x), (y))->R)
-#define RGB_GREEN_AT(RGB, width, x, y)    (RGB_PIXEL_AT(RGB, (width), (x), (y))->G)
-#define RGB_BLUE_AT(RGB, width, x, y)     (RGB_PIXEL_AT(RGB, (width), (x), (y))->B)
-#define RGB_SET_RED(RGB, width, x, y)     {RGB_t *p=RGB_PIXEL_AT(RGB, (width), (x), (y)); p->R=255; p->G=0;   p->B=0; }
-#define RGB_SET_GREEN(RGB, width, x, y)   {RGB_t *p=RGB_PIXEL_AT(RGB, (width), (x), (y)); p->R=0;   p->G=255; p->B=0; }
-#define RGB_SET_BLUE(RGB, width, x, y)    {RGB_t *p=RGB_PIXEL_AT(RGB, (width), (x), (y)); p->R=0;   p->G=0;   p->B=255; }
+#define RGB_PIXEL_AT(RGB, width, x, y) \
+	((RGB_t *)(RGB + ((y) * (width)*RGB_PIXEL_SIZE) + (x)*RGB_PIXEL_SIZE))
+#define RGB_CLEAR_PIXEL(RGB, width, x, y) \
+	memset(RGB + ((y) * (width)*RGB_PIXEL_SIZE) + (x)*RGB_PIXEL_SIZE, 0, RGB_PIXEL_SIZE);
+#define RGB_RED_AT(RGB, width, x, y) (RGB_PIXEL_AT(RGB, (width), (x), (y))->R)
+#define RGB_GREEN_AT(RGB, width, x, y) (RGB_PIXEL_AT(RGB, (width), (x), (y))->G)
+#define RGB_BLUE_AT(RGB, width, x, y) (RGB_PIXEL_AT(RGB, (width), (x), (y))->B)
+#define RGB_SET_RED(RGB, width, x, y)                \
+	{                                                  \
+		RGB_t *p = RGB_PIXEL_AT(RGB, (width), (x), (y)); \
+		p->R     = 255;                                  \
+		p->G     = 0;                                    \
+		p->B     = 0;                                    \
+	}
+#define RGB_SET_GREEN(RGB, width, x, y)              \
+	{                                                  \
+		RGB_t *p = RGB_PIXEL_AT(RGB, (width), (x), (y)); \
+		p->R     = 0;                                    \
+		p->G     = 255;                                  \
+		p->B     = 0;                                    \
+	}
+#define RGB_SET_BLUE(RGB, width, x, y)               \
+	{                                                  \
+		RGB_t *p = RGB_PIXEL_AT(RGB, (width), (x), (y)); \
+		p->R     = 0;                                    \
+		p->G     = 0;                                    \
+		p->B     = 255;                                  \
+	}
 
 /** Structure defining an RGB pixel (in R-G-B byte ordering). */
-typedef struct {
-  unsigned char R;	/**< R value */
-  unsigned char G;	/**< G value */
-  unsigned char B;	/**< B value */
+typedef struct
+{
+	unsigned char R; /**< R value */
+	unsigned char G; /**< G value */
+	unsigned char B; /**< B value */
 } RGB_t;
 
 /** Structure defining an RGB pixel (in B-G-R byte ordering). */
-typedef struct {
-  unsigned char B;	/**< B value */
-  unsigned char G;	/**< G value */
-  unsigned char R;	/**< R value */
+typedef struct
+{
+	unsigned char B; /**< B value */
+	unsigned char G; /**< G value */
+	unsigned char R; /**< R value */
 } BGR_t;
 
-void rgb_to_rgb_with_alpha_plainc(const unsigned char *rgb, unsigned char *rgb_alpha,
-				  unsigned int width, unsigned int height);
+void rgb_to_rgb_with_alpha_plainc(const unsigned char *rgb,
+                                  unsigned char *      rgb_alpha,
+                                  unsigned int         width,
+                                  unsigned int         height);
 
-void rgb_to_rgb_planar_plainc(const unsigned char *rgb, unsigned char *rgb_planar,
-			      const unsigned int width, const unsigned int height);
+void rgb_to_rgb_planar_plainc(const unsigned char *rgb,
+                              unsigned char *      rgb_planar,
+                              const unsigned int   width,
+                              const unsigned int   height);
 
-void rgb_planar_to_rgb_plainc(const unsigned char *rgb_planar, unsigned char *rgb,
-			      const unsigned int width, const unsigned int height);
+void rgb_planar_to_rgb_plainc(const unsigned char *rgb_planar,
+                              unsigned char *      rgb,
+                              const unsigned int   width,
+                              const unsigned int   height);
 
-void rgb_to_bgr_with_alpha_plainc(const unsigned char *rgb, unsigned char *bgr_alpha,
-				  unsigned int width, unsigned int height);
+void rgb_to_bgr_with_alpha_plainc(const unsigned char *rgb,
+                                  unsigned char *      bgr_alpha,
+                                  unsigned int         width,
+                                  unsigned int         height);
 
-void gray8_to_rgb_plainc(const unsigned char *mono8, unsigned char *rgb,
-			 unsigned int width, unsigned int height);
+void gray8_to_rgb_plainc(const unsigned char *mono8,
+                         unsigned char *      rgb,
+                         unsigned int         width,
+                         unsigned int         height);
 
-void bgr_to_rgb_plainc(const unsigned char *BGR, unsigned char *RGB,
-		       unsigned int width, unsigned int height);
+void bgr_to_rgb_plainc(const unsigned char *BGR,
+                       unsigned char *      RGB,
+                       unsigned int         width,
+                       unsigned int         height);
 
-void convert_line_bgr_rgb(const unsigned char *BGR, unsigned char *RGB,
-			   unsigned int width, unsigned int height);
+void convert_line_bgr_rgb(const unsigned char *BGR,
+                          unsigned char *      RGB,
+                          unsigned int         width,
+                          unsigned int         height);
 
 } // end namespace firevision
 

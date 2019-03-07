@@ -29,10 +29,10 @@
 
 namespace firevision {
 
-class ImageDecompressor {
- public:
-
-  /* Maybe later...
+class ImageDecompressor
+{
+public:
+	/* Maybe later...
   * Where to get the compressed image from
   enum DecompressionSource {
     COMP_SRC_FILE,	< read compressed image from file
@@ -40,21 +40,20 @@ class ImageDecompressor {
   };
   */
 
-  virtual ~ImageDecompressor();
+	virtual ~ImageDecompressor();
 
-  virtual void          set_image_dimensions(unsigned int width, unsigned int height);
-  virtual void          set_compressed_buffer(unsigned char *buf, unsigned int buf_size);
-  virtual void          set_decompressed_buffer(unsigned char *buf, unsigned int buf_size);
-  virtual void          decompress() = 0;
+	virtual void set_image_dimensions(unsigned int width, unsigned int height);
+	virtual void set_compressed_buffer(unsigned char *buf, unsigned int buf_size);
+	virtual void set_decompressed_buffer(unsigned char *buf, unsigned int buf_size);
+	virtual void decompress() = 0;
 
- protected:
-  unsigned int    _width;
-  unsigned int    _height;
-  unsigned char * _compressed_buffer;
-  unsigned char * _decompressed_buffer;
-  unsigned int    _compressed_buffer_size;
-  unsigned int    _decompressed_buffer_size;
-
+protected:
+	unsigned int   _width;
+	unsigned int   _height;
+	unsigned char *_compressed_buffer;
+	unsigned char *_decompressed_buffer;
+	unsigned int   _compressed_buffer_size;
+	unsigned int   _decompressed_buffer_size;
 };
 
 } // end namespace firevision

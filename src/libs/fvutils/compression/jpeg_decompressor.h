@@ -31,10 +31,10 @@ namespace firevision {
 
 class JpegImageDecompressor : public ImageDecompressor
 {
- public:
-  JpegImageDecompressor();
+public:
+	JpegImageDecompressor();
 
-  virtual void decompress();
+	virtual void decompress();
 };
 
 } // end namespace firevision

@@ -26,8 +26,8 @@
 
 #include <fvutils/colormap/generator.h>
 
-#include <vector>
 #include <map>
+#include <vector>
 
 namespace firevision {
 
@@ -36,62 +36,61 @@ class BayesHistosToLut;
 
 class BayesColormapGenerator : public ColormapGenerator
 {
+public:
+	BayesColormapGenerator(unsigned int lut_depth  = 1,
+	                       hint_t       fg_object  = H_UNKNOWN,
+	                       unsigned int lut_width  = 256,
+	                       unsigned int lut_height = 256);
+	~BayesColormapGenerator();
 
- public:
-  BayesColormapGenerator( unsigned int lut_depth = 1,
-			  hint_t fg_object = H_UNKNOWN,
-			  unsigned int lut_width = 256, unsigned int lut_height = 256);
-  ~BayesColormapGenerator();
+	virtual void         set_fg_object(hint_t object);
+	virtual void         set_buffer(unsigned char *buffer, unsigned int width, unsigned int height);
+	virtual YuvColormap *get_current();
+	virtual void         consider();
+	virtual void         calc();
+	virtual void         undo();
+	virtual void         reset();
+	virtual void         reset_undo();
 
-  virtual void                     set_fg_object(hint_t object);
-  virtual void                     set_buffer(unsigned char *buffer,
-					      unsigned int width, unsigned int height);
-  virtual YuvColormap *            get_current();
-  virtual void                     consider();
-  virtual void                     calc();
-  virtual void                     undo();
-  virtual void                     reset();
-  virtual void                     reset_undo();
+	virtual void set_selection(std::vector<fawkes::rectangle_t> region);
 
-  virtual void                     set_selection(std::vector< fawkes::rectangle_t > region);
+	virtual bool                           has_histograms();
+	virtual std::map<hint_t, Histogram *> *get_histograms();
 
-  virtual bool                     has_histograms();
-  virtual std::map< hint_t, Histogram * > *  get_histograms();
+	virtual void load_histograms(const char *filename);
+	virtual void save_histograms(const char *filename);
 
-  virtual void                     load_histograms(const char *filename);
-  virtual void                     save_histograms(const char *filename);
+	void set_min_probability(float min_prob);
 
-  void set_min_probability(float min_prob);
+private:
+	bool is_in_region(unsigned int x, unsigned int y);
+	void normalize_histos();
 
- private:
-  bool is_in_region(unsigned int x, unsigned int y);
-  void normalize_histos();
+	typedef std::map<hint_t, Histogram *> HistogramMap;
+	HistogramMap                          fg_histos;
+	HistogramMap                          bg_histos;
+	HistogramMap                          histos;
+	HistogramMap::iterator                histo_it;
 
-  typedef std::map< hint_t, Histogram * > HistogramMap;
-  HistogramMap fg_histos;
-  HistogramMap bg_histos;
-  HistogramMap histos;
-  HistogramMap::iterator histo_it;
+	BayesHistosToLut *bhtl;
+	YuvColormap *     cm;
 
-  BayesHistosToLut      *bhtl;
-  YuvColormap           *cm;
+	hint_t fg_object;
 
-  hint_t fg_object;
+	unsigned int lut_width;
+	unsigned int lut_height;
+	unsigned int lut_depth;
 
-  unsigned int lut_width;
-  unsigned int lut_height;
-  unsigned int lut_depth;
+	unsigned int image_width;
+	unsigned int image_height;
 
-  unsigned int image_width;
-  unsigned int image_height;
+	unsigned int norm_size;
 
-  unsigned int norm_size;
+	unsigned char *                            buffer;
+	std::vector<fawkes::rectangle_t>           region;
+	std::vector<fawkes::rectangle_t>::iterator rit;
 
-  unsigned char *buffer;
-  std::vector< fawkes::rectangle_t >  region;
-  std::vector< fawkes::rectangle_t >::iterator  rit;
-
-  bool *selection_mask;
+	bool *selection_mask;
 };
 
 } // end namespace firevision

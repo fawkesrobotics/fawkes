@@ -30,25 +30,24 @@ namespace firevision {
 
 class FuseMessageContent
 {
- public:
-  FuseMessageContent();
-  virtual ~FuseMessageContent();
+public:
+	FuseMessageContent();
+	virtual ~FuseMessageContent();
 
-  virtual void   serialize() = 0;
-  virtual void * payload() const;
-  virtual size_t payload_size() const;
+	virtual void   serialize() = 0;
+	virtual void * payload() const;
+	virtual size_t payload_size() const;
 
-  void free_payload();
+	void free_payload();
 
- protected:
-  void copy_payload(size_t offset, void *buf, size_t len);
+protected:
+	void copy_payload(size_t offset, void *buf, size_t len);
 
- protected:
-  /** Pointer to payload. */
-  void *  _payload;
-  /** Payloda size. */
-  size_t  _payload_size;
-
+protected:
+	/** Pointer to payload. */
+	void *_payload;
+	/** Payloda size. */
+	size_t _payload_size;
 };
 
 } // end namespace firevision

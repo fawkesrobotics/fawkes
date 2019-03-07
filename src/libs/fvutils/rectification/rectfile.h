@@ -24,8 +24,9 @@
 #ifndef _FIREVISION_FVUTILS_RECTIFICATION_RECTFILE_H_
 #define _FIREVISION_FVUTILS_RECTIFICATION_RECTFILE_H_
 
-#include <fvutils/rectification/rectinfo.h>
 #include <fvutils/fileformat/fvfile.h>
+#include <fvutils/rectification/rectinfo.h>
+
 #include <vector>
 
 namespace firevision {
@@ -34,34 +35,34 @@ class RectificationInfoBlock;
 
 class RectificationInfoFile : public FireVisionDataFile
 {
- public:
-  RectificationInfoFile();
-  RectificationInfoFile(uint64_t cam_guid, const char *model);
-  ~RectificationInfoFile();
+public:
+	RectificationInfoFile();
+	RectificationInfoFile(uint64_t cam_guid, const char *model);
+	~RectificationInfoFile();
 
-  /** Vector that is used for maintaining the rectification info blocks.
+	/** Vector that is used for maintaining the rectification info blocks.
    * For instance use RectificationInfoFile::RectInfoBlockVector::iterator as
    * iterator to go through the blocks returned by blocks().
    */
-  class RectInfoBlockVector : public std::vector<RectificationInfoBlock *>
-  {
-    public:
-     ~RectInfoBlockVector();
-  };
+	class RectInfoBlockVector : public std::vector<RectificationInfoBlock *>
+	{
+	public:
+		~RectInfoBlockVector();
+	};
 
-  uint64_t      guid();
-  const char *  model();
+	uint64_t    guid();
+	const char *model();
 
-  void add_rectinfo_block(RectificationInfoBlock *block);
+	void add_rectinfo_block(RectificationInfoBlock *block);
 
-  RectInfoBlockVector *  rectinfo_blocks();
+	RectInfoBlockVector *rectinfo_blocks();
 
-  virtual void read(const char *filename);
+	virtual void read(const char *filename);
 
- private:
-  rectinfo_header_t  *_header;
-  uint64_t            _cam_guid;
-  char               *_model;
+private:
+	rectinfo_header_t *_header;
+	uint64_t           _cam_guid;
+	char *             _model;
 };
 
 } // end namespace firevision

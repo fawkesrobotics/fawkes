@@ -32,16 +32,17 @@ class Colormap;
 
 class ColormapFileBlock : public FireVisionDataFileBlock
 {
- public:
-  ColormapFileBlock(unsigned int type, size_t data_size,
-		    void *spec_header, size_t spec_header_size);
-  ColormapFileBlock(unsigned int type, size_t data_size,
-		    size_t spec_header_size);
-  ColormapFileBlock(unsigned int type, size_t data_size);
-  virtual ~ColormapFileBlock();
+public:
+	ColormapFileBlock(unsigned int type,
+	                  size_t       data_size,
+	                  void *       spec_header,
+	                  size_t       spec_header_size);
+	ColormapFileBlock(unsigned int type, size_t data_size, size_t spec_header_size);
+	ColormapFileBlock(unsigned int type, size_t data_size);
+	virtual ~ColormapFileBlock();
 
- protected:
-  ColormapFileBlock(FireVisionDataFileBlock *block);
+protected:
+	ColormapFileBlock(FireVisionDataFileBlock *block);
 };
 
 } // end namespace firevision

@@ -24,21 +24,21 @@
 #define FIREVISION_UTILS_ADAPTERS_PCL_H_
 
 #ifdef HAVE_PCL
-#  include <pcl/point_cloud.h>
-#  include <pcl/point_types.h>
+#	include <pcl/point_cloud.h>
+#	include <pcl/point_types.h>
 
 namespace firevision {
 
 class SharedMemoryImageBuffer;
 
-void convert_buffer_to_pcl(const SharedMemoryImageBuffer *buffer,
+void convert_buffer_to_pcl(const SharedMemoryImageBuffer * buffer,
                            pcl::PointCloud<pcl::PointXYZ> &pcl);
 
-void convert_buffer_to_pcl(const SharedMemoryImageBuffer *buffer,
+void convert_buffer_to_pcl(const SharedMemoryImageBuffer *    buffer,
                            pcl::PointCloud<pcl::PointXYZRGB> &pcl);
 
 } // end namespace firevision
 #else // not HAVE_PCL
-#  error PCL not available, guard your include with HAVE_PCL
+#	error PCL not available, guard your include with HAVE_PCL
 #endif
 #endif
