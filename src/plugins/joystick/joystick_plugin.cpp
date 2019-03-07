@@ -20,11 +20,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/joystick/joystick_plugin.h>
-
+#include "acquisition_thread.h"
 #include "act_thread.h"
 #include "sensor_thread.h"
-#include "acquisition_thread.h"
+
+#include <plugins/joystick/joystick_plugin.h>
 
 using namespace fawkes;
 
@@ -37,16 +37,14 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-JoystickPlugin::JoystickPlugin(Configuration *config)
-  : Plugin(config)
+JoystickPlugin::JoystickPlugin(Configuration *config) : Plugin(config)
 {
-  JoystickAcquisitionThread *aqt = new JoystickAcquisitionThread();
-  JoystickSensorThread *senst = new JoystickSensorThread(aqt);
-  thread_list.push_back(senst);
-  thread_list.push_back(aqt);
-  thread_list.push_back(new JoystickActThread(aqt, senst));
+	JoystickAcquisitionThread *aqt   = new JoystickAcquisitionThread();
+	JoystickSensorThread *     senst = new JoystickSensorThread(aqt);
+	thread_list.push_back(senst);
+	thread_list.push_back(aqt);
+	thread_list.push_back(new JoystickActThread(aqt, senst));
 }
-
 
 PLUGIN_DESCRIPTION("Provides access to a joystick")
 EXPORT_PLUGIN(JoystickPlugin)

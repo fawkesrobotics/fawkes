@@ -23,59 +23,62 @@
 #ifndef _PLUGINS_JOYSTICK_ACT_THREAD_H_
 #define _PLUGINS_JOYSTICK_ACT_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  class JoystickInterface;
+class JoystickInterface;
 }
 
 class JoystickAcquisitionThread;
 class JoystickSensorThread;
 
-class JoystickActThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+class JoystickActThread : public fawkes::Thread,
+                          public fawkes::BlockedTimingAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::BlackBoardAspect
 {
- public:
-  class MessageProcessor
-  {
-   public:
-    MessageProcessor(JoystickAcquisitionThread *aqt,
-                     fawkes::JoystickInterface *joystick_if);
+public:
+	class MessageProcessor
+	{
+	public:
+		MessageProcessor(JoystickAcquisitionThread *aqt, fawkes::JoystickInterface *joystick_if);
 
-    void process();
-    void process_message(fawkes::Message *msg);
+		void process();
+		void process_message(fawkes::Message *msg);
 
-   private:    
-    JoystickAcquisitionThread *aqt_;
-    fawkes::JoystickInterface *joystick_if_;
-    bool                       joystick_connected_;
-  };
- public:
-  JoystickActThread(JoystickAcquisitionThread *aqt, JoystickSensorThread *senst);
+	private:
+		JoystickAcquisitionThread *aqt_;
+		fawkes::JoystickInterface *joystick_if_;
+		bool                       joystick_connected_;
+	};
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+public:
+	JoystickActThread(JoystickAcquisitionThread *aqt, JoystickSensorThread *senst);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- private:
-  fawkes::JoystickInterface *joystick_if_;
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
-  JoystickAcquisitionThread *aqt_;
-  JoystickSensorThread      *senst_;
+private:
+	fawkes::JoystickInterface *joystick_if_;
 
-  MessageProcessor *msgproc_;
+	JoystickAcquisitionThread *aqt_;
+	JoystickSensorThread *     senst_;
+
+	MessageProcessor *msgproc_;
 };
-
 
 #endif

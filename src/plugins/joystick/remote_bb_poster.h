@@ -24,41 +24,48 @@
 #define _PLUGINS_JOYSTICK_REMOTE_BB_POSTER_H_
 
 #include "acquisition_thread.h"
+
 #include <utils/system/argparser.h>
 
 namespace fawkes {
-  class Logger;
-  class BlackBoard;
-  class JoystickInterface;
-}
+class Logger;
+class BlackBoard;
+class JoystickInterface;
+} // namespace fawkes
 
 class JoystickRemoteBlackBoardPoster : public JoystickBlackBoardHandler
 {
- public:
-  JoystickRemoteBlackBoardPoster(const char *host, unsigned short int port,
-				 fawkes::Logger *logger);
-  ~JoystickRemoteBlackBoardPoster();
+public:
+	JoystickRemoteBlackBoardPoster(const char *host, unsigned short int port, fawkes::Logger *logger);
+	~JoystickRemoteBlackBoardPoster();
 
-  /** Get blackboard.
+	/** Get blackboard.
    * @return blackboard instance
    */
-  fawkes::BlackBoard * blackboard() { return bb_; }
+	fawkes::BlackBoard *
+	blackboard()
+	{
+		return bb_;
+	}
 
-  /** Get joystick interface.
+	/** Get joystick interface.
    * @return joystick interface
    */
-  fawkes::JoystickInterface * joystick_if() { return joystick_if_; }
-  
+	fawkes::JoystickInterface *
+	joystick_if()
+	{
+		return joystick_if_;
+	}
 
-  virtual void joystick_changed(unsigned int pressed_buttons, float *axis_values);
-  virtual void joystick_plugged(char num_axes, char num_buttons);
-  virtual void joystick_unplugged();
+	virtual void joystick_changed(unsigned int pressed_buttons, float *axis_values);
+	virtual void joystick_plugged(char num_axes, char num_buttons);
+	virtual void joystick_unplugged();
 
- private:
-  bool warning_printed_;
-  fawkes::BlackBoard *bb_;
-  fawkes::JoystickInterface *joystick_if_;
-  fawkes::Logger *logger_;
+private:
+	bool                       warning_printed_;
+	fawkes::BlackBoard *       bb_;
+	fawkes::JoystickInterface *joystick_if_;
+	fawkes::Logger *           logger_;
 };
 
 #endif
