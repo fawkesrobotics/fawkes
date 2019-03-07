@@ -21,6 +21,7 @@
 
 #include "cedar_thread.h"
 #include "plugin_director_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -30,18 +31,17 @@ using namespace fawkes;
  */
 class CedarPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit CedarPlugin(Configuration *config) : Plugin(config)
-  {
-    CedarPluginDirectorThread *pdt = new CedarPluginDirectorThread();
-    thread_list.push_back(pdt);
-    thread_list.push_back(new CedarThread(pdt));
-  }
+	explicit CedarPlugin(Configuration *config) : Plugin(config)
+	{
+		CedarPluginDirectorThread *pdt = new CedarPluginDirectorThread();
+		thread_list.push_back(pdt);
+		thread_list.push_back(new CedarThread(pdt));
+	}
 };
-
 
 PLUGIN_DESCRIPTION("CLIPS-based Error Detection, Analysis, and Recovery")
 EXPORT_PLUGIN(CedarPlugin)

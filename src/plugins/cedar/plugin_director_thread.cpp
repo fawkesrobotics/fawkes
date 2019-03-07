@@ -30,16 +30,14 @@ using namespace fawkes;
 
 /** Constructor. */
 CedarPluginDirectorThread::CedarPluginDirectorThread()
-  : Thread("CedarPluginDirectorThread", Thread::OPMODE_WAITFORWAKEUP)
+: Thread("CedarPluginDirectorThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
-
 
 /** Destructor. */
 CedarPluginDirectorThread::~CedarPluginDirectorThread()
 {
 }
-
 
 void
 CedarPluginDirectorThread::loop()
