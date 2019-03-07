@@ -25,6 +25,7 @@
 #include <core/exception.h>
 #include <utils/math/angle.h>
 #include <utils/time/time.h>
+
 #include <cstdlib>
 
 /** @class Laser720to360DataFilter "720to360.h"
@@ -39,39 +40,39 @@
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-Laser720to360DataFilter::Laser720to360DataFilter(const std::string& filter_name,
-                                                 bool average,
-                                                 unsigned int in_data_size,
+Laser720to360DataFilter::Laser720to360DataFilter(const std::string &filter_name,
+                                                 bool               average,
+                                                 unsigned int       in_data_size,
                                                  std::vector<LaserDataFilter::Buffer *> &in)
-	: LaserDataFilter(filter_name, in_data_size, in, in.size())
+: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
-  if (in_data_size != 720) {
-    throw fawkes::Exception("720to360 filter needs input array size of "
-			    "720 entries");
-  }
-  set_out_data_size(360);
-  average_ = average;
+	if (in_data_size != 720) {
+		throw fawkes::Exception("720to360 filter needs input array size of "
+		                        "720 entries");
+	}
+	set_out_data_size(360);
+	average_ = average;
 }
 
 void
 Laser720to360DataFilter::filter()
 {
-  const unsigned int vecsize = std::min(in.size(), out.size());
-  for (unsigned int a = 0; a < vecsize; ++a) {
-    out[a]->frame = in[a]->frame;
-    out[a]->timestamp->set_time(in[a]->timestamp);
-    float *inbuf  = in[a]->values;
-    float *outbuf = out[a]->values;
+	const unsigned int vecsize = std::min(in.size(), out.size());
+	for (unsigned int a = 0; a < vecsize; ++a) {
+		out[a]->frame = in[a]->frame;
+		out[a]->timestamp->set_time(in[a]->timestamp);
+		float *inbuf  = in[a]->values;
+		float *outbuf = out[a]->values;
 
-    if (average_) {
-      outbuf[0] = (inbuf[719] + inbuf[0]) / 2.0;
-      for (unsigned int i = 1; i < 360; ++i) {
-	outbuf[i] = (inbuf[i * 2 - 1] + inbuf[i * 2 + 1]) / 2.0;
-      }
-    } else {
-      for (unsigned int i = 0; i < 360; ++i) {
-	outbuf[i] = inbuf[i * 2];
-      }
-    }
-  }
+		if (average_) {
+			outbuf[0] = (inbuf[719] + inbuf[0]) / 2.0;
+			for (unsigned int i = 1; i < 360; ++i) {
+				outbuf[i] = (inbuf[i * 2 - 1] + inbuf[i * 2 + 1]) / 2.0;
+			}
+		} else {
+			for (unsigned int i = 0; i < 360; ++i) {
+				outbuf[i] = inbuf[i * 2];
+			}
+		}
+	}
 }

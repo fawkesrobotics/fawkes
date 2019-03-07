@@ -27,52 +27,52 @@
 //#include <plugins/amcl/amcl_utils.h>
 //#include <plugins/amcl/map/map.h>
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/tf.h>
-#include <aspect/configurable.h>
-#include <interfaces/LaserBoxFilterInterface.h>
-#include <aspect/blackboard.h>
 #include "filter.h"
 
+#include <aspect/blackboard.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <aspect/tf.h>
+#include <core/threading/thread.h>
+#include <interfaces/LaserBoxFilterInterface.h>
 
-class LaserBoxFilterDataFilter : public LaserDataFilter,
-    public fawkes::LoggingAspect
+class LaserBoxFilterDataFilter : public LaserDataFilter, public fawkes::LoggingAspect
 {
- private:
-  struct Vector {
-    float x = 0.0, y = 0.0;
-  };
-  struct Box {
-    Vector a, b, c, d;
-  };
-  
-  fawkes::tf::Transformer *tf_listener_;
-  fawkes::Configuration   *config_;
-  fawkes::Logger          *logger_;
+private:
+	struct Vector
+	{
+		float x = 0.0, y = 0.0;
+	};
+	struct Box
+	{
+		Vector a, b, c, d;
+	};
 
-//  map_t                   *map_;
-  fawkes::LaserBoxFilterInterface* box_filter_if_;
-  std::string             frame_map_;
-  float                   cfg_occupied_thresh_;
+	fawkes::tf::Transformer *tf_listener_;
+	fawkes::Configuration *  config_;
+	fawkes::Logger *         logger_;
 
- public:
+	//  map_t                   *map_;
+	fawkes::LaserBoxFilterInterface *box_filter_if_;
+	std::string                      frame_map_;
+	float                            cfg_occupied_thresh_;
 
-  LaserBoxFilterDataFilter(const std::string& filter_name,
-                           unsigned int in_data_size,
-                           std::vector<LaserDataFilter::Buffer *> &in,
-                           fawkes::tf::Transformer * tf_listener,
-                           fawkes::Configuration *config,
-                           fawkes::Logger *logger,
-                           fawkes::BlackBoard *blackboard);
+public:
+	LaserBoxFilterDataFilter(const std::string &                     filter_name,
+	                         unsigned int                            in_data_size,
+	                         std::vector<LaserDataFilter::Buffer *> &in,
+	                         fawkes::tf::Transformer *               tf_listener,
+	                         fawkes::Configuration *                 config,
+	                         fawkes::Logger *                        logger,
+	                         fawkes::BlackBoard *                    blackboard);
 
-  virtual void filter();
+	virtual void filter();
 
- private:
-  std::vector<Box> boxes_;
-  bool point_in_rectangle(float x, float y);
-  Vector d_vec(Vector p1, Vector p2);
-  inline double dot(Vector u, Vector v);
+private:
+	std::vector<Box> boxes_;
+	bool             point_in_rectangle(float x, float y);
+	Vector           d_vec(Vector p1, Vector p2);
+	inline double    dot(Vector u, Vector v);
 };
 
 #endif

@@ -26,17 +26,17 @@
 #include <core/plugin.h>
 
 namespace fawkes {
-  class Barrier;
+class Barrier;
 }
 
 class LaserFilterPlugin : public fawkes::Plugin
 {
- public:
-  explicit LaserFilterPlugin(fawkes::Configuration *config);
-  ~LaserFilterPlugin();
-  
- private:
-  fawkes::Barrier *barrier_;
+public:
+	explicit LaserFilterPlugin(fawkes::Configuration *config);
+	~LaserFilterPlugin();
+
+private:
+	fawkes::Barrier *barrier_;
 };
 
 #endif

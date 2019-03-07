@@ -33,23 +33,21 @@
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserDataFilterCascade::LaserDataFilterCascade(const std::string& filter_name,
-                                               unsigned int in_data_size,
+LaserDataFilterCascade::LaserDataFilterCascade(const std::string &    filter_name,
+                                               unsigned int           in_data_size,
                                                std::vector<Buffer *> &in)
-	: LaserDataFilter(filter_name, in_data_size, in, 0)
+: LaserDataFilter(filter_name, in_data_size, in, 0)
 {
-  out_data_size = in_data_size;
-  out = in;
-  set_array_ownership(false, false);
+	out_data_size = in_data_size;
+	out           = in;
+	set_array_ownership(false, false);
 }
-
 
 /** Destructor. */
 LaserDataFilterCascade::~LaserDataFilterCascade()
 {
-  delete_filters();
+	delete_filters();
 }
-
 
 /** Set filtered data array
  * @param out vector of output values. The vector is only accepted if it has
@@ -60,10 +58,9 @@ LaserDataFilterCascade::~LaserDataFilterCascade()
 void
 LaserDataFilterCascade::set_out_vector(std::vector<LaserDataFilter::Buffer *> &out)
 {
-  filters_.back()->set_out_vector(out);
-  this->out = filters_.back()->get_out_vector();
+	filters_.back()->set_out_vector(out);
+	this->out = filters_.back()->get_out_vector();
 }
-
 
 /** Add a filter to the cascade.
  * @param filter filter to add
@@ -71,11 +68,10 @@ LaserDataFilterCascade::set_out_vector(std::vector<LaserDataFilter::Buffer *> &o
 void
 LaserDataFilterCascade::add_filter(LaserDataFilter *filter)
 {
-  filters_.push_back(filter);
-  out_data_size = filter->get_out_data_size();
-  out = filter->get_out_vector();
+	filters_.push_back(filter);
+	out_data_size = filter->get_out_data_size();
+	out           = filter->get_out_vector();
 }
-
 
 /** Remove a filter from the cascade.
  * @param filter filter to remove
@@ -83,25 +79,23 @@ LaserDataFilterCascade::add_filter(LaserDataFilter *filter)
 void
 LaserDataFilterCascade::remove_filter(LaserDataFilter *filter)
 {
-  filters_.remove(filter);
+	filters_.remove(filter);
 }
-
 
 /** Delete all filters. */
 void
 LaserDataFilterCascade::delete_filters()
 {
-  for (fit_ = filters_.begin(); fit_ != filters_.end(); ++fit_) {
-    delete *fit_;
-  }
-  filters_.clear();
+	for (fit_ = filters_.begin(); fit_ != filters_.end(); ++fit_) {
+		delete *fit_;
+	}
+	filters_.clear();
 }
-
 
 void
 LaserDataFilterCascade::filter()
 {
-  for (fit_ = filters_.begin(); fit_ != filters_.end(); ++fit_) {
-    (*fit_)->filter();
-  }
+	for (fit_ = filters_.begin(); fit_ != filters_.end(); ++fit_) {
+		(*fit_)->filter();
+	}
 }

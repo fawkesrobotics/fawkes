@@ -28,39 +28,39 @@
 #include <vector>
 
 namespace fawkes {
-	class Logger;
+class Logger;
 }
 
 class LaserMinMergeDataFilter : public LaserDataFilter
 {
- public:
-  /// Timestamp selection method
-  typedef enum {
-    TIMESTAMP_LATEST,	///< use the latest of all timestamps
-    TIMESTAMP_FIRST,	///< use the first (oldest) of all timestamps
-    TIMESTAMP_INDEX	///< use a specific index in the input buffer list
-  } TimestampSelectionMethod;
+public:
+	/// Timestamp selection method
+	typedef enum {
+		TIMESTAMP_LATEST, ///< use the latest of all timestamps
+		TIMESTAMP_FIRST,  ///< use the first (oldest) of all timestamps
+		TIMESTAMP_INDEX   ///< use a specific index in the input buffer list
+	} TimestampSelectionMethod;
 
-  LaserMinMergeDataFilter(const std::string& filter_name,
-                          fawkes::Logger *logger,
-                          unsigned int in_data_size,
-                          std::vector<LaserDataFilter::Buffer *> &in);
-  LaserMinMergeDataFilter(const std::string& filter_name,
-                          fawkes::Logger *logger,
-                          unsigned int in_data_size,
-                          std::vector<LaserDataFilter::Buffer *> &in,
-                          TimestampSelectionMethod timestamp_selection_method,
-                          unsigned int timestamp_index = 0);
+	LaserMinMergeDataFilter(const std::string &                     filter_name,
+	                        fawkes::Logger *                        logger,
+	                        unsigned int                            in_data_size,
+	                        std::vector<LaserDataFilter::Buffer *> &in);
+	LaserMinMergeDataFilter(const std::string &                     filter_name,
+	                        fawkes::Logger *                        logger,
+	                        unsigned int                            in_data_size,
+	                        std::vector<LaserDataFilter::Buffer *> &in,
+	                        TimestampSelectionMethod                timestamp_selection_method,
+	                        unsigned int                            timestamp_index = 0);
 
-  virtual void filter();
+	virtual void filter();
 
- private:
-  fawkes::Logger *logger;
+private:
+	fawkes::Logger *logger;
 
-  TimestampSelectionMethod timestamp_selection_method_;
-  unsigned int timestamp_index_;
+	TimestampSelectionMethod timestamp_selection_method_;
+	unsigned int             timestamp_index_;
 
-  std::vector<bool> ignored_;
+	std::vector<bool> ignored_;
 };
 
 #endif

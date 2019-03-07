@@ -24,6 +24,7 @@
 
 #include <utils/math/angle.h>
 #include <utils/time/time.h>
+
 #include <cstdlib>
 
 /** @class LaserMaxCircleDataFilter "circle.h"
@@ -38,31 +39,31 @@
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserMaxCircleDataFilter::LaserMaxCircleDataFilter(const std::string& filter_name,
-                                                   float radius,
-                                                   unsigned int in_data_size,
+LaserMaxCircleDataFilter::LaserMaxCircleDataFilter(const std::string &filter_name,
+                                                   float              radius,
+                                                   unsigned int       in_data_size,
                                                    std::vector<LaserDataFilter::Buffer *> &in)
 : LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
-  radius_ = radius;
+	radius_ = radius;
 }
 
 void
 LaserMaxCircleDataFilter::filter()
 {
-  const unsigned int vecsize = std::min(in.size(), out.size());
-  const unsigned int arrsize = std::min(in_data_size, out_data_size);
-  for (unsigned int a = 0; a < vecsize; ++a) {
-    out[a]->frame = in[a]->frame;
-    out[a]->timestamp->set_time(in[a]->timestamp);
-    float *inbuf  = in[a]->values;
-    float *outbuf = out[a]->values;
-    for (unsigned int i = 0; i < arrsize; ++i) {
-      if (inbuf[i] > radius_) {
-	outbuf[i] = radius_;
-      } else {
-	outbuf[i] = inbuf[i];
-      }
-    }
-  }
+	const unsigned int vecsize = std::min(in.size(), out.size());
+	const unsigned int arrsize = std::min(in_data_size, out_data_size);
+	for (unsigned int a = 0; a < vecsize; ++a) {
+		out[a]->frame = in[a]->frame;
+		out[a]->timestamp->set_time(in[a]->timestamp);
+		float *inbuf  = in[a]->values;
+		float *outbuf = out[a]->values;
+		for (unsigned int i = 0; i < arrsize; ++i) {
+			if (inbuf[i] > radius_) {
+				outbuf[i] = radius_;
+			} else {
+				outbuf[i] = inbuf[i];
+			}
+		}
+	}
 }

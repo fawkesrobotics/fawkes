@@ -25,41 +25,42 @@
 
 #include "filter.h"
 
-#include <vector>
-#include <utility>
 #include <string>
+#include <utility>
+#include <vector>
 
 namespace fawkes {
-  class Configuration;
-  class Logger;
-}
+class Configuration;
+class Logger;
+} // namespace fawkes
 
 class LaserDeadSpotsDataFilter : public LaserDataFilter
 {
- public:
-  LaserDeadSpotsDataFilter(const std::string& filter_name,
-                           fawkes::Configuration *config, fawkes::Logger *logger,
-                           const std::string& prefix,
-                           unsigned int data_size, std::vector<LaserDataFilter::Buffer *> &in);
-  LaserDeadSpotsDataFilter(const LaserDeadSpotsDataFilter &other);
-  ~LaserDeadSpotsDataFilter();
+public:
+	LaserDeadSpotsDataFilter(const std::string &                     filter_name,
+	                         fawkes::Configuration *                 config,
+	                         fawkes::Logger *                        logger,
+	                         const std::string &                     prefix,
+	                         unsigned int                            data_size,
+	                         std::vector<LaserDataFilter::Buffer *> &in);
+	LaserDeadSpotsDataFilter(const LaserDeadSpotsDataFilter &other);
+	~LaserDeadSpotsDataFilter();
 
-  LaserDeadSpotsDataFilter& operator=(const LaserDeadSpotsDataFilter &other);
+	LaserDeadSpotsDataFilter &operator=(const LaserDeadSpotsDataFilter &other);
 
-  void filter();
+	void filter();
 
- private:
-  void calc_spots();
-  void set_out_vector(std::vector<LaserDataFilter::Buffer *> &out);
+private:
+	void calc_spots();
+	void set_out_vector(std::vector<LaserDataFilter::Buffer *> &out);
 
+private:
+	fawkes::Logger *logger_;
 
- private:
-  fawkes::Logger *logger_;
-
-  unsigned int  num_spots_;
-  unsigned int *dead_spots_;
-  unsigned int  dead_spots_size_;
-  std::vector<std::pair<float, float> > cfg_dead_spots_;
+	unsigned int                         num_spots_;
+	unsigned int *                       dead_spots_;
+	unsigned int                         dead_spots_size_;
+	std::vector<std::pair<float, float>> cfg_dead_spots_;
 };
 
 #endif

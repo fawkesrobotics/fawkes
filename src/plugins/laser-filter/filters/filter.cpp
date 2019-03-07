@@ -20,11 +20,12 @@
  */
 
 #include "filter.h"
+
 #include <core/exception.h>
 #include <utils/time/time.h>
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 #include <limits>
 
 /** @class LaserDataFilter "filter.h"
@@ -74,37 +75,39 @@
  * @param in vector of input arrays
  * @param out_size number of value arrays to generate in out vector
  */
-LaserDataFilter::LaserDataFilter(const std::string& filter_name,
-                                 unsigned int in_data_size,
-                                 const std::vector<Buffer *> &in, unsigned int out_size)
-: filter_name(filter_name), out_data_size(in_data_size), // yes, in_data_size!
-  in_data_size(in_data_size), in(in)
+LaserDataFilter::LaserDataFilter(const std::string &          filter_name,
+                                 unsigned int                 in_data_size,
+                                 const std::vector<Buffer *> &in,
+                                 unsigned int                 out_size)
+: filter_name(filter_name),
+  out_data_size(in_data_size), // yes, in_data_size!
+  in_data_size(in_data_size),
+  in(in)
 {
-  if (out_size > 0)  out.resize(out_size);
-  for (unsigned int i = 0; i < out_size; ++i) {
-    out[i]      = new Buffer(out_data_size);
-  }
+	if (out_size > 0)
+		out.resize(out_size);
+	for (unsigned int i = 0; i < out_size; ++i) {
+		out[i] = new Buffer(out_data_size);
+	}
 
-  own_in_  = false;
-  own_out_ = true;
+	own_in_  = false;
+	own_out_ = true;
 }
-
 
 /** Virtual empty destructor. */
 LaserDataFilter::~LaserDataFilter()
 {
-  if (own_in_) {
-    for (unsigned int i = 0; i < in.size(); ++i) {
-      delete in[i];
-    }
-  }
-  if (own_out_) {
-    for (unsigned int i = 0; i < out.size(); ++i) {
-      delete out[i];
-    }
-  }
+	if (own_in_) {
+		for (unsigned int i = 0; i < in.size(); ++i) {
+			delete in[i];
+		}
+	}
+	if (own_out_) {
+		for (unsigned int i = 0; i < out.size(); ++i) {
+			delete out[i];
+		}
+	}
 }
-
 
 /** Get filtered data array
  * @return a Buffer with an array of the same size as the last array
@@ -113,9 +116,8 @@ LaserDataFilter::~LaserDataFilter()
 std::vector<LaserDataFilter::Buffer *> &
 LaserDataFilter::get_out_vector()
 {
-  return out;
+	return out;
 }
-
 
 /** Set filtered data array
  * @param out vector of output values. The vector is only accepted if it has
@@ -126,22 +128,22 @@ LaserDataFilter::get_out_vector()
 void
 LaserDataFilter::set_out_vector(std::vector<Buffer *> &out)
 {
-  if (this->out.size() != out.size()) {
-    throw fawkes::Exception("Filter out vector size mismatch: %zu vs. %zu",
-			    this->out.size(), out.size());
-  }
+	if (this->out.size() != out.size()) {
+		throw fawkes::Exception("Filter out vector size mismatch: %zu vs. %zu",
+		                        this->out.size(),
+		                        out.size());
+	}
 
-  if (own_out_) {
-    for (unsigned int i = 0; i < this->out.size(); ++i) {
-      delete this->out[i];
-    }
-  }
-  this->out.clear();
+	if (own_out_) {
+		for (unsigned int i = 0; i < this->out.size(); ++i) {
+			delete this->out[i];
+		}
+	}
+	this->out.clear();
 
-  this->out = out;
-  own_out_ = false;
+	this->out = out;
+	own_out_  = false;
 }
-
 
 /** Resize output arrays.
  * A side effect is that the output array size will be owned afterwards.
@@ -153,17 +155,16 @@ LaserDataFilter::set_out_vector(std::vector<Buffer *> &out)
 void
 LaserDataFilter::set_out_data_size(unsigned int data_size)
 {
-  if (out_data_size != data_size) {
-    if (own_out_) {
-      for (unsigned int i = 0; i < out.size(); ++i) {
-	      out[i]->resize(data_size);
-      }
-    }
-  }
+	if (out_data_size != data_size) {
+		if (own_out_) {
+			for (unsigned int i = 0; i < out.size(); ++i) {
+				out[i]->resize(data_size);
+			}
+		}
+	}
 
-  out_data_size = data_size;
+	out_data_size = data_size;
 }
-
 
 /** Get size of filtered data array
  * @return size of filtered data array or 0 if filter() was never called.
@@ -171,9 +172,8 @@ LaserDataFilter::set_out_data_size(unsigned int data_size)
 unsigned int
 LaserDataFilter::get_out_data_size()
 {
-  return out_data_size;
+	return out_data_size;
 }
-
 
 /** Resets all readings in outbuf to NaN.
  * @param outbuf array of out_data_size
@@ -192,16 +192,15 @@ LaserDataFilter::reset_outbuf(Buffer *outbuf)
  * @param outbuf array of out_data_size (= in_data_size) readings
  */
 void
-LaserDataFilter::copy_to_outbuf(LaserDataFilter::Buffer *outbuf,
+LaserDataFilter::copy_to_outbuf(LaserDataFilter::Buffer *      outbuf,
                                 const LaserDataFilter::Buffer *inbuf)
 {
-  if (in_data_size != out_data_size) {
-    throw fawkes::Exception("copy_to_outbuf() requires equal "\
-                            "input and output data size");
-  }
-  memcpy(outbuf->values, inbuf->values, sizeof(float) * out_data_size);
+	if (in_data_size != out_data_size) {
+		throw fawkes::Exception("copy_to_outbuf() requires equal "
+		                        "input and output data size");
+	}
+	memcpy(outbuf->values, inbuf->values, sizeof(float) * out_data_size);
 }
-
 
 /** Set input/output array ownership.
  * Owned arrays will be freed on destruction or when setting new arrays.
@@ -211,63 +210,59 @@ LaserDataFilter::copy_to_outbuf(LaserDataFilter::Buffer *outbuf,
 void
 LaserDataFilter::set_array_ownership(bool own_in, bool own_out)
 {
-  own_in_  = own_in;
-  own_out_ = own_out;
+	own_in_  = own_in;
+	own_out_ = own_out;
 }
-
 
 /** Constructor.
  * @param num_values if not zero allocates the values arrays with the
  * given number of elements
  */
-LaserDataFilter::Buffer::Buffer(size_t num_values)
-: values(NULL), num_values_(num_values)
+LaserDataFilter::Buffer::Buffer(size_t num_values) : values(NULL), num_values_(num_values)
 {
-  if (num_values_ > 0) {
-    values = (float *)malloc(num_values_ * sizeof(float));
-  }
-  timestamp = new fawkes::Time(0,0);
+	if (num_values_ > 0) {
+		values = (float *)malloc(num_values_ * sizeof(float));
+	}
+	timestamp = new fawkes::Time(0, 0);
 }
 
 /** Copy constructor.
  * @param other instance to copy from
  */
-LaserDataFilter::Buffer::Buffer(const Buffer& other)
+LaserDataFilter::Buffer::Buffer(const Buffer &other)
 : values(NULL), timestamp(new fawkes::Time(other.timestamp))
 {
 	num_values_ = other.num_values_;
-  if (num_values_ > 0) {
-    values = (float *)malloc(num_values_ * sizeof(float));
-    memcpy(values, other.values, num_values_ * sizeof(float));
-  }
+	if (num_values_ > 0) {
+		values = (float *)malloc(num_values_ * sizeof(float));
+		memcpy(values, other.values, num_values_ * sizeof(float));
+	}
 }
-
 
 /** Destructor. */
 LaserDataFilter::Buffer::~Buffer()
 {
-  delete timestamp;
-  if (values) {
-	  free(values);
-  }
+	delete timestamp;
+	if (values) {
+		free(values);
+	}
 }
 
 /** Assignment operator.
  * @param other instance to copy from
  * @return reference to this instance
  */
-LaserDataFilter::Buffer&
-LaserDataFilter::Buffer::operator=(const Buffer& other)
+LaserDataFilter::Buffer &
+LaserDataFilter::Buffer::operator=(const Buffer &other)
 {
 	resize(other.num_values_);
 	if (num_values_ > 0) {
-	  memcpy(values, other.values, num_values_ * sizeof(float));
-  }
+		memcpy(values, other.values, num_values_ * sizeof(float));
+	}
 	*timestamp = *other.timestamp;
 
-  return *this;
+	return *this;
 }
-
 
 /** Resize buffer size.
  * Free data array and create a new one. All values are invalidated.
