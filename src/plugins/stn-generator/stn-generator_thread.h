@@ -22,54 +22,55 @@
 #ifndef _PLUGINS_STN_GENERATOR_THREAD_H_
 #define _PLUGINS_STN_GENERATOR_THREAD_H_
 
-#include <mongo/client/dbclient.h>
-
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/blackboard.h>
-#include <aspect/configurable.h>
-#include <blackboard/interface_listener.h>
-#include <plugins/robot-memory/aspect/robot_memory_aspect.h>
-#include <interfaces/PddlPlannerInterface.h>
-
 #include "stn.h"
 
+#include <aspect/blackboard.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <blackboard/interface_listener.h>
+#include <core/threading/thread.h>
+#include <interfaces/PddlPlannerInterface.h>
+#include <mongo/client/dbclient.h>
+#include <plugins/robot-memory/aspect/robot_memory_aspect.h>
+
 namespace fawkes {
-  // add forward declarations here, e.g., interfaces
+// add forward declarations here, e.g., interfaces
 }
 
-class StnGeneratorThread 
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlackBoardInterfaceListener,
-  public fawkes::RobotMemoryAspect
+class StnGeneratorThread : public fawkes::Thread,
+                           public fawkes::LoggingAspect,
+                           public fawkes::ConfigurableAspect,
+                           public fawkes::BlackBoardAspect,
+                           public fawkes::BlackBoardInterfaceListener,
+                           public fawkes::RobotMemoryAspect
 {
+public:
+	StnGeneratorThread();
 
- public:
-  StnGeneratorThread();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
 
-  virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
-  protected: virtual void run() { Thread::run(); }
+private:
+	std::string                   cfg_plan_collection_;
+	bool                          cfg_publish_to_robot_memory_;
+	bool                          cfg_draw_graph_;
+	size_t                        num_published_actions_ = 0;
+	std::string                   cfg_output_collection_;
+	std::string                   cfg_pddl_problem_path_;
+	fawkes::PddlPlannerInterface *plan_if_;
 
- private:
-   std::string cfg_plan_collection_;
-   bool cfg_publish_to_robot_memory_;
-   bool cfg_draw_graph_;
-   size_t num_published_actions_ = 0;
-   std::string cfg_output_collection_;
-   std::string cfg_pddl_problem_path_;
-   fawkes::PddlPlannerInterface *plan_if_;
-
-   fawkes::stn::Stn* stn_;
+	fawkes::stn::Stn *stn_;
 };
-
 
 #endif

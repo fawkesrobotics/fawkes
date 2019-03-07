@@ -22,47 +22,47 @@
 #ifndef PLUGINS_DOMAIN_ACTION_H_
 #define PLUGINS_DOMAIN_ACTION_H_
 
-#include <string>
-#include <vector>
-#include <map>
-#include <iostream>
-#include <sstream>
-#include <iterator>
-#include <algorithm>
-
 #include "predicate.h"
 #include "stn_action.h"
+
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <sstream>
+#include <string>
+#include <vector>
 
 namespace fawkes {
 namespace stn {
 
-class DomainAction {
+class DomainAction
+{
+public:
+	DomainAction(const std::string &             name,
+	             const std::vector<std::string> &params,
+	             const std::vector<Predicate> &  preconds,
+	             const std::vector<Predicate> &  effects,
+	             int                             duration      = 0,
+	             const std::vector<std::string> &cond_breakups = {},
+	             const std::vector<std::string> &temp_breakups = {});
+	virtual ~DomainAction(){};
 
- public:
-  DomainAction(const std::string& name,
-               const std::vector<std::string>& params,
-               const std::vector<Predicate>& preconds,
-               const std::vector<Predicate>& effects,
-               int duration = 0,
-               const std::vector<std::string>& cond_breakups = {},
-               const std::vector<std::string>& temp_breakups = {});
-  virtual ~DomainAction(){ };
+	const std::string              getName();
+	const std::vector<std::string> params();
+	StnAction generateStnAction(const std::string &name, const std::string &params);
 
-  const std::string getName();
-  const std::vector<std::string> params();
-  StnAction generateStnAction(const std::string& name, const std::string& params);
-
- private:
-  friend std::ostream& operator<<(std::ostream&, const DomainAction&);
-  std::string name_;
-  std::vector<std::string> params_;
-  std::vector<Predicate> preconds_;
-  std::vector<Predicate> effects_;
-  int duration_;
-  std::vector<std::string> cond_breakups_;
-  std::vector<std::string> temp_breakups_;
+private:
+	friend std::ostream &    operator<<(std::ostream &, const DomainAction &);
+	std::string              name_;
+	std::vector<std::string> params_;
+	std::vector<Predicate>   preconds_;
+	std::vector<Predicate>   effects_;
+	int                      duration_;
+	std::vector<std::string> cond_breakups_;
+	std::vector<std::string> temp_breakups_;
 };
 
-}
-}
+} // namespace stn
+} // namespace fawkes
 #endif
