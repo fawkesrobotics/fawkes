@@ -38,26 +38,24 @@ using std::string;
  * @param error_handler Xabsl error handler
  * @param params parameters of this skill
  */
-XabslSkillWrapper::XabslSkillWrapper(const char *name,
-				     xabsl::ErrorHandler &error_handler,
-				     ParameterList &params)
-  : xabsl::BasicBehavior(name, error_handler)
+XabslSkillWrapper::XabslSkillWrapper(const char *         name,
+                                     xabsl::ErrorHandler &error_handler,
+                                     ParameterList &      params)
+: xabsl::BasicBehavior(name, error_handler)
 {
-  params_  = params;
-  execute_ = false;
+	params_  = params;
+	execute_ = false;
 }
-
 
 /** Destructor. */
 XabslSkillWrapper::~XabslSkillWrapper()
 {
-  std::map<std::string, ParameterValueBase *>::iterator i;
-  for (i = param_values_.begin(); i != param_values_.end(); ++i) {
-    delete i->second;
-  }
-  param_values_.clear();
+	std::map<std::string, ParameterValueBase *>::iterator i;
+	for (i = param_values_.begin(); i != param_values_.end(); ++i) {
+		delete i->second;
+	}
+	param_values_.clear();
 }
-
 
 /** Get name of the skill.
  * @return skill name
@@ -65,40 +63,38 @@ XabslSkillWrapper::~XabslSkillWrapper()
 const char *
 XabslSkillWrapper::name()
 {
-  return n;
+	return n;
 }
-
 
 /** Register parameters. */
 void
 XabslSkillWrapper::registerParameters()
 {
-  for (ParameterList::iterator i = params_.begin(); i != params_.end(); ++i) {
-    if ( (i->second == "float") || (i->second == "double") ||
-	 (i->second == "int") || (i->second == "unsigned int") ||
-	 (i->second == "long int") || (i->second == "unsigned long int") ) {
-      ParameterValue<double> *pv = new ParameterValue<double>();
-      param_values_[i->first] = pv;
-      parameters->registerDecimal((string(n) + "." + i->first).c_str(), *(pv->get_value_ptr()));
-    } else if ( i->second == "bool" ) {
-       ParameterValue<bool> *pv = new ParameterValue<bool>();
-      param_values_[i->first] = pv;
-      parameters->registerBoolean((string(n) + "." + i->first).c_str(), *(pv->get_value_ptr()));
-    } else {
-      throw fawkes::Exception("Unknown parameter type for field %s in skill %s",
-			      i->first.c_str(), n);
-    }
-  }
+	for (ParameterList::iterator i = params_.begin(); i != params_.end(); ++i) {
+		if ((i->second == "float") || (i->second == "double") || (i->second == "int")
+		    || (i->second == "unsigned int") || (i->second == "long int")
+		    || (i->second == "unsigned long int")) {
+			ParameterValue<double> *pv = new ParameterValue<double>();
+			param_values_[i->first]    = pv;
+			parameters->registerDecimal((string(n) + "." + i->first).c_str(), *(pv->get_value_ptr()));
+		} else if (i->second == "bool") {
+			ParameterValue<bool> *pv = new ParameterValue<bool>();
+			param_values_[i->first]  = pv;
+			parameters->registerBoolean((string(n) + "." + i->first).c_str(), *(pv->get_value_ptr()));
+		} else {
+			throw fawkes::Exception("Unknown parameter type for field %s in skill %s",
+			                        i->first.c_str(),
+			                        n);
+		}
+	}
 }
-
 
 /** Execute skill. */
 void
 XabslSkillWrapper::execute()
 {
-  execute_ = true;
+	execute_ = true;
 }
-
 
 /** Get skill string for this string.
  * If execution has been ordered with execute() this method will return a skill
@@ -108,31 +104,31 @@ XabslSkillWrapper::execute()
 std::string
 XabslSkillWrapper::skill_string()
 {
-  if ( execute_ ) {
-    execute_ = false;
+	if (execute_) {
+		execute_ = false;
 
-    std::string rv = std::string(n) + "{";
-    std::map<std::string, ParameterValueBase *>::iterator i;
-    bool is_first = true;
-    for (i = param_values_.begin(); i != param_values_.end(); ++i) {
-      if ( is_first ) {
-	is_first = false;
-      } else {
-	rv += ", ";
-      }
-      ParameterValue<double> *pvd;
-      ParameterValue<bool>   *pvb;
-      if ( (pvd = dynamic_cast<ParameterValue<double> *>(i->second)) != NULL) {
-        rv += i->first + "=" + fawkes::StringConversions::to_string(pvd->get_value());
-      } else if ( (pvb = dynamic_cast<ParameterValue<bool> *>(i->second)) != NULL) {
-	rv += i->first + "=" + fawkes::StringConversions::to_string(pvb->get_value());
-      } else { 
-        throw fawkes::Exception("Unknonw parameter value type");
-      }
-    }
-    rv += "}";
-    return rv;
-  } else {
-    return "";
-  }
+		std::string                                           rv = std::string(n) + "{";
+		std::map<std::string, ParameterValueBase *>::iterator i;
+		bool                                                  is_first = true;
+		for (i = param_values_.begin(); i != param_values_.end(); ++i) {
+			if (is_first) {
+				is_first = false;
+			} else {
+				rv += ", ";
+			}
+			ParameterValue<double> *pvd;
+			ParameterValue<bool> *  pvb;
+			if ((pvd = dynamic_cast<ParameterValue<double> *>(i->second)) != NULL) {
+				rv += i->first + "=" + fawkes::StringConversions::to_string(pvd->get_value());
+			} else if ((pvb = dynamic_cast<ParameterValue<bool> *>(i->second)) != NULL) {
+				rv += i->first + "=" + fawkes::StringConversions::to_string(pvb->get_value());
+			} else {
+				throw fawkes::Exception("Unknonw parameter value type");
+			}
+		}
+		rv += "}";
+		return rv;
+	} else {
+		return "";
+	}
 }

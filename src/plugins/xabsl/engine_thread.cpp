@@ -21,18 +21,17 @@
  */
 
 #include "engine_thread.h"
-#include "xabsl_tools.h"
-#include "skill_wrapper.h"
 
-#include <core/exceptions/software.h>
-#include <utils/time/time.h>
-#include <interfaces/SkillerInterface.h>
-#include <interfaces/ObjectPositionInterface.h>
+#include "skill_wrapper.h"
+#include "xabsl_tools.h"
 
 #include <XabslEngine/XabslEngine.h>
+#include <core/exceptions/software.h>
+#include <interfaces/ObjectPositionInterface.h>
+#include <interfaces/SkillerInterface.h>
+#include <utils/time/time.h>
 
 using namespace fawkes;
-
 
 /** Global XabslEngineThread required for xet_current_time(). */
 static XabslEngineThread *g_xe = NULL;
@@ -45,11 +44,11 @@ static XabslEngineThread *g_xe = NULL;
 static unsigned long int
 xet_current_time()
 {
-  if ( ! g_xe) {
-    throw NullPointerException("No XabslEngineThread instance exists");
-  }
+	if (!g_xe) {
+		throw NullPointerException("No XabslEngineThread instance exists");
+	}
 
-  return g_xe->current_time();
+	return g_xe->current_time();
 }
 
 /** @class XabslEngineThread "engine_thread.h"
@@ -58,68 +57,74 @@ xet_current_time()
  * @author Tim Niemueller
  */
 
-
 /** Constructor. */
 XabslEngineThread::XabslEngineThread()
-  : Thread("XabslEngineThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK)
+: Thread("XabslEngineThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK)
 {
 }
-
 
 void
 XabslEngineThread::init()
 {
-  if ( g_xe ) {
-    throw Exception("Global XabslEngineThread has already been set.");
-  }
-  g_xe   = this;
+	if (g_xe) {
+		throw Exception("Global XabslEngineThread has already been set.");
+	}
+	g_xe = this;
 
-  xe_         = NULL;
-  xleh_       = NULL;
-  now_        = NULL;
-  ball_rx_    = NULL;
-  ball_ry_    = NULL;
-  skiller_if_ = NULL;
-  wm_ball_if_ = NULL;
+	xe_         = NULL;
+	xleh_       = NULL;
+	now_        = NULL;
+	ball_rx_    = NULL;
+	ball_ry_    = NULL;
+	skiller_if_ = NULL;
+	wm_ball_if_ = NULL;
 
-  now_  = new Time(clock);
-  xleh_ = new XabslLoggingErrorHandler(logger);
-  xe_   = new xabsl::Engine(*xleh_, &xet_current_time);
+	now_  = new Time(clock);
+	xleh_ = new XabslLoggingErrorHandler(logger);
+	xe_   = new xabsl::Engine(*xleh_, &xet_current_time);
 
-  wm_ball_if_ = blackboard->open_for_reading<ObjectPositionInterface>("WM Ball");
-  skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");
+	wm_ball_if_ = blackboard->open_for_reading<ObjectPositionInterface>("WM Ball");
+	skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");
 
-  XabslSkillWrapper::ParameterList params;
-  params.push_back(std::make_pair("x", "double"));
-  params.push_back(std::make_pair("y", "double"));
-  params.push_back(std::make_pair("ori", "double"));
-  XabslSkillWrapper *sw = new XabslSkillWrapper("relgoto", *xleh_, params);
-  wrappers_[sw->name()] = sw;
-  xe_->registerBasicBehavior(*sw);
+	XabslSkillWrapper::ParameterList params;
+	params.push_back(std::make_pair("x", "double"));
+	params.push_back(std::make_pair("y", "double"));
+	params.push_back(std::make_pair("ori", "double"));
+	XabslSkillWrapper *sw = new XabslSkillWrapper("relgoto", *xleh_, params);
+	wrappers_[sw->name()] = sw;
+	xe_->registerBasicBehavior(*sw);
 
-  ball_ry_ = ball_rx_ = NULL;
-  for (InterfaceFieldIterator i = wm_ball_if_->fields(); i != wm_ball_if_->fields_end(); ++i) {
-    if ( strcmp(i.get_name(), "relative_x") == 0 ) {
-      ball_rx_ = new XabslInterfaceFieldWrapper<double, float>(i.get_type(), i.get_name(), (float *)i.get_value());
-      xe_->registerDecimalInputSymbol("ball.relative_x", ball_rx_,
-				       (double (xabsl::FunctionProvider::*)())&XabslInterfaceFieldWrapper<double, float>::get_value);
-    } else if ( strcmp(i.get_name(), "relative_y") == 0 ) {
-      ball_ry_ = new XabslInterfaceFieldWrapper<double, float>(i.get_type(), i.get_name(), (float *)i.get_value());
-      xe_->registerDecimalInputSymbol("ball.relative_y", ball_ry_,
-				       (double (xabsl::FunctionProvider::*)())&XabslInterfaceFieldWrapper<double, float>::get_value);
-    }
-  }
+	ball_ry_ = ball_rx_ = NULL;
+	for (InterfaceFieldIterator i = wm_ball_if_->fields(); i != wm_ball_if_->fields_end(); ++i) {
+		if (strcmp(i.get_name(), "relative_x") == 0) {
+			ball_rx_ = new XabslInterfaceFieldWrapper<double, float>(i.get_type(),
+			                                                         i.get_name(),
+			                                                         (float *)i.get_value());
+			xe_->registerDecimalInputSymbol("ball.relative_x",
+			                                ball_rx_,
+			                                (double (xabsl::FunctionProvider::*)())
+			                                  & XabslInterfaceFieldWrapper<double, float>::get_value);
+		} else if (strcmp(i.get_name(), "relative_y") == 0) {
+			ball_ry_ = new XabslInterfaceFieldWrapper<double, float>(i.get_type(),
+			                                                         i.get_name(),
+			                                                         (float *)i.get_value());
+			xe_->registerDecimalInputSymbol("ball.relative_y",
+			                                ball_ry_,
+			                                (double (xabsl::FunctionProvider::*)())
+			                                  & XabslInterfaceFieldWrapper<double, float>::get_value);
+		}
+	}
 
-  XabslFileInputSource xinput(XABSLDIR"agent.xabslc");
-  xe_->createOptionGraph(xinput);
+	XabslFileInputSource xinput(XABSLDIR "agent.xabslc");
+	xe_->createOptionGraph(xinput);
 
-  if ( xleh_->errorsOccurred ) {
-    finalize();
-    throw Exception("Error while creating XABSL engine, see log for details");
-  }
+	if (xleh_->errorsOccurred) {
+		finalize();
+		throw Exception("Error while creating XABSL engine, see log for details");
+	}
 
-  /* Test code, exporting interfaces to allow for real skill-level programming
+	/* Test code, exporting interfaces to allow for real skill-level programming
    * is an overly complex and error prone task.
    * Since C++ methods for basic behaviors for sending a message cannot be
    * created on-the-fly wrappers would need to be written or generated for each
@@ -167,69 +172,69 @@ XabslEngineThread::init()
   */
 }
 
-
 void
 XabslEngineThread::finalize()
 {
-  g_xe = NULL;
+	g_xe = NULL;
 
-  for (wit_ = wrappers_.begin(); wit_ != wrappers_.end(); ++wit_) {
-    delete wit_->second;
-  }
-  wrappers_.clear();
+	for (wit_ = wrappers_.begin(); wit_ != wrappers_.end(); ++wit_) {
+		delete wit_->second;
+	}
+	wrappers_.clear();
 
-  delete xe_;
-  delete xleh_;
-  delete now_;
-  delete ball_rx_;
-  delete ball_ry_;
+	delete xe_;
+	delete xleh_;
+	delete now_;
+	delete ball_rx_;
+	delete ball_ry_;
 
-  if (skiller_if_)  blackboard->close(skiller_if_);
-  if (wm_ball_if_)  blackboard->close(wm_ball_if_);
+	if (skiller_if_)
+		blackboard->close(skiller_if_);
+	if (wm_ball_if_)
+		blackboard->close(wm_ball_if_);
 }
-
 
 void
 XabslEngineThread::once()
 {
-  try { 
-    skiller_if_->msgq_enqueue(new SkillerInterface::AcquireControlMessage());
-  } catch (Exception &e) {
-    logger->log_error("XabslEngineThread", "Cannot aquire exclusive skiller "
-		      "control, exception follows");
-    logger->log_error("XabslEngineThread", e);
-  }
+	try {
+		skiller_if_->msgq_enqueue(new SkillerInterface::AcquireControlMessage());
+	} catch (Exception &e) {
+		logger->log_error("XabslEngineThread",
+		                  "Cannot aquire exclusive skiller "
+		                  "control, exception follows");
+		logger->log_error("XabslEngineThread", e);
+	}
 }
 
 void
 XabslEngineThread::loop()
 {
-  now_->stamp();
+	now_->stamp();
 
-  wm_ball_if_->read();
-  skiller_if_->read();
+	wm_ball_if_->read();
+	skiller_if_->read();
 
-  xe_->execute();
+	xe_->execute();
 
-  std::string skill_string = "";
-  for (wit_ = wrappers_.begin(); wit_ != wrappers_.end(); ++wit_) {
-    std::string css = wit_->second->skill_string();
-    if ( css != "" ) {
-      skill_string += css + "; ";
-    }
-  }
-  if ( skill_string != "" ) {
-    logger->log_debug(name(), "Skill string: %s", skill_string.c_str());
-  }
+	std::string skill_string = "";
+	for (wit_ = wrappers_.begin(); wit_ != wrappers_.end(); ++wit_) {
+		std::string css = wit_->second->skill_string();
+		if (css != "") {
+			skill_string += css + "; ";
+		}
+	}
+	if (skill_string != "") {
+		logger->log_debug(name(), "Skill string: %s", skill_string.c_str());
+	}
 
-  try { 
-    skiller_if_->msgq_enqueue(new SkillerInterface::ExecSkillMessage(skill_string.c_str()));
-  } catch (Exception &e) {
-    logger->log_warn("XabslEngineThread", "Executing skill failed, exception follows");
-    logger->log_warn("XabslEngineThread", e);
-  }
+	try {
+		skiller_if_->msgq_enqueue(new SkillerInterface::ExecSkillMessage(skill_string.c_str()));
+	} catch (Exception &e) {
+		logger->log_warn("XabslEngineThread", "Executing skill failed, exception follows");
+		logger->log_warn("XabslEngineThread", e);
+	}
 }
-
 
 /** Get current time.
  * @return continuous time in miliseconds
@@ -237,5 +242,5 @@ XabslEngineThread::loop()
 unsigned long int
 XabslEngineThread::current_time()
 {
-  return now_->in_msec();
+	return now_->in_msec();
 }

@@ -23,8 +23,8 @@
 #ifndef _PLUGINS_XABSL_IFACE_FIELD_WRAPPER_H_
 #define _PLUGINS_XABSL_IFACE_FIELD_WRAPPER_H_
 
-#include <interface/field_pointer.h>
 #include <XabslEngine/XabslSymbols.h>
+#include <interface/field_pointer.h>
 
 /** Interface field wrapper for Xabsl.
  * This wraps a field of an iterface in a Xabsl function provider such that
@@ -36,60 +36,63 @@
  * @author Tim Niemueller.
  */
 template <typename XabslType, typename FieldType>
-  class XabslInterfaceFieldWrapper : public xabsl::FunctionProvider
+class XabslInterfaceFieldWrapper : public xabsl::FunctionProvider
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param type value type of the field
    * @param name name of the field
    * @param value pointer to the value of the field
    */
-  XabslInterfaceFieldWrapper(fawkes::interface_fieldtype_t type,
-			     const char *name, FieldType *value)
-  {
-    pointer_ = new fawkes::InterfaceFieldPointer<FieldType>(type, name, value);
-  }
+	XabslInterfaceFieldWrapper(fawkes::interface_fieldtype_t type, const char *name, FieldType *value)
+	{
+		pointer_ = new fawkes::InterfaceFieldPointer<FieldType>(type, name, value);
+	}
 
-  /** Destructor. */
-  ~XabslInterfaceFieldWrapper()
-  {
-    delete pointer_;
-  }
+	/** Destructor. */
+	~XabslInterfaceFieldWrapper()
+	{
+		delete pointer_;
+	}
 
-  /** Get name of the field.
+	/** Get name of the field.
    * @return name of the field.
    */
-  const char * get_name() const
-  {
-    return pointer_->get_name();
-  }
+	const char *
+	get_name() const
+	{
+		return pointer_->get_name();
+	}
 
-  /** Get type of the field.
+	/** Get type of the field.
    * @return type of the field.
    */
-  fawkes::interface_fieldtype_t  get_type() const
-  {
-    return pointer_->get_type();
-  }
+	fawkes::interface_fieldtype_t
+	get_type() const
+	{
+		return pointer_->get_type();
+	}
 
-  /** Get current value.
+	/** Get current value.
    * @return current value in the Xabsl type
    */
-  XabslType get_value() const
-  {
-    return (XabslType)pointer_->get_value();
-  }
+	XabslType
+	get_value() const
+	{
+		return (XabslType)pointer_->get_value();
+	}
 
-  /** Set new value.
+	/** Set new value.
    * @param new_value new value, converted to field type
    */
-  void set_value(XabslType new_value)
-  {
-    pointer_->set_value((FieldType)new_value);
-  }
+	void
+	set_value(XabslType new_value)
+	{
+		pointer_->set_value((FieldType)new_value);
+	}
 
- private:
-  fawkes::InterfaceFieldPointer<FieldType> *pointer_;
+private:
+	fawkes::InterfaceFieldPointer<FieldType> *pointer_;
 };
 
 #endif
