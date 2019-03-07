@@ -19,9 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "navgraph_interactive_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -30,15 +30,14 @@ using namespace fawkes;
  */
 class NavGraphInteractivePlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit NavGraphInteractivePlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new NavGraphInteractiveThread());
-  }
+	explicit NavGraphInteractivePlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new NavGraphInteractiveThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Interactive navgraph editing via rviz")
