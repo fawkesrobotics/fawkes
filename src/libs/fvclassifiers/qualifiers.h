@@ -19,96 +19,96 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-
 #ifndef _FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_
 #define _FIREVISION_APPS_NAO_LOC_QUALIFIERS_H_
 
-#include <fvutils/color/colorspaces.h>
 #include <fvutils/base/types.h>
+#include <fvutils/color/colorspaces.h>
 
 namespace firevision {
 
 class Qualifier
 {
- public:
-  Qualifier();
-  virtual ~Qualifier();
+public:
+	Qualifier();
+	virtual ~Qualifier();
 
-  /** Getter.
+	/** Getter.
    * @param pixel the pixel of interest
    * @return a corresponding int value
    */
-  virtual int   get(fawkes::upoint_t pixel) = 0;
+	virtual int get(fawkes::upoint_t pixel) = 0;
 
-  virtual unsigned char* get_buffer();
-  virtual void set_buffer(unsigned char* buffer, unsigned int width = 0,
-        unsigned int height = 0);
+	virtual unsigned char *get_buffer();
+	virtual void set_buffer(unsigned char *buffer, unsigned int width = 0, unsigned int height = 0);
 
-  virtual colorspace_t get_colorspace();
-  virtual void set_colorspace(colorspace_t colorspace);
+	virtual colorspace_t get_colorspace();
+	virtual void         set_colorspace(colorspace_t colorspace);
 
+protected:
+	Qualifier(unsigned char *buffer,
+	          unsigned int   width,
+	          unsigned int   height,
+	          colorspace_t   colorspace);
 
- protected:
-  Qualifier(unsigned char* buffer, unsigned int width,
-      unsigned int height, colorspace_t colorspace);
+	/** Image buffer */
+	unsigned char *buffer_;
 
-  /** Image buffer */
-  unsigned char* buffer_;
+	/** Width of the buffer */
+	unsigned int width_;
+	/** Height of the buffer */
+	unsigned int height_;
 
-  /** Width of the buffer */
-  unsigned int width_;
-  /** Height of the buffer */
-  unsigned int height_;
+	/** Size of the buffer */
+	unsigned int size_;
 
-  /** Size of the buffer */
-  unsigned int size_;
-
-  /** Colorspace of the buffer */
-  colorspace_t colorspace_;
+	/** Colorspace of the buffer */
+	colorspace_t colorspace_;
 };
 
-
-class LumaQualifier: public Qualifier
+class LumaQualifier : public Qualifier
 {
- public:
-  LumaQualifier() {};
-  LumaQualifier(unsigned char* buffer, unsigned int width,
-    unsigned int height, colorspace_t colorspace);
-  virtual ~LumaQualifier() {};
+public:
+	LumaQualifier(){};
+	LumaQualifier(unsigned char *buffer,
+	              unsigned int   width,
+	              unsigned int   height,
+	              colorspace_t   colorspace);
+	virtual ~LumaQualifier(){};
 
-  virtual int   get(fawkes::upoint_t pixel);
+	virtual int get(fawkes::upoint_t pixel);
 };
 
-
-class SkyblueQualifier: public Qualifier
+class SkyblueQualifier : public Qualifier
 {
- public:
-  SkyblueQualifier() {};
-  SkyblueQualifier(unsigned char* buffer, unsigned int width,
-       unsigned int height, colorspace_t colorspace);
-  virtual ~SkyblueQualifier() {};
+public:
+	SkyblueQualifier(){};
+	SkyblueQualifier(unsigned char *buffer,
+	                 unsigned int   width,
+	                 unsigned int   height,
+	                 colorspace_t   colorspace);
+	virtual ~SkyblueQualifier(){};
 
-  virtual int   get(fawkes::upoint_t pixel);
+	virtual int get(fawkes::upoint_t pixel);
 
-
- private:
-  static const unsigned int threshold_ = 128;
+private:
+	static const unsigned int threshold_ = 128;
 };
 
-
-class YellowQualifier: public Qualifier
+class YellowQualifier : public Qualifier
 {
- public:
-  YellowQualifier() {};
-  YellowQualifier(unsigned char* buffer, unsigned int width,
-      unsigned int height, colorspace_t colorspace);
-  virtual ~YellowQualifier() {};
+public:
+	YellowQualifier(){};
+	YellowQualifier(unsigned char *buffer,
+	                unsigned int   width,
+	                unsigned int   height,
+	                colorspace_t   colorspace);
+	virtual ~YellowQualifier(){};
 
-  virtual int   get(fawkes::upoint_t pixel);
+	virtual int get(fawkes::upoint_t pixel);
 
-
- private:
-  static const unsigned int threshold_ = 100;
+private:
+	static const unsigned int threshold_ = 100;
 };
 
 } // end namespace firevision

@@ -32,11 +32,10 @@ class ROI;
 
 class SquareShrinker : public Shrinker
 {
- public:
+public:
+	SquareShrinker();
 
-  SquareShrinker();
-
-  virtual void shrink( ROI *roi );
+	virtual void shrink(ROI *roi);
 };
 
 } // end namespace firevision

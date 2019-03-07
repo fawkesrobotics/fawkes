@@ -22,8 +22,9 @@
  */
 
 #include <fvclassifiers/classifier.h>
-#include <cstring>
+
 #include <cstdlib>
+#include <cstring>
 
 namespace firevision {
 
@@ -44,25 +45,22 @@ namespace firevision {
  * @return disjunct list of extracted regions of interest
  */
 
-
 /** Constructor.
  * @param name classifier name
  */
 Classifier::Classifier(const char *name)
 {
-  name_  = strdup(name);
-  _src    = NULL;
-  _width  = 0;
-  _height = 0;
+	name_   = strdup(name);
+	_src    = NULL;
+	_width  = 0;
+	_height = 0;
 }
-
 
 /** Destructor. */
 Classifier::~Classifier()
 {
-  free(name_);
+	free(name_);
 }
-
 
 /** Set source buffer.
  * @param yuv422_planar a YUV422 planar buffer with the source image to
@@ -72,14 +70,12 @@ Classifier::~Classifier()
  * @param height height of buffer in pixels
  */
 void
-Classifier::set_src_buffer(unsigned char *yuv422_planar, unsigned int width,
-			   unsigned int height)
+Classifier::set_src_buffer(unsigned char *yuv422_planar, unsigned int width, unsigned int height)
 {
-  _src    = yuv422_planar;
-  _width  = width;
-  _height = height;
+	_src    = yuv422_planar;
+	_width  = width;
+	_height = height;
 }
-
 
 /** Get name of classifier.
  * @return name of classifier.
@@ -87,7 +83,7 @@ Classifier::set_src_buffer(unsigned char *yuv422_planar, unsigned int width,
 const char *
 Classifier::name() const
 {
-  return name_;
+	return name_;
 }
 
 } // end namespace firevision

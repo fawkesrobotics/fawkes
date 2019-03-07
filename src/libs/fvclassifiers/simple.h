@@ -34,35 +34,36 @@ class ColorModel;
 
 class SimpleColorClassifier : public Classifier
 {
- public:
-  SimpleColorClassifier(ScanlineModel *scanline_model,
-                        ColorModel *color_model,
-                        unsigned int min_num_points=6,
-                        unsigned int box_extent = 50,
-                        bool upward = false,
-                        unsigned int neighbourhood_min_match = 8,
-                        unsigned int grow_by = 10,
-                        color_t color = C_ORANGE);
+public:
+	SimpleColorClassifier(ScanlineModel *scanline_model,
+	                      ColorModel *   color_model,
+	                      unsigned int   min_num_points          = 6,
+	                      unsigned int   box_extent              = 50,
+	                      bool           upward                  = false,
+	                      unsigned int   neighbourhood_min_match = 8,
+	                      unsigned int   grow_by                 = 10,
+	                      color_t        color                   = C_ORANGE);
 
-  virtual std::list< ROI > * classify();
+	virtual std::list<ROI> *classify();
 
-  virtual void get_mass_point_of_color(ROI *roi, fawkes::upoint_t *massPoint);
- private:
-  unsigned int consider_neighbourhood(unsigned int x, unsigned int y, color_t what);
+	virtual void get_mass_point_of_color(ROI *roi, fawkes::upoint_t *massPoint);
 
-  unsigned int neighbourhood_min_match;
-  unsigned int grow_by;
+private:
+	unsigned int consider_neighbourhood(unsigned int x, unsigned int y, color_t what);
 
-  bool         modified;
-  unsigned int min_num_points;
-  unsigned int box_extent;
+	unsigned int neighbourhood_min_match;
+	unsigned int grow_by;
 
-  bool         upward;
+	bool         modified;
+	unsigned int min_num_points;
+	unsigned int box_extent;
 
-  ScanlineModel *scanline_model;
-  ColorModel    *color_model;
+	bool upward;
 
-  const color_t  color;
+	ScanlineModel *scanline_model;
+	ColorModel *   color_model;
+
+	const color_t color;
 };
 
 } // end namespace firevision
