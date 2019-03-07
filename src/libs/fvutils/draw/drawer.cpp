@@ -21,11 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/draw/drawer.h>
 #include <fvutils/color/yuv.h>
+#include <fvutils/draw/drawer.h>
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <unistd.h>
 
 namespace firevision {
@@ -40,8 +40,8 @@ namespace firevision {
  */
 Drawer::Drawer()
 {
-  buffer_ = NULL;
-  color_  = YUV_t::white();
+	buffer_ = NULL;
+	color_  = YUV_t::white();
 }
 
 /** Destructor */
@@ -49,21 +49,18 @@ Drawer::~Drawer()
 {
 }
 
-
 /** Set the buffer to draw to
  * @param buffer buffer to draw to, must be YUV422 planar formatted
  * @param width width of the buffer
  * @param height height of the buffer
  */
 void
-Drawer::set_buffer(unsigned char *buffer,
-		  unsigned int width, unsigned int height)
+Drawer::set_buffer(unsigned char *buffer, unsigned int width, unsigned int height)
 {
-  this->buffer_     = buffer;
-  this->width_      = width;
-  this->height_     = height;
+	this->buffer_ = buffer;
+	this->width_  = width;
+	this->height_ = height;
 }
-
 
 /** Set drawing color.
  * @param y Y component of YUV drawing color
@@ -73,11 +70,10 @@ Drawer::set_buffer(unsigned char *buffer,
 void
 Drawer::set_color(unsigned char y, unsigned char u, unsigned char v)
 {
-  color_.Y = y;
-  color_.U = u;
-  color_.V = v;
+	color_.Y = y;
+	color_.U = u;
+	color_.V = v;
 }
-
 
 /** Set drawing color.
  * @param color the YUV drawing color
@@ -85,9 +81,8 @@ Drawer::set_color(unsigned char y, unsigned char u, unsigned char v)
 void
 Drawer::set_color(YUV_t color)
 {
-  color_ = color;
+	color_ = color;
 }
-
 
 /** Draw circle.
  * Draws a circle at the given center point and with the given radius.
@@ -98,106 +93,101 @@ Drawer::set_color(YUV_t color)
 void
 Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
 {
+	if (buffer_ == NULL)
+		return;
 
-  if (buffer_ == NULL) return;
+	unsigned int x = 0, y = radius, r2 = radius * radius;
 
-  unsigned int x  = 0,
-               y  = radius,
-               r2 = radius * radius;
+	unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
+	unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
 
-  unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
+	unsigned int x_tmp, y_tmp, ind_tmp;
 
-  unsigned int x_tmp, y_tmp, ind_tmp;
+	while (x <= y) {
+		x_tmp = center_x + x;
+		y_tmp = center_y + y;
+		if ((x_tmp < width_) && (y_tmp < height_)) {
+			ind_tmp          = y_tmp * width_ + x_tmp;
+			buffer_[ind_tmp] = color_.Y;
+			ind_tmp /= 2;
+			up[ind_tmp] = color_.U;
+			vp[ind_tmp] = color_.V;
+		}
 
-  while (x <= y) {
+		x_tmp = center_x - x;
+		y_tmp = center_y + y;
+		if ((x_tmp < width_) && (y_tmp < height_)) {
+			ind_tmp          = y_tmp * width_ + x_tmp;
+			buffer_[ind_tmp] = color_.Y;
+			ind_tmp /= 2;
+			up[ind_tmp] = color_.U;
+			vp[ind_tmp] = color_.V;
+		}
 
-    x_tmp = center_x + x;
-    y_tmp = center_y + y;
-    if ( (x_tmp < width_) && (y_tmp < height_) ) {
-      ind_tmp = y_tmp * width_ + x_tmp;
-      buffer_[ind_tmp]   = color_.Y;
-      ind_tmp /= 2;
-      up[ind_tmp] = color_.U;
-      vp[ind_tmp] = color_.V;
-    }
+		x_tmp = center_x + y;
+		y_tmp = center_y + x;
+		if ((x_tmp < width_) && (y_tmp < height_)) {
+			ind_tmp          = y_tmp * width_ + x_tmp;
+			buffer_[ind_tmp] = color_.Y;
+			ind_tmp /= 2;
+			up[ind_tmp] = color_.U;
+			vp[ind_tmp] = color_.V;
+		}
 
-    x_tmp = center_x - x;
-    y_tmp = center_y + y;
-    if ( (x_tmp < width_) && (y_tmp < height_) ) {
-      ind_tmp = y_tmp * width_ + x_tmp;
-      buffer_[ind_tmp]   = color_.Y;
-      ind_tmp /= 2;
-      up[ind_tmp] = color_.U;
-      vp[ind_tmp] = color_.V;
-    }
+		x_tmp = center_x - y;
+		y_tmp = center_y + x;
+		if ((x_tmp < width_) && (y_tmp < height_)) {
+			ind_tmp          = y_tmp * width_ + x_tmp;
+			buffer_[ind_tmp] = color_.Y;
+			ind_tmp /= 2;
+			up[ind_tmp] = color_.U;
+			vp[ind_tmp] = color_.V;
+		}
 
-    x_tmp = center_x + y;
-    y_tmp = center_y + x;
-    if ( (x_tmp < width_) && (y_tmp < height_) ) {
-      ind_tmp = y_tmp * width_ + x_tmp;
-      buffer_[ind_tmp]   = color_.Y;
-      ind_tmp /= 2;
-      up[ind_tmp] = color_.U;
-      vp[ind_tmp] = color_.V;
-    }
+		x_tmp = center_x + x;
+		y_tmp = center_y - y;
+		if ((x_tmp < width_) && (y_tmp < height_)) {
+			ind_tmp          = y_tmp * width_ + x_tmp;
+			buffer_[ind_tmp] = color_.Y;
+			ind_tmp /= 2;
+			up[ind_tmp] = color_.U;
+			vp[ind_tmp] = color_.V;
+		}
 
-    x_tmp = center_x - y;
-    y_tmp = center_y + x;
-    if ( (x_tmp < width_) && (y_tmp < height_) ) {
-      ind_tmp = y_tmp * width_ + x_tmp;
-      buffer_[ind_tmp]   = color_.Y;
-      ind_tmp /= 2;
-      up[ind_tmp] = color_.U;
-      vp[ind_tmp] = color_.V;
-    }
+		x_tmp = center_x - x;
+		y_tmp = center_y - y;
+		if ((x_tmp < width_) && (y_tmp < height_)) {
+			ind_tmp          = y_tmp * width_ + x_tmp;
+			buffer_[ind_tmp] = color_.Y;
+			ind_tmp /= 2;
+			up[ind_tmp] = color_.U;
+			vp[ind_tmp] = color_.V;
+		}
 
-    x_tmp = center_x + x;
-    y_tmp = center_y - y;
-    if ( (x_tmp < width_) && (y_tmp < height_) ) {
-      ind_tmp = y_tmp * width_ + x_tmp;
-      buffer_[ind_tmp]   = color_.Y;
-      ind_tmp /= 2;
-      up[ind_tmp] = color_.U;
-      vp[ind_tmp] = color_.V;
-    }
+		x_tmp = center_x + y;
+		y_tmp = center_y - x;
+		if ((x_tmp < width_) && (y_tmp < height_)) {
+			ind_tmp          = y_tmp * width_ + x_tmp;
+			buffer_[ind_tmp] = color_.Y;
+			ind_tmp /= 2;
+			up[ind_tmp] = color_.U;
+			vp[ind_tmp] = color_.V;
+		}
 
-    x_tmp = center_x - x;
-    y_tmp = center_y - y;
-    if ( (x_tmp < width_) && (y_tmp < height_)) {
-      ind_tmp = y_tmp * width_ + x_tmp;
-      buffer_[ind_tmp]   = color_.Y;
-      ind_tmp /= 2;
-      up[ind_tmp] = color_.U;
-      vp[ind_tmp] = color_.V;
-    }
+		x_tmp = center_x - y;
+		y_tmp = center_y - x;
+		if ((x_tmp < width_) && (y_tmp < height_)) {
+			ind_tmp          = y_tmp * width_ + x_tmp;
+			buffer_[ind_tmp] = color_.Y;
+			ind_tmp /= 2;
+			up[ind_tmp] = color_.U;
+			vp[ind_tmp] = color_.V;
+		}
 
-    x_tmp = center_x + y;
-    y_tmp = center_y - x;
-    if ( (x_tmp < width_) && (y_tmp < height_)) {
-      ind_tmp = y_tmp * width_ + x_tmp;
-      buffer_[ind_tmp]   = color_.Y;
-      ind_tmp /= 2;
-      up[ind_tmp] = color_.U;
-      vp[ind_tmp] = color_.V;
-    }
-
-    x_tmp = center_x - y;
-    y_tmp = center_y - x;
-    if ( (x_tmp < width_) && (y_tmp < height_) ) {
-      ind_tmp = y_tmp * width_ + x_tmp;
-      buffer_[ind_tmp]   = color_.Y;
-      ind_tmp /= 2;
-      up[ind_tmp] = color_.U;
-      vp[ind_tmp] = color_.V;
-    }
-
-    ++x;
-    y=(int)(sqrt((float)(r2 - x * x))+0.5);
-  }
-
+		++x;
+		y = (int)(sqrt((float)(r2 - x * x)) + 0.5);
+	}
 }
-
 
 /** Draw rectangle.
  * @param x x coordinate of rectangle's upper left corner
@@ -206,52 +196,48 @@ Drawer::draw_circle(int center_x, int center_y, unsigned int radius)
  * @param h height of rectangle from y to the bottom
  */
 void
-Drawer::draw_rectangle(unsigned int x, unsigned int y,
-		      unsigned int w, unsigned int h)
+Drawer::draw_rectangle(unsigned int x, unsigned int y, unsigned int w, unsigned int h)
 {
+	unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
+	unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
 
-  unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
+	// horizontal line at top
+	for (unsigned int i = x; i < x + w; ++i) {
+		if (i < width_) {
+			buffer_[y * width_ + i]  = color_.Y;
+			up[(y * width_ + i) / 2] = color_.U;
+			vp[(y * width_ + i) / 2] = color_.V;
+		} else {
+			break;
+		}
+	}
 
-  // horizontal line at top
-  for (unsigned int i = x; i < x + w; ++i) {
-    if ( i < width_ ) {
-      buffer_[ y * width_ + i ]   = color_.Y;
-      up[ (y * width_ + i) / 2 ] = color_.U;
-      vp[ (y * width_ + i) / 2 ] = color_.V;
-    } else {
-      break;
-    }
-  }
+	// left and right
+	for (unsigned int i = y; i < y + h; ++i) {
+		// left
+		buffer_[i * width_ + x]  = color_.Y;
+		up[(i * width_ + x) / 2] = color_.U;
+		vp[(i * width_ + x) / 2] = color_.V;
 
-  // left and right
-  for (unsigned int i = y; i < y + h; ++i) {
-    // left
-    buffer_[ i * width_ + x ]   = color_.Y;
-    up[ (i * width_ + x) / 2 ] = color_.U;
-    vp[ (i * width_ + x) / 2 ] = color_.V;
+		if ((x + w) < width_) {
+			// right
+			buffer_[i * width_ + x + w]  = color_.Y;
+			up[(i * width_ + x + w) / 2] = color_.U;
+			vp[(i * width_ + x + w) / 2] = color_.V;
+		}
+	}
 
-    if ( (x + w) < width_ ) {
-      // right
-      buffer_[ i * width_ + x + w ]   = color_.Y;
-      up[ (i * width_ + x + w) / 2 ] = color_.U;
-      vp[ (i * width_ + x + w) / 2 ] = color_.V;
-    }
-  }
-
-  // horizontal line at bottom
-  for (unsigned int i = x; i < x + w; ++i) {
-    if ( i < width_ ) {
-      buffer_[ (y + h) * width_ + i ]   = color_.Y;
-      up[ ((y + h) * width_ + i) / 2 ] = color_.U;
-      vp[ ((y + h) * width_ + i) / 2 ] = color_.V;
-    } else {
-      break;
-    }
-  }
-
+	// horizontal line at bottom
+	for (unsigned int i = x; i < x + w; ++i) {
+		if (i < width_) {
+			buffer_[(y + h) * width_ + i]  = color_.Y;
+			up[((y + h) * width_ + i) / 2] = color_.U;
+			vp[((y + h) * width_ + i) / 2] = color_.V;
+		} else {
+			break;
+		}
+	}
 }
-
 
 /** Draw inverted rectangle.
  * This draws a rectangle but instead of using the draw color it is drawn
@@ -262,46 +248,42 @@ Drawer::draw_rectangle(unsigned int x, unsigned int y,
  * @param h height of rectangle from y to the bottom
  */
 void
-Drawer::draw_rectangle_inverted(unsigned int x, unsigned int y,
-			      unsigned int w, unsigned int h)
+Drawer::draw_rectangle_inverted(unsigned int x, unsigned int y, unsigned int w, unsigned int h)
 {
+	unsigned int ind = 0;
 
-  unsigned int ind = 0;
+	// horizontal line at top
+	for (unsigned int i = x; i < x + w; ++i) {
+		if (i < width_) {
+			ind          = y * width_ + i;
+			buffer_[ind] = 255 - buffer_[ind];
+		} else {
+			break;
+		}
+	}
 
-  // horizontal line at top
-  for (unsigned int i = x; i < x + w; ++i) {
-    if ( i < width_ ) {
-      ind = y * width_ + i;
-      buffer_[ind]   = 255 - buffer_[ind];
-    } else {
-      break;
-    }
-  }
+	// left and right
+	for (unsigned int i = y; i < y + h; ++i) {
+		// left
+		ind          = i * width_ + x;
+		buffer_[ind] = 255 - buffer_[ind];
 
-  // left and right
-  for (unsigned int i = y; i < y + h; ++i) {
-    // left
-    ind = i * width_ + x;
-    buffer_[ind]   = 255 - buffer_[ind];
+		if ((x + w) < width_) {
+			// right
+			ind += w;
+			buffer_[ind] = 255 - buffer_[ind];
+		}
+	}
 
-    if ( (x + w) < width_ ) {
-      // right
-      ind += w;
-      buffer_[ind]   = 255 - buffer_[ind];
-    }
-  }
-
-  // horizontal line at bottom
-  for (unsigned int i = x; i < x + w; ++i) {
-    if ( i < width_ ) {
-      buffer_[ind]   = 255 - buffer_[ind];
-    } else {
-      break;
-    }
-  }
-
+	// horizontal line at bottom
+	for (unsigned int i = x; i < x + w; ++i) {
+		if (i < width_) {
+			buffer_[ind] = 255 - buffer_[ind];
+		} else {
+			break;
+		}
+	}
 }
-
 
 /** Draw point.
  * @param x x coordinate of point
@@ -310,17 +292,18 @@ Drawer::draw_rectangle_inverted(unsigned int x, unsigned int y,
 void
 Drawer::draw_point(unsigned int x, unsigned int y)
 {
-  if ( x > width_) return;
-  if ( y > height_) return;
+	if (x > width_)
+		return;
+	if (y > height_)
+		return;
 
-  unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
+	unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
+	unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
 
-  buffer_[ y * width_ + x ]   = color_.Y;
-  up[ (y * width_ + x) / 2 ] = color_.U;
-  vp[ (y * width_ + x) / 2 ] = color_.V;
+	buffer_[y * width_ + x]  = color_.Y;
+	up[(y * width_ + x) / 2] = color_.U;
+	vp[(y * width_ + x) / 2] = color_.V;
 }
-
 
 /** Color the given point.
  * This will leave the Y-component of the given pixel unchanged and will
@@ -332,17 +315,18 @@ Drawer::draw_point(unsigned int x, unsigned int y)
 void
 Drawer::color_point(unsigned int x, unsigned int y)
 {
-  if ( x > width_) return;
-  if ( y > height_) return;
+	if (x > width_)
+		return;
+	if (y > height_)
+		return;
 
-  unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
+	unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
+	unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
 
-  buffer_[ y * width_ + x ]   = color_.Y;
-  up[ (y * width_ + x) / 2 ] = color_.U;
-  vp[ (y * width_ + x) / 2 ] = color_.V;
+	buffer_[y * width_ + x]  = color_.Y;
+	up[(y * width_ + x) / 2] = color_.U;
+	vp[(y * width_ + x) / 2] = color_.V;
 }
-
 
 /** Color the given point.
  * This will color a single point (to save excessive function calls the color
@@ -354,17 +338,18 @@ Drawer::color_point(unsigned int x, unsigned int y)
 void
 Drawer::color_point(unsigned int x, unsigned int y, YUV_t color)
 {
-  if ( x > width_) return;
-  if ( y > height_) return;
+	if (x > width_)
+		return;
+	if (y > height_)
+		return;
 
-  unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
+	unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
+	unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
 
-  buffer_[ y * width_ + x ] = color.Y;
-  up[ (y * width_ + x) / 2 ] = color.U;
-  vp[ (y * width_ + x) / 2 ] = color.V;
+	buffer_[y * width_ + x]  = color.Y;
+	up[(y * width_ + x) / 2] = color.U;
+	vp[(y * width_ + x) / 2] = color.V;
 }
-
 
 /** Draw line.
  * Standard Bresenham in all directions. For in-depth information
@@ -375,84 +360,84 @@ Drawer::color_point(unsigned int x, unsigned int y, YUV_t color)
  * @param y_end y coordinate of end point
  */
 void
-Drawer::draw_line(unsigned int x_start, unsigned int y_start,
-		 unsigned int x_end, unsigned int y_end)
+Drawer::draw_line(unsigned int x_start,
+                  unsigned int y_start,
+                  unsigned int x_end,
+                  unsigned int y_end)
 {
-  /* heavily inspired by an article on German Wikipedia about
+	/* heavily inspired by an article on German Wikipedia about
    * Bresenham's algorithm, confer
    * http://de.wikipedia.org/wiki/Bresenham-Algorithmus
    */
 
+	int  x, y, dist, xerr, yerr, dx, dy, incx, incy;
+	bool was_inside_image = false;
 
-  int x, y, dist, xerr, yerr, dx, dy, incx, incy;
-  bool was_inside_image = false;
+	unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
+	unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
 
-  unsigned char *up = YUV422_PLANAR_U_PLANE(buffer_, width_, height_);
-  unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer_, width_, height_);
+	// calculate distance in both directions
+	dx = x_end - x_start;
+	dy = y_end - y_start;
 
-  // calculate distance in both directions
-  dx = x_end - x_start;
-  dy = y_end - y_start;
+	// Calculate sign of the increment
+	if (dx < 0) {
+		incx = -1;
+		dx   = -dx;
+	} else {
+		incx = dx ? 1 : 0;
+	}
 
-  // Calculate sign of the increment
-  if(dx < 0) {
-    incx = -1;
-    dx = -dx;
-  } else {
-    incx = dx ? 1 : 0;
-  }
+	if (dy < 0) {
+		incy = -1;
+		dy   = -dy;
+	} else {
+		incy = dy ? 1 : 0;
+	}
 
-  if(dy < 0) {
-    incy = -1;
-    dy = -dy;
-  } else {
-    incy = dy ? 1 : 0;
-  }
+	// check which distance is larger
+	dist = (dx > dy) ? dx : dy;
 
-  // check which distance is larger
-  dist = (dx > dy) ? dx : dy;
+	// Initialize for loops
+	x    = x_start;
+	y    = y_start;
+	xerr = dx;
+	yerr = dy;
 
-  // Initialize for loops
-  x = x_start;
-  y = y_start;
-  xerr = dx;
-  yerr = dy;
+	/* Calculate and draw pixels */
+	for (int t = 0; t < dist; ++t) {
+		if (((unsigned int)x < width_) && ((unsigned int)y < height_)) {
+			if ((x >= 0) && (y >= 0)) {
+				was_inside_image         = true;
+				buffer_[y * width_ + x]  = color_.Y;
+				up[(y * width_ + x) / 2] = color_.U;
+				vp[(y * width_ + x) / 2] = color_.V;
+			}
+		} else {
+			if (was_inside_image) {
+				break;
+			}
+		}
 
-  /* Calculate and draw pixels */
-  for(int t = 0; t < dist; ++t) {
-    if ( ((unsigned int)x < width_) && ((unsigned int)y < height_) ) {
-      if ( (x >= 0) && (y >= 0) ) {
-	was_inside_image = true;
-	buffer_[ y * width_ + x ]   = color_.Y;
-	up[ (y * width_ + x) / 2 ] = color_.U;
-	vp[ (y * width_ + x) / 2 ] = color_.V;
-      }
-    } else {
-      if ( was_inside_image ) {
-	break;
-      }
-    }
+		xerr += dx;
+		yerr += dy;
 
-    xerr += dx;
-    yerr += dy;
+		if (xerr > dist) {
+			xerr -= dist;
+			x += incx;
+		}
 
-    if(xerr > dist) {
-      xerr -= dist;
-      x += incx;
-    }
+		if (yerr > dist) {
+			yerr -= dist;
+			y += incy;
+		}
+	}
 
-    if(yerr>dist) {
-      yerr -= dist;
-      y += incy;
-    }
-  }
-
-  if ( (x_end < width_) && (y_end < height_) ) {
-    buffer_[ y_end * width_ + x_end ]   = color_.Y;
-    up[ (y_end * width_ + x_end) / 2 ] = color_.U;
-    vp[ (y_end * width_ + x_end) / 2 ] = color_.V;
-  }
-
+	if ((x_end < width_) && (y_end < height_)) {
+		buffer_[y_end * width_ + x_end]  = color_.Y;
+		up[(y_end * width_ + x_end) / 2] = color_.U;
+		vp[(y_end * width_ + x_end) / 2] = color_.V;
+	}
 }
 
 /** Draws a cross.
@@ -463,17 +448,17 @@ Drawer::draw_line(unsigned int x_start, unsigned int y_start,
 void
 Drawer::draw_cross(unsigned int x_center, unsigned int y_center, unsigned int width)
 {
-  x_center = std::min(x_center, width_);
-  y_center = std::min(y_center, height_);
+	x_center = std::min(x_center, width_);
+	y_center = std::min(y_center, height_);
 
-  int r = width / 2;
-  unsigned int a = std::max(0, (int)x_center - r);
-  unsigned int b = std::min(x_center + r, width_);
-  draw_line(a, y_center, b, y_center);
+	int          r = width / 2;
+	unsigned int a = std::max(0, (int)x_center - r);
+	unsigned int b = std::min(x_center + r, width_);
+	draw_line(a, y_center, b, y_center);
 
-  a = std::max(0, (int)y_center - r);
-  b = std::min(y_center + r, height_);
-  draw_line(x_center, a, x_center, b);
+	a = std::max(0, (int)y_center - r);
+	b = std::min(y_center + r, height_);
+	draw_line(x_center, a, x_center, b);
 }
 
 } // end namespace firevision

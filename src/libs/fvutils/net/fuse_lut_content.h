@@ -34,29 +34,32 @@ class SharedMemoryLookupTable;
 
 class FuseLutContent : public FuseMessageContent
 {
- public:
-  FuseLutContent(const char *lut_id, void *buffer,
-		 unsigned int width, unsigned int height,
-		 unsigned int depth, unsigned int bpc);
-  FuseLutContent(SharedMemoryLookupTable *l);
-  FuseLutContent(uint32_t type, void *payload, size_t payload_size);
-  virtual ~FuseLutContent();
+public:
+	FuseLutContent(const char * lut_id,
+	               void *       buffer,
+	               unsigned int width,
+	               unsigned int height,
+	               unsigned int depth,
+	               unsigned int bpc);
+	FuseLutContent(SharedMemoryLookupTable *l);
+	FuseLutContent(uint32_t type, void *payload, size_t payload_size);
+	virtual ~FuseLutContent();
 
-  const char *     lut_id() const;
-  unsigned char *  buffer() const;
-  size_t           buffer_size() const;
-  unsigned int     width() const;
-  unsigned int     height() const;
-  unsigned int     depth() const;
-  unsigned int     bytes_per_cell() const;
+	const char *   lut_id() const;
+	unsigned char *buffer() const;
+	size_t         buffer_size() const;
+	unsigned int   width() const;
+	unsigned int   height() const;
+	unsigned int   depth() const;
+	unsigned int   bytes_per_cell() const;
 
-  virtual void     serialize();
+	virtual void serialize();
 
- private:
-  char          *lut_id_;
-  unsigned char *buffer_;
-  size_t         buffer_size_;
-  FUSE_lut_message_header_t *header_;
+private:
+	char *                     lut_id_;
+	unsigned char *            buffer_;
+	size_t                     buffer_size_;
+	FUSE_lut_message_header_t *header_;
 };
 
 } // end namespace firevision

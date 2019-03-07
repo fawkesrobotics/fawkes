@@ -21,16 +21,15 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/fileformat/fvfile.h>
-
 #include <core/exceptions/system.h>
-#include <utils/misc/strndup.h>
-
-#include <cstring>
-#include <cstdio>
-#include <cerrno>
+#include <fvutils/fileformat/fvfile.h>
 #include <netinet/in.h>
 #include <sys/time.h>
+#include <utils/misc/strndup.h>
+
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
 
 using namespace fawkes;
 
@@ -84,41 +83,37 @@ namespace firevision {
  * Size in bytes of _spec_header.
  */
 
-
 /** Constructor.
  * @param magic_token magic token for the concrete file type
  * @param version file format version
  */
-FireVisionDataFile::FireVisionDataFile(unsigned short int magic_token,
-				       unsigned short int version)
+FireVisionDataFile::FireVisionDataFile(unsigned short int magic_token, unsigned short int version)
 {
-  header_       = (fvff_header_t *)calloc(1, sizeof(fvff_header_t));
+	header_ = (fvff_header_t *)calloc(1, sizeof(fvff_header_t));
 
-  magic_token_ = magic_token;
-  version_     = version;
-  comment_     = strdup("");
+	magic_token_ = magic_token;
+	version_     = version;
+	comment_     = strdup("");
 
-  _spec_header = NULL;
-  _spec_header_size = 0;
+	_spec_header      = NULL;
+	_spec_header_size = 0;
 
-  owns_blocks_ = true;
+	owns_blocks_ = true;
 
-  FireVisionDataFile::clear();
+	FireVisionDataFile::clear();
 }
-
 
 /** Destructor. */
 FireVisionDataFile::~FireVisionDataFile()
 {
-  FireVisionDataFile::clear();
+	FireVisionDataFile::clear();
 
-  free(header_);
-  free(comment_);
-  if ( _spec_header ) {
-    free(_spec_header);
-  }
+	free(header_);
+	free(comment_);
+	if (_spec_header) {
+		free(_spec_header);
+	}
 }
-
 
 /** Clear internal storage.
  * All internal data is deleted.
@@ -126,27 +121,26 @@ FireVisionDataFile::~FireVisionDataFile()
 void
 FireVisionDataFile::clear()
 {
-  if (owns_blocks_) {
-    for (bi_ = blocks_.begin(); bi_ != blocks_.end(); ++bi_) {
-      delete *bi_;
-    }
-  }
+	if (owns_blocks_) {
+		for (bi_ = blocks_.begin(); bi_ != blocks_.end(); ++bi_) {
+			delete *bi_;
+		}
+	}
 
-  blocks_.clear();
-  memset(header_, 0, sizeof(fvff_header_t));
+	blocks_.clear();
+	memset(header_, 0, sizeof(fvff_header_t));
 
-  header_->magic_token = htons(magic_token_);
-  header_->version     = version_;
-  header_->num_blocks = 0;
+	header_->magic_token = htons(magic_token_);
+	header_->version     = version_;
+	header_->num_blocks  = 0;
 #if BYTE_ORDER_ == BIG_ENDIAN_
-  header_->endianess = 1;
+	header_->endianess = 1;
 #else
-  header_->endianess = 0;
+	header_->endianess = 0;
 #endif
-  free(comment_);
-  comment_ = strdup("");
+	free(comment_);
+	comment_ = strdup("");
 }
-
 
 /** Get the magic token of the file.
  * @return Magic token
@@ -154,9 +148,8 @@ FireVisionDataFile::clear()
 unsigned int
 FireVisionDataFile::magic_token()
 {
-  return header_->magic_token;
+	return header_->magic_token;
 }
-
 
 /** Get the version of the file.
  * @return version of the file (or the current supported version if no file was loaded)
@@ -164,9 +157,8 @@ FireVisionDataFile::magic_token()
 unsigned int
 FireVisionDataFile::version()
 {
-  return header_->version;
+	return header_->version;
 }
-
 
 /** Check if data is encoded as big endian.
  * @return true if data is encoded as big endian, false otherwise
@@ -174,9 +166,8 @@ FireVisionDataFile::version()
 bool
 FireVisionDataFile::is_big_endian()
 {
-  return (header_->endianess == 1);
+	return (header_->endianess == 1);
 }
-
 
 /** Check if data is encoded as little endian.
  * @return true if data is encoded as little endian, false otherwise
@@ -184,9 +175,8 @@ FireVisionDataFile::is_big_endian()
 bool
 FireVisionDataFile::is_little_endian()
 {
-  return (header_->endianess == 0);
+	return (header_->endianess == 0);
 }
-
 
 /** Get comment.
  * @return comment of the file
@@ -194,9 +184,8 @@ FireVisionDataFile::is_little_endian()
 const char *
 FireVisionDataFile::get_comment() const
 {
-  return comment_;
+	return comment_;
 }
-
 
 /** Set comment.
  * @param comment new comment to set
@@ -204,11 +193,10 @@ FireVisionDataFile::get_comment() const
 void
 FireVisionDataFile::set_comment(const char *comment)
 {
-  free(comment_);
-  comment_ = strndup(comment, FVFF_COMMENT_SIZE);
-  strncpy(header_->comment, comment, FVFF_COMMENT_SIZE-1);
+	free(comment_);
+	comment_ = strndup(comment, FVFF_COMMENT_SIZE);
+	strncpy(header_->comment, comment, FVFF_COMMENT_SIZE - 1);
 }
-
 
 /** Lets the file take over the ownership and give up the ownership of the blocks,
  * respectively. By default, the file is the owner of the blocks. If a file owns
@@ -218,9 +206,8 @@ FireVisionDataFile::set_comment(const char *comment)
 void
 FireVisionDataFile::set_owns_blocks(bool owns_blocks)
 {
-  owns_blocks_ = owns_blocks;
+	owns_blocks_ = owns_blocks;
 }
-
 
 /** Get the number of available info blocks.
  * @return number of available info blocks
@@ -228,9 +215,8 @@ FireVisionDataFile::set_owns_blocks(bool owns_blocks)
 size_t
 FireVisionDataFile::num_blocks()
 {
-  return blocks_.size();
+	return blocks_.size();
 }
-
 
 /** Add a block.
  * @param block block to add
@@ -238,9 +224,8 @@ FireVisionDataFile::num_blocks()
 void
 FireVisionDataFile::add_block(FireVisionDataFileBlock *block)
 {
-  blocks_.push_back(block);
+	blocks_.push_back(block);
 }
-
 
 /** Get blocks.
  * @return block list
@@ -248,9 +233,8 @@ FireVisionDataFile::add_block(FireVisionDataFileBlock *block)
 FireVisionDataFile::BlockList &
 FireVisionDataFile::blocks()
 {
-  return blocks_;
+	return blocks_;
 }
-
 
 /** Write file.
  * @param file_name file to write to
@@ -258,45 +242,46 @@ FireVisionDataFile::blocks()
 void
 FireVisionDataFile::write(const char *file_name)
 {
-  FILE *f = fopen(file_name, "w");
-  if ( f == NULL ) {
-    throw CouldNotOpenFileException(file_name, errno, "Could not open rectlut file "
-				                      "for writing");
-  }
+	FILE *f = fopen(file_name, "w");
+	if (f == NULL) {
+		throw CouldNotOpenFileException(file_name,
+		                                errno,
+		                                "Could not open rectlut file "
+		                                "for writing");
+	}
 
-  header_->num_blocks = (unsigned int)blocks_.size();
-  timeval t;
-  gettimeofday(&t, NULL);
-  header_->created_sec  = t.tv_sec;
-  header_->created_usec = t.tv_usec;
-  header_->spec_head_size = _spec_header_size;
+	header_->num_blocks = (unsigned int)blocks_.size();
+	timeval t;
+	gettimeofday(&t, NULL);
+	header_->created_sec    = t.tv_sec;
+	header_->created_usec   = t.tv_usec;
+	header_->spec_head_size = _spec_header_size;
 
-  //printf("Writing %zu bytes for header\n", sizeof(fvff_header_t));
-  if ( fwrite(header_, sizeof(fvff_header_t), 1, f) != 1 ) {
-    fclose(f);
-    throw FileWriteException(file_name, errno, "Writing fvff header failed");
-  }
+	//printf("Writing %zu bytes for header\n", sizeof(fvff_header_t));
+	if (fwrite(header_, sizeof(fvff_header_t), 1, f) != 1) {
+		fclose(f);
+		throw FileWriteException(file_name, errno, "Writing fvff header failed");
+	}
 
-  if ( _spec_header_size > 0 ) {
-    //printf("Writing %zu bytes for spec header\n", _spec_header_size);
-    if ( fwrite(_spec_header, _spec_header_size, 1, f) != 1 ) {
-      fclose(f);
-      throw FileWriteException(file_name, errno, "Writing content specific header failed");
-    }
-  }
+	if (_spec_header_size > 0) {
+		//printf("Writing %zu bytes for spec header\n", _spec_header_size);
+		if (fwrite(_spec_header, _spec_header_size, 1, f) != 1) {
+			fclose(f);
+			throw FileWriteException(file_name, errno, "Writing content specific header failed");
+		}
+	}
 
-  for (bi_ = blocks_.begin(); bi_ != blocks_.end(); ++bi_) {
-    // write this info block
-    //printf("Writing %zu bytes for block\n", (*bi_)->block_size());
-    if ( fwrite((*bi_)->block_memptr(), (*bi_)->block_size(), 1, f) != 1 ) {
-      fclose(f);
-      throw FileWriteException(file_name, errno, "Failed to write info block");
-    }
-  }
+	for (bi_ = blocks_.begin(); bi_ != blocks_.end(); ++bi_) {
+		// write this info block
+		//printf("Writing %zu bytes for block\n", (*bi_)->block_size());
+		if (fwrite((*bi_)->block_memptr(), (*bi_)->block_size(), 1, f) != 1) {
+			fclose(f);
+			throw FileWriteException(file_name, errno, "Failed to write info block");
+		}
+	}
 
-  fclose(f);
+	fclose(f);
 }
-
 
 /** Read file.
  * @param file_name file to read from
@@ -304,109 +289,111 @@ FireVisionDataFile::write(const char *file_name)
 void
 FireVisionDataFile::read(const char *file_name)
 {
-  FILE *f = fopen(file_name, "r");
-  if ( f == NULL ) {
-    throw CouldNotOpenFileException(file_name, errno, "Could not open rectlut file "
-				                      "for reading");
-  }
+	FILE *f = fopen(file_name, "r");
+	if (f == NULL) {
+		throw CouldNotOpenFileException(file_name,
+		                                errno,
+		                                "Could not open rectlut file "
+		                                "for reading");
+	}
 
-  clear();
+	clear();
 
-  //printf("Reading %zu bytes for header\n", sizeof(fvff_header_t));
-  if ( fread(header_, sizeof(fvff_header_t), 1, f) != 1) {
-    fclose(f);
-    throw FileReadException(file_name, errno, "Reading header failed");
-  }
+	//printf("Reading %zu bytes for header\n", sizeof(fvff_header_t));
+	if (fread(header_, sizeof(fvff_header_t), 1, f) != 1) {
+		fclose(f);
+		throw FileReadException(file_name, errno, "Reading header failed");
+	}
 
-  if ( header_->magic_token != htons(magic_token_) ) {
-    fclose(f);
-    throw Exception("Unknown magic in fvff file (read: 0x%04x req: 0x%04x)",
-		    header_->magic_token, magic_token_);
-  }
+	if (header_->magic_token != htons(magic_token_)) {
+		fclose(f);
+		throw Exception("Unknown magic in fvff file (read: 0x%04x req: 0x%04x)",
+		                header_->magic_token,
+		                magic_token_);
+	}
 
-  if ( header_->version != version_ ) {
-    fclose(f);
-    throw Exception("Unsupported version of fvff file (read: %u req: %u)",
-		    header_->version, version_);
-  }
+	if (header_->version != version_) {
+		fclose(f);
+		throw Exception("Unsupported version of fvff file (read: %u req: %u)",
+		                header_->version,
+		                version_);
+	}
 
-  if ( header_->endianess ==
+	if (header_->endianess ==
 #if BYTE_ORDER_ == BIG_ENDIAN_
-       0
+	    0
 #else
-       1
+	    1
 #endif
-       ) {
-    fclose(f);
-    throw Exception("FVFile header cannot be translated for endianess by now");
-  }
+	) {
+		fclose(f);
+		throw Exception("FVFile header cannot be translated for endianess by now");
+	}
 
-  free(comment_);
-  comment_ = strndup(header_->comment, FVFF_COMMENT_SIZE);
+	free(comment_);
+	comment_ = strndup(header_->comment, FVFF_COMMENT_SIZE);
 
-  if ( _spec_header ) {
-    free(_spec_header);
-  }
-  _spec_header = calloc(1, header_->spec_head_size);
-  if ( ! _spec_header ) {
-    throw OutOfMemoryException("Cannot allocate memory for content specific header");
-  }
+	if (_spec_header) {
+		free(_spec_header);
+	}
+	_spec_header = calloc(1, header_->spec_head_size);
+	if (!_spec_header) {
+		throw OutOfMemoryException("Cannot allocate memory for content specific header");
+	}
 
-  if ( header_->spec_head_size > 0 ) {
-    //printf("Reading %u bytes for spec header\n", header_->spec_head_size);
-    if ( fread(_spec_header, header_->spec_head_size, 1, f) != 1) {
-      fclose(f);
-      throw FileReadException(file_name, errno, "Reading content specific header failed");
-    }
-  }
+	if (header_->spec_head_size > 0) {
+		//printf("Reading %u bytes for spec header\n", header_->spec_head_size);
+		if (fread(_spec_header, header_->spec_head_size, 1, f) != 1) {
+			fclose(f);
+			throw FileReadException(file_name, errno, "Reading content specific header failed");
+		}
+	}
 
-  //printf("Reading %u blocks\n", header_->num_blocks);
-  for (unsigned int b = 0; b < header_->num_blocks && !feof(f); ++b) {
-    fvff_block_header_t bh;
-    //printf("Reading %zu bytes for block header\n", sizeof(bh));
-    if ( fread(&bh, sizeof(bh), 1, f) != 1 ) {
-      fclose(f);
-      throw FileReadException(file_name, errno,
-			      "Could not read block info header while there should be one");
-    }
-    void *spec_header = NULL;
+	//printf("Reading %u blocks\n", header_->num_blocks);
+	for (unsigned int b = 0; b < header_->num_blocks && !feof(f); ++b) {
+		fvff_block_header_t bh;
+		//printf("Reading %zu bytes for block header\n", sizeof(bh));
+		if (fread(&bh, sizeof(bh), 1, f) != 1) {
+			fclose(f);
+			throw FileReadException(file_name,
+			                        errno,
+			                        "Could not read block info header while there should be one");
+		}
+		void *spec_header = NULL;
 
-    if ( bh.spec_head_size > 0 ) {
-      // Read specific header
-      spec_header = malloc(bh.spec_head_size);
-      if ( ! spec_header ) {
-	throw OutOfMemoryException("Could not allocate %u bytes for content specific header",
-				   bh.spec_head_size);
-      }
+		if (bh.spec_head_size > 0) {
+			// Read specific header
+			spec_header = malloc(bh.spec_head_size);
+			if (!spec_header) {
+				throw OutOfMemoryException("Could not allocate %u bytes for content specific header",
+				                           bh.spec_head_size);
+			}
 
-      //printf("Reading %u bytes for block spec header\n", bh.spec_head_size);
-      if ( fread(spec_header, bh.spec_head_size, 1, f) != 1 ) {
+			//printf("Reading %u bytes for block spec header\n", bh.spec_head_size);
+			if (fread(spec_header, bh.spec_head_size, 1, f) != 1) {
+				fclose(f);
+				free(spec_header);
+				throw FileReadException(file_name, errno, "Could not read content specific block header");
+			}
+		}
+
+		FireVisionDataFileBlock *block =
+		  new FireVisionDataFileBlock(bh.type, bh.size, spec_header, bh.spec_head_size);
+
+		free(spec_header);
+
+		//printf("Reading %u bytes for block data\n", bh.size);
+		if (bh.size && fread(block->data_ptr(), bh.size, 1, f) != 1) {
+			fclose(f);
+			delete block;
+			throw FileReadException(file_name, errno, "Could not read block data");
+		}
+
+		blocks_.push_back(block);
+	}
+
 	fclose(f);
-	free(spec_header);
-	throw FileReadException(file_name, errno,
-				"Could not read content specific block header");
-      }
-    }
-
-    FireVisionDataFileBlock *block = new FireVisionDataFileBlock(bh.type, bh.size,
-								 spec_header, bh.spec_head_size);
-
-    free(spec_header);
-
-    //printf("Reading %u bytes for block data\n", bh.size);
-    if ( bh.size && fread(block->data_ptr(), bh.size, 1, f) != 1 ) {
-      fclose(f);
-      delete block;
-      throw FileReadException(file_name, errno,
-			      "Could not read block data");
-    }
-
-    blocks_.push_back(block);
-  }
-
-  fclose(f);
 }
-
 
 /** Get magic token from file.
  * @param filename name of file to read the magic token from
@@ -415,24 +402,22 @@ FireVisionDataFile::read(const char *file_name)
 unsigned short int
 FireVisionDataFile::read_magic_token(const char *filename)
 {
-  uint16_t magic_token = 0;
+	uint16_t magic_token = 0;
 
-  FILE *f;
-  f = fopen(filename, "r");
-  if (f != NULL) {
-    if ( fread((char *)&magic_token, sizeof(magic_token), 1, f) != 1 ) {
-      fclose(f);
-      throw FileReadException(filename, errno, "Could not read magic token from file");
-    }
-    fclose(f);
-  } else {
-    throw FileReadException(filename, errno,
-                            "Could not read magic token from file");
-  }
+	FILE *f;
+	f = fopen(filename, "r");
+	if (f != NULL) {
+		if (fread((char *)&magic_token, sizeof(magic_token), 1, f) != 1) {
+			fclose(f);
+			throw FileReadException(filename, errno, "Could not read magic token from file");
+		}
+		fclose(f);
+	} else {
+		throw FileReadException(filename, errno, "Could not read magic token from file");
+	}
 
-  return magic_token;
+	return magic_token;
 }
-
 
 /** Check if file has a certain magic token.
  * @param filename name of file to read the magic token from
@@ -442,8 +427,8 @@ FireVisionDataFile::read_magic_token(const char *filename)
 bool
 FireVisionDataFile::has_magic_token(const char *filename, unsigned short int magic_token)
 {
-  uint16_t file_magic_token = read_magic_token(filename);
-  return (htons(magic_token) == file_magic_token);
+	uint16_t file_magic_token = read_magic_token(filename);
+	return (htons(magic_token) == file_magic_token);
 }
 
 } // end namespace firevision

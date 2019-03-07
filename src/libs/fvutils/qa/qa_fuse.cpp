@@ -23,8 +23,8 @@
 
 /// @cond QA
 
-#include <fvutils/net/fuse_server.h>
 #include <fvutils/net/fuse_client.h>
+#include <fvutils/net/fuse_server.h>
 // include <fvutils/net/fuse_message.h>
 
 //#include <cstdlib>
@@ -36,26 +36,23 @@ using namespace firevision;
 int
 main(int argc, char **argv)
 {
+	FuseServer *fs = new FuseServer(5000);
+	FuseClient *fc = new FuseClient("127.0.0.1", 5000, NULL);
 
-  FuseServer *fs = new FuseServer(5000);
-  FuseClient *fc = new FuseClient("127.0.0.1", 5000, NULL);
+	fc->connect();
+	fc->start();
 
-  fc->connect();
-  fc->start();
+	usleep(5000);
 
-  usleep(5000);
+	printf("Cancel and join\n");
+	fc->cancel();
+	fc->join();
 
-  printf("Cancel and join\n");
-  fc->cancel();
-  fc->join();
+	printf("Delete\n");
+	delete fc;
+	delete fs;
 
-  printf("Delete\n");
-  delete fc;
-  delete fs;
-
-  return 0;
+	return 0;
 }
-
-
 
 /// @endcond

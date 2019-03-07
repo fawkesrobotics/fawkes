@@ -24,8 +24,8 @@
 #ifndef _FIREVISION_MODELS_COLOR_COLOR_MAPPING_H__
 #define _FIREVISION_MODELS_COLOR_COLOR_MAPPING_H__
 
-#include <fvutils/base/types.h>
 #include <fvutils/base/roi.h>
+#include <fvutils/base/types.h>
 #include <fvutils/color/yuv.h>
 
 #include <map>
@@ -34,33 +34,38 @@ namespace firevision {
 
 class ColorObjectMap
 {
- public:
-  ~ColorObjectMap();
-  static const ColorObjectMap& get_instance() { return *singleton_; }
-  static YUV_t get_color(color_t color);
+public:
+	~ColorObjectMap();
+	static const ColorObjectMap &
+	get_instance()
+	{
+		return *singleton_;
+	}
+	static YUV_t get_color(color_t color);
 
-  color_t get(hint_t hint) const
-  {
-	  return color_for_hint_.find(hint) != color_for_hint_.end()
-	    ? color_for_hint_.find(hint)->second
-	    : c_other_;
-  }
-  hint_t get(color_t color) const
-  {
-	  return hint_for_color_.find(color) != hint_for_color_.end()
-	    ? hint_for_color_.find(color)->second
-	    : h_unknown_;
-  }
+	color_t
+	get(hint_t hint) const
+	{
+		return color_for_hint_.find(hint) != color_for_hint_.end() ? color_for_hint_.find(hint)->second
+		                                                           : c_other_;
+	}
+	hint_t
+	get(color_t color) const
+	{
+		return hint_for_color_.find(color) != hint_for_color_.end()
+		         ? hint_for_color_.find(color)->second
+		         : h_unknown_;
+	}
 
- private:
-  ColorObjectMap();
-  void set_mapping(hint_t roi, color_t color);
+private:
+	ColorObjectMap();
+	void set_mapping(hint_t roi, color_t color);
 
-  static ColorObjectMap    *singleton_;
-  std::map<hint_t, color_t> color_for_hint_;
-  std::map<color_t, hint_t> hint_for_color_;
-  color_t                   c_other_;
-  hint_t                    h_unknown_;
+	static ColorObjectMap *   singleton_;
+	std::map<hint_t, color_t> color_for_hint_;
+	std::map<color_t, hint_t> hint_for_color_;
+	color_t                   c_other_;
+	hint_t                    h_unknown_;
 };
 
 } // end namespace firevision

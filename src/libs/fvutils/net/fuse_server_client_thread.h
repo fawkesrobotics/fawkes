@@ -30,7 +30,7 @@
 #include <string>
 
 namespace fawkes {
-  class StreamSocket;
+class StreamSocket;
 }
 namespace firevision {
 
@@ -43,42 +43,41 @@ class JpegImageCompressor;
 
 class FuseServerClientThread : public fawkes::Thread
 {
- public:
-  FuseServerClientThread(FuseServer *fuse_server,
-			 fawkes::StreamSocket *s);
-  virtual ~FuseServerClientThread();
+public:
+	FuseServerClientThread(FuseServer *fuse_server, fawkes::StreamSocket *s);
+	virtual ~FuseServerClientThread();
 
-  void recv();
-  void send();
-  virtual void loop();
-  
-  void process_greeting_message(FuseNetworkMessage *m);
-  void process_getimage_message(FuseNetworkMessage *m);
-  void process_getimageinfo_message(FuseNetworkMessage *m);
-  void process_getimagelist_message(FuseNetworkMessage *m);
-  void process_getlut_message(FuseNetworkMessage *m);
-  void process_setlut_message(FuseNetworkMessage *m);
-  void process_getlutlist_message(FuseNetworkMessage *m);
+	void         recv();
+	void         send();
+	virtual void loop();
 
- private:
-  void process_inbound();
-  SharedMemoryImageBuffer *  get_shmimgbuf(const char *id);
+	void process_greeting_message(FuseNetworkMessage *m);
+	void process_getimage_message(FuseNetworkMessage *m);
+	void process_getimageinfo_message(FuseNetworkMessage *m);
+	void process_getimagelist_message(FuseNetworkMessage *m);
+	void process_getlut_message(FuseNetworkMessage *m);
+	void process_setlut_message(FuseNetworkMessage *m);
+	void process_getlutlist_message(FuseNetworkMessage *m);
 
-  FuseServer   *fuse_server_;
-  fawkes::StreamSocket *socket_;
+private:
+	void                     process_inbound();
+	SharedMemoryImageBuffer *get_shmimgbuf(const char *id);
 
-  FuseNetworkMessageQueue *outbound_queue_;
-  FuseNetworkMessageQueue *inbound_queue_;
+	FuseServer *          fuse_server_;
+	fawkes::StreamSocket *socket_;
 
-  JpegImageCompressor *jpeg_compressor_;
+	FuseNetworkMessageQueue *outbound_queue_;
+	FuseNetworkMessageQueue *inbound_queue_;
 
-  std::map< std::string, SharedMemoryImageBuffer * >  buffers_;
-  std::map< std::string, SharedMemoryImageBuffer * >::iterator  bit_;
+	JpegImageCompressor *jpeg_compressor_;
 
-  std::map< std::string, SharedMemoryLookupTable * >  luts_;
-  std::map< std::string, SharedMemoryLookupTable * >::iterator  lit_;
+	std::map<std::string, SharedMemoryImageBuffer *>           buffers_;
+	std::map<std::string, SharedMemoryImageBuffer *>::iterator bit_;
 
-  bool alive_;
+	std::map<std::string, SharedMemoryLookupTable *>           luts_;
+	std::map<std::string, SharedMemoryLookupTable *>::iterator lit_;
+
+	bool alive_;
 };
 
 } // end namespace firevision

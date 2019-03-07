@@ -22,11 +22,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-
 #include <fvutils/compression/jpeg_compressor.h>
 #include <fvutils/compression/jpeg_compressor_libjpeg.h>
 #ifdef HAVE_MMAL
-#  include <fvutils/compression/jpeg_compressor_mmal.h>
+#	include <fvutils/compression/jpeg_compressor_mmal.h>
 #endif
 
 #include <core/exception.h>
@@ -49,21 +48,20 @@ namespace firevision {
  */
 JpegImageCompressor::JpegImageCompressor(unsigned int quality, JpegColorspace jcs)
 {
-  impl_ = 0;
+	impl_ = 0;
 #ifdef HAVE_MMAL
-  if (jcs != JPEG_CS_RGB) {
-    throw Exception("JpegImageCompressor MMAL can only encode to RGB colorspace");
-  }
-  impl_ = new JpegImageCompressorMMAL(quality);
+	if (jcs != JPEG_CS_RGB) {
+		throw Exception("JpegImageCompressor MMAL can only encode to RGB colorspace");
+	}
+	impl_ = new JpegImageCompressorMMAL(quality);
 #else
-  #ifndef HAVE_LIBJPEG
-  throw Exception("No JPEG compressor implementation available.");
-  #else
-  impl_ = new JpegImageCompressorLibJpeg(quality, jcs);
-  #endif
+#	ifndef HAVE_LIBJPEG
+	throw Exception("No JPEG compressor implementation available.");
+#	else
+	impl_ = new JpegImageCompressorLibJpeg(quality, jcs);
+#	endif
 #endif
 }
-
 
 /** Constructor.
  * @param impl_type force usage of this implementation type
@@ -71,33 +69,34 @@ JpegImageCompressor::JpegImageCompressor(unsigned int quality, JpegColorspace jc
  * @param jcs Jpeg colorspace
  */
 JpegImageCompressor::JpegImageCompressor(JpegCompressorImplementation impl_type,
-					 unsigned int quality, JpegColorspace jcs)
+                                         unsigned int                 quality,
+                                         JpegColorspace               jcs)
 {
-  impl_ = 0;
-  if (impl_type == JPEG_CI_MMAL) {
+	impl_ = 0;
+	if (impl_type == JPEG_CI_MMAL) {
 #ifndef HAVE_MMAL
-    throw Exception("JpegImageCompressor MMAL not available at compile time");
+		throw Exception("JpegImageCompressor MMAL not available at compile time");
 #else
-  if (jcs != JPEG_CS_RGB) {
-    throw Exception("JpegImageCompressor MMAL can only encode to RGB colorspace");
-  }
-  impl_ = new JpegImageCompressorMMAL(quality);
+		if (jcs != JPEG_CS_RGB) {
+			throw Exception("JpegImageCompressor MMAL can only encode to RGB colorspace");
+		}
+		impl_ = new JpegImageCompressorMMAL(quality);
 #endif
-  } else if (impl_type == JPEG_CI_LIBJPEG) {
+	} else if (impl_type == JPEG_CI_LIBJPEG) {
 #ifndef HAVE_LIBJPEG
-    throw Exception("No JPEG compressor implementation available.");
+		throw Exception("No JPEG compressor implementation available.");
 #else
-    impl_ = new JpegImageCompressorLibJpeg(quality, jcs);
+		impl_ = new JpegImageCompressorLibJpeg(quality, jcs);
 #endif
-  } else {
-    throw Exception("JpegImageCompressor: requested unknown implementation");
-  }
+	} else {
+		throw Exception("JpegImageCompressor: requested unknown implementation");
+	}
 }
 
 /** Destructor. */
 JpegImageCompressor::~JpegImageCompressor()
 {
-  delete impl_;
+	delete impl_;
 }
 
 } // end namespace firevision

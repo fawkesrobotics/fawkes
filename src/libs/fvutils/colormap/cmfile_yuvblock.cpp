@@ -21,11 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/colormap/cmfile_yuvblock.h>
+#include <core/exceptions/software.h>
 #include <fvutils/colormap/cmfile.h>
+#include <fvutils/colormap/cmfile_yuvblock.h>
 #include <fvutils/colormap/yuvcm.h>
 
-#include <core/exceptions/software.h>
 #include <cstring>
 
 namespace firevision {
@@ -40,22 +40,21 @@ namespace firevision {
  * @param level Y level
  */
 ColormapFileYuvBlock::ColormapFileYuvBlock(YuvColormap *cm, unsigned int level)
-  : ColormapFileBlock(CMFILE_TYPE_YUV, cm->plane_size(), sizeof(cmfile_yuvblock_header_t))
+: ColormapFileBlock(CMFILE_TYPE_YUV, cm->plane_size(), sizeof(cmfile_yuvblock_header_t))
 {
-  if ( level > cm->depth() ) {
-    throw fawkes::OutOfBoundsException("YuvColormap level is out of bounds", level, 0, cm->depth());
-  }
+	if (level > cm->depth()) {
+		throw fawkes::OutOfBoundsException("YuvColormap level is out of bounds", level, 0, cm->depth());
+	}
 
-  cm_    = cm;
-  level_ = level;
+	cm_    = cm;
+	level_ = level;
 
-  header_ = (cmfile_yuvblock_header_t *)_spec_header;
-  header_->range_from = level * cm->deepness() / cm->depth();
-  header_->range_to   = ((level + 1) * cm->deepness() / cm->depth()) - 1;
+	header_             = (cmfile_yuvblock_header_t *)_spec_header;
+	header_->range_from = level * cm->deepness() / cm->depth();
+	header_->range_to   = ((level + 1) * cm->deepness() / cm->depth()) - 1;
 
-  memcpy(_data, cm_->get_buffer() + level * cm->plane_size(), _data_size);
+	memcpy(_data, cm_->get_buffer() + level * cm->plane_size(), _data_size);
 }
-
 
 /** Copy Constructor.
  * It is assumed that the block actually is a rectification LUT info block. Check that
@@ -63,11 +62,10 @@ ColormapFileYuvBlock::ColormapFileYuvBlock(YuvColormap *cm, unsigned int level)
  * @param block block to copy
  */
 ColormapFileYuvBlock::ColormapFileYuvBlock(FireVisionDataFileBlock *block)
-  : ColormapFileBlock(block)
+: ColormapFileBlock(block)
 {
-  header_ = (cmfile_yuvblock_header_t *)_spec_header;
+	header_ = (cmfile_yuvblock_header_t *)_spec_header;
 }
-
 
 /** Range from value.
  * @return range from value
@@ -75,9 +73,8 @@ ColormapFileYuvBlock::ColormapFileYuvBlock(FireVisionDataFileBlock *block)
 unsigned int
 ColormapFileYuvBlock::range_from() const
 {
-  return header_->range_from;
+	return header_->range_from;
 }
-
 
 /** Range to value.
  * @return range to value
@@ -85,7 +82,7 @@ ColormapFileYuvBlock::range_from() const
 unsigned int
 ColormapFileYuvBlock::range_to() const
 {
-  return header_->range_to;
+	return header_->range_to;
 }
 
 } // end namespace firevision

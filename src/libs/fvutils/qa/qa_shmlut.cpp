@@ -33,23 +33,21 @@ using namespace firevision;
 int
 main(int argc, char **argv)
 {
-  SharedMemoryLookupTable *lut;
+	SharedMemoryLookupTable *lut;
 
-  lut = new SharedMemoryLookupTable("QA test LUT", 100, 100, 2);
+	lut = new SharedMemoryLookupTable("QA test LUT", 100, 100, 2);
 
-  if ( lut->is_valid() ) {
-    cout << "IS valid!" << endl;
-  } else {
-    cout << "Is NOT valid!" << endl;
-  }
+	if (lut->is_valid()) {
+		cout << "IS valid!" << endl;
+	} else {
+		cout << "Is NOT valid!" << endl;
+	}
 
-  sleep(100);
+	sleep(100);
 
-  delete lut;
+	delete lut;
 
-  return 0;
+	return 0;
 }
-
-
 
 /// @endcond

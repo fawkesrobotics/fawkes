@@ -23,7 +23,6 @@
 
 #include <fvutils/compression/imagedecompressor.h>
 
-
 namespace firevision {
 
 /** @class ImageDecompressor <fvutils/compression/imagedecompressor.h>
@@ -59,12 +58,10 @@ namespace firevision {
  * Size in bytes of _decompressed_buffer
  */
 
-
 /** Virtual empty destructor. */
 ImageDecompressor::~ImageDecompressor()
 {
 }
-
 
 /** Set image dimensions.
  * @param width width of image in pixels
@@ -73,10 +70,9 @@ ImageDecompressor::~ImageDecompressor()
 void
 ImageDecompressor::set_image_dimensions(unsigned int width, unsigned int height)
 {
-  _width  = width;
-  _height = height;
+	_width  = width;
+	_height = height;
 }
-
 
 /** Set compressed buffer.
  * @param buf buffer
@@ -85,10 +81,9 @@ ImageDecompressor::set_image_dimensions(unsigned int width, unsigned int height)
 void
 ImageDecompressor::set_compressed_buffer(unsigned char *buf, unsigned int buf_size)
 {
-  _compressed_buffer = buf;
-  _compressed_buffer_size = buf_size;
+	_compressed_buffer      = buf;
+	_compressed_buffer_size = buf_size;
 }
-
 
 /** Set decompressed buffer.
  * @param buf decompressed buffer
@@ -97,8 +92,8 @@ ImageDecompressor::set_compressed_buffer(unsigned char *buf, unsigned int buf_si
 void
 ImageDecompressor::set_decompressed_buffer(unsigned char *buf, unsigned int buf_size)
 {
-  _decompressed_buffer = buf;
-  _decompressed_buffer_size = buf_size;
+	_decompressed_buffer      = buf;
+	_decompressed_buffer_size = buf_size;
 }
 
 } // end namespace firevision

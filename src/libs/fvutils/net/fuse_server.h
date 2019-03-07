@@ -28,43 +28,43 @@
 #include <core/utils/lock_list.h>
 #include <netcomm/utils/incoming_connection_handler.h>
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace fawkes {
-  class ThreadCollector;
-  class StreamSocket;
-  class NetworkAcceptorThread;
-}
+class ThreadCollector;
+class StreamSocket;
+class NetworkAcceptorThread;
+} // namespace fawkes
 namespace firevision {
 
 class FuseServerClientThread;
 
-class FuseServer
-: public fawkes::Thread,
-  public fawkes::NetworkIncomingConnectionHandler
+class FuseServer : public fawkes::Thread, public fawkes::NetworkIncomingConnectionHandler
 {
- public:
-
-	FuseServer(bool enable_ipv4, bool enable_ipv6,
-	           const std::string &listen_ipv4, const std::string &listen_ipv6,
-	           unsigned short int port, fawkes::ThreadCollector *collector = 0);
+public:
+	FuseServer(bool                     enable_ipv4,
+	           bool                     enable_ipv6,
+	           const std::string &      listen_ipv4,
+	           const std::string &      listen_ipv6,
+	           unsigned short int       port,
+	           fawkes::ThreadCollector *collector = 0);
 	virtual ~FuseServer();
 
-  virtual void add_connection(fawkes::StreamSocket *s) throw();
-  void connection_died(FuseServerClientThread *client) throw();
+	virtual void add_connection(fawkes::StreamSocket *s) throw();
+	void         connection_died(FuseServerClientThread *client) throw();
 
-  virtual void loop();
+	virtual void loop();
 
- private:
-  std::vector<fawkes::NetworkAcceptorThread *> acceptor_threads_;
+private:
+	std::vector<fawkes::NetworkAcceptorThread *> acceptor_threads_;
 
-  fawkes::LockList<FuseServerClientThread *>  clients_;
-  fawkes::LockList<FuseServerClientThread *>::iterator  cit_;
+	fawkes::LockList<FuseServerClientThread *>           clients_;
+	fawkes::LockList<FuseServerClientThread *>::iterator cit_;
 
-  fawkes::LockList<FuseServerClientThread *>  dead_clients_;
+	fawkes::LockList<FuseServerClientThread *> dead_clients_;
 
-  fawkes::ThreadCollector *thread_collector_;
+	fawkes::ThreadCollector *thread_collector_;
 };
 
 } // end namespace firevision

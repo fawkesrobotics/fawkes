@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/system/camargp.h>
 #include <core/exceptions/software.h>
+#include <fvutils/system/camargp.h>
 
 #include <cstdlib>
 
@@ -67,53 +67,51 @@ namespace firevision {
  */
 CameraArgumentParser::CameraArgumentParser(const char *as)
 {
-  values.clear();
+	values.clear();
 
-  std::string s = as;
-  s += ":";
+	std::string s = as;
+	s += ":";
 
-  _cam_type = s;
-  string::size_type start = 0;
-  string::size_type end;
-  if ( (end = s.find(":", start)) != string::npos ) {
-    _cam_type = s.substr(start, end);
-  } else {
-    _cam_type = "";
-  }
-  start = end + 1;
-  if ( (end = s.find(":", start)) != string::npos ) {
-    _cam_id = s.substr(start, end - start);
-    start = end + 1;
-  } else {
-    _cam_id = "";
-  }
+	_cam_type               = s;
+	string::size_type start = 0;
+	string::size_type end;
+	if ((end = s.find(":", start)) != string::npos) {
+		_cam_type = s.substr(start, end);
+	} else {
+		_cam_type = "";
+	}
+	start = end + 1;
+	if ((end = s.find(":", start)) != string::npos) {
+		_cam_id = s.substr(start, end - start);
+		start   = end + 1;
+	} else {
+		_cam_id = "";
+	}
 
-  while ( (end = s.find(":", start)) != string::npos ) {
-    string t = s.substr(start, (end - start));
-    string::size_type e;
-    if ( (e = t.find("=", 0)) != string::npos ) {
-      if ( (e > 0 ) && (e < t.length() - 1) ) {
-	string key   = t.substr(0, e);
-	string value = t.substr(e+1);
-	values[key] = value;
-      }
-    } else {
-      if ( t != "" ) {
-	args.push_back(t);
-      }
-    }
-    start = end + 1;
-  }
+	while ((end = s.find(":", start)) != string::npos) {
+		string            t = s.substr(start, (end - start));
+		string::size_type e;
+		if ((e = t.find("=", 0)) != string::npos) {
+			if ((e > 0) && (e < t.length() - 1)) {
+				string key   = t.substr(0, e);
+				string value = t.substr(e + 1);
+				values[key]  = value;
+			}
+		} else {
+			if (t != "") {
+				args.push_back(t);
+			}
+		}
+		start = end + 1;
+	}
 }
-
 
 /** Destructor. */
 CameraArgumentParser::~CameraArgumentParser()
 {
-  values.clear();
-  args.clear();
+	values.clear();
+	args.clear();
 }
-
 
 /** Get camera type.
  * Get the camera type. This is the very first element before
@@ -123,9 +121,8 @@ CameraArgumentParser::~CameraArgumentParser()
 std::string
 CameraArgumentParser::cam_type() const
 {
-  return _cam_type;
+	return _cam_type;
 }
-
 
 /** Get camera ID.
  * Get the camera ID. This is the very first element before
@@ -135,9 +132,8 @@ CameraArgumentParser::cam_type() const
 std::string
 CameraArgumentParser::cam_id() const
 {
-  return _cam_id;
+	return _cam_id;
 }
-
 
 /** Check if an parameter was given.
  * Checks if the given parameter s was given in the argument
@@ -148,9 +144,8 @@ CameraArgumentParser::cam_id() const
 bool
 CameraArgumentParser::has(std::string s) const
 {
-  return (values.find(s) != values.end());
+	return (values.find(s) != values.end());
 }
-
 
 /** Get the value of the given parameter.
  * @param s key of the parameter to retrieve
@@ -160,14 +155,13 @@ CameraArgumentParser::has(std::string s) const
 std::string
 CameraArgumentParser::get(std::string s) const
 {
-  if ( values.find(s) != values.end() ) {
-    // this is needed to be able to make this method const
-    return (*(values.find(s))).second;
-  } else {
-    return string();
-  }
+	if (values.find(s) != values.end()) {
+		// this is needed to be able to make this method const
+		return (*(values.find(s))).second;
+	} else {
+		return string();
+	}
 }
-
 
 /** Get the value of the given parameter as integer.
  * This method assumes that the value is an integer and converts it.
@@ -180,18 +174,17 @@ CameraArgumentParser::get(std::string s) const
 long int
 CameraArgumentParser::get_int(std::string s) const
 {
-  if ( values.find(s) != values.end() ) {
-    char *endptr;
-    long int rv = strtol((*(values.find(s))).second.c_str(), &endptr, 10);
-    if ( endptr[0] != 0 ) {
-      throw IllegalArgumentException("Supplied argument is not of type int");
-    }
-    return rv;
-  } else {
-    throw Exception("Value for '%s' not available", s.c_str());
-  }
+	if (values.find(s) != values.end()) {
+		char *   endptr;
+		long int rv = strtol((*(values.find(s))).second.c_str(), &endptr, 10);
+		if (endptr[0] != 0) {
+			throw IllegalArgumentException("Supplied argument is not of type int");
+		}
+		return rv;
+	} else {
+		throw Exception("Value for '%s' not available", s.c_str());
+	}
 }
-
 
 /** Get the value of the given parameter as integer.
  * This method assumes that the value is an integer and converts it.
@@ -204,18 +197,17 @@ CameraArgumentParser::get_int(std::string s) const
 double
 CameraArgumentParser::get_float(std::string s) const
 {
-  if ( values.find(s) != values.end() ) {
-    char *endptr;
-    double rv = strtod((*(values.find(s))).second.c_str(), &endptr);
-    if ( endptr[0] != 0 ) {
-      throw IllegalArgumentException("Supplied argument is not of type double");
-    }
-    return rv;
-  } else {
-    throw Exception("Value for '%s' not available", s.c_str());
-  }
+	if (values.find(s) != values.end()) {
+		char * endptr;
+		double rv = strtod((*(values.find(s))).second.c_str(), &endptr);
+		if (endptr[0] != 0) {
+			throw IllegalArgumentException("Supplied argument is not of type double");
+		}
+		return rv;
+	} else {
+		throw Exception("Value for '%s' not available", s.c_str());
+	}
 }
-
 
 /** Get the arguments.
  * Returns a vector of arguments supplied in the argument string.
@@ -224,9 +216,8 @@ CameraArgumentParser::get_float(std::string s) const
 std::vector<std::string>
 CameraArgumentParser::arguments() const
 {
-  return args;
+	return args;
 }
-
 
 /** Get a map of parameters.
  * @returns map of key/value pairs of parameters supplied in the argument string.
@@ -234,7 +225,7 @@ CameraArgumentParser::arguments() const
 std::map<std::string, std::string>
 CameraArgumentParser::parameters() const
 {
-  return values;
+	return values;
 }
 
 } // end namespace firevision

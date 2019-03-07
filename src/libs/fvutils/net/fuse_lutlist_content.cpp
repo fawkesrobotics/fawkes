@@ -21,14 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <core/exceptions/software.h>
 #include <fvutils/net/fuse_lutlist_content.h>
 #include <netcomm/utils/dynamic_buffer.h>
-
-#include <core/exceptions/software.h>
+#include <netinet/in.h>
 
 #include <cstdlib>
 #include <cstring>
-#include <netinet/in.h>
 
 using namespace fawkes;
 
@@ -48,12 +47,11 @@ namespace firevision {
  */
 FuseLutListContent::FuseLutListContent()
 {
-  list_ = new DynamicBuffer(&(lutlist_msg_.lut_list));
-  
-  _payload_size = 0;
-  _payload = NULL;
-}
+	list_ = new DynamicBuffer(&(lutlist_msg_.lut_list));
 
+	_payload_size = 0;
+	_payload      = NULL;
+}
 
 /** Parsing constructor.
  * Can be used with the FuseContent::fmsg() method to get correctly parsed output.
@@ -64,19 +62,18 @@ FuseLutListContent::FuseLutListContent()
  */
 FuseLutListContent::FuseLutListContent(uint32_t type, void *payload, size_t payload_size)
 {
-  FUSE_lutlist_message_t *tmsg = (FUSE_lutlist_message_t *)payload;
-  void *list_payload = (void *)((size_t)payload + sizeof(FUSE_lutlist_message_t));
-  list_ = new DynamicBuffer(&(tmsg->lut_list), list_payload,
-			     payload_size - sizeof(FUSE_lutlist_message_t));
+	FUSE_lutlist_message_t *tmsg         = (FUSE_lutlist_message_t *)payload;
+	void *                  list_payload = (void *)((size_t)payload + sizeof(FUSE_lutlist_message_t));
+	list_                                = new DynamicBuffer(&(tmsg->lut_list),
+                            list_payload,
+                            payload_size - sizeof(FUSE_lutlist_message_t));
 }
-
 
 /** Destructor. */
 FuseLutListContent::~FuseLutListContent()
 {
-  delete list_;
+	delete list_;
 }
-
 
 /** Add LUT info.
  * @param lut_id LUT ID
@@ -86,30 +83,30 @@ FuseLutListContent::~FuseLutListContent()
  * @param bytes_per_cell bytes per cell
  */
 void
-FuseLutListContent::add_lutinfo(const char *lut_id,
-				unsigned int width, unsigned int height,
-				unsigned int depth, unsigned int bytes_per_cell)
+FuseLutListContent::add_lutinfo(const char * lut_id,
+                                unsigned int width,
+                                unsigned int height,
+                                unsigned int depth,
+                                unsigned int bytes_per_cell)
 {
-  FUSE_lutinfo_t lutinfo;
-  memset(&lutinfo, 0, sizeof(lutinfo));
+	FUSE_lutinfo_t lutinfo;
+	memset(&lutinfo, 0, sizeof(lutinfo));
 
-  strncpy(lutinfo.lut_id, lut_id, LUT_ID_MAX_LENGTH-1);
-  lutinfo.width = ntohl(width);
-  lutinfo.height = ntohl(height);
-  lutinfo.depth  = ntohl(depth);  
-  lutinfo.bytes_per_cell = ntohl(bytes_per_cell);
+	strncpy(lutinfo.lut_id, lut_id, LUT_ID_MAX_LENGTH - 1);
+	lutinfo.width          = ntohl(width);
+	lutinfo.height         = ntohl(height);
+	lutinfo.depth          = ntohl(depth);
+	lutinfo.bytes_per_cell = ntohl(bytes_per_cell);
 
-  list_->append(&lutinfo, sizeof(lutinfo));
+	list_->append(&lutinfo, sizeof(lutinfo));
 }
-
 
 /** Reset iterator. */
 void
 FuseLutListContent::reset_iterator()
 {
-  list_->reset_iterator();
+	list_->reset_iterator();
 }
-
 
 /** Check if another LUT info is available.
  * @return true if another LUT info is available, false otherwise
@@ -117,9 +114,8 @@ FuseLutListContent::reset_iterator()
 bool
 FuseLutListContent::has_next()
 {
-  return list_->has_next();
+	return list_->has_next();
 }
-
 
 /** Get next LUT info.
  * @return next LUT info
@@ -129,25 +125,24 @@ FuseLutListContent::has_next()
 FUSE_lutinfo_t *
 FuseLutListContent::next()
 {
-  size_t size;
-  void *tmp = list_->next(&size);
-  if ( size != sizeof(FUSE_lutinfo_t) ) {
-    throw TypeMismatchException("Lut list content contains element that is of an "
-				"unexpected size");
-  }
+	size_t size;
+	void * tmp = list_->next(&size);
+	if (size != sizeof(FUSE_lutinfo_t)) {
+		throw TypeMismatchException("Lut list content contains element that is of an "
+		                            "unexpected size");
+	}
 
-  return (FUSE_lutinfo_t *)tmp;
+	return (FUSE_lutinfo_t *)tmp;
 }
-
 
 void
 FuseLutListContent::serialize()
 {
-  _payload_size = sizeof(FUSE_lutlist_message_t) + list_->buffer_size();
-  _payload = malloc(_payload_size);
+	_payload_size = sizeof(FUSE_lutlist_message_t) + list_->buffer_size();
+	_payload      = malloc(_payload_size);
 
-  copy_payload(0, &lutlist_msg_, sizeof(FUSE_lutlist_message_t));
-  copy_payload(sizeof(FUSE_lutlist_message_t), list_->buffer(), list_->buffer_size());
+	copy_payload(0, &lutlist_msg_, sizeof(FUSE_lutlist_message_t));
+	copy_payload(sizeof(FUSE_lutlist_message_t), list_->buffer(), list_->buffer_size());
 }
 
 } // end namespace firevision

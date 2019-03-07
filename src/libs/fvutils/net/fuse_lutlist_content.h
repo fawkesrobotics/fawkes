@@ -32,25 +32,26 @@ namespace firevision {
 
 class FuseLutListContent : public FuseMessageContent
 {
- public:
-  FuseLutListContent();
-  FuseLutListContent(uint32_t type, void *payload, size_t payload_size);
-  ~FuseLutListContent();
+public:
+	FuseLutListContent();
+	FuseLutListContent(uint32_t type, void *payload, size_t payload_size);
+	~FuseLutListContent();
 
-  void add_lutinfo(const char *lut_id,
-		   unsigned int width, unsigned int height,
-		   unsigned int depth, unsigned int bytes_per_cell);
+	void add_lutinfo(const char * lut_id,
+	                 unsigned int width,
+	                 unsigned int height,
+	                 unsigned int depth,
+	                 unsigned int bytes_per_cell);
 
+	void            reset_iterator();
+	bool            has_next();
+	FUSE_lutinfo_t *next();
 
-  void                reset_iterator();
-  bool                has_next();
-  FUSE_lutinfo_t *    next();
+	virtual void serialize();
 
-  virtual void        serialize();
-
- private:
-  fawkes::DynamicBuffer  *list_;
-  FUSE_lutlist_message_t lutlist_msg_;
+private:
+	fawkes::DynamicBuffer *list_;
+	FUSE_lutlist_message_t lutlist_msg_;
 };
 
 } // end namespace firevision

@@ -25,8 +25,9 @@
 #define _FIREVISION_FVUTILS_COLORMAP_GENERATOR_H__
 
 #include <fvutils/base/roi.h>
-#include <string>
+
 #include <map>
+#include <string>
 
 namespace firevision {
 
@@ -35,23 +36,20 @@ class Histogram;
 
 class ColormapGenerator
 {
+public:
+	virtual ~ColormapGenerator();
 
- public:
+	virtual void set_buffer(unsigned char *buffer, unsigned int width, unsigned int height) = 0;
+	virtual YuvColormap *get_current()                                                      = 0;
 
-  virtual ~ColormapGenerator();
+	virtual void consider()   = 0;
+	virtual void calc()       = 0;
+	virtual void undo()       = 0;
+	virtual void reset()      = 0;
+	virtual void reset_undo() = 0;
 
-  virtual void           set_buffer(unsigned char *buffer,
-				    unsigned int width, unsigned int height) = 0;
-  virtual YuvColormap *  get_current()                                       = 0;
-
-  virtual void           consider()                                          = 0;
-  virtual void           calc()                                              = 0;
-  virtual void           undo()                                              = 0;
-  virtual void           reset()                                             = 0;
-  virtual void           reset_undo()                                        = 0;
-
-  virtual bool           has_histograms()                                    = 0;
-  virtual std::map< hint_t, Histogram *> *  get_histograms()                 = 0;
+	virtual bool                           has_histograms() = 0;
+	virtual std::map<hint_t, Histogram *> *get_histograms() = 0;
 };
 
 } // end namespace firevision

@@ -23,6 +23,7 @@
 #define _FVUTILS_DRAW_FIELD_LINES_H__
 
 #include <utils/math/types.h>
+
 #include <list>
 #include <string>
 
@@ -30,60 +31,76 @@ namespace firevision {
 
 typedef std::list<fawkes::arc_t> field_circles_t;
 
-class FieldLines: public std::list<fawkes::field_line_t>
+class FieldLines : public std::list<fawkes::field_line_t>
 {
 public:
-  virtual ~FieldLines();
+	virtual ~FieldLines();
 
-  float get_line_width() const;
-  float get_field_length() const { return _field_length; }
-  float get_field_width() const { return _field_width; }
-  fawkes::cart_coord_2d_t get_field_offsets() const { return _field_offsets; }
-  const field_circles_t& get_circles() const { return _field_circles; }
-  const std::string& get_name() const;
+	float get_line_width() const;
+	float
+	get_field_length() const
+	{
+		return _field_length;
+	}
+	float
+	get_field_width() const
+	{
+		return _field_width;
+	}
+	fawkes::cart_coord_2d_t
+	get_field_offsets() const
+	{
+		return _field_offsets;
+	}
+	const field_circles_t &
+	get_circles() const
+	{
+		return _field_circles;
+	}
+	const std::string &get_name() const;
 
 protected:
-  FieldLines(std::string field_name, float field_length, float field_width, float line_width);
-  virtual void init() = 0;
+	FieldLines(std::string field_name, float field_length, float field_width, float line_width);
+	virtual void init() = 0;
 
-  void calc_offsets();
+	void calc_offsets();
 
-  std::string             _field_name;
-  float                   _line_width;
-  float                   _field_length;
-  float                   _field_width;
-  fawkes::cart_coord_2d_t _field_offsets;
-  field_circles_t         _field_circles;
+	std::string             _field_name;
+	float                   _line_width;
+	float                   _field_length;
+	float                   _field_width;
+	fawkes::cart_coord_2d_t _field_offsets;
+	field_circles_t         _field_circles;
 };
 
-class FieldLines6x4: public FieldLines
+class FieldLines6x4 : public FieldLines
 {
 public:
-  FieldLines6x4(float length, float width);
-  virtual ~FieldLines6x4();
+	FieldLines6x4(float length, float width);
+	virtual ~FieldLines6x4();
 
 private:
-  virtual void init();
+	virtual void init();
 };
 
-class FieldLinesCityTower: public FieldLines
+class FieldLinesCityTower : public FieldLines
 {
 public:
-  FieldLinesCityTower(float length, float width);
-  virtual ~FieldLinesCityTower();
+	FieldLinesCityTower(float length, float width);
+	virtual ~FieldLinesCityTower();
 
 private:
-  virtual void init();
+	virtual void init();
 };
 
-class FieldLinesCityTowerSeminar: public FieldLines
+class FieldLinesCityTowerSeminar : public FieldLines
 {
 public:
-  FieldLinesCityTowerSeminar(float length, float width);
-  virtual ~FieldLinesCityTowerSeminar();
+	FieldLinesCityTowerSeminar(float length, float width);
+	virtual ~FieldLinesCityTowerSeminar();
 
 private:
-  virtual void init();
+	virtual void init();
 };
 
 } // end namespace firevision

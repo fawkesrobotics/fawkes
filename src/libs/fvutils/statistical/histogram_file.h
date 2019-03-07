@@ -24,13 +24,14 @@
 #ifndef _FIREVISION_FVUTILS_STATISTICAL_HISTOGRAM_FILE_H_
 #define _FIREVISION_FVUTILS_STATISTICAL_HISTOGRAM_FILE_H_
 
-#define FIREVISION_HISTOGRAM_MAGIC  0xFF04
+#define FIREVISION_HISTOGRAM_MAGIC 0xFF04
 #define FIREVISION_HISTOGRAM_CURVER 1
 
-#include <fvutils/fileformat/fvfile.h>
 #include <fvutils/base/roi.h>
-#include <vector>
+#include <fvutils/fileformat/fvfile.h>
+
 #include <map>
+#include <vector>
 
 namespace firevision {
 
@@ -38,27 +39,23 @@ class HistogramBlock;
 
 class HistogramFile : public FireVisionDataFile
 {
- public:
-  HistogramFile();
-  ~HistogramFile();
-  
-  void add_histogram_block(HistogramBlock* block);
+public:
+	HistogramFile();
+	~HistogramFile();
 
-  /** Convenience typdef for a STL list of pointers to histogram blocks. */
-  typedef std::list<HistogramBlock*> HistogramBlockList;  
-  HistogramBlockList histogram_blocks();
+	void add_histogram_block(HistogramBlock *block);
 
-  uint32_t get_value(hint_t object_type, 
-		     uint16_t x, uint16_t y, uint16_t z);
-  
-  void set_value(hint_t object_type, 
-		 uint16_t x, uint16_t y, uint16_t z,
-		 uint32_t val);
+	/** Convenience typdef for a STL list of pointers to histogram blocks. */
+	typedef std::list<HistogramBlock *> HistogramBlockList;
+	HistogramBlockList                  histogram_blocks();
 
- private:
-  std::map<hint_t, HistogramBlock*> attached_histograms;
+	uint32_t get_value(hint_t object_type, uint16_t x, uint16_t y, uint16_t z);
+
+	void set_value(hint_t object_type, uint16_t x, uint16_t y, uint16_t z, uint32_t val);
+
+private:
+	std::map<hint_t, HistogramBlock *> attached_histograms;
 };
-
 
 } // end namespace firevision
 

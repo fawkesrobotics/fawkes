@@ -20,72 +20,67 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/adapters/pcl.h>
-#include <fvutils/ipc/shm_image.h>
-#include <fvutils/color/colorspaces.h>
-#include <fvutils/base/types.h>
 #include <core/exception.h>
+#include <fvutils/adapters/pcl.h>
+#include <fvutils/base/types.h>
+#include <fvutils/color/colorspaces.h>
+#include <fvutils/ipc/shm_image.h>
 
 using namespace fawkes;
 
 namespace firevision {
 
 void
-convert_buffer_to_pcl(const SharedMemoryImageBuffer *buffer,
-                      pcl::PointCloud<pcl::PointXYZ> &pcl)
+convert_buffer_to_pcl(const SharedMemoryImageBuffer *buffer, pcl::PointCloud<pcl::PointXYZ> &pcl)
 {
-  if (buffer->colorspace() != CARTESIAN_3D_FLOAT) {
-    throw Exception("Invalid colorspace, expected CARTESIAN_3D_FLOAT");
-  }
+	if (buffer->colorspace() != CARTESIAN_3D_FLOAT) {
+		throw Exception("Invalid colorspace, expected CARTESIAN_3D_FLOAT");
+	}
 
-  const pcl_point_t *pclbuf = (const pcl_point_t*)buffer->buffer();
+	const pcl_point_t *pclbuf = (const pcl_point_t *)buffer->buffer();
 
-  const unsigned int width  = buffer->width();
-  const unsigned int height = buffer->height();
+	const unsigned int width  = buffer->width();
+	const unsigned int height = buffer->height();
 
-  pcl.height = height;
-  pcl.width = width;
-  pcl.is_dense = false;
-  pcl.points.resize((size_t)width * (size_t)height);
+	pcl.height   = height;
+	pcl.width    = width;
+	pcl.is_dense = false;
+	pcl.points.resize((size_t)width * (size_t)height);
 
-  for (unsigned int i = 0; i < width * height; ++i) {
-    pcl::PointXYZ &p = pcl.points[i];
-    const pcl_point_t &pt = pclbuf[i];
-    p.x = pt.x;
-    p.y = pt.y;
-    p.z = pt.z;
-  }
-
+	for (unsigned int i = 0; i < width * height; ++i) {
+		pcl::PointXYZ &    p  = pcl.points[i];
+		const pcl_point_t &pt = pclbuf[i];
+		p.x                   = pt.x;
+		p.y                   = pt.y;
+		p.z                   = pt.z;
+	}
 }
-
 
 void
-convert_buffer_to_pcl(const SharedMemoryImageBuffer *buffer,
-                      pcl::PointCloud<pcl::PointXYZRGB> &pcl)
+convert_buffer_to_pcl(const SharedMemoryImageBuffer *buffer, pcl::PointCloud<pcl::PointXYZRGB> &pcl)
 {
-  if (buffer->colorspace() != CARTESIAN_3D_FLOAT) {
-    throw Exception("Invalid colorspace, expected CARTESIAN_3D_FLOAT");
-  }
+	if (buffer->colorspace() != CARTESIAN_3D_FLOAT) {
+		throw Exception("Invalid colorspace, expected CARTESIAN_3D_FLOAT");
+	}
 
-  const pcl_point_t *pclbuf = (const pcl_point_t*)buffer->buffer();
+	const pcl_point_t *pclbuf = (const pcl_point_t *)buffer->buffer();
 
-  const unsigned int width  = buffer->width();
-  const unsigned int height = buffer->height();
+	const unsigned int width  = buffer->width();
+	const unsigned int height = buffer->height();
 
-  pcl.height = height;
-  pcl.width = width;
-  pcl.is_dense = false;
-  pcl.points.resize((size_t)width * (size_t)height);
+	pcl.height   = height;
+	pcl.width    = width;
+	pcl.is_dense = false;
+	pcl.points.resize((size_t)width * (size_t)height);
 
-  for (unsigned int i = 0; i < width * height; ++i) {
-    pcl::PointXYZRGB &p = pcl.points[i];
-    const pcl_point_t &pt = pclbuf[i];
-    p.x = pt.x;
-    p.y = pt.y;
-    p.z = pt.z;
-    p.r = p.g = p.b = 255;
-  }
+	for (unsigned int i = 0; i < width * height; ++i) {
+		pcl::PointXYZRGB & p  = pcl.points[i];
+		const pcl_point_t &pt = pclbuf[i];
+		p.x                   = pt.x;
+		p.y                   = pt.y;
+		p.z                   = pt.z;
+		p.r = p.g = p.b = 255;
+	}
 }
-
 
 } // end namespace firevision

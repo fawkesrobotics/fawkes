@@ -33,33 +33,31 @@ using namespace firevision;
 int
 main(int argc, char **argv)
 {
-  const char *s = "firewire:funny ID:mode=xy:test=test2:blub";
-  if ( argc > 1 ) {
-    s = argv[1];
-  }
+	const char *s = "firewire:funny ID:mode=xy:test=test2:blub";
+	if (argc > 1) {
+		s = argv[1];
+	}
 
-  CameraArgumentParser *argp = new CameraArgumentParser(s);
+	CameraArgumentParser *argp = new CameraArgumentParser(s);
 
-  cout << "Camera Type: " << argp->cam_type() << endl;
-  cout << "Camera ID:   " << argp->cam_id() << endl;
+	cout << "Camera Type: " << argp->cam_type() << endl;
+	cout << "Camera ID:   " << argp->cam_id() << endl;
 
-  map<string, string> values = argp->parameters();
-  map<string, string>::iterator i;
-  for (i = values.begin(); i != values.end(); ++i) {
-    cout << "values[" << (*i).first << "] = " << (*i).second << endl;
-  }
+	map<string, string>           values = argp->parameters();
+	map<string, string>::iterator i;
+	for (i = values.begin(); i != values.end(); ++i) {
+		cout << "values[" << (*i).first << "] = " << (*i).second << endl;
+	}
 
-  vector<string> args = argp->arguments();
-  vector<string>::iterator j;
-  for (j = args.begin(); j != args.end(); ++j) {
-    cout << "arg: " << (*j) << endl;
-  }
+	vector<string>           args = argp->arguments();
+	vector<string>::iterator j;
+	for (j = args.begin(); j != args.end(); ++j) {
+		cout << "arg: " << (*j) << endl;
+	}
 
-  delete argp;
+	delete argp;
 
-  return 0;
+	return 0;
 }
-
-
 
 /// @endcond

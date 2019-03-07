@@ -26,7 +26,6 @@
 #include <cstdlib>
 #include <cstring>
 
-
 namespace firevision {
 
 /** @class FireVisionDataFileBlock <fvutils/fileformat/fvfile_block.h>
@@ -53,24 +52,25 @@ namespace firevision {
  * @param spec_header content-specific header
  * @param spec_header_size size of spec_header in bytes
  */
-FireVisionDataFileBlock::FireVisionDataFileBlock(unsigned int type, size_t data_size,
-						 void *spec_header, size_t spec_header_size)
+FireVisionDataFileBlock::FireVisionDataFileBlock(unsigned int type,
+                                                 size_t       data_size,
+                                                 void *       spec_header,
+                                                 size_t       spec_header_size)
 {
-  constructor(type, data_size, spec_header, spec_header_size);
+	constructor(type, data_size, spec_header, spec_header_size);
 }
-
 
 /** Constructor.
  * @param type block type, content specific
  * @param data_size size of the data segment
  * @param spec_header_size a specific header of the given size is created internally
  */
-FireVisionDataFileBlock::FireVisionDataFileBlock(unsigned int type, size_t data_size,
-						 size_t spec_header_size)
+FireVisionDataFileBlock::FireVisionDataFileBlock(unsigned int type,
+                                                 size_t       data_size,
+                                                 size_t       spec_header_size)
 {
-  constructor(type, data_size, NULL, spec_header_size);
+	constructor(type, data_size, NULL, spec_header_size);
 }
-
 
 /** Constructor.
  * Specific header is assumed to be unused.
@@ -79,9 +79,8 @@ FireVisionDataFileBlock::FireVisionDataFileBlock(unsigned int type, size_t data_
  */
 FireVisionDataFileBlock::FireVisionDataFileBlock(unsigned int type, size_t data_size)
 {
-  constructor(type, data_size, NULL, 0);
+	constructor(type, data_size, NULL, 0);
 }
-
 
 /** Shallow copy constructor.
  * This creates a shallow copy of the given block. "Shallow" means that the data is not
@@ -91,16 +90,15 @@ FireVisionDataFileBlock::FireVisionDataFileBlock(unsigned int type, size_t data_
  */
 FireVisionDataFileBlock::FireVisionDataFileBlock(FireVisionDataFileBlock *block)
 {
-  _data_size         = block->_data_size;
-  spec_header_size_ = block->spec_header_size_;
-  block_size_       = block->block_size_;
-  block_memptr_     = block->block_memptr_;
-  block_header_     = (fvff_block_header_t *)block_memptr_;
-  _spec_header       = (char *)block_memptr_ + sizeof(fvff_block_header_t);
-  _data              = (char *)block_memptr_ + sizeof(fvff_block_header_t) + spec_header_size_;
-  block_owner_      = false;
+	_data_size        = block->_data_size;
+	spec_header_size_ = block->spec_header_size_;
+	block_size_       = block->block_size_;
+	block_memptr_     = block->block_memptr_;
+	block_header_     = (fvff_block_header_t *)block_memptr_;
+	_spec_header      = (char *)block_memptr_ + sizeof(fvff_block_header_t);
+	_data             = (char *)block_memptr_ + sizeof(fvff_block_header_t) + spec_header_size_;
+	block_owner_      = false;
 }
-
 
 /** Internal constructor.
  * @param type block type, content specific
@@ -109,28 +107,29 @@ FireVisionDataFileBlock::FireVisionDataFileBlock(FireVisionDataFileBlock *block)
  * @param spec_header_size size of spec_header in bytes
  */
 void
-FireVisionDataFileBlock::constructor(unsigned int type, size_t data_size,
-				     void *spec_header, size_t spec_header_size)
+FireVisionDataFileBlock::constructor(unsigned int type,
+                                     size_t       data_size,
+                                     void *       spec_header,
+                                     size_t       spec_header_size)
 {
-  _data_size         = data_size;
-  spec_header_size_ = spec_header_size;
-  block_size_       = _data_size + sizeof(fvff_block_header_t) + spec_header_size;
+	_data_size        = data_size;
+	spec_header_size_ = spec_header_size;
+	block_size_       = _data_size + sizeof(fvff_block_header_t) + spec_header_size;
 
-  block_memptr_ = calloc(1, block_size_);
-  block_owner_  = true;
-  block_header_ = (fvff_block_header_t *)block_memptr_;
-  _spec_header   = (char *)block_memptr_ + sizeof(fvff_block_header_t);
-  _data          = (char *)block_memptr_ + sizeof(fvff_block_header_t) + spec_header_size;
+	block_memptr_ = calloc(1, block_size_);
+	block_owner_  = true;
+	block_header_ = (fvff_block_header_t *)block_memptr_;
+	_spec_header  = (char *)block_memptr_ + sizeof(fvff_block_header_t);
+	_data         = (char *)block_memptr_ + sizeof(fvff_block_header_t) + spec_header_size;
 
-  if ( (spec_header != NULL) && (spec_header_size > 0) ) {
-    memcpy((char *)block_memptr_ + sizeof(fvff_block_header_t), spec_header, spec_header_size);
-  }
+	if ((spec_header != NULL) && (spec_header_size > 0)) {
+		memcpy((char *)block_memptr_ + sizeof(fvff_block_header_t), spec_header, spec_header_size);
+	}
 
-  block_header_->type = type;
-  block_header_->size = _data_size;
-  block_header_->spec_head_size = spec_header_size;
+	block_header_->type           = type;
+	block_header_->size           = _data_size;
+	block_header_->spec_head_size = spec_header_size;
 }
-
 
 /** Set content-specific header.
  * If necessary this re-creates internal buffers. To avoid this use the three-parameter
@@ -141,39 +140,37 @@ FireVisionDataFileBlock::constructor(unsigned int type, size_t data_size,
 void
 FireVisionDataFileBlock::set_spec_header(void *spec_header, size_t spec_header_size)
 {
-  if( spec_header_size != spec_header_size_ ) {
-    // we need to re-create the memory and copy old data
-    spec_header_size_ = spec_header_size;
-    block_size_       = _data_size + sizeof(fvff_block_header_t) + spec_header_size;
+	if (spec_header_size != spec_header_size_) {
+		// we need to re-create the memory and copy old data
+		spec_header_size_ = spec_header_size;
+		block_size_       = _data_size + sizeof(fvff_block_header_t) + spec_header_size;
 
-    void *newblock = calloc(1, block_size_);
+		void *newblock = calloc(1, block_size_);
 
-    memcpy(newblock, block_memptr_, sizeof(fvff_block_header_t));
-    memcpy((char *)newblock + sizeof(fvff_block_header_t) + spec_header_size, _data, _data_size);
+		memcpy(newblock, block_memptr_, sizeof(fvff_block_header_t));
+		memcpy((char *)newblock + sizeof(fvff_block_header_t) + spec_header_size, _data, _data_size);
 
-    free(block_memptr_);
-    block_memptr_ = newblock;
-    block_header_ = (fvff_block_header_t *)block_memptr_;
-    _spec_header = (char *)block_memptr_ + sizeof(fvff_block_header_t);
-    _data = (char *)block_memptr_ + sizeof(fvff_block_header_t) + spec_header_size;
+		free(block_memptr_);
+		block_memptr_ = newblock;
+		block_header_ = (fvff_block_header_t *)block_memptr_;
+		_spec_header  = (char *)block_memptr_ + sizeof(fvff_block_header_t);
+		_data         = (char *)block_memptr_ + sizeof(fvff_block_header_t) + spec_header_size;
 
-    block_header_->spec_head_size = spec_header_size;
-  }
+		block_header_->spec_head_size = spec_header_size;
+	}
 
-  if ( (spec_header != NULL) && (spec_header_size > 0) ) {
-    memcpy((char *)block_memptr_ + sizeof(fvff_block_header_t), spec_header, spec_header_size);
-  }
+	if ((spec_header != NULL) && (spec_header_size > 0)) {
+		memcpy((char *)block_memptr_ + sizeof(fvff_block_header_t), spec_header, spec_header_size);
+	}
 }
-
 
 /** Destructor. */
 FireVisionDataFileBlock::~FireVisionDataFileBlock()
 {
-  if ( block_owner_) {
-    free(block_memptr_);
-  }
+	if (block_owner_) {
+		free(block_memptr_);
+	}
 }
-
 
 /** Get block type.
  * @return block type ID, content specific
@@ -181,9 +178,8 @@ FireVisionDataFileBlock::~FireVisionDataFileBlock()
 unsigned int
 FireVisionDataFileBlock::type() const
 {
-  return block_header_->type;
+	return block_header_->type;
 }
-
 
 /** Pointer to the whole block.
  * @return pointer to whole block, including headers
@@ -191,9 +187,8 @@ FireVisionDataFileBlock::type() const
 void *
 FireVisionDataFileBlock::block_memptr() const
 {
-  return block_memptr_;
+	return block_memptr_;
 }
-
 
 /** Size of blocks.
  * @return size of blocks in bytes.
@@ -201,9 +196,8 @@ FireVisionDataFileBlock::block_memptr() const
 size_t
 FireVisionDataFileBlock::block_size() const
 {
-  return block_size_;
+	return block_size_;
 }
-
 
 /** Get data pointer.
  * @return pointer to the data segment of the block
@@ -211,9 +205,8 @@ FireVisionDataFileBlock::block_size() const
 void *
 FireVisionDataFileBlock::data_ptr() const
 {
-  return _data;
+	return _data;
 }
-
 
 /** Size of data chunk.
  * @return size of data in bytes.
@@ -221,7 +214,7 @@ FireVisionDataFileBlock::data_ptr() const
 size_t
 FireVisionDataFileBlock::data_size() const
 {
-  return _data_size;
+	return _data_size;
 }
 
 } // end namespace firevision

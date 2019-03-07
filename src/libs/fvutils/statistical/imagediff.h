@@ -29,32 +29,30 @@
 
 namespace firevision {
 
-class ImageDiff {
- public:
-  ImageDiff(ScanlineModel *scanline_model);
-  ImageDiff();
-  ~ImageDiff();
+class ImageDiff
+{
+public:
+	ImageDiff(ScanlineModel *scanline_model);
+	ImageDiff();
+	~ImageDiff();
 
-  void setBufferA(unsigned char *yuv422planar_buffer,
-		  unsigned int width, unsigned int height);
+	void setBufferA(unsigned char *yuv422planar_buffer, unsigned int width, unsigned int height);
 
-  void setBufferB(unsigned char *yuv422planar_buffer,
-		  unsigned int width, unsigned int height);
+	void setBufferB(unsigned char *yuv422planar_buffer, unsigned int width, unsigned int height);
 
-  bool different();
-  unsigned int numDifferingPixels();
+	bool         different();
+	unsigned int numDifferingPixels();
 
- private:
-  ScanlineModel *scanline_model;
+private:
+	ScanlineModel *scanline_model;
 
-  unsigned char *buffer_a;
-  unsigned char *buffer_b;
+	unsigned char *buffer_a;
+	unsigned char *buffer_b;
 
-  unsigned int width_a;
-  unsigned int height_a;
-  unsigned int width_b;
-  unsigned int height_b;
-
+	unsigned int width_a;
+	unsigned int height_a;
+	unsigned int width_b;
+	unsigned int height_b;
 };
 
 } // end namespace firevision

@@ -21,15 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/writers/seq_writer.h>
 #include <core/exceptions/system.h>
-
-#include <time.h>
+#include <fvutils/writers/seq_writer.h>
 #include <sys/time.h>
 
-#include <cstring>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <time.h>
 
 using namespace fawkes;
 
@@ -44,38 +43,38 @@ namespace firevision {
 /** Constructor.
  * @param writer the actual image writer
  */
-SeqWriter::SeqWriter(Writer* writer)
+SeqWriter::SeqWriter(Writer *writer)
 {
-  this->writer = writer;
+	this->writer = writer;
 
-  frame_number = 0;
+	frame_number = 0;
 
-  cspace = CS_UNKNOWN;
+	cspace = CS_UNKNOWN;
 
-  filename = 0;
-  img_path = 0;
+	filename = 0;
+	img_path = 0;
 }
-
 
 /** Destructor.
  */
 SeqWriter::~SeqWriter()
 {
-  delete writer;
-  writer = 0;
-  
-  free(filename);
-  free(img_path);
+	delete writer;
+	writer = 0;
+
+	free(filename);
+	free(img_path);
 }
 
 /** Set the path to where the images are stored.
  * @param img_path the image path
  */
-void SeqWriter::set_path(const char* img_path)
+void
+SeqWriter::set_path(const char *img_path)
 {
-  free(this->img_path);
-  this->img_path = strdup(img_path);
-  printf("SeqWriter: img path set to %s\n", this->img_path);
+	free(this->img_path);
+	this->img_path = strdup(img_path);
+	printf("SeqWriter: img path set to %s\n", this->img_path);
 }
 
 /** Set a (base-) filename.
@@ -83,99 +82,96 @@ void SeqWriter::set_path(const char* img_path)
  * filename_index.ext .
  * @param filename the (base-) filename
  */
-void SeqWriter::set_filename(const char* filename)
+void
+SeqWriter::set_filename(const char *filename)
 {
-  free(this->filename);
-  this->filename = strdup(filename);
+	free(this->filename);
+	this->filename = strdup(filename);
 }
 
 /** Set the image dimensions.
  * @param width the width of the image
  * @param height the height of the image
  */
-void SeqWriter::set_dimensions(unsigned int width, unsigned int height)
+void
+SeqWriter::set_dimensions(unsigned int width, unsigned int height)
 {
-  writer->set_dimensions(width, height);
+	writer->set_dimensions(width, height);
 }
 
 /** Set the colorspace of the image.
  * @param cspace the colospace
  */
-void SeqWriter::set_colorspace(colorspace_t cspace)
+void
+SeqWriter::set_colorspace(colorspace_t cspace)
 {
-  this->cspace = cspace;
+	this->cspace = cspace;
 }
 
 /** Write a single image to disk.
  * A running number is added to the filename
  * @param buffer the image buffer that is written to disk
  */
-void SeqWriter::write(unsigned char *buffer)
+void
+SeqWriter::write(unsigned char *buffer)
 {
-  ++frame_number;
-  char* fn;
+	++frame_number;
+	char *fn;
 
-  time_t now = time(NULL);
-  struct tm now_tm;
-  struct timeval now_tv;
+	time_t         now = time(NULL);
+	struct tm      now_tm;
+	struct timeval now_tv;
 
-  gettimeofday(&now_tv, NULL);
-  localtime_r(&now, &now_tm);
+	gettimeofday(&now_tv, NULL);
+	localtime_r(&now, &now_tm);
 
-  char* timestring;
-  if (asprintf(&timestring, "%04d%02d%02d_%02d%02d%02d_%06ld", now_tm.tm_year + 1900, 
-	       now_tm.tm_mon + 1, now_tm.tm_mday, now_tm.tm_hour, now_tm.tm_min, 
-	       now_tm.tm_sec, now_tv.tv_usec) == -1)
-  {
-    throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (1)");
-  }
-  
-  if (filename)
-    {
-      // filename: YYYYMMDD-hhmmss_uuuuuu_name_index.ext
-      if (img_path)
-      {
-	if (asprintf(&fn, "%s/%s_%s-%04u", img_path, timestring, filename, frame_number) == -1)
-	{
-	  throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (2)");
+	char *timestring;
+	if (asprintf(&timestring,
+	             "%04d%02d%02d_%02d%02d%02d_%06ld",
+	             now_tm.tm_year + 1900,
+	             now_tm.tm_mon + 1,
+	             now_tm.tm_mday,
+	             now_tm.tm_hour,
+	             now_tm.tm_min,
+	             now_tm.tm_sec,
+	             now_tv.tv_usec)
+	    == -1) {
+		throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (1)");
 	}
-      }
-      else
-      {
-	if (asprintf(&fn, "%s_%s-%04u", timestring, filename, frame_number) == -1)
-	{
-	  throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (2)");
-	}
-      }
-    }	
-  else
-    {
-      // filename: YYYYMMDD-hhmmss_uuuuuu_index.ext
-      if (img_path)
-      {
-	if (asprintf(&fn, "%s/%s-%04u", img_path, timestring, frame_number) == -1)
-	{
-	  throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (3)");
-	}
-      }
-      else
-      {
-	if (asprintf(&fn, "%s-%04u", timestring, frame_number) == -1)
-	{
-	  throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (4)");
-	}
-      }
-    }
 
-  writer->set_filename(fn);
-  free(fn);
+	if (filename) {
+		// filename: YYYYMMDD-hhmmss_uuuuuu_name_index.ext
+		if (img_path) {
+			if (asprintf(&fn, "%s/%s_%s-%04u", img_path, timestring, filename, frame_number) == -1) {
+				throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (2)");
+			}
+		} else {
+			if (asprintf(&fn, "%s_%s-%04u", timestring, filename, frame_number) == -1) {
+				throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (2)");
+			}
+		}
+	} else {
+		// filename: YYYYMMDD-hhmmss_uuuuuu_index.ext
+		if (img_path) {
+			if (asprintf(&fn, "%s/%s-%04u", img_path, timestring, frame_number) == -1) {
+				throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (3)");
+			}
+		} else {
+			if (asprintf(&fn, "%s-%04u", timestring, frame_number) == -1) {
+				throw OutOfMemoryException("SeqWriter::write(): asprintf() failed (4)");
+			}
+		}
+	}
 
-  try {
-    writer->set_buffer(cspace, buffer);
-    writer->write();
-  } catch (Exception &e) {
-    throw;
-  }
+	writer->set_filename(fn);
+	free(fn);
+
+	try {
+		writer->set_buffer(cspace, buffer);
+		writer->write();
+	} catch (Exception &e) {
+		throw;
+	}
 }
 
 } // end namespace firevision

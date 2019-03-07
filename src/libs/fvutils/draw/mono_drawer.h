@@ -29,38 +29,34 @@
 
 namespace firevision {
 
-class MonoDrawer {
+class MonoDrawer
+{
+public:
+	MonoDrawer();
+	~MonoDrawer();
 
- public:
-  MonoDrawer();
-  ~MonoDrawer();
+	void draw_circle(int center_x, int center_y, unsigned int radius);
 
-  void draw_circle(int center_x, int center_y, unsigned int radius);
+	void draw_rectangle(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
 
-  void draw_rectangle(unsigned int x, unsigned int y,
-		     unsigned int w, unsigned int h);
+	void draw_rectangle_inverted(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
 
-  void draw_rectangle_inverted(unsigned int x, unsigned int y,
-			     unsigned int w, unsigned int h);
+	void draw_point(unsigned int x, unsigned int y);
+	void
+	     draw_line(unsigned int x_start, unsigned int y_start, unsigned int x_end, unsigned int y_end);
+	void draw_cross(unsigned int x_center, unsigned int y_center, unsigned int width);
 
-  void draw_point(unsigned int x, unsigned int y);
-  void draw_line(unsigned int x_start, unsigned int y_start,
-		unsigned int x_end, unsigned int y_end);
-  void draw_cross(unsigned int x_center, unsigned int y_center, unsigned int width);
+	void set_buffer(unsigned char *buffer, unsigned int width, unsigned int height);
 
-  void set_buffer(unsigned char *buffer,
-		 unsigned int width, unsigned int height);
+	void set_brightness(unsigned char b);
+	void set_overlap(bool o);
 
-  void set_brightness(unsigned char b);
-  void set_overlap(bool o);
-
- private:
-  unsigned char  *buffer_;
-  unsigned int    width_;
-  unsigned int    height_;
-  unsigned char   brightness_;
-  bool		  overlap_;
-
+private:
+	unsigned char *buffer_;
+	unsigned int   width_;
+	unsigned int   height_;
+	unsigned char  brightness_;
+	bool           overlap_;
 };
 
 } // end namespace firevision

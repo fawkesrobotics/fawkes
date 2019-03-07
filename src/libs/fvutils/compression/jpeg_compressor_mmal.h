@@ -25,54 +25,54 @@
 #define _FIREVISION_UTILS_COMPRESSION_JPEG_COMPRESSOR_MMAL_H_
 
 #ifndef _FIREVISION_UTILS_COMPRESSION_JPEG_COMPRESSOR_H_
-#  error Do not include jpeg_compressor_mmal.h directly, use jpeg_compressor.h
+#	error Do not include jpeg_compressor_mmal.h directly, use jpeg_compressor.h
 #endif
 
 #ifndef HAVE_MMAL
-#  error Cannot use MMAL JPEG Encoder without MMAL
+#	error Cannot use MMAL JPEG Encoder without MMAL
 #endif
 
 #include <fvutils/compression/imagecompressor.h>
 
 namespace firevision {
 
-class JpegImageCompressorMMAL : public ImageCompressor {
- public:
+class JpegImageCompressorMMAL : public ImageCompressor
+{
+public:
+	JpegImageCompressorMMAL(unsigned int quality = 80);
+	virtual ~JpegImageCompressorMMAL();
 
-  JpegImageCompressorMMAL(unsigned int quality = 80);
-  virtual ~JpegImageCompressorMMAL();
+	virtual void   set_image_dimensions(unsigned int width, unsigned int height);
+	virtual void   set_image_buffer(colorspace_t cspace, unsigned char *buffer);
+	virtual void   set_destination_buffer(unsigned char *buf, unsigned int buf_size);
+	virtual size_t compressed_size();
+	virtual void   set_filename(const char *filename);
+	virtual void   set_compression_destination(ImageCompressor::CompressionDestination cd);
+	virtual bool   supports_compression_destination(ImageCompressor::CompressionDestination cd);
+	virtual void   compress();
+	virtual size_t recommended_compressed_buffer_size();
 
-  virtual void          set_image_dimensions(unsigned int width, unsigned int height);
-  virtual void          set_image_buffer(colorspace_t cspace, unsigned char *buffer);
-  virtual void          set_destination_buffer(unsigned char *buf, unsigned int buf_size);
-  virtual size_t        compressed_size();
-  virtual void          set_filename(const char *filename);
-  virtual void          set_compression_destination(ImageCompressor::CompressionDestination cd);
-  virtual bool          supports_compression_destination(ImageCompressor::CompressionDestination cd);
-  virtual void          compress();
-  virtual size_t        recommended_compressed_buffer_size();
+	virtual bool supports_vflip();
+	virtual void set_vflip(bool enable);
 
-  virtual bool          supports_vflip();
-  virtual void          set_vflip(bool enable);
+	class State;
 
-  class State;
+private:
+	void create_encoder_component();
+	void destroy_encoder_component();
 
- private:
-  void create_encoder_component();
-  void destroy_encoder_component();
+private:
+	unsigned char *buffer_;
 
- private:
-  unsigned char *buffer_;
+	unsigned int quality_;
 
-  unsigned int   quality_;
+	unsigned int width_;
+	unsigned int height_;
 
-  unsigned int   width_;
-  unsigned int   height_;
+	const char *filename_;
 
-  const char    *filename_;
-
-  State *state_;
-  bool   vflip_;
+	State *state_;
+	bool   vflip_;
 };
 
 } // end namespace firevision

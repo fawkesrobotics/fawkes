@@ -30,28 +30,28 @@
 
 namespace firevision {
 
-class PNMReader : public Reader {
+class PNMReader : public Reader
+{
+public:
+	PNMReader(const char *filename);
+	virtual ~PNMReader();
 
- public:
-  PNMReader(const char* filename);
-  virtual ~PNMReader();
+	virtual void         set_buffer(unsigned char *yuv422planar_buffer);
+	virtual colorspace_t colorspace();
+	virtual unsigned int pixel_width();
+	virtual unsigned int pixel_height();
+	virtual void         read();
 
-  virtual void             set_buffer(unsigned char* yuv422planar_buffer);
-  virtual colorspace_t     colorspace();
-  virtual unsigned int     pixel_width();
-  virtual unsigned int     pixel_height();
-  virtual void             read();
+private:
+	FILE *         m_pnmfile;
+	unsigned char *m_yuv_buffer;
+	unsigned char *m_pnm_buffer;
 
- private:
-  FILE* m_pnmfile;
-  unsigned char* m_yuv_buffer;
-  unsigned char* m_pnm_buffer;
+	char *m_filename;
 
-  char* m_filename;
-
-  unsigned int m_img_width;
-  unsigned int m_img_height;
-  unsigned int m_img_depth;
+	unsigned int m_img_width;
+	unsigned int m_img_height;
+	unsigned int m_img_depth;
 };
 
 } // end namespace firevision

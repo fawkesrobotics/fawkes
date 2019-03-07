@@ -34,24 +34,24 @@ namespace firevision {
 
 class CameraArgumentParser
 {
- public:
-  CameraArgumentParser(const char *as);
-  ~CameraArgumentParser();
+public:
+	CameraArgumentParser(const char *as);
+	~CameraArgumentParser();
 
-  bool                                has(std::string s) const;
-  std::string                         get(std::string s) const;
-  long int                            get_int(std::string s) const;
-  double                              get_float(std::string s) const;
-  std::map<std::string, std::string>  parameters() const;
-  std::vector<std::string>            arguments() const;
-  std::string                         cam_id() const;
-  std::string                         cam_type() const;
+	bool                               has(std::string s) const;
+	std::string                        get(std::string s) const;
+	long int                           get_int(std::string s) const;
+	double                             get_float(std::string s) const;
+	std::map<std::string, std::string> parameters() const;
+	std::vector<std::string>           arguments() const;
+	std::string                        cam_id() const;
+	std::string                        cam_type() const;
 
- private:
-  std::string _cam_type;
-  std::string _cam_id;
-  std::map<std::string, std::string> values;
-  std::vector<std::string> args;
+private:
+	std::string                        _cam_type;
+	std::string                        _cam_id;
+	std::map<std::string, std::string> values;
+	std::vector<std::string>           args;
 };
 
 } // end namespace firevision

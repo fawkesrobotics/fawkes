@@ -21,9 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/rectification/rectinfo_lut_block.h>
-
 #include <core/exceptions/software.h>
+#include <fvutils/rectification/rectinfo_lut_block.h>
 
 using namespace fawkes;
 
@@ -42,21 +41,20 @@ namespace firevision {
  * @param camera camera identifier, see rectinfo_camera_t
  */
 RectificationLutInfoBlock::RectificationLutInfoBlock(uint16_t width,
-						     uint16_t height,
-						     uint8_t camera)
-  : RectificationInfoBlock(FIREVISION_RECTINFO_TYPE_LUT_16x16,
-			   camera,
-			   sizeof(rectinfo_lut_16x16_block_header_t) +
-			   ((size_t)width * height * sizeof(rectinfo_lut_16x16_entry_t)))
+                                                     uint16_t height,
+                                                     uint8_t  camera)
+: RectificationInfoBlock(FIREVISION_RECTINFO_TYPE_LUT_16x16,
+                         camera,
+                         sizeof(rectinfo_lut_16x16_block_header_t)
+                           + ((size_t)width * height * sizeof(rectinfo_lut_16x16_entry_t)))
 {
-  _lut_block_header = (rectinfo_lut_16x16_block_header_t *)_data;
-  _lut_data         = (rectinfo_lut_16x16_entry_t *)((char *)_data +
-						     sizeof(rectinfo_lut_16x16_block_header_t));
+	_lut_block_header = (rectinfo_lut_16x16_block_header_t *)_data;
+	_lut_data =
+	  (rectinfo_lut_16x16_entry_t *)((char *)_data + sizeof(rectinfo_lut_16x16_block_header_t));
 
-  _lut_block_header->width  = width;
-  _lut_block_header->height = height;
+	_lut_block_header->width  = width;
+	_lut_block_header->height = height;
 }
-
 
 /** Copy Constructor.
  * It is assumed that the block actually is a rectification LUT info block. Check that
@@ -64,29 +62,26 @@ RectificationLutInfoBlock::RectificationLutInfoBlock(uint16_t width,
  * @param block block to copy
  */
 RectificationLutInfoBlock::RectificationLutInfoBlock(FireVisionDataFileBlock *block)
-  : RectificationInfoBlock(block)
+: RectificationInfoBlock(block)
 {
-  _lut_block_header = (rectinfo_lut_16x16_block_header_t *)_data;
-  _lut_data         = (rectinfo_lut_16x16_entry_t *)((char *)_data +
-						     sizeof(rectinfo_lut_16x16_block_header_t));
+	_lut_block_header = (rectinfo_lut_16x16_block_header_t *)_data;
+	_lut_data =
+	  (rectinfo_lut_16x16_entry_t *)((char *)_data + sizeof(rectinfo_lut_16x16_block_header_t));
 }
-
 
 void
-RectificationLutInfoBlock::mapping(uint16_t x, uint16_t y,
-				   uint16_t *to_x, uint16_t *to_y)
+RectificationLutInfoBlock::mapping(uint16_t x, uint16_t y, uint16_t *to_x, uint16_t *to_y)
 {
-  if ( x > _lut_block_header->width ) {
-    throw OutOfBoundsException("RectLUT X (from)", x, 0, _lut_block_header->width);
-  }
-  if ( y > _lut_block_header->height ) {
-    throw OutOfBoundsException("RectLUT Y (from)", y, 0, _lut_block_header->height);
-  }
+	if (x > _lut_block_header->width) {
+		throw OutOfBoundsException("RectLUT X (from)", x, 0, _lut_block_header->width);
+	}
+	if (y > _lut_block_header->height) {
+		throw OutOfBoundsException("RectLUT Y (from)", y, 0, _lut_block_header->height);
+	}
 
-  *to_x = _lut_data[y * _lut_block_header->width + x].x;
-  *to_y = _lut_data[y * _lut_block_header->width + x].y;
+	*to_x = _lut_data[y * _lut_block_header->width + x].x;
+	*to_y = _lut_data[y * _lut_block_header->width + x].y;
 }
-
 
 /** Set mapping.
  * @param x X pixel coordinate to get mapping for
@@ -95,26 +90,24 @@ RectificationLutInfoBlock::mapping(uint16_t x, uint16_t y,
  * @param to_y Y pixel coordinate of the unrectified image
  */
 void
-RectificationLutInfoBlock::set_mapping(uint16_t x, uint16_t y,
-				       uint16_t to_x, uint16_t to_y)
+RectificationLutInfoBlock::set_mapping(uint16_t x, uint16_t y, uint16_t to_x, uint16_t to_y)
 {
-  if ( x > _lut_block_header->width ) {
-    throw OutOfBoundsException("RectLUT X (from)", x, 0, _lut_block_header->width);
-  }
-  if ( y > _lut_block_header->height ) {
-    throw OutOfBoundsException("RectLUT Y (from)", y, 0, _lut_block_header->height);
-  }
-  if ( to_x > _lut_block_header->width ) {
-    throw OutOfBoundsException("RectLUT X (to)", to_x, 0, _lut_block_header->width);
-  }
-  if ( to_y > _lut_block_header->height ) {
-    throw OutOfBoundsException("RectLUT Y (to)", to_y, 0, _lut_block_header->height);
-  }
+	if (x > _lut_block_header->width) {
+		throw OutOfBoundsException("RectLUT X (from)", x, 0, _lut_block_header->width);
+	}
+	if (y > _lut_block_header->height) {
+		throw OutOfBoundsException("RectLUT Y (from)", y, 0, _lut_block_header->height);
+	}
+	if (to_x > _lut_block_header->width) {
+		throw OutOfBoundsException("RectLUT X (to)", to_x, 0, _lut_block_header->width);
+	}
+	if (to_y > _lut_block_header->height) {
+		throw OutOfBoundsException("RectLUT Y (to)", to_y, 0, _lut_block_header->height);
+	}
 
-  _lut_data[y * _lut_block_header->width + x].x = to_x;
-  _lut_data[y * _lut_block_header->width + x].y = to_y;
+	_lut_data[y * _lut_block_header->width + x].x = to_x;
+	_lut_data[y * _lut_block_header->width + x].y = to_y;
 }
-
 
 /** Get width of the LUT.
  * @return width of LUT.
@@ -122,9 +115,8 @@ RectificationLutInfoBlock::set_mapping(uint16_t x, uint16_t y,
 uint16_t
 RectificationLutInfoBlock::pixel_width()
 {
-  return _lut_block_header->width;
+	return _lut_block_header->width;
 }
-
 
 /** Get height the LUT.
  * @return height of LUT.
@@ -132,9 +124,8 @@ RectificationLutInfoBlock::pixel_width()
 uint16_t
 RectificationLutInfoBlock::pixel_height()
 {
-  return _lut_block_header->height;
+	return _lut_block_header->height;
 }
-
 
 /** Get raw LUT data.
  * Use this to access the LUT.
@@ -143,7 +134,7 @@ RectificationLutInfoBlock::pixel_height()
 rectinfo_lut_16x16_entry_t *
 RectificationLutInfoBlock::lut_data()
 {
-  return _lut_data;
+	return _lut_data;
 }
 
 } // end namespace firevision

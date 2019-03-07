@@ -28,8 +28,9 @@
 #ifndef _FIREVISION_UTILS_COLOR_THRESHOLD_H_
 #define _FIREVISION_UTILS_COLOR_THRESHOLD_H_
 
-#include <cmath>
 #include <sys/types.h>
+
+#include <cmath>
 
 namespace firevision {
 
@@ -46,32 +47,42 @@ namespace firevision {
  * @param sat_thresh Minimum saturation
  * @return true if color (u, v) is similar to (ref_u, ref_v), false otherwise.
  */
-inline bool is_similar(int u, int v, int ref_u, int ref_v, int ref_length, int chroma_thresh, int sat_thresh) {
-  int length = sqrt(u * u + v * v);
+inline bool
+is_similar(int u, int v, int ref_u, int ref_v, int ref_length, int chroma_thresh, int sat_thresh)
+{
+	int length = sqrt(u * u + v * v);
 
-  int diffu, diffv;
-  int64_t difflen2, thres;
+	int     diffu, diffv;
+	int64_t difflen2, thres;
 
-  diffu = ref_u * length - u * ref_length;
-  diffv = ref_v * length - v * ref_length;
-  difflen2 = diffu * diffu + diffv * diffv;
-  thres = (int64_t)length * ref_length;
-  thres *= thres;
+	diffu    = ref_u * length - u * ref_length;
+	diffv    = ref_v * length - v * ref_length;
+	difflen2 = diffu * diffu + diffv * diffv;
+	thres    = (int64_t)length * ref_length;
+	thres *= thres;
 
-  return (length > sat_thresh) && (difflen2 * chroma_thresh < thres);
+	return (length > sat_thresh) && (difflen2 * chroma_thresh < thres);
 }
 
-inline bool is_similar_y(int y, int u, int v,
-  int ref_y, int ref_u, int ref_v,
-  int ref_length, int chroma_thresh, int sat_thresh, int y_thresh) {
-
-  return is_similar(u, v, ref_u, ref_v, ref_length, chroma_thresh, sat_thresh)
+inline bool
+is_similar_y(int y,
+             int u,
+             int v,
+             int ref_y,
+             int ref_u,
+             int ref_v,
+             int ref_length,
+             int chroma_thresh,
+             int sat_thresh,
+             int y_thresh)
+{
+	return is_similar(u, v, ref_u, ref_v, ref_length, chroma_thresh, sat_thresh)
 #if defined(__GNUC__) && ((__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || (__GNUC__ > 4))
-      && std::abs(y - ref_y) < (255 - y_thresh);
+	       && std::abs(y - ref_y) < (255 - y_thresh);
 #else
-      && ((y-ref_y) < 0 ? -1*(y-ref_y) : (y-ref_y)) < (255 - y_thresh);
+	       && ((y - ref_y) < 0 ? -1 * (y - ref_y) : (y - ref_y)) < (255 - y_thresh);
 #endif
 }
-}
+} // namespace firevision
 
 #endif /* FIREVISION_UTILS_COLOR_THRESHOLD_H__ */

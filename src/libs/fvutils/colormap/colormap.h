@@ -26,6 +26,7 @@
 
 #include <fvutils/base/types.h>
 #include <sys/types.h>
+
 #include <list>
 
 namespace firevision {
@@ -34,32 +35,31 @@ class ColormapFileBlock;
 
 class Colormap
 {
- public:
-  virtual ~Colormap();
+public:
+	virtual ~Colormap();
 
-  virtual color_t         determine(unsigned int y, unsigned int u, unsigned int v) const = 0;
-  virtual void            set(unsigned int y, unsigned int u, unsigned int v, color_t c)  = 0;
-  
-  virtual void            reset()                                                         = 0;
-  virtual void            set(unsigned char *buffer)                                      = 0;
+	virtual color_t determine(unsigned int y, unsigned int u, unsigned int v) const = 0;
+	virtual void    set(unsigned int y, unsigned int u, unsigned int v, color_t c)  = 0;
 
-  virtual size_t          size()                                                          = 0;
-  virtual void            to_image(unsigned char *yuv422_planar_buffer,
-				   unsigned int level = 0);
-  virtual unsigned int    image_height() const;
-  virtual unsigned int    image_width() const;
+	virtual void reset()                    = 0;
+	virtual void set(unsigned char *buffer) = 0;
 
-  virtual unsigned char * get_buffer() const                                              = 0;
+	virtual size_t       size() = 0;
+	virtual void         to_image(unsigned char *yuv422_planar_buffer, unsigned int level = 0);
+	virtual unsigned int image_height() const;
+	virtual unsigned int image_width() const;
 
-  virtual Colormap &      operator+=(const Colormap & cmlt)                               = 0;
-  virtual Colormap &      operator+=(const char *filename)                                = 0;
+	virtual unsigned char *get_buffer() const = 0;
 
-  virtual unsigned int    width() const                                                   = 0;
-  virtual unsigned int    height() const                                                  = 0;
-  virtual unsigned int    depth() const                                                   = 0;
-  virtual unsigned int    deepness() const                                                = 0;
+	virtual Colormap &operator+=(const Colormap &cmlt) = 0;
+	virtual Colormap &operator+=(const char *filename) = 0;
 
-  virtual std::list<ColormapFileBlock *>  get_blocks()                                    = 0;
+	virtual unsigned int width() const    = 0;
+	virtual unsigned int height() const   = 0;
+	virtual unsigned int depth() const    = 0;
+	virtual unsigned int deepness() const = 0;
+
+	virtual std::list<ColormapFileBlock *> get_blocks() = 0;
 };
 
 } // end namespace firevision

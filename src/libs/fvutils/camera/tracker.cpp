@@ -22,12 +22,10 @@
  */
 
 #include <core/exception.h>
-
-#include <fvutils/camera/tracker.h>
-#include <utils/system/console_colors.h>
-#include <utils/math/angle.h>
-
 #include <fvmodels/relative_position/relativepositionmodel.h>
+#include <fvutils/camera/tracker.h>
+#include <utils/math/angle.h>
+#include <utils/system/console_colors.h>
 
 #include <cmath>
 
@@ -54,7 +52,6 @@ const unsigned int CameraTracker::MODE_MODEL = 0;
 /** World point mode, track a world point */
 const unsigned int CameraTracker::MODE_WORLD = 1;
 
-
 /** Constructor.
  * @param relative_position_model Relative position model to use if in model tracking
  * mode.
@@ -64,22 +61,19 @@ const unsigned int CameraTracker::MODE_WORLD = 1;
  * of the camera on the robot in degrees, clock-wise positive.
  */
 CameraTracker::CameraTracker(RelativePositionModel *relative_position_model,
-			     float camera_height,
-                             float camera_ori_deg
-                             )
+                             float                  camera_height,
+                             float                  camera_ori_deg)
 {
-  rpm = relative_position_model;
-  mode = MODE_MODEL;
-  this->camera_height = camera_height;
-  this->camera_orientation = fawkes::deg2rad( camera_ori_deg );
+	rpm                      = relative_position_model;
+	mode                     = MODE_MODEL;
+	this->camera_height      = camera_height;
+	this->camera_orientation = fawkes::deg2rad(camera_ori_deg);
 }
-
 
 /** Destructor. */
 CameraTracker::~CameraTracker()
 {
 }
-
 
 /** Calculate values.
  * Based on the set data like robot position, world point and relative position model
@@ -88,22 +82,21 @@ CameraTracker::~CameraTracker()
 void
 CameraTracker::calc()
 {
-  if (mode == MODE_MODEL) {
-    new_pan  = rpm->get_bearing() - camera_orientation;
-    new_tilt = rpm->get_slope();
-  } else if (mode == MODE_WORLD) {
+	if (mode == MODE_MODEL) {
+		new_pan  = rpm->get_bearing() - camera_orientation;
+		new_tilt = rpm->get_slope();
+	} else if (mode == MODE_WORLD) {
+		float w_r_x = world_x - robot_x;
+		float w_r_y = world_y - robot_y;
 
-    float w_r_x = world_x - robot_x;
-    float w_r_y = world_y - robot_y;
+		float distance = sqrt(w_r_x * w_r_x + w_r_y * w_r_y);
 
-    float distance = sqrt( w_r_x * w_r_x + w_r_y * w_r_y );
+		//cout << msg_prefix << "  world_x=" << world_x << "  world_y=" << world_y
+		//     << "  robot_x=" << robot_x << "  robot_y=" << robot_y << endl;
+		//cout << msg_prefix << "  w_r_x=" << w_r_x << "  w_r_y=" << w_r_y
+		//     << "  dist=" << distance << endl;
 
-    //cout << msg_prefix << "  world_x=" << world_x << "  world_y=" << world_y
-    //     << "  robot_x=" << robot_x << "  robot_y=" << robot_y << endl;
-    //cout << msg_prefix << "  w_r_x=" << w_r_x << "  w_r_y=" << w_r_y
-    //     << "  dist=" << distance << endl;
-
-    /* atan2f magic
+		/* atan2f magic
      * tan alpha = opposite leg / adjacent leg
      * => alpha = atan( opposite leg / adjacent leg )
      *
@@ -120,13 +113,12 @@ CameraTracker::calc()
      * atan2f(distance, camera_height).
      */
 
-    // Calculate bearing to point
-    new_pan  = atan2f( w_r_y, w_r_x );
-    new_pan = fawkes::normalize_mirror_rad( new_pan - robot_ori - camera_orientation);
-    new_tilt = atan2f( camera_height, distance );
-  }
+		// Calculate bearing to point
+		new_pan  = atan2f(w_r_y, w_r_x);
+		new_pan  = fawkes::normalize_mirror_rad(new_pan - robot_ori - camera_orientation);
+		new_tilt = atan2f(camera_height, distance);
+	}
 }
-
 
 /** Get the new pan value.
  * @return new optimal pan value
@@ -134,9 +126,8 @@ CameraTracker::calc()
 float
 CameraTracker::get_new_pan()
 {
-  return new_pan;
+	return new_pan;
 }
-
 
 /** Get the new tilt value.
  * @return new optimal tilt value
@@ -144,9 +135,8 @@ CameraTracker::get_new_pan()
 float
 CameraTracker::get_new_tilt()
 {
-  return new_tilt;
+	return new_tilt;
 }
-
 
 /** Set tracking mode.
  * @param mode new tracking mode
@@ -155,13 +145,12 @@ CameraTracker::get_new_tilt()
 void
 CameraTracker::set_mode(unsigned int mode)
 {
-  if ( (mode == MODE_WORLD) || (mode == MODE_MODEL)) {
-    this->mode = mode;
-  } else {
-    throw fawkes::Exception("CameraTracker: Invalid mode, not setting mode");
-  }
+	if ((mode == MODE_WORLD) || (mode == MODE_MODEL)) {
+		this->mode = mode;
+	} else {
+		throw fawkes::Exception("CameraTracker: Invalid mode, not setting mode");
+	}
 }
-
 
 /** Set relative position model.
  * Switch the relative position model.
@@ -170,9 +159,8 @@ CameraTracker::set_mode(unsigned int mode)
 void
 CameraTracker::set_relative_position_model(RelativePositionModel *rpm)
 {
-  this->rpm = rpm;
+	this->rpm = rpm;
 }
-
 
 /** Set robot position.
  * Set the current robot position.
@@ -183,11 +171,10 @@ CameraTracker::set_relative_position_model(RelativePositionModel *rpm)
 void
 CameraTracker::set_robot_position(float x, float y, float ori)
 {
-  robot_x   = x;
-  robot_y   = y;
-  robot_ori = ori;
+	robot_x   = x;
+	robot_y   = y;
+	robot_ori = ori;
 }
-
 
 /** Set world point.
  * World point to track for the robot. The world point is given in a robot-relative
@@ -199,9 +186,8 @@ CameraTracker::set_robot_position(float x, float y, float ori)
 void
 CameraTracker::set_world_point(float x, float y)
 {
-  world_x = x;
-  world_y = y;
+	world_x = x;
+	world_y = y;
 }
-
 
 } // end namespace firevision

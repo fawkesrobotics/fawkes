@@ -24,25 +24,25 @@
 #ifndef _FIREVISION_FVUTILS_RECTIFICATION_RECTINFO_BLOCK_H_
 #define _FIREVISION_FVUTILS_RECTIFICATION_RECTINFO_BLOCK_H_
 
-#include <fvutils/rectification/rectinfo.h>
 #include <fvutils/fileformat/fvfile_block.h>
+#include <fvutils/rectification/rectinfo.h>
 #include <sys/types.h>
 
 namespace firevision {
 
 class RectificationInfoBlock : public FireVisionDataFileBlock
 {
- public:
-  RectificationInfoBlock(uint8_t block_type, uint8_t camera, size_t block_size);
-  RectificationInfoBlock(FireVisionDataFileBlock *block);
-  virtual ~RectificationInfoBlock();
+public:
+	RectificationInfoBlock(uint8_t block_type, uint8_t camera, size_t block_size);
+	RectificationInfoBlock(FireVisionDataFileBlock *block);
+	virtual ~RectificationInfoBlock();
 
-  uint8_t  camera() const;
+	uint8_t camera() const;
 
-  virtual void mapping(uint16_t x, uint16_t y, uint16_t *to_x, uint16_t *to_y) = 0;
+	virtual void mapping(uint16_t x, uint16_t y, uint16_t *to_x, uint16_t *to_y) = 0;
 
- protected:
-  rectinfo_block_header_t  *_block_header;
+protected:
+	rectinfo_block_header_t *_block_header;
 };
 
 } // end namespace firevision

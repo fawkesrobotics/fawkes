@@ -42,76 +42,63 @@ class YuvColormap;
 
 class BayesHistosToLut
 {
- public:
-  BayesHistosToLut(std::map< hint_t, Histogram * > &histos,
-		   unsigned int d = 1,
-		   hint_t fg_object = H_UNKNOWN,
-		   unsigned int w = 256,
-		   unsigned int h = 256);
-  ~BayesHistosToLut();
+public:
+	BayesHistosToLut(std::map<hint_t, Histogram *> &histos,
+	                 unsigned int                   d         = 1,
+	                 hint_t                         fg_object = H_UNKNOWN,
+	                 unsigned int                   w         = 256,
+	                 unsigned int                   h         = 256);
+	~BayesHistosToLut();
 
-  std::string getName();
+	std::string getName();
 
-  float getObjectProb(hint_t object);
+	float getObjectProb(hint_t object);
 
-  float getAPrioriProb( unsigned int u,
-			unsigned int v,
-			hint_t object );
-  float getAPrioriProb( unsigned int y,
-			unsigned int u,
-			unsigned int v,
-			hint_t object );
+	float getAPrioriProb(unsigned int u, unsigned int v, hint_t object);
+	float getAPrioriProb(unsigned int y, unsigned int u, unsigned int v, hint_t object);
 
-  float getAPosterioriProb( hint_t object,
-			    unsigned int u,
-			    unsigned int v );
-  float getAPosterioriProb( hint_t object,
-			    unsigned int y,
-			    unsigned int u,
-			    unsigned int v );
+	float getAPosterioriProb(hint_t object, unsigned int u, unsigned int v);
+	float getAPosterioriProb(hint_t object, unsigned int y, unsigned int u, unsigned int v);
 
-  hint_t getMostLikelyObject( unsigned int u,
-			      unsigned int v );
-  hint_t getMostLikelyObject( unsigned int y,
-			      unsigned int u,
-			      unsigned int v );
+	hint_t getMostLikelyObject(unsigned int u, unsigned int v);
+	hint_t getMostLikelyObject(unsigned int y, unsigned int u, unsigned int v);
 
-  void setMinProbability( float min_prob );
-  void setMinProbForColor( float min_prob, hint_t hint );
+	void setMinProbability(float min_prob);
+	void setMinProbForColor(float min_prob, hint_t hint);
 
-  YuvColormap * get_colormap();
+	YuvColormap *get_colormap();
 
-  /* method "calculateLutValues" calculates lut values
+	/* method "calculateLutValues" calculates lut values
      following the bayesian approach */
-  void calculateLutValues( bool penalty = false );
-  /* method "calculateLutAllColors" calculates lut values
+	void calculateLutValues(bool penalty = false);
+	/* method "calculateLutAllColors" calculates lut values
      _without_ following the bayesian approach, but it can handle all colors
      (not only "ball" and "background") */
-  void calculateLutAllColors();
-  void saveLut(char *file);
-  void save(std::string filename);
+	void calculateLutAllColors();
+	void saveLut(char *file);
+	void save(std::string filename);
 
- private:
-  std::map<hint_t, Histogram*>  &histograms;
-  std::map<hint_t, unsigned int> numberOfOccurrences;
-  std::map<hint_t, float>        object_probabilities;
+private:
+	std::map<hint_t, Histogram *> &histograms;
+	std::map<hint_t, unsigned int> numberOfOccurrences;
+	std::map<hint_t, float>        object_probabilities;
 
-  YuvColormap *lut;
-  unsigned int width;
-  unsigned int height;
-  unsigned int depth;
+	YuvColormap *lut;
+	unsigned int width;
+	unsigned int height;
+	unsigned int depth;
 
-  hint_t fg_object;
+	hint_t fg_object;
 
-  float   min_probability;
+	float min_probability;
 
-  // color thresholds:
-  float min_prob_ball;
-  float min_prob_green;
-  float min_prob_yellow;
-  float min_prob_blue;
-  float min_prob_white;
-  float min_prob_black;
+	// color thresholds:
+	float min_prob_ball;
+	float min_prob_green;
+	float min_prob_yellow;
+	float min_prob_blue;
+	float min_prob_white;
+	float min_prob_black;
 };
 
 } // end namespace firevision

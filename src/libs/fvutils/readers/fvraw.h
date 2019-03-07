@@ -31,28 +31,28 @@
 
 namespace firevision {
 
-class FvRawReader : public Reader {
+class FvRawReader : public Reader
+{
+public:
+	FvRawReader(const char *filename);
+	virtual ~FvRawReader();
 
- public:
-  FvRawReader(const char *filename);
-  virtual ~FvRawReader();
+	virtual void         set_buffer(unsigned char *yuv422planar_buffer);
+	virtual colorspace_t colorspace();
+	virtual unsigned int pixel_width();
+	virtual unsigned int pixel_height();
+	virtual void         read();
 
-  virtual void             set_buffer(unsigned char *yuv422planar_buffer);
-  virtual colorspace_t     colorspace();
-  virtual unsigned int     pixel_width();
-  virtual unsigned int     pixel_height();
-  virtual void             read();
+	static bool is_FvRaw(const char *filename);
 
-  static  bool             is_FvRaw(const char *filename);
+private:
+	bool           opened;
+	unsigned char *buffer;
+	FILE *         infile;
 
- private:
-  bool opened;
-  unsigned char *buffer;
-  FILE *infile;
+	unsigned int buffer_size;
 
-  unsigned int buffer_size;
-
-  FvRawWriter::FvRawHeader header;
+	FvRawWriter::FvRawHeader header;
 };
 
 } // end namespace firevision

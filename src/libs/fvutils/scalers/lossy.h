@@ -29,35 +29,32 @@
 
 namespace firevision {
 
-class LossyScaler : public Scaler {
+class LossyScaler : public Scaler
+{
+public:
+	LossyScaler();
+	virtual ~LossyScaler();
 
- public:
-  LossyScaler();
-  virtual ~LossyScaler();
+	virtual void         set_scale_factor(float factor);
+	virtual void         set_original_dimensions(unsigned int width, unsigned int height);
+	virtual void         set_scaled_dimensions(unsigned int width, unsigned int height);
+	virtual void         set_original_buffer(unsigned char *buffer);
+	virtual void         set_scaled_buffer(unsigned char *buffer);
+	virtual void         scale();
+	virtual unsigned int needed_scaled_width();
+	virtual unsigned int needed_scaled_height();
+	virtual float        get_scale_factor();
 
-  virtual void             set_scale_factor(float factor);
-  virtual void             set_original_dimensions(unsigned int width,
-						   unsigned int height);
-  virtual void             set_scaled_dimensions(unsigned int width,
-						 unsigned int height);
-  virtual void             set_original_buffer(unsigned char *buffer);
-  virtual void             set_scaled_buffer(unsigned char *buffer);
-  virtual void             scale();
-  virtual unsigned int     needed_scaled_width();
-  virtual unsigned int     needed_scaled_height();
-  virtual float            get_scale_factor();
+private:
+	unsigned int   orig_width;
+	unsigned int   orig_height;
+	unsigned char *orig_buffer;
 
- private:
-  unsigned int    orig_width;
-  unsigned int    orig_height;
-  unsigned char  *orig_buffer;
+	unsigned int   scal_width;
+	unsigned int   scal_height;
+	unsigned char *scal_buffer;
 
-  unsigned int    scal_width;
-  unsigned int    scal_height;
-  unsigned char  *scal_buffer;
-
-  float           scale_factor;
-
+	float scale_factor;
 };
 
 } // end namespace firevision

@@ -75,7 +75,6 @@ namespace firevision {
  *
  */
 
-
 /** Virtual empty destructor. */
 ColormapGenerator::~ColormapGenerator()
 {

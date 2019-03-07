@@ -24,60 +24,63 @@
 #ifndef _FIREVISION_FVUTILS_COLORMAP_CMFILE_H_
 #define _FIREVISION_FVUTILS_COLORMAP_CMFILE_H_
 
-#include <fvutils/fileformat/fvfile.h>
 #include <fvutils/colormap/cmfile_block.h>
-#include <vector>
-#include <string>
+#include <fvutils/fileformat/fvfile.h>
+
 #include <stdint.h>
+#include <string>
+#include <vector>
 
 namespace firevision {
 
 class Colormap;
 
-#define CMFILE_MAGIC_TOKEN  0xFF01
-#define CMFILE_CUR_VERSION  2
+#define CMFILE_MAGIC_TOKEN 0xFF01
+#define CMFILE_CUR_VERSION 2
 
-#define CMFILE_TYPE_YUV     1
+#define CMFILE_TYPE_YUV 1
 
-#pragma pack(push,4)
+#pragma pack(push, 4)
 /** Block header for a Colormap header block in a ColormapFile. */
-typedef struct {
-  uint16_t depth;      /**< Y resolution */
-  uint16_t width;      /**< U resolution */
-  uint16_t height;     /**< V resolution */
-  uint16_t reserved;   /**< reserved for future use, padding */
+typedef struct
+{
+	uint16_t depth;    /**< Y resolution */
+	uint16_t width;    /**< U resolution */
+	uint16_t height;   /**< V resolution */
+	uint16_t reserved; /**< reserved for future use, padding */
 } cmfile_header_t;
 #pragma pack(pop)
 
 class ColormapFile : public FireVisionDataFile
 {
- public:
-  ColormapFile();
-  ColormapFile(uint16_t depth, uint16_t width, uint16_t height);
+public:
+	ColormapFile();
+	ColormapFile(uint16_t depth, uint16_t width, uint16_t height);
 
-  class ColormapBlockVector : public std::vector<ColormapFileBlock *>
-  {
-   public:
-    ~ColormapBlockVector();
-  };
+	class ColormapBlockVector : public std::vector<ColormapFileBlock *>
+	{
+	public:
+		~ColormapBlockVector();
+	};
 
-  void                   add_colormap(Colormap *colormap);
-  ColormapBlockVector *  colormap_blocks();
-  Colormap *             get_colormap();
+	void                 add_colormap(Colormap *colormap);
+	ColormapBlockVector *colormap_blocks();
+	Colormap *           get_colormap();
 
-  uint16_t                get_depth();
-  uint16_t                get_width();
-  uint16_t                get_height();
+	uint16_t get_depth();
+	uint16_t get_width();
+	uint16_t get_height();
 
-  static bool            is_colormap_file(const char *filename);
-  static std::string     compose_filename(const std::string format);
+	static bool        is_colormap_file(const char *filename);
+	static std::string compose_filename(const std::string format);
 
-  virtual void           clear();
+	virtual void clear();
 
- private:
-  inline void assert_header();
- private:
-  cmfile_header_t  *header_;
+private:
+	inline void assert_header();
+
+private:
+	cmfile_header_t *header_;
 };
 
 } // end namespace firevision

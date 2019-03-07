@@ -21,12 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/colormap/yuvcm.h>
-
+#include <core/exceptions/software.h>
 #include <fvutils/colormap/cmfile.h>
 #include <fvutils/colormap/cmfile_yuvblock.h>
+#include <fvutils/colormap/yuvcm.h>
 #include <fvutils/ipc/shm_lut.h>
-#include <core/exceptions/software.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -60,9 +59,8 @@ namespace firevision {
  */
 YuvColormap::YuvColormap(unsigned int depth, unsigned int width, unsigned int height)
 {
-  constructor(depth, width, height);
+	constructor(depth, width, height);
 }
-
 
 /** Constructor.
  * Creates a colormap in shared memory for the given LUT ID.
@@ -71,11 +69,13 @@ YuvColormap::YuvColormap(unsigned int depth, unsigned int width, unsigned int he
  * @param width U depth
  * @param height V depth
  */
-YuvColormap::YuvColormap(const char *shmem_lut_id, unsigned int depth, unsigned int width, unsigned int height)
+YuvColormap::YuvColormap(const char * shmem_lut_id,
+                         unsigned int depth,
+                         unsigned int width,
+                         unsigned int height)
 {
-  constructor(depth, width, height, shmem_lut_id);
+	constructor(depth, width, height, shmem_lut_id);
 }
-
 
 /** Constructor.
  * Creates a colormap in shared memory for the given LUT ID.
@@ -85,11 +85,14 @@ YuvColormap::YuvColormap(const char *shmem_lut_id, unsigned int depth, unsigned 
  * @param width U depth
  * @param height V depth
  */
-YuvColormap::YuvColormap(const char *shmem_lut_id, bool destroy_on_free, unsigned int depth, unsigned int width, unsigned int height)
+YuvColormap::YuvColormap(const char * shmem_lut_id,
+                         bool         destroy_on_free,
+                         unsigned int depth,
+                         unsigned int width,
+                         unsigned int height)
 {
-  constructor(depth, width, height, shmem_lut_id, destroy_on_free);
+	constructor(depth, width, height, shmem_lut_id, destroy_on_free);
 }
-
 
 /** Constructor.
  * Creates a colormap in shared memory for the given LUT ID and copies the data of the
@@ -100,8 +103,8 @@ YuvColormap::YuvColormap(const char *shmem_lut_id, bool destroy_on_free, unsigne
  */
 YuvColormap::YuvColormap(YuvColormap *cm, const char *shmem_lut_id, bool destroy_on_free)
 {
-  constructor(cm->depth(), cm->width(), cm->height(), shmem_lut_id, destroy_on_free);
-  memcpy(lut_, cm->lut_, lut_size_);
+	constructor(cm->depth(), cm->width(), cm->height(), shmem_lut_id, destroy_on_free);
+	memcpy(lut_, cm->lut_, lut_size_);
 }
 
 /** Copy constructor.
@@ -109,12 +112,11 @@ YuvColormap::YuvColormap(YuvColormap *cm, const char *shmem_lut_id, bool destroy
  * given existing colormap.
  * @param cm color mape to copy from
  */
-YuvColormap::YuvColormap(const YuvColormap& cm)
+YuvColormap::YuvColormap(const YuvColormap &cm)
 {
-  constructor(cm.depth(), cm.width(), cm.height());
-  memcpy(lut_, cm.lut_, lut_size_);
+	constructor(cm.depth(), cm.width(), cm.height());
+	memcpy(lut_, cm.lut_, lut_size_);
 }
-
 
 /** Internal constructor.
  * @param shmem_lut_id shared memory LUT ID
@@ -124,116 +126,112 @@ YuvColormap::YuvColormap(const YuvColormap& cm)
  * @param height V depth
  */
 void
-YuvColormap::constructor(unsigned int depth, unsigned int width, unsigned int height,
-                         const char *shmem_lut_id, bool destroy_on_free)
+YuvColormap::constructor(unsigned int depth,
+                         unsigned int width,
+                         unsigned int height,
+                         const char * shmem_lut_id,
+                         bool         destroy_on_free)
 {
-  if ( depth > 256 ) {
-    throw OutOfBoundsException("YuvColormap depth out of bounds", depth, 1, 256);
-  }
-  if ( (depth != 1) && (depth != 2) && (depth != 4) && (depth != 8) && (depth != 16) &&
-       (depth != 32) && (depth != 64) && (depth != 128) && (depth != 256) ) {
-    throw IllegalArgumentException("Depth must be of the form d=2^n with n from [1,8]");
-  }
+	if (depth > 256) {
+		throw OutOfBoundsException("YuvColormap depth out of bounds", depth, 1, 256);
+	}
+	if ((depth != 1) && (depth != 2) && (depth != 4) && (depth != 8) && (depth != 16) && (depth != 32)
+	    && (depth != 64) && (depth != 128) && (depth != 256)) {
+		throw IllegalArgumentException("Depth must be of the form d=2^n with n from [1,8]");
+	}
 
-  if ( width > 256 ) {
-    throw OutOfBoundsException("YuvColormap width out of bounds", width, 1, 256);
-  }
-  if ( (width != 1) && (width != 2) && (width != 4) && (width != 8) && (width != 16) &&
-       (width != 32) && (width != 64) && (width != 128) && (width != 256) ) {
-    throw IllegalArgumentException("Width must be of the form d=2^n with n from [1,8]");
-  }
+	if (width > 256) {
+		throw OutOfBoundsException("YuvColormap width out of bounds", width, 1, 256);
+	}
+	if ((width != 1) && (width != 2) && (width != 4) && (width != 8) && (width != 16) && (width != 32)
+	    && (width != 64) && (width != 128) && (width != 256)) {
+		throw IllegalArgumentException("Width must be of the form d=2^n with n from [1,8]");
+	}
 
-  if ( height > 256 ) {
-    throw OutOfBoundsException("YuvColormap height out of bounds", height, 1, 256);
-  }
-  if ( (height != 1) && (height != 2) && (height != 4) && (height != 8) && (height != 16) &&
-       (height != 32) && (height != 64) && (height != 128) && (height != 256) ) {
-    throw IllegalArgumentException("Height must be of the form d=2^n with n from [1,8]");
-  }
+	if (height > 256) {
+		throw OutOfBoundsException("YuvColormap height out of bounds", height, 1, 256);
+	}
+	if ((height != 1) && (height != 2) && (height != 4) && (height != 8) && (height != 16)
+	    && (height != 32) && (height != 64) && (height != 128) && (height != 256)) {
+		throw IllegalArgumentException("Height must be of the form d=2^n with n from [1,8]");
+	}
 
-  width_  = width;
-  height_ = height;
-  depth_  = depth;
-  depth_div_  = 256 / depth_;
-  width_div_  = 256 / width_;
-  height_div_  = 256 / height_;
-  plane_size_ = width_ * height_;
+	width_      = width;
+	height_     = height;
+	depth_      = depth;
+	depth_div_  = 256 / depth_;
+	width_div_  = 256 / width_;
+	height_div_ = 256 / height_;
+	plane_size_ = width_ * height_;
 
-  if ( shmem_lut_id != NULL ) {
-    shm_lut_  = new SharedMemoryLookupTable(shmem_lut_id, width_, height_, depth_, /* bytes p. cell */ 1);
-    shm_lut_->set_destroy_on_delete( destroy_on_free );
-    lut_      = shm_lut_->buffer();
-    lut_size_ = shm_lut_->data_size();
-  } else {
-    shm_lut_ = NULL;
-    lut_size_ = (size_t)width_ * (size_t)height_ * (size_t)depth_;
-    lut_ = (unsigned char *)malloc( lut_size_ );
-  }
-  memset(lut_, C_OTHER, lut_size_);
+	if (shmem_lut_id != NULL) {
+		shm_lut_ =
+		  new SharedMemoryLookupTable(shmem_lut_id, width_, height_, depth_, /* bytes p. cell */ 1);
+		shm_lut_->set_destroy_on_delete(destroy_on_free);
+		lut_      = shm_lut_->buffer();
+		lut_size_ = shm_lut_->data_size();
+	} else {
+		shm_lut_  = NULL;
+		lut_size_ = (size_t)width_ * (size_t)height_ * (size_t)depth_;
+		lut_      = (unsigned char *)malloc(lut_size_);
+	}
+	memset(lut_, C_OTHER, lut_size_);
 }
-
 
 /** Destructor. */
 YuvColormap::~YuvColormap()
 {
-  if ( shm_lut_ ) {
-    delete shm_lut_;
-  } else {
-    free(lut_);
-  }
-  lut_ = NULL;
-  lut_size_ = 0;
+	if (shm_lut_) {
+		delete shm_lut_;
+	} else {
+		free(lut_);
+	}
+	lut_      = NULL;
+	lut_size_ = 0;
 }
-
 
 void
 YuvColormap::set(unsigned int y, unsigned int u, unsigned int v, color_t c)
 {
-  *(lut_ + (y / depth_div_) * plane_size_ + (v / height_div_) * width_ + (u / width_div_)) = c;
+	*(lut_ + (y / depth_div_) * plane_size_ + (v / height_div_) * width_ + (u / width_div_)) = c;
 }
-
 
 void
 YuvColormap::reset()
 {
-  memset(lut_, C_OTHER, lut_size_);
+	memset(lut_, C_OTHER, lut_size_);
 }
-
 
 void
 YuvColormap::set(unsigned char *buffer)
 {
-  memcpy(lut_, buffer, lut_size_);
+	memcpy(lut_, buffer, lut_size_);
 }
-
 
 size_t
 YuvColormap::size()
 {
-  return lut_size_;
+	return lut_size_;
 }
-
 
 std::list<ColormapFileBlock *>
 YuvColormap::get_blocks()
 {
-  std::list<ColormapFileBlock *> rv;
+	std::list<ColormapFileBlock *> rv;
 
-  for (unsigned int i = 0; i < depth_; ++i) {
-    ColormapFileYuvBlock *yuvb = new ColormapFileYuvBlock(this, i);
-    rv.push_back(yuvb);
-  }
+	for (unsigned int i = 0; i < depth_; ++i) {
+		ColormapFileYuvBlock *yuvb = new ColormapFileYuvBlock(this, i);
+		rv.push_back(yuvb);
+	}
 
-  return rv;
+	return rv;
 }
-
 
 unsigned char *
 YuvColormap::get_buffer() const
 {
-  return lut_;
+	return lut_;
 }
-
 
 /** Copy single U/V plane.
  * This will copy the given U/V plane to the given level in this colormap.
@@ -244,13 +242,12 @@ YuvColormap::get_buffer() const
 void
 YuvColormap::copy_uvplane(unsigned char *uvplane, unsigned int level)
 {
-  if ( level > depth_ ) {
-    throw OutOfBoundsException("YuvColormap::copy_uvplane(): Invalid level", level, 0, depth_);
-  }
+	if (level > depth_) {
+		throw OutOfBoundsException("YuvColormap::copy_uvplane(): Invalid level", level, 0, depth_);
+	}
 
-  memcpy(lut_ + level * plane_size_, uvplane, plane_size_);
+	memcpy(lut_ + level * plane_size_, uvplane, plane_size_);
 }
-
 
 /** Adds the given colormap to this colormap.
  * This operator takes the given colormap and compares it to this colormap. If
@@ -260,35 +257,34 @@ YuvColormap::copy_uvplane(unsigned char *uvplane, unsigned int level)
  * @return reference to this
  */
 Colormap &
-YuvColormap::operator+=(const Colormap & cmlt)
+YuvColormap::operator+=(const Colormap &cmlt)
 {
-  const YuvColormap *tc = dynamic_cast<const YuvColormap *>(&cmlt);
-  if ( tc == NULL ) {
-    throw TypeMismatchException("Only YUV colormaps can be added to a YUV colormap");
-  }
+	const YuvColormap *tc = dynamic_cast<const YuvColormap *>(&cmlt);
+	if (tc == NULL) {
+		throw TypeMismatchException("Only YUV colormaps can be added to a YUV colormap");
+	}
 
-  if ( (width_ != tc->width_) || (height_ != tc->height_) || (depth_ != tc->depth_) ) {
-    throw TypeMismatchException("YuvColormaps are of different sizes");
-  }
+	if ((width_ != tc->width_) || (height_ != tc->height_) || (depth_ != tc->depth_)) {
+		throw TypeMismatchException("YuvColormaps are of different sizes");
+	}
 
-  unsigned char *this_lut = lut_;
-  unsigned char *other_lut = tc->lut_;
+	unsigned char *this_lut  = lut_;
+	unsigned char *other_lut = tc->lut_;
 
-  for (unsigned int i = 0; i < plane_size_ * depth_; ++i) {
-    if ( (*this_lut == C_OTHER) || (*this_lut == C_BACKGROUND) ) {
-      // can be overridden
-      if ( (*other_lut != C_OTHER) && (*other_lut != C_BACKGROUND) ) {
-	// there is something that is worth overriding this value
-	*this_lut = *other_lut;
-      }
-    }
-    ++this_lut;
-    ++other_lut;
-  }
+	for (unsigned int i = 0; i < plane_size_ * depth_; ++i) {
+		if ((*this_lut == C_OTHER) || (*this_lut == C_BACKGROUND)) {
+			// can be overridden
+			if ((*other_lut != C_OTHER) && (*other_lut != C_BACKGROUND)) {
+				// there is something that is worth overriding this value
+				*this_lut = *other_lut;
+			}
+		}
+		++this_lut;
+		++other_lut;
+	}
 
-  return *this;
+	return *this;
 }
-
 
 /** Assign operation.
  * Copies all values from the given colormap.
@@ -297,62 +293,56 @@ YuvColormap::operator+=(const Colormap & cmlt)
  * @return reference to this
  */
 Colormap &
-YuvColormap::operator=(const YuvColormap & yuvcm)
+YuvColormap::operator=(const YuvColormap &yuvcm)
 {
-  if ( lut_size_ != yuvcm.lut_size_ ) {
-    throw TypeMismatchException("Size of colormaps does not match");
-  }
+	if (lut_size_ != yuvcm.lut_size_) {
+		throw TypeMismatchException("Size of colormaps does not match");
+	}
 
-  memcpy(lut_, yuvcm.lut_, lut_size_);
+	memcpy(lut_, yuvcm.lut_, lut_size_);
 
-  return *this;
+	return *this;
 }
-
 
 Colormap &
 YuvColormap::operator+=(const char *filename)
 {
-  ColormapFile cmf;
-  cmf.read(filename);
-  Colormap *tcm = cmf.get_colormap();
-  YuvColormap *tycm = dynamic_cast<YuvColormap *>(tcm);
-  if ( ! tycm ) {
-    delete tcm;
-    throw TypeMismatchException("File does not contain a YUV colormap");
-  }
-  *this += *tycm;
-  delete tcm;
-  return *this;
+	ColormapFile cmf;
+	cmf.read(filename);
+	Colormap *   tcm  = cmf.get_colormap();
+	YuvColormap *tycm = dynamic_cast<YuvColormap *>(tcm);
+	if (!tycm) {
+		delete tcm;
+		throw TypeMismatchException("File does not contain a YUV colormap");
+	}
+	*this += *tycm;
+	delete tcm;
+	return *this;
 }
-
 
 unsigned int
 YuvColormap::width() const
 {
-  return width_;
+	return width_;
 }
-
 
 unsigned int
 YuvColormap::height() const
 {
-  return height_;
+	return height_;
 }
-
 
 unsigned int
 YuvColormap::depth() const
 {
-  return depth_;
+	return depth_;
 }
-
 
 unsigned int
 YuvColormap::deepness() const
 {
-  return 256;
+	return 256;
 }
-
 
 /** Get U/V plane size.
  * @return size of a single U/V plane
@@ -360,9 +350,8 @@ YuvColormap::deepness() const
 unsigned int
 YuvColormap::plane_size() const
 {
-  return plane_size_;
+	return plane_size_;
 }
-
 
 /** Replace a given color with another one.
  * @param from color to replace
@@ -371,11 +360,12 @@ YuvColormap::plane_size() const
 void
 YuvColormap::replace_color(color_t from, color_t to)
 {
-  unsigned char *this_lut = lut_;
+	unsigned char *this_lut = lut_;
 
-  for (unsigned int i = 0; i < plane_size_ * depth_; ++i, ++this_lut) {
-    if (*this_lut == from)  *this_lut = to;
-  }
+	for (unsigned int i = 0; i < plane_size_ * depth_; ++i, ++this_lut) {
+		if (*this_lut == from)
+			*this_lut = to;
+	}
 }
 
 } // end namespace firevision

@@ -52,7 +52,6 @@ namespace firevision {
  * @param m message to handle
  */
 
-
 /** Destructor. */
 FuseClientHandler::~FuseClientHandler()
 {

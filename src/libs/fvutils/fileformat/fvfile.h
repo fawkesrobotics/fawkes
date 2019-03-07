@@ -26,6 +26,7 @@
 
 #include <fvutils/fileformat/fvff.h>
 #include <fvutils/fileformat/fvfile_block.h>
+
 #include <cstdlib>
 #include <list>
 
@@ -33,49 +34,49 @@ namespace firevision {
 
 class FireVisionDataFile
 {
- public:
-  FireVisionDataFile(unsigned short int magic_token, unsigned short int version);
-  virtual ~FireVisionDataFile();
+public:
+	FireVisionDataFile(unsigned short int magic_token, unsigned short int version);
+	virtual ~FireVisionDataFile();
 
-  unsigned int  magic_token();
-  unsigned int  version();
-  bool          is_big_endian();
-  bool          is_little_endian();
-  size_t        num_blocks();
+	unsigned int magic_token();
+	unsigned int version();
+	bool         is_big_endian();
+	bool         is_little_endian();
+	size_t       num_blocks();
 
-  const char *  get_comment() const;
-  void          set_comment(const char *comment);
+	const char *get_comment() const;
+	void        set_comment(const char *comment);
 
-  void          set_owns_blocks(bool owns_blocks);
+	void set_owns_blocks(bool owns_blocks);
 
-  virtual void add_block(FireVisionDataFileBlock *block);
-  virtual void clear();
+	virtual void add_block(FireVisionDataFileBlock *block);
+	virtual void clear();
 
-  virtual void write(const char *file_name);
-  virtual void read(const char *file_name);
+	virtual void write(const char *file_name);
+	virtual void read(const char *file_name);
 
-  static unsigned short int read_magic_token(const char *filename);
-  static bool has_magic_token(const char *filename, unsigned short int magic_token);
+	static unsigned short int read_magic_token(const char *filename);
+	static bool               has_magic_token(const char *filename, unsigned short int magic_token);
 
-  /** List of FireVision data file blocks. */
-  typedef std::list<FireVisionDataFileBlock *> BlockList;
-  BlockList &  blocks();
+	/** List of FireVision data file blocks. */
+	typedef std::list<FireVisionDataFileBlock *> BlockList;
+	BlockList &                                  blocks();
 
- protected:
-  void         *_spec_header;
-  size_t        _spec_header_size;
+protected:
+	void * _spec_header;
+	size_t _spec_header_size;
 
- private:
-  fvff_header_t       *header_;
-  BlockList            blocks_;
-  BlockList::iterator  bi_;
+private:
+	fvff_header_t *     header_;
+	BlockList           blocks_;
+	BlockList::iterator bi_;
 
-  unsigned int  magic_token_;
-  unsigned int  version_;
+	unsigned int magic_token_;
+	unsigned int version_;
 
-  char *        comment_;
+	char *comment_;
 
-  bool          owns_blocks_;
+	bool owns_blocks_;
 };
 
 } // end namespace firevision

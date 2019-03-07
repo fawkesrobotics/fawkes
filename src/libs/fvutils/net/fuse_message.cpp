@@ -24,11 +24,11 @@
 #include <core/exceptions/software.h>
 #include <fvutils/net/fuse_message.h>
 #include <fvutils/net/fuse_message_content.h>
+#include <netinet/in.h>
 
 #include <cstdio>
-#include <cstring>
 #include <cstdlib>
-#include <netinet/in.h>
+#include <cstring>
 
 namespace firevision {
 
@@ -46,20 +46,18 @@ namespace firevision {
 /** Constructor. */
 FuseNetworkMessage::FuseNetworkMessage()
 {
-  memset(&_msg, 0, sizeof(_msg));
-  content_ = NULL;
+	memset(&_msg, 0, sizeof(_msg));
+	content_ = NULL;
 }
-
 
 /** Constructor.
  * @param msg message information to copy
  */
 FuseNetworkMessage::FuseNetworkMessage(FUSE_message_t *msg)
 {
-  memcpy(&_msg, msg, sizeof(FUSE_message_t));
-  content_ = NULL;
+	memcpy(&_msg, msg, sizeof(FUSE_message_t));
+	content_ = NULL;
 }
-
 
 /** Constructor.
  * @param type message type
@@ -69,21 +67,21 @@ FuseNetworkMessage::FuseNetworkMessage(FUSE_message_t *msg)
  * and ownership of payload is claimed.
  */
 FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type,
-				       void *payload, size_t payload_size,
-				       bool copy_payload)
+                                       void *              payload,
+                                       size_t              payload_size,
+                                       bool                copy_payload)
 {
-  content_ = NULL;
-  _msg.header.message_type = htonl(type);
-  _msg.header.payload_size = htonl(payload_size);
+	content_                 = NULL;
+	_msg.header.message_type = htonl(type);
+	_msg.header.payload_size = htonl(payload_size);
 
-  if ( copy_payload ) {
-    _msg.payload = malloc(payload_size);
-    memcpy(_msg.payload, payload, payload_size);
-  } else {
-    _msg.payload = payload;
-  }
+	if (copy_payload) {
+		_msg.payload = malloc(payload_size);
+		memcpy(_msg.payload, payload, payload_size);
+	} else {
+		_msg.payload = payload;
+	}
 }
-
 
 /** Constructor without payload.
  * Constructs message without payload.
@@ -91,12 +89,11 @@ FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type,
  */
 FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type)
 {
-  content_ = NULL;
-  _msg.header.message_type = htonl(type);
-  _msg.header.payload_size = htonl(0);
-  _msg.payload = NULL;
+	content_                 = NULL;
+	_msg.header.message_type = htonl(type);
+	_msg.header.payload_size = htonl(0);
+	_msg.payload             = NULL;
 }
-
 
 /** Content constructor.
  * Construct a message with complex message content.
@@ -105,24 +102,24 @@ FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type)
  */
 FuseNetworkMessage::FuseNetworkMessage(FUSE_message_type_t type, FuseMessageContent *content)
 {
-  content_ = content;
-  _msg.header.message_type = htonl(type);
-  _msg.header.payload_size = htonl(0);
-  _msg.payload = NULL;
+	content_                 = content;
+	_msg.header.message_type = htonl(type);
+	_msg.header.payload_size = htonl(0);
+	_msg.payload             = NULL;
 }
 
 /** Destructor. */
 FuseNetworkMessage::~FuseNetworkMessage()
 {
-  if ( content_ == NULL ) {
-    if ( _msg.payload != NULL ) {
-      free(_msg.payload);
-      _msg.payload = NULL;
-    }
-  } else {
-    content_->free_payload();
-    delete content_;
-  }
+	if (content_ == NULL) {
+		if (_msg.payload != NULL) {
+			free(_msg.payload);
+			_msg.payload = NULL;
+		}
+	} else {
+		content_->free_payload();
+		delete content_;
+	}
 }
 
 /** Get message type.
@@ -131,9 +128,8 @@ FuseNetworkMessage::~FuseNetworkMessage()
 uint32_t
 FuseNetworkMessage::type() const
 {
-  return ntohl(_msg.header.message_type);
+	return ntohl(_msg.header.message_type);
 }
-
 
 /** Get payload size.
  * @return payload size
@@ -141,9 +137,8 @@ FuseNetworkMessage::type() const
 size_t
 FuseNetworkMessage::payload_size() const
 {
-  return ntohl(_msg.header.payload_size);
+	return ntohl(_msg.header.payload_size);
 }
-
 
 /** Get pointer to payload.
  * @return pointer to payload.
@@ -151,9 +146,8 @@ FuseNetworkMessage::payload_size() const
 void *
 FuseNetworkMessage::payload() const
 {
-  return _msg.payload;
+	return _msg.payload;
 }
-
 
 /** Get plain message.
  * @return plain message
@@ -161,9 +155,8 @@ FuseNetworkMessage::payload() const
 const FUSE_message_t &
 FuseNetworkMessage::fmsg() const
 {
-  return _msg;
+	return _msg;
 }
-
 
 /** Set payload.
  * Payload is referenced and ownership claimed.
@@ -173,14 +166,13 @@ FuseNetworkMessage::fmsg() const
 void
 FuseNetworkMessage::set_payload(void *payload, size_t payload_size)
 {
-  if ( payload_size > 0xFFFFFFFF ) {
-    // cannot carry that many bytes
-    throw fawkes::OutOfBoundsException("Payload too big", payload_size, 0, 0xFFFFFFFF);
-  }
-  _msg.payload = payload;
-  _msg.header.payload_size = htonl(payload_size);
+	if (payload_size > 0xFFFFFFFF) {
+		// cannot carry that many bytes
+		throw fawkes::OutOfBoundsException("Payload too big", payload_size, 0, 0xFFFFFFFF);
+	}
+	_msg.payload             = payload;
+	_msg.header.payload_size = htonl(payload_size);
 }
-
 
 /** Set from message.
  * @param msg reference to message. Content is deep-copied.
@@ -188,7 +180,7 @@ FuseNetworkMessage::set_payload(void *payload, size_t payload_size)
 void
 FuseNetworkMessage::set(FUSE_message_t &msg)
 {
-  memcpy(&_msg, &msg, sizeof(FUSE_message_t));
+	memcpy(&_msg, &msg, sizeof(FUSE_message_t));
 }
 
 /** Pack data for sending.
@@ -198,11 +190,11 @@ FuseNetworkMessage::set(FUSE_message_t &msg)
 void
 FuseNetworkMessage::pack()
 {
-  if ( content_ != NULL ) {
-    content_->serialize();
-    _msg.payload = content_->payload();
-    _msg.header.payload_size = htonl(content_->payload_size());
-  }
+	if (content_ != NULL) {
+		content_->serialize();
+		_msg.payload             = content_->payload();
+		_msg.header.payload_size = htonl(content_->payload_size());
+	}
 }
 
 } // end namespace firevision

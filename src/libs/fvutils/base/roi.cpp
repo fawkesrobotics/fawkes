@@ -41,17 +41,15 @@ namespace firevision {
  * @author Tim Niemueller
  */
 
-ROI* ROI::roi_full_image = NULL;
-
+ROI *ROI::roi_full_image = NULL;
 
 /** Constructor. */
 ROI::ROI()
 {
-  num_hint_points = 1;
-  start.x = start.y = width = height = image_width = image_height = line_step = pixel_step = 0;
-  color = C_BACKGROUND;
+	num_hint_points = 1;
+	start.x = start.y = width = height = image_width = image_height = line_step = pixel_step = 0;
+	color = C_BACKGROUND;
 }
-
 
 /** Constructor.
  * @param start_x Upper left corner of ROI X coordinate
@@ -61,58 +59,58 @@ ROI::ROI()
  * @param image_width width of full image this ROI belongs to
  * @param image_height height of full image this ROI belongs to
  */
-ROI::ROI(unsigned int start_x, unsigned int start_y,
-   unsigned int width, unsigned int height,
-   unsigned int image_width, unsigned int image_height)
+ROI::ROI(unsigned int start_x,
+         unsigned int start_y,
+         unsigned int width,
+         unsigned int height,
+         unsigned int image_width,
+         unsigned int image_height)
 {
-  num_hint_points = 1;
-  start.x = start_x;
-  start.y = start_y;
-  this->width = width;
-  this->height = height;
-  this->image_width = image_width;
-  this->image_height = image_height;
-  line_step = image_width;
-  pixel_step = 1;
-  color = C_BACKGROUND;
+	num_hint_points    = 1;
+	start.x            = start_x;
+	start.y            = start_y;
+	this->width        = width;
+	this->height       = height;
+	this->image_width  = image_width;
+	this->image_height = image_height;
+	line_step          = image_width;
+	pixel_step         = 1;
+	color              = C_BACKGROUND;
 }
-
 
 /** Copy constructor.
  * @param roi reference to ROI to copy
  */
 ROI::ROI(const ROI &roi)
 {
-  start           = roi.start;
-  width           = roi.width;
-  height          = roi.height;
-  image_width     = roi.image_width;
-  image_height    = roi.image_height;
-  line_step       = roi.line_step;
-  pixel_step      = roi.pixel_step;
-  hint            = roi.hint;
-  color           = roi.color;
-  num_hint_points = roi.num_hint_points;
+	start           = roi.start;
+	width           = roi.width;
+	height          = roi.height;
+	image_width     = roi.image_width;
+	image_height    = roi.image_height;
+	line_step       = roi.line_step;
+	pixel_step      = roi.pixel_step;
+	hint            = roi.hint;
+	color           = roi.color;
+	num_hint_points = roi.num_hint_points;
 }
-
 
 /** Copy constructor.
  * @param roi pointer to ROI to copy
  */
 ROI::ROI(const ROI *roi)
 {
-  start           = roi->start;
-  width           = roi->width;
-  height          = roi->height;
-  image_width     = roi->image_width;
-  image_height    = roi->image_height;
-  line_step       = roi->line_step;
-  pixel_step      = roi->pixel_step;
-  hint            = roi->hint;
-  color           = roi->color;
-  num_hint_points = roi->num_hint_points;
+	start           = roi->start;
+	width           = roi->width;
+	height          = roi->height;
+	image_width     = roi->image_width;
+	image_height    = roi->image_height;
+	line_step       = roi->line_step;
+	pixel_step      = roi->pixel_step;
+	hint            = roi->hint;
+	color           = roi->color;
+	num_hint_points = roi->num_hint_points;
 }
-
 
 /** Set upper left corner of ROI.
  * @param p point
@@ -120,10 +118,9 @@ ROI::ROI(const ROI *roi)
 void
 ROI::set_start(upoint_t p)
 {
-  start.x = p.x;
-  start.y = p.y;
+	start.x = p.x;
+	start.y = p.y;
 }
-
 
 /** Set upper left corner.
  * @param x x coordinate in image
@@ -132,10 +129,9 @@ ROI::set_start(upoint_t p)
 void
 ROI::set_start(unsigned int x, unsigned int y)
 {
-  start.x = x;
-  start.y = y;
+	start.x = x;
+	start.y = y;
 }
-
 
 /** Set width of ROI.
  * @param width new width
@@ -143,9 +139,8 @@ ROI::set_start(unsigned int x, unsigned int y)
 void
 ROI::set_width(unsigned int width)
 {
-  this->width = width;
+	this->width = width;
 }
-
 
 /** Get width of ROI.
  * @return width
@@ -153,9 +148,8 @@ ROI::set_width(unsigned int width)
 unsigned int
 ROI::get_width() const
 {
-  return width;
+	return width;
 }
-
 
 /** Set height of ROI.
  * @param height new height
@@ -163,9 +157,8 @@ ROI::get_width() const
 void
 ROI::set_height(unsigned int height)
 {
-  this->height = height;
+	this->height = height;
 }
-
 
 /** Get height of ROI.
  * @return height
@@ -173,9 +166,8 @@ ROI::set_height(unsigned int height)
 unsigned int
 ROI::get_height() const
 {
-  return height;
+	return height;
 }
-
 
 /** Set full image width.
  * Set the width of the image that contains this ROI.
@@ -184,9 +176,8 @@ ROI::get_height() const
 void
 ROI::set_image_width(unsigned int image_width)
 {
-  this->image_width = image_width;
+	this->image_width = image_width;
 }
-
 
 /** Get full image width.
  * Get the width of the image that contains this ROI.
@@ -195,9 +186,8 @@ ROI::set_image_width(unsigned int image_width)
 unsigned int
 ROI::get_image_width() const
 {
-  return image_width;
+	return image_width;
 }
-
 
 /** Set full image height
  * Set the height of the image that contains this ROI.
@@ -206,9 +196,8 @@ ROI::get_image_width() const
 void
 ROI::set_image_height(unsigned int image_height)
 {
-  this->image_height = image_height;
+	this->image_height = image_height;
 }
-
 
 /** Get full image height.
  * Get the height of the image that contains this ROI.
@@ -217,9 +206,8 @@ ROI::set_image_height(unsigned int image_height)
 unsigned int
 ROI::get_image_height() const
 {
-  return image_height;
+	return image_height;
 }
-
 
 /** Set linestep.
  * The linestep is the offset in bytes from the beginning of one line
@@ -229,9 +217,8 @@ ROI::get_image_height() const
 void
 ROI::set_line_step(unsigned int step)
 {
-  line_step = step;
+	line_step = step;
 }
-
 
 /** Get linestep.
  * @return line step
@@ -240,9 +227,8 @@ ROI::set_line_step(unsigned int step)
 unsigned int
 ROI::get_line_step() const
 {
-  return line_step;
+	return line_step;
 }
-
 
 /** Set pixel step.
  * The pixel step is the offset in bytes to get from one pixel to the next
@@ -252,9 +238,8 @@ ROI::get_line_step() const
 void
 ROI::set_pixel_step(unsigned int step)
 {
-  pixel_step = step;
+	pixel_step = step;
 }
-
 
 /** Get pixel step.
  * @return pixel step.
@@ -263,9 +248,8 @@ ROI::set_pixel_step(unsigned int step)
 unsigned int
 ROI::get_pixel_step() const
 {
-  return pixel_step;
+	return pixel_step;
 }
-
 
 /** Get hint.
  * The hint gives an intuition what is in the ROI. In most cases this will
@@ -275,9 +259,8 @@ ROI::get_pixel_step() const
 unsigned int
 ROI::get_hint() const
 {
-  return hint;
+	return hint;
 }
-
 
 /** Set hint.
  * @param hint new hint
@@ -286,9 +269,8 @@ ROI::get_hint() const
 void
 ROI::set_hint(unsigned int hint)
 {
-  this->hint = hint;
+	this->hint = hint;
 }
-
 
 /** Check if this ROI contains the given coordinates.
  * @param x x coordinate in image
@@ -298,18 +280,13 @@ ROI::set_hint(unsigned int hint)
 bool
 ROI::contains(unsigned int x, unsigned int y)
 {
-  if ( (x >= start.x) &&
-       (x < start.x+width) &&
-       (y >= start.y) &&
-       (y < start.y+height) ) {
-
-    num_hint_points += 1;
-    return true;
-  } else {
-    return false;
-  }
+	if ((x >= start.x) && (x < start.x + width) && (y >= start.y) && (y < start.y + height)) {
+		num_hint_points += 1;
+		return true;
+	} else {
+		return false;
+	}
 }
-
 
 /** Intersect this ROI with another.
  * @param roi The other roi
@@ -319,34 +296,28 @@ ROI::contains(unsigned int x, unsigned int y)
 ROI
 ROI::intersect(ROI const &roi) const
 {
-  ROI rv;
-  if (start.x + width <= roi.start.x
-      || roi.start.x + roi.width <= start.x
-      || start.y + height <= roi.start.y
-      || roi.start.y + roi.height <= start.y) {
+	ROI rv;
+	if (start.x + width <= roi.start.x || roi.start.x + roi.width <= start.x
+	    || start.y + height <= roi.start.y || roi.start.y + roi.height <= start.y) {
+		return rv;
 
-    return rv;
-
-  } else {
-
-    rv = new ROI(this);
-    rv.start.x = start.x <= roi.start.x ? roi.start.x : start.x;
-    rv.start.y = start.y <= roi.start.y ? roi.start.y : start.y;
-    if (start.x + width < roi.start.x + roi.width) {
-      rv.width = start.x + width - rv.start.x;
-    } else {
-      rv.width = roi.start.x + roi.width - rv.start.x;
-    }
-    if (start.y + height < roi.start.y + roi.height) {
-      rv.height = start.y + height - rv.start.y;
-    } else {
-      rv.height = roi.start.y + roi.height - rv.start.y;
-    }
-
-  }
-  return rv;
+	} else {
+		rv         = new ROI(this);
+		rv.start.x = start.x <= roi.start.x ? roi.start.x : start.x;
+		rv.start.y = start.y <= roi.start.y ? roi.start.y : start.y;
+		if (start.x + width < roi.start.x + roi.width) {
+			rv.width = start.x + width - rv.start.x;
+		} else {
+			rv.width = roi.start.x + roi.width - rv.start.x;
+		}
+		if (start.y + height < roi.start.y + roi.height) {
+			rv.height = start.y + height - rv.start.y;
+		} else {
+			rv.height = roi.start.y + roi.height - rv.start.y;
+		}
+	}
+	return rv;
 }
-
 
 /** Check if this ROI neighbours a pixel.
  * This checks if the given pixel is close to this ROI considered with
@@ -359,12 +330,11 @@ ROI::intersect(ROI const &roi) const
 bool
 ROI::neighbours(unsigned int x, unsigned int y, unsigned int margin) const
 {
-  return ( (static_cast<int>(x) >= static_cast<int>(start.x) - static_cast<int>(margin)) &&
-     (x <= start.x + width + margin) &&
-     (static_cast<int>(y) >= static_cast<int>(start.y) - static_cast<int>(margin)) &&
-     (y <= start.y + height + margin) );
+	return ((static_cast<int>(x) >= static_cast<int>(start.x) - static_cast<int>(margin))
+	        && (x <= start.x + width + margin)
+	        && (static_cast<int>(y) >= static_cast<int>(start.y) - static_cast<int>(margin))
+	        && (y <= start.y + height + margin));
 }
-
 
 /** Check if this ROI neighbours another ROI.
  * This checks if the given ROI is close to this ROI considered with
@@ -376,21 +346,20 @@ ROI::neighbours(unsigned int x, unsigned int y, unsigned int margin) const
 bool
 ROI::neighbours(ROI *roi, unsigned int margin) const
 {
-  //Testing only x -> y test returns always true
-  bool overlapping_x = neighbours(roi->start.x, start.y, margin)
-    || neighbours(roi->start.x + roi->width, start.y, margin)
-    || roi->neighbours(start.x, roi->start.y, margin)
-    || roi->neighbours(start.x + width, roi->start.y, margin);
+	//Testing only x -> y test returns always true
+	bool overlapping_x = neighbours(roi->start.x, start.y, margin)
+	                     || neighbours(roi->start.x + roi->width, start.y, margin)
+	                     || roi->neighbours(start.x, roi->start.y, margin)
+	                     || roi->neighbours(start.x + width, roi->start.y, margin);
 
-  //Testing only y -> x test returns always true
-  bool overlapping_y = roi->neighbours(roi->start.x, start.y, margin)
-    || roi->neighbours(roi->start.x, start.y + height, margin)
-    || neighbours(start.x, roi->start.y, margin)
-    || neighbours(start.x, roi->start.y + roi->height, margin);
+	//Testing only y -> x test returns always true
+	bool overlapping_y = roi->neighbours(roi->start.x, start.y, margin)
+	                     || roi->neighbours(roi->start.x, start.y + height, margin)
+	                     || neighbours(start.x, roi->start.y, margin)
+	                     || neighbours(start.x, roi->start.y + roi->height, margin);
 
-  return overlapping_x && overlapping_y;
+	return overlapping_x && overlapping_y;
 }
-
 
 /** Extend ROI to include given pixel.
  * @param x x coordinate of pixel to include
@@ -399,15 +368,23 @@ ROI::neighbours(ROI *roi, unsigned int margin) const
 void
 ROI::extend(unsigned int x, unsigned int y)
 {
+	if (x < start.x) {
+		width += start.x - x;
+		start.x = x;
+	}
+	if (y < start.y) {
+		height += start.y - y;
+		start.y = y;
+	}
+	if (x >= start.x + width) {
+		width += (x - (start.x + width) + 1);
+	}
+	if (y >= start.y + height) {
+		height += (y - (start.y + height) + 1);
+	}
 
-  if (x < start.x) { width  += start.x - x; start.x = x; }
-  if (y < start.y) { height += start.y - y; start.y = y; }
-  if (x >= start.x + width)  { width  += (x - (start.x + width) + 1); }
-  if (y >= start.y + height) { height += (y - (start.y + height) + 1); }
-
-  num_hint_points += 1;
+	num_hint_points += 1;
 }
-
 
 /** Grow this ROI by a given margin.
  * @param margin margin to grow by
@@ -415,32 +392,30 @@ ROI::extend(unsigned int x, unsigned int y)
 void
 ROI::grow(unsigned int margin)
 {
-  if (start.x < margin) {
-    start.x = 0;
-  } else {
-    start.x -= margin;
-  }
+	if (start.x < margin) {
+		start.x = 0;
+	} else {
+		start.x -= margin;
+	}
 
-  if (start.y < margin) {
-    start.y = 0;
-  } else {
-    start.y -= margin;
-  }
+	if (start.y < margin) {
+		start.y = 0;
+	} else {
+		start.y -= margin;
+	}
 
-  if ((start.x + width + margin) > image_width) {
-    width += (image_width - (start.x + width));
-  } else {
-    width += margin;
-  }
+	if ((start.x + width + margin) > image_width) {
+		width += (image_width - (start.x + width));
+	} else {
+		width += margin;
+	}
 
-  if ((start.y + height + margin) > image_height) {
-    height += (image_height - (start.y + height));
-  } else {
-    height += margin;
-  }
-
+	if ((start.y + height + margin) > image_height) {
+		height += (image_height - (start.y + height));
+	} else {
+		height += margin;
+	}
 }
-
 
 /** Merge two ROIs.
  * This ROI will be extended in any direction necessary to fully include the given
@@ -448,20 +423,28 @@ ROI::grow(unsigned int margin)
  * @param roi ROI to include
  * @return this instance
  */
-ROI&
+ROI &
 ROI::operator+=(ROI &roi)
 {
+	if (roi.start.x < start.x) {
+		width += start.x - roi.start.x;
+		start.x = roi.start.x;
+	}
+	if (roi.start.y < start.y) {
+		height += start.y - roi.start.y;
+		start.y = roi.start.y;
+	}
+	if (roi.start.x + roi.width > start.x + width) {
+		width += roi.start.x + roi.width - (start.x + width);
+	}
+	if (roi.start.y + roi.height > start.y + height) {
+		height += roi.start.y + roi.height - (start.y + height);
+	}
 
-  if (roi.start.x < start.x) { width  += start.x - roi.start.x; start.x = roi.start.x; }
-  if (roi.start.y < start.y) { height += start.y - roi.start.y; start.y = roi.start.y; }
-  if (roi.start.x + roi.width  > start.x + width)  { width  += roi.start.x + roi.width  - (start.x + width); }
-  if (roi.start.y + roi.height > start.y + height) { height += roi.start.y + roi.height - (start.y + height); }
+	num_hint_points += roi.num_hint_points;
 
-  num_hint_points += roi.num_hint_points;
-
-  return *this;
+	return *this;
 }
-
 
 /** Check if this ROI contains less hint points than the given ROI.
  * @param roi ROI to compare to.
@@ -470,9 +453,8 @@ ROI::operator+=(ROI &roi)
 bool
 ROI::operator<(const ROI &roi) const
 {
-  return (color < roi.color) || (num_hint_points < roi.num_hint_points);
+	return (color < roi.color) || (num_hint_points < roi.num_hint_points);
 }
-
 
 /** Check if this ROI contains more hint points than the given ROI.
  * @param roi ROI to compare to.
@@ -481,9 +463,8 @@ ROI::operator<(const ROI &roi) const
 bool
 ROI::operator>(const ROI &roi) const
 {
-  return (color > roi.color) || (num_hint_points > roi.num_hint_points);
+	return (color > roi.color) || (num_hint_points > roi.num_hint_points);
 }
-
 
 /** Check if this ROI marks the same region for the same object
  * and an image of the same base size and step parameters like the
@@ -494,19 +475,12 @@ ROI::operator>(const ROI &roi) const
 bool
 ROI::operator==(const ROI &roi) const
 {
-  return  (start.x == roi.start.x) &&
-          (start.y == roi.start.y) &&
-          (width == roi.width) &&
-          (height == roi.height) &&
-          (image_width == roi.image_width) &&
-          (image_height == roi.image_height) &&
-          (line_step == roi.line_step) &&
-          (pixel_step == roi.pixel_step) &&
-          (hint == roi.hint) &&
-          (color == roi.color) &&
-          (num_hint_points == roi.num_hint_points);
+	return (start.x == roi.start.x) && (start.y == roi.start.y) && (width == roi.width)
+	       && (height == roi.height) && (image_width == roi.image_width)
+	       && (image_height == roi.image_height) && (line_step == roi.line_step)
+	       && (pixel_step == roi.pixel_step) && (hint == roi.hint) && (color == roi.color)
+	       && (num_hint_points == roi.num_hint_points);
 }
-
 
 /** Check if this ROI does not mark the same region for the same object
  * and an image of the same base size and step parameters like the
@@ -517,30 +491,29 @@ ROI::operator==(const ROI &roi) const
 bool
 ROI::operator!=(const ROI &roi) const
 {
-  return (num_hint_points != roi.num_hint_points);
+	return (num_hint_points != roi.num_hint_points);
 }
-
 
 /** Assign the given ROI data to this ROI.
  * @param roi ROI to copy
  * @return this instance
  */
-ROI&
+ROI &
 ROI::operator=(const ROI &roi)
 {
-  this->start.x         = roi.start.x;
-  this->start.y         = roi.start.y;
-  this->width           = roi.width;
-  this->height          = roi.height;
-  this->image_width     = roi.image_width;
-  this->image_height    = roi.image_height;
-  this->line_step       = roi.line_step;
-  this->pixel_step      = roi.pixel_step;
-  this->hint            = roi.hint;
-  this->color           = roi.color;
-  this->num_hint_points = roi.num_hint_points;
+	this->start.x         = roi.start.x;
+	this->start.y         = roi.start.y;
+	this->width           = roi.width;
+	this->height          = roi.height;
+	this->image_width     = roi.image_width;
+	this->image_height    = roi.image_height;
+	this->line_step       = roi.line_step;
+	this->pixel_step      = roi.pixel_step;
+	this->hint            = roi.hint;
+	this->color           = roi.color;
+	this->num_hint_points = roi.num_hint_points;
 
-  return *this;
+	return *this;
 }
 
 /** Get ROI buffer start.
@@ -549,12 +522,11 @@ ROI::operator=(const ROI &roi)
  * @param buffer buffer
  * @return pointer into buffer where the ROI starts
  */
-unsigned char*
+unsigned char *
 ROI::get_roi_buffer_start(unsigned char *buffer) const
 {
-  return (buffer + (start.y * line_step) + (start.x * pixel_step));
+	return (buffer + (start.y * line_step) + (start.x * pixel_step));
 }
-
 
 /** Gives an estimate of the number of points in this ROI that
  * are classified to the given hint
@@ -576,9 +548,8 @@ ROI::get_roi_buffer_start(unsigned char *buffer) const
 unsigned int
 ROI::get_num_hint_points() const
 {
-  return num_hint_points;
+	return num_hint_points;
 }
-
 
 /** Get full image ROI for given size.
  * Shortcut to get a full size ROI. This ROI is a static member so this
@@ -593,19 +564,19 @@ ROI::get_num_hint_points() const
 ROI *
 ROI::full_image(unsigned int width, unsigned int height)
 {
-  if (roi_full_image == NULL) {
-    roi_full_image = new ROI();
-    roi_full_image->start.x      = 0;
-    roi_full_image->start.y      = 0;
-    roi_full_image->pixel_step   = 1;
-  }
-  roi_full_image->width        = width;
-  roi_full_image->height       = height;
-  roi_full_image->image_width  = roi_full_image->width;
-  roi_full_image->image_height = roi_full_image->height;
-  roi_full_image->line_step    = roi_full_image->width;
+	if (roi_full_image == NULL) {
+		roi_full_image             = new ROI();
+		roi_full_image->start.x    = 0;
+		roi_full_image->start.y    = 0;
+		roi_full_image->pixel_step = 1;
+	}
+	roi_full_image->width        = width;
+	roi_full_image->height       = height;
+	roi_full_image->image_width  = roi_full_image->width;
+	roi_full_image->image_height = roi_full_image->height;
+	roi_full_image->line_step    = roi_full_image->width;
 
-  return roi_full_image;
+	return roi_full_image;
 }
 
 } // end namespace firevision

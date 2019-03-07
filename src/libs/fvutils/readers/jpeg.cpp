@@ -22,8 +22,8 @@
  */
 
 #include <core/exception.h>
-#include <fvutils/readers/jpeg.h>
 #include <fvutils/color/rgbyuv.h>
+#include <fvutils/readers/jpeg.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -42,97 +42,89 @@ namespace firevision {
  */
 JpegReader::JpegReader(const char *filename)
 {
-  opened = false;
-  buffer = NULL;
+	opened = false;
+	buffer = NULL;
 
-  if ((infile = fopen(filename, "rb")) == NULL) {
-    throw Exception("Cannot open JPEG file");
-  }
+	if ((infile = fopen(filename, "rb")) == NULL) {
+		throw Exception("Cannot open JPEG file");
+	}
 
-  cinfo.err = jpeg_std_error( &jerr );
-  jpeg_create_decompress( &cinfo );
-  jpeg_stdio_src( &cinfo, infile );
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_decompress(&cinfo);
+	jpeg_stdio_src(&cinfo, infile);
 
-  jpeg_read_header( &cinfo, true );
-  jpeg_calc_output_dimensions( &cinfo );
+	jpeg_read_header(&cinfo, true);
+	jpeg_calc_output_dimensions(&cinfo);
 
-  /*
+	/*
   cout << "Read JPEG header, image info:" << endl
        << "  width:   " << cinfo.output_width << endl
        << "  height:  " << cinfo.output_height << endl;
   */
 
-  opened = true;
+	opened = true;
 }
-
 
 /** Destructor. */
 JpegReader::~JpegReader()
 {
-  jpeg_destroy_decompress( &cinfo );
-  fclose( infile );
-  opened = false;
+	jpeg_destroy_decompress(&cinfo);
+	fclose(infile);
+	opened = false;
 }
-
 
 void
 JpegReader::set_buffer(unsigned char *yuv422planar_buffer)
 {
-  buffer = yuv422planar_buffer;
+	buffer = yuv422planar_buffer;
 }
-
 
 colorspace_t
 JpegReader::colorspace()
 {
-  return YUV422_PLANAR;
+	return YUV422_PLANAR;
 }
-
 
 unsigned int
 JpegReader::pixel_width()
 {
-  if ( opened ) {
-    return cinfo.output_width;
-  } else {
-    return 0;
-  }
+	if (opened) {
+		return cinfo.output_width;
+	} else {
+		return 0;
+	}
 }
-
 
 unsigned int
 JpegReader::pixel_height()
 {
-  if ( opened ) {
-    return cinfo.output_height;
-  } else {
-    return 0;
-  }
+	if (opened) {
+		return cinfo.output_height;
+	} else {
+		return 0;
+	}
 }
-
 
 void
 JpegReader::read()
 {
-  if ( buffer == NULL ) {
-    throw Exception("JpegReader::read: buffer == NULL");
-  }
+	if (buffer == NULL) {
+		throw Exception("JpegReader::read: buffer == NULL");
+	}
 
-  jpeg_start_decompress( &cinfo );
-  row_stride = cinfo.output_width * cinfo.output_components;
+	jpeg_start_decompress(&cinfo);
+	row_stride = cinfo.output_width * cinfo.output_components;
 
-  row_buffer = (unsigned char *)malloc( row_stride );
+	row_buffer = (unsigned char *)malloc(row_stride);
 
-  while ( cinfo.output_scanline < cinfo.output_height ) {
-    jpeg_read_scanlines( &cinfo, &row_buffer, 1 );
-    convert_line_rgb_to_yuv422planar( row_buffer, buffer,
-				      cinfo.output_width, cinfo.output_height,
-				      0, cinfo.output_scanline - 1 );
-  }
+	while (cinfo.output_scanline < cinfo.output_height) {
+		jpeg_read_scanlines(&cinfo, &row_buffer, 1);
+		convert_line_rgb_to_yuv422planar(
+		  row_buffer, buffer, cinfo.output_width, cinfo.output_height, 0, cinfo.output_scanline - 1);
+	}
 
-  free( row_buffer );
-  jpeg_finish_decompress( &cinfo );
-
+	free(row_buffer);
+	jpeg_finish_decompress(&cinfo);
 }
 
 } // end namespace firevision

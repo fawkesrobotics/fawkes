@@ -24,33 +24,32 @@
 #ifndef _FIREVISION_FVUTILS_WRITERS_SEQ_WRITER_H_
 #define _FIREVISION_FVUTILS_WRITERS_SEQ_WRITER_H_
 
+#include <core/exception.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/writers/writer.h>
-#include <core/exception.h>
 
 namespace firevision {
 
-class SeqWriter {
-  
- public:
-  SeqWriter(Writer* writer);
-  ~SeqWriter();
+class SeqWriter
+{
+public:
+	SeqWriter(Writer *writer);
+	~SeqWriter();
 
-  void set_path(const char* img_path);
-  void set_filename(const char* filename);
+	void set_path(const char *img_path);
+	void set_filename(const char *filename);
 
-  void set_dimensions(unsigned int width, unsigned int height);
-  void set_colorspace(colorspace_t cspace);
+	void set_dimensions(unsigned int width, unsigned int height);
+	void set_colorspace(colorspace_t cspace);
 
-  void write(unsigned char* buffer);
+	void write(unsigned char *buffer);
 
- private:
-  Writer* writer;
-  char* filename;
-  char* img_path;
-  colorspace_t cspace;
-  unsigned int frame_number;
-
+private:
+	Writer *     writer;
+	char *       filename;
+	char *       img_path;
+	colorspace_t cspace;
+	unsigned int frame_number;
 };
 
 } // end namespace firevision

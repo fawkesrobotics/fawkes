@@ -29,29 +29,29 @@
 
 namespace firevision {
 
-class ImageCompressor {
- public:
+class ImageCompressor
+{
+public:
+	/** Where to put the compressed image */
+	enum CompressionDestination {
+		COMP_DEST_FILE, /**< write compressed image to file */
+		COMP_DEST_MEM   /**< write compressed image to buffer in memory */
+	};
 
-  /** Where to put the compressed image */
-  enum CompressionDestination {
-    COMP_DEST_FILE,	/**< write compressed image to file */
-    COMP_DEST_MEM	/**< write compressed image to buffer in memory */
-  };
+	virtual ~ImageCompressor();
 
-  virtual ~ImageCompressor();
+	virtual void   set_image_dimensions(unsigned int width, unsigned int height)     = 0;
+	virtual void   set_image_buffer(colorspace_t cspace, unsigned char *buffer)      = 0;
+	virtual void   set_destination_buffer(unsigned char *buf, unsigned int buf_size) = 0;
+	virtual size_t compressed_size()                                                 = 0;
+	virtual void   set_filename(const char *filename)                                = 0;
+	virtual void   set_compression_destination(CompressionDestination cd)            = 0;
+	virtual bool   supports_compression_destination(CompressionDestination cd)       = 0;
+	virtual size_t recommended_compressed_buffer_size()                              = 0;
+	virtual void   compress()                                                        = 0;
 
-  virtual void          set_image_dimensions(unsigned int width, unsigned int height)     = 0;
-  virtual void          set_image_buffer(colorspace_t cspace, unsigned char *buffer)      = 0;
-  virtual void          set_destination_buffer(unsigned char *buf, unsigned int buf_size) = 0;
-  virtual size_t        compressed_size()                                                 = 0;
-  virtual void          set_filename(const char *filename)                                = 0;
-  virtual void          set_compression_destination(CompressionDestination cd)            = 0;
-  virtual bool          supports_compression_destination(CompressionDestination cd)       = 0;
-  virtual size_t        recommended_compressed_buffer_size()                              = 0;
-  virtual void          compress()                                                        = 0;
-
-  virtual bool          supports_vflip() = 0;
-  virtual void          set_vflip(bool enable) = 0;
+	virtual bool supports_vflip()       = 0;
+	virtual void set_vflip(bool enable) = 0;
 };
 
 } // end namespace firevision

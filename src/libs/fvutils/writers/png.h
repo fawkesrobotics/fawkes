@@ -30,15 +30,16 @@ namespace firevision {
 
 class PNGWriter : public Writer
 {
- private:
-  colorspace_t colorspace_;
- public:
-  PNGWriter();
-  PNGWriter(const char *filename, unsigned int width, unsigned int height);
-  ~PNGWriter();
+private:
+	colorspace_t colorspace_;
 
-  virtual void set_buffer(colorspace_t cspace, unsigned char *buffer);
-  virtual void write();
+public:
+	PNGWriter();
+	PNGWriter(const char *filename, unsigned int width, unsigned int height);
+	~PNGWriter();
+
+	virtual void set_buffer(colorspace_t cspace, unsigned char *buffer);
+	virtual void write();
 };
 
 } // end namespace firevision

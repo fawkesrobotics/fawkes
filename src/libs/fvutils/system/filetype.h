@@ -26,9 +26,10 @@
 #define _FIREVISION_FVUTILS_FILETYPE_H_
 
 #include <core/exception.h>
-#include <utils/system/filetype.h>
-#include <fvutils/readers/fvraw.h>
 #include <fvutils/colormap/cmfile.h>
+#include <fvutils/readers/fvraw.h>
+#include <utils/system/filetype.h>
+
 #include <string>
 
 namespace firevision {
@@ -36,29 +37,28 @@ namespace firevision {
 inline std::string
 fv_filetype_file(const char *filename)
 {
-  std::string rv;
+	std::string rv;
 
-  try {
-    rv = fawkes::filetype_file(filename);
-  } catch (fawkes::Exception &e) {
-    // Some error occured, most likely libmagic was not available at compile
-    // time, assume data to make our own checks, we just cannot detect JPG
-    // and PNG in this case.
-    rv = "data";
-  }
+	try {
+		rv = fawkes::filetype_file(filename);
+	} catch (fawkes::Exception &e) {
+		// Some error occured, most likely libmagic was not available at compile
+		// time, assume data to make our own checks, we just cannot detect JPG
+		// and PNG in this case.
+		rv = "data";
+	}
 
-  if ( rv == "data" ) {
-    if ( FvRawReader::is_FvRaw(filename) ) {
-      rv = "FvRaw";
-    } else if ( ColormapFile::is_colormap_file(filename) ) {
-      rv = "FvColormap";
-    }
-  }
+	if (rv == "data") {
+		if (FvRawReader::is_FvRaw(filename)) {
+			rv = "FvRaw";
+		} else if (ColormapFile::is_colormap_file(filename)) {
+			rv = "FvColormap";
+		}
+	}
 
-  return rv;
+	return rv;
 }
 
 } // end namespace firevision
-
 
 #endif

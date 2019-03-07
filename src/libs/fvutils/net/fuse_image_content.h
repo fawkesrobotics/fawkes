@@ -26,8 +26,8 @@
 
 #include <fvutils/net/fuse.h>
 #include <fvutils/net/fuse_message_content.h>
-#include <utils/time/time.h>
 #include <sys/types.h>
+#include <utils/time/time.h>
 
 namespace firevision {
 
@@ -35,35 +35,39 @@ class SharedMemoryImageBuffer;
 
 class FuseImageContent : public FuseMessageContent
 {
- public:
-  FuseImageContent(SharedMemoryImageBuffer *b);
-  FuseImageContent(uint32_t type, void *payload, size_t payload_size);
-  FuseImageContent(FUSE_image_format_t image_format, const char *image_id,
-		   unsigned char *buffer, size_t buffer_size,
-		   colorspace_t colorspace,
-		   unsigned int width, unsigned int height,
-		   long int capture_time_sec = 0, long int capture_time_usec = 0);
+public:
+	FuseImageContent(SharedMemoryImageBuffer *b);
+	FuseImageContent(uint32_t type, void *payload, size_t payload_size);
+	FuseImageContent(FUSE_image_format_t image_format,
+	                 const char *        image_id,
+	                 unsigned char *     buffer,
+	                 size_t              buffer_size,
+	                 colorspace_t        colorspace,
+	                 unsigned int        width,
+	                 unsigned int        height,
+	                 long int            capture_time_sec  = 0,
+	                 long int            capture_time_usec = 0);
 
-  ~FuseImageContent();
+	~FuseImageContent();
 
-  unsigned char *  buffer() const;
-  size_t           buffer_size() const;
-  unsigned int     pixel_width() const;
-  unsigned int     pixel_height() const;
-  unsigned int     colorspace() const;
-  unsigned int     format() const;
-  void             decompress(unsigned char *yuv422_planar_buffer, size_t buffer_size);
+	unsigned char *buffer() const;
+	size_t         buffer_size() const;
+	unsigned int   pixel_width() const;
+	unsigned int   pixel_height() const;
+	unsigned int   colorspace() const;
+	unsigned int   format() const;
+	void           decompress(unsigned char *yuv422_planar_buffer, size_t buffer_size);
 
-  fawkes::Time *   capture_time() const;
+	fawkes::Time *capture_time() const;
 
-  virtual void     serialize();
+	virtual void serialize();
 
- private:
-  unsigned char *buffer_;
-  size_t         buffer_size_;
-  FUSE_image_message_header_t *header_;
+private:
+	unsigned char *              buffer_;
+	size_t                       buffer_size_;
+	FUSE_image_message_header_t *header_;
 
-  mutable fawkes::Time  *capture_time_;
+	mutable fawkes::Time *capture_time_;
 };
 
 } // end namespace firevision

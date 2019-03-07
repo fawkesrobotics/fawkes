@@ -21,14 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/writers/writer.h>
-
 #include <core/exception.h>
 #include <core/exceptions/system.h>
+#include <fvutils/writers/writer.h>
 
-#include <cstring>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 namespace firevision {
 
@@ -73,26 +72,26 @@ namespace firevision {
  */
 Writer::Writer(const char *extension)
 {
-  basename = 0;
-  filename = 0;
+	basename = 0;
+	filename = 0;
 
-  this->extension = 0;
-  if (0 != extension) {
-    this->extension = strdup(extension);
-  }
+	this->extension = 0;
+	if (0 != extension) {
+		this->extension = strdup(extension);
+	}
 
-  width = 0;
-  height = 0;
-  cspace = CS_UNKNOWN;
-  buffer = 0;
+	width  = 0;
+	height = 0;
+	cspace = CS_UNKNOWN;
+	buffer = 0;
 }
 
 /** Virtual empty destructor. */
 Writer::~Writer()
 {
-  free(filename);
-  free(basename);
-  free(extension);
+	free(filename);
+	free(basename);
+	free(extension);
 }
 
 /** Set filename.
@@ -102,23 +101,23 @@ Writer::~Writer()
 void
 Writer::set_filename(const char *filename)
 {
-  free(this->filename);
-  
-  if ( 0 != strstr(filename, ".") ) {
-    this->filename = strdup(filename);
-  } else {
-    free(this->basename);
-    this->basename = strdup(filename);
+	free(this->filename);
 
-    // re-generate complete filename
-    if (0 == extension) {
-      throw fawkes::Exception("Extension not set");
-    }
+	if (0 != strstr(filename, ".")) {
+		this->filename = strdup(filename);
+	} else {
+		free(this->basename);
+		this->basename = strdup(filename);
 
-    if (asprintf(&(this->filename), "%s.%s", basename, extension) == -1) {
-      throw fawkes::OutOfMemoryException("Writer::set_filename(): asprintf() failed");
-    }
-  }
+		// re-generate complete filename
+		if (0 == extension) {
+			throw fawkes::Exception("Extension not set");
+		}
+
+		if (asprintf(&(this->filename), "%s.%s", basename, extension) == -1) {
+			throw fawkes::OutOfMemoryException("Writer::set_filename(): asprintf() failed");
+		}
+	}
 }
 
 /** Set dimensions of image in pixels.
@@ -128,8 +127,8 @@ Writer::set_filename(const char *filename)
 void
 Writer::set_dimensions(unsigned int width, unsigned int height)
 {
-  this->width = width;
-  this->height = height;
+	this->width  = width;
+	this->height = height;
 }
 
 /** Set image buffer.
@@ -139,8 +138,8 @@ Writer::set_dimensions(unsigned int width, unsigned int height)
 void
 Writer::set_buffer(colorspace_t cspace, unsigned char *buffer)
 {
-  this->cspace = cspace;
-  this->buffer = buffer;
+	this->cspace = cspace;
+	this->buffer = buffer;
 }
 
 /** Set the filename extension for file written by this writer.
@@ -149,15 +148,15 @@ Writer::set_buffer(colorspace_t cspace, unsigned char *buffer)
 void
 Writer::set_extension(const char *extension)
 {
-  free(this->extension);
-  this->extension = strdup(extension);
+	free(this->extension);
+	this->extension = strdup(extension);
 
-  // re-generate complete filename
-  free(this->filename);
-  this->filename = (char *) malloc( strlen(basename) + strlen(extension) + 1 );
-  strcpy(filename, basename);
-  strcat(this->filename, ".");
-  strcat(filename, extension);
+	// re-generate complete filename
+	free(this->filename);
+	this->filename = (char *)malloc(strlen(basename) + strlen(extension) + 1);
+	strcpy(filename, basename);
+	strcat(this->filename, ".");
+	strcat(filename, extension);
 }
 
 } // end namespace firevision

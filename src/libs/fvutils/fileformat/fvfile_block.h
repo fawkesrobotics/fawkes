@@ -25,44 +25,45 @@
 #define _FIREVISION_FVUTILS_FILEFORMAT_FVFILE_BLOCK_H_
 
 #include <fvutils/fileformat/fvff.h>
+
 #include <cstddef>
 
 namespace firevision {
 
 class FireVisionDataFileBlock
 {
- public:
-  FireVisionDataFileBlock(unsigned int type, size_t data_size,
-			  void *spec_header, size_t spec_header_size);
-  FireVisionDataFileBlock(unsigned int type, size_t data_size,
-			  size_t spec_header_size);
-  FireVisionDataFileBlock(unsigned int type, size_t data_size);
-  FireVisionDataFileBlock(FireVisionDataFileBlock *block);
-  virtual ~FireVisionDataFileBlock();
+public:
+	FireVisionDataFileBlock(unsigned int type,
+	                        size_t       data_size,
+	                        void *       spec_header,
+	                        size_t       spec_header_size);
+	FireVisionDataFileBlock(unsigned int type, size_t data_size, size_t spec_header_size);
+	FireVisionDataFileBlock(unsigned int type, size_t data_size);
+	FireVisionDataFileBlock(FireVisionDataFileBlock *block);
+	virtual ~FireVisionDataFileBlock();
 
-  unsigned int  type() const;
-  void *        block_memptr() const;
-  size_t        block_size() const;
-  void *        data_ptr() const;
-  size_t        data_size() const;
+	unsigned int type() const;
+	void *       block_memptr() const;
+	size_t       block_size() const;
+	void *       data_ptr() const;
+	size_t       data_size() const;
 
- protected:
-  void set_spec_header(void *spec_header, size_t spec_header_size);
+protected:
+	void set_spec_header(void *spec_header, size_t spec_header_size);
 
-  void   *_data;
-  size_t  _data_size;
-  void   *_spec_header;
+	void * _data;
+	size_t _data_size;
+	void * _spec_header;
 
- private:
-  void constructor(unsigned int type, size_t data_size,
-		   void *spec_header, size_t spec_header_size);
+private:
+	void constructor(unsigned int type, size_t data_size, void *spec_header, size_t spec_header_size);
 
-  fvff_block_header_t *block_header_;
-  void                *block_memptr_;
-  size_t               block_size_;
-  bool                 block_owner_;
+	fvff_block_header_t *block_header_;
+	void *               block_memptr_;
+	size_t               block_size_;
+	bool                 block_owner_;
 
-  size_t               spec_header_size_;
+	size_t spec_header_size_;
 };
 
 } // end namespace firevision

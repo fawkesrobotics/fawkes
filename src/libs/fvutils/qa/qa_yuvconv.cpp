@@ -25,7 +25,6 @@
 
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/color/yuv.h>
-
 #include <fvutils/ipc/shm_image.h>
 
 #include <iostream>
@@ -33,26 +32,24 @@
 using namespace std;
 using namespace firevision;
 
-#define WIDTH  748
+#define WIDTH 748
 #define HEIGHT 572
 
 int
 main(int argc, char **argv)
 {
-  unsigned char *yuv422_packed = malloc_buffer(YUV422_PACKED, WIDTH, HEIGHT);
+	unsigned char *yuv422_packed = malloc_buffer(YUV422_PACKED, WIDTH, HEIGHT);
 
-  //  unsigned char *yuv422_planar = malloc_buffer(YUV422_PLANAR, WIDTH, HEIGHT);
-  SharedMemoryImageBuffer *shm = new SharedMemoryImageBuffer("fv_qa_yuvconv", YUV422_PLANAR, WIDTH, HEIGHT);
-  unsigned char *yuv422_planar = shm->buffer();
+	//  unsigned char *yuv422_planar = malloc_buffer(YUV422_PLANAR, WIDTH, HEIGHT);
+	SharedMemoryImageBuffer *shm =
+	  new SharedMemoryImageBuffer("fv_qa_yuvconv", YUV422_PLANAR, WIDTH, HEIGHT);
+	unsigned char *yuv422_planar = shm->buffer();
 
+	yuv422packed_to_yuv422planar(yuv422_packed, yuv422_planar, WIDTH, HEIGHT);
 
-  yuv422packed_to_yuv422planar(yuv422_packed, yuv422_planar, WIDTH, HEIGHT);
+	delete shm;
 
-  delete shm;
-
-  return 0;
+	return 0;
 }
-
-
 
 /// @endcond

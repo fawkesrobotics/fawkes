@@ -28,36 +28,37 @@
 
 namespace firevision {
 
-class FvRawWriter : public Writer {
+class FvRawWriter : public Writer
+{
+public:
+	FvRawWriter();
+	FvRawWriter(const char *filename, unsigned int width, unsigned int height);
+	FvRawWriter(const char *   filename,
+	            unsigned int   width,
+	            unsigned int   height,
+	            colorspace_t   colorspace,
+	            unsigned char *buffer);
+	virtual ~FvRawWriter();
 
- public:
-  FvRawWriter();
-  FvRawWriter(const char *filename,
-	      unsigned int width, unsigned int height);
-  FvRawWriter(const char *filename,
-	      unsigned int width, unsigned int height,
-	      colorspace_t colorspace, unsigned char *buffer);
-  virtual ~FvRawWriter();
+	virtual void           set_dimensions(unsigned int width, unsigned int height);
+	virtual void           set_buffer(colorspace_t cspace, unsigned char *buffer);
+	virtual void           write();
+	virtual unsigned char *get_write_buffer();
 
-  virtual void             set_dimensions(unsigned int width, unsigned int height);
-  virtual void             set_buffer(colorspace_t cspace, unsigned char *buffer);
-  virtual void             write();
-  virtual unsigned char *  get_write_buffer();
+	static const unsigned int FILE_IDENTIFIER;
 
-  static const unsigned int FILE_IDENTIFIER;
+	/** FvRaw image file header. */
+	typedef struct
+	{
+		unsigned int file_id;    /**< file id */
+		colorspace_t colorspace; /**< color space */
+		unsigned int width;      /**< width of image in pixels */
+		unsigned int height;     /**< height of image in pixels */
+	} FvRawHeader;
 
-  /** FvRaw image file header. */
-  typedef struct {
-    unsigned int file_id;	/**< file id */
-    colorspace_t colorspace;	/**< color space */
-    unsigned int width;		/**< width of image in pixels */
-    unsigned int height;	/**< height of image in pixels */
-  } FvRawHeader;
-
- private:
-  FvRawHeader header;
-  unsigned char *buffer;
-
+private:
+	FvRawHeader    header;
+	unsigned char *buffer;
 };
 
 } // end namespace firevision

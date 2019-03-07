@@ -28,17 +28,16 @@
 
 namespace firevision {
 
-class Reader {
+class Reader
+{
+public:
+	virtual ~Reader();
 
- public:
-  virtual ~Reader();
-
-  virtual void             set_buffer(unsigned char *yuv422planar_buffer)  = 0;
-  virtual colorspace_t     colorspace()                                    = 0;
-  virtual unsigned int     pixel_width()                                   = 0;
-  virtual unsigned int     pixel_height()                                  = 0;
-  virtual void             read()                                          = 0;
-
+	virtual void         set_buffer(unsigned char *yuv422planar_buffer) = 0;
+	virtual colorspace_t colorspace()                                   = 0;
+	virtual unsigned int pixel_width()                                  = 0;
+	virtual unsigned int pixel_height()                                 = 0;
+	virtual void         read()                                         = 0;
 };
 
 } // end namespace firevision

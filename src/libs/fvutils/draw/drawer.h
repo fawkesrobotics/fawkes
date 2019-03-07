@@ -28,39 +28,35 @@
 
 namespace firevision {
 
-class Drawer {
+class Drawer
+{
+public:
+	Drawer();
+	~Drawer();
 
- public:
-  Drawer();
-  ~Drawer();
+	void draw_circle(int center_x, int center_y, unsigned int radius);
 
-  void draw_circle(int center_x, int center_y, unsigned int radius);
+	void draw_rectangle(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
 
-  void draw_rectangle(unsigned int x, unsigned int y,
-		     unsigned int w, unsigned int h);
+	void draw_rectangle_inverted(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
 
-  void draw_rectangle_inverted(unsigned int x, unsigned int y,
-			     unsigned int w, unsigned int h);
+	void draw_point(unsigned int x, unsigned int y);
+	void color_point(unsigned int x, unsigned int y);
+	void color_point(unsigned int x, unsigned int y, YUV_t color);
+	void
+	     draw_line(unsigned int x_start, unsigned int y_start, unsigned int x_end, unsigned int y_end);
+	void draw_cross(unsigned int x_center, unsigned int y_center, unsigned int width);
 
-  void draw_point(unsigned int x, unsigned int y);
-  void color_point(unsigned int x, unsigned int y);
-  void color_point(unsigned int x, unsigned int y, YUV_t color);
-  void draw_line(unsigned int x_start, unsigned int y_start,
-		unsigned int x_end, unsigned int y_end);
-  void draw_cross(unsigned int x_center, unsigned int y_center, unsigned int width);
+	void set_buffer(unsigned char *buffer, unsigned int width, unsigned int height);
 
-  void set_buffer(unsigned char *buffer,
-		 unsigned int width, unsigned int height);
+	void set_color(unsigned char y, unsigned char u, unsigned char v);
+	void set_color(YUV_t color);
 
-  void set_color(unsigned char y, unsigned char u, unsigned char v);
-  void set_color(YUV_t color);
-
- private:
-  unsigned char  *buffer_;
-  unsigned int    width_;
-  unsigned int    height_;
-  YUV_t           color_;
-
+private:
+	unsigned char *buffer_;
+	unsigned int   width_;
+	unsigned int   height_;
+	YUV_t          color_;
 };
 
 } // end namespace firevision
