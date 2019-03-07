@@ -24,17 +24,17 @@
 #ifndef _PLUGIN_NET_HANDLER_H_
 #define _PLUGIN_NET_HANDLER_H_
 
-#include <netcomm/fawkes/handler.h>
+#include <config/change_handler.h>
 #include <core/threading/thread.h>
-#include <core/utils/lock_queue.h>
 #include <core/utils/lock_list.h>
 #include <core/utils/lock_map.h>
-#include <config/change_handler.h>
-#include <utils/system/fam.h>
+#include <core/utils/lock_queue.h>
+#include <netcomm/fawkes/handler.h>
 #include <plugin/listener.h>
+#include <utils/system/fam.h>
 
-#include <map>
 #include <list>
+#include <map>
 #include <string>
 #include <utility>
 
@@ -48,48 +48,52 @@ class PluginListMessage;
 class Configuration;
 class FamThread;
 
-class PluginNetworkHandler
-: public fawkes::Thread,
-  public fawkes::FawkesNetworkHandler,
-  public fawkes::PluginManagerListener
+class PluginNetworkHandler : public fawkes::Thread,
+                             public fawkes::FawkesNetworkHandler,
+                             public fawkes::PluginManagerListener
 {
- public:
-  PluginNetworkHandler(PluginManager *manager, FawkesNetworkHub *hub);
-  ~PluginNetworkHandler();
+public:
+	PluginNetworkHandler(PluginManager *manager, FawkesNetworkHub *hub);
+	~PluginNetworkHandler();
 
-  virtual void handle_network_message(FawkesNetworkMessage *msg);
-  virtual void client_connected(unsigned int clid);
-  virtual void client_disconnected(unsigned int clid);
+	virtual void handle_network_message(FawkesNetworkMessage *msg);
+	virtual void client_connected(unsigned int clid);
+	virtual void client_disconnected(unsigned int clid);
 
-  virtual void loop();
+	virtual void loop();
 
-  virtual void plugin_loaded(const char *plugin_name);
-  virtual void plugin_unloaded(const char *plugin_name);
+	virtual void plugin_loaded(const char *plugin_name);
+	virtual void plugin_unloaded(const char *plugin_name);
 
- private:
-  PluginListMessage * list_avail();
-  PluginListMessage * list_loaded();
-  void send_load_failure(const char *plugin_name, unsigned int client_id);
-  void send_load_success(const char *plugin_name, unsigned int client_id);
-  void send_unload_failure(const char *plugin_name, unsigned int client_id);
-  void send_unload_success(const char *plugin_name, unsigned int client_id);
-  void send_loaded(const char *plugin_name);
-  void send_unloaded(const char *plugin_name);
+private:
+	PluginListMessage *list_avail();
+	PluginListMessage *list_loaded();
+	void               send_load_failure(const char *plugin_name, unsigned int client_id);
+	void               send_load_success(const char *plugin_name, unsigned int client_id);
+	void               send_unload_failure(const char *plugin_name, unsigned int client_id);
+	void               send_unload_success(const char *plugin_name, unsigned int client_id);
+	void               send_loaded(const char *plugin_name);
+	void               send_unloaded(const char *plugin_name);
 
-  void load(const char *plugin_list, unsigned int clid);
-  void unload(const char *plugin_list, unsigned int clid);
+	void load(const char *plugin_list, unsigned int clid);
+	void unload(const char *plugin_list, unsigned int clid);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  PluginManager     *manager_;
-  FawkesNetworkHub  *hub_;
+private:
+	PluginManager *   manager_;
+	FawkesNetworkHub *hub_;
 
-  LockQueue< FawkesNetworkMessage * > inbound_queue_;
+	LockQueue<FawkesNetworkMessage *> inbound_queue_;
 
-  LockList<unsigned int>           subscribers_;
-  LockList<unsigned int>::iterator ssit_;
+	LockList<unsigned int>           subscribers_;
+	LockList<unsigned int>::iterator ssit_;
 };
 
 } // end namespace fawkes

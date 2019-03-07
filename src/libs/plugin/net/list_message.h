@@ -24,8 +24,8 @@
 #ifndef _FAWKES_PLUGIN_LIST_MESSAGE_H_
 #define _FAWKES_PLUGIN_LIST_MESSAGE_H_
 
-#include <plugin/net/messages.h>
 #include <netcomm/fawkes/message_content.h>
+#include <plugin/net/messages.h>
 
 namespace fawkes {
 
@@ -33,25 +33,26 @@ class DynamicBuffer;
 
 class PluginListMessage : public FawkesNetworkMessageContent
 {
- public:
-  PluginListMessage();
-  PluginListMessage(unsigned int component_id, unsigned int msg_id,
-		    void *payload, size_t payload_size);
-  virtual ~PluginListMessage();
+public:
+	PluginListMessage();
+	PluginListMessage(unsigned int component_id,
+	                  unsigned int msg_id,
+	                  void *       payload,
+	                  size_t       payload_size);
+	virtual ~PluginListMessage();
 
-  void append(const char *plugin_name, size_t len);
-  virtual void serialize();
+	void         append(const char *plugin_name, size_t len);
+	virtual void serialize();
 
-  void   reset_iterator();
-  bool   has_next();
-  char * next();
-  
+	void  reset_iterator();
+	bool  has_next();
+	char *next();
 
- private:
-  DynamicBuffer     *plugin_list;
-  plugin_list_msg_t  msg;
+private:
+	DynamicBuffer *   plugin_list;
+	plugin_list_msg_t msg;
 };
 
-}
+} // namespace fawkes
 
 #endif
