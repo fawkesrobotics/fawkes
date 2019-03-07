@@ -25,9 +25,9 @@
 
 #include <netcomm/utils/dynamic_buffer.h>
 
-#include <iostream>
-#include <cstring>
 #include <cstdio>
+#include <cstring>
+#include <iostream>
 
 using namespace std;
 using namespace fawkes;
@@ -35,35 +35,34 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
+	dynamic_list_t dl;
+	DynamicBuffer *dw = new DynamicBuffer(&dl);
 
-  dynamic_list_t dl;
-  DynamicBuffer *dw = new DynamicBuffer(&dl);
+	for (unsigned int i = 0; i < 1000; ++i) {
+		dw->append("test", strlen("test"));
+	}
 
-  for ( unsigned int i = 0; i < 1000; ++i ) {
-    dw->append("test", strlen("test"));
-  }
+	cout << "Added elements, num_elements: " << dw->num_elements()
+	     << ", buffer_size: " << dw->buffer_size() << ", real_buffer_size: " << dw->real_buffer_size()
+	     << endl;
 
-  cout << "Added elements, num_elements: " << dw->num_elements()
-       << ", buffer_size: " << dw->buffer_size()
-       << ", real_buffer_size: " << dw->real_buffer_size() << endl;
+	DynamicBuffer *dr = new DynamicBuffer(&dl, dw->buffer(), dw->buffer_size());
 
-  DynamicBuffer *dr = new DynamicBuffer(&dl, dw->buffer(), dw->buffer_size());
+	cout << "Read buffer opened, num_elements: " << dr->num_elements()
+	     << ", buffer_size: " << dr->buffer_size() << ", real_buffer_size: " << dr->real_buffer_size()
+	     << endl;
 
-  cout << "Read buffer opened, num_elements: " << dr->num_elements()
-       << ", buffer_size: " << dr->buffer_size()
-       << ", real_buffer_size: " << dr->real_buffer_size() << endl;
+	while (dr->has_next()) {
+		char tmp[1024];
+		memset(tmp, 0, sizeof(tmp));
+		size_t size;
+		void * buf = dr->next(&size);
+		strncpy(tmp, (const char *)buf, size);
+		printf("Read string (%lu bytes): '%s'\n", (unsigned long int)size, tmp);
+	}
 
-  while ( dr->has_next() ) {
-    char tmp[1024];
-    memset(tmp, 0, sizeof(tmp));
-    size_t size;
-    void *buf = dr->next(&size);
-    strncpy(tmp, (const char *)buf, size);
-    printf("Read string (%lu bytes): '%s'\n", (unsigned long int)size, tmp);
-  }
-
-  delete dw;
-  delete dr;
+	delete dw;
+	delete dr;
 }
 
 /// @endcond

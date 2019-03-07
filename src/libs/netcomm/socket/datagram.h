@@ -30,13 +30,13 @@ namespace fawkes {
 
 class DatagramSocket : public Socket
 {
- public:
+public:
 	DatagramSocket(AddrType addr_type, float timeout = 0.f);
-  DatagramSocket(DatagramSocket &s);
+	DatagramSocket(DatagramSocket &s);
 
-	DatagramSocket& operator=(DatagramSocket& s);
+	DatagramSocket &operator=(DatagramSocket &s);
 
-  virtual Socket *  clone();
+	virtual Socket *clone();
 };
 
 } // end namespace fawkes

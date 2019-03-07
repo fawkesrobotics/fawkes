@@ -30,15 +30,14 @@ namespace fawkes {
 
 class DummyServiceBrowser : public ServiceBrowser
 {
- public:
-  DummyServiceBrowser();
-  virtual ~DummyServiceBrowser();
+public:
+	DummyServiceBrowser();
+	virtual ~DummyServiceBrowser();
 
-  virtual void watch_service(const char *service_type, ServiceBrowseHandler *h);
-  virtual void unwatch_service(const char *service_type, ServiceBrowseHandler *h);
+	virtual void watch_service(const char *service_type, ServiceBrowseHandler *h);
+	virtual void unwatch_service(const char *service_type, ServiceBrowseHandler *h);
 };
 
 } // end namespace fawkes
-
 
 #endif

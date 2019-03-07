@@ -25,20 +25,21 @@
 #define _NETCOMM_UTILS_RESOLVER_THREAD_H_
 
 #include <core/threading/thread.h>
-#include <core/utils/lock_hashset.h>
 #include <core/utils/lock_hashmap.h>
+#include <core/utils/lock_hashset.h>
 #include <utils/misc/string_compare.h>
 #ifdef HAVE_AVAHI
-#include <netcomm/dns-sd/avahi_resolver_handler.h>
+#	include <netcomm/dns-sd/avahi_resolver_handler.h>
 #endif
-#include <sys/socket.h>
 #include <netinet/in.h>
-#include <stdint.h>
+#include <sys/socket.h>
+
 #include <cstddef>
+#include <list>
+#include <map>
+#include <stdint.h>
 #include <string>
 #include <utility>
-#include <map>
-#include <list>
 
 namespace fawkes {
 
@@ -52,48 +53,51 @@ class NetworkNameResolverThread : public Thread, public AvahiResolverHandler
 class NetworkNameResolverThread : public Thread
 #endif
 {
- public:
-  NetworkNameResolverThread(NetworkNameResolver *resolver,
-                            AvahiThread *avahi_thread = NULL);
-  ~NetworkNameResolverThread();
+public:
+	NetworkNameResolverThread(NetworkNameResolver *resolver, AvahiThread *avahi_thread = NULL);
+	~NetworkNameResolverThread();
 
-  void resolve_name(const std::string &name);
-  void resolve_address(struct sockaddr *addr, socklen_t addrlen);
+	void resolve_name(const std::string &name);
+	void resolve_address(struct sockaddr *addr, socklen_t addrlen);
 
-  bool resolve_name_immediately(const std::string &name,
-                                struct sockaddr **addr, socklen_t *addr_len);
-  bool resolve_address_immediately(struct sockaddr *addr, std::string &name, bool &namefound);
+	bool
+	     resolve_name_immediately(const std::string &name, struct sockaddr **addr, socklen_t *addr_len);
+	bool resolve_address_immediately(struct sockaddr *addr, std::string &name, bool &namefound);
 
-  virtual void resolved_name(char *name, struct sockaddr *addr, socklen_t addrlen);
-  virtual void resolved_address(struct sockaddr *addr, socklen_t addrlen, char *name);
-  virtual void name_resolution_failed(char *name);
-  virtual void address_resolution_failed(struct sockaddr *addr, socklen_t addrlen);
+	virtual void resolved_name(char *name, struct sockaddr *addr, socklen_t addrlen);
+	virtual void resolved_address(struct sockaddr *addr, socklen_t addrlen, char *name);
+	virtual void name_resolution_failed(char *name);
+	virtual void address_resolution_failed(struct sockaddr *addr, socklen_t addrlen);
 
-  virtual void loop();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  NetworkNameResolver  *resolver_;
+private:
+	NetworkNameResolver *resolver_;
 #ifdef HAVE_AVAHI
-  AvahiThread          *avahi_thread_;
+	AvahiThread *avahi_thread_;
 #endif
 
-  Mutex *namesq_mutex_;
-  unsigned int namesq_active_;
-  typedef LockHashSet<std::string>  NamesQMap;
-  NamesQMap   namesqs_[2];
-  NamesQMap  *namesq_;
-  NamesQMap  *namesq_proc_;
+	Mutex *                          namesq_mutex_;
+	unsigned int                     namesq_active_;
+	typedef LockHashSet<std::string> NamesQMap;
+	NamesQMap                        namesqs_[2];
+	NamesQMap *                      namesq_;
+	NamesQMap *                      namesq_proc_;
 
-
-  Mutex *addrq_mutex_;
-  unsigned int addrq_active_;
-  typedef std::list<struct sockaddr *> AddrQList;
-  AddrQList   addrqs_[2];
-  AddrQList  *addrq_;
-  AddrQList  *addrq_proc_;
+	Mutex *                              addrq_mutex_;
+	unsigned int                         addrq_active_;
+	typedef std::list<struct sockaddr *> AddrQList;
+	AddrQList                            addrqs_[2];
+	AddrQList *                          addrq_;
+	AddrQList *                          addrq_proc_;
 };
 
 } // end namespace fawkes

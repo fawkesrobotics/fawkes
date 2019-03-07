@@ -44,7 +44,7 @@ sock_addr_size(const struct sockaddr *a)
 		return 0;
 	}
 }
-	
+
 } // end namespace fawkes
 
 #endif

@@ -31,21 +31,20 @@ namespace fawkes {
 
 class StringContent : public FawkesNetworkMessageContent
 {
- public:
-  StringContent(const char *initial_string);
-  StringContent(unsigned int cid, unsigned int msgid, void *payload, size_t payload_size);
-  virtual ~StringContent();
+public:
+	StringContent(const char *initial_string);
+	StringContent(unsigned int cid, unsigned int msgid, void *payload, size_t payload_size);
+	virtual ~StringContent();
 
-  void          set_string(const char *s);
-  const char *  get_string() const;
-  size_t        get_string_length();
+	void        set_string(const char *s);
+	const char *get_string() const;
+	size_t      get_string_length();
 
-  virtual void  serialize();
+	virtual void serialize();
 
- private:
-  bool    string_owner_;
-  char *  string_;
-
+private:
+	bool  string_owner_;
+	char *string_;
 };
 
 } // end namespace fawkes

@@ -30,29 +30,23 @@ namespace fawkes {
  * Does nothing, used to fulfill NetworkAspect guarantees if Avahi is not available.
  */
 
-
 /** Constructor. */
 DummyServiceBrowser::DummyServiceBrowser()
 {
 }
-
 
 /** Virtual empty destructor. */
 DummyServiceBrowser::~DummyServiceBrowser()
 {
 }
 
-
 void
-DummyServiceBrowser::watch_service(const char *service_type,
-				   ServiceBrowseHandler *h)
+DummyServiceBrowser::watch_service(const char *service_type, ServiceBrowseHandler *h)
 {
 }
 
-
 void
-DummyServiceBrowser::unwatch_service(const char *service_type,
-				     ServiceBrowseHandler *h)
+DummyServiceBrowser::unwatch_service(const char *service_type, ServiceBrowseHandler *h)
 {
 }
 

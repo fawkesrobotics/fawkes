@@ -40,12 +40,10 @@ DummyServicePublisher::~DummyServicePublisher()
 {
 }
 
-
 void
 DummyServicePublisher::publish_service(NetworkService *service)
 {
 }
-
 
 void
 DummyServicePublisher::unpublish_service(NetworkService *service)

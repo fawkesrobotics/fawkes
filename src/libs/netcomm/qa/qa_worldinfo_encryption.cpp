@@ -23,11 +23,11 @@
 
 /// @cond QA
 
-#include <netcomm/worldinfo/encrypt.h>
 #include <netcomm/worldinfo/decrypt.h>
+#include <netcomm/worldinfo/encrypt.h>
 
-#include <cstdlib>
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 
@@ -39,46 +39,45 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  // ArgumentParser *argp = new ArgumentParser(argc, argv, "rl");
+	// ArgumentParser *argp = new ArgumentParser(argc, argv, "rl");
 
-  WorldInfoMessageEncryptor *e = new WorldInfoMessageEncryptor((const unsigned char *)"QAKEY",
-							       (const unsigned char *)"QAIV123456");
-  WorldInfoMessageDecryptor *d = new WorldInfoMessageDecryptor((const unsigned char *)"QAKEY",
-							       (const unsigned char *)"QAIV123456");
-  
+	WorldInfoMessageEncryptor *e = new WorldInfoMessageEncryptor((const unsigned char *)"QAKEY",
+	                                                             (const unsigned char *)"QAIV123456");
+	WorldInfoMessageDecryptor *d = new WorldInfoMessageDecryptor((const unsigned char *)"QAKEY",
+	                                                             (const unsigned char *)"QAIV123456");
 
-  char *input = (char *)malloc(MAXLENGTH);
-  char *output = (char *)malloc(MAXLENGTH);
-  e->set_plain_buffer(input, MAXLENGTH);
-  char *crypted = (char *)malloc(e->recommended_crypt_buffer_size());
-  e->set_crypt_buffer(crypted, e->recommended_crypt_buffer_size());
+	char *input  = (char *)malloc(MAXLENGTH);
+	char *output = (char *)malloc(MAXLENGTH);
+	e->set_plain_buffer(input, MAXLENGTH);
+	char *crypted = (char *)malloc(e->recommended_crypt_buffer_size());
+	e->set_crypt_buffer(crypted, e->recommended_crypt_buffer_size());
 
-  strncpy(input, "Test String 12345", MAXLENGTH);
-  printf("Plain text: %s\n", input);
+	strncpy(input, "Test String 12345", MAXLENGTH);
+	printf("Plain text: %s\n", input);
 
-  e->set_plain_buffer(input, strlen(input));
-  long unsigned int bytes = e->encrypt();
+	e->set_plain_buffer(input, strlen(input));
+	long unsigned int bytes = e->encrypt();
 
-  printf("Encrypted to %lu bytes ", bytes);
-  //for (size_t i = 0; i < bytes; i += 4) {
-  //  printf("%x", crypted[i]);
-  //}
-  printf("\n");
+	printf("Encrypted to %lu bytes ", bytes);
+	//for (size_t i = 0; i < bytes; i += 4) {
+	//  printf("%x", crypted[i]);
+	//}
+	printf("\n");
 
-  memset(output, 0, MAXLENGTH);
-  d->set_crypt_buffer(crypted, bytes);
-  d->set_plain_buffer(output, MAXLENGTH);
-  bytes = d->decrypt();
+	memset(output, 0, MAXLENGTH);
+	d->set_crypt_buffer(crypted, bytes);
+	d->set_plain_buffer(output, MAXLENGTH);
+	bytes = d->decrypt();
 
-  printf("Decrypted to %lu bytes: %s\n", bytes, output);
+	printf("Decrypted to %lu bytes: %s\n", bytes, output);
 
-  free(input);
-  free(output);
+	free(input);
+	free(output);
 
-  delete e;
-  delete d;
-  //delete argp;
-  return 0;
+	delete e;
+	delete d;
+	//delete argp;
+	return 0;
 }
 
 /// @endcond

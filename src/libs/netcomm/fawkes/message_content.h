@@ -25,28 +25,29 @@
 #define _NETCOMM_FAWKES_MESSAGE_CONTENT_H_
 
 #include <sys/types.h>
+
 #include <cstddef>
 
 namespace fawkes {
 
 class FawkesNetworkMessageContent
 {
- public:
-  FawkesNetworkMessageContent();
-  virtual ~FawkesNetworkMessageContent();
+public:
+	FawkesNetworkMessageContent();
+	virtual ~FawkesNetworkMessageContent();
 
-  virtual void   serialize() = 0;
-  virtual void * payload();
-  virtual size_t payload_size();
+	virtual void   serialize() = 0;
+	virtual void * payload();
+	virtual size_t payload_size();
 
- protected:
-  void copy_payload(size_t offset, const void *buf, size_t len);
+protected:
+	void copy_payload(size_t offset, const void *buf, size_t len);
 
- protected:
-  /** Pointer to payload. */
-  void *  _payload;
-  /** Payloda size. */
-  size_t  _payload_size;
+protected:
+	/** Pointer to payload. */
+	void *_payload;
+	/** Payloda size. */
+	size_t _payload_size;
 };
 
 } // end namespace fawkes

@@ -24,12 +24,11 @@
 #ifndef _NETCOMM_FAWKES_CLIENT_H_
 #define _NETCOMM_FAWKES_CLIENT_H_
 
-#include <netcomm/fawkes/message_queue.h>
-#include <netcomm/fawkes/message.h>
-#include <netcomm/fawkes/component_ids.h>
-
 #include <core/exception.h>
 #include <core/utils/lock_map.h>
+#include <netcomm/fawkes/component_ids.h>
+#include <netcomm/fawkes/message.h>
+#include <netcomm/fawkes/message_queue.h>
 #include <sys/socket.h>
 
 namespace fawkes {
@@ -43,86 +42,86 @@ class FawkesNetworkClientRecvThread;
 
 class HandlerAlreadyRegisteredException : public Exception
 {
- public:
-  HandlerAlreadyRegisteredException();
+public:
+	HandlerAlreadyRegisteredException();
 };
 
 #define FAWKES_TCP_PORT 1910
 
 class FawkesNetworkClient
 {
- friend FawkesNetworkClientSendThread;
- friend FawkesNetworkClientRecvThread;
- public:
- FawkesNetworkClient();
- FawkesNetworkClient(const char *host, unsigned short int port);
- FawkesNetworkClient(unsigned int id, const char *host, 
-                     unsigned short int port);
-  ~FawkesNetworkClient();
+	friend FawkesNetworkClientSendThread;
+	friend FawkesNetworkClientRecvThread;
 
-  void connect();
-  void disconnect();
-  void connect(const char *host, unsigned short int port);
-  void connect(const char *hostname, const struct sockaddr *addr, socklen_t addrlen);
-  void connect(const char *hostname, const struct sockaddr_storage &addr);
+public:
+	FawkesNetworkClient();
+	FawkesNetworkClient(const char *host, unsigned short int port);
+	FawkesNetworkClient(unsigned int id, const char *host, unsigned short int port);
+	~FawkesNetworkClient();
 
-  void enqueue(FawkesNetworkMessage *message);
-  void enqueue_and_wait(FawkesNetworkMessage *message, unsigned int timeout_sec = 15);
+	void connect();
+	void disconnect();
+	void connect(const char *host, unsigned short int port);
+	void connect(const char *hostname, const struct sockaddr *addr, socklen_t addrlen);
+	void connect(const char *hostname, const struct sockaddr_storage &addr);
 
-  void wait(unsigned int component_id, unsigned int timeout_sec = 15);
-  void wake(unsigned int component_id);
+	void enqueue(FawkesNetworkMessage *message);
+	void enqueue_and_wait(FawkesNetworkMessage *message, unsigned int timeout_sec = 15);
 
-  void interrupt_connect();
+	void wait(unsigned int component_id, unsigned int timeout_sec = 15);
+	void wake(unsigned int component_id);
 
-  void register_handler(FawkesNetworkClientHandler *handler, unsigned int component_id);
-  void deregister_handler(unsigned int component_id);
+	void interrupt_connect();
 
-  bool connected() const throw();
+	void register_handler(FawkesNetworkClientHandler *handler, unsigned int component_id);
+	void deregister_handler(unsigned int component_id);
 
-  bool has_id() const;
-  unsigned int id() const;
+	bool connected() const throw();
 
-  const char *get_hostname() const;
+	bool         has_id() const;
+	unsigned int id() const;
 
- private:
-  void recv();
-  void notify_of_connection_established();
-  void notify_of_connection_dead();
+	const char *get_hostname() const;
 
-  void wake_handlers(unsigned int cid);
-  void dispatch_message(FawkesNetworkMessage *m);
-  void connection_died();
-  void set_send_slave_alive();
-  void set_recv_slave_alive();
+private:
+	void recv();
+	void notify_of_connection_established();
+	void notify_of_connection_dead();
 
-  char *host_;
-  unsigned short int port_;
+	void wake_handlers(unsigned int cid);
+	void dispatch_message(FawkesNetworkMessage *m);
+	void connection_died();
+	void set_send_slave_alive();
+	void set_recv_slave_alive();
 
-  StreamSocket *s;
+	char *             host_;
+	unsigned short int port_;
 
-  typedef LockMap<unsigned int, FawkesNetworkClientHandler *> HandlerMap;
-  HandlerMap  handlers;
+	StreamSocket *s;
 
-  WaitCondition *connest_waitcond_;
-  Mutex         *connest_mutex_;
-  bool           connest_;
-  bool           connest_interrupted_;
+	typedef LockMap<unsigned int, FawkesNetworkClientHandler *> HandlerMap;
+	HandlerMap                                                  handlers;
 
-  Mutex                         *recv_mutex_;
-  WaitCondition                 *recv_waitcond_;
-  std::map<unsigned int, bool>   recv_received_;
-  FawkesNetworkClientRecvThread *recv_slave_;
-  FawkesNetworkClientSendThread *send_slave_;
-  bool                           recv_slave_alive_;
-  bool                           send_slave_alive_;
+	WaitCondition *connest_waitcond_;
+	Mutex *        connest_mutex_;
+	bool           connest_;
+	bool           connest_interrupted_;
 
-  bool connection_died_recently;
-  Mutex *slave_status_mutex;
-  bool _has_id;
-  unsigned int _id;
+	Mutex *                        recv_mutex_;
+	WaitCondition *                recv_waitcond_;
+	std::map<unsigned int, bool>   recv_received_;
+	FawkesNetworkClientRecvThread *recv_slave_;
+	FawkesNetworkClientSendThread *send_slave_;
+	bool                           recv_slave_alive_;
+	bool                           send_slave_alive_;
 
-  struct sockaddr *addr_;
-  socklen_t        addr_len_;
+	bool         connection_died_recently;
+	Mutex *      slave_status_mutex;
+	bool         _has_id;
+	unsigned int _id;
+
+	struct sockaddr *addr_;
+	socklen_t        addr_len_;
 };
 
 } // end namespace fawkes

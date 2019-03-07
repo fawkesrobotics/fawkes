@@ -22,15 +22,14 @@
  */
 
 #include <core/exceptions/system.h>
-
+#include <core/threading/mutex.h>
+#include <core/threading/wait_condition.h>
+#include <netcomm/fawkes/message_queue.h>
 #include <netcomm/fawkes/server_client_thread.h>
 #include <netcomm/fawkes/server_thread.h>
-#include <netcomm/fawkes/message_queue.h>
 #include <netcomm/fawkes/transceiver.h>
 #include <netcomm/socket/stream.h>
 #include <netcomm/utils/exceptions.h>
-#include <core/threading/mutex.h>
-#include <core/threading/wait_condition.h>
 
 #include <unistd.h>
 
@@ -44,105 +43,108 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-class FawkesNetworkServerClientSendThread
-  : public Thread
+class FawkesNetworkServerClientSendThread : public Thread
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param s client stream socket
    * @param parent parent FawkesNetworkServerClientThread instance
    */
-  FawkesNetworkServerClientSendThread(StreamSocket *s,
-				      FawkesNetworkServerClientThread *parent)
-    : Thread("FawkesNetworkServerClientSendThread", Thread::OPMODE_WAITFORWAKEUP)
-  {
-    s_ = s;
-    parent_ = parent;
-    outbound_mutex_    = new Mutex();
-    outbound_msgqs_[0] = new FawkesNetworkMessageQueue();
-    outbound_msgqs_[1] = new FawkesNetworkMessageQueue();
-    outbound_active_   = 0;
-    outbound_msgq_     = outbound_msgqs_[0];
-  }
-
-  /** Destructor. */
-  ~FawkesNetworkServerClientSendThread()
-  {
-    for (unsigned int i = 0; i < 2; ++i) {
-      while ( ! outbound_msgqs_[i]->empty() ) {
-	FawkesNetworkMessage *m = outbound_msgqs_[i]->front();
-	m->unref();
-	outbound_msgqs_[i]->pop();
-      }
-    }
-    delete outbound_msgqs_[0];
-    delete outbound_msgqs_[1];
-    delete outbound_mutex_;
-  }
-
-  virtual void loop()
-  {
-    if ( ! parent_->alive() )  return;
-
-    while ( outbound_havemore_ ) {
-      outbound_mutex_->lock();
-      outbound_havemore_ = false;
-      FawkesNetworkMessageQueue *q = outbound_msgq_;
-      outbound_active_ = 1 - outbound_active_;
-      outbound_msgq_ = outbound_msgqs_[outbound_active_];
-      outbound_mutex_->unlock();
-
-      if ( ! q->empty() ) {
-	try {
-	  FawkesNetworkTransceiver::send(s_, q);
-	} catch (ConnectionDiedException &e) {
-	  parent_->connection_died();
-	  exit();
+	FawkesNetworkServerClientSendThread(StreamSocket *s, FawkesNetworkServerClientThread *parent)
+	: Thread("FawkesNetworkServerClientSendThread", Thread::OPMODE_WAITFORWAKEUP)
+	{
+		s_                 = s;
+		parent_            = parent;
+		outbound_mutex_    = new Mutex();
+		outbound_msgqs_[0] = new FawkesNetworkMessageQueue();
+		outbound_msgqs_[1] = new FawkesNetworkMessageQueue();
+		outbound_active_   = 0;
+		outbound_msgq_     = outbound_msgqs_[0];
 	}
-      }
-    }
-  }
 
+	/** Destructor. */
+	~FawkesNetworkServerClientSendThread()
+	{
+		for (unsigned int i = 0; i < 2; ++i) {
+			while (!outbound_msgqs_[i]->empty()) {
+				FawkesNetworkMessage *m = outbound_msgqs_[i]->front();
+				m->unref();
+				outbound_msgqs_[i]->pop();
+			}
+		}
+		delete outbound_msgqs_[0];
+		delete outbound_msgqs_[1];
+		delete outbound_mutex_;
+	}
 
-  /** Enqueue message to outbound queue.
+	virtual void
+	loop()
+	{
+		if (!parent_->alive())
+			return;
+
+		while (outbound_havemore_) {
+			outbound_mutex_->lock();
+			outbound_havemore_           = false;
+			FawkesNetworkMessageQueue *q = outbound_msgq_;
+			outbound_active_             = 1 - outbound_active_;
+			outbound_msgq_               = outbound_msgqs_[outbound_active_];
+			outbound_mutex_->unlock();
+
+			if (!q->empty()) {
+				try {
+					FawkesNetworkTransceiver::send(s_, q);
+				} catch (ConnectionDiedException &e) {
+					parent_->connection_died();
+					exit();
+				}
+			}
+		}
+	}
+
+	/** Enqueue message to outbound queue.
    * This enqueues the given message to the outbound queue. The message will
    * be sent in the next loop iteration. This method takes ownership of the
    * transmitted message. If you want to use the message after enqueuing you
    * must reference it explicitly.
    * @param msg message to enqueue
    */
-  void enqueue(FawkesNetworkMessage *msg)
-  {
-    outbound_mutex_->lock();
-    outbound_msgq_->push(msg);
-    outbound_havemore_ = true;
-    outbound_mutex_->unlock();
-    wakeup();
-  }
+	void
+	enqueue(FawkesNetworkMessage *msg)
+	{
+		outbound_mutex_->lock();
+		outbound_msgq_->push(msg);
+		outbound_havemore_ = true;
+		outbound_mutex_->unlock();
+		wakeup();
+	}
 
+	/** Wait until all data has been sent. */
+	void
+	wait_for_all_sent()
+	{
+		loop_mutex->lock();
+		loop_mutex->unlock();
+	}
 
-  /** Wait until all data has been sent. */
-  void wait_for_all_sent()
-  {
-    loop_mutex->lock();
-    loop_mutex->unlock();
-  }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+private:
+	StreamSocket *                   s_;
+	FawkesNetworkServerClientThread *parent_;
 
- private:
-  StreamSocket                    *s_;
-  FawkesNetworkServerClientThread *parent_;
-
-  Mutex                     *outbound_mutex_;
-  unsigned int               outbound_active_;
-  bool                       outbound_havemore_;
-  FawkesNetworkMessageQueue *outbound_msgq_;
-  FawkesNetworkMessageQueue *outbound_msgqs_[2];
-
+	Mutex *                    outbound_mutex_;
+	unsigned int               outbound_active_;
+	bool                       outbound_havemore_;
+	FawkesNetworkMessageQueue *outbound_msgq_;
+	FawkesNetworkMessageQueue *outbound_msgqs_[2];
 };
-
 
 /** @class FawkesNetworkServerClientThread netcomm/fawkes/server_client_thread.h
  * Fawkes Network Client Thread for server.
@@ -160,32 +162,30 @@ class FawkesNetworkServerClientSendThread
  * @param s socket to client
  * @param parent parent network thread
  */
-FawkesNetworkServerClientThread::FawkesNetworkServerClientThread(StreamSocket *s,
-								 FawkesNetworkServerThread *parent)
-  : Thread("FawkesNetworkServerClientThread")
+FawkesNetworkServerClientThread::FawkesNetworkServerClientThread(StreamSocket *             s,
+                                                                 FawkesNetworkServerThread *parent)
+: Thread("FawkesNetworkServerClientThread")
 {
-  _s = s;
-  _parent = parent;
-  _alive = true;
-  _clid = 0;
-  _inbound_queue = new FawkesNetworkMessageQueue();
+	_s             = s;
+	_parent        = parent;
+	_alive         = true;
+	_clid          = 0;
+	_inbound_queue = new FawkesNetworkMessageQueue();
 
-  _send_slave = new FawkesNetworkServerClientSendThread(_s, this);
+	_send_slave = new FawkesNetworkServerClientSendThread(_s, this);
 
-  set_prepfin_conc_loop(true);
+	set_prepfin_conc_loop(true);
 }
-
 
 /** Destructor. */
 FawkesNetworkServerClientThread::~FawkesNetworkServerClientThread()
 {
-  _send_slave->cancel();
-  _send_slave->join();
-  delete _send_slave;
-  delete _s;
-  delete _inbound_queue;
+	_send_slave->cancel();
+	_send_slave->join();
+	delete _send_slave;
+	delete _s;
+	delete _inbound_queue;
 }
-
 
 /** Get client ID.
  * The client ID can be used to send replies.
@@ -194,9 +194,8 @@ FawkesNetworkServerClientThread::~FawkesNetworkServerClientThread()
 unsigned int
 FawkesNetworkServerClientThread::clid() const
 {
-  return _clid;
+	return _clid;
 }
-
 
 /** Set client ID.
  * @param client_id new client ID
@@ -204,9 +203,8 @@ FawkesNetworkServerClientThread::clid() const
 void
 FawkesNetworkServerClientThread::set_clid(unsigned int client_id)
 {
-  _clid = client_id;
+	_clid = client_id;
 }
-
 
 /** Receive data.
  * Receives data from the network if there is any and then dispatches all
@@ -215,34 +213,32 @@ FawkesNetworkServerClientThread::set_clid(unsigned int client_id)
 void
 FawkesNetworkServerClientThread::recv()
 {
-  try {
-    FawkesNetworkTransceiver::recv(_s, _inbound_queue);
+	try {
+		FawkesNetworkTransceiver::recv(_s, _inbound_queue);
 
-    _inbound_queue->lock();
-    while ( ! _inbound_queue->empty() ) {
-      FawkesNetworkMessage *m = _inbound_queue->front();
-      m->set_client_id(_clid);
-      _parent->dispatch(m);
-      m->unref();
-      _inbound_queue->pop();
-    }
-    _parent->wakeup();
-    _inbound_queue->unlock();
+		_inbound_queue->lock();
+		while (!_inbound_queue->empty()) {
+			FawkesNetworkMessage *m = _inbound_queue->front();
+			m->set_client_id(_clid);
+			_parent->dispatch(m);
+			m->unref();
+			_inbound_queue->pop();
+		}
+		_parent->wakeup();
+		_inbound_queue->unlock();
 
-  } catch (ConnectionDiedException &e) {
-    _alive = false;
-    _s->close();
-    _parent->wakeup();
-  }
+	} catch (ConnectionDiedException &e) {
+		_alive = false;
+		_s->close();
+		_parent->wakeup();
+	}
 }
-
 
 void
 FawkesNetworkServerClientThread::once()
 {
-  _send_slave->start();
+	_send_slave->start();
 }
-
 
 /** Thread loop.
  * The client thread loop polls on the socket for 10 ms (wait for events
@@ -259,28 +255,26 @@ FawkesNetworkServerClientThread::once()
 void
 FawkesNetworkServerClientThread::loop()
 {
-  if ( ! _alive) {
-    usleep(1000000);
-    return;
-  }
+	if (!_alive) {
+		usleep(1000000);
+		return;
+	}
 
-  short p = 0;
-  try {
-    p = _s->poll(); // block until we got a message
-  } catch (InterruptedException &e) {
-    // we just ignore this and try it again
-    return;
-  }
+	short p = 0;
+	try {
+		p = _s->poll(); // block until we got a message
+	} catch (InterruptedException &e) {
+		// we just ignore this and try it again
+		return;
+	}
 
-  if ( (p & Socket::POLL_ERR) ||
-       (p & Socket::POLL_HUP) ||
-       (p & Socket::POLL_RDHUP)) {
-    _alive = false;
-    _parent->wakeup();
-  } else if ( p & Socket::POLL_IN ) {
-    // Data can be read
-    recv();
-  }
+	if ((p & Socket::POLL_ERR) || (p & Socket::POLL_HUP) || (p & Socket::POLL_RDHUP)) {
+		_alive = false;
+		_parent->wakeup();
+	} else if (p & Socket::POLL_IN) {
+		// Data can be read
+		recv();
+	}
 }
 
 /** Enqueue message to outbound queue.
@@ -291,9 +285,8 @@ FawkesNetworkServerClientThread::loop()
 void
 FawkesNetworkServerClientThread::enqueue(FawkesNetworkMessage *msg)
 {
-  _send_slave->enqueue(msg);
+	_send_slave->enqueue(msg);
 }
-
 
 /** Check aliveness of connection.
  * @return true if connection is still alive, false otherwise.
@@ -301,9 +294,8 @@ FawkesNetworkServerClientThread::enqueue(FawkesNetworkMessage *msg)
 bool
 FawkesNetworkServerClientThread::alive() const
 {
-  return _alive;
+	return _alive;
 }
-
 
 /** Force sending of all pending outbound messages.
  * This is a blocking operation. The current poll will be interrupted by sending
@@ -313,9 +305,8 @@ FawkesNetworkServerClientThread::alive() const
 void
 FawkesNetworkServerClientThread::force_send()
 {
-  _send_slave->wait_for_all_sent();
+	_send_slave->wait_for_all_sent();
 }
-
 
 /** Connection died notification.
  * To be called only be the send slave thread.
@@ -323,8 +314,8 @@ FawkesNetworkServerClientThread::force_send()
 void
 FawkesNetworkServerClientThread::connection_died()
 {
-  _alive = false;
-  _parent->wakeup();
+	_alive = false;
+	_parent->wakeup();
 }
 
 } // end namespace fawkes

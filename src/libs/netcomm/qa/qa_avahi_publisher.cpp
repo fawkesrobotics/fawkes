@@ -24,52 +24,52 @@
 /// @cond QA
 
 #include <netcomm/dns-sd/avahi_thread.h>
-
 #include <utils/system/signal.h>
 
 using namespace fawkes;
 
 class QAAvahiPublisherMain : public SignalHandler
 {
- public:
-  QAAvahiPublisherMain()
-  {
-    NetworkService *as = new NetworkService("Fawkes QA", "_fawkes._udp", 1910);
-    at = new AvahiThread();
-    at->publish_service(as);
-    delete as;
-  }
+public:
+	QAAvahiPublisherMain()
+	{
+		NetworkService *as = new NetworkService("Fawkes QA", "_fawkes._udp", 1910);
+		at                 = new AvahiThread();
+		at->publish_service(as);
+		delete as;
+	}
 
-  ~QAAvahiPublisherMain()
-  {
-    delete at;
-  }
+	~QAAvahiPublisherMain()
+	{
+		delete at;
+	}
 
-  void handle_signal(int signum)
-  {
-    at->cancel();
-  }
+	void
+	handle_signal(int signum)
+	{
+		at->cancel();
+	}
 
-  void run()
-  {
-    at->start();
-    at->join();
-  }
+	void
+	run()
+	{
+		at->start();
+		at->join();
+	}
 
- private:
-  AvahiThread *at;
-
+private:
+	AvahiThread *at;
 };
 
 int
 main(int argc, char **argv)
 {
-  QAAvahiPublisherMain m;
-  SignalManager::register_handler(SIGINT, &m);
+	QAAvahiPublisherMain m;
+	SignalManager::register_handler(SIGINT, &m);
 
-  m.run();
+	m.run();
 
-  SignalManager::finalize();
+	SignalManager::finalize();
 }
 
 /// @endcond

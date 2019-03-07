@@ -23,9 +23,9 @@
 #include <core/exceptions/software.h>
 #include <netcomm/crypto/decrypt.h>
 #ifdef HAVE_LIBCRYPTO
-#  include <openssl/evp.h>
+#	include <openssl/evp.h>
 #else
-#  include <cstring>
+#	include <cstring>
 #endif
 
 namespace fawkes {
@@ -40,11 +40,9 @@ namespace fawkes {
 /** Constructor.
  * @param msg message
  */
-MessageDecryptionException::MessageDecryptionException(const char *msg)
-  : Exception(msg)
+MessageDecryptionException::MessageDecryptionException(const char *msg) : Exception(msg)
 {
 }
-
 
 /** @class MessageDecryptor <netcomm/crypto/decrypt.h>
  * Message decryptor.
@@ -62,28 +60,25 @@ MessageDecryptionException::MessageDecryptionException(const char *msg)
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param key encryption key
  * @param iv initialisation vector
  */
 MessageDecryptor::MessageDecryptor(const unsigned char *key, const unsigned char *iv)
 {
-  plain_buffer = NULL;
-  plain_buffer_length = 0;
-  crypt_buffer = NULL;
-  crypt_buffer_length = 0;
+	plain_buffer        = NULL;
+	plain_buffer_length = 0;
+	crypt_buffer        = NULL;
+	crypt_buffer_length = 0;
 
-  this->key = key;
-  this->iv  = iv;
+	this->key = key;
+	this->iv  = iv;
 }
-
 
 /** Empty destructor. */
 MessageDecryptor::~MessageDecryptor()
 {
 }
-
 
 /** Set plain buffer.
  * This is the destination buffer to which the decrypted plain text is written.
@@ -93,10 +88,9 @@ MessageDecryptor::~MessageDecryptor()
 void
 MessageDecryptor::set_plain_buffer(void *buffer, size_t buffer_length)
 {
-  plain_buffer        = buffer;
-  plain_buffer_length = buffer_length;
+	plain_buffer        = buffer;
+	plain_buffer_length = buffer_length;
 }
-
 
 /** Set crypted buffer.
  * This is the source buffer which is decrypted.
@@ -106,10 +100,9 @@ MessageDecryptor::set_plain_buffer(void *buffer, size_t buffer_length)
 void
 MessageDecryptor::set_crypt_buffer(void *buffer, size_t buffer_length)
 {
-  crypt_buffer        = buffer;
-  crypt_buffer_length = buffer_length;
+	crypt_buffer        = buffer;
+	crypt_buffer_length = buffer_length;
 }
-
 
 /** Decrypt.
  * Do the decryption.
@@ -118,40 +111,42 @@ MessageDecryptor::set_crypt_buffer(void *buffer, size_t buffer_length)
 size_t
 MessageDecryptor::decrypt()
 {
-  if ( (plain_buffer == NULL) || (plain_buffer_length == 0) ||
-       (crypt_buffer == NULL) || (crypt_buffer_length == 0) ) {
-    throw MissingParameterException("Buffer(s) not set for decryption");
-  }
+	if ((plain_buffer == NULL) || (plain_buffer_length == 0) || (crypt_buffer == NULL)
+	    || (crypt_buffer_length == 0)) {
+		throw MissingParameterException("Buffer(s) not set for decryption");
+	}
 
 #ifdef HAVE_LIBCRYPTO
-  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-  if ( ! EVP_DecryptInit(ctx, EVP_aes_128_ecb(), key, iv) ) {
-    EVP_CIPHER_CTX_free(ctx);
-    throw MessageDecryptionException("Could not initialize cipher context");
-  }
+	EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+	if (!EVP_DecryptInit(ctx, EVP_aes_128_ecb(), key, iv)) {
+		EVP_CIPHER_CTX_free(ctx);
+		throw MessageDecryptionException("Could not initialize cipher context");
+	}
 
-  int outl = plain_buffer_length;
-  if ( ! EVP_DecryptUpdate(ctx,
-			   (unsigned char *)plain_buffer, &outl,
-			   (unsigned char *)crypt_buffer, crypt_buffer_length) ) {
-    EVP_CIPHER_CTX_free(ctx);
-    throw MessageDecryptionException("DecryptUpdate failed");
-  }
+	int outl = plain_buffer_length;
+	if (!EVP_DecryptUpdate(ctx,
+	                       (unsigned char *)plain_buffer,
+	                       &outl,
+	                       (unsigned char *)crypt_buffer,
+	                       crypt_buffer_length)) {
+		EVP_CIPHER_CTX_free(ctx);
+		throw MessageDecryptionException("DecryptUpdate failed");
+	}
 
-  int plen = 0;
-  if ( ! EVP_DecryptFinal(ctx, (unsigned char *)plain_buffer + outl, &plen) ) {
-    EVP_CIPHER_CTX_free(ctx);
-    throw MessageDecryptionException("DecryptFinal failed");
-  }
-  outl += plen;
+	int plen = 0;
+	if (!EVP_DecryptFinal(ctx, (unsigned char *)plain_buffer + outl, &plen)) {
+		EVP_CIPHER_CTX_free(ctx);
+		throw MessageDecryptionException("DecryptFinal failed");
+	}
+	outl += plen;
 
-  EVP_CIPHER_CTX_free(ctx);
-  return outl;
+	EVP_CIPHER_CTX_free(ctx);
+	return outl;
 #else
-  // Plain-text copy-through for debugging.
-  //memcpy(plain_buffer, crypt_buffer, crypt_buffer_length);
-  //return crypt_buffer_length;
-  throw Exception("Decryption support not available");
+	// Plain-text copy-through for debugging.
+	//memcpy(plain_buffer, crypt_buffer, crypt_buffer_length);
+	//return crypt_buffer_length;
+	throw Exception("Decryption support not available");
 #endif
 }
 

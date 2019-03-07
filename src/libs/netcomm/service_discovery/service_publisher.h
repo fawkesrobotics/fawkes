@@ -30,11 +30,11 @@ namespace fawkes {
 
 class ServicePublisher
 {
- public:
-  virtual ~ServicePublisher();
+public:
+	virtual ~ServicePublisher();
 
-  virtual void publish_service(NetworkService *service)   = 0;
-  virtual void unpublish_service(NetworkService *service) = 0;
+	virtual void publish_service(NetworkService *service)   = 0;
+	virtual void unpublish_service(NetworkService *service) = 0;
 };
 
 } // end namespace fawkes

@@ -21,11 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <core/exception.h>
 #include <netcomm/utils/string_content.h>
 
-#include <core/exception.h>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
 namespace fawkes {
 
@@ -37,16 +37,14 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Primary constructor.
  * @param initial_string initial string
  */
 StringContent::StringContent(const char *initial_string)
 {
-  string_owner_ = true;
-  set_string(initial_string);
+	string_owner_ = true;
+	set_string(initial_string);
 }
-
 
 /** Constructor.
  * This ctor can be used with FawkesNetworkMessage::msgc().
@@ -55,28 +53,28 @@ StringContent::StringContent(const char *initial_string)
  * @param payload Payload, checked if it can be a valid string.
  * @param payload_size size in bytes of payload
  */
-StringContent::StringContent(unsigned int cid, unsigned int msgid,
-			     void *payload, size_t payload_size)
+StringContent::StringContent(unsigned int cid,
+                             unsigned int msgid,
+                             void *       payload,
+                             size_t       payload_size)
 {
-  string_owner_ = false;
-  _payload = payload;
-  _payload_size = payload_size;
-  string_ = (char *)payload;
-  if ( string_[payload_size - 1] != 0 ) {
-    // string is not null-terminated, it has not been created with this class, error!
-    throw Exception("String content of network message is not null-terminated.");
-  }
+	string_owner_ = false;
+	_payload      = payload;
+	_payload_size = payload_size;
+	string_       = (char *)payload;
+	if (string_[payload_size - 1] != 0) {
+		// string is not null-terminated, it has not been created with this class, error!
+		throw Exception("String content of network message is not null-terminated.");
+	}
 }
-
 
 /** Destructor. */
 StringContent::~StringContent()
 {
-  if ( string_owner_ ) {
-    free(string_);
-  }
+	if (string_owner_) {
+		free(string_);
+	}
 }
-
 
 /** Set the string.
  * Can only be called if the instance has been created with the primary constructor.
@@ -85,16 +83,15 @@ StringContent::~StringContent()
 void
 StringContent::set_string(const char *s)
 {
-  if ( string_owner_ ) {
-    free(string_);
-    string_ = strdup(s);
-    _payload = string_;
-    _payload_size = strlen(string_) + 1;
-  } else {
-    throw Exception("Cannot set read-only string extracted from network message.");
-  }
+	if (string_owner_) {
+		free(string_);
+		string_       = strdup(s);
+		_payload      = string_;
+		_payload_size = strlen(string_) + 1;
+	} else {
+		throw Exception("Cannot set read-only string extracted from network message.");
+	}
 }
-
 
 /** Get string.
  * @return null-terminated string
@@ -102,9 +99,8 @@ StringContent::set_string(const char *s)
 const char *
 StringContent::get_string() const
 {
-  return string_;
+	return string_;
 }
-
 
 /** Get length of string.
  * @return string length
@@ -112,14 +108,13 @@ StringContent::get_string() const
 size_t
 StringContent::get_string_length()
 {
-  return _payload_size - 1;
+	return _payload_size - 1;
 }
-
 
 void
 StringContent::serialize()
 {
-  // nothing to do...
+	// nothing to do...
 }
 
 } // end namespace fawkes

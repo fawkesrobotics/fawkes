@@ -31,33 +31,34 @@ namespace fawkes {
 
 class MulticastDatagramSocket : public Socket
 {
- public:
-	MulticastDatagramSocket(AddrType addr_type,
-	                        const char *multicast_addr_s, unsigned short port,
-	                        float timeout = 0.f);
-  MulticastDatagramSocket(MulticastDatagramSocket &s);
-  virtual ~MulticastDatagramSocket();
+public:
+	MulticastDatagramSocket(AddrType       addr_type,
+	                        const char *   multicast_addr_s,
+	                        unsigned short port,
+	                        float          timeout = 0.f);
+	MulticastDatagramSocket(MulticastDatagramSocket &s);
+	virtual ~MulticastDatagramSocket();
 
-	MulticastDatagramSocket& operator=(MulticastDatagramSocket& s);
+	MulticastDatagramSocket &operator=(MulticastDatagramSocket &s);
 
-  virtual Socket *  clone();
+	virtual Socket *clone();
 
-  virtual void bind();
-  virtual void bind(const unsigned short int port);
-  virtual void bind(const unsigned short int port,
-		    const char *hostname);
+	virtual void bind();
+	virtual void bind(const unsigned short int port);
+	virtual void bind(const unsigned short int port, const char *hostname);
 
-  virtual void send(void *buf, size_t buf_len);
-  virtual void send(void *buf, size_t buf_len,
-		    const struct sockaddr *to_addr, socklen_t addr_len)
-  { send(buf, buf_len); }
+	virtual void send(void *buf, size_t buf_len);
+	virtual void
+	send(void *buf, size_t buf_len, const struct sockaddr *to_addr, socklen_t addr_len)
+	{
+		send(buf, buf_len);
+	}
 
-  void set_loop(bool loop);
-  void set_ttl(int ttl);
+	void set_loop(bool loop);
+	void set_ttl(int ttl);
 
- private:
-  struct ::sockaddr_in *multicast_addr;
-
+private:
+	struct ::sockaddr_in *multicast_addr;
 };
 
 } // end namespace fawkes

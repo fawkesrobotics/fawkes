@@ -20,13 +20,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <netcomm/crypto/encrypt.h>
 #include <core/exceptions/software.h>
+#include <netcomm/crypto/encrypt.h>
 
 #ifdef HAVE_LIBCRYPTO
-#  include <openssl/evp.h>
+#	include <openssl/evp.h>
 #else
-#  include <cstring>
+#	include <cstring>
 #endif
 
 namespace fawkes {
@@ -41,11 +41,9 @@ namespace fawkes {
 /** Constructor.
  * @param msg message
  */
-MessageEncryptionException::MessageEncryptionException(const char *msg)
-  : Exception(msg)
+MessageEncryptionException::MessageEncryptionException(const char *msg) : Exception(msg)
 {
 }
-
 
 /** @class MessageEncryptor <netcomm/crypto/encrypt.h>
  * Message encryptor.
@@ -77,30 +75,25 @@ MessageEncryptionException::MessageEncryptionException(const char *msg)
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param key encryption key
  * @param iv initialisation vector
  */
 MessageEncryptor::MessageEncryptor(const unsigned char *key, const unsigned char *iv)
 {
-  plain_buffer = NULL;
-  plain_buffer_length = 0;
-  crypt_buffer = NULL;
-  crypt_buffer_length = 0;
+	plain_buffer        = NULL;
+	plain_buffer_length = 0;
+	crypt_buffer        = NULL;
+	crypt_buffer_length = 0;
 
-  this->key = key;
-  this->iv  = iv;
+	this->key = key;
+	this->iv  = iv;
 }
-
 
 /** Empty destructor. */
 MessageEncryptor::~MessageEncryptor()
 {
 }
-
-
-
 
 /** Set plain buffer.
  * This set the source buffer that is encrypted.
@@ -110,10 +103,9 @@ MessageEncryptor::~MessageEncryptor()
 void
 MessageEncryptor::set_plain_buffer(void *buffer, size_t buffer_length)
 {
-  plain_buffer        = buffer;
-  plain_buffer_length = buffer_length;
+	plain_buffer        = buffer;
+	plain_buffer_length = buffer_length;
 }
-
 
 /** Get recommended crypted buffer size.
  * The cryto text is in most cases longer than the plain text. This is because
@@ -130,21 +122,20 @@ MessageEncryptor::set_plain_buffer(void *buffer, size_t buffer_length)
 size_t
 MessageEncryptor::recommended_crypt_buffer_size()
 {
-  if ( plain_buffer_length == 0 ) {
-    throw MissingParameterException("plain buffer must be set and plain buffer size > 0");
-  }
+	if (plain_buffer_length == 0) {
+		throw MissingParameterException("plain buffer must be set and plain buffer size > 0");
+	}
 
 #ifdef HAVE_LIBCRYPTO
-  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-  EVP_EncryptInit(ctx, EVP_aes_128_ecb(), key, iv);
-  size_t rv = plain_buffer_length + EVP_CIPHER_CTX_block_size(ctx);
-  EVP_CIPHER_CTX_free(ctx);
-  return rv;
+	EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+	EVP_EncryptInit(ctx, EVP_aes_128_ecb(), key, iv);
+	size_t rv = plain_buffer_length + EVP_CIPHER_CTX_block_size(ctx);
+	EVP_CIPHER_CTX_free(ctx);
+	return rv;
 #else
-  return plain_buffer_length;
+	return plain_buffer_length;
 #endif
 }
-
 
 /** Set crypted buffer.
  * This set the destination buffer to which the encrypted message is written.
@@ -154,10 +145,9 @@ MessageEncryptor::recommended_crypt_buffer_size()
 void
 MessageEncryptor::set_crypt_buffer(void *buffer, size_t buffer_length)
 {
-  crypt_buffer        = buffer;
-  crypt_buffer_length = buffer_length;
+	crypt_buffer        = buffer;
+	crypt_buffer_length = buffer_length;
 }
-
 
 /** Encrypt.
  * Do the encryption.
@@ -166,42 +156,43 @@ MessageEncryptor::set_crypt_buffer(void *buffer, size_t buffer_length)
 size_t
 MessageEncryptor::encrypt()
 {
-  if ( (plain_buffer == NULL) || (plain_buffer_length == 0) ||
-       (crypt_buffer == NULL) || (crypt_buffer_length == 0) ) {
-    throw MissingParameterException("Buffer(s) not set for encryption");
-  }
+	if ((plain_buffer == NULL) || (plain_buffer_length == 0) || (crypt_buffer == NULL)
+	    || (crypt_buffer_length == 0)) {
+		throw MissingParameterException("Buffer(s) not set for encryption");
+	}
 
 #ifdef HAVE_LIBCRYPTO
-  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-  if ( ! EVP_EncryptInit(ctx, EVP_aes_128_ecb(), key, iv) ) {
-    EVP_CIPHER_CTX_free(ctx);
-    throw MessageEncryptionException("Could not initialize cipher context");
-  }
+	EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+	if (!EVP_EncryptInit(ctx, EVP_aes_128_ecb(), key, iv)) {
+		EVP_CIPHER_CTX_free(ctx);
+		throw MessageEncryptionException("Could not initialize cipher context");
+	}
 
+	int outl = crypt_buffer_length;
+	if (!EVP_EncryptUpdate(ctx,
+	                       (unsigned char *)crypt_buffer,
+	                       &outl,
+	                       (unsigned char *)plain_buffer,
+	                       plain_buffer_length)) {
+		EVP_CIPHER_CTX_free(ctx);
+		throw MessageEncryptionException("EncryptUpdate failed");
+	}
 
-  int outl = crypt_buffer_length;
-  if ( ! EVP_EncryptUpdate(ctx,
-			   (unsigned char *)crypt_buffer, &outl,
-			   (unsigned char *)plain_buffer, plain_buffer_length) ) {
-    EVP_CIPHER_CTX_free(ctx);
-    throw MessageEncryptionException("EncryptUpdate failed");
-  }
+	int plen = 0;
+	if (!EVP_EncryptFinal_ex(ctx, (unsigned char *)crypt_buffer + outl, &plen)) {
+		EVP_CIPHER_CTX_free(ctx);
+		throw MessageEncryptionException("EncryptFinal failed");
+	}
+	outl += plen;
 
-  int plen = 0;
-  if ( ! EVP_EncryptFinal_ex(ctx, (unsigned char *)crypt_buffer + outl, &plen) ) {
-    EVP_CIPHER_CTX_free(ctx);
-    throw MessageEncryptionException("EncryptFinal failed");
-  }
-  outl += plen;
- 
-  EVP_CIPHER_CTX_free(ctx);
-  return outl;
+	EVP_CIPHER_CTX_free(ctx);
+	return outl;
 #else
-  /* Plain text copy-through for debugging
+	/* Plain text copy-through for debugging
   memcpy(crypt_buffer, plain_buffer, plain_buffer_length);
   return plain_buffer_length;
   */
-  throw Exception("Encryption support not available");
+	throw Exception("Encryption support not available");
 #endif
 }
 

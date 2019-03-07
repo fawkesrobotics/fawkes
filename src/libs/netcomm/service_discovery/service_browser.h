@@ -24,18 +24,18 @@
 #ifndef _NETCOMM_SERVICE_DISCOVERY_SERVICE_BROWSER_H_
 #define _NETCOMM_SERVICE_DISCOVERY_SERVICE_BROWSER_H_
 
-#include <netcomm/service_discovery/service.h>
 #include <netcomm/service_discovery/browse_handler.h>
+#include <netcomm/service_discovery/service.h>
 
 namespace fawkes {
 
 class ServiceBrowser
 {
- public:
-  virtual ~ServiceBrowser();
+public:
+	virtual ~ServiceBrowser();
 
-  virtual void watch_service(const char *service_type, ServiceBrowseHandler *h)   = 0;
-  virtual void unwatch_service(const char *service_type, ServiceBrowseHandler *h) = 0;
+	virtual void watch_service(const char *service_type, ServiceBrowseHandler *h)   = 0;
+	virtual void unwatch_service(const char *service_type, ServiceBrowseHandler *h) = 0;
 };
 
 } // end namespace fawkes

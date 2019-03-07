@@ -25,16 +25,15 @@
 #define _NETCOMM_FAWKES_MESSAGE_QUEUE_H_
 
 #include <core/utils/lock_queue.h>
-
 #include <netcomm/fawkes/message.h>
 
 namespace fawkes {
 
 class FawkesNetworkMessageQueue : public LockQueue<FawkesNetworkMessage *>
 {
- public:
-  FawkesNetworkMessageQueue();
-  ~FawkesNetworkMessageQueue();
+public:
+	FawkesNetworkMessageQueue();
+	~FawkesNetworkMessageQueue();
 };
 
 } // end namespace fawkes

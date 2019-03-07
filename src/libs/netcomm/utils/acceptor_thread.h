@@ -36,31 +36,35 @@ class NetworkIncomingConnectionHandler;
 
 class NetworkAcceptorThread : public Thread
 {
- public:
+public:
 	NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
-	                      unsigned short int port,
-	                      const char *thread_name = "NetworkAcceptorThread");
-  NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
-                        Socket::AddrType addr_type,
-                        const std::string &listen_addr,
-                        unsigned short int port,
-                        const char *thread_name = "NetworkAcceptorThread");
-  NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
-                        StreamSocket *socket,
-                        const char *thread_name = "NetworkAcceptorThread");
-  ~NetworkAcceptorThread();
+	                      unsigned short int                port,
+	                      const char *                      thread_name = "NetworkAcceptorThread");
+	NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
+	                      Socket::AddrType                  addr_type,
+	                      const std::string &               listen_addr,
+	                      unsigned short int                port,
+	                      const char *                      thread_name = "NetworkAcceptorThread");
+	NetworkAcceptorThread(NetworkIncomingConnectionHandler *handler,
+	                      StreamSocket *                    socket,
+	                      const char *                      thread_name = "NetworkAcceptorThread");
+	~NetworkAcceptorThread();
 
-  virtual void loop();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  unsigned short int        port_;
-  StreamSocket             *socket_;
+private:
+	unsigned short int port_;
+	StreamSocket *     socket_;
 
-  NetworkIncomingConnectionHandler *handler_;
-
+	NetworkIncomingConnectionHandler *handler_;
 };
 
 } // end namespace fawkes

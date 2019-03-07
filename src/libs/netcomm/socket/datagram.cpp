@@ -22,7 +22,6 @@
  */
 
 #include <netcomm/socket/datagram.h>
-
 #include <sys/socket.h>
 
 namespace fawkes {
@@ -39,17 +38,14 @@ namespace fawkes {
  * @param timeout timeout, if 0 all operationsare blocking, otherwise it
  * is tried for timeout seconds.
  */
-DatagramSocket::DatagramSocket(AddrType addr_type, float timeout)
-: Socket(addr_type, UDP, timeout)
+DatagramSocket::DatagramSocket(AddrType addr_type, float timeout) : Socket(addr_type, UDP, timeout)
 {
 }
-
 
 /** Copy constructor.
  * @param datagram_socket socket to copy.
  */
-DatagramSocket::DatagramSocket(DatagramSocket &datagram_socket)
-: Socket(datagram_socket)
+DatagramSocket::DatagramSocket(DatagramSocket &datagram_socket) : Socket(datagram_socket)
 {
 }
 
@@ -57,13 +53,12 @@ DatagramSocket::DatagramSocket(DatagramSocket &datagram_socket)
  * @param s socket to copy from
  * @return reference to this
  */
-DatagramSocket&
-DatagramSocket::operator=(DatagramSocket& s)
+DatagramSocket &
+DatagramSocket::operator=(DatagramSocket &s)
 {
 	Socket::operator=(s);
 	return *this;
 }
-
 
 /** Clone socket.
  * @return a copied instance of DatagramSocket.
@@ -71,7 +66,7 @@ DatagramSocket::operator=(DatagramSocket& s)
 Socket *
 DatagramSocket::clone()
 {
-  return new DatagramSocket(*this);
+	return new DatagramSocket(*this);
 }
 
 } // end namespace fawkes

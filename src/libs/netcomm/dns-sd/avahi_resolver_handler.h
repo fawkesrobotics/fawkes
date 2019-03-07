@@ -30,16 +30,13 @@ namespace fawkes {
 
 class AvahiResolverHandler
 {
- public:
-  virtual ~AvahiResolverHandler();
-  virtual void resolved_name(char *name,
-                             struct sockaddr *addr, socklen_t addrlen)   = 0;
-  virtual void resolved_address(struct sockaddr *addr, socklen_t addrlen,
-                                char *name)                              = 0;
+public:
+	virtual ~AvahiResolverHandler();
+	virtual void resolved_name(char *name, struct sockaddr *addr, socklen_t addrlen)    = 0;
+	virtual void resolved_address(struct sockaddr *addr, socklen_t addrlen, char *name) = 0;
 
-  virtual void name_resolution_failed(char *name)                        = 0;
-  virtual void address_resolution_failed(struct sockaddr *addr,
-                                         socklen_t addrlen)              = 0;
+	virtual void name_resolution_failed(char *name)                                  = 0;
+	virtual void address_resolution_failed(struct sockaddr *addr, socklen_t addrlen) = 0;
 };
 
 } // end namespace fawkes

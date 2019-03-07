@@ -30,8 +30,8 @@ namespace fawkes {
 
 class ConnectionDiedException : public Exception
 {
- public:
-  ConnectionDiedException(const char *format, ...);
+public:
+	ConnectionDiedException(const char *format, ...);
 };
 
 } // end namespace fawkes
