@@ -22,29 +22,29 @@
 #ifndef _SYNCPOINT_SYNCPOINT_CALL_STATS_H_
 #define _SYNCPOINT_SYNCPOINT_CALL_STATS_H_
 
-#include <utils/time/time.h>
-
 #include <syncpoint/syncpoint_call.h>
+#include <utils/time/time.h>
 
 namespace fawkes {
 
-class SyncPointCallStats {
-  public:
-    SyncPointCallStats();
+class SyncPointCallStats
+{
+public:
+	SyncPointCallStats();
 
-    void update_calls(const Time& new_call, const Time& wait_time = Time(0.f));
-    void update_calls(const SyncPointCall& call);
-    Time get_first_call() const;
-    Time get_last_call() const;
-    float get_call_frequency() const;
-    float get_waittime_average() const;
-    unsigned int get_num_calls() const;
+	void         update_calls(const Time &new_call, const Time &wait_time = Time(0.f));
+	void         update_calls(const SyncPointCall &call);
+	Time         get_first_call() const;
+	Time         get_last_call() const;
+	float        get_call_frequency() const;
+	float        get_waittime_average() const;
+	unsigned int get_num_calls() const;
 
-  private:
-    Time first_call_;
-    Time last_call_;
-    Time total_wait_time_;
-    unsigned int num_calls_;
+private:
+	Time         first_call_;
+	Time         last_call_;
+	Time         total_wait_time_;
+	unsigned int num_calls_;
 };
 
 } // namespace fawkes

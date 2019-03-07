@@ -34,11 +34,9 @@ namespace fawkes {
 
 /** Constructor. */
 SyncPointCallStats::SyncPointCallStats()
-: first_call_(TIME_MAX),
-  last_call_(TIME_MIN),
-  total_wait_time_(Time(0.f)),
-  num_calls_(0)
-{}
+: first_call_(TIME_MAX), last_call_(TIME_MIN), total_wait_time_(Time(0.f)), num_calls_(0)
+{
+}
 
 /** Add a call to the stats.
  * Update the first and last call and increment the call counter
@@ -46,25 +44,25 @@ SyncPointCallStats::SyncPointCallStats()
  * @param wait_time the time the caller had to wait, 0 for emit()
  */
 void
-SyncPointCallStats::update_calls(const Time& new_call, const Time& wait_time)
+SyncPointCallStats::update_calls(const Time &new_call, const Time &wait_time)
 {
-  num_calls_++;
-  total_wait_time_ += wait_time;
-  if (new_call < first_call_) {
-    first_call_ = new_call;
-  }
-  if (new_call > last_call_) {
-    last_call_ = new_call;
-  }
+	num_calls_++;
+	total_wait_time_ += wait_time;
+	if (new_call < first_call_) {
+		first_call_ = new_call;
+	}
+	if (new_call > last_call_) {
+		last_call_ = new_call;
+	}
 }
 
 /** Add a call to the stats.
  * @param call the new call
  */
 void
-SyncPointCallStats::update_calls(const SyncPointCall& call)
+SyncPointCallStats::update_calls(const SyncPointCall &call)
 {
-  update_calls(call.get_call_time(), call.get_wait_time());
+	update_calls(call.get_call_time(), call.get_wait_time());
 }
 
 /** Get the first call to the SyncPoint by the component
@@ -73,7 +71,7 @@ SyncPointCallStats::update_calls(const SyncPointCall& call)
 Time
 SyncPointCallStats::get_first_call() const
 {
-  return first_call_;
+	return first_call_;
 }
 
 /** Get the last call to the SyncPoint by the component
@@ -82,7 +80,7 @@ SyncPointCallStats::get_first_call() const
 Time
 SyncPointCallStats::get_last_call() const
 {
-  return last_call_;
+	return last_call_;
 }
 
 /** Get the call frequency. This is calculated using the first and last call
@@ -92,10 +90,10 @@ SyncPointCallStats::get_last_call() const
 float
 SyncPointCallStats::get_call_frequency() const
 {
-  if (num_calls_ <= 1) {
-    return 0.f;
-  }
-  return num_calls_ / (last_call_.in_sec() - first_call_.in_sec());
+	if (num_calls_ <= 1) {
+		return 0.f;
+	}
+	return num_calls_ / (last_call_.in_sec() - first_call_.in_sec());
 }
 
 /** Get the average wait time. For emit calls, this is 0.
@@ -104,7 +102,7 @@ SyncPointCallStats::get_call_frequency() const
 float
 SyncPointCallStats::get_waittime_average() const
 {
-  return total_wait_time_.in_sec() / num_calls_;
+	return total_wait_time_.in_sec() / num_calls_;
 }
 
 /** Get total number of calls.
@@ -113,7 +111,7 @@ SyncPointCallStats::get_waittime_average() const
 unsigned int
 SyncPointCallStats::get_num_calls() const
 {
-  return num_calls_;
+	return num_calls_;
 }
 
 } // namespace fawkes

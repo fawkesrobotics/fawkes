@@ -32,18 +32,17 @@ namespace fawkes {
  */
 class SyncPointAlreadyOpenedException : public Exception
 {
-  public:
-    /** Constructor.
+public:
+	/** Constructor.
      * @param component The calling component
      * @param identifier The identifier of the SyncPoint
      */
-    SyncPointAlreadyOpenedException(const char * component,
-      const char *identifier)
-    {
-      append(
-          "Component '%s' called get_syncpoint() for identifier '%s', but is already watching",
-          component, identifier);
-    }
+	SyncPointAlreadyOpenedException(const char *component, const char *identifier)
+	{
+		append("Component '%s' called get_syncpoint() for identifier '%s', but is already watching",
+		       component,
+		       identifier);
+	}
 };
 
 /** Emit was called by a component which isn't in the watcher set
@@ -51,17 +50,17 @@ class SyncPointAlreadyOpenedException : public Exception
  */
 class SyncPointNonWatcherCalledEmitException : public Exception
 {
-  public:
-    /** Constructor.
+public:
+	/** Constructor.
      * @param component The calling component
      * @param identifier The identifier of the SyncPoint
      */
-    SyncPointNonWatcherCalledEmitException(const char * component,
-      const char *identifier)
-    {
-      append("Component '%s' called emit for SyncPoint '%s', but is not a watcher",
-          component, identifier);
-    }
+	SyncPointNonWatcherCalledEmitException(const char *component, const char *identifier)
+	{
+		append("Component '%s' called emit for SyncPoint '%s', but is not a watcher",
+		       component,
+		       identifier);
+	}
 };
 
 /** Emit was called by a component which isn't in the watcher set
@@ -69,17 +68,17 @@ class SyncPointNonWatcherCalledEmitException : public Exception
  */
 class SyncPointNonWatcherCalledWaitException : public Exception
 {
-  public:
-    /** Constructor.
+public:
+	/** Constructor.
      * @param component The calling component
      * @param identifier The identifier of the SyncPoint
      */
-    SyncPointNonWatcherCalledWaitException(const char * component,
-      const char *identifier)
-    {
-      append("Component '%s' called wait for SyncPoint '%s', but is not a watcher",
-          component, identifier);
-    }
+	SyncPointNonWatcherCalledWaitException(const char *component, const char *identifier)
+	{
+		append("Component '%s' called wait for SyncPoint '%s', but is not a watcher",
+		       component,
+		       identifier);
+	}
 };
 
 /** Release was called on a non-existing SyncPoint
@@ -87,17 +86,15 @@ class SyncPointNonWatcherCalledWaitException : public Exception
  */
 class SyncPointReleasedDoesNotExistException : public Exception
 {
-  public:
-    /** Constructor.
+public:
+	/** Constructor.
      * @param component The calling component
      * @param identifier The identifier of the SyncPoint
      */
-    SyncPointReleasedDoesNotExistException(const char * component,
-      const char * identifier)
-    {
-      append("Component '%s' tried to release non-existing SyncPoint '%s'",
-          component, identifier);
-    }
+	SyncPointReleasedDoesNotExistException(const char *component, const char *identifier)
+	{
+		append("Component '%s' tried to release non-existing SyncPoint '%s'", component, identifier);
+	}
 };
 
 /** Release was called by a component which isn't a watcher
@@ -105,17 +102,17 @@ class SyncPointReleasedDoesNotExistException : public Exception
  */
 class SyncPointReleasedByNonWatcherException : public Exception
 {
-  public:
-    /** Constructor.
+public:
+	/** Constructor.
      * @param component The calling component
      * @param identifier The identifier of the SyncPoint
      */
-    SyncPointReleasedByNonWatcherException(const char * component,
-      const char * identifier)
-    {
-      append("Component '%s' tried to release SyncPoint '%s' but is not a watcher",
-          component, identifier);
-    }
+	SyncPointReleasedByNonWatcherException(const char *component, const char *identifier)
+	{
+		append("Component '%s' tried to release SyncPoint '%s' but is not a watcher",
+		       component,
+		       identifier);
+	}
 };
 
 /** Invalid identifier used (i.e. an empty string)
@@ -123,17 +120,17 @@ class SyncPointReleasedByNonWatcherException : public Exception
  */
 class SyncPointInvalidIdentifierException : public Exception
 {
-  public:
-    /** Constructor.
+public:
+	/** Constructor.
      * @param identifier The identifier of the SyncPoint
      */
-    SyncPointInvalidIdentifierException(const char * identifier)
-    {
-      append("Tried to construct a SyncPoint with invalid identifier ('%s'). "
-          "Identifier must be a non-empty absolute path (e.g. '/path/to/syncpoint')"
-          " and may not end with '/'",
-          identifier);
-    }
+	SyncPointInvalidIdentifierException(const char *identifier)
+	{
+		append("Tried to construct a SyncPoint with invalid identifier ('%s'). "
+		       "Identifier must be a non-empty absolute path (e.g. '/path/to/syncpoint')"
+		       " and may not end with '/'",
+		       identifier);
+	}
 };
 
 /** Invalid component name used (i.e. an empty string)
@@ -141,17 +138,15 @@ class SyncPointInvalidIdentifierException : public Exception
  */
 class SyncPointInvalidComponentException : public Exception
 {
-  public:
-    /** Constructor.
+public:
+	/** Constructor.
      * @param component The calling component
      * @param identifier The identifier of the SyncPoint
      */
-    SyncPointInvalidComponentException(const char * component,
-      const char * identifier)
-    {
-      append("Invalid component name '%s' while accessing SyncPoint '%s'",
-          component, identifier);
-    }
+	SyncPointInvalidComponentException(const char *component, const char *identifier)
+	{
+		append("Invalid component name '%s' while accessing SyncPoint '%s'", component, identifier);
+	}
 };
 
 /** A component called wait() but is already waiting
@@ -159,17 +154,17 @@ class SyncPointInvalidComponentException : public Exception
  */
 class SyncPointMultipleWaitCallsException : public Exception
 {
-  public:
-    /** Constructor.
+public:
+	/** Constructor.
      * @param component The calling component
      * @param identifier The identifier of the SyncPoint
      */
-    SyncPointMultipleWaitCallsException(const char * component,
-      const char * identifier)
-    {
-      append("Component '%s' called wait() on SyncPoint '%s', but is already waiting",
-          component, identifier);
-    }
+	SyncPointMultipleWaitCallsException(const char *component, const char *identifier)
+	{
+		append("Component '%s' called wait() on SyncPoint '%s', but is already waiting",
+		       component,
+		       identifier);
+	}
 };
 
 /** Emit was called on a SyncBarrier but the calling component is not registered
@@ -177,17 +172,18 @@ class SyncPointMultipleWaitCallsException : public Exception
  */
 class SyncPointNonEmitterCalledEmitException : public Exception
 {
-  public:
-    /** Constructor.
+public:
+	/** Constructor.
      * @param component The calling component
      * @param identifier The identifier of the SyncPoint
      */
-	SyncPointNonEmitterCalledEmitException(const char * component,
-      const char *identifier)
-    {
-      append("Component '%s' called emit for SyncPoint '%s', "
-          "but is not a registered emitter", component, identifier);
-    }
+	SyncPointNonEmitterCalledEmitException(const char *component, const char *identifier)
+	{
+		append("Component '%s' called emit for SyncPoint '%s', "
+		       "but is not a registered emitter",
+		       component,
+		       identifier);
+	}
 };
 
 /** Invalid SyncPoint type.
@@ -195,31 +191,30 @@ class SyncPointNonEmitterCalledEmitException : public Exception
 class SyncPointInvalidTypeException : public Exception
 {
 public:
-  /** Constructor. */
-  SyncPointInvalidTypeException()
-  {
-    append("Invalid SyncPoint Wakeup type.");
-  }
+	/** Constructor. */
+	SyncPointInvalidTypeException()
+	{
+		append("Invalid SyncPoint Wakeup type.");
+	}
 };
 
 /** The component called release but is still registered as emitter. */
 class SyncPointCannotReleaseEmitter : public Exception
 {
-  public:
-  /** Constructor.
+public:
+	/** Constructor.
    *  @param component The calling component
    *  @param identifier The identifier of the SyncPoint
    */
-SyncPointCannotReleaseEmitter(const char * component,
-    const char * identifier)
-  {
-    append("Component '%s' called emit for SyncPoint '%s', "
-        "but is still registered as emitter", component, identifier);
-  }
+	SyncPointCannotReleaseEmitter(const char *component, const char *identifier)
+	{
+		append("Component '%s' called emit for SyncPoint '%s', "
+		       "but is still registered as emitter",
+		       component,
+		       identifier);
+	}
 };
 
-
 } // namespace fawkes
-
 
 #endif

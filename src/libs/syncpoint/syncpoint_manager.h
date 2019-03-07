@@ -22,47 +22,43 @@
 #ifndef _SYNCPOINT_SYNCPOINT_MANAGER_H_
 #define _SYNCPOINT_SYNCPOINT_MANAGER_H_
 
+#include <core/threading/mutex.h>
+#include <core/utils/refptr.h>
+#include <logging/multi.h>
+#include <syncpoint/syncpoint.h>
+
 #include <set>
 #include <string>
-
-#include <syncpoint/syncpoint.h>
-#include <core/utils/refptr.h>
-#include <core/threading/mutex.h>
-
-#include <logging/multi.h>
 
 namespace fawkes {
 
 class SyncPoint;
 
-
 class SyncPointManager
 {
-  public:
-    SyncPointManager(MultiLogger *logger);
-    virtual ~SyncPointManager();
+public:
+	SyncPointManager(MultiLogger *logger);
+	virtual ~SyncPointManager();
 
-    RefPtr<SyncPoint> get_syncpoint(const std::string & component, const std::string & identifier);
-    void release_syncpoint(const std::string & component, RefPtr<SyncPoint> syncpoint);
+	RefPtr<SyncPoint> get_syncpoint(const std::string &component, const std::string &identifier);
+	void              release_syncpoint(const std::string &component, RefPtr<SyncPoint> syncpoint);
 
-    std::set<RefPtr<SyncPoint>, SyncPointSetLessThan > get_syncpoints();
+	std::set<RefPtr<SyncPoint>, SyncPointSetLessThan> get_syncpoints();
 
-  protected:
-    /** Set of all existing SyncPoints */
-    std::set<RefPtr<SyncPoint>, SyncPointSetLessThan > syncpoints_;
-    /** Mutex used for all SyncPointManager calls */
-    Mutex *mutex_;
+protected:
+	/** Set of all existing SyncPoints */
+	std::set<RefPtr<SyncPoint>, SyncPointSetLessThan> syncpoints_;
+	/** Mutex used for all SyncPointManager calls */
+	Mutex *mutex_;
 
-  private:
-    std::string find_prefix(const std::string & identifier) const;
-    RefPtr<SyncPoint> get_syncpoint_no_lock(const std::string & component,
-      const std::string & identifier);
-    void release_syncpoint_no_lock(const std::string & component,
-      RefPtr<SyncPoint> syncpoint);
-    bool component_watches_any_successor(const RefPtr<SyncPoint> sp,
-      const std::string component) const;
-    MultiLogger *logger_;
-
+private:
+	std::string       find_prefix(const std::string &identifier) const;
+	RefPtr<SyncPoint> get_syncpoint_no_lock(const std::string &component,
+	                                        const std::string &identifier);
+	void         release_syncpoint_no_lock(const std::string &component, RefPtr<SyncPoint> syncpoint);
+	bool         component_watches_any_successor(const RefPtr<SyncPoint> sp,
+	                                             const std::string       component) const;
+	MultiLogger *logger_;
 };
 
 } // end namespace fawkes
