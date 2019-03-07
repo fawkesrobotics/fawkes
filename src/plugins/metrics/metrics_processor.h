@@ -25,27 +25,27 @@
 #include "protobuf/metrics.pb.h"
 
 namespace fawkes {
-  class Logger;
-  class MetricsManager;
-  class WebReply;
-  class WebRequest;
-}
+class Logger;
+class MetricsManager;
+class WebReply;
+class WebRequest;
+} // namespace fawkes
 
 class MetricsRequestProcessor
 {
- public:
+public:
 	MetricsRequestProcessor(fawkes::MetricsManager *manager,
-	                        fawkes::Logger *logger,
-	                        const std::string &base_url);
+	                        fawkes::Logger *        logger,
+	                        const std::string &     base_url);
 
-  virtual ~MetricsRequestProcessor();
+	virtual ~MetricsRequestProcessor();
 
-  fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+	fawkes::WebReply *process_request(const fawkes::WebRequest *request);
 
- private:
-  fawkes::MetricsManager *  metrics_manager_;
-  fawkes::Logger         *  logger_;
-  std::string               base_url_;
+private:
+	fawkes::MetricsManager *metrics_manager_;
+	fawkes::Logger *        logger_;
+	std::string             base_url_;
 };
 
 #endif

@@ -34,8 +34,7 @@ namespace fawkes {
  */
 
 /** Constructor. */
-MetricsAspectIniFin::MetricsAspectIniFin()
-  : AspectIniFin("MetricsAspect")
+MetricsAspectIniFin::MetricsAspectIniFin() : AspectIniFin("MetricsAspect")
 {
 }
 
@@ -44,37 +43,35 @@ MetricsAspectIniFin::~MetricsAspectIniFin()
 {
 }
 
-
-
 void
 MetricsAspectIniFin::init(Thread *thread)
 {
-  MetricsAspect *metrics_thread;
-  metrics_thread = dynamic_cast<MetricsAspect *>(thread);
-  if (metrics_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "MetricsAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
-  
-  metrics_mgr_->add_supplier(metrics_thread->get_metrics_supplier());
+	MetricsAspect *metrics_thread;
+	metrics_thread = dynamic_cast<MetricsAspect *>(thread);
+	if (metrics_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "MetricsAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
+
+	metrics_mgr_->add_supplier(metrics_thread->get_metrics_supplier());
 }
 
 void
 MetricsAspectIniFin::finalize(Thread *thread)
 {
-  MetricsAspect *metrics_thread;
-  metrics_thread = dynamic_cast<MetricsAspect *>(thread);
-  if (metrics_thread == NULL) {
-    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
-					"MetricsAspect, but RTTI says it "
-					"has not. ", thread->name());
-  }
+	MetricsAspect *metrics_thread;
+	metrics_thread = dynamic_cast<MetricsAspect *>(thread);
+	if (metrics_thread == NULL) {
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+		                                    "MetricsAspect, but RTTI says it "
+		                                    "has not. ",
+		                                    thread->name());
+	}
 
-  metrics_mgr_->remove_supplier(metrics_thread->get_metrics_supplier());
+	metrics_mgr_->remove_supplier(metrics_thread->get_metrics_supplier());
 }
-
-
 
 /** Set Metrics environment manger.
  * @param metrics_mgr metrics manager
@@ -82,7 +79,7 @@ MetricsAspectIniFin::finalize(Thread *thread)
 void
 MetricsAspectIniFin::set_manager(MetricsManager *metrics_mgr)
 {
-  metrics_mgr_ = metrics_mgr;
+	metrics_mgr_ = metrics_mgr;
 }
 
 } // end namespace fawkes

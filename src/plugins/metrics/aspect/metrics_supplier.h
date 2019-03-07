@@ -23,16 +23,17 @@
 #define _PLUGINS_METRICS_ASPECT_METRICS_SUPPLIER_H_
 
 #include <plugins/metrics/protobuf/metrics.pb.h>
+
 #include <list>
 
 namespace fawkes {
 
 class MetricsSupplier
 {
- public:
-  virtual ~MetricsSupplier();
+public:
+	virtual ~MetricsSupplier();
 
-  virtual std::list<io::prometheus::client::MetricFamily>  metrics() = 0;
+	virtual std::list<io::prometheus::client::MetricFamily> metrics() = 0;
 };
 
 } // end namespace fawkes

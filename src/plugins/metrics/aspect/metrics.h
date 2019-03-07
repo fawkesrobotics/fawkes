@@ -35,15 +35,15 @@ class MetricsAspect : public virtual Aspect
 {
 	friend MetricsAspectIniFin;
 
- public:
+public:
 	MetricsAspect(MetricsSupplier *metrics_supplier) __attribute__((nonnull));
 	virtual ~MetricsAspect();
 
- private:
-	MetricsSupplier *  get_metrics_supplier() const;
-	
- private:
-	MetricsSupplier *  metrics_supplier_;
+private:
+	MetricsSupplier *get_metrics_supplier() const;
+
+private:
+	MetricsSupplier *metrics_supplier_;
 };
 
 } // end namespace fawkes
