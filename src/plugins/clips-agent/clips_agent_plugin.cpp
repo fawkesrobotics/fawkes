@@ -21,6 +21,7 @@
  */
 
 #include "clips_agent_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -30,16 +31,15 @@ using namespace fawkes;
  */
 class ClipsAgentPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit ClipsAgentPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new ClipsAgentThread());
-  }
+	explicit ClipsAgentPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new ClipsAgentThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("CLIPS-based agent plugin")
 EXPORT_PLUGIN(ClipsAgentPlugin)
