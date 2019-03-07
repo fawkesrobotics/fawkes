@@ -13,10 +13,10 @@
  */
 
 #include "thresholds_black.h"
+
 #include <cmath>
 
-namespace firevision
-{
+namespace firevision {
 
 /** @class ColorModelBlack <fvmodels/color/thresholds_black.h>
  * Detect configurable shades/hues of "black" as a cuboid in YUV space.
@@ -33,40 +33,40 @@ namespace firevision
  * @param ref_u U component of the "black" reference color (default 128)
  * @param ref_v V component of the "black" reference color (default 128)
  */
-ColorModelBlack::ColorModelBlack(unsigned int y_thresh, unsigned int u_thresh, unsigned int v_thresh,
-  unsigned int ref_u, unsigned int ref_v) :
-    y_thresh_(y_thresh),
-    u_thresh_(u_thresh),
-    v_thresh_(v_thresh),
-    ref_u_ (ref_u),
-    ref_v_ (ref_v) {}
+ColorModelBlack::ColorModelBlack(unsigned int y_thresh,
+                                 unsigned int u_thresh,
+                                 unsigned int v_thresh,
+                                 unsigned int ref_u,
+                                 unsigned int ref_v)
+: y_thresh_(y_thresh), u_thresh_(u_thresh), v_thresh_(v_thresh), ref_u_(ref_u), ref_v_(ref_v)
+{
+}
 
 color_t
-ColorModelBlack::determine(unsigned int y,
-			   unsigned int u,
-			   unsigned int v) const
+ColorModelBlack::determine(unsigned int y, unsigned int u, unsigned int v) const
 {
-  int diff_u = ref_u_ - u;
-  int diff_v = ref_v_ - v;
-  if ( y <= y_thresh_
+	int diff_u = ref_u_ - u;
+	int diff_v = ref_v_ - v;
+	if (y <= y_thresh_
 #if defined(__GNUC__) && ((__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || (__GNUC__ > 4))
-      && std::abs(diff_u) < u_thresh_ && std::abs(diff_v) < v_thresh_
+	    && std::abs(diff_u) < u_thresh_ && std::abs(diff_v) < v_thresh_
 #else
-      && (diff_u < 0) ? (diff_u > -1*(int)u_thresh_) : (diff_u < (int)u_thresh_)
-      && (diff_v < 0) ? (diff_v > -1*(int)v_thresh_) : (diff_v < (int)v_thresh_)
+	        && (diff_u < 0)
+	      ? (diff_u > -1 * (int)u_thresh_)
+	      : (diff_u < (int)u_thresh_) && (diff_v < 0) ? (diff_v > -1 * (int)v_thresh_)
+	                                                  : (diff_v < (int)v_thresh_)
 #endif
-  )
-  {
-    return C_BLACK;
-  } else {
-    return C_OTHER;
-  }
+	) {
+		return C_BLACK;
+	} else {
+		return C_OTHER;
+	}
 }
 
 const char *
 ColorModelBlack::get_name()
 {
-  return "ColorModelBlack";
+	return "ColorModelBlack";
 }
 
 } // end namespace firevision

@@ -35,62 +35,57 @@ namespace firevision {
    and that (0, 0) is at the lower left corner. */
 
 // 1/8 * 255 = 31
-#define THRESHOLD_ORANGE_U_LOW     0
+#define THRESHOLD_ORANGE_U_LOW 0
 
 // 3/8 * 255 = 94
-#define THRESHOLD_ORANGE_U_HIGH   120
+#define THRESHOLD_ORANGE_U_HIGH 120
 
 // 3/4 * 255 = 191
-#define THRESHOLD_ORANGE_V_LOW    170
+#define THRESHOLD_ORANGE_V_LOW 170
 
 // 5/8 * 255
-#define THRESHOLD_MAGENTA_U_LOW   159
+#define THRESHOLD_MAGENTA_U_LOW 159
 
 // 5/8 * 255
-#define THRESHOLD_MAGENTA_V_LOW   159
+#define THRESHOLD_MAGENTA_V_LOW 159
 
 //1/4 * 255
-#define THRESHOLD_CYAN_U_LOW       63
+#define THRESHOLD_CYAN_U_LOW 63
 
 // 5/8 * 255
-#define THRESHOLD_CYAN_U_HIGH     159
+#define THRESHOLD_CYAN_U_HIGH 159
 
 //1/4 * 255
-#define THRESHOLD_CYAN_V_HIGH      63
+#define THRESHOLD_CYAN_V_HIGH 63
 
 // 3/4 * 255
-#define THRESHOLD_BLUE_U_LOW      191
+#define THRESHOLD_BLUE_U_LOW 191
 
 // 0 :-)
-#define THRESHOLD_BLUE_V_HIGH      90
+#define THRESHOLD_BLUE_V_HIGH 90
 
 // 1/8 * 255
-#define THRESHOLD_YELLOW_U_HIGH    31
+#define THRESHOLD_YELLOW_U_HIGH 31
 
 // 3/4 * 255
-#define THRESHOLD_YELLOW_V_LOW    191
+#define THRESHOLD_YELLOW_V_LOW 191
 
 //1/4 * 255
-#define THRESHOLD_GREEN_U_HIGH     63
+#define THRESHOLD_GREEN_U_HIGH 63
 
 // 5/8 * 255
-#define THRESHOLD_GREEN_V_HIGH    159
+#define THRESHOLD_GREEN_V_HIGH 159
 
 // 2/3 * 255
-#define THRESHOLD_WHITE_Y_LOW     170
-
+#define THRESHOLD_WHITE_Y_LOW 170
 
 class ColorModelThresholds : public ColorModel
 {
- public:
+public:
+	color_t determine(unsigned int y, unsigned int u, unsigned int v) const;
 
-  color_t       determine(unsigned int y,
-			  unsigned int u,
-			  unsigned int v) const;
-
-  const char *  get_name();
-  void          print_thresholds();
-
+	const char *get_name();
+	void        print_thresholds();
 };
 
 } // end namespace firevision

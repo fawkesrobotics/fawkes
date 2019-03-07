@@ -32,33 +32,32 @@ class MirrorModel;
 
 class OmniGlobal : public GlobalPositionModel
 {
- public:
-  // constructor
-  OmniGlobal(MirrorModel *mirror_model);
+public:
+	// constructor
+	OmniGlobal(MirrorModel *mirror_model);
 
-  virtual void		set_robot_position(float x, float y, float ori);
-  virtual void          set_position_in_image(unsigned int x, unsigned int y);
+	virtual void set_robot_position(float x, float y, float ori);
+	virtual void set_position_in_image(unsigned int x, unsigned int y);
 
-  virtual float		get_x() const;
-  virtual float		get_y() const;
+	virtual float get_x() const;
+	virtual float get_y() const;
 
-  virtual void          calc();
+	virtual void calc();
 
-  virtual bool          is_pos_valid() const;
+	virtual bool is_pos_valid() const;
 
 private:
-  float	                pose_x;
-  float			pose_y;
-  float			pose_ori;
+	float pose_x;
+	float pose_y;
+	float pose_ori;
 
-  float                 ball_x;
-  float                 ball_y;
+	float ball_x;
+	float ball_y;
 
-  MirrorModel          *mirror_model;
+	MirrorModel *mirror_model;
 
-  unsigned int          image_x;
-  unsigned int          image_y;
-
+	unsigned int image_x;
+	unsigned int image_y;
 };
 
 } // end namespace firevision

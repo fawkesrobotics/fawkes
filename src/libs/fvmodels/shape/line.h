@@ -25,12 +25,12 @@
 #ifndef _FIREVISION_MODELS_SHAPE_LINE_H_
 #define _FIREVISION_MODELS_SHAPE_LINE_H_
 
-#include <vector>
-#include <iostream>
-
-#include <fvutils/base/types.h>
-#include <fvutils/base/roi.h>
 #include <fvmodels/shape/shapemodel.h>
+#include <fvutils/base/roi.h>
+#include <fvutils/base/types.h>
+
+#include <iostream>
+#include <vector>
 
 namespace firevision {
 
@@ -39,39 +39,37 @@ class RhtLinesModel;
 
 class LineShape : public Shape
 {
- friend HtLinesModel;
- friend RhtLinesModel;
+	friend HtLinesModel;
+	friend RhtLinesModel;
 
- public:
-  LineShape(unsigned int roi_width, unsigned int roi_height);
-  ~LineShape();
+public:
+	LineShape(unsigned int roi_width, unsigned int roi_height);
+	~LineShape();
 
-  void printToStream(std::ostream &stream);
-  void setMargin( unsigned int margin );
-  bool isClose(unsigned int in_roi_x, unsigned int in_roi_y);
+	void printToStream(std::ostream &stream);
+	void setMargin(unsigned int margin);
+	bool isClose(unsigned int in_roi_x, unsigned int in_roi_y);
 
-  void calcPoints();
-  void getPoints(int *x1, int *y1, int *x2, int *y2);
+	void calcPoints();
+	void getPoints(int *x1, int *y1, int *x2, int *y2);
 
- private:
-  float r;
-  float phi;
-  int			count;
-  unsigned int          margin;
-  int                   max_length;
+private:
+	float        r;
+	float        phi;
+	int          count;
+	unsigned int margin;
+	int          max_length;
 
-  unsigned int  roi_width;
-  unsigned int  roi_height;
+	unsigned int roi_width;
+	unsigned int roi_height;
 
-  float last_calc_r;
-  float last_calc_phi;
+	float last_calc_r;
+	float last_calc_phi;
 
-  int x1;
-  int y1;
-  int x2;
-  int y2;
-
-
+	int x1;
+	int y1;
+	int x2;
+	int y2;
 };
 
 } // end namespace firevision

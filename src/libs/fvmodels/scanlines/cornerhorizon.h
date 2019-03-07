@@ -36,71 +36,72 @@ namespace firevision {
 
 class CornerHorizon : public ScanlineModel
 {
+public:
+	CornerHorizon(ScanlineModel *model,
+	              float          field_length,
+	              float          field_width,
+	              float          field_border,
+	              unsigned int   image_width,
+	              unsigned int   image_height,
+	              float          camera_height,
+	              float          camera_ori,
+	              float          horizontal_angle,
+	              float          vertical_angle);
 
- public:
+	virtual ~CornerHorizon();
 
-  CornerHorizon( ScanlineModel *model,
-     float field_length, float field_width, float field_border,
-     unsigned int image_width, unsigned int image_height,
-     float camera_height, float camera_ori,
-     float horizontal_angle, float vertical_angle
-     );
+	fawkes::upoint_t  operator*();
+	fawkes::upoint_t *operator->();
+	fawkes::upoint_t *operator++();
+	fawkes::upoint_t *operator++(int);
 
-  virtual ~CornerHorizon();
+	bool         finished();
+	void         reset();
+	const char * get_name();
+	unsigned int get_margin();
 
-  fawkes::upoint_t    operator*();
-  fawkes::upoint_t *  operator->();
-  fawkes::upoint_t *  operator++();
-  fawkes::upoint_t *  operator++(int);
+	void set_robot_pose(float x, float y, float ori);
+	void set_pan_tilt(float pan, float tilt);
 
-  bool          finished();
-  void          reset();
-  const char *  get_name();
-  unsigned int  get_margin();
+	unsigned int getHorizon();
 
-  void set_robot_pose(float x, float y, float ori);
-  void set_pan_tilt(float pan, float tilt);
+protected:
+	void calculate();
 
-  unsigned int getHorizon();
+private:
+	ScanlineModel *model;
 
- protected:
-  void calculate();
+	bool calculated;
 
- private:
-  ScanlineModel *model;
+	float field_length;
+	float field_width;
+	float field_border;
 
-  bool calculated;
+	float pose_x;
+	float pose_y;
+	float pose_ori;
 
-  float field_length;
-  float field_width;
-  float field_border;
+	float pan;
+	float tilt;
 
-  float pose_x;
-  float pose_y;
-  float pose_ori;
+	unsigned int image_width;
+	unsigned int image_height;
 
-  float pan;
-  float tilt;
+	float camera_height;
+	float camera_ori;
 
-  unsigned int image_width;
-  unsigned int image_height;
+	float horizontal_angle;
+	float vertical_angle;
 
-  float camera_height;
-  float camera_ori;
+	float pan_pixel_per_rad;
+	float tilt_pixel_per_rad;
 
-  float horizontal_angle;
-  float vertical_angle;
+	fawkes::upoint_t coord;
+	fawkes::upoint_t tmp_coord;
 
-  float pan_pixel_per_rad;
-  float tilt_pixel_per_rad;
+	unsigned int horizon;
 
-  fawkes::upoint_t coord;
-  fawkes::upoint_t tmp_coord;
-
-  unsigned int horizon;
-
-  static const float M_PI_HALF;
-
+	static const float M_PI_HALF;
 };
 
 } // end namespace firevision
