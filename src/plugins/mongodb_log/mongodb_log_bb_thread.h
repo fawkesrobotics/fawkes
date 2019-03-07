@@ -23,84 +23,88 @@
 #ifndef _PLUGINS_MONGODB_LOG_MONGODB_LOG_BB_THREAD_H_
 #define _PLUGINS_MONGODB_LOG_MONGODB_LOG_BB_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
 #include <aspect/blackboard.h>
-#include <plugins/mongodb/aspect/mongodb.h>
-
-#include <blackboard/interface_observer.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <blackboard/interface_listener.h>
+#include <blackboard/interface_observer.h>
+#include <core/threading/thread.h>
 #include <core/utils/lock_map.h>
 #include <core/utils/lock_set.h>
+#include <plugins/mongodb/aspect/mongodb.h>
 
 #include <string>
 
-
-class MongoLogBlackboardThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::MongoDBAspect,
-  public fawkes::BlackBoardInterfaceObserver
+class MongoLogBlackboardThread : public fawkes::Thread,
+                                 public fawkes::LoggingAspect,
+                                 public fawkes::ConfigurableAspect,
+                                 public fawkes::ClockAspect,
+                                 public fawkes::BlackBoardAspect,
+                                 public fawkes::MongoDBAspect,
+                                 public fawkes::BlackBoardInterfaceObserver
 {
- public:
-  MongoLogBlackboardThread();
-  virtual ~MongoLogBlackboardThread();
+public:
+	MongoLogBlackboardThread();
+	virtual ~MongoLogBlackboardThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  // for BlackBoardInterfaceObserver
-  virtual void bb_interface_created(const char *type, const char *id) throw();
+	// for BlackBoardInterfaceObserver
+	virtual void bb_interface_created(const char *type, const char *id) throw();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  /** Mongo Logger interface listener. */
-  class InterfaceListener : public fawkes::BlackBoardInterfaceListener
-  {
-   public:
-    InterfaceListener(fawkes::BlackBoard *blackboard,
-		      fawkes::Interface *interface,
-		      mongo::DBClientBase *mongodb,
-		      std::string &database,
-		      fawkes::LockSet<std::string> &colls,
-		      fawkes::Logger *logger,
-		      fawkes::Time *now);
-    ~InterfaceListener();
+private:
+	/** Mongo Logger interface listener. */
+	class InterfaceListener : public fawkes::BlackBoardInterfaceListener
+	{
+	public:
+		InterfaceListener(fawkes::BlackBoard *          blackboard,
+		                  fawkes::Interface *           interface,
+		                  mongo::DBClientBase *         mongodb,
+		                  std::string &                 database,
+		                  fawkes::LockSet<std::string> &colls,
+		                  fawkes::Logger *              logger,
+		                  fawkes::Time *                now);
+		~InterfaceListener();
 
-    /** Get MongoDB Client.
+		/** Get MongoDB Client.
      * @return MongoDB client */
-    mongo::DBClientBase * mongodb_client() const
-    { return mongodb_; }
+		mongo::DBClientBase *
+		mongodb_client() const
+		{
+			return mongodb_;
+		}
 
-    // for BlackBoardInterfaceListener
-    virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+		// for BlackBoardInterfaceListener
+		virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
 
-   private:
-    fawkes::BlackBoard  *blackboard_;
-    fawkes::Interface   *interface_;
-    mongo::DBClientBase *mongodb_;
-    fawkes::Logger      *logger_;
-    std::string          collection_;
-    std::string         &database_;
-    fawkes::LockSet<std::string> &collections_;
-    fawkes::Time        *now_;
-  };
+	private:
+		fawkes::BlackBoard *          blackboard_;
+		fawkes::Interface *           interface_;
+		mongo::DBClientBase *         mongodb_;
+		fawkes::Logger *              logger_;
+		std::string                   collection_;
+		std::string &                 database_;
+		fawkes::LockSet<std::string> &collections_;
+		fawkes::Time *                now_;
+	};
 
+	fawkes::LockMap<std::string, InterfaceListener *> listeners_;
+	fawkes::LockSet<std::string>                      collections_;
+	std::string                                       database_;
+	fawkes::Time *                                    now_;
 
-  fawkes::LockMap<std::string, InterfaceListener *> listeners_;
-  fawkes::LockSet<std::string> collections_;
-  std::string database_;
-  fawkes::Time        *now_;
-
-  std::vector<std::string> excludes_;
+	std::vector<std::string> excludes_;
 };
 
 #endif
