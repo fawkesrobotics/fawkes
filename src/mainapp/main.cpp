@@ -23,8 +23,8 @@
 
 #include <baseapp/run.h>
 #include <core/exception.h>
-#include <cstdio>
 
+#include <cstdio>
 
 /** Fawkes application.
  * @param argc argument count
@@ -33,18 +33,18 @@
 int
 main(int argc, char **argv)
 {
-  try {
-    int retval = 0;
-    if (! fawkes::runtime::init(argc, argv, retval)) {
-      return retval;
-    }
-    fawkes::runtime::run();
-    fawkes::runtime::cleanup();
-  } catch (fawkes::Exception &e) {
-    printf("Fawkes execution ended unexpectedly, exception follows.\n");
-    e.print_trace();
-    return 1;
-  }
+	try {
+		int retval = 0;
+		if (!fawkes::runtime::init(argc, argv, retval)) {
+			return retval;
+		}
+		fawkes::runtime::run();
+		fawkes::runtime::cleanup();
+	} catch (fawkes::Exception &e) {
+		printf("Fawkes execution ended unexpectedly, exception follows.\n");
+		e.print_trace();
+		return 1;
+	}
 
-  return 0;
+	return 0;
 }
