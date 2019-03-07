@@ -21,6 +21,7 @@
  */
 
 #include "transfer_thread.h"
+
 #include <core/threading/read_write_lock.h>
 #include <fvcams/camera.h>
 #include <fvutils/color/colorspaces.h>
@@ -41,22 +42,20 @@ using namespace firevision;
 
 /** Constructor. */
 PclViewerTransferThread::PclViewerTransferThread()
-  : Thread("PclViewerTransferThread", Thread::OPMODE_CONTINUOUS)
+: Thread("PclViewerTransferThread", Thread::OPMODE_CONTINUOUS)
 {
-  rwlock_ = new ReadWriteLock();
+	rwlock_ = new ReadWriteLock();
 }
-
 
 /** Destructor. */
 PclViewerTransferThread::~PclViewerTransferThread()
 {
-  delete rwlock_;
-  std::map<std::string, unsigned char *>::iterator c;
-  for (c = buffers_.begin(); c != buffers_.end(); ++c) {
-    free(c->second);
-  }
+	delete rwlock_;
+	std::map<std::string, unsigned char *>::iterator c;
+	for (c = buffers_.begin(); c != buffers_.end(); ++c) {
+		free(c->second);
+	}
 }
-
 
 /** Lock for reading.
  * Images will not be updated while the lock is held. Any number of
@@ -66,17 +65,15 @@ PclViewerTransferThread::~PclViewerTransferThread()
 void
 PclViewerTransferThread::lock_for_read()
 {
-  rwlock_->lock_for_read();
+	rwlock_->lock_for_read();
 }
-
 
 /** Unlock. */
 void
 PclViewerTransferThread::unlock()
 {
-  rwlock_->unlock();
+	rwlock_->unlock();
 }
-
 
 /** Add a camera from which to pull images.
  * @param name symbolic name, used to access buffers
@@ -85,24 +82,21 @@ PclViewerTransferThread::unlock()
 void
 PclViewerTransferThread::add_camera(std::string name, firevision::Camera *cam)
 {
-  cams_[name] = cam;
-  buffers_[name] = malloc_buffer(cam->colorspace(), cam->pixel_width(),
-				  cam->pixel_height());
-  buffer_sizes_[name] = colorspace_buffer_size(cam->colorspace(),
-						cam->pixel_width(),
-						cam->pixel_height());
+	cams_[name]    = cam;
+	buffers_[name] = malloc_buffer(cam->colorspace(), cam->pixel_width(), cam->pixel_height());
+	buffer_sizes_[name] =
+	  colorspace_buffer_size(cam->colorspace(), cam->pixel_width(), cam->pixel_height());
 }
-
 
 void
 PclViewerTransferThread::loop()
 {
-  std::map<std::string, firevision::Camera *>::iterator c;
-  for (c = cams_.begin(); c != cams_.end(); ++c) {
-    c->second->capture();
-    rwlock_->lock_for_write();
-    memcpy(buffers_[c->first], c->second->buffer(), buffer_sizes_[c->first]);
-    rwlock_->unlock();
-    c->second->dispose_buffer();
-  }
+	std::map<std::string, firevision::Camera *>::iterator c;
+	for (c = cams_.begin(); c != cams_.end(); ++c) {
+		c->second->capture();
+		rwlock_->lock_for_write();
+		memcpy(buffers_[c->first], c->second->buffer(), buffer_sizes_[c->first]);
+		rwlock_->unlock();
+		c->second->dispose_buffer();
+	}
 }
