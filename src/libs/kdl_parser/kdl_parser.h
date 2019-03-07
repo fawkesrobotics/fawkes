@@ -56,62 +56,61 @@
 #ifndef KDL_PARSER_H
 #define KDL_PARSER_H
 
+#include <urdf_model/model.h>
+
 #include <kdl/tree.hpp>
 #include <string>
-#include <urdf_model/model.h>
 #include <tinyxml.h>
 
 #if !defined(HAVE_URDFDOM_TYPES_H)
 namespace urdf {
-typedef boost::shared_ptr<urdf::Joint> JointSharedPtr;
-typedef boost::shared_ptr<urdf::Inertial> InertialSharedPtr;
-typedef boost::shared_ptr<urdf::Link> LinkSharedPtr;
+typedef boost::shared_ptr<urdf::Joint>          JointSharedPtr;
+typedef boost::shared_ptr<urdf::Inertial>       InertialSharedPtr;
+typedef boost::shared_ptr<urdf::Link>           LinkSharedPtr;
 typedef boost::shared_ptr<urdf::ModelInterface> ModelInterfaceSharedPtr;
-}
+} // namespace urdf
 #endif
 
 namespace fawkes {
 
 namespace kdl_parser {
 
-
-
 /** Constructs a KDL tree from a file, given the file name
  * @param file The filename from where to read the xml
  * @param tree The resulting KDL Tree
  * @return true on success, false on failure
  */
-bool tree_from_file(const std::string& file, KDL::Tree& tree);
+bool tree_from_file(const std::string &file, KDL::Tree &tree);
 
 /** Constructs a KDL tree from the parameter server, given the parameter name
  * @param param the name of the parameter on the parameter server
  * @param tree The resulting KDL Tree
  * @return true on success, false on failure
  */
-bool tree_from_param(const std::string& param, KDL::Tree& tree);
+bool tree_from_param(const std::string &param, KDL::Tree &tree);
 
 /** Constructs a KDL tree from a string containing xml
  * @param xml A string containting the xml description of the robot
  * @param tree The resulting KDL Tree
  * returns true on success, false on failure
  */
-bool tree_from_string(const std::string& xml, KDL::Tree& tree);
+bool tree_from_string(const std::string &xml, KDL::Tree &tree);
 
 /** Constructs a KDL tree from a TiXmlDocument
  * @param xml_doc The TiXmlDocument containting the xml description of the robot
  * @param tree The resulting KDL Tree
  * @return true on success, false on failure
  */
-bool tree_from_xml(TiXmlDocument *xml_doc, KDL::Tree& tree);
+bool tree_from_xml(TiXmlDocument *xml_doc, KDL::Tree &tree);
 
 /** Constructs a KDL tree from a URDF robot model
  * @param robot_model The URDF robot model
  * @param tree The resulting KDL Tree
  * @return true on success, false on failure
  */
-bool tree_from_urdf_model(const urdf::ModelInterface& robot_model, KDL::Tree& tree);
-}
+bool tree_from_urdf_model(const urdf::ModelInterface &robot_model, KDL::Tree &tree);
+} // namespace kdl_parser
 
-}
+} // namespace fawkes
 
 #endif
