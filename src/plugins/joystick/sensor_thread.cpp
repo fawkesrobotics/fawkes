@@ -21,6 +21,7 @@
  */
 
 #include "sensor_thread.h"
+
 #include "acquisition_thread.h"
 
 #include <interfaces/JoystickInterface.h>
@@ -34,41 +35,37 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param aqt JoystickAcquisitionThread to get data from
  */
 JoystickSensorThread::JoystickSensorThread(JoystickAcquisitionThread *aqt)
-  : Thread("JoystickSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
+: Thread("JoystickSensorThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
-  aqt_    = aqt;
+	aqt_ = aqt;
 }
-
 
 void
 JoystickSensorThread::init()
 {
-  joystick_if_ = blackboard->open_for_writing<JoystickInterface>("Joystick");
+	joystick_if_ = blackboard->open_for_writing<JoystickInterface>("Joystick");
 }
-
 
 void
 JoystickSensorThread::finalize()
 {
-  blackboard->close(joystick_if_);
+	blackboard->close(joystick_if_);
 }
-
 
 void
 JoystickSensorThread::loop()
 {
-  if ( aqt_->lock_if_new_data() ) {
-    joystick_if_->set_num_axes( aqt_->num_axes() );
-    joystick_if_->set_num_buttons( aqt_->num_buttons() );
-    joystick_if_->set_pressed_buttons( aqt_->pressed_buttons() );
-    joystick_if_->set_axis( aqt_->axis_values() );
-    joystick_if_->write();
-    aqt_->unlock();
-  }
+	if (aqt_->lock_if_new_data()) {
+		joystick_if_->set_num_axes(aqt_->num_axes());
+		joystick_if_->set_num_buttons(aqt_->num_buttons());
+		joystick_if_->set_pressed_buttons(aqt_->pressed_buttons());
+		joystick_if_->set_axis(aqt_->axis_values());
+		joystick_if_->write();
+		aqt_->unlock();
+	}
 }

@@ -19,9 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "joystick_teleop_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -30,15 +30,14 @@ using namespace fawkes;
  */
 class JoystickTeleOpPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit JoystickTeleOpPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new JoystickTeleOpThread());
-  }
+	explicit JoystickTeleOpPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new JoystickTeleOpThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Joystick remote control")

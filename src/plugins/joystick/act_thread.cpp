@@ -21,12 +21,12 @@
  */
 
 #include "act_thread.h"
-#include "sensor_thread.h"
+
 #include "acquisition_thread.h"
+#include "force_feedback.h"
+#include "sensor_thread.h"
 
 #include <interfaces/JoystickInterface.h>
-
-#include "force_feedback.h"
 
 using namespace fawkes;
 
@@ -37,42 +37,36 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param aqt JoystickAcquisitionThread to get data from
  * @param senst sensor thread to share joystick interface with
  */
-JoystickActThread::JoystickActThread(JoystickAcquisitionThread *aqt,
-				     JoystickSensorThread *senst)
-  : Thread("JoystickActThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+JoystickActThread::JoystickActThread(JoystickAcquisitionThread *aqt, JoystickSensorThread *senst)
+: Thread("JoystickActThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
-  aqt_   = aqt;
-  senst_ = senst;
+	aqt_   = aqt;
+	senst_ = senst;
 }
-
 
 void
 JoystickActThread::init()
 {
-  joystick_if_ = senst_->joystick_interface();
-  msgproc_ = new MessageProcessor(aqt_, joystick_if_);
+	joystick_if_ = senst_->joystick_interface();
+	msgproc_     = new MessageProcessor(aqt_, joystick_if_);
 }
-
 
 void
 JoystickActThread::finalize()
 {
-  delete msgproc_;
+	delete msgproc_;
 }
-
 
 void
 JoystickActThread::loop()
 {
-  msgproc_->process();
+	msgproc_->process();
 }
-
 
 /** @class JoystickActThread::MessageProcessor "act_thread.h"
  * Process incoming messages.
@@ -85,11 +79,11 @@ JoystickActThread::loop()
  * @param joystick_if interface to listen on for messages
  */
 JoystickActThread::MessageProcessor::MessageProcessor(JoystickAcquisitionThread *aqt,
-                                                      JoystickInterface *joystick_if)
+                                                      JoystickInterface *        joystick_if)
 {
-  aqt_ = aqt;
-  joystick_if_ = joystick_if;
-  joystick_connected_ = false;
+	aqt_                = aqt;
+	joystick_if_        = joystick_if;
+	joystick_connected_ = false;
 }
 
 /** Process a single message.
@@ -98,93 +92,90 @@ JoystickActThread::MessageProcessor::MessageProcessor(JoystickAcquisitionThread 
 void
 JoystickActThread::MessageProcessor::process_message(Message *msg)
 {
-  JoystickForceFeedback *ff = aqt_->ff();
+	JoystickForceFeedback *ff = aqt_->ff();
 
-  if (! ff)  return;
+	if (!ff)
+		return;
 
-  if (dynamic_cast<JoystickInterface::StartRumbleMessage *>(msg) != NULL) {
-    JoystickInterface::StartRumbleMessage *srm =
-      dynamic_cast<JoystickInterface::StartRumbleMessage *>(msg);
+	if (dynamic_cast<JoystickInterface::StartRumbleMessage *>(msg) != NULL) {
+		JoystickInterface::StartRumbleMessage *srm =
+		  dynamic_cast<JoystickInterface::StartRumbleMessage *>(msg);
 
-    ff->rumble(srm->strong_magnitude(), srm->weak_magnitude(),
-               (JoystickForceFeedback::Direction)srm->direction(),
-               srm->length(), srm->delay());
+		ff->rumble(srm->strong_magnitude(),
+		           srm->weak_magnitude(),
+		           (JoystickForceFeedback::Direction)srm->direction(),
+		           srm->length(),
+		           srm->delay());
 
-    uint8_t e = joystick_if_->ff_effects() | JoystickInterface::JFF_RUMBLE;
-    joystick_if_->set_ff_effects(e);
-    joystick_if_->write();
-    
-  }
-  else if (dynamic_cast<JoystickInterface::StopRumbleMessage *>(msg) != NULL)
-  {
-    ff->stop_rumble();
-    uint8_t e = joystick_if_->ff_effects() & ~JoystickInterface::JFF_RUMBLE;
-    joystick_if_->set_ff_effects(e);
-    joystick_if_->write();
+		uint8_t e = joystick_if_->ff_effects() | JoystickInterface::JFF_RUMBLE;
+		joystick_if_->set_ff_effects(e);
+		joystick_if_->write();
 
-  }
-  else if (dynamic_cast<JoystickInterface::StopAllMessage *>(msg) != NULL)
-  {
-    ff->stop_all();
-    joystick_if_->set_ff_effects(0);
-    joystick_if_->write();
-  }
+	} else if (dynamic_cast<JoystickInterface::StopRumbleMessage *>(msg) != NULL) {
+		ff->stop_rumble();
+		uint8_t e = joystick_if_->ff_effects() & ~JoystickInterface::JFF_RUMBLE;
+		joystick_if_->set_ff_effects(e);
+		joystick_if_->write();
+
+	} else if (dynamic_cast<JoystickInterface::StopAllMessage *>(msg) != NULL) {
+		ff->stop_all();
+		joystick_if_->set_ff_effects(0);
+		joystick_if_->write();
+	}
 }
-
 
 /** Process message currently in the queue. */
 void
 JoystickActThread::MessageProcessor::process()
 {
-  JoystickForceFeedback *ff = aqt_->ff();
+	JoystickForceFeedback *ff = aqt_->ff();
 
-  if (ff == NULL) {
-    joystick_if_->msgq_flush();
-    if (joystick_connected_) {
-      joystick_if_->set_supported_ff_effects(0);
-      joystick_if_->write();
-      joystick_connected_ = false;
-    }
-  } else  if (! joystick_connected_) {
-    uint8_t effects = 0;
-    if (ff->can_rumble()) {
-      effects |= JoystickInterface::JFF_RUMBLE;
-    }
-    if (ff->can_periodic()) {
-      effects |= JoystickInterface::JFF_PERIODIC;
-    }
-    if (ff->can_ramp()) {
-      effects |= JoystickInterface::JFF_RAMP;
-    }
-    if (ff->can_spring()) {
-      effects |= JoystickInterface::JFF_SPRING;
-    }
-    if (ff->can_friction()) {
-      effects |= JoystickInterface::JFF_FRICTION;
-    }
-    if (ff->can_damper()) {
-      effects |= JoystickInterface::JFF_DAMPER;
-    }
-    if (ff->can_inertia()) {
-      effects |= JoystickInterface::JFF_INERTIA;
-    }
-    if (ff->can_constant()) {
-      effects |= JoystickInterface::JFF_CONSTANT;
-    }
-    joystick_if_->set_supported_ff_effects(effects);    
-    joystick_if_->write();
-    joystick_connected_ = true;
-  }
+	if (ff == NULL) {
+		joystick_if_->msgq_flush();
+		if (joystick_connected_) {
+			joystick_if_->set_supported_ff_effects(0);
+			joystick_if_->write();
+			joystick_connected_ = false;
+		}
+	} else if (!joystick_connected_) {
+		uint8_t effects = 0;
+		if (ff->can_rumble()) {
+			effects |= JoystickInterface::JFF_RUMBLE;
+		}
+		if (ff->can_periodic()) {
+			effects |= JoystickInterface::JFF_PERIODIC;
+		}
+		if (ff->can_ramp()) {
+			effects |= JoystickInterface::JFF_RAMP;
+		}
+		if (ff->can_spring()) {
+			effects |= JoystickInterface::JFF_SPRING;
+		}
+		if (ff->can_friction()) {
+			effects |= JoystickInterface::JFF_FRICTION;
+		}
+		if (ff->can_damper()) {
+			effects |= JoystickInterface::JFF_DAMPER;
+		}
+		if (ff->can_inertia()) {
+			effects |= JoystickInterface::JFF_INERTIA;
+		}
+		if (ff->can_constant()) {
+			effects |= JoystickInterface::JFF_CONSTANT;
+		}
+		joystick_if_->set_supported_ff_effects(effects);
+		joystick_if_->write();
+		joystick_connected_ = true;
+	}
 
-  while (! joystick_if_->msgq_empty() ) {
+	while (!joystick_if_->msgq_empty()) {
+		if (!joystick_connected_) {
+			joystick_if_->msgq_flush();
+			break;
+		}
 
-    if (! joystick_connected_) {
-      joystick_if_->msgq_flush();
-      break;
-    }
+		process_message(joystick_if_->msgq_first());
 
-    process_message(joystick_if_->msgq_first());
-
-    joystick_if_->msgq_pop();
-  }
+		joystick_if_->msgq_pop();
+	}
 }
