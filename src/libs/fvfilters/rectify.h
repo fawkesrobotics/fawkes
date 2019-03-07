@@ -32,17 +32,16 @@ class RectificationInfoBlock;
 
 class FilterRectify : public Filter
 {
- public:
-  FilterRectify(RectificationInfoBlock *rib, bool mark_zeros = true);
+public:
+	FilterRectify(RectificationInfoBlock *rib, bool mark_zeros = true);
 
-  virtual void apply();
+	virtual void apply();
 
- private:
-  RectificationInfoBlock *rib_;
-  bool mark_zeros_;
+private:
+	RectificationInfoBlock *rib_;
+	bool                    mark_zeros_;
 };
 
 } // end namespace firevision
 
 #endif
-

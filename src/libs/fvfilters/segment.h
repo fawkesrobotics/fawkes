@@ -33,14 +33,14 @@ class ColorModel;
 
 class FilterSegment : public Filter
 {
- public:
-  FilterSegment(ColorModel *cm, color_t what);
+public:
+	FilterSegment(ColorModel *cm, color_t what);
 
-  virtual void apply();
+	virtual void apply();
 
- private:
-  ColorModel    *cm;
-  color_t        what;
+private:
+	ColorModel *cm;
+	color_t     what;
 };
 
 } // end namespace firevision

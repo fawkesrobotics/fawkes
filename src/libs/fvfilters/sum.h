@@ -30,10 +30,10 @@ namespace firevision {
 
 class FilterSum : public Filter
 {
- public:
-  FilterSum();
+public:
+	FilterSum();
 
-  virtual void apply();
+	virtual void apply();
 };
 
 } // end namespace firevision

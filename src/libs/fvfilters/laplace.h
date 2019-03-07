@@ -23,8 +23,8 @@
 #ifndef _FIREVISION_FILTER_LAPLACE_H_
 #define _FIREVISION_FILTER_LAPLACE_H_
 
-#if ! (defined(HAVE_IPP) || defined(HAVE_OPENCV))
-#error "Neither IPP nor OpenCV installed"
+#if !(defined(HAVE_IPP) || defined(HAVE_OPENCV))
+#	error "Neither IPP nor OpenCV installed"
 #endif
 
 #include <fvfilters/filter.h>
@@ -33,22 +33,21 @@ namespace firevision {
 
 class FilterLaplace : public Filter
 {
+public:
+	FilterLaplace();
+	FilterLaplace(float sigma, unsigned int size, float scale);
+	~FilterLaplace();
 
- public:
-  FilterLaplace();
-  FilterLaplace(float sigma, unsigned int size, float scale);
-  ~FilterLaplace();
+	virtual void apply();
 
-  virtual void apply();
+	static void calculate_kernel(int *kernel_buffer, float sigma, unsigned int size, float scale);
 
-  static void calculate_kernel(int *kernel_buffer, float sigma, unsigned int size, float scale);
-
- private:
-  int           *kernel;
-  // only used for OpenCV, but adding unconditional to avoid weird
-  // problems with differently sized class type sizes of macro missing
-  float         *kernel_float;
-  unsigned int   kernel_size;
+private:
+	int *kernel;
+	// only used for OpenCV, but adding unconditional to avoid weird
+	// problems with differently sized class type sizes of macro missing
+	float *      kernel_float;
+	unsigned int kernel_size;
 };
 
 } // end namespace firevision

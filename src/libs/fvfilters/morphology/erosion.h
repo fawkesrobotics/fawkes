@@ -29,10 +29,10 @@ namespace firevision {
 
 class FilterErosion : public MorphologicalFilter
 {
- public:
-  FilterErosion();
+public:
+	FilterErosion();
 
-  virtual void apply();
+	virtual void apply();
 };
 
 } // end namespace firevision

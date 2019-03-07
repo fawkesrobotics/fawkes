@@ -23,8 +23,8 @@
 #ifndef _FIREVISION_FILTERS_HIPASS_H_
 #define _FIREVISION_FILTERS_HIPASS_H_
 
-#if ! (defined(HAVE_IPP) || defined(HAVE_OPENCV))
-#error "Neither IPP nor OpenCV installed"
+#if !(defined(HAVE_IPP) || defined(HAVE_OPENCV))
+#	error "Neither IPP nor OpenCV installed"
 #endif
 
 #include <fvfilters/filter.h>
@@ -33,10 +33,10 @@ namespace firevision {
 
 class FilterHipass : public Filter
 {
- public:
-  FilterHipass();
+public:
+	FilterHipass();
 
-  virtual void apply();
+	virtual void apply();
 };
 
 } // end namespace firevision

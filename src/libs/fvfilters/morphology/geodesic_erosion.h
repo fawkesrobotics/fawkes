@@ -36,27 +36,27 @@ class ROI;
 
 class FilterGeodesicErosion : public MorphologicalFilter
 {
- public:
-  FilterGeodesicErosion(unsigned int se_size = 3);
-  virtual ~FilterGeodesicErosion();
+public:
+	FilterGeodesicErosion(unsigned int se_size = 3);
+	virtual ~FilterGeodesicErosion();
 
-  virtual void apply();
+	virtual void apply();
 
-  virtual unsigned int num_iterations();
+	virtual unsigned int num_iterations();
 
-  static const unsigned int MARKER;
-  static const unsigned int MASK;
+	static const unsigned int MARKER;
+	static const unsigned int MASK;
 
- private:
-  unsigned char *isotropic_se;
-  unsigned int   se_size;
+private:
+	unsigned char *isotropic_se;
+	unsigned int   se_size;
 
-  FilterErosion  *erode;
-  FilterMax      *max;
+	FilterErosion *erode;
+	FilterMax *    max;
 
-  ImageDiff      *diff;
+	ImageDiff *diff;
 
-  unsigned int iterations;
+	unsigned int iterations;
 };
 
 } // end namespace firevision

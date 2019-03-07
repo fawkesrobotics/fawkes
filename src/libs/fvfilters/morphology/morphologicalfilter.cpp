@@ -38,18 +38,16 @@ namespace firevision {
  * @param name filter name
  * @param max_num_buffers maximum number of source buffers. */
 MorphologicalFilter::MorphologicalFilter(const char *name, unsigned int max_num_buffers)
-  : Filter(name, max_num_buffers)
+: Filter(name, max_num_buffers)
 {
-  se = NULL;
-  se_width = se_height = se_anchor_x = se_anchor_y = 0;
+	se       = NULL;
+	se_width = se_height = se_anchor_x = se_anchor_y = 0;
 }
-
 
 /** Destructor. */
 MorphologicalFilter::~MorphologicalFilter()
 {
 }
-
 
 /** Set the structuring element for successive filter runs.
  * @param se structuring element buffer. This is just a line-wise concatenated array
@@ -62,14 +60,16 @@ MorphologicalFilter::~MorphologicalFilter()
  */
 void
 MorphologicalFilter::set_structuring_element(unsigned char *se,
-					     unsigned int se_width, unsigned int se_height,
-					     unsigned int se_anchor_x, unsigned int se_anchor_y)
+                                             unsigned int   se_width,
+                                             unsigned int   se_height,
+                                             unsigned int   se_anchor_x,
+                                             unsigned int   se_anchor_y)
 {
-  this->se          = se;
-  this->se_width    = se_width;
-  this->se_height   = se_height;
-  this->se_anchor_x = se_anchor_x;
-  this->se_anchor_y = se_anchor_y;
+	this->se          = se;
+	this->se_width    = se_width;
+	this->se_height   = se_height;
+	this->se_anchor_x = se_anchor_x;
+	this->se_anchor_y = se_anchor_y;
 }
 
 } // end namespace firevision
