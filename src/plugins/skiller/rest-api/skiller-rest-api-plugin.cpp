@@ -21,6 +21,7 @@
  */
 
 #include "skiller-rest-api.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -30,16 +31,15 @@ using namespace fawkes;
  */
 class SkillerRestApiPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit SkillerRestApiPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new SkillerRestApi());
-  }
+	explicit SkillerRestApiPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new SkillerRestApi());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("Behavior Engine REST API")
 EXPORT_PLUGIN(SkillerRestApiPlugin)
