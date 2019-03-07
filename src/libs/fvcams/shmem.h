@@ -34,54 +34,52 @@ class CameraArgumentParser;
 
 class SharedMemoryCamera : public Camera
 {
+public:
+	SharedMemoryCamera(const char *image_id, bool deep_copy = false);
+	SharedMemoryCamera(const CameraArgumentParser *cap);
+	~SharedMemoryCamera();
 
- public:
+	virtual void open();
+	virtual void start();
+	virtual void stop();
+	virtual void close();
+	virtual void flush();
+	virtual void capture();
+	virtual void print_info();
 
-  SharedMemoryCamera(const char *image_id, bool deep_copy = false);
-  SharedMemoryCamera(const CameraArgumentParser *cap);
-  ~SharedMemoryCamera();
+	virtual bool ready();
 
-  virtual void open();
-  virtual void start();
-  virtual void stop();
-  virtual void close();
-  virtual void flush();
-  virtual void capture();
-  virtual void print_info();
+	virtual unsigned char *buffer();
+	virtual unsigned int   buffer_size();
+	virtual void           dispose_buffer();
 
-  virtual bool ready();
+	virtual unsigned int  pixel_width();
+	virtual unsigned int  pixel_height();
+	virtual colorspace_t  colorspace();
+	virtual fawkes::Time *capture_time();
 
-  virtual unsigned char* buffer();
-  virtual unsigned int   buffer_size();
-  virtual void           dispose_buffer();
+	virtual void set_image_number(unsigned int n);
 
-  virtual unsigned int   pixel_width();
-  virtual unsigned int   pixel_height();
-  virtual colorspace_t   colorspace();
-  virtual fawkes::Time * capture_time();
+	SharedMemoryImageBuffer *shared_memory_image_buffer();
 
-  virtual void           set_image_number(unsigned int n);
+	virtual void lock_for_read();
+	virtual bool try_lock_for_read();
+	virtual void lock_for_write();
+	virtual bool try_lock_for_write();
+	virtual void unlock();
 
-  SharedMemoryImageBuffer *  shared_memory_image_buffer();
+private:
+	void init();
 
-  virtual void           lock_for_read();
-  virtual bool           try_lock_for_read();
-  virtual void           lock_for_write();
-  virtual bool           try_lock_for_write();
-  virtual void           unlock();
+	bool  deep_copy_;
+	bool  opened_;
+	char *image_id_;
 
- private:
-  void init();
+	SharedMemoryImageBuffer *shm_buffer_;
 
-  bool          deep_copy_;
-  bool          opened_;
-  char *        image_id_;
+	unsigned char *deep_buffer_;
 
-  SharedMemoryImageBuffer  *shm_buffer_;
-
-  unsigned char *deep_buffer_;
-
-  fawkes::Time *capture_time_;
+	fawkes::Time *capture_time_;
 };
 
 } // end namespace firevision

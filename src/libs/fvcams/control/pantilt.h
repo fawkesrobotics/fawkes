@@ -31,30 +31,29 @@ namespace firevision {
 
 class CameraControlPanTilt : virtual public CameraControl
 {
- public:
-  virtual ~CameraControlPanTilt();
+public:
+	virtual ~CameraControlPanTilt();
 
-  virtual void process_pantilt()                                        = 0;
+	virtual void process_pantilt() = 0;
 
-  virtual bool supports_pan()                                           = 0;
-  virtual bool supports_tilt()                                          = 0;
-  virtual void set_pan(int pan)                                         = 0;
-  virtual void set_tilt(int tilt)                                       = 0;
-  virtual void set_pan_tilt(int pan, int tilt)                          = 0;
-  virtual void set_pan_tilt_rad(float pan, float tilt)                  = 0;
-  virtual int  pan()                                                    = 0;
-  virtual int  tilt()                                                   = 0;
-  virtual void start_get_pan_tilt()                                     = 0;
-  virtual void pan_tilt(int &pan, int &tilt)                            = 0;
-  virtual void pan_tilt_rad(float &pan, float &tilt)                    = 0;
-  virtual int  min_pan()                                                = 0;
-  virtual int  max_pan()                                                = 0;
-  virtual int  min_tilt()                                               = 0;
-  virtual int  max_tilt()                                               = 0;
-  virtual void reset_pan_tilt()                                         = 0;
-  virtual void set_pan_tilt_limit(int pan_left, int pan_right,
-                                  int tilt_up, int tilt_down)           = 0;
-  virtual void reset_pan_tilt_limit()                                   = 0;
+	virtual bool supports_pan()                                                              = 0;
+	virtual bool supports_tilt()                                                             = 0;
+	virtual void set_pan(int pan)                                                            = 0;
+	virtual void set_tilt(int tilt)                                                          = 0;
+	virtual void set_pan_tilt(int pan, int tilt)                                             = 0;
+	virtual void set_pan_tilt_rad(float pan, float tilt)                                     = 0;
+	virtual int  pan()                                                                       = 0;
+	virtual int  tilt()                                                                      = 0;
+	virtual void start_get_pan_tilt()                                                        = 0;
+	virtual void pan_tilt(int &pan, int &tilt)                                               = 0;
+	virtual void pan_tilt_rad(float &pan, float &tilt)                                       = 0;
+	virtual int  min_pan()                                                                   = 0;
+	virtual int  max_pan()                                                                   = 0;
+	virtual int  min_tilt()                                                                  = 0;
+	virtual int  max_tilt()                                                                  = 0;
+	virtual void reset_pan_tilt()                                                            = 0;
+	virtual void set_pan_tilt_limit(int pan_left, int pan_right, int tilt_up, int tilt_down) = 0;
+	virtual void reset_pan_tilt_limit()                                                      = 0;
 };
 
 } // end namespace firevision

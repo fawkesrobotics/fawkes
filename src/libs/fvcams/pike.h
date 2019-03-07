@@ -30,29 +30,29 @@ namespace firevision {
 
 class PikeCamera : public FirewireCamera
 {
- public:
-  PikeCamera(const CameraArgumentParser* cap);
-  virtual ~PikeCamera();
+public:
+	PikeCamera(const CameraArgumentParser *cap);
+	virtual ~PikeCamera();
 
-  virtual void open();
+	virtual void open();
 
-  virtual void print_info();
+	virtual void print_info();
 
-  virtual bool set_autofunction_aoi( unsigned int left,
-				     unsigned int top,
-				     unsigned int width,
-				     unsigned int height,
-				     bool show_work_area = false );
+	virtual bool set_autofunction_aoi(unsigned int left,
+	                                  unsigned int top,
+	                                  unsigned int width,
+	                                  unsigned int height,
+	                                  bool         show_work_area = false);
 
-  virtual void parse_set_autofnc_aoi( const char* aoi );
+	virtual void parse_set_autofnc_aoi(const char *aoi);
 
- private:
-  bool set_autofnc_aoi_;
-  unsigned int aoi_left_;
-  unsigned int aoi_top_;
-  unsigned int aoi_width_;
-  unsigned int aoi_height_;
-  bool aoi_show_work_area_;
+private:
+	bool         set_autofnc_aoi_;
+	unsigned int aoi_left_;
+	unsigned int aoi_top_;
+	unsigned int aoi_width_;
+	unsigned int aoi_height_;
+	bool         aoi_show_work_area_;
 };
 
 } // end namespace firevision

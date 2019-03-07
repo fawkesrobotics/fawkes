@@ -34,68 +34,68 @@ class CameraArgumentParser;
 
 class FvFreenectDevice : public Freenect::FreenectDevice
 {
- public:
-  FvFreenectDevice( freenect_context* ctx, int index );
-  ~FvFreenectDevice();
+public:
+	FvFreenectDevice(freenect_context *ctx, int index);
+	~FvFreenectDevice();
 
-  void RGBCallback( freenect_pixel* rgb, uint32_t timestamp );
-  void DepthCallback( void* depth, uint32_t timestamp );
+	void RGBCallback(freenect_pixel *rgb, uint32_t timestamp);
+	void DepthCallback(void *depth, uint32_t timestamp);
 
-  unsigned char* rgb_buffer();
-  uint16_t*      depth_buffer();
+	unsigned char *rgb_buffer();
+	uint16_t *     depth_buffer();
 
- private:
-  unsigned char* m_rgb_buffer;
-  uint16_t*      m_depth_buffer;
+private:
+	unsigned char *m_rgb_buffer;
+	uint16_t *     m_depth_buffer;
 
-  uint32_t m_rgb_timestamp;
-  uint32_t m_depth_timestamp;
+	uint32_t m_rgb_timestamp;
+	uint32_t m_depth_timestamp;
 };
 
 class KinectCamera : public Camera
 {
- public:
-  KinectCamera( const CameraArgumentParser* cap = NULL );
-  ~KinectCamera();
+public:
+	KinectCamera(const CameraArgumentParser *cap = NULL);
+	~KinectCamera();
 
-  virtual void open();
-  virtual void start();
-  virtual void stop();
-  virtual void close();
-  virtual void capture();
-  virtual void flush();
+	virtual void open();
+	virtual void start();
+	virtual void stop();
+	virtual void close();
+	virtual void capture();
+	virtual void flush();
 
-  virtual bool ready();
+	virtual bool ready();
 
-  virtual void print_info();
+	virtual void print_info();
 
-  virtual unsigned char* buffer();
-  virtual unsigned int   buffer_size();
-  virtual void           dispose_buffer();
+	virtual unsigned char *buffer();
+	virtual unsigned int   buffer_size();
+	virtual void           dispose_buffer();
 
-  virtual unsigned int pixel_width();
-  virtual unsigned int pixel_height();
-  virtual colorspace_t colorspace();
+	virtual unsigned int pixel_width();
+	virtual unsigned int pixel_height();
+	virtual colorspace_t colorspace();
 
-  virtual void set_image_number( unsigned int n );
+	virtual void set_image_number(unsigned int n);
 
- public:
-  static const unsigned int RGB_IMAGE;
-  static const unsigned int FALSE_COLOR_DEPTH_IMAGE;
+public:
+	static const unsigned int RGB_IMAGE;
+	static const unsigned int FALSE_COLOR_DEPTH_IMAGE;
 
- private:
-  Freenect::Freenect< FvFreenectDevice >* m_freenect_ctx;
-  FvFreenectDevice*                       m_freenect_dev;
+private:
+	Freenect::Freenect<FvFreenectDevice> *m_freenect_ctx;
+	FvFreenectDevice *                    m_freenect_dev;
 
-  bool m_opened;
-  bool m_started;
+	bool m_opened;
+	bool m_started;
 
-  unsigned int m_image_num;
+	unsigned int m_image_num;
 
-  unsigned char* m_buffer;
-  unsigned char* m_false_color_depth_buffer;
+	unsigned char *m_buffer;
+	unsigned char *m_false_color_depth_buffer;
 
-  uint16_t m_gamma[2048];
+	uint16_t m_gamma[2048];
 };
 
 } // end namespace firevision

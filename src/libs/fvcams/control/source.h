@@ -31,11 +31,11 @@ namespace firevision {
 
 class CameraControlSource : virtual public CameraControl
 {
- public:
-  virtual ~CameraControlSource();
+public:
+	virtual ~CameraControlSource();
 
-  virtual unsigned char source()                         = 0;
-  virtual void          set_source(unsigned char source) = 0;
+	virtual unsigned char source()                         = 0;
+	virtual void          set_source(unsigned char source) = 0;
 };
 
 } // end namespace firevision

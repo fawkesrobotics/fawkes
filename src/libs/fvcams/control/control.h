@@ -29,8 +29,8 @@ namespace firevision {
 
 class CameraControl
 {
- public:
-  virtual ~CameraControl();
+public:
+	virtual ~CameraControl();
 };
 
 } // end namespace firevision

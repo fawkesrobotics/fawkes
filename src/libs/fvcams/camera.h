@@ -31,32 +31,31 @@ namespace firevision {
 
 class Camera
 {
+public:
+	virtual ~Camera();
 
- public:
-  virtual ~Camera();
+	virtual void open()    = 0;
+	virtual void start()   = 0;
+	virtual void stop()    = 0;
+	virtual void close()   = 0;
+	virtual void capture() = 0;
+	virtual void flush()   = 0;
 
-  virtual void             open()                                  = 0;
-  virtual void             start()                                 = 0;
-  virtual void             stop()                                  = 0;
-  virtual void             close()                                 = 0;
-  virtual void             capture()                               = 0;
-  virtual void             flush()                                 = 0;
+	virtual bool ready() = 0;
 
-  virtual bool             ready()                                 = 0;
+	virtual void print_info() = 0;
 
-  virtual void             print_info()                            = 0;
+	virtual unsigned char *buffer()         = 0;
+	virtual unsigned int   buffer_size()    = 0;
+	virtual void           dispose_buffer() = 0;
 
-  virtual unsigned char *  buffer()                                = 0;
-  virtual unsigned int     buffer_size()                           = 0;
-  virtual void             dispose_buffer()                        = 0;
+	virtual unsigned int  pixel_width()  = 0;
+	virtual unsigned int  pixel_height() = 0;
+	virtual colorspace_t  colorspace()   = 0;
+	virtual fawkes::Time *capture_time();
 
-  virtual unsigned int     pixel_width()                           = 0;
-  virtual unsigned int     pixel_height()                          = 0;
-  virtual colorspace_t     colorspace()                            = 0;
-  virtual fawkes::Time *   capture_time();
-
-  // virtual unsigned int     number_of_images()                      = 0;
-  virtual void             set_image_number(unsigned int n)        = 0;
+	// virtual unsigned int     number_of_images()                      = 0;
+	virtual void set_image_number(unsigned int n) = 0;
 };
 
 } // end namespace firevision

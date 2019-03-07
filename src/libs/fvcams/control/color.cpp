@@ -8,7 +8,6 @@
  *
  ****************************************************************************/
 
-
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -23,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvcams/control/color.h>
 #include <core/exceptions/software.h>
+#include <fvcams/control/color.h>
 
 namespace firevision {
 
@@ -153,7 +152,6 @@ CameraControlColor::~CameraControlColor()
 {
 }
 
-
 /** Enable/disable all automatic settings.
  * Most of the time, you'll want to disable all of them.
  * @param enabled whether the automatic settings should be enabled or disabled
@@ -161,15 +159,18 @@ CameraControlColor::~CameraControlColor()
 void
 CameraControlColor::set_auto_all(bool enabled)
 {
-  try {
-    set_auto_gain(enabled);
-  } catch (NotImplementedException &e) {}
-  try {
-    set_auto_white_balance(enabled);
-  } catch (NotImplementedException &e) {}
-  try {
-    set_exposure_auto(enabled);
-  } catch (NotImplementedException &e) {}
+	try {
+		set_auto_gain(enabled);
+	} catch (NotImplementedException &e) {
+	}
+	try {
+		set_auto_white_balance(enabled);
+	} catch (NotImplementedException &e) {
+	}
+	try {
+		set_exposure_auto(enabled);
+	} catch (NotImplementedException &e) {
+	}
 }
 
 } // end namespace firevision

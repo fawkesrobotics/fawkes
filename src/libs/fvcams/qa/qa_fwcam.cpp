@@ -23,37 +23,37 @@
 
 /// @cond QA
 
-#include <cams/firewire.h>
 #include <cams/factory.h>
+#include <cams/firewire.h>
 
 #include <cstdio>
 
 int
 main(int argc, char **argv)
 {
-  Camera *cam;
-  if ( argc > 1 ) {
-    printf("Opening from camera argument string '%s'\n", argv[1]);
-    cam = CameraFactory::instance(argv[1]);
-  } else {
-    printf("Opening plain Firewire camera\n");
-    cam = new FirewireCamera();
-  }
-  cam->open();
-  cam->start();
-  cam->print_info();
+	Camera *cam;
+	if (argc > 1) {
+		printf("Opening from camera argument string '%s'\n", argv[1]);
+		cam = CameraFactory::instance(argv[1]);
+	} else {
+		printf("Opening plain Firewire camera\n");
+		cam = new FirewireCamera();
+	}
+	cam->open();
+	cam->start();
+	cam->print_info();
 
-  for (unsigned int i = 0; i < 100; ++i) {
-    printf("Capturing\n");
-    cam->capture();
-    cam->dispose_buffer();
-  }
+	for (unsigned int i = 0; i < 100; ++i) {
+		printf("Capturing\n");
+		cam->capture();
+		cam->dispose_buffer();
+	}
 
-  printf("Closing\n");
-  cam->close();
-  delete cam;
+	printf("Closing\n");
+	cam->close();
+	delete cam;
 
-  return 0;
+	return 0;
 }
 
 /// @endcond

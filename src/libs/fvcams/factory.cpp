@@ -25,40 +25,40 @@
 #include <fvutils/system/camargp.h>
 
 #ifdef HAVE_FIREWIRE_CAM
-#include <fvcams/firewire.h>
+#	include <fvcams/firewire.h>
 #endif
 #ifdef HAVE_LEUTRON_CAM
-#include <fvcams/leutron.h>
+#	include <fvcams/leutron.h>
 #endif
 #ifdef HAVE_FILELOADER_CAM
-#include <fvcams/fileloader.h>
+#	include <fvcams/fileloader.h>
 #endif
 #ifdef HAVE_SHMEM_CAM
-#include <fvcams/shmem.h>
+#	include <fvcams/shmem.h>
 #endif
 #ifdef HAVE_NETWORK_CAM
-#include <fvcams/net.h>
+#	include <fvcams/net.h>
 #endif
 #ifdef HAVE_V4L_CAM
-#include <fvcams/v4l.h>
+#	include <fvcams/v4l.h>
 #endif
 #ifdef HAVE_V4L1_CAM
-#include <fvcams/v4l1.h>
+#	include <fvcams/v4l1.h>
 #endif
 #ifdef HAVE_V4L2_CAM
-#include <fvcams/v4l2.h>
+#	include <fvcams/v4l2.h>
 #endif
 #ifdef HAVE_NAO_CAM
-#include <fvcams/nao.h>
+#	include <fvcams/nao.h>
 #endif
 #ifdef HAVE_BUMBLEBEE2_CAM
-#include <fvcams/bumblebee2.h>
+#	include <fvcams/bumblebee2.h>
 #endif
 #ifdef HAVE_PIKE_CAM
-#include <fvcams/pike.h>
+#	include <fvcams/pike.h>
 #endif
 #ifdef HAVE_KINECT_CAM
-#include <fvcams/kinect.h>
+#	include <fvcams/kinect.h>
 #endif
 
 using namespace std;
@@ -85,128 +85,127 @@ namespace firevision {
 Camera *
 CameraFactory::instance(const CameraArgumentParser *cap)
 {
-  Camera *c = NULL;
+	Camera *c = NULL;
 
-  // ######
-  if ( cap->cam_type() == "firewire" ) {
+	// ######
+	if (cap->cam_type() == "firewire") {
 #ifdef HAVE_FIREWIRE_CAM
-    c = new FirewireCamera(cap);
+		c = new FirewireCamera(cap);
 #else
-    throw UnknownCameraTypeException("No firewire support at compile time");
+		throw UnknownCameraTypeException("No firewire support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "leutron" ) {
+	// ######
+	if (cap->cam_type() == "leutron") {
 #ifdef HAVE_LEUTRON_CAM
-    c = new LeutronCamera();
+		c = new LeutronCamera();
 #else
-    throw UnknownCameraTypeException("No Leutron support at compile time");
+		throw UnknownCameraTypeException("No Leutron support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "file" ) {
+	// ######
+	if (cap->cam_type() == "file") {
 #ifdef HAVE_FILELOADER_CAM
-    c = new FileLoader(cap);
+		c = new FileLoader(cap);
 #else
-    throw UnknownCameraTypeException("No file loader support at compile time");
+		throw UnknownCameraTypeException("No file loader support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "shmem" ) {
+	// ######
+	if (cap->cam_type() == "shmem") {
 #ifdef HAVE_SHMEM_CAM
-    c = new SharedMemoryCamera(cap);
+		c = new SharedMemoryCamera(cap);
 #else
-    throw UnknownCameraTypeException("No shared memory support at compile time");
+		throw UnknownCameraTypeException("No shared memory support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "net" ) {
+	// ######
+	if (cap->cam_type() == "net") {
 #ifdef HAVE_NETWORK_CAM
-    c = new NetworkCamera(cap);
+		c = new NetworkCamera(cap);
 #else
-    throw UnknownCameraTypeException("No network support at compile time");
+		throw UnknownCameraTypeException("No network support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "v4l" ) {
+	// ######
+	if (cap->cam_type() == "v4l") {
 #ifdef HAVE_V4L_CAM
-    c = new V4LCamera(cap);
+		c = new V4LCamera(cap);
 #else
-    throw UnknownCameraTypeException("No video4linux support at compile time");
+		throw UnknownCameraTypeException("No video4linux support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "v4l1" ) {
+	// ######
+	if (cap->cam_type() == "v4l1") {
 #ifdef HAVE_V4L1_CAM
-    c = new V4L1Camera(cap);
+		c = new V4L1Camera(cap);
 #else
-    throw UnknownCameraTypeException("No video4linux1 support at compile time");
+		throw UnknownCameraTypeException("No video4linux1 support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "v4l2" ) {
+	// ######
+	if (cap->cam_type() == "v4l2") {
 #ifdef HAVE_V4L2_CAM
-    c = new V4L2Camera(cap);
+		c = new V4L2Camera(cap);
 #else
-    throw UnknownCameraTypeException("No video4linux2 support at compile time");
+		throw UnknownCameraTypeException("No video4linux2 support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "nao" ) {
+	// ######
+	if (cap->cam_type() == "nao") {
 #ifdef HAVE_NAO_CAM
-    c = new NaoCamera(cap);
+		c = new NaoCamera(cap);
 #else
-    throw UnknownCameraTypeException("No nao camera support at compile time");
+		throw UnknownCameraTypeException("No nao camera support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "bumblebee2" ) {
+	// ######
+	if (cap->cam_type() == "bumblebee2") {
 #ifdef HAVE_BUMBLEBEE2_CAM
-    c = new Bumblebee2Camera(cap);
+		c = new Bumblebee2Camera(cap);
 #else
-    throw UnknownCameraTypeException("No Bumblebee 2 support at compile time");
+		throw UnknownCameraTypeException("No Bumblebee 2 support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "swissranger" ) {
-    throw UnknownCameraTypeException("SwissRanger support has been removed permanently");
-  }
+	// ######
+	if (cap->cam_type() == "swissranger") {
+		throw UnknownCameraTypeException("SwissRanger support has been removed permanently");
+	}
 
-  // ######
-  if ( cap->cam_type() == "pike" ) {
+	// ######
+	if (cap->cam_type() == "pike") {
 #ifdef HAVE_PIKE_CAM
-    c = new PikeCamera(cap);
+		c = new PikeCamera(cap);
 #else
-    throw UnknownCameraTypeException("No Bumblebee 2 support at compile time");
+		throw UnknownCameraTypeException("No Bumblebee 2 support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "kinect" ) {
+	// ######
+	if (cap->cam_type() == "kinect") {
 #ifdef HAVE_KINECT_CAM
-    c = new KinectCamera(cap);
+		c = new KinectCamera(cap);
 #else
-    throw UnknownCameraTypeException("No Kinect support at compile time");
+		throw UnknownCameraTypeException("No Kinect support at compile time");
 #endif
-  }
+	}
 
-  if ( c == NULL ) {
-    throw UnknownCameraTypeException();
-  }
+	if (c == NULL) {
+		throw UnknownCameraTypeException();
+	}
 
-  return c;
+	return c;
 }
-
 
 /** Get camera instance.
  * Get an instance of a camera of the given type. The argument string determines
@@ -228,15 +227,15 @@ CameraFactory::instance(const CameraArgumentParser *cap)
 Camera *
 CameraFactory::instance(const char *as)
 {
-  CameraArgumentParser *cap = new CameraArgumentParser(as);
-  try {
-    Camera *cam = instance(cap);
-    delete cap;
-    return cam;
-  } catch (UnknownCameraTypeException &e) {
-    delete cap;
-    throw;
-  }
+	CameraArgumentParser *cap = new CameraArgumentParser(as);
+	try {
+		Camera *cam = instance(cap);
+		delete cap;
+		return cam;
+	} catch (UnknownCameraTypeException &e) {
+		delete cap;
+		throw;
+	}
 }
 
 } // end namespace firevision

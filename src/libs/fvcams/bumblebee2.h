@@ -33,60 +33,64 @@ class Bumblebee2CameraData;
 
 class Bumblebee2Camera : public FirewireCamera
 {
- public:
+public:
+	static const unsigned int ORIGINAL;
+	static const unsigned int DEINTERLACED;
+	static const unsigned int RGB_IMAGE;
 
-  static const unsigned int ORIGINAL;
-  static const unsigned int DEINTERLACED;
-  static const unsigned int RGB_IMAGE;
+	Bumblebee2Camera(const CameraArgumentParser *cap);
+	Bumblebee2Camera();
+	virtual ~Bumblebee2Camera();
 
-  Bumblebee2Camera(const CameraArgumentParser *cap);
-  Bumblebee2Camera();
-  virtual ~Bumblebee2Camera();
+	virtual void open_device();
+	virtual void open();
+	virtual void close();
+	virtual void capture();
 
-  virtual void open_device();
-  virtual void open();
-  virtual void close();
-  virtual void capture();
+	virtual unsigned char *buffer();
 
-  virtual unsigned char* buffer();
+	virtual void set_image_number(unsigned int image_num);
 
-  virtual void set_image_number(unsigned int image_num);
+	bool is_bumblebee2();
+	void write_triclops_config_from_camera_to_file(const char *filename);
 
-  bool is_bumblebee2();
-  void write_triclops_config_from_camera_to_file(const char *filename);
+	void deinterlace_stereo();
+	void decode_bayer();
 
-  void deinterlace_stereo();
-  void decode_bayer();
+	virtual void     print_info();
+	virtual uint32_t serial_no() const;
+	virtual bool     verify_guid(uint64_t ver_guid) const;
 
-  virtual void     print_info();
-  virtual uint32_t serial_no() const;
-  virtual bool     verify_guid(uint64_t ver_guid) const;
+	static void deinterlace_stereo(unsigned char *raw16,
+	                               unsigned char *deinterlaced,
+	                               unsigned int   width,
+	                               unsigned int   height);
+	static void decode_bayer(unsigned char * deinterlaced,
+	                         unsigned char * rgb,
+	                         unsigned int    width,
+	                         unsigned int    height,
+	                         bayer_pattern_t bayer_pattern);
 
-  static void deinterlace_stereo(unsigned char *raw16, unsigned char *deinterlaced,
-				 unsigned int width, unsigned int height);
-  static void decode_bayer(unsigned char *deinterlaced, unsigned char *rgb,
-			   unsigned int width, unsigned int height,
-			   bayer_pattern_t bayer_pattern);
+private:
+	void get_sensor_info();
+	void get_triclops_context_from_camera();
+	void get_bayer_tile();
+	void deinterlace_green(unsigned char *src,
+	                       unsigned char *dest,
+	                       unsigned int   width,
+	                       unsigned int   height);
 
- private:
-  void get_sensor_info();
-  void get_triclops_context_from_camera();
-  void get_bayer_tile();
-  void deinterlace_green( unsigned char* src,  unsigned char* dest, 
-			  unsigned int width,  unsigned int height);
+	/** Bayer pattern */
+	dc1394color_filter_t bayer_pattern_;
 
+	bool _auto_acquire_sensor_info;
 
-  /** Bayer pattern */
-  dc1394color_filter_t bayer_pattern_;
+	unsigned int   image_num_;
+	unsigned char *buffer_;
+	unsigned char *buffer_deinterlaced_;
+	unsigned char *buffer_rgb_;
 
-  bool _auto_acquire_sensor_info;
-
-  unsigned int   image_num_;
-  unsigned char *buffer_;
-  unsigned char *buffer_deinterlaced_;
-  unsigned char *buffer_rgb_;
-
-  bool          _supports_color;
+	bool _supports_color;
 };
 
 } // end namespace firevision

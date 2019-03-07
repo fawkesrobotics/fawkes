@@ -30,39 +30,38 @@ namespace firevision {
 
 class CameraNotOpenedException : public fawkes::Exception
 {
- public:
-  CameraNotOpenedException();
+public:
+	CameraNotOpenedException();
 };
 
 class CameraNotStartedException : public fawkes::Exception
 {
- public:
-  CameraNotStartedException();
+public:
+	CameraNotStartedException();
 };
-
 
 class CaptureException : public fawkes::Exception
 {
- public:
-  CaptureException(const char *format, ...);
+public:
+	CaptureException(const char *format, ...);
 };
 
 class UnknownCameraTypeException : public fawkes::Exception
 {
- public:
-  UnknownCameraTypeException(const char *msg = 0);
+public:
+	UnknownCameraTypeException(const char *msg = 0);
 };
 
 class UnknownCameraException : public fawkes::Exception
 {
- public:
-  UnknownCameraException(const char *msg = 0);
+public:
+	UnknownCameraException(const char *msg = 0);
 };
 
 class UnknownCameraControlTypeException : public fawkes::Exception
 {
- public:
-  UnknownCameraControlTypeException(const char *msg = 0);
+public:
+	UnknownCameraControlTypeException(const char *msg = 0);
 };
 
 } // end namespace firevision

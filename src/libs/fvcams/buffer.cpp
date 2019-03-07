@@ -24,7 +24,6 @@
 
 #include <cstdlib>
 
-
 using namespace fawkes;
 
 namespace firevision {
@@ -37,7 +36,6 @@ namespace firevision {
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param cspace color space of image
  * @param width width of image
@@ -45,13 +43,12 @@ namespace firevision {
  */
 BufferCamera::BufferCamera(colorspace_t cspace, unsigned int width, unsigned int height)
 {
-	cspace_ = cspace;
-  width_  = width;
-  height_ = height;
-  buffer_ = malloc_buffer(cspace, width, height);
-  buffer_size_ = colorspace_buffer_size(cspace, width, height);
+	cspace_      = cspace;
+	width_       = width;
+	height_      = height;
+	buffer_      = malloc_buffer(cspace, width, height);
+	buffer_size_ = colorspace_buffer_size(cspace, width, height);
 }
-
 
 /** Destructor. */
 BufferCamera::~BufferCamera()
@@ -59,12 +56,10 @@ BufferCamera::~BufferCamera()
 	free(buffer_);
 }
 
-
 void
 BufferCamera::open()
 {
 }
-
 
 void
 BufferCamera::start()
@@ -76,50 +71,42 @@ BufferCamera::stop()
 {
 }
 
-
 void
 BufferCamera::print_info()
 {
 }
-
 
 void
 BufferCamera::capture()
 {
 }
 
-
-unsigned char*
+unsigned char *
 BufferCamera::buffer()
 {
-  return buffer_;
+	return buffer_;
 }
-
 
 unsigned int
 BufferCamera::buffer_size()
 {
-  return buffer_size_;
+	return buffer_size_;
 }
-
 
 void
 BufferCamera::close()
 {
 }
 
-
 void
 BufferCamera::dispose_buffer()
 {
 }
 
-
 void
 BufferCamera::flush()
 {
 }
-
 
 bool
 BufferCamera::ready()
@@ -127,31 +114,27 @@ BufferCamera::ready()
 	return true;
 }
 
-
 void
 BufferCamera::set_image_number(unsigned int n)
 {
 }
 
-
 unsigned int
 BufferCamera::pixel_width()
 {
-  return width_;
+	return width_;
 }
-
 
 unsigned int
 BufferCamera::pixel_height()
 {
-  return height_;
+	return height_;
 }
-
 
 colorspace_t
 BufferCamera::colorspace()
 {
-  return cspace_;
+	return cspace_;
 }
 
 } // end namespace firevision

@@ -31,32 +31,31 @@ namespace firevision {
 
 class CameraControlImage : virtual public CameraControl
 {
- public:
-  virtual ~CameraControlImage();
+public:
+	virtual ~CameraControlImage();
 
-  virtual const char * format();
-  virtual void         set_format(const char *format);
-  virtual unsigned int width()                                         = 0;
-  virtual unsigned int height()                                        = 0;
-  virtual void         size(unsigned int &width, unsigned int &height);
-  virtual void         set_size(unsigned int width,
-                                unsigned int height)                   = 0;
-  virtual bool         horiz_mirror();
-  virtual bool         vert_mirror();
-  virtual void         mirror(bool &horiz, bool &vert);
-  virtual void         set_horiz_mirror(bool enabled);
-  virtual void         set_vert_mirror(bool enabled);
-  virtual void         set_mirror(bool horiz, bool vert);
+	virtual const char * format();
+	virtual void         set_format(const char *format);
+	virtual unsigned int width()  = 0;
+	virtual unsigned int height() = 0;
+	virtual void         size(unsigned int &width, unsigned int &height);
+	virtual void         set_size(unsigned int width, unsigned int height) = 0;
+	virtual bool         horiz_mirror();
+	virtual bool         vert_mirror();
+	virtual void         mirror(bool &horiz, bool &vert);
+	virtual void         set_horiz_mirror(bool enabled);
+	virtual void         set_vert_mirror(bool enabled);
+	virtual void         set_mirror(bool horiz, bool vert);
 
-  virtual unsigned int fps();
-  virtual void         set_fps(unsigned int fps);
+	virtual unsigned int fps();
+	virtual void         set_fps(unsigned int fps);
 
-  virtual unsigned int lens_x_corr();
-  virtual unsigned int lens_y_corr();
-  virtual void         lens_corr(unsigned int &x_corr, unsigned int &y_corr);
-  virtual void         set_lens_x_corr(unsigned int x_corr);
-  virtual void         set_lens_y_corr(unsigned int y_corr);
-  virtual void         set_lens_corr(unsigned int x_corr, unsigned int y_corr);
+	virtual unsigned int lens_x_corr();
+	virtual unsigned int lens_y_corr();
+	virtual void         lens_corr(unsigned int &x_corr, unsigned int &y_corr);
+	virtual void         set_lens_x_corr(unsigned int x_corr);
+	virtual void         set_lens_y_corr(unsigned int y_corr);
+	virtual void         set_lens_corr(unsigned int x_corr, unsigned int y_corr);
 };
 
 } // end namespace firevision

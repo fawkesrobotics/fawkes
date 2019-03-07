@@ -31,15 +31,15 @@ namespace firevision {
 
 class CameraControlFocus : virtual public CameraControl
 {
- public:
-  virtual ~CameraControlFocus();
+public:
+	virtual ~CameraControlFocus();
 
-  virtual bool         auto_focus()                                     = 0;
-  virtual void         set_auto_focus(bool enabled)                     = 0;
-  virtual unsigned int focus()                                          = 0;
-  virtual void         set_focus(unsigned int focus)                    = 0;
-  virtual unsigned int focus_min()                                      = 0;
-  virtual unsigned int focus_max()                                      = 0;
+	virtual bool         auto_focus()                  = 0;
+	virtual void         set_auto_focus(bool enabled)  = 0;
+	virtual unsigned int focus()                       = 0;
+	virtual void         set_focus(unsigned int focus) = 0;
+	virtual unsigned int focus_min()                   = 0;
+	virtual unsigned int focus_max()                   = 0;
 };
 
 } // end namespace firevision

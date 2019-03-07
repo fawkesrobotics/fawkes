@@ -150,5 +150,4 @@ CameraControlPanTilt::~CameraControlPanTilt()
 {
 }
 
-
 } // end namespace firevision

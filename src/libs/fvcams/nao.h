@@ -25,11 +25,10 @@
 #ifndef _FIREVISION_CAMS_NAO_H_
 #define _FIREVISION_CAMS_NAO_H_
 
+#include <core/exceptions/software.h>
+#include <fvcams/control/source.h>
 #include <fvcams/v4l2.h>
 
-#include <fvcams/control/source.h>
-
-#include <core/exceptions/software.h>
 #include <unistd.h>
 
 #define DSPIC_I2C_ADDR 0x8
@@ -40,33 +39,30 @@ namespace firevision {
 
 class CameraArgumentParser;
 
-class NaoCamera :
-  public V4L2Camera,
-  public CameraControlSource
+class NaoCamera : public V4L2Camera, public CameraControlSource
 {
- public:
-  NaoCamera(const CameraArgumentParser *cap);
-  virtual ~NaoCamera();
+public:
+	NaoCamera(const CameraArgumentParser *cap);
+	virtual ~NaoCamera();
 
-  virtual unsigned char source();
-  virtual void          set_source(unsigned char source);
-  virtual bool          exposure_auto();
-  virtual void          set_exposure_auto(bool enabled);
+	virtual unsigned char source();
+	virtual void          set_source(unsigned char source);
+	virtual bool          exposure_auto();
+	virtual void          set_exposure_auto(bool enabled);
 
- private:
-  static int open_dev(const char *i2c);
-  static void close_dev(int dev, const char *error = 0);
-  static int get_open_cam_id(int dev);
-  static void switch_to_cam_id(int dev, int cam_id);
-  static void init_cam(const char *cam);
+private:
+	static int  open_dev(const char *i2c);
+	static void close_dev(int dev, const char *error = 0);
+	static int  get_open_cam_id(int dev);
+	static void switch_to_cam_id(int dev, int cam_id);
+	static void init_cam(const char *cam);
 
- private:
-  char *i2c_device_name_; ///< I2C device file descriptor
-  int   cam_id_;          ///< ID of the Camera to be used
-  bool  can_switch_cam_;  ///< Needs to be Nao V3 for camera switching
+private:
+	char *i2c_device_name_; ///< I2C device file descriptor
+	int   cam_id_;          ///< ID of the Camera to be used
+	bool  can_switch_cam_;  ///< Needs to be Nao V3 for camera switching
 };
 
 } // end namespace firevision
 
 #endif //FIREVISION_CAMS_V4L2_H__
-

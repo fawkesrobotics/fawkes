@@ -34,388 +34,463 @@ namespace firevision {
  * @author Tim Niemueller
  */
 
-bool DummyCameraControl::auto_gain()
+bool
+DummyCameraControl::auto_gain()
 {
-  return true;
+	return true;
 }
 
-void DummyCameraControl::set_auto_gain(bool enabled)
+void
+DummyCameraControl::set_auto_gain(bool enabled)
 {
 }
 
-bool DummyCameraControl::auto_white_balance()
+bool
+DummyCameraControl::auto_white_balance()
 {
-  return true;
+	return true;
 }
 
-void DummyCameraControl::set_auto_white_balance(bool enabled)
+void
+DummyCameraControl::set_auto_white_balance(bool enabled)
 {
 }
 
-unsigned int DummyCameraControl::exposure_auto()
+unsigned int
+DummyCameraControl::exposure_auto()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_exposure_auto(unsigned int exposure_auto)
+void
+DummyCameraControl::set_exposure_auto(unsigned int exposure_auto)
 {
 }
 
-
-int DummyCameraControl::red_balance()
+int
+DummyCameraControl::red_balance()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_red_balance(int red_balance)
+void
+DummyCameraControl::set_red_balance(int red_balance)
 {
 }
 
-int DummyCameraControl::blue_balance()
+int
+DummyCameraControl::blue_balance()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_blue_balance(int blue_balance)
+void
+DummyCameraControl::set_blue_balance(int blue_balance)
 {
 }
 
-
-int DummyCameraControl::u_balance()
+int
+DummyCameraControl::u_balance()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_u_balance(int u_balance)
+void
+DummyCameraControl::set_u_balance(int u_balance)
 {
 }
 
-int DummyCameraControl::v_balance()
+int
+DummyCameraControl::v_balance()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_v_balance(int v_balance)
+void
+DummyCameraControl::set_v_balance(int v_balance)
 {
 }
-
 
-unsigned int DummyCameraControl::brightness()
+unsigned int
+DummyCameraControl::brightness()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_brightness(unsigned int brightness)
+void
+DummyCameraControl::set_brightness(unsigned int brightness)
 {
 }
 
-unsigned int DummyCameraControl::contrast()
+unsigned int
+DummyCameraControl::contrast()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_contrast(unsigned int contrast)
+void
+DummyCameraControl::set_contrast(unsigned int contrast)
 {
 }
 
-unsigned int DummyCameraControl::saturation()
+unsigned int
+DummyCameraControl::saturation()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_saturation(unsigned int saturation)
+void
+DummyCameraControl::set_saturation(unsigned int saturation)
 {
 }
 
-int DummyCameraControl::hue()
+int
+DummyCameraControl::hue()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_hue(int hue)
+void
+DummyCameraControl::set_hue(int hue)
 {
 }
 
-unsigned int DummyCameraControl::exposure()
+unsigned int
+DummyCameraControl::exposure()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_exposure(unsigned int exposure)
+void
+DummyCameraControl::set_exposure(unsigned int exposure)
 {
 }
 
-unsigned int DummyCameraControl::gain()
+unsigned int
+DummyCameraControl::gain()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_gain(unsigned int gain)
+void
+DummyCameraControl::set_gain(unsigned int gain)
 {
 }
 
-  // From CameraControlImage
-const char * DummyCameraControl::format()
+// From CameraControlImage
+const char *
+DummyCameraControl::format()
 {
-  return "";
+	return "";
 }
 
-void DummyCameraControl::set_format(const char *format)
+void
+DummyCameraControl::set_format(const char *format)
 {
 }
 
-unsigned int DummyCameraControl::width()
+unsigned int
+DummyCameraControl::width()
 {
-  return 0;
+	return 0;
 }
 
-unsigned int DummyCameraControl::height()
+unsigned int
+DummyCameraControl::height()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::size(unsigned int &width, unsigned int &height)
+void
+DummyCameraControl::size(unsigned int &width, unsigned int &height)
 {
-  width = height = 0;
+	width = height = 0;
 }
 
-void DummyCameraControl::set_size(unsigned int width,
-				unsigned int height)
+void
+DummyCameraControl::set_size(unsigned int width, unsigned int height)
 {
 }
 
-bool DummyCameraControl::horiz_mirror()
+bool
+DummyCameraControl::horiz_mirror()
 {
-  return false;
+	return false;
 }
 
-bool DummyCameraControl::vert_mirror()
+bool
+DummyCameraControl::vert_mirror()
 {
-  return false;
+	return false;
 }
 
-void DummyCameraControl::mirror(bool &horiz, bool &vert)
+void
+DummyCameraControl::mirror(bool &horiz, bool &vert)
 {
-  horiz = vert = false;
+	horiz = vert = false;
 }
 
-void DummyCameraControl::set_horiz_mirror(bool enabled)
+void
+DummyCameraControl::set_horiz_mirror(bool enabled)
 {
 }
 
-void DummyCameraControl::set_vert_mirror(bool enabled)
+void
+DummyCameraControl::set_vert_mirror(bool enabled)
 {
 }
 
-void DummyCameraControl::set_mirror(bool horiz, bool vert)
+void
+DummyCameraControl::set_mirror(bool horiz, bool vert)
 {
 }
 
-
-unsigned int DummyCameraControl::fps()
+unsigned int
+DummyCameraControl::fps()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_fps(unsigned int fps)
+void
+DummyCameraControl::set_fps(unsigned int fps)
 {
 }
 
-
-unsigned int DummyCameraControl::lens_x_corr()
+unsigned int
+DummyCameraControl::lens_x_corr()
 {
-  return 0;
+	return 0;
 }
 
-unsigned int DummyCameraControl::lens_y_corr()
+unsigned int
+DummyCameraControl::lens_y_corr()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::lens_corr(unsigned int &x_corr, unsigned int &y_corr)
+void
+DummyCameraControl::lens_corr(unsigned int &x_corr, unsigned int &y_corr)
 {
-  x_corr = y_corr = 0;
+	x_corr = y_corr = 0;
 }
 
-void DummyCameraControl::set_lens_x_corr(unsigned int x_corr)
+void
+DummyCameraControl::set_lens_x_corr(unsigned int x_corr)
 {
 }
 
-void DummyCameraControl::set_lens_y_corr(unsigned int y_corr)
+void
+DummyCameraControl::set_lens_y_corr(unsigned int y_corr)
 {
 }
 
-void DummyCameraControl::set_lens_corr(unsigned int x_corr, unsigned int y_corr)
+void
+DummyCameraControl::set_lens_corr(unsigned int x_corr, unsigned int y_corr)
 {
 }
 
-void DummyCameraControl::process_pantilt()
+void
+DummyCameraControl::process_pantilt()
 {
 }
-
 
-bool DummyCameraControl::supports_pan()
+bool
+DummyCameraControl::supports_pan()
 {
-  return false;
+	return false;
 }
 
-bool DummyCameraControl::supports_tilt()
+bool
+DummyCameraControl::supports_tilt()
 {
-  return false;
+	return false;
 }
 
-void DummyCameraControl::set_pan(int pan)
+void
+DummyCameraControl::set_pan(int pan)
 {
 }
 
-void DummyCameraControl::set_tilt(int tilt)
+void
+DummyCameraControl::set_tilt(int tilt)
 {
 }
 
-void DummyCameraControl::set_pan_tilt(int pan, int tilt)
+void
+DummyCameraControl::set_pan_tilt(int pan, int tilt)
 {
 }
 
-void DummyCameraControl::set_pan_tilt_rad(float pan, float tilt)
+void
+DummyCameraControl::set_pan_tilt_rad(float pan, float tilt)
 {
 }
 
-int DummyCameraControl::pan()
+int
+DummyCameraControl::pan()
 {
-  return 0;
+	return 0;
 }
 
-int DummyCameraControl::tilt()
+int
+DummyCameraControl::tilt()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::start_get_pan_tilt()
+void
+DummyCameraControl::start_get_pan_tilt()
 {
 }
 
-void DummyCameraControl::pan_tilt(int &pan, int &tilt)
+void
+DummyCameraControl::pan_tilt(int &pan, int &tilt)
 {
-  pan = tilt = 0;
+	pan = tilt = 0;
 }
 
-void DummyCameraControl::pan_tilt_rad(float &pan, float &tilt)
+void
+DummyCameraControl::pan_tilt_rad(float &pan, float &tilt)
 {
-  pan = tilt = 0.f;
+	pan = tilt = 0.f;
 }
 
-int DummyCameraControl::min_pan()
+int
+DummyCameraControl::min_pan()
 {
-  return 0;
+	return 0;
 }
 
-int DummyCameraControl::max_pan()
+int
+DummyCameraControl::max_pan()
 {
-  return 0;
+	return 0;
 }
 
-int DummyCameraControl::min_tilt()
+int
+DummyCameraControl::min_tilt()
 {
-  return 0;
+	return 0;
 }
 
-int DummyCameraControl::max_tilt()
+int
+DummyCameraControl::max_tilt()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::reset_pan_tilt()
+void
+DummyCameraControl::reset_pan_tilt()
 {
 }
 
-void DummyCameraControl::set_pan_tilt_limit(int pan_left, int pan_right,
-					    int tilt_up, int tilt_down)
+void
+DummyCameraControl::set_pan_tilt_limit(int pan_left, int pan_right, int tilt_up, int tilt_down)
 {
 }
 
-void DummyCameraControl::reset_pan_tilt_limit()
+void
+DummyCameraControl::reset_pan_tilt_limit()
 {
 }
 
-void DummyCameraControl::reset_zoom()
+void
+DummyCameraControl::reset_zoom()
 {
 }
 
-void DummyCameraControl::set_zoom(unsigned int zoom)
+void
+DummyCameraControl::set_zoom(unsigned int zoom)
 {
 }
 
-unsigned int DummyCameraControl::zoom()
+unsigned int
+DummyCameraControl::zoom()
 {
-  return 0;
+	return 0;
 }
 
-unsigned int DummyCameraControl::zoom_max()
+unsigned int
+DummyCameraControl::zoom_max()
 {
-  return 0;
+	return 0;
 }
 
-unsigned int DummyCameraControl::zoom_min()
+unsigned int
+DummyCameraControl::zoom_min()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_zoom_speed_tele(unsigned int speed)
+void
+DummyCameraControl::set_zoom_speed_tele(unsigned int speed)
 {
 }
 
-void DummyCameraControl::set_zoom_speed_wide(unsigned int speed)
+void
+DummyCameraControl::set_zoom_speed_wide(unsigned int speed)
 {
 }
 
-void DummyCameraControl::set_zoom_digital_enabled(bool enabled)
+void
+DummyCameraControl::set_zoom_digital_enabled(bool enabled)
 {
 }
 
-bool DummyCameraControl::supports_effect(unsigned int effect)
+bool
+DummyCameraControl::supports_effect(unsigned int effect)
 {
-  return false;
+	return false;
 }
 
-void DummyCameraControl::set_effect(unsigned int effect)
+void
+DummyCameraControl::set_effect(unsigned int effect)
 {
 }
 
-unsigned int DummyCameraControl::effect()
+unsigned int
+DummyCameraControl::effect()
 {
-  return EFFECT_NONE;
+	return EFFECT_NONE;
 }
 
-void DummyCameraControl::reset_effect()
+void
+DummyCameraControl::reset_effect()
 {
 }
 
-bool DummyCameraControl::auto_focus()
+bool
+DummyCameraControl::auto_focus()
 {
-  return true;
+	return true;
 }
 
-void DummyCameraControl::set_auto_focus(bool enabled)
+void
+DummyCameraControl::set_auto_focus(bool enabled)
 {
 }
 
-unsigned int DummyCameraControl::focus()
+unsigned int
+DummyCameraControl::focus()
 {
-  return 0;
+	return 0;
 }
 
-void DummyCameraControl::set_focus(unsigned int focus)
+void
+DummyCameraControl::set_focus(unsigned int focus)
 {
 }
 
-unsigned int DummyCameraControl::focus_min()
+unsigned int
+DummyCameraControl::focus_min()
 {
-  return 0;
+	return 0;
 }
 
-unsigned int DummyCameraControl::focus_max()
+unsigned int
+DummyCameraControl::focus_max()
 {
-  return 0;
+	return 0;
 }
 
 } // end namespace firevision

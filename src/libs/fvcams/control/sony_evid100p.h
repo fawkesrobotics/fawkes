@@ -24,111 +24,105 @@
 #ifndef _FIREVISION_CONTROL_SONYEVID100P_H_
 #define _FIREVISION_CONTROL_SONYEVID100P_H_
 
+#include <fvcams/control/effect.h>
 #include <fvcams/control/pantilt.h>
 #include <fvcams/control/zoom.h>
-#include <fvcams/control/effect.h>
 
 namespace firevision {
 
 class CameraArgumentParser;
 class ViscaControl;
 
-class SonyEviD100PControl
-: public CameraControlPanTilt,
-  public CameraControlZoom,
-  public CameraControlEffect
+class SonyEviD100PControl : public CameraControlPanTilt,
+                            public CameraControlZoom,
+                            public CameraControlEffect
 {
+public:
+	static const unsigned int EFFECT_PASTEL;
+	static const unsigned int EFFECT_NEGATIVE;
+	static const unsigned int EFFECT_SEPIA;
+	static const unsigned int EFFECT_BW;
+	static const unsigned int EFFECT_SOLARIZE;
+	static const unsigned int EFFECT_MOSAIC;
+	static const unsigned int EFFECT_SLIM;
+	static const unsigned int EFFECT_STRETCH;
 
- public:
+	SonyEviD100PControl(const CameraArgumentParser *cap);
+	SonyEviD100PControl(const char *tty_port);
+	virtual ~SonyEviD100PControl();
 
-  static const unsigned int EFFECT_PASTEL;
-  static const unsigned int EFFECT_NEGATIVE;
-  static const unsigned int EFFECT_SEPIA;
-  static const unsigned int EFFECT_BW;
-  static const unsigned int EFFECT_SOLARIZE;
-  static const unsigned int EFFECT_MOSAIC;
-  static const unsigned int EFFECT_SLIM;
-  static const unsigned int EFFECT_STRETCH;
+	void open();
+	void close();
+	void process_pantilt();
 
-  SonyEviD100PControl(const CameraArgumentParser *cap);
-  SonyEviD100PControl(const char *tty_port);
-  virtual ~SonyEviD100PControl();
+	// pan/tilt
+	bool supports_pan();
+	bool supports_tilt();
+	void set_pan(int pan);
+	void set_tilt(int tilt);
+	void set_pan_tilt(int pan, int tilt);
+	void set_pan_tilt_rad(float pan, float tilt);
+	int  pan();
+	int  tilt();
+	void start_get_pan_tilt();
+	void pan_tilt(int &pan, int &tilt);
+	void pan_tilt_rad(float &pan, float &tilt);
+	int  min_pan();
+	int  max_pan();
+	int  min_tilt();
+	int  max_tilt();
+	void reset_pan_tilt();
+	void set_pan_tilt_limit(int pan_left, int pan_right, int tilt_up, int tilt_down);
+	void reset_pan_tilt_limit();
 
-  void open();
-  void close();
-  void process_pantilt();
+	// zoom
+	void         reset_zoom();
+	void         set_zoom(unsigned int zoom);
+	unsigned int zoom();
+	unsigned int zoom_max();
+	unsigned int zoom_min();
+	void         set_zoom_speed_tele(unsigned int speed);
+	void         set_zoom_speed_wide(unsigned int speed);
+	void         set_zoom_digital_enabled(bool enabled);
 
-  // pan/tilt
-  bool         supports_pan();
-  bool         supports_tilt();
-  void         set_pan(int pan);
-  void         set_tilt(int tilt);
-  void         set_pan_tilt(int pan, int tilt);
-  void         set_pan_tilt_rad(float pan, float tilt);
-  int          pan();
-  int          tilt();
-  void         start_get_pan_tilt();
-  void         pan_tilt(int &pan, int &tilt);
-  void         pan_tilt_rad(float &pan, float &tilt);
-  int          min_pan();
-  int          max_pan();
-  int          min_tilt();
-  int          max_tilt();
-  void         reset_pan_tilt();
-  void         set_pan_tilt_limit(int pan_left, int pan_right,
-				  int tilt_up, int tilt_down);
-  void         reset_pan_tilt_limit();
+	unsigned int white_balance_mode();
 
-  // zoom
-  void         reset_zoom();
-  void         set_zoom(unsigned int zoom);
-  unsigned int zoom();
-  unsigned int zoom_max();
-  unsigned int zoom_min();
-  void         set_zoom_speed_tele(unsigned int speed);
-  void         set_zoom_speed_wide(unsigned int speed);
-  void         set_zoom_digital_enabled(bool enabled);
+	// effect
+	bool         supports_effect(unsigned int effect);
+	void         set_effect(unsigned int effect);
+	unsigned int effect();
+	void         reset_effect();
 
-  unsigned int white_balance_mode();
+	static const int MAX_PAN;
+	static const int MIN_PAN;
+	static const int MAX_TILT;
+	static const int MIN_TILT;
 
-  // effect
-  bool         supports_effect(unsigned int effect);
-  void         set_effect(unsigned int effect);
-  unsigned int effect();
-  void         reset_effect();
+	static const float MAX_PAN_DEG;
+	static const float MIN_PAN_DEG;
+	static const float MAX_TILT_DEG;
+	static const float MIN_TILT_DEG;
 
+	static const float MAX_PAN_RAD;
+	static const float MIN_PAN_RAD;
+	static const float MAX_TILT_RAD;
+	static const float MIN_TILT_RAD;
 
-  static const int   MAX_PAN;
-  static const int   MIN_PAN;
-  static const int   MAX_TILT;
-  static const int   MIN_TILT;
+	static const float PAN_STEPS_PER_DEG;
+	static const float TILT_STEPS_PER_DEG;
 
-  static const float MAX_PAN_DEG;
-  static const float MIN_PAN_DEG;
-  static const float MAX_TILT_DEG;
-  static const float MIN_TILT_DEG;
+	static const float PAN_STEPS_PER_RAD;
+	static const float TILT_STEPS_PER_RAD;
 
-  static const float MAX_PAN_RAD;
-  static const float MIN_PAN_RAD;
-  static const float MAX_TILT_RAD;
-  static const float MIN_TILT_RAD;
+private:
+	ViscaControl *visca;
+	char *        tty_port;
+	bool          opened;
 
-  static const float PAN_STEPS_PER_DEG;
-  static const float TILT_STEPS_PER_DEG;
+	int pan_target;
+	int tilt_target;
 
-  static const float PAN_STEPS_PER_RAD;
-  static const float TILT_STEPS_PER_RAD;
-
- private:
-  ViscaControl *visca;
-  char  *tty_port;
-  bool   opened;
-
-  int    pan_target;
-  int    tilt_target;
-
-  unsigned int _effect;
-
+	unsigned int _effect;
 };
 
 } // end namespace firevision
