@@ -22,54 +22,56 @@
  */
 
 #include "spl.h"
+
 #include "state_handler.h"
+
 #include <core/exception.h>
-#include <netcomm/socket/datagram.h>
 #include <logging/logger.h>
+#include <netcomm/socket/datagram.h>
 
 #ifdef USE_SPL_GC6
-#  include <interfaces/SoccerPenaltyInterface.h>
+#	include <interfaces/SoccerPenaltyInterface.h>
 #endif
 
-#include <cstring>
-#include <cstdio>
-#include <unistd.h>
 #include <cerrno>
+#include <cstdio>
+#include <cstring>
+#include <unistd.h>
 // it it was defined, Exception::errno() could not be called...
 #ifdef errno
-#  undef errno
+#	undef errno
 #endif
 using namespace fawkes;
 
 #ifdef USE_SPL_GC6
-static const uint32_t  SPL_STRUCT_VERSION = 6;
+static const uint32_t SPL_STRUCT_VERSION = 6;
 #else
-static const uint32_t  SPL_STRUCT_VERSION = 7;
+static const uint32_t SPL_STRUCT_VERSION = 7;
 #endif
 
-static const uint8_t   SPL_STATE_INITIAL  = 0;
-static const uint8_t   SPL_STATE_READY    = 1;
-static const uint8_t   SPL_STATE_SET      = 2;
-static const uint8_t   SPL_STATE_PLAYING  = 3;
-static const uint8_t   SPL_STATE_FINISHED = 4;
+static const uint8_t SPL_STATE_INITIAL  = 0;
+static const uint8_t SPL_STATE_READY    = 1;
+static const uint8_t SPL_STATE_SET      = 2;
+static const uint8_t SPL_STATE_PLAYING  = 3;
+static const uint8_t SPL_STATE_FINISHED = 4;
 
 /*
 static const uint8_t   SPL_STATE2_NORMAL       = 0;
 static const uint8_t   SPL_STATE2_PENALTYSHOOT = 1;
 */
 
-static const uint8_t   SPL_PENALTY_NONE               =  0;
+static const uint8_t SPL_PENALTY_NONE = 0;
 #ifdef USE_SPL_GC6
-static const uint8_t   SPL_PENALTY_BALL_HOLDING       =  1;
-static const uint8_t   SPL_PENALTY_GOALIE_PUSHING     =  2;
-static const uint8_t   SPL_PENALTY_PLAYER_PUSHING     =  3;
-static const uint8_t   SPL_PENALTY_ILLEGAL_DEFENDER   =  4;
-static const uint8_t   SPL_PENALTY_ILLEGAL_DEFENSE    =  5;
-static const uint8_t   SPL_PENALTY_OBSTRUCTION        =  6;
-static const uint8_t   SPL_PENALTY_REQ_FOR_PICKUP     =  7;
-static const uint8_t   SPL_PENALTY_LEAVING            =  8;
-static const uint8_t   SPL_PENALTY_DAMAGE             =  9;
-static const uint8_t   SPL_PENALTY_MANUAL             = 10;
+static const uint8_t SPL_PENALTY_BALL_HOLDING     = 1;
+static const uint8_t SPL_PENALTY_GOALIE_PUSHING   = 2;
+static const uint8_t SPL_PENALTY_PLAYER_PUSHING   = 3;
+static const uint8_t SPL_PENALTY_ILLEGAL_DEFENDER = 4;
+static const uint8_t SPL_PENALTY_ILLEGAL_DEFENSE  = 5;
+static const uint8_t SPL_PENALTY_OBSTRUCTION      = 6;
+static const uint8_t SPL_PENALTY_REQ_FOR_PICKUP   = 7;
+static const uint8_t SPL_PENALTY_LEAVING          = 8;
+static const uint8_t SPL_PENALTY_DAMAGE           = 9;
+static const uint8_t SPL_PENALTY_MANUAL           = 10;
 #else
 /*
 static const uint8_t   SPL_PENALTY_BALL_HOLDING       =  1;
@@ -85,16 +87,15 @@ static const uint8_t   SPL_PENALTY_MANUAL             = 15;
 #endif
 
 // team numbers
-static const uint8_t   SPL_TEAM_BLUE                  =  0;
-static const uint8_t   SPL_TEAM_RED                   =  1;
+static const uint8_t SPL_TEAM_BLUE = 0;
+static const uint8_t SPL_TEAM_RED  = 1;
 
 /*
 static const uint8_t   SPL_GOAL_BLUE                  =  0;
 static const uint8_t   SPL_GOAL_YELLOW                =  1;
 */
 
-static const char    SPL_GAMECONTROL_HEADER[SPL_HEADER_SIZE] = {'R','G','m','e'};
-
+static const char SPL_GAMECONTROL_HEADER[SPL_HEADER_SIZE] = {'R', 'G', 'm', 'e'};
 
 /** @class SplRefBoxProcessor "processor/spl.h"
  * SPL league refbox repeater.
@@ -109,150 +110,133 @@ static const char    SPL_GAMECONTROL_HEADER[SPL_HEADER_SIZE] = {'R','G','m','e'}
  * @param team_number our team number
  * @param player_number individual player number
  */
-SplRefBoxProcessor::SplRefBoxProcessor(fawkes::Logger *logger,
+SplRefBoxProcessor::SplRefBoxProcessor(fawkes::Logger *   logger,
                                        unsigned short int broadcast_port,
-                                       unsigned int team_number,
-                                       unsigned int player_number)
+                                       unsigned int       team_number,
+                                       unsigned int       player_number)
 {
-  player_number_ = player_number;
-  team_number_ = team_number;
-  logger_ = logger;
-  quit_ = false;
-  s_.reset(new DatagramSocket(Socket::IPv4, 0.0000000001));
-  s_->bind(broadcast_port);
+	player_number_ = player_number;
+	team_number_   = team_number;
+	logger_        = logger;
+	quit_          = false;
+	s_.reset(new DatagramSocket(Socket::IPv4, 0.0000000001));
+	s_->bind(broadcast_port);
 
-  penalty_ = SPL_PENALTY_NONE;
+	penalty_ = SPL_PENALTY_NONE;
 }
-
 
 /** Destructor. */
 SplRefBoxProcessor::~SplRefBoxProcessor()
 {
-  s_->close();
-  s_.reset();
+	s_->close();
+	s_.reset();
 }
-
 
 /** Process received struct. */
 void
 SplRefBoxProcessor::process_struct(spl_gamecontrol_t *msg)
 {
-  fawkes::worldinfo_gamestate_team_t our_team;
-  //fawkes::worldinfo_gamestate_goalcolor_t our_goal;
+	fawkes::worldinfo_gamestate_team_t our_team;
+	//fawkes::worldinfo_gamestate_goalcolor_t our_goal;
 
-  int team_index;
-  if (msg->teams[0].team_number == team_number_) team_index = 0;
-  else if (msg->teams[1].team_number == team_number_) team_index = 1;
-  else return; //Message doesn't concern us
+	int team_index;
+	if (msg->teams[0].team_number == team_number_)
+		team_index = 0;
+	else if (msg->teams[1].team_number == team_number_)
+		team_index = 1;
+	else
+		return; //Message doesn't concern us
 
-  switch (msg->teams[team_index].team_color) {
-    case SPL_TEAM_BLUE:
-      our_team = TEAM_CYAN;
-      break;
-    case SPL_TEAM_RED:
-      our_team = TEAM_MAGENTA;
-      break;
-    default:
-      printf("Ignoring faulty packet\n");
-      return;
-  }
+	switch (msg->teams[team_index].team_color) {
+	case SPL_TEAM_BLUE: our_team = TEAM_CYAN; break;
+	case SPL_TEAM_RED: our_team = TEAM_MAGENTA; break;
+	default: printf("Ignoring faulty packet\n"); return;
+	}
 
-  _rsh->set_score(msg->teams[team_index].score, msg->teams[(team_index == 1 ? 0 : 1)].score);
-  _rsh->set_team_goal(our_team, (our_team == TEAM_CYAN ? GOAL_BLUE : GOAL_YELLOW)); //blue team defends blue goal
+	_rsh->set_score(msg->teams[team_index].score, msg->teams[(team_index == 1 ? 0 : 1)].score);
+	_rsh->set_team_goal(our_team,
+	                    (our_team == TEAM_CYAN ? GOAL_BLUE
+	                                           : GOAL_YELLOW)); //blue team defends blue goal
 
-  for (unsigned int pl_num = 0; pl_num < SPL_MAX_NUM_PLAYERS; ++pl_num)
-  {
-    if ((pl_num + 1) == player_number_)
-    {
-      if ((msg->teams[team_index].players[pl_num].penalty != penalty_) ||
-          (msg->teams[team_index].players[pl_num].penalty != PENALTY_NONE))
-      {
-        penalty_ = msg->teams[team_index].players[pl_num].penalty;
+	for (unsigned int pl_num = 0; pl_num < SPL_MAX_NUM_PLAYERS; ++pl_num) {
+		if ((pl_num + 1) == player_number_) {
+			if ((msg->teams[team_index].players[pl_num].penalty != penalty_)
+			    || (msg->teams[team_index].players[pl_num].penalty != PENALTY_NONE)) {
+				penalty_ = msg->teams[team_index].players[pl_num].penalty;
 
 #ifdef USE_SPL_GC6
-	// convert GC6 codes to new GC7 codes, "closest match"
-	switch (penalty_) {
-	case SPL_PENALTY_BALL_HOLDING:
-	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_BALL_HOLDING; break;
-	case SPL_PENALTY_GOALIE_PUSHING:
-	case SPL_PENALTY_PLAYER_PUSHING:
-	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_PLAYER_PUSHING; break;
-	case SPL_PENALTY_ILLEGAL_DEFENDER:
-	case SPL_PENALTY_ILLEGAL_DEFENSE:
-	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_ILLEGAL_DEFENDER; break;
-	case SPL_PENALTY_OBSTRUCTION:
-	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_OBSTRUCTION; break;
-	case SPL_PENALTY_REQ_FOR_PICKUP:
-	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_REQ_FOR_PICKUP; break;
-	case SPL_PENALTY_LEAVING:
-	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_LEAVING_THE_FIELD; break;
-	case SPL_PENALTY_DAMAGE:
-	case SPL_PENALTY_MANUAL:
-	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_MANUAL; break;
-	default:
-	  penalty_ = SoccerPenaltyInterface::SPL_PENALTY_NONE; break;
-	}
+				// convert GC6 codes to new GC7 codes, "closest match"
+				switch (penalty_) {
+				case SPL_PENALTY_BALL_HOLDING:
+					penalty_ = SoccerPenaltyInterface::SPL_PENALTY_BALL_HOLDING;
+					break;
+				case SPL_PENALTY_GOALIE_PUSHING:
+				case SPL_PENALTY_PLAYER_PUSHING:
+					penalty_ = SoccerPenaltyInterface::SPL_PENALTY_PLAYER_PUSHING;
+					break;
+				case SPL_PENALTY_ILLEGAL_DEFENDER:
+				case SPL_PENALTY_ILLEGAL_DEFENSE:
+					penalty_ = SoccerPenaltyInterface::SPL_PENALTY_ILLEGAL_DEFENDER;
+					break;
+				case SPL_PENALTY_OBSTRUCTION:
+					penalty_ = SoccerPenaltyInterface::SPL_PENALTY_OBSTRUCTION;
+					break;
+				case SPL_PENALTY_REQ_FOR_PICKUP:
+					penalty_ = SoccerPenaltyInterface::SPL_PENALTY_REQ_FOR_PICKUP;
+					break;
+				case SPL_PENALTY_LEAVING:
+					penalty_ = SoccerPenaltyInterface::SPL_PENALTY_LEAVING_THE_FIELD;
+					break;
+				case SPL_PENALTY_DAMAGE:
+				case SPL_PENALTY_MANUAL: penalty_ = SoccerPenaltyInterface::SPL_PENALTY_MANUAL; break;
+				default: penalty_ = SoccerPenaltyInterface::SPL_PENALTY_NONE; break;
+				}
 #endif
 
-        _rsh->add_penalty(penalty_,
-                          msg->teams[team_index].players[pl_num].secs_till_unpenalized);
-      }
-      break;
-    }
-  }
+				_rsh->add_penalty(penalty_, msg->teams[team_index].players[pl_num].secs_till_unpenalized);
+			}
+			break;
+		}
+	}
 
-  switch (msg->state) {
-  case SPL_STATE_INITIAL:
-    _rsh->set_gamestate(GS_SPL_INITIAL, TEAM_BOTH);
-    break;
-  case SPL_STATE_READY:
-    _rsh->set_gamestate(GS_SPL_READY, TEAM_BOTH);
-    break;
-  case SPL_STATE_SET:
-    _rsh->set_gamestate(GS_SPL_SET, TEAM_BOTH);
-    break;
-  case SPL_STATE_PLAYING:
-    _rsh->set_gamestate(GS_SPL_PLAY, TEAM_BOTH);
-    break;
-  case SPL_STATE_FINISHED:
-    _rsh->set_gamestate(GS_SPL_FINISHED, TEAM_BOTH);
-    break;
-  default:
-    _rsh->set_gamestate(GS_SPL_FINISHED, TEAM_BOTH);
-    break;
-  }
+	switch (msg->state) {
+	case SPL_STATE_INITIAL: _rsh->set_gamestate(GS_SPL_INITIAL, TEAM_BOTH); break;
+	case SPL_STATE_READY: _rsh->set_gamestate(GS_SPL_READY, TEAM_BOTH); break;
+	case SPL_STATE_SET: _rsh->set_gamestate(GS_SPL_SET, TEAM_BOTH); break;
+	case SPL_STATE_PLAYING: _rsh->set_gamestate(GS_SPL_PLAY, TEAM_BOTH); break;
+	case SPL_STATE_FINISHED: _rsh->set_gamestate(GS_SPL_FINISHED, TEAM_BOTH); break;
+	default: _rsh->set_gamestate(GS_SPL_FINISHED, TEAM_BOTH); break;
+	}
 
-  _rsh->set_half((msg->first_half == 1) ? HALF_FIRST : HALF_SECOND,
-                 msg->kick_off_team == team_index);
+	_rsh->set_half((msg->first_half == 1) ? HALF_FIRST : HALF_SECOND,
+	               msg->kick_off_team == team_index);
 }
-
 
 void
 SplRefBoxProcessor::refbox_process()
 {
-  try {
-    spl_gamecontrol_t ctrlmsg;
-    size_t bytes_read = s_->recv((void *)&ctrlmsg, sizeof(ctrlmsg));
-    if ( bytes_read == sizeof(ctrlmsg) ) {
-      if ((strncmp(ctrlmsg.header, SPL_GAMECONTROL_HEADER, SPL_HEADER_SIZE) == 0) &&
-	  (ctrlmsg.version == SPL_STRUCT_VERSION) ) {
-	process_struct(&ctrlmsg);
-      }
-    }
-  } catch (fawkes::Exception &e) {
-    if ( e.get_errno() != EAGAIN ) {
-      logger_->log_warn("SplRefBoxProcessor", "Receiving failed, exception follows");
-      logger_->log_warn("SplRefBoxProcessor", e);
-    } // else just no data available this time
-  }
+	try {
+		spl_gamecontrol_t ctrlmsg;
+		size_t            bytes_read = s_->recv((void *)&ctrlmsg, sizeof(ctrlmsg));
+		if (bytes_read == sizeof(ctrlmsg)) {
+			if ((strncmp(ctrlmsg.header, SPL_GAMECONTROL_HEADER, SPL_HEADER_SIZE) == 0)
+			    && (ctrlmsg.version == SPL_STRUCT_VERSION)) {
+				process_struct(&ctrlmsg);
+			}
+		}
+	} catch (fawkes::Exception &e) {
+		if (e.get_errno() != EAGAIN) {
+			logger_->log_warn("SplRefBoxProcessor", "Receiving failed, exception follows");
+			logger_->log_warn("SplRefBoxProcessor", e);
+		} // else just no data available this time
+	}
 }
 
 bool
 SplRefBoxProcessor::check_connection()
 {
-  return true;
+	return true;
 }
-
 
 /** Run.
  * Reads messages from the network, processes them and calls the refbox state sender.
@@ -260,17 +244,17 @@ SplRefBoxProcessor::check_connection()
 void
 SplRefBoxProcessor::run()
 {
-  spl_gamecontrol_t ctrlmsg;
-  while ( ! quit_ ) {
-    size_t bytes_read = s_->recv((void *)&ctrlmsg, sizeof(ctrlmsg));
-    if ( bytes_read == sizeof(ctrlmsg) ) {
-      if ( (strncmp(ctrlmsg.header, SPL_GAMECONTROL_HEADER, SPL_HEADER_SIZE) == 0) &&
-	   (ctrlmsg.version == SPL_STRUCT_VERSION) ) {
-	process_struct(&ctrlmsg);
-	_rsh->handle_refbox_state();
-      } else {
-	printf("Received illegal package\n");
-      }
-    }
-  }
+	spl_gamecontrol_t ctrlmsg;
+	while (!quit_) {
+		size_t bytes_read = s_->recv((void *)&ctrlmsg, sizeof(ctrlmsg));
+		if (bytes_read == sizeof(ctrlmsg)) {
+			if ((strncmp(ctrlmsg.header, SPL_GAMECONTROL_HEADER, SPL_HEADER_SIZE) == 0)
+			    && (ctrlmsg.version == SPL_STRUCT_VERSION)) {
+				process_struct(&ctrlmsg);
+				_rsh->handle_refbox_state();
+			} else {
+				printf("Received illegal package\n");
+			}
+		}
+	}
 }

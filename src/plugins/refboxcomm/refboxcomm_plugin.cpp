@@ -21,6 +21,7 @@
  */
 
 #include "refboxcomm_plugin.h"
+
 #include "comm_thread.h"
 
 using namespace fawkes;
@@ -34,12 +35,10 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-RefBoxCommPlugin::RefBoxCommPlugin(Configuration *config)
-  : Plugin(config)
+RefBoxCommPlugin::RefBoxCommPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new RefBoxCommThread());
+	thread_list.push_back(new RefBoxCommThread());
 }
-
 
 PLUGIN_DESCRIPTION("RefBox Communication Plugin")
 EXPORT_PLUGIN(RefBoxCommPlugin)

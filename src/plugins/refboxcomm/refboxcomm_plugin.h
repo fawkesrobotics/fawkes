@@ -27,8 +27,8 @@
 
 class RefBoxCommPlugin : public fawkes::Plugin
 {
- public:
-  explicit RefBoxCommPlugin(fawkes::Configuration *config);
+public:
+	explicit RefBoxCommPlugin(fawkes::Configuration *config);
 };
 
 #endif
