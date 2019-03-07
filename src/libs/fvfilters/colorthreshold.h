@@ -24,11 +24,10 @@
 #define _FIREVISION_FILTER_COLORTHRESHOLD_H_
 
 #include <fvfilters/filter.h>
-#include <fvutils/color/rgb.h>
 #include <fvmodels/color/similarity.h>
+#include <fvutils/color/rgb.h>
 
-namespace firevision
-{
+namespace firevision {
 
 /**
  * A filter that uses the VLC color similarity algorithm to mark a certain color.
@@ -45,6 +44,7 @@ public:
 	~FilterColorThreshold();
 
 	virtual void apply();
+
 private:
 	ColorModelSimilarity *color_model_;
 };

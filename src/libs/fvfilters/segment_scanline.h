@@ -33,14 +33,14 @@ class ScanlineModel;
 
 class FilterScanlineSegmentation : public Filter
 {
- public:
-  FilterScanlineSegmentation(ColorModel *cm, ScanlineModel *slm);
+public:
+	FilterScanlineSegmentation(ColorModel *cm, ScanlineModel *slm);
 
-  virtual void apply();
+	virtual void apply();
 
- private:
-  ColorModel    *cm;
-  ScanlineModel *slm;
+private:
+	ColorModel *   cm;
+	ScanlineModel *slm;
 };
 
 } // end namespace firevision

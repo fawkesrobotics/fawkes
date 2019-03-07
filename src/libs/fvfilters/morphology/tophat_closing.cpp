@@ -22,11 +22,10 @@
  */
 
 #include <core/exception.h>
-
-#include <fvfilters/morphology/tophat_closing.h>
-#include <fvfilters/morphology/segenerator.h>
-#include <fvfilters/morphology/closing.h>
 #include <fvfilters/difference.h>
+#include <fvfilters/morphology/closing.h>
+#include <fvfilters/morphology/segenerator.h>
+#include <fvfilters/morphology/tophat_closing.h>
 
 #include <cstddef>
 
@@ -35,14 +34,15 @@ namespace firevision {
 /** Image that we subtract from */
 const unsigned int FilterTophatClosing::SUBTRACTFROM = 0;
 /** Image to filter. */
-const unsigned int FilterTophatClosing::FILTERIMAGE  = 1;
+const unsigned int FilterTophatClosing::FILTERIMAGE = 1;
 
-#define ERROR(m) {							\
-    fawkes::Exception e("FilterTophatClosing failed");				\
-    e.append("Function: %s", __FUNCTION__);				\
-    e.append("Message:  %s", m);					\
-    throw e;								\
-  }
+#define ERROR(m)                                       \
+	{                                                    \
+		fawkes::Exception e("FilterTophatClosing failed"); \
+		e.append("Function: %s", __FUNCTION__);            \
+		e.append("Message:  %s", m);                       \
+		throw e;                                           \
+	}
 
 /** @class FilterTophatClosing <fvfilters/morphology/tophat_closing.h>
  * Morphological tophat closing.
@@ -50,44 +50,45 @@ const unsigned int FilterTophatClosing::FILTERIMAGE  = 1;
  */
 
 /** Constructor. */
-FilterTophatClosing::FilterTophatClosing()
-  : MorphologicalFilter("Morphological Tophat Closing")
+FilterTophatClosing::FilterTophatClosing() : MorphologicalFilter("Morphological Tophat Closing")
 {
-  closing  = new FilterClosing();
-  diff     = new FilterDifference();
+	closing = new FilterClosing();
+	diff    = new FilterDifference();
 
-  src[SUBTRACTFROM] = src[FILTERIMAGE] = dst = NULL;
-  src_roi[SUBTRACTFROM] = src_roi[FILTERIMAGE] = dst_roi = NULL;
+	src[SUBTRACTFROM] = src[FILTERIMAGE] = dst = NULL;
+	src_roi[SUBTRACTFROM] = src_roi[FILTERIMAGE] = dst_roi = NULL;
 }
-
 
 /** Destructor. */
 FilterTophatClosing::~FilterTophatClosing()
 {
-  delete closing;
-  delete diff;
+	delete closing;
+	delete diff;
 }
-
 
 void
 FilterTophatClosing::apply()
 {
-  if ( dst == NULL ) ERROR("dst == NULL");
-  if ( src[SUBTRACTFROM] == NULL ) ERROR("src[SUBTRACTFROM] == NULL");
-  if ( src[FILTERIMAGE] == NULL ) ERROR("src[FILTERIMAGE] == NULL");
-  if ( *(src_roi[SUBTRACTFROM]) != *(src_roi[FILTERIMAGE]) ) ERROR("marker and mask ROI differ");
+	if (dst == NULL)
+		ERROR("dst == NULL");
+	if (src[SUBTRACTFROM] == NULL)
+		ERROR("src[SUBTRACTFROM] == NULL");
+	if (src[FILTERIMAGE] == NULL)
+		ERROR("src[FILTERIMAGE] == NULL");
+	if (*(src_roi[SUBTRACTFROM]) != *(src_roi[FILTERIMAGE]))
+		ERROR("marker and mask ROI differ");
 
-  closing->set_structuring_element( se, se_width, se_height, se_anchor_x, se_anchor_y );
+	closing->set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
 
-  closing->set_src_buffer( src[FILTERIMAGE], src_roi[FILTERIMAGE] );
-  closing->set_dst_buffer( dst, dst_roi );
+	closing->set_src_buffer(src[FILTERIMAGE], src_roi[FILTERIMAGE]);
+	closing->set_dst_buffer(dst, dst_roi);
 
-  diff->set_src_buffer( src[SUBTRACTFROM], src_roi[SUBTRACTFROM], 1 );
-  diff->set_src_buffer( dst, dst_roi, 0 );
-  diff->set_dst_buffer( dst, dst_roi );
+	diff->set_src_buffer(src[SUBTRACTFROM], src_roi[SUBTRACTFROM], 1);
+	diff->set_src_buffer(dst, dst_roi, 0);
+	diff->set_dst_buffer(dst, dst_roi);
 
-  closing->apply();
-  diff->apply();
+	closing->apply();
+	diff->apply();
 }
 
 } // end namespace firevision

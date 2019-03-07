@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <core/exceptions/software.h>
 #include <fvfilters/filter.h>
 
-#include <core/exceptions/software.h>
 #include <cstdlib>
 #include <cstring>
 
@@ -50,31 +50,30 @@ namespace firevision {
  */
 Filter::Filter(const char *name, unsigned int max_num_buffers)
 {
-  if ( max_num_buffers == 0 ) {
-    throw OutOfBoundsException("Need to set at least one buffer", 0, 1, 0xFFFFFFFF);
-  }
+	if (max_num_buffers == 0) {
+		throw OutOfBoundsException("Need to set at least one buffer", 0, 1, 0xFFFFFFFF);
+	}
 
-  _name = strdup(name);
-  _max_num_buffers = max_num_buffers;
+	_name            = strdup(name);
+	_max_num_buffers = max_num_buffers;
 
-  src = (unsigned char **)malloc(_max_num_buffers * sizeof(unsigned char *));
-  memset(src, 0, _max_num_buffers * sizeof(unsigned char *));
+	src = (unsigned char **)malloc(_max_num_buffers * sizeof(unsigned char *));
+	memset(src, 0, _max_num_buffers * sizeof(unsigned char *));
 
-  src_roi = (ROI **)malloc(_max_num_buffers * sizeof(ROI *));
-  memset(src_roi, 0, _max_num_buffers * sizeof(ROI *));
+	src_roi = (ROI **)malloc(_max_num_buffers * sizeof(ROI *));
+	memset(src_roi, 0, _max_num_buffers * sizeof(ROI *));
 
-  ori = (orientation_t *)malloc(_max_num_buffers * sizeof(orientation_t));
-  memset(ori, 0, _max_num_buffers * sizeof(orientation_t));
+	ori = (orientation_t *)malloc(_max_num_buffers * sizeof(orientation_t));
+	memset(ori, 0, _max_num_buffers * sizeof(orientation_t));
 }
-
 
 /** Destructor. */
 Filter::~Filter()
 {
-  free(_name);
-  free(src);
-  free(src_roi);
-  free(ori);
+	free(_name);
+	free(src);
+	free(src_roi);
+	free(ori);
 }
 
 /** Set source buffer with orientation.
@@ -87,20 +86,16 @@ Filter::~Filter()
  * @exception OutOfBoundsException Thrown if buffer_num is illegal
  */
 void
-Filter::set_src_buffer(unsigned char *buf,
-		       ROI *roi,
-		       orientation_t ori,
-		       unsigned int buffer_num)
+Filter::set_src_buffer(unsigned char *buf, ROI *roi, orientation_t ori, unsigned int buffer_num)
 {
-  if ( buffer_num >= _max_num_buffers ) {
-    throw OutOfBoundsException("Invalid buffer number", buffer_num, 0, _max_num_buffers);
-  }
+	if (buffer_num >= _max_num_buffers) {
+		throw OutOfBoundsException("Invalid buffer number", buffer_num, 0, _max_num_buffers);
+	}
 
-  src[buffer_num]       = buf;
-  src_roi[buffer_num]   = roi;
-  this->ori[buffer_num] = ori;
+	src[buffer_num]       = buf;
+	src_roi[buffer_num]   = roi;
+	this->ori[buffer_num] = ori;
 }
-
 
 /** Set source buffer.
  * @param buf Buffer to use as source image
@@ -109,19 +104,16 @@ Filter::set_src_buffer(unsigned char *buf,
  * @exception OutOfBoundsException Thrown if buffer_num is illegal
  */
 void
-Filter::set_src_buffer(unsigned char *buf,
-		       ROI *roi,
-		       unsigned int buffer_num)
+Filter::set_src_buffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
 {
-  if ( buffer_num >= _max_num_buffers ) {
-    throw OutOfBoundsException("Invalid buffer number", buffer_num, 0, _max_num_buffers);
-  }
+	if (buffer_num >= _max_num_buffers) {
+		throw OutOfBoundsException("Invalid buffer number", buffer_num, 0, _max_num_buffers);
+	}
 
-  src[buffer_num]     = buf;
-  src_roi[buffer_num] = roi;
-  ori[buffer_num]     = ORI_HORIZONTAL;
+	src[buffer_num]     = buf;
+	src_roi[buffer_num] = roi;
+	ori[buffer_num]     = ORI_HORIZONTAL;
 }
-
 
 /** Set the destination buffer.
  * @param buf Buffer to use as destination image
@@ -130,10 +122,9 @@ Filter::set_src_buffer(unsigned char *buf,
 void
 Filter::set_dst_buffer(unsigned char *buf, ROI *roi)
 {
-  dst     = buf;
-  dst_roi = roi;
+	dst     = buf;
+	dst_roi = roi;
 }
-
 
 /** Set the orientation to apply the filter in.
  * Maybe ignored by some filters.
@@ -143,13 +134,12 @@ Filter::set_dst_buffer(unsigned char *buf, ROI *roi)
 void
 Filter::set_orientation(orientation_t ori, unsigned int buffer_num)
 {
-  if ( buffer_num >= _max_num_buffers ) {
-    throw OutOfBoundsException("Invalid buffer number", buffer_num, 0, _max_num_buffers);
-  }
+	if (buffer_num >= _max_num_buffers) {
+		throw OutOfBoundsException("Invalid buffer number", buffer_num, 0, _max_num_buffers);
+	}
 
-  this->ori[buffer_num] = ORI_HORIZONTAL;
+	this->ori[buffer_num] = ORI_HORIZONTAL;
 }
-
 
 /** Get filter name
  * @return filter name
@@ -157,9 +147,8 @@ Filter::set_orientation(orientation_t ori, unsigned int buffer_num)
 const char *
 Filter::name()
 {
-  return _name;
+	return _name;
 }
-
 
 /** This shrinks the regions as needed for a N x N matrix.
  * @param r ROI to shrink
@@ -168,18 +157,18 @@ Filter::name()
 void
 Filter::shrink_region(ROI *r, unsigned int n)
 {
-  if (r->start.x < (n/2)) {
-    r->start.x = n/2;
-  }
-  if (r->start.y < (n/2)) {
-    r->start.y = n/2;
-  }
-  if ( (r->start.x + r->width) >= (r->image_width - (n/2)) ) {
-    r->width -= (r->start.x + r->width) - (r->image_width - (n/2));
-  }
-  if ( (r->start.y + r->height) >= (r->image_height - (n/2)) ) {
-    r->height -= (r->start.y + r->height) - (r->image_height - (n/2));
-  }
+	if (r->start.x < (n / 2)) {
+		r->start.x = n / 2;
+	}
+	if (r->start.y < (n / 2)) {
+		r->start.y = n / 2;
+	}
+	if ((r->start.x + r->width) >= (r->image_width - (n / 2))) {
+		r->width -= (r->start.x + r->width) - (r->image_width - (n / 2));
+	}
+	if ((r->start.y + r->height) >= (r->image_height - (n / 2))) {
+		r->height -= (r->start.y + r->height) - (r->image_height - (n / 2));
+	}
 }
 
 } // end namespace firevision

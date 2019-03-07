@@ -25,13 +25,11 @@
  */
 
 #include <fvfilters/segment_scanline.h>
-
 #include <fvmodels/color/colormodel.h>
 #include <fvmodels/scanlines/scanlinemodel.h>
-
 #include <fvutils/color/yuv.h>
-#include <cstddef>
 
+#include <cstddef>
 
 namespace firevision {
 
@@ -50,101 +48,97 @@ namespace firevision {
  * @param slm scanline model to use
  */
 FilterScanlineSegmentation::FilterScanlineSegmentation(ColorModel *cm, ScanlineModel *slm)
-  : Filter("FilterScanlineSegmentation")
+: Filter("FilterScanlineSegmentation")
 {
-  this->cm = cm;
-  this->slm = slm;
+	this->cm  = cm;
+	this->slm = slm;
 }
-
 
 void
 FilterScanlineSegmentation::apply()
 {
-  unsigned int  x = 0, y = 0;
-  unsigned char   py = 0, pu = 0, pv = 0;
-  unsigned char *dyp, *dup, *dvp;
-  color_t c;
+	unsigned int   x = 0, y = 0;
+	unsigned char  py = 0, pu = 0, pv = 0;
+	unsigned char *dyp, *dup, *dvp;
+	color_t        c;
 
+	slm->reset();
+	while (!slm->finished()) {
+		x = (*slm)->x;
+		y = (*slm)->y;
 
-  slm->reset();
-  while (! slm->finished()) {
+		// Get source pixel values
+		YUV422_PLANAR_YUV(src[0], src_roi[0]->image_width, src_roi[0]->image_height, x, y, py, pu, pv);
 
-    x = (*slm)->x;
-    y = (*slm)->y;
+		// destination y-plane
+		dyp = dst + (y * dst_roi->line_step) + (x * dst_roi->pixel_step);
+		// destination u-plane
+		dup = YUV422_PLANAR_U_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
+		      + (((y * dst_roi->line_step) + (x * dst_roi->pixel_step)) / 2);
+		// destination v-plane
+		dvp = YUV422_PLANAR_V_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
+		      + (((y * dst_roi->line_step) + (x * dst_roi->pixel_step)) / 2);
 
+		c = cm->determine(py, pu, pv);
 
-    // Get source pixel values
-    YUV422_PLANAR_YUV(src[0], src_roi[0]->image_width, src_roi[0]->image_height, x, y,  py,  pu,  pv);
-
-    // destination y-plane
-    dyp  = dst + (y * dst_roi->line_step) + (x * dst_roi->pixel_step);
-    // destination u-plane
-    dup  = YUV422_PLANAR_U_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
-                                   + (((y * dst_roi->line_step) + (x * dst_roi->pixel_step)) / 2) ;
-    // destination v-plane
-    dvp  = YUV422_PLANAR_V_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
-                                   + (((y * dst_roi->line_step) + (x * dst_roi->pixel_step)) / 2);
-
-    c = cm->determine(py, pu, pv);
-
-    switch (c) {
-    case C_ORANGE:
-      *dyp++ = 128;
-      *dyp++ = 128;
-      *dup++ = 0;
-      *dvp++ = 255;
-      break;
-    case C_MAGENTA:
-      *dyp++ = 128;
-      *dyp++ = 128;
-      *dup++ = 128;
-      *dvp++ = 255;
-      break;
-    case C_CYAN:
-      *dyp++ = 128;
-      *dyp++ = 128;
-      *dup++ = 255;
-      *dvp++ = 0;
-      break;
-    case C_BLUE:
-      *dyp++ = 128;
-      *dyp++ = 128;
-      *dup++ = 255;
-      *dvp++ = 128;
-      break;
-    case C_YELLOW:
-      *dyp++ = 255;
-      *dyp++ = 255;
-      *dup++ = 0;
-      *dvp++ = 128;
-      break;
-    case C_GREEN:
-      *dyp++ = 128;
-      *dyp++ = 128;
-      *dup++ = 0;
-      *dvp++ = 0;
-      break;
-    case C_WHITE:
-      *dyp++ = 255;
-      *dyp++ = 255;
-      *dup++ = 128;
-      *dvp++ = 128;
-      break;
-    case C_RED:
-      *dyp++ = 196;
-      *dyp++ = 196;
-      *dup++ = 0;
-      *dvp++ = 255;
-      break;
-    default:
-      *dyp++ = 0;
-      *dyp++ = 0;
-      *dup++ = 128;
-      *dvp++ = 128;
-      break;
-    }
-    ++(*slm);
-  }
+		switch (c) {
+		case C_ORANGE:
+			*dyp++ = 128;
+			*dyp++ = 128;
+			*dup++ = 0;
+			*dvp++ = 255;
+			break;
+		case C_MAGENTA:
+			*dyp++ = 128;
+			*dyp++ = 128;
+			*dup++ = 128;
+			*dvp++ = 255;
+			break;
+		case C_CYAN:
+			*dyp++ = 128;
+			*dyp++ = 128;
+			*dup++ = 255;
+			*dvp++ = 0;
+			break;
+		case C_BLUE:
+			*dyp++ = 128;
+			*dyp++ = 128;
+			*dup++ = 255;
+			*dvp++ = 128;
+			break;
+		case C_YELLOW:
+			*dyp++ = 255;
+			*dyp++ = 255;
+			*dup++ = 0;
+			*dvp++ = 128;
+			break;
+		case C_GREEN:
+			*dyp++ = 128;
+			*dyp++ = 128;
+			*dup++ = 0;
+			*dvp++ = 0;
+			break;
+		case C_WHITE:
+			*dyp++ = 255;
+			*dyp++ = 255;
+			*dup++ = 128;
+			*dvp++ = 128;
+			break;
+		case C_RED:
+			*dyp++ = 196;
+			*dyp++ = 196;
+			*dup++ = 0;
+			*dvp++ = 255;
+			break;
+		default:
+			*dyp++ = 0;
+			*dyp++ = 0;
+			*dup++ = 128;
+			*dvp++ = 128;
+			break;
+		}
+		++(*slm);
+	}
 }
 
 } // end namespace firevision

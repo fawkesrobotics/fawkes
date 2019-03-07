@@ -33,16 +33,16 @@ class Shape;
 
 class FilterShapeRemover : public Filter
 {
- public:
-  FilterShapeRemover();
+public:
+	FilterShapeRemover();
 
-  virtual void set_shape( Shape *shape );
-  virtual void set_margin( unsigned int margin );
-  virtual void apply();
+	virtual void set_shape(Shape *shape);
+	virtual void set_margin(unsigned int margin);
+	virtual void apply();
 
- private:
-  Shape *shape;
-  unsigned int margin;
+private:
+	Shape *      shape;
+	unsigned int margin;
 };
 
 } // end namespace firevision

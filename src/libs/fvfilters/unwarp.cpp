@@ -22,11 +22,10 @@
  */
 
 #include <fvfilters/unwarp.h>
-
 #include <fvmodels/mirror/mirrormodel.h>
 #include <fvutils/color/yuv.h>
-#include <cstddef>
 
+#include <cstddef>
 
 namespace firevision {
 
@@ -38,103 +37,109 @@ namespace firevision {
 /** Constructor.
  * @param mm mirror model
  */
-FilterUnwarp::FilterUnwarp(MirrorModel *mm)
-  : Filter("FilterUnwarp")
+FilterUnwarp::FilterUnwarp(MirrorModel *mm) : Filter("FilterUnwarp")
 {
-  this->mm = mm;
+	this->mm = mm;
 }
-
 
 void
 FilterUnwarp::apply()
 {
-  // destination y-plane
-  unsigned char *dyp  = dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step);
+	// destination y-plane
+	unsigned char *dyp =
+	  dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step);
 
-  // destination u-plane
-  unsigned char *dup  = YUV422_PLANAR_U_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
-                                   + ((dst_roi->start.y * dst_roi->line_step) / 2 + (dst_roi->start.x * dst_roi->pixel_step) / 2) ;
-  // v-plane
-  unsigned char *dvp  = YUV422_PLANAR_V_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
-                                   + ((dst_roi->start.y * dst_roi->line_step) / 2 + (dst_roi->start.x * dst_roi->pixel_step) / 2);
+	// destination u-plane
+	unsigned char *dup =
+	  YUV422_PLANAR_U_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
+	  + ((dst_roi->start.y * dst_roi->line_step) / 2 + (dst_roi->start.x * dst_roi->pixel_step) / 2);
+	// v-plane
+	unsigned char *dvp =
+	  YUV422_PLANAR_V_PLANE(dst, dst_roi->image_width, dst_roi->image_height)
+	  + ((dst_roi->start.y * dst_roi->line_step) / 2 + (dst_roi->start.x * dst_roi->pixel_step) / 2);
 
-  // line starts
-  unsigned char *ldyp  = dyp;  // destination y-plane
-  unsigned char *ldup  = dup;   // u-plane
-  unsigned char *ldvp  = dvp;   // v-plane
+	// line starts
+	unsigned char *ldyp = dyp; // destination y-plane
+	unsigned char *ldup = dup; // u-plane
+	unsigned char *ldvp = dvp; // v-plane
 
-  unsigned int warp1_x = 0, warp1_y = 0,
-               warp2_x = 0, warp2_y = 0;
+	unsigned int warp1_x = 0, warp1_y = 0, warp2_x = 0, warp2_y = 0;
 
-  unsigned char py1=0, py2=0, pu1=0, pu2=0, pv1=0, pv2=0;
+	unsigned char py1 = 0, py2 = 0, pu1 = 0, pu2 = 0, pv1 = 0, pv2 = 0;
 
-  for (unsigned int h = 0; h < dst_roi->height; ++h) {
-    for (unsigned int w = 0; w < dst_roi->width; w += 2) {
-      mm->unwarp2warp( dst_roi->start.x + w, dst_roi->start.y + h,
-		       &warp1_x, &warp1_y );
-      mm->unwarp2warp( dst_roi->start.x + w + 1, dst_roi->start.y + h + 1,
-		       &warp2_x, &warp2_y );
+	for (unsigned int h = 0; h < dst_roi->height; ++h) {
+		for (unsigned int w = 0; w < dst_roi->width; w += 2) {
+			mm->unwarp2warp(dst_roi->start.x + w, dst_roi->start.y + h, &warp1_x, &warp1_y);
+			mm->unwarp2warp(dst_roi->start.x + w + 1, dst_roi->start.y + h + 1, &warp2_x, &warp2_y);
 
-      if ( (warp1_x < src_roi[0]->image_width) &&
-	   (warp1_y < src_roi[0]->image_height) ) {
-	// Src pixel is in original image
+			if ((warp1_x < src_roi[0]->image_width) && (warp1_y < src_roi[0]->image_height)) {
+				// Src pixel is in original image
 
-	YUV422_PLANAR_YUV(src[0], src_roi[0]->image_width, src_roi[0]->image_height,
-			  warp1_x, warp1_y,
-			  py1, pu1, pv1);
+				YUV422_PLANAR_YUV(src[0],
+				                  src_roi[0]->image_width,
+				                  src_roi[0]->image_height,
+				                  warp1_x,
+				                  warp1_y,
+				                  py1,
+				                  pu1,
+				                  pv1);
 
-	*dyp++ = py1;
-	*dup   = pu1;
-	*dvp   = pv1;
+				*dyp++ = py1;
+				*dup   = pu1;
+				*dvp   = pv1;
 
+				if ((warp2_x < src_roi[0]->image_width) && (warp2_y < src_roi[0]->image_height)) {
+					YUV422_PLANAR_YUV(src[0],
+					                  src_roi[0]->image_width,
+					                  src_roi[0]->image_height,
+					                  warp2_x,
+					                  warp2_y,
+					                  py2,
+					                  pu2,
+					                  pv2);
 
-	if ( (warp2_x < src_roi[0]->image_width) &&
-	     (warp2_y < src_roi[0]->image_height) ) {
+					*dyp++ = py2;
+					*dup   = (*dup + pu2) / 2;
+					*dvp   = (*dvp + pv2) / 2;
+				} else {
+					*dyp++ = 0;
+				}
+				dup++;
+				dvp++;
+			} else {
+				*dyp++ = 0;
+				*dup   = 0;
+				*dvp   = 0;
 
-	  YUV422_PLANAR_YUV(src[0], src_roi[0]->image_width, src_roi[0]->image_height,
-			  warp2_x, warp2_y,
-			  py2, pu2, pv2);
-	  
-	  *dyp++ = py2;
-	  *dup   = (*dup + pu2) / 2;
-	  *dvp   = (*dvp + pv2) / 2;
-	} else {
-	  *dyp++ = 0;
+				if ((warp2_x < src_roi[0]->image_width) && (warp2_y < src_roi[0]->image_height)) {
+					YUV422_PLANAR_YUV(src[0],
+					                  src_roi[0]->image_width,
+					                  src_roi[0]->image_height,
+					                  warp2_x,
+					                  warp2_y,
+					                  py2,
+					                  pu2,
+					                  pv2);
+
+					*dyp++ = py2;
+					*dup   = pu2;
+					*dvp   = pv2;
+				} else {
+					*dyp++ = 0;
+				}
+
+				dup++;
+				dvp++;
+			}
+		}
+
+		ldyp += dst_roi->line_step;
+		ldup += dst_roi->line_step;
+		ldup += dst_roi->line_step;
+		dyp = ldyp;
+		dup = ldup;
+		dvp = ldvp;
 	}
-	dup++;
-	dvp++;
-      } else {
-
-	*dyp++ = 0;
-	*dup   = 0;
-	*dvp   = 0;
-
-	if ( (warp2_x < src_roi[0]->image_width) &&
-	     (warp2_y < src_roi[0]->image_height) ) {
-
-	  YUV422_PLANAR_YUV(src[0], src_roi[0]->image_width, src_roi[0]->image_height,
-			  warp2_x, warp2_y,
-			  py2, pu2, pv2);
-	  
-	  *dyp++ = py2;
-	  *dup   = pu2;
-	  *dvp   = pv2;
-	} else {
-	  *dyp++ = 0;
-	}
-
-	dup++;
-	dvp++;
-      }
-    }
-
-    ldyp += dst_roi->line_step;
-    ldup += dst_roi->line_step;
-    ldup += dst_roi->line_step;
-    dyp = ldyp;
-    dup = ldup;
-    dvp = ldvp;
-  }
 }
 
 } // end namespace firevision

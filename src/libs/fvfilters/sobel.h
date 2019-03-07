@@ -23,8 +23,8 @@
 #ifndef _FIREVISION_FILTER_SOBEL_H_
 #define _FIREVISION_FILTER_SOBEL_H_
 
-#if ! (defined(HAVE_IPP) || defined(HAVE_OPENCV))
-#error "Neither IPP nor OpenCV installed"
+#if !(defined(HAVE_IPP) || defined(HAVE_OPENCV))
+#	error "Neither IPP nor OpenCV installed"
 #endif
 
 #include <fvfilters/filter.h>
@@ -33,10 +33,10 @@ namespace firevision {
 
 class FilterSobel : public Filter
 {
- public:
-  FilterSobel(orientation_t ori = ORI_HORIZONTAL);
+public:
+	FilterSobel(orientation_t ori = ORI_HORIZONTAL);
 
-  virtual void apply();
+	virtual void apply();
 };
 
 } // end namespace firevision

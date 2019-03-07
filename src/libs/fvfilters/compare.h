@@ -30,14 +30,13 @@ namespace firevision {
 
 class FilterCompare : public Filter
 {
+public:
+	FilterCompare();
 
- public:
-  FilterCompare();
+	virtual void apply();
 
-  virtual void apply();
-
-  static const unsigned int BACKGROUND;
-  static const unsigned int FOREGROUND;
+	static const unsigned int BACKGROUND;
+	static const unsigned int FOREGROUND;
 };
 
 } // end namespace firevision

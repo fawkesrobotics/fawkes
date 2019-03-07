@@ -25,6 +25,7 @@
 #define _FIREVISION_FILTER_ROIDRAW_H_
 
 #include <fvfilters/filter.h>
+
 #include <list>
 
 namespace firevision {
@@ -34,28 +35,28 @@ class Drawer;
 
 class FilterROIDraw : public Filter
 {
- public: // Typedefs
-  /** Defines the possible border styles to display a ROI */
-  typedef enum {
-    INVERTED,    /**< Displays border with inverted Y-value */
-    DASHED_HINT  /**< Displays border dashed black and color of hint*/
-  } border_style_t;
+public: // Typedefs
+	/** Defines the possible border styles to display a ROI */
+	typedef enum {
+		INVERTED,   /**< Displays border with inverted Y-value */
+		DASHED_HINT /**< Displays border dashed black and color of hint*/
+	} border_style_t;
 
- public:
-  FilterROIDraw(const std::list<ROI> *rois = 0, border_style_t style = INVERTED);
-  virtual ~FilterROIDraw();
+public:
+	FilterROIDraw(const std::list<ROI> *rois = 0, border_style_t style = INVERTED);
+	virtual ~FilterROIDraw();
 
-  virtual void apply();
+	virtual void apply();
 
-  void set_rois(const std::list<ROI> *rois);
-  void set_style(border_style_t style);
+	void set_rois(const std::list<ROI> *rois);
+	void set_style(border_style_t style);
 
- private:
-  void draw_roi(const ROI *roi);
+private:
+	void draw_roi(const ROI *roi);
 
-  const std::list<ROI> *rois_;
-  Drawer *drawer_;
-  border_style_t border_style_;
+	const std::list<ROI> *rois_;
+	Drawer *              drawer_;
+	border_style_t        border_style_;
 };
 
 } // end namespace firevision

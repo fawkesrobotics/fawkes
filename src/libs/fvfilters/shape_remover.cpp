@@ -22,8 +22,6 @@
  */
 
 #include <fvfilters/shape_remover.h>
-
-
 #include <fvmodels/shape/shapemodel.h>
 
 namespace firevision {
@@ -33,85 +31,79 @@ namespace firevision {
  */
 
 /** Constructor. */
-FilterShapeRemover::FilterShapeRemover()
-  : Filter("FilterShapeRemover")
+FilterShapeRemover::FilterShapeRemover() : Filter("FilterShapeRemover")
 {
-  shape = NULL;
+	shape = NULL;
 }
-
 
 void
 FilterShapeRemover::apply()
 {
-  /* Code to remove lines here
+	/* Code to remove lines here
    * INPUT:  Pre-filtered image or part of image that has clear edges set (white
    *         value at edge > 240)
    * OUTPUT: the edges close to the given shape have been removed
    */
 
-  if (shape == NULL) return;
+	if (shape == NULL)
+		return;
 
-  shape->setMargin( margin );
+	shape->setMargin(margin);
 
-  unsigned char *buffer = src_roi[0]->get_roi_buffer_start( src[0] );
-  unsigned char *linestart = buffer;
+	unsigned char *buffer    = src_roi[0]->get_roi_buffer_start(src[0]);
+	unsigned char *linestart = buffer;
 
-  if ( (dst == NULL) || (src[0] == dst) ) {
+	if ((dst == NULL) || (src[0] == dst)) {
+		for (unsigned int h = 0; h < src_roi[0]->height; ++h) {
+			for (unsigned int w = 0; w < src_roi[0]->width; ++w) {
+				if ((*buffer > 240) && (shape->isClose(w, h))) {
+					*buffer = 0;
+				}
+				buffer++;
+			}
 
-    for (unsigned int h = 0; h < src_roi[0]->height; ++h) {
-    
-      for (unsigned int w = 0; w < src_roi[0]->width; ++w) {
-	if ((*buffer > 240) && (shape->isClose(w, h))) {
-	  *buffer = 0;
-	}
-	buffer++;
-      }
-      
-      linestart += src_roi[0]->line_step;
-      buffer = linestart;
-    }
-  } else {
-    unsigned char *dst_buffer = dst_roi->get_roi_buffer_start( dst );
-    unsigned char *dst_linestart = dst_buffer;
-
-    for (unsigned int h = 0; h < src_roi[0]->height; ++h) {
-    
-      for (unsigned int w = 0; w < src_roi[0]->width; ++w) {
-	if ((*buffer > 240) && (shape->isClose(w, h))) {
-	  *dst_buffer = 0;
+			linestart += src_roi[0]->line_step;
+			buffer = linestart;
+		}
 	} else {
-	  *dst_buffer = *buffer;
-	}
-	buffer++;
-	dst_buffer++;
-      }
-      
-      linestart += src_roi[0]->line_step;
-      dst_linestart += dst_roi->line_step;
-      buffer = linestart;
-      dst_buffer = dst_linestart;
-    }
-  }
-}
+		unsigned char *dst_buffer    = dst_roi->get_roi_buffer_start(dst);
+		unsigned char *dst_linestart = dst_buffer;
 
+		for (unsigned int h = 0; h < src_roi[0]->height; ++h) {
+			for (unsigned int w = 0; w < src_roi[0]->width; ++w) {
+				if ((*buffer > 240) && (shape->isClose(w, h))) {
+					*dst_buffer = 0;
+				} else {
+					*dst_buffer = *buffer;
+				}
+				buffer++;
+				dst_buffer++;
+			}
+
+			linestart += src_roi[0]->line_step;
+			dst_linestart += dst_roi->line_step;
+			buffer     = linestart;
+			dst_buffer = dst_linestart;
+		}
+	}
+}
 
 /** Set margin.
  * @param margin margin around shape to be close to a point.
  */
 void
-FilterShapeRemover::set_margin( unsigned int margin )
+FilterShapeRemover::set_margin(unsigned int margin)
 {
-  this->margin = margin;
+	this->margin = margin;
 }
-
 
 /** Set shape that is to be removed.
  * @param shape shape to remove
  */
 void
-FilterShapeRemover::set_shape( Shape *shape )
+FilterShapeRemover::set_shape(Shape *shape)
 {
-  this->shape = shape;
+	this->shape = shape;
 }
 
 } // end namespace firevision

@@ -32,16 +32,15 @@ class MirrorModel;
 
 class FilterUnwarp : public Filter
 {
- public:
-  FilterUnwarp(MirrorModel *mm);
+public:
+	FilterUnwarp(MirrorModel *mm);
 
-  virtual void apply();
+	virtual void apply();
 
- private:
-  MirrorModel   *mm;
+private:
+	MirrorModel *mm;
 };
 
 } // end namespace firevision
 
 #endif
-

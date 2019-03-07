@@ -36,11 +36,16 @@ namespace firevision {
 
 class FilterNothing : public Filter
 {
- public:
-  /** Constructor. */
-  FilterNothing() : Filter("FilterNothing") {}
+public:
+	/** Constructor. */
+	FilterNothing() : Filter("FilterNothing")
+	{
+	}
 
-  virtual void apply() {}
+	virtual void
+	apply()
+	{
+	}
 };
 
 } // end namespace firevision

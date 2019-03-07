@@ -32,19 +32,16 @@ namespace firevision {
 
 class FilterHSearch : public Filter
 {
+public:
+	FilterHSearch(ColorModel *cm, color_t what);
 
- public:
-  FilterHSearch(ColorModel *cm, color_t what);
+	virtual void apply();
 
-  virtual void apply();
-
- private:
-  ColorModel    *cm;
-  color_t        what;
-
+private:
+	ColorModel *cm;
+	color_t     what;
 };
 
 } // end namespace firevision
 
 #endif // FIREVISION_FILTERS_HOR_SEARCH_H__
-

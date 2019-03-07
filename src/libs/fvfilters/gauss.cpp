@@ -25,14 +25,14 @@
 #include <cstddef>
 
 #ifdef HAVE_IPP
-#  include <ippi.h>
+#	include <ippi.h>
 #elif defined(HAVE_OPENCV)
-#  if CV_MAJOR_VERSION < 2 || (CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION < 4)
-#    include <opencv/cv.h>
-#  endif
-#  include <opencv/cv.hpp>
+#	if CV_MAJOR_VERSION < 2 || (CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION < 4)
+#		include <opencv/cv.h>
+#	endif
+#	include <opencv/cv.hpp>
 #else
-#  error "Neither IPP nor OpenCV available"
+#	error "Neither IPP nor OpenCV available"
 #endif
 
 namespace firevision {
@@ -43,26 +43,28 @@ namespace firevision {
  */
 
 /** Constructor. */
-FilterGauss::FilterGauss()
-  : Filter("FilterGauss")
+FilterGauss::FilterGauss() : Filter("FilterGauss")
 {
 }
-
 
 void
 FilterGauss::apply()
 {
 #if defined(HAVE_IPP)
-  IppiSize size;
-  size.width = src_roi[0]->width;
-  size.height = src_roi[0]->height;
+	IppiSize size;
+	size.width  = src_roi[0]->width;
+	size.height = src_roi[0]->height;
 
-  /* IppStatus status = */ ippiFilterGauss_8u_C1R( src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step), src_roi[0]->line_step,
-						   dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step), dst_roi->line_step,
-						   size,
-						   ippMskSize5x5 );
+	/* IppStatus status = */ ippiFilterGauss_8u_C1R(
+	  src[0] + (src_roi[0]->start.y * src_roi[0]->line_step)
+	    + (src_roi[0]->start.x * src_roi[0]->pixel_step),
+	  src_roi[0]->line_step,
+	  dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step),
+	  dst_roi->line_step,
+	  size,
+	  ippMskSize5x5);
 
-  /*
+	/*
   cout << "FilterGauss: ippiFilterGauss exit code: " << flush;
   switch (status) {
   case ippStsNoErr:
@@ -87,24 +89,28 @@ FilterGauss::apply()
   */
 
 #elif defined(HAVE_OPENCV)
-  cv::Mat srcm(src_roi[0]->height, src_roi[0]->width, CV_8UC1,
-               src[0] +
-                 (src_roi[0]->start.y * src_roi[0]->line_step) +
-                 (src_roi[0]->start.x * src_roi[0]->pixel_step),
-               src_roi[0]->line_step);
+	cv::Mat srcm(src_roi[0]->height,
+	             src_roi[0]->width,
+	             CV_8UC1,
+	             src[0] + (src_roi[0]->start.y * src_roi[0]->line_step)
+	               + (src_roi[0]->start.x * src_roi[0]->pixel_step),
+	             src_roi[0]->line_step);
 
-  if (dst == NULL) { dst = src[0]; dst_roi = src_roi[0]; }
+	if (dst == NULL) {
+		dst     = src[0];
+		dst_roi = src_roi[0];
+	}
 
-  cv::Mat dstm(dst_roi->height, dst_roi->width, CV_8UC1,
-               dst +
-                 (dst_roi->start.y * dst_roi->line_step) +
-                 (dst_roi->start.x * dst_roi->pixel_step),
-               dst_roi->line_step);
+	cv::Mat dstm(dst_roi->height,
+	             dst_roi->width,
+	             CV_8UC1,
+	             dst + (dst_roi->start.y * dst_roi->line_step)
+	               + (dst_roi->start.x * dst_roi->pixel_step),
+	             dst_roi->line_step);
 
-  cv::GaussianBlur(srcm, dstm, /* ksize */ cv::Size(5, 5), /* sigma */ 1.0);
+	cv::GaussianBlur(srcm, dstm, /* ksize */ cv::Size(5, 5), /* sigma */ 1.0);
 
 #endif
-
 }
 
 } // end namespace firevision

@@ -30,10 +30,10 @@ namespace firevision {
 
 class FilterInvert : public Filter
 {
- public:
-  FilterInvert();
+public:
+	FilterInvert();
 
-  virtual void apply();
+	virtual void apply();
 };
 
 } // end namespace firevision

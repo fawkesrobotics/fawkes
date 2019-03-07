@@ -29,13 +29,15 @@ namespace firevision {
 
 class FilterDilation : public MorphologicalFilter
 {
- public:
-  FilterDilation();
-  FilterDilation(unsigned char *se, unsigned int se_width, unsigned int se_height,
-		 unsigned int se_anchor_x, unsigned int se_anchor_y);
+public:
+	FilterDilation();
+	FilterDilation(unsigned char *se,
+	               unsigned int   se_width,
+	               unsigned int   se_height,
+	               unsigned int   se_anchor_x,
+	               unsigned int   se_anchor_y);
 
-  virtual void apply();
-
+	virtual void apply();
 };
 
 } // end namespace firevision

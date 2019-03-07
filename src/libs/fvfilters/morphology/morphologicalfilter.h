@@ -23,35 +23,36 @@
 #ifndef _FIREVISION_FILTER_MORPHOLOGY_MORPHOLOGICAL_H_
 #define _FIREVISION_FILTER_MORPHOLOGY_MORPHOLOGICAL_H_
 
-#if ! (defined(HAVE_IPP) || defined(HAVE_OPENCV))
-#error "Neither IPP nor OpenCV installed"
+#if !(defined(HAVE_IPP) || defined(HAVE_OPENCV))
+#	error "Neither IPP nor OpenCV installed"
 #endif
 
 #include <fvfilters/filter.h>
 
 namespace firevision {
 
-class MorphologicalFilter : public Filter {
- public:
-  MorphologicalFilter(const char *name, unsigned int max_num_buffers = 1);
-  virtual ~MorphologicalFilter();
-  virtual void set_structuring_element(unsigned char *se,
-				       unsigned int se_width,
-				       unsigned int se_height,
-				       unsigned int se_anchor_x,
-				       unsigned int se_anchor_y );
+class MorphologicalFilter : public Filter
+{
+public:
+	MorphologicalFilter(const char *name, unsigned int max_num_buffers = 1);
+	virtual ~MorphologicalFilter();
+	virtual void set_structuring_element(unsigned char *se,
+	                                     unsigned int   se_width,
+	                                     unsigned int   se_height,
+	                                     unsigned int   se_anchor_x,
+	                                     unsigned int   se_anchor_y);
 
- protected:
-  /** Structuring element */
-  unsigned char *se;
-  /** Width of structuring element */
-  unsigned int   se_width;
-  /** Height of structuring element */
-  unsigned int   se_height;
-  /** Anchor point x offset of structuring element */
-  unsigned int   se_anchor_x;
-  /** Anchor point y offset of structuring element */
-  unsigned int   se_anchor_y;
+protected:
+	/** Structuring element */
+	unsigned char *se;
+	/** Width of structuring element */
+	unsigned int se_width;
+	/** Height of structuring element */
+	unsigned int se_height;
+	/** Anchor point x offset of structuring element */
+	unsigned int se_anchor_x;
+	/** Anchor point y offset of structuring element */
+	unsigned int se_anchor_y;
 };
 
 } // end namespace firevision

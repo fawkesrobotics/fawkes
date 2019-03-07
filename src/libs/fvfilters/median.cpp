@@ -20,19 +20,18 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <core/exception.h>
 #include <fvfilters/median.h>
 
-#include <core/exception.h>
-
 #ifdef HAVE_IPP
-#  include <ippi.h>
+#	include <ippi.h>
 #elif defined(HAVE_OPENCV)
-#  if CV_MAJOR_VERSION < 2 || (CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION < 4)
-#    include <opencv/cv.h>
-#  endif
-#  include <opencv/cv.hpp>
+#	if CV_MAJOR_VERSION < 2 || (CV_MAJOR_VERSION == 2 && CV_MINOR_VERSION < 4)
+#		include <opencv/cv.h>
+#	endif
+#	include <opencv/cv.hpp>
 #else
-#  error "Neither IPP nor OpenCV available"
+#	error "Neither IPP nor OpenCV available"
 #endif
 
 namespace firevision {
@@ -45,50 +44,60 @@ namespace firevision {
 /** Constructor.
  * @param mask_size size of median mask
  */
-FilterMedian::FilterMedian(unsigned int mask_size)
-  : Filter("FilterMedian")
+FilterMedian::FilterMedian(unsigned int mask_size) : Filter("FilterMedian")
 {
-  this->mask_size = mask_size;
+	this->mask_size = mask_size;
 }
-
 
 void
 FilterMedian::apply()
 {
 #if defined(HAVE_IPP)
-  IppiSize size;
-  size.width = src_roi[0]->width - mask_size;
-  size.height = src_roi[0]->height - mask_size;
+	IppiSize size;
+	size.width  = src_roi[0]->width - mask_size;
+	size.height = src_roi[0]->height - mask_size;
 
-  IppiSize mask = { mask_size, mask_size };
-  IppiPoint anchor = { (mask_size + 1) / 2, (mask_size + 1) / 2 };
+	IppiSize  mask   = {mask_size, mask_size};
+	IppiPoint anchor = {(mask_size + 1) / 2, (mask_size + 1) / 2};
 
-  IppStatus status;
+	IppStatus status;
 
-  //                                  base + number of bytes to line y              + pixel bytes
-  status = ippiFilterMedian_8u_C1R( src[0] + ((src_roi[0]->start.y + (mask_size + 1) / 2) * src_roi[0]->line_step) + ((src_roi[0]->start.x + ( mask_size + 1) / 2) * src_roi[0]->pixel_step), src_roi[0]->line_step,
-				    dst + ((dst_roi->start.y + (mask_size + 1) / 2) * dst_roi->line_step) + ((dst_roi->start.x + ( mask_size + 1) / 2) * dst_roi->pixel_step), dst_roi->line_step,
-				    size, mask, anchor );
+	//                                  base + number of bytes to line y              + pixel bytes
+	status = ippiFilterMedian_8u_C1R(
+	  src[0] + ((src_roi[0]->start.y + (mask_size + 1) / 2) * src_roi[0]->line_step)
+	    + ((src_roi[0]->start.x + (mask_size + 1) / 2) * src_roi[0]->pixel_step),
+	  src_roi[0]->line_step,
+	  dst + ((dst_roi->start.y + (mask_size + 1) / 2) * dst_roi->line_step)
+	    + ((dst_roi->start.x + (mask_size + 1) / 2) * dst_roi->pixel_step),
+	  dst_roi->line_step,
+	  size,
+	  mask,
+	  anchor);
 
-  if ( status != ippStsNoErr ) {
-    throw fawkes::Exception("Median filter failed with %i\n", status);
-  }
+	if (status != ippStsNoErr) {
+		throw fawkes::Exception("Median filter failed with %i\n", status);
+	}
 #elif defined(HAVE_OPENCV)
-  cv::Mat srcm(src_roi[0]->height, src_roi[0]->width, CV_8UC1,
-               src[0] +
-                 (src_roi[0]->start.y * src_roi[0]->line_step) +
-                 (src_roi[0]->start.x * src_roi[0]->pixel_step),
-               src_roi[0]->line_step);
+	cv::Mat srcm(src_roi[0]->height,
+	             src_roi[0]->width,
+	             CV_8UC1,
+	             src[0] + (src_roi[0]->start.y * src_roi[0]->line_step)
+	               + (src_roi[0]->start.x * src_roi[0]->pixel_step),
+	             src_roi[0]->line_step);
 
-  if (dst == NULL) { dst = src[0]; dst_roi = src_roi[0]; }
+	if (dst == NULL) {
+		dst     = src[0];
+		dst_roi = src_roi[0];
+	}
 
-  cv::Mat dstm(dst_roi->height, dst_roi->width, CV_8UC1,
-               dst +
-                 (dst_roi->start.y * dst_roi->line_step) +
-                 (dst_roi->start.x * dst_roi->pixel_step),
-               dst_roi->line_step);
+	cv::Mat dstm(dst_roi->height,
+	             dst_roi->width,
+	             CV_8UC1,
+	             dst + (dst_roi->start.y * dst_roi->line_step)
+	               + (dst_roi->start.x * dst_roi->pixel_step),
+	             dst_roi->line_step);
 
-  cv::medianBlur(srcm, dstm, mask_size);
+	cv::medianBlur(srcm, dstm, mask_size);
 #endif
 }
 

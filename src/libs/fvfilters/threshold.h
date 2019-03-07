@@ -23,8 +23,8 @@
 #ifndef _FIREVISION_FILTER_THRESHOLD_H_
 #define _FIREVISION_FILTER_THRESHOLD_H_
 
-#if ! (defined(HAVE_IPP) || defined(HAVE_OPENCV))
-#error "Neither IPP nor OpenCV installed"
+#if !(defined(HAVE_IPP) || defined(HAVE_OPENCV))
+#	error "Neither IPP nor OpenCV installed"
 #endif
 
 #include <fvfilters/filter.h>
@@ -33,21 +33,24 @@ namespace firevision {
 
 class FilterThreshold : public Filter
 {
- public:
-  FilterThreshold(unsigned char min = 128, unsigned char min_replace =   0,
-		  unsigned char max = 127, unsigned char max_replace = 255);
+public:
+	FilterThreshold(unsigned char min         = 128,
+	                unsigned char min_replace = 0,
+	                unsigned char max         = 127,
+	                unsigned char max_replace = 255);
 
-  void set_thresholds(unsigned char min, unsigned char min_replace,
-		      unsigned char max, unsigned char max_replace);
+	void set_thresholds(unsigned char min,
+	                    unsigned char min_replace,
+	                    unsigned char max,
+	                    unsigned char max_replace);
 
-  virtual void apply();
+	virtual void apply();
 
- private:
-  unsigned char max;
-  unsigned char min;
-  unsigned char min_replace;
-  unsigned char max_replace;
-
+private:
+	unsigned char max;
+	unsigned char min;
+	unsigned char min_replace;
+	unsigned char max_replace;
 };
 
 } // end namespace firevision

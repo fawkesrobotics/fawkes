@@ -27,26 +27,28 @@
 
 namespace firevision {
 
-class SEGenerator {
- private:
-  SEGenerator();
+class SEGenerator
+{
+private:
+	SEGenerator();
 
+public:
+	static unsigned char *linear(unsigned int  width,
+	                             unsigned int  height,
+	                             unsigned int *proposed_center_x,
+	                             unsigned int *proposed_center_y,
+	                             float         slope_angle_rad);
 
- public:
-  
-  static unsigned char * linear(unsigned int width, unsigned int height,
-				unsigned int *proposed_center_x,
-				unsigned int *proposed_center_y,
-				float slope_angle_rad);
+	static unsigned char *square(unsigned int width, unsigned int height);
 
-  static unsigned char * square(unsigned int width, unsigned int height);
-
-
-  static void drawSE(unsigned char *yuv422planar_buffer, unsigned char *mask,
-		     unsigned int width, unsigned int height);
-  static void drawSEbw(unsigned char *yuv422planar_buffer, unsigned char *mask,
-		       unsigned int width, unsigned int height);
-
+	static void drawSE(unsigned char *yuv422planar_buffer,
+	                   unsigned char *mask,
+	                   unsigned int   width,
+	                   unsigned int   height);
+	static void drawSEbw(unsigned char *yuv422planar_buffer,
+	                     unsigned char *mask,
+	                     unsigned int   width,
+	                     unsigned int   height);
 };
 
 } // end namespace firevision

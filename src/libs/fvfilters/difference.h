@@ -30,10 +30,10 @@ namespace firevision {
 
 class FilterDifference : public Filter
 {
- public:
-  FilterDifference();
+public:
+	FilterDifference();
 
-  virtual void apply();
+	virtual void apply();
 };
 
 } // end namespace firevision

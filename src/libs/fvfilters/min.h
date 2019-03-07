@@ -30,10 +30,10 @@ namespace firevision {
 
 class FilterMin : public Filter
 {
- public:
-  FilterMin();
+public:
+	FilterMin();
 
-  virtual void apply();
+	virtual void apply();
 };
 
 } // end namespace firevision

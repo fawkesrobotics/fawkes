@@ -34,18 +34,18 @@ class FilterDifference;
 
 class FilterTophatClosing : public MorphologicalFilter
 {
- public:
-  FilterTophatClosing();
-  virtual ~FilterTophatClosing();
+public:
+	FilterTophatClosing();
+	virtual ~FilterTophatClosing();
 
-  virtual void apply();
-  
-  static const unsigned int SUBTRACTFROM;
-  static const unsigned int FILTERIMAGE;
+	virtual void apply();
 
- private:
-  FilterClosing    *closing;
-  FilterDifference *diff;
+	static const unsigned int SUBTRACTFROM;
+	static const unsigned int FILTERIMAGE;
+
+private:
+	FilterClosing *   closing;
+	FilterDifference *diff;
 };
 
 } // end namespace firevision
