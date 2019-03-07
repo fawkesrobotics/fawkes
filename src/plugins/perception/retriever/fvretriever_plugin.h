@@ -27,8 +27,8 @@
 
 class FvRetrieverPlugin : public fawkes::Plugin
 {
- public:
-  explicit FvRetrieverPlugin(fawkes::Configuration *config);
+public:
+	explicit FvRetrieverPlugin(fawkes::Configuration *config);
 };
 
 #endif
