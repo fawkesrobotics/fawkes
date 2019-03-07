@@ -20,15 +20,16 @@
  */
 
 #include <gtest/gtest.h>
+
 #include <stdexcept>
 
 //for running fawkes in main
 #include <baseapp/run.h>
-#include <core/exception.h>
-#include <cstdio>
-#include <utils/misc/string_conversions.h>
 #include <config/yaml.h>
+#include <core/exception.h>
+#include <utils/misc/string_conversions.h>
 
+#include <cstdio>
 
 //TEST(GTestTest, TestsWorking)
 //{
@@ -40,46 +41,48 @@
  * @param argc argument count
  * @param argv array of arguments
  */
-int main(int argc, char **argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  try {
-    int retval = 0;
+int
+main(int argc, char **argv)
+{
+	::testing::InitGoogleTest(&argc, argv);
+	try {
+		int retval = 0;
 
-    //get config values
-    std::string cfg_path = fawkes::StringConversions::resolve_path("@CONFDIR@/conf.d/gtest.yaml");
-    printf("Config path: %s\n", cfg_path.c_str());
-    fawkes::YamlConfiguration config = fawkes::YamlConfiguration();
-    config.load(cfg_path.c_str());
-    std::string plugins = config.get_string("gtest/plugin-dependencies") + ","
-      + config.get_string("gtest/test-plugin");
-    std::string config_path = config.get_string("gtest/config");
-    
-    //init arguments to start fawkes with
-    char **fawkes_argv;
-    fawkes_argv = new char*[5];
-    fawkes_argv[0] = new char[6];
-    strcpy(fawkes_argv[0], "fawkes");
-    fawkes_argv[1] = new char[2];
-    strcpy(fawkes_argv[1], "-p");
-    fawkes_argv[2] = new char[128];
-    strcpy(fawkes_argv[2], plugins.c_str());
-    fawkes_argv[3] = new char[2];
-    strcpy(fawkes_argv[3], "-c");
-    fawkes_argv[4] = new char[128];
-    strcpy(fawkes_argv[4], config_path.c_str());
+		//get config values
+		std::string cfg_path = fawkes::StringConversions::resolve_path("@CONFDIR@/conf.d/gtest.yaml");
+		printf("Config path: %s\n", cfg_path.c_str());
+		fawkes::YamlConfiguration config = fawkes::YamlConfiguration();
+		config.load(cfg_path.c_str());
+		std::string plugins =
+		  config.get_string("gtest/plugin-dependencies") + "," + config.get_string("gtest/test-plugin");
+		std::string config_path = config.get_string("gtest/config");
 
-    if (! fawkes::runtime::init(5, fawkes_argv, retval)) {
-      return retval;
-    }
-    fawkes::runtime::run();
-    fawkes::runtime::cleanup();
+		//init arguments to start fawkes with
+		char **fawkes_argv;
+		fawkes_argv    = new char *[5];
+		fawkes_argv[0] = new char[6];
+		strcpy(fawkes_argv[0], "fawkes");
+		fawkes_argv[1] = new char[2];
+		strcpy(fawkes_argv[1], "-p");
+		fawkes_argv[2] = new char[128];
+		strcpy(fawkes_argv[2], plugins.c_str());
+		fawkes_argv[3] = new char[2];
+		strcpy(fawkes_argv[3], "-c");
+		fawkes_argv[4] = new char[128];
+		strcpy(fawkes_argv[4], config_path.c_str());
 
-    delete [] fawkes_argv;
-  } catch (fawkes::Exception &e) {
-    printf("Fawkes Test execution ended.\n");
-//    e.print_trace();
-    return 1;
-  }
+		if (!fawkes::runtime::init(5, fawkes_argv, retval)) {
+			return retval;
+		}
+		fawkes::runtime::run();
+		fawkes::runtime::cleanup();
 
-  return 0;
+		delete[] fawkes_argv;
+	} catch (fawkes::Exception &e) {
+		printf("Fawkes Test execution ended.\n");
+		//    e.print_trace();
+		return 1;
+	}
+
+	return 0;
 }
