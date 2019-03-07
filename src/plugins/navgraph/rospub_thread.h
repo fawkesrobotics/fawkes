@@ -21,62 +21,63 @@
 #ifndef _PLUGINS_NAVGRAPH_NAVGRAPH_ROSPUB_THREAD_H_
 #define _PLUGINS_NAVGRAPH_NAVGRAPH_ROSPUB_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/tf.h>
-#include <plugins/ros/aspect/ros.h>
+#include <core/threading/thread.h>
+#include <fawkes_msgs/NavGraphGetPairwiseCosts.h>
+#include <fawkes_msgs/NavGraphSearchPath.h>
 #include <navgraph/aspect/navgraph.h>
-
 #include <navgraph/navgraph.h>
-
+#include <plugins/ros/aspect/ros.h>
 #include <ros/publisher.h>
 #include <ros/service_server.h>
 
-#include <fawkes_msgs/NavGraphSearchPath.h>
-#include <fawkes_msgs/NavGraphGetPairwiseCosts.h>
-
-class NavGraphROSPubThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-	public fawkes::TransformAspect,
-  public fawkes::ROSAspect,
-	public fawkes::NavGraphAspect,
-	public fawkes::NavGraph::ChangeListener
+class NavGraphROSPubThread : public fawkes::Thread,
+                             public fawkes::ClockAspect,
+                             public fawkes::LoggingAspect,
+                             public fawkes::ConfigurableAspect,
+                             public fawkes::TransformAspect,
+                             public fawkes::ROSAspect,
+                             public fawkes::NavGraphAspect,
+                             public fawkes::NavGraph::ChangeListener
 {
- public:
-  NavGraphROSPubThread();
-  virtual ~NavGraphROSPubThread();
+public:
+	NavGraphROSPubThread();
+	virtual ~NavGraphROSPubThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  virtual void graph_changed() throw();
-  
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run();}
+	virtual void graph_changed() throw();
 
- private:
-  void publish_graph();
-  void convert_nodes(const std::vector<fawkes::NavGraphNode> &nodes,
-                     std::vector<fawkes_msgs::NavGraphNode> &out);
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
-  bool svs_search_path_cb(fawkes_msgs::NavGraphSearchPath::Request  &req,
-                          fawkes_msgs::NavGraphSearchPath::Response &res);
-  bool svs_get_pwcosts_cb(fawkes_msgs::NavGraphGetPairwiseCosts::Request  &req,
-                          fawkes_msgs::NavGraphGetPairwiseCosts::Response &res);
+private:
+	void publish_graph();
+	void convert_nodes(const std::vector<fawkes::NavGraphNode> &nodes,
+	                   std::vector<fawkes_msgs::NavGraphNode> & out);
 
- private:
-  std::string  cfg_base_frame_;
-  std::string  cfg_global_frame_;
+	bool svs_search_path_cb(fawkes_msgs::NavGraphSearchPath::Request & req,
+	                        fawkes_msgs::NavGraphSearchPath::Response &res);
+	bool svs_get_pwcosts_cb(fawkes_msgs::NavGraphGetPairwiseCosts::Request & req,
+	                        fawkes_msgs::NavGraphGetPairwiseCosts::Response &res);
 
-  ros::Publisher pub_;
-  ros::ServiceServer svs_search_path_;
-  ros::ServiceServer svs_get_pwcosts_;
+private:
+	std::string cfg_base_frame_;
+	std::string cfg_global_frame_;
+
+	ros::Publisher     pub_;
+	ros::ServiceServer svs_search_path_;
+	ros::ServiceServer svs_get_pwcosts_;
 };
 
 #endif
