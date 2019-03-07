@@ -21,8 +21,9 @@
  */
 
 #include "roomba_plugin.h"
-#include "thread_roomba_500.h"
+
 #include "sensor_thread.h"
+#include "thread_roomba_500.h"
 
 using namespace fawkes;
 
@@ -34,14 +35,12 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-RoombaPlugin::RoombaPlugin(Configuration *config)
-  : Plugin(config)
+RoombaPlugin::RoombaPlugin(Configuration *config) : Plugin(config)
 {
-  Roomba500Thread *roomba500_thread = new Roomba500Thread();
-  thread_list.push_back(roomba500_thread);
-  thread_list.push_back(new RoombaSensorThread(roomba500_thread));
+	Roomba500Thread *roomba500_thread = new Roomba500Thread();
+	thread_list.push_back(roomba500_thread);
+	thread_list.push_back(new RoombaSensorThread(roomba500_thread));
 }
-
 
 PLUGIN_DESCRIPTION("Roomba vacuum robot plugin.")
 EXPORT_PLUGIN(RoombaPlugin)

@@ -21,6 +21,7 @@
  */
 
 #include "roombajoy_plugin.h"
+
 #include "roombajoy_thread.h"
 
 using namespace fawkes;
@@ -33,12 +34,10 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-RoombaJoystickPlugin::RoombaJoystickPlugin(Configuration *config)
-  : Plugin(config)
+RoombaJoystickPlugin::RoombaJoystickPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new RoombaJoystickThread());
+	thread_list.push_back(new RoombaJoystickThread());
 }
-
 
 PLUGIN_DESCRIPTION("Control your Roomba with a Joystick")
 EXPORT_PLUGIN(RoombaJoystickPlugin)

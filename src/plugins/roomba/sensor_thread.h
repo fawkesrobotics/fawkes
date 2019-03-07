@@ -23,28 +23,31 @@
 #ifndef _PLUGINS_ROOMBA_SENSOR_THREAD_H_
 #define _PLUGINS_ROOMBA_SENSOR_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 class Roomba500Thread;
 
-class RoombaSensorThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect
+class RoombaSensorThread : public fawkes::Thread,
+                           public fawkes::BlockedTimingAspect,
+                           public fawkes::LoggingAspect
 {
- public:
-  RoombaSensorThread(Roomba500Thread *roomba500_thread);
+public:
+	RoombaSensorThread(Roomba500Thread *roomba500_thread);
 
-  virtual void loop();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  Roomba500Thread *roomba500_thread_;
+private:
+	Roomba500Thread *roomba500_thread_;
 };
-
 
 #endif
