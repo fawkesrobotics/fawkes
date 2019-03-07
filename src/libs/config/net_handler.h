@@ -24,84 +24,91 @@
 #ifndef _CONFIG_NET_HANDLER_H_
 #define _CONFIG_NET_HANDLER_H_
 
-#include <core/threading/thread.h>
-#include <netcomm/fawkes/handler.h>
-#include <core/utils/lock_queue.h>
-#include <core/utils/lock_list.h>
-
-#include <config/net_messages.h>
-#include <config/config.h>
 #include <config/change_handler.h>
+#include <config/config.h>
+#include <config/net_messages.h>
+#include <core/threading/thread.h>
+#include <core/utils/lock_list.h>
+#include <core/utils/lock_queue.h>
+#include <netcomm/fawkes/handler.h>
 
 #include <cstdlib>
+#include <cstring>
 #include <map>
 #include <string>
 #include <utility>
-#include <cstring>
 
 namespace fawkes {
 
 class FawkesNetworkHub;
 
-
-class ConfigNetworkHandler
-: public Thread,
-  public FawkesNetworkHandler,
-  public ConfigurationChangeHandler
+class ConfigNetworkHandler : public Thread,
+                             public FawkesNetworkHandler,
+                             public ConfigurationChangeHandler
 {
- public:
-  ConfigNetworkHandler(Configuration *config, FawkesNetworkHub *hub);
-  ~ConfigNetworkHandler();
+public:
+	ConfigNetworkHandler(Configuration *config, FawkesNetworkHub *hub);
+	~ConfigNetworkHandler();
 
-  /* from FawkesNetworkHandler interface */
-  virtual void handle_network_message(FawkesNetworkMessage *msg);
-  virtual void client_connected(unsigned int clid);
-  virtual void client_disconnected(unsigned int clid);
-  virtual void loop();
+	/* from FawkesNetworkHandler interface */
+	virtual void handle_network_message(FawkesNetworkMessage *msg);
+	virtual void client_connected(unsigned int clid);
+	virtual void client_disconnected(unsigned int clid);
+	virtual void loop();
 
-  /* from ConfigurationChangeHandler interface */
-  virtual void config_tag_changed(const char *new_location);
-  virtual void config_value_changed(const Configuration::ValueIterator *v);
-  virtual void config_comment_changed(const Configuration::ValueIterator *v);
-  virtual void config_value_erased(const char *path);
+	/* from ConfigurationChangeHandler interface */
+	virtual void config_tag_changed(const char *new_location);
+	virtual void config_value_changed(const Configuration::ValueIterator *v);
+	virtual void config_comment_changed(const Configuration::ValueIterator *v);
+	virtual void config_value_erased(const char *path);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void send_value(unsigned int clid, const Configuration::ValueIterator *i);
-  void send_inv_value(unsigned int clid, const char *path);
+private:
+	void send_value(unsigned int clid, const Configuration::ValueIterator *i);
+	void send_inv_value(unsigned int clid, const char *path);
 
-  template <typename T>
-  T *  prepare_msg(const char *path, bool is_default)
-  {
-    T * m = (T *)calloc(1, sizeof(T));
-    snprintf(m->cp.path, CONFIG_MSG_PATH_LENGTH, "%s", path);
-    m->cp.is_default = is_default;
-    return m;
-  }
+	template <typename T>
+	T *
+	prepare_msg(const char *path, bool is_default)
+	{
+		T *m = (T *)calloc(1, sizeof(T));
+		snprintf(m->cp.path, CONFIG_MSG_PATH_LENGTH, "%s", path);
+		m->cp.is_default = is_default;
+		return m;
+	}
 
-  template <typename T>
-  void *
-    prepare_value_msg(const char *path, bool is_default, bool is_list,
-		      uint16_t num_values, size_t &data_size, void * __attribute__((__may_alias__)) * data)
-  {
-    data_size = sizeof(config_descriptor_t) + sizeof(T) * (is_list ? num_values : 1);
-    void* m = calloc(1, data_size);
-    config_descriptor_t *cd = (config_descriptor_t *)m;
-    snprintf(cd->path, CONFIG_MSG_PATH_LENGTH, "%s", path);
-    cd->is_default = is_default;
-    cd->num_values = is_list ? num_values : 0;
-    *data = (void *)((char *)m + sizeof(config_descriptor_t));
-    return m;
-  }
+	template <typename T>
+	void *
+	prepare_value_msg(const char *path,
+	                  bool        is_default,
+	                  bool        is_list,
+	                  uint16_t    num_values,
+	                  size_t &    data_size,
+	                  void *__attribute__((__may_alias__)) * data)
+	{
+		data_size               = sizeof(config_descriptor_t) + sizeof(T) * (is_list ? num_values : 1);
+		void *               m  = calloc(1, data_size);
+		config_descriptor_t *cd = (config_descriptor_t *)m;
+		snprintf(cd->path, CONFIG_MSG_PATH_LENGTH, "%s", path);
+		cd->is_default = is_default;
+		cd->num_values = is_list ? num_values : 0;
+		*data          = (void *)((char *)m + sizeof(config_descriptor_t));
+		return m;
+	}
 
-  Configuration                       *config_;
-  FawkesNetworkHub                    *hub_;
-  LockQueue< FawkesNetworkMessage * >  inbound_queue_;
+	Configuration *                   config_;
+	FawkesNetworkHub *                hub_;
+	LockQueue<FawkesNetworkMessage *> inbound_queue_;
 
-  LockList< unsigned int >             subscribers_;
-  LockList< unsigned int >::iterator   sit_;
+	LockList<unsigned int>           subscribers_;
+	LockList<unsigned int>::iterator sit_;
 };
 
 } // end namespace fawkes
