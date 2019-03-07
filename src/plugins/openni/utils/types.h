@@ -27,31 +27,32 @@
 #include <string>
 
 namespace fawkes {
-  class HumanSkeletonInterface;
-  class HumanSkeletonProjectionInterface;
-  class ObjectPositionInterface;
+class HumanSkeletonInterface;
+class HumanSkeletonProjectionInterface;
+class ObjectPositionInterface;
 
-  namespace openni {
+namespace openni {
 
 /** User info to pass to draw_skeletons(). */
-typedef struct {
-  fawkes::HumanSkeletonInterface            *skel_if;	/**< Skeleton interface. */
-  fawkes::HumanSkeletonProjectionInterface  *proj_if;	/**< Projection interface. */
+typedef struct
+{
+	fawkes::HumanSkeletonInterface *          skel_if; /**< Skeleton interface. */
+	fawkes::HumanSkeletonProjectionInterface *proj_if; /**< Projection interface. */
 } UserInfo;
 
 /** Map from name to user info. */
-typedef std::map<std::string, UserInfo>  UserMap;
-
+typedef std::map<std::string, UserInfo> UserMap;
 
 /** Hand info to pass to draw_skeletons(). */
-typedef struct {
-  fawkes::ObjectPositionInterface           *hand_if;	/**< Hand pos interface. */
+typedef struct
+{
+	fawkes::ObjectPositionInterface *hand_if; /**< Hand pos interface. */
 } HandInfo;
 
 /** Map from name to hand info. */
-typedef std::map<std::string, HandInfo>  HandMap;
+typedef std::map<std::string, HandInfo> HandMap;
 
-} // end namespace fawkes::openni
+} // namespace openni
 } // end namespace fawkes
 
 #endif

@@ -25,7 +25,7 @@
 #include <cmath>
 
 namespace fawkes {
-  namespace openni {
+namespace openni {
 
 /** Project world coordinate into 2D image projection.
  * This takes the input world coordinates and projects them into the 2D
@@ -45,40 +45,41 @@ namespace fawkes {
  */
 void
 world2projection(xn::DepthGenerator *depthgen,
-		 unsigned int num_points, const XnPoint3D *world, XnPoint3D *proj,
-		 unsigned int width, unsigned int height)
+                 unsigned int        num_points,
+                 const XnPoint3D *   world,
+                 XnPoint3D *         proj,
+                 unsigned int        width,
+                 unsigned int        height)
 {
-  if (width == 0 || height == 0) {
-    xn::DepthMetaData depth_md;
-    depthgen->GetMetaData(depth_md);
-    width  = depth_md.XRes();
-    height = depth_md.YRes();
-  }
-  
-  XnFieldOfView fov;
-  XnStatus st;
-  if ((st = depthgen->GetFieldOfView(fov)) != XN_STATUS_OK) {
-    throw Exception("Failed to get field of view, ignoring. (%s)",
-		    xnGetStatusString(st));
-  }
+	if (width == 0 || height == 0) {
+		xn::DepthMetaData depth_md;
+		depthgen->GetMetaData(depth_md);
+		width  = depth_md.XRes();
+		height = depth_md.YRes();
+	}
 
-  float world_x_to_z = tan(fov.fHFOV / 2) * 2;;
-  float world_y_to_z = tan(fov.fVFOV / 2) * 2;
+	XnFieldOfView fov;
+	XnStatus      st;
+	if ((st = depthgen->GetFieldOfView(fov)) != XN_STATUS_OK) {
+		throw Exception("Failed to get field of view, ignoring. (%s)", xnGetStatusString(st));
+	}
 
-  XnFloat coeff_x = width  / world_x_to_z;
-  XnFloat coeff_y = height / world_y_to_z;
+	float world_x_to_z = tan(fov.fHFOV / 2) * 2;
+	;
+	float world_y_to_z = tan(fov.fVFOV / 2) * 2;
 
-  XnUInt32 half_res_x = width  / 2;
-  XnUInt32 half_res_y = height / 2;
+	XnFloat coeff_x = width / world_x_to_z;
+	XnFloat coeff_y = height / world_y_to_z;
 
-  for (unsigned int i = 0; i < num_points; ++i) {
-    proj[i].X = coeff_x * world[i].X / world[i].Z + half_res_x;
-    proj[i].Y = half_res_y - coeff_y * world[i].Y / world[i].Z;
-    proj[i].Z = world[i].Z;
-  }
+	XnUInt32 half_res_x = width / 2;
+	XnUInt32 half_res_y = height / 2;
+
+	for (unsigned int i = 0; i < num_points; ++i) {
+		proj[i].X = coeff_x * world[i].X / world[i].Z + half_res_x;
+		proj[i].Y = half_res_y - coeff_y * world[i].Y / world[i].Z;
+		proj[i].Z = world[i].Z;
+	}
 }
 
-
-
-} // end namespace fawkes::openni
+} // namespace openni
 } // end namespace fawkes

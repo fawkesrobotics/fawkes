@@ -22,9 +22,9 @@
 
 #include "pcl_frombuf_thread.h"
 
-#include <fvutils/ipc/shm_image.h>
-#include <fvutils/color/colorspaces.h>
 #include <fvutils/base/types.h>
+#include <fvutils/color/colorspaces.h>
+#include <fvutils/ipc/shm_image.h>
 #include <pcl_utils/utils.h>
 
 #include <memory>
@@ -43,75 +43,69 @@ using namespace firevision;
 
 /** Constructor. */
 OpenNiPclOnlyThread::OpenNiPclOnlyThread()
-  : Thread("OpenNiPclOnlyThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE)
+: Thread("OpenNiPclOnlyThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE)
 {
 }
-
 
 /** Destructor. */
 OpenNiPclOnlyThread::~OpenNiPclOnlyThread()
 {
 }
 
-
 void
 OpenNiPclOnlyThread::init()
 {
-  pcl_buf_ = new SharedMemoryImageBuffer("openni-pointcloud");
+	pcl_buf_ = new SharedMemoryImageBuffer("openni-pointcloud");
 
+	width_  = pcl_buf_->width();
+	height_ = pcl_buf_->height();
 
-  width_  = pcl_buf_->width();
-  height_ = pcl_buf_->height();
+	pcl_           = new pcl::PointCloud<pcl::PointXYZ>();
+	pcl_->is_dense = false;
+	pcl_->width    = width_;
+	pcl_->height   = height_;
+	pcl_->points.resize((size_t)width_ * (size_t)height_);
+	pcl_->header.frame_id = config->get_string("/plugins/openni/frame/depth");
 
-  pcl_ = new pcl::PointCloud<pcl::PointXYZ>();
-  pcl_->is_dense = false;
-  pcl_->width    = width_;
-  pcl_->height   = height_;
-  pcl_->points.resize((size_t)width_ * (size_t)height_);
-  pcl_->header.frame_id = config->get_string("/plugins/openni/frame/depth");
-
-  pcl_manager->add_pointcloud("openni-pointcloud", pcl_);
+	pcl_manager->add_pointcloud("openni-pointcloud", pcl_);
 }
-
 
 void
 OpenNiPclOnlyThread::finalize()
 {
-  pcl_manager->remove_pointcloud("openni-pointcloud");
+	pcl_manager->remove_pointcloud("openni-pointcloud");
 
-  delete pcl_buf_;
+	delete pcl_buf_;
 }
-
 
 void
 OpenNiPclOnlyThread::loop()
 {
-  if ((pcl_buf_->num_attached() > 1) || (pcl_.use_count() > 1))
-  {
-    pcl_buf_->lock_for_read();
-    fawkes::Time capture_time = pcl_buf_->capture_time();
+	if ((pcl_buf_->num_attached() > 1) || (pcl_.use_count() > 1)) {
+		pcl_buf_->lock_for_read();
+		fawkes::Time capture_time = pcl_buf_->capture_time();
 
-    if (last_capture_time_ != capture_time) {
-      last_capture_time_ = capture_time;
+		if (last_capture_time_ != capture_time) {
+			last_capture_time_ = capture_time;
 
-      pcl_point_t *pclbuf = (pcl_point_t *)pcl_buf_->buffer();
+			pcl_point_t *pclbuf = (pcl_point_t *)pcl_buf_->buffer();
 
-      pcl::PointCloud<pcl::PointXYZ> &pcl = **pcl_;
-      pcl.header.seq += 1;
-      pcl_utils::set_time(pcl_, capture_time);
+			pcl::PointCloud<pcl::PointXYZ> &pcl = **pcl_;
+			pcl.header.seq += 1;
+			pcl_utils::set_time(pcl_, capture_time);
 
-      unsigned int idx = 0;
-      for (unsigned int h = 0; h < height_; ++h) {
-        for (unsigned int w = 0; w < width_; ++w, ++idx, ++pclbuf) {
-          // Fill in XYZ
-          pcl.points[idx].x = pclbuf->x;
-          pcl.points[idx].y = pclbuf->y;
-          pcl.points[idx].z = pclbuf->z;
-        }
-      }
-    }
+			unsigned int idx = 0;
+			for (unsigned int h = 0; h < height_; ++h) {
+				for (unsigned int w = 0; w < width_; ++w, ++idx, ++pclbuf) {
+					// Fill in XYZ
+					pcl.points[idx].x = pclbuf->x;
+					pcl.points[idx].y = pclbuf->y;
+					pcl.points[idx].z = pclbuf->z;
+				}
+			}
+		}
 
-    pcl_buf_->unlock();
-  }
+		pcl_buf_->unlock();
+	}
 }

@@ -22,6 +22,7 @@
  */
 
 #include <plugins/openni/aspect/openni.h>
+
 #include <XnCppWrapper.h>
 
 namespace fawkes {
@@ -45,15 +46,13 @@ namespace fawkes {
 /** Constructor. */
 OpenNiAspect::OpenNiAspect()
 {
-  add_aspect("OpenNiAspect");
+	add_aspect("OpenNiAspect");
 }
-
 
 /** Virtual empty destructor. */
 OpenNiAspect::~OpenNiAspect()
 {
 }
-
 
 /** Init OpenNI aspect.
  * This set the OpenNI context.
@@ -64,7 +63,7 @@ OpenNiAspect::~OpenNiAspect()
 void
 OpenNiAspect::init_OpenNiAspect(LockPtr<xn::Context> openni_context)
 {
-  this->openni = openni_context;
+	this->openni = openni_context;
 }
 
 } // end namespace fawkes

@@ -31,16 +31,16 @@ namespace fawkes {
 
 class OpenNiAspectIniFin : public AspectIniFin
 {
- public:
-  OpenNiAspectIniFin();
+public:
+	OpenNiAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
-  void set_openni_context(LockPtr<xn::Context> openni_context);
+	void set_openni_context(LockPtr<xn::Context> openni_context);
 
- private:
-  LockPtr<xn::Context> openni_context_;
+private:
+	LockPtr<xn::Context> openni_context_;
 };
 
 } // end namespace fawkes

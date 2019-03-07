@@ -20,9 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "image_thread.h"
 #include "depth_thread.h"
+#include "image_thread.h"
 #include "pointcloud_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -34,17 +35,17 @@ using namespace fawkes;
  */
 class OpenNiDataPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit OpenNiDataPlugin(Configuration *config) : Plugin(config)
-  {
-    OpenNiImageThread *img_thread = new OpenNiImageThread();
-    thread_list.push_back(img_thread);
-    thread_list.push_back(new OpenNiDepthThread());
-    thread_list.push_back(new OpenNiPointCloudThread(img_thread));
-  }
+	explicit OpenNiDataPlugin(Configuration *config) : Plugin(config)
+	{
+		OpenNiImageThread *img_thread = new OpenNiImageThread();
+		thread_list.push_back(img_thread);
+		thread_list.push_back(new OpenNiDepthThread());
+		thread_list.push_back(new OpenNiPointCloudThread(img_thread));
+	}
 };
 
 PLUGIN_DESCRIPTION("Image, depth, and point cloud provider")

@@ -23,67 +23,71 @@
 #ifndef _PLUGINS_OPENNI_CONTEXT_THREAD_H_
 #define _PLUGINS_OPENNI_CONTEXT_THREAD_H_
 
+#include <aspect/aspect_provider.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/aspect_provider.h>
 #include <plugins/openni/aspect/openni_inifin.h>
+#include <sys/types.h>
 #include <utils/time/time.h>
 
-#include <sys/types.h>
 #include <map>
 #include <string>
 
 namespace xn {
-  class Context;
-  class Device;
-}
+class Context;
+class Device;
+} // namespace xn
 
-class OpenNiContextThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::AspectProviderAspect
+class OpenNiContextThread : public fawkes::Thread,
+                            public fawkes::BlockedTimingAspect,
+                            public fawkes::LoggingAspect,
+                            public fawkes::ConfigurableAspect,
+                            public fawkes::ClockAspect,
+                            public fawkes::AspectProviderAspect
 {
- public:
-  OpenNiContextThread();
-  virtual ~OpenNiContextThread();
+public:
+	OpenNiContextThread();
+	virtual ~OpenNiContextThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- private:
-  void print_nodes();
-  void verify_active();
-  void start_sensor_server();
-  void stop_sensor_server();
+private:
+	void print_nodes();
+	void verify_active();
+	void start_sensor_server();
+	void stop_sensor_server();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  fawkes::LockPtr<xn::Context>  openni_;
-  fawkes::OpenNiAspectIniFin    openni_aspect_inifin_;
+private:
+	fawkes::LockPtr<xn::Context> openni_;
+	fawkes::OpenNiAspectIniFin   openni_aspect_inifin_;
 
-  bool         cfg_run_sensor_server_;
-  std::string  cfg_sensor_bin_;
-  pid_t        sensor_server_pid_;
-  xn::Device  *device_;
+	bool        cfg_run_sensor_server_;
+	std::string cfg_sensor_bin_;
+	pid_t       sensor_server_pid_;
+	xn::Device *device_;
 
-  int last_refcount_;
+	int last_refcount_;
 
-  fawkes::Time check_last_;
-  fawkes::Time check_now_;
+	fawkes::Time check_last_;
+	fawkes::Time check_now_;
 
-  unsigned int device_no_data_loops_;
+	unsigned int device_no_data_loops_;
 
-  std::map<std::string, unsigned int> dead_loops_;
+	std::map<std::string, unsigned int> dead_loops_;
 };
 
 #endif
