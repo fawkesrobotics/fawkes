@@ -34,54 +34,51 @@ class V4LCamera;
 
 class V4L1Camera : public Camera
 {
- friend V4LCamera;
+	friend V4LCamera;
 
- public:
-  V4L1Camera(const char *device_name = "/dev/video0");
-  V4L1Camera(const CameraArgumentParser *cap);
-  virtual ~V4L1Camera();
+public:
+	V4L1Camera(const char *device_name = "/dev/video0");
+	V4L1Camera(const CameraArgumentParser *cap);
+	virtual ~V4L1Camera();
 
-  virtual void open();
-  virtual void start();
-  virtual void stop();
-  virtual void close();
-  virtual void flush();
-  virtual void capture();
-  virtual void print_info();
-  virtual bool ready();
+	virtual void open();
+	virtual void start();
+	virtual void stop();
+	virtual void close();
+	virtual void flush();
+	virtual void capture();
+	virtual void print_info();
+	virtual bool ready();
 
-  virtual unsigned char* buffer();
-  virtual unsigned int   buffer_size();
-  virtual void           dispose_buffer();
+	virtual unsigned char *buffer();
+	virtual unsigned int   buffer_size();
+	virtual void           dispose_buffer();
 
-  virtual unsigned int    pixel_width();
-  virtual unsigned int    pixel_height();
-  virtual colorspace_t    colorspace();
+	virtual unsigned int pixel_width();
+	virtual unsigned int pixel_height();
+	virtual colorspace_t colorspace();
 
-  virtual void           set_image_number(unsigned int n);
+	virtual void set_image_number(unsigned int n);
 
- protected:
-  V4L1Camera(const char *device_name, int dev);
+protected:
+	V4L1Camera(const char *device_name, int dev);
 
- private:
-  virtual void post_open();
+private:
+	virtual void post_open();
 
- private:
+private:
+	static const int MMAP = 1;
+	static const int READ = 2;
 
-  static const int MMAP = 1;
-  static const int READ = 2;
+	V4L1CameraData *data_;
 
-  V4L1CameraData *data_;
+	bool opened;
+	bool started;
 
-  bool opened;
-  bool started;
+	int capture_method;
 
-  int capture_method;
-
-  int dev;
-  unsigned char *frame_buffer;
-
-
+	int            dev;
+	unsigned char *frame_buffer;
 };
 
 } // end namespace firevision

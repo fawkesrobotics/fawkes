@@ -21,10 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvcams/camera.h>
-
 #include <core/exception.h>
 #include <core/exceptions/software.h>
+#include <fvcams/camera.h>
 
 namespace firevision {
 
@@ -137,7 +136,7 @@ Camera::~Camera()
 fawkes::Time *
 Camera::capture_time()
 {
-  throw fawkes::NotImplementedException("Timestamping not supported by this camera");
+	throw fawkes::NotImplementedException("Timestamping not supported by this camera");
 }
 
 } // end namespace firevision

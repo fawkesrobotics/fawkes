@@ -26,6 +26,7 @@
 
 #include <fvcams/camera.h>
 #include <fvutils/net/fuse_client_handler.h>
+
 #include <vector>
 
 namespace firevision {
@@ -38,70 +39,67 @@ class JpegImageDecompressor;
 
 class NetworkCamera : public Camera, public FuseClientHandler
 {
+public:
+	NetworkCamera(const char *host, unsigned short port, bool jpeg = false);
+	NetworkCamera(const char *host, unsigned short port, const char *image_id, bool jpeg = false);
+	NetworkCamera(const CameraArgumentParser *cap);
 
- public:
-  NetworkCamera(const char *host, unsigned short port, bool jpeg = false);
-  NetworkCamera(const char *host, unsigned short port, const char *image_id,
-		bool jpeg = false);
-  NetworkCamera(const CameraArgumentParser *cap);
+	virtual ~NetworkCamera();
 
-  virtual ~NetworkCamera();
+	virtual void open();
+	virtual void start();
+	virtual void stop();
+	virtual void close();
+	virtual void flush();
+	virtual void capture();
+	virtual void print_info();
+	virtual bool ready();
 
-  virtual void open();
-  virtual void start();
-  virtual void stop();
-  virtual void close();
-  virtual void flush();
-  virtual void capture();
-  virtual void print_info();
-  virtual bool ready();
+	virtual unsigned char *buffer();
+	virtual unsigned int   buffer_size();
+	virtual void           dispose_buffer();
 
-  virtual unsigned char* buffer();
-  virtual unsigned int   buffer_size();
-  virtual void           dispose_buffer();
+	virtual unsigned int pixel_width();
+	virtual unsigned int pixel_height();
+	virtual colorspace_t colorspace();
 
-  virtual unsigned int   pixel_width();
-  virtual unsigned int   pixel_height();
-  virtual colorspace_t   colorspace();
+	virtual void set_image_id(const char *image_id);
+	virtual void set_image_number(unsigned int n);
 
-  virtual void           set_image_id(const char *image_id);
-  virtual void           set_image_number(unsigned int n);
+	virtual fawkes::Time *capture_time();
 
-  virtual fawkes::Time * capture_time();
+	virtual std::vector<FUSE_imageinfo_t> &image_list();
 
-  virtual std::vector<FUSE_imageinfo_t>& image_list();
+	virtual void fuse_invalid_server_version(uint32_t local_version, uint32_t remote_version) throw();
+	virtual void fuse_connection_established() throw();
+	virtual void fuse_connection_died() throw();
+	virtual void fuse_inbound_received(FuseNetworkMessage *m) throw();
 
-  virtual void fuse_invalid_server_version(uint32_t local_version,
-					   uint32_t remote_version) throw();
-  virtual void fuse_connection_established() throw();
-  virtual void fuse_connection_died() throw();
-  virtual void fuse_inbound_received(FuseNetworkMessage *m) throw();
+private:
+	bool started_;
+	bool opened_;
 
- private:
-  bool started_;
-  bool opened_;
+	bool         connected_;
+	unsigned int local_version_;
+	unsigned int remote_version_;
 
-  bool         connected_;
-  unsigned int local_version_;
-  unsigned int remote_version_;
+	char *         host_;
+	unsigned short port_;
+	char *         image_id_;
 
-  char               *host_;
-  unsigned short      port_;
-  char               *image_id_;
+	bool                   get_jpeg_;
+	JpegImageDecompressor *decompressor_;
+	unsigned char *        decompressed_buffer_;
+	unsigned int           last_width_;
+	unsigned int           last_height_;
 
-  bool get_jpeg_;
-  JpegImageDecompressor *decompressor_;
-  unsigned char      *decompressed_buffer_;
-  unsigned int        last_width_;
-  unsigned int        last_height_;
+	FuseClient *        fusec_;
+	FuseImageContent *  fuse_image_;
+	FuseNetworkMessage *fuse_message_;
 
-  FuseClient         *fusec_;
-  FuseImageContent   *fuse_image_;
-  FuseNetworkMessage *fuse_message_;
+	FUSE_imageinfo_t *fuse_imageinfo_;
 
-  FUSE_imageinfo_t   *fuse_imageinfo_;
-
-  std::vector<FUSE_imageinfo_t> image_list_;
+	std::vector<FUSE_imageinfo_t> image_list_;
 };
 
 } // end namespace firevision

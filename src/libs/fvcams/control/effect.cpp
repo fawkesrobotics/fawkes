@@ -60,7 +60,6 @@ namespace firevision {
  */
 const unsigned int CameraControlEffect::EFFECT_NONE = 0;
 
-
 /** Empty virtual destructor. */
 CameraControlEffect::~CameraControlEffect()
 {

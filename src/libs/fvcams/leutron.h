@@ -33,55 +33,52 @@ namespace firevision {
 
 class LeutronCamera : public Camera
 {
+public:
+	LeutronCamera();
+	virtual ~LeutronCamera();
 
- public:
+	virtual void open();
+	virtual void start();
+	virtual void stop();
+	virtual void close();
+	virtual void flush();
+	virtual void capture();
 
-  LeutronCamera();
-  virtual ~LeutronCamera();
+	virtual void print_info();
 
-  virtual void open();
-  virtual void start();
-  virtual void stop();
-  virtual void close();
-  virtual void flush();
-  virtual void capture();
+	virtual bool ready();
 
-  virtual void print_info();
+	virtual unsigned char *buffer();
+	virtual unsigned int   buffer_size();
+	virtual void           dispose_buffer();
 
-  virtual bool ready();
+	virtual unsigned int pixel_width();
+	virtual unsigned int pixel_height();
+	virtual colorspace_t colorspace();
 
-  virtual unsigned char* buffer();
-  virtual unsigned int   buffer_size();
-  virtual void           dispose_buffer();
+	virtual void set_image_number(unsigned int n);
 
-  virtual unsigned int   pixel_width();
-  virtual unsigned int   pixel_height();
-  virtual colorspace_t   colorspace();
+private:
+	bool opened;
+	bool started;
+	bool autodetect;
 
-  virtual void           set_image_number(unsigned int n);
+	const char *camera_name;
 
- private:
-  bool opened;
-  bool started;
-  bool autodetect;
+	// should be HGRABBER, set to unsigned short to get rid of all the warnings
+	// by the broken-like-shit dsylib.
+	unsigned short int camera_handle;
+	LvCameraNode *     camera;
+	LvGrabberNode *    grabber;
 
-  const char *camera_name;
+	unsigned int width;
+	unsigned int height;
+	unsigned int scaled_width;
+	unsigned int scaled_height;
 
-  // should be HGRABBER, set to unsigned short to get rid of all the warnings
-  // by the broken-like-shit dsylib.
-  unsigned short int camera_handle;
-  LvCameraNode   *camera;
-  LvGrabberNode  *grabber;
+	colorspace_t cspace;
 
-  unsigned int    width;
-  unsigned int    height;
-  unsigned int    scaled_width;
-  unsigned int    scaled_height;
-
-  colorspace_t cspace;
-
-  unsigned char  *scaled_buffer;
-
+	unsigned char *scaled_buffer;
 };
 
 } // end namespace firevision

@@ -26,11 +26,10 @@
 
 #include <core/exception.h>
 #include <core/exceptions/software.h>
-
 #include <fvcams/control/control.h>
 
-#include <typeinfo>
 #include <cstddef>
+#include <typeinfo>
 
 namespace firevision {
 
@@ -39,12 +38,12 @@ class CameraArgumentParser;
 
 class CameraControlFactory
 {
- public:
-  static CameraControl * instance(const char *as);
-  static CameraControl * instance(Camera *camera);
-  static CameraControl * instance(const CameraArgumentParser *cap);
+public:
+	static CameraControl *instance(const char *as);
+	static CameraControl *instance(Camera *camera);
+	static CameraControl *instance(const CameraArgumentParser *cap);
 
-  static CameraControl * instance(const std::type_info &typeinf, Camera *camera);
+	static CameraControl *instance(const std::type_info &typeinf, Camera *camera);
 };
 
 } // end namespace firevision

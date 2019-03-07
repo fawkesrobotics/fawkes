@@ -22,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvcams/control/zoom.h>
 #include <core/exceptions/software.h>
+#include <fvcams/control/zoom.h>
 
 namespace firevision {
 
@@ -64,7 +64,6 @@ CameraControlZoom::~CameraControlZoom()
 {
 }
 
-
 /** Set speed in tele range.
  * @param speed camera-specific speed value
  * @throws NotImplementedException Not implemented by this control
@@ -72,9 +71,8 @@ CameraControlZoom::~CameraControlZoom()
 void
 CameraControlZoom::set_zoom_speed_tele(unsigned int speed)
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Set speed in wide range.
  * @param speed camera-specific speed value.
@@ -83,9 +81,8 @@ CameraControlZoom::set_zoom_speed_tele(unsigned int speed)
 void
 CameraControlZoom::set_zoom_speed_wide(unsigned int speed)
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Set if digital zoom may be used.
  * @param enabled true, to enable digital zoom, false otherwise
@@ -94,7 +91,7 @@ CameraControlZoom::set_zoom_speed_wide(unsigned int speed)
 void
 CameraControlZoom::set_zoom_digital_enabled(bool enabled)
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
 
 } // end namespace firevision

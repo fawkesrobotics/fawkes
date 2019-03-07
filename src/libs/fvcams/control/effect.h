@@ -31,15 +31,15 @@ namespace firevision {
 
 class CameraControlEffect : virtual public CameraControl
 {
- public:
-  static const unsigned int EFFECT_NONE;
+public:
+	static const unsigned int EFFECT_NONE;
 
-  virtual ~CameraControlEffect();
+	virtual ~CameraControlEffect();
 
-  virtual bool         supports_effect(unsigned int effect)             = 0;
-  virtual void         set_effect(unsigned int effect)                  = 0;
-  virtual unsigned int effect()                                         = 0;
-  virtual void         reset_effect()                                   = 0;
+	virtual bool         supports_effect(unsigned int effect) = 0;
+	virtual void         set_effect(unsigned int effect)      = 0;
+	virtual unsigned int effect()                             = 0;
+	virtual void         reset_effect()                       = 0;
 };
 
 } // end namespace firevision

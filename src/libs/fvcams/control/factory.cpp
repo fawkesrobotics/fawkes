@@ -21,28 +21,27 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvcams/control/factory.h>
-#include <fvutils/system/camargp.h>
 #include <core/exceptions/software.h>
-
-#include <fvcams/control/color.h>
-#include <fvcams/control/image.h>
-#include <fvcams/control/effect.h>
-#include <fvcams/control/focus.h>
-#include <fvcams/control/pantilt.h>
-#include <fvcams/control/zoom.h>
-#include <fvcams/control/source.h>
-#include <fvcams/control/dummy.h>
 #include <fvcams/cam_exceptions.h>
+#include <fvcams/control/color.h>
+#include <fvcams/control/dummy.h>
+#include <fvcams/control/effect.h>
+#include <fvcams/control/factory.h>
+#include <fvcams/control/focus.h>
+#include <fvcams/control/image.h>
+#include <fvcams/control/pantilt.h>
+#include <fvcams/control/source.h>
+#include <fvcams/control/zoom.h>
+#include <fvutils/system/camargp.h>
 
 #ifdef HAVE_VISCA_CTRL
-#include <fvcams/control/visca.h>
+#	include <fvcams/control/visca.h>
 #endif
 #ifdef HAVE_EVID100P_CTRL
-#include <fvcams/control/sony_evid100p.h>
+#	include <fvcams/control/sony_evid100p.h>
 #endif
 #ifdef HAVE_DPPTU_CTRL
-#include <fvcams/control/dp_ptu.h>
+#	include <fvcams/control/dp_ptu.h>
 #endif
 
 #include <typeinfo>
@@ -72,38 +71,37 @@ namespace firevision {
 CameraControl *
 CameraControlFactory::instance(const CameraArgumentParser *cap)
 {
-  CameraControl *c = NULL;
+	CameraControl *c = NULL;
 
-  // ######
-  if ( cap->cam_type() == "evid100p" ) {
+	// ######
+	if (cap->cam_type() == "evid100p") {
 #ifdef HAVE_EVID100P_CTRL
-    c = new SonyEviD100PControl(cap);
+		c = new SonyEviD100PControl(cap);
 #else
-    throw UnknownCameraControlTypeException("No EviD100P/Visca support at compile time");
+		throw UnknownCameraControlTypeException("No EviD100P/Visca support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "dpptu" ) {
+	// ######
+	if (cap->cam_type() == "dpptu") {
 #ifdef HAVE_DPPTU_CTRL
-    c = new DPPTUControl(cap);
+		c = new DPPTUControl(cap);
 #else
-    throw UnknownCameraControlTypeException("No DPPTU support at compile time");
+		throw UnknownCameraControlTypeException("No DPPTU support at compile time");
 #endif
-  }
+	}
 
-  // ######
-  if ( cap->cam_type() == "dummy" ) {
-    c = new DummyCameraControl();
-  }
+	// ######
+	if (cap->cam_type() == "dummy") {
+		c = new DummyCameraControl();
+	}
 
-  if ( c == NULL ) {
-    throw UnknownCameraControlTypeException();
-  }
+	if (c == NULL) {
+		throw UnknownCameraControlTypeException();
+	}
 
-  return c;
+	return c;
 }
-
 
 /** Get camera control instance.
  * Get an instance of a camera of the given type. The argument string determines
@@ -121,14 +119,13 @@ CameraControlFactory::instance(const CameraArgumentParser *cap)
 CameraControl *
 CameraControlFactory::instance(const char *as)
 {
-  CameraArgumentParser *cap = new CameraArgumentParser(as);
-  try {
-    return instance(cap);
-  } catch (UnknownCameraControlTypeException &e) {
-    throw;
-  }
+	CameraArgumentParser *cap = new CameraArgumentParser(as);
+	try {
+		return instance(cap);
+	} catch (UnknownCameraControlTypeException &e) {
+		throw;
+	}
 }
-
 
 /** Get camera control instance.
  * Get an instance of a camera control from the passed camera.
@@ -144,14 +141,13 @@ CameraControlFactory::instance(const char *as)
 CameraControl *
 CameraControlFactory::instance(Camera *camera)
 {
-  CameraControl *c = dynamic_cast<CameraControl *>(camera);
-  if (c) {
-    return c;
-  } else {
-    throw fawkes::TypeMismatchException("Camera does not provide requested camera control");
-  }
+	CameraControl *c = dynamic_cast<CameraControl *>(camera);
+	if (c) {
+		return c;
+	} else {
+		throw fawkes::TypeMismatchException("Camera does not provide requested camera control");
+	}
 }
-
 
 /** Get camera control instance.
  * Get an instance of a camera of the given type based on the given camera.
@@ -168,38 +164,38 @@ CameraControlFactory::instance(Camera *camera)
 CameraControl *
 CameraControlFactory::instance(const std::type_info &typeinf, Camera *camera)
 {
-  CameraControl *c = NULL;
+	CameraControl *c = NULL;
 
-  if (typeid(CameraControlColor) == typeinf) {
-    c = dynamic_cast<CameraControlColor *>(camera);
+	if (typeid(CameraControlColor) == typeinf) {
+		c = dynamic_cast<CameraControlColor *>(camera);
 
-  } else if (typeid(CameraControlImage) == typeinf) {
-    c = dynamic_cast<CameraControlImage *>(camera);
+	} else if (typeid(CameraControlImage) == typeinf) {
+		c = dynamic_cast<CameraControlImage *>(camera);
 
-  } else if (typeid(CameraControlPanTilt) == typeinf) {
-    c = dynamic_cast<CameraControlPanTilt *>(camera);
+	} else if (typeid(CameraControlPanTilt) == typeinf) {
+		c = dynamic_cast<CameraControlPanTilt *>(camera);
 
-  } else if (typeid(CameraControlFocus) == typeinf) {
-    c = dynamic_cast<CameraControlFocus *>(camera);
+	} else if (typeid(CameraControlFocus) == typeinf) {
+		c = dynamic_cast<CameraControlFocus *>(camera);
 
-  } else if (typeid(CameraControlZoom) == typeinf) {
-    c = dynamic_cast<CameraControlZoom *>(camera);
+	} else if (typeid(CameraControlZoom) == typeinf) {
+		c = dynamic_cast<CameraControlZoom *>(camera);
 
-  } else if (typeid(CameraControlEffect) == typeinf) {
-    c = dynamic_cast<CameraControlEffect *>(camera);
+	} else if (typeid(CameraControlEffect) == typeinf) {
+		c = dynamic_cast<CameraControlEffect *>(camera);
 
-  } else if (typeid(CameraControlSource) == typeinf) {
-    c = dynamic_cast<CameraControlSource *>(camera);
+	} else if (typeid(CameraControlSource) == typeinf) {
+		c = dynamic_cast<CameraControlSource *>(camera);
 
-  } else {
-    throw UnknownCameraControlTypeException();
-  }
+	} else {
+		throw UnknownCameraControlTypeException();
+	}
 
-  if (c) {
-    return c;
-  } else {
-    throw fawkes::TypeMismatchException("Camera does not provide requested camera control");
-  }
+	if (c) {
+		return c;
+	} else {
+		throw fawkes::TypeMismatchException("Camera does not provide requested camera control");
+	}
 }
 
 } // end namespace firevision
