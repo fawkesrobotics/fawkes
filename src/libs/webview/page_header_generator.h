@@ -29,13 +29,11 @@ namespace fawkes {
 
 class WebPageHeaderGenerator
 {
- public:
-  virtual ~WebPageHeaderGenerator();
+public:
+	virtual ~WebPageHeaderGenerator();
 
-  virtual std::string html_header(std::string &title,
-				  std::string &active_baseurl,
-				  std::string &html_header) = 0;
-
+	virtual std::string
+	html_header(std::string &title, std::string &active_baseurl, std::string &html_header) = 0;
 };
 
 } // end namespace fawkes

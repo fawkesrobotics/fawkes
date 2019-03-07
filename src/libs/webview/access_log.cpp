@@ -19,17 +19,16 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <webview/access_log.h>
-#include <webview/request.h>
-
 #include <core/exception.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
+#include <webview/access_log.h>
+#include <webview/request.h>
 
 #include <cerrno>
-#include <unistd.h>
-#include <stdint.h>
 #include <microhttpd.h>
+#include <stdint.h>
+#include <unistd.h>
 
 namespace fawkes {
 
@@ -45,20 +44,19 @@ namespace fawkes {
  */
 WebviewAccessLog::WebviewAccessLog(const char *filename)
 {
-  logfile_ = fopen(filename, "a");
-  if (! logfile_) {
-    throw Exception(errno, "Failed to open access log %s", filename);
-  }
-  mutex_ = new Mutex();
+	logfile_ = fopen(filename, "a");
+	if (!logfile_) {
+		throw Exception(errno, "Failed to open access log %s", filename);
+	}
+	mutex_ = new Mutex();
 }
 
 /** Destructor. */
 WebviewAccessLog::~WebviewAccessLog()
 {
-  fclose(logfile_);
-  delete mutex_;
+	fclose(logfile_);
+	delete mutex_;
 }
-
 
 /** Log a request.
  * @param request request to log
@@ -66,27 +64,33 @@ WebviewAccessLog::~WebviewAccessLog()
 void
 WebviewAccessLog::log(const WebRequest *request)
 {
-  MutexLocker lock(mutex_);
-  // Apache combined log:
-  //"%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"
-  struct tm ltime;
-  time_t timesec = request->time().get_sec();
-  localtime_r(&timesec, &ltime);
-  char timestr[1024];
-  // [day/month/year:hour:minute:second zone]
-  strftime(timestr, sizeof(timestr), "[%d/%b/%Y:%H:%M:%S %z]", &ltime);
-  fprintf(logfile_, "%s - %s %s \"%s %s %s\" %i %zu \"%s\" \"%s\"\n",
-	  request->client_addr().c_str(),
-	  request->user().length() == 0 ? "-" : request->user().c_str(),
-	  timestr,
-	  request->method_str(), request->uri().c_str(), request->http_version_str(),
-	  request->reply_code(), request->reply_size(),
-	  request->has_header(MHD_HTTP_HEADER_REFERER)
-	    ? request->header(MHD_HTTP_HEADER_REFERER).c_str() : "",
-	  request->has_header(MHD_HTTP_HEADER_USER_AGENT)
-	    ? request->header(MHD_HTTP_HEADER_USER_AGENT).c_str() : "");
+	MutexLocker lock(mutex_);
+	// Apache combined log:
+	//"%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"
+	struct tm ltime;
+	time_t    timesec = request->time().get_sec();
+	localtime_r(&timesec, &ltime);
+	char timestr[1024];
+	// [day/month/year:hour:minute:second zone]
+	strftime(timestr, sizeof(timestr), "[%d/%b/%Y:%H:%M:%S %z]", &ltime);
+	fprintf(logfile_,
+	        "%s - %s %s \"%s %s %s\" %i %zu \"%s\" \"%s\"\n",
+	        request->client_addr().c_str(),
+	        request->user().length() == 0 ? "-" : request->user().c_str(),
+	        timestr,
+	        request->method_str(),
+	        request->uri().c_str(),
+	        request->http_version_str(),
+	        request->reply_code(),
+	        request->reply_size(),
+	        request->has_header(MHD_HTTP_HEADER_REFERER)
+	          ? request->header(MHD_HTTP_HEADER_REFERER).c_str()
+	          : "",
+	        request->has_header(MHD_HTTP_HEADER_USER_AGENT)
+	          ? request->header(MHD_HTTP_HEADER_USER_AGENT).c_str()
+	          : "");
 
-  fflush(logfile_);
+	fflush(logfile_);
 }
 
 } // end namespace fawkes

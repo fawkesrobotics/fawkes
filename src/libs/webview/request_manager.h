@@ -33,20 +33,21 @@ class WebServer;
 
 class WebRequestManager
 {
-  friend WebServer;
- public:
-  WebRequestManager();
-  ~WebRequestManager();
+	friend WebServer;
 
-  unsigned int num_active_requests() const;
-  Time last_request_completion_time() const;
+public:
+	WebRequestManager();
+	~WebRequestManager();
 
- private:
-  void set_server(WebServer *server);
+	unsigned int num_active_requests() const;
+	Time         last_request_completion_time() const;
 
- private:
-  Mutex     *mutex_;
-  WebServer *server_;
+private:
+	void set_server(WebServer *server);
+
+private:
+	Mutex *    mutex_;
+	WebServer *server_;
 };
 
 } // end namespace fawkes

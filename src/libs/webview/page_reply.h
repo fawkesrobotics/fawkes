@@ -32,38 +32,42 @@ class WebPageFooterGenerator;
 
 class WebPageReply : public StaticWebReply
 {
- public:
-  WebPageReply(std::string title, std::string page = "");
+public:
+	WebPageReply(std::string title, std::string page = "");
 
-  virtual const std::string & body();
-  virtual std::string::size_type body_length();
-  virtual void pack() { pack("", 0, 0); }
-  virtual void pack(std::string active_baseurl,
-		    WebPageHeaderGenerator *headergen,
-		    WebPageFooterGenerator *footergen);
+	virtual const std::string &    body();
+	virtual std::string::size_type body_length();
+	virtual void
+	pack()
+	{
+		pack("", 0, 0);
+	}
+	virtual void pack(std::string             active_baseurl,
+	                  WebPageHeaderGenerator *headergen,
+	                  WebPageFooterGenerator *footergen);
 
-  virtual void set_html_header(std::string h);
-  
-  void set_navbar_enabled(bool enabled);
-  bool get_navbar_enabled();
-  void set_footer_enabled(bool enabled);
-  bool get_footer_enabled();
+	virtual void set_html_header(std::string h);
 
- protected:
-  WebPageReply(Code code);
+	void set_navbar_enabled(bool enabled);
+	bool get_navbar_enabled();
+	void set_footer_enabled(bool enabled);
+	bool get_footer_enabled();
 
- protected:
-  /** Title of the page. */
-  std::string _title;
+protected:
+	WebPageReply(Code code);
 
- private:
-  static const char *PAGE_HEADER;
-  static const char *PAGE_FOOTER;
+protected:
+	/** Title of the page. */
+	std::string _title;
 
-  std::string merged_body_;
-  std::string html_header_;
-  bool navbar_enabled_;
-  bool footer_enabled_;
+private:
+	static const char *PAGE_HEADER;
+	static const char *PAGE_FOOTER;
+
+	std::string merged_body_;
+	std::string html_header_;
+	bool        navbar_enabled_;
+	bool        footer_enabled_;
 };
 
 } // end namespace fawkes

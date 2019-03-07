@@ -33,30 +33,31 @@ namespace fawkes {
 
 class Mutex;
 class WebReply;
-template <typename T> class WebviewRouter;
+template <typename T>
+class WebviewRouter;
 
 class WebUrlManager
 {
 	friend WebRequestDispatcher;
- public:
 
+public:
 	/** Function type for handling requests. */
-	typedef std::function<WebReply* (const WebRequest *)> Handler;
+	typedef std::function<WebReply *(const WebRequest *)> Handler;
 
 	WebUrlManager();
-  ~WebUrlManager();
+	~WebUrlManager();
 
-  void add_handler(WebRequest::Method method, const std::string& path, Handler handler);
-  void remove_handler(WebRequest::Method method, const std::string& path);
+	void add_handler(WebRequest::Method method, const std::string &path, Handler handler);
+	void remove_handler(WebRequest::Method method, const std::string &path);
 
+	void add_handler(WebRequest::Method method, const std::string &path, Handler handler, int weight);
 
-  void add_handler(WebRequest::Method method, const std::string& path, Handler handler, int weight);
- private:
-  WebReply * process_request(WebRequest *request);
+private:
+	WebReply *process_request(WebRequest *request);
 
- private:
-  std::mutex  mutex_;
-  std::shared_ptr<WebviewRouter<Handler>>  router_;
+private:
+	std::mutex                              mutex_;
+	std::shared_ptr<WebviewRouter<Handler>> router_;
 };
 
 } // end namespace fawkes
