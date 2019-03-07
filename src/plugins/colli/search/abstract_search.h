@@ -23,14 +23,13 @@
 #ifndef _PLUGINS_COLLI_SEARCH_ABSTRACTSEARCH_H_
 #define _PLUGINS_COLLI_SEARCH_ABSTRACTSEARCH_H_
 
-#include "og_laser.h"
 #include "../common/types.h"
+#include "og_laser.h"
 
 #include <logging/logger.h>
 #include <utils/math/types.h>
 
-namespace fawkes
-{
+namespace fawkes {
 
 /** @class AbstractSearch <plugins/colli/search/abstract_search.h>
  * This is the abstract search interpretation class for an arbitrary
@@ -40,80 +39,76 @@ namespace fawkes
 
 class AbstractSearch
 {
- public:
-  AbstractSearch( LaserOccupancyGrid * occ_grid, Logger* logger );
-  virtual ~AbstractSearch();
+public:
+	AbstractSearch(LaserOccupancyGrid *occ_grid, Logger *logger);
+	virtual ~AbstractSearch();
 
-  /** update complete plan things
+	/** update complete plan things
    *  precondition: the occupancy grid has to be updated previously!
    * @param robo_x Robot x position in grid
    * @param robo_y Robot y position in grid
    * @param target_x Target x position in grid
    * @param target_y Target y position in grid
    */
-  virtual void update( int robo_x, int robo_y, int target_x, int target_y ) = 0;
+	virtual void update(int robo_x, int robo_y, int target_x, int target_y) = 0;
 
-  /** Checks if the update was successful.
+	/** Checks if the update was successful.
    * @return true if "update(...)" was successful, fals otherwise.
    */
-  virtual bool updated_successful() = 0;
+	virtual bool updated_successful() = 0;
 
-  /** return pointer to the local target. do not modify afterwards
+	/** return pointer to the local target. do not modify afterwards
    *  precondition: update has to be called before this is ok here
    */
-  const point_t& get_local_target();
+	const point_t &get_local_target();
 
-  /** return pointer to the local trajectory point. do not modify afterwards
+	/** return pointer to the local trajectory point. do not modify afterwards
    *  precondition: update has to be called before this is ok here
    */
-  const point_t& get_local_trajec();
+	const point_t &get_local_trajec();
 
- protected:
-  LaserOccupancyGrid * occ_grid_; /**< The occupancy grid */
+protected:
+	LaserOccupancyGrid *occ_grid_; /**< The occupancy grid */
 
-  point_t local_target_;  /**< the calculated target where to drive to */
-  point_t local_trajec_;  /**< the calculated trajectory where to drive to */
+	point_t local_target_; /**< the calculated target where to drive to */
+	point_t local_trajec_; /**< the calculated trajectory where to drive to */
 
-  colli_cell_cost_t cell_costs_; /**< The costs for cells in occupancy grid */
+	colli_cell_cost_t cell_costs_; /**< The costs for cells in occupancy grid */
 };
-
-
 
 /** Constructor.
  * @param occ_grid The laser occupancy-grid
  * @param logger The fawkes logger
  */
-inline
-AbstractSearch::AbstractSearch( LaserOccupancyGrid * occ_grid, Logger* logger )
+inline AbstractSearch::AbstractSearch(LaserOccupancyGrid *occ_grid, Logger *logger)
 {
-  logger->log_debug("AbstractSearch", "(Constructor): Entering");
-  occ_grid_ = occ_grid;
-  cell_costs_ = occ_grid_->get_cell_costs();
-  logger->log_debug("AbstractSearch", "(Constructor): Exiting");
+	logger->log_debug("AbstractSearch", "(Constructor): Entering");
+	occ_grid_   = occ_grid;
+	cell_costs_ = occ_grid_->get_cell_costs();
+	logger->log_debug("AbstractSearch", "(Constructor): Exiting");
 }
 
 /** Destructor. */
-inline
-AbstractSearch::~AbstractSearch()
+inline AbstractSearch::~AbstractSearch()
 {
 }
 
 /** Get the local target in the grid.
  * @return The local target in grid as a point_t struct
  */
-inline const point_t&
+inline const point_t &
 AbstractSearch::get_local_target()
 {
-  return local_target_;
+	return local_target_;
 }
 
 /** Get the local trajectory in the grid.
  * @return The local trajectory in grid as a point_t struct
  */
-inline const point_t&
+inline const point_t &
 AbstractSearch::get_local_trajec()
 {
-  return local_trajec_;
+	return local_trajec_;
 }
 
 } // namespace fawkes

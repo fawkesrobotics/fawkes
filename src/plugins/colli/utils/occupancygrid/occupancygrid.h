@@ -27,66 +27,64 @@
 
 #include <vector>
 
-namespace fawkes
-{
+namespace fawkes {
 
 /** Occupancy threshold. */
 const float OCCUPANCY_THRESHOLD = 0.45f;
 
 class OccupancyGrid
 {
- public:
-  OccupancyGrid(int width, int height, int cell_width=5, int cell_height=5);
-  virtual ~OccupancyGrid();
+public:
+	OccupancyGrid(int width, int height, int cell_width = 5, int cell_height = 5);
+	virtual ~OccupancyGrid();
 
-  ///\brief Get the cell width (in cm)
-  int get_cell_width();
+	///\brief Get the cell width (in cm)
+	int get_cell_width();
 
-   ///\brief Get the cell height (in cm)
-  int get_cell_height();
+	///\brief Get the cell height (in cm)
+	int get_cell_height();
 
-  ///\brief Get the width of the grid
-  int get_width();
+	///\brief Get the width of the grid
+	int get_width();
 
-  ///\brief Get the height of the grid
-  int get_height();
+	///\brief Get the height of the grid
+	int get_height();
 
-  ///\brief Resets the cell width (in cm)
-  void set_cell_width(int cell_width);
+	///\brief Resets the cell width (in cm)
+	void set_cell_width(int cell_width);
 
-  ///\brief Resets the cell height (in cm)
-  void set_cell_height(int cell_height);
+	///\brief Resets the cell height (in cm)
+	void set_cell_height(int cell_height);
 
-  ///\brief Resets the width of the grid and constructs a new empty grid
-  void set_width(int width);
+	///\brief Resets the width of the grid and constructs a new empty grid
+	void set_width(int width);
 
-  ///\brief Resets the height of the grid and constructs a new empty grid
-  void set_height(int height);
+	///\brief Resets the height of the grid and constructs a new empty grid
+	void set_height(int height);
 
-  ///\brief Reset the occupancy probability of a cell
-  virtual void set_prob(int x, int y, Probability prob);
+	///\brief Reset the occupancy probability of a cell
+	virtual void set_prob(int x, int y, Probability prob);
 
-  ///\brief Resets all occupancy probabilities
-  void fill(Probability prob);
+	///\brief Resets all occupancy probabilities
+	void fill(Probability prob);
 
-  ///\brief Get the occupancy probability of a cell
-  Probability get_prob(int x, int y);
+	///\brief Get the occupancy probability of a cell
+	Probability get_prob(int x, int y);
 
-  ///\brief Get the occupancy probability of a cell
-  Probability& operator () (const int x, const int y);
+	///\brief Get the occupancy probability of a cell
+	Probability &operator()(const int x, const int y);
 
-  ///\brief Init a new empty grid with the predefined parameters */
-  void init_grid();
+	///\brief Init a new empty grid with the predefined parameters */
+	void init_grid();
 
-  /// The occupancy probability of the cells in a 2D array
-  std::vector<std::vector<Probability> > occupancy_probs_;
+	/// The occupancy probability of the cells in a 2D array
+	std::vector<std::vector<Probability>> occupancy_probs_;
 
- protected:
-  int cell_width_;   /**< Cell width in cm */
-  int cell_height_;  /**< Cell height in cm */
-  int width_;       /**< Width of the grid in # cells */
-  int height_;      /**< Height of the grid in # cells */
-
+protected:
+	int cell_width_;  /**< Cell width in cm */
+	int cell_height_; /**< Cell height in cm */
+	int width_;       /**< Width of the grid in # cells */
+	int height_;      /**< Height of the grid in # cells */
 };
 
 } // namespace fawkes

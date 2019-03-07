@@ -25,28 +25,27 @@
 
 #include "abstract_drive_mode.h"
 
-namespace fawkes
-{
+namespace fawkes {
 
 class ForwardDriveModule;
 class BackwardDriveModule;
 
 class BiwardDriveModule : public AbstractDriveMode
 {
- public:
-  BiwardDriveModule( ForwardDriveModule*  forward,
-                     BackwardDriveModule* backward,
-                     Logger* logger,
-                     Configuration* config);
-  ~BiwardDriveModule();
+public:
+	BiwardDriveModule(ForwardDriveModule * forward,
+	                  BackwardDriveModule *backward,
+	                  Logger *             logger,
+	                  Configuration *      config);
+	~BiwardDriveModule();
 
-  void update();
+	void update();
 
- private:
-  ForwardDriveModule*  mod_forward_;
-  BackwardDriveModule* mod_backward_;
+private:
+	ForwardDriveModule * mod_forward_;
+	BackwardDriveModule *mod_backward_;
 
-  int   count_forward_;
+	int count_forward_;
 };
 
 } // namespace fawkes

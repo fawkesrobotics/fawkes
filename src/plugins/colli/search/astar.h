@@ -23,15 +23,14 @@
 #ifndef _PLUGINS_COLLI_SEARCH_ASTAR_H_
 #define _PLUGINS_COLLI_SEARCH_ASTAR_H_
 
-#include "astar_state.h"
 #include "../common/types.h"
+#include "astar_state.h"
 
-#include <vector>
-#include <queue>
 #include <map>
+#include <queue>
+#include <vector>
 
-namespace fawkes
-{
+namespace fawkes {
 
 class LaserOccupancyGrid;
 class Logger;
@@ -45,85 +44,86 @@ typedef struct point_struct point_t;
  */
 class AStarColli
 {
- public:
-  AStarColli( LaserOccupancyGrid * occGrid, Logger* logger, Configuration* config );
-  ~AStarColli();
+public:
+	AStarColli(LaserOccupancyGrid *occGrid, Logger *logger, Configuration *config);
+	~AStarColli();
 
-  /* =========================================== */
-  /* ************* PUBLIC METHODS ************** */
-  /* =========================================== */
-  /** solves the given assignment.
+	/* =========================================== */
+	/* ************* PUBLIC METHODS ************** */
+	/* =========================================== */
+	/** solves the given assignment.
    *  This starts the search for a path through the occupance grid to the
    *    target point.
    *  Performing astar search over the occupancy grid and returning the solution.
    */
-  void solve( const point_t &robo_pos, const point_t &target_pos, std::vector<point_t> &solution );
+	void solve(const point_t &robo_pos, const point_t &target_pos, std::vector<point_t> &solution);
 
-  ///\brief Method, returning the nearest point outside of an obstacle.
-  point_t remove_target_from_obstacle( int target_x, int target_y, int step_x, int step_y );
+	///\brief Method, returning the nearest point outside of an obstacle.
+	point_t remove_target_from_obstacle(int target_x, int target_y, int step_x, int step_y);
 
- private:
-  /* =========================================== */
-  /* ************ PRIVATE VARIABLES ************ */
-  /* =========================================== */
-  fawkes::Logger* logger_;
+private:
+	/* =========================================== */
+	/* ************ PRIVATE VARIABLES ************ */
+	/* =========================================== */
+	fawkes::Logger *logger_;
 
-  // this is the local reference to the occupancy grid.
-  LaserOccupancyGrid * occ_grid_;
-  unsigned int width_;
-  unsigned int height_;
+	// this is the local reference to the occupancy grid.
+	LaserOccupancyGrid *occ_grid_;
+	unsigned int        width_;
+	unsigned int        height_;
 
-  // Costs for the cells in grid
-  colli_cell_cost_t cell_costs_;
+	// Costs for the cells in grid
+	colli_cell_cost_t cell_costs_;
 
-  // this is the local robot position and target point.
-  AStarState robo_pos_;
-  AStarState target_state_;
+	// this is the local robot position and target point.
+	AStarState robo_pos_;
+	AStarState target_state_;
 
-  // This is a state vector...
-  // It is for speed purposes. So I do not have to do a new each time
-  //   I have to malloc a new one each time.
-  std::vector< AStarState * > astar_states_;
+	// This is a state vector...
+	// It is for speed purposes. So I do not have to do a new each time
+	//   I have to malloc a new one each time.
+	std::vector<AStarState *> astar_states_;
 
-  // maximum number of states available for a* and current index
-  int max_states_;
-  int astar_state_count_;
+	// maximum number of states available for a* and current index
+	int max_states_;
+	int astar_state_count_;
 
-  // this is AStars openlist
-  struct cmp {
-    bool operator() ( AStarState * a1, AStarState * a2 ) const
-    {
-      return (a1->total_cost_ > a2->total_cost_);
-    }
-  };
+	// this is AStars openlist
+	struct cmp
+	{
+		bool
+		operator()(AStarState *a1, AStarState *a2) const
+		{
+			return (a1->total_cost_ > a2->total_cost_);
+		}
+	};
 
-  std::priority_queue< AStarState *, std::vector< AStarState * >, cmp > open_list_;
+	std::priority_queue<AStarState *, std::vector<AStarState *>, cmp> open_list_;
 
-  // this is AStars closedList
-  std::map< int, int > closed_list_;
+	// this is AStars closedList
+	std::map<int, int> closed_list_;
 
-  /* =========================================== */
-  /* ************ PRIVATE METHODS ************** */
-  /* =========================================== */
+	/* =========================================== */
+	/* ************ PRIVATE METHODS ************** */
+	/* =========================================== */
 
-  // search with AStar through the OccGrid
-  AStarState * search();
+	// search with AStar through the OccGrid
+	AStarState *search();
 
-  // Calculate a unique key for a given coordinate
-  int calculate_key( int x, int y );
+	// Calculate a unique key for a given coordinate
+	int calculate_key(int x, int y);
 
-  // Check if the state is a goal
-  bool is_goal( AStarState * state );
+	// Check if the state is a goal
+	bool is_goal(AStarState *state);
 
-  // Calculate heuristic for a given state
-  int heuristic( AStarState * state );
+	// Calculate heuristic for a given state
+	int heuristic(AStarState *state);
 
-  // Generate all children for a given State
-  void generate_children( AStarState * father );
+	// Generate all children for a given State
+	void generate_children(AStarState *father);
 
-  // Generates a solution sequence for a given state
-  void get_solution_sequence( AStarState * node, std::vector<point_t> &solution );
-
+	// Generates a solution sequence for a given state
+	void get_solution_sequence(AStarState *node, std::vector<point_t> &solution);
 };
 
 } // namespace fawkes

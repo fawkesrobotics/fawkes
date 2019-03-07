@@ -25,19 +25,17 @@
 
 #include "abstract_drive_mode.h"
 
-namespace fawkes
-{
+namespace fawkes {
 
 class StopDriveModule : public AbstractDriveMode
 {
- public:
-  StopDriveModule(Logger* logger, Configuration* config);
-  ~StopDriveModule();
+public:
+	StopDriveModule(Logger *logger, Configuration *config);
+	~StopDriveModule();
 
-  virtual void update();
+	virtual void update();
 
- private:
-
+private:
 };
 
 } // namespace fawkes

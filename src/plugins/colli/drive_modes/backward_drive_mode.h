@@ -25,26 +25,31 @@
 
 #include "abstract_drive_mode.h"
 
-namespace fawkes
-{
+namespace fawkes {
 
 class BackwardDriveModule : public AbstractDriveMode
 {
- public:
-  BackwardDriveModule(Logger* logger, Configuration* config);
-  ~BackwardDriveModule();
+public:
+	BackwardDriveModule(Logger *logger, Configuration *config);
+	~BackwardDriveModule();
 
-  void update();
+	void update();
 
- private:
-  float backward_curvature( float dist_to_target, float dist_to_trajec, float alpha,
-                            float cur_trans, float cur_rot );
+private:
+	float backward_curvature(float dist_to_target,
+	                         float dist_to_trajec,
+	                         float alpha,
+	                         float cur_trans,
+	                         float cur_rot);
 
-  float backward_translation( float dist_to_target, float dist_to_front, float alpha,
-                              float cur_trans, float cur_rot, float des_rot );
-
+	float backward_translation(float dist_to_target,
+	                           float dist_to_front,
+	                           float alpha,
+	                           float cur_trans,
+	                           float cur_rot,
+	                           float des_rot);
 };
 
-} // nanespace fawkes
+} // namespace fawkes
 
 #endif

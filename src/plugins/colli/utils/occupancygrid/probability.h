@@ -23,8 +23,7 @@
 #ifndef _PLUGINS_COLLI_UTILS_OCCUPANCYGRID_PROBABILITY_H_
 #define _PLUGINS_COLLI_UTILS_OCCUPANCYGRID_PROBABILITY_H_
 
-namespace fawkes
-{
+namespace fawkes {
 
 /** A probability type. */
 typedef float Probability;
@@ -36,7 +35,7 @@ typedef float Probability;
 inline bool
 isProb(Probability p)
 {
-  return ((p >= 0) && (p <= 1));
+	return ((p >= 0) && (p <= 1));
 }
 
 } // namespace fawkes

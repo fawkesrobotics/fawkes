@@ -25,23 +25,29 @@
 
 #include "abstract_drive_mode.h"
 
-namespace fawkes
-{
+namespace fawkes {
 
 class ForwardDriveModule : public AbstractDriveMode
 {
- public:
-  ForwardDriveModule(Logger* logger, Configuration* config);
-  ~ForwardDriveModule();
+public:
+	ForwardDriveModule(Logger *logger, Configuration *config);
+	~ForwardDriveModule();
 
-  virtual void update();
+	virtual void update();
 
- private:
-  float forward_curvature( float dist_to_target, float dist_to_trajec, float alpha,
-                           float cur_trans, float cur_rot );
+private:
+	float forward_curvature(float dist_to_target,
+	                        float dist_to_trajec,
+	                        float alpha,
+	                        float cur_trans,
+	                        float cur_rot);
 
-  float forward_translation( float dist_to_target, float dist_to_front, float alpha,
-                             float cur_trans, float cur_rot, float des_rot );
+	float forward_translation(float dist_to_target,
+	                          float dist_to_front,
+	                          float alpha,
+	                          float cur_trans,
+	                          float cur_rot,
+	                          float des_rot);
 };
 
 } // namespace fawkes

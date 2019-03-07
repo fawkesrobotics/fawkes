@@ -23,71 +23,66 @@
 #ifndef _PLUGINS_COLLI_ACT_THREAD_H_
 #define _PLUGINS_COLLI_ACT_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <aspect/tf.h>
-
+#include <core/threading/thread.h>
 #include <interfaces/NavigatorInterface.h>
 
 #include <string>
 
 namespace ros {
-  class Subscriber;
+class Subscriber;
 }
 
-namespace fawkes
-{
-  class NavigatorInterface;
+namespace fawkes {
+class NavigatorInterface;
 }
 
 class ColliThread;
 
-class ColliActThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::TransformAspect
+class ColliActThread : public fawkes::Thread,
+                       public fawkes::BlockedTimingAspect,
+                       public fawkes::LoggingAspect,
+                       public fawkes::BlackBoardAspect,
+                       public fawkes::ConfigurableAspect,
+                       public fawkes::TransformAspect
 {
- public:
-  ColliActThread(ColliThread* colli_thread);
-  virtual ~ColliActThread();
+public:
+	ColliActThread(ColliThread *colli_thread);
+	virtual ~ColliActThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- private:
+private:
+	ColliThread *thread_colli_;
 
-  ColliThread*   thread_colli_;
+	fawkes::NavigatorInterface *if_navi_;
 
-  fawkes::NavigatorInterface* if_navi_;
+	ros::Subscriber *sub_;
 
-  ros::Subscriber* sub_;
+	std::string cfg_iface_navi_;
 
-  std::string cfg_iface_navi_;
+	std::string cfg_frame_odom_;
 
-  std::string cfg_frame_odom_;
+	// default parameters, read from config
+	float                                       cfg_security_distance_;
+	float                                       cfg_max_velocity_;
+	float                                       cfg_max_rotation_;
+	float                                       cfg_escaping_enabled_;
+	bool                                        cfg_stop_at_target_;
+	fawkes::NavigatorInterface::OrientationMode cfg_orient_mode_;
+	fawkes::NavigatorInterface::DriveMode       cfg_drive_mode_;
 
-  // default parameters, read from config
-  float cfg_security_distance_;
-  float cfg_max_velocity_;
-  float cfg_max_rotation_;
-  float cfg_escaping_enabled_;
-  bool  cfg_stop_at_target_;
-  fawkes::NavigatorInterface::OrientationMode cfg_orient_mode_;
-  fawkes::NavigatorInterface::DriveMode       cfg_drive_mode_;
-
-  // methods mainly transfered from libmonaco
-  bool colli_final();
-  void colli_stop();
-  void colli_relgoto(float x, float y, float ori);
-  void colli_goto(float x, float y, float ori);
+	// methods mainly transfered from libmonaco
+	bool colli_final();
+	void colli_stop();
+	void colli_relgoto(float x, float y, float ori);
+	void colli_goto(float x, float y, float ori);
 };
 
 #endif
-

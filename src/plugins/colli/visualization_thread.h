@@ -24,70 +24,68 @@
 
 #ifdef HAVE_VISUAL_DEBUGGING
 
-#include "common/types.h"
+#	include "common/types.h"
 
-#include <core/threading/thread.h>
-#include <core/threading/mutex.h>
-#include <aspect/tf.h>
-#include <aspect/configurable.h>
-#include <aspect/logging.h>
-#include <plugins/ros/aspect/ros.h>
+#	include <aspect/configurable.h>
+#	include <aspect/logging.h>
+#	include <aspect/tf.h>
+#	include <core/threading/mutex.h>
+#	include <core/threading/thread.h>
+#	include <plugins/ros/aspect/ros.h>
 
-#include <vector>
+#	include <vector>
 
 namespace ros {
-  class Publisher;
+class Publisher;
 }
 
 namespace fawkes {
-  class LaserOccupancyGrid;
-  class Search;
-  class RoboShapeColli;
-  typedef struct point_struct point_t;
-}
+class LaserOccupancyGrid;
+class Search;
+class RoboShapeColli;
+typedef struct point_struct point_t;
+} // namespace fawkes
 
-class ColliVisualizationThread
-: public fawkes::Thread,
-  public fawkes::TransformAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ROSAspect
+class ColliVisualizationThread : public fawkes::Thread,
+                                 public fawkes::TransformAspect,
+                                 public fawkes::ConfigurableAspect,
+                                 public fawkes::LoggingAspect,
+                                 public fawkes::ROSAspect
 {
- public:
-  ColliVisualizationThread();
+public:
+	ColliVisualizationThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  virtual void setup(fawkes::LaserOccupancyGrid* occ_grid,
-                     fawkes::Search* search);
+	virtual void setup(fawkes::LaserOccupancyGrid *occ_grid, fawkes::Search *search);
 
- private:
-  fawkes::Mutex mutex_;
+private:
+	fawkes::Mutex mutex_;
 
-  fawkes::LaserOccupancyGrid *occ_grid_;
-  fawkes::Search             *search_;
-  fawkes::RoboShapeColli    *roboshape_;
-  fawkes::colli_cell_cost_t   cell_costs_;
+	fawkes::LaserOccupancyGrid *occ_grid_;
+	fawkes::Search *            search_;
+	fawkes::RoboShapeColli *    roboshape_;
+	fawkes::colli_cell_cost_t   cell_costs_;
 
-  ros::Publisher *pub_roboshape_;
+	ros::Publisher *pub_roboshape_;
 
-  ros::Publisher *pub_cells_occ_;
-  ros::Publisher *pub_cells_near_;
-  ros::Publisher *pub_cells_mid_;
-  ros::Publisher *pub_cells_far_;
-  ros::Publisher *pub_cells_free_;
-  ros::Publisher *pub_search_path_;
+	ros::Publisher *pub_cells_occ_;
+	ros::Publisher *pub_cells_near_;
+	ros::Publisher *pub_cells_mid_;
+	ros::Publisher *pub_cells_far_;
+	ros::Publisher *pub_cells_free_;
+	ros::Publisher *pub_search_path_;
 
-  std::vector<fawkes::point_t> cells_occ_;
-  std::vector<fawkes::point_t> cells_near_;
-  std::vector<fawkes::point_t> cells_mid_;
-  std::vector<fawkes::point_t> cells_far_;
-  std::vector<fawkes::point_t> cells_free_;
+	std::vector<fawkes::point_t> cells_occ_;
+	std::vector<fawkes::point_t> cells_near_;
+	std::vector<fawkes::point_t> cells_mid_;
+	std::vector<fawkes::point_t> cells_far_;
+	std::vector<fawkes::point_t> cells_free_;
 
-  std::string frame_base_;
-  std::string frame_laser_;
+	std::string frame_base_;
+	std::string frame_laser_;
 };
 
 #endif
