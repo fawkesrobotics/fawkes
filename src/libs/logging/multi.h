@@ -29,75 +29,63 @@
 
 namespace fawkes {
 
-
 class MultiLoggerData;
 
- class MultiLogger : public Logger, public LoggerEmployer
+class MultiLogger : public Logger, public LoggerEmployer
 {
- public:
-  MultiLogger();
-  MultiLogger(Logger *logger);
-  virtual ~MultiLogger();
+public:
+	MultiLogger();
+	MultiLogger(Logger *logger);
+	virtual ~MultiLogger();
 
-  void add_logger(Logger *logger);
-  void remove_logger(Logger *logger);
+	void add_logger(Logger *logger);
+	void remove_logger(Logger *logger);
 
-  virtual void set_loglevel(LogLevel level);
+	virtual void set_loglevel(LogLevel level);
 
-  virtual void log(LogLevel level,
-		   const char *component, const char *format, ...);
-  virtual void log_debug(const char *component, const char *format, ...);
-  virtual void log_info(const char *component, const char *format, ...);
-  virtual void log_warn(const char *component, const char *format, ...);
-  virtual void log_error(const char *component, const char *format, ...);
+	virtual void log(LogLevel level, const char *component, const char *format, ...);
+	virtual void log_debug(const char *component, const char *format, ...);
+	virtual void log_info(const char *component, const char *format, ...);
+	virtual void log_warn(const char *component, const char *format, ...);
+	virtual void log_error(const char *component, const char *format, ...);
 
+	virtual void log(LogLevel level, const char *component, Exception &e);
+	virtual void log_debug(const char *component, Exception &e);
+	virtual void log_info(const char *component, Exception &e);
+	virtual void log_warn(const char *component, Exception &e);
+	virtual void log_error(const char *component, Exception &e);
 
-  virtual void log(LogLevel level, const char *component, Exception &e);
-  virtual void log_debug(const char *component, Exception &e);
-  virtual void log_info(const char *component, Exception &e);
-  virtual void log_warn(const char *component, Exception &e);
-  virtual void log_error(const char *component, Exception &e);
+	virtual void vlog(LogLevel level, const char *component, const char *format, va_list va);
+	virtual void vlog_debug(const char *component, const char *format, va_list va);
+	virtual void vlog_info(const char *component, const char *format, va_list va);
+	virtual void vlog_warn(const char *component, const char *format, va_list va);
+	virtual void vlog_error(const char *component, const char *format, va_list va);
 
-  virtual void vlog(LogLevel level, const char *component,
-		    const char *format, va_list va);
-  virtual void vlog_debug(const char *component, const char *format, va_list va);
-  virtual void vlog_info(const char *component, const char *format, va_list va);
-  virtual void vlog_warn(const char *component, const char *format, va_list va);
-  virtual void vlog_error(const char *component, const char *format, va_list va);
+	virtual void
+	             tlog(LogLevel level, struct timeval *t, const char *component, const char *format, ...);
+	virtual void tlog_debug(struct timeval *t, const char *component, const char *format, ...);
+	virtual void tlog_info(struct timeval *t, const char *component, const char *format, ...);
+	virtual void tlog_warn(struct timeval *t, const char *component, const char *format, ...);
+	virtual void tlog_error(struct timeval *t, const char *component, const char *format, ...);
 
-  virtual void tlog(LogLevel level, struct timeval *t,
-		    const char *component, const char *format, ...);
-  virtual void tlog_debug(struct timeval *t, const char *component,
-			  const char *format, ...);
-  virtual void tlog_info(struct timeval *t, const char *component,
-			 const char *format, ...);
-  virtual void tlog_warn(struct timeval *t, const char *component,
-			 const char *format, ...);
-  virtual void tlog_error(struct timeval *t, const char *component,
-			  const char *format, ...);
+	virtual void tlog(LogLevel level, struct timeval *t, const char *component, Exception &e);
+	virtual void tlog_debug(struct timeval *t, const char *component, Exception &e);
+	virtual void tlog_info(struct timeval *t, const char *component, Exception &e);
+	virtual void tlog_warn(struct timeval *t, const char *component, Exception &e);
+	virtual void tlog_error(struct timeval *t, const char *component, Exception &e);
 
-  virtual void tlog(LogLevel level, struct timeval *t, const char *component, Exception &e);
-  virtual void tlog_debug(struct timeval *t, const char *component, Exception &e);
-  virtual void tlog_info(struct timeval *t, const char *component, Exception &e);
-  virtual void tlog_warn(struct timeval *t, const char *component, Exception &e);
-  virtual void tlog_error(struct timeval *t, const char *component, Exception &e);
+	virtual void
+	vtlog(LogLevel level, struct timeval *t, const char *component, const char *format, va_list va);
+	virtual void
+	             vtlog_debug(struct timeval *t, const char *component, const char *format, va_list va);
+	virtual void vtlog_info(struct timeval *t, const char *component, const char *format, va_list va);
+	virtual void vtlog_warn(struct timeval *t, const char *component, const char *format, va_list va);
+	virtual void
+	vtlog_error(struct timeval *t, const char *component, const char *format, va_list va);
 
-  virtual void vtlog(LogLevel level, struct timeval *t, const char *component,
-		     const char *format, va_list va);
-  virtual void vtlog_debug(struct timeval *t, const char *component,
-			   const char *format, va_list va);
-  virtual void vtlog_info(struct timeval *t, const char *component,
-			  const char *format, va_list va);
-  virtual void vtlog_warn(struct timeval *t, const char *component,
-			  const char *format, va_list va);
-  virtual void vtlog_error(struct timeval *t, const char *component,
-			   const char *format, va_list va);
-
-
- private:
-  MultiLoggerData *data;
+private:
+	MultiLoggerData *data;
 };
-
 
 } // end namespace fawkes
 

@@ -21,14 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <logging/factory.h>
 #include <logging/console.h>
+#include <logging/factory.h>
 #include <logging/file.h>
-#include <logging/syslog.h>
 #include <logging/multi.h>
+#include <logging/syslog.h>
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 
 namespace fawkes {
@@ -43,11 +43,10 @@ namespace fawkes {
  * @param msg optional explanation
  */
 UnknownLoggerTypeException::UnknownLoggerTypeException(const char *msg)
-  : Exception("Unknown logger type")
+: Exception("Unknown logger type")
 {
-  append(msg);
+	append(msg);
 }
-
 
 /** @class LoggerFactory <logging/factory.h>
  * Logger factory.
@@ -67,17 +66,17 @@ UnknownLoggerTypeException::UnknownLoggerTypeException(const char *msg)
 Logger::LogLevel
 LoggerFactory::string_to_loglevel(const char *log_level)
 {
-  std::string ll = log_level;
+	std::string ll = log_level;
 
-  if (ll == "info" || ll == "INFO") {
-    return Logger::LL_INFO;
-  } else if (ll == "warn" || ll == "WARN") {
-    return Logger::LL_WARN;
-  } else if (ll == "error" || ll == "ERROR") {
-    return Logger::LL_ERROR;
-  } else {
-    return Logger::LL_DEBUG;
-  }
+	if (ll == "info" || ll == "INFO") {
+		return Logger::LL_INFO;
+	} else if (ll == "warn" || ll == "WARN") {
+		return Logger::LL_WARN;
+	} else if (ll == "error" || ll == "ERROR") {
+		return Logger::LL_ERROR;
+	} else {
+		return Logger::LL_DEBUG;
+	}
 }
 
 /** Get logger instance.
@@ -98,32 +97,32 @@ LoggerFactory::string_to_loglevel(const char *log_level)
 Logger *
 LoggerFactory::instance(const char *type, const char *as)
 {
-  Logger *l = NULL;
+	Logger *l = NULL;
 
-  if ( strcmp(type, "console") == 0 ) {
-    // no supported arguments
-    l = new ConsoleLogger();
-  } else if ( strcmp(type, "file") == 0 ) {
-    char *tmp = strdup(as);
-    char *saveptr;
-    char *r = strtok_r(tmp, ":", &saveptr);
-    const char *file_name;
-    r = strtok_r(tmp, ":", &saveptr);
-    if ( r == NULL ) {
-      file_name = "unnamed.log";
-    } else {
-      file_name = r;
-    }
-    l = new FileLogger(file_name);
-    free(tmp);
-  } else if ( strcmp(type, "syslog") == 0 ) {
-    l = new SyslogLogger(as);
-  }
+	if (strcmp(type, "console") == 0) {
+		// no supported arguments
+		l = new ConsoleLogger();
+	} else if (strcmp(type, "file") == 0) {
+		char *      tmp = strdup(as);
+		char *      saveptr;
+		char *      r = strtok_r(tmp, ":", &saveptr);
+		const char *file_name;
+		r = strtok_r(tmp, ":", &saveptr);
+		if (r == NULL) {
+			file_name = "unnamed.log";
+		} else {
+			file_name = r;
+		}
+		l = new FileLogger(file_name);
+		free(tmp);
+	} else if (strcmp(type, "syslog") == 0) {
+		l = new SyslogLogger(as);
+	}
 
-  if ( l == NULL )  throw UnknownLoggerTypeException();
-  return l;
+	if (l == NULL)
+		throw UnknownLoggerTypeException();
+	return l;
 }
-
 
 /** Create MultiLogger instance.
  * This creates a multi logger instance based on the supplied argument string.
@@ -142,56 +141,55 @@ LoggerFactory::instance(const char *type, const char *as)
 MultiLogger *
 LoggerFactory::multilogger_instance(const char *as, Logger::LogLevel default_ll)
 {
-  MultiLogger *m = new MultiLogger();
-  m->set_loglevel(default_ll);
+	MultiLogger *m = new MultiLogger();
+	m->set_loglevel(default_ll);
 
-  char *logger_string = strdup(as);
-  char *str = logger_string;
-  char *saveptr, *r;
-  const char *type, *args, *level;
-  char *typeargs_saveptr, *level_saveptr, *type_str;
-  const char *logger_delim = ";";
-  const char *logger_typeargs_delim = ":";
-  const char *logger_level_delim = "/";
-  while ((r = strtok_r(str, logger_delim, &saveptr)) != NULL ) {
-    type  = strtok_r(r, logger_typeargs_delim, &typeargs_saveptr);
-    args  = strtok_r(NULL, logger_typeargs_delim, &typeargs_saveptr);
+	char *      logger_string = strdup(as);
+	char *      str           = logger_string;
+	char *      saveptr, *r;
+	const char *type, *args, *level;
+	char *      typeargs_saveptr, *level_saveptr, *type_str;
+	const char *logger_delim          = ";";
+	const char *logger_typeargs_delim = ":";
+	const char *logger_level_delim    = "/";
+	while ((r = strtok_r(str, logger_delim, &saveptr)) != NULL) {
+		type = strtok_r(r, logger_typeargs_delim, &typeargs_saveptr);
+		args = strtok_r(NULL, logger_typeargs_delim, &typeargs_saveptr);
 
-    type_str = strdup(type);
+		type_str = strdup(type);
 
-    type  = strtok_r(type_str, logger_level_delim, &level_saveptr);
-    level = strtok_r(NULL, logger_level_delim, &level_saveptr);
+		type  = strtok_r(type_str, logger_level_delim, &level_saveptr);
+		level = strtok_r(NULL, logger_level_delim, &level_saveptr);
 
-    if ( type == NULL ) {
-      throw UnknownLoggerTypeException();
-    }
-    if ( args == NULL ) {
-      args = "";
-    }
+		if (type == NULL) {
+			throw UnknownLoggerTypeException();
+		}
+		if (args == NULL) {
+			args = "";
+		}
 
-    try {
-      Logger *l = instance(type, args);
-      m->add_logger(l);
-      if (level) {
-	Logger::LogLevel ll = string_to_loglevel(level);
-	l->set_loglevel(ll);
-      }
-    } catch (Exception &e) {
-      e.append("Could not open logger '%s:%s'", type, args);
-      free(type_str);
-      free(logger_string);
-      delete m;
-      throw;
-    }
-    str = NULL;
+		try {
+			Logger *l = instance(type, args);
+			m->add_logger(l);
+			if (level) {
+				Logger::LogLevel ll = string_to_loglevel(level);
+				l->set_loglevel(ll);
+			}
+		} catch (Exception &e) {
+			e.append("Could not open logger '%s:%s'", type, args);
+			free(type_str);
+			free(logger_string);
+			delete m;
+			throw;
+		}
+		str = NULL;
 
-    free(type_str);
-  }
+		free(type_str);
+	}
 
-  free(logger_string);
+	free(logger_string);
 
-  return m;
+	return m;
 }
-
 
 } // end namespace fawkes

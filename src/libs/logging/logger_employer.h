@@ -35,21 +35,23 @@ class Logger;
  */
 class LoggerEmployer
 {
- public:
-  /** Virtual empty destructor. */
-  virtual ~LoggerEmployer() {}
+public:
+	/** Virtual empty destructor. */
+	virtual ~LoggerEmployer()
+	{
+	}
 
-  /** Add a new logger.
+	/** Add a new logger.
    * An exception should be thrown if anything prevents this from succeeding.
    * @param logger logger to add
    */
-  virtual void add_logger(Logger *logger)    = 0;
+	virtual void add_logger(Logger *logger) = 0;
 
-  /** Remove a logger.
+	/** Remove a logger.
    * An exception should be thrown if anything prevents this from succeeding.
    * @param logger logger to remove
    */
-  virtual void remove_logger(Logger *logger) = 0;
+	virtual void remove_logger(Logger *logger) = 0;
 };
 
 } // end of namespace fawkes
