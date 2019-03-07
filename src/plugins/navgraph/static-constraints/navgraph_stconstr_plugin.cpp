@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "navgraph_stconstr_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,15 +31,14 @@ using namespace fawkes;
  */
 class NavGraphStaticConstraintsPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit NavGraphStaticConstraintsPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new NavGraphStaticConstraintsThread());
-  }
+	explicit NavGraphStaticConstraintsPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new NavGraphStaticConstraintsThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Static blocking of navgraph nodes")

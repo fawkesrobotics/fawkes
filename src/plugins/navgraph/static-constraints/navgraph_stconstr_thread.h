@@ -21,45 +21,48 @@
 #ifndef _PLUGINS_NAVGRAPH_NAVGRAPH_STCONSTR_THREAD_H_
 #define _PLUGINS_NAVGRAPH_NAVGRAPH_STCONSTR_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-
-#include <navgraph/navgraph.h>
+#include <core/threading/thread.h>
 #include <navgraph/aspect/navgraph.h>
 #include <navgraph/constraints/constraint_repo.h>
+#include <navgraph/navgraph.h>
 
 namespace fawkes {
-  class NavGraphStaticListNodeConstraint;
-  class NavGraphStaticListEdgeConstraint;
-  class NavGraphStaticListEdgeCostConstraint;
-  class NavGraphPolygonNodeConstraint;
-  class NavGraphPolygonEdgeConstraint;
-}
+class NavGraphStaticListNodeConstraint;
+class NavGraphStaticListEdgeConstraint;
+class NavGraphStaticListEdgeCostConstraint;
+class NavGraphPolygonNodeConstraint;
+class NavGraphPolygonEdgeConstraint;
+} // namespace fawkes
 
-class NavGraphStaticConstraintsThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::NavGraphAspect
+class NavGraphStaticConstraintsThread : public fawkes::Thread,
+                                        public fawkes::LoggingAspect,
+                                        public fawkes::ConfigurableAspect,
+                                        public fawkes::NavGraphAspect
 {
- public:
-  NavGraphStaticConstraintsThread();
-  virtual ~NavGraphStaticConstraintsThread();
+public:
+	NavGraphStaticConstraintsThread();
+	virtual ~NavGraphStaticConstraintsThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run();}
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  fawkes::NavGraphStaticListNodeConstraint      *node_constraint_;
-  fawkes::NavGraphStaticListEdgeConstraint      *edge_constraint_;
-  fawkes::NavGraphStaticListEdgeCostConstraint  *edge_cost_constraint_;
-  fawkes::NavGraphPolygonNodeConstraint         *node_poly_constraint_;
-  fawkes::NavGraphPolygonEdgeConstraint         *edge_poly_constraint_;
+private:
+	fawkes::NavGraphStaticListNodeConstraint *    node_constraint_;
+	fawkes::NavGraphStaticListEdgeConstraint *    edge_constraint_;
+	fawkes::NavGraphStaticListEdgeCostConstraint *edge_cost_constraint_;
+	fawkes::NavGraphPolygonNodeConstraint *       node_poly_constraint_;
+	fawkes::NavGraphPolygonEdgeConstraint *       edge_poly_constraint_;
 };
 
 #endif

@@ -20,14 +20,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "navgraph_thread.h"
+
+#include <core/plugin.h>
 #ifdef HAVE_VISUALIZATION
-#  include "visualization_thread.h"
+#	include "visualization_thread.h"
 #endif
 #ifdef HAVE_FAWKES_MSGS
-#  include "rospub_thread.h"
+#	include "rospub_thread.h"
 #endif
 
 using namespace fawkes;
@@ -37,38 +37,39 @@ using namespace fawkes;
  */
 class NavGraphPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit NavGraphPlugin(Configuration *config)
-    : Plugin(config)
-  {
+	explicit NavGraphPlugin(Configuration *config) : Plugin(config)
+	{
 #ifdef HAVE_VISUALIZATION
-    bool use_vis = false;
-    try {
-      use_vis = config->get_bool("/navgraph/visualization/enable");
-    } catch (Exception &e) {} // ignored, use default
-    if (use_vis) {
-      NavGraphVisualizationThread *vt = new NavGraphVisualizationThread();
-      thread_list.push_back(new NavGraphThread(vt));
-      thread_list.push_back(vt);
-    } else {
-      thread_list.push_back(new NavGraphThread());
-    }
+		bool use_vis = false;
+		try {
+			use_vis = config->get_bool("/navgraph/visualization/enable");
+		} catch (Exception &e) {
+		} // ignored, use default
+		if (use_vis) {
+			NavGraphVisualizationThread *vt = new NavGraphVisualizationThread();
+			thread_list.push_back(new NavGraphThread(vt));
+			thread_list.push_back(vt);
+		} else {
+			thread_list.push_back(new NavGraphThread());
+		}
 #else
-    thread_list.push_back(new NavGraphThread());
+		thread_list.push_back(new NavGraphThread());
 #endif
 #ifdef HAVE_FAWKES_MSGS
-    bool use_rospub = false;
-    try {
-	    use_rospub = config->get_bool("/navgraph/ros-publishing/enable");
-    } catch (Exception &e) {} // ignored, use default
-    if (use_rospub) {
-	    thread_list.push_back(new NavGraphROSPubThread());
-    }
+		bool use_rospub = false;
+		try {
+			use_rospub = config->get_bool("/navgraph/ros-publishing/enable");
+		} catch (Exception &e) {
+		} // ignored, use default
+		if (use_rospub) {
+			thread_list.push_back(new NavGraphROSPubThread());
+		}
 #endif
-  }
+	}
 };
 
 PLUGIN_DESCRIPTION("Graph-based local path planning")
