@@ -21,59 +21,59 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <baseapp/run.h>
 #include <baseapp/daemonize.h>
 #include <baseapp/main_thread.h>
+#include <baseapp/run.h>
 #include <baseapp/thread_manager.h>
-
 #include <core/threading/thread.h>
 
 #ifdef HAVE_BLACKBOARD
-#  include <blackboard/local.h>
+#	include <blackboard/local.h>
 #endif
 #include <config/sqlite.h>
 #include <config/yaml.h>
 #ifdef HAVE_CONFIG_NETWORK_HANDLER
-#  include <config/net_handler.h>
+#	include <config/net_handler.h>
 #endif
+#include <logging/console.h>
+#include <logging/factory.h>
+#include <logging/liblogger.h>
+#include <logging/multi.h>
 #include <utils/ipc/shm.h>
 #include <utils/system/argparser.h>
-#include <logging/multi.h>
-#include <logging/console.h>
-#include <logging/liblogger.h>
-#include <logging/factory.h>
 #ifdef HAVE_NETWORK_LOGGER
-#  include <network_logger/network_logger.h>
+#	include <network_logger/network_logger.h>
 #endif
 #ifdef HAVE_LOGGING_FD_REDIRECT
-#  include <logging/fd_redirect.h>
+#	include <logging/fd_redirect.h>
 #endif
 #include <utils/time/clock.h>
 #include <utils/time/time.h>
 #ifdef HAVE_NETWORK_MANAGER
-#  include <netcomm/fawkes/network_manager.h>
+#	include <netcomm/fawkes/network_manager.h>
 #endif
 #include <plugin/manager.h>
 #ifdef HAVE_PLUGIN_NETWORK_HANDLER
-#  include <plugin/net/handler.h>
+#	include <plugin/net/handler.h>
 #endif
 #include <aspect/manager.h>
 #include <syncpoint/syncpoint_manager.h>
 #ifdef HAVE_TF
-#  include <tf/transform_listener.h>
-#  include <tf/transformer.h>
+#	include <tf/transform_listener.h>
+#	include <tf/transformer.h>
 #endif
 
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <pwd.h>
-#include <grp.h>
-#include <cstdlib>
+#include <sys/types.h>
+
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
-#include <unistd.h>
-#include <signal.h>
 #include <fnmatch.h>
+#include <grp.h>
+#include <pwd.h>
+#include <signal.h>
+#include <unistd.h>
 
 namespace fawkes {
 
@@ -82,498 +82,521 @@ class FawkesNetworkManager;
 
 namespace runtime {
 
-ArgumentParser            * argument_parser = NULL;
-FawkesMainThread          * main_thread = NULL;
-MultiLogger               * logger = NULL;
-NetworkLogger             * network_logger = NULL;
-BlackBoard                * blackboard = NULL;
-Configuration             * config = NULL;
-PluginManager             * plugin_manager = NULL;
-AspectManager             * aspect_manager = NULL;
-ThreadManager             * thread_manager = NULL;
-FawkesNetworkManager      * network_manager = NULL;
-ConfigNetworkHandler      * nethandler_config = NULL;
-PluginNetworkHandler      * nethandler_plugin = NULL;
-Clock                     * clock = NULL;
-SharedMemoryRegistry      * shm_registry;
-InitOptions               * init_options = NULL;
-tf::Transformer           * tf_transformer = NULL;
-tf::TransformListener     * tf_listener = NULL;
-Time                      * start_time = NULL;
-SyncPointManager          * syncpoint_manager = NULL;
+ArgumentParser *       argument_parser   = NULL;
+FawkesMainThread *     main_thread       = NULL;
+MultiLogger *          logger            = NULL;
+NetworkLogger *        network_logger    = NULL;
+BlackBoard *           blackboard        = NULL;
+Configuration *        config            = NULL;
+PluginManager *        plugin_manager    = NULL;
+AspectManager *        aspect_manager    = NULL;
+ThreadManager *        thread_manager    = NULL;
+FawkesNetworkManager * network_manager   = NULL;
+ConfigNetworkHandler * nethandler_config = NULL;
+PluginNetworkHandler * nethandler_plugin = NULL;
+Clock *                clock             = NULL;
+SharedMemoryRegistry * shm_registry;
+InitOptions *          init_options      = NULL;
+tf::Transformer *      tf_transformer    = NULL;
+tf::TransformListener *tf_listener       = NULL;
+Time *                 start_time        = NULL;
+SyncPointManager *     syncpoint_manager = NULL;
 #ifdef HAVE_LOGGING_FD_REDIRECT
-LogFileDescriptorToLog    * log_fd_redirect_stderr_ = NULL;
-LogFileDescriptorToLog    * log_fd_redirect_stdout_ = NULL;
+LogFileDescriptorToLog *log_fd_redirect_stderr_ = NULL;
+LogFileDescriptorToLog *log_fd_redirect_stdout_ = NULL;
 #endif
 
 // this is NOT shared to the outside
-FawkesMainThread::Runner  * runner = NULL;
+FawkesMainThread::Runner *runner = NULL;
 
 bool
-init(int argc, char **argv, int & retval)
+init(int argc, char **argv, int &retval)
 {
-  return init(InitOptions(argc, argv), retval);
+	return init(InitOptions(argc, argv), retval);
 }
 
-
 bool
-init(const InitOptions& options, int & retval)
+init(const InitOptions &options, int &retval)
 {
-  init_options = new InitOptions(options);
+	init_options = new InitOptions(options);
 
-  if (init_options->show_help())  return true;
+	if (init_options->show_help())
+		return true;
 
-  if ( options.daemonize() ) {
-    fawkes::daemon::init(options.daemon_pid_file(), options.basename());
-    if (options.daemonize_kill()) {
-      fawkes::daemon::kill();
-      retval = 0;
-      return false;
-    } else if (options.daemonize_status()) {
-      retval = fawkes::daemon::running() ? 0 : 1;
-      return false;
-    } else {
-      if (fawkes::daemon::start()) {
-	retval = 0;
-	return false;
-      }
-    }
-  }
-
-  // *** set user group if requested
-  const char *user  = NULL;
-  const char *group = NULL;
-  if (options.has_username()) {
-    user = options.username();
-  }
-  if (options.has_groupname()) {
-    group = options.groupname();
-  }
-
-  if (user != NULL) {
-    struct passwd *pw;
-    if (! (pw = getpwnam(user))) {
-      printf("Failed to find user %s, check -u argument.\n", user);
-      retval = 203;
-      return false;
-    }
-    int r = 0;
-    r = setreuid(pw->pw_uid, pw->pw_uid);
-    if (r < 0) {
-      perror("Failed to drop privileges (user)");
-    }
-  }
-
-  if (group != NULL) {
-    struct group *gr;
-    if (! (gr = getgrnam(group))) {
-      printf("Failed to find group %s, check -g argument.\n", user);
-      retval = 204;
-      return false;
-    }
-    int r = 0;
-    r = setregid(gr->gr_gid, gr->gr_gid);
-    if (r < 0) {
-      perror("Failed to drop privileges (group)");
-    }
-  }
-
-  // *** setup base thread and shm registry
-  Thread::init_main();
-
-  shm_registry = NULL;
-  struct passwd *uid_pw = getpwuid(getuid());
-  if (uid_pw == NULL) {
-    shm_registry = new SharedMemoryRegistry();
-  } else {
-    char *registry_name;
-    if (asprintf(&registry_name, USER_SHM_NAME, uid_pw->pw_name) == -1) {
-      shm_registry = new SharedMemoryRegistry();
-    } else {
-      shm_registry = new SharedMemoryRegistry(registry_name);
-      free(registry_name);
-    }
-  }
-
-  if (! shm_registry) {
-    throw Exception("Failed to create shared memory registry");
-  }
-
-  // *** setup logging
-  if (options.has_loggers()) {
-    try {
-      logger = LoggerFactory::multilogger_instance(options.loggers());
-    } catch (Exception &e) {
-      e.append("Initializing multi logger failed");
-      throw;
-    }
-  } else {
-    logger = new MultiLogger(new ConsoleLogger());
-  }
-
-  logger->set_loglevel(options.log_level());
-  LibLogger::init(logger);
-
-  // *** Prepare home dir directory, just in case
-  const char *homedir = getenv("HOME");
-  if (homedir) {
-    char *userdir;
-    if (asprintf(&userdir, "%s/%s", homedir, USERDIR) != -1) {
-      if (access(userdir, W_OK) != 0) {
-	if (mkdir(userdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1) {
-	  logger->log_warn("FawkesMainThread", "Failed to create .fawkes "
-			   "directory %s, trying without", userdir);
+	if (options.daemonize()) {
+		fawkes::daemon::init(options.daemon_pid_file(), options.basename());
+		if (options.daemonize_kill()) {
+			fawkes::daemon::kill();
+			retval = 0;
+			return false;
+		} else if (options.daemonize_status()) {
+			retval = fawkes::daemon::running() ? 0 : 1;
+			return false;
+		} else {
+			if (fawkes::daemon::start()) {
+				retval = 0;
+				return false;
+			}
+		}
 	}
-      }
-      free(userdir);
-    }
-  }
 
-  // *** setup config
-  
-  SQLiteConfiguration *sqconfig = NULL;
+	// *** set user group if requested
+	const char *user  = NULL;
+	const char *group = NULL;
+	if (options.has_username()) {
+		user = options.username();
+	}
+	if (options.has_groupname()) {
+		group = options.groupname();
+	}
 
-  if (options.config_file() &&
-      fnmatch("*.sql", options.config_file(), FNM_PATHNAME) == 0)
-  {
-    sqconfig = new SQLiteConfiguration(CONFDIR);
-    config = sqconfig;
-  } else {
-    config = new YamlConfiguration(CONFDIR);
-  }
+	if (user != NULL) {
+		struct passwd *pw;
+		if (!(pw = getpwnam(user))) {
+			printf("Failed to find user %s, check -u argument.\n", user);
+			retval = 203;
+			return false;
+		}
+		int r = 0;
+		r     = setreuid(pw->pw_uid, pw->pw_uid);
+		if (r < 0) {
+			perror("Failed to drop privileges (user)");
+		}
+	}
 
-  config->load(options.config_file());
+	if (group != NULL) {
+		struct group *gr;
+		if (!(gr = getgrnam(group))) {
+			printf("Failed to find group %s, check -g argument.\n", user);
+			retval = 204;
+			return false;
+		}
+		int r = 0;
+		r     = setregid(gr->gr_gid, gr->gr_gid);
+		if (r < 0) {
+			perror("Failed to drop privileges (group)");
+		}
+	}
 
-  if (sqconfig) {
-    try {
-      SQLiteConfiguration::SQLiteValueIterator *i = sqconfig->modified_iterator();
-      while (i->next()) {
-	std::string modtype = i->get_modtype();
-	if (modtype == "changed") {
-	  logger->log_warn("FawkesMainThread", "Default config value CHANGED: %s"
-			   "(was: %s now: %s)", i->path(),
-			   i->get_oldvalue().c_str(), i->get_as_string().c_str());
-	} else if (modtype == "erased") {
-	  logger->log_warn("FawkesMainThread", "Default config value ERASED:  %s",
-			   i->path());
+	// *** setup base thread and shm registry
+	Thread::init_main();
+
+	shm_registry          = NULL;
+	struct passwd *uid_pw = getpwuid(getuid());
+	if (uid_pw == NULL) {
+		shm_registry = new SharedMemoryRegistry();
 	} else {
-	  logger->log_debug("FawkesMainThread", "Default config value ADDED:   %s "
-			    "(value: %s)", i->path(), i->get_as_string().c_str());
+		char *registry_name;
+		if (asprintf(&registry_name, USER_SHM_NAME, uid_pw->pw_name) == -1) {
+			shm_registry = new SharedMemoryRegistry();
+		} else {
+			shm_registry = new SharedMemoryRegistry(registry_name);
+			free(registry_name);
+		}
 	}
-      }
-      delete i;
-    } catch (Exception &e) {
-      logger->log_warn("FawkesMainThread", "Failed to read modified default "
-		       "config values, no dump?");
-    }
-  }
 
-  if (! options.has_loggers()) {
-    // Allow configuration override from config
-    if (config->exists("/fawkes/mainapp/loggers")) {
-      try {
-        std::string loggers = config->get_string("/fawkes/mainapp/loggers");
-        MultiLogger *new_logger =
-	  LoggerFactory::multilogger_instance(loggers.c_str(), options.log_level());
-        logger = new_logger;
-        LibLogger::finalize();
-        LibLogger::init(new_logger);
-      } catch (Exception &e) {
-        logger->log_warn("FawkesMainThread", "Loggers set in config file, "
-			 "but failed to read, exception follows.");
-        logger->log_warn("FawkesMainThread", e);
-      }
-    }
-  }
+	if (!shm_registry) {
+		throw Exception("Failed to create shared memory registry");
+	}
 
-  if (config->exists("/fawkes/mainapp/log_stderr_as_warn")) {
-    try {
-      bool log_stderr_as_warn = config->get_bool("/fawkes/mainapp/log_stderr_as_warn");
-      if (log_stderr_as_warn) {
+	// *** setup logging
+	if (options.has_loggers()) {
+		try {
+			logger = LoggerFactory::multilogger_instance(options.loggers());
+		} catch (Exception &e) {
+			e.append("Initializing multi logger failed");
+			throw;
+		}
+	} else {
+		logger = new MultiLogger(new ConsoleLogger());
+	}
+
+	logger->set_loglevel(options.log_level());
+	LibLogger::init(logger);
+
+	// *** Prepare home dir directory, just in case
+	const char *homedir = getenv("HOME");
+	if (homedir) {
+		char *userdir;
+		if (asprintf(&userdir, "%s/%s", homedir, USERDIR) != -1) {
+			if (access(userdir, W_OK) != 0) {
+				if (mkdir(userdir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == -1) {
+					logger->log_warn("FawkesMainThread",
+					                 "Failed to create .fawkes "
+					                 "directory %s, trying without",
+					                 userdir);
+				}
+			}
+			free(userdir);
+		}
+	}
+
+	// *** setup config
+
+	SQLiteConfiguration *sqconfig = NULL;
+
+	if (options.config_file() && fnmatch("*.sql", options.config_file(), FNM_PATHNAME) == 0) {
+		sqconfig = new SQLiteConfiguration(CONFDIR);
+		config   = sqconfig;
+	} else {
+		config = new YamlConfiguration(CONFDIR);
+	}
+
+	config->load(options.config_file());
+
+	if (sqconfig) {
+		try {
+			SQLiteConfiguration::SQLiteValueIterator *i = sqconfig->modified_iterator();
+			while (i->next()) {
+				std::string modtype = i->get_modtype();
+				if (modtype == "changed") {
+					logger->log_warn("FawkesMainThread",
+					                 "Default config value CHANGED: %s"
+					                 "(was: %s now: %s)",
+					                 i->path(),
+					                 i->get_oldvalue().c_str(),
+					                 i->get_as_string().c_str());
+				} else if (modtype == "erased") {
+					logger->log_warn("FawkesMainThread", "Default config value ERASED:  %s", i->path());
+				} else {
+					logger->log_debug("FawkesMainThread",
+					                  "Default config value ADDED:   %s "
+					                  "(value: %s)",
+					                  i->path(),
+					                  i->get_as_string().c_str());
+				}
+			}
+			delete i;
+		} catch (Exception &e) {
+			logger->log_warn("FawkesMainThread",
+			                 "Failed to read modified default "
+			                 "config values, no dump?");
+		}
+	}
+
+	if (!options.has_loggers()) {
+		// Allow configuration override from config
+		if (config->exists("/fawkes/mainapp/loggers")) {
+			try {
+				std::string  loggers = config->get_string("/fawkes/mainapp/loggers");
+				MultiLogger *new_logger =
+				  LoggerFactory::multilogger_instance(loggers.c_str(), options.log_level());
+				logger = new_logger;
+				LibLogger::finalize();
+				LibLogger::init(new_logger);
+			} catch (Exception &e) {
+				logger->log_warn("FawkesMainThread",
+				                 "Loggers set in config file, "
+				                 "but failed to read, exception follows.");
+				logger->log_warn("FawkesMainThread", e);
+			}
+		}
+	}
+
+	if (config->exists("/fawkes/mainapp/log_stderr_as_warn")) {
+		try {
+			bool log_stderr_as_warn = config->get_bool("/fawkes/mainapp/log_stderr_as_warn");
+			if (log_stderr_as_warn) {
 #ifdef HAVE_LOGGING_FD_REDIRECT
-	log_fd_redirect_stderr_ =
-	  new LogFileDescriptorToLog(STDERR_FILENO, logger, "stderr", Logger::LL_WARN);
+				log_fd_redirect_stderr_ =
+				  new LogFileDescriptorToLog(STDERR_FILENO, logger, "stderr", Logger::LL_WARN);
 #else
-	logger->log_warn("FawkesMainThread", "stderr log redirection enabled but not available at compile time");
+				logger->log_warn("FawkesMainThread",
+				                 "stderr log redirection enabled but not available at compile time");
 #endif
-      }
-    } catch (Exception &e) {} // ignored
-  }
+			}
+		} catch (Exception &e) {
+		} // ignored
+	}
 
-  // *** Determine network parameters
-  bool enable_ipv4 = true;
-  bool enable_ipv6 = true;
-  std::string listen_ipv4;
-  std::string listen_ipv6;
-  unsigned int net_tcp_port     = 1910;
-  std::string  net_service_name = "Fawkes on %h";
-  if (options.has_net_tcp_port()) {
-    net_tcp_port = options.net_tcp_port();
-  } else {
-    try {
-      net_tcp_port = config->get_uint("/network/fawkes/tcp_port");
-    } catch (Exception &e) {}  // ignore, we stick with the default
-  }
+	// *** Determine network parameters
+	bool         enable_ipv4 = true;
+	bool         enable_ipv6 = true;
+	std::string  listen_ipv4;
+	std::string  listen_ipv6;
+	unsigned int net_tcp_port     = 1910;
+	std::string  net_service_name = "Fawkes on %h";
+	if (options.has_net_tcp_port()) {
+		net_tcp_port = options.net_tcp_port();
+	} else {
+		try {
+			net_tcp_port = config->get_uint("/network/fawkes/tcp_port");
+		} catch (Exception &e) {
+		} // ignore, we stick with the default
+	}
 
-  if (options.has_net_service_name()) {
-    net_service_name = options.net_service_name();
-  } else {
-    try {
-      net_service_name = config->get_string("/network/fawkes/service_name");
-    } catch (Exception &e) {}  // ignore, we stick with the default
-  }
+	if (options.has_net_service_name()) {
+		net_service_name = options.net_service_name();
+	} else {
+		try {
+			net_service_name = config->get_string("/network/fawkes/service_name");
+		} catch (Exception &e) {
+		} // ignore, we stick with the default
+	}
 
-  if (net_tcp_port > 65535) {
-    logger->log_warn("FawkesMainThread", "Invalid port '%u', using 1910",
-		     net_tcp_port);
-    net_tcp_port = 1910;
-  }
+	if (net_tcp_port > 65535) {
+		logger->log_warn("FawkesMainThread", "Invalid port '%u', using 1910", net_tcp_port);
+		net_tcp_port = 1910;
+	}
 
-  try {
-	  enable_ipv4 = config->get_bool("/network/ipv4/enable");
-  } catch (Exception &e) {}  // ignore, we stick with the default
-  try {
-	  enable_ipv6 = config->get_bool("/network/ipv6/enable");
-  } catch (Exception &e) {}  // ignore, we stick with the default
+	try {
+		enable_ipv4 = config->get_bool("/network/ipv4/enable");
+	} catch (Exception &e) {
+	} // ignore, we stick with the default
+	try {
+		enable_ipv6 = config->get_bool("/network/ipv6/enable");
+	} catch (Exception &e) {
+	} // ignore, we stick with the default
 
-  try {
-	  listen_ipv4 = config->get_string("/network/ipv4/listen");
-  } catch (Exception &e) {}  // ignore, we stick with the default
-  try {
-	  listen_ipv6 = config->get_string("/network/ipv6/listen");
-  } catch (Exception &e) {}  // ignore, we stick with the default
+	try {
+		listen_ipv4 = config->get_string("/network/ipv4/listen");
+	} catch (Exception &e) {
+	} // ignore, we stick with the default
+	try {
+		listen_ipv6 = config->get_string("/network/ipv6/listen");
+	} catch (Exception &e) {
+	} // ignore, we stick with the default
 
-  if (! enable_ipv4) {
-	  logger->log_warn("FawkesMainThread", "Disabling IPv4 support");
-  }
-  if (! enable_ipv6) {
-	  logger->log_warn("FawkesMainThread", "Disabling IPv6 support");
-  }
-  if (! listen_ipv4.empty()) {
-	  logger->log_info("FawkesMainThread", "Listening on IPv4 address %s", listen_ipv4.c_str());
-  }
-  if (! listen_ipv6.empty()) {
-	  logger->log_info("FawkesMainThread", "Listening on IPv6 address %s", listen_ipv4.c_str());
-  }
-  
+	if (!enable_ipv4) {
+		logger->log_warn("FawkesMainThread", "Disabling IPv4 support");
+	}
+	if (!enable_ipv6) {
+		logger->log_warn("FawkesMainThread", "Disabling IPv6 support");
+	}
+	if (!listen_ipv4.empty()) {
+		logger->log_info("FawkesMainThread", "Listening on IPv4 address %s", listen_ipv4.c_str());
+	}
+	if (!listen_ipv6.empty()) {
+		logger->log_info("FawkesMainThread", "Listening on IPv6 address %s", listen_ipv4.c_str());
+	}
+
 #ifdef HAVE_BLACKBOARD
-  // *** Setup blackboard
-  std::string bb_magic_token = "";
-  unsigned int bb_size = 2097152;
-  try {
-    bb_magic_token = config->get_string("/fawkes/mainapp/blackboard_magic_token");
-    logger->log_info("FawkesMainApp", "BlackBoard magic token defined. "
-		     "Using shared memory BlackBoard.");
-  } catch (Exception &e) {
-    // ignore
-  }
-  try {
-    bb_size = config->get_uint("/fawkes/mainapp/blackboard_size");
-  } catch (Exception &e) {
-    logger->log_warn("FawkesMainApp", "BlackBoard size not defined. "
-		     "Will use %u, saving to default DB", bb_size);
-    config->set_default_uint("/fawkes/mainapp/blackboard_size", bb_size);
-  }
+	// *** Setup blackboard
+	std::string  bb_magic_token = "";
+	unsigned int bb_size        = 2097152;
+	try {
+		bb_magic_token = config->get_string("/fawkes/mainapp/blackboard_magic_token");
+		logger->log_info("FawkesMainApp",
+		                 "BlackBoard magic token defined. "
+		                 "Using shared memory BlackBoard.");
+	} catch (Exception &e) {
+		// ignore
+	}
+	try {
+		bb_size = config->get_uint("/fawkes/mainapp/blackboard_size");
+	} catch (Exception &e) {
+		logger->log_warn("FawkesMainApp",
+		                 "BlackBoard size not defined. "
+		                 "Will use %u, saving to default DB",
+		                 bb_size);
+		config->set_default_uint("/fawkes/mainapp/blackboard_size", bb_size);
+	}
 
-  // Cleanup stale BlackBoard shared memory segments if requested
-  if ( options.bb_cleanup()) {
-    LocalBlackBoard::cleanup(bb_magic_token.c_str(),
-                             /* output with lister? */ true);
-    SharedMemoryRegistry::cleanup();
-  }
+	// Cleanup stale BlackBoard shared memory segments if requested
+	if (options.bb_cleanup()) {
+		LocalBlackBoard::cleanup(bb_magic_token.c_str(),
+		                         /* output with lister? */ true);
+		SharedMemoryRegistry::cleanup();
+	}
 
-  LocalBlackBoard *lbb = NULL;
-  if ( bb_magic_token == "") {
-    lbb = new LocalBlackBoard(bb_size);
-  } else {
-    lbb = new LocalBlackBoard(bb_size, bb_magic_token.c_str());
-  }
-  blackboard = lbb;
+	LocalBlackBoard *lbb = NULL;
+	if (bb_magic_token == "") {
+		lbb = new LocalBlackBoard(bb_size);
+	} else {
+		lbb = new LocalBlackBoard(bb_size, bb_magic_token.c_str());
+	}
+	blackboard = lbb;
 #endif
 
 #ifdef HAVE_TF
-  tf_transformer     = new tf::Transformer();
-  tf_listener        = new tf::TransformListener(blackboard, tf_transformer);
+	tf_transformer = new tf::Transformer();
+	tf_listener    = new tf::TransformListener(blackboard, tf_transformer);
 #endif
 
-  aspect_manager     = new AspectManager();
-  thread_manager     = new ThreadManager(aspect_manager, aspect_manager);
+	aspect_manager = new AspectManager();
+	thread_manager = new ThreadManager(aspect_manager, aspect_manager);
 
-  syncpoint_manager  = new SyncPointManager(logger);
+	syncpoint_manager = new SyncPointManager(logger);
 
-  plugin_manager     = new PluginManager(thread_manager, config,
-					 "/fawkes/meta_plugins/",
-					 options.plugin_module_flags(),
-					 options.init_plugin_cache());
+	plugin_manager = new PluginManager(thread_manager,
+	                                   config,
+	                                   "/fawkes/meta_plugins/",
+	                                   options.plugin_module_flags(),
+	                                   options.init_plugin_cache());
 #ifdef HAVE_NETWORK_MANAGER
-  network_manager    = new FawkesNetworkManager(thread_manager,
-                                                enable_ipv4, enable_ipv6,
-                                                listen_ipv4, listen_ipv6,
-                                                net_tcp_port,
-                                                net_service_name.c_str());
-#  ifdef HAVE_CONFIG_NETWORK_HANDLER
-  nethandler_config  = new ConfigNetworkHandler(config,
-                                                network_manager->hub());
-#  endif
-#  ifdef HAVE_PLUGIN_NETWORK_HANDLER
-  nethandler_plugin  = new PluginNetworkHandler(plugin_manager,
-                                                network_manager->hub());
-  nethandler_plugin->start();
-#  endif
-#  ifdef HAVE_NETWORK_LOGGER
-  network_logger = new NetworkLogger(network_manager->hub(),
-                                     logger->loglevel());
-  logger->add_logger(network_logger);
-#  endif
+	network_manager = new FawkesNetworkManager(thread_manager,
+	                                           enable_ipv4,
+	                                           enable_ipv6,
+	                                           listen_ipv4,
+	                                           listen_ipv6,
+	                                           net_tcp_port,
+	                                           net_service_name.c_str());
+#	ifdef HAVE_CONFIG_NETWORK_HANDLER
+	nethandler_config = new ConfigNetworkHandler(config, network_manager->hub());
+#	endif
+#	ifdef HAVE_PLUGIN_NETWORK_HANDLER
+	nethandler_plugin = new PluginNetworkHandler(plugin_manager, network_manager->hub());
+	nethandler_plugin->start();
+#	endif
+#	ifdef HAVE_NETWORK_LOGGER
+	network_logger = new NetworkLogger(network_manager->hub(), logger->loglevel());
+	logger->add_logger(network_logger);
+#	endif
 #endif
 
-  clock = Clock::instance();
-  start_time = new Time(clock);
+	clock      = Clock::instance();
+	start_time = new Time(clock);
 
 #if defined(HAVE_NETWORK_MANAGER) && defined(HAVE_BLACKBOARD)
-  lbb->start_nethandler(network_manager->hub());
+	lbb->start_nethandler(network_manager->hub());
 #endif
 
+	// *** Create main thread, but do not start, yet
+	main_thread = new fawkes::FawkesMainThread(config,
+	                                           logger,
+	                                           thread_manager,
+	                                           syncpoint_manager,
+	                                           plugin_manager,
+	                                           options.load_plugin_list(),
+	                                           options.default_plugin());
 
-  // *** Create main thread, but do not start, yet
-  main_thread = new fawkes::FawkesMainThread(config, logger,
-					     thread_manager,
-					     syncpoint_manager,
-					     plugin_manager,
-					     options.load_plugin_list(),
-                                             options.default_plugin());
-
-  aspect_manager->register_default_inifins(blackboard,
-                                           thread_manager->aspect_collector(),
-                                           config, logger, clock,
+	aspect_manager->register_default_inifins(blackboard,
+	                                         thread_manager->aspect_collector(),
+	                                         config,
+	                                         logger,
+	                                         clock,
 #ifdef HAVE_NETWORK_MANAGER
-                                           network_manager->hub(),
+	                                         network_manager->hub(),
 #else
-                                           NULL,
+	                                         NULL,
 #endif
-                                           main_thread, logger,
-                                           thread_manager,
+	                                         main_thread,
+	                                         logger,
+	                                         thread_manager,
 #ifdef HAVE_NETWORK_MANAGER
-                                           network_manager->nnresolver(),
-                                           network_manager->service_publisher(),
-                                           network_manager->service_browser(),
+	                                         network_manager->nnresolver(),
+	                                         network_manager->service_publisher(),
+	                                         network_manager->service_browser(),
 #else
-                                           NULL, NULL, NULL,
+	                                         NULL,
+	                                         NULL,
+	                                         NULL,
 #endif
-                                           plugin_manager, tf_transformer,
-                                           syncpoint_manager);
+	                                         plugin_manager,
+	                                         tf_transformer,
+	                                         syncpoint_manager);
 
-  retval = 0;
-  return true;
+	retval = 0;
+	return true;
 }
 
 void
 cleanup()
 {
-  if (init_options->daemonize()) {
-    fawkes::daemon::cleanup();
-  }
+	if (init_options->daemonize()) {
+		fawkes::daemon::cleanup();
+	}
 
 #ifdef HAVE_PLUGIN_NETWORK_HANDLER
-  if (nethandler_plugin) {
-    nethandler_plugin->cancel();
-    nethandler_plugin->join();
-  }
+	if (nethandler_plugin) {
+		nethandler_plugin->cancel();
+		nethandler_plugin->join();
+	}
 #endif
 
 #ifdef HAVE_NETWORK_LOGGER
-  if (logger) {
-    // Must delete network logger first since network manager
-    // has to die before the LibLogger is finalized.
-    logger->remove_logger(network_logger);
-    delete network_logger;
-  }
+	if (logger) {
+		// Must delete network logger first since network manager
+		// has to die before the LibLogger is finalized.
+		logger->remove_logger(network_logger);
+		delete network_logger;
+	}
 #endif
 
 #ifdef HAVE_CONFIG_NETWORK_HANDLER
-  delete nethandler_config;
+	delete nethandler_config;
 #endif
 #ifdef HAVE_PLUGIN_NETWORK_HANDLER
-  delete nethandler_plugin;
+	delete nethandler_plugin;
 #endif
-  delete plugin_manager;
-  delete main_thread;
+	delete plugin_manager;
+	delete main_thread;
 #ifdef HAVE_TF
-  delete tf_listener;
-  delete tf_transformer;
+	delete tf_listener;
+	delete tf_transformer;
 #endif
 #ifdef HAVE_BLACKBOARD
-  delete blackboard;
+	delete blackboard;
 #endif
-  delete config;
-  delete argument_parser;
-  delete init_options;
+	delete config;
+	delete argument_parser;
+	delete init_options;
 #ifdef HAVE_NETWORK_MANAGER
-  delete network_manager;
+	delete network_manager;
 #endif
-  delete thread_manager;
-  delete aspect_manager;
-  delete shm_registry;
+	delete thread_manager;
+	delete aspect_manager;
+	delete shm_registry;
 #ifdef HAVE_LOGGING_FD_REDIRECT
-  delete log_fd_redirect_stderr_;
-  delete log_fd_redirect_stdout_;
+	delete log_fd_redirect_stderr_;
+	delete log_fd_redirect_stdout_;
 #endif
 
-  main_thread = NULL;
-  argument_parser = NULL;
-  init_options = NULL;
-  nethandler_config = NULL;
-  nethandler_plugin = NULL;
-  plugin_manager = NULL;
-  network_manager = NULL;
-  config = NULL;
-  thread_manager = NULL;
-  aspect_manager = NULL;
-  shm_registry = NULL;
-  blackboard = NULL;
+	main_thread       = NULL;
+	argument_parser   = NULL;
+	init_options      = NULL;
+	nethandler_config = NULL;
+	nethandler_plugin = NULL;
+	plugin_manager    = NULL;
+	network_manager   = NULL;
+	config            = NULL;
+	thread_manager    = NULL;
+	aspect_manager    = NULL;
+	shm_registry      = NULL;
+	blackboard        = NULL;
 #ifdef HAVE_LOGGING_FD_REDIRECT
-  log_fd_redirect_stderr_ = NULL;
-  log_fd_redirect_stdout_ = NULL;
+	log_fd_redirect_stderr_ = NULL;
+	log_fd_redirect_stdout_ = NULL;
 #endif
 
-  // implicitly frees multi_logger and all sub-loggers
-  LibLogger::finalize();
-  logger = NULL;
+	// implicitly frees multi_logger and all sub-loggers
+	LibLogger::finalize();
+	logger = NULL;
 
-  delete start_time;
-  start_time = NULL;
-  Clock::finalize();
-  clock = NULL;
+	delete start_time;
+	start_time = NULL;
+	Clock::finalize();
+	clock = NULL;
 
-  try {
-    Thread::destroy_main();
-  } catch (Exception &e) {} // ignored, can fire on show_help
+	try {
+		Thread::destroy_main();
+	} catch (Exception &e) {
+	} // ignored, can fire on show_help
 
-  // should be last, because of not disabled this hosts the
-  // default signal handlers
-  delete runner;
-  runner = 0;
+	// should be last, because of not disabled this hosts the
+	// default signal handlers
+	delete runner;
+	runner = 0;
 }
 
 void
 run()
 {
-  if (init_options->show_help()) {
-    print_usage(init_options->basename());
-    return;
-  }
+	if (init_options->show_help()) {
+		print_usage(init_options->basename());
+		return;
+	}
 
-  bool defsigs = init_options->default_signal_handlers();
-  runner = new FawkesMainThread::Runner(main_thread, defsigs);
+	bool defsigs = init_options->default_signal_handlers();
+	runner       = new FawkesMainThread::Runner(main_thread, defsigs);
 
-  try {
-    runner->run();
-  } catch (Exception &e) {
-    printf("Running Fawkes failed\n");
-    e.print_trace();
-  }
+	try {
+		runner->run();
+	} catch (Exception &e) {
+		printf("Running Fawkes failed\n");
+		e.print_trace();
+	}
 }
-
 
 /** Quit Fawkes.
  * You can call this from within Fawkes to quit Fawkes. Use with extreme care an
@@ -586,52 +609,52 @@ run()
 void
 quit()
 {
-  kill(getpid(), SIGINT);
+	kill(getpid(), SIGINT);
 }
 
 void
 print_usage(const char *progname)
 {
-  printf("Fawkes Main Application - Usage Instructions\n"
-  "================================================"
-  "===============================\n"
-  "Usage: %s [options] [plugins]\n"
-  "where\n"
-  " [plugins] is a space-separated list of plugins to load on startup in given order\n"
-  " [options] is one or more of:\n"
-    "  -h                       These help instructions\n"
-    "  -C                       Cleanup old BB and shared memory segments\n"
-    "  -c config file           Configuration file to load.\n"
-    "                           Examples: default.sql or config.yaml\n"
-    "  -d                       Enable debug output\n"
-    "  -q[qqq]                  Quiet mode, -q omits debug, -qq debug and"
-      "info,\n                           "
-      "-qqq omit debug, info and warn, -qqqq no output\n"
-    "  -l level                 Set log level directly mutually exclusive"
-      "with -q,\n                           "
-      "level is one of debug, info, warn, error, or none\n"
-    "  -L loggers               Define loggers. By default this setting is"
-      "read from\n                           "
-      "config (console logger if unset). Format is:\n"
-      "                           logger:args[;logger2:args2[!...]]\n"
-      "                           Currently supported:\n"
-      "                           console, file:file.log, network logger always added\n"
-    "  -p plugins               List of plugins to load on startup in given order\n"
-    "  -P port                  TCP port to listen on for Fawkes network connections.\n"
-      "  --net-service-name=name  mDNS service name to use.\n"
-    "  -u user                  Drop privileges and run as given user.\n"
-    "  -g group                 Drop privileges and run as given group.\n"
+	printf("Fawkes Main Application - Usage Instructions\n"
+	       "================================================"
+	       "===============================\n"
+	       "Usage: %s [options] [plugins]\n"
+	       "where\n"
+	       " [plugins] is a space-separated list of plugins to load on startup in given order\n"
+	       " [options] is one or more of:\n"
+	       "  -h                       These help instructions\n"
+	       "  -C                       Cleanup old BB and shared memory segments\n"
+	       "  -c config file           Configuration file to load.\n"
+	       "                           Examples: default.sql or config.yaml\n"
+	       "  -d                       Enable debug output\n"
+	       "  -q[qqq]                  Quiet mode, -q omits debug, -qq debug and"
+	       "info,\n                           "
+	       "-qqq omit debug, info and warn, -qqqq no output\n"
+	       "  -l level                 Set log level directly mutually exclusive"
+	       "with -q,\n                           "
+	       "level is one of debug, info, warn, error, or none\n"
+	       "  -L loggers               Define loggers. By default this setting is"
+	       "read from\n                           "
+	       "config (console logger if unset). Format is:\n"
+	       "                           logger:args[;logger2:args2[!...]]\n"
+	       "                           Currently supported:\n"
+	       "                           console, file:file.log, network logger always added\n"
+	       "  -p plugins               List of plugins to load on startup in given order\n"
+	       "  -P port                  TCP port to listen on for Fawkes network connections.\n"
+	       "  --net-service-name=name  mDNS service name to use.\n"
+	       "  -u user                  Drop privileges and run as given user.\n"
+	       "  -g group                 Drop privileges and run as given group.\n"
 #ifdef HAVE_LIBDAEMON
-    "  -D[pid file]             Run daemonized in the background, pid file "
-      "is optional,\n                           "
-      "default is /var/run/fawkes.pid, must be absolute path.\n"
-    "  -D[pid file] -k          Kill a daemonized Fawkes running in the"
-      "background\n"
-    "  -D[pid file] -s          Check status of daemon.\n"
+	       "  -D[pid file]             Run daemonized in the background, pid file "
+	       "is optional,\n                           "
+	       "default is /var/run/fawkes.pid, must be absolute path.\n"
+	       "  -D[pid file] -k          Kill a daemonized Fawkes running in the"
+	       "background\n"
+	       "  -D[pid file] -s          Check status of daemon.\n"
 #endif
-  "\n", progname);
+	       "\n",
+	       progname);
 }
-
 
 /** Get Fawkes uptime.
  * Returns the time in seconds since Fawkes was started.
@@ -641,12 +664,12 @@ print_usage(const char *progname)
 float
 uptime()
 {
-  if (start_time) {
-    fawkes::Time now(clock);
-    return now - start_time;
-  } else {
-    return 0.0;
-  }
+	if (start_time) {
+		fawkes::Time now(clock);
+		return now - start_time;
+	} else {
+		return 0.0;
+	}
 }
 
 } // end namespace runtime

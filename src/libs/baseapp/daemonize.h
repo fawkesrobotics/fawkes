@@ -24,9 +24,8 @@
 #ifndef _LIBS_BASEAPP_DAEMONIZE_H_
 #define _LIBS_BASEAPP_DAEMONIZE_H_
 
-
 namespace fawkes {
-  namespace daemon {
+namespace daemon {
 
 void init(const char *pidfile, const char *progname);
 bool start();
@@ -34,7 +33,7 @@ bool running();
 void kill();
 void cleanup();
 
-} // end namespace fawkes::daemon
+} // namespace daemon
 } // end namespace fawkes
 
 #endif

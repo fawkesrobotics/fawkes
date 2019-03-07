@@ -24,13 +24,13 @@
 #ifndef _LIBS_BASEAPP_THREAD_MANAGER_H_
 #define _LIBS_BASEAPP_THREAD_MANAGER_H_
 
-#include <core/threading/thread_list.h>
-#include <core/threading/thread_collector.h>
-#include <core/exception.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/blocked_timing/executor.h>
-
+#include <core/exception.h>
+#include <core/threading/thread_collector.h>
+#include <core/threading/thread_list.h>
 #include <core/utils/lock_map.h>
+
 #include <list>
 
 namespace fawkes {
@@ -39,92 +39,90 @@ class WaitCondition;
 class ThreadInitializer;
 class ThreadFinalizer;
 
-class ThreadManager
-: public ThreadCollector,
-  public BlockedTimingExecutor
+class ThreadManager : public ThreadCollector, public BlockedTimingExecutor
 {
- public:
-  ThreadManager();
-  ThreadManager(ThreadInitializer *initializer, ThreadFinalizer *finalizer);
-  virtual ~ThreadManager();
+public:
+	ThreadManager();
+	ThreadManager(ThreadInitializer *initializer, ThreadFinalizer *finalizer);
+	virtual ~ThreadManager();
 
-  void set_inifin(ThreadInitializer *initializer,
-		  ThreadFinalizer *finalizer);
+	void set_inifin(ThreadInitializer *initializer, ThreadFinalizer *finalizer);
 
-  virtual void add(ThreadList &tl)
-  {
-    add_maybelocked(tl, /* lock */ true);
-  }
+	virtual void
+	add(ThreadList &tl)
+	{
+		add_maybelocked(tl, /* lock */ true);
+	}
 
-  virtual void add(Thread *t)
-  {
-    add_maybelocked(t, /* lock */ true);
-  }
+	virtual void
+	add(Thread *t)
+	{
+		add_maybelocked(t, /* lock */ true);
+	}
 
-  virtual void remove(ThreadList &tl)
-  {
-    remove_maybelocked(tl, /* lock */ true);
-  }
+	virtual void
+	remove(ThreadList &tl)
+	{
+		remove_maybelocked(tl, /* lock */ true);
+	}
 
-  virtual void remove(Thread *t)
-  {
-    remove_maybelocked(t, /* lock */ true);
-  }
+	virtual void
+	remove(Thread *t)
+	{
+		remove_maybelocked(t, /* lock */ true);
+	}
 
-  virtual void force_remove(ThreadList &tl);
-  virtual void force_remove(Thread *t);
+	virtual void force_remove(ThreadList &tl);
+	virtual void force_remove(Thread *t);
 
-  virtual void wakeup_and_wait(BlockedTimingAspect::WakeupHook hook,
-			       unsigned int timeout_usec = 0);
-  virtual void wakeup(BlockedTimingAspect::WakeupHook hook,
-		      Barrier *barrier = 0);
-  virtual void try_recover(std::list<std::string> &recovered_threads);
+	virtual void wakeup_and_wait(BlockedTimingAspect::WakeupHook hook, unsigned int timeout_usec = 0);
+	virtual void wakeup(BlockedTimingAspect::WakeupHook hook, Barrier *barrier = 0);
+	virtual void try_recover(std::list<std::string> &recovered_threads);
 
-  virtual bool timed_threads_exist();
-  virtual void wait_for_timed_threads();
-  virtual void interrupt_timed_thread_wait();
+	virtual bool timed_threads_exist();
+	virtual void wait_for_timed_threads();
+	virtual void interrupt_timed_thread_wait();
 
-  ThreadCollector *  aspect_collector() const;
+	ThreadCollector *aspect_collector() const;
 
- private:
-  void internal_add_thread(Thread *t);
-  void internal_remove_thread(Thread *t);
-  void add_maybelocked(ThreadList &tl, bool lock);
-  void add_maybelocked(Thread *t, bool lock);
-  void remove_maybelocked(ThreadList &tl, bool lock);
-  void remove_maybelocked(Thread *t, bool lock);
+private:
+	void internal_add_thread(Thread *t);
+	void internal_remove_thread(Thread *t);
+	void add_maybelocked(ThreadList &tl, bool lock);
+	void add_maybelocked(Thread *t, bool lock);
+	void remove_maybelocked(ThreadList &tl, bool lock);
+	void remove_maybelocked(Thread *t, bool lock);
 
-  class ThreadManagerAspectCollector : public ThreadCollector
-  {
-   public:
-    ThreadManagerAspectCollector(ThreadManager *parent_manager);
+	class ThreadManagerAspectCollector : public ThreadCollector
+	{
+	public:
+		ThreadManagerAspectCollector(ThreadManager *parent_manager);
 
-    virtual void add(ThreadList &tl);
-    virtual void add(Thread *t);
+		virtual void add(ThreadList &tl);
+		virtual void add(Thread *t);
 
-    virtual void remove(ThreadList &tl);
-    virtual void remove(Thread *t);
+		virtual void remove(ThreadList &tl);
+		virtual void remove(Thread *t);
 
-    virtual void force_remove(ThreadList &tl);
-    virtual void force_remove(Thread *t);
+		virtual void force_remove(ThreadList &tl);
+		virtual void force_remove(Thread *t);
 
-   private:
-    ThreadManager *parent_manager_;
-  };
+	private:
+		ThreadManager *parent_manager_;
+	};
 
- private:
-  ThreadInitializer *initializer_;
-  ThreadFinalizer   *finalizer_;
+private:
+	ThreadInitializer *initializer_;
+	ThreadFinalizer *  finalizer_;
 
-  LockMap< BlockedTimingAspect::WakeupHook, ThreadList > threads_;
-  LockMap< BlockedTimingAspect::WakeupHook, ThreadList >::iterator tit_;
+	LockMap<BlockedTimingAspect::WakeupHook, ThreadList>           threads_;
+	LockMap<BlockedTimingAspect::WakeupHook, ThreadList>::iterator tit_;
 
-  ThreadList     untimed_threads_;
-  WaitCondition *waitcond_timedthreads_;
+	ThreadList     untimed_threads_;
+	WaitCondition *waitcond_timedthreads_;
 
-  ThreadManagerAspectCollector *aspect_collector_;
-  bool interrupt_timed_thread_wait_;
-
+	ThreadManagerAspectCollector *aspect_collector_;
+	bool                          interrupt_timed_thread_wait_;
 };
 
 } // end namespace fawkes

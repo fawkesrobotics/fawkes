@@ -24,18 +24,18 @@
 #ifndef _LIBS_BASEAPP_MAIN_THREAD_H_
 #define _LIBS_BASEAPP_MAIN_THREAD_H_
 
-#include <syncpoint/syncpoint_manager.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/mainloop/employer.h>
 #include <baseapp/thread_manager.h>
 #include <core/threading/thread.h>
-#include <aspect/mainloop/employer.h>
-#include <aspect/blocked_timing.h>
-#include <utils/system/signal.h>
 #include <logging/multi.h>
+#include <syncpoint/syncpoint_manager.h>
+#include <utils/system/signal.h>
 
+#include <getopt.h>
 #include <list>
 #include <string>
 #include <vector>
-#include <getopt.h>
 
 namespace fawkes {
 class Configuration;
@@ -55,95 +55,98 @@ class ThreadManager;
 class SyncPointManager;
 class FawkesNetworkManager;
 
-class FawkesMainThread
-: public Thread,
-  public MainLoopEmployer
+class FawkesMainThread : public Thread, public MainLoopEmployer
 {
- public:
-  FawkesMainThread(Configuration *config,
-		   MultiLogger *multi_logger,
-		   ThreadManager *thread_manager,
-		   SyncPointManager *syncpoint_manager,
-		   PluginManager *plugin_manager,
-		   const char *load_plugins,
-                   const char *default_plugin = 0);
-  virtual ~FawkesMainThread();
+public:
+	FawkesMainThread(Configuration *   config,
+	                 MultiLogger *     multi_logger,
+	                 ThreadManager *   thread_manager,
+	                 SyncPointManager *syncpoint_manager,
+	                 PluginManager *   plugin_manager,
+	                 const char *      load_plugins,
+	                 const char *      default_plugin = 0);
+	virtual ~FawkesMainThread();
 
-  virtual void once();
-  virtual void loop();
+	virtual void once();
+	virtual void loop();
 
-  virtual void set_mainloop_thread(Thread *mainloop_thread);
+	virtual void set_mainloop_thread(Thread *mainloop_thread);
 
-  void full_start();
+	void full_start();
 
-  MultiLogger *  logger() const;
+	MultiLogger *logger() const;
 
-  class Runner : public SignalHandler {
-  public:
-    Runner(FawkesMainThread *fmt, bool register_signals = true);
-    ~Runner();
-    void run();
-    void handle_signal(int signum);
-  private:
-    FawkesMainThread *fmt_;
-    Mutex            *init_mutex_;
-    bool              init_running_;
-    bool              init_quit_;
-    bool              sigint_running_;
-    bool              register_signals_;
-  };
+	class Runner : public SignalHandler
+	{
+	public:
+		Runner(FawkesMainThread *fmt, bool register_signals = true);
+		~Runner();
+		void run();
+		void handle_signal(int signum);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	private:
+		FawkesMainThread *fmt_;
+		Mutex *           init_mutex_;
+		bool              init_running_;
+		bool              init_quit_;
+		bool              sigint_running_;
+		bool              register_signals_;
+	};
 
- private:
-  void destruct();
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
-  inline void safe_wake(BlockedTimingAspect::WakeupHook hook, unsigned int timeout_usec)
-  {
-    try {
-      thread_manager_->wakeup_and_wait(hook, timeout_usec);
-    } catch (Exception &e) {
-      if (enable_looptime_warnings_) {
-        //multi_logger_->log_error("FawkesMainThread",
-        //                          "Error while processing hook %s, exception follows",
-        //                          BlockedTimingAspect::blocked_timing_hook_to_string(hook));
-        multi_logger_->log_error("FawkesMainThread", e);
-      }
+private:
+	void destruct();
 
-    }
-  }
+	inline void
+	safe_wake(BlockedTimingAspect::WakeupHook hook, unsigned int timeout_usec)
+	{
+		try {
+			thread_manager_->wakeup_and_wait(hook, timeout_usec);
+		} catch (Exception &e) {
+			if (enable_looptime_warnings_) {
+				//multi_logger_->log_error("FawkesMainThread",
+				//                          "Error while processing hook %s, exception follows",
+				//                          BlockedTimingAspect::blocked_timing_hook_to_string(hook));
+				multi_logger_->log_error("FawkesMainThread", e);
+			}
+		}
+	}
 
+	Configuration *config_;
+	MultiLogger *  multi_logger_;
+	Clock *        clock_;
+	TimeWait *     time_wait_;
 
-  Configuration        *config_;
-  MultiLogger          *multi_logger_;
-  Clock                *clock_;
-  TimeWait             *time_wait_;
+	Barrier *             init_barrier_;
+	Thread *              mainloop_thread_;
+	Mutex *               mainloop_mutex_;
+	InterruptibleBarrier *mainloop_barrier_;
 
-  Barrier              *init_barrier_;
-  Thread               *mainloop_thread_;
-  Mutex                *mainloop_mutex_;
-  InterruptibleBarrier *mainloop_barrier_;
+	char *default_plugin_;
+	char *load_plugins_;
 
-  char                 *default_plugin_;
-  char                 *load_plugins_;
+	ThreadManager *   thread_manager_;
+	SyncPointManager *syncpoint_manager_;
+	PluginManager *   plugin_manager_;
 
-  ThreadManager        *thread_manager_;
-  SyncPointManager     *syncpoint_manager_;
-  PluginManager        *plugin_manager_;
+	std::list<std::string> recovered_threads_;
+	unsigned int           desired_loop_time_usec_;
+	float                  desired_loop_time_sec_;
+	unsigned int           max_thread_time_usec_;
+	unsigned int           max_thread_time_nanosec_;
+	Time *                 loop_start_;
+	Time *                 loop_end_;
+	bool                   enable_looptime_warnings_;
 
-  std::list<std::string>        recovered_threads_;
-  unsigned int                  desired_loop_time_usec_;
-  float                         desired_loop_time_sec_;
-  unsigned int                  max_thread_time_usec_;
-  unsigned int                  max_thread_time_nanosec_;
-  Time                         *loop_start_;
-  Time                         *loop_end_;
-  bool                          enable_looptime_warnings_;
-
-  std::vector<RefPtr<SyncPoint> > syncpoints_start_hook_;
-  std::vector<RefPtr<SyncPoint> > syncpoints_end_hook_;
-
+	std::vector<RefPtr<SyncPoint>> syncpoints_start_hook_;
+	std::vector<RefPtr<SyncPoint>> syncpoints_end_hook_;
 };
 
 } // end namespace fawkes

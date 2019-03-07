@@ -19,48 +19,43 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-
 #ifndef _LIBS_BASEAPP_TIMING_THREAD_H_
 #define _LIBS_BASEAPP_TIMING_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/syncpoint_manager.h>
-#include <aspect/logging.h>
 #include <aspect/configurable.h>
-
+#include <aspect/logging.h>
+#include <aspect/syncpoint_manager.h>
+#include <core/threading/thread.h>
 #include <utils/time/clock.h>
-
 
 namespace fawkes {
 
-class FawkesTimingThread
-: public Thread,
-  public SyncPointManagerAspect,
-  public ConfigurableAspect,
-//  public ConfigurationChangeHandler,
-  public LoggingAspect
+class FawkesTimingThread : public Thread,
+                           public SyncPointManagerAspect,
+                           public ConfigurableAspect,
+                           //  public ConfigurationChangeHandler,
+                           public LoggingAspect
 {
-  public:
-    FawkesTimingThread();
+public:
+	FawkesTimingThread();
 
-    virtual void init();
-    virtual void loop();
-    virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  private:
-    Clock *clock_;
-    Time *loop_start_;
-    Time *loop_end_;
-    float desired_loop_time_sec_;
-    uint desired_loop_time_usec_;
-    float min_loop_time_sec_;
-    uint min_loop_time_usec_;
-    bool enable_looptime_warnings_;
+private:
+	Clock *clock_;
+	Time * loop_start_;
+	Time * loop_end_;
+	float  desired_loop_time_sec_;
+	uint   desired_loop_time_usec_;
+	float  min_loop_time_sec_;
+	uint   min_loop_time_usec_;
+	bool   enable_looptime_warnings_;
 
-    RefPtr<SyncPoint> syncpoint_loop_start_;
-    RefPtr<SyncPoint> syncpoint_loop_end_;
+	RefPtr<SyncPoint> syncpoint_loop_start_;
+	RefPtr<SyncPoint> syncpoint_loop_end_;
 };
-
 
 } // namespace fawkes
 

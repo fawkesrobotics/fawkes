@@ -17,11 +17,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-
 #include <baseapp/timing_thread.h>
 
 #include <unistd.h>
-
 
 #define CFG_PREFIX "/fawkes/mainapp/"
 
@@ -36,8 +34,7 @@ namespace fawkes {
  * releasing the postloop SyncPoint. If the loop time is longer than the maximum
  * loop time, a warning is printed.
  */
-FawkesTimingThread::FawkesTimingThread()
-: Thread("FawkesTimingThread", Thread::OPMODE_CONTINUOUS)
+FawkesTimingThread::FawkesTimingThread() : Thread("FawkesTimingThread", Thread::OPMODE_CONTINUOUS)
 //  ConfigurationChangeHandler(CFG_PREFIX)
 {
 }
@@ -48,43 +45,37 @@ FawkesTimingThread::FawkesTimingThread()
 void
 FawkesTimingThread::init()
 {
-  clock_ = Clock::instance();
-  loop_start_ = new Time(clock_);
-  loop_end_ = new Time(clock_);
+	clock_      = Clock::instance();
+	loop_start_ = new Time(clock_);
+	loop_end_   = new Time(clock_);
 
-  syncpoint_loop_start_ = syncpoint_manager->get_syncpoint(name(),
-      "/preloop/start");
-  syncpoint_loop_end_ = syncpoint_manager->get_syncpoint(name(),
-      "/postloop/end");
+	syncpoint_loop_start_ = syncpoint_manager->get_syncpoint(name(), "/preloop/start");
+	syncpoint_loop_end_   = syncpoint_manager->get_syncpoint(name(), "/postloop/end");
 
-  try {
-    desired_loop_time_usec_ =
-        config->get_uint("/fawkes/mainapp/desired_loop_time");
-  } catch (Exception &e) {
-    desired_loop_time_usec_ = 0;
-    logger->log_info(name(), "Desired loop time not set, assuming 0");
-  }
-  desired_loop_time_sec_  = (float)desired_loop_time_usec_ / 1000000.f;
+	try {
+		desired_loop_time_usec_ = config->get_uint("/fawkes/mainapp/desired_loop_time");
+	} catch (Exception &e) {
+		desired_loop_time_usec_ = 0;
+		logger->log_info(name(), "Desired loop time not set, assuming 0");
+	}
+	desired_loop_time_sec_ = (float)desired_loop_time_usec_ / 1000000.f;
 
-  try {
-    min_loop_time_usec_ =
-        config->get_uint("/fawkes/mainapp/min_loop_time");
-  } catch (Exception &e) {
-    min_loop_time_usec_ = 0;
-    logger->log_info(name(), "Minimal loop time not set, assuming 0");
-  }
-  min_loop_time_sec_  = (float)min_loop_time_usec_ / 1000000.f;
+	try {
+		min_loop_time_usec_ = config->get_uint("/fawkes/mainapp/min_loop_time");
+	} catch (Exception &e) {
+		min_loop_time_usec_ = 0;
+		logger->log_info(name(), "Minimal loop time not set, assuming 0");
+	}
+	min_loop_time_sec_ = (float)min_loop_time_usec_ / 1000000.f;
 
-  try {
-    enable_looptime_warnings_ =
-      config->get_bool("/fawkes/mainapp/enable_looptime_warnings");
-    if(!enable_looptime_warnings_) {
-      logger->log_debug(name(), "loop time warnings are disabled");
-    }
-  } catch(Exception &e) {
-    enable_looptime_warnings_ = true;
-  }
-
+	try {
+		enable_looptime_warnings_ = config->get_bool("/fawkes/mainapp/enable_looptime_warnings");
+		if (!enable_looptime_warnings_) {
+			logger->log_debug(name(), "loop time warnings are disabled");
+		}
+	} catch (Exception &e) {
+		enable_looptime_warnings_ = true;
+	}
 }
 
 /** Thread loop.
@@ -95,37 +86,41 @@ FawkesTimingThread::init()
 void
 FawkesTimingThread::loop()
 {
-  syncpoint_loop_start_->wait(name());
-  loop_start_->stamp_systime();
+	syncpoint_loop_start_->wait(name());
+	loop_start_->stamp_systime();
 
-  syncpoint_loop_end_->wait(name());
-  loop_end_->stamp_systime();
-  float loop_time = *loop_end_ - loop_start_;
+	syncpoint_loop_end_->wait(name());
+	loop_end_->stamp_systime();
+	float loop_time = *loop_end_ - loop_start_;
 
-  if (loop_time < min_loop_time_usec_) {
-    logger->log_warn(name(), "Minimal loop time not reached, extending loop");
-    usleep(min_loop_time_usec_ - loop_time);
-    loop_end_->stamp_systime();
-    loop_time = *loop_end_ - loop_start_;
-  }
+	if (loop_time < min_loop_time_usec_) {
+		logger->log_warn(name(), "Minimal loop time not reached, extending loop");
+		usleep(min_loop_time_usec_ - loop_time);
+		loop_end_->stamp_systime();
+		loop_time = *loop_end_ - loop_start_;
+	}
 
-  if (desired_loop_time_sec_ > 0) {
-    if(enable_looptime_warnings_) {
-      // give some extra 10% to eliminate frequent false warnings due to regular
-      // time jitter (TimeWait might not be all that precise)
-      if (loop_time > 1.1 * desired_loop_time_sec_) {
-        logger->log_warn(name(), "Loop time exceeded, "
-            "desired: %f sec (%u usec),  actual: %f sec",
-            desired_loop_time_sec_, desired_loop_time_usec_,
-            loop_time);
-      } else {
-        logger->log_warn(name(), "Desired loop time achieved, "
-            "desired: %f sec (%u usec),  actual: %f sec",
-            desired_loop_time_sec_, desired_loop_time_usec_,
-            loop_time);
-      }
-    }
-  }
+	if (desired_loop_time_sec_ > 0) {
+		if (enable_looptime_warnings_) {
+			// give some extra 10% to eliminate frequent false warnings due to regular
+			// time jitter (TimeWait might not be all that precise)
+			if (loop_time > 1.1 * desired_loop_time_sec_) {
+				logger->log_warn(name(),
+				                 "Loop time exceeded, "
+				                 "desired: %f sec (%u usec),  actual: %f sec",
+				                 desired_loop_time_sec_,
+				                 desired_loop_time_usec_,
+				                 loop_time);
+			} else {
+				logger->log_warn(name(),
+				                 "Desired loop time achieved, "
+				                 "desired: %f sec (%u usec),  actual: %f sec",
+				                 desired_loop_time_sec_,
+				                 desired_loop_time_usec_,
+				                 loop_time);
+			}
+		}
+	}
 }
 
 /** Finalize the thread.
@@ -134,10 +129,10 @@ FawkesTimingThread::loop()
 void
 FawkesTimingThread::finalize()
 {
-  syncpoint_manager->release_syncpoint(name(), syncpoint_loop_start_);
-  syncpoint_manager->release_syncpoint(name(), syncpoint_loop_end_);
-  delete loop_start_;
-  delete loop_end_;
+	syncpoint_manager->release_syncpoint(name(), syncpoint_loop_start_);
+	syncpoint_manager->release_syncpoint(name(), syncpoint_loop_end_);
+	delete loop_start_;
+	delete loop_end_;
 }
 
 } // end namespace fawkes
