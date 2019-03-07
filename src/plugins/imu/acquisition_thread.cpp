@@ -24,9 +24,9 @@
 #include <core/threading/mutex.h>
 #include <interfaces/IMUInterface.h>
 
-#include <limits>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
+#include <limits>
 
 using namespace fawkes;
 
@@ -90,80 +90,83 @@ using namespace fawkes;
  * Sub-classes must call init(), loop(), and finalize().
  */
 
-
 /** Constructor.
  * @param thread_name name of the thread, be descriptive
  * @param continuous true to run continuous, false otherwise
  * @param cfg_name configuration name
  * @param cfg_prefix configuration path prefix
  */
-IMUAcquisitionThread::IMUAcquisitionThread(const char *thread_name, bool continuous,
-                                           const std::string& cfg_name,
-                                           const std::string& cfg_prefix)
+IMUAcquisitionThread::IMUAcquisitionThread(const char *       thread_name,
+                                           bool               continuous,
+                                           const std::string &cfg_name,
+                                           const std::string &cfg_prefix)
 : Thread(thread_name, Thread::OPMODE_CONTINUOUS),
-  cfg_name_      (cfg_name),
-  cfg_prefix_    (cfg_prefix),
+  cfg_name_(cfg_name),
+  cfg_prefix_(cfg_prefix),
   cfg_continuous_(continuous)
 {
-  data_mutex_ = new Mutex();
-  timestamp_  = new Time();
-  new_data_   = false;
+	data_mutex_ = new Mutex();
+	timestamp_  = new Time();
+	new_data_   = false;
 
-  for (unsigned int i = 0; i < 4; ++i)  orientation_[i] = 0.;
-  for (unsigned int i = 0; i < 9; ++i)  orientation_covariance_[i] = 0.;
-  for (unsigned int i = 0; i < 3; ++i)  angular_velocity_[i] = 0.;
-  for (unsigned int i = 0; i < 9; ++i)  angular_velocity_covariance_[i] = 0.;
-  for (unsigned int i = 0; i < 3; ++i)  linear_acceleration_[i] = 0.;
-  for (unsigned int i = 0; i < 9; ++i)  linear_acceleration_covariance_[i] = 0.;
-
+	for (unsigned int i = 0; i < 4; ++i)
+		orientation_[i] = 0.;
+	for (unsigned int i = 0; i < 9; ++i)
+		orientation_covariance_[i] = 0.;
+	for (unsigned int i = 0; i < 3; ++i)
+		angular_velocity_[i] = 0.;
+	for (unsigned int i = 0; i < 9; ++i)
+		angular_velocity_covariance_[i] = 0.;
+	for (unsigned int i = 0; i < 3; ++i)
+		linear_acceleration_[i] = 0.;
+	for (unsigned int i = 0; i < 9; ++i)
+		linear_acceleration_covariance_[i] = 0.;
 }
 
 IMUAcquisitionThread::~IMUAcquisitionThread()
 {
-  delete data_mutex_;
-  delete timestamp_;
+	delete data_mutex_;
+	delete timestamp_;
 }
-
 
 void
 IMUAcquisitionThread::init()
 {
-  if (! cfg_continuous_)  return;
+	if (!cfg_continuous_)
+		return;
 
-  imu_if_ = NULL;
-  cfg_frame_ = config->get_string((cfg_prefix_ + "frame").c_str());
+	imu_if_    = NULL;
+	cfg_frame_ = config->get_string((cfg_prefix_ + "frame").c_str());
 
-  std::string if_id = "IMU " + cfg_name_;
+	std::string if_id = "IMU " + cfg_name_;
 
-  imu_if_ = blackboard->open_for_writing<IMUInterface>(if_id.c_str());
-  imu_if_->set_auto_timestamping(false);
-  imu_if_->set_frame(cfg_frame_.c_str());
-  imu_if_->write();
+	imu_if_ = blackboard->open_for_writing<IMUInterface>(if_id.c_str());
+	imu_if_->set_auto_timestamping(false);
+	imu_if_->set_frame(cfg_frame_.c_str());
+	imu_if_->write();
 }
-
 
 void
 IMUAcquisitionThread::finalize()
 {
-  blackboard->close(imu_if_);
+	blackboard->close(imu_if_);
 }
-
 
 void
 IMUAcquisitionThread::loop()
 {
-  data_mutex_->lock();
-  if (new_data_) {
-    imu_if_->set_timestamp(timestamp_);
-    imu_if_->set_orientation(orientation_);
-    imu_if_->set_orientation_covariance(orientation_covariance_);
-    imu_if_->set_angular_velocity(angular_velocity_);
-    imu_if_->set_angular_velocity_covariance(angular_velocity_covariance_);
-    imu_if_->set_linear_acceleration(linear_acceleration_);
-    imu_if_->set_linear_acceleration_covariance(linear_acceleration_covariance_);
-    imu_if_->write();
-  }
-  data_mutex_->unlock();
+	data_mutex_->lock();
+	if (new_data_) {
+		imu_if_->set_timestamp(timestamp_);
+		imu_if_->set_orientation(orientation_);
+		imu_if_->set_orientation_covariance(orientation_covariance_);
+		imu_if_->set_angular_velocity(angular_velocity_);
+		imu_if_->set_angular_velocity_covariance(angular_velocity_covariance_);
+		imu_if_->set_linear_acceleration(linear_acceleration_);
+		imu_if_->set_linear_acceleration_covariance(linear_acceleration_covariance_);
+		imu_if_->write();
+	}
+	data_mutex_->unlock();
 }
 
 /** Lock data if fresh.
@@ -175,19 +178,18 @@ IMUAcquisitionThread::loop()
 bool
 IMUAcquisitionThread::lock_if_new_data()
 {
-  data_mutex_->lock();
-  if (new_data_) {
-    return true;
-  } else {
-    data_mutex_->unlock();
-    return false;
-  }
+	data_mutex_->lock();
+	if (new_data_) {
+		return true;
+	} else {
+		data_mutex_->unlock();
+		return false;
+	}
 }
-
 
 /** Unlock data, */
 void
 IMUAcquisitionThread::unlock()
 {
-  data_mutex_->unlock();
+	data_mutex_->unlock();
 }
