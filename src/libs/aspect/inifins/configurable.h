@@ -32,14 +32,14 @@ class Configuration;
 
 class ConfigurableAspectIniFin : public AspectIniFin
 {
- public:
-  ConfigurableAspectIniFin(Configuration *config);
+public:
+	ConfigurableAspectIniFin(Configuration *config);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  Configuration *config_;
+private:
+	Configuration *config_;
 };
 
 } // end namespace fawkes

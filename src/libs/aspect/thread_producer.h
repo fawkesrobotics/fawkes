@@ -31,14 +31,14 @@ namespace fawkes {
 
 class ThreadProducerAspect : public virtual Aspect
 {
- public:
-  ThreadProducerAspect();
-  virtual ~ThreadProducerAspect();
+public:
+	ThreadProducerAspect();
+	virtual ~ThreadProducerAspect();
 
-  void init_ThreadProducerAspect(ThreadCollector *collector);
+	void init_ThreadProducerAspect(ThreadCollector *collector);
 
- protected:
-  ThreadCollector *thread_collector;
+protected:
+	ThreadCollector *thread_collector;
 };
 
 } // end namespace fawkes

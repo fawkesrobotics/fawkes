@@ -23,8 +23,8 @@
 
 #include <aspect/inifins/vision_master.h>
 #include <aspect/vision_master.h>
-#include <fvutils/base/vision_master.h>
 #include <core/threading/thread_finalizer.h>
+#include <fvutils/base/vision_master.h>
 
 namespace fawkes {
 
@@ -34,73 +34,71 @@ namespace fawkes {
  */
 
 /** Constructor. */
-VisionMasterAspectIniFin::VisionMasterAspectIniFin()
-  : AspectIniFin("VisionMasterAspect")
+VisionMasterAspectIniFin::VisionMasterAspectIniFin() : AspectIniFin("VisionMasterAspect")
 {
 }
-
 
 void
 VisionMasterAspectIniFin::init(Thread *thread)
 {
-  VisionMasterAspect *vision_master_thread;
-  vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread);
-  if (vision_master_thread == 0) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "VisionMasterAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	VisionMasterAspect *vision_master_thread;
+	vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread);
+	if (vision_master_thread == 0) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "VisionMasterAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  try {
-    vision_dependency_.add(vision_master_thread);
-  } catch (DependencyViolationException &e) {
-    CannotInitializeThreadException ce("Dependency violation for "
-				       "VisionMasterAspect detected");
-    ce.append(e);
-    throw ce;
-  }
+	try {
+		vision_dependency_.add(vision_master_thread);
+	} catch (DependencyViolationException &e) {
+		CannotInitializeThreadException ce("Dependency violation for "
+		                                   "VisionMasterAspect detected");
+		ce.append(e);
+		throw ce;
+	}
 }
-
 
 bool
 VisionMasterAspectIniFin::prepare_finalize(Thread *thread)
 {
-  VisionMasterAspect *vision_master_thread;
-  vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread);
-  if (vision_master_thread == 0) {
-    return true;
-  }
+	VisionMasterAspect *vision_master_thread;
+	vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread);
+	if (vision_master_thread == 0) {
+		return true;
+	}
 
-  if ( ! vision_dependency_.can_remove(vision_master_thread) ) {
-    //logger_->log_warn("AspectIniFin", "Cannot remove vision master, there are "
-    //		"still vision threads that depend on it");
-    return false;
-  }
+	if (!vision_dependency_.can_remove(vision_master_thread)) {
+		//logger_->log_warn("AspectIniFin", "Cannot remove vision master, there are "
+		//		"still vision threads that depend on it");
+		return false;
+	}
 
-  return true;
+	return true;
 }
 
 void
 VisionMasterAspectIniFin::finalize(Thread *thread)
 {
-  VisionMasterAspect *vision_master_thread;
-  vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread);
-  if (vision_master_thread == 0) {
-    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
-					"VisionMasterAspect, but RTTI says it "
-					"has not. ", thread->name());
-  }
+	VisionMasterAspect *vision_master_thread;
+	vision_master_thread = dynamic_cast<VisionMasterAspect *>(thread);
+	if (vision_master_thread == 0) {
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+		                                    "VisionMasterAspect, but RTTI says it "
+		                                    "has not. ",
+		                                    thread->name());
+	}
 
-  try {
-    vision_dependency_.remove(vision_master_thread);
-  } catch (DependencyViolationException &e) {
-    CannotFinalizeThreadException ce("Dependency violation for "
-				     "VisionMasterAspect detected");
-    ce.append(e);
-    throw ce;
-  }
+	try {
+		vision_dependency_.remove(vision_master_thread);
+	} catch (DependencyViolationException &e) {
+		CannotFinalizeThreadException ce("Dependency violation for "
+		                                 "VisionMasterAspect detected");
+		ce.append(e);
+		throw ce;
+	}
 }
-
 
 /** Get vision master.
  * @return vision master
@@ -108,9 +106,8 @@ VisionMasterAspectIniFin::finalize(Thread *thread)
 firevision::VisionMaster *
 VisionMasterAspectIniFin::vision_master()
 {
-  return vision_dependency_.provider()->vision_master();
+	return vision_dependency_.provider()->vision_master();
 }
-
 
 /** Add a vision thread.
  * @param thread thread to add
@@ -118,7 +115,7 @@ VisionMasterAspectIniFin::vision_master()
 void
 VisionMasterAspectIniFin::add_vision_thread(VisionAspect *thread)
 {
-  vision_dependency_.add(thread);
+	vision_dependency_.add(thread);
 }
 
 /** Remove a vision thread.
@@ -127,7 +124,7 @@ VisionMasterAspectIniFin::add_vision_thread(VisionAspect *thread)
 void
 VisionMasterAspectIniFin::remove_vision_thread(VisionAspect *thread)
 {
-  vision_dependency_.remove(thread);
+	vision_dependency_.remove(thread);
 }
 
 /** Query if vision thread can be removed.
@@ -137,8 +134,7 @@ VisionMasterAspectIniFin::remove_vision_thread(VisionAspect *thread)
 bool
 VisionMasterAspectIniFin::can_remove_vision_thread(VisionAspect *thread)
 {
-  return vision_dependency_.can_remove(thread);
+	return vision_dependency_.can_remove(thread);
 }
-
 
 } // end namespace fawkes

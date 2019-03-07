@@ -25,25 +25,25 @@
 #define _ASPECT_INIFINS_INIFIN_H_
 
 #include <core/threading/thread.h>
-#include <core/threading/thread_initializer.h>
 #include <core/threading/thread_finalizer.h>
+#include <core/threading/thread_initializer.h>
 
 namespace fawkes {
 
 class AspectIniFin
 {
- public:
-  AspectIniFin(const char *aspect_name) __attribute__((nonnull));
-  virtual ~AspectIniFin();
+public:
+	AspectIniFin(const char *aspect_name) __attribute__((nonnull));
+	virtual ~AspectIniFin();
 
-  virtual void init(Thread *thread) = 0;
-  virtual void finalize(Thread *thread) = 0;
-  virtual bool prepare_finalize(Thread *thread);
+	virtual void init(Thread *thread)     = 0;
+	virtual void finalize(Thread *thread) = 0;
+	virtual bool prepare_finalize(Thread *thread);
 
-  const char * get_aspect_name() const;
+	const char *get_aspect_name() const;
 
- private:
-  const char *aspect_name_;
+private:
+	const char *aspect_name_;
 };
 
 } // end namespace fawkes

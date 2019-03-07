@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <aspect/inifins/clock.h>
 #include <aspect/clock.h>
+#include <aspect/inifins/clock.h>
 #include <utils/time/clock.h>
 
 namespace fawkes {
@@ -35,32 +35,29 @@ namespace fawkes {
 /** Constructor.
  * @param clock clock instance to pass to threads
  */
-ClockAspectIniFin::ClockAspectIniFin(Clock *clock)
-  : AspectIniFin("ClockAspect")
+ClockAspectIniFin::ClockAspectIniFin(Clock *clock) : AspectIniFin("ClockAspect")
 {
-  clock_ = clock;
+	clock_ = clock;
 }
-
 
 void
 ClockAspectIniFin::init(Thread *thread)
 {
-  ClockAspect *clock_thread;
-  clock_thread = dynamic_cast<ClockAspect *>(thread);
-  if (clock_thread == 0) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "ClockAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	ClockAspect *clock_thread;
+	clock_thread = dynamic_cast<ClockAspect *>(thread);
+	if (clock_thread == 0) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "ClockAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  clock_thread->init_ClockAspect(clock_);
+	clock_thread->init_ClockAspect(clock_);
 }
-
 
 void
 ClockAspectIniFin::finalize(Thread *thread)
 {
 }
-
 
 } // end namespace fawkes

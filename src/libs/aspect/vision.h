@@ -31,25 +31,27 @@ namespace fawkes {
 
 class VisionAspect : public virtual Aspect
 {
- public:
-  /** The operation mode of this vision thread.
+public:
+	/** The operation mode of this vision thread.
    * @see Thread
    */
-  typedef enum {
-    CYCLIC,	/**< cyclic mode */
-    CONTINUOUS	/**< continuous mode */
-  } VisionThreadMode;
+	typedef enum {
+		CYCLIC,    /**< cyclic mode */
+		CONTINUOUS /**< continuous mode */
+	} VisionThreadMode;
 
-  VisionAspect(VisionThreadMode mode);
-  virtual ~VisionAspect();
+	VisionAspect(VisionThreadMode mode);
+	virtual ~VisionAspect();
 
-  void              init_VisionAspect(firevision::VisionMaster *vision_master);
-  VisionThreadMode  vision_thread_mode();
- protected:
-  /** Vision master */
-  firevision::VisionMaster *vision_master;
- private:
-  VisionThreadMode vision_thread_mode_;
+	void             init_VisionAspect(firevision::VisionMaster *vision_master);
+	VisionThreadMode vision_thread_mode();
+
+protected:
+	/** Vision master */
+	firevision::VisionMaster *vision_master;
+
+private:
+	VisionThreadMode vision_thread_mode_;
 };
 
 } // end namespace fawkes

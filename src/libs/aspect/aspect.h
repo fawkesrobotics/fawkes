@@ -30,12 +30,14 @@ namespace fawkes {
 
 class Aspect
 {
- public:
-  const std::list<const char *> & get_aspects() const;
- protected:
-  void add_aspect(const char *name);
- private:
-  std::list<const char *> aspects_;
+public:
+	const std::list<const char *> &get_aspects() const;
+
+protected:
+	void add_aspect(const char *name);
+
+private:
+	std::list<const char *> aspects_;
 };
 
 } // end namespace fawkes

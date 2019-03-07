@@ -36,37 +36,36 @@ namespace fawkes {
  * @param config configuration used to conditionally make PCL quiet.
  */
 PointCloudAspectIniFin::PointCloudAspectIniFin(Configuration *config)
-  : AspectIniFin("PointCloudAspect")
+: AspectIniFin("PointCloudAspect")
 {
-  pcl_manager_ = new PointCloudManager();
-  pcl_utils::shutup_conditional(config);
+	pcl_manager_ = new PointCloudManager();
+	pcl_utils::shutup_conditional(config);
 }
-
 
 /** Destructor. */
 PointCloudAspectIniFin::~PointCloudAspectIniFin()
 {
-  delete pcl_manager_;
+	delete pcl_manager_;
 }
 
 void
 PointCloudAspectIniFin::init(Thread *thread)
 {
-  PointCloudAspect *pcl_thread;
-  pcl_thread = dynamic_cast<PointCloudAspect *>(thread);
-  if (pcl_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "PointCloudAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	PointCloudAspect *pcl_thread;
+	pcl_thread = dynamic_cast<PointCloudAspect *>(thread);
+	if (pcl_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "PointCloudAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  pcl_thread->init_PointCloudAspect(pcl_manager_);
+	pcl_thread->init_PointCloudAspect(pcl_manager_);
 }
 
 void
 PointCloudAspectIniFin::finalize(Thread *thread)
 {
 }
-
 
 } // end namespace fawkes

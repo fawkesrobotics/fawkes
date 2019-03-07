@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <aspect/inifins/configurable.h>
 #include <aspect/configurable.h>
+#include <aspect/inifins/configurable.h>
 #include <config/config.h>
 
 namespace fawkes {
@@ -36,31 +36,29 @@ namespace fawkes {
  * @param config configuration instance to pass to threads
  */
 ConfigurableAspectIniFin::ConfigurableAspectIniFin(Configuration *config)
-  : AspectIniFin("ConfigurableAspect")
+: AspectIniFin("ConfigurableAspect")
 {
-  config_ = config;
+	config_ = config;
 }
-
 
 void
 ConfigurableAspectIniFin::init(Thread *thread)
 {
-  ConfigurableAspect *configurable_thread;
-  configurable_thread = dynamic_cast<ConfigurableAspect *>(thread);
-  if (configurable_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "ConfigurableAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	ConfigurableAspect *configurable_thread;
+	configurable_thread = dynamic_cast<ConfigurableAspect *>(thread);
+	if (configurable_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "ConfigurableAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  configurable_thread->init_ConfigurableAspect(config_);
+	configurable_thread->init_ConfigurableAspect(config_);
 }
-
 
 void
 ConfigurableAspectIniFin::finalize(Thread *thread)
 {
 }
-
 
 } // end namespace fawkes

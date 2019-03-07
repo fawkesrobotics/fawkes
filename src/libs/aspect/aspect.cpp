@@ -48,9 +48,8 @@ namespace fawkes {
 void
 Aspect::add_aspect(const char *name)
 {
-  aspects_.push_back(name);
+	aspects_.push_back(name);
 }
-
 
 /** Get list of aspect names attached to a aspected thread.
  * @return list of aspect names attached to an aspected thread
@@ -58,8 +57,7 @@ Aspect::add_aspect(const char *name)
 const std::list<const char *> &
 Aspect::get_aspects() const
 {
-  return aspects_;
+	return aspects_;
 }
-
 
 } // end namespace fawkes

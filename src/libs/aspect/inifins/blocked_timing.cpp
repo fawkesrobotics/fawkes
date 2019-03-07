@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <aspect/inifins/blocked_timing.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/inifins/blocked_timing.h>
 #include <core/macros.h>
 
 namespace fawkes {
@@ -33,47 +33,46 @@ namespace fawkes {
  */
 
 /** Constructor. */
-BlockedTimingAspectIniFin::BlockedTimingAspectIniFin()
-  : AspectIniFin("BlockedTimingAspect")
+BlockedTimingAspectIniFin::BlockedTimingAspectIniFin() : AspectIniFin("BlockedTimingAspect")
 {
 }
-
 
 void
 BlockedTimingAspectIniFin::init(Thread *thread)
 {
-  BlockedTimingAspect *blocked_timing_thread;
-  blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread);
+	BlockedTimingAspect *blocked_timing_thread;
+	blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread);
 
-  if (blocked_timing_thread == 0) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "BlockedTimingAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	if (blocked_timing_thread == 0) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "BlockedTimingAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  if ( thread->opmode() != Thread::OPMODE_WAITFORWAKEUP) {
-    throw CannotInitializeThreadException("Thread '%s' not in WAITFORWAKEUP mode"
-                                          " (required for BlockedTimingAspect)",
-                                          thread->name());
-  }
+	if (thread->opmode() != Thread::OPMODE_WAITFORWAKEUP) {
+		throw CannotInitializeThreadException("Thread '%s' not in WAITFORWAKEUP mode"
+		                                      " (required for BlockedTimingAspect)",
+		                                      thread->name());
+	}
 
-  blocked_timing_thread->init_BlockedTimingAspect(thread);
+	blocked_timing_thread->init_BlockedTimingAspect(thread);
 }
 
 void
 BlockedTimingAspectIniFin::finalize(Thread *thread)
 {
-  BlockedTimingAspect *blocked_timing_thread;
-    blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread);
+	BlockedTimingAspect *blocked_timing_thread;
+	blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread);
 
-  if (blocked_timing_thread == 0) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-      "BlockedTimingAspect, but RTTI says it "
-      "has not. ", thread->name());
-  }
+	if (blocked_timing_thread == 0) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "BlockedTimingAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  blocked_timing_thread->finalize_BlockedTimingAspect(thread);
+	blocked_timing_thread->finalize_BlockedTimingAspect(thread);
 }
-
 
 } // end namespace fawkes

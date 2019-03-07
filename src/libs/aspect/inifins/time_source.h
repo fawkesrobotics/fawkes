@@ -25,8 +25,8 @@
 #define _ASPECT_INIFINS_TIMESOURCE_H_
 
 #include <aspect/inifins/inifin.h>
-#include <utils/constraints/unique.h>
 #include <aspect/time_source.h>
+#include <utils/constraints/unique.h>
 
 namespace fawkes {
 
@@ -34,15 +34,15 @@ class Clock;
 
 class TimeSourceAspectIniFin : public AspectIniFin
 {
- public:
-  TimeSourceAspectIniFin(Clock *clock);
+public:
+	TimeSourceAspectIniFin(Clock *clock);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  Clock *clock_;
-  UniquenessConstraint<TimeSource> timesource_uc_;
+private:
+	Clock *                          clock_;
+	UniquenessConstraint<TimeSource> timesource_uc_;
 };
 
 } // end namespace fawkes

@@ -33,14 +33,14 @@ class BlockedTimingExecutor;
 
 class MainLoopAspect : public virtual Aspect
 {
- public:
-  MainLoopAspect();
-  virtual ~MainLoopAspect();
+public:
+	MainLoopAspect();
+	virtual ~MainLoopAspect();
 
-  void init_MainLoopAspect(BlockedTimingExecutor *btexec);
+	void init_MainLoopAspect(BlockedTimingExecutor *btexec);
 
- protected:
-  BlockedTimingExecutor *blocked_timing_executor;
+protected:
+	BlockedTimingExecutor *blocked_timing_executor;
 };
 
 } // end namespace fawkes

@@ -23,8 +23,8 @@
 
 #include <aspect/inifins/time_source.h>
 #include <aspect/time_source.h>
-#include <utils/time/clock.h>
 #include <core/threading/thread_finalizer.h>
+#include <utils/time/clock.h>
 
 namespace fawkes {
 
@@ -36,55 +36,53 @@ namespace fawkes {
 /** Constructor.
  * @param clock clock to register time source to
  */
-TimeSourceAspectIniFin::TimeSourceAspectIniFin(Clock *clock)
-  : AspectIniFin("TimeSourceAspect")
+TimeSourceAspectIniFin::TimeSourceAspectIniFin(Clock *clock) : AspectIniFin("TimeSourceAspect")
 {
-  clock_ = clock;
+	clock_ = clock;
 }
-
 
 void
 TimeSourceAspectIniFin::init(Thread *thread)
 {
-  TimeSourceAspect *timesource_thread;
-  timesource_thread = dynamic_cast<TimeSourceAspect *>(thread);
-  if (timesource_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "TimeSourceAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	TimeSourceAspect *timesource_thread;
+	timesource_thread = dynamic_cast<TimeSourceAspect *>(thread);
+	if (timesource_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "TimeSourceAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  try {
-    timesource_uc_.add(timesource_thread->get_timesource());
-    clock_->register_ext_timesource(timesource_thread->get_timesource(),
-				     /* make default */ true);
-  } catch (Exception &e) {
-    throw CannotInitializeThreadException("Thread has TimeSourceAspect but there "
-					  "is already another time provider.");
-  }
+	try {
+		timesource_uc_.add(timesource_thread->get_timesource());
+		clock_->register_ext_timesource(timesource_thread->get_timesource(),
+		                                /* make default */ true);
+	} catch (Exception &e) {
+		throw CannotInitializeThreadException("Thread has TimeSourceAspect but there "
+		                                      "is already another time provider.");
+	}
 }
-
 
 void
 TimeSourceAspectIniFin::finalize(Thread *thread)
 {
-  TimeSourceAspect *timesource_thread;
-  timesource_thread = dynamic_cast<TimeSourceAspect *>(thread);
-  if (timesource_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "TimeSourceAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	TimeSourceAspect *timesource_thread;
+	timesource_thread = dynamic_cast<TimeSourceAspect *>(thread);
+	if (timesource_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "TimeSourceAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  try {
-    clock_->remove_ext_timesource(timesource_thread->get_timesource());
-    timesource_uc_.remove(timesource_thread->get_timesource());
-  } catch (Exception &e) {
-    CannotFinalizeThreadException ce("Failed to remove time source");
-    ce.append(e);
-    throw;
-  }
+	try {
+		clock_->remove_ext_timesource(timesource_thread->get_timesource());
+		timesource_uc_.remove(timesource_thread->get_timesource());
+	} catch (Exception &e) {
+		CannotFinalizeThreadException ce("Failed to remove time source");
+		ce.append(e);
+		throw;
+	}
 }
-
 
 } // end namespace fawkes

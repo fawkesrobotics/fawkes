@@ -23,8 +23,8 @@
 
 #include <aspect/inifins/network.h>
 #include <aspect/network.h>
-#include <netcomm/service_discovery/service_publisher.h>
 #include <netcomm/service_discovery/service_browser.h>
+#include <netcomm/service_discovery/service_publisher.h>
 #include <netcomm/utils/resolver.h>
 
 namespace fawkes {
@@ -40,36 +40,33 @@ namespace fawkes {
  * @param service_publisher service publisher resolver to pass to threads
  */
 NetworkAspectIniFin::NetworkAspectIniFin(NetworkNameResolver *nnresolver,
-					 ServicePublisher *service_publisher,
-					 ServiceBrowser *service_browser)
-  : AspectIniFin("NetworkAspect")
+                                         ServicePublisher *   service_publisher,
+                                         ServiceBrowser *     service_browser)
+: AspectIniFin("NetworkAspect")
 {
-  nnresolver_        = nnresolver;
-  service_publisher_ = service_publisher;
-  service_browser_   = service_browser;
+	nnresolver_        = nnresolver;
+	service_publisher_ = service_publisher;
+	service_browser_   = service_browser;
 }
-
 
 void
 NetworkAspectIniFin::init(Thread *thread)
 {
-  NetworkAspect *network_thread;
-  network_thread = dynamic_cast<NetworkAspect *>(thread);
-  if (network_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "NetworkAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	NetworkAspect *network_thread;
+	network_thread = dynamic_cast<NetworkAspect *>(thread);
+	if (network_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "NetworkAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  network_thread->init_NetworkAspect(nnresolver_,
-				     service_publisher_, service_browser_);
+	network_thread->init_NetworkAspect(nnresolver_, service_publisher_, service_browser_);
 }
-
 
 void
 NetworkAspectIniFin::finalize(Thread *thread)
 {
 }
-
 
 } // end namespace fawkes

@@ -32,14 +32,14 @@ namespace fawkes {
 
 class ClockAspect : public virtual Aspect
 {
- public:
-  ClockAspect();
-  virtual ~ClockAspect();
+public:
+	ClockAspect();
+	virtual ~ClockAspect();
 
-  void init_ClockAspect(Clock *clock);
+	void init_ClockAspect(Clock *clock);
 
- protected:
-  Clock *clock;
+protected:
+	Clock *clock;
 };
 
 } // end namespace fawkes
