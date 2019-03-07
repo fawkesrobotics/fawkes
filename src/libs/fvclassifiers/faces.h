@@ -34,24 +34,27 @@ namespace firevision {
 
 class FacesClassifier : public Classifier
 {
- public:
-  FacesClassifier(const char *haarcascade_file,
-		  unsigned int pixel_width, unsigned int pixel_height,
-		  IplImage *image = 0,
-		  float haar_scale_factor = 1.1, int min_neighbours = 3, int flags = 0);
+public:
+	FacesClassifier(const char * haarcascade_file,
+	                unsigned int pixel_width,
+	                unsigned int pixel_height,
+	                IplImage *   image             = 0,
+	                float        haar_scale_factor = 1.1,
+	                int          min_neighbours    = 3,
+	                int          flags             = 0);
 
-  virtual ~FacesClassifier(); 
+	virtual ~FacesClassifier();
 
-  virtual std::list< ROI > * classify();
+	virtual std::list<ROI> *classify();
 
- private:
-  CvHaarClassifierCascade *cascade_;
-  CvMemStorage *storage_;
-  IplImage *image_;
-  float haar_scale_factor_;
-  int min_neighbours_;
-  int flags_;
-  bool  own_image_;
+private:
+	CvHaarClassifierCascade *cascade_;
+	CvMemStorage *           storage_;
+	IplImage *               image_;
+	float                    haar_scale_factor_;
+	int                      min_neighbours_;
+	int                      flags_;
+	bool                     own_image_;
 };
 
 } // end namespace firevision

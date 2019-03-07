@@ -30,18 +30,16 @@ class ROI;
 
 class Shrinker
 {
- public:
+public:
+	Shrinker();
+	virtual ~Shrinker();
 
-  Shrinker();
-  virtual ~Shrinker();
+	virtual void setFilteredBuffer(unsigned char *yuv422planar_buffer);
+	virtual void shrink(ROI *roi);
 
-  virtual void setFilteredBuffer(unsigned char *yuv422planar_buffer);
-  virtual void shrink( ROI *roi );
-
- protected:
-  /** Source image buffer. */
-  unsigned char *src;
-
+protected:
+	/** Source image buffer. */
+	unsigned char *src;
 };
 
 } // end namespace firevision

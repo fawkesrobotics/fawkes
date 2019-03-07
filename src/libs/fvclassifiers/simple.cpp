@@ -21,16 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <core/exceptions/software.h>
 #include <fvclassifiers/simple.h>
-
+#include <fvmodels/color/colormodel.h>
+#include <fvmodels/scanlines/scanlinemodel.h>
+#include <fvutils/color/color_object_map.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/color/yuv.h>
-#include <fvutils/color/color_object_map.h>
-
-#include <fvmodels/scanlines/scanlinemodel.h>
-#include <fvmodels/color/colormodel.h>
-
-#include <core/exceptions/software.h>
 
 #include <cstdlib>
 
@@ -53,291 +50,283 @@ namespace firevision {
  * @param color color to look for
  */
 SimpleColorClassifier::SimpleColorClassifier(ScanlineModel *scanline_model,
-                                             ColorModel *color_model,
-                                             unsigned int min_num_points,
-                                             unsigned int box_extent,
-                                             bool upward,
-                                             unsigned int neighbourhood_min_match,
-                                             unsigned int grow_by,
-               color_t color)
-  : Classifier("SimpleColorClassifier"),
-    color(color)
+                                             ColorModel *   color_model,
+                                             unsigned int   min_num_points,
+                                             unsigned int   box_extent,
+                                             bool           upward,
+                                             unsigned int   neighbourhood_min_match,
+                                             unsigned int   grow_by,
+                                             color_t        color)
+: Classifier("SimpleColorClassifier"), color(color)
 {
-  if (scanline_model == NULL) {
-    throw fawkes::NullPointerException("SimpleColorClassifier: scanline_model "
-               "may not be NULL");
-  }
-  if (color_model == NULL) {
-    throw fawkes::NullPointerException("SimpleColorClassifier: color_model "
-               "may not be NULL");
-  }
+	if (scanline_model == NULL) {
+		throw fawkes::NullPointerException("SimpleColorClassifier: scanline_model "
+		                                   "may not be NULL");
+	}
+	if (color_model == NULL) {
+		throw fawkes::NullPointerException("SimpleColorClassifier: color_model "
+		                                   "may not be NULL");
+	}
 
-  modified = false;
-  this->scanline_model = scanline_model;
-  this->color_model = color_model;
-  this->min_num_points = min_num_points;
-  this->box_extent = box_extent;
-  this->upward = upward;
-  this->grow_by = grow_by;
-  this->neighbourhood_min_match = neighbourhood_min_match;
+	modified                      = false;
+	this->scanline_model          = scanline_model;
+	this->color_model             = color_model;
+	this->min_num_points          = min_num_points;
+	this->box_extent              = box_extent;
+	this->upward                  = upward;
+	this->grow_by                 = grow_by;
+	this->neighbourhood_min_match = neighbourhood_min_match;
 }
-
 
 unsigned int
-SimpleColorClassifier::consider_neighbourhood( unsigned int x, unsigned int y , color_t what)
+SimpleColorClassifier::consider_neighbourhood(unsigned int x, unsigned int y, color_t what)
 {
-  color_t c;
-  unsigned int num_what = 0;
+	color_t      c;
+	unsigned int num_what = 0;
 
-  unsigned char yp = 0, up = 0, vp = 0;
-  int start_x = -2, start_y = -2;
-  int end_x = 2, end_y = 2;
+	unsigned char yp = 0, up = 0, vp = 0;
+	int           start_x = -2, start_y = -2;
+	int           end_x = 2, end_y = 2;
 
-  if (x < (unsigned int)abs(start_x)) {
-    start_x = 0;
-  }
-  if (y < (unsigned int)abs(start_y)) {
-    start_y = 0;
-  }
+	if (x < (unsigned int)abs(start_x)) {
+		start_x = 0;
+	}
+	if (y < (unsigned int)abs(start_y)) {
+		start_y = 0;
+	}
 
-  if (x > _width - end_x) {
-    end_x = 0;
-  }
-  if (y == _height - end_y) {
-    end_y = 0;
-  }
+	if (x > _width - end_x) {
+		end_x = 0;
+	}
+	if (y == _height - end_y) {
+		end_y = 0;
+	}
 
-  for (int dx = start_x; dx <= end_x ; dx += 2) {
-    for (int dy = start_y; dy <= end_y; ++dy) {
-      if ((dx == 0) && (dy == 0)) {
-        continue;
-      }
+	for (int dx = start_x; dx <= end_x; dx += 2) {
+		for (int dy = start_y; dy <= end_y; ++dy) {
+			if ((dx == 0) && (dy == 0)) {
+				continue;
+			}
 
-      //      cout << "x=" << x << "  dx=" << dx << "  +=" << x+dx
-      //   << "  y=" << y << "  dy=" << dy << "  +2=" << y+dy << endl;
+			//      cout << "x=" << x << "  dx=" << dx << "  +=" << x+dx
+			//   << "  y=" << y << "  dy=" << dy << "  +2=" << y+dy << endl;
 
-      YUV422_PLANAR_YUV(_src, _width, _height, x+dx, y+dy, yp, up, vp);
-      c = color_model->determine(yp, up, vp);
+			YUV422_PLANAR_YUV(_src, _width, _height, x + dx, y + dy, yp, up, vp);
+			c = color_model->determine(yp, up, vp);
 
-      if (c == what) {
-        ++num_what;
-      }
-    }
-  }
+			if (c == what) {
+				++num_what;
+			}
+		}
+	}
 
-  return num_what;
+	return num_what;
 }
 
-std::list< ROI > *
+std::list<ROI> *
 SimpleColorClassifier::classify()
 {
+	if (_src == NULL) {
+		//cout << "SimpleColorClassifier: ERROR, src buffer not set. NOT classifying." << endl;
+		return new std::list<ROI>;
+	}
 
-  if (_src == NULL) {
-    //cout << "SimpleColorClassifier: ERROR, src buffer not set. NOT classifying." << endl;
-    return new std::list< ROI >;
-  }
+	std::list<ROI> *         rv = new std::list<ROI>();
+	std::list<ROI>::iterator roi_it, roi_it2;
+	color_t                  c;
 
+	unsigned int  x = 0, y = 0;
+	unsigned char yp = 0, up = 0, vp = 0;
+	unsigned int  num_what = 0;
 
-  std::list< ROI > *rv = new std::list< ROI >();
-  std::list< ROI >::iterator roi_it, roi_it2;
-  color_t c;
+	ROI r;
 
-  unsigned int  x = 0, y = 0;
-  unsigned char yp = 0, up = 0, vp = 0;
-  unsigned int num_what = 0;
+	scanline_model->reset();
+	while (!scanline_model->finished()) {
+		x = (*scanline_model)->x;
+		y = (*scanline_model)->y;
 
-  ROI r;
+		YUV422_PLANAR_YUV(_src, _width, _height, x, y, yp, up, vp);
 
-  scanline_model->reset();
-  while (! scanline_model->finished()) {
+		c = color_model->determine(yp, up, vp);
 
-    x = (*scanline_model)->x;
-    y = (*scanline_model)->y;
+		if (color == c) {
+			// Yeah, found a ball, make it big and name it a ROI
+			// Note that this may throw out a couple of ROIs for just one ball,
+			// as the name suggests this one is really ABSOLUTELY simple and not
+			// useful for anything else than quick testing
 
-    YUV422_PLANAR_YUV(_src, _width, _height, x, y, yp, up, vp);
+			if (neighbourhood_min_match) {
+				num_what = consider_neighbourhood((*scanline_model)->x, (*scanline_model)->y, c);
+			}
+			if (num_what >= neighbourhood_min_match) {
+				bool ok = false;
 
-    c = color_model->determine(yp,up, vp);
+				for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
+					if ((*roi_it).contains(x, y)) {
+						// everything is fine, this point is already in another ROI
+						ok = true;
+						break;
+					}
+				}
+				if (!ok) {
+					for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
+						if ((*roi_it).neighbours(x, y, scanline_model->get_margin())) {
+							// ROI is neighbour of this point, extend region
+							(*roi_it).extend(x, y);
+							ok = true;
+							break;
+						}
+					}
+				}
 
-    if (color == c) {
-      // Yeah, found a ball, make it big and name it a ROI
-      // Note that this may throw out a couple of ROIs for just one ball,
-      // as the name suggests this one is really ABSOLUTELY simple and not
-      // useful for anything else than quick testing
+				if (!ok) {
+					if (upward) {
+						if (x < box_extent) {
+							x = 0;
+						} else {
+							x -= box_extent;
+						}
+						if (y < box_extent) {
+							y = 0;
+						} else {
+							y -= box_extent;
+						}
+					}
+					r.start.x = x;
+					r.start.y = y;
 
-      if (neighbourhood_min_match) {
-        num_what =
-    consider_neighbourhood((*scanline_model)->x, (*scanline_model)->y, c);
-      }
-      if (num_what >= neighbourhood_min_match) {
-        bool ok = false;
+					unsigned int to_x = (*scanline_model)->x + box_extent;
+					unsigned int to_y = (*scanline_model)->y + box_extent;
+					if (to_x > _width)
+						to_x = _width;
+					if (to_y > _height)
+						to_y = _height;
+					r.width  = to_x - r.start.x;
+					r.height = to_y - r.start.y;
+					r.hint   = c;
+					r.color  = c;
 
-        for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
-          if ( (*roi_it).contains(x, y) ) {
-            // everything is fine, this point is already in another ROI
-            ok = true;
-            break;
-          }
-        }
-        if (! ok) {
-          for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
-            if ( (*roi_it).neighbours(x, y, scanline_model->get_margin()) ) {
-              // ROI is neighbour of this point, extend region
-              (*roi_it).extend(x, y);
-              ok = true;
-              break;
-            }
-          }
-        }
+					r.line_step  = _width;
+					r.pixel_step = 1;
 
-        if (! ok) {
-          if ( upward ) {
-            if ( x < box_extent ) {
-              x = 0;
-            } else {
-              x -= box_extent;
-            }
-            if ( y < box_extent ) {
-              y = 0;
-            } else {
-              y -= box_extent;
-            }
-          }
-          r.start.x = x;
-          r.start.y = y;
+					r.image_width  = _width;
+					r.image_height = _height;
 
-          unsigned int to_x = (*scanline_model)->x + box_extent;
-          unsigned int to_y = (*scanline_model)->y + box_extent;
-          if (to_x > _width)  to_x = _width;
-          if (to_y > _height) to_y = _height;
-          r.width = to_x - r.start.x;
-          r.height = to_y - r.start.y;
-          r.hint = c;
-    r.color = c;
+					if ((r.start.x + r.width) > _width) {
+						r.width -= (r.start.x + r.width) - _width;
+					}
+					if ((r.start.y + r.height) > _height) {
+						r.height -= (r.start.y + r.height) - _height;
+					}
 
-          r.line_step = _width;
-          r.pixel_step = 1;
+					rv->push_back(r);
+				}
+			} // End if enough neighbours
+		}   // end if is orange
 
-          r.image_width  = _width;
-          r.image_height = _height;
+		++(*scanline_model);
+	}
 
-          if ( (r.start.x + r.width) > _width ) {
-            r.width -= (r.start.x + r.width) - _width;
-          }
-          if ( (r.start.y + r.height) > _height ) {
-            r.height -= (r.start.y + r.height) - _height;
-          }
+	// Grow regions
+	if (grow_by > 0) {
+		for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
+			(*roi_it).grow(grow_by);
+		}
+	}
 
-          rv->push_back( r );
-        }
-      } // End if enough neighbours
-    } // end if is orange
+	// Merge neighbouring regions
+	for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
+		roi_it2 = roi_it;
+		++roi_it2;
 
-    ++(*scanline_model);
-  }
+		while (roi_it2 != rv->end()) {
+			if ((roi_it != roi_it2) && roi_it->neighbours(&(*roi_it2), scanline_model->get_margin())) {
+				*roi_it += *roi_it2;
+				rv->erase(roi_it2);
+				roi_it2 = rv->begin(); //restart
+			} else {
+				++roi_it2;
+			}
+		}
+	}
 
-  // Grow regions
-  if (grow_by > 0) {
-    for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
-      (*roi_it).grow( grow_by );
-    }
-  }
+	// Throw away all ROIs that have not enough classified points
+	for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
+		while ((roi_it != rv->end()) && ((*roi_it).num_hint_points < min_num_points)) {
+			roi_it = rv->erase(roi_it);
+		}
+	}
 
-  // Merge neighbouring regions
-  for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
-    roi_it2 = roi_it;
-    ++roi_it2;
+	// sort ROIs by number of hint points, descending (and thus call reverse)
+	rv->sort();
+	rv->reverse();
 
-    while ( roi_it2 != rv->end() ) {
-      if ((roi_it != roi_it2) &&
-    roi_it->neighbours(&(*roi_it2), scanline_model->get_margin()))
-      {
-  *roi_it += *roi_it2;
-  rv->erase(roi_it2);
-  roi_it2 = rv->begin(); //restart
-      } else {
-  ++roi_it2;
-      }
-    }
-  }
-
-  // Throw away all ROIs that have not enough classified points
-  for (roi_it = rv->begin(); roi_it != rv->end(); ++roi_it) {
-    while ( (roi_it != rv->end()) &&
-      ((*roi_it).num_hint_points < min_num_points ))
-    {
-      roi_it = rv->erase( roi_it );
-    }
-  }
-
-  // sort ROIs by number of hint points, descending (and thus call reverse)
-  rv->sort();
-  rv->reverse();
-
-  return rv;
+	return rv;
 }
-
 
 /** Get mass point of primary color.
  * @param roi ROI to consider
  * @param massPoint contains mass point upon return
  */
 void
-SimpleColorClassifier::get_mass_point_of_color( ROI *roi,
-            fawkes::upoint_t *massPoint )
+SimpleColorClassifier::get_mass_point_of_color(ROI *roi, fawkes::upoint_t *massPoint)
 {
-  unsigned int nrOfOrangePixels;
-  nrOfOrangePixels = 0;
-  massPoint->x     = 0;
-  massPoint->y     = 0;
+	unsigned int nrOfOrangePixels;
+	nrOfOrangePixels = 0;
+	massPoint->x     = 0;
+	massPoint->y     = 0;
 
-  // for accessing ROI pixels
-  unsigned int h = 0;
-  unsigned int w = 0;
-  // planes
-  unsigned char *yp   = _src + (roi->start.y * roi->line_step) + (roi->start.x * roi->pixel_step);
-  unsigned char *up   = YUV422_PLANAR_U_PLANE(_src, roi->image_width, roi->image_height)
-    + ((roi->start.y * roi->line_step) / 2 + (roi->start.x * roi->pixel_step) / 2) ;
-  unsigned char *vp   = YUV422_PLANAR_V_PLANE(_src, roi->image_width, roi->image_height)
-    + ((roi->start.y * roi->line_step) / 2 + (roi->start.x * roi->pixel_step) / 2);
-  // line starts
-  unsigned char *lyp  = yp;
-  unsigned char *lup  = up;
-  unsigned char *lvp  = vp;
+	// for accessing ROI pixels
+	unsigned int h = 0;
+	unsigned int w = 0;
+	// planes
+	unsigned char *yp = _src + (roi->start.y * roi->line_step) + (roi->start.x * roi->pixel_step);
+	unsigned char *up =
+	  YUV422_PLANAR_U_PLANE(_src, roi->image_width, roi->image_height)
+	  + ((roi->start.y * roi->line_step) / 2 + (roi->start.x * roi->pixel_step) / 2);
+	unsigned char *vp =
+	  YUV422_PLANAR_V_PLANE(_src, roi->image_width, roi->image_height)
+	  + ((roi->start.y * roi->line_step) / 2 + (roi->start.x * roi->pixel_step) / 2);
+	// line starts
+	unsigned char *lyp = yp;
+	unsigned char *lup = up;
+	unsigned char *lvp = vp;
 
-  color_t dcolor;
+	color_t dcolor;
 
-  // consider each ROI pixel
-  for (h = 0; h < roi->height; ++h) {
-    for (w = 0; w < roi->width; w += 2) {
-      // classify its color
-      dcolor = color_model->determine(*yp++, *up++, *vp++);
-      yp++;
-      // ball pixel?
-      if (color == dcolor) {
-        // take into account its coordinates
-        massPoint->x += w;
-        massPoint->y += h;
-        nrOfOrangePixels++;
-      }
-    }
-    // next line
-    lyp  += roi->line_step;
-    lup  += roi->line_step / 2;
-    lvp  += roi->line_step / 2;
-    yp    = lyp;
-    up    = lup;
-    vp    = lvp;
-  }
+	// consider each ROI pixel
+	for (h = 0; h < roi->height; ++h) {
+		for (w = 0; w < roi->width; w += 2) {
+			// classify its color
+			dcolor = color_model->determine(*yp++, *up++, *vp++);
+			yp++;
+			// ball pixel?
+			if (color == dcolor) {
+				// take into account its coordinates
+				massPoint->x += w;
+				massPoint->y += h;
+				nrOfOrangePixels++;
+			}
+		}
+		// next line
+		lyp += roi->line_step;
+		lup += roi->line_step / 2;
+		lvp += roi->line_step / 2;
+		yp = lyp;
+		up = lup;
+		vp = lvp;
+	}
 
-  // to obtain mass point, divide by number of pixels that were added up
-  massPoint->x = (unsigned int) (float(massPoint->x) / float(nrOfOrangePixels));
-  massPoint->y = (unsigned int) (float(massPoint->y) / float(nrOfOrangePixels));
+	// to obtain mass point, divide by number of pixels that were added up
+	massPoint->x = (unsigned int)(float(massPoint->x) / float(nrOfOrangePixels));
+	massPoint->y = (unsigned int)(float(massPoint->y) / float(nrOfOrangePixels));
 
-  /* shift mass point
+	/* shift mass point
    such that it is relative to image
    (not relative to ROI) */
-  massPoint->x += roi->start.x;
-  massPoint->y += roi->start.y;
+	massPoint->x += roi->start.x;
+	massPoint->y += roi->start.y;
 }
 
 } // end namespace firevision

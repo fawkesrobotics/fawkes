@@ -32,9 +32,8 @@ class ROI;
 
 class BorderShrinker : public Shrinker
 {
- public:
-
-  /** CloseShrinker shrinks ROIs
+public:
+	/** CloseShrinker shrinks ROIs
    * It will make sure that any ROI that passes it will NOT be in the border regions
    * denoted by the pixels
    * @param border_left left pixel margin
@@ -42,19 +41,20 @@ class BorderShrinker : public Shrinker
    * @param border_top top pixel margin
    * @param border_bottom botto pixel margin
    */
-  BorderShrinker(unsigned int border_left = 0, unsigned int border_right = 0,
-		 unsigned int border_top = 0, unsigned int border_bottom = 10);
+	BorderShrinker(unsigned int border_left   = 0,
+	               unsigned int border_right  = 0,
+	               unsigned int border_top    = 0,
+	               unsigned int border_bottom = 10);
 
-  virtual ~BorderShrinker();
+	virtual ~BorderShrinker();
 
-  virtual void shrink( ROI *roi );
+	virtual void shrink(ROI *roi);
 
- private:
-  unsigned int border_left;
-  unsigned int border_right;
-  unsigned int border_top;
-  unsigned int border_bottom;
-
+private:
+	unsigned int border_left;
+	unsigned int border_right;
+	unsigned int border_top;
+	unsigned int border_bottom;
 };
 
 } // end namespace firevision

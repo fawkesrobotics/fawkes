@@ -22,12 +22,10 @@
  */
 
 #include <fvclassifiers/square_shrinker.h>
-
-#include <fvutils/color/colorspaces.h>
-#include <fvutils/base/roi.h>
-
-#include <fvmodels/scanlines/scanlinemodel.h>
 #include <fvmodels/color/colormodel.h>
+#include <fvmodels/scanlines/scanlinemodel.h>
+#include <fvutils/base/roi.h>
+#include <fvutils/color/colorspaces.h>
 
 #include <cstddef>
 
@@ -40,26 +38,24 @@ namespace firevision {
  */
 
 /** Constructor. */
-SquareShrinker::SquareShrinker()
-  : Shrinker()
+SquareShrinker::SquareShrinker() : Shrinker()
 {
 }
-
 
 /** Shrink!
  * Do the actual shrinking.
  * @param roi ROI to shrink
  */
 void
-SquareShrinker::shrink( ROI *roi )
+SquareShrinker::shrink(ROI *roi)
 {
-  if ( roi->width < roi->height ) {
-    roi->start.y += (roi->height - roi->width) / 2;
-    roi->height = roi->width;
-  } else if ( roi->width > roi->height) {
-    roi->start.x += (roi->width - roi->height) / 2;
-    roi->width = roi->height;
-  }
+	if (roi->width < roi->height) {
+		roi->start.y += (roi->height - roi->width) / 2;
+		roi->height = roi->width;
+	} else if (roi->width > roi->height) {
+		roi->start.x += (roi->width - roi->height) / 2;
+		roi->width = roi->height;
+	}
 }
 
 } // end namespace firevision
