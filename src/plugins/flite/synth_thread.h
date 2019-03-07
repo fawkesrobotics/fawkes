@@ -23,56 +23,58 @@
 #ifndef _PLUGINS_FLITE_SYNTH_THREAD_H_
 #define _PLUGINS_FLITE_SYNTH_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <blackboard/interface_listener.h>
+#include <core/threading/thread.h>
+#include <flite/flite.h>
 
 #include <string>
 
-#include <flite/flite.h>
-
 namespace fawkes {
-  class SpeechSynthInterface;
+class SpeechSynthInterface;
 }
 
-class FliteSynthThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlackBoardInterfaceListener
+class FliteSynthThread : public fawkes::Thread,
+                         public fawkes::LoggingAspect,
+                         public fawkes::ConfigurableAspect,
+                         public fawkes::ClockAspect,
+                         public fawkes::BlackBoardAspect,
+                         public fawkes::BlackBoardInterfaceListener
 {
- public:
-  FliteSynthThread();
+public:
+	FliteSynthThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  void say(const char *text);
+	void say(const char *text);
 
-  virtual bool bb_interface_message_received(fawkes::Interface *interface,
-					     fawkes::Message *message) throw();
+	virtual bool bb_interface_message_received(fawkes::Interface *interface,
+	                                           fawkes::Message *  message) throw();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private: /* methods */
-  void  play_wave(cst_wave *wave);
-  float get_duration(cst_wave *wave);
+private: /* methods */
+	void  play_wave(cst_wave *wave);
+	float get_duration(cst_wave *wave);
 
- private:
-  fawkes::SpeechSynthInterface   *speechsynth_if_;
+private:
+	fawkes::SpeechSynthInterface *speechsynth_if_;
 
-  std::string cfg_soundcard_;
+	std::string cfg_soundcard_;
 
-  cst_voice  *voice_;
+	cst_voice *voice_;
 };
-
 
 #endif
