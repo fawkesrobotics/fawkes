@@ -21,54 +21,54 @@
  */
 
 #include "plugin_tool.h"
-#include <netcomm/fawkes/client.h>
 
 #include <core/threading/thread.h>
+#include <netcomm/fawkes/client.h>
 #include <utils/system/argparser.h>
 #include <utils/system/signal.h>
 
-#include <string>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include <string>
 
 using namespace fawkes;
 
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "hl:u:R:waLr:");
+	ArgumentParser argp(argc, argv, "hl:u:R:waLr:");
 
-  if ( argp.has_arg("h") ) {
-    PluginTool::print_usage(argp.program_name());
-    exit(0);
-  }
+	if (argp.has_arg("h")) {
+		PluginTool::print_usage(argp.program_name());
+		exit(0);
+	}
 
-  Thread::init_main();
+	Thread::init_main();
 
-  std::string host = "localhost";
-  unsigned short int port = 1910;
-  if ( argp.has_arg("r") ) {
-    argp.parse_hostport("r", host, port);
-  }
+	std::string        host = "localhost";
+	unsigned short int port = 1910;
+	if (argp.has_arg("r")) {
+		argp.parse_hostport("r", host, port);
+	}
 
-  FawkesNetworkClient *c = new FawkesNetworkClient(host.c_str(), port);
-  try {
-    c->connect();
-  } catch( Exception &e ) {
-	  printf("Could not connect to host: %s (%s)\n", host.c_str(), e.what_no_backtrace());
-    exit(1);
-  }
+	FawkesNetworkClient *c = new FawkesNetworkClient(host.c_str(), port);
+	try {
+		c->connect();
+	} catch (Exception &e) {
+		printf("Could not connect to host: %s (%s)\n", host.c_str(), e.what_no_backtrace());
+		exit(1);
+	}
 
-  PluginTool *pt = new PluginTool(&argp, c);
-  SignalManager::register_handler(SIGINT, pt);
-  pt->run();
-  SignalManager::finalize();
-  delete pt;
+	PluginTool *pt = new PluginTool(&argp, c);
+	SignalManager::register_handler(SIGINT, pt);
+	pt->run();
+	SignalManager::finalize();
+	delete pt;
 
-  c->disconnect();
-  delete c;
+	c->disconnect();
+	delete c;
 
-  Thread::destroy_main();
+	Thread::destroy_main();
 
-  return 0;
+	return 0;
 }
