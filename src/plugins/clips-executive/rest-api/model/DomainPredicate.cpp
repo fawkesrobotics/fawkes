@@ -14,9 +14,9 @@
 #include "DomainPredicate.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ DomainPredicate::DomainPredicate(const std::string &json)
 	from_json(json);
 }
 
-DomainPredicate::DomainPredicate(const rapidjson::Value& v)
+DomainPredicate::DomainPredicate(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ DomainPredicate::to_json(bool pretty) const
 }
 
 void
-DomainPredicate::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+DomainPredicate::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -87,7 +87,7 @@ DomainPredicate::to_json_value(rapidjson::Document& d, rapidjson::Value& v) cons
 	}
 	rapidjson::Value v_param_names(rapidjson::kArrayType);
 	v_param_names.Reserve(param_names_.size(), allocator);
-	for (const auto & e : param_names_) {
+	for (const auto &e : param_names_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_param_names.PushBack(v, allocator);
@@ -95,13 +95,12 @@ DomainPredicate::to_json_value(rapidjson::Document& d, rapidjson::Value& v) cons
 	v.AddMember("param-names", v_param_names, allocator);
 	rapidjson::Value v_param_types(rapidjson::kArrayType);
 	v_param_types.Reserve(param_types_.size(), allocator);
-	for (const auto & e : param_types_) {
+	for (const auto &e : param_types_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_param_types.PushBack(v, allocator);
 	}
 	v.AddMember("param-types", v_param_types, allocator);
-
 }
 
 void
@@ -114,7 +113,7 @@ DomainPredicate::from_json(const std::string &json)
 }
 
 void
-DomainPredicate::from_json_value(const rapidjson::Value& d)
+DomainPredicate::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -129,43 +128,44 @@ DomainPredicate::from_json_value(const rapidjson::Value& d)
 		sensed_ = d["sensed"].GetBool();
 	}
 	if (d.HasMember("param-names") && d["param-names"].IsArray()) {
-		const rapidjson::Value& a = d["param-names"];
-		param_names_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["param-names"];
+		param_names_              = std::vector<std::string>{};
+		;
 		param_names_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			param_names_.push_back(v.GetString());
 		}
 	}
 	if (d.HasMember("param-types") && d["param-types"].IsArray()) {
-		const rapidjson::Value& a = d["param-types"];
-		param_types_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["param-types"];
+		param_types_              = std::vector<std::string>{};
+		;
 		param_types_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			param_types_.push_back(v.GetString());
 		}
 	}
-
 }
 
 void
 DomainPredicate::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! name_)  missing.push_back("name");
-	if (! sensed_)  missing.push_back("sensed");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!name_)
+		missing.push_back("name");
+	if (!sensed_)
+		missing.push_back("sensed");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "DomainPredicate is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "DomainPredicate is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

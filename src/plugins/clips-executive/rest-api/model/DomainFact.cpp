@@ -14,9 +14,9 @@
 #include "DomainFact.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ DomainFact::DomainFact(const std::string &json)
 	from_json(json);
 }
 
-DomainFact::DomainFact(const rapidjson::Value& v)
+DomainFact::DomainFact(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ DomainFact::to_json(bool pretty) const
 }
 
 void
-DomainFact::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+DomainFact::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -82,13 +82,12 @@ DomainFact::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	}
 	rapidjson::Value v_param_values(rapidjson::kArrayType);
 	v_param_values.Reserve(param_values_.size(), allocator);
-	for (const auto & e : param_values_) {
+	for (const auto &e : param_values_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_param_values.PushBack(v, allocator);
 	}
 	v.AddMember("param-values", v_param_values, allocator);
-
 }
 
 void
@@ -101,7 +100,7 @@ DomainFact::from_json(const std::string &json)
 }
 
 void
-DomainFact::from_json_value(const rapidjson::Value& d)
+DomainFact::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -113,33 +112,33 @@ DomainFact::from_json_value(const rapidjson::Value& d)
 		name_ = d["name"].GetString();
 	}
 	if (d.HasMember("param-values") && d["param-values"].IsArray()) {
-		const rapidjson::Value& a = d["param-values"];
-		param_values_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["param-values"];
+		param_values_             = std::vector<std::string>{};
+		;
 		param_values_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			param_values_.push_back(v.GetString());
 		}
 	}
-
 }
 
 void
 DomainFact::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! name_)  missing.push_back("name");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!name_)
+		missing.push_back("name");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "DomainFact is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "DomainFact is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

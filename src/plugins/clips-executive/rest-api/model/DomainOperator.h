@@ -14,22 +14,21 @@
 #pragma once
 
 #define RAPIDJSON_HAS_STDSTRING 1
-#include <rapidjson/fwd.h>
-
-#include <string>
-#include <cstdint>
-#include <vector>
-#include <memory>
-#include <optional>
-
 #include "DomainOperatorParameter.h"
 
+#include <rapidjson/fwd.h>
+
+#include <cstdint>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
 /** DomainOperator representation for JSON transfer. */
 class DomainOperator
 
 {
- public:
+public:
 	/** Constructor. */
 	DomainOperator();
 	/** Constructor from JSON.
@@ -39,7 +38,7 @@ class DomainOperator
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	DomainOperator(const rapidjson::Value& v);
+	DomainOperator(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~DomainOperator();
@@ -47,9 +46,10 @@ class DomainOperator
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -61,19 +61,19 @@ class DomainOperator
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -86,12 +86,12 @@ class DomainOperator
 	virtual void validate(bool subcall = false) const;
 
 	// Schema: DomainOperator
- public:
-  /** Get kind value.
+public:
+	/** Get kind value.
    * @return kind value
    */
 	std::optional<std::string>
- kind() const
+	kind() const
 	{
 		return kind_;
 	}
@@ -99,15 +99,16 @@ class DomainOperator
 	/** Set kind value.
 	 * @param kind new value
 	 */
-	void set_kind(const std::string& kind)
+	void
+	set_kind(const std::string &kind)
 	{
 		kind_ = kind;
 	}
-  /** Get apiVersion value.
+	/** Get apiVersion value.
    * @return apiVersion value
    */
 	std::optional<std::string>
- apiVersion() const
+	apiVersion() const
 	{
 		return apiVersion_;
 	}
@@ -115,15 +116,16 @@ class DomainOperator
 	/** Set apiVersion value.
 	 * @param apiVersion new value
 	 */
-	void set_apiVersion(const std::string& apiVersion)
+	void
+	set_apiVersion(const std::string &apiVersion)
 	{
 		apiVersion_ = apiVersion;
 	}
-  /** Get name value.
+	/** Get name value.
    * @return name value
    */
 	std::optional<std::string>
- name() const
+	name() const
 	{
 		return name_;
 	}
@@ -131,15 +133,16 @@ class DomainOperator
 	/** Set name value.
 	 * @param name new value
 	 */
-	void set_name(const std::string& name)
+	void
+	set_name(const std::string &name)
 	{
 		name_ = name;
 	}
-  /** Get wait-sensed value.
+	/** Get wait-sensed value.
    * @return wait-sensed value
    */
 	std::optional<bool>
- wait_sensed() const
+	wait_sensed() const
 	{
 		return wait_sensed_;
 	}
@@ -147,15 +150,16 @@ class DomainOperator
 	/** Set wait-sensed value.
 	 * @param wait_sensed new value
 	 */
-	void set_wait_sensed(const bool& wait_sensed)
+	void
+	set_wait_sensed(const bool &wait_sensed)
 	{
 		wait_sensed_ = wait_sensed;
 	}
-  /** Get parameters value.
+	/** Get parameters value.
    * @return parameters value
    */
 	std::vector<std::shared_ptr<DomainOperatorParameter>>
- parameters() const
+	parameters() const
 	{
 		return parameters_;
 	}
@@ -163,14 +167,16 @@ class DomainOperator
 	/** Set parameters value.
 	 * @param parameters new value
 	 */
-	void set_parameters(const std::vector<std::shared_ptr<DomainOperatorParameter>>& parameters)
+	void
+	set_parameters(const std::vector<std::shared_ptr<DomainOperatorParameter>> &parameters)
 	{
 		parameters_ = parameters;
 	}
 	/** Add element to parameters array.
 	 * @param parameters new value
 	 */
-	void addto_parameters(const std::shared_ptr<DomainOperatorParameter>&& parameters)
+	void
+	addto_parameters(const std::shared_ptr<DomainOperatorParameter> &&parameters)
 	{
 		parameters_.push_back(std::move(parameters));
 	}
@@ -179,27 +185,24 @@ class DomainOperator
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param parameters new value
 	 */
-	void addto_parameters(const std::shared_ptr<DomainOperatorParameter>& parameters)
+	void
+	addto_parameters(const std::shared_ptr<DomainOperatorParameter> &parameters)
 	{
 		parameters_.push_back(parameters);
 	}
 	/** Add element to parameters array.
 	 * @param parameters new value
 	 */
-	void addto_parameters(const DomainOperatorParameter&& parameters)
+	void
+	addto_parameters(const DomainOperatorParameter &&parameters)
 	{
 		parameters_.push_back(std::make_shared<DomainOperatorParameter>(std::move(parameters)));
 	}
- private:
-	std::optional<std::string>
- kind_;
-	std::optional<std::string>
- apiVersion_;
-	std::optional<std::string>
- name_;
-	std::optional<bool>
- wait_sensed_;
-	std::vector<std::shared_ptr<DomainOperatorParameter>>
- parameters_;
 
+private:
+	std::optional<std::string>                            kind_;
+	std::optional<std::string>                            apiVersion_;
+	std::optional<std::string>                            name_;
+	std::optional<bool>                                   wait_sensed_;
+	std::vector<std::shared_ptr<DomainOperatorParameter>> parameters_;
 };

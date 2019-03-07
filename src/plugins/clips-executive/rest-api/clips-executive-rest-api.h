@@ -21,37 +21,34 @@
 
 #pragma once
 
-#include <core/threading/thread.h>
+#include "model/DomainFact.h"
+#include "model/DomainObject.h"
+#include "model/DomainOperator.h"
+#include "model/DomainPreconditionAtom.h"
+#include "model/DomainPreconditionCompound.h"
+#include "model/DomainPredicate.h"
+#include "model/Goal.h"
+#include "model/Plan.h"
+
 #include <aspect/logging.h>
 #include <aspect/webview.h>
+#include <clipsmm/fact.h>
+#include <core/threading/thread.h>
+#include <core/utils/lockptr.h>
 #include <plugins/clips/aspect/clips_manager.h>
-
 #include <webview/rest_api.h>
 #include <webview/rest_array.h>
 
-#include <core/utils/lockptr.h>
-#include <clipsmm/fact.h>
-
-#include "model/Goal.h"
-#include "model/Plan.h"
-#include "model/DomainOperator.h"
-#include "model/DomainObject.h"
-#include "model/DomainPredicate.h"
-#include "model/DomainFact.h"
-#include "model/DomainPreconditionCompound.h"
-#include "model/DomainPreconditionAtom.h"
-
 namespace CLIPS {
-	class Environment;
+class Environment;
 }
 
-class ClipsExecutiveRestApi
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-	public fawkes::WebviewAspect,
-  public fawkes::CLIPSManagerAspect
+class ClipsExecutiveRestApi : public fawkes::Thread,
+                              public fawkes::LoggingAspect,
+                              public fawkes::WebviewAspect,
+                              public fawkes::CLIPSManagerAspect
 {
- public:
+public:
 	ClipsExecutiveRestApi();
 	~ClipsExecutiveRestApi();
 
@@ -59,17 +56,16 @@ class ClipsExecutiveRestApi
 	virtual void loop();
 	virtual void finalize();
 
- private:
-	typedef std::pair<std::string, std::string> PlanKey;
+private:
+	typedef std::pair<std::string, std::string>           PlanKey;
 	typedef std::tuple<std::string, std::string, int64_t> PlanActionKey;
-	typedef std::list<CLIPS::Fact::pointer> ClipsFactList;
-	typedef std::map<PlanActionKey, ClipsFactList> PreCompoundMap;
-	typedef std::map<PlanActionKey, ClipsFactList> PreAtomMap;
-	typedef std::map<PlanKey, CLIPS::Fact::pointer> PlanMap;
-	typedef std::map<PlanKey, ClipsFactList> PlanActionMap;
+	typedef std::list<CLIPS::Fact::pointer>               ClipsFactList;
+	typedef std::map<PlanActionKey, ClipsFactList>        PreCompoundMap;
+	typedef std::map<PlanActionKey, ClipsFactList>        PreAtomMap;
+	typedef std::map<PlanKey, CLIPS::Fact::pointer>       PlanMap;
+	typedef std::map<PlanKey, ClipsFactList>              PlanActionMap;
 
- private:
-
+private:
 	WebviewRestArray<Goal>            cb_list_goals();
 	WebviewRestArray<DomainOperator>  cb_list_domain_operators();
 	WebviewRestArray<DomainObject>    cb_list_domain_objects();
@@ -77,29 +73,30 @@ class ClipsExecutiveRestApi
 	WebviewRestArray<DomainFact>      cb_list_domain_facts();
 	WebviewRestArray<Plan>            cb_list_plans();
 
-	Goal cb_get_goal(fawkes::WebviewRestParams& params);
-	Plan cb_get_plan(fawkes::WebviewRestParams& params);
+	Goal cb_get_goal(fawkes::WebviewRestParams &params);
+	Plan cb_get_plan(fawkes::WebviewRestParams &params);
 
 	Goal generate_goal(CLIPS::Fact::pointer fact);
 	void gen_plan_precompute(std::map<PlanKey, CLIPS::Fact::pointer> &plans,
-	                         std::map<PlanKey, ClipsFactList> &plan_actions,
-	                         PreCompoundMap &prec,
-	                         PreAtomMap &prea);
+	                         std::map<PlanKey, ClipsFactList> &       plan_actions,
+	                         PreCompoundMap &                         prec,
+	                         PreAtomMap &                             prea);
 	std::shared_ptr<DomainPreconditionAtom>
-		gen_domain_precondition_atom(const CLIPS::Fact::pointer fact);
-	
+	gen_domain_precondition_atom(const CLIPS::Fact::pointer fact);
+
 	std::shared_ptr<DomainPreconditionCompound>
-		gen_domain_precondition_compound(const CLIPS::Fact::pointer fact,
-		                                 const PlanActionKey &plan_action_key,
-		                                 PreCompoundMap &prec,
-		                                 PreAtomMap &prea);
+	gen_domain_precondition_compound(const CLIPS::Fact::pointer fact,
+	                                 const PlanActionKey &      plan_action_key,
+	                                 PreCompoundMap &           prec,
+	                                 PreAtomMap &               prea);
 
-	Plan gen_plan(const PlanKey &plan_key,
-	              const CLIPS::Fact::pointer fact, PlanActionMap &plan_actions,
-	              PreCompoundMap &prec, PreAtomMap &prea);
+	Plan gen_plan(const PlanKey &            plan_key,
+	              const CLIPS::Fact::pointer fact,
+	              PlanActionMap &            plan_actions,
+	              PreCompoundMap &           prec,
+	              PreAtomMap &               prea);
 
- private:
-	fawkes::WebviewRestApi *rest_api_;
+private:
+	fawkes::WebviewRestApi *            rest_api_;
 	fawkes::LockPtr<CLIPS::Environment> clips_;
-	
 };

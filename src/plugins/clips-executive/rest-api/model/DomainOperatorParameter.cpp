@@ -14,9 +14,9 @@
 #include "DomainOperatorParameter.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ DomainOperatorParameter::DomainOperatorParameter(const std::string &json)
 	from_json(json);
 }
 
-DomainOperatorParameter::DomainOperatorParameter(const rapidjson::Value& v)
+DomainOperatorParameter::DomainOperatorParameter(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ DomainOperatorParameter::to_json(bool pretty) const
 }
 
 void
-DomainOperatorParameter::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+DomainOperatorParameter::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -75,7 +75,6 @@ DomainOperatorParameter::to_json_value(rapidjson::Document& d, rapidjson::Value&
 		v_type.SetString(*type_, allocator);
 		v.AddMember("type", v_type, allocator);
 	}
-
 }
 
 void
@@ -88,7 +87,7 @@ DomainOperatorParameter::from_json(const std::string &json)
 }
 
 void
-DomainOperatorParameter::from_json_value(const rapidjson::Value& d)
+DomainOperatorParameter::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("name") && d["name"].IsString()) {
 		name_ = d["name"].GetString();
@@ -96,24 +95,23 @@ DomainOperatorParameter::from_json_value(const rapidjson::Value& d)
 	if (d.HasMember("type") && d["type"].IsString()) {
 		type_ = d["type"].GetString();
 	}
-
 }
 
 void
 DomainOperatorParameter::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! name_)  missing.push_back("name");
-	if (! type_)  missing.push_back("type");
+	std::vector<std::string> missing;
+	if (!name_)
+		missing.push_back("name");
+	if (!type_)
+		missing.push_back("type");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "DomainOperatorParameter is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "DomainOperatorParameter is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {
