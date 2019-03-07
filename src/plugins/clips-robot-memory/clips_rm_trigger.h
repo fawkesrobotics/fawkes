@@ -22,11 +22,12 @@
 #ifndef FAWKES_SRC_PLUGINS_CLIPS_ROBOT_MEMORY_CLIPS_RM_TRIGGER_H_
 #define FAWKES_SRC_PLUGINS_CLIPS_ROBOT_MEMORY_CLIPS_RM_TRIGGER_H_
 
-#include <string>
-#include <plugins/robot-memory/robot_memory.h>
-#include <clipsmm.h>
 #include <core/utils/lockptr.h>
 #include <logging/logger.h>
+#include <plugins/robot-memory/robot_memory.h>
+
+#include <clipsmm.h>
+#include <string>
 
 /** @class ClipsRmTrigger  clips_rm_trigger.h
  *
@@ -34,19 +35,22 @@
  */
 class ClipsRmTrigger
 {
-  public:
-    ClipsRmTrigger(std::string assert_name, RobotMemory *robot_memory, fawkes::LockPtr<CLIPS::Environment> &clips, fawkes::Logger *logger);
-    virtual ~ClipsRmTrigger();
+public:
+	ClipsRmTrigger(std::string                          assert_name,
+	               RobotMemory *                        robot_memory,
+	               fawkes::LockPtr<CLIPS::Environment> &clips,
+	               fawkes::Logger *                     logger);
+	virtual ~ClipsRmTrigger();
 
-    void callback(mongo::BSONObj update);
-    void set_trigger(EventTrigger *trigger);
+	void callback(mongo::BSONObj update);
+	void set_trigger(EventTrigger *trigger);
 
-  private:
-    std::string assert_name;
-    EventTrigger *trigger;
-    RobotMemory *robot_memory;
-    fawkes::LockPtr<CLIPS::Environment> clips;
-    fawkes::Logger *logger;
+private:
+	std::string                         assert_name;
+	EventTrigger *                      trigger;
+	RobotMemory *                       robot_memory;
+	fawkes::LockPtr<CLIPS::Environment> clips;
+	fawkes::Logger *                    logger;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_CLIPS_ROBOT_MEMORY_CLIPS_RM_TRIGGER_H_ */
