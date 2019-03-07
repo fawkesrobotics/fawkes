@@ -21,6 +21,7 @@
  */
 
 #include "procrrd_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -31,14 +32,14 @@ using namespace fawkes;
  */
 class ProcRRDPlugin : public fawkes::Plugin
 {
- public:
-/** Constructor.
+public:
+	/** Constructor.
  * @param config Fawkes configuration
  */
-  explicit ProcRRDPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new ProcRRDThread());
-  }
+	explicit ProcRRDPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new ProcRRDThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Log /proc data using RRD")
