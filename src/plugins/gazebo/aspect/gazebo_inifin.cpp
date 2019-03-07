@@ -21,8 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/gazebo/aspect/gazebo_inifin.h>
 #include <core/threading/thread_finalizer.h>
+#include <plugins/gazebo/aspect/gazebo_inifin.h>
+
 #include <stdio.h>
 
 namespace fawkes {
@@ -35,8 +36,7 @@ namespace fawkes {
  */
 
 /** Constructor. */
-GazeboAspectIniFin::GazeboAspectIniFin()
-  : AspectIniFin("GazeboAspect")
+GazeboAspectIniFin::GazeboAspectIniFin() : AspectIniFin("GazeboAspect")
 {
 }
 
@@ -46,18 +46,19 @@ GazeboAspectIniFin::GazeboAspectIniFin()
 void
 GazeboAspectIniFin::init(Thread *thread)
 {
-  GazeboAspect *gazebo_thread;
-  gazebo_thread = dynamic_cast<GazeboAspect *>(thread);
-  if (gazebo_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "GazeboAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
-  if (! gazebonode_) {
-    throw CannotInitializeThreadException("Gazebo node handle has not been set.");
-  }
+	GazeboAspect *gazebo_thread;
+	gazebo_thread = dynamic_cast<GazeboAspect *>(thread);
+	if (gazebo_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "GazeboAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
+	if (!gazebonode_) {
+		throw CannotInitializeThreadException("Gazebo node handle has not been set.");
+	}
 
-  gazebo_thread->init_GazeboAspect(gazebonode_, gazebo_world_node_);
+	gazebo_thread->init_GazeboAspect(gazebonode_, gazebo_world_node_);
 }
 
 /** Finalize
@@ -66,16 +67,16 @@ GazeboAspectIniFin::init(Thread *thread)
 void
 GazeboAspectIniFin::finalize(Thread *thread)
 {
-  GazeboAspect *gazebo_thread;
-  gazebo_thread = dynamic_cast<GazeboAspect *>(thread);
-  if (gazebo_thread == NULL) {
-    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
-					"GazeboAspect, but RTTI says it "
-					"has not. ", thread->name());
-  }
-  gazebo_thread->finalize_GazeboAspect();
+	GazeboAspect *gazebo_thread;
+	gazebo_thread = dynamic_cast<GazeboAspect *>(thread);
+	if (gazebo_thread == NULL) {
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+		                                    "GazeboAspect, but RTTI says it "
+		                                    "has not. ",
+		                                    thread->name());
+	}
+	gazebo_thread->finalize_GazeboAspect();
 }
-
 
 /** Set the Gazebo node handle to use for aspect initialization.
  * (used for robot specific communication)
@@ -84,7 +85,7 @@ GazeboAspectIniFin::finalize(Thread *thread)
 void
 GazeboAspectIniFin::set_gazebonode(gazebo::transport::NodePtr gazebonode)
 {
-  gazebonode_ = gazebonode;
+	gazebonode_ = gazebonode;
 }
 /** Set the Gazebo node handle to use for aspect initialization.
  * (used for robot independent or world changing communication)
@@ -93,7 +94,7 @@ GazeboAspectIniFin::set_gazebonode(gazebo::transport::NodePtr gazebonode)
 void
 GazeboAspectIniFin::set_gazebo_world_node(gazebo::transport::NodePtr gazebo_world_node)
 {
-  gazebo_world_node_ = gazebo_world_node;
+	gazebo_world_node_ = gazebo_world_node;
 }
 
 } // end namespace fawkes
