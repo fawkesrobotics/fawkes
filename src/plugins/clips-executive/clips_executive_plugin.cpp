@@ -21,6 +21,7 @@
  */
 
 #include "clips_executive_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -39,7 +40,6 @@ public:
 		thread_list.push_back(new ClipsExecutiveThread());
 	}
 };
-
 
 PLUGIN_DESCRIPTION("CLIPS Executive")
 EXPORT_PLUGIN(ClipsExecutivePlugin)
