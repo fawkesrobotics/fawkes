@@ -24,12 +24,12 @@
 // Do not include in api reference
 ///@cond QA
 
-
-#include <plugins/openrave/types.h>
-#include <plugins/openrave/environment.h>
-#include <plugins/openrave/robot.h>
-#include <plugins/openrave/manipulators/katana6M180.h>
 #include <logging/console.h>
+#include <plugins/openrave/environment.h>
+#include <plugins/openrave/manipulators/katana6M180.h>
+#include <plugins/openrave/robot.h>
+#include <plugins/openrave/types.h>
+
 #include <cstdio>
 #include <iostream>
 #include <sstream>
@@ -41,82 +41,77 @@ using namespace std;
 void
 printVector(vector<float> &v)
 {
-  stringstream s;
-  //printf("## size:%u \n", v.size());
-  for(unsigned int i=0; i<v.size(); i++)
-  {
-    s << "(" << i << ")" << v[i] << "    ";
-    //printf("## %u:)%f \n", i, v[i]);
-  }
-  printf("%s \n", s.str().c_str());
+	stringstream s;
+	//printf("## size:%u \n", v.size());
+	for (unsigned int i = 0; i < v.size(); i++) {
+		s << "(" << i << ")" << v[i] << "    ";
+		//printf("## %u:)%f \n", i, v[i]);
+	}
+	printf("%s \n", s.str().c_str());
 }
 
 int
 main(int argc, char **argv)
 {
-  printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+	printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
-  string robotFile = SRCDIR"/../manipulators/katana.robot.xml";
+	string robotFile = SRCDIR "/../manipulators/katana.robot.xml";
 
-  ConsoleLogger* cl = new ConsoleLogger();
+	ConsoleLogger *cl = new ConsoleLogger();
 
-  OpenRaveManipulatorPtr manip( new OpenRaveManipulatorKatana6M180(6, 5) );
-  OpenRaveRobotPtr robot( new OpenRaveRobot(cl) );
-  OpenRaveEnvironmentPtr env( new OpenRaveEnvironment(cl) );
+	OpenRaveManipulatorPtr manip(new OpenRaveManipulatorKatana6M180(6, 5));
+	OpenRaveRobotPtr       robot(new OpenRaveRobot(cl));
+	OpenRaveEnvironmentPtr env(new OpenRaveEnvironment(cl));
 
-  env->create();
+	env->create();
 
-  try {
-    robot->load(robotFile, env);
-  } catch (Exception &e) {
-    cl->log_error("qa_robot", "error:%s", e.what());
-    return 0;
-  }
+	try {
+		robot->load(robotFile, env);
+	} catch (Exception &e) {
+		cl->log_error("qa_robot", "error:%s", e.what());
+		return 0;
+	}
 
-  // configure manip
-  manip->add_motor(0,0);
-  manip->add_motor(1,1);
-  manip->add_motor(2,2);
-  manip->add_motor(4,3);
-  manip->add_motor(5,4);
-  robot->set_manipulator(manip);
+	// configure manip
+	manip->add_motor(0, 0);
+	manip->add_motor(1, 1);
+	manip->add_motor(2, 2);
+	manip->add_motor(4, 3);
+	manip->add_motor(5, 4);
+	robot->set_manipulator(manip);
 
-  env->add_robot(robot);
-  robot->set_ready();
-  env->lock();
+	env->add_robot(robot);
+	robot->set_ready();
+	env->lock();
 
+	vector<float> val, v;
+	val.push_back(0.1);
+	val.push_back(0.2);
+	val.push_back(0.3);
+	val.push_back(0.4);
+	val.push_back(0.5);
 
-  vector<float> val, v;
-  val.push_back(0.1);
-  val.push_back(0.2);
-  val.push_back(0.3);
-  val.push_back(0.4);
-  val.push_back(0.5);
+	manip->set_angles_device(val);
+	manip->get_angles(v);
+	printVector(v);
+	manip->get_angles_device(v);
+	printVector(v);
 
-  manip->set_angles_device(val);
-  manip->get_angles(v);
-  printVector(v);
-  manip->get_angles_device(v);
-  printVector(v);
+	env->start_viewer();
 
+	//print angles taken from OpenRAVE Model (can be modified in GUI)
+	while (1) {
+		robot->update_manipulator();
+		manip->get_angles(v);
+		printVector(v);
+		manip->get_angles_device(v);
+		printVector(v);
+		usleep(1000 * 500);
+	}
 
-  env->start_viewer();
+	env->destroy();
 
-  //print angles taken from OpenRAVE Model (can be modified in GUI)
-  while(1) {
-    robot->update_manipulator();
-    manip->get_angles(v);
-    printVector(v);
-    manip->get_angles_device(v);
-    printVector(v);
-    usleep(1000*500);
-  }
-
-
-  env->destroy();
-
-  return 0;
+	return 0;
 }
-
 
 /// @endcond

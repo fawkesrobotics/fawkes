@@ -42,15 +42,13 @@ namespace fawkes {
 /** Constructor. */
 OpenRaveAspect::OpenRaveAspect()
 {
-  add_aspect("OpenRaveAspect");
+	add_aspect("OpenRaveAspect");
 }
-
 
 /** Virtual empty destructor. */
 OpenRaveAspect::~OpenRaveAspect()
 {
 }
-
 
 /** Init OpenRave aspect.
  * This sets the OpenRave manager to access OpenRave.
@@ -61,7 +59,7 @@ OpenRaveAspect::~OpenRaveAspect()
 void
 OpenRaveAspect::init_OpenRaveAspect(OpenRaveConnector *openrave)
 {
-  this->openrave = openrave;
+	this->openrave = openrave;
 }
 
 } // end namespace fawkes

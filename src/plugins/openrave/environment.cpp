@@ -21,26 +21,24 @@
  */
 
 // must be first because it redefines macros from standard headers
-#include <Python.h>
-
 #include "environment.h"
-#include "robot.h"
+
 #include "manipulator.h"
+#include "robot.h"
 
-#include <logging/logger.h>
 #include <core/exceptions/software.h>
-
-#include <openrave-core.h>
+#include <logging/logger.h>
 #include <openrave/planningutils.h>
-#include <boost/thread/thread.hpp>
-#include <boost/bind.hpp>
 
-#include <sstream>
+#include <Python.h>
+#include <boost/bind.hpp>
+#include <boost/thread/thread.hpp>
 #include <cstdio>
+#include <openrave-core.h>
+#include <sstream>
 
 using namespace OpenRAVE;
 namespace fawkes {
-
 
 /** Sets and loads a viewer for OpenRAVE.
  * @param env OpenRAVE environment to be attached
@@ -49,17 +47,16 @@ namespace fawkes {
  *  as long as the viewer thread runs, and "false" when the GUI closes.
  */
 void
-run_viewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername, bool* running)
+run_viewer(OpenRAVE::EnvironmentBasePtr env, const std::string &viewername, bool *running)
 {
-  ViewerBasePtr viewer = RaveCreateViewer(env, viewername);
-  env->Add(viewer);
-  //call the viewer's infinite loop (this is why you need a separate thread):
-  *running = true;
-  viewer->main(/*showGUI=*/true);
-  *running = false;
-  env->Remove(viewer);
+	ViewerBasePtr viewer = RaveCreateViewer(env, viewername);
+	env->Add(viewer);
+	//call the viewer's infinite loop (this is why you need a separate thread):
+	*running = true;
+	viewer->main(/*showGUI=*/true);
+	*running = false;
+	env->Remove(viewer);
 }
-
 
 /** @class OpenRaveEnvironment <plugins/openrave/environment.h>
 * Class handling interaction with the OpenRAVE::EnvironmentBase class.
@@ -71,12 +68,10 @@ run_viewer(OpenRAVE::EnvironmentBasePtr env, const std::string& viewername, bool
 /** Constructor.
  * @param logger pointer to fawkes logger
  */
-OpenRaveEnvironment::OpenRaveEnvironment(fawkes::Logger* logger) :
-  logger_( logger ),
-  viewer_thread_( 0 ),
-  viewer_running_( 0 )
+OpenRaveEnvironment::OpenRaveEnvironment(fawkes::Logger *logger)
+: logger_(logger), viewer_thread_(0), viewer_running_(0)
 {
-  set_name("");
+	set_name("");
 }
 
 /** Copy constructor.
@@ -84,88 +79,86 @@ OpenRaveEnvironment::OpenRaveEnvironment(fawkes::Logger* logger) :
  * BiRRT planner and IKFast module are also created.
  * @param src The OpenRaveEnvironment to clone
  */
-OpenRaveEnvironment::OpenRaveEnvironment(const OpenRaveEnvironment& src)
- : logger_( src.logger_ ),
-   viewer_thread_( 0 ),
-   viewer_running_( 0 )
+OpenRaveEnvironment::OpenRaveEnvironment(const OpenRaveEnvironment &src)
+: logger_(src.logger_), viewer_thread_(0), viewer_running_(0)
 {
-  env_ = src.env_->CloneSelf(OpenRAVE::Clone_Bodies);
+	env_ = src.env_->CloneSelf(OpenRAVE::Clone_Bodies);
 
-  // update name string
-  set_name( src.name_.c_str() );
+	// update name string
+	set_name(src.name_.c_str());
 
-  // create planner
-  planner_ = RaveCreatePlanner(env_,"birrt");
-  if(!planner_)
-    throw fawkes::Exception("%s: Could not create planner. Error in OpenRAVE.", name());
+	// create planner
+	planner_ = RaveCreatePlanner(env_, "birrt");
+	if (!planner_)
+		throw fawkes::Exception("%s: Could not create planner. Error in OpenRAVE.", name());
 
-  // create ikfast module
-  mod_ikfast_ = RaveCreateModule(env_,"ikfast");
-  env_->AddModule(mod_ikfast_,"");
+	// create ikfast module
+	mod_ikfast_ = RaveCreateModule(env_, "ikfast");
+	env_->AddModule(mod_ikfast_, "");
 
-  if (logger_)
-    logger_->log_debug(name(), "Environment cloned from %s", src.name_.c_str());
+	if (logger_)
+		logger_->log_debug(name(), "Environment cloned from %s", src.name_.c_str());
 }
 
 /** Destructor. */
 OpenRaveEnvironment::~OpenRaveEnvironment()
 {
-  this->destroy();
+	this->destroy();
 }
 
 /** Create and lock the environment. */
 void
 OpenRaveEnvironment::create()
 {
-  // create environment
-  env_ = RaveCreateEnvironment();
-  if(!env_) {
-    throw fawkes::Exception("%s: Could not create environment. Error in OpenRAVE.", name());
-  } else {
-    // update name_string
-    set_name(name_.c_str());
-    if (logger_)
-      logger_->log_debug(name(), "Environment created");
-  }
+	// create environment
+	env_ = RaveCreateEnvironment();
+	if (!env_) {
+		throw fawkes::Exception("%s: Could not create environment. Error in OpenRAVE.", name());
+	} else {
+		// update name_string
+		set_name(name_.c_str());
+		if (logger_)
+			logger_->log_debug(name(), "Environment created");
+	}
 
-  EnvironmentMutex::scoped_lock( env_->GetMutex());
+	EnvironmentMutex::scoped_lock(env_->GetMutex());
 
-  // create planner
-  planner_ = RaveCreatePlanner(env_,"birrt");
-  if(!planner_)
-    throw fawkes::Exception("%s: Could not create planner. Error in OpenRAVE.", name());
+	// create planner
+	planner_ = RaveCreatePlanner(env_, "birrt");
+	if (!planner_)
+		throw fawkes::Exception("%s: Could not create planner. Error in OpenRAVE.", name());
 
-  // create ikfast module
-  mod_ikfast_ = RaveCreateModule(env_,"ikfast");
-  env_->AddModule(mod_ikfast_,"");
+	// create ikfast module
+	mod_ikfast_ = RaveCreateModule(env_, "ikfast");
+	env_->AddModule(mod_ikfast_, "");
 }
 
 /** Destroy the environment. */
 void
 OpenRaveEnvironment::destroy()
 {
-  if( viewer_thread_ ) {
-    viewer_thread_->detach();
-    viewer_thread_->join();
-    delete viewer_thread_;
-    viewer_thread_=NULL;
-  }
+	if (viewer_thread_) {
+		viewer_thread_->detach();
+		viewer_thread_->join();
+		delete viewer_thread_;
+		viewer_thread_ = NULL;
+	}
 
-  try {
-    env_->Destroy();
-    if(logger_)
-      logger_->log_debug(name(), "Environment destroyed");
-  } catch(const openrave_exception& e) {
-    if(logger_)
-      logger_->log_warn(name(), "Could not destroy Environment. Ex:%s", e.what());
-  }
+	try {
+		env_->Destroy();
+		if (logger_)
+			logger_->log_debug(name(), "Environment destroyed");
+	} catch (const openrave_exception &e) {
+		if (logger_)
+			logger_->log_warn(name(), "Could not destroy Environment. Ex:%s", e.what());
+	}
 }
 
 /** Get the name string to use in logging messages etc. */
-const char*
+const char *
 OpenRaveEnvironment::name() const
 {
-  return name_str_.c_str();
+	return name_str_.c_str();
 }
 
 /** Set name of environment.
@@ -173,18 +166,19 @@ OpenRaveEnvironment::name() const
  * @param name The name of the environment. Can be an empty string.
  */
 void
-OpenRaveEnvironment::set_name(const char* name)
+OpenRaveEnvironment::set_name(const char *name)
 {
-  std::stringstream n;
-  n << "OpenRaveEnvironment" << "[";
-  if( env_ )
-    n << RaveGetEnvironmentId(env_) << ":";
-  n << name << "]";
-  name_str_ = n.str();
+	std::stringstream n;
+	n << "OpenRaveEnvironment"
+	  << "[";
+	if (env_)
+		n << RaveGetEnvironmentId(env_) << ":";
+	n << name << "]";
+	name_str_ = n.str();
 
-  if (logger_)
-    logger_->log_debug(name_str_.c_str(), "Set environment name (previously '%s')", name_.c_str());
-  name_ = name;
+	if (logger_)
+		logger_->log_debug(name_str_.c_str(), "Set environment name (previously '%s')", name_.c_str());
+	name_ = name;
 }
 
 /** Enable debugging messages of OpenRAVE.
@@ -193,14 +187,14 @@ OpenRaveEnvironment::set_name(const char* name)
 void
 OpenRaveEnvironment::enable_debug(OpenRAVE::DebugLevel level)
 {
-  RaveSetDebugLevel(level);
+	RaveSetDebugLevel(level);
 }
 
 /** Disable debugging messages of OpenRAVE. */
 void
 OpenRaveEnvironment::disable_debug()
 {
-  RaveSetDebugLevel(Level_Fatal);
+	RaveSetDebugLevel(Level_Fatal);
 }
 
 /** Add a robot into the scene.
@@ -210,15 +204,18 @@ OpenRaveEnvironment::disable_debug()
 void
 OpenRaveEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
 {
-  try{
-    EnvironmentMutex::scoped_lock( env_->GetMutex());
-    env_->Add(robot);
-    if(logger_)
-      logger_->log_debug(name(), "Robot '%s' added to environment.", robot->GetName().c_str());
-  } catch(openrave_exception &e) {
-    if(logger_)
-      logger_->log_debug(name(), "Could not add robot '%s' to environment. OpenRAVE error:%s", robot->GetName().c_str(), e.message().c_str());
-  }
+	try {
+		EnvironmentMutex::scoped_lock(env_->GetMutex());
+		env_->Add(robot);
+		if (logger_)
+			logger_->log_debug(name(), "Robot '%s' added to environment.", robot->GetName().c_str());
+	} catch (openrave_exception &e) {
+		if (logger_)
+			logger_->log_debug(name(),
+			                   "Could not add robot '%s' to environment. OpenRAVE error:%s",
+			                   robot->GetName().c_str(),
+			                   e.message().c_str());
+	}
 }
 
 /** Add a robot into the scene.
@@ -226,23 +223,24 @@ OpenRaveEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
  * @return 1 if succeeded, 0 if not able to load file
  */
 void
-OpenRaveEnvironment::add_robot(const std::string& filename)
+OpenRaveEnvironment::add_robot(const std::string &filename)
 {
-  RobotBasePtr robot;
-  {
-    // load the robot
-    EnvironmentMutex::scoped_lock( env_->GetMutex());
-    robot = env_->ReadRobotXMLFile(filename);
-  }
+	RobotBasePtr robot;
+	{
+		// load the robot
+		EnvironmentMutex::scoped_lock(env_->GetMutex());
+		robot = env_->ReadRobotXMLFile(filename);
+	}
 
-  // if could not load robot file: Check file path, and test file itself for correct syntax and semantics
-  // by loading it directly into openrave with "openrave robotfile.xml"
-  if( !robot )
-    throw fawkes::IllegalArgumentException("%s: Robot '%s' could not be loaded. Check xml file/path.", name(), filename.c_str());
-  else if(logger_)
-    logger_->log_debug(name(), "Robot '%s' loaded.", robot->GetName().c_str());
+	// if could not load robot file: Check file path, and test file itself for correct syntax and semantics
+	// by loading it directly into openrave with "openrave robotfile.xml"
+	if (!robot)
+		throw fawkes::IllegalArgumentException(
+		  "%s: Robot '%s' could not be loaded. Check xml file/path.", name(), filename.c_str());
+	else if (logger_)
+		logger_->log_debug(name(), "Robot '%s' loaded.", robot->GetName().c_str());
 
-  add_robot(robot);
+	add_robot(robot);
 }
 
 /** Add a robot into the scene.
@@ -250,11 +248,10 @@ OpenRaveEnvironment::add_robot(const std::string& filename)
  * @return 1 if succeeded, 0 if not able to add robot
  */
 void
-OpenRaveEnvironment::add_robot(OpenRaveRobotPtr& robot)
+OpenRaveEnvironment::add_robot(OpenRaveRobotPtr &robot)
 {
-  add_robot(robot->get_robot_ptr());
+	add_robot(robot->get_robot_ptr());
 }
-
 
 /** Get EnvironmentBasePtr.
  * @return EnvironmentBasePtr in use
@@ -262,7 +259,7 @@ OpenRaveEnvironment::add_robot(OpenRaveRobotPtr& robot)
 OpenRAVE::EnvironmentBasePtr
 OpenRaveEnvironment::get_env_ptr() const
 {
-  return env_;
+	return env_;
 }
 
 /** Starts the  qt viewer in a separate thread.
@@ -272,47 +269,47 @@ OpenRaveEnvironment::get_env_ptr() const
 void
 OpenRaveEnvironment::start_viewer()
 {
-  if( viewer_running_ )
-    return;
+	if (viewer_running_)
+		return;
 
-  if( viewer_thread_ ) {
-    viewer_thread_->join();
-    delete viewer_thread_;
-    viewer_thread_ = NULL;
-  }
+	if (viewer_thread_) {
+		viewer_thread_->join();
+		delete viewer_thread_;
+		viewer_thread_ = NULL;
+	}
 
-  try {
-    // set this variable to true here already. Otherwise we would have to wait for the upcoming
-    // boost thread to start, create viewer and add viewer to environment to get this variable set
-    // to "true". Another call to "start_viewer()" would get stuck then, waiting for "join()"!
-    viewer_running_ = true;
-    viewer_thread_ = new boost::thread(boost::bind(run_viewer, env_, "qtcoin", &viewer_running_));
-  } catch( const openrave_exception &e) {
-    viewer_running_ = false;
-    if(logger_)
-      logger_->log_error(name(), "Could not load viewr. Ex:%s", e.what());
-    throw;
-  }
+	try {
+		// set this variable to true here already. Otherwise we would have to wait for the upcoming
+		// boost thread to start, create viewer and add viewer to environment to get this variable set
+		// to "true". Another call to "start_viewer()" would get stuck then, waiting for "join()"!
+		viewer_running_ = true;
+		viewer_thread_  = new boost::thread(boost::bind(run_viewer, env_, "qtcoin", &viewer_running_));
+	} catch (const openrave_exception &e) {
+		viewer_running_ = false;
+		if (logger_)
+			logger_->log_error(name(), "Could not load viewr. Ex:%s", e.what());
+		throw;
+	}
 }
-
 
 /** Autogenerate IKfast IK solver for robot.
  * @param robot pointer to OpenRaveRobot object
  * @param iktype IK type of solver (default: Transform6D; use TranslationDirection5D for 5DOF arms)
  */
 void
-OpenRaveEnvironment::load_IK_solver(OpenRaveRobotPtr& robot, OpenRAVE::IkParameterizationType iktype)
+OpenRaveEnvironment::load_IK_solver(OpenRaveRobotPtr &               robot,
+                                    OpenRAVE::IkParameterizationType iktype)
 {
-  EnvironmentMutex::scoped_lock( env_->GetMutex());
+	EnvironmentMutex::scoped_lock(env_->GetMutex());
 
-  RobotBasePtr robotBase = robot->get_robot_ptr();
+	RobotBasePtr robotBase = robot->get_robot_ptr();
 
-  std::stringstream ssin,ssout;
-  ssin << "LoadIKFastSolver " << robotBase->GetName() << " " << (int)iktype;
-  // if necessary, add free inc for degrees of freedom
-  //ssin << " " << 0.04f;
-  if( !mod_ikfast_->SendCommand(ssout,ssin) )
-    throw fawkes::Exception("%s: Could not load ik solver", name());
+	std::stringstream ssin, ssout;
+	ssin << "LoadIKFastSolver " << robotBase->GetName() << " " << (int)iktype;
+	// if necessary, add free inc for degrees of freedom
+	//ssin << " " << 0.04f;
+	if (!mod_ikfast_->SendCommand(ssout, ssin))
+		throw fawkes::Exception("%s: Could not load ik solver", name());
 }
 
 /** Plan collision-free path for current and target manipulator
@@ -321,14 +318,14 @@ OpenRaveEnvironment::load_IK_solver(OpenRaveRobotPtr& robot, OpenRAVE::IkParamet
  * @param sampling sampling time between each trajectory point (in seconds)
  */
 void
-OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
+OpenRaveEnvironment::run_planner(OpenRaveRobotPtr &robot, float sampling)
 {
-  bool success;
-  EnvironmentMutex::scoped_lock lock(env_->GetMutex()); // lock environment
+	bool                          success;
+	EnvironmentMutex::scoped_lock lock(env_->GetMutex()); // lock environment
 
-  robot->get_planner_params(); // also updates internal manip_
+	robot->get_planner_params(); // also updates internal manip_
 
-  /*
+	/*
   // init planner. This is automatically done by BaseManipulation, but putting it here
   // helps to identify problem source if any occurs.
   success = planner_->InitPlan(robot->get_robot_ptr(),robot->get_planner_params());
@@ -337,135 +334,133 @@ OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
   else if(logger_)
     {logger_->log_debug(name(), "Planner: initialized");}
   */
-  // plan path with basemanipulator
-  ModuleBasePtr basemanip = robot->get_basemanip();
-  target_t target = robot->get_target();
-  std::stringstream cmdin,cmdout;
-  cmdin << std::setprecision(std::numeric_limits<dReal>::digits10+1);
-  cmdout << std::setprecision(std::numeric_limits<dReal>::digits10+1);
+	// plan path with basemanipulator
+	ModuleBasePtr     basemanip = robot->get_basemanip();
+	target_t          target    = robot->get_target();
+	std::stringstream cmdin, cmdout;
+	cmdin << std::setprecision(std::numeric_limits<dReal>::digits10 + 1);
+	cmdout << std::setprecision(std::numeric_limits<dReal>::digits10 + 1);
 
-  if( target.type == TARGET_RELATIVE_EXT ) {
-    Transform t = robot->get_robot_ptr()->GetActiveManipulator()->GetEndEffectorTransform();
-    //initial pose of arm looks at +z. Target values are referring to robot's coordinating system,
-    //which have this direction vector if taken as extension of manipulator (rotate -90° on y-axis)
-    Vector dir(target.y,target.z,target.x);
-    TransformMatrix mat = matrixFromQuat(t.rot);
-    dir = mat.rotate(dir);
-    target.type = TARGET_RELATIVE;
-    target.x = dir[0];
-    target.y = dir[1];
-    target.z = dir[2];
-  }
+	if (target.type == TARGET_RELATIVE_EXT) {
+		Transform t = robot->get_robot_ptr()->GetActiveManipulator()->GetEndEffectorTransform();
+		//initial pose of arm looks at +z. Target values are referring to robot's coordinating system,
+		//which have this direction vector if taken as extension of manipulator (rotate -90° on y-axis)
+		Vector          dir(target.y, target.z, target.x);
+		TransformMatrix mat = matrixFromQuat(t.rot);
+		dir                 = mat.rotate(dir);
+		target.type         = TARGET_RELATIVE;
+		target.x            = dir[0];
+		target.y            = dir[1];
+		target.z            = dir[2];
+	}
 
-  switch(target.type) {
-    case (TARGET_RAW) :
-      cmdin << target.raw_cmd;
-      break;
+	switch (target.type) {
+	case (TARGET_RAW): cmdin << target.raw_cmd; break;
 
-    case (TARGET_JOINTS) :
-      cmdin << "MoveActiveJoints goal";
-      {
-        std::vector<dReal> v;
-        target.manip->get_angles(v);
-        for(size_t i = 0; i < v.size(); ++i) {
-          cmdin << " " << v[i];
-        }
-      }
-      break;
+	case (TARGET_JOINTS):
+		cmdin << "MoveActiveJoints goal";
+		{
+			std::vector<dReal> v;
+			target.manip->get_angles(v);
+			for (size_t i = 0; i < v.size(); ++i) {
+				cmdin << " " << v[i];
+			}
+		}
+		break;
 
-    case (TARGET_IKPARAM) :
-      cmdin << "MoveToHandPosition ikparam";
-      cmdin << " " << target.ikparam;
-      break;
+	case (TARGET_IKPARAM):
+		cmdin << "MoveToHandPosition ikparam";
+		cmdin << " " << target.ikparam;
+		break;
 
-    case (TARGET_TRANSFORM) :
-      cmdin << "MoveToHandPosition pose";
-      cmdin << " " << target.qw << " " << target.qx << " " << target.qy << " " << target.qz;
-      cmdin << " " << target.x  << " " << target.y  << " " << target.z;
-      break;
+	case (TARGET_TRANSFORM):
+		cmdin << "MoveToHandPosition pose";
+		cmdin << " " << target.qw << " " << target.qx << " " << target.qy << " " << target.qz;
+		cmdin << " " << target.x << " " << target.y << " " << target.z;
+		break;
 
-    case (TARGET_RELATIVE) :
-      // for now move to all relative targets in a straigt line
-      cmdin << "MoveHandStraight direction";
-      cmdin << " " << target.x << " " << target.y << " " << target.z;
-      {
-        dReal stepsize = 0.005;
-        dReal length = sqrt(target.x*target.x + target.y*target.y + target.z*target.z);
-        int minsteps = (int)(length/stepsize);
-        if( minsteps > 4 )
-          minsteps -= 4;
+	case (TARGET_RELATIVE):
+		// for now move to all relative targets in a straigt line
+		cmdin << "MoveHandStraight direction";
+		cmdin << " " << target.x << " " << target.y << " " << target.z;
+		{
+			dReal stepsize = 0.005;
+			dReal length   = sqrt(target.x * target.x + target.y * target.y + target.z * target.z);
+			int   minsteps = (int)(length / stepsize);
+			if (minsteps > 4)
+				minsteps -= 4;
 
-        cmdin << " stepsize " << stepsize;
-        cmdin << " minsteps " << minsteps;
-        cmdin << " maxsteps " << (int)(length/stepsize);
-      }
-      break;
+			cmdin << " stepsize " << stepsize;
+			cmdin << " minsteps " << minsteps;
+			cmdin << " maxsteps " << (int)(length / stepsize);
+		}
+		break;
 
-    default :
-      throw fawkes::Exception("%s: Planner: Invalid target type", name());
-  }
+	default: throw fawkes::Exception("%s: Planner: Invalid target type", name());
+	}
 
-  //add additional planner parameters
-  if( !target.plannerparams.empty() ) {
-    cmdin << " " << target.plannerparams;
-  }
-  cmdin << " execute 0";
-  cmdin << " outputtraj";
-  if(logger_)
-    logger_->log_debug(name(), "Planner: basemanip cmdin:%s", cmdin.str().c_str());
+	//add additional planner parameters
+	if (!target.plannerparams.empty()) {
+		cmdin << " " << target.plannerparams;
+	}
+	cmdin << " execute 0";
+	cmdin << " outputtraj";
+	if (logger_)
+		logger_->log_debug(name(), "Planner: basemanip cmdin:%s", cmdin.str().c_str());
 
-  try {
-    success = basemanip->SendCommand(cmdout,cmdin);
-  } catch(openrave_exception &e) {
-    throw fawkes::Exception("%s: Planner: basemanip command failed. Ex%s", name(), e.what());
-  }
-  if(!success)
-    throw fawkes::Exception("%s: Planner: planning failed", name());
-  else if(logger_)
-    logger_->log_debug(name(), "Planner: path planned");
+	try {
+		success = basemanip->SendCommand(cmdout, cmdin);
+	} catch (openrave_exception &e) {
+		throw fawkes::Exception("%s: Planner: basemanip command failed. Ex%s", name(), e.what());
+	}
+	if (!success)
+		throw fawkes::Exception("%s: Planner: planning failed", name());
+	else if (logger_)
+		logger_->log_debug(name(), "Planner: path planned");
 
-  if(logger_)
-    logger_->log_debug(name(), "Planner: planned. cmdout:%s", cmdout.str().c_str());
+	if (logger_)
+		logger_->log_debug(name(), "Planner: planned. cmdout:%s", cmdout.str().c_str());
 
-  // read returned trajectory
-  TrajectoryBasePtr traj = RaveCreateTrajectory(env_, "");
-  traj->Init(robot->get_robot_ptr()->GetActiveConfigurationSpecification());
-  if( !traj->deserialize(cmdout) )
-    throw fawkes::Exception("%s: Planner: Cannot read trajectory data.", name());
+	// read returned trajectory
+	TrajectoryBasePtr traj = RaveCreateTrajectory(env_, "");
+	traj->Init(robot->get_robot_ptr()->GetActiveConfigurationSpecification());
+	if (!traj->deserialize(cmdout))
+		throw fawkes::Exception("%s: Planner: Cannot read trajectory data.", name());
 
-  // sampling trajectory and setting robots trajectory
-  std::vector< std::vector<dReal> >* trajRobot = robot->get_trajectory();
-  trajRobot->clear();
-  for(dReal time = 0; time <= traj->GetDuration(); time += (dReal)sampling) {
-    std::vector<dReal> point;
-    traj->Sample(point,time);
-    trajRobot->push_back(point);
-  }
+	// sampling trajectory and setting robots trajectory
+	std::vector<std::vector<dReal>> *trajRobot = robot->get_trajectory();
+	trajRobot->clear();
+	for (dReal time = 0; time <= traj->GetDuration(); time += (dReal)sampling) {
+		std::vector<dReal> point;
+		traj->Sample(point, time);
+		trajRobot->push_back(point);
+	}
 
-  // viewer options
-  if( viewer_running_ ) {
+	// viewer options
+	if (viewer_running_) {
+		// display trajectory in viewer
+		graph_handle_.clear(); // remove all GraphHandlerPtr and currently drawn plots
+		{
+			RobotBasePtr               tmp_robot = robot->get_robot_ptr();
+			RobotBase::RobotStateSaver saver(
+			  tmp_robot); // save the state, do not modifiy currently active robot!
+			for (std::vector<std::vector<dReal>>::iterator it = trajRobot->begin();
+			     it != trajRobot->end();
+			     ++it) {
+				tmp_robot->SetActiveDOFValues((*it));
+				const OpenRAVE::Vector &trans =
+				  tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans;
+				float transa[4] = {(float)trans.x, (float)trans.y, (float)trans.z, (float)trans.w};
+				graph_handle_.push_back(env_->plot3(transa, 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
+			}
+		} // robot state is restored
 
-    // display trajectory in viewer
-    graph_handle_.clear(); // remove all GraphHandlerPtr and currently drawn plots
-    {
-      RobotBasePtr tmp_robot = robot->get_robot_ptr();
-      RobotBase::RobotStateSaver saver(tmp_robot); // save the state, do not modifiy currently active robot!
-        for(std::vector< std::vector<dReal> >::iterator it = trajRobot->begin(); it!=trajRobot->end(); ++it) {
-          tmp_robot->SetActiveDOFValues((*it));
-          const OpenRAVE::Vector &trans = tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans;
-          float transa[4] = { (float)trans.x, (float)trans.y, (float)trans.z, (float)trans.w };
-          graph_handle_.push_back(env_->plot3(transa, 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
-        }
-     } // robot state is restored
-
-    // display motion in viewer
-    if( robot->display_planned_movements()) {
-      robot->get_robot_ptr()->GetController()->SetPath(traj);
-    }
-  }
-
+		// display motion in viewer
+		if (robot->display_planned_movements()) {
+			robot->get_robot_ptr()->GetController()->SetPath(traj);
+		}
+	}
 }
-
 
 /** Run graspplanning script for a given target.
  * Script loads grasping databse, checks if target is graspable for various grasps
@@ -477,147 +472,162 @@ OpenRaveEnvironment::run_planner(OpenRaveRobotPtr& robot, float sampling)
  * @param sampling sampling time between each trajectory point (in seconds)
  */
 void
-OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveRobotPtr& robot, float sampling)
+OpenRaveEnvironment::run_graspplanning(const std::string &target_name,
+                                       OpenRaveRobotPtr & robot,
+                                       float              sampling)
 {
-  std::string filename = SRCDIR"/python/graspplanning.py";
-  std::string funcname = "runGrasp";
+	std::string filename = SRCDIR "/python/graspplanning.py";
+	std::string funcname = "runGrasp";
 
-  TrajectoryBasePtr traj = RaveCreateTrajectory(env_, "");
-  traj->Init(robot->get_robot_ptr()->GetActiveConfigurationSpecification());
+	TrajectoryBasePtr traj = RaveCreateTrajectory(env_, "");
+	traj->Init(robot->get_robot_ptr()->GetActiveConfigurationSpecification());
 
-  FILE* py_file = fopen(filename.c_str(), "r");
-  if (py_file == NULL)
-    throw fawkes::Exception("%s: Graspplanning: opening python file failed", name());
+	FILE *py_file = fopen(filename.c_str(), "r");
+	if (py_file == NULL)
+		throw fawkes::Exception("%s: Graspplanning: opening python file failed", name());
 
-  Py_Initialize();
+	Py_Initialize();
 
-  // Need to aquire global interpreter lock (GIL), create new sub-interpreter to run code in there
-  PyGILState_STATE gil_state = PyGILState_Ensure(); // aquire python GIL
-  PyThreadState* cur_state = PyThreadState_Get();   // get current ThreadState; need this to switch back to later
-  PyThreadState* int_state = Py_NewInterpreter();   // create new sub-interpreter
-  PyThreadState_Swap(int_state);                    // set active ThreadState; maybe not needed after calling NewInterpreter() ?
-  // Now we can safely run our python code
+	// Need to aquire global interpreter lock (GIL), create new sub-interpreter to run code in there
+	PyGILState_STATE gil_state = PyGILState_Ensure(); // aquire python GIL
+	PyThreadState *  cur_state =
+	  PyThreadState_Get(); // get current ThreadState; need this to switch back to later
+	PyThreadState *int_state = Py_NewInterpreter(); // create new sub-interpreter
+	PyThreadState_Swap(
+	  int_state); // set active ThreadState; maybe not needed after calling NewInterpreter() ?
+	// Now we can safely run our python code
 
-  // using python C API
-  PyObject* py_main = PyImport_AddModule("main___"); // borrowed reference
-  if( !py_main ) {
-    // main___ should always exist
-    fclose(py_file);
-    Py_EndInterpreter(int_state);
-    PyThreadState_Swap(cur_state);
-    PyGILState_Release(gil_state); // release GIL
-    Py_Finalize();
-    throw fawkes::Exception("%s: Graspplanning: Python reference 'main__'_ does not exist.", name());
-  }
-  PyObject* py_dict = PyModule_GetDict(py_main);      // borrowed reference
-  if( !py_dict ) {
-    // main___ should have a dictionary
-    fclose(py_file);
-    Py_Finalize();
-    throw fawkes::Exception("%s: Graspplanning: Python reference 'main__'_ does not have a dictionary.", name());
-  }
+	// using python C API
+	PyObject *py_main = PyImport_AddModule("main___"); // borrowed reference
+	if (!py_main) {
+		// main___ should always exist
+		fclose(py_file);
+		Py_EndInterpreter(int_state);
+		PyThreadState_Swap(cur_state);
+		PyGILState_Release(gil_state); // release GIL
+		Py_Finalize();
+		throw fawkes::Exception("%s: Graspplanning: Python reference 'main__'_ does not exist.",
+		                        name());
+	}
+	PyObject *py_dict = PyModule_GetDict(py_main); // borrowed reference
+	if (!py_dict) {
+		// main___ should have a dictionary
+		fclose(py_file);
+		Py_Finalize();
+		throw fawkes::Exception(
+		  "%s: Graspplanning: Python reference 'main__'_ does not have a dictionary.", name());
+	}
 
-  // load file
-  int py_module = PyRun_SimpleFile(py_file, filename.c_str());
-  fclose(py_file);
-  if (!py_module) {
-    // load function from global dictionary
-    PyObject* py_func = PyDict_GetItemString(py_dict, funcname.c_str());
-    if (py_func && PyCallable_Check(py_func)) {
-      // create tuple for args to be passed to py_func
-      PyObject* py_args = PyTuple_New(3);
-      // fill tuple with values. We're not checking for conversion errors here atm, can be added!
-      PyObject* py_value_env_id      = PyInt_FromLong(RaveGetEnvironmentId(env_));
-      PyObject* py_value_robot_name  = PyString_FromString(robot->get_robot_ptr()->GetName().c_str());
-      PyObject* py_value_target_name = PyString_FromString(target_name.c_str());
-      PyTuple_SetItem(py_args, 0, py_value_env_id);      //py_value reference stolen here! no need to DECREF
-      PyTuple_SetItem(py_args, 1, py_value_robot_name);  //py_value reference stolen here! no need to DECREF
-      PyTuple_SetItem(py_args, 2, py_value_target_name); //py_value reference stolen here! no need to DECREF
-      // call function, get return value
-      PyObject* py_value = PyObject_CallObject(py_func, py_args);
-      Py_DECREF(py_args);
-      // check return value
-      if (py_value != NULL) {
-        if (!PyString_Check(py_value)) {
-          Py_DECREF(py_value);
-          Py_DECREF(py_func);
-          Py_Finalize();
-          throw fawkes::Exception("%s: Graspplanning: No grasping path found.", name());
-        }
-        std::stringstream resval;
-        resval << std::setprecision(std::numeric_limits<dReal>::digits10+1);
-        resval << PyString_AsString(py_value);
-        if (!traj->deserialize(resval) ) {
-          Py_DECREF(py_value);
-          Py_DECREF(py_func);
-          Py_Finalize();
-          throw fawkes::Exception("%s: Graspplanning: Reading trajectory data failed.", name());
-        }
-        Py_DECREF(py_value);
-      } else { // if calling function failed
-        Py_DECREF(py_func);
-        PyErr_Print();
-        Py_Finalize();
-        throw fawkes::Exception("%s: Graspplanning: Calling function failed.", name());
-      }
-    } else { // if loading func failed
-      if (PyErr_Occurred())
-        PyErr_Print();
-      Py_XDECREF(py_func);
-      Py_Finalize();
-      throw fawkes::Exception("%s: Graspplanning: Loading function failed.", name());
-    }
-    Py_XDECREF(py_func);
-  } else { // if loading module failed
-    PyErr_Print();
-    Py_Finalize();
-    throw fawkes::Exception("%s: Graspplanning: Loading python file failed.", name());
-  }
+	// load file
+	int py_module = PyRun_SimpleFile(py_file, filename.c_str());
+	fclose(py_file);
+	if (!py_module) {
+		// load function from global dictionary
+		PyObject *py_func = PyDict_GetItemString(py_dict, funcname.c_str());
+		if (py_func && PyCallable_Check(py_func)) {
+			// create tuple for args to be passed to py_func
+			PyObject *py_args = PyTuple_New(3);
+			// fill tuple with values. We're not checking for conversion errors here atm, can be added!
+			PyObject *py_value_env_id = PyInt_FromLong(RaveGetEnvironmentId(env_));
+			PyObject *py_value_robot_name =
+			  PyString_FromString(robot->get_robot_ptr()->GetName().c_str());
+			PyObject *py_value_target_name = PyString_FromString(target_name.c_str());
+			PyTuple_SetItem(py_args,
+			                0,
+			                py_value_env_id); //py_value reference stolen here! no need to DECREF
+			PyTuple_SetItem(py_args,
+			                1,
+			                py_value_robot_name); //py_value reference stolen here! no need to DECREF
+			PyTuple_SetItem(py_args,
+			                2,
+			                py_value_target_name); //py_value reference stolen here! no need to DECREF
+			// call function, get return value
+			PyObject *py_value = PyObject_CallObject(py_func, py_args);
+			Py_DECREF(py_args);
+			// check return value
+			if (py_value != NULL) {
+				if (!PyString_Check(py_value)) {
+					Py_DECREF(py_value);
+					Py_DECREF(py_func);
+					Py_Finalize();
+					throw fawkes::Exception("%s: Graspplanning: No grasping path found.", name());
+				}
+				std::stringstream resval;
+				resval << std::setprecision(std::numeric_limits<dReal>::digits10 + 1);
+				resval << PyString_AsString(py_value);
+				if (!traj->deserialize(resval)) {
+					Py_DECREF(py_value);
+					Py_DECREF(py_func);
+					Py_Finalize();
+					throw fawkes::Exception("%s: Graspplanning: Reading trajectory data failed.", name());
+				}
+				Py_DECREF(py_value);
+			} else { // if calling function failed
+				Py_DECREF(py_func);
+				PyErr_Print();
+				Py_Finalize();
+				throw fawkes::Exception("%s: Graspplanning: Calling function failed.", name());
+			}
+		} else { // if loading func failed
+			if (PyErr_Occurred())
+				PyErr_Print();
+			Py_XDECREF(py_func);
+			Py_Finalize();
+			throw fawkes::Exception("%s: Graspplanning: Loading function failed.", name());
+		}
+		Py_XDECREF(py_func);
+	} else { // if loading module failed
+		PyErr_Print();
+		Py_Finalize();
+		throw fawkes::Exception("%s: Graspplanning: Loading python file failed.", name());
+	}
 
-  Py_EndInterpreter(int_state); // close sub-interpreter
-  PyThreadState_Swap(cur_state); // re-set active state to previous one
-  PyGILState_Release(gil_state); // release GIL
+	Py_EndInterpreter(int_state);  // close sub-interpreter
+	PyThreadState_Swap(cur_state); // re-set active state to previous one
+	PyGILState_Release(gil_state); // release GIL
 
-  Py_Finalize(); // should be careful with that, as it closes global interpreter; Other threads running python may fail
+	Py_Finalize(); // should be careful with that, as it closes global interpreter; Other threads running python may fail
 
-  if(logger_)
-    logger_->log_debug(name(), "Graspplanning: path planned");
+	if (logger_)
+		logger_->log_debug(name(), "Graspplanning: path planned");
 
-  // re-timing the trajectory with
-  planningutils::RetimeActiveDOFTrajectory(traj, robot->get_robot_ptr());
+	// re-timing the trajectory with
+	planningutils::RetimeActiveDOFTrajectory(traj, robot->get_robot_ptr());
 
-  // sampling trajectory and setting robots trajectory
-  std::vector< std::vector<dReal> >* trajRobot = robot->get_trajectory();
-  trajRobot->clear();
-  for(dReal time = 0; time <= traj->GetDuration(); time += (dReal)sampling) {
-    std::vector<dReal> point;
-    traj->Sample(point,time);
-    trajRobot->push_back(point);
-  }
+	// sampling trajectory and setting robots trajectory
+	std::vector<std::vector<dReal>> *trajRobot = robot->get_trajectory();
+	trajRobot->clear();
+	for (dReal time = 0; time <= traj->GetDuration(); time += (dReal)sampling) {
+		std::vector<dReal> point;
+		traj->Sample(point, time);
+		trajRobot->push_back(point);
+	}
 
-  // viewer options
-  if( viewer_running_ ) {
+	// viewer options
+	if (viewer_running_) {
+		// display trajectory in viewer
+		graph_handle_.clear(); // remove all GraphHandlerPtr and currently drawn plots
+		{
+			RobotBasePtr               tmp_robot = robot->get_robot_ptr();
+			RobotBase::RobotStateSaver saver(
+			  tmp_robot); // save the state, do not modifiy currently active robot!
+			for (std::vector<std::vector<dReal>>::iterator it = trajRobot->begin();
+			     it != trajRobot->end();
+			     ++it) {
+				tmp_robot->SetActiveDOFValues((*it));
+				const OpenRAVE::Vector &trans =
+				  tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans;
+				float transa[4] = {(float)trans.x, (float)trans.y, (float)trans.z, (float)trans.w};
+				graph_handle_.push_back(env_->plot3(transa, 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
+			}
+		} // robot state is restored
 
-    // display trajectory in viewer
-    graph_handle_.clear(); // remove all GraphHandlerPtr and currently drawn plots
-    {
-      RobotBasePtr tmp_robot = robot->get_robot_ptr();
-      RobotBase::RobotStateSaver saver(tmp_robot); // save the state, do not modifiy currently active robot!
-        for(std::vector< std::vector<dReal> >::iterator it = trajRobot->begin(); it!=trajRobot->end(); ++it) {
-          tmp_robot->SetActiveDOFValues((*it));
-          const OpenRAVE::Vector &trans = tmp_robot->GetActiveManipulator()->GetEndEffectorTransform().trans;
-          float transa[4] = { (float)trans.x, (float)trans.y, (float)trans.z, (float)trans.w };
-          graph_handle_.push_back(env_->plot3(transa, 1, 0, 2.f, Vector(1.f, 0.f, 0.f, 1.f)));
-        }
-     } // robot state is restored
-
-    // display motion in viewer
-    if( robot->display_planned_movements()) {
-      robot->get_robot_ptr()->GetController()->SetPath(traj);
-    }
-  }
+		// display motion in viewer
+		if (robot->display_planned_movements()) {
+			robot->get_robot_ptr()->GetController()->SetPath(traj);
+		}
+	}
 }
-
 
 /** Add an object to the environment.
  * @param name name that should be given to that object
@@ -625,20 +635,20 @@ OpenRaveEnvironment::run_graspplanning(const std::string& target_name, OpenRaveR
  * @return true if successful
  */
 bool
-OpenRaveEnvironment::add_object(const std::string& name, const std::string& filename)
+OpenRaveEnvironment::add_object(const std::string &name, const std::string &filename)
 {
-  try {
-    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
-    KinBodyPtr kb = env_->ReadKinBodyXMLFile(filename);
-    kb->SetName(name);
-    env_->Add(kb);
-  } catch(const OpenRAVE::openrave_exception &e) {
-    if(logger_)
-      logger_->log_warn(this->name(), "Could not add Object '%s'. Ex:%s", name.c_str(), e.what());
-    return false;
-  }
+	try {
+		EnvironmentMutex::scoped_lock lock(env_->GetMutex());
+		KinBodyPtr                    kb = env_->ReadKinBodyXMLFile(filename);
+		kb->SetName(name);
+		env_->Add(kb);
+	} catch (const OpenRAVE::openrave_exception &e) {
+		if (logger_)
+			logger_->log_warn(this->name(), "Could not add Object '%s'. Ex:%s", name.c_str(), e.what());
+		return false;
+	}
 
-  return true;
+	return true;
 }
 
 /** Remove object from environment.
@@ -646,19 +656,22 @@ OpenRaveEnvironment::add_object(const std::string& name, const std::string& file
  * @return true if successful
  */
 bool
-OpenRaveEnvironment::delete_object(const std::string& name)
+OpenRaveEnvironment::delete_object(const std::string &name)
 {
-  try {
-    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
-    KinBodyPtr kb = env_->GetKinBody(name);
-    env_->Remove(kb);
-  } catch(const OpenRAVE::openrave_exception &e) {
-    if(logger_)
-      logger_->log_warn(this->name(), "Could not delete Object '%s'. Ex:%s", name.c_str(), e.what());
-    return false;
-  }
+	try {
+		EnvironmentMutex::scoped_lock lock(env_->GetMutex());
+		KinBodyPtr                    kb = env_->GetKinBody(name);
+		env_->Remove(kb);
+	} catch (const OpenRAVE::openrave_exception &e) {
+		if (logger_)
+			logger_->log_warn(this->name(),
+			                  "Could not delete Object '%s'. Ex:%s",
+			                  name.c_str(),
+			                  e.what());
+		return false;
+	}
 
-  return true;
+	return true;
 }
 
 /** Remove all objects from environment.
@@ -667,22 +680,22 @@ OpenRaveEnvironment::delete_object(const std::string& name)
 bool
 OpenRaveEnvironment::delete_all_objects()
 {
-  try {
-    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
-    std::vector<KinBodyPtr> bodies;
-    env_->GetBodies( bodies );
+	try {
+		EnvironmentMutex::scoped_lock lock(env_->GetMutex());
+		std::vector<KinBodyPtr>       bodies;
+		env_->GetBodies(bodies);
 
-    for( std::vector<KinBodyPtr>::iterator it=bodies.begin(); it!=bodies.end(); ++it ) {
-      if( !(*it)->IsRobot() )
-        env_->Remove(*it);
-    }
-  } catch(const OpenRAVE::openrave_exception &e) {
-    if(logger_)
-      logger_->log_warn(this->name(), "Could not delete all objects. Ex:%s", e.what());
-    return false;
-  }
+		for (std::vector<KinBodyPtr>::iterator it = bodies.begin(); it != bodies.end(); ++it) {
+			if (!(*it)->IsRobot())
+				env_->Remove(*it);
+		}
+	} catch (const OpenRAVE::openrave_exception &e) {
+		if (logger_)
+			logger_->log_warn(this->name(), "Could not delete all objects. Ex:%s", e.what());
+		return false;
+	}
 
-  return true;
+	return true;
 }
 
 /** Rename object.
@@ -691,19 +704,23 @@ OpenRaveEnvironment::delete_all_objects()
  * @return true if successful
  */
 bool
-OpenRaveEnvironment::rename_object(const std::string& name, const std::string& new_name)
+OpenRaveEnvironment::rename_object(const std::string &name, const std::string &new_name)
 {
-  try {
-    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
-    KinBodyPtr kb = env_->GetKinBody(name);
-    kb->SetName(new_name);
-  } catch(const OpenRAVE::openrave_exception &e) {
-    if(logger_)
-      logger_->log_warn(this->name(), "Could not rename Object '%s' to '%s'. Ex:%s", name.c_str(), new_name.c_str(), e.what());
-    return false;
-  }
+	try {
+		EnvironmentMutex::scoped_lock lock(env_->GetMutex());
+		KinBodyPtr                    kb = env_->GetKinBody(name);
+		kb->SetName(new_name);
+	} catch (const OpenRAVE::openrave_exception &e) {
+		if (logger_)
+			logger_->log_warn(this->name(),
+			                  "Could not rename Object '%s' to '%s'. Ex:%s",
+			                  name.c_str(),
+			                  new_name.c_str(),
+			                  e.what());
+		return false;
+	}
 
-  return true;
+	return true;
 }
 
 /** Move object in the environment.
@@ -715,23 +732,26 @@ OpenRaveEnvironment::rename_object(const std::string& name, const std::string& n
  * @return true if successful
  */
 bool
-OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float trans_y, float trans_z)
+OpenRaveEnvironment::move_object(const std::string &name,
+                                 float              trans_x,
+                                 float              trans_y,
+                                 float              trans_z)
 {
-  try {
-    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
-    KinBodyPtr kb = env_->GetKinBody(name);
+	try {
+		EnvironmentMutex::scoped_lock lock(env_->GetMutex());
+		KinBodyPtr                    kb = env_->GetKinBody(name);
 
-    Transform transform = kb->GetTransform();
-    transform.trans = Vector(trans_x, trans_y, trans_z);
+		Transform transform = kb->GetTransform();
+		transform.trans     = Vector(trans_x, trans_y, trans_z);
 
-    kb->SetTransform(transform);
-  } catch(const OpenRAVE::openrave_exception &e) {
-    if(logger_)
-      logger_->log_warn(this->name(), "Could not move Object '%s'. Ex:%s", name.c_str(), e.what());
-    return false;
-  }
+		kb->SetTransform(transform);
+	} catch (const OpenRAVE::openrave_exception &e) {
+		if (logger_)
+			logger_->log_warn(this->name(), "Could not move Object '%s'. Ex:%s", name.c_str(), e.what());
+		return false;
+	}
 
-  return true;
+	return true;
 }
 
 /** Move object in the environment.
@@ -744,15 +764,19 @@ OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float t
  * @return true if successful
  */
 bool
-OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobotPtr& robot)
+OpenRaveEnvironment::move_object(const std::string &name,
+                                 float              trans_x,
+                                 float              trans_y,
+                                 float              trans_z,
+                                 OpenRaveRobotPtr & robot)
 {
-  // remember, OpenRAVE Vector is 4-tuple (w,x,y,z)
-  Transform t;
-  {
-    EnvironmentMutex::scoped_lock( env_->GetMutex());
-    t = robot->get_robot_ptr()->GetTransform();
-  }
-  return move_object(name, trans_x+t.trans[1], trans_y+t.trans[2], trans_z+t.trans[3]);
+	// remember, OpenRAVE Vector is 4-tuple (w,x,y,z)
+	Transform t;
+	{
+		EnvironmentMutex::scoped_lock(env_->GetMutex());
+		t = robot->get_robot_ptr()->GetTransform();
+	}
+	return move_object(name, trans_x + t.trans[1], trans_y + t.trans[2], trans_z + t.trans[3]);
 }
 
 /** Rotate object by a quaternion.
@@ -764,25 +788,32 @@ OpenRaveEnvironment::move_object(const std::string& name, float trans_x, float t
  * @return true if successful
  */
 bool
-OpenRaveEnvironment::rotate_object(const std::string& name, float quat_x, float quat_y, float quat_z, float quat_w)
+OpenRaveEnvironment::rotate_object(const std::string &name,
+                                   float              quat_x,
+                                   float              quat_y,
+                                   float              quat_z,
+                                   float              quat_w)
 {
-  try {
-    EnvironmentMutex::scoped_lock lock(env_->GetMutex());
-    KinBodyPtr kb = env_->GetKinBody(name);
+	try {
+		EnvironmentMutex::scoped_lock lock(env_->GetMutex());
+		KinBodyPtr                    kb = env_->GetKinBody(name);
 
-    Vector quat(quat_w, quat_x, quat_y, quat_z);
+		Vector quat(quat_w, quat_x, quat_y, quat_z);
 
-    Transform transform = kb->GetTransform();
-    transform.rot = quat;
+		Transform transform = kb->GetTransform();
+		transform.rot       = quat;
 
-    kb->SetTransform(transform);
-  } catch(const OpenRAVE::openrave_exception &e) {
-    if(logger_)
-      logger_->log_warn(this->name(), "Could not rotate Object '%s'. Ex:%s", name.c_str(), e.what());
-    return false;
-  }
+		kb->SetTransform(transform);
+	} catch (const OpenRAVE::openrave_exception &e) {
+		if (logger_)
+			logger_->log_warn(this->name(),
+			                  "Could not rotate Object '%s'. Ex:%s",
+			                  name.c_str(),
+			                  e.what());
+		return false;
+	}
 
-  return true;
+	return true;
 }
 
 /** Rotate object along its axis.
@@ -794,18 +825,17 @@ OpenRaveEnvironment::rotate_object(const std::string& name, float quat_x, float 
  * @return true if successful
  */
 bool
-OpenRaveEnvironment::rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z)
+OpenRaveEnvironment::rotate_object(const std::string &name, float rot_x, float rot_y, float rot_z)
 {
-  Vector q1 = quatFromAxisAngle(Vector(rot_x, 0.f, 0.f));
-  Vector q2 = quatFromAxisAngle(Vector(0.f, rot_y, 0.f));
-  Vector q3 = quatFromAxisAngle(Vector(0.f, 0.f, rot_z));
+	Vector q1 = quatFromAxisAngle(Vector(rot_x, 0.f, 0.f));
+	Vector q2 = quatFromAxisAngle(Vector(0.f, rot_y, 0.f));
+	Vector q3 = quatFromAxisAngle(Vector(0.f, 0.f, rot_z));
 
-  Vector q12  = quatMultiply (q1, q2);
-  Vector quat = quatMultiply (q12, q3);
+	Vector q12  = quatMultiply(q1, q2);
+	Vector quat = quatMultiply(q12, q3);
 
-  return rotate_object(name, quat[1], quat[2], quat[3], quat[0]);
+	return rotate_object(name, quat[1], quat[2], quat[3], quat[0]);
 }
-
 
 /** Clone all non-robot objects from a referenced OpenRaveEnvironment to this one.
  * The environments should contain the same objects afterwards. Therefore objects in current
@@ -813,73 +843,76 @@ OpenRaveEnvironment::rotate_object(const std::string& name, float rot_x, float r
  * @param env The reference environment
  */
 void
-OpenRaveEnvironment::clone_objects(OpenRaveEnvironmentPtr& env)
+OpenRaveEnvironment::clone_objects(OpenRaveEnvironmentPtr &env)
 {
-  // lock environments
-  EnvironmentMutex::scoped_lock lockold(env->get_env_ptr()->GetMutex());
-  EnvironmentMutex::scoped_lock lock(env_->GetMutex());
+	// lock environments
+	EnvironmentMutex::scoped_lock lockold(env->get_env_ptr()->GetMutex());
+	EnvironmentMutex::scoped_lock lock(env_->GetMutex());
 
-  // get kinbodies
-  std::vector<KinBodyPtr> old_bodies, bodies;
-  env->get_env_ptr()->GetBodies( old_bodies );
-  env_->GetBodies( bodies );
+	// get kinbodies
+	std::vector<KinBodyPtr> old_bodies, bodies;
+	env->get_env_ptr()->GetBodies(old_bodies);
+	env_->GetBodies(bodies);
 
-  // check for existing bodies in this environment
-  std::vector<KinBodyPtr>::iterator old_body, body;
-  for(old_body=old_bodies.begin(); old_body!=old_bodies.end(); ++old_body ) {
-    if( (*old_body)->IsRobot() )
-      continue;
+	// check for existing bodies in this environment
+	std::vector<KinBodyPtr>::iterator old_body, body;
+	for (old_body = old_bodies.begin(); old_body != old_bodies.end(); ++old_body) {
+		if ((*old_body)->IsRobot())
+			continue;
 
-    KinBodyPtr new_body;
-    for( body=bodies.begin(); body!=bodies.end(); ++body ) {
-      if( (*body)->IsRobot() )
-        continue;
+		KinBodyPtr new_body;
+		for (body = bodies.begin(); body != bodies.end(); ++body) {
+			if ((*body)->IsRobot())
+				continue;
 
-      if( (*body)->GetName() == (*old_body)->GetName() && (*body)->GetKinematicsGeometryHash() == (*old_body)->GetKinematicsGeometryHash() ) {
-        new_body = *body;
-        break;
-      }
-    }
+			if ((*body)->GetName() == (*old_body)->GetName()
+			    && (*body)->GetKinematicsGeometryHash() == (*old_body)->GetKinematicsGeometryHash()) {
+				new_body = *body;
+				break;
+			}
+		}
 
-    if( body != bodies.end() ) {
-      // remove this one from the list, to reduce checking
-      // (this one has already been found a match)
-      bodies.erase( body );
-    }
+		if (body != bodies.end()) {
+			// remove this one from the list, to reduce checking
+			// (this one has already been found a match)
+			bodies.erase(body);
+		}
 
-    if( !new_body ) {
-      // this is a new kinbody!
+		if (!new_body) {
+			// this is a new kinbody!
 
-      // create new empty KinBody, then clone from old
-      KinBodyPtr empty;
-      new_body = env_->ReadKinBodyData(empty, "<KinBody></KinBody>");
-      new_body->Clone(*old_body, 0);
+			// create new empty KinBody, then clone from old
+			KinBodyPtr empty;
+			new_body = env_->ReadKinBodyData(empty, "<KinBody></KinBody>");
+			new_body->Clone(*old_body, 0);
 
-      // add kinbody to environment
-      env_->Add(new_body);
+			// add kinbody to environment
+			env_->Add(new_body);
 
-      // update collisison-checker and physics-engine to consider new kinbody
-      //env_->GetCollisionChecker()->InitKinBody(new_body);
-      //env_->GetPhysicsEngine()->InitKinBody(new_body);
+			// update collisison-checker and physics-engine to consider new kinbody
+			//env_->GetCollisionChecker()->InitKinBody(new_body);
+			//env_->GetPhysicsEngine()->InitKinBody(new_body);
 
-      // clone kinbody state
-      KinBody::KinBodyStateSaver saver(*old_body, KinBody::Save_LinkTransformation|KinBody::Save_LinkEnable|KinBody::Save_LinkVelocities);
-      saver.Restore(new_body);
+			// clone kinbody state
+			KinBody::KinBodyStateSaver saver(*old_body,
+			                                 KinBody::Save_LinkTransformation | KinBody::Save_LinkEnable
+			                                   | KinBody::Save_LinkVelocities);
+			saver.Restore(new_body);
 
-    } else {
-      // this kinbody already exists. just clone the state
-      KinBody::KinBodyStateSaver saver(*old_body, 0xffffffff);
-      saver.Restore(new_body);
-    }
-  }
+		} else {
+			// this kinbody already exists. just clone the state
+			KinBody::KinBodyStateSaver saver(*old_body, 0xffffffff);
+			saver.Restore(new_body);
+		}
+	}
 
-  // remove bodies that are not in old_env anymore
-  for( body=bodies.begin(); body!=bodies.end(); ++body ) {
-    if( (*body)->IsRobot() )
-      continue;
+	// remove bodies that are not in old_env anymore
+	for (body = bodies.begin(); body != bodies.end(); ++body) {
+		if ((*body)->IsRobot())
+			continue;
 
-    env_->Remove( *body );
-  }
+		env_->Remove(*body);
+	}
 }
 
 } // end of namespace fawkes

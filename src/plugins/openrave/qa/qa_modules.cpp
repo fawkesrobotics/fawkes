@@ -24,16 +24,16 @@
 // Do not include in api reference
 ///@cond QA
 
+#include <logging/console.h>
 #include <openrave/openrave.h>
-
 #include <plugins/openrave/environment.h>
 #include <plugins/openrave/robot.h>
-#include <logging/console.h>
+
 #include <cstdio>
 #include <iostream>
+#include <list>
 #include <sstream>
 #include <vector>
-#include <list>
 
 using namespace fawkes;
 using namespace std;
@@ -41,81 +41,67 @@ using namespace std;
 void
 printVector(vector<float> &v)
 {
-  stringstream s;
-  //printf("## size:%u \n", v.size());
-  for(unsigned int i=0; i<v.size(); i++)
-  {
-    s << "(" << i << ")" << v[i] << "    ";
-    //printf("## %u:)%f \n", i, v[i]);
-  }
-  printf("%s \n", s.str().c_str());
+	stringstream s;
+	//printf("## size:%u \n", v.size());
+	for (unsigned int i = 0; i < v.size(); i++) {
+		s << "(" << i << ")" << v[i] << "    ";
+		//printf("## %u:)%f \n", i, v[i]);
+	}
+	printf("%s \n", s.str().c_str());
 }
 
 int
 main(int argc, char **argv)
 {
-  printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+	printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
-  string robotFile = SRCDIR"/../manipulators/katana.robot.xml";
+	string robotFile = SRCDIR "/../manipulators/katana.robot.xml";
 
-  ConsoleLogger* cl = new ConsoleLogger();
+	ConsoleLogger *cl = new ConsoleLogger();
 
-  OpenRaveRobotPtr robot( new OpenRaveRobot(cl) );
-  OpenRaveEnvironmentPtr env( new OpenRaveEnvironment(cl) );
+	OpenRaveRobotPtr       robot(new OpenRaveRobot(cl));
+	OpenRaveEnvironmentPtr env(new OpenRaveEnvironment(cl));
 
-  vector<OpenRAVE::RobotBasePtr> robots;
-  list<OpenRAVE::ModuleBasePtr> modules;
+	vector<OpenRAVE::RobotBasePtr> robots;
+	list<OpenRAVE::ModuleBasePtr>  modules;
 
+	env->create();
 
+	env->get_env_ptr()->GetModules(modules);
+	env->get_env_ptr()->GetRobots(robots);
+	cl->log_debug("qa_modules", "Environment created");
+	cl->log_debug("qa_modules", "#modules:%u  #robots:%u", modules.size(), robots.size());
 
-  env->create();
+	try {
+		robot->load(robotFile, env);
+	} catch (Exception &e) {
+		cl->log_error("qa_modules", "error:%s", e.what());
+		return 0;
+	}
 
-  env->get_env_ptr()->GetModules(modules);
-  env->get_env_ptr()->GetRobots(robots);
-  cl->log_debug("qa_modules", "Environment created");
-  cl->log_debug("qa_modules", "#modules:%u  #robots:%u", modules.size(), robots.size());
+	env->get_env_ptr()->GetModules(modules);
+	env->get_env_ptr()->GetRobots(robots);
+	cl->log_debug("qa_modules", "Robot loaded");
+	cl->log_debug("qa_modules", "#modules:%u  #robots:%u", modules.size(), robots.size());
 
+	env->add_robot(robot);
+	robot->set_ready();
 
+	env->get_env_ptr()->GetModules(modules);
+	env->get_env_ptr()->GetRobots(robots);
+	cl->log_debug("qa_modules", "Robot initialized");
+	cl->log_debug("qa_modules", "#modules:%u  #robots:%u", modules.size(), robots.size());
 
+	robot = NULL;
 
-  try {
-    robot->load(robotFile, env);
-  } catch (Exception &e) {
-    cl->log_error("qa_modules", "error:%s", e.what());
-    return 0;
-  }
+	env->get_env_ptr()->GetModules(modules);
+	env->get_env_ptr()->GetRobots(robots);
+	cl->log_debug("qa_modules", "Robot Destroyed");
+	cl->log_debug("qa_modules", "#modules:%u  #robots:%u", modules.size(), robots.size());
 
-  env->get_env_ptr()->GetModules(modules);
-  env->get_env_ptr()->GetRobots(robots);
-  cl->log_debug("qa_modules", "Robot loaded");
-  cl->log_debug("qa_modules", "#modules:%u  #robots:%u", modules.size(), robots.size());
+	env->destroy();
 
-
-
-  env->add_robot(robot);
-  robot->set_ready();
-
-  env->get_env_ptr()->GetModules(modules);
-  env->get_env_ptr()->GetRobots(robots);
-  cl->log_debug("qa_modules", "Robot initialized");
-  cl->log_debug("qa_modules", "#modules:%u  #robots:%u", modules.size(), robots.size());
-
-
-
-  robot = NULL;
-
-  env->get_env_ptr()->GetModules(modules);
-  env->get_env_ptr()->GetRobots(robots);
-  cl->log_debug("qa_modules", "Robot Destroyed");
-  cl->log_debug("qa_modules", "#modules:%u  #robots:%u", modules.size(), robots.size());
-
-
-
-
-  env->destroy();
-
-  return 0;
+	return 0;
 }
-
 
 /// @endcond

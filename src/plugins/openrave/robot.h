@@ -26,6 +26,7 @@
 #include "types.h"
 
 #include <openrave/openrave.h>
+
 #include <vector>
 
 namespace fawkes {
@@ -35,91 +36,128 @@ class Logger;
 /** OpenRAVE Robot class */
 class OpenRaveRobot
 {
- public:
-  OpenRaveRobot(fawkes::Logger* logger = 0);
-  OpenRaveRobot(const std::string& filename, fawkes::OpenRaveEnvironmentPtr& env, fawkes::Logger* logger = 0);
-  OpenRaveRobot(const fawkes::OpenRaveRobot& src, const fawkes::OpenRaveEnvironmentPtr& new_env);
-  virtual ~OpenRaveRobot();
+public:
+	OpenRaveRobot(fawkes::Logger *logger = 0);
+	OpenRaveRobot(const std::string &             filename,
+	              fawkes::OpenRaveEnvironmentPtr &env,
+	              fawkes::Logger *                logger = 0);
+	OpenRaveRobot(const fawkes::OpenRaveRobot &src, const fawkes::OpenRaveEnvironmentPtr &new_env);
+	virtual ~OpenRaveRobot();
 
-  // build/load robot parts
-  virtual void load(const std::string& filename, fawkes::OpenRaveEnvironmentPtr& env);
-  virtual void set_ready();
-  virtual void set_offset(float trans_x, float trans_y, float trans_z);
-  virtual void calibrate(float device_trans_x, float device_trans_y, float device_trans_z);
-  virtual void set_manipulator(fawkes::OpenRaveManipulatorPtr& manip, bool display_movements = false);
-  virtual void update_manipulator();
-  virtual void update_model();
+	// build/load robot parts
+	virtual void load(const std::string &filename, fawkes::OpenRaveEnvironmentPtr &env);
+	virtual void set_ready();
+	virtual void set_offset(float trans_x, float trans_y, float trans_z);
+	virtual void calibrate(float device_trans_x, float device_trans_y, float device_trans_z);
+	virtual void set_manipulator(fawkes::OpenRaveManipulatorPtr &manip,
+	                             bool                            display_movements = false);
+	virtual void update_manipulator();
+	virtual void update_model();
 
-  virtual bool attach_object(OpenRAVE::KinBodyPtr object, const char* manip_name = NULL);
-  virtual bool attach_object(const char* name, fawkes::OpenRaveEnvironmentPtr& env, const char* manip_name = NULL);
-  virtual bool release_object(OpenRAVE::KinBodyPtr object);
-  virtual bool release_object(const std::string& name, fawkes::OpenRaveEnvironmentPtr& env);
-  virtual bool release_all_objects();
+	virtual bool attach_object(OpenRAVE::KinBodyPtr object, const char *manip_name = NULL);
+	virtual bool attach_object(const char *                    name,
+	                           fawkes::OpenRaveEnvironmentPtr &env,
+	                           const char *                    manip_name = NULL);
+	virtual bool release_object(OpenRAVE::KinBodyPtr object);
+	virtual bool release_object(const std::string &name, fawkes::OpenRaveEnvironmentPtr &env);
+	virtual bool release_all_objects();
 
-  virtual bool set_target_rel(float trans_x, float trans_y, float trans_z, bool is_extension=false);
-  virtual bool set_target_straight(float trans_x, float trans_y, float trans_z);
-  virtual bool set_target_quat(float trans_x, float trans_y, float trans_z,
-                               float quat_w, float quat_x, float quat_y, float quat_z,
-                               OpenRAVE::IkFilterOptions filter = OpenRAVE::IKFO_CheckEnvCollisions, bool no_offset = false);
-  virtual bool set_target_axis_angle(float trans_x, float trans_y, float trans_z,
-                                     float angle, float axisX, float axisY, float axisZ,
-                                     OpenRAVE::IkFilterOptions filter = OpenRAVE::IKFO_CheckEnvCollisions, bool no_offset = false);
-  virtual bool set_target_euler(euler_rotation_t type,
-                                float trans_x, float trans_y, float trans_z,
-                                float phi, float theta, float psi,
-                                OpenRAVE::IkFilterOptions filter = OpenRAVE::IKFO_CheckEnvCollisions, bool no_offset = false);
-  virtual bool set_target_object_position(float trans_x, float trans_y, float trans_z, float rot_x, OpenRAVE::IkFilterOptions filter = OpenRAVE::IKFO_CheckEnvCollisions);
-  virtual bool set_target_ikparam(OpenRAVE::IkParameterization ik_param, OpenRAVE::IkFilterOptions filter = OpenRAVE::IKFO_CheckEnvCollisions);
-  virtual void set_target_plannerparams(std::string& params);
-  virtual void set_target_plannerparams(const char* params);
-  virtual void set_target_raw(std::string& cmd);
-  virtual void set_target_raw(const char* cmd);
-  virtual void set_target_angles( std::vector<float>& angles );
+	virtual bool
+	             set_target_rel(float trans_x, float trans_y, float trans_z, bool is_extension = false);
+	virtual bool set_target_straight(float trans_x, float trans_y, float trans_z);
+	virtual bool set_target_quat(float                     trans_x,
+	                             float                     trans_y,
+	                             float                     trans_z,
+	                             float                     quat_w,
+	                             float                     quat_x,
+	                             float                     quat_y,
+	                             float                     quat_z,
+	                             OpenRAVE::IkFilterOptions filter = OpenRAVE::IKFO_CheckEnvCollisions,
+	                             bool                      no_offset = false);
+	virtual bool
+	set_target_axis_angle(float                     trans_x,
+	                      float                     trans_y,
+	                      float                     trans_z,
+	                      float                     angle,
+	                      float                     axisX,
+	                      float                     axisY,
+	                      float                     axisZ,
+	                      OpenRAVE::IkFilterOptions filter    = OpenRAVE::IKFO_CheckEnvCollisions,
+	                      bool                      no_offset = false);
+	virtual bool
+	set_target_euler(euler_rotation_t          type,
+	                 float                     trans_x,
+	                 float                     trans_y,
+	                 float                     trans_z,
+	                 float                     phi,
+	                 float                     theta,
+	                 float                     psi,
+	                 OpenRAVE::IkFilterOptions filter    = OpenRAVE::IKFO_CheckEnvCollisions,
+	                 bool                      no_offset = false);
+	virtual bool
+	set_target_object_position(float                     trans_x,
+	                           float                     trans_y,
+	                           float                     trans_z,
+	                           float                     rot_x,
+	                           OpenRAVE::IkFilterOptions filter = OpenRAVE::IKFO_CheckEnvCollisions);
+	virtual bool
+	             set_target_ikparam(OpenRAVE::IkParameterization ik_param,
+	                                OpenRAVE::IkFilterOptions    filter = OpenRAVE::IKFO_CheckEnvCollisions);
+	virtual void set_target_plannerparams(std::string &params);
+	virtual void set_target_plannerparams(const char *params);
+	virtual void set_target_raw(std::string &cmd);
+	virtual void set_target_raw(const char *cmd);
+	virtual void set_target_angles(std::vector<float> &angles);
 
-  virtual void enable_ik_comparison(bool enable);
+	virtual void enable_ik_comparison(bool enable);
 
-  virtual OpenRAVE::RobotBasePtr get_robot_ptr() const;
-  virtual target_t get_target() const;
-  virtual OpenRaveManipulatorPtr get_manipulator() const;
-  virtual OpenRAVE::PlannerBase::PlannerParametersPtr get_planner_params() const;
-  virtual std::vector< std::vector<OpenRAVE::dReal> >* get_trajectory() const;
-  virtual std::vector< std::vector<float> >* get_trajectory_device() const;
+	virtual OpenRAVE::RobotBasePtr                      get_robot_ptr() const;
+	virtual target_t                                    get_target() const;
+	virtual OpenRaveManipulatorPtr                      get_manipulator() const;
+	virtual OpenRAVE::PlannerBase::PlannerParametersPtr get_planner_params() const;
+	virtual std::vector<std::vector<OpenRAVE::dReal>> * get_trajectory() const;
+	virtual std::vector<std::vector<float>> *           get_trajectory_device() const;
 
-  virtual bool display_planned_movements() const;
+	virtual bool display_planned_movements() const;
 
-  virtual OpenRAVE::ModuleBasePtr get_basemanip() const;
+	virtual OpenRAVE::ModuleBasePtr get_basemanip() const;
 
- private:
-  void init();
-  void build_name_str();
-  const char* name() const;
+private:
+	void        init();
+	void        build_name_str();
+	const char *name() const;
 
-  bool set_target_transform(OpenRAVE::Vector& trans, OpenRAVE::Vector& rotQuat, OpenRAVE::IkFilterOptions filter, bool no_offset = false);
-  bool set_target_euler(OpenRAVE::Vector& trans, std::vector<float>& rotations, OpenRAVE::IkFilterOptions filter, bool no_offset = false);
-  OpenRAVE::IkParameterization get_5dof_ikparam(OpenRAVE::Transform& trans);
-  bool solve_ik(OpenRAVE::IkFilterOptions filter);
+	bool                         set_target_transform(OpenRAVE::Vector &        trans,
+	                                                  OpenRAVE::Vector &        rotQuat,
+	                                                  OpenRAVE::IkFilterOptions filter,
+	                                                  bool                      no_offset = false);
+	bool                         set_target_euler(OpenRAVE::Vector &        trans,
+	                                              std::vector<float> &      rotations,
+	                                              OpenRAVE::IkFilterOptions filter,
+	                                              bool                      no_offset = false);
+	OpenRAVE::IkParameterization get_5dof_ikparam(OpenRAVE::Transform &trans);
+	bool                         solve_ik(OpenRAVE::IkFilterOptions filter);
 
-  fawkes::Logger*                 logger_;
+	fawkes::Logger *logger_;
 
-  std::string                           name_;
-  std::string                           name_str_;
-  OpenRAVE::RobotBasePtr                robot_;
-  OpenRAVE::RobotBase::ManipulatorPtr   arm_;
-  OpenRaveManipulatorPtr                manip_;
-  target_t                              target_;
+	std::string                         name_;
+	std::string                         name_str_;
+	OpenRAVE::RobotBasePtr              robot_;
+	OpenRAVE::RobotBase::ManipulatorPtr arm_;
+	OpenRaveManipulatorPtr              manip_;
+	target_t                            target_;
 
+	OpenRAVE::ModuleBasePtr mod_basemanip_;
 
-  OpenRAVE::ModuleBasePtr               mod_basemanip_;
+	OpenRAVE::PlannerBase::PlannerParametersPtr planner_params_;
+	std::vector<std::vector<OpenRAVE::dReal>> * traj_;
 
-  OpenRAVE::PlannerBase::PlannerParametersPtr   planner_params_;
-  std::vector< std::vector<OpenRAVE::dReal> >*  traj_;
+	float trans_offset_x_;
+	float trans_offset_y_;
+	float trans_offset_z_;
 
-  float         trans_offset_x_;
-  float         trans_offset_y_;
-  float         trans_offset_z_;
-
-  bool          display_planned_movements_;
-  bool          find_best_ik_;
+	bool display_planned_movements_;
+	bool find_best_ik_;
 };
 
 } // end of namespace fawkes

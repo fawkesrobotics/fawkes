@@ -35,9 +35,8 @@ namespace fawkes {
  * @param count number of motors of OpenRAVE model
  * @param count_device number of motors of real device
  */
-OpenRaveManipulator::OpenRaveManipulator(unsigned int count, unsigned int count_device) :
-  cnt_( count ),
-  cnt_device_( count_device )
+OpenRaveManipulator::OpenRaveManipulator(unsigned int count, unsigned int count_device)
+: cnt_(count), cnt_device_(count_device)
 {
 }
 
@@ -46,7 +45,6 @@ OpenRaveManipulator::~OpenRaveManipulator()
 {
 }
 
-
 /** Adds a motor to the list(vector) of motors
  * @param number motor number in OpenRAVE
  * @param number_device motor number of real device
@@ -54,12 +52,12 @@ OpenRaveManipulator::~OpenRaveManipulator()
 void
 OpenRaveManipulator::add_motor(unsigned int number, unsigned int number_device)
 {
-  motor_t motor;
-  motor.no = number;
-  motor.no_device = number_device;
-  motor.angle = 0.f;
+	motor_t motor;
+	motor.no        = number;
+	motor.no_device = number_device;
+	motor.angle     = 0.f;
 
-  motors_.push_back(motor);
+	motors_.push_back(motor);
 }
 
 } // end of namespace fawkes
