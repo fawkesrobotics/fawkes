@@ -29,24 +29,25 @@ namespace fawkes {
 class Clock;
 class Time;
 
-class TimeWait {
- public:
-  TimeWait(Clock *clock, long int desired_loop_time_usec);
-  ~TimeWait();
+class TimeWait
+{
+public:
+	TimeWait(Clock *clock, long int desired_loop_time_usec);
+	~TimeWait();
 
-  void mark_start();
-  void wait();
-  void wait_systime();
+	void mark_start();
+	void wait();
+	void wait_systime();
 
-  static void wait(long int usec);
-  static void wait_systime(long int usec);
+	static void wait(long int usec);
+	static void wait_systime(long int usec);
 
- private:
-  Clock *clock_;
-  Time  *until_;
-  Time  *until_systime_;
-  Time  *now_;
-  long int desired_loop_time_;
+private:
+	Clock *  clock_;
+	Time *   until_;
+	Time *   until_systime_;
+	Time *   now_;
+	long int desired_loop_time_;
 };
 
 } // end namespace fawkes

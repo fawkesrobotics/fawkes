@@ -25,178 +25,203 @@
 #define _UTILS_MATH_TYPES_H_
 
 #ifndef M_TWO_PI
-#define M_TWO_PI 6.28318530717959
+#	define M_TWO_PI 6.28318530717959
 #endif
 
 namespace fawkes {
 
 /** Point with cartesian coordinates as unsigned integers. */
-typedef struct {
-  unsigned int x;       /**< x coordinate */
-  unsigned int y;       /**< y coordinate */
+typedef struct
+{
+	unsigned int x; /**< x coordinate */
+	unsigned int y; /**< y coordinate */
 } upoint_t;
 
 /** Point with cartesian coordinates as signed integers. */
-typedef struct point_struct {
-  int x;       /**< x coordinate */
-  int y;       /**< y coordinate */
+typedef struct point_struct
+{
+	int x; /**< x coordinate */
+	int y; /**< y coordinate */
 
-  /** Default constructor */
-  point_struct() {}
+	/** Default constructor */
+	point_struct()
+	{
+	}
 
-  /** Constructor.
+	/** Constructor.
    * @param x The x coordinate
    * @param y The y coordinate
    */
-  point_struct(int x, int y) {
-    this->x = x;
-    this->y = y;
-  }
+	point_struct(int x, int y)
+	{
+		this->x = x;
+		this->y = y;
+	}
 
 } point_t;
 
 /** Cartesian coordinates (2D). */
-typedef struct cart_coord_2d_struct {
-  float x;      /**< x coordinate */
-  float y;      /**< y coordinate */
+typedef struct cart_coord_2d_struct
+{
+	float x; /**< x coordinate */
+	float y; /**< y coordinate */
 
-  /** Default constructor */
-  cart_coord_2d_struct() {}
+	/** Default constructor */
+	cart_coord_2d_struct()
+	{
+	}
 
-  /** Constructor.
+	/** Constructor.
    * @param x The x coordinate.
    * @param y The y coordinate.
    */
-  cart_coord_2d_struct(float x, float y) {
-    this->x = x;
-    this->y = y;
-  }
+	cart_coord_2d_struct(float x, float y)
+	{
+		this->x = x;
+		this->y = y;
+	}
 
 } cart_coord_2d_t;
 
 /** Cartesian coordinates (3D). */
-typedef struct {
-  float x;      /**< x coordinate */
-  float y;      /**< y coordinate */
-  float z;      /**< z coordinate */
+typedef struct
+{
+	float x; /**< x coordinate */
+	float y; /**< y coordinate */
+	float z; /**< z coordinate */
 } cart_coord_3d_t;
 
 /** Polar coordinates. */
-typedef struct {
-  float r;      /**< distance */
-  float phi;    /**< angle */
+typedef struct
+{
+	float r;   /**< distance */
+	float phi; /**< angle */
 } polar_coord_2d_t;
 
 /** Polar coordinates. */
-typedef struct {
-  float r;      /**< distance */
-  float phi;    /**< x-y : plane */
-  float theta;  /**< plane-z : space */
+typedef struct
+{
+	float r;     /**< distance */
+	float phi;   /**< x-y : plane */
+	float theta; /**< plane-z : space */
 } polar_coord_3d_t;
 
 /** Rectangular extent with unsigne integers. */
-typedef struct {
-  unsigned int w;       /**< width */
-  unsigned int h;       /**< height */
+typedef struct
+{
+	unsigned int w; /**< width */
+	unsigned int h; /**< height */
 } extent_2d_t;
 
 /** Rectangle (unsigned integers) */
-typedef struct {
-  upoint_t      start;      /**< start point */
-  extent_2d_t  extent;     /**< extent */
+typedef struct
+{
+	upoint_t    start;  /**< start point */
+	extent_2d_t extent; /**< extent */
 } rectangle_t;
 
 /** Position on the field. */
-typedef struct {
-  float x;      /**< x coordinate in meters */
-  float y;      /**< y coordinate in meters */
-  float ori;    /**< orientation */
+typedef struct
+{
+	float x;   /**< x coordinate in meters */
+	float y;   /**< y coordinate in meters */
+	float ori; /**< orientation */
 } field_pos_t;
 
 /** Describes a field line */
-typedef struct field_line_struct{
-  cart_coord_2d_t start;   /**< start of the line [m] */
-  cart_coord_2d_t end;     /**< end of the line [m] */
+typedef struct field_line_struct
+{
+	cart_coord_2d_t start; /**< start of the line [m] */
+	cart_coord_2d_t end;   /**< end of the line [m] */
 
-  /**
+	/**
    * Constructor
    * @param start of the line
    * @param end of the line
    */
-  field_line_struct(fawkes::cart_coord_2d_t start, fawkes::cart_coord_2d_t end)
-  {
-    this->start = start;
-    this->end   = end;
-  }
+	field_line_struct(fawkes::cart_coord_2d_t start, fawkes::cart_coord_2d_t end)
+	{
+		this->start = start;
+		this->end   = end;
+	}
 
-  /**
+	/**
    * Constructor
    * @param start_x of the line
    * @param start_y of the line
    * @param end_x of the line
    * @param end_y of the line
    */
-  field_line_struct(float start_x, float start_y, float end_x, float end_y)
-  {
-    this->start.x = start_x;
-    this->start.y = start_y;
-    this->end.x   = end_x;
-    this->end.y   = end_y;
-  }
+	field_line_struct(float start_x, float start_y, float end_x, float end_y)
+	{
+		this->start.x = start_x;
+		this->start.y = start_y;
+		this->end.x   = end_x;
+		this->end.y   = end_y;
+	}
 } field_line_t;
 
 /** Defines an arc (or circle) */
-typedef struct arc_struct {
-  /** Constructor.
+typedef struct arc_struct
+{
+	/** Constructor.
    * @param radius The radius of the arc or circle
    * @param center_x The x-coordinate of the center of the arc or circle
    * @param center_y The y-coordinate of the center of the arc or circle
    * @param start_phi The start angle of the arc
    * @param end_phi The end angle of the arc
    */
-  arc_struct(float radius, float center_x, float center_y, float start_phi = 0, float end_phi = M_TWO_PI) {
-    this->radius    = radius;
-    this->center.x  = center_x;
-    this->center.y  = center_y;
-    this->start_phi = start_phi;
-    this->end_phi   = end_phi;
-  }
+	arc_struct(float radius,
+	           float center_x,
+	           float center_y,
+	           float start_phi = 0,
+	           float end_phi   = M_TWO_PI)
+	{
+		this->radius    = radius;
+		this->center.x  = center_x;
+		this->center.y  = center_y;
+		this->start_phi = start_phi;
+		this->end_phi   = end_phi;
+	}
 
-  float radius;           /**< The radius of the arc or circle */
-  cart_coord_2d_t center; /**< The center of the arc or circle */
-  float start_phi;        /**< The start angle of the arc */
-  float end_phi;          /**< The end angle of the arc */
+	float           radius;    /**< The radius of the arc or circle */
+	cart_coord_2d_t center;    /**< The center of the arc or circle */
+	float           start_phi; /**< The start angle of the arc */
+	float           end_phi;   /**< The end angle of the arc */
 } arc_t;
 
 /** Defines an ellipse */
-typedef struct ellipse_struct {
-  cart_coord_2d_t center; /**< The center point of the ellipse */
-  float width;            /**< The total width of the ellipse */
-  float height;           /**< The total height of the ellipse */
+typedef struct ellipse_struct
+{
+	cart_coord_2d_t center; /**< The center point of the ellipse */
+	float           width;  /**< The total width of the ellipse */
+	float           height; /**< The total height of the ellipse */
 
-  /** Constructur.
+	/** Constructur.
    * @param x The x-coordinate of the center of the ellipse
    * @param y The y-coordinate of the center of the ellipse
    * @param w The total width of the ellipse
    * @param h The total height of the ellipse
    */
-  ellipse_struct(float x, float y, float w, float h) {
-    this->center.x = x;
-    this->center.y = y;
-    this->width = w;
-    this->height = h;
-  }
+	ellipse_struct(float x, float y, float w, float h)
+	{
+		this->center.x = x;
+		this->center.y = y;
+		this->width    = w;
+		this->height   = h;
+	}
 
 } ellipse_t;
 
 /** Defines a point with 6-degrees of freedom */
-typedef struct point_6D_struct {
-  float x;      /**< The x-coordinate of the point */
-  float y;      /**< The y-coordinate of the point */
-  float z;      /**< The z-coordinate of the point */
-  float roll;   /**< The angle around the x-axis */
-  float pitch;  /**< The angle around the y-axis */
-  float yaw;    /**< The angle around the z-axis */
+typedef struct point_6D_struct
+{
+	float x;     /**< The x-coordinate of the point */
+	float y;     /**< The y-coordinate of the point */
+	float z;     /**< The z-coordinate of the point */
+	float roll;  /**< The angle around the x-axis */
+	float pitch; /**< The angle around the y-axis */
+	float yaw;   /**< The angle around the z-axis */
 } point_6D_t;
 
 } // end namespace fawkes

@@ -23,30 +23,33 @@
 #ifndef _UTILS_SYSTEM_FAM_THREAD_H_
 #define _UTILS_SYSTEM_FAM_THREAD_H_
 
+#include <core/threading/thread.h>
 #include <core/utils/refptr.h>
 #include <utils/system/fam.h>
-#include <core/threading/thread.h>
 
 namespace fawkes {
 
 class FamThread : public Thread
 {
- public:
-  FamThread(RefPtr<FileAlterationMonitor> fam = RefPtr<FileAlterationMonitor>());
+public:
+	FamThread(RefPtr<FileAlterationMonitor> fam = RefPtr<FileAlterationMonitor>());
 
-  RefPtr<FileAlterationMonitor> get_fam();
+	RefPtr<FileAlterationMonitor> get_fam();
 
-  virtual void loop();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  RefPtr<FileAlterationMonitor> fam_;
+private:
+	RefPtr<FileAlterationMonitor> fam_;
 };
 
-
 } // end of namespace fawkes
-
 
 #endif

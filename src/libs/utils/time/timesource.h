@@ -35,22 +35,24 @@ namespace fawkes {
  */
 class TimeSource
 {
- public:
-  /** Destructor. */
-  virtual ~TimeSource() {}
+public:
+	/** Destructor. */
+	virtual ~TimeSource()
+	{
+	}
 
-  /** Get the current time.
+	/** Get the current time.
    * @param tv the current time is written to this timeval
    */
-  virtual void get_time(timeval* tv) const = 0;
+	virtual void get_time(timeval *tv) const = 0;
 
-  /** Convert a time given w.r.t. this time sources into system time.
+	/** Convert a time given w.r.t. this time sources into system time.
    * @param tv the time to convert
    * @return the converted time
    */
-  virtual timeval conv_to_realtime(const timeval* tv) const = 0;
+	virtual timeval conv_to_realtime(const timeval *tv) const = 0;
 
-  /** Convert a native time to the external time.
+	/** Convert a native time to the external time.
    * When communicating with another instance which provides times in
    * some timeformat native to the underlying time source (e.g. received
    * from a simulation) it must be converted to a Fawkes time.
@@ -58,7 +60,7 @@ class TimeSource
    * @return time in Fawkes comparable to other times generated using
    * the external timesource.
    */
-  virtual timeval conv_native_to_exttime(const timeval* tv) const = 0;
+	virtual timeval conv_native_to_exttime(const timeval *tv) const = 0;
 };
 
 } // end namespace fawkes

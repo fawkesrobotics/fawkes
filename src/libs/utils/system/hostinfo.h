@@ -30,26 +30,26 @@ namespace fawkes {
 
 class HostInfo
 {
- public:
-  HostInfo();
-  ~HostInfo();
+public:
+	HostInfo();
+	~HostInfo();
 
-  const char *  name();
-  const char *  short_name();
-  const char *  domain();
+	const char *name();
+	const char *short_name();
+	const char *domain();
 
-  const char *  arch();
+	const char *arch();
 
-  const char *  sys_name();
-  const char *  sys_release();
-  const char *  sys_version();
+	const char *sys_name();
+	const char *sys_release();
+	const char *sys_version();
 
-  void update();
+	void update();
 
- private:
-  struct ::utsname *utsname;
-  char *shortname_;
-  char *domain_name;
+private:
+	struct ::utsname *utsname;
+	char *            shortname_;
+	char *            domain_name;
 };
 
 } // end namespace fawkes

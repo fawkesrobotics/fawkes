@@ -26,47 +26,41 @@
 
 namespace fawkes {
 
-
 class SemaphoreSetData;
 
-class SemaphoreSet {
- public:
+class SemaphoreSet
+{
+public:
+	SemaphoreSet(const char *path,
+	             char        id,
+	             int         num_sems,
+	             bool        create            = false,
+	             bool        destroy_on_delete = false);
 
-  SemaphoreSet(const char *path, char id,
-	       int num_sems,
-	       bool create = false,
-	       bool destroy_on_delete = false);
+	SemaphoreSet(int key, int num_sems, bool create = false, bool destroy_on_delete = false);
 
-  SemaphoreSet(int key,
-	       int num_sems,
-	       bool create = false,
-	       bool destroy_on_delete = false);
+	SemaphoreSet(int num_sems, bool destroy_on_delete = false);
 
-  SemaphoreSet( int num_sems,
-	        bool destroy_on_delete = false);
+	~SemaphoreSet();
 
-  ~SemaphoreSet();
+	bool valid();
+	void lock(unsigned short sem_num = 0, short num = 1);
+	bool try_lock(unsigned short sem_num = 0, short num = 1);
+	void unlock(unsigned short sem_num = 0, short num = -1);
+	void set_value(int sem_num, int val);
+	int  get_value(int sem_num);
+	int  key();
+	void set_destroy_on_delete(bool destroy);
 
-  bool valid();
-  void lock(unsigned short sem_num = 0, short num = 1);
-  bool try_lock(unsigned short sem_num = 0, short num = 1);
-  void unlock(unsigned short sem_num = 0, short num = -1);
-  void set_value(int sem_num, int val);
-  int  get_value(int sem_num);
-  int  key();
-  void set_destroy_on_delete(bool destroy);
+	static int  free_key();
+	static void destroy(int key);
 
-  static int  free_key();
-  static void destroy(int key);
+protected:
+	bool destroy_on_delete;
 
- protected:
-  bool destroy_on_delete;
-
- private:
-  SemaphoreSetData *data;
-
+private:
+	SemaphoreSetData *data;
 };
-
 
 } // end namespace fawkes
 

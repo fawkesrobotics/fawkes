@@ -27,7 +27,6 @@
 
 namespace fawkes {
 
-
 /** Calculate Yaw angle from quaternion.
  * The Yaw angle is the rotation around the Z axis of a given reference
  * frame.
@@ -39,11 +38,11 @@ template <typename Scalar>
 Scalar
 quat_yaw(const Eigen::Quaternion<Scalar> &q)
 {
-  Scalar qx=q.x(), qy=q.y(), qz=q.z(), qw=q.w();
-  Scalar qx2=qx*qx, qy2=qy*qy, qz2=qz*qz, qw2=qw*qw;
-  // for abs(pitch) = PI/2 this will lead to atan2(0,0)
-  // i.e. for noisy values, result will be arbitrary
-  return atan2(2*(qw*qz + qx*qy), qw2 + qx2 - qy2 - qz2);
+	Scalar qx = q.x(), qy = q.y(), qz = q.z(), qw = q.w();
+	Scalar qx2 = qx * qx, qy2 = qy * qy, qz2 = qz * qz, qw2 = qw * qw;
+	// for abs(pitch) = PI/2 this will lead to atan2(0,0)
+	// i.e. for noisy values, result will be arbitrary
+	return atan2(2 * (qw * qz + qx * qy), qw2 + qx2 - qy2 - qz2);
 }
 
 /** Get euler angles for quaternion.
@@ -58,27 +57,26 @@ template <typename Scalar>
 void
 quat_to_euler(const Eigen::Quaternion<Scalar> &q, float &roll, float &pitch, float &yaw)
 {
-  using std::cos;
-  using std::sin;
-  using std::atan2;
-	
-  // Get yaw angle:
-  Scalar qx=q.x(), qy=q.y(), qz=q.z(), qw=q.w();
-  Scalar qx2=qx*qx, qy2=qy*qy, qz2=qz*qz, qw2=qw*qw;
-  // for abs(pitch) = PI/2 this will lead to atan2(0,0)
-  // i.e. for noisy values, result will be arbitrary
-  yaw = atan2(2*(qw*qz + qx*qy), qw2 + qx2 - qy2 - qz2);
-	
-  // Now rotate the original Quaternion backwards by yaw:
-  Scalar c = cos(yaw/2), s=sin(yaw/2);
-  Scalar px=c*qx+s*qy, py=c*qy-s*qx, pz=c*qz-s*qw, pw=c*qw+s*qz;
-  Scalar px2=px*px, py2=py*py, pz2=pz*pz, pw2=pw*pw;
-	
-  // Now calculating pitch and roll does not have singularities anymore:
-  pitch = atan2(2*(py*pw - px*pz), px2 + pw2 - py2 - pz2);
-  roll  = atan2(2*(px*pw - py*pz), py2 + pw2 - px2 - pz2);
-}
+	using std::atan2;
+	using std::cos;
+	using std::sin;
 
+	// Get yaw angle:
+	Scalar qx = q.x(), qy = q.y(), qz = q.z(), qw = q.w();
+	Scalar qx2 = qx * qx, qy2 = qy * qy, qz2 = qz * qz, qw2 = qw * qw;
+	// for abs(pitch) = PI/2 this will lead to atan2(0,0)
+	// i.e. for noisy values, result will be arbitrary
+	yaw = atan2(2 * (qw * qz + qx * qy), qw2 + qx2 - qy2 - qz2);
+
+	// Now rotate the original Quaternion backwards by yaw:
+	Scalar c = cos(yaw / 2), s = sin(yaw / 2);
+	Scalar px = c * qx + s * qy, py = c * qy - s * qx, pz = c * qz - s * qw, pw = c * qw + s * qz;
+	Scalar px2 = px * px, py2 = py * py, pz2 = pz * pz, pw2 = pw * pw;
+
+	// Now calculating pitch and roll does not have singularities anymore:
+	pitch = atan2(2 * (py * pw - px * pz), px2 + pw2 - py2 - pz2);
+	roll  = atan2(2 * (px * pw - py * pz), py2 + pw2 - px2 - pz2);
+}
 
 } // end namespace fawkes
 

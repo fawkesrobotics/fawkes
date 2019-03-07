@@ -21,6 +21,7 @@
  */
 
 #include <utils/kalman/kalman_1d.h>
+
 #include <math.h>
 
 namespace fawkes {
@@ -38,10 +39,10 @@ namespace fawkes {
  */
 KalmanFilter1D::KalmanFilter1D(float noise_x, float noise_z, float mu, float sig)
 {
-  noise_x_ = noise_x;
-  noise_z_ = noise_z;
-  mu_      = mu;
-  sig_     = sig;
+	noise_x_ = noise_x;
+	noise_z_ = noise_z;
+	mu_      = mu;
+	sig_     = sig;
 }
 
 /** Destructor. */
@@ -55,11 +56,10 @@ KalmanFilter1D::~KalmanFilter1D()
 void
 KalmanFilter1D::filter(float observe)
 {
-  float help = sig_*sig_ + noise_x_*noise_x_ + noise_z_*noise_z_;
-  mu_  = ((sig_*sig_ + noise_x_*noise_x_) * observe + noise_z_*noise_z_*mu_) / help;
-  sig_ = sqrt( (sig_*sig_ + noise_x_*noise_x_)*noise_z_*noise_z_ / help );
+	float help = sig_ * sig_ + noise_x_ * noise_x_ + noise_z_ * noise_z_;
+	mu_        = ((sig_ * sig_ + noise_x_ * noise_x_) * observe + noise_z_ * noise_z_ * mu_) / help;
+	sig_       = sqrt((sig_ * sig_ + noise_x_ * noise_x_) * noise_z_ * noise_z_ / help);
 }
-
 
 /** Filters an observation. The resulting mu and sig are not only stored
  * internally, but also in the given parameters mean and deviation.
@@ -68,10 +68,10 @@ KalmanFilter1D::filter(float observe)
  * @param sig The deviation (out parameter)
  */
 void
-KalmanFilter1D::filter(float observe, float& mu, float& sig)
+KalmanFilter1D::filter(float observe, float &mu, float &sig)
 {
-  mu  = mu_;
-  sig = sig_;
+	mu  = mu_;
+	sig = sig_;
 }
 
 /** Predicts the next position based on the past observations. Equivalent
@@ -81,9 +81,8 @@ KalmanFilter1D::filter(float observe, float& mu, float& sig)
 float
 KalmanFilter1D::predict() const
 {
-  return predict(0.0);
+	return predict(0.0);
 }
-
 
 /** Predicts the next position based on the past observations. Equivalent
  * to predict(vel, 1, 0.0). 
@@ -93,9 +92,8 @@ KalmanFilter1D::predict() const
 float
 KalmanFilter1D::predict(float vel) const
 {
-  return predict(vel, 1, 0.0);
+	return predict(vel, 1, 0.0);
 }
-
 
 /** Predicts the next position based on the past observations.
  * @param vel The velocity of the object.
@@ -106,7 +104,7 @@ KalmanFilter1D::predict(float vel) const
 float
 KalmanFilter1D::predict(float vel, int steps, float noise_z) const
 {
-  return predict(mu_, vel, steps, noise_z);
+	return predict(mu_, vel, steps, noise_z);
 }
 
 /** Predicts the next position based on the past observations.
@@ -119,8 +117,7 @@ KalmanFilter1D::predict(float vel, int steps, float noise_z) const
 float
 KalmanFilter1D::predict(float mu, float vel, int steps, float noise_z) const
 {
-  return mu + steps * (vel + noise_z);
+	return mu + steps * (vel + noise_z);
 }
 
-}
-
+} // namespace fawkes

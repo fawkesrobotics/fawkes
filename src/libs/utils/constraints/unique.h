@@ -25,10 +25,10 @@
 #define _UTILS_CONSTRAINTS_UNIQUE_H_
 
 #include <core/exception.h>
+
 #include <cstddef>
 
 namespace fawkes {
-
 
 /** @class UniquenessViolationException <utils/constraints/unique.h>
  * Uniqueness violation exception.
@@ -41,13 +41,14 @@ namespace fawkes {
 
 class UniquenessViolationException : public Exception
 {
- public:
-  /** Contructor.
+public:
+	/** Contructor.
    * @param msg message
    */
-  UniquenessViolationException(const char *msg) : Exception(msg) {}
+	UniquenessViolationException(const char *msg) : Exception(msg)
+	{
+	}
 };
-
 
 /** @class UniquenessConstraint <utils/constraints/unique.h>
  * Uniqueness constraint.
@@ -60,28 +61,26 @@ class UniquenessViolationException : public Exception
  */
 
 template <class ResourceType>
-  class UniquenessConstraint
+class UniquenessConstraint
 {
- public:
-  UniquenessConstraint();
+public:
+	UniquenessConstraint();
 
-  void add(ResourceType *r);
-  void remove(ResourceType *p);
+	void add(ResourceType *r);
+	void remove(ResourceType *p);
 
-  ResourceType *             resource();
+	ResourceType *resource();
 
- private:
-  ResourceType *_resource;
+private:
+	ResourceType *_resource;
 };
-
 
 /** Constructor. */
 template <class ResourceType>
-  UniquenessConstraint<ResourceType>::UniquenessConstraint()
+UniquenessConstraint<ResourceType>::UniquenessConstraint()
 {
-  _resource = NULL;
+	_resource = NULL;
 }
-
 
 /** Add resource.
  * This will add the resources or throw an exception if there is already a resource.
@@ -92,13 +91,12 @@ template <class ResourceType>
 void
 UniquenessConstraint<ResourceType>::add(ResourceType *r)
 {
-  if ( (_resource != NULL) && (r != _resource) ) {
-    throw UniquenessViolationException("Different resource has already been added.");
-  } else {
-    _resource = r;
-  }
+	if ((_resource != NULL) && (r != _resource)) {
+		throw UniquenessViolationException("Different resource has already been added.");
+	} else {
+		_resource = r;
+	}
 }
-
 
 /** Remove resource.
  * @param r resource object to remove
@@ -107,7 +105,8 @@ template <class ResourceType>
 void
 UniquenessConstraint<ResourceType>::remove(ResourceType *r)
 {
-  if ( r == _resource )  _resource = NULL;
+	if (r == _resource)
+		_resource = NULL;
 }
 
 /** Get resource.
@@ -117,9 +116,8 @@ template <class ResourceType>
 ResourceType *
 UniquenessConstraint<ResourceType>::resource()
 {
-  return _resource;
+	return _resource;
 }
-
 
 } // end namespace fawkes
 

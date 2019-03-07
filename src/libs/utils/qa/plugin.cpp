@@ -21,10 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/system/dynamic_module/module_dl.h>
-#include <utils/system/dynamic_module/module_manager_template.h>
 #include <core/plugin.h>
 #include <plugin/loader.h>
+#include <utils/system/dynamic_module/module_dl.h>
+#include <utils/system/dynamic_module/module_manager_template.h>
 
 #include <iostream>
 
@@ -37,10 +37,10 @@ using namespace fawkes;
  */
 bool
 test_plugin(Plugin *p)
-{	
-  cout << "Plugin name: " << p->name() << endl;
+{
+	cout << "Plugin name: " << p->name() << endl;
 
-  return true;
+	return true;
 }
 
 /** Test a module.
@@ -50,45 +50,43 @@ test_plugin(Plugin *p)
 bool
 test_module(Module *m)
 {
-  bool success = true;
-  try {
- 
-    if ( ! m->has_symbol("plugin_factory") ) { // "plugin_factory"
-      cout << "Doh, symbol not found" << endl;
-      success = false;
-    } else {
-      cout << "Yeah, we got the symbol" << endl;
+	bool success = true;
+	try {
+		if (!m->has_symbol("plugin_factory")) { // "plugin_factory"
+			cout << "Doh, symbol not found" << endl;
+			success = false;
+		} else {
+			cout << "Yeah, we got the symbol" << endl;
 
-      PluginFactoryFunc pff = (PluginFactoryFunc)m->get_symbol("plugin_factory");
-      PluginDestroyFunc pdf = (PluginDestroyFunc)m->get_symbol("plugin_destroy");
+			PluginFactoryFunc pff = (PluginFactoryFunc)m->get_symbol("plugin_factory");
+			PluginDestroyFunc pdf = (PluginDestroyFunc)m->get_symbol("plugin_destroy");
 
-      if ( (pff != NULL) && (pdf != NULL) ) {
-	Plugin *p = pff(NULL);
+			if ((pff != NULL) && (pdf != NULL)) {
+				Plugin *p = pff(NULL);
 
-	success = test_plugin(p);
+				success = test_plugin(p);
 
-	pdf(p);
-	p = NULL;
+				pdf(p);
+				p = NULL;
 
-      } else {
-	success = false;
-	if ( pff == NULL ) {
-	  cout << "pff == NULL" << endl;
+			} else {
+				success = false;
+				if (pff == NULL) {
+					cout << "pff == NULL" << endl;
+				}
+				if (pdf == NULL) {
+					cout << "pdf == NULL" << endl;
+				}
+			}
+		}
+	} catch (Exception &e) {
+		cout << "Could not open module" << endl;
+		e.print_trace();
+		success = false;
 	}
-	if ( pdf == NULL ) {
-	  cout << "pdf == NULL" << endl;
-	}
-      }
-    }
-  } catch (Exception &e) {
-    cout << "Could not open module" << endl;
-    e.print_trace();
-    success = false;
-  }
 
-  return success;
+	return success;
 }
-
 
 /** The main test program.
  * @param argc the number of arguments
@@ -98,92 +96,90 @@ test_module(Module *m)
 int
 main(int argc, char **argv)
 {
-  // Load just the test module
+	// Load just the test module
 
-  bool success = true;
+	bool success = true;
 
-  cout << "Running plain module tests" << endl;
-  ModuleDL *m = new ModuleDL(PLUGINDIR"/test_splugin.so");
-  try {
-    m->open();
-  } catch (Exception &e) {
-    e.print_trace();
-    throw;
-  }
-  success = test_module(m);
-  m->close();
-  delete m;
-  if ( success ) {
-    cout << "SUCCESSFULLY tested plain module" << endl;
-  } else {
-    cout << "FAILED plain module tests, aborting further tests" << endl;
-    return -1;
-  }
+	cout << "Running plain module tests" << endl;
+	ModuleDL *m = new ModuleDL(PLUGINDIR "/test_splugin.so");
+	try {
+		m->open();
+	} catch (Exception &e) {
+		e.print_trace();
+		throw;
+	}
+	success = test_module(m);
+	m->close();
+	delete m;
+	if (success) {
+		cout << "SUCCESSFULLY tested plain module" << endl;
+	} else {
+		cout << "FAILED plain module tests, aborting further tests" << endl;
+		return -1;
+	}
 
-  success = true;
-  cout << endl << endl << "Running ModuleManagerTemplate tests" << endl;
-  ModuleManagerTemplate<ModuleDL> mm(PLUGINDIR);
-  Module *mod = mm.open_module("test_plugin.so");
-  if ( mod == NULL ) {
-    cout << "Failed to retrieve module from manager" << endl;
-    success = false;
-  } else {
-    cout << "Retrieved module from module manager" << endl;
-  }
+	success = true;
+	cout << endl << endl << "Running ModuleManagerTemplate tests" << endl;
+	ModuleManagerTemplate<ModuleDL> mm(PLUGINDIR);
+	Module *                        mod = mm.open_module("test_plugin.so");
+	if (mod == NULL) {
+		cout << "Failed to retrieve module from manager" << endl;
+		success = false;
+	} else {
+		cout << "Retrieved module from module manager" << endl;
+	}
 
-  success = test_module(mod);
+	success = test_module(mod);
 
-  cout << "Testing ref count" << endl;
-  cout << "RefCount (should be 1): " << mod->get_ref_count() << endl;
-  cout << "Retrieving module twice, again" << endl;
-  mm.open_module("test_plugin.so");
-  mm.open_module("test_plugin.so");
-  cout << "RefCount (should be 3): " << mod->get_ref_count() << endl;
-  cout << "Closing module twice" << endl;
-  mm.close_module(mod);
-  mm.close_module(mod);
-  cout << "RefCount (should be 1): " << mod->get_ref_count() << endl;
-  cout << "Finally closing module" << endl;
-  mm.close_module(mod);
-  if ( mm.module_opened("test_plugin.so") ) {
-    cout << "Plugin still opened, bug!" << endl;
-    success = false;
-  } else {
-    cout << "Plugin has been unloaded from module manager" << endl;
-  }
+	cout << "Testing ref count" << endl;
+	cout << "RefCount (should be 1): " << mod->get_ref_count() << endl;
+	cout << "Retrieving module twice, again" << endl;
+	mm.open_module("test_plugin.so");
+	mm.open_module("test_plugin.so");
+	cout << "RefCount (should be 3): " << mod->get_ref_count() << endl;
+	cout << "Closing module twice" << endl;
+	mm.close_module(mod);
+	mm.close_module(mod);
+	cout << "RefCount (should be 1): " << mod->get_ref_count() << endl;
+	cout << "Finally closing module" << endl;
+	mm.close_module(mod);
+	if (mm.module_opened("test_plugin.so")) {
+		cout << "Plugin still opened, bug!" << endl;
+		success = false;
+	} else {
+		cout << "Plugin has been unloaded from module manager" << endl;
+	}
 
+	if (success) {
+		cout << "SUCCESSFULLY tested module manager" << endl;
+	} else {
+		cout << "FAILED module manager tests, aborting further tests" << endl;
+		return 2;
+	}
 
-  if ( success ) {
-    cout << "SUCCESSFULLY tested module manager" << endl;
-  } else {
-    cout << "FAILED module manager tests, aborting further tests" << endl;
-    return 2;
-  }
+	success = true;
+	cout << endl << endl << "Running PluginLoader tests" << endl;
+	PluginLoader *pl = new PluginLoader(PLUGINDIR, NULL);
 
+	Plugin *p;
+	try {
+		p       = pl->load("test_plugin");
+		success = test_plugin(p);
+		pl->unload(p);
+		success = true;
+	} catch (PluginLoadException &e) {
+		cout << "Could not load plugin" << endl;
+		e.print_trace();
+		success = false;
+	}
 
-  success = true;
-  cout << endl << endl << "Running PluginLoader tests" << endl;
-  PluginLoader *pl = new PluginLoader(PLUGINDIR, NULL);
+	delete pl;
+	if (success) {
+		cout << "SUCCESSFULLY tested PluginLoader" << endl;
+	} else {
+		cout << "FAILED module manager tests, aborting further tests" << endl;
+		return 3;
+	}
 
-  Plugin *p;
-  try {
-    p = pl->load("test_plugin");
-    success = test_plugin(p);
-    pl->unload(p);
-    success = true;
-  } catch (PluginLoadException &e) {
-    cout << "Could not load plugin" << endl;
-    e.print_trace();
-    success = false;
-  }
-
-  delete pl;
-  if ( success ) {
-    cout << "SUCCESSFULLY tested PluginLoader" << endl;
-  } else {
-    cout << "FAILED module manager tests, aborting further tests" << endl;
-    return 3;
-  }
-
-  return 0;
+	return 0;
 }

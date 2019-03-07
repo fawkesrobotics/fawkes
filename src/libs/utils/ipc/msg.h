@@ -26,57 +26,51 @@
 
 namespace fawkes {
 
-
 class IPCMessageQueueData;
 
-class IPCMessageQueue {
- public:
+class IPCMessageQueue
+{
+public:
+	static const int MaxMessageSize;
 
-  static const int MaxMessageSize;
-
-  /** This is the struct of the messages that has to be fed to send and
+	/** This is the struct of the messages that has to be fed to send and
    * receive methods.
    */
-  typedef struct {
-    long int mtype;      /**< type of the message */
-    char     mtext[1];   /**< content of the message, can be of arbitrary
+	typedef struct
+	{
+		long int mtype;    /**< type of the message */
+		char     mtext[1]; /**< content of the message, can be of arbitrary
 			  * size up to MaxMessageSize
 			  */
-  } MessageStruct;
+	} MessageStruct;
 
-  IPCMessageQueue(const char *path, char id,
-		  bool create = false,
-		  bool destroy_on_delete = false);
-  
-  IPCMessageQueue(int id,
-		  bool create = false,
-		  bool destroy_on_delete = false);
+	IPCMessageQueue(const char *path, char id, bool create = false, bool destroy_on_delete = false);
 
-  ~IPCMessageQueue();
+	IPCMessageQueue(int id, bool create = false, bool destroy_on_delete = false);
 
-  bool isValid();
-  bool recv(long mtype, MessageStruct *msg, unsigned int data_size);
-  bool recvNext(MessageStruct *msg, unsigned int max_data_size, int *data_size);
-  bool send(MessageStruct *msg, unsigned int data_size);
+	~IPCMessageQueue();
 
-  /** Get the message type
+	bool isValid();
+	bool recv(long mtype, MessageStruct *msg, unsigned int data_size);
+	bool recvNext(MessageStruct *msg, unsigned int max_data_size, int *data_size);
+	bool send(MessageStruct *msg, unsigned int data_size);
+
+	/** Get the message type
    * @param buffer the buffer of the message as returned by getMessage()
    * @return the message type
    */
-  static inline long
-  mtype(char *buffer)
-  {
-    return (((MessageStruct *)buffer)->mtype);
-  }
+	static inline long
+	mtype(char *buffer)
+	{
+		return (((MessageStruct *)buffer)->mtype);
+	}
 
- protected:
-  bool destroy_on_delete;
+protected:
+	bool destroy_on_delete;
 
- private:
-  IPCMessageQueueData *data;
-
+private:
+	IPCMessageQueueData *data;
 };
-
 
 } // end namespace fawkes
 

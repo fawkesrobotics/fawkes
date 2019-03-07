@@ -24,66 +24,70 @@
 #ifndef _UTILS_TIME_TRACKER_H_
 #define _UTILS_TIME_TRACKER_H_
 
+#include <sys/time.h>
+
 #include <cstdio>
-#include <vector>
 #include <map>
 #include <string>
-#include <sys/time.h>
+#include <vector>
 
 namespace fawkes {
 
-class TimeTracker {
- public:
-  static const unsigned int DEFAULT_CLASS;
-
-  TimeTracker(const char *filename, bool add_default_class = false);
-  TimeTracker(bool add_default_class = false);
-  ~TimeTracker();
-
-  unsigned int add_class(std::string name);
-  void         remove_class(unsigned int cls);
-
-  void ping(unsigned int cls);
-  void ping_start(unsigned int cls);
-  void ping_end(unsigned int cls);
-  void ping_abort(unsigned int cls);
-
-  void ping(std::string comment = "");
-  void reset(std::string comment = "");
-  void print_to_stdout();
-
-  void print_to_file();
-  
- private:
-  void average_and_deviation(std::vector<struct timeval *> &values,
-			     double &average_sec, double &average_ms,
-			     double &deviation_sec, double &deviation_ms);
-
- private:
-  timeval start_time;
-  timeval last_time;
-  std::vector<std::vector<struct timeval *> >    class_times_;
-  std::vector<std::string>                       class_names_;
-  std::vector<struct timeval *>                  times_;
-  std::map<unsigned int, std::string>            comments_;
-  std::vector<struct timeval *>::iterator        time_it_;
-  std::map<unsigned int, std::string>::iterator  comment_it_;
-  std::string                                    tracker_comment_;
-
-  unsigned int write_cycle_;
-  FILE *timelog_;
-};
-
-
-class ScopedClassItemTracker {
+class TimeTracker
+{
 public:
-  explicit ScopedClassItemTracker(TimeTracker &tt, unsigned int cls);
-  ~ScopedClassItemTracker();
+	static const unsigned int DEFAULT_CLASS;
+
+	TimeTracker(const char *filename, bool add_default_class = false);
+	TimeTracker(bool add_default_class = false);
+	~TimeTracker();
+
+	unsigned int add_class(std::string name);
+	void         remove_class(unsigned int cls);
+
+	void ping(unsigned int cls);
+	void ping_start(unsigned int cls);
+	void ping_end(unsigned int cls);
+	void ping_abort(unsigned int cls);
+
+	void ping(std::string comment = "");
+	void reset(std::string comment = "");
+	void print_to_stdout();
+
+	void print_to_file();
+
 private:
-  TimeTracker &tt_;
-  unsigned int cls_;
+	void average_and_deviation(std::vector<struct timeval *> &values,
+	                           double &                       average_sec,
+	                           double &                       average_ms,
+	                           double &                       deviation_sec,
+	                           double &                       deviation_ms);
+
+private:
+	timeval                                       start_time;
+	timeval                                       last_time;
+	std::vector<std::vector<struct timeval *>>    class_times_;
+	std::vector<std::string>                      class_names_;
+	std::vector<struct timeval *>                 times_;
+	std::map<unsigned int, std::string>           comments_;
+	std::vector<struct timeval *>::iterator       time_it_;
+	std::map<unsigned int, std::string>::iterator comment_it_;
+	std::string                                   tracker_comment_;
+
+	unsigned int write_cycle_;
+	FILE *       timelog_;
 };
 
+class ScopedClassItemTracker
+{
+public:
+	explicit ScopedClassItemTracker(TimeTracker &tt, unsigned int cls);
+	~ScopedClassItemTracker();
+
+private:
+	TimeTracker &tt_;
+	unsigned int cls_;
+};
 
 } // end namespace fawkes
 

@@ -24,103 +24,105 @@
 /// @cond QA
 
 #include <core/threading/thread.h>
+#include <utils/system/signal.h>
 #include <utils/time/clock.h>
 #include <utils/time/time.h>
 #include <utils/time/wait.h>
-#include <utils/system/signal.h>
-
-#include <unistd.h>
 
 #include <iostream>
+#include <unistd.h>
 
 using namespace std;
 using namespace fawkes;
 
-
 class QaTestWait
 {
 public:
-  QaTestWait()
-  {
-    clock_ = Clock::instance();
-    until_ = new Time();
-  }
+	QaTestWait()
+	{
+		clock_ = Clock::instance();
+		until_ = new Time();
+	}
 
+	void
+	mark_start()
+	{
+		clock_->get_time(until_);
+		*until_ += (long int)30000;
+	}
 
-  void mark_start()
-  {
-    clock_->get_time(until_);
-    *until_ += (long int)30000;
-  }
+	void
+	wait()
+	{
+		Time now;
+		printf("Now at %p\n", &now);
+		clock_->get_time(&now);
+		usleep(0);
+		long int remaining_usec = (*until_ - now).in_usec();
+		while (remaining_usec > 0) {
+			usleep(remaining_usec);
+			clock_->get_time(&now);
+			remaining_usec = (*until_ - now).in_usec();
+			//remaining_usec = 0;
+		}
+	}
 
-  void wait()
-  {
-    Time now;
-    printf("Now at %p\n", &now);
-    clock_->get_time(&now);
-    usleep(0);
-    long int remaining_usec = (*until_ - now).in_usec();
-    while ( remaining_usec > 0 ) {
-      usleep(remaining_usec);
-      clock_->get_time(&now);
-      remaining_usec = (*until_ - now).in_usec();
-      //remaining_usec = 0;
-    }
-  }
-
-  Clock *clock_;
-  Time  *until_;
+	Clock *clock_;
+	Time * until_;
 };
 
 class QaSignalHandler : public SignalHandler
 {
 public:
-  QaSignalHandler(Thread *thread)
-  {
-    this->thread = thread;
-  }
+	QaSignalHandler(Thread *thread)
+	{
+		this->thread = thread;
+	}
 
-  virtual void handle_signal(int signum)
-  {
-    thread->cancel();
-  }
+	virtual void
+	handle_signal(int signum)
+	{
+		thread->cancel();
+	}
 
-  Thread *thread;
+	Thread *thread;
 };
 
 class QaTestThread : public Thread
 {
 public:
-  QaTestThread() : Thread("QaTestThread")
-  {
-    timewait = new TimeWait(Clock::instance(), 30000);
-    testwait = new QaTestWait();
-  }
+	QaTestThread() : Thread("QaTestThread")
+	{
+		timewait = new TimeWait(Clock::instance(), 30000);
+		testwait = new QaTestWait();
+	}
 
-  virtual void loop()
-  {
-    printf("Loop running\n");
-    timewait->mark_start();
-    timewait->wait();
-    //testwait->mark_start();
-    //testwait->wait();
-  }
+	virtual void
+	loop()
+	{
+		printf("Loop running\n");
+		timewait->mark_start();
+		timewait->wait();
+		//testwait->mark_start();
+		//testwait->wait();
+	}
 
-  QaTestWait *testwait;
-  TimeWait *timewait;
+	QaTestWait *testwait;
+	TimeWait *  timewait;
 };
 
-int main(int argc, char** argv)
+int
+main(int argc, char **argv)
 {
-  QaTestThread t;
-  t.start();
+	QaTestThread t;
+	t.start();
 
-  QaSignalHandler h(&t);
-  SignalManager::register_handler(SIGINT, &h);
+	QaSignalHandler h(&t);
+	SignalManager::register_handler(SIGINT, &h);
 
-  t.join();
+	t.join();
 
-  return 0;
+	return 0;
 }
 
 /// @endcond

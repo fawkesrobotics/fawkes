@@ -27,35 +27,38 @@
 
 #include <utils/search/astar_state.h>
 
-#include <vector>
 #include <map>
 #include <queue>
+#include <vector>
 
 namespace fawkes {
 
 class AStar
 {
- public:
-  AStar ();
-  ~AStar();
+public:
+	AStar();
+	~AStar();
 
-  std::vector<AStarState *> solve( AStarState * initialState );
+	std::vector<AStarState *> solve(AStarState *initialState);
 
- private:
-  struct CmpSearchStateCost {
-    bool operator() ( AStarState * a1, AStarState * a2 ) const
-    { return (a1->total_estimated_cost >= a2->total_estimated_cost); }
-  };
-  
-  std::priority_queue<AStarState *, std::vector<AStarState *>, CmpSearchStateCost> open_list;
-  std::map<const size_t, AStarState*> closed_list;
+private:
+	struct CmpSearchStateCost
+	{
+		bool
+		operator()(AStarState *a1, AStarState *a2) const
+		{
+			return (a1->total_estimated_cost >= a2->total_estimated_cost);
+		}
+	};
 
-  AStarState * search();
-  
-  std::vector<AStarState *> solution_sequence(AStarState * node);
-  std::vector<AStarState *> solution;
+	std::priority_queue<AStarState *, std::vector<AStarState *>, CmpSearchStateCost> open_list;
+	std::map<const size_t, AStarState *>                                             closed_list;
+
+	AStarState *search();
+
+	std::vector<AStarState *> solution_sequence(AStarState *node);
+	std::vector<AStarState *> solution;
 };
-
 
 } // end namespace fawkes
 

@@ -28,13 +28,12 @@ namespace fawkes {
 
 class Interpolator
 {
- public:
-  virtual ~Interpolator();
+public:
+	virtual ~Interpolator();
 
-  virtual float interpolate(float t_current, float t_end, float t_step,
-			    float v_start, float v_end)                   = 0;
+	virtual float
+	interpolate(float t_current, float t_end, float t_step, float v_start, float v_end) = 0;
 };
-
 
 } // end namespace fawkes
 

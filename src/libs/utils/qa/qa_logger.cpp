@@ -25,10 +25,10 @@
 ///@cond QA
 
 #include <core/threading/thread.h>
-#include <utils/system/signal.h>
 #include <utils/logging/console.h>
-#include <utils/logging/multi.h>
 #include <utils/logging/logger.h>
+#include <utils/logging/multi.h>
+#include <utils/system/signal.h>
 
 #include <cstdio>
 
@@ -36,102 +36,102 @@ using namespace fawkes;
 
 class LoggerQAThread : public Thread
 {
- public:
-  LoggerQAThread(const char *name, Logger *logger)
-    : Thread(name)
-  {
-    this->logger = logger;
-    i = 0;
-  }
+public:
+	LoggerQAThread(const char *name, Logger *logger) : Thread(name)
+	{
+		this->logger = logger;
+		i            = 0;
+	}
 
-  virtual void loop()
-  {
-    ++i;
-    printf("%s: Testing: %i\n", name(), i);
-    logger->log_info(name(), "Testing: %i", i);
-  }
+	virtual void
+	loop()
+	{
+		++i;
+		printf("%s: Testing: %i\n", name(), i);
+		logger->log_info(name(), "Testing: %i", i);
+	}
 
- private:
-  unsigned int i;
-  Logger *logger;
+private:
+	unsigned int i;
+	Logger *     logger;
 };
-
 
 class LoggerQAMain : public SignalHandler
 {
- public:
-  LoggerQAMain()
-  {
-    cl = ml = NULL;
-    t1 = t2 = t3 = t4 = t5 = t6 = NULL;
-  }
+public:
+	LoggerQAMain()
+	{
+		cl = ml = NULL;
+		t1 = t2 = t3 = t4 = t5 = t6 = NULL;
+	}
 
-  ~LoggerQAMain()
-  {
-    delete t1;
-    delete t2;
-    delete t3;
-    delete t4;
-    delete t5;
-    delete t6;
-    // also deletes cl!
-    delete ml;
-  }
+	~LoggerQAMain()
+	{
+		delete t1;
+		delete t2;
+		delete t3;
+		delete t4;
+		delete t5;
+		delete t6;
+		// also deletes cl!
+		delete ml;
+	}
 
-  virtual void handle_signal(int signum)
-  {
-    printf("Signal received, cancelling threads\n");
-    t1->cancel();
-    t2->cancel();
-    t3->cancel();
-    t4->cancel();
-    t5->cancel();
-    t6->cancel();
-    printf("Threads cancelled\n");
-  }
+	virtual void
+	handle_signal(int signum)
+	{
+		printf("Signal received, cancelling threads\n");
+		t1->cancel();
+		t2->cancel();
+		t3->cancel();
+		t4->cancel();
+		t5->cancel();
+		t6->cancel();
+		printf("Threads cancelled\n");
+	}
 
-  void run()
-  {
-    cl = new ConsoleLogger();
-    ml = new MultiLogger(cl);
+	void
+	run()
+	{
+		cl = new ConsoleLogger();
+		ml = new MultiLogger(cl);
 
-    t1 = new LoggerQAThread("L-1-", ml);
-    t2 = new LoggerQAThread("L-2-", ml);
-    t3 = new LoggerQAThread("L-3-", ml);
-    t4 = new LoggerQAThread("L-4-", ml);
-    t5 = new LoggerQAThread("L-5-", ml);
-    t6 = new LoggerQAThread("L-6-", ml);
+		t1 = new LoggerQAThread("L-1-", ml);
+		t2 = new LoggerQAThread("L-2-", ml);
+		t3 = new LoggerQAThread("L-3-", ml);
+		t4 = new LoggerQAThread("L-4-", ml);
+		t5 = new LoggerQAThread("L-5-", ml);
+		t6 = new LoggerQAThread("L-6-", ml);
 
-    t1->start();
-    t2->start();
-    t3->start();
-    t4->start();
-    t5->start();
-    t6->start();
-    t1->join();
-    t2->join();
-    t3->join();
-    t4->join();
-    t5->join();
-    t6->join();
-  }
-  
- private:
-  Logger *cl;
-  Logger *ml;
-  LoggerQAThread *t1;
-  LoggerQAThread *t2;
-  LoggerQAThread *t3;
-  LoggerQAThread *t4;
-  LoggerQAThread *t5;
-  LoggerQAThread *t6;
+		t1->start();
+		t2->start();
+		t3->start();
+		t4->start();
+		t5->start();
+		t6->start();
+		t1->join();
+		t2->join();
+		t3->join();
+		t4->join();
+		t5->join();
+		t6->join();
+	}
+
+private:
+	Logger *        cl;
+	Logger *        ml;
+	LoggerQAThread *t1;
+	LoggerQAThread *t2;
+	LoggerQAThread *t3;
+	LoggerQAThread *t4;
+	LoggerQAThread *t5;
+	LoggerQAThread *t6;
 };
 
 int
 main(int argc, char **argv)
 {
-
-  /*
+	/*
   ConsoleLogger cl;
 
   Exception e("Test Exception");
@@ -166,12 +166,12 @@ main(int argc, char **argv)
   delete clp;
   */
 
-  LoggerQAMain main;
-  SignalManager::register_handler(SIGINT, &main);
-  main.run();
-  SignalManager::finalize();
+	LoggerQAMain main;
+	SignalManager::register_handler(SIGINT, &main);
+	main.run();
+	SignalManager::finalize();
 
-  return 0;
+	return 0;
 }
 
 /// @endcond

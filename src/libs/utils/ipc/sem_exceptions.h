@@ -29,35 +29,45 @@
 
 namespace fawkes {
 
-
 /** Semaphore or semaphore set invalid */
-class SemInvalidException : public Exception {
- public:
-  /** Constructor */
-  SemInvalidException() : Exception("Semaphore or semaphore set invalid")  {}
+class SemInvalidException : public Exception
+{
+public:
+	/** Constructor */
+	SemInvalidException() : Exception("Semaphore or semaphore set invalid")
+	{
+	}
 };
 
 /** Cannot lock semaphore */
-class SemCannotLockException : public Exception {
- public:
-  /** Constructor */
-  SemCannotLockException() : Exception("Cannot lock semaphore")  {}
+class SemCannotLockException : public Exception
+{
+public:
+	/** Constructor */
+	SemCannotLockException() : Exception("Cannot lock semaphore")
+	{
+	}
 };
 
 /** Cannot unlock semaphore */
-class SemCannotUnlockException : public Exception {
- public:
-  /** Constructor */
-  SemCannotUnlockException() : Exception("Cannot unlock semaphore")  {}
+class SemCannotUnlockException : public Exception
+{
+public:
+	/** Constructor */
+	SemCannotUnlockException() : Exception("Cannot unlock semaphore")
+	{
+	}
 };
 
 /** Cannot set value on semaphore */
-class SemCannotSetValException : public Exception {
- public:
-  /** Constructor */
-  SemCannotSetValException() : Exception("Cannot set value")  {}
+class SemCannotSetValException : public Exception
+{
+public:
+	/** Constructor */
+	SemCannotSetValException() : Exception("Cannot set value")
+	{
+	}
 };
-
 
 } // end namespace fawkes
 

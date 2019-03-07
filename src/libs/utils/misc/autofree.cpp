@@ -22,6 +22,7 @@
  */
 
 #include <utils/misc/autofree.h>
+
 #include <cstdlib>
 
 namespace fawkes {
@@ -41,18 +42,17 @@ namespace fawkes {
  */
 MemAutoFree::MemAutoFree(void *ptr)
 {
-  ptr_ = ptr;
+	ptr_ = ptr;
 }
-
 
 /** Destructor.
  * Destroys the memory chunk unless it has been released before.
  */
 MemAutoFree::~MemAutoFree()
 {
-  if (ptr_)  free(ptr_);
+	if (ptr_)
+		free(ptr_);
 }
-
 
 /** Release ownership.
  * The instance no longer owns the pointer and memory will not be deleted
@@ -61,9 +61,8 @@ MemAutoFree::~MemAutoFree()
 void
 MemAutoFree::release()
 {
-  ptr_ = NULL;
+	ptr_ = NULL;
 }
-
 
 /** Reset pointer to a different one,
  * This will free the pointer hold up to this call and will replace it with
@@ -74,18 +73,17 @@ MemAutoFree::release()
 void
 MemAutoFree::reset(void *new_ptr)
 {
-  if (ptr_ != new_ptr) {
-    if (ptr_)  free(ptr_);
-    ptr_ = new_ptr;
-  }
+	if (ptr_ != new_ptr) {
+		if (ptr_)
+			free(ptr_);
+		ptr_ = new_ptr;
+	}
 }
-
 
 /** Access memory pointer.
  * @return pointer to memory, maybe NULL
  */
-void *
-MemAutoFree::operator*() const
+void *MemAutoFree::operator*() const
 {
 	return ptr_;
 }

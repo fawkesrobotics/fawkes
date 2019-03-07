@@ -29,23 +29,23 @@ using namespace fawkes;
 
 /** Simple test plugin for QA application.
  */
-class TestPlugin : public Plugin {
-
- public:
-  /** Constructor, prints out info message
+class TestPlugin : public Plugin
+{
+public:
+	/** Constructor, prints out info message
    * @param config configuration instance
    */
-  explicit TestPlugin(Configuration *config) : Plugin(config)
-  {
-    printf("TestPlugin constructor called\n");
-  }
+	explicit TestPlugin(Configuration *config) : Plugin(config)
+	{
+		printf("TestPlugin constructor called\n");
+	}
 
-  /** Destrcutor, prints out info message
+	/** Destrcutor, prints out info message
    */
-  ~TestPlugin()
-  {
-    printf("TestPlugin destructor called\n");
-  }
+	~TestPlugin()
+	{
+		printf("TestPlugin destructor called\n");
+	}
 };
 
 PLUGIN_DESCRIPTION("Test plugin")

@@ -23,27 +23,26 @@
 #ifndef UTILS_KALMAN_KALMAN_1D_H__
 #define UTILS_KALMAN_KALMAN_1D_H__
 
-namespace fawkes  {
+namespace fawkes {
 
 class KalmanFilter1D
 {
 public:
-	KalmanFilter1D(float noise_x = 1.0, float noise_z = 1.0, float mu = 0.0,
-	               float sig = 1.0);
+	KalmanFilter1D(float noise_x = 1.0, float noise_z = 1.0, float mu = 0.0, float sig = 1.0);
 	~KalmanFilter1D();
 
-	void filter(float observe);
-	void filter(float observe, float& mu, float& sig);
+	void  filter(float observe);
+	void  filter(float observe, float &mu, float &sig);
 	float predict() const;
 	float predict(float vel) const;
 	float predict(float vel, int steps, float noise_z) const;
 	float predict(float mu, float vel, int steps, float noise_z) const;
 
 private:
-	float noise_x_;	/**< transition noise */
-	float noise_z_;	/**< "sigma_z", sensor noise */
-	float mu_;		/**< mean "mu" */
-	float sig_;	/**< "sigma_0". sigma ~ standard deviation */
+	float noise_x_; /**< transition noise */
+	float noise_z_; /**< "sigma_z", sensor noise */
+	float mu_;      /**< mean "mu" */
+	float sig_;     /**< "sigma_0". sigma ~ standard deviation */
 };
 } // end namespace fawkes
 

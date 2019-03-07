@@ -22,18 +22,17 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-
-#include <utils/system/file.h>
 #include <core/exceptions/system.h>
-
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
-#include <errno.h>
-#include <stdlib.h>
+#include <sys/types.h>
+#include <utils/system/file.h>
+
 #include <cstdio>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 namespace fawkes {
 
@@ -46,11 +45,10 @@ namespace fawkes {
  * @param error the errno
  */
 UnableToOpenFileException::UnableToOpenFileException(const char *filename, int error)
-  : Exception(error, "Unable to open file")
+: Exception(error, "Unable to open file")
 {
-  append("File that could not be opened: %s", filename);
+	append("File that could not be opened: %s", filename);
 }
-
 
 /** @class File file.h <utils/system/file.h>
  * File utility methods.
@@ -59,7 +57,6 @@ UnableToOpenFileException::UnableToOpenFileException(const char *filename, int e
  * @author Tim Niemueller
  * @author Daniel Beck
  */
-
 
 /** Constructor. 
  * Independent of the FileOpenMethod files are created with 
@@ -70,57 +67,49 @@ UnableToOpenFileException::UnableToOpenFileException(const char *filename, int e
  */
 File::File(const char *filename, FileOpenMethod method)
 {
-  fd = -1;
+	fd = -1;
 
-  switch (method)
-    {
-    case OVERWRITE:
-      fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
-      fn = strdup(filename);
-      break;
-      
-    case APPEND:
-      fd = open(filename, O_RDWR | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
-      fn = strdup(filename);
-      break;
-      
-    case ADD_SUFFIX:
-      {
-	char *filename_ext = strdup(filename);
-	int index = 0;
-	while (File::exists(filename_ext)) {
-	  free(filename_ext);
-	  if ( asprintf(&filename_ext, "%s.%d", filename, ++index) == -1 ) {
-	    throw OutOfMemoryException("Could not allocate filename string");
-	  }
-   
+	switch (method) {
+	case OVERWRITE:
+		fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+		fn = strdup(filename);
+		break;
+
+	case APPEND:
+		fd = open(filename, O_RDWR | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+		fn = strdup(filename);
+		break;
+
+	case ADD_SUFFIX: {
+		char *filename_ext = strdup(filename);
+		int   index        = 0;
+		while (File::exists(filename_ext)) {
+			free(filename_ext);
+			if (asprintf(&filename_ext, "%s.%d", filename, ++index) == -1) {
+				throw OutOfMemoryException("Could not allocate filename string");
+			}
+		}
+		fd = open(filename_ext, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+		fn = filename_ext;
+	} break;
+
+	default: printf("%s [line %d]: Unkown method.\n", __FILE__, __LINE__);
 	}
-	fd = open(filename_ext, O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
-	fn = filename_ext;
-      }
-      break;
-      
-      default:
-	printf("%s [line %d]: Unkown method.\n", __FILE__, __LINE__);
-    }
 
-  if (-1 == fd)
-    {
-      throw UnableToOpenFileException(filename, errno);
-    }
-  
-  fp = fdopen(fd, "r+");
+	if (-1 == fd) {
+		throw UnableToOpenFileException(filename, errno);
+	}
+
+	fp = fdopen(fd, "r+");
 }
-
 
 /** Destructor. */
 File::~File()
 {
-  // this also closes the underlying file descritptor fd
-  fclose(fp);
-  free(fn);
+	// this also closes the underlying file descritptor fd
+	fclose(fp);
+	free(fn);
 }
-
 
 /** Get access to the file stream.
  * @return a pointer to the file stream
@@ -128,7 +117,7 @@ File::~File()
 FILE *
 File::stream() const
 {
-  return fp;
+	return fp;
 }
 
 /** Get the file's name.
@@ -137,9 +126,8 @@ File::stream() const
 const char *
 File::filename() const
 {
-  return fn;
+	return fn;
 }
-
 
 /** Check if a file exists.
  * @param filename the name of the file to check
@@ -148,9 +136,8 @@ File::filename() const
 bool
 File::exists(const char *filename)
 {
-  return (access(filename, F_OK) == 0);
+	return (access(filename, F_OK) == 0);
 }
-
 
 /** Check if a file is a regular file
  * @param filename the name of the file to check
@@ -159,14 +146,13 @@ File::exists(const char *filename)
 bool
 File::is_regular(const char *filename)
 {
-  struct stat s;
+	struct stat s;
 
-  if ( stat(filename, &s) == 0 ) {
-    return S_ISREG(s.st_mode);
-  } else {
-    return false;
-  }
+	if (stat(filename, &s) == 0) {
+		return S_ISREG(s.st_mode);
+	} else {
+		return false;
+	}
 }
-
 
 } // end namespace fawkes

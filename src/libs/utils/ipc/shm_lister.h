@@ -26,7 +26,6 @@
 
 namespace fawkes {
 
-
 class SharedMemoryHeader;
 
 /** Format list output for shared memory segments.
@@ -35,36 +34,38 @@ class SharedMemoryHeader;
  * @ingroup IPC
  * @author Tim Niemueller
  */
-class SharedMemoryLister {
- public:
+class SharedMemoryLister
+{
+public:
+	/** virtual destructor */
+	virtual ~SharedMemoryLister()
+	{
+	}
 
-  /** virtual destructor */
-  virtual ~SharedMemoryLister() {}
-
-  /** Print header of the table.
+	/** Print header of the table.
    * This should fit on the terminal and thus have a width of at most
    * 79 columns.
    */
-  virtual void print_header()                                          = 0;
+	virtual void print_header() = 0;
 
-  /** Print footer of the table.
+	/** Print footer of the table.
    * This should fit on the terminal and thus have a width of at most
    * 79 columns.
    */
-  virtual void print_footer()                                          = 0;
+	virtual void print_footer() = 0;
 
-  /** Print this if no matching segment was found.
+	/** Print this if no matching segment was found.
    * Called by SharedMemory if no matching segment could be found.
    */
-  virtual void print_no_segments()                                     = 0;
+	virtual void print_no_segments() = 0;
 
-  /** Print this if no matching orphaned segment was found.
+	/** Print this if no matching orphaned segment was found.
    * Called by SharedMemory::erase_orphaned() if no matching segment
    * could be found.
    */
-  virtual void print_no_orphaned_segments()                            = 0;
+	virtual void print_no_orphaned_segments() = 0;
 
-  /** Print info about segment.
+	/** Print info about segment.
    * This method is called for every matching shared memory segment.
    * You should print a line of information (maybe more than one line
    * if needed) about the segment.
@@ -74,11 +75,12 @@ class SharedMemoryLister {
    * @param mem_size the total memory size
    * @param memptr pointer to the data segment.
    */
-  virtual void print_info(const SharedMemoryHeader *header,
-			  int shm_id, int semaphore,
-			  unsigned int mem_size, const void *memptr)   = 0;
+	virtual void print_info(const SharedMemoryHeader *header,
+	                        int                       shm_id,
+	                        int                       semaphore,
+	                        unsigned int              mem_size,
+	                        const void *              memptr) = 0;
 };
-
 
 } // end namespace fawkes
 

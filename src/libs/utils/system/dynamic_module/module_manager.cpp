@@ -21,12 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/system/dynamic_module/module_manager.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
+#include <utils/system/dynamic_module/module_manager.h>
 
 namespace fawkes {
-
 
 /** @class ModuleManager <utils/system/dynamic_module/module_manager.h>
  * Dynamic module manager.
@@ -39,26 +38,24 @@ namespace fawkes {
  * @param module_base_dir The module basedir where to look for plugins
  * @param open_flags flags to pass to modules when opening them
  */
-ModuleManager::ModuleManager(const char *module_base_dir,
-			     Module::ModuleFlags open_flags)
+ModuleManager::ModuleManager(const char *module_base_dir, Module::ModuleFlags open_flags)
 {
-  modules_.clear();
-  module_base_dir_ = module_base_dir;
-  mutex_ = new Mutex();
-  open_flags_ = open_flags;
+	modules_.clear();
+	module_base_dir_ = module_base_dir;
+	mutex_           = new Mutex();
+	open_flags_      = open_flags;
 }
 
 /** Destructor. */
 ModuleManager::~ModuleManager()
 {
-  std::map<std::string, Module * >::iterator i;
-  for (i = modules_.begin(); i != modules_.end(); ++i) {
-    delete (*i).second;
-  }
-  modules_.clear();
-  delete mutex_;
+	std::map<std::string, Module *>::iterator i;
+	for (i = modules_.begin(); i != modules_.end(); ++i) {
+		delete (*i).second;
+	}
+	modules_.clear();
+	delete mutex_;
 }
-
 
 /** Set flags to open modules with.
  * @param open_flags flags to pass to modules when opening them
@@ -66,9 +63,8 @@ ModuleManager::~ModuleManager()
 void
 ModuleManager::set_open_flags(Module::ModuleFlags open_flags)
 {
-  open_flags_ = open_flags;
+	open_flags_ = open_flags;
 }
-
 
 /** Open a module
  * @param filename The file name of the module that should be
@@ -83,29 +79,27 @@ ModuleManager::set_open_flags(Module::ModuleFlags open_flags)
 Module *
 ModuleManager::open_module(const char *filename)
 {
-  mutex_->lock();
-  if ( modules_.find(filename) != modules_.end() ) {
-    modules_[filename]->ref();
-    mutex_->unlock();
-    return modules_[filename];
-  } else {
-    Module *module = new Module(std::string(module_base_dir_) + "/" + filename,
-				open_flags_);
-    try {
-      module->open();
-      // ref count of module is now 1
-      modules_[module->get_base_filename()] = module;
-      mutex_->unlock();
-      return module;
-    } catch (ModuleOpenException &e) {
-      delete module;
-      mutex_->unlock();
-      throw;
-    }
-  }
-  mutex_->unlock();
+	mutex_->lock();
+	if (modules_.find(filename) != modules_.end()) {
+		modules_[filename]->ref();
+		mutex_->unlock();
+		return modules_[filename];
+	} else {
+		Module *module = new Module(std::string(module_base_dir_) + "/" + filename, open_flags_);
+		try {
+			module->open();
+			// ref count of module is now 1
+			modules_[module->get_base_filename()] = module;
+			mutex_->unlock();
+			return module;
+		} catch (ModuleOpenException &e) {
+			delete module;
+			mutex_->unlock();
+			throw;
+		}
+	}
+	mutex_->unlock();
 }
-
 
 /** Close a module by Module instance
  * @param module The module that is to be closed
@@ -113,9 +107,8 @@ ModuleManager::open_module(const char *filename)
 void
 ModuleManager::close_module(Module *module)
 {
-  close_module(module->get_base_filename().c_str());
+	close_module(module->get_base_filename().c_str());
 }
-
 
 /** Close a module by filename
  * @param filename the name of the module file that should be closed, this
@@ -125,17 +118,16 @@ ModuleManager::close_module(Module *module)
 void
 ModuleManager::close_module(const char *filename)
 {
-  mutex_->lock();
-  if ( modules_.find(filename) != modules_.end() ) {
-    modules_[filename]->unref();
-    if (modules_[filename]->notref()) {
-      delete modules_[filename];
-      modules_.erase( filename );
-    }
-  }
-  mutex_->unlock();
+	mutex_->lock();
+	if (modules_.find(filename) != modules_.end()) {
+		modules_[filename]->unref();
+		if (modules_[filename]->notref()) {
+			delete modules_[filename];
+			modules_.erase(filename);
+		}
+	}
+	mutex_->unlock();
 }
-
 
 /** Get a module if opened.
  * This will return a pointer to a module if it had already been opened! The
@@ -149,15 +141,14 @@ ModuleManager::close_module(const char *filename)
 Module *
 ModuleManager::get_module(const char *filename)
 {
-  MutexLocker lock(mutex_);
-  if ( modules_.find(filename) != modules_.end() ) {
-    modules_[filename]->ref();
-    return modules_[filename];
-  } else {
-    return NULL;
-  }
+	MutexLocker lock(mutex_);
+	if (modules_.find(filename) != modules_.end()) {
+		modules_[filename]->ref();
+		return modules_[filename];
+	} else {
+		return NULL;
+	}
 }
-
 
 /** Check if the module is already opened.
  * @param filename the name of the module file to check if it is opened.
@@ -168,10 +159,9 @@ ModuleManager::get_module(const char *filename)
 bool
 ModuleManager::module_opened(const char *filename)
 {
-  return ( modules_.find(filename) != modules_.end() );
+	return (modules_.find(filename) != modules_.end());
 }
 
-  
 /** Get the file extension for the current module type.
  * @return Returns a string with the file extension that has to
  * be used for modules on the current system (for example "so")
@@ -179,7 +169,7 @@ ModuleManager::module_opened(const char *filename)
 const char *
 ModuleManager::get_module_file_extension()
 {
-  return Module::get_file_extension();
+	return Module::get_file_extension();
 }
 
 } // end of namespace fawkes

@@ -27,14 +27,14 @@
 char *
 strndup(const char *s, size_t n)
 {
-  size_t l = strlen(s);
+	size_t l = strlen(s);
 
-  if (l <= n) return strdup(s);
+	if (l <= n)
+		return strdup(s);
 
-  char *rv = (char *)malloc(n + 1);
-  strncpy(rv, s, n);
-  rv[n] = 0;
-  return rv;
+	char *rv = (char *)malloc(n + 1);
+	strncpy(rv, s, n);
+	rv[n] = 0;
+	return rv;
 }
 #endif
-

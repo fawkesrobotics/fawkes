@@ -49,11 +49,13 @@ namespace fawkes {
  */
 
 float
-SinusoidalInterpolator::interpolate(float t_current, float t_end, float t_step,
-				    float v_start, float v_end)
+SinusoidalInterpolator::interpolate(float t_current,
+                                    float t_end,
+                                    float t_step,
+                                    float v_start,
+                                    float v_end)
 {
-  return ( sin((-0.5 + (t_current / t_end)) * M_PI) / 2.0 + 0.5) * (v_end - v_start) + v_start;
+	return (sin((-0.5 + (t_current / t_end)) * M_PI) / 2.0 + 0.5) * (v_end - v_start) + v_start;
 }
-
 
 } // end namespace fawkes

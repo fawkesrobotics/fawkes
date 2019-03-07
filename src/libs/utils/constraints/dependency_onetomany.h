@@ -30,7 +30,6 @@
 
 namespace fawkes {
 
-
 /** @class OneToManyDependency <utils/constraints/dependency_onetomany.h>
  * One-to-Many dependency constraint.
  * This dependency constraint models a 1-to-n relationship. There is one
@@ -48,47 +47,44 @@ namespace fawkes {
  */
 
 template <class Provider, class Dependant>
-  class OneToManyDependency
+class OneToManyDependency
 {
- public:
-  OneToManyDependency();
-  virtual ~OneToManyDependency();
+public:
+	OneToManyDependency();
+	virtual ~OneToManyDependency();
 
-  virtual void add(Provider *p);
-  virtual void add(Dependant *d);
-  virtual void remove(Provider *p);
-  virtual void remove(Dependant *d);
+	virtual void add(Provider *p);
+	virtual void add(Dependant *d);
+	virtual void remove(Provider *p);
+	virtual void remove(Dependant *d);
 
-  virtual bool can_add(Provider *p);
-  virtual bool can_add(Dependant *d);
-  virtual bool can_remove(Provider *p);
-  virtual bool can_remove(Dependant *d);
+	virtual bool can_add(Provider *p);
+	virtual bool can_add(Dependant *d);
+	virtual bool can_remove(Provider *p);
+	virtual bool can_remove(Dependant *d);
 
-  virtual Provider *                 provider();
-  virtual std::list<Dependant *> &   dependants();
+	virtual Provider *              provider();
+	virtual std::list<Dependant *> &dependants();
 
- private:
-  Provider                 *_provider;
-  std::list<Dependant *>    _dependants;
+private:
+	Provider *             _provider;
+	std::list<Dependant *> _dependants;
 };
-
 
 /** Constructor. */
 template <class Provider, class Dependant>
-  OneToManyDependency<Provider, Dependant>::OneToManyDependency()
+OneToManyDependency<Provider, Dependant>::OneToManyDependency()
 {
-  _provider = 0;
-  _dependants.clear();
+	_provider = 0;
+	_dependants.clear();
 }
-
 
 /** Destructor. */
 template <class Provider, class Dependant>
-  OneToManyDependency<Provider, Dependant>::~OneToManyDependency()
+OneToManyDependency<Provider, Dependant>::~OneToManyDependency()
 {
-  _dependants.clear();
+	_dependants.clear();
 }
-
 
 /** Add provider object.
  * This will add the provider to this dependency or throw an exception if there is
@@ -100,13 +96,12 @@ template <class Provider, class Dependant>
 void
 OneToManyDependency<Provider, Dependant>::add(Provider *p)
 {
-  if ( (_provider != 0) && (p != _provider) ) {
-    throw DependencyViolationException("Different provider already set");
-  } else {
-    _provider = p;
-  }
+	if ((_provider != 0) && (p != _provider)) {
+		throw DependencyViolationException("Different provider already set");
+	} else {
+		_provider = p;
+	}
 }
-
 
 /** Add dependant object.
  * This will add the dependant to this dependency or throw an exception if there is
@@ -118,13 +113,12 @@ template <class Provider, class Dependant>
 void
 OneToManyDependency<Provider, Dependant>::add(Dependant *d)
 {
-  if (_provider == 0) {
-    throw DependencyViolationException("No provider set, cannot accept dependant");
-  } else {
-    _dependants.push_back(d);
-  }
+	if (_provider == 0) {
+		throw DependencyViolationException("No provider set, cannot accept dependant");
+	} else {
+		_dependants.push_back(d);
+	}
 }
-
 
 /** Remove provider object.
  * @param p provider object to remove
@@ -135,13 +129,13 @@ template <class Provider, class Dependant>
 void
 OneToManyDependency<Provider, Dependant>::remove(Provider *p)
 {
-  if ( ! _dependants.empty() ) {
-    throw DependencyViolationException("There are still dependants of provider, "
-				       "cannot accept removal of provider");
-  }
-  if ( p == _provider )  _provider = 0;
+	if (!_dependants.empty()) {
+		throw DependencyViolationException("There are still dependants of provider, "
+		                                   "cannot accept removal of provider");
+	}
+	if (p == _provider)
+		_provider = 0;
 }
-
 
 /** Remove a depending object
  * @param d depending object to remove
@@ -150,11 +144,10 @@ template <class Provider, class Dependant>
 void
 OneToManyDependency<Provider, Dependant>::remove(Dependant *d)
 {
-  if ( d != 0 ) {
-    _dependants.remove(d);
-  }
+	if (d != 0) {
+		_dependants.remove(d);
+	}
 }
-
 
 /** Check if provider can be added.
  * @param p provider object to add
@@ -164,9 +157,8 @@ template <class Provider, class Dependant>
 bool
 OneToManyDependency<Provider, Dependant>::can_add(Provider *p)
 {
-  return ( (_provider == 0) || (p == _provider) );
+	return ((_provider == 0) || (p == _provider));
 }
-
 
 /** Check if dependant can be added.
  * @param d dependant object to add
@@ -176,9 +168,8 @@ template <class Provider, class Dependant>
 bool
 OneToManyDependency<Provider, Dependant>::can_add(Dependant *d)
 {
-  return (_provider != 0);
+	return (_provider != 0);
 }
-
 
 /** Check if provider can be removed.
  * @param p provider object to remove
@@ -188,9 +179,8 @@ template <class Provider, class Dependant>
 bool
 OneToManyDependency<Provider, Dependant>::can_remove(Provider *p)
 {
-  return _dependants.empty();
+	return _dependants.empty();
 }
-
 
 /** Check if dependant can be removed.
  * @param d depending object to remove
@@ -200,9 +190,8 @@ template <class Provider, class Dependant>
 bool
 OneToManyDependency<Provider, Dependant>::can_remove(Dependant *d)
 {
-  return true;
+	return true;
 }
-
 
 /** Get provider.
  * @return provider if set, 0 otherwise
@@ -211,9 +200,8 @@ template <class Provider, class Dependant>
 Provider *
 OneToManyDependency<Provider, Dependant>::provider()
 {
-  return _provider;
+	return _provider;
 }
-
 
 /** Get dependants.
  * @return list of dependants.
@@ -222,9 +210,8 @@ template <class Provider, class Dependant>
 std::list<Dependant *> &
 OneToManyDependency<Provider, Dependant>::dependants()
 {
-  return _dependants;
+	return _dependants;
 }
-
 
 } // end namespace fawkes
 
