@@ -18,11 +18,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
 #include "test_thread.h"
+
 #include <aspect/blocked_timing.h>
-#include <vector>
+#include <core/plugin.h>
+
 #include <algorithm>
+#include <vector>
 
 using namespace fawkes;
 
@@ -31,41 +33,39 @@ using namespace fawkes;
  */
 class SyncPointTestPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-    explicit SyncPointTestPlugin(Configuration *config)
-    : Plugin(config)
-  {
-      std::vector<BlockedTimingAspect::WakeupHook> hooks;
-      hooks = {
-          BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP, /**< before each loop */
-          BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE, /**< sensor acquisition thread,
+	explicit SyncPointTestPlugin(Configuration *config) : Plugin(config)
+	{
+		std::vector<BlockedTimingAspect::WakeupHook> hooks;
+		hooks = {
+		  BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,       /**< before each loop */
+		  BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE, /**< sensor acquisition thread,
                                        *  acquire data from sensor */
-          BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE, /**< sensor data preparation thread,
+		  BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE, /**< sensor data preparation thread,
                                        * convert acquired data to usable format */
-          BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, /**< sensor data processing thread */
-          BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE, /**< world state thread */
-          BlockedTimingAspect::WAKEUP_HOOK_THINK,    /**< think thread (agent) */
-          BlockedTimingAspect::WAKEUP_HOOK_SKILL,    /**< skill thread (skill module) */
-          BlockedTimingAspect::WAKEUP_HOOK_ACT,    /**< act thread (motor module etc.) */
-          BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC, /**< act execution thread */
-          BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP /**< run after loop */
-      };
+		  BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS, /**< sensor data processing thread */
+		  BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,     /**< world state thread */
+		  BlockedTimingAspect::WAKEUP_HOOK_THINK,          /**< think thread (agent) */
+		  BlockedTimingAspect::WAKEUP_HOOK_SKILL,          /**< skill thread (skill module) */
+		  BlockedTimingAspect::WAKEUP_HOOK_ACT,            /**< act thread (motor module etc.) */
+		  BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC,       /**< act execution thread */
+		  BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP       /**< run after loop */
+		};
 
-      for (std::vector<BlockedTimingAspect::WakeupHook>::iterator it = hooks.begin();
-           it != hooks.end(); ++it)
-      {
-        std::string name = "SyncPointTestThread-";
-        std::string hook_name = BlockedTimingAspect::blocked_timing_hook_to_string(*it);
-        std::transform(hook_name.begin(), hook_name.end(), hook_name.begin(), ::tolower);
-        name.append(hook_name);
-        thread_list.push_back(new SyncPointTestThread(name.c_str(), *it));
-      }
-  }
+		for (std::vector<BlockedTimingAspect::WakeupHook>::iterator it = hooks.begin();
+		     it != hooks.end();
+		     ++it) {
+			std::string name      = "SyncPointTestThread-";
+			std::string hook_name = BlockedTimingAspect::blocked_timing_hook_to_string(*it);
+			std::transform(hook_name.begin(), hook_name.end(), hook_name.begin(), ::tolower);
+			name.append(hook_name);
+			thread_list.push_back(new SyncPointTestThread(name.c_str(), *it));
+		}
+	}
 };
 
 PLUGIN_DESCRIPTION("Test SyncPoints and BlockedTimingAspect")
 EXPORT_PLUGIN(SyncPointTestPlugin)
-

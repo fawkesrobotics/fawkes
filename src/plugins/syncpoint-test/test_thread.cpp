@@ -37,10 +37,8 @@ using namespace fawkes;
  *  @param hook the hook this thread belongs to
  */
 
-SyncPointTestThread::SyncPointTestThread(const char * name, BlockedTimingAspect::WakeupHook hook)
-  : Thread(name, Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(hook),
-    hook_(hook)
+SyncPointTestThread::SyncPointTestThread(const char *name, BlockedTimingAspect::WakeupHook hook)
+: Thread(name, Thread::OPMODE_WAITFORWAKEUP), BlockedTimingAspect(hook), hook_(hook)
 {
 }
 
@@ -57,6 +55,8 @@ SyncPointTestThread::finalize()
 void
 SyncPointTestThread::loop()
 {
-  usleep(random() % 100000);
-  logger->log_info("SyncPointTestThread", "In hook %s", BlockedTimingAspect::blocked_timing_hook_to_string(hook_));
+	usleep(random() % 100000);
+	logger->log_info("SyncPointTestThread",
+	                 "In hook %s",
+	                 BlockedTimingAspect::blocked_timing_hook_to_string(hook_));
 }
