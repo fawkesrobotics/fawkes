@@ -23,31 +23,33 @@
 #ifndef _PLUGINS_ECLIPSE_CLP_EXTERNALS_ECLIPSE_PATH_H_
 #define _PLUGINS_ECLIPSE_CLP_EXTERNALS_ECLIPSE_PATH_H_
 
-#include <vector>
-#include <string>
 #include <boost/filesystem.hpp>
 #include <boost/regex.hpp>
+#include <string>
+#include <vector>
 
 class EclipsePath
 {
- private:
-  EclipsePath();
- public:
-  static void create_initial_object();
-  static EclipsePath* instance();
-  void add_path(const std::string& path);
-  void add_path_check(const std::string& path);
-  std::string locate_file(const std::string& filename);
-  void add_regex(boost::regex re, const std::string& str);
-  void apply_regexes();
-  void print_all_paths();
+private:
+	EclipsePath();
 
- private:
-  static EclipsePath* m_instance;
-  
- public: /* members */
-  std::vector<std::string>            paths;    //!< all paths known
-  std::map<boost::regex, std::string> regexes;  /**< regexes and strings they should be replaced with */
+public:
+	static void         create_initial_object();
+	static EclipsePath *instance();
+	void                add_path(const std::string &path);
+	void                add_path_check(const std::string &path);
+	std::string         locate_file(const std::string &filename);
+	void                add_regex(boost::regex re, const std::string &str);
+	void                apply_regexes();
+	void                print_all_paths();
+
+private:
+	static EclipsePath *m_instance;
+
+public:                           /* members */
+	std::vector<std::string> paths; //!< all paths known
+	std::map<boost::regex, std::string>
+	  regexes; /**< regexes and strings they should be replaced with */
 };
 
 extern "C" int p_locate_file(...);
