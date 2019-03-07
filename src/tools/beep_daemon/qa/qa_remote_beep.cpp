@@ -21,7 +21,6 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-
 /// @cond QA
 
 #include <blackboard/remote.h>
@@ -35,31 +34,30 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "01f:d:");
+	ArgumentParser argp(argc, argv, "01f:d:");
 
-  BlackBoard *rbb = new RemoteBlackBoard("localhost", 1910);
-  SwitchInterface *si = rbb->open_for_reading<SwitchInterface>("Beep");
+	BlackBoard *     rbb = new RemoteBlackBoard("localhost", 1910);
+	SwitchInterface *si  = rbb->open_for_reading<SwitchInterface>("Beep");
 
-  if (argp.has_arg("1")) {
-    si->msgq_enqueue(new SwitchInterface::EnableSwitchMessage());
-  } else if (argp.has_arg("0")) {
-    si->msgq_enqueue(new SwitchInterface::DisableSwitchMessage());
-  } else if (argp.has_arg("d")) {
-    if ( ! argp.has_arg("f") ) {
-      printf("Argument -d requires to have -f as well\n");
-    } else {
-      float d = argp.parse_float("d");
-      float f = argp.parse_float("f");
-      si->msgq_enqueue(new SwitchInterface::EnableDurationMessage(d, f));
-    }
-  } else if (argp.has_arg("f")) {
-    float f = argp.parse_float("f");
-    si->msgq_enqueue(new SwitchInterface::SetMessage(true, f));
-  }
+	if (argp.has_arg("1")) {
+		si->msgq_enqueue(new SwitchInterface::EnableSwitchMessage());
+	} else if (argp.has_arg("0")) {
+		si->msgq_enqueue(new SwitchInterface::DisableSwitchMessage());
+	} else if (argp.has_arg("d")) {
+		if (!argp.has_arg("f")) {
+			printf("Argument -d requires to have -f as well\n");
+		} else {
+			float d = argp.parse_float("d");
+			float f = argp.parse_float("f");
+			si->msgq_enqueue(new SwitchInterface::EnableDurationMessage(d, f));
+		}
+	} else if (argp.has_arg("f")) {
+		float f = argp.parse_float("f");
+		si->msgq_enqueue(new SwitchInterface::SetMessage(true, f));
+	}
 
-  rbb->close(si);
-  delete rbb;
+	rbb->close(si);
+	delete rbb;
 }
-
 
 /// @endcond
