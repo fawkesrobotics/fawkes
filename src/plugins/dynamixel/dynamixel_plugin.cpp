@@ -19,11 +19,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
+#include "act_thread.h"
 #include "driver_thread.h"
 #include "sensor_thread.h"
-#include "act_thread.h"
+
+#include <core/plugin.h>
 
 #include <set>
 
@@ -34,74 +34,71 @@ using namespace fawkes;
  */
 class DynamixelPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit DynamixelPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    DynamixelSensorThread *sensor_thread = new DynamixelSensorThread();
-    DynamixelActThread *act_thread = new DynamixelActThread();
+	explicit DynamixelPlugin(Configuration *config) : Plugin(config)
+	{
+		DynamixelSensorThread *sensor_thread = new DynamixelSensorThread();
+		DynamixelActThread *   act_thread    = new DynamixelActThread();
 
+		std::set<std::string> configs;
+		std::set<std::string> ignored_configs;
 
-    std::set<std::string> configs;
-    std::set<std::string> ignored_configs;
+		std::string prefix = "/dynamixel/";
 
-    std::string prefix = "/dynamixel/";
-
-    // Read configurations and spawn LaserFilterThreads
+		// Read configurations and spawn LaserFilterThreads
 #if __cplusplus >= 201103L
-    std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+		std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
 #else
-    std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+		std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
 #endif
-    while (i->next()) {
-      std::string cfg_name = std::string(i->path()).substr(prefix.length());
-      cfg_name = cfg_name.substr(0, cfg_name.find("/"));
-      
-      if ( (configs.find(cfg_name) == configs.end()) &&
-	   (ignored_configs.find(cfg_name) == ignored_configs.end()) ) {
+		while (i->next()) {
+			std::string cfg_name = std::string(i->path()).substr(prefix.length());
+			cfg_name             = cfg_name.substr(0, cfg_name.find("/"));
 
-	std::string cfg_prefix = prefix + cfg_name + "/";
+			if ((configs.find(cfg_name) == configs.end())
+			    && (ignored_configs.find(cfg_name) == ignored_configs.end())) {
+				std::string cfg_prefix = prefix + cfg_name + "/";
 
-	bool active = true;
-	try {
-	  active = config->get_bool((cfg_prefix + "active").c_str());
-	} catch (Exception &e) {} // ignored, assume enabled
+				bool active = true;
+				try {
+					active = config->get_bool((cfg_prefix + "active").c_str());
+				} catch (Exception &e) {
+				} // ignored, assume enabled
 
-	try {
-	  if (active) {
-	    DynamixelDriverThread *drv_thread = new DynamixelDriverThread(cfg_name, cfg_prefix);
-	    act_thread->add_driver_thread(drv_thread);
-	    sensor_thread->add_driver_thread(drv_thread);
-	    thread_list.push_back(drv_thread);
-	    configs.insert(cfg_name);
-	  } else {
-	    //printf("Ignoring dynamixel config %s\n", cfg_name.c_str());
-	    ignored_configs.insert(cfg_name);
-	  }
-	} catch(Exception &e) {
-	  for (ThreadList::iterator i = thread_list.begin();
-	       i != thread_list.end(); ++i) {
-	    delete *i;
-	  }
-	  delete act_thread;
-	  delete sensor_thread;
-	  throw;
+				try {
+					if (active) {
+						DynamixelDriverThread *drv_thread = new DynamixelDriverThread(cfg_name, cfg_prefix);
+						act_thread->add_driver_thread(drv_thread);
+						sensor_thread->add_driver_thread(drv_thread);
+						thread_list.push_back(drv_thread);
+						configs.insert(cfg_name);
+					} else {
+						//printf("Ignoring dynamixel config %s\n", cfg_name.c_str());
+						ignored_configs.insert(cfg_name);
+					}
+				} catch (Exception &e) {
+					for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i) {
+						delete *i;
+					}
+					delete act_thread;
+					delete sensor_thread;
+					throw;
+				}
+			}
+		}
+
+		if (thread_list.empty()) {
+			delete act_thread;
+			delete sensor_thread;
+			throw Exception("No active servo configs, aborting");
+		}
+
+		thread_list.push_back(sensor_thread);
+		thread_list.push_back(act_thread);
 	}
-      }
-    }
-
-    if ( thread_list.empty() ) {
-      delete act_thread;
-      delete sensor_thread;
-      throw Exception("No active servo configs, aborting");
-    }
-
-    thread_list.push_back(sensor_thread);
-    thread_list.push_back(act_thread);
-  }
 };
 
 PLUGIN_DESCRIPTION("Robotis Dynamixel servo driver plugin")

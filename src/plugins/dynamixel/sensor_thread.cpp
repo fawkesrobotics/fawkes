@@ -20,6 +20,7 @@
  */
 
 #include "sensor_thread.h"
+
 #include "driver_thread.h"
 
 using namespace fawkes;
@@ -33,18 +34,17 @@ using namespace fawkes;
 
 /** Constructor. */
 DynamixelSensorThread::DynamixelSensorThread()
-  : Thread("DynamixelSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
+: Thread("DynamixelSensorThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
 }
-
 
 void
 DynamixelSensorThread::loop()
 {
-  for (auto &d : driver_threads_) {
-    d->exec_sensor();
-  }
+	for (auto &d : driver_threads_) {
+		d->exec_sensor();
+	}
 }
 
 /** Add a driver thread to wake in SENSOR_ACQUIRE hook.
@@ -53,5 +53,5 @@ DynamixelSensorThread::loop()
 void
 DynamixelSensorThread::add_driver_thread(DynamixelDriverThread *drv_thread)
 {
-  driver_threads_.push_back(drv_thread);
+	driver_threads_.push_back(drv_thread);
 }
