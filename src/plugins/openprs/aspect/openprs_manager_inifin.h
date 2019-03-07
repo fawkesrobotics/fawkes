@@ -36,17 +36,17 @@ class OpenPRSKernelManager;
 
 class OpenPRSManagerAspectIniFin : public AspectIniFin
 {
- public:
-  OpenPRSManagerAspectIniFin();
-  ~OpenPRSManagerAspectIniFin();
+public:
+	OpenPRSManagerAspectIniFin();
+	~OpenPRSManagerAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
-  void set_manager(LockPtr<OpenPRSKernelManager> &clips_kernel_mgr);
+	void set_manager(LockPtr<OpenPRSKernelManager> &clips_kernel_mgr);
 
- private:
-  LockPtr<OpenPRSKernelManager> openprs_kernel_mgr_;
+private:
+	LockPtr<OpenPRSKernelManager> openprs_kernel_mgr_;
 };
 
 } // end namespace fawkes

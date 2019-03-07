@@ -45,9 +45,8 @@ namespace fawkes {
 /** Constructor. */
 OpenPRSManagerAspect::OpenPRSManagerAspect()
 {
-  add_aspect("OpenPRSManagerAspect");
+	add_aspect("OpenPRSManagerAspect");
 }
-
 
 /** Virtual empty destructor. */
 OpenPRSManagerAspect::~OpenPRSManagerAspect()

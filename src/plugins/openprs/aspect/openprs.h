@@ -26,8 +26,9 @@
 
 #include <aspect/aspect.h>
 #include <core/utils/lockptr.h>
-#include <string>
+
 #include <list>
+#include <string>
 
 namespace fawkes {
 
@@ -36,34 +37,33 @@ class OpenPRSAspectIniFin;
 
 class OpenPRSAspect : public virtual Aspect
 {
- friend OpenPRSAspectIniFin;
+	friend OpenPRSAspectIniFin;
 
- public:
-  /** OPRS kernel operation mode. */
-  typedef enum {
-    OPRS,	///< command line mode
-    XOPRS	///< graphical mode
-  } Mode;
+public:
+	/** OPRS kernel operation mode. */
+	typedef enum {
+		OPRS, ///< command line mode
+		XOPRS ///< graphical mode
+	} Mode;
 
-  OpenPRSAspect(const char *kernel_name, Mode mode = OPRS, const char *local_name = NULL);
-  virtual ~OpenPRSAspect();
+	OpenPRSAspect(const char *kernel_name, Mode mode = OPRS, const char *local_name = NULL);
+	virtual ~OpenPRSAspect();
 
-  void add_openprs_data_path(const std::string &path);
-  void set_openprs_gdb_delay(const bool enable_gdb_delay);
+	void add_openprs_data_path(const std::string &path);
+	void set_openprs_gdb_delay(const bool enable_gdb_delay);
 
- protected:
-  LockPtr<OpenPRSComm>   openprs;
-  const std::string      openprs_kernel_name;
-  const Mode             openprs_kernel_mode;
-  const std::string      openprs_local_name;
+protected:
+	LockPtr<OpenPRSComm> openprs;
+	const std::string    openprs_kernel_name;
+	const Mode           openprs_kernel_mode;
+	const std::string    openprs_local_name;
 
- private:
-  void init_OpenPRSAspect(LockPtr<OpenPRSComm> oprs_comm);
-  void finalize_OpenPRSAspect();
+private:
+	void init_OpenPRSAspect(LockPtr<OpenPRSComm> oprs_comm);
+	void finalize_OpenPRSAspect();
 
-  std::list<std::string> openprs_data_paths_;
-  bool                   openprs_gdb_delay_;
-
+	std::list<std::string> openprs_data_paths_;
+	bool                   openprs_gdb_delay_;
 };
 
 } // end namespace fawkes

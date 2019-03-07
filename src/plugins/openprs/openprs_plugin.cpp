@@ -21,6 +21,7 @@
  */
 
 #include "openprs_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -32,16 +33,15 @@ using namespace fawkes;
  */
 class OpenPRSPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit OpenPRSPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new OpenPRSThread());
-  }
+	explicit OpenPRSPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new OpenPRSThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("OpenPRS integration kernel provider")
 EXPORT_PLUGIN(OpenPRSPlugin)

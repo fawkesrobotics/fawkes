@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <core/exception.h>
 #include <plugins/openprs/aspect/openprs.h>
 #include <plugins/openprs/utils/openprs_comm.h>
-#include <core/exception.h>
 
 namespace fawkes {
 
@@ -62,23 +62,24 @@ namespace fawkes {
  * If NULL will be set to "fawkes-|kernel_name|" (where |kernel_name|
  * will be replaced by the value of @p kernel_name).
  */
-OpenPRSAspect::OpenPRSAspect(const char *kernel_name, OpenPRSAspect::Mode mode, const char *local_name)
-  : openprs_kernel_name(kernel_name), openprs_kernel_mode(mode),
-    openprs_local_name(local_name ? local_name : std::string("fawkes-") + kernel_name),
-    openprs_gdb_delay_(false)
+OpenPRSAspect::OpenPRSAspect(const char *        kernel_name,
+                             OpenPRSAspect::Mode mode,
+                             const char *        local_name)
+: openprs_kernel_name(kernel_name),
+  openprs_kernel_mode(mode),
+  openprs_local_name(local_name ? local_name : std::string("fawkes-") + kernel_name),
+  openprs_gdb_delay_(false)
 {
-  add_aspect("OpenPRSAspect");
-  if (openprs_local_name.find_first_of(" \t\n") != std::string::npos) {
-    throw Exception("Local name may not contains spaces");
-  }
+	add_aspect("OpenPRSAspect");
+	if (openprs_local_name.find_first_of(" \t\n") != std::string::npos) {
+		throw Exception("Local name may not contains spaces");
+	}
 }
-
 
 /** Virtual empty destructor. */
 OpenPRSAspect::~OpenPRSAspect()
 {
 }
-
 
 /** Add an OpenPRS data path.
  * The paths are added to the kernel on intialization and are
@@ -90,12 +91,11 @@ OpenPRSAspect::~OpenPRSAspect()
 void
 OpenPRSAspect::add_openprs_data_path(const std::string &path)
 {
-  if (openprs) {
-    throw Exception("OpenPRS kernel has already been intialized");
-  }
-  openprs_data_paths_.push_back(path);
+	if (openprs) {
+		throw Exception("OpenPRS kernel has already been intialized");
+	}
+	openprs_data_paths_.push_back(path);
 }
-
 
 /** Enable/disable GDB delay.
  * This can be used to order mod_utils to wait for a few seconds to allow
@@ -105,10 +105,10 @@ OpenPRSAspect::add_openprs_data_path(const std::string &path)
 void
 OpenPRSAspect::set_openprs_gdb_delay(const bool enable_gdb_delay)
 {
-  if (openprs) {
-    throw Exception("OpenPRS kernel has already been intialized");
-  }
-  openprs_gdb_delay_ = enable_gdb_delay;
+	if (openprs) {
+		throw Exception("OpenPRS kernel has already been intialized");
+	}
+	openprs_gdb_delay_ = enable_gdb_delay;
 }
 
 /** Init OpenPRS aspect.
@@ -120,7 +120,7 @@ OpenPRSAspect::set_openprs_gdb_delay(const bool enable_gdb_delay)
 void
 OpenPRSAspect::init_OpenPRSAspect(LockPtr<OpenPRSComm> oprs_comm)
 {
-  this->openprs = oprs_comm;
+	this->openprs = oprs_comm;
 }
 
 /** Finalize OpenPRS aspect.
@@ -129,8 +129,7 @@ OpenPRSAspect::init_OpenPRSAspect(LockPtr<OpenPRSComm> oprs_comm)
 void
 OpenPRSAspect::finalize_OpenPRSAspect()
 {
-  openprs.clear();
+	openprs.clear();
 }
-
 
 } // end namespace fawkes

@@ -35,26 +35,24 @@ using namespace fawkes;
 
 /** Constructor. */
 OpenPRSExampleThread::OpenPRSExampleThread()
-  : Thread("OpenPRSExampleThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK),
-    OpenPRSAspect("openprs-example", OpenPRSAspect::OPRS)
+: Thread("OpenPRSExampleThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK),
+  OpenPRSAspect("openprs-example", OpenPRSAspect::OPRS)
 {
 }
-
 
 /** Destructor. */
 OpenPRSExampleThread::~OpenPRSExampleThread()
 {
 }
 
-
 void
 OpenPRSExampleThread::init()
 {
-  openprs.lock();
-  openprs->send_message(openprs_kernel_name, "(foo bar)");
-  openprs->transmit_command(openprs_kernel_name, "add (foo2 bar)");
-  openprs.unlock();
+	openprs.lock();
+	openprs->send_message(openprs_kernel_name, "(foo bar)");
+	openprs->transmit_command(openprs_kernel_name, "add (foo2 bar)");
+	openprs.unlock();
 }
 
 void
@@ -62,14 +60,13 @@ OpenPRSExampleThread::finalize()
 {
 }
 
-
 void
 OpenPRSExampleThread::loop()
 {
-  static int modcount = 0;
-  if (++modcount % 50 == 0) {
-    openprs.lock();
-    openprs->transmit_command(openprs_kernel_name, "show db");
-    openprs.unlock();
-  }
+	static int modcount = 0;
+	if (++modcount % 50 == 0) {
+		openprs.lock();
+		openprs->transmit_command(openprs_kernel_name, "show db");
+		openprs.unlock();
+	}
 }

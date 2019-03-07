@@ -24,9 +24,10 @@
 #define _PLUGINS_OPENPRS_ASPECT_OPENPRS_ENV_MANAGER_H_
 
 #include <core/utils/lockptr.h>
-#include <string>
-#include <map>
+
 #include <list>
+#include <map>
+#include <string>
 
 namespace fawkes {
 
@@ -37,49 +38,67 @@ class SubProcess;
 
 class OpenPRSKernelManager
 {
- public:
-  OpenPRSKernelManager(const std::string &server_host, unsigned short server_tcp_port,
-		       const std::string &mp_host, unsigned short mp_tcp_port,
-		       Logger *logger, Clock *clock, Configuration *config);
-  virtual ~OpenPRSKernelManager();
+public:
+	OpenPRSKernelManager(const std::string &server_host,
+	                     unsigned short     server_tcp_port,
+	                     const std::string &mp_host,
+	                     unsigned short     mp_tcp_port,
+	                     Logger *           logger,
+	                     Clock *            clock,
+	                     Configuration *    config);
+	virtual ~OpenPRSKernelManager();
 
-  void create_kernel(const std::string &kernel_name, bool use_xoprs,
-		     std::list<std::string> &extra_data_path, bool utils_gdb_delay);
-  void destroy_kernel(const std::string &kernel_name);
+	void create_kernel(const std::string &     kernel_name,
+	                   bool                    use_xoprs,
+	                   std::list<std::string> &extra_data_path,
+	                   bool                    utils_gdb_delay);
+	void destroy_kernel(const std::string &kernel_name);
 
-  std::list<std::string> kernels() const;
+	std::list<std::string> kernels() const;
 
-  /** Get oprs-server hostname.
+	/** Get oprs-server hostname.
    * @return hostname where oprs-server is running */
-  const std::string &  server_host() const
-  { return server_host_; }
+	const std::string &
+	server_host() const
+	{
+		return server_host_;
+	}
 
-  /** Get oprs-server TCP port.
+	/** Get oprs-server TCP port.
    * @return TCP port where oprs-server is listening */
-  unsigned short server_port() const
-  { return server_port_; }
+	unsigned short
+	server_port() const
+	{
+		return server_port_;
+	}
 
-  /** Get mp-oprs hostname.
+	/** Get mp-oprs hostname.
    * @return hostname where mp-oprs is running */
-  const std::string &  mp_host() const
-  { return mp_host_; }
+	const std::string &
+	mp_host() const
+	{
+		return mp_host_;
+	}
 
-  /** Get mp-oprs TCP port.
+	/** Get mp-oprs TCP port.
    * @return TCP port where mp-oprs is listening */
-  unsigned short mp_port() const
-  { return mp_port_; }
+	unsigned short
+	mp_port() const
+	{
+		return mp_port_;
+	}
 
- private:
-  const std::string    server_host_;
-  const unsigned short server_port_;
-  const std::string    mp_host_;
-  const unsigned short mp_port_;
+private:
+	const std::string    server_host_;
+	const unsigned short server_port_;
+	const std::string    mp_host_;
+	const unsigned short mp_port_;
 
-  Logger        *logger_;
-  Clock         *clock_;
-  Configuration *config_;
+	Logger *       logger_;
+	Clock *        clock_;
+	Configuration *config_;
 
-  std::map<std::string, fawkes::SubProcess *> kernels_;
+	std::map<std::string, fawkes::SubProcess *> kernels_;
 };
 
 } // end namespace fawkes
