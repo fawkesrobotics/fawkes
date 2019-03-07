@@ -35,59 +35,61 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 template <typename FieldType>
-  class InterfaceFieldPointer
+class InterfaceFieldPointer
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param type value type of the field
    * @param name name of the field
    * @param value pointer to the value of the field
    */
-  InterfaceFieldPointer(interface_fieldtype_t type,
-			const char *name,
-			FieldType *value)
-  {
-    type_       = type;
-    name_       = name;
-    value_      = value;
-  }
+	InterfaceFieldPointer(interface_fieldtype_t type, const char *name, FieldType *value)
+	{
+		type_  = type;
+		name_  = name;
+		value_ = value;
+	}
 
-  /** Get the type of the field.
+	/** Get the type of the field.
    * @return type of the field
    */
-  interface_fieldtype_t get_type() const
-  {
-    return type_;
-  }
+	interface_fieldtype_t
+	get_type() const
+	{
+		return type_;
+	}
 
-  /** Get name of the field.
+	/** Get name of the field.
    * @return name of the field.
    */
-  const char * get_name() const
-  {
-    return name_;
-  }
+	const char *
+	get_name() const
+	{
+		return name_;
+	}
 
-  /** Get current value of the field.
+	/** Get current value of the field.
    * @return current vlaue of the field.
    */
-  FieldType get_value() const
-  {
-    return *value_;
-  }
+	FieldType
+	get_value() const
+	{
+		return *value_;
+	}
 
-  /** Set value of the field.
+	/** Set value of the field.
    * @param value new value to set for the field.
    */
-  void set_value(FieldType value)
-  {
-    *value_ = value;
-  }
+	void
+	set_value(FieldType value)
+	{
+		*value_ = value;
+	}
 
- private:
-  interface_fieldtype_t             type_;
-  const char                       *name_;
-  volatile FieldType               *value_;
+private:
+	interface_fieldtype_t type_;
+	const char *          name_;
+	volatile FieldType *  value_;
 };
 
 } // end namespace fawkes

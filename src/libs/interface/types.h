@@ -26,6 +26,7 @@
 #define _INTERFACE_TYPES_H__
 
 #include <sys/types.h>
+
 #include <map>
 #include <string>
 
@@ -33,36 +34,37 @@ namespace fawkes {
 
 /** Interface field type*/
 typedef enum {
-  IFT_BOOL,		/**< boolean field */
-  IFT_INT8,		/**< 8 bit integer field */
-  IFT_UINT8,		/**< 8 bit unsigned integer field */
-  IFT_INT16,		/**< 16 bit integer field */
-  IFT_UINT16,		/**< 16 bit unsigned integer field */
-  IFT_INT32,		/**< 32 bit integer field */
-  IFT_UINT32,		/**< 32 bit unsigned integer field */
-  IFT_INT64,		/**< 64 bit integer field */
-  IFT_UINT64,		/**< 64 bit unsigned integer field */
-  IFT_FLOAT,		/**< float field */
-  IFT_DOUBLE,		/**< double field */
-  IFT_STRING,		/**< string field */
-  IFT_BYTE,		/**< byte field, alias for uint8 */
-  IFT_ENUM		/**< field with interface specific enum type */
+	IFT_BOOL,   /**< boolean field */
+	IFT_INT8,   /**< 8 bit integer field */
+	IFT_UINT8,  /**< 8 bit unsigned integer field */
+	IFT_INT16,  /**< 16 bit integer field */
+	IFT_UINT16, /**< 16 bit unsigned integer field */
+	IFT_INT32,  /**< 32 bit integer field */
+	IFT_UINT32, /**< 32 bit unsigned integer field */
+	IFT_INT64,  /**< 64 bit integer field */
+	IFT_UINT64, /**< 64 bit unsigned integer field */
+	IFT_FLOAT,  /**< float field */
+	IFT_DOUBLE, /**< double field */
+	IFT_STRING, /**< string field */
+	IFT_BYTE,   /**< byte field, alias for uint8 */
+	IFT_ENUM    /**< field with interface specific enum type */
 } interface_fieldtype_t;
 
 /** Map of enum integer to string values. */
 typedef std::map<int, std::string> interface_enum_map_t;
 
 /** Interface field info list */
-struct interface_fieldinfo_t {
-  interface_fieldtype_t        type;	/**< type of this field */
-  const char                  *enumtype;	/**< text representation of enum type */
-  const char                  *name;	/**< Name of this field */
-  size_t                       length;	/**< Length of field (array, string) */
-  void                        *value;	/**< Current value of this field */
-  const interface_enum_map_t  *enum_map; /**< Map of possible enum values */
-  interface_fieldinfo_t       *next;	/**< next field, NULL if last */
+struct interface_fieldinfo_t
+{
+	interface_fieldtype_t       type;     /**< type of this field */
+	const char *                enumtype; /**< text representation of enum type */
+	const char *                name;     /**< Name of this field */
+	size_t                      length;   /**< Length of field (array, string) */
+	void *                      value;    /**< Current value of this field */
+	const interface_enum_map_t *enum_map; /**< Map of possible enum values */
+	interface_fieldinfo_t *     next;     /**< next field, NULL if last */
 };
 
-}
+} // namespace fawkes
 
 #endif /* INTERFACE_TYPES_H___ */

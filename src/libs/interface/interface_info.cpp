@@ -21,14 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interface/interface_info.h>
 #include <interface/interface.h>
+#include <interface/interface_info.h>
 #include <utils/misc/strndup.h>
 #include <utils/time/time.h>
 
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
 
 namespace fawkes {
 
@@ -49,78 +49,79 @@ namespace fawkes {
  * @param writer name of writer of interface
  * @param timestamp interface timestamp (time of last write or data timestamp)
  */
-InterfaceInfo::InterfaceInfo(const char *type, const char *id, const unsigned char *hash,
-			     unsigned int serial, bool has_writer, unsigned int num_readers,
-			     const std::list<std::string> &readers, const std::string &writer,
-			     const Time *timestamp)
+InterfaceInfo::InterfaceInfo(const char *                  type,
+                             const char *                  id,
+                             const unsigned char *         hash,
+                             unsigned int                  serial,
+                             bool                          has_writer,
+                             unsigned int                  num_readers,
+                             const std::list<std::string> &readers,
+                             const std::string &           writer,
+                             const Time *                  timestamp)
 {
-  type_ = strndup(type, INTERFACE_TYPE_SIZE_);
-  id_   = strndup(id, INTERFACE_ID_SIZE_);
-  hash_ = (unsigned char *)malloc(INTERFACE_HASH_SIZE_);
-  memcpy(hash_, hash, INTERFACE_HASH_SIZE_);
-  has_writer_ = has_writer;
-  num_readers_ = num_readers;
-  serial_ = serial;
-  timestamp_ = new Time(timestamp);
-  readers_ = readers;
-  writer_ = writer;
+	type_ = strndup(type, INTERFACE_TYPE_SIZE_);
+	id_   = strndup(id, INTERFACE_ID_SIZE_);
+	hash_ = (unsigned char *)malloc(INTERFACE_HASH_SIZE_);
+	memcpy(hash_, hash, INTERFACE_HASH_SIZE_);
+	has_writer_  = has_writer;
+	num_readers_ = num_readers;
+	serial_      = serial;
+	timestamp_   = new Time(timestamp);
+	readers_     = readers;
+	writer_      = writer;
 }
-
 
 /** Copy constructor.
  * @param i info to copy
  */
 InterfaceInfo::InterfaceInfo(const InterfaceInfo &i)
 {
-  type_ = strndup(i.type_, INTERFACE_TYPE_SIZE_);
-  id_   = strndup(i.id_, INTERFACE_ID_SIZE_);
-  hash_ = (unsigned char *)malloc(INTERFACE_HASH_SIZE_);
-  memcpy(hash_, i.hash_, INTERFACE_HASH_SIZE_);
-  has_writer_ = i.has_writer_;
-  num_readers_ = i.num_readers_;
-  serial_ = i.serial_;
-  timestamp_ = new Time(i.timestamp_);
-  readers_ = i.readers_;
-  writer_  = i.writer_;
+	type_ = strndup(i.type_, INTERFACE_TYPE_SIZE_);
+	id_   = strndup(i.id_, INTERFACE_ID_SIZE_);
+	hash_ = (unsigned char *)malloc(INTERFACE_HASH_SIZE_);
+	memcpy(hash_, i.hash_, INTERFACE_HASH_SIZE_);
+	has_writer_  = i.has_writer_;
+	num_readers_ = i.num_readers_;
+	serial_      = i.serial_;
+	timestamp_   = new Time(i.timestamp_);
+	readers_     = i.readers_;
+	writer_      = i.writer_;
 }
-
 
 /** Destructor. */
 InterfaceInfo::~InterfaceInfo()
 {
-  free(type_);
-  free(id_);
-  free(hash_);
-  delete timestamp_;
+	free(type_);
+	free(id_);
+	free(hash_);
+	delete timestamp_;
 }
-
 
 /** Assignment operator.
  * @param i info to copy from
  * @return reference to this instance
  */
-InterfaceInfo&
+InterfaceInfo &
 InterfaceInfo::operator=(const InterfaceInfo &i)
 {
-  free(type_);
-  free(id_);
-  free(hash_);
-  delete timestamp_;
+	free(type_);
+	free(id_);
+	free(hash_);
+	delete timestamp_;
 
-  type_ = strndup(i.type_, INTERFACE_TYPE_SIZE_);
-  id_   = strndup(i.id_, INTERFACE_ID_SIZE_);
-  hash_ = (unsigned char *)malloc(INTERFACE_HASH_SIZE_);
-  memcpy(hash_, i.hash_, INTERFACE_HASH_SIZE_);
-  has_writer_ = i.has_writer_;
-  num_readers_ = i.num_readers_;
-  serial_ = i.serial_;
-  timestamp_ = new Time(i.timestamp_);
-  readers_ = i.readers_;
-  writer_  = i.writer_;
+	type_ = strndup(i.type_, INTERFACE_TYPE_SIZE_);
+	id_   = strndup(i.id_, INTERFACE_ID_SIZE_);
+	hash_ = (unsigned char *)malloc(INTERFACE_HASH_SIZE_);
+	memcpy(hash_, i.hash_, INTERFACE_HASH_SIZE_);
+	has_writer_  = i.has_writer_;
+	num_readers_ = i.num_readers_;
+	serial_      = i.serial_;
+	timestamp_   = new Time(i.timestamp_);
+	readers_     = i.readers_;
+	writer_      = i.writer_;
 
-  return *this;
+	return *this;
 }
-
 
 /** Get interface type.
  * @return type string
@@ -128,9 +129,8 @@ InterfaceInfo::operator=(const InterfaceInfo &i)
 const char *
 InterfaceInfo::type() const
 {
-  return type_;
+	return type_;
 }
-
 
 /** Get interface ID.
  * @return ID string
@@ -138,9 +138,8 @@ InterfaceInfo::type() const
 const char *
 InterfaceInfo::id() const
 {
-  return id_;
+	return id_;
 }
-
 
 /** Get interface version hash.
  * @return interface version hash
@@ -148,7 +147,7 @@ InterfaceInfo::id() const
 const unsigned char *
 InterfaceInfo::hash() const
 {
-  return hash_;
+	return hash_;
 }
 
 /** Get interface version hash in printable format.
@@ -157,14 +156,13 @@ InterfaceInfo::hash() const
 std::string
 InterfaceInfo::hash_printable() const
 {
-  char phash[INTERFACE_HASH_SIZE_ * 2 + 1];
-  phash[INTERFACE_HASH_SIZE_ * 2] = 0;
-  for (size_t s = 0; s < INTERFACE_HASH_SIZE_; ++s) {
-    snprintf(&phash[s*2], 3, "%02X", hash_[s]);
-  }
-  return std::string(phash);
+	char phash[INTERFACE_HASH_SIZE_ * 2 + 1];
+	phash[INTERFACE_HASH_SIZE_ * 2] = 0;
+	for (size_t s = 0; s < INTERFACE_HASH_SIZE_; ++s) {
+		snprintf(&phash[s * 2], 3, "%02X", hash_[s]);
+	}
+	return std::string(phash);
 }
-
 
 /** Check if there is a writer.
  * @return true if there is a writer, false otherwise
@@ -172,9 +170,8 @@ InterfaceInfo::hash_printable() const
 bool
 InterfaceInfo::has_writer() const
 {
-  return has_writer_;
+	return has_writer_;
 }
-
 
 /** Get number of readers.
  * @return number of readers
@@ -182,9 +179,8 @@ InterfaceInfo::has_writer() const
 unsigned int
 InterfaceInfo::num_readers() const
 {
-  return num_readers_;
+	return num_readers_;
 }
-
 
 /** Get readers of interface.
  * @return string of names of readers of this interface
@@ -192,9 +188,8 @@ InterfaceInfo::num_readers() const
 const std::list<std::string> &
 InterfaceInfo::readers() const
 {
-  return readers_;
+	return readers_;
 }
-
 
 /** Get name of writer on interface.
  * @return name of writer owner or empty string of no writer or unknown
@@ -202,9 +197,8 @@ InterfaceInfo::readers() const
 const std::string &
 InterfaceInfo::writer() const
 {
-  return writer_;
+	return writer_;
 }
-
 
 /** Get interface instance serial.
  * @return type string
@@ -212,9 +206,8 @@ InterfaceInfo::writer() const
 unsigned int
 InterfaceInfo::serial() const
 {
-  return serial_;
+	return serial_;
 }
-
 
 /** Get interface timestamp.
  * @return point to interface last update time
@@ -222,7 +215,7 @@ InterfaceInfo::serial() const
 const Time *
 InterfaceInfo::timestamp() const
 {
-  return timestamp_;
+	return timestamp_;
 }
 
 /** < operator
@@ -236,16 +229,15 @@ InterfaceInfo::timestamp() const
 bool
 InterfaceInfo::operator<(const InterfaceInfo &ii) const
 {
-  int td = strncmp(type_, ii.type_, INTERFACE_TYPE_SIZE_);
-  if ( td < 0 ) {
-    return true;
-  } else if (td > 0) {
-    return false;
-  } else {
-    return (strncmp(id_, ii.id_, INTERFACE_ID_SIZE_) < 0);
-  }
+	int td = strncmp(type_, ii.type_, INTERFACE_TYPE_SIZE_);
+	if (td < 0) {
+		return true;
+	} else if (td > 0) {
+		return false;
+	} else {
+		return (strncmp(id_, ii.id_, INTERFACE_ID_SIZE_) < 0);
+	}
 }
-
 
 /** @class InterfaceInfoList <interface/interface_info.h>
  * Interface information list.
@@ -265,12 +257,18 @@ InterfaceInfo::operator<(const InterfaceInfo &ii) const
  * @param timestamp interface timestamp (time of last write or data timestamp)
  */
 void
-InterfaceInfoList::append(const char *type, const char *id, const unsigned char *hash,
-			  unsigned int serial, bool has_writer, unsigned int num_readers,
-			  const std::list<std::string> &readers, const std::string &writer,
-			  const Time &timestamp)
+InterfaceInfoList::append(const char *                  type,
+                          const char *                  id,
+                          const unsigned char *         hash,
+                          unsigned int                  serial,
+                          bool                          has_writer,
+                          unsigned int                  num_readers,
+                          const std::list<std::string> &readers,
+                          const std::string &           writer,
+                          const Time &                  timestamp)
 {
-  push_back(InterfaceInfo(type, id, hash, serial, has_writer, num_readers, readers, writer, &timestamp));
+	push_back(
+	  InterfaceInfo(type, id, hash, serial, has_writer, num_readers, readers, writer, &timestamp));
 }
 
 } // end namespace fawkes
