@@ -26,66 +26,82 @@
 #include <utils/time/time.h>
 
 #include <map>
-#include <vector>
-#include <string>
 #include <stdint.h>
+#include <string>
+#include <vector>
 
 namespace fawkes {
-  class PointCloudManager;
-  class Logger;
-}
+class PointCloudManager;
+class Logger;
+} // namespace fawkes
 
 class PointCloudAdapter
 {
- public:
-  /** Information about the data fields. */
-  class PointFieldInfo {
-   public:
-    std::string name;   ///< Name of field
-    uint32_t offset;    ///< Offset from start of point struct
-    uint8_t  datatype;  ///< Datatype enumeration see above
-    uint32_t count;     ///< How many elements in field
+public:
+	/** Information about the data fields. */
+	class PointFieldInfo
+	{
+	public:
+		std::string name;     ///< Name of field
+		uint32_t    offset;   ///< Offset from start of point struct
+		uint8_t     datatype; ///< Datatype enumeration see above
+		uint32_t    count;    ///< How many elements in field
 
-    /** Constructor for pre-allocation. */
-    PointFieldInfo() {}
-    /** Constructor.
+		/** Constructor for pre-allocation. */
+		PointFieldInfo()
+		{
+		}
+		/** Constructor.
      * @param name field name
      * @param offset data offset
      * @param datatype data type ID, see sensor_msgs::PointField
      * @param count number of data entries
      */
-    PointFieldInfo(std::string name, uint32_t offset,
-                   uint8_t datatype, uint32_t count)
-    : name(name), offset(offset), datatype(datatype), count(count) {}
-  };
-  /** Vector of PointFieldInfo. */
-  typedef std::vector<PointFieldInfo> V_PointFieldInfo;
+		PointFieldInfo(std::string name, uint32_t offset, uint8_t datatype, uint32_t count)
+		: name(name), offset(offset), datatype(datatype), count(count)
+		{
+		}
+	};
+	/** Vector of PointFieldInfo. */
+	typedef std::vector<PointFieldInfo> V_PointFieldInfo;
 
-  PointCloudAdapter(fawkes::PointCloudManager *pcl_manager,
-		    fawkes::Logger *logger);
-  ~PointCloudAdapter();
+	PointCloudAdapter(fawkes::PointCloudManager *pcl_manager, fawkes::Logger *logger);
+	~PointCloudAdapter();
 
-  void get_info(const std::string &id,
-                unsigned int &width, unsigned int &height,
-                std::string &frame_id, bool &is_dense,
-                V_PointFieldInfo &pfi);
+	void get_info(const std::string &id,
+	              unsigned int &     width,
+	              unsigned int &     height,
+	              std::string &      frame_id,
+	              bool &             is_dense,
+	              V_PointFieldInfo & pfi);
 
-  void get_data(const std::string &id, std::string &frame_id,
-                unsigned int &width, unsigned int &height, fawkes::Time &time,
-                void **data_ptr, size_t &point_size, size_t &num_points);
+	void get_data(const std::string &id,
+	              std::string &      frame_id,
+	              unsigned int &     width,
+	              unsigned int &     height,
+	              fawkes::Time &     time,
+	              void **            data_ptr,
+	              size_t &           point_size,
+	              size_t &           num_points);
 
-  void get_data_and_info(const std::string &id, std::string &frame_id, bool &is_dense,
-			 unsigned int &width, unsigned int &height, fawkes::Time &time,
-			 V_PointFieldInfo &pfi, void **data_ptr, size_t &point_size, size_t &num_points);
+	void get_data_and_info(const std::string &id,
+	                       std::string &      frame_id,
+	                       bool &             is_dense,
+	                       unsigned int &     width,
+	                       unsigned int &     height,
+	                       fawkes::Time &     time,
+	                       V_PointFieldInfo & pfi,
+	                       void **            data_ptr,
+	                       size_t &           point_size,
+	                       size_t &           num_points);
 
-  void close(const std::string &id);
+	void close(const std::string &id);
 
- private:
-  fawkes::PointCloudManager *pcl_manager_;
+private:
+	fawkes::PointCloudManager *pcl_manager_;
 
-  class StorageAdapter;
-  std::map<std::string, StorageAdapter *> sas_;
+	class StorageAdapter;
+	std::map<std::string, StorageAdapter *> sas_;
 };
-
 
 #endif

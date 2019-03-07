@@ -24,7 +24,6 @@
 
 namespace fawkes {
 
-
 /** @class PointCloudManager <pcl_utils/pointcloud_manager.h>
  * Point Cloud manager.
  * This class manages a number of points clouds and acts as a hub to
@@ -52,14 +51,13 @@ PointCloudManager::PointCloudManager()
 /** Destructor. */
 PointCloudManager::~PointCloudManager()
 {
-  LockMap<std::string, pcl_utils::StorageAdapter *>::iterator c;
-  for (c = clouds_.begin(); c != clouds_.end(); ++c) {
-    delete c->second;
-  }
+	LockMap<std::string, pcl_utils::StorageAdapter *>::iterator c;
+	for (c = clouds_.begin(); c != clouds_.end(); ++c) {
+		delete c->second;
+	}
 
-  clouds_.clear();
+	clouds_.clear();
 }
-
 
 /** Remove the point cloud.
  * @param id ID of point cloud to remove
@@ -67,12 +65,12 @@ PointCloudManager::~PointCloudManager()
 void
 PointCloudManager::remove_pointcloud(const char *id)
 {
-  MutexLocker lock(clouds_.mutex());
+	MutexLocker lock(clouds_.mutex());
 
-  if (clouds_.find(id) != clouds_.end()) {
-    delete clouds_[id];
-    clouds_.erase(id);
-  }
+	if (clouds_.find(id) != clouds_.end()) {
+		delete clouds_[id];
+		clouds_.erase(id);
+	}
 }
 
 /** Check if point cloud exists
@@ -82,11 +80,10 @@ PointCloudManager::remove_pointcloud(const char *id)
 bool
 PointCloudManager::exists_pointcloud(const char *id)
 {
-  MutexLocker lock(clouds_.mutex());
+	MutexLocker lock(clouds_.mutex());
 
-  return (clouds_.find(id) != clouds_.end());
+	return (clouds_.find(id) != clouds_.end());
 }
-
 
 /** Get list of point cloud IDs.
  * @return list of point cloud IDs
@@ -94,17 +91,16 @@ PointCloudManager::exists_pointcloud(const char *id)
 std::vector<std::string>
 PointCloudManager::get_pointcloud_list() const
 {
-  MutexLocker lock(clouds_.mutex());
+	MutexLocker lock(clouds_.mutex());
 
-  std::vector<std::string> rv;
-  rv.clear();
-  LockMap<std::string, pcl_utils::StorageAdapter *>::const_iterator c;
-  for (c = clouds_.begin(); c != clouds_.end(); ++c) {
-    rv.push_back(c->first);
-  }
-  return rv;
+	std::vector<std::string> rv;
+	rv.clear();
+	LockMap<std::string, pcl_utils::StorageAdapter *>::const_iterator c;
+	for (c = clouds_.begin(); c != clouds_.end(); ++c) {
+		rv.push_back(c->first);
+	}
+	return rv;
 }
-
 
 /** Get map of point clouds.
  * Use with care. Do not use in ROS-enabled plugins unless you are aware
@@ -115,9 +111,8 @@ PointCloudManager::get_pointcloud_list() const
 const fawkes::LockMap<std::string, pcl_utils::StorageAdapter *> &
 PointCloudManager::get_pointclouds() const
 {
-  return clouds_;
+	return clouds_;
 }
-
 
 /** Get a storage adapter.
  * Use with care. Do not use in ROS-enabled plugins unless you are aware
@@ -130,14 +125,12 @@ PointCloudManager::get_pointclouds() const
 const pcl_utils::StorageAdapter *
 PointCloudManager::get_storage_adapter(const char *id)
 {
-  MutexLocker lock(clouds_.mutex());
+	MutexLocker lock(clouds_.mutex());
 
-  if (clouds_.find(id) == clouds_.end()) {
-    throw Exception("PointCloud '%s' unknown", id);
-  }
-  return clouds_[id];
+	if (clouds_.find(id) == clouds_.end()) {
+		throw Exception("PointCloud '%s' unknown", id);
+	}
+	return clouds_[id];
 }
-
-
 
 } // end namespace fawkes
