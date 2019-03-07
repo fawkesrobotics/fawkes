@@ -19,6 +19,7 @@
  */
 
 #include "clusters_block_constraint.h"
+
 #include "navgraph_clusters_thread.h"
 
 /** @class NavGraphClustersBlockConstraint "clusters_block_constraint.h"
@@ -30,11 +31,11 @@
  * @param name constraint name
  * @param parent parent to call for blocked edges
  */
-NavGraphClustersBlockConstraint::NavGraphClustersBlockConstraint(const char *name,
-								 NavGraphClustersThread *parent)
-  : NavGraphEdgeConstraint(name)
+NavGraphClustersBlockConstraint::NavGraphClustersBlockConstraint(const char *            name,
+                                                                 NavGraphClustersThread *parent)
+: NavGraphEdgeConstraint(name)
 {
-  parent_ = parent;
+	parent_ = parent;
 }
 
 /** Virtual empty destructor. */
@@ -42,23 +43,19 @@ NavGraphClustersBlockConstraint::~NavGraphClustersBlockConstraint()
 {
 }
 
-
 bool
 NavGraphClustersBlockConstraint::compute(void) throw()
 {
-  blocked_ = parent_->blocked_edges();
-  return true;
+	blocked_ = parent_->blocked_edges();
+	return true;
 }
-
 
 bool
 NavGraphClustersBlockConstraint::blocks(const fawkes::NavGraphNode &from,
-					const fawkes::NavGraphNode &to) throw()
+                                        const fawkes::NavGraphNode &to) throw()
 {
-  std::string to_n = to.name();
-  std::string from_n = from.name();
-  return
-    ((find(blocked_.begin(), blocked_.end(), make_pair(from_n, to_n)) != blocked_.end()) ||
-     (find(blocked_.begin(), blocked_.end(), make_pair(to_n, from_n)) != blocked_.end()) );
+	std::string to_n   = to.name();
+	std::string from_n = from.name();
+	return ((find(blocked_.begin(), blocked_.end(), make_pair(from_n, to_n)) != blocked_.end())
+	        || (find(blocked_.begin(), blocked_.end(), make_pair(to_n, from_n)) != blocked_.end()));
 }
-

@@ -19,6 +19,7 @@
  */
 
 #include "clusters_static_cost_constraint.h"
+
 #include "navgraph_clusters_thread.h"
 
 /** @class NavGraphClustersStaticCostConstraint "clusters_static_cost_constraint.h"
@@ -32,13 +33,13 @@
  * @param cost_factor cost factor to return for blocked edges
  */
 NavGraphClustersStaticCostConstraint::NavGraphClustersStaticCostConstraint(
-  const char *name,
+  const char *            name,
   NavGraphClustersThread *parent,
-  float cost_factor)
+  float                   cost_factor)
 : NavGraphEdgeCostConstraint(name)
 {
-  parent_      = parent;
-  cost_factor_ = cost_factor;
+	parent_      = parent;
+	cost_factor_ = cost_factor;
 }
 
 /** Virtual empty destructor. */
@@ -46,26 +47,23 @@ NavGraphClustersStaticCostConstraint::~NavGraphClustersStaticCostConstraint()
 {
 }
 
-
 bool
 NavGraphClustersStaticCostConstraint::compute(void) throw()
 {
-  blocked_ = parent_->blocked_edges();
-  return true;
+	blocked_ = parent_->blocked_edges();
+	return true;
 }
-
 
 float
 NavGraphClustersStaticCostConstraint::cost_factor(const fawkes::NavGraphNode &from,
-						  const fawkes::NavGraphNode &to) throw()
+                                                  const fawkes::NavGraphNode &to) throw()
 {
-  std::string to_n = to.name();
-  std::string from_n = from.name();
-  if ((find(blocked_.begin(), blocked_.end(), make_pair(from_n, to_n)) != blocked_.end()) ||
-      (find(blocked_.begin(), blocked_.end(), make_pair(to_n, from_n)) != blocked_.end()) )
-  {
-    return cost_factor_;
-  }
+	std::string to_n   = to.name();
+	std::string from_n = from.name();
+	if ((find(blocked_.begin(), blocked_.end(), make_pair(from_n, to_n)) != blocked_.end())
+	    || (find(blocked_.begin(), blocked_.end(), make_pair(to_n, from_n)) != blocked_.end())) {
+		return cost_factor_;
+	}
 
-  return 1.0;
+	return 1.0;
 }
