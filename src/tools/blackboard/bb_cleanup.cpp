@@ -22,6 +22,7 @@
 
 #include <blackboard/local.h>
 #include <config/sqlite.h>
+
 #include <iostream>
 
 using namespace std;
@@ -30,18 +31,18 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  SQLiteConfiguration config(CONFDIR);
-  config.load();
+	SQLiteConfiguration config(CONFDIR);
+	config.load();
 
-  std::string token = "";
-  try {
-    token = config.get_string("/fawkes/mainapp/blackboard_magic_token");
-  } catch (Exception &e) {
-    cout << "Could not read shared memory token for blackboard." << endl;
-    cout << "BlackBoard is probably running without shared memory." << endl;
-    return -1;
-  }
+	std::string token = "";
+	try {
+		token = config.get_string("/fawkes/mainapp/blackboard_magic_token");
+	} catch (Exception &e) {
+		cout << "Could not read shared memory token for blackboard." << endl;
+		cout << "BlackBoard is probably running without shared memory." << endl;
+		return -1;
+	}
 
-  LocalBlackBoard::cleanup(token.c_str());
-  return 0;
+	LocalBlackBoard::cleanup(token.c_str());
+	return 0;
 }
