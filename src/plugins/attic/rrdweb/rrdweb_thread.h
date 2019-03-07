@@ -23,36 +23,40 @@
 #ifndef _PLUGINS_RRDWEB_RRDWEB_THREAD_H_
 #define _PLUGINS_RRDWEB_RRDWEB_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <aspect/webview.h>
+#include <core/threading/thread.h>
 #include <plugins/rrd/aspect/rrd.h>
 
 class RRDWebRequestProcessor;
 
-class RRDWebThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::RRDAspect,
-  public fawkes::WebviewAspect
+class RRDWebThread : public fawkes::Thread,
+                     public fawkes::LoggingAspect,
+                     public fawkes::ConfigurableAspect,
+                     public fawkes::ClockAspect,
+                     public fawkes::RRDAspect,
+                     public fawkes::WebviewAspect
 {
- public:
-  RRDWebThread();
-  virtual ~RRDWebThread();
+public:
+	RRDWebThread();
+	virtual ~RRDWebThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  RRDWebRequestProcessor *processor_;
+private:
+	RRDWebRequestProcessor *processor_;
 };
 
 #endif

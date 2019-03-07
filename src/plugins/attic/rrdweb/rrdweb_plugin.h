@@ -27,8 +27,8 @@
 
 class RRDWebPlugin : public fawkes::Plugin
 {
- public:
-  explicit RRDWebPlugin(fawkes::Configuration *config);
+public:
+	explicit RRDWebPlugin(fawkes::Configuration *config);
 };
 
 #endif

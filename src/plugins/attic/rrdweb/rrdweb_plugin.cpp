@@ -21,6 +21,7 @@
  */
 
 #include "rrdweb_plugin.h"
+
 #include "rrdweb_thread.h"
 
 using namespace fawkes;
@@ -35,12 +36,10 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-RRDWebPlugin::RRDWebPlugin(Configuration *config)
-  : Plugin(config)
+RRDWebPlugin::RRDWebPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new RRDWebThread());
+	thread_list.push_back(new RRDWebThread());
 }
-
 
 PLUGIN_DESCRIPTION("RRD graph displaying via Webview")
 EXPORT_PLUGIN(RRDWebPlugin)
