@@ -24,54 +24,58 @@
 #ifndef _PLUGINS_PDDL_ROBOT_MEMORYTHREAD_H_
 #define _PLUGINS_PDDL_ROBOT_MEMORYTHREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
+#include "interfaces/PddlGenInterface.h"
+
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
-#include <plugins/robot-memory/aspect/robot_memory_aspect.h>
+#include <aspect/logging.h>
 #include <blackboard/interface_listener.h>
+#include <core/threading/thread.h>
+#include <ctemplate/template.h>
+#include <plugins/robot-memory/aspect/robot_memory_aspect.h>
 
 #include <string>
-
-#include <ctemplate/template.h>
-#include "interfaces/PddlGenInterface.h"
 
 namespace fawkes {
 }
 
-class PddlRobotMemoryThread 
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::RobotMemoryAspect,
-  public fawkes::BlackBoardInterfaceListener
+class PddlRobotMemoryThread : public fawkes::Thread,
+                              public fawkes::LoggingAspect,
+                              public fawkes::ConfigurableAspect,
+                              public fawkes::BlackBoardAspect,
+                              public fawkes::RobotMemoryAspect,
+                              public fawkes::BlackBoardInterfaceListener
 {
+public:
+	PddlRobotMemoryThread();
 
- public:
-  PddlRobotMemoryThread();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
-  protected: virtual void run() { Thread::run(); }
+private:
+	fawkes::PddlGenInterface *gen_if;
 
- private:
-  fawkes::PddlGenInterface *gen_if;
+	std::string collection;
+	std::string input_path;
+	std::string output_path;
+	std::string goal;
 
-  std::string collection;
-  std::string input_path;
-  std::string output_path;
-  std::string goal;
+	void fill_dict_from_document(ctemplate::TemplateDictionary *dict,
+	                             mongo::BSONObj                 obj,
+	                             std::string                    prefix = "");
+	void generate();
 
-  void fill_dict_from_document(ctemplate::TemplateDictionary *dict, mongo::BSONObj obj, std::string prefix = "");
-  void generate();
-
-  virtual bool bb_interface_message_received(fawkes::Interface *interface,
-                                             fawkes::Message *message) throw();
+	virtual bool bb_interface_message_received(fawkes::Interface *interface,
+	                                           fawkes::Message *  message) throw();
 };
-
 
 #endif
