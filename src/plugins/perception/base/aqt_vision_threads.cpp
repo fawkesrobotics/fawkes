@@ -22,9 +22,9 @@
 
 #include "aqt_vision_threads.h"
 
+#include <aspect/vision.h>
 #include <core/threading/barrier.h>
 #include <utils/time/clock.h>
-#include <aspect/vision.h>
 
 #include <algorithm>
 
@@ -37,22 +37,19 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param clock Clock for timeout handling, system time is used only.
  */
 FvAqtVisionThreads::FvAqtVisionThreads(fawkes::Clock *clock)
 : cyclic_barrier(new Barrier(1)), clock(clock)
 {
-  clock->get_systime(_empty_time);
+	clock->get_systime(_empty_time);
 }
-
 
 /** Destructor. */
 FvAqtVisionThreads::~FvAqtVisionThreads()
 {
 }
-
 
 /** Add a thread in waiting state.
  * The thread is marked as dependant but it is otherwise ignored.
@@ -62,9 +59,8 @@ FvAqtVisionThreads::~FvAqtVisionThreads()
 void
 FvAqtVisionThreads::add_waiting_thread(Thread *thread)
 {
-  waiting_threads.push_back_locked(thread);
+	waiting_threads.push_back_locked(thread);
 }
-
 
 /** Mark the thread as running.
  * @param thread thread to mark as running
@@ -72,18 +68,17 @@ FvAqtVisionThreads::add_waiting_thread(Thread *thread)
 void
 FvAqtVisionThreads::set_thread_running(Thread *thread)
 {
-  VisionAspect *vision_thread = dynamic_cast<VisionAspect *>(thread);
-  if ( find(waiting_threads.begin(), waiting_threads.end(), thread) != waiting_threads.end()) {
-    if ( vision_thread->vision_thread_mode() == VisionAspect::CYCLIC ) {
-      running_threads_cyclic.push_back_locked(thread);
-      cyclic_barrier.reset(new Barrier( running_threads_cyclic.size() + 1 ));
-    } else {
-      running_threads_cont.push_back_locked(thread);
-    }
-    waiting_threads.remove_locked(thread);
-  }
+	VisionAspect *vision_thread = dynamic_cast<VisionAspect *>(thread);
+	if (find(waiting_threads.begin(), waiting_threads.end(), thread) != waiting_threads.end()) {
+		if (vision_thread->vision_thread_mode() == VisionAspect::CYCLIC) {
+			running_threads_cyclic.push_back_locked(thread);
+			cyclic_barrier.reset(new Barrier(running_threads_cyclic.size() + 1));
+		} else {
+			running_threads_cont.push_back_locked(thread);
+		}
+		waiting_threads.remove_locked(thread);
+	}
 }
-
 
 /** Remove a thread.
  * The thread is removed from all internal structures.
@@ -92,20 +87,18 @@ FvAqtVisionThreads::set_thread_running(Thread *thread)
 void
 FvAqtVisionThreads::remove_thread(Thread *thread)
 {
-  waiting_threads.remove_locked(thread);
-  if ( find(running_threads_cyclic.begin(), running_threads_cyclic.end(), thread) !=
-       running_threads_cyclic.end()) {
+	waiting_threads.remove_locked(thread);
+	if (find(running_threads_cyclic.begin(), running_threads_cyclic.end(), thread)
+	    != running_threads_cyclic.end()) {
+		running_threads_cyclic.remove_locked(thread);
 
-    running_threads_cyclic.remove_locked(thread);
-
-    cyclic_barrier.reset(new Barrier(running_threads_cyclic.size() + 1));
-  }
-  running_threads_cont.remove_locked(thread);
-  if ( empty() ) {
-    clock->get_systime(_empty_time);
-  }
+		cyclic_barrier.reset(new Barrier(running_threads_cyclic.size() + 1));
+	}
+	running_threads_cont.remove_locked(thread);
+	if (empty()) {
+		clock->get_systime(_empty_time);
+	}
 }
-
 
 /** Remove waiting thread.
  * @param thread thread to remove from waiting structures.
@@ -113,12 +106,11 @@ FvAqtVisionThreads::remove_thread(Thread *thread)
 void
 FvAqtVisionThreads::remove_waiting_thread(Thread *thread)
 {
-  waiting_threads.remove_locked(thread);
-  if ( empty() ) {
-    clock->get_systime(_empty_time);
-  }
+	waiting_threads.remove_locked(thread);
+	if (empty()) {
+		clock->get_systime(_empty_time);
+	}
 }
-
 
 /** Check if there is at least one cyclic thread.
  * @return true if there is at least one cyclic thread, false otherwise.
@@ -126,9 +118,8 @@ FvAqtVisionThreads::remove_waiting_thread(Thread *thread)
 bool
 FvAqtVisionThreads::has_cyclic_thread()
 {
-  return ( ! running_threads_cyclic.empty() );
+	return (!running_threads_cyclic.empty());
 }
-
 
 /** Check if there is at least one continuous thread.
  * @return true if there is at least one continuous thread, false otherwise.
@@ -136,9 +127,8 @@ FvAqtVisionThreads::has_cyclic_thread()
 bool
 FvAqtVisionThreads::has_cont_thread()
 {
-  return ( ! running_threads_cont.empty() );
+	return (!running_threads_cont.empty());
 }
-
 
 /** Check if the given waiting thread is registered.
  * @param t thread to check for
@@ -147,9 +137,8 @@ FvAqtVisionThreads::has_cont_thread()
 bool
 FvAqtVisionThreads::has_waiting_thread(Thread *t)
 {
-  return (find(waiting_threads.begin(), waiting_threads.end(), t) != waiting_threads.end());
+	return (find(waiting_threads.begin(), waiting_threads.end(), t) != waiting_threads.end());
 }
-
 
 /** Check if there is no thread at all.
  * @return true if there is no thread in any of the internal running or waiting
@@ -158,11 +147,9 @@ FvAqtVisionThreads::has_waiting_thread(Thread *t)
 bool
 FvAqtVisionThreads::empty()
 {
-  return ( waiting_threads.empty() &&
-	   running_threads_cyclic.empty() &&
-	   running_threads_cont.empty() );
+	return (waiting_threads.empty() && running_threads_cyclic.empty()
+	        && running_threads_cont.empty());
 }
-
 
 /** Get the empty time.
  * @return the time in seconds since the last thread has been removed.
@@ -170,20 +157,18 @@ FvAqtVisionThreads::empty()
 float
 FvAqtVisionThreads::empty_time()
 {
-  return clock->elapsed(&_empty_time);
+	return clock->elapsed(&_empty_time);
 }
-
 
 /** Wakeup and wait for all cyclic threads. */
 void
 FvAqtVisionThreads::wakeup_and_wait_cyclic_threads()
 {
-  if ( has_cyclic_thread() ) {
-    running_threads_cyclic.wakeup(&*cyclic_barrier);
-    cyclic_barrier->wait();
-  }
+	if (has_cyclic_thread()) {
+		running_threads_cyclic.wakeup(&*cyclic_barrier);
+		cyclic_barrier->wait();
+	}
 }
-
 
 /** Set prepfin hold fo cyclic threads.
  * Sets prepfin hold for cyclice threads and rolls back if it cannot
@@ -196,10 +181,10 @@ FvAqtVisionThreads::wakeup_and_wait_cyclic_threads()
 void
 FvAqtVisionThreads::set_prepfin_hold(bool hold)
 {
-  try {
-    running_threads_cyclic.set_prepfin_hold(hold);
-  } catch (Exception &e) {
-    running_threads_cyclic.set_prepfin_hold(false);
-    throw;
-  }
+	try {
+		running_threads_cyclic.set_prepfin_hold(hold);
+	} catch (Exception &e) {
+		running_threads_cyclic.set_prepfin_hold(false);
+		throw;
+	}
 }
