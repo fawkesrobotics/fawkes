@@ -29,56 +29,54 @@
 #define SONY_EVID100P_NUM_PAN_SPEEDS 24
 #define SONY_EVID100P_NUM_TILT_SPEEDS 20
 
-class SonyEviD100PVisca : public Visca {
+class SonyEviD100PVisca : public Visca
+{
+public:
+	SonyEviD100PVisca(const char * device_file,
+	                  unsigned int def_timeout_ms = 30,
+	                  bool         blocking       = true);
+	~SonyEviD100PVisca();
 
- public:
-  SonyEviD100PVisca(const char *device_file, unsigned int def_timeout_ms = 30,
-		   bool blocking = true);
-  ~SonyEviD100PVisca();
+	void get_pan_tilt_rad(float &pan, float &tilt);
+	void set_pan_tilt_rad(float pan, float tilt);
 
-  void  get_pan_tilt_rad(float &pan, float &tilt);
-  void  set_pan_tilt_rad(float pan, float tilt);
+	void set_speed_radsec(float pan_speed, float tilt_speed);
+	void get_speed_radsec(float &pan_speed, float &tilt_speed);
 
-  void set_speed_radsec(float pan_speed, float tilt_speed);
-  void get_speed_radsec(float &pan_speed, float &tilt_speed);
+	void get_speed_limits(float &pan_min, float &pan_max, float &tilt_min, float &tilt_max);
 
-  void get_speed_limits(float &pan_min, float &pan_max,
-			float &tilt_min, float &tilt_max);
+	static const int MAX_PAN;
+	static const int MIN_PAN;
+	static const int MAX_TILT;
+	static const int MIN_TILT;
 
-  static const int   MAX_PAN;
-  static const int   MIN_PAN;
-  static const int   MAX_TILT;
-  static const int   MIN_TILT;
+	static const float MAX_PAN_DEG;
+	static const float MIN_PAN_DEG;
+	static const float MAX_TILT_DEG;
+	static const float MIN_TILT_DEG;
 
-  static const float MAX_PAN_DEG;
-  static const float MIN_PAN_DEG;
-  static const float MAX_TILT_DEG;
-  static const float MIN_TILT_DEG;
+	static const float MAX_PAN_RAD;
+	static const float MIN_PAN_RAD;
+	static const float MAX_TILT_RAD;
+	static const float MIN_TILT_RAD;
 
-  static const float MAX_PAN_RAD;
-  static const float MIN_PAN_RAD;
-  static const float MAX_TILT_RAD;
-  static const float MIN_TILT_RAD;
+	static const float PAN_STEPS_PER_DEG;
+	static const float TILT_STEPS_PER_DEG;
 
-  static const float PAN_STEPS_PER_DEG;
-  static const float TILT_STEPS_PER_DEG;
+	static const float PAN_STEPS_PER_RAD;
+	static const float TILT_STEPS_PER_RAD;
 
-  static const float PAN_STEPS_PER_RAD;
-  static const float TILT_STEPS_PER_RAD;
+	static const unsigned int EFFECT_PASTEL;
+	static const unsigned int EFFECT_NEGATIVE;
+	static const unsigned int EFFECT_SEPIA;
+	static const unsigned int EFFECT_BW;
+	static const unsigned int EFFECT_SOLARIZE;
+	static const unsigned int EFFECT_MOSAIC;
+	static const unsigned int EFFECT_SLIM;
+	static const unsigned int EFFECT_STRETCH;
 
-  static const unsigned int EFFECT_PASTEL;
-  static const unsigned int EFFECT_NEGATIVE;
-  static const unsigned int EFFECT_SEPIA;
-  static const unsigned int EFFECT_BW;
-  static const unsigned int EFFECT_SOLARIZE;
-  static const unsigned int EFFECT_MOSAIC;
-  static const unsigned int EFFECT_SLIM;
-  static const unsigned int EFFECT_STRETCH;
-
-  static const float        SPEED_TABLE_PAN[SONY_EVID100P_NUM_PAN_SPEEDS];
-  static const float        SPEED_TABLE_TILT[SONY_EVID100P_NUM_TILT_SPEEDS];
+	static const float SPEED_TABLE_PAN[SONY_EVID100P_NUM_PAN_SPEEDS];
+	static const float SPEED_TABLE_TILT[SONY_EVID100P_NUM_TILT_SPEEDS];
 };
-
-
 
 #endif

@@ -21,6 +21,7 @@
  */
 
 #include "sensor_thread.h"
+
 #include "act_thread.h"
 
 using namespace fawkes;
@@ -34,11 +35,10 @@ using namespace fawkes;
 
 /** Constructor. */
 PanTiltSensorThread::PanTiltSensorThread()
-  : Thread("PanTiltSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
+: Thread("PanTiltSensorThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
 }
-
 
 /** Add an act thread.
  * @param act_thread to add
@@ -46,20 +46,20 @@ PanTiltSensorThread::PanTiltSensorThread()
 void
 PanTiltSensorThread::add_act_thread(PanTiltActThread *act_thread)
 {
-  act_threads_.push_back(act_thread);
+	act_threads_.push_back(act_thread);
 }
-
 
 void
 PanTiltSensorThread::loop()
 {
-  for (ati_ = act_threads_.begin(); ati_ != act_threads_.end(); ++ati_) {
-    try {
-      (*ati_)->update_sensor_values();
-    } catch (Exception &e) {
-      logger->log_warn(name(), "Act thread %s threw an exception when updating sensor values",
-		       (*ati_)->name());
-      logger->log_warn(name(), e);
-    }
-  }
+	for (ati_ = act_threads_.begin(); ati_ != act_threads_.end(); ++ati_) {
+		try {
+			(*ati_)->update_sensor_values();
+		} catch (Exception &e) {
+			logger->log_warn(name(),
+			                 "Act thread %s threw an exception when updating sensor values",
+			                 (*ati_)->name());
+			logger->log_warn(name(), e);
+		}
+	}
 }

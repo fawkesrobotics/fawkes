@@ -36,76 +36,75 @@ using namespace fawkes;
  */
 
 /** Maximum pan. */
-const int   SonyEviD100PVisca::MAX_PAN       =  1440;
+const int SonyEviD100PVisca::MAX_PAN = 1440;
 /** Minimum pan. */
-const int   SonyEviD100PVisca::MIN_PAN       = -1439;
+const int SonyEviD100PVisca::MIN_PAN = -1439;
 /** Max Tilt. */
-const int   SonyEviD100PVisca::MAX_TILT      =   360;
+const int SonyEviD100PVisca::MAX_TILT = 360;
 /** Min tilt .*/
-const int   SonyEviD100PVisca::MIN_TILT      = - 359;
+const int SonyEviD100PVisca::MIN_TILT = -359;
 
 /** Max pan in degrees. */
-const float SonyEviD100PVisca::MAX_PAN_DEG   =  100.f;
+const float SonyEviD100PVisca::MAX_PAN_DEG = 100.f;
 /** Min pan in degrees. */
-const float SonyEviD100PVisca::MIN_PAN_DEG   = -100.f;
+const float SonyEviD100PVisca::MIN_PAN_DEG = -100.f;
 /** Max tilt in degrees. */
-const float SonyEviD100PVisca::MAX_TILT_DEG  =   25.f;
+const float SonyEviD100PVisca::MAX_TILT_DEG = 25.f;
 /** Min tilt in degrees. */
-const float SonyEviD100PVisca::MIN_TILT_DEG  = - 25.f;
+const float SonyEviD100PVisca::MIN_TILT_DEG = -25.f;
 
 /** Max pan in rad. */
-const float SonyEviD100PVisca::MAX_PAN_RAD   = deg2rad(MAX_PAN_DEG);
+const float SonyEviD100PVisca::MAX_PAN_RAD = deg2rad(MAX_PAN_DEG);
 /** Min pan in rad. */
-const float SonyEviD100PVisca::MIN_PAN_RAD   = deg2rad(MIN_PAN_DEG);
+const float SonyEviD100PVisca::MIN_PAN_RAD = deg2rad(MIN_PAN_DEG);
 /** Max tilt in rad. */
-const float SonyEviD100PVisca::MAX_TILT_RAD  = deg2rad(MAX_TILT_DEG);
+const float SonyEviD100PVisca::MAX_TILT_RAD = deg2rad(MAX_TILT_DEG);
 /** Min tilt in rad. */
-const float SonyEviD100PVisca::MIN_TILT_RAD  = deg2rad(MIN_TILT_DEG);
+const float SonyEviD100PVisca::MIN_TILT_RAD = deg2rad(MIN_TILT_DEG);
 
 /** Pan steps per degree */
-const float SonyEviD100PVisca::PAN_STEPS_PER_DEG  = MAX_PAN  / MAX_PAN_DEG;
+const float SonyEviD100PVisca::PAN_STEPS_PER_DEG = MAX_PAN / MAX_PAN_DEG;
 /** Tilt steps per degree */
 const float SonyEviD100PVisca::TILT_STEPS_PER_DEG = MAX_TILT / MAX_TILT_DEG;
 
 /** Pan steps per rad */
-const float SonyEviD100PVisca::PAN_STEPS_PER_RAD  = MAX_PAN  / MAX_PAN_RAD;
+const float SonyEviD100PVisca::PAN_STEPS_PER_RAD = MAX_PAN / MAX_PAN_RAD;
 /** Tilt steps per rad */
 const float SonyEviD100PVisca::TILT_STEPS_PER_RAD = MAX_TILT / MAX_TILT_RAD;
 
 /** Pastel effect. */
-const unsigned int SonyEviD100PVisca::EFFECT_PASTEL   = 1;
+const unsigned int SonyEviD100PVisca::EFFECT_PASTEL = 1;
 /** Negative effect. */
 const unsigned int SonyEviD100PVisca::EFFECT_NEGATIVE = 2;
 /** Sepia effect. */
-const unsigned int SonyEviD100PVisca::EFFECT_SEPIA    = 3;
+const unsigned int SonyEviD100PVisca::EFFECT_SEPIA = 3;
 /** B/W effect. */
-const unsigned int SonyEviD100PVisca::EFFECT_BW       = 4;
+const unsigned int SonyEviD100PVisca::EFFECT_BW = 4;
 /** Solarize effect. */
 const unsigned int SonyEviD100PVisca::EFFECT_SOLARIZE = 5;
 /** Mosaic effect. */
-const unsigned int SonyEviD100PVisca::EFFECT_MOSAIC   = 6;
+const unsigned int SonyEviD100PVisca::EFFECT_MOSAIC = 6;
 /** Slim effect. */
-const unsigned int SonyEviD100PVisca::EFFECT_SLIM     = 7;
+const unsigned int SonyEviD100PVisca::EFFECT_SLIM = 7;
 /** Stretch effect. */
-const unsigned int SonyEviD100PVisca::EFFECT_STRETCH  = 8;
-
+const unsigned int SonyEviD100PVisca::EFFECT_STRETCH = 8;
 
 /** Speed table for supported pan speed values in radians.
  * Has been created empirically.
  */
-const float SonyEviD100PVisca::SPEED_TABLE_PAN[] =
-  {0.03548, 0.04138, 0.05319, 0.06497, 0.08262, 0.10608, 0.12951, 0.15865,
-   0.19933, 0.24535, 0.30159, 0.35137, 0.43540, 0.53611, 0.67246, 0.81519,
-   0.99870, 1.20673, 1.45304, 1.70703, 1.99278, 2.25729, 2.44293, 2.71852};
+const float SonyEviD100PVisca::SPEED_TABLE_PAN[] = {0.03548, 0.04138, 0.05319, 0.06497, 0.08262,
+                                                    0.10608, 0.12951, 0.15865, 0.19933, 0.24535,
+                                                    0.30159, 0.35137, 0.43540, 0.53611, 0.67246,
+                                                    0.81519, 0.99870, 1.20673, 1.45304, 1.70703,
+                                                    1.99278, 2.25729, 2.44293, 2.71852};
 
 /** Speed table for supported tilt speed values in radians.
  * Has been created empirically.
  */
-const float SonyEviD100PVisca::SPEED_TABLE_TILT[] =
-  {0.03541, 0.04127, 0.05298, 0.06449, 0.08195, 0.10480, 0.12741, 0.15535,
-   0.19356, 0.23685, 0.28438, 0.33367, 0.41066, 0.49517, 0.59622, 0.71474,
-   0.83085, 0.97431, 1.08745, 1.20977};
-
+const float SonyEviD100PVisca::SPEED_TABLE_TILT[] = {0.03541, 0.04127, 0.05298, 0.06449, 0.08195,
+                                                     0.10480, 0.12741, 0.15535, 0.19356, 0.23685,
+                                                     0.28438, 0.33367, 0.41066, 0.49517, 0.59622,
+                                                     0.71474, 0.83085, 0.97431, 1.08745, 1.20977};
 
 /** Constructor.
  * @param device_file serial device file (e.g. /dev/ttyUSB0)
@@ -114,19 +113,17 @@ const float SonyEviD100PVisca::SPEED_TABLE_TILT[] =
  * @param blocking true to make gathering pan/tilt information wait for
  * the reponse, false to be able to split the operation
  */
-SonyEviD100PVisca::SonyEviD100PVisca(const char *device_file,
-				     unsigned int def_timeout_ms,
-				     bool blocking)
-  : Visca(device_file, def_timeout_ms, blocking)
+SonyEviD100PVisca::SonyEviD100PVisca(const char * device_file,
+                                     unsigned int def_timeout_ms,
+                                     bool         blocking)
+: Visca(device_file, def_timeout_ms, blocking)
 {
 }
-
 
 /** Destructor. */
 SonyEviD100PVisca::~SonyEviD100PVisca()
 {
 }
-
 
 /** Set pan/tilt in radians.
  * @param pan pan value in radians
@@ -135,21 +132,20 @@ SonyEviD100PVisca::~SonyEviD100PVisca()
 void
 SonyEviD100PVisca::set_pan_tilt_rad(float pan, float tilt)
 {
-  if ( (pan < MIN_PAN_RAD) || (pan > MAX_PAN_RAD) ) {
-    throw OutOfBoundsException("Illegal pan value", pan, MIN_PAN_RAD, MAX_PAN_RAD);
-  }
-  if ( (tilt < MIN_TILT_RAD) || (tilt > MAX_TILT_RAD) ) {
-    throw OutOfBoundsException("Illegal tilt value", tilt, MIN_TILT_RAD, MAX_TILT_RAD);
-  }
+	if ((pan < MIN_PAN_RAD) || (pan > MAX_PAN_RAD)) {
+		throw OutOfBoundsException("Illegal pan value", pan, MIN_PAN_RAD, MAX_PAN_RAD);
+	}
+	if ((tilt < MIN_TILT_RAD) || (tilt > MAX_TILT_RAD)) {
+		throw OutOfBoundsException("Illegal tilt value", tilt, MIN_TILT_RAD, MAX_TILT_RAD);
+	}
 
-  int tpan = 0, ttilt = 0;
+	int tpan = 0, ttilt = 0;
 
-  tpan = (int)rintf(  pan  * PAN_STEPS_PER_RAD  );
-  ttilt = (int)rintf( tilt * TILT_STEPS_PER_RAD );
+	tpan  = (int)rintf(pan * PAN_STEPS_PER_RAD);
+	ttilt = (int)rintf(tilt * TILT_STEPS_PER_RAD);
 
-  set_pan_tilt(tpan, ttilt);
+	set_pan_tilt(tpan, ttilt);
 }
-
 
 /** Get pan/tilt in radians.
  * @param pan upon return contains the current pan value
@@ -158,13 +154,12 @@ SonyEviD100PVisca::set_pan_tilt_rad(float pan, float tilt)
 void
 SonyEviD100PVisca::get_pan_tilt_rad(float &pan, float &tilt)
 {
-  int tpan = 0, ttilt = 0;
-  get_pan_tilt(tpan, ttilt);
+	int tpan = 0, ttilt = 0;
+	get_pan_tilt(tpan, ttilt);
 
-  pan  = tpan  / PAN_STEPS_PER_RAD;
-  tilt = ttilt / PAN_STEPS_PER_RAD;
+	pan  = tpan / PAN_STEPS_PER_RAD;
+	tilt = ttilt / PAN_STEPS_PER_RAD;
 }
-
 
 /** Set speed given in rad/sec.
  * Note that not the exact speed is taken, but rather the closes equivalent in
@@ -176,48 +171,50 @@ SonyEviD100PVisca::get_pan_tilt_rad(float &pan, float &tilt)
 void
 SonyEviD100PVisca::set_speed_radsec(float pan_speed, float tilt_speed)
 {
-  if ( (pan_speed < 0) ||
-       (pan_speed > SPEED_TABLE_PAN[SONY_EVID100P_NUM_PAN_SPEEDS - 1]) ) {
-    throw OutOfBoundsException("Illegal pan speed", pan_speed, 0,
-			       SPEED_TABLE_PAN[SONY_EVID100P_NUM_PAN_SPEEDS - 1]);
-  }
-  if ( (tilt_speed < 0) ||
-       (tilt_speed > SPEED_TABLE_TILT[SONY_EVID100P_NUM_TILT_SPEEDS - 1]) ) {
-    throw OutOfBoundsException("Illegal tilt speed", tilt_speed, 0,
-			       SPEED_TABLE_TILT[SONY_EVID100P_NUM_TILT_SPEEDS - 1]);
-  }
+	if ((pan_speed < 0) || (pan_speed > SPEED_TABLE_PAN[SONY_EVID100P_NUM_PAN_SPEEDS - 1])) {
+		throw OutOfBoundsException("Illegal pan speed",
+		                           pan_speed,
+		                           0,
+		                           SPEED_TABLE_PAN[SONY_EVID100P_NUM_PAN_SPEEDS - 1]);
+	}
+	if ((tilt_speed < 0) || (tilt_speed > SPEED_TABLE_TILT[SONY_EVID100P_NUM_TILT_SPEEDS - 1])) {
+		throw OutOfBoundsException("Illegal tilt speed",
+		                           tilt_speed,
+		                           0,
+		                           SPEED_TABLE_TILT[SONY_EVID100P_NUM_TILT_SPEEDS - 1]);
+	}
 
-  unsigned int pan_ind = SONY_EVID100P_NUM_PAN_SPEEDS - 1;
-  float min_pan_dist = SPEED_TABLE_PAN[pan_ind];
-  float last_dist = min_pan_dist;;
-  for (unsigned int i = 0; i < SONY_EVID100P_NUM_PAN_SPEEDS; ++i) {
-    float dist = 0;
-    if ( (dist = fabs(pan_speed - SPEED_TABLE_PAN[i])) < min_pan_dist ) {
-      min_pan_dist = dist;
-      pan_ind = i;
-    } else if (dist > last_dist) {
-      break; // times are growing now, found best
-    }
-    last_dist = dist;
-  }
+	unsigned int pan_ind      = SONY_EVID100P_NUM_PAN_SPEEDS - 1;
+	float        min_pan_dist = SPEED_TABLE_PAN[pan_ind];
+	float        last_dist    = min_pan_dist;
+	;
+	for (unsigned int i = 0; i < SONY_EVID100P_NUM_PAN_SPEEDS; ++i) {
+		float dist = 0;
+		if ((dist = fabs(pan_speed - SPEED_TABLE_PAN[i])) < min_pan_dist) {
+			min_pan_dist = dist;
+			pan_ind      = i;
+		} else if (dist > last_dist) {
+			break; // times are growing now, found best
+		}
+		last_dist = dist;
+	}
 
-  unsigned int tilt_ind = SONY_EVID100P_NUM_TILT_SPEEDS - 1;
-  float min_tilt_dist = SPEED_TABLE_TILT[tilt_ind];
-  last_dist = min_tilt_dist;
-  for (unsigned int i = 0; i < SONY_EVID100P_NUM_TILT_SPEEDS; ++i) {
-    float dist = 0;
-    if ( (dist = fabs(tilt_speed - SPEED_TABLE_TILT[i])) < min_tilt_dist ) {
-      min_tilt_dist = dist;
-      tilt_ind = i;
-    } else if (dist > last_dist) {
-      break; // times are growing now, found best
-    }
-    last_dist = dist;
-  }
+	unsigned int tilt_ind      = SONY_EVID100P_NUM_TILT_SPEEDS - 1;
+	float        min_tilt_dist = SPEED_TABLE_TILT[tilt_ind];
+	last_dist                  = min_tilt_dist;
+	for (unsigned int i = 0; i < SONY_EVID100P_NUM_TILT_SPEEDS; ++i) {
+		float dist = 0;
+		if ((dist = fabs(tilt_speed - SPEED_TABLE_TILT[i])) < min_tilt_dist) {
+			min_tilt_dist = dist;
+			tilt_ind      = i;
+		} else if (dist > last_dist) {
+			break; // times are growing now, found best
+		}
+		last_dist = dist;
+	}
 
-  set_pan_tilt_speed(pan_ind, tilt_ind);
+	set_pan_tilt_speed(pan_ind, tilt_ind);
 }
-
 
 /** Get current speed in rad/sec.
  * @param pan_speed upon return contains pan speed in rad/sec
@@ -226,12 +223,11 @@ SonyEviD100PVisca::set_speed_radsec(float pan_speed, float tilt_speed)
 void
 SonyEviD100PVisca::get_speed_radsec(float &pan_speed, float &tilt_speed)
 {
-  unsigned char ps, ts;
-  get_pan_tilt_speed(ps, ts);
-  pan_speed = SPEED_TABLE_PAN[ps - 1];
-  tilt_speed = SPEED_TABLE_TILT[ps - 1];
+	unsigned char ps, ts;
+	get_pan_tilt_speed(ps, ts);
+	pan_speed  = SPEED_TABLE_PAN[ps - 1];
+	tilt_speed = SPEED_TABLE_TILT[ps - 1];
 }
-
 
 /** Get speed limits.
  * @param pan_min minimum pan speed possible
@@ -240,11 +236,13 @@ SonyEviD100PVisca::get_speed_radsec(float &pan_speed, float &tilt_speed)
  * @param tilt_max maximum tilt speed possible
  */
 void
-SonyEviD100PVisca::get_speed_limits(float &pan_min, float &pan_max,
-				    float &tilt_min, float &tilt_max)
+SonyEviD100PVisca::get_speed_limits(float &pan_min,
+                                    float &pan_max,
+                                    float &tilt_min,
+                                    float &tilt_max)
 {
-  pan_min = SPEED_TABLE_PAN[0];
-  pan_max = SPEED_TABLE_PAN[SONY_EVID100P_NUM_PAN_SPEEDS - 1];
-  tilt_min = SPEED_TABLE_TILT[0];
-  tilt_max = SPEED_TABLE_TILT[SONY_EVID100P_NUM_TILT_SPEEDS - 1];
+	pan_min  = SPEED_TABLE_PAN[0];
+	pan_max  = SPEED_TABLE_PAN[SONY_EVID100P_NUM_PAN_SPEEDS - 1];
+	tilt_min = SPEED_TABLE_TILT[0];
+	tilt_max = SPEED_TABLE_TILT[SONY_EVID100P_NUM_TILT_SPEEDS - 1];
 }

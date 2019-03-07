@@ -46,11 +46,10 @@ using namespace fawkes;
  * @param thread_name thread name
  */
 PanTiltActThread::PanTiltActThread(const char *thread_name)
-  : Thread(thread_name, Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
+: Thread(thread_name, Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC)
 {
 }
-
 
 /** Destructor. */
 PanTiltActThread::~PanTiltActThread()

@@ -25,34 +25,37 @@
 
 #include "sensor_thread.h"
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 #include <list>
 
 class PanTiltActThread;
 
-class PanTiltSensorThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect
+class PanTiltSensorThread : public fawkes::Thread,
+                            public fawkes::BlockedTimingAspect,
+                            public fawkes::LoggingAspect,
+                            public fawkes::ConfigurableAspect
 {
- public:
-  PanTiltSensorThread();
+public:
+	PanTiltSensorThread();
 
-  void add_act_thread(PanTiltActThread *act_thread);
-  virtual void loop();
+	void         add_act_thread(PanTiltActThread *act_thread);
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  std::list<PanTiltActThread *>           act_threads_;
-  std::list<PanTiltActThread *>::iterator ati_;
+private:
+	std::list<PanTiltActThread *>           act_threads_;
+	std::list<PanTiltActThread *>::iterator ati_;
 };
-
 
 #endif
