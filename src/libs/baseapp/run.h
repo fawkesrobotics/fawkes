@@ -27,56 +27,55 @@
 #include <baseapp/init_options.h>
 
 namespace fawkes {
-  class ArgumentParser;
-  class MultiLogger;
-  class NetworkLogger;
-  class BlackBoard;
-  class Configuration;
-  class FawkesMainThread;
-  class PluginManager;
-  class AspectManager;
-  class ThreadManager;
-  class FawkesNetworkManager;
-  class Clock;
-  class Time;
-  class ConfigNetworkHandler;
-  class PluginNetworkHandler;
+class ArgumentParser;
+class MultiLogger;
+class NetworkLogger;
+class BlackBoard;
+class Configuration;
+class FawkesMainThread;
+class PluginManager;
+class AspectManager;
+class ThreadManager;
+class FawkesNetworkManager;
+class Clock;
+class Time;
+class ConfigNetworkHandler;
+class PluginNetworkHandler;
 
-  namespace tf {
-	  class Transformer;
-    class TransformListener;
-  }
+namespace tf {
+class Transformer;
+class TransformListener;
+} // namespace tf
 
-  namespace runtime {
+namespace runtime {
 
-extern ArgumentParser        *argument_parser;
-extern FawkesMainThread      *main_thread;
-extern MultiLogger           *logger;
-extern NetworkLogger         *network_logger;
-extern BlackBoard            *blackboard;
-extern Configuration         *config;
-extern Clock                 *clock;
-extern PluginManager         *plugin_manager;
-extern AspectManager         *aspect_manager;
-extern ThreadManager         *thread_manager;
-extern FawkesNetworkManager  *network_manager;
-extern ConfigNetworkHandler  *nethandler_config;
-extern PluginNetworkHandler  *nethandler_plugin;
-extern tf::Transformer       *tf_transformer;
+extern ArgumentParser *       argument_parser;
+extern FawkesMainThread *     main_thread;
+extern MultiLogger *          logger;
+extern NetworkLogger *        network_logger;
+extern BlackBoard *           blackboard;
+extern Configuration *        config;
+extern Clock *                clock;
+extern PluginManager *        plugin_manager;
+extern AspectManager *        aspect_manager;
+extern ThreadManager *        thread_manager;
+extern FawkesNetworkManager * network_manager;
+extern ConfigNetworkHandler * nethandler_config;
+extern PluginNetworkHandler * nethandler_plugin;
+extern tf::Transformer *      tf_transformer;
 extern tf::TransformListener *tf_listener;
-extern Time                  *start_time;
+extern Time *                 start_time;
 
-bool init(int argc, char **argv, int & retval);
-bool init(const InitOptions& options, int & retval);
-void run();
-void cleanup();
-void quit();
+bool  init(int argc, char **argv, int &retval);
+bool  init(const InitOptions &options, int &retval);
+void  run();
+void  cleanup();
+void  quit();
 float uptime();
 
 void print_usage(const char *progname);
 
 } // end namespace runtime
 } // end namespace fawkes
-
 
 #endif
