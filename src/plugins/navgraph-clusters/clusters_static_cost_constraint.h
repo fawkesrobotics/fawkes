@@ -26,24 +26,24 @@
 #include <list>
 #include <string>
 
-class NavGraphClustersThread; 
+class NavGraphClustersThread;
 
 class NavGraphClustersStaticCostConstraint : public fawkes::NavGraphEdgeCostConstraint
 {
- public:
-  NavGraphClustersStaticCostConstraint(const char *name, NavGraphClustersThread *parent,
-				       float cost_factor);
-  virtual ~NavGraphClustersStaticCostConstraint();
+public:
+	NavGraphClustersStaticCostConstraint(const char *            name,
+	                                     NavGraphClustersThread *parent,
+	                                     float                   cost_factor);
+	virtual ~NavGraphClustersStaticCostConstraint();
 
-  virtual bool compute(void) throw();
-  virtual float cost_factor(const fawkes::NavGraphNode &from,
-			    const fawkes::NavGraphNode &to) throw();
+	virtual bool  compute(void) throw();
+	virtual float cost_factor(const fawkes::NavGraphNode &from,
+	                          const fawkes::NavGraphNode &to) throw();
 
- private:
-  NavGraphClustersThread *parent_;
-  float cost_factor_;
-  std::list<std::pair<std::string, std::string>> blocked_;
-
+private:
+	NavGraphClustersThread *                       parent_;
+	float                                          cost_factor_;
+	std::list<std::pair<std::string, std::string>> blocked_;
 };
 
 #endif

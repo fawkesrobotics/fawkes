@@ -24,37 +24,39 @@
 
 #include <navgraph/constraints/edge_cost_constraint.h>
 
-#include <list>
-#include <tuple>
-#include <string>
 #include <Eigen/Geometry>
+#include <list>
+#include <string>
+#include <tuple>
 
-class NavGraphClustersThread; 
+class NavGraphClustersThread;
 
 class NavGraphClustersDistanceCostConstraint : public fawkes::NavGraphEdgeCostConstraint
 {
- public:
-  NavGraphClustersDistanceCostConstraint(const char *name, NavGraphClustersThread *parent,
-				       float cost_min, float cost_max,
-				       float dist_min, float dist_max);
-  virtual ~NavGraphClustersDistanceCostConstraint();
+public:
+	NavGraphClustersDistanceCostConstraint(const char *            name,
+	                                       NavGraphClustersThread *parent,
+	                                       float                   cost_min,
+	                                       float                   cost_max,
+	                                       float                   dist_min,
+	                                       float                   dist_max);
+	virtual ~NavGraphClustersDistanceCostConstraint();
 
-  virtual bool compute(void) throw();
-  virtual float cost_factor(const fawkes::NavGraphNode &from,
-			    const fawkes::NavGraphNode &to) throw();
+	virtual bool  compute(void) throw();
+	virtual float cost_factor(const fawkes::NavGraphNode &from,
+	                          const fawkes::NavGraphNode &to) throw();
 
- private:
-  NavGraphClustersThread *parent_;
-  float cost_min_;
-  float cost_max_;
-  float cost_span_;
-  float dist_min_;
-  float dist_max_;
-  float dist_span_;
-  bool valid_;
-  std::list<std::tuple<std::string, std::string, Eigen::Vector2f>> blocked_;
-  Eigen::Vector2f pose_;
-
+private:
+	NavGraphClustersThread *                                         parent_;
+	float                                                            cost_min_;
+	float                                                            cost_max_;
+	float                                                            cost_span_;
+	float                                                            dist_min_;
+	float                                                            dist_max_;
+	float                                                            dist_span_;
+	bool                                                             valid_;
+	std::list<std::tuple<std::string, std::string, Eigen::Vector2f>> blocked_;
+	Eigen::Vector2f                                                  pose_;
 };
 
 #endif

@@ -26,22 +26,20 @@
 #include <list>
 #include <string>
 
-class NavGraphClustersThread; 
+class NavGraphClustersThread;
 
 class NavGraphClustersBlockConstraint : public fawkes::NavGraphEdgeConstraint
 {
- public:
-  NavGraphClustersBlockConstraint(const char *name, NavGraphClustersThread *parent);
-  virtual ~NavGraphClustersBlockConstraint();
+public:
+	NavGraphClustersBlockConstraint(const char *name, NavGraphClustersThread *parent);
+	virtual ~NavGraphClustersBlockConstraint();
 
-  virtual bool compute(void) throw();
-  virtual bool blocks(const fawkes::NavGraphNode &from,
-		      const fawkes::NavGraphNode &to) throw();
+	virtual bool compute(void) throw();
+	virtual bool blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) throw();
 
- private:
-  NavGraphClustersThread *parent_;
-  std::list<std::pair<std::string, std::string>> blocked_;
-
+private:
+	NavGraphClustersThread *                       parent_;
+	std::list<std::pair<std::string, std::string>> blocked_;
 };
 
 #endif

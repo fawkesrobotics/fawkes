@@ -20,6 +20,7 @@
  */
 
 #include "clusters_distance_cost_constraint.h"
+
 #include "navgraph_clusters_thread.h"
 
 #include <core/exception.h>
@@ -42,26 +43,29 @@ using namespace fawkes;
  * assigned 1.0.
  */
 NavGraphClustersDistanceCostConstraint::NavGraphClustersDistanceCostConstraint(
-  const char *name,
+  const char *            name,
   NavGraphClustersThread *parent,
-  float cost_min, float cost_max, float dist_min, float dist_max)
+  float                   cost_min,
+  float                   cost_max,
+  float                   dist_min,
+  float                   dist_max)
 : NavGraphEdgeCostConstraint(name)
 {
-  parent_    = parent;
-  cost_min_  = cost_min;
-  cost_max_  = cost_max;
-  cost_span_ = cost_max_ - cost_min_;
-  dist_min_  = dist_min;
-  dist_max_  = dist_max;
-  dist_span_ = dist_max_ - dist_min_;
-  valid_     = false;
+	parent_    = parent;
+	cost_min_  = cost_min;
+	cost_max_  = cost_max;
+	cost_span_ = cost_max_ - cost_min_;
+	dist_min_  = dist_min;
+	dist_max_  = dist_max;
+	dist_span_ = dist_max_ - dist_min_;
+	valid_     = false;
 
-  if (cost_min_ > cost_max_) {
-    throw Exception("Cost min must be less or equal to max");
-  }
-  if (dist_min_ > dist_max_) {
-    throw Exception("Dist min must be less or equal to max");
-  }
+	if (cost_min_ > cost_max_) {
+		throw Exception("Cost min must be less or equal to max");
+	}
+	if (dist_min_ > dist_max_) {
+		throw Exception("Dist min must be less or equal to max");
+	}
 }
 
 /** Virtual empty destructor. */
@@ -69,43 +73,41 @@ NavGraphClustersDistanceCostConstraint::~NavGraphClustersDistanceCostConstraint(
 {
 }
 
-
 bool
 NavGraphClustersDistanceCostConstraint::compute(void) throw()
 {
-  blocked_ = parent_->blocked_edges_centroids();
-  valid_   = parent_->robot_pose(pose_);
-  return valid_;
+	blocked_ = parent_->blocked_edges_centroids();
+	valid_   = parent_->robot_pose(pose_);
+	return valid_;
 }
-
 
 float
 NavGraphClustersDistanceCostConstraint::cost_factor(const fawkes::NavGraphNode &from,
-						  const fawkes::NavGraphNode &to) throw()
+                                                    const fawkes::NavGraphNode &to) throw()
 {
-  if (valid_) {
-    std::string to_n = to.name();
-    std::string from_n = from.name();
+	if (valid_) {
+		std::string to_n   = to.name();
+		std::string from_n = from.name();
 
-    std::list<std::tuple<std::string, std::string, Eigen::Vector2f>>::iterator bl=
-      std::find_if(blocked_.begin(), blocked_.end(),
-		   [&to_n, &from_n](std::tuple<std::string, std::string, Eigen::Vector2f> &b) {
-		     return
-		     (to_n == std::get<0>(b) && from_n == std::get<1>(b)) ||
-		     (to_n == std::get<1>(b) && from_n == std::get<0>(b));
-		   });
+		std::list<std::tuple<std::string, std::string, Eigen::Vector2f>>::iterator bl =
+		  std::find_if(blocked_.begin(),
+		               blocked_.end(),
+		               [&to_n, &from_n](std::tuple<std::string, std::string, Eigen::Vector2f> &b) {
+			               return (to_n == std::get<0>(b) && from_n == std::get<1>(b))
+			                      || (to_n == std::get<1>(b) && from_n == std::get<0>(b));
+		               });
 
-    if (bl != blocked_.end()) {
-      float distance = (pose_ - std::get<2>(*bl)).norm();
-      if (distance <= dist_min_) {
-	return cost_max_;
-      } else if (distance >= dist_max_) {
+		if (bl != blocked_.end()) {
+			float distance = (pose_ - std::get<2>(*bl)).norm();
+			if (distance <= dist_min_) {
+				return cost_max_;
+			} else if (distance >= dist_max_) {
+				return 1.0;
+			} else {
+				return cost_max_ - (((distance - dist_min_) / dist_span_) * cost_span_);
+			}
+		}
+	}
+
 	return 1.0;
-      } else {
-	return cost_max_ - (((distance - dist_min_) / dist_span_) * cost_span_);
-      }
-    }
-  }
-
-  return 1.0;
 }
