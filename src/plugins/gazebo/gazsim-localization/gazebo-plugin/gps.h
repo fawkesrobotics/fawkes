@@ -19,49 +19,48 @@
  */
 
 #include <boost/bind.hpp>
+#include <gazebo/common/common.hh>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
-#include <gazebo/common/common.hh>
-#include <stdio.h>
 #include <gazebo/transport/transport.hh>
 #include <list>
+#include <stdio.h>
 #include <string.h>
 
-namespace gazebo
-{
-  /**
+namespace gazebo {
+/**
    * Provides ground Truth position
    * @author Frederik Zwilling
    */
-  class Gps : public ModelPlugin
-  {
-  public:
-    Gps();
-   ~Gps();
+class Gps : public ModelPlugin
+{
+public:
+	Gps();
+	~Gps();
 
-    //Overridden ModelPlugin-Functions
-    virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/);
-    virtual void OnUpdate(const common::UpdateInfo &);
-    virtual void Reset();
+	//Overridden ModelPlugin-Functions
+	virtual void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/);
+	virtual void OnUpdate(const common::UpdateInfo &);
+	virtual void Reset();
 
-  private:
-    /// Pointer to the gazbeo model
-    physics::ModelPtr model_;
-    /// Pointer to the update event connection
-    event::ConnectionPtr update_connection_;
-    ///Node for communication to fawkes
-    transport::NodePtr node_;
-    ///name of the gps and the communication channel
-    std::string name_;
+private:
+	/// Pointer to the gazbeo model
+	physics::ModelPtr model_;
+	/// Pointer to the update event connection
+	event::ConnectionPtr update_connection_;
+	///Node for communication to fawkes
+	transport::NodePtr node_;
+	///name of the gps and the communication channel
+	std::string name_;
 
-    ///time variable to send in intervals
-    double last_sent_time_;
+	///time variable to send in intervals
+	double last_sent_time_;
 
-    //Gps Stuff:
-    ///Functions for sending information to fawkes:
-    void send_position();
+	//Gps Stuff:
+	///Functions for sending information to fawkes:
+	void send_position();
 
-    ///Publisher for GyroAngle
-    transport::PublisherPtr gps_pub_;
-  };
-}
+	///Publisher for GyroAngle
+	transport::PublisherPtr gps_pub_;
+};
+} // namespace gazebo
