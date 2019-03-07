@@ -24,39 +24,37 @@
 
 #include <glibmm/exception.h>
 #ifdef HAVE_GCONFMM
-#include <gui_utils/service_chooser_dialog.h>
+#	include <gui_utils/service_chooser_dialog.h>
 #endif
 
-
-#  define UI_FILE RESDIR"/eclipsedebuggergui/eclipsedebuggergui.ui"
-
+#define UI_FILE RESDIR "/eclipsedebuggergui/eclipsedebuggergui.ui"
 
 /** This is the main program of the Eclipse debugger starter.
  */
 int
-main(int argc, char **argv) {
-  Gtk::Main gtk_main(argc, argv);
+main(int argc, char **argv)
+{
+	Gtk::Main gtk_main(argc, argv);
 #ifdef HAVE_GCONFMM
-  Gnome::Conf::init();
+	Gnome::Conf::init();
 #endif
 
-  try {
-    Glib::RefPtr<Gtk::Builder> builder =
-      Gtk::Builder::create_from_file(UI_FILE);
+	try {
+		Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create_from_file(UI_FILE);
 
-    EclipseDebugger *window = NULL;
-    builder->get_widget_derived("wnd_eclipsedebuggergui", window);
+		EclipseDebugger *window = NULL;
+		builder->get_widget_derived("wnd_eclipsedebuggergui", window);
 
-    Gtk::Main::run(*window);
+		Gtk::Main::run(*window);
 
-    delete window;
-  } catch (Gtk::BuilderError &e) {
-    printf("Failed to instantiate window: %s\n", e.what().c_str());
-    return 1;
-  } catch (Glib::Exception &e) {
-    printf("%s\n", e.what().c_str());
-    return 1;
-  }
+		delete window;
+	} catch (Gtk::BuilderError &e) {
+		printf("Failed to instantiate window: %s\n", e.what().c_str());
+		return 1;
+	} catch (Glib::Exception &e) {
+		printf("%s\n", e.what().c_str());
+		return 1;
+	}
 
-  return 0;
+	return 0;
 }
