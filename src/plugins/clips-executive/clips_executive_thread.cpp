@@ -21,11 +21,11 @@
 
 #include "clips_executive_thread.h"
 
+#include <core/threading/mutex_locker.h>
+#include <interfaces/SwitchInterface.h>
+#include <utils/misc/map_skill.h>
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
-#include <utils/misc/map_skill.h>
-#include <interfaces/SwitchInterface.h>
-#include <core/threading/mutex_locker.h>
 
 using namespace fawkes;
 
@@ -37,18 +37,16 @@ using namespace fawkes;
 
 /** Constructor. */
 ClipsExecutiveThread::ClipsExecutiveThread()
-	: Thread("ClipsExecutiveThread", Thread::OPMODE_WAITFORWAKEUP),
-	  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK),
-	  CLIPSAspect("executive", "CLIPS (executive)")
+: Thread("ClipsExecutiveThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK),
+  CLIPSAspect("executive", "CLIPS (executive)")
 {
 }
-
 
 /** Destructor. */
 ClipsExecutiveThread::~ClipsExecutiveThread()
 {
 }
-
 
 void
 ClipsExecutiveThread::init()
@@ -56,24 +54,27 @@ ClipsExecutiveThread::init()
 	cfg_assert_time_each_loop_ = false;
 	try {
 		cfg_assert_time_each_loop_ = config->get_bool("/clips-executive/assert-time-each-loop");
-	} catch (Exception &e) {} // ignore, use default
+	} catch (Exception &e) {
+	} // ignore, use default
 
 	std::vector<std::string> clips_dirs;
 	try {
 		clips_dirs = config->get_strings("/clips-executive/clips-dirs");
 		for (size_t i = 0; i < clips_dirs.size(); ++i) {
-			if (clips_dirs[i][clips_dirs[i].size()-1] != '/') {
+			if (clips_dirs[i][clips_dirs[i].size() - 1] != '/') {
 				clips_dirs[i] += "/";
 			}
 			logger->log_debug(name(), "DIR: %s", clips_dirs[i].c_str());
 		}
-	} catch (Exception &e) {} // ignore, use default
+	} catch (Exception &e) {
+	} // ignore, use default
 	clips_dirs.insert(clips_dirs.begin(), std::string(SRCDIR) + "/clips/");
 
 	try {
 		std::string cfg_spec = config->get_string("/clips-executive/spec");
 
-		std::string action_mapping_cfgpath = std::string("/clips-executive/specs/") + cfg_spec + "/action-mapping/";
+		std::string action_mapping_cfgpath =
+		  std::string("/clips-executive/specs/") + cfg_spec + "/action-mapping/";
 #if __cplusplus >= 201103L
 		std::unique_ptr<Configuration::ValueIterator> v(config->search(action_mapping_cfgpath.c_str()));
 #else
@@ -82,19 +83,21 @@ ClipsExecutiveThread::init()
 		std::map<std::string, std::string> mapping;
 		while (v->next()) {
 			std::string action_name = std::string(v->path()).substr(action_mapping_cfgpath.length());
-			mapping[action_name] = v->get_as_string();
-			logger->log_info(name(), "Adding action mapping '%s' -> '%s'",
-			                 action_name.c_str(), v->get_as_string().c_str());
+			mapping[action_name]    = v->get_as_string();
+			logger->log_info(name(),
+			                 "Adding action mapping '%s' -> '%s'",
+			                 action_name.c_str(),
+			                 v->get_as_string().c_str());
 		}
 
 		action_skill_mapping_ = std::make_shared<fawkes::ActionSkillMapping>(mapping);
-	} catch (Exception &e) {} // ignore
-	
+	} catch (Exception &e) {
+	} // ignore
+
 	MutexLocker lock(clips.objmutex_ptr());
 
 	clips->evaluate(std::string("(path-add-subst \"@BASEDIR@\" \"") + BASEDIR + "\")");
-	clips->evaluate(std::string("(path-add-subst \"@FAWKES_BASEDIR@\" \"") +
-	                FAWKES_BASEDIR + "\")");
+	clips->evaluate(std::string("(path-add-subst \"@FAWKES_BASEDIR@\" \"") + FAWKES_BASEDIR + "\")");
 	clips->evaluate(std::string("(path-add-subst \"@RESDIR@\" \"") + RESDIR + "\")");
 	clips->evaluate(std::string("(path-add-subst \"@CONFDIR@\" \"") + CONFDIR + "\")");
 
@@ -105,28 +108,30 @@ ClipsExecutiveThread::init()
 	clips->evaluate("(ff-feature-request \"config\")");
 
 	clips->add_function("map-action-skill",
-	                    sigc::slot<std::string, std::string, CLIPS::Values, CLIPS::Values>
-	                    (sigc::mem_fun(*this, &ClipsExecutiveThread::clips_map_skill)));
+	                    sigc::slot<std::string, std::string, CLIPS::Values, CLIPS::Values>(
+	                      sigc::mem_fun(*this, &ClipsExecutiveThread::clips_map_skill)));
 
 	bool cfg_req_redefwarn_feature = true;
 	try {
 		cfg_req_redefwarn_feature =
-			config->get_bool("/clips-executive/request-redefine-warning-feature");
-	} catch (Exception &e) {} // ignored, use default
+		  config->get_bool("/clips-executive/request-redefine-warning-feature");
+	} catch (Exception &e) {
+	} // ignored, use default
 	if (cfg_req_redefwarn_feature) {
 		logger->log_debug(name(), "Enabling warnings for redefinitions");
 		clips->evaluate("(ff-feature-request \"redefine-warning\")");
 	}
 
-  std::vector<std::string> files{SRCDIR "/clips/saliences.clp", SRCDIR "/clips/init.clp"};
+	std::vector<std::string> files{SRCDIR "/clips/saliences.clp", SRCDIR "/clips/init.clp"};
 	for (const auto f : files) {
 		if (!clips->batch_evaluate(f)) {
-		  logger->log_error(name(), "Failed to initialize CLIPS environment, "
-			                  "batch file '%s' failed.", f.c_str());
-			throw Exception("Failed to initialize CLIPS environment, batch file '%s' failed.",
-			                f.c_str());
-	  }
-  }
+			logger->log_error(name(),
+			                  "Failed to initialize CLIPS environment, "
+			                  "batch file '%s' failed.",
+			                  f.c_str());
+			throw Exception("Failed to initialize CLIPS environment, batch file '%s' failed.", f.c_str());
+		}
+	}
 
 	clips->assert_fact("(executive-init)");
 	clips->refresh_agenda();
@@ -149,7 +154,6 @@ ClipsExecutiveThread::init()
 	}
 }
 
-
 void
 ClipsExecutiveThread::finalize()
 {
@@ -157,7 +161,6 @@ ClipsExecutiveThread::finalize()
 	clips->refresh_agenda();
 	clips->run();
 }
-
 
 void
 ClipsExecutiveThread::loop()
@@ -174,11 +177,12 @@ ClipsExecutiveThread::loop()
 	clips->run();
 }
 
-
 std::string
-ClipsExecutiveThread::clips_map_skill(std::string action_name, CLIPS::Values param_names, CLIPS::Values param_values)
+ClipsExecutiveThread::clips_map_skill(std::string   action_name,
+                                      CLIPS::Values param_names,
+                                      CLIPS::Values param_values)
 {
-	if (! action_skill_mapping_) {
+	if (!action_skill_mapping_) {
 		logger->log_error(name(), "No action mapping has been loaded");
 		return "";
 	}
@@ -186,18 +190,21 @@ ClipsExecutiveThread::clips_map_skill(std::string action_name, CLIPS::Values par
 		logger->log_warn(name(), "Failed to map, action name is empty");
 		return "";
 	}
-	if (! action_skill_mapping_->has_mapping(action_name)) {
+	if (!action_skill_mapping_->has_mapping(action_name)) {
 		logger->log_warn(name(), "No mapping for action '%s' known", action_name.c_str());
 		return "";
 	}
 	if (param_names.size() != param_values.size()) {
-		logger->log_warn(name(), "Number of parameter names and values "
-		                 "do not match for action '%s'", action_name.c_str());
+		logger->log_warn(name(),
+		                 "Number of parameter names and values "
+		                 "do not match for action '%s'",
+		                 action_name.c_str());
 		return "";
 	}
 	std::map<std::string, std::string> param_map;
 	for (size_t i = 0; i < param_names.size(); ++i) {
-		if (param_names[i].type() != CLIPS::TYPE_SYMBOL && param_names[i].type() != CLIPS::TYPE_STRING) {
+		if (param_names[i].type() != CLIPS::TYPE_SYMBOL
+		    && param_names[i].type() != CLIPS::TYPE_STRING) {
 			logger->log_error(name(), "Param for '%s' is not a string or symbol", action_name.c_str());
 			return "";
 		}
@@ -213,8 +220,10 @@ ClipsExecutiveThread::clips_map_skill(std::string action_name, CLIPS::Values par
 			param_map[param_names[i].as_string()] = param_values[i].as_string();
 			break;
 		default:
-			logger->log_error(name(), "Param '%s' for action '%s' of invalid type",
-			                  param_names[i].as_string().c_str(), action_name.c_str());
+			logger->log_error(name(),
+			                  "Param '%s' for action '%s' of invalid type",
+			                  param_names[i].as_string().c_str(),
+			                  action_name.c_str());
 			break;
 		}
 	}
