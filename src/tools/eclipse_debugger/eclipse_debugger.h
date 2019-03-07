@@ -23,38 +23,32 @@
 #ifndef _TOOLS_ECLIPSEDEBUGGER_ECLIPSEDEBUGGER_H_
 #define _TOOLS_ECLIPSEDEBUGGER_ECLIPSEDEBUGGER_H_
 
+#include <gui_utils/connection_dispatcher.h>
 #include <interfaces/EclipseDebuggerInterface.h>
 
-#include <gui_utils/connection_dispatcher.h>
 #include <gtkmm.h>
 
-
-
 namespace fawkes {
-  class BlackBoard;
-  class InterfaceDispatcher;
-  class LogView;
-}
-
-
+class BlackBoard;
+class InterfaceDispatcher;
+class LogView;
+} // namespace fawkes
 
 class EclipseDebugger : public Gtk::Window
 {
-  public: 
-    EclipseDebugger(BaseObjectType* cobject,
-                    const Glib::RefPtr<Gtk::Builder> &builder);
-    ~EclipseDebugger();
-  
-  private:
-    void establish_connection();
-    void on_connect();
-    void on_disconnect();
-    void close_bb();
-    fawkes::BlackBoard *bb;
-    
-    fawkes::EclipseDebuggerInterface *debugger_if_;
-    fawkes::ConnectionDispatcher connection_dispatcher;
+public:
+	EclipseDebugger(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &builder);
+	~EclipseDebugger();
 
+private:
+	void                establish_connection();
+	void                on_connect();
+	void                on_disconnect();
+	void                close_bb();
+	fawkes::BlackBoard *bb;
+
+	fawkes::EclipseDebuggerInterface *debugger_if_;
+	fawkes::ConnectionDispatcher      connection_dispatcher;
 };
 
 #endif
