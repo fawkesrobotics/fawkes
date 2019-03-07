@@ -27,8 +27,8 @@
 
 class SkillerPlugin : public fawkes::Plugin
 {
- public:
-  explicit SkillerPlugin(fawkes::Configuration *config);
+public:
+	explicit SkillerPlugin(fawkes::Configuration *config);
 };
 
 #endif
