@@ -26,42 +26,41 @@
 #include <gtkmm.h>
 
 namespace fawkes {
-  class AvahiThread;
-  class LogView;
-  class NetworkService;
-  class AvahiDispatcher;
-}
+class AvahiThread;
+class LogView;
+class NetworkService;
+class AvahiDispatcher;
+} // namespace fawkes
 
 class NetLogGuiGtkWindow : public Gtk::Window
 {
- public:  
-  NetLogGuiGtkWindow(BaseObjectType* cobject,
-		     const Glib::RefPtr<Gtk::Builder> &builder);
-  ~NetLogGuiGtkWindow();
+public:
+	NetLogGuiGtkWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &builder);
+	~NetLogGuiGtkWindow();
 
- private:
-  int  on_service_added(fawkes::NetworkService *service);
-  void on_service_removed(fawkes::NetworkService *service);
+private:
+	int  on_service_added(fawkes::NetworkService *service);
+	void on_service_removed(fawkes::NetworkService *service);
 
-  void on_connection_clicked();
-  void on_exit_clicked();
-  void on_clear_clicked();
+	void on_connection_clicked();
+	void on_exit_clicked();
+	void on_clear_clicked();
 
-  void on_connbut_clicked(Gtk::Image *image, fawkes::LogView *logview);
-  void on_connected(Gtk::Image *image);
-  void on_disconnected(Gtk::Image *image);
+	void on_connbut_clicked(Gtk::Image *image, fawkes::LogView *logview);
+	void on_connected(Gtk::Image *image);
+	void on_disconnected(Gtk::Image *image);
 
- private:
-  fawkes::AvahiThread     *avahi_thread;
-  fawkes::AvahiDispatcher *avahi_dispatcher;
+private:
+	fawkes::AvahiThread *    avahi_thread;
+	fawkes::AvahiDispatcher *avahi_dispatcher;
 
-  Gtk::VBox        *vbox_main;
-  Gtk::Label       *lab_no_connection;
-  Gtk::ToolButton  *tb_connection;
-  Gtk::ToolButton  *tb_exit;
-  Gtk::ToolButton  *tb_clear;
+	Gtk::VBox *      vbox_main;
+	Gtk::Label *     lab_no_connection;
+	Gtk::ToolButton *tb_connection;
+	Gtk::ToolButton *tb_exit;
+	Gtk::ToolButton *tb_clear;
 
-  Gtk::Notebook ntb_logviewers; 
+	Gtk::Notebook ntb_logviewers;
 };
 
 #endif

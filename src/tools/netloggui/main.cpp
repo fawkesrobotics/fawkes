@@ -25,18 +25,19 @@
 /** This is the main program of the NetLog GUI.
  */
 int
-main(int argc, char **argv) {
-  Gtk::Main gtk_main(argc, argv);
+main(int argc, char **argv)
+{
+	Gtk::Main gtk_main(argc, argv);
 
-  Glib::RefPtr<Gtk::Builder> builder;
-  builder = Gtk::Builder::create_from_file(RESDIR"/guis/netloggui/netloggui.ui");
+	Glib::RefPtr<Gtk::Builder> builder;
+	builder = Gtk::Builder::create_from_file(RESDIR "/guis/netloggui/netloggui.ui");
 
-  NetLogGuiGtkWindow *window = NULL;
-  builder->get_widget_derived("wnd_netloggui", window);
+	NetLogGuiGtkWindow *window = NULL;
+	builder->get_widget_derived("wnd_netloggui", window);
 
-  Gtk::Main::run(*window);
+	Gtk::Main::run(*window);
 
-  delete window;
+	delete window;
 
-  return 0;
+	return 0;
 }
