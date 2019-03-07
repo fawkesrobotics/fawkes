@@ -21,30 +21,27 @@
  */
 
 #include "battery_monitor.h"
+
 #include <iostream>
 
 using namespace std;
 
-int main( int argc, char** argv )
+int
+main(int argc, char **argv)
 {
-  try
-  {
-    Gtk::Main kit( argc, argv );
-    Glib::RefPtr<Gtk::Builder> builder =
-      Gtk::Builder::create_from_file( RESDIR"/guis/battery_monitor/battery_monitor.ui");
+	try {
+		Gtk::Main                  kit(argc, argv);
+		Glib::RefPtr<Gtk::Builder> builder =
+		  Gtk::Builder::create_from_file(RESDIR "/guis/battery_monitor/battery_monitor.ui");
 
-    BatteryMonitor battery_monitor(builder);
+		BatteryMonitor battery_monitor(builder);
 
-    kit.run(battery_monitor.get_window());
-  }
-  catch (Gtk::BuilderError &e)
-  {
-    printf("Failed to instantiate window: %s\n", e.what().c_str());
-  }
-  catch (const std::exception& e)
-  {
-    cerr << "Error: " << e.what() << endl;
-  }
+		kit.run(battery_monitor.get_window());
+	} catch (Gtk::BuilderError &e) {
+		printf("Failed to instantiate window: %s\n", e.what().c_str());
+	} catch (const std::exception &e) {
+		cerr << "Error: " << e.what() << endl;
+	}
 
-  return 0;
+	return 0;
 }
