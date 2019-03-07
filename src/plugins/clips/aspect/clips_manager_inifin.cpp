@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/clips/aspect/clips_manager_inifin.h>
-#include <plugins/clips/aspect/clips_env_manager.h>
 #include <core/threading/thread_finalizer.h>
+#include <plugins/clips/aspect/clips_env_manager.h>
+#include <plugins/clips/aspect/clips_manager_inifin.h>
 
 #include <clipsmm.h>
 
@@ -35,8 +35,7 @@ namespace fawkes {
  */
 
 /** Constructor. */
-CLIPSManagerAspectIniFin::CLIPSManagerAspectIniFin()
-  : AspectIniFin("CLIPSManagerAspect")
+CLIPSManagerAspectIniFin::CLIPSManagerAspectIniFin() : AspectIniFin("CLIPSManagerAspect")
 {
 }
 
@@ -45,38 +44,35 @@ CLIPSManagerAspectIniFin::~CLIPSManagerAspectIniFin()
 {
 }
 
-
-
 void
 CLIPSManagerAspectIniFin::init(Thread *thread)
 {
-  CLIPSManagerAspect *clips_thread;
-  clips_thread = dynamic_cast<CLIPSManagerAspect *>(thread);
-  if (clips_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "CLIPSManagerAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	CLIPSManagerAspect *clips_thread;
+	clips_thread = dynamic_cast<CLIPSManagerAspect *>(thread);
+	if (clips_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "CLIPSManagerAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  clips_thread->clips_env_mgr = clips_env_mgr_;
+	clips_thread->clips_env_mgr = clips_env_mgr_;
 }
-
 
 void
 CLIPSManagerAspectIniFin::finalize(Thread *thread)
 {
-  CLIPSManagerAspect *clips_thread;
-  clips_thread = dynamic_cast<CLIPSManagerAspect *>(thread);
-  if (clips_thread == NULL) {
-    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
-					"CLIPSManagerAspect, but RTTI says it "
-					"has not. ", thread->name());
-  }
+	CLIPSManagerAspect *clips_thread;
+	clips_thread = dynamic_cast<CLIPSManagerAspect *>(thread);
+	if (clips_thread == NULL) {
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+		                                    "CLIPSManagerAspect, but RTTI says it "
+		                                    "has not. ",
+		                                    thread->name());
+	}
 
-  clips_thread->clips_env_mgr.clear();
+	clips_thread->clips_env_mgr.clear();
 }
-
-
 
 /** Set CLIPS environment manger.
  * @param clips_env_mgr CLIPS environment manager
@@ -84,7 +80,7 @@ CLIPSManagerAspectIniFin::finalize(Thread *thread)
 void
 CLIPSManagerAspectIniFin::set_manager(LockPtr<CLIPSEnvManager> &clips_env_mgr)
 {
-  clips_env_mgr_ = clips_env_mgr;
+	clips_env_mgr_ = clips_env_mgr;
 }
 
 } // end namespace fawkes

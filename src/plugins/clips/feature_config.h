@@ -29,35 +29,34 @@
 #include <string>
 
 namespace CLIPS {
-  class Environment;
+class Environment;
 }
 
 namespace fawkes {
-  class Configuration;
-  class Logger;
-}
+class Configuration;
+class Logger;
+} // namespace fawkes
 
 class ConfigCLIPSFeature : public fawkes::CLIPSFeature
 {
- public:
-  ConfigCLIPSFeature(fawkes::Logger *logger, fawkes::Configuration *config);
-  virtual ~ConfigCLIPSFeature();
+public:
+	ConfigCLIPSFeature(fawkes::Logger *logger, fawkes::Configuration *config);
+	virtual ~ConfigCLIPSFeature();
 
-  // for CLIPSFeature
-  virtual void clips_context_init(const std::string &env_name,
-				  fawkes::LockPtr<CLIPS::Environment> &clips);
-  virtual void clips_context_destroyed(const std::string &env_name);
+	// for CLIPSFeature
+	virtual void clips_context_init(const std::string &                  env_name,
+	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_destroyed(const std::string &env_name);
 
- private: // members
-  fawkes::Logger        *logger_;
-  fawkes::Configuration *config_;
+private: // members
+	fawkes::Logger *       logger_;
+	fawkes::Configuration *config_;
 
-  std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 
- private: // methods
-  void clips_config_load(std::string env_name, std::string cfg_prefix);
-  void clips_config_cleanup(std::string env_name);
-
+private: // methods
+	void clips_config_load(std::string env_name, std::string cfg_prefix);
+	void clips_config_cleanup(std::string env_name);
 };
 
 #endif

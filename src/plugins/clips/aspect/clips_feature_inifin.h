@@ -36,18 +36,18 @@ class CLIPSEnvManager;
 
 class CLIPSFeatureAspectIniFin : public AspectIniFin
 {
- public:
-  CLIPSFeatureAspectIniFin();
-  ~CLIPSFeatureAspectIniFin();
+public:
+	CLIPSFeatureAspectIniFin();
+	~CLIPSFeatureAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
-  virtual bool prepare_finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
+	virtual bool prepare_finalize(Thread *thread);
 
-  void set_manager(LockPtr<CLIPSEnvManager> &clips_env_mgr);
+	void set_manager(LockPtr<CLIPSEnvManager> &clips_env_mgr);
 
- private:
-  LockPtr<CLIPSEnvManager> clips_env_mgr_;
+private:
+	LockPtr<CLIPSEnvManager> clips_env_mgr_;
 };
 
 } // end namespace fawkes

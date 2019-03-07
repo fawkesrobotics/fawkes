@@ -23,55 +23,59 @@
 #ifndef _PLUGINS_CLIPS_CLIPS_THREAD_H_
 #define _PLUGINS_CLIPS_CLIPS_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/aspect_provider.h>
-#include <aspect/logging.h>
+#include <aspect/blackboard.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
-#include <aspect/blackboard.h>
-#include <plugins/clips/aspect/clips_inifin.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips_feature_inifin.h>
+#include <plugins/clips/aspect/clips_inifin.h>
 #include <plugins/clips/aspect/clips_manager_inifin.h>
 
 namespace CLIPS {
-  class Environment;
+class Environment;
 }
 namespace fawkes {
-  class AspectIniFin;
-  class CLIPSFeature;
-}
+class AspectIniFin;
+class CLIPSFeature;
+} // namespace fawkes
 
 class BlackboardCLIPSFeature;
 
-class CLIPSThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ClockAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::AspectProviderAspect
+class CLIPSThread : public fawkes::Thread,
+                    public fawkes::LoggingAspect,
+                    public fawkes::ClockAspect,
+                    public fawkes::ConfigurableAspect,
+                    public fawkes::BlackBoardAspect,
+                    public fawkes::AspectProviderAspect
 {
- public:
-  CLIPSThread();
-  virtual ~CLIPSThread();
+public:
+	CLIPSThread();
+	virtual ~CLIPSThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  const std::list<fawkes::AspectIniFin *>  inifin_list();
+private:
+	const std::list<fawkes::AspectIniFin *> inifin_list();
 
- private:
-  fawkes::CLIPSAspectIniFin                 clips_aspect_inifin_;
-  fawkes::CLIPSFeatureAspectIniFin          clips_feature_aspect_inifin_;
-  fawkes::CLIPSManagerAspectIniFin          clips_manager_aspect_inifin_;
-  fawkes::LockPtr<fawkes::CLIPSEnvManager>  clips_env_mgr_;
+private:
+	fawkes::CLIPSAspectIniFin                clips_aspect_inifin_;
+	fawkes::CLIPSFeatureAspectIniFin         clips_feature_aspect_inifin_;
+	fawkes::CLIPSManagerAspectIniFin         clips_manager_aspect_inifin_;
+	fawkes::LockPtr<fawkes::CLIPSEnvManager> clips_env_mgr_;
 
-  std::list<fawkes::CLIPSFeature *> features_;
+	std::list<fawkes::CLIPSFeature *> features_;
 };
 
 #endif
