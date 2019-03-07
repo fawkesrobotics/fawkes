@@ -22,8 +22,7 @@
 
 #include "occupancygrid.h"
 
-namespace fawkes
-{
+namespace fawkes {
 
 /** @class OccupancyGrid <plugins/colli/utils/occupancygrid/occupancygrid.h>
  * Occupancy Grid class for general use. Many derivated classes
@@ -41,18 +40,18 @@ namespace fawkes
  */
 OccupancyGrid::OccupancyGrid(int width, int height, int cell_width, int cell_height)
 {
-  width_ = width;
-  height_ = height;
-  cell_width_ = cell_width;
-  cell_height_ = cell_height;
+	width_       = width;
+	height_      = height;
+	cell_width_  = cell_width;
+	cell_height_ = cell_height;
 
-  init_grid();
+	init_grid();
 }
 
 /** Destructor */
 OccupancyGrid::~OccupancyGrid()
 {
-  occupancy_probs_.clear();
+	occupancy_probs_.clear();
 }
 
 /** Get the cell width
@@ -61,7 +60,7 @@ OccupancyGrid::~OccupancyGrid()
 int
 OccupancyGrid::get_cell_width()
 {
-  return cell_width_;
+	return cell_width_;
 }
 
 /** Get the cell height
@@ -70,7 +69,7 @@ OccupancyGrid::get_cell_width()
 int
 OccupancyGrid::get_cell_height()
 {
-  return cell_height_;
+	return cell_height_;
 }
 
 /** Get the width of the grid
@@ -79,7 +78,7 @@ OccupancyGrid::get_cell_height()
 int
 OccupancyGrid::get_width()
 {
-  return width_;
+	return width_;
 }
 
 /** Get the height of the grid
@@ -88,7 +87,7 @@ OccupancyGrid::get_width()
 int
 OccupancyGrid::get_height()
 {
-  return height_;
+	return height_;
 }
 
 /** Resets the cell width
@@ -97,7 +96,7 @@ OccupancyGrid::get_height()
 void
 OccupancyGrid::set_cell_width(int width)
 {
-  cell_width_ = width;
+	cell_width_ = width;
 }
 
 /** Resets the cell height
@@ -106,7 +105,7 @@ OccupancyGrid::set_cell_width(int width)
 void
 OccupancyGrid::set_cell_height(int height)
 {
-  cell_height_ = height;
+	cell_height_ = height;
 }
 
 /** Resets the width of the grid and constructs a new empty grid
@@ -115,8 +114,8 @@ OccupancyGrid::set_cell_height(int height)
 void
 OccupancyGrid::set_width(int width)
 {
-  width_ = width;
-  init_grid();
+	width_ = width;
+	init_grid();
 }
 
 /** Resets the height of the grid and constructs a new empty grid
@@ -125,10 +124,9 @@ OccupancyGrid::set_width(int width)
 void
 OccupancyGrid::set_height(int height)
 {
-  height_ = height;
-  init_grid();
+	height_ = height;
+	init_grid();
 }
-
 
 /** Reset the occupancy probability of a cell
  * @param x the x-position of the cell
@@ -138,8 +136,8 @@ OccupancyGrid::set_height(int height)
 void
 OccupancyGrid::set_prob(int x, int y, Probability prob)
 {
-  if( (x < width_) && (y < height_) && ((isProb(prob)) || (prob == 2.f)) )
-    occupancy_probs_[x][y] = prob;
+	if ((x < width_) && (y < height_) && ((isProb(prob)) || (prob == 2.f)))
+		occupancy_probs_[x][y] = prob;
 }
 
 /** Resets all occupancy probabilities
@@ -148,13 +146,13 @@ OccupancyGrid::set_prob(int x, int y, Probability prob)
 void
 OccupancyGrid::fill(Probability prob)
 {
-  if((isProb(prob)) || (prob == -1.f)) {
-    for(int x = 0; x < width_; x++) {
-      for(int y = 0; y < height_; y++) {
-        occupancy_probs_[x][y] = prob;
-      }
-    }
-  }
+	if ((isProb(prob)) || (prob == -1.f)) {
+		for (int x = 0; x < width_; x++) {
+			for (int y = 0; y < height_; y++) {
+				occupancy_probs_[x][y] = prob;
+			}
+		}
+	}
 }
 
 /** Get the occupancy probability of a cell
@@ -165,11 +163,11 @@ OccupancyGrid::fill(Probability prob)
 Probability
 OccupancyGrid::get_prob(int x, int y)
 {
-  if( (x >= 0) && (x < width_) && (y >= 0) && (y < height_) ) {
-    return occupancy_probs_[x][y];
-  } else {
-    return 1;
-  }
+	if ((x >= 0) && (x < width_) && (y >= 0) && (y < height_)) {
+		return occupancy_probs_[x][y];
+	} else {
+		return 1;
+	}
 }
 
 /** Operator (), get occupancy probability of a cell
@@ -177,21 +175,21 @@ OccupancyGrid::get_prob(int x, int y)
  * @param y the y-position of the cell
  * @return the occupancy probability of cell (x,y)
  */
-Probability&
-OccupancyGrid::operator () (const int x, const int y)
+Probability &
+OccupancyGrid::operator()(const int x, const int y)
 {
-  return occupancy_probs_[x][y];
+	return occupancy_probs_[x][y];
 }
 
 /** Init a new empty grid with the predefined parameters */
 void
 OccupancyGrid::init_grid()
 {
-  occupancy_probs_.clear();
-  std::vector<Probability> column;
-  column.resize(height_, 0.f);
-  occupancy_probs_.resize(width_, column);
-  fill( 0.f );
+	occupancy_probs_.clear();
+	std::vector<Probability> column;
+	column.resize(height_, 0.f);
+	occupancy_probs_.resize(width_, column);
+	fill(0.f);
 }
 
 } // namespace fawkes

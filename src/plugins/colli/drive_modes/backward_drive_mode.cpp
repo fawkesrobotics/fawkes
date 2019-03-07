@@ -25,8 +25,7 @@
 #include <utils/math/angle.h>
 #include <utils/math/common.h>
 
-namespace fawkes
-{
+namespace fawkes {
 
 /** @class BackwardDriveModule <plugins/colli/drive_modes/backward_drive_mode.h>
  * This is the SlowBackward drive-module, for slow backward only movements.
@@ -36,28 +35,26 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-BackwardDriveModule::BackwardDriveModule(Logger* logger, Configuration* config)
- : AbstractDriveMode(logger, config)
+BackwardDriveModule::BackwardDriveModule(Logger *logger, Configuration *config)
+: AbstractDriveMode(logger, config)
 {
-  logger_->log_debug("BackwardDriveModule", "(Constructor): Entering...");
-  drive_mode_ = NavigatorInterface::Backward;
+	logger_->log_debug("BackwardDriveModule", "(Constructor): Entering...");
+	drive_mode_ = NavigatorInterface::Backward;
 
-  max_trans_ = config_->get_float( "/plugins/colli/drive_mode/normal/max_trans" );
-  max_rot_   = config_->get_float( "/plugins/colli/drive_mode/normal/max_rot" );
+	max_trans_ = config_->get_float("/plugins/colli/drive_mode/normal/max_trans");
+	max_rot_   = config_->get_float("/plugins/colli/drive_mode/normal/max_rot");
 
-  logger_->log_debug("BackwardDriveModule", "(Constructor): Exiting");
+	logger_->log_debug("BackwardDriveModule", "(Constructor): Exiting");
 }
-
 
 /** Destruct your local values here!
  */
 BackwardDriveModule::~BackwardDriveModule()
 {
-  logger_->log_debug("BackwardDriveModule", "(Destructor): Entering...");
-  drive_mode_ = NavigatorInterface::MovingNotAllowed;
-  logger_->log_debug("BackwardDriveModule", "(Destructor): Exiting");
+	logger_->log_debug("BackwardDriveModule", "(Destructor): Entering...");
+	drive_mode_ = NavigatorInterface::MovingNotAllowed;
+	logger_->log_debug("BackwardDriveModule", "(Destructor): Exiting");
 }
-
 
 /** Calculate by given variables a new rotation to give for the motor to minimize curvature.
  *
@@ -75,12 +72,14 @@ BackwardDriveModule::~BackwardDriveModule()
  *  @return A desired rotation.
  */
 float
-BackwardDriveModule::backward_curvature( float dist_to_target, float dist_to_trajec, float alpha,
-                                         float cur_trans, float cur_rot )
+BackwardDriveModule::backward_curvature(float dist_to_target,
+                                        float dist_to_trajec,
+                                        float alpha,
+                                        float cur_trans,
+                                        float cur_rot)
 {
-  return 1.2f*alpha;
+	return 1.2f * alpha;
 }
-
 
 /** Calculate by given variables a new translation to give for the motor to
  *    minimize distance to the target.
@@ -92,52 +91,57 @@ BackwardDriveModule::backward_curvature( float dist_to_target, float dist_to_tra
  *  @return A desired translation.
  */
 float
-BackwardDriveModule::backward_translation( float dist_to_target, float dist_to_front, float alpha,
-                                           float cur_trans, float cur_rot, float des_rot)
+BackwardDriveModule::backward_translation(float dist_to_target,
+                                          float dist_to_front,
+                                          float alpha,
+                                          float cur_trans,
+                                          float cur_rot,
+                                          float des_rot)
 {
-  float des_trans = 0.f;
+	float des_trans = 0.f;
 
-  if ( fabs( des_rot ) >= 0.f && fabs( des_rot ) <= 1.f )
-    des_trans = lin_interpol( fabs( des_rot ), 0.f, 1.f, 0.7f, fabs(max_trans_+0.1f) );
+	if (fabs(des_rot) >= 0.f && fabs(des_rot) <= 1.f)
+		des_trans = lin_interpol(fabs(des_rot), 0.f, 1.f, 0.7f, fabs(max_trans_ + 0.1f));
 
-  else if ( fabs( des_rot ) > 1.f )
-    des_trans = lin_interpol( fabs( des_rot ), M_PI, 1.f, 0.f, 0.7f );
+	else if (fabs(des_rot) > 1.f)
+		des_trans = lin_interpol(fabs(des_rot), M_PI, 1.f, 0.f, 0.7f);
 
-  // test the borders (no agressive behaviour!)
-  if ( des_trans > 0.f ) des_trans = 0.f;
-  if ( des_trans < max_trans_ ) des_trans = max_trans_;
+	// test the borders (no agressive behaviour!)
+	if (des_trans > 0.f)
+		des_trans = 0.f;
+	if (des_trans < max_trans_)
+		des_trans = max_trans_;
 
-  // OLD STUFF
-  //   // check stopping on target and compare distances with choosen velocities
-  //   if ( fabs( dist_to_target - dist_to_front ) < 0.2 )
-  //     {
-  //       if (stop_at_target_ == true)
-  //  des_trans = min( des_trans, dist_to_target*1.5 );
-  //       else
-  //  ; // do not stop, so drive behind the target with full power
-  //     }
-  //   else
-  //     {
-  //       des_trans = min( des_trans, dist_to_front );
-  //     }
+	// OLD STUFF
+	//   // check stopping on target and compare distances with choosen velocities
+	//   if ( fabs( dist_to_target - dist_to_front ) < 0.2 )
+	//     {
+	//       if (stop_at_target_ == true)
+	//  des_trans = min( des_trans, dist_to_target*1.5 );
+	//       else
+	//  ; // do not stop, so drive behind the target with full power
+	//     }
+	//   else
+	//     {
+	//       des_trans = min( des_trans, dist_to_front );
+	//     }
 
-  // NEW STUFF
-  float trans_target = 10000.f;
-  float trans_front  = 10000.f;
+	// NEW STUFF
+	float trans_target = 10000.f;
+	float trans_front  = 10000.f;
 
-  if ( stop_at_target_ == true )
-    trans_target = guarantee_trans_stop( dist_to_target, cur_trans, des_trans );
+	if (stop_at_target_ == true)
+		trans_target = guarantee_trans_stop(dist_to_target, cur_trans, des_trans);
 
-  // And the next collision point
-  if ( dist_to_front < dist_to_target )
-    trans_front = guarantee_trans_stop( (1.f*dist_to_front)/2.f, cur_trans, des_trans );
-  // NEW STUFF END HERE
+	// And the next collision point
+	if (dist_to_front < dist_to_target)
+		trans_front = guarantee_trans_stop((1.f * dist_to_front) / 2.f, cur_trans, des_trans);
+	// NEW STUFF END HERE
 
-  des_trans = std::min( des_trans, std::min( trans_target, trans_front ) );
+	des_trans = std::min(des_trans, std::min(trans_target, trans_front));
 
-  return des_trans;
+	return des_trans;
 }
-
 
 /* ************************************************************************** */
 /* ***********************        U P D A T E       ************************* */
@@ -169,43 +173,40 @@ BackwardDriveModule::backward_translation( float dist_to_target, float dist_to_f
 void
 BackwardDriveModule::update()
 {
-  proposed_.x = proposed_.y = proposed_.rot = 0.f;
+	proposed_.x = proposed_.y = proposed_.rot = 0.f;
 
-  float dist_to_target = sqrt( sqr(local_target_.x) + sqr(local_target_.y) );
-  float alpha          = normalize_mirror_rad(atan2( local_target_.y, local_target_.x ) + M_PI);
-  float dist_to_trajec = sqrt( sqr(local_trajec_.x) + sqr(local_trajec_.y) );
+	float dist_to_target = sqrt(sqr(local_target_.x) + sqr(local_target_.y));
+	float alpha          = normalize_mirror_rad(atan2(local_target_.y, local_target_.x) + M_PI);
+	float dist_to_trajec = sqrt(sqr(local_trajec_.x) + sqr(local_trajec_.y));
 
+	proposed_.rot =
+	  backward_curvature(dist_to_target, dist_to_trajec, alpha, -robot_speed_, -robot_vel_.rot);
 
-  proposed_.rot = backward_curvature( dist_to_target, dist_to_trajec, alpha,
-                                      -robot_speed_, -robot_vel_.rot );
+	if (fabs(alpha) <= M_PI_2 + 0.1f)
+		proposed_.x = backward_translation(
+		  dist_to_target, dist_to_trajec, alpha, -robot_speed_, -robot_vel_.rot, proposed_.rot);
 
+	// last time border check............. IMPORTANT!!!
+	// because the motorinstructor just tests robots physical borders.
+	if (dist_to_target >= 0.04f) {
+		proposed_.x = std::min(proposed_.x, max_trans_);
+		proposed_.x = std::max(proposed_.x, 0.f);
+		proposed_.x *= -1.f;
 
-  if ( fabs( alpha ) <= M_PI_2+0.1f )
-    proposed_.x = backward_translation( dist_to_target, dist_to_trajec, alpha,
-                                       -robot_speed_, -robot_vel_.rot, proposed_.rot);
+		if (proposed_.rot > max_rot_)
+			proposed_.rot = max_rot_;
 
-  // last time border check............. IMPORTANT!!!
-  // because the motorinstructor just tests robots physical borders.
-  if ( dist_to_target >= 0.04f ) {
-    proposed_.x  = std::min ( proposed_.x, max_trans_ );
-    proposed_.x  = std::max ( proposed_.x, 0.f );
-    proposed_.x *= -1.f;
+		if (proposed_.rot < -max_rot_)
+			proposed_.rot = -max_rot_;
 
-    if (proposed_.rot > max_rot_)
-      proposed_.rot = max_rot_;
-
-    if (proposed_.rot < -max_rot_)
-      proposed_.rot = -max_rot_;
-
-
-    if ( !stop_at_target_ && dist_to_target < 1.f ) {
-      // reduce rotation velocity to avoid wild rotations
-      if ( proposed_.rot > 0.5f )
-        proposed_.rot =  0.5f;
-      else if ( proposed_.rot < -0.5f )
-        proposed_.rot = -0.5f;
-    }
-  }
+		if (!stop_at_target_ && dist_to_target < 1.f) {
+			// reduce rotation velocity to avoid wild rotations
+			if (proposed_.rot > 0.5f)
+				proposed_.rot = 0.5f;
+			else if (proposed_.rot < -0.5f)
+				proposed_.rot = -0.5f;
+		}
+	}
 }
 
 } // namespace fawkes

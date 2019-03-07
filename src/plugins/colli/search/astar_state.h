@@ -23,41 +23,38 @@
 #ifndef _PLUGINS_COLLI_SEARCH_ASTAR_STATE_H_
 #define _PLUGINS_COLLI_SEARCH_ASTAR_STATE_H_
 
-namespace fawkes
-{
+namespace fawkes {
 
 /** @class AStarState <plugins/colli/search/astar_state.h>
  *  This is the class for an A* State.
  */
 class AStarState
 {
- public:
-  AStarState( );
-  AStarState( int x, int y, int past_cost, AStarState * father );
-  ~AStarState();
+public:
+	AStarState();
+	AStarState(int x, int y, int past_cost, AStarState *father);
+	~AStarState();
 
-  int x_;  /**< x coordinate of the state */
-  int y_;  /**< y coordinate of the state */
+	int x_; /**< x coordinate of the state */
+	int y_; /**< y coordinate of the state */
 
-  AStarState * father_; /**< The predecessor state */
+	AStarState *father_; /**< The predecessor state */
 
-  int past_cost_;  /**< The past cost */
-  int total_cost_; /**< The total cost */
+	int past_cost_;  /**< The past cost */
+	int total_cost_; /**< The total cost */
 };
-
 
 /* ************************************************************************** */
 /* ***********************  IMPLEMENTATION DETAILS  ************************* */
 /* ************************************************************************** */
 
 /**  This is the standard constructor. */
-inline
-AStarState::AStarState( )
+inline AStarState::AStarState()
 {
-  father_ =  0;
-  x_ = y_ = 0;
-  total_cost_ = 0;
-  past_cost_ = 0;
+	father_ = 0;
+	x_ = y_     = 0;
+	total_cost_ = 0;
+	past_cost_  = 0;
 }
 
 /**  This is another standard constuctor, this time parametrized.
@@ -66,18 +63,16 @@ AStarState::AStarState( )
  * @param past_cost is the total left cost.
  * @param father is a pointer to the predecessor of this AStarState.
  */
-inline
-AStarState::AStarState( int x, int y, int past_cost, AStarState * father )
+inline AStarState::AStarState(int x, int y, int past_cost, AStarState *father)
 {
-  x_ = x;
-  y_ = y;
-  past_cost_ = past_cost;
-  father_ = father;
+	x_         = x;
+	y_         = y;
+	past_cost_ = past_cost;
+	father_    = father;
 }
 
 /** Standard Destructor */
-inline
-AStarState::~AStarState( )
+inline AStarState::~AStarState()
 {
 }
 

@@ -26,8 +26,7 @@
 
 #include <vector>
 
-namespace fawkes
-{
+namespace fawkes {
 
 class AbstractDriveMode;
 class MotorInterface;
@@ -39,66 +38,66 @@ class LaserOccupancyGrid;
 class SelectDriveMode
 {
 public:
-  SelectDriveMode( MotorInterface* motor,
-                   NavigatorInterface* colli_target,
-                   Logger* logger,
-                   Configuration* config,
-                   colli_escape_mode_t escape_mode = colli_escape_mode_t::basic);
-  ~SelectDriveMode( );
+	SelectDriveMode(MotorInterface *    motor,
+	                NavigatorInterface *colli_target,
+	                Logger *            logger,
+	                Configuration *     config,
+	                colli_escape_mode_t escape_mode = colli_escape_mode_t::basic);
+	~SelectDriveMode();
 
-  ///\brief Set local target point before update!
-  void set_local_target( float x, float y );
+	///\brief Set local target point before update!
+	void set_local_target(float x, float y);
 
-  ///\brief Set local trajectory point before update!
-  void set_local_trajec( float x, float y );
+	///\brief Set local trajectory point before update!
+	void set_local_trajec(float x, float y);
 
-  ///\brief Has to be called before the proposed values are called.
-  void update( bool escape = false );
+	///\brief Has to be called before the proposed values are called.
+	void update(bool escape = false);
 
-  ///\brief Returns the proposed translation. After an update.
-  float get_proposed_trans_x();
+	///\brief Returns the proposed translation. After an update.
+	float get_proposed_trans_x();
 
-  ///\brief Returns the proposed translation. After an update.
-  float get_proposed_trans_y();
+	///\brief Returns the proposed translation. After an update.
+	float get_proposed_trans_y();
 
-  ///\brief Returns the proposed rotation. After an update.
-  float get_proposed_rot();
+	///\brief Returns the proposed rotation. After an update.
+	float get_proposed_rot();
 
-  void set_grid_information( LaserOccupancyGrid* occ_grid, int robo_x, int robo_y );
+	void set_grid_information(LaserOccupancyGrid *occ_grid, int robo_x, int robo_y);
 
-  void set_laser_data( std::vector<fawkes::polar_coord_2d_t>& laser_points );
+	void set_laser_data(std::vector<fawkes::polar_coord_2d_t> &laser_points);
 
 private:
-  Logger*        logger_;
-  Configuration* config_;
+	Logger *       logger_;
+	Configuration *config_;
 
-  // local pointers to interfaces
-  NavigatorInterface*  if_colli_target_;
-  MotorInterface*      if_motor_;
+	// local pointers to interfaces
+	NavigatorInterface *if_colli_target_;
+	MotorInterface *    if_motor_;
 
-  colli_escape_mode_t cfg_escape_mode_;
+	colli_escape_mode_t cfg_escape_mode_;
 
-  // Vector of drive modes
-  std::vector< AbstractDriveMode * > drive_modes_;
+	// Vector of drive modes
+	std::vector<AbstractDriveMode *> drive_modes_;
 
-  // local copies of current local target values
-  cart_coord_2d_t local_target_;
-  cart_coord_2d_t local_trajec_;
+	// local copies of current local target values
+	cart_coord_2d_t local_target_;
+	cart_coord_2d_t local_trajec_;
 
-  // local copies of the proposed values
-  colli_trans_rot_t proposed_;
+	// local copies of the proposed values
+	colli_trans_rot_t proposed_;
 
-  // an escape flag
-  int escape_flag_;
+	// an escape flag
+	int escape_flag_;
 
-  colli_drive_restriction_t drive_restriction_;
+	colli_drive_restriction_t drive_restriction_;
 
-  /* ************************************************************************ */
-  /* PRIVATE METHODS                                                          */
-  /* ************************************************************************ */
+	/* ************************************************************************ */
+	/* PRIVATE METHODS                                                          */
+	/* ************************************************************************ */
 
-  void load_drive_modes_differential();
-  void load_drive_modes_omnidirectional();
+	void load_drive_modes_differential();
+	void load_drive_modes_omnidirectional();
 };
 
 } // namespace fawkes

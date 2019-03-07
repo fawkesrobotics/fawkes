@@ -23,14 +23,13 @@
 #ifndef _PLUGINS_COLLI_SEARCH_OBSTACLE_MAP_H_
 #define _PLUGINS_COLLI_SEARCH_OBSTACLE_MAP_H_
 
-#include "obstacle.h"
 #include "../common/types.h"
+#include "obstacle.h"
 
-#include <vector>
 #include <map>
+#include <vector>
 
-namespace fawkes
-{
+namespace fawkes {
 
 /** @class ColliObstacleMap <plugins/colli/search/obstacle_map.h>
  * This is an implementation of a collection of fast obstacles.
@@ -38,27 +37,29 @@ namespace fawkes
 
 class ColliObstacleMap
 {
- public:
-  ColliObstacleMap(colli_cell_cost_t cell_costs, bool is_rectangle = false);
-  ~ColliObstacleMap() { obstacles_.clear(); }
+public:
+	ColliObstacleMap(colli_cell_cost_t cell_costs, bool is_rectangle = false);
+	~ColliObstacleMap()
+	{
+		obstacles_.clear();
+	}
 
-  const std::vector< int > get_obstacle( int width, int height, bool obstacle_increasement = true );
+	const std::vector<int> get_obstacle(int width, int height, bool obstacle_increasement = true);
 
- private:
-  std::map< unsigned int, ColliFastObstacle * > obstacles_;
-  bool is_rectangle_;
-  colli_cell_cost_t cell_costs_;
+private:
+	std::map<unsigned int, ColliFastObstacle *> obstacles_;
+	bool                                        is_rectangle_;
+	colli_cell_cost_t                           cell_costs_;
 };
 
 /** Constructor.
  * @param cell_costs struct containing the occ-grid cell costs
  * @param is_rectangle Defines if obstacles are rectangles or ellipses(=default).
  */
-inline
-ColliObstacleMap::ColliObstacleMap(colli_cell_cost_t cell_costs, bool is_rectangle)
+inline ColliObstacleMap::ColliObstacleMap(colli_cell_cost_t cell_costs, bool is_rectangle)
 {
-  cell_costs_ = cell_costs;
-  is_rectangle_ = is_rectangle;
+	cell_costs_   = cell_costs;
+	is_rectangle_ = is_rectangle;
 }
 
 /** Get the occupied cells that match a given obstacle.
@@ -67,27 +68,27 @@ ColliObstacleMap::ColliObstacleMap(colli_cell_cost_t cell_costs, bool is_rectang
  * @param obstacle_increasement Enable obstacle increasement?
  * @return vector with pairwise cell coordinates (x,y), that are occupied by such an obstacle
  */
-inline const std::vector< int >
-ColliObstacleMap::get_obstacle( int width, int height, bool obstacle_increasement )
+inline const std::vector<int>
+ColliObstacleMap::get_obstacle(int width, int height, bool obstacle_increasement)
 {
-  unsigned int key = ((unsigned int)width << 16) | (unsigned int)height;
+	unsigned int key = ((unsigned int)width << 16) | (unsigned int)height;
 
-  std::map< unsigned int, ColliFastObstacle * >::iterator p = obstacles_.find( key );
-  if ( p == obstacles_.end() ) {
-    // obstacle not found
-    ColliFastObstacle* obstacle;
-    if( is_rectangle_ )
-      obstacle = new ColliFastRectangle( width, height, cell_costs_ );
-    else
-      obstacle = new ColliFastEllipse( width, height, cell_costs_, obstacle_increasement );
-    obstacle->set_key( key );
-    obstacles_[ key ] = obstacle;
-    return obstacle->get_obstacle();
+	std::map<unsigned int, ColliFastObstacle *>::iterator p = obstacles_.find(key);
+	if (p == obstacles_.end()) {
+		// obstacle not found
+		ColliFastObstacle *obstacle;
+		if (is_rectangle_)
+			obstacle = new ColliFastRectangle(width, height, cell_costs_);
+		else
+			obstacle = new ColliFastEllipse(width, height, cell_costs_, obstacle_increasement);
+		obstacle->set_key(key);
+		obstacles_[key] = obstacle;
+		return obstacle->get_obstacle();
 
-  } else {
-    // obstacle found in p (previously created obstacles)
-    return obstacles_[ key ]->get_obstacle();
-  }
+	} else {
+		// obstacle found in p (previously created obstacles)
+		return obstacles_[key]->get_obstacle();
+	}
 }
 
 } // namespace fawkes

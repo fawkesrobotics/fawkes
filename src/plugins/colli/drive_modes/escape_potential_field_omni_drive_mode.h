@@ -23,31 +23,31 @@
 #define _PLUGINS_COLLI_ESCAPE_POTENTIAL_FIELD_OMNI_DRIVE_MODE_H_
 
 #include "abstract_drive_mode.h"
+
 #include <utils/math/types.h>
 
 #include <vector>
 
-namespace fawkes
-{
+namespace fawkes {
 
 class LaserOccupancyGrid;
 
 class EscapePotentialFieldOmniDriveModule : public AbstractDriveMode
 {
- public:
-  EscapePotentialFieldOmniDriveModule( Logger* logger, Configuration* config );
-  ~EscapePotentialFieldOmniDriveModule();
+public:
+	EscapePotentialFieldOmniDriveModule(Logger *logger, Configuration *config);
+	~EscapePotentialFieldOmniDriveModule();
 
-  void set_grid_information( LaserOccupancyGrid* occ_grid, int robo_x, int robo_y );
-  virtual void update();
+	void         set_grid_information(LaserOccupancyGrid *occ_grid, int robo_x, int robo_y);
+	virtual void update();
 
- private:
-  LaserOccupancyGrid*  occ_grid_;
-  point_t robot_pos_;
+private:
+	LaserOccupancyGrid *occ_grid_;
+	point_t             robot_pos_;
 
-  bool cfg_write_spam_debug_;
+	bool cfg_write_spam_debug_;
 
-  int turn_;
+	int turn_;
 };
 
 } // end namespace fawkes

@@ -23,7 +23,7 @@
 #include "act_thread.h"
 #include "colli_thread.h"
 #ifdef HAVE_VISUAL_DEBUGGING
- #include "visualization_thread.h"
+#	include "visualization_thread.h"
 #endif
 
 #include <core/plugin.h>
@@ -36,26 +36,23 @@ using namespace fawkes;
 class ColliPlugin : public fawkes::Plugin
 {
 public:
-  /** Constructor.
+	/** Constructor.
    * @param config The fawkes configuration
    */
-  explicit ColliPlugin(Configuration *config)
-      : Plugin(config)
-  {
-    ColliThread* colli_thread = new ColliThread();
-    thread_list.push_back(colli_thread);
-    
-    thread_list.push_back(new ColliActThread(colli_thread));
+	explicit ColliPlugin(Configuration *config) : Plugin(config)
+	{
+		ColliThread *colli_thread = new ColliThread();
+		thread_list.push_back(colli_thread);
+
+		thread_list.push_back(new ColliActThread(colli_thread));
 
 #ifdef HAVE_VISUAL_DEBUGGING
-    ColliVisualizationThread* vis_thread = new ColliVisualizationThread();
-    thread_list.push_back(vis_thread);
-    colli_thread->set_vis_thread( vis_thread );
+		ColliVisualizationThread *vis_thread = new ColliVisualizationThread();
+		thread_list.push_back(vis_thread);
+		colli_thread->set_vis_thread(vis_thread);
 #endif
-
-  }
+	}
 };
 
 PLUGIN_DESCRIPTION("Local locomotion path planning with collision avoidance")
 EXPORT_PLUGIN(ColliPlugin)
-

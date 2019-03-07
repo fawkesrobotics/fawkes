@@ -24,22 +24,23 @@
 
 #include "abstract_drive_mode.h"
 
-namespace fawkes
-{
+namespace fawkes {
 
 class ForwardOmniDriveModule : public AbstractDriveMode
 {
- public:
-  ForwardOmniDriveModule(Logger* logger, Configuration* config);
-  ~ForwardOmniDriveModule();
+public:
+	ForwardOmniDriveModule(Logger *logger, Configuration *config);
+	~ForwardOmniDriveModule();
 
-  virtual void update();
+	virtual void update();
 
- private:
-  void calculate_rotation(float ori_alpha_target, float ori_alpha_next_target,
-                          float dist_to_target, float angle_allowed_to_next_target);
+private:
+	void calculate_rotation(float ori_alpha_target,
+	                        float ori_alpha_next_target,
+	                        float dist_to_target,
+	                        float angle_allowed_to_next_target);
 
-  void calculate_translation(float dist_to_target, float ori_alpha_target, float dec_factor);
+	void calculate_translation(float dist_to_target, float ori_alpha_target, float dec_factor);
 };
 
 } // namespace fawkes

@@ -25,24 +25,23 @@
 
 #include "base_motor_instruct.h"
 
-namespace fawkes
+namespace fawkes {
+
+class QuadraticMotorInstruct : public BaseMotorInstruct
 {
+public:
+	QuadraticMotorInstruct(MotorInterface *motor,
+	                       float           frequency,
+	                       Logger *        logger,
+	                       Configuration * config);
+	virtual ~QuadraticMotorInstruct();
 
-class QuadraticMotorInstruct: public BaseMotorInstruct
-{
- public:
-  QuadraticMotorInstruct( MotorInterface* motor,
-                          float frequency,
-                          Logger* logger,
-                          Configuration* config );
-  virtual ~QuadraticMotorInstruct();
+private:
+	///\brief linear implementation of velocity constraints
+	float calculate_rotation(float current, float desired, float time_factor);
 
- private:
-  ///\brief linear implementation of velocity constraints
-  float calculate_rotation( float current, float desired, float time_factor );
-
-  ///\brief linear implementation of velocity constraints
-  float calculate_translation( float current, float desired, float time_factor );
+	///\brief linear implementation of velocity constraints
+	float calculate_translation(float current, float desired, float time_factor);
 };
 
 } // namespace fawkes

@@ -25,11 +25,10 @@
 
 #include "abstract_search.h"
 
-#include <vector>
 #include <memory>
+#include <vector>
 
-namespace fawkes
-{
+namespace fawkes {
 
 class LaserOccupancyGrid;
 class AStarColli;
@@ -42,47 +41,46 @@ typedef struct point_struct point_t;
  *  Here the plan from A* is managed and cut into small pieces.
  *    Also usable methods for managing the plan are implemented here.
  */
-class Search: public AbstractSearch
+class Search : public AbstractSearch
 {
- public:
-  Search(LaserOccupancyGrid* occ_grid , Logger* logger, Configuration* config);
-  virtual ~Search();
+public:
+	Search(LaserOccupancyGrid *occ_grid, Logger *logger, Configuration *config);
+	virtual ~Search();
 
-  ///\brief update complete plan things
-  void update( int robo_x, int robo_y, int target_x, int target_y );
+	///\brief update complete plan things
+	void update(int robo_x, int robo_y, int target_x, int target_y);
 
-  ///\brief returns, if the update was successful or not.
-  bool updated_successful();
+	///\brief returns, if the update was successful or not.
+	bool updated_successful();
 
-  ///\brief Get the current plan
-  std::vector<point_t>* get_plan();
+	///\brief Get the current plan
+	std::vector<point_t> *get_plan();
 
-  ///\brief Get the robot's position in the grid, used for the plan
-  point_t get_robot_position();
+	///\brief Get the robot's position in the grid, used for the plan
+	point_t get_robot_position();
 
- private:
+private:
+	/** Returns the current, modified waypoint to drive to. */
+	point_t calculate_local_target();
 
-  /** Returns the current, modified waypoint to drive to. */
-  point_t calculate_local_target();
+	/** Adjust the waypoint if it is not the final point. */
+	point_t adjust_waypoint(const point_t &local_target);
 
-  /** Adjust the waypoint if it is not the final point. */
-  point_t adjust_waypoint( const point_t &local_target );
+	/** Returns the current trajectory point to drive to. */
+	point_t calculate_local_trajec_point();
 
-  /** Returns the current trajectory point to drive to. */
-  point_t calculate_local_trajec_point( );
+	/** Method for checking if an obstacle is between two points. */
+	bool is_obstacle_between(const point_t &a, const point_t &b, const int maxcount);
 
-  /** Method for checking if an obstacle is between two points. */
-  bool is_obstacle_between( const point_t &a, const point_t &b, const int maxcount );
+	std::unique_ptr<AStarColli> astar_; /**< the A* search algorithm */
+	std::vector<point_t>        plan_;  /**< the local representation of the plan */
 
+	point_t robo_position_, target_position_;
+	bool    updated_successful_;
+	int
+	  cfg_search_line_allowed_cost_max_; /**< the config value for the max allowed costs on the line search on the a-star result */
 
-  std::unique_ptr<AStarColli> astar_;              /**< the A* search algorithm */
-  std::vector< point_t > plan_; /**< the local representation of the plan */
-
-  point_t robo_position_, target_position_;
-  bool updated_successful_;
-  int cfg_search_line_allowed_cost_max_; /**< the config value for the max allowed costs on the line search on the a-star result */
-
-  fawkes::Logger* logger_;
+	fawkes::Logger *logger_;
 };
 
 } // namespace fawkes
