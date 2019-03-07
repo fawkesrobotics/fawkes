@@ -26,7 +26,6 @@
 
 #include <aspect/inifins/inifin.h>
 #include <core/utils/lockptr.h>
-
 #include <plugins/asp/aspect/asp.h>
 
 namespace fawkes {
@@ -43,7 +42,7 @@ public:
 	void init(Thread *thread) override;
 	void finalize(Thread *thread) override;
 
-	void set_control_manager(const LockPtr<ClingoControlManager>& ctrl_mgr);
+	void set_control_manager(const LockPtr<ClingoControlManager> &ctrl_mgr);
 
 private:
 	LockPtr<ClingoControlManager> ctrl_mgr_;
