@@ -21,14 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <netcomm/socket/datagram_multicast.h>
-
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netcomm/socket/datagram_multicast.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
-#include <cerrno>
 
 namespace fawkes {
 
@@ -48,45 +48,44 @@ namespace fawkes {
  * @param timeout timeout, if 0 all operationsare blocking, otherwise it
  * is tried for timeout seconds.
  */
-MulticastDatagramSocket::MulticastDatagramSocket(AddrType addr_type,
-                                                 const char *multicast_addr_s,
+MulticastDatagramSocket::MulticastDatagramSocket(AddrType       addr_type,
+                                                 const char *   multicast_addr_s,
                                                  unsigned short port,
-                                                 float timeout)
+                                                 float          timeout)
 : Socket(addr_type, UDP, timeout)
 {
 	multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
 
-  struct in_addr a;
-  if ( inet_aton(multicast_addr_s, &a) == -1 ) {
-    throw SocketException("Invalid address given");
-  }
-  multicast_addr->sin_family = AF_INET;
-  multicast_addr->sin_addr.s_addr = a.s_addr;
-  multicast_addr->sin_port = htons(port);
+	struct in_addr a;
+	if (inet_aton(multicast_addr_s, &a) == -1) {
+		throw SocketException("Invalid address given");
+	}
+	multicast_addr->sin_family      = AF_INET;
+	multicast_addr->sin_addr.s_addr = a.s_addr;
+	multicast_addr->sin_port        = htons(port);
 
-  //set_ttl(1);
-  set_loop(false);
+	//set_ttl(1);
+	set_loop(false);
 }
-
 
 /** Destructor. */
 MulticastDatagramSocket::~MulticastDatagramSocket()
 {
-  free(multicast_addr);
+	free(multicast_addr);
 }
 
 /** Assignment operator.
  * @param s socket to copy from
  * @return reference to this instance
  */
-MulticastDatagramSocket&
-MulticastDatagramSocket::operator=(MulticastDatagramSocket& s)
+MulticastDatagramSocket &
+MulticastDatagramSocket::operator=(MulticastDatagramSocket &s)
 {
 	Socket::operator=(s);
 	free(multicast_addr);
-  multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
-  memcpy(multicast_addr, s.multicast_addr, sizeof(struct ::sockaddr_in));
-  return *this;
+	multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
+	memcpy(multicast_addr, s.multicast_addr, sizeof(struct ::sockaddr_in));
+	return *this;
 }
 
 /** Copy constructor.
@@ -95,10 +94,9 @@ MulticastDatagramSocket::operator=(MulticastDatagramSocket& s)
 MulticastDatagramSocket::MulticastDatagramSocket(MulticastDatagramSocket &datagram_socket)
 : Socket(datagram_socket)
 {
-  multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
-  memcpy(multicast_addr, datagram_socket.multicast_addr, sizeof(struct ::sockaddr_in));
+	multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
+	memcpy(multicast_addr, datagram_socket.multicast_addr, sizeof(struct ::sockaddr_in));
 }
-
 
 /** Bind socket.
  * This will make the socket listen for incoming traffic. It will also add this host to
@@ -107,52 +105,49 @@ MulticastDatagramSocket::MulticastDatagramSocket(MulticastDatagramSocket &datagr
 void
 MulticastDatagramSocket::bind()
 {
-  int reuse = 1;
-  if ( setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) == -1) {
-	  throw SocketException(errno, "Could not set SO_REUSEADDR");
-  }
+	int reuse = 1;
+	if (setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) == -1) {
+		throw SocketException(errno, "Could not set SO_REUSEADDR");
+	}
 
-  struct ip_mreq imr;
-  imr.imr_multiaddr.s_addr = multicast_addr->sin_addr.s_addr;
-  imr.imr_interface.s_addr = htonl( INADDR_ANY );
-  if ( setsockopt(sock_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &imr, sizeof(imr)) == -1 ) {
-	  throw SocketException(errno, "Could not add multicast group membership");
-  }
+	struct ip_mreq imr;
+	imr.imr_multiaddr.s_addr = multicast_addr->sin_addr.s_addr;
+	imr.imr_interface.s_addr = htonl(INADDR_ANY);
+	if (setsockopt(sock_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &imr, sizeof(imr)) == -1) {
+		throw SocketException(errno, "Could not add multicast group membership");
+	}
 
-  struct ::sockaddr_in local;
-  local.sin_family = AF_INET;
-  local.sin_addr.s_addr = INADDR_ANY;
-  local.sin_port = multicast_addr->sin_port;
+	struct ::sockaddr_in local;
+	local.sin_family      = AF_INET;
+	local.sin_addr.s_addr = INADDR_ANY;
+	local.sin_port        = multicast_addr->sin_port;
 
-  if (::bind(sock_fd, (struct ::sockaddr *) &local, sizeof(local)) < 0) {
-	  throw SocketException(errno, "Could not bind to port");
-  }
+	if (::bind(sock_fd, (struct ::sockaddr *)&local, sizeof(local)) < 0) {
+		throw SocketException(errno, "Could not bind to port");
+	}
 }
-
 
 void
 MulticastDatagramSocket::bind(const unsigned short int port)
 {
-  multicast_addr->sin_port = htons(port);
-  bind();
+	multicast_addr->sin_port = htons(port);
+	bind();
 }
 
-
 void
-MulticastDatagramSocket::bind(const unsigned short int port,
-			      const char *hostname)
+MulticastDatagramSocket::bind(const unsigned short int port, const char *hostname)
 {
-  free(multicast_addr);
-  multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
+	free(multicast_addr);
+	multicast_addr = (struct ::sockaddr_in *)malloc(sizeof(struct ::sockaddr_in));
 
-  struct in_addr a;
-  if ( inet_aton(hostname, &a) == -1 ) {
-    throw SocketException("Invalid address given");
-  }
-  multicast_addr->sin_family = AF_INET;
-  multicast_addr->sin_addr.s_addr = a.s_addr;
-  multicast_addr->sin_port = htons(port);
-  bind();
+	struct in_addr a;
+	if (inet_aton(hostname, &a) == -1) {
+		throw SocketException("Invalid address given");
+	}
+	multicast_addr->sin_family      = AF_INET;
+	multicast_addr->sin_addr.s_addr = a.s_addr;
+	multicast_addr->sin_port        = htons(port);
+	bind();
 }
 
 /** Clone socket.
@@ -161,9 +156,8 @@ MulticastDatagramSocket::bind(const unsigned short int port,
 Socket *
 MulticastDatagramSocket::clone()
 {
-  return new MulticastDatagramSocket(*this);
+	return new MulticastDatagramSocket(*this);
 }
-
 
 /** Send data.
  * This will send the given data to the multicast address specified
@@ -174,14 +168,13 @@ MulticastDatagramSocket::clone()
 void
 MulticastDatagramSocket::send(void *buf, size_t buf_len)
 {
-  try {
-    Socket::send(buf, buf_len, (struct ::sockaddr *)multicast_addr, sizeof(struct ::sockaddr_in));
-  } catch (SocketException &e) {
-    e.append("MulticastDatagramSocket::send(void*, unsigned int) failed");
-    throw;
-  }
+	try {
+		Socket::send(buf, buf_len, (struct ::sockaddr *)multicast_addr, sizeof(struct ::sockaddr_in));
+	} catch (SocketException &e) {
+		e.append("MulticastDatagramSocket::send(void*, unsigned int) failed");
+		throw;
+	}
 }
-
 
 /** Set loopback of sent packets.
  * @param loop true to deliver sent packets to local sockets, false prevent delivering
@@ -189,12 +182,11 @@ MulticastDatagramSocket::send(void *buf, size_t buf_len)
 void
 MulticastDatagramSocket::set_loop(bool loop)
 {
-  int l = (loop ? 1 : 0);
-  if (setsockopt(sock_fd, IPPROTO_IP, IP_MULTICAST_LOOP, &l, sizeof(l)) == -1) {
-	  throw SocketException(errno, "MulticastDatagramSocket::set_loop: setsockopt failed");
-  }
+	int l = (loop ? 1 : 0);
+	if (setsockopt(sock_fd, IPPROTO_IP, IP_MULTICAST_LOOP, &l, sizeof(l)) == -1) {
+		throw SocketException(errno, "MulticastDatagramSocket::set_loop: setsockopt failed");
+	}
 }
-
 
 /** Set multicast time-to-live (TTL)
  * @param ttl time-to-live
@@ -202,10 +194,11 @@ MulticastDatagramSocket::set_loop(bool loop)
 void
 MulticastDatagramSocket::set_ttl(int ttl)
 {
-  if ( ttl < 0 ) ttl = -ttl;
-  if ( setsockopt( sock_fd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl) ) == -1 ) {
-	  throw SocketException(errno, "MulticastDatagramSocket::set_ttl: setsockopt failed");
-  }
+	if (ttl < 0)
+		ttl = -ttl;
+	if (setsockopt(sock_fd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl)) == -1) {
+		throw SocketException(errno, "MulticastDatagramSocket::set_ttl: setsockopt failed");
+	}
 }
 
 } // end namespace fawkes

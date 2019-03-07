@@ -61,15 +61,13 @@ namespace fawkes {
  */
 FawkesNetworkHandler::FawkesNetworkHandler(unsigned short int id)
 {
-  _id = id;
+	_id = id;
 }
-
 
 /** Destructor. */
 FawkesNetworkHandler::~FawkesNetworkHandler()
 {
 }
-
 
 /** Get the component ID for this handler.
  * @return component ID
@@ -77,7 +75,7 @@ FawkesNetworkHandler::~FawkesNetworkHandler()
 unsigned short int
 FawkesNetworkHandler::id() const
 {
-  return _id;
+	return _id;
 }
 
 } // end namespace fawkes

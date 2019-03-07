@@ -22,15 +22,14 @@
  */
 
 #include <netcomm/socket/stream.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+
 #include <errno.h>
 
 namespace fawkes {
-
 
 /** @class StreamSocket netcomm/socket/stream.h
  * TCP stream socket over IP.
@@ -44,8 +43,7 @@ namespace fawkes {
  * @param timeout timeout, if 0 all operationsare blocking, otherwise it
  * is tried for timeout seconds.
  */
-StreamSocket::StreamSocket(float timeout)
-: Socket(Socket::TCP, timeout)
+StreamSocket::StreamSocket(float timeout) : Socket(Socket::TCP, timeout)
 {
 }
 
@@ -59,12 +57,10 @@ StreamSocket::StreamSocket(AddrType addr_type, float timeout)
 {
 }
 
-
 /** Copy constructor.
  * @param stream_socket socket to copy.
  */
-StreamSocket::StreamSocket(StreamSocket &stream_socket)
-: Socket(stream_socket)
+StreamSocket::StreamSocket(StreamSocket &stream_socket) : Socket(stream_socket)
 {
 }
 
@@ -72,8 +68,8 @@ StreamSocket::StreamSocket(StreamSocket &stream_socket)
  * @param s socket to copy from
  * @return reference to this
  */
-StreamSocket&
-StreamSocket::operator=(StreamSocket& s)
+StreamSocket &
+StreamSocket::operator=(StreamSocket &s)
 {
 	Socket::operator=(s);
 	return *this;
@@ -85,9 +81,8 @@ StreamSocket::operator=(StreamSocket& s)
 Socket *
 StreamSocket::clone()
 {
-  return new StreamSocket(*this);
+	return new StreamSocket(*this);
 }
-
 
 /** Check if Nalge algorithm is disabled.
  * This checks the TCP_NODELAY option on the socket. If it is set then the
@@ -101,15 +96,14 @@ StreamSocket::nodelay()
 	if (sock_fd == -1) {
 		throw Exception("Socket not initialized, call bind() or connect()");
 	}
-	
-  int val = 0;
-  socklen_t val_len = sizeof(val);
-  if ( getsockopt(sock_fd, IPPROTO_TCP, TCP_NODELAY, &val, &val_len) == -1 ) {
-    throw SocketException("StreamSocket::nodelay: getsockopt failed", errno);
-  }
-  return (val == 1);
-}
 
+	int       val     = 0;
+	socklen_t val_len = sizeof(val);
+	if (getsockopt(sock_fd, IPPROTO_TCP, TCP_NODELAY, &val, &val_len) == -1) {
+		throw SocketException("StreamSocket::nodelay: getsockopt failed", errno);
+	}
+	return (val == 1);
+}
 
 /** Enable or disable Nagle algorithm.
  * @param nodelay true to disable Nagle algorithm, false to enable it
@@ -122,11 +116,11 @@ StreamSocket::set_nodelay(bool nodelay)
 		throw Exception("Socket not initialized, call bind() or connect()");
 	}
 
-	int val = (nodelay ? 1 : 0);
-  socklen_t val_len = sizeof(val);
-  if ( setsockopt(sock_fd, IPPROTO_TCP, TCP_NODELAY, &val, val_len) == -1 ) {
-    throw SocketException("StreamSocket::set_nodelay: setsockopt failed", errno);
-  }
+	int       val     = (nodelay ? 1 : 0);
+	socklen_t val_len = sizeof(val);
+	if (setsockopt(sock_fd, IPPROTO_TCP, TCP_NODELAY, &val, val_len) == -1) {
+		throw SocketException("StreamSocket::set_nodelay: setsockopt failed", errno);
+	}
 }
 
 } // end namespace fawkes

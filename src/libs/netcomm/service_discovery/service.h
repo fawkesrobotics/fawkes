@@ -24,11 +24,11 @@
 #ifndef _NETCOMM_SERVICE_DISCOVERY_SERVICE_H_
 #define _NETCOMM_SERVICE_DISCOVERY_SERVICE_H_
 
-#include <string>
-#include <list>
-
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+
+#include <list>
+#include <string>
 
 namespace fawkes {
 
@@ -36,68 +36,65 @@ class NetworkNameResolver;
 
 class NetworkService
 {
- public:
-  NetworkService(const char         *name,
-                 const char         *type,
-                 const char         *domain,
-                 const char         *host,
-                 unsigned short int  port);
+public:
+	NetworkService(const char *       name,
+	               const char *       type,
+	               const char *       domain,
+	               const char *       host,
+	               unsigned short int port);
 
-	NetworkService(const char         *name,
-	               const char         *type,
-	               const char         *domain,
-	               const char         *host,
-	               unsigned short int  port,
-	               const struct sockaddr *addr,
-	               const socklen_t     addr_size,
+	NetworkService(const char *            name,
+	               const char *            type,
+	               const char *            domain,
+	               const char *            host,
+	               unsigned short int      port,
+	               const struct sockaddr * addr,
+	               const socklen_t         addr_size,
 	               std::list<std::string> &txt);
 
-	NetworkService(const char         *name,
-	               const char         *type,
-	               unsigned short int  port);
+	NetworkService(const char *name, const char *type, unsigned short int port);
 
-	NetworkService(const char         *name,
-	               const char         *type,
-	               const char         *domain);
+	NetworkService(const char *name, const char *type, const char *domain);
 
-  NetworkService(NetworkNameResolver *nnresolver,
-                 const char *name, const char *type,
-                 unsigned short int port);
+	NetworkService(NetworkNameResolver *nnresolver,
+	               const char *         name,
+	               const char *         type,
+	               unsigned short int   port);
 
-  NetworkService(const NetworkService *s);
-  NetworkService(const NetworkService &s);
-  ~NetworkService();
+	NetworkService(const NetworkService *s);
+	NetworkService(const NetworkService &s);
+	~NetworkService();
 
-  void                add_txt(const char *format, ...);
-  void                set_txt(std::list<std::string> &txtlist);
+	void add_txt(const char *format, ...);
+	void set_txt(std::list<std::string> &txtlist);
 
-  void                set_name(const char *new_name);
-  void                set_modified_name(const char *new_name) const;
+	void set_name(const char *new_name);
+	void set_modified_name(const char *new_name) const;
 
-  const char *        name() const;
-  const char *        modified_name() const;
-  const char *        type() const;
-  const char *        domain() const;
-  const char *        host() const;
-  std::string         addr_string() const;
-  unsigned short int  port() const;
-  const std::list<std::string> & txt() const;
+	const char *                  name() const;
+	const char *                  modified_name() const;
+	const char *                  type() const;
+	const char *                  domain() const;
+	const char *                  host() const;
+	std::string                   addr_string() const;
+	unsigned short int            port() const;
+	const std::list<std::string> &txt() const;
 
-  NetworkService&     operator=(const NetworkService &s);
-  bool                operator==(const NetworkService &s) const;
-  bool                operator==(const NetworkService *s) const;
-  bool                operator<(const NetworkService &s) const;
+	NetworkService &operator=(const NetworkService &s);
+	bool            operator==(const NetworkService &s) const;
+	bool            operator==(const NetworkService *s) const;
+	bool            operator<(const NetworkService &s) const;
 
- private:
-  std::list<std::string> list;
-  char *              _name;
-  char *              _type;
-  char *              _domain;
-  char *              _host;
-  unsigned short int  _port;
-  struct sockaddr_storage _addr;
+private:
+	std::list<std::string>  list;
+	char *                  _name;
+	char *                  _type;
+	char *                  _domain;
+	char *                  _host;
+	unsigned short int      _port;
+	struct sockaddr_storage _addr;
 
-  mutable char *      _modified_name;
+	mutable char *_modified_name;
 };
 
 } // end namespace fawkes

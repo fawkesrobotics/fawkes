@@ -22,13 +22,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <core/exceptions/system.h>
 #include <core/exceptions/software.h>
+#include <core/exceptions/system.h>
 #include <netcomm/utils/dynamic_buffer.h>
+#include <netinet/in.h>
 
 #include <cstdlib>
 #include <cstring>
-#include <netinet/in.h>
 
 namespace fawkes {
 
@@ -55,7 +55,6 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Write constructor.
  * Use this constructor to create and write to this dynamic buffer.
  * @param db dynamic list header in your message
@@ -63,21 +62,20 @@ namespace fawkes {
  */
 DynamicBuffer::DynamicBuffer(dynamic_list_t *db, size_t initial_buffer_size)
 {
-  _read_only   = false;
-  _db          = db;
-  _buffer_size = initial_buffer_size;
-  _buffer      = malloc(_buffer_size);
-  _curhead     = (element_header_t *)_buffer;
-  _curdata     = (void *)((size_t)_buffer + sizeof(element_header_t));
+	_read_only   = false;
+	_db          = db;
+	_buffer_size = initial_buffer_size;
+	_buffer      = malloc(_buffer_size);
+	_curhead     = (element_header_t *)_buffer;
+	_curdata     = (void *)((size_t)_buffer + sizeof(element_header_t));
 
-  _db->size         = htonl(0);
-  _db->num_elements = htonl(0);
+	_db->size         = htonl(0);
+	_db->num_elements = htonl(0);
 
-  _it_curhead = NULL;
-  _it_curdata = NULL;
-  _it_curel = 0;
+	_it_curhead = NULL;
+	_it_curdata = NULL;
+	_it_curel   = 0;
 }
-
 
 /** Read constructor.
  * Use this constructor to read from a dynamic buffer.
@@ -87,28 +85,27 @@ DynamicBuffer::DynamicBuffer(dynamic_list_t *db, size_t initial_buffer_size)
  */
 DynamicBuffer::DynamicBuffer(dynamic_list_t *db, void *buf, size_t size)
 {
-  _read_only   = true;
-  _db          = db;
-  _buffer_size = size;
-  _buffer      = buf;
+	_read_only   = true;
+	_db          = db;
+	_buffer_size = size;
+	_buffer      = buf;
 
-  _curhead     = (element_header_t *)_buffer;
-  _curdata     = (void *)((size_t)_buffer + sizeof(element_header_t));
+	_curhead = (element_header_t *)_buffer;
+	_curdata = (void *)((size_t)_buffer + sizeof(element_header_t));
 
-  _it_curhead  = _curhead;
-  _it_curdata  = _curdata;
-  _it_curel    = 0;
+	_it_curhead = _curhead;
+	_it_curdata = _curdata;
+	_it_curel   = 0;
 }
-
 
 /** Destructor.
  * If in writing mode frees up the buffer.
  */
 DynamicBuffer::~DynamicBuffer()
 {
-  if (! _read_only)  free(_buffer);
+	if (!_read_only)
+		free(_buffer);
 }
-
 
 /** Append data.
  * Appends data to the list. Throws an exception if there is not enough memory to
@@ -122,35 +119,34 @@ DynamicBuffer::~DynamicBuffer()
 void
 DynamicBuffer::append(const void *data, size_t data_size)
 {
-  if ( _read_only ) throw AccessViolationException("DynamicBuffer is read-only");
+	if (_read_only)
+		throw AccessViolationException("DynamicBuffer is read-only");
 
-  if ( data_size > (0xFFFF - sizeof(element_header_t)) ) {
-    throw IllegalArgumentException("Buffer size too big, max 65535 bytes");
-  }
+	if (data_size > (0xFFFF - sizeof(element_header_t))) {
+		throw IllegalArgumentException("Buffer size too big, max 65535 bytes");
+	}
 
-  size_t cur_size = ntohl(_db->size);
-  if ( (cur_size + data_size + sizeof(element_header_t)) > _buffer_size ) {
-    try {
-      increase();
-    } catch (OutOfMemoryException &e) {
-      throw;
-    }
-    if ( (cur_size + data_size + sizeof(element_header_t)) > _buffer_size ) {
-      throw OutOfMemoryException("Could not increase buffer far enough to hold data");
-    }
-  }
+	size_t cur_size = ntohl(_db->size);
+	if ((cur_size + data_size + sizeof(element_header_t)) > _buffer_size) {
+		try {
+			increase();
+		} catch (OutOfMemoryException &e) {
+			throw;
+		}
+		if ((cur_size + data_size + sizeof(element_header_t)) > _buffer_size) {
+			throw OutOfMemoryException("Could not increase buffer far enough to hold data");
+		}
+	}
 
-  *_curhead = htons(data_size);
-  memcpy(_curdata, data, data_size);
+	*_curhead = htons(data_size);
+	memcpy(_curdata, data, data_size);
 
-  _curhead           = (element_header_t *)((size_t)_curhead + data_size
-					                     + sizeof(element_header_t));
-  _curdata           = (void *)((size_t)_curdata + data_size + sizeof(element_header_t));
-  _db->size          = htonl(cur_size + sizeof(element_header_t) + data_size);
-  uint16_t tmp = ntohl(_db->num_elements) + 1;
-  _db->num_elements  = htonl(tmp);
+	_curhead          = (element_header_t *)((size_t)_curhead + data_size + sizeof(element_header_t));
+	_curdata          = (void *)((size_t)_curdata + data_size + sizeof(element_header_t));
+	_db->size         = htonl(cur_size + sizeof(element_header_t) + data_size);
+	uint16_t tmp      = ntohl(_db->num_elements) + 1;
+	_db->num_elements = htonl(tmp);
 }
-
 
 /** Get pointer to buffer.
  * @return packed buffer
@@ -158,9 +154,8 @@ DynamicBuffer::append(const void *data, size_t data_size)
 void *
 DynamicBuffer::buffer()
 {
-  return _buffer;
+	return _buffer;
 }
-
 
 /** Increase buffer size.
  * Internal usage only.
@@ -168,29 +163,28 @@ DynamicBuffer::buffer()
 void
 DynamicBuffer::increase()
 {
-  size_t new_buffer_size;
+	size_t new_buffer_size;
 
-  if ( (_buffer_size) >= 0xFFFFFFFF / 2 ) {
-    if ( _buffer_size == 0xFFFFFFFF ) {
-      throw OutOfMemoryException("Dynamic buffer may not be greater than 64KB");
-    } else {
-      new_buffer_size = 0xFFFFFFFF;
-    }
-  } else {
-    new_buffer_size = _buffer_size * 2;
-  }
+	if ((_buffer_size) >= 0xFFFFFFFF / 2) {
+		if (_buffer_size == 0xFFFFFFFF) {
+			throw OutOfMemoryException("Dynamic buffer may not be greater than 64KB");
+		} else {
+			new_buffer_size = 0xFFFFFFFF;
+		}
+	} else {
+		new_buffer_size = _buffer_size * 2;
+	}
 
-  void *tmp = realloc(_buffer, new_buffer_size);
-  if ( tmp == NULL ) {
-    throw OutOfMemoryException();
-  } else {
-    _buffer_size = new_buffer_size;
-    _curhead = (element_header_t *)((size_t)tmp + ((size_t)_curhead - (size_t)_buffer));
-    _curdata = (void *)((size_t)tmp + ((size_t)_curdata - (size_t)_buffer));
-    _buffer = tmp;
-  }
+	void *tmp = realloc(_buffer, new_buffer_size);
+	if (tmp == NULL) {
+		throw OutOfMemoryException();
+	} else {
+		_buffer_size = new_buffer_size;
+		_curhead     = (element_header_t *)((size_t)tmp + ((size_t)_curhead - (size_t)_buffer));
+		_curdata     = (void *)((size_t)tmp + ((size_t)_curdata - (size_t)_buffer));
+		_buffer      = tmp;
+	}
 }
-
 
 /** Get buffer size.
  * Gets the size of the used part of the buffer. The size of the buffer that
@@ -200,9 +194,8 @@ DynamicBuffer::increase()
 size_t
 DynamicBuffer::buffer_size()
 {
-  return ntohl(_db->size);
+	return ntohl(_db->size);
 }
-
 
 /** Get real buffer size.
  * Gets the real size of the buffer including yet unused parts. Meant to be
@@ -212,9 +205,8 @@ DynamicBuffer::buffer_size()
 size_t
 DynamicBuffer::real_buffer_size()
 {
-  return _buffer_size;
+	return _buffer_size;
 }
-
 
 /** Get number of elements.
  * @return number of elements in list
@@ -222,21 +214,19 @@ DynamicBuffer::real_buffer_size()
 unsigned int
 DynamicBuffer::num_elements()
 {
-  return ntohl(_db->num_elements);
+	return ntohl(_db->num_elements);
 }
-
 
 /** Reset iterator.
  */
 void
 DynamicBuffer::reset_iterator()
 {
-  _it_curhead  = _curhead;
-  _it_curdata  = _curdata;
-  // invalid element
-  _it_curel    = 0;
+	_it_curhead = _curhead;
+	_it_curdata = _curdata;
+	// invalid element
+	_it_curel = 0;
 }
-
 
 /** Check if another element is available.
  * @return true if another element can be fetched with next(), false otherwise
@@ -244,9 +234,8 @@ DynamicBuffer::reset_iterator()
 bool
 DynamicBuffer::has_next()
 {
-  return (_read_only && (_it_curel < (ntohl(_db->num_elements))));
+	return (_read_only && (_it_curel < (ntohl(_db->num_elements))));
 }
-
 
 /** Get next buffer.
  * @param size upon successful return contains size of the current list buffer
@@ -257,20 +246,20 @@ DynamicBuffer::has_next()
 void *
 DynamicBuffer::next(size_t *size)
 {
-  // advance
-  if ( ! has_next() ) {
-    throw OutOfBoundsException("No next element while iterator DynamicBuffer");
-  }
+	// advance
+	if (!has_next()) {
+		throw OutOfBoundsException("No next element while iterator DynamicBuffer");
+	}
 
-  if ( _it_curel > 0 ) {
-    size_t offset = ntohs(*_it_curhead) + sizeof(element_header_t);
-    _it_curhead = (element_header_t *)((size_t)_it_curhead + offset);
-    _it_curdata = (void *)((size_t)_it_curdata + offset);
-  }
-  ++_it_curel;
-  *size = ntohs(*_it_curhead);
+	if (_it_curel > 0) {
+		size_t offset = ntohs(*_it_curhead) + sizeof(element_header_t);
+		_it_curhead   = (element_header_t *)((size_t)_it_curhead + offset);
+		_it_curdata   = (void *)((size_t)_it_curdata + offset);
+	}
+	++_it_curel;
+	*size = ntohs(*_it_curhead);
 
-  return _it_curdata;
+	return _it_curdata;
 }
 
 } // end namespace fawkes

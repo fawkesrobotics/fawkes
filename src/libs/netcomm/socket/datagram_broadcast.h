@@ -31,30 +31,28 @@ namespace fawkes {
 
 class BroadcastDatagramSocket : public Socket
 {
- public:
-  BroadcastDatagramSocket(const char *broadcast_addr_s, unsigned short port,
-                          float timeout = 0.f);
-  BroadcastDatagramSocket(BroadcastDatagramSocket &s);
-  virtual ~BroadcastDatagramSocket();
+public:
+	BroadcastDatagramSocket(const char *broadcast_addr_s, unsigned short port, float timeout = 0.f);
+	BroadcastDatagramSocket(BroadcastDatagramSocket &s);
+	virtual ~BroadcastDatagramSocket();
 
-	BroadcastDatagramSocket& operator=(BroadcastDatagramSocket& s);
+	BroadcastDatagramSocket &operator=(BroadcastDatagramSocket &s);
 
-  virtual Socket *  clone();
+	virtual Socket *clone();
 
-  virtual void bind();
-  virtual void bind(const unsigned short int port);
-  virtual void bind(const unsigned short int port,
-		    const char *hostname);
+	virtual void bind();
+	virtual void bind(const unsigned short int port);
+	virtual void bind(const unsigned short int port, const char *hostname);
 
-  virtual void send(void *buf, size_t buf_len);
-  virtual void send(void *buf, size_t buf_len,
-		    const struct sockaddr *to_addr, socklen_t addr_len)
-  { send(buf, buf_len); }
+	virtual void send(void *buf, size_t buf_len);
+	virtual void
+	send(void *buf, size_t buf_len, const struct sockaddr *to_addr, socklen_t addr_len)
+	{
+		send(buf, buf_len);
+	}
 
-
- private:
-  struct ::sockaddr_in *broadcast_addr;
-
+private:
+	struct ::sockaddr_in *broadcast_addr;
 };
 
 } // end namespace fawkes

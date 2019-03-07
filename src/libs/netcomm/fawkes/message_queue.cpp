@@ -38,7 +38,6 @@ FawkesNetworkMessageQueue::FawkesNetworkMessageQueue()
 {
 }
 
-
 /** Destructor. */
 FawkesNetworkMessageQueue::~FawkesNetworkMessageQueue()
 {

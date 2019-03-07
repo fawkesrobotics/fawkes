@@ -23,10 +23,9 @@
 
 /// @cond QA
 
+#include <core/exception.h>
 #include <netcomm/dns-sd/avahi_thread.h>
 #include <netcomm/service_discovery/browse_handler.h>
-
-#include <core/exception.h>
 #include <utils/system/signal.h>
 
 #include <cstdio>
@@ -35,88 +34,89 @@ using namespace fawkes;
 
 class QAAvahiBrowserMain : public SignalHandler, public ServiceBrowseHandler
 {
- public:
-  QAAvahiBrowserMain()
-  {
-    at = new AvahiThread();;
-    at->watch_service("_fawkes._udp", this);
-  }
+public:
+	QAAvahiBrowserMain()
+	{
+		at = new AvahiThread();
+		;
+		at->watch_service("_fawkes._udp", this);
+	}
 
-  ~QAAvahiBrowserMain()
-  {
-    delete at;
-  }
+	~QAAvahiBrowserMain()
+	{
+		delete at;
+	}
 
-  void handle_signal(int signum)
-  {
-    at->cancel();
-  }
+	void
+	handle_signal(int signum)
+	{
+		at->cancel();
+	}
 
-  void run()
-  {
-    at->start();
-    at->join();
-  }
+	void
+	run()
+	{
+		at->start();
+		at->join();
+	}
 
-  virtual void all_for_now()
-  {
-    printf("ALL_FOR_NOW\n");
-  }
+	virtual void
+	all_for_now()
+	{
+		printf("ALL_FOR_NOW\n");
+	}
 
-  virtual void cache_exhausted()
-  {
-    printf("CACHE_EXHAUSTED\n");
-  }
+	virtual void
+	cache_exhausted()
+	{
+		printf("CACHE_EXHAUSTED\n");
+	}
 
-  virtual void browse_failed(const char *name,
-			     const char *type,
-			     const char *domain)
-  {
-    printf("FAILED: name=%s  type=%s  domain=%s\n", name, type, domain);
-  }
+	virtual void
+	browse_failed(const char *name, const char *type, const char *domain)
+	{
+		printf("FAILED: name=%s  type=%s  domain=%s\n", name, type, domain);
+	}
 
-  virtual void service_added(const char *name,
-			     const char *type,
-			     const char *domain,
-			     const char *host_name,
-			     const struct sockaddr *addr,
-			     const socklen_t addr_size,
-			     uint16_t port,
-			     std::list<std::string> &txt,
-			     int flags
-			     )
-  {
-    printf("SERVICE_ADDED: name=%s  type=%s  domain=%s  hostname=%s\n",
-	   name, type, domain, host_name);
-  }
+	virtual void
+	service_added(const char *            name,
+	              const char *            type,
+	              const char *            domain,
+	              const char *            host_name,
+	              const struct sockaddr * addr,
+	              const socklen_t         addr_size,
+	              uint16_t                port,
+	              std::list<std::string> &txt,
+	              int                     flags)
+	{
+		printf(
+		  "SERVICE_ADDED: name=%s  type=%s  domain=%s  hostname=%s\n", name, type, domain, host_name);
+	}
 
-  virtual void service_removed(const char *name,
-			       const char *type,
-			       const char *domain)
-  {
-    printf("SERVICE_REMOVED: name=%s  type=%s  domain=%s\n", name, type, domain);
-  }
+	virtual void
+	service_removed(const char *name, const char *type, const char *domain)
+	{
+		printf("SERVICE_REMOVED: name=%s  type=%s  domain=%s\n", name, type, domain);
+	}
 
- private:
-  AvahiThread *at;
-
+private:
+	AvahiThread *at;
 };
 
 int
 main(int argc, char **argv)
 {
-  try {
+	try {
+		QAAvahiBrowserMain m;
+		SignalManager::register_handler(SIGINT, &m);
 
-    QAAvahiBrowserMain m;
-    SignalManager::register_handler(SIGINT, &m);
+		m.run();
 
-    m.run();
+	} catch (Exception &e) {
+		e.print_trace();
+	}
 
-  } catch (Exception &e) {
-    e.print_trace();
-  }
-
-  SignalManager::finalize();
+	SignalManager::finalize();
 }
 
 /// @endcond

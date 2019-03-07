@@ -21,13 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <netcomm/fawkes/transceiver.h>
 #include <netcomm/fawkes/message.h>
 #include <netcomm/fawkes/message_queue.h>
+#include <netcomm/fawkes/transceiver.h>
 #include <netcomm/socket/stream.h>
 #include <netcomm/utils/exceptions.h>
-
 #include <netinet/in.h>
+
 #include <cstdlib>
 
 namespace fawkes {
@@ -50,25 +50,24 @@ namespace fawkes {
 void
 FawkesNetworkTransceiver::send(StreamSocket *s, FawkesNetworkMessageQueue *msgq)
 {
-  msgq->lock();
-  try {
-    while ( ! msgq->empty() ) {
-      FawkesNetworkMessage *m = msgq->front();
-      m->pack();
-      const fawkes_message_t &f = m->fmsg();
-      unsigned int payload_size = m->payload_size();
-      s->write(&(f.header), sizeof(f.header));
-      s->write(f.payload, payload_size);
-      m->unref();
-      msgq->pop();
-    }
-  } catch (SocketException &e) {
-    msgq->unlock();
-    throw ConnectionDiedException("Write failed");
-  }
-  msgq->unlock();
+	msgq->lock();
+	try {
+		while (!msgq->empty()) {
+			FawkesNetworkMessage *m = msgq->front();
+			m->pack();
+			const fawkes_message_t &f            = m->fmsg();
+			unsigned int            payload_size = m->payload_size();
+			s->write(&(f.header), sizeof(f.header));
+			s->write(f.payload, payload_size);
+			m->unref();
+			msgq->pop();
+		}
+	} catch (SocketException &e) {
+		msgq->unlock();
+		throw ConnectionDiedException("Write failed");
+	}
+	msgq->unlock();
 }
-
 
 /** Receive data.
  * This method receives all messages currently available from the network, or
@@ -83,34 +82,35 @@ FawkesNetworkTransceiver::send(StreamSocket *s, FawkesNetworkMessageQueue *msgq)
  * operation since for any error the conncetion is considered dead.
  */
 void
-FawkesNetworkTransceiver::recv(StreamSocket *s, FawkesNetworkMessageQueue *msgq,
-			       unsigned int max_num_msgs)
+FawkesNetworkTransceiver::recv(StreamSocket *             s,
+                               FawkesNetworkMessageQueue *msgq,
+                               unsigned int               max_num_msgs)
 {
-  msgq->lock();
+	msgq->lock();
 
-  try {
-    unsigned int num_msgs = 0;
-    while ( s->available() && (num_msgs++ < max_num_msgs) ) {
-      fawkes_message_t msg;
-      s->read(&(msg.header), sizeof(msg.header));
+	try {
+		unsigned int num_msgs = 0;
+		while (s->available() && (num_msgs++ < max_num_msgs)) {
+			fawkes_message_t msg;
+			s->read(&(msg.header), sizeof(msg.header));
 
-      unsigned int payload_size = ntohl(msg.header.payload_size);
+			unsigned int payload_size = ntohl(msg.header.payload_size);
 
-      if ( payload_size > 0 ) {
-	msg.payload = malloc(payload_size);
-	s->read(msg.payload, payload_size);
-      } else {
-	msg.payload = NULL;
-      }
+			if (payload_size > 0) {
+				msg.payload = malloc(payload_size);
+				s->read(msg.payload, payload_size);
+			} else {
+				msg.payload = NULL;
+			}
 
-      FawkesNetworkMessage *m = new FawkesNetworkMessage(msg);
-      msgq->push(m);
-    }
-  } catch (SocketException &e) {
-    msgq->unlock();
-    throw ConnectionDiedException("Read failed");
-  }
-  msgq->unlock();
+			FawkesNetworkMessage *m = new FawkesNetworkMessage(msg);
+			msgq->push(m);
+		}
+	} catch (SocketException &e) {
+		msgq->unlock();
+		throw ConnectionDiedException("Read failed");
+	}
+	msgq->unlock();
 }
 
 } // end namespace fawkes

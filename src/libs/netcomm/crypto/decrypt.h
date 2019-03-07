@@ -24,39 +24,38 @@
 #define _NETCOMM_CRYPTO_DECRYPT_H_
 
 #include <core/exception.h>
+
 #include <cstddef>
 
 namespace fawkes {
 
 class MessageDecryptionException : public Exception
 {
- public:
-  MessageDecryptionException(const char *msg);
+public:
+	MessageDecryptionException(const char *msg);
 };
-
 
 class MessageDecryptor
 {
- public:
-  MessageDecryptor(const unsigned char *key, const unsigned char *iv);
-  ~MessageDecryptor();
+public:
+	MessageDecryptor(const unsigned char *key, const unsigned char *iv);
+	~MessageDecryptor();
 
-  void set_plain_buffer(void *buffer, size_t buffer_length);
-  void set_crypt_buffer(void *buffer, size_t buffer_length);
+	void set_plain_buffer(void *buffer, size_t buffer_length);
+	void set_crypt_buffer(void *buffer, size_t buffer_length);
 
-  size_t decrypt();
+	size_t decrypt();
 
- private:
-  void    *plain_buffer;
-  size_t   plain_buffer_length;
-  void    *crypt_buffer;
-  size_t   crypt_buffer_length;
+private:
+	void * plain_buffer;
+	size_t plain_buffer_length;
+	void * crypt_buffer;
+	size_t crypt_buffer_length;
 
-  const unsigned char *key;
-  const unsigned char *iv;
+	const unsigned char *key;
+	const unsigned char *iv;
 };
 
 } // end namespace fawkes
-
 
 #endif
