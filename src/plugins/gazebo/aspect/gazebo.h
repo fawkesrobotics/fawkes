@@ -35,24 +35,25 @@ class GazeboAspectIniFin;
 
 class GazeboAspect : public virtual Aspect
 {
- friend GazeboAspectIniFin;
+	friend GazeboAspectIniFin;
 
- public:
-  GazeboAspect();
-  virtual ~GazeboAspect();
+public:
+	GazeboAspect();
+	virtual ~GazeboAspect();
 
- protected:
-  /// Gazebo Node for communication with a robot
-  gazebo::transport::NodePtr gazebonode;
-  /**
+protected:
+	/// Gazebo Node for communication with a robot
+	gazebo::transport::NodePtr gazebonode;
+	/**
    * Gazebo Node for communication with the world
    * (e.g. for spawning visuals or robot independent information)
    */
-  gazebo::transport::NodePtr gazebo_world_node;
+	gazebo::transport::NodePtr gazebo_world_node;
 
- private:
-  void init_GazeboAspect(gazebo::transport::NodePtr gazebonode, gazebo::transport::NodePtr gazebo_world_node);
-  void finalize_GazeboAspect();
+private:
+	void init_GazeboAspect(gazebo::transport::NodePtr gazebonode,
+	                       gazebo::transport::NodePtr gazebo_world_node);
+	void finalize_GazeboAspect();
 };
 
 } // end namespace fawkes

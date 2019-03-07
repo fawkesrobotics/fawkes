@@ -22,6 +22,7 @@
  */
 
 #include <plugins/gazebo/aspect/gazebo.h>
+
 #include <stdio.h>
 
 namespace fawkes {
@@ -45,15 +46,13 @@ namespace fawkes {
 /** Constructor. */
 GazeboAspect::GazeboAspect()
 {
-  add_aspect("GazeboAspect");
+	add_aspect("GazeboAspect");
 }
-
 
 /** Virtual empty destructor. */
 GazeboAspect::~GazeboAspect()
 {
 }
-
 
 /** Init Gazebo aspect.
  * This set the Gazebo node handle.
@@ -62,10 +61,11 @@ GazeboAspect::~GazeboAspect()
  * @param gazebonode Gazebo node handle
  */
 void
-GazeboAspect::init_GazeboAspect(gazebo::transport::NodePtr gazebonode , gazebo::transport::NodePtr gazebo_world_node)
+GazeboAspect::init_GazeboAspect(gazebo::transport::NodePtr gazebonode,
+                                gazebo::transport::NodePtr gazebo_world_node)
 {
-  this->gazebonode = gazebonode;
-  this->gazebo_world_node = gazebo_world_node;
+	this->gazebonode        = gazebonode;
+	this->gazebo_world_node = gazebo_world_node;
 }
 
 /** Finalize Gazebo aspect.
@@ -74,7 +74,7 @@ GazeboAspect::init_GazeboAspect(gazebo::transport::NodePtr gazebonode , gazebo::
 void
 GazeboAspect::finalize_GazeboAspect()
 {
-  gazebonode.reset();
+	gazebonode.reset();
 }
 
 } // end namespace fawkes

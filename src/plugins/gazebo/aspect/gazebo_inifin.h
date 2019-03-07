@@ -34,20 +34,19 @@ namespace fawkes {
 
 class GazeboAspectIniFin : public AspectIniFin
 {
- public:
-  GazeboAspectIniFin();
+public:
+	GazeboAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
-  //setters for the node_thread
-  void set_gazebonode(gazebo::transport::NodePtr gazebonode);
-  void set_gazebo_world_node(gazebo::transport::NodePtr gazebo_world_node);
+	//setters for the node_thread
+	void set_gazebonode(gazebo::transport::NodePtr gazebonode);
+	void set_gazebo_world_node(gazebo::transport::NodePtr gazebo_world_node);
 
- private:
-  gazebo::transport::NodePtr gazebonode_;
-  gazebo::transport::NodePtr gazebo_world_node_;
-
+private:
+	gazebo::transport::NodePtr gazebonode_;
+	gazebo::transport::NodePtr gazebo_world_node_;
 };
 
 } // end namespace fawkes

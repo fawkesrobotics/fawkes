@@ -23,13 +23,13 @@
 #include "node_thread.h"
 
 // from Gazebo
-#include <gazebo/transport/TransportIface.hh>
-#include <gazebo/transport/TransportTypes.hh>
-#include <gazebo/transport/Node.hh>
 #include <gazebo/gazebo_config.h>
 #include <google/protobuf/message.h>
-#include <gazebo/msgs/msgs.hh>
 
+#include <gazebo/msgs/msgs.hh>
+#include <gazebo/transport/Node.hh>
+#include <gazebo/transport/TransportIface.hh>
+#include <gazebo/transport/TransportTypes.hh>
 
 using namespace fawkes;
 
@@ -43,62 +43,57 @@ using namespace fawkes;
 
 /** Constructor. */
 GazeboNodeThread::GazeboNodeThread()
-  : Thread("GazeboNodeThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
-    AspectProviderAspect(&gazebo_aspect_inifin_)
+: Thread("GazeboNodeThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
+  AspectProviderAspect(&gazebo_aspect_inifin_)
 {
 }
-
 
 /** Destructor. */
 GazeboNodeThread::~GazeboNodeThread()
 {
 }
 
-
 void
 GazeboNodeThread::init()
 {
-  //read config values
-  robot_channel = config->get_string("/gazsim/world-name")
-    + "/" + config->get_string("/gazsim/robot-name");
-  
-  world_name = config->get_string("/gazsim/world-name");
+	//read config values
+	robot_channel =
+	  config->get_string("/gazsim/world-name") + "/" + config->get_string("/gazsim/robot-name");
 
-  if(gazebo::transport::is_stopped()) {
-    gazebo::transport::init();
-    gazebo::transport::run();
-  }
-  else {
-    logger->log_warn(name(), "Gazebo already running ");
-  }
+	world_name = config->get_string("/gazsim/world-name");
 
-  //Initialize Communication nodes:
-  //the common one for the robot
-  gazebo::transport::NodePtr node(new gazebo::transport::Node());
-  gazebonode_ = node;
-  //initialize node (this node only communicates with nodes that were initialized with the same string)
-  gazebonode_->Init(robot_channel.c_str());
-  gazebo_aspect_inifin_.set_gazebonode(gazebonode_);
-  
-  //and the node for world change messages
-  gazebo_world_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
-  gazebo_world_node_->Init(world_name.c_str());
-  gazebo_aspect_inifin_.set_gazebo_world_node(gazebo_world_node_);
+	if (gazebo::transport::is_stopped()) {
+		gazebo::transport::init();
+		gazebo::transport::run();
+	} else {
+		logger->log_warn(name(), "Gazebo already running ");
+	}
+
+	//Initialize Communication nodes:
+	//the common one for the robot
+	gazebo::transport::NodePtr node(new gazebo::transport::Node());
+	gazebonode_ = node;
+	//initialize node (this node only communicates with nodes that were initialized with the same string)
+	gazebonode_->Init(robot_channel.c_str());
+	gazebo_aspect_inifin_.set_gazebonode(gazebonode_);
+
+	//and the node for world change messages
+	gazebo_world_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
+	gazebo_world_node_->Init(world_name.c_str());
+	gazebo_aspect_inifin_.set_gazebo_world_node(gazebo_world_node_);
 }
-
 
 void
 GazeboNodeThread::finalize()
 {
-  gazebonode_->Fini();
-  gazebonode_.reset();
-  gazebo_aspect_inifin_.set_gazebonode(gazebonode_);
-  gazebo_world_node_->Fini();
-  gazebo_world_node_.reset();
-  gazebo_aspect_inifin_.set_gazebonode(gazebo_world_node_);
+	gazebonode_->Fini();
+	gazebonode_.reset();
+	gazebo_aspect_inifin_.set_gazebonode(gazebonode_);
+	gazebo_world_node_->Fini();
+	gazebo_world_node_.reset();
+	gazebo_aspect_inifin_.set_gazebonode(gazebo_world_node_);
 }
-
 
 void
 GazeboNodeThread::loop()
