@@ -23,37 +23,41 @@
 #ifndef _PLUGINS_BALLPOSLOG_THREAD_H_
 #define _PLUGINS_BALLPOSLOG_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  class ObjectPositionInterface;
+class ObjectPositionInterface;
 }
 
-class BallPosLogThread
-  : public fawkes::Thread,
-    public fawkes::BlockedTimingAspect,
-    public fawkes::LoggingAspect,
-    public fawkes::ConfigurableAspect,
-    public fawkes::BlackBoardAspect
+class BallPosLogThread : public fawkes::Thread,
+                         public fawkes::BlockedTimingAspect,
+                         public fawkes::LoggingAspect,
+                         public fawkes::ConfigurableAspect,
+                         public fawkes::BlackBoardAspect
 {
- public:
-  BallPosLogThread();
-  virtual ~BallPosLogThread();
+public:
+	BallPosLogThread();
+	virtual ~BallPosLogThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  fawkes::ObjectPositionInterface *wm_ball_interface;
-  fawkes::Logger::LogLevel         log_level;
+private:
+	fawkes::ObjectPositionInterface *wm_ball_interface;
+	fawkes::Logger::LogLevel         log_level;
 };
 
 #endif

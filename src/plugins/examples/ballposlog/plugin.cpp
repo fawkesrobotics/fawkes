@@ -21,6 +21,7 @@
  */
 
 #include "plugin.h"
+
 #include "thread.h"
 
 /** @class BallPosLogPlugin "plugin.h"
@@ -36,12 +37,10 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-BallPosLogPlugin::BallPosLogPlugin(Configuration *config)
-  : Plugin(config)
+BallPosLogPlugin::BallPosLogPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new BallPosLogThread());
+	thread_list.push_back(new BallPosLogThread());
 }
 
 PLUGIN_DESCRIPTION("Example that logs ball position")
 EXPORT_PLUGIN(BallPosLogPlugin)
-
