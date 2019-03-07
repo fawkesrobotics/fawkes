@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  pseudomap.h - Interface generator pseudo map representation
  *
@@ -25,36 +25,35 @@
 
 #include <interfaces/generator/enum_constant.h>
 
-#include <string>
 #include <list>
+#include <string>
 
 class InterfacePseudoMap
 {
- public:
-  /** Reference list. */
-  typedef std::list<std::pair<std::string, std::string> > RefList;
+public:
+	/** Reference list. */
+	typedef std::list<std::pair<std::string, std::string>> RefList;
 
-  InterfacePseudoMap(std::string name, std::string type,
-		     std::string keytype, std::string comment);
+	InterfacePseudoMap(std::string name, std::string type, std::string keytype, std::string comment);
 
-  void valid();
+	void valid();
 
-  std::string               getName() const;
-  std::string               getComment() const;
-  std::string               getType() const;
-  std::string               getKeyType() const;
+	std::string getName() const;
+	std::string getComment() const;
+	std::string getType() const;
+	std::string getKeyType() const;
 
-  void                      addRef(std::string fieldname, std::string key);
+	void addRef(std::string fieldname, std::string key);
 
-  RefList &                 getRefList();
+	RefList &getRefList();
 
- private:
-  std::string name_;
-  std::string type_;
-  std::string comment_;
-  std::string keytype_;
+private:
+	std::string name_;
+	std::string type_;
+	std::string comment_;
+	std::string keytype_;
 
-  RefList parefs_;
+	RefList parefs_;
 };
 
 #endif

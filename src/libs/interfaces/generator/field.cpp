@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  field.cpp - Interface generator field representation
  *
@@ -20,18 +20,16 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <interfaces/generator/field.h>
 #include <interfaces/generator/checker.h>
 #include <interfaces/generator/exceptions.h>
+#include <interfaces/generator/field.h>
 
 #include <stdlib.h>
-
 
 /** @class InterfaceField interfaces/generator/field.h
  * Interface generator internal representation of a field as parsed from
  * the XML template file.
  */
-
 
 /** Constructor.
  * @param enum_constants enumeration constants that are available and which can be
@@ -39,12 +37,11 @@
  */
 InterfaceField::InterfaceField(std::vector<InterfaceEnumConstant> *enum_constants)
 {
-  this->enum_constants = enum_constants;
-  length = "";
-  length_value = 0;
-  is_enum_type = false;
+	this->enum_constants = enum_constants;
+	length               = "";
+	length_value         = 0;
+	is_enum_type         = false;
 }
-
 
 /** Get name of field.
  * @return name of field.
@@ -52,9 +49,8 @@ InterfaceField::InterfaceField(std::vector<InterfaceEnumConstant> *enum_constant
 std::string
 InterfaceField::getName() const
 {
-  return name;
+	return name;
 }
-
 
 /** Get type of field.
  * @return type of field.
@@ -62,9 +58,8 @@ InterfaceField::getName() const
 std::string
 InterfaceField::getType() const
 {
-    return type;
+	return type;
 }
-
 
 /** Get comment of field.
  * @return comment of field.
@@ -72,9 +67,8 @@ InterfaceField::getType() const
 std::string
 InterfaceField::getComment() const
 {
-    return comment;
+	return comment;
 }
-
 
 /** Get type as used for accessor methods of class.
  * @return accessor type
@@ -82,29 +76,28 @@ InterfaceField::getComment() const
 std::string
 InterfaceField::getAccessType() const
 {
-  if (type == "string") {
-    return "char *";
-  } else {
-    if ( length != "" ) {
-      if (type == "byte") {
-	return "uint8_t *";
-      } else if (type == "float" || type == "double" || type == "bool" || is_enum_type) {
-	return type + " *";
-      } else {
-	return type + "_t *";
-      }
-    } else {
-      if (type == "byte") {
-	return "uint8_t";
-      } else if (type == "float" || type == "double" || type == "bool" || is_enum_type) {
-	return type;
-      } else {
-	return type + "_t";
-      }
-    }
-  }
+	if (type == "string") {
+		return "char *";
+	} else {
+		if (length != "") {
+			if (type == "byte") {
+				return "uint8_t *";
+			} else if (type == "float" || type == "double" || type == "bool" || is_enum_type) {
+				return type + " *";
+			} else {
+				return type + "_t *";
+			}
+		} else {
+			if (type == "byte") {
+				return "uint8_t";
+			} else if (type == "float" || type == "double" || type == "bool" || is_enum_type) {
+				return type;
+			} else {
+				return type + "_t";
+			}
+		}
+	}
 }
-
 
 /** Get non-array accessor type.
  * @return accessor type
@@ -112,17 +105,16 @@ InterfaceField::getAccessType() const
 std::string
 InterfaceField::getPlainAccessType() const
 {
-  if (type == "string") {
-    return "char *";
-  } else if (type == "byte") {
-    return "uint8_t";
-  } else if (type == "float" || type == "double" || type == "bool" || is_enum_type) {
-    return type;
-  } else {
-    return type + "_t";
-  }
+	if (type == "string") {
+		return "char *";
+	} else if (type == "byte") {
+		return "uint8_t";
+	} else if (type == "float" || type == "double" || type == "bool" || is_enum_type) {
+		return type;
+	} else {
+		return type + "_t";
+	}
 }
-
 
 /** Get type used to formulate struct.
  * @return struct type
@@ -130,19 +122,18 @@ InterfaceField::getPlainAccessType() const
 std::string
 InterfaceField::getStructType() const
 {
-  if (type == "string") {
-    return "char";
-  } else if (type == "byte") {
-    return "uint8_t";
-  } else if (type == "float" || type == "double" || type == "bool") {
-    return type;
-  } else if (is_enum_type) {
-    return "int32_t";
-  } else {
-    return type + "_t";
-  }
+	if (type == "string") {
+		return "char";
+	} else if (type == "byte") {
+		return "uint8_t";
+	} else if (type == "float" || type == "double" || type == "bool") {
+		return type;
+	} else if (is_enum_type) {
+		return "int32_t";
+	} else {
+		return type + "_t";
+	}
 }
-
 
 /** Check if type is an enum type.
  * @return true if the type of this field is an enum type, false otherwise
@@ -150,7 +141,7 @@ InterfaceField::getStructType() const
 bool
 InterfaceField::isEnumType() const
 {
-  return is_enum_type;
+	return is_enum_type;
 }
 
 /** Get field length.
@@ -159,9 +150,8 @@ InterfaceField::isEnumType() const
 std::string
 InterfaceField::getLength() const
 {
-  return length;
+	return length;
 }
-
 
 /** Get length value.
  * This gives the length of the value as a uint instead of a string
@@ -172,9 +162,8 @@ InterfaceField::getLength() const
 unsigned int
 InterfaceField::getLengthValue() const
 {
-  return length_value;
+	return length_value;
 }
-
 
 /** Get valid for time.
  * @return valid for time
@@ -182,9 +171,8 @@ InterfaceField::getLengthValue() const
 std::string
 InterfaceField::getValidFor() const
 {
-  return validfor;
+	return validfor;
 }
-
 
 /** Get default value.
  * @return default value
@@ -192,9 +180,8 @@ InterfaceField::getValidFor() const
 std::string
 InterfaceField::getDefaultValue() const
 {
-  return default_value;
+	return default_value;
 }
-
 
 /** Get vector of enum constants.
  * @return const reference to vector of interface enum constants.
@@ -202,7 +189,7 @@ InterfaceField::getDefaultValue() const
 const std::vector<InterfaceEnumConstant> *
 InterfaceField::getEnumConstants() const
 {
-  return enum_constants;
+	return enum_constants;
 }
 
 /** Get specific enum constant.
@@ -214,18 +201,18 @@ InterfaceField::getEnumConstants() const
 const InterfaceEnumConstant &
 InterfaceField::getEnumConstant(const std::string &name) const
 {
-  if (! enum_constants) throw fawkes::Exception("No enum constants registered");
+	if (!enum_constants)
+		throw fawkes::Exception("No enum constants registered");
 
-  std::vector<InterfaceEnumConstant>::const_iterator i;
-  for (i = enum_constants->begin(); i != enum_constants->end(); ++i) {
-    if ( type == i->get_name() ) {
-      return *i;
-    }
-  }
+	std::vector<InterfaceEnumConstant>::const_iterator i;
+	for (i = enum_constants->begin(); i != enum_constants->end(); ++i) {
+		if (type == i->get_name()) {
+			return *i;
+		}
+	}
 
-  throw fawkes::Exception("Enum constant %s not found", name.c_str());
+	throw fawkes::Exception("Enum constant %s not found", name.c_str());
 }
-
 
 /** Get flags.
  * @return flags.
@@ -233,9 +220,8 @@ InterfaceField::getEnumConstant(const std::string &name) const
 std::vector<std::string>
 InterfaceField::getFlags() const
 {
-  return flags;
+	return flags;
 }
-
 
 /** Set type of field.
  * @param type new type of field.
@@ -243,18 +229,17 @@ InterfaceField::getFlags() const
 void
 InterfaceField::setType(const std::string &type)
 {
-  is_enum_type = false;
-  if ( enum_constants != NULL ) {
-    std::vector<InterfaceEnumConstant>::iterator i;
-    for (i = enum_constants->begin(); i != enum_constants->end(); ++i) {
-      if ( type == (*i).get_name() ) {
-	is_enum_type = true;
-      }
-    }
-  }
-  this->type = type;
+	is_enum_type = false;
+	if (enum_constants != NULL) {
+		std::vector<InterfaceEnumConstant>::iterator i;
+		for (i = enum_constants->begin(); i != enum_constants->end(); ++i) {
+			if (type == (*i).get_name()) {
+				is_enum_type = true;
+			}
+		}
+	}
+	this->type = type;
 }
-
 
 /** Set name of field.
  * @param name new name of field.
@@ -262,9 +247,8 @@ InterfaceField::setType(const std::string &type)
 void
 InterfaceField::setName(const std::string &name)
 {
-  this->name = name;
+	this->name = name;
 }
-
 
 /** Set comment of field.
  * @param comment new comment of field.
@@ -272,9 +256,8 @@ InterfaceField::setName(const std::string &name)
 void
 InterfaceField::setComment(const std::string &comment)
 {
-  this->comment = comment;
+	this->comment = comment;
 }
-
 
 /** Set length of field.
  * @param length set length of field.
@@ -282,10 +265,9 @@ InterfaceField::setComment(const std::string &comment)
 void
 InterfaceField::setLength(const std::string &length)
 {
-  this->length_value = (unsigned int)atoi(length.c_str());
-  this->length = length;
+	this->length_value = (unsigned int)atoi(length.c_str());
+	this->length       = length;
 }
-
 
 /** Set valid for time.
  * @param validfor new valid for time
@@ -293,9 +275,8 @@ InterfaceField::setLength(const std::string &length)
 void
 InterfaceField::setValidFor(const std::string &validfor)
 {
-  this->validfor = validfor;
+	this->validfor = validfor;
 }
-
 
 /** Set default value.
  * @param default_value new default value
@@ -303,9 +284,8 @@ InterfaceField::setValidFor(const std::string &validfor)
 void
 InterfaceField::setDefaultValue(const std::string &default_value)
 {
-  this->default_value = default_value;
+	this->default_value = default_value;
 }
-
 
 /** Set flags.
  * @param flags new flags of field
@@ -313,9 +293,8 @@ InterfaceField::setDefaultValue(const std::string &default_value)
 void
 InterfaceField::setFlags(const std::vector<std::string> &flags)
 {
-  this->flags = flags;
+	this->flags = flags;
 }
-
 
 /** Tokenize given string.
  * @param str tsring to tokenize
@@ -323,25 +302,24 @@ InterfaceField::setFlags(const std::vector<std::string> &flags)
  * @param delimiters string with delimiters.
  */
 void
-InterfaceField::tokenize(const std::string&   str,
-			 std::vector<std::string>& tokens,
-			 const std::string&   delimiters)
+InterfaceField::tokenize(const std::string &       str,
+                         std::vector<std::string> &tokens,
+                         const std::string &       delimiters)
 {
-  // Skip delimiters at beginning.
-  std::string::size_type last_pos = str.find_first_not_of(delimiters, 0);
-  // Find first "non-delimiter".
-  std::string::size_type pos      = str.find_first_of(delimiters, last_pos);
+	// Skip delimiters at beginning.
+	std::string::size_type last_pos = str.find_first_not_of(delimiters, 0);
+	// Find first "non-delimiter".
+	std::string::size_type pos = str.find_first_of(delimiters, last_pos);
 
-  while (std::string::npos != pos || std::string::npos != last_pos) {
-    // Found a token, add it to the vector.
-    tokens.push_back(str.substr(last_pos, pos - last_pos));
-    // Skip delimiters.  Note the "not_of"
-    last_pos = str.find_first_not_of(delimiters, pos);
-    // Find next "non-delimiter"
-    pos = str.find_first_of(delimiters, last_pos);
-  }
+	while (std::string::npos != pos || std::string::npos != last_pos) {
+		// Found a token, add it to the vector.
+		tokens.push_back(str.substr(last_pos, pos - last_pos));
+		// Skip delimiters.  Note the "not_of"
+		last_pos = str.find_first_not_of(delimiters, pos);
+		// Find next "non-delimiter"
+		pos = str.find_first_of(delimiters, last_pos);
+	}
 }
-
 
 /** Set attribute.
  * @param attr_name attribute name
@@ -350,21 +328,20 @@ InterfaceField::tokenize(const std::string&   str,
 void
 InterfaceField::setAttribute(const std::string &attr_name, const std::string &attr_value)
 {
-  if ( attr_name == "name" ) {
-    setName(attr_value);
-  } else if ( attr_name == "type" ) {
-    setType(attr_value);
-  } else if ( attr_name == "length" ) {
-    setLength(attr_value);
-  } else if ( attr_name == "validfor" ) {
-    setValidFor(attr_value);
-  } else if ( attr_name == "default" ) {
-    setDefaultValue(attr_value);
-  } else if ( attr_name == "flags" ) {
-    tokenize(attr_value, flags, ",");
-  }
+	if (attr_name == "name") {
+		setName(attr_value);
+	} else if (attr_name == "type") {
+		setType(attr_value);
+	} else if (attr_name == "length") {
+		setLength(attr_value);
+	} else if (attr_name == "validfor") {
+		setValidFor(attr_value);
+	} else if (attr_name == "default") {
+		setDefaultValue(attr_value);
+	} else if (attr_name == "flags") {
+		tokenize(attr_value, flags, ",");
+	}
 }
-
 
 /** Assert validity.
  * Calling valid() acts like an assertion. An Exception is thrown if something is wrong.
@@ -379,40 +356,38 @@ InterfaceField::setAttribute(const std::string &attr_name, const std::string &at
 void
 InterfaceField::valid(const std::set<std::string> &reserved_names)
 {
-  if ( ! InterfaceChecker::validName(name, reserved_names) ) {
-    throw InterfaceGeneratorReservedIdentifierException("field", name.c_str());
-  }
-  if ( ! InterfaceChecker::validName(type, reserved_names) ) {
-    throw InterfaceGeneratorReservedIdentifierException("type", type.c_str());
-  }
-  if ( ! InterfaceChecker::validType(type, enum_constants) ) {
-    throw InterfaceGeneratorInvalidTypeException("field", name.c_str(), type.c_str());
-  }
-  if ( (name.length() == 0) || (name.find(" ") != std::string::npos) ) {
-    throw InterfaceGeneratorInvalidValueException("name", "string", "name must not contain spaces");
-  }
-  if ( (length.length() > 0) && ! InterfaceChecker::validValue("uint32", length) ) {
-    throw InterfaceGeneratorInvalidValueException("length", "uint32", length.c_str());
-  }
-  if ( (validfor.length() > 0) && ! InterfaceChecker::validValue("uint32", validfor) ) {
-    throw InterfaceGeneratorInvalidValueException("validfor", "uint32", validfor.c_str());
-  }
-  if ( (default_value.length() > 0) &&
-       ! InterfaceChecker::validValue(type, default_value) ) {
-    throw InterfaceGeneratorInvalidValueException("default", type.c_str(), validfor.c_str());
-  }
-  for (std::vector<std::string>::iterator i = flags.begin(); i != flags.end(); ++i) {
-    if ( *i != "changed_indicator" ) {
-      throw InterfaceGeneratorInvalidFlagException(name.c_str(), (*i).c_str());
-    }
-  }
-  /*
+	if (!InterfaceChecker::validName(name, reserved_names)) {
+		throw InterfaceGeneratorReservedIdentifierException("field", name.c_str());
+	}
+	if (!InterfaceChecker::validName(type, reserved_names)) {
+		throw InterfaceGeneratorReservedIdentifierException("type", type.c_str());
+	}
+	if (!InterfaceChecker::validType(type, enum_constants)) {
+		throw InterfaceGeneratorInvalidTypeException("field", name.c_str(), type.c_str());
+	}
+	if ((name.length() == 0) || (name.find(" ") != std::string::npos)) {
+		throw InterfaceGeneratorInvalidValueException("name", "string", "name must not contain spaces");
+	}
+	if ((length.length() > 0) && !InterfaceChecker::validValue("uint32", length)) {
+		throw InterfaceGeneratorInvalidValueException("length", "uint32", length.c_str());
+	}
+	if ((validfor.length() > 0) && !InterfaceChecker::validValue("uint32", validfor)) {
+		throw InterfaceGeneratorInvalidValueException("validfor", "uint32", validfor.c_str());
+	}
+	if ((default_value.length() > 0) && !InterfaceChecker::validValue(type, default_value)) {
+		throw InterfaceGeneratorInvalidValueException("default", type.c_str(), validfor.c_str());
+	}
+	for (std::vector<std::string>::iterator i = flags.begin(); i != flags.end(); ++i) {
+		if (*i != "changed_indicator") {
+			throw InterfaceGeneratorInvalidFlagException(name.c_str(), (*i).c_str());
+		}
+	}
+	/*
   if ( (type == "char") && (length.length() == 0) ) {
     throw InterfaceGeneratorMissingAttributeException(name.c_str(), type.c_str(), "length");
   }
   */
 }
-
 
 /** Check order of two elements.
  * The overall order is like the following:
@@ -429,55 +404,38 @@ InterfaceField::valid(const std::set<std::string> &reserved_names)
  * @return true, if current instance is small than f, false otherwise
  */
 bool
-InterfaceField::operator< (const InterfaceField &f) const
+InterfaceField::operator<(const InterfaceField &f) const
 {
-  if ( (type == "unsigned int") ) {
-    return (f.type != "unsigned int");
+	if ((type == "unsigned int")) {
+		return (f.type != "unsigned int");
 
-  } else if ( type == "int" ) {
-    return ( (f.type != "int") &&
-	     (f.type != "unsigned int") );
+	} else if (type == "int") {
+		return ((f.type != "int") && (f.type != "unsigned int"));
 
+	} else if (type == "unsigned long int") {
+		return ((f.type != "unsigned long int") && (f.type != "unsigned int") && (f.type != "int"));
 
-  } else if ( type == "unsigned long int" ) {
-    return ( (f.type != "unsigned long int") &&
-	     (f.type != "unsigned int") &&
-	     (f.type != "int") );
+	} else if (type == "long int") {
+		return ((f.type != "long int") && (f.type != "unsigned int") && (f.type != "int")
+		        && (f.type != "unsigned long int"));
 
-  } else if ( type == "long int" ) {
-    return ( (f.type != "long int") &&
-	     (f.type != "unsigned int") &&
-	     (f.type != "int") &&
-	     (f.type != "unsigned long int") );
+	} else if (type == "float") {
+		return ((f.type != "float") && (f.type != "unsigned int") && (f.type != "int"));
 
-  } else if ( type == "float" ) {
-    return ( (f.type != "float") &&
-	     (f.type != "unsigned int") &&
-	     (f.type != "int") );
+	} else if (type == "double") {
+		return ((f.type != "double") && (f.type != "unsigned int") && (f.type != "int")
+		        && (f.type != "float"));
 
-  } else if ( type == "double" ) {
-    return ( (f.type != "double") &&  
-	     (f.type != "unsigned int") &&
-	     (f.type != "int") &&
-	     (f.type != "float") );
+	} else if (type == "bool") {
+		return ((f.type != "bool") && (f.type != "double") && (f.type != "unsigned int")
+		        && (f.type != "int") && (f.type != "float"));
 
-  } else if ( type == "bool" ) {
-    return ( (f.type != "bool") &&
-	     (f.type != "double") &&  
-	     (f.type != "unsigned int") &&
-	     (f.type != "int") &&
-	     (f.type != "float") );
+	} else if (type == "byte") {
+		return ((f.type != "byte") && (f.type != "bool") && (f.type != "double")
+		        && (f.type != "unsigned int") && (f.type != "int") && (f.type != "float"));
 
-  } else if ( type == "byte" ) {
-    return ( (f.type != "byte") &&
-	     (f.type != "bool") &&
-	     (f.type != "double") &&  
-	     (f.type != "unsigned int") &&
-	     (f.type != "int") &&
-	     (f.type != "float") );
-
-  } else {
-    // char or unknown, char is always last and thus >=
-    return false;
-  }
+	} else {
+		// char or unknown, char is always last and thus >=
+		return false;
+	}
 }

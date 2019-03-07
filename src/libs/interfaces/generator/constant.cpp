@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  constant.cpp - Interface generator constant representation
  *
@@ -20,15 +20,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <interfaces/generator/constant.h>
 #include <interfaces/generator/checker.h>
+#include <interfaces/generator/constant.h>
 #include <interfaces/generator/exceptions.h>
 
 /** @class InterfaceConstant interfaces/generator/constant.h
  * Interface generator internal representation of a constant as parsed from
  * the XML template file.
  */
-
 
 /** Constructor
  * @param name name of constant
@@ -40,29 +39,30 @@
  * @exception InterfaceGeneratorInvalidValueException thrown if InterfaceDataTypeChecker
  * reports an illegal value for the given type.
  */
-InterfaceConstant::InterfaceConstant(const std::string &name, const std::string &type,
-				     const std::string &value, const std::string &comment)
+InterfaceConstant::InterfaceConstant(const std::string &name,
+                                     const std::string &type,
+                                     const std::string &value,
+                                     const std::string &comment)
 {
-  if ( ! InterfaceChecker::validName(name, reserved_names_interface()) ) {
-    throw InterfaceGeneratorReservedIdentifierException("constant", name.c_str());
-  }
-  if ( ! InterfaceChecker::validType(type) ) {
-    throw InterfaceGeneratorInvalidTypeException("constant", name.c_str(), type.c_str());
-  }
-  if ( ! InterfaceChecker::validValue(type, value) ) {
-    throw InterfaceGeneratorInvalidValueException(name.c_str(), type.c_str(), value.c_str());
-  }
+	if (!InterfaceChecker::validName(name, reserved_names_interface())) {
+		throw InterfaceGeneratorReservedIdentifierException("constant", name.c_str());
+	}
+	if (!InterfaceChecker::validType(type)) {
+		throw InterfaceGeneratorInvalidTypeException("constant", name.c_str(), type.c_str());
+	}
+	if (!InterfaceChecker::validValue(type, value)) {
+		throw InterfaceGeneratorInvalidValueException(name.c_str(), type.c_str(), value.c_str());
+	}
 
-  this->name  = name;
-  this->type  = type;
-  if ( type == "string" ) {
-    this->value = std::string("\"") + value + "\"";
-  } else {
-    this->value = value;
-  }
-  this->comment = comment;
+	this->name = name;
+	this->type = type;
+	if (type == "string") {
+		this->value = std::string("\"") + value + "\"";
+	} else {
+		this->value = value;
+	}
+	this->comment = comment;
 }
-
 
 /** Get name of constant.
  * @return name of constant.
@@ -70,9 +70,8 @@ InterfaceConstant::InterfaceConstant(const std::string &name, const std::string 
 std::string
 InterfaceConstant::getName()
 {
-  return name;
+	return name;
 }
-
 
 /** Get value of constant.
  * @return value of constant.
@@ -80,9 +79,8 @@ InterfaceConstant::getName()
 std::string
 InterfaceConstant::getValue()
 {
-  return value;
+	return value;
 }
-
 
 /** Get type of constant.
  * @return type of constnat.
@@ -90,17 +88,16 @@ InterfaceConstant::getValue()
 std::string
 InterfaceConstant::getType()
 {
-  if (type == "string") {
-    return "char *";
-  } else if (type == "byte") {
-    return "uint8_t";
-  } else if (type == "float" || type == "double" || type == "bool") {
-    return type;
-  } else {
-    return type + "_t";
-  }
+	if (type == "string") {
+		return "char *";
+	} else if (type == "byte") {
+		return "uint8_t";
+	} else if (type == "float" || type == "double" || type == "bool") {
+		return type;
+	} else {
+		return type + "_t";
+	}
 }
-
 
 /** Get comment of constant.
  * @return comment of constant.
@@ -108,5 +105,5 @@ InterfaceConstant::getType()
 std::string
 InterfaceConstant::getComment()
 {
-  return comment;
+	return comment;
 }

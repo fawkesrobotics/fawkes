@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  parser.h - Interface config parser
  *
@@ -22,67 +22,66 @@
 #ifndef _INTERFACES_GENERATOR_PARSER_H_
 #define _INTERFACES_GENERATOR_PARSER_H_
 
-#include "field.h"
 #include "constant.h"
 #include "enum_constant.h"
+#include "field.h"
 #include "message.h"
 #include "pseudomap.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace xmlpp {
-  class DomParser;
-  class Node;
-}
+class DomParser;
+class Node;
+} // namespace xmlpp
 
 class InterfaceParser
 {
- public:
-  InterfaceParser(std::string config_filename);
-  ~InterfaceParser();
+public:
+	InterfaceParser(std::string config_filename);
+	~InterfaceParser();
 
-  std::vector<InterfaceField>  getFields(xmlpp::Node *node, const std::set<std::string> &reserved_names);
-  std::vector<InterfacePseudoMap> getPseudoMaps(xmlpp::Node *node,
-						std::vector<InterfaceField> &fields);
-  void parse();
+	std::vector<InterfaceField>     getFields(xmlpp::Node *                node,
+	                                          const std::set<std::string> &reserved_names);
+	std::vector<InterfacePseudoMap> getPseudoMaps(xmlpp::Node *                node,
+	                                              std::vector<InterfaceField> &fields);
+	void                            parse();
 
-  void printFields(std::vector<InterfaceField> &fields);
-  void printPseudoMaps(std::vector<InterfacePseudoMap> &pseudo_maps);
-  void print();
-  void printParsed(std::vector<InterfaceConstant> &     constants,
-		   std::vector<InterfaceEnumConstant> & enum_constants,
-		   std::vector<InterfaceField> &        data_fields,
-		   std::vector<InterfacePseudoMap> &    pseudo_maps,
-		   std::vector<InterfaceMessage> &      messages);
+	void printFields(std::vector<InterfaceField> &fields);
+	void printPseudoMaps(std::vector<InterfacePseudoMap> &pseudo_maps);
+	void print();
+	void printParsed(std::vector<InterfaceConstant> &    constants,
+	                 std::vector<InterfaceEnumConstant> &enum_constants,
+	                 std::vector<InterfaceField> &       data_fields,
+	                 std::vector<InterfacePseudoMap> &   pseudo_maps,
+	                 std::vector<InterfaceMessage> &     messages);
 
-  std::string                         getInterfaceName();
-  std::string                         getInterfaceAuthor();
-  std::string                         getInterfaceYear();
-  std::string                         getInterfaceCreationDate();
-  std::vector<InterfaceConstant>      getConstants();
-  std::vector<InterfaceEnumConstant>  getEnumConstants();
-  std::vector<InterfaceField>         getDataFields();
-  std::vector<InterfacePseudoMap>     getPseudoMaps();
-  std::string                         getDataComment();
-  std::vector<InterfaceMessage>       getMessages();
+	std::string                        getInterfaceName();
+	std::string                        getInterfaceAuthor();
+	std::string                        getInterfaceYear();
+	std::string                        getInterfaceCreationDate();
+	std::vector<InterfaceConstant>     getConstants();
+	std::vector<InterfaceEnumConstant> getEnumConstants();
+	std::vector<InterfaceField>        getDataFields();
+	std::vector<InterfacePseudoMap>    getPseudoMaps();
+	std::string                        getDataComment();
+	std::vector<InterfaceMessage>      getMessages();
 
- private:
-  xmlpp::DomParser *dom;
-  xmlpp::Node      *root;
-  std::string       name;
-  std::string       author;
-  std::string       year;
-  std::string       creation_date;
-  std::string       data_comment;
+private:
+	xmlpp::DomParser *dom;
+	xmlpp::Node *     root;
+	std::string       name;
+	std::string       author;
+	std::string       year;
+	std::string       creation_date;
+	std::string       data_comment;
 
-  std::vector<InterfaceConstant>     constants;
-  std::vector<InterfaceEnumConstant> enum_constants;
-  std::vector<InterfaceField>        data_fields;
-  std::vector<InterfacePseudoMap>    pseudo_maps;
-  std::vector<InterfaceMessage>      messages;
-
+	std::vector<InterfaceConstant>     constants;
+	std::vector<InterfaceEnumConstant> enum_constants;
+	std::vector<InterfaceField>        data_fields;
+	std::vector<InterfacePseudoMap>    pseudo_maps;
+	std::vector<InterfaceMessage>      messages;
 };
-
 
 #endif
