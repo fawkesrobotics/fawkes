@@ -21,7 +21,6 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-
 /// @cond QA
 
 #include <blackboard/remote.h>
@@ -37,29 +36,27 @@ bool quit = false;
 void
 signal_handler(int signum)
 {
-  quit = true;
+	quit = true;
 }
-
 
 int
 main(int argc, char **argv)
 {
-  signal(SIGINT, signal_handler);
+	signal(SIGINT, signal_handler);
 
-  BlackBoard *rbb = new RemoteBlackBoard("localhost", 1910);
-  TestInterface *ti = rbb->open_for_writing<TestInterface>("BBLoggerTest");
+	BlackBoard *   rbb = new RemoteBlackBoard("localhost", 1910);
+	TestInterface *ti  = rbb->open_for_writing<TestInterface>("BBLoggerTest");
 
-  int i = 0;
-  while (! quit) {
-    ti->set_test_int(++i);
-    ti->write();
-    usleep(100000);
-  }
+	int i = 0;
+	while (!quit) {
+		ti->set_test_int(++i);
+		ti->write();
+		usleep(100000);
+	}
 
-  rbb->close(ti);
-  sleep(2);
-  delete rbb;
+	rbb->close(ti);
+	sleep(2);
+	delete rbb;
 }
-
 
 /// @endcond

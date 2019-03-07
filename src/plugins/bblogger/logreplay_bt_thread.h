@@ -28,23 +28,24 @@
 
 #include <aspect/blocked_timing.h>
 
-class BBLogReplayBlockedTimingThread
-: public BBLogReplayThread,
-  public fawkes::BlockedTimingAspect
+class BBLogReplayBlockedTimingThread : public BBLogReplayThread, public fawkes::BlockedTimingAspect
 {
- public:
-  BBLogReplayBlockedTimingThread(fawkes::BlockedTimingAspect::WakeupHook hook,
-				 const char *logfile_name,
-				 const char *logdir, 
-				 const char *scenario,
-				 float grace_period,
-				 bool loop_replay,
-				 bool non_blocking);
+public:
+	BBLogReplayBlockedTimingThread(fawkes::BlockedTimingAspect::WakeupHook hook,
+	                               const char *                            logfile_name,
+	                               const char *                            logdir,
+	                               const char *                            scenario,
+	                               float                                   grace_period,
+	                               bool                                    loop_replay,
+	                               bool                                    non_blocking);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
-
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 };
-
 
 #endif

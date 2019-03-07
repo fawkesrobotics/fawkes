@@ -22,235 +22,234 @@
 
 #include "../bblogfile.h"
 
+#include <arpa/inet.h>
+#include <blackboard/internal/instance_factory.h>
+#include <blackboard/remote.h>
+#include <interfaces/SwitchInterface.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <utils/system/argparser.h>
+#include <utils/system/fam.h>
 #include <utils/system/signal.h>
 #include <utils/time/time.h>
-#include <utils/system/fam.h>
 
-#include <blackboard/remote.h>
-#include <blackboard/internal/instance_factory.h>
-#include <interfaces/SwitchInterface.h>
-
-#include <cstdlib>
-#include <cstdio>
 #include <cerrno>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
-#include <sys/mman.h>
 
 using namespace fawkes;
 
 void
 print_usage(const char *program_name)
 {
-  printf("Usage: %s [-h] [-r host:port] <COMMAND> <logfile>\n"
-	 "       %s print <logfile> <index> [index ...]\n"
-	 "       %s convert <infile> <outfile> <format>\n"
-	 "\n"
-         " -h  Print this usage information\n"
-         "COMMANDS:\n"
-         " watch     Continuously watch a log file (like tail)\n"
-         " info      Print meta information of log file\n"
-         " print     Print specific data index\n"
-	 "           <index> [index ...] is a list of indices to print\n"
-         " replay    Replay log file in real-time to console\n"
-	 " repair    Repair file, i.e. properly set number of entries\n"
-	 " enable    Enable logging on a remotely running bblogger\n"
-	 " disable   Disable logging on a remotely running bblogger\n"
-	 " convert   Convert logfile to different format\n"
-	 "           <infile>  input log file\n"
-	 "           <outfile> converted output file\n"
-	 "           <format>  format to convert to, currently supported:\n"
-	 "             - csv  Comma-separated values\n",
-	 program_name, program_name, program_name);
+	printf("Usage: %s [-h] [-r host:port] <COMMAND> <logfile>\n"
+	       "       %s print <logfile> <index> [index ...]\n"
+	       "       %s convert <infile> <outfile> <format>\n"
+	       "\n"
+	       " -h  Print this usage information\n"
+	       "COMMANDS:\n"
+	       " watch     Continuously watch a log file (like tail)\n"
+	       " info      Print meta information of log file\n"
+	       " print     Print specific data index\n"
+	       "           <index> [index ...] is a list of indices to print\n"
+	       " replay    Replay log file in real-time to console\n"
+	       " repair    Repair file, i.e. properly set number of entries\n"
+	       " enable    Enable logging on a remotely running bblogger\n"
+	       " disable   Disable logging on a remotely running bblogger\n"
+	       " convert   Convert logfile to different format\n"
+	       "           <infile>  input log file\n"
+	       "           <outfile> converted output file\n"
+	       "           <format>  format to convert to, currently supported:\n"
+	       "             - csv  Comma-separated values\n",
+	       program_name,
+	       program_name,
+	       program_name);
 }
-
 
 int
 print_info(std::string &filename)
 {
-  try {
-    BBLogFile bf(filename.c_str());
-    bf.print_info();
-    return 0;
-  } catch (Exception &e) {
-    printf("Failed to print info, exception follows\n");
-    e.print_trace();
-    return -1;
-  }
+	try {
+		BBLogFile bf(filename.c_str());
+		bf.print_info();
+		return 0;
+	} catch (Exception &e) {
+		printf("Failed to print info, exception follows\n");
+		e.print_trace();
+		return -1;
+	}
 }
 
 int
 repair_file(std::string &filename)
 {
-  try {
-    BBLogFile::repair_file(filename.c_str());
-    printf("Nothing to repair, files are fine\n");
-    return 0;
-  } catch (Exception &e) {
-    if (strcmp(e.type_id(), "repair-success") == 0) {
-      printf("Repair successful, actions done follow.\n");
-      e.print_trace();
-      return 0;
-    } else {
-      printf("Repair failed, exception follows.\n");
-      e.print_trace();
-      return -1;
-    }
-  }
+	try {
+		BBLogFile::repair_file(filename.c_str());
+		printf("Nothing to repair, files are fine\n");
+		return 0;
+	} catch (Exception &e) {
+		if (strcmp(e.type_id(), "repair-success") == 0) {
+			printf("Repair successful, actions done follow.\n");
+			e.print_trace();
+			return 0;
+		} else {
+			printf("Repair failed, exception follows.\n");
+			e.print_trace();
+			return -1;
+		}
+	}
 }
 
 int
 print_indexes(std::string &filename, std::vector<unsigned int> &indexes)
 {
-  try {
-    BBLogFile bf(filename.c_str());
-    for (unsigned int i = 0; i < indexes.size(); ++i) {
-      bf.read_index(indexes[i]);
-      bf.print_entry();
-    }
-    return 0;
-  } catch (Exception &e) {
-    printf("Failed to print info, exception follows\n");
-    e.print_trace();
-    return -1;
-  }
+	try {
+		BBLogFile bf(filename.c_str());
+		for (unsigned int i = 0; i < indexes.size(); ++i) {
+			bf.read_index(indexes[i]);
+			bf.print_entry();
+		}
+		return 0;
+	} catch (Exception &e) {
+		printf("Failed to print info, exception follows\n");
+		e.print_trace();
+		return -1;
+	}
 
-  return 0;  
+	return 0;
 }
 
 int
 replay_file(std::string &filename)
 {
-  try {
-    BBLogFile bf(filename.c_str());
+	try {
+		BBLogFile bf(filename.c_str());
 
-    Time last_offset((long)0);
+		Time last_offset((long)0);
 
-    if (! bf.has_next()) {
-      printf("File does not have any entries, aborting.\n");
-      return -1;
-    }
+		if (!bf.has_next()) {
+			printf("File does not have any entries, aborting.\n");
+			return -1;
+		}
 
-    // print out first immediately, the first offset, usually is a waiting
-    // period until everything was started during logging
-    bf.read_next();
-    bf.print_entry();
-    last_offset = bf.entry_offset();
+		// print out first immediately, the first offset, usually is a waiting
+		// period until everything was started during logging
+		bf.read_next();
+		bf.print_entry();
+		last_offset = bf.entry_offset();
 
-    Time diff;
-    while (bf.has_next()) {
-      bf.read_next();
-      diff = bf.entry_offset() - last_offset;
-      diff.wait();
-      last_offset = bf.entry_offset();
-      bf.print_entry();
-    }
-    return 0;
-  } catch (Exception &e) {
-    printf("Failed to print info, exception follows\n");
-    e.print_trace();
-    return -1;
-  }
+		Time diff;
+		while (bf.has_next()) {
+			bf.read_next();
+			diff = bf.entry_offset() - last_offset;
+			diff.wait();
+			last_offset = bf.entry_offset();
+			bf.print_entry();
+		}
+		return 0;
+	} catch (Exception &e) {
+		printf("Failed to print info, exception follows\n");
+		e.print_trace();
+		return -1;
+	}
 
-  return 0;  
+	return 0;
 }
 /// @cond INTERNAL
 
-class BBLogWatcher
-  : public FamListener,
-    public SignalHandler
+class BBLogWatcher : public FamListener, public SignalHandler
 {
- public:
-  BBLogWatcher(const char *filename, BBLogFile &file)
-    : file_(file)
-  {
-    quit_ = false;
-    fam_ = new FileAlterationMonitor();
-    fam_->add_listener(this);
-    fam_->watch_file(filename);
-    SignalManager::register_handler(SIGINT, this);
-  }
+public:
+	BBLogWatcher(const char *filename, BBLogFile &file) : file_(file)
+	{
+		quit_ = false;
+		fam_  = new FileAlterationMonitor();
+		fam_->add_listener(this);
+		fam_->watch_file(filename);
+		SignalManager::register_handler(SIGINT, this);
+	}
 
-  ~BBLogWatcher() {
-    SignalManager::unregister_handler(this);
-    fam_->remove_listener(this);
-    delete fam_;
-  }
+	~BBLogWatcher()
+	{
+		SignalManager::unregister_handler(this);
+		fam_->remove_listener(this);
+		delete fam_;
+	}
 
-  virtual void fam_event(const char *filename, unsigned int mask)
-  {
-    if (mask & FAM_DELETE) {
-      quit_ = true;
-      fam_->interrupt();
-    } else {
-      unsigned int remaining = file_.remaining_entries();
-      for (unsigned int i = 0; i < remaining; ++i) {
-	file_.read_next();
-	file_.print_entry();
-      }
-    }
-  }
+	virtual void
+	fam_event(const char *filename, unsigned int mask)
+	{
+		if (mask & FAM_DELETE) {
+			quit_ = true;
+			fam_->interrupt();
+		} else {
+			unsigned int remaining = file_.remaining_entries();
+			for (unsigned int i = 0; i < remaining; ++i) {
+				file_.read_next();
+				file_.print_entry();
+			}
+		}
+	}
 
-  virtual void handle_signal(int signal)
-  {
-    quit_ = true;
-    fam_->interrupt();
-  }
+	virtual void
+	handle_signal(int signal)
+	{
+		quit_ = true;
+		fam_->interrupt();
+	}
 
-  void run()
-  {
-    while (! quit_) {
-      fam_->process_events(-1);
-    }
-  }
+	void
+	run()
+	{
+		while (!quit_) {
+			fam_->process_events(-1);
+		}
+	}
 
-
- private:
-  bool quit_;
-  FileAlterationMonitor *fam_;
-  BBLogFile &file_;
+private:
+	bool                   quit_;
+	FileAlterationMonitor *fam_;
+	BBLogFile &            file_;
 };
 
 int
 watch_file(std::string &filename)
 {
-  BBLogFile file(filename.c_str(), NULL, false);
-  if (file.remaining_entries() > 0) {
-    // jump to end of file
-    file.read_index(file.remaining_entries() - 1);
-  }
-  BBLogWatcher watcher(filename.c_str(), file);
-  watcher.run();
+	BBLogFile file(filename.c_str(), NULL, false);
+	if (file.remaining_entries() > 0) {
+		// jump to end of file
+		file.read_index(file.remaining_entries() - 1);
+	}
+	BBLogWatcher watcher(filename.c_str(), file);
+	watcher.run();
 
-  return 0;  
+	return 0;
 }
-
 
 int
 set_enabled(const char *hostname, unsigned short int port, bool enabled)
 {
-  bool rv = 0;
+	bool rv = 0;
 
-  BlackBoard *bb = new RemoteBlackBoard(hostname, port);
-  SwitchInterface *si = bb->open_for_reading<SwitchInterface>("BBLogger");
-  if ( ! si->has_writer() ) {
-    printf("No writer exists, BBLogger not loaded?\n");
-    rv = -1;
-  } else {
-    if (enabled) {
-      si->msgq_enqueue(new SwitchInterface::EnableSwitchMessage());
-    } else {
-      si->msgq_enqueue(new SwitchInterface::DisableSwitchMessage());
-    }
-  }
+	BlackBoard *     bb = new RemoteBlackBoard(hostname, port);
+	SwitchInterface *si = bb->open_for_reading<SwitchInterface>("BBLogger");
+	if (!si->has_writer()) {
+		printf("No writer exists, BBLogger not loaded?\n");
+		rv = -1;
+	} else {
+		if (enabled) {
+			si->msgq_enqueue(new SwitchInterface::EnableSwitchMessage());
+		} else {
+			si->msgq_enqueue(new SwitchInterface::DisableSwitchMessage());
+		}
+	}
 
-  bb->close(si);
-  delete bb;
-  return rv;
+	bb->close(si);
+	delete bb;
+	return rv;
 }
 
 /// @endcond
@@ -258,62 +257,60 @@ set_enabled(const char *hostname, unsigned short int port, bool enabled)
 void
 convert_file_csv(BBLogFile &bf, FILE *outf)
 {
-  fawkes::Interface *iface = bf.interface();
+	fawkes::Interface *iface = bf.interface();
 
-  // print header row
-  fprintf(outf, "# Time relative to beginning (in sec)");
-  InterfaceFieldIterator i;
-  for (i = iface->fields(); i != iface->fields_end(); ++i) {
-    fprintf(outf, ";%s (%s[%zu])",
-	    i.get_name(), i.get_typename(), i.get_length());
-  }
-  fprintf(outf, "\n");
+	// print header row
+	fprintf(outf, "# Time relative to beginning (in sec)");
+	InterfaceFieldIterator i;
+	for (i = iface->fields(); i != iface->fields_end(); ++i) {
+		fprintf(outf, ";%s (%s[%zu])", i.get_name(), i.get_typename(), i.get_length());
+	}
+	fprintf(outf, "\n");
 
-  while (bf.has_next()) {
-    bf.read_next();
-    fprintf(outf, "%f", bf.entry_offset().in_sec());
+	while (bf.has_next()) {
+		bf.read_next();
+		fprintf(outf, "%f", bf.entry_offset().in_sec());
 
-    InterfaceFieldIterator i;
-    for (i = iface->fields(); i != iface->fields_end(); ++i) {
-      fprintf(outf, ";%s", i.get_value_string());
-    }
-    fprintf(outf, "\n");
-  }
+		InterfaceFieldIterator i;
+		for (i = iface->fields(); i != iface->fields_end(); ++i) {
+			fprintf(outf, ";%s", i.get_value_string());
+		}
+		fprintf(outf, "\n");
+	}
 }
-
 
 int
 convert_file(std::string &infile, std::string &outfile, std::string &format)
 {
-  if (format != "csv") {
-    printf("Unsupported output format '%s'\n", format.c_str());
-    return 8;
-  }
+	if (format != "csv") {
+		printf("Unsupported output format '%s'\n", format.c_str());
+		return 8;
+	}
 
-  FILE *outf = fopen(outfile.c_str(), "wx");
-  if (!outf) {
-    perror("Failed to open output file");
-    return 3;
-  }
+	FILE *outf = fopen(outfile.c_str(), "wx");
+	if (!outf) {
+		perror("Failed to open output file");
+		return 3;
+	}
 
-  try {
-    BBLogFile bf(infile.c_str());
+	try {
+		BBLogFile bf(infile.c_str());
 
-    // Do the conversion!
-    if (format == "csv") {
-      convert_file_csv(bf, outf);
-    }
+		// Do the conversion!
+		if (format == "csv") {
+			convert_file_csv(bf, outf);
+		}
 
-  } catch (Exception &e) {
-    printf("Failed to convert log file: %s\n", e.what());
-    e.print_trace();
-    fclose(outf);
-    return 4;
-  }
+	} catch (Exception &e) {
+		printf("Failed to convert log file: %s\n", e.what());
+		e.print_trace();
+		fclose(outf);
+		return 4;
+	}
 
-  fclose(outf);
+	fclose(outf);
 
-  return 0;
+	return 0;
 }
 
 /** BBLogger tool main.
@@ -323,81 +320,82 @@ convert_file(std::string &infile, std::string &outfile, std::string &format)
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "h");
+	ArgumentParser argp(argc, argv, "h");
 
-  if ( argp.has_arg("h") ) {
-    print_usage(argv[0]);
-    exit(0);
-  }
+	if (argp.has_arg("h")) {
+		print_usage(argv[0]);
+		exit(0);
+	}
 
-  std::string command, file;
-  if (argp.num_items() < 1) {
-    printf("Invalid number of arguments\n");
-    print_usage(argv[0]);
-    exit(1);
-  } else if (argp.num_items() >= 2) {
-    file    = argp.items()[1];
-  }
+	std::string command, file;
+	if (argp.num_items() < 1) {
+		printf("Invalid number of arguments\n");
+		print_usage(argv[0]);
+		exit(1);
+	} else if (argp.num_items() >= 2) {
+		file = argp.items()[1];
+	}
 
-  command = argp.items()[0];
+	command = argp.items()[0];
 
-  if (command == "watch") {
-    return watch_file(file);
+	if (command == "watch") {
+		return watch_file(file);
 
-  } else if (command == "info") {
-    return print_info(file);
+	} else if (command == "info") {
+		return print_info(file);
 
-  } else if (command == "print") {
-    std::vector<const char *> index_strings = argp.items();
-    index_strings.erase(index_strings.begin(), index_strings.begin() + 2);
+	} else if (command == "print") {
+		std::vector<const char *> index_strings = argp.items();
+		index_strings.erase(index_strings.begin(), index_strings.begin() + 2);
 
-    std::vector<unsigned int> indexes(index_strings.size());
-    for (unsigned int i = 0; i < index_strings.size(); ++i) {
-      long l = atol(index_strings[i]);
-      if (l < 0) throw Exception("Invalid index %li", l);
+		std::vector<unsigned int> indexes(index_strings.size());
+		for (unsigned int i = 0; i < index_strings.size(); ++i) {
+			long l = atol(index_strings[i]);
+			if (l < 0)
+				throw Exception("Invalid index %li", l);
 
-      indexes[i] = l;
-    }
+			indexes[i] = l;
+		}
 
-    if (indexes.size() == 0) {
-      printf("No indexes given.\n\n");
-      print_usage(argv[0]);
-      exit(6);
-    }
+		if (indexes.size() == 0) {
+			printf("No indexes given.\n\n");
+			print_usage(argv[0]);
+			exit(6);
+		}
 
-    return print_indexes(file, indexes);
+		return print_indexes(file, indexes);
 
-  } else if (command == "replay") {
-    return replay_file(file);
+	} else if (command == "replay") {
+		return replay_file(file);
 
-  } else if (command == "repair") {
-    return repair_file(file);
+	} else if (command == "repair") {
+		return repair_file(file);
 
-  } else if ( (command == "enable") || (command == "disable")) {
-    char *host = strdup("localhost");
-    unsigned short int port = 1910;
-    if (argp.has_arg("r")) {
-      argp.parse_hostport("r", &host, &port);
-    }
-    int rv = set_enabled(host, port, (command == "enable"));
-    free(host);
-    return rv;
+	} else if ((command == "enable") || (command == "disable")) {
+		char *             host = strdup("localhost");
+		unsigned short int port = 1910;
+		if (argp.has_arg("r")) {
+			argp.parse_hostport("r", &host, &port);
+		}
+		int rv = set_enabled(host, port, (command == "enable"));
+		free(host);
+		return rv;
 
-  } else if (command == "convert") {
-    if (argp.num_items() != 4) {
-      printf("Invalid number of arguments\n");
-      print_usage(argv[0]);
-      exit(7);
-    }
-    std::string outfile = argp.items()[2];
-    std::string format = argp.items()[3];
-    return convert_file(file, outfile, format);
+	} else if (command == "convert") {
+		if (argp.num_items() != 4) {
+			printf("Invalid number of arguments\n");
+			print_usage(argv[0]);
+			exit(7);
+		}
+		std::string outfile = argp.items()[2];
+		std::string format  = argp.items()[3];
+		return convert_file(file, outfile, format);
 
-  } else {
-    printf("Invalid command '%s'\n", command.c_str());
-    print_usage(argv[0]);
-    exit(2);
-  }
+	} else {
+		printf("Invalid command '%s'\n", command.c_str());
+		print_usage(argv[0]);
+		exit(2);
+	}
 
-  return 0;
+	return 0;
 }

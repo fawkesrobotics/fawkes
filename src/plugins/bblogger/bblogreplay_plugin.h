@@ -28,8 +28,8 @@
 
 class BlackBoardLogReplayPlugin : public fawkes::Plugin
 {
- public:
-  explicit BlackBoardLogReplayPlugin(fawkes::Configuration *config);
+public:
+	explicit BlackBoardLogReplayPlugin(fawkes::Configuration *config);
 };
 
 #endif

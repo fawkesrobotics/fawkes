@@ -26,66 +26,69 @@
 
 #include "bblogfile.h"
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 #include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <core/utils/lock_queue.h>
- 
+
 #include <cstdio>
 
 namespace fawkes {
-  class BlackBoard;
-  class Logger;
-  class Time;
-}
+class BlackBoard;
+class Logger;
+class Time;
+} // namespace fawkes
 
-class BBLogReplayThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::BlackBoardAspect
+class BBLogReplayThread : public fawkes::Thread,
+                          public fawkes::LoggingAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::ClockAspect,
+                          public fawkes::BlackBoardAspect
 {
- public:
-  BBLogReplayThread(const char *logfile_name,
-		    const char *logdir, 
-		    const char *scenario,
-		    float grace_period,
-		    bool loop_replay,
-		    bool non_blocking = false,
-		    const char *thread_name = "BBLogReplayThread",
-		    fawkes::Thread::OpMode th_opmode = Thread::OPMODE_CONTINUOUS);
-  virtual ~BBLogReplayThread();
+public:
+	BBLogReplayThread(const char *           logfile_name,
+	                  const char *           logdir,
+	                  const char *           scenario,
+	                  float                  grace_period,
+	                  bool                   loop_replay,
+	                  bool                   non_blocking = false,
+	                  const char *           thread_name  = "BBLogReplayThread",
+	                  fawkes::Thread::OpMode th_opmode    = Thread::OPMODE_CONTINUOUS);
+	virtual ~BBLogReplayThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
-  virtual void once();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
+	virtual void once();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  char               *scenario_;
-  char               *filename_;
-  char               *logdir_;
-  char               *logfile_name_;
-  float               cfg_grace_period_;
-  bool                cfg_non_blocking_;
-  bool                cfg_loop_replay_;
+private:
+	char *scenario_;
+	char *filename_;
+	char *logdir_;
+	char *logfile_name_;
+	float cfg_grace_period_;
+	bool  cfg_non_blocking_;
+	bool  cfg_loop_replay_;
 
-  BBLogFile          *logfile_;
+	BBLogFile *logfile_;
 
-  fawkes::Time        last_offset_;
-  fawkes::Time        offsetdiff_;
-  fawkes::Time        loopdiff_;
-  fawkes::Time        waittime_;
-  fawkes::Time        last_loop_;
-  fawkes::Time        now_;
-  fawkes::Interface  *interface_;
+	fawkes::Time       last_offset_;
+	fawkes::Time       offsetdiff_;
+	fawkes::Time       loopdiff_;
+	fawkes::Time       waittime_;
+	fawkes::Time       last_loop_;
+	fawkes::Time       now_;
+	fawkes::Interface *interface_;
 };
-
 
 #endif

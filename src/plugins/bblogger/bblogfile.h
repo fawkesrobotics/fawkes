@@ -28,91 +28,90 @@
 #include <core/exceptions/software.h>
 #include <utils/time/time.h>
 
-#include <memory>
 #include <cstdio>
+#include <memory>
 
 namespace fawkes {
-  class Interface;
-  class BlackBoardInstanceFactory;
-}
+class Interface;
+class BlackBoardInstanceFactory;
+} // namespace fawkes
 
-class BBLogFile {
- public:
-  BBLogFile(const char *filename, bool do_sanity_check);
-  BBLogFile(const char *filename, fawkes::Interface *interface = NULL,
-	    bool do_sanity_check = true);
-  ~BBLogFile();
+class BBLogFile
+{
+public:
+	BBLogFile(const char *filename, bool do_sanity_check);
+	BBLogFile(const char *filename, fawkes::Interface *interface = NULL, bool do_sanity_check = true);
+	~BBLogFile();
 
-  bool            has_next();
-  void            read_next();
-  void            read_index(unsigned int index);
-  const fawkes::Time &  entry_offset() const;
-  void            print_entry(FILE *outf = stdout);
+	bool                has_next();
+	void                read_next();
+	void                read_index(unsigned int index);
+	const fawkes::Time &entry_offset() const;
+	void                print_entry(FILE *outf = stdout);
 
-  void            rewind();
+	void rewind();
 
-  void            set_num_entries(size_t num_entries);
-  void            print_info(const char *line_prefix = "", FILE *outf = stdout);
+	void set_num_entries(size_t num_entries);
+	void print_info(const char *line_prefix = "", FILE *outf = stdout);
 
-  // Header information
-  uint32_t        file_version() const;
-  bool            is_big_endian() const;
-  uint32_t        num_data_items() const;
-  const char *    scenario() const;
-  const char *    interface_type() const;
-  const char *    interface_id() const;
-  unsigned char * interface_hash() const;
-  uint32_t        data_size();
-  fawkes::Time &  start_time();
+	// Header information
+	uint32_t       file_version() const;
+	bool           is_big_endian() const;
+	uint32_t       num_data_items() const;
+	const char *   scenario() const;
+	const char *   interface_type() const;
+	const char *   interface_id() const;
+	unsigned char *interface_hash() const;
+	uint32_t       data_size();
+	fawkes::Time & start_time();
 
-  size_t          file_size() const;
-  unsigned int    remaining_entries();
+	size_t       file_size() const;
+	unsigned int remaining_entries();
 
-  static void     repair_file(const char *filename);
+	static void repair_file(const char *filename);
 
-  void                 set_interface(fawkes::Interface *interface);
-  fawkes::Interface *  interface();
+	void               set_interface(fawkes::Interface *interface);
+	fawkes::Interface *interface();
 
-  /** Get typed interface.
+	/** Get typed interface.
    * @param iface will assigned to the interface on success
    * @return interface of the given type
    * @exception TypeMismatchException thrown if interface type or ID do not match
    */
-  template <class IT>
-    IT *  interface(IT*& iface = 0) const
-  {
-    IT *rv = dynamic_cast<IT *>(interface_);
-    if (rv) {
-      iface = rv;
-      return rv;
-    } else {
-      throw fawkes::TypeMismatchException("Interface types do not match.");
-    }
-  }
+	template <class IT>
+	IT *
+	interface(IT *&iface = 0) const
+	{
+		IT *rv = dynamic_cast<IT *>(interface_);
+		if (rv) {
+			iface = rv;
+			return rv;
+		} else {
+			throw fawkes::TypeMismatchException("Interface types do not match.");
+		}
+	}
 
- private: // methods
-  void ctor(const char *filename, bool do_sanity_check);
-  void read_file_header();
-  void sanity_check();
-  void repair();
+private: // methods
+	void ctor(const char *filename, bool do_sanity_check);
+	void read_file_header();
+	void sanity_check();
+	void repair();
 
+private: // members
+	FILE *             f_;
+	bblog_file_header *header_;
 
- private: // members
-  FILE              *f_;
-  bblog_file_header *header_;
+	void *ifdata_;
 
-  void *ifdata_;
+	char *filename_;
+	char *scenario_;
+	char *interface_type_;
+	char *interface_id_;
 
-  char *filename_;
-  char *scenario_;
-  char *interface_type_;
-  char *interface_id_;
-
-  fawkes::Interface *interface_;
+	fawkes::Interface *                                interface_;
 	std::unique_ptr<fawkes::BlackBoardInstanceFactory> instance_factory_;
-  fawkes::Time       start_time_;
-  fawkes::Time       entry_offset_;
+	fawkes::Time                                       start_time_;
+	fawkes::Time                                       entry_offset_;
 };
-
 
 #endif
