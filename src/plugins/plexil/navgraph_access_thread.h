@@ -25,21 +25,23 @@
 #include <core/threading/thread.h>
 #include <navgraph/aspect/navgraph.h>
 
-class PlexilNavgraphAccessThread
-: public fawkes::Thread,
-  public fawkes::NavGraphAspect
+class PlexilNavgraphAccessThread : public fawkes::Thread, public fawkes::NavGraphAspect
 {
- public:
+public:
 	PlexilNavgraphAccessThread();
 	virtual ~PlexilNavgraphAccessThread();
 
 	virtual void loop();
 
-	fawkes::LockPtr<fawkes::NavGraph>   get_navgraph() const;
-	
-	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	fawkes::LockPtr<fawkes::NavGraph> get_navgraph() const;
 
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 };
 
 #endif

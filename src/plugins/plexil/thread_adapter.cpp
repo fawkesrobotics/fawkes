@@ -21,11 +21,11 @@
 
 #include "thread_adapter.h"
 
+#include <core/threading/thread.h>
+
 #include <AdapterConfiguration.hh>
 #include <AdapterExecInterface.hh>
 #include <AdapterFactory.hh>
-
-#include <core/threading/thread.h>
 #include <cstring>
 
 /** @class ThreadNamePlexilAdapter "log_adapter.h"
@@ -36,7 +36,7 @@
 /** Constructor.
  * @param execInterface Reference to the parent AdapterExecInterface object.
  */
-ThreadNamePlexilAdapter::ThreadNamePlexilAdapter(PLEXIL::AdapterExecInterface& execInterface)
+ThreadNamePlexilAdapter::ThreadNamePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface)
 : InterfaceAdapter(execInterface)
 {
 }
@@ -46,8 +46,8 @@ ThreadNamePlexilAdapter::ThreadNamePlexilAdapter(PLEXIL::AdapterExecInterface& e
  * @param xml A const reference to the XML element describing this adapter
  * @note The instance maintains a shared pointer to the XML.
  */
-ThreadNamePlexilAdapter::ThreadNamePlexilAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-                                               pugi::xml_node const xml)
+ThreadNamePlexilAdapter::ThreadNamePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface,
+                                                 pugi::xml_node const          xml)
 : InterfaceAdapter(execInterface, xml)
 {
 }
@@ -56,7 +56,6 @@ ThreadNamePlexilAdapter::ThreadNamePlexilAdapter(PLEXIL::AdapterExecInterface& e
 ThreadNamePlexilAdapter::~ThreadNamePlexilAdapter()
 {
 }
-
 
 /** Initialize adapter.
  * @return true if initialization was successful, false otherwise.
@@ -67,7 +66,6 @@ ThreadNamePlexilAdapter::initialize()
 	return true;
 }
 
-
 /** Start adapter.
  * @return true if starting was successful, false otherwise.
  */
@@ -76,7 +74,7 @@ ThreadNamePlexilAdapter::start()
 {
 	std::string name;
 
-	pugi::xml_node config = getXml();
+	pugi::xml_node      config   = getXml();
 	pugi::xml_attribute xml_attr = config.attribute("name");
 	if (xml_attr) {
 		name = xml_attr.value();
@@ -91,14 +89,13 @@ ThreadNamePlexilAdapter::start()
 		}
 	}
 
-	if (! name.empty()) {
+	if (!name.empty()) {
 		fawkes::Thread::current_thread_name(name);
 	} else if (fawkes::Thread::current_thread_name() == "") {
 		fawkes::Thread::current_thread_name("PlexilExecutive");
 	}
 	return true;
 }
-
 
 /** Stop adapter.
  * @return true if successful, false otherwise.
@@ -108,7 +105,6 @@ ThreadNamePlexilAdapter::stop()
 {
 	return true;
 }
-
 
 /** Reset adapter.
  * @return true if successful, false otherwise.
@@ -129,7 +125,9 @@ ThreadNamePlexilAdapter::shutdown()
 }
 
 extern "C" {
-	void initThreadName() {
-		REGISTER_ADAPTER(ThreadNamePlexilAdapter, "ThreadName");
-	}
+void
+initThreadName()
+{
+	REGISTER_ADAPTER(ThreadNamePlexilAdapter, "ThreadName");
+}
 }
