@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  cpp_generator.h - C++ Interface generator
  *
@@ -23,47 +23,48 @@
 #ifndef _PLUGINS_GENERATOR_H_
 #define _PLUGINS_GENERATOR_H_
 
-#include <vector>
-#include <string>
 #include <sstream>
 #include <stdio.h>
+#include <string>
+#include <vector>
 
 class PluginGenerator
 {
- public:
-  PluginGenerator(const std::string& directory,
-                  const std::string& author,
-                  const std::string& year, const std::string& creation_date,
-                  const std::string& plugin_name, const std::string& description);
-  ~PluginGenerator();
+public:
+	PluginGenerator(const std::string &directory,
+	                const std::string &author,
+	                const std::string &year,
+	                const std::string &creation_date,
+	                const std::string &plugin_name,
+	                const std::string &description);
+	~PluginGenerator();
 
-  void write_thread_h(FILE *f);
-  void write_thread_cpp(FILE *f);
-  void write_plugin_cpp(FILE *f);
-  void write_makefile(FILE *f);
-  void write_makefile_header(FILE *f);
-  void write_header(FILE *f, std::string filename);
-  void write_deflector(FILE *f);
-  std::string format_class_name(std::string plugin_name, std::string append);
-  std::string replace_dash_w_undescore(std::string source);
-  void generate();
+	void        write_thread_h(FILE *f);
+	void        write_thread_cpp(FILE *f);
+	void        write_plugin_cpp(FILE *f);
+	void        write_makefile(FILE *f);
+	void        write_makefile_header(FILE *f);
+	void        write_header(FILE *f, std::string filename);
+	void        write_deflector(FILE *f);
+	std::string format_class_name(std::string plugin_name, std::string append);
+	std::string replace_dash_w_undescore(std::string source);
+	void        generate();
 
- private:
-  std::string _dir;
-  std::string _author;
-  std::string _year;
-  std::string _creation_date;
-  std::string _plugin_name;
-  std::string _plugin_name_underscore;
-  std::string _class_name_thread;
-  std::string _class_name_plugin;
-  std::string _description;
-  std::string _filename_thread_cpp;
-  std::string _filename_thread_h;
-  std::string _filename_plugin_cpp;
-  std::string _filename_makefile;
-  std::string _deflector;
+private:
+	std::string _dir;
+	std::string _author;
+	std::string _year;
+	std::string _creation_date;
+	std::string _plugin_name;
+	std::string _plugin_name_underscore;
+	std::string _class_name_thread;
+	std::string _class_name_plugin;
+	std::string _description;
+	std::string _filename_thread_cpp;
+	std::string _filename_thread_h;
+	std::string _filename_plugin_cpp;
+	std::string _filename_makefile;
+	std::string _deflector;
 };
-
 
 #endif
