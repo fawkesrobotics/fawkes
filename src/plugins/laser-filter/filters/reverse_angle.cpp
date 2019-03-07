@@ -25,6 +25,7 @@
 #include <core/exception.h>
 #include <utils/math/angle.h>
 #include <utils/time/time.h>
+
 #include <cstdlib>
 
 /** @class LaserReverseAngleDataFilter "reverse_angle.h"
@@ -42,8 +43,8 @@
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserReverseAngleDataFilter::LaserReverseAngleDataFilter(const std::string& filter_name,
-                                                         unsigned int in_data_size,
+LaserReverseAngleDataFilter::LaserReverseAngleDataFilter(const std::string &filter_name,
+                                                         unsigned int       in_data_size,
                                                          std::vector<LaserDataFilter::Buffer *> &in)
 : LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
@@ -52,15 +53,15 @@ LaserReverseAngleDataFilter::LaserReverseAngleDataFilter(const std::string& filt
 void
 LaserReverseAngleDataFilter::filter()
 {
-  const unsigned int vecsize = std::min(in.size(), out.size());
-  const unsigned int arrsize = std::min(in_data_size, out_data_size);
-  for (unsigned int a = 0; a < vecsize; ++a) {
-    out[a]->frame = in[a]->frame;
-    out[a]->timestamp->set_time(in[a]->timestamp);
-    float *inbuf  = in[a]->values;
-    float *outbuf = out[a]->values;
-    for (unsigned int i = 0; i < arrsize; ++i) {
-      outbuf[i] = inbuf[arrsize - i];
-    }
-  }
+	const unsigned int vecsize = std::min(in.size(), out.size());
+	const unsigned int arrsize = std::min(in_data_size, out_data_size);
+	for (unsigned int a = 0; a < vecsize; ++a) {
+		out[a]->frame = in[a]->frame;
+		out[a]->timestamp->set_time(in[a]->timestamp);
+		float *inbuf  = in[a]->values;
+		float *outbuf = out[a]->values;
+		for (unsigned int i = 0; i < arrsize; ++i) {
+			outbuf[i] = inbuf[arrsize - i];
+		}
+	}
 }

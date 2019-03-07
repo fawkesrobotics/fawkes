@@ -33,23 +33,25 @@
  * @param in vector of input arrays
  */
 
-LaserCopyDataFilter::LaserCopyDataFilter(const std::string& filter_name,
-                                         unsigned int in_data_size, std::vector<Buffer *> &in)
+LaserCopyDataFilter::LaserCopyDataFilter(const std::string &    filter_name,
+                                         unsigned int           in_data_size,
+                                         std::vector<Buffer *> &in)
 : LaserDataFilter(filter_name, in_data_size, in, in.size())
-{}
+{
+}
 
 void
 LaserCopyDataFilter::filter()
 {
-  const unsigned int num_buffers = std::min(in.size(), out.size());
-  const unsigned int data_size = std::min(in_data_size, out_data_size);
-  for (unsigned int buffer_i = 0; buffer_i < num_buffers; buffer_i++) {
-    out[buffer_i]->frame = in[buffer_i]->frame;
-    out[buffer_i]->timestamp->set_time(in[buffer_i]->timestamp);
-    float *inbuf = in[buffer_i]->values;
-    float *outbuf = out[buffer_i]->values;
-    for (unsigned int i = 0; i < data_size; i++) {
-      outbuf[i] = inbuf[i];
-    }
-  }
+	const unsigned int num_buffers = std::min(in.size(), out.size());
+	const unsigned int data_size   = std::min(in_data_size, out_data_size);
+	for (unsigned int buffer_i = 0; buffer_i < num_buffers; buffer_i++) {
+		out[buffer_i]->frame = in[buffer_i]->frame;
+		out[buffer_i]->timestamp->set_time(in[buffer_i]->timestamp);
+		float *inbuf  = in[buffer_i]->values;
+		float *outbuf = out[buffer_i]->values;
+		for (unsigned int i = 0; i < data_size; i++) {
+			outbuf[i] = inbuf[i];
+		}
+	}
 }

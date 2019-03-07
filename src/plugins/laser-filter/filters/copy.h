@@ -25,11 +25,11 @@
 
 class LaserCopyDataFilter : public LaserDataFilter
 {
-  public:
-    LaserCopyDataFilter(const std::string& filter_name,
-                        unsigned int in_data_size,
-                        std::vector<Buffer *> &in);
-    void filter();
+public:
+	LaserCopyDataFilter(const std::string &    filter_name,
+	                    unsigned int           in_data_size,
+	                    std::vector<Buffer *> &in);
+	void filter();
 };
 
 #endif /* !PLUGINS_LASER_FILTER_FILTERS_COPY_H__ */

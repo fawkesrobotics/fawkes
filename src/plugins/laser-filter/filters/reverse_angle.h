@@ -27,12 +27,12 @@
 
 class LaserReverseAngleDataFilter : public LaserDataFilter
 {
- public:
-  LaserReverseAngleDataFilter(const std::string& filter_name,
-                              unsigned int data_size, std::vector<LaserDataFilter::Buffer *> &in);
+public:
+	LaserReverseAngleDataFilter(const std::string &                     filter_name,
+	                            unsigned int                            data_size,
+	                            std::vector<LaserDataFilter::Buffer *> &in);
 
-  void filter();
-
+	void filter();
 };
 
 #endif

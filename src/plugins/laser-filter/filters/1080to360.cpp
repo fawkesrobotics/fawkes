@@ -24,6 +24,7 @@
 #include <core/exception.h>
 #include <utils/math/angle.h>
 #include <utils/time/time.h>
+
 #include <cstdlib>
 
 /** @class Laser1080to360DataFilter "1080to360.h"
@@ -38,38 +39,38 @@
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-Laser1080to360DataFilter::Laser1080to360DataFilter(const std::string& filter_name,
-                                                   bool average,
-                                                   unsigned int in_data_size,
+Laser1080to360DataFilter::Laser1080to360DataFilter(const std::string &filter_name,
+                                                   bool               average,
+                                                   unsigned int       in_data_size,
                                                    std::vector<LaserDataFilter::Buffer *> &in)
-	: LaserDataFilter(filter_name, in_data_size, in, in.size())
+: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
-  if (in_data_size != 1080) {
-    throw fawkes::Exception("1080to360 filter needs input array size of "
-			    "1080 entries");
-  }
-  set_out_data_size(360);
-  average_ = average;
+	if (in_data_size != 1080) {
+		throw fawkes::Exception("1080to360 filter needs input array size of "
+		                        "1080 entries");
+	}
+	set_out_data_size(360);
+	average_ = average;
 }
 
 void
 Laser1080to360DataFilter::filter()
 {
-  const unsigned int vecsize = std::min(in.size(), out.size());
-  for (unsigned int a = 0; a < vecsize; ++a) {
-    out[a]->frame = in[a]->frame;
-    out[a]->timestamp->set_time(in[a]->timestamp);
-    float *inbuf  = in[a]->values;
-    float *outbuf = out[a]->values;
+	const unsigned int vecsize = std::min(in.size(), out.size());
+	for (unsigned int a = 0; a < vecsize; ++a) {
+		out[a]->frame = in[a]->frame;
+		out[a]->timestamp->set_time(in[a]->timestamp);
+		float *inbuf  = in[a]->values;
+		float *outbuf = out[a]->values;
 
-    if (average_) {
-      for (unsigned int i = 0; i < 360; ++i) {
-	outbuf[i] = (inbuf[i * 3] + inbuf[i * 2 + 1] + inbuf[i * 2 + 2]) / 2.0;
-      }
-    } else {
-      for (unsigned int i = 0; i < 360; ++i) {
-	outbuf[i] = inbuf[i * 3 + 1];
-      }
-    }
-  }
+		if (average_) {
+			for (unsigned int i = 0; i < 360; ++i) {
+				outbuf[i] = (inbuf[i * 3] + inbuf[i * 2 + 1] + inbuf[i * 2 + 2]) / 2.0;
+			}
+		} else {
+			for (unsigned int i = 0; i < 360; ++i) {
+				outbuf[i] = inbuf[i * 3 + 1];
+			}
+		}
+	}
 }
