@@ -16,19 +16,17 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/fwd.h>
 
-#include <string>
 #include <cstdint>
-#include <vector>
 #include <memory>
 #include <optional>
-
-
+#include <string>
+#include <vector>
 
 /** SlotValue representation for JSON transfer. */
 class SlotValue
 
 {
- public:
+public:
 	/** Constructor. */
 	SlotValue();
 	/** Constructor from JSON.
@@ -38,7 +36,7 @@ class SlotValue
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	SlotValue(const rapidjson::Value& v);
+	SlotValue(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~SlotValue();
@@ -46,9 +44,10 @@ class SlotValue
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -60,19 +59,19 @@ class SlotValue
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -85,12 +84,12 @@ class SlotValue
 	virtual void validate(bool subcall = false) const;
 
 	// Schema: SlotValue
- public:
-  /** Get name value.
+public:
+	/** Get name value.
    * @return name value
    */
 	std::optional<std::string>
- name() const
+	name() const
 	{
 		return name_;
 	}
@@ -98,15 +97,16 @@ class SlotValue
 	/** Set name value.
 	 * @param name new value
 	 */
-	void set_name(const std::string& name)
+	void
+	set_name(const std::string &name)
 	{
 		name_ = name;
 	}
-  /** Get type value.
+	/** Get type value.
    * @return type value
    */
 	std::optional<std::string>
- type() const
+	type() const
 	{
 		return type_;
 	}
@@ -114,15 +114,16 @@ class SlotValue
 	/** Set type value.
 	 * @param type new value
 	 */
-	void set_type(const std::string& type)
+	void
+	set_type(const std::string &type)
 	{
 		type_ = type;
 	}
-  /** Get is-multifield value.
+	/** Get is-multifield value.
    * @return is-multifield value
    */
 	std::optional<bool>
- is_multifield() const
+	is_multifield() const
 	{
 		return is_multifield_;
 	}
@@ -130,15 +131,16 @@ class SlotValue
 	/** Set is-multifield value.
 	 * @param is_multifield new value
 	 */
-	void set_is_multifield(const bool& is_multifield)
+	void
+	set_is_multifield(const bool &is_multifield)
 	{
 		is_multifield_ = is_multifield;
 	}
-  /** Get values value.
+	/** Get values value.
    * @return values value
    */
 	std::vector<std::string>
- values() const
+	values() const
 	{
 		return values_;
 	}
@@ -146,14 +148,16 @@ class SlotValue
 	/** Set values value.
 	 * @param values new value
 	 */
-	void set_values(const std::vector<std::string>& values)
+	void
+	set_values(const std::vector<std::string> &values)
 	{
 		values_ = values;
 	}
 	/** Add element to values array.
 	 * @param values new value
 	 */
-	void addto_values(const std::string&& values)
+	void
+	addto_values(const std::string &&values)
 	{
 		values_.push_back(std::move(values));
 	}
@@ -162,18 +166,15 @@ class SlotValue
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param values new value
 	 */
-	void addto_values(const std::string& values)
+	void
+	addto_values(const std::string &values)
 	{
 		values_.push_back(values);
 	}
- private:
-	std::optional<std::string>
- name_;
-	std::optional<std::string>
- type_;
-	std::optional<bool>
- is_multifield_;
-	std::vector<std::string>
- values_;
 
+private:
+	std::optional<std::string> name_;
+	std::optional<std::string> type_;
+	std::optional<bool>        is_multifield_;
+	std::vector<std::string>   values_;
 };

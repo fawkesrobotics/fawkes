@@ -14,9 +14,9 @@
 #include "Fact.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ Fact::Fact(const std::string &json)
 	from_json(json);
 }
 
-Fact::Fact(const rapidjson::Value& v)
+Fact::Fact(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ Fact::to_json(bool pretty) const
 }
 
 void
-Fact::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+Fact::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -92,13 +92,12 @@ Fact::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	}
 	rapidjson::Value v_slots(rapidjson::kArrayType);
 	v_slots.Reserve(slots_.size(), allocator);
-	for (const auto & e : slots_) {
+	for (const auto &e : slots_) {
 		rapidjson::Value v(rapidjson::kObjectType);
 		e->to_json_value(d, v);
 		v_slots.PushBack(v, allocator);
 	}
 	v.AddMember("slots", v_slots, allocator);
-
 }
 
 void
@@ -111,7 +110,7 @@ Fact::from_json(const std::string &json)
 }
 
 void
-Fact::from_json_value(const rapidjson::Value& d)
+Fact::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -129,36 +128,37 @@ Fact::from_json_value(const rapidjson::Value& d)
 		formatted_ = d["formatted"].GetString();
 	}
 	if (d.HasMember("slots") && d["slots"].IsArray()) {
-		const rapidjson::Value& a = d["slots"];
-		slots_ = std::vector<std::shared_ptr<SlotValue>>{};
-;
+		const rapidjson::Value &a = d["slots"];
+		slots_                    = std::vector<std::shared_ptr<SlotValue>>{};
+		;
 		slots_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			std::shared_ptr<SlotValue> nv{new SlotValue()};
 			nv->from_json_value(v);
 			slots_.push_back(std::move(nv));
 		}
 	}
-
 }
 
 void
 Fact::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! index_)  missing.push_back("index");
-	if (! template_name_)  missing.push_back("template_name");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!index_)
+		missing.push_back("index");
+	if (!template_name_)
+		missing.push_back("template_name");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "Fact is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "Fact is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

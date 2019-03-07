@@ -14,9 +14,9 @@
 #include "Environment.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ Environment::Environment(const std::string &json)
 	from_json(json);
 }
 
-Environment::Environment(const rapidjson::Value& v)
+Environment::Environment(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ Environment::to_json(bool pretty) const
 }
 
 void
-Environment::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+Environment::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -80,7 +80,6 @@ Environment::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_name.SetString(*name_, allocator);
 		v.AddMember("name", v_name, allocator);
 	}
-
 }
 
 void
@@ -93,7 +92,7 @@ Environment::from_json(const std::string &json)
 }
 
 void
-Environment::from_json_value(const rapidjson::Value& d)
+Environment::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -104,25 +103,25 @@ Environment::from_json_value(const rapidjson::Value& d)
 	if (d.HasMember("name") && d["name"].IsString()) {
 		name_ = d["name"].GetString();
 	}
-
 }
 
 void
 Environment::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! name_)  missing.push_back("name");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!name_)
+		missing.push_back("name");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "Environment is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "Environment is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {
