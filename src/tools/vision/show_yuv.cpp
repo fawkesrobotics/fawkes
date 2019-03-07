@@ -20,14 +20,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <unistd.h>
-#include <iostream>
-
-#include <fvwidgets/image_display.h>
 #include <fvutils/color/conversions.h>
 #include <fvutils/color/yuv.h>
+#include <fvwidgets/image_display.h>
 
 #include <SDL.h>
+#include <iostream>
+#include <unistd.h>
 
 using namespace std;
 using namespace firevision;
@@ -38,158 +37,148 @@ using namespace firevision;
  */
 class YUVSpaceDemo
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param yuv_buffer YUV422_PLANAR encoded buffer.
    */
-  explicit
-  YUVSpaceDemo(unsigned char *yuv_buffer)
-  {
-    brightness = 128;
-    buffer = yuv_buffer;
-  }
+	explicit YUVSpaceDemo(unsigned char *yuv_buffer)
+	{
+		brightness = 128;
+		buffer     = yuv_buffer;
+	}
 
-  /** Fill buffer. */
-  void
-  fill()
-  {
-    unsigned char *yp = buffer;
-    unsigned char *up = YUV422_PLANAR_U_PLANE(buffer, 512, 512);
-    unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer, 512, 512);
+	/** Fill buffer. */
+	void
+	fill()
+	{
+		unsigned char *yp = buffer;
+		unsigned char *up = YUV422_PLANAR_U_PLANE(buffer, 512, 512);
+		unsigned char *vp = YUV422_PLANAR_V_PLANE(buffer, 512, 512);
 
-    for (int v = 255; v >= 0 ; --v) {
-      for (int u = 0; u < 256; ++u) {
-	*yp++ = brightness;
-	*yp++ = brightness;
-	*up++ = u;
-	*vp++ = v;
-      }
-      // Double line
-      memcpy(yp, (yp - 512), 512);
-      yp += 512;
-      memcpy(up, (up - 256), 256);
-      memcpy(vp, (vp - 256), 256);
-      up += 256;
-      vp += 256;
-    }
-  }
+		for (int v = 255; v >= 0; --v) {
+			for (int u = 0; u < 256; ++u) {
+				*yp++ = brightness;
+				*yp++ = brightness;
+				*up++ = u;
+				*vp++ = v;
+			}
+			// Double line
+			memcpy(yp, (yp - 512), 512);
+			yp += 512;
+			memcpy(up, (up - 256), 256);
+			memcpy(vp, (vp - 256), 256);
+			up += 256;
+			vp += 256;
+		}
+	}
 
-  /** Increase brightness.
+	/** Increase brightness.
    * @param val value to increase brightness by
    */
-  void brightness_up(unsigned int val = 1)
-  {
-    if ( brightness != 255 ) {
-      if ( (brightness + val) < 255 ) {
-	brightness += val;
-      } else {
-	brightness = 255;
-      }
-      printf("New brightness: %i\n", brightness);
-      fill();
-    }
-  }
+	void
+	brightness_up(unsigned int val = 1)
+	{
+		if (brightness != 255) {
+			if ((brightness + val) < 255) {
+				brightness += val;
+			} else {
+				brightness = 255;
+			}
+			printf("New brightness: %i\n", brightness);
+			fill();
+		}
+	}
 
-  /** Decrease brightness.
+	/** Decrease brightness.
    * @param val value to decrease brightness by
    */
-  void brightness_down(unsigned int val = 1) {
-    if ( brightness != 0 ) {
-      if ( (brightness - (int)val) > 0 ) {
-	brightness -= val;
-      } else {
-	brightness = 0;
-      }
-      printf("New brightness: %i\n", brightness);
-      fill();
-    }
-  }
+	void
+	brightness_down(unsigned int val = 1)
+	{
+		if (brightness != 0) {
+			if ((brightness - (int)val) > 0) {
+				brightness -= val;
+			} else {
+				brightness = 0;
+			}
+			printf("New brightness: %i\n", brightness);
+			fill();
+		}
+	}
 
-  /** Get Brightness.
+	/** Get Brightness.
    * @return current brightness
    */
-  int get_brightness() const
-  {
-    return brightness;
-  }
+	int
+	get_brightness() const
+	{
+		return brightness;
+	}
 
- private:
-  unsigned char *buffer;
-  int brightness;
-
+private:
+	unsigned char *buffer;
+	int            brightness;
 };
 
-
 int
-main( int argc, char **argv )
+main(int argc, char **argv)
 {
+	unsigned int width  = 512;
+	unsigned int height = 512;
 
-  unsigned int width = 512;
-  unsigned int height = 512;
+	unsigned char *yuv_buffer = malloc_buffer(YUV422_PLANAR, width, height);
+	YUVSpaceDemo * yuvspace   = new YUVSpaceDemo(yuv_buffer);
+	ImageDisplay * display    = new ImageDisplay(width, height);
 
-  unsigned char *yuv_buffer = malloc_buffer(YUV422_PLANAR, width, height);
-  YUVSpaceDemo *yuvspace = new YUVSpaceDemo(yuv_buffer);
-  ImageDisplay *display = new ImageDisplay(width, height);
+	cout << endl << endl << " V" << endl << " ^" << endl << " |" << endl << " +--> U" << endl << endl;
 
-  cout << endl << endl
-       << " V" << endl
-       << " ^" << endl
-       << " |" << endl
-       << " +--> U" << endl << endl;
+	yuvspace->fill();
+	display->show(yuv_buffer);
 
-  yuvspace->fill();
-  display->show(yuv_buffer);
+	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
-  SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+	bool quit = false;
+	while (!quit) {
+		SDL_Event event;
+		if (SDL_WaitEvent(&event)) {
+			switch (event.type) {
+			case SDL_QUIT: quit = true; break;
+			case SDL_KEYDOWN:
+				if (event.key.keysym.sym == SDLK_UP) {
+					yuvspace->brightness_up();
+					display->show(yuv_buffer);
+				} else if (event.key.keysym.sym == SDLK_DOWN) {
+					yuvspace->brightness_down();
+					display->show(yuv_buffer);
+				} else if (event.key.keysym.sym == SDLK_PAGEUP) {
+					yuvspace->brightness_up(20);
+					display->show(yuv_buffer);
+				} else if (event.key.keysym.sym == SDLK_PAGEDOWN) {
+					yuvspace->brightness_down(20);
+					display->show(yuv_buffer);
 
-  bool quit = false;
-  while (! quit) {
-    SDL_Event event;
-    if ( SDL_WaitEvent(&event) ) {
-      switch (event.type) {
-      case SDL_QUIT:
-	quit = true;
-	break;
-      case SDL_KEYDOWN:
-	if ( event.key.keysym.sym == SDLK_UP ) {
-	  yuvspace->brightness_up();
-	  display->show(yuv_buffer);
-	} else if ( event.key.keysym.sym == SDLK_DOWN ) {
-	  yuvspace->brightness_down();
-	  display->show(yuv_buffer);
-	} else if ( event.key.keysym.sym == SDLK_PAGEUP ) {
-	  yuvspace->brightness_up(20);
-	  display->show(yuv_buffer);
-	} else if ( event.key.keysym.sym == SDLK_PAGEDOWN ) {
-	  yuvspace->brightness_down(20);
-	  display->show(yuv_buffer);
+				} else if (event.key.keysym.sym == SDLK_ESCAPE) {
+					quit = true;
+				} else if (event.key.keysym.sym == SDLK_q) {
+					quit = true;
+				}
+				break;
 
-	} else if ( event.key.keysym.sym == SDLK_ESCAPE ) {
-	  quit = true;
-	} else if ( event.key.keysym.sym == SDLK_q ) {
-	  quit = true;
+			case SDL_MOUSEBUTTONDOWN: {
+				int x = event.button.x;
+				int y = event.button.y;
+
+				printf("YUV: %i %i %i\n", yuvspace->get_brightness(), x / 2, y / 2);
+			} break;
+
+			default: break;
+			}
+		}
 	}
-	break;
 
-      case SDL_MOUSEBUTTONDOWN:
-	{
-	  int x = event.button.x;
-	  int y = event.button.y;
+	free(yuv_buffer);
+	delete display;
+	delete yuvspace;
 
-	  printf("YUV: %i %i %i\n", yuvspace->get_brightness(),
-	         x / 2, y / 2);
-	}
-	break;
-
-      default:
-	break;
-      }
-    }
-  }
-
-  free(yuv_buffer);
-  delete display;
-  delete yuvspace;
-
-  return 0;
+	return 0;
 }

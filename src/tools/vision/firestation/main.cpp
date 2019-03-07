@@ -21,24 +21,23 @@
  */
 
 #include "firestation.h"
+
 #include <iostream>
 
 using namespace std;
 
-int main(int argc, char** argv)
+int
+main(int argc, char **argv)
 {
-  try
-  {
-    Gtk::Main kit(argc, argv);
-    Glib::RefPtr<Gtk::Builder> builder =
-      Gtk::Builder::create_from_file(RESDIR"/guis/firestation/firestation.ui");
-    Firestation firestation(builder);
-    kit.run(firestation.get_window());
-    return 0;
-  }
-  catch (std::exception const& e)
-  {
-    std::cerr << "Error: " << e.what() << std::endl;
-    return -1;
-  }
+	try {
+		Gtk::Main                  kit(argc, argv);
+		Glib::RefPtr<Gtk::Builder> builder =
+		  Gtk::Builder::create_from_file(RESDIR "/guis/firestation/firestation.ui");
+		Firestation firestation(builder);
+		kit.run(firestation.get_window());
+		return 0;
+	} catch (std::exception const &e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+		return -1;
+	}
 }

@@ -26,29 +26,29 @@
 #include <gtkmm.h>
 
 namespace firevision {
-  class Colormap;
+class Colormap;
 }
 
 class ColormapViewerWidget
 {
- public:
-  ColormapViewerWidget();
-  ~ColormapViewerWidget();
+public:
+	ColormapViewerWidget();
+	~ColormapViewerWidget();
 
-  void set_colormap(firevision::Colormap* cm);
-  void set_colormap_img(Gtk::Image* img);
-  void set_layer_selector(Gtk::Scale* scl);
-  
-  void draw(unsigned int layer = 0);
+	void set_colormap(firevision::Colormap *cm);
+	void set_colormap_img(Gtk::Image *img);
+	void set_layer_selector(Gtk::Scale *scl);
 
- private:
-  bool on_layer_selected(Gtk::ScrollType scroll, double value);
+	void draw(unsigned int layer = 0);
 
-  firevision::Colormap* m_cm;
+private:
+	bool on_layer_selected(Gtk::ScrollType scroll, double value);
 
-  Gtk::Image* m_img_colormap;
-  Gtk::Scale* m_scl_layer_selector;
-  unsigned char* m_colormap_img_buf;
+	firevision::Colormap *m_cm;
+
+	Gtk::Image *   m_img_colormap;
+	Gtk::Scale *   m_scl_layer_selector;
+	unsigned char *m_colormap_img_buf;
 };
 
 #endif /* #define _FIREVISION_TOOLS_FIRESTATION_COLORMAP_VIEWER_WIDGET_H_ */

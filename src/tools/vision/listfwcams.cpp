@@ -27,6 +27,6 @@ using namespace firevision;
 int
 main(int argc, char **argv)
 {
-  FirewireCamera::print_available_fwcams();
-  return 0;
+	FirewireCamera::print_available_fwcams();
+	return 0;
 }

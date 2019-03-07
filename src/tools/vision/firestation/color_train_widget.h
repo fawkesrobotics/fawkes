@@ -27,105 +27,103 @@
 #include <fvutils/color/colorspaces.h>
 
 #include <gtkmm.h>
-
 #include <memory>
 
 class ColormapViewerWidget;
 namespace firevision {
-  class BayesColormapGenerator;
-  class Zauberstab;
-  class YuvColormap;
-}
+class BayesColormapGenerator;
+class Zauberstab;
+class YuvColormap;
+} // namespace firevision
 
 class ColorTrainWidget
 {
- public:
-	static const unsigned int MOUSE_BUTTON_LEFT = 1; /**< constant for left mouse button id */
+public:
+	static const unsigned int MOUSE_BUTTON_LEFT  = 1; /**< constant for left mouse button id */
 	static const unsigned int MOUSE_BUTTON_RIGHT = 3; /**< constant for right mouse button id */
 
-  ColorTrainWidget(Gtk::Window* parent);
-  virtual ~ColorTrainWidget();
+	ColorTrainWidget(Gtk::Window *parent);
+	virtual ~ColorTrainWidget();
 
-  void set_fg_object(firevision::hint_t fg_object);
+	void set_fg_object(firevision::hint_t fg_object);
 
-  void set_src_buffer(unsigned char* buffer,
-		      unsigned int img_width, unsigned int img_height);
-  void set_draw_buffer(unsigned char* buffer);
+	void set_src_buffer(unsigned char *buffer, unsigned int img_width, unsigned int img_height);
+	void set_draw_buffer(unsigned char *buffer);
 
+	void click(unsigned int x, unsigned int y, unsigned int button = MOUSE_BUTTON_LEFT);
+	void reset_selection();
 
-  void click(unsigned int x, unsigned int y, unsigned int button = MOUSE_BUTTON_LEFT);
-  void reset_selection();
+	void load_histograms();
+	void save_histograms();
 
-  void load_histograms();
-  void save_histograms();
+	void                     add_to_colormap();
+	void                     reset_colormap();
+	void                     load_colormap();
+	void                     save_colormap();
+	firevision::YuvColormap *get_colormap() const;
 
-  void add_to_colormap();
-  void reset_colormap();
-  void load_colormap();
-  void save_colormap();
-  firevision::YuvColormap* get_colormap() const;
+	void draw_segmentation_result();
 
-  void draw_segmentation_result();
+	void set_reset_selection_btn(Gtk::Button *btn);
+	void set_add_to_colormap_btn(Gtk::Button *btn);
+	void set_reset_colormap_btn(Gtk::Button *btn);
+	void set_load_histos_btn(Gtk::Button *btn);
+	void set_save_histos_btn(Gtk::Button *btn);
+	void set_load_colormap_btn(Gtk::Button *btn);
+	void set_save_colormap_btn(Gtk::Button *btn);
+	void set_colormap_img(Gtk::Image *img);
+	void set_segmentation_img(Gtk::Image *img);
+	void set_threshold_scl(Gtk::Scale *scl);
+	void set_min_prob_scl(Gtk::Scale *scl);
+	void set_filechooser_dlg(Gtk::FileChooserDialog *dlg);
+	void set_cm_layer_selector(Gtk::Scale *scl);
+	void
+	set_cm_selector(Gtk::SpinButton *depth, Gtk::SpinButton *width = 0, Gtk::SpinButton *height = 0);
 
-  void set_reset_selection_btn(Gtk::Button* btn);
-  void set_add_to_colormap_btn(Gtk::Button* btn);
-  void set_reset_colormap_btn(Gtk::Button* btn);
-  void set_load_histos_btn(Gtk::Button* btn);
-  void set_save_histos_btn(Gtk::Button* btn);
-  void set_load_colormap_btn(Gtk::Button* btn);
-  void set_save_colormap_btn(Gtk::Button* btn);
-  void set_colormap_img(Gtk::Image* img);
-  void set_segmentation_img(Gtk::Image* img);
-  void set_threshold_scl(Gtk::Scale* scl);
-  void set_min_prob_scl(Gtk::Scale* scl);
-  void set_filechooser_dlg(Gtk::FileChooserDialog* dlg);
-  void set_cm_layer_selector(Gtk::Scale* scl);
-  void set_cm_selector(Gtk::SpinButton* depth, Gtk::SpinButton* width = 0, Gtk::SpinButton* height = 0);
+	Glib::Dispatcher &update_image();
+	Glib::Dispatcher &colormap_updated();
 
-  Glib::Dispatcher& update_image();
-  Glib::Dispatcher& colormap_updated();
+private:
+	void        resize_seg_image(Gtk::Allocation &allocation);
+	bool        set_threshold(Gtk::ScrollType scroll, double value);
+	bool        set_min_prob(Gtk::ScrollType scroll, double value);
+	static void free_rgb_buffer(const guint8 *rgb_buffer);
 
- private:
-  void resize_seg_image(Gtk::Allocation& allocation);
-  bool set_threshold(Gtk::ScrollType scroll, double value);
-  bool set_min_prob(Gtk::ScrollType scroll, double value);
-  static void free_rgb_buffer(const guint8* rgb_buffer);
+	void reset_gui();
 
-  void reset_gui();
-
-  firevision::BayesColormapGenerator* m_generator;
+	firevision::BayesColormapGenerator *    m_generator;
 	std::shared_ptr<firevision::Zauberstab> m_zauberstab;
-	std::shared_ptr<ColormapViewerWidget> m_cvw;
+	std::shared_ptr<ColormapViewerWidget>   m_cvw;
 
-  firevision::hint_t m_fg_object;
+	firevision::hint_t m_fg_object;
 
-  unsigned char* m_src_buffer;
-  unsigned char* m_draw_buffer;
-  unsigned int m_img_width;
-  unsigned int m_img_height;
-  unsigned int m_img_size;
-  firevision::colorspace_t m_img_cs;
-  unsigned int m_seg_img_max_width;
-  unsigned int m_seg_img_max_height;
+	unsigned char *          m_src_buffer;
+	unsigned char *          m_draw_buffer;
+	unsigned int             m_img_width;
+	unsigned int             m_img_height;
+	unsigned int             m_img_size;
+	firevision::colorspace_t m_img_cs;
+	unsigned int             m_seg_img_max_width;
+	unsigned int             m_seg_img_max_height;
 
-  Gtk::Window* m_wnd_parent;
-  Gtk::Button* m_btn_reset_selection;
-  Gtk::Button* m_btn_add_to_colormap;
-  Gtk::Button* m_btn_reset_colormap;
-  Gtk::Button* m_btn_load_histos;
-  Gtk::Button* m_btn_save_histos;
-  Gtk::Button* m_btn_load_colormap;
-  Gtk::Button* m_btn_save_colormap;
-  Gtk::SpinButton* m_spbtn_cm_depth;
-  Gtk::SpinButton* m_spbtn_cm_width;
-  Gtk::SpinButton* m_spbtn_cm_height;
-  Gtk::Image* m_img_segmentation;
-  Gtk::Scale* m_scl_threshold;
-  Gtk::Scale* m_scl_min_prob;
-  Gtk::FileChooserDialog* m_fcd_filechooser;
+	Gtk::Window *           m_wnd_parent;
+	Gtk::Button *           m_btn_reset_selection;
+	Gtk::Button *           m_btn_add_to_colormap;
+	Gtk::Button *           m_btn_reset_colormap;
+	Gtk::Button *           m_btn_load_histos;
+	Gtk::Button *           m_btn_save_histos;
+	Gtk::Button *           m_btn_load_colormap;
+	Gtk::Button *           m_btn_save_colormap;
+	Gtk::SpinButton *       m_spbtn_cm_depth;
+	Gtk::SpinButton *       m_spbtn_cm_width;
+	Gtk::SpinButton *       m_spbtn_cm_height;
+	Gtk::Image *            m_img_segmentation;
+	Gtk::Scale *            m_scl_threshold;
+	Gtk::Scale *            m_scl_min_prob;
+	Gtk::FileChooserDialog *m_fcd_filechooser;
 
-  Glib::Dispatcher m_signal_update_image;
-  Glib::Dispatcher m_signal_colormap_updated;
+	Glib::Dispatcher m_signal_update_image;
+	Glib::Dispatcher m_signal_colormap_updated;
 };
 
 #endif /* FIREVISION_TOOLS_FIRESTATION_COLOR_TRAIN_WIDGET_H__ */
