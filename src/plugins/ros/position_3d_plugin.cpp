@@ -19,9 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "position_3d_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -30,15 +30,14 @@ using namespace fawkes;
  */
 class RosPosition3DPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit RosPosition3DPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new RosPosition3DThread());
-  }
+	explicit RosPosition3DPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RosPosition3DThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Plugin to publish 3D Positions to ROS")

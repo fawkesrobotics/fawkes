@@ -19,8 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
 #include "navgraph_breakout_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -29,15 +30,14 @@ using namespace fawkes;
  */
 class RosNavgraphBreakoutPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit RosNavgraphBreakoutPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new RosNavgraphBreakoutThread());
-  }
+	explicit RosNavgraphBreakoutPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RosNavgraphBreakoutThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Use external ROS node for place goto")
