@@ -22,41 +22,39 @@
 #ifndef _NAVGRAPH_CONSTRAINTS_STATIC_LIST_EDGE_COST_CONSTRAINT_H_
 #define _NAVGRAPH_CONSTRAINTS_STATIC_LIST_EDGE_COST_CONSTRAINT_H_
 
-#include <navgraph/constraints/edge_cost_constraint.h>
 #include <core/utils/lock_vector.h>
-
-#include <vector>
-#include <string>
-
+#include <navgraph/constraints/edge_cost_constraint.h>
 #include <navgraph/navgraph.h>
 
-namespace fawkes{
+#include <string>
+#include <vector>
+
+namespace fawkes {
 
 class NavGraphStaticListEdgeCostConstraint : public NavGraphEdgeCostConstraint
 {
- public:
-  NavGraphStaticListEdgeCostConstraint(std::string name);
+public:
+	NavGraphStaticListEdgeCostConstraint(std::string name);
 
-  virtual ~NavGraphStaticListEdgeCostConstraint();
+	virtual ~NavGraphStaticListEdgeCostConstraint();
 
-  const std::vector<std::pair<fawkes::NavGraphEdge, float>> &  edge_cost_list() const;
+	const std::vector<std::pair<fawkes::NavGraphEdge, float>> &edge_cost_list() const;
 
-  void add_edge(const fawkes::NavGraphEdge &edge, const float cost_factor);
-  void add_edges(const std::vector<std::pair<fawkes::NavGraphEdge, float>> &edge_costs);
-  void remove_edge(const fawkes::NavGraphEdge &edge);
-  void clear_edges();
-  bool has_edge(const fawkes::NavGraphEdge &edge);
+	void add_edge(const fawkes::NavGraphEdge &edge, const float cost_factor);
+	void add_edges(const std::vector<std::pair<fawkes::NavGraphEdge, float>> &edge_costs);
+	void remove_edge(const fawkes::NavGraphEdge &edge);
+	void clear_edges();
+	bool has_edge(const fawkes::NavGraphEdge &edge);
 
-  virtual bool compute(void) throw();
+	virtual bool compute(void) throw();
 
-  virtual float cost_factor(const fawkes::NavGraphNode &from,
-			    const fawkes::NavGraphNode &to) throw();
+	virtual float cost_factor(const fawkes::NavGraphNode &from,
+	                          const fawkes::NavGraphNode &to) throw();
 
- private:
-  std::vector<std::pair<fawkes::NavGraphEdge, float>> edge_cost_list_;
-  fawkes::LockVector<std::pair<fawkes::NavGraphEdge, float>> edge_cost_list_buffer_;
-  bool modified_;
-
+private:
+	std::vector<std::pair<fawkes::NavGraphEdge, float>>        edge_cost_list_;
+	fawkes::LockVector<std::pair<fawkes::NavGraphEdge, float>> edge_cost_list_buffer_;
+	bool                                                       modified_;
 };
 
 } // end namespace fawkes

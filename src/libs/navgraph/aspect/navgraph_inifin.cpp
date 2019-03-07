@@ -21,10 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <navgraph/aspect/navgraph_inifin.h>
-#include <navgraph/aspect/navgraph.h>
 #include <core/threading/thread_finalizer.h>
+#include <navgraph/aspect/navgraph.h>
+#include <navgraph/aspect/navgraph_inifin.h>
 #include <navgraph/navgraph.h>
+
 #include <cstddef>
 
 namespace fawkes {
@@ -35,11 +36,9 @@ namespace fawkes {
  */
 
 /** Constructor. */
-NavGraphAspectIniFin::NavGraphAspectIniFin()
-  : AspectIniFin("NavGraphAspect")
+NavGraphAspectIniFin::NavGraphAspectIniFin() : AspectIniFin("NavGraphAspect")
 {
 }
-
 
 /** Set navgraph.
  * @param navgraph navgraph to pass to thread with the NavGraphAspect
@@ -47,37 +46,37 @@ NavGraphAspectIniFin::NavGraphAspectIniFin()
 void
 NavGraphAspectIniFin::set_navgraph(LockPtr<NavGraph> &navgraph)
 {
-  navgraph_ = navgraph;
+	navgraph_ = navgraph;
 }
 
 void
 NavGraphAspectIniFin::init(Thread *thread)
 {
-  NavGraphAspect *navgraph_thread;
-  navgraph_thread = dynamic_cast<NavGraphAspect *>(thread);
-  if (navgraph_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "NavGraphAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	NavGraphAspect *navgraph_thread;
+	navgraph_thread = dynamic_cast<NavGraphAspect *>(thread);
+	if (navgraph_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "NavGraphAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  navgraph_thread->navgraph = navgraph_;
+	navgraph_thread->navgraph = navgraph_;
 }
 
 void
 NavGraphAspectIniFin::finalize(Thread *thread)
 {
-  NavGraphAspect *navgraph_thread;
-  navgraph_thread = dynamic_cast<NavGraphAspect *>(thread);
-  if (navgraph_thread == NULL) {
-    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
-					"NavGraphAspect, but RTTI says it "
-					"has not. ", thread->name());
-  }
+	NavGraphAspect *navgraph_thread;
+	navgraph_thread = dynamic_cast<NavGraphAspect *>(thread);
+	if (navgraph_thread == NULL) {
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+		                                    "NavGraphAspect, but RTTI says it "
+		                                    "has not. ",
+		                                    thread->name());
+	}
 
-  navgraph_thread->navgraph.clear();
+	navgraph_thread->navgraph.clear();
 }
-
-
 
 } // end namespace fawkes

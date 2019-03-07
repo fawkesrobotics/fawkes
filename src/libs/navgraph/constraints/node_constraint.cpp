@@ -21,7 +21,7 @@
 
 #include <navgraph/constraints/node_constraint.h>
 
-namespace fawkes{
+namespace fawkes {
 
 /** @class NavGraphNodeConstraint <navgraph/constraints/node_constraint.h>
  * Constraint that can be queried to check if a node is blocked.
@@ -41,13 +41,12 @@ namespace fawkes{
  * Name of constraint.
  */
 
-
 /** Constructor.
  * @param name name of node constraint
  */
 NavGraphNodeConstraint::NavGraphNodeConstraint(const std::string &name)
 {
-  name_   = name;
+	name_ = name;
 }
 
 /** Constructor.
@@ -55,9 +54,8 @@ NavGraphNodeConstraint::NavGraphNodeConstraint(const std::string &name)
  */
 NavGraphNodeConstraint::NavGraphNodeConstraint(const char *name)
 {
-  name_   = name;
+	name_ = name;
 }
-
 
 /** Virtual empty destructor. */
 NavGraphNodeConstraint::~NavGraphNodeConstraint()
@@ -70,9 +68,8 @@ NavGraphNodeConstraint::~NavGraphNodeConstraint()
 std::string
 NavGraphNodeConstraint::name()
 {
-  return name_;
+	return name_;
 }
-
 
 /** Perform compuations before graph search and to indicate re-planning.
  * The compute method is called on all constraints just before a path
@@ -95,9 +92,8 @@ NavGraphNodeConstraint::name()
 bool
 NavGraphNodeConstraint::compute(void) throw()
 {
-  return false;
+	return false;
 }
-
 
 /** Check if constraint matches name.
  * @param name name string to compare this constraints name to
@@ -107,8 +103,7 @@ NavGraphNodeConstraint::compute(void) throw()
 bool
 NavGraphNodeConstraint::operator==(const std::string &name) const
 {
-  return name_ == name;
+	return name_ == name;
 }
-
 
 } // end of namespace fawkes

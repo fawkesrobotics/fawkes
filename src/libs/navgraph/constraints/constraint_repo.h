@@ -22,82 +22,77 @@
 #ifndef _NAVGRAPH_CONSTRAINTS_CONSTRAINT_REPO_H_
 #define _NAVGRAPH_CONSTRAINTS_CONSTRAINT_REPO_H_
 
-#include <navgraph/constraints/node_constraint.h>
 #include <navgraph/constraints/edge_constraint.h>
 #include <navgraph/constraints/edge_cost_constraint.h>
-
+#include <navgraph/constraints/node_constraint.h>
 #include <navgraph/navgraph_edge.h>
 
-#include <vector>
-#include <tuple>
 #include <list>
 #include <map>
+#include <tuple>
+#include <vector>
 
-namespace fawkes{
+namespace fawkes {
 
 class NavGraphConstraintRepo
 {
- public:
-  /** List of navgraph node constraints. */
-  typedef std::vector<fawkes::NavGraphNodeConstraint*> NodeConstraintList;
-  /** List of navgraph edge constraints. */
-  typedef std::vector<fawkes::NavGraphEdgeConstraint*> EdgeConstraintList;
-  /** List of navgraph edge cost constraints. */
-  typedef std::vector<fawkes::NavGraphEdgeCostConstraint*> EdgeCostConstraintList;
+public:
+	/** List of navgraph node constraints. */
+	typedef std::vector<fawkes::NavGraphNodeConstraint *> NodeConstraintList;
+	/** List of navgraph edge constraints. */
+	typedef std::vector<fawkes::NavGraphEdgeConstraint *> EdgeConstraintList;
+	/** List of navgraph edge cost constraints. */
+	typedef std::vector<fawkes::NavGraphEdgeCostConstraint *> EdgeCostConstraintList;
 
-  NavGraphConstraintRepo();
-  ~NavGraphConstraintRepo();
+	NavGraphConstraintRepo();
+	~NavGraphConstraintRepo();
 
-  void register_constraint(NavGraphNodeConstraint *constraint);
-  void register_constraint(NavGraphEdgeConstraint *constraint);
-  void register_constraint(NavGraphEdgeCostConstraint *constraint);
-  void unregister_constraint(std::string name);
+	void register_constraint(NavGraphNodeConstraint *constraint);
+	void register_constraint(NavGraphEdgeConstraint *constraint);
+	void register_constraint(NavGraphEdgeCostConstraint *constraint);
+	void unregister_constraint(std::string name);
 
-  bool has_constraint(std::string &name);
-  fawkes::NavGraphNodeConstraint *      get_node_constraint(std::string &name);
-  fawkes::NavGraphEdgeConstraint *      get_edge_constraint(std::string &name);
-  fawkes::NavGraphEdgeCostConstraint *  get_edge_cost_constraint(std::string &name);
+	bool                                has_constraint(std::string &name);
+	fawkes::NavGraphNodeConstraint *    get_node_constraint(std::string &name);
+	fawkes::NavGraphEdgeConstraint *    get_edge_constraint(std::string &name);
+	fawkes::NavGraphEdgeCostConstraint *get_edge_cost_constraint(std::string &name);
 
-  const NodeConstraintList &      node_constraints() const;
-  const EdgeConstraintList &      edge_constraints() const;
-  const EdgeCostConstraintList &  edge_cost_constraints() const;
+	const NodeConstraintList &    node_constraints() const;
+	const EdgeConstraintList &    edge_constraints() const;
+	const EdgeCostConstraintList &edge_cost_constraints() const;
 
-  bool has_constraints() const;
+	bool has_constraints() const;
 
-  bool compute();
+	bool compute();
 
-  NavGraphNodeConstraint *     blocks(const fawkes::NavGraphNode &node);
-  NavGraphEdgeConstraint *     blocks(const fawkes::NavGraphNode &from,
-				      const fawkes::NavGraphNode &to);
+	NavGraphNodeConstraint *blocks(const fawkes::NavGraphNode &node);
+	NavGraphEdgeConstraint *blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to);
 
-  NavGraphEdgeCostConstraint * increases_cost(const fawkes::NavGraphNode &from,
-					      const fawkes::NavGraphNode &to);
+	NavGraphEdgeCostConstraint *increases_cost(const fawkes::NavGraphNode &from,
+	                                           const fawkes::NavGraphNode &to);
 
-  NavGraphEdgeCostConstraint * increases_cost(const fawkes::NavGraphNode &from,
-					      const fawkes::NavGraphNode &to,
-					      float & cost_factor);
+	NavGraphEdgeCostConstraint *increases_cost(const fawkes::NavGraphNode &from,
+	                                           const fawkes::NavGraphNode &to,
+	                                           float &                     cost_factor);
 
-  float                        cost_factor(const fawkes::NavGraphNode &from,
-					   const fawkes::NavGraphNode &to);
+	float cost_factor(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to);
 
-  std::map<std::string, std::string>
-    blocks(const std::vector<fawkes::NavGraphNode> &nodes);
+	std::map<std::string, std::string> blocks(const std::vector<fawkes::NavGraphNode> &nodes);
 
-  std::map<std::pair<std::string, std::string>, std::string>
-    blocks(const std::vector<fawkes::NavGraphEdge> &edges);
+	std::map<std::pair<std::string, std::string>, std::string>
+	blocks(const std::vector<fawkes::NavGraphEdge> &edges);
 
-  std::list<std::tuple<std::string, std::string, std::string, float>>
-    cost_factor(const std::vector<fawkes::NavGraphEdge> &edges);
+	std::list<std::tuple<std::string, std::string, std::string, float>>
+	cost_factor(const std::vector<fawkes::NavGraphEdge> &edges);
 
-  bool modified(bool reset_modified = false);
+	bool modified(bool reset_modified = false);
 
- private:
-
-  NodeConstraintList node_constraints_;
-  EdgeConstraintList edge_constraints_;
-  EdgeCostConstraintList edge_cost_constraints_;
-  bool    modified_;
+private:
+	NodeConstraintList     node_constraints_;
+	EdgeConstraintList     edge_constraints_;
+	EdgeCostConstraintList edge_cost_constraints_;
+	bool                   modified_;
 };
-} // namespace
+} // namespace fawkes
 
 #endif

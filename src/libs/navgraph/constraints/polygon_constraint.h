@@ -21,55 +21,57 @@
 #ifndef _NAVGRAPH_CONSTRAINTS_POLYGON_CONSTRAINT_H_
 #define _NAVGRAPH_CONSTRAINTS_POLYGON_CONSTRAINT_H_
 
-#include <navgraph/constraints/static_list_node_constraint.h>
 #include <navgraph/constraints/static_list_edge_constraint.h>
-
-#include <vector>
-#include <string>
-
+#include <navgraph/constraints/static_list_node_constraint.h>
 #include <navgraph/navgraph.h>
 
-namespace fawkes{
+#include <string>
+#include <vector>
+
+namespace fawkes {
 
 class NavGraphPolygonConstraint
 {
- public:
-  /** Simple point representation for polygon. */
-  typedef struct Point_ {
-    /** Constructor.
+public:
+	/** Simple point representation for polygon. */
+	typedef struct Point_
+	{
+		/** Constructor.
      * @param x X coordinate of point
      * @param y Y coordinate of point
      */
-    Point_(float x, float y) : x(x), y(y) {}
-    float x;	///< X coordinate of point
-    float y;	///< Y coordinate of point
-  } Point;
-  /// Handle for polygon for selective removal
-  typedef unsigned int                     PolygonHandle;
-  /// A vector of points makes a polygon.
-  typedef std::vector<Point>               Polygon;
-  /// Map for accessing all polygons at once with their handles.
-  typedef std::map<PolygonHandle, Polygon> PolygonMap;
+		Point_(float x, float y) : x(x), y(y)
+		{
+		}
+		float x; ///< X coordinate of point
+		float y; ///< Y coordinate of point
+	} Point;
+	/// Handle for polygon for selective removal
+	typedef unsigned int PolygonHandle;
+	/// A vector of points makes a polygon.
+	typedef std::vector<Point> Polygon;
+	/// Map for accessing all polygons at once with their handles.
+	typedef std::map<PolygonHandle, Polygon> PolygonMap;
 
-  virtual ~NavGraphPolygonConstraint();
+	virtual ~NavGraphPolygonConstraint();
 
-  const PolygonMap &  polygons() const;
-  PolygonHandle       add_polygon(const Polygon &polygon);
-  void                remove_polygon(const PolygonHandle &handle);
-  void                clear_polygons();
+	const PolygonMap &polygons() const;
+	PolygonHandle     add_polygon(const Polygon &polygon);
+	void              remove_polygon(const PolygonHandle &handle);
+	void              clear_polygons();
 
- protected:
-  NavGraphPolygonConstraint();
-  NavGraphPolygonConstraint(const Polygon &polygon);
+protected:
+	NavGraphPolygonConstraint();
+	NavGraphPolygonConstraint(const Polygon &polygon);
 
-  bool in_poly(const Point &point, const Polygon &polygon);
-  bool on_poly(const Point &p1, const Point &p2, const Polygon &polygon);
+	bool in_poly(const Point &point, const Polygon &polygon);
+	bool on_poly(const Point &p1, const Point &p2, const Polygon &polygon);
 
- protected:
-  PolygonMap      polygons_;	///< currently registered polygons
+protected:
+	PolygonMap polygons_; ///< currently registered polygons
 
- private:
-  unsigned int    cur_polygon_handle_;
+private:
+	unsigned int cur_polygon_handle_;
 };
 
 } // end namespace fawkes

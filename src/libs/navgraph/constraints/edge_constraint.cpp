@@ -21,7 +21,7 @@
 
 #include <navgraph/constraints/edge_constraint.h>
 
-namespace fawkes{
+namespace fawkes {
 
 /** @class NavGraphEdgeConstraint <navgraph/constraints/edge_constraint.h>
  * Constraint that can be queried to check if an edge is blocked.
@@ -49,13 +49,12 @@ namespace fawkes{
  * Name of constraint.
  */
 
-
 /** Constructor.
  * @param name name of edge constraint
  */
 NavGraphEdgeConstraint::NavGraphEdgeConstraint(const std::string &name)
 {
-  name_   = name;
+	name_ = name;
 }
 
 /** Constructor.
@@ -63,9 +62,8 @@ NavGraphEdgeConstraint::NavGraphEdgeConstraint(const std::string &name)
  */
 NavGraphEdgeConstraint::NavGraphEdgeConstraint(const char *name)
 {
-  name_   = name;
+	name_ = name;
 }
-
 
 /** Virtual empty destructor. */
 NavGraphEdgeConstraint::~NavGraphEdgeConstraint()
@@ -78,9 +76,8 @@ NavGraphEdgeConstraint::~NavGraphEdgeConstraint()
 std::string
 NavGraphEdgeConstraint::name()
 {
-  return name_;
+	return name_;
 }
-
 
 /** Perform compuations before graph search and to indicate re-planning.
  * The compute method is called on all constraints just before a path
@@ -103,9 +100,8 @@ NavGraphEdgeConstraint::name()
 bool
 NavGraphEdgeConstraint::compute(void) throw()
 {
-  return false;
+	return false;
 }
-
 
 /** Check if constraint matches name.
  * @param name name string to compare this constraints name to
@@ -115,8 +111,7 @@ NavGraphEdgeConstraint::compute(void) throw()
 bool
 NavGraphEdgeConstraint::operator==(const std::string &name) const
 {
-  return name_ == name;
+	return name_ == name;
 }
-
 
 } // end of namespace fawkes

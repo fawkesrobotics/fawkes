@@ -24,8 +24,8 @@
 #include <navgraph/aspect/navgraph.h>
 #include <navgraph/navgraph.h>
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
 namespace fawkes {
 
@@ -46,9 +46,8 @@ namespace fawkes {
 /** Constructor. */
 NavGraphAspect::NavGraphAspect()
 {
-  add_aspect("NavGraphAspect");
+	add_aspect("NavGraphAspect");
 }
-
 
 /** Virtual empty destructor. */
 NavGraphAspect::~NavGraphAspect()

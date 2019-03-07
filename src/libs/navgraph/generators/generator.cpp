@@ -21,7 +21,6 @@
  */
 
 #include <core/exception.h>
-
 #include <navgraph/generators/generator.h>
 
 namespace fawkes {
@@ -55,9 +54,12 @@ namespace fawkes {
  * Disabled bounding box, set near threshold to 1cm.
  */
 NavGraphGenerator::NavGraphGenerator()
-	: bbox_enabled_(false),
-	  bbox_p1_x_(0.), bbox_p1_y_(0.), bbox_p2_x_(0.), bbox_p2_y_(0.),
-	  near_threshold_(0.01)
+: bbox_enabled_(false),
+  bbox_p1_x_(0.),
+  bbox_p1_y_(0.),
+  bbox_p2_x_(0.),
+  bbox_p2_y_(0.),
+  near_threshold_(0.01)
 {
 }
 
@@ -65,19 +67,20 @@ NavGraphGenerator::NavGraphGenerator()
  * @param params parameters
  */
 NavGraphGenerator::NavGraphGenerator(const std::map<std::string, std::string> params)
-	: bbox_enabled_(false),
-	  bbox_p1_x_(0.), bbox_p1_y_(0.), bbox_p2_x_(0.), bbox_p2_y_(0.),
-	  near_threshold_(0.01), params_(params)
+: bbox_enabled_(false),
+  bbox_p1_x_(0.),
+  bbox_p1_y_(0.),
+  bbox_p2_x_(0.),
+  bbox_p2_y_(0.),
+  near_threshold_(0.01),
+  params_(params)
 {
 }
-
 
 /** Destructor. */
 NavGraphGenerator::~NavGraphGenerator()
 {
 }
-
-
 
 /** Generate a new name
  * @param i number parameter for point name, will be incremented by one
@@ -86,7 +89,7 @@ NavGraphGenerator::~NavGraphGenerator()
 std::string
 NavGraphGenerator::genname(unsigned int &i)
 {
-	char * name;
+	char *name;
 	if (asprintf(&name, "V_%02u", ++i) != -1) {
 		std::string rv = name;
 		free(name);
@@ -95,7 +98,6 @@ NavGraphGenerator::genname(unsigned int &i)
 		throw Exception("Failed to create node name");
 	}
 }
-
 
 /** Set bounding box.
  * Setting a bounding box will cause compute() to ignore any edge with
@@ -106,14 +108,16 @@ NavGraphGenerator::genname(unsigned int &i)
  * @param bbox_p2_y y coordinate of second (upper) bounding box point
  */
 void
-NavGraphGenerator::set_bounding_box(float bbox_p1_x, float bbox_p1_y,
-                                    float bbox_p2_x, float bbox_p2_y)
+NavGraphGenerator::set_bounding_box(float bbox_p1_x,
+                                    float bbox_p1_y,
+                                    float bbox_p2_x,
+                                    float bbox_p2_y)
 {
 	bbox_enabled_ = true;
-	bbox_p1_x_ = bbox_p1_x;
-	bbox_p1_y_ = bbox_p1_y;
-	bbox_p2_x_ = bbox_p2_x;
-	bbox_p2_y_ = bbox_p2_y;  
+	bbox_p1_x_    = bbox_p1_x;
+	bbox_p1_y_    = bbox_p1_y;
+	bbox_p2_x_    = bbox_p2_x;
+	bbox_p2_y_    = bbox_p2_y;
 }
 
 /** Set distance threshold for considering nodes to be the same.

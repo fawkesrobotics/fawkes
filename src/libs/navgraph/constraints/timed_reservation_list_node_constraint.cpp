@@ -24,7 +24,7 @@
 
 #include <algorithm>
 
-namespace fawkes{
+namespace fawkes {
 
 /** @class NavGraphTimedReservationListNodeConstraint <navgraph/constraints/timed_reservation_list_node_constraint.h>
  * Constraint that holds a list of nodes to block with timeouts.
@@ -37,12 +37,14 @@ namespace fawkes{
  * @param name name of node constraint
  * @param clock time source to evaluate constraint timeouts
  */
-NavGraphTimedReservationListNodeConstraint::NavGraphTimedReservationListNodeConstraint
-  (Logger *logger, std::string name, fawkes::Clock *clock)
-  : NavGraphNodeConstraint(name)
+NavGraphTimedReservationListNodeConstraint::NavGraphTimedReservationListNodeConstraint(
+  Logger *       logger,
+  std::string    name,
+  fawkes::Clock *clock)
+: NavGraphNodeConstraint(name)
 {
-  logger_ = logger;
-  clock_ = clock;
+	logger_ = logger;
+	clock_  = clock;
 }
 
 /** Constructor.
@@ -51,52 +53,51 @@ NavGraphTimedReservationListNodeConstraint::NavGraphTimedReservationListNodeCons
  * @param clock time source to evaluate constraint timeouts
  * @param node_time_list list of nodes with valid_time
  */
-NavGraphTimedReservationListNodeConstraint::NavGraphTimedReservationListNodeConstraint
-  (Logger *logger, std::string name, fawkes::Clock *clock,
+NavGraphTimedReservationListNodeConstraint::NavGraphTimedReservationListNodeConstraint(
+  Logger *                                                   logger,
+  std::string                                                name,
+  fawkes::Clock *                                            clock,
   std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> node_time_list)
-  : NavGraphNodeConstraint(name)
+: NavGraphNodeConstraint(name)
 {
-  logger_ = logger;
-  clock_ = clock;
-  constraint_name_ = name;
-  node_time_list_ = node_time_list;
+	logger_          = logger;
+	clock_           = clock;
+	constraint_name_ = name;
+	node_time_list_  = node_time_list;
 }
-
 
 /** Virtual empty destructor. */
 NavGraphTimedReservationListNodeConstraint::~NavGraphTimedReservationListNodeConstraint()
 {
 }
 
-
 bool
 NavGraphTimedReservationListNodeConstraint::compute(void) throw()
 {
+	fawkes::Time                                       now(clock_);
+	std::vector<std::pair<NavGraphNode, fawkes::Time>> erase_list;
+	for (const std::pair<NavGraphNode, fawkes::Time> &ec : node_time_list_) {
+		if (now > ec.second) {
+			erase_list.push_back(ec);
+		}
+	}
+	for (const std::pair<NavGraphNode, fawkes::Time> &ec : erase_list) {
+		node_time_list_.erase(std::remove(node_time_list_.begin(), node_time_list_.end(), ec),
+		                      node_time_list_.end());
+		modified_ = true;
+		logger_->log_debug("TimedNodeConstraint",
+		                   "Deleted node '%s' from '%s' because its validity duration ran out",
+		                   ec.first.name().c_str(),
+		                   name_.c_str());
+	}
 
-  fawkes::Time now(clock_);
-  std::vector<std::pair<NavGraphNode, fawkes::Time>> erase_list;
-  for (const std::pair<NavGraphNode, fawkes::Time> &ec : node_time_list_) {
-    if(now > ec.second){
-      erase_list.push_back(ec);
-    }
-  }
-  for (const std::pair<NavGraphNode, fawkes::Time> &ec : erase_list) {
-    node_time_list_.erase(std::remove(node_time_list_.begin(), node_time_list_.end(), ec),
-			  node_time_list_.end());
-    modified_ = true;
-    logger_->log_debug("TimedNodeConstraint",
-		       "Deleted node '%s' from '%s' because its validity duration ran out",
-		       ec.first.name().c_str(), name_.c_str() );
-  }
-
-  if (modified_) {
-    modified_ = false;
-    return true;
-  } else {
-    return false;
-  }
+	if (modified_) {
+		modified_ = false;
+		return true;
+	} else {
+		return false;
+	}
 }
-
 
 /** Add a single node to constraint list.
  * @param node node to add to constraint list
@@ -104,38 +105,40 @@ NavGraphTimedReservationListNodeConstraint::compute(void) throw()
  */
 void
 NavGraphTimedReservationListNodeConstraint::add_node(const fawkes::NavGraphNode &node,
-						     fawkes::Time valid_time)
+                                                     fawkes::Time                valid_time)
 {
-  fawkes::Time now(clock_);
+	fawkes::Time now(clock_);
 
-  if (valid_time < now) {
-    logger_->log_warn("TimedNodeConstraint",
-		      "Constraint '%s' received node with old reservation time='%f' - now='%f'",
-		      name_.c_str(), valid_time.in_sec(), now.in_sec());
-  }
-  if (! has_node(node)) {
-    modified_ = true;
-    node_time_list_.push_back(std::make_pair(node, valid_time));
-    std::string txt = node.name();
-  }
+	if (valid_time < now) {
+		logger_->log_warn("TimedNodeConstraint",
+		                  "Constraint '%s' received node with old reservation time='%f' - now='%f'",
+		                  name_.c_str(),
+		                  valid_time.in_sec(),
+		                  now.in_sec());
+	}
+	if (!has_node(node)) {
+		modified_ = true;
+		node_time_list_.push_back(std::make_pair(node, valid_time));
+		std::string txt = node.name();
+	}
 }
-
 
 /** Add multiple nodes to constraint list.
  * @param timed_nodes nodes with timeout to add to constraint list
  */
 void
-NavGraphTimedReservationListNodeConstraint::add_nodes
-  (const std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> &timed_nodes)
+NavGraphTimedReservationListNodeConstraint::add_nodes(
+  const std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> &timed_nodes)
 {
-  std::string txt = "{";
-  for (const std::pair<NavGraphNode, fawkes::Time> &ec : timed_nodes) {
-    add_node(ec.first, ec.second);
-    txt += ec.first.name(); txt += ",";
-  }
-  txt.erase(txt.length()-1,1); txt += "}";
+	std::string txt = "{";
+	for (const std::pair<NavGraphNode, fawkes::Time> &ec : timed_nodes) {
+		add_node(ec.first, ec.second);
+		txt += ec.first.name();
+		txt += ",";
+	}
+	txt.erase(txt.length() - 1, 1);
+	txt += "}";
 }
-
 
 /** Remove a single node from the constraint list.
  * @param node node to remote
@@ -143,18 +146,18 @@ NavGraphTimedReservationListNodeConstraint::add_nodes
 void
 NavGraphTimedReservationListNodeConstraint::remove_node(const fawkes::NavGraphNode &node)
 {
-  std::vector<std::pair<NavGraphNode, fawkes::Time>>::iterator ec
-    = std::find_if(node_time_list_.begin(), node_time_list_.end(),
-		   [&node](const std::pair<fawkes::NavGraphNode, fawkes::Time> &p) {
-		     return p.first == node;
-		   });
+	std::vector<std::pair<NavGraphNode, fawkes::Time>>::iterator ec =
+	  std::find_if(node_time_list_.begin(),
+	               node_time_list_.end(),
+	               [&node](const std::pair<fawkes::NavGraphNode, fawkes::Time> &p) {
+		               return p.first == node;
+	               });
 
-  if (ec != node_time_list_.end()) {
-    modified_ = true;
-    node_time_list_.erase(ec);
-  }
+	if (ec != node_time_list_.end()) {
+		modified_ = true;
+		node_time_list_.erase(ec);
+	}
 }
-
 
 /** Check if constraint has a specific node.
  * @param node node to check
@@ -163,24 +166,24 @@ NavGraphTimedReservationListNodeConstraint::remove_node(const fawkes::NavGraphNo
 bool
 NavGraphTimedReservationListNodeConstraint::has_node(const fawkes::NavGraphNode &node)
 {
-  return (std::find_if(node_time_list_.begin(), node_time_list_.end(),
-		       [&node](const std::pair<fawkes::NavGraphNode, fawkes::Time> &p) {
-			 return p.first == node;
-		       })
-	  != node_time_list_.end());
+	return (std::find_if(node_time_list_.begin(),
+	                     node_time_list_.end(),
+	                     [&node](const std::pair<fawkes::NavGraphNode, fawkes::Time> &p) {
+		                     return p.first == node;
+	                     })
+	        != node_time_list_.end());
 }
 
 bool
 NavGraphTimedReservationListNodeConstraint::blocks(const fawkes::NavGraphNode &node) throw()
 {
-  for (const std::pair<fawkes::NavGraphNode, fawkes::Time> &te : node_time_list_) {
-    if(te.first.name() == node.name()) {
-      return true;
-    }
-  }
-  return false;
+	for (const std::pair<fawkes::NavGraphNode, fawkes::Time> &te : node_time_list_) {
+		if (te.first.name() == node.name()) {
+			return true;
+		}
+	}
+	return false;
 }
-
 
 /** Get list of blocked nodes.
  * @return list of blocked nodes
@@ -188,19 +191,17 @@ NavGraphTimedReservationListNodeConstraint::blocks(const fawkes::NavGraphNode &n
 const std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> &
 NavGraphTimedReservationListNodeConstraint::node_time_list() const
 {
-  return node_time_list_;
+	return node_time_list_;
 }
-
 
 /** Remove all nodes. */
 void
 NavGraphTimedReservationListNodeConstraint::clear_nodes()
 {
-  if (! node_time_list_.empty()) {
-    modified_ = true;
-    node_time_list_.clear();
-  }
+	if (!node_time_list_.empty()) {
+		modified_ = true;
+		node_time_list_.clear();
+	}
 }
-
 
 } // end of namespace fawkes

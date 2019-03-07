@@ -24,36 +24,33 @@
 
 #include <algorithm>
 
-namespace fawkes{
+namespace fawkes {
 
 /** @class NavGraphStaticListNodeConstraint <navgraph/constraints/static_list_node_constraint.h>
  * Constraint that holds a list of nodes to block.
  * @author Sebastian Reuter
  */
 
-
 /** Constructor.
  * @param name name of node constraint
  */
 NavGraphStaticListNodeConstraint::NavGraphStaticListNodeConstraint(std::string name)
-  : NavGraphNodeConstraint(name)
+: NavGraphNodeConstraint(name)
 {
-  modified_ = false;
+	modified_ = false;
 }
-
-
 
 /** Constructor.
  * @param name name of node constraint
  * @param node_list list of nodes to block
  */
 NavGraphStaticListNodeConstraint::NavGraphStaticListNodeConstraint(
-    std::string name,
-    std::vector<fawkes::NavGraphNode> &node_list)
-  : NavGraphNodeConstraint(name)
+  std::string                        name,
+  std::vector<fawkes::NavGraphNode> &node_list)
+: NavGraphNodeConstraint(name)
 {
-  node_list_ = node_list;
-  modified_  = false;
+	node_list_ = node_list;
+	modified_  = false;
 }
 
 /** Virtual empty destructor. */
@@ -61,18 +58,16 @@ NavGraphStaticListNodeConstraint::~NavGraphStaticListNodeConstraint()
 {
 }
 
-
 bool
 NavGraphStaticListNodeConstraint::compute(void) throw()
 {
-  if (modified_) {
-    modified_ = false;
-    return true;
-  } else {
-    return false;
-  }
+	if (modified_) {
+		modified_ = false;
+		return true;
+	} else {
+		return false;
+	}
 }
-
 
 /** Add a single node to constraint list.
  * @param node node to add to constraint list
@@ -80,22 +75,21 @@ NavGraphStaticListNodeConstraint::compute(void) throw()
 void
 NavGraphStaticListNodeConstraint::add_node(const fawkes::NavGraphNode &node)
 {
-  if (! has_node(node)) {
-    modified_ = true;
-    node_list_.push_back(node);
-  }
+	if (!has_node(node)) {
+		modified_ = true;
+		node_list_.push_back(node);
+	}
 }
 
 /** Add multiple nodes to constraint list.
  * @param nodes nodes to add to constraint list
  */
 void
-NavGraphStaticListNodeConstraint::add_nodes(
-  const std::vector<fawkes::NavGraphNode> &nodes)
+NavGraphStaticListNodeConstraint::add_nodes(const std::vector<fawkes::NavGraphNode> &nodes)
 {
-  for (const NavGraphNode &n : nodes) {
-    add_node(n);
-  }
+	for (const NavGraphNode &n : nodes) {
+		add_node(n);
+	}
 }
 
 /** Remove a single node from the constraint list.
@@ -104,12 +98,11 @@ NavGraphStaticListNodeConstraint::add_nodes(
 void
 NavGraphStaticListNodeConstraint::remove_node(const fawkes::NavGraphNode &node)
 {
-  std::vector<NavGraphNode>::iterator n =
-    std::find(node_list_.begin(), node_list_.end(), node);
-  if (n != node_list_.end()) {
-    modified_ = true;
-    node_list_.erase(n);
-  }
+	std::vector<NavGraphNode>::iterator n = std::find(node_list_.begin(), node_list_.end(), node);
+	if (n != node_list_.end()) {
+		modified_ = true;
+		node_list_.erase(n);
+	}
 }
 
 /** Check if constraint has a specific node.
@@ -119,9 +112,8 @@ NavGraphStaticListNodeConstraint::remove_node(const fawkes::NavGraphNode &node)
 bool
 NavGraphStaticListNodeConstraint::has_node(const fawkes::NavGraphNode &node)
 {
-  return (std::find(node_list_.begin(), node_list_.end(), node) != node_list_.end());
+	return (std::find(node_list_.begin(), node_list_.end(), node) != node_list_.end());
 }
-
 
 /** Get list of blocked nodes.
  * @return list of blocked nodes
@@ -129,19 +121,17 @@ NavGraphStaticListNodeConstraint::has_node(const fawkes::NavGraphNode &node)
 const std::vector<fawkes::NavGraphNode> &
 NavGraphStaticListNodeConstraint::node_list() const
 {
-  return node_list_;
+	return node_list_;
 }
-
 
 /** Remove all nodes. */
 void
 NavGraphStaticListNodeConstraint::clear_nodes()
 {
-  if (! node_list_.empty()) {
-    modified_ = true;
-    node_list_.clear();
-  }
+	if (!node_list_.empty()) {
+		modified_ = true;
+		node_list_.clear();
+	}
 }
-
 
 } // end of namespace fawkes

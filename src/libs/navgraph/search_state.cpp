@@ -21,8 +21,8 @@
 
 #include <navgraph/search_state.h>
 
-#include <functional>
 #include <cmath>
+#include <functional>
 
 namespace fawkes {
 
@@ -48,26 +48,27 @@ namespace fawkes {
  * match the cost function to be admissible.
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
-NavGraphSearchState::NavGraphSearchState(const NavGraphNode& node, const NavGraphNode& goal,
-                                         double cost_sofar, NavGraphSearchState *parent,
-                                         NavGraph *map_graph,
-                                         navgraph::EstimateFunction estimate_func,
-                                         navgraph::CostFunction cost_func,
+NavGraphSearchState::NavGraphSearchState(const NavGraphNode &            node,
+                                         const NavGraphNode &            goal,
+                                         double                          cost_sofar,
+                                         NavGraphSearchState *           parent,
+                                         NavGraph *                      map_graph,
+                                         navgraph::EstimateFunction      estimate_func,
+                                         navgraph::CostFunction          cost_func,
                                          fawkes::NavGraphConstraintRepo *constraint_repo)
 : AStarState(cost_sofar, parent), estimate_func_(estimate_func), cost_func_(cost_func)
 {
-  node_ = node;
-  goal_ = goal;
-  map_graph_ = map_graph;
+	node_      = node;
+	goal_      = goal;
+	map_graph_ = map_graph;
 
-  total_estimated_cost = path_cost + estimate();
+	total_estimated_cost = path_cost + estimate();
 
-  std::hash<std::string> h;
-  key_ = h(node_.name());
+	std::hash<std::string> h;
+	key_ = h(node_.name());
 
-  constraint_repo_ = constraint_repo;
+	constraint_repo_ = constraint_repo;
 }
-
 
 /** Constructor.
  * @param node graph node this search state represents
@@ -75,26 +76,26 @@ NavGraphSearchState::NavGraphSearchState(const NavGraphNode& node, const NavGrap
  * @param map_graph map graph
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
-NavGraphSearchState::NavGraphSearchState(const NavGraphNode& node, const NavGraphNode& goal,
-                                         NavGraph *map_graph,
+NavGraphSearchState::NavGraphSearchState(const NavGraphNode &            node,
+                                         const NavGraphNode &            goal,
+                                         NavGraph *                      map_graph,
                                          fawkes::NavGraphConstraintRepo *constraint_repo)
 : AStarState(0, NULL)
 {
-  node_ = node;
-  goal_ = goal;
-  map_graph_ = map_graph;
+	node_      = node;
+	goal_      = goal;
+	map_graph_ = map_graph;
 
-  estimate_func_ = straight_line_estimate;
-  cost_func_ = euclidean_cost;
+	estimate_func_ = straight_line_estimate;
+	cost_func_     = euclidean_cost;
 
-  total_estimated_cost = path_cost + estimate();
+	total_estimated_cost = path_cost + estimate();
 
-  std::hash<std::string> h;
-  key_ = h(node_.name());
+	std::hash<std::string> h;
+	key_ = h(node_.name());
 
-  constraint_repo_ = constraint_repo;
+	constraint_repo_ = constraint_repo;
 }
-
 
 /** Constructor.
  * @param node graph node this search state represents
@@ -111,32 +112,30 @@ NavGraphSearchState::NavGraphSearchState(const NavGraphNode& node, const NavGrap
  * match the cost function to be admissible.
  * @param constraint_repo constraint repository, null to plan only without constraints
  */
-NavGraphSearchState::NavGraphSearchState(const NavGraphNode& node,
-                                         const NavGraphNode& goal,
-                                         NavGraph *map_graph,
-                                         navgraph::EstimateFunction estimate_func,
-                                         navgraph::CostFunction cost_func,
+NavGraphSearchState::NavGraphSearchState(const NavGraphNode &            node,
+                                         const NavGraphNode &            goal,
+                                         NavGraph *                      map_graph,
+                                         navgraph::EstimateFunction      estimate_func,
+                                         navgraph::CostFunction          cost_func,
                                          fawkes::NavGraphConstraintRepo *constraint_repo)
 : AStarState(0, NULL), estimate_func_(estimate_func), cost_func_(cost_func)
 {
-  node_ = node;
-  goal_ = goal;
-  map_graph_ = map_graph;
+	node_      = node;
+	goal_      = goal;
+	map_graph_ = map_graph;
 
-  total_estimated_cost = path_cost + estimate();
+	total_estimated_cost = path_cost + estimate();
 
-  std::hash<std::string> h;
-  key_ = h(node_.name());
+	std::hash<std::string> h;
+	key_ = h(node_.name());
 
-  constraint_repo_ = constraint_repo;
+	constraint_repo_ = constraint_repo;
 }
-
 
 /** Destructor. */
 NavGraphSearchState::~NavGraphSearchState()
 {
 }
-
 
 /** Get graph node corresponding to this search state.
  * @return graph node corresponding to this search state
@@ -144,61 +143,63 @@ NavGraphSearchState::~NavGraphSearchState()
 fawkes::NavGraphNode &
 NavGraphSearchState::node()
 {
-  return node_;
+	return node_;
 }
-
 
 float
 NavGraphSearchState::estimate()
 {
-  return estimate_func_(node_, goal_);
+	return estimate_func_(node_, goal_);
 }
-
 
 bool
 NavGraphSearchState::is_goal()
 {
-  return (node_.name() == goal_.name());
+	return (node_.name() == goal_.name());
 }
-
 
 std::vector<AStarState *>
 NavGraphSearchState::children()
 {
-  std::vector< AStarState * > children;
-  children.clear();
+	std::vector<AStarState *> children;
+	children.clear();
 
-  std::vector<std::string> descendants = node_.reachable_nodes();
+	std::vector<std::string> descendants = node_.reachable_nodes();
 
-  for (unsigned int i = 0; i < descendants.size(); ++i) {
-    NavGraphNode d = map_graph_->node(descendants[i]);
+	for (unsigned int i = 0; i < descendants.size(); ++i) {
+		NavGraphNode d = map_graph_->node(descendants[i]);
 
-    bool expand = true;
-    if (constraint_repo_) {
-      if (constraint_repo_->blocks(d)) {
-	expand = false;
-      } else if (constraint_repo_->blocks(node_, d)) {
-	expand = false;
-      }
-    }
+		bool expand = true;
+		if (constraint_repo_) {
+			if (constraint_repo_->blocks(d)) {
+				expand = false;
+			} else if (constraint_repo_->blocks(node_, d)) {
+				expand = false;
+			}
+		}
 
-    if (expand) {
-      float d_cost = cost_func_(node_, d);
+		if (expand) {
+			float d_cost = cost_func_(node_, d);
 
-      if (constraint_repo_) {
-	float cost_factor = 0.;
-	if (constraint_repo_->increases_cost(node_, d, cost_factor)) {
-	  d_cost *= cost_factor;
+			if (constraint_repo_) {
+				float cost_factor = 0.;
+				if (constraint_repo_->increases_cost(node_, d, cost_factor)) {
+					d_cost *= cost_factor;
+				}
+			}
+
+			children.push_back(new NavGraphSearchState(d,
+			                                           goal_,
+			                                           path_cost + d_cost,
+			                                           this,
+			                                           map_graph_,
+			                                           estimate_func_,
+			                                           cost_func_,
+			                                           constraint_repo_));
+		}
 	}
-      }
 
-      children.push_back(new NavGraphSearchState(d, goal_, path_cost + d_cost, this,
-						 map_graph_, estimate_func_, cost_func_,
-						 constraint_repo_));
-    }
-  }
-
-  return children;
+	return children;
 }
 
 } // end of namespace fawkes

@@ -22,31 +22,28 @@
 
 #include <algorithm>
 
-namespace fawkes{
+namespace fawkes {
 
 /** @class NavGraphPolygonNodeConstraint <navgraph/constraints/polygon_constraint.h>
  * Constraint that blocks nodes inside a polygon.
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param name name of node constraint
  */
 NavGraphPolygonNodeConstraint::NavGraphPolygonNodeConstraint(const std::string &name)
-  : NavGraphNodeConstraint(name)
+: NavGraphNodeConstraint(name)
 {
 }
-
-
 
 /** Constructor.
  * @param name name of node constraint
  * @param polygon polygon to add immediately
  */
 NavGraphPolygonNodeConstraint::NavGraphPolygonNodeConstraint(const std::string &name,
-						     const Polygon &polygon)
-  : NavGraphNodeConstraint(name), NavGraphPolygonConstraint(polygon)
+                                                             const Polygon &    polygon)
+: NavGraphNodeConstraint(name), NavGraphPolygonConstraint(polygon)
 {
 }
 
@@ -55,30 +52,27 @@ NavGraphPolygonNodeConstraint::~NavGraphPolygonNodeConstraint()
 {
 }
 
-
 bool
 NavGraphPolygonNodeConstraint::compute(void) throw()
 {
-  if (! polygons_.empty()) {
-    return true;
-  } else {
-    return false;
-  }
+	if (!polygons_.empty()) {
+		return true;
+	} else {
+		return false;
+	}
 }
-
 
 bool
 NavGraphPolygonNodeConstraint::blocks(const fawkes::NavGraphNode &node) throw()
 {
-  for (auto p : polygons_) {
-    Point point(node.x(), node.y());
-    if (in_poly(point, p.second)) {
-      return true;
-    }
-  }
+	for (auto p : polygons_) {
+		Point point(node.x(), node.y());
+		if (in_poly(point, p.second)) {
+			return true;
+		}
+	}
 
-  return false;
+	return false;
 }
-
 
 } // end of namespace fawkes

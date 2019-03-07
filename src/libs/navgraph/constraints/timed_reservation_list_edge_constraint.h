@@ -23,50 +23,50 @@
 #ifndef _NAVGRAPH_CONSTRAINTS_TIMED_RESERVATION_LIST_EDGE_CONSTRAINT_H_
 #define _NAVGRAPH_CONSTRAINTS_TIMED_RESERVATION_LIST_EDGE_CONSTRAINT_H_
 
-#include <navgraph/constraints/static_list_edge_constraint.h>
-
-#include <vector>
-#include <string>
-
-#include <utils/time/time.h>
-#include <navgraph/navgraph.h>
 #include <logging/logger.h>
+#include <navgraph/constraints/static_list_edge_constraint.h>
+#include <navgraph/navgraph.h>
+#include <utils/time/time.h>
 
-namespace fawkes{
+#include <string>
+#include <vector>
 
+namespace fawkes {
 
 class NavGraphTimedReservationListEdgeConstraint : public NavGraphEdgeConstraint
 {
- public:
-   NavGraphTimedReservationListEdgeConstraint(Logger *logger, std::string constraint_name, fawkes::Clock *clock);
+public:
+	NavGraphTimedReservationListEdgeConstraint(Logger *       logger,
+	                                           std::string    constraint_name,
+	                                           fawkes::Clock *clock);
 
-   NavGraphTimedReservationListEdgeConstraint(Logger *logger, std::string constraint_name, fawkes::Clock *clock,
-		   std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> edge_time_list );
+	NavGraphTimedReservationListEdgeConstraint(
+	  Logger *                                                   logger,
+	  std::string                                                constraint_name,
+	  fawkes::Clock *                                            clock,
+	  std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> edge_time_list);
 
-  virtual ~NavGraphTimedReservationListEdgeConstraint();
+	virtual ~NavGraphTimedReservationListEdgeConstraint();
 
-  const std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> &  edge_time_list() const;
+	const std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> &edge_time_list() const;
 
-  void add_edge(const fawkes::NavGraphEdge &edge, const fawkes::Time valid_time);
-  void add_edges(const std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> &edges);
-  void remove_edge(const fawkes::NavGraphEdge &edge);
-  void clear_edges();
-  bool has_edge(const fawkes::NavGraphEdge &edge);
+	void add_edge(const fawkes::NavGraphEdge &edge, const fawkes::Time valid_time);
+	void add_edges(const std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> &edges);
+	void remove_edge(const fawkes::NavGraphEdge &edge);
+	void clear_edges();
+	bool has_edge(const fawkes::NavGraphEdge &edge);
 
-  virtual bool compute(void) throw();
-  virtual bool blocks(const fawkes::NavGraphNode &from,
- 		      const fawkes::NavGraphNode &to) throw();
+	virtual bool compute(void) throw();
+	virtual bool blocks(const fawkes::NavGraphNode &from, const fawkes::NavGraphNode &to) throw();
 
- private:
-  std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> edge_time_list_;
-  bool modified_;
-  Logger *logger_;
-  fawkes::Clock *clock_;
-  std::string constraint_name_;
-
+private:
+	std::vector<std::pair<fawkes::NavGraphEdge, fawkes::Time>> edge_time_list_;
+	bool                                                       modified_;
+	Logger *                                                   logger_;
+	fawkes::Clock *                                            clock_;
+	std::string                                                constraint_name_;
 };
 
 } // end namespace fawkes
 
 #endif
-

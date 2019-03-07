@@ -22,32 +22,31 @@
 #ifndef _NAVGRAPH_CONSTRAINTS_NODE_CONSTRAINT_H_
 #define _NAVGRAPH_CONSTRAINTS_NODE_CONSTRAINT_H_
 
-#include <vector>
-#include <string>
-
 #include <navgraph/navgraph_node.h>
 
-namespace fawkes{
+#include <string>
+#include <vector>
+
+namespace fawkes {
 
 class Logger;
 
 class NavGraphNodeConstraint
 {
- public:
-  NavGraphNodeConstraint(const std::string &name);
-  NavGraphNodeConstraint(const char *name);
-  virtual ~NavGraphNodeConstraint();
+public:
+	NavGraphNodeConstraint(const std::string &name);
+	NavGraphNodeConstraint(const char *name);
+	virtual ~NavGraphNodeConstraint();
 
-  std::string name();
+	std::string name();
 
-  virtual bool compute(void) throw();
-  virtual bool blocks(const fawkes::NavGraphNode &node) throw() = 0;
+	virtual bool compute(void) throw();
+	virtual bool blocks(const fawkes::NavGraphNode &node) throw() = 0;
 
-  bool operator==(const std::string &name) const;
+	bool operator==(const std::string &name) const;
 
- protected:
-  std::string name_;
-
+protected:
+	std::string name_;
 };
 
 } // end namespace fawkes
