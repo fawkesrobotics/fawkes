@@ -26,44 +26,42 @@
 #include <utils/misc/autofree.h>
 
 namespace firevision {
-  class Camera;
+class Camera;
 }
 
 class SkelGuiTextureDrawer
 {
- public:
-  SkelGuiTextureDrawer(unsigned int width, unsigned int height);
-  virtual ~SkelGuiTextureDrawer();
+public:
+	SkelGuiTextureDrawer(unsigned int width, unsigned int height);
+	virtual ~SkelGuiTextureDrawer();
 
-  virtual void fill_texture() = 0;
+	virtual void fill_texture() = 0;
 
-  void draw();
+	void draw();
 
- protected:
-  void copy_rgb_to_texture(const unsigned char *rgb_buf);
+protected:
+	void copy_rgb_to_texture(const unsigned char *rgb_buf);
 
- private:
-  unsigned int get_closest_power_of_two(unsigned int n);
-  void init_texture();
-  void draw_texture();
-  void draw_rectangle(float topLeftX, float topLeftY,
-		      float bottomRightX, float bottomRightY);
+private:
+	unsigned int get_closest_power_of_two(unsigned int n);
+	void         init_texture();
+	void         draw_texture();
+	void draw_rectangle(float topLeftX, float topLeftY, float bottomRightX, float bottomRightY);
 
- protected:
-  const unsigned int   width_;		/**< Width of visible area from texture */
-  const unsigned int   height_;	/**< Height of visible area from texture */
+protected:
+	const unsigned int width_;  /**< Width of visible area from texture */
+	const unsigned int height_; /**< Height of visible area from texture */
 
-  const unsigned int   texture_width_;	/**< Real texture width */
-  const unsigned int   texture_height_;		/**< Real texture height */
+	const unsigned int texture_width_;  /**< Real texture width */
+	const unsigned int texture_height_; /**< Real texture height */
 
-  unsigned char       *texture_;	/**< Texture buffer. */
+	unsigned char *texture_; /**< Texture buffer. */
 
- private:
-	fawkes::MemAutoFree  texture_raii_;
-  bool                 texture_initialized_;
-  unsigned int         texture_id_;
-  float                texture_coords_[8];
-
+private:
+	fawkes::MemAutoFree texture_raii_;
+	bool                texture_initialized_;
+	unsigned int        texture_id_;
+	float               texture_coords_[8];
 };
 
 #endif

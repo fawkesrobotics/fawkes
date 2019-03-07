@@ -28,32 +28,33 @@
 #include <utils/misc/autofree.h>
 
 namespace firevision {
-  class Camera;
+class Camera;
 }
 
 class SkelGuiDepthDrawer : public SkelGuiTextureDrawer
 {
- public:
-  SkelGuiDepthDrawer(firevision::Camera *depth_cam, firevision::Camera *label_cam,
-                     unsigned int max_depth);
+public:
+	SkelGuiDepthDrawer(firevision::Camera *depth_cam,
+	                   firevision::Camera *label_cam,
+	                   unsigned int        max_depth);
 	~SkelGuiDepthDrawer();
 
-  virtual void fill_texture();
+	virtual void fill_texture();
 
-  void toggle_show_labels();
+	void toggle_show_labels();
 
- private:
-  firevision::Camera  *depth_cam_;
-  firevision::Camera  *label_cam_;
+private:
+	firevision::Camera *depth_cam_;
+	firevision::Camera *label_cam_;
 
-	fawkes::MemAutoFree  rgb_buf_raii_;
-  unsigned char       *rgb_buf_;
+	fawkes::MemAutoFree rgb_buf_raii_;
+	unsigned char *     rgb_buf_;
 
-  const unsigned int   max_depth_;
-	fawkes::MemAutoFree  histogram_raii_;
-  float               *histogram_;
+	const unsigned int  max_depth_;
+	fawkes::MemAutoFree histogram_raii_;
+	float *             histogram_;
 
-  bool                 show_labels_;
+	bool show_labels_;
 };
 
 #endif
