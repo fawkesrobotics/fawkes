@@ -33,4 +33,3 @@ extern "C" int p_map_graph_search_nodes();
 extern "C" int p_map_graph_get_children();
 
 #endif /* ECLIPSE_EXTERNALS_BLACKBOARD_H__ */
-

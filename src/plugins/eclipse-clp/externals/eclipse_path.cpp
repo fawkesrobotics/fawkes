@@ -21,10 +21,12 @@
  */
 
 #include "eclipse_path.h"
-#include <iterator>
-#include <iostream>
+
 #include <core/exception.h>
+
 #include <eclipseclass.h>
+#include <iostream>
+#include <iterator>
 
 using namespace boost::filesystem;
 using namespace fawkes;
@@ -38,9 +40,7 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-
-EclipsePath* EclipsePath::m_instance = NULL;
-
+EclipsePath *EclipsePath::m_instance = NULL;
 
 /** Constructor. */
 EclipsePath::EclipsePath()
@@ -53,24 +53,24 @@ EclipsePath::EclipsePath()
 void
 EclipsePath::create_initial_object()
 {
-  if (m_instance)  return;
+	if (m_instance)
+		return;
 
-  m_instance = new EclipsePath();
-  m_instance->add_regex(boost::regex("@BASEDIR@"), BASEDIR);
-  m_instance->add_regex(boost::regex("@CONFDIR@"), CONFDIR);
-  m_instance->add_regex(boost::regex("@FAWKESDIR@"), FAWKES_BASEDIR);
+	m_instance = new EclipsePath();
+	m_instance->add_regex(boost::regex("@BASEDIR@"), BASEDIR);
+	m_instance->add_regex(boost::regex("@CONFDIR@"), CONFDIR);
+	m_instance->add_regex(boost::regex("@FAWKESDIR@"), FAWKES_BASEDIR);
 }
 
 /** Get the EclipsePath instance.
  * @return the instance
  */
-EclipsePath* EclipsePath::instance()
+EclipsePath *
+EclipsePath::instance()
 {
-  create_initial_object();
-  return m_instance;
+	create_initial_object();
+	return m_instance;
 }
-
-
 
 /** Add a new path.
  * @param path The path to be added.
@@ -78,18 +78,17 @@ EclipsePath* EclipsePath::instance()
 void
 EclipsePath::add_path(const std::string &path)
 {
-  paths.push_back(path);
+	paths.push_back(path);
 }
-
 
 /** Add a new path and apply regexes to all paths.
  * @param path The path to be added.
  */
 void
-EclipsePath::add_path_check(const std::string& path)
+EclipsePath::add_path_check(const std::string &path)
 {
-  instance()->add_path(path);
-  instance()->apply_regexes();
+	instance()->add_path(path);
+	instance()->apply_regexes();
 }
 
 /** Locate a file by filename
@@ -97,33 +96,30 @@ EclipsePath::add_path_check(const std::string& path)
  * @return path to the file
  */
 std::string
-EclipsePath::locate_file(const std::string& filename)
+EclipsePath::locate_file(const std::string &filename)
 {
-  if (paths.empty()){
-    return "";
-  }
-  //std::cout << "locate file: " << filename << '\n';
-  for (std::vector<std::string>::iterator it = paths.begin(); it != paths.end(); ++it){
-    path p (*it);
-    p /= filename;
-    //std::cout << "locate file: created path for:" << p.native() << '\n' ;
-    try {
-      if (exists(p)) {
-	//std::cout << "found file " << filename << " at:" << '\n'; 
+	if (paths.empty()) {
+		return "";
+	}
+	//std::cout << "locate file: " << filename << '\n';
+	for (std::vector<std::string>::iterator it = paths.begin(); it != paths.end(); ++it) {
+		path p(*it);
+		p /= filename;
+		//std::cout << "locate file: created path for:" << p.native() << '\n' ;
+		try {
+			if (exists(p)) {
+				//std::cout << "found file " << filename << " at:" << '\n';
 #ifdef BOOST_FILESYSTEM_VERSION
-	return p.native();
+				return p.native();
 #else
-	return p.string();
+				return p.string();
 #endif
-      }
-    }
-    catch (const filesystem_error& ex)
-    {
-      throw Exception( "Filesystem error" );
-    }
-		
-  }
-  return "";
+			}
+		} catch (const filesystem_error &ex) {
+			throw Exception("Filesystem error");
+		}
+	}
+	return "";
 }
 
 /** Apply the regexes to all paths.
@@ -131,17 +127,17 @@ EclipsePath::locate_file(const std::string& filename)
 void
 EclipsePath::apply_regexes()
 {
-  int i;
-  std::vector<std::string>::iterator it;
-  for (i = 0, it = paths.begin(); it != paths.end(); ++it, i++){
-    for (std::map<boost::regex,std::string>::iterator re=regexes.begin(); re!=regexes.end(); ++re){
-      std::string result = boost::regex_replace(*it, re->first, re->second);
-      //std::cout << "path: " << paths[i] << '\n'; 
-      paths[i]=result;
-      //std::cout << "applying: " << re->first << "=>" << re->second << "\nregex result:" << result << '\n';
-
-    }
-  }
+	int                                i;
+	std::vector<std::string>::iterator it;
+	for (i = 0, it = paths.begin(); it != paths.end(); ++it, i++) {
+		for (std::map<boost::regex, std::string>::iterator re = regexes.begin(); re != regexes.end();
+		     ++re) {
+			std::string result = boost::regex_replace(*it, re->first, re->second);
+			//std::cout << "path: " << paths[i] << '\n';
+			paths[i] = result;
+			//std::cout << "applying: " << re->first << "=>" << re->second << "\nregex result:" << result << '\n';
+		}
+	}
 }
 
 /** Debug method to print all path to the command line.
@@ -149,9 +145,9 @@ EclipsePath::apply_regexes()
 void
 EclipsePath::print_all_paths()
 {
-  for ( std::vector<std::string>::iterator it = paths.begin(); it != paths.end(); ++it){
-    //std::cout << *it << '\n';
-  }
+	for (std::vector<std::string>::iterator it = paths.begin(); it != paths.end(); ++it) {
+		//std::cout << *it << '\n';
+	}
 }
 
 /** Add a regex. To apply the regex to all paths use
@@ -160,9 +156,9 @@ EclipsePath::print_all_paths()
  * @param str the string by which each instanstance of the regex will be replaced
  */
 void
-EclipsePath::add_regex(boost::regex re, const std::string& str)
+EclipsePath::add_regex(boost::regex re, const std::string &str)
 {
-  regexes.insert(std::make_pair(re, str));
+	regexes.insert(std::make_pair(re, str));
 }
 
 /** Wrapper method for external ECLiPSe-clp.
@@ -172,15 +168,14 @@ EclipsePath::add_regex(boost::regex re, const std::string& str)
 int
 p_locate_file(...)
 {
-  char* filename;
-  if ( EC_succeed != EC_arg(1).is_string ( &filename ) )
-  {
-    printf( "p_locate_file(): no filename given\n" );
-  }
-  std::string p = EclipsePath::instance()->locate_file(filename);
-  if (EC_succeed != EC_arg(2).unify( EC_word(p.c_str()) ) ){
-    printf( "p_locate_file(): could not bind return valie\n" );
-    return EC_fail;
-  }
-  return p.empty() ? EC_fail : EC_succeed;
+	char *filename;
+	if (EC_succeed != EC_arg(1).is_string(&filename)) {
+		printf("p_locate_file(): no filename given\n");
+	}
+	std::string p = EclipsePath::instance()->locate_file(filename);
+	if (EC_succeed != EC_arg(2).unify(EC_word(p.c_str()))) {
+		printf("p_locate_file(): could not bind return valie\n");
+		return EC_fail;
+	}
+	return p.empty() ? EC_fail : EC_succeed;
 }

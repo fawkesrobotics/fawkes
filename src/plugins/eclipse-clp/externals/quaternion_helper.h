@@ -20,11 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-
 #ifndef _ECLIPSE_EXTERNALS_QUATERNION_H_
 #define _ECLIPSE_EXTERNALS_QUATERNION_H_
-
-
 
 extern "C" int p_get_yaw();
 
