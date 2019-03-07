@@ -21,6 +21,7 @@
  */
 
 #include "xmlrpc_plugin.h"
+
 #include "xmlrpc_thread.h"
 
 using namespace fawkes;
@@ -34,12 +35,11 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-XmlRpcPlugin::XmlRpcPlugin(Configuration *config)
-  : Plugin(config)
+XmlRpcPlugin::XmlRpcPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new XmlRpcThread());
+	thread_list.push_back(new XmlRpcThread());
 
-  /*
+	/*
   bool custom_server = false;
   try {
     custom_server = config->get_bool("/xmlrpc/custom_server");
@@ -48,7 +48,6 @@ XmlRpcPlugin::XmlRpcPlugin(Configuration *config)
   if (! custom_server) add_dependency("webview");
   */
 }
-
 
 PLUGIN_DESCRIPTION("Provide XML-RPC API for Fawkes")
 EXPORT_PLUGIN(XmlRpcPlugin)

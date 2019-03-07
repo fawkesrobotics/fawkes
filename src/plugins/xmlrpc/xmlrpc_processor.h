@@ -24,32 +24,32 @@
 #define _PLUGINS_XMLRPC_XMLRPC_PROCESSOR_H_
 
 #include <map>
-#include <string>
 #include <memory>
+#include <string>
 
 namespace xmlrpc_c {
-  class registry;
+class registry;
 }
 
 namespace fawkes {
-  class Logger;
-  class WebReply;
-  class WebRequest;
-}
+class Logger;
+class WebReply;
+class WebRequest;
+} // namespace fawkes
 
 class XmlRpcRequestProcessor
 {
- public:
-  XmlRpcRequestProcessor(fawkes::Logger *logger);
-  ~XmlRpcRequestProcessor();
+public:
+	XmlRpcRequestProcessor(fawkes::Logger *logger);
+	~XmlRpcRequestProcessor();
 
-  fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+	fawkes::WebReply *process_request(const fawkes::WebRequest *request);
 
-	std::shared_ptr<xmlrpc_c::registry>  registry();
+	std::shared_ptr<xmlrpc_c::registry> registry();
 
- private:
-  fawkes::Logger                      *logger_;
-	std::shared_ptr<xmlrpc_c::registry>  xmlrpc_registry_;
+private:
+	fawkes::Logger *                    logger_;
+	std::shared_ptr<xmlrpc_c::registry> xmlrpc_registry_;
 };
 
 #endif

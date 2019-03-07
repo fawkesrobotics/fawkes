@@ -21,18 +21,19 @@
  */
 
 #include "xmlrpc_processor.h"
-#include <webview/page_reply.h>
-#include <webview/error_reply.h>
-#include <webview/request.h>
-#include <logging/logger.h>
 
-#include <xmlrpc-c/registry.hpp>
+#include <logging/logger.h>
+#include <webview/error_reply.h>
+#include <webview/page_reply.h>
+#include <webview/request.h>
+
 #include <cstring>
+#include <xmlrpc-c/registry.hpp>
 
 using namespace fawkes;
 
 // accept up to 512KB as request
-#define MAX_REQUEST_LENGTH (1024*512)
+#define MAX_REQUEST_LENGTH (1024 * 512)
 
 /** @class XmlRpcRequestProcessor "xmlrpc_processor.h"
  * XML-RPC web request processor.
@@ -45,10 +46,9 @@ using namespace fawkes;
  */
 XmlRpcRequestProcessor::XmlRpcRequestProcessor(fawkes::Logger *logger)
 {
-  logger_ = logger;
-  xmlrpc_registry_.reset(new xmlrpc_c::registry);
+	logger_ = logger;
+	xmlrpc_registry_.reset(new xmlrpc_c::registry);
 }
-
 
 /** Destructor. */
 XmlRpcRequestProcessor::~XmlRpcRequestProcessor()
@@ -62,9 +62,8 @@ XmlRpcRequestProcessor::~XmlRpcRequestProcessor()
 std::shared_ptr<xmlrpc_c::registry>
 XmlRpcRequestProcessor::registry()
 {
-  return xmlrpc_registry_;
+	return xmlrpc_registry_;
 }
-
 
 /** Process request.
  * @param request incoming request
@@ -73,13 +72,13 @@ XmlRpcRequestProcessor::registry()
 WebReply *
 XmlRpcRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-  if (request->method() != WebRequest::METHOD_POST) {
-    return new WebErrorPageReply(WebErrorPageReply::HTTP_METHOD_NOT_ALLOWED);
-  } else {
-    std::string response;
-    xmlrpc_registry_->processCall(request->body(), &response);
-    //logger_->log_debug("XmlRpcRequestProcessor", "Call: %s  reponse: %s",
-    //		          request->raw_post_data().c_str(), response.c_str());
-    return new StaticWebReply(WebReply::HTTP_OK, response);
-  }
+	if (request->method() != WebRequest::METHOD_POST) {
+		return new WebErrorPageReply(WebErrorPageReply::HTTP_METHOD_NOT_ALLOWED);
+	} else {
+		std::string response;
+		xmlrpc_registry_->processCall(request->body(), &response);
+		//logger_->log_debug("XmlRpcRequestProcessor", "Call: %s  reponse: %s",
+		//		          request->raw_post_data().c_str(), response.c_str());
+		return new StaticWebReply(WebReply::HTTP_OK, response);
+	}
 }
