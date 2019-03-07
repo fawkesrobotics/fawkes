@@ -22,20 +22,21 @@
 #define _PLUGINS_CLIPS_PDDL_PARSER_EFFECT_VISITOR_H_
 
 #include <pddl_parser/pddl_parser.h>
-#include <boost/variant/variant.hpp>
-#include <vector>
-#include <string>
 
-class EffectToCLIPSFactVisitor
-: public boost::static_visitor<std::vector<std::string>>
+#include <boost/variant/variant.hpp>
+#include <string>
+#include <vector>
+
+class EffectToCLIPSFactVisitor : public boost::static_visitor<std::vector<std::string>>
 {
- public:
-  EffectToCLIPSFactVisitor(const std::string &pddl_operator, bool positive);
-  std::vector<std::string> operator()(pddl_parser::Atom &a) const;
-  std::vector<std::string> operator()(pddl_parser::Predicate &p) const;
- private:
-  std::string pddl_operator_;
-  bool positive_effect_;
+public:
+	EffectToCLIPSFactVisitor(const std::string &pddl_operator, bool positive);
+	std::vector<std::string> operator()(pddl_parser::Atom &a) const;
+	std::vector<std::string> operator()(pddl_parser::Predicate &p) const;
+
+private:
+	std::string pddl_operator_;
+	bool        positive_effect_;
 };
 
 #endif /* !PLUGINS_CLIPS_PDDL_PARSER_EFFECT_VISITOR_H__ */

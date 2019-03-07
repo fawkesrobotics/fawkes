@@ -35,9 +35,10 @@ using namespace pddl_parser;
  * @param pddl_operator The name of the operator this effect belongs to.
  * @param positive True iff this is a positive (not a negative) effect.
  */
-EffectToCLIPSFactVisitor::EffectToCLIPSFactVisitor(
-    const string &pddl_operator, bool positive)
-: pddl_operator_(pddl_operator), positive_effect_(positive) {}
+EffectToCLIPSFactVisitor::EffectToCLIPSFactVisitor(const string &pddl_operator, bool positive)
+: pddl_operator_(pddl_operator), positive_effect_(positive)
+{
+}
 
 /** Translate an Atom into a vector of strings.
  * Note that this does not return a CLIPS fact because we do not store atoms
@@ -47,8 +48,9 @@ EffectToCLIPSFactVisitor::EffectToCLIPSFactVisitor(
  * @return A vector that only contains the atom as is.
  */
 vector<string>
-EffectToCLIPSFactVisitor::operator()(Atom &a) const {
-  return vector<string>({a});
+EffectToCLIPSFactVisitor::operator()(Atom &a) const
+{
+	return vector<string>({a});
 }
 
 /** Translate a Predicate into a vector of strings.
@@ -59,58 +61,65 @@ EffectToCLIPSFactVisitor::operator()(Atom &a) const {
  * @return A vector of strings, each string is a properly formed CLIPS fact.
  */
 vector<string>
-EffectToCLIPSFactVisitor::operator()(Predicate &p) const {
-  vector<string> res;
-  if (p.function == "and") {
-    for (Expression &sub : p.arguments) {
-      vector<string> sub_effects = boost::apply_visitor(
-          EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_), sub);
-      res.insert(res.end(), sub_effects.begin(), sub_effects.end());
-    }
-  } else if (p.function == "not") {
-    if (p.arguments.size() != 1) {
-      throw PddlParserException("Expected exactly one sub-formula for 'not'");
-    }
-    vector<string> sub_effects = boost::apply_visitor(
-        EffectToCLIPSFactVisitor(pddl_operator_, !positive_effect_),
-        p.arguments[0]);
-    res.insert(res.end(), sub_effects.begin(), sub_effects.end());
-  } else {
-    // We expect p.function to be a predicate name.
-    string params = "";
-    string constants = "";
-    for (auto &p : p.arguments) {
-      vector<string> p_strings =
-        boost::apply_visitor(
-            EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_),
-            p);
-      if (p_strings.size() != 1) {
-        throw PddlParserException(
-            "Unexpected parameter length for a predicate parameter, "
-            "expected exactly one");
-      }
-      string p_string = p_strings[0];
-      if (p_string[0] == '?') {
-        // It's really a parameter.
-        if (p_string.length() <= 1) {
-          throw PddlParserException("Invalid parameter name " + p_string);
-        }
-        params += " " + p_string.substr(1);
-        constants += " nil";
-      } else {
-        // It's a constant.
-        params += " c";
-        constants += " " + p_string;
-      }
-    }
-    res.push_back(string(
-          "(domain-effect"
-          " (part-of " + pddl_operator_ + ")"
-          " (predicate " + p.function + ")"
-          " (param-names " + params + ")"
-          " (param-constants " + constants + ")"
-          " (type " + (positive_effect_ ? "POSITIVE" : "NEGATIVE") + ")"
-          ")"));
-  }
-  return res;
+EffectToCLIPSFactVisitor::operator()(Predicate &p) const
+{
+	vector<string> res;
+	if (p.function == "and") {
+		for (Expression &sub : p.arguments) {
+			vector<string> sub_effects =
+			  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_), sub);
+			res.insert(res.end(), sub_effects.begin(), sub_effects.end());
+		}
+	} else if (p.function == "not") {
+		if (p.arguments.size() != 1) {
+			throw PddlParserException("Expected exactly one sub-formula for 'not'");
+		}
+		vector<string> sub_effects =
+		  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, !positive_effect_),
+		                       p.arguments[0]);
+		res.insert(res.end(), sub_effects.begin(), sub_effects.end());
+	} else {
+		// We expect p.function to be a predicate name.
+		string params    = "";
+		string constants = "";
+		for (auto &p : p.arguments) {
+			vector<string> p_strings =
+			  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_), p);
+			if (p_strings.size() != 1) {
+				throw PddlParserException("Unexpected parameter length for a predicate parameter, "
+				                          "expected exactly one");
+			}
+			string p_string = p_strings[0];
+			if (p_string[0] == '?') {
+				// It's really a parameter.
+				if (p_string.length() <= 1) {
+					throw PddlParserException("Invalid parameter name " + p_string);
+				}
+				params += " " + p_string.substr(1);
+				constants += " nil";
+			} else {
+				// It's a constant.
+				params += " c";
+				constants += " " + p_string;
+			}
+		}
+		res.push_back(string("(domain-effect"
+		                     " (part-of "
+		                     + pddl_operator_
+		                     + ")"
+		                       " (predicate "
+		                     + p.function
+		                     + ")"
+		                       " (param-names "
+		                     + params
+		                     + ")"
+		                       " (param-constants "
+		                     + constants
+		                     + ")"
+		                       " (type "
+		                     + (positive_effect_ ? "POSITIVE" : "NEGATIVE")
+		                     + ")"
+		                       ")"));
+	}
+	return res;
 }

@@ -19,6 +19,7 @@
  */
 
 #include "clips_pddl_parser_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -31,14 +32,14 @@ using namespace fawkes;
 
 class ClipsPddlParserPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit ClipsPddlParserPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new ClipsPddlParserThread());
-  }
+	explicit ClipsPddlParserPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new ClipsPddlParserThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("CLIPS feature to parse PDDL domains")
