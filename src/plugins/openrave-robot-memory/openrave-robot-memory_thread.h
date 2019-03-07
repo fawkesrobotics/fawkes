@@ -22,48 +22,51 @@
 #ifndef _PLUGINS_OPENRAVE_ROBOT_MEMORY_THREAD_H_
 #define _PLUGINS_OPENRAVE_ROBOT_MEMORY_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <interfaces/OpenRaveInterface.h>
 #include <interfaces/OpenraveRobotMemoryInterface.h>
 #include <plugins/robot-memory/aspect/robot_memory_aspect.h>
-#include <list>
+
 #include <algorithm>
+#include <list>
 
 namespace fawkes {
-  // add forward declarations here, e.g., interfaces
+// add forward declarations here, e.g., interfaces
 }
 
-class OpenraveRobotMemoryThread 
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::RobotMemoryAspect,
-  public fawkes::BlackBoardAspect
+class OpenraveRobotMemoryThread : public fawkes::Thread,
+                                  public fawkes::BlockedTimingAspect,
+                                  public fawkes::LoggingAspect,
+                                  public fawkes::ConfigurableAspect,
+                                  public fawkes::RobotMemoryAspect,
+                                  public fawkes::BlackBoardAspect
 {
+public:
+	OpenraveRobotMemoryThread();
 
- public:
-  OpenraveRobotMemoryThread();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
-  protected: virtual void run() { Thread::run(); }
+private:
+	fawkes::OpenRaveInterface *           openrave_if_;
+	fawkes::OpenraveRobotMemoryInterface *or_rm_if_;
+	std::list<std::string>                added_objects_;
+	std::list<std::string>                added_object_types_;
 
- private:
-  fawkes::OpenRaveInterface* openrave_if_;
-  fawkes::OpenraveRobotMemoryInterface* or_rm_if_;
-  std::list<std::string> added_objects_;
-  std::list<std::string> added_object_types_;
-
-  void construct_scene();
+	void construct_scene();
 };
-
 
 #endif

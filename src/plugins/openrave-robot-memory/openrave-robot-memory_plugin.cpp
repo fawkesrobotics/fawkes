@@ -19,9 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "openrave-robot-memory_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,15 +31,14 @@ using namespace fawkes;
  */
 class OpenraveRobotMemoryPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fakwes configuration
    */
-  explicit OpenraveRobotMemoryPlugin(Configuration *config)
-     : Plugin(config)
-  {
-     thread_list.push_back(new OpenraveRobotMemoryThread());
-  }
+	explicit OpenraveRobotMemoryPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new OpenraveRobotMemoryThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Creates an OpenRave Scene for motion planning from data in the robot memory")
