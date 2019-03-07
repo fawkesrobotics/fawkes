@@ -27,17 +27,17 @@ class RefBoxStateHandler;
 
 class RefBoxProcessor
 {
- public:
-  virtual ~RefBoxProcessor();
+public:
+	virtual ~RefBoxProcessor();
 
-  virtual bool check_connection() = 0;
-  virtual void refbox_process() = 0;
+	virtual bool check_connection() = 0;
+	virtual void refbox_process()   = 0;
 
-  virtual void set_handler(RefBoxStateHandler *rsh);
+	virtual void set_handler(RefBoxStateHandler *rsh);
 
- protected:
-  /** Refbox state handler, set via set_handler() */
-  RefBoxStateHandler  *_rsh;
+protected:
+	/** Refbox state handler, set via set_handler() */
+	RefBoxStateHandler *_rsh;
 };
 
 #endif

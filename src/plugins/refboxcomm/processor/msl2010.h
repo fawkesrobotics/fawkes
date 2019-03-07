@@ -30,48 +30,47 @@
 #include <cstddef>
 
 namespace fawkes {
-  class MulticastDatagramSocket;
-  class Logger;
-}
+class MulticastDatagramSocket;
+class Logger;
+} // namespace fawkes
 
 namespace xmlpp {
-  class DomParser;
-  class Node;
-}
+class DomParser;
+class Node;
+} // namespace xmlpp
 
 class Msl2010RefBoxProcessor : public RefBoxProcessor
 {
- public:
-  Msl2010RefBoxProcessor(fawkes::Logger *logger,
-			 const char *refbox_host, unsigned short int refbox_port);
-  ~Msl2010RefBoxProcessor();
+public:
+	Msl2010RefBoxProcessor(fawkes::Logger *   logger,
+	                       const char *       refbox_host,
+	                       unsigned short int refbox_port);
+	~Msl2010RefBoxProcessor();
 
-  bool check_connection();
-  void refbox_process();
+	bool check_connection();
+	void refbox_process();
 
- private:
-  void process_string(char *buf, size_t len);
-  void reconnect();
+private:
+	void process_string(char *buf, size_t len);
+	void reconnect();
 
- private:
-  fawkes::Logger *logger_;
-  fawkes::MulticastDatagramSocket *s_;
+private:
+	fawkes::Logger *                 logger_;
+	fawkes::MulticastDatagramSocket *s_;
 
-  unsigned int score_cyan_;
-  unsigned int score_magenta_;
+	unsigned int score_cyan_;
+	unsigned int score_magenta_;
 
-  const char *name_;
+	const char *name_;
 
-  bool quit_;
-  bool connection_died_;
+	bool quit_;
+	bool connection_died_;
 
-  char *refbox_host_;
-  unsigned short int refbox_port_;
+	char *             refbox_host_;
+	unsigned short int refbox_port_;
 
-
-  xmlpp::DomParser *dom;
-  xmlpp::Node      *root;
-
+	xmlpp::DomParser *dom;
+	xmlpp::Node *     root;
 };
 
 #endif

@@ -52,5 +52,5 @@ RefBoxProcessor::~RefBoxProcessor()
 void
 RefBoxProcessor::set_handler(RefBoxStateHandler *rsh)
 {
-  _rsh = rsh;
+	_rsh = rsh;
 }
