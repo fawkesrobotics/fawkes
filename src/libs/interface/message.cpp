@@ -21,16 +21,15 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interface/message.h>
-#include <interface/interface.h>
-
-#include <core/threading/thread.h>
-#include <core/threading/mutex.h>
 #include <core/exceptions/software.h>
+#include <core/threading/mutex.h>
+#include <core/threading/thread.h>
+#include <interface/interface.h>
+#include <interface/message.h>
 #include <utils/time/time.h>
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 #include <unistd.h>
 
 namespace fawkes {
@@ -57,135 +56,132 @@ namespace fawkes {
  * to the appropriate value.
  */
 
-
 /** Constructor.
  * @param type string representation of the message type
  */
 Message::Message(const char *type)
 {
-  fieldinfo_list_ = NULL;
+	fieldinfo_list_ = NULL;
 
-  message_id_ = 0;
-  hops_       = 0;
-  enqueued_   = false;
-  num_fields_ = 0;
-  data_ptr     = NULL;
-  data_ts      = NULL;
-  _sender_id   = 0;
-  _type        = strdup(type);
-  time_enqueued_ = new Time();
+	message_id_    = 0;
+	hops_          = 0;
+	enqueued_      = false;
+	num_fields_    = 0;
+	data_ptr       = NULL;
+	data_ts        = NULL;
+	_sender_id     = 0;
+	_type          = strdup(type);
+	time_enqueued_ = new Time();
 
-  _transmit_via_iface              = NULL;
-  sender_interface_instance_serial = 0;
-  recipient_interface_mem_serial   = 0;
+	_transmit_via_iface              = NULL;
+	sender_interface_instance_serial = 0;
+	recipient_interface_mem_serial   = 0;
 
-  std::string sender_name = Thread::current_thread_name();
-  if (sender_name != "") {
-	  _sender_thread_name = strdup(sender_name.c_str());
-  } else {
-	  _sender_thread_name = strdup("Unknown");
-  }
+	std::string sender_name = Thread::current_thread_name();
+	if (sender_name != "") {
+		_sender_thread_name = strdup(sender_name.c_str());
+	} else {
+		_sender_thread_name = strdup("Unknown");
+	}
 }
-
 
 /** Copy constructor.
  * @param mesg Message to copy.
  */
 Message::Message(const Message &mesg)
 {
-  message_id_ = 0;
-  hops_       = mesg.hops_;
-  enqueued_   = false;
-  num_fields_ = mesg.num_fields_;
-  data_size    = mesg.data_size;
-  data_ptr     = malloc(data_size);
-  data_ts      = (message_data_ts_t *)data_ptr;
-  _sender_id   = 0;
-  _type        = strdup(mesg._type);
-  time_enqueued_ = new Time(mesg.time_enqueued_);
+	message_id_    = 0;
+	hops_          = mesg.hops_;
+	enqueued_      = false;
+	num_fields_    = mesg.num_fields_;
+	data_size      = mesg.data_size;
+	data_ptr       = malloc(data_size);
+	data_ts        = (message_data_ts_t *)data_ptr;
+	_sender_id     = 0;
+	_type          = strdup(mesg._type);
+	time_enqueued_ = new Time(mesg.time_enqueued_);
 
-  _transmit_via_iface              = NULL;
-  sender_interface_instance_serial = 0;
-  recipient_interface_mem_serial   = 0;
+	_transmit_via_iface              = NULL;
+	sender_interface_instance_serial = 0;
+	recipient_interface_mem_serial   = 0;
 
-  memcpy(data_ptr, mesg.data_ptr, data_size);
+	memcpy(data_ptr, mesg.data_ptr, data_size);
 
-  interface_fieldinfo_t  *info_src  = mesg.fieldinfo_list_;
-  interface_fieldinfo_t **info_dest = &fieldinfo_list_;
-  while ( info_src ) {
-    interface_fieldinfo_t *new_info = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
-    memcpy(new_info, info_src, sizeof(interface_fieldinfo_t));
-    *info_dest = new_info;
+	interface_fieldinfo_t * info_src  = mesg.fieldinfo_list_;
+	interface_fieldinfo_t **info_dest = &fieldinfo_list_;
+	while (info_src) {
+		interface_fieldinfo_t *new_info =
+		  (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
+		memcpy(new_info, info_src, sizeof(interface_fieldinfo_t));
+		*info_dest = new_info;
 
-    info_dest = &((*info_dest)->next);
-    info_src  = info_src->next;
-  }
+		info_dest = &((*info_dest)->next);
+		info_src  = info_src->next;
+	}
 
-  Thread *t = Thread::current_thread_noexc();
-  if ( t ) {
-    _sender_thread_name = strdup(t->name());
-  } else {
-    _sender_thread_name    = strdup("Unknown");
-  }
+	Thread *t = Thread::current_thread_noexc();
+	if (t) {
+		_sender_thread_name = strdup(t->name());
+	} else {
+		_sender_thread_name = strdup("Unknown");
+	}
 }
-
 
 /** Copy constructor.
  * @param mesg Message to copy.
  */
 Message::Message(const Message *mesg)
 {
-  message_id_ = 0;
-  hops_       = mesg->hops_;
-  enqueued_   = false;
-  num_fields_ = mesg->num_fields_;
-  data_size    = mesg->data_size;
-  data_ptr     = malloc(data_size);
-  data_ts      = (message_data_ts_t *)data_ptr;
-  _sender_id   = 0;
-  _type        = strdup(mesg->_type);
-  _transmit_via_iface              = NULL;
-  sender_interface_instance_serial = 0;
-  recipient_interface_mem_serial   = 0;
-  time_enqueued_ = new Time(mesg->time_enqueued_);
+	message_id_                      = 0;
+	hops_                            = mesg->hops_;
+	enqueued_                        = false;
+	num_fields_                      = mesg->num_fields_;
+	data_size                        = mesg->data_size;
+	data_ptr                         = malloc(data_size);
+	data_ts                          = (message_data_ts_t *)data_ptr;
+	_sender_id                       = 0;
+	_type                            = strdup(mesg->_type);
+	_transmit_via_iface              = NULL;
+	sender_interface_instance_serial = 0;
+	recipient_interface_mem_serial   = 0;
+	time_enqueued_                   = new Time(mesg->time_enqueued_);
 
-  memcpy(data_ptr, mesg->data_ptr, data_size);
+	memcpy(data_ptr, mesg->data_ptr, data_size);
 
-  interface_fieldinfo_t  *info_src  = mesg->fieldinfo_list_;
-  interface_fieldinfo_t **info_dest = &fieldinfo_list_;
-  while ( info_src ) {
-    interface_fieldinfo_t *new_info = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
-    memcpy(new_info, info_src, sizeof(interface_fieldinfo_t));
-    *info_dest = new_info;
+	interface_fieldinfo_t * info_src  = mesg->fieldinfo_list_;
+	interface_fieldinfo_t **info_dest = &fieldinfo_list_;
+	while (info_src) {
+		interface_fieldinfo_t *new_info =
+		  (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
+		memcpy(new_info, info_src, sizeof(interface_fieldinfo_t));
+		*info_dest = new_info;
 
-    info_dest = &((*info_dest)->next);
-    info_src  = info_src->next;
-  }
+		info_dest = &((*info_dest)->next);
+		info_src  = info_src->next;
+	}
 
-  Thread *t = Thread::current_thread_noexc();
-  if ( t ) {
-    _sender_thread_name    = strdup(t->name());
-  } else {
-    _sender_thread_name    = strdup("Unknown");
-  }
+	Thread *t = Thread::current_thread_noexc();
+	if (t) {
+		_sender_thread_name = strdup(t->name());
+	} else {
+		_sender_thread_name = strdup("Unknown");
+	}
 }
-
 
 /** Destructor. */
 Message::~Message()
 {
-  free(_sender_thread_name);
-  free(_type);
-  delete time_enqueued_;
+	free(_sender_thread_name);
+	free(_type);
+	delete time_enqueued_;
 
-  interface_fieldinfo_t *infol = fieldinfo_list_;
-  while ( infol ) {
-    fieldinfo_list_ = fieldinfo_list_->next;
-    free(infol);
-    infol = fieldinfo_list_;
-  }
+	interface_fieldinfo_t *infol = fieldinfo_list_;
+	while (infol) {
+		fieldinfo_list_ = fieldinfo_list_->next;
+		free(infol);
+		infol = fieldinfo_list_;
+	}
 }
-
 
 /** Get message ID.
  * @return message ID.
@@ -193,9 +189,8 @@ Message::~Message()
 unsigned int
 Message::id() const
 {
-  return message_id_;
+	return message_id_;
 }
-
 
 /** Get number of hops.
  * @return number of hops
@@ -203,9 +198,8 @@ Message::id() const
 unsigned int
 Message::hops() const
 {
-  return hops_;
+	return hops_;
 }
-
 
 /** Set message ID.
  * @param message_id message ID
@@ -213,9 +207,8 @@ Message::hops() const
 void
 Message::set_id(unsigned int message_id)
 {
-  message_id_ = message_id;
+	message_id_ = message_id;
 }
-
 
 /** Set number of hops.
  * @param hops number of hops
@@ -223,23 +216,21 @@ Message::set_id(unsigned int message_id)
 void
 Message::set_hops(unsigned int hops)
 {
-  hops_=hops;
+	hops_ = hops;
 }
-
 
 /** Mark message as being enqueued. */
 void
 Message::mark_enqueued()
 {
-  time_enqueued_->stamp();
-  long sec = 0, usec = 0;
-  time_enqueued_->get_timestamp(sec, usec);
-  data_ts->timestamp_sec  = sec;
-  data_ts->timestamp_usec = usec;
+	time_enqueued_->stamp();
+	long sec = 0, usec = 0;
+	time_enqueued_->get_timestamp(sec, usec);
+	data_ts->timestamp_sec  = sec;
+	data_ts->timestamp_usec = usec;
 
-  enqueued_ = true;
+	enqueued_ = true;
 }
-
 
 /** Check is message has been enqueued.
  * @return true if the message has already been enqueued, false otherwise
@@ -247,9 +238,8 @@ Message::mark_enqueued()
 bool
 Message::enqueued() const
 {
-  return enqueued_;
+	return enqueued_;
 }
-
 
 /** Get time when message was enqueued.
  * Note that this assumes synchronized clocks between sender and receiver.
@@ -261,9 +251,8 @@ Message::enqueued() const
 const Time *
 Message::time_enqueued() const
 {
-  return time_enqueued_;
+	return time_enqueued_;
 }
-
 
 /** Get recipient memory serial.
  * @return Interface memory serial of the recipient interface.
@@ -271,7 +260,7 @@ Message::time_enqueued() const
 unsigned int
 Message::recipient() const
 {
-  return recipient_interface_mem_serial;
+	return recipient_interface_mem_serial;
 }
 
 /** Get pointer to data.
@@ -281,9 +270,8 @@ Message::recipient() const
 const void *
 Message::datachunk() const
 {
-  return data_ptr;
+	return data_ptr;
 }
-
 
 /** Get size of data.
  * @return size in bytes of data
@@ -291,9 +279,8 @@ Message::datachunk() const
 unsigned int
 Message::datasize() const
 {
-  return data_size;
+	return data_size;
 }
-
 
 /** Set from raw data chunk.
  * This sets the internal storage to the given chunk. The chunk must be exactly
@@ -303,10 +290,9 @@ Message::datasize() const
 void
 Message::set_from_chunk(const void *chunk)
 {
-  memcpy(data_ptr, chunk, data_size);
-  time_enqueued_->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
+	memcpy(data_ptr, chunk, data_size);
+	time_enqueued_->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
 }
-
 
 /** Assign this message to given message.
  * Data is copied over from message if data sizes are the same.
@@ -314,16 +300,15 @@ Message::set_from_chunk(const void *chunk)
  * @return reference to current instance
  */
 Message &
-Message::operator=  (const Message & m)
+Message::operator=(const Message &m)
 {
-  if ( data_size == m.data_size ) {
-    memcpy(data_ptr, m.data_ptr, data_size);
-    time_enqueued_->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
-  }
+	if (data_size == m.data_size) {
+		memcpy(data_ptr, m.data_ptr, data_size);
+		time_enqueued_->set_time(data_ts->timestamp_sec, data_ts->timestamp_usec);
+	}
 
-  return *this;
+	return *this;
 }
-
 
 /** Get sender of message.
  * @return name of sending thread
@@ -331,9 +316,8 @@ Message::operator=  (const Message & m)
 const char *
 Message::sender_thread_name() const
 {
-  return _sender_thread_name;
+	return _sender_thread_name;
 }
-
 
 /** Get ID of sender.
  * @return name of sending thread.
@@ -341,9 +325,8 @@ Message::sender_thread_name() const
 unsigned int
 Message::sender_id() const
 {
-  return _sender_id;
+	return _sender_id;
 }
-
 
 /** Set transmitting interface.
  * Called by Message Manager
@@ -352,11 +335,10 @@ Message::sender_id() const
 void
 Message::set_interface(Interface *iface)
 {
-  _transmit_via_iface = iface;
-  _sender_id = iface->serial();
-  recipient_interface_mem_serial = iface->mem_serial();
+	_transmit_via_iface            = iface;
+	_sender_id                     = iface->serial();
+	recipient_interface_mem_serial = iface->mem_serial();
 }
-
 
 /** Get transmitting interface.
  * @return transmitting interface, or NULL if message has not been enqueued, yet.
@@ -364,9 +346,8 @@ Message::set_interface(Interface *iface)
 Interface *
 Message::interface() const
 {
-  return _transmit_via_iface;
+	return _transmit_via_iface;
 }
-
 
 /** Get message type.
  * @return textual representation of the interface type
@@ -374,9 +355,8 @@ Message::interface() const
 const char *
 Message::type() const
 {
-  return _type;
+	return _type;
 }
-
 
 /** Get iterator over all fields of this interface instance.
  * @return field iterator pointing to the very first value
@@ -384,9 +364,8 @@ Message::type() const
 InterfaceFieldIterator
 Message::fields()
 {
-  return InterfaceFieldIterator(_transmit_via_iface, fieldinfo_list_);
+	return InterfaceFieldIterator(_transmit_via_iface, fieldinfo_list_);
 }
-
 
 /** Invalid iterator.
  * @return invalid iterator reprensenting the end.
@@ -394,9 +373,8 @@ Message::fields()
 InterfaceFieldIterator
 Message::fields_end()
 {
-  return InterfaceFieldIterator();
+	return InterfaceFieldIterator();
 }
-
 
 /** Get the number of fields in the message.
  * @return the number of fields
@@ -404,9 +382,8 @@ Message::fields_end()
 unsigned int
 Message::num_fields() const
 {
-  return num_fields_;
+	return num_fields_;
 }
-
 
 /** Clone this message.
  * Shall be implemented by every sub-class to return a message of proper type.
@@ -415,7 +392,7 @@ Message::num_fields() const
 Message *
 Message::clone() const
 {
-  return new Message(this);
+	return new Message(this);
 }
 
 /** Add an entry to the info list.
@@ -430,34 +407,36 @@ Message::clone() const
  * @param enum_map enum value map
  */
 void
-Message::add_fieldinfo(interface_fieldtype_t type, const char *name,
-		       size_t length, void *value, const char *enumtype,
-		       const interface_enum_map_t *enum_map)
+Message::add_fieldinfo(interface_fieldtype_t       type,
+                       const char *                name,
+                       size_t                      length,
+                       void *                      value,
+                       const char *                enumtype,
+                       const interface_enum_map_t *enum_map)
 {
-  interface_fieldinfo_t *infol = fieldinfo_list_;
-  interface_fieldinfo_t *newinfo = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
+	interface_fieldinfo_t *infol   = fieldinfo_list_;
+	interface_fieldinfo_t *newinfo = (interface_fieldinfo_t *)malloc(sizeof(interface_fieldinfo_t));
 
-  newinfo->type     = type;
-  newinfo->enumtype = enumtype;
-  newinfo->name     = name;
-  newinfo->length   = length;
-  newinfo->value    = value;
-  newinfo->enum_map = enum_map;
-  newinfo->next     = NULL;
+	newinfo->type     = type;
+	newinfo->enumtype = enumtype;
+	newinfo->name     = name;
+	newinfo->length   = length;
+	newinfo->value    = value;
+	newinfo->enum_map = enum_map;
+	newinfo->next     = NULL;
 
-  if ( infol == NULL ) {
-    // first entry
-    fieldinfo_list_ = newinfo;
-  } else {
-    // append to list
-    while ( infol->next != NULL ) {
-      infol = infol->next;
-    }
-    infol->next = newinfo;
-  }
+	if (infol == NULL) {
+		// first entry
+		fieldinfo_list_ = newinfo;
+	} else {
+		// append to list
+		while (infol->next != NULL) {
+			infol = infol->next;
+		}
+		infol->next = newinfo;
+	}
 
-  ++num_fields_;
+	++num_fields_;
 }
-
 
 } // end namespace fawkes

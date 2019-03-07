@@ -21,11 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <interface/message_queue.h>
-#include <interface/message.h>
-
-#include <core/threading/mutex.h>
 #include <core/exceptions/software.h>
+#include <core/threading/mutex.h>
+#include <interface/message.h>
+#include <interface/message_queue.h>
 
 #include <cstddef>
 #include <cstdlib>
@@ -39,14 +38,11 @@ namespace fawkes {
  * need to enqueue a message multiple times use the copy constructor to do this.
  */
 
-
 /** Constructor. */
 MessageAlreadyQueuedException::MessageAlreadyQueuedException()
-  : Exception("Message already enqueued in another MessageQueue.")
+: Exception("Message already enqueued in another MessageQueue.")
 {
 }
-
-
 
 /** @class MessageQueue <interface/message_queue.h>
  * Message queue used in interfaces.
@@ -56,23 +52,20 @@ MessageAlreadyQueuedException::MessageAlreadyQueuedException()
  * @see Interface
  */
 
-
 /** Constructor. */
 MessageQueue::MessageQueue()
 {
-  list_ = NULL;
-  end_el_ = NULL;
-  mutex_ = new Mutex();
+	list_   = NULL;
+	end_el_ = NULL;
+	mutex_  = new Mutex();
 }
-
 
 /** Destructor */
 MessageQueue::~MessageQueue()
 {
-  flush();
-  delete mutex_;
+	flush();
+	delete mutex_;
 }
-
 
 /** Delete all messages from queue.
  * This method deletes all messages from the queue.
@@ -80,20 +73,19 @@ MessageQueue::~MessageQueue()
 void
 MessageQueue::flush()
 {
-  mutex_->lock();
-  // free list elements
-  msg_list_t *l = list_;
-  msg_list_t *next;
-  while ( l ) {
-    next = l->next;
-    l->msg->unref();
-    free(l);
-    l = next;
-  }
-  list_ = NULL;
-  mutex_->unlock();
+	mutex_->lock();
+	// free list elements
+	msg_list_t *l = list_;
+	msg_list_t *next;
+	while (l) {
+		next = l->next;
+		l->msg->unref();
+		free(l);
+		l = next;
+	}
+	list_ = NULL;
+	mutex_->unlock();
 }
-
 
 /** Append message to queue.
  * @param msg Message to append
@@ -103,29 +95,28 @@ MessageQueue::flush()
 void
 MessageQueue::append(Message *msg)
 {
-  if ( msg->enqueued() != 0 ) {
-    throw MessageAlreadyQueuedException();
-  }
-  mutex_->lock();
-  msg->mark_enqueued();
-  if ( list_ == NULL ) {
-    list_ = (msg_list_t *)malloc(sizeof(msg_list_t));
-    list_->next = NULL;
-    list_->msg = msg;
-    list_->msg_id = msg->id();
-    end_el_ = list_;
-  } else {
-    msg_list_t *l = (msg_list_t *)malloc(sizeof(msg_list_t));
-    l->next = NULL;
-    l->msg = msg;
-    l->msg_id = msg->id();
-    end_el_->next = l;
-    end_el_ = l;
-  }
+	if (msg->enqueued() != 0) {
+		throw MessageAlreadyQueuedException();
+	}
+	mutex_->lock();
+	msg->mark_enqueued();
+	if (list_ == NULL) {
+		list_         = (msg_list_t *)malloc(sizeof(msg_list_t));
+		list_->next   = NULL;
+		list_->msg    = msg;
+		list_->msg_id = msg->id();
+		end_el_       = list_;
+	} else {
+		msg_list_t *l = (msg_list_t *)malloc(sizeof(msg_list_t));
+		l->next       = NULL;
+		l->msg        = msg;
+		l->msg_id     = msg->id();
+		end_el_->next = l;
+		end_el_       = l;
+	}
 
-  mutex_->unlock();
+	mutex_->unlock();
 }
-
 
 /** Enqueue message after given iterator.
  * @param it Iterator
@@ -139,27 +130,26 @@ MessageQueue::append(Message *msg)
 void
 MessageQueue::insert_after(const MessageIterator &it, Message *msg)
 {
-  if ( mutex_->try_lock() ) {
-    mutex_->unlock();
-    throw NotLockedException("Message queue must be locked to insert messages after iterator.");
-  }
-  if ( it.cur == NULL ) {
-    throw NullPointerException("Cannot append message at end element.");
-  }
-  if ( msg->enqueued() != 0 ) {
-    throw MessageAlreadyQueuedException();
-  }
-  msg->mark_enqueued();
-  msg_list_t *l = (msg_list_t *)malloc(sizeof(msg_list_t));
-  l->next = it.cur->next;
-  l->msg = msg;
-  l->msg_id = msg->id();
-  it.cur->next = l;
-  if ( l->next == NULL ) {
-    end_el_ = l;
-  }
+	if (mutex_->try_lock()) {
+		mutex_->unlock();
+		throw NotLockedException("Message queue must be locked to insert messages after iterator.");
+	}
+	if (it.cur == NULL) {
+		throw NullPointerException("Cannot append message at end element.");
+	}
+	if (msg->enqueued() != 0) {
+		throw MessageAlreadyQueuedException();
+	}
+	msg->mark_enqueued();
+	msg_list_t *l = (msg_list_t *)malloc(sizeof(msg_list_t));
+	l->next       = it.cur->next;
+	l->msg        = msg;
+	l->msg_id     = msg->id();
+	it.cur->next  = l;
+	if (l->next == NULL) {
+		end_el_ = l;
+	}
 }
-
 
 /** Remove message from queue.
  * @param msg message to remove
@@ -167,21 +157,20 @@ MessageQueue::insert_after(const MessageIterator &it, Message *msg)
 void
 MessageQueue::remove(const Message *msg)
 {
-  mutex_->lock();
-  msg_list_t *l = list_;
-  msg_list_t *p = NULL;
-  while ( l ) {
-    if ( l->msg == msg ) {
-      remove(l, p);
-      break;
-    } else {
-      p = l;
-      l = l->next;
-    }
-  }
-  mutex_->unlock();
+	mutex_->lock();
+	msg_list_t *l = list_;
+	msg_list_t *p = NULL;
+	while (l) {
+		if (l->msg == msg) {
+			remove(l, p);
+			break;
+		} else {
+			p = l;
+			l = l->next;
+		}
+	}
+	mutex_->unlock();
 }
-
 
 /** Remove message from queue by message id.
  * @param msg_id id of message to remove
@@ -189,21 +178,20 @@ MessageQueue::remove(const Message *msg)
 void
 MessageQueue::remove(const unsigned int msg_id)
 {
-  mutex_->lock();
-  msg_list_t *l = list_;
-  msg_list_t *p = NULL;
-  while ( l ) {
-    if ( l->msg_id == msg_id ) {
-      remove(l, p);
-      break;
-    } else {
-      p = l;
-      l = l->next;
-    }
-  }
-  mutex_->unlock();
+	mutex_->lock();
+	msg_list_t *l = list_;
+	msg_list_t *p = NULL;
+	while (l) {
+		if (l->msg_id == msg_id) {
+			remove(l, p);
+			break;
+		} else {
+			p = l;
+			l = l->next;
+		}
+	}
+	mutex_->unlock();
 }
-
 
 /** Remove message from list.
  * @param l list item to remove
@@ -212,20 +200,19 @@ MessageQueue::remove(const unsigned int msg_id)
 void
 MessageQueue::remove(msg_list_t *l, msg_list_t *p)
 {
-  if ( mutex_->try_lock() ) {
-    mutex_->unlock();
-    throw NotLockedException("Protected remove must be made safe by locking.");
-  }
-  if ( p ) {
-    p->next = l->next;
-  } else {
-    // was first element
-    list_ = l->next;
-  }
-  l->msg->unref();
-  free(l);
+	if (mutex_->try_lock()) {
+		mutex_->unlock();
+		throw NotLockedException("Protected remove must be made safe by locking.");
+	}
+	if (p) {
+		p->next = l->next;
+	} else {
+		// was first element
+		list_ = l->next;
+	}
+	l->msg->unref();
+	free(l);
 }
-
 
 /** Get number of messages in queue.
  * @return number of messages in queue.
@@ -233,18 +220,17 @@ MessageQueue::remove(msg_list_t *l, msg_list_t *p)
 unsigned int
 MessageQueue::size() const
 {
-  mutex_->lock();
-  unsigned int rv = 0;
-  msg_list_t *l = list_;
-  while ( l ) {
-    ++rv;
-    l = l->next;
-  }
+	mutex_->lock();
+	unsigned int rv = 0;
+	msg_list_t * l  = list_;
+	while (l) {
+		++rv;
+		l = l->next;
+	}
 
-  mutex_->unlock();
-  return rv;
+	mutex_->unlock();
+	return rv;
 }
-
 
 /** Check if message queue is empty.
  * @return true if message queue is empty, false otherwise
@@ -252,12 +238,11 @@ MessageQueue::size() const
 bool
 MessageQueue::empty() const
 {
-  mutex_->lock();
-  bool rv = ( list_ == NULL );
-  mutex_->unlock();
-  return rv;
+	mutex_->lock();
+	bool rv = (list_ == NULL);
+	mutex_->unlock();
+	return rv;
 }
-
 
 /** Lock message queue.
  * No operations can be performed on the message queue after locking it.
@@ -268,9 +253,8 @@ MessageQueue::empty() const
 void
 MessageQueue::lock()
 {
-  mutex_->lock();
+	mutex_->lock();
 }
-
 
 /** Try to lock message queue.
  * No operations can be performed on the message queue after locking it.
@@ -282,18 +266,16 @@ MessageQueue::lock()
 bool
 MessageQueue::try_lock()
 {
-  return mutex_->try_lock();
+	return mutex_->try_lock();
 }
-
 
 /** Unlock message queue.
  */
 void
 MessageQueue::unlock()
 {
-  mutex_->unlock();
+	mutex_->unlock();
 }
-
 
 /** Get first message from queue.
  * @return first message from queue
@@ -301,26 +283,24 @@ MessageQueue::unlock()
 Message *
 MessageQueue::first()
 {
-  if ( list_ ) {
-    return list_->msg;
-  } else {
-    return NULL;
-  }
+	if (list_) {
+		return list_->msg;
+	} else {
+		return NULL;
+	}
 }
-
 
 /** Erase first message from queue.
  */
 void
 MessageQueue::pop()
 {
-  mutex_->lock();
-  if ( list_ ) {
-    remove(list_, NULL);
-  }
-  mutex_->unlock();
+	mutex_->lock();
+	if (list_) {
+		remove(list_, NULL);
+	}
+	mutex_->unlock();
 }
-
 
 /** Get iterator to first element in message queue.
  * @return iterator to first element in message queue
@@ -329,13 +309,12 @@ MessageQueue::pop()
 MessageQueue::MessageIterator
 MessageQueue::begin()
 {
-  if ( mutex_->try_lock() ) {
-    mutex_->unlock();
-    throw NotLockedException("Message queue must be locked to get begin iterator.");
-  }
-  return MessageIterator(list_);
+	if (mutex_->try_lock()) {
+		mutex_->unlock();
+		throw NotLockedException("Message queue must be locked to get begin iterator.");
+	}
+	return MessageIterator(list_);
 }
-
 
 /** Get iterator to element beyond end of message queue list.
  * @return iterator to element beyond end of message queue list
@@ -344,13 +323,12 @@ MessageQueue::begin()
 MessageQueue::MessageIterator
 MessageQueue::end()
 {
-  if ( mutex_->try_lock() ) {
-    mutex_->unlock();
-    throw NotLockedException("Message queue must be locked to get end iterator.");
-  }
-  return MessageIterator();
+	if (mutex_->try_lock()) {
+		mutex_->unlock();
+		throw NotLockedException("Message queue must be locked to get end iterator.");
+	}
+	return MessageIterator();
 }
-
 
 /** @class MessageQueue::MessageIterator message_queue.h <interface/message_queue.h>
  * Message iterator.
@@ -364,25 +342,22 @@ MessageQueue::end()
  */
 MessageQueue::MessageIterator::MessageIterator(msg_list_t *cur)
 {
-  this->cur = cur;
+	this->cur = cur;
 }
-
 
 /** Constructor */
 MessageQueue::MessageIterator::MessageIterator()
 {
-  cur = NULL;
+	cur = NULL;
 }
-
 
 /** Copy constructor.
  * @param it Iterator to copy
  */
 MessageQueue::MessageIterator::MessageIterator(const MessageIterator &it)
 {
-  cur = it.cur;
+	cur = it.cur;
 }
-
 
 /** Increment iterator.
  * Advances to the next element. This is the infix-operator. It may be used
@@ -397,12 +372,11 @@ MessageQueue::MessageIterator::MessageIterator(const MessageIterator &it)
 MessageQueue::MessageIterator &
 MessageQueue::MessageIterator::operator++()
 {
-  if ( cur != NULL )
-    cur = cur->next;
+	if (cur != NULL)
+		cur = cur->next;
 
-  return *this;
+	return *this;
 }
-
 
 /** Increment iterator.
  * Advances to the next element in allocated chunk list. This is the postfix-operator.
@@ -422,13 +396,12 @@ MessageQueue::MessageIterator::operator++()
 MessageQueue::MessageIterator
 MessageQueue::MessageIterator::operator++(int inc)
 {
-  MessageIterator rv(cur);
-  if ( cur != NULL )
-    cur = cur->next;
-  
-  return rv;
-}
+	MessageIterator rv(cur);
+	if (cur != NULL)
+		cur = cur->next;
 
+	return rv;
+}
 
 /** Advance by a certain amount.
  * Can be used to add an integer to the iterator to advance many steps in one go.
@@ -441,12 +414,11 @@ MessageQueue::MessageIterator::operator++(int inc)
 MessageQueue::MessageIterator &
 MessageQueue::MessageIterator::operator+(unsigned int i)
 {
-  for (unsigned int j = 0; (cur != NULL) && (j < i); ++j) {
-    cur = cur->next;
-  }
-  return *this;
+	for (unsigned int j = 0; (cur != NULL) && (j < i); ++j) {
+		cur = cur->next;
+	}
+	return *this;
 }
-
 
 /** Advance by a certain amount.
  * Works like operator+(unsigned int i), provided for convenience.
@@ -457,12 +429,11 @@ MessageQueue::MessageIterator::operator+(unsigned int i)
 MessageQueue::MessageIterator &
 MessageQueue::MessageIterator::operator+=(unsigned int i)
 {
-  for (unsigned int j = 0; (cur != NULL) && (j < i); ++j) {
-    cur = cur->next;
-  }
-  return *this;
+	for (unsigned int j = 0; (cur != NULL) && (j < i); ++j) {
+		cur = cur->next;
+	}
+	return *this;
 }
-
 
 /** Check equality of two iterators.
  * Can be used to determine if two iterators point to the same chunk.
@@ -470,11 +441,10 @@ MessageQueue::MessageIterator::operator+=(unsigned int i)
  * @return true, if iterators point to the same chunk, false otherwise
  */
 bool
-MessageQueue::MessageIterator::operator==(const MessageIterator & c) const
+MessageQueue::MessageIterator::operator==(const MessageIterator &c) const
 {
-  return (cur == c.cur);
+	return (cur == c.cur);
 }
-
 
 /** Check inequality of two iterators.
  * Can be used to determine if two iterators point to different chunks.
@@ -482,34 +452,29 @@ MessageQueue::MessageIterator::operator==(const MessageIterator & c) const
  * @return true, if iterators point to different chunks of memory, false otherwise
  */
 bool
-MessageQueue::MessageIterator::operator!=(const MessageIterator & c) const
+MessageQueue::MessageIterator::operator!=(const MessageIterator &c) const
 {
-  return (cur != c.cur);
+	return (cur != c.cur);
 }
-
 
 /** Get memory pointer of chunk.
  * Use this operator to get the pointer to the chunk of memory that this iterator
  * points to.
  * @return pointer to memory
  */
-Message *
-MessageQueue::MessageIterator::operator*() const
+Message *MessageQueue::MessageIterator::operator*() const
 {
-  return ( cur != NULL ) ? cur->msg : NULL;
+	return (cur != NULL) ? cur->msg : NULL;
 }
-
 
 /** Act on current message.
  * Node that you have to make sure that this is not called on the end node!
  * @return current message
  */
-Message *
-MessageQueue::MessageIterator::operator->() const
+Message *MessageQueue::MessageIterator::operator->() const
 {
-  return cur->msg;
+	return cur->msg;
 }
-
 
 /** Assign iterator.
  * Makes the current instance to point to the same memory element as c.
@@ -517,12 +482,11 @@ MessageQueue::MessageIterator::operator->() const
  * @return reference to current instance
  */
 MessageQueue::MessageIterator &
-MessageQueue::MessageIterator::operator=(const MessageIterator & c)
+MessageQueue::MessageIterator::operator=(const MessageIterator &c)
 {
-  this->cur = c.cur;
-  return *this;
+	this->cur = c.cur;
+	return *this;
 }
-
 
 /** Get ID of current element or 0 if element is end.
  * @return ID of current element or 0 if element is end.
@@ -530,8 +494,9 @@ MessageQueue::MessageIterator::operator=(const MessageIterator & c)
 unsigned int
 MessageQueue::MessageIterator::id() const
 {
-  if ( cur == NULL ) return 0;
-  return cur->msg_id;
+	if (cur == NULL)
+		return 0;
+	return cur->msg_id;
 }
 
 } // end namespace fawkes

@@ -32,88 +32,88 @@ namespace fawkes {
 class Message;
 class Mutex;
 
-
-class MessageAlreadyQueuedException : public Exception {
- public:
-  MessageAlreadyQueuedException();
+class MessageAlreadyQueuedException : public Exception
+{
+public:
+	MessageAlreadyQueuedException();
 };
-
 
 class MessageQueue
 {
- private:
-  // define our own list type since std::list is way too fat
-  /** Message list, internal only
+private:
+	// define our own list type since std::list is way too fat
+	/** Message list, internal only
    */
-  struct msg_list_t {
-    msg_list_t    *next;	/**< pointer to next element in list */
-    unsigned int   msg_id;	/**< message id */
-    Message       *msg;		/**< pointer to message */
-  };
+	struct msg_list_t
+	{
+		msg_list_t * next;   /**< pointer to next element in list */
+		unsigned int msg_id; /**< message id */
+		Message *    msg;    /**< pointer to message */
+	};
 
- public:
-  MessageQueue();
-  virtual ~MessageQueue();
+public:
+	MessageQueue();
+	virtual ~MessageQueue();
 
-  class MessageIterator
-  {
-    friend MessageQueue;
-   private:
-    MessageIterator(msg_list_t *cur);
-   public:
-    MessageIterator();
-    MessageIterator(const MessageIterator &it);
-    MessageIterator & operator++ ();        // prefix
-    MessageIterator   operator++ (int inc); // postfix
-    MessageIterator & operator+  (unsigned int i);
-    MessageIterator & operator+= (unsigned int i);
-    bool              operator== (const MessageIterator & c) const;
-    bool              operator!= (const MessageIterator & c) const;
-    Message *         operator*  () const;
-    Message *         operator-> () const;
-    MessageIterator & operator=  (const MessageIterator & c);
+	class MessageIterator
+	{
+		friend MessageQueue;
 
-    unsigned int      id() const;
+	private:
+		MessageIterator(msg_list_t *cur);
 
-    template <class MessageType>
-      bool            is() const;
+	public:
+		MessageIterator();
+		MessageIterator(const MessageIterator &it);
+		MessageIterator &operator++();        // prefix
+		MessageIterator  operator++(int inc); // postfix
+		MessageIterator &operator+(unsigned int i);
+		MessageIterator &operator+=(unsigned int i);
+		bool             operator==(const MessageIterator &c) const;
+		bool             operator!=(const MessageIterator &c) const;
+		Message *        operator*() const;
+		Message *        operator->() const;
+		MessageIterator &operator=(const MessageIterator &c);
 
-    template <class MessageType>
-      MessageType *   get() const;
+		unsigned int id() const;
 
-   private:
-    msg_list_t *cur;
-  };
+		template <class MessageType>
+		bool is() const;
 
+		template <class MessageType>
+		MessageType *get() const;
 
-  void         append(Message *msg);
-  void         remove(const Message *msg);
-  void         remove(const unsigned int msg_id);
-  void         insert_after(const MessageIterator &it, Message *msg);
+	private:
+		msg_list_t *cur;
+	};
 
-  unsigned int size() const;
+	void append(Message *msg);
+	void remove(const Message *msg);
+	void remove(const unsigned int msg_id);
+	void insert_after(const MessageIterator &it, Message *msg);
 
-  void         flush();
-  bool         empty() const;
+	unsigned int size() const;
 
-  void         lock();
-  bool         try_lock();
-  void         unlock();
+	void flush();
+	bool empty() const;
 
-  Message *    first();
-  void         pop();
+	void lock();
+	bool try_lock();
+	void unlock();
 
-  MessageIterator begin();
-  MessageIterator end();
+	Message *first();
+	void     pop();
 
- private:
-  void remove(msg_list_t *l, msg_list_t *p);
+	MessageIterator begin();
+	MessageIterator end();
 
-  msg_list_t  *list_;
-  msg_list_t  *end_el_;
-  Mutex       *mutex_;
+private:
+	void remove(msg_list_t *l, msg_list_t *p);
+
+	msg_list_t *list_;
+	msg_list_t *end_el_;
+	Mutex *     mutex_;
 };
-
 
 /** Check if message is of given type.
  * The current message is checked if it is of the type that the
@@ -124,10 +124,9 @@ template <class MessageType>
 bool
 MessageQueue::MessageIterator::is() const
 {
-  MessageType *msg = dynamic_cast<MessageType *>(cur->msg);
-  return ( msg != 0 );
+	MessageType *msg = dynamic_cast<MessageType *>(cur->msg);
+	return (msg != 0);
 }
-
 
 /** Get current message of given type.
  * This will return the current message of the given template type. An TypeMismatchException
@@ -139,11 +138,11 @@ template <class MessageType>
 MessageType *
 MessageQueue::MessageIterator::get() const
 {
-  MessageType *msg = dynamic_cast<MessageType *>(cur->msg);
-  if ( msg == 0 ) {
-    throw TypeMismatchException("Message types do not match (get)");
-  }
-  return msg;
+	MessageType *msg = dynamic_cast<MessageType *>(cur->msg);
+	if (msg == 0) {
+		throw TypeMismatchException("Message types do not match (get)");
+	}
+	return msg;
 }
 
 } // end namespace fawkes

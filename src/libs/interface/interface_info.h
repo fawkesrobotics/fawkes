@@ -33,48 +33,57 @@ class Time;
 
 class InterfaceInfo
 {
- public:
-  InterfaceInfo(const char *type, const char *id, const unsigned char *hash,
-		unsigned int serial, bool has_writer, unsigned int num_readers,
-		const std::list<std::string> &readers, const std::string &writer,
-		const Time *timestamp);
-  InterfaceInfo(const InterfaceInfo &i);
-  ~InterfaceInfo();
+public:
+	InterfaceInfo(const char *                  type,
+	              const char *                  id,
+	              const unsigned char *         hash,
+	              unsigned int                  serial,
+	              bool                          has_writer,
+	              unsigned int                  num_readers,
+	              const std::list<std::string> &readers,
+	              const std::string &           writer,
+	              const Time *                  timestamp);
+	InterfaceInfo(const InterfaceInfo &i);
+	~InterfaceInfo();
 
-  const char *                    type() const;
-  const char *                    id() const;
-  const unsigned char *           hash() const;
-  std::string                     hash_printable() const;
-  bool                            has_writer() const;
-  unsigned int                    num_readers() const;
-  const std::list<std::string> &  readers() const;
-  const std::string &             writer() const;
-  unsigned int                    serial() const;
-  const Time *                    timestamp() const;
+	const char *                  type() const;
+	const char *                  id() const;
+	const unsigned char *         hash() const;
+	std::string                   hash_printable() const;
+	bool                          has_writer() const;
+	unsigned int                  num_readers() const;
+	const std::list<std::string> &readers() const;
+	const std::string &           writer() const;
+	unsigned int                  serial() const;
+	const Time *                  timestamp() const;
 
-	InterfaceInfo& operator=(const InterfaceInfo &i);
-  bool operator<(const InterfaceInfo &ii) const;
+	InterfaceInfo &operator=(const InterfaceInfo &i);
+	bool           operator<(const InterfaceInfo &ii) const;
 
- private:
-  char          *type_;
-  char          *id_;
-  unsigned char *hash_;
-  bool           has_writer_;
-  unsigned int   num_readers_;
-  unsigned int   serial_;
-  Time          *timestamp_;
-  std::list<std::string> readers_;
-  std::string    writer_;
+private:
+	char *                 type_;
+	char *                 id_;
+	unsigned char *        hash_;
+	bool                   has_writer_;
+	unsigned int           num_readers_;
+	unsigned int           serial_;
+	Time *                 timestamp_;
+	std::list<std::string> readers_;
+	std::string            writer_;
 };
-
 
 class InterfaceInfoList : public std::list<InterfaceInfo>
 {
- public:
-  void append(const char *type, const char *id, const unsigned char *hash,
-	      unsigned int serial, bool has_writer, unsigned int num_readers,
-	      const std::list<std::string> &readers, const std::string &writer,
-	      const Time &timestamp);
+public:
+	void append(const char *                  type,
+	            const char *                  id,
+	            const unsigned char *         hash,
+	            unsigned int                  serial,
+	            bool                          has_writer,
+	            unsigned int                  num_readers,
+	            const std::list<std::string> &readers,
+	            const std::string &           writer,
+	            const Time &                  timestamp);
 };
 
 } // end namespace fawkes

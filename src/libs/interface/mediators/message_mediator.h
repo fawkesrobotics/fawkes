@@ -36,18 +36,19 @@ class Message;
  */
 class MessageMediator
 {
- public:
-  /** Virtual destructor */
-  virtual ~MessageMediator() {}
+public:
+	/** Virtual destructor */
+	virtual ~MessageMediator()
+	{
+	}
 
-  /** Transmit message.
+	/** Transmit message.
    * The mediator may modify the message ID of the message.
    * @param message message to transmit.
    * @exception BlackBoardNoWritingInstanceException thrown if there is no writing
    *instance for the transmitting interface
    */
-  virtual void transmit(Message *message)                        = 0;
-
+	virtual void transmit(Message *message) = 0;
 };
 
 } // end namespace fawkes
