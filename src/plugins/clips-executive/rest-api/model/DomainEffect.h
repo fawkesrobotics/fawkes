@@ -16,19 +16,17 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/fwd.h>
 
-#include <string>
 #include <cstdint>
-#include <vector>
 #include <memory>
 #include <optional>
-
-
+#include <string>
+#include <vector>
 
 /** DomainEffect representation for JSON transfer. */
 class DomainEffect
 
 {
- public:
+public:
 	/** Constructor. */
 	DomainEffect();
 	/** Constructor from JSON.
@@ -38,7 +36,7 @@ class DomainEffect
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	DomainEffect(const rapidjson::Value& v);
+	DomainEffect(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~DomainEffect();
@@ -46,9 +44,10 @@ class DomainEffect
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -60,19 +59,19 @@ class DomainEffect
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -85,12 +84,12 @@ class DomainEffect
 	virtual void validate(bool subcall = false) const;
 
 	// Schema: DomainEffect
- public:
-  /** Get kind value.
+public:
+	/** Get kind value.
    * @return kind value
    */
 	std::optional<std::string>
- kind() const
+	kind() const
 	{
 		return kind_;
 	}
@@ -98,15 +97,16 @@ class DomainEffect
 	/** Set kind value.
 	 * @param kind new value
 	 */
-	void set_kind(const std::string& kind)
+	void
+	set_kind(const std::string &kind)
 	{
 		kind_ = kind;
 	}
-  /** Get apiVersion value.
+	/** Get apiVersion value.
    * @return apiVersion value
    */
 	std::optional<std::string>
- apiVersion() const
+	apiVersion() const
 	{
 		return apiVersion_;
 	}
@@ -114,15 +114,16 @@ class DomainEffect
 	/** Set apiVersion value.
 	 * @param apiVersion new value
 	 */
-	void set_apiVersion(const std::string& apiVersion)
+	void
+	set_apiVersion(const std::string &apiVersion)
 	{
 		apiVersion_ = apiVersion;
 	}
-  /** Get name value.
+	/** Get name value.
    * @return name value
    */
 	std::optional<std::string>
- name() const
+	name() const
 	{
 		return name_;
 	}
@@ -130,15 +131,16 @@ class DomainEffect
 	/** Set name value.
 	 * @param name new value
 	 */
-	void set_name(const std::string& name)
+	void
+	set_name(const std::string &name)
 	{
 		name_ = name;
 	}
-  /** Get type value.
+	/** Get type value.
    * @return type value
    */
 	std::optional<std::string>
- type() const
+	type() const
 	{
 		return type_;
 	}
@@ -146,15 +148,16 @@ class DomainEffect
 	/** Set type value.
 	 * @param type new value
 	 */
-	void set_type(const std::string& type)
+	void
+	set_type(const std::string &type)
 	{
 		type_ = type;
 	}
-  /** Get predicate value.
+	/** Get predicate value.
    * @return predicate value
    */
 	std::optional<std::string>
- predicate() const
+	predicate() const
 	{
 		return predicate_;
 	}
@@ -162,15 +165,16 @@ class DomainEffect
 	/** Set predicate value.
 	 * @param predicate new value
 	 */
-	void set_predicate(const std::string& predicate)
+	void
+	set_predicate(const std::string &predicate)
 	{
 		predicate_ = predicate;
 	}
-  /** Get param-names value.
+	/** Get param-names value.
    * @return param-names value
    */
 	std::vector<std::string>
- param_names() const
+	param_names() const
 	{
 		return param_names_;
 	}
@@ -178,14 +182,16 @@ class DomainEffect
 	/** Set param-names value.
 	 * @param param_names new value
 	 */
-	void set_param_names(const std::vector<std::string>& param_names)
+	void
+	set_param_names(const std::vector<std::string> &param_names)
 	{
 		param_names_ = param_names;
 	}
 	/** Add element to param-names array.
 	 * @param param_names new value
 	 */
-	void addto_param_names(const std::string&& param_names)
+	void
+	addto_param_names(const std::string &&param_names)
 	{
 		param_names_.push_back(std::move(param_names));
 	}
@@ -194,15 +200,16 @@ class DomainEffect
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param param_names new value
 	 */
-	void addto_param_names(const std::string& param_names)
+	void
+	addto_param_names(const std::string &param_names)
 	{
 		param_names_.push_back(param_names);
 	}
-  /** Get param-values value.
+	/** Get param-values value.
    * @return param-values value
    */
 	std::vector<std::string>
- param_values() const
+	param_values() const
 	{
 		return param_values_;
 	}
@@ -210,14 +217,16 @@ class DomainEffect
 	/** Set param-values value.
 	 * @param param_values new value
 	 */
-	void set_param_values(const std::vector<std::string>& param_values)
+	void
+	set_param_values(const std::vector<std::string> &param_values)
 	{
 		param_values_ = param_values;
 	}
 	/** Add element to param-values array.
 	 * @param param_values new value
 	 */
-	void addto_param_values(const std::string&& param_values)
+	void
+	addto_param_values(const std::string &&param_values)
 	{
 		param_values_.push_back(std::move(param_values));
 	}
@@ -226,15 +235,16 @@ class DomainEffect
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param param_values new value
 	 */
-	void addto_param_values(const std::string& param_values)
+	void
+	addto_param_values(const std::string &param_values)
 	{
 		param_values_.push_back(param_values);
 	}
-  /** Get param-constants value.
+	/** Get param-constants value.
    * @return param-constants value
    */
 	std::vector<std::string>
- param_constants() const
+	param_constants() const
 	{
 		return param_constants_;
 	}
@@ -242,14 +252,16 @@ class DomainEffect
 	/** Set param-constants value.
 	 * @param param_constants new value
 	 */
-	void set_param_constants(const std::vector<std::string>& param_constants)
+	void
+	set_param_constants(const std::vector<std::string> &param_constants)
 	{
 		param_constants_ = param_constants;
 	}
 	/** Add element to param-constants array.
 	 * @param param_constants new value
 	 */
-	void addto_param_constants(const std::string&& param_constants)
+	void
+	addto_param_constants(const std::string &&param_constants)
 	{
 		param_constants_.push_back(std::move(param_constants));
 	}
@@ -258,26 +270,19 @@ class DomainEffect
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param param_constants new value
 	 */
-	void addto_param_constants(const std::string& param_constants)
+	void
+	addto_param_constants(const std::string &param_constants)
 	{
 		param_constants_.push_back(param_constants);
 	}
- private:
-	std::optional<std::string>
- kind_;
-	std::optional<std::string>
- apiVersion_;
-	std::optional<std::string>
- name_;
-	std::optional<std::string>
- type_;
-	std::optional<std::string>
- predicate_;
-	std::vector<std::string>
- param_names_;
-	std::vector<std::string>
- param_values_;
-	std::vector<std::string>
- param_constants_;
 
+private:
+	std::optional<std::string> kind_;
+	std::optional<std::string> apiVersion_;
+	std::optional<std::string> name_;
+	std::optional<std::string> type_;
+	std::optional<std::string> predicate_;
+	std::vector<std::string>   param_names_;
+	std::vector<std::string>   param_values_;
+	std::vector<std::string>   param_constants_;
 };

@@ -14,9 +14,9 @@
 #include "DomainPreconditionCompound.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ DomainPreconditionCompound::DomainPreconditionCompound(const std::string &json)
 	from_json(json);
 }
 
-DomainPreconditionCompound::DomainPreconditionCompound(const rapidjson::Value& v)
+DomainPreconditionCompound::DomainPreconditionCompound(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ DomainPreconditionCompound::to_json(bool pretty) const
 }
 
 void
-DomainPreconditionCompound::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+DomainPreconditionCompound::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -68,13 +68,12 @@ DomainPreconditionCompound::to_json_value(rapidjson::Document& d, rapidjson::Val
 	DomainPrecondition::to_json_value(d, v);
 	rapidjson::Value v_elements(rapidjson::kArrayType);
 	v_elements.Reserve(elements_.size(), allocator);
-	for (const auto & e : elements_) {
+	for (const auto &e : elements_) {
 		rapidjson::Value v(rapidjson::kObjectType);
 		e->to_json_value(d, v);
 		v_elements.PushBack(v, allocator);
 	}
 	v.AddMember("elements", v_elements, allocator);
-
 }
 
 void
@@ -87,34 +86,33 @@ DomainPreconditionCompound::from_json(const std::string &json)
 }
 
 void
-DomainPreconditionCompound::from_json_value(const rapidjson::Value& d)
+DomainPreconditionCompound::from_json_value(const rapidjson::Value &d)
 {
 	DomainPrecondition::from_json_value(d);
 	if (d.HasMember("elements") && d["elements"].IsArray()) {
-		const rapidjson::Value& a = d["elements"];
-		elements_ = std::vector<std::shared_ptr<DomainPrecondition>>{};
-;
+		const rapidjson::Value &a = d["elements"];
+		elements_                 = std::vector<std::shared_ptr<DomainPrecondition>>{};
+		;
 		elements_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			std::shared_ptr<DomainPrecondition> nv{new DomainPrecondition()};
 			nv->from_json_value(v);
 			elements_.push_back(std::move(nv));
 		}
 	}
-
 }
 
 void
 DomainPreconditionCompound::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
+	std::vector<std::string> missing;
 	try {
-  	DomainPrecondition::validate(true);
+		DomainPrecondition::validate(true);
 	} catch (std::vector<std::string> &supertype_missing) {
 		missing.insert(missing.end(), supertype_missing.begin(), supertype_missing.end());
 	}
 	for (size_t i = 0; i < elements_.size(); ++i) {
-		if (! elements_[i]) {
+		if (!elements_[i]) {
 			missing.push_back("elements[" + std::to_string(i) + "]");
 		} else {
 			try {
@@ -127,14 +125,12 @@ DomainPreconditionCompound::validate(bool subcall) const
 		}
 	}
 
-
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "DomainPreconditionCompound is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
+			s << "DomainPreconditionCompound is missing field" << ((missing.size() > 0) ? "s" : "")
 			  << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];

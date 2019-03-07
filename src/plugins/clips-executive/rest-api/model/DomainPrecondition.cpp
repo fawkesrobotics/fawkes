@@ -14,9 +14,9 @@
 #include "DomainPrecondition.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ DomainPrecondition::DomainPrecondition(const std::string &json)
 	from_json(json);
 }
 
-DomainPrecondition::DomainPrecondition(const rapidjson::Value& v)
+DomainPrecondition::DomainPrecondition(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ DomainPrecondition::to_json(bool pretty) const
 }
 
 void
-DomainPrecondition::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+DomainPrecondition::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -95,7 +95,6 @@ DomainPrecondition::to_json_value(rapidjson::Document& d, rapidjson::Value& v) c
 		v_is_satisfied.SetBool(*is_satisfied_);
 		v.AddMember("is-satisfied", v_is_satisfied, allocator);
 	}
-
 }
 
 void
@@ -108,7 +107,7 @@ DomainPrecondition::from_json(const std::string &json)
 }
 
 void
-DomainPrecondition::from_json_value(const rapidjson::Value& d)
+DomainPrecondition::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -128,28 +127,31 @@ DomainPrecondition::from_json_value(const rapidjson::Value& d)
 	if (d.HasMember("is-satisfied") && d["is-satisfied"].IsBool()) {
 		is_satisfied_ = d["is-satisfied"].GetBool();
 	}
-
 }
 
 void
 DomainPrecondition::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! name_)  missing.push_back("name");
-	if (! type_)  missing.push_back("type");
-	if (! grounded_)  missing.push_back("grounded");
-	if (! is_satisfied_)  missing.push_back("is-satisfied");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!name_)
+		missing.push_back("name");
+	if (!type_)
+		missing.push_back("type");
+	if (!grounded_)
+		missing.push_back("grounded");
+	if (!is_satisfied_)
+		missing.push_back("is-satisfied");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "DomainPrecondition is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "DomainPrecondition is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

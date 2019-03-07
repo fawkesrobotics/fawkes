@@ -14,9 +14,9 @@
 #include "Goal.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ Goal::Goal(const std::string &json)
 	from_json(json);
 }
 
-Goal::Goal(const rapidjson::Value& v)
+Goal::Goal(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ Goal::to_json(bool pretty) const
 }
 
 void
-Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+Goal::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -107,7 +107,7 @@ Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	}
 	rapidjson::Value v_error(rapidjson::kArrayType);
 	v_error.Reserve(error_.size(), allocator);
-	for (const auto & e : error_) {
+	for (const auto &e : error_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_error.PushBack(v, allocator);
@@ -130,7 +130,7 @@ Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	}
 	rapidjson::Value v_parameters(rapidjson::kArrayType);
 	v_parameters.Reserve(parameters_.size(), allocator);
-	for (const auto & e : parameters_) {
+	for (const auto &e : parameters_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_parameters.PushBack(v, allocator);
@@ -138,7 +138,7 @@ Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	v.AddMember("parameters", v_parameters, allocator);
 	rapidjson::Value v_meta(rapidjson::kArrayType);
 	v_meta.Reserve(meta_.size(), allocator);
-	for (const auto & e : meta_) {
+	for (const auto &e : meta_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_meta.PushBack(v, allocator);
@@ -146,7 +146,7 @@ Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	v.AddMember("meta", v_meta, allocator);
 	rapidjson::Value v_plans(rapidjson::kArrayType);
 	v_plans.Reserve(plans_.size(), allocator);
-	for (const auto & e : plans_) {
+	for (const auto &e : plans_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_plans.PushBack(v, allocator);
@@ -154,7 +154,7 @@ Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	v.AddMember("plans", v_plans, allocator);
 	rapidjson::Value v_required_resources(rapidjson::kArrayType);
 	v_required_resources.Reserve(required_resources_.size(), allocator);
-	for (const auto & e : required_resources_) {
+	for (const auto &e : required_resources_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_required_resources.PushBack(v, allocator);
@@ -162,13 +162,12 @@ Goal::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	v.AddMember("required-resources", v_required_resources, allocator);
 	rapidjson::Value v_acquired_resources(rapidjson::kArrayType);
 	v_acquired_resources.Reserve(acquired_resources_.size(), allocator);
-	for (const auto & e : acquired_resources_) {
+	for (const auto &e : acquired_resources_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_acquired_resources.PushBack(v, allocator);
 	}
 	v.AddMember("acquired-resources", v_acquired_resources, allocator);
-
 }
 
 void
@@ -181,7 +180,7 @@ Goal::from_json(const std::string &json)
 }
 
 void
-Goal::from_json_value(const rapidjson::Value& d)
+Goal::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -208,11 +207,11 @@ Goal::from_json_value(const rapidjson::Value& d)
 		outcome_ = d["outcome"].GetString();
 	}
 	if (d.HasMember("error") && d["error"].IsArray()) {
-		const rapidjson::Value& a = d["error"];
-		error_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["error"];
+		error_                    = std::vector<std::string>{};
+		;
 		error_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			error_.push_back(v.GetString());
 		}
 	}
@@ -226,72 +225,75 @@ Goal::from_json_value(const rapidjson::Value& d)
 		priority_ = d["priority"].GetInt64();
 	}
 	if (d.HasMember("parameters") && d["parameters"].IsArray()) {
-		const rapidjson::Value& a = d["parameters"];
-		parameters_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["parameters"];
+		parameters_               = std::vector<std::string>{};
+		;
 		parameters_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			parameters_.push_back(v.GetString());
 		}
 	}
 	if (d.HasMember("meta") && d["meta"].IsArray()) {
-		const rapidjson::Value& a = d["meta"];
-		meta_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["meta"];
+		meta_                     = std::vector<std::string>{};
+		;
 		meta_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			meta_.push_back(v.GetString());
 		}
 	}
 	if (d.HasMember("plans") && d["plans"].IsArray()) {
-		const rapidjson::Value& a = d["plans"];
-		plans_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["plans"];
+		plans_                    = std::vector<std::string>{};
+		;
 		plans_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			plans_.push_back(v.GetString());
 		}
 	}
 	if (d.HasMember("required-resources") && d["required-resources"].IsArray()) {
-		const rapidjson::Value& a = d["required-resources"];
-		required_resources_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["required-resources"];
+		required_resources_       = std::vector<std::string>{};
+		;
 		required_resources_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			required_resources_.push_back(v.GetString());
 		}
 	}
 	if (d.HasMember("acquired-resources") && d["acquired-resources"].IsArray()) {
-		const rapidjson::Value& a = d["acquired-resources"];
-		acquired_resources_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["acquired-resources"];
+		acquired_resources_       = std::vector<std::string>{};
+		;
 		acquired_resources_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			acquired_resources_.push_back(v.GetString());
 		}
 	}
-
 }
 
 void
 Goal::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! id_)  missing.push_back("id");
-	if (! type_)  missing.push_back("type");
-	if (! _class_)  missing.push_back("class");
-	if (! mode_)  missing.push_back("mode");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!id_)
+		missing.push_back("id");
+	if (!type_)
+		missing.push_back("type");
+	if (!_class_)
+		missing.push_back("class");
+	if (!mode_)
+		missing.push_back("mode");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "Goal is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "Goal is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

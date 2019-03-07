@@ -14,23 +14,21 @@
 #pragma once
 
 #define RAPIDJSON_HAS_STDSTRING 1
-#include <rapidjson/fwd.h>
-
-#include <string>
-#include <cstdint>
-#include <vector>
-#include <memory>
-#include <optional>
-
 #include "DomainPrecondition.h"
 
+#include <rapidjson/fwd.h>
+
+#include <cstdint>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
 /** DomainPreconditionCompound representation for JSON transfer. */
-class DomainPreconditionCompound
-: public DomainPrecondition
+class DomainPreconditionCompound : public DomainPrecondition
 
 {
- public:
+public:
 	/** Constructor. */
 	DomainPreconditionCompound();
 	/** Constructor from JSON.
@@ -40,7 +38,7 @@ class DomainPreconditionCompound
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	DomainPreconditionCompound(const rapidjson::Value& v);
+	DomainPreconditionCompound(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~DomainPreconditionCompound();
@@ -48,9 +46,10 @@ class DomainPreconditionCompound
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -62,19 +61,19 @@ class DomainPreconditionCompound
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -88,12 +87,12 @@ class DomainPreconditionCompound
 
 	// allOf
 	// Schema: DomainPreconditionCompound[2]
- public:
-  /** Get elements value.
+public:
+	/** Get elements value.
    * @return elements value
    */
 	std::vector<std::shared_ptr<DomainPrecondition>>
- elements() const
+	elements() const
 	{
 		return elements_;
 	}
@@ -101,14 +100,16 @@ class DomainPreconditionCompound
 	/** Set elements value.
 	 * @param elements new value
 	 */
-	void set_elements(const std::vector<std::shared_ptr<DomainPrecondition>>& elements)
+	void
+	set_elements(const std::vector<std::shared_ptr<DomainPrecondition>> &elements)
 	{
 		elements_ = elements;
 	}
 	/** Add element to elements array.
 	 * @param elements new value
 	 */
-	void addto_elements(const std::shared_ptr<DomainPrecondition>&& elements)
+	void
+	addto_elements(const std::shared_ptr<DomainPrecondition> &&elements)
 	{
 		elements_.push_back(std::move(elements));
 	}
@@ -117,19 +118,20 @@ class DomainPreconditionCompound
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param elements new value
 	 */
-	void addto_elements(const std::shared_ptr<DomainPrecondition>& elements)
+	void
+	addto_elements(const std::shared_ptr<DomainPrecondition> &elements)
 	{
 		elements_.push_back(elements);
 	}
 	/** Add element to elements array.
 	 * @param elements new value
 	 */
-	void addto_elements(const DomainPrecondition&& elements)
+	void
+	addto_elements(const DomainPrecondition &&elements)
 	{
 		elements_.push_back(std::make_shared<DomainPrecondition>(std::move(elements)));
 	}
- private:
-	std::vector<std::shared_ptr<DomainPrecondition>>
- elements_;
 
+private:
+	std::vector<std::shared_ptr<DomainPrecondition>> elements_;
 };
