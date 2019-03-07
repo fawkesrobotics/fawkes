@@ -26,29 +26,28 @@
 
 /** This is the main program of the Nao GUI. */
 int
-main(int argc, char **argv) {
-  fawkes::Thread::init_main();
+main(int argc, char **argv)
+{
+	fawkes::Thread::init_main();
 
-  std::locale::global( std::locale( "" ) );
-  Gtk::Main gtk_main(argc, argv);
+	std::locale::global(std::locale(""));
+	Gtk::Main gtk_main(argc, argv);
 
+	try {
+		Glib::RefPtr<Gtk::Builder> builder;
+		builder = Gtk::Builder::create_from_file(RESDIR "/guis/bb2calib/bb2calib.ui");
 
-  try {
-    Glib::RefPtr<Gtk::Builder> builder;
-    builder =
-      Gtk::Builder::create_from_file(RESDIR"/guis/bb2calib/bb2calib.ui");
-    
-    Bumblebee2CalibGtkWindow *window = NULL;
-    builder->get_widget_derived("window", window);
-    
-    Gtk::Main::run(*window);
+		Bumblebee2CalibGtkWindow *window = NULL;
+		builder->get_widget_derived("window", window);
 
-    delete window;
-  } catch (Gtk::BuilderError &e) {
-    printf("Failed to instantiate window: %s\n", e.what().c_str());
-  }
+		Gtk::Main::run(*window);
 
-  fawkes::Thread::destroy_main();
+		delete window;
+	} catch (Gtk::BuilderError &e) {
+		printf("Failed to instantiate window: %s\n", e.what().c_str());
+	}
 
-  return 0;
+	fawkes::Thread::destroy_main();
+
+	return 0;
 }

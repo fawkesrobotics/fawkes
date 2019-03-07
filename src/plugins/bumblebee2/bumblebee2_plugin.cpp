@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "bumblebee2_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,15 +31,14 @@ using namespace fawkes;
  */
 class Bumblebee2Plugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit Bumblebee2Plugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new Bumblebee2Thread());
-  }
+	explicit Bumblebee2Plugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new Bumblebee2Thread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Data acquisition from Bumblebee2 stereo camera")
