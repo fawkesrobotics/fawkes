@@ -27,8 +27,8 @@
 
 class ExamplePlugin : public fawkes::Plugin
 {
- public:
-  explicit ExamplePlugin(fawkes::Configuration *config);
+public:
+	explicit ExamplePlugin(fawkes::Configuration *config);
 };
 
 #endif
