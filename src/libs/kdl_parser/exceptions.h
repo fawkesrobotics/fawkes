@@ -31,14 +31,14 @@ namespace fawkes {
  */
 class KDLParserUnknownJointTypeException : public Exception
 {
-  public:
-    /** Constructor.
+public:
+	/** Constructor.
      * @param joint_type The unknown joint type in the URDF model
      */
-    KDLParserUnknownJointTypeException(const char * joint_type)
-    {
-      append("Found unknown Joint Type %s", joint_type);
-    }
+	KDLParserUnknownJointTypeException(const char *joint_type)
+	{
+		append("Found unknown Joint Type %s", joint_type);
+	}
 };
 
 /**
@@ -46,11 +46,11 @@ class KDLParserUnknownJointTypeException : public Exception
  */
 class KDLParserModelGenerationFailedException : public Exception
 {
-  public:
-    KDLParserModelGenerationFailedException()
-    {
-      append("Could not generate robot model");
-    }
+public:
+	KDLParserModelGenerationFailedException()
+	{
+		append("Could not generate robot model");
+	}
 };
 
 /**
@@ -58,11 +58,11 @@ class KDLParserModelGenerationFailedException : public Exception
  */
 class URDFColladaNotSupportedException : public Exception
 {
-  public:
-    URDFColladaNotSupportedException()
-    {
-      append("Collada Data models are currently not supported.");
-    }
+public:
+	URDFColladaNotSupportedException()
+	{
+		append("Collada Data models are currently not supported.");
+	}
 };
 
 /**
@@ -70,11 +70,11 @@ class URDFColladaNotSupportedException : public Exception
  */
 class URDFXMLDocumentParseErrorException : public Exception
 {
-  public:
-    URDFXMLDocumentParseErrorException()
-    {
-      append("Could not parse the XML document");
-    }
+public:
+	URDFXMLDocumentParseErrorException()
+	{
+		append("Could not parse the XML document");
+	}
 };
 
 /**
@@ -82,18 +82,13 @@ class URDFXMLDocumentParseErrorException : public Exception
  */
 class URDFXMLElementParseErrorException : public Exception
 {
-  public:
-    URDFXMLElementParseErrorException()
-    {
-      append("Could not parse the xml element");
-    }
+public:
+	URDFXMLElementParseErrorException()
+	{
+		append("Could not parse the xml element");
+	}
 };
 
 } // namespace fawkes
-
-
-
-
-
 
 #endif

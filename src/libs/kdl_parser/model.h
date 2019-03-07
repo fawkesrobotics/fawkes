@@ -56,9 +56,10 @@
 #ifndef URDF_MODEL_H
 #define URDF_MODEL_H
 
-#include <string>
-#include <map>
 #include <urdf_model/model.h>
+
+#include <map>
+#include <string>
 #include <tinyxml.h>
 
 #if !defined(HAVE_URDFDOM_TYPES_H)
@@ -67,17 +68,17 @@ typedef boost::shared_ptr<urdf::ModelInterface> ModelInterfaceSharedPtr;
 }
 #endif
 
-namespace urdf{
+namespace urdf {
 
-class Model: public ModelInterface
+class Model : public ModelInterface
 {
 public:
-  bool initXml(TiXmlElement *xml);
-  bool initXml(TiXmlDocument *xml);
-  bool initFile(const std::string& filename);
-  bool initString(const std::string& xmlstring);
+	bool initXml(TiXmlElement *xml);
+	bool initXml(TiXmlDocument *xml);
+	bool initFile(const std::string &filename);
+	bool initString(const std::string &xmlstring);
 };
 
-}
+} // namespace urdf
 
 #endif
