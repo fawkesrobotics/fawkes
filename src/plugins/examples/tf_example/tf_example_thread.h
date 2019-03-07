@@ -22,40 +22,44 @@
 #ifndef _PLUGINS_TF_EXAMPLE_TF_EXAMPLE_THREAD_H_
 #define _PLUGINS_TF_EXAMPLE_TF_EXAMPLE_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <aspect/tf.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  namespace tf {
-    class TransformListener;
-  }
+namespace tf {
+class TransformListener;
 }
+} // namespace fawkes
 
-class TfExampleThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::TransformAspect
+class TfExampleThread : public fawkes::Thread,
+                        public fawkes::BlockedTimingAspect,
+                        public fawkes::LoggingAspect,
+                        public fawkes::ConfigurableAspect,
+                        public fawkes::BlackBoardAspect,
+                        public fawkes::TransformAspect
 {
- public:
-  TfExampleThread();
-  virtual ~TfExampleThread();
+public:
+	TfExampleThread();
+	virtual ~TfExampleThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  float angle_;
+private:
+	float angle_;
 };
 
 #endif

@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "tf_example_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,15 +31,14 @@ using namespace fawkes;
  */
 class TfExamplePlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit TfExamplePlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new TfExampleThread());
-  }
+	explicit TfExamplePlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new TfExampleThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("TF example plugin")
