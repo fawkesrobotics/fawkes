@@ -26,7 +26,6 @@
 
 using namespace fawkes;
 
-
 /** @class VisualDisplay2D "visdisplay.h"
  * 2D visualization processor for VisualDisplay2DInterface.
  * This class processes messages from the VisualDisplay2DInterface and
@@ -37,18 +36,17 @@ using namespace fawkes;
 /** Constructor. */
 VisualDisplay2D::VisualDisplay2D()
 {
-  interface_ = NULL;
+	interface_ = NULL;
 }
 
 /** Destructor. */
 VisualDisplay2D::~VisualDisplay2D()
 {
-  for (sit_ = shapes_.begin(); sit_ != shapes_.end(); ++sit_) {
-    delete sit_->second;
-  }
-  shapes_.clear();
+	for (sit_ = shapes_.begin(); sit_ != shapes_.end(); ++sit_) {
+		delete sit_->second;
+	}
+	shapes_.clear();
 }
-
 
 /** Set interface.
  * @param interface interface to query for messages
@@ -56,9 +54,8 @@ VisualDisplay2D::~VisualDisplay2D()
 void
 VisualDisplay2D::set_interface(fawkes::VisualDisplay2DInterface *interface)
 {
-  interface_ = interface;
+	interface_ = interface;
 }
-
 
 /** Process messages.
  * This processes the messages and builds up the internal object
@@ -67,47 +64,76 @@ VisualDisplay2D::set_interface(fawkes::VisualDisplay2DInterface *interface)
 void
 VisualDisplay2D::process_messages()
 {
-  while (! interface_->msgq_empty()) {
-    if ( interface_->msgq_first_is<VisualDisplay2DInterface::AddCartLineMessage>() ) {
-      VisualDisplay2DInterface::AddCartLineMessage *m = interface_->msgq_first<VisualDisplay2DInterface::AddCartLineMessage>();
-      shapes_[m->id()] = new Line(m->x(0), m->y(0), m->x(1), m->y(1),
-				   m->id(), m->sender_id(),
-				   m->style(), m->color(0),
-				   m->color(1), m->color(2), m->color(3));
+	while (!interface_->msgq_empty()) {
+		if (interface_->msgq_first_is<VisualDisplay2DInterface::AddCartLineMessage>()) {
+			VisualDisplay2DInterface::AddCartLineMessage *m =
+			  interface_->msgq_first<VisualDisplay2DInterface::AddCartLineMessage>();
+			shapes_[m->id()] = new Line(m->x(0),
+			                            m->y(0),
+			                            m->x(1),
+			                            m->y(1),
+			                            m->id(),
+			                            m->sender_id(),
+			                            m->style(),
+			                            m->color(0),
+			                            m->color(1),
+			                            m->color(2),
+			                            m->color(3));
 
-    } else if ( interface_->msgq_first_is<VisualDisplay2DInterface::AddCartRectMessage>() ) {
-      VisualDisplay2DInterface::AddCartRectMessage *m = interface_->msgq_first<VisualDisplay2DInterface::AddCartRectMessage>();
-      shapes_[m->id()] = new Rectangle(m->x(), m->y(), m->width(), m->height(),
-					m->id(), m->sender_id(),
-					m->style(), m->color(0),
-					m->color(1), m->color(2), m->color(3));
+		} else if (interface_->msgq_first_is<VisualDisplay2DInterface::AddCartRectMessage>()) {
+			VisualDisplay2DInterface::AddCartRectMessage *m =
+			  interface_->msgq_first<VisualDisplay2DInterface::AddCartRectMessage>();
+			shapes_[m->id()] = new Rectangle(m->x(),
+			                                 m->y(),
+			                                 m->width(),
+			                                 m->height(),
+			                                 m->id(),
+			                                 m->sender_id(),
+			                                 m->style(),
+			                                 m->color(0),
+			                                 m->color(1),
+			                                 m->color(2),
+			                                 m->color(3));
 
-    } else if ( interface_->msgq_first_is<VisualDisplay2DInterface::AddCartCircleMessage>() ) {
-      VisualDisplay2DInterface::AddCartCircleMessage *m = interface_->msgq_first<VisualDisplay2DInterface::AddCartCircleMessage>();
-      shapes_[m->id()] = new Circle(m->x(), m->y(), m->radius(),
-				     m->id(), m->sender_id(),
-				     m->style(), m->color(0),
-				     m->color(1), m->color(2), m->color(3));
+		} else if (interface_->msgq_first_is<VisualDisplay2DInterface::AddCartCircleMessage>()) {
+			VisualDisplay2DInterface::AddCartCircleMessage *m =
+			  interface_->msgq_first<VisualDisplay2DInterface::AddCartCircleMessage>();
+			shapes_[m->id()] = new Circle(m->x(),
+			                              m->y(),
+			                              m->radius(),
+			                              m->id(),
+			                              m->sender_id(),
+			                              m->style(),
+			                              m->color(0),
+			                              m->color(1),
+			                              m->color(2),
+			                              m->color(3));
 
-    } else if ( interface_->msgq_first_is<VisualDisplay2DInterface::AddCartTextMessage>() ) {
-      VisualDisplay2DInterface::AddCartTextMessage *m = interface_->msgq_first<VisualDisplay2DInterface::AddCartTextMessage>();
-      shapes_[m->id()] = new Text(m->x(), m->y(), m->text(),
-				   m->anchor(), m->size(),
-				   m->id(), m->sender_id(),
-				   m->color(0),
-				   m->color(1), m->color(2), m->color(3));
+		} else if (interface_->msgq_first_is<VisualDisplay2DInterface::AddCartTextMessage>()) {
+			VisualDisplay2DInterface::AddCartTextMessage *m =
+			  interface_->msgq_first<VisualDisplay2DInterface::AddCartTextMessage>();
+			shapes_[m->id()] = new Text(m->x(),
+			                            m->y(),
+			                            m->text(),
+			                            m->anchor(),
+			                            m->size(),
+			                            m->id(),
+			                            m->sender_id(),
+			                            m->color(0),
+			                            m->color(1),
+			                            m->color(2),
+			                            m->color(3));
 
-    } else if (interface_->msgq_first_is<VisualDisplay2DInterface::DeleteAllMessage>() ) {
-      for (sit_ = shapes_.begin(); sit_ != shapes_.end(); ++sit_) {
-	delete sit_->second;
-      }
-      shapes_.clear();
-    }
+		} else if (interface_->msgq_first_is<VisualDisplay2DInterface::DeleteAllMessage>()) {
+			for (sit_ = shapes_.begin(); sit_ != shapes_.end(); ++sit_) {
+				delete sit_->second;
+			}
+			shapes_.clear();
+		}
 
-    interface_->msgq_pop();
-  }
+		interface_->msgq_pop();
+	}
 }
-
 
 /** Draw objects.
  * This draws all objects currently enqueued by process_messages().
@@ -116,17 +142,16 @@ VisualDisplay2D::process_messages()
 void
 VisualDisplay2D::draw(Cairo::RefPtr<Cairo::Context> cr)
 {
-  cr->save();
-  for (sit_ = shapes_.begin(); sit_ != shapes_.end(); ++sit_) {
-    float r, g, b, a;
-    sit_->second->color(r, g, b, a);
-    sit_->second->apply_style(cr);
-    sit_->second->draw(cr);
-  }
-  cr->stroke();
-  cr->restore();
+	cr->save();
+	for (sit_ = shapes_.begin(); sit_ != shapes_.end(); ++sit_) {
+		float r, g, b, a;
+		sit_->second->color(r, g, b, a);
+		sit_->second->apply_style(cr);
+		sit_->second->draw(cr);
+	}
+	cr->stroke();
+	cr->restore();
 }
-
 
 /** @class VisualDisplay2D::Shape "visdisplay.h"
  * Class representing a shape.
@@ -176,26 +201,27 @@ VisualDisplay2D::draw(Cairo::RefPtr<Cairo::Context> cr)
  * @param b blue part of RGBA color
  * @param a alpha part of RGBA color
  */
-VisualDisplay2D::Shape::Shape(unsigned int id, unsigned int owner,
-			      VisualDisplay2DInterface::LineStyle line_style,
-			      unsigned char r, unsigned char g,
-			      unsigned char b, unsigned char a)
+VisualDisplay2D::Shape::Shape(unsigned int                        id,
+                              unsigned int                        owner,
+                              VisualDisplay2DInterface::LineStyle line_style,
+                              unsigned char                       r,
+                              unsigned char                       g,
+                              unsigned char                       b,
+                              unsigned char                       a)
 {
-  _id         = id;
-  _owner      = owner;
-  _line_style = line_style;
-  _color_r    = r / 255.f;
-  _color_g    = g / 255.f;
-  _color_b    = b / 255.f;
-  _color_a    = a / 255.f;
+	_id         = id;
+	_owner      = owner;
+	_line_style = line_style;
+	_color_r    = r / 255.f;
+	_color_g    = g / 255.f;
+	_color_b    = b / 255.f;
+	_color_a    = a / 255.f;
 }
-
 
 /** Virtual empty destructor. */
 VisualDisplay2D::Shape::~Shape()
 {
 }
-
 
 /** @class VisualDisplay2D::Line "visdisplay.h"
  * Class representing a line.
@@ -216,29 +242,32 @@ VisualDisplay2D::Shape::~Shape()
  * @param b blue part of RGBA color
  * @param a alpha part of RGBA color
  */
-VisualDisplay2D::Line::Line(float x1, float y1, float x2, float y2,
-			    unsigned int id, unsigned int owner,
-			    VisualDisplay2DInterface::LineStyle line_style,
-			    unsigned char r, unsigned char g,
-			    unsigned char b, unsigned char a)
-  : Shape(id, owner, line_style, r, g, b, a)
+VisualDisplay2D::Line::Line(float                               x1,
+                            float                               y1,
+                            float                               x2,
+                            float                               y2,
+                            unsigned int                        id,
+                            unsigned int                        owner,
+                            VisualDisplay2DInterface::LineStyle line_style,
+                            unsigned char                       r,
+                            unsigned char                       g,
+                            unsigned char                       b,
+                            unsigned char                       a)
+: Shape(id, owner, line_style, r, g, b, a)
 {
-  x1_ = x1;
-  y1_ = y1;
-  x2_ = x2;
-  y2_ = y2;
+	x1_ = x1;
+	y1_ = y1;
+	x2_ = x2;
+	y2_ = y2;
 }
-
 
 void
 VisualDisplay2D::Line::draw(Cairo::RefPtr<Cairo::Context> &cr)
 {
-  cr->move_to(x1_, y1_);
-  cr->line_to(x2_, y2_);
-  cr->stroke();
+	cr->move_to(x1_, y1_);
+	cr->line_to(x2_, y2_);
+	cr->stroke();
 }
-
-
 
 /** @class VisualDisplay2D::Rectangle "visdisplay.h"
  * Class representing a rectangle.
@@ -260,27 +289,30 @@ VisualDisplay2D::Line::draw(Cairo::RefPtr<Cairo::Context> &cr)
  * @param b blue part of RGBA color
  * @param a alpha part of RGBA color
  */
-VisualDisplay2D::Rectangle::Rectangle(float x, float y, float width, float height,
-				      unsigned int id, unsigned int owner,
-				      VisualDisplay2DInterface::LineStyle line_style,
-				      unsigned char r, unsigned char g,
-				      unsigned char b, unsigned char a)
-  : Shape(id, owner, line_style, r, g, b, a)
+VisualDisplay2D::Rectangle::Rectangle(float                               x,
+                                      float                               y,
+                                      float                               width,
+                                      float                               height,
+                                      unsigned int                        id,
+                                      unsigned int                        owner,
+                                      VisualDisplay2DInterface::LineStyle line_style,
+                                      unsigned char                       r,
+                                      unsigned char                       g,
+                                      unsigned char                       b,
+                                      unsigned char                       a)
+: Shape(id, owner, line_style, r, g, b, a)
 {
-  x_      = x;
-  y_      = y;
-  width_  = width;
-  height_ = height;
+	x_      = x;
+	y_      = y;
+	width_  = width;
+	height_ = height;
 }
-
 
 void
 VisualDisplay2D::Rectangle::draw(Cairo::RefPtr<Cairo::Context> &cr)
 {
-  cr->rectangle(x_, y_, width_, height_);
+	cr->rectangle(x_, y_, width_, height_);
 }
-
-
 
 /** @class VisualDisplay2D::Circle "visdisplay.h"
  * Class representing a circle
@@ -300,25 +332,28 @@ VisualDisplay2D::Rectangle::draw(Cairo::RefPtr<Cairo::Context> &cr)
  * @param b blue part of RGBA color
  * @param a alpha part of RGBA color
  */
-VisualDisplay2D::Circle::Circle(float x, float y, float radius,
-				unsigned int id, unsigned int owner,
-				VisualDisplay2DInterface::LineStyle line_style,
-				unsigned char r, unsigned char g,
-				unsigned char b, unsigned char a)
-  : Shape(id, owner, line_style, r, g, b, a)
+VisualDisplay2D::Circle::Circle(float                               x,
+                                float                               y,
+                                float                               radius,
+                                unsigned int                        id,
+                                unsigned int                        owner,
+                                VisualDisplay2DInterface::LineStyle line_style,
+                                unsigned char                       r,
+                                unsigned char                       g,
+                                unsigned char                       b,
+                                unsigned char                       a)
+: Shape(id, owner, line_style, r, g, b, a)
 {
-  x_      = x;
-  y_      = y;
-  radius_ = radius;
+	x_      = x;
+	y_      = y;
+	radius_ = radius;
 }
-
 
 void
 VisualDisplay2D::Circle::draw(Cairo::RefPtr<Cairo::Context> &cr)
 {
-  cr->arc(x_, y_, radius_, 0, 2*M_PI);
+	cr->arc(x_, y_, radius_, 0, 2 * M_PI);
 }
-
 
 /** @class VisualDisplay2D::Text "visdisplay.h"
  * Class representing a text object.
@@ -340,52 +375,63 @@ VisualDisplay2D::Circle::draw(Cairo::RefPtr<Cairo::Context> &cr)
  * @param b blue part of RGBA color
  * @param a alpha part of RGBA color
  */
-VisualDisplay2D::Text::Text(float x, float y, const std::string& text,
+VisualDisplay2D::Text::Text(float                                    x,
+                            float                                    y,
+                            const std::string &                      text,
                             fawkes::VisualDisplay2DInterface::Anchor anchor,
-                            float size,
-                            unsigned int id, unsigned int owner,
-                            unsigned char r, unsigned char g,
-                            unsigned char b, unsigned char a)
+                            float                                    size,
+                            unsigned int                             id,
+                            unsigned int                             owner,
+                            unsigned char                            r,
+                            unsigned char                            g,
+                            unsigned char                            b,
+                            unsigned char                            a)
 : Shape(id, owner, fawkes::VisualDisplay2DInterface::LS_SOLID, r, g, b, a),
-  x_(x), y_(y), text_(text), size_(size), anchor_(anchor)
+  x_(x),
+  y_(y),
+  text_(text),
+  size_(size),
+  anchor_(anchor)
 {
 }
-
 
 void
 VisualDisplay2D::Text::draw(Cairo::RefPtr<Cairo::Context> &cr)
 {
-  cr->save();
-  cr->scale(-1, 1);
-  cr->rotate(-0.5 * M_PI);
-  cr->set_font_size(1.36 * size_);
+	cr->save();
+	cr->scale(-1, 1);
+	cr->rotate(-0.5 * M_PI);
+	cr->set_font_size(1.36 * size_);
 
-  Cairo::TextExtents te;
-  cr->get_text_extents(text_, te);
+	Cairo::TextExtents te;
+	cr->get_text_extents(text_, te);
 
-  float x = x_, y = y_;
-  switch (anchor_) {
-  case VisualDisplay2DInterface::CENTERED:
-    x = x_ - te.width / 2.;  y = y_ + te.height / 2.; break;
-  case VisualDisplay2DInterface::NORTH:
-    x = x_ - te.width / 2.;  y = y_ + te.height; break;
-  case VisualDisplay2DInterface::EAST:
-    x = x_ - te.width; y = y_ + te.height / 2.; break;
-  case VisualDisplay2DInterface::SOUTH:
-    x = x_ - te.width / 2.; break;
-  case VisualDisplay2DInterface::WEST:
-    y = y_ + te.height / 2.; break;
-  case VisualDisplay2DInterface::NORTH_EAST:
-    x = x_ - te.width;  y = y_ + te.height; break;
-  case VisualDisplay2DInterface::SOUTH_EAST:
-    x = x_ - te.width; break;
-  case VisualDisplay2DInterface::SOUTH_WEST:
-    break;
-  case VisualDisplay2DInterface::NORTH_WEST:
-    y = y_ + te.height; break;
-  }
+	float x = x_, y = y_;
+	switch (anchor_) {
+	case VisualDisplay2DInterface::CENTERED:
+		x = x_ - te.width / 2.;
+		y = y_ + te.height / 2.;
+		break;
+	case VisualDisplay2DInterface::NORTH:
+		x = x_ - te.width / 2.;
+		y = y_ + te.height;
+		break;
+	case VisualDisplay2DInterface::EAST:
+		x = x_ - te.width;
+		y = y_ + te.height / 2.;
+		break;
+	case VisualDisplay2DInterface::SOUTH: x = x_ - te.width / 2.; break;
+	case VisualDisplay2DInterface::WEST: y = y_ + te.height / 2.; break;
+	case VisualDisplay2DInterface::NORTH_EAST:
+		x = x_ - te.width;
+		y = y_ + te.height;
+		break;
+	case VisualDisplay2DInterface::SOUTH_EAST: x = x_ - te.width; break;
+	case VisualDisplay2DInterface::SOUTH_WEST: break;
+	case VisualDisplay2DInterface::NORTH_WEST: y = y_ + te.height; break;
+	}
 
-  cr->move_to(x, y);
-  cr->show_text(text_);
-  cr->restore();
+	cr->move_to(x, y);
+	cr->show_text(text_);
+	cr->restore();
 }
