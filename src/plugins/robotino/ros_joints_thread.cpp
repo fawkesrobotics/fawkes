@@ -22,9 +22,9 @@
 
 #include "ros_joints_thread.h"
 
-#include <utils/time/time.h>
 #include <interfaces/RobotinoSensorInterface.h>
 #include <ros/node_handle.h>
+#include <utils/time/time.h>
 
 using namespace fawkes;
 
@@ -37,59 +37,56 @@ using namespace fawkes;
 
 /** Constructor. */
 RobotinoRosJointsThread::RobotinoRosJointsThread()
-  : Thread("RobotinoRosJointsThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE)
+: Thread("RobotinoRosJointsThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE)
 {
 }
-
 
 void
 RobotinoRosJointsThread::init()
 {
-  sens_if_ = blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
-  sens_if_->read();
+	sens_if_ = blackboard->open_for_reading<RobotinoSensorInterface>("Robotino");
+	sens_if_->read();
 
-  pub_joints_ = rosnode->advertise<sensor_msgs::JointState>("joint_states", 1);
+	pub_joints_ = rosnode->advertise<sensor_msgs::JointState>("joint_states", 1);
 
-  joint_state_msg_.name.resize(3);
-  joint_state_msg_.position.resize(3, 0.0);
-  joint_state_msg_.velocity.resize(3, 0.0);
-  joint_state_msg_.name[0] = "wheel2_joint";
-  joint_state_msg_.name[1] = "wheel0_joint";
-  joint_state_msg_.name[2] = "wheel1_joint";
-
+	joint_state_msg_.name.resize(3);
+	joint_state_msg_.position.resize(3, 0.0);
+	joint_state_msg_.velocity.resize(3, 0.0);
+	joint_state_msg_.name[0] = "wheel2_joint";
+	joint_state_msg_.name[1] = "wheel0_joint";
+	joint_state_msg_.name[2] = "wheel1_joint";
 }
-
 
 void
 RobotinoRosJointsThread::finalize()
 {
-  blackboard->close(sens_if_);
-  pub_joints_.shutdown();
+	blackboard->close(sens_if_);
+	pub_joints_.shutdown();
 }
 
 void
 RobotinoRosJointsThread::loop()
 {
-  // update sensor values in interface
-  sens_if_->read();
+	// update sensor values in interface
+	sens_if_->read();
 
-  if (sens_if_->changed()) {
-    const Time *ct = sens_if_->timestamp();
-    float   *mot_velocity = sens_if_->mot_velocity();
-    int32_t *mot_position = sens_if_->mot_position();
+	if (sens_if_->changed()) {
+		const Time *ct           = sens_if_->timestamp();
+		float *     mot_velocity = sens_if_->mot_velocity();
+		int32_t *   mot_position = sens_if_->mot_position();
 
-    joint_state_msg_.header.seq   += 1;
-    joint_state_msg_.header.stamp  = ros::Time(ct->get_sec(), ct->get_usec() * 1e3);
+		joint_state_msg_.header.seq += 1;
+		joint_state_msg_.header.stamp = ros::Time(ct->get_sec(), ct->get_usec() * 1e3);
 
-    joint_state_msg_.velocity[0] = (mot_velocity[2] / 16) * (2 * M_PI) / 60;
-    joint_state_msg_.velocity[1] = (mot_velocity[0] / 16) * (2 * M_PI) / 60;
-    joint_state_msg_.velocity[2] = (mot_velocity[1] / 16) * (2 * M_PI) / 60;
+		joint_state_msg_.velocity[0] = (mot_velocity[2] / 16) * (2 * M_PI) / 60;
+		joint_state_msg_.velocity[1] = (mot_velocity[0] / 16) * (2 * M_PI) / 60;
+		joint_state_msg_.velocity[2] = (mot_velocity[1] / 16) * (2 * M_PI) / 60;
 
-    joint_state_msg_.position[0] = (mot_position[2] / 16) * (2 * M_PI);
-    joint_state_msg_.position[1] = (mot_position[0] / 16) * (2 * M_PI);
-    joint_state_msg_.position[2] = (mot_position[1] / 16) * (2 * M_PI);
+		joint_state_msg_.position[0] = (mot_position[2] / 16) * (2 * M_PI);
+		joint_state_msg_.position[1] = (mot_position[0] / 16) * (2 * M_PI);
+		joint_state_msg_.position[2] = (mot_position[1] / 16) * (2 * M_PI);
 
-    pub_joints_.publish(joint_state_msg_);
-  }
+		pub_joints_.publish(joint_state_msg_);
+	}
 }
