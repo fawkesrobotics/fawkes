@@ -23,65 +23,58 @@
 
 /// @cond QA
 
+#include <fvutils/readers/fvraw.h>
 #include <fvwidgets/image_display.h>
 #include <fvwidgets/sdl_keeper.h>
-#include <fvutils/readers/fvraw.h>
 
+#include <SDL.h>
 #include <cstdio>
 #include <cstdlib>
 #include <unistd.h>
-
-#include <SDL.h>
 
 using namespace firevision;
 
 int
 main(int argc, char **argv)
 {
-  const char *img_file;
-  if ( argc > 1 ) {
-    img_file = argv[1];
-  } else {
-    printf("Usage: %s <raw image file>\n", argv[0]);
-    exit(-1);
-  }
+	const char *img_file;
+	if (argc > 1) {
+		img_file = argv[1];
+	} else {
+		printf("Usage: %s <raw image file>\n", argv[0]);
+		exit(-1);
+	}
 
+	FvRawReader *  fvraw = new FvRawReader(img_file);
+	unsigned char *buffer =
+	  malloc_buffer(fvraw->colorspace(), fvraw->pixel_width(), fvraw->pixel_height());
 
-  FvRawReader *fvraw = new FvRawReader(img_file);
-  unsigned char *buffer = malloc_buffer(fvraw->colorspace(),
-					fvraw->pixel_width(), fvraw->pixel_height());
+	fvraw->set_buffer(buffer);
+	fvraw->read();
 
-  fvraw->set_buffer(buffer);
-  fvraw->read();
+	ImageDisplay *display = new ImageDisplay(fvraw->pixel_width(), fvraw->pixel_height());
+	display->show(fvraw->colorspace(), buffer);
 
-  ImageDisplay *display = new ImageDisplay(fvraw->pixel_width(), fvraw->pixel_height());
-  display->show(fvraw->colorspace(), buffer);
+	SDLKeeper::init(SDL_INIT_EVENTTHREAD);
 
-  SDLKeeper::init(SDL_INIT_EVENTTHREAD);
+	bool quit = false;
+	while (!quit) {
+		SDL_Event event;
+		if (SDL_WaitEvent(&event)) {
+			switch (event.type) {
+			case SDL_QUIT: quit = true; break;
+			default: break;
+			}
+		}
+	}
 
-  bool quit = false;
-  while (! quit) {
-    SDL_Event event;
-    if ( SDL_WaitEvent(&event) ) {
-      switch (event.type) {
-      case SDL_QUIT:
-	quit = true;
-	break;
-      default:
-	break;
-      }
-    }
-  }
+	delete display;
+	free(buffer);
+	delete (fvraw);
 
-  delete display;
-  free(buffer);
-  delete(fvraw);
+	SDLKeeper::quit();
 
-  SDLKeeper::quit();
-
-  return 0;
+	return 0;
 }
-
-
 
 /// @endcond

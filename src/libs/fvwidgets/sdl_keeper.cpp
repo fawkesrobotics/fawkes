@@ -21,11 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvwidgets/sdl_keeper.h>
-
+#include <core/exception.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
-#include <core/exception.h>
+#include <fvwidgets/sdl_keeper.h>
 
 #include <SDL.h>
 
@@ -35,7 +34,6 @@ namespace firevision {
 
 unsigned int SDLKeeper::_refcount = 0;
 Mutex        SDLKeeper::_mutex;
-
 
 /** @class SDLKeeper <fvwidgets/sdl_keeper.h>
  * SDL Reference keeper.
@@ -51,7 +49,6 @@ SDLKeeper::SDLKeeper()
 {
 }
 
-
 /** Init SDL.
  * Keeps track of SDL_Init calls and only calls SDL_InitSubSystem on consecutive
  * calls.
@@ -60,26 +57,25 @@ SDLKeeper::SDLKeeper()
 void
 SDLKeeper::init(unsigned int flags)
 {
-  MutexLocker lock(&_mutex); 
+	MutexLocker lock(&_mutex);
 
-  unsigned int alive_subsys = SDL_WasInit(SDL_INIT_EVERYTHING);
-  if ( (alive_subsys & flags) != flags ) {
-    // Subsystem has not been initialized, yet
-    if ( _refcount == 0 ) {
-      if ( SDL_Init(flags) != 0 ) {
-	throw Exception("SDL: initialization failed");
-      }
-    } else {
-      unsigned int still_to_init = ~alive_subsys & flags;
-      if ( SDL_Init(still_to_init) != 0 ) {
-	throw Exception("SDL: initialization failed");
-      }
-    }
-  }
+	unsigned int alive_subsys = SDL_WasInit(SDL_INIT_EVERYTHING);
+	if ((alive_subsys & flags) != flags) {
+		// Subsystem has not been initialized, yet
+		if (_refcount == 0) {
+			if (SDL_Init(flags) != 0) {
+				throw Exception("SDL: initialization failed");
+			}
+		} else {
+			unsigned int still_to_init = ~alive_subsys & flags;
+			if (SDL_Init(still_to_init) != 0) {
+				throw Exception("SDL: initialization failed");
+			}
+		}
+	}
 
-  ++_refcount;
+	++_refcount;
 }
-
 
 /** Conditionally quit SDL.
  * Use this after you are done with the SDL. No subsystem will be closed after all
@@ -88,13 +84,12 @@ SDLKeeper::init(unsigned int flags)
 void
 SDLKeeper::quit() throw()
 {
-  MutexLocker lock(&_mutex); 
+	MutexLocker lock(&_mutex);
 
-  if ( (_refcount > 0) && (--_refcount == 0) ) {
-    SDL_Quit();
-  }
+	if ((_refcount > 0) && (--_refcount == 0)) {
+		SDL_Quit();
+	}
 }
-
 
 /** Force quit of SDL.
  * This will quit the SDL no matter of the reference count. Use with extreme care.
@@ -102,10 +97,10 @@ SDLKeeper::quit() throw()
 void
 SDLKeeper::force_quit()
 {
-  MutexLocker lock(&_mutex); 
+	MutexLocker lock(&_mutex);
 
-  SDL_Quit();
-  _refcount = 0;
+	SDL_Quit();
+	_refcount = 0;
 }
 
 } // end namespace firevision

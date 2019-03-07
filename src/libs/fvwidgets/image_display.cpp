@@ -21,14 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvwidgets/image_display.h>
-
-#include <fvwidgets/sdl_keeper.h>
-#include <SDL.h>
-
 #include <core/exception.h>
 #include <fvutils/color/conversions.h>
 #include <fvutils/color/yuv.h>
+#include <fvwidgets/image_display.h>
+#include <fvwidgets/sdl_keeper.h>
+
+#include <SDL.h>
 
 using namespace fawkes;
 
@@ -46,47 +45,45 @@ namespace firevision {
  * @param height height of image
  * @param title window title
  */
-ImageDisplay::ImageDisplay(unsigned int width, unsigned int height, const char* title)
+ImageDisplay::ImageDisplay(unsigned int width, unsigned int height, const char *title)
 {
+	SDLKeeper::init(SDL_INIT_VIDEO);
+	if (title)
+		SDL_WM_SetCaption(title, NULL);
 
-  SDLKeeper::init(SDL_INIT_VIDEO);
-  if (title) SDL_WM_SetCaption (title, NULL);
+	_width  = width;
+	_height = height;
 
-  _width  = width;
-  _height = height;
+	int bpp  = SDL_VideoModeOK(_width, _height, 16, SDL_ANYFORMAT);
+	_surface = SDL_SetVideoMode(width, height, bpp, /* flags */ SDL_HWSURFACE | SDL_ANYFORMAT);
+	if (!_surface) {
+		throw Exception("SDL: cannot create surface");
+	}
 
-  int bpp = SDL_VideoModeOK(_width, _height, 16, SDL_ANYFORMAT);
-  _surface = SDL_SetVideoMode(width, height, bpp, /* flags */ SDL_HWSURFACE | SDL_ANYFORMAT);
-  if ( ! _surface ) {
-    throw Exception("SDL: cannot create surface");
-  }
+	// SDL_UYVY_OVERLAY
+	_overlay = SDL_CreateYUVOverlay(width, height, SDL_UYVY_OVERLAY, _surface);
+	if (!_overlay) {
+		throw Exception("Cannot create overlay");
+	}
 
-  // SDL_UYVY_OVERLAY
-  _overlay = SDL_CreateYUVOverlay(width, height, SDL_UYVY_OVERLAY, _surface);
-  if ( ! _overlay ) {
-    throw Exception("Cannot create overlay");
-  }
+	_rect = new SDL_Rect;
 
-  _rect = new SDL_Rect;
-
-  _rect->x = 0;
-  _rect->y = 0;
-  _rect->w = _width;
-  _rect->h = _height;
+	_rect->x = 0;
+	_rect->y = 0;
+	_rect->w = _width;
+	_rect->h = _height;
 }
-
 
 /** Destructor. */
 ImageDisplay::~ImageDisplay()
 {
-  delete _rect;
+	delete _rect;
 
-  SDL_FreeYUVOverlay(_overlay);
-  SDL_FreeSurface(_surface);
+	SDL_FreeYUVOverlay(_overlay);
+	SDL_FreeSurface(_surface);
 
-  SDLKeeper::quit();
+	SDLKeeper::quit();
 }
-
 
 /** Show image from given colorspace.
  * @param colorspace colorspace of the supplied buffer
@@ -95,12 +92,11 @@ ImageDisplay::~ImageDisplay()
 void
 ImageDisplay::show(colorspace_t colorspace, unsigned char *buffer)
 {
-  SDL_LockYUVOverlay(_overlay);
-  convert(colorspace, YUV422_PACKED, buffer, _overlay->pixels[0], _width, _height);
-  SDL_UnlockYUVOverlay(_overlay);
-  SDL_DisplayYUVOverlay(_overlay, _rect);
+	SDL_LockYUVOverlay(_overlay);
+	convert(colorspace, YUV422_PACKED, buffer, _overlay->pixels[0], _width, _height);
+	SDL_UnlockYUVOverlay(_overlay);
+	SDL_DisplayYUVOverlay(_overlay, _rect);
 }
-
 
 /** Show image from YUV422_PLANAR colorspace.
  * @param yuv422_planar_buffer YUV422_PLANAR encoded image.
@@ -108,13 +104,12 @@ ImageDisplay::show(colorspace_t colorspace, unsigned char *buffer)
 void
 ImageDisplay::show(unsigned char *yuv422_planar_buffer)
 {
-  SDL_LockYUVOverlay(_overlay);
+	SDL_LockYUVOverlay(_overlay);
 
-  yuv422planar_to_yuv422packed(yuv422_planar_buffer, _overlay->pixels[0],
-			       _width, _height);
+	yuv422planar_to_yuv422packed(yuv422_planar_buffer, _overlay->pixels[0], _width, _height);
 
-  SDL_UnlockYUVOverlay(_overlay);
-  SDL_DisplayYUVOverlay(_overlay, _rect);
+	SDL_UnlockYUVOverlay(_overlay);
+	SDL_DisplayYUVOverlay(_overlay, _rect);
 }
 
 /** Process a few SDL events.
@@ -123,13 +118,12 @@ ImageDisplay::show(unsigned char *yuv422_planar_buffer)
 void
 ImageDisplay::process_events(unsigned int max_num_events)
 {
-  unsigned int proc = 0;
-  SDL_Event event;
-  while ( (proc++ < max_num_events) && (SDL_PollEvent(&event)) ) {
-    // nothing to do here
-  }
+	unsigned int proc = 0;
+	SDL_Event    event;
+	while ((proc++ < max_num_events) && (SDL_PollEvent(&event))) {
+		// nothing to do here
+	}
 }
-
 
 /** Process SDL events until quit.
  * Process SDL events and keeps the window responsive until either
@@ -138,23 +132,20 @@ ImageDisplay::process_events(unsigned int max_num_events)
 void
 ImageDisplay::loop_until_quit()
 {
-  bool quit = false;
-  while (! quit) {
-    SDL_Event event;
-    if ( SDL_WaitEvent(&event) ) {
-      switch (event.type) {
-      case SDL_QUIT:
-	quit = true;
-	break;
-      case SDL_KEYUP:
-	if ( (event.key.keysym.sym == SDLK_ESCAPE) ||
-	     (event.key.keysym.sym == SDLK_q) ) {
-	  quit = true;
+	bool quit = false;
+	while (!quit) {
+		SDL_Event event;
+		if (SDL_WaitEvent(&event)) {
+			switch (event.type) {
+			case SDL_QUIT: quit = true; break;
+			case SDL_KEYUP:
+				if ((event.key.keysym.sym == SDLK_ESCAPE) || (event.key.keysym.sym == SDLK_q)) {
+					quit = true;
+				}
+				break;
+			}
+		}
 	}
-	break;
-      }
-    }
-  }
 }
 
 } // end namespace firevision
