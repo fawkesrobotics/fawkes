@@ -34,23 +34,22 @@ class Logger;
 
 class ClingoControlManager
 {
-	public:
+public:
 	ClingoControlManager(void);
 	virtual ~ClingoControlManager(void);
 
 	void set_logger(Logger *logger);
 
-	LockPtr<ClingoAccess> create_control(const std::string& ctrl_name,
-	                                     const std::string& log_component_name);
-	void destroy_control(const std::string& ctrl_name);
+	LockPtr<ClingoAccess> create_control(const std::string &ctrl_name,
+	                                     const std::string &log_component_name);
+	void                  destroy_control(const std::string &ctrl_name);
 
-	const std::unordered_map<std::string, LockPtr<ClingoAccess>>& controls(void) const;
+	const std::unordered_map<std::string, LockPtr<ClingoAccess>> &controls(void) const;
 
 private:
-	Logger *logger_;
+	Logger *                                               logger_;
 	std::unordered_map<std::string, LockPtr<ClingoAccess>> controls_;
 };
-
 
 } // end namespace fawkes
 

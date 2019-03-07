@@ -32,14 +32,14 @@ class ClingoControlManager;
 
 class ClingoManagerAspectIniFin : public AspectIniFin
 {
-	public:
+public:
 	ClingoManagerAspectIniFin(void);
 	~ClingoManagerAspectIniFin(void);
 
 	void init(Thread *thread) override;
 	void finalize(Thread *thread) override;
 
-	void set_control_manager(LockPtr<ClingoControlManager>& clingo_ctrl_mgr);
+	void set_control_manager(LockPtr<ClingoControlManager> &clingo_ctrl_mgr);
 
 private:
 	LockPtr<ClingoControlManager> clingo_ctrl_mgr_;

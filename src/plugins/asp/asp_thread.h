@@ -26,19 +26,17 @@
 #include <aspect/aspect_provider.h>
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
-
 #include <plugins/asp/aspect/asp_inifin.h>
 #include <plugins/asp/aspect/clingo_control_manager.h>
 #include <plugins/asp/aspect/clingo_manager_inifin.h>
 
 namespace fawkes {
-	class AspectIniFin;
+class AspectIniFin;
 }
 
-class ASPThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::AspectProviderAspect
+class ASPThread : public fawkes::Thread,
+                  public fawkes::LoggingAspect,
+                  public fawkes::AspectProviderAspect
 {
 public:
 	ASPThread();
@@ -49,13 +47,16 @@ public:
 
 protected:
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
-	void run() override { Thread::run(); }
+	void
+	run() override
+	{
+		Thread::run();
+	}
 
 private:
-	fawkes::ASPAspectIniFin asp_inifin_;
-	fawkes::ClingoManagerAspectIniFin clingo_mgr_inifin_;
+	fawkes::ASPAspectIniFin                       asp_inifin_;
+	fawkes::ClingoManagerAspectIniFin             clingo_mgr_inifin_;
 	fawkes::LockPtr<fawkes::ClingoControlManager> control_mgr_;
-
 };
 
 #endif

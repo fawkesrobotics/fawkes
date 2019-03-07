@@ -25,7 +25,6 @@
 
 #include <aspect/aspect.h>
 #include <core/utils/lockptr.h>
-
 #include <plugins/asp/aspect/clingo_control_manager.h>
 
 namespace fawkes {
@@ -36,7 +35,7 @@ public:
 	ClingoManagerAspect(void);
 	virtual ~ClingoManagerAspect(void);
 
-	void init_ClingoManagerAspect(const LockPtr<ClingoControlManager>& clingo_ctrl_mgr);
+	void init_ClingoManagerAspect(const LockPtr<ClingoControlManager> &clingo_ctrl_mgr);
 	void finalize_ClingoManagerAspect(void);
 
 protected:

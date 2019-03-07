@@ -23,7 +23,6 @@
 
 #include <core/threading/thread_finalizer.h>
 #include <logging/logger.h>
-
 #include <plugins/asp/aspect/asp.h>
 #include <plugins/asp/aspect/asp_inifin.h>
 #include <plugins/asp/aspect/clingo_access.h>
@@ -54,22 +53,22 @@ ASPAspectIniFin::~ASPAspectIniFin()
 void
 ASPAspectIniFin::init(Thread *thread)
 {
-	ASPAspect *asp_thread = dynamic_cast<ASPAspect*>(thread);
-	if ( asp_thread == nullptr ) {
+	ASPAspect *asp_thread = dynamic_cast<ASPAspect *>(thread);
+	if (asp_thread == nullptr) {
 		throw CannotInitializeThreadException("Thread '%s' claims to have the ASPAspect, "
 		                                      "but RTTI says it has not.",
 		                                      thread->name());
 	}
 
-	asp_thread->init_ASPAspect(ctrl_mgr_->create_control(asp_thread->control_name_,
-	                                                     asp_thread->log_comp_));
+	asp_thread->init_ASPAspect(
+	  ctrl_mgr_->create_control(asp_thread->control_name_, asp_thread->log_comp_));
 }
 
 void
 ASPAspectIniFin::finalize(Thread *thread)
 {
-	ASPAspect *asp_thread = dynamic_cast<ASPAspect*>(thread);
-	if ( asp_thread == nullptr ) {
+	ASPAspect *asp_thread = dynamic_cast<ASPAspect *>(thread);
+	if (asp_thread == nullptr) {
 		throw CannotFinalizeThreadException("Thread '%s' claims to have the ASPAspect, "
 		                                    "but RTTI says it has not.",
 		                                    thread->name());
@@ -82,7 +81,7 @@ ASPAspectIniFin::finalize(Thread *thread)
  * @param[in] ctrl_mgr The new control manager
  */
 void
-ASPAspectIniFin::set_control_manager(const LockPtr<ClingoControlManager>& ctrl_mgr)
+ASPAspectIniFin::set_control_manager(const LockPtr<ClingoControlManager> &ctrl_mgr)
 {
 	ctrl_mgr_ = ctrl_mgr;
 }
