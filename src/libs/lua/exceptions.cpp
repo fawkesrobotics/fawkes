@@ -35,10 +35,9 @@ namespace fawkes {
  * @param errmsg error message
  */
 LuaRuntimeException::LuaRuntimeException(const char *what, const char *errmsg)
-  : Exception("Lua runtime error (in '%s'): %s", what, errmsg)
+: Exception("Lua runtime error (in '%s'): %s", what, errmsg)
 {
 }
-
 
 /** @class LuaErrorException exceptions.h <lua/exceptions.h>
  * Lua error exception.
@@ -51,7 +50,7 @@ LuaRuntimeException::LuaRuntimeException(const char *what, const char *errmsg)
  * @param errmsg error message
  */
 LuaErrorException::LuaErrorException(const char *what, const char *errmsg)
-  : Exception("Lua error while running error handler (in '%s'): %s", what, errmsg)
+: Exception("Lua error while running error handler (in '%s'): %s", what, errmsg)
 {
 }
 
