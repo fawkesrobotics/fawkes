@@ -20,16 +20,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <netcomm/fawkes/client.h>
 #include <blackboard/remote.h>
-
+#include <interfaces/SwitchInterface.h>
+#include <netcomm/fawkes/client.h>
 #include <utils/system/argparser.h>
 
-#include <interfaces/SwitchInterface.h>
-
-#include <string>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include <string>
 
 using namespace fawkes;
 
@@ -39,65 +37,65 @@ using namespace fawkes;
 void
 print_usage(const char *program_name)
 {
-    printf("Usage: %s [-e interface_id|-d interface_id] [-r host[:port]]\n"
-         "  -e         Send enable msg to the switch interface specified by interface_id\n"
-         "  -d         Send disable msg to the switch interface specified by interface_id\n"
-         "  -r host[:port] Remote host (and optionally port) to connect to\n\n",
-         program_name);
+	printf("Usage: %s [-e interface_id|-d interface_id] [-r host[:port]]\n"
+	       "  -e         Send enable msg to the switch interface specified by interface_id\n"
+	       "  -d         Send disable msg to the switch interface specified by interface_id\n"
+	       "  -r host[:port] Remote host (and optionally port) to connect to\n\n",
+	       program_name);
 }
 
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "he:d:r:");
+	ArgumentParser argp(argc, argv, "he:d:r:");
 
-  if ( argp.has_arg("h") ) {
-    print_usage(argp.program_name());
-    exit(0);
-  }
+	if (argp.has_arg("h")) {
+		print_usage(argp.program_name());
+		exit(0);
+	}
 
-  std::string host = "localhost";
-  unsigned short int port = 1910;
-  if ( argp.has_arg("r") ) {
-    argp.parse_hostport("r", host, port);
-  }
+	std::string        host = "localhost";
+	unsigned short int port = 1910;
+	if (argp.has_arg("r")) {
+		argp.parse_hostport("r", host, port);
+	}
 
-  FawkesNetworkClient *c = new FawkesNetworkClient(host.c_str(), port);
-  try {
-    c->connect();
-  } catch( Exception &e ) {
-    printf("Could not connect to host: %s\n", host.c_str());
-    exit(1);
-  }
+	FawkesNetworkClient *c = new FawkesNetworkClient(host.c_str(), port);
+	try {
+		c->connect();
+	} catch (Exception &e) {
+		printf("Could not connect to host: %s\n", host.c_str());
+		exit(1);
+	}
 
-  try {
-    BlackBoard *bb = new RemoteBlackBoard(c);
-    //SwitchInterface *sw_if = bb->open_for_reading<SwitchInterface>("Start");
-    if (argp.has_arg("e")) {
-      const char *switch_name = argp.arg("e");
-      SwitchInterface *sw_if = bb->open_for_reading<SwitchInterface>(switch_name);
-      //send enable msg
-      SwitchInterface::EnableSwitchMessage *em = new SwitchInterface::EnableSwitchMessage();
-      sw_if->msgq_enqueue(em);
-      bb->close(sw_if);
-    }else if (argp.has_arg("d")) {
-      const char *switch_name = argp.arg("d");
-      SwitchInterface *sw_if = bb->open_for_reading<SwitchInterface>(switch_name);
-      //send disable msg
-      SwitchInterface::DisableSwitchMessage *dm = new SwitchInterface::DisableSwitchMessage();
-      sw_if->msgq_enqueue(dm);
-      bb->close(sw_if);
-    }
+	try {
+		BlackBoard *bb = new RemoteBlackBoard(c);
+		//SwitchInterface *sw_if = bb->open_for_reading<SwitchInterface>("Start");
+		if (argp.has_arg("e")) {
+			const char *     switch_name = argp.arg("e");
+			SwitchInterface *sw_if       = bb->open_for_reading<SwitchInterface>(switch_name);
+			//send enable msg
+			SwitchInterface::EnableSwitchMessage *em = new SwitchInterface::EnableSwitchMessage();
+			sw_if->msgq_enqueue(em);
+			bb->close(sw_if);
+		} else if (argp.has_arg("d")) {
+			const char *     switch_name = argp.arg("d");
+			SwitchInterface *sw_if       = bb->open_for_reading<SwitchInterface>(switch_name);
+			//send disable msg
+			SwitchInterface::DisableSwitchMessage *dm = new SwitchInterface::DisableSwitchMessage();
+			sw_if->msgq_enqueue(dm);
+			bb->close(sw_if);
+		}
 
-    delete bb;
+		delete bb;
 
-  } catch (Exception &e) {
-    printf("Error connecting to BlackBoard: %s\n", e.what());
-    c->disconnect();
-  }
+	} catch (Exception &e) {
+		printf("Error connecting to BlackBoard: %s\n", e.what());
+		c->disconnect();
+	}
 
-  c->disconnect();
-  delete c;
+	c->disconnect();
+	delete c;
 
-  return 0;
+	return 0;
 }
