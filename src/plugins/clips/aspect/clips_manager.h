@@ -34,15 +34,14 @@ class CLIPSManagerAspectIniFin;
 
 class CLIPSManagerAspect : public virtual Aspect
 {
-  friend CLIPSManagerAspectIniFin;
+	friend CLIPSManagerAspectIniFin;
 
- public:
-  CLIPSManagerAspect();
-  virtual ~CLIPSManagerAspect();
+public:
+	CLIPSManagerAspect();
+	virtual ~CLIPSManagerAspect();
 
- protected:
-  LockPtr<CLIPSEnvManager> clips_env_mgr;
-
+protected:
+	LockPtr<CLIPSEnvManager> clips_env_mgr;
 };
 
 } // end namespace fawkes

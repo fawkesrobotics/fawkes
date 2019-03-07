@@ -22,6 +22,7 @@
  */
 
 #include <plugins/clips/aspect/clips.h>
+
 #include <clipsmm.h>
 
 namespace fawkes {
@@ -53,18 +54,15 @@ namespace fawkes {
  * unique.  If left out will be set to "CLIPS[env_name]".
  */
 CLIPSAspect::CLIPSAspect(const char *env_name, const char *log_component_name)
-  : clips_env_name(env_name),
-    CLIPSAspect_log_component_name_(log_component_name)
+: clips_env_name(env_name), CLIPSAspect_log_component_name_(log_component_name)
 {
-  add_aspect("CLIPSAspect");
+	add_aspect("CLIPSAspect");
 }
-
 
 /** Virtual empty destructor. */
 CLIPSAspect::~CLIPSAspect()
 {
 }
-
 
 /** Init CLIPS aspect.
  * This set the CLIPS environment.
@@ -75,7 +73,7 @@ CLIPSAspect::~CLIPSAspect()
 void
 CLIPSAspect::init_CLIPSAspect(LockPtr<CLIPS::Environment> clips)
 {
-  this->clips = clips;
+	this->clips = clips;
 }
 
 /** Finalize CLIPS aspect.
@@ -84,8 +82,7 @@ CLIPSAspect::init_CLIPSAspect(LockPtr<CLIPS::Environment> clips)
 void
 CLIPSAspect::finalize_CLIPSAspect()
 {
-  clips.clear();
+	clips.clear();
 }
-
 
 } // end namespace fawkes

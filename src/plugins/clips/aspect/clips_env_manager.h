@@ -24,11 +24,11 @@
 #define _PLUGINS_CLIPS_ASPECT_CLIPS_ENV_MANAGER_H_
 
 #include <core/utils/lockptr.h>
-#include <string>
-#include <map>
-#include <list>
 
 #include <clipsmm.h>
+#include <list>
+#include <map>
+#include <string>
 
 namespace fawkes {
 
@@ -38,45 +38,45 @@ class CLIPSFeature;
 
 class CLIPSEnvManager
 {
- public:
-  CLIPSEnvManager(Logger *logger, Clock *clock, std::string &clips_dir);
-  virtual ~CLIPSEnvManager();
+public:
+	CLIPSEnvManager(Logger *logger, Clock *clock, std::string &clips_dir);
+	virtual ~CLIPSEnvManager();
 
-  LockPtr<CLIPS::Environment>
-    create_env(const std::string &env_name, const std::string &log_component_name);
-  void destroy_env(const std::string &env_name);
+	LockPtr<CLIPS::Environment> create_env(const std::string &env_name,
+	                                       const std::string &log_component_name);
+	void                        destroy_env(const std::string &env_name);
 
-  void add_features(const std::list<CLIPSFeature *> &features);
-  void remove_features(const std::list<CLIPSFeature *> &features);
-  void assert_can_remove_features(const std::list<CLIPSFeature *> &features);
+	void add_features(const std::list<CLIPSFeature *> &features);
+	void remove_features(const std::list<CLIPSFeature *> &features);
+	void assert_can_remove_features(const std::list<CLIPSFeature *> &features);
 
-  std::map<std::string, LockPtr<CLIPS::Environment>> environments() const;
+	std::map<std::string, LockPtr<CLIPS::Environment>> environments() const;
 
- private:
-  LockPtr<CLIPS::Environment> new_env(const std::string &log_component_name);
-  void assert_features(LockPtr<CLIPS::Environment> &clips, bool immediate_assert);
-  void add_functions(const std::string &env_name, LockPtr<CLIPS::Environment> &clips);
-  CLIPS::Value clips_request_feature(std::string env_name, std::string feature_name);
-  CLIPS::Values clips_now();
-  CLIPS::Values clips_now_systime();
-  void guarded_load(const std::string &env_name, const std::string &filename);
+private:
+	LockPtr<CLIPS::Environment> new_env(const std::string &log_component_name);
+	void          assert_features(LockPtr<CLIPS::Environment> &clips, bool immediate_assert);
+	void          add_functions(const std::string &env_name, LockPtr<CLIPS::Environment> &clips);
+	CLIPS::Value  clips_request_feature(std::string env_name, std::string feature_name);
+	CLIPS::Values clips_now();
+	CLIPS::Values clips_now_systime();
+	void          guarded_load(const std::string &env_name, const std::string &filename);
 
+private:
+	Logger *logger_;
+	Clock * clock_;
 
- private:
-  Logger *logger_;
-  Clock  *clock_;
+	std::string clips_dir_;
 
-  std::string clips_dir_;
+	/// @cond INTERNAL
+	typedef struct
+	{
+		LockPtr<CLIPS::Environment> env;
+		std::list<std::string>      req_feat;
+	} ClipsEnvData;
+	/// @endcond
 
-  /// @cond INTERNAL
-  typedef struct {
-    LockPtr<CLIPS::Environment> env;
-    std::list<std::string>      req_feat;
-  } ClipsEnvData;
-  /// @endcond
-
-  std::map<std::string, ClipsEnvData > envs_;
-  std::map<std::string, CLIPSFeature * > features_;
+	std::map<std::string, ClipsEnvData>   envs_;
+	std::map<std::string, CLIPSFeature *> features_;
 };
 
 } // end namespace fawkes

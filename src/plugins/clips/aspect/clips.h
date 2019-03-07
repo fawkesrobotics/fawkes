@@ -30,7 +30,7 @@
 #include <string>
 
 namespace CLIPS {
-  class Environment;
+class Environment;
 }
 
 namespace fawkes {
@@ -39,22 +39,22 @@ class CLIPSAspectIniFin;
 
 class CLIPSAspect : public virtual Aspect
 {
- friend CLIPSAspectIniFin;
+	friend CLIPSAspectIniFin;
 
- public:
-  CLIPSAspect(const char *env_name, const char *log_component_name = 0);
-  virtual ~CLIPSAspect();
+public:
+	CLIPSAspect(const char *env_name, const char *log_component_name = 0);
+	virtual ~CLIPSAspect();
 
- protected:
-  const std::string            clips_env_name;
-  LockPtr<CLIPS::Environment>  clips;
+protected:
+	const std::string           clips_env_name;
+	LockPtr<CLIPS::Environment> clips;
 
- private:
-  void init_CLIPSAspect(LockPtr<CLIPS::Environment> clips);
-  void finalize_CLIPSAspect();
+private:
+	void init_CLIPSAspect(LockPtr<CLIPS::Environment> clips);
+	void finalize_CLIPSAspect();
 
- private:
-  const std::string CLIPSAspect_log_component_name_;
+private:
+	const std::string CLIPSAspect_log_component_name_;
 };
 
 } // end namespace fawkes

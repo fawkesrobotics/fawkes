@@ -21,6 +21,7 @@
  */
 
 #include "clips_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -32,16 +33,15 @@ using namespace fawkes;
  */
 class CLIPSPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit CLIPSPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new CLIPSThread());
-  }
+	explicit CLIPSPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new CLIPSThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("Provides CLIPS environments")
 EXPORT_PLUGIN(CLIPSPlugin)

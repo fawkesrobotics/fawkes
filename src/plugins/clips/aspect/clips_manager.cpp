@@ -22,6 +22,7 @@
  */
 
 #include <plugins/clips/aspect/clips_manager.h>
+
 #include <clipsmm.h>
 
 namespace fawkes {
@@ -46,9 +47,8 @@ namespace fawkes {
 /** Constructor. */
 CLIPSManagerAspect::CLIPSManagerAspect()
 {
-  add_aspect("CLIPSManagerAspect");
+	add_aspect("CLIPSManagerAspect");
 }
-
 
 /** Virtual empty destructor. */
 CLIPSManagerAspect::~CLIPSManagerAspect()
