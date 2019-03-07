@@ -22,67 +22,73 @@
 #ifndef _PLUGINS_LASER_LINES_LINE_INFO_H_
 #define _PLUGINS_LASER_LINES_LINE_INFO_H_
 
-#include <Eigen/Geometry>
+#include <logging/logger.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <tf/transformer.h>
+#include <tf/types.h>
+
+#include <Eigen/Geometry>
 #include <boost/circular_buffer.hpp>
 #include <memory>
-#include <tf/types.h>
-#include <tf/transformer.h>
-#include <logging/logger.h>
 
 /** Line information container.
  * All points and angles are in the sensor reference frame
  * from which the lines were extracted.
  */
-class LineInfo {
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+class LineInfo
+{
+public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  float bearing;	///< bearing to point on line
-  float length;		///< length of the detecte line segment
+	float bearing; ///< bearing to point on line
+	float length;  ///< length of the detecte line segment
 
-  Eigen::Vector3f point_on_line;	///< point on line vector
-  Eigen::Vector3f line_direction;	///< line direction vector
+	Eigen::Vector3f point_on_line;  ///< point on line vector
+	Eigen::Vector3f line_direction; ///< line direction vector
 
-  Eigen::Vector3f base_point;		///< optimized closest point on line
+	Eigen::Vector3f base_point; ///< optimized closest point on line
 
-  Eigen::Vector3f end_point_1;		///< line segment end point
-  Eigen::Vector3f end_point_2;		///< line segment end point
+	Eigen::Vector3f end_point_1; ///< line segment end point
+	Eigen::Vector3f end_point_2; ///< line segment end point
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;	///< point cloud consisting only of
-  						///< points account to this line
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud; ///< point cloud consisting only of
+	                                           ///< points account to this line
 };
 
-
-class TrackedLineInfo {
+class TrackedLineInfo
+{
 public:
-  int interface_idx;			///< id of the interface, this line is written to, -1 when not yet assigned
-  int visibility_history;	///< visibility history of this line, negative for "no sighting"
-  LineInfo raw;   	///< the latest geometry of this line, i.e. unfiltered
-  LineInfo smooth;	///< moving-average geometry of this line (cf. length of history buffer)
-  fawkes::tf::Stamped<fawkes::tf::Point> base_point_odom;	///< last reference point (in odom frame) for line tracking
-  fawkes::tf::Transformer *transformer;	///< Transformer used to transform from input_frame_id_to odom
-  std::string input_frame_id;	///< Input frame ID of raw line infos (base_laser usually)
-  std::string tracking_frame_id;	///< Track lines relative to this frame (e.g. odom helps compensate movement)
-  float cfg_switch_tolerance;	///< Configured line jitter threshold
-  boost::circular_buffer<LineInfo> history;	///< history of raw line geometries for computing moving average
-  float bearing_center; 	///< Bearing towards line center, used to select lines "in front of us" when there
-  fawkes::Logger *logger;	///< Logger pointer of the calling class
-  std::string plugin_name;	///< Plugin name of the calling class
+	int interface_idx; ///< id of the interface, this line is written to, -1 when not yet assigned
+	int visibility_history; ///< visibility history of this line, negative for "no sighting"
+	LineInfo raw;           ///< the latest geometry of this line, i.e. unfiltered
+	LineInfo smooth;        ///< moving-average geometry of this line (cf. length of history buffer)
+	fawkes::tf::Stamped<fawkes::tf::Point>
+	  base_point_odom; ///< last reference point (in odom frame) for line tracking
+	fawkes::tf::Transformer
+	  *         transformer;    ///< Transformer used to transform from input_frame_id_to odom
+	std::string input_frame_id; ///< Input frame ID of raw line infos (base_laser usually)
+	std::string
+	      tracking_frame_id; ///< Track lines relative to this frame (e.g. odom helps compensate movement)
+	float cfg_switch_tolerance; ///< Configured line jitter threshold
+	boost::circular_buffer<LineInfo>
+	  history; ///< history of raw line geometries for computing moving average
+	float
+	                bearing_center; ///< Bearing towards line center, used to select lines "in front of us" when there
+	fawkes::Logger *logger;      ///< Logger pointer of the calling class
+	std::string     plugin_name; ///< Plugin name of the calling class
 
-  TrackedLineInfo(
-      fawkes::tf::Transformer *tfer,
-      const std::string &input_frame_id,
-      const std::string &tracking_frame_id,
-      float cfg_switch_tolerance,
-      unsigned int cfg_moving_avg_len,
-      fawkes::Logger *logger,
-      const std::string &plugin_name);
+	TrackedLineInfo(fawkes::tf::Transformer *tfer,
+	                const std::string &      input_frame_id,
+	                const std::string &      tracking_frame_id,
+	                float                    cfg_switch_tolerance,
+	                unsigned int             cfg_moving_avg_len,
+	                fawkes::Logger *         logger,
+	                const std::string &      plugin_name);
 
-  btScalar distance(const LineInfo &linfo) const;
-  void update(LineInfo &new_linfo);
-  void not_visible_update();
+	btScalar distance(const LineInfo &linfo) const;
+	void     update(LineInfo &new_linfo);
+	void     not_visible_update();
 };
 
 #endif
