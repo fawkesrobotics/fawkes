@@ -26,38 +26,36 @@
 
 #include <core/threading/read_write_lock.h>
 #include <core/utils/refptr.h>
+
 #include <queue>
 
 namespace fawkes {
 
-
 template <typename Type>
 class RWLockQueue : public std::queue<Type>
 {
- public:
-  RWLockQueue();
-  RWLockQueue(const RWLockQueue<Type> &ll);
-  virtual ~RWLockQueue();
+public:
+	RWLockQueue();
+	RWLockQueue(const RWLockQueue<Type> &ll);
+	virtual ~RWLockQueue();
 
-  void                   lock_for_read();
-  void                   lock_for_write();
-  bool                   try_lock_for_read();
-  bool                   try_lock_for_write();
-  void                   unlock();
-  RefPtr<ReadWriteLock>  rwlock() const;
+	void                  lock_for_read();
+	void                  lock_for_write();
+	bool                  try_lock_for_read();
+	bool                  try_lock_for_write();
+	void                  unlock();
+	RefPtr<ReadWriteLock> rwlock() const;
 
-  void     push_locked(const Type& x);
-  void     pop_locked();
+	void push_locked(const Type &x);
+	void pop_locked();
 
-  void clear();
+	void clear();
 
-  // not needed, no change to rwlock required (thus "incomplete" BigThree)
-  //LockList<Type> &  operator=(const LockList<Type> &ll);
- private:
-  RefPtr<ReadWriteLock> rwlock_;
-
+	// not needed, no change to rwlock required (thus "incomplete" BigThree)
+	//LockList<Type> &  operator=(const LockList<Type> &ll);
+private:
+	RefPtr<ReadWriteLock> rwlock_;
 };
-
 
 /** @class RWLockQueue <core/utils/rwlock_queue.h>
  * Queue with a read/write lock.
@@ -69,51 +67,44 @@ class RWLockQueue : public std::queue<Type>
  * @author Tim Niemueller
  */
 
-
 /** Constructor. */
 template <typename Type>
 RWLockQueue<Type>::RWLockQueue()
 {
-  rwlock_ = new ReadWriteLock();
+	rwlock_ = new ReadWriteLock();
 }
-
 
 /** Copy constructor.
  * @param ll RWLockQueue to copy
  */
 template <typename Type>
-RWLockQueue<Type>::RWLockQueue(const RWLockQueue<Type> &ll)
-  : std::queue<Type>::queue(ll)
+RWLockQueue<Type>::RWLockQueue(const RWLockQueue<Type> &ll) : std::queue<Type>::queue(ll)
 {
-  rwlock_ = new ReadWriteLock();
+	rwlock_ = new ReadWriteLock();
 }
-
 
 /** Destructor. */
 template <typename Type>
 RWLockQueue<Type>::~RWLockQueue()
 {
-  delete rwlock_;
+	delete rwlock_;
 }
-
 
 /** Lock queue for reading. */
 template <typename Type>
 void
 RWLockQueue<Type>::lock_for_read()
 {
-  rwlock_->lock_for_read();
+	rwlock_->lock_for_read();
 }
-
 
 /** Lock queue for writing. */
 template <typename Type>
 void
 RWLockQueue<Type>::lock_for_write()
 {
-  rwlock_->lock_for_write();
+	rwlock_->lock_for_write();
 }
-
 
 /** Try to lock queue for reading.
  * @return true, if the lock has been aquired, false otherwise.
@@ -122,9 +113,8 @@ template <typename Type>
 bool
 RWLockQueue<Type>::try_lock_for_read()
 {
-  return rwlock_->try_lock_for_read();
+	return rwlock_->try_lock_for_read();
 }
-
 
 /** Try to lock queue for writing.
  * @return true, if the lock has been aquired, false otherwise.
@@ -133,31 +123,28 @@ template <typename Type>
 bool
 RWLockQueue<Type>::try_lock_for_write()
 {
-  return rwlock_->try_lock_for_write();
+	return rwlock_->try_lock_for_write();
 }
-
 
 /** Unlock list. */
 template <typename Type>
 void
 RWLockQueue<Type>::unlock()
 {
-  return rwlock_->unlock();
+	return rwlock_->unlock();
 }
-
 
 /** Push element to queue with lock protection.
  * @param x element to add
  */
 template <typename Type>
 void
-RWLockQueue<Type>::push_locked(const Type& x)
+RWLockQueue<Type>::push_locked(const Type &x)
 {
-  rwlock_->lock_for_write();
-  std::queue<Type>::push(x);
-  rwlock_->unlock();
+	rwlock_->lock_for_write();
+	std::queue<Type>::push(x);
+	rwlock_->unlock();
 }
-
 
 /** Pop element from queue with lock protection.
  */
@@ -165,24 +152,22 @@ template <typename Type>
 void
 RWLockQueue<Type>::pop_locked()
 {
-  rwlock_->lock_for_write();
-  std::queue<Type>::pop();
-  rwlock_->unlock();
+	rwlock_->lock_for_write();
+	std::queue<Type>::pop();
+	rwlock_->unlock();
 }
-
 
 /** Clear the queue. */
 template <typename Type>
 void
 RWLockQueue<Type>::clear()
 {
-  rwlock_->lock_for_write();
-  while ( ! std::queue<Type>::empty() ) {
-    std::queue<Type>::pop();
-  }
-  rwlock_->unlock();
+	rwlock_->lock_for_write();
+	while (!std::queue<Type>::empty()) {
+		std::queue<Type>::pop();
+	}
+	rwlock_->unlock();
 }
-
 
 /** Get access to the internal rwlock.
  * Can be used with RwlockLocker.
@@ -192,9 +177,8 @@ template <typename Type>
 ReadWriteLock *
 RWLockQueue<Type>::rwlock() const
 {
-  return rwlock_;
+	return rwlock_;
 }
-
 
 } // end namespace fawkes
 

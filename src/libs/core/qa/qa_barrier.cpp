@@ -23,8 +23,8 @@
 // Do not mention in API doc
 /// @cond EXAMPLES
 
-#include <core/threading/thread.h>
 #include <core/threading/barrier.h>
+#include <core/threading/thread.h>
 
 #include <iostream>
 #include <string>
@@ -34,55 +34,52 @@ using namespace fawkes;
 
 class ExampleBarrierThread : public Thread
 {
- public:
-  ExampleBarrierThread(string pp,
-		       Barrier *barrier, unsigned int sleep_time)
-    : Thread("ExampleBarrierThread", Thread::OPMODE_CONTINUOUS)
-  {
-    this->pp         = pp;
-    this->barrier    = barrier;
-    this->sleep_time = sleep_time;
-  }
+public:
+	ExampleBarrierThread(string pp, Barrier *barrier, unsigned int sleep_time)
+	: Thread("ExampleBarrierThread", Thread::OPMODE_CONTINUOUS)
+	{
+		this->pp         = pp;
+		this->barrier    = barrier;
+		this->sleep_time = sleep_time;
+	}
 
-  virtual void loop()
-  {
-    usleep( sleep_time );
-    cout << pp << ": Waiting for barrier" << endl;
-    barrier->wait();
-    cout << pp << ": Barrier lifted" << endl;
-  }
+	virtual void
+	loop()
+	{
+		usleep(sleep_time);
+		cout << pp << ": Waiting for barrier" << endl;
+		barrier->wait();
+		cout << pp << ": Barrier lifted" << endl;
+	}
 
- private:
-  Barrier *barrier;
-  unsigned int sleep_time;
-  string pp;
-
+private:
+	Barrier *    barrier;
+	unsigned int sleep_time;
+	string       pp;
 };
-
 
 int
 main(int argc, char **argv)
 {
-  Barrier *b = new Barrier(3);
+	Barrier *b = new Barrier(3);
 
-  ExampleBarrierThread *t1 = new ExampleBarrierThread("t1", b, 3424345);
-  ExampleBarrierThread *t2 = new ExampleBarrierThread("t2", b, 326545);
-  ExampleBarrierThread *t3 = new ExampleBarrierThread("t3", b, 6458642);
+	ExampleBarrierThread *t1 = new ExampleBarrierThread("t1", b, 3424345);
+	ExampleBarrierThread *t2 = new ExampleBarrierThread("t2", b, 326545);
+	ExampleBarrierThread *t3 = new ExampleBarrierThread("t3", b, 6458642);
 
-  t1->start();
-  t2->start();
-  t3->start();
+	t1->start();
+	t2->start();
+	t3->start();
 
-  t1->join();
-  t2->join();
-  t3->join();
+	t1->join();
+	t2->join();
+	t3->join();
 
-  delete t1;
-  delete t2;
-  delete t3;
+	delete t1;
+	delete t2;
+	delete t3;
 
-  delete b;
+	delete b;
 }
-
 
 /// @endcond

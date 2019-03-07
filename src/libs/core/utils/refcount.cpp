@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <core/utils/refcount.h>
-#include <core/threading/mutex.h>
 #include <core/exceptions/software.h>
+#include <core/threading/mutex.h>
+#include <core/utils/refcount.h>
 
 #include <unistd.h>
 
@@ -45,21 +45,18 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor. */
 RefCount::RefCount()
 {
-  ref_mutex = new Mutex();
-  refc = 1;
+	ref_mutex = new Mutex();
+	refc      = 1;
 }
-
 
 /** Destructor. */
 RefCount::~RefCount()
 {
-  delete ref_mutex;
+	delete ref_mutex;
 }
-
 
 /** Increment reference count.
  * @exception DestructionInProgressException Thrown if the only other reference holder
@@ -69,14 +66,13 @@ RefCount::~RefCount()
 void
 RefCount::ref()
 {
-  ref_mutex->lock();
-  if ( refc == 0 ) {
-    throw DestructionInProgressException("Tried to reference that is currently being deleted");
-  }
-  ++refc;
-  ref_mutex->unlock();
+	ref_mutex->lock();
+	if (refc == 0) {
+		throw DestructionInProgressException("Tried to reference that is currently being deleted");
+	}
+	++refc;
+	ref_mutex->unlock();
 }
-
 
 /** Decrement reference count and conditionally delete this instance.
  * This method will decrement the reference count of this message. If the reference count
@@ -98,20 +94,19 @@ RefCount::ref()
 void
 RefCount::unref()
 {
-  
-  ref_mutex->lock();
-  if ( refc == 0 ) {
-    throw DestructionInProgressException("Tried to reference that is currently being deleted");
-  }
-  if ( refc > 0 )  --refc;
-  if ( refc == 0 ) {
-    // commit suicide
-    delete this;
-    return;
-  }
-  ref_mutex->unlock();
+	ref_mutex->lock();
+	if (refc == 0) {
+		throw DestructionInProgressException("Tried to reference that is currently being deleted");
+	}
+	if (refc > 0)
+		--refc;
+	if (refc == 0) {
+		// commit suicide
+		delete this;
+		return;
+	}
+	ref_mutex->unlock();
 }
-
 
 /** Get reference count for this instance.
  * The reference count is used to determine if a message should really be destructed
@@ -124,8 +119,7 @@ RefCount::unref()
 unsigned int
 RefCount::refcount()
 {
-  return refc;
+	return refc;
 }
-
 
 } // end namespace fawkes

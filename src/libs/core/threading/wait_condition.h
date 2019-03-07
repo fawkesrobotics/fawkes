@@ -33,24 +33,24 @@ class Mutex;
 void cleanup_mutex(void *);
 /// @endcond
 
-class WaitCondition {
- public:
-  WaitCondition(Mutex *mutex = 0);
-  ~WaitCondition();
+class WaitCondition
+{
+public:
+	WaitCondition(Mutex *mutex = 0);
+	~WaitCondition();
 
-  void wait();
-  bool abstimed_wait(long int sec, long int nanosec);
-  bool reltimed_wait(unsigned int sec, unsigned int nanosec);
+	void wait();
+	bool abstimed_wait(long int sec, long int nanosec);
+	bool reltimed_wait(unsigned int sec, unsigned int nanosec);
 
-  void wake_one();
-  void wake_all();
+	void wake_one();
+	void wake_all();
 
- private:
-  WaitConditionData *cond_data_;
-  Mutex             *mutex_;
-  bool               own_mutex_;
+private:
+	WaitConditionData *cond_data_;
+	Mutex *            mutex_;
+	bool               own_mutex_;
 };
-
 
 } // end namespace fawkes
 

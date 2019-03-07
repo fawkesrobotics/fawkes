@@ -32,10 +32,10 @@ class WaitCondition;
 
 class RecursiveMutex : public Mutex
 {
-  friend WaitCondition;
+	friend WaitCondition;
 
- public:
-  RecursiveMutex();
+public:
+	RecursiveMutex();
 };
 
 } // end namespace fawkes

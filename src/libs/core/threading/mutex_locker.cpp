@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <core/threading/mutex_locker.h>
 #include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
 
 namespace fawkes {
 
@@ -82,21 +82,19 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param mutex Mutex to lock/unlock appropriately.
  * @param initially_lock true to lock the mutex in the constructor, false to not lock
  */
 MutexLocker::MutexLocker(RefPtr<Mutex> mutex, bool initially_lock)
 {
-  rawmutex_ = 0;
-  refmutex_ = mutex;
-  if ( initially_lock ) {
-    refmutex_->lock();
-  }
-  locked_ = initially_lock;
+	rawmutex_ = 0;
+	refmutex_ = mutex;
+	if (initially_lock) {
+		refmutex_->lock();
+	}
+	locked_ = initially_lock;
 }
-
 
 /** Constructor.
  * @param mutex Mutex to lock/unlock appropriately.
@@ -104,11 +102,11 @@ MutexLocker::MutexLocker(RefPtr<Mutex> mutex, bool initially_lock)
  */
 MutexLocker::MutexLocker(Mutex *mutex, bool initially_lock)
 {
-  rawmutex_ = mutex;
-  if ( initially_lock ) {
-    rawmutex_->lock();
-  }
-  locked_ = initially_lock;
+	rawmutex_ = mutex;
+	if (initially_lock) {
+		rawmutex_->lock();
+	}
+	locked_ = initially_lock;
 }
 
 /** Constructor.
@@ -117,26 +115,24 @@ MutexLocker::MutexLocker(Mutex *mutex, bool initially_lock)
  */
 MutexLocker::MutexLocker(Mutex &mutex, bool initially_lock)
 {
-  rawmutex_ = &mutex;
-  if ( initially_lock ) {
-    rawmutex_->lock();
-  }
-  locked_ = initially_lock;
+	rawmutex_ = &mutex;
+	if (initially_lock) {
+		rawmutex_->lock();
+	}
+	locked_ = initially_lock;
 }
-
 
 /** Destructor */
 MutexLocker::~MutexLocker()
 {
-  if ( locked_ ) {
-    if ( rawmutex_) {
-      rawmutex_->unlock();
-    } else {
-      refmutex_->unlock();
-    }
-  }
+	if (locked_) {
+		if (rawmutex_) {
+			rawmutex_->unlock();
+		} else {
+			refmutex_->unlock();
+		}
+	}
 }
-
 
 /** Lock this mutex, again.
  * Use this if you unlocked the mutex from the outside.
@@ -144,26 +140,24 @@ MutexLocker::~MutexLocker()
 void
 MutexLocker::relock()
 {
-  if ( rawmutex_ ) {
-    rawmutex_->lock();
-  } else {
-    refmutex_->lock();
-  }
-  locked_ = true;
+	if (rawmutex_) {
+		rawmutex_->lock();
+	} else {
+		refmutex_->lock();
+	}
+	locked_ = true;
 }
-
 
 /** Unlock the mutex. */
 void
 MutexLocker::unlock()
 {
-  locked_ = false;
-  if ( rawmutex_ ) {
-    rawmutex_->unlock();
-  } else {
-    refmutex_->unlock();
-  }
+	locked_ = false;
+	if (rawmutex_) {
+		rawmutex_->unlock();
+	} else {
+		refmutex_->unlock();
+	}
 }
-
 
 } // end namespace fawkes

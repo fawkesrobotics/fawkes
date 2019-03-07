@@ -26,10 +26,10 @@
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
+
 #include <list>
 
 namespace fawkes {
-
 
 /** @class LockList <core/utils/lock_list.h>
  * List with a lock.
@@ -43,179 +43,167 @@ namespace fawkes {
 template <typename Type>
 class LockList : public std::list<Type>
 {
- public:
-  /** Constructor. */
-  LockList();
+public:
+	/** Constructor. */
+	LockList();
 
-  /** Copy constructor.
+	/** Copy constructor.
    * @param ll LockList to copy
    */
-  LockList(const LockList<Type> &ll);
+	LockList(const LockList<Type> &ll);
 
-  /** Destructor. */
-  virtual ~LockList() {}
+	/** Destructor. */
+	virtual ~LockList()
+	{
+	}
 
+	/** Lock list. */
+	virtual void lock() const;
 
-  /** Lock list. */
-  virtual void  lock() const;
-
-  /** Try to lock list.
+	/** Try to lock list.
    * @return true, if the lock has been aquired, false otherwise.
    */
-  virtual bool  try_lock() const;
+	virtual bool try_lock() const;
 
-  /** Unlock list. */
-  virtual void  unlock() const;
+	/** Unlock list. */
+	virtual void unlock() const;
 
-  /** Get access to the internal mutex.
+	/** Get access to the internal mutex.
    * Can be used with MutexLocker.
    * @return internal mutex
    */
-  RefPtr<Mutex> mutex() const;
+	RefPtr<Mutex> mutex() const;
 
-  /** Push element to list at back with lock protection.
+	/** Push element to list at back with lock protection.
    * @param x element to add
    */
-  void     push_back_locked(const Type& x);
+	void push_back_locked(const Type &x);
 
-  /** Push element to list at front with lock protection.
+	/** Push element to list at front with lock protection.
    * @param x element to add
    */
-  void     push_front_locked(const Type& x);
+	void push_front_locked(const Type &x);
 
-  /** Remove element from list with lock protection.
+	/** Remove element from list with lock protection.
    * @param x element to remove
    */
-  void     remove_locked(const Type& x);
+	void remove_locked(const Type &x);
 
-  /** Copy values from another LockList.
+	/** Copy values from another LockList.
    * Copies the values one by one. Both instances are locked during the copying and
    * this instance is cleared before copying.
    * @param ll list to copy
    * @return reference to this instance
    */
-  LockList<Type> &  operator=(const LockList<Type> &ll);
+	LockList<Type> &operator=(const LockList<Type> &ll);
 
-  /** Copy values from a standard list.
+	/** Copy values from a standard list.
    * Copies the values one by one. This instance is locked during the copying and
    * cleared.
    * @param l list to copy
    * @return reference to this instance
    */
-  LockList<Type> &  operator=(const std::list<Type> &l);
- private:
-  mutable RefPtr<Mutex> mutex_;
+	LockList<Type> &operator=(const std::list<Type> &l);
 
+private:
+	mutable RefPtr<Mutex> mutex_;
 };
 
-
-
+template <typename Type>
+LockList<Type>::LockList() : mutex_(new Mutex())
+{
+}
 
 template <typename Type>
-LockList<Type>::LockList()
-  : mutex_(new Mutex())
-{}
-
-
-template <typename Type>
-LockList<Type>::LockList(const LockList<Type> &ll)
-  : std::list<Type>::list(ll), mutex_(new Mutex())
-{}
-
+LockList<Type>::LockList(const LockList<Type> &ll) : std::list<Type>::list(ll), mutex_(new Mutex())
+{
+}
 
 template <typename Type>
 void
 LockList<Type>::lock() const
 {
-  mutex_->lock();
+	mutex_->lock();
 }
-
 
 template <typename Type>
 bool
 LockList<Type>::try_lock() const
 {
-  return mutex_->try_lock();
+	return mutex_->try_lock();
 }
-
 
 template <typename Type>
 void
 LockList<Type>::unlock() const
 {
-  return mutex_->unlock();
+	return mutex_->unlock();
 }
-
 
 template <typename Type>
 void
-LockList<Type>::push_back_locked(const Type& x)
+LockList<Type>::push_back_locked(const Type &x)
 {
-  mutex_->lock();
-  std::list<Type>::push_back(x);
-  mutex_->unlock();
+	mutex_->lock();
+	std::list<Type>::push_back(x);
+	mutex_->unlock();
 }
-
 
 template <typename Type>
 void
-LockList<Type>::push_front_locked(const Type& x)
+LockList<Type>::push_front_locked(const Type &x)
 {
-  mutex_->lock();
-  std::list<Type>::push_front(x);
-  mutex_->unlock();
+	mutex_->lock();
+	std::list<Type>::push_front(x);
+	mutex_->unlock();
 }
-
 
 template <typename Type>
 void
-LockList<Type>::remove_locked(const Type& x)
+LockList<Type>::remove_locked(const Type &x)
 {
-  mutex_->lock();
-  std::list<Type>::remove(x);
-  mutex_->unlock();
+	mutex_->lock();
+	std::list<Type>::remove(x);
+	mutex_->unlock();
 }
-
 
 template <typename Type>
 RefPtr<Mutex>
 LockList<Type>::mutex() const
 {
-  return mutex_;
+	return mutex_;
 }
-
 
 template <typename Type>
 LockList<Type> &
 LockList<Type>::operator=(const LockList<Type> &ll)
 {
-  mutex_->lock();
-  ll.lock();
-  this->clear();
-  typename LockList<Type>::const_iterator i;
-  for (i = ll.begin(); i != ll.end(); ++i) {
-    this->push_back(*i);
-  }
-  ll.unlock();
-  mutex_->unlock();
+	mutex_->lock();
+	ll.lock();
+	this->clear();
+	typename LockList<Type>::const_iterator i;
+	for (i = ll.begin(); i != ll.end(); ++i) {
+		this->push_back(*i);
+	}
+	ll.unlock();
+	mutex_->unlock();
 
-  return *this;
+	return *this;
 }
-
 
 template <typename Type>
 LockList<Type> &
 LockList<Type>::operator=(const std::list<Type> &l)
 {
-  mutex_->lock();
-  this->clear();
-  typename std::list<Type>::const_iterator i;
-  for (i = l.begin(); i != l.end(); ++i) {
-    this->push_back(*i);
-  }
-  mutex_->unlock();
+	mutex_->lock();
+	this->clear();
+	typename std::list<Type>::const_iterator i;
+	for (i = l.begin(); i != l.end(); ++i) {
+		this->push_back(*i);
+	}
+	mutex_->unlock();
 
-  return *this;
+	return *this;
 }
 
 } // end namespace fawkes

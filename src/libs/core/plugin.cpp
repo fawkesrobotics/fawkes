@@ -24,8 +24,9 @@
 
 #include <core/plugin.h>
 #include <core/threading/thread.h>
-#include <cstring>
+
 #include <cstdlib>
+#include <cstring>
 
 namespace fawkes {
 
@@ -70,20 +71,20 @@ namespace fawkes {
  */
 Plugin::Plugin(Configuration *config)
 {
-  this->config = config;
-  _name_alloc = NULL;
-  _name = "PluginNameNotSet";
+	this->config = config;
+	_name_alloc  = NULL;
+	_name        = "PluginNameNotSet";
 }
 
 /** Virtual destructor */
 Plugin::~Plugin()
 {
-  for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i) {
-    delete *i;
-  }
-  if (_name_alloc) free(_name_alloc);
+	for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i) {
+		delete *i;
+	}
+	if (_name_alloc)
+		free(_name_alloc);
 }
-
 
 /** Determines if the plugin can be unloaded.
  * This method tells the plugin loader if this plugin can be unloaded. Use
@@ -95,7 +96,7 @@ Plugin::~Plugin()
 bool
 Plugin::persistent()
 {
-  return false;
+	return false;
 }
 
 /** Get a list of threads.
@@ -109,9 +110,8 @@ Plugin::persistent()
 ThreadList &
 Plugin::threads()
 {
-  return thread_list;
+	return thread_list;
 }
-
 
 /** Set plugin name.
  * Set the name of this plugin. This method should never be called from user code,
@@ -121,19 +121,19 @@ Plugin::threads()
 void
 Plugin::set_name(const char *name)
 {
-  if ( _name_alloc )  free(_name_alloc);
+	if (_name_alloc)
+		free(_name_alloc);
 
-  thread_list.set_name("%s", name);
+	thread_list.set_name("%s", name);
 
-  _name_alloc = strdup(name);
-  if ( ! _name_alloc ) {
-    // We do not want to throw an exception here
-    _name = "OutOfMemoryForPluginName";
-  } else {
-    _name = _name_alloc;
-  }
+	_name_alloc = strdup(name);
+	if (!_name_alloc) {
+		// We do not want to throw an exception here
+		_name = "OutOfMemoryForPluginName";
+	} else {
+		_name = _name_alloc;
+	}
 }
-
 
 /** Get the name of the plugin.
  * @return name of the plugin
@@ -141,8 +141,7 @@ Plugin::set_name(const char *name)
 const char *
 Plugin::name() const
 {
-  return _name;
+	return _name;
 }
-
 
 } // end namespace fawkes

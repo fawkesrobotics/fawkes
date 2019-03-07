@@ -36,15 +36,13 @@ namespace fawkes {
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-NullPointerException::NullPointerException(const char *format, ...) throw()
-  : Exception()
+NullPointerException::NullPointerException(const char *format, ...) throw() : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class DivisionByZeroException <core/exceptions/software.h>
  * Division by zero.
@@ -54,15 +52,13 @@ NullPointerException::NullPointerException(const char *format, ...) throw()
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-DivisionByZeroException::DivisionByZeroException(const char *format, ...) throw()
-  : Exception()
+DivisionByZeroException::DivisionByZeroException(const char *format, ...) throw() : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class TypeMismatchException <core/exceptions/software.h>
  * Type mismatch.
@@ -72,15 +68,13 @@ DivisionByZeroException::DivisionByZeroException(const char *format, ...) throw(
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-TypeMismatchException::TypeMismatchException(const char *format, ...) throw()
-  : Exception()
+TypeMismatchException::TypeMismatchException(const char *format, ...) throw() : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class UnknownTypeException <core/exceptions/software.h>
  * Unknown type.
@@ -90,15 +84,13 @@ TypeMismatchException::TypeMismatchException(const char *format, ...) throw()
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-UnknownTypeException::UnknownTypeException(const char *format, ...) throw()
-  : Exception()
+UnknownTypeException::UnknownTypeException(const char *format, ...) throw() : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class DestructionInProgressException <core/exceptions/software.h>
  * Delete in progress.
@@ -110,14 +102,13 @@ UnknownTypeException::UnknownTypeException(const char *format, ...) throw()
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
 DestructionInProgressException::DestructionInProgressException(const char *format, ...) throw()
-  : Exception()
+: Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class NotLockedException <core/exceptions/software.h>
  * Operation on unlocked object.
@@ -128,15 +119,13 @@ DestructionInProgressException::DestructionInProgressException(const char *forma
 /** Constructor.
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-NotLockedException::NotLockedException(const char *format, ...) throw()
-  : Exception()
+NotLockedException::NotLockedException(const char *format, ...) throw() : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class NonPointerTypeExpectedException <core/exceptions/software.h>
  * Non-pointer type expected.
@@ -148,14 +137,13 @@ NotLockedException::NotLockedException(const char *format, ...) throw()
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
 NonPointerTypeExpectedException::NonPointerTypeExpectedException(const char *format, ...) throw()
-  :  Exception()
+: Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class MissingParameterException <core/exceptions/software.h>
  * Expected parameter is missing.
@@ -166,15 +154,13 @@ NonPointerTypeExpectedException::NonPointerTypeExpectedException(const char *for
 /** Constructor.
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-MissingParameterException::MissingParameterException(const char *format, ...) throw()
-  :  Exception()
+MissingParameterException::MissingParameterException(const char *format, ...) throw() : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class IllegalArgumentException <core/exceptions/software.h>
  * Expected parameter is missing.
@@ -185,15 +171,13 @@ MissingParameterException::MissingParameterException(const char *format, ...) th
 /** Constructor.
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-IllegalArgumentException::IllegalArgumentException(const char *format, ...) throw()
-  :  Exception()
+IllegalArgumentException::IllegalArgumentException(const char *format, ...) throw() : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class OutOfBoundsException >core/exceptions/software.h>
  * Index out of bounds.
@@ -207,7 +191,7 @@ IllegalArgumentException::IllegalArgumentException(const char *format, ...) thro
  * "Out Of Bounds"
  */
 OutOfBoundsException::OutOfBoundsException(const char *msg) throw()
-  : Exception("Out Of Bounds: %s", msg)
+: Exception("Out Of Bounds: %s", msg)
 {
 }
 
@@ -219,19 +203,17 @@ OutOfBoundsException::OutOfBoundsException(const char *msg) throw()
  * @param min minimum required value
  * @param max maximum allowed value
  */
-OutOfBoundsException::OutOfBoundsException(const char *msg, float val,
-					   float min, float max) throw()
-  : Exception()
+OutOfBoundsException::OutOfBoundsException(const char *msg, float val, float min, float max) throw()
+: Exception()
 {
-  if ( (roundf(val) == val) && (roundf(min) == min) && (roundf(max) == max) ) {
-    // really the values are just integers
-    append("Out Of Bounds (%s):  min: %.0f  max: %.0f  val: %.0f", msg, min, max, val);
-  } else {
-    // at least one "real" float
-    append("Out Of Bounds (%s):  min: %f  max: %f  val: %f", msg, min, max, val);
-  }
+	if ((roundf(val) == val) && (roundf(min) == min) && (roundf(max) == max)) {
+		// really the values are just integers
+		append("Out Of Bounds (%s):  min: %.0f  max: %.0f  val: %.0f", msg, min, max, val);
+	} else {
+		// at least one "real" float
+		append("Out Of Bounds (%s):  min: %f  max: %f  val: %f", msg, min, max, val);
+	}
 }
-
 
 /** @class AccessViolationException <core/exceptions/software.h>
  * Access violates policy.
@@ -242,15 +224,13 @@ OutOfBoundsException::OutOfBoundsException(const char *msg, float val,
 /** Constructor.
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-AccessViolationException::AccessViolationException(const char *format, ...) throw()
-  :  Exception()
+AccessViolationException::AccessViolationException(const char *format, ...) throw() : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class SyntaxErrorException <core/exceptions/software.h>
  * Syntax error.
@@ -261,15 +241,13 @@ AccessViolationException::AccessViolationException(const char *format, ...) thro
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-SyntaxErrorException::SyntaxErrorException(const char *format, ...) throw()
-  : Exception()
+SyntaxErrorException::SyntaxErrorException(const char *format, ...) throw() : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class NotImplementedException <core/exceptions/software.h>
  * Called method has not been implemented.
@@ -281,14 +259,12 @@ SyntaxErrorException::SyntaxErrorException(const char *format, ...) throw()
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-NotImplementedException::NotImplementedException(const char *format, ...) throw()
-  : Exception()
+NotImplementedException::NotImplementedException(const char *format, ...) throw() : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 } // end namespace fawkes

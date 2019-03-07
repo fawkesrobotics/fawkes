@@ -27,19 +27,18 @@
 #include <core/exception.h>
 
 #ifdef _ASSERT_H
-#  undef assert
+#	undef assert
 #else
-#  if defined __cplusplus && __GNUC__ >= 3
-#    define __ASSERT_VOID_CAST static_cast<void>
-#  else
-#    define __ASSERT_VOID_CAST (void)
-#  endif
+#	if defined __cplusplus && __GNUC__ >= 3
+#		define __ASSERT_VOID_CAST static_cast<void>
+#	else
+#		define __ASSERT_VOID_CAST (void)
+#	endif
 #endif
 
-#define assert(expr)                                                    \
-  ((expr)                                                               \
-   ? __ASSERT_VOID_CAST (0)                                             \
-   : throw fawkes::Exception("Assertion '%s' failed in %s:%u",          \
-                             __STRING(expr), __FILE__, __LINE__))
+#define assert(expr)                 \
+	((expr) ? __ASSERT_VOID_CAST(0)    \
+	        : throw fawkes::Exception( \
+	            "Assertion '%s' failed in %s:%u", __STRING(expr), __FILE__, __LINE__))
 
 #endif

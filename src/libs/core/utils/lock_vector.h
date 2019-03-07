@@ -26,6 +26,7 @@
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
+
 #include <vector>
 
 namespace fawkes {
@@ -33,28 +34,27 @@ namespace fawkes {
 template <typename Type>
 class LockVector : public std::vector<Type>
 {
- public:
-  LockVector();
-  LockVector(const LockVector<Type> &lv);
-  virtual ~LockVector();
-  virtual void  lock() const;
-  virtual bool  try_lock() const;
-  virtual void  unlock() const;
-  RefPtr<Mutex> mutex() const;
+public:
+	LockVector();
+	LockVector(const LockVector<Type> &lv);
+	virtual ~LockVector();
+	virtual void  lock() const;
+	virtual bool  try_lock() const;
+	virtual void  unlock() const;
+	RefPtr<Mutex> mutex() const;
 
-  void     push_back_locked(const Type& x);
-  void     pop_back_locked();
-  void     erase_locked(typename std::vector<Type>::iterator pos);
-  void     erase_locked(typename std::vector<Type>::iterator first,
-			typename std::vector<Type>::iterator last);
+	void push_back_locked(const Type &x);
+	void pop_back_locked();
+	void erase_locked(typename std::vector<Type>::iterator pos);
+	void erase_locked(typename std::vector<Type>::iterator first,
+	                  typename std::vector<Type>::iterator last);
 
-  LockVector<Type> &  operator=(const LockVector<Type> &lv);
-  LockVector<Type> &  operator=(const std::vector<Type> &v);
- private:
-  mutable RefPtr<Mutex> mutex_;
+	LockVector<Type> &operator=(const LockVector<Type> &lv);
+	LockVector<Type> &operator=(const std::vector<Type> &v);
 
+private:
+	mutable RefPtr<Mutex> mutex_;
 };
-
 
 /** @class LockVector <core/utils/lock_vector.h>
  * Vector with a lock.
@@ -66,37 +66,34 @@ class LockVector : public std::vector<Type>
  * @author Tim Niemueller
  */
 
-
 /** Constructor. */
 template <typename Type>
-LockVector<Type>::LockVector()
-  : mutex_(new Mutex())
-{}
-
+LockVector<Type>::LockVector() : mutex_(new Mutex())
+{
+}
 
 /** Copy constructor.
  * @param lv LockVector to copy
  */
 template <typename Type>
 LockVector<Type>::LockVector(const LockVector<Type> &lv)
-  : std::vector<Type>::vector(lv), mutex_(new Mutex())
-{}
-
+: std::vector<Type>::vector(lv), mutex_(new Mutex())
+{
+}
 
 /** Destructor. */
 template <typename Type>
 LockVector<Type>::~LockVector()
-{}
-
+{
+}
 
 /** Lock vector. */
 template <typename Type>
 void
 LockVector<Type>::lock() const
 {
-  mutex_->lock();
+	mutex_->lock();
 }
-
 
 /** Try to lock vector.
  * @return true, if the lock has been aquired, false otherwise.
@@ -105,42 +102,38 @@ template <typename Type>
 bool
 LockVector<Type>::try_lock() const
 {
-  return mutex_->try_lock();
+	return mutex_->try_lock();
 }
-
 
 /** Unlock vector. */
 template <typename Type>
 void
 LockVector<Type>::unlock() const
 {
-  return mutex_->unlock();
+	return mutex_->unlock();
 }
-
 
 /** Push element to vector at back with lock protection.
  * @param x element to add
  */
 template <typename Type>
 void
-LockVector<Type>::push_back_locked(const Type& x)
+LockVector<Type>::push_back_locked(const Type &x)
 {
-  mutex_->lock();
-  std::vector<Type>::push_back(x);
-  mutex_->unlock();
+	mutex_->lock();
+	std::vector<Type>::push_back(x);
+	mutex_->unlock();
 }
-
 
 /** Remove last element with lock protection. */
 template <typename Type>
 void
 LockVector<Type>::pop_back_locked()
 {
-  mutex_->lock();
-  std::vector<Type>::pop_back();
-  mutex_->unlock();
+	mutex_->lock();
+	std::vector<Type>::pop_back();
+	mutex_->unlock();
 }
-
 
 /** Erase given element with lock protection.
  * @param pos iterator for the object position to remove
@@ -149,9 +142,9 @@ template <typename Type>
 void
 LockVector<Type>::erase_locked(typename std::vector<Type>::iterator pos)
 {
-  mutex_->lock();
-  std::vector<Type>::erase(pos);
-  mutex_->unlock();
+	mutex_->lock();
+	std::vector<Type>::erase(pos);
+	mutex_->unlock();
 }
 
 /** Erase given element range with lock protection.
@@ -161,13 +154,12 @@ LockVector<Type>::erase_locked(typename std::vector<Type>::iterator pos)
 template <typename Type>
 void
 LockVector<Type>::erase_locked(typename std::vector<Type>::iterator first,
-			       typename std::vector<Type>::iterator last)
+                               typename std::vector<Type>::iterator last)
 {
-  mutex_->lock();
-  std::vector<Type>::erase(first, last);
-  mutex_->unlock();
+	mutex_->lock();
+	std::vector<Type>::erase(first, last);
+	mutex_->unlock();
 }
-
 
 /** Get access to the internal mutex.
  * Can be used with MutexLocker.
@@ -177,9 +169,8 @@ template <typename Type>
 RefPtr<Mutex>
 LockVector<Type>::mutex() const
 {
-  return mutex_;
+	return mutex_;
 }
-
 
 /** Copy values from another LockVector.
  * Copies the values one by one. Both instances are locked during the copying and
@@ -191,19 +182,18 @@ template <typename Type>
 LockVector<Type> &
 LockVector<Type>::operator=(const LockVector<Type> &lv)
 {
-  mutex_->lock();
-  lv.lock();
-  this->clear();
-  typename LockVector<Type>::const_iterator i;
-  for (i = lv.begin(); i != lv.end(); ++i) {
-    this->push_back(*i);
-  }
-  lv.unlock();
-  mutex_->unlock();
+	mutex_->lock();
+	lv.lock();
+	this->clear();
+	typename LockVector<Type>::const_iterator i;
+	for (i = lv.begin(); i != lv.end(); ++i) {
+		this->push_back(*i);
+	}
+	lv.unlock();
+	mutex_->unlock();
 
-  return *this;
+	return *this;
 }
-
 
 /** Copy values from a standard vector.
  * Copies the values one by one. This instance is locked during the copying and
@@ -215,15 +205,15 @@ template <typename Type>
 LockVector<Type> &
 LockVector<Type>::operator=(const std::vector<Type> &v)
 {
-  mutex_->lock();
-  this->clear();
-  typename std::vector<Type>::const_iterator i;
-  for (i = v.begin(); i != v.end(); ++i) {
-    this->push_back(*i);
-  }
-  mutex_->unlock();
+	mutex_->lock();
+	this->clear();
+	typename std::vector<Type>::const_iterator i;
+	for (i = v.begin(); i != v.end(); ++i) {
+		this->push_back(*i);
+	}
+	mutex_->unlock();
 
-  return *this;
+	return *this;
 }
 
 } // end namespace fawkes

@@ -56,5 +56,4 @@ ThreadNotificationListener::~ThreadNotificationListener()
 {
 }
 
-
 } // end namespace fawkes

@@ -34,37 +34,40 @@ class ThreadList;
 
 class InterruptibleBarrier : public Barrier
 {
- public:
-  InterruptibleBarrier(unsigned int count);
-  InterruptibleBarrier(Mutex *mutex, unsigned int count);
-  virtual ~InterruptibleBarrier();
+public:
+	InterruptibleBarrier(unsigned int count);
+	InterruptibleBarrier(Mutex *mutex, unsigned int count);
+	virtual ~InterruptibleBarrier();
 
-  bool wait(unsigned int timeout_sec, unsigned int timeout_nanosec);
-  virtual inline void wait() { wait(0, 0); }
+	bool wait(unsigned int timeout_sec, unsigned int timeout_nanosec);
+	virtual inline void
+	wait()
+	{
+		wait(0, 0);
+	}
 
-  void interrupt() throw();
-  void reset() throw();
+	void interrupt() throw();
+	void reset() throw();
 
-  RefPtr<ThreadList>  passed_threads();
+	RefPtr<ThreadList> passed_threads();
 
-  bool no_threads_in_wait();
+	bool no_threads_in_wait();
 
- private:
-  InterruptibleBarrier(const InterruptibleBarrier &b);
-  InterruptibleBarrier(const InterruptibleBarrier *b);
-  InterruptibleBarrier &  operator=(const InterruptibleBarrier &b);
-  InterruptibleBarrier &  operator=(const InterruptibleBarrier *b);
+private:
+	InterruptibleBarrier(const InterruptibleBarrier &b);
+	InterruptibleBarrier(const InterruptibleBarrier *b);
+	InterruptibleBarrier &operator=(const InterruptibleBarrier &b);
+	InterruptibleBarrier &operator=(const InterruptibleBarrier *b);
 
- private:
-  InterruptibleBarrierData *data_;
-  RefPtr<ThreadList>        passed_threads_;
+private:
+	InterruptibleBarrierData *data_;
+	RefPtr<ThreadList>        passed_threads_;
 
-  bool interrupted_;
-  bool timeout_;
-  bool wait_at_barrier_;
-  int num_threads_in_wait_function_;
+	bool interrupted_;
+	bool timeout_;
+	bool wait_at_barrier_;
+	int  num_threads_in_wait_function_;
 };
-
 
 } // end namespace fawkes
 

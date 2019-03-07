@@ -26,25 +26,22 @@
 
 namespace fawkes {
 
-
 class Mutex;
 
 class RefCount
 {
- public:
-  RefCount();
-  virtual ~RefCount();
+public:
+	RefCount();
+	virtual ~RefCount();
 
-  void              ref();
-  void              unref();
-  unsigned int      refcount();
+	void         ref();
+	void         unref();
+	unsigned int refcount();
 
- private:
-
-  unsigned int  refc;
-  Mutex        *ref_mutex;
+private:
+	unsigned int refc;
+	Mutex *      ref_mutex;
 };
-
 
 } // end namespace fawkes
 

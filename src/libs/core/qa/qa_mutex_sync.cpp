@@ -24,9 +24,9 @@
 
 /// @cond EXAMPLES
 
+#include <core/threading/mutex.h>
 #include <core/threading/thread.h>
 #include <core/threading/wait_condition.h>
-#include <core/threading/mutex.h>
 
 #include <iostream>
 #include <string>
@@ -44,77 +44,81 @@ using namespace fawkes;
  */
 class ExampleMutexWaitThread : public Thread
 {
- public:
-  ExampleMutexWaitThread(string s)
-    : Thread("ExampleMutexWaitThread", Thread::OPMODE_CONTINUOUS)
-  {
-    this->s      = s;
+public:
+	ExampleMutexWaitThread(string s) : Thread("ExampleMutexWaitThread", Thread::OPMODE_CONTINUOUS)
+	{
+		this->s = s;
 
-    m.lock();
-  }
+		m.lock();
+	}
 
-  ~ExampleMutexWaitThread()
-  {
-  }
+	~ExampleMutexWaitThread()
+	{
+	}
 
-  void wake()
-  {
-    m.unlock();;
-  }
+	void
+	wake()
+	{
+		m.unlock();
+		;
+	}
 
-  string getS()
-  {
-    return s;
-  }
+	string
+	getS()
+	{
+		return s;
+	}
 
-  /** Action!
+	/** Action!
    */
-  virtual void loop()
-  {
-    m.lock();
-    cout << s << ": my turn" << endl;
-    // unlock mutex inside wait condition
-    m.unlock();
-  }
+	virtual void
+	loop()
+	{
+		m.lock();
+		cout << s << ": my turn" << endl;
+		// unlock mutex inside wait condition
+		m.unlock();
+	}
 
- private:
-  Mutex          m;
-  string         s;
-
+private:
+	Mutex  m;
+	string s;
 };
 
 class ExampleMutexWaitStarterThread : public Thread
 {
- public:
-  ExampleMutexWaitStarterThread()
-    : Thread("ExampleMutexWaitStarterThread", Thread::OPMODE_CONTINUOUS)
-  {
-    threads.clear();
-  }
+public:
+	ExampleMutexWaitStarterThread()
+	: Thread("ExampleMutexWaitStarterThread", Thread::OPMODE_CONTINUOUS)
+	{
+		threads.clear();
+	}
 
-  void wakeThreads()
-  {
-    vector< ExampleMutexWaitThread * >::iterator tit;
-    for (tit = threads.begin(); tit != threads.end(); ++tit) {
-      cout << "Waking thread " << (*tit)->getS() << endl;
-      (*tit)->wake();
-    }
-  }
+	void
+	wakeThreads()
+	{
+		vector<ExampleMutexWaitThread *>::iterator tit;
+		for (tit = threads.begin(); tit != threads.end(); ++tit) {
+			cout << "Waking thread " << (*tit)->getS() << endl;
+			(*tit)->wake();
+		}
+	}
 
-  void addThread(ExampleMutexWaitThread *t)
-  {
-    threads.push_back(t);
-  }
+	void
+	addThread(ExampleMutexWaitThread *t)
+	{
+		threads.push_back(t);
+	}
 
+	virtual void
+	loop()
+	{
+		sleep(2423423);
+		wakeThreads();
+	}
 
-  virtual void loop()
-  {
-    sleep(2423423);
-    wakeThreads();
-  }
-
- private:
-  vector< ExampleMutexWaitThread * > threads;
+private:
+	vector<ExampleMutexWaitThread *> threads;
 };
 
 /* This small app uses a condition variable to serialize
@@ -123,33 +127,31 @@ class ExampleMutexWaitStarterThread : public Thread
 int
 main(int argc, char **argv)
 {
+	ExampleMutexWaitThread *t1 = new ExampleMutexWaitThread("t1");
+	ExampleMutexWaitThread *t2 = new ExampleMutexWaitThread("t2");
+	ExampleMutexWaitThread *t3 = new ExampleMutexWaitThread("t3");
 
-  ExampleMutexWaitThread *t1 = new ExampleMutexWaitThread("t1");
-  ExampleMutexWaitThread *t2 = new ExampleMutexWaitThread("t2");
-  ExampleMutexWaitThread *t3 = new ExampleMutexWaitThread("t3");
+	ExampleMutexWaitStarterThread *st = new ExampleMutexWaitStarterThread();
+	st->addThread(t1);
+	st->addThread(t2);
+	st->addThread(t3);
 
-  ExampleMutexWaitStarterThread *st = new ExampleMutexWaitStarterThread();
-  st->addThread( t1 );
-  st->addThread( t2 );
-  st->addThread( t3 );
+	t1->start();
+	t2->start();
+	t3->start();
+	st->start();
 
-  t1->start();
-  t2->start();
-  t3->start();
-  st->start();
+	t1->join();
+	t2->join();
+	t3->join();
+	st->join();
 
-  t1->join();
-  t2->join();
-  t3->join();
-  st->join();
+	delete st;
+	delete t3;
+	delete t2;
+	delete t1;
 
-  delete st;
-  delete t3;
-  delete t2;
-  delete t1;
-
-  return 0;
+	return 0;
 }
-
 
 /// @endcond

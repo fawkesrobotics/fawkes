@@ -26,19 +26,16 @@
 
 namespace fawkes {
 
-
 class Thread;
 
 class ThreadNotificationListener
 {
- public:
-  virtual ~ThreadNotificationListener();
+public:
+	virtual ~ThreadNotificationListener();
 
-  virtual bool thread_started(Thread *thread) throw()                    = 0;
-  virtual bool thread_init_failed(Thread *thread) throw()                = 0;
-
+	virtual bool thread_started(Thread *thread) throw()     = 0;
+	virtual bool thread_init_failed(Thread *thread) throw() = 0;
 };
-
 
 } // end namespace fawkes
 

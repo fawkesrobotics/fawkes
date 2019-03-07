@@ -31,29 +31,28 @@ class WaitCondition;
 
 class Mutex
 {
-  friend WaitCondition;
+	friend WaitCondition;
 
- public:
-  /** Mutex type. */
-  typedef enum {
-    NORMAL,	///< This type of mutex does not detect deadlock.
-    RECURSIVE	///< A thread attempting to relock this mutex without
-    		///< first unlocking it shall succeed in locking the mutex.
-  } Type;
+public:
+	/** Mutex type. */
+	typedef enum {
+		NORMAL,   ///< This type of mutex does not detect deadlock.
+		RECURSIVE ///< A thread attempting to relock this mutex without
+		          ///< first unlocking it shall succeed in locking the mutex.
+	} Type;
 
-  Mutex(Type type = NORMAL);
-  ~Mutex();
+	Mutex(Type type = NORMAL);
+	~Mutex();
 
-  void lock();
-  bool try_lock();
-  void unlock();
+	void lock();
+	bool try_lock();
+	void unlock();
 
-  void stopby();
+	void stopby();
 
- private:
-  MutexData *mutex_data;
+private:
+	MutexData *mutex_data;
 };
-
 
 } // end namespace fawkes
 

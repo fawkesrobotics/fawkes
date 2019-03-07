@@ -21,32 +21,31 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <core/threading/thread.h>
-#include <core/threading/mutex.h>
-#include <core/threading/mutex_locker.h>
-#include <core/threading/barrier.h>
-#include <core/threading/wait_condition.h>
-#include <core/threading/read_write_lock.h>
-#include <core/threading/thread_finalizer.h>
-#include <core/threading/thread_notification_listener.h>
-#include <core/threading/thread_loop_listener.h>
-
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
+#include <core/threading/barrier.h>
+#include <core/threading/mutex.h>
+#include <core/threading/mutex_locker.h>
+#include <core/threading/read_write_lock.h>
+#include <core/threading/thread.h>
+#include <core/threading/thread_finalizer.h>
+#include <core/threading/thread_loop_listener.h>
+#include <core/threading/thread_notification_listener.h>
+#include <core/threading/wait_condition.h>
 #include <core/utils/lock_list.h>
 
-#if defined(gnu_linux___) && ! defined(_GNU_SOURCE)
+#if defined(gnu_linux___) && !defined(_GNU_SOURCE)
 // to get pthread_setname_np
-#  define _GNU_SOURCE
+#	define _GNU_SOURCE
 #endif
-#include <pthread.h>
-#include <climits>
-#include <unistd.h>
-#include <cstring>
-#include <cstdlib>
 #include <cerrno>
+#include <climits>
 #include <csignal>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <pthread.h>
+#include <unistd.h>
 
 namespace fawkes {
 
@@ -185,10 +184,8 @@ namespace fawkes {
  * @return thread name
  */
 
-
 /** We need not initialize this one timely by ourselves thus we do not use Mutex */
 pthread_mutex_t Thread::thread_key_mutex_ = PTHREAD_MUTEX_INITIALIZER;
-
 
 /** Key used to store a reference to the thread object as thread specific data. */
 pthread_key_t Thread::THREAD_KEY = PTHREAD_KEYS_MAX;
@@ -206,9 +203,8 @@ const unsigned int Thread::FLAG_BAD = 0x00000001;
  */
 Thread::Thread(const char *name)
 {
-  __constructor(name, OPMODE_CONTINUOUS);
+	__constructor(name, OPMODE_CONTINUOUS);
 }
-
 
 /** Constructor.
  * This constructor is protected so that Thread cannot be instantiated. This
@@ -218,9 +214,8 @@ Thread::Thread(const char *name)
  */
 Thread::Thread(const char *name, OpMode op_mode)
 {
-  __constructor(name, op_mode);
+	__constructor(name, op_mode);
 }
-
 
 /** Constructor.
  * This constructor is protected so that Thread cannot be instantiated. This
@@ -232,10 +227,9 @@ Thread::Thread(const char *name, OpMode op_mode)
  */
 Thread::Thread(const char *name, pthread_t id)
 {
-  __constructor(name, OPMODE_CONTINUOUS);
-  thread_id_ = id;
+	__constructor(name, OPMODE_CONTINUOUS);
+	thread_id_ = id;
 }
-
 
 /** Initialize.
  * Kind of the base constructor.
@@ -245,69 +239,66 @@ Thread::Thread(const char *name, pthread_t id)
 void
 Thread::__constructor(const char *name, OpMode op_mode)
 {
-  init_thread_key();
+	init_thread_key();
 
-  prepfin_conc_loop_ = false;
-  coalesce_wakeups_  = false;
-  op_mode_ = op_mode;
-  name_   = strdup(name);
-  notification_listeners_ = new LockList<ThreadNotificationListener *>();
-  loop_listeners_         = new LockList<ThreadLoopListener *>();
+	prepfin_conc_loop_      = false;
+	coalesce_wakeups_       = false;
+	op_mode_                = op_mode;
+	name_                   = strdup(name);
+	notification_listeners_ = new LockList<ThreadNotificationListener *>();
+	loop_listeners_         = new LockList<ThreadLoopListener *>();
 
-  if ( op_mode_ == OPMODE_WAITFORWAKEUP ) {
-    sleep_mutex_        = new Mutex();
-    sleep_condition_    = new WaitCondition(sleep_mutex_);
-    waiting_for_wakeup_ = true;
-  } else {
-    sleep_condition_    = NULL;
-    sleep_mutex_        = NULL;
-    waiting_for_wakeup_ = false;
-  }
+	if (op_mode_ == OPMODE_WAITFORWAKEUP) {
+		sleep_mutex_        = new Mutex();
+		sleep_condition_    = new WaitCondition(sleep_mutex_);
+		waiting_for_wakeup_ = true;
+	} else {
+		sleep_condition_    = NULL;
+		sleep_mutex_        = NULL;
+		waiting_for_wakeup_ = false;
+	}
 
-  thread_id_       = 0;
-  flags_           = 0;
-  barrier_         = NULL;
-  started_         = false;
-  cancelled_       = false;
-  delete_on_exit_  = false;
-  prepfin_hold_    = false;
-  pending_wakeups_ = 0;
+	thread_id_       = 0;
+	flags_           = 0;
+	barrier_         = NULL;
+	started_         = false;
+	cancelled_       = false;
+	delete_on_exit_  = false;
+	prepfin_hold_    = false;
+	pending_wakeups_ = 0;
 
-  loop_mutex = new Mutex();
-  finalize_prepared = false;
+	loop_mutex        = new Mutex();
+	finalize_prepared = false;
 
-  loop_done_ = true;
-  loop_done_mutex_ = new Mutex();
-  loop_done_waitcond_ = new WaitCondition(loop_done_mutex_);
+	loop_done_          = true;
+	loop_done_mutex_    = new Mutex();
+	loop_done_waitcond_ = new WaitCondition(loop_done_mutex_);
 
-  loopinterrupt_antistarve_mutex = new Mutex();
-  prepfin_hold_mutex_       = new Mutex();
-  prepfin_hold_waitcond_    = new WaitCondition(prepfin_hold_mutex_);
-  startup_barrier_          = new Barrier(2);
+	loopinterrupt_antistarve_mutex = new Mutex();
+	prepfin_hold_mutex_            = new Mutex();
+	prepfin_hold_waitcond_         = new WaitCondition(prepfin_hold_mutex_);
+	startup_barrier_               = new Barrier(2);
 }
-
 
 /** Virtual destructor. */
 Thread::~Thread()
 {
-  loop_done_waitcond_->wake_all();
-  yield();
+	loop_done_waitcond_->wake_all();
+	yield();
 
-  delete sleep_condition_;
-  delete sleep_mutex_;
-  delete loop_mutex;
-  free(name_);
-  delete notification_listeners_;
-  delete loop_listeners_;
-  delete loopinterrupt_antistarve_mutex;
-  delete startup_barrier_;
-  delete prepfin_hold_mutex_;
-  delete prepfin_hold_waitcond_;
-  delete loop_done_waitcond_;
-  delete loop_done_mutex_;
+	delete sleep_condition_;
+	delete sleep_mutex_;
+	delete loop_mutex;
+	free(name_);
+	delete notification_listeners_;
+	delete loop_listeners_;
+	delete loopinterrupt_antistarve_mutex;
+	delete startup_barrier_;
+	delete prepfin_hold_mutex_;
+	delete prepfin_hold_waitcond_;
+	delete loop_done_waitcond_;
+	delete loop_done_mutex_;
 }
-
-
 
 /** Copy constructor is NOT supported.
  * Using this constructor will cause havoc and chaos. It's only here
@@ -318,9 +309,8 @@ Thread::~Thread()
  */
 Thread::Thread(const Thread &t)
 {
-  throw Exception("You may not use copy constructor of class Thread");
+	throw Exception("You may not use copy constructor of class Thread");
 }
-
 
 /** Assignment is not allowed.
  * You may not assign one thread to another.
@@ -329,9 +319,8 @@ Thread::Thread(const Thread &t)
 Thread &
 Thread::operator=(const Thread &t)
 {
-  throw Exception("You may not use assignment operator of class Thread");
+	throw Exception("You may not use assignment operator of class Thread");
 }
-
 
 /** Initialize the thread.
  * This method is meant to be used in conjunction with aspects. Some parts
@@ -354,7 +343,6 @@ void
 Thread::init()
 {
 }
-
 
 /** Prepare finalization.
  * Check if finalization at this point is possible and if so execute the
@@ -386,30 +374,29 @@ Thread::init()
 bool
 Thread::prepare_finalize()
 {
-  if ( ! started_ ) {
-    throw CannotFinalizeThreadException("Thread has not been started");
-  }
-  if ( finalize_prepared ) {
-    throw CannotFinalizeThreadException("prepare_finalize() has already been called");
-  }
-  prepfin_hold_mutex_->lock();
-  while (prepfin_hold_) {
-    prepfin_hold_waitcond_->wait();
-  }
-  if (! prepfin_conc_loop_) {
-    loopinterrupt_antistarve_mutex->lock();
-    loop_mutex->lock();
-  }
-  finalize_prepared = true;
-  bool prepared = prepare_finalize_user();
-  if (! prepfin_conc_loop_) {
-    loop_mutex->unlock();
-    loopinterrupt_antistarve_mutex->unlock();
-  }
-  prepfin_hold_mutex_->unlock();
-  return prepared;
+	if (!started_) {
+		throw CannotFinalizeThreadException("Thread has not been started");
+	}
+	if (finalize_prepared) {
+		throw CannotFinalizeThreadException("prepare_finalize() has already been called");
+	}
+	prepfin_hold_mutex_->lock();
+	while (prepfin_hold_) {
+		prepfin_hold_waitcond_->wait();
+	}
+	if (!prepfin_conc_loop_) {
+		loopinterrupt_antistarve_mutex->lock();
+		loop_mutex->lock();
+	}
+	finalize_prepared = true;
+	bool prepared     = prepare_finalize_user();
+	if (!prepfin_conc_loop_) {
+		loop_mutex->unlock();
+		loopinterrupt_antistarve_mutex->unlock();
+	}
+	prepfin_hold_mutex_->unlock();
+	return prepared;
 }
-
 
 /** Prepare finalization user implementation.
  * This method is called by prepare_finalize(). If there can ever be a
@@ -436,9 +423,8 @@ Thread::prepare_finalize()
 bool
 Thread::prepare_finalize_user()
 {
-  return true;
+	return true;
 }
-
 
 /** Finalize the thread.
  * This method is executed just before the thread is canceled and destroyed.
@@ -478,7 +464,6 @@ Thread::finalize()
 {
 }
 
-
 /** Cancel finalization.
  * This means that something has happened (for example another thread from
  * the same plugin) has indicated that it can not be finalized. In that case
@@ -495,14 +480,13 @@ Thread::finalize()
 void
 Thread::cancel_finalize()
 {
-  if ( ! started_ ) {
-    throw CannotFinalizeThreadException("Cannot cancel finalize, thread has not been started");
-  }
-  loop_mutex->lock();
-  finalize_prepared = false;
-  loop_mutex->unlock();
+	if (!started_) {
+		throw CannotFinalizeThreadException("Cannot cancel finalize, thread has not been started");
+	}
+	loop_mutex->lock();
+	finalize_prepared = false;
+	loop_mutex->unlock();
 }
-
 
 /** Call this method to start the thread.
  * This method has to be called after the thread has been instantiated and
@@ -514,81 +498,81 @@ Thread::cancel_finalize()
 void
 Thread::start(bool wait)
 {
-  int err;
-  if (started_) {
-    throw Exception("You cannot start the same thread twice!");
-  }
+	int err;
+	if (started_) {
+		throw Exception("You cannot start the same thread twice!");
+	}
 
-  cancelled_ = false;
-  detached_  = false;
-  started_   = true;
-  wait_      = wait;
+	cancelled_ = false;
+	detached_  = false;
+	started_   = true;
+	wait_      = wait;
 
-  if ( (err = pthread_create(&thread_id_, NULL, Thread::entry, this)) != 0) {
-    // An error occured
-    throw Exception("Could not start thread", err);
-  }
-#if defined(_GNU_SOURCE) && defined(GLIBC___) && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
-  char tmpname[16];
-  strncpy(tmpname, name_, 15);
-  tmpname[15] = 0;
-  pthread_setname_np(thread_id_, tmpname);
+	if ((err = pthread_create(&thread_id_, NULL, Thread::entry, this)) != 0) {
+		// An error occured
+		throw Exception("Could not start thread", err);
+	}
+#if defined(_GNU_SOURCE) && defined(GLIBC___) \
+  && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
+	char tmpname[16];
+	strncpy(tmpname, name_, 15);
+	tmpname[15] = 0;
+	pthread_setname_np(thread_id_, tmpname);
 #endif
 
-  if (wait_)  startup_barrier_->wait();
+	if (wait_)
+		startup_barrier_->wait();
 }
-
 
 void
 Thread::lock_sleep_mutex()
 {
-  if (sleep_mutex_) {
-    sleep_mutex_->lock();
-  }
+	if (sleep_mutex_) {
+		sleep_mutex_->lock();
+	}
 }
-
 
 /** Entry point for the thread.
  * This is an utility method that acts as an entry point to the thread.
  * It is called automatically when you start the thread and will call run()
  * @param pthis a pointer to the instance that triggered the run of this method
  */
-/* static */  void *
+/* static */ void *
 Thread::entry(void *pthis)
 {
-  Thread *t = (Thread *)pthis;
+	Thread *t = (Thread *)pthis;
 
-  // Can be used for easier debugging in gdb, need to make this accessible
-  // printf("Thread %s (%lu) started\n", t->name(), t->thread_id());
+	// Can be used for easier debugging in gdb, need to make this accessible
+	// printf("Thread %s (%lu) started\n", t->name(), t->thread_id());
 
-  // Set thread instance as TSD
-  set_tsd_thread_instance(t);
+	// Set thread instance as TSD
+	set_tsd_thread_instance(t);
 
-  // lock sleep mutex, needed such that thread waits for initial wakeup
-  t->lock_sleep_mutex();
+	// lock sleep mutex, needed such that thread waits for initial wakeup
+	t->lock_sleep_mutex();
 
-  // Notify listeners that this thread started
-  t->notify_of_startup();
+	// Notify listeners that this thread started
+	t->notify_of_startup();
 
-  // Thread is started now, thread that called start() will continue
-  if (t->wait_)  t->startup_barrier_->wait();
+	// Thread is started now, thread that called start() will continue
+	if (t->wait_)
+		t->startup_barrier_->wait();
 
-  // Run thread
-  t->loop_mutex->lock();
-  t->once();
-  t->loop_mutex->unlock();
-  t->run();
+	// Run thread
+	t->loop_mutex->lock();
+	t->once();
+	t->loop_mutex->unlock();
+	t->run();
 
-  if ( t->detached_ ) {
-    // mark as stopped if detached since the thread will be deleted
-    // after entry() is done
-    t->started_ = false;
-  }
+	if (t->detached_) {
+		// mark as stopped if detached since the thread will be deleted
+		// after entry() is done
+		t->started_ = false;
+	}
 
-  // have no useful exit value
-  return NULL;
+	// have no useful exit value
+	return NULL;
 }
-
 
 /** Exit the thread.
  * You may call this from within your run() method to exit the thread.
@@ -597,15 +581,14 @@ Thread::entry(void *pthis)
 void
 Thread::exit()
 {
-  if ( delete_on_exit_ ) {
-    delete this;
-  }
+	if (delete_on_exit_) {
+		delete this;
+	}
 
-  waiting_for_wakeup_ = false;
-  cancelled_   = true;
-  pthread_exit(NULL);
+	waiting_for_wakeup_ = false;
+	cancelled_          = true;
+	pthread_exit(NULL);
 }
-
 
 /** Join the thread.
  * This waites for the thread to exit.
@@ -613,38 +596,37 @@ Thread::exit()
 void
 Thread::join()
 {
-  if ( started_ ) {
-    void *dont_care;
-    pthread_join(thread_id_, &dont_care);
-    started_ = false;
+	if (started_) {
+		void *dont_care;
+		pthread_join(thread_id_, &dont_care);
+		started_ = false;
 
-    if ( sleep_mutex_ != NULL ) {
-      // We HAVE to release this sleep mutex under any circumstances, so we try
-      // to lock it (locking a locked mutex or unlocking and unlocked mutex are undefined)
-      // and then unlock it. This is for example necessary if a thread is cancelled, and
-      // then set_opmode() is called, this would lead to a deadlock if the thread was
-      // cancelled while waiting for the sleep lock (which is very likely)
-      sleep_mutex_->try_lock();
-      sleep_mutex_->unlock();
-    }
+		if (sleep_mutex_ != NULL) {
+			// We HAVE to release this sleep mutex under any circumstances, so we try
+			// to lock it (locking a locked mutex or unlocking and unlocked mutex are undefined)
+			// and then unlock it. This is for example necessary if a thread is cancelled, and
+			// then set_opmode() is called, this would lead to a deadlock if the thread was
+			// cancelled while waiting for the sleep lock (which is very likely)
+			sleep_mutex_->try_lock();
+			sleep_mutex_->unlock();
+		}
 
-    // Force unlock of these mutexes, otherwise the same bad things as for the sleep
-    // mutex above could happen!
-    loop_mutex->try_lock();
-    loop_mutex->unlock();
+		// Force unlock of these mutexes, otherwise the same bad things as for the sleep
+		// mutex above could happen!
+		loop_mutex->try_lock();
+		loop_mutex->unlock();
 
-    // Force unlock of the loop listeners' mutex. If the thread is canceled
-    // during a loop listener call (pre_loop or post_loop), the thread cannot
-    // be finalized because this LockList is still locked, and any aspect using
-    // a LoopListener will try to remove itself from the LockList during
-    // finalization, leading to a deadlock. It is safe to unlock the mutex
-    // because the thread is already joined and thus no more loop listener calls
-    // will occur.
-    loop_listeners_->try_lock();
-    loop_listeners_->unlock();
-  }
+		// Force unlock of the loop listeners' mutex. If the thread is canceled
+		// during a loop listener call (pre_loop or post_loop), the thread cannot
+		// be finalized because this LockList is still locked, and any aspect using
+		// a LoopListener will try to remove itself from the LockList during
+		// finalization, leading to a deadlock. It is safe to unlock the mutex
+		// because the thread is already joined and thus no more loop listener calls
+		// will occur.
+		loop_listeners_->try_lock();
+		loop_listeners_->unlock();
+	}
 }
-
 
 /** Detach the thread.
  * Memory claimed by the thread will be automatically freed after the
@@ -653,10 +635,9 @@ Thread::join()
 void
 Thread::detach()
 {
-  detached_ = true;
-  pthread_detach(thread_id_);
+	detached_ = true;
+	pthread_detach(thread_id_);
 }
-
 
 /** Cancel a thread.
  * Use this to cancel the thread.
@@ -664,14 +645,13 @@ Thread::detach()
 void
 Thread::cancel()
 {
-  if ( started_ && ! cancelled_ ) {
-    if ( pthread_cancel(thread_id_) == 0 ) {
-      waiting_for_wakeup_ = false;
-      cancelled_ = true;
-    }
-  }
+	if (started_ && !cancelled_) {
+		if (pthread_cancel(thread_id_) == 0) {
+			waiting_for_wakeup_ = false;
+			cancelled_          = true;
+		}
+	}
 }
-
 
 /** Send signal to a thread.
  * Not that sending an unhandled signal might kill the whole process, not just the
@@ -681,9 +661,8 @@ Thread::cancel()
 void
 Thread::kill(int sig)
 {
-  pthread_kill(thread_id_, sig);
+	pthread_kill(thread_id_, sig);
 }
-
 
 /** Get operation mode.
  * @return opmode of thread.
@@ -691,9 +670,8 @@ Thread::kill(int sig)
 Thread::OpMode
 Thread::opmode() const
 {
-  return op_mode_;
+	return op_mode_;
 }
-
 
 /** Set operation mode.
  * This can be done at any time and the thread will from the next cycle on
@@ -703,25 +681,22 @@ Thread::opmode() const
 void
 Thread::set_opmode(OpMode op_mode)
 {
-  if ( started_ ) {
-    throw Exception("Cannot set thread opmode while running");
-  }
+	if (started_) {
+		throw Exception("Cannot set thread opmode while running");
+	}
 
-  if ( (op_mode_ == OPMODE_WAITFORWAKEUP) &&
-       (op_mode == OPMODE_CONTINUOUS) ) {
-    op_mode_ = OPMODE_CONTINUOUS;
-    delete sleep_condition_;
-    delete sleep_mutex_;
-    sleep_condition_ = NULL;
-    sleep_mutex_ = NULL;
-  } else if ( (op_mode_ == OPMODE_CONTINUOUS) &&
-	      (op_mode == OPMODE_WAITFORWAKEUP) ) {
-    sleep_mutex_     = new Mutex();
-    sleep_condition_ = new WaitCondition(sleep_mutex_);
-    op_mode_ = OPMODE_WAITFORWAKEUP;
-  }
+	if ((op_mode_ == OPMODE_WAITFORWAKEUP) && (op_mode == OPMODE_CONTINUOUS)) {
+		op_mode_ = OPMODE_CONTINUOUS;
+		delete sleep_condition_;
+		delete sleep_mutex_;
+		sleep_condition_ = NULL;
+		sleep_mutex_     = NULL;
+	} else if ((op_mode_ == OPMODE_CONTINUOUS) && (op_mode == OPMODE_WAITFORWAKEUP)) {
+		sleep_mutex_     = new Mutex();
+		sleep_condition_ = new WaitCondition(sleep_mutex_);
+		op_mode_         = OPMODE_WAITFORWAKEUP;
+	}
 }
-
 
 /** Set concurrent execution of prepare_finalize() and loop().
  * Usually calls to prepare_finalize() and a running loop() are mutually exclusive.
@@ -740,9 +715,8 @@ Thread::set_opmode(OpMode op_mode)
 void
 Thread::set_prepfin_conc_loop(bool concurrent)
 {
-  prepfin_conc_loop_ = concurrent;
+	prepfin_conc_loop_ = concurrent;
 }
-
 
 /** Set wakeup coalescing.
  * The standard behavior of multiple calls to wakeup() (before the thread actually
@@ -754,16 +728,15 @@ Thread::set_prepfin_conc_loop(bool concurrent)
 void
 Thread::set_coalesce_wakeups(bool coalesce)
 {
-  if ( op_mode_ == OPMODE_CONTINUOUS ) {
-    // nothing is using the value, just write it
-    coalesce_wakeups_ = coalesce;
-  } else {
-    // protect usage for calls to wakeup()
-    MutexLocker lock(sleep_mutex_);
-    coalesce_wakeups_ = coalesce;
-  }
+	if (op_mode_ == OPMODE_CONTINUOUS) {
+		// nothing is using the value, just write it
+		coalesce_wakeups_ = coalesce;
+	} else {
+		// protect usage for calls to wakeup()
+		MutexLocker lock(sleep_mutex_);
+		coalesce_wakeups_ = coalesce;
+	}
 }
-
 
 /** Set name of thread.
  * If you want a more descriptive thread name you can do so by calling this method
@@ -774,26 +747,26 @@ Thread::set_coalesce_wakeups(bool coalesce)
 void
 Thread::set_name(const char *format, ...)
 {
-  va_list va;
-  va_start(va, format);
-  char *old_name = name_;
-  if (vasprintf(&name_, format, va) == -1) {
-    name_ = old_name;
-    throw OutOfMemoryException("Could not set new thread name for '%s'", name_);
-  } else {
-    free(old_name);
-  }
-  va_end(va);
-#if defined(_GNU_SOURCE) && defined(GLIBC___) && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
-  if (thread_id_) {
-    char tmpname[16];
-    strncpy(tmpname, name_, 15);
-    tmpname[15] = 0;
-    pthread_setname_np(thread_id_, tmpname);
-  }
+	va_list va;
+	va_start(va, format);
+	char *old_name = name_;
+	if (vasprintf(&name_, format, va) == -1) {
+		name_ = old_name;
+		throw OutOfMemoryException("Could not set new thread name for '%s'", name_);
+	} else {
+		free(old_name);
+	}
+	va_end(va);
+#if defined(_GNU_SOURCE) && defined(GLIBC___) \
+  && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
+	if (thread_id_) {
+		char tmpname[16];
+		strncpy(tmpname, name_, 15);
+		tmpname[15] = 0;
+		pthread_setname_np(thread_id_, tmpname);
+	}
 #endif
 }
-
 
 /** Hold prepare_finalize().
  * In some situations you have to hold the finalization of a thread up to a certain
@@ -807,19 +780,19 @@ Thread::set_name(const char *format, ...)
 void
 Thread::set_prepfin_hold(bool hold)
 {
-  prepfin_hold_mutex_->lock();
-  if ( hold && finalize_prepared ) {
-    prepfin_hold_mutex_->unlock();
-    throw Exception("Thread(%s)::set_prepfin_hold: prepare_finalize() has "
-		    "been called already()", name_);
-  }
-  prepfin_hold_ = hold;
-  if ( ! hold ) {
-    prepfin_hold_waitcond_->wake_all();
-  }
-  prepfin_hold_mutex_->unlock();
+	prepfin_hold_mutex_->lock();
+	if (hold && finalize_prepared) {
+		prepfin_hold_mutex_->unlock();
+		throw Exception("Thread(%s)::set_prepfin_hold: prepare_finalize() has "
+		                "been called already()",
+		                name_);
+	}
+	prepfin_hold_ = hold;
+	if (!hold) {
+		prepfin_hold_waitcond_->wake_all();
+	}
+	prepfin_hold_mutex_->unlock();
 }
-
 
 /** Get ID of thread.
  * @return thread ID
@@ -827,9 +800,8 @@ Thread::set_prepfin_hold(bool hold)
 pthread_t
 Thread::thread_id() const
 {
-  return thread_id_;
+	return thread_id_;
 }
-
 
 /** Check if thread has been started.
  * @return true if thread has been started, false otherwise
@@ -837,9 +809,8 @@ Thread::thread_id() const
 bool
 Thread::started() const
 {
-  return started_;
+	return started_;
 }
-
 
 /** Check if thread has been cancelled.
  * @return true if the thread has been cancelled, false otherwise
@@ -847,9 +818,8 @@ Thread::started() const
 bool
 Thread::cancelled() const
 {
-  return cancelled_;
+	return cancelled_;
 }
-
 
 /** Check if thread has been detached.
  * @return true if the thread has been detached, false otherwise
@@ -857,9 +827,8 @@ Thread::cancelled() const
 bool
 Thread::detached() const
 {
-  return detached_;
+	return detached_;
 }
-
 
 /** Check if the thread is running.
  * A thread is running if it currently is busy in its loop() or once() method.
@@ -868,15 +837,14 @@ Thread::detached() const
 bool
 Thread::running() const
 {
-  // loop_mutex is mutable and thus we can call the lock methods here
-  if (loop_mutex->try_lock()) {
-    loop_mutex->unlock();
-    return false;
-  } else {
-    return true;
-  }
+	// loop_mutex is mutable and thus we can call the lock methods here
+	if (loop_mutex->try_lock()) {
+		loop_mutex->unlock();
+		return false;
+	} else {
+		return true;
+	}
 }
-
 
 /** Check if thread is currently waiting for wakeup.
  * A continuous thread is never waiting for wakeup and thus will always return
@@ -888,12 +856,12 @@ Thread::running() const
 bool
 Thread::waiting() const
 {
-  if (op_mode_ != OPMODE_WAITFORWAKEUP) {
-    return false;
-  } else {
-    MutexLocker lock(sleep_mutex_);
-    return waiting_for_wakeup_;
-  }
+	if (op_mode_ != OPMODE_WAITFORWAKEUP) {
+		return false;
+	} else {
+		MutexLocker lock(sleep_mutex_);
+		return waiting_for_wakeup_;
+	}
 }
 
 /** Set cancellation point.
@@ -902,9 +870,8 @@ Thread::waiting() const
 void
 Thread::test_cancel()
 {
-  pthread_testcancel();
+	pthread_testcancel();
 }
-
 
 /** Yield the processor to another thread or process.
  * This will suspend the execution of the current thread in favor of other
@@ -916,12 +883,11 @@ void
 Thread::yield()
 {
 #ifdef __USE_GNU
-  pthread_yield();
+	pthread_yield();
 #else
-  usleep(0);
+	usleep(0);
 #endif
 }
-
 
 /** Check if two threads are the same.
  * @param thread Thread to compare this thread to.
@@ -930,9 +896,8 @@ Thread::yield()
 bool
 Thread::operator==(const Thread &thread)
 {
-  return ( pthread_equal(thread_id_, thread.thread_id_) != 0 );
+	return (pthread_equal(thread_id_, thread.thread_id_) != 0);
 }
-
 
 /** Code to execute in the thread.
  * Executes loop() in each cycle. This is the default implementation and if
@@ -952,77 +917,75 @@ Thread::operator==(const Thread &thread)
 void
 Thread::run()
 {
-  if ( op_mode_ == OPMODE_WAITFORWAKEUP ) {
-    // Wait for initial wakeup
-    // sleep_mutex_ has been locked in entry() already!
-    while (pending_wakeups_ == 0) {
-      waiting_for_wakeup_ = true;
-      sleep_condition_->wait();
-    }
-    pending_wakeups_ -= 1;
-    sleep_mutex_->unlock();
-  }
+	if (op_mode_ == OPMODE_WAITFORWAKEUP) {
+		// Wait for initial wakeup
+		// sleep_mutex_ has been locked in entry() already!
+		while (pending_wakeups_ == 0) {
+			waiting_for_wakeup_ = true;
+			sleep_condition_->wait();
+		}
+		pending_wakeups_ -= 1;
+		sleep_mutex_->unlock();
+	}
 
-  forever {
+	forever
+	{
+		loopinterrupt_antistarve_mutex->stopby();
 
-    loopinterrupt_antistarve_mutex->stopby();
+		if (!finalize_prepared) {
+			loop_done_ = false;
 
+			loop_listeners_->lock();
+			for (LockList<ThreadLoopListener *>::iterator it = loop_listeners_->begin();
+			     it != loop_listeners_->end();
+			     it++) {
+				(*it)->pre_loop(this);
+			}
+			loop_listeners_->unlock();
 
-    if ( ! finalize_prepared ) {
-      loop_done_ = false;
+			loop_mutex->lock();
+			loop();
+			loop_mutex->unlock();
 
-      loop_listeners_->lock();
-      for (LockList<ThreadLoopListener *>::iterator it = loop_listeners_->begin();
-          it != loop_listeners_->end();
-          it++) {
-        (*it)->pre_loop(this);
-      }
-      loop_listeners_->unlock();
+			loop_listeners_->lock();
+			for (LockList<ThreadLoopListener *>::reverse_iterator it = loop_listeners_->rbegin();
+			     it != loop_listeners_->rend();
+			     it++) {
+				(*it)->post_loop(this);
+			}
+			loop_listeners_->unlock();
+		}
 
-      loop_mutex->lock();
-      loop();
-      loop_mutex->unlock();
+		loop_done_mutex_->lock();
+		loop_done_ = true;
+		loop_done_mutex_->unlock();
+		loop_done_waitcond_->wake_all();
 
-      loop_listeners_->lock();
-      for (LockList<ThreadLoopListener *>::reverse_iterator it = loop_listeners_->rbegin();
-          it != loop_listeners_->rend();
-          it++) {
-        (*it)->post_loop(this);
-      }
-      loop_listeners_->unlock();
-    }
+		test_cancel();
+		if (op_mode_ == OPMODE_WAITFORWAKEUP) {
+			if (barrier_) {
+				sleep_mutex_->lock();
+				Barrier *b = barrier_;
+				barrier_   = NULL;
+				sleep_mutex_->unlock();
 
-    loop_done_mutex_->lock();
-    loop_done_ = true;
-    loop_done_mutex_->unlock();
-    loop_done_waitcond_->wake_all();
+				b->wait();
 
-    test_cancel();
-    if ( op_mode_ == OPMODE_WAITFORWAKEUP ) {
-      if ( barrier_ ) {
-	sleep_mutex_->lock();
-        Barrier *b = barrier_;
-        barrier_ = NULL;
-	sleep_mutex_->unlock();
+				sleep_mutex_->lock();
+			} else {
+				sleep_mutex_->lock();
+			}
 
-	b->wait();
-
-	sleep_mutex_->lock();
-      } else {
-	sleep_mutex_->lock();
-      }
-
-      while (pending_wakeups_ == 0) {
-	waiting_for_wakeup_ = true;
-	sleep_condition_->wait();
-      }
-      pending_wakeups_ -= 1;
-      sleep_mutex_->unlock();
-    }
-    yield();
-  }
+			while (pending_wakeups_ == 0) {
+				waiting_for_wakeup_ = true;
+				sleep_condition_->wait();
+			}
+			pending_wakeups_ -= 1;
+			sleep_mutex_->unlock();
+		}
+		yield();
+	}
 }
-
 
 /** Wake up thread.
  * If the thread is being used in wait for wakeup mode this will wake up the
@@ -1031,24 +994,26 @@ Thread::run()
 void
 Thread::wakeup()
 {
-  if ( op_mode_ == OPMODE_WAITFORWAKEUP ) {
-    MutexLocker lock(sleep_mutex_);
+	if (op_mode_ == OPMODE_WAITFORWAKEUP) {
+		MutexLocker lock(sleep_mutex_);
 
-    if ( barrier_ ) {
-      throw Exception("Thread(%s): wakeup() cannot be called if loop is running "
-		      "with barrier already", name_);
-    }
+		if (barrier_) {
+			throw Exception("Thread(%s): wakeup() cannot be called if loop is running "
+			                "with barrier already",
+			                name_);
+		}
 
-    if (coalesce_wakeups_) pending_wakeups_  = 1;
-    else                    pending_wakeups_ += 1;
-    if (waiting_for_wakeup_) {
-      // currently waiting
-      waiting_for_wakeup_ = false;
-      sleep_condition_->wake_all();
-    }
-  }
+		if (coalesce_wakeups_)
+			pending_wakeups_ = 1;
+		else
+			pending_wakeups_ += 1;
+		if (waiting_for_wakeup_) {
+			// currently waiting
+			waiting_for_wakeup_ = false;
+			sleep_condition_->wake_all();
+		}
+	}
 }
-
 
 /** Wake up thread and wait for barrier afterwards.
  * If the thread is being used in wait for wakeup mode this will wake up the
@@ -1058,37 +1023,39 @@ Thread::wakeup()
 void
 Thread::wakeup(Barrier *barrier)
 {
-  if ( op_mode_ != OPMODE_WAITFORWAKEUP )  return;
+	if (op_mode_ != OPMODE_WAITFORWAKEUP)
+		return;
 
-  if ( barrier == NULL ) {
-    throw NullPointerException("Thread(%s)::wakeup(): barrier must not be NULL", name_);
-  }
+	if (barrier == NULL) {
+		throw NullPointerException("Thread(%s)::wakeup(): barrier must not be NULL", name_);
+	}
 
-  MutexLocker lock(sleep_mutex_);
-  if ( ! waiting_for_wakeup_ && barrier_) {
-    throw Exception("Thread %s already running with barrier, cannot wakeup %i  %p", name_,
-                    waiting_for_wakeup_, barrier_);
-  }
+	MutexLocker lock(sleep_mutex_);
+	if (!waiting_for_wakeup_ && barrier_) {
+		throw Exception("Thread %s already running with barrier, cannot wakeup %i  %p",
+		                name_,
+		                waiting_for_wakeup_,
+		                barrier_);
+	}
 
-  pending_wakeups_ += 1;
-  barrier_ = barrier;
-  if (waiting_for_wakeup_) {
-    // currently waiting
-    waiting_for_wakeup_ = false;
-    sleep_condition_->wake_all();
-  }
+	pending_wakeups_ += 1;
+	barrier_ = barrier;
+	if (waiting_for_wakeup_) {
+		// currently waiting
+		waiting_for_wakeup_ = false;
+		sleep_condition_->wake_all();
+	}
 }
-
 
 /** Wait for the current loop iteration to finish. */
 void
 Thread::wait_loop_done()
 {
-  loop_done_mutex_->lock();
-  while (! loop_done_) {
-    loop_done_waitcond_->wait();
-  }
-  loop_done_mutex_->unlock();
+	loop_done_mutex_->lock();
+	while (!loop_done_) {
+		loop_done_waitcond_->wait();
+	}
+	loop_done_mutex_->unlock();
 }
 
 /** Code to execute in the thread.
@@ -1099,13 +1066,12 @@ Thread::wait_loop_done()
 void
 Thread::loop()
 {
-  if ( delete_on_exit_ ) {
-    delete this;
-  }
-  loop_mutex->unlock();
-  pthread_exit(NULL);
+	if (delete_on_exit_) {
+		delete this;
+	}
+	loop_mutex->unlock();
+	pthread_exit(NULL);
 }
-
 
 /** Execute an action exactly once.
  * This code is executed once and only once right after the thread is started
@@ -1120,7 +1086,6 @@ Thread::once()
 {
 }
 
-
 /** Set whether the thread should be deleted on exit.
  * If you set this to true the thread instance is deleted if the threads exits
  * (only on internal exits, not if you cancel the thread!).
@@ -1130,9 +1095,8 @@ Thread::once()
 void
 Thread::set_delete_on_exit(bool del)
 {
-  delete_on_exit_ = del;
+	delete_on_exit_ = del;
 }
-
 
 /** Check if wakeups are pending.
  * @return true if at least one more loop iteration has been queued (wakeup() has
@@ -1141,8 +1105,8 @@ Thread::set_delete_on_exit(bool del)
 bool
 Thread::wakeup_pending()
 {
-  MutexLocker lock(sleep_mutex_);
-  return (pending_wakeups_ > 0);
+	MutexLocker lock(sleep_mutex_);
+	return (pending_wakeups_ > 0);
 }
 
 /** Set flag for the thread.
@@ -1157,9 +1121,8 @@ Thread::wakeup_pending()
 void
 Thread::set_flag(uint32_t flag)
 {
-  flags_ |= flag;
+	flags_ |= flag;
 }
-
 
 /** Unset flag.
  * Unsets a specified flag.
@@ -1169,9 +1132,8 @@ Thread::set_flag(uint32_t flag)
 void
 Thread::unset_flag(uint32_t flag)
 {
-  flags_ &= 0xFFFFFFFF ^ flag;
+	flags_ &= 0xFFFFFFFF ^ flag;
 }
-
 
 /** Set all flags in one go.
  * @param flags flags
@@ -1179,9 +1141,8 @@ Thread::unset_flag(uint32_t flag)
 void
 Thread::set_flags(uint32_t flags)
 {
-  flags_ = flags;
+	flags_ = flags;
 }
-
 
 /** Check if FLAG_BAD was set.
  * This is a convenience method to check if FLAG_BAD has been set.
@@ -1190,9 +1151,8 @@ Thread::set_flags(uint32_t flags)
 bool
 Thread::flagged_bad() const
 {
-  return flags_ & FLAG_BAD;
+	return flags_ & FLAG_BAD;
 }
-
 
 /** Add notification listener.
  * Add a notification listener for this thread.
@@ -1201,9 +1161,8 @@ Thread::flagged_bad() const
 void
 Thread::add_notification_listener(ThreadNotificationListener *notification_listener)
 {
-  notification_listeners_->push_back_locked(notification_listener);
+	notification_listeners_->push_back_locked(notification_listener);
 }
-
 
 /** Remove notification listener.
  * @param notification_listener notification listener to remove
@@ -1211,9 +1170,8 @@ Thread::add_notification_listener(ThreadNotificationListener *notification_liste
 void
 Thread::remove_notification_listener(ThreadNotificationListener *notification_listener)
 {
-  notification_listeners_->remove_locked(notification_listener);
+	notification_listeners_->remove_locked(notification_listener);
 }
-
 
 /** Add loop listener.
  * Add a loop listener for this thread.
@@ -1222,9 +1180,8 @@ Thread::remove_notification_listener(ThreadNotificationListener *notification_li
 void
 Thread::add_loop_listener(ThreadLoopListener *loop_listener)
 {
-  loop_listeners_->push_back_locked(loop_listener);
+	loop_listeners_->push_back_locked(loop_listener);
 }
-
 
 /** Remove loop listener.
  * @param loop_listener loop listener to remove
@@ -1232,9 +1189,8 @@ Thread::add_loop_listener(ThreadLoopListener *loop_listener)
 void
 Thread::remove_loop_listener(ThreadLoopListener *loop_listener)
 {
-  loop_listeners_->remove_locked(loop_listener);
+	loop_listeners_->remove_locked(loop_listener);
 }
-
 
 /** Notify of successful startup.
  * This method is called internally in entry().
@@ -1242,18 +1198,17 @@ Thread::remove_loop_listener(ThreadLoopListener *loop_listener)
 void
 Thread::notify_of_startup()
 {
-  notification_listeners_->lock();
-  LockList<ThreadNotificationListener *>::iterator i = notification_listeners_->begin();
-  while (i != notification_listeners_->end()) {
-    if (! (*i)->thread_started(this)) {
-      i = notification_listeners_->erase(i);
-    } else {
-      ++i;
-    }
-  }
-  notification_listeners_->unlock();  
+	notification_listeners_->lock();
+	LockList<ThreadNotificationListener *>::iterator i = notification_listeners_->begin();
+	while (i != notification_listeners_->end()) {
+		if (!(*i)->thread_started(this)) {
+			i = notification_listeners_->erase(i);
+		} else {
+			++i;
+		}
+	}
+	notification_listeners_->unlock();
 }
-
 
 /** Notify of failed init.
  * This method must be called if the initialization of the thread
@@ -1262,18 +1217,17 @@ Thread::notify_of_startup()
 void
 Thread::notify_of_failed_init()
 {
-  notification_listeners_->lock();
-  LockList<ThreadNotificationListener *>::iterator i = notification_listeners_->begin();
-  while (i != notification_listeners_->end()) {
-    if ( ! (*i)->thread_init_failed(this) ) {
-      i = notification_listeners_->erase(i);
-    } else {
-      ++i;
-    }
-  }
-  notification_listeners_->unlock();
+	notification_listeners_->lock();
+	LockList<ThreadNotificationListener *>::iterator i = notification_listeners_->begin();
+	while (i != notification_listeners_->end()) {
+		if (!(*i)->thread_init_failed(this)) {
+			i = notification_listeners_->erase(i);
+		} else {
+			++i;
+		}
+	}
+	notification_listeners_->unlock();
 }
-
 
 /** Intialize thread key.
  * For internal usage only.
@@ -1281,22 +1235,21 @@ Thread::notify_of_failed_init()
 void
 Thread::init_thread_key()
 {
-  pthread_mutex_lock(&thread_key_mutex_);
-  if ( THREAD_KEY == PTHREAD_KEYS_MAX ) {
-    // Has not been initialized, do it!
-    int err;
-    if ( (err = pthread_key_create(&THREAD_KEY, NULL)) != 0 ) {
-      if ( ENOMEM == err ) {
-	throw OutOfMemoryException("Could not create key for thread "
-				   "specific data (reference to thread)");
-      } else {
-	throw Exception("Thread key for reference to thread could not be created", err);
-      }
-    }
-  }
-  pthread_mutex_unlock(&thread_key_mutex_);
+	pthread_mutex_lock(&thread_key_mutex_);
+	if (THREAD_KEY == PTHREAD_KEYS_MAX) {
+		// Has not been initialized, do it!
+		int err;
+		if ((err = pthread_key_create(&THREAD_KEY, NULL)) != 0) {
+			if (ENOMEM == err) {
+				throw OutOfMemoryException("Could not create key for thread "
+				                           "specific data (reference to thread)");
+			} else {
+				throw Exception("Thread key for reference to thread could not be created", err);
+			}
+		}
+	}
+	pthread_mutex_unlock(&thread_key_mutex_);
 }
-
 
 /** Set thread instance in thread-specific data (TSD).
  * Use thread-specific data to store a reference to the Thread instance in the
@@ -1306,16 +1259,15 @@ Thread::init_thread_key()
 void
 Thread::set_tsd_thread_instance(Thread *t)
 {
-  int err = 0;
-  if ( (err = pthread_setspecific(THREAD_KEY, t)) != 0 ) {
-    if ( ENOMEM == err ) {
-      throw OutOfMemoryException("Could not set specific data (reference to thread)");
-    } else {
-      throw Exception("Could not set specific data (reference to thread), unknown reason");
-    }
-  }
+	int err = 0;
+	if ((err = pthread_setspecific(THREAD_KEY, t)) != 0) {
+		if (ENOMEM == err) {
+			throw OutOfMemoryException("Could not set specific data (reference to thread)");
+		} else {
+			throw Exception("Could not set specific data (reference to thread), unknown reason");
+		}
+	}
 }
-
 
 /** Initialize Thread wrapper instance for main thread.
  * This will create an internal Thread instance such that it can be guaranteed that
@@ -1323,11 +1275,10 @@ Thread::set_tsd_thread_instance(Thread *t)
 void
 Thread::init_main()
 {
-  init_thread_key();
-  Thread *t = new Thread(MAIN_THREAD_NAME, pthread_self());
-  set_tsd_thread_instance(t);
+	init_thread_key();
+	Thread *t = new Thread(MAIN_THREAD_NAME, pthread_self());
+	set_tsd_thread_instance(t);
 }
-
 
 /** Destroy main thread wrapper instance.
  * This destroys the thread wrapper created with init_main(). Note that
@@ -1337,14 +1288,13 @@ Thread::init_main()
 void
 Thread::destroy_main()
 {
-  Thread *t = current_thread();
-  if ( strcmp(t->name(), MAIN_THREAD_NAME) == 0 ) {
-    delete t;
-  } else {
-    throw Exception("Main thread can only be destroyed in main thread");
-  }
+	Thread *t = current_thread();
+	if (strcmp(t->name(), MAIN_THREAD_NAME) == 0) {
+		delete t;
+	} else {
+		throw Exception("Main thread can only be destroyed in main thread");
+	}
 }
-
 
 /** Get the ID of the currently running thread.
  * This will return the ID of the thread in which's context this method was
@@ -1354,9 +1304,8 @@ Thread::destroy_main()
 pthread_t
 Thread::current_thread_id()
 {
-  return pthread_self();
+	return pthread_self();
 }
-
 
 /** Get the name of the current thread.
  * This will first check if this is a Thread instance, and if so call
@@ -1369,18 +1318,19 @@ std::string
 Thread::current_thread_name()
 {
 	Thread *t = Thread::current_thread_noexc();
-  if ( t ) {
-	  return t->name();
-#if defined(_GNU_SOURCE) && defined(GLIBC___) && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
-  } else {
-	  char name[16];
-	  if (pthread_getname_np(pthread_self(), name, 16) == 0) {
-		  return name;
-	  }
+	if (t) {
+		return t->name();
+#if defined(_GNU_SOURCE) && defined(GLIBC___) \
+  && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
+	} else {
+		char name[16];
+		if (pthread_getname_np(pthread_self(), name, 16) == 0) {
+			return name;
+		}
 #endif
-  }
+	}
 
-  return "";
+	return "";
 }
 
 /** Set the name of the current thread.
@@ -1390,16 +1340,17 @@ Thread::current_thread_name()
  * @param thread_name thread name to set
  */
 void
-Thread::current_thread_name(const std::string& thread_name)
+Thread::current_thread_name(const std::string &thread_name)
 {
 	Thread *t = Thread::current_thread_noexc();
-  if ( t ) {
-	  return t->set_name("%s", thread_name.c_str());
-#if defined(_GNU_SOURCE) && defined(GLIBC___) && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
-  } else {
-	  pthread_setname_np(pthread_self(), thread_name.c_str());
+	if (t) {
+		return t->set_name("%s", thread_name.c_str());
+#if defined(_GNU_SOURCE) && defined(GLIBC___) \
+  && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
+	} else {
+		pthread_setname_np(pthread_self(), thread_name.c_str());
 #endif
-  }
+	}
 }
 
 /** Get the Thread instance of the currently running thread.
@@ -1414,12 +1365,11 @@ Thread::current_thread_name(const std::string& thread_name)
 Thread *
 Thread::current_thread()
 {
-  if ( THREAD_KEY == PTHREAD_KEYS_MAX ) {
-    throw Exception("No thread has been initialized");
-  }
-  return (Thread *)pthread_getspecific(THREAD_KEY);
+	if (THREAD_KEY == PTHREAD_KEYS_MAX) {
+		throw Exception("No thread has been initialized");
+	}
+	return (Thread *)pthread_getspecific(THREAD_KEY);
 }
-
 
 /** Similar to current_thread, but does never throw an exception.
  * This is a convenience method doing the same as current_thread(), but it never ever
@@ -1430,12 +1380,11 @@ Thread::current_thread()
 Thread *
 Thread::current_thread_noexc() throw()
 {
-  if ( THREAD_KEY == PTHREAD_KEYS_MAX ) {
-    return 0;
-  }
-  return (Thread *)pthread_getspecific(THREAD_KEY);
+	if (THREAD_KEY == PTHREAD_KEYS_MAX) {
+		return 0;
+	}
+	return (Thread *)pthread_getspecific(THREAD_KEY);
 }
-
 
 /** Set the cancel state of the current thread.
  * The cancel state can only be set on the current thread. Please also
@@ -1446,22 +1395,21 @@ Thread::current_thread_noexc() throw()
 void
 Thread::set_cancel_state(CancelState new_state, CancelState *old_state)
 {
-  int oldstate = PTHREAD_CANCEL_ENABLE;
-  int newstate = PTHREAD_CANCEL_ENABLE;
-  if ( new_state == CANCEL_DISABLED ) {
-    newstate = PTHREAD_CANCEL_DISABLE;
-  }
+	int oldstate = PTHREAD_CANCEL_ENABLE;
+	int newstate = PTHREAD_CANCEL_ENABLE;
+	if (new_state == CANCEL_DISABLED) {
+		newstate = PTHREAD_CANCEL_DISABLE;
+	}
 
-  pthread_setcancelstate(newstate, &oldstate);
+	pthread_setcancelstate(newstate, &oldstate);
 
-  if ( old_state != NULL ) {
-    if ( oldstate == PTHREAD_CANCEL_DISABLE ) {
-      *old_state = CANCEL_DISABLED;
-    } else {
-      *old_state = CANCEL_ENABLED;
-    }
-  }
+	if (old_state != NULL) {
+		if (oldstate == PTHREAD_CANCEL_DISABLE) {
+			*old_state = CANCEL_DISABLED;
+		} else {
+			*old_state = CANCEL_ENABLED;
+		}
+	}
 }
-
 
 } // end namespace fawkes

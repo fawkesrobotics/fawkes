@@ -26,54 +26,52 @@
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
+
 #include <cstdlib>
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
-#  include <unordered_set>
-#  include <functional>
+#	include <functional>
+#	include <unordered_set>
 #elif GLIBCXX___ > 20080305
-#  include <tr1/unordered_set>
+#	include <tr1/unordered_set>
 #else
-#  include <ext/hash_set>
+#	include <ext/hash_set>
 #endif
 
 namespace fawkes {
 
-
 template <class KeyType,
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
           class HashFunction = std::hash<KeyType>,
-          class EqualKey     = std::equal_to<KeyType> >
+          class EqualKey     = std::equal_to<KeyType>>
 class LockHashSet : public std::unordered_set<KeyType, HashFunction, EqualKey>
 #elif GLIBCXX___ > 20080305
           class HashFunction = std::tr1::hash<KeyType>,
-          class EqualKey     = std::equal_to<KeyType> >
+          class EqualKey     = std::equal_to<KeyType>>
 class LockHashSet : public std::tr1::unordered_set<KeyType, HashFunction, EqualKey>
 #else
           class HashFunction = gnu_cxx_::hash<KeyType>,
-          class EqualKey     = std::equal_to<KeyType> >
+          class EqualKey     = std::equal_to<KeyType>>
 class LockHashSet : public gnu_cxx_::hash_set<KeyType, HashFunction, EqualKey>
 #endif
 {
- public:
-  LockHashSet();
-  LockHashSet(const LockHashSet<KeyType, HashFunction, EqualKey> &lh);
-  virtual ~LockHashSet();
+public:
+	LockHashSet();
+	LockHashSet(const LockHashSet<KeyType, HashFunction, EqualKey> &lh);
+	virtual ~LockHashSet();
 
-  void           lock() const;
-  bool           try_lock() const;
-  void           unlock() const;
-  RefPtr<Mutex>  mutex() const;
+	void          lock() const;
+	bool          try_lock() const;
+	void          unlock() const;
+	RefPtr<Mutex> mutex() const;
 
-  void           insert_locked(const KeyType& x);
+	void insert_locked(const KeyType &x);
 
-  LockHashSet<KeyType, HashFunction, EqualKey> &
-  operator=(const LockHashSet<KeyType, HashFunction, EqualKey> &ll);
+	LockHashSet<KeyType, HashFunction, EqualKey> &
+	operator=(const LockHashSet<KeyType, HashFunction, EqualKey> &ll);
 
- private:
-  mutable RefPtr<Mutex> mutex_;
-
+private:
+	mutable RefPtr<Mutex> mutex_;
 };
-
 
 /** @class LockHashSet core/utils/lock_hashset.h
  * Hash set with a lock.
@@ -85,44 +83,42 @@ class LockHashSet : public gnu_cxx_::hash_set<KeyType, HashFunction, EqualKey>
  * @author Tim Niemueller
  */
 
-
 /** Constructor. */
 template <class KeyType, class HashFunction, class EqualKey>
-LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet()
-  : mutex_(new Mutex())
-{}
-
+LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet() : mutex_(new Mutex())
+{
+}
 
 /** Copy constructor.
  * @param lh LockHashSet to copy
  */
 template <class KeyType, class HashFunction, class EqualKey>
-LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet(const LockHashSet<KeyType, HashFunction, EqualKey> &lh)
+LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet(
+  const LockHashSet<KeyType, HashFunction, EqualKey> &lh)
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
-  : std::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh),
+: std::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh),
 #elif GLIBCXX___ > 20080305
-  : std::tr1::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh),
+: std::tr1::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh),
 #else
-  : gnu_cxx_::hash_set<KeyType, HashFunction, EqualKey>::hash_set(lh),
+: gnu_cxx_::hash_set<KeyType, HashFunction, EqualKey>::hash_set(lh),
 #endif
-    mutex_(new Mutex())
-{}
-
+  mutex_(new Mutex())
+{
+}
 
 /** Destructor. */
 template <class KeyType, class HashFunction, class EqualKey>
 LockHashSet<KeyType, HashFunction, EqualKey>::~LockHashSet()
-{}
-
+{
+}
 
 /** Lock set. */
 template <class KeyType, class HashFunction, class EqualKey>
 void
 LockHashSet<KeyType, HashFunction, EqualKey>::lock() const
 {
-  mutex_->lock();
+	mutex_->lock();
 }
-
 
 /** Try to lock set.
  * @return true, if the lock has been aquired, false otherwise.
@@ -131,31 +127,28 @@ template <class KeyType, class HashFunction, class EqualKey>
 bool
 LockHashSet<KeyType, HashFunction, EqualKey>::try_lock() const
 {
-  return mutex_->try_lock();
+	return mutex_->try_lock();
 }
-
 
 /** Unlock set. */
 template <class KeyType, class HashFunction, class EqualKey>
 void
 LockHashSet<KeyType, HashFunction, EqualKey>::unlock() const
 {
-  return mutex_->unlock();
+	return mutex_->unlock();
 }
-
 
 /** Insert element to hash set with lock protection.
  * @param x element to add
  */
 template <class KeyType, class HashFunction, class EqualKey>
 void
-LockHashSet<KeyType, HashFunction, EqualKey>::insert_locked(const KeyType& x)
+LockHashSet<KeyType, HashFunction, EqualKey>::insert_locked(const KeyType &x)
 {
-  mutex_->lock();
-  insert(x);
-  mutex_->unlock();
+	mutex_->lock();
+	insert(x);
+	mutex_->unlock();
 }
-
 
 /** Get access to the internal mutex.
  * Can be used with MutexLocker.
@@ -165,7 +158,7 @@ template <typename KeyType, class HashFunction, class EqualKey>
 RefPtr<Mutex>
 LockHashSet<KeyType, HashFunction, EqualKey>::mutex() const
 {
-  return mutex_;
+	return mutex_;
 }
 
 /** Copy values from another LockHashSet.
@@ -176,22 +169,21 @@ LockHashSet<KeyType, HashFunction, EqualKey>::mutex() const
  */
 template <typename KeyType, class HashFunction, class EqualKey>
 LockHashSet<KeyType, HashFunction, EqualKey> &
-LockHashSet<KeyType, HashFunction, EqualKey>::operator=(
-  const LockHashSet<KeyType, HashFunction, EqualKey> &ll)
+LockHashSet<KeyType, HashFunction, EqualKey>::
+operator=(const LockHashSet<KeyType, HashFunction, EqualKey> &ll)
 {
-  mutex_->lock();
-  ll.lock();
-  this->clear();
-  typename LockHashSet<KeyType, HashFunction, EqualKey>::const_iterator i;
-  for (i = ll.begin(); i != ll.end(); ++i) {
-    this->insert(*i);
-  }
-  ll.unlock();
-  mutex_->unlock();
+	mutex_->lock();
+	ll.lock();
+	this->clear();
+	typename LockHashSet<KeyType, HashFunction, EqualKey>::const_iterator i;
+	for (i = ll.begin(); i != ll.end(); ++i) {
+		this->insert(*i);
+	}
+	ll.unlock();
+	mutex_->unlock();
 
-  return *this;
+	return *this;
 }
-
 
 } // end namespace fawkes
 

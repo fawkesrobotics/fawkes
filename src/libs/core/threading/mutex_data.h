@@ -27,64 +27,69 @@
 #include <pthread.h>
 
 #ifdef DEBUG_THREADING
-#include <core/threading/thread.h>
-#include <core/exception.h>
-#include <cstring>
-#include <cstdlib>
-#include <cstdio>
+#	include <core/exception.h>
+#	include <core/threading/thread.h>
+
+#	include <cstdio>
+#	include <cstdlib>
+#	include <cstring>
 #endif
 
 namespace fawkes {
 
-
 /// @cond INTERNALS
 /** Internal class of Mutexes, do not use directly.
  */
-class MutexData {
- public:
-  pthread_mutex_t mutex;
+class MutexData
+{
+public:
+	pthread_mutex_t mutex;
 
 #ifdef DEBUG_THREADING
-  MutexData() {
-    lock_holder = strdup("Not locked");
-  }
+	MutexData()
+	{
+		lock_holder = strdup("Not locked");
+	}
 
-  ~MutexData() {
-    if ( lock_holder ) {
-      free(lock_holder);
-    }
-  }
+	~MutexData()
+	{
+		if (lock_holder) {
+			free(lock_holder);
+		}
+	}
 
-  char *lock_holder;
+	char *lock_holder;
 
-  void set_lock_holder()
-  {
-    if ( lock_holder ) {
-      free(lock_holder);
-    }
-    try {
-      Thread *ct = Thread::current_thread();
-      if ( ct ) {
-	lock_holder = strdup(ct->name());
-      } else {
-	lock_holder = strdup("Unknown");
-      }
-    } catch (Exception &e) {
-      asprintf(&lock_holder, "Unknown: failed to get thread (%s)", e.what());
-    }
-  }
+	void
+	set_lock_holder()
+	{
+		if (lock_holder) {
+			free(lock_holder);
+		}
+		try {
+			Thread *ct = Thread::current_thread();
+			if (ct) {
+				lock_holder = strdup(ct->name());
+			} else {
+				lock_holder = strdup("Unknown");
+			}
+		} catch (Exception &e) {
+			asprintf(&lock_holder, "Unknown: failed to get thread (%s)", e.what());
+		}
+	}
 
-  void unset_lock_holder() {
-    if ( lock_holder ) {
-      free(lock_holder);
-    }
-    lock_holder = strdup("Not locked");
-  }
+	void
+	unset_lock_holder()
+	{
+		if (lock_holder) {
+			free(lock_holder);
+		}
+		lock_holder = strdup("Not locked");
+	}
 
 #endif
 };
 /// @endcond
-
 
 } // end namespace fawkes
 
