@@ -21,6 +21,7 @@
  */
 
 #include "sensor_thread.h"
+
 #include "thread_roomba_500.h"
 
 using namespace fawkes;
@@ -36,22 +37,21 @@ using namespace fawkes;
  * @param roomba500_thread Roomba 500 thread to trigger to write to blackboard.
  */
 RoombaSensorThread::RoombaSensorThread(Roomba500Thread *roomba500_thread)
-  : Thread("RoombaSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
+: Thread("RoombaSensorThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
-  roomba500_thread_ = roomba500_thread;
+	roomba500_thread_ = roomba500_thread;
 }
-
-
 
 void
 RoombaSensorThread::loop()
 {
-  try {
-    roomba500_thread_->write_blackboard();
-  } catch (Exception &e) {
-    logger->log_warn(name(), "%s failed to write to BB, exception follows.",
-		     roomba500_thread_->name());
-    logger->log_warn(name(), e);
-  }
+	try {
+		roomba500_thread_->write_blackboard();
+	} catch (Exception &e) {
+		logger->log_warn(name(),
+		                 "%s failed to write to BB, exception follows.",
+		                 roomba500_thread_->name());
+		logger->log_warn(name(), e);
+	}
 }
