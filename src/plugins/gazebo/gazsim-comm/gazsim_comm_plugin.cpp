@@ -23,6 +23,7 @@
  */
 
 #include "gazsim_comm_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -32,16 +33,15 @@ using namespace fawkes;
  */
 class GazsimCommPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit GazsimCommPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new GazsimCommThread());
-  }
+	explicit GazsimCommPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new GazsimCommThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("Simulates and manages communication for testing with Gazebo")
 EXPORT_PLUGIN(GazsimCommPlugin)
