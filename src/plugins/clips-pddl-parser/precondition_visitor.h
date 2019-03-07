@@ -24,22 +24,20 @@
 #include <pddl_parser/pddl_parser.h>
 
 #include <boost/variant/variant.hpp>
-#include <vector>
 #include <string>
+#include <vector>
 
-class PreconditionToCLIPSFactVisitor
-: public boost::static_visitor<std::vector<std::string>>
+class PreconditionToCLIPSFactVisitor : public boost::static_visitor<std::vector<std::string>>
 {
- public:
-  PreconditionToCLIPSFactVisitor(const std::string &parent, int sub_counter,
-      bool is_main=false);
-  std::vector<std::string> operator()(pddl_parser::Atom &a) const;
-  std::vector<std::string> operator()(pddl_parser::Predicate &p) const;
- private:
-  std::string parent_;
-  uint sub_counter_;
-  bool is_main_;
-};
+public:
+	PreconditionToCLIPSFactVisitor(const std::string &parent, int sub_counter, bool is_main = false);
+	std::vector<std::string> operator()(pddl_parser::Atom &a) const;
+	std::vector<std::string> operator()(pddl_parser::Predicate &p) const;
 
+private:
+	std::string parent_;
+	uint        sub_counter_;
+	bool        is_main_;
+};
 
 #endif /* !PLUGINS_CLIPS_PDDL_PARSER_PRECONDITION_VISITOR_H__ */

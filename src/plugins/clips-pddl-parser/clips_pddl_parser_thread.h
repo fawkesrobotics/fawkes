@@ -21,17 +21,16 @@
 #ifndef _PLUGINS_CLIPS_PDDL_PARSER_THEAD_H_
 #define _PLUGINS_CLIPS_PDDL_PARSER_THEAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips_feature.h>
 
-class ClipsPddlParserThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::CLIPSFeatureAspect
+class ClipsPddlParserThread : public fawkes::Thread,
+                              public fawkes::LoggingAspect,
+                              public fawkes::CLIPSFeatureAspect
 {
-  public:
-    ClipsPddlParserThread();
-    //virtual ~ClipsPddlParserThread();
+public:
+	ClipsPddlParserThread();
+	//virtual ~ClipsPddlParserThread();
 };
 #endif /* !PLUGINS_CLIPS_PDDL_PARSER_THEAD_H__ */
