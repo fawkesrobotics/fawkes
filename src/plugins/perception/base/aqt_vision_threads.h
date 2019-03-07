@@ -29,47 +29,48 @@
 #include <memory>
 
 namespace fawkes {
-  class Clock;
-  class Barrier;
-}
+class Clock;
+class Barrier;
+} // namespace fawkes
 
 class FvBaseThread;
 class FvAquisitionThread;
 
 class FvAqtVisionThreads
 {
- friend FvBaseThread;
- friend FvAquisitionThread;
- public:
-  FvAqtVisionThreads(fawkes::Clock *clock);
-  ~FvAqtVisionThreads();
+	friend FvBaseThread;
+	friend FvAquisitionThread;
 
-  void add_waiting_thread(fawkes::Thread *thread);
-  void remove_thread(fawkes::Thread *thread);
-  void remove_waiting_thread(fawkes::Thread *thread);
-  void set_thread_running(fawkes::Thread *thread);
+public:
+	FvAqtVisionThreads(fawkes::Clock *clock);
+	~FvAqtVisionThreads();
 
-  bool  empty();
-  float empty_time();
+	void add_waiting_thread(fawkes::Thread *thread);
+	void remove_thread(fawkes::Thread *thread);
+	void remove_waiting_thread(fawkes::Thread *thread);
+	void set_thread_running(fawkes::Thread *thread);
 
-  bool  has_cyclic_thread();
-  bool  has_cont_thread();
+	bool  empty();
+	float empty_time();
 
-  void  wakeup_and_wait_cyclic_threads();
+	bool has_cyclic_thread();
+	bool has_cont_thread();
 
-  void  set_prepfin_hold(bool hold);
+	void wakeup_and_wait_cyclic_threads();
 
-  bool  has_waiting_thread(fawkes::Thread *t);
+	void set_prepfin_hold(bool hold);
 
- private:
-  fawkes::ThreadList  running_threads_cyclic;
-  fawkes::ThreadList  running_threads_cont;
-  fawkes::ThreadList  waiting_threads;
+	bool has_waiting_thread(fawkes::Thread *t);
+
+private:
+	fawkes::ThreadList running_threads_cyclic;
+	fawkes::ThreadList running_threads_cont;
+	fawkes::ThreadList waiting_threads;
 
 	std::unique_ptr<fawkes::Barrier> cyclic_barrier;
 
-  fawkes::Clock *clock;
-  fawkes::Time  _empty_time;
+	fawkes::Clock *clock;
+	fawkes::Time   _empty_time;
 };
 
 #endif

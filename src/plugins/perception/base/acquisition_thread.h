@@ -23,107 +23,111 @@
 #ifndef _FIREVISION_APPS_BASE_ACQUISITION_THREAD_H_
 #define _FIREVISION_APPS_BASE_ACQUISITION_THREAD_H_
 
-#include <core/threading/thread.h>
-
-#include <aspect/logging.h>
 #include <aspect/blackboard.h>
-
+#include <aspect/logging.h>
+#include <blackboard/interface_listener.h>
+#include <core/threading/thread.h>
 #include <fvcams/shmem.h>
 #include <fvutils/color/colorspaces.h>
-#include <blackboard/interface_listener.h>
 
 #include <map>
 
 namespace fawkes {
-  class Logger;
-  class Clock;
-  class Mutex;
-  class WaitCondition;
-  class SwitchInterface;
+class Logger;
+class Clock;
+class Mutex;
+class WaitCondition;
+class SwitchInterface;
 #ifdef FVBASE_TIMETRACKER
-  class TimeTracker;
+class TimeTracker;
 #endif
-}
+} // namespace fawkes
 namespace firevision {
-  class SharedMemoryImageBuffer;
+class SharedMemoryImageBuffer;
 }
 class FvBaseThread;
 class FvAqtVisionThreads;
 
-class FvAcquisitionThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlackBoardInterfaceListener
+class FvAcquisitionThread : public fawkes::Thread,
+                            public fawkes::LoggingAspect,
+                            public fawkes::BlackBoardAspect,
+                            public fawkes::BlackBoardInterfaceListener
 {
- public:
-  /** Acquisition thread mode. */
-  typedef enum {
-    AqtCyclic,		/**< cyclic mode, use if there is at least one cyclic thread
+public:
+	/** Acquisition thread mode. */
+	typedef enum {
+		AqtCyclic,    /**< cyclic mode, use if there is at least one cyclic thread
 			 * for this acquisition thread. */
-    AqtContinuous	/**< continuous mode, use if there are only continuous threads
+		AqtContinuous /**< continuous mode, use if there are only continuous threads
 			 * for this acquisition thread. */
-  } AqtMode;
+	} AqtMode;
 
-  FvAcquisitionThread(const char *id, firevision::Camera *camera,
-		      fawkes::Logger *logger, fawkes::Clock *clock);
-  virtual ~FvAcquisitionThread();
+	FvAcquisitionThread(const char *        id,
+	                    firevision::Camera *camera,
+	                    fawkes::Logger *    logger,
+	                    fawkes::Clock *     clock);
+	virtual ~FvAcquisitionThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  void set_aqtmode(AqtMode mode);
-  AqtMode aqtmode();
-  firevision::Camera *  camera_instance(firevision::colorspace_t cspace, bool deep_copy);
+	void                set_aqtmode(AqtMode mode);
+	AqtMode             aqtmode();
+	firevision::Camera *camera_instance(firevision::colorspace_t cspace, bool deep_copy);
 
-  firevision::Camera *get_camera();
+	firevision::Camera *get_camera();
 
-  void set_vt_prepfin_hold(bool hold);
-  void set_enabled(bool enabled);
+	void set_vt_prepfin_hold(bool hold);
+	void set_enabled(bool enabled);
 
- public:
-  /** Vision threads assigned to this acquisition thread. To be used only by the
+public:
+	/** Vision threads assigned to this acquisition thread. To be used only by the
    * base thread. */
-  FvAqtVisionThreads       *vision_threads;
+	FvAqtVisionThreads *vision_threads;
 
-  /** Vision thread registered for raw camera access on this camera. */
-  fawkes::Thread           *raw_subscriber_thread;
+	/** Vision thread registered for raw camera access on this camera. */
+	fawkes::Thread *raw_subscriber_thread;
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  virtual bool bb_interface_message_received(fawkes::Interface *interface,
-                                             fawkes::Message *message) throw();
+private:
+	virtual bool bb_interface_message_received(fawkes::Interface *interface,
+	                                           fawkes::Message *  message) throw();
 
- private:
-  bool                      enabled_;
-  fawkes::Mutex            *enabled_mutex_;
-  fawkes::WaitCondition    *enabled_waitcond_;
+private:
+	bool                   enabled_;
+	fawkes::Mutex *        enabled_mutex_;
+	fawkes::WaitCondition *enabled_waitcond_;
 
-  firevision::Camera       *camera_;
-  char                     *image_id_;
+	firevision::Camera *camera_;
+	char *              image_id_;
 
-  firevision::colorspace_t  colorspace_;
-  unsigned int              width_;
-  unsigned int              height_;
+	firevision::colorspace_t colorspace_;
+	unsigned int             width_;
+	unsigned int             height_;
 
-  AqtMode                   mode_;
+	AqtMode mode_;
 
-  std::map<firevision::colorspace_t, firevision::SharedMemoryImageBuffer *> shm_;
-  std::map<firevision::colorspace_t, firevision::SharedMemoryImageBuffer *>::iterator shmit_;
+	std::map<firevision::colorspace_t, firevision::SharedMemoryImageBuffer *>           shm_;
+	std::map<firevision::colorspace_t, firevision::SharedMemoryImageBuffer *>::iterator shmit_;
 
-  fawkes::SwitchInterface  *enabled_if_;
+	fawkes::SwitchInterface *enabled_if_;
 
 #ifdef FVBASE_TIMETRACKER
-  fawkes::TimeTracker *tt_;
-  unsigned int loop_count_;
-  unsigned int ttc_capture_;
-  unsigned int ttc_lock_;
-  unsigned int ttc_convert_;
-  unsigned int ttc_unlock_;
-  unsigned int ttc_dispose_;
+	fawkes::TimeTracker *tt_;
+	unsigned int         loop_count_;
+	unsigned int         ttc_capture_;
+	unsigned int         ttc_lock_;
+	unsigned int         ttc_convert_;
+	unsigned int         ttc_unlock_;
+	unsigned int         ttc_dispose_;
 #endif
 };
 
