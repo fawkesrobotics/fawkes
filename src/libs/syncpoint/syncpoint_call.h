@@ -30,21 +30,19 @@ namespace fawkes {
 
 class SyncPointCall
 {
-  public:
-    SyncPointCall(const std::string & caller, Time call_time = Time(), Time wait_time =
-      Time(0.f));
+public:
+	SyncPointCall(const std::string &caller, Time call_time = Time(), Time wait_time = Time(0.f));
 
-  public:
-    Time get_call_time() const;
-    Time get_wait_time() const;
-    std::string get_caller() const;
+public:
+	Time        get_call_time() const;
+	Time        get_wait_time() const;
+	std::string get_caller() const;
 
-  private:
-    const std::string caller_;
-    const Time call_time_;
-    const Time wait_time_;
+private:
+	const std::string caller_;
+	const Time        call_time_;
+	const Time        wait_time_;
 };
-
 
 } // namespace fawkes
 
