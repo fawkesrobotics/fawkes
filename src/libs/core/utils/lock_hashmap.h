@@ -26,53 +26,51 @@
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
+
 #include <cstdlib>
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
-#  include <unordered_map>
-#  include <functional>
+#	include <functional>
+#	include <unordered_map>
 #elif GLIBCXX___ > 20080305
-#  include <tr1/unordered_map>
+#	include <tr1/unordered_map>
 #else
-#  include <ext/hash_map>
+#	include <ext/hash_map>
 #endif
 
 namespace fawkes {
-
 
 template <class KeyType,
           class ValueType,
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
           class HashFunction = std::hash<KeyType>,
-          class EqualKey     = std::equal_to<KeyType> >
+          class EqualKey     = std::equal_to<KeyType>>
 class LockHashMap : public std::unordered_map<KeyType, ValueType, HashFunction, EqualKey>
 #elif GLIBCXX___ > 20080305
           class HashFunction = std::tr1::hash<KeyType>,
-          class EqualKey     = std::equal_to<KeyType> >
+          class EqualKey     = std::equal_to<KeyType>>
 class LockHashMap : public std::tr1::unordered_map<KeyType, ValueType, HashFunction, EqualKey>
 #else
           class HashFunction = gnu_cxx_::hash<KeyType>,
-          class EqualKey     = std::equal_to<KeyType> >
+          class EqualKey     = std::equal_to<KeyType>>
 class LockHashMap : public gnu_cxx_::hash_map<KeyType, ValueType, HashFunction, EqualKey>
 #endif
 {
- public:
-  LockHashMap();
-  LockHashMap(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &lh);
-  virtual ~LockHashMap();
+public:
+	LockHashMap();
+	LockHashMap(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &lh);
+	virtual ~LockHashMap();
 
-  void          lock() const;
-  bool          try_lock() const;
-  void          unlock() const;
-  RefPtr<Mutex> mutex() const;
+	void          lock() const;
+	bool          try_lock() const;
+	void          unlock() const;
+	RefPtr<Mutex> mutex() const;
 
-  LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &
-  operator=(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &ll);
+	LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &
+	operator=(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &ll);
 
- private:
-  mutable RefPtr<Mutex> mutex_;
-
+private:
+	mutable RefPtr<Mutex> mutex_;
 };
-
 
 /** @class LockHashMap core/utils/lock_hashmap.h
  * Hash map with a lock.
@@ -84,31 +82,29 @@ class LockHashMap : public gnu_cxx_::hash_map<KeyType, ValueType, HashFunction, 
  * @author Tim Niemueller
  */
 
-
 /** Constructor. */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
-LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap()
-  : mutex_(new Mutex())
+LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap() : mutex_(new Mutex())
 {
 }
-
 
 /** Copy constructor.
  * @param lh LockHashMap to copy
  */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
-LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &lh)
+LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap(
+  const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &lh)
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
-  : std::unordered_map<KeyType, ValueType, HashFunction, EqualKey>::unordered_map(lh)
+: std::unordered_map<KeyType, ValueType, HashFunction, EqualKey>::unordered_map(lh)
 #elif GLIBCXX___ > 20080305
-  : std::tr1::unordered_map<KeyType, ValueType, HashFunction, EqualKey>::unordered_map(lh)
+: std::tr1::unordered_map<KeyType, ValueType, HashFunction, EqualKey>::unordered_map(lh)
 #else
-  : gnu_cxx_::hash_map<KeyType, ValueType, HashFunction, EqualKey>::hash_map(lh)
+: gnu_cxx_::hash_map<KeyType, ValueType, HashFunction, EqualKey>::hash_map(lh)
 #endif
-    , mutex_(new Mutex())
+  ,
+  mutex_(new Mutex())
 {
 }
-
 
 /** Destructor. */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
@@ -116,15 +112,13 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::~LockHashMap()
 {
 }
 
-
 /** Lock map. */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 void
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::lock() const
 {
-  mutex_->lock();
+	mutex_->lock();
 }
-
 
 /** Try to lock map.
  * @return true, if the lock has been aquired, false otherwise.
@@ -133,18 +127,16 @@ template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 bool
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::try_lock() const
 {
-  return mutex_->try_lock();
+	return mutex_->try_lock();
 }
-
 
 /** Unlock map. */
 template <class KeyType, class ValueType, class HashFunction, class EqualKey>
 void
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::unlock() const
 {
-  return mutex_->unlock();
+	return mutex_->unlock();
 }
-
 
 /** Get access to the internal mutex.
  * Can be used with MutexLocker.
@@ -154,9 +146,8 @@ template <typename KeyType, typename ValueType, class HashFunction, typename Equ
 RefPtr<Mutex>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::mutex() const
 {
-  return mutex_;
+	return mutex_;
 }
-
 
 /** Copy values from another LockHashMap.
  * Copies the values one by one. Both instances are locked during the copying and
@@ -166,20 +157,20 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::mutex() const
  */
 template <typename KeyType, typename ValueType, class HashFunction, typename EqualKey>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &
-LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::operator=(
-  const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &ll)
+LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::
+operator=(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &ll)
 {
-  mutex_->lock();
-  ll.lock();
-  this->clear();
-  typename LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::const_iterator i;
-  for (i = ll.begin(); i != ll.end(); ++i) {
-    this->insert(*i);
-  }
-  ll.unlock();
-  mutex_->unlock();
+	mutex_->lock();
+	ll.lock();
+	this->clear();
+	typename LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::const_iterator i;
+	for (i = ll.begin(); i != ll.end(); ++i) {
+		this->insert(*i);
+	}
+	ll.unlock();
+	mutex_->unlock();
 
-  return *this;
+	return *this;
 }
 
 } // end namespace fawkes

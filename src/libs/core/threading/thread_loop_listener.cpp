@@ -66,5 +66,4 @@ ThreadLoopListener::post_loop(Thread *thread)
 {
 }
 
-
 } // end namespace fawkes

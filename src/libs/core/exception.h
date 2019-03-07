@@ -30,90 +30,91 @@
 
 namespace fawkes {
 
-
 class Mutex;
 
-class Exception : public std::exception {
- public:
+class Exception : public std::exception
+{
+public:
+	Exception(const char *format, ...) throw();
+	Exception(int errnoval, const char *format, ...) throw();
+	Exception(const Exception &exc) throw();
+	virtual ~Exception() throw();
 
-  Exception(const char *format, ...) throw();
-  Exception(int errnoval, const char *format, ...) throw();
-  Exception(const Exception &exc) throw();
-  virtual ~Exception() throw();
+	virtual void raise();
+	void         prepend(const char *format, ...) throw();
+	void         append(const char *format, ...) throw();
+	void         append_va(const char *format, va_list va) throw();
+	void         append(const Exception &e) throw();
+	void         print_trace() throw();
+	void         print_backtrace() const throw();
+	char *       generate_backtrace() const throw();
 
-  virtual void raise();
-  void prepend(const char *format, ...) throw();
-  void append(const char *format, ...) throw();
-  void append_va(const char *format, va_list va) throw();
-  void append(const Exception &e) throw();
-  void print_trace() throw();
-  void print_backtrace() const throw();
-  char *  generate_backtrace() const throw();
+	int get_errno() throw();
 
-  int get_errno() throw();
+	void        set_type_id(const char *id);
+	const char *type_id() const;
 
-  void          set_type_id(const char *id);
-  const char *  type_id() const;
+	virtual const char *what() const throw();
+	virtual const char *what_no_backtrace() const throw();
 
-  virtual const char* what() const throw();
-  virtual const char* what_no_backtrace() const throw();
+	Exception &operator=(const Exception &exc) throw();
 
-  Exception& operator=(const Exception &exc) throw();
-
- protected:
-   /** Internal exception message list */
-   struct message_list_t {
-     message_list_t  *next;   /**< pointer to next element, NULL if last element */
-     char            *msg;    /**< pointer to message, may not be NULL, will be freed
+protected:
+	/** Internal exception message list */
+	struct message_list_t
+	{
+		message_list_t *next; /**< pointer to next element, NULL if last element */
+		char *          msg;  /**< pointer to message, may not be NULL, will be freed
 			       *   in dtor */
-   };
+	};
 
- public:
-  class iterator
-  {
-    friend Exception;
-   private:
-    iterator(message_list_t *message_list);
-   public:
-    iterator(const iterator &i);
-    iterator();
+public:
+	class iterator
+	{
+		friend Exception;
 
-    iterator &    operator++ ();        // prefix
-    iterator      operator++ (int inc); // postfix
+	private:
+		iterator(message_list_t *message_list);
 
-    bool          operator== (const iterator & i) const;
-    bool          operator!= (const iterator & i) const;
+	public:
+		iterator(const iterator &i);
+		iterator();
 
-    const char *  operator*  () const;
-    iterator &    operator=  (const iterator & i);
+		iterator &operator++();        // prefix
+		iterator  operator++(int inc); // postfix
 
-   private:
-    message_list_t *mlist;
-  };
+		bool operator==(const iterator &i) const;
+		bool operator!=(const iterator &i) const;
 
-  iterator begin() throw();
-  iterator end() throw();
+		const char *operator*() const;
+		iterator &  operator=(const iterator &i);
 
- protected:
-  Exception() throw();
+	private:
+		message_list_t *mlist;
+	};
 
-  void append_nolock(const char *format, ...) throw();
-  void append_nolock_va(const char *format, va_list va) throw();
-  void append_nolock_nocopy(char *msg) throw();
-  void prepend_nolock_va(const char *format, va_list va) throw();
-  void copy_messages(const Exception &exc) throw();
+	iterator begin() throw();
+	iterator end() throw();
 
-  message_list_t  *messages;
-  message_list_t  *messages_iterator;
-  message_list_t  *messages_end;
-  Mutex           *messages_mutex;
+protected:
+	Exception() throw();
 
-  int              _errno;
+	void append_nolock(const char *format, ...) throw();
+	void append_nolock_va(const char *format, va_list va) throw();
+	void append_nolock_nocopy(char *msg) throw();
+	void prepend_nolock_va(const char *format, va_list va) throw();
+	void copy_messages(const Exception &exc) throw();
 
- private:
-  const char *type_id_;
+	message_list_t *messages;
+	message_list_t *messages_iterator;
+	message_list_t *messages_end;
+	Mutex *         messages_mutex;
+
+	int _errno;
+
+private:
+	const char *type_id_;
 };
-
 
 } // end namespace fawkes
 

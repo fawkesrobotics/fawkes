@@ -25,14 +25,14 @@
 #include <core/threading/mutex.h>
 
 #ifndef _GNU_SOURCE
-#define _GNU_SOURCE
+#	define _GNU_SOURCE
 #endif
 
-#include <cstring>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #ifdef HAVE_EXECINFO
-#  include <execinfo.h>
+#	include <execinfo.h>
 #endif
 
 namespace fawkes {
@@ -135,7 +135,6 @@ namespace fawkes {
  * errno.
  */
 
-
 /** Constructor.
  * Constructs a new exception with the given message.
  * @param format The format of the primary message. Supports the same
@@ -143,26 +142,25 @@ namespace fawkes {
  * Thus the memory has to be freed if it is a dynamic  string on the heap.
  */
 Exception::Exception(const char *format, ...) throw()
-{ 
-  messages_mutex = new Mutex();
+{
+	messages_mutex = new Mutex();
 
-  _errno = 0;
-  type_id_ = "unknown";
+	_errno   = 0;
+	type_id_ = "unknown";
 
-  messages = NULL;
-  messages_end = NULL;
-  messages_iterator = NULL;
+	messages          = NULL;
+	messages_end      = NULL;
+	messages_iterator = NULL;
 
-  if ( format != NULL ) {
-    va_list arg;
-    va_start(arg, format);
-    append_nolock_va(format, arg);
-    va_end(arg);
-  } else {
-    append_nolock("Unnkown Exception");
-  }
+	if (format != NULL) {
+		va_list arg;
+		va_start(arg, format);
+		append_nolock_va(format, arg);
+		va_end(arg);
+	} else {
+		append_nolock("Unnkown Exception");
+	}
 }
-
 
 /** Constructor.
  * Constructs a new exception with the given message and errno value. This
@@ -175,31 +173,30 @@ Exception::Exception(const char *format, ...) throw()
  */
 Exception::Exception(int errnoval, const char *format, ...) throw()
 {
-  messages_mutex = new Mutex();
+	messages_mutex = new Mutex();
 
-  _errno = errnoval;
-  type_id_ = "unknown";
+	_errno   = errnoval;
+	type_id_ = "unknown";
 
-  messages = NULL;
-  messages_end = NULL;
-  messages_iterator = NULL;
+	messages          = NULL;
+	messages_end      = NULL;
+	messages_iterator = NULL;
 
-  if ( format != NULL ) {
-    va_list arg;
-    va_start(arg, format);
-    char *ext_format;
-    if ( asprintf(&ext_format, "%s (errno: %i, %s)", format, _errno, strerror(_errno)) == -1 ) {
-      append_nolock_va(format, arg);
-    } else {
-      append_nolock_va(ext_format, arg);
-      free(ext_format);
-    }
-    va_end(arg);
-  } else {
-    append_nolock("Exception with errno=%i (%s)", _errno, strerror(_errno));
-  }
+	if (format != NULL) {
+		va_list arg;
+		va_start(arg, format);
+		char *ext_format;
+		if (asprintf(&ext_format, "%s (errno: %i, %s)", format, _errno, strerror(_errno)) == -1) {
+			append_nolock_va(format, arg);
+		} else {
+			append_nolock_va(ext_format, arg);
+			free(ext_format);
+		}
+		va_end(arg);
+	} else {
+		append_nolock("Exception with errno=%i (%s)", _errno, strerror(_errno));
+	}
 }
-
 
 /** Copy constructor.
  * The copy constructor is worth some extra discussion. If you do an exception
@@ -237,17 +234,16 @@ Exception::Exception(int errnoval, const char *format, ...) throw()
  */
 Exception::Exception(const Exception &exc) throw()
 {
-  messages_mutex = new Mutex();
+	messages_mutex = new Mutex();
 
-  messages = NULL;
-  messages_end = NULL;
-  messages_iterator = NULL;
+	messages          = NULL;
+	messages_end      = NULL;
+	messages_iterator = NULL;
 
-  _errno = exc._errno;
-  type_id_ = exc.type_id_;
-  copy_messages(exc);
+	_errno   = exc._errno;
+	type_id_ = exc.type_id_;
+	copy_messages(exc);
 }
-
 
 /** Constructor for subclasses.
  * This constructor can be used in subclasses is some processing code is
@@ -256,31 +252,29 @@ Exception::Exception(const Exception &exc) throw()
  */
 Exception::Exception() throw()
 {
-  messages_mutex = new Mutex();
-  _errno = 0;
-  type_id_ = "unknown";
-  messages = NULL;
-  messages_end = NULL;
-  messages_iterator = NULL;
+	messages_mutex    = new Mutex();
+	_errno            = 0;
+	type_id_          = "unknown";
+	messages          = NULL;
+	messages_end      = NULL;
+	messages_iterator = NULL;
 }
-
 
 /** Destructor. */
 Exception::~Exception() throw()
 {
-  message_list_t *msg_this;
-  messages_iterator = messages;
-  while ( messages_iterator ) {
-    free(messages_iterator->msg);
-    msg_this = messages_iterator;
-    messages_iterator = messages_iterator->next;
-    free(msg_this);
-  }
-  messages = NULL;
-  messages_end = NULL;
-  delete messages_mutex;
+	message_list_t *msg_this;
+	messages_iterator = messages;
+	while (messages_iterator) {
+		free(messages_iterator->msg);
+		msg_this          = messages_iterator;
+		messages_iterator = messages_iterator->next;
+		free(msg_this);
+	}
+	messages     = NULL;
+	messages_end = NULL;
+	delete messages_mutex;
 }
-
 
 /** Set exception type ID.
  * Set the type ID of this exception.
@@ -291,9 +285,8 @@ Exception::~Exception() throw()
 void
 Exception::set_type_id(const char *id)
 {
-  type_id_ = id;
+	type_id_ = id;
 }
-
 
 /** Get type ID.
  * Exceptions can have a type ID. This can be used to avoid having to declare
@@ -310,9 +303,8 @@ Exception::set_type_id(const char *id)
 const char *
 Exception::type_id() const
 {
-  return type_id_;
+	return type_id_;
 }
-
 
 /** Prepend messages to the message list.
  * @param format format of the message to prepend, see printf(3) for details about formatting
@@ -321,17 +313,17 @@ Exception::type_id() const
 void
 Exception::prepend(const char *format, ...) throw()
 {
-  // do not append empty messages
-  if (format == NULL)  return;
+	// do not append empty messages
+	if (format == NULL)
+		return;
 
-  va_list arg;
-  va_start(arg, format);
-  messages_mutex->lock();
-  prepend_nolock_va(format, arg);
-  messages_mutex->unlock();
-  va_end(arg);
+	va_list arg;
+	va_start(arg, format);
+	messages_mutex->lock();
+	prepend_nolock_va(format, arg);
+	messages_mutex->unlock();
+	va_end(arg);
 }
-
 
 /** Append messages to the message list.
  * @param format format of the message to append, see printf(3) for details about formatting
@@ -340,17 +332,17 @@ Exception::prepend(const char *format, ...) throw()
 void
 Exception::append(const char *format, ...) throw()
 {
-  // do not append empty messages
-  if (format == NULL)  return;
+	// do not append empty messages
+	if (format == NULL)
+		return;
 
-  va_list arg;
-  va_start(arg, format);
-  messages_mutex->lock();
-  append_nolock_va(format, arg);
-  messages_mutex->unlock();
-  va_end(arg);
+	va_list arg;
+	va_start(arg, format);
+	messages_mutex->lock();
+	append_nolock_va(format, arg);
+	messages_mutex->unlock();
+	va_end(arg);
 }
-
 
 /** Append messages to the message list.
  * @param format format of the message to append, see printf(3) for details about formatting
@@ -360,14 +352,14 @@ Exception::append(const char *format, ...) throw()
 void
 Exception::append_va(const char *format, va_list va) throw()
 {
-  // do not append empty messages
-  if (format == NULL)  return;
+	// do not append empty messages
+	if (format == NULL)
+		return;
 
-  messages_mutex->lock();
-  append_nolock_va(format, va);
-  messages_mutex->unlock();
+	messages_mutex->lock();
+	append_nolock_va(format, va);
+	messages_mutex->unlock();
 }
-
 
 /** Append message that are from another Exception.
  * @param e Exception to copy messages from
@@ -375,9 +367,8 @@ Exception::append_va(const char *format, va_list va) throw()
 void
 Exception::append(const Exception &e) throw()
 {
-  copy_messages(e);  
+	copy_messages(e);
 }
-
 
 /** Append messages without lock.
  * this can be used to append messages without locking the mutex if the mutex
@@ -391,31 +382,30 @@ Exception::append(const Exception &e) throw()
 void
 Exception::append_nolock(const char *format, ...) throw()
 {
-  va_list arg;
-  va_start(arg, format);
+	va_list arg;
+	va_start(arg, format);
 
-  char *msg;
-  if ( vasprintf(&msg, format, arg) == -1 ) {
-    msg = strdup(format);
-  }
+	char *msg;
+	if (vasprintf(&msg, format, arg) == -1) {
+		msg = strdup(format);
+	}
 
-  va_end(arg);
+	va_end(arg);
 
-  if ( messages == NULL ) {
-    // This is our first message
-    messages = (message_list_t *)malloc(sizeof(message_list_t));
-    messages->next = NULL;
-    messages->msg  = msg;
-    messages_end = messages;
-  } else {
-    message_list_t *ml = (message_list_t *)malloc(sizeof(message_list_t));
-    ml->next = NULL;
-    ml->msg = msg;
-    messages_end->next = ml;
-    messages_end = ml;
-  }
+	if (messages == NULL) {
+		// This is our first message
+		messages       = (message_list_t *)malloc(sizeof(message_list_t));
+		messages->next = NULL;
+		messages->msg  = msg;
+		messages_end   = messages;
+	} else {
+		message_list_t *ml = (message_list_t *)malloc(sizeof(message_list_t));
+		ml->next           = NULL;
+		ml->msg            = msg;
+		messages_end->next = ml;
+		messages_end       = ml;
+	}
 }
-
 
 /** Prepend messages without lock by formatted string.
  * This can be used to append messages without locking the mutex if the mutex
@@ -428,25 +418,24 @@ Exception::append_nolock(const char *format, ...) throw()
 void
 Exception::prepend_nolock_va(const char *format, va_list ap) throw()
 {
-  char *msg;
-  if ( vasprintf(&msg, format, ap) == -1 ) {
-    msg = strdup(format);
-  }
+	char *msg;
+	if (vasprintf(&msg, format, ap) == -1) {
+		msg = strdup(format);
+	}
 
-  if ( messages == NULL ) {
-    // This is our first message
-    messages = (message_list_t *)malloc(sizeof(message_list_t));
-    messages->next = NULL;
-    messages->msg  = msg;
-    messages_end = messages;
-  } else {
-    message_list_t *ml = (message_list_t *)malloc(sizeof(message_list_t));
-    ml->next = messages;
-    ml->msg = msg;
-    messages = ml;
-  }
+	if (messages == NULL) {
+		// This is our first message
+		messages       = (message_list_t *)malloc(sizeof(message_list_t));
+		messages->next = NULL;
+		messages->msg  = msg;
+		messages_end   = messages;
+	} else {
+		message_list_t *ml = (message_list_t *)malloc(sizeof(message_list_t));
+		ml->next           = messages;
+		ml->msg            = msg;
+		messages           = ml;
+	}
 }
-
 
 /** Append messages without lock by formatted string.
  * this can be used to append messages without locking the mutex if the mutex
@@ -459,26 +448,25 @@ Exception::prepend_nolock_va(const char *format, va_list ap) throw()
 void
 Exception::append_nolock_va(const char *format, va_list ap) throw()
 {
-  char *msg;
-  if ( vasprintf(&msg, format, ap) == -1 ) {
-    msg = strdup(format);
-  }
+	char *msg;
+	if (vasprintf(&msg, format, ap) == -1) {
+		msg = strdup(format);
+	}
 
-  if ( messages == NULL ) {
-    // This is our first message
-    messages = (message_list_t *)malloc(sizeof(message_list_t));
-    messages->next = NULL;
-    messages->msg  = msg;
-    messages_end = messages;
-  } else {
-    message_list_t *ml = (message_list_t *)malloc(sizeof(message_list_t));
-    ml->next = NULL;
-    ml->msg = msg;
-    messages_end->next = ml;
-    messages_end = ml;
-  }
+	if (messages == NULL) {
+		// This is our first message
+		messages       = (message_list_t *)malloc(sizeof(message_list_t));
+		messages->next = NULL;
+		messages->msg  = msg;
+		messages_end   = messages;
+	} else {
+		message_list_t *ml = (message_list_t *)malloc(sizeof(message_list_t));
+		ml->next           = NULL;
+		ml->msg            = msg;
+		messages_end->next = ml;
+		messages_end       = ml;
+	}
 }
-
 
 /** Append message without copying.
  * Can be used in subclasses to append messages that have been allocated
@@ -490,21 +478,20 @@ Exception::append_nolock_va(const char *format, va_list ap) throw()
 void
 Exception::append_nolock_nocopy(char *msg) throw()
 {
-  if ( messages == NULL ) {
-    // This is our first message
-    messages = (message_list_t *)malloc(sizeof(message_list_t));
-    messages->next = NULL;
-    messages->msg  = msg;
-    messages_end = messages;
-  } else {
-    message_list_t *ml = (message_list_t *)malloc(sizeof(message_list_t));
-    ml->next = NULL;
-    ml->msg = msg;
-    messages_end->next = ml;
-    messages_end = ml;
-  }  
+	if (messages == NULL) {
+		// This is our first message
+		messages       = (message_list_t *)malloc(sizeof(message_list_t));
+		messages->next = NULL;
+		messages->msg  = msg;
+		messages_end   = messages;
+	} else {
+		message_list_t *ml = (message_list_t *)malloc(sizeof(message_list_t));
+		ml->next           = NULL;
+		ml->msg            = msg;
+		messages_end->next = ml;
+		messages_end       = ml;
+	}
 }
-
 
 /** Assign an Exception.
  * As this is one of the Big Three (see C++ FAQ at
@@ -518,12 +505,11 @@ Exception::append_nolock_nocopy(char *msg) throw()
 Exception &
 Exception::operator=(const Exception &exc) throw()
 {
-  messages_mutex = new Mutex();
-  copy_messages(exc);
+	messages_mutex = new Mutex();
+	copy_messages(exc);
 
-  return *this;
+	return *this;
 }
-
 
 /** Copy messages from given exception.
  * Copies the messages from exc to this exception.
@@ -532,20 +518,19 @@ Exception::operator=(const Exception &exc) throw()
 void
 Exception::copy_messages(const Exception &exc) throw()
 {
-  messages_mutex->lock();
-  exc.messages_mutex->lock();
+	messages_mutex->lock();
+	exc.messages_mutex->lock();
 
-  // copy messages
-  messages_iterator = exc.messages;
-  while ( messages_iterator ) {
-    append_nolock(messages_iterator->msg);
-    messages_iterator = messages_iterator->next;
-  }
+	// copy messages
+	messages_iterator = exc.messages;
+	while (messages_iterator) {
+		append_nolock(messages_iterator->msg);
+		messages_iterator = messages_iterator->next;
+	}
 
-  exc.messages_mutex->unlock();
-  messages_mutex->unlock();
+	exc.messages_mutex->unlock();
+	messages_mutex->unlock();
 }
-
 
 /** This can be used to throw this exception.
  * This can be used to throw this exception instance. This is a precaution if
@@ -554,30 +539,28 @@ Exception::copy_messages(const Exception &exc) throw()
 void
 Exception::raise()
 {
-  throw *this;
+	throw *this;
 }
-
 
 /** Prints a backtrace. */
 void
 Exception::print_backtrace() const throw()
 {
 #ifdef HAVE_EXECINFO
-  void * array[25];
-  int size = backtrace(array, 25);
-  char ** symbols = backtrace_symbols(array, size);
+	void * array[25];
+	int    size    = backtrace(array, 25);
+	char **symbols = backtrace_symbols(array, size);
 
-  printf("Backtrace:\n");
-  for (int i = 0; i < size; ++i) {
-    printf("  %s\n", symbols[i]);
-  }
-  
-  free(symbols);
+	printf("Backtrace:\n");
+	for (int i = 0; i < size; ++i) {
+		printf("  %s\n", symbols[i]);
+	}
+
+	free(symbols);
 #else
-  printf("Backtrace not available on current system\n");
+	printf("Backtrace not available on current system\n");
 #endif
 }
-
 
 /** Generate backtrace string.
  * @return freshly allocated string of backtrace. Free after you are done.
@@ -586,29 +569,28 @@ char *
 Exception::generate_backtrace() const throw()
 {
 #ifdef HAVE_BACKTRACE
-  void * array[25];
-  int size = backtrace(array, 25);
-  char ** symbols = backtrace_symbols(array, size);
-  
-  size_t total_size = 1; //null termination
-  for (int i = 0; i < size; ++i) {
-    total_size += strlen(symbols[i]) + 1;
-  }
-  char *rv = (char *)calloc(1, total_size);
-  char *r = rv;
-  for (int i = 0; i < size; ++i) {
-    sprintf(r, "%s\n", symbols[i]);
-    r += strlen(symbols[i]);
-  }
-  
-  free(symbols);
+	void * array[25];
+	int    size    = backtrace(array, 25);
+	char **symbols = backtrace_symbols(array, size);
+
+	size_t total_size = 1; //null termination
+	for (int i = 0; i < size; ++i) {
+		total_size += strlen(symbols[i]) + 1;
+	}
+	char *rv = (char *)calloc(1, total_size);
+	char *r  = rv;
+	for (int i = 0; i < size; ++i) {
+		sprintf(r, "%s\n", symbols[i]);
+		r += strlen(symbols[i]);
+	}
+
+	free(symbols);
 #else
-  char *rv = strdup("Backtrace not available on current system\n");
+	char *rv = strdup("Backtrace not available on current system\n");
 #endif
 
-  return rv;
+	return rv;
 }
-
 
 /** Prints trace to stderr.
  * This prints out a message trace of all messages appended to the exception
@@ -618,23 +600,20 @@ Exception::generate_backtrace() const throw()
 void
 Exception::print_trace() throw()
 {
-  messages_mutex->lock();
-  fprintf(stderr,
-	  "=================================================== BEGIN OF EXCEPTION =====\n");
-  if ( messages == NULL ) {
-    fprintf(stderr, "No messages recorded.\n");
-  } else {
-    messages_iterator = messages;
-    while ( messages_iterator ) {
-      fprintf(stderr, "%s\n", messages_iterator->msg);
-      messages_iterator = messages_iterator->next;
-    }
-  }
-  fprintf(stderr,
-	  "=================================================== END OF EXCEPTION =======\n");
-  messages_mutex->unlock();
+	messages_mutex->lock();
+	fprintf(stderr, "=================================================== BEGIN OF EXCEPTION =====\n");
+	if (messages == NULL) {
+		fprintf(stderr, "No messages recorded.\n");
+	} else {
+		messages_iterator = messages;
+		while (messages_iterator) {
+			fprintf(stderr, "%s\n", messages_iterator->msg);
+			messages_iterator = messages_iterator->next;
+		}
+	}
+	fprintf(stderr, "=================================================== END OF EXCEPTION =======\n");
+	messages_mutex->unlock();
 }
-
 
 /** Get errno.
  * @return error number, may be 0 if not set
@@ -642,9 +621,8 @@ Exception::print_trace() throw()
 int
 Exception::get_errno() throw()
 {
-  return _errno;
+	return _errno;
 }
-
 
 /** Get primary string.
  * Messages are stored in a list. The first entry in this list is called primary
@@ -661,15 +639,14 @@ const char *
 Exception::what() const throw()
 {
 #ifdef HAVE_EXECINFO
-  print_backtrace();
+	print_backtrace();
 #endif
-  if ( messages != NULL ) {
-    return messages->msg;
-  } else {
-    return "Unknown error";
-  }
+	if (messages != NULL) {
+		return messages->msg;
+	} else {
+		return "Unknown error";
+	}
 }
-
 
 /** Get primary string (does not implicitly print the back trace).
  * Messages are stored in a list. The first entry in this list is called primary
@@ -685,13 +662,12 @@ Exception::what() const throw()
 const char *
 Exception::what_no_backtrace() const throw()
 {
-  if ( messages != NULL ) {
-    return messages->msg;
-  } else {
-    return "Unknown error";
-  }
+	if (messages != NULL) {
+		return messages->msg;
+	} else {
+		return "Unknown error";
+	}
 }
-
 
 /** Get iterator for messages.
  * @return iterator for messages
@@ -699,10 +675,9 @@ Exception::what_no_backtrace() const throw()
 Exception::iterator
 Exception::begin() throw()
 {
-  Exception::iterator i(messages);
-  return i;
+	Exception::iterator i(messages);
+	return i;
 }
-
 
 /** @class Exception::iterator <core/exception.h>
  * Message iterator for exceptions.
@@ -716,10 +691,9 @@ Exception::begin() throw()
 Exception::iterator
 Exception::end() throw()
 {
-  Exception::iterator i;
-  return i;
+	Exception::iterator i;
+	return i;
 }
-
 
 /** Constructor.
  * @param message_list list of messages, will be used unlocked so use
@@ -727,27 +701,24 @@ Exception::end() throw()
  */
 Exception::iterator::iterator(message_list_t *message_list)
 {
-  mlist = message_list;
+	mlist = message_list;
 }
-
 
 /** Plain constructor.
  * Creates a new invalid iterator (same as Exception::end()).
  */
 Exception::iterator::iterator()
 {
-  this->mlist = NULL;
+	this->mlist = NULL;
 }
-
 
 /** Copy constructor.
  * @param i iterator to copy
  */
-Exception::iterator::iterator(const Exception::iterator & i)
+Exception::iterator::iterator(const Exception::iterator &i)
 {
-  this->mlist = i.mlist;
+	this->mlist = i.mlist;
 }
-
 
 /** Prefix ++ operator.
  * @return reference to this iterator after advancing.
@@ -755,12 +726,11 @@ Exception::iterator::iterator(const Exception::iterator & i)
 Exception::iterator &
 Exception::iterator::operator++()
 {
-  if ( mlist != NULL ) {
-    mlist = mlist->next;
-  }
-  return *this;
+	if (mlist != NULL) {
+		mlist = mlist->next;
+	}
+	return *this;
 }
-
 
 /** Postfix ++ operator.
  * @param inc used to denote postfix operator
@@ -769,50 +739,45 @@ Exception::iterator::operator++()
 Exception::iterator
 Exception::iterator::operator++(int inc)
 {
-  iterator i(mlist);
-  if ( mlist != NULL ) {
-    mlist = mlist->next;
-  }
-  return i;
+	iterator i(mlist);
+	if (mlist != NULL) {
+		mlist = mlist->next;
+	}
+	return i;
 }
-
 
 /** Check equality.
  * @param i iterator to compare to
  * @return true, if iterators point to the same message, false otherwise
  */
 bool
-Exception::iterator::operator==(const iterator & i) const
+Exception::iterator::operator==(const iterator &i) const
 {
-  return (mlist == i.mlist);
+	return (mlist == i.mlist);
 }
-
 
 /** Check inequality.
  * @param i iterator to compare to
  * @return true, if iterators point to different messages, false otherwise
  */
 bool
-Exception::iterator::operator!=(const iterator & i) const
+Exception::iterator::operator!=(const iterator &i) const
 {
-  return (mlist != i.mlist);
+	return (mlist != i.mlist);
 }
-
 
 /** Get current message.
  * Get message at current position. Returns NULL for the invalid ieterator.
  * @return message or NULL if iterator is invalid
  */
-const char *
-Exception::iterator::operator* () const
+const char *Exception::iterator::operator*() const
 {
-  if ( mlist != NULL ) {
-    return mlist->msg;
-  } else {
-    return NULL;
-  }
+	if (mlist != NULL) {
+		return mlist->msg;
+	} else {
+		return NULL;
+	}
 }
-
 
 /** Assignment operator.
  * @param i iterator to assign to this iterator.
@@ -821,9 +786,8 @@ Exception::iterator::operator* () const
 Exception::iterator &
 Exception::iterator::operator=(const iterator &i)
 {
-  this->mlist = i.mlist;
-  return *this;
+	this->mlist = i.mlist;
+	return *this;
 }
-
 
 } // end namespace fawkes

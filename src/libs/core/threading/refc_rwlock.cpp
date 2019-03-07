@@ -42,14 +42,13 @@ namespace fawkes {
  * @param policy Policy, see ReadWriteLock::ReadWriteLock() for more info on this.
  */
 RefCountRWLock::RefCountRWLock(ReadWriteLock::ReadWriteLockPolicy policy)
-  : ReadWriteLock(policy), RefCount()
-{ 
+: ReadWriteLock(policy), RefCount()
+{
 }
 
 /** Destructor */
 RefCountRWLock::~RefCountRWLock()
 {
 }
-
 
 } // end namespace fawkes

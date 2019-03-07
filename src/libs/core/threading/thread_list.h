@@ -26,15 +26,14 @@
 
 #include <core/exception.h>
 #include <core/threading/thread.h>
-#include <core/threading/thread_initializer.h>
 #include <core/threading/thread_finalizer.h>
+#include <core/threading/thread_initializer.h>
 #include <core/utils/lock_list.h>
 
-#include <utility>
 #include <string>
+#include <utility>
 
 namespace fawkes {
-
 
 class ThreadList;
 class Mutex;
@@ -43,93 +42,89 @@ class InterruptibleBarrier;
 
 class ThreadListSealedException : public Exception
 {
- public:
-  ThreadListSealedException(const char *operation);
+public:
+	ThreadListSealedException(const char *operation);
 };
 
 class ThreadListNotSealedException : public Exception
 {
- public:
-  ThreadListNotSealedException(const char *format, ...);
+public:
+	ThreadListNotSealedException(const char *format, ...);
 };
-
 
 class ThreadList : private LockList<Thread *>
 {
- public:
-  ThreadList(const char *tlname = "");
-  ThreadList(bool maintain_barrier, const char *tlname = "");
-  ThreadList(const ThreadList &tl);
-  ~ThreadList();
+public:
+	ThreadList(const char *tlname = "");
+	ThreadList(bool maintain_barrier, const char *tlname = "");
+	ThreadList(const ThreadList &tl);
+	~ThreadList();
 
-  const char *  name();
-  void          set_name(const char *format, ...);
+	const char *name();
+	void        set_name(const char *format, ...);
 
-  void seal();
-  bool sealed();
+	void seal();
+	bool sealed();
 
-  void init(ThreadInitializer *initializer, ThreadFinalizer *finalizer);
-  bool prepare_finalize(ThreadFinalizer *finalizer);
-  void finalize(ThreadFinalizer *finalizer);
-  void cancel_finalize();
-  void set_prepfin_hold(bool hold);
+	void init(ThreadInitializer *initializer, ThreadFinalizer *finalizer);
+	bool prepare_finalize(ThreadFinalizer *finalizer);
+	void finalize(ThreadFinalizer *finalizer);
+	void cancel_finalize();
+	void set_prepfin_hold(bool hold);
 
-  void wakeup();
-  void wakeup(Barrier *barrier);
-  void wakeup_unlocked();
-  void wakeup_unlocked(Barrier *barrier);
-  void wakeup_and_wait(unsigned int timeout_sec = 0,
-		       unsigned int timeout_nanosec = 0);
-  void start();
-  void stop();
-  void cancel();
-  void join();
+	void wakeup();
+	void wakeup(Barrier *barrier);
+	void wakeup_unlocked();
+	void wakeup_unlocked(Barrier *barrier);
+	void wakeup_and_wait(unsigned int timeout_sec = 0, unsigned int timeout_nanosec = 0);
+	void start();
+	void stop();
+	void cancel();
+	void join();
 
-  void try_recover(std::list<std::string> &recovered_threads);
-  void set_maintain_barrier(bool maintain_barrier);
+	void try_recover(std::list<std::string> &recovered_threads);
+	void set_maintain_barrier(bool maintain_barrier);
 
-  void force_stop(ThreadFinalizer *finalizer);
+	void force_stop(ThreadFinalizer *finalizer);
 
-  void push_front(Thread *thread);
-  void push_front_locked(Thread *thread);
-  void push_back(Thread *thread);
-  void push_back_locked(Thread *thread);
-  void clear();
-  void pop_back();
-  void pop_front();
-  ThreadList::iterator erase(iterator pos);
+	void                 push_front(Thread *thread);
+	void                 push_front_locked(Thread *thread);
+	void                 push_back(Thread *thread);
+	void                 push_back_locked(Thread *thread);
+	void                 clear();
+	void                 pop_back();
+	void                 pop_front();
+	ThreadList::iterator erase(iterator pos);
 
-  void remove(Thread *thread);
-  void remove_locked(Thread *thread);
+	void remove(Thread *thread);
+	void remove_locked(Thread *thread);
 
-  using LockList<Thread *>::begin;
-  using LockList<Thread *>::end;
-  using LockList<Thread *>::iterator;
-  using LockList<Thread *>::lock;
-  using LockList<Thread *>::try_lock;
-  using LockList<Thread *>::unlock;
-  using LockList<Thread *>::size;
-  using LockList<Thread *>::empty;
-  using LockList<Thread *>::front;
-  using LockList<Thread *>::back;
+	using LockList<Thread *>::begin;
+	using LockList<Thread *>::end;
+	using LockList<Thread *>::iterator;
+	using LockList<Thread *>::lock;
+	using LockList<Thread *>::try_lock;
+	using LockList<Thread *>::unlock;
+	using LockList<Thread *>::size;
+	using LockList<Thread *>::empty;
+	using LockList<Thread *>::front;
+	using LockList<Thread *>::back;
 
-  ThreadList &  operator=  (const ThreadList & tl);
+	ThreadList &operator=(const ThreadList &tl);
 
+private:
+	void notify_of_failed_init();
+	void update_barrier();
 
- private:
-  void notify_of_failed_init();
-  void update_barrier();
+private:
+	char *                name_;
+	bool                  sealed_;
+	Mutex *               finalize_mutex_;
+	InterruptibleBarrier *wnw_barrier_;
 
- private:
-  char                   *name_;
-  bool                    sealed_;
-  Mutex                  *finalize_mutex_;
-  InterruptibleBarrier   *wnw_barrier_;
-
-  std::list<std::pair<InterruptibleBarrier *, ThreadList> >  wnw_bad_barriers_;
-  std::list<std::pair<InterruptibleBarrier *, ThreadList> >::iterator wnw_bbit_;
+	std::list<std::pair<InterruptibleBarrier *, ThreadList>>           wnw_bad_barriers_;
+	std::list<std::pair<InterruptibleBarrier *, ThreadList>>::iterator wnw_bbit_;
 };
-
 
 } // end namespace fawkes
 

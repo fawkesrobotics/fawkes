@@ -21,19 +21,19 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <core/exception.h>
 #include <core/threading/spinlock.h>
 #include <core/threading/thread.h>
-#include <core/exception.h>
 
 #include <pthread.h>
 #include <unistd.h>
 
 // cf. http://people.redhat.com/drepper/posix-option-groups.html
 #if defined(_POSIX_SPIN_LOCKS) && (_POSIX_SPIN_LOCKS - 200112L) >= 0
-#  define USE_POSIX_SPIN_LOCKS
+#	define USE_POSIX_SPIN_LOCKS
 #else
-#  undef USE_POSIX_SPIN_LOCKS
-#  include <core/threading/mutex.h>
+#	undef USE_POSIX_SPIN_LOCKS
+#	include <core/threading/mutex.h>
 #endif
 
 namespace fawkes {
@@ -59,22 +59,21 @@ namespace fawkes {
 /// @cond INTERNALS
 class SpinlockData
 {
- public:
+public:
 #ifdef USE_POSIX_SPIN_LOCKS
-  pthread_spinlock_t spinlock;
+	pthread_spinlock_t spinlock;
 #else
-  Mutex              mutex;
+	Mutex mutex;
 #endif
 };
 /// @endcond
 
-
 /** Constructor */
 Spinlock::Spinlock()
 {
-  spinlock_data = new SpinlockData();
+	spinlock_data = new SpinlockData();
 #ifdef USE_POSIX_SPIN_LOCKS
-  pthread_spin_init(&(spinlock_data->spinlock), PTHREAD_PROCESS_PRIVATE);
+	pthread_spin_init(&(spinlock_data->spinlock), PTHREAD_PROCESS_PRIVATE);
 #endif
 }
 
@@ -82,12 +81,11 @@ Spinlock::Spinlock()
 Spinlock::~Spinlock()
 {
 #ifdef USE_POSIX_SPIN_LOCKS
-  pthread_spin_destroy(&(spinlock_data->spinlock));
+	pthread_spin_destroy(&(spinlock_data->spinlock));
 #endif
-  delete spinlock_data;
-  spinlock_data = NULL;
+	delete spinlock_data;
+	spinlock_data = NULL;
 }
-
 
 /** Lock this spinlock.
  * A call to lock() will block until the lock on the spinlock could be aquired.
@@ -97,18 +95,17 @@ void
 Spinlock::lock()
 {
 #ifdef USE_POSIX_SPIN_LOCKS
-  int err = 0;
-  if ( (err = pthread_spin_lock(&(spinlock_data->spinlock))) != 0 ) {
-    throw Exception(err, "Failed to aquire lock for thread %s", Thread::current_thread()->name());
-  }
+	int err = 0;
+	if ((err = pthread_spin_lock(&(spinlock_data->spinlock))) != 0) {
+		throw Exception(err, "Failed to aquire lock for thread %s", Thread::current_thread()->name());
+	}
 #else
-  bool locked = false;
-  while ( ! locked ) {
-    locked = spinlock_data->mutex.try_lock();
-  }
+	bool  locked = false;
+	while (!locked) {
+		locked = spinlock_data->mutex.try_lock();
+	}
 #endif
 }
-
 
 /** Tries to lock the spinlock.
  * This can also be used to check if a spinlock is locked. The code for this
@@ -131,27 +128,25 @@ bool
 Spinlock::try_lock()
 {
 #ifdef USE_POSIX_SPIN_LOCKS
-  if (pthread_spin_trylock(&(spinlock_data->spinlock)) == 0) {
-    return true;
-  } else {
-    return false;
-  }
+	if (pthread_spin_trylock(&(spinlock_data->spinlock)) == 0) {
+		return true;
+	} else {
+		return false;
+	}
 #else
-  return spinlock_data->mutex.try_lock();
+	return spinlock_data->mutex.try_lock();
 #endif
 }
-
 
 /** Unlock the spinlock. */
 void
 Spinlock::unlock()
 {
 #ifdef USE_POSIX_SPIN_LOCKS
-  pthread_spin_unlock(&(spinlock_data->spinlock));
+	pthread_spin_unlock(&(spinlock_data->spinlock));
 #else
-  spinlock_data->mutex.unlock();
+	spinlock_data->mutex.unlock();
 #endif
 }
-
 
 } // end namespace fawkes

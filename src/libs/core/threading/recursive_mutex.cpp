@@ -41,8 +41,7 @@ namespace fawkes {
  */
 
 /** Constructor. */
-RecursiveMutex::RecursiveMutex()
-  : Mutex(Mutex::RECURSIVE)
+RecursiveMutex::RecursiveMutex() : Mutex(Mutex::RECURSIVE)
 {
 }
 

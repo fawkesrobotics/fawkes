@@ -28,84 +28,84 @@
 
 namespace fawkes {
 
-class NullPointerException : public Exception {
- public:
-  NullPointerException(const char *format, ...) throw();
+class NullPointerException : public Exception
+{
+public:
+	NullPointerException(const char *format, ...) throw();
 };
 
-
-class DivisionByZeroException : public Exception {
- public:
-  DivisionByZeroException(const char *format, ...) throw();
+class DivisionByZeroException : public Exception
+{
+public:
+	DivisionByZeroException(const char *format, ...) throw();
 };
 
-
-class TypeMismatchException : public Exception {
- public:
-  TypeMismatchException(const char *format, ...) throw();
+class TypeMismatchException : public Exception
+{
+public:
+	TypeMismatchException(const char *format, ...) throw();
 };
 
-
-class UnknownTypeException : public Exception {
- public:
-  UnknownTypeException(const char *format, ...) throw();
+class UnknownTypeException : public Exception
+{
+public:
+	UnknownTypeException(const char *format, ...) throw();
 };
 
-
-class DestructionInProgressException : public Exception {
- public:
-  DestructionInProgressException(const char *format, ...) throw();
+class DestructionInProgressException : public Exception
+{
+public:
+	DestructionInProgressException(const char *format, ...) throw();
 };
 
-
-class NotLockedException : public Exception {
- public:
-  NotLockedException(const char *format, ...) throw();
+class NotLockedException : public Exception
+{
+public:
+	NotLockedException(const char *format, ...) throw();
 };
 
-
-class NonPointerTypeExpectedException : public Exception {
- public:
-  NonPointerTypeExpectedException(const char *format, ...) throw();
+class NonPointerTypeExpectedException : public Exception
+{
+public:
+	NonPointerTypeExpectedException(const char *format, ...) throw();
 };
 
-
-class MissingParameterException : public Exception {
- public:
-  MissingParameterException(const char *format, ...) throw();
+class MissingParameterException : public Exception
+{
+public:
+	MissingParameterException(const char *format, ...) throw();
 };
 
-
-class IllegalArgumentException : public Exception {
- public:
-  IllegalArgumentException(const char *format, ...) throw();
+class IllegalArgumentException : public Exception
+{
+public:
+	IllegalArgumentException(const char *format, ...) throw();
 };
 
-
-class OutOfBoundsException : public Exception {
- public:
-  OutOfBoundsException(const char *msg) throw();
-  OutOfBoundsException(const char *msg, float val,
-		       float min, float max) throw();
+class OutOfBoundsException : public Exception
+{
+public:
+	OutOfBoundsException(const char *msg) throw();
+	OutOfBoundsException(const char *msg, float val, float min, float max) throw();
 };
 
-
-class AccessViolationException : public Exception {
- public:
-  AccessViolationException(const char *format, ...) throw();
+class AccessViolationException : public Exception
+{
+public:
+	AccessViolationException(const char *format, ...) throw();
 };
 
-
-class SyntaxErrorException : public Exception {
- public:
-  SyntaxErrorException(const char *format, ...) throw();
+class SyntaxErrorException : public Exception
+{
+public:
+	SyntaxErrorException(const char *format, ...) throw();
 };
 
-class NotImplementedException : public Exception {
- public:
-  NotImplementedException(const char *format, ...) throw();
+class NotImplementedException : public Exception
+{
+public:
+	NotImplementedException(const char *format, ...) throw();
 };
-
 
 } // end namespace fawkes
 

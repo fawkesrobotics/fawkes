@@ -21,40 +21,40 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <core/threading/barrier.h>
 #include <core/exception.h>
+#include <core/threading/barrier.h>
 
 #include <pthread.h>
 #include <unistd.h>
 
 // cf. http://people.redhat.com/drepper/posix-option-groups.html
 #if defined(_POSIX_BARRIERS) && (_POSIX_BARRIERS - 200112L) >= 0
-#  define USE_POSIX_BARRIERS
+#	define USE_POSIX_BARRIERS
 #else
-#  undef USE_POSIX_BARRIERS
-#  include <core/threading/mutex.h>
-#  include <core/threading/wait_condition.h>
+#	undef USE_POSIX_BARRIERS
+#	include <core/threading/mutex.h>
+#	include <core/threading/wait_condition.h>
 #endif
 
 namespace fawkes {
 
-
 /// @cond INTERNALS
 class BarrierData
 {
- public:
+public:
 #ifdef USE_POSIX_BARRIERS
-  pthread_barrier_t barrier;
+	pthread_barrier_t barrier;
 #else
-  BarrierData() : threads_left(0), mutex(), waitcond(&mutex) {}
+	BarrierData() : threads_left(0), mutex(), waitcond(&mutex)
+	{
+	}
 
-  unsigned int  threads_left;
-  Mutex         mutex;
-  WaitCondition waitcond;
+	unsigned int  threads_left;
+	Mutex         mutex;
+	WaitCondition waitcond;
 #endif
 };
 /// @endcond
-
 
 /** @class Barrier core/threading/barrier.h
  * A barrier is a synchronization tool which blocks until a given number of
@@ -108,46 +108,42 @@ class BarrierData
  * @author Tim Niemueller
  */
 
-
 /** Constructor
  * @param count the number of threads to wait for
  */
 Barrier::Barrier(unsigned int count)
 {
-  _count = count;
-  if ( _count == 0 ) {
-    throw Exception("Barrier count must be at least 1");
-  }
-  barrier_data = new BarrierData();
+	_count = count;
+	if (_count == 0) {
+		throw Exception("Barrier count must be at least 1");
+	}
+	barrier_data = new BarrierData();
 #ifdef USE_POSIX_BARRIERS
-  pthread_barrier_init( &(barrier_data->barrier), NULL, _count );
+	pthread_barrier_init(&(barrier_data->barrier), NULL, _count);
 #else
-  barrier_data->threads_left = _count;
+	barrier_data->threads_left = _count;
 #endif
 }
-
 
 /** Protected Constructor.
  * Does not initialize any internal structures other than setting them to 0.
  */
 Barrier::Barrier()
 {
-  _count = 0;
-  barrier_data = NULL;
+	_count       = 0;
+	barrier_data = NULL;
 }
-
 
 /** Destructor */
 Barrier::~Barrier()
 {
-  if (barrier_data) {
+	if (barrier_data) {
 #ifdef USE_POSIX_BARRIERS
-    pthread_barrier_destroy( &(barrier_data->barrier) );
+		pthread_barrier_destroy(&(barrier_data->barrier));
 #endif
-    delete barrier_data;
-  }
+		delete barrier_data;
+	}
 }
-
 
 /** Wait for other threads.
  * This method will block until as many threads have called wait as you have
@@ -157,22 +153,21 @@ void
 Barrier::wait()
 {
 #ifdef USE_POSIX_BARRIERS
-  pthread_barrier_wait( &(barrier_data->barrier) );
+	pthread_barrier_wait(&(barrier_data->barrier));
 #else
-  barrier_data->mutex.lock();
+	barrier_data->mutex.lock();
 
-  if ( --barrier_data->threads_left == 0 ) {
-    barrier_data->threads_left = _count;
-    barrier_data->mutex.unlock();
-    barrier_data->waitcond.wake_all();
-  } else {
-    barrier_data->waitcond.wait();
-    barrier_data->mutex.unlock();
-  }
+	if (--barrier_data->threads_left == 0) {
+		barrier_data->threads_left = _count;
+		barrier_data->mutex.unlock();
+		barrier_data->waitcond.wake_all();
+	} else {
+		barrier_data->waitcond.wait();
+		barrier_data->mutex.unlock();
+	}
 
 #endif
 }
-
 
 /** Get number of threads this barrier will wait for.
  * @return number of threads this barrier will wait for.
@@ -180,8 +175,7 @@ Barrier::wait()
 unsigned int
 Barrier::count()
 {
-  return _count;
+	return _count;
 }
-
 
 } // end namespace fawkes

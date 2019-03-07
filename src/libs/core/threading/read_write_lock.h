@@ -26,17 +26,15 @@
 
 namespace fawkes {
 
-
 class ReadWriteLockData;
 
 class ReadWriteLock
 {
- public:
-
-  /** The policy to use for the read/write lock.
+public:
+	/** The policy to use for the read/write lock.
    */
-  enum ReadWriteLockPolicy {
-    RWLockPolicyPreferWriter,    /**< Prefer writers over readers. A writer
+	enum ReadWriteLockPolicy {
+		RWLockPolicyPreferWriter, /**< Prefer writers over readers. A writer
 				  * is granted prefered access to the lock.
 				  * This means that the writer can aquire
 				  * the lock as soon as all readers unlocked
@@ -46,7 +44,7 @@ class ReadWriteLock
 				  * writers you can run into the problem of
 				  * reader starvation.
 				  */
-    RWLockPolicyPreferReader     /**< Prefer readers over writers. This is
+		RWLockPolicyPreferReader  /**< Prefer readers over writers. This is
 				  * similar to the writer preference. Readers
 				  * will be allowed to aquire the lock no
 				  * matter if there is a writer enqueued for
@@ -57,22 +55,21 @@ class ReadWriteLock
 				  * problem of writer starvation: the writer
 				  * can never aquire the lock.
 				  */
-  };
+	};
 
-  ReadWriteLock(ReadWriteLockPolicy policy = RWLockPolicyPreferWriter);
+	ReadWriteLock(ReadWriteLockPolicy policy = RWLockPolicyPreferWriter);
 
-  virtual ~ReadWriteLock();
+	virtual ~ReadWriteLock();
 
-  void lock_for_read();
-  void lock_for_write();
-  bool try_lock_for_read();
-  bool try_lock_for_write();
-  void unlock();
+	void lock_for_read();
+	void lock_for_write();
+	bool try_lock_for_read();
+	bool try_lock_for_write();
+	void unlock();
 
- private:
-  ReadWriteLockData *rwlock_data;
+private:
+	ReadWriteLockData *rwlock_data;
 };
-
 
 } // end namespace fawkes
 

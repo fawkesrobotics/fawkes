@@ -26,28 +26,26 @@
 
 namespace fawkes {
 
-
 class BarrierData;
 
 class Barrier
 {
- public:
-  Barrier(unsigned int count);
-  virtual ~Barrier();
+public:
+	Barrier(unsigned int count);
+	virtual ~Barrier();
 
-  virtual void wait();
+	virtual void wait();
 
-  unsigned int count();
+	unsigned int count();
 
- private:
-  BarrierData *barrier_data;
+private:
+	BarrierData *barrier_data;
 
- protected:
-  Barrier();
-  /** Number of threads that are expected to wait for the barrier */
-  unsigned int _count;
+protected:
+	Barrier();
+	/** Number of threads that are expected to wait for the barrier */
+	unsigned int _count;
 };
-
 
 } // end namespace fawkes
 

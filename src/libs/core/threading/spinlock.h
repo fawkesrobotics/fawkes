@@ -26,23 +26,21 @@
 
 namespace fawkes {
 
-
 class SpinlockData;
 
 class Spinlock
 {
- public:
-  Spinlock();
-  ~Spinlock();
+public:
+	Spinlock();
+	~Spinlock();
 
-  void lock();
-  bool try_lock();
-  void unlock();
+	void lock();
+	bool try_lock();
+	void unlock();
 
- private:
-  SpinlockData *spinlock_data;
+private:
+	SpinlockData *spinlock_data;
 };
-
 
 } // end namespace fawkes
 

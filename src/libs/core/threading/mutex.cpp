@@ -21,10 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <core/exception.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_data.h>
 #include <core/threading/thread.h>
-#include <core/exception.h>
 
 #include <pthread.h>
 
@@ -53,33 +53,31 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param type mutex type 
  */
 Mutex::Mutex(Type type)
 {
-  mutex_data = new MutexData();
+	mutex_data = new MutexData();
 
-  pthread_mutexattr_t attr;
-  pthread_mutexattr_init(&attr);
-  if (type == RECURSIVE) {
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-  } else {
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL);
-  }
+	pthread_mutexattr_t attr;
+	pthread_mutexattr_init(&attr);
+	if (type == RECURSIVE) {
+		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+	} else {
+		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL);
+	}
 
-  pthread_mutex_init(&(mutex_data->mutex), &attr);
+	pthread_mutex_init(&(mutex_data->mutex), &attr);
 }
 
 /** Destructor */
 Mutex::~Mutex()
 {
-  pthread_mutex_destroy(&(mutex_data->mutex));
-  delete mutex_data;
-  mutex_data = NULL;
+	pthread_mutex_destroy(&(mutex_data->mutex));
+	delete mutex_data;
+	mutex_data = NULL;
 }
-
 
 /** Lock this mutex.
  * A call to lock() will block until the lock on the mutex could be aquired.
@@ -88,16 +86,15 @@ Mutex::~Mutex()
 void
 Mutex::lock()
 {
-  int err = 0;
-  if ( (err = pthread_mutex_lock(&(mutex_data->mutex))) != 0 ) {
-    throw Exception(err, "Failed to aquire lock for thread %s", Thread::current_thread()->name());
-  }
+	int err = 0;
+	if ((err = pthread_mutex_lock(&(mutex_data->mutex))) != 0) {
+		throw Exception(err, "Failed to aquire lock for thread %s", Thread::current_thread()->name());
+	}
 #ifdef DEBUG_THREADING
-  // do not switch order, lock holder must be protected with this mutex!
-  mutex_data->set_lock_holder();
+	// do not switch order, lock holder must be protected with this mutex!
+	mutex_data->set_lock_holder();
 #endif
 }
-
 
 /** Tries to lock the mutex.
  * This can also be used to check if a mutex is locked. The code for this
@@ -119,28 +116,26 @@ Mutex::lock()
 bool
 Mutex::try_lock()
 {
-  if (pthread_mutex_trylock(&(mutex_data->mutex)) == 0) {
+	if (pthread_mutex_trylock(&(mutex_data->mutex)) == 0) {
 #ifdef DEBUG_THREADING
-    mutex_data->set_lock_holder();
+		mutex_data->set_lock_holder();
 #endif
-    return true;
-  } else {
-    return false;
-  }
+		return true;
+	} else {
+		return false;
+	}
 }
-
 
 /** Unlock the mutex. */
 void
 Mutex::unlock()
 {
 #ifdef DEBUG_THREADING
-  mutex_data->unset_lock_holder();
-  // do not switch order, lock holder must be protected with this mutex!
+	mutex_data->unset_lock_holder();
+	// do not switch order, lock holder must be protected with this mutex!
 #endif
-  pthread_mutex_unlock(&(mutex_data->mutex));
+	pthread_mutex_unlock(&(mutex_data->mutex));
 }
-
 
 /** Shortly stop by at the mutex.
  * This will just lock and unlock the mutex. It is equivalent to
@@ -154,9 +149,8 @@ Mutex::unlock()
 void
 Mutex::stopby()
 {
-  pthread_mutex_lock(&(mutex_data->mutex));
-  pthread_mutex_unlock(&(mutex_data->mutex));
+	pthread_mutex_lock(&(mutex_data->mutex));
+	pthread_mutex_unlock(&(mutex_data->mutex));
 }
-
 
 } // end namespace fawkes

@@ -24,28 +24,38 @@
 #ifndef _CORE_VERSION_H_
 #define _CORE_VERSION_H_
 
-#define FAWKES_VERSION_MAJOR  1
-#define FAWKES_VERSION_MINOR  0
-#define FAWKES_VERSION_MICRO  1
+#define FAWKES_VERSION_MAJOR 1
+#define FAWKES_VERSION_MINOR 0
+#define FAWKES_VERSION_MICRO 1
 
-#define FAWKES_VERSION_GT(major, minor) ((FAWKES_MAJOR_VERSION  > major) || (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION  > minor))
-#define FAWKES_VERSION_GE(major, minor) ((FAWKES_MAJOR_VERSION  > major) || (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION >= minor))
-#define FAWKES_VERSION_EQ(major, minor) ((FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION == minor))
-#define FAWKES_VERSION_NE(major, minor) ((FAWKES_MAJOR_VERSION != major) || (FAWKES_MINOR_VERSION != minor))
-#define FAWKES_VERSION_LE(major, minor) ((FAWKES_MAJOR_VERSION  < major) || (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION <= minor))
-#define FAWKES_VERSION_LT(major, minor) ((FAWKES_MAJOR_VERSION  < major) || (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION  < minor))
+#define FAWKES_VERSION_GT(major, minor) \
+	((FAWKES_MAJOR_VERSION > major)       \
+	 || (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION > minor))
+#define FAWKES_VERSION_GE(major, minor) \
+	((FAWKES_MAJOR_VERSION > major)       \
+	 || (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION >= minor))
+#define FAWKES_VERSION_EQ(major, minor) \
+	((FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION == minor))
+#define FAWKES_VERSION_NE(major, minor) \
+	((FAWKES_MAJOR_VERSION != major) || (FAWKES_MINOR_VERSION != minor))
+#define FAWKES_VERSION_LE(major, minor) \
+	((FAWKES_MAJOR_VERSION < major)       \
+	 || (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION <= minor))
+#define FAWKES_VERSION_LT(major, minor) \
+	((FAWKES_MAJOR_VERSION < major)       \
+	 || (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION < minor))
 
-#define FAWKES_VERSION_GT_MICRO(major, minor, micro)			\
-  ((FAWKES_MAJOR_VERSION  > major) ||					\
-   (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION  > minor) || \
-   (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION == minor) && (FAWKES_MICRO_VERSION > minor))
+#define FAWKES_VERSION_GT_MICRO(major, minor, micro)                     \
+	((FAWKES_MAJOR_VERSION > major)                                        \
+	 || (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION > minor)  \
+	 || (FAWKES_MAJOR_VERSION == major) && (FAWKES_MINOR_VERSION == minor) \
+	      && (FAWKES_MICRO_VERSION > minor))
 
 #define FAWKES_VERSION_xstr(s) FAWKES_VERSION_str(s)
 #define FAWKES_VERSION_str(s) #s
 
-#define FAWKES_VERSION_STRING \
-  FAWKES_VERSION_xstr(FAWKES_VERSION_MAJOR) "."	 \
-  FAWKES_VERSION_xstr(FAWKES_VERSION_MINOR) "."  \
-  FAWKES_VERSION_xstr(FAWKES_VERSION_MICRO)
+#define FAWKES_VERSION_STRING                                        \
+	FAWKES_VERSION_xstr(FAWKES_VERSION_MAJOR) "." FAWKES_VERSION_xstr( \
+	  FAWKES_VERSION_MINOR) "." FAWKES_VERSION_xstr(FAWKES_VERSION_MICRO)
 
 #endif

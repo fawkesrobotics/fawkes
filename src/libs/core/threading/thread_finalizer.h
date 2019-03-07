@@ -28,25 +28,23 @@
 
 namespace fawkes {
 
-
 class Thread;
 
 class CannotFinalizeThreadException : public Exception
 {
- public:
-  CannotFinalizeThreadException(const char *format, ...);
-  CannotFinalizeThreadException(Exception &e);
+public:
+	CannotFinalizeThreadException(const char *format, ...);
+	CannotFinalizeThreadException(Exception &e);
 };
 
 class ThreadFinalizer
 {
- public:
-  virtual ~ThreadFinalizer();
+public:
+	virtual ~ThreadFinalizer();
 
-  virtual bool prepare_finalize(Thread *thread)                      = 0;
-  virtual void finalize(Thread *thread)                              = 0;
+	virtual bool prepare_finalize(Thread *thread) = 0;
+	virtual void finalize(Thread *thread)         = 0;
 };
-
 
 } // end namespace fawkes
 
