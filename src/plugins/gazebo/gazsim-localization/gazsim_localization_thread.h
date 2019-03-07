@@ -22,71 +22,69 @@
 #ifndef _PLUGINS_GAZSIM_LOCALIZATION_THREAD_H_
 #define _PLUGINS_GAZSIM_LOCALIZATION_THREAD_H_
 
-#include <core/threading/thread.h>
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/blackboard.h>
-#include <aspect/blocked_timing.h>
 #include <aspect/tf.h>
+#include <core/threading/thread.h>
 #include <plugins/gazebo/aspect/gazebo.h>
 
 //from Gazebo
-#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/msgs/MessageTypes.hh>
+#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/transport/transport.hh>
 
-
 namespace fawkes {
-  class Position3DInterface;
+class Position3DInterface;
 }
 
-class LocalizationSimThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::GazeboAspect,
-  public fawkes::TransformAspect
+class LocalizationSimThread : public fawkes::Thread,
+                              public fawkes::ClockAspect,
+                              public fawkes::LoggingAspect,
+                              public fawkes::ConfigurableAspect,
+                              public fawkes::BlackBoardAspect,
+                              public fawkes::BlockedTimingAspect,
+                              public fawkes::GazeboAspect,
+                              public fawkes::TransformAspect
 {
- public:
-  LocalizationSimThread();
+public:
+	LocalizationSimThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- private:
-  //Subscriber to receive localization data from gazebo
-  gazebo::transport::SubscriberPtr localization_sub_;
-  std::string gps_topic_;
+private:
+	//Subscriber to receive localization data from gazebo
+	gazebo::transport::SubscriberPtr localization_sub_;
+	std::string                      gps_topic_;
 
-  //provided interface
-  fawkes::Position3DInterface *localization_if_;
+	//provided interface
+	fawkes::Position3DInterface *localization_if_;
 
-  //handler function for incoming localization data messages
-  void on_localization_msg(ConstPosePtr &msg);
+	//handler function for incoming localization data messages
+	void on_localization_msg(ConstPosePtr &msg);
 
-  //is there new information to write in the interface?
-  bool new_data_;
+	//is there new information to write in the interface?
+	bool new_data_;
 
-  //localization data
-  double x_;
-  double y_;
-  double z_;
-  double quat_x_;
-  double quat_y_;
-  double quat_z_;
-  double quat_w_;
+	//localization data
+	double x_;
+	double y_;
+	double z_;
+	double quat_x_;
+	double quat_y_;
+	double quat_z_;
+	double quat_w_;
 
-  //time the transform should be up to date
-  double transform_tolerance_;
+	//time the transform should be up to date
+	double transform_tolerance_;
 
-  //frame ids for transform
-  std::string odom_frame_id_;
-  std::string global_frame_id_;
+	//frame ids for transform
+	std::string odom_frame_id_;
+	std::string global_frame_id_;
 };
 
 #endif
