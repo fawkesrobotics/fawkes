@@ -174,8 +174,6 @@ check_commit_authors () {
 
 	OTHER_BRANCHES=$(git for-each-ref --format='%(refname)' refs/heads/ | grep -F -v "refs/heads/${BUILDKITE_BRANCH:-}" || :)
 
-	OIFSN=$IFS
-	IFS=$'\n'
 	git rev-parse ${OTHER_BRANCHES:+--not "$OTHER_BRANCHES" } |
 	git rev-list --stdin $MERGE_BASE..HEAD |
 	while read onerev
