@@ -23,160 +23,188 @@
 #ifndef _LIBS_PCL_UTILS_STORAGE_ADAPTER_H_
 #define _LIBS_PCL_UTILS_STORAGE_ADAPTER_H_
 
-#include <pcl_utils/utils.h>
-#include <pcl_utils/transforms.h>
 #include <pcl/point_cloud.h>
+#include <pcl_utils/transforms.h>
+#include <pcl_utils/utils.h>
 
 namespace fawkes {
-  namespace pcl_utils {
+namespace pcl_utils {
 
 template <typename PointT>
 class PointCloudStorageAdapter;
 
-class StorageAdapter {
- public:
-  /** Virtual empty destructor. */
-  virtual ~StorageAdapter() {};
+class StorageAdapter
+{
+public:
+	/** Virtual empty destructor. */
+	virtual ~StorageAdapter(){};
 
-  template <typename PointT>
-  bool is_pointtype() const;
+	template <typename PointT>
+	bool is_pointtype() const;
 
-  template <typename PointT>
-  PointCloudStorageAdapter<PointT> * as_pointtype();
+	template <typename PointT>
+	PointCloudStorageAdapter<PointT> *as_pointtype();
 
-  virtual void transform(const std::string &target_frame,
-			 const tf::Transformer &transformer) = 0;
+	virtual void transform(const std::string &target_frame, const tf::Transformer &transformer) = 0;
 
-  virtual void transform(const std::string &target_frame,
-			 const Time &target_time,
-			 const std::string &fixed_frame,
-			 const tf::Transformer &transformer) = 0;
+	virtual void transform(const std::string &    target_frame,
+	                       const Time &           target_time,
+	                       const std::string &    fixed_frame,
+	                       const tf::Transformer &transformer) = 0;
 
-  virtual const char * get_typename() = 0;
-  virtual StorageAdapter * clone() const = 0;
-  virtual size_t  point_size() const = 0;
-  virtual unsigned int  width() const = 0;
-  virtual unsigned int  height() const = 0;
-  virtual size_t  num_points() const = 0;
-  virtual void *  data_ptr() const = 0;
-  virtual std::string frame_id() const = 0;
-  virtual void get_time(fawkes::Time &time) const = 0;
+	virtual const char *    get_typename()                     = 0;
+	virtual StorageAdapter *clone() const                      = 0;
+	virtual size_t          point_size() const                 = 0;
+	virtual unsigned int    width() const                      = 0;
+	virtual unsigned int    height() const                     = 0;
+	virtual size_t          num_points() const                 = 0;
+	virtual void *          data_ptr() const                   = 0;
+	virtual std::string     frame_id() const                   = 0;
+	virtual void            get_time(fawkes::Time &time) const = 0;
 };
 
 template <typename PointT>
 class PointCloudStorageAdapter : public StorageAdapter
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param cloud cloud to encapsulate.
    */
- PointCloudStorageAdapter(RefPtr<pcl::PointCloud<PointT> > cloud)
-   : cloud(cloud) {}
+	PointCloudStorageAdapter(RefPtr<pcl::PointCloud<PointT>> cloud) : cloud(cloud)
+	{
+	}
 
-  /** Copy constructor.
+	/** Copy constructor.
    * @param p storage adapter to copy
    */
- PointCloudStorageAdapter(const PointCloudStorageAdapter<PointT> *p)
-   : cloud(p->cloud) {}
+	PointCloudStorageAdapter(const PointCloudStorageAdapter<PointT> *p) : cloud(p->cloud)
+	{
+	}
 
-  /** The point cloud. */
-  const RefPtr<pcl::PointCloud<PointT> > cloud;
+	/** The point cloud. */
+	const RefPtr<pcl::PointCloud<PointT>> cloud;
 
-  /** Get PCL shared pointer to cloud.
+	/** Get PCL shared pointer to cloud.
    * @return PCL shared pointer to cloud
    */
-  typename pcl::PointCloud<PointT>::Ptr cloud_ptr()
-  { return pcl_utils::cloudptr_from_refptr(cloud); }
+	typename pcl::PointCloud<PointT>::Ptr
+	cloud_ptr()
+	{
+		return pcl_utils::cloudptr_from_refptr(cloud);
+	}
 
-  /** Get PCL const shared pointer to cloud.
+	/** Get PCL const shared pointer to cloud.
    * @return PCL const shared pointer to cloud
    */
-  typename pcl::PointCloud<PointT>::ConstPtr cloud_const_ptr()
-  { return pcl_utils::cloudptr_from_refptr(cloud); }
+	typename pcl::PointCloud<PointT>::ConstPtr
+	cloud_const_ptr()
+	{
+		return pcl_utils::cloudptr_from_refptr(cloud);
+	}
 
-  virtual StorageAdapter * clone() const;
+	virtual StorageAdapter *clone() const;
 
-  virtual void transform(const std::string &target_frame,
-			 const tf::Transformer &transformer);
+	virtual void transform(const std::string &target_frame, const tf::Transformer &transformer);
 
-  virtual void transform(const std::string &target_frame,
-			 const Time &target_time,
-			 const std::string &fixed_frame,
-			 const tf::Transformer &transformer);
+	virtual void transform(const std::string &    target_frame,
+	                       const Time &           target_time,
+	                       const std::string &    fixed_frame,
+	                       const tf::Transformer &transformer);
 
-  virtual const char * get_typename() { return typeid(this).name(); }
-  virtual size_t  point_size() const { return sizeof(PointT); }
-  virtual unsigned int  width() const { return cloud->width; }
-  virtual unsigned int  height() const { return cloud->height; }
-  virtual size_t  num_points() const { return cloud->points.size(); }
-  virtual void *  data_ptr() const  { return &cloud->points[0]; }
-  virtual std::string frame_id() const { return cloud->header.frame_id; }
-  virtual void get_time(fawkes::Time &time) const;
+	virtual const char *
+	get_typename()
+	{
+		return typeid(this).name();
+	}
+	virtual size_t
+	point_size() const
+	{
+		return sizeof(PointT);
+	}
+	virtual unsigned int
+	width() const
+	{
+		return cloud->width;
+	}
+	virtual unsigned int
+	height() const
+	{
+		return cloud->height;
+	}
+	virtual size_t
+	num_points() const
+	{
+		return cloud->points.size();
+	}
+	virtual void *
+	data_ptr() const
+	{
+		return &cloud->points[0];
+	}
+	virtual std::string
+	frame_id() const
+	{
+		return cloud->header.frame_id;
+	}
+	virtual void get_time(fawkes::Time &time) const;
 };
 
 template <typename PointT>
 bool
 StorageAdapter::is_pointtype() const
 {
-  const PointCloudStorageAdapter<PointT> *pa =
-    dynamic_cast<const PointCloudStorageAdapter<PointT> *>(this);
-  return (!!pa);
+	const PointCloudStorageAdapter<PointT> *pa =
+	  dynamic_cast<const PointCloudStorageAdapter<PointT> *>(this);
+	return (!!pa);
 }
-
 
 template <typename PointT>
 PointCloudStorageAdapter<PointT> *
 StorageAdapter::as_pointtype()
 {
-  PointCloudStorageAdapter<PointT> *pa =
-    dynamic_cast<PointCloudStorageAdapter<PointT> *>(this);
-  if (!pa) {
-    throw Exception("PointCloud storage adapter is not of anticipated type");
-  }
-  return pa;
+	PointCloudStorageAdapter<PointT> *pa = dynamic_cast<PointCloudStorageAdapter<PointT> *>(this);
+	if (!pa) {
+		throw Exception("PointCloud storage adapter is not of anticipated type");
+	}
+	return pa;
 }
-
 
 template <typename PointT>
 StorageAdapter *
 PointCloudStorageAdapter<PointT>::clone() const
 {
-  return new PointCloudStorageAdapter<PointT>(this);
+	return new PointCloudStorageAdapter<PointT>(this);
 }
-
 
 template <typename PointT>
 void
 PointCloudStorageAdapter<PointT>::get_time(fawkes::Time &time) const
 {
-  pcl_utils::get_time(cloud, time);
-}
-
-
-template <typename PointT>
-void
-PointCloudStorageAdapter<PointT>::transform(const std::string &target_frame,
-					    const tf::Transformer &transformer)
-{
-  pcl::PointCloud<PointT> tmp;
-  pcl_utils::transform_pointcloud(target_frame, **cloud, tmp, transformer);
-  **cloud = tmp;
+	pcl_utils::get_time(cloud, time);
 }
 
 template <typename PointT>
 void
-PointCloudStorageAdapter<PointT>::transform(const std::string &target_frame,
-					    const Time &target_time,
-					    const std::string &fixed_frame,
-					    const tf::Transformer &transformer)
+PointCloudStorageAdapter<PointT>::transform(const std::string &    target_frame,
+                                            const tf::Transformer &transformer)
 {
-  pcl::PointCloud<PointT> tmp;
-  pcl_utils::transform_pointcloud(target_frame, target_time, fixed_frame,
-				  **cloud, tmp, transformer);
-  **cloud = tmp;
+	pcl::PointCloud<PointT> tmp;
+	pcl_utils::transform_pointcloud(target_frame, **cloud, tmp, transformer);
+	**cloud = tmp;
 }
 
-
+template <typename PointT>
+void
+PointCloudStorageAdapter<PointT>::transform(const std::string &    target_frame,
+                                            const Time &           target_time,
+                                            const std::string &    fixed_frame,
+                                            const tf::Transformer &transformer)
+{
+	pcl::PointCloud<PointT> tmp;
+	pcl_utils::transform_pointcloud(
+	  target_frame, target_time, fixed_frame, **cloud, tmp, transformer);
+	**cloud = tmp;
+}
 
 } // end namespace pcl_utils
 } // end namespace fawkes

@@ -24,109 +24,104 @@
 #define _LIBS_PCL_UTILS_POINTCLOUD_MANAGER_H_
 
 #include <core/exception.h>
-#include <core/utils/refptr.h>
-#include <core/utils/lock_map.h>
 #include <core/threading/mutex_locker.h>
+#include <core/utils/lock_map.h>
+#include <core/utils/refptr.h>
+#include <pcl_utils/storage_adapter.h>
 #include <utils/time/time.h>
 
-#include <pcl_utils/storage_adapter.h>
-
-#include <vector>
-#include <string>
-#include <stdint.h>
-#include <typeinfo>
 #include <cstring>
+#include <stdint.h>
+#include <string>
+#include <typeinfo>
+#include <vector>
 
 namespace pcl {
-  template <typename PointT>
-    class PointCloud;
+template <typename PointT>
+class PointCloud;
 }
 
 namespace fawkes {
 
 class PointCloudManager
 {
- public:
-  PointCloudManager();
-  virtual ~PointCloudManager();
+public:
+	PointCloudManager();
+	virtual ~PointCloudManager();
 
-  template <typename PointT>
-    void add_pointcloud(const char *id, RefPtr<pcl::PointCloud<PointT> > cloud);
+	template <typename PointT>
+	void add_pointcloud(const char *id, RefPtr<pcl::PointCloud<PointT>> cloud);
 
-  void remove_pointcloud(const char *id);
+	void remove_pointcloud(const char *id);
 
-  template <typename PointT>
-    const RefPtr<const pcl::PointCloud<PointT> > get_pointcloud(const char *id);
-  bool exists_pointcloud(const char *id);
+	template <typename PointT>
+	const RefPtr<const pcl::PointCloud<PointT>> get_pointcloud(const char *id);
+	bool                                        exists_pointcloud(const char *id);
 
-  /**  Check if point cloud of specified type exists.
+	/**  Check if point cloud of specified type exists.
    * @param id ID of point cloud to check
    * @return true if the point cloud exists, false otherwise
    */
-  template <typename PointT>
-  bool exists_pointcloud(const char *id);
+	template <typename PointT>
+	bool exists_pointcloud(const char *id);
 
+	std::vector<std::string>                                         get_pointcloud_list() const;
+	const fawkes::LockMap<std::string, pcl_utils::StorageAdapter *> &get_pointclouds() const;
+	const pcl_utils::StorageAdapter *get_storage_adapter(const char *id);
 
-  std::vector<std::string>  get_pointcloud_list() const;
-  const fawkes::LockMap<std::string, pcl_utils::StorageAdapter *> &  get_pointclouds() const;
-  const pcl_utils::StorageAdapter *  get_storage_adapter(const char *id);
-
- private:
-  fawkes::LockMap<std::string, pcl_utils::StorageAdapter *>  clouds_;
+private:
+	fawkes::LockMap<std::string, pcl_utils::StorageAdapter *> clouds_;
 };
-
 
 template <typename PointT>
 void
-PointCloudManager::add_pointcloud(const char *id,
-                                  RefPtr<pcl::PointCloud<PointT> > cloud)
+PointCloudManager::add_pointcloud(const char *id, RefPtr<pcl::PointCloud<PointT>> cloud)
 {
-  fawkes::MutexLocker lock(clouds_.mutex());
+	fawkes::MutexLocker lock(clouds_.mutex());
 
-  if (clouds_.find(id) == clouds_.end()) {
-    clouds_[id] = new pcl_utils::PointCloudStorageAdapter<PointT>(cloud);
-  } else {
-    throw Exception("Cloud %s already registered");
-  }
+	if (clouds_.find(id) == clouds_.end()) {
+		clouds_[id] = new pcl_utils::PointCloudStorageAdapter<PointT>(cloud);
+	} else {
+		throw Exception("Cloud %s already registered");
+	}
 }
 
 template <typename PointT>
-const RefPtr<const pcl::PointCloud<PointT> >
+const RefPtr<const pcl::PointCloud<PointT>>
 PointCloudManager::get_pointcloud(const char *id)
 {
-  fawkes::MutexLocker lock(clouds_.mutex());
+	fawkes::MutexLocker lock(clouds_.mutex());
 
-  if (clouds_.find(id) != clouds_.end()) {
-    pcl_utils::PointCloudStorageAdapter<PointT> *pa =
-      dynamic_cast<pcl_utils::PointCloudStorageAdapter<PointT> *>(clouds_[id]);
+	if (clouds_.find(id) != clouds_.end()) {
+		pcl_utils::PointCloudStorageAdapter<PointT> *pa =
+		  dynamic_cast<pcl_utils::PointCloudStorageAdapter<PointT> *>(clouds_[id]);
 
-    if (!pa) {
-      // workaround for older compilers
-      if (strcmp(clouds_[id]->get_typename(),
-                 typeid(pcl_utils::PointCloudStorageAdapter<PointT> *).name()) == 0)
-      {
-        return static_cast<pcl_utils::PointCloudStorageAdapter<PointT> *>(clouds_[id])->cloud;
-      }
+		if (!pa) {
+			// workaround for older compilers
+			if (strcmp(clouds_[id]->get_typename(),
+			           typeid(pcl_utils::PointCloudStorageAdapter<PointT> *).name())
+			    == 0) {
+				return static_cast<pcl_utils::PointCloudStorageAdapter<PointT> *>(clouds_[id])->cloud;
+			}
 
-      throw Exception("The desired point cloud is of a different type");
-    }
-    return pa->cloud;
-  } else {
-    throw Exception("No point cloud with ID '%s' registered", id);
-  }
+			throw Exception("The desired point cloud is of a different type");
+		}
+		return pa->cloud;
+	} else {
+		throw Exception("No point cloud with ID '%s' registered", id);
+	}
 }
 
 template <typename PointT>
 bool
 PointCloudManager::exists_pointcloud(const char *id)
 {
-  try {
-    const RefPtr<const pcl::PointCloud<PointT> > p = get_pointcloud<PointT>(id);
-    return true;
-  } catch (Exception &e) {
-    return false;
-  }
-
+	try {
+		const RefPtr<const pcl::PointCloud<PointT>> p = get_pointcloud<PointT>(id);
+		return true;
+	} catch (Exception &e) {
+		return false;
+	}
 }
 
 } // end namespace fawkes

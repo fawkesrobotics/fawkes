@@ -23,7 +23,7 @@
 #include <pcl_utils/storage_adapter.h>
 
 namespace fawkes {
-  namespace pcl_utils {
+namespace pcl_utils {
 
 /** @class StorageAdapter <pcl_utils/storage_adapter.h>
  * Adapter base class.
@@ -88,7 +88,6 @@ namespace fawkes {
  * @param fixed_frame frame fixed over time
  * @param transformer transformer to get transform from
  */
-
 
 /** @class PointCloudStorageAdapter <pcl_utils/storage_adapter.h>
  * Adapter class for PCL point types.
