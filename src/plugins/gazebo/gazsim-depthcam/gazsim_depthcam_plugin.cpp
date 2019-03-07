@@ -19,9 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "gazsim_depthcam_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -32,16 +32,14 @@ using namespace fawkes;
  */
 class GazsimDepthcamPlugin : public fawkes::Plugin
 {
- public:
-
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit GazsimDepthcamPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new DepthcamSimThread());
-  }
+	explicit GazsimDepthcamPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new DepthcamSimThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Simulation of a Depthcam in Gazebo")
