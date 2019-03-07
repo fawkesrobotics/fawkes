@@ -30,17 +30,17 @@ namespace firevision {
 
 class SDLKeeper
 {
- public:
-  static void init(unsigned int flags);
-  static void quit() throw();
+public:
+	static void init(unsigned int flags);
+	static void quit() throw();
 
-  static void force_quit();
+	static void force_quit();
 
- private:
-  SDLKeeper();
+private:
+	SDLKeeper();
 
-  static unsigned int  _refcount;
-  static fawkes::Mutex         _mutex;
+	static unsigned int  _refcount;
+	static fawkes::Mutex _mutex;
 };
 
 } // end namespace firevision

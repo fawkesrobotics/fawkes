@@ -34,23 +34,23 @@ namespace firevision {
 
 class ImageDisplay
 {
- public:
-  ImageDisplay(unsigned int width, unsigned int height, const char* title = 0);
-  ~ImageDisplay();
+public:
+	ImageDisplay(unsigned int width, unsigned int height, const char *title = 0);
+	~ImageDisplay();
 
-  void show(colorspace_t colorspace, unsigned char *buffer);
-  void show(unsigned char *yuv422_planar_buffer);
+	void show(colorspace_t colorspace, unsigned char *buffer);
+	void show(unsigned char *yuv422_planar_buffer);
 
-  void process_events(unsigned int max_num_events = 10);
-  void loop_until_quit();
+	void process_events(unsigned int max_num_events = 10);
+	void loop_until_quit();
 
- private:
-  SDL_Surface *_surface;
-  SDL_Overlay *_overlay;
-  SDL_Rect    *_rect;
+private:
+	SDL_Surface *_surface;
+	SDL_Overlay *_overlay;
+	SDL_Rect *   _rect;
 
-  unsigned int _width;
-  unsigned int _height;
+	unsigned int _width;
+	unsigned int _height;
 };
 
 } // end namespace firevision
