@@ -24,11 +24,11 @@
 #ifndef _PLUGIN_MANAGER_H_
 #define _PLUGIN_MANAGER_H_
 
+#include <config/change_handler.h>
 #include <core/utils/lock_list.h>
 #include <core/utils/lock_map.h>
-#include <config/change_handler.h>
-#include <utils/system/fam.h>
 #include <utils/system/dynamic_module/module.h>
+#include <utils/system/fam.h>
 
 #include <string>
 #include <utility>
@@ -44,80 +44,77 @@ class Configuration;
 class FamThread;
 class PluginManagerListener;
 
-class PluginManager
-: public fawkes::ConfigurationChangeHandler,
-  public FamListener
+class PluginManager : public fawkes::ConfigurationChangeHandler, public FamListener
 {
- public:
-  PluginManager(ThreadCollector *thread_collector,
-		Configuration *config,
-		const char *meta_plugin_prefix,
-		Module::ModuleFlags module_flags = Module::MODULE_FLAGS_DEFAULT,
-		bool init_cache = true);
-  ~PluginManager();
+public:
+	PluginManager(ThreadCollector *   thread_collector,
+	              Configuration *     config,
+	              const char *        meta_plugin_prefix,
+	              Module::ModuleFlags module_flags = Module::MODULE_FLAGS_DEFAULT,
+	              bool                init_cache   = true);
+	~PluginManager();
 
-  void set_module_flags(Module::ModuleFlags flags);
-  void init_pinfo_cache();
+	void set_module_flags(Module::ModuleFlags flags);
+	void init_pinfo_cache();
 
-  // for ConfigurationChangeHandler
-  virtual void config_tag_changed(const char *new_location);
-  virtual void config_value_changed(const Configuration::ValueIterator *v);
-  virtual void config_comment_changed(const Configuration::ValueIterator *v);
-  virtual void config_value_erased(const char *path);
+	// for ConfigurationChangeHandler
+	virtual void config_tag_changed(const char *new_location);
+	virtual void config_value_changed(const Configuration::ValueIterator *v);
+	virtual void config_comment_changed(const Configuration::ValueIterator *v);
+	virtual void config_value_erased(const char *path);
 
-  // for FamListener
-  virtual void fam_event(const char *filename, unsigned int mask);
+	// for FamListener
+	virtual void fam_event(const char *filename, unsigned int mask);
 
-  void load(const std::string& plugin_list);
-  void load(const std::list<std::string> &plugin_list);
-  void unload(const std::string& plugin_name);
+	void load(const std::string &plugin_list);
+	void load(const std::list<std::string> &plugin_list);
+	void unload(const std::string &plugin_name);
 
-  bool is_loaded(const std::string& plugin_name);
-  bool is_meta_plugin(const std::string& plugin_name);
+	bool is_loaded(const std::string &plugin_name);
+	bool is_meta_plugin(const std::string &plugin_name);
 
-  std::list<std::string>
-	  get_meta_plugin_children(const std::string& plugin_name);
+	std::list<std::string> get_meta_plugin_children(const std::string &plugin_name);
 
-  std::list<std::string>                           get_loaded_plugins();
-  std::list<std::pair<std::string, std::string> >  get_available_plugins();
+	std::list<std::string>                         get_loaded_plugins();
+	std::list<std::pair<std::string, std::string>> get_available_plugins();
 
-  void add_listener(PluginManagerListener *listener);
-  void remove_listener(PluginManagerListener *listener);
+	void add_listener(PluginManagerListener *listener);
+	void remove_listener(PluginManagerListener *listener);
 
-  void lock();
-  bool try_lock();
-  void unlock();
+	void lock();
+	bool try_lock();
+	void unlock();
 
- private:
-  void notify_loaded(const char *plugin_name);
-  void notify_unloaded(const char *plugin_name);
+private:
+	void notify_loaded(const char *plugin_name);
+	void notify_unloaded(const char *plugin_name);
 
-  std::list<std::string>  parse_plugin_list(const char *plugin_type_list);
+	std::list<std::string> parse_plugin_list(const char *plugin_type_list);
 
- private:
-  ThreadCollector   *thread_collector;
-  PluginLoader      *plugin_loader;
-  Mutex             *mutex_;
+private:
+	ThreadCollector *thread_collector;
+	PluginLoader *   plugin_loader;
+	Mutex *          mutex_;
 
-  LockList<Plugin *> plugins;
-  LockList<Plugin *>::iterator pit;
-  LockList<Plugin *>::reverse_iterator rpit;
+	LockList<Plugin *>                   plugins;
+	LockList<Plugin *>::iterator         pit;
+	LockList<Plugin *>::reverse_iterator rpit;
 
-  LockMap< std::string, std::list<std::string> > meta_plugins_;
-  LockMap< std::string, std::list<std::string> >::iterator mpit_;
+	LockMap<std::string, std::list<std::string>>           meta_plugins_;
+	LockMap<std::string, std::list<std::string>>::iterator mpit_;
 
-  unsigned int next_plugin_id;
-  std::map< std::string, unsigned int > plugin_ids;
+	unsigned int                        next_plugin_id;
+	std::map<std::string, unsigned int> plugin_ids;
 
-  LockList<std::pair<std::string, std::string> > pinfo_cache_;
+	LockList<std::pair<std::string, std::string>> pinfo_cache_;
 
-  LockList<PluginManagerListener *>           listeners_;
-  LockList<PluginManagerListener *>::iterator lit_;
+	LockList<PluginManagerListener *>           listeners_;
+	LockList<PluginManagerListener *>::iterator lit_;
 
-  Configuration *config_;
-  std::string meta_plugin_prefix_;
+	Configuration *config_;
+	std::string    meta_plugin_prefix_;
 
-  FamThread *fam_thread_;
+	FamThread *fam_thread_;
 };
 
 } // end namespace fawkes

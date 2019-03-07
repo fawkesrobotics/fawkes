@@ -28,11 +28,11 @@ namespace fawkes {
 
 class PluginManagerListener
 {
- public:
-  virtual ~PluginManagerListener();
+public:
+	virtual ~PluginManagerListener();
 
-  virtual void plugin_loaded(const char *plugin_name)    = 0;
-  virtual void plugin_unloaded(const char *plugin_name)  = 0;
+	virtual void plugin_loaded(const char *plugin_name)   = 0;
+	virtual void plugin_unloaded(const char *plugin_name) = 0;
 };
 
 } // end namespace fawkes
