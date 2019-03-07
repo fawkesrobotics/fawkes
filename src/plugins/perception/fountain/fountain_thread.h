@@ -23,39 +23,36 @@
 #ifndef _FIREVISION_APPS_FOUNTAIN_FOUNTAIN_THREAD_H_
 #define _FIREVISION_APPS_FOUNTAIN_FOUNTAIN_THREAD_H_
 
-#include <core/threading/thread.h>
-
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/network.h>
 #include <aspect/thread_producer.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  class NetworkService;
+class NetworkService;
 }
 namespace firevision {
-  class FuseServer;
+class FuseServer;
 }
 
-class FountainThread
-: public fawkes::Thread,
-  public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::NetworkAspect,
-  public fawkes::ThreadProducerAspect
+class FountainThread : public fawkes::Thread,
+                       public fawkes::ConfigurableAspect,
+                       public fawkes::LoggingAspect,
+                       public fawkes::NetworkAspect,
+                       public fawkes::ThreadProducerAspect
 {
- public:
-  FountainThread();
-  ~FountainThread();
+public:
+	FountainThread();
+	~FountainThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- private:
-  firevision::FuseServer *fuse_server_;
-  fawkes::NetworkService *service_;
+private:
+	firevision::FuseServer *fuse_server_;
+	fawkes::NetworkService *service_;
 };
-
 
 #endif

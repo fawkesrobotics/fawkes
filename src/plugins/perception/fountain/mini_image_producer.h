@@ -24,33 +24,33 @@
 #define _FIREVISION_APPS_FOUNTAIN_MINI_IMAGE_H_
 
 namespace fawkes {
-  class Logger;
+class Logger;
 }
 namespace firevision {
-  class Scaler;
-  class SharedMemoryImageBuffer;
-}
+class Scaler;
+class SharedMemoryImageBuffer;
+} // namespace firevision
 
-class MiniImageProducer {
- public:
+class MiniImageProducer
+{
+public:
+	MiniImageProducer(const char *        orig_id,
+	                  const char *        mini_id,
+	                  firevision::Scaler *scaler,
+	                  fawkes::Logger *    logger);
 
-  MiniImageProducer(const char *orig_id, const char *mini_id,
-		    firevision::Scaler *scaler, fawkes::Logger *logger);
+	~MiniImageProducer();
 
-  ~MiniImageProducer();
+	bool isValid();
+	void produce();
 
-  bool isValid();
-  void produce();
+private:
+	fawkes::Logger *                     logger;
+	firevision::Scaler *                 scaler;
+	firevision::SharedMemoryImageBuffer *orig_shmem;
+	firevision::SharedMemoryImageBuffer *mini_shmem;
 
- private:
-  fawkes::Logger *logger;
-  firevision::Scaler *scaler;
-  firevision::SharedMemoryImageBuffer *orig_shmem;
-  firevision::SharedMemoryImageBuffer *mini_shmem;
-
-  float scale_factor;
-
+	float scale_factor;
 };
-
 
 #endif

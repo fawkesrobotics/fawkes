@@ -22,10 +22,10 @@
 
 #include "mini_image_producer.h"
 
-#include <utils/system/console_colors.h>
-#include <utils/logging/logger.h>
-#include <fvutils/scalers/scaler.h>
 #include <fvutils/ipc/shm_image.h>
+#include <fvutils/scalers/scaler.h>
+#include <utils/logging/logger.h>
+#include <utils/system/console_colors.h>
 
 using namespace firevision;
 
@@ -41,52 +41,55 @@ using namespace firevision;
  * @param scaler Scaler
  * @param logger Logger
  */
-MiniImageProducer::MiniImageProducer(const char *orig_id, const char *mini_id,
-				     Scaler *scaler, fawkes::Logger *logger)
+MiniImageProducer::MiniImageProducer(const char *    orig_id,
+                                     const char *    mini_id,
+                                     Scaler *        scaler,
+                                     fawkes::Logger *logger)
 {
-  scale_factor = 0.25;
+	scale_factor = 0.25;
 
-  this->scaler = scaler;
-  scaler->set_scale_factor( scale_factor );
+	this->scaler = scaler;
+	scaler->set_scale_factor(scale_factor);
 
-  logger->log_debug("MiniImageProducer", "Opening original image shmem segment for id %s", orig_id);
-  orig_shmem = new SharedMemoryImageBuffer( orig_id );
+	logger->log_debug("MiniImageProducer", "Opening original image shmem segment for id %s", orig_id);
+	orig_shmem = new SharedMemoryImageBuffer(orig_id);
 
-  if ( ! orig_shmem->is_valid() ) {
-    logger->log_error("MiniImageProducer", "Could not open original image");
-    delete orig_shmem;
-    orig_shmem = NULL;
-    mini_shmem = NULL;
-  } else {
+	if (!orig_shmem->is_valid()) {
+		logger->log_error("MiniImageProducer", "Could not open original image");
+		delete orig_shmem;
+		orig_shmem = NULL;
+		mini_shmem = NULL;
+	} else {
+		scaler->set_original_dimensions(orig_shmem->width(), orig_shmem->height());
 
-    scaler->set_original_dimensions( orig_shmem->width(), orig_shmem->height() );
+		logger->log_debug("MiniImageProducer",
+		                  "Opening mini image shmem segment for id %s"
+		                  ", w=%u, h=%u",
+		                  mini_id,
+		                  scaler->needed_scaled_width(),
+		                  scaler->needed_scaled_height());
 
-    logger->log_debug("MiniImageProducer", "Opening mini image shmem segment for id %s"
-		                           ", w=%u, h=%u",
-		      mini_id, scaler->needed_scaled_width(), scaler->needed_scaled_height());
+		mini_shmem = new SharedMemoryImageBuffer(mini_id,
+		                                         YUV422_PLANAR,
+		                                         scaler->needed_scaled_width(),
+		                                         scaler->needed_scaled_height());
 
-    mini_shmem = new SharedMemoryImageBuffer( mini_id, YUV422_PLANAR,
-					      scaler->needed_scaled_width(),
-					      scaler->needed_scaled_height() );
-
-    if ( ! mini_shmem->is_valid() ) {
-      logger->log_error("MiniImageProducer", "Could not open mini image");
-      delete orig_shmem;
-      delete mini_shmem;
-      orig_shmem = NULL;
-      mini_shmem = NULL;
-    }
-  }
+		if (!mini_shmem->is_valid()) {
+			logger->log_error("MiniImageProducer", "Could not open mini image");
+			delete orig_shmem;
+			delete mini_shmem;
+			orig_shmem = NULL;
+			mini_shmem = NULL;
+		}
+	}
 }
-
 
 /** Destructor. */
 MiniImageProducer::~MiniImageProducer()
 {
-  delete orig_shmem;
-  delete mini_shmem;
+	delete orig_shmem;
+	delete mini_shmem;
 }
-
 
 /** Check if all data is valid.
  * @return true if shared memory images have been openened successfully and a scaler is
@@ -95,30 +98,26 @@ MiniImageProducer::~MiniImageProducer()
 bool
 MiniImageProducer::isValid()
 {
-  return ( (orig_shmem != NULL) &&
-	   (mini_shmem != NULL) &&
-	   (scaler != NULL) );
+	return ((orig_shmem != NULL) && (mini_shmem != NULL) && (scaler != NULL));
 }
-
 
 /** Produce mini image. */
 void
 MiniImageProducer::produce()
 {
-  if ( orig_shmem == NULL ) {
-    logger->log_warn("MiniImageProducer", "Original shmem image not opened");
-    return;
-  }
-  if ( mini_shmem == NULL ) {
-    logger->log_warn("MiniImageProducer", "Mini shmem image not opened");
-    return;
-  }
+	if (orig_shmem == NULL) {
+		logger->log_warn("MiniImageProducer", "Original shmem image not opened");
+		return;
+	}
+	if (mini_shmem == NULL) {
+		logger->log_warn("MiniImageProducer", "Mini shmem image not opened");
+		return;
+	}
 
-  scaler->set_scale_factor( scale_factor );
-  scaler->set_original_dimensions( orig_shmem->width(), orig_shmem->height() );
-  scaler->set_scaled_dimensions( mini_shmem->width(), mini_shmem->height() );
-  scaler->set_original_buffer( orig_shmem->buffer() );
-  scaler->set_scaled_buffer( mini_shmem->buffer() );
-  scaler->scale();
+	scaler->set_scale_factor(scale_factor);
+	scaler->set_original_dimensions(orig_shmem->width(), orig_shmem->height());
+	scaler->set_scaled_dimensions(mini_shmem->width(), mini_shmem->height());
+	scaler->set_original_buffer(orig_shmem->buffer());
+	scaler->set_scaled_buffer(mini_shmem->buffer());
+	scaler->scale();
 }
-
