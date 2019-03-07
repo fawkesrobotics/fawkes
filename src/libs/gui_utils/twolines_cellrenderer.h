@@ -30,49 +30,49 @@ namespace fawkes {
 
 class TwoLinesCellRenderer : public Gtk::CellRenderer
 {
- public:
-  TwoLinesCellRenderer();
-  virtual ~TwoLinesCellRenderer();
+public:
+	TwoLinesCellRenderer();
+	virtual ~TwoLinesCellRenderer();
 
 #ifdef GLIBMM_PROPERTIES_ENABLED
-  // Properties
-  Glib::PropertyProxy<Glib::ustring> property_line1();
-  Glib::PropertyProxy<Glib::ustring> property_line2();
-  Glib::PropertyProxy<bool> property_line2_enabled();
+	// Properties
+	Glib::PropertyProxy<Glib::ustring> property_line1();
+	Glib::PropertyProxy<Glib::ustring> property_line2();
+	Glib::PropertyProxy<bool>          property_line2_enabled();
 #endif
 
- protected:
-#if GTK_VERSION_GE(3,0)
-  virtual void get_preferred_width_vfunc(Gtk::Widget &widget,
-                                         int &minimum_width,
-                                         int &natural_width) const;
-  virtual void get_preferred_height_vfunc(Gtk::Widget &widget,
-                                          int &minimum_height,
-                                          int &natural_height) const;
-  virtual void get_size(Gtk::Widget& widget, int *width, int *height) const;
-  virtual void render_vfunc (const Cairo::RefPtr<Cairo::Context> &cr,
-                             Gtk::Widget& widget,
-                             const Gdk::Rectangle& background_area,
-                             const Gdk::Rectangle& cell_area,
-                             Gtk::CellRendererState flags);
+protected:
+#if GTK_VERSION_GE(3, 0)
+	virtual void
+	get_preferred_width_vfunc(Gtk::Widget &widget, int &minimum_width, int &natural_width) const;
+	virtual void
+	             get_preferred_height_vfunc(Gtk::Widget &widget, int &minimum_height, int &natural_height) const;
+	virtual void get_size(Gtk::Widget &widget, int *width, int *height) const;
+	virtual void render_vfunc(const Cairo::RefPtr<Cairo::Context> &cr,
+	                          Gtk::Widget &                        widget,
+	                          const Gdk::Rectangle &               background_area,
+	                          const Gdk::Rectangle &               cell_area,
+	                          Gtk::CellRendererState               flags);
 #else
-  virtual void get_size_vfunc (Gtk::Widget& widget,
-			       const Gdk::Rectangle* cell_area,
-			       int* x_offset, int* y_offset,
-			       int* width, int* height) const;
-  virtual void render_vfunc (const Glib::RefPtr<Gdk::Drawable>& window,
-			     Gtk::Widget& widget,
-			     const Gdk::Rectangle& background_area,
-			     const Gdk::Rectangle& cell_area,
-			     const Gdk::Rectangle& expose_area,
-			     Gtk::CellRendererState flags);
+	virtual void get_size_vfunc(Gtk::Widget &         widget,
+	                            const Gdk::Rectangle *cell_area,
+	                            int *                 x_offset,
+	                            int *                 y_offset,
+	                            int *                 width,
+	                            int *                 height) const;
+	virtual void render_vfunc(const Glib::RefPtr<Gdk::Drawable> &window,
+	                          Gtk::Widget &                      widget,
+	                          const Gdk::Rectangle &             background_area,
+	                          const Gdk::Rectangle &             cell_area,
+	                          const Gdk::Rectangle &             expose_area,
+	                          Gtk::CellRendererState             flags);
 #endif
 
- private:
+private:
 #ifdef GLIBMM_PROPERTIES_ENABLED
-  Glib::Property<Glib::ustring> property_line1_;
-  Glib::Property<Glib::ustring> property_line2_;
-  Glib::Property<bool>          property_line2_enabled_;
+	Glib::Property<Glib::ustring> property_line1_;
+	Glib::Property<Glib::ustring> property_line2_;
+	Glib::Property<bool>          property_line2_enabled_;
 #endif
 };
 

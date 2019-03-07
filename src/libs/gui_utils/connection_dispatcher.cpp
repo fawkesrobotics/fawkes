@@ -24,8 +24,8 @@
 #include <gui_utils/connection_dispatcher.h>
 #include <netcomm/fawkes/client.h>
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
 namespace fawkes {
 
@@ -40,14 +40,13 @@ namespace fawkes {
  */
 ConnectionDispatcher::ConnectionDispatcher(unsigned int cid)
 {
-  cid_ = cid;
-  client_ = new FawkesNetworkClient();
-  client_->register_handler(this, cid_);
-  client_owned_ = true;
+	cid_    = cid;
+	client_ = new FawkesNetworkClient();
+	client_->register_handler(this, cid_);
+	client_owned_ = true;
 
-  connect_signals();
+	connect_signals();
 }
-
 
 /** Constructor.
  * @param cid component ID to register this dispatcher for. This is relevant if
@@ -55,31 +54,32 @@ ConnectionDispatcher::ConnectionDispatcher(unsigned int cid)
  * @param hostname hostname to connect to
  * @param port port to connect to
  */
-  ConnectionDispatcher::ConnectionDispatcher(const char *hostname,
-					     unsigned short int port,
-					     unsigned int cid)
+ConnectionDispatcher::ConnectionDispatcher(const char *       hostname,
+                                           unsigned short int port,
+                                           unsigned int       cid)
 {
-  cid_ = cid;
-  client_ = new FawkesNetworkClient(hostname, port);
-  client_->register_handler(this, cid_);
-  client_owned_ = true;
+	cid_    = cid;
+	client_ = new FawkesNetworkClient(hostname, port);
+	client_->register_handler(this, cid_);
+	client_owned_ = true;
 
-  connect_signals();
+	connect_signals();
 }
 
 /** Destructor. */
 ConnectionDispatcher::~ConnectionDispatcher()
 {
-  set_client(NULL);
+	set_client(NULL);
 }
-
 
 void
 ConnectionDispatcher::connect_signals()
 {
-  dispatcher_connected_.connect(sigc::mem_fun(*this, &ConnectionDispatcher::on_connection_established));
-  dispatcher_disconnected_.connect(sigc::mem_fun(*this, &ConnectionDispatcher::on_connection_died));
-  dispatcher_message_received_.connect(sigc::mem_fun(*this, &ConnectionDispatcher::on_message_received));
+	dispatcher_connected_.connect(
+	  sigc::mem_fun(*this, &ConnectionDispatcher::on_connection_established));
+	dispatcher_disconnected_.connect(sigc::mem_fun(*this, &ConnectionDispatcher::on_connection_died));
+	dispatcher_message_received_.connect(
+	  sigc::mem_fun(*this, &ConnectionDispatcher::on_message_received));
 }
 
 /** Set component ID.
@@ -92,13 +92,12 @@ ConnectionDispatcher::connect_signals()
 void
 ConnectionDispatcher::set_cid(unsigned int cid)
 {
-  if ( client_ ) {
-    client_->deregister_handler(cid_);
-    client_->register_handler(this, cid);
-  }
-  cid_ = cid;
+	if (client_) {
+		client_->deregister_handler(cid_);
+		client_->register_handler(this, cid);
+	}
+	cid_ = cid;
 }
-
 
 /** Set Fawkes network client.
  * The instance you set is not owned by the ConnectionDispatcher, it's only
@@ -109,15 +108,16 @@ ConnectionDispatcher::set_cid(unsigned int cid)
 void
 ConnectionDispatcher::set_client(FawkesNetworkClient *client)
 {
-  if ( client_ )  client_->deregister_handler(cid_);
-  if ( client_owned_ ) {
-    delete client_;
-  }
-  client_owned_ = false;
-  client_ = client;
-  if ( client_ )  client_->register_handler(this, cid_);
+	if (client_)
+		client_->deregister_handler(cid_);
+	if (client_owned_) {
+		delete client_;
+	}
+	client_owned_ = false;
+	client_       = client;
+	if (client_)
+		client_->register_handler(this, cid_);
 }
-
 
 /** Get client.
  * @return associated Fawkes network client.
@@ -125,9 +125,8 @@ ConnectionDispatcher::set_client(FawkesNetworkClient *client)
 FawkesNetworkClient *
 ConnectionDispatcher::get_client()
 {
-  return client_;
+	return client_;
 }
-
 
 /** Check if client is set and connection has been established.
  * @return true if a client exists and a connection is established, false
@@ -135,9 +134,8 @@ ConnectionDispatcher::get_client()
  */
 ConnectionDispatcher::operator bool()
 {
-  return (client_ && client_->connected());
+	return (client_ && client_->connected());
 }
-
 
 /** Internal event handler.
  * Called by dispatcher to emit signal.
@@ -145,9 +143,8 @@ ConnectionDispatcher::operator bool()
 void
 ConnectionDispatcher::on_connection_established()
 {
-  signal_connected_.emit();
+	signal_connected_.emit();
 }
-
 
 /** Internal event handler.
  * Called by dispatcher to emit signal.
@@ -155,9 +152,8 @@ ConnectionDispatcher::on_connection_established()
 void
 ConnectionDispatcher::on_connection_died()
 {
-  signal_disconnected_.emit();
+	signal_disconnected_.emit();
 }
-
 
 /** Internal event handler.
  * Called by dispatcher to emit signal.
@@ -165,58 +161,52 @@ ConnectionDispatcher::on_connection_died()
 void
 ConnectionDispatcher::on_message_received()
 {
-  queue_message_received_.lock();
-  while (! queue_message_received_.empty()) {
-    FawkesNetworkMessage *msg = queue_message_received_.front();
-    signal_message_received_.emit(msg);
-    msg->unref();
-    queue_message_received_.pop();
-  }
-  queue_message_received_.unlock();
+	queue_message_received_.lock();
+	while (!queue_message_received_.empty()) {
+		FawkesNetworkMessage *msg = queue_message_received_.front();
+		signal_message_received_.emit(msg);
+		msg->unref();
+		queue_message_received_.pop();
+	}
+	queue_message_received_.unlock();
 }
-
 
 void
 ConnectionDispatcher::deregistered(unsigned int id) throw()
 {
-  // ignored
+	// ignored
 }
-
 
 void
 ConnectionDispatcher::inbound_received(FawkesNetworkMessage *m, unsigned int id) throw()
 {
-  m->ref();
-  queue_message_received_.push_locked(m);
-  dispatcher_message_received_();
+	m->ref();
+	queue_message_received_.push_locked(m);
+	dispatcher_message_received_();
 }
-
 
 void
 ConnectionDispatcher::connection_died(unsigned int id) throw()
 {
-  dispatcher_disconnected_();
+	dispatcher_disconnected_();
 }
-
 
 void
 ConnectionDispatcher::connection_established(unsigned int id) throw()
 {
-  dispatcher_connected_();
+	dispatcher_connected_();
 }
-
 
 /** Get "message received" signal.
  * The "message received" signal is emitted whenever a FawkesNetworkMessage has
  * been received.
  * @return "message received" signal
  */
-  sigc::signal<void, FawkesNetworkMessage *>
+sigc::signal<void, FawkesNetworkMessage *>
 ConnectionDispatcher::signal_message_received()
 {
-  return signal_message_received_;
+	return signal_message_received_;
 }
-
 
 /** Get "connected" signal.
  * The "connected" signal is emitted when the connection has been established.
@@ -225,9 +215,8 @@ ConnectionDispatcher::signal_message_received()
 sigc::signal<void>
 ConnectionDispatcher::signal_connected()
 {
-  return signal_connected_;
+	return signal_connected_;
 }
-
 
 /** Get "disconnected" signal.
  * The "disconnected" signal is emitted when the connection has died, for example
@@ -237,7 +226,7 @@ ConnectionDispatcher::signal_connected()
 sigc::signal<void>
 ConnectionDispatcher::signal_disconnected()
 {
-  return signal_disconnected_;
+	return signal_disconnected_;
 }
 
 } // end of namespace fawkes

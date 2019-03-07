@@ -24,64 +24,65 @@
 #ifndef _LIBS_GUI_UTILS_CONNECTION_DISPATCHER_H_
 #define _LIBS_GUI_UTILS_CONNECTION_DISPATCHER_H_
 
-#include <cstddef>
+#include <core/utils/lock_queue.h>
 #include <glibmm/dispatcher.h>
 #include <netcomm/fawkes/client_handler.h>
 #include <netcomm/fawkes/component_ids.h>
-#include <core/utils/lock_queue.h>
+
+#include <cstddef>
 
 namespace fawkes {
 class FawkesNetworkClient;
 class FawkesNetworkMessage;
 
-class ConnectionDispatcher
-: public FawkesNetworkClientHandler
+class ConnectionDispatcher : public FawkesNetworkClientHandler
 {
- public:
-  ConnectionDispatcher(unsigned int cid = FAWKES_CID_OBSERVER_MODE);
-  ConnectionDispatcher(const char *hostname, unsigned short int port,
-		       unsigned int cid = FAWKES_CID_OBSERVER_MODE);
-  virtual ~ConnectionDispatcher();
+public:
+	ConnectionDispatcher(unsigned int cid = FAWKES_CID_OBSERVER_MODE);
+	ConnectionDispatcher(const char *       hostname,
+	                     unsigned short int port,
+	                     unsigned int       cid = FAWKES_CID_OBSERVER_MODE);
+	virtual ~ConnectionDispatcher();
 
-  void set_cid(unsigned int cid);
-  void set_client(FawkesNetworkClient *client);
-  FawkesNetworkClient *   get_client();
+	void                 set_cid(unsigned int cid);
+	void                 set_client(FawkesNetworkClient *client);
+	FawkesNetworkClient *get_client();
 
-  sigc::signal<void>                         signal_connected();
-  sigc::signal<void>                         signal_disconnected();
-  sigc::signal<void, FawkesNetworkMessage *> signal_message_received();
+	sigc::signal<void>                         signal_connected();
+	sigc::signal<void>                         signal_disconnected();
+	sigc::signal<void, FawkesNetworkMessage *> signal_message_received();
 
-  virtual void deregistered(unsigned int id) throw();
-  virtual void inbound_received(FawkesNetworkMessage *m, unsigned int id) throw();
-  virtual void connection_died(unsigned int id) throw();
-  virtual void connection_established(unsigned int id) throw();
+	virtual void deregistered(unsigned int id) throw();
+	virtual void inbound_received(FawkesNetworkMessage *m, unsigned int id) throw();
+	virtual void connection_died(unsigned int id) throw();
+	virtual void connection_established(unsigned int id) throw();
 
-  operator bool();
+	operator bool();
 
- protected:
-  virtual void on_connection_established();
-  virtual void on_connection_died();
-  virtual void on_message_received();
+protected:
+	virtual void on_connection_established();
+	virtual void on_connection_died();
+	virtual void on_message_received();
 
- private:
-  void connect_signals();
+private:
+	void connect_signals();
 
- private:
-  unsigned int                                   cid_;
-  FawkesNetworkClient                           *client_;
-  bool                                           client_owned_;
+private:
+	unsigned int         cid_;
+	FawkesNetworkClient *client_;
+	bool                 client_owned_;
 
-  Glib::Dispatcher                               dispatcher_connected_;
-  Glib::Dispatcher                               dispatcher_disconnected_;
-  Glib::Dispatcher                               dispatcher_message_received_;
+	Glib::Dispatcher dispatcher_connected_;
+	Glib::Dispatcher dispatcher_disconnected_;
+	Glib::Dispatcher dispatcher_message_received_;
 
-  sigc::signal<void>                             signal_connected_;
-  sigc::signal<void>                             signal_disconnected_;
-  sigc::signal<void, FawkesNetworkMessage *>     signal_message_received_;
+	sigc::signal<void>                         signal_connected_;
+	sigc::signal<void>                         signal_disconnected_;
+	sigc::signal<void, FawkesNetworkMessage *> signal_message_received_;
 
-  LockQueue<FawkesNetworkMessage *>              queue_message_received_;
+	LockQueue<FawkesNetworkMessage *> queue_message_received_;
 };
 
-}
+} // namespace fawkes
 
 #endif

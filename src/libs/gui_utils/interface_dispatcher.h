@@ -24,81 +24,82 @@
 #ifndef _LIBS_GUI_UTILS_INTERFACE_DISPATCHER_H_
 #define _LIBS_GUI_UTILS_INTERFACE_DISPATCHER_H_
 
-#include <cstddef>
-#include <glibmm/dispatcher.h>
 #include <blackboard/interface_listener.h>
 #include <core/utils/lock_queue.h>
+#include <glibmm/dispatcher.h>
+
+#include <cstddef>
 
 namespace fawkes {
 class Interface;
 
-class InterfaceDispatcher
-: public BlackBoardInterfaceListener
+class InterfaceDispatcher : public BlackBoardInterfaceListener
 {
- public:
-  InterfaceDispatcher(const char *listener_name, fawkes::Interface *iface,
-		      bool message_enqueueing = true);
+public:
+	InterfaceDispatcher(const char *       listener_name,
+	                    fawkes::Interface *iface,
+	                    bool               message_enqueueing = true);
 
-  InterfaceDispatcher(const char *listener_name_prefix,
-                      std::list<fawkes::Interface *> ifaces,
-		      bool message_enqueueing = true);
+	InterfaceDispatcher(const char *                   listener_name_prefix,
+	                    std::list<fawkes::Interface *> ifaces,
+	                    bool                           message_enqueueing = true);
 
-  void set_message_enqueueing(bool enqueue);
+	void set_message_enqueueing(bool enqueue);
 
-  sigc::signal<void, Interface *>               signal_data_changed();
-  sigc::signal<void, Interface *, Message *>    signal_message_received();
-  sigc::signal<void, Interface *>               signal_writer_added();
-  sigc::signal<void, Interface *>               signal_writer_removed();
-  sigc::signal<void, Interface *>               signal_reader_added();
-  sigc::signal<void, Interface *>               signal_reader_removed();
+	sigc::signal<void, Interface *>            signal_data_changed();
+	sigc::signal<void, Interface *, Message *> signal_message_received();
+	sigc::signal<void, Interface *>            signal_writer_added();
+	sigc::signal<void, Interface *>            signal_writer_removed();
+	sigc::signal<void, Interface *>            signal_reader_added();
+	sigc::signal<void, Interface *>            signal_reader_removed();
 
-  virtual void bb_interface_data_changed(Interface *interface) throw();
-  virtual bool bb_interface_message_received(Interface *interface, Message *message) throw();
-  virtual void bb_interface_writer_added(Interface *interface,
-					 unsigned int instance_serial) throw();
-  virtual void bb_interface_writer_removed(Interface *interface,
-					   unsigned int instance_serial) throw();
-  virtual void bb_interface_reader_added(Interface *interface,
-					 unsigned int instance_serial) throw();
-  virtual void bb_interface_reader_removed(Interface *interface,
-					   unsigned int instance_serial) throw();
+	virtual void bb_interface_data_changed(Interface *interface) throw();
+	virtual bool bb_interface_message_received(Interface *interface, Message *message) throw();
+	virtual void bb_interface_writer_added(Interface *  interface,
+	                                       unsigned int instance_serial) throw();
+	virtual void bb_interface_writer_removed(Interface *  interface,
+	                                         unsigned int instance_serial) throw();
+	virtual void bb_interface_reader_added(Interface *  interface,
+	                                       unsigned int instance_serial) throw();
+	virtual void bb_interface_reader_removed(Interface *  interface,
+	                                         unsigned int instance_serial) throw();
 
- protected:
-  virtual void on_data_changed();
-  virtual void on_message_received();
-  virtual void on_writer_added();
-  virtual void on_writer_removed();
-  virtual void on_reader_added();
-  virtual void on_reader_removed();
+protected:
+	virtual void on_data_changed();
+	virtual void on_message_received();
+	virtual void on_writer_added();
+	virtual void on_writer_removed();
+	virtual void on_reader_added();
+	virtual void on_reader_removed();
 
- private:
-  void setup_signals();
+private:
+	void setup_signals();
 
- private:
-  bool                                           message_enqueueing_;
+private:
+	bool message_enqueueing_;
 
-  Glib::Dispatcher                               dispatcher_data_changed_;
-  Glib::Dispatcher                               dispatcher_message_received_;
-  Glib::Dispatcher                               dispatcher_writer_added_;
-  Glib::Dispatcher                               dispatcher_writer_removed_;
-  Glib::Dispatcher                               dispatcher_reader_added_;
-  Glib::Dispatcher                               dispatcher_reader_removed_;
+	Glib::Dispatcher dispatcher_data_changed_;
+	Glib::Dispatcher dispatcher_message_received_;
+	Glib::Dispatcher dispatcher_writer_added_;
+	Glib::Dispatcher dispatcher_writer_removed_;
+	Glib::Dispatcher dispatcher_reader_added_;
+	Glib::Dispatcher dispatcher_reader_removed_;
 
-  sigc::signal<void, Interface *>                signal_data_changed_;
-  sigc::signal<void, Interface *, Message *>     signal_message_received_;
-  sigc::signal<void, Interface *>                signal_writer_added_;
-  sigc::signal<void, Interface *>                signal_writer_removed_;
-  sigc::signal<void, Interface *>                signal_reader_added_;
-  sigc::signal<void, Interface *>                signal_reader_removed_;
+	sigc::signal<void, Interface *>            signal_data_changed_;
+	sigc::signal<void, Interface *, Message *> signal_message_received_;
+	sigc::signal<void, Interface *>            signal_writer_added_;
+	sigc::signal<void, Interface *>            signal_writer_removed_;
+	sigc::signal<void, Interface *>            signal_reader_added_;
+	sigc::signal<void, Interface *>            signal_reader_removed_;
 
-  LockQueue<Interface *>                         queue_data_changed_;
-  LockQueue<std::pair<Interface *, Message *> >  queue_message_received_;
-  LockQueue<Interface *>                         queue_writer_added_;
-  LockQueue<Interface *>                         queue_writer_removed_;
-  LockQueue<Interface *>                         queue_reader_added_;
-  LockQueue<Interface *>                         queue_reader_removed_;
+	LockQueue<Interface *>                       queue_data_changed_;
+	LockQueue<std::pair<Interface *, Message *>> queue_message_received_;
+	LockQueue<Interface *>                       queue_writer_added_;
+	LockQueue<Interface *>                       queue_writer_removed_;
+	LockQueue<Interface *>                       queue_reader_added_;
+	LockQueue<Interface *>                       queue_reader_removed_;
 };
 
-}
+} // namespace fawkes
 
 #endif

@@ -22,20 +22,19 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <gui_utils/interface_chooser_dialog.h>
-
-#include <gtkmm.h>
+#include <blackboard/blackboard.h>
 #include <core/exception.h>
 #include <core/exceptions/software.h>
-#include <blackboard/blackboard.h>
+#include <gui_utils/interface_chooser_dialog.h>
 #include <interface/interface_info.h>
 
 #include <cstring>
+#include <gtkmm.h>
 
 namespace fawkes {
 
 /** Default title of interface chooser dialogs. */
-const char* const InterfaceChooserDialog::DEFAULT_TITLE = "Select Interfaces";
+const char *const InterfaceChooserDialog::DEFAULT_TITLE = "Select Interfaces";
 
 /** @class InterfaceChooserDialog::Record <gui_utils/interface_chooser_dialog.h>
  * Blackboard interface record.
@@ -46,10 +45,10 @@ const char* const InterfaceChooserDialog::DEFAULT_TITLE = "Select Interfaces";
 /** Constructor. */
 InterfaceChooserDialog::Record::Record()
 {
-  add(type);
-  add(id);
-  add(has_writer);
-  add(num_readers);
+	add(type);
+	add(id);
+	add(has_writer);
+	add(num_readers);
 }
 
 /** @class InterfaceChooserDialog <gui_utils/interface_chooser_dialog.h>
@@ -58,7 +57,6 @@ InterfaceChooserDialog::Record::Record()
  * given type and ID patterns.
  * @author Tim Niemueller, Christoph Schwering
  */
-
 
 /** Factory method.
  *
@@ -77,19 +75,17 @@ InterfaceChooserDialog::Record::Record()
  * @param title title of the dialog
  * @return new InterfaceChooserDialog
  */
-InterfaceChooserDialog*
-InterfaceChooserDialog::create(
-    Gtk::Window& parent,
-    BlackBoard* blackboard,
-    const char* type_pattern,
-    const char* id_pattern,
-    const Glib::ustring& title)
+InterfaceChooserDialog *
+InterfaceChooserDialog::create(Gtk::Window &        parent,
+                               BlackBoard *         blackboard,
+                               const char *         type_pattern,
+                               const char *         id_pattern,
+                               const Glib::ustring &title)
 {
-  InterfaceChooserDialog* d = new InterfaceChooserDialog(parent, title);
-  d->init(blackboard, type_pattern, id_pattern);
-  return d;
+	InterfaceChooserDialog *d = new InterfaceChooserDialog(parent, title);
+	d->init(blackboard, type_pattern, id_pattern);
+	return d;
 }
-
 
 /** Constructor for subclasses.
  *
@@ -98,15 +94,11 @@ InterfaceChooserDialog::create(
  * @param parent parent window
  * @param title title of the dialog
  */
-InterfaceChooserDialog::InterfaceChooserDialog(Gtk::Window& parent,
-					       const Glib::ustring& title)
-  : Gtk::Dialog(title, parent, /* modal */ true),
-    parent_(parent),
-    record_(NULL)
+InterfaceChooserDialog::InterfaceChooserDialog(Gtk::Window &parent, const Glib::ustring &title)
+: Gtk::Dialog(title, parent, /* modal */ true), parent_(parent), record_(NULL)
 {
-  // May *NOT* call init(), because init() calls virtual methods.
+	// May *NOT* call init(), because init() calls virtual methods.
 }
-
 
 /** Initialization method.
  *
@@ -126,61 +118,59 @@ InterfaceChooserDialog::init(BlackBoard *blackboard,
                              const char *type_pattern,
                              const char *id_pattern)
 {
-  model_ = Gtk::ListStore::create(record());
+	model_ = Gtk::ListStore::create(record());
 
-  set_default_size(360, 240);
+	set_default_size(360, 240);
 
-  treeview_.set_model(model_);
-  init_columns();
-  scrollwin_.add(treeview_);
-  scrollwin_.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-  treeview_.show();
+	treeview_.set_model(model_);
+	init_columns();
+	scrollwin_.add(treeview_);
+	scrollwin_.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	treeview_.show();
 
-  Gtk::Box *vbox = get_vbox();
-  vbox->pack_start(scrollwin_);
-  scrollwin_.show();
+	Gtk::Box *vbox = get_vbox();
+	vbox->pack_start(scrollwin_);
+	scrollwin_.show();
 
-  add_button(Gtk::Stock::CANCEL, 0);
-  add_button(Gtk::Stock::OK, 1);
+	add_button(Gtk::Stock::CANCEL, 0);
+	add_button(Gtk::Stock::OK, 1);
 
-  set_default_response(1);
+	set_default_response(1);
 
-  treeview_.signal_row_activated().connect(sigc::bind(sigc::hide<0>(sigc::hide<0>(sigc::mem_fun(*this, &InterfaceChooserDialog::response))), 1));
+	treeview_.signal_row_activated().connect(sigc::bind(
+	  sigc::hide<0>(sigc::hide<0>(sigc::mem_fun(*this, &InterfaceChooserDialog::response))), 1));
 
-  bb_ = blackboard;
+	bb_ = blackboard;
 
-  InterfaceInfoList *infl = bb_->list(type_pattern, id_pattern);
-  for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i) {
-    Gtk::TreeModel::Row row = *model_->append();
-    init_row(row, *i);
-  }
-  delete infl;
+	InterfaceInfoList *infl = bb_->list(type_pattern, id_pattern);
+	for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i) {
+		Gtk::TreeModel::Row row = *model_->append();
+		init_row(row, *i);
+	}
+	delete infl;
 }
-
 
 /** Destructor. */
 InterfaceChooserDialog::~InterfaceChooserDialog()
 {
-  if (record_) {
-    delete record_;
-  }
+	if (record_) {
+		delete record_;
+	}
 }
-
 
 /** Returns the Record of this chooser dialog.
  * Subclasses of InterfaceChooserDialog might want to override this method.
  * @return Record implementation.
  */
-const InterfaceChooserDialog::Record&
+const InterfaceChooserDialog::Record &
 InterfaceChooserDialog::record() const
 {
-  if (!record_) {
-    InterfaceChooserDialog* this_nonconst = const_cast<InterfaceChooserDialog*>(this);
-    this_nonconst->record_ = new Record();
-  }
-  return *record_;
+	if (!record_) {
+		InterfaceChooserDialog *this_nonconst = const_cast<InterfaceChooserDialog *>(this);
+		this_nonconst->record_                = new Record();
+	}
+	return *record_;
 }
-
 
 /** Initializes the columns GUI-wise.
  * Called in the ctor.
@@ -192,13 +182,12 @@ InterfaceChooserDialog::record() const
 int
 InterfaceChooserDialog::init_columns()
 {
-  treeview_.append_column("Type", record().type);
-  treeview_.append_column("ID", record().id);
-  treeview_.append_column("Writer?", record().has_writer);
-  treeview_.append_column("Readers", record().num_readers);
-  return 4;
+	treeview_.append_column("Type", record().type);
+	treeview_.append_column("ID", record().id);
+	treeview_.append_column("Writer?", record().has_writer);
+	treeview_.append_column("Readers", record().num_readers);
+	return 4;
 }
-
 
 /** Initializes a row with the given interface.
  * Called in the ctor.
@@ -209,15 +198,13 @@ InterfaceChooserDialog::init_columns()
  * @param ii The interface info that should populate the row.
  */
 void
-InterfaceChooserDialog::init_row(Gtk::TreeModel::Row& row,
-                                 const InterfaceInfo& ii)
+InterfaceChooserDialog::init_row(Gtk::TreeModel::Row &row, const InterfaceInfo &ii)
 {
-  row[record().type]         = ii.type();
-  row[record().id]           = ii.id();
-  row[record().has_writer]   = ii.has_writer();
-  row[record().num_readers]  = ii.num_readers();
+	row[record().type]        = ii.type();
+	row[record().id]          = ii.id();
+	row[record().has_writer]  = ii.has_writer();
+	row[record().num_readers] = ii.num_readers();
 }
-
 
 /** Get selected interface type and ID.
  * If an interface has been selected use this method to get the
@@ -228,20 +215,18 @@ InterfaceChooserDialog::init_row(Gtk::TreeModel::Row& row,
  * @exception Exception thrown if no interface has been selected
  */
 void
-InterfaceChooserDialog::get_selected_interface(Glib::ustring &type,
-					       Glib::ustring &id)
+InterfaceChooserDialog::get_selected_interface(Glib::ustring &type, Glib::ustring &id)
 {
-  const Glib::RefPtr<Gtk::TreeSelection> treesel = treeview_.get_selection();
-  const Gtk::TreeModel::iterator iter = treesel->get_selected();
-  if (iter) {
-    const Gtk::TreeModel::Row row = *iter;
-    type   = row[record().type];
-    id     = row[record().id];
-  } else {
-    throw Exception("No interface selected");
-  }
+	const Glib::RefPtr<Gtk::TreeSelection> treesel = treeview_.get_selection();
+	const Gtk::TreeModel::iterator         iter    = treesel->get_selected();
+	if (iter) {
+		const Gtk::TreeModel::Row row = *iter;
+		type                          = row[record().type];
+		id                            = row[record().id];
+	} else {
+		throw Exception("No interface selected");
+	}
 }
-
 
 /** Run dialog and try to connect.
  * This runs the service chooser dialog and connects to the given service
@@ -256,26 +241,30 @@ InterfaceChooserDialog::get_selected_interface(Glib::ustring &type,
 fawkes::Interface *
 InterfaceChooserDialog::run_and_open_for_reading()
 {
-  if (bb_->is_alive()) throw Exception("BlackBoard is not alive");
+	if (bb_->is_alive())
+		throw Exception("BlackBoard is not alive");
 
-  if ( run() ) {
-    try {
-      Glib::ustring type;
-      Glib::ustring id;
+	if (run()) {
+		try {
+			Glib::ustring type;
+			Glib::ustring id;
 
-      return bb_->open_for_reading(type.c_str(), id.c_str());
-    } catch (Exception &e) {
-      Glib::ustring message = *(e.begin());
-      Gtk::MessageDialog md(parent_, message, /* markup */ false,
-			    Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
-			    /* modal */ true);
-      md.set_title("Opening Interface failed");
-      md.run();
-      throw;
-    }
-  } else {
-    return NULL;
-  }
+			return bb_->open_for_reading(type.c_str(), id.c_str());
+		} catch (Exception &e) {
+			Glib::ustring      message = *(e.begin());
+			Gtk::MessageDialog md(parent_,
+			                      message,
+			                      /* markup */ false,
+			                      Gtk::MESSAGE_ERROR,
+			                      Gtk::BUTTONS_OK,
+			                      /* modal */ true);
+			md.set_title("Opening Interface failed");
+			md.run();
+			throw;
+		}
+	} else {
+		return NULL;
+	}
 }
 
 } // end of namespace fawkes

@@ -29,7 +29,7 @@
 
 #include <gtkmm.h>
 #ifdef HAVE_GLADEMM
-#  include <libglademm/xml.h>
+#	include <libglademm/xml.h>
 #endif
 
 namespace fawkes {
@@ -40,66 +40,66 @@ class ConnectionDispatcher;
 
 class ServiceSelectorCBE
 {
- public:
-#if GTK_VERSION_GE(3,0)
-  ServiceSelectorCBE( Gtk::ComboBox* services,
-		      Gtk::Button* connect,
-		      Gtk::Window* parent,
-		      const char* service = "_fawkes._tcp" );
-  ServiceSelectorCBE( Gtk::ComboBox* services,
-		      Gtk::ToolButton* connect,
-		      Gtk::Window* parent,
-		      const char* service = "_fawkes._tcp" );
+public:
+#if GTK_VERSION_GE(3, 0)
+	ServiceSelectorCBE(Gtk::ComboBox *services,
+	                   Gtk::Button *  connect,
+	                   Gtk::Window *  parent,
+	                   const char *   service = "_fawkes._tcp");
+	ServiceSelectorCBE(Gtk::ComboBox *  services,
+	                   Gtk::ToolButton *connect,
+	                   Gtk::Window *    parent,
+	                   const char *     service = "_fawkes._tcp");
 #else
-  ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
-		      Gtk::Button* connect,
-		      Gtk::Window* parent,
-		      const char* service = "_fawkes._tcp" );
-  ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
-		      Gtk::ToolButton* connect,
-		      Gtk::Window* parent,
-		      const char* service = "_fawkes._tcp" );
+	ServiceSelectorCBE(Gtk::ComboBoxEntry *services,
+	                   Gtk::Button *       connect,
+	                   Gtk::Window *       parent,
+	                   const char *        service = "_fawkes._tcp");
+	ServiceSelectorCBE(Gtk::ComboBoxEntry *services,
+	                   Gtk::ToolButton *   connect,
+	                   Gtk::Window *       parent,
+	                   const char *        service = "_fawkes._tcp");
 #endif
-  ServiceSelectorCBE( Glib::RefPtr<Gtk::Builder> builder,
-		      const char* cbe_name = "cbeServices",
-		      const char* btn_name = "btnConnect",
-		      const char* wnd_name = "wndMain",
-		      const char* service = "_fawkes._tcp" );
-  virtual ~ServiceSelectorCBE();
+	ServiceSelectorCBE(Glib::RefPtr<Gtk::Builder> builder,
+	                   const char *               cbe_name = "cbeServices",
+	                   const char *               btn_name = "btnConnect",
+	                   const char *               wnd_name = "wndMain",
+	                   const char *               service  = "_fawkes._tcp");
+	virtual ~ServiceSelectorCBE();
 
-  FawkesNetworkClient* get_network_client();
-  Glib::ustring get_hostname();
-  Glib::ustring get_name();
-  unsigned int get_port();
+	FawkesNetworkClient *get_network_client();
+	Glib::ustring        get_hostname();
+	Glib::ustring        get_name();
+	unsigned int         get_port();
 
-  sigc::signal<void> signal_connected();
-  sigc::signal<void> signal_disconnected();
+	sigc::signal<void> signal_connected();
+	sigc::signal<void> signal_disconnected();
 
- protected:
-  void initialize();
-  void on_btn_connect_clicked();
-  void on_service_selected();
-  void on_connected();
-  void on_disconnected();
+protected:
+	void initialize();
+	void on_btn_connect_clicked();
+	void on_service_selected();
+	void on_connected();
+	void on_disconnected();
 
- protected:
-#if GTK_VERSION_GE(3,0)
-  Gtk::ComboBox        *m_cbe_services;
+protected:
+#if GTK_VERSION_GE(3, 0)
+	Gtk::ComboBox *m_cbe_services;
 #else
-  Gtk::ComboBoxEntry   *m_cbe_services;
+	Gtk::ComboBoxEntry *m_cbe_services;
 #endif
-  Gtk::Button          *m_btn_connect;
-  Gtk::ToolButton      *m_tbtn_connect;
-  Gtk::Window          *m_parent;
+	Gtk::Button *    m_btn_connect;
+	Gtk::ToolButton *m_tbtn_connect;
+	Gtk::Window *    m_parent;
 
-  ConnectionDispatcher *m_dispatcher;
-  ServiceModel         *m_service_model;
+	ConnectionDispatcher *m_dispatcher;
+	ServiceModel *        m_service_model;
 
- private:
-   Glib::ustring  hostname_;
-   Glib::ustring  servicename_;
-   unsigned short port_;
+private:
+	Glib::ustring  hostname_;
+	Glib::ustring  servicename_;
+	unsigned short port_;
 };
 
-}
+} // namespace fawkes
 #endif /* LIBS_GUI_UTILS_SERVICE_SELECTOR_CBE_H__ */

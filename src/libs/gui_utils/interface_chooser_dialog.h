@@ -25,11 +25,11 @@
 #define _LIBS_GUI_UTILS_INTERFACE_CHOOSER_DIALOG_H_
 
 #include <gtkmm/dialog.h>
-#include <gtkmm/treeview.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/expander.h>
-#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treeview.h>
 
 namespace fawkes {
 
@@ -37,60 +37,56 @@ class Interface;
 class BlackBoard;
 class InterfaceInfo;
 
-class InterfaceChooserDialog
-  : public Gtk::Dialog
+class InterfaceChooserDialog : public Gtk::Dialog
 {
- public:
-  static const char* const DEFAULT_TITLE;
+public:
+	static const char *const DEFAULT_TITLE;
 
-  static InterfaceChooserDialog* create(
-      Gtk::Window &parent,
-      BlackBoard *blackboard,
-      const char *type_pattern,
-      const char *id_pattern,
-      const Glib::ustring& title = DEFAULT_TITLE);
+	static InterfaceChooserDialog *create(Gtk::Window &        parent,
+	                                      BlackBoard *         blackboard,
+	                                      const char *         type_pattern,
+	                                      const char *         id_pattern,
+	                                      const Glib::ustring &title = DEFAULT_TITLE);
 
-  virtual ~InterfaceChooserDialog();
+	virtual ~InterfaceChooserDialog();
 
-  void get_selected_interface(Glib::ustring &type, Glib::ustring &id);
+	void get_selected_interface(Glib::ustring &type, Glib::ustring &id);
 
-  fawkes::Interface *   run_and_open_for_reading();
+	fawkes::Interface *run_and_open_for_reading();
 
- protected:
-  class Record : public Gtk::TreeModelColumnRecord
-  {
-   public:
-    Record();
-      
-    Gtk::TreeModelColumn<Glib::ustring> type;	/**< The type of the interface */
-    Gtk::TreeModelColumn<Glib::ustring> id;	/**< The ID of the interface */
-    Gtk::TreeModelColumn<bool> has_writer;	/**< Writer exists? */
-    Gtk::TreeModelColumn<unsigned int> num_readers;	/**< Number of readers */
-  };
+protected:
+	class Record : public Gtk::TreeModelColumnRecord
+	{
+	public:
+		Record();
 
-  InterfaceChooserDialog(Gtk::Window& parent, const Glib::ustring& title);
+		Gtk::TreeModelColumn<Glib::ustring> type;        /**< The type of the interface */
+		Gtk::TreeModelColumn<Glib::ustring> id;          /**< The ID of the interface */
+		Gtk::TreeModelColumn<bool>          has_writer;  /**< Writer exists? */
+		Gtk::TreeModelColumn<unsigned int>  num_readers; /**< Number of readers */
+	};
 
-  void init(BlackBoard* blackboard,
-            const char* type_pattern,
-            const char* id_pattern);
+	InterfaceChooserDialog(Gtk::Window &parent, const Glib::ustring &title);
 
-  virtual const Record& record() const;
-  virtual int init_columns();
-  virtual void init_row(Gtk::TreeModel::Row& row, const InterfaceInfo& ii);
+	void init(BlackBoard *blackboard, const char *type_pattern, const char *id_pattern);
 
-  Gtk::TreeView                 treeview_; /**< Tree widget for interfaces. */
-  Glib::RefPtr<Gtk::ListStore>  model_;    /**< Data model of the tree. */
+	virtual const Record &record() const;
+	virtual int           init_columns();
+	virtual void          init_row(Gtk::TreeModel::Row &row, const InterfaceInfo &ii);
 
- private:
-  InterfaceChooserDialog(const InterfaceChooserDialog& obj);
-  InterfaceChooserDialog& operator=(const InterfaceChooserDialog& obj);
+	Gtk::TreeView                treeview_; /**< Tree widget for interfaces. */
+	Glib::RefPtr<Gtk::ListStore> model_;    /**< Data model of the tree. */
 
-  BlackBoard *bb_;
+private:
+	InterfaceChooserDialog(const InterfaceChooserDialog &obj);
+	InterfaceChooserDialog &operator=(const InterfaceChooserDialog &obj);
 
-  Gtk::Window         &parent_;
-  Gtk::ScrolledWindow  scrollwin_;
+	BlackBoard *bb_;
 
-  const Record* record_; /**< Should only be accessed by record(). */
+	Gtk::Window &       parent_;
+	Gtk::ScrolledWindow scrollwin_;
+
+	const Record *record_; /**< Should only be accessed by record(). */
 };
 
 } // end of namespace fawkes

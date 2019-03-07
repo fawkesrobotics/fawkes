@@ -24,22 +24,22 @@
 #ifndef _LIBS_GUI_UTILS_ROBOT_DRAWER_H_
 #define _LIBS_GUI_UTILS_ROBOT_DRAWER_H_
 
-#include <glibmm/refptr.h>
-#include <gdkmm/window.h>
-#include <cairomm/refptr.h>
 #include <cairomm/context.h>
+#include <cairomm/refptr.h>
+#include <gdkmm/window.h>
+#include <glibmm/refptr.h>
 
 namespace fawkes {
 
 class CairoRobotDrawer
 {
- public:
-  virtual ~CairoRobotDrawer();
+public:
+	virtual ~CairoRobotDrawer();
 
-  virtual void draw_robot(Glib::RefPtr<Gdk::Window> &window,
-			  const Cairo::RefPtr<Cairo::Context> &cr)   = 0;
+	virtual void draw_robot(Glib::RefPtr<Gdk::Window> &          window,
+	                        const Cairo::RefPtr<Cairo::Context> &cr) = 0;
 };
 
-}
+} // namespace fawkes
 
 #endif

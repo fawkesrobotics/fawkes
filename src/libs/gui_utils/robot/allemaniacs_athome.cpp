@@ -36,53 +36,57 @@ namespace fawkes {
  */
 AllemaniACsAtHomeCairoRobotDrawer::AllemaniACsAtHomeCairoRobotDrawer(bool laser_at_center)
 {
-  laser_at_center_ = laser_at_center;
+	laser_at_center_ = laser_at_center;
 }
 
 void
-AllemaniACsAtHomeCairoRobotDrawer::draw_robot(Glib::RefPtr<Gdk::Window> &window,
-					      const Cairo::RefPtr<Cairo::Context> &cr)
+AllemaniACsAtHomeCairoRobotDrawer::draw_robot(Glib::RefPtr<Gdk::Window> &          window,
+                                              const Cairo::RefPtr<Cairo::Context> &cr)
 {
-  cr->save();
+	cr->save();
 
-  if ( laser_at_center_ ) {
-    cr->translate(0, -0.12);
-  }
+	if (laser_at_center_) {
+		cr->translate(0, -0.12);
+	}
 
-  // body
-  cr->set_source_rgba(0.6, 0.6, 0.6, 0.6);
-  cr->rectangle(-0.2, -0.2, 0.4, 0.38);
-  cr->fill_preserve();
-  cr->set_source_rgba(0.4, 0.4, 0.4, 0.6);
-  cr->stroke();
+	// body
+	cr->set_source_rgba(0.6, 0.6, 0.6, 0.6);
+	cr->rectangle(-0.2, -0.2, 0.4, 0.38);
+	cr->fill_preserve();
+	cr->set_source_rgba(0.4, 0.4, 0.4, 0.6);
+	cr->stroke();
 
-  // yellow arrow
-  cr->move_to(0, -0.175);
-  cr->line_to(0.18, 0.17);
-  cr->line_to(-0.18, 0.17);
-  cr->line_to(0, -0.175);
-  cr->set_source_rgba(1, 1, 0, 0.5);
-  cr->fill_preserve();
-  cr->stroke();
+	// yellow arrow
+	cr->move_to(0, -0.175);
+	cr->line_to(0.18, 0.17);
+	cr->line_to(-0.18, 0.17);
+	cr->line_to(0, -0.175);
+	cr->set_source_rgba(1, 1, 0, 0.5);
+	cr->fill_preserve();
+	cr->stroke();
 
-  // poles
-  cr->set_source_rgba(0.4, 0.4, 0.4, 0.6);
-  cr->arc(-0.19, -0.19, 0.005, 0, 2*M_PI);
-  cr->fill_preserve(); cr->stroke();
-  cr->arc(-0.19, +0.17, 0.005, 0, 2*M_PI);
-  cr->fill_preserve(); cr->stroke();
-  cr->arc(+0.19, +0.17, 0.005, 0, 2*M_PI);
-  cr->fill_preserve(); cr->stroke();
-  cr->arc(+0.19, -0.19, 0.005, 0, 2*M_PI);
-  cr->fill_preserve(); cr->stroke();
+	// poles
+	cr->set_source_rgba(0.4, 0.4, 0.4, 0.6);
+	cr->arc(-0.19, -0.19, 0.005, 0, 2 * M_PI);
+	cr->fill_preserve();
+	cr->stroke();
+	cr->arc(-0.19, +0.17, 0.005, 0, 2 * M_PI);
+	cr->fill_preserve();
+	cr->stroke();
+	cr->arc(+0.19, +0.17, 0.005, 0, 2 * M_PI);
+	cr->fill_preserve();
+	cr->stroke();
+	cr->arc(+0.19, -0.19, 0.005, 0, 2 * M_PI);
+	cr->fill_preserve();
+	cr->stroke();
 
-  // laser
-  cr->set_source_rgba(0.4, 0.4, 0.4, 0.2);
-  cr->arc(0, 0.12, 0.03, 0, 2*M_PI);
-  cr->fill_preserve(); cr->stroke();
+	// laser
+	cr->set_source_rgba(0.4, 0.4, 0.4, 0.2);
+	cr->arc(0, 0.12, 0.03, 0, 2 * M_PI);
+	cr->fill_preserve();
+	cr->stroke();
 
-  cr->restore();
+	cr->restore();
 }
 
-
-}
+} // namespace fawkes

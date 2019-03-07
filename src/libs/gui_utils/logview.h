@@ -24,9 +24,9 @@
 #ifndef _LIBS_GUI_UTILS_LOGVIEW_H_
 #define _LIBS_GUI_UTILS_LOGVIEW_H_
 
-#include <gtkmm.h>
-
 #include <logging/logger.h>
+
+#include <gtkmm.h>
 
 namespace fawkes {
 
@@ -34,68 +34,67 @@ class FawkesNetworkClient;
 class FawkesNetworkMessage;
 class ConnectionDispatcher;
 
-class LogView
-  : public Gtk::TreeView
+class LogView : public Gtk::TreeView
 {
- public:
-  LogView();
-  LogView(const char *hostname, unsigned short int port);
-  LogView(BaseObjectType* cobject,
-	  const Glib::RefPtr<Gtk::Builder> &builder);
-  ~LogView();
+public:
+	LogView();
+	LogView(const char *hostname, unsigned short int port);
+	LogView(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &builder);
+	~LogView();
 
-  void set_client(FawkesNetworkClient *client);
-  FawkesNetworkClient *  get_client();
+	void                 set_client(FawkesNetworkClient *client);
+	FawkesNetworkClient *get_client();
 
-  void append_message(Logger::LogLevel log_level, struct timeval t,
-		      const char *component, bool is_exception,
-		      const char *message);
+	void append_message(Logger::LogLevel log_level,
+	                    struct timeval   t,
+	                    const char *     component,
+	                    bool             is_exception,
+	                    const char *     message);
 
-  void clear();
+	void clear();
 
-  ConnectionDispatcher *  get_connection_dispatcher() const;
+	ConnectionDispatcher *get_connection_dispatcher() const;
 
- private:
-  virtual void on_row_inserted(const Gtk::TreeModel::Path& path,
-  			       const Gtk::TreeModel::iterator& iter);
-  virtual void on_message_received(FawkesNetworkMessage *msg);
-  virtual void on_client_connected();
-  virtual void on_client_disconnected();
-#if GTK_VERSION_GE(3,0)
-  virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr);
+private:
+	virtual void on_row_inserted(const Gtk::TreeModel::Path &    path,
+	                             const Gtk::TreeModel::iterator &iter);
+	virtual void on_message_received(FawkesNetworkMessage *msg);
+	virtual void on_client_connected();
+	virtual void on_client_disconnected();
+#if GTK_VERSION_GE(3, 0)
+	virtual bool on_draw(const Cairo::RefPtr<Cairo::Context> &cr);
 #else
-  virtual void on_expose_notify(GdkEventExpose *event);
+	virtual void on_expose_notify(GdkEventExpose *event);
 #endif
 
-  void ctor(const char *hostname = NULL, unsigned short int port = 0);
+	void ctor(const char *hostname = NULL, unsigned short int port = 0);
 
- private:
-  class LogRecord : public Gtk::TreeModelColumnRecord
-  {
-   public:
-    LogRecord();
+private:
+	class LogRecord : public Gtk::TreeModelColumnRecord
+	{
+	public:
+		LogRecord();
 
-    /// @cond INTERNALS
-    Gtk::TreeModelColumn<Glib::ustring> loglevel;
-    Gtk::TreeModelColumn<Glib::ustring> time;
-    Gtk::TreeModelColumn<Glib::ustring> component;
-    Gtk::TreeModelColumn<Glib::ustring> message;
-    Gtk::TreeModelColumn<Gdk::Color>    foreground;
-    Gtk::TreeModelColumn<Gdk::Color>    background;
-    /// @endcond
-  };
+		/// @cond INTERNALS
+		Gtk::TreeModelColumn<Glib::ustring> loglevel;
+		Gtk::TreeModelColumn<Glib::ustring> time;
+		Gtk::TreeModelColumn<Glib::ustring> component;
+		Gtk::TreeModelColumn<Glib::ustring> message;
+		Gtk::TreeModelColumn<Gdk::Color>    foreground;
+		Gtk::TreeModelColumn<Gdk::Color>    background;
+		/// @endcond
+	};
 
-  LogRecord record_;
+	LogRecord record_;
 
-  Glib::RefPtr<Gtk::ListStore> list_;
+	Glib::RefPtr<Gtk::ListStore> list_;
 
-  ConnectionDispatcher *connection_dispatcher_;
+	ConnectionDispatcher *connection_dispatcher_;
 
-  bool                  have_recently_added_path_;
-  Gtk::TreeModel::Path  recently_added_path_;
+	bool                 have_recently_added_path_;
+	Gtk::TreeModel::Path recently_added_path_;
 };
 
 } // end namespace fawkes
-
 
 #endif
