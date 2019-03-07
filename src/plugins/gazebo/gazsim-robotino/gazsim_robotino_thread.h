@@ -23,133 +23,133 @@
 #ifndef _PLUGINS_GAZSIM_ROBOTINO_THREAD_H_
 #define _PLUGINS_GAZSIM_ROBOTINO_THREAD_H_
 
-#include <list>
+#include "../msgs/Float.pb.h"
 
-#include <core/threading/thread.h>
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/blackboard.h>
-#include <aspect/blocked_timing.h>
-#include <plugins/gazebo/aspect/gazebo.h>
 #include <aspect/tf.h>
-#include "../msgs/Float.pb.h"
+#include <core/threading/thread.h>
+#include <plugins/gazebo/aspect/gazebo.h>
+
+#include <list>
 
 //from Gazebo
-#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/msgs/MessageTypes.hh>
+#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/transport/transport.hh>
-
 
 typedef const boost::shared_ptr<gazsim_msgs::Float const> ConstFloatPtr;
 
 namespace fawkes {
-  class BatteryInterface;
-  class IMUInterface;
-  class MotorInterface;
-  class RobotinoSensorInterface;
-  class SwitchInterface;
-}
+class BatteryInterface;
+class IMUInterface;
+class MotorInterface;
+class RobotinoSensorInterface;
+class SwitchInterface;
+} // namespace fawkes
 
-class RobotinoSimThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::TransformAspect,
-  public fawkes::GazeboAspect
+class RobotinoSimThread : public fawkes::Thread,
+                          public fawkes::ClockAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::BlackBoardAspect,
+                          public fawkes::BlockedTimingAspect,
+                          public fawkes::TransformAspect,
+                          public fawkes::GazeboAspect
 {
- public:
-  RobotinoSimThread();
+public:
+	RobotinoSimThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
- private:
-  //Publisher to send messages to gazebo
-  gazebo::transport::PublisherPtr string_pub_;
-  gazebo::transport::PublisherPtr motor_move_pub_;
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  //Suscribers to recieve messages from gazebo
-  gazebo::transport::SubscriberPtr gyro_sub_;
-  gazebo::transport::SubscriberPtr infrared_puck_sensor_sub_;
-  gazebo::transport::SubscriberPtr gripper_laser_left_sensor_sub_;
-  gazebo::transport::SubscriberPtr gripper_laser_right_sensor_sub_;
-  gazebo::transport::SubscriberPtr pos_sub_;
+private:
+	//Publisher to send messages to gazebo
+	gazebo::transport::PublisherPtr string_pub_;
+	gazebo::transport::PublisherPtr motor_move_pub_;
 
-  //Handler functions for incoming messages
-  void on_gyro_msg(ConstVector3dPtr &msg);
-  void on_infrared_puck_sensor_msg(ConstLaserScanStampedPtr &msg);
-  void on_gripper_laser_left_sensor_msg(ConstFloatPtr &msg);
-  void on_gripper_laser_right_sensor_msg(ConstFloatPtr &msg);
-  void on_pos_msg(ConstPosePtr &msg);
+	//Suscribers to recieve messages from gazebo
+	gazebo::transport::SubscriberPtr gyro_sub_;
+	gazebo::transport::SubscriberPtr infrared_puck_sensor_sub_;
+	gazebo::transport::SubscriberPtr gripper_laser_left_sensor_sub_;
+	gazebo::transport::SubscriberPtr gripper_laser_right_sensor_sub_;
+	gazebo::transport::SubscriberPtr pos_sub_;
 
-  //provided interfaces
-  fawkes::RobotinoSensorInterface *sens_if_;
-  fawkes::MotorInterface          *motor_if_;
-  fawkes::SwitchInterface         *switch_if_;
-  fawkes::IMUInterface            *imu_if_;
+	//Handler functions for incoming messages
+	void on_gyro_msg(ConstVector3dPtr &msg);
+	void on_infrared_puck_sensor_msg(ConstLaserScanStampedPtr &msg);
+	void on_gripper_laser_left_sensor_msg(ConstFloatPtr &msg);
+	void on_gripper_laser_right_sensor_msg(ConstFloatPtr &msg);
+	void on_pos_msg(ConstPosePtr &msg);
 
-  //config values
-  std::string cfg_frame_odom_;
-  std::string cfg_frame_base_;
-  std::string cfg_frame_imu_;
-  double gripper_laser_threshold_;
-  double gripper_laser_value_far_;
-  double gripper_laser_value_near_;
-  bool slippery_wheels_enabled_;
-  double slippery_wheels_threshold_;
-  double moving_speed_factor_;
-  double rotation_speed_factor_;
-  bool have_gripper_sensors_;
-  int gripper_laser_left_pos_;
-  int gripper_laser_right_pos_;
-  int infrared_sensor_index_;
+	//provided interfaces
+	fawkes::RobotinoSensorInterface *sens_if_;
+	fawkes::MotorInterface *         motor_if_;
+	fawkes::SwitchInterface *        switch_if_;
+	fawkes::IMUInterface *           imu_if_;
 
-  //Helper variables for motor:
+	//config values
+	std::string cfg_frame_odom_;
+	std::string cfg_frame_base_;
+	std::string cfg_frame_imu_;
+	double      gripper_laser_threshold_;
+	double      gripper_laser_value_far_;
+	double      gripper_laser_value_near_;
+	bool        slippery_wheels_enabled_;
+	double      slippery_wheels_threshold_;
+	double      moving_speed_factor_;
+	double      rotation_speed_factor_;
+	bool        have_gripper_sensors_;
+	int         gripper_laser_left_pos_;
+	int         gripper_laser_right_pos_;
+	int         infrared_sensor_index_;
 
-  //current motorMovements
-  float vx_;
-  float vy_;
-  float vomega_;
-  float des_vx_;
-  float des_vy_;
-  float des_vomega_;
-  //last received odom position
-  float x_;
-  float y_;
-  float ori_;
-  float path_length_;
- 
-  //RobotinoSensorInterface values (stored here to write the interfaces only in the loop)
-  bool gyro_available_;
-  int gyro_buffer_size_;
-  int gyro_buffer_index_new_;
-  int gyro_buffer_index_delayed_;
-  fawkes::Time *gyro_timestamp_buffer_;
-  float *gyro_angle_buffer_;
-  float gyro_delay_;
-  float infrared_puck_sensor_dist_;
-  float analog_in_left_;
-  float analog_in_right_;
+	//Helper variables for motor:
 
-  //are there new values to write in the interfaces?
-  bool new_data_;
+	//current motorMovements
+	float vx_;
+	float vy_;
+	float vomega_;
+	float des_vx_;
+	float des_vy_;
+	float des_vomega_;
+	//last received odom position
+	float x_;
+	float y_;
+	float ori_;
+	float path_length_;
 
-  fawkes::Time last_pos_time_;
-  fawkes::Time last_vel_set_time_;
+	//RobotinoSensorInterface values (stored here to write the interfaces only in the loop)
+	bool          gyro_available_;
+	int           gyro_buffer_size_;
+	int           gyro_buffer_index_new_;
+	int           gyro_buffer_index_delayed_;
+	fawkes::Time *gyro_timestamp_buffer_;
+	float *       gyro_angle_buffer_;
+	float         gyro_delay_;
+	float         infrared_puck_sensor_dist_;
+	float         analog_in_left_;
+	float         analog_in_right_;
 
-  //Odometry offset
-  float x_offset_;
-  float y_offset_;
-  float ori_offset_;
+	//are there new values to write in the interfaces?
+	bool new_data_;
 
-  //Helper functions:
-  void process_motor_messages();
-  void send_transroot(double vx, double vy, double omega);
-  bool vel_changed(float before, float after, float relativeThreashold);  
+	fawkes::Time last_pos_time_;
+	fawkes::Time last_vel_set_time_;
+
+	//Odometry offset
+	float x_offset_;
+	float y_offset_;
+	float ori_offset_;
+
+	//Helper functions:
+	void process_motor_messages();
+	void send_transroot(double vx, double vy, double omega);
+	bool vel_changed(float before, float after, float relativeThreashold);
 };
 
 #endif

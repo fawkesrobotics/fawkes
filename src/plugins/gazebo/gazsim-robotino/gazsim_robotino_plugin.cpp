@@ -18,9 +18,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "gazsim_robotino_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,16 +31,14 @@ using namespace fawkes;
  */
 class GazsimRobotinoPlugin : public fawkes::Plugin
 {
- public:
-
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit GazsimRobotinoPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new RobotinoSimThread());
-  }
+	explicit GazsimRobotinoPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RobotinoSimThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Simulation of Robotino in Gazebo")
