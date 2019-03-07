@@ -22,71 +22,69 @@
 #define _PLUGINS_AMCL_ROS_THREAD_H_
 
 #ifndef HAVE_ROS
-#  error "ROS integration requires ROS support of system"
+#	error "ROS integration requires ROS support of system"
 #endif
 
 #include "amcl_thread.h"
-
 #include "map/map.h"
 #include "pf/pf.h"
 
-#include <core/threading/thread.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/configurable.h>
 #include <aspect/logging.h>
-
+#include <core/threading/thread.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <interfaces/LocalizationInterface.h>
-
 #include <plugins/ros/aspect/ros.h>
 #include <ros/publisher.h>
 #include <ros/subscriber.h>
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
 
 namespace fawkes {
-  class Mutex;
+class Mutex;
 }
 
 class AmclThread;
 
-class AmclROSThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ROSAspect
+class AmclROSThread : public fawkes::Thread,
+                      public fawkes::LoggingAspect,
+                      public fawkes::ConfigurableAspect,
+                      public fawkes::BlackBoardAspect,
+                      public fawkes::ROSAspect
 {
 public:
-  AmclROSThread();
-  virtual ~AmclROSThread();
+	AmclROSThread();
+	virtual ~AmclROSThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  void publish_pose_array(const std::string &global_frame_id,
-			  const pf_sample_set_t* set);
-  void publish_pose(const std::string &global_frame_id,
-		    const amcl_hyp_t &amcl_hyp,
-		    const double last_covariance[36]);
-  void publish_map(const std::string &global_frame_id,
-		   const map_t *map);
+	void publish_pose_array(const std::string &global_frame_id, const pf_sample_set_t *set);
+	void publish_pose(const std::string &global_frame_id,
+	                  const amcl_hyp_t & amcl_hyp,
+	                  const double       last_covariance[36]);
+	void publish_map(const std::string &global_frame_id, const map_t *map);
 
-
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run();}
-
- private:
-  void initial_pose_received(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg);
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
 private:
-  std::string cfg_pose_ifname_;
+	void initial_pose_received(const geometry_msgs::PoseWithCovarianceStampedConstPtr &msg);
 
-  fawkes::LocalizationInterface   *loc_if_;
+private:
+	std::string cfg_pose_ifname_;
 
-  ros::Publisher pose_pub_;
-  ros::Publisher particlecloud_pub_;
-  ros::Subscriber initial_pose_sub_;
-  ros::Publisher map_pub_;
+	fawkes::LocalizationInterface *loc_if_;
+
+	ros::Publisher  pose_pub_;
+	ros::Publisher  particlecloud_pub_;
+	ros::Subscriber initial_pose_sub_;
+	ros::Publisher  map_pub_;
 };
 
 #endif

@@ -23,86 +23,90 @@
 
 #include "map/map.h"
 
-#include <core/threading/thread.h>
+#include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/tf.h>
-#include <aspect/blackboard.h>
+#include <core/threading/thread.h>
 
 #if __cplusplus > 201100L || defined(__GXX_EXPERIMENTAL_CXX0X__)
-#  define HAVE_RANDOM
-#  include <random>
+#	define HAVE_RANDOM
+#	include <random>
 #endif
 
 #include <interfaces/Laser360Interface.h>
 #include <interfaces/Position3DInterface.h>
 
-class MapLaserGenThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::TransformAspect
+class MapLaserGenThread : public fawkes::Thread,
+                          public fawkes::ClockAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::BlockedTimingAspect,
+                          public fawkes::BlackBoardAspect,
+                          public fawkes::TransformAspect
 {
 public:
-  MapLaserGenThread();
-  virtual ~MapLaserGenThread();
+	MapLaserGenThread();
+	virtual ~MapLaserGenThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run();}
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  bool set_laser_pose();
+private:
+	bool set_laser_pose();
 
- private:
-  std::string  cfg_map_file_;
-  float        cfg_resolution_;
-  float        cfg_origin_x_;
-  float        cfg_origin_y_;
-  float        cfg_origin_theta_;
-  float        cfg_occupied_thresh_;
-  float        cfg_free_thresh_;
-  bool         cfg_send_zero_odom_;
-  bool         cfg_use_current_pose_;
+private:
+	std::string cfg_map_file_;
+	float       cfg_resolution_;
+	float       cfg_origin_x_;
+	float       cfg_origin_y_;
+	float       cfg_origin_theta_;
+	float       cfg_occupied_thresh_;
+	float       cfg_free_thresh_;
+	bool        cfg_send_zero_odom_;
+	bool        cfg_use_current_pose_;
 
-  std::string  cfg_laser_ifname_;
-  std::string  cfg_pose_ifname_;
-  std::string  laser_frame_id_;
-  std::string  odom_frame_id_;
-  std::string  base_frame_id_;
+	std::string cfg_laser_ifname_;
+	std::string cfg_pose_ifname_;
+	std::string laser_frame_id_;
+	std::string odom_frame_id_;
+	std::string base_frame_id_;
 
-  unsigned int map_width_;
-  unsigned int map_height_;
-  bool laser_pose_set_;
+	unsigned int map_width_;
+	unsigned int map_height_;
+	bool         laser_pose_set_;
 
-  fawkes::tf::Transform         latest_tf_;
-  fawkes::tf::Stamped<fawkes::tf::Pose> laser_pose_;
+	fawkes::tf::Transform                 latest_tf_;
+	fawkes::tf::Stamped<fawkes::tf::Pose> laser_pose_;
 
-  float pos_x_;
-  float pos_y_;
-  float pos_theta_;
-  float laser_pos_x_;
-  float laser_pos_y_;
-  float laser_pos_theta_;
-  map_t* map_;
+	float  pos_x_;
+	float  pos_y_;
+	float  pos_theta_;
+	float  laser_pos_x_;
+	float  laser_pos_y_;
+	float  laser_pos_theta_;
+	map_t *map_;
 
-  bool cfg_add_noise_;
-  float cfg_noise_sigma_;
+	bool  cfg_add_noise_;
+	float cfg_noise_sigma_;
 #ifdef HAVE_RANDOM
-  std::mt19937 noise_rg_;
-  std::normal_distribution<float> noise_nd_;
+	std::mt19937                    noise_rg_;
+	std::normal_distribution<float> noise_nd_;
 #endif
 
-  fawkes::Laser360Interface* laser_if_;
-  fawkes::Position3DInterface * gt_pose_if_;
-  fawkes::Position3DInterface * cur_pose_if_;
+	fawkes::Laser360Interface *  laser_if_;
+	fawkes::Position3DInterface *gt_pose_if_;
+	fawkes::Position3DInterface *cur_pose_if_;
 };
 
 #endif
