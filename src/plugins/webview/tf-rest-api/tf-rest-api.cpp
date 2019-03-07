@@ -31,8 +31,7 @@ using namespace fawkes;
  */
 
 /** Constructor. */
-TransformsRestApi::TransformsRestApi()
-	: Thread("TransformsRestApi", Thread::OPMODE_WAITFORWAKEUP)
+TransformsRestApi::TransformsRestApi() : Thread("TransformsRestApi", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
 
@@ -45,9 +44,9 @@ void
 TransformsRestApi::init()
 {
 	rest_api_ = new WebviewRestApi("transforms", logger);
-	rest_api_->add_handler<TransformsGraph>
-		(WebRequest::METHOD_GET, "/graph",
-		 std::bind(&TransformsRestApi::cb_get_graph, this));
+	rest_api_->add_handler<TransformsGraph>(WebRequest::METHOD_GET,
+	                                        "/graph",
+	                                        std::bind(&TransformsRestApi::cb_get_graph, this));
 	webview_rest_api_manager->register_api(rest_api_);
 }
 
@@ -58,12 +57,10 @@ TransformsRestApi::finalize()
 	delete rest_api_;
 }
 
-
 void
 TransformsRestApi::loop()
 {
 }
-
 
 TransformsGraph
 TransformsRestApi::cb_get_graph()

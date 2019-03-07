@@ -14,23 +14,22 @@
 #pragma once
 
 #define RAPIDJSON_HAS_STDSTRING 1
-#include <rapidjson/fwd.h>
-
-#include <string>
-#include <cstdint>
-#include <vector>
-#include <memory>
-#include <optional>
-
 #include "InterfaceFieldType.h"
 #include "InterfaceMessageType.h"
 
+#include <rapidjson/fwd.h>
+
+#include <cstdint>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
 /** InterfaceInfo representation for JSON transfer. */
 class InterfaceInfo
 
 {
- public:
+public:
 	/** Constructor. */
 	InterfaceInfo();
 	/** Constructor from JSON.
@@ -40,7 +39,7 @@ class InterfaceInfo
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	InterfaceInfo(const rapidjson::Value& v);
+	InterfaceInfo(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~InterfaceInfo();
@@ -48,9 +47,10 @@ class InterfaceInfo
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -62,19 +62,19 @@ class InterfaceInfo
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -87,12 +87,12 @@ class InterfaceInfo
 	virtual void validate(bool subcall = false) const;
 
 	// Schema: InterfaceInfo
- public:
-  /** Get kind value.
+public:
+	/** Get kind value.
    * @return kind value
    */
 	std::optional<std::string>
- kind() const
+	kind() const
 	{
 		return kind_;
 	}
@@ -100,15 +100,16 @@ class InterfaceInfo
 	/** Set kind value.
 	 * @param kind new value
 	 */
-	void set_kind(const std::string& kind)
+	void
+	set_kind(const std::string &kind)
 	{
 		kind_ = kind;
 	}
-  /** Get apiVersion value.
+	/** Get apiVersion value.
    * @return apiVersion value
    */
 	std::optional<std::string>
- apiVersion() const
+	apiVersion() const
 	{
 		return apiVersion_;
 	}
@@ -116,15 +117,16 @@ class InterfaceInfo
 	/** Set apiVersion value.
 	 * @param apiVersion new value
 	 */
-	void set_apiVersion(const std::string& apiVersion)
+	void
+	set_apiVersion(const std::string &apiVersion)
 	{
 		apiVersion_ = apiVersion;
 	}
-  /** Get id value.
+	/** Get id value.
    * @return id value
    */
 	std::optional<std::string>
- id() const
+	id() const
 	{
 		return id_;
 	}
@@ -132,15 +134,16 @@ class InterfaceInfo
 	/** Set id value.
 	 * @param id new value
 	 */
-	void set_id(const std::string& id)
+	void
+	set_id(const std::string &id)
 	{
 		id_ = id;
 	}
-  /** Get type value.
+	/** Get type value.
    * @return type value
    */
 	std::optional<std::string>
- type() const
+	type() const
 	{
 		return type_;
 	}
@@ -148,15 +151,16 @@ class InterfaceInfo
 	/** Set type value.
 	 * @param type new value
 	 */
-	void set_type(const std::string& type)
+	void
+	set_type(const std::string &type)
 	{
 		type_ = type;
 	}
-  /** Get hash value.
+	/** Get hash value.
    * @return hash value
    */
 	std::optional<std::string>
- hash() const
+	hash() const
 	{
 		return hash_;
 	}
@@ -164,15 +168,16 @@ class InterfaceInfo
 	/** Set hash value.
 	 * @param hash new value
 	 */
-	void set_hash(const std::string& hash)
+	void
+	set_hash(const std::string &hash)
 	{
 		hash_ = hash;
 	}
-  /** Get writer value.
+	/** Get writer value.
    * @return writer value
    */
 	std::optional<std::string>
- writer() const
+	writer() const
 	{
 		return writer_;
 	}
@@ -180,15 +185,16 @@ class InterfaceInfo
 	/** Set writer value.
 	 * @param writer new value
 	 */
-	void set_writer(const std::string& writer)
+	void
+	set_writer(const std::string &writer)
 	{
 		writer_ = writer;
 	}
-  /** Get readers value.
+	/** Get readers value.
    * @return readers value
    */
 	std::vector<std::string>
- readers() const
+	readers() const
 	{
 		return readers_;
 	}
@@ -196,14 +202,16 @@ class InterfaceInfo
 	/** Set readers value.
 	 * @param readers new value
 	 */
-	void set_readers(const std::vector<std::string>& readers)
+	void
+	set_readers(const std::vector<std::string> &readers)
 	{
 		readers_ = readers;
 	}
 	/** Add element to readers array.
 	 * @param readers new value
 	 */
-	void addto_readers(const std::string&& readers)
+	void
+	addto_readers(const std::string &&readers)
 	{
 		readers_.push_back(std::move(readers));
 	}
@@ -212,15 +220,16 @@ class InterfaceInfo
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param readers new value
 	 */
-	void addto_readers(const std::string& readers)
+	void
+	addto_readers(const std::string &readers)
 	{
 		readers_.push_back(readers);
 	}
-  /** Get fields value.
+	/** Get fields value.
    * @return fields value
    */
 	std::vector<std::shared_ptr<InterfaceFieldType>>
- fields() const
+	fields() const
 	{
 		return fields_;
 	}
@@ -228,14 +237,16 @@ class InterfaceInfo
 	/** Set fields value.
 	 * @param fields new value
 	 */
-	void set_fields(const std::vector<std::shared_ptr<InterfaceFieldType>>& fields)
+	void
+	set_fields(const std::vector<std::shared_ptr<InterfaceFieldType>> &fields)
 	{
 		fields_ = fields;
 	}
 	/** Add element to fields array.
 	 * @param fields new value
 	 */
-	void addto_fields(const std::shared_ptr<InterfaceFieldType>&& fields)
+	void
+	addto_fields(const std::shared_ptr<InterfaceFieldType> &&fields)
 	{
 		fields_.push_back(std::move(fields));
 	}
@@ -244,22 +255,24 @@ class InterfaceInfo
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param fields new value
 	 */
-	void addto_fields(const std::shared_ptr<InterfaceFieldType>& fields)
+	void
+	addto_fields(const std::shared_ptr<InterfaceFieldType> &fields)
 	{
 		fields_.push_back(fields);
 	}
 	/** Add element to fields array.
 	 * @param fields new value
 	 */
-	void addto_fields(const InterfaceFieldType&& fields)
+	void
+	addto_fields(const InterfaceFieldType &&fields)
 	{
 		fields_.push_back(std::make_shared<InterfaceFieldType>(std::move(fields)));
 	}
-  /** Get message_types value.
+	/** Get message_types value.
    * @return message_types value
    */
 	std::vector<std::shared_ptr<InterfaceMessageType>>
- message_types() const
+	message_types() const
 	{
 		return message_types_;
 	}
@@ -267,14 +280,16 @@ class InterfaceInfo
 	/** Set message_types value.
 	 * @param message_types new value
 	 */
-	void set_message_types(const std::vector<std::shared_ptr<InterfaceMessageType>>& message_types)
+	void
+	set_message_types(const std::vector<std::shared_ptr<InterfaceMessageType>> &message_types)
 	{
 		message_types_ = message_types;
 	}
 	/** Add element to message_types array.
 	 * @param message_types new value
 	 */
-	void addto_message_types(const std::shared_ptr<InterfaceMessageType>&& message_types)
+	void
+	addto_message_types(const std::shared_ptr<InterfaceMessageType> &&message_types)
 	{
 		message_types_.push_back(std::move(message_types));
 	}
@@ -283,35 +298,28 @@ class InterfaceInfo
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param message_types new value
 	 */
-	void addto_message_types(const std::shared_ptr<InterfaceMessageType>& message_types)
+	void
+	addto_message_types(const std::shared_ptr<InterfaceMessageType> &message_types)
 	{
 		message_types_.push_back(message_types);
 	}
 	/** Add element to message_types array.
 	 * @param message_types new value
 	 */
-	void addto_message_types(const InterfaceMessageType&& message_types)
+	void
+	addto_message_types(const InterfaceMessageType &&message_types)
 	{
 		message_types_.push_back(std::make_shared<InterfaceMessageType>(std::move(message_types)));
 	}
- private:
-	std::optional<std::string>
- kind_;
-	std::optional<std::string>
- apiVersion_;
-	std::optional<std::string>
- id_;
-	std::optional<std::string>
- type_;
-	std::optional<std::string>
- hash_;
-	std::optional<std::string>
- writer_;
-	std::vector<std::string>
- readers_;
-	std::vector<std::shared_ptr<InterfaceFieldType>>
- fields_;
-	std::vector<std::shared_ptr<InterfaceMessageType>>
- message_types_;
 
+private:
+	std::optional<std::string>                         kind_;
+	std::optional<std::string>                         apiVersion_;
+	std::optional<std::string>                         id_;
+	std::optional<std::string>                         type_;
+	std::optional<std::string>                         hash_;
+	std::optional<std::string>                         writer_;
+	std::vector<std::string>                           readers_;
+	std::vector<std::shared_ptr<InterfaceFieldType>>   fields_;
+	std::vector<std::shared_ptr<InterfaceMessageType>> message_types_;
 };

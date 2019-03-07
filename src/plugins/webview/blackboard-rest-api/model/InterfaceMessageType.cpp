@@ -14,9 +14,9 @@
 #include "InterfaceMessageType.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ InterfaceMessageType::InterfaceMessageType(const std::string &json)
 	from_json(json);
 }
 
-InterfaceMessageType::InterfaceMessageType(const rapidjson::Value& v)
+InterfaceMessageType::InterfaceMessageType(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ InterfaceMessageType::to_json(bool pretty) const
 }
 
 void
-InterfaceMessageType::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+InterfaceMessageType::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -72,13 +72,12 @@ InterfaceMessageType::to_json_value(rapidjson::Document& d, rapidjson::Value& v)
 	}
 	rapidjson::Value v_fields(rapidjson::kArrayType);
 	v_fields.Reserve(fields_.size(), allocator);
-	for (const auto & e : fields_) {
+	for (const auto &e : fields_) {
 		rapidjson::Value v(rapidjson::kObjectType);
 		e->to_json_value(d, v);
 		v_fields.PushBack(v, allocator);
 	}
 	v.AddMember("fields", v_fields, allocator);
-
 }
 
 void
@@ -91,32 +90,32 @@ InterfaceMessageType::from_json(const std::string &json)
 }
 
 void
-InterfaceMessageType::from_json_value(const rapidjson::Value& d)
+InterfaceMessageType::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("name") && d["name"].IsString()) {
 		name_ = d["name"].GetString();
 	}
 	if (d.HasMember("fields") && d["fields"].IsArray()) {
-		const rapidjson::Value& a = d["fields"];
-		fields_ = std::vector<std::shared_ptr<InterfaceFieldType>>{};
-;
+		const rapidjson::Value &a = d["fields"];
+		fields_                   = std::vector<std::shared_ptr<InterfaceFieldType>>{};
+		;
 		fields_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			std::shared_ptr<InterfaceFieldType> nv{new InterfaceFieldType()};
 			nv->from_json_value(v);
 			fields_.push_back(std::move(nv));
 		}
 	}
-
 }
 
 void
 InterfaceMessageType::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! name_)  missing.push_back("name");
+	std::vector<std::string> missing;
+	if (!name_)
+		missing.push_back("name");
 	for (size_t i = 0; i < fields_.size(); ++i) {
-		if (! fields_[i]) {
+		if (!fields_[i]) {
 			missing.push_back("fields[" + std::to_string(i) + "]");
 		} else {
 			try {
@@ -129,14 +128,12 @@ InterfaceMessageType::validate(bool subcall) const
 		}
 	}
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "InterfaceMessageType is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "InterfaceMessageType is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

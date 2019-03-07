@@ -22,10 +22,9 @@
 #include "config-rest-api.h"
 
 #include <config/config.h>
-#include <webview/rest_api_manager.h>
-
 #include <rapidjson/document.h>
 #include <rapidjson/pointer.h>
+#include <webview/rest_api_manager.h>
 
 #include <memory>
 
@@ -38,7 +37,7 @@ using namespace fawkes;
 
 /** Constructor. */
 ConfigurationRestApi::ConfigurationRestApi()
-	: Thread("ConfigurationRestApi", Thread::OPMODE_WAITFORWAKEUP)
+: Thread("ConfigurationRestApi", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
 
@@ -51,9 +50,11 @@ void
 ConfigurationRestApi::init()
 {
 	rest_api_ = new WebviewRestApi("config", logger);
-	rest_api_->add_handler<ConfigTree>
-		(WebRequest::METHOD_GET, "/?",
-		 std::bind(&ConfigurationRestApi::cb_get_config, this, std::placeholders::_1));
+	rest_api_->add_handler<ConfigTree>(WebRequest::METHOD_GET,
+	                                   "/?",
+	                                   std::bind(&ConfigurationRestApi::cb_get_config,
+	                                             this,
+	                                             std::placeholders::_1));
 	webview_rest_api_manager->register_api(rest_api_);
 }
 
@@ -64,7 +65,6 @@ ConfigurationRestApi::finalize()
 	delete rest_api_;
 }
 
-
 void
 ConfigurationRestApi::loop()
 {
@@ -72,7 +72,7 @@ ConfigurationRestApi::loop()
 
 static rapidjson::Value
 create_value(std::unique_ptr<fawkes::Configuration::ValueIterator> &i,
-             rapidjson::Document::AllocatorType& a)
+             rapidjson::Document::AllocatorType &                   a)
 {
 	rapidjson::Value v;
 	if (i->is_list()) {
@@ -130,48 +130,50 @@ ConfigurationRestApi::cb_get_config(WebviewRestParams &params)
 	response.set_apiVersion(ConfigTree::api_version());
 
 	std::shared_ptr<rapidjson::Document> d = std::make_shared<rapidjson::Document>();
-	rapidjson::Document::AllocatorType& a = d->GetAllocator();
+	rapidjson::Document::AllocatorType & a = d->GetAllocator();
 	d->SetObject();
 
 	//rapidjson::Value &v{*d};
-	std::unique_ptr<fawkes::Configuration::ValueIterator>
-		i{config->search(query.c_str())};
+	std::unique_ptr<fawkes::Configuration::ValueIterator> i{config->search(query.c_str())};
 	while (i->next()) {
-		std::vector<std::string> path_elements{str_split(i->path(), '/')};
-		rapidjson::Value::MemberIterator parent = d->MemberEnd();;
-		rapidjson::Value::MemberIterator m      = d->MemberBegin();
-		rapidjson::Value::MemberIterator m_end  = d->MemberEnd();
+		std::vector<std::string>         path_elements{str_split(i->path(), '/')};
+		rapidjson::Value::MemberIterator parent = d->MemberEnd();
+		;
+		rapidjson::Value::MemberIterator m     = d->MemberBegin();
+		rapidjson::Value::MemberIterator m_end = d->MemberEnd();
 
 		if (path_elements.size() > 1) {
 			for (size_t p = 0; p < path_elements.size() - 1; ++p) {
-				m = std::find_if(m, m_end,
-				                 [&path_elements,&p](const auto &v)
-				                 {
-					                 return path_elements[p] == v.name.GetString();
-				                 });
+				m = std::find_if(m, m_end, [&path_elements, &p](const auto &v) {
+					return path_elements[p] == v.name.GetString();
+				});
 				if (m != m_end) {
 					parent = m;
 				} else {
 					if (parent != d->MemberEnd()) {
 						parent->value.AddMember(rapidjson::Value(path_elements[p], a).Move(),
-						                        rapidjson::Value(rapidjson::kObjectType).Move(), a);
+						                        rapidjson::Value(rapidjson::kObjectType).Move(),
+						                        a);
 						parent = parent->value.FindMember(path_elements[p].c_str());
 					} else {
 						d->AddMember(rapidjson::Value(path_elements[p], a).Move(),
-						            rapidjson::Value(rapidjson::kObjectType).Move(), a);
+						             rapidjson::Value(rapidjson::kObjectType).Move(),
+						             a);
 						parent = d->FindMember(path_elements[p].c_str());
 					}
 				}
-				m = parent->value.MemberBegin();
+				m     = parent->value.MemberBegin();
 				m_end = parent->value.MemberEnd();
 			}
 
 			if (parent == d->MemberEnd()) {
 				d->AddMember(rapidjson::Value(path_elements.back(), a).Move(),
-				             create_value(i, a).Move(), a);
+				             create_value(i, a).Move(),
+				             a);
 			} else {
 				parent->value.AddMember(rapidjson::Value(path_elements.back(), a).Move(),
-				                        create_value(i, a).Move(), a);
+				                        create_value(i, a).Move(),
+				                        a);
 			}
 		}
 	}

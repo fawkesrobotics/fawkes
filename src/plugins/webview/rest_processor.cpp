@@ -20,17 +20,17 @@
  */
 
 #include "rest_processor.h"
-#include <webview/error_reply.h>
-#include <webview/rest_api_manager.h>
-#include <webview/rest_api.h>
-#include <webview/url_manager.h>
 
 #include <core/exception.h>
 #include <logging/logger.h>
 #include <utils/misc/string_split.h>
+#include <webview/error_reply.h>
+#include <webview/rest_api.h>
+#include <webview/rest_api_manager.h>
+#include <webview/url_manager.h>
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -47,63 +47,66 @@ using namespace fawkes;
  * @param api_mgr REST API manager to check for available APIs
  * @param logger logger
  */
-WebviewRESTRequestProcessor::WebviewRESTRequestProcessor(fawkes::WebUrlManager *url_manager,
+WebviewRESTRequestProcessor::WebviewRESTRequestProcessor(fawkes::WebUrlManager *        url_manager,
                                                          fawkes::WebviewRestApiManager *api_mgr,
-                                                         fawkes::Logger *logger)
+                                                         fawkes::Logger *               logger)
 : url_mgr_(url_manager),
   api_mgr_(api_mgr),
   logger_(logger),
-  methods_{WebRequest::METHOD_GET, WebRequest::METHOD_POST,
-           WebRequest::METHOD_PUT, WebRequest::METHOD_DELETE,
+  methods_{WebRequest::METHOD_GET,
+           WebRequest::METHOD_POST,
+           WebRequest::METHOD_PUT,
+           WebRequest::METHOD_DELETE,
            WebRequest::METHOD_PATCH}
 {
-  for (const auto &method : methods_) {
-	  url_mgr_->add_handler(method, "/api/{rest_url*}",
-	                        std::bind(&WebviewRESTRequestProcessor::process_request, this,
-	                                  std::placeholders::_1));
-  }
+	for (const auto &method : methods_) {
+		url_mgr_->add_handler(method,
+		                      "/api/{rest_url*}",
+		                      std::bind(&WebviewRESTRequestProcessor::process_request,
+		                                this,
+		                                std::placeholders::_1));
+	}
 }
 
 /** Destructor. */
 WebviewRESTRequestProcessor::~WebviewRESTRequestProcessor()
 {
-  for (const auto &method : methods_) {
-	  url_mgr_->remove_handler(method, "/api/{rest_url*}");
-  }
+	for (const auto &method : methods_) {
+		url_mgr_->remove_handler(method, "/api/{rest_url*}");
+	}
 }
 
 WebReply *
 WebviewRESTRequestProcessor::process_request(const fawkes::WebRequest *request)
 {
-	std::string rest_url = "/" + request->path_arg("rest_url");
+	std::string              rest_url = "/" + request->path_arg("rest_url");
 	std::vector<std::string> rest_url_parts{str_split(rest_url, '/')};
 
 	if (rest_url_parts.empty()) {
 		return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "REST API overview not yet implemented\n");
 	}
 
-	std::string rest_path = rest_url.substr(rest_url_parts[0].length()+1);
-	std::string rest_api = rest_url_parts[0];
-	WebviewRestApi *api = api_mgr_->get_api(rest_api);
-	if (! api) {
+	std::string     rest_path = rest_url.substr(rest_url_parts[0].length() + 1);
+	std::string     rest_api  = rest_url_parts[0];
+	WebviewRestApi *api       = api_mgr_->get_api(rest_api);
+	if (!api) {
 		logger_->log_error("WebRESTProc", "REST API '%s' unknown", rest_api.c_str());
-		return new StaticWebReply(WebReply::HTTP_NOT_FOUND,
-		                           "REST API '" + rest_api + "' unknown\n");
+		return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "REST API '" + rest_api + "' unknown\n");
 	}
 
 	try {
 		WebReply *reply = api->process_request(request, rest_path);
-		if (! reply) {
-			return new StaticWebReply(WebReply::HTTP_NOT_FOUND, "REST API '" + rest_api +
-			                          "' has no endpoint '" + rest_path + "'\n");
+		if (!reply) {
+			return new StaticWebReply(WebReply::HTTP_NOT_FOUND,
+			                          "REST API '" + rest_api + "' has no endpoint '" + rest_path
+			                            + "'\n");
 		}
 		return no_caching(reply);
 	} catch (Exception &e) {
 		logger_->log_error("WebRESTProc", "REST API '%s' failed, exception follows", rest_api.c_str());
 		logger_->log_error("WebRESTProc", e);
-		return no_caching(new StaticWebReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
-		                                     "REST API '" + rest_api + "': " +
-		                                     e.what_no_backtrace() + "\n"));
+		return no_caching(
+		  new StaticWebReply(WebReply::HTTP_INTERNAL_SERVER_ERROR,
+		                     "REST API '" + rest_api + "': " + e.what_no_backtrace() + "\n"));
 	}
-	
 }

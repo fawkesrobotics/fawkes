@@ -14,9 +14,9 @@
 #include "Backend.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ Backend::Backend(const std::string &json)
 	from_json(json);
 }
 
-Backend::Backend(const rapidjson::Value& v)
+Backend::Backend(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ Backend::to_json(bool pretty) const
 }
 
 void
-Backend::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+Backend::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -92,13 +92,12 @@ Backend::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	}
 	rapidjson::Value v_services(rapidjson::kArrayType);
 	v_services.Reserve(services_.size(), allocator);
-	for (const auto & e : services_) {
+	for (const auto &e : services_) {
 		rapidjson::Value v(rapidjson::kObjectType);
 		e->to_json_value(d, v);
 		v_services.PushBack(v, allocator);
 	}
 	v.AddMember("services", v_services, allocator);
-
 }
 
 void
@@ -111,7 +110,7 @@ Backend::from_json(const std::string &json)
 }
 
 void
-Backend::from_json_value(const rapidjson::Value& d)
+Backend::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -129,29 +128,32 @@ Backend::from_json_value(const rapidjson::Value& d)
 		url_ = d["url"].GetString();
 	}
 	if (d.HasMember("services") && d["services"].IsArray()) {
-		const rapidjson::Value& a = d["services"];
-		services_ = std::vector<std::shared_ptr<Service>>{};
-;
+		const rapidjson::Value &a = d["services"];
+		services_                 = std::vector<std::shared_ptr<Service>>{};
+		;
 		services_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			std::shared_ptr<Service> nv{new Service()};
 			nv->from_json_value(v);
 			services_.push_back(std::move(nv));
 		}
 	}
-
 }
 
 void
 Backend::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! id_)  missing.push_back("id");
-	if (! name_)  missing.push_back("name");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!id_)
+		missing.push_back("id");
+	if (!name_)
+		missing.push_back("name");
 	for (size_t i = 0; i < services_.size(); ++i) {
-		if (! services_[i]) {
+		if (!services_[i]) {
 			missing.push_back("services[" + std::to_string(i) + "]");
 		} else {
 			try {
@@ -164,14 +166,12 @@ Backend::validate(bool subcall) const
 		}
 	}
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "Backend is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "Backend is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

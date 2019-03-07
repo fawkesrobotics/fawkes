@@ -23,45 +23,44 @@
 #ifndef _PLUGINS_WEBVIEW_STATIC_PROCESSOR_H_
 #define _PLUGINS_WEBVIEW_STATIC_PROCESSOR_H_
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 namespace fawkes {
-  class Logger;
-  class WebUrlManager;
-  class WebReply;
-  class WebRequest;
-}
+class Logger;
+class WebUrlManager;
+class WebReply;
+class WebRequest;
+} // namespace fawkes
 
 class WebviewStaticRequestProcessor
 {
- public:
-	WebviewStaticRequestProcessor(fawkes::WebUrlManager *url_manager,
-	                              const std::string& base_url,
-	                              std::vector<std::string>& htdocs_dir,
-	                              const std::string& catchall_file,
-	                              const std::string& mime_file,
-	                              fawkes::Logger *logger);
-  ~WebviewStaticRequestProcessor();
+public:
+	WebviewStaticRequestProcessor(fawkes::WebUrlManager *   url_manager,
+	                              const std::string &       base_url,
+	                              std::vector<std::string> &htdocs_dir,
+	                              const std::string &       catchall_file,
+	                              const std::string &       mime_file,
+	                              fawkes::Logger *          logger);
+	~WebviewStaticRequestProcessor();
 
- private:
-  fawkes::WebReply * process_request(const fawkes::WebRequest *request);
-  std::string find_file(const std::string& filename);
-  void read_mime_database(const std::string& mime_file);
-  const std::string & get_mime_type(const std::string& file_name);
+private:
+	fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+	std::string        find_file(const std::string &filename);
+	void               read_mime_database(const std::string &mime_file);
+	const std::string &get_mime_type(const std::string &file_name);
 
- private:
-  std::vector<std::string> htdocs_dirs_;
+private:
+	std::vector<std::string> htdocs_dirs_;
 
-  fawkes::Logger *logger_;
-  fawkes::WebUrlManager *url_manager_;
+	fawkes::Logger *       logger_;
+	fawkes::WebUrlManager *url_manager_;
 
-  std::map<std::string, std::string> mime_types_;
+	std::map<std::string, std::string> mime_types_;
 
-  std::string base_url_;
-  std::string catchall_file_;
-
+	std::string base_url_;
+	std::string catchall_file_;
 };
 
 #endif

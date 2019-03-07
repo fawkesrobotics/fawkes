@@ -14,9 +14,9 @@
 #include "Service.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ Service::Service(const std::string &json)
 	from_json(json);
 }
 
-Service::Service(const rapidjson::Value& v)
+Service::Service(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ Service::to_json(bool pretty) const
 }
 
 void
-Service::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+Service::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -75,7 +75,6 @@ Service::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_url.SetString(*url_, allocator);
 		v.AddMember("url", v_url, allocator);
 	}
-
 }
 
 void
@@ -88,7 +87,7 @@ Service::from_json(const std::string &json)
 }
 
 void
-Service::from_json_value(const rapidjson::Value& d)
+Service::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("name") && d["name"].IsString()) {
 		name_ = d["name"].GetString();
@@ -96,24 +95,23 @@ Service::from_json_value(const rapidjson::Value& d)
 	if (d.HasMember("url") && d["url"].IsString()) {
 		url_ = d["url"].GetString();
 	}
-
 }
 
 void
 Service::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! name_)  missing.push_back("name");
-	if (! url_)  missing.push_back("url");
+	std::vector<std::string> missing;
+	if (!name_)
+		missing.push_back("name");
+	if (!url_)
+		missing.push_back("url");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "Service is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "Service is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

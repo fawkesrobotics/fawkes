@@ -23,33 +23,34 @@
 #ifndef _PLUGINS_WEBVIEW_REST_PROCESSOR_H_
 #define _PLUGINS_WEBVIEW_REST_PROCESSOR_H_
 
-#include <vector>
 #include <webview/request.h>
 
+#include <vector>
+
 namespace fawkes {
-	class WebUrlManager;
-	class WebviewRestApiManager;
-  class Logger;
-  class WebReply;
-}
+class WebUrlManager;
+class WebviewRestApiManager;
+class Logger;
+class WebReply;
+} // namespace fawkes
 
 class WebviewRESTRequestProcessor
 {
- public:
-  WebviewRESTRequestProcessor(fawkes::WebUrlManager *url_manager,
-                              fawkes::WebviewRestApiManager *api_mgr,
-                              fawkes::Logger *logger);
-  ~WebviewRESTRequestProcessor();
+public:
+	WebviewRESTRequestProcessor(fawkes::WebUrlManager *        url_manager,
+	                            fawkes::WebviewRestApiManager *api_mgr,
+	                            fawkes::Logger *               logger);
+	~WebviewRESTRequestProcessor();
 
- private:
-  fawkes::WebReply * process_request(const fawkes::WebRequest *request);
+private:
+	fawkes::WebReply *process_request(const fawkes::WebRequest *request);
 
- private:
-  fawkes::WebUrlManager         *url_mgr_;
-  fawkes::WebviewRestApiManager *api_mgr_;
-  fawkes::Logger *logger_;
+private:
+	fawkes::WebUrlManager *        url_mgr_;
+	fawkes::WebviewRestApiManager *api_mgr_;
+	fawkes::Logger *               logger_;
 
-  std::vector<fawkes::WebRequest::Method> methods_;
+	std::vector<fawkes::WebRequest::Method> methods_;
 };
 
 #endif

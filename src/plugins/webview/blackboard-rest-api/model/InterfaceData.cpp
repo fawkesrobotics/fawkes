@@ -14,9 +14,9 @@
 #include "InterfaceData.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ InterfaceData::InterfaceData(const std::string &json)
 	from_json(json);
 }
 
-InterfaceData::InterfaceData(const rapidjson::Value& v)
+InterfaceData::InterfaceData(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ InterfaceData::to_json(bool pretty) const
 }
 
 void
-InterfaceData::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+InterfaceData::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -92,7 +92,7 @@ InterfaceData::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	}
 	rapidjson::Value v_readers(rapidjson::kArrayType);
 	v_readers.Reserve(readers_.size(), allocator);
-	for (const auto & e : readers_) {
+	for (const auto &e : readers_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_readers.PushBack(v, allocator);
@@ -106,7 +106,6 @@ InterfaceData::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_timestamp.SetString(*timestamp_, allocator);
 		v.AddMember("timestamp", v_timestamp, allocator);
 	}
-
 }
 
 void
@@ -119,7 +118,7 @@ InterfaceData::from_json(const std::string &json)
 }
 
 void
-InterfaceData::from_json_value(const rapidjson::Value& d)
+InterfaceData::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -137,44 +136,46 @@ InterfaceData::from_json_value(const rapidjson::Value& d)
 		writer_ = d["writer"].GetString();
 	}
 	if (d.HasMember("readers") && d["readers"].IsArray()) {
-		const rapidjson::Value& a = d["readers"];
-		readers_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["readers"];
+		readers_                  = std::vector<std::string>{};
+		;
 		readers_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			readers_.push_back(v.GetString());
 		}
 	}
 	if (d.HasMember("data") && d["data"].IsObject()) {
-		std::shared_ptr<rapidjson::Document> d_data =
-		  std::make_shared<rapidjson::Document>();
+		std::shared_ptr<rapidjson::Document> d_data = std::make_shared<rapidjson::Document>();
 		d_data->CopyFrom(d["data"], d_data->GetAllocator());
 	}
 	if (d.HasMember("timestamp") && d["timestamp"].IsString()) {
 		timestamp_ = d["timestamp"].GetString();
 	}
-
 }
 
 void
 InterfaceData::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! id_)  missing.push_back("id");
-	if (! type_)  missing.push_back("type");
-	if (! data_)  missing.push_back("data");
-	if (! timestamp_)  missing.push_back("timestamp");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!id_)
+		missing.push_back("id");
+	if (!type_)
+		missing.push_back("type");
+	if (!data_)
+		missing.push_back("data");
+	if (!timestamp_)
+		missing.push_back("timestamp");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "InterfaceData is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "InterfaceData is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

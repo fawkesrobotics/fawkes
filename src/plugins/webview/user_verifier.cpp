@@ -22,20 +22,20 @@
 
 #include "user_verifier.h"
 
-#include <core/exception.h>
 #include <config/config.h>
+#include <core/exception.h>
 #include <logging/logger.h>
 
 #include <string>
 #ifdef HAVE_CRYPT
-#  ifdef __USE_GNU
-#    include <crypt.h>
-#  else
-#    include <unistd.h>
-#  endif
+#	ifdef __USE_GNU
+#		include <crypt.h>
+#	else
+#		include <unistd.h>
+#	endif
 #endif
 #ifdef HAVE_APR_UTIL
-#  include <apr_md5.h>
+#	include <apr_md5.h>
 #endif
 using namespace fawkes;
 
@@ -49,60 +49,56 @@ using namespace fawkes;
  * @param config configuration to read users from
  * @param logger logger for log output
  */
-WebviewUserVerifier::WebviewUserVerifier(Configuration *config, Logger *logger)
-  : config(config)
+WebviewUserVerifier::WebviewUserVerifier(Configuration *config, Logger *logger) : config(config)
 {
 }
-
 
 /** Destructor. */
 WebviewUserVerifier::~WebviewUserVerifier()
 {
 }
 
-
 bool
 WebviewUserVerifier::verify_user(const char *user, const char *password) throw()
 {
-  try {
-    std::string userpath = std::string("/webview/users/") + user;
-    std::string confpass = config->get_string(userpath.c_str());
+	try {
+		std::string userpath = std::string("/webview/users/") + user;
+		std::string confpass = config->get_string(userpath.c_str());
 
-    if (confpass.compare(0, 11, "!cleartext!") == 0) {
-      return (confpass.substr(11) == password);
-    }
+		if (confpass.compare(0, 11, "!cleartext!") == 0) {
+			return (confpass.substr(11) == password);
+		}
 
 #ifdef HAVE_APR_UTIL
-    return
-      (apr_password_validate(password, confpass.c_str()) == APR_SUCCESS);
+		return (apr_password_validate(password, confpass.c_str()) == APR_SUCCESS);
 
 #elif defined(HAVE_CRYPT)
-#  ifdef __USE_GNU
-    struct crypt_data cd;
-    cd.initialized = 0;
+#	ifdef __USE_GNU
+		struct crypt_data cd;
+		cd.initialized = 0;
 
-    char *crypted = crypt_r(password, confpass.c_str(), &cd);
-#  else
-    char *crypted = crypt(password, confpass.c_str());
-#  endif
+		char *crypted = crypt_r(password, confpass.c_str(), &cd);
+#	else
+		char *crypted = crypt(password, confpass.c_str());
+#	endif
 
-    if (confpass == crypted) {
-      return true;
-    } else {
-      //logger->log_warn("WebviewUserVerifier", "Access denied for user %s, "
-      //		       "invalid clear hashed password", user);
-      return false;
-    }
+		if (confpass == crypted) {
+			return true;
+		} else {
+			//logger->log_warn("WebviewUserVerifier", "Access denied for user %s, "
+			//		       "invalid clear hashed password", user);
+			return false;
+		}
 #else
-    return (confpass == password);
+		return (confpass == password);
 #endif
 
-  } catch (Exception &e) {
-    //logger->log_warn("WebviewUserVerifier", "Access denied for unknown user %s",
-    //		     user);
-    return false;
-  }
+	} catch (Exception &e) {
+		//logger->log_warn("WebviewUserVerifier", "Access denied for unknown user %s",
+		//		     user);
+		return false;
+	}
 
-  // should not actually happen, just in case...
-  return false;
+	// should not actually happen, just in case...
+	return false;
 }

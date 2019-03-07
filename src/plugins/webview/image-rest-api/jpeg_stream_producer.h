@@ -22,18 +22,17 @@
 #ifndef _PLUGINS_WEBVIEW_JPEG_STREAM_PRODUCER_H_
 #define _PLUGINS_WEBVIEW_JPEG_STREAM_PRODUCER_H_
 
+#include <aspect/clock.h>
 #include <core/threading/thread.h>
 #include <core/utils/lock_list.h>
-#include <aspect/clock.h>
 
-#include <string>
 #include <memory>
+#include <string>
 
 namespace firevision {
-  class SharedMemoryCamera;
-  class JpegImageCompressor;
-}
-
+class SharedMemoryCamera;
+class JpegImageCompressor;
+} // namespace firevision
 
 namespace fawkes {
 
@@ -41,66 +40,74 @@ class TimeWait;
 class Mutex;
 class WaitCondition;
 
-class WebviewJpegStreamProducer
-: public fawkes::Thread,
-  public fawkes::ClockAspect
+class WebviewJpegStreamProducer : public fawkes::Thread, public fawkes::ClockAspect
 {
- public:
-  class Buffer {
-   public:
-    Buffer(unsigned char *data, size_t size);
-    ~Buffer();
+public:
+	class Buffer
+	{
+	public:
+		Buffer(unsigned char *data, size_t size);
+		~Buffer();
 
-    /** Get data buffer.
+		/** Get data buffer.
      * @return data buffer */
-    const unsigned char *  data() const
-    { return data_; }
+		const unsigned char *
+		data() const
+		{
+			return data_;
+		}
 
-    /** Get buffer size.
+		/** Get buffer size.
      * @return b uffer size. */
-    size_t  size() const
-    { return size_; }
+		size_t
+		size() const
+		{
+			return size_;
+		}
 
-  private:
-    unsigned char *data_;
-    size_t         size_;
-  };
+	private:
+		unsigned char *data_;
+		size_t         size_;
+	};
 
-  class Subscriber {
-   public:
-    virtual ~Subscriber();
-    virtual void handle_buffer(std::shared_ptr<Buffer> buffer) = 0;
-  };
+	class Subscriber
+	{
+	public:
+		virtual ~Subscriber();
+		virtual void handle_buffer(std::shared_ptr<Buffer> buffer) = 0;
+	};
 
- public:
-  WebviewJpegStreamProducer(const std::string & image_id,
-			    unsigned int quality, float fps, bool vflip);
-  virtual ~WebviewJpegStreamProducer();
+public:
+	WebviewJpegStreamProducer(const std::string &image_id,
+	                          unsigned int       quality,
+	                          float              fps,
+	                          bool               vflip);
+	virtual ~WebviewJpegStreamProducer();
 
-  void add_subscriber(Subscriber *subscriber);
-  void remove_subscriber(Subscriber *subscriber);
-  std::shared_ptr<Buffer> wait_for_next_frame();
+	void                    add_subscriber(Subscriber *subscriber);
+	void                    remove_subscriber(Subscriber *subscriber);
+	std::shared_ptr<Buffer> wait_for_next_frame();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- private:
-  std::string    image_id_;
-  unsigned int   quality_;
-  float          fps_;
-  bool           vflip_;
-  unsigned char *in_buffer_;
+private:
+	std::string    image_id_;
+	unsigned int   quality_;
+	float          fps_;
+	bool           vflip_;
+	unsigned char *in_buffer_;
 
-  TimeWait *timewait_;
+	TimeWait *timewait_;
 
-  firevision::SharedMemoryCamera  *cam_;
-  fawkes::LockList<Subscriber *>   subs_;
-  firevision::JpegImageCompressor *jpeg_;
+	firevision::SharedMemoryCamera * cam_;
+	fawkes::LockList<Subscriber *>   subs_;
+	firevision::JpegImageCompressor *jpeg_;
 
-  std::shared_ptr<Buffer>         last_buf_;
-  fawkes::Mutex         *last_buf_mutex_;
-  fawkes::WaitCondition *last_buf_waitcond_;
+	std::shared_ptr<Buffer> last_buf_;
+	fawkes::Mutex *         last_buf_mutex_;
+	fawkes::WaitCondition * last_buf_waitcond_;
 };
 
 } // end namespace fawkes

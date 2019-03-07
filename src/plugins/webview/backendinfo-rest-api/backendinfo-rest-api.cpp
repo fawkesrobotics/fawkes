@@ -34,7 +34,7 @@ using namespace fawkes;
 
 /** Constructor. */
 BackendInfoRestApi::BackendInfoRestApi()
-	: Thread("BackendInfoRestApi", Thread::OPMODE_WAITFORWAKEUP)
+: Thread("BackendInfoRestApi", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
 
@@ -47,14 +47,13 @@ void
 BackendInfoRestApi::init()
 {
 	std::set<std::string> configs;
-	std::string prefix = "/webview/backends/";
+	std::string           prefix = "/webview/backends/";
 
 	{
-		std::unique_ptr<Configuration::ValueIterator>
-			i{config->search(prefix.c_str())};
+		std::unique_ptr<Configuration::ValueIterator> i{config->search(prefix.c_str())};
 		while (i->next()) {
 			std::string cfg_name = std::string(i->path()).substr(prefix.length());
-			cfg_name = cfg_name.substr(0, cfg_name.find("/"));
+			cfg_name             = cfg_name.substr(0, cfg_name.find("/"));
 			configs.insert(cfg_name);
 		}
 	}
@@ -66,12 +65,11 @@ BackendInfoRestApi::init()
 		b.set_name(config->get_string(prefix + c + "/name"));
 		b.set_url(config->get_string(prefix + c + "/url"));
 
-		std::string svc_prefix = prefix + c + "/services/";
-		std::unique_ptr<Configuration::ValueIterator>
-			i{config->search(svc_prefix.c_str())};
+		std::string                                   svc_prefix = prefix + c + "/services/";
+		std::unique_ptr<Configuration::ValueIterator> i{config->search(svc_prefix.c_str())};
 		while (i->next()) {
 			std::string svc_name = std::string(i->path()).substr(svc_prefix.length());
-			Service s;
+			Service     s;
 			s.set_name(svc_name);
 			s.set_url(i->get_string());
 			b.addto_services(std::move(s));
@@ -80,9 +78,8 @@ BackendInfoRestApi::init()
 	}
 
 	rest_api_ = new WebviewRestApi("backends", logger);
-	rest_api_->add_handler<WebviewRestArray<Backend>>
-		(WebRequest::METHOD_GET, "/?",
-		 std::bind(&BackendInfoRestApi::cb_list_backends, this));
+	rest_api_->add_handler<WebviewRestArray<Backend>>(
+	  WebRequest::METHOD_GET, "/?", std::bind(&BackendInfoRestApi::cb_list_backends, this));
 	webview_rest_api_manager->register_api(rest_api_);
 }
 
@@ -93,12 +90,10 @@ BackendInfoRestApi::finalize()
 	delete rest_api_;
 }
 
-
 void
 BackendInfoRestApi::loop()
 {
 }
-
 
 WebviewRestArray<Backend>
 BackendInfoRestApi::cb_list_backends()

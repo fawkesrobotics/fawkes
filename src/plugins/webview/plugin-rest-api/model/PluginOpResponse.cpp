@@ -14,9 +14,9 @@
 #include "PluginOpResponse.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ PluginOpResponse::PluginOpResponse(const std::string &json)
 	from_json(json);
 }
 
-PluginOpResponse::PluginOpResponse(const rapidjson::Value& v)
+PluginOpResponse::PluginOpResponse(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ PluginOpResponse::to_json(bool pretty) const
 }
 
 void
-PluginOpResponse::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+PluginOpResponse::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -90,7 +90,6 @@ PluginOpResponse::to_json_value(rapidjson::Document& d, rapidjson::Value& v) con
 		v_message.SetString(*message_, allocator);
 		v.AddMember("message", v_message, allocator);
 	}
-
 }
 
 void
@@ -103,7 +102,7 @@ PluginOpResponse::from_json(const std::string &json)
 }
 
 void
-PluginOpResponse::from_json_value(const rapidjson::Value& d)
+PluginOpResponse::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -120,26 +119,27 @@ PluginOpResponse::from_json_value(const rapidjson::Value& d)
 	if (d.HasMember("message") && d["message"].IsString()) {
 		message_ = d["message"].GetString();
 	}
-
 }
 
 void
 PluginOpResponse::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! name_)  missing.push_back("name");
-	if (! state_)  missing.push_back("state");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!name_)
+		missing.push_back("name");
+	if (!state_)
+		missing.push_back("state");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "PluginOpResponse is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "PluginOpResponse is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

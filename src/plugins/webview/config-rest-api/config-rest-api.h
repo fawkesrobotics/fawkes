@@ -21,26 +21,24 @@
 
 #pragma once
 
-#include <core/threading/thread.h>
+#include "model/ConfigTree.h"
+
+#include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/webview.h>
-#include <aspect/configurable.h>
-
+#include <core/threading/thread.h>
 #include <webview/rest_api.h>
 #include <webview/rest_array.h>
-
-#include "model/ConfigTree.h"
 
 #include <map>
 #include <string>
 
-class ConfigurationRestApi
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-	public fawkes::ConfigurableAspect,
-	public fawkes::WebviewAspect
+class ConfigurationRestApi : public fawkes::Thread,
+                             public fawkes::LoggingAspect,
+                             public fawkes::ConfigurableAspect,
+                             public fawkes::WebviewAspect
 {
- public:
+public:
 	ConfigurationRestApi();
 	~ConfigurationRestApi();
 
@@ -48,9 +46,9 @@ class ConfigurationRestApi
 	virtual void loop();
 	virtual void finalize();
 
- private:
+private:
 	ConfigTree cb_get_config(fawkes::WebviewRestParams &params);
 
- private:
-	fawkes::WebviewRestApi        *rest_api_;
+private:
+	fawkes::WebviewRestApi *rest_api_;
 };

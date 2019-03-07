@@ -16,19 +16,17 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/fwd.h>
 
-#include <string>
 #include <cstdint>
-#include <vector>
 #include <memory>
 #include <optional>
-
-
+#include <string>
+#include <vector>
 
 /** PluginOpRequest representation for JSON transfer. */
 class PluginOpRequest
 
 {
- public:
+public:
 	/** Constructor. */
 	PluginOpRequest();
 	/** Constructor from JSON.
@@ -38,7 +36,7 @@ class PluginOpRequest
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	PluginOpRequest(const rapidjson::Value& v);
+	PluginOpRequest(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~PluginOpRequest();
@@ -46,9 +44,10 @@ class PluginOpRequest
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -60,19 +59,19 @@ class PluginOpRequest
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -85,12 +84,12 @@ class PluginOpRequest
 	virtual void validate(bool subcall = false) const;
 
 	// Schema: PluginOpRequest
- public:
-  /** Get kind value.
+public:
+	/** Get kind value.
    * @return kind value
    */
 	std::optional<std::string>
- kind() const
+	kind() const
 	{
 		return kind_;
 	}
@@ -98,15 +97,16 @@ class PluginOpRequest
 	/** Set kind value.
 	 * @param kind new value
 	 */
-	void set_kind(const std::string& kind)
+	void
+	set_kind(const std::string &kind)
 	{
 		kind_ = kind;
 	}
-  /** Get apiVersion value.
+	/** Get apiVersion value.
    * @return apiVersion value
    */
 	std::optional<std::string>
- apiVersion() const
+	apiVersion() const
 	{
 		return apiVersion_;
 	}
@@ -114,15 +114,16 @@ class PluginOpRequest
 	/** Set apiVersion value.
 	 * @param apiVersion new value
 	 */
-	void set_apiVersion(const std::string& apiVersion)
+	void
+	set_apiVersion(const std::string &apiVersion)
 	{
 		apiVersion_ = apiVersion;
 	}
-  /** Get desired_state value.
+	/** Get desired_state value.
    * @return desired_state value
    */
 	std::optional<std::string>
- desired_state() const
+	desired_state() const
 	{
 		return desired_state_;
 	}
@@ -130,16 +131,14 @@ class PluginOpRequest
 	/** Set desired_state value.
 	 * @param desired_state new value
 	 */
-	void set_desired_state(const std::string& desired_state)
+	void
+	set_desired_state(const std::string &desired_state)
 	{
 		desired_state_ = desired_state;
 	}
- private:
-	std::optional<std::string>
- kind_;
-	std::optional<std::string>
- apiVersion_;
-	std::optional<std::string>
- desired_state_;
 
+private:
+	std::optional<std::string> kind_;
+	std::optional<std::string> apiVersion_;
+	std::optional<std::string> desired_state_;
 };

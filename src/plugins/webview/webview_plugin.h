@@ -27,8 +27,8 @@
 
 class WebviewPlugin : public fawkes::Plugin
 {
- public:
-  explicit WebviewPlugin(fawkes::Configuration *config);
+public:
+	explicit WebviewPlugin(fawkes::Configuration *config);
 };
 
 #endif

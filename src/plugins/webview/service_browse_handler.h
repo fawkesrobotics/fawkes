@@ -23,52 +23,48 @@
 #ifndef _PLUGINS_WEBVIEW_SERVICE_BROWSER_H_
 #define _PLUGINS_WEBVIEW_SERVICE_BROWSER_H_
 
-#include <netcomm/service_discovery/service.h>
 #include <netcomm/service_discovery/browse_handler.h>
+#include <netcomm/service_discovery/service.h>
 
 #include <map>
 #include <string>
 
 namespace fawkes {
-  class Logger;
+class Logger;
 }
 
 class WebviewServiceBrowseHandler : public fawkes::ServiceBrowseHandler
 {
- public:
-  WebviewServiceBrowseHandler(fawkes::Logger *logger, fawkes::NetworkService *webview_service);
-  ~WebviewServiceBrowseHandler();
+public:
+	WebviewServiceBrowseHandler(fawkes::Logger *logger, fawkes::NetworkService *webview_service);
+	~WebviewServiceBrowseHandler();
 
-  virtual void all_for_now();
-  virtual void cache_exhausted();
-  virtual void browse_failed(const char *name,
-			     const char *type,
-			     const char *domain);
-  virtual void service_added(const char *name,
-			     const char *type,
-			     const char *domain,
-			     const char *host_name,
-			     const char *interface,
-			     const struct sockaddr *addr,
-			     const socklen_t addr_size,
-			     uint16_t port,
-			     std::list<std::string> &txt,
-			     int flags);
-  virtual void service_removed(const char *name,
-			       const char *type,
-			       const char *domain);
+	virtual void all_for_now();
+	virtual void cache_exhausted();
+	virtual void browse_failed(const char *name, const char *type, const char *domain);
+	virtual void service_added(const char *            name,
+	                           const char *            type,
+	                           const char *            domain,
+	                           const char *            host_name,
+	                           const char *            interface,
+	                           const struct sockaddr * addr,
+	                           const socklen_t         addr_size,
+	                           uint16_t                port,
+	                           std::list<std::string> &txt,
+	                           int                     flags);
+	virtual void service_removed(const char *name, const char *type, const char *domain);
 
-  /** A map of services.
+	/** A map of services.
    * Maps service names to NetworkService instances describing the service
    * in more detail. */
-  typedef std::map<std::string, fawkes::NetworkService *> ServiceList;
+	typedef std::map<std::string, fawkes::NetworkService *> ServiceList;
 
-  ServiceList &  service_list();
+	ServiceList &service_list();
 
- private:
-  fawkes::Logger         *logger_;
-  fawkes::NetworkService *webview_service_;
-  ServiceList             service_list_;
+private:
+	fawkes::Logger *        logger_;
+	fawkes::NetworkService *webview_service_;
+	ServiceList             service_list_;
 };
 
 #endif

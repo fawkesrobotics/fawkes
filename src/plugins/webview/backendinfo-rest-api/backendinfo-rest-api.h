@@ -21,23 +21,21 @@
 
 #pragma once
 
-#include <core/threading/thread.h>
+#include "model/Backend.h"
+
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/webview.h>
-
+#include <core/threading/thread.h>
 #include <webview/rest_api.h>
 #include <webview/rest_array.h>
 
-#include "model/Backend.h"
-
-class BackendInfoRestApi
-: public fawkes::Thread,
-	public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect,
-	public fawkes::WebviewAspect
+class BackendInfoRestApi : public fawkes::Thread,
+                           public fawkes::ConfigurableAspect,
+                           public fawkes::LoggingAspect,
+                           public fawkes::WebviewAspect
 {
- public:
+public:
 	BackendInfoRestApi();
 	~BackendInfoRestApi();
 
@@ -45,10 +43,10 @@ class BackendInfoRestApi
 	virtual void loop();
 	virtual void finalize();
 
- private:
+private:
 	WebviewRestArray<Backend> cb_list_backends();
 
- private:
-	fawkes::WebviewRestApi        *rest_api_;
-	WebviewRestArray<Backend>      backends_;
+private:
+	fawkes::WebviewRestApi *  rest_api_;
+	WebviewRestArray<Backend> backends_;
 };

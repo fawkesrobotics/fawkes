@@ -14,9 +14,9 @@
 #include "Plugin.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ Plugin::Plugin(const std::string &json)
 	from_json(json);
 }
 
-Plugin::Plugin(const rapidjson::Value& v)
+Plugin::Plugin(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ Plugin::to_json(bool pretty) const
 }
 
 void
-Plugin::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+Plugin::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -92,7 +92,7 @@ Plugin::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	}
 	rapidjson::Value v_meta_children(rapidjson::kArrayType);
 	v_meta_children.Reserve(meta_children_.size(), allocator);
-	for (const auto & e : meta_children_) {
+	for (const auto &e : meta_children_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_meta_children.PushBack(v, allocator);
@@ -103,7 +103,6 @@ Plugin::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_is_loaded.SetBool(*is_loaded_);
 		v.AddMember("is_loaded", v_is_loaded, allocator);
 	}
-
 }
 
 void
@@ -116,7 +115,7 @@ Plugin::from_json(const std::string &json)
 }
 
 void
-Plugin::from_json_value(const rapidjson::Value& d)
+Plugin::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -134,39 +133,42 @@ Plugin::from_json_value(const rapidjson::Value& d)
 		is_meta_ = d["is_meta"].GetBool();
 	}
 	if (d.HasMember("meta_children") && d["meta_children"].IsArray()) {
-		const rapidjson::Value& a = d["meta_children"];
-		meta_children_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["meta_children"];
+		meta_children_            = std::vector<std::string>{};
+		;
 		meta_children_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			meta_children_.push_back(v.GetString());
 		}
 	}
 	if (d.HasMember("is_loaded") && d["is_loaded"].IsBool()) {
 		is_loaded_ = d["is_loaded"].GetBool();
 	}
-
 }
 
 void
 Plugin::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! name_)  missing.push_back("name");
-	if (! description_)  missing.push_back("description");
-	if (! is_meta_)  missing.push_back("is_meta");
-	if (! is_loaded_)  missing.push_back("is_loaded");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!name_)
+		missing.push_back("name");
+	if (!description_)
+		missing.push_back("description");
+	if (!is_meta_)
+		missing.push_back("is_meta");
+	if (!is_loaded_)
+		missing.push_back("is_loaded");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "Plugin is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "Plugin is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {
