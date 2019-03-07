@@ -25,43 +25,41 @@
 #define _UTILS_LOGGING_COMPONENT_H_
 
 #include <core/exception.h>
+
 #include <string>
 
 namespace fawkes {
-
 
 class Logger;
 
 class ComponentLogger
 {
- public:
-  ComponentLogger(Logger *logger, const char *component);
-  ~ComponentLogger();
+public:
+	ComponentLogger(Logger *logger, const char *component);
+	~ComponentLogger();
 
-  void set_component(const char *format, ...);
-  
-  void log_debug(const char *format, ...); 
-  void log_info(const char *format, ...);
-  void log_warn(const char *format, ...);
-  void log_error(const char *format, ...);
+	void set_component(const char *format, ...);
 
-  void log_debug(std::string message); 
-  void log_info(std::string message);
-  void log_warn(std::string message);
-  void log_error(std::string message);
+	void log_debug(const char *format, ...);
+	void log_info(const char *format, ...);
+	void log_warn(const char *format, ...);
+	void log_error(const char *format, ...);
 
-  void log_debug(Exception &e);
-  void log_info(Exception &e);
-  void log_warn(Exception &e);
-  void log_error(Exception &e);
+	void log_debug(std::string message);
+	void log_info(std::string message);
+	void log_warn(std::string message);
+	void log_error(std::string message);
 
- private:
-  Logger *logger_;
-  char *component_;
+	void log_debug(Exception &e);
+	void log_info(Exception &e);
+	void log_warn(Exception &e);
+	void log_error(Exception &e);
+
+private:
+	Logger *logger_;
+	char *  component_;
 };
-
 
 } // end namespace fawkes
 
 #endif
-

@@ -25,61 +25,57 @@
 #define _UTILS_LOGGING_SYSLOG_H_
 
 #include <logging/logger.h>
+
 #include <ctime>
 
 namespace fawkes {
-
 
 class Mutex;
 
 class SyslogLogger : public Logger
 {
- public:
-  SyslogLogger(LogLevel log_level = LL_DEBUG);
-  SyslogLogger(const char *ident, LogLevel log_level = LL_DEBUG);
-  virtual ~SyslogLogger();
+public:
+	SyslogLogger(LogLevel log_level = LL_DEBUG);
+	SyslogLogger(const char *ident, LogLevel log_level = LL_DEBUG);
+	virtual ~SyslogLogger();
 
-  virtual void log_debug(const char *component, const char *format, ...);
-  virtual void log_info(const char *component, const char *format, ...);
-  virtual void log_warn(const char *component, const char *format, ...);
-  virtual void log_error(const char *component, const char *format, ...);
+	virtual void log_debug(const char *component, const char *format, ...);
+	virtual void log_info(const char *component, const char *format, ...);
+	virtual void log_warn(const char *component, const char *format, ...);
+	virtual void log_error(const char *component, const char *format, ...);
 
-  virtual void vlog_debug(const char *component, const char *format, va_list va);
-  virtual void vlog_info(const char *component, const char *format, va_list va);
-  virtual void vlog_warn(const char *component, const char *format, va_list va);
-  virtual void vlog_error(const char *component, const char *format, va_list va);
+	virtual void vlog_debug(const char *component, const char *format, va_list va);
+	virtual void vlog_info(const char *component, const char *format, va_list va);
+	virtual void vlog_warn(const char *component, const char *format, va_list va);
+	virtual void vlog_error(const char *component, const char *format, va_list va);
 
-  virtual void log_debug(const char *component, Exception &e);
-  virtual void log_info(const char *component, Exception &e);
-  virtual void log_warn(const char *component, Exception &e);
-  virtual void log_error(const char *component, Exception &e);
+	virtual void log_debug(const char *component, Exception &e);
+	virtual void log_info(const char *component, Exception &e);
+	virtual void log_warn(const char *component, Exception &e);
+	virtual void log_error(const char *component, Exception &e);
 
-  virtual void tlog_debug(struct timeval *t, const char *component, const char *format, ...);
-  virtual void tlog_info(struct timeval *t, const char *component, const char *format, ...);
-  virtual void tlog_warn(struct timeval *t, const char *component, const char *format, ...);
-  virtual void tlog_error(struct timeval *t, const char *component, const char *format, ...);
+	virtual void tlog_debug(struct timeval *t, const char *component, const char *format, ...);
+	virtual void tlog_info(struct timeval *t, const char *component, const char *format, ...);
+	virtual void tlog_warn(struct timeval *t, const char *component, const char *format, ...);
+	virtual void tlog_error(struct timeval *t, const char *component, const char *format, ...);
 
-  virtual void tlog_debug(struct timeval *t, const char *component, Exception &e);
-  virtual void tlog_info(struct timeval *t, const char *component, Exception &e);
-  virtual void tlog_warn(struct timeval *t, const char *component, Exception &e);
-  virtual void tlog_error(struct timeval *t, const char *component, Exception &e);
+	virtual void tlog_debug(struct timeval *t, const char *component, Exception &e);
+	virtual void tlog_info(struct timeval *t, const char *component, Exception &e);
+	virtual void tlog_warn(struct timeval *t, const char *component, Exception &e);
+	virtual void tlog_error(struct timeval *t, const char *component, Exception &e);
 
-  virtual void vtlog_debug(struct timeval *t, const char *component,
-			   const char *format, va_list va);
-  virtual void vtlog_info(struct timeval *t, const char *component,
-			  const char *format, va_list va);
-  virtual void vtlog_warn(struct timeval *t, const char *component,
-			  const char *format, va_list va);
-  virtual void vtlog_error(struct timeval *t, const char *component,
-			   const char *format, va_list va);
+	virtual void
+	             vtlog_debug(struct timeval *t, const char *component, const char *format, va_list va);
+	virtual void vtlog_info(struct timeval *t, const char *component, const char *format, va_list va);
+	virtual void vtlog_warn(struct timeval *t, const char *component, const char *format, va_list va);
+	virtual void
+	vtlog_error(struct timeval *t, const char *component, const char *format, va_list va);
 
-
- private:
-  struct ::tm  *now_s;
-  Mutex        *mutex;
-  char *ident_;
+private:
+	struct ::tm *now_s;
+	Mutex *      mutex;
+	char *       ident_;
 };
-
 
 } // end namespace fawkes
 

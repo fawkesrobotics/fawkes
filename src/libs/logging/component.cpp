@@ -24,9 +24,9 @@
 #include <logging/component.h>
 #include <logging/logger.h>
 
-#include <cstring>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 namespace fawkes {
 
@@ -45,17 +45,15 @@ namespace fawkes {
  */
 ComponentLogger::ComponentLogger(Logger *logger, const char *component)
 {
-  logger_ = logger;
-  component_ = strdup(component);
+	logger_    = logger;
+	component_ = strdup(component);
 }
-
 
 /** Destructor. */
 ComponentLogger::~ComponentLogger()
 {
-  free(component_);
+	free(component_);
 }
-
 
 /** Set a new component name.
  * @param format format string for the new command string, cf. sprintf
@@ -64,17 +62,17 @@ ComponentLogger::~ComponentLogger()
 void
 ComponentLogger::set_component(const char *format, ...)
 {
-  va_list arg;
-  va_start(arg, format);
-  char *new_component;
-  if (vasprintf(&new_component, format, arg) > 0) {
-	  char *old_component = component_;
-	  component_ = new_component;
-	  free(old_component);
-  }
-  va_end(arg);
+	va_list arg;
+	va_start(arg, format);
+	char *new_component;
+	if (vasprintf(&new_component, format, arg) > 0) {
+		char *old_component = component_;
+		component_          = new_component;
+		free(old_component);
+	}
+	va_end(arg);
 }
-	
+
 /** Log debug message.
  * @param format format of the message, see man page of sprintf for available
  * tokens.
@@ -82,12 +80,11 @@ ComponentLogger::set_component(const char *format, ...)
 void
 ComponentLogger::log_debug(const char *format, ...)
 {
-  va_list va;
-  va_start(va, format);
-  logger_->vlog_debug(component_, format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	logger_->vlog_debug(component_, format, va);
+	va_end(va);
 }
-
 
 /** Log info message.
  * @param format format of the message, see man page of sprintf for available
@@ -96,12 +93,11 @@ ComponentLogger::log_debug(const char *format, ...)
 void
 ComponentLogger::log_info(const char *format, ...)
 {
-  va_list va;
-  va_start(va, format);
-  logger_->vlog_info(component_, format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	logger_->vlog_info(component_, format, va);
+	va_end(va);
 }
-
 
 /** Log warning message.
  * @param format format of the message, see man page of sprintf for available
@@ -110,12 +106,11 @@ ComponentLogger::log_info(const char *format, ...)
 void
 ComponentLogger::log_warn(const char *format, ...)
 {
-  va_list va;
-  va_start(va, format);
-  logger_->vlog_warn(component_, format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	logger_->vlog_warn(component_, format, va);
+	va_end(va);
 }
-
 
 /** Log error message.
  * @param format format of the message, see man page of sprintf for available
@@ -124,12 +119,11 @@ ComponentLogger::log_warn(const char *format, ...)
 void
 ComponentLogger::log_error(const char *format, ...)
 {
-  va_list va;
-  va_start(va, format);
-  logger_->vlog_error(component_, format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	logger_->vlog_error(component_, format, va);
+	va_end(va);
 }
-
 
 /** Log debug message.
  * @param message message to log
@@ -137,9 +131,8 @@ ComponentLogger::log_error(const char *format, ...)
 void
 ComponentLogger::log_debug(std::string message)
 {
-  logger_->log_debug(component_, "%s", message.c_str());
+	logger_->log_debug(component_, "%s", message.c_str());
 }
-
 
 /** Log info message.
  * @param message message to log
@@ -147,9 +140,8 @@ ComponentLogger::log_debug(std::string message)
 void
 ComponentLogger::log_info(std::string message)
 {
-  logger_->log_info(component_, "%s", message.c_str());
+	logger_->log_info(component_, "%s", message.c_str());
 }
-
 
 /** Log warning message.
  * @param message message to log
@@ -157,9 +149,8 @@ ComponentLogger::log_info(std::string message)
 void
 ComponentLogger::log_warn(std::string message)
 {
-  logger_->log_warn(component_, "%s", message.c_str());
+	logger_->log_warn(component_, "%s", message.c_str());
 }
-
 
 /** Log error message.
  * @param message message to log
@@ -167,9 +158,8 @@ ComponentLogger::log_warn(std::string message)
 void
 ComponentLogger::log_error(std::string message)
 {
-  logger_->log_error(component_, "%s", message.c_str());
+	logger_->log_error(component_, "%s", message.c_str());
 }
-
 
 /** Log exception at debug log level.
  * @param e exception to log, exception messages will be logged
@@ -177,9 +167,8 @@ ComponentLogger::log_error(std::string message)
 void
 ComponentLogger::log_debug(Exception &e)
 {
-  logger_->log_debug(component_, e);
+	logger_->log_debug(component_, e);
 }
-
 
 /** Log exception at info log level.
  * @param e exception to log, exception messages will be logged
@@ -187,9 +176,8 @@ ComponentLogger::log_debug(Exception &e)
 void
 ComponentLogger::log_info(Exception &e)
 {
-  logger_->log_info(component_, e);
+	logger_->log_info(component_, e);
 }
-
 
 /** Log exception at warn log level.
  * @param e exception to log, exception messages will be logged
@@ -197,9 +185,8 @@ ComponentLogger::log_info(Exception &e)
 void
 ComponentLogger::log_warn(Exception &e)
 {
-  logger_->log_warn(component_, e);
+	logger_->log_warn(component_, e);
 }
-
 
 /** Log exception at error log level.
  * @param e exception to log, exception messages will be logged
@@ -207,8 +194,7 @@ ComponentLogger::log_warn(Exception &e)
 void
 ComponentLogger::log_error(Exception &e)
 {
-  logger_->log_debug(component_, e);
+	logger_->log_debug(component_, e);
 }
-
 
 } // end namespace fawkes

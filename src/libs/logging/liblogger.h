@@ -25,11 +25,11 @@
 #define _UTILS_LOGGING_LIBLOGGER_H_
 
 #include <core/exception.h>
+
 #include <cstdarg>
 #include <cstddef>
 
 namespace fawkes {
-
 
 class MultiLogger;
 class Logger;
@@ -37,35 +37,34 @@ class Mutex;
 
 class LibLogger
 {
- public:
-  static void init(MultiLogger *multi_logger = NULL);
-  static void finalize();
+public:
+	static void init(MultiLogger *multi_logger = NULL);
+	static void finalize();
 
-  static void add_logger(Logger *logger);
-  static void remove_logger(Logger *logger);
+	static void add_logger(Logger *logger);
+	static void remove_logger(Logger *logger);
 
-  static void log_debug(const char *component, const char *format, ...);
-  static void log_info(const char *component, const char *format, ...);
-  static void log_warn(const char *component, const char *format, ...);
-  static void log_error(const char *component, const char *format, ...);
+	static void log_debug(const char *component, const char *format, ...);
+	static void log_info(const char *component, const char *format, ...);
+	static void log_warn(const char *component, const char *format, ...);
+	static void log_error(const char *component, const char *format, ...);
 
-  static void vlog_debug(const char *component, const char *format, va_list va);
-  static void vlog_info(const char *component, const char *format, va_list va);
-  static void vlog_warn(const char *component, const char *format, va_list va);
-  static void vlog_error(const char *component, const char *format, va_list va);
+	static void vlog_debug(const char *component, const char *format, va_list va);
+	static void vlog_info(const char *component, const char *format, va_list va);
+	static void vlog_warn(const char *component, const char *format, va_list va);
+	static void vlog_error(const char *component, const char *format, va_list va);
 
-  static void log_debug(const char *component, Exception &e);
-  static void log_info(const char *component, Exception &e);
-  static void log_warn(const char *component, Exception &e);
-  static void log_error(const char *component, Exception &e);
+	static void log_debug(const char *component, Exception &e);
+	static void log_info(const char *component, Exception &e);
+	static void log_warn(const char *component, Exception &e);
+	static void log_error(const char *component, Exception &e);
 
- private:
-  LibLogger(){};
+private:
+	LibLogger(){};
 
-  static MultiLogger *logger;
-  static Mutex       *mutex;
+	static MultiLogger *logger;
+	static Mutex *      mutex;
 };
-
 
 } // end namespace fawkes
 
