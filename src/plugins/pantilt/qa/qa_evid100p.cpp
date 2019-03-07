@@ -24,6 +24,7 @@
 /// @cond QA
 
 #include "../sony/evid100p.h"
+
 #include <utils/time/tracker.h>
 
 #include <cstdio>
@@ -34,57 +35,63 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  SonyEviD100PVisca ptu("/dev/ttyUSB1", 100, false);
+	SonyEviD100PVisca ptu("/dev/ttyUSB1", 100, false);
 
-  for (int i = 0; i < 10; ++i) {
-    ptu.process();
-    usleep(100000);
-  }
+	for (int i = 0; i < 10; ++i) {
+		ptu.process();
+		usleep(100000);
+	}
 
-  printf("Min pan: %f  max pan: %f   min tilt: %f  max tilt: %f\n",
-	 SonyEviD100PVisca::MIN_PAN_RAD, SonyEviD100PVisca::MAX_PAN_RAD,
-	 SonyEviD100PVisca::MIN_TILT_RAD, SonyEviD100PVisca::MAX_TILT_RAD);
+	printf("Min pan: %f  max pan: %f   min tilt: %f  max tilt: %f\n",
+	       SonyEviD100PVisca::MIN_PAN_RAD,
+	       SonyEviD100PVisca::MAX_PAN_RAD,
+	       SonyEviD100PVisca::MIN_TILT_RAD,
+	       SonyEviD100PVisca::MAX_TILT_RAD);
 
-  float pan = 0, tilt = 0;
-  ptu.get_pan_tilt_rad(pan, tilt);
-  printf("Pan: %f, tilt: %f\n", pan, tilt);
+	float pan = 0, tilt = 0;
+	ptu.get_pan_tilt_rad(pan, tilt);
+	printf("Pan: %f, tilt: %f\n", pan, tilt);
 
-  float panval  = SonyEviD100PVisca::MIN_PAN_RAD;
-  float tiltval = SonyEviD100PVisca::MIN_TILT_RAD;
+	float panval  = SonyEviD100PVisca::MIN_PAN_RAD;
+	float tiltval = SonyEviD100PVisca::MIN_TILT_RAD;
 
-  float pan_smin, pan_smax, tilt_smin, tilt_smax;
-  ptu.get_speed_limits(pan_smin, pan_smax, tilt_smin, tilt_smax);
+	float pan_smin, pan_smax, tilt_smin, tilt_smax;
+	ptu.get_speed_limits(pan_smin, pan_smax, tilt_smin, tilt_smax);
 
-  ptu.set_speed_radsec(pan_smax, tilt_smax);
-  printf("Moving to %f, %f... ", panval, tiltval);
-  ptu.set_pan_tilt_rad(panval, tiltval);
-  while (! ptu.is_nonblocking_finished(SonyEviD100PVisca::NONBLOCKING_PANTILT)) {
-    printf("."); fflush(stdout);
-    usleep(10000);
-    try {
-      ptu.process();
-    } catch (Exception &e) {}
-  }
-  printf("\n");
+	ptu.set_speed_radsec(pan_smax, tilt_smax);
+	printf("Moving to %f, %f... ", panval, tiltval);
+	ptu.set_pan_tilt_rad(panval, tiltval);
+	while (!ptu.is_nonblocking_finished(SonyEviD100PVisca::NONBLOCKING_PANTILT)) {
+		printf(".");
+		fflush(stdout);
+		usleep(10000);
+		try {
+			ptu.process();
+		} catch (Exception &e) {
+		}
+	}
+	printf("\n");
 
-  sleep(1);
+	sleep(1);
 
-  ptu.set_speed_radsec(1.0, 0.8);
+	ptu.set_speed_radsec(1.0, 0.8);
 
-  panval *= -1; tiltval *= -1;
-  printf("Moving to %f, %f... ", panval, tiltval);
-  ptu.set_pan_tilt_rad(panval, tiltval);
-  while (! ptu.is_nonblocking_finished(SonyEviD100PVisca::NONBLOCKING_PANTILT)) {
-    printf("."); fflush(stdout);
-    usleep(10000);
-    try {
-      ptu.process();
-    } catch (Exception &e) {
-      e.print_trace();
-    }
-  }
+	panval *= -1;
+	tiltval *= -1;
+	printf("Moving to %f, %f... ", panval, tiltval);
+	ptu.set_pan_tilt_rad(panval, tiltval);
+	while (!ptu.is_nonblocking_finished(SonyEviD100PVisca::NONBLOCKING_PANTILT)) {
+		printf(".");
+		fflush(stdout);
+		usleep(10000);
+		try {
+			ptu.process();
+		} catch (Exception &e) {
+			e.print_trace();
+		}
+	}
 
-  /*
+	/*
   TimeTracker tt;
   unsigned int ttc_full_pan = tt.add_class("Full pan");
 
@@ -123,7 +130,7 @@ main(int argc, char **argv)
   printf("Pan: %f, tilt: %f\n", pan, tilt);
   */
 
-  return 0;
+	return 0;
 }
 
 /// @endcond

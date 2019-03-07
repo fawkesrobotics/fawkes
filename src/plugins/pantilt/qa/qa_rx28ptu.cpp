@@ -24,6 +24,7 @@
 /// @cond QA
 
 #include "../robotis/rx28.h"
+
 #include <utils/time/tracker.h>
 
 #include <cstdio>
@@ -36,19 +37,19 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  RobotisRX28 rx28("/dev/ttyUSB0");
+	RobotisRX28 rx28("/dev/ttyUSB0");
 
-  RobotisRX28::DeviceList devl = rx28.discover();
+	RobotisRX28::DeviceList devl = rx28.discover();
 
-  if (devl.empty()) {
-    printf("No devices found\n");
-  } else {
-    for (RobotisRX28::DeviceList::iterator i = devl.begin(); i != devl.end(); ++i) {
-      printf("Found servo with ID %d\n", *i);
-    }
-  }
+	if (devl.empty()) {
+		printf("No devices found\n");
+	} else {
+		for (RobotisRX28::DeviceList::iterator i = devl.begin(); i != devl.end(); ++i) {
+			printf("Found servo with ID %d\n", *i);
+		}
+	}
 
-  /*
+	/*
   rx28.set_status_return_level(RobotisRX28::BROADCAST_ID, RobotisRX28::SRL_RESPOND_READ);
   rx28.set_return_delay_time(RobotisRX28::BROADCAST_ID, 0);
   rx28.set_baudrate(RobotisRX28::BROADCAST_ID, 0x22);
@@ -124,8 +125,8 @@ main(int argc, char **argv)
   sleep(2);
   */
 
-  try {
-    /*
+	try {
+		/*
     rx28.goto_position(1, 430);
     rx28.goto_position(2, 512);
     sleep(1);
@@ -143,62 +144,62 @@ main(int argc, char **argv)
 
     */
 
-    //rx28.set_torque_enabled(0xFE, false);
+		//rx28.set_torque_enabled(0xFE, false);
 
-    for (unsigned int i = 0; i < 5; ++i) {
-      try {
-        //rx28.goto_position(TEST_SERVO, 800);
-        //sleep(1);
-        //rx28.goto_position(TEST_SERVO, 400);
-        rx28.read_table_values(TEST_SERVO);
-        //sleep(1);
-      } catch (Exception &e) {
-        rx28.ping(TEST_SERVO);
-        e.print_trace();
-      }
-    }
-    // for (RobotisRX28::DeviceList::iterator i = devl.begin(); i != devl.end(); ++i) {
-    //   unsigned int angle_cw_limit, angle_ccw_limit, down_calib, up_calib;
-    //   unsigned char voltage_low, voltage_high;
-    //   unsigned char compl_cw_margin, compl_cw_slope, compl_ccw_margin, compl_ccw_slope;
-    //   rx28.get_angle_limits(*i, angle_cw_limit, angle_ccw_limit);
-    //   rx28.get_voltage_limits(*i, voltage_low, voltage_high);
-    //   rx28.get_calibration(*i, down_calib, up_calib);
-    //   rx28.get_compliance_values(*i, compl_cw_margin, compl_cw_slope, compl_ccw_margin, compl_ccw_slope);
+		for (unsigned int i = 0; i < 5; ++i) {
+			try {
+				//rx28.goto_position(TEST_SERVO, 800);
+				//sleep(1);
+				//rx28.goto_position(TEST_SERVO, 400);
+				rx28.read_table_values(TEST_SERVO);
+				//sleep(1);
+			} catch (Exception &e) {
+				rx28.ping(TEST_SERVO);
+				e.print_trace();
+			}
+		}
+		// for (RobotisRX28::DeviceList::iterator i = devl.begin(); i != devl.end(); ++i) {
+		//   unsigned int angle_cw_limit, angle_ccw_limit, down_calib, up_calib;
+		//   unsigned char voltage_low, voltage_high;
+		//   unsigned char compl_cw_margin, compl_cw_slope, compl_ccw_margin, compl_ccw_slope;
+		//   rx28.get_angle_limits(*i, angle_cw_limit, angle_ccw_limit);
+		//   rx28.get_voltage_limits(*i, voltage_low, voltage_high);
+		//   rx28.get_calibration(*i, down_calib, up_calib);
+		//   rx28.get_compliance_values(*i, compl_cw_margin, compl_cw_slope, compl_ccw_margin, compl_ccw_slope);
 
-    //   printf("Servo %03u, model number:        %u\n", *i, rx28.get_model(*i));
-    //   printf("Servo %03u, current position:    %u\n", *i, rx28.get_position(*i));
-    //   printf("Servo %03u, firmware version:    %u\n", *i, rx28.get_firmware_version(*i));
-    //   printf("Servo %03u, baudrate:            %u\n", *i, rx28.get_baudrate(*i));
-    //   printf("Servo %03u, delay time:          %u\n", *i, rx28.get_delay_time(*i));
-    //   printf("Servo %03u, angle limits:        CW: %u  CCW: %u\n", *i, angle_cw_limit, angle_ccw_limit);
-    //   printf("Servo %03u, temperature limit:   %u\n", *i, rx28.get_temperature_limit(*i));
-    //   printf("Servo %03u, voltage limits:      %u to %u\n", *i, voltage_low, voltage_high);
-    //   printf("Servo %03u, max torque:          %u\n", *i, rx28.get_max_torque(*i));
-    //   printf("Servo %03u, status return level: %u\n", *i, rx28.get_status_return_level(*i));
-    //   printf("Servo %03u, alarm LED:           %u\n", *i, rx28.get_alarm_led(*i));
-    //   printf("Servo %03u, alarm shutdown:      %u\n", *i, rx28.get_alarm_shutdown(*i));
-    //   printf("Servo %03u, calibration:         %u to %u\n", *i, down_calib, up_calib);
-    //   printf("Servo %03u, torque enabled:      %s\n", *i, rx28.is_torque_enabled(*i) ? "Yes" : "No");
-    //   printf("Servo %03u, LED enabled:         %s\n", *i, rx28.is_led_enabled(*i) ? "Yes" : "No");
-    //   printf("Servo %03u, compliance:          CW_M: %u  CW_S: %u  CCW_M: %u  CCW_S: %u\n", *i,
-    // 	     compl_cw_margin, compl_cw_slope, compl_ccw_margin, compl_ccw_slope);
-    //   printf("Servo %03u, goal position:       %u\n", *i, rx28.get_goal_position(*i));
-    //   printf("Servo %03u, goal speed:          %u\n", *i, rx28.get_goal_speed(*i));
-    //   printf("Servo %03u, torque limit:        %u\n", *i, rx28.get_torque_limit(*i));
-    //   printf("Servo %03u, speed:               %u\n", *i, rx28.get_speed(*i));
-    //   printf("Servo %03u, load:                %u\n", *i, rx28.get_load(*i));
-    //   printf("Servo %03u, voltage:             %u\n", *i, rx28.get_voltage(*i));
-    //   printf("Servo %03u, temperature:         %u\n", *i, rx28.get_temperature(*i));
-    //   printf("Servo %03u, moving:              %s\n", *i, rx28.is_moving(*i) ? "Yes" : "No");
-    //   printf("Servo %03u, Locked:              %s\n", *i, rx28.is_locked(*i) ? "Yes" : "No");
-    //   printf("Servo %03u, Punch:               %u\n", *i, rx28.get_punch(*i));
-    // }
-  } catch (Exception &e) {
-    e.print_trace();
-  }
+		//   printf("Servo %03u, model number:        %u\n", *i, rx28.get_model(*i));
+		//   printf("Servo %03u, current position:    %u\n", *i, rx28.get_position(*i));
+		//   printf("Servo %03u, firmware version:    %u\n", *i, rx28.get_firmware_version(*i));
+		//   printf("Servo %03u, baudrate:            %u\n", *i, rx28.get_baudrate(*i));
+		//   printf("Servo %03u, delay time:          %u\n", *i, rx28.get_delay_time(*i));
+		//   printf("Servo %03u, angle limits:        CW: %u  CCW: %u\n", *i, angle_cw_limit, angle_ccw_limit);
+		//   printf("Servo %03u, temperature limit:   %u\n", *i, rx28.get_temperature_limit(*i));
+		//   printf("Servo %03u, voltage limits:      %u to %u\n", *i, voltage_low, voltage_high);
+		//   printf("Servo %03u, max torque:          %u\n", *i, rx28.get_max_torque(*i));
+		//   printf("Servo %03u, status return level: %u\n", *i, rx28.get_status_return_level(*i));
+		//   printf("Servo %03u, alarm LED:           %u\n", *i, rx28.get_alarm_led(*i));
+		//   printf("Servo %03u, alarm shutdown:      %u\n", *i, rx28.get_alarm_shutdown(*i));
+		//   printf("Servo %03u, calibration:         %u to %u\n", *i, down_calib, up_calib);
+		//   printf("Servo %03u, torque enabled:      %s\n", *i, rx28.is_torque_enabled(*i) ? "Yes" : "No");
+		//   printf("Servo %03u, LED enabled:         %s\n", *i, rx28.is_led_enabled(*i) ? "Yes" : "No");
+		//   printf("Servo %03u, compliance:          CW_M: %u  CW_S: %u  CCW_M: %u  CCW_S: %u\n", *i,
+		// 	     compl_cw_margin, compl_cw_slope, compl_ccw_margin, compl_ccw_slope);
+		//   printf("Servo %03u, goal position:       %u\n", *i, rx28.get_goal_position(*i));
+		//   printf("Servo %03u, goal speed:          %u\n", *i, rx28.get_goal_speed(*i));
+		//   printf("Servo %03u, torque limit:        %u\n", *i, rx28.get_torque_limit(*i));
+		//   printf("Servo %03u, speed:               %u\n", *i, rx28.get_speed(*i));
+		//   printf("Servo %03u, load:                %u\n", *i, rx28.get_load(*i));
+		//   printf("Servo %03u, voltage:             %u\n", *i, rx28.get_voltage(*i));
+		//   printf("Servo %03u, temperature:         %u\n", *i, rx28.get_temperature(*i));
+		//   printf("Servo %03u, moving:              %s\n", *i, rx28.is_moving(*i) ? "Yes" : "No");
+		//   printf("Servo %03u, Locked:              %s\n", *i, rx28.is_locked(*i) ? "Yes" : "No");
+		//   printf("Servo %03u, Punch:               %u\n", *i, rx28.get_punch(*i));
+		// }
+	} catch (Exception &e) {
+		e.print_trace();
+	}
 
-  /*
+	/*
   sleep(2);
 
   try {
@@ -207,17 +208,17 @@ main(int argc, char **argv)
   }
   */
 
-//   std::list<unsigned char> disc = rx28.discover();
+	//   std::list<unsigned char> disc = rx28.discover();
 
-//   if (disc.empty()) {
-//     printf("No devices found\n");
-//   } else {
-//     for (std::list<unsigned char>::iterator i = disc.begin(); i != disc.end(); ++i) {
-//       printf("Found servo with ID %d\n", *i);
-//     }
-//   }
+	//   if (disc.empty()) {
+	//     printf("No devices found\n");
+	//   } else {
+	//     for (std::list<unsigned char>::iterator i = disc.begin(); i != disc.end(); ++i) {
+	//       printf("Found servo with ID %d\n", *i);
+	//     }
+	//   }
 
-  return 0;
+	return 0;
 }
 
 /// @endcond
