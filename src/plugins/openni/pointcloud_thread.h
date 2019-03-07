@@ -23,110 +23,113 @@
 #ifndef _PLUGINS_OPENNI_POINTCLOUD_THREAD_H_
 #define _PLUGINS_OPENNI_POINTCLOUD_THREAD_H_
 
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
-#include <aspect/blocked_timing.h>
 #ifdef HAVE_PCL
-#  include <pcl/point_cloud.h>
-#  include <pcl/point_types.h>
-#  include <fvutils/adapters/pcl.h>
-#  include <aspect/pointcloud.h>
+#	include <aspect/pointcloud.h>
+#	include <fvutils/adapters/pcl.h>
+#	include <pcl/point_cloud.h>
+#	include <pcl/point_types.h>
 #endif
 #include <plugins/openni/aspect/openni.h>
 
 // OpenNI relies on GNU extension to detect Linux
 #if defined(__linux__) && not defined(linux)
-#  define linux true
+#	define linux true
 #endif
 #if defined(__i386__) && not defined(i386)
-#  define i386 true
+#	define i386 true
 #endif
 #include <XnCppWrapper.h>
-
 #include <map>
 
 namespace fawkes {
-  class Time;
+class Time;
 }
 
 namespace firevision {
-  class SharedMemoryImageBuffer;
+class SharedMemoryImageBuffer;
 }
 
 class OpenNiImageThread;
 
-class OpenNiPointCloudThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
+class OpenNiPointCloudThread : public fawkes::Thread,
+                               public fawkes::BlockedTimingAspect,
+                               public fawkes::LoggingAspect,
+                               public fawkes::ConfigurableAspect,
+                               public fawkes::ClockAspect,
 #ifdef HAVE_PCL
-  public fawkes::PointCloudAspect,
+                               public fawkes::PointCloudAspect,
 #endif
-  public fawkes::OpenNiAspect
+                               public fawkes::OpenNiAspect
 {
- public:
-  OpenNiPointCloudThread(OpenNiImageThread *img_thread);
-  virtual ~OpenNiPointCloudThread();
+public:
+	OpenNiPointCloudThread(OpenNiImageThread *img_thread);
+	virtual ~OpenNiPointCloudThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void fill_xyz_no_pcl(fawkes::Time &ts, const XnDepthPixel * const data);
-  void fill_xyzrgb_no_pcl(fawkes::Time &ts, const XnDepthPixel * const data);
-  void fill_xyz_xyzrgb_no_pcl(fawkes::Time &ts, const XnDepthPixel * const data);
-  void fill_rgb_no_pcl();
+private:
+	void fill_xyz_no_pcl(fawkes::Time &ts, const XnDepthPixel *const data);
+	void fill_xyzrgb_no_pcl(fawkes::Time &ts, const XnDepthPixel *const data);
+	void fill_xyz_xyzrgb_no_pcl(fawkes::Time &ts, const XnDepthPixel *const data);
+	void fill_rgb_no_pcl();
 
 #ifdef HAVE_PCL
-  void fill_xyz(fawkes::Time &ts, const XnDepthPixel * const depth_data);
-  void fill_xyzrgb(fawkes::Time &ts, const XnDepthPixel * const depth_data);
-  void fill_xyz_xyzrgb(fawkes::Time &ts, const XnDepthPixel * const depth_data);
-  void fill_rgb(pcl::PointCloud<pcl::PointXYZRGB> &pcl_rgb);
+	void fill_xyz(fawkes::Time &ts, const XnDepthPixel *const depth_data);
+	void fill_xyzrgb(fawkes::Time &ts, const XnDepthPixel *const depth_data);
+	void fill_xyz_xyzrgb(fawkes::Time &ts, const XnDepthPixel *const depth_data);
+	void fill_rgb(pcl::PointCloud<pcl::PointXYZRGB> &pcl_rgb);
 #endif
 
- private:
-  OpenNiImageThread *img_thread_;
+private:
+	OpenNiImageThread *img_thread_;
 
-  xn::DepthGenerator  *depth_gen_;
-  xn::ImageGenerator  *image_gen_;
-  xn::DepthMetaData   *depth_md_;
+	xn::DepthGenerator *depth_gen_;
+	xn::ImageGenerator *image_gen_;
+	xn::DepthMetaData * depth_md_;
 
-  bool         cfg_register_depth_image_;
+	bool cfg_register_depth_image_;
 
-  firevision::SharedMemoryImageBuffer *pcl_xyz_buf_;
-  firevision::SharedMemoryImageBuffer *pcl_xyzrgb_buf_;
+	firevision::SharedMemoryImageBuffer *pcl_xyz_buf_;
+	firevision::SharedMemoryImageBuffer *pcl_xyzrgb_buf_;
 
-  firevision::SharedMemoryImageBuffer *image_rgb_buf_;
+	firevision::SharedMemoryImageBuffer *image_rgb_buf_;
 
-  float        focal_length_;
-  float        foc_const_; // focal length constant used in conversion
-  float        center_x_;
-  float        center_y_;
-  unsigned int width_;
-  unsigned int height_;
+	float        focal_length_;
+	float        foc_const_; // focal length constant used in conversion
+	float        center_x_;
+	float        center_y_;
+	unsigned int width_;
+	unsigned int height_;
 
-  XnUInt64     no_sample_value_;
-  XnUInt64     shadow_value_;
+	XnUInt64 no_sample_value_;
+	XnUInt64 shadow_value_;
 
-  fawkes::Time *capture_start_;
+	fawkes::Time *capture_start_;
 
-  std::string cfg_frame_depth_;
-  std::string cfg_frame_image_;
+	std::string cfg_frame_depth_;
+	std::string cfg_frame_image_;
 
 #ifdef HAVE_PCL
-  bool         cfg_generate_pcl_;
+	bool cfg_generate_pcl_;
 
-  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> >    pcl_xyz_;
-  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB> > pcl_xyzrgb_;
+	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ>>    pcl_xyz_;
+	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZRGB>> pcl_xyzrgb_;
 #endif
 };
 

@@ -24,11 +24,11 @@
 #define _PLUGINS_OPENNI_UTILS_COLORS_H_
 
 namespace fawkes {
-  namespace openni {
-extern float USER_COLORS[][3];
+namespace openni {
+extern float        USER_COLORS[][3];
 extern unsigned int NUM_USER_COLORS;
 
-} // end namespace fawkes::openni
+} // namespace openni
 } // end namespace fawkes
 
 #endif

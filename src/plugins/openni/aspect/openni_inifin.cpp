@@ -21,8 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/openni/aspect/openni_inifin.h>
 #include <core/threading/thread_finalizer.h>
+#include <plugins/openni/aspect/openni_inifin.h>
+
 #include <XnCppWrapper.h>
 
 namespace fawkes {
@@ -35,26 +36,26 @@ namespace fawkes {
  */
 
 /** Constructor. */
-OpenNiAspectIniFin::OpenNiAspectIniFin()
-  : AspectIniFin("OpenNiAspect")
+OpenNiAspectIniFin::OpenNiAspectIniFin() : AspectIniFin("OpenNiAspect")
 {
 }
 
 void
 OpenNiAspectIniFin::init(Thread *thread)
 {
-  OpenNiAspect *openni_thread;
-  openni_thread = dynamic_cast<OpenNiAspect *>(thread);
-  if (openni_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "OpenNiAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
-  if (! openni_context_) {
-    throw CannotInitializeThreadException("OpenNI context has not been set.");
-  }
+	OpenNiAspect *openni_thread;
+	openni_thread = dynamic_cast<OpenNiAspect *>(thread);
+	if (openni_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "OpenNiAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
+	if (!openni_context_) {
+		throw CannotInitializeThreadException("OpenNI context has not been set.");
+	}
 
-  openni_thread->init_OpenNiAspect(openni_context_);
+	openni_thread->init_OpenNiAspect(openni_context_);
 }
 
 void
@@ -62,14 +63,13 @@ OpenNiAspectIniFin::finalize(Thread *thread)
 {
 }
 
-
 /** Set the OpenNI context to use for aspect initialization.
  * @param openni_context OpenNI context to pass to threads with OpenNiAspect.
  */
 void
 OpenNiAspectIniFin::set_openni_context(LockPtr<xn::Context> openni_context)
 {
-  openni_context_ = openni_context;
+	openni_context_ = openni_context;
 }
 
 } // end namespace fawkes

@@ -23,67 +23,66 @@
 #ifndef _PLUGINS_OPENNI_IMAGE_THREAD_H_
 #define _PLUGINS_OPENNI_IMAGE_THREAD_H_
 
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
-#include <aspect/blocked_timing.h>
 #include <plugins/openni/aspect/openni.h>
 
 // OpenNI relies on GNU extension to detect Linux
 #if defined(__linux__) && not defined(linux)
-#  define linux true
+#	define linux true
 #endif
 #if defined(__i386__) && not defined(i386)
-#  define i386 true
+#	define i386 true
 #endif
 #include <XnCppWrapper.h>
 
 namespace firevision {
-  class SharedMemoryImageBuffer;
+class SharedMemoryImageBuffer;
 }
 
-class OpenNiImageThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::OpenNiAspect
+class OpenNiImageThread : public fawkes::Thread,
+                          public fawkes::BlockedTimingAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::ClockAspect,
+                          public fawkes::OpenNiAspect
 {
- public:
-  OpenNiImageThread();
-  virtual ~OpenNiImageThread();
+public:
+	OpenNiImageThread();
+	virtual ~OpenNiImageThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  xn::ImageGenerator                  *image_gen_;
-  xn::ImageMetaData                   *image_md_;
+private:
+	xn::ImageGenerator *image_gen_;
+	xn::ImageMetaData * image_md_;
 
-  firevision::SharedMemoryImageBuffer *image_buf_yuv_;
-  firevision::SharedMemoryImageBuffer *image_buf_rgb_;
+	firevision::SharedMemoryImageBuffer *image_buf_yuv_;
+	firevision::SharedMemoryImageBuffer *image_buf_rgb_;
 
-  typedef enum {
-    DEBAYER_BILINEAR,
-    DEBAYER_NEAREST_NEIGHBOR,
-    CONVERT_YUV,
-    CONVERT_RGB
-  } CopyMode;
-  CopyMode                             cfg_copy_mode_;
+	typedef enum { DEBAYER_BILINEAR, DEBAYER_NEAREST_NEIGHBOR, CONVERT_YUV, CONVERT_RGB } CopyMode;
+	CopyMode cfg_copy_mode_;
 
-  unsigned short int                   usb_vendor_;
-  unsigned short int                   usb_product_;
-  unsigned int                         image_width_;
-  unsigned int                         image_height_;
+	unsigned short int usb_vendor_;
+	unsigned short int usb_product_;
+	unsigned int       image_width_;
+	unsigned int       image_height_;
 
-  fawkes::Time *capture_start_;
+	fawkes::Time *capture_start_;
 };
 
 #endif

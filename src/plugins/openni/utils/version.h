@@ -26,15 +26,15 @@
 #include <XnVersion.h>
 
 namespace fawkes {
-  namespace openni {
+namespace openni {
 
-#define XN_VERSION_GT(major, minor, micro, build)                       \
-  (XN_VERSION > (major*100000000 + minor*1000000 + micro*10000 + build))
+#define XN_VERSION_GT(major, minor, micro, build) \
+	(XN_VERSION > (major * 100000000 + minor * 1000000 + micro * 10000 + build))
 
-#define XN_VERSION_GE(major, minor, micro, build)                       \
-  (XN_VERSION >= (major*100000000 + minor*1000000 + micro*10000 + build))
+#define XN_VERSION_GE(major, minor, micro, build) \
+	(XN_VERSION >= (major * 100000000 + minor * 1000000 + micro * 10000 + build))
 
-} // end namespace fawkes::openni
+} // namespace openni
 } // end namespace fawkes
 
 #endif

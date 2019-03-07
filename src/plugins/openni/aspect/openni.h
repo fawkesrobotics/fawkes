@@ -28,7 +28,7 @@
 #include <core/utils/lockptr.h>
 
 namespace xn {
-  class Context;
+class Context;
 }
 
 namespace fawkes {
@@ -37,17 +37,17 @@ class OpenNiAspectIniFin;
 
 class OpenNiAspect : public virtual Aspect
 {
- friend OpenNiAspectIniFin;
+	friend OpenNiAspectIniFin;
 
- public:
-  OpenNiAspect();
-  virtual ~OpenNiAspect();
+public:
+	OpenNiAspect();
+	virtual ~OpenNiAspect();
 
- protected:
-  LockPtr<xn::Context> openni;
+protected:
+	LockPtr<xn::Context> openni;
 
- private:
-  void init_OpenNiAspect(LockPtr<xn::Context> openni_context);
+private:
+	void init_OpenNiAspect(LockPtr<xn::Context> openni_context);
 };
 
 } // end namespace fawkes

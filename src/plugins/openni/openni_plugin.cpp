@@ -21,6 +21,7 @@
  */
 
 #include "context_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -32,14 +33,14 @@ using namespace fawkes;
  */
 class OpenNiPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit OpenNiPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new OpenNiContextThread());
-  }
+	explicit OpenNiPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new OpenNiContextThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("OpenNI integration base plugin")
