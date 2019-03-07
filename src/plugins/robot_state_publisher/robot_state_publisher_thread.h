@@ -54,29 +54,26 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
 #ifndef _PLUGINS_ROBOTSTATEPUBLISHER_ROBOTSTATEPUBLISHER_THREAD_H_
 #define _PLUGINS_ROBOTSTATEPUBLISHER_ROBOTSTATEPUBLISHER_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
+#include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
-#include <aspect/tf.h>
 #include <aspect/configurable.h>
-#include <aspect/blackboard.h>
+#include <aspect/logging.h>
+#include <aspect/tf.h>
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
-
+#include <core/threading/thread.h>
 #include <interfaces/JointInterface.h>
 
-#include <kdl/kdl.hpp>
 #include <kdl/frames.hpp>
+#include <kdl/kdl.hpp>
 #include <kdl/segment.hpp>
 #include <kdl/tree.hpp>
-
-#include <map>
 #include <list>
+#include <map>
 
 /** @class SegmentPair
  * This class represents the segment between a parent and a child joint
@@ -84,66 +81,66 @@
 class SegmentPair
 {
 public:
-  /** Constructor.
+	/** Constructor.
    * @param p_segment The Segment of the joint pair
    * @param p_root The name of the parent joint
    * @param p_tip The name of the child joint
    */
-  SegmentPair(const KDL::Segment& p_segment, const std::string& p_root, const std::string& p_tip):
-    segment(p_segment), root(p_root), tip(p_tip){}
+	SegmentPair(const KDL::Segment &p_segment, const std::string &p_root, const std::string &p_tip)
+	: segment(p_segment), root(p_root), tip(p_tip)
+	{
+	}
 
-  /** The segment of the joint pair */
-  KDL::Segment segment;
-  /** The name of the parent joint */
-  std::string root;
-  /** The name of the child joint */
-  std::string tip;
+	/** The segment of the joint pair */
+	KDL::Segment segment;
+	/** The name of the parent joint */
+	std::string root;
+	/** The name of the child joint */
+	std::string tip;
 };
 
-class RobotStatePublisherThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::ClockAspect,
-  public fawkes::TransformAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlackBoardInterfaceObserver,
-  public fawkes::BlackBoardInterfaceListener
+class RobotStatePublisherThread : public fawkes::Thread,
+                                  public fawkes::LoggingAspect,
+                                  public fawkes::BlockedTimingAspect,
+                                  public fawkes::ClockAspect,
+                                  public fawkes::TransformAspect,
+                                  public fawkes::ConfigurableAspect,
+                                  public fawkes::BlackBoardAspect,
+                                  public fawkes::BlackBoardInterfaceObserver,
+                                  public fawkes::BlackBoardInterfaceListener
 {
 public:
-  RobotStatePublisherThread();
+	RobotStatePublisherThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  // InterfaceObserver
-  virtual void bb_interface_created(const char *type, const char *id) throw();
+	// InterfaceObserver
+	virtual void bb_interface_created(const char *type, const char *id) throw();
 
-  // InterfaceListener
-  virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
-  virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-                                           unsigned int instance_serial) throw();
-  virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-                                           unsigned int instance_serial) throw();
-
-private:
-  void publish_fixed_transforms();
-
-  void add_children(const KDL::SegmentMap::const_iterator segment);
-  void transform_kdl_to_tf(const KDL::Frame &k, fawkes::tf::Transform &t);
-  bool joint_is_in_model(const char *id);
-  void conditional_close(fawkes::Interface *interface) throw();
+	// InterfaceListener
+	virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
+	                                         unsigned int       instance_serial) throw();
+	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
+	                                         unsigned int       instance_serial) throw();
 
 private:
+	void publish_fixed_transforms();
 
-  std::map<std::string, SegmentPair> segments_, segments_fixed_;
-  KDL::Tree tree_;
-  std::string cfg_urdf_path_;
-  float cfg_postdate_to_future_;
+	void add_children(const KDL::SegmentMap::const_iterator segment);
+	void transform_kdl_to_tf(const KDL::Frame &k, fawkes::tf::Transform &t);
+	bool joint_is_in_model(const char *id);
+	void conditional_close(fawkes::Interface *interface) throw();
 
-  std::list<fawkes::JointInterface *> ifs_;
+private:
+	std::map<std::string, SegmentPair> segments_, segments_fixed_;
+	KDL::Tree                          tree_;
+	std::string                        cfg_urdf_path_;
+	float                              cfg_postdate_to_future_;
+
+	std::list<fawkes::JointInterface *> ifs_;
 };
 
 #endif

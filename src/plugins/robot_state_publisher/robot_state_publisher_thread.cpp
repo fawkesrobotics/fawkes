@@ -53,12 +53,12 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-
 #include "robot_state_publisher_thread.h"
-#include <kdl/frames_io.hpp>
+
 #include <kdl_parser/kdl_parser.h>
 
 #include <fstream>
+#include <kdl/frames_io.hpp>
 #include <list>
 
 #define CFG_PREFIX "/robot_state_publisher/"
@@ -80,228 +80,246 @@ RobotStatePublisherThread::RobotStatePublisherThread()
 {
 }
 
-void RobotStatePublisherThread::init()
+void
+RobotStatePublisherThread::init()
 {
-  cfg_urdf_path_ = config->get_string(CFG_PREFIX"urdf_file");
-  try {
-    cfg_postdate_to_future_ = config->get_float(CFG_PREFIX"postdate_to_future");
-  } catch (const Exception& e) {
-    cfg_postdate_to_future_ = 0.f;
-  }
+	cfg_urdf_path_ = config->get_string(CFG_PREFIX "urdf_file");
+	try {
+		cfg_postdate_to_future_ = config->get_float(CFG_PREFIX "postdate_to_future");
+	} catch (const Exception &e) {
+		cfg_postdate_to_future_ = 0.f;
+	}
 
-  string urdf;
-  string line;
-  if (cfg_urdf_path_.substr(0,1) != "/") {
-    // relative path, add prefix RESDIR/urdf/
-    cfg_urdf_path_.insert(0, RESDIR"/urdf/");
-  }
-  ifstream urdf_file(cfg_urdf_path_);
-  if (!urdf_file.is_open()) {
-    throw Exception("Failed to open URDF File %s", cfg_urdf_path_.c_str()) ;
-  }
-  while ( getline(urdf_file, line)) {
-    urdf += line;
-  }
-  urdf_file.close();
+	string urdf;
+	string line;
+	if (cfg_urdf_path_.substr(0, 1) != "/") {
+		// relative path, add prefix RESDIR/urdf/
+		cfg_urdf_path_.insert(0, RESDIR "/urdf/");
+	}
+	ifstream urdf_file(cfg_urdf_path_);
+	if (!urdf_file.is_open()) {
+		throw Exception("Failed to open URDF File %s", cfg_urdf_path_.c_str());
+	}
+	while (getline(urdf_file, line)) {
+		urdf += line;
+	}
+	urdf_file.close();
 
-  if (!kdl_parser::tree_from_string(urdf, tree_)) {
-    logger->log_error(name(), "failed to parse urdf description to tree");
-    throw Exception("Failed to parse URDF description");
-  }
-  // walk the tree and add segments to segments_
-  add_children(tree_.getRootSegment());
+	if (!kdl_parser::tree_from_string(urdf, tree_)) {
+		logger->log_error(name(), "failed to parse urdf description to tree");
+		throw Exception("Failed to parse URDF description");
+	}
+	// walk the tree and add segments to segments_
+	add_children(tree_.getRootSegment());
 
-  std::map<std::string, SegmentPair> unknown_segments = segments_;
+	std::map<std::string, SegmentPair> unknown_segments = segments_;
 
-  // check for open JointInterfaces
-  std::list<fawkes::JointInterface *> ifs = blackboard->open_multiple_for_reading<JointInterface>();
-  for (std::list<JointInterface *>::iterator it = ifs.begin(); it != ifs.end(); ++it) {
-    if (joint_is_in_model((*it)->id())) {
-      logger->log_debug(name(), "Found joint information for %s", (*it)->id());
-      unknown_segments.erase((*it)->id());
-      ifs_.push_back(*it);
-      bbil_add_data_interface(*it);
-      bbil_add_reader_interface(*it);
-      bbil_add_writer_interface(*it);
-    }
-    else {
-      blackboard->close(*it);
-    }
-  }
-  for (map<string, SegmentPair>::const_iterator it = unknown_segments.begin();
-       it != unknown_segments.end(); ++it)
-  {
-    logger->log_warn(name(), "No information for joint %s available", it->first.c_str());
-  }
-  // watch for creation of new JointInterfaces
-  bbio_add_observed_create("JointInterface");
+	// check for open JointInterfaces
+	std::list<fawkes::JointInterface *> ifs = blackboard->open_multiple_for_reading<JointInterface>();
+	for (std::list<JointInterface *>::iterator it = ifs.begin(); it != ifs.end(); ++it) {
+		if (joint_is_in_model((*it)->id())) {
+			logger->log_debug(name(), "Found joint information for %s", (*it)->id());
+			unknown_segments.erase((*it)->id());
+			ifs_.push_back(*it);
+			bbil_add_data_interface(*it);
+			bbil_add_reader_interface(*it);
+			bbil_add_writer_interface(*it);
+		} else {
+			blackboard->close(*it);
+		}
+	}
+	for (map<string, SegmentPair>::const_iterator it = unknown_segments.begin();
+	     it != unknown_segments.end();
+	     ++it) {
+		logger->log_warn(name(), "No information for joint %s available", it->first.c_str());
+	}
+	// watch for creation of new JointInterfaces
+	bbio_add_observed_create("JointInterface");
 
-  // register to blackboard
-  blackboard->register_listener(this);
-  blackboard->register_observer(this);
+	// register to blackboard
+	blackboard->register_listener(this);
+	blackboard->register_observer(this);
 }
 
-void RobotStatePublisherThread::finalize()
+void
+RobotStatePublisherThread::finalize()
 {
-  blackboard->unregister_listener(this);
-  blackboard->unregister_observer(this);
-  for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); ++it) {
-    blackboard->close(*it);
-  }
+	blackboard->unregister_listener(this);
+	blackboard->unregister_observer(this);
+	for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); ++it) {
+		blackboard->close(*it);
+	}
 }
 
-void RobotStatePublisherThread::loop()
+void
+RobotStatePublisherThread::loop()
 {
-  publish_fixed_transforms();
+	publish_fixed_transforms();
 }
-
 
 // add children to correct maps
-void RobotStatePublisherThread::add_children(const KDL::SegmentMap::const_iterator segment)
+void
+RobotStatePublisherThread::add_children(const KDL::SegmentMap::const_iterator segment)
 {
-  const std::string& root = segment->second.segment.getName();
+	const std::string &root = segment->second.segment.getName();
 
-  const std::vector<KDL::SegmentMap::const_iterator>& children = segment->second.children;
-  for (unsigned int i=0; i<children.size(); ++i){
-    const KDL::Segment& child = children[i]->second.segment;
-    SegmentPair s(children[i]->second.segment, root, child.getName());
-    if (child.getJoint().getType() == KDL::Joint::None){
-      segments_fixed_.insert(make_pair(child.getJoint().getName(), s));
-      logger->log_debug(name(), "Adding fixed segment from %s to %s", root.c_str(), child.getName().c_str());
-    }
-    else{
-      segments_.insert(make_pair(child.getJoint().getName(), s));
-      logger->log_debug(name(), "Adding moving segment from %s to %s", root.c_str(), child.getName().c_str());
-    }
-    add_children(children[i]);
-  }
+	const std::vector<KDL::SegmentMap::const_iterator> &children = segment->second.children;
+	for (unsigned int i = 0; i < children.size(); ++i) {
+		const KDL::Segment &child = children[i]->second.segment;
+		SegmentPair         s(children[i]->second.segment, root, child.getName());
+		if (child.getJoint().getType() == KDL::Joint::None) {
+			segments_fixed_.insert(make_pair(child.getJoint().getName(), s));
+			logger->log_debug(name(),
+			                  "Adding fixed segment from %s to %s",
+			                  root.c_str(),
+			                  child.getName().c_str());
+		} else {
+			segments_.insert(make_pair(child.getJoint().getName(), s));
+			logger->log_debug(name(),
+			                  "Adding moving segment from %s to %s",
+			                  root.c_str(),
+			                  child.getName().c_str());
+		}
+		add_children(children[i]);
+	}
 }
 
 // publish fixed transforms
-void RobotStatePublisherThread::publish_fixed_transforms()
+void
+RobotStatePublisherThread::publish_fixed_transforms()
 {
-  std::vector<tf::StampedTransform> tf_transforms;
-  tf::StampedTransform tf_transform;
-  fawkes::Time now(clock);
-  tf_transform.stamp = now + cfg_postdate_to_future_;  // future publish
+	std::vector<tf::StampedTransform> tf_transforms;
+	tf::StampedTransform              tf_transform;
+	fawkes::Time                      now(clock);
+	tf_transform.stamp = now + cfg_postdate_to_future_; // future publish
 
-  // loop over all fixed segments
-  for (map<string, SegmentPair>::const_iterator seg=segments_fixed_.begin(); seg != segments_fixed_.end(); ++seg)
-  {
-    transform_kdl_to_tf(seg->second.segment.pose(0), tf_transform);
-    tf_transform.frame_id = seg->second.root;
-    tf_transform.child_frame_id = seg->second.tip;
-    tf_transforms.push_back(tf_transform);
-  }
-  for (std::vector<tf::StampedTransform>::const_iterator it = tf_transforms.begin();
-       it != tf_transforms.end(); ++it)
-  {
-    tf_publisher->send_transform(*it);
-  }
+	// loop over all fixed segments
+	for (map<string, SegmentPair>::const_iterator seg = segments_fixed_.begin();
+	     seg != segments_fixed_.end();
+	     ++seg) {
+		transform_kdl_to_tf(seg->second.segment.pose(0), tf_transform);
+		tf_transform.frame_id       = seg->second.root;
+		tf_transform.child_frame_id = seg->second.tip;
+		tf_transforms.push_back(tf_transform);
+	}
+	for (std::vector<tf::StampedTransform>::const_iterator it = tf_transforms.begin();
+	     it != tf_transforms.end();
+	     ++it) {
+		tf_publisher->send_transform(*it);
+	}
 }
 
-void RobotStatePublisherThread::transform_kdl_to_tf(const KDL::Frame &k, fawkes::tf::Transform &t)
-  {
-    t.setOrigin(tf::Vector3(k.p[0], k.p[1], k.p[2]));
-    t.setBasis(tf::Matrix3x3(k.M.data[0], k.M.data[1], k.M.data[2],
-                           k.M.data[3], k.M.data[4], k.M.data[5],
-                           k.M.data[6], k.M.data[7], k.M.data[8]));
-  }
-
+void
+RobotStatePublisherThread::transform_kdl_to_tf(const KDL::Frame &k, fawkes::tf::Transform &t)
+{
+	t.setOrigin(tf::Vector3(k.p[0], k.p[1], k.p[2]));
+	t.setBasis(tf::Matrix3x3(k.M.data[0],
+	                         k.M.data[1],
+	                         k.M.data[2],
+	                         k.M.data[3],
+	                         k.M.data[4],
+	                         k.M.data[5],
+	                         k.M.data[6],
+	                         k.M.data[7],
+	                         k.M.data[8]));
+}
 
 /**
  * @return true if the joint (represented by the interface) is part of our robot model
  */
-bool RobotStatePublisherThread::joint_is_in_model(const char *id) {
-  return (segments_.find(id) != segments_.end());
+bool
+RobotStatePublisherThread::joint_is_in_model(const char *id)
+{
+	return (segments_.find(id) != segments_.end());
 }
 
 // InterfaceObserver
 void
 RobotStatePublisherThread::bb_interface_created(const char *type, const char *id) throw()
 {
-  if (strncmp(type, "JointInterface", INTERFACE_TYPE_SIZE_) != 0)  return;
-  if (!joint_is_in_model(id)) return;
-  JointInterface *interface;
-  try {
-    interface = blackboard->open_for_reading<JointInterface>(id);
-  } catch (Exception &e) {
-    logger->log_warn(name(), "Failed to open %s:%s: %s", type, id, e.what());
-    return;
-  }
-  logger->log_debug(name(), "Found joint information for %s", interface->id());
-  try {
-    ifs_.push_back(interface);
-    bbil_add_data_interface(interface);
-    bbil_add_reader_interface(interface);
-    bbil_add_writer_interface(interface);
-    blackboard->update_listener(this);
-  } catch (Exception &e) {
-    // remove from all watch lists, then close
-    bbil_remove_data_interface(interface);
-    bbil_remove_reader_interface(interface);
-    bbil_remove_writer_interface(interface);
-    blackboard->update_listener(this);
-    blackboard->close(interface);
-    logger->log_warn(name(), "Failed to register for %s:%s: %s", type, id, e.what());
-    return;
-  }
+	if (strncmp(type, "JointInterface", INTERFACE_TYPE_SIZE_) != 0)
+		return;
+	if (!joint_is_in_model(id))
+		return;
+	JointInterface *interface;
+	try {
+		interface = blackboard->open_for_reading<JointInterface>(id);
+	} catch (Exception &e) {
+		logger->log_warn(name(), "Failed to open %s:%s: %s", type, id, e.what());
+		return;
+	}
+	logger->log_debug(name(), "Found joint information for %s", interface->id());
+	try {
+		ifs_.push_back(interface);
+		bbil_add_data_interface(interface);
+		bbil_add_reader_interface(interface);
+		bbil_add_writer_interface(interface);
+		blackboard->update_listener(this);
+	} catch (Exception &e) {
+		// remove from all watch lists, then close
+		bbil_remove_data_interface(interface);
+		bbil_remove_reader_interface(interface);
+		bbil_remove_writer_interface(interface);
+		blackboard->update_listener(this);
+		blackboard->close(interface);
+		logger->log_warn(name(), "Failed to register for %s:%s: %s", type, id, e.what());
+		return;
+	}
 }
 
 void
-RobotStatePublisherThread::bb_interface_writer_removed(Interface *interface,
-                                               unsigned int instance_serial)
-  throw()
+RobotStatePublisherThread::bb_interface_writer_removed(Interface *  interface,
+                                                       unsigned int instance_serial) throw()
 {
-  conditional_close(interface);
+	conditional_close(interface);
 }
 
-
 void
-RobotStatePublisherThread::bb_interface_reader_removed(Interface *interface,
-                                               unsigned int instance_serial)
-  throw()
+RobotStatePublisherThread::bb_interface_reader_removed(Interface *  interface,
+                                                       unsigned int instance_serial) throw()
 {
-  conditional_close(interface);
+	conditional_close(interface);
 }
 
 void
 RobotStatePublisherThread::conditional_close(Interface *interface) throw()
 {
-  // Verify it's a JointInterface
-  JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
-  if (! jiface) return;
+	// Verify it's a JointInterface
+	JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
+	if (!jiface)
+		return;
 
-  std::list<JointInterface *>::iterator it;
-  for (it = ifs_.begin(); it != ifs_.end(); ++it) {
-    if (*interface == **it) {
-      if (! interface->has_writer() && (interface->num_readers() == 1)) {
-        // It's only us
-        bbil_remove_data_interface(*it);
-        bbil_remove_reader_interface(*it);
-        bbil_remove_writer_interface(*it);
-        blackboard->update_listener(this);
-        blackboard->close(*it);
-        ifs_.erase(it);
-        break;
-      }
-    }
-  }
+	std::list<JointInterface *>::iterator it;
+	for (it = ifs_.begin(); it != ifs_.end(); ++it) {
+		if (*interface == **it) {
+			if (!interface->has_writer() && (interface->num_readers() == 1)) {
+				// It's only us
+				bbil_remove_data_interface(*it);
+				bbil_remove_reader_interface(*it);
+				bbil_remove_writer_interface(*it);
+				blackboard->update_listener(this);
+				blackboard->close(*it);
+				ifs_.erase(it);
+				break;
+			}
+		}
+	}
 }
 
 void
 RobotStatePublisherThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
 {
-  JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
-  if (!jiface) return;
-  jiface->read();
-  std::map<std::string, SegmentPair>::const_iterator seg = segments_.find(jiface->id());
-  if (seg == segments_.end()) return;
-  tf::StampedTransform transform;
-  transform.stamp = fawkes::Time(clock);
-  transform.frame_id = seg->second.root;
-  transform.child_frame_id = seg->second.tip;
-  transform_kdl_to_tf(seg->second.segment.pose(jiface->position()), transform);
-  tf_publisher->send_transform(transform);
-
+	JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
+	if (!jiface)
+		return;
+	jiface->read();
+	std::map<std::string, SegmentPair>::const_iterator seg = segments_.find(jiface->id());
+	if (seg == segments_.end())
+		return;
+	tf::StampedTransform transform;
+	transform.stamp          = fawkes::Time(clock);
+	transform.frame_id       = seg->second.root;
+	transform.child_frame_id = seg->second.tip;
+	transform_kdl_to_tf(seg->second.segment.pose(jiface->position()), transform);
+	tf_publisher->send_transform(transform);
 }
