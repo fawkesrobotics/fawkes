@@ -36,22 +36,19 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param master vision master
  */
 VisionMasterAspect::VisionMasterAspect(firevision::VisionMaster *master)
 {
-  add_aspect("VisionMasterAspect");
-  this->master = master;
+	add_aspect("VisionMasterAspect");
+	this->master = master;
 }
-
 
 /** Virtual empty Destructor. */
 VisionMasterAspect::~VisionMasterAspect()
 {
 }
-
 
 /** Get vision master.
  * @return vision master
@@ -59,7 +56,7 @@ VisionMasterAspect::~VisionMasterAspect()
 firevision::VisionMaster *
 VisionMasterAspect::vision_master()
 {
-  return master;
+	return master;
 }
 
 } // end namespace fawkes

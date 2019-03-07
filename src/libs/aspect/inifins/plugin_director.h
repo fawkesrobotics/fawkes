@@ -32,14 +32,14 @@ class PluginManager;
 
 class PluginDirectorAspectIniFin : public AspectIniFin
 {
- public:
-  PluginDirectorAspectIniFin(PluginManager *manager);
+public:
+	PluginDirectorAspectIniFin(PluginManager *manager);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  PluginManager *manager_;
+private:
+	PluginManager *manager_;
 };
 
 } // end namespace fawkes

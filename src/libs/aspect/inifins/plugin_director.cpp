@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <aspect/blocked_timing.h>
 #include <aspect/inifins/plugin_director.h>
 #include <aspect/plugin_director.h>
-#include <aspect/blocked_timing.h>
 #include <plugin/manager.h>
 
 namespace fawkes {
@@ -37,39 +37,37 @@ namespace fawkes {
  * @param manager plugin manager instance to pass to threads
  */
 PluginDirectorAspectIniFin::PluginDirectorAspectIniFin(PluginManager *manager)
-  : AspectIniFin("PluginDirectorAspect")
+: AspectIniFin("PluginDirectorAspect")
 {
-  manager_ = manager;
+	manager_ = manager;
 }
-
 
 void
 PluginDirectorAspectIniFin::init(Thread *thread)
 {
-  PluginDirectorAspect *plugin_director_thread;
-  plugin_director_thread = dynamic_cast<PluginDirectorAspect *>(thread);
-  if (plugin_director_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "PluginDirectorAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	PluginDirectorAspect *plugin_director_thread;
+	plugin_director_thread = dynamic_cast<PluginDirectorAspect *>(thread);
+	if (plugin_director_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "PluginDirectorAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  BlockedTimingAspect *blocked_timing_thread;
-  blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread);
-  if (blocked_timing_thread != NULL) {
-    throw CannotInitializeThreadException("Thread '%s' cannot have BlockedTimingAspect "
-					  "(conflicts with PluginDirectorAspect)",
-					  thread->name());
-  }
+	BlockedTimingAspect *blocked_timing_thread;
+	blocked_timing_thread = dynamic_cast<BlockedTimingAspect *>(thread);
+	if (blocked_timing_thread != NULL) {
+		throw CannotInitializeThreadException("Thread '%s' cannot have BlockedTimingAspect "
+		                                      "(conflicts with PluginDirectorAspect)",
+		                                      thread->name());
+	}
 
-  plugin_director_thread->init_PluginDirectorAspect(manager_);
+	plugin_director_thread->init_PluginDirectorAspect(manager_);
 }
-
 
 void
 PluginDirectorAspectIniFin::finalize(Thread *thread)
 {
 }
-
 
 } // end namespace fawkes

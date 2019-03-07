@@ -34,32 +34,29 @@ namespace fawkes {
 /** Constructor.
  * @param logger logger instance to pass to threads
  */
-LoggingAspectIniFin::LoggingAspectIniFin(Logger *logger)
-  : AspectIniFin("LoggingAspect")
+LoggingAspectIniFin::LoggingAspectIniFin(Logger *logger) : AspectIniFin("LoggingAspect")
 {
-  logger_ = logger;
+	logger_ = logger;
 }
-
 
 void
 LoggingAspectIniFin::init(Thread *thread)
 {
-  LoggingAspect *logging_thread;
-  logging_thread = dynamic_cast<LoggingAspect *>(thread);
-  if (logging_thread == 0) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "LoggingAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	LoggingAspect *logging_thread;
+	logging_thread = dynamic_cast<LoggingAspect *>(thread);
+	if (logging_thread == 0) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "LoggingAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  logging_thread->init_LoggingAspect(logger_);
+	logging_thread->init_LoggingAspect(logger_);
 }
-
 
 void
 LoggingAspectIniFin::finalize(Thread *thread)
 {
 }
-
 
 } // end namespace fawkes

@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <aspect/inifins/fawkes_network.h>
 #include <aspect/fawkes_network.h>
+#include <aspect/inifins/fawkes_network.h>
 #include <netcomm/fawkes/hub.h>
 
 namespace fawkes {
@@ -36,31 +36,29 @@ namespace fawkes {
  * @param hub Fawkes network hub instance to pass to threads
  */
 FawkesNetworkAspectIniFin::FawkesNetworkAspectIniFin(FawkesNetworkHub *hub)
-  : AspectIniFin("FawkesNetworkAspect")
+: AspectIniFin("FawkesNetworkAspect")
 {
-  hub_ = hub;
+	hub_ = hub;
 }
-
 
 void
 FawkesNetworkAspectIniFin::init(Thread *thread)
 {
-  FawkesNetworkAspect *fnet_thread;
-  fnet_thread = dynamic_cast<FawkesNetworkAspect *>(thread);
-  if (fnet_thread == 0) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "FawkesNetworkAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	FawkesNetworkAspect *fnet_thread;
+	fnet_thread = dynamic_cast<FawkesNetworkAspect *>(thread);
+	if (fnet_thread == 0) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "FawkesNetworkAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  fnet_thread->init_FawkesNetworkAspect(hub_);
+	fnet_thread->init_FawkesNetworkAspect(hub_);
 }
-
 
 void
 FawkesNetworkAspectIniFin::finalize(Thread *thread)
 {
 }
-
 
 } // end namespace fawkes

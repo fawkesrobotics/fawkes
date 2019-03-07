@@ -26,10 +26,9 @@
 
 namespace fawkes {
 
-  namespace tf {
-    class Transformer;
-  }
-
+namespace tf {
+class Transformer;
+}
 
 /** @class TransformAspectIniFin <aspect/inifins/tf.h>
  * Initializer/finalizer for the TransformAspect.
@@ -40,41 +39,41 @@ namespace fawkes {
  * @param blackboard blackboard instance to pass to threads
  * @param transformer system-wide shared transformer to pass to threads
  */
-TransformAspectIniFin::TransformAspectIniFin(BlackBoard *blackboard,
-                                             tf::Transformer *transformer)
-  : AspectIniFin("TransformAspect")
+TransformAspectIniFin::TransformAspectIniFin(BlackBoard *blackboard, tf::Transformer *transformer)
+: AspectIniFin("TransformAspect")
 {
-  blackboard_  = blackboard;
-  transformer_ = transformer;
+	blackboard_  = blackboard;
+	transformer_ = transformer;
 }
 
 void
 TransformAspectIniFin::init(Thread *thread)
 {
-  TransformAspect *transform_thread;
-  transform_thread = dynamic_cast<TransformAspect *>(thread);
-  if (transform_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "TransformAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	TransformAspect *transform_thread;
+	transform_thread = dynamic_cast<TransformAspect *>(thread);
+	if (transform_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "TransformAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  transform_thread->init_TransformAspect(blackboard_, transformer_, thread->name());
+	transform_thread->init_TransformAspect(blackboard_, transformer_, thread->name());
 }
 
 void
 TransformAspectIniFin::finalize(Thread *thread)
 {
-  TransformAspect *transform_thread;
-  transform_thread = dynamic_cast<TransformAspect *>(thread);
-  if (transform_thread == NULL) {
-    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
-                                        "TransformAspect, but RTTI says it "
-                                        "has not. ", thread->name());
-  }
+	TransformAspect *transform_thread;
+	transform_thread = dynamic_cast<TransformAspect *>(thread);
+	if (transform_thread == NULL) {
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+		                                    "TransformAspect, but RTTI says it "
+		                                    "has not. ",
+		                                    thread->name());
+	}
 
-  transform_thread->finalize_TransformAspect();
+	transform_thread->finalize_TransformAspect();
 }
-
 
 } // end namespace fawkes

@@ -36,31 +36,29 @@ namespace fawkes {
  * @param collector collector instance to pass to threads
  */
 ThreadProducerAspectIniFin::ThreadProducerAspectIniFin(ThreadCollector *collector)
-  : AspectIniFin("ThreadProducerAspect")
+: AspectIniFin("ThreadProducerAspect")
 {
-  collector_ = collector;
+	collector_ = collector;
 }
-
 
 void
 ThreadProducerAspectIniFin::init(Thread *thread)
 {
-  ThreadProducerAspect *thread_producer_thread;
-  thread_producer_thread = dynamic_cast<ThreadProducerAspect *>(thread);
-  if (thread_producer_thread == 0) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "ThreadProducerAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	ThreadProducerAspect *thread_producer_thread;
+	thread_producer_thread = dynamic_cast<ThreadProducerAspect *>(thread);
+	if (thread_producer_thread == 0) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "ThreadProducerAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  thread_producer_thread->init_ThreadProducerAspect(collector_);
+	thread_producer_thread->init_ThreadProducerAspect(collector_);
 }
-
 
 void
 ThreadProducerAspectIniFin::finalize(Thread *thread)
 {
 }
-
 
 } // end namespace fawkes

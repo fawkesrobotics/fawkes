@@ -36,21 +36,19 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param logger Logger to add to the Fawkes loggers
  */
 LoggerAspect::LoggerAspect(Logger *logger)
 {
-  add_aspect("LoggerAspect");
-  logger_ = logger;
+	add_aspect("LoggerAspect");
+	logger_ = logger;
 }
 
 /** Virtual empty destructor. */
 LoggerAspect::~LoggerAspect()
 {
 }
-
 
 /** Get time source.
  * This method is called by the aspect initializer to get the time source
@@ -60,7 +58,7 @@ LoggerAspect::~LoggerAspect()
 Logger *
 LoggerAspect::get_logger() const
 {
-  return logger_;
+	return logger_;
 }
 
 } // end namespace fawkes

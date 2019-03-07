@@ -25,6 +25,7 @@
 #define _ASPECT_BLOCKED_TIMING_EXECUTOR_H_
 
 #include <aspect/blocked_timing.h>
+
 #include <list>
 #include <string>
 
@@ -34,19 +35,18 @@ class Barrier;
 
 class BlockedTimingExecutor
 {
- public:
-  virtual ~BlockedTimingExecutor();
+public:
+	virtual ~BlockedTimingExecutor();
 
-  virtual void wakeup_and_wait(BlockedTimingAspect::WakeupHook hook,
-			       unsigned int timeout_usec = 0)         = 0;
-  virtual void wakeup(BlockedTimingAspect::WakeupHook hook,
-		      Barrier *barrier = 0)                           = 0;
+	virtual void wakeup_and_wait(BlockedTimingAspect::WakeupHook hook,
+	                             unsigned int                    timeout_usec = 0)                     = 0;
+	virtual void wakeup(BlockedTimingAspect::WakeupHook hook, Barrier *barrier = 0) = 0;
 
-  virtual void try_recover(std::list<std::string> &recovered_threads) = 0;
+	virtual void try_recover(std::list<std::string> &recovered_threads) = 0;
 
-  virtual bool timed_threads_exist()                                  = 0;
-  virtual void wait_for_timed_threads()                               = 0;
-  virtual void interrupt_timed_thread_wait()                          = 0;
+	virtual bool timed_threads_exist()         = 0;
+	virtual void wait_for_timed_threads()      = 0;
+	virtual void interrupt_timed_thread_wait() = 0;
 };
 
 } // end namespace fawkes

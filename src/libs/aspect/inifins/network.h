@@ -34,18 +34,18 @@ class ServiceBrowser;
 
 class NetworkAspectIniFin : public AspectIniFin
 {
- public:
-  NetworkAspectIniFin(NetworkNameResolver *nnresolver,
-		      ServicePublisher *service_publisher,
-		      ServiceBrowser *service_browser);
+public:
+	NetworkAspectIniFin(NetworkNameResolver *nnresolver,
+	                    ServicePublisher *   service_publisher,
+	                    ServiceBrowser *     service_browser);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  NetworkNameResolver *nnresolver_;
-  ServicePublisher    *service_publisher_;
-  ServiceBrowser      *service_browser_;
+private:
+	NetworkNameResolver *nnresolver_;
+	ServicePublisher *   service_publisher_;
+	ServiceBrowser *     service_browser_;
 };
 
 } // end namespace fawkes

@@ -57,7 +57,7 @@ namespace fawkes {
  */
 AspectIniFin::AspectIniFin(const char *aspect_name)
 {
-  aspect_name_ = aspect_name;
+	aspect_name_ = aspect_name;
 }
 
 /** Virtual empty destructor. */
@@ -75,7 +75,7 @@ AspectIniFin::~AspectIniFin()
 bool
 AspectIniFin::prepare_finalize(Thread *thread)
 {
-  return true;
+	return true;
 }
 
 /** Get aspect name.
@@ -84,7 +84,7 @@ AspectIniFin::prepare_finalize(Thread *thread)
 const char *
 AspectIniFin::get_aspect_name() const
 {
-  return aspect_name_;
+	return aspect_name_;
 }
 
 } // end namespace fawkes

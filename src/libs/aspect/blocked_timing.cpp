@@ -22,9 +22,8 @@
  */
 
 #include <aspect/blocked_timing.h>
-#include <core/threading/thread.h>
 #include <core/exception.h>
-
+#include <core/threading/thread.h>
 
 namespace fawkes {
 
@@ -50,22 +49,20 @@ namespace fawkes {
  * @param wakeup_hook hook when this thread should be woken up
  */
 BlockedTimingAspect::BlockedTimingAspect(WakeupHook wakeup_hook)
-    : SyncPointAspect(SyncPoint::WAIT_FOR_ALL,
-        blocked_timing_hook_to_start_syncpoint(wakeup_hook),
-        blocked_timing_hook_to_end_syncpoint(wakeup_hook))
+: SyncPointAspect(SyncPoint::WAIT_FOR_ALL,
+                  blocked_timing_hook_to_start_syncpoint(wakeup_hook),
+                  blocked_timing_hook_to_end_syncpoint(wakeup_hook))
 {
-  add_aspect("BlockedTimingAspect");
-  wakeup_hook_ = wakeup_hook;
-  loop_listener_ = new BlockedTimingLoopListener();
+	add_aspect("BlockedTimingAspect");
+	wakeup_hook_   = wakeup_hook;
+	loop_listener_ = new BlockedTimingLoopListener();
 }
-
 
 /** Virtual empty destructor. */
 BlockedTimingAspect::~BlockedTimingAspect()
 {
-  delete loop_listener_;
+	delete loop_listener_;
 }
-
 
 /** Init BlockedTiming aspect.
  * This intializes the aspect and adds the loop listener to the thread.
@@ -74,10 +71,9 @@ BlockedTimingAspect::~BlockedTimingAspect()
 void
 BlockedTimingAspect::init_BlockedTimingAspect(Thread *thread)
 {
-  thread->add_loop_listener(loop_listener_);
-  thread->wakeup();
+	thread->add_loop_listener(loop_listener_);
+	thread->wakeup();
 }
-
 
 /** Finalize BlockedTiming aspect.
  * This finalizes the aspect and removes the loop listener from the thread.
@@ -86,7 +82,7 @@ BlockedTimingAspect::init_BlockedTimingAspect(Thread *thread)
 void
 BlockedTimingAspect::finalize_BlockedTimingAspect(Thread *thread)
 {
-  thread->remove_loop_listener(loop_listener_);
+	thread->remove_loop_listener(loop_listener_);
 }
 
 /** Get the wakeup hook.
@@ -97,7 +93,7 @@ BlockedTimingAspect::finalize_BlockedTimingAspect(Thread *thread)
 BlockedTimingAspect::WakeupHook
 BlockedTimingAspect::blockedTimingAspectHook() const
 {
-  return wakeup_hook_;
+	return wakeup_hook_;
 }
 
 /** Get string for wakeup hook.
@@ -107,34 +103,32 @@ BlockedTimingAspect::blockedTimingAspectHook() const
 const char *
 BlockedTimingAspect::blocked_timing_hook_to_string(WakeupHook hook)
 {
-  switch (hook) {
-  case WAKEUP_HOOK_PRE_LOOP:       return "WAKEUP_HOOK_PRE_LOOP";
-  case WAKEUP_HOOK_SENSOR_ACQUIRE: return "WAKEUP_HOOK_SENSOR_ACQUIRE";
-  case WAKEUP_HOOK_SENSOR_PREPARE: return "WAKEUP_HOOK_SENSOR_PREPARE";
-  case WAKEUP_HOOK_SENSOR_PROCESS: return "WAKEUP_HOOK_SENSOR_PROCESS";
-  case WAKEUP_HOOK_WORLDSTATE:     return "WAKEUP_HOOK_WORLDSTATE";
-  case WAKEUP_HOOK_THINK:          return "WAKEUP_HOOK_THINK";
-  case WAKEUP_HOOK_SKILL:          return "WAKEUP_HOOK_SKILL";
-  case WAKEUP_HOOK_ACT:            return "WAKEUP_HOOK_ACT";
-  case WAKEUP_HOOK_ACT_EXEC:       return "WAKEUP_HOOK_ACT_EXEC";
-  case WAKEUP_HOOK_POST_LOOP:      return "WAKEUP_HOOK_POST_LOOP";
-  default: throw Exception("Unknown blocked timing wakeup hook");
-  }
+	switch (hook) {
+	case WAKEUP_HOOK_PRE_LOOP: return "WAKEUP_HOOK_PRE_LOOP";
+	case WAKEUP_HOOK_SENSOR_ACQUIRE: return "WAKEUP_HOOK_SENSOR_ACQUIRE";
+	case WAKEUP_HOOK_SENSOR_PREPARE: return "WAKEUP_HOOK_SENSOR_PREPARE";
+	case WAKEUP_HOOK_SENSOR_PROCESS: return "WAKEUP_HOOK_SENSOR_PROCESS";
+	case WAKEUP_HOOK_WORLDSTATE: return "WAKEUP_HOOK_WORLDSTATE";
+	case WAKEUP_HOOK_THINK: return "WAKEUP_HOOK_THINK";
+	case WAKEUP_HOOK_SKILL: return "WAKEUP_HOOK_SKILL";
+	case WAKEUP_HOOK_ACT: return "WAKEUP_HOOK_ACT";
+	case WAKEUP_HOOK_ACT_EXEC: return "WAKEUP_HOOK_ACT_EXEC";
+	case WAKEUP_HOOK_POST_LOOP: return "WAKEUP_HOOK_POST_LOOP";
+	default: throw Exception("Unknown blocked timing wakeup hook");
+	}
 }
 
 const std::map<const BlockedTimingAspect::WakeupHook, const std::string>
-BlockedTimingAspect::hook_to_syncpoint = {
-  { WAKEUP_HOOK_PRE_LOOP,       "/preloop" },
-  { WAKEUP_HOOK_SENSOR_ACQUIRE, "/sensors/acquire" },
-  { WAKEUP_HOOK_SENSOR_PREPARE, "/sensors/prepare" },
-  { WAKEUP_HOOK_SENSOR_PROCESS, "/sensors/process" },
-  { WAKEUP_HOOK_WORLDSTATE,     "/worldstate" },
-  { WAKEUP_HOOK_THINK,          "/agent" },
-  { WAKEUP_HOOK_SKILL,          "/skill" },
-  { WAKEUP_HOOK_ACT,            "/act/main" },
-  { WAKEUP_HOOK_ACT_EXEC,       "/act/exec" },
-  { WAKEUP_HOOK_POST_LOOP,      "/postloop" }
-};
+  BlockedTimingAspect::hook_to_syncpoint = {{WAKEUP_HOOK_PRE_LOOP, "/preloop"},
+                                            {WAKEUP_HOOK_SENSOR_ACQUIRE, "/sensors/acquire"},
+                                            {WAKEUP_HOOK_SENSOR_PREPARE, "/sensors/prepare"},
+                                            {WAKEUP_HOOK_SENSOR_PROCESS, "/sensors/process"},
+                                            {WAKEUP_HOOK_WORLDSTATE, "/worldstate"},
+                                            {WAKEUP_HOOK_THINK, "/agent"},
+                                            {WAKEUP_HOOK_SKILL, "/skill"},
+                                            {WAKEUP_HOOK_ACT, "/act/main"},
+                                            {WAKEUP_HOOK_ACT_EXEC, "/act/exec"},
+                                            {WAKEUP_HOOK_POST_LOOP, "/postloop"}};
 
 /** Get the syncpoint identifier corresponding to the end of a wakeup hook.
  * This is the syncpoint emitted at the end of a hook.
@@ -144,11 +138,11 @@ BlockedTimingAspect::hook_to_syncpoint = {
 std::string
 BlockedTimingAspect::blocked_timing_hook_to_end_syncpoint(WakeupHook hook)
 {
-  try {
-    return std::string(hook_to_syncpoint.at(hook)) + "/end";
-  } catch (const std::out_of_range &e) {
-    throw Exception("Unknown blocked timing wakeup hook. Error: %s", e.what());
-  }
+	try {
+		return std::string(hook_to_syncpoint.at(hook)) + "/end";
+	} catch (const std::out_of_range &e) {
+		throw Exception("Unknown blocked timing wakeup hook. Error: %s", e.what());
+	}
 }
 
 /** Get the syncpoint identifier corresponding to the start of a wakeup hook.
@@ -159,11 +153,11 @@ BlockedTimingAspect::blocked_timing_hook_to_end_syncpoint(WakeupHook hook)
 std::string
 BlockedTimingAspect::blocked_timing_hook_to_start_syncpoint(WakeupHook hook)
 {
-  try {
-    return std::string(hook_to_syncpoint.at(hook)) + "/start";
-  } catch (const std::out_of_range &e) {
-    throw Exception("Unknown blocked timing wakeup hook. Error: %s", e.what());
-  }
+	try {
+		return std::string(hook_to_syncpoint.at(hook)) + "/start";
+	} catch (const std::out_of_range &e) {
+		throw Exception("Unknown blocked timing wakeup hook. Error: %s", e.what());
+	}
 }
 
 /** The post loop function of the BlockedTimingAspect
@@ -173,7 +167,7 @@ BlockedTimingAspect::blocked_timing_hook_to_start_syncpoint(WakeupHook hook)
 void
 BlockedTimingLoopListener::post_loop(Thread *thread)
 {
-  thread->wakeup();
+	thread->wakeup();
 }
 
 } // end namespace fawkes

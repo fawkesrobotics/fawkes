@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <aspect/inifins/blackboard.h>
 #include <aspect/blackboard.h>
+#include <aspect/inifins/blackboard.h>
 #include <blackboard/blackboard.h>
 #include <blackboard/ownership.h>
 
@@ -37,52 +37,52 @@ namespace fawkes {
  * @param blackboard blackboard instance to pass to threads
  */
 BlackBoardAspectIniFin::BlackBoardAspectIniFin(BlackBoard *blackboard)
-  : AspectIniFin("BlackBoardAspect")
+: AspectIniFin("BlackBoardAspect")
 {
-  blackboard_ = blackboard;
+	blackboard_ = blackboard;
 }
 
 void
 BlackBoardAspectIniFin::init(Thread *thread)
 {
-  BlackBoardAspect *blackboard_thread;
-  blackboard_thread = dynamic_cast<BlackBoardAspect *>(thread);
-  if (blackboard_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "BlackBoardAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	BlackBoardAspect *blackboard_thread;
+	blackboard_thread = dynamic_cast<BlackBoardAspect *>(thread);
+	if (blackboard_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "BlackBoardAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  if (! blackboard_) {
-	  throw CannotInitializeThreadException("Thread '%s' needs BlackBoardAspect, "
-	                                        "but not blackboard available");
-  }
+	if (!blackboard_) {
+		throw CannotInitializeThreadException("Thread '%s' needs BlackBoardAspect, "
+		                                      "but not blackboard available");
+	}
 
-  BlackBoard *bb;
-  if (blackboard_thread->blackboard_owner_name_) {
-    bb = new BlackBoardWithOwnership(blackboard_,
-				     blackboard_thread->blackboard_owner_name_);
-  } else {
-    bb = new BlackBoardWithOwnership(blackboard_, thread->name());
-  }
+	BlackBoard *bb;
+	if (blackboard_thread->blackboard_owner_name_) {
+		bb = new BlackBoardWithOwnership(blackboard_, blackboard_thread->blackboard_owner_name_);
+	} else {
+		bb = new BlackBoardWithOwnership(blackboard_, thread->name());
+	}
 
-  blackboard_thread->init_BlackBoardAspect(bb);
+	blackboard_thread->init_BlackBoardAspect(bb);
 }
 
 void
 BlackBoardAspectIniFin::finalize(Thread *thread)
 {
-  BlackBoardAspect *blackboard_thread;
-  blackboard_thread = dynamic_cast<BlackBoardAspect *>(thread);
-  if (blackboard_thread == NULL) {
-    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
-					"BlackBoardAspect, but RTTI says it "
-					"has not. ", thread->name());
-  }
+	BlackBoardAspect *blackboard_thread;
+	blackboard_thread = dynamic_cast<BlackBoardAspect *>(thread);
+	if (blackboard_thread == NULL) {
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+		                                    "BlackBoardAspect, but RTTI says it "
+		                                    "has not. ",
+		                                    thread->name());
+	}
 
-  delete blackboard_thread->blackboard;
-  blackboard_thread->blackboard = NULL;
+	delete blackboard_thread->blackboard;
+	blackboard_thread->blackboard = NULL;
 }
-
 
 } // end namespace fawkes

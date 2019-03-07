@@ -32,14 +32,14 @@ class ThreadCollector;
 
 class ThreadProducerAspectIniFin : public AspectIniFin
 {
- public:
-  ThreadProducerAspectIniFin(ThreadCollector *collector);
+public:
+	ThreadProducerAspectIniFin(ThreadCollector *collector);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  ThreadCollector *collector_;
+private:
+	ThreadCollector *collector_;
 };
 
 } // end namespace fawkes

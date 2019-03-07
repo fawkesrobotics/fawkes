@@ -22,14 +22,14 @@
  */
 
 #include <aspect/tf.h>
+#include <blackboard/ownership.h>
+#include <core/exceptions/system.h>
+#include <core/threading/thread_initializer.h>
 #include <tf/transform_listener.h>
 
-#include <cstring>
-#include <cstdlib>
 #include <cstdarg>
-#include <core/threading/thread_initializer.h>
-#include <core/exceptions/system.h>
-#include <blackboard/ownership.h>
+#include <cstdlib>
+#include <cstring>
 
 namespace fawkes {
 
@@ -44,7 +44,6 @@ namespace fawkes {
  * @ingroup Aspects
  * @author Tim Niemueller
  */
-
 
 /** @var tf::TransformListener *  TransformAspect::tf_listener
  * This is the transform listener which saves transforms published by
@@ -72,28 +71,25 @@ namespace fawkes {
  * @param frame_id ID of frame to create publisher for, can be zero if
  * creating of publisher is omitted or deferred.
  */
-TransformAspect::TransformAspect(Mode mode, const char *frame_id)
-  : tf_aspect_mode_(mode)
+TransformAspect::TransformAspect(Mode mode, const char *frame_id) : tf_aspect_mode_(mode)
 {
-  add_aspect("TransformAspect");
-  if (((mode == ONLY_PUBLISHER) || (mode == BOTH) ||
-       (mode == BOTH_DEFER_PUBLISHER) || (mode == DEFER_PUBLISHER))
-      && frame_id)
-  {
-	  tf_aspect_frame_id_ = strdup(frame_id);
-  } else {
-	  tf_aspect_frame_id_ = 0;
-  }
-  tf_aspect_blackboard_ = 0;
+	add_aspect("TransformAspect");
+	if (((mode == ONLY_PUBLISHER) || (mode == BOTH) || (mode == BOTH_DEFER_PUBLISHER)
+	     || (mode == DEFER_PUBLISHER))
+	    && frame_id) {
+		tf_aspect_frame_id_ = strdup(frame_id);
+	} else {
+		tf_aspect_frame_id_ = 0;
+	}
+	tf_aspect_blackboard_ = 0;
 }
-
 
 /** Virtual empty destructor. */
 TransformAspect::~TransformAspect()
 {
-  if (tf_aspect_frame_id_)  free(tf_aspect_frame_id_);
+	if (tf_aspect_frame_id_)
+		free(tf_aspect_frame_id_);
 }
-
 
 /** Init transform aspect.
  * This creates the listener and potentially publisher.
@@ -102,38 +98,34 @@ TransformAspect::~TransformAspect()
  * @param thread_name name of thread opening publishers
  */
 void
-TransformAspect::init_TransformAspect(BlackBoard *blackboard, tf::Transformer *transformer,
-                                      const char *thread_name)
+TransformAspect::init_TransformAspect(BlackBoard *     blackboard,
+                                      tf::Transformer *transformer,
+                                      const char *     thread_name)
 {
-  if (((tf_aspect_mode_ == ONLY_PUBLISHER) || (tf_aspect_mode_ == BOTH)) &&
-      (tf_aspect_frame_id_ == NULL))
-  {
-    throw CannotInitializeThreadException("TransformAspect was initialized "
-                                          "in mode %s but BB interface ID"
-                                          "is not set",
-                                          (tf_aspect_mode_ == BOTH) ? "BOTH"
-                                          : "ONLY_PUBLISHER");
-  }
+	if (((tf_aspect_mode_ == ONLY_PUBLISHER) || (tf_aspect_mode_ == BOTH))
+	    && (tf_aspect_frame_id_ == NULL)) {
+		throw CannotInitializeThreadException("TransformAspect was initialized "
+		                                      "in mode %s but BB interface ID"
+		                                      "is not set",
+		                                      (tf_aspect_mode_ == BOTH) ? "BOTH" : "ONLY_PUBLISHER");
+	}
 
-  tf_aspect_blackboard_ = new BlackBoardWithOwnership(blackboard, thread_name);
+	tf_aspect_blackboard_ = new BlackBoardWithOwnership(blackboard, thread_name);
 
-  if ((tf_aspect_mode_ == ONLY_LISTENER) || (tf_aspect_mode_ == BOTH) ||
-      (tf_aspect_mode_ == BOTH_DEFER_PUBLISHER))
-  {
-    tf_listener = transformer;
-  } else {
-    tf_listener = NULL;
-  }
+	if ((tf_aspect_mode_ == ONLY_LISTENER) || (tf_aspect_mode_ == BOTH)
+	    || (tf_aspect_mode_ == BOTH_DEFER_PUBLISHER)) {
+		tf_listener = transformer;
+	} else {
+		tf_listener = NULL;
+	}
 
-  if ((tf_aspect_mode_ == ONLY_PUBLISHER) || (tf_aspect_mode_ == BOTH)) {
-    tf_publisher =
-      new tf::TransformPublisher(tf_aspect_blackboard_, tf_aspect_frame_id_);
-    tf_publishers[tf_aspect_frame_id_] = tf_publisher;
-  } else {
-    tf_publisher = new tf::TransformPublisher(NULL, NULL);
-  }
+	if ((tf_aspect_mode_ == ONLY_PUBLISHER) || (tf_aspect_mode_ == BOTH)) {
+		tf_publisher = new tf::TransformPublisher(tf_aspect_blackboard_, tf_aspect_frame_id_);
+		tf_publishers[tf_aspect_frame_id_] = tf_publisher;
+	} else {
+		tf_publisher = new tf::TransformPublisher(NULL, NULL);
+	}
 }
-
 
 /** Late enabling of publisher.
  * If and only if the TransformAspect has been initialized in
@@ -152,30 +144,29 @@ TransformAspect::init_TransformAspect(BlackBoard *blackboard, tf::Transformer *t
 void
 TransformAspect::tf_enable_publisher(const char *frame_id)
 {
-  if ((tf_aspect_mode_ != DEFER_PUBLISHER) && (tf_aspect_mode_ != BOTH_DEFER_PUBLISHER)) {
-    throw Exception("Publisher can only be enabled later in (BOTH_)DEFER_PUBLISHER mode");
-  }
-  if (frame_id) {
-	  if (tf_aspect_frame_id_) {
-		  throw Exception("Cannot overwrite frame_id '%s' with '%s' in tf_enable_publisher",
-		                  tf_aspect_frame_id_, frame_id);
-	  } else {
-		  tf_aspect_frame_id_ = strdup(frame_id);
-	  }
-  }
-  if (tf_aspect_frame_id_ == 0) {
-	  throw Exception("TransformAspect in %s mode "
-	                  "requires a valid blackboard interface ID to enable the publisher",
-	                  tf_aspect_mode_ == DEFER_PUBLISHER
-	                  ? "DEFER_PUBLISHER" : "BOTH_DEFER_PUBLISHER" );
-  }
+	if ((tf_aspect_mode_ != DEFER_PUBLISHER) && (tf_aspect_mode_ != BOTH_DEFER_PUBLISHER)) {
+		throw Exception("Publisher can only be enabled later in (BOTH_)DEFER_PUBLISHER mode");
+	}
+	if (frame_id) {
+		if (tf_aspect_frame_id_) {
+			throw Exception("Cannot overwrite frame_id '%s' with '%s' in tf_enable_publisher",
+			                tf_aspect_frame_id_,
+			                frame_id);
+		} else {
+			tf_aspect_frame_id_ = strdup(frame_id);
+		}
+	}
+	if (tf_aspect_frame_id_ == 0) {
+		throw Exception("TransformAspect in %s mode "
+		                "requires a valid blackboard interface ID to enable the publisher",
+		                tf_aspect_mode_ == DEFER_PUBLISHER ? "DEFER_PUBLISHER"
+		                                                   : "BOTH_DEFER_PUBLISHER");
+	}
 
-  delete tf_publisher;
-  tf_publisher =
-    new tf::TransformPublisher(tf_aspect_blackboard_, tf_aspect_frame_id_);
-  tf_publishers[tf_aspect_frame_id_] = tf_publisher;
+	delete tf_publisher;
+	tf_publisher = new tf::TransformPublisher(tf_aspect_blackboard_, tf_aspect_frame_id_);
+	tf_publishers[tf_aspect_frame_id_] = tf_publisher;
 }
-
 
 /** Late add of publisher.
  * If and only if the TransformAspect has been initialized in
@@ -194,27 +185,26 @@ TransformAspect::tf_enable_publisher(const char *frame_id)
 void
 TransformAspect::tf_add_publisher(const char *frame_id_format, ...)
 {
-  if ((tf_aspect_mode_ != DEFER_PUBLISHER) && (tf_aspect_mode_ != BOTH_DEFER_PUBLISHER)) {
-    throw Exception("Publisher can only be enabled later in (BOTH_)DEFER_PUBLISHER mode");
-  }
+	if ((tf_aspect_mode_ != DEFER_PUBLISHER) && (tf_aspect_mode_ != BOTH_DEFER_PUBLISHER)) {
+		throw Exception("Publisher can only be enabled later in (BOTH_)DEFER_PUBLISHER mode");
+	}
 
-  va_list arg;
-  va_start(arg, frame_id_format);
+	va_list arg;
+	va_start(arg, frame_id_format);
 
-  char *msg;
-  if (vasprintf(&msg, frame_id_format, arg) == -1) {
-    throw OutOfMemoryException("Cannot format transform publisher BB interface ID");
-  }
-  va_end(arg);
-  std::string frame_id = msg;
-  free(msg);
+	char *msg;
+	if (vasprintf(&msg, frame_id_format, arg) == -1) {
+		throw OutOfMemoryException("Cannot format transform publisher BB interface ID");
+	}
+	va_end(arg);
+	std::string frame_id = msg;
+	free(msg);
 
-  if (tf_publishers.find(frame_id) != tf_publishers.end()) {
-	  throw Exception("Publisher for %s has already been added", frame_id.c_str());
-  }
+	if (tf_publishers.find(frame_id) != tf_publishers.end()) {
+		throw Exception("Publisher for %s has already been added", frame_id.c_str());
+	}
 
-  tf_publishers[frame_id] =
-	  new tf::TransformPublisher(tf_aspect_blackboard_, frame_id.c_str());
+	tf_publishers[frame_id] = new tf::TransformPublisher(tf_aspect_blackboard_, frame_id.c_str());
 }
 
 /** Finalize transform aspect.
@@ -223,19 +213,19 @@ TransformAspect::tf_add_publisher(const char *frame_id_format, ...)
 void
 TransformAspect::finalize_TransformAspect()
 {
-  if (tf_aspect_frame_id_) {
-	  tf_publishers.erase(tf_aspect_frame_id_);
-  }
-  delete tf_publisher;
-  std::map<std::string, tf::TransformPublisher *>::iterator ti;
-  for (ti = tf_publishers.begin(); ti != tf_publishers.end(); ++ti) {
-	  delete ti->second;
-  }
-  tf_publishers.clear();
-  tf_listener = 0;
-  tf_publisher = 0;
-  delete tf_aspect_blackboard_;
-  tf_aspect_blackboard_ = 0;
+	if (tf_aspect_frame_id_) {
+		tf_publishers.erase(tf_aspect_frame_id_);
+	}
+	delete tf_publisher;
+	std::map<std::string, tf::TransformPublisher *>::iterator ti;
+	for (ti = tf_publishers.begin(); ti != tf_publishers.end(); ++ti) {
+		delete ti->second;
+	}
+	tf_publishers.clear();
+	tf_listener  = 0;
+	tf_publisher = 0;
+	delete tf_aspect_blackboard_;
+	tf_aspect_blackboard_ = 0;
 }
 
 } // end namespace fawkes

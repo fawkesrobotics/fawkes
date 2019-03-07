@@ -38,8 +38,8 @@ namespace fawkes {
 /** Constructor. */
 SyncPointManagerAspect::SyncPointManagerAspect()
 {
-  add_aspect("SyncPointManagerAspect");
-  syncpoint_manager = 0;
+	add_aspect("SyncPointManagerAspect");
+	syncpoint_manager = 0;
 }
 
 SyncPointManagerAspect::~SyncPointManagerAspect()
@@ -53,7 +53,7 @@ SyncPointManagerAspect::~SyncPointManagerAspect()
 void
 SyncPointManagerAspect::init_SyncPointManagerAspect(SyncPointManager *manager)
 {
-  syncpoint_manager = manager;
+	syncpoint_manager = manager;
 }
 
 } // end namespace fawkes

@@ -32,14 +32,14 @@ class BlackBoard;
 
 class BlackBoardAspectIniFin : public AspectIniFin
 {
- public:
-  BlackBoardAspectIniFin(BlackBoard *blackboard);
+public:
+	BlackBoardAspectIniFin(BlackBoard *blackboard);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  BlackBoard *blackboard_;
+private:
+	BlackBoard *blackboard_;
 };
 
 } // end namespace fawkes

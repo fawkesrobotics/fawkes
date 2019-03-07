@@ -33,7 +33,6 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** @var BlackBoard *  BlackBoardAspect::blackboard
  * This is the BlackBoard instance you can use to interact with the
  * BlackBoard. It is set when the thread starts.
@@ -46,17 +45,15 @@ namespace fawkes {
  */
 BlackBoardAspect::BlackBoardAspect(const char *owner)
 {
-  add_aspect("BlackBoardAspect");
-  blackboard_owner_name_ = owner;
-  blackboard = 0;
+	add_aspect("BlackBoardAspect");
+	blackboard_owner_name_ = owner;
+	blackboard             = 0;
 }
-
 
 /** Virtual empty destructor. */
 BlackBoardAspect::~BlackBoardAspect()
 {
 }
-
 
 /** Init BlackBoard aspect.
  * This set the BlackBoard interface manager that can be used to access the
@@ -68,7 +65,7 @@ BlackBoardAspect::~BlackBoardAspect()
 void
 BlackBoardAspect::init_BlackBoardAspect(BlackBoard *bb)
 {
-  blackboard = bb;
+	blackboard = bb;
 }
 
 } // end namespace fawkes

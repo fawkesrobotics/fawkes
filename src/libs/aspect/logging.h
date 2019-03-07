@@ -31,14 +31,14 @@ namespace fawkes {
 
 class LoggingAspect : public virtual Aspect
 {
- public:
-  LoggingAspect();
-  virtual ~LoggingAspect();
+public:
+	LoggingAspect();
+	virtual ~LoggingAspect();
 
-  void init_LoggingAspect(Logger *logger);
+	void init_LoggingAspect(Logger *logger);
 
- protected:
-  Logger *logger;
+protected:
+	Logger *logger;
 };
 
 } // end namespace fawkes

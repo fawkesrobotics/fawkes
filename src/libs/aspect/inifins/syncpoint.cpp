@@ -36,40 +36,37 @@ namespace fawkes {
 SyncPointAspectIniFin::SyncPointAspectIniFin(SyncPointManager *syncpoint_manager)
 : AspectIniFin("SyncPointAspect")
 {
-  syncpoint_manager_ = syncpoint_manager;
+	syncpoint_manager_ = syncpoint_manager;
 }
 
 void
 SyncPointAspectIniFin::init(Thread *thread)
 {
-  SyncPointAspect *syncpoint_thread;
-  syncpoint_thread = dynamic_cast<SyncPointAspect *>(thread);
-  if (syncpoint_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-        "SyncPointManagerAspect, but RTTI says it "
-        "has not. ", thread->name());
-  }
+	SyncPointAspect *syncpoint_thread;
+	syncpoint_thread = dynamic_cast<SyncPointAspect *>(thread);
+	if (syncpoint_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "SyncPointManagerAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  syncpoint_thread->init_SyncPointAspect(thread, syncpoint_manager_);
-
+	syncpoint_thread->init_SyncPointAspect(thread, syncpoint_manager_);
 }
 
 void
 SyncPointAspectIniFin::finalize(Thread *thread)
 {
-  SyncPointAspect *syncpoint_thread;
-  syncpoint_thread = dynamic_cast<SyncPointAspect *>(thread);
-  if (syncpoint_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-        "SyncPointManagerAspect, but RTTI says it "
-        "has not. ", thread->name());
-  }
+	SyncPointAspect *syncpoint_thread;
+	syncpoint_thread = dynamic_cast<SyncPointAspect *>(thread);
+	if (syncpoint_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "SyncPointManagerAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  syncpoint_thread->finalize_SyncPointAspect(thread, syncpoint_manager_);
-
+	syncpoint_thread->finalize_SyncPointAspect(thread, syncpoint_manager_);
 }
 
-
 } // end namespace fawkes
-
-

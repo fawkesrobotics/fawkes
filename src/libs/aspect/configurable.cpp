@@ -46,7 +46,6 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** @var Configuration *  ConfigurableAspect::config
  * This is the Configuration member used to access the configuration.
  * The configuration will remain valid for the whole lifetime of the
@@ -56,14 +55,13 @@ namespace fawkes {
 /** Constructor. */
 ConfigurableAspect::ConfigurableAspect()
 {
-  add_aspect("ConfigurableAspect");
+	add_aspect("ConfigurableAspect");
 }
 
 /** Virtual empty Destructor. */
 ConfigurableAspect::~ConfigurableAspect()
 {
 }
-
 
 /** Set the configuration
  * It is guaranteed that this is called for a configurable thread before
@@ -73,7 +71,7 @@ ConfigurableAspect::~ConfigurableAspect()
 void
 ConfigurableAspect::init_ConfigurableAspect(Configuration *config)
 {
-  this->config = config;
+	this->config = config;
 }
 
 } // end namespace fawkes

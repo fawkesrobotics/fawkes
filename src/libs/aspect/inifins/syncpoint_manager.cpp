@@ -36,32 +36,27 @@ namespace fawkes {
 SyncPointManagerAspectIniFin::SyncPointManagerAspectIniFin(SyncPointManager *syncpoint_manager)
 : AspectIniFin("SyncPointManagerAspect")
 {
-  syncpoint_manager_ = syncpoint_manager;
+	syncpoint_manager_ = syncpoint_manager;
 }
 
 void
 SyncPointManagerAspectIniFin::init(Thread *thread)
 {
-  SyncPointManagerAspect *syncpoint_thread;
-  syncpoint_thread = dynamic_cast<SyncPointManagerAspect *>(thread);
-  if (syncpoint_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-        "SyncPointManagerAspect, but RTTI says it "
-        "has not. ", thread->name());
-  }
+	SyncPointManagerAspect *syncpoint_thread;
+	syncpoint_thread = dynamic_cast<SyncPointManagerAspect *>(thread);
+	if (syncpoint_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "SyncPointManagerAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  syncpoint_thread->init_SyncPointManagerAspect(syncpoint_manager_);
-
+	syncpoint_thread->init_SyncPointManagerAspect(syncpoint_manager_);
 }
-
 
 void
 SyncPointManagerAspectIniFin::finalize(Thread *thread)
 {
-
 }
 
-
 } // end namespace fawkes
-
-

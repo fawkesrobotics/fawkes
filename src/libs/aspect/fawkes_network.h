@@ -31,14 +31,14 @@ namespace fawkes {
 
 class FawkesNetworkAspect : public virtual Aspect
 {
- public:
-  FawkesNetworkAspect();
-  virtual ~FawkesNetworkAspect();
+public:
+	FawkesNetworkAspect();
+	virtual ~FawkesNetworkAspect();
 
-  void init_FawkesNetworkAspect(FawkesNetworkHub *fnethub);
+	void init_FawkesNetworkAspect(FawkesNetworkHub *fnethub);
 
- protected:
-  FawkesNetworkHub *fnethub;
+protected:
+	FawkesNetworkHub *fnethub;
 };
 
 } // end namespace fawkes

@@ -24,55 +24,55 @@
 #define _ASPECT_TF_H_
 
 #ifndef HAVE_TF
-#  error TF not available. Forgot to add CFLAGS_TF?
+#	error TF not available. Forgot to add CFLAGS_TF?
 #endif
 
 #include <aspect/aspect.h>
-#include <tf/transformer.h>
 #include <tf/transform_publisher.h>
+#include <tf/transformer.h>
 
 namespace fawkes {
 
-  class BlackBoard;
-
+class BlackBoard;
 
 class TransformAspect : public virtual Aspect
 {
- public:
-  /** Enumeration describing the desired mode of operation. */
-  typedef enum {
-    ONLY_LISTENER,	///< only create a transform listener
-    ONLY_PUBLISHER,	///< only create a transform publisher
-    DEFER_PUBLISHER,	/**< Create neither listener or publisher, but allow late
+public:
+	/** Enumeration describing the desired mode of operation. */
+	typedef enum {
+		ONLY_LISTENER,       ///< only create a transform listener
+		ONLY_PUBLISHER,      ///< only create a transform publisher
+		DEFER_PUBLISHER,     /**< Create neither listener or publisher, but allow late
 			 * enabling of a publisher using tf_enable_publisher() or tf_add_publisher() in init().
 			 * Note that this requires to pass a valid (unique) tf_bb_iface_id
 			 * to the constructor. */
-    BOTH,		///< create both, transform listener and publisher
-    BOTH_DEFER_PUBLISHER /**< create transform listener but defer creation of publisher,
+		BOTH,                ///< create both, transform listener and publisher
+		BOTH_DEFER_PUBLISHER /**< create transform listener but defer creation of publisher,
 			  * cf. DEFER_PUBLISHER mode documentation above for details. */
-  } Mode;
+	} Mode;
 
-  TransformAspect(Mode mode = ONLY_LISTENER, const char *frame_id = 0);
-  virtual ~TransformAspect();
+	TransformAspect(Mode mode = ONLY_LISTENER, const char *frame_id = 0);
+	virtual ~TransformAspect();
 
-  void init_TransformAspect(BlackBoard *blackboard, tf::Transformer *transformer,
-                            const char *thread_name);
-  void finalize_TransformAspect();
+	void init_TransformAspect(BlackBoard *     blackboard,
+	                          tf::Transformer *transformer,
+	                          const char *     thread_name);
+	void finalize_TransformAspect();
 
- protected: // methods
-  void tf_enable_publisher(const char *frame_id = 0);
-  void tf_add_publisher(const char *frame_id_format, ...);
+protected: // methods
+	void tf_enable_publisher(const char *frame_id = 0);
+	void tf_add_publisher(const char *frame_id_format, ...);
 
- protected: // members
-  tf::Transformer         * tf_listener;
-  tf::TransformPublisher  * tf_publisher;
+protected: // members
+	tf::Transformer *       tf_listener;
+	tf::TransformPublisher *tf_publisher;
 
-  std::map<std::string, tf::TransformPublisher *>  tf_publishers;
+	std::map<std::string, tf::TransformPublisher *> tf_publishers;
 
- private:
-  Mode  tf_aspect_mode_;
-  char *tf_aspect_frame_id_;
-  BlackBoard *tf_aspect_blackboard_;
+private:
+	Mode        tf_aspect_mode_;
+	char *      tf_aspect_frame_id_;
+	BlackBoard *tf_aspect_blackboard_;
 };
 
 } // end namespace fawkes

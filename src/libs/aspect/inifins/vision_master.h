@@ -25,32 +25,32 @@
 #define _ASPECT_INIFINS_VISION_MASTER_H_
 
 #include <aspect/inifins/inifin.h>
-#include <aspect/vision_master.h>
 #include <aspect/vision.h>
+#include <aspect/vision_master.h>
 #include <utils/constraints/dependency_onetomany.h>
 
 namespace firevision {
-  class VisionMaster;
+class VisionMaster;
 }
 
 namespace fawkes {
 
 class VisionMasterAspectIniFin : public AspectIniFin
 {
- public:
-  VisionMasterAspectIniFin();
+public:
+	VisionMasterAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
-  virtual bool prepare_finalize(Thread *thread);
-  
-  firevision::VisionMaster *  vision_master();
-  void add_vision_thread(VisionAspect *thread);
-  void remove_vision_thread(VisionAspect *thread);
-  bool can_remove_vision_thread(VisionAspect *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
+	virtual bool prepare_finalize(Thread *thread);
 
- private:
-  OneToManyDependency<VisionMasterAspect, VisionAspect> vision_dependency_;
+	firevision::VisionMaster *vision_master();
+	void                      add_vision_thread(VisionAspect *thread);
+	void                      remove_vision_thread(VisionAspect *thread);
+	bool                      can_remove_vision_thread(VisionAspect *thread);
+
+private:
+	OneToManyDependency<VisionMasterAspect, VisionAspect> vision_dependency_;
 };
 
 } // end namespace fawkes

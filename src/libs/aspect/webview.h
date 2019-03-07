@@ -35,24 +35,24 @@ class WebviewRestApiManager;
 
 class WebviewAspect : public virtual Aspect
 {
- public:
-  WebviewAspect();
-  virtual ~WebviewAspect();
+public:
+	WebviewAspect();
+	virtual ~WebviewAspect();
 
-  void              init_WebviewAspect(WebUrlManager *url_manager,
-                                       WebNavManager *nav_manager,
-                                       WebRequestManager *request_manager,
-                                       WebviewRestApiManager *rest_api_manager);
+	void init_WebviewAspect(WebUrlManager *        url_manager,
+	                        WebNavManager *        nav_manager,
+	                        WebRequestManager *    request_manager,
+	                        WebviewRestApiManager *rest_api_manager);
 
- protected:
-  /** Webview request processor manager. */
-  WebUrlManager *webview_url_manager;
-  /** Webview navigation manager. */
-  WebNavManager *webview_nav_manager;
-  /** Webview request manager. */
-  WebRequestManager *webview_request_manager;
-  /** Webview REST API manager. */
-  WebviewRestApiManager *webview_rest_api_manager;
+protected:
+	/** Webview request processor manager. */
+	WebUrlManager *webview_url_manager;
+	/** Webview navigation manager. */
+	WebNavManager *webview_nav_manager;
+	/** Webview request manager. */
+	WebRequestManager *webview_request_manager;
+	/** Webview REST API manager. */
+	WebviewRestApiManager *webview_rest_api_manager;
 };
 
 } // end namespace fawkes

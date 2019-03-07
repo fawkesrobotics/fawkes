@@ -33,7 +33,6 @@
 
 namespace fawkes {
 
-
 /** @class BlockedTimingLoopListener
  * Loop Listener of the BlockedTimingAspect.
  * This loop listener immediately wakes up the thread after loop returned.
@@ -44,54 +43,54 @@ namespace fawkes {
  */
 class BlockedTimingLoopListener : public ThreadLoopListener
 {
- public:
-  void post_loop(Thread *thread);
+public:
+	void post_loop(Thread *thread);
 };
 
 class BlockedTimingAspect : public SyncPointAspect
 {
- public:
-  /** Type to define at which hook the thread is woken up.
+public:
+	/** Type to define at which hook the thread is woken up.
    * See FawkesMainThread for information when and in which order the hooks
    * are called.
    * @see FawkesMainThread::loop()
    */
-  typedef enum {
-    WAKEUP_HOOK_PRE_LOOP,	/**< before each loop */
-    WAKEUP_HOOK_SENSOR_ACQUIRE,	/**< sensor acquisition thread,
+	typedef enum {
+		WAKEUP_HOOK_PRE_LOOP,       /**< before each loop */
+		WAKEUP_HOOK_SENSOR_ACQUIRE, /**< sensor acquisition thread,
                                  *  acquire data from sensor */
-    WAKEUP_HOOK_SENSOR_PREPARE,	/**< sensor data preparation thread,
+		WAKEUP_HOOK_SENSOR_PREPARE, /**< sensor data preparation thread,
                                  * convert acquired data to usable format */
-    WAKEUP_HOOK_SENSOR_PROCESS,	/**< sensor data processing thread */
-    WAKEUP_HOOK_WORLDSTATE,	/**< world state thread */
-    WAKEUP_HOOK_THINK,		/**< think thread (agent) */
-    WAKEUP_HOOK_SKILL,		/**< skill thread (skill module) */
-    WAKEUP_HOOK_ACT,		/**< act thread (motor module etc.) */
-    WAKEUP_HOOK_ACT_EXEC,	/**< act execution thread */
-    WAKEUP_HOOK_POST_LOOP	/**< run after loop */
-  } WakeupHook;
+		WAKEUP_HOOK_SENSOR_PROCESS, /**< sensor data processing thread */
+		WAKEUP_HOOK_WORLDSTATE,     /**< world state thread */
+		WAKEUP_HOOK_THINK,          /**< think thread (agent) */
+		WAKEUP_HOOK_SKILL,          /**< skill thread (skill module) */
+		WAKEUP_HOOK_ACT,            /**< act thread (motor module etc.) */
+		WAKEUP_HOOK_ACT_EXEC,       /**< act execution thread */
+		WAKEUP_HOOK_POST_LOOP       /**< run after loop */
+	} WakeupHook;
 
-  BlockedTimingAspect(WakeupHook wakeup_hook);
-  virtual ~BlockedTimingAspect();
+	BlockedTimingAspect(WakeupHook wakeup_hook);
+	virtual ~BlockedTimingAspect();
 
-  static const char *  blocked_timing_hook_to_string(WakeupHook hook);
+	static const char *blocked_timing_hook_to_string(WakeupHook hook);
 
-  static std::string blocked_timing_hook_to_start_syncpoint(WakeupHook hook);
-  static std::string blocked_timing_hook_to_end_syncpoint(WakeupHook hook);
+	static std::string blocked_timing_hook_to_start_syncpoint(WakeupHook hook);
+	static std::string blocked_timing_hook_to_end_syncpoint(WakeupHook hook);
 
-  void init_BlockedTimingAspect(Thread *thread);
-  void finalize_BlockedTimingAspect(Thread *thread);
+	void init_BlockedTimingAspect(Thread *thread);
+	void finalize_BlockedTimingAspect(Thread *thread);
 
-  WakeupHook blockedTimingAspectHook() const;
+	WakeupHook blockedTimingAspectHook() const;
 
-  /** Translation from WakeupHooks to SyncPoints. Each WakeupHook corresponds to
+	/** Translation from WakeupHooks to SyncPoints. Each WakeupHook corresponds to
    *  exactly one SyncPoint, e.g., WAKEUP_HOOK_PRE_LOOP becomes /preloop.
    */
-  static const std::map<const WakeupHook, const std::string> hook_to_syncpoint;
+	static const std::map<const WakeupHook, const std::string> hook_to_syncpoint;
 
- private:
-  WakeupHook wakeup_hook_;
-  BlockedTimingLoopListener *loop_listener_;
+private:
+	WakeupHook                 wakeup_hook_;
+	BlockedTimingLoopListener *loop_listener_;
 };
 
 } // end namespace fawkes

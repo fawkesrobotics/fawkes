@@ -31,18 +31,18 @@ namespace fawkes {
 
 class WebviewAspectIniFin : public AspectIniFin
 {
- public:
-  WebviewAspectIniFin();
-  ~WebviewAspectIniFin();
+public:
+	WebviewAspectIniFin();
+	~WebviewAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  WebUrlManager *url_manager_;
-  WebNavManager *nav_manager_;
-  WebRequestManager *request_manager_;
-  WebviewRestApiManager *rest_api_manager_;
+private:
+	WebUrlManager *        url_manager_;
+	WebNavManager *        nav_manager_;
+	WebRequestManager *    request_manager_;
+	WebviewRestApiManager *rest_api_manager_;
 };
 
 } // end namespace fawkes

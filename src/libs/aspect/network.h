@@ -25,26 +25,26 @@
 #define _ASPECT_NETWORK_H_
 
 #include <aspect/aspect.h>
-#include <netcomm/service_discovery/service_publisher.h>
 #include <netcomm/service_discovery/service_browser.h>
+#include <netcomm/service_discovery/service_publisher.h>
 #include <netcomm/utils/resolver.h>
 
 namespace fawkes {
 
 class NetworkAspect : public virtual Aspect
 {
- public:
-  NetworkAspect();
-  virtual ~NetworkAspect();
+public:
+	NetworkAspect();
+	virtual ~NetworkAspect();
 
-  void init_NetworkAspect(NetworkNameResolver *resolver,
-			  ServicePublisher *service_publisher,
-			  ServiceBrowser *service_browser);
+	void init_NetworkAspect(NetworkNameResolver *resolver,
+	                        ServicePublisher *   service_publisher,
+	                        ServiceBrowser *     service_browser);
 
- protected:
-  NetworkNameResolver *nnresolver;
-  ServicePublisher    *service_publisher;
-  ServiceBrowser      *service_browser;
+protected:
+	NetworkNameResolver *nnresolver;
+	ServicePublisher *   service_publisher;
+	ServiceBrowser *     service_browser;
 };
 
 } // end namespace fawkes

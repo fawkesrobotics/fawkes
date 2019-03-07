@@ -28,23 +28,23 @@
 #include <pcl_utils/pointcloud_manager.h>
 
 namespace pcl {
-  template <typename PointT>
-    class PointCloud;
+template <typename PointT>
+class PointCloud;
 }
 
 namespace fawkes {
 
 class PointCloudAspect : public virtual Aspect
 {
- public:
-  PointCloudAspect();
-  virtual ~PointCloudAspect();
+public:
+	PointCloudAspect();
+	virtual ~PointCloudAspect();
 
-  void init_PointCloudAspect(PointCloudManager *pcl_manager);
+	void init_PointCloudAspect(PointCloudManager *pcl_manager);
 
- protected:
-  /** Manager to distribute and access point clouds. */
-  PointCloudManager *pcl_manager;
+protected:
+	/** Manager to distribute and access point clouds. */
+	PointCloudManager *pcl_manager;
 };
 
 } // end namespace fawkes

@@ -31,14 +31,14 @@ namespace fawkes {
 
 class ConfigurableAspect : public virtual Aspect
 {
- public:
-  ConfigurableAspect();
-  virtual ~ConfigurableAspect();
+public:
+	ConfigurableAspect();
+	virtual ~ConfigurableAspect();
 
-  void init_ConfigurableAspect(Configuration *config);
+	void init_ConfigurableAspect(Configuration *config);
 
- protected:
-  Configuration *config;
+protected:
+	Configuration *config;
 };
 
 } // end namespace fawkes

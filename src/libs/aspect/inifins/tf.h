@@ -26,24 +26,23 @@
 #include <aspect/inifins/inifin.h>
 
 namespace fawkes {
-  namespace tf {
-    class Transformer;
-  }
-
+namespace tf {
+class Transformer;
+}
 
 class BlackBoard;
 
 class TransformAspectIniFin : public AspectIniFin
 {
- public:
-  TransformAspectIniFin(BlackBoard *blackboard, tf::Transformer *transformer);
+public:
+	TransformAspectIniFin(BlackBoard *blackboard, tf::Transformer *transformer);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  BlackBoard      *blackboard_;
-  tf::Transformer *transformer_;
+private:
+	BlackBoard *     blackboard_;
+	tf::Transformer *transformer_;
 };
 
 } // end namespace fawkes

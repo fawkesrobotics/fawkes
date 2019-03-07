@@ -45,19 +45,16 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor. */
 WebviewAspect::WebviewAspect()
 {
-  add_aspect("WebviewAspect");
+	add_aspect("WebviewAspect");
 }
-
 
 /** Virtual empty Destructor. */
 WebviewAspect::~WebviewAspect()
 {
 }
-
 
 /** Set URL manager.
  * It is guaranteed that this is called for a logging thread before
@@ -69,15 +66,15 @@ WebviewAspect::~WebviewAspect()
  * @see WebviewMaster
  */
 void
-WebviewAspect::init_WebviewAspect(WebUrlManager *url_manager,
-                                  WebNavManager *nav_manager,
-                                  WebRequestManager *request_manager,
+WebviewAspect::init_WebviewAspect(WebUrlManager *        url_manager,
+                                  WebNavManager *        nav_manager,
+                                  WebRequestManager *    request_manager,
                                   WebviewRestApiManager *rest_api_manager)
 {
-  webview_url_manager = url_manager;
-  webview_nav_manager = nav_manager;
-  webview_request_manager = request_manager;
-  webview_rest_api_manager = rest_api_manager;
+	webview_url_manager      = url_manager;
+	webview_nav_manager      = nav_manager;
+	webview_request_manager  = request_manager;
+	webview_rest_api_manager = rest_api_manager;
 }
 
 } // end namespace fawkes

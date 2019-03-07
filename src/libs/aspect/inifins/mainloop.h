@@ -26,32 +26,29 @@
 
 #include <aspect/inifins/inifin.h>
 #include <aspect/mainloop.h>
-#include <utils/constraints/unique.h>
 #include <core/threading/thread_notification_listener.h>
+#include <utils/constraints/unique.h>
 
 namespace fawkes {
 
 class MainLoopEmployer;
 class BlockedTimingExecutor;
 
-class MainLoopAspectIniFin
-: public AspectIniFin,
-  public ThreadNotificationListener
+class MainLoopAspectIniFin : public AspectIniFin, public ThreadNotificationListener
 {
- public:
-  MainLoopAspectIniFin(MainLoopEmployer *employer,
-		       BlockedTimingExecutor *btexec);
+public:
+	MainLoopAspectIniFin(MainLoopEmployer *employer, BlockedTimingExecutor *btexec);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
-  virtual bool thread_started(Thread *thread) throw();
-  virtual bool thread_init_failed(Thread *thread) throw();
+	virtual bool thread_started(Thread *thread) throw();
+	virtual bool thread_init_failed(Thread *thread) throw();
 
- private:
-  MainLoopEmployer      *employer_;
-  BlockedTimingExecutor *btexec_;
-  UniquenessConstraint<MainLoopAspect> mainloop_uc_;
+private:
+	MainLoopEmployer *                   employer_;
+	BlockedTimingExecutor *              btexec_;
+	UniquenessConstraint<MainLoopAspect> mainloop_uc_;
 };
 
 } // end namespace fawkes

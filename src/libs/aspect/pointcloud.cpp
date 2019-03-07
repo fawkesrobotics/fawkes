@@ -34,19 +34,16 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor. */
 PointCloudAspect::PointCloudAspect()
 {
-  add_aspect("PointCloudAspect");
+	add_aspect("PointCloudAspect");
 }
-
 
 /** Virtual empty Destructor. */
 PointCloudAspect::~PointCloudAspect()
 {
 }
-
 
 /** Set URL manager.
  * It is guaranteed that this is called for a thread before
@@ -56,7 +53,7 @@ PointCloudAspect::~PointCloudAspect()
 void
 PointCloudAspect::init_PointCloudAspect(PointCloudManager *cloud_manager)
 {
-  pcl_manager = cloud_manager;
+	pcl_manager = cloud_manager;
 }
 
 } // end namespace fawkes

@@ -32,18 +32,19 @@ class BlackBoardAspectIniFin;
 
 class BlackBoardAspect : public virtual Aspect
 {
-  friend BlackBoardAspectIniFin;
- public:
-  BlackBoardAspect(const char *owner = NULL);
-  virtual ~BlackBoardAspect();
+	friend BlackBoardAspectIniFin;
 
-  void init_BlackBoardAspect(BlackBoard *bb);
+public:
+	BlackBoardAspect(const char *owner = NULL);
+	virtual ~BlackBoardAspect();
 
- protected:
-  BlackBoard *blackboard;
+	void init_BlackBoardAspect(BlackBoard *bb);
 
- private:
-  const char *blackboard_owner_name_;
+protected:
+	BlackBoard *blackboard;
+
+private:
+	const char *blackboard_owner_name_;
 };
 
 } // end namespace fawkes

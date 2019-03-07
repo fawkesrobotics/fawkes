@@ -22,7 +22,6 @@
  */
 
 #include <aspect/fawkes_network.h>
-
 #include <netcomm/fawkes/hub.h>
 
 namespace fawkes {
@@ -47,7 +46,6 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** @var FawkesNetworkHub FawkesNetworkAspect::fnethub
  * This is the Fawkes network hub member used to access the Fawkes
  * network protocol.
@@ -58,14 +56,13 @@ namespace fawkes {
 /** Constructor. */
 FawkesNetworkAspect::FawkesNetworkAspect()
 {
-  add_aspect("FawkesNetworkAspect");
+	add_aspect("FawkesNetworkAspect");
 }
 
 /** Virtual empty Destructor. */
 FawkesNetworkAspect::~FawkesNetworkAspect()
 {
 }
-
 
 /** Set the logger.
  * It is guaranteed that this is called for a thread having the
@@ -77,7 +74,7 @@ FawkesNetworkAspect::~FawkesNetworkAspect()
 void
 FawkesNetworkAspect::init_FawkesNetworkAspect(FawkesNetworkHub *fnethub)
 {
-  this->fnethub = fnethub;
+	this->fnethub = fnethub;
 }
 
 } // end namespace fawkes

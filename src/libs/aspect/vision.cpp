@@ -48,22 +48,19 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param mode mode to operate in
  */
 VisionAspect::VisionAspect(VisionThreadMode mode)
 {
-  add_aspect("VisionAspect");
-  vision_thread_mode_ = mode;
+	add_aspect("VisionAspect");
+	vision_thread_mode_ = mode;
 }
-
 
 /** Virtual empty Destructor. */
 VisionAspect::~VisionAspect()
 {
 }
-
 
 /** Set vision master.
  * @param vision_master vision master
@@ -74,9 +71,8 @@ VisionAspect::~VisionAspect()
 void
 VisionAspect::init_VisionAspect(firevision::VisionMaster *vision_master)
 {
-  this->vision_master = vision_master;
+	this->vision_master = vision_master;
 }
-
 
 /** Get the vision thread mode of this thread.
  * @return vision thread mode
@@ -84,7 +80,7 @@ VisionAspect::init_VisionAspect(firevision::VisionMaster *vision_master)
 VisionAspect::VisionThreadMode
 VisionAspect::vision_thread_mode()
 {
-  return vision_thread_mode_;
+	return vision_thread_mode_;
 }
 
 } // end namespace fawkes

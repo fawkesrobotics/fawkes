@@ -23,9 +23,9 @@
 #define _ASPECT_SYNCPOINT_H_
 
 #include <aspect/aspect.h>
+#include <core/threading/thread_loop_listener.h>
 #include <syncpoint/syncpoint.h>
 #include <syncpoint/syncpoint_manager.h>
-#include <core/threading/thread_loop_listener.h>
 
 #include <string>
 
@@ -33,25 +33,27 @@ namespace fawkes {
 
 class SyncPointAspect : public virtual Aspect, public ThreadLoopListener
 {
-  public:
-    SyncPointAspect(SyncPoint::WakeupType type_in, std::string identifier_in, std::string identifier_out = "");
-    SyncPointAspect(std::string out_identifier);
-    virtual ~SyncPointAspect();
+public:
+	SyncPointAspect(SyncPoint::WakeupType type_in,
+	                std::string           identifier_in,
+	                std::string           identifier_out = "");
+	SyncPointAspect(std::string out_identifier);
+	virtual ~SyncPointAspect();
 
-    void init_SyncPointAspect(Thread *thread, SyncPointManager *syncpoint_manager);
-    void finalize_SyncPointAspect(Thread *thread, SyncPointManager *syncpoint_manager);
+	void init_SyncPointAspect(Thread *thread, SyncPointManager *syncpoint_manager);
+	void finalize_SyncPointAspect(Thread *thread, SyncPointManager *syncpoint_manager);
 
-    void pre_loop(Thread *thread);
-    void post_loop(Thread *thread);
+	void pre_loop(Thread *thread);
+	void post_loop(Thread *thread);
 
-  private:
-    SyncPoint::WakeupType type_in_;
-    std::string identifier_in_;
-    std::string identifier_out_;
-    bool has_input_syncpoint_;
-    bool has_output_syncpoint_;
-    RefPtr<SyncPoint> sp_in_;
-    RefPtr<SyncPoint> sp_out_;
+private:
+	SyncPoint::WakeupType type_in_;
+	std::string           identifier_in_;
+	std::string           identifier_out_;
+	bool                  has_input_syncpoint_;
+	bool                  has_output_syncpoint_;
+	RefPtr<SyncPoint>     sp_in_;
+	RefPtr<SyncPoint>     sp_out_;
 };
 
 } // end namespace fawkes

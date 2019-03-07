@@ -24,11 +24,11 @@
 #ifndef _ASPECT_MANAGER_H_
 #define _ASPECT_MANAGER_H_
 
-#include <core/threading/thread_initializer.h>
 #include <core/threading/thread_finalizer.h>
+#include <core/threading/thread_initializer.h>
 
-#include <map>
 #include <list>
+#include <map>
 #include <string>
 
 namespace fawkes {
@@ -51,45 +51,44 @@ class AspectIniFin;
 class SyncPointManager;
 
 namespace tf {
-  class Transformer;
+class Transformer;
 }
 
 class AspectManager : public ThreadInitializer, public ThreadFinalizer
 {
- public:
-  virtual ~AspectManager();
+public:
+	virtual ~AspectManager();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
-  virtual bool prepare_finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
+	virtual bool prepare_finalize(Thread *thread);
 
-  void register_inifin(AspectIniFin *inifin);
-  void unregister_inifin(AspectIniFin *inifin);
+	void register_inifin(AspectIniFin *inifin);
+	void unregister_inifin(AspectIniFin *inifin);
 
-  bool has_threads_for_aspect(const char *aspect_name);
+	bool has_threads_for_aspect(const char *aspect_name);
 
-  void register_default_inifins(BlackBoard *blackboard,
-				ThreadCollector *collector,
-				Configuration *config,
-				Logger *logger,
-				Clock *clock,
-				FawkesNetworkHub *fnethub,
-				MainLoopEmployer *mloop_employer,
-				LoggerEmployer *logger_employer,
-				BlockedTimingExecutor *btexec,
-				NetworkNameResolver *nnresolver,
-				ServicePublisher *service_publisher,
-				ServiceBrowser *service_browser,
-				PluginManager *pmanager,
-				tf::Transformer *tf_listener,
-				SyncPointManager *syncpoint_manager);
+	void register_default_inifins(BlackBoard *           blackboard,
+	                              ThreadCollector *      collector,
+	                              Configuration *        config,
+	                              Logger *               logger,
+	                              Clock *                clock,
+	                              FawkesNetworkHub *     fnethub,
+	                              MainLoopEmployer *     mloop_employer,
+	                              LoggerEmployer *       logger_employer,
+	                              BlockedTimingExecutor *btexec,
+	                              NetworkNameResolver *  nnresolver,
+	                              ServicePublisher *     service_publisher,
+	                              ServiceBrowser *       service_browser,
+	                              PluginManager *        pmanager,
+	                              tf::Transformer *      tf_listener,
+	                              SyncPointManager *     syncpoint_manager);
 
- private:
-  std::map<std::string, AspectIniFin *> inifins_;
-  std::map<std::string, AspectIniFin *> default_inifins_;
-  std::map<std::string, std::list<Thread *> > threads_;
+private:
+	std::map<std::string, AspectIniFin *>      inifins_;
+	std::map<std::string, AspectIniFin *>      default_inifins_;
+	std::map<std::string, std::list<Thread *>> threads_;
 };
-
 
 } // end namespace fawkes
 

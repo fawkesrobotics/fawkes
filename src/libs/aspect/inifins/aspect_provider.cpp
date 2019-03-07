@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <aspect/inifins/aspect_provider.h>
 #include <aspect/aspect_provider.h>
+#include <aspect/inifins/aspect_provider.h>
 #include <aspect/manager.h>
 
 namespace fawkes {
@@ -39,72 +39,69 @@ namespace fawkes {
  * @param manager aspect manager to register new aspects to
  */
 AspectProviderAspectIniFin::AspectProviderAspectIniFin(AspectManager *manager)
-  : AspectIniFin("AspectProviderAspect")
+: AspectIniFin("AspectProviderAspect")
 {
-  aspect_manager_ = manager;
+	aspect_manager_ = manager;
 }
-
 
 void
 AspectProviderAspectIniFin::init(Thread *thread)
 {
-  AspectProviderAspect *provider_thread;
-  provider_thread = dynamic_cast<AspectProviderAspect *>(thread);
+	AspectProviderAspect *provider_thread;
+	provider_thread = dynamic_cast<AspectProviderAspect *>(thread);
 
-  if (provider_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "AspectProviderAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	if (provider_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "AspectProviderAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  const std::list<AspectIniFin *> &aspects =
-    provider_thread->aspect_provider_aspects();
-  std::list<AspectIniFin *>::const_iterator a;
-  for (a = aspects.begin(); a != aspects.end(); ++a) {
-    aspect_manager_->register_inifin(*a);
-  }
+	const std::list<AspectIniFin *> &         aspects = provider_thread->aspect_provider_aspects();
+	std::list<AspectIniFin *>::const_iterator a;
+	for (a = aspects.begin(); a != aspects.end(); ++a) {
+		aspect_manager_->register_inifin(*a);
+	}
 }
-
 
 bool
 AspectProviderAspectIniFin::prepare_finalize(Thread *thread)
 {
-  AspectProviderAspect *p_thr;
-  p_thr = dynamic_cast<AspectProviderAspect *>(thread);
+	AspectProviderAspect *p_thr;
+	p_thr = dynamic_cast<AspectProviderAspect *>(thread);
 
-  if (p_thr == NULL)  return true;
+	if (p_thr == NULL)
+		return true;
 
-  const std::list<AspectIniFin *> &aspects = p_thr->aspect_provider_aspects();
-  std::list<AspectIniFin *>::const_iterator a;
-  for (a = aspects.begin(); a != aspects.end(); ++a) {
-    if (aspect_manager_->has_threads_for_aspect((*a)->get_aspect_name())) {
-      return false;
-    }
-  }
+	const std::list<AspectIniFin *> &         aspects = p_thr->aspect_provider_aspects();
+	std::list<AspectIniFin *>::const_iterator a;
+	for (a = aspects.begin(); a != aspects.end(); ++a) {
+		if (aspect_manager_->has_threads_for_aspect((*a)->get_aspect_name())) {
+			return false;
+		}
+	}
 
-  return true;
+	return true;
 }
-
 
 void
 AspectProviderAspectIniFin::finalize(Thread *thread)
 {
-  AspectProviderAspect *provider_thread;
-  provider_thread = dynamic_cast<AspectProviderAspect *>(thread);
+	AspectProviderAspect *provider_thread;
+	provider_thread = dynamic_cast<AspectProviderAspect *>(thread);
 
-  if (provider_thread == NULL) {
-    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
-					"AspectProviderAspect, but RTTI says it "
-					"has not. ", thread->name());
-  }
+	if (provider_thread == NULL) {
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+		                                    "AspectProviderAspect, but RTTI says it "
+		                                    "has not. ",
+		                                    thread->name());
+	}
 
-  const std::list<AspectIniFin *> &aspects =
-    provider_thread->aspect_provider_aspects();
-  std::list<AspectIniFin *>::const_iterator a;
-  for (a = aspects.begin(); a != aspects.end(); ++a) {
-    aspect_manager_->unregister_inifin(*a);  
-  }
+	const std::list<AspectIniFin *> &         aspects = provider_thread->aspect_provider_aspects();
+	std::list<AspectIniFin *>::const_iterator a;
+	for (a = aspects.begin(); a != aspects.end(); ++a) {
+		aspect_manager_->unregister_inifin(*a);
+	}
 }
-
 
 } // end namespace fawkes

@@ -46,14 +46,13 @@ namespace fawkes {
 /** Constructor. */
 MainLoopAspect::MainLoopAspect()
 {
-  add_aspect("MainLoopAspect");
+	add_aspect("MainLoopAspect");
 }
 
 /** Virtual empty destructor. */
 MainLoopAspect::~MainLoopAspect()
 {
 }
-
 
 /** Initialize main loop aspect.
  * Called from the Aspect initializer.
@@ -64,7 +63,7 @@ MainLoopAspect::~MainLoopAspect()
 void
 MainLoopAspect::init_MainLoopAspect(BlockedTimingExecutor *btexec)
 {
-  blocked_timing_executor = btexec;
+	blocked_timing_executor = btexec;
 }
 
 } // end namespace fawkes

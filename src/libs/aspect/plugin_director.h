@@ -31,14 +31,14 @@ namespace fawkes {
 
 class PluginDirectorAspect : public virtual Aspect
 {
- public:
-  PluginDirectorAspect();
-  virtual ~PluginDirectorAspect();
+public:
+	PluginDirectorAspect();
+	virtual ~PluginDirectorAspect();
 
-  void init_PluginDirectorAspect(PluginManager *manager);
+	void init_PluginDirectorAspect(PluginManager *manager);
 
- protected:
-  PluginManager *plugin_manager;
+protected:
+	PluginManager *plugin_manager;
 };
 
 } // end namespace fawkes

@@ -50,7 +50,6 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** @var ThreadCollector * ThreadProducerAspect::thread_collector
  * Thread collector.
  * Use this thread collector to register/unregister threads as they are
@@ -60,14 +59,13 @@ namespace fawkes {
 /** Constructor. */
 ThreadProducerAspect::ThreadProducerAspect()
 {
-  add_aspect("ThreadProducerAspect");
+	add_aspect("ThreadProducerAspect");
 }
 
 /** Virtual empty destructor. */
 ThreadProducerAspect::~ThreadProducerAspect()
 {
 }
-
 
 /** Init thread producer aspect.
  * This set the thread collector.
@@ -78,7 +76,7 @@ ThreadProducerAspect::~ThreadProducerAspect()
 void
 ThreadProducerAspect::init_ThreadProducerAspect(ThreadCollector *collector)
 {
-  thread_collector = collector;
+	thread_collector = collector;
 }
 
 } // end namespace fawkes

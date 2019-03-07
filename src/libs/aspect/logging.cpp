@@ -41,7 +41,6 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** @var Logger LoggingAspect::logger
  * This is the Logger member used to access the logger.
  * The logger will remain valid for the whole lifetime of the
@@ -51,15 +50,13 @@ namespace fawkes {
 /** Constructor. */
 LoggingAspect::LoggingAspect()
 {
-  add_aspect("LoggingAspect");
+	add_aspect("LoggingAspect");
 }
-
 
 /** Virtual empty Destructor. */
 LoggingAspect::~LoggingAspect()
 {
 }
-
 
 /** Set the logger.
  * It is guaranteed that this is called for a logging thread before
@@ -69,7 +66,7 @@ LoggingAspect::~LoggingAspect()
 void
 LoggingAspect::init_LoggingAspect(Logger *logger)
 {
-  this->logger = logger;
+	this->logger = logger;
 }
 
 } // end namespace fawkes
