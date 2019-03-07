@@ -20,17 +20,16 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <gui_utils/multi_interface_chooser_dialog.h>
-
-#include <gtkmm.h>
+#include <blackboard/blackboard.h>
 #include <core/exception.h>
 #include <core/exceptions/software.h>
-#include <blackboard/blackboard.h>
+#include <gui_utils/multi_interface_chooser_dialog.h>
 #include <interface/interface_info.h>
 
 #include <algorithm>
 #include <cassert>
 #include <cstring>
+#include <gtkmm.h>
 
 namespace fawkes {
 
@@ -43,7 +42,7 @@ namespace fawkes {
 /** Constructor. */
 MultiInterfaceChooserDialog::Record::Record()
 {
-  add(load);
+	add(load);
 }
 
 /** @class MultiInterfaceChooserDialog <gui_utils/multi_interface_chooser_dialog.h>
@@ -52,7 +51,6 @@ MultiInterfaceChooserDialog::Record::Record()
  * matching given type and ID patterns.
  * @author Christoph Schwering
  */
-
 
 /** Factory method.
  *
@@ -72,21 +70,19 @@ MultiInterfaceChooserDialog::Record::Record()
  * @param title title of the dialog
  * @return new MultiInterfaceChooserDialog
  */
-MultiInterfaceChooserDialog*
-MultiInterfaceChooserDialog::create(
-    Gtk::Window& parent,
-    BlackBoard* blackboard,
-    const char* type_pattern,
-    const char* id_pattern,
-    const TypeIdPairList& loaded_interfaces,
-    const Glib::ustring& title)
+MultiInterfaceChooserDialog *
+MultiInterfaceChooserDialog::create(Gtk::Window &         parent,
+                                    BlackBoard *          blackboard,
+                                    const char *          type_pattern,
+                                    const char *          id_pattern,
+                                    const TypeIdPairList &loaded_interfaces,
+                                    const Glib::ustring & title)
 {
-  MultiInterfaceChooserDialog* d = new MultiInterfaceChooserDialog(
-      parent, loaded_interfaces, title);
-  d->init(blackboard, type_pattern, id_pattern);
-  return d;
+	MultiInterfaceChooserDialog *d =
+	  new MultiInterfaceChooserDialog(parent, loaded_interfaces, title);
+	d->init(blackboard, type_pattern, id_pattern);
+	return d;
 }
-
 
 /** Constructor for subclasses.
  *
@@ -96,53 +92,47 @@ MultiInterfaceChooserDialog::create(
  * @param loaded_interfaces list of interfaces which are already loaded
  * @param title title of the dialog
  */
-MultiInterfaceChooserDialog::MultiInterfaceChooserDialog(
-    Gtk::Window &parent,
-    const TypeIdPairList& loaded_interfaces,
-    const Glib::ustring& title)
-  : InterfaceChooserDialog(parent, title),
-    record_(NULL)
+MultiInterfaceChooserDialog::MultiInterfaceChooserDialog(Gtk::Window &         parent,
+                                                         const TypeIdPairList &loaded_interfaces,
+                                                         const Glib::ustring & title)
+: InterfaceChooserDialog(parent, title), record_(NULL)
 {
-  loaded_interfaces_.insert(loaded_interfaces.begin(), loaded_interfaces.end());
-  Glib::RefPtr<Gtk::TreeSelection> treesel = treeview_.get_selection();
-  treeview_.set_reorderable(true);
-  treeview_.set_tooltip_text("Drag the rows to change the painting order.");
-  treesel->set_mode(Gtk::SELECTION_NONE);
-  // May *NOT* call init(), because init() calls virtual methods.
+	loaded_interfaces_.insert(loaded_interfaces.begin(), loaded_interfaces.end());
+	Glib::RefPtr<Gtk::TreeSelection> treesel = treeview_.get_selection();
+	treeview_.set_reorderable(true);
+	treeview_.set_tooltip_text("Drag the rows to change the painting order.");
+	treesel->set_mode(Gtk::SELECTION_NONE);
+	// May *NOT* call init(), because init() calls virtual methods.
 }
-
 
 /** Destructor. */
 MultiInterfaceChooserDialog::~MultiInterfaceChooserDialog()
 {
-  if (record_) {
-    delete record_;
-  }
+	if (record_) {
+		delete record_;
+	}
 }
-
 
 void
-MultiInterfaceChooserDialog::on_load_toggled(const Glib::ustring& path)
+MultiInterfaceChooserDialog::on_load_toggled(const Glib::ustring &path)
 {
-  Gtk::TreeModel::Row row = *model_->get_iter(path);
-  row[record().load] = !row[record().load];
+	Gtk::TreeModel::Row row = *model_->get_iter(path);
+	row[record().load]      = !row[record().load];
 }
-
 
 /** Returns the Record of this chooser dialog.
  * Subclasses of InterfaceChooserDialog might want to override this method.
  * @return Record implementation.
  */
-const MultiInterfaceChooserDialog::Record&
+const MultiInterfaceChooserDialog::Record &
 MultiInterfaceChooserDialog::record() const
 {
-  if (!record_) {
-    MultiInterfaceChooserDialog* this_nonconst = const_cast<MultiInterfaceChooserDialog*>(this);
-    this_nonconst->record_ = new Record();
-  }
-  return *record_;
+	if (!record_) {
+		MultiInterfaceChooserDialog *this_nonconst = const_cast<MultiInterfaceChooserDialog *>(this);
+		this_nonconst->record_                     = new Record();
+	}
+	return *record_;
 }
-
 
 /** Initializes the columns GUI-wise.
  * Called in the ctor.
@@ -154,21 +144,20 @@ MultiInterfaceChooserDialog::record() const
 int
 MultiInterfaceChooserDialog::init_columns()
 {
-  treeview_.append_column("Load", record().load);
+	treeview_.append_column("Load", record().load);
 
-  const int n = InterfaceChooserDialog::init_columns();
+	const int n = InterfaceChooserDialog::init_columns();
 
-  Gtk::CellRendererToggle* renderer = dynamic_cast<Gtk::CellRendererToggle*>(
-      treeview_.get_column_cell_renderer(0));
-  assert(renderer != NULL);
+	Gtk::CellRendererToggle *renderer =
+	  dynamic_cast<Gtk::CellRendererToggle *>(treeview_.get_column_cell_renderer(0));
+	assert(renderer != NULL);
 
-  renderer->set_activatable(true);
-  renderer->signal_toggled().connect(
-      sigc::mem_fun(*this, &MultiInterfaceChooserDialog::on_load_toggled));
+	renderer->set_activatable(true);
+	renderer->signal_toggled().connect(
+	  sigc::mem_fun(*this, &MultiInterfaceChooserDialog::on_load_toggled));
 
-  return n + 2;
+	return n + 2;
 }
-
 
 /** Initializes a row with the given interface.
  * Called in the ctor.
@@ -179,14 +168,12 @@ MultiInterfaceChooserDialog::init_columns()
  * @param ii The interface info that should populate the row.
  */
 void
-MultiInterfaceChooserDialog::init_row(Gtk::TreeModel::Row& row,
-                                      const InterfaceInfo& ii)
+MultiInterfaceChooserDialog::init_row(Gtk::TreeModel::Row &row, const InterfaceInfo &ii)
 {
-  InterfaceChooserDialog::init_row(row, ii);
-  row[record().load] = loaded_interfaces_.find(std::make_pair(ii.type(), ii.id())) !=
-                       loaded_interfaces_.end();
+	InterfaceChooserDialog::init_row(row, ii);
+	row[record().load] =
+	  loaded_interfaces_.find(std::make_pair(ii.type(), ii.id())) != loaded_interfaces_.end();
 }
-
 
 /** Get selected interface types and their respective IDs.
  * @return A list of type + id pairs of interfaces that are to be loaded.
@@ -194,22 +181,19 @@ MultiInterfaceChooserDialog::init_row(Gtk::TreeModel::Row& row,
 MultiInterfaceChooserDialog::TypeIdPairList
 MultiInterfaceChooserDialog::get_selected_interfaces() const
 {
-  TypeIdPairList types_and_ids;
+	TypeIdPairList types_and_ids;
 
-  const Gtk::TreeNodeChildren children = model_->children();
-  for (Gtk::TreeNodeChildren::const_iterator it = children.begin();
-       it != children.end(); ++it)
-  {
-    const Gtk::TreeRow& row = *it;
-    if (row[record().load]) {
-      TypeIdPair pair = std::make_pair(row[record().type], row[record().id]);
-      types_and_ids.push_back(pair);
-    }
-  }
+	const Gtk::TreeNodeChildren children = model_->children();
+	for (Gtk::TreeNodeChildren::const_iterator it = children.begin(); it != children.end(); ++it) {
+		const Gtk::TreeRow &row = *it;
+		if (row[record().load]) {
+			TypeIdPair pair = std::make_pair(row[record().type], row[record().id]);
+			types_and_ids.push_back(pair);
+		}
+	}
 
-  return types_and_ids;
+	return types_and_ids;
 }
-
 
 /** Get selected interface types and their respective IDs.
  * @return A list of type + id pairs of interfaces that are to be loaded,
@@ -219,24 +203,20 @@ MultiInterfaceChooserDialog::get_selected_interfaces() const
 MultiInterfaceChooserDialog::TypeIdPairList
 MultiInterfaceChooserDialog::get_newly_selected_interfaces() const
 {
-  TypeIdPairList types_and_ids;
+	TypeIdPairList types_and_ids;
 
-  const Gtk::TreeNodeChildren children = model_->children();
-  for (Gtk::TreeNodeChildren::const_iterator it = children.begin();
-       it != children.end(); ++it)
-  {
-    const Gtk::TreeRow& row = *it;
-    if (row[record().load]) {
-      TypeIdPair pair = std::make_pair(row[record().type], row[record().id]);
-      if (loaded_interfaces_.find(pair) == loaded_interfaces_.end())
-      {
-        types_and_ids.push_back(pair);
-      }
-    }
-  }
+	const Gtk::TreeNodeChildren children = model_->children();
+	for (Gtk::TreeNodeChildren::const_iterator it = children.begin(); it != children.end(); ++it) {
+		const Gtk::TreeRow &row = *it;
+		if (row[record().load]) {
+			TypeIdPair pair = std::make_pair(row[record().type], row[record().id]);
+			if (loaded_interfaces_.find(pair) == loaded_interfaces_.end()) {
+				types_and_ids.push_back(pair);
+			}
+		}
+	}
 
-  return types_and_ids;
+	return types_and_ids;
 }
 
 } // end of namespace fawkes
-

@@ -43,4 +43,4 @@ CairoRobotDrawer::~CairoRobotDrawer()
 {
 }
 
-}
+} // namespace fawkes

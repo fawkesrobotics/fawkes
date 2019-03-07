@@ -24,65 +24,62 @@
 #ifndef _LIBS_GUI_UTILS_SERVICE_CHOOSER_DIALOG_H_
 #define _LIBS_GUI_UTILS_SERVICE_CHOOSER_DIALOG_H_
 
-#include <gui_utils/service_model.h>
-
 #include <gtkmm/dialog.h>
-#include <gtkmm/treeview.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/expander.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treeview.h>
+#include <gui_utils/service_model.h>
 #ifdef HAVE_GCONFMM
-#  include <gconfmm.h>
+#	include <gconfmm.h>
 #endif
 
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
 
 namespace fawkes {
 
 class FawkesNetworkClient;
 class ServiceModel;
 
-class ServiceChooserDialog
-  : public Gtk::Dialog
+class ServiceChooserDialog : public Gtk::Dialog
 {
- public:
-  ServiceChooserDialog(Gtk::Window &parent,
-		       FawkesNetworkClient *client,
-		       Glib::ustring title = "Select Service",
-		       const char *service = "_fawkes._tcp");
+public:
+	ServiceChooserDialog(Gtk::Window &        parent,
+	                     FawkesNetworkClient *client,
+	                     Glib::ustring        title   = "Select Service",
+	                     const char *         service = "_fawkes._tcp");
 
-  ServiceChooserDialog(Gtk::Window &parent,
-		       Glib::ustring title = "Select Service",
-		       const char *service = "_fawkes._tcp");
+	ServiceChooserDialog(Gtk::Window & parent,
+	                     Glib::ustring title   = "Select Service",
+	                     const char *  service = "_fawkes._tcp");
 
-  virtual ~ServiceChooserDialog();
+	virtual ~ServiceChooserDialog();
 
-  void get_selected_service(Glib::ustring &name, Glib::ustring &hostname,
-                            unsigned short int &port);
-  void get_selected_service(Glib::ustring &hostname, struct sockaddr_storage &sockaddr);
-  
-  void get_raw_address(struct sockaddr *addr, socklen_t addr_size);
+	void get_selected_service(Glib::ustring &name, Glib::ustring &hostname, unsigned short int &port);
+	void get_selected_service(Glib::ustring &hostname, struct sockaddr_storage &sockaddr);
 
-  void run_and_connect();
+	void get_raw_address(struct sockaddr *addr, socklen_t addr_size);
 
- protected:
-  virtual void on_expander_changed();
+	void run_and_connect();
 
- private:
-  void ctor();
-  fawkes::FawkesNetworkClient *client_;
+protected:
+	virtual void on_expander_changed();
 
-  Gtk::Window         &parent_;
-  Gtk::TreeView        treeview_;
-  Gtk::Entry           entry_;
-  Gtk::Expander        expander_;
-  Gtk::ScrolledWindow  scrollwin_;
+private:
+	void                         ctor();
+	fawkes::FawkesNetworkClient *client_;
+
+	Gtk::Window &       parent_;
+	Gtk::TreeView       treeview_;
+	Gtk::Entry          entry_;
+	Gtk::Expander       expander_;
+	Gtk::ScrolledWindow scrollwin_;
 #ifdef HAVE_GCONFMM
-  Glib::RefPtr<Gnome::Conf::Client> gconf_;
+	Glib::RefPtr<Gnome::Conf::Client> gconf_;
 #endif
 
-  ServiceModel *service_model_;
+	ServiceModel *service_model_;
 };
 
 } // end of namespace fawkes
