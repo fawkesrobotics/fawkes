@@ -23,56 +23,59 @@
 #ifndef _PLUGINS_RRD_RRD_THREAD_H_
 #define _PLUGINS_RRD_RRD_THREAD_H_
 
-#include <plugins/rrd/aspect/rrd_manager.h>
-#include <plugins/rrd/aspect/rrd_inifin.h>
+#include <aspect/aspect_provider.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <core/utils/rwlock_vector.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
-#include <aspect/aspect_provider.h>
+#include <plugins/rrd/aspect/rrd_inifin.h>
+#include <plugins/rrd/aspect/rrd_manager.h>
 #include <utils/time/wait.h>
 
-class RRDThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::AspectProviderAspect,
-  public fawkes::RRDManager
+class RRDThread : public fawkes::Thread,
+                  public fawkes::LoggingAspect,
+                  public fawkes::ConfigurableAspect,
+                  public fawkes::ClockAspect,
+                  public fawkes::AspectProviderAspect,
+                  public fawkes::RRDManager
 {
- public:
-  RRDThread();
-  virtual ~RRDThread();
+public:
+	RRDThread();
+	virtual ~RRDThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  // for RRDManager
-  virtual void add_rrd(fawkes::RRDDefinition *rrd_def);
-  virtual void remove_rrd(fawkes::RRDDefinition *rrd_def);
-  virtual void add_graph(fawkes::RRDGraphDefinition *rrd_graph_def);
+	// for RRDManager
+	virtual void add_rrd(fawkes::RRDDefinition *rrd_def);
+	virtual void remove_rrd(fawkes::RRDDefinition *rrd_def);
+	virtual void add_graph(fawkes::RRDGraphDefinition *rrd_graph_def);
 
-  virtual void add_data(const char *rrd_name, const char *format, ...);
+	virtual void add_data(const char *rrd_name, const char *format, ...);
 
-  virtual const fawkes::RWLockVector<fawkes::RRDDefinition *> & get_rrds() const;
-  virtual const fawkes::RWLockVector<fawkes::RRDGraphDefinition *> &
-    get_graphs() const;
+	virtual const fawkes::RWLockVector<fawkes::RRDDefinition *> &     get_rrds() const;
+	virtual const fawkes::RWLockVector<fawkes::RRDGraphDefinition *> &get_graphs() const;
 
-  void generate_graphs();
+	void generate_graphs();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  fawkes::RRDAspectIniFin     rrd_aspect_inifin_;
+private:
+	fawkes::RRDAspectIniFin rrd_aspect_inifin_;
 
-  fawkes::RWLockVector<fawkes::RRDDefinition *>      rrds_;
-  fawkes::RWLockVector<fawkes::RRDGraphDefinition *> graphs_;
+	fawkes::RWLockVector<fawkes::RRDDefinition *>      rrds_;
+	fawkes::RWLockVector<fawkes::RRDGraphDefinition *> graphs_;
 
-  fawkes::TimeWait           *time_wait_;
-  float                       cfg_graph_interval_;
+	fawkes::TimeWait *time_wait_;
+	float             cfg_graph_interval_;
 };
 
 #endif

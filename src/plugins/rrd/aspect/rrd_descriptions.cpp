@@ -21,16 +21,16 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/rrd/aspect/rrd_descriptions.h>
-#include <plugins/rrd/aspect/rrd_manager.h>
 #include <core/exceptions/software.h>
 #include <core/exceptions/system.h>
+#include <plugins/rrd/aspect/rrd_descriptions.h>
+#include <plugins/rrd/aspect/rrd_manager.h>
 #include <utils/misc/string_conversions.h>
 
-#include <cstring>
-#include <cstdlib>
-#include <cstdio>
 #include <cfloat>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 namespace fawkes {
 
@@ -50,25 +50,38 @@ const float RRDDataSource::UNKNOWN = FLT_MIN;
  * @param min minimum value, use UNKNOWN constant if not known
  * @param max maximum value, use UNKNOWN constant if not known
  */
-RRDDataSource::RRDDataSource(const char *name, Type type, unsigned int heartbeat,
-			     float min, float max)
-  : name_(strdup(name)), type_(type), heartbeat_(heartbeat),
-    min_(min), max_(max), rpn_expression_(NULL), string_(NULL)
+RRDDataSource::RRDDataSource(const char * name,
+                             Type         type,
+                             unsigned int heartbeat,
+                             float        min,
+                             float        max)
+: name_(strdup(name)),
+  type_(type),
+  heartbeat_(heartbeat),
+  min_(min),
+  max_(max),
+  rpn_expression_(NULL),
+  string_(NULL)
 {
-  if (type_ == COMPUTE) {
-    throw IllegalArgumentException("Non-compute data source ctor used with "
-				   "COMPUTE type for DS %s", name);
-  }
+	if (type_ == COMPUTE) {
+		throw IllegalArgumentException("Non-compute data source ctor used with "
+		                               "COMPUTE type for DS %s",
+		                               name);
+	}
 }
-
 
 /** Constructor for expression RRDs.
  * @param name name of the data source
  * @param rpn_expression RPN expression
  */
 RRDDataSource::RRDDataSource(const char *name, const char *rpn_expression)
-  : name_(strdup(name)), type_(COMPUTE), heartbeat_(300), min_(UNKNOWN),
-    max_(UNKNOWN), rpn_expression_(strdup(rpn_expression)), string_(NULL)
+: name_(strdup(name)),
+  type_(COMPUTE),
+  heartbeat_(300),
+  min_(UNKNOWN),
+  max_(UNKNOWN),
+  rpn_expression_(strdup(rpn_expression)),
+  string_(NULL)
 {
 }
 
@@ -76,20 +89,25 @@ RRDDataSource::RRDDataSource(const char *name, const char *rpn_expression)
  * @param other other instance to copy
  */
 RRDDataSource::RRDDataSource(const RRDDataSource &other)
-  : name_(strdup(other.name_)), type_(other.type_),
-    heartbeat_(other.heartbeat_),
-    min_(other.min_), max_(other.max_),
-    rpn_expression_(other.rpn_expression_ ? strdup(other.rpn_expression_) : 0),
-    string_(NULL)
+: name_(strdup(other.name_)),
+  type_(other.type_),
+  heartbeat_(other.heartbeat_),
+  min_(other.min_),
+  max_(other.max_),
+  rpn_expression_(other.rpn_expression_ ? strdup(other.rpn_expression_) : 0),
+  string_(NULL)
 {
 }
 
 /** Destructor. */
 RRDDataSource::~RRDDataSource()
 {
-  if (string_) free(string_);
-  if (name_)  free(name_);
-  if (rpn_expression_)  free(rpn_expression_);
+	if (string_)
+		free(string_);
+	if (name_)
+		free(name_);
+	if (rpn_expression_)
+		free(rpn_expression_);
 }
 
 /** Assignment operator.
@@ -99,21 +117,24 @@ RRDDataSource::~RRDDataSource()
 RRDDataSource &
 RRDDataSource::operator=(const RRDDataSource &other)
 {
-  if (string_) free(string_);
-  if (name_)  free(name_);
-  if (rpn_expression_)  free(rpn_expression_);
-  string_ = NULL;
-  rpn_expression_ = NULL;
-  name_ = strdup(other.name_);
-  type_ = other.type_;
-  heartbeat_ = other.heartbeat_;
-  min_ = other.min_;
-  max_ = other.max_;
-  if (other.rpn_expression_)  rpn_expression_ = strdup(other.rpn_expression_);
+	if (string_)
+		free(string_);
+	if (name_)
+		free(name_);
+	if (rpn_expression_)
+		free(rpn_expression_);
+	string_         = NULL;
+	rpn_expression_ = NULL;
+	name_           = strdup(other.name_);
+	type_           = other.type_;
+	heartbeat_      = other.heartbeat_;
+	min_            = other.min_;
+	max_            = other.max_;
+	if (other.rpn_expression_)
+		rpn_expression_ = strdup(other.rpn_expression_);
 
-  return *this;
+	return *this;
 }
-
 
 /** Get string reprensetation.
  * @return string representation suitable to be bassed to rrd_create().
@@ -121,41 +142,40 @@ RRDDataSource::operator=(const RRDDataSource &other)
 const char *
 RRDDataSource::to_string() const
 {
-  if (! string_) {
-    if (type_ == COMPUTE) {
-      if (asprintf(&string_, "DS:%s:COMPUTE:%s", name_, rpn_expression_) == -1) {
-	throw OutOfMemoryException("Failed to create DS string for %s", name_);
-      }
-    } else {
-      const char *type_string;
-      switch (type_) {
-      case COUNTER:  type_string = "COUNTER";  break;
-      case DERIVE:   type_string = "DERIVE";   break;
-      case ABSOLUTE: type_string = "ABSOLUTE"; break;
-      default:       type_string = "GAUGE";    break;
-      }
-      char min_s[32];
-      char max_s[32];
-      if (min_ == UNKNOWN) {
-	strcpy(min_s, "U");
-      } else {
-	snprintf(min_s, 32, "%f", min_);
-      }
-      if (max_ == UNKNOWN) {
-	strcpy(max_s, "U");
-      } else {
-	snprintf(max_s, 32, "%f", max_);
-      }
-      if (asprintf(&string_, "DS:%s:%s:%u:%s:%s", name_, type_string,
-		   heartbeat_, min_s, max_s) == -1) {
-	throw OutOfMemoryException("Failed to create DS string for %s", name_);
-      }
-    }
-  }
+	if (!string_) {
+		if (type_ == COMPUTE) {
+			if (asprintf(&string_, "DS:%s:COMPUTE:%s", name_, rpn_expression_) == -1) {
+				throw OutOfMemoryException("Failed to create DS string for %s", name_);
+			}
+		} else {
+			const char *type_string;
+			switch (type_) {
+			case COUNTER: type_string = "COUNTER"; break;
+			case DERIVE: type_string = "DERIVE"; break;
+			case ABSOLUTE: type_string = "ABSOLUTE"; break;
+			default: type_string = "GAUGE"; break;
+			}
+			char min_s[32];
+			char max_s[32];
+			if (min_ == UNKNOWN) {
+				strcpy(min_s, "U");
+			} else {
+				snprintf(min_s, 32, "%f", min_);
+			}
+			if (max_ == UNKNOWN) {
+				strcpy(max_s, "U");
+			} else {
+				snprintf(max_s, 32, "%f", max_);
+			}
+			if (asprintf(&string_, "DS:%s:%s:%u:%s:%s", name_, type_string, heartbeat_, min_s, max_s)
+			    == -1) {
+				throw OutOfMemoryException("Failed to create DS string for %s", name_);
+			}
+		}
+	}
 
-  return string_;
+	return string_;
 }
-
 
 /** @class RRDArchive <plugins/rrd/aspect/rrd_descriptions.h>
  * RRD Archive description.
@@ -173,27 +193,24 @@ RRDDataSource::to_string() const
  * @param rows defines how many generations of data values are kept in an RRA.
  * Obviously, this has to be greater than zero.
  */
-RRDArchive::RRDArchive(ConsolidationFunction cf, float xff,
-		       unsigned int steps, unsigned int rows)
-  : cf_(cf), xff_(xff), steps_(steps), rows_(rows), string_(NULL)
+RRDArchive::RRDArchive(ConsolidationFunction cf, float xff, unsigned int steps, unsigned int rows)
+: cf_(cf), xff_(xff), steps_(steps), rows_(rows), string_(NULL)
 {
 }
-
 
 /** Copy constructor.
  * @param rra instance to copy
  */
 RRDArchive::RRDArchive(const RRDArchive &rra)
-  : cf_(rra.cf_), xff_(rra.xff_), steps_(rra.steps_), rows_(rra.rows_),
-    string_(NULL)
+: cf_(rra.cf_), xff_(rra.xff_), steps_(rra.steps_), rows_(rra.rows_), string_(NULL)
 {
 }
-
 
 /** Destructor. */
 RRDArchive::~RRDArchive()
 {
-  if (string_) free(string_);
+	if (string_)
+		free(string_);
 }
 
 /** Assignment operator.
@@ -203,13 +220,14 @@ RRDArchive::~RRDArchive()
 RRDArchive &
 RRDArchive::operator=(const RRDArchive &rra)
 {
-  if (string_) free(string_);
-  string_ = NULL;
-  cf_     = rra.cf_;
-  xff_    = rra.xff_;
-  steps_  = rra.steps_;
-  rows_   = rra.rows_;
-  return *this;
+	if (string_)
+		free(string_);
+	string_ = NULL;
+	cf_     = rra.cf_;
+	xff_    = rra.xff_;
+	steps_  = rra.steps_;
+	rows_   = rra.rows_;
+	return *this;
 }
 
 /** Get string representation.
@@ -218,21 +236,20 @@ RRDArchive::operator=(const RRDArchive &rra)
 const char *
 RRDArchive::to_string() const
 {
-  if (! string_) {
-    const char *cf_string;
-    switch (cf_) {
-    case MIN:  cf_string = "MIN";  break;
-    case MAX:  cf_string = "MAX";   break;
-    case LAST: cf_string = "LAST"; break;
-    default:   cf_string = "AVERAGE";    break;
-    }
-    if (asprintf(&string_, "RRA:%s:%f:%u:%u", cf_string,
-		 xff_, steps_, rows_) == -1) {
-      throw OutOfMemoryException("Failed to create RRA string");
-    }
-  }
+	if (!string_) {
+		const char *cf_string;
+		switch (cf_) {
+		case MIN: cf_string = "MIN"; break;
+		case MAX: cf_string = "MAX"; break;
+		case LAST: cf_string = "LAST"; break;
+		default: cf_string = "AVERAGE"; break;
+		}
+		if (asprintf(&string_, "RRA:%s:%f:%u:%u", cf_string, xff_, steps_, rows_) == -1) {
+			throw OutOfMemoryException("Failed to create RRA string");
+		}
+	}
 
-  return string_;
+	return string_;
 }
 
 /** Convert consolidation function type to string.
@@ -242,12 +259,12 @@ RRDArchive::to_string() const
 const char *
 RRDArchive::cf_to_string(ConsolidationFunction cf)
 {
-  switch (cf) {
-  case RRDArchive::MIN:  return "MIN";     break;
-  case RRDArchive::MAX:  return "MAX";     break;
-  case RRDArchive::LAST: return "LAST";    break;
-  default:               return "AVERAGE"; break;
-  }
+	switch (cf) {
+	case RRDArchive::MIN: return "MIN"; break;
+	case RRDArchive::MAX: return "MAX"; break;
+	case RRDArchive::LAST: return "LAST"; break;
+	default: return "AVERAGE"; break;
+	}
 }
 
 /** @class RRDDefinition <plugins/rrd/aspect/rrd_descriptions.h>
@@ -268,10 +285,17 @@ RRDArchive::cf_to_string(ConsolidationFunction cf)
  * @param recreate if true existing RRD files will be overwritten, otherwise
  * data is appended.
  */
-RRDDefinition::RRDDefinition(const char *name, std::vector<RRDDataSource> &ds,
-			     unsigned int step_sec, bool recreate)
-  : name_(strdup(name)), step_sec_(step_sec), recreate_(recreate),
-    ds_(ds), rra_(get_default_rra()), filename_(NULL), rrd_manager_(NULL)
+RRDDefinition::RRDDefinition(const char *                name,
+                             std::vector<RRDDataSource> &ds,
+                             unsigned int                step_sec,
+                             bool                        recreate)
+: name_(strdup(name)),
+  step_sec_(step_sec),
+  recreate_(recreate),
+  ds_(ds),
+  rra_(get_default_rra()),
+  filename_(NULL),
+  rrd_manager_(NULL)
 {
 }
 
@@ -284,24 +308,32 @@ RRDDefinition::RRDDefinition(const char *name, std::vector<RRDDataSource> &ds,
  * @param recreate if true existing RRD files will be overwritten, otherwise
  * data is appended.
  */
-RRDDefinition::RRDDefinition(const char *name,
-			     std::vector<RRDDataSource> &ds,
-			     std::vector<RRDArchive> &rra,
-			     unsigned int step_sec, bool recreate)
-  : name_(strdup(name)), step_sec_(step_sec), recreate_(recreate), ds_(ds),
-    rra_(rra), filename_(NULL), rrd_manager_(NULL)
+RRDDefinition::RRDDefinition(const char *                name,
+                             std::vector<RRDDataSource> &ds,
+                             std::vector<RRDArchive> &   rra,
+                             unsigned int                step_sec,
+                             bool                        recreate)
+: name_(strdup(name)),
+  step_sec_(step_sec),
+  recreate_(recreate),
+  ds_(ds),
+  rra_(rra),
+  filename_(NULL),
+  rrd_manager_(NULL)
 {
 }
-
 
 /** Copy constructor.
  * @param other instance to clone
  */
 RRDDefinition::RRDDefinition(const RRDDefinition &other)
-  : name_(strdup(other.name_)), step_sec_(other.step_sec_),
-    recreate_(other.recreate_), ds_(other.ds_), rra_(other.rra_),
-    filename_(other.filename_ ? strdup(other.filename_) : 0),
-    rrd_manager_(NULL)
+: name_(strdup(other.name_)),
+  step_sec_(other.step_sec_),
+  recreate_(other.recreate_),
+  ds_(other.ds_),
+  rra_(other.rra_),
+  filename_(other.filename_ ? strdup(other.filename_) : 0),
+  rrd_manager_(NULL)
 {
 }
 
@@ -312,27 +344,34 @@ RRDDefinition::RRDDefinition(const RRDDefinition &other)
 RRDDefinition &
 RRDDefinition::operator=(const RRDDefinition &other)
 {
-  if (name_)  free(name_);
-  if (filename_) free(filename_);
-  if (rrd_manager_)  rrd_manager_->remove_rrd(this);
-  filename_    = NULL;
-  rrd_manager_ = NULL;
-  name_        = strdup(other.name_);
-  step_sec_    = other.step_sec_;
-  recreate_    = other.recreate_;
-  ds_          = other.ds_;
-  rra_         = other.rra_;
-  if (other.filename_) filename_=strdup(other.filename_);
-  return *this;
+	if (name_)
+		free(name_);
+	if (filename_)
+		free(filename_);
+	if (rrd_manager_)
+		rrd_manager_->remove_rrd(this);
+	filename_    = NULL;
+	rrd_manager_ = NULL;
+	name_        = strdup(other.name_);
+	step_sec_    = other.step_sec_;
+	recreate_    = other.recreate_;
+	ds_          = other.ds_;
+	rra_         = other.rra_;
+	if (other.filename_)
+		filename_ = strdup(other.filename_);
+	return *this;
 }
 
 /** Destructor. */
 RRDDefinition::~RRDDefinition()
 {
-  if (rrd_manager_)  rrd_manager_->remove_rrd(this);
+	if (rrd_manager_)
+		rrd_manager_->remove_rrd(this);
 
-  if (name_)  free(name_);
-  if (filename_)  free(filename_);
+	if (name_)
+		free(name_);
+	if (filename_)
+		free(filename_);
 }
 
 /** Get default RRAs. They correspond to the following and assume a
@@ -362,28 +401,27 @@ RRDDefinition::~RRDDefinition()
 const std::vector<RRDArchive>
 RRDDefinition::get_default_rra()
 {
-  std::vector<RRDArchive> rv;
-  rv.push_back(RRDArchive(RRDArchive::AVERAGE, 0.5,    1,  720));
-  rv.push_back(RRDArchive(RRDArchive::AVERAGE, 0.5,    3, 1680));
-  rv.push_back(RRDArchive(RRDArchive::AVERAGE, 0.5,   30,  456));
-  rv.push_back(RRDArchive(RRDArchive::AVERAGE, 0.5,  180,  412));
-  rv.push_back(RRDArchive(RRDArchive::AVERAGE, 0.5,  720,  439));
-  rv.push_back(RRDArchive(RRDArchive::AVERAGE, 0.5, 8640,  402));
-  rv.push_back(RRDArchive(RRDArchive::MIN,     0.5,    1,  720));
-  rv.push_back(RRDArchive(RRDArchive::MIN,     0.5,    3, 1680));
-  rv.push_back(RRDArchive(RRDArchive::MIN,     0.5,   30,  456));
-  rv.push_back(RRDArchive(RRDArchive::MIN,     0.5,  180,  412));
-  rv.push_back(RRDArchive(RRDArchive::MIN,     0.5,  720,  439));
-  rv.push_back(RRDArchive(RRDArchive::MIN,     0.5, 8640,  402));
-  rv.push_back(RRDArchive(RRDArchive::MAX,     0.5,    1,  720));
-  rv.push_back(RRDArchive(RRDArchive::MAX,     0.5,    3, 1680));
-  rv.push_back(RRDArchive(RRDArchive::MAX,     0.5,   30,  456));
-  rv.push_back(RRDArchive(RRDArchive::MAX,     0.5,  180,  412));
-  rv.push_back(RRDArchive(RRDArchive::MAX,     0.5,  720,  439));
-  rv.push_back(RRDArchive(RRDArchive::MAX,     0.5, 8640,  402));
-  return rv;
+	std::vector<RRDArchive> rv;
+	rv.push_back(RRDArchive(RRDArchive::AVERAGE, 0.5, 1, 720));
+	rv.push_back(RRDArchive(RRDArchive::AVERAGE, 0.5, 3, 1680));
+	rv.push_back(RRDArchive(RRDArchive::AVERAGE, 0.5, 30, 456));
+	rv.push_back(RRDArchive(RRDArchive::AVERAGE, 0.5, 180, 412));
+	rv.push_back(RRDArchive(RRDArchive::AVERAGE, 0.5, 720, 439));
+	rv.push_back(RRDArchive(RRDArchive::AVERAGE, 0.5, 8640, 402));
+	rv.push_back(RRDArchive(RRDArchive::MIN, 0.5, 1, 720));
+	rv.push_back(RRDArchive(RRDArchive::MIN, 0.5, 3, 1680));
+	rv.push_back(RRDArchive(RRDArchive::MIN, 0.5, 30, 456));
+	rv.push_back(RRDArchive(RRDArchive::MIN, 0.5, 180, 412));
+	rv.push_back(RRDArchive(RRDArchive::MIN, 0.5, 720, 439));
+	rv.push_back(RRDArchive(RRDArchive::MIN, 0.5, 8640, 402));
+	rv.push_back(RRDArchive(RRDArchive::MAX, 0.5, 1, 720));
+	rv.push_back(RRDArchive(RRDArchive::MAX, 0.5, 3, 1680));
+	rv.push_back(RRDArchive(RRDArchive::MAX, 0.5, 30, 456));
+	rv.push_back(RRDArchive(RRDArchive::MAX, 0.5, 180, 412));
+	rv.push_back(RRDArchive(RRDArchive::MAX, 0.5, 720, 439));
+	rv.push_back(RRDArchive(RRDArchive::MAX, 0.5, 8640, 402));
+	return rv;
 }
-
 
 /** Find data source index.
  * @param ds_name name of the data source
@@ -393,11 +431,12 @@ RRDDefinition::get_default_rra()
 size_t
 RRDDefinition::find_ds_index(const char *ds_name) const
 {
-  for (size_t i = 0; i < ds_.size(); ++i) {
-    if (strcmp(ds_[i].get_name(), ds_name) == 0) return i;
-  }
+	for (size_t i = 0; i < ds_.size(); ++i) {
+		if (strcmp(ds_[i].get_name(), ds_name) == 0)
+			return i;
+	}
 
-  throw Exception("Data source name %s not found", ds_name);
+	throw Exception("Data source name %s not found", ds_name);
 }
 
 /** Set filename.
@@ -409,12 +448,11 @@ RRDDefinition::find_ds_index(const char *ds_name) const
 void
 RRDDefinition::set_filename(const char *filename)
 {
-  if (filename_) {
-    throw Exception("Graph definition %s: filename has already been set!", name_);
-  }
-  filename_ = strdup(filename);
+	if (filename_) {
+		throw Exception("Graph definition %s: filename has already been set!", name_);
+	}
+	filename_ = strdup(filename);
 }
-
 
 /** Set RRD manager.
  * This can be done only once. Do not do this manually, rather let the RRDManager
@@ -425,13 +463,11 @@ RRDDefinition::set_filename(const char *filename)
 void
 RRDDefinition::set_rrd_manager(RRDManager *rrd_manager)
 {
-  if (rrd_manager_) {
-    throw Exception("RRD definition %s: RRD manager has already been set", name_);
-  }
-  rrd_manager_ = rrd_manager;
+	if (rrd_manager_) {
+		throw Exception("RRD definition %s: RRD manager has already been set", name_);
+	}
+	rrd_manager_ = rrd_manager;
 }
-
-
 
 /** @class RRDGraphDataDefinition <plugins/rrd/aspect/rrd_descriptions.h>
  * Represent data definition in graph arguments.
@@ -446,49 +482,57 @@ RRDDefinition::set_rrd_manager(RRDManager *rrd_manager)
  * @param ds_name data source name in RRD, @p rrd_def will be queried for the
  * data source. If ds_name is NULL, @p name will be used as the data source name.
  */
-RRDGraphDataDefinition::RRDGraphDataDefinition(const char *name,
-					       RRDArchive::ConsolidationFunction cf,
-					       const RRDDefinition *rrd_def,
-					       const char *ds_name)
-  : name_(strdup(name)), rrd_def_(rrd_def),
-    ds_name_(ds_name ? strdup(ds_name) : strdup(name)),
-    rpn_expression_(NULL), cf_(cf), string_(NULL)
+RRDGraphDataDefinition::RRDGraphDataDefinition(const char *                      name,
+                                               RRDArchive::ConsolidationFunction cf,
+                                               const RRDDefinition *             rrd_def,
+                                               const char *                      ds_name)
+: name_(strdup(name)),
+  rrd_def_(rrd_def),
+  ds_name_(ds_name ? strdup(ds_name) : strdup(name)),
+  rpn_expression_(NULL),
+  cf_(cf),
+  string_(NULL)
 {
 }
-
 
 /** CDEF constructor.
  * @param name name of the graph data source
  * @param rpn_expression RPN expression
  */
-RRDGraphDataDefinition::RRDGraphDataDefinition(const char *name,
-					       const char *rpn_expression)
-  : name_(strdup(name)), rrd_def_(0), ds_name_(NULL),
-    rpn_expression_(strdup(rpn_expression)),
-    cf_(RRDArchive::AVERAGE), string_(NULL)
+RRDGraphDataDefinition::RRDGraphDataDefinition(const char *name, const char *rpn_expression)
+: name_(strdup(name)),
+  rrd_def_(0),
+  ds_name_(NULL),
+  rpn_expression_(strdup(rpn_expression)),
+  cf_(RRDArchive::AVERAGE),
+  string_(NULL)
 {
 }
-
 
 /** Copy constructor.
  * @param other instance to clone
  */
 RRDGraphDataDefinition::RRDGraphDataDefinition(const RRDGraphDataDefinition &other)
-  : name_(strdup(other.name_)), rrd_def_(other.rrd_def_),
-    ds_name_(other.ds_name_ ? strdup(other.ds_name_) : NULL),
-    rpn_expression_(other.rpn_expression_ ? strdup(other.rpn_expression_) : 0),
-    cf_(other.cf_), string_(NULL)
+: name_(strdup(other.name_)),
+  rrd_def_(other.rrd_def_),
+  ds_name_(other.ds_name_ ? strdup(other.ds_name_) : NULL),
+  rpn_expression_(other.rpn_expression_ ? strdup(other.rpn_expression_) : 0),
+  cf_(other.cf_),
+  string_(NULL)
 {
 }
-
 
 /** Destructor. */
 RRDGraphDataDefinition::~RRDGraphDataDefinition()
 {
-  if (name_)  free(name_);
-  if (ds_name_)  free(ds_name_);
-  if (rpn_expression_)  free(rpn_expression_);
-  if (string_)   free(string_);
+	if (name_)
+		free(name_);
+	if (ds_name_)
+		free(ds_name_);
+	if (rpn_expression_)
+		free(rpn_expression_);
+	if (string_)
+		free(string_);
 }
 
 /** Assignment operator.
@@ -498,22 +542,27 @@ RRDGraphDataDefinition::~RRDGraphDataDefinition()
 RRDGraphDataDefinition &
 RRDGraphDataDefinition::operator=(const RRDGraphDataDefinition &other)
 {
-  if (string_)  free(string_);
-  if (ds_name_) free(ds_name_);
-  if (name_)  free(name_);
-  if (rpn_expression_) free(rpn_expression_);
+	if (string_)
+		free(string_);
+	if (ds_name_)
+		free(ds_name_);
+	if (name_)
+		free(name_);
+	if (rpn_expression_)
+		free(rpn_expression_);
 
-  string_         = NULL;
-  rpn_expression_ = NULL;
-  name_           = strdup(other.name_);
-  rrd_def_        = other.rrd_def_;
-  if (other.ds_name_)  ds_name_ = strdup(other.ds_name_);
-  if (other.rpn_expression_)  rpn_expression_ = other.rpn_expression_;
-  cf_             = other.cf_;
+	string_         = NULL;
+	rpn_expression_ = NULL;
+	name_           = strdup(other.name_);
+	rrd_def_        = other.rrd_def_;
+	if (other.ds_name_)
+		ds_name_ = strdup(other.ds_name_);
+	if (other.rpn_expression_)
+		rpn_expression_ = other.rpn_expression_;
+	cf_ = other.cf_;
 
-  return *this;
+	return *this;
 }
-
 
 /** Create string representation.
  * @return string representation suitable for rrd_graph_v().
@@ -521,23 +570,27 @@ RRDGraphDataDefinition::operator=(const RRDGraphDataDefinition &other)
 const char *
 RRDGraphDataDefinition::to_string() const
 {
-  if (! string_) {
-    if (rpn_expression_) {
-      if (asprintf(&string_, "CDEF:%s=%s", name_, rpn_expression_) == -1) {
-	throw OutOfMemoryException("Failed to create RRA string");
-      }
-    } else {
-      size_t ds_index = rrd_def_->find_ds_index(ds_name_);
+	if (!string_) {
+		if (rpn_expression_) {
+			if (asprintf(&string_, "CDEF:%s=%s", name_, rpn_expression_) == -1) {
+				throw OutOfMemoryException("Failed to create RRA string");
+			}
+		} else {
+			size_t ds_index = rrd_def_->find_ds_index(ds_name_);
 
-      if (asprintf(&string_, "DEF:%s=%s:%s:%s", name_, rrd_def_->get_filename(),
-		   rrd_def_->get_ds(ds_index).get_name(),
-		   RRDArchive::cf_to_string(cf_)) == -1) {
-	throw OutOfMemoryException("Failed to create RRA string");
-      }
-    }
-  }
+			if (asprintf(&string_,
+			             "DEF:%s=%s:%s:%s",
+			             name_,
+			             rrd_def_->get_filename(),
+			             rrd_def_->get_ds(ds_index).get_name(),
+			             RRDArchive::cf_to_string(cf_))
+			    == -1) {
+				throw OutOfMemoryException("Failed to create RRA string");
+			}
+		}
+	}
 
-  return string_;
+	return string_;
 }
 
 /** @class RRDGraphElement <plugins/rrd/aspect/rrd_descriptions.h>
@@ -559,10 +612,8 @@ RRDGraphDataDefinition::to_string() const
 const char *
 RRDGraphElement::to_string() const
 {
-  throw NotImplementedException("Invalid graph element");
+	throw NotImplementedException("Invalid graph element");
 }
-
-
 
 /** @class RRDGraphGPrint <plugins/rrd/aspect/rrd_descriptions.h>
  * Print string inside graph.
@@ -574,11 +625,10 @@ RRDGraphElement::to_string() const
  * @param cf consolidation function to use
  * @param format Format string, cf. man rrdgraph_graph(1).
  */
-RRDGraphGPrint::RRDGraphGPrint(const char *def_name,
-			       RRDArchive::ConsolidationFunction cf,
-			       const char *format)
-  : def_name_(strdup(def_name)), cf_(cf), format_(strdup(format)),
-    string_(NULL)
+RRDGraphGPrint::RRDGraphGPrint(const char *                      def_name,
+                               RRDArchive::ConsolidationFunction cf,
+                               const char *                      format)
+: def_name_(strdup(def_name)), cf_(cf), format_(strdup(format)), string_(NULL)
 {
 }
 
@@ -586,18 +636,19 @@ RRDGraphGPrint::RRDGraphGPrint(const char *def_name,
  * @param other instance to copy
  */
 RRDGraphGPrint::RRDGraphGPrint(const RRDGraphGPrint &other)
-  : def_name_(strdup(other.def_name_)), cf_(other.cf_),
-    format_(strdup(other.format_)), string_(NULL)
+: def_name_(strdup(other.def_name_)), cf_(other.cf_), format_(strdup(other.format_)), string_(NULL)
 {
 }
-
 
 /** Destructor. */
 RRDGraphGPrint::~RRDGraphGPrint()
 {
-  if (def_name_)  free(def_name_);
-  if (format_) free(format_);
-  if (string_) free(string_);
+	if (def_name_)
+		free(def_name_);
+	if (format_)
+		free(format_);
+	if (string_)
+		free(string_);
 }
 
 /** Assignment operator.
@@ -607,32 +658,33 @@ RRDGraphGPrint::~RRDGraphGPrint()
 RRDGraphGPrint &
 RRDGraphGPrint::operator=(const RRDGraphGPrint &g)
 {
-  if (def_name_)  free(def_name_);
-  if (format_) free(format_);
-  if (string_) free(string_);
+	if (def_name_)
+		free(def_name_);
+	if (format_)
+		free(format_);
+	if (string_)
+		free(string_);
 
-  string_   = NULL;
-  def_name_ = strdup(g.def_name_);
-  cf_       = g.cf_;
-  format_   = strdup(g.format_);
+	string_   = NULL;
+	def_name_ = strdup(g.def_name_);
+	cf_       = g.cf_;
+	format_   = strdup(g.format_);
 
-  return *this;
+	return *this;
 }
-
 
 const char *
 RRDGraphGPrint::to_string() const
 {
-  if (! string_) {
-    if (asprintf(&string_, "GPRINT:%s:%s:%s", def_name_,
-		 RRDArchive::cf_to_string(cf_), format_) == -1) {
-      throw OutOfMemoryException("Failed to create RRD graph GPRINT string");
-    }
-  }
+	if (!string_) {
+		if (asprintf(&string_, "GPRINT:%s:%s:%s", def_name_, RRDArchive::cf_to_string(cf_), format_)
+		    == -1) {
+			throw OutOfMemoryException("Failed to create RRD graph GPRINT string");
+		}
+	}
 
-  return string_;
+	return string_;
 }
-
 
 /** @class RRDGraphLine <plugins/rrd/aspect/rrd_descriptions.h>
  * Print graph line.
@@ -646,10 +698,17 @@ RRDGraphGPrint::to_string() const
  * @param legend legend string
  * @param stacked true to stack on previous graph element
  */
-RRDGraphLine::RRDGraphLine(const char *def_name, float width, const char *color,
-			   const char *legend, bool stacked)
-  : def_name_(strdup(def_name)), width_(width), color_(strdup(color)),
-    legend_(strdup(legend)), stacked_(stacked), string_(NULL)
+RRDGraphLine::RRDGraphLine(const char *def_name,
+                           float       width,
+                           const char *color,
+                           const char *legend,
+                           bool        stacked)
+: def_name_(strdup(def_name)),
+  width_(width),
+  color_(strdup(color)),
+  legend_(strdup(legend)),
+  stacked_(stacked),
+  string_(NULL)
 {
 }
 
@@ -657,22 +716,27 @@ RRDGraphLine::RRDGraphLine(const char *def_name, float width, const char *color,
  * @param other instance to copy
  */
 RRDGraphLine::RRDGraphLine(const RRDGraphLine &other)
-  : def_name_(strdup(other.def_name_)), width_(other.width_),
-    color_(strdup(other.color_)),
-    legend_(strdup(other.legend_)), stacked_(other.stacked_), string_(NULL)
+: def_name_(strdup(other.def_name_)),
+  width_(other.width_),
+  color_(strdup(other.color_)),
+  legend_(strdup(other.legend_)),
+  stacked_(other.stacked_),
+  string_(NULL)
 {
 }
-
 
 /** Destructor. */
 RRDGraphLine::~RRDGraphLine()
 {
-  if (def_name_)  free(def_name_);
-  if (color_)  free(color_);
-  if (legend_)  free(legend_);
-  if (string_) free(string_);
+	if (def_name_)
+		free(def_name_);
+	if (color_)
+		free(color_);
+	if (legend_)
+		free(legend_);
+	if (string_)
+		free(string_);
 }
-
 
 /** Assignment operator.
  * @param g matching graph element to assign
@@ -681,35 +745,43 @@ RRDGraphLine::~RRDGraphLine()
 RRDGraphLine &
 RRDGraphLine::operator=(const RRDGraphLine &g)
 {
-  if (def_name_)  free(def_name_);
-  if (color_)  free(color_);
-  if (legend_)  free(legend_);
-  if (string_) free(string_);
+	if (def_name_)
+		free(def_name_);
+	if (color_)
+		free(color_);
+	if (legend_)
+		free(legend_);
+	if (string_)
+		free(string_);
 
-  string_   = NULL;
-  def_name_ = strdup(g.def_name_);
-  width_    = g.width_;
-  color_    = strdup(g.color_);
-  legend_   = strdup(g.legend_);
-  stacked_  = g.stacked_;
+	string_   = NULL;
+	def_name_ = strdup(g.def_name_);
+	width_    = g.width_;
+	color_    = strdup(g.color_);
+	legend_   = strdup(g.legend_);
+	stacked_  = g.stacked_;
 
-  return *this;
+	return *this;
 }
-
 
 const char *
 RRDGraphLine::to_string() const
 {
-  if (! string_) {
-    if (asprintf(&string_, "LINE%f:%s#%s:%s%s", width_, def_name_, color_,
-		 legend_, stacked_ ? ":STACK" : "") == -1) {
-      throw OutOfMemoryException("Failed to create RRD graph LINE string");
-    }
-  }
+	if (!string_) {
+		if (asprintf(&string_,
+		             "LINE%f:%s#%s:%s%s",
+		             width_,
+		             def_name_,
+		             color_,
+		             legend_,
+		             stacked_ ? ":STACK" : "")
+		    == -1) {
+			throw OutOfMemoryException("Failed to create RRD graph LINE string");
+		}
+	}
 
-  return string_;
+	return string_;
 }
-
 
 /** @class RRDGraphArea <plugins/rrd/aspect/rrd_descriptions.h>
  * Print graph area.
@@ -722,33 +794,42 @@ RRDGraphLine::to_string() const
  * @param legend legend string
  * @param stacked true to stack on previous graph element
  */
-RRDGraphArea::RRDGraphArea(const char *def_name,const char *color,
-			   const char *legend, bool stacked)
-  : def_name_(strdup(def_name)), color_(strdup(color)),
-    legend_(strdup(legend)), stacked_(stacked), string_(NULL)
+RRDGraphArea::RRDGraphArea(const char *def_name,
+                           const char *color,
+                           const char *legend,
+                           bool        stacked)
+: def_name_(strdup(def_name)),
+  color_(strdup(color)),
+  legend_(strdup(legend)),
+  stacked_(stacked),
+  string_(NULL)
 {
 }
-
 
 /** Copy ctor.
  * @param other instance to copy
  */
 RRDGraphArea::RRDGraphArea(const RRDGraphArea &other)
-  : def_name_(strdup(other.def_name_)), color_(strdup(other.color_)),
-    legend_(strdup(other.legend_)), stacked_(other.stacked_), string_(NULL)
+: def_name_(strdup(other.def_name_)),
+  color_(strdup(other.color_)),
+  legend_(strdup(other.legend_)),
+  stacked_(other.stacked_),
+  string_(NULL)
 {
 }
-
 
 /** Destructor. */
 RRDGraphArea::~RRDGraphArea()
 {
-  if (def_name_)  free(def_name_);
-  if (color_)  free(color_);
-  if (legend_)  free(legend_);
-  if (string_) free(string_);
+	if (def_name_)
+		free(def_name_);
+	if (color_)
+		free(color_);
+	if (legend_)
+		free(legend_);
+	if (string_)
+		free(string_);
 }
-
 
 /** Assignment operator.
  * @param g matching graph element to assign
@@ -757,34 +838,36 @@ RRDGraphArea::~RRDGraphArea()
 RRDGraphArea &
 RRDGraphArea::operator=(const RRDGraphArea &g)
 {
-  if (def_name_)  free(def_name_);
-  if (color_)  free(color_);
-  if (legend_)  free(legend_);
-  if (string_) free(string_);
+	if (def_name_)
+		free(def_name_);
+	if (color_)
+		free(color_);
+	if (legend_)
+		free(legend_);
+	if (string_)
+		free(string_);
 
-  string_   = NULL;
-  def_name_ = strdup(g.def_name_);
-  color_    = strdup(g.color_);
-  legend_   = strdup(g.legend_);
-  stacked_  = g.stacked_;
+	string_   = NULL;
+	def_name_ = strdup(g.def_name_);
+	color_    = strdup(g.color_);
+	legend_   = strdup(g.legend_);
+	stacked_  = g.stacked_;
 
-  return *this;
+	return *this;
 }
-
 
 const char *
 RRDGraphArea::to_string() const
 {
-  if (! string_) {
-    if (asprintf(&string_, "AREA:%s#%s:%s%s", def_name_, color_, legend_,
-		 stacked_ ? ":STACK" : "") == -1) {
-      throw OutOfMemoryException("Failed to create RRD graph AREA string");
-    }
-  }
+	if (!string_) {
+		if (asprintf(&string_, "AREA:%s#%s:%s%s", def_name_, color_, legend_, stacked_ ? ":STACK" : "")
+		    == -1) {
+			throw OutOfMemoryException("Failed to create RRD graph AREA string");
+		}
+	}
 
-  return string_;
+	return string_;
 }
-
 
 /** @class RRDGraphDefinition <plugins/rrd/aspect/rrd_descriptions.h>
  * Class representing a graph definition.
@@ -811,79 +894,97 @@ RRDGraphArea::to_string() const
  * @param elements elements to print in the graph. This graph definition takes
  * ownership of the graph elemenets and will delete them in its dtor.
  */
-RRDGraphDefinition::RRDGraphDefinition(const char *name, RRDDefinition *rrd_def,
-				       const char *title,
-				       const char *vertical_label,
-				       std::vector<RRDGraphDataDefinition> &def,
-				       std::vector<RRDGraphElement *> &elements,
-				       time_t start, time_t end, unsigned int step,
-				       unsigned int update_interval,
-				       bool slope_mode)
-  : name_(strdup(name)), rrd_def_(rrd_def),
-    start_(start), end_(end), step_(step),
-    title_(strdup(title)), vertical_label_(strdup(vertical_label)),
-    update_interval_(update_interval), slope_mode_(slope_mode),
-    defs_(def), elements_(elements)
+RRDGraphDefinition::RRDGraphDefinition(const char *                         name,
+                                       RRDDefinition *                      rrd_def,
+                                       const char *                         title,
+                                       const char *                         vertical_label,
+                                       std::vector<RRDGraphDataDefinition> &def,
+                                       std::vector<RRDGraphElement *> &     elements,
+                                       time_t                               start,
+                                       time_t                               end,
+                                       unsigned int                         step,
+                                       unsigned int                         update_interval,
+                                       bool                                 slope_mode)
+: name_(strdup(name)),
+  rrd_def_(rrd_def),
+  start_(start),
+  end_(end),
+  step_(step),
+  title_(strdup(title)),
+  vertical_label_(strdup(vertical_label)),
+  update_interval_(update_interval),
+  slope_mode_(slope_mode),
+  defs_(def),
+  elements_(elements)
 {
-  filename_ = NULL;
-  argv_ = NULL;
-  argc_ = 0;
-  fonts_.push_back("LEGEND:10:");
-  fonts_.push_back("UNIT:8:");
-  fonts_.push_back("TITLE:12:");
-  fonts_.push_back("AXIS:8:");
-  width_ = 560;
-  width_s_ = strdup(StringConversions::to_string(width_).c_str());
-  start_s_ = strdup(StringConversions::to_string(start_).c_str());
-  end_s_   = strdup(StringConversions::to_string(end_).c_str());
-  step_s_  = strdup(StringConversions::to_string(step_).c_str());
+	filename_ = NULL;
+	argv_     = NULL;
+	argc_     = 0;
+	fonts_.push_back("LEGEND:10:");
+	fonts_.push_back("UNIT:8:");
+	fonts_.push_back("TITLE:12:");
+	fonts_.push_back("AXIS:8:");
+	width_   = 560;
+	width_s_ = strdup(StringConversions::to_string(width_).c_str());
+	start_s_ = strdup(StringConversions::to_string(start_).c_str());
+	end_s_   = strdup(StringConversions::to_string(end_).c_str());
+	step_s_  = strdup(StringConversions::to_string(step_).c_str());
 }
 
 /** Copy constructor.
  * @param other instance to copy
  */
 RRDGraphDefinition::RRDGraphDefinition(const RRDGraphDefinition &other)
-  : name_(strdup(other.name_)), rrd_def_(other.rrd_def_),
-    start_(other.start_), end_(other.end_), step_(other.step_),
-    title_(strdup(other.title_)),
-    vertical_label_(strdup(other.vertical_label_)),
-    update_interval_(other.update_interval_),
-    slope_mode_(other.slope_mode_), defs_(other.defs_),
-    width_(other.width_), fonts_(other.fonts_),
-    filename_(strdup(other.filename_))
+: name_(strdup(other.name_)),
+  rrd_def_(other.rrd_def_),
+  start_(other.start_),
+  end_(other.end_),
+  step_(other.step_),
+  title_(strdup(other.title_)),
+  vertical_label_(strdup(other.vertical_label_)),
+  update_interval_(other.update_interval_),
+  slope_mode_(other.slope_mode_),
+  defs_(other.defs_),
+  width_(other.width_),
+  fonts_(other.fonts_),
+  filename_(strdup(other.filename_))
 {
-  std::vector<RRDGraphElement *>::const_iterator i;
-  for (i = other.elements_.begin(); i != other.elements_.end(); ++i) {
-    elements_.push_back((*i)->clone());
-  }
+	std::vector<RRDGraphElement *>::const_iterator i;
+	for (i = other.elements_.begin(); i != other.elements_.end(); ++i) {
+		elements_.push_back((*i)->clone());
+	}
 
-  argv_ = NULL;
-  argc_ = 0;
-  width_s_ = strdup(StringConversions::to_string(width_).c_str());
-  start_s_ = strdup(StringConversions::to_string(start_).c_str());
-  end_s_   = strdup(StringConversions::to_string(end_).c_str());
-  step_s_  = strdup(StringConversions::to_string(step_).c_str());
+	argv_    = NULL;
+	argc_    = 0;
+	width_s_ = strdup(StringConversions::to_string(width_).c_str());
+	start_s_ = strdup(StringConversions::to_string(start_).c_str());
+	end_s_   = strdup(StringConversions::to_string(end_).c_str());
+	step_s_  = strdup(StringConversions::to_string(step_).c_str());
 }
-
 
 /** Destructor. */
 RRDGraphDefinition::~RRDGraphDefinition()
 {
-  if (filename_) free(filename_);
-  if (argv_)  free(argv_);
-  if (name_)  free(name_);
-  if (title_)  free(title_);
-  if (vertical_label_)  free(vertical_label_);
+	if (filename_)
+		free(filename_);
+	if (argv_)
+		free(argv_);
+	if (name_)
+		free(name_);
+	if (title_)
+		free(title_);
+	if (vertical_label_)
+		free(vertical_label_);
 
-  free(width_s_);
-  free(start_s_);
-  free(end_s_);
-  free(step_s_);
+	free(width_s_);
+	free(start_s_);
+	free(end_s_);
+	free(step_s_);
 
-  std::vector<RRDGraphElement *>::iterator i;
-  for (i = elements_.begin(); i != elements_.end(); ++i) {
-    delete *i;
-  }
+	std::vector<RRDGraphElement *>::iterator i;
+	for (i = elements_.begin(); i != elements_.end(); ++i) {
+		delete *i;
+	}
 }
 
 /** Set filename.
@@ -895,11 +996,11 @@ RRDGraphDefinition::~RRDGraphDefinition()
 void
 RRDGraphDefinition::set_filename(const char *filename)
 {
-  if (filename_) {
-    throw Exception("Graph definition for RRD %s: filename has already been set!",
-		    rrd_def_->get_name());
-  }
-  filename_ = strdup(filename);
+	if (filename_) {
+		throw Exception("Graph definition for RRD %s: filename has already been set!",
+		                rrd_def_->get_name());
+	}
+	filename_ = strdup(filename);
 }
 
 /** Get argument array and size.
@@ -910,57 +1011,57 @@ RRDGraphDefinition::set_filename(const char *filename)
 const char **
 RRDGraphDefinition::get_argv(size_t &argc) const
 {
-  if (argv_ == NULL) {
-    // "graph" filename --disable-rrdtool-tag --width ... --start ... --end ...
-    // [fonts] --title ... --vertical-label ... [--slope-mode] DEFS... ELEMS...
-    argc_ = 16 + fonts_.size() * 2 + defs_.size() + elements_.size();
-    argv_ = (const char **)malloc(argc_ * sizeof(char *));
-    size_t i = 0;
-    argv_[i++] = "graph";
-    argv_[i++] = filename_;
-    argv_[i++] = "--disable-rrdtool-tag";
-    argv_[i++] = "--width";
-    argv_[i++] = width_s_;
-    argv_[i++] = "--start";
-    argv_[i++] = start_s_;
-    argv_[i++] = "--end";
-    argv_[i++] = end_s_;
-    argv_[i++] = "--step";
-    argv_[i++] = step_s_;
-    argv_[i++] = "--title";
-    argv_[i++] = title_;
-    argv_[i++] = "--vertical-label";
+	if (argv_ == NULL) {
+		// "graph" filename --disable-rrdtool-tag --width ... --start ... --end ...
+		// [fonts] --title ... --vertical-label ... [--slope-mode] DEFS... ELEMS...
+		argc_      = 16 + fonts_.size() * 2 + defs_.size() + elements_.size();
+		argv_      = (const char **)malloc(argc_ * sizeof(char *));
+		size_t i   = 0;
+		argv_[i++] = "graph";
+		argv_[i++] = filename_;
+		argv_[i++] = "--disable-rrdtool-tag";
+		argv_[i++] = "--width";
+		argv_[i++] = width_s_;
+		argv_[i++] = "--start";
+		argv_[i++] = start_s_;
+		argv_[i++] = "--end";
+		argv_[i++] = end_s_;
+		argv_[i++] = "--step";
+		argv_[i++] = step_s_;
+		argv_[i++] = "--title";
+		argv_[i++] = title_;
+		argv_[i++] = "--vertical-label";
 
-    if (strcmp(vertical_label_, "") == 0) {
-      argv_[i++] = " ";
-    } else {
-      argv_[i++] = vertical_label_;
-    }
+		if (strcmp(vertical_label_, "") == 0) {
+			argv_[i++] = " ";
+		} else {
+			argv_[i++] = vertical_label_;
+		}
 
-    if (slope_mode_) argv_[i++] = "--slope-mode";
+		if (slope_mode_)
+			argv_[i++] = "--slope-mode";
 
-    std::vector<const char *>::const_iterator f;
-    for (f = fonts_.begin(); f != fonts_.end(); ++f) {
-      argv_[i++] = "--font";
-      argv_[i++] = *f;
-    }
+		std::vector<const char *>::const_iterator f;
+		for (f = fonts_.begin(); f != fonts_.end(); ++f) {
+			argv_[i++] = "--font";
+			argv_[i++] = *f;
+		}
 
-    std::vector<RRDGraphDataDefinition>::const_iterator d;
-    for (d = defs_.begin(); d != defs_.end(); ++d) {
-      argv_[i++] = d->to_string();
-    }
+		std::vector<RRDGraphDataDefinition>::const_iterator d;
+		for (d = defs_.begin(); d != defs_.end(); ++d) {
+			argv_[i++] = d->to_string();
+		}
 
-    std::vector<RRDGraphElement *>::const_iterator e;
-    for (e = elements_.begin(); e != elements_.end(); ++e) {
-      argv_[i++] = (*e)->to_string();
-    }
+		std::vector<RRDGraphElement *>::const_iterator e;
+		for (e = elements_.begin(); e != elements_.end(); ++e) {
+			argv_[i++] = (*e)->to_string();
+		}
 
-    argc_ = i;
-  }
+		argc_ = i;
+	}
 
-  argc = argc_;
-  return argv_;
+	argc = argc_;
+	return argv_;
 }
-
 
 } // end namespace fawkes

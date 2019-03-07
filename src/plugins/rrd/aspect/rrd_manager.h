@@ -24,11 +24,10 @@
 #ifndef _PLUGINS_RRD_ASPECT_RRD_MANAGER_H_
 #define _PLUGINS_RRD_ASPECT_RRD_MANAGER_H_
 
-#include <plugins/rrd/aspect/rrd_descriptions.h>
 #include <core/utils/rwlock_vector.h>
+#include <plugins/rrd/aspect/rrd_descriptions.h>
 
 namespace fawkes {
-
 
 /** @class RRDManager <plugins/rrd/aspect/rrd_manager.h>
  * Interface for a RRD connection creator.
@@ -36,29 +35,31 @@ namespace fawkes {
  */
 class RRDManager
 {
- public:
-  /** Virtual empty destructor. */
-  virtual ~RRDManager() {}
+public:
+	/** Virtual empty destructor. */
+	virtual ~RRDManager()
+	{
+	}
 
-  /** Add RRD.
+	/** Add RRD.
    * Add an RRD which can then be fed with data using add_data().
    * @param rrd_def RRD definition
    */
-  virtual void add_rrd(RRDDefinition *rrd_def) = 0;
+	virtual void add_rrd(RRDDefinition *rrd_def) = 0;
 
-  /** Remove RRD.
+	/** Remove RRD.
    * Remove a RRD definition. This also removes all associated graphs.
    * @param rrd_def RRD definition
    */
-  virtual void remove_rrd(RRDDefinition *rrd_def) = 0;
+	virtual void remove_rrd(RRDDefinition *rrd_def) = 0;
 
-  /** Add graph.
+	/** Add graph.
    * Add a graph definition from which to generate graphs.
    * @param rrd_graph_def RRD graph definition
    */
-  virtual void add_graph(RRDGraphDefinition *rrd_graph_def) = 0;
+	virtual void add_graph(RRDGraphDefinition *rrd_graph_def) = 0;
 
-  /** Add data.
+	/** Add data.
    * Add data to an RRF.
    * @param rrd_name name of the RRD to add data to
    * @param format format string. It must have the form TIMESTAMP|N:DATA,
@@ -66,18 +67,17 @@ class RRDManager
    * the letter N to use the current time. DATA is a concatenation of formats
    * according to man sprintf and concatenated by colons, e.g. 1:2:3:4.5.
    */
-  virtual void add_data(const char *rrd_name, const char *format, ...) = 0;
+	virtual void add_data(const char *rrd_name, const char *format, ...) = 0;
 
-  /** Get RRDs.
+	/** Get RRDs.
    * @return vector of all current RRD definitions.
    */
-  virtual const RWLockVector<RRDDefinition *> &       get_rrds() const = 0;
+	virtual const RWLockVector<RRDDefinition *> &get_rrds() const = 0;
 
-  /** Get graphs.
+	/** Get graphs.
    * @return vector of all current graph definitions.
    */
-  virtual const RWLockVector<RRDGraphDefinition *> &  get_graphs() const = 0;
-
+	virtual const RWLockVector<RRDGraphDefinition *> &get_graphs() const = 0;
 };
 
 } // end namespace fawkes

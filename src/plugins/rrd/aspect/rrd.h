@@ -25,8 +25,8 @@
 #define _PLUGINS_RRD_ASPECT_RRD_H_
 
 #include <aspect/aspect.h>
-#include <plugins/rrd/aspect/rrd_manager.h>
 #include <plugins/rrd/aspect/rrd_descriptions.h>
+#include <plugins/rrd/aspect/rrd_manager.h>
 
 namespace fawkes {
 
@@ -34,17 +34,17 @@ class RRDAspectIniFin;
 
 class RRDAspect : public virtual Aspect
 {
-  friend RRDAspectIniFin;
+	friend RRDAspectIniFin;
 
- public:
-  RRDAspect();
-  virtual ~RRDAspect();
+public:
+	RRDAspect();
+	virtual ~RRDAspect();
 
- protected:
-  RRDManager *rrd_manager;
+protected:
+	RRDManager *rrd_manager;
 
- private:
-  void init_RRDAspect(RRDManager *rrd_manager);
+private:
+	void init_RRDAspect(RRDManager *rrd_manager);
 };
 
 } // end namespace fawkes
