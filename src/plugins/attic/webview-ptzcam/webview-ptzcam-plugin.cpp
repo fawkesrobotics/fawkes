@@ -21,6 +21,7 @@
  */
 
 #include "webview-ptzcam-thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -30,16 +31,15 @@ using namespace fawkes;
  */
 class WebviewPtzCamPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit WebviewPtzCamPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new WebviewPtzCamThread());
-  }
+	explicit WebviewPtzCamPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new WebviewPtzCamThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("Pan/tilt/zoom camera control via webview")
 EXPORT_PLUGIN(WebviewPtzCamPlugin)

@@ -22,58 +22,64 @@
 #ifndef _PLUGINS_WEBVIEW_PTZCAM_WEBVIEW_PTZCAM_PROCESSOR_H_
 #define _PLUGINS_WEBVIEW_PTZCAM_WEBVIEW_PTZCAM_PROCESSOR_H_
 
+#include <map>
 #include <string>
 #include <tuple>
-#include <map>
 
 namespace fawkes {
-  class Logger;
-  class BlackBoard;
-  class PanTiltInterface;
-  class CameraControlInterface;
-  class SwitchInterface;
-  class WebReply;
-  class WebRequest;
-}
+class Logger;
+class BlackBoard;
+class PanTiltInterface;
+class CameraControlInterface;
+class SwitchInterface;
+class WebReply;
+class WebRequest;
+} // namespace fawkes
 
 class WebviewPtzCamRequestProcessor
 {
- public:
-  WebviewPtzCamRequestProcessor(const std::string& image_id, const std::string& pantilt_id,
-                                const std::string& camctrl_id, const std::string& power_id,
-                                const std::string& camera_id,
-                                float pan_increment, float tilt_increment, unsigned int zoom_increment,
-                                float post_powerup_time,
-                                const std::map<std::string, std::tuple<std::string, float, float, unsigned int>>& presets,
-                                fawkes::BlackBoard *blackboard, fawkes::Logger *logger);
+public:
+	WebviewPtzCamRequestProcessor(
+	  const std::string &image_id,
+	  const std::string &pantilt_id,
+	  const std::string &camctrl_id,
+	  const std::string &power_id,
+	  const std::string &camera_id,
+	  float              pan_increment,
+	  float              tilt_increment,
+	  unsigned int       zoom_increment,
+	  float              post_powerup_time,
+	  const std::map<std::string, std::tuple<std::string, float, float, unsigned int>> &presets,
+	  fawkes::BlackBoard *                                                              blackboard,
+	  fawkes::Logger *                                                                  logger);
 
-  ~WebviewPtzCamRequestProcessor();
+	~WebviewPtzCamRequestProcessor();
 
-  fawkes::WebReply * process_overview();
-  fawkes::WebReply * process_ping();
-  fawkes::WebReply * process_move(const fawkes::WebRequest *request);
-  fawkes::WebReply * process_effect(const fawkes::WebRequest *request);
+	fawkes::WebReply *process_overview();
+	fawkes::WebReply *process_ping();
+	fawkes::WebReply *process_move(const fawkes::WebRequest *request);
+	fawkes::WebReply *process_effect(const fawkes::WebRequest *request);
 
- private:
-  void wakeup_hardware();
-  
- private:
-  fawkes::Logger       *logger_;
-  fawkes::BlackBoard   *blackboard_;
+private:
+	void wakeup_hardware();
 
-  fawkes::PanTiltInterface       *ptu_if_;
-  fawkes::CameraControlInterface *camctrl_if_;
-  fawkes::SwitchInterface        *power_if_;
-  fawkes::SwitchInterface        *camen_if_;
+private:
+	fawkes::Logger *    logger_;
+	fawkes::BlackBoard *blackboard_;
 
-  std::string           image_id_;
+	fawkes::PanTiltInterface *      ptu_if_;
+	fawkes::CameraControlInterface *camctrl_if_;
+	fawkes::SwitchInterface *       power_if_;
+	fawkes::SwitchInterface *       camen_if_;
 
-  std::map<std::string, std::tuple<std::string, float, float, unsigned int>> presets_;
+	std::string image_id_;
 
-  float                 pan_increment_;
-  float                 tilt_increment_;
-  long int              zoom_increment_;
-  long int              post_powerup_time_;
+	std::map<std::string, std::tuple<std::string, float, float, unsigned int>> presets_;
+
+	float    pan_increment_;
+	float    tilt_increment_;
+	long int zoom_increment_;
+	long int post_powerup_time_;
 };
 
 #endif
