@@ -21,24 +21,23 @@
 #ifndef _PLUGINS_SYNCPOINT_TEST_THREAD_H_
 #define _PLUGINS_SYNCPOINT_TEST_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
-class SyncPointTestThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::BlockedTimingAspect
+class SyncPointTestThread : public fawkes::Thread,
+                            public fawkes::LoggingAspect,
+                            public fawkes::BlockedTimingAspect
 {
- public:
-    SyncPointTestThread(const char * name, BlockedTimingAspect::WakeupHook hook);
+public:
+	SyncPointTestThread(const char *name, BlockedTimingAspect::WakeupHook hook);
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- private:
-  BlockedTimingAspect::WakeupHook hook_;
+private:
+	BlockedTimingAspect::WakeupHook hook_;
 };
 
 #endif
