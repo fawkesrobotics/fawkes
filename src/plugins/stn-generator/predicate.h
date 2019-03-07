@@ -22,31 +22,31 @@
 #ifndef PLUGINS_PREDICATE_H_
 #define PLUGINS_PREDICATE_H_
 
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
 
 namespace fawkes {
 namespace stn {
 
-class Predicate {
+class Predicate
+{
+public:
+	Predicate(const std::string &name, bool condition, const std::vector<std::string> &attrs);
+	virtual ~Predicate(){};
 
- public:
-  Predicate(const std::string& name, bool condition, const std::vector<std::string>& attrs);
-  virtual ~Predicate(){ };
+	friend std::ostream &operator<<(std::ostream &, const Predicate &);
+	bool                 operator==(const Predicate &rhs);
 
-  friend std::ostream& operator<<(std::ostream&, const Predicate&);
-  bool operator==( const Predicate& rhs);
+	std::string                     name() const;
+	bool                            condition() const;
+	const std::vector<std::string> &attrs() const;
 
-  std::string name() const;
-  bool condition() const;
-  const std::vector<std::string>& attrs() const;
-
- private:
-  std::string name_;
-  bool condition_;
-  std::vector<std::string> attrs_;
+private:
+	std::string              name_;
+	bool                     condition_;
+	std::vector<std::string> attrs_;
 };
-}
-}
+} // namespace stn
+} // namespace fawkes
 #endif

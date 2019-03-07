@@ -22,74 +22,70 @@
 #ifndef PLUGINS_STN_H_
 #define PLUGINS_STN_H_
 
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <iterator>
-#include <graphviz/gvc.h>
-#include <mongo/client/dbclient.h>
-
-#include <aspect/logging.h>
-
-#include <pddl_parser/pddl_ast.h>
 #include "domain_action.h"
 #include "stn_action.h"
+
+#include <aspect/logging.h>
+#include <graphviz/gvc.h>
+#include <mongo/client/dbclient.h>
+#include <pddl_parser/pddl_ast.h>
+
+#include <algorithm>
+#include <iterator>
+#include <string>
+#include <vector>
 
 namespace fawkes {
 namespace stn {
 
 class Stn
 {
- public:
-  Stn(fawkes::Logger* logger);
-  Stn(fawkes::Logger* logger, const std::string& classic_dom_path);
-  virtual ~Stn();
+public:
+	Stn(fawkes::Logger *logger);
+	Stn(fawkes::Logger *logger, const std::string &classic_dom_path);
+	virtual ~Stn();
 
-  void add_plan_action(const std::string& name, const std::string& params);
-  void set_initial_state(const StnAction& action);
-  void read_initial_state(const std::string& pddl_problem_string);
-  void set_pddl_domain(const std::string& pddl_domain_string);
-  void generate();
-  void drawGraph();
-  std::vector<mongo::BSONObj> get_bson();
+	void                        add_plan_action(const std::string &name, const std::string &params);
+	void                        set_initial_state(const StnAction &action);
+	void                        read_initial_state(const std::string &pddl_problem_string);
+	void                        set_pddl_domain(const std::string &pddl_domain_string);
+	void                        generate();
+	void                        drawGraph();
+	std::vector<mongo::BSONObj> get_bson();
 
- private:
-  struct plan_action {
-    std::string name;
-    std::string params;
-  };
+private:
+	struct plan_action
+	{
+		std::string name;
+		std::string params;
+	};
 
-  fawkes::Logger* logger_;
-  bool gen_classic_dom_ = false;
-  std::string classic_dom_path_;
-  StnAction initial_state_;
+	fawkes::Logger *logger_;
+	bool            gen_classic_dom_ = false;
+	std::string     classic_dom_path_;
+	StnAction       initial_state_;
 
-  std::vector<DomainAction> domain_actions_;
-  std::vector<plan_action> plan_actions_;
-  std::vector<StnAction> stn_actions_;
+	std::vector<DomainAction> domain_actions_;
+	std::vector<plan_action>  plan_actions_;
+	std::vector<StnAction>    stn_actions_;
 
-  std::vector<std::pair<StnAction,StnAction>> cond_edges_;
-  std::vector<std::pair<StnAction,StnAction>> temp_edges_;
+	std::vector<std::pair<StnAction, StnAction>> cond_edges_;
+	std::vector<std::pair<StnAction, StnAction>> temp_edges_;
 
-  enum LogLevel {
-    WARN, INFO, DEBUG
-  };
-  void log_warn(const std::string& s);
-  void log_info(const std::string& s);
-  void log_debug(const std::string& s);
-	void log(const std::string& s, Stn::LogLevel log_leve);
+	enum LogLevel { WARN, INFO, DEBUG };
+	void      log_warn(const std::string &s);
+	void      log_info(const std::string &s);
+	void      log_debug(const std::string &s);
+	void      log(const std::string &s, Stn::LogLevel log_leve);
 	StnAction findActionById(size_t id);
-  void add_domain_action(const DomainAction& action);
-  void build_pred_list(pddl_parser::Expression e,
-                       std::vector<Predicate> *preconds, bool condition);
-  void build_breakup_list(pddl_parser::Expression e,
-                          std::vector<std::string> *breakups);
-  void generate_classic_pddl_domain(pddl_parser::Domain *dom,
-                                    const std::string& classic_dom_path);
-  void output_pred_list(pddl_parser::Expression e, std::ofstream& out);
+	void      add_domain_action(const DomainAction &action);
+	void build_pred_list(pddl_parser::Expression e, std::vector<Predicate> *preconds, bool condition);
+	void build_breakup_list(pddl_parser::Expression e, std::vector<std::string> *breakups);
+	void generate_classic_pddl_domain(pddl_parser::Domain *dom, const std::string &classic_dom_path);
+	void output_pred_list(pddl_parser::Expression e, std::ofstream &out);
 };
 
-}
-}
+} // namespace stn
+} // namespace fawkes
 
 #endif

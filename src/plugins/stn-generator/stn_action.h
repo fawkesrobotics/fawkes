@@ -22,65 +22,62 @@
 #ifndef PLUGINS_STN_ACTION_H_
 #define PLUGINS_STN_ACTION_H_
 
+#include "predicate.h"
+
+#include <algorithm>
+#include <atomic>
+#include <iostream>
+#include <iterator>
+#include <map>
 #include <string>
 #include <vector>
-#include <atomic>
-#include <map>
-#include <iterator>
-#include <algorithm>
-#include <iostream>
-
-#include "predicate.h"
 
 namespace fawkes {
 namespace stn {
 
-enum EdgeType
-{
-  CONDITIONAL,
-  TEMPORAL
-};
+enum EdgeType { CONDITIONAL, TEMPORAL };
 
 class StnAction
 {
+public:
+	StnAction(const std::string &             name,
+	          const std::vector<Predicate> &  preconds,
+	          const std::vector<Predicate> &  effects,
+	          const std::string &             opts,
+	          size_t                          duration      = 0,
+	          const std::vector<std::string> &cond_breakups = {},
+	          const std::vector<std::string> &temp_breakups = {});
+	StnAction(){};
+	virtual ~StnAction(){};
 
- public:
-  StnAction(const std::string& name, const std::vector<Predicate>& preconds,
-            const std::vector<Predicate>& effects, const std::string& opts,
-            size_t duration = 0, const std::vector<std::string>& cond_breakups = {},
-            const std::vector<std::string>& temp_breakups = {});
-  StnAction(){ };
-  virtual ~StnAction(){ };
+	bool operator==(const StnAction &o);
+	bool operator!=(const StnAction &o);
 
-  bool operator==(const StnAction &o);
-  bool operator!=(const StnAction &o);
+	size_t                        id() const;
+	bool                          checkForBreakup(EdgeType t, const Predicate &p) const;
+	std::vector<size_t>           condActionIds() const;
+	std::string                   genGraphNodeName() const;
+	std::string                   genConditionEdgeLabel(size_t cond_action) const;
+	std::string                   genTemporalEdgeLabel() const;
+	void                          genConditionalActions(std::vector<StnAction> candidate_actions);
+	const std::vector<Predicate> &effects() const;
+	std::string                   name() const;
+	size_t                        duration() const;
+	std::string                   opts() const;
 
-  size_t id() const;
-  bool checkForBreakup(EdgeType t, const Predicate& p) const;
-  std::vector<size_t> condActionIds() const;
-  std::string genGraphNodeName() const;
-  std::string genConditionEdgeLabel(size_t cond_action) const;
-  std::string genTemporalEdgeLabel() const;
-	void genConditionalActions(std::vector<StnAction> candidate_actions);
-  const std::vector<Predicate>& effects() const;
-  std::string name() const;
-  size_t      duration() const;
-  std::string opts() const;
-
- private:
-  friend std::ostream& operator<<(std::ostream&, const StnAction&);
-  size_t id_;
-  std::string name_;
-  std::vector<Predicate> preconds_;
-  std::vector<Predicate> effects_;
-  std::string opts_;
-  size_t duration_;
-  std::vector<std::string> cond_breakups_;
-  std::vector<std::string> temp_breakups_;
-  std::map<size_t, std::pair<std::string, std::vector<Predicate>>> cond_actions_;
-  static size_t count;
-
+private:
+	friend std::ostream &    operator<<(std::ostream &, const StnAction &);
+	size_t                   id_;
+	std::string              name_;
+	std::vector<Predicate>   preconds_;
+	std::vector<Predicate>   effects_;
+	std::string              opts_;
+	size_t                   duration_;
+	std::vector<std::string> cond_breakups_;
+	std::vector<std::string> temp_breakups_;
+	std::map<size_t, std::pair<std::string, std::vector<Predicate>>> cond_actions_;
+	static size_t                                                    count;
 };
-}
-}
+} // namespace stn
+} // namespace fawkes
 #endif

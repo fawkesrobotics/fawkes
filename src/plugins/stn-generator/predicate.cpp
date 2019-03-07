@@ -33,7 +33,7 @@ namespace stn {
  * @param condition False iff this predicate is negated.
  * @param attrs Parameters of the predicate.
  */
-Predicate::Predicate(const std::string& name, bool condition, const std::vector<std::string>& attrs)
+Predicate::Predicate(const std::string &name, bool condition, const std::vector<std::string> &attrs)
 : name_(name), condition_(condition), attrs_(attrs)
 {
 }
@@ -43,16 +43,16 @@ Predicate::Predicate(const std::string& name, bool condition, const std::vector<
  * @param strm The stream to pass the information to.
  * @param a The predicate to show.
  */
-std::ostream&
+std::ostream &
 operator<<(std::ostream &strm, const Predicate &a)
 {
-  strm << "\t" << a.name_ << "," << a.condition_;
-  for ( std::string s : a.attrs_ ) {
-    strm << "," << s;
-  }
-  strm << std::endl;
+	strm << "\t" << a.name_ << "," << a.condition_;
+	for (std::string s : a.attrs_) {
+		strm << "," << s;
+	}
+	strm << std::endl;
 
-  return strm;
+	return strm;
 }
 
 /** Compare two Predicates.
@@ -60,9 +60,9 @@ operator<<(std::ostream &strm, const Predicate &a)
  * @return True iff the two predicates have the same properties.
  */
 bool
-Predicate::operator==(const Predicate& rhs)
+Predicate::operator==(const Predicate &rhs)
 {
-  return ( ( name_ == rhs.name_ ) && ( condition_ == rhs.condition_ ) && ( attrs_ == rhs.attrs_ ) );
+	return ((name_ == rhs.name_) && (condition_ == rhs.condition_) && (attrs_ == rhs.attrs_));
 }
 
 /** Get the name of the predicate.
@@ -71,7 +71,7 @@ Predicate::operator==(const Predicate& rhs)
 std::string
 Predicate::name() const
 {
-  return name_;
+	return name_;
 }
 
 /** Get the condition of the predicate.
@@ -80,16 +80,16 @@ Predicate::name() const
 bool
 Predicate::condition() const
 {
-  return condition_;
+	return condition_;
 }
 
 /** Get the attributes of the predicate.
  * @return A vector of attributes as strings.
  */
-const std::vector<std::string>&
+const std::vector<std::string> &
 Predicate::attrs() const
 {
-  return attrs_;
+	return attrs_;
 }
-}
-}
+} // namespace stn
+} // namespace fawkes

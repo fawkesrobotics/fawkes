@@ -28,7 +28,6 @@ namespace stn {
  * An action representation within an STN.
  */
 
-
 size_t StnAction::count = 0;
 
 /** Constructor.
@@ -42,12 +41,13 @@ size_t StnAction::count = 0;
  * @param cond_breakups A vector of conditional breakups as strings.
  * @param temp_breakups A vector of temporal breakups as strings.
  */
-StnAction::StnAction(const std::string& name, const std::vector<Predicate>& preconds,
-                     const std::vector<Predicate>& effects,
-                     const std::string &opts,
-                     size_t duration,
-                     const std::vector<std::string>& cond_breakups,
-                     const std::vector<std::string>& temp_breakups)
+StnAction::StnAction(const std::string &             name,
+                     const std::vector<Predicate> &  preconds,
+                     const std::vector<Predicate> &  effects,
+                     const std::string &             opts,
+                     size_t                          duration,
+                     const std::vector<std::string> &cond_breakups,
+                     const std::vector<std::string> &temp_breakups)
 : name_(name),
   preconds_(preconds),
   effects_(effects),
@@ -56,47 +56,47 @@ StnAction::StnAction(const std::string& name, const std::vector<Predicate>& prec
   cond_breakups_(cond_breakups),
   temp_breakups_(temp_breakups)
 {
-  id_ = ++count;
+	id_ = ++count;
 }
 
 /** Print relevant information about the StnAction.
  * @param strm The stream to print the information to.
  * @param a The action to show the information about.
  */
-std::ostream&
+std::ostream &
 operator<<(std::ostream &strm, const StnAction &a)
 {
-  strm << "id: " << a.id_ << std::endl << "action: " << a.name_ << "\npreconditions:" << std::endl;
-  for ( Predicate p : a.preconds_  ) {
-    strm << p;
-  }
-  strm << "effects:" << std::endl;
-  for ( Predicate e : a.effects_ ) {
-    strm << e;
-  }
-  strm << "required actions: ";
-  for ( auto const &kv : a.cond_actions_) {
-    strm << kv.first << ":" << kv.second.first;
-    for ( auto const &p : kv.second.second ) {
-      strm << p;
-    }
-  }
-  strm << "duration: " << std::to_string(a.duration_) << std::endl;
-  if ( !a.cond_breakups_.empty() ) {
-    strm << "conditional breakup conditions: ";
-  }
-  for ( auto const &p : a.cond_breakups_ ) {
-    strm << p;
-  }
-  if ( !a.temp_breakups_.empty() ) {
-    strm << "temporal breakup conditions: ";
-  }
-  for ( auto const &p : a.temp_breakups_ ) {
-    strm << p;
-  }
-  strm << std::endl << std::endl;
+	strm << "id: " << a.id_ << std::endl << "action: " << a.name_ << "\npreconditions:" << std::endl;
+	for (Predicate p : a.preconds_) {
+		strm << p;
+	}
+	strm << "effects:" << std::endl;
+	for (Predicate e : a.effects_) {
+		strm << e;
+	}
+	strm << "required actions: ";
+	for (auto const &kv : a.cond_actions_) {
+		strm << kv.first << ":" << kv.second.first;
+		for (auto const &p : kv.second.second) {
+			strm << p;
+		}
+	}
+	strm << "duration: " << std::to_string(a.duration_) << std::endl;
+	if (!a.cond_breakups_.empty()) {
+		strm << "conditional breakup conditions: ";
+	}
+	for (auto const &p : a.cond_breakups_) {
+		strm << p;
+	}
+	if (!a.temp_breakups_.empty()) {
+		strm << "temporal breakup conditions: ";
+	}
+	for (auto const &p : a.temp_breakups_) {
+		strm << p;
+	}
+	strm << std::endl << std::endl;
 
-  return strm;
+	return strm;
 }
 
 /** Compare two StnActions.
@@ -106,7 +106,7 @@ operator<<(std::ostream &strm, const StnAction &a)
 bool
 StnAction::operator==(const StnAction &o)
 {
-  return id_ == o.id_;
+	return id_ == o.id_;
 }
 
 /** Compare two StnActions.
@@ -116,7 +116,7 @@ StnAction::operator==(const StnAction &o)
 bool
 StnAction::operator!=(const StnAction &o)
 {
-  return id_ != o.id_;
+	return id_ != o.id_;
 }
 
 /** Get the ID of the action.
@@ -125,7 +125,7 @@ StnAction::operator!=(const StnAction &o)
 size_t
 StnAction::id() const
 {
-  return id_;
+	return id_;
 }
 
 /** Get all IDs of this StnAction's conditional actions.
@@ -134,11 +134,11 @@ StnAction::id() const
 std::vector<size_t>
 StnAction::condActionIds() const
 {
-  std::vector<size_t> ids;
-  for ( auto const &kv : cond_actions_) {
-    ids.push_back(kv.first);
-  }
-  return ids;
+	std::vector<size_t> ids;
+	for (auto const &kv : cond_actions_) {
+		ids.push_back(kv.first);
+	}
+	return ids;
 }
 
 /** Check if the given predicate is a breakup.
@@ -147,27 +147,26 @@ StnAction::condActionIds() const
  * @return True iff a breakup by the given predicate is possible.
  */
 bool
-StnAction::checkForBreakup(EdgeType t, const Predicate& p) const
+StnAction::checkForBreakup(EdgeType t, const Predicate &p) const
 {
-  const std::vector<std::string> *breakups;
-  if ( t == EdgeType::CONDITIONAL ) {
-    breakups = &cond_breakups_;
-  }
-  else if ( t == EdgeType::TEMPORAL ) {
-    breakups = &temp_breakups_;
-  } else {
-    throw "Wrong Edge type";
-  }
+	const std::vector<std::string> *breakups;
+	if (t == EdgeType::CONDITIONAL) {
+		breakups = &cond_breakups_;
+	} else if (t == EdgeType::TEMPORAL) {
+		breakups = &temp_breakups_;
+	} else {
+		throw "Wrong Edge type";
+	}
 
-  if ( std::find(breakups->begin(), breakups->end(), p.name()) != breakups->end() ) {
-    std::cout << "Break because of: " << p << " ";
-    switch (t) {
-      case EdgeType::CONDITIONAL : std::cout << "Conditional" << std::endl; break;
-      case EdgeType::TEMPORAL : std::cout << "Temporal" << std::endl; break;
-    }
-    return true;
-  }
-  return false;
+	if (std::find(breakups->begin(), breakups->end(), p.name()) != breakups->end()) {
+		std::cout << "Break because of: " << p << " ";
+		switch (t) {
+		case EdgeType::CONDITIONAL: std::cout << "Conditional" << std::endl; break;
+		case EdgeType::TEMPORAL: std::cout << "Temporal" << std::endl; break;
+		}
+		return true;
+	}
+	return false;
 }
 
 /** Get a string representation of the StnAction for the graph representation.
@@ -176,9 +175,7 @@ StnAction::checkForBreakup(EdgeType t, const Predicate& p) const
 std::string
 StnAction::genGraphNodeName() const
 {
-  return  "Action ID: " + std::to_string(id_) + "\n"
-     + "Name: " + name_ + "\n"
-     + "Params: " + opts_;
+	return "Action ID: " + std::to_string(id_) + "\n" + "Name: " + name_ + "\n" + "Params: " + opts_;
 }
 
 /** Generate an edge label for the graph representation.
@@ -188,23 +185,24 @@ StnAction::genGraphNodeName() const
 std::string
 StnAction::genConditionEdgeLabel(size_t cond_action) const
 {
-  std::string edge_label;
-  std::map<size_t, std::pair<std::string, std::vector<Predicate>>>::const_iterator it =
-    cond_actions_.find(cond_action);
-  if ( it == cond_actions_.end() ) return "";
-  for ( Predicate p : it->second.second ) {
-    if ( p.condition() ) {
-      edge_label += "<FONT COLOR=\"darkgreen\">";
-    } else {
-      edge_label += "<FONT COLOR=\"red\">";
-    }
-    edge_label += p.name() + ": ";
-    for ( const std::string s : p.attrs() ) {
-      edge_label += s + " ";
-    }
-    edge_label += "</FONT>";
-  }
-  return edge_label;
+	std::string                                                                      edge_label;
+	std::map<size_t, std::pair<std::string, std::vector<Predicate>>>::const_iterator it =
+	  cond_actions_.find(cond_action);
+	if (it == cond_actions_.end())
+		return "";
+	for (Predicate p : it->second.second) {
+		if (p.condition()) {
+			edge_label += "<FONT COLOR=\"darkgreen\">";
+		} else {
+			edge_label += "<FONT COLOR=\"red\">";
+		}
+		edge_label += p.name() + ": ";
+		for (const std::string s : p.attrs()) {
+			edge_label += s + " ";
+		}
+		edge_label += "</FONT>";
+	}
+	return edge_label;
 }
 
 /** Generate a temporal edge for the graph representation.
@@ -213,10 +211,10 @@ StnAction::genConditionEdgeLabel(size_t cond_action) const
 std::string
 StnAction::genTemporalEdgeLabel() const
 {
-  std::string edge_label = "<FONT COLOR=\"blue\">";
-  edge_label += std::to_string(duration_);
-  edge_label += "</FONT>";
-  return edge_label;
+	std::string edge_label = "<FONT COLOR=\"blue\">";
+	edge_label += std::to_string(duration_);
+	edge_label += "</FONT>";
+	return edge_label;
 }
 
 /** Generate the conditional actions of this StnAction.
@@ -224,39 +222,40 @@ StnAction::genTemporalEdgeLabel() const
  */
 void
 StnAction::genConditionalActions(const std::vector<StnAction> candidate_actions)
-{ 
-  std::vector<Predicate> check_preds = preconds_;
-  // iterate backwards to resolve conditions in the correct order
-  for ( int i = candidate_actions.size() - 1; i >= 0; i-- ) {
-    try {
-      for ( Predicate candidate_pred : candidate_actions.at(i).effects_ ) {
-        for ( auto pred_it = check_preds.begin(); pred_it != check_preds.end(); ) {
-          if ( !checkForBreakup(EdgeType::CONDITIONAL, (*pred_it)) && (*pred_it) == candidate_pred ) {
-            std::map<size_t,std::pair<std::string,std::vector<Predicate>>>::iterator it =
-              cond_actions_.find(candidate_actions.at(i).id_);
-            if ( it == cond_actions_.end() ) {
-              cond_actions_.insert(std::map<size_t,
-                  std::pair<std::string, std::vector<Predicate>>>::value_type(
-                    candidate_actions.at(i).id_,
-                    std::make_pair(candidate_actions.at(i).name_, std::vector<Predicate>{(*pred_it)})));
-            } else {
-              it->second.second.push_back((*pred_it));
-            }
-            // remove predicate to only take the first (backwards)
-            // occurence of a predicate into account _it
-            pred_it = check_preds.erase(pred_it);
-          } else {
-            pred_it++;
-          }
-        }
-      }
-    } catch (std::exception& e) {
-      std::cout << "ERROR in stn_action: " << e.what() << std::endl;
-    }
-  }
-  
-  // erase initial condition if others are present
-  /*std::map<size_t, std::pair<std::string, std::vector<Predicate>>>::iterator it = cond_actions_.find(0);
+{
+	std::vector<Predicate> check_preds = preconds_;
+	// iterate backwards to resolve conditions in the correct order
+	for (int i = candidate_actions.size() - 1; i >= 0; i--) {
+		try {
+			for (Predicate candidate_pred : candidate_actions.at(i).effects_) {
+				for (auto pred_it = check_preds.begin(); pred_it != check_preds.end();) {
+					if (!checkForBreakup(EdgeType::CONDITIONAL, (*pred_it)) && (*pred_it) == candidate_pred) {
+						std::map<size_t, std::pair<std::string, std::vector<Predicate>>>::iterator it =
+						  cond_actions_.find(candidate_actions.at(i).id_);
+						if (it == cond_actions_.end()) {
+							cond_actions_.insert(
+							  std::map<size_t, std::pair<std::string, std::vector<Predicate>>>::value_type(
+							    candidate_actions.at(i).id_,
+							    std::make_pair(candidate_actions.at(i).name_,
+							                   std::vector<Predicate>{(*pred_it)})));
+						} else {
+							it->second.second.push_back((*pred_it));
+						}
+						// remove predicate to only take the first (backwards)
+						// occurence of a predicate into account _it
+						pred_it = check_preds.erase(pred_it);
+					} else {
+						pred_it++;
+					}
+				}
+			}
+		} catch (std::exception &e) {
+			std::cout << "ERROR in stn_action: " << e.what() << std::endl;
+		}
+	}
+
+	// erase initial condition if others are present
+	/*std::map<size_t, std::pair<std::string, std::vector<Predicate>>>::iterator it = cond_actions_.find(0);
   if ( cond_actions_.size() > 1 && it != cond_actions_.end() ) {
     cond_actions_.erase(it);
   }*/
@@ -265,10 +264,10 @@ StnAction::genConditionalActions(const std::vector<StnAction> candidate_actions)
 /** Get the effects of the StnAction.
  * @return A vector of Predicates that are part of the effect.
  */
-const std::vector<Predicate>&
+const std::vector<Predicate> &
 StnAction::effects() const
 {
-  return effects_;
+	return effects_;
 }
 
 /** Get the name of the StnAction.
@@ -277,7 +276,7 @@ StnAction::effects() const
 std::string
 StnAction::name() const
 {
-  return name_;
+	return name_;
 }
 
 /** Get the duration of the StnAction.
@@ -286,7 +285,7 @@ StnAction::name() const
 size_t
 StnAction::duration() const
 {
-  return duration_;
+	return duration_;
 }
 
 /** Get the action parameters.
@@ -295,8 +294,8 @@ StnAction::duration() const
 std::string
 StnAction::opts() const
 {
-  return opts_;
+	return opts_;
 }
 
-}
-}
+} // namespace stn
+} // namespace fawkes
