@@ -25,7 +25,6 @@
 #include <alcore/alerror.h>
 #include <alproxies/allauncherproxy.h>
 #include <alproxies/altexttospeechproxy.h>
-
 #include <interfaces/SpeechSynthInterface.h>
 
 using namespace fawkes;
@@ -40,99 +39,89 @@ using namespace fawkes;
 
 /** Constructor. */
 NaoQiSpeechSynthThread::NaoQiSpeechSynthThread()
-  : Thread("NaoQiSpeechSynthThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+: Thread("NaoQiSpeechSynthThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
 }
-
 
 /** Destructor. */
 NaoQiSpeechSynthThread::~NaoQiSpeechSynthThread()
 {
 }
 
-
 void
 NaoQiSpeechSynthThread::init()
 {
-  tts_task_id_ = -1;
+	tts_task_id_ = -1;
 
-  // Is ALTextToSpeech available?
-  try {
-    AL::ALPtr<AL::ALLauncherProxy> launcher(new AL::ALLauncherProxy(naoqi_broker));
-    bool is_tts_available = launcher->isModulePresent("ALTextToSpeech");
+	// Is ALTextToSpeech available?
+	try {
+		AL::ALPtr<AL::ALLauncherProxy> launcher(new AL::ALLauncherProxy(naoqi_broker));
+		bool                           is_tts_available = launcher->isModulePresent("ALTextToSpeech");
 
-    if (! is_tts_available) {
-      throw Exception("NaoQi ALTextToSpeech is not available");
-    }
-  } catch (AL::ALError& e) {
-    throw Exception("Checking ALTextToSpeech aliveness failed: %s",
-		    e.toString().c_str());
-  }
+		if (!is_tts_available) {
+			throw Exception("NaoQi ALTextToSpeech is not available");
+		}
+	} catch (AL::ALError &e) {
+		throw Exception("Checking ALTextToSpeech aliveness failed: %s", e.toString().c_str());
+	}
 
-  altts_ =
-    AL::ALPtr<AL::ALTextToSpeechProxy>(new AL::ALTextToSpeechProxy(naoqi_broker));
+	altts_ = AL::ALPtr<AL::ALTextToSpeechProxy>(new AL::ALTextToSpeechProxy(naoqi_broker));
 
-  speechsynth_if_ =
-    blackboard->open_for_writing<SpeechSynthInterface>("NaoQi TTS");
+	speechsynth_if_ = blackboard->open_for_writing<SpeechSynthInterface>("NaoQi TTS");
 }
-
 
 void
 NaoQiSpeechSynthThread::finalize()
 {
-  stop_speech();
+	stop_speech();
 
-  blackboard->close(speechsynth_if_);
-  speechsynth_if_ = NULL;
+	blackboard->close(speechsynth_if_);
+	speechsynth_if_ = NULL;
 
-  altts_.reset();
+	altts_.reset();
 }
-
 
 /** Stop currently running speech synthesis. */
 void
 NaoQiSpeechSynthThread::stop_speech()
 {
-  if (tts_task_id_ != -1) {
-    if (altts_->isRunning(tts_task_id_)) {
-      altts_->stop(tts_task_id_);
-    }
-    tts_task_id_ = -1;
-  }
+	if (tts_task_id_ != -1) {
+		if (altts_->isRunning(tts_task_id_)) {
+			altts_->stop(tts_task_id_);
+		}
+		tts_task_id_ = -1;
+	}
 }
 
 void
 NaoQiSpeechSynthThread::say(const char *text)
 {
-  tts_task_id_ = altts_->say(text);
+	tts_task_id_ = altts_->say(text);
 }
 
 void
 NaoQiSpeechSynthThread::loop()
 {
-  bool working = (tts_task_id_ != -1) && altts_->isRunning(tts_task_id_);
-  if (! working) {
-    process_messages();
-  }
-  speechsynth_if_->set_final( ! working );
-  speechsynth_if_->write();
+	bool working = (tts_task_id_ != -1) && altts_->isRunning(tts_task_id_);
+	if (!working) {
+		process_messages();
+	}
+	speechsynth_if_->set_final(!working);
+	speechsynth_if_->write();
 }
-
 
 /** Process incoming BB messages. */
 void
 NaoQiSpeechSynthThread::process_messages()
 {
-  // process bb messages
-  if ( ! speechsynth_if_->msgq_empty() ) {
-    if (SpeechSynthInterface::SayMessage *msg =
-	speechsynth_if_->msgq_first_safe(msg))
-    {
-      say(msg->text());
-      speechsynth_if_->set_msgid(msg->id());
-    }
+	// process bb messages
+	if (!speechsynth_if_->msgq_empty()) {
+		if (SpeechSynthInterface::SayMessage *msg = speechsynth_if_->msgq_first_safe(msg)) {
+			say(msg->text());
+			speechsynth_if_->set_msgid(msg->id());
+		}
 
-    speechsynth_if_->msgq_pop();
-  }
+		speechsynth_if_->msgq_pop();
+	}
 }

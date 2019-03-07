@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/nao/aspect/naoqi_inifin.h>
 #include <core/threading/thread_finalizer.h>
+#include <plugins/nao/aspect/naoqi_inifin.h>
 
 namespace fawkes {
 
@@ -34,26 +34,26 @@ namespace fawkes {
  */
 
 /** Constructor. */
-NaoQiAspectIniFin::NaoQiAspectIniFin()
-  : AspectIniFin("NaoQiAspect")
+NaoQiAspectIniFin::NaoQiAspectIniFin() : AspectIniFin("NaoQiAspect")
 {
 }
 
 void
 NaoQiAspectIniFin::init(Thread *thread)
 {
-  NaoQiAspect *naoqi_thread;
-  naoqi_thread = dynamic_cast<NaoQiAspect *>(thread);
-  if (naoqi_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "NaoQiAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
-  if (! naoqi_broker_) {
-    throw CannotInitializeThreadException("NaoQi broker has not been set.");
-  }
+	NaoQiAspect *naoqi_thread;
+	naoqi_thread = dynamic_cast<NaoQiAspect *>(thread);
+	if (naoqi_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "NaoQiAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
+	if (!naoqi_broker_) {
+		throw CannotInitializeThreadException("NaoQi broker has not been set.");
+	}
 
-  naoqi_thread->init_NaoQiAspect(naoqi_broker_);
+	naoqi_thread->init_NaoQiAspect(naoqi_broker_);
 }
 
 void
@@ -61,14 +61,13 @@ NaoQiAspectIniFin::finalize(Thread *thread)
 {
 }
 
-
 /** Set the NaoQi broker to use for aspect initialization.
  * @param naoqi_broker NaoQi broker to pass to threads with NaoQiAspect.
  */
 void
 NaoQiAspectIniFin::set_naoqi_broker(AL::ALPtr<AL::ALBroker> naoqi_broker)
 {
-  naoqi_broker_ = naoqi_broker;
+	naoqi_broker_ = naoqi_broker;
 }
 
 } // end namespace fawkes

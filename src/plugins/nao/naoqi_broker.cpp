@@ -23,7 +23,7 @@
 #include "naoqi_broker.h"
 
 namespace fawkes {
-  namespace naoqi {
-    AL::ALPtr<AL::ALBroker> broker;
-  }
+namespace naoqi {
+AL::ALPtr<AL::ALBroker> broker;
 }
+} // namespace fawkes
