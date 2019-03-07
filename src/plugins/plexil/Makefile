@@ -20,7 +20,7 @@ include $(BUILDSYSDIR)/boost.mk
 include $(BUILDSYSDIR)/protobuf.mk
 include $(LIBSRCDIR)/navgraph/navgraph.mk
 
-PLEXIL_REQ_BOOST_LIBS = system filesystem
+PLEXIL_REQ_BOOST_LIBS = system filesystem interprocess/sync/file_lock
 HAVE_PLEXIL_BOOST_LIBS = $(call boost-have-libs,$(OPENPRS_REQ_BOOST_LIBS))
 
 LIBS_plexil = \
@@ -71,6 +71,12 @@ LIBS_plexil_FawkesConfigurationAdapter = fawkescore fawkesutils \
                                          PlexilAppFramework PlexilValue PlexilIntfc PlexilUtils
 NOSOVER_plexil_FawkesConfigurationAdapter = 1
 
+OBJS_plexil_FawkesBlackboardAdapter = blackboard_adapter.o
+LIBS_plexil_FawkesBlackboardAdapter = fawkescore fawkesutils fawkesblackboard fawkesinterface \
+                                      fawkesconfig fawkeslogging \
+                                      PlexilAppFramework PlexilValue PlexilIntfc PlexilUtils
+NOSOVER_plexil_FawkesBlackboardAdapter = 1
+
 OBJS_plexil_GlobalState = globals_adapter.o
 LIBS_plexil_GlobalState = fawkescore \
                          PlexilAppFramework PlexilValue PlexilIntfc PlexilUtils pugixml
@@ -80,11 +86,12 @@ OBJS_all    = $(OBJS_plexil) $(OBJS_plexil_FawkesTimeAdapter) $(OBJS_plexil_Fawk
               $(OBJS_plexil_BehaviorEngineAdapter) $(OBJS_plexil_ThreadName) \
               $(OBJS_plexil_ProtobufCommAdapter) $(OBJS_plexil_NavGraphAdapter) \
               $(OBJS_plexil_FawkesRemoteAdapter) $(OBJS_plexil_FawkesConfigurationAdapter) \
-              $(OBJS_plexil_GlobalState)
+              $(OBJS_plexil_GlobalState) $(OBJS_plexil_FawkesBlackboardAdapter)
 LIBS_base   = $(LIBDIR)/plexil/FawkesTimeAdapter.$(SOEXT) \
               $(LIBDIR)/plexil/FawkesLoggingAdapter.$(SOEXT) \
               $(LIBDIR)/plexil/FawkesRemoteAdapter.$(SOEXT) \
               $(LIBDIR)/plexil/FawkesConfigurationAdapter.$(SOEXT) \
+              $(LIBDIR)/plexil/FawkesBlackboardAdapter.$(SOEXT) \
               $(LIBDIR)/plexil/BehaviorEngineAdapter.$(SOEXT) \
               $(LIBDIR)/plexil/ThreadName.$(SOEXT) \
               $(LIBDIR)/plexil/GlobalState.$(SOEXT)

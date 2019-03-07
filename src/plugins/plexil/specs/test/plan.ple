@@ -8,6 +8,23 @@ Command skill_call(...);
 Boolean Command say(String text);
 Real    Lookup time;
 
+Boolean Command BB_open_for_reading(String type, String id);
+Boolean Command BB_read(String uid);
+        Command BB_close(String uid);
+        Command BB_read_all();
+        Command BB_print(String uid);
+
+Boolean Lookup BB_changed(String uid);
+Integer Lookup BB_int(String uid, String field);
+Real    Lookup BB_real(String uid, String field);
+Boolean Lookup BB_bool(String uid, String field);
+String  Lookup BB_string(String uid, String field);
+Integer Lookup BB_field_length(String uid, String field);
+
+Integer Lookup BB_int_at(String uid, String field, Integer index);
+Real    Lookup BB_real_at(String uid, String field, Integer index);
+Boolean Lookup BB_bool_at(String uid, String field, Integer index);
+
 HelloWorld:
 {
   Print: { pprint("Hello World"); }
@@ -15,4 +32,36 @@ HelloWorld:
   Delay1: Wait 2.0;
   Say: SynchronousCommand say("Hello World");
   SayComplete: { log_info("Say call completed"); }
+
+  BBTest:
+  {
+    Print1: { pprint("BBTest, consider enabling BlackboardAdapter markers"); }
+    BB_open_for_reading("SpeechSynthInterface", "Flite");
+    BB_read("SpeechSynthInterface::Flite");
+    BB_print("SpeechSynthInterface::Flite");
+    //BB_close("SpeechSynthInterface::Flite");
+  }
+
+  BBEventTest: Concurrence
+  {
+    Boolean running;
+    running = true;
+    WaitChanged:
+    {
+      String text;
+      StartCondition running && Lookup(BB_changed("SpeechSynthInterface::Flite"));
+      RepeatCondition running;
+      text = Lookup(BB_string("SpeechSynthInterface::Flite", "text"));
+      pprint("Interface changed, text: " + text);
+      BB_print("SpeechSynthInterface::Flite");
+    }
+    CallSkill:
+    {
+      Delay: Wait 2.0;
+      Say: SynchronousCommand say("Check blackboard change");
+      running = false;
+    }
+  }
+
+  BB_close("SpeechSynthInterface::Flite");
 }

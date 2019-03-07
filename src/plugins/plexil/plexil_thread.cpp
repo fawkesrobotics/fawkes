@@ -47,6 +47,7 @@
 #include <cstring>
 #include <numeric>
 #include <boost/filesystem.hpp>
+#include <boost/interprocess/sync/file_lock.hpp>
 
 using namespace fawkes;
 namespace fs = boost::filesystem;
@@ -213,6 +214,9 @@ PlexilExecutiveThread::init()
 
 		fs::path ple_path{p};
 		fs::path plx_path{fs::path{ple_path}.replace_extension(".plx")};
+
+		// make sure not two processes try to compile at the same time
+		boost::interprocess::file_lock flock(ple_path.string().c_str());
 
 		base_paths.insert(plx_path.parent_path().string());
 
