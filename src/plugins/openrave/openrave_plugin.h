@@ -27,8 +27,8 @@
 
 class OpenRavePlugin : public fawkes::Plugin
 {
- public:
-  explicit OpenRavePlugin(fawkes::Configuration *config);
+public:
+	explicit OpenRavePlugin(fawkes::Configuration *config);
 };
 
 #endif

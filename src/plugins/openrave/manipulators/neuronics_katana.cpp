@@ -21,12 +21,13 @@
  */
 
 #include "neuronics_katana.h"
+
 #include "../manipulator.h"
 
 #include <cmath>
 #include <cstdio>
 
- namespace fawkes {
+namespace fawkes {
 
 /** @class OpenRaveManipulatorNeuronicsKatana <plugins/openrave/manipulators/neuronics_katana.h>
  * Class containing information about all neuronics-katana motors.
@@ -38,8 +39,9 @@
  * @param count number of motors of OpenRAVE model
  * @param countDevice number of motors of real device
  */
-OpenRaveManipulatorNeuronicsKatana::OpenRaveManipulatorNeuronicsKatana(unsigned int count, unsigned int countDevice) :
-  OpenRaveManipulator( count, countDevice )
+OpenRaveManipulatorNeuronicsKatana::OpenRaveManipulatorNeuronicsKatana(unsigned int count,
+                                                                       unsigned int countDevice)
+: OpenRaveManipulator(count, countDevice)
 {
 }
 
@@ -54,66 +56,41 @@ OpenRaveManipulatorNeuronicsKatana::~OpenRaveManipulatorNeuronicsKatana()
 OpenRaveManipulatorPtr
 OpenRaveManipulatorNeuronicsKatana::copy()
 {
-  return RefPtr<OpenRaveManipulatorNeuronicsKatana>( new OpenRaveManipulatorNeuronicsKatana(*this) );
+	return RefPtr<OpenRaveManipulatorNeuronicsKatana>(new OpenRaveManipulatorNeuronicsKatana(*this));
 }
-
 
 /* ########## various ######### */
 float
 OpenRaveManipulatorNeuronicsKatana::angle_OR_to_device(unsigned int number, float angle) const
 {
-  float _angle;
+	float _angle;
 
-  switch( number ) {
-    case 0:
-      _angle = M_PI - angle;
-      break;
-    case 1:
-      _angle = M_PI/2 - angle;
-      break;
-    case 2:
-      _angle = M_PI - angle;
-      break;
-    case 3:
-      _angle = M_PI - angle;
-      break;
-    case 4:
-      _angle = M_PI - angle;
-      break;
-    default:
-      _angle = angle;
-      break;
-  }
+	switch (number) {
+	case 0: _angle = M_PI - angle; break;
+	case 1: _angle = M_PI / 2 - angle; break;
+	case 2: _angle = M_PI - angle; break;
+	case 3: _angle = M_PI - angle; break;
+	case 4: _angle = M_PI - angle; break;
+	default: _angle = angle; break;
+	}
 
-  return _angle;
+	return _angle;
 }
 
 float
 OpenRaveManipulatorNeuronicsKatana::angle_device_to_OR(unsigned int number, float angle) const
 {
-  float _angle;
+	float _angle;
 
-  switch( number ) {
-    case 0:
-      _angle = M_PI - angle;
-      break;
-    case 1:
-      _angle = M_PI/2 - angle;
-      break;
-    case 2:
-      _angle = M_PI - angle;
-      break;
-    case 3:
-      _angle = M_PI - angle;
-      break;
-    case 4:
-      _angle = M_PI - angle;
-      break;
-    default:
-      _angle = angle;
-      break;
-  }
+	switch (number) {
+	case 0: _angle = M_PI - angle; break;
+	case 1: _angle = M_PI / 2 - angle; break;
+	case 2: _angle = M_PI - angle; break;
+	case 3: _angle = M_PI - angle; break;
+	case 4: _angle = M_PI - angle; break;
+	default: _angle = angle; break;
+	}
 
-  return _angle;
+	return _angle;
 }
 } // end namespace fawkes

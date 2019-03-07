@@ -31,45 +31,48 @@ namespace fawkes {
 
 class OpenRaveManipulator
 {
- public:
-  OpenRaveManipulator(unsigned int count, unsigned int count_device);
-  virtual ~OpenRaveManipulator();
+public:
+	OpenRaveManipulator(unsigned int count, unsigned int count_device);
+	virtual ~OpenRaveManipulator();
 
-  /** Create a new copy of this OpenRaveManipulator instance
+	/** Create a new copy of this OpenRaveManipulator instance
    * @return RefPtr to the copied OpenRaveManipulator
    */
-  virtual OpenRaveManipulatorPtr copy() = 0;
+	virtual OpenRaveManipulatorPtr copy() = 0;
 
-  void add_motor(unsigned int number, unsigned int number_device);
+	void add_motor(unsigned int number, unsigned int number_device);
 
-  template <typename T_from, typename T_to> void angles_or_to_device(std::vector<T_from>& from, std::vector<T_to>& to) const;
-  template <typename T> void get_angles(std::vector<T>& to) const; // angles of OpenRAVE model
-  template <typename T> void get_angles_device(std::vector<T>& to) const; // angles of real device
+	template <typename T_from, typename T_to>
+	void angles_or_to_device(std::vector<T_from> &from, std::vector<T_to> &to) const;
+	template <typename T>
+	void get_angles(std::vector<T> &to) const; // angles of OpenRAVE model
+	template <typename T>
+	void get_angles_device(std::vector<T> &to) const; // angles of real device
 
-  template <typename T> void set_angles(std::vector<T>& angles);
-  template <typename T> void set_angles_device(std::vector<T>& angles);
+	template <typename T>
+	void set_angles(std::vector<T> &angles);
+	template <typename T>
+	void set_angles_device(std::vector<T> &angles);
 
-
- protected:
-  /** Transform single OpenRAVE motor angle to real device angle
+protected:
+	/** Transform single OpenRAVE motor angle to real device angle
    * @param number motor number of real device
    * @param angle motor angle of OpenRAVE model
    * @return transformed angle
    */
-  virtual float angle_OR_to_device(unsigned int number, float angle) const = 0;
+	virtual float angle_OR_to_device(unsigned int number, float angle) const = 0;
 
-  /** Transform single device motor angle to OpenRAVE angle
+	/** Transform single device motor angle to OpenRAVE angle
    * @param number motor number of real device
    * @param angle motor angle of real device
    * @return transformed angle
    */
-  virtual float angle_device_to_OR(unsigned int number, float angle) const = 0;
+	virtual float angle_device_to_OR(unsigned int number, float angle) const = 0;
 
-  std::vector<motor_t>  motors_;       /**< vector of motors */
-  unsigned int          cnt_;          /**< number of motors on OpenRAVE model */
-  unsigned int          cnt_device_;   /**< number of motors on real device */
+	std::vector<motor_t> motors_;     /**< vector of motors */
+	unsigned int         cnt_;        /**< number of motors on OpenRAVE model */
+	unsigned int         cnt_device_; /**< number of motors on real device */
 };
-
 
 /* ########## getter ########## */
 /** Get motor angles of OpenRAVE model
@@ -77,12 +80,12 @@ class OpenRaveManipulator
  */
 template <typename T>
 void
-OpenRaveManipulator::get_angles(std::vector<T>& to) const
+OpenRaveManipulator::get_angles(std::vector<T> &to) const
 {
-  to.resize(cnt_);
-  for (unsigned int i=0; i<motors_.size(); i++) {
-    to[motors_[i].no] = (T)motors_[i].angle;
-  }
+	to.resize(cnt_);
+	for (unsigned int i = 0; i < motors_.size(); i++) {
+		to[motors_[i].no] = (T)motors_[i].angle;
+	}
 }
 
 /** Get motor angles of real device
@@ -90,12 +93,12 @@ OpenRaveManipulator::get_angles(std::vector<T>& to) const
  */
 template <typename T>
 void
-OpenRaveManipulator::get_angles_device(std::vector<T>& to) const
+OpenRaveManipulator::get_angles_device(std::vector<T> &to) const
 {
-  std::vector<float> tmp;
-  get_angles(tmp);
-  angles_or_to_device(tmp, to);
-  //to = angles_or_to_device(tmp);
+	std::vector<float> tmp;
+	get_angles(tmp);
+	angles_or_to_device(tmp, to);
+	//to = angles_or_to_device(tmp);
 }
 
 /** Transform OpenRAVE motor angles to real device angles
@@ -104,15 +107,15 @@ OpenRaveManipulator::get_angles_device(std::vector<T>& to) const
  */
 template <typename T_from, typename T_to>
 void
-OpenRaveManipulator::angles_or_to_device(std::vector<T_from>& from, std::vector<T_to>&to) const
+OpenRaveManipulator::angles_or_to_device(std::vector<T_from> &from, std::vector<T_to> &to) const
 {
-  to.resize(cnt_device_);
+	to.resize(cnt_device_);
 
-  for (unsigned int i=0; i<motors_.size(); i++) {
-    to[motors_[i].no_device] = (T_to)angle_OR_to_device(motors_[i].no_device, (float)from[motors_[i].no]);
-  }
+	for (unsigned int i = 0; i < motors_.size(); i++) {
+		to[motors_[i].no_device] =
+		  (T_to)angle_OR_to_device(motors_[i].no_device, (float)from[motors_[i].no]);
+	}
 }
-
 
 /* ########## setter ########## */
 /** Set motor angles of OpenRAVE model
@@ -120,14 +123,14 @@ OpenRaveManipulator::angles_or_to_device(std::vector<T_from>& from, std::vector<
  */
 template <typename T>
 void
-OpenRaveManipulator::set_angles(std::vector<T>& angles)
+OpenRaveManipulator::set_angles(std::vector<T> &angles)
 {
-  if( angles.size() < motors_.size() ) {
-    angles.reserve(motors_.size());
-  }
-  for (unsigned int i=0; i<motors_.size(); i++) {
-    motors_[i].angle = (float)angles[motors_[i].no];
-  }
+	if (angles.size() < motors_.size()) {
+		angles.reserve(motors_.size());
+	}
+	for (unsigned int i = 0; i < motors_.size(); i++) {
+		motors_[i].angle = (float)angles[motors_[i].no];
+	}
 }
 
 /** Set motor angles of real device
@@ -135,17 +138,16 @@ OpenRaveManipulator::set_angles(std::vector<T>& angles)
  */
 template <typename T>
 void
-OpenRaveManipulator::set_angles_device(std::vector<T>& angles)
+OpenRaveManipulator::set_angles_device(std::vector<T> &angles)
 {
-  if( angles.size() < motors_.size() ) {
-    angles.reserve(motors_.size());
-  }
-  for (unsigned int i=0; i<motors_.size(); i++) {
-    motors_[i].angle = angle_device_to_OR(motors_[i].no_device, (float)angles[motors_[i].no_device]);
-  }
+	if (angles.size() < motors_.size()) {
+		angles.reserve(motors_.size());
+	}
+	for (unsigned int i = 0; i < motors_.size(); i++) {
+		motors_[i].angle =
+		  angle_device_to_OR(motors_[i].no_device, (float)angles[motors_[i].no_device]);
+	}
 }
-
-
 
 } // end of namespace fawkes
 

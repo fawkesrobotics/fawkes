@@ -34,14 +34,14 @@ class OpenRaveConnector;
 
 class OpenRaveAspectIniFin : public AspectIniFin
 {
- public:
-  OpenRaveAspectIniFin(OpenRaveConnector *openrave);
+public:
+	OpenRaveAspectIniFin(OpenRaveConnector *openrave);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  OpenRaveConnector *openrave_;
+private:
+	OpenRaveConnector *openrave_;
 };
 
 } // end namespace fawkes

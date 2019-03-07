@@ -25,8 +25,9 @@
 ///@cond QA
 
 //#include <openrave-core.h>
-#include <plugins/openrave/environment.h>
 #include <logging/console.h>
+#include <plugins/openrave/environment.h>
+
 #include <cstdio>
 #include <iostream>
 #include <vector>
@@ -37,41 +38,39 @@ using namespace std;
 void
 printVector(std::vector<float> &v)
 {
-  printf("## size:%zu \n", v.size());
-  for(unsigned int i=0; i<v.size(); i++)
-  {
-    printf("## %u:)%f \n", i, v[i]);
-  }
+	printf("## size:%zu \n", v.size());
+	for (unsigned int i = 0; i < v.size(); i++) {
+		printf("## %u:)%f \n", i, v[i]);
+	}
 }
 
 int
 main(int argc, char **argv)
 {
-  printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+	printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
-  ConsoleLogger* cl = new ConsoleLogger();
+	ConsoleLogger *cl = new ConsoleLogger();
 
-  //OpenRAVE::RaveInitialize(true); //optional..should be done automatically if not explicitly implemented
+	//OpenRAVE::RaveInitialize(true); //optional..should be done automatically if not explicitly implemented
 
-  OpenRaveEnvironment* env;
-  env = new OpenRaveEnvironment(cl);
-  env->create();
+	OpenRaveEnvironment *env;
+	env = new OpenRaveEnvironment(cl);
+	env->create();
 
-  env->enable_debug();
+	env->enable_debug();
 
-  string robotFile = SRCDIR"/../manipulators/katana.robot.xml";
-  env->add_robot(robotFile);
+	string robotFile = SRCDIR "/../manipulators/katana.robot.xml";
+	env->add_robot(robotFile);
 
-  env->lock();
+	env->lock();
 
-  env->start_viewer();
+	env->start_viewer();
 
-  usleep(1000*10000);
+	usleep(1000 * 10000);
 
-  env->destroy();
+	env->destroy();
 
-  return 0;
+	return 0;
 }
-
 
 /// @endcond

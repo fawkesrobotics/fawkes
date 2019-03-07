@@ -29,15 +29,15 @@ namespace fawkes {
 
 class OpenRaveManipulatorKinovaJaco : public OpenRaveManipulator
 {
- public:
-  OpenRaveManipulatorKinovaJaco(unsigned int count, unsigned int countDevice);
-  virtual ~OpenRaveManipulatorKinovaJaco();
+public:
+	OpenRaveManipulatorKinovaJaco(unsigned int count, unsigned int countDevice);
+	virtual ~OpenRaveManipulatorKinovaJaco();
 
-  virtual OpenRaveManipulatorPtr copy();
+	virtual OpenRaveManipulatorPtr copy();
 
- private:
-  virtual float angle_OR_to_device(unsigned int number, float angle) const;
-  virtual float angle_device_to_OR(unsigned int number, float angle) const;
+private:
+	virtual float angle_OR_to_device(unsigned int number, float angle) const;
+	virtual float angle_device_to_OR(unsigned int number, float angle) const;
 };
 
 } // end of namespace fawkes

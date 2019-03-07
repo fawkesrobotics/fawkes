@@ -21,11 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/openrave/aspect/openrave_inifin.h>
+#include <core/threading/thread_finalizer.h>
 #include <plugins/openrave/aspect/openrave.h>
 #include <plugins/openrave/aspect/openrave_connector.h>
-
-#include <core/threading/thread_finalizer.h>
+#include <plugins/openrave/aspect/openrave_inifin.h>
 
 namespace fawkes {
 
@@ -40,31 +39,30 @@ namespace fawkes {
  * @param openrave OpenRaveConnector to pass on to threads
  */
 OpenRaveAspectIniFin::OpenRaveAspectIniFin(OpenRaveConnector *openrave)
-  : AspectIniFin("OpenRaveAspect")
+: AspectIniFin("OpenRaveAspect")
 {
-  openrave_ = openrave;
+	openrave_ = openrave;
 }
 
 void
 OpenRaveAspectIniFin::init(Thread *thread)
 {
-  OpenRaveAspect *or_thread;
+	OpenRaveAspect *or_thread;
 
-  or_thread = dynamic_cast<OpenRaveAspect *>(thread);
-  if (or_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "OpenRaveAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
+	or_thread = dynamic_cast<OpenRaveAspect *>(thread);
+	if (or_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "OpenRaveAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
 
-  or_thread->init_OpenRaveAspect(openrave_);
+	or_thread->init_OpenRaveAspect(openrave_);
 }
 
 void
 OpenRaveAspectIniFin::finalize(Thread *thread)
 {
 }
-
-
 
 } // end namespace fawkes

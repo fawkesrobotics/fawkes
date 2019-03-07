@@ -33,17 +33,17 @@ class OpenRaveAspectIniFin;
 
 class OpenRaveAspect : public virtual Aspect
 {
-  friend OpenRaveAspectIniFin;
+	friend OpenRaveAspectIniFin;
 
- public:
-  OpenRaveAspect();
-  virtual ~OpenRaveAspect();
+public:
+	OpenRaveAspect();
+	virtual ~OpenRaveAspect();
 
- protected:
-  OpenRaveConnector *openrave;
+protected:
+	OpenRaveConnector *openrave;
 
- private:
-  void init_OpenRaveAspect(OpenRaveConnector *openrave);
+private:
+	void init_OpenRaveAspect(OpenRaveConnector *openrave);
 };
 
 } // end namespace fawkes
