@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "laser-cluster-thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,62 +31,59 @@ using namespace fawkes;
  */
 class LaserClusterPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit LaserClusterPlugin(Configuration *config)
-    : Plugin(config)
-  {
+	explicit LaserClusterPlugin(Configuration *config) : Plugin(config)
+	{
+		std::set<std::string> configs;
+		std::set<std::string> ignored_configs;
 
-    std::set<std::string> configs;
-    std::set<std::string> ignored_configs;
+		std::string prefix = "/laser-cluster/";
 
-    std::string prefix = "/laser-cluster/";
-
-    // Read configurations and spawn LaserFilterThreads
+		// Read configurations and spawn LaserFilterThreads
 #if __cplusplus >= 201103L
-    std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+		std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
 #else
-    std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+		std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
 #endif
-    while (i->next()) {
-      std::string cfg_name = std::string(i->path()).substr(prefix.length());
-      cfg_name = cfg_name.substr(0, cfg_name.find("/"));
+		while (i->next()) {
+			std::string cfg_name = std::string(i->path()).substr(prefix.length());
+			cfg_name             = cfg_name.substr(0, cfg_name.find("/"));
 
-      if ( (configs.find(cfg_name) == configs.end()) &&
-	   (ignored_configs.find(cfg_name) == ignored_configs.end()) ) {
+			if ((configs.find(cfg_name) == configs.end())
+			    && (ignored_configs.find(cfg_name) == ignored_configs.end())) {
+				std::string cfg_prefix = prefix + cfg_name + "/";
 
-	std::string cfg_prefix = prefix + cfg_name + "/";
+				bool active = true;
+				try {
+					active = config->get_bool((cfg_prefix + "active").c_str());
+				} catch (Exception &e) {
+				} // ignored, assume enabled
 
-	bool active = true;
-	try {
-	  active = config->get_bool((cfg_prefix + "active").c_str());
-	} catch (Exception &e) {} // ignored, assume enabled
+				try {
+					if (active) {
+						LaserClusterThread *thread = new LaserClusterThread(cfg_name, cfg_prefix);
+						thread_list.push_back(thread);
+						configs.insert(cfg_name);
+					} else {
+						//printf("Ignoring laser config %s\n", cfg_name.c_str());
+						ignored_configs.insert(cfg_name);
+					}
+				} catch (Exception &e) {
+					for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i) {
+						delete *i;
+					}
+					throw;
+				}
+			}
+		}
 
-	try {
-	  if (active) {
-	    LaserClusterThread *thread = new LaserClusterThread(cfg_name, cfg_prefix);
-	    thread_list.push_back(thread);
-	    configs.insert(cfg_name);
-	  } else {
-	    //printf("Ignoring laser config %s\n", cfg_name.c_str());
-	    ignored_configs.insert(cfg_name);
-	  }
-	} catch(Exception &e) {
-	  for (ThreadList::iterator i = thread_list.begin();
-	       i != thread_list.end(); ++i) {
-	    delete *i;
-	  }
-	  throw;
+		if (thread_list.empty()) {
+			throw Exception("No active laser filters configured, aborting");
+		}
 	}
-      }
-    }
-
-    if ( thread_list.empty() ) {
-      throw Exception("No active laser filters configured, aborting");
-    }
-  }
 };
 
 PLUGIN_DESCRIPTION("Detect cluster in 2D laser data")
