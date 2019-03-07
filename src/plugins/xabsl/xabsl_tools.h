@@ -28,42 +28,41 @@
 #include <cstdio>
 
 namespace fawkes {
-  class Logger;
+class Logger;
 }
 
 class XabslLoggingErrorHandler : public xabsl::ErrorHandler
 {
- public:
-  XabslLoggingErrorHandler(fawkes::Logger *logger);
+public:
+	XabslLoggingErrorHandler(fawkes::Logger *logger);
 
-  virtual void printError(const char *text);
-  virtual void printMessage(const char *text);
+	virtual void printError(const char *text);
+	virtual void printMessage(const char *text);
 
- private:
-  fawkes::Logger *logger_;
+private:
+	fawkes::Logger *logger_;
 };
-
 
 class XabslFileInputSource : public xabsl::InputSource
 {
- public:
-  XabslFileInputSource(const char* filename);
-  ~XabslFileInputSource();
+public:
+	XabslFileInputSource(const char *filename);
+	~XabslFileInputSource();
 
-  virtual bool open();
-  virtual void close();
+	virtual bool open();
+	virtual void close();
 
-  virtual double readValue() ;
-  virtual bool   readString(char* destination, int maxLength);
+	virtual double readValue();
+	virtual bool   readString(char *destination, int maxLength);
 
- private:
-  char read_and_omit_whitespace(bool omit_whitespace);
-  bool read_from_file(char *buf, size_t buf_length);
-  void omit_comment();
+private:
+	char read_and_omit_whitespace(bool omit_whitespace);
+	bool read_from_file(char *buf, size_t buf_length);
+	void omit_comment();
 
- private:
-  char *filename_;
-  FILE *f_;
+private:
+	char *filename_;
+	FILE *f_;
 };
 
 #endif

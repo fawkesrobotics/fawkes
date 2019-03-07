@@ -39,9 +39,8 @@
  */
 XabslLoggingErrorHandler::XabslLoggingErrorHandler(fawkes::Logger *logger)
 {
-  logger_ = logger;
+	logger_ = logger;
 }
-
 
 /** Print error message.
  * @param text text of the error message
@@ -49,9 +48,8 @@ XabslLoggingErrorHandler::XabslLoggingErrorHandler(fawkes::Logger *logger)
 void
 XabslLoggingErrorHandler::printError(const char *text)
 {
-  logger_->log_error("XABSL", "%s", text);
+	logger_->log_error("XABSL", "%s", text);
 }
-
 
 /** Print info message.
  * @param text text of the info message
@@ -59,9 +57,8 @@ XabslLoggingErrorHandler::printError(const char *text)
 void
 XabslLoggingErrorHandler::printMessage(const char *text)
 {
-  logger_->log_info("XABSL", "%s", text);
+	logger_->log_info("XABSL", "%s", text);
 }
-
 
 /** @class XabslFileInputSource "xabsl_tools.h"
  * File input class for Xabsl integration.
@@ -73,18 +70,16 @@ XabslLoggingErrorHandler::printMessage(const char *text)
  */
 XabslFileInputSource::XabslFileInputSource(const char *filename)
 {
-  filename_ = strdup(filename);
-  f_ = NULL;
+	filename_ = strdup(filename);
+	f_        = NULL;
 }
-
 
 /** Destructor. */
 XabslFileInputSource::~XabslFileInputSource()
 {
-  close();
-  free(filename_);
+	close();
+	free(filename_);
 }
-
 
 /** Open file.
  * @return true if file has been opened successfully, false otherwise
@@ -92,20 +87,19 @@ XabslFileInputSource::~XabslFileInputSource()
 bool
 XabslFileInputSource::open()
 {
-  close();
-  f_ = fopen(filename_, "r");
-  return (f_ != NULL);
+	close();
+	f_ = fopen(filename_, "r");
+	return (f_ != NULL);
 }
-
 
 /** Close file. */
 void
 XabslFileInputSource::close()
 {
-  if ( f_ )  fclose(f_);
-  f_ = NULL;
+	if (f_)
+		fclose(f_);
+	f_ = NULL;
 }
-
 
 /** Read a double value from the file.
  * @return value read from the file
@@ -113,14 +107,13 @@ XabslFileInputSource::close()
 double
 XabslFileInputSource::readValue()
 {
-  char buf[20];
-  if (read_from_file(buf, sizeof(buf)-1)) {
-    return atof(buf);
-  } else {
-    return 0.;
-  }
+	char buf[20];
+	if (read_from_file(buf, sizeof(buf) - 1)) {
+		return atof(buf);
+	} else {
+		return 0.;
+	}
 }
-
 
 /** Read a string from the file.
  * @param buf buffer where the string is stored
@@ -132,22 +125,22 @@ XabslFileInputSource::readValue()
 bool
 XabslFileInputSource::readString(char *buf, int buf_length)
 {
-  return read_from_file(buf, buf_length);
+	return read_from_file(buf, buf_length);
 }
-
 
 /** Omit comments. */
 void
 XabslFileInputSource::omit_comment()
 {
-  while ( !feof(f_) ) {
-    char c;
-    if (fread(&c, 1, 1, f_)) {
-      if ( c == '\n')  return;
-    } else {
-      return;
-    }
-  }
+	while (!feof(f_)) {
+		char c;
+		if (fread(&c, 1, 1, f_)) {
+			if (c == '\n')
+				return;
+		} else {
+			return;
+		}
+	}
 }
 
 /** Read and possibly omit whitespace.
@@ -157,24 +150,24 @@ XabslFileInputSource::omit_comment()
 char
 XabslFileInputSource::read_and_omit_whitespace(bool omit_whitespace)
 {
-  while ( ! feof(f_) ) {
-    char c;
-    if (fread(&c, 1, 1, f_)) {
-      if ( c == '/' ) {
-	omit_comment();
-	continue;
-      }
-      if ( (c != ' ') && (c != '\n') && (c != '\r') && (c != '\t') ) {
-	return c;
-      } else if ( ! omit_whitespace ) {
-	return 0;
-      }
-    } else {
-      throw fawkes::Exception ("XabslFileInputSource: omit_whitespace() fread failed");
-    }
-  }
+	while (!feof(f_)) {
+		char c;
+		if (fread(&c, 1, 1, f_)) {
+			if (c == '/') {
+				omit_comment();
+				continue;
+			}
+			if ((c != ' ') && (c != '\n') && (c != '\r') && (c != '\t')) {
+				return c;
+			} else if (!omit_whitespace) {
+				return 0;
+			}
+		} else {
+			throw fawkes::Exception("XabslFileInputSource: omit_whitespace() fread failed");
+		}
+	}
 
-  return 0;
+	return 0;
 }
 
 /** Read bytes from file.
@@ -187,21 +180,22 @@ XabslFileInputSource::read_and_omit_whitespace(bool omit_whitespace)
 bool
 XabslFileInputSource::read_from_file(char *buf, size_t buf_length)
 {
-  if ( ! f_ || feof(f_) )  return false;
+	if (!f_ || feof(f_))
+		return false;
 
-  memset(buf, 0, buf_length);
-  size_t cur_length = 0;
-  bool is_first = true;
-  while (! feof(f_) && (cur_length < buf_length)) {
-    char c = read_and_omit_whitespace(is_first);
-    is_first = false;
-    if (c) {
-      buf[cur_length++] = c;
-      buf[cur_length] = 0;
-    } else {
-      return (cur_length > 0);
-    }
-  }
+	memset(buf, 0, buf_length);
+	size_t cur_length = 0;
+	bool   is_first   = true;
+	while (!feof(f_) && (cur_length < buf_length)) {
+		char c   = read_and_omit_whitespace(is_first);
+		is_first = false;
+		if (c) {
+			buf[cur_length++] = c;
+			buf[cur_length]   = 0;
+		} else {
+			return (cur_length > 0);
+		}
+	}
 
-  return (cur_length > 0);
+	return (cur_length > 0);
 }

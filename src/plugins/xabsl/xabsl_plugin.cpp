@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/xabsl/xabsl_plugin.h>
-
 #include "engine_thread.h"
+
+#include <plugins/xabsl/xabsl_plugin.h>
 
 using namespace fawkes;
 
@@ -36,12 +36,10 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-XabslPlugin::XabslPlugin(Configuration *config)
-  : Plugin(config)
+XabslPlugin::XabslPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new XabslEngineThread());
+	thread_list.push_back(new XabslEngineThread());
 }
-
 
 PLUGIN_DESCRIPTION("Integrates XABSL interpreter")
 EXPORT_PLUGIN(XabslPlugin)

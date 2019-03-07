@@ -25,67 +25,70 @@
 
 #include "iface_field_wrapper.h"
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 #include <map>
 #include <string>
 
 namespace xabsl {
-  class Engine;
+class Engine;
 }
 
 namespace fawkes {
-  class Time;
-  class ObjectPositionInterface;
-  class SkillerInterface;
-}
+class Time;
+class ObjectPositionInterface;
+class SkillerInterface;
+} // namespace fawkes
 
 class XabslLoggingErrorHandler;
 class XabslFileInputSource;
 class XabslSkillWrapper;
 
-class XabslEngineThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::BlackBoardAspect
+class XabslEngineThread : public fawkes::Thread,
+                          public fawkes::BlockedTimingAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::ClockAspect,
+                          public fawkes::BlackBoardAspect
 {
- public:
-  XabslEngineThread();
+public:
+	XabslEngineThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void once();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void once();
+	virtual void loop();
 
-  unsigned long int current_time();
+	unsigned long int current_time();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  xabsl::Engine             *xe_;
-  XabslLoggingErrorHandler  *xleh_;
+private:
+	xabsl::Engine *           xe_;
+	XabslLoggingErrorHandler *xleh_;
 
-  fawkes::Time              *now_;
+	fawkes::Time *now_;
 
-  fawkes::SkillerInterface        *skiller_if_;
-  fawkes::ObjectPositionInterface *wm_ball_if_;
-  fawkes::ObjectPositionInterface *wm_ball_w_if_;
+	fawkes::SkillerInterface *       skiller_if_;
+	fawkes::ObjectPositionInterface *wm_ball_if_;
+	fawkes::ObjectPositionInterface *wm_ball_w_if_;
 
-  XabslInterfaceFieldWrapper<double, float> *ball_rx_;
-  XabslInterfaceFieldWrapper<double, float> *ball_ry_;
+	XabslInterfaceFieldWrapper<double, float> *ball_rx_;
+	XabslInterfaceFieldWrapper<double, float> *ball_ry_;
 
-  std::map<std::string, XabslSkillWrapper *> wrappers_;
-  std::map<std::string, XabslSkillWrapper *>::iterator wit_;
+	std::map<std::string, XabslSkillWrapper *>           wrappers_;
+	std::map<std::string, XabslSkillWrapper *>::iterator wit_;
 };
-
 
 #endif
