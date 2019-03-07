@@ -23,93 +23,100 @@
 #ifndef _PLUGINS_LUAAGENT_CONTINUOUS_EXEC_THREAD_H_
 #define _PLUGINS_LUAAGENT_CONTINUOUS_EXEC_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <aspect/thread_producer.h>
+#include <core/threading/thread.h>
 #ifdef HAVE_TF
-#include <aspect/tf.h>
+#	include <aspect/tf.h>
 #endif
 #include <utils/system/fam.h>
 
-#include <string>
 #include <cstdlib>
+#include <string>
 
 namespace fawkes {
-  class ComponentLogger;
-  class Mutex;
-  class LuaContext;
-  class LuaInterfaceImporter;
-  class Interface;
-  class SkillerInterface;
-  class SkillerDebugInterface;
-}
+class ComponentLogger;
+class Mutex;
+class LuaContext;
+class LuaInterfaceImporter;
+class Interface;
+class SkillerInterface;
+class SkillerDebugInterface;
+} // namespace fawkes
 
-class LuaAgentContinuousExecutionThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::ThreadProducerAspect,
+class LuaAgentContinuousExecutionThread : public fawkes::Thread,
+                                          public fawkes::BlockedTimingAspect,
+                                          public fawkes::LoggingAspect,
+                                          public fawkes::BlackBoardAspect,
+                                          public fawkes::ConfigurableAspect,
+                                          public fawkes::ClockAspect,
+                                          public fawkes::ThreadProducerAspect,
 #ifdef HAVE_TF
-  public fawkes::TransformAspect,
+                                          public fawkes::TransformAspect,
 #endif
-  public fawkes::FamListener
+                                          public fawkes::FamListener
 {
- public:
-  LuaAgentContinuousExecutionThread();
-  virtual ~LuaAgentContinuousExecutionThread();
+public:
+	LuaAgentContinuousExecutionThread();
+	virtual ~LuaAgentContinuousExecutionThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  virtual void fam_event(const char *filename, unsigned int mask);
+	virtual void fam_event(const char *filename, unsigned int mask);
 
-  void read_interfaces();
-  void write_interfaces();
+	void read_interfaces();
+	void write_interfaces();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private: /* methods */
-  void init_failure_cleanup();
+private: /* methods */
+	void init_failure_cleanup();
 
-  class LuaThread
-    : public Thread,
-    public fawkes::LoggingAspect
-  {
-   public:
-    LuaThread(fawkes::LuaContext  *lua);
-    virtual void loop();
+	class LuaThread : public Thread, public fawkes::LoggingAspect
+	{
+	public:
+		LuaThread(fawkes::LuaContext *lua);
+		virtual void loop();
 
-    /** Check if LuaThread failed.
+		/** Check if LuaThread failed.
      * @return true if an error occured, false otherwise. */
-    bool failed() { return failed_; }
-   private:
-    fawkes::LuaContext  *lua_;
-    bool failed_;
-  };
+		bool
+		failed()
+		{
+			return failed_;
+		}
 
- private: /* members */
-  fawkes::ComponentLogger *clog_;
+	private:
+		fawkes::LuaContext *lua_;
+		bool                failed_;
+	};
 
-  // config values
-  std::string cfg_agent_;
-  bool        cfg_watch_files_;
+private: /* members */
+	fawkes::ComponentLogger *clog_;
 
-  fawkes::SkillerInterface      *skiller_if_;
+	// config values
+	std::string cfg_agent_;
+	bool        cfg_watch_files_;
 
-  fawkes::LuaContext  *lua_;
-  fawkes::LuaInterfaceImporter  *lua_ifi_;
+	fawkes::SkillerInterface *skiller_if_;
 
-  fawkes::Mutex *ifi_mutex_;
-  LuaThread *lua_thread_;
+	fawkes::LuaContext *          lua_;
+	fawkes::LuaInterfaceImporter *lua_ifi_;
+
+	fawkes::Mutex *ifi_mutex_;
+	LuaThread *    lua_thread_;
 };
 
 #endif

@@ -23,69 +23,73 @@
 #ifndef _PLUGINS_LUAAGENT_PERIODIC_EXEC_THREAD_H_
 #define _PLUGINS_LUAAGENT_PERIODIC_EXEC_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #ifdef HAVE_TF
-#  include <aspect/tf.h>
+#	include <aspect/tf.h>
 #endif
-#include <utils/system/fam.h>
 #include <blackboard/interface_listener.h>
+#include <utils/system/fam.h>
 
-#include <string>
 #include <cstdlib>
+#include <string>
 
 namespace fawkes {
-  class ComponentLogger;
-  class Mutex;
-  class LuaContext;
-  class LuaInterfaceImporter;
-  class Interface;
-  class SkillerInterface;
-  class SkillerDebugInterface;
-}
+class ComponentLogger;
+class Mutex;
+class LuaContext;
+class LuaInterfaceImporter;
+class Interface;
+class SkillerInterface;
+class SkillerDebugInterface;
+} // namespace fawkes
 
-class LuaAgentPeriodicExecutionThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect,
+class LuaAgentPeriodicExecutionThread : public fawkes::Thread,
+                                        public fawkes::BlockedTimingAspect,
+                                        public fawkes::LoggingAspect,
+                                        public fawkes::BlackBoardAspect,
+                                        public fawkes::ConfigurableAspect,
 #ifdef HAVE_TF
-  public fawkes::TransformAspect,
+                                        public fawkes::TransformAspect,
 #endif
-  public fawkes::ClockAspect
+                                        public fawkes::ClockAspect
 {
- public:
-  LuaAgentPeriodicExecutionThread();
-  virtual ~LuaAgentPeriodicExecutionThread();
+public:
+	LuaAgentPeriodicExecutionThread();
+	virtual ~LuaAgentPeriodicExecutionThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private: /* methods */
-  void init_failure_cleanup();
-  void process_agdbg_messages();
+private: /* methods */
+	void init_failure_cleanup();
+	void process_agdbg_messages();
 
- private: /* members */
-  fawkes::ComponentLogger *clog_;
+private: /* members */
+	fawkes::ComponentLogger *clog_;
 
-  // config values
-  std::string cfg_agent_;
-  bool        cfg_watch_files_;
+	// config values
+	std::string cfg_agent_;
+	bool        cfg_watch_files_;
 
-  fawkes::SkillerInterface      *skiller_if_;
-  fawkes::SkillerDebugInterface *agdbg_if_;
+	fawkes::SkillerInterface *     skiller_if_;
+	fawkes::SkillerDebugInterface *agdbg_if_;
 
-  fawkes::LuaContext  *lua_;
-  fawkes::LuaInterfaceImporter  *lua_ifi_;
+	fawkes::LuaContext *          lua_;
+	fawkes::LuaInterfaceImporter *lua_ifi_;
 };
 
 #endif
