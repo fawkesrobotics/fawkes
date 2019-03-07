@@ -26,16 +26,18 @@
 class PitchCalibration : public LaserCalibration
 {
 public:
-  PitchCalibration(LaserInterface *laser,
-      fawkes::tf::Transformer *tf_transformer,
-      fawkes::NetworkConfiguration *config, std::string config_path);
-  virtual void calibrate();
-protected:
-  float get_new_pitch(float z, float old_pitch);
-protected:
-  /** The threshold of the mean of z to stop calibration */
-  constexpr static float threshold = 0.001;
-};
+	PitchCalibration(LaserInterface *              laser,
+	                 fawkes::tf::Transformer *     tf_transformer,
+	                 fawkes::NetworkConfiguration *config,
+	                 std::string                   config_path);
+	virtual void calibrate();
 
+protected:
+	float get_new_pitch(float z, float old_pitch);
+
+protected:
+	/** The threshold of the mean of z to stop calibration */
+	constexpr static float threshold = 0.001;
+};
 
 #endif /* !PITCH_CALIBRATION_H */

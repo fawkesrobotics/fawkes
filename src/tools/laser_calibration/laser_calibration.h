@@ -23,31 +23,30 @@
 
 #include <core/exception.h>
 #include <interfaces/Laser360Interface.h>
-
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
-#include <string>
 #include <cmath>
+#include <string>
 
-typedef pcl::PointXYZ Point;
+typedef pcl::PointXYZ          Point;
 typedef pcl::PointCloud<Point> PointCloud;
-typedef PointCloud::Ptr PointCloudPtr;
+typedef PointCloud::Ptr        PointCloudPtr;
 
 typedef fawkes::Laser360Interface LaserInterface;
 
 namespace fawkes {
-  class NetworkConfiguration;
-  class MotorInterface;
-  namespace tf {
-    class Transformer;
-  }
+class NetworkConfiguration;
+class MotorInterface;
+namespace tf {
+class Transformer;
 }
+} // namespace fawkes
 
 inline float
 deg2rad(float deg)
 {
-  return (deg * M_PI / 180.f);
+	return (deg * M_PI / 180.f);
 }
 
 /** Exception that is thrown if there are not enough laser points to
@@ -56,50 +55,50 @@ deg2rad(float deg)
 class InsufficientDataException : public fawkes::Exception
 {
 public:
-  /** Constructor.
+	/** Constructor.
    *  @param error: the error message
    */
-  InsufficientDataException(const char *error) : Exception(error) {}
+	InsufficientDataException(const char *error) : Exception(error)
+	{
+	}
 };
 
 class LaserCalibration
 {
 public:
-  LaserCalibration(LaserInterface *laser,
-      fawkes::tf::Transformer *tf_transformer,
-      fawkes::NetworkConfiguration *config,
-      std::string config_path);
-  virtual ~LaserCalibration();
-  virtual void calibrate() = 0;
+	LaserCalibration(LaserInterface *              laser,
+	                 fawkes::tf::Transformer *     tf_transformer,
+	                 fawkes::NetworkConfiguration *config,
+	                 std::string                   config_path);
+	virtual ~LaserCalibration();
+	virtual void calibrate() = 0;
 
 protected:
-  PointCloudPtr laser_to_pointcloud(const LaserInterface &laser);
-  void transform_pointcloud(const std::string &target_frame,
-      PointCloudPtr cloud);
-  PointCloudPtr filter_cloud_in_rear(PointCloudPtr input);
-  float get_mean_z(PointCloudPtr cloud);
-  PointCloudPtr filter_left_cloud(PointCloudPtr input);
-  PointCloudPtr filter_right_cloud(PointCloudPtr input);
-  PointCloudPtr filter_out_ground(PointCloudPtr input);
-  float get_matching_cost(
-      PointCloudPtr cloud1, PointCloudPtr cloud2, float *rot_yaw);
-  PointCloudPtr filter_center_cloud(PointCloudPtr input);
+	PointCloudPtr laser_to_pointcloud(const LaserInterface &laser);
+	void          transform_pointcloud(const std::string &target_frame, PointCloudPtr cloud);
+	PointCloudPtr filter_cloud_in_rear(PointCloudPtr input);
+	float         get_mean_z(PointCloudPtr cloud);
+	PointCloudPtr filter_left_cloud(PointCloudPtr input);
+	PointCloudPtr filter_right_cloud(PointCloudPtr input);
+	PointCloudPtr filter_out_ground(PointCloudPtr input);
+	float         get_matching_cost(PointCloudPtr cloud1, PointCloudPtr cloud2, float *rot_yaw);
+	PointCloudPtr filter_center_cloud(PointCloudPtr input);
 
 protected:
-  /** The laser that provides the input data */
-  LaserInterface *laser_;
-  /** The transformer used to compute transforms */
-  fawkes::tf::Transformer *tf_transformer_;
-  /** The network config to use for reading and updating config values */
-  fawkes::NetworkConfiguration *config_;
-  /** The config path to use for reading and updating config values */
-  const std::string config_path_;
-  /** Time in micro seconds to sleep between iterations */
-  const static long sleep_time_ = 50000;
-  /** The number of iterations to run before aborting the calibration */
-  const static uint max_iterations_ = 100;
-  /** The number of points required in a pointcloud to use it as input data */
-  const static size_t min_points = 10;
+	/** The laser that provides the input data */
+	LaserInterface *laser_;
+	/** The transformer used to compute transforms */
+	fawkes::tf::Transformer *tf_transformer_;
+	/** The network config to use for reading and updating config values */
+	fawkes::NetworkConfiguration *config_;
+	/** The config path to use for reading and updating config values */
+	const std::string config_path_;
+	/** Time in micro seconds to sleep between iterations */
+	const static long sleep_time_ = 50000;
+	/** The number of iterations to run before aborting the calibration */
+	const static uint max_iterations_ = 100;
+	/** The number of points required in a pointcloud to use it as input data */
+	const static size_t min_points = 10;
 };
 
 #endif /* !LASER_CALIBRATION_H */

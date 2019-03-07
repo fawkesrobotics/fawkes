@@ -20,8 +20,8 @@
 
 #include "yaw_calibration.h"
 
-#include <tf/transformer.h>
 #include <config/netconf.h>
+#include <tf/transformer.h>
 
 using namespace fawkes;
 using namespace std;
@@ -41,59 +41,68 @@ using namespace std;
  *  @param config The network config to read from and write the time offset to
  *  @param config_path The config path to read from and write the time offset to
  */
-YawCalibration::YawCalibration(LaserInterface *laser, LaserInterface *front_laser,
-      tf::Transformer *tf_transformer, NetworkConfiguration *config,
-      string config_path)
-  : LaserCalibration(laser, tf_transformer, config, config_path),
-    front_laser_(front_laser), step_(init_step_),
-    random_float_dist_(0,1),
-    min_cost_(numeric_limits<float>::max()), min_cost_yaw_(0.) {}
+YawCalibration::YawCalibration(LaserInterface *      laser,
+                               LaserInterface *      front_laser,
+                               tf::Transformer *     tf_transformer,
+                               NetworkConfiguration *config,
+                               string                config_path)
+: LaserCalibration(laser, tf_transformer, config, config_path),
+  front_laser_(front_laser),
+  step_(init_step_),
+  random_float_dist_(0, 1),
+  min_cost_(numeric_limits<float>::max()),
+  min_cost_yaw_(0.)
+{
+}
 
 /** The actual calibration.
  *  Continuously compare the data from both lasers and update the yaw config
  *  until the cost reaches the threshold.
  */
 void
-YawCalibration::calibrate() {
-  printf("Starting to calibrate yaw angle.\n");
-  float current_cost;
-  while (true) {
-    try {
-      current_cost = get_current_cost(NULL);
-      break;
-    } catch (InsufficientDataException &e) {
-      printf("Insufficient data, please move the robot\n");
-    }
-  }
-  uint iterations = 0;
-  float last_yaw = config_->get_float(config_path_.c_str());
-  min_cost_ = current_cost;
-  min_cost_yaw_ = last_yaw;
-  while (abs(step_) > 0.0005 && iterations++ < max_iterations_) {
-    float next_yaw;
-    try {
-      current_cost = get_current_cost(&step_);
-      next_yaw = last_yaw + step_;
-      if (current_cost < min_cost_) {
-        min_cost_ = current_cost;
-        min_cost_yaw_ = last_yaw;
-      }
-    } catch (InsufficientDataException &e) {
-      printf("Insufficient data, skipping loop.\n");
-      continue;
-    }
-    printf("Updating yaw from %f to %f (step %f), last cost %f\n",
-        last_yaw, next_yaw, step_, current_cost);
-    config_->set_float(config_path_.c_str(), next_yaw);
-    last_yaw = next_yaw;
-    usleep(sleep_time_);
-  }
-  if (current_cost > min_cost_) {
-    printf("Setting yaw to %f with minimal cost %f\n",
-        min_cost_yaw_, min_cost_);
-    config_->set_float(config_path_.c_str(), min_cost_yaw_);
-  }
-  printf("Yaw calibration finished.\n");
+YawCalibration::calibrate()
+{
+	printf("Starting to calibrate yaw angle.\n");
+	float current_cost;
+	while (true) {
+		try {
+			current_cost = get_current_cost(NULL);
+			break;
+		} catch (InsufficientDataException &e) {
+			printf("Insufficient data, please move the robot\n");
+		}
+	}
+	uint  iterations = 0;
+	float last_yaw   = config_->get_float(config_path_.c_str());
+	min_cost_        = current_cost;
+	min_cost_yaw_    = last_yaw;
+	while (abs(step_) > 0.0005 && iterations++ < max_iterations_) {
+		float next_yaw;
+		try {
+			current_cost = get_current_cost(&step_);
+			next_yaw     = last_yaw + step_;
+			if (current_cost < min_cost_) {
+				min_cost_     = current_cost;
+				min_cost_yaw_ = last_yaw;
+			}
+		} catch (InsufficientDataException &e) {
+			printf("Insufficient data, skipping loop.\n");
+			continue;
+		}
+		printf("Updating yaw from %f to %f (step %f), last cost %f\n",
+		       last_yaw,
+		       next_yaw,
+		       step_,
+		       current_cost);
+		config_->set_float(config_path_.c_str(), next_yaw);
+		last_yaw = next_yaw;
+		usleep(sleep_time_);
+	}
+	if (current_cost > min_cost_) {
+		printf("Setting yaw to %f with minimal cost %f\n", min_cost_yaw_, min_cost_);
+		config_->set_float(config_path_.c_str(), min_cost_yaw_);
+	}
+	printf("Yaw calibration finished.\n");
 }
 
 /** Get the cost of the current configuration.
@@ -101,16 +110,17 @@ YawCalibration::calibrate() {
  *  @return The current matching cost
  */
 float
-YawCalibration::get_current_cost(float *new_yaw) {
-  front_laser_->read();
-  laser_->read();
-  PointCloudPtr front_cloud = laser_to_pointcloud(*front_laser_);
-  PointCloudPtr back_cloud = laser_to_pointcloud(*laser_);
-  transform_pointcloud("base_link", front_cloud);
-  transform_pointcloud("base_link", back_cloud);
-  front_cloud = filter_center_cloud(front_cloud);
-  back_cloud = filter_center_cloud(back_cloud);
-  return get_matching_cost(front_cloud, back_cloud, new_yaw);
+YawCalibration::get_current_cost(float *new_yaw)
+{
+	front_laser_->read();
+	laser_->read();
+	PointCloudPtr front_cloud = laser_to_pointcloud(*front_laser_);
+	PointCloudPtr back_cloud  = laser_to_pointcloud(*laser_);
+	transform_pointcloud("base_link", front_cloud);
+	transform_pointcloud("base_link", back_cloud);
+	front_cloud = filter_center_cloud(front_cloud);
+	back_cloud  = filter_center_cloud(back_cloud);
+	return get_matching_cost(front_cloud, back_cloud, new_yaw);
 }
 
 /** Compute the new yaw.
@@ -122,31 +132,34 @@ YawCalibration::get_current_cost(float *new_yaw) {
  *  @return The new yaw configuration
  */
 float
-YawCalibration::get_new_yaw(float current_cost, float last_yaw) {
-  static float last_cost = current_cost;
-  costs_[last_yaw] = current_cost;
-  float next_yaw = last_yaw + step_;
-  for (auto &cost_pair : costs_) {
-    if (cost_pair.second < current_cost && cost_pair.first != last_yaw) {
-      float jump_probability =
-          static_cast<float>((current_cost - cost_pair.second)) / current_cost;
-      float rand_01 = random_float_dist_(random_generator_);
-      if (rand_01 > 1 - jump_probability) {
-        last_cost = current_cost;
-        if (random_float_dist_(random_generator_) >= 0.5) {
-          step_ = init_step_;
-        } else {
-          step_ = -init_step_;
-        }
-        printf("Jumping to %f, cost %f -> %f (probability was %f)\n",
-            cost_pair.first, current_cost, cost_pair.second, jump_probability);
-        return cost_pair.first;
-      }
-    }
-  }
-  if (current_cost > last_cost) {
-    step_ = -step_/2;
-  }
-  last_cost = current_cost;
-  return next_yaw;
+YawCalibration::get_new_yaw(float current_cost, float last_yaw)
+{
+	static float last_cost = current_cost;
+	costs_[last_yaw]       = current_cost;
+	float next_yaw         = last_yaw + step_;
+	for (auto &cost_pair : costs_) {
+		if (cost_pair.second < current_cost && cost_pair.first != last_yaw) {
+			float jump_probability = static_cast<float>((current_cost - cost_pair.second)) / current_cost;
+			float rand_01          = random_float_dist_(random_generator_);
+			if (rand_01 > 1 - jump_probability) {
+				last_cost = current_cost;
+				if (random_float_dist_(random_generator_) >= 0.5) {
+					step_ = init_step_;
+				} else {
+					step_ = -init_step_;
+				}
+				printf("Jumping to %f, cost %f -> %f (probability was %f)\n",
+				       cost_pair.first,
+				       current_cost,
+				       cost_pair.second,
+				       jump_probability);
+				return cost_pair.first;
+			}
+		}
+	}
+	if (current_cost > last_cost) {
+		step_ = -step_ / 2;
+	}
+	last_cost = current_cost;
+	return next_yaw;
 }

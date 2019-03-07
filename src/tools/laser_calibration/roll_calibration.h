@@ -26,21 +26,22 @@
 class RollCalibration : public LaserCalibration
 {
 public:
-  RollCalibration(LaserInterface *laser,
-      fawkes::tf::Transformer *tf_transformer,
-      fawkes::NetworkConfiguration *config, std::string config_path);
+	RollCalibration(LaserInterface *              laser,
+	                fawkes::tf::Transformer *     tf_transformer,
+	                fawkes::NetworkConfiguration *config,
+	                std::string                   config_path);
 
-  virtual void calibrate();
-
-protected:
-  float get_lr_mean_diff();
-  float get_new_roll(float mean_error, float old_roll);
-  PointCloudPtr filter_calibration_cloud(PointCloudPtr input);
+	virtual void calibrate();
 
 protected:
-  // TODO: make threshold and min_points configurable
-  /** The threshold of the left-right difference to stop calibration */
-  constexpr static float threshold = 0.00001;
+	float         get_lr_mean_diff();
+	float         get_new_roll(float mean_error, float old_roll);
+	PointCloudPtr filter_calibration_cloud(PointCloudPtr input);
+
+protected:
+	// TODO: make threshold and min_points configurable
+	/** The threshold of the left-right difference to stop calibration */
+	constexpr static float threshold = 0.00001;
 };
 
 #endif /* !ROLL_CALIBRATION_H */

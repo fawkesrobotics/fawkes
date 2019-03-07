@@ -28,33 +28,34 @@
 class YawCalibration : public LaserCalibration
 {
 public:
-  YawCalibration(LaserInterface *laser,
-      LaserInterface *front_laser,
-      fawkes::tf::Transformer *tf_transformer,
-      fawkes::NetworkConfiguration *config,
-      std::string config_path);
-  virtual void calibrate();
-protected:
-  float get_current_cost(float *new_yaw);
-  float get_new_yaw(float current_cost, float last_yaw);
+	YawCalibration(LaserInterface *              laser,
+	               LaserInterface *              front_laser,
+	               fawkes::tf::Transformer *     tf_transformer,
+	               fawkes::NetworkConfiguration *config,
+	               std::string                   config_path);
+	virtual void calibrate();
 
 protected:
-  /** The laser interface used to read the front laser data from */
-  LaserInterface *front_laser_;
-  /** The initial step size */
-  const float init_step_ = 0.02;
-  /** The current step size */
-  float step_;
-  /** Random number generator used to compute the random reset probability */
-  std::mt19937 random_generator_;
-  /** The distribution used to compute the random reset probability */
-  std::uniform_real_distribution<float> random_float_dist_;
-  /** A map of yaw config values to costs */
-  std::map<float, float> costs_;
-  /** The minimal cost */
-  float min_cost_;
-  /** A yaw configuration with the minimal cost */
-  float min_cost_yaw_;
+	float get_current_cost(float *new_yaw);
+	float get_new_yaw(float current_cost, float last_yaw);
+
+protected:
+	/** The laser interface used to read the front laser data from */
+	LaserInterface *front_laser_;
+	/** The initial step size */
+	const float init_step_ = 0.02;
+	/** The current step size */
+	float step_;
+	/** Random number generator used to compute the random reset probability */
+	std::mt19937 random_generator_;
+	/** The distribution used to compute the random reset probability */
+	std::uniform_real_distribution<float> random_float_dist_;
+	/** A map of yaw config values to costs */
+	std::map<float, float> costs_;
+	/** The minimal cost */
+	float min_cost_;
+	/** A yaw configuration with the minimal cost */
+	float min_cost_yaw_;
 };
 
 #endif /* !YAW_CALIBRATION_H */
