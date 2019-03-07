@@ -33,12 +33,10 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  ConfigListContent *content = new ConfigListContent();
-  delete content;
+	ConfigListContent *content = new ConfigListContent();
+	delete content;
 
-  return 0;
+	return 0;
 }
-
-
 
 /// @endcond

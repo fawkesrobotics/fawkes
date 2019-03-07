@@ -25,8 +25,8 @@
 
 #include <config/yaml.h>
 
-#include <iostream>
 #include <cstdio>
+#include <iostream>
 
 using namespace std;
 using namespace fawkes;
@@ -34,115 +34,108 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  YamlConfiguration *config = new YamlConfiguration(CONFDIR);
+	YamlConfiguration *config = new YamlConfiguration(CONFDIR);
 
-  try {
-  printf("=== Loading configuration ===\n");
-    config->load("config.yaml");
-    cout << "...done" << endl;
-  } catch (CouldNotOpenConfigException &e) {
-    cout << "...failed" << endl;
-    e.print_trace();
-    return -1;
-  }
+	try {
+		printf("=== Loading configuration ===\n");
+		config->load("config.yaml");
+		cout << "...done" << endl;
+	} catch (CouldNotOpenConfigException &e) {
+		cout << "...failed" << endl;
+		e.print_trace();
+		return -1;
+	}
 
+	printf("\n\n=== Reading some assorted values ===\n");
 
-  printf("\n\n=== Reading some assorted values ===\n");
+	unsigned int u = config->get_uint("/fawkes/mainapp/blackboard_size");
+	printf("Blackboard size: %u\n", u);
 
-  unsigned int u = config->get_uint("/fawkes/mainapp/blackboard_size");
-  printf("Blackboard size: %u\n", u);
+	std::string s = config->get_string("/hardware/roomba/connection_type");
+	printf("Roomba connection type: %s\n", s.c_str());
 
-  std::string s = config->get_string("/hardware/roomba/connection_type");
-  printf("Roomba connection type: %s\n", s.c_str());
+	Configuration::ValueIterator *i = config->get_value("/hardware/roomba/connection_type");
+	if (i->next() && i->is_string()) {
+		printf("Again as iterator: %s\n", i->get_string().c_str());
+	} else {
+		printf("!!! Failed, iterator value is not a string\n");
+	}
+	delete i;
 
-  Configuration::ValueIterator *i = config->get_value("/hardware/roomba/connection_type");
-  if (i->next() && i->is_string()) {
-    printf("Again as iterator: %s\n", i->get_string().c_str());
-  } else {
-    printf("!!! Failed, iterator value is not a string\n");
-  }
-  delete i;
+	printf("\n\n=== Printing ALL values ===\n");
+	i = config->iterator();
+	while (i->next()) {
+		printf("%s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
+	}
+	delete i;
 
-  printf("\n\n=== Printing ALL values ===\n");
-  i = config->iterator();
-  while (i->next()) {
-    printf("%s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
-  }
-  delete i;
+	printf("\n\n=== Printing values with prefix /webview ===\n");
+	i = config->search("/webview");
+	while (i->next()) {
+		printf("%s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
+	}
+	delete i;
 
+	printf("\n\n=== Printing values with prefix /hardware/laser/ ===\n");
+	i = config->search("/hardware/laser/");
+	while (i->next()) {
+		printf("%s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
+	}
+	delete i;
 
-  printf("\n\n=== Printing values with prefix /webview ===\n");
-  i = config->search("/webview");
-  while (i->next()) {
-    printf("%s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
-  }
-  delete i;
+	printf("\n\n=== Setting /z/foo/bar to test ===\n");
+	config->set_string("/z/foo/bar", "test");
+	printf("Reading back: %s\n", config->get_string("/z/foo/bar").c_str());
 
-  printf("\n\n=== Printing values with prefix /hardware/laser/ ===\n");
-  i = config->search("/hardware/laser/");
-  while (i->next()) {
-    printf("%s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
-  }
-  delete i;
+	printf("\n\n=== Erase test ===\n");
+	config->set_string("/z/erase/1", "test1");
+	config->set_string("/z/erase/2", "test2");
+	config->set_string("/z/erase/3", "test3");
+	config->set_string("/z/erase/4", "test4");
+	config->set_string("/z/erase/5", "test5");
+	printf("- Before erasing:\n");
+	i = config->search("/z/erase");
+	while (i->next()) {
+		printf("  %s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
+	}
+	delete i;
 
-  printf("\n\n=== Setting /z/foo/bar to test ===\n");
-  config->set_string("/z/foo/bar", "test");
-  printf("Reading back: %s\n", config->get_string("/z/foo/bar").c_str());
+	printf("- Now erasing /z/erase/4... afterwards:\n");
+	config->erase("/z/erase/4");
+	i = config->search("/z/erase");
+	while (i->next()) {
+		printf("  %s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
+	}
+	delete i;
 
+	printf("- Now erasing /z/erase/6 (which does not exist)\n");
+	try {
+		config->erase("/z/erase/6");
+	} catch (Exception &e) {
+		printf("  Got exception as expected: %s\n", e.what_no_backtrace());
+	}
 
-  printf("\n\n=== Erase test ===\n");
-  config->set_string("/z/erase/1", "test1");
-  config->set_string("/z/erase/2", "test2");
-  config->set_string("/z/erase/3", "test3");
-  config->set_string("/z/erase/4", "test4");
-  config->set_string("/z/erase/5", "test5");
-  printf("- Before erasing:\n");
-  i = config->search("/z/erase");
-  while (i->next()) {
-    printf("  %s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
-  }
-  delete i;
+	config->set_string("/z/erase/second/1", "test1");
+	config->set_string("/z/erase/second/2", "test2");
+	printf("- Before second erasing:\n");
+	i = config->search("/z/erase");
+	while (i->next()) {
+		printf("  %s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
+	}
+	delete i;
 
-  printf("- Now erasing /z/erase/4... afterwards:\n");
-  config->erase("/z/erase/4");
-  i = config->search("/z/erase");
-  while (i->next()) {
-    printf("  %s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
-  }
-  delete i;
+	printf("- Now erasing /z/erase/second/*... afterwards:\n");
+	config->erase("/z/erase/second/1");
+	config->erase("/z/erase/second/2");
+	i = config->search("/z/erase");
+	while (i->next()) {
+		printf("  %s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
+	}
+	delete i;
 
-  printf("- Now erasing /z/erase/6 (which does not exist)\n");
-  try {
-    config->erase("/z/erase/6");
-  } catch (Exception &e) {
-    printf("  Got exception as expected: %s\n", e.what_no_backtrace());
-  }
+	delete config;
 
-
-  config->set_string("/z/erase/second/1", "test1");
-  config->set_string("/z/erase/second/2", "test2");
-  printf("- Before second erasing:\n");
-  i = config->search("/z/erase");
-  while (i->next()) {
-    printf("  %s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
-  }
-  delete i;
-
-  printf("- Now erasing /z/erase/second/*... afterwards:\n");
-  config->erase("/z/erase/second/1");
-  config->erase("/z/erase/second/2");
-  i = config->search("/z/erase");
-  while (i->next()) {
-    printf("  %s: %s (%s)\n", i->path(), i->get_as_string().c_str(), i->type());
-  }
-  delete i;
-
-
-  delete config;
-
-  return 0;
+	return 0;
 }
-
-
 
 /// @endcond

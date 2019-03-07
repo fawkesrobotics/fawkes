@@ -30,20 +30,19 @@ namespace fawkes {
 
 class ConfigurationChangeHandler
 {
- public:
-  ConfigurationChangeHandler(const char *path_prefix);
-  virtual ~ConfigurationChangeHandler();
+public:
+	ConfigurationChangeHandler(const char *path_prefix);
+	virtual ~ConfigurationChangeHandler();
 
-  virtual void config_tag_changed(const char *new_tag)                       = 0;
-  virtual void config_value_changed(const Configuration::ValueIterator *v) = 0;
-  virtual void config_comment_changed(const Configuration::ValueIterator *v) = 0;
-  virtual void config_value_erased(const char *path) = 0;
+	virtual void config_tag_changed(const char *new_tag)                       = 0;
+	virtual void config_value_changed(const Configuration::ValueIterator *v)   = 0;
+	virtual void config_comment_changed(const Configuration::ValueIterator *v) = 0;
+	virtual void config_value_erased(const char *path)                         = 0;
 
-  const char *  config_monitor_prefix();
+	const char *config_monitor_prefix();
 
- private:
-  char *path_prefix_;
-
+private:
+	char *path_prefix_;
 };
 
 } // end namespace fawkes

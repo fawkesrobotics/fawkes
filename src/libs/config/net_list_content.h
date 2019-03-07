@@ -24,8 +24,8 @@
 #ifndef _CONFIG_NET_LIST_CONTENT_H_
 #define _CONFIG_NET_LIST_CONTENT_H_
 
-#include <config/net_messages.h>
 #include <config/config.h>
+#include <config/net_messages.h>
 #include <netcomm/fawkes/message_content.h>
 
 namespace fawkes {
@@ -34,23 +34,25 @@ class DynamicBuffer;
 
 class ConfigListContent : public FawkesNetworkMessageContent
 {
- public:
-  ConfigListContent();
-  ConfigListContent(unsigned int component_id, unsigned int msg_id,
-		    void *payload, size_t payload_size);
-  virtual ~ConfigListContent();
+public:
+	ConfigListContent();
+	ConfigListContent(unsigned int component_id,
+	                  unsigned int msg_id,
+	                  void *       payload,
+	                  size_t       payload_size);
+	virtual ~ConfigListContent();
 
-  void append(Configuration::ValueIterator *i);
+	void append(Configuration::ValueIterator *i);
 
-  virtual void serialize();
+	virtual void serialize();
 
-  void                           reset_iterator();
-  bool                           has_next();
-  config_list_entity_header_t *  next(size_t *size);
+	void                         reset_iterator();
+	bool                         has_next();
+	config_list_entity_header_t *next(size_t *size);
 
- private:
-  DynamicBuffer     *config_list;
-  config_list_msg_t  msg;
+private:
+	DynamicBuffer *   config_list;
+	config_list_msg_t msg;
 };
 
 } // end namespace fawkes

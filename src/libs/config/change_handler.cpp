@@ -23,8 +23,8 @@
 
 #include <config/change_handler.h>
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
 namespace fawkes {
 
@@ -57,24 +57,20 @@ namespace fawkes {
  * @param path path of value
  */
 
-
 /** Constructor.
  * @param path_prefix Path prefix to monitor. Use the empty string ("") to
  * monitor all changes.
  */
 ConfigurationChangeHandler::ConfigurationChangeHandler(const char *path_prefix)
 {
-  path_prefix_ = strdup(path_prefix);
+	path_prefix_ = strdup(path_prefix);
 }
-
-
 
 /** Destructor. */
 ConfigurationChangeHandler::~ConfigurationChangeHandler()
 {
-  free(path_prefix_);
+	free(path_prefix_);
 }
-
 
 /** Which path prefix shall be monitored.
  * Implement this method to return the name of the component whose values you
@@ -85,7 +81,7 @@ ConfigurationChangeHandler::~ConfigurationChangeHandler()
 const char *
 ConfigurationChangeHandler::config_monitor_prefix()
 {
-  return path_prefix_;
+	return path_prefix_;
 }
 
 } // end namespace fawkes

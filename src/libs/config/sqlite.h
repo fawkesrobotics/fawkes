@@ -26,6 +26,7 @@
 
 #include <config/config.h>
 #include <utils/system/hostinfo.h>
+
 #include <list>
 #include <string>
 
@@ -38,163 +39,164 @@ class Mutex;
 
 class SQLiteConfiguration : public Configuration
 {
- public:
-  SQLiteConfiguration();
-  SQLiteConfiguration(const char *sysconfdir, const char *userconfdir = NULL);
-  virtual ~SQLiteConfiguration();
+public:
+	SQLiteConfiguration();
+	SQLiteConfiguration(const char *sysconfdir, const char *userconfdir = NULL);
+	virtual ~SQLiteConfiguration();
 
-  virtual void          copy(Configuration *copyconf);
+	virtual void copy(Configuration *copyconf);
 
-  virtual void          load(const char *filename);
+	virtual void load(const char *filename);
 
-  virtual bool          exists(const char *path);
-  virtual bool          is_float(const char *path);
-  virtual bool          is_uint(const char *path);
-  virtual bool          is_int(const char *path);
-  virtual bool          is_bool(const char *path);
-  virtual bool          is_string(const char *path);
-  virtual bool          is_list(const char *path);
+	virtual bool exists(const char *path);
+	virtual bool is_float(const char *path);
+	virtual bool is_uint(const char *path);
+	virtual bool is_int(const char *path);
+	virtual bool is_bool(const char *path);
+	virtual bool is_string(const char *path);
+	virtual bool is_list(const char *path);
 
-  virtual bool          is_default(const char *path);
+	virtual bool is_default(const char *path);
 
-  virtual std::string     get_type(const char *path);
-  virtual float           get_float(const char *path);
-  virtual unsigned int    get_uint(const char *path);
-  virtual int             get_int(const char *path);
-  virtual bool            get_bool(const char *path);
-  virtual std::string     get_string(const char *path);
-  virtual std::vector<float>         get_floats(const char *path);
-  virtual std::vector<unsigned int>  get_uints(const char *path);
-  virtual std::vector<int>           get_ints(const char *path);
-  virtual std::vector<bool>          get_bools(const char *path);
-  virtual std::vector<std::string>   get_strings(const char *path);
-  virtual ValueIterator * get_value(const char *path);
-  virtual std::string     get_comment(const char *path);
-  virtual std::string     get_default_comment(const char *path);
+	virtual std::string               get_type(const char *path);
+	virtual float                     get_float(const char *path);
+	virtual unsigned int              get_uint(const char *path);
+	virtual int                       get_int(const char *path);
+	virtual bool                      get_bool(const char *path);
+	virtual std::string               get_string(const char *path);
+	virtual std::vector<float>        get_floats(const char *path);
+	virtual std::vector<unsigned int> get_uints(const char *path);
+	virtual std::vector<int>          get_ints(const char *path);
+	virtual std::vector<bool>         get_bools(const char *path);
+	virtual std::vector<std::string>  get_strings(const char *path);
+	virtual ValueIterator *           get_value(const char *path);
+	virtual std::string               get_comment(const char *path);
+	virtual std::string               get_default_comment(const char *path);
 
-  virtual void          set_float(const char *path, float f);
-  virtual void          set_uint(const char *path, unsigned int uint);
-  virtual void          set_int(const char *path, int i);
-  virtual void          set_bool(const char *path, bool b);
-  virtual void          set_string(const char *path, std::string &s);
-  virtual void          set_string(const char *path, const char *s);
-  virtual void          set_floats(const char *path, std::vector<float> &f);
-  virtual void          set_uints(const char *path, std::vector<unsigned int> &uint);
-  virtual void          set_ints(const char *path, std::vector<int> &i);
-  virtual void          set_bools(const char *path, std::vector<bool> &b);
-  virtual void          set_strings(const char *path, std::vector<std::string> &s);
-  virtual void          set_strings(const char *path, std::vector<const char *> &s);
-  virtual void          set_comment(const char *path, std::string &comment);
-  virtual void          set_comment(const char *path, const char *comment);
+	virtual void set_float(const char *path, float f);
+	virtual void set_uint(const char *path, unsigned int uint);
+	virtual void set_int(const char *path, int i);
+	virtual void set_bool(const char *path, bool b);
+	virtual void set_string(const char *path, std::string &s);
+	virtual void set_string(const char *path, const char *s);
+	virtual void set_floats(const char *path, std::vector<float> &f);
+	virtual void set_uints(const char *path, std::vector<unsigned int> &uint);
+	virtual void set_ints(const char *path, std::vector<int> &i);
+	virtual void set_bools(const char *path, std::vector<bool> &b);
+	virtual void set_strings(const char *path, std::vector<std::string> &s);
+	virtual void set_strings(const char *path, std::vector<const char *> &s);
+	virtual void set_comment(const char *path, std::string &comment);
+	virtual void set_comment(const char *path, const char *comment);
 
-  virtual void          erase(const char *path);
+	virtual void erase(const char *path);
 
-  virtual void          set_default_float(const char *path, float f);
-  virtual void          set_default_uint(const char *path, unsigned int uint);
-  virtual void          set_default_int(const char *path, int i);
-  virtual void          set_default_bool(const char *path, bool b);
-  virtual void          set_default_string(const char *path, std::string &s);
-  virtual void          set_default_string(const char *path, const char *s);
-  virtual void          set_default_comment(const char *path, const char *comment);
-  virtual void          set_default_comment(const char *path, std::string &comment);
+	virtual void set_default_float(const char *path, float f);
+	virtual void set_default_uint(const char *path, unsigned int uint);
+	virtual void set_default_int(const char *path, int i);
+	virtual void set_default_bool(const char *path, bool b);
+	virtual void set_default_string(const char *path, std::string &s);
+	virtual void set_default_string(const char *path, const char *s);
+	virtual void set_default_comment(const char *path, const char *comment);
+	virtual void set_default_comment(const char *path, std::string &comment);
 
-  virtual void          erase_default(const char *path);
+	virtual void erase_default(const char *path);
 
-  /** Transaction type.
+	/** Transaction type.
    * See SQLite Documentation for BEGIN TRANSACTION.
    */
-  typedef enum {
-    TRANSACTION_DEFERRED,	/**< Deferred transaction, lock acquired late. */
-    TRANSACTION_IMMEDIATE,	/**< Immediately acquire lock, reading remains possible. */
-    TRANSACTION_EXCLUSIVE	/**< Immediately acquire lock, no more reading or writing possible. */
-  } transaction_type_t;
+	typedef enum {
+		TRANSACTION_DEFERRED,  /**< Deferred transaction, lock acquired late. */
+		TRANSACTION_IMMEDIATE, /**< Immediately acquire lock, reading remains possible. */
+		TRANSACTION_EXCLUSIVE  /**< Immediately acquire lock, no more reading or writing possible. */
+	} transaction_type_t;
 
-  void transaction_begin(transaction_type_t ttype = TRANSACTION_DEFERRED);
-  void transaction_commit();
-  void transaction_rollback();
+	void transaction_begin(transaction_type_t ttype = TRANSACTION_DEFERRED);
+	void transaction_commit();
+	void transaction_rollback();
 
- public:
- class SQLiteValueIterator : public Configuration::ValueIterator
-  {
-    friend SQLiteConfiguration;
-   protected:
-    SQLiteValueIterator(::sqlite3_stmt *stmt, void *p = NULL);
-   public:
-    virtual ~SQLiteValueIterator();
-    virtual bool          next();
-    virtual bool          valid() const;
-    
-    virtual const char *  path() const;
-    virtual const char *  type() const;
-    
-    virtual bool          is_float() const;
-    virtual bool          is_uint() const;
-    virtual bool          is_int() const;
-    virtual bool          is_bool() const;
-    virtual bool          is_string() const;
-    virtual bool          is_list() const;
-    virtual size_t        get_list_size() const;
+public:
+	class SQLiteValueIterator : public Configuration::ValueIterator
+	{
+		friend SQLiteConfiguration;
 
-    virtual bool          is_default() const;
+	protected:
+		SQLiteValueIterator(::sqlite3_stmt *stmt, void *p = NULL);
 
-    virtual float         get_float() const;
-    virtual unsigned int  get_uint() const;
-    virtual int           get_int() const;
-    virtual bool          get_bool() const;
-    virtual std::string   get_string() const;
-    virtual std::vector<float>         get_floats() const;
-    virtual std::vector<unsigned int>  get_uints() const;
-    virtual std::vector<int>           get_ints() const;
-    virtual std::vector<bool>          get_bools() const;
-    virtual std::vector<std::string>   get_strings() const;
+	public:
+		virtual ~SQLiteValueIterator();
+		virtual bool next();
+		virtual bool valid() const;
 
-    virtual std::string   get_as_string() const;
+		virtual const char *path() const;
+		virtual const char *type() const;
 
-    virtual std::string   get_comment() const;
+		virtual bool   is_float() const;
+		virtual bool   is_uint() const;
+		virtual bool   is_int() const;
+		virtual bool   is_bool() const;
+		virtual bool   is_string() const;
+		virtual bool   is_list() const;
+		virtual size_t get_list_size() const;
 
-    std::string           get_modtype() const;
-    std::string           get_oldvalue() const;
+		virtual bool is_default() const;
 
-   private:
-    ::sqlite3_stmt *stmt_;
-    void *p_;
-  };
+		virtual float                     get_float() const;
+		virtual unsigned int              get_uint() const;
+		virtual int                       get_int() const;
+		virtual bool                      get_bool() const;
+		virtual std::string               get_string() const;
+		virtual std::vector<float>        get_floats() const;
+		virtual std::vector<unsigned int> get_uints() const;
+		virtual std::vector<int>          get_ints() const;
+		virtual std::vector<bool>         get_bools() const;
+		virtual std::vector<std::string>  get_strings() const;
 
-  ValueIterator * iterator();
-  ValueIterator * iterator_default();
-  ValueIterator * iterator_hostspecific();
-  ValueIterator * search(const char *path);
+		virtual std::string get_as_string() const;
 
-  void lock();
-  bool try_lock();
-  void unlock();
+		virtual std::string get_comment() const;
 
-  SQLiteValueIterator * modified_iterator();
+		std::string get_modtype() const;
+		std::string get_oldvalue() const;
 
-  void try_dump();
+	private:
+		::sqlite3_stmt *stmt_;
+		void *          p_;
+	};
 
- private:
-  void            init_dbs();
-  ::sqlite3_stmt *  get_typed_value(const char *path, const char *type);
-  ::sqlite3_stmt *  prepare_update(const char *sql, const char *path);
-  ::sqlite3_stmt *  prepare_insert_value(const char *sql, const char *type,
-				       const char *path);
-  void execute_insert_or_update(sqlite3_stmt *stmt);
-  void dump(::sqlite3 *tdb, const char *dumpfile);
-  void import(::sqlite3 *tdb, const char *dumpfile);
-  void import_default(const char *default_dump);
-  void attach_default(const char *db_file);
+	ValueIterator *iterator();
+	ValueIterator *iterator_default();
+	ValueIterator *iterator_hostspecific();
+	ValueIterator *search(const char *path);
 
- private:
-  ::sqlite3 *db;
-  bool opened;
-  Mutex *mutex;
+	void lock();
+	bool try_lock();
+	void unlock();
 
-  char *sysconfdir_;
-  char *userconfdir_;
-  char *host_file_;
-  char *default_file_;
-  char *default_sql_;
+	SQLiteValueIterator *modified_iterator();
+
+	void try_dump();
+
+private:
+	void            init_dbs();
+	::sqlite3_stmt *get_typed_value(const char *path, const char *type);
+	::sqlite3_stmt *prepare_update(const char *sql, const char *path);
+	::sqlite3_stmt *prepare_insert_value(const char *sql, const char *type, const char *path);
+	void            execute_insert_or_update(sqlite3_stmt *stmt);
+	void            dump(::sqlite3 *tdb, const char *dumpfile);
+	void            import(::sqlite3 *tdb, const char *dumpfile);
+	void            import_default(const char *default_dump);
+	void            attach_default(const char *db_file);
+
+private:
+	::sqlite3 *db;
+	bool       opened;
+	Mutex *    mutex;
+
+	char *sysconfdir_;
+	char *userconfdir_;
+	char *host_file_;
+	char *default_file_;
+	char *default_sql_;
 };
 
 } // end namespace fawkes
