@@ -21,6 +21,7 @@
  */
 
 #include "bbsync_plugin.h"
+
 #include "sync_thread.h"
 
 #include <set>
@@ -39,46 +40,45 @@ using namespace fawkes;
  * @param config Fawkes configuration
  */
 BlackBoardSynchronizationPlugin::BlackBoardSynchronizationPlugin(Configuration *config)
-  : Plugin(config)
+: Plugin(config)
 {
-  std::set<std::string> peers;
-  std::set<std::string> ignored_peers;
+	std::set<std::string> peers;
+	std::set<std::string> ignored_peers;
 
-  std::string prefix = "/fawkes/bbsync/";
-  std::string peers_prefix = prefix + "peers/";
+	std::string prefix       = "/fawkes/bbsync/";
+	std::string peers_prefix = prefix + "peers/";
 
-  Configuration::ValueIterator *i = config->search(peers_prefix.c_str());
-  while (i->next()) {
-    std::string peer = std::string(i->path()).substr(peers_prefix.length());
-    peer = peer.substr(0, peer.find("/"));
+	Configuration::ValueIterator *i = config->search(peers_prefix.c_str());
+	while (i->next()) {
+		std::string peer = std::string(i->path()).substr(peers_prefix.length());
+		peer             = peer.substr(0, peer.find("/"));
 
-    if ( (peers.find(peer) == peers.end()) &&
-	 (ignored_peers.find(peer) == ignored_peers.end()) ) {
+		if ((peers.find(peer) == peers.end()) && (ignored_peers.find(peer) == ignored_peers.end())) {
+			std::string peer_prefix = peers_prefix + peer + "/";
 
-      std::string peer_prefix = peers_prefix + peer + "/";
+			bool active = true;
+			try {
+				active = config->get_bool((peer_prefix + "active").c_str());
+			} catch (Exception &e) {
+			} // ignored, assume enabled
 
-      bool active = true;
-      try {
-	active = config->get_bool((peer_prefix + "active").c_str());
-      } catch (Exception &e) {} // ignored, assume enabled
+			if (active) {
+				//printf("Adding sync thread for peer %s\n", peer.c_str());
+				BlackBoardSynchronizationThread *sync_thread;
+				sync_thread = new BlackBoardSynchronizationThread(prefix, peer_prefix, peer);
+				peers.insert(peer);
+				thread_list.push_back(sync_thread);
+			} else {
+				//printf("Ignoring sync peer %s\n", peer.c_str());
+				ignored_peers.insert(peer);
+			}
+		}
+	}
+	delete i;
 
-      if (active) {
-	//printf("Adding sync thread for peer %s\n", peer.c_str());
-	BlackBoardSynchronizationThread *sync_thread;
-	sync_thread = new BlackBoardSynchronizationThread(prefix, peer_prefix, peer);
-	peers.insert(peer);
-	thread_list.push_back(sync_thread);
-      } else {
-	//printf("Ignoring sync peer %s\n", peer.c_str());
-	ignored_peers.insert(peer);
-      }
-    }
-  }
-  delete i;
-
-  if ( thread_list.empty() ) {
-    throw Exception("No synchronization peers configured, aborting");
-  }
+	if (thread_list.empty()) {
+		throw Exception("No synchronization peers configured, aborting");
+	}
 }
 
 PLUGIN_DESCRIPTION("Synchronize with remote Fawkes BlackBoards")

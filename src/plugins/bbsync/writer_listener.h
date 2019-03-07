@@ -26,32 +26,31 @@
 #include <blackboard/interface_listener.h>
 
 namespace fawkes {
-  class BlackBoard;
-  class Logger;
-}
+class BlackBoard;
+class Logger;
+} // namespace fawkes
 
 class BlackBoardSynchronizationThread;
 
-class SyncWriterInterfaceListener
-: public fawkes::BlackBoardInterfaceListener
+class SyncWriterInterfaceListener : public fawkes::BlackBoardInterfaceListener
 {
- public:
-  SyncWriterInterfaceListener(BlackBoardSynchronizationThread *sync_thread,
-			      fawkes::Logger *logger, const char *desc);
+public:
+	SyncWriterInterfaceListener(BlackBoardSynchronizationThread *sync_thread,
+	                            fawkes::Logger *                 logger,
+	                            const char *                     desc);
 
-  void add_interface(fawkes::Interface *interface);
-  void remove_interface(fawkes::Interface *interface);
+	void add_interface(fawkes::Interface *interface);
+	void remove_interface(fawkes::Interface *interface);
 
-  // BlackBoardInterfaceListener
-  virtual void bb_interface_writer_added(fawkes::Interface *interface,
-					 unsigned int instance_serial) throw();
-  virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-					   unsigned int instance_serial) throw();
+	// BlackBoardInterfaceListener
+	virtual void bb_interface_writer_added(fawkes::Interface *interface,
+	                                       unsigned int       instance_serial) throw();
+	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
+	                                         unsigned int       instance_serial) throw();
 
- private:
-  fawkes::Logger                   *logger_;
-  BlackBoardSynchronizationThread  *sync_thread_;
+private:
+	fawkes::Logger *                 logger_;
+	BlackBoardSynchronizationThread *sync_thread_;
 };
-
 
 #endif
