@@ -49,19 +49,23 @@ using namespace fawkes;
  * to replay new data but just wait for the next cycle. This is ignored in
  * continuous thread mode as it could cause busy waiting.
  */
-BBLogReplayBlockedTimingThread::BBLogReplayBlockedTimingThread(
-				   BlockedTimingAspect::WakeupHook hook,
-				   const char *logfile_name,
-				   const char *logdir,
-				   const char *scenario,
-				   float grace_period,
-				   bool loop_replay,
-				   bool non_blocking)
-  : BBLogReplayThread(logfile_name, logdir, scenario,
-		      grace_period, loop_replay, non_blocking,
-		      "BBLogReplayBTThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(hook)
+BBLogReplayBlockedTimingThread::BBLogReplayBlockedTimingThread(BlockedTimingAspect::WakeupHook hook,
+                                                               const char *logfile_name,
+                                                               const char *logdir,
+                                                               const char *scenario,
+                                                               float       grace_period,
+                                                               bool        loop_replay,
+                                                               bool        non_blocking)
+: BBLogReplayThread(logfile_name,
+                    logdir,
+                    scenario,
+                    grace_period,
+                    loop_replay,
+                    non_blocking,
+                    "BBLogReplayBTThread",
+                    Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(hook)
 {
-  set_name("BBLogReplayBTThread(%s)", logfile_name);
-  set_prepfin_conc_loop(false);
+	set_name("BBLogReplayBTThread(%s)", logfile_name);
+	set_prepfin_conc_loop(false);
 }
