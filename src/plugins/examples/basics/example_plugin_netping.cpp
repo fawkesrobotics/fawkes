@@ -36,55 +36,56 @@ using namespace fawkes;
  */
 class ExamplePluginClientNetworkReceiver : public FawkesNetworkClientHandler
 {
- public:
-  /** Constructor. */
-  ExamplePluginClientNetworkReceiver()
-  {
-    quit = false;
-  }
+public:
+	/** Constructor. */
+	ExamplePluginClientNetworkReceiver()
+	{
+		quit = false;
+	}
 
-  /** The handler got deregistered.
+	/** The handler got deregistered.
    * @param id the id of the calling client
    */
-  virtual void deregistered(unsigned int id) throw()
-  {
-    printf("Got deregistered\n");
-    quit = true;
-  }
+	virtual void
+	deregistered(unsigned int id) throw()
+	{
+		printf("Got deregistered\n");
+		quit = true;
+	}
 
-  /** Inbound mesage received.
+	/** Inbound mesage received.
    * @param m message
    * @param id the id of the calling thread
    */
-  virtual void inbound_received(FawkesNetworkMessage *m,
-				unsigned int id) throw()
-  {
-    if ( m->payload_size() == sizeof(unsigned int) ) {
-      unsigned int *u = (unsigned int *)m->payload();
-      printf("Received message of type %hu with payload u=%u\n", m->msgid(), *u);
-    } else {
-      printf("Received message of invalid size, ignoring\n");
-    }
-    quit = true;
-  }
+	virtual void
+	inbound_received(FawkesNetworkMessage *m, unsigned int id) throw()
+	{
+		if (m->payload_size() == sizeof(unsigned int)) {
+			unsigned int *u = (unsigned int *)m->payload();
+			printf("Received message of type %hu with payload u=%u\n", m->msgid(), *u);
+		} else {
+			printf("Received message of invalid size, ignoring\n");
+		}
+		quit = true;
+	}
 
-  virtual void connection_died(unsigned int id) throw()
-  {
-    printf("Connection died.\n");
-    quit = true;
-  }
+	virtual void
+	connection_died(unsigned int id) throw()
+	{
+		printf("Connection died.\n");
+		quit = true;
+	}
 
+	virtual void
+	connection_established(unsigned int id) throw()
+	{
+		printf("Connection established\n");
+	}
 
-  virtual void connection_established(unsigned int id) throw()
-  {
-    printf("Connection established\n");
-  }
-
-
-  /** Set to true if answer has been received or handler was deregistered.
+	/** Set to true if answer has been received or handler was deregistered.
    * False at object creation.
    */
-  bool quit;
+	bool quit;
 };
 
 /** Config tool main.
@@ -94,43 +95,43 @@ class ExamplePluginClientNetworkReceiver : public FawkesNetworkClientHandler
 int
 main(int argc, char **argv)
 {
-  ArgumentParser argp(argc, argv, "Hn:i:");
+	ArgumentParser argp(argc, argv, "Hn:i:");
 
-  FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
-  c->connect();
+	FawkesNetworkClient *c = new FawkesNetworkClient("localhost", 1910);
+	c->connect();
 
-  ExamplePluginClientNetworkReceiver r;
-  c->register_handler(&r, FAWKES_CID_EXAMPLE_PLUGIN);
+	ExamplePluginClientNetworkReceiver r;
+	c->register_handler(&r, FAWKES_CID_EXAMPLE_PLUGIN);
 
-  const char *tmp;
-  unsigned int *u = (unsigned int *)malloc(sizeof(unsigned int));;
-  unsigned int id = 1;
-  if ( (tmp = argp.arg("n")) != NULL ) {
-    int i = atoi(tmp);
-    if ( i > 0 ) {
-      *u = i;
-    }
-  }
+	const char *  tmp;
+	unsigned int *u = (unsigned int *)malloc(sizeof(unsigned int));
+	;
+	unsigned int id = 1;
+	if ((tmp = argp.arg("n")) != NULL) {
+		int i = atoi(tmp);
+		if (i > 0) {
+			*u = i;
+		}
+	}
 
-  if ( (tmp = argp.arg("i")) != NULL ) {
-    int i = atoi(tmp);
-    if ( i > 0 ) {
-      id = i;
-    }
-  }
+	if ((tmp = argp.arg("i")) != NULL) {
+		int i = atoi(tmp);
+		if (i > 0) {
+			id = i;
+		}
+	}
 
+	FawkesNetworkMessage *msg =
+	  new FawkesNetworkMessage(FAWKES_CID_EXAMPLE_PLUGIN, id, u, sizeof(unsigned int));
+	c->enqueue(msg);
 
-  FawkesNetworkMessage *msg = new FawkesNetworkMessage(FAWKES_CID_EXAMPLE_PLUGIN, id, u, sizeof(unsigned int));
-  c->enqueue(msg);
+	while (!r.quit) {
+		c->wait(FAWKES_CID_EXAMPLE_PLUGIN);
+	}
 
-  while ( ! r.quit ) {
-    c->wait(FAWKES_CID_EXAMPLE_PLUGIN);
-  }
+	c->deregister_handler(FAWKES_CID_EXAMPLE_PLUGIN);
+	c->disconnect();
+	delete c;
 
-  c->deregister_handler(FAWKES_CID_EXAMPLE_PLUGIN);
-  c->disconnect();
-  delete c;
-
-  return 0;
+	return 0;
 }
-

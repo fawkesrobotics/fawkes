@@ -20,11 +20,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/examples/basics/example_plugin.h>
-#include <plugins/examples/basics/thread.h>
-#include <plugins/examples/basics/net_thread.h>
-#include <plugins/examples/basics/finalize_nettler_thread.h>
 #include <plugins/examples/basics/blackboard_thread.h>
+#include <plugins/examples/basics/example_plugin.h>
+#include <plugins/examples/basics/finalize_nettler_thread.h>
+#include <plugins/examples/basics/net_thread.h>
+#include <plugins/examples/basics/thread.h>
 
 /** @class ExamplePlugin plugins/examples/basics/example_plugin.h
  * Simple example plugin.
@@ -42,28 +42,26 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-ExamplePlugin::ExamplePlugin(Configuration *config)
-  : Plugin(config)
+ExamplePlugin::ExamplePlugin(Configuration *config) : Plugin(config)
 {
-  // printf("ExamplePlugin constructor called\n");
-  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP,
-					  "PreLoopThread", MODC));
-  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_SENSOR,
-					  "SensorThread", MODC));
-  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE,
-					  "WorldStateThread", MODC));
-  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_THINK,
-					  "ThinkThread", MODC));
-  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_SKILL,
-					  "SkillThread", MODC));
-  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_ACT,
-					  "ActThread", MODC));
-  thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP,
-					  "PostLoopThread", MODC));
-  thread_list.push_back(new ExampleNetworkThread("NetworkThread"));
-  thread_list.push_back(new ExampleFinalizeNettlerThread("FinalizeNettlerThread"));
-  thread_list.push_back(new ExampleBlackBoardThread(/* reader */ true));
-  thread_list.push_back(new ExampleBlackBoardThread(/* reader */ false));
+	// printf("ExamplePlugin constructor called\n");
+	thread_list.push_back(
+	  new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP, "PreLoopThread", MODC));
+	thread_list.push_back(
+	  new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_SENSOR, "SensorThread", MODC));
+	thread_list.push_back(
+	  new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE, "WorldStateThread", MODC));
+	thread_list.push_back(
+	  new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_THINK, "ThinkThread", MODC));
+	thread_list.push_back(
+	  new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_SKILL, "SkillThread", MODC));
+	thread_list.push_back(new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_ACT, "ActThread", MODC));
+	thread_list.push_back(
+	  new ExampleThread(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP, "PostLoopThread", MODC));
+	thread_list.push_back(new ExampleNetworkThread("NetworkThread"));
+	thread_list.push_back(new ExampleFinalizeNettlerThread("FinalizeNettlerThread"));
+	thread_list.push_back(new ExampleBlackBoardThread(/* reader */ true));
+	thread_list.push_back(new ExampleBlackBoardThread(/* reader */ false));
 }
 
 PLUGIN_DESCRIPTION("Example plugin demonstrating Fawkes basics")

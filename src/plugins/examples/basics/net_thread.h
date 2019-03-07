@@ -23,35 +23,36 @@
 #ifndef _PLUGINS_EXAMPLE_NET_THREAD_H_
 #define _PLUGINS_EXAMPLE_NET_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
 #include <aspect/fawkes_network.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <netcomm/fawkes/handler.h>
 
-class ExampleNetworkThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::FawkesNetworkAspect,
-  public fawkes::FawkesNetworkHandler
+class ExampleNetworkThread : public fawkes::Thread,
+                             public fawkes::LoggingAspect,
+                             public fawkes::FawkesNetworkAspect,
+                             public fawkes::FawkesNetworkHandler
 {
+public:
+	ExampleNetworkThread(const char *name);
+	virtual ~ExampleNetworkThread();
 
- public:
-  ExampleNetworkThread(const char *name);
-  virtual ~ExampleNetworkThread();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	/* from FawkesNetworkHandler interface */
+	virtual void handle_network_message(fawkes::FawkesNetworkMessage *msg);
+	virtual void client_connected(unsigned int clid);
+	virtual void client_disconnected(unsigned int clid);
 
-  /* from FawkesNetworkHandler interface */
-  virtual void handle_network_message(fawkes::FawkesNetworkMessage *msg);
-  virtual void client_connected(unsigned int clid);
-  virtual void client_disconnected(unsigned int clid);
-
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
-
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 };
-
 
 #endif

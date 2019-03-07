@@ -21,34 +21,33 @@
  */
 
 #ifndef _PLUGINS_EXAMPLE_BLACKBOARD_THREAD_H_
-#define _PLUGINS_EXAMPLE_BLACKBOARD_THRED_H_
+#	define _PLUGINS_EXAMPLE_BLACKBOARD_THRED_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/blackboard.h>
+#	include <aspect/blackboard.h>
+#	include <aspect/blocked_timing.h>
+#	include <aspect/logging.h>
+#	include <core/threading/thread.h>
 
 namespace fawkes {
-  class TestInterface;
+class TestInterface;
 }
 
-class ExampleBlackBoardThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect
+class ExampleBlackBoardThread : public fawkes::Thread,
+                                public fawkes::BlockedTimingAspect,
+                                public fawkes::LoggingAspect,
+                                public fawkes::BlackBoardAspect
 {
- public:
-  ExampleBlackBoardThread(bool reader);
-  virtual ~ExampleBlackBoardThread();
+public:
+	ExampleBlackBoardThread(bool reader);
+	virtual ~ExampleBlackBoardThread();
 
-  virtual void finalize();
-  virtual void init();
-  virtual void loop();
+	virtual void finalize();
+	virtual void init();
+	virtual void loop();
 
- private:
-  fawkes::TestInterface* test_interface;  
-  bool                   reader;
+private:
+	fawkes::TestInterface *test_interface;
+	bool                   reader;
 };
 
 #endif

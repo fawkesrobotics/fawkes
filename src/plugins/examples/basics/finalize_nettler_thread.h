@@ -23,31 +23,32 @@
 #ifndef _PLUGINS_EXAMPLE_FINALIZE_NETTLER_THREAD_H_
 #define _PLUGINS_EXAMPLE_FINALIZE_NETTLER_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
+#include <core/threading/thread.h>
 
-class ExampleFinalizeNettlerThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect
+class ExampleFinalizeNettlerThread : public fawkes::Thread, public fawkes::LoggingAspect
 {
+public:
+	ExampleFinalizeNettlerThread(const char *name);
+	virtual ~ExampleFinalizeNettlerThread();
 
- public:
-  ExampleFinalizeNettlerThread(const char *name);
-  virtual ~ExampleFinalizeNettlerThread();
+	virtual void init();
+	virtual void loop();
 
-  virtual void init();
-  virtual void loop();
+	virtual bool prepare_finalize_user();
+	virtual void finalize();
 
-  virtual bool prepare_finalize_user();
-  virtual void finalize();
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
-
- private:
-  bool nagged;
+private:
+	bool nagged;
 };
-
 
 #endif
