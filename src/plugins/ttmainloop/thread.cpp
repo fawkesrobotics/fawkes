@@ -34,63 +34,58 @@ using namespace fawkes;
 
 /** Constructor. */
 TimeTrackerMainLoopThread::TimeTrackerMainLoopThread()
-  : Thread("TimeTrackerMainLoopThread", Thread::OPMODE_WAITFORWAKEUP)
+: Thread("TimeTrackerMainLoopThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
-
 
 /** Destructor. */
 TimeTrackerMainLoopThread::~TimeTrackerMainLoopThread()
 {
 }
 
-
 void
 TimeTrackerMainLoopThread::init()
 {
-  loop_start_ = new Time(clock);
-  loop_end_   = new Time(clock);
+	loop_start_ = new Time(clock);
+	loop_end_   = new Time(clock);
 
-  try {
-    output_interval_ = config->get_uint("/ttmainloop/output_interval");
-  } catch (Exception &e) {
-    output_interval_ = 5.0;
-    logger->log_info(name(), "Output interval not set, using 5 seconds.");
-  }
+	try {
+		output_interval_ = config->get_uint("/ttmainloop/output_interval");
+	} catch (Exception &e) {
+		output_interval_ = 5.0;
+		logger->log_info(name(), "Output interval not set, using 5 seconds.");
+	}
 
+	last_outp_time_ = new Time(clock);
+	now_            = new Time(clock);
+	last_outp_time_->stamp();
 
-  last_outp_time_ = new Time(clock);
-  now_            = new Time(clock);
-  last_outp_time_->stamp();
-
-  tt_ = new TimeTracker("time.log");
-  tt_loopcount_        = 0;
-  ttc_pre_loop_        = tt_->add_class("Pre Loop");
-  ttc_sensor_acquire_  = tt_->add_class("Sensor Acquire");
-  ttc_sensor_prepare_  = tt_->add_class("Sensor Prepare");
-  ttc_sensor_process_  = tt_->add_class("Sensor Process");
-  ttc_worldstate_      = tt_->add_class("World State");
-  ttc_think_           = tt_->add_class("Think");
-  ttc_skill_           = tt_->add_class("Skill");
-  ttc_act_             = tt_->add_class("Act");
-  ttc_post_loop_       = tt_->add_class("Post Loop");
-  ttc_netproc_         = tt_->add_class("Net Proc");
-  ttc_full_loop_       = tt_->add_class("Full Loop");
-  ttc_real_loop_       = tt_->add_class("Real Loop");
+	tt_                 = new TimeTracker("time.log");
+	tt_loopcount_       = 0;
+	ttc_pre_loop_       = tt_->add_class("Pre Loop");
+	ttc_sensor_acquire_ = tt_->add_class("Sensor Acquire");
+	ttc_sensor_prepare_ = tt_->add_class("Sensor Prepare");
+	ttc_sensor_process_ = tt_->add_class("Sensor Process");
+	ttc_worldstate_     = tt_->add_class("World State");
+	ttc_think_          = tt_->add_class("Think");
+	ttc_skill_          = tt_->add_class("Skill");
+	ttc_act_            = tt_->add_class("Act");
+	ttc_post_loop_      = tt_->add_class("Post Loop");
+	ttc_netproc_        = tt_->add_class("Net Proc");
+	ttc_full_loop_      = tt_->add_class("Full Loop");
+	ttc_real_loop_      = tt_->add_class("Real Loop");
 }
 
+#define TIMETRACK_START(c1, c2, c3) \
+	tt_->ping_start(c1);              \
+	tt_->ping_start(c2);              \
+	tt_->ping_start(c3);
 
-#define TIMETRACK_START(c1, c2, c3)		\
-  tt_->ping_start(c1);				\
-  tt_->ping_start(c2);				\
-  tt_->ping_start(c3);
+#define TIMETRACK_INTER(c1, c2) \
+	tt_->ping_end(c1);            \
+	tt_->ping_start(c2);
 
-#define TIMETRACK_INTER(c1, c2)			\
- tt_->ping_end(c1);				\
- tt_->ping_start(c2);
-
-#define TIMETRACK_END(c)			\
-  tt_->ping_end(c);
+#define TIMETRACK_END(c) tt_->ping_end(c);
 
 void
 TimeTrackerMainLoopThread::finalize()
@@ -98,68 +93,67 @@ TimeTrackerMainLoopThread::finalize()
 	delete loop_start_;
 	delete loop_end_;
 	delete last_outp_time_;
-  delete now_;
-  delete tt_;
+	delete now_;
+	delete tt_;
 }
 
 void
 TimeTrackerMainLoopThread::loop()
 {
-  Thread::CancelState old_state;
-  set_cancel_state(CANCEL_DISABLED, &old_state);
+	Thread::CancelState old_state;
+	set_cancel_state(CANCEL_DISABLED, &old_state);
 
-  TIMETRACK_START(ttc_real_loop_, ttc_full_loop_, ttc_pre_loop_);
+	TIMETRACK_START(ttc_real_loop_, ttc_full_loop_, ttc_pre_loop_);
 
-  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP );
+	blocked_timing_executor->wakeup_and_wait(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP);
 
-  TIMETRACK_INTER(ttc_pre_loop_, ttc_sensor_acquire_)
+	TIMETRACK_INTER(ttc_pre_loop_, ttc_sensor_acquire_)
 
-  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE );
+	blocked_timing_executor->wakeup_and_wait(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE);
 
-  TIMETRACK_INTER(ttc_sensor_acquire_, ttc_sensor_prepare_)
+	TIMETRACK_INTER(ttc_sensor_acquire_, ttc_sensor_prepare_)
 
-  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE );
+	blocked_timing_executor->wakeup_and_wait(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PREPARE);
 
-  TIMETRACK_INTER(ttc_sensor_prepare_, ttc_sensor_process_)
+	TIMETRACK_INTER(ttc_sensor_prepare_, ttc_sensor_process_)
 
-  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS );
+	blocked_timing_executor->wakeup_and_wait(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS);
 
-  TIMETRACK_INTER(ttc_sensor_process_, ttc_worldstate_)
+	TIMETRACK_INTER(ttc_sensor_process_, ttc_worldstate_)
 
-  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE );
+	blocked_timing_executor->wakeup_and_wait(BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE);
 
-  TIMETRACK_INTER(ttc_worldstate_, ttc_think_)
+	TIMETRACK_INTER(ttc_worldstate_, ttc_think_)
 
-  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_THINK );
+	blocked_timing_executor->wakeup_and_wait(BlockedTimingAspect::WAKEUP_HOOK_THINK);
 
-  TIMETRACK_INTER(ttc_think_, ttc_skill_)
+	TIMETRACK_INTER(ttc_think_, ttc_skill_)
 
-  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_SKILL );
+	blocked_timing_executor->wakeup_and_wait(BlockedTimingAspect::WAKEUP_HOOK_SKILL);
 
-  TIMETRACK_INTER(ttc_skill_, ttc_act_)
+	TIMETRACK_INTER(ttc_skill_, ttc_act_)
 
-  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT );
-  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC );
+	blocked_timing_executor->wakeup_and_wait(BlockedTimingAspect::WAKEUP_HOOK_ACT);
+	blocked_timing_executor->wakeup_and_wait(BlockedTimingAspect::WAKEUP_HOOK_ACT_EXEC);
 
-  TIMETRACK_INTER(ttc_act_, ttc_post_loop_)
+	TIMETRACK_INTER(ttc_act_, ttc_post_loop_)
 
-  blocked_timing_executor->wakeup_and_wait( BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP );
+	blocked_timing_executor->wakeup_and_wait(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP);
 
-  TIMETRACK_INTER(ttc_post_loop_, ttc_netproc_)
+	TIMETRACK_INTER(ttc_post_loop_, ttc_netproc_)
 
-  TIMETRACK_END(ttc_netproc_);
-  TIMETRACK_END(ttc_real_loop_);
+	TIMETRACK_END(ttc_netproc_);
+	TIMETRACK_END(ttc_real_loop_);
 
-  set_cancel_state(old_state);
+	set_cancel_state(old_state);
 
-  test_cancel();
+	test_cancel();
 
-  now_->stamp();
-  if ( (*now_ - last_outp_time_) >= output_interval_ ) {
-    tt_->print_to_stdout();
-    tt_->print_to_file();
-    tt_->reset();
-    *last_outp_time_ = *now_;
-  }
-
+	now_->stamp();
+	if ((*now_ - last_outp_time_) >= output_interval_) {
+		tt_->print_to_stdout();
+		tt_->print_to_file();
+		tt_->reset();
+		*last_outp_time_ = *now_;
+	}
 }
