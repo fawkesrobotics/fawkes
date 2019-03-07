@@ -27,8 +27,8 @@
 
 class PlayerPlugin : public fawkes::Plugin
 {
- public:
-  explicit PlayerPlugin(fawkes::Configuration *config);
+public:
+	explicit PlayerPlugin(fawkes::Configuration *config);
 };
 
 #endif

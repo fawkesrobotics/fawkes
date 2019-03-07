@@ -34,27 +34,23 @@ using namespace fawkes;
  * @todo needs real integration, currently only place holder
  */
 
-
 /** Constructor. */
 PlayerTimeSyncThread::PlayerTimeSyncThread()
-  : Thread("PlayerTimeSyncThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP)
-    //TimeSourceAspect(&simts_)
+: Thread("PlayerTimeSyncThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_PRE_LOOP)
+//TimeSourceAspect(&simts_)
 {
 }
-
 
 void
 PlayerTimeSyncThread::init()
 {
 }
 
-
 void
 PlayerTimeSyncThread::finalize()
 {
 }
-
 
 void
 PlayerTimeSyncThread::loop()

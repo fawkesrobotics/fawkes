@@ -44,17 +44,15 @@
 /** Constructor.
  * @param varname variable name
  */
-PlayerProxyFawkesInterfaceMapper::PlayerProxyFawkesInterfaceMapper(const std::string& varname)
+PlayerProxyFawkesInterfaceMapper::PlayerProxyFawkesInterfaceMapper(const std::string &varname)
 : varname_(varname)
 {
 }
-
 
 /** Virtual empty destructor. */
 PlayerProxyFawkesInterfaceMapper::~PlayerProxyFawkesInterfaceMapper()
 {
 }
-
 
 /** Get variable name
  * @return variable name
@@ -62,5 +60,5 @@ PlayerProxyFawkesInterfaceMapper::~PlayerProxyFawkesInterfaceMapper()
 std::string
 PlayerProxyFawkesInterfaceMapper::varname() const
 {
-  return varname_;
+	return varname_;
 }

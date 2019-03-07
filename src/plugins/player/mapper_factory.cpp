@@ -21,13 +21,14 @@
  */
 
 #include "mapper_factory.h"
-#include "position_mapper.h"
-#include "motor_mapper.h"
-#include "laser_mapper.h"
 
-#include <interfaces/ObjectPositionInterface.h>
-#include <interfaces/MotorInterface.h>
+#include "laser_mapper.h"
+#include "motor_mapper.h"
+#include "position_mapper.h"
+
 #include <interfaces/Laser360Interface.h>
+#include <interfaces/MotorInterface.h>
+#include <interfaces/ObjectPositionInterface.h>
 #include <libplayerc++/playerc++.h>
 
 using namespace PlayerCc;
@@ -50,21 +51,31 @@ using namespace fawkes;
  * interfaces.
  */
 PlayerProxyFawkesInterfaceMapper *
-PlayerMapperFactory::create_mapper(std::string varname,
-				   fawkes::Interface *interface,
-				   PlayerCc::ClientProxy *proxy)
+PlayerMapperFactory::create_mapper(std::string            varname,
+                                   fawkes::Interface *    interface,
+                                   PlayerCc::ClientProxy *proxy)
 {
-  PlayerProxyFawkesInterfaceMapper *rv = NULL;
+	PlayerProxyFawkesInterfaceMapper *rv = NULL;
 
-  if ( (rv = try_create<ObjectPositionInterface, Position2dProxy, PlayerPositionMapper>(varname, interface, proxy)) != NULL ) {
-    return rv;
-  } else if ( (rv = try_create<MotorInterface, Position2dProxy, PlayerMotorPositionMapper>(varname, interface, proxy)) != NULL ) {
-    return rv;
-  } else if ( (rv = try_create<Laser360Interface, LaserProxy, PlayerLaserMapper>(varname, interface, proxy)) != NULL ) {
-    return rv;
-  } else {
-    throw Exception("Unknown mapping, don't know how to map Fawkes interface %s "
-		    "to Player proxy %s",
-		    interface->type(), proxy->GetInterfaceStr().c_str());
-  }
+	if ((rv = try_create<ObjectPositionInterface, Position2dProxy, PlayerPositionMapper>(varname,
+	                                                                                     interface,
+	                                                                                     proxy))
+	    != NULL) {
+		return rv;
+	} else if ((rv = try_create<MotorInterface, Position2dProxy, PlayerMotorPositionMapper>(varname,
+	                                                                                        interface,
+	                                                                                        proxy))
+	           != NULL) {
+		return rv;
+	} else if ((rv = try_create<Laser360Interface, LaserProxy, PlayerLaserMapper>(varname,
+	                                                                              interface,
+	                                                                              proxy))
+	           != NULL) {
+		return rv;
+	} else {
+		throw Exception("Unknown mapping, don't know how to map Fawkes interface %s "
+		                "to Player proxy %s",
+		                interface->type(),
+		                proxy->GetInterfaceStr().c_str());
+	}
 }

@@ -26,29 +26,29 @@
 #include "mapper.h"
 
 namespace fawkes {
-  class Laser360Interface;
+class Laser360Interface;
 }
 
 namespace PlayerCc {
-  class LaserProxy;
+class LaserProxy;
 }
 
 class PlayerLaserMapper : public PlayerProxyFawkesInterfaceMapper
 {
- public:
-  PlayerLaserMapper(const std::string& varname,
-                    fawkes::Laser360Interface *interface,
-                    PlayerCc::LaserProxy *proxy);
+public:
+	PlayerLaserMapper(const std::string &        varname,
+	                  fawkes::Laser360Interface *interface,
+	                  PlayerCc::LaserProxy *     proxy);
 
-  virtual void sync_fawkes_to_player();
-  virtual void sync_player_to_fawkes();
+	virtual void sync_fawkes_to_player();
+	virtual void sync_player_to_fawkes();
 
- private:
-  fawkes::Laser360Interface  *interface_;
-  PlayerCc::LaserProxy       *proxy_;
+private:
+	fawkes::Laser360Interface *interface_;
+	PlayerCc::LaserProxy *     proxy_;
 
-  bool                        first_read_;
-  unsigned int                index_offset_;
+	bool         first_read_;
+	unsigned int index_offset_;
 };
 
 #endif
