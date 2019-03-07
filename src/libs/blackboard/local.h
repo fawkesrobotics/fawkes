@@ -43,45 +43,39 @@ class FawkesNetworkHub;
 
 class LocalBlackBoard : public BlackBoard
 {
- public:
-  LocalBlackBoard(size_t memsize);
-  LocalBlackBoard(size_t memsize, const char *magic_token,
-		  bool master = true);
-  virtual ~LocalBlackBoard();
+public:
+	LocalBlackBoard(size_t memsize);
+	LocalBlackBoard(size_t memsize, const char *magic_token, bool master = true);
+	virtual ~LocalBlackBoard();
 
-  virtual Interface *  open_for_reading(const char *interface_type,
-					const char *identifier,
-					const char *owner = NULL);
-  virtual Interface *  open_for_writing(const char *interface_type,
-					const char *identifier,
-					const char *owner = NULL);
-  virtual void         close(Interface *interface);
+	virtual Interface *
+	open_for_reading(const char *interface_type, const char *identifier, const char *owner = NULL);
+	virtual Interface *
+	             open_for_writing(const char *interface_type, const char *identifier, const char *owner = NULL);
+	virtual void close(Interface *interface);
 
-  virtual InterfaceInfoList *  list_all();
-  virtual InterfaceInfoList *  list(const char *type_pattern,
-				    const char *id_pattern);
-  virtual bool                 is_alive() const throw();
-  virtual bool                 try_aliveness_restore() throw();
+	virtual InterfaceInfoList *list_all();
+	virtual InterfaceInfoList *list(const char *type_pattern, const char *id_pattern);
+	virtual bool               is_alive() const throw();
+	virtual bool               try_aliveness_restore() throw();
 
-  virtual std::list<Interface *>
-    open_multiple_for_reading(const char *type_pattern,
-			      const char *id_pattern = "*",
-			      const char *owner = NULL);
+	virtual std::list<Interface *> open_multiple_for_reading(const char *type_pattern,
+	                                                         const char *id_pattern = "*",
+	                                                         const char *owner      = NULL);
 
-  virtual void start_nethandler(FawkesNetworkHub *hub);
+	virtual void start_nethandler(FawkesNetworkHub *hub);
 
-  static void cleanup(const char *magic_token, bool use_lister = false);
+	static void cleanup(const char *magic_token, bool use_lister = false);
 
-  /* for debugging only */
-  const BlackBoardMemoryManager * memory_manager() const;
+	/* for debugging only */
+	const BlackBoardMemoryManager *memory_manager() const;
 
- private: /* members */
-  BlackBoardInterfaceManager *im_;
-  BlackBoardMemoryManager    *memmgr_;
-  BlackBoardMessageManager   *msgmgr_;
-  BlackBoardNetworkHandler   *nethandler_;
+private: /* members */
+	BlackBoardInterfaceManager *im_;
+	BlackBoardMemoryManager *   memmgr_;
+	BlackBoardMessageManager *  msgmgr_;
+	BlackBoardNetworkHandler *  nethandler_;
 };
-
 
 } // end namespace fawkes
 

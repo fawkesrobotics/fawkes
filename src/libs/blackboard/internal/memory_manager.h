@@ -41,12 +41,13 @@ class SemaphoreSet;
  * pointer to a chunk then the data segment of that chunk can be accessed via
  * (char *)c + sizeof(chunk_list_t).
  */
-struct chunk_list_t {
-  chunk_list_t  *next;		/**< offset to next element in list */
-  void          *ptr;		/**< pointer to data memory */
-  unsigned int   size;		/**< total size of chunk, including overhanging bytes,
+struct chunk_list_t
+{
+	chunk_list_t *next;     /**< offset to next element in list */
+	void *        ptr;      /**< pointer to data memory */
+	unsigned int  size;     /**< total size of chunk, including overhanging bytes,
 				 * excluding header */
-  unsigned int   overhang;	/**< number of overhanging bytes in this chunk */
+	unsigned int  overhang; /**< number of overhanging bytes in this chunk */
 };
 
 // May be added later if we want/need per chunk semaphores
@@ -54,111 +55,113 @@ struct chunk_list_t {
 //  unsigned int   reserved   :16;/* reserved bytes */
 //  unsigned int   semset_sem : 8;/* semaphore number in semaphore set */
 
-
 class BlackBoardMemoryManager
 {
-  friend BlackBoardInterfaceManager;
- public:
-  BlackBoardMemoryManager(size_t memsize);
-  BlackBoardMemoryManager(size_t memsize, unsigned int version,
-			  bool use_shmem,
-			  const char *shmem_token = "FawkesBlackBoard");
-  ~BlackBoardMemoryManager();
+	friend BlackBoardInterfaceManager;
 
-  void * alloc(unsigned int num_bytes);
-  void   free(void *chunk_ptr);
+public:
+	BlackBoardMemoryManager(size_t memsize);
+	BlackBoardMemoryManager(size_t       memsize,
+	                        unsigned int version,
+	                        bool         use_shmem,
+	                        const char * shmem_token = "FawkesBlackBoard");
+	~BlackBoardMemoryManager();
 
-  void   check();
+	void *alloc(unsigned int num_bytes);
+	void  free(void *chunk_ptr);
 
-  bool   is_master() const;
+	void check();
 
-  unsigned int max_free_size() const;
-  unsigned int max_allocated_size() const;
+	bool is_master() const;
 
-  unsigned int free_size() const;
-  unsigned int allocated_size() const;
-  unsigned int overhang_size() const;
+	unsigned int max_free_size() const;
+	unsigned int max_allocated_size() const;
 
-  unsigned int num_free_chunks() const;
-  unsigned int num_allocated_chunks() const;
+	unsigned int free_size() const;
+	unsigned int allocated_size() const;
+	unsigned int overhang_size() const;
 
-  unsigned int memory_size() const;
-  unsigned int version() const;
+	unsigned int num_free_chunks() const;
+	unsigned int num_allocated_chunks() const;
 
-  void   print_free_chunks_info() const;
-  void   print_allocated_chunks_info() const;
-  void   print_performance_info() const;
+	unsigned int memory_size() const;
+	unsigned int version() const;
 
-  void   lock();
-  bool   try_lock();
-  void   unlock();
+	void print_free_chunks_info() const;
+	void print_allocated_chunks_info() const;
+	void print_performance_info() const;
 
-  /*
+	void lock();
+	bool try_lock();
+	void unlock();
+
+	/*
   void   lock(void *ptr);
   bool   try_lock(void *ptr);
   void   unlock(void *ptr);
   */
 
-  class ChunkIterator
-  {
-    friend BlackBoardMemoryManager;
-   private:
-    ChunkIterator(SharedMemory *shmem, chunk_list_t *cur);
-    ChunkIterator(chunk_list_t *cur);
-   public:
-    ChunkIterator();
-    ChunkIterator(const ChunkIterator &it);
-    ChunkIterator & operator++ ();        // prefix
-    ChunkIterator   operator++ (int inc); // postfix
-    ChunkIterator & operator+  (unsigned int i);
-    ChunkIterator & operator+= (unsigned int i);
-    bool            operator== (const ChunkIterator & c) const;
-    bool            operator!= (const ChunkIterator & c) const;
-    void *          operator*  () const;
-    ChunkIterator & operator=  (const ChunkIterator & c);
+	class ChunkIterator
+	{
+		friend BlackBoardMemoryManager;
 
-    unsigned int    size() const;
-    unsigned int    overhang() const;
+	private:
+		ChunkIterator(SharedMemory *shmem, chunk_list_t *cur);
+		ChunkIterator(chunk_list_t *cur);
 
-   private:
-    SharedMemory *shmem_;
-    chunk_list_t *cur_;
-  };
+	public:
+		ChunkIterator();
+		ChunkIterator(const ChunkIterator &it);
+		ChunkIterator &operator++();        // prefix
+		ChunkIterator  operator++(int inc); // postfix
+		ChunkIterator &operator+(unsigned int i);
+		ChunkIterator &operator+=(unsigned int i);
+		bool           operator==(const ChunkIterator &c) const;
+		bool           operator!=(const ChunkIterator &c) const;
+		void *         operator*() const;
+		ChunkIterator &operator=(const ChunkIterator &c);
 
-  ChunkIterator begin();
-  ChunkIterator end();
+		unsigned int size() const;
+		unsigned int overhang() const;
 
- private:
-  chunk_list_t * list_add(chunk_list_t *list, chunk_list_t *addel);
-  chunk_list_t * list_remove(chunk_list_t *list, chunk_list_t *rmel);
-  chunk_list_t * list_find_ptr(chunk_list_t *list, void *ptr);
-  unsigned int   list_length(const chunk_list_t *list) const;
-  chunk_list_t * list_get_biggest(const chunk_list_t *list) const;
-  chunk_list_t * list_next(const chunk_list_t *list) const;
+	private:
+		SharedMemory *shmem_;
+		chunk_list_t *cur_;
+	};
 
-  void cleanup_free_chunks();
+	ChunkIterator begin();
+	ChunkIterator end();
 
-  void list_print_info(const chunk_list_t *list) const;
+private:
+	chunk_list_t *list_add(chunk_list_t *list, chunk_list_t *addel);
+	chunk_list_t *list_remove(chunk_list_t *list, chunk_list_t *rmel);
+	chunk_list_t *list_find_ptr(chunk_list_t *list, void *ptr);
+	unsigned int  list_length(const chunk_list_t *list) const;
+	chunk_list_t *list_get_biggest(const chunk_list_t *list) const;
+	chunk_list_t *list_next(const chunk_list_t *list) const;
 
-  void * alloc_nolock(unsigned int num_bytes);
+	void cleanup_free_chunks();
 
- private:
-  bool master_;
+	void list_print_info(const chunk_list_t *list) const;
 
-  size_t memsize_;
+	void *alloc_nolock(unsigned int num_bytes);
 
-  // Mutex to be used for all list operations (alloc, free)
-  Mutex *mutex_;
+private:
+	bool master_;
 
-  // used for shmem
-  BlackBoardSharedMemoryHeader *shmem_header_;
-  SharedMemory *shmem_;
+	size_t memsize_;
 
-  // Used for heap memory
-  void  *memory_;
-  chunk_list_t *free_list_head_;	/**< offset of the free chunks list head */
-  chunk_list_t *alloc_list_head_;	/**< offset of the allocated chunks list head */
+	// Mutex to be used for all list operations (alloc, free)
+	Mutex *mutex_;
 
+	// used for shmem
+	BlackBoardSharedMemoryHeader *shmem_header_;
+	SharedMemory *                shmem_;
+
+	// Used for heap memory
+	void *        memory_;
+	chunk_list_t *free_list_head_;  /**< offset of the free chunks list head */
+	chunk_list_t *alloc_list_head_; /**< offset of the allocated chunks list head */
 };
 
 } // end namespace fawkes

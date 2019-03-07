@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  instance_factory.h - BlackBoard interface instance factory
  *
@@ -32,16 +32,15 @@ class ModuleManager;
 
 class BlackBoardInstanceFactory
 {
- public:
+public:
+	BlackBoardInstanceFactory();
+	~BlackBoardInstanceFactory();
 
-  BlackBoardInstanceFactory();
-  ~BlackBoardInstanceFactory();
+	Interface *new_interface_instance(const char *type, const char *identifier);
+	void       delete_interface_instance(Interface *interface);
 
-  Interface *  new_interface_instance(const char *type, const char *identifier);
-  void         delete_interface_instance(Interface *interface);
-
- private:
-  ModuleManager  *mm_;
+private:
+	ModuleManager *mm_;
 };
 
 } // end namespace fawkes

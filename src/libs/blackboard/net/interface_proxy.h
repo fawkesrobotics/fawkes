@@ -26,6 +26,7 @@
 
 #include <interface/mediators/interface_mediator.h>
 #include <interface/mediators/message_mediator.h>
+
 #include <cstdlib>
 
 namespace fawkes {
@@ -36,59 +37,60 @@ class RefCountRWLock;
 class BlackBoardNotifier;
 class Interface;
 
-class BlackBoardInterfaceProxy
-: public InterfaceMediator,
-  public MessageMediator
+class BlackBoardInterfaceProxy : public InterfaceMediator, public MessageMediator
 {
- public:
-  BlackBoardInterfaceProxy(FawkesNetworkClient *client, FawkesNetworkMessage *msg,
-			   BlackBoardNotifier *notifier, Interface *interface,
-			   bool readwrite);
-  ~BlackBoardInterfaceProxy();
+public:
+	BlackBoardInterfaceProxy(FawkesNetworkClient * client,
+	                         FawkesNetworkMessage *msg,
+	                         BlackBoardNotifier *  notifier,
+	                         Interface *           interface,
+	                         bool                  readwrite);
+	~BlackBoardInterfaceProxy();
 
-  void process_data_changed(FawkesNetworkMessage *msg);
-  void process_interface_message(FawkesNetworkMessage *msg);
-  void reader_added(unsigned int event_serial);
-  void reader_removed(unsigned int event_serial);
-  void writer_added(unsigned int event_serial);
-  void writer_removed(unsigned int event_serial);
+	void process_data_changed(FawkesNetworkMessage *msg);
+	void process_interface_message(FawkesNetworkMessage *msg);
+	void reader_added(unsigned int event_serial);
+	void reader_removed(unsigned int event_serial);
+	void writer_added(unsigned int event_serial);
+	void writer_removed(unsigned int event_serial);
 
-  unsigned int serial() const;
-  unsigned int clid() const;
-  Interface *  interface() const;
+	unsigned int serial() const;
+	unsigned int clid() const;
+	Interface *  interface() const;
 
-  /* InterfaceMediator */
-  virtual bool exists_writer(const Interface *interface) const;
-  virtual unsigned int num_readers(const Interface *interface) const;
-  virtual void notify_of_data_change(const Interface *interface);
-  virtual std::list<std::string>  readers(const Interface *interface) const;
-  virtual std::string             writer(const Interface *interface) const;
+	/* InterfaceMediator */
+	virtual bool                   exists_writer(const Interface *interface) const;
+	virtual unsigned int           num_readers(const Interface *interface) const;
+	virtual void                   notify_of_data_change(const Interface *interface);
+	virtual std::list<std::string> readers(const Interface *interface) const;
+	virtual std::string            writer(const Interface *interface) const;
 
-  /* MessageMediator */
-  virtual void transmit(Message *message);
+	/* MessageMediator */
+	virtual void transmit(Message *message);
 
- private:
-  inline unsigned int next_msg_id()
-  {
-    return ((instance_serial_ << 16) | next_msg_id_++);
-  }
+private:
+	inline unsigned int
+	next_msg_id()
+	{
+		return ((instance_serial_ << 16) | next_msg_id_++);
+	}
 
- private:
-  FawkesNetworkClient *fnc_;
+private:
+	FawkesNetworkClient *fnc_;
 
-  RefCountRWLock      *rwlock_;
-  BlackBoardNotifier  *notifier_;
-  Interface           *interface_;
+	RefCountRWLock *    rwlock_;
+	BlackBoardNotifier *notifier_;
+	Interface *         interface_;
 
-  void                *mem_chunk_;
-  void                *data_chunk_;
-  size_t               data_size_;
+	void * mem_chunk_;
+	void * data_chunk_;
+	size_t data_size_;
 
-  unsigned short       instance_serial_;
-  unsigned short       next_msg_id_;
-  unsigned int         num_readers_;
-  bool                 has_writer_;
-  unsigned int         clid_;
+	unsigned short instance_serial_;
+	unsigned short next_msg_id_;
+	unsigned int   num_readers_;
+	bool           has_writer_;
+	unsigned int   clid_;
 };
 
 } // end namespace fawkes

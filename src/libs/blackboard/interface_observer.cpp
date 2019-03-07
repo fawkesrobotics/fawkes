@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  interface_observer.cpp - BlackBoard interface observer
  *
@@ -23,6 +23,7 @@
 
 #include <blackboard/interface_observer.h>
 #include <interface/interface.h>
+
 #include <cstdlib>
 #include <cstring>
 
@@ -72,10 +73,9 @@ BlackBoardInterfaceObserver::BlackBoardInterfaceObserver()
 /** Destructor. */
 BlackBoardInterfaceObserver::~BlackBoardInterfaceObserver()
 {
-  bbio_observed_create_.clear();
-  bbio_observed_destroy_.clear();
+	bbio_observed_create_.clear();
+	bbio_observed_destroy_.clear();
 }
-
 
 /** BlackBoard interface created notification.
  * This is called whenever an interface is created for a type that you registered
@@ -92,7 +92,6 @@ BlackBoardInterfaceObserver::bb_interface_created(const char *type, const char *
 {
 }
 
-
 /** BlackBoard interface destroyed notification.
  * This is called whenever an interface is destroyed for a type that you registered
  * for.
@@ -108,7 +107,6 @@ BlackBoardInterfaceObserver::bb_interface_destroyed(const char *type, const char
 {
 }
 
-
 /** Add interface creation type to watch list.
  * With this you add an interface type to the watch list. For any type on this list
  * you will be notified if an interface is created.
@@ -119,15 +117,14 @@ BlackBoardInterfaceObserver::bb_interface_destroyed(const char *type, const char
  */
 void
 BlackBoardInterfaceObserver::bbio_add_observed_create(const char *type_pattern,
-						      const char *id_pattern) throw()
+                                                      const char *id_pattern) throw()
 {
-  bbio_observed_create_.lock();
-  bbio_observed_create_[type_pattern].push_back(id_pattern);
-  bbio_observed_create_[type_pattern].sort();
-  bbio_observed_create_[type_pattern].unique();
-  bbio_observed_create_.unlock();
+	bbio_observed_create_.lock();
+	bbio_observed_create_[type_pattern].push_back(id_pattern);
+	bbio_observed_create_[type_pattern].sort();
+	bbio_observed_create_[type_pattern].unique();
+	bbio_observed_create_.unlock();
 }
-
 
 /** Add interface destruction type to watch list.
  * With this you add an interface type to the watch list. For any type on this
@@ -139,15 +136,14 @@ BlackBoardInterfaceObserver::bbio_add_observed_create(const char *type_pattern,
  */
 void
 BlackBoardInterfaceObserver::bbio_add_observed_destroy(const char *type_pattern,
-						       const char *id_pattern) throw()
+                                                       const char *id_pattern) throw()
 {
-  bbio_observed_destroy_.lock();
-  bbio_observed_destroy_[type_pattern].push_back(id_pattern);
-  bbio_observed_destroy_[type_pattern].sort();
-  bbio_observed_destroy_[type_pattern].unique();
-  bbio_observed_destroy_.unlock();
+	bbio_observed_destroy_.lock();
+	bbio_observed_destroy_[type_pattern].push_back(id_pattern);
+	bbio_observed_destroy_[type_pattern].sort();
+	bbio_observed_destroy_[type_pattern].unique();
+	bbio_observed_destroy_.unlock();
 }
-
 
 /** Get interface creation type watch list.
  * @return interface type watch list
@@ -155,9 +151,8 @@ BlackBoardInterfaceObserver::bbio_add_observed_destroy(const char *type_pattern,
 BlackBoardInterfaceObserver::ObservedInterfaceLockMap *
 BlackBoardInterfaceObserver::bbio_get_observed_create() throw()
 {
-  return &bbio_observed_create_;
+	return &bbio_observed_create_;
 }
-
 
 /** Get interface destriction type watch list.
  * @return interface type watch list
@@ -165,8 +160,7 @@ BlackBoardInterfaceObserver::bbio_get_observed_create() throw()
 BlackBoardInterfaceObserver::ObservedInterfaceLockMap *
 BlackBoardInterfaceObserver::bbio_get_observed_destroy() throw()
 {
-  return &bbio_observed_destroy_;
+	return &bbio_observed_destroy_;
 }
-
 
 } // end namespace fawkes

@@ -21,11 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-
 #ifndef _BLACKBOARD_BBCONFIG_H_
 #define _BLACKBOARD_BBCONFIG_H_
 
-#define  BLACKBOARD_VERSION  1
+#define BLACKBOARD_VERSION 1
 
 // Can be used as useful defaults
 #define BLACKBOARD_MEMSIZE 2 * 1024 * 1024

@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  on_message_waker.h - wake a thread whenever a message is received
  *
@@ -21,11 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/utils/on_message_waker.h>
 #include <blackboard/blackboard.h>
+#include <blackboard/utils/on_message_waker.h>
+#include <core/threading/thread.h>
 #include <interface/interface.h>
 #include <interface/message.h>
-#include <core/threading/thread.h>
 
 namespace fawkes {
 
@@ -42,38 +42,33 @@ namespace fawkes {
  * @param thread thread to wake
  */
 BlackBoardOnMessageWaker::BlackBoardOnMessageWaker(BlackBoard *bb,
-						   Interface *interface,
-						   Thread *thread)
-  : BlackBoardInterfaceListener("OnMessageWaker[%s]", interface->uid()),
-    bb_(bb), thread_(thread)
+                                                   Interface * interface,
+                                                   Thread *    thread)
+: BlackBoardInterfaceListener("OnMessageWaker[%s]", interface->uid()), bb_(bb), thread_(thread)
 {
-  bbil_add_message_interface(interface);
-  bb_->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
+	bbil_add_message_interface(interface);
+	bb_->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
 }
-
 
 /** Destructor.
  * Unregisters from the blackboard.
  */
 BlackBoardOnMessageWaker::~BlackBoardOnMessageWaker()
 {
-  bb_->unregister_listener(this);
+	bb_->unregister_listener(this);
 }
-
 
 bool
 BlackBoardOnMessageWaker::bb_interface_message_received(Interface *interface,
-							Message *message) throw()
+                                                        Message *  message) throw()
 {
-  try {
-    interface->msgq_append(message);
-    thread_->wakeup();
-    return false;
-  } catch (Exception &e) {
-    return true;
-  }
+	try {
+		interface->msgq_append(message);
+		thread_->wakeup();
+		return false;
+	} catch (Exception &e) {
+		return true;
+	}
 }
 
-
 } // end namespace fawkes
-

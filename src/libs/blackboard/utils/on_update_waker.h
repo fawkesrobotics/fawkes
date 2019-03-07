@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  on_update_waker.h - wake a thread whenever am interface is updated
  *
@@ -33,15 +33,15 @@ class Thread;
 
 class BlackBoardOnUpdateWaker : public BlackBoardInterfaceListener
 {
- public:
-  BlackBoardOnUpdateWaker(BlackBoard *bb, Interface *interface, Thread *thread);
-  virtual ~BlackBoardOnUpdateWaker();
+public:
+	BlackBoardOnUpdateWaker(BlackBoard *bb, Interface *interface, Thread *thread);
+	virtual ~BlackBoardOnUpdateWaker();
 
-  virtual void bb_interface_data_changed(Interface *interface) throw();
+	virtual void bb_interface_data_changed(Interface *interface) throw();
 
- private:
-  BlackBoard *bb_;
-  Thread *thread_;
+private:
+	BlackBoard *bb_;
+	Thread *    thread_;
 };
 
 } // end namespace fawkes

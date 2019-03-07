@@ -22,8 +22,8 @@
 
 #include <blackboard/ownership.h>
 
-#include <string>
 #include <cstring>
+#include <string>
 
 namespace fawkes {
 
@@ -36,13 +36,12 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param parent parent blackboard to use as actual blackboard
  * @param owner owner name to record in newly created interfaces
  */
 BlackBoardWithOwnership::BlackBoardWithOwnership(fawkes::BlackBoard *parent, const char *owner)
-  : BlackBoard(/* create notifier */ false), blackboard_(parent), owner_(owner)
+: BlackBoard(/* create notifier */ false), blackboard_(parent), owner_(owner)
 {
 	BlackBoardWithOwnership *bbo = dynamic_cast<BlackBoardWithOwnership *>(blackboard_);
 	if (bbo) {
@@ -52,110 +51,105 @@ BlackBoardWithOwnership::BlackBoardWithOwnership(fawkes::BlackBoard *parent, con
 	}
 }
 
-
 /** Destructor. */
 BlackBoardWithOwnership::~BlackBoardWithOwnership()
 {
 }
 
-
 Interface *
-BlackBoardWithOwnership::open_for_reading(const char *type, const char *identifier, const char *owner)
+BlackBoardWithOwnership::open_for_reading(const char *type,
+                                          const char *identifier,
+                                          const char *owner)
 {
-  return blackboard_->open_for_reading(type, identifier,
-				       owner ? owner : owner_.c_str());
+	return blackboard_->open_for_reading(type, identifier, owner ? owner : owner_.c_str());
 }
 
-
 Interface *
-BlackBoardWithOwnership::open_for_writing(const char *type, const char *identifier, const char *owner)
+BlackBoardWithOwnership::open_for_writing(const char *type,
+                                          const char *identifier,
+                                          const char *owner)
 {
-  return blackboard_->open_for_writing(type, identifier,
-				       owner ? owner : owner_.c_str());
+	return blackboard_->open_for_writing(type, identifier, owner ? owner : owner_.c_str());
 }
-
 
 std::list<Interface *>
 BlackBoardWithOwnership::open_multiple_for_reading(const char *type_pattern,
-							 const char *id_pattern,
-							 const char *owner)
+                                                   const char *id_pattern,
+                                                   const char *owner)
 {
-  return blackboard_->open_multiple_for_reading(type_pattern, id_pattern,
-						owner ? owner : owner_.c_str());
+	return blackboard_->open_multiple_for_reading(type_pattern,
+	                                              id_pattern,
+	                                              owner ? owner : owner_.c_str());
 }
-
 
 void
 BlackBoardWithOwnership::close(Interface *interface)
 {
-  blackboard_->close(interface);
+	blackboard_->close(interface);
 }
-
 
 InterfaceInfoList *
 BlackBoardWithOwnership::list_all()
 {
-  return blackboard_->list_all();
+	return blackboard_->list_all();
 }
-
 
 InterfaceInfoList *
 BlackBoardWithOwnership::list(const char *type_pattern, const char *id_pattern)
 {
-  return blackboard_->list(type_pattern, id_pattern);
+	return blackboard_->list(type_pattern, id_pattern);
 }
-
 
 bool
 BlackBoardWithOwnership::is_alive() const throw()
 {
-  return blackboard_->is_alive();
+	return blackboard_->is_alive();
 }
-
 
 bool
 BlackBoardWithOwnership::try_aliveness_restore() throw()
 {
-  return blackboard_->try_aliveness_restore();
+	return blackboard_->try_aliveness_restore();
 }
 
 void
 BlackBoardWithOwnership::register_listener(BlackBoardInterfaceListener *listener,
-					   ListenerRegisterFlag flag)
+                                           ListenerRegisterFlag         flag)
 {
-  blackboard_->register_listener(listener, flag);
+	blackboard_->register_listener(listener, flag);
 }
 
 void
 BlackBoardWithOwnership::update_listener(BlackBoardInterfaceListener *listener,
-                            ListenerRegisterFlag flag)
+                                         ListenerRegisterFlag         flag)
 {
-  if (! listener)  return;
-  blackboard_->update_listener(listener, flag);
+	if (!listener)
+		return;
+	blackboard_->update_listener(listener, flag);
 }
-
 
 void
 BlackBoardWithOwnership::unregister_listener(BlackBoardInterfaceListener *listener)
 {
-  if (! listener) return;
-  blackboard_->unregister_listener(listener);
+	if (!listener)
+		return;
+	blackboard_->unregister_listener(listener);
 }
 
 void
 BlackBoardWithOwnership::register_observer(BlackBoardInterfaceObserver *observer)
 {
-  if (! observer) return;
-  blackboard_->register_observer(observer);
+	if (!observer)
+		return;
+	blackboard_->register_observer(observer);
 }
-
 
 void
 BlackBoardWithOwnership::unregister_observer(BlackBoardInterfaceObserver *observer)
 {
-  if (! observer) return;
-  blackboard_->unregister_observer(observer);
+	if (!observer)
+		return;
+	blackboard_->unregister_observer(observer);
 }
-
 
 } // end namespace fawkes

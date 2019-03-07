@@ -22,11 +22,11 @@
  */
 
 #include <blackboard/shmem/lister.h>
-#include <utils/system/console_colors.h>
 #include <utils/ipc/shm.h>
+#include <utils/system/console_colors.h>
 
-#include <iostream>
 #include <cstdio>
+#include <iostream>
 
 using namespace std;
 namespace fawkes {
@@ -41,15 +41,13 @@ namespace fawkes {
 /** Constructor */
 BlackBoardSharedMemoryLister::BlackBoardSharedMemoryLister()
 {
-  num = 0;
+	num = 0;
 }
-
 
 /** Destructor */
 BlackBoardSharedMemoryLister::~BlackBoardSharedMemoryLister()
 {
 }
-
 
 /** Print header of the table.
  * This should fit on the terminal and thus have a width of at most
@@ -58,16 +56,16 @@ BlackBoardSharedMemoryLister::~BlackBoardSharedMemoryLister()
 void
 BlackBoardSharedMemoryLister::print_header()
 {
-  cout << endl << cblue << "Fawkes BlackBoard Shared Memory Segments" << cnormal << endl
-       << "========================================================================" << endl
-       << cdarkgray;
-  printf ("%-3s %-10s %-11s %-16s %-12s %s\n",
-          "#", "ShmID", "Semaphore", "Bytes", "# attached", "State");
-  cout << cnormal
-       << "------------------------------------------------------------------------" << endl;
-  num = 0;
+	cout << endl
+	     << cblue << "Fawkes BlackBoard Shared Memory Segments" << cnormal << endl
+	     << "========================================================================" << endl
+	     << cdarkgray;
+	printf(
+	  "%-3s %-10s %-11s %-16s %-12s %s\n", "#", "ShmID", "Semaphore", "Bytes", "# attached", "State");
+	cout << cnormal << "------------------------------------------------------------------------"
+	     << endl;
+	num = 0;
 }
-
 
 /** Print footer of the table.
  * This should fit on the terminal and thus have a width of at most
@@ -76,9 +74,8 @@ BlackBoardSharedMemoryLister::print_header()
 void
 BlackBoardSharedMemoryLister::print_footer()
 {
-  cout << "========================================================================" << endl;
+	cout << "========================================================================" << endl;
 }
-
 
 /** Print this if no matching segment was found.
  * Called by SharedMemory if no matching segment could be found.
@@ -86,9 +83,8 @@ BlackBoardSharedMemoryLister::print_footer()
 void
 BlackBoardSharedMemoryLister::print_no_segments()
 {
-  cout << "No Fawkes BlackBoard shared memory segments found" << endl;
+	cout << "No Fawkes BlackBoard shared memory segments found" << endl;
 }
-
 
 /** Print this if no matching orphaned segment was found.
  * Called by SharedMemory::erase_orphaned() if no matching segment
@@ -97,10 +93,9 @@ BlackBoardSharedMemoryLister::print_no_segments()
 void
 BlackBoardSharedMemoryLister::print_no_orphaned_segments()
 {
-  cout << "No " << cdarkgray << "orphaned" << cnormal
-       << " Fawkes BlackBoard shared memory segments found" << endl;
+	cout << "No " << cdarkgray << "orphaned" << cnormal
+	     << " Fawkes BlackBoard shared memory segments found" << endl;
 }
-
 
 /** Print info about segment.
  * This method is called for every matching shared memory segment.
@@ -114,22 +109,26 @@ BlackBoardSharedMemoryLister::print_no_orphaned_segments()
  */
 void
 BlackBoardSharedMemoryLister::print_info(const SharedMemoryHeader *header,
-					 int shm_id, int semaphore,
-					 unsigned int mem_size,
-					 const void *memptr)
+                                         int                       shm_id,
+                                         int                       semaphore,
+                                         unsigned int              mem_size,
+                                         const void *              memptr)
 {
-  unsigned int nattch = SharedMemory::num_attached(shm_id);
-  bool swapable = SharedMemory::is_swapable(shm_id);
-  bool destroyed = SharedMemory::is_destroyed(shm_id);
+	unsigned int nattch    = SharedMemory::num_attached(shm_id);
+	bool         swapable  = SharedMemory::is_swapable(shm_id);
+	bool         destroyed = SharedMemory::is_destroyed(shm_id);
 
-  printf ("%-3u %-10d 0x%08x  %-16u %-12u %s%s%s%s%s\n",
-          ++num, shm_id, semaphore, mem_size, nattch,
- 	  ((nattch > 1) ? "active" : "orphaned"),
-	  ((swapable || destroyed) ? " (" : ""),
-	  (swapable ? "S" : ""),
-	  (destroyed ? "D" : ""),
-	  ((swapable || destroyed) ? ")" : "")
-	  );
+	printf("%-3u %-10d 0x%08x  %-16u %-12u %s%s%s%s%s\n",
+	       ++num,
+	       shm_id,
+	       semaphore,
+	       mem_size,
+	       nattch,
+	       ((nattch > 1) ? "active" : "orphaned"),
+	       ((swapable || destroyed) ? " (" : ""),
+	       (swapable ? "S" : ""),
+	       (destroyed ? "D" : ""),
+	       ((swapable || destroyed) ? ")" : ""));
 }
 
 } // end namespace fawkes

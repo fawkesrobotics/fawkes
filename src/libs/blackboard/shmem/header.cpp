@@ -23,6 +23,7 @@
 
 #include <blackboard/shmem/header.h>
 #include <utils/ipc/shm.h>
+
 #include <cstddef>
 
 namespace fawkes {
@@ -39,21 +40,18 @@ namespace fawkes {
  * @see SharedMemoryHeader
  */
 
-
 /** Constructor
  * @param data_size the size of the shared memory segment without the header
  *                  that should be allocated.
  * @param version The BB version to store in the shared memory segment to prevent
  *                conflicts with older software.
  */
-BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(size_t data_size,
-							   unsigned int version)
+BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(size_t data_size, unsigned int version)
 {
-  _data_size = data_size;
-  _version   = version;
-  data       = NULL;
+	_data_size = data_size;
+	_version   = version;
+	data       = NULL;
 }
-
 
 /** Constructor.
  * @param version The BB version to store in the shared memory segment to prevent
@@ -61,22 +59,20 @@ BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(size_t data_size,
  */
 BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(unsigned int version)
 {
-  _data_size = 0;
-  _version   = version;
-  data       = NULL;
+	_data_size = 0;
+	_version   = version;
+	data       = NULL;
 }
-
 
 /** Copy constructor.
  * @param h header to copy
  */
 BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(const BlackBoardSharedMemoryHeader *h)
 {
-  _data_size = h->_data_size;
-  _version   = h->_version;
-  data       = h->data;
+	_data_size = h->_data_size;
+	_version   = h->_version;
+	data       = h->data;
 }
-
 
 /** Set SharedMemory instance.
  * This is needed for address conversion and must be set right after the constructor
@@ -86,23 +82,19 @@ BlackBoardSharedMemoryHeader::BlackBoardSharedMemoryHeader(const BlackBoardShare
 void
 BlackBoardSharedMemoryHeader::set_shared_memory(SharedMemory *shmem)
 {
-  this->shmem = shmem;
+	this->shmem = shmem;
 }
-
 
 /** Destructor */
 BlackBoardSharedMemoryHeader::~BlackBoardSharedMemoryHeader()
 {
 }
 
-
-
 SharedMemoryHeader *
 BlackBoardSharedMemoryHeader::clone() const
 {
-  return new BlackBoardSharedMemoryHeader(this);
+	return new BlackBoardSharedMemoryHeader(this);
 }
-
 
 /** Check if the given shared memory segment is a Fawkes BB segment
  * @param memptr Ptr to the segment
@@ -111,10 +103,9 @@ BlackBoardSharedMemoryHeader::clone() const
 bool
 BlackBoardSharedMemoryHeader::matches(void *memptr)
 {
-  BlackBoardSharedMemoryHeaderData *md = (BlackBoardSharedMemoryHeaderData *)memptr;
-  return (_version == md->version);
+	BlackBoardSharedMemoryHeaderData *md = (BlackBoardSharedMemoryHeaderData *)memptr;
+	return (_version == md->version);
 }
-
 
 /** Check for equality of headers.
  * First checks if passed SharedMemoryHeader is an instance of
@@ -128,14 +119,12 @@ BlackBoardSharedMemoryHeader::matches(void *memptr)
 bool
 BlackBoardSharedMemoryHeader::operator==(const SharedMemoryHeader &s) const
 {
-  const BlackBoardSharedMemoryHeader *h = dynamic_cast<const BlackBoardSharedMemoryHeader *>(&s);
-  if ( ! h ) {
-    return false;
-  } else {
-    return ( (_version == h->_version) &&
-	     (_data_size == h->_data_size) &&
-	     (data == h->data) );
-  }
+	const BlackBoardSharedMemoryHeader *h = dynamic_cast<const BlackBoardSharedMemoryHeader *>(&s);
+	if (!h) {
+		return false;
+	} else {
+		return ((_version == h->_version) && (_data_size == h->_data_size) && (data == h->data));
+	}
 }
 
 /** Get the size of the header data.
@@ -144,9 +133,8 @@ BlackBoardSharedMemoryHeader::operator==(const SharedMemoryHeader &s) const
 size_t
 BlackBoardSharedMemoryHeader::size()
 {
-  return sizeof(BlackBoardSharedMemoryHeaderData);
+	return sizeof(BlackBoardSharedMemoryHeaderData);
 }
-
 
 /** Initialize shared memory segment
  * This copies basic management header data into the shared memory segment.
@@ -156,13 +144,12 @@ BlackBoardSharedMemoryHeader::size()
 void
 BlackBoardSharedMemoryHeader::initialize(void *memptr)
 {
-  data = (BlackBoardSharedMemoryHeaderData *)memptr;
-  data->version         = _version;
-  data->shm_addr        = memptr;
-  data->free_list_head  = NULL;
-  data->alloc_list_head = NULL;
+	data                  = (BlackBoardSharedMemoryHeaderData *)memptr;
+	data->version         = _version;
+	data->shm_addr        = memptr;
+	data->free_list_head  = NULL;
+	data->alloc_list_head = NULL;
 }
-
 
 /** Set data of this header
  * Sets the internal pointer to the shared memory header data 
@@ -172,16 +159,14 @@ BlackBoardSharedMemoryHeader::initialize(void *memptr)
 void
 BlackBoardSharedMemoryHeader::set(void *memptr)
 {
-  data = (BlackBoardSharedMemoryHeaderData *)memptr;
+	data = (BlackBoardSharedMemoryHeaderData *)memptr;
 }
-
 
 void
 BlackBoardSharedMemoryHeader::reset()
 {
-  data = NULL;
+	data = NULL;
 }
-
 
 /** Data segment size.
  * @return size of the data segment without header
@@ -189,9 +174,8 @@ BlackBoardSharedMemoryHeader::reset()
 size_t
 BlackBoardSharedMemoryHeader::data_size()
 {
-  return _data_size;
+	return _data_size;
 }
-
 
 /** Get the head of the free chunks list.
  * @return pointer to the free list head, local pointer, already transformed,
@@ -200,9 +184,8 @@ BlackBoardSharedMemoryHeader::data_size()
 chunk_list_t *
 BlackBoardSharedMemoryHeader::free_list_head()
 {
-  return (chunk_list_t *)shmem->ptr(data->free_list_head);
+	return (chunk_list_t *)shmem->ptr(data->free_list_head);
 }
-
 
 /** Get the head of the allocated chunks list.
  * @return pointer to the allocated list head, local pointer, already transformed,
@@ -211,9 +194,8 @@ BlackBoardSharedMemoryHeader::free_list_head()
 chunk_list_t *
 BlackBoardSharedMemoryHeader::alloc_list_head()
 {
-  return (chunk_list_t *)shmem->ptr(data->alloc_list_head);
+	return (chunk_list_t *)shmem->ptr(data->alloc_list_head);
 }
-
 
 /** Set the head of the free chunks list.
  * @param flh pointer to the new free list head, must be a pointer to the local
@@ -222,9 +204,8 @@ BlackBoardSharedMemoryHeader::alloc_list_head()
 void
 BlackBoardSharedMemoryHeader::set_free_list_head(chunk_list_t *flh)
 {
-  data->free_list_head = (chunk_list_t *)shmem->addr(flh);
+	data->free_list_head = (chunk_list_t *)shmem->addr(flh);
 }
-
 
 /** Set the head of the allocated chunks list.
  * @param alh pointer to the new allocated list head, must be a pointer to the local
@@ -233,9 +214,8 @@ BlackBoardSharedMemoryHeader::set_free_list_head(chunk_list_t *flh)
 void
 BlackBoardSharedMemoryHeader::set_alloc_list_head(chunk_list_t *alh)
 {
-  data->alloc_list_head = (chunk_list_t *)shmem->addr(alh);
+	data->alloc_list_head = (chunk_list_t *)shmem->addr(alh);
 }
-
 
 /** Get BlackBoard version.
  * @return BlackBoard version
@@ -243,7 +223,7 @@ BlackBoardSharedMemoryHeader::set_alloc_list_head(chunk_list_t *alh)
 unsigned int
 BlackBoardSharedMemoryHeader::version() const
 {
-  return data->version;
+	return data->version;
 }
 
 } // end namespace fawkes

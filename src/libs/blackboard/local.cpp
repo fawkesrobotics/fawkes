@@ -20,21 +20,21 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/local.h>
 #include <blackboard/bbconfig.h>
-#include <blackboard/internal/message_manager.h>
-#include <blackboard/internal/memory_manager.h>
 #include <blackboard/internal/interface_manager.h>
+#include <blackboard/internal/memory_manager.h>
+#include <blackboard/internal/message_manager.h>
 #include <blackboard/internal/notifier.h>
+#include <blackboard/local.h>
 #include <blackboard/net/handler.h>
 
 // for -C: bb_cleanup
-#include <utils/ipc/shm.h>
 #include <blackboard/shmem/header.h>
 #include <blackboard/shmem/lister.h>
+#include <utils/ipc/shm.h>
 
-#include <string>
 #include <cstring>
+#include <string>
 
 namespace fawkes {
 
@@ -47,125 +47,112 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Shared Memory Constructor.
  * @param memsize size of memory in bytes
  * @param magic_token magic token used for shared memory segment
  * @param master true to operate in master mode, false otherwise
  */
-LocalBlackBoard::LocalBlackBoard(size_t memsize,
-				 const char *magic_token, bool master)
+LocalBlackBoard::LocalBlackBoard(size_t memsize, const char *magic_token, bool master)
 {
-  memmgr_ = new BlackBoardMemoryManager(memsize, BLACKBOARD_VERSION, master);
+	memmgr_ = new BlackBoardMemoryManager(memsize, BLACKBOARD_VERSION, master);
 
-  msgmgr_ = new BlackBoardMessageManager(notifier_);
-  im_ = new BlackBoardInterfaceManager(memmgr_, msgmgr_, notifier_);
+	msgmgr_ = new BlackBoardMessageManager(notifier_);
+	im_     = new BlackBoardInterfaceManager(memmgr_, msgmgr_, notifier_);
 
-  msgmgr_->set_interface_manager(im_);
+	msgmgr_->set_interface_manager(im_);
 
-  nethandler_ = NULL;
+	nethandler_ = NULL;
 }
-
 
 /** Heap Memory Constructor.
  * @param memsize size of memory in bytes
  */
 LocalBlackBoard::LocalBlackBoard(size_t memsize)
 {
-  memmgr_ = new BlackBoardMemoryManager(memsize);
+	memmgr_ = new BlackBoardMemoryManager(memsize);
 
-  msgmgr_ = new BlackBoardMessageManager(notifier_);
-  im_ = new BlackBoardInterfaceManager(memmgr_, msgmgr_, notifier_);
+	msgmgr_ = new BlackBoardMessageManager(notifier_);
+	im_     = new BlackBoardInterfaceManager(memmgr_, msgmgr_, notifier_);
 
-  msgmgr_->set_interface_manager(im_);
+	msgmgr_->set_interface_manager(im_);
 
-  nethandler_ = NULL;
+	nethandler_ = NULL;
 }
-
 
 /** Destructor. */
 LocalBlackBoard::~LocalBlackBoard()
 {
-  if ( nethandler_ ) {
-    nethandler_->cancel();
-    nethandler_->join();
-    delete nethandler_;
-  }
-  delete im_;
-  delete msgmgr_;
-  delete memmgr_;
+	if (nethandler_) {
+		nethandler_->cancel();
+		nethandler_->join();
+		delete nethandler_;
+	}
+	delete im_;
+	delete msgmgr_;
+	delete memmgr_;
 }
-
 
 Interface *
 LocalBlackBoard::open_for_reading(const char *type, const char *identifier, const char *owner)
 {
-  try {
-    return im_->open_for_reading(type, identifier, owner);
-  } catch (Exception &e) {
-    throw;
-  }
+	try {
+		return im_->open_for_reading(type, identifier, owner);
+	} catch (Exception &e) {
+		throw;
+	}
 }
-
 
 Interface *
 LocalBlackBoard::open_for_writing(const char *type, const char *identifier, const char *owner)
 {
-  try {
-    return im_->open_for_writing(type, identifier, owner);
-  } catch (Exception &e) {
-    throw;
-  }
+	try {
+		return im_->open_for_writing(type, identifier, owner);
+	} catch (Exception &e) {
+		throw;
+	}
 }
-
 
 std::list<Interface *>
 LocalBlackBoard::open_multiple_for_reading(const char *type_pattern,
-					   const char *id_pattern,
-					   const char *owner)
+                                           const char *id_pattern,
+                                           const char *owner)
 {
-  try {
-    return im_->open_multiple_for_reading(type_pattern, id_pattern, owner);
-  } catch (Exception &e) {
-    throw;
-  }  
+	try {
+		return im_->open_multiple_for_reading(type_pattern, id_pattern, owner);
+	} catch (Exception &e) {
+		throw;
+	}
 }
-
 
 void
 LocalBlackBoard::close(Interface *interface)
 {
-  im_->close(interface);
+	im_->close(interface);
 }
-
 
 InterfaceInfoList *
 LocalBlackBoard::list_all()
 {
-  return im_->list_all();
+	return im_->list_all();
 }
-
 
 InterfaceInfoList *
 LocalBlackBoard::list(const char *type_pattern, const char *id_pattern)
 {
-  return im_->list(type_pattern, id_pattern);
+	return im_->list(type_pattern, id_pattern);
 }
-
 
 bool
 LocalBlackBoard::is_alive() const throw()
 {
-  return true;
+	return true;
 }
-
 
 bool
 LocalBlackBoard::try_aliveness_restore() throw()
 {
-  return true;
+	return true;
 }
-
 
 /** Cleanup orphaned BlackBoard segments.
  * This erase orphaned shared memory segments that belonged to a
@@ -176,16 +163,15 @@ LocalBlackBoard::try_aliveness_restore() throw()
 void
 LocalBlackBoard::cleanup(const char *magic_token, bool use_lister)
 {
-  BlackBoardSharedMemoryHeader *bbsh = new BlackBoardSharedMemoryHeader( BLACKBOARD_VERSION );
-  BlackBoardSharedMemoryLister *bblister = NULL;
-  if ( use_lister ) {
-    bblister = new BlackBoardSharedMemoryLister();
-  }
-  SharedMemory::erase_orphaned(magic_token, bbsh, bblister);
-  delete bblister;
-  delete bbsh;
+	BlackBoardSharedMemoryHeader *bbsh     = new BlackBoardSharedMemoryHeader(BLACKBOARD_VERSION);
+	BlackBoardSharedMemoryLister *bblister = NULL;
+	if (use_lister) {
+		bblister = new BlackBoardSharedMemoryLister();
+	}
+	SharedMemory::erase_orphaned(magic_token, bbsh, bblister);
+	delete bblister;
+	delete bbsh;
 }
-
 
 /** Get memory manager.
  * CAUTION: This is NOT meant to be used in your application.
@@ -197,9 +183,8 @@ LocalBlackBoard::cleanup(const char *magic_token, bool use_lister)
 const BlackBoardMemoryManager *
 LocalBlackBoard::memory_manager() const
 {
-  return memmgr_;
+	return memmgr_;
 }
-
 
 /** Start network handler.
  * This will start the network handler thread and register it with the given hub.
@@ -208,11 +193,11 @@ LocalBlackBoard::memory_manager() const
 void
 LocalBlackBoard::start_nethandler(FawkesNetworkHub *hub)
 {
-  if ( nethandler_ ) {
-    throw Exception("BlackBoardNetworkHandler already started");
-  }
-  nethandler_ = new BlackBoardNetworkHandler(this, hub);
-  nethandler_->start();
+	if (nethandler_) {
+		throw Exception("BlackBoardNetworkHandler already started");
+	}
+	nethandler_ = new BlackBoardNetworkHandler(this, hub);
+	nethandler_->start();
 }
 
 } // end namespace fawkes

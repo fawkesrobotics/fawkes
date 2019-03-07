@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  instance_factory.cpp - BlackBoard interface instance factory
  *
@@ -21,13 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/internal/instance_factory.h>
 #include <blackboard/exceptions.h>
-
+#include <blackboard/internal/instance_factory.h>
 #include <interface/interface.h>
-
-#include <utils/system/dynamic_module/module_manager.h>
 #include <utils/system/dynamic_module/module.h>
+#include <utils/system/dynamic_module/module_manager.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -42,20 +40,17 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor.*/
 BlackBoardInstanceFactory::BlackBoardInstanceFactory()
 {
-  mm_ = new ModuleManager(IFACEDIR);
+	mm_ = new ModuleManager(IFACEDIR);
 }
-
 
 /** Destructor */
 BlackBoardInstanceFactory::~BlackBoardInstanceFactory()
 {
-  delete mm_;
+	delete mm_;
 }
-
 
 /** Creates a new interface instance.
  * This method will look in the for the appropriate library in LIBDIR/interfaces
@@ -71,40 +66,39 @@ Interface *
 BlackBoardInstanceFactory::new_interface_instance(const char *type, const char *identifier)
 {
 	if (strlen(identifier) == 0) {
-		throw Exception("Interface ID may not be empty");	
+		throw Exception("Interface ID may not be empty");
 	}
 	if (strlen(type) == 0) {
-		throw Exception("Interface type may not be empty");	
+		throw Exception("Interface type may not be empty");
 	}
 	if (strlen(type) > INTERFACE_TYPE_SIZE_) {
 		throw Exception("Interface type '%s' too long, maximum length is %zu",
-		                type, INTERFACE_TYPE_SIZE_);
+		                type,
+		                INTERFACE_TYPE_SIZE_);
 	}
 	if (strlen(identifier) > INTERFACE_ID_SIZE_) {
-		throw Exception("Interface ID '%s' too long, maximum length is %zu",
-		                type, INTERFACE_ID_SIZE_);
+		throw Exception("Interface ID '%s' too long, maximum length is %zu", type, INTERFACE_ID_SIZE_);
 	}
 
-  Module *mod = NULL;
-  std::string filename = std::string("lib") + type + "." + mm_->get_module_file_extension();
-  try {
-      mod = mm_->open_module(filename.c_str());
-  } catch (Exception &e) {
-    throw BlackBoardInterfaceNotFoundException(type, " Module file not found.");
-  }
+	Module *    mod      = NULL;
+	std::string filename = std::string("lib") + type + "." + mm_->get_module_file_extension();
+	try {
+		mod = mm_->open_module(filename.c_str());
+	} catch (Exception &e) {
+		throw BlackBoardInterfaceNotFoundException(type, " Module file not found.");
+	}
 
-  if ( ! mod->has_symbol("interface_factory") ) {
-    throw BlackBoardInterfaceNotFoundException(type, " Generator function not found.");
-  }
+	if (!mod->has_symbol("interface_factory")) {
+		throw BlackBoardInterfaceNotFoundException(type, " Generator function not found.");
+	}
 
-  InterfaceFactoryFunc iff = (InterfaceFactoryFunc)mod->get_symbol("interface_factory");
+	InterfaceFactoryFunc iff = (InterfaceFactoryFunc)mod->get_symbol("interface_factory");
 
-  Interface *iface = iff();
-  iface->set_type_id(type, identifier);
+	Interface *iface = iff();
+	iface->set_type_id(type, identifier);
 
-  return iface;
+	return iface;
 }
-
 
 /** Destroy an interface instance.
  * The destroyer function for the given interface is called to destroy the given
@@ -116,22 +110,23 @@ BlackBoardInstanceFactory::new_interface_instance(const char *type, const char *
 void
 BlackBoardInstanceFactory::delete_interface_instance(Interface *interface)
 {
-  std::string filename = std::string("lib") + interface->type_ + "." + mm_->get_module_file_extension();
-  Module *mod = mm_->get_module(filename.c_str());
+	std::string filename =
+	  std::string("lib") + interface->type_ + "." + mm_->get_module_file_extension();
+	Module *mod = mm_->get_module(filename.c_str());
 
-  if ( ! mod) {
-    throw BlackBoardInterfaceNotFoundException(interface->type_, " Interface module not opened.");
-  }
+	if (!mod) {
+		throw BlackBoardInterfaceNotFoundException(interface->type_, " Interface module not opened.");
+	}
 
-  if ( ! mod->has_symbol("interface_destroy") ) {
-    throw BlackBoardInterfaceNotFoundException(interface->type_, " Destroyer function not found.");
-  }
+	if (!mod->has_symbol("interface_destroy")) {
+		throw BlackBoardInterfaceNotFoundException(interface->type_, " Destroyer function not found.");
+	}
 
-  InterfaceDestroyFunc idf = (InterfaceDestroyFunc)mod->get_symbol("interface_destroy");
-  idf(interface);
+	InterfaceDestroyFunc idf = (InterfaceDestroyFunc)mod->get_symbol("interface_destroy");
+	idf(interface);
 
-  mod->unref();
-  mm_->close_module(mod);
+	mod->unref();
+	mm_->close_module(mod);
 }
 
 } // end namespace fawkes

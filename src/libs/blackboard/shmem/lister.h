@@ -30,23 +30,25 @@ namespace fawkes {
 
 class SharedMemoryHeader;
 
-class BlackBoardSharedMemoryLister : public SharedMemoryLister {
- public:
+class BlackBoardSharedMemoryLister : public SharedMemoryLister
+{
+public:
+	BlackBoardSharedMemoryLister();
+	virtual ~BlackBoardSharedMemoryLister();
 
-  BlackBoardSharedMemoryLister();
-  virtual ~BlackBoardSharedMemoryLister();
+	virtual void print_header();
+	virtual void print_footer();
+	virtual void print_no_segments();
+	virtual void print_no_orphaned_segments();
 
-  virtual void print_header();
-  virtual void print_footer();
-  virtual void print_no_segments();
-  virtual void print_no_orphaned_segments();
+	virtual void print_info(const SharedMemoryHeader *header,
+	                        int                       shm_id,
+	                        int                       semaphore,
+	                        unsigned int              mem_size,
+	                        const void *              memptr);
 
-  virtual void print_info(const SharedMemoryHeader *header,
-			  int shm_id, int semaphore,
-			  unsigned int mem_size, const void *memptr);
-
- private:
-  unsigned int num;
+private:
+	unsigned int num;
 };
 
 } // end namespace fawkes

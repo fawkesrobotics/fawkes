@@ -25,10 +25,10 @@
 #define _FAWKES_BLACKBOARD_NETWORK_HANDLER_H_
 
 #include <core/threading/thread.h>
+#include <core/utils/lock_map.h>
+#include <core/utils/lock_queue.h>
 #include <netcomm/fawkes/handler.h>
 
-#include <core/utils/lock_queue.h>
-#include <core/utils/lock_map.h>
 #include <list>
 
 namespace fawkes {
@@ -39,49 +39,50 @@ class FawkesNetworkHub;
 class BlackBoardNetHandlerInterfaceListener;
 class BlackBoardNetHandlerInterfaceObserver;
 
-class BlackBoardNetworkHandler
-: public Thread,
-  public FawkesNetworkHandler
+class BlackBoardNetworkHandler : public Thread, public FawkesNetworkHandler
 {
- public:
-  BlackBoardNetworkHandler(BlackBoard *blackboard,
-			   FawkesNetworkHub *hub);
-  ~BlackBoardNetworkHandler();
+public:
+	BlackBoardNetworkHandler(BlackBoard *blackboard, FawkesNetworkHub *hub);
+	~BlackBoardNetworkHandler();
 
-  /* from FawkesNetworkHandler interface */
-  virtual void handle_network_message(FawkesNetworkMessage *msg);
-  virtual void client_connected(unsigned int clid);
-  virtual void client_disconnected(unsigned int clid);
-  virtual void loop();
+	/* from FawkesNetworkHandler interface */
+	virtual void handle_network_message(FawkesNetworkMessage *msg);
+	virtual void client_connected(unsigned int clid);
+	virtual void client_disconnected(unsigned int clid);
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void send_opensuccess(unsigned int clid, Interface *interface);
-  void send_openfailure(unsigned int clid, unsigned int error_code);
+private:
+	void send_opensuccess(unsigned int clid, Interface *interface);
+	void send_openfailure(unsigned int clid, unsigned int error_code);
 
+	BlackBoard *                      bb_;
+	LockQueue<FawkesNetworkMessage *> inbound_queue_;
 
-  BlackBoard *bb_;
-  LockQueue< FawkesNetworkMessage * >  inbound_queue_;
+	// All interfaces, key is the instance serial, value the interface
+	LockMap<unsigned int, Interface *>           interfaces_;
+	LockMap<unsigned int, Interface *>::iterator iit_;
 
-  // All interfaces, key is the instance serial, value the interface
-  LockMap< unsigned int, Interface * > interfaces_;
-  LockMap< unsigned int, Interface * >::iterator iit_;
+	std::map<unsigned int, BlackBoardNetHandlerInterfaceListener *>           listeners_;
+	std::map<unsigned int, BlackBoardNetHandlerInterfaceListener *>::iterator lit_;
 
-  std::map<unsigned int, BlackBoardNetHandlerInterfaceListener *>  listeners_;
-  std::map<unsigned int, BlackBoardNetHandlerInterfaceListener *>::iterator  lit_;
+	BlackBoardNetHandlerInterfaceObserver *observer_;
 
-  BlackBoardNetHandlerInterfaceObserver *observer_;
+	// Map from instance serial to clid
+	LockMap<unsigned int, unsigned int> serial_to_clid_;
 
-  // Map from instance serial to clid
-  LockMap<unsigned int, unsigned int > serial_to_clid_;
+	// Interfaces per client, key is the client ID, value a list of interfaces opened by client
+	LockMap<unsigned int, std::list<Interface *>> client_interfaces_;
+	std::list<Interface *>::iterator              ciit_;
 
-  // Interfaces per client, key is the client ID, value a list of interfaces opened by client
-  LockMap< unsigned int, std::list<Interface *> > client_interfaces_;
-  std::list<Interface *>::iterator ciit_;
-
-  FawkesNetworkHub *nhub_;
+	FawkesNetworkHub *nhub_;
 };
 
 } // end namespace fawkes
