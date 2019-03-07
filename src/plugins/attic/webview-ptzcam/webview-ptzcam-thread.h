@@ -22,56 +22,59 @@
 #ifndef _PLUGINS_WEBVIEW_PTZCAM_WEBVIEW_PTZCAM_THREAD_H_
 #define _PLUGINS_WEBVIEW_PTZCAM_WEBVIEW_PTZCAM_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/clock.h>
 #include <aspect/blackboard.h>
-#include <aspect/webview.h>
+#include <aspect/clock.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <aspect/webview.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  class TimeWait;
-  class PanTiltInterface;
-  class SwitchInterface;
-}
+class TimeWait;
+class PanTiltInterface;
+class SwitchInterface;
+} // namespace fawkes
 
 class WebviewPtzCamRequestProcessor;
 
-class WebviewPtzCamThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ClockAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::WebviewAspect
+class WebviewPtzCamThread : public fawkes::Thread,
+                            public fawkes::LoggingAspect,
+                            public fawkes::ClockAspect,
+                            public fawkes::ConfigurableAspect,
+                            public fawkes::BlackBoardAspect,
+                            public fawkes::WebviewAspect
 {
- public:
-  WebviewPtzCamThread();
-  virtual ~WebviewPtzCamThread();
+public:
+	WebviewPtzCamThread();
+	virtual ~WebviewPtzCamThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  WebviewPtzCamRequestProcessor *web_proc_;
+private:
+	WebviewPtzCamRequestProcessor *web_proc_;
 
-  fawkes::TimeWait *time_wait_;
-  fawkes::PanTiltInterface *ptu_if_;
-  fawkes::SwitchInterface  *power_if_;
-  fawkes::SwitchInterface  *camen_if_;
+	fawkes::TimeWait *        time_wait_;
+	fawkes::PanTiltInterface *ptu_if_;
+	fawkes::SwitchInterface * power_if_;
+	fawkes::SwitchInterface * camen_if_;
 
-  bool  timeout_;
+	bool timeout_;
 
-  float cfg_inactivity_timeout_;
-  float cfg_park_pan_tolerance_;
-  float cfg_park_pan_pos_;
-  float cfg_park_tilt_tolerance_;
-  float cfg_park_tilt_pos_;
-
+	float cfg_inactivity_timeout_;
+	float cfg_park_pan_tolerance_;
+	float cfg_park_pan_pos_;
+	float cfg_park_tilt_tolerance_;
+	float cfg_park_tilt_pos_;
 };
 
 #endif
