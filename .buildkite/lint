@@ -168,7 +168,8 @@ check_branch_name () {
 
 check_commit_authors () {
 
-	git_repo_clone "$(git config --get remote.origin.url)" ".barerepo" "--reference . --bare"
+	rm -rf .barerepo
+	git_repo_clone "$BUILDKITE_REPO" .barerepo "--reference . --bare"
 	pushd .barerepo >/dev/null
 
 	OTHER_BRANCHES=$(git for-each-ref --format='%(refname)' refs/heads/ | grep -F -v "refs/heads/${BUILDKITE_BRANCH:-}" || :)
