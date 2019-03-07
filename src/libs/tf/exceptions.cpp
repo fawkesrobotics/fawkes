@@ -22,15 +22,16 @@
 #include <tf/exceptions.h>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
 /** @class TransformException
  * Base class for fawkes tf exceptions.
  */
 
 /** Constructor. */
-TransformException::TransformException()
-  : Exception() {}
+TransformException::TransformException() : Exception()
+{
+}
 
 /** @class ConnectivityException
  * No connection between two frames in tree.
@@ -42,13 +43,12 @@ TransformException::TransformException()
  * @param format format of explanatory message of the error, format
  * and parameters similar to sprintf.
  */
-ConnectivityException::ConnectivityException(const char *format, ...)
-  : TransformException()
+ConnectivityException::ConnectivityException(const char *format, ...) : TransformException()
 {
-  va_list args;
-  va_start(args, format);
-  append_nolock_va(format, args);
-  va_end(args);
+	va_list args;
+	va_start(args, format);
+	append_nolock_va(format, args);
+	va_end(args);
 }
 
 /** @class LookupException
@@ -61,13 +61,12 @@ ConnectivityException::ConnectivityException(const char *format, ...)
  * @param format format of explanatory message of the error, format
  * and parameters similar to sprintf.
  */
-LookupException::LookupException(const char *format, ...)
-  : TransformException()
+LookupException::LookupException(const char *format, ...) : TransformException()
 {
-  va_list args;
-  va_start(args, format);
-  append_nolock_va(format, args);
-  va_end(args);
+	va_list args;
+	va_start(args, format);
+	append_nolock_va(format, args);
+	va_end(args);
 }
 
 /** @class ExtrapolationException
@@ -78,13 +77,12 @@ LookupException::LookupException(const char *format, ...)
  * @param format format of explanatory message of the error, format
  * and parameters similar to sprintf.
  */
-ExtrapolationException::ExtrapolationException(const char *format, ...)
-  : TransformException()
+ExtrapolationException::ExtrapolationException(const char *format, ...) : TransformException()
 {
-  va_list args;
-  va_start(args, format);
-  append_nolock_va(format, args);
-  va_end(args);
+	va_list args;
+	va_start(args, format);
+	append_nolock_va(format, args);
+	va_end(args);
 }
 
 /** @class InvalidArgumentException
@@ -96,15 +94,13 @@ ExtrapolationException::ExtrapolationException(const char *format, ...)
  * @param format format of explanatory message of the error, format
  * and parameters similar to sprintf.
  */
-InvalidArgumentException::InvalidArgumentException(const char *format, ...)
-  : TransformException()
+InvalidArgumentException::InvalidArgumentException(const char *format, ...) : TransformException()
 {
-  va_list args;
-  va_start(args, format);
-  append_nolock_va(format, args);
-  va_end(args);
+	va_list args;
+	va_start(args, format);
+	append_nolock_va(format, args);
+	va_end(args);
 }
-
 
 /** @class DisabledException
  * The requested feature is disabled.
@@ -114,15 +110,13 @@ InvalidArgumentException::InvalidArgumentException(const char *format, ...)
  * @param format format of explanatory message of the error, format
  * and parameters similar to sprintf.
  */
-DisabledException::DisabledException(const char *format, ...)
-  : TransformException()
+DisabledException::DisabledException(const char *format, ...) : TransformException()
 {
-  va_list args;
-  va_start(args, format);
-  append_nolock_va(format, args);
-  va_end(args);
+	va_list args;
+	va_start(args, format);
+	append_nolock_va(format, args);
+	va_end(args);
 }
-
 
 } // end namespace tf
 } // end namespace fawkes

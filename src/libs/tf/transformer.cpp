@@ -49,19 +49,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <tf/transformer.h>
-#include <tf/time_cache.h>
+#include <core/macros.h>
+#include <core/threading/mutex_locker.h>
 #include <tf/exceptions.h>
+#include <tf/time_cache.h>
+#include <tf/transformer.h>
 #include <tf/utils.h>
 
-#include <core/threading/mutex_locker.h>
-#include <core/macros.h>
+#include <algorithm>
 #include <iostream>
 #include <sstream>
-#include <algorithm>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
 /** @class Transformer <tf/transformer.h>
  * Coordinate transforms between any two frames in a system.
@@ -96,18 +96,12 @@ namespace fawkes {
 /** Constructor.
  * @param cache_time time in seconds to cache incoming transforms
  */
-Transformer::Transformer(float cache_time)
-	: BufferCore(cache_time),
-	  enabled_(true)
+Transformer::Transformer(float cache_time) : BufferCore(cache_time), enabled_(true)
 {
 }
 
-
 /** Destructor. */
-Transformer::~Transformer()
-{
-};
-
+Transformer::~Transformer(){};
 
 /** Set enabled status of transformer.
  * @param enabled true to enable, false to disable
@@ -143,9 +137,8 @@ Transformer::get_cache_time() const
 void
 Transformer::lock()
 {
-  frame_mutex_.lock();
+	frame_mutex_.lock();
 }
-
 
 /** Try to acquire lock.
  * @return true if lock has been acquired, alse otherwise
@@ -153,9 +146,8 @@ Transformer::lock()
 bool
 Transformer::try_lock()
 {
-  return frame_mutex_.try_lock();
+	return frame_mutex_.try_lock();
 }
-
 
 /** Unlock.
  * Release currently held lock.
@@ -163,29 +155,27 @@ Transformer::try_lock()
 void
 Transformer::unlock()
 {
-  frame_mutex_.unlock();
+	frame_mutex_.unlock();
 }
-
 
 /** Check if frame exists.
  * @param frame_id_str frame ID
  * @result true if frame exists, false otherwise
  */
 bool
-Transformer::frame_exists(const std::string& frame_id_str) const
+Transformer::frame_exists(const std::string &frame_id_str) const
 {
 	std::unique_lock<std::mutex> lock(frame_mutex_);
 
 	return (frameIDs_.count(frame_id_str) > 0);
 }
 
-
 /** Get cache for specific frame.
  * @param frame_id ID of frame
  * @return pointer to time cache for frame
  */
 TimeCacheInterfacePtr
-Transformer::get_frame_cache(const std::string& frame_id) const
+Transformer::get_frame_cache(const std::string &frame_id) const
 {
 	return get_frame(lookup_frame_number(frame_id));
 }
@@ -199,7 +189,6 @@ Transformer::get_frame_caches() const
 	return frames_;
 }
 
-
 /** Get mappings from frame ID to names.
  * @return vector of mappings from frame IDs to names
  */
@@ -208,7 +197,6 @@ Transformer::get_frame_id_mappings() const
 {
 	return frameIDs_reverse;
 }
-
 
 /** Test if a transform is possible.
  * @param target_frame The frame into which to transform
@@ -219,17 +207,17 @@ Transformer::get_frame_id_mappings() const
  * @return true if the transformation can be calculated, false otherwise
  */
 bool
-Transformer::can_transform(const std::string& target_frame,
-                           const std::string& source_frame,
-                           const fawkes::Time& time,
-                           std::string* error_msg) const
+Transformer::can_transform(const std::string & target_frame,
+                           const std::string & source_frame,
+                           const fawkes::Time &time,
+                           std::string *       error_msg) const
 {
 	if (likely(enabled_)) {
 		std::string stripped_target = strip_slash(target_frame);
 		std::string stripped_source = strip_slash(source_frame);
 		return BufferCore::can_transform(stripped_target, stripped_source, time, error_msg);
-	}
-	else return false;
+	} else
+		return false;
 }
 
 /** Test if a transform is possible.
@@ -244,21 +232,20 @@ Transformer::can_transform(const std::string& target_frame,
  * @return true if the transformation can be calculated, false otherwise
  */
 bool
-Transformer::can_transform(const std::string& target_frame,
-                           const fawkes::Time& target_time,
-                           const std::string& source_frame,
-                           const fawkes::Time& source_time,
-                           const std::string& fixed_frame,
-                           std::string* error_msg) const
+Transformer::can_transform(const std::string & target_frame,
+                           const fawkes::Time &target_time,
+                           const std::string & source_frame,
+                           const fawkes::Time &source_time,
+                           const std::string & fixed_frame,
+                           std::string *       error_msg) const
 {
 	if (likely(enabled_)) {
 		std::string stripped_target = strip_slash(target_frame);
 		std::string stripped_source = strip_slash(source_frame);
-		return BufferCore::can_transform(stripped_target, target_time,
-		                                 stripped_source, source_time,
-		                                 fixed_frame, error_msg);
-	}
-	else return false;
+		return BufferCore::can_transform(
+		  stripped_target, target_time, stripped_source, source_time, fixed_frame, error_msg);
+	} else
+		return false;
 }
 
 /** Lookup transform.
@@ -275,19 +262,19 @@ Transformer::can_transform(const std::string& target_frame,
  * unknown
  */
 void
-Transformer::lookup_transform(const std::string& target_frame,
-                              const std::string& source_frame,
-                              const fawkes::Time& time,
-                              StampedTransform& transform) const
+Transformer::lookup_transform(const std::string & target_frame,
+                              const std::string & source_frame,
+                              const fawkes::Time &time,
+                              StampedTransform &  transform) const
 {
-  if (! enabled_) {
-    throw DisabledException("Transformer has been disabled");
-  }
+	if (!enabled_) {
+		throw DisabledException("Transformer has been disabled");
+	}
 
-  std::string stripped_target = strip_slash(target_frame);
-  std::string stripped_source = strip_slash(source_frame);
+	std::string stripped_target = strip_slash(target_frame);
+	std::string stripped_source = strip_slash(source_frame);
 
-  BufferCore::lookup_transform(stripped_target, stripped_source, time, transform);
+	BufferCore::lookup_transform(stripped_target, stripped_source, time, transform);
 }
 
 /** Lookup transform assuming a fixed frame.
@@ -309,22 +296,21 @@ Transformer::lookup_transform(const std::string& target_frame,
  * unknown
  */
 void
-Transformer::lookup_transform(const std::string& target_frame,
-                              const fawkes::Time& target_time,
-                              const std::string& source_frame,
-                              const fawkes::Time& source_time,
-                              const std::string& fixed_frame,
-                              StampedTransform& transform) const
+Transformer::lookup_transform(const std::string & target_frame,
+                              const fawkes::Time &target_time,
+                              const std::string & source_frame,
+                              const fawkes::Time &source_time,
+                              const std::string & fixed_frame,
+                              StampedTransform &  transform) const
 {
-  if (! enabled_) {
-    throw DisabledException("Transformer has been disabled");
-  }
-  std::string stripped_target = strip_slash(target_frame);
-  std::string stripped_source = strip_slash(source_frame);
-  
-  BufferCore::lookup_transform(stripped_target, target_time,
-                               stripped_source, source_time,
-                               fixed_frame, transform);
+	if (!enabled_) {
+		throw DisabledException("Transformer has been disabled");
+	}
+	std::string stripped_target = strip_slash(target_frame);
+	std::string stripped_source = strip_slash(source_frame);
+
+	BufferCore::lookup_transform(
+	  stripped_target, target_time, stripped_source, source_time, fixed_frame, transform);
 }
 
 /** Lookup transform at latest common time.
@@ -338,13 +324,13 @@ Transformer::lookup_transform(const std::string& target_frame,
  * @exception LookupException at least one of the two given frames is
  * unknown
  */
-void Transformer::lookup_transform(const std::string& target_frame,
-                                   const std::string& source_frame,
-                                   StampedTransform& transform) const
+void
+Transformer::lookup_transform(const std::string &target_frame,
+                              const std::string &source_frame,
+                              StampedTransform & transform) const
 {
-  lookup_transform(target_frame, source_frame, fawkes::Time(0,0), transform);
+	lookup_transform(target_frame, source_frame, fawkes::Time(0, 0), transform);
 }
-
 
 /** Transform a stamped Quaternion into the target frame.
  * This transforms the quaternion relative to the frame set in the
@@ -362,19 +348,18 @@ void Transformer::lookup_transform(const std::string& target_frame,
  * likely an uninitialized Quaternion (0,0,0,0).
  */
 void
-Transformer::transform_quaternion(const std::string& target_frame,
-                                  const Stamped<Quaternion>& stamped_in,
-                                  Stamped<Quaternion>& stamped_out) const
+Transformer::transform_quaternion(const std::string &        target_frame,
+                                  const Stamped<Quaternion> &stamped_in,
+                                  Stamped<Quaternion> &      stamped_out) const
 {
-  assert_quaternion_valid(stamped_in);
+	assert_quaternion_valid(stamped_in);
 
-  StampedTransform transform;
-  lookup_transform(target_frame, stamped_in.frame_id,
-                   stamped_in.stamp, transform);
+	StampedTransform transform;
+	lookup_transform(target_frame, stamped_in.frame_id, stamped_in.stamp, transform);
 
-  stamped_out.set_data(transform * stamped_in);
-  stamped_out.stamp = transform.stamp;
-  stamped_out.frame_id = target_frame;
+	stamped_out.set_data(transform * stamped_in);
+	stamped_out.stamp    = transform.stamp;
+	stamped_out.frame_id = target_frame;
 }
 
 /** Transform a stamped vector into the target frame.
@@ -390,23 +375,22 @@ Transformer::transform_quaternion(const std::string& target_frame,
  * @exception LookupException at least one of the two given frames is
  * unknown
  */
-void 
-Transformer::transform_vector(const std::string& target_frame,
-                              const Stamped<Vector3>& stamped_in,
-                              Stamped<Vector3>& stamped_out) const
+void
+Transformer::transform_vector(const std::string &     target_frame,
+                              const Stamped<Vector3> &stamped_in,
+                              Stamped<Vector3> &      stamped_out) const
 {
-  StampedTransform transform;
-  lookup_transform(target_frame, stamped_in.frame_id,
-                   stamped_in.stamp, transform);
+	StampedTransform transform;
+	lookup_transform(target_frame, stamped_in.frame_id, stamped_in.stamp, transform);
 
-  // may not be most efficient
-  Vector3 end    = stamped_in;
-  Vector3 origin = Vector3(0,0,0);
-  Vector3 output = (transform * end) - (transform * origin);
-  stamped_out.set_data(output);
+	// may not be most efficient
+	Vector3 end    = stamped_in;
+	Vector3 origin = Vector3(0, 0, 0);
+	Vector3 output = (transform * end) - (transform * origin);
+	stamped_out.set_data(output);
 
-  stamped_out.stamp = transform.stamp;
-  stamped_out.frame_id = target_frame;
+	stamped_out.stamp    = transform.stamp;
+	stamped_out.frame_id = target_frame;
 }
 
 /** Transform a stamped point into the target frame.
@@ -422,19 +406,17 @@ Transformer::transform_vector(const std::string& target_frame,
  * @exception LookupException at least one of the two given frames is
  * unknown
  */
-void 
-Transformer::transform_point(const std::string& target_frame,
-                             const Stamped<Point>& stamped_in,
-                             Stamped<Point>& stamped_out) const
+void
+Transformer::transform_point(const std::string &   target_frame,
+                             const Stamped<Point> &stamped_in,
+                             Stamped<Point> &      stamped_out) const
 {
-  StampedTransform transform;
-  lookup_transform(target_frame, stamped_in.frame_id,
-                   stamped_in.stamp, transform);
+	StampedTransform transform;
+	lookup_transform(target_frame, stamped_in.frame_id, stamped_in.stamp, transform);
 
-  stamped_out.set_data(transform * stamped_in);
-  stamped_out.stamp = transform.stamp;
-  stamped_out.frame_id = target_frame;
-
+	stamped_out.set_data(transform * stamped_in);
+	stamped_out.stamp    = transform.stamp;
+	stamped_out.frame_id = target_frame;
 }
 
 /** Transform a stamped pose into the target frame.
@@ -450,20 +432,18 @@ Transformer::transform_point(const std::string& target_frame,
  * @exception LookupException at least one of the two given frames is
  * unknown
  */
-void 
-Transformer::transform_pose(const std::string& target_frame,
-                            const Stamped<Pose>& stamped_in,
-                            Stamped<Pose>& stamped_out) const
+void
+Transformer::transform_pose(const std::string &  target_frame,
+                            const Stamped<Pose> &stamped_in,
+                            Stamped<Pose> &      stamped_out) const
 {
-  StampedTransform transform;
-  lookup_transform(target_frame, stamped_in.frame_id,
-                   stamped_in.stamp, transform);
+	StampedTransform transform;
+	lookup_transform(target_frame, stamped_in.frame_id, stamped_in.stamp, transform);
 
-  stamped_out.set_data(transform * stamped_in);
-  stamped_out.stamp = transform.stamp;
-  stamped_out.frame_id = target_frame;
+	stamped_out.set_data(transform * stamped_in);
+	stamped_out.stamp    = transform.stamp;
+	stamped_out.frame_id = target_frame;
 }
-
 
 /** Transform ident pose from one frame to another.
  * This utility method can be used to transform the ident pose,
@@ -485,19 +465,19 @@ Transformer::transform_pose(const std::string& target_frame,
  * false otherwise.
  */
 bool
-Transformer::transform_origin(const std::string& source_frame,
-                              const std::string& target_frame,
-                              Stamped<Pose>& stamped_out, const fawkes::Time time) const
+Transformer::transform_origin(const std::string &source_frame,
+                              const std::string &target_frame,
+                              Stamped<Pose> &    stamped_out,
+                              const fawkes::Time time) const
 {
-  tf::Stamped<tf::Pose> ident = tf::ident(source_frame, time);
-  try {
-    transform_pose(target_frame, ident, stamped_out);
-    return true;
-  } catch (Exception &e) {
-    return false;
-  }
+	tf::Stamped<tf::Pose> ident = tf::ident(source_frame, time);
+	try {
+		transform_pose(target_frame, ident, stamped_out);
+		return true;
+	} catch (Exception &e) {
+		return false;
+	}
 }
-
 
 /** Transform a stamped Quaternion into the target frame assuming a fixed frame.
  * This transforms the quaternion relative to the frame set in the
@@ -520,22 +500,21 @@ Transformer::transform_origin(const std::string& source_frame,
  * @exception InvalidArgument thrown if the Quaternion is invalid, most
  * likely an uninitialized Quaternion (0,0,0,0).
  */
-void 
-Transformer::transform_quaternion(const std::string& target_frame,
-                                  const fawkes::Time& target_time,
-                                  const Stamped<Quaternion>& stamped_in,
-                                  const std::string& fixed_frame,
-                                  Stamped<Quaternion>& stamped_out) const
+void
+Transformer::transform_quaternion(const std::string &        target_frame,
+                                  const fawkes::Time &       target_time,
+                                  const Stamped<Quaternion> &stamped_in,
+                                  const std::string &        fixed_frame,
+                                  Stamped<Quaternion> &      stamped_out) const
 {
-  assert_quaternion_valid(stamped_in);
-  StampedTransform transform;
-  lookup_transform(target_frame, target_time,
-                   stamped_in.frame_id, stamped_in.stamp,
-                   fixed_frame, transform);
+	assert_quaternion_valid(stamped_in);
+	StampedTransform transform;
+	lookup_transform(
+	  target_frame, target_time, stamped_in.frame_id, stamped_in.stamp, fixed_frame, transform);
 
-  stamped_out.set_data(transform * stamped_in);
-  stamped_out.stamp = transform.stamp;
-  stamped_out.frame_id = target_frame;
+	stamped_out.set_data(transform * stamped_in);
+	stamped_out.stamp    = transform.stamp;
+	stamped_out.frame_id = target_frame;
 }
 
 /** Transform a stamped vector into the target frame assuming a fixed frame.
@@ -557,27 +536,25 @@ Transformer::transform_quaternion(const std::string& target_frame,
  * @exception LookupException at least one of the two given frames is
  * unknown
  */
-void 
-Transformer::transform_vector(const std::string& target_frame,
-                              const fawkes::Time& target_time,
-                              const Stamped<Vector3>& stamped_in,
-                              const std::string& fixed_frame,
-                              Stamped<Vector3>& stamped_out) const
+void
+Transformer::transform_vector(const std::string &     target_frame,
+                              const fawkes::Time &    target_time,
+                              const Stamped<Vector3> &stamped_in,
+                              const std::string &     fixed_frame,
+                              Stamped<Vector3> &      stamped_out) const
 {
-  StampedTransform transform;
-  lookup_transform(target_frame, target_time,
-                   stamped_in.frame_id,stamped_in.stamp,
-                   fixed_frame, transform);
+	StampedTransform transform;
+	lookup_transform(
+	  target_frame, target_time, stamped_in.frame_id, stamped_in.stamp, fixed_frame, transform);
 
-  // may not be most efficient
-  Vector3 end = stamped_in;
-  Vector3 origin(0,0,0);
-  Vector3 output = (transform * end) - (transform * origin);
-  stamped_out.set_data( output);
+	// may not be most efficient
+	Vector3 end = stamped_in;
+	Vector3 origin(0, 0, 0);
+	Vector3 output = (transform * end) - (transform * origin);
+	stamped_out.set_data(output);
 
-  stamped_out.stamp = transform.stamp;
-  stamped_out.frame_id = target_frame;
-
+	stamped_out.stamp    = transform.stamp;
+	stamped_out.frame_id = target_frame;
 }
 
 /** Transform a stamped point into the target frame assuming a fixed frame.
@@ -599,21 +576,20 @@ Transformer::transform_vector(const std::string& target_frame,
  * @exception LookupException at least one of the two given frames is
  * unknown
  */
-void 
-Transformer::transform_point(const std::string& target_frame,
-                             const fawkes::Time& target_time,
-                             const Stamped<Point>& stamped_in,
-                             const std::string& fixed_frame,
-                             Stamped<Point>& stamped_out) const
+void
+Transformer::transform_point(const std::string &   target_frame,
+                             const fawkes::Time &  target_time,
+                             const Stamped<Point> &stamped_in,
+                             const std::string &   fixed_frame,
+                             Stamped<Point> &      stamped_out) const
 {
-  StampedTransform transform;
-  lookup_transform(target_frame, target_time,
-                   stamped_in.frame_id, stamped_in.stamp,
-                   fixed_frame, transform);
+	StampedTransform transform;
+	lookup_transform(
+	  target_frame, target_time, stamped_in.frame_id, stamped_in.stamp, fixed_frame, transform);
 
-  stamped_out.set_data(transform * stamped_in);
-  stamped_out.stamp = transform.stamp;
-  stamped_out.frame_id = target_frame;
+	stamped_out.set_data(transform * stamped_in);
+	stamped_out.stamp    = transform.stamp;
+	stamped_out.frame_id = target_frame;
 }
 
 /** Transform a stamped pose into the target frame assuming a fixed frame.
@@ -635,23 +611,21 @@ Transformer::transform_point(const std::string& target_frame,
  * @exception LookupException at least one of the two given frames is
  * unknown
  */
-void 
-Transformer::transform_pose(const std::string& target_frame,
-                            const fawkes::Time& target_time,
-                            const Stamped<Pose>& stamped_in,
-                            const std::string& fixed_frame,
-                            Stamped<Pose>& stamped_out) const
+void
+Transformer::transform_pose(const std::string &  target_frame,
+                            const fawkes::Time & target_time,
+                            const Stamped<Pose> &stamped_in,
+                            const std::string &  fixed_frame,
+                            Stamped<Pose> &      stamped_out) const
 {
-  StampedTransform transform;
-  lookup_transform(target_frame, target_time,
-                   stamped_in.frame_id, stamped_in.stamp,
-                   fixed_frame, transform);
+	StampedTransform transform;
+	lookup_transform(
+	  target_frame, target_time, stamped_in.frame_id, stamped_in.stamp, fixed_frame, transform);
 
-  stamped_out.set_data(transform * stamped_in);
-  stamped_out.stamp = transform.stamp;
-  stamped_out.frame_id = target_frame;
+	stamped_out.set_data(transform * stamped_in);
+	stamped_out.stamp    = transform.stamp;
+	stamped_out.frame_id = target_frame;
 }
-
 
 /** Get DOT graph of all frames.
  * @param print_time true to add the time of the transform as graph label
@@ -664,53 +638,57 @@ Transformer::all_frames_as_dot(bool print_time, fawkes::Time *time) const
 	std::unique_lock<std::mutex> lock(frame_mutex_);
 
 	fawkes::Time current_time;
-	if (time)  *time = current_time;
+	if (time)
+		*time = current_time;
 
 	std::stringstream mstream;
 	mstream << std::fixed; //fixed point notation
-	mstream.precision(3); //3 decimal places
+	mstream.precision(3);  //3 decimal places
 	mstream << "digraph { graph [fontsize=14";
 	if (print_time) {
-		mstream << ", label=\"\\nRecorded at time: "
-		        << current_time.str() << " (" << current_time.in_sec() << ")\"";
+		mstream << ", label=\"\\nRecorded at time: " << current_time.str() << " ("
+		        << current_time.in_sec() << ")\"";
 	}
 	mstream << "]; node [fontsize=12]; edge [fontsize=12]; " << std::endl;
 
 	TransformStorage temp;
 
 	if (frames_.size() == 1)
-		mstream <<"\"no tf data received\"";
+		mstream << "\"no tf data received\"";
 
 	mstream.precision(3);
 	mstream.setf(std::ios::fixed, std::ios::floatfield);
-    
+
 	//  for (std::vector< TimeCache*>::iterator  it = frames_.begin(); it != frames_.end(); ++it)
 	for (unsigned int cnt = 1; cnt < frames_.size(); ++cnt) //one referenced for 0 is no frame
 	{
 		std::shared_ptr<TimeCacheInterface> cache = get_frame(cnt);
-		if (! cache) continue;
+		if (!cache)
+			continue;
 
 		unsigned int frame_id_num;
-		if(cache->get_data(fawkes::Time(0,0), temp)) {
+		if (cache->get_data(fawkes::Time(0, 0), temp)) {
 			frame_id_num = temp.frame_id;
 		} else {
 			frame_id_num = 0;
 		}
 		if (frame_id_num != 0) {
-			std::string authority = "no recorded authority";
-			std::map<unsigned int, std::string>::const_iterator it = frame_authority_.find(cnt);
+			std::string                                         authority = "no recorded authority";
+			std::map<unsigned int, std::string>::const_iterator it        = frame_authority_.find(cnt);
 			if (it != frame_authority_.end())
 				authority = it->second;
 
-			double rate = cache->get_list_length() /
-				std::max((cache->get_latest_timestamp().in_sec() -
-				          cache->get_oldest_timestamp().in_sec()), 0.0001);
+			double rate = cache->get_list_length()
+			              / std::max((cache->get_latest_timestamp().in_sec()
+			                          - cache->get_oldest_timestamp().in_sec()),
+			                         0.0001);
 
-			mstream << "\"" << frameIDs_reverse[frame_id_num] << "\"" << " -> "
-			        << "\"" << frameIDs_reverse[cnt] << "\"" << "[label=\"";
+			mstream << "\"" << frameIDs_reverse[frame_id_num] << "\""
+			        << " -> "
+			        << "\"" << frameIDs_reverse[cnt] << "\""
+			        << "[label=\"";
 
-			std::shared_ptr<StaticCache> static_cache =
-				std::dynamic_pointer_cast<StaticCache>(cache);
+			std::shared_ptr<StaticCache> static_cache = std::dynamic_pointer_cast<StaticCache>(cache);
 			if (static_cache) {
 				mstream << "Static";
 			} else {
@@ -722,7 +700,7 @@ Transformer::all_frames_as_dot(bool print_time, fawkes::Time *time) const
 				        << (cache->get_latest_timestamp() - cache->get_oldest_timestamp()).in_sec()
 				        << " sec\\n";
 			}
-			mstream <<"\"];" <<std::endl;
+			mstream << "\"];" << std::endl;
 		}
 	}
 

@@ -57,33 +57,35 @@
 
 namespace fawkes {
 
-  class BlackBoard;
-  class TransformInterface;
-  class Mutex;
+class BlackBoard;
+class TransformInterface;
+class Mutex;
 
-  namespace tf {
+namespace tf {
 
 class TransformPublisher
 {
- public:
-  TransformPublisher(BlackBoard *bb, const char *bb_iface_id);
-  virtual ~TransformPublisher();
+public:
+	TransformPublisher(BlackBoard *bb, const char *bb_iface_id);
+	virtual ~TransformPublisher();
 
-  virtual void send_transform(const StampedTransform &transform, const bool is_static = false);
+	virtual void send_transform(const StampedTransform &transform, const bool is_static = false);
 
-  virtual void send_transform(const Transform &transform,
-                              const fawkes::Time &time,
-                              const std::string frame,
-                              const std::string child_frame,
-                              const bool is_static = false)
-  { send_transform(StampedTransform(transform, time, frame, child_frame), is_static); }
+	virtual void
+	send_transform(const Transform &   transform,
+	               const fawkes::Time &time,
+	               const std::string   frame,
+	               const std::string   child_frame,
+	               const bool          is_static = false)
+	{
+		send_transform(StampedTransform(transform, time, frame, child_frame), is_static);
+	}
 
- private:
-  BlackBoard *bb_;
-  TransformInterface *tfif_;
-  Mutex *mutex_;
+private:
+	BlackBoard *        bb_;
+	TransformInterface *tfif_;
+	Mutex *             mutex_;
 };
-
 
 } // end namespace tf
 } // end namespace fawkes
