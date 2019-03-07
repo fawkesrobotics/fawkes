@@ -22,9 +22,8 @@
 
 #include "node_thread.h"
 
-#include <utils/system/hostinfo.h>
-
 #include <ros/ros.h>
+#include <utils/system/hostinfo.h>
 
 using namespace fawkes;
 
@@ -38,83 +37,81 @@ using namespace fawkes;
 
 /** Constructor. */
 ROSNodeThread::ROSNodeThread()
-  : Thread("ROSNodeThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
-    AspectProviderAspect(&ros_aspect_inifin_)
+: Thread("ROSNodeThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP),
+  AspectProviderAspect(&ros_aspect_inifin_)
 {
 }
-
 
 /** Destructor. */
 ROSNodeThread::~ROSNodeThread()
 {
 }
 
-
 void
 ROSNodeThread::init()
 {
-  cfg_async_spinning_ = false;
-  try {
-    cfg_async_spinning_ = config->get_bool("/ros/async-spinning");
-  } catch (Exception &e) {} // ignored, use default
+	cfg_async_spinning_ = false;
+	try {
+		cfg_async_spinning_ = config->get_bool("/ros/async-spinning");
+	} catch (Exception &e) {
+	} // ignored, use default
 
-  cfg_async_num_threads_ = 4;
-  try {
-    cfg_async_num_threads_ = config->get_uint("/ros/async-num-threads");
-  } catch (Exception &e) {} // ignored, use default
+	cfg_async_num_threads_ = 4;
+	try {
+		cfg_async_num_threads_ = config->get_uint("/ros/async-num-threads");
+	} catch (Exception &e) {
+	} // ignored, use default
 
-  if (! ros::isInitialized()) {
-    int argc = 1;
-    const char *argv[] = {"fawkes"};
-    std::string node_name = "fawkes";
-    try {
-      node_name = config->get_string("/ros/node-name");
-    } catch (Exception &e) {} // ignored, use default
-    if (node_name == "$HOSTNAME") {
-      HostInfo hinfo;
-      node_name = hinfo.short_name();
-    }
+	if (!ros::isInitialized()) {
+		int         argc      = 1;
+		const char *argv[]    = {"fawkes"};
+		std::string node_name = "fawkes";
+		try {
+			node_name = config->get_string("/ros/node-name");
+		} catch (Exception &e) {
+		} // ignored, use default
+		if (node_name == "$HOSTNAME") {
+			HostInfo hinfo;
+			node_name = hinfo.short_name();
+		}
 
-    ros::init(argc, (char **)argv, node_name,
-	      (uint32_t)ros::init_options::NoSigintHandler);
-  } else {
-    logger->log_warn(name(), "ROS node already initialized");
-  }
+		ros::init(argc, (char **)argv, node_name, (uint32_t)ros::init_options::NoSigintHandler);
+	} else {
+		logger->log_warn(name(), "ROS node already initialized");
+	}
 
-  if (ros::isStarted()) {
-    logger->log_warn(name(), "ROS node already *started*");
-  }
+	if (ros::isStarted()) {
+		logger->log_warn(name(), "ROS node already *started*");
+	}
 
-  rosnode_ = new ros::NodeHandle();
+	rosnode_ = new ros::NodeHandle();
 
-  ros_aspect_inifin_.set_rosnode(rosnode_);
+	ros_aspect_inifin_.set_rosnode(rosnode_);
 
-  if (cfg_async_spinning_) {
-    async_spinner_ = new ros::AsyncSpinner(cfg_async_num_threads_);
-    async_spinner_->start();
-  }
+	if (cfg_async_spinning_) {
+		async_spinner_ = new ros::AsyncSpinner(cfg_async_num_threads_);
+		async_spinner_->start();
+	}
 }
-
 
 void
 ROSNodeThread::finalize()
 {
-  if (cfg_async_spinning_) {
-    async_spinner_->stop();
-    delete async_spinner_;
-  }
-  rosnode_->shutdown();
+	if (cfg_async_spinning_) {
+		async_spinner_->stop();
+		delete async_spinner_;
+	}
+	rosnode_->shutdown();
 
-  rosnode_.clear();
-  ros_aspect_inifin_.set_rosnode(rosnode_);
+	rosnode_.clear();
+	ros_aspect_inifin_.set_rosnode(rosnode_);
 }
-
 
 void
 ROSNodeThread::loop()
 {
-  if (! cfg_async_spinning_) {
-    ros::spinOnce();
-  }
+	if (!cfg_async_spinning_) {
+		ros::spinOnce();
+	}
 }

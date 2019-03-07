@@ -31,16 +31,16 @@ namespace fawkes {
 
 class ROSAspectIniFin : public AspectIniFin
 {
- public:
-  ROSAspectIniFin();
+public:
+	ROSAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
-  void set_rosnode(LockPtr<ros::NodeHandle> rosnode);
+	void set_rosnode(LockPtr<ros::NodeHandle> rosnode);
 
- private:
-  LockPtr<ros::NodeHandle> rosnode_;
+private:
+	LockPtr<ros::NodeHandle> rosnode_;
 };
 
 } // end namespace fawkes

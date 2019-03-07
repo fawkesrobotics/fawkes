@@ -21,47 +21,50 @@
 #ifndef _PLUGINS_ROS_ODOMETRY_THREAD_H_
 #define _PLUGINS_ROS_ODOMETRY_THREAD_H_
 
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/blackboard.h>
 #include <plugins/ros/aspect/ros.h>
 #include <ros/node_handle.h>
 
-
 namespace fawkes {
-  class MotorInterface;
+class MotorInterface;
 }
 
-class ROSOdometryThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ROSAspect
+class ROSOdometryThread : public fawkes::Thread,
+                          public fawkes::BlockedTimingAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::BlackBoardAspect,
+                          public fawkes::ROSAspect
 {
- public:
-  ROSOdometryThread();
+public:
+	ROSOdometryThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
-
- private:
-  void publish_odom();
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
 private:
-  fawkes::MotorInterface *motor_if_;
-  ros::Publisher pub_;
-  std::string cfg_odom_frame_id_;
-  std::string cfg_base_frame_id_;
-  boost::array<double, 36> odom_covariance_;
+	void publish_odom();
+
+private:
+	fawkes::MotorInterface * motor_if_;
+	ros::Publisher           pub_;
+	std::string              cfg_odom_frame_id_;
+	std::string              cfg_base_frame_id_;
+	boost::array<double, 36> odom_covariance_;
 };
 
 #endif

@@ -21,6 +21,7 @@
  */
 
 #include "ros_plugin.h"
+
 #include "node_thread.h"
 
 using namespace fawkes;
@@ -35,12 +36,10 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-ROSPlugin::ROSPlugin(Configuration *config)
-  : Plugin(config)
+ROSPlugin::ROSPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new ROSNodeThread());
+	thread_list.push_back(new ROSNodeThread());
 }
-
 
 PLUGIN_DESCRIPTION("Provides access to ROS")
 EXPORT_PLUGIN(ROSPlugin)

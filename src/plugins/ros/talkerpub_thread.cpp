@@ -35,39 +35,35 @@ using namespace fawkes;
 
 /** Constructor. */
 ROSTalkerPubThread::ROSTalkerPubThread()
-  : Thread("ROSTalkerPubThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
+: Thread("ROSTalkerPubThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_ACT)
 {
 }
-
 
 /** Destructor. */
 ROSTalkerPubThread::~ROSTalkerPubThread()
 {
 }
 
-
 void
 ROSTalkerPubThread::init()
 {
-  pub_ = rosnode->advertise<std_msgs::String>("/chatter", 10);
+	pub_ = rosnode->advertise<std_msgs::String>("/chatter", 10);
 }
-
 
 void
 ROSTalkerPubThread::finalize()
 {
-  pub_.shutdown();
+	pub_.shutdown();
 }
-
 
 void
 ROSTalkerPubThread::loop()
 {
-  Time t;
+	Time t;
 
-  std_msgs::String msg;
-  msg.data = std::string("Hello world ") + t.str();
+	std_msgs::String msg;
+	msg.data = std::string("Hello world ") + t.str();
 
-  pub_.publish(msg);
+	pub_.publish(msg);
 }

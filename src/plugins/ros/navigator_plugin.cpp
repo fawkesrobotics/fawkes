@@ -19,8 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
 #include "navigator_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -29,18 +30,17 @@ using namespace fawkes;
  */
 class RosNavigatorPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit RosNavigatorPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    std::string prefix = "/ros/navigator";
-    std::string cfg_prefix = prefix + "/";
+	explicit RosNavigatorPlugin(Configuration *config) : Plugin(config)
+	{
+		std::string prefix     = "/ros/navigator";
+		std::string cfg_prefix = prefix + "/";
 
-    thread_list.push_back(new RosNavigatorThread(cfg_prefix));
-  }
+		thread_list.push_back(new RosNavigatorThread(cfg_prefix));
+	}
 };
 
 PLUGIN_DESCRIPTION("Send locomotion commands to ROS")

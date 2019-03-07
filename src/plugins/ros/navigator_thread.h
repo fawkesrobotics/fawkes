@@ -18,106 +18,108 @@
  *
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
- 
+
 #ifndef _ROS_NAVIGATOR_THREAD_H_
 #define _ROS_NAVIGATOR_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/blackboard.h>
-#include <aspect/configurable.h>
-#include <aspect/tf.h>
-#include <aspect/clock.h>
-#include <plugins/ros/aspect/ros.h>
-
-#include <interfaces/NavigatorInterface.h>
-
-#include <tf/types.h>
-#include <math.h>
-#include <ros/ros.h>
-#include <utils/math/angle.h>
-#include <move_base_msgs/MoveBaseAction.h>
-#include <move_base_msgs/MoveBaseGoal.h>
-#include <move_base_msgs/MoveBaseActionGoal.h>
 #include <actionlib/client/simple_action_client.h>
-#include <dynamic_reconfigure/Reconfigure.h>
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <aspect/tf.h>
+#include <core/threading/thread.h>
 #include <dynamic_reconfigure/Config.h>
 #include <dynamic_reconfigure/DoubleParameter.h>
+#include <dynamic_reconfigure/Reconfigure.h>
+#include <interfaces/NavigatorInterface.h>
+#include <move_base_msgs/MoveBaseAction.h>
+#include <move_base_msgs/MoveBaseActionGoal.h>
+#include <move_base_msgs/MoveBaseGoal.h>
+#include <plugins/ros/aspect/ros.h>
+#include <ros/ros.h>
+#include <tf/types.h>
+#include <utils/math/angle.h>
+
+#include <math.h>
 
 namespace fawkes {
-  class NavigatorInterface;
+class NavigatorInterface;
 }
 
-class RosNavigatorThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ROSAspect,
-  public fawkes::TransformAspect
+class RosNavigatorThread : public fawkes::Thread,
+                           public fawkes::ClockAspect,
+                           public fawkes::BlockedTimingAspect,
+                           public fawkes::LoggingAspect,
+                           public fawkes::BlackBoardAspect,
+                           public fawkes::ConfigurableAspect,
+                           public fawkes::ROSAspect,
+                           public fawkes::TransformAspect
 {
- public:
-  RosNavigatorThread(std::string &cfg_prefix);
+public:
+	RosNavigatorThread(std::string &cfg_prefix);
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void check_status();
-  void send_goal();
-  void stop_goals();
-  void load_config();
-  bool set_dynreconf_value(const std::string& path, const float value);
+private:
+	void check_status();
+	void send_goal();
+	void stop_goals();
+	void load_config();
+	bool set_dynreconf_value(const std::string &path, const float value);
 
- private:
-  typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
+private:
+	typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 
-  void activeCb();
-  void feedbackCb(const move_base_msgs::MoveBaseFeedbackConstPtr& feedback);
-  void doneCb(const actionlib::SimpleClientGoalState& state,
-            const move_base_msgs::MoveBaseResultConstPtr& result);
+	void activeCb();
+	void feedbackCb(const move_base_msgs::MoveBaseFeedbackConstPtr &feedback);
+	void doneCb(const actionlib::SimpleClientGoalState &      state,
+	            const move_base_msgs::MoveBaseResultConstPtr &result);
 
-  void transform_to_fixed_frame();
+	void transform_to_fixed_frame();
 
-  fawkes::NavigatorInterface *nav_if_;
-  MoveBaseClient *ac_;
-  move_base_msgs::MoveBaseGoal goal_;
-  bool cmd_sent_;
-  bool connected_history_;
+	fawkes::NavigatorInterface * nav_if_;
+	MoveBaseClient *             ac_;
+	move_base_msgs::MoveBaseGoal goal_;
+	bool                         cmd_sent_;
+	bool                         connected_history_;
 
-  fawkes::Time *ac_init_checktime_;
-  
-  std::string cfg_prefix_;
+	fawkes::Time *ac_init_checktime_;
 
-  // ROS dynamic reconfigure parts
-  dynamic_reconfigure::ReconfigureRequest dynreconf_srv_req;
-  dynamic_reconfigure::ReconfigureResponse dynreconf_srv_resp;
-  dynamic_reconfigure::DoubleParameter dynreconf_double_param;
-  dynamic_reconfigure::Config dynreconf_conf;
+	std::string cfg_prefix_;
 
-  std::string cfg_dynreconf_path_;
-  std::string cfg_dynreconf_trans_vel_name_;
-  std::string cfg_dynreconf_rot_vel_name_;
+	// ROS dynamic reconfigure parts
+	dynamic_reconfigure::ReconfigureRequest  dynreconf_srv_req;
+	dynamic_reconfigure::ReconfigureResponse dynreconf_srv_resp;
+	dynamic_reconfigure::DoubleParameter     dynreconf_double_param;
+	dynamic_reconfigure::Config              dynreconf_conf;
 
-  std::string cfg_fixed_frame_;
-  float cfg_ori_tolerance_;
-  float cfg_trans_tolerance_;
+	std::string cfg_dynreconf_path_;
+	std::string cfg_dynreconf_trans_vel_name_;
+	std::string cfg_dynreconf_rot_vel_name_;
 
-  float param_max_vel;
-  float param_max_rot;
-  
-  geometry_msgs::PoseStamped base_position;
-  float goal_position_x;
-  float goal_position_y;
-  float goal_position_yaw;
+	std::string cfg_fixed_frame_;
+	float       cfg_ori_tolerance_;
+	float       cfg_trans_tolerance_;
 
+	float param_max_vel;
+	float param_max_rot;
+
+	geometry_msgs::PoseStamped base_position;
+	float                      goal_position_x;
+	float                      goal_position_y;
+	float                      goal_position_yaw;
 };
 
 #endif /* ROS_NAVIGATOR_THREAD_H__ */

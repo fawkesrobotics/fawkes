@@ -47,30 +47,30 @@ ROSRobotDescriptionThread::~ROSRobotDescriptionThread()
 void
 ROSRobotDescriptionThread::init()
 {
-  cfg_urdf_path_ = config->get_string(CFG_PREFIX"urdf_file");
-  cfg_ros_param_ = config->get_string(CFG_PREFIX"ros_robot_description");
+	cfg_urdf_path_ = config->get_string(CFG_PREFIX "urdf_file");
+	cfg_ros_param_ = config->get_string(CFG_PREFIX "ros_robot_description");
 
-  string urdf;
-  string line;
-  if (cfg_urdf_path_.substr(0,1) != "/") {
-    // relative path, add prefix RESDIR/urdf/
-    cfg_urdf_path_.insert(0, RESDIR"/urdf/");
-  }
-  ifstream urdf_file(cfg_urdf_path_.c_str());
-  if (!urdf_file.is_open()) {
-    logger->log_error(name(), "failed to open URDF File %s", cfg_urdf_path_.c_str());
-    throw Exception("Failed to open URDF File %s", cfg_urdf_path_.c_str());
-  }
-  while ( getline(urdf_file, line)) {
-    urdf += line;
-  }
-  urdf_file.close();
+	string urdf;
+	string line;
+	if (cfg_urdf_path_.substr(0, 1) != "/") {
+		// relative path, add prefix RESDIR/urdf/
+		cfg_urdf_path_.insert(0, RESDIR "/urdf/");
+	}
+	ifstream urdf_file(cfg_urdf_path_.c_str());
+	if (!urdf_file.is_open()) {
+		logger->log_error(name(), "failed to open URDF File %s", cfg_urdf_path_.c_str());
+		throw Exception("Failed to open URDF File %s", cfg_urdf_path_.c_str());
+	}
+	while (getline(urdf_file, line)) {
+		urdf += line;
+	}
+	urdf_file.close();
 
-  ros::param::set(cfg_ros_param_, urdf);
+	ros::param::set(cfg_ros_param_, urdf);
 }
 
 void
 ROSRobotDescriptionThread::finalize()
 {
-  ros::param::del(cfg_ros_param_);
+	ros::param::del(cfg_ros_param_);
 }

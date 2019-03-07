@@ -23,37 +23,40 @@
 #ifndef _PLUGINS_ROS_TALKERPUB_THREAD_H_
 #define _PLUGINS_ROS_TALKERPUB_THREAD_H_
 
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
-#include <aspect/blocked_timing.h>
 #include <plugins/ros/aspect/ros.h>
-
 #include <ros/publisher.h>
 
-class ROSTalkerPubThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::ROSAspect
+class ROSTalkerPubThread : public fawkes::Thread,
+                           public fawkes::BlockedTimingAspect,
+                           public fawkes::LoggingAspect,
+                           public fawkes::ConfigurableAspect,
+                           public fawkes::ClockAspect,
+                           public fawkes::ROSAspect
 {
- public:
-  ROSTalkerPubThread();
-  virtual ~ROSTalkerPubThread();
+public:
+	ROSTalkerPubThread();
+	virtual ~ROSTalkerPubThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  ros::Publisher pub_;
+private:
+	ros::Publisher pub_;
 };
 
 #endif

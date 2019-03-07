@@ -28,7 +28,7 @@
 #include <core/utils/lockptr.h>
 
 namespace ros {
-  class NodeHandle;
+class NodeHandle;
 }
 
 namespace fawkes {
@@ -37,18 +37,18 @@ class ROSAspectIniFin;
 
 class ROSAspect : public virtual Aspect
 {
-  friend ROSAspectIniFin;
+	friend ROSAspectIniFin;
 
- public:
-  ROSAspect();
-  virtual ~ROSAspect();
+public:
+	ROSAspect();
+	virtual ~ROSAspect();
 
- protected:
-  LockPtr<ros::NodeHandle> rosnode;
+protected:
+	LockPtr<ros::NodeHandle> rosnode;
 
- private:
-  void init_ROSAspect(LockPtr<ros::NodeHandle> rosnode);
-  void finalize_ROSAspect();
+private:
+	void init_ROSAspect(LockPtr<ros::NodeHandle> rosnode);
+	void finalize_ROSAspect();
 };
 
 } // end namespace fawkes

@@ -22,64 +22,66 @@
 #ifndef _PLUGINS_ROS_IMAGE_THREAD_H_
 #define _PLUGINS_ROS_IMAGE_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <plugins/ros/aspect/ros.h>
 #include <core/threading/mutex.h>
+#include <core/threading/thread.h>
+#include <image_transport/image_transport.h>
+#include <plugins/ros/aspect/ros.h>
+#include <ros/node_handle.h>
+#include <sensor_msgs/Image.h>
 
 #include <list>
 #include <queue>
 
-#include <ros/node_handle.h>
-#include <image_transport/image_transport.h>
-#include <sensor_msgs/Image.h>
-
 namespace firevision {
-  class SharedMemoryImageBuffer;
+class SharedMemoryImageBuffer;
 }
 
-class RosImagesThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::ROSAspect
+class RosImagesThread : public fawkes::Thread,
+                        public fawkes::ClockAspect,
+                        public fawkes::LoggingAspect,
+                        public fawkes::ConfigurableAspect,
+                        public fawkes::BlockedTimingAspect,
+                        public fawkes::ROSAspect
 {
- public:
-  RosImagesThread();
-  virtual ~RosImagesThread();
+public:
+	RosImagesThread();
+	virtual ~RosImagesThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void update_images();
-  void get_sets(std::set<std::string> &missing_images,
-                std::set<std::string> &unbacked_images);
+private:
+	void update_images();
+	void get_sets(std::set<std::string> &missing_images, std::set<std::string> &unbacked_images);
 
- private:
-  /// @cond INTERNALS
-  typedef struct {
-    image_transport::Publisher           pub;
-    sensor_msgs::Image                   msg;
-    fawkes::Time                         last_sent;
-    firevision::SharedMemoryImageBuffer *img;
-  } PublisherInfo;
-  /// @endcond
-  std::map<std::string, PublisherInfo> pubs_;
+private:
+	/// @cond INTERNALS
+	typedef struct
+	{
+		image_transport::Publisher           pub;
+		sensor_msgs::Image                   msg;
+		fawkes::Time                         last_sent;
+		firevision::SharedMemoryImageBuffer *img;
+	} PublisherInfo;
+	/// @endcond
+	std::map<std::string, PublisherInfo> pubs_;
 
-  image_transport::ImageTransport *it_;
-  fawkes::Time *last_update_;
-  fawkes::Time *now_;
-
+	image_transport::ImageTransport *it_;
+	fawkes::Time *                   last_update_;
+	fawkes::Time *                   now_;
 };
 
 #endif

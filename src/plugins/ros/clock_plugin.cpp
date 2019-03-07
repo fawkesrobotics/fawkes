@@ -19,9 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "clock_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -30,15 +30,14 @@ using namespace fawkes;
  */
 class RosClockPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit RosClockPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new RosClockThread());
-  }
+	explicit RosClockPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RosClockThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Publish clock to ROS")

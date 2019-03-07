@@ -19,6 +19,7 @@
  */
 
 #include "clock_thread.h"
+
 #include <rosgraph_msgs/Clock.h>
 #include <utils/time/wait.h>
 
@@ -30,8 +31,7 @@ using namespace fawkes;
  */
 
 /** Constructor. */
-RosClockThread::RosClockThread()
-	: Thread("ClockThread", Thread::OPMODE_CONTINUOUS)
+RosClockThread::RosClockThread() : Thread("ClockThread", Thread::OPMODE_CONTINUOUS)
 {
 	set_prepfin_conc_loop(true);
 }
@@ -40,7 +40,7 @@ void
 RosClockThread::init()
 {
 	cfg_freq_ = config->get_uint("/ros/clock/frequency");
-	pub_ = rosnode->advertise<rosgraph_msgs::Clock>("clock", 1);
+	pub_      = rosnode->advertise<rosgraph_msgs::Clock>("clock", 1);
 	rosnode->setParam("/use_sim_time", true);
 
 	set_local_ = ros::Time::isSystemTime();
@@ -56,10 +56,9 @@ void
 RosClockThread::finalize()
 {
 	rosnode->deleteParam("/use_sim_time");
-  pub_.shutdown();
-  delete time_wait_;
+	pub_.shutdown();
+	delete time_wait_;
 }
-
 
 void
 RosClockThread::publish_clock()
@@ -68,19 +67,19 @@ RosClockThread::publish_clock()
 
 	fawkes::Time now(clock);
 	clock_msg.clock.sec  = now.get_sec();
-  clock_msg.clock.nsec = now.get_usec() * 1000;
+	clock_msg.clock.nsec = now.get_usec() * 1000;
 
-  pub_.publish(clock_msg);
+	pub_.publish(clock_msg);
 
-  if (set_local_)  ros::Time::setNow(clock_msg.clock);
+	if (set_local_)
+		ros::Time::setNow(clock_msg.clock);
 }
 
 void
-ros_clock_cb(const rosgraph_msgs::Clock::ConstPtr& msg)
+ros_clock_cb(const rosgraph_msgs::Clock::ConstPtr &msg)
 {
 	ros::Time::setNow(msg->clock);
 }
-
 
 void
 RosClockThread::loop()

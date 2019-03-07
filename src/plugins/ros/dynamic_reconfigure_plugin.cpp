@@ -19,8 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
 #include "dynamic_reconfigure_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -29,15 +30,14 @@ using namespace fawkes;
  */
 class RosDynamicReconfigurePlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit RosDynamicReconfigurePlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new RosDynamicReconfigureThread());
-  }
+	explicit RosDynamicReconfigurePlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RosDynamicReconfigureThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Send dynamic reconfigure commands to ROS")

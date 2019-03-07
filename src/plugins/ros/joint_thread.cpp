@@ -35,8 +35,8 @@ using namespace fawkes;
 
 /** Constructor. */
 RosJointThread::RosJointThread()
-  : Thread("RosJointThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlackBoardInterfaceListener("RosJointThread")
+: Thread("RosJointThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlackBoardInterfaceListener("RosJointThread")
 {
 }
 
@@ -48,102 +48,102 @@ RosJointThread::~RosJointThread()
 void
 RosJointThread::init()
 {
-  ros_pub_ = rosnode->advertise<sensor_msgs::JointState>("/joints", 100);
-  // check for open JointInterfaces
-  ifs_ = blackboard->open_multiple_for_reading<JointInterface>();
-  for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); ++it) {
-    bbil_add_data_interface(*it);
-  }
-  // watch for creation of new JointInterfaces
-  bbio_add_observed_create("JointInterface");
+	ros_pub_ = rosnode->advertise<sensor_msgs::JointState>("/joints", 100);
+	// check for open JointInterfaces
+	ifs_ = blackboard->open_multiple_for_reading<JointInterface>();
+	for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); ++it) {
+		bbil_add_data_interface(*it);
+	}
+	// watch for creation of new JointInterfaces
+	bbio_add_observed_create("JointInterface");
 
-  // register to blackboard
-  blackboard->register_listener(this);
-  blackboard->register_observer(this);
+	// register to blackboard
+	blackboard->register_listener(this);
+	blackboard->register_observer(this);
 }
 
 void
 RosJointThread::finalize()
 {
-  blackboard->unregister_listener(this);
-  blackboard->unregister_observer(this);
-  for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); ++it) {
-    blackboard->close(*it);
-  }
-  ros_pub_.shutdown();
+	blackboard->unregister_listener(this);
+	blackboard->unregister_observer(this);
+	for (std::list<JointInterface *>::iterator it = ifs_.begin(); it != ifs_.end(); ++it) {
+		blackboard->close(*it);
+	}
+	ros_pub_.shutdown();
 }
 
 void
 RosJointThread::bb_interface_created(const char *type, const char *id) throw()
 {
-  if (strncmp(type, "JointInterface", INTERFACE_TYPE_SIZE_) != 0)  return;
-  JointInterface *interface;
-  try {
-    interface = blackboard->open_for_reading<JointInterface>(id);
-  } catch (Exception &e) {
-    logger->log_warn(name(), "Failed to open %s:%s: %s", type, id, e.what());
-    return;
-  }
-  try {
-    bbil_add_data_interface(interface);
-    blackboard->update_listener(this);
-    ifs_.push_back(interface);
-  } catch (Exception &e) {
-    blackboard->close(interface);
-    logger->log_warn(name(), "Failed to register for %s:%s: %s", type, id, e.what());
-    return;
-  }
+	if (strncmp(type, "JointInterface", INTERFACE_TYPE_SIZE_) != 0)
+		return;
+	JointInterface *interface;
+	try {
+		interface = blackboard->open_for_reading<JointInterface>(id);
+	} catch (Exception &e) {
+		logger->log_warn(name(), "Failed to open %s:%s: %s", type, id, e.what());
+		return;
+	}
+	try {
+		bbil_add_data_interface(interface);
+		blackboard->update_listener(this);
+		ifs_.push_back(interface);
+	} catch (Exception &e) {
+		blackboard->close(interface);
+		logger->log_warn(name(), "Failed to register for %s:%s: %s", type, id, e.what());
+		return;
+	}
 }
 
 void
-RosJointThread::bb_interface_writer_removed(Interface *interface,
-                                               unsigned int instance_serial)
-  throw()
+RosJointThread::bb_interface_writer_removed(Interface *  interface,
+                                            unsigned int instance_serial) throw()
 {
-  conditional_close(interface);
+	conditional_close(interface);
 }
 
-
 void
-RosJointThread::bb_interface_reader_removed(Interface *interface,
-                                               unsigned int instance_serial)
-  throw()
+RosJointThread::bb_interface_reader_removed(Interface *  interface,
+                                            unsigned int instance_serial) throw()
 {
-  conditional_close(interface);
+	conditional_close(interface);
 }
 
 void
 RosJointThread::conditional_close(Interface *interface) throw()
 {
-  // Verify it's a JointInterface
-  JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
-  if (! jiface) return;
+	// Verify it's a JointInterface
+	JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
+	if (!jiface)
+		return;
 
-  std::list<JointInterface *>::iterator it;
-  for (it = ifs_.begin(); it != ifs_.end(); ++it) {
-    if (*interface == **it) {
-      if (! interface->has_writer() && (interface->num_readers() == 1)) {
-        // It's only us
-        bbil_remove_data_interface(*it);
-        blackboard->update_listener(this);
-        blackboard->close(*it);
-        ifs_.erase(it);
-        break;
-      }
-    }
-  }
+	std::list<JointInterface *>::iterator it;
+	for (it = ifs_.begin(); it != ifs_.end(); ++it) {
+		if (*interface == **it) {
+			if (!interface->has_writer() && (interface->num_readers() == 1)) {
+				// It's only us
+				bbil_remove_data_interface(*it);
+				blackboard->update_listener(this);
+				blackboard->close(*it);
+				ifs_.erase(it);
+				break;
+			}
+		}
+	}
 }
 
 void
 RosJointThread::bb_interface_data_changed(Interface *interface) throw()
 {
-  JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
-  if (!jiface) return;
-  jiface->read();
-  sensor_msgs::JointState joint_state;
-//  std::string names[] = { "testJoint" };
-  joint_state.name.push_back(jiface->id());
-  joint_state.position.push_back(jiface->position());
-  joint_state.velocity.push_back(jiface->velocity());
-  ros_pub_.publish(joint_state);
+	JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
+	if (!jiface)
+		return;
+	jiface->read();
+	sensor_msgs::JointState joint_state;
+	//  std::string names[] = { "testJoint" };
+	joint_state.name.push_back(jiface->id());
+	joint_state.position.push_back(jiface->position());
+	joint_state.velocity.push_back(jiface->velocity());
+	ros_pub_.publish(joint_state);
 }

@@ -18,54 +18,57 @@
  *
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
- 
+
 #ifndef _ROS_NAVGRAPH_BREAKOUT_THREAD_H_
 #define _ROS_NAVGRAPH_BREAKOUT_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
+#include <actionlib/client/simple_action_client.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
-
-#include <ros/ros.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <fawkes_msgs/NavGraphGotoAction.h>
 #include <fawkes_msgs/NavGraphGotoGoal.h>
-#include <actionlib/client/simple_action_client.h>
+#include <ros/ros.h>
 
 #include <string>
 
 namespace fawkes {
-  class NavigatorInterface;
+class NavigatorInterface;
 }
 
-class RosNavgraphBreakoutThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect
+class RosNavgraphBreakoutThread : public fawkes::Thread,
+                                  public fawkes::BlockedTimingAspect,
+                                  public fawkes::LoggingAspect,
+                                  public fawkes::BlackBoardAspect,
+                                  public fawkes::ConfigurableAspect
 {
- public:
-  RosNavgraphBreakoutThread();
+public:
+	RosNavgraphBreakoutThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  typedef actionlib::SimpleActionClient<fawkes_msgs::NavGraphGotoAction> NavGraphGotoClient;
+private:
+	typedef actionlib::SimpleActionClient<fawkes_msgs::NavGraphGotoAction> NavGraphGotoClient;
 
-  std::string cfg_action_topic_;
-  
-  fawkes::NavigatorInterface *pp_nav_if_;
-  NavGraphGotoClient *ac_;
-  fawkes_msgs::NavGraphGotoGoal goal_;
-  bool goal_active_;
-  bool was_connected_;
+	std::string cfg_action_topic_;
+
+	fawkes::NavigatorInterface *  pp_nav_if_;
+	NavGraphGotoClient *          ac_;
+	fawkes_msgs::NavGraphGotoGoal goal_;
+	bool                          goal_active_;
+	bool                          was_connected_;
 };
 
 #endif /* ROS_NAVIGATOR_THREAD_H__ */

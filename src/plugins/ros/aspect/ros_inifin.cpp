@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/ros/aspect/ros_inifin.h>
 #include <core/threading/thread_finalizer.h>
+#include <plugins/ros/aspect/ros_inifin.h>
 #include <ros/node_handle.h>
 
 namespace fawkes {
@@ -35,41 +35,41 @@ namespace fawkes {
  */
 
 /** Constructor. */
-ROSAspectIniFin::ROSAspectIniFin()
-  : AspectIniFin("ROSAspect")
+ROSAspectIniFin::ROSAspectIniFin() : AspectIniFin("ROSAspect")
 {
 }
 
 void
 ROSAspectIniFin::init(Thread *thread)
 {
-  ROSAspect *ros_thread;
-  ros_thread = dynamic_cast<ROSAspect *>(thread);
-  if (ros_thread == NULL) {
-    throw CannotInitializeThreadException("Thread '%s' claims to have the "
-					  "ROSAspect, but RTTI says it "
-					  "has not. ", thread->name());
-  }
-  if (! rosnode_) {
-    throw CannotInitializeThreadException("ROS node handle has not been set.");
-  }
+	ROSAspect *ros_thread;
+	ros_thread = dynamic_cast<ROSAspect *>(thread);
+	if (ros_thread == NULL) {
+		throw CannotInitializeThreadException("Thread '%s' claims to have the "
+		                                      "ROSAspect, but RTTI says it "
+		                                      "has not. ",
+		                                      thread->name());
+	}
+	if (!rosnode_) {
+		throw CannotInitializeThreadException("ROS node handle has not been set.");
+	}
 
-  ros_thread->init_ROSAspect(rosnode_);
+	ros_thread->init_ROSAspect(rosnode_);
 }
 
 void
 ROSAspectIniFin::finalize(Thread *thread)
 {
-  ROSAspect *ros_thread;
-  ros_thread = dynamic_cast<ROSAspect *>(thread);
-  if (ros_thread == NULL) {
-    throw CannotFinalizeThreadException("Thread '%s' claims to have the "
-					"ROSAspect, but RTTI says it "
-					"has not. ", thread->name());
-  }
-  ros_thread->finalize_ROSAspect();
+	ROSAspect *ros_thread;
+	ros_thread = dynamic_cast<ROSAspect *>(thread);
+	if (ros_thread == NULL) {
+		throw CannotFinalizeThreadException("Thread '%s' claims to have the "
+		                                    "ROSAspect, but RTTI says it "
+		                                    "has not. ",
+		                                    thread->name());
+	}
+	ros_thread->finalize_ROSAspect();
 }
-
 
 /** Set the ROS node handle to use for aspect initialization.
  * @param rosnode ROS node handle to pass to threads with ROSAspect.
@@ -77,7 +77,7 @@ ROSAspectIniFin::finalize(Thread *thread)
 void
 ROSAspectIniFin::set_rosnode(LockPtr<ros::NodeHandle> rosnode)
 {
-  rosnode_ = rosnode;
+	rosnode_ = rosnode;
 }
 
 } // end namespace fawkes

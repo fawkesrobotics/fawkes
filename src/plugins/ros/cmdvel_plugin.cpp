@@ -19,24 +19,23 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "cmdvel_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
 /** Plugin to translate ROS Twist messages to Navigator transrot. */
 class ROSCmdVelPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit ROSCmdVelPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new ROSCmdVelThread());
-  }
+	explicit ROSCmdVelPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new ROSCmdVelThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Translate ROS Twist to Fawkes TransRot")

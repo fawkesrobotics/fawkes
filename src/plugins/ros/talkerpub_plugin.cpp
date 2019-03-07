@@ -21,6 +21,7 @@
  */
 
 #include "talkerpub_plugin.h"
+
 #include "talkerpub_thread.h"
 
 using namespace fawkes;
@@ -33,12 +34,10 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-ROSTalkerPubPlugin::ROSTalkerPubPlugin(Configuration *config)
-  : Plugin(config)
+ROSTalkerPubPlugin::ROSTalkerPubPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new ROSTalkerPubThread());
+	thread_list.push_back(new ROSTalkerPubThread());
 }
-
 
 PLUGIN_DESCRIPTION("Publish talker messages via ROS")
 EXPORT_PLUGIN(ROSTalkerPubPlugin)

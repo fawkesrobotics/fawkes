@@ -18,60 +18,62 @@
  *
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
- 
+
 #ifndef _ROS_DYNAMIC_RECONFIGURE_THREAD_H_
 #define _ROS_DYNAMIC_RECONFIGURE_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
-#include <plugins/ros/aspect/ros.h>
-
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <interfaces/DynamicReconfigureInterface.h>
-
+#include <plugins/ros/aspect/ros.h>
 #include <ros/ros.h>
 
 namespace fawkes {
-  class DynamicReconfigureInterface;
+class DynamicReconfigureInterface;
 }
 
-class RosDynamicReconfigureThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ROSAspect
+class RosDynamicReconfigureThread : public fawkes::Thread,
+                                    public fawkes::BlockedTimingAspect,
+                                    public fawkes::LoggingAspect,
+                                    public fawkes::BlackBoardAspect,
+                                    public fawkes::ConfigurableAspect,
+                                    public fawkes::ROSAspect
 {
- public:
-  RosDynamicReconfigureThread();
+public:
+	RosDynamicReconfigureThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  // set methods for dynamic reconfiguration of different types
-  bool set_dynreconf_value(const std::string& service, const std::string& parameter,
-                           const std::string& value);
-  bool set_dynreconf_value(const std::string& service, const std::string& parameter,
-                           const bool value);
-  bool set_dynreconf_value(const std::string& service, const std::string& parameter,
-                           const int value);
-  bool set_dynreconf_value(const std::string& service, const std::string& parameter,
-                           const double value);
+private:
+	// set methods for dynamic reconfiguration of different types
+	bool set_dynreconf_value(const std::string &service,
+	                         const std::string &parameter,
+	                         const std::string &value);
+	bool
+	set_dynreconf_value(const std::string &service, const std::string &parameter, const bool value);
+	bool
+	set_dynreconf_value(const std::string &service, const std::string &parameter, const int value);
+	bool
+	set_dynreconf_value(const std::string &service, const std::string &parameter, const double value);
 
-  // method for resetting the dynamic reconfigure interface
-  void reset_dynamic_reconfigure_interface();
+	// method for resetting the dynamic reconfigure interface
+	void reset_dynamic_reconfigure_interface();
 
- private:
-  fawkes::DynamicReconfigureInterface *dynrec_if_;
-
+private:
+	fawkes::DynamicReconfigureInterface *dynrec_if_;
 };
 
 #endif /* ROS_DYNAMIC_RECONFIGURE_THREAD_H__ */

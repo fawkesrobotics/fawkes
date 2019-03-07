@@ -21,45 +21,49 @@
 #ifndef _PLUGINS_ROS_CLOCK_THREAD_H_
 #define _PLUGINS_ROS_CLOCK_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 #include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/ros/aspect/ros.h>
 #include <ros/node_handle.h>
 
 namespace fawkes {
-	class TimeWait;
+class TimeWait;
 }
 
-class RosClockThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-	public fawkes::ClockAspect,
-  public fawkes::ROSAspect
+class RosClockThread : public fawkes::Thread,
+                       public fawkes::LoggingAspect,
+                       public fawkes::ConfigurableAspect,
+                       public fawkes::BlackBoardAspect,
+                       public fawkes::ClockAspect,
+                       public fawkes::ROSAspect
 {
- public:
-  RosClockThread();
+public:
+	RosClockThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
-
- private:
-  void publish_clock();
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
 private:
-  ros::Publisher  pub_;
-  bool            set_local_;
-  unsigned int cfg_freq_;
+	void publish_clock();
 
-  fawkes::TimeWait *time_wait_;
+private:
+	ros::Publisher pub_;
+	bool           set_local_;
+	unsigned int   cfg_freq_;
+
+	fawkes::TimeWait *time_wait_;
 };
 
 #endif

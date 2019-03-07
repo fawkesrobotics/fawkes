@@ -19,24 +19,23 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "odometry_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
 /** Plugin to publish odometry to ROS. */
 class ROSOdometryPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit ROSOdometryPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new ROSOdometryThread());
-  }
+	explicit ROSOdometryPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new ROSOdometryThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Send odometry data to ROS")

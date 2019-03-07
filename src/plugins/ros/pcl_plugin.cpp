@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "pcl_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,15 +31,14 @@ using namespace fawkes;
  */
 class RosPointCloudPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit RosPointCloudPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new RosPointCloudThread());
-  }
+	explicit RosPointCloudPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RosPointCloudThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("ROS point cloud exchange plugin")
