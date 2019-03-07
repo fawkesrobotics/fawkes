@@ -34,64 +34,59 @@
 #ifndef AMCL_ODOM_H
 #define AMCL_ODOM_H
 
-#include "amcl_sensor.h"
 #include "../pf/pf_pdf.h"
+#include "amcl_sensor.h"
 
 /// @cond EXTERNAL
 
-namespace amcl
-{
+namespace amcl {
 
-typedef enum
-{
-  ODOM_MODEL_DIFF,
-  ODOM_MODEL_OMNI
-} odom_model_t;
+typedef enum { ODOM_MODEL_DIFF, ODOM_MODEL_OMNI } odom_model_t;
 
 // Odometric sensor data
 class AMCLOdomData : public AMCLSensorData
 {
-  // Odometric pose
-  public: pf_vector_t pose;
+	// Odometric pose
+public:
+	pf_vector_t pose;
 
-  // Change in odometric pose
-  public: pf_vector_t delta;
+	// Change in odometric pose
+public:
+	pf_vector_t delta;
 };
-
 
 // Odometric sensor model
 class AMCLOdom : public AMCLSensor
 {
-  // Default constructor
-  public: AMCLOdom();
+	// Default constructor
+public:
+	AMCLOdom();
 
-  public: void SetModelDiff(double alpha1, 
-                            double alpha2, 
-                            double alpha3, 
-                            double alpha4);
+public:
+	void SetModelDiff(double alpha1, double alpha2, double alpha3, double alpha4);
 
-  public: void SetModelOmni(double alpha1, 
-                            double alpha2, 
-                            double alpha3, 
-                            double alpha4,
-                            double alpha5);
+public:
+	void SetModelOmni(double alpha1, double alpha2, double alpha3, double alpha4, double alpha5);
 
-  // Update the filter based on the action model.  Returns true if the filter
-  // has been updated.
-  public: virtual bool UpdateAction(pf_t *pf, AMCLSensorData *data);
+	// Update the filter based on the action model.  Returns true if the filter
+	// has been updated.
+public:
+	virtual bool UpdateAction(pf_t *pf, AMCLSensorData *data);
 
-  // Current data timestamp
-  private: double time;
-  
-  // Model type
-  private: odom_model_t model_type;
+	// Current data timestamp
+private:
+	double time;
 
-  // Drift parameters
-  private: double alpha1, alpha2, alpha3, alpha4, alpha5;
+	// Model type
+private:
+	odom_model_t model_type;
+
+	// Drift parameters
+private:
+	double alpha1, alpha2, alpha3, alpha4, alpha5;
 };
 
-
-}
+} // namespace amcl
 
 /// @endcond
 

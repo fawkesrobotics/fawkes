@@ -42,20 +42,18 @@ extern "C" {
 #include <stdio.h>
 
 /// @cond EXTERNAL
-  
+
 // The basic vector
 typedef struct
 {
-  double v[3];
+	double v[3];
 } pf_vector_t;
-
 
 // The basic matrix
 typedef struct
 {
-  double m[3][3];
+	double m[3][3];
 } pf_matrix_t;
-
 
 // Return a zero vector
 pf_vector_t pf_vector_zero();
@@ -77,7 +75,6 @@ pf_vector_t pf_vector_coord_add(pf_vector_t a, pf_vector_t b);
 
 // Transform from global to local coords (a - b)
 pf_vector_t pf_vector_coord_sub(pf_vector_t a, pf_vector_t b);
-
 
 // Return a zero matrix
 pf_matrix_t pf_matrix_zero();

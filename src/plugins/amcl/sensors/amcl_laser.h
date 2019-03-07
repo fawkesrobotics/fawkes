@@ -35,99 +35,123 @@
 #ifndef AMCL_LASER_H
 #define AMCL_LASER_H
 
-#include "amcl_sensor.h"
 #include "../map/map.h"
+#include "amcl_sensor.h"
 
 /// @cond EXTERNAL
 
-namespace amcl
-{
+namespace amcl {
 
-typedef enum
-{
-  LASER_MODEL_BEAM,
-  LASER_MODEL_LIKELIHOOD_FIELD
-} laser_model_t;
+typedef enum { LASER_MODEL_BEAM, LASER_MODEL_LIKELIHOOD_FIELD } laser_model_t;
 
 // Laser sensor data
 class AMCLLaserData : public AMCLSensorData
 {
-  public:
-    AMCLLaserData () {ranges=NULL;};
-    virtual ~AMCLLaserData() {delete [] ranges;};
-  // Laser range data (range, bearing tuples)
-  public: int range_count;
-  public: double range_max;
-  public: double (*ranges)[2];
-};
+public:
+	AMCLLaserData()
+	{
+		ranges = NULL;
+	};
+	virtual ~AMCLLaserData()
+	{
+		delete[] ranges;
+	};
+	// Laser range data (range, bearing tuples)
+public:
+	int range_count;
 
+public:
+	double range_max;
+
+public:
+	double (*ranges)[2];
+};
 
 // Laseretric sensor model
 class AMCLLaser : public AMCLSensor
 {
-  // Default constructor
-  public: AMCLLaser(size_t max_beams, map_t* map);
+	// Default constructor
+public:
+	AMCLLaser(size_t max_beams, map_t *map);
 
-  public: void SetModelBeam(double z_hit,
-                            double z_short,
-                            double z_max,
-                            double z_rand,
-                            double sigma_hit,
-                            double labda_short,
-                            double chi_outlier);
+public:
+	void SetModelBeam(double z_hit,
+	                  double z_short,
+	                  double z_max,
+	                  double z_rand,
+	                  double sigma_hit,
+	                  double labda_short,
+	                  double chi_outlier);
 
-  public: void SetModelLikelihoodField(double z_hit,
-                                       double z_rand,
-                                       double sigma_hit,
-                                       double max_occ_dist);
-  
-  // Update the filter based on the sensor model.  Returns true if the
-  // filter has been updated.
-  public: virtual bool UpdateSensor(pf_t *pf, AMCLSensorData *data);
+public:
+	void SetModelLikelihoodField(double z_hit, double z_rand, double sigma_hit, double max_occ_dist);
 
-  // Set the laser's pose after construction
-  public: void SetLaserPose(pf_vector_t& laser_pose) 
-          {this->laser_pose = laser_pose;}
+	// Update the filter based on the sensor model.  Returns true if the
+	// filter has been updated.
+public:
+	virtual bool UpdateSensor(pf_t *pf, AMCLSensorData *data);
 
-  // Determine the probability for the given pose
-  private: static double BeamModel(AMCLLaserData *data, 
-                                   pf_sample_set_t* set);
-  // Determine the probability for the given pose
-  private: static double LikelihoodFieldModel(AMCLLaserData *data, 
-                                              pf_sample_set_t* set);
+	// Set the laser's pose after construction
+public:
+	void
+	SetLaserPose(pf_vector_t &laser_pose)
+	{
+		this->laser_pose = laser_pose;
+	}
 
-  private: laser_model_t model_type;
+	// Determine the probability for the given pose
+private:
+	static double BeamModel(AMCLLaserData *data, pf_sample_set_t *set);
+	// Determine the probability for the given pose
+private:
+	static double LikelihoodFieldModel(AMCLLaserData *data, pf_sample_set_t *set);
 
-  // Current data timestamp
-  private: double time;
+private:
+	laser_model_t model_type;
 
-  // The laser map
-  private: map_t *map;
+	// Current data timestamp
+private:
+	double time;
 
-  // Laser offset relative to robot
-  private: pf_vector_t laser_pose;
-  
-  // Max beams to consider
-  private: int max_beams;
+	// The laser map
+private:
+	map_t *map;
 
-  // Laser model params
-  //
-  // Mixture params for the components of the model; must sum to 1
-  private: double z_hit;
-  private: double z_short;
-  private: double z_max;
-  private: double z_rand;
-  //
-  // Stddev of Gaussian model for laser hits.
-  private: double sigma_hit;
-  // Decay rate of exponential model for short readings.
-  private: double lambda_short;
-  // Threshold for outlier rejection (unused)
-  private: double chi_outlier;
+	// Laser offset relative to robot
+private:
+	pf_vector_t laser_pose;
+
+	// Max beams to consider
+private:
+	int max_beams;
+
+	// Laser model params
+	//
+	// Mixture params for the components of the model; must sum to 1
+private:
+	double z_hit;
+
+private:
+	double z_short;
+
+private:
+	double z_max;
+
+private:
+	double z_rand;
+	//
+	// Stddev of Gaussian model for laser hits.
+private:
+	double sigma_hit;
+	// Decay rate of exponential model for short readings.
+private:
+	double lambda_short;
+	// Threshold for outlier rejection (unused)
+private:
+	double chi_outlier;
 };
 
-
-}
+} // namespace amcl
 
 /// @endcond
 

@@ -20,12 +20,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "amcl_thread.h"
+
+#include <core/plugin.h>
 #ifdef HAVE_ROS
-#  include "ros_thread.h"
-#  include "amcl_utils.h"
+#	include "amcl_utils.h"
+#	include "ros_thread.h"
 #endif
 
 using namespace fawkes;
@@ -35,28 +35,28 @@ using namespace fawkes;
  */
 class AmclPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit AmclPlugin(Configuration *config)
-    : Plugin(config)
-  {
+	explicit AmclPlugin(Configuration *config) : Plugin(config)
+	{
 #ifdef HAVE_ROS
-    AmclROSThread *rt = NULL;
-    bool ros_enabled = true;
-    try {
-      ros_enabled = config->get_bool(AMCL_CFG_PREFIX"ros/enable");
-    } catch (Exception &e) {} // ignore, use default
-    if (ros_enabled) {
-      rt = new AmclROSThread();
-      thread_list.push_back(rt);
-    }
-    thread_list.push_back(new AmclThread(rt));
+		AmclROSThread *rt          = NULL;
+		bool           ros_enabled = true;
+		try {
+			ros_enabled = config->get_bool(AMCL_CFG_PREFIX "ros/enable");
+		} catch (Exception &e) {
+		} // ignore, use default
+		if (ros_enabled) {
+			rt = new AmclROSThread();
+			thread_list.push_back(rt);
+		}
+		thread_list.push_back(new AmclThread(rt));
 #else
-    thread_list.push_back(new AmclThread());
+		thread_list.push_back(new AmclThread());
 #endif
-  }
+	}
 };
 
 PLUGIN_DESCRIPTION("Adaptive Monte Carlo Localization")

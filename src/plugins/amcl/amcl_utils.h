@@ -23,30 +23,34 @@
 
 #include "map/map.h"
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #define AMCL_CFG_PREFIX "/plugins/amcl/"
 
 namespace fawkes {
 
-  class Configuration;
+class Configuration;
 
-  namespace amcl {
+namespace amcl {
 
-map_t *
-read_map(const char *map_file,
-	 float origin_x, float origin_y, float resolution,
-	 float occupied_threshold, float free_threshold,
-	 std::vector<std::pair<int, int> > &free_space_indices);
+map_t *read_map(const char *                      map_file,
+                float                             origin_x,
+                float                             origin_y,
+                float                             resolution,
+                float                             occupied_threshold,
+                float                             free_threshold,
+                std::vector<std::pair<int, int>> &free_space_indices);
 
-void
-read_map_config(Configuration *config,
-		std::string  &cfg_map_file, float &cfg_resolution,
-		float &cfg_origin_x, float &cfg_origin_y, float &cfg_origin_theta,
-		float &cfg_occupied_thresh, float &cfg_free_thresh,
-		const std::string& cfg_prefix = AMCL_CFG_PREFIX);
-
+void read_map_config(Configuration *    config,
+                     std::string &      cfg_map_file,
+                     float &            cfg_resolution,
+                     float &            cfg_origin_x,
+                     float &            cfg_origin_y,
+                     float &            cfg_origin_theta,
+                     float &            cfg_occupied_thresh,
+                     float &            cfg_free_thresh,
+                     const std::string &cfg_prefix = AMCL_CFG_PREFIX);
 
 } // end namespace amcl
 } // end namespace fawkes
