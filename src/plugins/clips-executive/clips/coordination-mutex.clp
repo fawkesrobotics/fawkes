@@ -387,6 +387,16 @@
 	(modify ?mf (request NONE) (response NONE) (pending-requests ?pending-requests))
 )
 
+(defrule mutex-lock-auto-renew-done-but-lock-open
+	?mf <- (mutex (name ?name) (state OPEN)
+	              (request RENEW-LOCK) (response ACQUIRED|REJECTED)
+	              (pending-requests AUTO-RENEW-PROC $?pending-requests))
+  =>
+  (printout error "Received response to renewal request for " ?name
+                  " but lock has expired in the meantime. " crlf)
+  (modify ?mf (request NONE) (response NONE) (pending-requests ?pending-requests))
+)
+
 (defrule mutex-lock-auto-renew-failed
 	?mf <- (mutex (name ?name) (state LOCKED)
 								(request RENEW-LOCK) (response REJECTED) (locked-by ?lb)
