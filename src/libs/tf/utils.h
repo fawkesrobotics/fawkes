@@ -56,7 +56,7 @@
 #include <tf/types.h>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
 /** Resolve transform name.
  * @param prefix prefix to prepend to frame name
@@ -64,33 +64,33 @@ namespace fawkes {
  * @return resolved frame name
  */
 inline std::string
-resolve(const std::string& prefix, const std::string& frame_name)
+resolve(const std::string &prefix, const std::string &frame_name)
 {
-  if (frame_name.size() > 0) {
-    if (frame_name[0] == '/') {
-      return frame_name;
-    }
-  }
-  if (prefix.size() > 0) {
-    if (prefix[0] == '/') {
-      std::string composite = prefix;
-      composite.append("/");
-      composite.append(frame_name);
-      return composite;
-    } else {
-      std::string composite;
-      composite = "/";
-      composite.append(prefix);
-      composite.append("/");
-      composite.append(frame_name);
-      return composite;
-    }
-  } else {
-    std::string composite;
-    composite = "/";
-    composite.append(frame_name);
-    return composite;
-  }
+	if (frame_name.size() > 0) {
+		if (frame_name[0] == '/') {
+			return frame_name;
+		}
+	}
+	if (prefix.size() > 0) {
+		if (prefix[0] == '/') {
+			std::string composite = prefix;
+			composite.append("/");
+			composite.append(frame_name);
+			return composite;
+		} else {
+			std::string composite;
+			composite = "/";
+			composite.append(prefix);
+			composite.append("/");
+			composite.append(frame_name);
+			return composite;
+		}
+	} else {
+		std::string composite;
+		composite = "/";
+		composite.append(frame_name);
+		return composite;
+	}
 }
 
 /** Create an ident pose in the given frame.
@@ -102,12 +102,11 @@ resolve(const std::string& prefix, const std::string& frame_name)
  * @return ident pose in given frame at given time
  */
 inline Stamped<Pose>
-ident(std::string frame, Time t = Time(0,0))
+ident(std::string frame, Time t = Time(0, 0))
 {
-  return
-    tf::Stamped<tf::Pose>(tf::Transform(tf::Quaternion(0, 0, 0, 1),
-					tf::Vector3(0, 0, 0)),
-			  t, frame);
+	return tf::Stamped<tf::Pose>(tf::Transform(tf::Quaternion(0, 0, 0, 1), tf::Vector3(0, 0, 0)),
+	                             t,
+	                             frame);
 }
 
 /** Resize a vector.
@@ -118,34 +117,31 @@ ident(std::string frame, Time t = Time(0,0))
 inline Vector3
 resize_vector(const Vector3 &v, double s)
 {
-  return v.normalized() * s;
+	return v.normalized() * s;
 }
-
 
 /** Check if frame ID starts with a slash (/).
  * @param frame_id frame ID to check
  * @return true if strings starts with slash, false otherwise
  */
 inline bool
-starts_with_slash(const std::string& frame_id)
+starts_with_slash(const std::string &frame_id)
 {
 	return (frame_id.size() > 0) && (frame_id[0] == '/');
 }
-
 
 /** Remove leading slash, if any.
  * @param in frame_id to process
  * @return returns @p in with leading slash removed, if any
  */
 inline std::string
-strip_slash(const std::string& in)
+strip_slash(const std::string &in)
 {
-  if (starts_with_slash(in))
-	  return in.substr(1);
-  else
-	  return in;
+	if (starts_with_slash(in))
+		return in.substr(1);
+	else
+		return in;
 }
-
 
 } // end namespace tf
 } // end namespace fawkes

@@ -49,16 +49,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <tf/transform_publisher.h>
-
 #include <blackboard/blackboard.h>
-#include <interfaces/TransformInterface.h>
-
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
+#include <interfaces/TransformInterface.h>
+#include <tf/transform_publisher.h>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
 /** @class TransformPublisher <tf/transform_publisher.h>
  * Utility class to send transforms.
@@ -88,17 +86,15 @@ namespace fawkes {
  * @param bb_iface_id the blackboard interface ID to be used for the
  * opened TransformInterface. Note that the name is prefixed with "/tf/".
  */
-TransformPublisher::TransformPublisher(BlackBoard *bb,
-                                       const char *bb_iface_id)
-  : bb_(bb), mutex_(new Mutex())
+TransformPublisher::TransformPublisher(BlackBoard *bb, const char *bb_iface_id)
+: bb_(bb), mutex_(new Mutex())
 {
-  if (bb_) {
-	  std::string bbid = (bb_iface_id[0] == '/') ? bb_iface_id : std::string("/tf/") + bb_iface_id;
-    tfif_ = bb_->open_for_writing<TransformInterface>(bbid.c_str());
-    tfif_->set_auto_timestamping(false);
-  }
+	if (bb_) {
+		std::string bbid = (bb_iface_id[0] == '/') ? bb_iface_id : std::string("/tf/") + bb_iface_id;
+		tfif_            = bb_->open_for_writing<TransformInterface>(bbid.c_str());
+		tfif_->set_auto_timestamping(false);
+	}
 }
-
 
 /** Destructor.
  * Closes TransformInterface, hence BlackBoard must still be alive and
@@ -106,10 +102,10 @@ TransformPublisher::TransformPublisher(BlackBoard *bb,
  */
 TransformPublisher::~TransformPublisher()
 {
-  if (bb_) bb_->close(tfif_);
-  delete mutex_;
+	if (bb_)
+		bb_->close(tfif_);
+	delete mutex_;
 }
-
 
 /** Publish transform.
  * @param transform transform to publish
@@ -118,28 +114,31 @@ TransformPublisher::~TransformPublisher()
 void
 TransformPublisher::send_transform(const StampedTransform &transform, bool is_static)
 {
-  if (! bb_) {
-    throw DisabledException("TransformPublisher is disabled");
-  }
+	if (!bb_) {
+		throw DisabledException("TransformPublisher is disabled");
+	}
 
-  MutexLocker lock(mutex_);
+	MutexLocker lock(mutex_);
 
-  tfif_->set_timestamp(&transform.stamp);
-  tfif_->set_frame(transform.frame_id.c_str());
-  tfif_->set_child_frame(transform.child_frame_id.c_str());
-  tfif_->set_static_transform(is_static);
-  double translation[3], rotation[4];
-  const Vector3 &t = transform.getOrigin();
-  translation[0] = t.x(); translation[1] = t.y(); translation[2] = t.z();
-  Quaternion r = transform.getRotation();
-  assert_quaternion_valid(r);
-  rotation[0] = r.x(); rotation[1] = r.y();
-  rotation[2] = r.z(); rotation[3] = r.w();
-  tfif_->set_translation(translation);
-  tfif_->set_rotation(rotation);
-  tfif_->write();
+	tfif_->set_timestamp(&transform.stamp);
+	tfif_->set_frame(transform.frame_id.c_str());
+	tfif_->set_child_frame(transform.child_frame_id.c_str());
+	tfif_->set_static_transform(is_static);
+	double         translation[3], rotation[4];
+	const Vector3 &t = transform.getOrigin();
+	translation[0]   = t.x();
+	translation[1]   = t.y();
+	translation[2]   = t.z();
+	Quaternion r     = transform.getRotation();
+	assert_quaternion_valid(r);
+	rotation[0] = r.x();
+	rotation[1] = r.y();
+	rotation[2] = r.z();
+	rotation[3] = r.w();
+	tfif_->set_translation(translation);
+	tfif_->set_rotation(rotation);
+	tfif_->write();
 }
-
 
 } // end namespace tf
 } // end namespace fawkes

@@ -52,50 +52,46 @@
 #ifndef _LIBS_TF_TRANSFORM_LISTENER_H_
 #define _LIBS_TF_TRANSFORM_LISTENER_H_
 
-#include <tf/types.h>
-
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
+#include <tf/types.h>
 
 #include <list>
 
 namespace fawkes {
 
-  class BlackBoard;
-  class TransformInterface;
+class BlackBoard;
+class TransformInterface;
 
-  namespace tf {
+namespace tf {
 
 class Transformer;
 
-class TransformListener
-: public BlackBoardInterfaceObserver,
-  public BlackBoardInterfaceListener
+class TransformListener : public BlackBoardInterfaceObserver, public BlackBoardInterfaceListener
 {
- public:
-	TransformListener(BlackBoard *bb, Transformer *tf_transformer,
-	    bool bb_is_remote=false);
-  virtual ~TransformListener();
+public:
+	TransformListener(BlackBoard *bb, Transformer *tf_transformer, bool bb_is_remote = false);
+	virtual ~TransformListener();
 
-  // for BlackBoardInterfaceObserver
-  virtual void bb_interface_created(const char *type, const char *id) throw();
+	// for BlackBoardInterfaceObserver
+	virtual void bb_interface_created(const char *type, const char *id) throw();
 
-  // for BlackBoardInterfaceListener
-  virtual void bb_interface_data_changed(Interface *interface) throw();
-  virtual void bb_interface_writer_removed(Interface *interface,
-                                           unsigned int instance_serial) throw();
-  virtual void bb_interface_reader_removed(Interface *interface,
-                                           unsigned int instance_serial) throw();
+	// for BlackBoardInterfaceListener
+	virtual void bb_interface_data_changed(Interface *interface) throw();
+	virtual void bb_interface_writer_removed(Interface *  interface,
+	                                         unsigned int instance_serial) throw();
+	virtual void bb_interface_reader_removed(Interface *  interface,
+	                                         unsigned int instance_serial) throw();
 
- private:
-  void conditional_close(Interface *interface) throw();
+private:
+	void conditional_close(Interface *interface) throw();
 
- private:
-  BlackBoard  *bb_;
-  Transformer *tf_transformer_;
-  bool bb_is_remote_;
+private:
+	BlackBoard * bb_;
+	Transformer *tf_transformer_;
+	bool         bb_is_remote_;
 
-  std::list<TransformInterface *> tfifs_;
+	std::list<TransformInterface *> tfifs_;
 };
 
 } // end namespace tf

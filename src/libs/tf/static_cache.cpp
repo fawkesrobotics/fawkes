@@ -49,12 +49,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <tf/time_cache.h>
 #include <tf/exceptions.h>
+#include <tf/time_cache.h>
 #include <tf/types.h>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
 /** @class StaticCache <tf/time_cache.h>
  * Transform cache for static transforms.
@@ -62,8 +62,7 @@ namespace fawkes {
 
 /** Constructor.
  */
-StaticCache::StaticCache()
-	: storage_as_list_(1)
+StaticCache::StaticCache() : storage_as_list_(1)
 {
 }
 
@@ -79,27 +78,26 @@ StaticCache::~StaticCache()
 TimeCacheInterfacePtr
 StaticCache::clone(const fawkes::Time &look_back_until) const
 {
-	StaticCache *copy = new StaticCache();
-	copy->storage_ = storage_;
+	StaticCache *copy      = new StaticCache();
+	copy->storage_         = storage_;
 	copy->storage_as_list_ = storage_as_list_;
 	return std::shared_ptr<TimeCacheInterface>(copy);
 }
 
 bool
-StaticCache::get_data(fawkes::Time time, TransformStorage & data_out,
-                      std::string* error_str)
+StaticCache::get_data(fawkes::Time time, TransformStorage &data_out, std::string *error_str)
 {
-	data_out = storage_;
+	data_out       = storage_;
 	data_out.stamp = time;
 	return true;
 }
 
 bool
-StaticCache::insert_data(const TransformStorage& new_data)
+StaticCache::insert_data(const TransformStorage &new_data)
 {
-  storage_ = new_data;
-  storage_as_list_.front() = new_data;
-  return true;
+	storage_                 = new_data;
+	storage_as_list_.front() = new_data;
+	return true;
 }
 
 void
@@ -117,39 +115,38 @@ StaticCache::get_list_length() const
 CompactFrameID
 StaticCache::get_parent(fawkes::Time time, std::string *error_str)
 {
-  return storage_.frame_id;
+	return storage_.frame_id;
 }
 
 P_TimeAndFrameID
 StaticCache::get_latest_time_and_parent()
 {
-	return std::make_pair(fawkes::Time(0,0), storage_.frame_id);
+	return std::make_pair(fawkes::Time(0, 0), storage_.frame_id);
 }
 
 fawkes::Time
 StaticCache::get_latest_timestamp() const
 {
-	return fawkes::Time(0,0);
+	return fawkes::Time(0, 0);
 }
 
 fawkes::Time
 StaticCache::get_oldest_timestamp() const
-{   
-	return fawkes::Time(0,0);
+{
+	return fawkes::Time(0, 0);
 }
 
 const TimeCacheInterface::L_TransformStorage &
 StaticCache::get_storage() const
 {
-  return storage_as_list_;
+	return storage_as_list_;
 }
 
 TimeCacheInterface::L_TransformStorage
 StaticCache::get_storage_copy() const
 {
-  return storage_as_list_;
+	return storage_as_list_;
 }
-
 
 } // end namespace tf
 } // end namespace fawkes

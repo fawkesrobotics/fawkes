@@ -57,38 +57,40 @@
 #include <list>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
 class TransformStorage
 {
- public:
+public:
 	TransformStorage();
-	TransformStorage(const StampedTransform& data, CompactFrameID frame_id,
-	                 CompactFrameID child_frame_id);
+	TransformStorage(const StampedTransform &data,
+	                 CompactFrameID          frame_id,
+	                 CompactFrameID          child_frame_id);
 
 	/** Copy constructor.
 	 * @param rhs storage to copy
 	 */
-	TransformStorage(const TransformStorage& rhs)
+	TransformStorage(const TransformStorage &rhs)
 	{
 		*this = rhs;
 	}
 
-	TransformStorage& operator=(const TransformStorage& rhs)
+	TransformStorage &
+	operator=(const TransformStorage &rhs)
 	{
-		rotation = rhs.rotation;
-		translation = rhs.translation;
-		stamp = rhs.stamp;
-		frame_id = rhs.frame_id;
+		rotation       = rhs.rotation;
+		translation    = rhs.translation;
+		stamp          = rhs.stamp;
+		frame_id       = rhs.frame_id;
 		child_frame_id = rhs.child_frame_id;
 		return *this;
 	}
 
-	Quaternion rotation;	///< rotation quaternion
-	Vector3 translation;	///< translation vector
-	fawkes::Time stamp;		///< time stamp
-	CompactFrameID frame_id;	///< parent/reference frame number
-	CompactFrameID child_frame_id;	///< child frame number
+	Quaternion     rotation;       ///< rotation quaternion
+	Vector3        translation;    ///< translation vector
+	fawkes::Time   stamp;          ///< time stamp
+	CompactFrameID frame_id;       ///< parent/reference frame number
+	CompactFrameID child_frame_id; ///< child frame number
 };
 
 } // end namespace tf

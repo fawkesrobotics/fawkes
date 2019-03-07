@@ -53,22 +53,21 @@
 #define _LIBS_TF_TYPES_H_
 
 #ifndef HAVE_TF
-#  error HAVE_TF not defined, forgot CFLAGS_TF in Makefile or bullet no installed?
+#	error HAVE_TF not defined, forgot CFLAGS_TF in Makefile or bullet no installed?
 #endif
 
-#include <utils/time/time.h>
-#include <tf/exceptions.h>
-
 #include <LinearMath/btQuaternion.h>
-#include <LinearMath/btVector3.h>
 #include <LinearMath/btTransform.h>
+#include <LinearMath/btVector3.h>
+#include <tf/exceptions.h>
+#include <utils/time/time.h>
 
-#include <string>
 #include <cmath>
 #include <cstdint>
+#include <string>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
 /** Scalar datatype. */
 typedef btScalar Scalar;
@@ -91,69 +90,70 @@ typedef uint32_t CompactFrameID;
 /** Transform that contains a timestamp and frame IDs. */
 class StampedTransform : public Transform
 {
- public:
-  /// Timestamp of this transform.
-  fawkes::Time stamp;
-  /// Parent/reference frame ID.
-  std::string frame_id;
-  /// Frame ID of child frame, e.g. the transform denotes the
-  /// transform from the parent frame to this child.
-  std::string child_frame_id;
+public:
+	/// Timestamp of this transform.
+	fawkes::Time stamp;
+	/// Parent/reference frame ID.
+	std::string frame_id;
+	/// Frame ID of child frame, e.g. the transform denotes the
+	/// transform from the parent frame to this child.
+	std::string child_frame_id;
 
-  /** Constructor.
+	/** Constructor.
    * @param input transform
    * @param timestamp timestamp for this transform
    * @param frame_id parent frame ID
    * @param child_frame_id child frame ID
    */
-  StampedTransform(const tf::Transform &input, const fawkes::Time &timestamp,
-                   const std::string &frame_id, const std::string &child_frame_id)
-  : tf::Transform(input), stamp(timestamp),
-    frame_id(frame_id), child_frame_id(child_frame_id)
-  {};
+	StampedTransform(const tf::Transform &input,
+	                 const fawkes::Time & timestamp,
+	                 const std::string &  frame_id,
+	                 const std::string &  child_frame_id)
+	: tf::Transform(input), stamp(timestamp), frame_id(frame_id), child_frame_id(child_frame_id){};
 
-  
-  /** Default constructor only to be used for preallocation */
-  StampedTransform() {};
+	/** Default constructor only to be used for preallocation */
+	StampedTransform(){};
 
-  /** Set the inherited Transform data.
+	/** Set the inherited Transform data.
    * @param input transform to set
    */
-  void set_data(const tf::Transform &input)
-  { *static_cast<tf::Transform*>(this) = input; };
+	void
+	set_data(const tf::Transform &input)
+	{
+		*static_cast<tf::Transform *>(this) = input;
+	};
 };
-
 
 /** Wrapper class to add time stamp and frame ID to base types. */
 template <typename T>
-class Stamped : public T{
- public:
-  fawkes::Time stamp; ///< The timestamp associated with this data
-  std::string frame_id; ///< The frame_id associated this data
+class Stamped : public T
+{
+public:
+	fawkes::Time stamp;    ///< The timestamp associated with this data
+	std::string  frame_id; ///< The frame_id associated this data
 
-  /** Default constructor.
+	/** Default constructor.
    * Default constructor used only for preallocation.
    */
-  Stamped()
-    : stamp(0,0), frame_id("NO_ID_STAMPED_DEFAULT_CONSTRUCTION")
-  {};
+	Stamped() : stamp(0, 0), frame_id("NO_ID_STAMPED_DEFAULT_CONSTRUCTION"){};
 
-  /** Constructor.
+	/** Constructor.
    * @param input transform
    * @param timestamp timestamp for this transform
    * @param frame_id frame ID the transform is relative to
    */
-  Stamped(const T &input, const fawkes::Time &timestamp,
-          const std::string &frame_id)
-    : T(input), stamp(timestamp), frame_id(frame_id) {};
+	Stamped(const T &input, const fawkes::Time &timestamp, const std::string &frame_id)
+	: T(input), stamp(timestamp), frame_id(frame_id){};
 
-  /** Set the data element.
+	/** Set the data element.
    * @param input data to set this instance to
    */
-  void set_data(const T& input){*static_cast<T*>(this) = input;};
+	void
+	set_data(const T &input)
+	{
+		*static_cast<T *>(this) = input;
+	};
 };
-
-
 
 /** Comparison operator for StampedTransform.
  * @param a transform to compare
@@ -165,11 +165,8 @@ class Stamped : public T{
 static inline bool
 operator==(const StampedTransform &a, const StampedTransform &b)
 {
-  return
-    a.frame_id == b.frame_id &&
-    a.child_frame_id == b.child_frame_id &&
-    a.stamp == b.stamp &&
-    static_cast<const Transform&>(a) == static_cast<const Transform&>(b);
+	return a.frame_id == b.frame_id && a.child_frame_id == b.child_frame_id && a.stamp == b.stamp
+	       && static_cast<const Transform &>(a) == static_cast<const Transform &>(b);
 }
 
 /** Comparison operator for StampedTransform.
@@ -181,30 +178,26 @@ operator==(const StampedTransform &a, const StampedTransform &b)
  */
 template <typename T>
 bool
-operator==(const Stamped<T> &a, const Stamped<T> &b) {
-	return
-	a.frame_id_ == b.frame_id_ &&
-	a.stamp_ == b.stamp_ &&
-	static_cast<const T&>(a) == static_cast<const T&>(b);
+operator==(const Stamped<T> &a, const Stamped<T> &b)
+{
+	return a.frame_id_ == b.frame_id_ && a.stamp_ == b.stamp_
+	       && static_cast<const T &>(a) == static_cast<const T &>(b);
 }
-
-
 
 /** \brief Throw InvalidArgument if quaternion is malformed */
 inline void
-assert_quaternion_valid(const Quaternion & q)
+assert_quaternion_valid(const Quaternion &q)
 {
-  if (std::isnan(q.x()) || std::isnan(q.y()) ||
-      std::isnan(q.z()) || std::isnan(q.w()))
-  {
-    throw InvalidArgumentException("Quaternion malformed, contains NaN value");
-  }
+	if (std::isnan(q.x()) || std::isnan(q.y()) || std::isnan(q.z()) || std::isnan(q.w())) {
+		throw InvalidArgumentException("Quaternion malformed, contains NaN value");
+	}
 
-  double magnitude = q.x()*q.x() + q.y()*q.y() + q.z()*q.z() + q.w()*q.w();
-  if(std::fabs(magnitude - 1) > 0.01) {
-    throw InvalidArgumentException("Quaternion malformed, magnitude: %f, "
-                                   "should be 1.0", magnitude);
-  }
+	double magnitude = q.x() * q.x() + q.y() * q.y() + q.z() * q.z() + q.w() * q.w();
+	if (std::fabs(magnitude - 1) > 0.01) {
+		throw InvalidArgumentException("Quaternion malformed, magnitude: %f, "
+		                               "should be 1.0",
+		                               magnitude);
+	}
 }
 
 /** Construct a Quaternion from fixed angles.
@@ -216,9 +209,9 @@ assert_quaternion_valid(const Quaternion & q)
 static inline Quaternion
 create_quaternion_from_rpy(double roll, double pitch, double yaw)
 {
-  Quaternion q;
-  q.setEulerZYX(yaw, pitch, roll);
-  return q;
+	Quaternion q;
+	q.setEulerZYX(yaw, pitch, roll);
+	return q;
 }
 
 /** Construct a Quaternion from yaw only.
@@ -228,11 +221,10 @@ create_quaternion_from_rpy(double roll, double pitch, double yaw)
 static inline Quaternion
 create_quaternion_from_yaw(double yaw)
 {
-  Quaternion q;
-  q.setEulerZYX(yaw, 0.0, 0.0);
-  return q;
+	Quaternion q;
+	q.setEulerZYX(yaw, 0.0, 0.0);
+	return q;
 }
-
 
 /** Construct a Quaternion from an array of quaternion values.
  * @param q quaternion as array of four values ordered as x, y, z, w
@@ -241,48 +233,51 @@ create_quaternion_from_yaw(double yaw)
 static inline Quaternion
 create_quaternion_from_array(double *q)
 {
-  return Quaternion(q[0], q[1], q[2], q[3]);
+	return Quaternion(q[0], q[1], q[2], q[3]);
 }
-
 
 /** Helper function for getting yaw from a Quaternion.
  * @param bt_q quaternion to get yaw from
  * @return yaw value
  */
-static inline double get_yaw(const Quaternion& bt_q){
-  Scalar useless_pitch, useless_roll, yaw;
-  Matrix3x3(bt_q).getEulerZYX(yaw, useless_pitch, useless_roll);
-  return yaw;
+static inline double
+get_yaw(const Quaternion &bt_q)
+{
+	Scalar useless_pitch, useless_roll, yaw;
+	Matrix3x3(bt_q).getEulerZYX(yaw, useless_pitch, useless_roll);
+	return yaw;
 }
 
 /** Helper function for getting yaw from a pose
  * @param t pose to get yaw from
  * @return yaw value
  */
-static inline double get_yaw(Pose& t)
+static inline double
+get_yaw(Pose &t)
 {
-  double yaw, pitch, roll;
-  t.getBasis().getEulerZYX(yaw,pitch,roll);
-  return yaw;
-}
-
-
-/** Helper function for getting yaw from a Quaternion.
- * @param q quaternion as array of four values ordered as x, y, z, w
- * @return yaw value
- */
-static inline double get_yaw(const double *q)
-{
-  return get_yaw(Quaternion(q[0], q[1], q[2], q[3]));
+	double yaw, pitch, roll;
+	t.getBasis().getEulerZYX(yaw, pitch, roll);
+	return yaw;
 }
 
 /** Helper function for getting yaw from a Quaternion.
  * @param q quaternion as array of four values ordered as x, y, z, w
  * @return yaw value
  */
-static inline double get_yaw(const float *q)
+static inline double
+get_yaw(const double *q)
 {
-  return get_yaw(Quaternion(q[0], q[1], q[2], q[3]));
+	return get_yaw(Quaternion(q[0], q[1], q[2], q[3]));
+}
+
+/** Helper function for getting yaw from a Quaternion.
+ * @param q quaternion as array of four values ordered as x, y, z, w
+ * @return yaw value
+ */
+static inline double
+get_yaw(const float *q)
+{
+	return get_yaw(Quaternion(q[0], q[1], q[2], q[3]));
 }
 
 } // end namespace tf
