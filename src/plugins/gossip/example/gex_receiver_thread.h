@@ -22,43 +22,47 @@
 #ifndef _PLUGINS_GOSSIP_EXAMPLE_GEX_RECEIVER_THREAD_H_
 #define _PLUGINS_GOSSIP_EXAMPLE_GEX_RECEIVER_THREAD_H_
 
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/gossip/aspect/gossip.h>
 #include <plugins/gossip/gossip/gossip_group.h>
 
-#include <core/threading/thread.h>
-#include <aspect/clock.h>
-#include <aspect/logging.h>
-#include <aspect/blocked_timing.h>
-
-class GossipExampleReceiverThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::GossipAspect
+class GossipExampleReceiverThread : public fawkes::Thread,
+                                    public fawkes::ClockAspect,
+                                    public fawkes::LoggingAspect,
+                                    public fawkes::BlockedTimingAspect,
+                                    public fawkes::GossipAspect
 {
- public:
-  GossipExampleReceiverThread();
-  virtual ~GossipExampleReceiverThread();
+public:
+	GossipExampleReceiverThread();
+	virtual ~GossipExampleReceiverThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void handle_peer_msg(boost::asio::ip::udp::endpoint &endpoint,
-		       uint16_t component_id, uint16_t msg_type,
-		       std::shared_ptr<google::protobuf::Message> msg);
-  void handle_peer_recv_error(boost::asio::ip::udp::endpoint &endpoint, std::string msg);
-  void handle_peer_send_error(std::string msg);
+private:
+	void handle_peer_msg(boost::asio::ip::udp::endpoint &           endpoint,
+	                     uint16_t                                   component_id,
+	                     uint16_t                                   msg_type,
+	                     std::shared_ptr<google::protobuf::Message> msg);
+	void handle_peer_recv_error(boost::asio::ip::udp::endpoint &endpoint, std::string msg);
+	void handle_peer_send_error(std::string msg);
 
- private:
-  boost::signals2::connection sig_rcvd_conn_;
-  boost::signals2::connection sig_recv_error_conn_;
-  boost::signals2::connection sig_send_error_conn_;
+private:
+	boost::signals2::connection sig_rcvd_conn_;
+	boost::signals2::connection sig_recv_error_conn_;
+	boost::signals2::connection sig_send_error_conn_;
 };
 
 #endif
