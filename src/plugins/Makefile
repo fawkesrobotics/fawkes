@@ -31,7 +31,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd \
 	  openrave-robot-memory openni refboxcomm ros player xmlrpc gossip \
 	  robot_state_publisher gazebo dynamixel navgraph-interactive \
 	  pddl-planner stn-generator clips-executive \
-	  asp plexil
+	  asp plexil cedar
 
 include $(BUILDSYSDIR)/rules.mk
 
@@ -56,4 +56,4 @@ navgraph-generator: navgraph amcl
 openprs-agent: openprs
 laser-filter: amcl
 stn-generator: pddl-planner
-
+cedar: clips
