@@ -20,10 +20,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/mongodb/aspect/mongodb_inifin.h>
+#include <core/threading/thread_finalizer.h>
 #include <plugins/mongodb/aspect/mongodb.h>
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
-#include <core/threading/thread_finalizer.h>
+#include <plugins/mongodb/aspect/mongodb_inifin.h>
+
 #include <cstddef>
 
 namespace fawkes {
@@ -39,7 +40,7 @@ namespace fawkes {
  * @param conn_creator connection creator to use for initializing threads
  */
 MongoDBAspectIniFin::MongoDBAspectIniFin(MongoDBConnCreator *conn_creator)
-	: AspectIniFin("MongoDBAspect")
+: AspectIniFin("MongoDBAspect")
 {
 	conn_creator_ = conn_creator;
 }
@@ -52,12 +53,13 @@ MongoDBAspectIniFin::init(Thread *thread)
 	if (mongodb_thread == NULL) {
 		throw CannotInitializeThreadException("Thread '%s' claims to have the "
 		                                      "MongoDBAspect, but RTTI says it "
-		                                      "has not. ", thread->name());
+		                                      "has not. ",
+		                                      thread->name());
 	}
 
 	mongo::DBClientBase *client = nullptr;
 
-	if (! mongodb_thread->mongodb_config_name().empty()) {
+	if (!mongodb_thread->mongodb_config_name().empty()) {
 		conn_creator_->create_client(mongodb_thread->mongodb_config_name());
 	}
 
@@ -72,7 +74,8 @@ MongoDBAspectIniFin::finalize(Thread *thread)
 	if (mongodb_thread == NULL) {
 		throw CannotFinalizeThreadException("Thread '%s' claims to have the "
 		                                    "MongoDBAspect, but RTTI says it "
-		                                    "has not. ", thread->name());
+		                                    "has not. ",
+		                                    thread->name());
 	}
 
 	conn_creator_->delete_client(mongodb_thread->mongodb_client);

@@ -28,40 +28,48 @@
 #include <vector>
 
 namespace fawkes {
-	class Configuration;
-	class Logger;
-}
+class Configuration;
+class Logger;
+} // namespace fawkes
 
 /** Client configuration. */
 class MongoDBClientConfig
 {
- public:
+public:
 	/** Connection mode enumeration. */
 	typedef enum {
-		CONNECTION,		/**< connect to single node */
-		REPLICA_SET,	/**< connect to replica set */
+		CONNECTION,  /**< connect to single node */
+		REPLICA_SET, /**< connect to replica set */
 	} ConnectionMode;
 
-	MongoDBClientConfig(fawkes::Configuration *config, fawkes::Logger *logger,
-	                    std::string cfgname, std::string prefix);
-	mongo::DBClientBase * create_client();
+	MongoDBClientConfig(fawkes::Configuration *config,
+	                    fawkes::Logger *       logger,
+	                    std::string            cfgname,
+	                    std::string            prefix);
+	mongo::DBClientBase *create_client();
 
 	/** Check if configuration is enabled.
 	 * @return true if configuration is enabled, false otherwise
 	 */
-	bool is_enabled() const { return enabled_; }
+	bool
+	is_enabled() const
+	{
+		return enabled_;
+	}
 
 	std::string hostport() const;
-	
+
 	void log(fawkes::Logger *logger, const char *component, const char *indent);
 
 	ConnectionMode mode() const;
-	
- private:
-	void read_authinfo(fawkes::Configuration *config, fawkes::Logger *logger,
-	                   std::string cfgname, std::string prefix);
 
- private:
+private:
+	void read_authinfo(fawkes::Configuration *config,
+	                   fawkes::Logger *       logger,
+	                   std::string            cfgname,
+	                   std::string            prefix);
+
+private:
 	std::string                     logcomp_;
 	bool                            enabled_;
 	ConnectionMode                  mode_;
@@ -70,14 +78,18 @@ class MongoDBClientConfig
 	std::string                     replicaset_name_;
 
 	/// @cond INTERNALS
-	typedef struct _AuthInfo {
+	typedef struct _AuthInfo
+	{
 		_AuthInfo(std::string dbname, std::string username, std::string clearpwd)
-		{ this->dbname = dbname; this->username = username;
-			this->clearpwd = clearpwd; }
+		{
+			this->dbname   = dbname;
+			this->username = username;
+			this->clearpwd = clearpwd;
+		}
 		std::string dbname;
 		std::string username;
 		std::string clearpwd;
-	} AuthInfo;    
+	} AuthInfo;
 	/// @endcond
 
 	std::list<AuthInfo> auth_infos_;
