@@ -21,19 +21,17 @@
 
 #include "gazsim_laser_thread.h"
 
+#include <aspect/logging.h>
+#include <core/threading/mutex_locker.h>
+#include <interfaces/Laser360Interface.h>
 #include <tf/types.h>
 #include <utils/math/angle.h>
-#include <core/threading/mutex_locker.h>
 
-#include <interfaces/Laser360Interface.h>
-
-#include <gazebo/transport/Node.hh>
-#include <gazebo/msgs/msgs.hh>
-#include <gazebo/transport/transport.hh>
-#include <aspect/logging.h>
-
-#include <cstdio>
 #include <cmath>
+#include <cstdio>
+#include <gazebo/msgs/msgs.hh>
+#include <gazebo/transport/Node.hh>
+#include <gazebo/transport/transport.hh>
 
 using namespace fawkes;
 using namespace gazebo;
@@ -45,85 +43,83 @@ using namespace gazebo;
 
 /** Constructor. */
 LaserSimThread::LaserSimThread()
-  : Thread("LaserSimThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
+: Thread("LaserSimThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
 {
 }
 
-void LaserSimThread::init()
+void
+LaserSimThread::init()
 {
-  logger->log_debug(name(), "Initializing Simulation of the Laser Sensor");
+	logger->log_debug(name(), "Initializing Simulation of the Laser Sensor");
 
-  //read config values
-  max_range_ = config->get_float("/gazsim/laser/max_range");
-  laser_topic_ = config->get_string("/gazsim/topics/laser");
-  interface_id_ = config->get_string("/gazsim/laser/interface-id");
-  frame_id_ = config->get_string("/gazsim/laser/frame-id");
+	//read config values
+	max_range_    = config->get_float("/gazsim/laser/max_range");
+	laser_topic_  = config->get_string("/gazsim/topics/laser");
+	interface_id_ = config->get_string("/gazsim/laser/interface-id");
+	frame_id_     = config->get_string("/gazsim/laser/frame-id");
 
-  //open interface
-  laser_if_ = blackboard->open_for_writing<Laser360Interface>(interface_id_.c_str());
-  laser_if_->set_auto_timestamping(false);
+	//open interface
+	laser_if_ = blackboard->open_for_writing<Laser360Interface>(interface_id_.c_str());
+	laser_if_->set_auto_timestamping(false);
 
-  //subscribing to gazebo publisher
-  laser_sub_ = gazebonode->Subscribe(laser_topic_, &LaserSimThread::on_laser_data_msg, this);
+	//subscribing to gazebo publisher
+	laser_sub_ = gazebonode->Subscribe(laser_topic_, &LaserSimThread::on_laser_data_msg, this);
 
-  //initialize laser data
-  laser_data_ = (float *)malloc(sizeof(float) * 360);
-  laser_time_ = new Time(clock);
-  new_data_ = false;
+	//initialize laser data
+	laser_data_ = (float *)malloc(sizeof(float) * 360);
+	laser_time_ = new Time(clock);
+	new_data_   = false;
 
-  //set frame in the interface
-  laser_if_->set_frame(frame_id_.c_str());
+	//set frame in the interface
+	laser_if_->set_frame(frame_id_.c_str());
 }
 
-void LaserSimThread::finalize()
+void
+LaserSimThread::finalize()
 {
-  blackboard->close(laser_if_);
-  free(laser_data_);
-  delete laser_time_;
+	blackboard->close(laser_if_);
+	free(laser_data_);
+	delete laser_time_;
 }
 
-void LaserSimThread::loop()
+void
+LaserSimThread::loop()
 {
-  if(new_data_)
-  {
-    //write interface
-    laser_if_->set_distances(laser_data_);
-    laser_if_->set_timestamp(laser_time_);
-    laser_if_->write();
+	if (new_data_) {
+		//write interface
+		laser_if_->set_distances(laser_data_);
+		laser_if_->set_timestamp(laser_time_);
+		laser_if_->write();
 
-    new_data_ = false;
-  }  
+		new_data_ = false;
+	}
 }
 
-void LaserSimThread::on_laser_data_msg(ConstLaserScanStampedPtr &msg)
+void
+LaserSimThread::on_laser_data_msg(ConstLaserScanStampedPtr &msg)
 {
-  //logger->log_info(name(), "Got new Laser data.\n");
+	//logger->log_info(name(), "Got new Laser data.\n");
 
-  MutexLocker lock(loop_mutex);
+	MutexLocker lock(loop_mutex);
 
-  const gazebo::msgs::LaserScan &scan = msg->scan();
+	const gazebo::msgs::LaserScan &scan = msg->scan();
 
-  //calculate start angle
-  int start_index = (scan.angle_min() + 2* M_PI) / M_PI * 180;
-  
-  int number_beams = scan.ranges_size();
+	//calculate start angle
+	int start_index = (scan.angle_min() + 2 * M_PI) / M_PI * 180;
 
-  *laser_time_ = clock->now();
-  
-  //copy laser data
-  for(int i = 0; i < number_beams; i++)
-  {
-    const float range = scan.ranges(i);
-    if(range < max_range_)
-    {
-      laser_data_[(start_index + i) % 360] = range; 
-    }
-    else
-    {
-      laser_data_[(start_index + i) % 360] = NAN;
-    }
+	int number_beams = scan.ranges_size();
 
-  }
-  new_data_  = true;
+	*laser_time_ = clock->now();
+
+	//copy laser data
+	for (int i = 0; i < number_beams; i++) {
+		const float range = scan.ranges(i);
+		if (range < max_range_) {
+			laser_data_[(start_index + i) % 360] = range;
+		} else {
+			laser_data_[(start_index + i) % 360] = NAN;
+		}
+	}
+	new_data_ = true;
 }

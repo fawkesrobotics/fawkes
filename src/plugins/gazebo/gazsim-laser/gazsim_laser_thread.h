@@ -21,64 +21,62 @@
 #ifndef _PLUGINS_GAZSIM_LASER_THREAD_H_
 #define _PLUGINS_GAZSIM_LASER_THREAD_H_
 
-#include <core/threading/thread.h>
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/blackboard.h>
-#include <aspect/blocked_timing.h>
+#include <core/threading/thread.h>
 #include <plugins/gazebo/aspect/gazebo.h>
 
 //from Gazebo
-#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/msgs/MessageTypes.hh>
+#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/transport/transport.hh>
 
-
 namespace fawkes {
-  class Laser360Interface;
-  class Time;
-}
+class Laser360Interface;
+class Time;
+} // namespace fawkes
 
-class LaserSimThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::GazeboAspect
+class LaserSimThread : public fawkes::Thread,
+                       public fawkes::ClockAspect,
+                       public fawkes::LoggingAspect,
+                       public fawkes::ConfigurableAspect,
+                       public fawkes::BlackBoardAspect,
+                       public fawkes::BlockedTimingAspect,
+                       public fawkes::GazeboAspect
 {
- public:
-  LaserSimThread();
+public:
+	LaserSimThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- private:
-  ///Subscriber to receive laser data from gazebo
-  gazebo::transport::SubscriberPtr laser_sub_;
-  std::string laser_topic_;
+private:
+	///Subscriber to receive laser data from gazebo
+	gazebo::transport::SubscriberPtr laser_sub_;
+	std::string                      laser_topic_;
 
-  ///provided interface
-  fawkes::Laser360Interface *laser_if_;
+	///provided interface
+	fawkes::Laser360Interface *laser_if_;
 
-  ///storage for laser data
-  float        *laser_data_;
-  fawkes::Time *laser_time_;
+	///storage for laser data
+	float *       laser_data_;
+	fawkes::Time *laser_time_;
 
-  ///is there new information to write in the interface?
-  bool new_data_;
+	///is there new information to write in the interface?
+	bool new_data_;
 
-  ///handler function for incoming laser data messages
-  void on_laser_data_msg(ConstLaserScanStampedPtr &msg);
+	///handler function for incoming laser data messages
+	void on_laser_data_msg(ConstLaserScanStampedPtr &msg);
 
-  ///maximal range of the laser sensor
-  float max_range_;  
+	///maximal range of the laser sensor
+	float max_range_;
 
-  std::string interface_id_;
-  std::string frame_id_;
+	std::string interface_id_;
+	std::string frame_id_;
 };
 
 #endif
