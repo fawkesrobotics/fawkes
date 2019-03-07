@@ -23,74 +23,82 @@
 #ifndef _PLUGINS_XMLRPC_METHODS_LOG_H_
 #define _PLUGINS_XMLRPC_METHODS_LOG_H_
 
-#include <xmlrpc-c/registry.hpp>
-
 #include <logging/logger.h>
 
+#include <xmlrpc-c/registry.hpp>
+
 namespace fawkes {
-  class CacheLogger;
+class CacheLogger;
 }
 
-class XmlRpcLogMethods {
- public:
-  XmlRpcLogMethods(std::shared_ptr<xmlrpc_c::registry> registry,
-                   fawkes::CacheLogger *cache_logger,
-                   fawkes::Logger *logger);
-  ~XmlRpcLogMethods();
+class XmlRpcLogMethods
+{
+public:
+	XmlRpcLogMethods(std::shared_ptr<xmlrpc_c::registry> registry,
+	                 fawkes::CacheLogger *               cache_logger,
+	                 fawkes::Logger *                    logger);
+	~XmlRpcLogMethods();
 
-  class log_entries : public xmlrpc_c::method {
-   public:
-    log_entries(fawkes::CacheLogger *logger);
-    virtual ~log_entries();
-    virtual void execute(xmlrpc_c::paramList const& params,
-			 xmlrpc_c::value *   const  result);
-   private:
-    fawkes::CacheLogger *cache_logger_;;
-  };
+	class log_entries : public xmlrpc_c::method
+	{
+	public:
+		log_entries(fawkes::CacheLogger *logger);
+		virtual ~log_entries();
+		virtual void execute(xmlrpc_c::paramList const &params, xmlrpc_c::value *const result);
 
-  class log_get_size : public xmlrpc_c::method {
-   public:
-    log_get_size(fawkes::CacheLogger *logger);
-    virtual ~log_get_size();
-    virtual void execute(xmlrpc_c::paramList const& params,
-			 xmlrpc_c::value *   const  result);
-   private:
-    fawkes::CacheLogger *cache_logger_;;
-  };
+	private:
+		fawkes::CacheLogger *cache_logger_;
+		;
+	};
 
-  class log_set_size : public xmlrpc_c::method {
-   public:
-    log_set_size(fawkes::CacheLogger *cache_logger);
-    virtual ~log_set_size();
-    virtual void execute(xmlrpc_c::paramList const& params,
-			 xmlrpc_c::value *   const  result);
-   private:
-    fawkes::CacheLogger *cache_logger_;;
-  };
+	class log_get_size : public xmlrpc_c::method
+	{
+	public:
+		log_get_size(fawkes::CacheLogger *logger);
+		virtual ~log_get_size();
+		virtual void execute(xmlrpc_c::paramList const &params, xmlrpc_c::value *const result);
 
-  class log_log : public xmlrpc_c::method {
-   public:
-    log_log(fawkes::Logger *logger, fawkes::Logger::LogLevel log_level);
-    virtual ~log_log();
-    virtual void execute(xmlrpc_c::paramList const& params,
-			 xmlrpc_c::value *   const  result);
-   private:
-    fawkes::Logger           *logger_;
-    fawkes::Logger::LogLevel  log_level_;
-  };
+	private:
+		fawkes::CacheLogger *cache_logger_;
+		;
+	};
 
- private:
-  std::shared_ptr<xmlrpc_c::registry> xmlrpc_registry_;
+	class log_set_size : public xmlrpc_c::method
+	{
+	public:
+		log_set_size(fawkes::CacheLogger *cache_logger);
+		virtual ~log_set_size();
+		virtual void execute(xmlrpc_c::paramList const &params, xmlrpc_c::value *const result);
 
-  fawkes::Logger        *logger_;
-  fawkes::CacheLogger   *cache_logger_;
-	std::unique_ptr<log_entries>   log_entries_;
-	std::unique_ptr<log_get_size>  log_get_size_;
-	std::unique_ptr<log_set_size>  log_set_size_;
-	std::unique_ptr<log_log>       log_log_debug_;
-	std::unique_ptr<log_log>       log_log_info_;
-	std::unique_ptr<log_log>       log_log_warn_;
-	std::unique_ptr<log_log>       log_log_error_;
+	private:
+		fawkes::CacheLogger *cache_logger_;
+		;
+	};
+
+	class log_log : public xmlrpc_c::method
+	{
+	public:
+		log_log(fawkes::Logger *logger, fawkes::Logger::LogLevel log_level);
+		virtual ~log_log();
+		virtual void execute(xmlrpc_c::paramList const &params, xmlrpc_c::value *const result);
+
+	private:
+		fawkes::Logger *         logger_;
+		fawkes::Logger::LogLevel log_level_;
+	};
+
+private:
+	std::shared_ptr<xmlrpc_c::registry> xmlrpc_registry_;
+
+	fawkes::Logger *              logger_;
+	fawkes::CacheLogger *         cache_logger_;
+	std::unique_ptr<log_entries>  log_entries_;
+	std::unique_ptr<log_get_size> log_get_size_;
+	std::unique_ptr<log_set_size> log_set_size_;
+	std::unique_ptr<log_log>      log_log_debug_;
+	std::unique_ptr<log_log>      log_log_info_;
+	std::unique_ptr<log_log>      log_log_warn_;
+	std::unique_ptr<log_log>      log_log_error_;
 };
 
 #endif
