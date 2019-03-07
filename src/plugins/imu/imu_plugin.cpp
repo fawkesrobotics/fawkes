@@ -19,16 +19,16 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
-#include "sensor_thread.h"
 #include "acquisition_thread.h"
+#include "sensor_thread.h"
+
+#include <core/plugin.h>
 #ifdef HAVE_CRUIZCORE
-#  include "imu_cruizcore_xg1010.h"
+#	include "imu_cruizcore_xg1010.h"
 #endif
 
-#include <set>
 #include <memory>
+#include <set>
 
 using namespace fawkes;
 
@@ -37,82 +37,82 @@ using namespace fawkes;
  */
 class IMUPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit IMUPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    std::set<std::string> configs;
-    std::set<std::string> ignored_configs;
+	explicit IMUPlugin(Configuration *config) : Plugin(config)
+	{
+		std::set<std::string> configs;
+		std::set<std::string> ignored_configs;
 
-    std::string prefix = "/hardware/imu/";
+		std::string prefix = "/hardware/imu/";
 
 #if __cplusplus >= 201103L
-    std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+		std::unique_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
 #else
-    std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
+		std::auto_ptr<Configuration::ValueIterator> i(config->search(prefix.c_str()));
 #endif
-    while (i->next()) {
-      std::string cfg_name = std::string(i->path()).substr(prefix.length());
-      cfg_name = cfg_name.substr(0, cfg_name.find("/"));
+		while (i->next()) {
+			std::string cfg_name = std::string(i->path()).substr(prefix.length());
+			cfg_name             = cfg_name.substr(0, cfg_name.find("/"));
 
-      if ( (configs.find(cfg_name) == configs.end()) &&
-	   (ignored_configs.find(cfg_name) == ignored_configs.end()) ) {
+			if ((configs.find(cfg_name) == configs.end())
+			    && (ignored_configs.find(cfg_name) == ignored_configs.end())) {
+				std::string cfg_prefix = prefix + cfg_name + "/";
 
-	std::string cfg_prefix = prefix + cfg_name + "/";
+				bool active = true;
+				try {
+					active = config->get_bool((cfg_prefix + "active").c_str());
+				} catch (Exception &e) {
+				} // ignored, assume enabled
 
-	bool active = true;
-	try {
-	  active = config->get_bool((cfg_prefix + "active").c_str());
-	} catch (Exception &e) {} // ignored, assume enabled
+				try {
+					if (active) {
+						std::string type       = config->get_string((cfg_prefix + "type").c_str());
+						bool        continuous = false;
+						try {
+							continuous = config->get_bool((cfg_prefix + "continuous").c_str());
+						} catch (Exception &e) {
+						} // ignored, use default
 
-	try {
-	  if (active) {
-	    std::string type = config->get_string((cfg_prefix + "type").c_str());
-	    bool continuous = false;
-	    try {
-	      continuous = config->get_bool((cfg_prefix + "continuous").c_str());
-	    } catch (Exception &e) {} // ignored, use default
-
-	    //printf("Adding IMU acquisition thread for %s\n", cfg_name.c_str());
-	    IMUAcquisitionThread *aqt = NULL;
+						//printf("Adding IMU acquisition thread for %s\n", cfg_name.c_str());
+						IMUAcquisitionThread *aqt = NULL;
 #ifdef HAVE_CRUIZCORE
-	    if ( type == "CruizCore-XG1010" ) {
-	      aqt = new CruizCoreXG1010AcquisitionThread(cfg_name, cfg_prefix, continuous);
-	    } else
+						if (type == "CruizCore-XG1010") {
+							aqt = new CruizCoreXG1010AcquisitionThread(cfg_name, cfg_prefix, continuous);
+						} else
 #endif
 
-	    {
-	      throw Exception("Unknown IMU type '%s' for config %s",
-			      type.c_str(), cfg_name.c_str());
-	    }
+						{
+							throw Exception("Unknown IMU type '%s' for config %s",
+							                type.c_str(),
+							                cfg_name.c_str());
+						}
 
-	    thread_list.push_back(aqt);
-	    if (! continuous) {
-	      thread_list.push_back(new IMUSensorThread(cfg_name, cfg_prefix, aqt));
-	    }
+						thread_list.push_back(aqt);
+						if (!continuous) {
+							thread_list.push_back(new IMUSensorThread(cfg_name, cfg_prefix, aqt));
+						}
 
-	    configs.insert(cfg_name);
-	  } else {
-	    //printf("Ignoring IMU config %s\n", cfg_name.c_str());
-	    ignored_configs.insert(cfg_name);
-	  }
-	} catch(Exception &e) {
-	  for (ThreadList::iterator i = thread_list.begin();
-	       i != thread_list.end(); ++i) {
-	    delete *i;
-	  }
-	  throw;
+						configs.insert(cfg_name);
+					} else {
+						//printf("Ignoring IMU config %s\n", cfg_name.c_str());
+						ignored_configs.insert(cfg_name);
+					}
+				} catch (Exception &e) {
+					for (ThreadList::iterator i = thread_list.begin(); i != thread_list.end(); ++i) {
+						delete *i;
+					}
+					throw;
+				}
+			}
+		}
+
+		if (thread_list.empty()) {
+			throw Exception("No IMU devices configured, aborting");
+		}
 	}
-      }
-    }
-
-    if ( thread_list.empty() ) {
-      throw Exception("No IMU devices configured, aborting");
-    }
-  }
 };
 
 PLUGIN_DESCRIPTION("Driver for inertial measurement units (IMU)")

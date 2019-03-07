@@ -23,47 +23,49 @@
 #ifndef _PLUGINS_IMU_SENSOR_THREAD_H_
 #define _PLUGINS_IMU_SENSOR_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 #include <string>
 
 namespace fawkes {
-  class IMUInterface;
+class IMUInterface;
 }
 
 class IMUAcquisitionThread;
 
-class IMUSensorThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+class IMUSensorThread : public fawkes::Thread,
+                        public fawkes::BlockedTimingAspect,
+                        public fawkes::LoggingAspect,
+                        public fawkes::ConfigurableAspect,
+                        public fawkes::BlackBoardAspect
 {
- public:
-  IMUSensorThread(std::string &cfg_name, std::string &cfg_prefix,
-		    IMUAcquisitionThread *aqt);
+public:
+	IMUSensorThread(std::string &cfg_name, std::string &cfg_prefix, IMUAcquisitionThread *aqt);
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  fawkes::IMUInterface *imu_if_;
+private:
+	fawkes::IMUInterface *imu_if_;
 
-  IMUAcquisitionThread *aqt_;
+	IMUAcquisitionThread *aqt_;
 
-  std::string             cfg_name_;
-  std::string             cfg_frame_;
-  std::string             cfg_prefix_;
+	std::string cfg_name_;
+	std::string cfg_frame_;
+	std::string cfg_prefix_;
 };
-
 
 #endif
