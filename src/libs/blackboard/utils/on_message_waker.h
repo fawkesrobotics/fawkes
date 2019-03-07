@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  on_message_waker.h - wake a thread whenever a message is received
  *
@@ -34,16 +34,15 @@ class Thread;
 
 class BlackBoardOnMessageWaker : public BlackBoardInterfaceListener
 {
- public:
-  BlackBoardOnMessageWaker(BlackBoard *bb, Interface *interface, Thread *thread);
-  virtual ~BlackBoardOnMessageWaker();
+public:
+	BlackBoardOnMessageWaker(BlackBoard *bb, Interface *interface, Thread *thread);
+	virtual ~BlackBoardOnMessageWaker();
 
-  virtual bool bb_interface_message_received(Interface *interface,
-                                             Message *message) throw();
+	virtual bool bb_interface_message_received(Interface *interface, Message *message) throw();
 
- private:
-  BlackBoard *bb_;
-  Thread *thread_;
+private:
+	BlackBoard *bb_;
+	Thread *    thread_;
 };
 
 } // end namespace fawkes

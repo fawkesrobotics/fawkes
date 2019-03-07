@@ -24,9 +24,9 @@
 #define _BLACKBOARD_REMOTE_H_
 
 #include <blackboard/blackboard.h>
-#include <netcomm/fawkes/client_handler.h>
-#include <core/utils/lock_map.h>
 #include <core/exceptions/software.h>
+#include <core/utils/lock_map.h>
+#include <netcomm/fawkes/client_handler.h>
 
 #include <list>
 
@@ -45,63 +45,61 @@ class BlackBoardInterfaceProxy;
 class BlackBoardInterfaceListener;
 class BlackBoardInterfaceObserver;
 
-class RemoteBlackBoard
-: public BlackBoard,
-  public FawkesNetworkClientHandler
+class RemoteBlackBoard : public BlackBoard, public FawkesNetworkClientHandler
 {
- public:
-  RemoteBlackBoard(FawkesNetworkClient *client);
-  RemoteBlackBoard(const char *hostname, unsigned short int port);
-  virtual ~RemoteBlackBoard();
+public:
+	RemoteBlackBoard(FawkesNetworkClient *client);
+	RemoteBlackBoard(const char *hostname, unsigned short int port);
+	virtual ~RemoteBlackBoard();
 
-  virtual Interface *  open_for_reading(const char *interface_type, const char *identifier,
-					const char *owner = NULL);
-  virtual Interface *  open_for_writing(const char *interface_type, const char *identifier,
-					const char *owner = NULL);
-  virtual void         close(Interface *interface);
+	virtual Interface *
+	open_for_reading(const char *interface_type, const char *identifier, const char *owner = NULL);
+	virtual Interface *
+	             open_for_writing(const char *interface_type, const char *identifier, const char *owner = NULL);
+	virtual void close(Interface *interface);
 
-  virtual InterfaceInfoList *  list_all();
-  virtual InterfaceInfoList *  list(const char *type_pattern,
-				    const char *id_pattern);
-  virtual bool                 is_alive() const throw();
-  virtual bool                 try_aliveness_restore() throw();
+	virtual InterfaceInfoList *list_all();
+	virtual InterfaceInfoList *list(const char *type_pattern, const char *id_pattern);
+	virtual bool               is_alive() const throw();
+	virtual bool               try_aliveness_restore() throw();
 
-  std::list<Interface *>  open_multiple_for_reading(const char *interface_type,
-						    const char *id_pattern = "*",
-						    const char *owner = NULL);
+	std::list<Interface *> open_multiple_for_reading(const char *interface_type,
+	                                                 const char *id_pattern = "*",
+	                                                 const char *owner      = NULL);
 
-  /* for FawkesNetworkClientHandler */
-  virtual void          deregistered(unsigned int id) throw();
-  virtual void          inbound_received(FawkesNetworkMessage *msg,
-					 unsigned int id) throw();
-  virtual void          connection_died(unsigned int id) throw();
-  virtual void          connection_established(unsigned int id) throw();
+	/* for FawkesNetworkClientHandler */
+	virtual void deregistered(unsigned int id) throw();
+	virtual void inbound_received(FawkesNetworkMessage *msg, unsigned int id) throw();
+	virtual void connection_died(unsigned int id) throw();
+	virtual void connection_established(unsigned int id) throw();
 
+	/* extensions for RemoteBlackBoard */
 
-  /* extensions for RemoteBlackBoard */
+private: /* methods */
+	void open_interface(const char *type,
+	                    const char *identifier,
+	                    const char *owner,
+	                    bool        writer,
+	                    Interface * iface);
+	Interface *
+	     open_interface(const char *type, const char *identifier, const char *owner, bool writer);
+	void reopen_interfaces();
 
- private: /* methods */
-  void        open_interface(const char *type, const char *identifier, const char *owner,
-			     bool writer, Interface *iface);
-  Interface * open_interface(const char *type, const char *identifier, const char *owner, bool writer);
-  void        reopen_interfaces();
+private: /* members */
+	Mutex *                                                     mutex_;
+	FawkesNetworkClient *                                       fnc_;
+	bool                                                        fnc_owner_;
+	FawkesNetworkMessage *                                      m_;
+	BlackBoardInstanceFactory *                                 instance_factory_;
+	LockMap<unsigned int, BlackBoardInterfaceProxy *>           proxies_;
+	LockMap<unsigned int, BlackBoardInterfaceProxy *>::iterator pit_;
+	std::list<BlackBoardInterfaceProxy *>                       invalid_proxies_;
+	std::list<BlackBoardInterfaceProxy *>::iterator             ipit_;
 
+	Mutex *        wait_mutex_;
+	WaitCondition *wait_cond_;
 
- private: /* members */
-  Mutex *mutex_;
-  FawkesNetworkClient  *fnc_;
-  bool                  fnc_owner_;
-  FawkesNetworkMessage *m_;
-  BlackBoardInstanceFactory *instance_factory_;
-  LockMap<unsigned int, BlackBoardInterfaceProxy *> proxies_;
-  LockMap<unsigned int, BlackBoardInterfaceProxy *>::iterator pit_;
-  std::list<BlackBoardInterfaceProxy *> invalid_proxies_;
-  std::list<BlackBoardInterfaceProxy *>::iterator ipit_;
-
-  Mutex         *wait_mutex_;
-  WaitCondition *wait_cond_;
-
-  const char *inbound_thread_;
+	const char *inbound_thread_;
 };
 
 } // end namespace fawkes

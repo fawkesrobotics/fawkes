@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  interface_listener.cpp - BlackBoard event listener
  *
@@ -25,9 +25,10 @@
 #include <core/exceptions/system.h>
 #include <core/threading/mutex_locker.h>
 #include <interface/interface.h>
+
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
 
 namespace fawkes {
 
@@ -82,29 +83,27 @@ namespace fawkes {
  * @param name_format format of name to identify the listener,
  * see sprintf for supported tokens
  */
-  BlackBoardInterfaceListener::BlackBoardInterfaceListener(const char *name_format, ...)
+BlackBoardInterfaceListener::BlackBoardInterfaceListener(const char *name_format, ...)
 {
-  va_list arg;
-  va_start(arg, name_format);
-  if (vasprintf(&name_, name_format, arg) == -1) {
-    throw OutOfMemoryException("BlackBoardInterfaceListener ctor: vasprintf() failed");
-  }
-  va_end(arg);
+	va_list arg;
+	va_start(arg, name_format);
+	if (vasprintf(&name_, name_format, arg) == -1) {
+		throw OutOfMemoryException("BlackBoardInterfaceListener ctor: vasprintf() failed");
+	}
+	va_end(arg);
 
-  bbil_queue_mutex_ = new Mutex();
-  bbil_maps_mutex_ = new Mutex();
+	bbil_queue_mutex_ = new Mutex();
+	bbil_maps_mutex_  = new Mutex();
 }
-
 
 /** Destructor. */
 BlackBoardInterfaceListener::~BlackBoardInterfaceListener()
 {
-  free(name_);
+	free(name_);
 
-  delete bbil_queue_mutex_;
-  delete bbil_maps_mutex_;
+	delete bbil_queue_mutex_;
+	delete bbil_maps_mutex_;
 }
-
 
 /** Get BBIL name.
  * @return BBIL name
@@ -112,9 +111,8 @@ BlackBoardInterfaceListener::~BlackBoardInterfaceListener()
 const char *
 BlackBoardInterfaceListener::bbil_name() const
 {
-  return name_;
+	return name_;
 }
-
 
 /** BlackBoard data changed notification.
  * This is called whenever the data in an interface that you registered for is
@@ -125,7 +123,6 @@ void
 BlackBoardInterfaceListener::bb_interface_data_changed(Interface *interface) throw()
 {
 }
-
 
 /** BlackBoard message received notification.
  * This is called whenever a message is received for this interface. This method is
@@ -146,11 +143,10 @@ BlackBoardInterfaceListener::bb_interface_data_changed(Interface *interface) thr
  */
 bool
 BlackBoardInterfaceListener::bb_interface_message_received(Interface *interface,
-							   Message *message) throw()
+                                                           Message *  message) throw()
 {
-  return true;
+	return true;
 }
-
 
 /** A reading instance has been opened for a watched interface.
  * This is called whenever a reading instance of the interface you are watching
@@ -160,11 +156,10 @@ BlackBoardInterfaceListener::bb_interface_message_received(Interface *interface,
  * added.
  */
 void
-BlackBoardInterfaceListener::bb_interface_reader_added(Interface *interface,
-						       unsigned int instance_serial) throw()
+BlackBoardInterfaceListener::bb_interface_reader_added(Interface *  interface,
+                                                       unsigned int instance_serial) throw()
 {
 }
-
 
 /** A reading instance has been closed for a watched interface.
  * This is called whenever a reading instance of an interface you are watching
@@ -174,11 +169,10 @@ BlackBoardInterfaceListener::bb_interface_reader_added(Interface *interface,
  * removed.
  */
 void
-BlackBoardInterfaceListener::bb_interface_reader_removed(Interface *interface,
-							 unsigned int instance_serial) throw()
+BlackBoardInterfaceListener::bb_interface_reader_removed(Interface *  interface,
+                                                         unsigned int instance_serial) throw()
 {
 }
-
 
 /** A writing instance has been opened for a watched interface.
  * This is called whenever a writing instance of the interface you are watching
@@ -188,11 +182,10 @@ BlackBoardInterfaceListener::bb_interface_reader_removed(Interface *interface,
  * added.
  */
 void
-BlackBoardInterfaceListener::bb_interface_writer_added(Interface *interface,
-						       unsigned int instance_serial) throw()
+BlackBoardInterfaceListener::bb_interface_writer_added(Interface *  interface,
+                                                       unsigned int instance_serial) throw()
 {
 }
-
 
 /** A writing instance has been closed for a watched interface.
  * This is called whenever a writing instance of an interface you are watching
@@ -202,37 +195,35 @@ BlackBoardInterfaceListener::bb_interface_writer_added(Interface *interface,
  * removed.
  */
 void
-BlackBoardInterfaceListener::bb_interface_writer_removed(Interface *interface,
-							 unsigned int instance_serial) throw()
+BlackBoardInterfaceListener::bb_interface_writer_removed(Interface *  interface,
+                                                         unsigned int instance_serial) throw()
 {
 }
-
 
 void
-BlackBoardInterfaceListener::bbil_queue_add(QueueEntryType type, bool op,
-                                            InterfaceMap &not_in_map,
-                                            Interface *interface,
-                                            const char *hint)
+BlackBoardInterfaceListener::bbil_queue_add(QueueEntryType type,
+                                            bool           op,
+                                            InterfaceMap & not_in_map,
+                                            Interface *    interface,
+                                            const char *   hint)
 {
-  MutexLocker lock(bbil_queue_mutex_);
+	MutexLocker lock(bbil_queue_mutex_);
 
-  if (op) {
-    if (not_in_map.find(interface->uid()) != not_in_map.end() ) {
-      throw Exception("Interface %s already registered (%s)",
-                      interface->uid(), hint);
-    }
-  }
-  InterfaceQueue::iterator i;
-  for (i = bbil_queue_.begin(); i != bbil_queue_.end(); ++i) {
-    if ((i->type == type) && (*(i->interface) == *interface)) {
-      bbil_queue_.erase(i);
-      break;
-    }
-  }
-  QueueEntry qe = { type, op, interface };
-  bbil_queue_.push_back(qe);
+	if (op) {
+		if (not_in_map.find(interface->uid()) != not_in_map.end()) {
+			throw Exception("Interface %s already registered (%s)", interface->uid(), hint);
+		}
+	}
+	InterfaceQueue::iterator i;
+	for (i = bbil_queue_.begin(); i != bbil_queue_.end(); ++i) {
+		if ((i->type == type) && (*(i->interface) == *interface)) {
+			bbil_queue_.erase(i);
+			break;
+		}
+	}
+	QueueEntry qe = {type, op, interface};
+	bbil_queue_.push_back(qe);
 }
-
 
 /** Add an interface to the data modification watch list.
  * @param interface interface to watch for data modifications.
@@ -240,7 +231,7 @@ BlackBoardInterfaceListener::bbil_queue_add(QueueEntryType type, bool op,
 void
 BlackBoardInterfaceListener::bbil_add_data_interface(Interface *interface)
 {
-  bbil_queue_add(DATA, true, bbil_maps_.data, interface, "data");
+	bbil_queue_add(DATA, true, bbil_maps_.data, interface, "data");
 }
 
 /** Add an interface to the message received watch list.
@@ -249,13 +240,13 @@ BlackBoardInterfaceListener::bbil_add_data_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_add_message_interface(Interface *interface)
 {
-  if ( ! interface->is_writer() ) {
-    throw Exception("Message received events can only be watched "
-                    "on writing interface instances (%s)", interface->uid());
-  }
-  bbil_queue_add(MESSAGES, true, bbil_maps_.messages, interface, "messages");
+	if (!interface->is_writer()) {
+		throw Exception("Message received events can only be watched "
+		                "on writing interface instances (%s)",
+		                interface->uid());
+	}
+	bbil_queue_add(MESSAGES, true, bbil_maps_.messages, interface, "messages");
 }
-
 
 /** Add an interface to the reader addition/removal watch list.
  * This method does not mean that you add interfaces that you opened for reading
@@ -266,9 +257,8 @@ BlackBoardInterfaceListener::bbil_add_message_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_add_reader_interface(Interface *interface)
 {
-  bbil_queue_add(READER, true, bbil_maps_.reader, interface, "reader");
+	bbil_queue_add(READER, true, bbil_maps_.reader, interface, "reader");
 }
-
 
 /** Add an interface to the writer addition/removal watch list.
  * This method does not mean that you add interfaces that you opened for writing
@@ -279,10 +269,8 @@ BlackBoardInterfaceListener::bbil_add_reader_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_add_writer_interface(Interface *interface)
 {
-  bbil_queue_add(WRITER, true, bbil_maps_.writer, interface, "writer");
+	bbil_queue_add(WRITER, true, bbil_maps_.writer, interface, "writer");
 }
-
-
 
 /** Remove an interface to the data modification watch list.
  * Only remove interfaces from the list when not currently registered to
@@ -292,7 +280,7 @@ BlackBoardInterfaceListener::bbil_add_writer_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_remove_data_interface(Interface *interface)
 {
-  bbil_queue_add(DATA, false, bbil_maps_.data, interface, "data");
+	bbil_queue_add(DATA, false, bbil_maps_.data, interface, "data");
 }
 
 /** Remove an interface to the message received watch list.
@@ -303,9 +291,8 @@ BlackBoardInterfaceListener::bbil_remove_data_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_remove_message_interface(Interface *interface)
 {
-  bbil_queue_add(MESSAGES, false, bbil_maps_.messages, interface, "messages");
+	bbil_queue_add(MESSAGES, false, bbil_maps_.messages, interface, "messages");
 }
-
 
 /** Remove an interface to the reader addition/removal watch list.
  * Only remove interfaces from the list when not currently registered to
@@ -315,9 +302,8 @@ BlackBoardInterfaceListener::bbil_remove_message_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_remove_reader_interface(Interface *interface)
 {
-  bbil_queue_add(READER, false, bbil_maps_.reader, interface, "reader");
+	bbil_queue_add(READER, false, bbil_maps_.reader, interface, "reader");
 }
-
 
 /** Remove an interface to the writer addition/removal watch list.
  * Only remove interfaces from the list when not currently registered to
@@ -327,153 +313,152 @@ BlackBoardInterfaceListener::bbil_remove_reader_interface(Interface *interface)
 void
 BlackBoardInterfaceListener::bbil_remove_writer_interface(Interface *interface)
 {
-  bbil_queue_add(WRITER, false, bbil_maps_.writer, interface, "writer");
+	bbil_queue_add(WRITER, false, bbil_maps_.writer, interface, "writer");
 }
-
 
 const BlackBoardInterfaceListener::InterfaceQueue &
 BlackBoardInterfaceListener::bbil_acquire_queue() throw()
 {
-  bbil_queue_mutex_->lock();
-  return bbil_queue_;
+	bbil_queue_mutex_->lock();
+	return bbil_queue_;
 }
 
 void
 BlackBoardInterfaceListener::bbil_release_queue(BlackBoard::ListenerRegisterFlag flag) throw()
 {
-  bbil_maps_mutex_->lock();
+	bbil_maps_mutex_->lock();
 
-  InterfaceQueue::iterator i = bbil_queue_.begin();
-  while (i != bbil_queue_.end()) {
-    if (i->op) { // add
-      switch (i->type) {
-      case DATA:
-        if (flag & BlackBoard::BBIL_FLAG_DATA) {
-          bbil_maps_.data[i->interface->uid()] = i->interface;
-          i = bbil_queue_.erase(i);
-        } else ++i;
-        break;
+	InterfaceQueue::iterator i = bbil_queue_.begin();
+	while (i != bbil_queue_.end()) {
+		if (i->op) { // add
+			switch (i->type) {
+			case DATA:
+				if (flag & BlackBoard::BBIL_FLAG_DATA) {
+					bbil_maps_.data[i->interface->uid()] = i->interface;
+					i                                    = bbil_queue_.erase(i);
+				} else
+					++i;
+				break;
 
-      case MESSAGES:
-        if (flag & BlackBoard::BBIL_FLAG_MESSAGES) {
-          bbil_maps_.messages[i->interface->uid()] = i->interface;
-          i = bbil_queue_.erase(i);
-        } else ++i;
-        break;
+			case MESSAGES:
+				if (flag & BlackBoard::BBIL_FLAG_MESSAGES) {
+					bbil_maps_.messages[i->interface->uid()] = i->interface;
+					i                                        = bbil_queue_.erase(i);
+				} else
+					++i;
+				break;
 
-      case READER:
-        if (flag & BlackBoard::BBIL_FLAG_READER) {
-          bbil_maps_.reader[i->interface->uid()] = i->interface;
-          i = bbil_queue_.erase(i);
-        } else ++i;
-        break;
+			case READER:
+				if (flag & BlackBoard::BBIL_FLAG_READER) {
+					bbil_maps_.reader[i->interface->uid()] = i->interface;
+					i                                      = bbil_queue_.erase(i);
+				} else
+					++i;
+				break;
 
-      case WRITER:
-        if (flag & BlackBoard::BBIL_FLAG_WRITER) {
-          bbil_maps_.writer[i->interface->uid()] = i->interface;
-          i = bbil_queue_.erase(i);
-        } else ++i;
-        break;
+			case WRITER:
+				if (flag & BlackBoard::BBIL_FLAG_WRITER) {
+					bbil_maps_.writer[i->interface->uid()] = i->interface;
+					i                                      = bbil_queue_.erase(i);
+				} else
+					++i;
+				break;
 
-      default:
-        ++i;
-        break;
-      }
-    } else { // remove
-      switch (i->type) {
-      case DATA:
-        if (flag & BlackBoard::BBIL_FLAG_DATA) {
-          bbil_maps_.data.erase(i->interface->uid());
-          i = bbil_queue_.erase(i);
-        } else ++i;
-        break;
+			default: ++i; break;
+			}
+		} else { // remove
+			switch (i->type) {
+			case DATA:
+				if (flag & BlackBoard::BBIL_FLAG_DATA) {
+					bbil_maps_.data.erase(i->interface->uid());
+					i = bbil_queue_.erase(i);
+				} else
+					++i;
+				break;
 
-      case MESSAGES:
-        if (flag & BlackBoard::BBIL_FLAG_MESSAGES) {
-          bbil_maps_.messages.erase(i->interface->uid());
-          i = bbil_queue_.erase(i);
-        } else ++i;
-        break;
+			case MESSAGES:
+				if (flag & BlackBoard::BBIL_FLAG_MESSAGES) {
+					bbil_maps_.messages.erase(i->interface->uid());
+					i = bbil_queue_.erase(i);
+				} else
+					++i;
+				break;
 
-      case READER:
-        if (flag & BlackBoard::BBIL_FLAG_READER) {
-          bbil_maps_.reader.erase(i->interface->uid());
-          i = bbil_queue_.erase(i);
-        } else ++i;
-        break;
+			case READER:
+				if (flag & BlackBoard::BBIL_FLAG_READER) {
+					bbil_maps_.reader.erase(i->interface->uid());
+					i = bbil_queue_.erase(i);
+				} else
+					++i;
+				break;
 
-      case WRITER:
-        if (flag & BlackBoard::BBIL_FLAG_WRITER) {
-          bbil_maps_.writer.erase(i->interface->uid());
-          i = bbil_queue_.erase(i);
-        } else ++i;
-        break;
+			case WRITER:
+				if (flag & BlackBoard::BBIL_FLAG_WRITER) {
+					bbil_maps_.writer.erase(i->interface->uid());
+					i = bbil_queue_.erase(i);
+				} else
+					++i;
+				break;
 
-      default:
-        ++i;
-        break;
-      }
-    }
-  }
+			default: ++i; break;
+			}
+		}
+	}
 
-  bbil_maps_mutex_->unlock();
-  bbil_queue_mutex_->unlock();
+	bbil_maps_mutex_->unlock();
+	bbil_queue_mutex_->unlock();
 }
-
 
 const BlackBoardInterfaceListener::InterfaceMaps &
 BlackBoardInterfaceListener::bbil_acquire_maps() throw()
 {
-  bbil_maps_mutex_->lock();
-  return bbil_maps_;
+	bbil_maps_mutex_->lock();
+	return bbil_maps_;
 }
 
 void
 BlackBoardInterfaceListener::bbil_release_maps() throw()
 {
-  bbil_queue_mutex_->lock();
+	bbil_queue_mutex_->lock();
 
-  InterfaceMap::iterator i;
-  for (i = bbil_maps_.data.begin(); i != bbil_maps_.data.end(); ++i) {
-    QueueEntry qe = { DATA, true, i->second };
-    bbil_queue_.push_back(qe);
-  }
-  for (i = bbil_maps_.messages.begin(); i != bbil_maps_.messages.end(); ++i) {
-    QueueEntry qe = { MESSAGES, true, i->second };
-    bbil_queue_.push_back(qe);
-  }
-  for (i = bbil_maps_.reader.begin(); i != bbil_maps_.reader.end(); ++i) {
-    QueueEntry qe = { READER, true, i->second };
-    bbil_queue_.push_back(qe);
-  }
-  for (i = bbil_maps_.writer.begin(); i != bbil_maps_.writer.end(); ++i) {
-    QueueEntry qe = { WRITER, true, i->second };
-    bbil_queue_.push_back(qe);
-  }
+	InterfaceMap::iterator i;
+	for (i = bbil_maps_.data.begin(); i != bbil_maps_.data.end(); ++i) {
+		QueueEntry qe = {DATA, true, i->second};
+		bbil_queue_.push_back(qe);
+	}
+	for (i = bbil_maps_.messages.begin(); i != bbil_maps_.messages.end(); ++i) {
+		QueueEntry qe = {MESSAGES, true, i->second};
+		bbil_queue_.push_back(qe);
+	}
+	for (i = bbil_maps_.reader.begin(); i != bbil_maps_.reader.end(); ++i) {
+		QueueEntry qe = {READER, true, i->second};
+		bbil_queue_.push_back(qe);
+	}
+	for (i = bbil_maps_.writer.begin(); i != bbil_maps_.writer.end(); ++i) {
+		QueueEntry qe = {WRITER, true, i->second};
+		bbil_queue_.push_back(qe);
+	}
 
-  bbil_maps_.data.clear();
-  bbil_maps_.messages.clear();
-  bbil_maps_.reader.clear();
-  bbil_maps_.writer.clear();
+	bbil_maps_.data.clear();
+	bbil_maps_.messages.clear();
+	bbil_maps_.reader.clear();
+	bbil_maps_.writer.clear();
 
-  bbil_queue_mutex_->unlock();
-  bbil_maps_mutex_->unlock();
+	bbil_queue_mutex_->unlock();
+	bbil_maps_mutex_->unlock();
 }
-
 
 Interface *
-BlackBoardInterfaceListener::bbil_find_interface(const char *iuid,
-                                                 InterfaceMap &map)
+BlackBoardInterfaceListener::bbil_find_interface(const char *iuid, InterfaceMap &map)
 {
-  MutexLocker lock(bbil_maps_mutex_);
-  InterfaceMap::iterator i;
-  if ((i = map.find((char *)iuid)) != map.end()) {
-    return i->second;
-  } else {
-    return NULL;
-  }
+	MutexLocker            lock(bbil_maps_mutex_);
+	InterfaceMap::iterator i;
+	if ((i = map.find((char *)iuid)) != map.end()) {
+		return i->second;
+	} else {
+		return NULL;
+	}
 }
-
 
 /** Get interface instance for given UID.
  * A data modification notification is about to be triggered. For this the
@@ -484,9 +469,8 @@ BlackBoardInterfaceListener::bbil_find_interface(const char *iuid,
 Interface *
 BlackBoardInterfaceListener::bbil_data_interface(const char *iuid) throw()
 {
-  return bbil_find_interface(iuid, bbil_maps_.data);
+	return bbil_find_interface(iuid, bbil_maps_.data);
 }
-
 
 /** Get interface instance for given UID.
  * A message received notification is about to be triggered. For this the
@@ -497,9 +481,8 @@ BlackBoardInterfaceListener::bbil_data_interface(const char *iuid) throw()
 Interface *
 BlackBoardInterfaceListener::bbil_message_interface(const char *iuid) throw()
 {
-  return bbil_find_interface(iuid, bbil_maps_.messages);
+	return bbil_find_interface(iuid, bbil_maps_.messages);
 }
-
 
 /** Get interface instance for given UID.
  * A reader notification is about to be triggered. For this the
@@ -510,9 +493,8 @@ BlackBoardInterfaceListener::bbil_message_interface(const char *iuid) throw()
 Interface *
 BlackBoardInterfaceListener::bbil_reader_interface(const char *iuid) throw()
 {
-  return bbil_find_interface(iuid, bbil_maps_.reader);
+	return bbil_find_interface(iuid, bbil_maps_.reader);
 }
-
 
 /** Get interface instance for given UID.
  * A writer notification is about to be triggered. For this the
@@ -523,7 +505,7 @@ BlackBoardInterfaceListener::bbil_reader_interface(const char *iuid) throw()
 Interface *
 BlackBoardInterfaceListener::bbil_writer_interface(const char *iuid) throw()
 {
-  return bbil_find_interface(iuid, bbil_maps_.writer);
+	return bbil_find_interface(iuid, bbil_maps_.writer);
 }
 
 } // end namespace fawkes

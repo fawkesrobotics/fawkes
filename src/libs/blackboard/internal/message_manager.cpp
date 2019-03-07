@@ -21,15 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/internal/message_manager.h>
-#include <blackboard/internal/interface_manager.h>
-#include <blackboard/internal/notifier.h>
 #include <blackboard/exceptions.h>
-
-#include <interface/message.h>
-#include <interface/interface.h>
-
+#include <blackboard/internal/interface_manager.h>
+#include <blackboard/internal/message_manager.h>
+#include <blackboard/internal/notifier.h>
 #include <core/exceptions/software.h>
+#include <interface/interface.h>
+#include <interface/message.h>
 #include <logging/liblogger.h>
 
 namespace fawkes {
@@ -46,40 +44,38 @@ namespace fawkes {
  */
 BlackBoardMessageManager::BlackBoardMessageManager(BlackBoardNotifier *notifier)
 {
-  im_ = NULL;
-  notifier_ = notifier;
+	im_       = NULL;
+	notifier_ = notifier;
 }
-
 
 /** Destructor */
 BlackBoardMessageManager::~BlackBoardMessageManager()
 {
 }
 
-
 void
 BlackBoardMessageManager::transmit(Message *message)
 {
-  if ( im_ == NULL ) {
-    throw NullPointerException("InterfaceManager has not been set for MessageManager");
-  }
-  try {
-    Interface *writer = im_->writer_for_mem_serial(message->recipient());
-    if (notifier_->notify_of_message_received(writer, message)) {
-      writer->msgq_append(message);
-    }
-  } catch (BlackBoardNoWritingInstanceException &e) {
-    Interface *iface = message->interface();
-    LibLogger::log_warn("BlackBoardMessageManager", "Cannot transmit message from sender %s "
-			                            "via interface %s (type %s), no writing "
-			                            "instance exists!",
-			message->sender_thread_name(),
-			(iface != NULL) ? iface->id() : "Unknown",
-			(iface != NULL) ? iface->type() : "unknown");
-    throw;
-  }
+	if (im_ == NULL) {
+		throw NullPointerException("InterfaceManager has not been set for MessageManager");
+	}
+	try {
+		Interface *writer = im_->writer_for_mem_serial(message->recipient());
+		if (notifier_->notify_of_message_received(writer, message)) {
+			writer->msgq_append(message);
+		}
+	} catch (BlackBoardNoWritingInstanceException &e) {
+		Interface *iface = message->interface();
+		LibLogger::log_warn("BlackBoardMessageManager",
+		                    "Cannot transmit message from sender %s "
+		                    "via interface %s (type %s), no writing "
+		                    "instance exists!",
+		                    message->sender_thread_name(),
+		                    (iface != NULL) ? iface->id() : "Unknown",
+		                    (iface != NULL) ? iface->type() : "unknown");
+		throw;
+	}
 }
-
 
 /** Set interface manager.
  * @param im interface manager
@@ -87,7 +83,7 @@ BlackBoardMessageManager::transmit(Message *message)
 void
 BlackBoardMessageManager::set_interface_manager(BlackBoardInterfaceManager *im)
 {
-  im_ = im;
+	im_ = im;
 }
 
 } // end namespace fawkes

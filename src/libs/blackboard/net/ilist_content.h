@@ -25,8 +25,8 @@
 #define _BLACKBOARD_NET_ILIST_CONTENT_H_
 
 #include <blackboard/net/messages.h>
-#include <netcomm/fawkes/message_content.h>
 #include <interface/interface_info.h>
+#include <netcomm/fawkes/message_content.h>
 
 namespace fawkes {
 
@@ -34,26 +34,32 @@ class DynamicBuffer;
 
 class BlackBoardInterfaceListContent : public FawkesNetworkMessageContent
 {
- public:
-  BlackBoardInterfaceListContent();
-  BlackBoardInterfaceListContent(unsigned int component_id, unsigned int msg_id,
-				 void *payload, size_t payload_size);
-  virtual ~BlackBoardInterfaceListContent();
+public:
+	BlackBoardInterfaceListContent();
+	BlackBoardInterfaceListContent(unsigned int component_id,
+	                               unsigned int msg_id,
+	                               void *       payload,
+	                               size_t       payload_size);
+	virtual ~BlackBoardInterfaceListContent();
 
-  void append_interface(const char *type, const char *id, const unsigned char *hash,
-			unsigned int serial, bool has_writer, unsigned int num_readers,
-			const fawkes::Time &time);
-  void append_interface(InterfaceInfo &info);
+	void append_interface(const char *         type,
+	                      const char *         id,
+	                      const unsigned char *hash,
+	                      unsigned int         serial,
+	                      bool                 has_writer,
+	                      unsigned int         num_readers,
+	                      const fawkes::Time & time);
+	void append_interface(InterfaceInfo &info);
 
-  virtual void serialize();
+	virtual void serialize();
 
-  void               reset_iterator();
-  bool               has_next();
-  bb_iinfo_msg_t *   next(size_t *size);
+	void            reset_iterator();
+	bool            has_next();
+	bb_iinfo_msg_t *next(size_t *size);
 
- private:
-  DynamicBuffer     *interface_list;
-  bb_ilist_msg_t     msg;
+private:
+	DynamicBuffer *interface_list;
+	bb_ilist_msg_t msg;
 };
 
 } // end namespace fawkes

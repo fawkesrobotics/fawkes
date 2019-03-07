@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  on_update_waker.h - wake a thread whenever an interface is updated
  *
@@ -21,11 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <blackboard/utils/on_update_waker.h>
 #include <blackboard/blackboard.h>
+#include <blackboard/utils/on_update_waker.h>
+#include <core/threading/thread.h>
 #include <interface/interface.h>
 #include <interface/message.h>
-#include <core/threading/thread.h>
 
 namespace fawkes {
 
@@ -42,13 +42,12 @@ namespace fawkes {
  * @param thread thread to wake
  */
 BlackBoardOnUpdateWaker::BlackBoardOnUpdateWaker(BlackBoard *bb,
-						   Interface *interface,
-						   Thread *thread)
-  : BlackBoardInterfaceListener("OnUpdateWaker[%s]", interface->uid()),
-    bb_(bb), thread_(thread)
+                                                 Interface * interface,
+                                                 Thread *    thread)
+: BlackBoardInterfaceListener("OnUpdateWaker[%s]", interface->uid()), bb_(bb), thread_(thread)
 {
-  bbil_add_data_interface(interface);
-  bb_->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
+	bbil_add_data_interface(interface);
+	bb_->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
 }
 
 /** Destructor.
@@ -56,16 +55,13 @@ BlackBoardOnUpdateWaker::BlackBoardOnUpdateWaker(BlackBoard *bb,
  */
 BlackBoardOnUpdateWaker::~BlackBoardOnUpdateWaker()
 {
-  bb_->unregister_listener(this);
+	bb_->unregister_listener(this);
 }
-
 
 void
 BlackBoardOnUpdateWaker::bb_interface_data_changed(Interface *interface) throw()
 {
-  thread_->wakeup();
+	thread_->wakeup();
 }
 
-
 } // end namespace fawkes
-

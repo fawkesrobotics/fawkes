@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  net_interface_listener.h - BlackBoard interface listener for net handler
  *
@@ -31,33 +31,34 @@ namespace fawkes {
 class FawkesNetworkHub;
 class BlackBoard;
 
-class BlackBoardNetHandlerInterfaceListener
-: public BlackBoardInterfaceListener
+class BlackBoardNetHandlerInterfaceListener : public BlackBoardInterfaceListener
 {
- public:
-  BlackBoardNetHandlerInterfaceListener(BlackBoard *blackboard, Interface *interface,
-					FawkesNetworkHub *hub, unsigned int clid);
-  virtual ~BlackBoardNetHandlerInterfaceListener();
+public:
+	BlackBoardNetHandlerInterfaceListener(BlackBoard *      blackboard,
+	                                      Interface *       interface,
+	                                      FawkesNetworkHub *hub,
+	                                      unsigned int      clid);
+	virtual ~BlackBoardNetHandlerInterfaceListener();
 
-  virtual void bb_interface_data_changed(Interface *interface) throw();
-  virtual bool bb_interface_message_received(Interface *interface, Message *message) throw();
-  virtual void bb_interface_writer_added(Interface *interface,
-					 unsigned int instance_serial) throw();
-  virtual void bb_interface_writer_removed(Interface *interface,
-					   unsigned int instance_serial) throw();
-  virtual void bb_interface_reader_added(Interface *interface,
-					 unsigned int instance_serial) throw();
-  virtual void bb_interface_reader_removed(Interface *interface,
-					   unsigned int instance_serial) throw();
+	virtual void bb_interface_data_changed(Interface *interface) throw();
+	virtual bool bb_interface_message_received(Interface *interface, Message *message) throw();
+	virtual void bb_interface_writer_added(Interface *  interface,
+	                                       unsigned int instance_serial) throw();
+	virtual void bb_interface_writer_removed(Interface *  interface,
+	                                         unsigned int instance_serial) throw();
+	virtual void bb_interface_reader_added(Interface *  interface,
+	                                       unsigned int instance_serial) throw();
+	virtual void bb_interface_reader_removed(Interface *  interface,
+	                                         unsigned int instance_serial) throw();
 
- private:
-  void send_event_serial(Interface *interface, unsigned int msg_id, unsigned int event_serial);
+private:
+	void send_event_serial(Interface *interface, unsigned int msg_id, unsigned int event_serial);
 
-  BlackBoard       *blackboard_;
-  Interface        *interface_;
-  FawkesNetworkHub *fnh_;
+	BlackBoard *      blackboard_;
+	Interface *       interface_;
+	FawkesNetworkHub *fnh_;
 
-  unsigned int      clid_;
+	unsigned int clid_;
 };
 
 } // end namespace fawkes

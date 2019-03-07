@@ -35,18 +35,19 @@ class Message;
 
 class BlackBoardMessageManager : public MessageMediator
 {
- friend LocalBlackBoard;
- public:
-  BlackBoardMessageManager(BlackBoardNotifier *notifier);
-  ~BlackBoardMessageManager();
+	friend LocalBlackBoard;
 
-  virtual void transmit(Message *message);
+public:
+	BlackBoardMessageManager(BlackBoardNotifier *notifier);
+	~BlackBoardMessageManager();
 
- private:
-  BlackBoardInterfaceManager *im_;
-  BlackBoardNotifier         *notifier_;
+	virtual void transmit(Message *message);
 
-  void set_interface_manager(BlackBoardInterfaceManager *im);
+private:
+	BlackBoardInterfaceManager *im_;
+	BlackBoardNotifier *        notifier_;
+
+	void set_interface_manager(BlackBoardInterfaceManager *im);
 };
 
 } // end namespace fawkes

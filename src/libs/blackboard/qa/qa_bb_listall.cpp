@@ -21,85 +21,81 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-
 /// @cond QA
 
-#include <blackboard/local.h>
-#include <blackboard/exceptions.h>
 #include <blackboard/bbconfig.h>
-
-#include <interfaces/TestInterface.h>
-#include <interface/interface_info.h>
-
+#include <blackboard/exceptions.h>
+#include <blackboard/local.h>
 #include <core/exceptions/system.h>
+#include <interface/interface_info.h>
+#include <interfaces/TestInterface.h>
 
-#include <signal.h>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
-
 #include <iostream>
+#include <signal.h>
 #include <vector>
 
 using namespace std;
 using namespace fawkes;
-
 
 bool quit = false;
 
 void
 signal_handler(int signum)
 {
-  quit = true;
+	quit = true;
 }
-
 
 #define NUM_CHUNKS 5
 
 int
 main(int argc, char **argv)
 {
+	signal(SIGINT, signal_handler);
 
-  signal(SIGINT, signal_handler);
+	BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE);
 
-  BlackBoard *bb = new LocalBlackBoard(BLACKBOARD_MEMSIZE);
-  
-  TestInterface *ti_writer;
-  TestInterface *ti_reader;
+	TestInterface *ti_writer;
+	TestInterface *ti_reader;
 
-  try {
-    cout << "Opening interfaces.. " << flush;
-    ti_writer = bb->open_for_writing<TestInterface>("SomeID");
-    ti_reader = bb->open_for_reading<TestInterface>("SomeID");
-    cout << "success, " <<
-            "writer hash=" << ti_writer->hash_printable() <<
-            "  reader hash=" << ti_reader->hash_printable() << endl;
-  } catch (Exception &e) {
-    cout << "failed! Aborting" << endl;
-    e.print_trace();
-    exit(1);
-  }
+	try {
+		cout << "Opening interfaces.. " << flush;
+		ti_writer = bb->open_for_writing<TestInterface>("SomeID");
+		ti_reader = bb->open_for_reading<TestInterface>("SomeID");
+		cout << "success, "
+		     << "writer hash=" << ti_writer->hash_printable()
+		     << "  reader hash=" << ti_reader->hash_printable() << endl;
+	} catch (Exception &e) {
+		cout << "failed! Aborting" << endl;
+		e.print_trace();
+		exit(1);
+	}
 
-  cout << "Listing interfaces.." << endl;
-  InterfaceInfoList *infl = bb->list_all();
-  for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i) {
-    const unsigned char *hash = (*i).hash();
-    char phash[INTERFACE_HASH_SIZE_ * 2 + 1];
-    memset(phash, 0, sizeof(phash));
-    for (unsigned int j = 0; j < INTERFACE_HASH_SIZE_; ++j) {
-      sprintf(&phash[j * 2], "%02x", hash[j]);
-    }
-    printf("%s::%s (%s), w:%i  r:%u  s:%u\n",
-	   (*i).type(), (*i).id(), phash, (*i).has_writer(),
-	   (*i).num_readers(), (*i).serial());
-  }
-  delete infl;
+	cout << "Listing interfaces.." << endl;
+	InterfaceInfoList *infl = bb->list_all();
+	for (InterfaceInfoList::iterator i = infl->begin(); i != infl->end(); ++i) {
+		const unsigned char *hash = (*i).hash();
+		char                 phash[INTERFACE_HASH_SIZE_ * 2 + 1];
+		memset(phash, 0, sizeof(phash));
+		for (unsigned int j = 0; j < INTERFACE_HASH_SIZE_; ++j) {
+			sprintf(&phash[j * 2], "%02x", hash[j]);
+		}
+		printf("%s::%s (%s), w:%i  r:%u  s:%u\n",
+		       (*i).type(),
+		       (*i).id(),
+		       phash,
+		       (*i).has_writer(),
+		       (*i).num_readers(),
+		       (*i).serial());
+	}
+	delete infl;
 
-  bb->close(ti_reader);
-  bb->close(ti_writer);
+	bb->close(ti_reader);
+	bb->close(ti_writer);
 
-  delete bb;
+	delete bb;
 }
-
 
 /// @endcond

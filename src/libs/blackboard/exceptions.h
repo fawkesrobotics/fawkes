@@ -32,28 +32,30 @@ namespace fawkes {
  * Throw this exception if a pointer to NULL has been supplied where this is
  * not allowed.
  */
-class BlackBoardMemMgrInvalidPointerException : public Exception {
- public:
-  /** Constructor */
-  BlackBoardMemMgrInvalidPointerException() : Exception("Invalid pointer to free") {}
+class BlackBoardMemMgrInvalidPointerException : public Exception
+{
+public:
+	/** Constructor */
+	BlackBoardMemMgrInvalidPointerException() : Exception("Invalid pointer to free")
+	{
+	}
 };
-
 
 /** Thrown when BlackBoard memory has been corupted
  * This exception is thrown by the memory manager if the memory has been
  * corrupted, for example if there are bytes that belong to neither a free chunk nor
  * a allocated chunk.
  */
-class BBInconsistentMemoryException : public Exception {
- public:
-  /** Constructor
+class BBInconsistentMemoryException : public Exception
+{
+public:
+	/** Constructor
    * @param msg message, appended to exception, base message "Memory corruption detected"
    */
-  BBInconsistentMemoryException(const char *msg)
-    : Exception("Memory corruption detected")
-  {
-    append(msg);
-  }
+	BBInconsistentMemoryException(const char *msg) : Exception("Memory corruption detected")
+	{
+		append(msg);
+	}
 };
 
 /** Thrown if BlackBoard is not master and master operation has been requested.
@@ -63,88 +65,91 @@ class BBInconsistentMemoryException : public Exception {
  * corrupted, for example if there are bytes that belong to neither a free chunk nor
  * a allocated chunk.
  */
-class BBNotMasterException : public Exception {
- public:
-  /** Constructor
+class BBNotMasterException : public Exception
+{
+public:
+	/** Constructor
    * @param msg message, appended to exception, base message "Memory corruption detected"
    */
-  BBNotMasterException(const char *msg)
-    : Exception("Not BlackBoard Master!")
-  {
-    append(msg);
-  }
+	BBNotMasterException(const char *msg) : Exception("Not BlackBoard Master!")
+	{
+		append(msg);
+	}
 };
-
 
 /** Thrown if shared memory could not be opened. Can happen only if opening the
  * segment as non-master.
  */
-class BBMemMgrCannotOpenException : public Exception {
- public:
-  /** Constructor */
-  BBMemMgrCannotOpenException() : Exception("Cannot open shared memory segment") {}
+class BBMemMgrCannotOpenException : public Exception
+{
+public:
+	/** Constructor */
+	BBMemMgrCannotOpenException() : Exception("Cannot open shared memory segment")
+	{
+	}
 };
-
 
 /** Thrown if no definition of interface or interface generator found.
  */
-class BlackBoardInterfaceNotFoundException : public Exception {
- public:
-  /** Constructor
+class BlackBoardInterfaceNotFoundException : public Exception
+{
+public:
+	/** Constructor
    * @param type type of interface that could not be found
    * @param add_msg additional message, add a space as first character
    */
-  BlackBoardInterfaceNotFoundException(const char *type, const char *add_msg = "")
-    : Exception("Interface of type '%s' not found.%s", type, add_msg)
-  {
-  }
+	BlackBoardInterfaceNotFoundException(const char *type, const char *add_msg = "")
+	: Exception("Interface of type '%s' not found.%s", type, add_msg)
+	{
+	}
 };
-
 
 /** Thrown if versions do not match.
  * If the hashes of two interfaces of the very same type do not match they
  * are incompatible.
  */
-class BlackBoardInterfaceVersionMismatchException : public Exception {
- public:
-  /** Constructor. */
-  BlackBoardInterfaceVersionMismatchException()
-    : Exception("Interface versions do not match, need to update and recompile interfaces?")
-  {
-  }
+class BlackBoardInterfaceVersionMismatchException : public Exception
+{
+public:
+	/** Constructor. */
+	BlackBoardInterfaceVersionMismatchException()
+	: Exception("Interface versions do not match, need to update and recompile interfaces?")
+	{
+	}
 };
-
 
 /** Thrown if a writer is already active on an interface that writing has
  * been requested for.
  */
-class BlackBoardWriterActiveException : public Exception {
- public:
-  /** Constructor
+class BlackBoardWriterActiveException : public Exception
+{
+public:
+	/** Constructor
    * @param type type of interface that could not be found
    * @param id identifier of the interface
    */
-  BlackBoardWriterActiveException(const char *id, const char *type) : Exception()
-  {
-    append("There is already a writer on interface '%s' of type '%s'", id, type);
-  }
+	BlackBoardWriterActiveException(const char *id, const char *type) : Exception()
+	{
+		append("There is already a writer on interface '%s' of type '%s'", id, type);
+	}
 };
-
 
 /** Thrown if BlackBoard is opened as non-master with no master alive.
  */
-class BlackBoardNoMasterAliveException : public Exception {
- public:
-  /** Constructor*/
-  BlackBoardNoMasterAliveException() : Exception("No master BlackBoard alive") {}
+class BlackBoardNoMasterAliveException : public Exception
+{
+public:
+	/** Constructor*/
+	BlackBoardNoMasterAliveException() : Exception("No master BlackBoard alive")
+	{
+	}
 };
-
 
 /** Thrown if no writer interface is alive.
  */
 class BlackBoardNoWritingInstanceException : public Exception
 {
- public:
+public:
 	/** Constructor.
 	 * @param type interface type string
 	 * @param id interface ID

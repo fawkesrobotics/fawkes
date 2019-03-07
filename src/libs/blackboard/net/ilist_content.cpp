@@ -21,15 +21,15 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <arpa/inet.h>
 #include <blackboard/net/ilist_content.h>
-
-#include <netcomm/utils/dynamic_buffer.h>
-#include <netcomm/fawkes/component_ids.h>
 #include <core/exceptions/software.h>
+#include <netcomm/fawkes/component_ids.h>
+#include <netcomm/utils/dynamic_buffer.h>
 #include <utils/time/time.h>
+
 #include <cstdlib>
 #include <cstring>
-#include <arpa/inet.h>
 
 namespace fawkes {
 
@@ -45,9 +45,8 @@ namespace fawkes {
 /** Constructor. */
 BlackBoardInterfaceListContent::BlackBoardInterfaceListContent()
 {
-  interface_list = new DynamicBuffer(&(msg.interface_list));
+	interface_list = new DynamicBuffer(&(msg.interface_list));
 }
-
 
 /** Message content constructor.
  * This constructor is meant to be used with FawkesNetworkMessage::msgc().
@@ -57,32 +56,29 @@ BlackBoardInterfaceListContent::BlackBoardInterfaceListContent()
  * @param payload_size total payload size
  */
 BlackBoardInterfaceListContent::BlackBoardInterfaceListContent(unsigned int component_id,
-							       unsigned int msg_id,
-							       void *payload,
-							       size_t payload_size)
+                                                               unsigned int msg_id,
+                                                               void *       payload,
+                                                               size_t       payload_size)
 {
-  if ( component_id != FAWKES_CID_BLACKBOARD ) {
-    throw TypeMismatchException("BlackBoardInterfaceListContent: invalid component ID");
-  }
-  bb_ilist_msg_t *tmsg = (bb_ilist_msg_t *)payload;
-  void *ilist_payload = (void *)((size_t)payload + sizeof(msg));
-  interface_list = new DynamicBuffer(&(tmsg->interface_list), ilist_payload,
-				     payload_size - sizeof(msg));
+	if (component_id != FAWKES_CID_BLACKBOARD) {
+		throw TypeMismatchException("BlackBoardInterfaceListContent: invalid component ID");
+	}
+	bb_ilist_msg_t *tmsg          = (bb_ilist_msg_t *)payload;
+	void *          ilist_payload = (void *)((size_t)payload + sizeof(msg));
+	interface_list =
+	  new DynamicBuffer(&(tmsg->interface_list), ilist_payload, payload_size - sizeof(msg));
 }
-
 
 /** Destructor. */
 BlackBoardInterfaceListContent::~BlackBoardInterfaceListContent()
 {
-  delete interface_list;
-  if (_payload != NULL) {
-    free(_payload);
-    _payload = NULL;
-    _payload_size = 0;
-  }
+	delete interface_list;
+	if (_payload != NULL) {
+		free(_payload);
+		_payload      = NULL;
+		_payload_size = 0;
+	}
 }
-
-
 
 /** Append interface info.
  * @param type type of interface
@@ -94,29 +90,30 @@ BlackBoardInterfaceListContent::~BlackBoardInterfaceListContent()
  * @param timestamp interface timestamp (time of last write or data timestamp)
  */
 void
-BlackBoardInterfaceListContent::append_interface(const char *type, const char *id,
-						 const unsigned char *hash,
-						 unsigned int serial,
-						 bool has_writer, unsigned int num_readers,
-						 const fawkes::Time &timestamp)
+BlackBoardInterfaceListContent::append_interface(const char *         type,
+                                                 const char *         id,
+                                                 const unsigned char *hash,
+                                                 unsigned int         serial,
+                                                 bool                 has_writer,
+                                                 unsigned int         num_readers,
+                                                 const fawkes::Time & timestamp)
 {
-  bb_iinfo_msg_t info;
-  memset(&info, 0, sizeof(info));
-  strncpy(info.type, type, INTERFACE_TYPE_SIZE_-1);
-  strncpy(info.id, id, INTERFACE_ID_SIZE_-1);
-  memcpy(info.hash, hash, INTERFACE_HASH_SIZE_);
-  info.serial      = htonl(serial);
-  info.writer_readers = htonl(num_readers);
-  if (has_writer) {
-    info.writer_readers |= htonl(0x80000000);
-  } else {
-    info.writer_readers &= htonl(0x7FFFFFFF);
-  }
-  interface_list->append(&info, sizeof(info));
-  info.timestamp_sec  = timestamp.get_sec();
-  info.timestamp_usec = timestamp.get_usec();
+	bb_iinfo_msg_t info;
+	memset(&info, 0, sizeof(info));
+	strncpy(info.type, type, INTERFACE_TYPE_SIZE_ - 1);
+	strncpy(info.id, id, INTERFACE_ID_SIZE_ - 1);
+	memcpy(info.hash, hash, INTERFACE_HASH_SIZE_);
+	info.serial         = htonl(serial);
+	info.writer_readers = htonl(num_readers);
+	if (has_writer) {
+		info.writer_readers |= htonl(0x80000000);
+	} else {
+		info.writer_readers &= htonl(0x7FFFFFFF);
+	}
+	interface_list->append(&info, sizeof(info));
+	info.timestamp_sec  = timestamp.get_sec();
+	info.timestamp_usec = timestamp.get_usec();
 }
-
 
 /** Append interface info.
  * @param iinfo interface info
@@ -124,35 +121,33 @@ BlackBoardInterfaceListContent::append_interface(const char *type, const char *i
 void
 BlackBoardInterfaceListContent::append_interface(InterfaceInfo &iinfo)
 {
-  bb_iinfo_msg_t info;
-  memset(&info, 0, sizeof(info));
-  strncpy(info.type, iinfo.type(), INTERFACE_TYPE_SIZE_-1);
-  strncpy(info.id, iinfo.id(), INTERFACE_ID_SIZE_-1);
-  memcpy(info.hash, iinfo.hash(), INTERFACE_HASH_SIZE_);
-  info.serial      = htonl(iinfo.serial());
-  info.writer_readers = htonl(iinfo.num_readers());
-  if (iinfo.has_writer()) {
-    info.writer_readers |= htonl(0x80000000);
-  } else {
-    info.writer_readers &= htonl(0x7FFFFFFF);
-  }
-  const Time *timestamp = iinfo.timestamp();
-  info.timestamp_sec  = timestamp->get_sec();
-  info.timestamp_usec = timestamp->get_usec();
+	bb_iinfo_msg_t info;
+	memset(&info, 0, sizeof(info));
+	strncpy(info.type, iinfo.type(), INTERFACE_TYPE_SIZE_ - 1);
+	strncpy(info.id, iinfo.id(), INTERFACE_ID_SIZE_ - 1);
+	memcpy(info.hash, iinfo.hash(), INTERFACE_HASH_SIZE_);
+	info.serial         = htonl(iinfo.serial());
+	info.writer_readers = htonl(iinfo.num_readers());
+	if (iinfo.has_writer()) {
+		info.writer_readers |= htonl(0x80000000);
+	} else {
+		info.writer_readers &= htonl(0x7FFFFFFF);
+	}
+	const Time *timestamp = iinfo.timestamp();
+	info.timestamp_sec    = timestamp->get_sec();
+	info.timestamp_usec   = timestamp->get_usec();
 
-  interface_list->append(&info, sizeof(info));
+	interface_list->append(&info, sizeof(info));
 }
-
 
 void
 BlackBoardInterfaceListContent::serialize()
 {
-  _payload_size = sizeof(msg) + interface_list->buffer_size();
-  _payload = malloc(_payload_size);
-  copy_payload(0, &msg, sizeof(msg));
-  copy_payload(sizeof(msg), interface_list->buffer(), interface_list->buffer_size());
+	_payload_size = sizeof(msg) + interface_list->buffer_size();
+	_payload      = malloc(_payload_size);
+	copy_payload(0, &msg, sizeof(msg));
+	copy_payload(sizeof(msg), interface_list->buffer(), interface_list->buffer_size());
 }
-
 
 /** Reset iterator.
  * For incoming messages only.
@@ -160,9 +155,8 @@ BlackBoardInterfaceListContent::serialize()
 void
 BlackBoardInterfaceListContent::reset_iterator()
 {
-  interface_list->reset_iterator();
+	interface_list->reset_iterator();
 }
-
 
 /** Check if more list elements are available.
  * For incoming messages only.
@@ -171,9 +165,8 @@ BlackBoardInterfaceListContent::reset_iterator()
 bool
 BlackBoardInterfaceListContent::has_next()
 {
-  return interface_list->has_next();
+	return interface_list->has_next();
 }
-
 
 /** Get next plugin from list.
  * @param size upon return contains the size of the returned data element.
@@ -184,8 +177,8 @@ BlackBoardInterfaceListContent::has_next()
 bb_iinfo_msg_t *
 BlackBoardInterfaceListContent::next(size_t *size)
 {
-  void *tmp = interface_list->next(size);
-  return (bb_iinfo_msg_t *)tmp;
+	void *tmp = interface_list->next(size);
+	return (bb_iinfo_msg_t *)tmp;
 }
 
 } // end namespace fawkes
