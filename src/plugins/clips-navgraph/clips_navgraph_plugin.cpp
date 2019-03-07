@@ -21,6 +21,7 @@
  */
 
 #include "clips_navgraph_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -30,16 +31,15 @@ using namespace fawkes;
  */
 class ClipsNavGraphPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit ClipsNavGraphPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new ClipsNavGraphThread());
-  }
+	explicit ClipsNavGraphPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new ClipsNavGraphThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("CLIPS feature to access the NavGraph")
 EXPORT_PLUGIN(ClipsNavGraphPlugin)

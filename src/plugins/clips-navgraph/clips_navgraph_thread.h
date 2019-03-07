@@ -23,57 +23,61 @@
 #ifndef _PLUGINS_CLIPS_NAVGRAPH_CLIPS_NAVGRAPH_THREAD_H_
 #define _PLUGINS_CLIPS_NAVGRAPH_CLIPS_NAVGRAPH_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
 #include <aspect/configurable.h>
-#include <plugins/clips/aspect/clips_feature.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <navgraph/aspect/navgraph.h>
 #include <navgraph/navgraph.h>
+#include <plugins/clips/aspect/clips_feature.h>
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 namespace fawkes {
-  class NavGraphStaticListEdgeConstraint;
+class NavGraphStaticListEdgeConstraint;
 }
 
-class ClipsNavGraphThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::NavGraphAspect,
-  public fawkes::CLIPSFeature,
-  public fawkes::CLIPSFeatureAspect,
-  public fawkes::NavGraph::ChangeListener
+class ClipsNavGraphThread : public fawkes::Thread,
+                            public fawkes::LoggingAspect,
+                            public fawkes::ConfigurableAspect,
+                            public fawkes::NavGraphAspect,
+                            public fawkes::CLIPSFeature,
+                            public fawkes::CLIPSFeatureAspect,
+                            public fawkes::NavGraph::ChangeListener
 {
- public:
-  ClipsNavGraphThread();
-  virtual ~ClipsNavGraphThread();
+public:
+	ClipsNavGraphThread();
+	virtual ~ClipsNavGraphThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  // for CLIPSFeature
-  virtual void clips_context_init(const std::string &env_name,
-				  fawkes::LockPtr<CLIPS::Environment> &clips);
-  virtual void clips_context_destroyed(const std::string &env_name);
+	// for CLIPSFeature
+	virtual void clips_context_init(const std::string &                  env_name,
+	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_destroyed(const std::string &env_name);
 
-  virtual void graph_changed() throw();
+	virtual void graph_changed() throw();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void clips_navgraph_load(fawkes::LockPtr<CLIPS::Environment> &clips);
-  void clips_navgraph_block_edge(std::string env_name, std::string from, std::string to);
-  void clips_navgraph_unblock_edge(std::string env_name, std::string from, std::string to);
+private:
+	void clips_navgraph_load(fawkes::LockPtr<CLIPS::Environment> &clips);
+	void clips_navgraph_block_edge(std::string env_name, std::string from, std::string to);
+	void clips_navgraph_unblock_edge(std::string env_name, std::string from, std::string to);
 
- private:
-  std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+private:
+	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 
-  fawkes::NavGraphStaticListEdgeConstraint  *edge_constraint_;
+	fawkes::NavGraphStaticListEdgeConstraint *edge_constraint_;
 };
 
 #endif
