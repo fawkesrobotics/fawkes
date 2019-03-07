@@ -27,63 +27,59 @@
 #include <utils/system/signal.h>
 
 namespace fawkes {
-  class FawkesNetworkClient;
-  class FawkesNetworkMessage;
-  class ArgumentParser;
-}
+class FawkesNetworkClient;
+class FawkesNetworkMessage;
+class ArgumentParser;
+} // namespace fawkes
 
-class PluginTool
-: public fawkes::SignalHandler,
-  public fawkes::FawkesNetworkClientHandler
+class PluginTool : public fawkes::SignalHandler, public fawkes::FawkesNetworkClientHandler
 {
- public:
-  PluginTool(fawkes::ArgumentParser *argp, fawkes::FawkesNetworkClient *c);
-  PluginTool(fawkes::FawkesNetworkClient *c);
-  ~PluginTool();
+public:
+	PluginTool(fawkes::ArgumentParser *argp, fawkes::FawkesNetworkClient *c);
+	PluginTool(fawkes::FawkesNetworkClient *c);
+	~PluginTool();
 
-  void handle_signal(int signum);
+	void handle_signal(int signum);
 
-  void set_load_plugin(const char *plugin_name);
-  void set_unload_plugin(const char *plugin_name);
-  void set_watch_mode();
-  void set_list_mode();
+	void set_load_plugin(const char *plugin_name);
+	void set_unload_plugin(const char *plugin_name);
+	void set_watch_mode();
+	void set_list_mode();
 
-  void run();
+	void run();
 
-  static void print_usage(const char *program_name);
+	static void print_usage(const char *program_name);
 
- private:
-  void load();
-  void unload();
-  void list_loaded();
-  void watch();
-  void list_avail();
+private:
+	void load();
+	void unload();
+	void list_loaded();
+	void watch();
+	void list_avail();
 
-  virtual void deregistered(unsigned int id) throw();
-  virtual void inbound_received(fawkes::FawkesNetworkMessage *msg,
-				unsigned int id) throw();
-  virtual void connection_died(unsigned int id) throw();
-  virtual void connection_established(unsigned int id) throw();
+	virtual void deregistered(unsigned int id) throw();
+	virtual void inbound_received(fawkes::FawkesNetworkMessage *msg, unsigned int id) throw();
+	virtual void connection_died(unsigned int id) throw();
+	virtual void connection_established(unsigned int id) throw();
 
- private:
-  typedef enum {
-    M_LIST_LOADED,
-    M_LIST_AVAIL,
-    M_LOAD,
-    M_UNLOAD,
-    M_RELOAD,
-    M_WATCH,
-    M_UNKNOWN
-  } OperationMode;
+private:
+	typedef enum {
+		M_LIST_LOADED,
+		M_LIST_AVAIL,
+		M_LOAD,
+		M_UNLOAD,
+		M_RELOAD,
+		M_WATCH,
+		M_UNKNOWN
+	} OperationMode;
 
-  fawkes::FawkesNetworkClient *c;
-  OperationMode   opmode;
-  const char     *plugin_name;
-  const char     *program_name_;
-  bool            quit;
+	fawkes::FawkesNetworkClient *c;
+	OperationMode                opmode;
+	const char *                 plugin_name;
+	const char *                 program_name_;
+	bool                         quit;
 
-  bool            list_found;
+	bool list_found;
 };
-
 
 #endif
