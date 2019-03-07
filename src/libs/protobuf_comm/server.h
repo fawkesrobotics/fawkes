@@ -37,166 +37,192 @@
 #ifndef _PROTOBUF_COMM_SERVER_H_
 #define _PROTOBUF_COMM_SERVER_H_
 
+#include <google/protobuf/message.h>
 #include <protobuf_comm/frame_header.h>
 #include <protobuf_comm/message_register.h>
 #include <protobuf_comm/queue_entry.h>
 
 #include <boost/asio.hpp>
-#include <boost/signals2.hpp>
 #include <boost/enable_shared_from_this.hpp>
-#include <google/protobuf/message.h>
+#include <boost/signals2.hpp>
 
 #ifndef _GLIBCXX_USE_SCHED_YIELD
-#  define _GLIBCXX_USE_SCHED_YIELD
+#	define _GLIBCXX_USE_SCHED_YIELD
 #endif
-#include <thread>
 #include <mutex>
 #include <queue>
+#include <thread>
 #if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
-#  include <atomic>
+#	include <atomic>
 #endif
 
 namespace protobuf_comm {
 
 class ProtobufStreamServer
 {
- public:
-  /** ID to identify connected clients. */
-  typedef unsigned int ClientID;
+public:
+	/** ID to identify connected clients. */
+	typedef unsigned int ClientID;
 
-  ProtobufStreamServer(unsigned short port);
-  ProtobufStreamServer(unsigned short port, std::vector<std::string> &proto_path);
-  ProtobufStreamServer(unsigned short port, MessageRegister *mr);
-  ~ProtobufStreamServer();
+	ProtobufStreamServer(unsigned short port);
+	ProtobufStreamServer(unsigned short port, std::vector<std::string> &proto_path);
+	ProtobufStreamServer(unsigned short port, MessageRegister *mr);
+	~ProtobufStreamServer();
 
-  void send(ClientID client, uint16_t component_id, uint16_t msg_type,
-	    google::protobuf::Message &m);
-  void send(ClientID client, uint16_t component_id, uint16_t msg_type,
-	    std::shared_ptr<google::protobuf::Message> m);
-  void send(ClientID client, std::shared_ptr<google::protobuf::Message> m);
-  void send(ClientID client, google::protobuf::Message &m);
+	void
+	     send(ClientID client, uint16_t component_id, uint16_t msg_type, google::protobuf::Message &m);
+	void send(ClientID                                   client,
+	          uint16_t                                   component_id,
+	          uint16_t                                   msg_type,
+	          std::shared_ptr<google::protobuf::Message> m);
+	void send(ClientID client, std::shared_ptr<google::protobuf::Message> m);
+	void send(ClientID client, google::protobuf::Message &m);
 
-  void send_to_all(uint16_t component_id, uint16_t msg_type,
-		   google::protobuf::Message &m);
-  void send_to_all(uint16_t component_id, uint16_t msg_type,
-		   std::shared_ptr<google::protobuf::Message> m);
-  void send_to_all(std::shared_ptr<google::protobuf::Message> m);
-  void send_to_all(google::protobuf::Message &m);
+	void send_to_all(uint16_t component_id, uint16_t msg_type, google::protobuf::Message &m);
+	void send_to_all(uint16_t                                   component_id,
+	                 uint16_t                                   msg_type,
+	                 std::shared_ptr<google::protobuf::Message> m);
+	void send_to_all(std::shared_ptr<google::protobuf::Message> m);
+	void send_to_all(google::protobuf::Message &m);
 
-  void disconnect(ClientID client);
+	void disconnect(ClientID client);
 
-  /** Get the server's message register.
+	/** Get the server's message register.
    * @return message register
    */
-  MessageRegister &  message_register()
-  { return *message_register_; }
+	MessageRegister &
+	message_register()
+	{
+		return *message_register_;
+	}
 
-  /** Signal that is invoked when a message has been received.
+	/** Signal that is invoked when a message has been received.
    * @return signal
    */
-  boost::signals2::signal<void (ClientID, uint16_t, uint16_t,
-				std::shared_ptr<google::protobuf::Message>)> &
-    signal_received() { return sig_rcvd_; }
+	boost::signals2::signal<
+	  void(ClientID, uint16_t, uint16_t, std::shared_ptr<google::protobuf::Message>)> &
+	signal_received()
+	{
+		return sig_rcvd_;
+	}
 
-  /** Signal that is invoked when receiving a message failed.
+	/** Signal that is invoked when receiving a message failed.
    * @return signal
    */
-  boost::signals2::signal<void (ClientID, uint16_t, uint16_t, std::string)> &
-    signal_receive_failed() { return sig_recv_failed_; }
+	boost::signals2::signal<void(ClientID, uint16_t, uint16_t, std::string)> &
+	signal_receive_failed()
+	{
+		return sig_recv_failed_;
+	}
 
-  /** Signal that is invoked when a new client has connected.
+	/** Signal that is invoked when a new client has connected.
    * @return signal
    */
-  boost::signals2::signal<void (ClientID, boost::asio::ip::tcp::endpoint &)> &
-    signal_connected() { return sig_connected_; }
+	boost::signals2::signal<void(ClientID, boost::asio::ip::tcp::endpoint &)> &
+	signal_connected()
+	{
+		return sig_connected_;
+	}
 
-  /** Signal that is invoked when a new client has disconnected.
+	/** Signal that is invoked when a new client has disconnected.
    * @return signal
    */
-  boost::signals2::signal<void (ClientID, const boost::system::error_code &)> &
-    signal_disconnected() { return sig_disconnected_; }
+	boost::signals2::signal<void(ClientID, const boost::system::error_code &)> &
+	signal_disconnected()
+	{
+		return sig_disconnected_;
+	}
 
- private:
-  class Session : public boost::enable_shared_from_this<Session>
-  {
-   public:
-    /** Shortcut for shared pointer of session. */
-    typedef boost::shared_ptr<Session> Ptr;
+private:
+	class Session : public boost::enable_shared_from_this<Session>
+	{
+	public:
+		/** Shortcut for shared pointer of session. */
+		typedef boost::shared_ptr<Session> Ptr;
 
-    Session(ClientID id, ProtobufStreamServer *parent,
-	    boost::asio::io_service &io_service);
-    ~Session();
+		Session(ClientID id, ProtobufStreamServer *parent, boost::asio::io_service &io_service);
+		~Session();
 
-    /** Get underlying socket.
+		/** Get underlying socket.
      * @return socket */
-    boost::asio::ip::tcp::socket & socket() { return socket_; }
+		boost::asio::ip::tcp::socket &
+		socket()
+		{
+			return socket_;
+		}
 
-    /** Get client ID.
+		/** Get client ID.
      * @return client ID */
-    ClientID id() const { return id_; }
-    /** Get client's endpoint.
+		ClientID
+		id() const
+		{
+			return id_;
+		}
+		/** Get client's endpoint.
      * @return remote client's endpoint */
-    boost::asio::ip::tcp::endpoint & remote_endpoint()
-    { return remote_endpoint_; }
+		boost::asio::ip::tcp::endpoint &
+		remote_endpoint()
+		{
+			return remote_endpoint_;
+		}
 
-    void start_session();
-    void start_read();
-    void send(uint16_t component_id, uint16_t msg_type,
-	      google::protobuf::Message &m);
-    void disconnect();
+		void start_session();
+		void start_read();
+		void send(uint16_t component_id, uint16_t msg_type, google::protobuf::Message &m);
+		void disconnect();
 
-   private:
-    void handle_read_message(const boost::system::error_code& error);
-    void handle_read_header(const boost::system::error_code& error);
-    void handle_write(const boost::system::error_code& error,
-		      size_t /*bytes_transferred*/, QueueEntry *entry);
+	private:
+		void handle_read_message(const boost::system::error_code &error);
+		void handle_read_header(const boost::system::error_code &error);
+		void handle_write(const boost::system::error_code &error,
+		                  size_t /*bytes_transferred*/,
+		                  QueueEntry *entry);
 
-   private:
-    ClientID id_;
-    ProtobufStreamServer *parent_;
-    boost::asio::ip::tcp::socket socket_;
-    boost::asio::ip::tcp::endpoint remote_endpoint_;
+	private:
+		ClientID                       id_;
+		ProtobufStreamServer *         parent_;
+		boost::asio::ip::tcp::socket   socket_;
+		boost::asio::ip::tcp::endpoint remote_endpoint_;
 
-    frame_header_t in_frame_header_;
-    size_t         in_data_size_;
-    void *         in_data_;
+		frame_header_t in_frame_header_;
+		size_t         in_data_size_;
+		void *         in_data_;
 
-    std::queue<QueueEntry *> outbound_queue_;
-    std::mutex               outbound_mutex_;
-    bool                     outbound_active_;
-  };
+		std::queue<QueueEntry *> outbound_queue_;
+		std::mutex               outbound_mutex_;
+		bool                     outbound_active_;
+	};
 
- private: // methods
-  void run_asio();
-  void start_accept();
-  void handle_accept(Session::Ptr new_session, const boost::system::error_code& error);
+private: // methods
+	void run_asio();
+	void start_accept();
+	void handle_accept(Session::Ptr new_session, const boost::system::error_code &error);
 
-  void disconnected(boost::shared_ptr<Session> session,
-		    const boost::system::error_code &error);
+	void disconnected(boost::shared_ptr<Session> session, const boost::system::error_code &error);
 
- private: // members
-  boost::asio::io_service io_service_;
-  boost::asio::ip::tcp::acceptor acceptor_;
-  boost::signals2::signal<void (ClientID, uint16_t, uint16_t,
-				std::shared_ptr<google::protobuf::Message>)> sig_rcvd_;
-  boost::signals2::signal<void (ClientID, uint16_t, uint16_t, std::string)> sig_recv_failed_;
-  boost::signals2::signal<void (ClientID, boost::asio::ip::tcp::endpoint &)> sig_connected_;
-  boost::signals2::signal<void (ClientID, const boost::system::error_code &)>
-    sig_disconnected_;
+private: // members
+	boost::asio::io_service        io_service_;
+	boost::asio::ip::tcp::acceptor acceptor_;
+	boost::signals2::signal<
+	  void(ClientID, uint16_t, uint16_t, std::shared_ptr<google::protobuf::Message>)>
+	                                                                           sig_rcvd_;
+	boost::signals2::signal<void(ClientID, uint16_t, uint16_t, std::string)>   sig_recv_failed_;
+	boost::signals2::signal<void(ClientID, boost::asio::ip::tcp::endpoint &)>  sig_connected_;
+	boost::signals2::signal<void(ClientID, const boost::system::error_code &)> sig_disconnected_;
 
-  std::thread asio_thread_;
+	std::thread asio_thread_;
 
-  std::map<ClientID, boost::shared_ptr<Session>> sessions_;
+	std::map<ClientID, boost::shared_ptr<Session>> sessions_;
 
 #if defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7))
-  std::atomic<ClientID> next_cid_;
+	std::atomic<ClientID> next_cid_;
 #else
-  ClientID next_cid_;
-  std::mutex next_cid_mutex_;
+	ClientID   next_cid_;
+	std::mutex next_cid_mutex_;
 #endif
 
-  MessageRegister *message_register_;
-  bool             own_message_register_;
+	MessageRegister *message_register_;
+	bool             own_message_register_;
 };
 
 } // end namespace protobuf_comm

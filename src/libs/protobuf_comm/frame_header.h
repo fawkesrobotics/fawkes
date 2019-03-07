@@ -41,13 +41,13 @@
 
 namespace protobuf_comm {
 
-#pragma pack(push,4)
+#pragma pack(push, 4)
 
-#define PB_ENCRYPTION_NONE         0x00
-#define PB_ENCRYPTION_AES_128_ECB  0x01
-#define PB_ENCRYPTION_AES_128_CBC  0x02
-#define PB_ENCRYPTION_AES_256_ECB  0x03
-#define PB_ENCRYPTION_AES_256_CBC  0x04
+#define PB_ENCRYPTION_NONE 0x00
+#define PB_ENCRYPTION_AES_128_ECB 0x01
+#define PB_ENCRYPTION_AES_128_CBC 0x02
+#define PB_ENCRYPTION_AES_256_ECB 0x03
+#define PB_ENCRYPTION_AES_256_CBC 0x04
 
 /** Network frame header version to use.
  * V1 is the old version which for example is required to communicate with the
@@ -55,8 +55,8 @@ namespace protobuf_comm {
  * V2 supports data encryption.
  */
 typedef enum {
-  PB_FRAME_V1 = 1,	///< Version 1
-  PB_FRAME_V2 = 2	///< Version 2
+	PB_FRAME_V1 = 1, ///< Version 1
+	PB_FRAME_V2 = 2  ///< Version 2
 } frame_header_version_t;
 
 /** Network framing header.
@@ -68,19 +68,20 @@ typedef enum {
  * counted in the payload size).
  * @author Tim Niemueller
  */
-typedef struct {
-  /// Frame header version
-  uint8_t  header_version;
-  /// One of PB_ENCRYPTION_*
-  uint8_t  cipher;
-  /// reserved for future use
-  uint8_t  reserved_2;
-  /// reserved for future use
-  uint8_t  reserved_3;
-  /// payload size in bytes
-  /// includes message and
-  /// header, _not_ IV
-  uint32_t  payload_size;
+typedef struct
+{
+	/// Frame header version
+	uint8_t header_version;
+	/// One of PB_ENCRYPTION_*
+	uint8_t cipher;
+	/// reserved for future use
+	uint8_t reserved_2;
+	/// reserved for future use
+	uint8_t reserved_3;
+	/// payload size in bytes
+	/// includes message and
+	/// header, _not_ IV
+	uint32_t payload_size;
 } frame_header_t;
 
 /** Network message header.
@@ -93,13 +94,13 @@ typedef struct {
  * All numbers are given in network byte order (big endian).
  * @author Tim Niemueller
  */
-typedef struct {
-  /// component id
-  uint16_t  component_id;
-  /// message type
-  uint16_t  msg_type;
+typedef struct
+{
+	/// component id
+	uint16_t component_id;
+	/// message type
+	uint16_t msg_type;
 } message_header_t;
-
 
 /** Old network message framing header.
  * Header that is prepended to all messages.
@@ -111,13 +112,14 @@ typedef struct {
  * All numbers are given in network byte order (big endian).
  * @author Tim Niemueller
  */
-typedef struct {
-  /** component id */
-  uint16_t  component_id;
-  /** message type */
-  uint16_t  msg_type;
-  /** payload size in bytes */
-  uint32_t  payload_size;
+typedef struct
+{
+	/** component id */
+	uint16_t component_id;
+	/** message type */
+	uint16_t msg_type;
+	/** payload size in bytes */
+	uint32_t payload_size;
 } frame_header_v1_t;
 
 #pragma pack(pop)
