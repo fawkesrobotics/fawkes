@@ -21,17 +21,16 @@
 
 #include "gazsim_webcam_thread.h"
 
+#include <aspect/logging.h>
+#include <fvutils/color/conversions.h>
 #include <tf/types.h>
-#include <stdio.h>
-#include <math.h>
 #include <utils/math/angle.h>
 
-#include <gazebo/transport/Node.hh>
 #include <gazebo/msgs/msgs.hh>
+#include <gazebo/transport/Node.hh>
 #include <gazebo/transport/transport.hh>
-#include <aspect/logging.h>
-
-#include <fvutils/color/conversions.h>
+#include <math.h>
+#include <stdio.h>
 
 using namespace fawkes;
 using namespace gazebo;
@@ -43,31 +42,32 @@ using namespace gazebo;
 
 /** Constructor. */
 WebcamSimThread::WebcamSimThread()
-  : Thread("WebcamSimThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
+: Thread("WebcamSimThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS)
 {
 }
 
-void WebcamSimThread::init()
+void
+WebcamSimThread::init()
 {
-  logger->log_debug(name(), "Initializing Simulation of the Webcams");
-  shm_ids_ = config->get_strings("/gazsim/webcam/shm-image-ids");
+	logger->log_debug(name(), "Initializing Simulation of the Webcams");
+	shm_ids_ = config->get_strings("/gazsim/webcam/shm-image-ids");
 
-  for (std::vector<std::string>::iterator it = shm_ids_.begin(); it != shm_ids_.end(); ++it)
-  {
-    webcams_.push_back(new GazsimWebcam(*it, gazebo_world_node, config));
-  }
+	for (std::vector<std::string>::iterator it = shm_ids_.begin(); it != shm_ids_.end(); ++it) {
+		webcams_.push_back(new GazsimWebcam(*it, gazebo_world_node, config));
+	}
 }
 
-void WebcamSimThread::finalize()
+void
+WebcamSimThread::finalize()
 {
-  for (std::vector<GazsimWebcam*>::iterator it = webcams_.begin(); it != webcams_.end(); ++it)
-  {
-    delete *it;
-  }  
+	for (std::vector<GazsimWebcam *>::iterator it = webcams_.begin(); it != webcams_.end(); ++it) {
+		delete *it;
+	}
 }
 
-void WebcamSimThread::loop()
+void
+WebcamSimThread::loop()
 {
-  //The interesting stuff happens in the callback of the webcams
+	//The interesting stuff happens in the callback of the webcams
 }
