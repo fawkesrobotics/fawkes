@@ -21,6 +21,7 @@
  */
 
 #include "flite_plugin.h"
+
 #include "synth_thread.h"
 
 using namespace fawkes;
@@ -35,12 +36,10 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-FlitePlugin::FlitePlugin(Configuration *config)
-  : Plugin(config)
+FlitePlugin::FlitePlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new FliteSynthThread());
+	thread_list.push_back(new FliteSynthThread());
 }
-
 
 PLUGIN_DESCRIPTION("Flite speech synthesis integration")
 EXPORT_PLUGIN(FlitePlugin)
