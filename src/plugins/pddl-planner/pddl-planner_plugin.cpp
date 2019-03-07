@@ -19,9 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "pddl-planner_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,15 +31,14 @@ using namespace fawkes;
  */
 class PddlPlannerPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fakwes configuration
    */
-  explicit PddlPlannerPlugin(Configuration *config)
-     : Plugin(config)
-  {
-     thread_list.push_back(new PddlPlannerThread());
-  }
+	explicit PddlPlannerPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new PddlPlannerThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Starts a pddl planner and writes the resulting plan into the robot memory")
