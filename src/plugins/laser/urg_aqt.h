@@ -25,58 +25,57 @@
 
 #include "acquisition_thread.h"
 
-#include <string>
 #include <map>
+#include <string>
 
 namespace qrk {
-  class UrgCtrl;
+class UrgCtrl;
 }
 
 namespace fawkes {
-  class TimeWait;
+class TimeWait;
 }
 
 class HokuyoUrgAcquisitionThread : public LaserAcquisitionThread
 {
- public:
-  HokuyoUrgAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
+public:
+	HokuyoUrgAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
 
-  // from LaserAcquisitionThread
-  virtual void pre_init(fawkes::Configuration *config, fawkes::Logger *logger);
+	// from LaserAcquisitionThread
+	virtual void pre_init(fawkes::Configuration *config, fawkes::Logger *logger);
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- private:
-  std::map<std::string, std::string> get_device_info(qrk::UrgCtrl *ctrl);
+private:
+	std::map<std::string, std::string> get_device_info(qrk::UrgCtrl *ctrl);
 
- private:
-  bool pre_init_done_;
-  unsigned int number_of_values_;
-  qrk::UrgCtrl *ctrl_;
-  int           fd_;
+private:
+	bool          pre_init_done_;
+	unsigned int  number_of_values_;
+	qrk::UrgCtrl *ctrl_;
+	int           fd_;
 
-  fawkes::TimeWait *timer_;
+	fawkes::TimeWait *timer_;
 
-  std::string  cfg_name_;
-  std::string  cfg_prefix_;
+	std::string cfg_name_;
+	std::string cfg_prefix_;
 
-  std::map<std::string, std::string> device_info_;
+	std::map<std::string, std::string> device_info_;
 
-  std::string  cfg_device_;
-  std::string  cfg_serial_;
-  float        cfg_time_offset_;
+	std::string cfg_device_;
+	std::string cfg_serial_;
+	float       cfg_time_offset_;
 
-  unsigned int first_ray_;
-  unsigned int last_ray_;
-  unsigned int front_ray_;
-  unsigned int slit_division_;
-  float        step_per_angle_;
-  float        angle_per_step_;
-  float        angular_range_;
-  long int     scan_msec_;
+	unsigned int first_ray_;
+	unsigned int last_ray_;
+	unsigned int front_ray_;
+	unsigned int slit_division_;
+	float        step_per_angle_;
+	float        angle_per_step_;
+	float        angular_range_;
+	long int     scan_msec_;
 };
-
 
 #endif

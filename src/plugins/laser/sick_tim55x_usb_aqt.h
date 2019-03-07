@@ -25,35 +25,34 @@
 
 #include "sick_tim55x_common_aqt.h"
 
-#include <string>
 #include <libusb.h>
+#include <string>
 
 namespace fawkes {
-  class Mutex;
+class Mutex;
 }
 
 class SickTiM55xUSBAcquisitionThread : public SickTiM55xCommonAcquisitionThread
 {
- public:
-  SickTiM55xUSBAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
+public:
+	SickTiM55xUSBAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- private:
-  void open_device();
-  void close_device();
-  void flush_device();
-  void send_with_reply(const char *request, std::string *reply = NULL);
+private:
+	void open_device();
+	void close_device();
+	void flush_device();
+	void send_with_reply(const char *request, std::string *reply = NULL);
 
- private:
-  std::string  cfg_serial_;
+private:
+	std::string cfg_serial_;
 
-  libusb_context *usb_ctx_;
-  libusb_device_handle  *usb_device_handle_;
-  fawkes::Mutex  *usb_mutex_;
+	libusb_context *      usb_ctx_;
+	libusb_device_handle *usb_device_handle_;
+	fawkes::Mutex *       usb_mutex_;
 };
-
 
 #endif
