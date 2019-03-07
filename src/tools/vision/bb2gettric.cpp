@@ -22,6 +22,7 @@
 
 #include <fvcams/bumblebee2.h>
 #include <fvutils/system/camargp.h>
+
 #include <cerrno>
 #include <cstdlib>
 #include <unistd.h>
@@ -32,34 +33,35 @@ using namespace firevision;
 int
 main(int argc, char **argv)
 {
+	if (argc < 2) {
+		printf("Usage: %s <context_file>\n", argv[0]);
+		exit(-1);
+	}
 
-  if ( argc < 2 ) {
-    printf("Usage: %s <context_file>\n", argv[0]);
-    exit(-1);
-  }
+	const char *context_file = argv[1];
+	if (access(context_file, F_OK) == 0) {
+		fprintf(stderr,
+		        "File with name %s exists, delete manually and retry. Aborting.\n",
+		        context_file);
+		return -1;
+	}
+	if (access(context_file, W_OK) != 0) {
+		// ENOENT is ok, we would have access, but there is no file, yet
+		if (errno != ENOENT) {
+			fprintf(stderr, "Cannot write to file %s, permission problem?\n", context_file);
+			return -2;
+		}
+	}
 
-  const char *context_file = argv[1];
-  if ( access(context_file, F_OK) == 0) {
-    fprintf(stderr, "File with name %s exists, delete manually and retry. Aborting.\n", context_file);
-    return -1;
-  }
-  if ( access(context_file, W_OK) != 0) {
-    // ENOENT is ok, we would have access, but there is no file, yet
-    if ( errno != ENOENT ) {
-      fprintf(stderr, "Cannot write to file %s, permission problem?\n", context_file);
-      return -2;
-    }
-  }
+	CameraArgumentParser *cap = new CameraArgumentParser("bumblebee2:Bumblebee2 BB2-03S2C");
 
-  CameraArgumentParser *cap = new CameraArgumentParser("bumblebee2:Bumblebee2 BB2-03S2C");
+	Bumblebee2Camera *bb2 = new Bumblebee2Camera(cap);
+	bb2->open();
 
-  Bumblebee2Camera *bb2 = new Bumblebee2Camera(cap);
-  bb2->open();
+	bb2->write_triclops_config_from_camera_to_file(context_file);
+	bb2->close();
+	delete bb2;
+	delete cap;
 
-  bb2->write_triclops_config_from_camera_to_file(context_file);
-  bb2->close();
-  delete bb2;
-  delete cap;
-
-  return 0;
+	return 0;
 }

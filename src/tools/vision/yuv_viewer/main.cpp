@@ -28,28 +28,26 @@
 
 using namespace std;
 
-int main(int argc, char** argv)
+int
+main(int argc, char **argv)
 {
-  Glib::thread_init();
+	Glib::thread_init();
 
-  try
-  {
-    Gtk::Main kit(argc, argv);
+	try {
+		Gtk::Main kit(argc, argv);
 
-    Glib::RefPtr<Gtk::Builder> builder =
-      Gtk::Builder::create_from_file(RESDIR"/guis/yuv_viewer/yuv_viewer.ui");
+		Glib::RefPtr<Gtk::Builder> builder =
+		  Gtk::Builder::create_from_file(RESDIR "/guis/yuv_viewer/yuv_viewer.ui");
 
-    YuvViewerGtkWindow *window = NULL;
-    builder->get_widget_derived("wndMain", window);
+		YuvViewerGtkWindow *window = NULL;
+		builder->get_widget_derived("wndMain", window);
 
-    kit.run( *window );
+		kit.run(*window);
 
-    delete window;
-  }
-  catch (std::exception const& e)
-  {
-    std::cerr << "Error: " << e.what() << std::endl;
-  }
+		delete window;
+	} catch (std::exception const &e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
 
-  return 0;
+	return 0;
 }

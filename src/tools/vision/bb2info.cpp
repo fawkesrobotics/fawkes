@@ -29,17 +29,15 @@ using namespace firevision;
 int
 main(int argc, char **argv)
 {
+	CameraArgumentParser *cap = new CameraArgumentParser("bumblebee2:Bumblebee2 BB2-03S2C");
 
-  CameraArgumentParser *cap = new CameraArgumentParser("bumblebee2:Bumblebee2 BB2-03S2C");
+	Bumblebee2Camera *bb2 = new Bumblebee2Camera(cap);
+	bb2->open();
+	bb2->print_info();
+	bb2->close();
 
-  Bumblebee2Camera *bb2 = new Bumblebee2Camera(cap);
-  bb2->open();
-  bb2->print_info();
-  bb2->close();
+	delete bb2;
+	delete cap;
 
-  delete bb2;
-  delete cap;
-
-  return 0;
+	return 0;
 }
-
