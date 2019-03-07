@@ -35,16 +35,14 @@ namespace fawkes {
  */
 MetricsAspect::MetricsAspect(MetricsSupplier *metrics_supplier)
 {
-  add_aspect("MetricsAspect");
-  metrics_supplier_ = metrics_supplier;
+	add_aspect("MetricsAspect");
+	metrics_supplier_ = metrics_supplier;
 }
-
 
 /** Virtual empty destructor. */
 MetricsAspect::~MetricsAspect()
 {
 }
-
 
 /** Get metrics supplier of this thread.
  * @return metrics supplier
@@ -54,6 +52,5 @@ MetricsAspect::get_metrics_supplier() const
 {
 	return metrics_supplier_;
 }
-
 
 } // end namespace fawkes

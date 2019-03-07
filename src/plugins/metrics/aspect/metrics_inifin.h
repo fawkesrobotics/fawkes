@@ -25,9 +25,9 @@
 #define _PLUGINS_METRICS_ASPECT_METRICS_INIFIN_H_
 
 #include <aspect/inifins/inifin.h>
+#include <core/utils/lockptr.h>
 #include <plugins/metrics/aspect/metrics.h>
 #include <plugins/metrics/aspect/metrics_manager.h>
-#include <core/utils/lockptr.h>
 
 namespace fawkes {
 
@@ -36,17 +36,17 @@ class MetricsManager;
 
 class MetricsAspectIniFin : public AspectIniFin
 {
- public:
-  MetricsAspectIniFin();
-  ~MetricsAspectIniFin();
+public:
+	MetricsAspectIniFin();
+	~MetricsAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
-  void set_manager(MetricsManager * supplier_mgr);
+	void set_manager(MetricsManager *supplier_mgr);
 
- private:
-  MetricsManager * metrics_mgr_;
+private:
+	MetricsManager *metrics_mgr_;
 };
 
 } // end namespace fawkes
