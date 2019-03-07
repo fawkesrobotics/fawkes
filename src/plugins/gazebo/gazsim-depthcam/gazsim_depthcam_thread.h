@@ -22,59 +22,57 @@
 #ifndef _PLUGINS_GAZSIM_DEPTHCAM_THREAD_H_
 #define _PLUGINS_GAZSIM_DEPTHCAM_THREAD_H_
 
-#include <core/threading/thread.h>
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/blackboard.h>
-#include <aspect/blocked_timing.h>
-#include <plugins/gazebo/aspect/gazebo.h>
-#include <string.h>
-
 #include <aspect/pointcloud.h>
+#include <core/threading/thread.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <plugins/gazebo/aspect/gazebo.h>
 
+#include <string.h>
 
 //from Gazebo
-#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/msgs/MessageTypes.hh>
+#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/transport/transport.hh>
 
-class DepthcamSimThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::GazeboAspect,
-  public fawkes::PointCloudAspect
+class DepthcamSimThread : public fawkes::Thread,
+                          public fawkes::ClockAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::BlackBoardAspect,
+                          public fawkes::BlockedTimingAspect,
+                          public fawkes::GazeboAspect,
+                          public fawkes::PointCloudAspect
 {
- public:
-  DepthcamSimThread();
+public:
+	DepthcamSimThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- private:
-  gazebo::transport::SubscriberPtr depthcam_sub_;
+private:
+	gazebo::transport::SubscriberPtr depthcam_sub_;
 
-  //handler function for incoming depthcam data messages
-  void on_depthcam_data_msg(ConstPointCloudPtr &msg);
+	//handler function for incoming depthcam data messages
+	void on_depthcam_data_msg(ConstPointCloudPtr &msg);
 
-  //config values
-  //topic name of the gazebo message publisher
-  std::string topic_name_;
-  unsigned int width_;
-  unsigned int height_;
-  //id of the shared memory object
-  std::string shm_id_;
-  std::string frame_;
-  std::string pcl_id_;
+	//config values
+	//topic name of the gazebo message publisher
+	std::string  topic_name_;
+	unsigned int width_;
+	unsigned int height_;
+	//id of the shared memory object
+	std::string shm_id_;
+	std::string frame_;
+	std::string pcl_id_;
 
-  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> > pcl_;
+	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ>> pcl_;
 };
 
 #endif
