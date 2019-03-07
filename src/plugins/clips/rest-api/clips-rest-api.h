@@ -21,31 +21,28 @@
 
 #pragma once
 
-#include <core/threading/thread.h>
+#include "model/Environment.h"
+#include "model/Fact.h"
+
 #include <aspect/logging.h>
 #include <aspect/webview.h>
+#include <clipsmm/fact.h>
+#include <core/threading/thread.h>
+#include <core/utils/lockptr.h>
 #include <plugins/clips/aspect/clips_manager.h>
-
 #include <webview/rest_api.h>
 #include <webview/rest_array.h>
 
-#include <core/utils/lockptr.h>
-#include <clipsmm/fact.h>
-
-#include "model/Fact.h"
-#include "model/Environment.h"
-
 namespace CLIPS {
-	class Environment;
+class Environment;
 }
 
-class ClipsRestApi
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-	public fawkes::WebviewAspect,
-  public fawkes::CLIPSManagerAspect
+class ClipsRestApi : public fawkes::Thread,
+                     public fawkes::LoggingAspect,
+                     public fawkes::WebviewAspect,
+                     public fawkes::CLIPSManagerAspect
 {
- public:
+public:
 	ClipsRestApi();
 	~ClipsRestApi();
 
@@ -53,16 +50,13 @@ class ClipsRestApi
 	virtual void loop();
 	virtual void finalize();
 
- private:
+private:
 	WebviewRestArray<Environment> cb_list_environments();
-	WebviewRestArray<Fact>
-		cb_get_facts(fawkes::WebviewRestParams& params);
+	WebviewRestArray<Fact>        cb_get_facts(fawkes::WebviewRestParams &params);
 
-	Fact gen_fact(fawkes::LockPtr<CLIPS::Environment>& clips,
-	              CLIPS::Fact::pointer &fact, bool formatted);
+	Fact
+	gen_fact(fawkes::LockPtr<CLIPS::Environment> &clips, CLIPS::Fact::pointer &fact, bool formatted);
 
-
- private:
+private:
 	fawkes::WebviewRestApi *rest_api_;
-	
 };
