@@ -20,8 +20,9 @@
  */
 
 #include "openprs_agent_thread.h"
-#include <core/plugin.h>
+
 #include <config/config.h>
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -30,25 +31,27 @@ using namespace fawkes;
  */
 class OpenPRSAgentPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit OpenPRSAgentPlugin(Configuration *config) : Plugin(config)
-  {
-    OpenPRSAspect::Mode mode = OpenPRSAspect::OPRS;
-    bool gdb_delay = false;
-    try {
-      std::string mode_s = config->get_string("/openprs-agent/oprs-mode");
-      if (mode_s == "XOPRS")  mode = OpenPRSAspect::XOPRS;
-    } catch (Exception &e) {} // ignored, use default
-    try {
-      gdb_delay = config->get_bool("/openprs-agent/gdb-delay");
-    } catch (Exception &e) {} // ignored, use default
-    thread_list.push_back(new OpenPRSAgentThread(mode, gdb_delay));
-  }
+	explicit OpenPRSAgentPlugin(Configuration *config) : Plugin(config)
+	{
+		OpenPRSAspect::Mode mode      = OpenPRSAspect::OPRS;
+		bool                gdb_delay = false;
+		try {
+			std::string mode_s = config->get_string("/openprs-agent/oprs-mode");
+			if (mode_s == "XOPRS")
+				mode = OpenPRSAspect::XOPRS;
+		} catch (Exception &e) {
+		} // ignored, use default
+		try {
+			gdb_delay = config->get_bool("/openprs-agent/gdb-delay");
+		} catch (Exception &e) {
+		} // ignored, use default
+		thread_list.push_back(new OpenPRSAgentThread(mode, gdb_delay));
+	}
 };
-
 
 PLUGIN_DESCRIPTION("OpenPRS agent executive")
 EXPORT_PLUGIN(OpenPRSAgentPlugin)
