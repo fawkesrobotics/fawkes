@@ -205,7 +205,7 @@ public:
 	/** Constructor.
    * @param parent parent NaoQiDCMThread to call.
    */
-	HighFreqThread(NaoQiDCMThread *parent)
+	explicit HighFreqThread(NaoQiDCMThread *parent)
 	: Thread("NaoQiDCMThread::HighFreqThread", Thread::OPMODE_WAITFORWAKEUP), parent_(parent)
 	{
 		set_coalesce_wakeups(true);
