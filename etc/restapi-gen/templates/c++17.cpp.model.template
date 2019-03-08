@@ -6,7 +6,7 @@
 %  if p.type and p.type == 'array'
 	rapidjson::Value v_{{ propname | sanitize }}(rapidjson::kArrayType);
 	v_{{ propname | sanitize }}.Reserve({{ propname | sanitize }}_.size(), allocator);
-	for (const auto & e : {{ propname | sanitize }}_) {
+	for (const auto &e : {{ propname | sanitize }}_) {
 %    if '$ref' in p['items']
 		rapidjson::Value v(rapidjson::kObjectType);
 		e->to_json_value(d, v);
@@ -34,17 +34,17 @@
 		v.AddMember("{{ propname }}", v_{{ propname | sanitize }}, allocator);
 	}
 %  endif
-% endfor
+%- endfor
 %- endmacro
 
 %- macro gen_from_json(schema)
 % for propname, p in schema['properties'].items()
 %  if p.type and p.type == 'array'
 	if (d.HasMember("{{ propname }}") && d["{{ propname }}"].IsArray()) {
-		const rapidjson::Value& a = d["{{ propname }}"];
-		{{ propname | sanitize }}_ = {{ common.make_optional(p) }};
+		const rapidjson::Value &a = d["{{ propname }}"];
+		{{ "%-25s"|format(propname | sanitize(True)) }} = {{ common.make_optional(p) }}
 		{{ propname | sanitize }}_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 %    if '$ref' in p['items']
 			std::shared_ptr<{{ p['items']['$ref'] | reftype }}> nv{new {{ p['items']['$ref'] | reftype }}()};
 			nv->from_json_value(v);
@@ -56,14 +56,12 @@
 	}
 %  elif p.type and p.type == 'object'
 	if (d.HasMember("{{ propname }}") && d["{{ propname }}"].IsObject()) {
-		std::shared_ptr<rapidjson::Document> d_{{ propname | sanitize }} =
-		  std::make_shared<rapidjson::Document>();
+		std::shared_ptr<rapidjson::Document> d_{{ propname | sanitize }} = std::make_shared<rapidjson::Document>();
 		d_{{ propname | sanitize }}->CopyFrom(d["{{ propname }}"], d_{{ propname | sanitize }}->GetAllocator());
 	}
 %  elif '$ref' in p
 	if (d.HasMember("{{ propname }}") && d["{{ propname }}"].IsObject()) {
-		std::shared_ptr<{{ p['$ref'] | reftype }}>
-			nv{new {{ p['$ref'] | reftype }}(d["{{ propname }}"])};
+		std::shared_ptr<{{ p['$ref'] | reftype }}> nv{new {{ p['$ref'] | reftype }}(d["{{ propname }}"])};
 		{{ propname | sanitize }}_ = std::move(nv);
 	}
 %  else
@@ -93,12 +91,12 @@
 %   for s in schema.allOf
 %     if '$ref' in s
 	try {
-  	{{ s['$ref'] | reftype }}::validate(true);
+		{{ s['$ref'] | reftype }}::validate(true);
 	} catch (std::vector<std::string> &supertype_missing) {
 		missing.insert(missing.end(), supertype_missing.begin(), supertype_missing.end());
 	}
 %     elif 'type' in s and s['type'] == 'object'
-{{ gen_validate(s) }}
+{{ gen_validate(s) -}}
 %     endif
 %   endfor
 % else
@@ -107,7 +105,7 @@
 %       if r in schema.properties and schema.properties[r].type and schema.properties[r].type == 'array'
 %         if '$ref' in schema.properties[r]['items']
 	for (size_t i = 0; i < {{ r | sanitize }}_.size(); ++i) {
-		if (! {{ r | sanitize }}_[i]) {
+		if (!{{ r | sanitize }}_[i]) {
 			missing.push_back("{{ r }}[" + std::to_string(i) + "]");
 		} else {
 			try {
@@ -121,9 +119,11 @@
 	}
 %         endif
 %       else
-	if (! {{ r | sanitize }}_)  missing.push_back("{{ r }}");
+	if (!{{ r | sanitize }}_) {
+		missing.push_back("{{ r }}");
+	}
 %       endif
-%     endfor
+%-     endfor
 %   endif
 % endif
 %- endmacro
@@ -146,9 +146,9 @@
 #include "{{ name }}.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -161,7 +161,7 @@
 	from_json(json);
 }
 
-{{ name }}::{{ name }}(const rapidjson::Value& v)
+{{ name }}::{{ name }}(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -190,25 +190,24 @@ std::string
 }
 
 void
-{{ name }}::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+{{ name }}::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
 
 % if 'properties' in schema
-{{ gen_to_json(schema) }}
+{{ gen_to_json(schema) -}}
 % elif schema.allOf
 %   for s in schema.allOf
 %     if '$ref' in s
 	{{ s['$ref'] | reftype }}::to_json_value(d, v);
 %     elif 'type' in s and s['type'] == 'object'
-{{ gen_to_json(s) }}
+{{ gen_to_json(s) -}}
 %     endif
 %   endfor
 % endif
-
 }
 
 void
@@ -221,42 +220,36 @@ void
 }
 
 void
-{{ name }}::from_json_value(const rapidjson::Value& d)
+{{ name }}::from_json_value(const rapidjson::Value &d)
 {
 % if 'properties' in schema
-{{ gen_from_json(schema) }}
+{{ gen_from_json(schema) -}}
 % elif schema.allOf
 %   for s in schema.allOf
 %     if '$ref' in s
 	{{ s['$ref'] | reftype }}::from_json_value(d);
 %     elif 'type' in s and s['type'] == 'object'
-{{ gen_from_json(s) }}
+{{ gen_from_json(s) -}}
 %     endif
 %   endfor
 % endif
-
 }
 
 void
 {{ name }}::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
+	std::vector<std::string> missing;
 {{ gen_validate(schema) }}
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
-			std::ostringstream s;
-			s << "{{ name }} is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
-			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
-				s << missing[i];
-				if (i < (missing.size() - 1)) {
-					s << ", ";
-				}
-			}
-			throw std::runtime_error(s.str());
+			std::string s =
+			  std::accumulate(std::next(missing.begin()),
+			                  missing.end(),
+			                  missing.front(),
+			                  [](std::string &s, const std::string &n) { return s + ", " + n; });
+			throw std::runtime_error("{{ name }} is missing " + s);
 		}
 	}
 }
