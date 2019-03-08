@@ -21,11 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include "firewire.h"
+
 #include <core/exception.h>
 #include <core/exceptions/software.h>
 #include <dc1394/utils.h>
 #include <fvcams/cam_exceptions.h>
-#include <fvcams/firewire.h>
 #include <fvutils/system/camargp.h>
 #include <utils/system/console_colors.h>
 
