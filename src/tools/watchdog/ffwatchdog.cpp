@@ -21,6 +21,10 @@
  */
 
 #include <core/exception.h>
+#include <libdaemon/dfork.h>
+#include <libdaemon/dlog.h>
+#include <libdaemon/dpid.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 
 #include <cerrno>
@@ -29,17 +33,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <unistd.h>
-
-#ifdef HAVE_LIBDAEMON
-#	include <libdaemon/dfork.h>
-#	include <libdaemon/dlog.h>
-#	include <libdaemon/dpid.h>
-#	include <sys/stat.h>
-#	include <sys/wait.h>
-
-#	include <cerrno>
-#	include <cstring>
-#endif
 
 int  g_quit       = 0;
 bool g_force_quit = false;
@@ -68,13 +61,11 @@ usage(const char *progname)
 	       "progfile   full absolute path to executable\n"
 	       "args       any number of arguments, passed to program as-is\n\n"
 	       "where [options] passed in before <progfile> are one or more of:\n"
-#ifdef HAVE_LIBDAEMON
 	       " -D[pid file]     Run daemonized in the background, pid file is optional,\n"
 	       "                  defaults to /var/run/ffwatchdog_basename.pid, must be absolute path.\n"
 	       " -D[pid file] -k  Kill a daemonized process running in the background,\n"
 	       "                  pid file is optional as above.\n"
 	       " -D[pid file] -s  Check status of daemon.\n"
-#endif
 	       " -h               Show help instructions.\n\n",
 	       progname);
 }
@@ -103,7 +94,6 @@ fork_and_exec(int argc, char **argv, int prog_start)
 	return pid;
 }
 
-#ifdef HAVE_LIBDAEMON
 void
 daemonize_cleanup()
 {
@@ -146,14 +136,14 @@ daemonize(int argc, char **argv)
 		}
 
 	} else { // the daemon
-#	ifdef DAEMON_CLOSE_ALL_AVAILABLE
+#ifdef DAEMON_CLOSE_ALL_AVAILABLE
 		if (daemon_close_all(-1) < 0) {
 			daemon_log(LOG_ERR, "Failed to close all file descriptors: %s", strerror(errno));
 			// Send the error condition to the parent process
 			daemon_retval_send(1);
 			return -1;
 		}
-#	endif
+#endif
 
 		// Create the PID file
 		if (daemon_pid_file_create() < 0) {
@@ -187,7 +177,6 @@ ffwatchdog_daemon_pid_file_proc()
 {
 	return ffwatchdog_pid_file;
 }
-#endif // HAVE_LIBDAEMON
 
 /** Watchdog main.
  * @param argc argument count
@@ -253,7 +242,6 @@ main(int argc, char **argv)
 		exit(2);
 	}
 
-#ifdef HAVE_LIBDAEMON
 	pid_t dpid;
 
 	char *daemon_ident = NULL;
@@ -323,12 +311,6 @@ main(int argc, char **argv)
 			return 0;
 		} // else child, continue as usual
 	}
-#else
-	if (daemonize) {
-		printf("Daemonize support was not available at compile time.\n");
-		exit(13);
-	}
-#endif
 
 	struct sigaction sa;
 	sa.sa_handler = handle_signal;
@@ -409,11 +391,9 @@ main(int argc, char **argv)
 		}
 	}
 
-#ifdef HAVE_LIBDAEMON
 	if (arg_daemonize) {
 		daemonize_cleanup();
 	}
-#endif
 
 	return 0;
 }
