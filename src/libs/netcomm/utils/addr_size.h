@@ -25,6 +25,7 @@
 #define _NETCOMM_UTILS_ADDR_SIZE_H_
 
 #include <netinet/in.h>
+#include <sys/socket.h>
 
 namespace fawkes {
 
