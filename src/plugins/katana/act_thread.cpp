@@ -46,6 +46,7 @@
 
 #include <algorithm>
 #include <cstdarg>
+#include <cstring>
 
 using namespace fawkes;
 #ifdef HAVE_TF
