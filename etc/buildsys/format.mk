@@ -39,6 +39,25 @@ format-modified-clang:
     exit 1; \
   fi
 
+.PHONY: format-all
+format-all:
+	$(SILENT) echo -e "$(INDENT_PRINT)[FMT] Formatting all local files (git)"
+	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
+		pushd $(SRCDIR) >/dev/null; \
+		FILES=$$(git ls-files *.{h,cpp}); \
+		if [ -n "$$FILES" ]; then \
+			if type -p parallel >/dev/null; then \
+				parallel -u --will-cite --bar clang-format -i ::: $$FILES; \
+			else \
+				echo "$$FILES" | xargs -P$$(nproc) -n1 clang-format -i; \
+			fi; \
+		fi; \
+		popd >/dev/null; \
+	else \
+		echo -e "$(INDENT_PRINT)$(TRED)--- Cannot format code$(TNORMAL) (clang-format not found)"; \
+    exit 1; \
+  fi
+
 .PHONY: format-diff
 format-diff:
 	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
