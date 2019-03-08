@@ -212,7 +212,7 @@ Stn::generate()
 
 	for (plan_action pa : plan_actions_) {
 		std::vector<DomainAction>::iterator it = domain_actions_.begin();
-		for (; it != domain_actions_.end(); it++) {
+		for (; it != domain_actions_.end(); ++it) {
 			if (it->getName() == pa.name) {
 				break;
 			}
