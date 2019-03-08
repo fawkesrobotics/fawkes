@@ -35,6 +35,7 @@
 #ifndef PF_KDTREE_H
 #define PF_KDTREE_H
 
+#include "pf_vector.h"
 #ifdef INCLUDE_RTKGUI
 #	include "rtk.h"
 #endif
