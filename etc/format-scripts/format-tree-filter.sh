@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #  Copyright (c) 2018 Tim Niemueller [www.niemueller.de]
 #
@@ -20,7 +20,12 @@ MERGE_BASE=$1
 GIT_COMMIT=$2
 PREV=$3
 
-AFFECTED_FILES=$(git diff --diff-filter=AM --name-only $GIT_COMMIT^..$GIT_COMMIT | egrep "\.(h|cpp)$")
+AFFECTED_FILES=$(git diff --diff-filter=AM --name-only $GIT_COMMIT^..$GIT_COMMIT | egrep "\.(h|cpp)$" || :)
+
+if [ -z "$AFFECTED_FILES" ]; then
+	exit 0
+fi
+
 PREV_AFFECTED_FILES=$(comm -23 <(git diff --name-only $MERGE_BASE..$GIT_COMMIT^ | egrep "\.(h|cpp)$" | sort -u) <(echo $AFFECTED_FILES | sort -u))
 
 echo
@@ -36,6 +41,7 @@ fi
 
 echo "Checking out: " $NUM_PREV_AFFECTED_FILES
 echo "Formatting:   " $NUM_AFFECTED_FILES
+#echo "Affected:     " $AFFECTED_FILES
 
 if [ -n "$PREV_AFFECTED_FILES" ]; then
 	git checkout $PREV -- $PREV_AFFECTED_FILES
