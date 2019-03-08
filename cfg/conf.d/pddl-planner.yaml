@@ -6,7 +6,7 @@ doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/pddl-planner
 plugins/pddl-planner:
 
   # PDDL planner to be used
-  # Possible values: ff, fd
+  # Possible values: ff, fd, kstar
   planner: ff
 
   # Domain and problem description and location
@@ -23,6 +23,9 @@ plugins/pddl-planner:
     --heuristic "hff=ff()"
     --heuristic "hcea=cea()"
     --search "lazy_greedy([hff, hcea], preferred=[hff, hcea])"
+
+  kstar-search-opts: >
+    --search "kstar(blind(),30,bound=3)"
 
   # mongodb collection for robot-memory
   collection: robmem.pddl-plan
