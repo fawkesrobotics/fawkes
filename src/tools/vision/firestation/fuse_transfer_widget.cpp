@@ -313,11 +313,9 @@ FuseTransferWidget::get_lut_list()
 void
 FuseTransferWidget::delete_clients()
 {
-	FuseClient *c;
-
 	m_delete_clients.lock();
 	while (m_delete_clients.size() != 0) {
-		c = m_delete_clients.front();
+		FuseClient *c = m_delete_clients.front();
 		m_delete_clients.pop();
 
 		c->disconnect();
