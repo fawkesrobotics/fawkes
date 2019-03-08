@@ -24,10 +24,13 @@
 #include <core/exception.h>
 #include <core/exceptions/system.h>
 #include <fvutils/color/conversions.h>
+#include <fvutils/color/yuv.h>
+#include <fvutils/color/yuvrgb.h>
 #include <fvutils/writers/pnm.h>
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 using namespace fawkes;
 
