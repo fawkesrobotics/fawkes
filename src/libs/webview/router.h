@@ -23,6 +23,7 @@
 #define _LIBS_WEBVIEW_ROUTER_H_
 
 #include <core/exceptions/software.h>
+#include <webview/request.h>
 
 #include <algorithm>
 #include <list>
