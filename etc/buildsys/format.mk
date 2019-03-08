@@ -39,6 +39,26 @@ format-modified-clang:
     exit 1; \
   fi
 
+.PHONY: format-diff
+format-diff:
+	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
+		pushd $(SRCDIR) >/dev/null; \
+		FILES=$$(git ls-files *.{h,cpp}); \
+		if [ -n "$$FILES" ]; then \
+			for f in $$FILES; do \
+				DIFF=$$(diff -u $$f <(clang-format $$f)); \
+				if [ -n "$$DIFF" ]; then \
+					echo -e "$(INDENT_PRINT)$(TRED)--- Formatting errors in $$f$(TNORMAL)"; \
+					cat <<< $$DIFF; \
+				fi; \
+			done; \
+		fi; \
+		popd >/dev/null; \
+	else \
+		echo -e "$(INDENT_PRINT)$(TRED)--- Cannot format code$(TNORMAL) (clang-format not found)"; \
+    exit 1; \
+  fi
+
 # The local version only updates modified files by default
 .PHONY: format
 format: format-modified-clang
