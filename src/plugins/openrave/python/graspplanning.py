@@ -29,7 +29,7 @@ from numpy import *
 # those grasps to find a valid grasp for the given target, and
 # calculate a collision-free path for the arm to move to a grasping
 # position.
-class GraspPlanner:
+class GraspPlanner(object):
 
     ## Constructor.
     #
