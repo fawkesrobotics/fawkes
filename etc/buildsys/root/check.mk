@@ -69,7 +69,7 @@ format-check: check-parallel
 format-check-branch: check-parallel
 	$(SILENT) echo -e "$(INDENT_PRINT)[CHK] Checking code formatting in branch and modified files"
 	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
-		OFFENDING_FILES=$$($(FAWKES_BASEDIR)/etc/format-scripts/check-branch-files.sh); \
+		OFFENDING_FILES=$$(SHOW_PROGRESS="$(if $(HIDE_FORMAT_PROGRESS),no,yes)" $(FAWKES_BASEDIR)/etc/format-scripts/check-branch-files.sh); \
 		if [ "$$?" != "0" ]; then \
 			NUM_FILES=$$(cut -d$$'\n' -f1 <<< "$$OFFENDING_FILES"); \
 			OFFENDING_FILES=$$(cut -d$$'\n' -f2- <<< "$$OFFENDING_FILES"); \
