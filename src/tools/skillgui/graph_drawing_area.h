@@ -35,7 +35,9 @@ public:
 	SkillGuiGraphDrawingArea();
 	~SkillGuiGraphDrawingArea();
 
+	/// @cond deleted
 	SkillGuiGraphDrawingArea(const SkillGuiGraphDrawingArea &) = delete;
+	/// @endcond
 
 	void save();
 	void open();
