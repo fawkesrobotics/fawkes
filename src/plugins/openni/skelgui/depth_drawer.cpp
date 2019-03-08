@@ -23,6 +23,7 @@
 #include "depth_drawer.h"
 
 #include <GL/glut.h>
+#include <core/exception.h>
 #include <fvcams/camera.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/color/conversions.h>
@@ -31,6 +32,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 using namespace fawkes;
 using namespace fawkes::openni;
