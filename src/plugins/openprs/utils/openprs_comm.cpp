@@ -28,8 +28,11 @@
 #include <core/exceptions/system.h>
 #include <utils/sub_process/proc.h>
 
-#include <mp-pub.h>
+// clang-format off
+// The OpenPRS headers have an include problem and require this ordering.
 #include <opaque-pub.h>
+#include <mp-pub.h>
+// clang-format on
 #include <unistd.h>
 
 // these exist in libExtMP and are exported, but not mentioned in the header
