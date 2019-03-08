@@ -41,10 +41,8 @@ using namespace fawkes;
 XmlRpcLogMethods::XmlRpcLogMethods(std::shared_ptr<xmlrpc_c::registry> registry,
                                    fawkes::CacheLogger *               cache_logger,
                                    fawkes::Logger *                    logger)
+: xmlrpc_registry_(registry), logger_(logger), cache_logger_(cache_logger)
 {
-	xmlrpc_registry_ = registry;
-	cache_logger_    = cache_logger;
-	logger_          = logger;
 	log_entries_.reset(new log_entries(cache_logger));
 	log_get_size_.reset(new log_get_size(cache_logger));
 	log_set_size_.reset(new log_set_size(cache_logger));
