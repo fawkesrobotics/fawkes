@@ -85,6 +85,9 @@ public:
 	CachedDistanceMap &
 	operator=(const CachedDistanceMap &other)
 	{
+		if (&other == this)
+			return *this;
+
 		if (distances_) {
 			for (int i = 0; i <= cell_radius_ + 1; i++)
 				delete[] distances_[i];
