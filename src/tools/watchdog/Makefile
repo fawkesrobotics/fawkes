@@ -19,20 +19,21 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 # Check for availability of libdaemon
 HAVE_LIBDAEMON = $(if $(shell $(PKGCONFIG) --exists 'libdaemon'; echo $${?/1/}),1,0)
-ifeq ($(HAVE_LIBDAEMON),1)
-  CFLAGS  += -DHAVE_LIBDAEMON $(shell $(PKGCONFIG) --cflags 'libdaemon')
-  LDFLAGS += $(shell $(PKGCONFIG) --libs 'libdaemon')
-else
-  WARN_TARGETS += warning_libdaemon
-endif
 
 LIBS_ffwatchdog = stdc++ fawkescore
 OBJS_ffwatchdog = ffwatchdog.o
 
 OBJS_all     = $(OBJS_ffwatchdog)
 BINS_all     = $(BINDIR)/ffwatchdog
-BINS_build   = $(BINS_all)
 MANPAGES_all = $(MANDIR)/man1/ffwatchdog.1
+
+ifeq ($(HAVE_LIBDAEMON),1)
+  CFLAGS  += -DHAVE_LIBDAEMON $(shell $(PKGCONFIG) --cflags 'libdaemon')
+  LDFLAGS += $(shell $(PKGCONFIG) --libs 'libdaemon')
+  BINS_build = $(BINS_all)
+else
+  WARN_TARGETS += warning_libdaemon
+endif
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
@@ -40,7 +41,7 @@ all: $(WARN_TARGETS)
   endif
 .PHONY: warning_libdaemon
 warning_libdaemon:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Building without daemonizing support$(TNORMAL) (libdaemon[-devel] not installed)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TYELLOW)Cannot build ffwatchdog$(TNORMAL) (libdaemon[-devel] not installed)"
 endif
 
 
