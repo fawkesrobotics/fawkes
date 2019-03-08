@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 
 using namespace fawkes;
 using namespace firevision;
