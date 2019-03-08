@@ -33,19 +33,27 @@ typedef Slist *Thread_Intention_Block_List;
 typedef Slist *Condition_List;
 struct intention
 {
-	Fact *                      fact;
-	Goal *                      goal;
+	// cppcheck-suppress unusedStructMember
+	Fact *fact;
+	// cppcheck-suppress unusedStructMember
+	Goal *goal;
+	// cppcheck-suppress unusedStructMember
 	Thread_Intention_Block_List fils;
+	// cppcheck-suppress unusedStructMember
 	Thread_Intention_Block_List active_tibs;
 	Op_Instance *               top_op;
-	short                       priority;
-	Intention_Status            status;
-	Symbol                      id;
-	Thread_Intention_Block *    critical_section;
-	PDate                       creation;
-	Condition_List              activation_conditions_list;
-	Sprinter *                  failed_goal_sprinter;
-	OPRS_LIST                   failed_goal_stack;
+	// cppcheck-suppress unusedStructMember
+	short            priority;
+	Intention_Status status;
+	Symbol           id;
+	// cppcheck-suppress unusedStructMember
+	Thread_Intention_Block *critical_section;
+	PDate                   creation;
+	// cppcheck-suppress unusedStructMember
+	Condition_List activation_conditions_list;
+	// cppcheck-suppress unusedStructMember
+	Sprinter *failed_goal_sprinter;
+	OPRS_LIST failed_goal_stack;
 };
 }
 /// @endcond
