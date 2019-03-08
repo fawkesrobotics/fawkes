@@ -63,7 +63,7 @@ def filter_reftype(value):
 	else:
 		return value
 
-def filter_sanitize(name):
+def filter_sanitize(name, priv_member=False):
 	# input[] => input
 	name = name.replace("\\[\\]", "");
 
@@ -87,6 +87,9 @@ def filter_sanitize(name):
 	keywords = ["class", "operator"]
 	if name in keywords:
 		name = "_" + name
+
+	if priv_member:
+		name += "_"
 
 	return name
 
@@ -282,6 +285,16 @@ if __name__ == '__main__':
 		template = jinja.get_template(f['file'])
 
 		schemas = spec['components']['schemas']
+
+		for n, s in schemas.items():
+			if 'allOf' in s:
+				for a in s['allOf']:
+					if '$ref' in a:
+						a['$reftype'] = filter_reftype(a['$ref'])
+			if 'properties' in s:
+				for propname, p in s['properties'].items():
+					if '$ref' in p:
+						p['$reftype'] = filter_reftype(p['$ref'])
 
 		res = None
 
