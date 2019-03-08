@@ -22,23 +22,26 @@
 #ifndef _PLUGINS_OPENPRS_AGENT_MOD_UTILS_H_
 #define _PLUGINS_OPENPRS_AGENT_MOD_UTILS_H_
 
-#include <action_f-pub.h>
 #include <algorithm>
-#include <constant-pub.h>
 #include <cstdio>
 #include <cstring>
+#include <string>
+#include <unistd.h>
+
+// clang-format off
+#include <opaque-pub.h>
+#include <action_f-pub.h>
+#include <constant-pub.h>
 #include <ev-function_f-pub.h>
 #include <ev-predicate_f-pub.h>
 #include <intention_f-pub.h>
 #include <macro-pub.h>
-#include <opaque-pub.h>
 #include <oprs-type-pub.h>
 #include <oprs-type_f-pub.h>
 #include <shashPack_f.h>
 #include <slistPack-pub.h>
-#include <string>
-#include <unistd.h>
 #include <user-end-hook_f-pub.h>
+// clang-format on
 
 /// @cond EXTERNAL
 extern "C" {
