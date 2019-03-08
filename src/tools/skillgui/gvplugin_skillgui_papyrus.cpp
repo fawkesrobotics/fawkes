@@ -386,7 +386,7 @@ skillgui_render_polyline(GVJ_t *job, pointf *A, int n)
 	++num_polyline_;
 #endif
 	//printf("Polyline\n");
-	SkillGuiGraphViewport *gvp = (SkillGuiGraphViewport *)job->context;
+	SkillGuiGraphViewport *gvp = static_cast<SkillGuiGraphViewport *>(job->context);
 	obj_state_t *          obj = job->obj;
 
 	Papyrus::Vertices v;

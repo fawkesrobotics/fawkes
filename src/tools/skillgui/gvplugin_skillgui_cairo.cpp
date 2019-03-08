@@ -488,7 +488,7 @@ skillgui_cairo_render_polyline(GVJ_t *job, pointf *A, int n)
 	++num_polyline_;
 #endif
 	//printf("Polyline\n");
-	SkillGuiCairoRenderInstructor *cri   = (SkillGuiCairoRenderInstructor *)job->context;
+	SkillGuiCairoRenderInstructor *cri   = static_cast<SkillGuiCairoRenderInstructor *>(job->context);
 	Cairo::RefPtr<Cairo::Context>  cairo = cri->get_cairo();
 	obj_state_t *                  obj   = job->obj;
 
