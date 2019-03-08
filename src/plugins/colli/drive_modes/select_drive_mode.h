@@ -24,6 +24,8 @@
 #ifndef _PLUGINS_COLLI_SELECT_DRIVE_MODE_H_
 #define _PLUGINS_COLLI_SELECT_DRIVE_MODE_H_
 
+#include "../common/types.h"
+
 #include <vector>
 
 namespace fawkes {
