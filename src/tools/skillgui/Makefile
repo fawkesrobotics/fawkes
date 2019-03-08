@@ -63,7 +63,7 @@ ifneq ($(PKGCONFIG),)
   endif
 endif
 
-CFLAGS  += $(CFLAGS_GUI) $(CFLAGS_GRAPHVIZ) $(CFLAGS_PAPYRUS)
+CFLAGS  += $(CFLAGS_GUI) $(CFLAGS_GRAPHVIZ) $(CFLAGS_PAPYRUS) $(CFLAGS_CPP11)
 LDFLAGS += $(LDFLAGS_GUI) $(LDFLAGS_GRAPHVIZ) $(LDFLAGS_PAPYRUS)
 
 LIBS_skillgui = stdc++ m fawkescore fawkesutils fawkesnetcomm fawkesblackboard \
@@ -87,7 +87,7 @@ OBJS_skillgui_batch_render = batch_render.o gvplugin_skillgui_cairo.o
 OBJS_all = $(OBJS_skillgui) $(OBJS_skillgui_batch_render)
 BINS_all = $(BINDIR)/skillgui $(BINDIR)/skillgui_batch_render
 
-ifeq ($(HAVE_GUI)$(HAVE_GRAPHVIZ),11)
+ifeq ($(HAVE_GUI)$(HAVE_GRAPHVIZ)$(HAVE_CPP11),111)
   BINS_gui = $(BINS_all)
   INST_RESDIRS = guis/skillgui
   MANPAGES_all = $(MANDIR)/man1/skillgui.1 $(MANDIR)/man1/skillgui_batch_render.1

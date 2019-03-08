@@ -35,6 +35,8 @@ public:
 	SkillGuiGraphDrawingArea();
 	~SkillGuiGraphDrawingArea();
 
+	SkillGuiGraphDrawingArea(const SkillGuiGraphDrawingArea &) = delete;
+
 	void save();
 	void open();
 	bool set_recording(bool recording);
