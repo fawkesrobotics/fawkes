@@ -192,9 +192,8 @@ double
 AMCLLaser::LikelihoodFieldModel(AMCLLaserData *data, pf_sample_set_t *set)
 {
 	AMCLLaser *  self;
-	int          i, j, step;
+	int          i, j;
 	double       z, pz;
-	double       p;
 	double       obs_range, obs_bearing;
 	double       total_weight;
 	pf_sample_t *sample;
@@ -213,13 +212,13 @@ AMCLLaser::LikelihoodFieldModel(AMCLLaserData *data, pf_sample_set_t *set)
 		// Take account of the laser pose relative to the robot
 		pose = pf_vector_coord_add(self->laser_pose, pose);
 
-		p = 1.0;
+		double p = 1.0;
 
 		// Pre-compute a couple of things
 		double z_hit_denom = 2 * self->sigma_hit * self->sigma_hit;
 		double z_rand_mult = 1.0 / data->range_max;
 
-		step = (data->range_count - 1) / (self->max_beams - 1);
+		int step = (data->range_count - 1) / (self->max_beams - 1);
 		for (i = 0; i < data->range_count; i += step) {
 			obs_range   = data->ranges[i][0];
 			obs_bearing = data->ranges[i][1];

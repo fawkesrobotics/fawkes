@@ -112,18 +112,16 @@ void pf_draw_cep_stats(pf_t *pf, rtk_fig_t *fig)
 void pf_draw_cluster_stats(pf_t *pf, rtk_fig_t *fig)
 {
   int i;
-  pf_cluster_t *cluster;
   pf_sample_set_t *set;
   pf_vector_t mean;
   pf_matrix_t cov;
   pf_matrix_t r, d;
-  double o, d1, d2;
 
   set = pf->sets + pf->current_set;
 
   for (i = 0; i < set->cluster_count; i++)
   {
-    cluster = set->clusters + i;
+    pf_cluster_t *cluster = set->clusters + i;
 
     //weight = cluster->weight;
     mean = cluster->mean;
@@ -144,9 +142,9 @@ void pf_draw_cluster_stats(pf_t *pf, rtk_fig_t *fig)
     */
 
     // Compute the orientation of the error ellipse (first eigenvector)
-    o = atan2(r.m[1][0], r.m[0][0]);
-    d1 = 6 * sqrt(d.m[0][0]);
-    d2 = 6 * sqrt(d.m[1][1]);
+    double o  = atan2(r.m[1][0], r.m[0][0]);
+    double d1 = 6 * sqrt(d.m[0][0]);
+    double d2 = 6 * sqrt(d.m[1][1]);
 
     if (d1 > 1e-3 && d2 > 1e-3)
     {

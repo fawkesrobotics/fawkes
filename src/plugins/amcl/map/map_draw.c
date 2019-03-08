@@ -83,10 +83,7 @@ void map_draw_occ(map_t *map, rtk_fig_t *fig)
 void map_draw_cspace(map_t *map, rtk_fig_t *fig)
 {
   int i, j;
-  int col;
-  map_cell_t *cell;
   uint16_t *image;
-  uint16_t *pixel;
 
   image = malloc(map->size_x * map->size_y * sizeof(image[0]));
 
@@ -95,10 +92,10 @@ void map_draw_cspace(map_t *map, rtk_fig_t *fig)
   {
     for (i =  0; i < map->size_x; i++)
     {
-      cell = map->cells + MAP_INDEX(map, i, j);
-      pixel = image + (j * map->size_x + i);
+      map_cell_t *cell = map->cells + MAP_INDEX(map, i, j);
+      uint16_t *pixel  = image + (j * map->size_x + i);
 
-      col = 255 * cell->occ_dist / map->max_occ_dist;
+      int col = 255 * cell->occ_dist / map->max_occ_dist;
 
       *pixel = RTK_RGB16(col, col, col);
     }

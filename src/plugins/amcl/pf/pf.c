@@ -568,7 +568,6 @@ void pf_get_cep_stats(pf_t *pf, pf_vector_t *mean, double *var)
   int i;
   double mn, mx, my, mrr;
   pf_sample_set_t *set;
-  pf_sample_t *sample;
   
   set = pf->sets + pf->current_set;
 
@@ -579,7 +578,7 @@ void pf_get_cep_stats(pf_t *pf, pf_vector_t *mean, double *var)
   
   for (i = 0; i < set->sample_count; i++)
   {
-    sample = set->samples + i;
+    pf_sample_t *sample = set->samples + i;
 
     mn += sample->weight;
     mx += sample->weight * sample->pose.v[0];
