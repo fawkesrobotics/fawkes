@@ -193,9 +193,13 @@ DirectRobotinoComMessage::~DirectRobotinoComMessage()
 DirectRobotinoComMessage &
 DirectRobotinoComMessage::operator=(const DirectRobotinoComMessage &other)
 {
+	if (&other == this)
+		return *this;
+
 	::free(data_);
-	if (escaped_data_)
+	if (escaped_data_) {
 		::free(escaped_data_);
+	}
 
 	mode_ = other.mode_;
 
