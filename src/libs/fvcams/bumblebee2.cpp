@@ -21,13 +21,14 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include "bumblebee2.h"
+
 #include <core/exception.h>
-#include <fvcams/bumblebee2.h>
 #include <fvcams/cam_exceptions.h>
-#include <fvutils/color/conversions.h>
 #include <fvutils/system/camargp.h>
 // include <fvutils/writers/pnm.h>
 
+#include <cstring>
 #include <stdlib.h>
 #include <string>
 #include <unistd.h>
@@ -39,7 +40,6 @@
 #	include <endian.h>
 #endif
 
-#include <dc1394/conversions.h>
 #include <dc1394/register.h>
 #include <dc1394/utils.h>
 #include <utils/math/angle.h>
