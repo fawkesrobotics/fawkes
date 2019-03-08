@@ -34,14 +34,16 @@ if [ -z "$AFFECTED_FILES" -a -z "$MODIFIED_FILES" ]; then
 	exit 0
 fi
 
+FILES=$(echo "$AFFECTED_FILES" "$MODIFIED_FILES" | tr ' ' '\n' | sort -u)
+
 if type -p parallel >/dev/null; then
-	OFFENDING_FILES=$(parallel --will-cite --bar $SCRIPT_PATH/check-file.sh ::: $AFFECTED_FILES $MODIFIED_FILES)
+	OFFENDING_FILES=$(parallel --will-cite --bar $SCRIPT_PATH/check-file.sh ::: $FILES)
 else
-	OFFENDING_FILES=$(echo "$AFFECTED_FILES" "$MODIFIED_FILES" | xargs -P$(nproc) -n1 $SCRIPT_PATH/check-file.sh)
+	OFFENDING_FILES=$(echo "$FILES" | xargs -P$(nproc) -n1 $SCRIPT_PATH/check-file.sh)
 fi
 
 if [ "$OFFENDING_FILES" != "" ]; then
-	echo $AFFECTED_FILES $MODIFIED_FILES | wc -w
+	echo $FILES | wc -w
 	echo $OFFENDING_FILES
 	exit 1
 else
