@@ -33,11 +33,9 @@ class SkillGuiGraphDrawingArea : public Gtk::DrawingArea, public SkillGuiCairoRe
 {
 public:
 	SkillGuiGraphDrawingArea();
-	~SkillGuiGraphDrawingArea();
+	SkillGuiGraphDrawingArea(const SkillGuiGraphDrawingArea &other);
 
-	/// @cond deleted
-	SkillGuiGraphDrawingArea(const SkillGuiGraphDrawingArea &) = delete;
-	/// @endcond
+	~SkillGuiGraphDrawingArea();
 
 	void save();
 	void open();

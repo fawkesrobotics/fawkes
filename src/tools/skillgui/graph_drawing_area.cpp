@@ -24,6 +24,7 @@
 
 #include "gvplugin_skillgui_cairo.h"
 
+#include <core/exception.h>
 #include <sys/time.h>
 
 #include <cmath>
@@ -115,6 +116,15 @@ SkillGuiGraphDrawingArea::SkillGuiGraphDrawingArea()
 	  sigc::mem_fun(*this, &SkillGuiGraphDrawingArea::on_button_press_event));
 	signal_motion_notify_event().connect(
 	  sigc::mem_fun(*this, &SkillGuiGraphDrawingArea::on_motion_notify_event));
+}
+
+/** Unsupported copy constructor.
+ * Always throws Exception.
+ * @param other other instance
+ */
+SkillGuiGraphDrawingArea::SkillGuiGraphDrawingArea(const SkillGuiGraphDrawingArea &other)
+{
+	throw fawkes::Exception("SkillGuiGraphDrawingArea cannot be copied");
 }
 
 SkillGuiGraphDrawingArea::~SkillGuiGraphDrawingArea()
