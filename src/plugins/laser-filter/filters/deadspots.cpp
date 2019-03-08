@@ -120,14 +120,13 @@ LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const std::string &    filter
  * @param other instance to copy from
  */
 LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const LaserDeadSpotsDataFilter &other)
-: LaserDataFilter(other.filter_name, other.in_data_size, other.in, other.in.size())
+: LaserDataFilter(other.filter_name, other.in_data_size, other.in, other.in.size()),
+  logger_(other.logger_),
+  num_spots_(other.num_spots_),
+  dead_spots_size_(other.dead_spots_size_),
+  cfg_dead_spots_(other.cfg_dead_spots_)
 {
-	logger_ = other.logger_;
-
-	cfg_dead_spots_  = other.cfg_dead_spots_;
-	num_spots_       = other.num_spots_;
-	dead_spots_size_ = other.dead_spots_size_;
-	dead_spots_      = new unsigned int[dead_spots_size_];
+	dead_spots_ = new unsigned int[dead_spots_size_];
 	for (unsigned int i = 0; i < dead_spots_size_; ++i) {
 		dead_spots_[i] = other.dead_spots_[i];
 	}
@@ -145,6 +144,9 @@ LaserDeadSpotsDataFilter::~LaserDeadSpotsDataFilter()
 LaserDeadSpotsDataFilter &
 LaserDeadSpotsDataFilter::operator=(const LaserDeadSpotsDataFilter &other)
 {
+	if (&other == this)
+		return *this;
+
 	delete[] dead_spots_;
 
 	filter_name  = other.filter_name;
