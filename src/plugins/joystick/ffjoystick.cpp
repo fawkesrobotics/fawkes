@@ -68,7 +68,7 @@ public:
 	/** Constructor.
    * @param aqt Joystick acquisition thread
    */
-	JoystickQuitHandler(JoystickAcquisitionThread &aqt) : aqt_(aqt)
+	explicit JoystickQuitHandler(JoystickAcquisitionThread &aqt) : aqt_(aqt)
 	{
 	}
 
