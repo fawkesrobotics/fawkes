@@ -39,7 +39,7 @@ using namespace fawkes;
 class NetLogConsolePrinter : public FawkesNetworkClientHandler, public SignalHandler
 {
 public:
-	NetLogConsolePrinter(const char *hostport)
+	explicit NetLogConsolePrinter(const char *hostport)
 	{
 		logger = new ConsoleLogger();
 		quit   = false;
