@@ -21,6 +21,12 @@ if type -p gdiff >/dev/null; then
   DIFF=gdiff
 fi
 
+if [ "${SHOW_PROGRESS:-}" == "no" ]; then
+	SHOW_PROGRESS=
+else
+	SHOW_PROGRESS="yes";
+fi
+
 MERGE_BASE=$($DIFF --old-line-format='' --new-line-format='' \
              <(git rev-list --first-parent "HEAD") \
              <(git rev-list --first-parent "origin/master") \
@@ -37,7 +43,7 @@ fi
 FILES=$(echo "$AFFECTED_FILES" "$MODIFIED_FILES" | tr ' ' '\n' | sort -u)
 
 if type -p parallel >/dev/null; then
-	OFFENDING_FILES=$(parallel --will-cite --bar $SCRIPT_PATH/check-file.sh ::: $FILES)
+	OFFENDING_FILES=$(parallel --will-cite ${SHOW_PROGRESS:+--bar} $SCRIPT_PATH/check-file.sh ::: $FILES)
 else
 	OFFENDING_FILES=$(echo "$FILES" | xargs -P$(nproc) -n1 $SCRIPT_PATH/check-file.sh)
 fi
