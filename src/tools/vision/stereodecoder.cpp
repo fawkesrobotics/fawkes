@@ -20,6 +20,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <core/exception.h>
 #include <fvcams/bumblebee2.h>
 #include <fvutils/color/conversions.h>
 #include <fvutils/readers/fvraw.h>
@@ -28,6 +29,7 @@
 #include <sys/types.h>
 
 #include <cstdlib>
+#include <cstring>
 #include <dirent.h>
 #include <list>
 #include <string>
