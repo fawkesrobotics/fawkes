@@ -480,7 +480,7 @@ NavGraphGeneratorThread::bb_interface_message_received(Interface *interface,
 		NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage *msg =
 		  message->as_type<NavGraphGeneratorInterface::AddPointOfInterestWithOriMessage>();
 
-		if (std::isfinite(msg->x()) && std::isfinite(msg->x())) {
+		if (std::isfinite(msg->x()) && std::isfinite(msg->y())) {
 			PointOfInterest poi;
 			poi.position  = cart_coord_2d_t(msg->x(), msg->y());
 			poi.conn_mode = msg->mode();
