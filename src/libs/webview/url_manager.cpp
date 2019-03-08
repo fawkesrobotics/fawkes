@@ -22,7 +22,6 @@
 
 #include <core/exception.h>
 #include <core/threading/mutex.h>
-#include <webview/router.h>
 #include <webview/url_manager.h>
 
 namespace fawkes {
