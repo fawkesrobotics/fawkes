@@ -21,9 +21,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include "memory.h"
+
 #include "yaml_node.h"
 
-#include <config/memory.h>
 #include <core/exceptions/software.h>
 #include <core/threading/mutex.h>
 #include <utils/misc/string_split.h>
