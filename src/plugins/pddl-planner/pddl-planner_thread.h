@@ -70,6 +70,7 @@ private:
 	std::string cfg_domain_path_;
 	std::string cfg_problem_path_;
 	std::string cfg_fd_options_;
+  std::string cfg_kstar_options_;
   std::string cfg_collection_;
 
   std::vector<action> action_list_;

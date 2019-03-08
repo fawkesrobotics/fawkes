@@ -63,8 +63,9 @@ PddlPlannerThread::init()
 	cfg_result_path_  = cfg_descripton_path_ + config->get_string((cfg_prefix + "result-file"));
 	cfg_domain_path_  = cfg_descripton_path_ + config->get_string(cfg_prefix + "domain-description");
 	cfg_problem_path_ = cfg_descripton_path_ + config->get_string(cfg_prefix + "problem-description");
-	cfg_fd_options_   = config->get_string(cfg_prefix + "fd-search-opts");
-	cfg_collection_   = config->get_string(cfg_prefix + "collection");
+	cfg_fd_options_ = config->get_string(cfg_prefix + "fd-search-opts");
+	cfg_kstar_options_ = config->get_string(cfg_prefix + "kstar-search-opts");
+  cfg_collection_ = config->get_string(cfg_prefix + "collection");
 
 	//set configured planner
 	std::string planner_string = config->get_string((cfg_prefix + "planner").c_str());
@@ -267,7 +268,7 @@ PddlPlannerThread::kstar_planner()
 		+ std::string(" ") + cfg_problem_path_;
 
 	if ( !cfg_fd_options_.empty() ) {
-		command += std::string(" ") + cfg_fd_options_;
+		command += std::string(" ") + cfg_kstar_options_;
 	}
 
 	std::string result = run_planner(command);
