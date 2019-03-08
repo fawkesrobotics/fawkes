@@ -43,13 +43,13 @@ XmlRpcLogMethods::XmlRpcLogMethods(std::shared_ptr<xmlrpc_c::registry> registry,
                                    fawkes::Logger *                    logger)
 : xmlrpc_registry_(registry), logger_(logger), cache_logger_(cache_logger)
 {
-	log_entries_.reset(new log_entries(cache_logger));
-	log_get_size_.reset(new log_get_size(cache_logger));
-	log_set_size_.reset(new log_set_size(cache_logger));
-	log_log_debug_.reset(new log_log(logger, fawkes::Logger::LL_DEBUG));
-	log_log_info_.reset(new log_log(logger, fawkes::Logger::LL_INFO));
-	log_log_warn_.reset(new log_log(logger, fawkes::Logger::LL_WARN));
-	log_log_error_.reset(new log_log(logger, fawkes::Logger::LL_ERROR));
+	log_entries_.reset(new log_entries(cache_logger_));
+	log_get_size_.reset(new log_get_size(cache_logger_));
+	log_set_size_.reset(new log_set_size(cache_logger_));
+	log_log_debug_.reset(new log_log(logger_, fawkes::Logger::LL_DEBUG));
+	log_log_info_.reset(new log_log(logger_, fawkes::Logger::LL_INFO));
+	log_log_warn_.reset(new log_log(logger_, fawkes::Logger::LL_WARN));
+	log_log_error_.reset(new log_log(logger_, fawkes::Logger::LL_ERROR));
 	xmlrpc_registry_->addMethod("log.entries", &*log_entries_);
 	xmlrpc_registry_->addMethod("log.get_size", &*log_get_size_);
 	xmlrpc_registry_->addMethod("log.set_size", &*log_set_size_);
