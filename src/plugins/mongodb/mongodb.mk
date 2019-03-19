@@ -18,7 +18,7 @@ include $(BUILDSYSDIR)/boost.mk
 MONGO_CXX_DRIVER_BOOST_LIBS = thread system
 
 ifneq ($(wildcard /usr/include/mongo/client/dbclient.h /usr/local/include/mongo/client/dbclient.h),)
-  ifneq ($(wildcard $(SYSROOT)/usr/include/mongo/version.h $(SYSROOT)/usr/local/include/mongo/version.h),)
+  ifneq ($(wildcard $(SYSROOT)/usr/include/mongo/version.h $(SYSROOT)/usr/include/*/mongo/version.h $(SYSROOT)/usr/local/include/mongo/version.h),)
     CFLAGS_MONGODB_VERSION_H += -DHAVE_MONGODB_VERSION_H
     ifeq ($(OS),FreeBSD)
       MONGO_CXX_DRIVER_BOOST_LIBS += regex
