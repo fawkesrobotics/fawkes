@@ -22,6 +22,7 @@ steps:
             - BUILDKITE
             - BUILDKITE_REPO
             - BUILDKITE_BRANCH
+            - BUILDKITE_COMMIT
             - BUILDKITE_LABEL
             - BUILDKITE_BUILD_CREATOR
             - BUILDKITE_BUILD_CREATOR_EMAIL
