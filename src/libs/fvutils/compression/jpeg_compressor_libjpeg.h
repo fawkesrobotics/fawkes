@@ -25,49 +25,50 @@
 #define _FIREVISION_UTILS_COMPRESSION_JPEG_COMPRESSOR_LIBJPEG_H_
 
 #ifndef _FIREVISION_UTILS_COMPRESSION_JPEG_COMPRESSOR_H_
-#  error Do not include jpeg_compressor_libjpeg.h directly, use jpeg_compressor.h
+#	error Do not include jpeg_compressor_libjpeg.h directly, use jpeg_compressor.h
 #endif
 
 #include <fvutils/compression/imagecompressor.h>
 
 namespace firevision {
 
-class JpegImageCompressorLibJpeg : public ImageCompressor {
- public:
+class JpegImageCompressorLibJpeg : public ImageCompressor
+{
+public:
+	JpegImageCompressorLibJpeg(
+	  unsigned int                        quality = 80,
+	  JpegImageCompressor::JpegColorspace jcs     = JpegImageCompressor::JPEG_CS_RGB);
+	virtual ~JpegImageCompressorLibJpeg();
 
-  JpegImageCompressorLibJpeg(unsigned int quality = 80,
-			     JpegImageCompressor::JpegColorspace jcs = JpegImageCompressor::JPEG_CS_RGB);
-  virtual ~JpegImageCompressorLibJpeg();
+	virtual void   set_image_dimensions(unsigned int width, unsigned int height);
+	virtual void   set_image_buffer(colorspace_t cspace, unsigned char *buffer);
+	virtual void   set_destination_buffer(unsigned char *buf, unsigned int buf_size);
+	virtual size_t compressed_size();
+	virtual void   set_filename(const char *filename);
+	virtual void   set_compression_destination(ImageCompressor::CompressionDestination cd);
+	virtual bool   supports_compression_destination(ImageCompressor::CompressionDestination cd);
+	virtual void   compress();
+	virtual size_t recommended_compressed_buffer_size();
+	virtual bool   supports_vflip();
+	virtual void   set_vflip(bool enable);
 
-  virtual void          set_image_dimensions(unsigned int width, unsigned int height);
-  virtual void          set_image_buffer(colorspace_t cspace, unsigned char *buffer);
-  virtual void          set_destination_buffer(unsigned char *buf, unsigned int buf_size);
-  virtual size_t        compressed_size();
-  virtual void          set_filename(const char *filename);
-  virtual void          set_compression_destination(ImageCompressor::CompressionDestination cd);
-  virtual bool          supports_compression_destination(ImageCompressor::CompressionDestination cd);
-  virtual void          compress();
-  virtual size_t        recommended_compressed_buffer_size();
-  virtual bool          supports_vflip();
-  virtual void          set_vflip(bool enable);
+private:
+	unsigned char *jpeg_buffer;
+	unsigned int   jpeg_buffer_size;
+	unsigned char *buffer;
 
- private:
-  unsigned char *jpeg_buffer;
-  unsigned int   jpeg_buffer_size;
-  unsigned char *buffer;
+	unsigned int quality;
+	bool         vflip;
 
-  unsigned int   quality;
-  bool           vflip;
+	unsigned int width;
+	unsigned int height;
 
-  unsigned int   width;
-  unsigned int   height;
+	unsigned int jpeg_bytes;
 
-  unsigned int   jpeg_bytes;
+	const char *filename;
 
-  const char    *filename;
-
-  JpegImageCompressor::JpegColorspace jpeg_cs;
-  CompressionDestination compdest;
+	JpegImageCompressor::JpegColorspace jpeg_cs;
+	CompressionDestination              compdest;
 };
 
 } // end namespace firevision

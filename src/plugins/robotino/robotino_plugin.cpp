@@ -23,13 +23,13 @@
 #include <core/plugin.h>
 
 #ifdef HAVE_OPENROBOTINO
-#  include "openrobotino_com_thread.h"
+#	include "openrobotino_com_thread.h"
 #endif
 #ifdef HAVE_ROBOTINO_DIRECT
-#  include "direct_com_thread.h"
+#	include "direct_com_thread.h"
 #endif
-#include "sensor_thread.h"
 #include "act_thread.h"
+#include "sensor_thread.h"
 
 using namespace fawkes;
 
@@ -42,11 +42,10 @@ public:
 	/** Constructor.
 	 * @param config Fawkes configuration
 	 */
-	explicit RobotinoPlugin(Configuration *config)
-		: Plugin(config)
+	explicit RobotinoPlugin(Configuration *config) : Plugin(config)
 	{
 		std::string cfg_driver = config->get_string("/hardware/robotino/driver");
-	  
+
 		RobotinoComThread *com_thread = NULL;
 
 		if (cfg_driver == "openrobotino") {
@@ -57,7 +56,7 @@ public:
 #endif
 		} else if (cfg_driver == "direct") {
 #ifdef HAVE_ROBOTINO_DIRECT
-			com_thread = new DirectRobotinoComThread();    
+			com_thread = new DirectRobotinoComThread();
 #else
 			throw Exception("robotino: driver mode 'direct' not available at compile time");
 #endif

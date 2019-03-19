@@ -1,10 +1,10 @@
-    
+
 /***************************************************************************     
  *  pddl_parser.h
  *     
  *  Created: Fri 19 May 2017 11:10:30 CEST
  *  Copyright  2017  Matthias Loebach     
- ****************************************************************************/     
+ ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,10 +32,11 @@ namespace pddl_parser {
 
 class PddlParser
 {
- public:
-  static Domain parseDomain(const std::string pddl_domain);
-  static Problem parseProblem(const std::string pddl_problem);
- private:
+public:
+	static Domain  parseDomain(const std::string pddl_domain);
+	static Problem parseProblem(const std::string pddl_problem);
+
+private:
 };
 
 /** @class PddlParserException <pddl_parser/pddl_parser.h>
@@ -44,20 +45,22 @@ class PddlParser
 
 class PddlParserException : public fawkes::Exception
 {
- public:
-   /** Constructor.
+public:
+	/** Constructor.
     * @param msg A message describing the error.
     */
-  PddlParserException(const char *msg)
-    : fawkes::Exception(msg) {}
-  /** Constructor with a string message.
+	PddlParserException(const char *msg) : fawkes::Exception(msg)
+	{
+	}
+	/** Constructor with a string message.
    * This wraps the constructor with a char* message for usage with std::string.
    * @param msg A message describing the error.
    */
-  PddlParserException(const std::string &msg)
-    : fawkes::Exception(msg.c_str()) {}
+	PddlParserException(const std::string &msg) : fawkes::Exception(msg.c_str())
+	{
+	}
 };
 
-}
+} // namespace pddl_parser
 
 #endif

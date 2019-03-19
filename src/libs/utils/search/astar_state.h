@@ -25,8 +25,8 @@
 #ifndef _ASTAR_ABSTRACT_STATE_H_
 #define _ASTAR_ABSTRACT_STATE_H_
 
-#include <vector>
 #include <cstdlib>
+#include <vector>
 
 namespace fawkes {
 
@@ -37,53 +37,48 @@ namespace fawkes {
  */
 class AStarState
 {
- public:
-  
-  /** Constructor.
+public:
+	/** Constructor.
    * @param cost_sofar costs for the path so far
    * @param parent parent search state (maybe NULL for first state)
    */
-  AStarState(float cost_sofar, AStarState *parent)
-    : parent(parent), path_cost(cost_sofar)
-  {};
-  
-  /** Destructor. */
-  virtual ~AStarState() {};
+	AStarState(float cost_sofar, AStarState *parent) : parent(parent), path_cost(cost_sofar){};
 
-  
-  // ***** You have to implement the following 4 methods! ***** //
-  // ***** ============================================== ***** //
-  
-  /** Generates a unique key for this state.
+	/** Destructor. */
+	virtual ~AStarState(){};
+
+	// ***** You have to implement the following 4 methods! ***** //
+	// ***** ============================================== ***** //
+
+	/** Generates a unique key for this state.
    * There has to be a unique key for each state (fast closed list -> bottleneck!)
    * @return unique key
    */
-  virtual size_t key() = 0;
-  
-  /** Estimate the heuristic cost to the goal.
+	virtual size_t key() = 0;
+
+	/** Estimate the heuristic cost to the goal.
    * @return estimated cost
    */
-  virtual float estimate() = 0;
+	virtual float estimate() = 0;
 
-  /** Check, wether we reached a goal or not.
+	/** Check, wether we reached a goal or not.
    * @return true, if this state is a goal, else false
    */
-  virtual bool is_goal() = 0;
-  
-  /** Generate all successors and put them to this vector.
+	virtual bool is_goal() = 0;
+
+	/** Generate all successors and put them to this vector.
    *  @return a vector of pointers of AStarState to a successor
    */
-  virtual std::vector<AStarState *> children() = 0;
+	virtual std::vector<AStarState *> children() = 0;
 
-  /** Predecessor. */
-  AStarState *parent;
+	/** Predecessor. */
+	AStarState *parent;
 
-  /** Cost of path leading to this search state. */
-  float path_cost;
+	/** Cost of path leading to this search state. */
+	float path_cost;
 
-  /** Total estimated cost. */
-  float total_estimated_cost;
-
+	/** Total estimated cost. */
+	float total_estimated_cost;
 };
 
 } // end namespace fawkes

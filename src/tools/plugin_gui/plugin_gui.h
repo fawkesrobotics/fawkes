@@ -27,27 +27,26 @@
 #include <gtkmm.h>
 
 namespace fawkes {
-  class PluginTreeView;
-  class ServiceSelectorCBE;
-}
+class PluginTreeView;
+class ServiceSelectorCBE;
+} // namespace fawkes
 
 #define GCONF_PREFIX "/apps/fawkes/plugingui"
 
 class PluginGuiGtkWindow : public Gtk::Window
 {
- public:
-  PluginGuiGtkWindow(BaseObjectType* cobject,
-                     const Glib::RefPtr<Gtk::Builder> builder);
-  virtual ~PluginGuiGtkWindow();
+public:
+	PluginGuiGtkWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> builder);
+	virtual ~PluginGuiGtkWindow();
 
- private:
-  void on_connect();
-  void on_disconnect();
+private:
+	void on_connect();
+	void on_disconnect();
 
- private:
-  Gtk::Statusbar             *m_stb_status;
-  fawkes::PluginTreeView     *m_trv_plugins;
-  fawkes::ServiceSelectorCBE *m_service_selector;
+private:
+	Gtk::Statusbar *            m_stb_status;
+	fawkes::PluginTreeView *    m_trv_plugins;
+	fawkes::ServiceSelectorCBE *m_service_selector;
 };
 
 #endif /* TOOLS_PLUGIN_PLUGIN_GUI_PLUGIN_GUI_H__ */

@@ -34,14 +34,14 @@ class RRDManager;
 
 class RRDAspectIniFin : public AspectIniFin
 {
- public:
-  RRDAspectIniFin(RRDManager *rrd_manager);
+public:
+	RRDAspectIniFin(RRDManager *rrd_manager);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  RRDManager *rrd_manager_;
+private:
+	RRDManager *rrd_manager_;
 };
 
 } // end namespace fawkes

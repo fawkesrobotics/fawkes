@@ -23,31 +23,31 @@
 #ifndef _PLUGINS_PLAYER_TIMESYNC_THREAD_H_
 #define _PLUGINS_PLAYER_TIMESYNC_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/time_source.h>
-
+#include <core/threading/thread.h>
 #include <utils/time/simts.h>
 
-class PlayerTimeSyncThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect
-  //public fawkes::TimeSourceAspect
+class PlayerTimeSyncThread : public fawkes::Thread, public fawkes::BlockedTimingAspect
+//public fawkes::TimeSourceAspect
 {
- public:
-  PlayerTimeSyncThread();
+public:
+	PlayerTimeSyncThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  fawkes::SimulatorTimeSource   simts_;
-
+private:
+	fawkes::SimulatorTimeSource simts_;
 };
-
 
 #endif

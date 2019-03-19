@@ -24,7 +24,7 @@
 #define UTILS_SYSTEM_GETKEY_H_
 
 namespace fawkes {
-  char getkey(int timeout_decisecs = 0);
+char getkey(int timeout_decisecs = 0);
 } // end namespace fawkes
 
 #endif

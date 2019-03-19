@@ -23,60 +23,62 @@
 #ifndef _PLUGINS_TTMAINLOOP_THREAD_H_
 #define _PLUGINS_TTMAINLOOP_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/clock.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <aspect/mainloop.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  class Time;
-  class TimeTracker;
-}
+class Time;
+class TimeTracker;
+} // namespace fawkes
 
-class TimeTrackerMainLoopThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ClockAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::MainLoopAspect
+class TimeTrackerMainLoopThread : public fawkes::Thread,
+                                  public fawkes::LoggingAspect,
+                                  public fawkes::ClockAspect,
+                                  public fawkes::ConfigurableAspect,
+                                  public fawkes::MainLoopAspect
 {
- public:
-  TimeTrackerMainLoopThread();
-  virtual ~TimeTrackerMainLoopThread();
+public:
+	TimeTrackerMainLoopThread();
+	virtual ~TimeTrackerMainLoopThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  float             output_interval_;
-  fawkes::Time     *last_outp_time_;
-  fawkes::Time     *now_;
+private:
+	float         output_interval_;
+	fawkes::Time *last_outp_time_;
+	fawkes::Time *now_;
 
-  fawkes::Time                 *loop_start_;
-  fawkes::Time                 *loop_end_;
+	fawkes::Time *loop_start_;
+	fawkes::Time *loop_end_;
 
-  fawkes::TimeTracker  *tt_;
-  unsigned int  tt_loopcount_;
-  unsigned int  ttc_pre_loop_;
-  unsigned int  ttc_sensor_acquire_;
-  unsigned int  ttc_sensor_prepare_;
-  unsigned int  ttc_sensor_process_;
-  unsigned int  ttc_worldstate_;
-  unsigned int  ttc_think_;
-  unsigned int  ttc_skill_;
-  unsigned int  ttc_act_;
-  unsigned int  ttc_post_loop_;
-  unsigned int  ttc_netproc_;
-  unsigned int  ttc_full_loop_;
-  unsigned int  ttc_real_loop_;
-
+	fawkes::TimeTracker *tt_;
+	unsigned int         tt_loopcount_;
+	unsigned int         ttc_pre_loop_;
+	unsigned int         ttc_sensor_acquire_;
+	unsigned int         ttc_sensor_prepare_;
+	unsigned int         ttc_sensor_process_;
+	unsigned int         ttc_worldstate_;
+	unsigned int         ttc_think_;
+	unsigned int         ttc_skill_;
+	unsigned int         ttc_act_;
+	unsigned int         ttc_post_loop_;
+	unsigned int         ttc_netproc_;
+	unsigned int         ttc_full_loop_;
+	unsigned int         ttc_real_loop_;
 };
-
 
 #endif

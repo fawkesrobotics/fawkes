@@ -25,6 +25,7 @@
 #define _FIREVISION_CLASSIFIERS_CLASSIFIER_H_
 
 #include <fvutils/base/roi.h>
+
 #include <list>
 
 namespace firevision {
@@ -33,28 +34,26 @@ typedef std::list<ROI> ROIList;
 
 class Classifier
 {
+public:
+	Classifier(const char *name);
+	virtual ~Classifier();
 
- public:
-  Classifier(const char *name);
-  virtual ~Classifier();
+	virtual void
+	                    set_src_buffer(unsigned char *yuv422_planar, unsigned int width, unsigned int height);
+	virtual const char *name() const;
 
-  virtual void set_src_buffer(unsigned char *yuv422_planar,
-			      unsigned int width, unsigned int height);
-  virtual const char *  name() const;
+	virtual ROIList *classify() = 0;
 
-  virtual ROIList * classify()                      = 0;
+protected:
+	/** Source buffer, encoded as YUV422_PLANAR */
+	unsigned char *_src;
+	/** Width in pixels of _src buffer */
+	unsigned int _width;
+	/** Height in pixels of _src buffer */
+	unsigned int _height;
 
- protected:
-  /** Source buffer, encoded as YUV422_PLANAR */
-  unsigned char *_src;
-  /** Width in pixels of _src buffer */
-  unsigned int   _width;
-  /** Height in pixels of _src buffer */
-  unsigned int   _height;
-
- private:
-  char *name_;
-
+private:
+	char *name_;
 };
 
 } // end namespace firevision

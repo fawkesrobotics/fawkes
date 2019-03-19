@@ -25,6 +25,7 @@
 #define _NETCOMM_UTILS_ADDR_SIZE_H_
 
 #include <netinet/in.h>
+#include <sys/socket.h>
 
 namespace fawkes {
 
@@ -44,7 +45,7 @@ sock_addr_size(const struct sockaddr *a)
 		return 0;
 	}
 }
-	
+
 } // end namespace fawkes
 
 #endif

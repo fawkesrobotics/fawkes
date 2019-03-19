@@ -16,19 +16,17 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/fwd.h>
 
-#include <string>
 #include <cstdint>
-#include <vector>
 #include <memory>
 #include <optional>
-
-
+#include <string>
+#include <vector>
 
 /** DomainObjectType representation for JSON transfer. */
 class DomainObjectType
 
 {
- public:
+public:
 	/** Constructor. */
 	DomainObjectType();
 	/** Constructor from JSON.
@@ -38,7 +36,7 @@ class DomainObjectType
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	DomainObjectType(const rapidjson::Value& v);
+	DomainObjectType(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~DomainObjectType();
@@ -46,9 +44,10 @@ class DomainObjectType
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -60,19 +59,19 @@ class DomainObjectType
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -85,12 +84,12 @@ class DomainObjectType
 	virtual void validate(bool subcall = false) const;
 
 	// Schema: DomainObjectType
- public:
-  /** Get kind value.
+public:
+	/** Get kind value.
    * @return kind value
    */
 	std::optional<std::string>
- kind() const
+	kind() const
 	{
 		return kind_;
 	}
@@ -98,15 +97,16 @@ class DomainObjectType
 	/** Set kind value.
 	 * @param kind new value
 	 */
-	void set_kind(const std::string& kind)
+	void
+	set_kind(const std::string &kind)
 	{
 		kind_ = kind;
 	}
-  /** Get apiVersion value.
+	/** Get apiVersion value.
    * @return apiVersion value
    */
 	std::optional<std::string>
- apiVersion() const
+	apiVersion() const
 	{
 		return apiVersion_;
 	}
@@ -114,15 +114,16 @@ class DomainObjectType
 	/** Set apiVersion value.
 	 * @param apiVersion new value
 	 */
-	void set_apiVersion(const std::string& apiVersion)
+	void
+	set_apiVersion(const std::string &apiVersion)
 	{
 		apiVersion_ = apiVersion;
 	}
-  /** Get name value.
+	/** Get name value.
    * @return name value
    */
 	std::optional<std::string>
- name() const
+	name() const
 	{
 		return name_;
 	}
@@ -130,15 +131,16 @@ class DomainObjectType
 	/** Set name value.
 	 * @param name new value
 	 */
-	void set_name(const std::string& name)
+	void
+	set_name(const std::string &name)
 	{
 		name_ = name;
 	}
-  /** Get super-type value.
+	/** Get super-type value.
    * @return super-type value
    */
 	std::optional<std::string>
- super_type() const
+	super_type() const
 	{
 		return super_type_;
 	}
@@ -146,18 +148,15 @@ class DomainObjectType
 	/** Set super-type value.
 	 * @param super_type new value
 	 */
-	void set_super_type(const std::string& super_type)
+	void
+	set_super_type(const std::string &super_type)
 	{
 		super_type_ = super_type;
 	}
- private:
-	std::optional<std::string>
- kind_;
-	std::optional<std::string>
- apiVersion_;
-	std::optional<std::string>
- name_;
-	std::optional<std::string>
- super_type_;
 
+private:
+	std::optional<std::string> kind_;
+	std::optional<std::string> apiVersion_;
+	std::optional<std::string> name_;
+	std::optional<std::string> super_type_;
 };

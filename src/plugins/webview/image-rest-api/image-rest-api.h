@@ -21,37 +21,35 @@
 
 #pragma once
 
-#include <core/threading/thread.h>
+#include "model/ImageInfo.h"
+
+#include <aspect/blackboard.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/webview.h>
-#include <aspect/blackboard.h>
 #include <aspect/thread_producer.h>
-
+#include <aspect/webview.h>
+#include <core/threading/thread.h>
 #include <webview/rest_api.h>
 #include <webview/rest_array.h>
-
-#include "model/ImageInfo.h"
 
 #include <map>
 #include <string>
 #include <utility>
 
 namespace fawkes {
-  class WebviewJpegStreamProducer;
+class WebviewJpegStreamProducer;
 }
 
-class ImageRestApi
-: public fawkes::Thread,
-	public fawkes::ClockAspect,
-	public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect,
-	public fawkes::BlackBoardAspect,
-  public fawkes::ThreadProducerAspect,
-	public fawkes::WebviewAspect
+class ImageRestApi : public fawkes::Thread,
+                     public fawkes::ClockAspect,
+                     public fawkes::ConfigurableAspect,
+                     public fawkes::LoggingAspect,
+                     public fawkes::BlackBoardAspect,
+                     public fawkes::ThreadProducerAspect,
+                     public fawkes::WebviewAspect
 {
- public:
+public:
 	ImageRestApi();
 	~ImageRestApi();
 
@@ -59,15 +57,14 @@ class ImageRestApi
 	virtual void loop();
 	virtual void finalize();
 
- private:
+private:
 	WebviewRestArray<ImageInfo> cb_list_images();
 
-	std::shared_ptr<fawkes::WebviewJpegStreamProducer>
-		get_stream(const std::string& image_id);
+	std::shared_ptr<fawkes::WebviewJpegStreamProducer> get_stream(const std::string &image_id);
 
-	std::unique_ptr<fawkes::WebReply> cb_get_image(fawkes::WebviewRestParams& params);
+	std::unique_ptr<fawkes::WebReply> cb_get_image(fawkes::WebviewRestParams &params);
 
- private:
-	fawkes::WebviewRestApi        *rest_api_;
+private:
+	fawkes::WebviewRestApi *                                                  rest_api_;
 	std::map<std::string, std::shared_ptr<fawkes::WebviewJpegStreamProducer>> streams_;
 };

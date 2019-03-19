@@ -33,25 +33,23 @@ using namespace firevision;
 int
 main(int argc, char **argv)
 {
-  SharedMemoryImageBuffer *buf, *buf2;
+	SharedMemoryImageBuffer *buf, *buf2;
 
-  buf = new SharedMemoryImageBuffer("QA test image", YUV422_PLANAR, 100, 100);
-  buf2 = new SharedMemoryImageBuffer("QA test image 2", YUV422_PLANAR, 100, 100);
+	buf  = new SharedMemoryImageBuffer("QA test image", YUV422_PLANAR, 100, 100);
+	buf2 = new SharedMemoryImageBuffer("QA test image 2", YUV422_PLANAR, 100, 100);
 
-  if ( buf->is_valid() ) {
-    cout << "IS valid!" << endl;
-  } else {
-    cout << "Is NOT valid!" << endl;
-  }
+	if (buf->is_valid()) {
+		cout << "IS valid!" << endl;
+	} else {
+		cout << "Is NOT valid!" << endl;
+	}
 
-  sleep(100);
+	sleep(100);
 
-  delete buf;
-  delete buf2;
+	delete buf;
+	delete buf2;
 
-  return 0;
+	return 0;
 }
-
-
 
 /// @endcond

@@ -22,8 +22,8 @@
 
 #include "openrave_plugin.h"
 
-#include "openrave_thread.h"
 #include "message_handler_thread.h"
+#include "openrave_thread.h"
 
 using namespace fawkes;
 
@@ -39,15 +39,13 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-OpenRavePlugin::OpenRavePlugin(Configuration *config)
-  : Plugin(config)
+OpenRavePlugin::OpenRavePlugin(Configuration *config) : Plugin(config)
 {
-  OpenRaveThread* or_thread = new OpenRaveThread();
+	OpenRaveThread *or_thread = new OpenRaveThread();
 
-  thread_list.push_back(or_thread);
-  thread_list.push_back(new OpenRaveMessageHandlerThread(or_thread));
+	thread_list.push_back(or_thread);
+	thread_list.push_back(new OpenRaveMessageHandlerThread(or_thread));
 }
-
 
 PLUGIN_DESCRIPTION("OpenRAVE Connector Plugin")
 EXPORT_PLUGIN(OpenRavePlugin)

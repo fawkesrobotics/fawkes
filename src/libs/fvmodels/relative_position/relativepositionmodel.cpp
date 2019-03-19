@@ -100,7 +100,6 @@ namespace firevision {
  * @author Tim Niemueller
  */
 
-
 /** Destructor. */
 RelativePositionModel::~RelativePositionModel()
 {
@@ -124,8 +123,8 @@ RelativePositionModel::set_cam_rotation(float pan, float tilt, float roll)
 void
 RelativePositionModel::get_cam_rotation(float &pan, float &tilt, float &roll) const
 {
-  roll = 0;
-  get_pan_tilt(&pan, &tilt);
+	roll = 0;
+	get_pan_tilt(&pan, &tilt);
 }
 
 /** Sets the current translation of the camera

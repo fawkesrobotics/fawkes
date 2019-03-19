@@ -22,55 +22,59 @@
 #ifndef _PLUGINS_PERCEPTION_PCL_DB_STORE_PCL_DB_STORE_THREAD_H_
 #define _PLUGINS_PERCEPTION_PCL_DB_STORE_PCL_DB_STORE_THREAD_H_
 
-#include <core/threading/thread.h>
+#include <aspect/blackboard.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/blackboard.h>
 #include <aspect/pointcloud.h>
+#include <core/threading/thread.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 #include <plugins/mongodb/aspect/mongodb.h>
 
-#include <pcl/point_types.h>
-#include <pcl/point_cloud.h>
-
 namespace fawkes {
-  class PclDatabaseStoreInterface;
-  class BlackBoardOnMessageWaker;
-}
+class PclDatabaseStoreInterface;
+class BlackBoardOnMessageWaker;
+} // namespace fawkes
 class PointCloudAdapter;
 
-class PointCloudDBStoreThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::MongoDBAspect,
-  public fawkes::PointCloudAspect
+class PointCloudDBStoreThread : public fawkes::Thread,
+                                public fawkes::ClockAspect,
+                                public fawkes::LoggingAspect,
+                                public fawkes::ConfigurableAspect,
+                                public fawkes::BlackBoardAspect,
+                                public fawkes::MongoDBAspect,
+                                public fawkes::PointCloudAspect
 {
- public:
-  PointCloudDBStoreThread();
-  virtual ~PointCloudDBStoreThread();
+public:
+	PointCloudDBStoreThread();
+	virtual ~PointCloudDBStoreThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- private:
-  bool store_pointcloud(std::string pcl_id, std::string database,
-			std::string collection, std::string &errmsg);
+private:
+	bool store_pointcloud(std::string  pcl_id,
+	                      std::string  database,
+	                      std::string  collection,
+	                      std::string &errmsg);
 
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+private: // members
+	fawkes::PclDatabaseStoreInterface *store_if_;
+	fawkes::BlackBoardOnMessageWaker * msg_waker_;
+	PointCloudAdapter *                adapter_;
 
- private: // members
-  fawkes::PclDatabaseStoreInterface *store_if_;
-  fawkes::BlackBoardOnMessageWaker  *msg_waker_;
-  PointCloudAdapter                 *adapter_;
-
-  std::string cfg_input_id_;
-  std::string cfg_database_;
+	std::string cfg_input_id_;
+	std::string cfg_database_;
 };
 
 #endif

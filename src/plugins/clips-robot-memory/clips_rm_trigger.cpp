@@ -20,9 +20,10 @@
  */
 
 #include "clips_rm_trigger.h"
-#include <clipsmm.h>
 
 #include <core/threading/mutex_locker.h>
+
+#include <clipsmm.h>
 
 using namespace fawkes;
 using namespace mongo;
@@ -34,30 +35,32 @@ using namespace mongo;
  * @param clips Clips environment
  * @param logger Logger
  */
-ClipsRmTrigger::ClipsRmTrigger(std::string assert_name, RobotMemory *robot_memory,
-  LockPtr<CLIPS::Environment> &clips, fawkes::Logger *logger)
+ClipsRmTrigger::ClipsRmTrigger(std::string                  assert_name,
+                               RobotMemory *                robot_memory,
+                               LockPtr<CLIPS::Environment> &clips,
+                               fawkes::Logger *             logger)
 {
-  this->assert_name = assert_name;
-  this->robot_memory = robot_memory;
-  this->clips = clips;
-  this->logger = logger;
+	this->assert_name  = assert_name;
+	this->robot_memory = robot_memory;
+	this->clips        = clips;
+	this->logger       = logger;
 }
 
 ClipsRmTrigger::~ClipsRmTrigger()
 {
-  if(trigger)
-  {
-    robot_memory->remove_trigger(trigger);
-  }
+	if (trigger) {
+		robot_memory->remove_trigger(trigger);
+	}
 }
 
 /**
  * Set the trigger object given by the robot memory
  * @param trigger Trigger
  */
-void ClipsRmTrigger::set_trigger(EventTrigger *trigger)
+void
+ClipsRmTrigger::set_trigger(EventTrigger *trigger)
 {
-  this->trigger = trigger;
+	this->trigger = trigger;
 }
 
 /**
@@ -65,34 +68,32 @@ void ClipsRmTrigger::set_trigger(EventTrigger *trigger)
  * When you retract the fact about the update, also call bson-destroy on the included pointer to avoid memory leaks.
  * @param update updated object
  */
-void ClipsRmTrigger::callback(mongo::BSONObj update)
+void
+ClipsRmTrigger::callback(mongo::BSONObj update)
 {
-  MutexLocker locker(clips.objmutex_ptr());
-  clips->assert_fact_f("( %s)", assert_name.c_str());
-  CLIPS::Template::pointer temp = clips->get_template("robmem-trigger");
-  if (temp) {
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-    fact->set_slot("name", assert_name.c_str());
-    CLIPS::Values rcvd_at(2, CLIPS::Value(CLIPS::TYPE_INTEGER));
-    rcvd_at[0] = tv.tv_sec;
-    rcvd_at[1] = tv.tv_usec;
-    fact->set_slot("rcvd-at", rcvd_at);
-    BSONObjBuilder *b = new BSONObjBuilder();
-    b->appendElements(update);
-    void *ptr = b;
-    fact->set_slot("ptr", CLIPS::Value(ptr));
-    CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
+	MutexLocker locker(clips.objmutex_ptr());
+	clips->assert_fact_f("( %s)", assert_name.c_str());
+	CLIPS::Template::pointer temp = clips->get_template("robmem-trigger");
+	if (temp) {
+		struct timeval tv;
+		gettimeofday(&tv, 0);
+		CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
+		fact->set_slot("name", assert_name.c_str());
+		CLIPS::Values rcvd_at(2, CLIPS::Value(CLIPS::TYPE_INTEGER));
+		rcvd_at[0] = tv.tv_sec;
+		rcvd_at[1] = tv.tv_usec;
+		fact->set_slot("rcvd-at", rcvd_at);
+		BSONObjBuilder *b = new BSONObjBuilder();
+		b->appendElements(update);
+		void *ptr = b;
+		fact->set_slot("ptr", CLIPS::Value(ptr));
+		CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
-    if (!new_fact) {
-      logger->log_warn("CLIPS-RobotMemory", "Asserting robmem-trigger fact failed");
-      delete static_cast<BSONObjBuilder *>(ptr);
-    }
-  } else {
-    logger->log_warn("CLIPS-RobotMemory",
-        "Did not get template, did you load robot-memory.clp?");
-  }
-
+		if (!new_fact) {
+			logger->log_warn("CLIPS-RobotMemory", "Asserting robmem-trigger fact failed");
+			delete static_cast<BSONObjBuilder *>(ptr);
+		}
+	} else {
+		logger->log_warn("CLIPS-RobotMemory", "Did not get template, did you load robot-memory.clp?");
+	}
 }
-

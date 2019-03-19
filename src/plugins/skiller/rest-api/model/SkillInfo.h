@@ -17,19 +17,17 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/fwd.h>
 
-#include <string>
 #include <cstdint>
-#include <vector>
 #include <memory>
 #include <optional>
-
-
+#include <string>
+#include <vector>
 
 /** SkillInfo representation for JSON transfer. */
 class SkillInfo
 
 {
- public:
+public:
 	/** Constructor. */
 	SkillInfo();
 	/** Constructor from JSON.
@@ -39,7 +37,7 @@ class SkillInfo
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	SkillInfo(const rapidjson::Value& v);
+	SkillInfo(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~SkillInfo();
@@ -47,9 +45,10 @@ class SkillInfo
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -61,19 +60,19 @@ class SkillInfo
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -86,12 +85,12 @@ class SkillInfo
 	virtual void validate(bool subcall = false) const;
 
 	// Schema: SkillInfo
- public:
-  /** Get kind value.
+public:
+	/** Get kind value.
    * @return kind value
    */
 	std::optional<std::string>
- kind() const
+	kind() const
 	{
 		return kind_;
 	}
@@ -99,15 +98,16 @@ class SkillInfo
 	/** Set kind value.
 	 * @param kind new value
 	 */
-	void set_kind(const std::string& kind)
+	void
+	set_kind(const std::string &kind)
 	{
 		kind_ = kind;
 	}
-  /** Get apiVersion value.
+	/** Get apiVersion value.
    * @return apiVersion value
    */
 	std::optional<std::string>
- apiVersion() const
+	apiVersion() const
 	{
 		return apiVersion_;
 	}
@@ -115,15 +115,16 @@ class SkillInfo
 	/** Set apiVersion value.
 	 * @param apiVersion new value
 	 */
-	void set_apiVersion(const std::string& apiVersion)
+	void
+	set_apiVersion(const std::string &apiVersion)
 	{
 		apiVersion_ = apiVersion;
 	}
-  /** Get name value.
+	/** Get name value.
    * @return name value
    */
 	std::optional<std::string>
- name() const
+	name() const
 	{
 		return name_;
 	}
@@ -131,16 +132,14 @@ class SkillInfo
 	/** Set name value.
 	 * @param name new value
 	 */
-	void set_name(const std::string& name)
+	void
+	set_name(const std::string &name)
 	{
 		name_ = name;
 	}
- private:
-	std::optional<std::string>
- kind_;
-	std::optional<std::string>
- apiVersion_;
-	std::optional<std::string>
- name_;
 
+private:
+	std::optional<std::string> kind_;
+	std::optional<std::string> apiVersion_;
+	std::optional<std::string> name_;
 };

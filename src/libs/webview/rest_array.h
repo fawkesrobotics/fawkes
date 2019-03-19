@@ -23,33 +23,35 @@
 #ifndef _LIBS_WEBVIEW_REST_ARRAY_H_
 #define _LIBS_WEBVIEW_REST_ARRAY_H_
 
-#include <string>
-#include <sstream>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <sstream>
+#include <string>
 
 /** Container to return array via REST.
  * @author Tim Niemueller
  */
-template<class M>
+template <class M>
 class WebviewRestArray
 {
- public:
+public:
 	/** Empty array constructor. */
-	WebviewRestArray() {}
+	WebviewRestArray()
+	{
+	}
 	/** Constructor.
 	 * @param items vector of values to copy
 	 */
-	WebviewRestArray(std::vector<M> &  items)
-		: items_(items)
-	{}
+	WebviewRestArray(std::vector<M> &items) : items_(items)
+	{
+	}
 
 	/** Constructor.
 	 * @param items vector of values to move to this array.
 	 */
-	WebviewRestArray(std::vector<M> &&  items)
-	  : items_(std::move(items))
-	{}
+	WebviewRestArray(std::vector<M> &&items) : items_(std::move(items))
+	{
+	}
 
 	/** Render object to JSON.
 	 * @param pretty true to enable pretty printing (readable spacing)
@@ -74,18 +76,19 @@ class WebviewRestArray
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	void from_json(const std::string& json)
+	void
+	from_json(const std::string &json)
 	{
-		std::stringstream ss(json);
+		std::stringstream           ss(json);
 		boost::property_tree::ptree pt;
-    boost::property_tree::read_json(ss, pt);
-    for (auto& c : pt.get_child("")) {
-	    std::stringstream os;
-	    boost::property_tree::write_json(os, c.second);
-	    M m;
-	    m.from_json(os.str());
-	    items_.push_back(std::move(m));
-    }
+		boost::property_tree::read_json(ss, pt);
+		for (auto &c : pt.get_child("")) {
+			std::stringstream os;
+			boost::property_tree::write_json(os, c.second);
+			M m;
+			m.from_json(os.str());
+			items_.push_back(std::move(m));
+		}
 	}
 
 	/** Validate if all required fields have been set.
@@ -96,7 +99,8 @@ class WebviewRestArray
 	 * @exception std::runtime_error informative message describing the missing
 	 * fields
 	 */
-	void validate(bool subcall = false)
+	void
+	validate(bool subcall = false)
 	{
 		for (const auto &i : items_) {
 			i.validate(subcall);
@@ -106,7 +110,8 @@ class WebviewRestArray
 	/** Accessor for items.
 	 * @return item vector
 	 */
-	std::vector<M> & items()
+	std::vector<M> &
+	items()
 	{
 		return items_;
 	}
@@ -114,7 +119,8 @@ class WebviewRestArray
 	/** Add item at the back of the container.
 	 * @param m element to copy
 	 */
-	void push_back(M& m)
+	void
+	push_back(M &m)
 	{
 		items_.push_back(m);
 	}
@@ -122,12 +128,13 @@ class WebviewRestArray
 	/** Add item at the back of the container.
 	 * @param m element to move
 	 */
-	void push_back(M&& m)
+	void
+	push_back(M &&m)
 	{
 		items_.push_back(std::move(m));
 	}
 
- private:
+private:
 	std::vector<M> items_;
 };
 

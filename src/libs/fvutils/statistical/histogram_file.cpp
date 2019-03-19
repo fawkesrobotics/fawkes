@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/statistical/histogram_file.h>
-#include <fvutils/statistical/histogram_block.h>
 #include <core/exception.h>
+#include <fvutils/statistical/histogram_block.h>
+#include <fvutils/statistical/histogram_file.h>
 
 using namespace fawkes;
 
@@ -37,32 +37,30 @@ namespace firevision {
 
 /** Constructor. */
 HistogramFile::HistogramFile()
-  : FireVisionDataFile(FIREVISION_HISTOGRAM_MAGIC, FIREVISION_HISTOGRAM_CURVER)
+: FireVisionDataFile(FIREVISION_HISTOGRAM_MAGIC, FIREVISION_HISTOGRAM_CURVER)
 {
-  attached_histograms.clear();
+	attached_histograms.clear();
 }
-
 
 /** Destructor. */
 HistogramFile::~HistogramFile()
 {
-  attached_histograms.clear();
+	attached_histograms.clear();
 }
-
 
 /** Adds a new histogram block to the file.
  * @param block the histogram block
  */
 void
-HistogramFile::add_histogram_block(HistogramBlock* block)
+HistogramFile::add_histogram_block(HistogramBlock *block)
 {
-  if ( attached_histograms.find( block->object_type() ) != attached_histograms.end() )
-    { throw Exception("Cannot add another histogram of type %d to the file", block->object_type()); }
+	if (attached_histograms.find(block->object_type()) != attached_histograms.end()) {
+		throw Exception("Cannot add another histogram of type %d to the file", block->object_type());
+	}
 
-  attached_histograms[ block->object_type() ] = block;
-  add_block(block);
+	attached_histograms[block->object_type()] = block;
+	add_block(block);
 }
-
 
 /** Generates a list of histogram blocks attached to the file.
  * @return a list of all attached histogram blocks
@@ -70,24 +68,21 @@ HistogramFile::add_histogram_block(HistogramBlock* block)
 HistogramFile::HistogramBlockList
 HistogramFile::histogram_blocks()
 {
-  FireVisionDataFile::BlockList bl = blocks();
-  FireVisionDataFile::BlockList::iterator blit;
+	FireVisionDataFile::BlockList           bl = blocks();
+	FireVisionDataFile::BlockList::iterator blit;
 
-  HistogramBlockList hbl;
-  
-  for (blit = bl.begin(); blit != bl.end(); ++blit)
-    {
-      if ((*blit)->type() == FIREVISION_HISTOGRAM_TYPE_16 ||
-	  (*blit)->type() == FIREVISION_HISTOGRAM_TYPE_32 )
-	{
-	  HistogramBlock* hb = new HistogramBlock(*blit);
-	  hbl.push_back(hb);
+	HistogramBlockList hbl;
+
+	for (blit = bl.begin(); blit != bl.end(); ++blit) {
+		if ((*blit)->type() == FIREVISION_HISTOGRAM_TYPE_16
+		    || (*blit)->type() == FIREVISION_HISTOGRAM_TYPE_32) {
+			HistogramBlock *hb = new HistogramBlock(*blit);
+			hbl.push_back(hb);
+		}
 	}
-    }
 
-  return hbl;
+	return hbl;
 }
-
 
 /** Get a value from a certain histogram.
  * @param object_type the requested value is obtained from the histogram for this type of
@@ -98,15 +93,14 @@ HistogramFile::histogram_blocks()
  * @return value
  */
 uint32_t
-HistogramFile::get_value(hint_t object_type,
-			 uint16_t x, uint16_t y, uint16_t z)
+HistogramFile::get_value(hint_t object_type, uint16_t x, uint16_t y, uint16_t z)
 {
-  if ( attached_histograms.find(object_type) == attached_histograms.end() )
-    { throw Exception("File contains no histogram for type %d", object_type); }
+	if (attached_histograms.find(object_type) == attached_histograms.end()) {
+		throw Exception("File contains no histogram for type %d", object_type);
+	}
 
-  return attached_histograms[object_type]->get_value(x, y, z);
+	return attached_histograms[object_type]->get_value(x, y, z);
 }
-
 
 /** Set a value in a certain histogram.
  * @param object_type this specifies the type for which the respective histogram is changed
@@ -116,14 +110,13 @@ HistogramFile::get_value(hint_t object_type,
  * @param val the new value for the specified cell
  */
 void
-HistogramFile::set_value(hint_t object_type,
-			 uint16_t x, uint16_t y, uint16_t z,
-			 uint32_t val)
+HistogramFile::set_value(hint_t object_type, uint16_t x, uint16_t y, uint16_t z, uint32_t val)
 {
-  if ( attached_histograms.find(object_type) == attached_histograms.end() )
-    { throw Exception("File contains no histogram for type %d", object_type); }
+	if (attached_histograms.find(object_type) == attached_histograms.end()) {
+		throw Exception("File contains no histogram for type %d", object_type);
+	}
 
-  attached_histograms[object_type]->set_value(x, y, z, val);
+	attached_histograms[object_type]->set_value(x, y, z, val);
 }
 
 } // end namespace firevision

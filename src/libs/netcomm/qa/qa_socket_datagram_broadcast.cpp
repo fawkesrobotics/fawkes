@@ -35,16 +35,15 @@
  * at i ~ 1000).
  */
 
-
 #include <core/threading/thread.h>
 #include <netcomm/socket/datagram_broadcast.h>
-#include <utils/system/signal.h>
+#include <netinet/in.h>
 #include <utils/system/argparser.h>
+#include <utils/system/signal.h>
 
-#include <netdb.h>
 #include <cstdio>
 #include <cstring>
-#include <netinet/in.h>
+#include <netdb.h>
 
 #define BROADCAST_IP "172.16.35.255"
 
@@ -53,156 +52,159 @@ using namespace fawkes;
 class BroadcastDatagramServerThread : public Thread
 {
 public:
-  BroadcastDatagramServerThread(unsigned short int port)
-    : Thread("BroadcastDatagramServerThread", Thread::OPMODE_CONTINUOUS)
-  {
-    i = 0;
-    try {
-      s = new BroadcastDatagramSocket(BROADCAST_IP, port);
-      s->bind();
-    } catch (Exception &e) {
-      e.print_trace();
-      throw;
-    }
-  }
+	BroadcastDatagramServerThread(unsigned short int port)
+	: Thread("BroadcastDatagramServerThread", Thread::OPMODE_CONTINUOUS)
+	{
+		i = 0;
+		try {
+			s = new BroadcastDatagramSocket(BROADCAST_IP, port);
+			s->bind();
+		} catch (Exception &e) {
+			e.print_trace();
+			throw;
+		}
+	}
 
-  ~BroadcastDatagramServerThread()
-  {
-    printf("Closing server socket\n");
-    s->close();
-    printf("Closed server socket\n");
-    delete s;
-  }
+	~BroadcastDatagramServerThread()
+	{
+		printf("Closing server socket\n");
+		s->close();
+		printf("Closed server socket\n");
+		delete s;
+	}
 
-  virtual void loop()
-  {
-    try {
-      printf("Sending %u\n", i);
-      s->send(&i, sizeof(i));
-      printf("Sent %u\n", i);
-      unsigned int ri = 0;
-      from_len = sizeof(from);
-      printf("Receiving\n");
-      s->recv(&ri, sizeof(ri), (struct sockaddr *)&from, &from_len);
-      if ( ri != i ) {
-	printf("ERROR: sent %u but received %u\n", i, ri);
-      } else {
-	printf("OK: sent %u and received %u\n", i, ri);
-      }
-      ++i;
-    } catch (Exception &e) {
-      printf("Loop failed\n");
-      e.print_trace();
-      throw;
-    }
-  }
+	virtual void
+	loop()
+	{
+		try {
+			printf("Sending %u\n", i);
+			s->send(&i, sizeof(i));
+			printf("Sent %u\n", i);
+			unsigned int ri = 0;
+			from_len        = sizeof(from);
+			printf("Receiving\n");
+			s->recv(&ri, sizeof(ri), (struct sockaddr *)&from, &from_len);
+			if (ri != i) {
+				printf("ERROR: sent %u but received %u\n", i, ri);
+			} else {
+				printf("OK: sent %u and received %u\n", i, ri);
+			}
+			++i;
+		} catch (Exception &e) {
+			printf("Loop failed\n");
+			e.print_trace();
+			throw;
+		}
+	}
 
- private:
-  unsigned int i;
-  BroadcastDatagramSocket *s;
-  struct sockaddr_in from;
-  unsigned int from_len;
+private:
+	unsigned int             i;
+	BroadcastDatagramSocket *s;
+	struct sockaddr_in       from;
+	unsigned int             from_len;
 };
 
 class BroadcastDatagramReflectorThread : public Thread
 {
 public:
-  BroadcastDatagramReflectorThread(unsigned short int port)
-    : Thread("BroadcastDatagramReflectorThread", Thread::OPMODE_CONTINUOUS)
-  {
-    try {
-      s = new BroadcastDatagramSocket("224.16.0.1", port);
-      s->bind();
-    } catch (Exception &e) {
-      e.print_trace();
-      throw;
-    }
-    from_len = sizeof(from);
-  }
+	BroadcastDatagramReflectorThread(unsigned short int port)
+	: Thread("BroadcastDatagramReflectorThread", Thread::OPMODE_CONTINUOUS)
+	{
+		try {
+			s = new BroadcastDatagramSocket("224.16.0.1", port);
+			s->bind();
+		} catch (Exception &e) {
+			e.print_trace();
+			throw;
+		}
+		from_len = sizeof(from);
+	}
 
-  ~BroadcastDatagramReflectorThread()
-  {
-    printf("Closing reflector socket\n");
-    s->close();
-    printf("Closed reflector socket\n");
-    delete s;
-  }
+	~BroadcastDatagramReflectorThread()
+	{
+		printf("Closing reflector socket\n");
+		s->close();
+		printf("Closed reflector socket\n");
+		delete s;
+	}
 
-  virtual void loop()
-  {
-    unsigned int i = 0;
-    printf("Waiting for data to reflect\n");
-    s->recv(&i, sizeof(i), (struct sockaddr *)&from, &from_len);
-    printf("Received %u, reflecting\n", i);
-    s->send(&i, sizeof(i));
-  }
+	virtual void
+	loop()
+	{
+		unsigned int i = 0;
+		printf("Waiting for data to reflect\n");
+		s->recv(&i, sizeof(i), (struct sockaddr *)&from, &from_len);
+		printf("Received %u, reflecting\n", i);
+		s->send(&i, sizeof(i));
+	}
 
- private:
-  BroadcastDatagramSocket *s;
-  struct sockaddr_in from;
-  unsigned int from_len;
+private:
+	BroadcastDatagramSocket *s;
+	struct sockaddr_in       from;
+	unsigned int             from_len;
 };
-
 
 class BroadcastDatagramSocketQAMain : public SignalHandler
 {
- public:
-  BroadcastDatagramSocketQAMain(ArgumentParser& argp)
-  {
-    s = NULL;
-    r = NULL;
-    if ( argp.has_arg("r") ) {
-      printf("Going to be a reflector\n");
-      r = new BroadcastDatagramReflectorThread(1910);
-    } else {
-      s = new BroadcastDatagramServerThread(1910);
-    }
-  }
+public:
+	BroadcastDatagramSocketQAMain(ArgumentParser &argp)
+	{
+		s = NULL;
+		r = NULL;
+		if (argp.has_arg("r")) {
+			printf("Going to be a reflector\n");
+			r = new BroadcastDatagramReflectorThread(1910);
+		} else {
+			s = new BroadcastDatagramServerThread(1910);
+		}
+	}
 
-  ~BroadcastDatagramSocketQAMain()
-  {
-    delete s;
-    delete r;
-  }
+	~BroadcastDatagramSocketQAMain()
+	{
+		delete s;
+		delete r;
+	}
 
+	virtual void
+	handle_signal(int signum)
+	{
+		printf("Signal received, cancelling threads\n");
+		if (s != NULL)
+			s->cancel();
+		if (r != NULL)
+			r->cancel();
+		printf("Threads cancelled\n");
+	}
 
-  virtual void handle_signal(int signum)
-  {
-    printf("Signal received, cancelling threads\n");
-    if ( s != NULL )  s->cancel();
-    if ( r != NULL )  r->cancel();
-    printf("Threads cancelled\n");
-  }
+	void
+	run()
+	{
+		if (s != NULL) {
+			s->start();
+			s->join();
+		}
+		if (r != NULL) {
+			r->start();
+			r->join();
+		}
+	}
 
-  void run()
-  {
-    if ( s != NULL ) {
-      s->start();
-      s->join();
-    }
-    if ( r != NULL ) {
-      r->start();
-      r->join();
-    }
-  }
-
- private:
-  BroadcastDatagramServerThread *s;
-  BroadcastDatagramReflectorThread *r;
-
+private:
+	BroadcastDatagramServerThread *   s;
+	BroadcastDatagramReflectorThread *r;
 };
 
 int
 main(int argc, char **argv)
 {
-  printf("Going to broadcast to " BROADCAST_IP "\n");
-  ArgumentParser argp(argc, argv, "r");
-  BroadcastDatagramSocketQAMain m(argp);
-  SignalManager::register_handler(SIGINT, &m);
-  SignalManager::ignore(SIGPIPE);
+	printf("Going to broadcast to " BROADCAST_IP "\n");
+	ArgumentParser                argp(argc, argv, "r");
+	BroadcastDatagramSocketQAMain m(argp);
+	SignalManager::register_handler(SIGINT, &m);
+	SignalManager::ignore(SIGPIPE);
 
-  m.run();
-  return 0;
+	m.run();
+	return 0;
 }
 
 /// @endcond

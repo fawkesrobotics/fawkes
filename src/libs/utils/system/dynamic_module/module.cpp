@@ -37,8 +37,7 @@ namespace fawkes {
 /** Constructor.
  * @param msg message
  */
-ModuleOpenException::ModuleOpenException(const char *msg)
-  : Exception(msg)
+ModuleOpenException::ModuleOpenException(const char *msg) : Exception(msg)
 {
 }
 
@@ -55,7 +54,7 @@ ModuleOpenException::ModuleOpenException(const char *msg)
 
 // SOEXT is a macro passed in from the build system and set in config.mk or
 // a build type specific config file.
-const char * Module::FILE_EXTENSION = SOEXT;
+const char *Module::FILE_EXTENSION = SOEXT;
 
 /** Constructor.
  * @param filename full filename of the module
@@ -63,21 +62,20 @@ const char * Module::FILE_EXTENSION = SOEXT;
  */
 Module::Module(std::string filename, Module::ModuleFlags flags)
 {
-  filename_ = filename;
-  flags_    = flags;
+	filename_ = filename;
+	flags_    = flags;
 
-  handle_         = NULL;
+	handle_ = NULL;
 
-  is_resident_    = false;
-  ref_count_      = 0;
+	is_resident_ = false;
+	ref_count_   = 0;
 }
-
 
 /** Destructor.
  * Closes the module. */
 Module::~Module()
 {
-  close();
+	close();
 }
 
 /** Open the module
@@ -88,61 +86,60 @@ Module::~Module()
 void
 Module::open()
 {
-  if ( handle_ != NULL )  return;
+	if (handle_ != NULL)
+		return;
 
-  // Note: We assume Linux-style shared objects
-  std::string full_filename = "";
-  full_filename = filename_;
-  //                                                                .   SOEXT
-  if ( full_filename.find("." SOEXT, 0) != (full_filename.length() - 1 - strlen(FILE_EXTENSION)) ) {
-    // filename has no proper ending
-    full_filename += "." SOEXT;
-  }
+	// Note: We assume Linux-style shared objects
+	std::string full_filename = "";
+	full_filename             = filename_;
+	//                                                                .   SOEXT
+	if (full_filename.find("." SOEXT, 0) != (full_filename.length() - 1 - strlen(FILE_EXTENSION))) {
+		// filename has no proper ending
+		full_filename += "." SOEXT;
+	}
 
-  int tflags = 0;
-  tflags |= ((flags_ & MODULE_BIND_LAZY)   != 0) ? RTLD_LAZY : RTLD_NOW;
-  tflags |= ((flags_ & MODULE_BIND_NOW)    != 0) ? RTLD_NOW : 0;
-  tflags |= ((flags_ & MODULE_BIND_LOCAL)  != 0) ? RTLD_LOCAL : 0;
-  tflags |= ((flags_ & MODULE_BIND_GLOBAL) != 0) ? RTLD_GLOBAL : 0;
-  tflags |= ((flags_ & MODULE_NODELETE)    != 0) ? RTLD_NODELETE : 0;
+	int tflags = 0;
+	tflags |= ((flags_ & MODULE_BIND_LAZY) != 0) ? RTLD_LAZY : RTLD_NOW;
+	tflags |= ((flags_ & MODULE_BIND_NOW) != 0) ? RTLD_NOW : 0;
+	tflags |= ((flags_ & MODULE_BIND_LOCAL) != 0) ? RTLD_LOCAL : 0;
+	tflags |= ((flags_ & MODULE_BIND_GLOBAL) != 0) ? RTLD_GLOBAL : 0;
+	tflags |= ((flags_ & MODULE_NODELETE) != 0) ? RTLD_NODELETE : 0;
 #ifdef linux
-  tflags |= ((flags_ & MODULE_BIND_DEEP)   != 0) ? RTLD_DEEPBIND : 0;
+	tflags |= ((flags_ & MODULE_BIND_DEEP) != 0) ? RTLD_DEEPBIND : 0;
 #endif
 
-  if ( full_filename == "") {
-    handle_ = dlopen (NULL, tflags);
+	if (full_filename == "") {
+		handle_ = dlopen(NULL, tflags);
 
-    filename_    = "main";
-    is_resident_ = true;
-    ref_count_   = 1;
-  } else {
-
-    // check whether we have a readable file right away
-    if (File::is_regular(full_filename.c_str())) {
-      // ok, try loading the module
-      handle_ = dlopen(full_filename.c_str(), tflags);
-
-      if ( NULL == handle_) {
-	const char *err = dlerror();
-	if ( NULL == err ) {
-	  throw ModuleOpenException("dlopen failed with an unknown error");
+		filename_    = "main";
+		is_resident_ = true;
+		ref_count_   = 1;
 	} else {
-	  ModuleOpenException e("dlopen failed");
-	  e.append("dlerror: %s", err);
-	  throw e;
-	}
-      } else {
-	is_resident_ = false;
-	ref_count_   = 1;
-      }
-    } else {
-      ModuleOpenException e("Cannot open module");
-      e.append("File '%s' does not exist", full_filename.c_str());
-      throw e;
-    }
-  }
-}
+		// check whether we have a readable file right away
+		if (File::is_regular(full_filename.c_str())) {
+			// ok, try loading the module
+			handle_ = dlopen(full_filename.c_str(), tflags);
 
+			if (NULL == handle_) {
+				const char *err = dlerror();
+				if (NULL == err) {
+					throw ModuleOpenException("dlopen failed with an unknown error");
+				} else {
+					ModuleOpenException e("dlopen failed");
+					e.append("dlerror: %s", err);
+					throw e;
+				}
+			} else {
+				is_resident_ = false;
+				ref_count_   = 1;
+			}
+		} else {
+			ModuleOpenException e("Cannot open module");
+			e.append("File '%s' does not exist", full_filename.c_str());
+			throw e;
+		}
+	}
+}
 
 /** Close the module
  * @return Returns true if the module could be closed, false otherwise
@@ -150,39 +147,38 @@ Module::open()
 bool
 Module::close()
 {
-  if ( handle_ == NULL )  return true;
+	if (handle_ == NULL)
+		return true;
 
-  if ( ref_count_ > 0 )  --ref_count_;
+	if (ref_count_ > 0)
+		--ref_count_;
 
-  if ( (ref_count_ == 0) && ! is_resident_ ) {
-    if ( dlclose(handle_) != 0 ) {
-      handle_ = NULL;
-      return false;
-    }
-    handle_ = NULL;
-  }
+	if ((ref_count_ == 0) && !is_resident_) {
+		if (dlclose(handle_) != 0) {
+			handle_ = NULL;
+			return false;
+		}
+		handle_ = NULL;
+	}
 
-  return true;
+	return true;
 }
-
 
 /** Increment the reference count of this module */
 void
 Module::ref()
 {
-  ++ref_count_;
+	++ref_count_;
 }
-
 
 /** Decrease the reference count of this module */
 void
 Module::unref()
 {
-  if ( ref_count_ > 0 ) {
-    --ref_count_;
-  }
+	if (ref_count_ > 0) {
+		--ref_count_;
+	}
 }
-
 
 /** Check if there are no reference to this module
  * @return Returns true if there are no references to this module,
@@ -191,9 +187,8 @@ Module::unref()
 bool
 Module::notref()
 {
-  return (ref_count_ == 0);
+	return (ref_count_ == 0);
 }
-
 
 /** Get the reference count of this module
  * @return Returns the number of references to this module
@@ -201,9 +196,8 @@ Module::notref()
 unsigned int
 Module::get_ref_count()
 {
-  return ref_count_;
+	return ref_count_;
 }
-
 
 /** Compare to another Module instance
  * @param cmod a reference to the other comparison instance
@@ -213,9 +207,8 @@ Module::get_ref_count()
 bool
 Module::operator==(const Module &cmod)
 {
-  return (filename_ == cmod.filename_);
+	return (filename_ == cmod.filename_);
 }
-
 
 /** Check if the module has the given symbol
  * @param symbol_name The name of the symbol.
@@ -229,16 +222,15 @@ Module::operator==(const Module &cmod)
 bool
 Module::has_symbol(const char *symbol_name)
 {
-  if( symbol_name == NULL ) {
-    return false;
-  }
-  if ( handle_ == NULL ) {
-    return false;
-  }
+	if (symbol_name == NULL) {
+		return false;
+	}
+	if (handle_ == NULL) {
+		return false;
+	}
 
-  return ( dlsym( handle_, symbol_name ) != NULL );
+	return (dlsym(handle_, symbol_name) != NULL);
 }
-
 
 /** Get a symbol from the module
  * @param symbol_name The name of the symbol.
@@ -252,12 +244,13 @@ Module::has_symbol(const char *symbol_name)
 void *
 Module::get_symbol(const char *symbol_name)
 {
-  if( symbol_name == NULL ) return NULL;
-  if ( handle_ == NULL ) return NULL;
+	if (symbol_name == NULL)
+		return NULL;
+	if (handle_ == NULL)
+		return NULL;
 
-  return dlsym( handle_, symbol_name );
+	return dlsym(handle_, symbol_name);
 }
-
 
 /** Get file extension for dl modules
  * @return Returns the file extension for dl modules, this is "so" on Linux
@@ -267,9 +260,8 @@ Module::get_symbol(const char *symbol_name)
 const char *
 Module::get_file_extension()
 {
-  return FILE_EXTENSION;
+	return FILE_EXTENSION;
 }
-
 
 /** Get the full file name of the module
  * @return Returns a string with the full file name of the module
@@ -277,9 +269,8 @@ Module::get_file_extension()
 std::string
 Module::get_filename()
 {
-  return filename_;
+	return filename_;
 }
-
 
 /** Get the base file name of the module
  * @return Returns the base file name of the module. On Unix systems this is
@@ -288,12 +279,13 @@ Module::get_filename()
 std::string
 Module::get_base_filename()
 {
-  if ( filename_.find("/", 0) != std::string::npos ) {
-    std::string rv = filename_.substr(filename_.rfind("/", filename_.length()) + 1, filename_.length());
-    return rv;
-  } else {
-    return filename_.c_str();
-  }
+	if (filename_.find("/", 0) != std::string::npos) {
+		std::string rv =
+		  filename_.substr(filename_.rfind("/", filename_.length()) + 1, filename_.length());
+		return rv;
+	} else {
+		return filename_.c_str();
+	}
 }
 
 } // end namespace fawkes

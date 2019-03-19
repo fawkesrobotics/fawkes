@@ -33,8 +33,7 @@ public:
 	/** Constructor.
 	 * @param logger logger to write output to
 	 */
-	PlexilLogStreamBuffer(fawkes::Logger* logger)
-	: logger_(logger)
+	PlexilLogStreamBuffer(fawkes::Logger *logger) : logger_(logger)
 	{
 	}
 
@@ -43,10 +42,10 @@ public:
 	 * @return always zero
 	 */
 	int_type
-	overflow(int_type ch) 
+	overflow(int_type ch)
 	{
 		if (ch == '\n') {
-			std::string s = ss_.str();
+			std::string            s = ss_.str();
 			std::string::size_type opening, closing;
 			opening = s.find('[');
 			closing = s.find(']');
@@ -65,6 +64,6 @@ public:
 	}
 
 private:
-	fawkes::Logger* logger_;
+	fawkes::Logger *  logger_;
 	std::stringstream ss_;
 };

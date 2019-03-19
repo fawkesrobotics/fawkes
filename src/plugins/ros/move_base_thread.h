@@ -18,88 +18,82 @@
  *
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
- 
+
 #ifndef _ROS_MOVE_BASE_THREAD_H_
 #define _ROS_MOVE_BASE_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/blackboard.h>
-#include <aspect/configurable.h>
-#include <aspect/tf.h>
-#include <plugins/ros/aspect/ros.h>
-
-#include <interfaces/NavigatorInterface.h>
-
-#include <tf/types.h>
-#include <cmath>
-#include <ros/ros.h>
-#include <move_base_msgs/MoveBaseAction.h>
-#include <move_base_msgs/MoveBaseGoal.h>
-#include <move_base_msgs/MoveBaseActionGoal.h>
 #include <actionlib/server/simple_action_server.h>
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <aspect/tf.h>
+#include <core/threading/thread.h>
+#include <interfaces/NavigatorInterface.h>
+#include <move_base_msgs/MoveBaseAction.h>
+#include <move_base_msgs/MoveBaseActionGoal.h>
+#include <move_base_msgs/MoveBaseGoal.h>
+#include <plugins/ros/aspect/ros.h>
+#include <ros/ros.h>
+#include <tf/types.h>
+
+#include <cmath>
 
 namespace fawkes {
-  class NavigatorInterface;
+class NavigatorInterface;
 }
 
-class RosMoveBaseThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::TransformAspect,
-  public fawkes::ROSAspect
+class RosMoveBaseThread : public fawkes::Thread,
+                          public fawkes::BlockedTimingAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::BlackBoardAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::TransformAspect,
+                          public fawkes::ROSAspect
 {
- public:
-  RosMoveBaseThread();
+public:
+	RosMoveBaseThread();
 
-  /* thread */
-  virtual void init();
-  virtual void finalize();
-  virtual void once();
-  virtual void loop();
+	/* thread */
+	virtual void init();
+	virtual void finalize();
+	virtual void once();
+	virtual void loop();
 
- private:
-  typedef enum {
-    NAVGRAPH,
-    COLLI
-  } ExecType;
+private:
+	typedef enum { NAVGRAPH, COLLI } ExecType;
 
-  typedef actionlib::ActionServer<move_base_msgs::MoveBaseAction> MoveBaseServer;
+	typedef actionlib::ActionServer<move_base_msgs::MoveBaseAction> MoveBaseServer;
 
-  void action_goal_cb(MoveBaseServer::GoalHandle goal, ExecType ext);
-  void action_cancel_cb(MoveBaseServer::GoalHandle goal);
-  void message_cb(geometry_msgs::PoseStampedConstPtr goal_pose, ExecType ext);
+	void action_goal_cb(MoveBaseServer::GoalHandle goal, ExecType ext);
+	void action_cancel_cb(MoveBaseServer::GoalHandle goal);
+	void message_cb(geometry_msgs::PoseStampedConstPtr goal_pose, ExecType ext);
 
-  void stop();
-  move_base_msgs::MoveBaseResult   create_result();
-  move_base_msgs::MoveBaseFeedback create_feedback();
+	void                             stop();
+	move_base_msgs::MoveBaseResult   create_result();
+	move_base_msgs::MoveBaseFeedback create_feedback();
 
+private:
+	fawkes::NavigatorInterface *nav_navgraph_if_;
+	fawkes::NavigatorInterface *nav_colli_if_;
+	fawkes::NavigatorInterface *nav_if_;
 
- private:
-  fawkes::NavigatorInterface *nav_navgraph_if_;
-  fawkes::NavigatorInterface *nav_colli_if_;
-  fawkes::NavigatorInterface *nav_if_;
+	MoveBaseServer *as_colli_;
+	MoveBaseServer *as_navgraph_;
+	ros::Subscriber sub_colli_;
+	ros::Subscriber sub_navgraph_;
 
-  MoveBaseServer  *as_colli_;
-  MoveBaseServer  *as_navgraph_;
-  ros::Subscriber  sub_colli_;
-  ros::Subscriber  sub_navgraph_;
+	MoveBaseServer::GoalHandle as_goal_;
+	geometry_msgs::PoseStamped goal_pose_;
 
-  MoveBaseServer::GoalHandle as_goal_;
-  geometry_msgs::PoseStamped goal_pose_;
+	std::string cfg_base_frame_;
+	std::string cfg_fixed_frame_;
 
-  std::string cfg_base_frame_;
-  std::string cfg_fixed_frame_;
-
-  bool         exec_as_;
-  bool         exec_request_;
-  bool         exec_running_;
-  ExecType     exec_type_;
-  unsigned int exec_msgid_;
+	bool         exec_as_;
+	bool         exec_request_;
+	bool         exec_running_;
+	ExecType     exec_type_;
+	unsigned int exec_msgid_;
 };
 
 #endif /* ROS_NAVIGATOR_THREAD_H__ */

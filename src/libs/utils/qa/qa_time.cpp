@@ -24,56 +24,56 @@
 #include <utils/time/clock.h>
 #include <utils/time/watch.h>
 
-#include <unistd.h>
-
 #include <iostream>
+#include <unistd.h>
 
 using namespace std;
 using namespace fawkes;
 
-int main(int argc, char** argv)
+int
+main(int argc, char **argv)
 {
-  Clock *clock = Clock::instance();
+	Clock *clock = Clock::instance();
 
-  Watch watch(clock);
-  Time time(clock);
+	Watch watch(clock);
+	Time  time(clock);
 
-  time = watch.clock_time();
-  cout << "Current clock time is " << time.str() << endl;
+	time = watch.clock_time();
+	cout << "Current clock time is " << time.str() << endl;
 
-  watch.start(&time);
-  cout << "Starting watch at " << time.str() << endl;
-  sleep(1);
+	watch.start(&time);
+	cout << "Starting watch at " << time.str() << endl;
+	sleep(1);
 
-  cout << "Watch is running for " << watch.watch_time().str() << endl;
-  sleep(1);
+	cout << "Watch is running for " << watch.watch_time().str() << endl;
+	sleep(1);
 
-  cout << "Watch is running for " << watch.watch_time().str() << endl;
-  sleep(1);
+	cout << "Watch is running for " << watch.watch_time().str() << endl;
+	sleep(1);
 
-  watch.pause(&time);
-  cout << "Start pausing at "<< time.str() << endl;
-  sleep(1);
+	watch.pause(&time);
+	cout << "Start pausing at " << time.str() << endl;
+	sleep(1);
 
-  cout << "Watch is running for " << watch.watch_time().str() << endl;
-  sleep(1);
+	cout << "Watch is running for " << watch.watch_time().str() << endl;
+	sleep(1);
 
-  cout << "Watch is running for " << watch.watch_time().str() << endl;
-  sleep(1);
+	cout << "Watch is running for " << watch.watch_time().str() << endl;
+	sleep(1);
 
-  watch.start(&time);
-  cout << "Resuming at "<< time.str() << endl;
-  sleep(1);
+	watch.start(&time);
+	cout << "Resuming at " << time.str() << endl;
+	sleep(1);
 
-  watch.stop(&time);
-  cout << "Stopping watch at "<< time.str() << endl;
+	watch.stop(&time);
+	cout << "Stopping watch at " << time.str() << endl;
 
-  cout << "Watch is running for " << watch.watch_time().str() << endl;
-  
-  time = watch.clock_time();
-  cout << "Current clock time is " << time.str() << endl;
+	cout << "Watch is running for " << watch.watch_time().str() << endl;
 
-  Clock::finalize();
+	time = watch.clock_time();
+	cout << "Current clock time is " << time.str() << endl;
 
-  return 0;
+	Clock::finalize();
+
+	return 0;
 }

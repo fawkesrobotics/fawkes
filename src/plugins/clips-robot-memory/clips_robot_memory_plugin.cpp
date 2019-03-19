@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "clips_robot_memory_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -33,15 +33,14 @@ using namespace fawkes;
  */
 class ClipsRobotMemoryPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor
+public:
+	/** Constructor
    * @param config Fakwes configuration
    */
-  explicit ClipsRobotMemoryPlugin(Configuration *config)
-     : Plugin(config)
-  {
-     thread_list.push_back(new ClipsRobotMemoryThread());
-  }
+	explicit ClipsRobotMemoryPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new ClipsRobotMemoryThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("CLIPS feature to access the robot memory")

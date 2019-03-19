@@ -32,23 +32,22 @@
 
 namespace fawkes {
 
-
 class UnknownLoggerTypeException : public Exception
 {
- public:
-  UnknownLoggerTypeException(const char *msg = NULL);
+public:
+	UnknownLoggerTypeException(const char *msg = NULL);
 };
 
 class MultiLogger;
 
 class LoggerFactory
 {
- public:
-  static Logger * instance(const char *type, const char *as);
-  static MultiLogger *multilogger_instance(const char *as,
-					   Logger::LogLevel default_ll = Logger::LL_DEBUG);
+public:
+	static Logger *     instance(const char *type, const char *as);
+	static MultiLogger *multilogger_instance(const char *     as,
+	                                         Logger::LogLevel default_ll = Logger::LL_DEBUG);
 
-  /** Get typed instance of logger.
+	/** Get typed instance of logger.
    * Creates a new instance and converts it to the requested type. If the type
    * does not match the requested logger an exception is thrown.
    * @param type logger type
@@ -57,24 +56,23 @@ class LoggerFactory
    * @exception TypeMismatchException thrown, if requested logger does not match
    * requested type.
    */
-  template <class L>
-    static L* instance(const char *type, const char *as);
+	template <class L>
+	static L *instance(const char *type, const char *as);
 
- private:
-  static Logger::LogLevel string_to_loglevel(const char *log_level);
+private:
+	static Logger::LogLevel string_to_loglevel(const char *log_level);
 };
-
 
 template <class L>
 L *
 LoggerFactory::instance(const char *type, const char *as)
 {
-  Logger *l = LoggerFactory::instance(type, as);
-  L *tl = dynamic_cast<L *>(l);
-  if ( tl == NULL ) {
-    throw TypeMismatchException("Named type %s is not template type", type);
-  }
-  return tl;
+	Logger *l  = LoggerFactory::instance(type, as);
+	L *     tl = dynamic_cast<L *>(l);
+	if (tl == NULL) {
+		throw TypeMismatchException("Named type %s is not template type", type);
+	}
+	return tl;
 }
 
 } // end namespace fawkes

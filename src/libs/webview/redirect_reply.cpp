@@ -37,9 +37,9 @@ namespace fawkes {
  * @param url the URL to redirect to
  */
 WebRedirectReply::WebRedirectReply(std::string url)
-  : StaticWebReply(WebReply::HTTP_MOVED_PERMANENTLY)
+: StaticWebReply(WebReply::HTTP_MOVED_PERMANENTLY)
 {
-  add_header("Location", url);
+	add_header("Location", url);
 }
 
 } // end namespace fawkes

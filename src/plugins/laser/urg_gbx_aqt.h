@@ -25,61 +25,60 @@
 
 #include "acquisition_thread.h"
 
-#include <string>
 #include <map>
+#include <string>
 
 #ifdef HAVE_URG_GBX_9_11
 namespace hokuyo_aist {
-  class HokuyoLaser;
-  class HokuyoData;
-}
+class HokuyoLaser;
+class HokuyoData;
+} // namespace hokuyo_aist
 #else
 namespace hokuyoaist {
-  class Sensor;
-  class ScanData;
-}
+class Sensor;
+class ScanData;
+} // namespace hokuyoaist
 #endif
 
 class HokuyoUrgGbxAcquisitionThread : public LaserAcquisitionThread
 {
- public:
-  HokuyoUrgGbxAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
+public:
+	HokuyoUrgGbxAcquisitionThread(std::string &cfg_name, std::string &cfg_prefix);
 
-  // from LaserAcquisitionThread
-  virtual void pre_init(fawkes::Configuration *config, fawkes::Logger *logger);
+	// from LaserAcquisitionThread
+	virtual void pre_init(fawkes::Configuration *config, fawkes::Logger *logger);
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- private:
-  bool pre_init_done_;
-  unsigned int number_of_values_;
+private:
+	bool         pre_init_done_;
+	unsigned int number_of_values_;
 #ifdef HAVE_URG_GBX_9_11
-  hokuyo_aist::HokuyoLaser *laser_;
-  hokuyo_aist::HokuyoData  *data_;
+	hokuyo_aist::HokuyoLaser *laser_;
+	hokuyo_aist::HokuyoData * data_;
 #else
-  hokuyoaist::Sensor *laser_;
-  hokuyoaist::ScanData  *data_;
+	hokuyoaist::Sensor *  laser_;
+	hokuyoaist::ScanData *data_;
 #endif
 
-  std::string  cfg_name_;
-  std::string  cfg_prefix_;
+	std::string cfg_name_;
+	std::string cfg_prefix_;
 
-  std::map<std::string, std::string> device_info_;
+	std::map<std::string, std::string> device_info_;
 
-  std::string  cfg_device_;
+	std::string cfg_device_;
 
-  unsigned int first_ray_;
-  unsigned int last_ray_;
-  unsigned int front_ray_;
-  unsigned int front_idx_;
-  unsigned int num_rays_;
-  unsigned int slit_division_;
-  float        step_per_angle_;
-  float        angle_per_step_;
-  float        angular_range_;
+	unsigned int first_ray_;
+	unsigned int last_ray_;
+	unsigned int front_ray_;
+	unsigned int front_idx_;
+	unsigned int num_rays_;
+	unsigned int slit_division_;
+	float        step_per_angle_;
+	float        angle_per_step_;
+	float        angular_range_;
 };
-
 
 #endif

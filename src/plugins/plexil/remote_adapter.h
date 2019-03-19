@@ -27,38 +27,34 @@
 
 #include <InterfaceAdapter.hh>
 #include <Value.hh>
-
 #include <functional>
 #include <map>
-#include <string>
 #include <memory>
-#include <thread>
 #include <mutex>
+#include <string>
+#include <thread>
 
 namespace fawkes {
-	class BlackBoard;
-	class Logger;
-	class NavGraph;
-	class Clock;
-	class NetworkConfiguration;
-	class FawkesNetworkClient;
-	class FileAlterationMonitor;
-}
+class BlackBoard;
+class Logger;
+class NavGraph;
+class Clock;
+class NetworkConfiguration;
+class FawkesNetworkClient;
+class FileAlterationMonitor;
+} // namespace fawkes
 
 /** Interface adapter to provide logging facilities. */
-class FawkesRemotePlexilAdapter
-	: public PLEXIL::InterfaceAdapter,
-	  public fawkes::FamListener
+class FawkesRemotePlexilAdapter : public PLEXIL::InterfaceAdapter, public fawkes::FamListener
 {
 public:
-	FawkesRemotePlexilAdapter(PLEXIL::AdapterExecInterface& execInterface);
-	FawkesRemotePlexilAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-	                      pugi::xml_node const xml);
+	FawkesRemotePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface);
+	FawkesRemotePlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	FawkesRemotePlexilAdapter() = delete;
+	FawkesRemotePlexilAdapter()                                  = delete;
 	FawkesRemotePlexilAdapter(const FawkesRemotePlexilAdapter &) = delete;
-	FawkesRemotePlexilAdapter & operator=(const FawkesRemotePlexilAdapter &) = delete;
+	FawkesRemotePlexilAdapter &operator=(const FawkesRemotePlexilAdapter &) = delete;
 	/// @endcond
 
 	virtual ~FawkesRemotePlexilAdapter();
@@ -70,14 +66,14 @@ public:
 	virtual bool shutdown();
 
 	void executeCommand(PLEXIL::Command *cmd);
-  void invokeAbort(PLEXIL::Command *cmd);
+	void invokeAbort(PLEXIL::Command *cmd);
 
 	virtual void fam_event(const char *filename, unsigned int mask);
-	
-private:
-	std::string  cfg_navgraph_filename_;
 
-	fawkes::Clock*                                 clock_;
+private:
+	std::string cfg_navgraph_filename_;
+
+	fawkes::Clock *                                clock_;
 	std::unique_ptr<fawkes::FawkesNetworkClient>   client_;
 	std::unique_ptr<fawkes::Logger>                logger_;
 	std::unique_ptr<fawkes::BlackBoard>            blackboard_;
@@ -87,11 +83,11 @@ private:
 	std::mutex                                     navgraph_fam_mutex_;
 	std::thread                                    navgraph_fam_thread_;
 
-	std::map<std::string, std::function<void (PLEXIL::Command*)>> commands_;
+	std::map<std::string, std::function<void(PLEXIL::Command *)>> commands_;
 };
 
 extern "C" {
-  void initNavGraphAdapter();
+void initNavGraphAdapter();
 }
 
 #endif

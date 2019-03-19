@@ -33,54 +33,62 @@ namespace firevision {
 
 class ScanlineBeams : public ScanlineModel
 {
+public:
+	ScanlineBeams(unsigned int image_width,
+	              unsigned int image_height,
+	              unsigned int start_x,
+	              unsigned int start_y,
+	              unsigned int stop_y,
+	              unsigned int offset_y,
+	              bool         distribute_start_x,
+	              float        angle_from,
+	              float        angle_range,
+	              unsigned int num_beams);
 
- public:
+	fawkes::upoint_t  operator*();
+	fawkes::upoint_t *operator->();
+	fawkes::upoint_t *operator++();
+	fawkes::upoint_t *operator++(int);
 
-  ScanlineBeams(unsigned int image_width, unsigned int image_height,
-    unsigned int start_x, unsigned int start_y,
-    unsigned int stop_y, unsigned int offset_y,
-                bool distribute_start_x,
-    float angle_from, float angle_range, unsigned int num_beams);
+	bool         finished();
+	void         reset();
+	const char * get_name();
+	unsigned int get_margin();
 
-  fawkes::upoint_t    operator*();
-  fawkes::upoint_t *  operator->();
-  fawkes::upoint_t *  operator++();
-  fawkes::upoint_t *  operator++(int);
+	virtual void
+	set_robot_pose(float x, float y, float ori)
+	{
+	}
+	virtual void
+	set_pan_tilt(float pan, float tilt)
+	{
+	}
 
-  bool          finished();
-  void          reset();
-  const char *  get_name();
-  unsigned int  get_margin();
+private:
+	void advance();
 
-  virtual void  set_robot_pose(float x, float y, float ori) {}
-  virtual void  set_pan_tilt(float pan, float tilt) {}
+	bool _finished;
 
- private:
-  void advance();
+	std::vector<fawkes::upoint_t> beam_current_pos;
+	std::vector<fawkes::upoint_t> beam_end_pos;
 
+	unsigned int start_x;
+	unsigned int start_y;
+	float        angle_from;
+	float        angle_range;
+	unsigned int num_beams;
+	unsigned int stop_y;
+	unsigned int offset_y;
+	unsigned int image_width;
+	unsigned int image_height;
+	bool         distribute_start_x;
 
-  bool _finished;
+	fawkes::upoint_t coord;
+	fawkes::upoint_t tmp_coord;
 
-  std::vector<fawkes::upoint_t> beam_current_pos;
-  std::vector<fawkes::upoint_t> beam_end_pos;
-
-  unsigned int start_x;
-  unsigned int start_y;
-  float angle_from;
-  float angle_range;
-  unsigned int num_beams;
-  unsigned int stop_y;
-  unsigned int offset_y;
-  unsigned int image_width;
-  unsigned int image_height;
-  bool distribute_start_x;
-
-  fawkes::upoint_t coord;
-  fawkes::upoint_t tmp_coord;
-
-  unsigned int next_beam;
-  unsigned int first_beam;
-  unsigned int last_beam;
+	unsigned int next_beam;
+	unsigned int first_beam;
+	unsigned int last_beam;
 };
 
 } // end namespace firevision

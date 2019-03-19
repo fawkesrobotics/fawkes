@@ -21,56 +21,56 @@
 #ifndef _PLUGINS_GAZSIM_VIS_LOCALIZATION_THREAD_H_
 #define _PLUGINS_GAZSIM_VIS_LOCALIZATION_THREAD_H_
 
-#include <core/threading/thread.h>
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/blackboard.h>
-#include <aspect/blocked_timing.h>
+#include <core/threading/thread.h>
 #include <plugins/gazebo/aspect/gazebo.h>
 #include <utils/time/clock.h>
 #include <utils/time/time.h>
+
 #include <string.h>
 
 //from Gazebo
-#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/msgs/MessageTypes.hh>
+#include <gazebo/transport/TransportTypes.hh>
 #include <gazebo/transport/transport.hh>
 
-
 namespace fawkes {
-  class Position3DInterface;
+class Position3DInterface;
 }
 
-class VisLocalizationThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::GazeboAspect
+class VisLocalizationThread : public fawkes::Thread,
+                              public fawkes::ClockAspect,
+                              public fawkes::LoggingAspect,
+                              public fawkes::ConfigurableAspect,
+                              public fawkes::BlackBoardAspect,
+                              public fawkes::BlockedTimingAspect,
+                              public fawkes::GazeboAspect
 {
- public:
-  VisLocalizationThread();
+public:
+	VisLocalizationThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- private:
-  //read pose interface
-  fawkes::Position3DInterface *pose_if_;
+private:
+	//read pose interface
+	fawkes::Position3DInterface *pose_if_;
 
-  //Publisher for visual msgs
-  gazebo::transport::PublisherPtr visual_publisher_;
+	//Publisher for visual msgs
+	gazebo::transport::PublisherPtr visual_publisher_;
 
-  double update_rate_;
-  fawkes::Time last_update_time_;
+	double       update_rate_;
+	fawkes::Time last_update_time_;
 
-  //config values
-  std::string robot_name_, label_script_name_, location_scripts_, location_textures_, parent_name_, arrow_script_name_;
-  float label_size_;
-  float label_height_;
+	//config values
+	std::string robot_name_, label_script_name_, location_scripts_, location_textures_, parent_name_,
+	  arrow_script_name_;
+	float label_size_;
+	float label_height_;
 };
 #endif

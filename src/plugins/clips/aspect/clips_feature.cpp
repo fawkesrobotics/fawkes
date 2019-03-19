@@ -22,10 +22,10 @@
  */
 
 #include <plugins/clips/aspect/clips_feature.h>
+
 #include <clipsmm.h>
 
 namespace fawkes {
-
 
 /** @class CLIPSFeature <plugins/clips/aspect/clips_feature.h>
  * CLIPS feature maintainer.
@@ -38,11 +38,9 @@ namespace fawkes {
 /** Constructor.
  * @param feature_name name of the feature
  */
-CLIPSFeature::CLIPSFeature(const char *feature_name)
-  : clips_feature_name(feature_name)
+CLIPSFeature::CLIPSFeature(const char *feature_name) : clips_feature_name(feature_name)
 {
 }
-
 
 /** Virtual empty constructor. */
 CLIPSFeature::~CLIPSFeature()
@@ -66,7 +64,6 @@ CLIPSFeature::~CLIPSFeature()
  * @param env_name name of destroyed CLIPS environment
  */
 
-
 /** @class CLIPSFeatureAspect <plugins/clips/aspect/clips_feature.h>
  * Thread aspect to provide a feature to CLIPS environments.
  * Give this aspect to your thread if you want to provide a CLIPS
@@ -81,8 +78,8 @@ CLIPSFeature::~CLIPSFeature()
  */
 CLIPSFeatureAspect::CLIPSFeatureAspect(CLIPSFeature *feature)
 {
-  add_aspect("CLIPSFeatureAspect");
-  clips_features_.push_back(feature);
+	add_aspect("CLIPSFeatureAspect");
+	clips_features_.push_back(feature);
 }
 
 /** Constructor for multiple features.
@@ -90,15 +87,14 @@ CLIPSFeatureAspect::CLIPSFeatureAspect(CLIPSFeature *feature)
  */
 CLIPSFeatureAspect::CLIPSFeatureAspect(const std::list<CLIPSFeature *> features)
 {
-  add_aspect("CLIPSFeatureAspect");
-  clips_features_ = features;
+	add_aspect("CLIPSFeatureAspect");
+	clips_features_ = features;
 }
-
 
 /** Virtual empty destructor. */
 CLIPSFeatureAspect::~CLIPSFeatureAspect()
 {
-  clips_features_.clear();
+	clips_features_.clear();
 }
 
 } // end namespace fawkes

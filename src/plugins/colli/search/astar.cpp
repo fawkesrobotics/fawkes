@@ -21,16 +21,16 @@
  */
 
 #include "astar.h"
+
 #include "../search/og_laser.h"
 
-#include <utils/math/types.h>
-#include <logging/logger.h>
 #include <config/config.h>
+#include <logging/logger.h>
+#include <utils/math/types.h>
 
 using namespace std;
 
-namespace fawkes
-{
+namespace fawkes {
 
 /** @class AStar <plugins/colli/search/astar.h>
  * This is a high efficient implementation. Therefore this code
@@ -49,49 +49,45 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-AStarColli::AStarColli( LaserOccupancyGrid * occGrid, Logger* logger, Configuration* config )
- : logger_( logger )
+AStarColli::AStarColli(LaserOccupancyGrid *occGrid, Logger *logger, Configuration *config)
+: logger_(logger)
 {
-  logger_->log_debug("AStar", "(Constructor): Initializing AStar");
+	logger_->log_debug("AStar", "(Constructor): Initializing AStar");
 
-  max_states_ = config->get_int( "/plugins/colli/search/a_star/max_states" );
+	max_states_ = config->get_int("/plugins/colli/search/a_star/max_states");
 
-  occ_grid_ = occGrid;
-  width_ = occ_grid_->get_width() - 1;
-  height_ = occ_grid_->get_height() - 1;
+	occ_grid_ = occGrid;
+	width_    = occ_grid_->get_width() - 1;
+	height_   = occ_grid_->get_height() - 1;
 
-  cell_costs_ = occ_grid_->get_cell_costs();
+	cell_costs_ = occ_grid_->get_cell_costs();
 
-  astar_state_count_ = 0;
-  astar_states_.reserve( max_states_ );
+	astar_state_count_ = 0;
+	astar_states_.reserve(max_states_);
 
-  for( int i = 0; i < max_states_; i++) {
-    AStarState * state = new AStarState();
-    astar_states_[i] = state;
-  }
+	for (int i = 0; i < max_states_; i++) {
+		AStarState *state = new AStarState();
+		astar_states_[i]  = state;
+	}
 
-  while ( open_list_.size() > 0 )
-    open_list_.pop();
+	while (open_list_.size() > 0)
+		open_list_.pop();
 
-  closed_list_.clear();
+	closed_list_.clear();
 
-  logger_->log_debug("AStar", "(Constructor): Initializing AStar done");
+	logger_->log_debug("AStar", "(Constructor): Initializing AStar done");
 }
-
-
 
 /** Destructor.
  *  This destructor deletes all the states allocated during construction.
  */
 AStarColli::~AStarColli()
 {
-  logger_->log_debug("AStar", "(Destructor): Destroying AStar");
-  for( int i = 0; i < max_states_; i++ )
-    delete astar_states_[i];
-  logger_->log_debug("AStar", "(Destructor): Destroying AStar done");
+	logger_->log_debug("AStar", "(Destructor): Destroying AStar");
+	for (int i = 0; i < max_states_; i++)
+		delete astar_states_[i];
+	logger_->log_debug("AStar", "(Destructor): Destroying AStar done");
 }
-
-
 
 /** solve.
  *  solve is the externally called method to solve the assignment by A*.
@@ -103,87 +99,83 @@ AStarColli::~AStarColli()
  * @param solution a vector that will be filled with the found path
  */
 void
-AStarColli::solve( const point_t &robo_pos, const point_t &target_pos, vector<point_t> &solution )
+AStarColli::solve(const point_t &robo_pos, const point_t &target_pos, vector<point_t> &solution)
 {
-  // initialize counter, vectors/lists/queues
-  astar_state_count_ = 0;
-  while ( open_list_.size() > 0 )
-    open_list_.pop();
-  closed_list_.clear();
-  solution.clear();
+	// initialize counter, vectors/lists/queues
+	astar_state_count_ = 0;
+	while (open_list_.size() > 0)
+		open_list_.pop();
+	closed_list_.clear();
+	solution.clear();
 
-  // setting start coordinates
-  robo_pos_.x_  = robo_pos.x;
-  robo_pos_.y_  = robo_pos.y;
-  target_state_.x_ = target_pos.x;
-  target_state_.y_ = target_pos.y;
+	// setting start coordinates
+	robo_pos_.x_     = robo_pos.x;
+	robo_pos_.y_     = robo_pos.y;
+	target_state_.x_ = target_pos.x;
+	target_state_.y_ = target_pos.y;
 
-  // generating initialstate
-  AStarState * initial_state = astar_states_[++astar_state_count_];
-  initial_state->x_ = robo_pos_.x_;
-  initial_state->y_ = robo_pos_.y_;
-  initial_state->father_   = 0;
-  initial_state->past_cost_  = 0;
-  initial_state->total_cost_ = heuristic( initial_state );
+	// generating initialstate
+	AStarState *initial_state  = astar_states_[++astar_state_count_];
+	initial_state->x_          = robo_pos_.x_;
+	initial_state->y_          = robo_pos_.y_;
+	initial_state->father_     = 0;
+	initial_state->past_cost_  = 0;
+	initial_state->total_cost_ = heuristic(initial_state);
 
-  // performing search
-  open_list_.push( initial_state );
-  get_solution_sequence( search(), solution );
+	// performing search
+	open_list_.push(initial_state);
+	get_solution_sequence(search(), solution);
 }
-
-
 
 /* =========================================== */
 /* *************** PRIVATE PART ************** */
 /* =========================================== */
 
-
 /** search.
  *  This is the magic A* algorithm.
  *  Its really easy, you can find it like this everywhere.
  */
-AStarState*
-AStarColli::search( )
+AStarState *
+AStarColli::search()
 {
-  AStarState * best = 0;
+	AStarState *best = 0;
 
-  // while the openlist not is empty
-  while ( open_list_.size() > 0 ) {
-    // get best state
-    if ( open_list_.size() > 0 ) {
-      best = open_list_.top();
-      open_list_.pop( );
-    } else
-      return 0;
+	// while the openlist not is empty
+	while (open_list_.size() > 0) {
+		// get best state
+		if (open_list_.size() > 0) {
+			best = open_list_.top();
+			open_list_.pop();
+		} else
+			return 0;
 
-    // check if its a goal.
-    if ( is_goal( best ) )
-      return best;
-    else if ( astar_state_count_ > max_states_ - 6 ) {
-      logger_->log_warn("AStar", "**** Warning: Out of states! Increasing A* MaxStates!");
+		// check if its a goal.
+		if (is_goal(best))
+			return best;
+		else if (astar_state_count_ > max_states_ - 6) {
+			logger_->log_warn("AStar", "**** Warning: Out of states! Increasing A* MaxStates!");
 
-      for( int i = 0; i < max_states_; i++ )
-        delete astar_states_[i];
+			for (int i = 0; i < max_states_; i++)
+				delete astar_states_[i];
 
-      max_states_ += (int)(max_states_/3.0);
+			max_states_ += (int)(max_states_ / 3.0);
 
-      astar_states_.clear();
-      astar_states_.resize( max_states_ );
-      for( int i = 0; i < max_states_; i++) {
-        best = new AStarState();
-        astar_states_[i] = best;
-      }
-      logger_->log_warn("AStar", "**** Increasing done!");
-      return 0;
-    }
+			astar_states_.clear();
+			astar_states_.resize(max_states_);
+			for (int i = 0; i < max_states_; i++) {
+				best             = new AStarState();
+				astar_states_[i] = best;
+			}
+			logger_->log_warn("AStar", "**** Increasing done!");
+			return 0;
+		}
 
-    // generate all its children
-    generate_children( best );
-  }
+		// generate all its children
+		generate_children(best);
+	}
 
-  return 0;
+	return 0;
 }
-
 
 /** calculate_key.
  *  This method produces one unique key for a state for
@@ -194,11 +186,10 @@ AStarColli::search( )
  *    afterwards a number that is smaller tham 14 bits!
  */
 int
-AStarColli::calculate_key( int x, int y )
+AStarColli::calculate_key(int x, int y)
 {
-  return (x << 15) | y;  // This line is a crime! But fast ;-)
+	return (x << 15) | y; // This line is a crime! But fast ;-)
 }
-
 
 /** generate_children.
  *  This method generates all children for a given state.
@@ -206,91 +197,89 @@ AStarColli::calculate_key( int x, int y )
  *   Afterwards these children are put on the openlist.
  */
 void
-AStarColli::generate_children( AStarState * father )
+AStarColli::generate_children(AStarState *father)
 {
-  AStarState * child;
-  int key;
+	AStarState *child;
+	int         key;
 
-  float prob;
+	float prob;
 
-  if ( father->y_ > 0 ) {
-    prob = occ_grid_->get_prob( father->x_, father->y_-1 );
-    if ( prob != cell_costs_.occ ) {
-      child = astar_states_[++astar_state_count_];
-      child->x_ = father->x_;
-      child->y_ = father->y_-1;
-      key = calculate_key( child->x_, child->y_ );
-      if ( closed_list_.find( key ) == closed_list_.end() ) {
-        child->father_ = father;
-        child->past_cost_ = father->past_cost_ + (int)prob;
-        child->total_cost_ = child->past_cost_ + heuristic( child );
-        open_list_.push( child );
-        closed_list_[key] = key;
+	if (father->y_ > 0) {
+		prob = occ_grid_->get_prob(father->x_, father->y_ - 1);
+		if (prob != cell_costs_.occ) {
+			child     = astar_states_[++astar_state_count_];
+			child->x_ = father->x_;
+			child->y_ = father->y_ - 1;
+			key       = calculate_key(child->x_, child->y_);
+			if (closed_list_.find(key) == closed_list_.end()) {
+				child->father_     = father;
+				child->past_cost_  = father->past_cost_ + (int)prob;
+				child->total_cost_ = child->past_cost_ + heuristic(child);
+				open_list_.push(child);
+				closed_list_[key] = key;
 
-      } else
-        --astar_state_count_;
-    }
-  }
+			} else
+				--astar_state_count_;
+		}
+	}
 
-  if ( father->y_ < (signed int)height_ ) {
-    prob = occ_grid_->get_prob( father->x_, father->y_+1 );
-    if ( prob != cell_costs_.occ ) {
-      child = astar_states_[++astar_state_count_];
-      child->x_ = father->x_;
-      child->y_ = father->y_+1;
-      key = calculate_key( child->x_, child->y_ );
-      if ( closed_list_.find( key ) == closed_list_.end() ) {
-        child->father_ = father;
-        child->past_cost_ = father->past_cost_ + (int)prob;
-        child->total_cost_ = child->past_cost_ + heuristic( child );
-        open_list_.push( child );
-        closed_list_[key] = key;
+	if (father->y_ < (signed int)height_) {
+		prob = occ_grid_->get_prob(father->x_, father->y_ + 1);
+		if (prob != cell_costs_.occ) {
+			child     = astar_states_[++astar_state_count_];
+			child->x_ = father->x_;
+			child->y_ = father->y_ + 1;
+			key       = calculate_key(child->x_, child->y_);
+			if (closed_list_.find(key) == closed_list_.end()) {
+				child->father_     = father;
+				child->past_cost_  = father->past_cost_ + (int)prob;
+				child->total_cost_ = child->past_cost_ + heuristic(child);
+				open_list_.push(child);
+				closed_list_[key] = key;
 
-      } else
-      --astar_state_count_;
-    }
-  }
+			} else
+				--astar_state_count_;
+		}
+	}
 
-  if ( father->x_ > 0 ) {
-    prob = occ_grid_->get_prob( father->x_-1, father->y_ );
-    if ( prob != cell_costs_.occ ) {
-      child = astar_states_[++astar_state_count_];
-      child->x_ = father->x_-1;
-      child->y_ = father->y_;
-      key = calculate_key( child->x_, child->y_ );
-      if ( closed_list_.find( key ) == closed_list_.end() ) {
-        child->father_ = father;
-        child->past_cost_ = father->past_cost_ + (int)prob;
-        child->total_cost_ = child->past_cost_ + heuristic( child );
-        open_list_.push( child );
-        closed_list_[key] = key;
+	if (father->x_ > 0) {
+		prob = occ_grid_->get_prob(father->x_ - 1, father->y_);
+		if (prob != cell_costs_.occ) {
+			child     = astar_states_[++astar_state_count_];
+			child->x_ = father->x_ - 1;
+			child->y_ = father->y_;
+			key       = calculate_key(child->x_, child->y_);
+			if (closed_list_.find(key) == closed_list_.end()) {
+				child->father_     = father;
+				child->past_cost_  = father->past_cost_ + (int)prob;
+				child->total_cost_ = child->past_cost_ + heuristic(child);
+				open_list_.push(child);
+				closed_list_[key] = key;
 
-      } else
-      --astar_state_count_;
-    }
-  }
+			} else
+				--astar_state_count_;
+		}
+	}
 
-  if ( father->x_ < (signed int)width_ ) {
-    prob = occ_grid_->get_prob( father->x_+1, father->y_ );
-    if ( prob != cell_costs_.occ ) {
-      child = astar_states_[++astar_state_count_];
-      child->x_ = father->x_+1;
-      child->y_ = father->y_;
-      key = calculate_key( child->x_, child->y_ );
-      if ( closed_list_.find( key ) == closed_list_.end() ) {
-        child->father_ = father;
-        child->past_cost_ = father->past_cost_ + (int)prob;
-        child->total_cost_ = child->past_cost_ + heuristic( child );
-        open_list_.push( child );
-        closed_list_[key] = key;
+	if (father->x_ < (signed int)width_) {
+		prob = occ_grid_->get_prob(father->x_ + 1, father->y_);
+		if (prob != cell_costs_.occ) {
+			child     = astar_states_[++astar_state_count_];
+			child->x_ = father->x_ + 1;
+			child->y_ = father->y_;
+			key       = calculate_key(child->x_, child->y_);
+			if (closed_list_.find(key) == closed_list_.end()) {
+				child->father_     = father;
+				child->past_cost_  = father->past_cost_ + (int)prob;
+				child->total_cost_ = child->past_cost_ + heuristic(child);
+				open_list_.push(child);
+				closed_list_[key] = key;
 
-      } else
-      --astar_state_count_;
-    }
-  }
-
+			} else
+				--astar_state_count_;
+		}
+	}
 }
-
 
 /** heuristic.
  *  This method calculates the heuristic value for a given
@@ -298,41 +287,36 @@ AStarColli::generate_children( AStarState * father )
  *    because we are calculating on a grid...
  */
 int
-AStarColli::heuristic( AStarState * state )
+AStarColli::heuristic(AStarState *state)
 {
-  //  return (int)( abs( state->x_ - target_state_.x_ ));
-  return (int)( abs( state->x_ - target_state_.x_ ) +
-                abs( state->y_ - target_state_.y_ ) );
+	//  return (int)( abs( state->x_ - target_state_.x_ ));
+	return (int)(abs(state->x_ - target_state_.x_) + abs(state->y_ - target_state_.y_));
 }
-
 
 /** is_goal.
  *  This method checks, if a state is a goal state.
  */
 bool
-AStarColli::is_goal( AStarState * state )
+AStarColli::is_goal(AStarState *state)
 {
-  return ( (target_state_.x_ == state->x_) &&
-           (target_state_.y_ == state->y_) );
+	return ((target_state_.x_ == state->x_) && (target_state_.y_ == state->y_));
 }
-
 
 /** get_solution_sequence.
  *  This one enqueues the way of a node back to its root through the
  *    tree into the solution/plan vector.
  */
 void
-AStarColli::get_solution_sequence( AStarState * node, vector<point_t> &solution )
+AStarColli::get_solution_sequence(AStarState *node, vector<point_t> &solution)
 {
-  AStarState * state = node;
-  while ( state != 0 ) {
-    solution.insert( solution.begin(), point_t( state->x_, state->y_ ) );
-    state = state->father_;
-  }
-  //logger_->log_debug("AStar", "(get_solution_sequence): Solutionsize=%u  , Used states=%i",
-  //                   solution.size(), astar_state_count_);
+	AStarState *state = node;
+	while (state != 0) {
+		solution.insert(solution.begin(), point_t(state->x_, state->y_));
+		state = state->father_;
+	}
+	//logger_->log_debug("AStar", "(get_solution_sequence): Solutionsize=%u  , Used states=%i",
+	//                   solution.size(), astar_state_count_);
 }
-
 
 /* =========================================================================== */
 /* =========================================================================== */
@@ -347,62 +331,61 @@ AStarColli::get_solution_sequence( AStarState * node, vector<point_t> &solution 
  * @return a new modified point.
  */
 point_t
-AStarColli::remove_target_from_obstacle( int target_x, int target_y, int step_x, int step_y  )
+AStarColli::remove_target_from_obstacle(int target_x, int target_y, int step_x, int step_y)
 {
-  // initializing lists...
-  while ( open_list_.size() > 0 )
-    open_list_.pop();
+	// initializing lists...
+	while (open_list_.size() > 0)
+		open_list_.pop();
 
-  closed_list_.clear();
-  astar_state_count_ = 0;
-  // starting fill algorithm by putting first state in openlist
-  AStarState * initial_state = astar_states_[++astar_state_count_];
-  initial_state->x_ = target_x;
-  initial_state->y_ = target_y;
-  initial_state->total_cost_ = 0;
-  open_list_.push( initial_state );
-  // search algorithm by gridfilling
-  AStarState * child;
-  AStarState * father;
+	closed_list_.clear();
+	astar_state_count_ = 0;
+	// starting fill algorithm by putting first state in openlist
+	AStarState *initial_state  = astar_states_[++astar_state_count_];
+	initial_state->x_          = target_x;
+	initial_state->y_          = target_y;
+	initial_state->total_cost_ = 0;
+	open_list_.push(initial_state);
+	// search algorithm by gridfilling
+	AStarState *child;
+	AStarState *father;
 
-  while ( !(open_list_.empty()) && (astar_state_count_ < max_states_ - 6) ) {
-    father = open_list_.top();
-    open_list_.pop();
-    int key = calculate_key( father->x_, father->y_ );
+	while (!(open_list_.empty()) && (astar_state_count_ < max_states_ - 6)) {
+		father = open_list_.top();
+		open_list_.pop();
+		int key = calculate_key(father->x_, father->y_);
 
-    if ( closed_list_.find( key ) == closed_list_.end() ) {
-      closed_list_[key] = key;
-      // generiere zwei kinder. wenn besetzt, pack sie an das ende
-      //   der openlist mit kosten + 1, sonst return den Knoten
-      if ( (father->x_ > 1) && ( father->x_ < (signed)width_-2 ) ) {
-        child = astar_states_[++astar_state_count_];
-        child->x_ = father->x_ + step_x;
-        child->y_ = father->y_;
-        child->total_cost_ = father->total_cost_+1;
-        key = calculate_key( child->x_, child->y_ );
-        if ( occ_grid_->get_prob( child->x_, child->y_ ) == cell_costs_.near )
-          return point_t( child->x_, child->y_ );
-        else if ( closed_list_.find( key ) == closed_list_.end() )
-          open_list_.push( child );
-      }
+		if (closed_list_.find(key) == closed_list_.end()) {
+			closed_list_[key] = key;
+			// generiere zwei kinder. wenn besetzt, pack sie an das ende
+			//   der openlist mit kosten + 1, sonst return den Knoten
+			if ((father->x_ > 1) && (father->x_ < (signed)width_ - 2)) {
+				child              = astar_states_[++astar_state_count_];
+				child->x_          = father->x_ + step_x;
+				child->y_          = father->y_;
+				child->total_cost_ = father->total_cost_ + 1;
+				key                = calculate_key(child->x_, child->y_);
+				if (occ_grid_->get_prob(child->x_, child->y_) == cell_costs_.near)
+					return point_t(child->x_, child->y_);
+				else if (closed_list_.find(key) == closed_list_.end())
+					open_list_.push(child);
+			}
 
-      if ( (father->y_ > 1) && (father->y_ < (signed)height_-2) ) {
-        child = astar_states_[++astar_state_count_];
-        child->x_ = father->x_;
-        child->y_ = father->y_ + step_y;
-        child->total_cost_ = father->total_cost_+1;
-        key = calculate_key( child->x_, child->y_ );
-        if ( occ_grid_->get_prob( child->x_, child->y_ ) == cell_costs_.near )
-          return point_t( child->x_, child->y_ );
-        else if ( closed_list_.find( key ) == closed_list_.end() )
-          open_list_.push( child );
-      }
-    }
+			if ((father->y_ > 1) && (father->y_ < (signed)height_ - 2)) {
+				child              = astar_states_[++astar_state_count_];
+				child->x_          = father->x_;
+				child->y_          = father->y_ + step_y;
+				child->total_cost_ = father->total_cost_ + 1;
+				key                = calculate_key(child->x_, child->y_);
+				if (occ_grid_->get_prob(child->x_, child->y_) == cell_costs_.near)
+					return point_t(child->x_, child->y_);
+				else if (closed_list_.find(key) == closed_list_.end())
+					open_list_.push(child);
+			}
+		}
+	}
 
-  }
-
-  logger_->log_debug("AStar", "Failed to get a modified targetpoint");
-  return point_t( target_x, target_y );
+	logger_->log_debug("AStar", "Failed to get a modified targetpoint");
+	return point_t(target_x, target_y);
 }
 
 } // namespace fawkes

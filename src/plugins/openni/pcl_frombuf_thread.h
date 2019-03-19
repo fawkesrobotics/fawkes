@@ -24,52 +24,55 @@
 #define _PLUGINS_OPENNI_PCL_FROMBUF_THREAD_H_
 
 // must be first for reliable ROS detection
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <aspect/pointcloud.h>
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/pointcloud.h>
 #include <fvutils/adapters/pcl.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 #include <plugins/openni/aspect/openni.h>
 #include <utils/time/time.h>
 
 #include <map>
 
 namespace firevision {
-  class SharedMemoryImageBuffer;
+class SharedMemoryImageBuffer;
 }
 
-class OpenNiPclOnlyThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::PointCloudAspect
+class OpenNiPclOnlyThread : public fawkes::Thread,
+                            public fawkes::BlockedTimingAspect,
+                            public fawkes::LoggingAspect,
+                            public fawkes::ConfigurableAspect,
+                            public fawkes::ClockAspect,
+                            public fawkes::PointCloudAspect
 {
- public:
-  OpenNiPclOnlyThread();
-  virtual ~OpenNiPclOnlyThread();
+public:
+	OpenNiPclOnlyThread();
+	virtual ~OpenNiPclOnlyThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  firevision::SharedMemoryImageBuffer *pcl_buf_;
-  fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ> > pcl_;
+private:
+	firevision::SharedMemoryImageBuffer *          pcl_buf_;
+	fawkes::RefPtr<pcl::PointCloud<pcl::PointXYZ>> pcl_;
 
-  fawkes::Time last_capture_time_;
-  unsigned int width_;
-  unsigned int height_;
+	fawkes::Time last_capture_time_;
+	unsigned int width_;
+	unsigned int height_;
 };
 
 #endif

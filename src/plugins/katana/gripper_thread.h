@@ -27,26 +27,31 @@
 
 class KatanaGripperThread : public KatanaMotionThread
 {
- public:
-  KatanaGripperThread(fawkes::RefPtr<fawkes::KatanaController> katana, fawkes::Logger *logger,
-		      unsigned int poll_interval_ms);
+public:
+	KatanaGripperThread(fawkes::RefPtr<fawkes::KatanaController> katana,
+	                    fawkes::Logger *                         logger,
+	                    unsigned int                             poll_interval_ms);
 
-  /** Gripper execution mode. */
-  typedef enum {
-    OPEN_GRIPPER,	/**< Open gripper */
-    CLOSE_GRIPPER	/**< Close gripper */
-  } gripper_mode_t;
+	/** Gripper execution mode. */
+	typedef enum {
+		OPEN_GRIPPER, /**< Open gripper */
+		CLOSE_GRIPPER /**< Close gripper */
+	} gripper_mode_t;
 
-  void set_mode(gripper_mode_t mode);
-  virtual void once();
+	void         set_mode(gripper_mode_t mode);
+	virtual void once();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  gripper_mode_t  mode_;
-  unsigned int    poll_interval_usec_;
+private:
+	gripper_mode_t mode_;
+	unsigned int   poll_interval_usec_;
 };
-
 
 #endif

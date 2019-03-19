@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  enum_constant.h - Interface generator enum constant representation
  *
@@ -24,33 +24,33 @@
 #define _INTERFACES_GENERATOR_ENUM_CONSTANT_H_
 
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 class InterfaceEnumConstant
 {
- public:
-  /** Enumeration item. */
-  typedef struct {
-    std::string name;			///< Name of item.
-    std::string comment;		///< Comment for item.
-    bool        has_custom_value;	///< True if custom value set.
-    int         custom_value;		///< Custom value.
-  } EnumItem;
+public:
+	/** Enumeration item. */
+	typedef struct
+	{
+		std::string name;             ///< Name of item.
+		std::string comment;          ///< Comment for item.
+		bool        has_custom_value; ///< True if custom value set.
+		int         custom_value;     ///< Custom value.
+	} EnumItem;
 
-  InterfaceEnumConstant(const std::string &name, const std::string &comment);
+	InterfaceEnumConstant(const std::string &name, const std::string &comment);
 
-  const std::string &  get_name() const;
-  const std::string &  get_comment() const;
-  const std::vector<EnumItem> &  get_items() const;
-  void add_item(std::string name, std::string comment);
-  void add_item(std::string name, std::string comment, int value);
+	const std::string &          get_name() const;
+	const std::string &          get_comment() const;
+	const std::vector<EnumItem> &get_items() const;
+	void                         add_item(std::string name, std::string comment);
+	void                         add_item(std::string name, std::string comment, int value);
 
- private:
-
-  std::string name_;
-  std::string comment_;
-  std::vector<EnumItem> items_;
+private:
+	std::string           name_;
+	std::string           comment_;
+	std::vector<EnumItem> items_;
 };
 
 #endif

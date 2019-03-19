@@ -34,8 +34,7 @@ namespace firevision {
  */
 
 /** Constructor. */
-CameraNotOpenedException::CameraNotOpenedException()
-  : Exception("Camera not opened")
+CameraNotOpenedException::CameraNotOpenedException() : Exception("Camera not opened")
 {
 }
 
@@ -46,11 +45,9 @@ CameraNotOpenedException::CameraNotOpenedException()
  */
 
 /** Constructor. */
-CameraNotStartedException::CameraNotStartedException()
-  : Exception("Camera not started")
+CameraNotStartedException::CameraNotStartedException() : Exception("Camera not started")
 {
 }
-
 
 /** @class CaptureException <fvcams/cam_exceptions.h>
  * Capturing a frame failed.
@@ -61,15 +58,13 @@ CameraNotStartedException::CameraNotStartedException()
 /** Constructor.
  * @param format format of the descriptive message
  */
-CaptureException::CaptureException(const char *format, ...)
-  : Exception()
+CaptureException::CaptureException(const char *format, ...) : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class UnknownCameraTypeException <fvcams/cam_exceptions.h>
  * Unknown camera type exception.
@@ -81,11 +76,10 @@ CaptureException::CaptureException(const char *format, ...)
  * @param msg optional extra message
  */
 UnknownCameraTypeException::UnknownCameraTypeException(const char *msg)
-  : Exception("Unknown camera type")
+: Exception("Unknown camera type")
 {
-  append(msg);
+	append(msg);
 }
-
 
 /** @class UnknownCameraException <fvcams/cam_exceptions.h>
  * Unknown camera exception.
@@ -95,12 +89,10 @@ UnknownCameraTypeException::UnknownCameraTypeException(const char *msg)
 /** Constructor.
  * @param msg optional extra message
  */
-UnknownCameraException::UnknownCameraException(const char *msg)
-  : Exception("Unknown camera")
+UnknownCameraException::UnknownCameraException(const char *msg) : Exception("Unknown camera")
 {
-  append(msg);
+	append(msg);
 }
-
 
 /** @class UnknownCameraControlTypeException <fvcams/cam_exceptions.h>
  * Unknown camera control exception.
@@ -112,9 +104,9 @@ UnknownCameraException::UnknownCameraException(const char *msg)
  * @param msg optional extra message
  */
 UnknownCameraControlTypeException::UnknownCameraControlTypeException(const char *msg)
-  : Exception("Unknown camera control type")
+: Exception("Unknown camera control type")
 {
-  append(msg);
+	append(msg);
 }
 
 } // end namespace firevision

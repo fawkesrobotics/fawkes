@@ -22,9 +22,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <gui_utils/service_selector_cbe.h>
-#include <gui_utils/service_model.h>
 #include <gui_utils/connection_dispatcher.h>
+#include <gui_utils/service_model.h>
+#include <gui_utils/service_selector_cbe.h>
 #include <netcomm/fawkes/client.h>
 
 #include <sstream>
@@ -70,23 +70,23 @@ using namespace fawkes;
  * @param parent the parent window. Used for error dialogs.
  * @param service a service identifier
  */
-#if GTK_VERSION_GE(3,0)
-ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBox* services,
+#if GTK_VERSION_GE(3, 0)
+ServiceSelectorCBE::ServiceSelectorCBE(Gtk::ComboBox *services,
 #else
-ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
+ServiceSelectorCBE::ServiceSelectorCBE(Gtk::ComboBoxEntry *services,
 #endif
-					Gtk::Button* connect,
-					Gtk::Window* parent,
-					const char* service )
+                                       Gtk::Button *connect,
+                                       Gtk::Window *parent,
+                                       const char * service)
 {
-  m_service_model = new ServiceModel(service);
+	m_service_model = new ServiceModel(service);
 
-  m_cbe_services  = services;
-  m_btn_connect   = connect;
-  m_tbtn_connect  = NULL;
-  m_parent        = parent;
+	m_cbe_services = services;
+	m_btn_connect  = connect;
+	m_tbtn_connect = NULL;
+	m_parent       = parent;
 
-  initialize();
+	initialize();
 }
 
 /** Construtor.
@@ -95,23 +95,23 @@ ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
  * @param parent the parent window. Used for error dialogs.
  * @param service a service identifier
  */
-#if GTK_VERSION_GE(3,0)
-ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBox* services,
+#if GTK_VERSION_GE(3, 0)
+ServiceSelectorCBE::ServiceSelectorCBE(Gtk::ComboBox *services,
 #else
-ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
+ServiceSelectorCBE::ServiceSelectorCBE(Gtk::ComboBoxEntry *services,
 #endif
-					Gtk::ToolButton* connect,
-					Gtk::Window* parent,
-					const char* service )
+                                       Gtk::ToolButton *connect,
+                                       Gtk::Window *    parent,
+                                       const char *     service)
 {
-  m_service_model = new ServiceModel(service);
+	m_service_model = new ServiceModel(service);
 
-  m_cbe_services  = services;
-  m_btn_connect   = NULL;
-  m_tbtn_connect  = connect;
-  m_parent        = parent;
+	m_cbe_services = services;
+	m_btn_connect  = NULL;
+	m_tbtn_connect = connect;
+	m_parent       = parent;
 
-  initialize();
+	initialize();
 }
 
 /** Constructor.
@@ -121,83 +121,85 @@ ServiceSelectorCBE::ServiceSelectorCBE( Gtk::ComboBoxEntry* services,
  * @param wnd_name name of the parent window
  * @param service service identifier
  */
-ServiceSelectorCBE::ServiceSelectorCBE( Glib::RefPtr<Gtk::Builder> builder,
-					const char* cbe_name,
-					const char* btn_name,
-					const char* wnd_name,
-					const char* service )
+ServiceSelectorCBE::ServiceSelectorCBE(Glib::RefPtr<Gtk::Builder> builder,
+                                       const char *               cbe_name,
+                                       const char *               btn_name,
+                                       const char *               wnd_name,
+                                       const char *               service)
 {
-  m_service_model = new ServiceModel(service);
+	m_service_model = new ServiceModel(service);
 
-  builder->get_widget(wnd_name, m_parent);
-  builder->get_widget(cbe_name, m_cbe_services);
-  builder->get_widget(btn_name, m_btn_connect);
+	builder->get_widget(wnd_name, m_parent);
+	builder->get_widget(cbe_name, m_cbe_services);
+	builder->get_widget(btn_name, m_btn_connect);
 
-  initialize();
+	initialize();
 }
 
 /** Initializer method. */
 void
 ServiceSelectorCBE::initialize()
 {
-#if GTK_VERSION_GE(3,0)
-  if (! m_cbe_services->get_has_entry()) {
-    throw Exception("Service combo box does not have an entry, fix UI file?");
-  }
+#if GTK_VERSION_GE(3, 0)
+	if (!m_cbe_services->get_has_entry()) {
+		throw Exception("Service combo box does not have an entry, fix UI file?");
+	}
 #endif
-  m_cbe_services->set_model( m_service_model->get_list_store() );
-#if GTK_VERSION_GE(3,0)
-  m_cbe_services->set_entry_text_column(m_service_model->get_column_record().name);
+	m_cbe_services->set_model(m_service_model->get_list_store());
+#if GTK_VERSION_GE(3, 0)
+	m_cbe_services->set_entry_text_column(m_service_model->get_column_record().name);
 #else
-  m_cbe_services->set_text_column(m_service_model->get_column_record().name);
+	m_cbe_services->set_text_column(m_service_model->get_column_record().name);
 #endif
-  m_cbe_services->get_entry()->set_activates_default(true);
-  m_cbe_services->signal_changed().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_service_selected) );
-  
-  Gtk::Entry *ent = static_cast<Gtk::Entry *>(m_cbe_services->get_child());
-  if (ent)
-  {
-    char * fawkes_ip = getenv("FAWKES_IP");
-    if (fawkes_ip) ent->set_text(fawkes_ip);
-    else ent->set_text("localhost");
-  }
+	m_cbe_services->get_entry()->set_activates_default(true);
+	m_cbe_services->signal_changed().connect(
+	  sigc::mem_fun(*this, &ServiceSelectorCBE::on_service_selected));
 
-  if ( m_btn_connect )
-  {
-    m_btn_connect->signal_clicked().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_btn_connect_clicked) );
-    m_btn_connect->set_label("gtk-connect");
-    m_btn_connect->set_use_stock(true);
-    m_btn_connect->grab_default();
-  }
-  else
-  {
-    m_tbtn_connect->signal_clicked().connect( sigc::mem_fun( *this, &ServiceSelectorCBE::on_btn_connect_clicked) );
-    m_tbtn_connect->set_stock_id( Gtk::StockID("gtk-connect") );
-    m_tbtn_connect->grab_default();
-  }
+	Gtk::Entry *ent = static_cast<Gtk::Entry *>(m_cbe_services->get_child());
+	if (ent) {
+		char *fawkes_ip = getenv("FAWKES_IP");
+		if (fawkes_ip)
+			ent->set_text(fawkes_ip);
+		else
+			ent->set_text("localhost");
+	}
 
-  m_dispatcher = new ConnectionDispatcher();
-  m_dispatcher->signal_connected().connect(sigc::mem_fun(*this, &ServiceSelectorCBE::on_connected));
-  m_dispatcher->signal_disconnected().connect(sigc::mem_fun(*this, &ServiceSelectorCBE::on_disconnected));
-  
-  hostname_ = "";
-  port_ = 0;
+	if (m_btn_connect) {
+		m_btn_connect->signal_clicked().connect(
+		  sigc::mem_fun(*this, &ServiceSelectorCBE::on_btn_connect_clicked));
+		m_btn_connect->set_label("gtk-connect");
+		m_btn_connect->set_use_stock(true);
+		m_btn_connect->grab_default();
+	} else {
+		m_tbtn_connect->signal_clicked().connect(
+		  sigc::mem_fun(*this, &ServiceSelectorCBE::on_btn_connect_clicked));
+		m_tbtn_connect->set_stock_id(Gtk::StockID("gtk-connect"));
+		m_tbtn_connect->grab_default();
+	}
+
+	m_dispatcher = new ConnectionDispatcher();
+	m_dispatcher->signal_connected().connect(sigc::mem_fun(*this, &ServiceSelectorCBE::on_connected));
+	m_dispatcher->signal_disconnected().connect(
+	  sigc::mem_fun(*this, &ServiceSelectorCBE::on_disconnected));
+
+	hostname_ = "";
+	port_     = 0;
 }
 
 /** Destructor. */
 ServiceSelectorCBE::~ServiceSelectorCBE()
 {
-  delete m_dispatcher;
-  delete m_service_model;
+	delete m_dispatcher;
+	delete m_service_model;
 }
 
 /** Access the current network client.
  * @return the current network client
  */
-FawkesNetworkClient*
+FawkesNetworkClient *
 ServiceSelectorCBE::get_network_client()
 {
-  return m_dispatcher->get_client();
+	return m_dispatcher->get_client();
 }
 
 /**
@@ -207,7 +209,7 @@ ServiceSelectorCBE::get_network_client()
 Glib::ustring
 ServiceSelectorCBE::get_hostname()
 {
-  return hostname_;
+	return hostname_;
 }
 
 /**
@@ -217,7 +219,7 @@ ServiceSelectorCBE::get_hostname()
 Glib::ustring
 ServiceSelectorCBE::get_name()
 {
-  return servicename_;
+	return servicename_;
 }
 
 /**
@@ -227,7 +229,7 @@ ServiceSelectorCBE::get_name()
 unsigned int
 ServiceSelectorCBE::get_port()
 {
-  return port_;
+	return port_;
 }
 
 /** This signal is emitted whenever a network connection is established.
@@ -236,7 +238,7 @@ ServiceSelectorCBE::get_port()
 sigc::signal<void>
 ServiceSelectorCBE::signal_connected()
 {
-  return m_dispatcher->signal_connected();
+	return m_dispatcher->signal_connected();
 }
 
 /** This signal is emitted whenever a network connection is terminated.
@@ -245,7 +247,7 @@ ServiceSelectorCBE::signal_connected()
 sigc::signal<void>
 ServiceSelectorCBE::signal_disconnected()
 {
-  return m_dispatcher->signal_disconnected();
+	return m_dispatcher->signal_disconnected();
 }
 
 /** Signal handler that is called whenever the connect button is
@@ -254,63 +256,56 @@ ServiceSelectorCBE::signal_disconnected()
 void
 ServiceSelectorCBE::on_btn_connect_clicked()
 {
-  FawkesNetworkClient *client = m_dispatcher->get_client();
+	FawkesNetworkClient *client = m_dispatcher->get_client();
 
-  if (client->connected())
-  {
-    client->disconnect();
-    if ( m_btn_connect )
-    { m_btn_connect->set_label("gtk-connect"); }
-    else
-    { m_tbtn_connect->set_label("gtk-connect"); }
-  }
-  else
-  { 
-    if ( -1 == m_cbe_services->get_active_row_number() )
-    {
-      Gtk::Entry* entry = m_cbe_services->get_entry();
-      hostname_ = entry->get_text();
+	if (client->connected()) {
+		client->disconnect();
+		if (m_btn_connect) {
+			m_btn_connect->set_label("gtk-connect");
+		} else {
+			m_tbtn_connect->set_label("gtk-connect");
+		}
+	} else {
+		if (-1 == m_cbe_services->get_active_row_number()) {
+			Gtk::Entry *entry = m_cbe_services->get_entry();
+			hostname_         = entry->get_text();
 
-      Glib::ustring::size_type pos;
-      if ((pos = hostname_.find(':')) != Glib::ustring::npos) 
-      {
-        Glib::ustring host = "";
-        unsigned int port = 1234567; //Greater than max port num (i.e. 65535)
-        std::istringstream is(hostname_.replace(pos, 1, " "));
-        is >> host;
-        is >> port;
-        
-        if (port != 1234567 && host.size())
-        {
-          hostname_ = host;
-          port_ = port;
-        }
-      }
-      else port_ = 1910;
-      servicename_ = hostname_;
-    }
-    else
-    {
-      Gtk::TreeModel::Row row = *m_cbe_services->get_active();
-      hostname_ = row[m_service_model->get_column_record().hostname];
-      servicename_ = row[m_service_model->get_column_record().name];
-      port_ = row[m_service_model->get_column_record().port];
-    }
+			Glib::ustring::size_type pos;
+			if ((pos = hostname_.find(':')) != Glib::ustring::npos) {
+				Glib::ustring      host = "";
+				unsigned int       port = 1234567; //Greater than max port num (i.e. 65535)
+				std::istringstream is(hostname_.replace(pos, 1, " "));
+				is >> host;
+				is >> port;
 
-    try
-    {
-      client->connect( hostname_.c_str(), port_ );
-    }
-    catch (Exception& e)
-    {
-      Glib::ustring message = *(e.begin());
-      Gtk::MessageDialog md(*m_parent, message, /* markup */ false,
-			    Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
-			    /* modal */ true);
-      md.set_title("Connection failed");
-      md.run();
-    }
-  }
+				if (port != 1234567 && host.size()) {
+					hostname_ = host;
+					port_     = port;
+				}
+			} else
+				port_ = 1910;
+			servicename_ = hostname_;
+		} else {
+			Gtk::TreeModel::Row row = *m_cbe_services->get_active();
+			hostname_               = row[m_service_model->get_column_record().hostname];
+			servicename_            = row[m_service_model->get_column_record().name];
+			port_                   = row[m_service_model->get_column_record().port];
+		}
+
+		try {
+			client->connect(hostname_.c_str(), port_);
+		} catch (Exception &e) {
+			Glib::ustring      message = *(e.begin());
+			Gtk::MessageDialog md(*m_parent,
+			                      message,
+			                      /* markup */ false,
+			                      Gtk::MESSAGE_ERROR,
+			                      Gtk::BUTTONS_OK,
+			                      /* modal */ true);
+			md.set_title("Connection failed");
+			md.run();
+		}
+	}
 }
 
 /** Signal handler that is called whenever an entry is selected from
@@ -319,52 +314,54 @@ ServiceSelectorCBE::on_btn_connect_clicked()
 void
 ServiceSelectorCBE::on_service_selected()
 {
-  if ( -1 == m_cbe_services->get_active_row_number() )  return;
+	if (-1 == m_cbe_services->get_active_row_number())
+		return;
 
-  FawkesNetworkClient *client = m_dispatcher->get_client();
-  if ( client->connected() )
-  {
-    client->disconnect();
-  }
+	FawkesNetworkClient *client = m_dispatcher->get_client();
+	if (client->connected()) {
+		client->disconnect();
+	}
 
-  Gtk::TreeModel::Row row = *m_cbe_services->get_active();
-  hostname_ = row[m_service_model->get_column_record().hostname];
-  servicename_ = row[m_service_model->get_column_record().name];
-  port_ = row[m_service_model->get_column_record().port];
+	Gtk::TreeModel::Row row = *m_cbe_services->get_active();
+	hostname_               = row[m_service_model->get_column_record().hostname];
+	servicename_            = row[m_service_model->get_column_record().name];
+	port_                   = row[m_service_model->get_column_record().port];
 
-  m_cbe_services->get_entry()->set_text(hostname_);
+	m_cbe_services->get_entry()->set_text(hostname_);
 
-  try
-  {
-    client->connect( hostname_.c_str(), port_ );
-  }
-  catch (Exception& e)
-  {
-    Glib::ustring message = *(e.begin());
-    Gtk::MessageDialog md(*m_parent, message, /* markup */ false,
-			  Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
-			  /* modal */ true);
-    md.set_title("Connection failed");
-    md.run();
-  }
+	try {
+		client->connect(hostname_.c_str(), port_);
+	} catch (Exception &e) {
+		Glib::ustring      message = *(e.begin());
+		Gtk::MessageDialog md(*m_parent,
+		                      message,
+		                      /* markup */ false,
+		                      Gtk::MESSAGE_ERROR,
+		                      Gtk::BUTTONS_OK,
+		                      /* modal */ true);
+		md.set_title("Connection failed");
+		md.run();
+	}
 }
 
 /** Signal handler for the connection established signal. */
 void
 ServiceSelectorCBE::on_connected()
 {
-  if ( m_btn_connect )
-  { m_btn_connect->set_label("gtk-disconnect"); }
-  else
-  { m_tbtn_connect->set_stock_id( Gtk::StockID("gtk-disconnect") ); }
+	if (m_btn_connect) {
+		m_btn_connect->set_label("gtk-disconnect");
+	} else {
+		m_tbtn_connect->set_stock_id(Gtk::StockID("gtk-disconnect"));
+	}
 }
 
 /** Signal handler for the connection terminated signal. */
 void
 ServiceSelectorCBE::on_disconnected()
 {
-  if ( m_btn_connect )
-  { m_btn_connect->set_label("gtk-connect"); }
-  else
-  { m_tbtn_connect->set_stock_id( Gtk::StockID("gtk-connect") ); }
+	if (m_btn_connect) {
+		m_btn_connect->set_label("gtk-connect");
+	} else {
+		m_tbtn_connect->set_stock_id(Gtk::StockID("gtk-connect"));
+	}
 }

@@ -43,15 +43,13 @@ namespace fawkes {
 /** Constructor. */
 ROSAspect::ROSAspect()
 {
-  add_aspect("ROSAspect");
+	add_aspect("ROSAspect");
 }
-
 
 /** Virtual empty destructor. */
 ROSAspect::~ROSAspect()
 {
 }
-
 
 /** Init ROS aspect.
  * This set the ROS node handle.
@@ -62,7 +60,7 @@ ROSAspect::~ROSAspect()
 void
 ROSAspect::init_ROSAspect(LockPtr<ros::NodeHandle> rosnode)
 {
-  this->rosnode = rosnode;
+	this->rosnode = rosnode;
 }
 
 /** Finalize ROS aspect.
@@ -71,7 +69,7 @@ ROSAspect::init_ROSAspect(LockPtr<ros::NodeHandle> rosnode)
 void
 ROSAspect::finalize_ROSAspect()
 {
-  rosnode.clear();
+	rosnode.clear();
 }
 
 } // end namespace fawkes

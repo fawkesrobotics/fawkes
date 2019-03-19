@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "pcl_db_retrieve_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,15 +31,14 @@ using namespace fawkes;
  */
 class PointCloudDBRetrievePlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit PointCloudDBRetrievePlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new PointCloudDBRetrieveThread());
-  }
+	explicit PointCloudDBRetrievePlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new PointCloudDBRetrieveThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Retrieve and transform point cloud from MongoDB")

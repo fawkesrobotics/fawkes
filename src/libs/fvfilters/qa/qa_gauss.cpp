@@ -22,16 +22,16 @@
 
 /// @cond QA
 
+#include <fvfilters/gauss.h>
 #include <fvutils/adapters/iplimage.h>
 #include <fvutils/color/colorspaces.h>
-#include <fvutils/readers/jpeg.h>
 #include <fvutils/draw/drawer.h>
-#include <fvfilters/gauss.h>
+#include <fvutils/readers/jpeg.h>
 #include <fvwidgets/image_display.h>
 #include <utils/system/argparser.h>
 
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 using namespace fawkes;
@@ -40,53 +40,52 @@ using namespace firevision;
 int
 main(int argc, char **argv)
 {
-  ArgumentParser* argp = new ArgumentParser( argc, argv, "h:f:c:" );
+	ArgumentParser *argp = new ArgumentParser(argc, argv, "h:f:c:");
 
-  if (argp->has_arg( "f" ))
-    // read image from file
-  {
-    const char *image_file = argp->arg( "f" );
-    
-    JpegReader *reader = new JpegReader(image_file);
-    unsigned char *buffer = malloc_buffer(YUV422_PLANAR,
-					  reader->pixel_width(), reader->pixel_height());
+	if (argp->has_arg("f"))
+	// read image from file
+	{
+		const char *image_file = argp->arg("f");
 
-    reader->set_buffer(buffer);
-    reader->read();
-    
-    unsigned char *filtered = malloc_buffer(YUV422_PLANAR,
-                                            reader->pixel_width(), reader->pixel_height());
-    memset(filtered + reader->pixel_width() * reader->pixel_height(), 128,
-           reader->pixel_width() * reader->pixel_height());
+		JpegReader *   reader = new JpegReader(image_file);
+		unsigned char *buffer =
+		  malloc_buffer(YUV422_PLANAR, reader->pixel_width(), reader->pixel_height());
 
-    ROI *roi = ROI::full_image(reader->pixel_width(), reader->pixel_height());
+		reader->set_buffer(buffer);
+		reader->read();
 
+		unsigned char *filtered =
+		  malloc_buffer(YUV422_PLANAR, reader->pixel_width(), reader->pixel_height());
+		memset(filtered + reader->pixel_width() * reader->pixel_height(),
+		       128,
+		       reader->pixel_width() * reader->pixel_height());
 
-    FilterGauss *f = new FilterGauss();
-    f->set_src_buffer(buffer, roi);
-    f->set_dst_buffer(filtered, roi);
-    f->apply();
-    
-    ImageDisplay *display = new ImageDisplay(reader->pixel_width(), reader->pixel_height());
-    display->show(filtered);
-    display->loop_until_quit();
-    
-    delete display;
-    
-    delete roi;
-    free(buffer);
-    free(filtered);
-    delete f;
-    delete reader;
-  }
+		ROI *roi = ROI::full_image(reader->pixel_width(), reader->pixel_height());
 
-  else
-  {
-    printf("Usage: %s -f <Image file as JPEG>\n", argv[0]);
-    exit(-1);
-  }
+		FilterGauss *f = new FilterGauss();
+		f->set_src_buffer(buffer, roi);
+		f->set_dst_buffer(filtered, roi);
+		f->apply();
 
-  delete argp;
+		ImageDisplay *display = new ImageDisplay(reader->pixel_width(), reader->pixel_height());
+		display->show(filtered);
+		display->loop_until_quit();
+
+		delete display;
+
+		delete roi;
+		free(buffer);
+		free(filtered);
+		delete f;
+		delete reader;
+	}
+
+	else {
+		printf("Usage: %s -f <Image file as JPEG>\n", argv[0]);
+		exit(-1);
+	}
+
+	delete argp;
 }
 
 /// @endcond

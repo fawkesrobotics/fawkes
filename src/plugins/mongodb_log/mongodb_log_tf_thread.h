@@ -22,54 +22,59 @@
 #ifndef _PLUGINS_MONGODB_LOG_MONGODB_LOG_TF_THREAD_H_
 #define _PLUGINS_MONGODB_LOG_MONGODB_LOG_TF_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <utils/time/time.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
 #include <aspect/blackboard.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <aspect/tf.h>
+#include <core/threading/thread.h>
 #include <plugins/mongodb/aspect/mongodb.h>
+#include <utils/time/time.h>
 
 #include <string>
 #include <vector>
 
 namespace fawkes {
-  class TimeWait;
+class TimeWait;
 }
 
-class MongoLogTransformsThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::MongoDBAspect,
-  public fawkes::TransformAspect
+class MongoLogTransformsThread : public fawkes::Thread,
+                                 public fawkes::LoggingAspect,
+                                 public fawkes::ConfigurableAspect,
+                                 public fawkes::ClockAspect,
+                                 public fawkes::BlackBoardAspect,
+                                 public fawkes::MongoDBAspect,
+                                 public fawkes::TransformAspect
 {
- public:
-  MongoLogTransformsThread();
-  virtual ~MongoLogTransformsThread();
+public:
+	MongoLogTransformsThread();
+	virtual ~MongoLogTransformsThread();
 
-  virtual void init();
-  virtual bool prepare_finalize_user();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual bool prepare_finalize_user();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void store(std::vector<fawkes::tf::TimeCacheInterfacePtr> &caches,
-	     std::vector<fawkes::Time> &from, std::vector<fawkes::Time> &to);
+private:
+	void store(std::vector<fawkes::tf::TimeCacheInterfacePtr> &caches,
+	           std::vector<fawkes::Time> &                     from,
+	           std::vector<fawkes::Time> &                     to);
 
- private:
-  fawkes::Mutex    *mutex_;
-  fawkes::TimeWait *wait_;
-  std::string      database_;
-  std::string      collection_;
-  float            cfg_storage_interval_;
-  std::vector<fawkes::Time> last_tf_range_end_;
+private:
+	fawkes::Mutex *           mutex_;
+	fawkes::TimeWait *        wait_;
+	std::string               database_;
+	std::string               collection_;
+	float                     cfg_storage_interval_;
+	std::vector<fawkes::Time> last_tf_range_end_;
 };
 
 #endif

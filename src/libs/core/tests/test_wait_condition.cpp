@@ -23,20 +23,20 @@
 
 #include <pthread.h>
 #ifdef __FreeBSD__
-#  include <pthread_np.h>
+#	include <pthread_np.h>
 #endif
-#include <unistd.h>
-#include <time.h>
-
 #include <core/threading/wait_condition.h>
+
+#include <time.h>
+#include <unistd.h>
 
 using namespace fawkes;
 
 /** The parameters passed to the threads. */
 struct thread_params
 {
-  /** The thread's wait condition. */
-  WaitCondition * cond;
+	/** The thread's wait condition. */
+	WaitCondition *cond;
 };
 
 /** @class WaitConditionTest
@@ -47,83 +47,85 @@ struct thread_params
 class WaitConditionTest : public ::testing::Test
 {
 protected:
-  WaitConditionTest()
-  : cond(new WaitCondition()),
-    num_threads(2)
-  {
-  }
-  virtual ~WaitConditionTest() {
-    delete cond;
-  }
+	WaitConditionTest() : cond(new WaitCondition()), num_threads(2)
+	{
+	}
+	virtual ~WaitConditionTest()
+	{
+		delete cond;
+	}
 
-  /** Start threads with the given function, cancel the threads
+	/** Start threads with the given function, cancel the threads
    *  and assert they have terminated.
    *  @param thread_func The function the threads are started with.
    */
-  void start_test(void * (*thread_func) (void *)) {
-    pthread_t threads[num_threads];
-    thread_params *params[num_threads];
-    for (uint i = 0; i < num_threads; i++) {
-      params[i] = new thread_params();
-      params[i]->cond = cond;
-      pthread_create(&threads[i], NULL, thread_func, params[i]);
-      pthread_yield();
-    }
+	void
+	start_test(void *(*thread_func)(void *))
+	{
+		pthread_t      threads[num_threads];
+		thread_params *params[num_threads];
+		for (uint i = 0; i < num_threads; i++) {
+			params[i]       = new thread_params();
+			params[i]->cond = cond;
+			pthread_create(&threads[i], NULL, thread_func, params[i]);
+			pthread_yield();
+		}
 
-    usleep(1000);
-    for (uint i = 0; i < num_threads; i++) {
-      pthread_cancel(threads[i]);
-      struct timespec ts;
-      ASSERT_NE(-1, clock_gettime(CLOCK_REALTIME, &ts));
-      // give the thread two seconds to terminate
-      ts.tv_sec += 2;
-      ASSERT_EQ(0, pthread_timedjoin_np(threads[i], NULL, &ts));
-      delete params[i];
-    }
-  }
+		usleep(1000);
+		for (uint i = 0; i < num_threads; i++) {
+			pthread_cancel(threads[i]);
+			struct timespec ts;
+			ASSERT_NE(-1, clock_gettime(CLOCK_REALTIME, &ts));
+			// give the thread two seconds to terminate
+			ts.tv_sec += 2;
+			ASSERT_EQ(0, pthread_timedjoin_np(threads[i], NULL, &ts));
+			delete params[i];
+		}
+	}
 
 private:
-  WaitCondition *cond;
-  const uint num_threads;
+	WaitCondition *cond;
+	const uint     num_threads;
 };
 
-
-void * start_waiter_thread(void * args)
+void *
+start_waiter_thread(void *args)
 {
-  thread_params *params = (thread_params *) args;
-  params->cond->wait();
-  pthread_exit(NULL);
+	thread_params *params = (thread_params *)args;
+	params->cond->wait();
+	pthread_exit(NULL);
 }
 
-void * start_abstimed_waiter_thread(void * args)
+void *
+start_abstimed_waiter_thread(void *args)
 {
-  thread_params *params = (thread_params *) args;
-  struct timespec ts;
-  EXPECT_NE(-1, clock_gettime(CLOCK_REALTIME, &ts));
-  ts.tv_sec += 5;
-  params->cond->abstimed_wait(ts.tv_sec, 0);
-  pthread_exit(NULL);
+	thread_params * params = (thread_params *)args;
+	struct timespec ts;
+	EXPECT_NE(-1, clock_gettime(CLOCK_REALTIME, &ts));
+	ts.tv_sec += 5;
+	params->cond->abstimed_wait(ts.tv_sec, 0);
+	pthread_exit(NULL);
 }
 
-void * start_reltimed_waiter_thread(void * args)
+void *
+start_reltimed_waiter_thread(void *args)
 {
-  thread_params *params = (thread_params *) args;
-  params->cond->reltimed_wait(10, 0);
-  pthread_exit(NULL);
+	thread_params *params = (thread_params *)args;
+	params->cond->reltimed_wait(10, 0);
+	pthread_exit(NULL);
 }
 
 TEST_F(WaitConditionTest, CancelWaitingThread)
 {
-  start_test(start_waiter_thread);
+	start_test(start_waiter_thread);
 }
 
 TEST_F(WaitConditionTest, CancelAbsTimedWaitingThread)
 {
-  start_test(start_abstimed_waiter_thread);
+	start_test(start_abstimed_waiter_thread);
 }
 
 TEST_F(WaitConditionTest, CancelRelTimedWaitingThread)
 {
-  start_test(start_reltimed_waiter_thread);
+	start_test(start_reltimed_waiter_thread);
 }
-

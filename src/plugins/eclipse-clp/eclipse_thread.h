@@ -23,56 +23,52 @@
 #ifndef _PLUGINS_ECLIPSE_CLP_ECLIPSE_THREAD_H_
 #define _PLUGINS_ECLIPSE_CLP_ECLIPSE_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <core/threading/mutex.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/mutex.h>
+#include <core/threading/thread.h>
 
+#include <eclipseclass.h>
 #include <string>
 #include <vector>
 
-#include <eclipseclass.h>
-
 namespace fawkes {
-  class Interface;
-  class Mutex;
-}
+class Interface;
+class Mutex;
+} // namespace fawkes
 
-class EclipseAgentThread 
-: public fawkes::Thread,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect
+class EclipseAgentThread : public fawkes::Thread,
+                           public fawkes::BlackBoardAspect,
+                           public fawkes::ConfigurableAspect,
+                           public fawkes::LoggingAspect
 {
+public:
+	EclipseAgentThread();
+	virtual ~EclipseAgentThread();
 
- public:
-  EclipseAgentThread();
-  virtual ~EclipseAgentThread();
+	virtual void init();
+	virtual void finalize();
+	virtual void once();
+	virtual void loop();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void once();
-  virtual void loop();
+	void            post_event(const char *);
+	fawkes::Logger *get_logger();
 
-  void post_event( const char* );
-  fawkes::Logger*    get_logger();
+	static EclipseAgentThread *instance();
 
-  static EclipseAgentThread* instance();
+private: /* methods */
+	bool load_file(const char *filename);
 
- private: /* methods */
-  bool load_file( const char* filename );
+private: /* members */
+	static EclipseAgentThread *m_instance;
 
- private: /* members */
-  static EclipseAgentThread* m_instance;
-
-  bool m_initialized;
-  std::string agent;
-  std::string graph_path;
-  int ec_result;
-  EC_ref ec_yield_reason;
-  fawkes::Mutex* mutex;
-
+	bool           m_initialized;
+	std::string    agent;
+	std::string    graph_path;
+	int            ec_result;
+	EC_ref         ec_yield_reason;
+	fawkes::Mutex *mutex;
 };
 
 #endif /* PLUGINS_ECLIPSE_CLP_ECLIPSE_THREAD_H__ */

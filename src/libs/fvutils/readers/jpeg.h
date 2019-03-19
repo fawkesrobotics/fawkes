@@ -33,28 +33,28 @@ extern "C" {
 
 namespace firevision {
 
-class JpegReader : public Reader {
+class JpegReader : public Reader
+{
+public:
+	JpegReader(const char *filename);
+	virtual ~JpegReader();
 
- public:
-  JpegReader(const char *filename);
-  virtual ~JpegReader();
+	virtual void         set_buffer(unsigned char *yuv422planar_buffer);
+	virtual colorspace_t colorspace();
+	virtual unsigned int pixel_width();
+	virtual unsigned int pixel_height();
+	virtual void         read();
 
-  virtual void             set_buffer(unsigned char *yuv422planar_buffer);
-  virtual colorspace_t     colorspace();
-  virtual unsigned int     pixel_width();
-  virtual unsigned int     pixel_height();
-  virtual void             read();
+private:
+	bool opened;
 
- private:
-  bool opened;
+	unsigned char *buffer;
+	unsigned char *row_buffer;
 
-  unsigned char *buffer;
-  unsigned char *row_buffer;
-
-  FILE *infile;
-  int row_stride;
-  struct jpeg_decompress_struct cinfo;
-  struct jpeg_error_mgr         jerr;
+	FILE *                        infile;
+	int                           row_stride;
+	struct jpeg_decompress_struct cinfo;
+	struct jpeg_error_mgr         jerr;
 };
 
 } // end namespace firevision

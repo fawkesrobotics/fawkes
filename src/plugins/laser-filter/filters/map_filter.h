@@ -24,38 +24,38 @@
 #ifndef _PLUGINS_LASER_FILTER_FILTERS_MAP_FILTER_H_
 #define _PLUGINS_LASER_FILTER_FILTERS_MAP_FILTER_H_
 
-#include <plugins/amcl/amcl_utils.h>
-#include <plugins/amcl/map/map.h>
+#include "filter.h"
+
+#include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/tf.h>
-#include <aspect/configurable.h>
-#include "filter.h"
+#include <plugins/amcl/amcl_utils.h>
+#include <plugins/amcl/map/map.h>
 
 class LaserMapFilterDataFilter : public LaserDataFilter
 {
- private:
-  
-  fawkes::tf::Transformer *tf_listener_;
-  fawkes::Configuration   *config_;
-  fawkes::Logger          *logger_;
+private:
+	fawkes::tf::Transformer *tf_listener_;
+	fawkes::Configuration *  config_;
+	fawkes::Logger *         logger_;
 
-  map_t                   *map_;
-  std::string             frame_map_;
-  float                   cfg_occupied_thresh_;
+	map_t *     map_;
+	std::string frame_map_;
+	float       cfg_occupied_thresh_;
 
- public:
-  LaserMapFilterDataFilter(const std::string& filter_name,
-                           unsigned int in_data_size,
-                           std::vector<LaserDataFilter::Buffer *> &in,
-                           fawkes::tf::Transformer * tf_listener,
-                           fawkes::Configuration *config,
-                           fawkes::Logger *logger);
+public:
+	LaserMapFilterDataFilter(const std::string &                     filter_name,
+	                         unsigned int                            in_data_size,
+	                         std::vector<LaserDataFilter::Buffer *> &in,
+	                         fawkes::tf::Transformer *               tf_listener,
+	                         fawkes::Configuration *                 config,
+	                         fawkes::Logger *                        logger);
 
-  virtual void filter();
+	virtual void filter();
 
- private:
-  map_t * load_map();
-  bool is_in_map(int cell_x, int cell_y);
+private:
+	map_t *load_map();
+	bool   is_in_map(int cell_x, int cell_y);
 };
 
 #endif

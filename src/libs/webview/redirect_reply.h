@@ -29,8 +29,8 @@ namespace fawkes {
 
 class WebRedirectReply : public StaticWebReply
 {
- public:
-  WebRedirectReply(std::string url);
+public:
+	WebRedirectReply(std::string url);
 };
 
 } // end namespace fawkes

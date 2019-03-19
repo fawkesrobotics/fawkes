@@ -16,19 +16,17 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/fwd.h>
 
-#include <string>
 #include <cstdint>
-#include <vector>
 #include <memory>
 #include <optional>
-
-
+#include <string>
+#include <vector>
 
 /** InterfaceData representation for JSON transfer. */
 class InterfaceData
 
 {
- public:
+public:
 	/** Constructor. */
 	InterfaceData();
 	/** Constructor from JSON.
@@ -38,7 +36,7 @@ class InterfaceData
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	InterfaceData(const rapidjson::Value& v);
+	InterfaceData(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~InterfaceData();
@@ -46,9 +44,10 @@ class InterfaceData
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -60,19 +59,19 @@ class InterfaceData
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -85,12 +84,12 @@ class InterfaceData
 	virtual void validate(bool subcall = false) const;
 
 	// Schema: InterfaceData
- public:
-  /** Get kind value.
+public:
+	/** Get kind value.
    * @return kind value
    */
 	std::optional<std::string>
- kind() const
+	kind() const
 	{
 		return kind_;
 	}
@@ -98,15 +97,16 @@ class InterfaceData
 	/** Set kind value.
 	 * @param kind new value
 	 */
-	void set_kind(const std::string& kind)
+	void
+	set_kind(const std::string &kind)
 	{
 		kind_ = kind;
 	}
-  /** Get apiVersion value.
+	/** Get apiVersion value.
    * @return apiVersion value
    */
 	std::optional<std::string>
- apiVersion() const
+	apiVersion() const
 	{
 		return apiVersion_;
 	}
@@ -114,15 +114,16 @@ class InterfaceData
 	/** Set apiVersion value.
 	 * @param apiVersion new value
 	 */
-	void set_apiVersion(const std::string& apiVersion)
+	void
+	set_apiVersion(const std::string &apiVersion)
 	{
 		apiVersion_ = apiVersion;
 	}
-  /** Get id value.
+	/** Get id value.
    * @return id value
    */
 	std::optional<std::string>
- id() const
+	id() const
 	{
 		return id_;
 	}
@@ -130,15 +131,16 @@ class InterfaceData
 	/** Set id value.
 	 * @param id new value
 	 */
-	void set_id(const std::string& id)
+	void
+	set_id(const std::string &id)
 	{
 		id_ = id;
 	}
-  /** Get type value.
+	/** Get type value.
    * @return type value
    */
 	std::optional<std::string>
- type() const
+	type() const
 	{
 		return type_;
 	}
@@ -146,15 +148,16 @@ class InterfaceData
 	/** Set type value.
 	 * @param type new value
 	 */
-	void set_type(const std::string& type)
+	void
+	set_type(const std::string &type)
 	{
 		type_ = type;
 	}
-  /** Get writer value.
+	/** Get writer value.
    * @return writer value
    */
 	std::optional<std::string>
- writer() const
+	writer() const
 	{
 		return writer_;
 	}
@@ -162,15 +165,16 @@ class InterfaceData
 	/** Set writer value.
 	 * @param writer new value
 	 */
-	void set_writer(const std::string& writer)
+	void
+	set_writer(const std::string &writer)
 	{
 		writer_ = writer;
 	}
-  /** Get readers value.
+	/** Get readers value.
    * @return readers value
    */
 	std::vector<std::string>
- readers() const
+	readers() const
 	{
 		return readers_;
 	}
@@ -178,14 +182,16 @@ class InterfaceData
 	/** Set readers value.
 	 * @param readers new value
 	 */
-	void set_readers(const std::vector<std::string>& readers)
+	void
+	set_readers(const std::vector<std::string> &readers)
 	{
 		readers_ = readers;
 	}
 	/** Add element to readers array.
 	 * @param readers new value
 	 */
-	void addto_readers(const std::string&& readers)
+	void
+	addto_readers(const std::string &&readers)
 	{
 		readers_.push_back(std::move(readers));
 	}
@@ -194,15 +200,16 @@ class InterfaceData
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param readers new value
 	 */
-	void addto_readers(const std::string& readers)
+	void
+	addto_readers(const std::string &readers)
 	{
 		readers_.push_back(readers);
 	}
-  /** Get data value.
+	/** Get data value.
    * @return data value
    */
 	std::shared_ptr<rapidjson::Document>
- data() const
+	data() const
 	{
 		return data_;
 	}
@@ -210,15 +217,16 @@ class InterfaceData
 	/** Set data value.
 	 * @param data new value
 	 */
-	void set_data(const std::shared_ptr<rapidjson::Document>& data)
+	void
+	set_data(const std::shared_ptr<rapidjson::Document> &data)
 	{
 		data_ = data;
 	}
-  /** Get timestamp value.
+	/** Get timestamp value.
    * @return timestamp value
    */
 	std::optional<std::string>
- timestamp() const
+	timestamp() const
 	{
 		return timestamp_;
 	}
@@ -226,26 +234,19 @@ class InterfaceData
 	/** Set timestamp value.
 	 * @param timestamp new value
 	 */
-	void set_timestamp(const std::string& timestamp)
+	void
+	set_timestamp(const std::string &timestamp)
 	{
 		timestamp_ = timestamp;
 	}
- private:
-	std::optional<std::string>
- kind_;
-	std::optional<std::string>
- apiVersion_;
-	std::optional<std::string>
- id_;
-	std::optional<std::string>
- type_;
-	std::optional<std::string>
- writer_;
-	std::vector<std::string>
- readers_;
-	std::shared_ptr<rapidjson::Document>
- data_;
-	std::optional<std::string>
- timestamp_;
 
+private:
+	std::optional<std::string>           kind_;
+	std::optional<std::string>           apiVersion_;
+	std::optional<std::string>           id_;
+	std::optional<std::string>           type_;
+	std::optional<std::string>           writer_;
+	std::vector<std::string>             readers_;
+	std::shared_ptr<rapidjson::Document> data_;
+	std::optional<std::string>           timestamp_;
 };

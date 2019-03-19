@@ -29,16 +29,14 @@
 
 namespace fawkes {
 
-
 class RefCountRWLock : public ReadWriteLock, public RefCount
 {
- public:
-  RefCountRWLock(ReadWriteLock::ReadWriteLockPolicy policy = ReadWriteLock::RWLockPolicyPreferWriter);
+public:
+	RefCountRWLock(
+	  ReadWriteLock::ReadWriteLockPolicy policy = ReadWriteLock::RWLockPolicyPreferWriter);
 
-  virtual ~RefCountRWLock();
-
+	virtual ~RefCountRWLock();
 };
-
 
 } // end namespace fawkes
 

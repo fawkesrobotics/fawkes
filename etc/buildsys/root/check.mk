@@ -65,6 +65,28 @@ format-check: check-parallel
     exit 1; \
   fi
 
+.PHONY: format-check-branch
+format-check-branch: check-parallel
+	$(SILENT) echo -e "$(INDENT_PRINT)[CHK] Checking code formatting in branch and modified files"
+	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
+		OFFENDING_FILES=$$(SHOW_PROGRESS="$(if $(HIDE_FORMAT_PROGRESS),no,yes)" $(FAWKES_BASEDIR)/etc/format-scripts/check-branch-files.sh); \
+		if [ "$$?" != "0" ]; then \
+			NUM_FILES=$$(cut -d$$'\n' -f1 <<< "$$OFFENDING_FILES"); \
+			OFFENDING_FILES=$$(cut -d$$'\n' -f2- <<< "$$OFFENDING_FILES"); \
+			BAD_FILES=$$(wc -w <<< "$$OFFENDING_FILES"); \
+			for f in $$OFFENDING_FILES; do \
+				echo -e "$(INDENT_PRINT)$(TRED)--> $$f is not properly formatted$(TNORMAL)"; \
+			done; \
+			echo -e "$(INDENT_PRINT)$(TRED)--> $$BAD_FILES/$$NUM_FILES have bad formatting.$(TNORMAL)"; \
+			exit 1; \
+		else \
+			echo -e "$(INDENT_PRINT)$(TGREEN)--> All source files properly formatted$(TNORMAL)"; \
+		fi; \
+	else \
+		echo -e "$(INDENT_PRINT)$(TRED)--- Cannot do format check$(TNORMAL) (clang-format not found)"; \
+    exit 1; \
+  fi
+
 .PHONY: check-parallel
 check-parallel:
 	$(SILENT)if ! type -p parallel >/dev/null; then \
@@ -72,7 +94,6 @@ check-parallel:
 	fi
 
 .PHONY: check
-check: quickdoc $(if $(subst 0,,$(YAMLLINT)),yamllint) license-check
-
+check: format-check-branch quickdoc $(if $(subst 0,,$(YAMLLINT)),yamllint) license-check
 
 endif # __buildsys_root_check_mk_

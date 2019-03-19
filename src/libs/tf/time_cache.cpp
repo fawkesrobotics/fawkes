@@ -54,7 +54,7 @@
 #include <cstdio>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
 /** @class TransformStorage <tf/time_cache.h>
  * Storage for transforms and their parent.
@@ -75,16 +75,16 @@ TransformStorage::TransformStorage()
  * @param frame_id parent frame ID
  * @param child_frame_id child frame ID
  */
-TransformStorage::TransformStorage(const StampedTransform& data,
-                                   CompactFrameID frame_id,
-                                   CompactFrameID child_frame_id)
-: rotation(data.getRotation())
-, translation(data.getOrigin())
-, stamp(data.stamp)
-, frame_id(frame_id)
-, child_frame_id(child_frame_id)
-{ }
-
+TransformStorage::TransformStorage(const StampedTransform &data,
+                                   CompactFrameID          frame_id,
+                                   CompactFrameID          child_frame_id)
+: rotation(data.getRotation()),
+  translation(data.getOrigin()),
+  stamp(data.stamp),
+  frame_id(frame_id),
+  child_frame_id(child_frame_id)
+{
+}
 
 /** @class TimeCacheInterface <tf/time_cache.h>
  * Interface for transform time caches.
@@ -151,9 +151,9 @@ TransformStorage::TransformStorage(const StampedTransform& data,
 /** Constructor.
  * @param max_storage_time maximum time in seconds to cache, defaults to 10 seconds
  */
-TimeCache::TimeCache(float max_storage_time)
-: max_storage_time_(max_storage_time)
-{}
+TimeCache::TimeCache(float max_storage_time) : max_storage_time_(max_storage_time)
+{
+}
 
 /** Destructor. */
 TimeCache::~TimeCache()
@@ -168,19 +168,22 @@ TimeCache::~TimeCache()
 // hoisting these into separate functions causes an ~8% speedup.
 // Removing calling them altogether adds another ~10%
 void
-create_extrapolation_exception1(fawkes::Time t0, fawkes::Time t1, std::string* error_str)
+create_extrapolation_exception1(fawkes::Time t0, fawkes::Time t1, std::string *error_str)
 {
-  if (error_str)
-  {
-    char *tmp;
-    if (asprintf(&tmp, "Lookup would require extrapolation at time %li.%li, "
-                 "but only time %li.%li is in the buffer", t0.get_sec(), t0.get_nsec(),
-                 t1.get_sec(), t1.get_usec()) != -1)
-    {
-      *error_str = tmp;
-      free(tmp);
-    }
-  }
+	if (error_str) {
+		char *tmp;
+		if (asprintf(&tmp,
+		             "Lookup would require extrapolation at time %li.%li, "
+		             "but only time %li.%li is in the buffer",
+		             t0.get_sec(),
+		             t0.get_nsec(),
+		             t1.get_sec(),
+		             t1.get_usec())
+		    != -1) {
+			*error_str = tmp;
+			free(tmp);
+		}
+	}
 }
 
 /** Create extrapolation error string.
@@ -189,19 +192,22 @@ create_extrapolation_exception1(fawkes::Time t0, fawkes::Time t1, std::string* e
  * @param error_str upon return contains the error string.
  */
 void
-create_extrapolation_exception2(fawkes::Time t0, fawkes::Time t1, std::string* error_str)
+create_extrapolation_exception2(fawkes::Time t0, fawkes::Time t1, std::string *error_str)
 {
-  if (error_str)
-  {
-    char *tmp;
-    if (asprintf(&tmp,"Lookup would require extrapolation into the future. "
-                 "Requested time %li.%li, but the latest data is at time %li.%li",
-                 t0.get_sec(), t0.get_usec(), t1.get_sec(), t1.get_usec()) != -1)
-    {
-      *error_str = tmp;
-      free(tmp);
-    }
-  }
+	if (error_str) {
+		char *tmp;
+		if (asprintf(&tmp,
+		             "Lookup would require extrapolation into the future. "
+		             "Requested time %li.%li, but the latest data is at time %li.%li",
+		             t0.get_sec(),
+		             t0.get_usec(),
+		             t1.get_sec(),
+		             t1.get_usec())
+		    != -1) {
+			*error_str = tmp;
+			free(tmp);
+		}
+	}
 }
 
 /** Create extrapolation error string.
@@ -210,108 +216,113 @@ create_extrapolation_exception2(fawkes::Time t0, fawkes::Time t1, std::string* e
  * @param error_str upon return contains the error string.
  */
 void
-create_extrapolation_exception3(fawkes::Time t0, fawkes::Time t1, std::string* error_str)
+create_extrapolation_exception3(fawkes::Time t0, fawkes::Time t1, std::string *error_str)
 {
-  if (error_str)
-  {
-    char *tmp;
-    if (asprintf(&tmp,"Lookup would require extrapolation into the past. "
-                 "Requested time %li.%li, but the latest data is at time %li.%li",
-                 t0.get_sec(), t0.get_usec(), t1.get_sec(), t1.get_usec()) != -1)
-    {
-      *error_str = tmp;
-      free(tmp);
-    }
-  }
+	if (error_str) {
+		char *tmp;
+		if (asprintf(&tmp,
+		             "Lookup would require extrapolation into the past. "
+		             "Requested time %li.%li, but the latest data is at time %li.%li",
+		             t0.get_sec(),
+		             t0.get_usec(),
+		             t1.get_sec(),
+		             t1.get_usec())
+		    != -1) {
+			*error_str = tmp;
+			free(tmp);
+		}
+	}
 }
 
 /// A helper function for getData
 //Assumes storage is already locked for it
 uint8_t
-TimeCache::find_closest(TransformStorage*& one, TransformStorage*& two,
-                        fawkes::Time target_time, std::string* error_str)
+TimeCache::find_closest(TransformStorage *&one,
+                        TransformStorage *&two,
+                        fawkes::Time       target_time,
+                        std::string *      error_str)
 {
-  //No values stored
-  if (storage_.empty()) {
-    if (error_str) *error_str = "Transform cache storage is empty";
-    return 0;
-  }
+	//No values stored
+	if (storage_.empty()) {
+		if (error_str)
+			*error_str = "Transform cache storage is empty";
+		return 0;
+	}
 
-  //If time == 0 return the latest
-  if (target_time.is_zero()) {
-    one = &storage_.front();
-    return 1;
-  }
+	//If time == 0 return the latest
+	if (target_time.is_zero()) {
+		one = &storage_.front();
+		return 1;
+	}
 
-  // One value stored
-  if (++storage_.begin() == storage_.end()) {
-    TransformStorage& ts = *storage_.begin();
-    if (ts.stamp == target_time) {
-      one = &ts;
-      return 1;
-    } else {
-      create_extrapolation_exception1(target_time, ts.stamp, error_str);
-      return 0;
-    }
-  }
+	// One value stored
+	if (++storage_.begin() == storage_.end()) {
+		TransformStorage &ts = *storage_.begin();
+		if (ts.stamp == target_time) {
+			one = &ts;
+			return 1;
+		} else {
+			create_extrapolation_exception1(target_time, ts.stamp, error_str);
+			return 0;
+		}
+	}
 
-  fawkes::Time latest_time = (*storage_.begin()).stamp;
-  fawkes::Time earliest_time = (*(storage_.rbegin())).stamp;
+	fawkes::Time latest_time   = (*storage_.begin()).stamp;
+	fawkes::Time earliest_time = (*(storage_.rbegin())).stamp;
 
-  if (target_time == latest_time) {
-    one = &(*storage_.begin());
-    return 1;
-  } else if (target_time == earliest_time) {
-    one = &(*storage_.rbegin());
-    return 1;
-  } else if (target_time > latest_time) {
-    // Catch cases that would require extrapolation
-    create_extrapolation_exception2(target_time, latest_time, error_str);
-    return 0;
-  } else if (target_time < earliest_time) {
-    create_extrapolation_exception3(target_time, earliest_time, error_str);
-    return 0;
-  }
+	if (target_time == latest_time) {
+		one = &(*storage_.begin());
+		return 1;
+	} else if (target_time == earliest_time) {
+		one = &(*storage_.rbegin());
+		return 1;
+	} else if (target_time > latest_time) {
+		// Catch cases that would require extrapolation
+		create_extrapolation_exception2(target_time, latest_time, error_str);
+		return 0;
+	} else if (target_time < earliest_time) {
+		create_extrapolation_exception3(target_time, earliest_time, error_str);
+		return 0;
+	}
 
-  //At least 2 values stored
-  //Find the first value less than the target value
-  L_TransformStorage::iterator storage_it = storage_.begin();
-  while(storage_it != storage_.end()) {
-    if (storage_it->stamp <= target_time)  break;
-    storage_it++;
-  }
+	//At least 2 values stored
+	//Find the first value less than the target value
+	L_TransformStorage::iterator storage_it = storage_.begin();
+	while (storage_it != storage_.end()) {
+		if (storage_it->stamp <= target_time)
+			break;
+		storage_it++;
+	}
 
-  //Finally the case were somewhere in the middle  Guarenteed no extrapolation :-)
-  one = &*(storage_it); //Older
-  two = &*(--storage_it); //Newer
-  return 2;
+	//Finally the case were somewhere in the middle  Guarenteed no extrapolation :-)
+	one = &*(storage_it);   //Older
+	two = &*(--storage_it); //Newer
+	return 2;
 }
 
-
 void
-TimeCache::interpolate(const TransformStorage& one,
-                       const TransformStorage& two,
-                       fawkes::Time time, TransformStorage& output)
+TimeCache::interpolate(const TransformStorage &one,
+                       const TransformStorage &two,
+                       fawkes::Time            time,
+                       TransformStorage &      output)
 {
-  // Check for zero distance case
-  if( two.stamp == one.stamp ) {
-    output = two;
-    return;
-  }
-  //Calculate the ratio
-  btScalar ratio =
-    (time.in_sec() - one.stamp.in_sec()) /
-    (two.stamp.in_sec() - one.stamp.in_sec());
+	// Check for zero distance case
+	if (two.stamp == one.stamp) {
+		output = two;
+		return;
+	}
+	//Calculate the ratio
+	btScalar ratio = (time.in_sec() - one.stamp.in_sec()) / (two.stamp.in_sec() - one.stamp.in_sec());
 
-  //Interpolate translation
-  output.translation.setInterpolate3(one.translation, two.translation, ratio);
+	//Interpolate translation
+	output.translation.setInterpolate3(one.translation, two.translation, ratio);
 
-  //Interpolate rotation
-  output.rotation = slerp( one.rotation, two.rotation, ratio);
+	//Interpolate rotation
+	output.rotation = slerp(one.rotation, two.rotation, ratio);
 
-  output.stamp = one.stamp;
-  output.frame_id = one.frame_id;
-  output.child_frame_id = one.child_frame_id;
+	output.stamp          = one.stamp;
+	output.frame_id       = one.frame_id;
+	output.child_frame_id = one.child_frame_id;
 }
 
 TimeCacheInterfacePtr
@@ -323,139 +334,133 @@ TimeCache::clone(const fawkes::Time &look_back_until) const
 	} else {
 		L_TransformStorage::const_iterator storage_it = storage_.begin();
 		for (storage_it = storage_.begin(); storage_it != storage_.end(); ++storage_it) {
-			if (storage_it->stamp <= look_back_until)  break;
+			if (storage_it->stamp <= look_back_until)
+				break;
 			copy->storage_.push_back(*storage_it);
 		}
 	}
 	return std::shared_ptr<TimeCacheInterface>(copy);
 }
 
-
 bool
-TimeCache::get_data(fawkes::Time time, TransformStorage & data_out,
-                    std::string* error_str)
+TimeCache::get_data(fawkes::Time time, TransformStorage &data_out, std::string *error_str)
 {
-  TransformStorage* p_temp_1 = NULL;
-  TransformStorage* p_temp_2 = NULL;
+	TransformStorage *p_temp_1 = NULL;
+	TransformStorage *p_temp_2 = NULL;
 
-  int num_nodes = find_closest(p_temp_1, p_temp_2, time, error_str);
-  if (num_nodes == 0) {
-    return false;
-  } else if (num_nodes == 1) {
-    data_out = *p_temp_1;
-  } else if (num_nodes == 2) {
-    if( p_temp_1->frame_id == p_temp_2->frame_id) {
-      interpolate(*p_temp_1, *p_temp_2, time, data_out);
-    } else {
-      data_out = *p_temp_1;
-    }
-  }
+	int num_nodes = find_closest(p_temp_1, p_temp_2, time, error_str);
+	if (num_nodes == 0) {
+		return false;
+	} else if (num_nodes == 1) {
+		data_out = *p_temp_1;
+	} else if (num_nodes == 2) {
+		if (p_temp_1->frame_id == p_temp_2->frame_id) {
+			interpolate(*p_temp_1, *p_temp_2, time, data_out);
+		} else {
+			data_out = *p_temp_1;
+		}
+	}
 
-  return true;
+	return true;
 }
 
 CompactFrameID
-TimeCache::get_parent(fawkes::Time time, std::string* error_str)
+TimeCache::get_parent(fawkes::Time time, std::string *error_str)
 {
-  TransformStorage* p_temp_1 = NULL;
-  TransformStorage* p_temp_2 = NULL;
+	TransformStorage *p_temp_1 = NULL;
+	TransformStorage *p_temp_2 = NULL;
 
-  int num_nodes = find_closest(p_temp_1, p_temp_2, time, error_str);
-  if (num_nodes == 0) {
-    return 0;
-  }
+	int num_nodes = find_closest(p_temp_1, p_temp_2, time, error_str);
+	if (num_nodes == 0) {
+		return 0;
+	}
 
-  return p_temp_1->frame_id;
+	return p_temp_1->frame_id;
 }
 
-
 bool
-TimeCache::insert_data(const TransformStorage& new_data)
+TimeCache::insert_data(const TransformStorage &new_data)
 {
-  L_TransformStorage::iterator storage_it = storage_.begin();
+	L_TransformStorage::iterator storage_it = storage_.begin();
 
-  if(storage_it != storage_.end()) {
-    if (storage_it->stamp > new_data.stamp + max_storage_time_) {
-      return false;
-    }
-  }
+	if (storage_it != storage_.end()) {
+		if (storage_it->stamp > new_data.stamp + max_storage_time_) {
+			return false;
+		}
+	}
 
+	while (storage_it != storage_.end()) {
+		if (storage_it->stamp <= new_data.stamp)
+			break;
+		storage_it++;
+	}
+	storage_.insert(storage_it, new_data);
 
-  while(storage_it != storage_.end()) {
-    if (storage_it->stamp <= new_data.stamp)
-      break;
-    storage_it++;
-  }
-  storage_.insert(storage_it, new_data);
-
-  prune_list();
-  return true;
+	prune_list();
+	return true;
 }
 
 void
 TimeCache::clear_list()
 {
-  storage_.clear();
+	storage_.clear();
 }
 
 unsigned int
 TimeCache::get_list_length() const
 {
-  return storage_.size();
+	return storage_.size();
 }
-
 
 const TimeCacheInterface::L_TransformStorage &
 TimeCache::get_storage() const
 {
-  return storage_;
+	return storage_;
 }
 
 TimeCacheInterface::L_TransformStorage
 TimeCache::get_storage_copy() const
 {
-  return storage_;
+	return storage_;
 }
 
 P_TimeAndFrameID
 TimeCache::get_latest_time_and_parent()
 {
-  if (storage_.empty()) {
-    return std::make_pair(fawkes::Time(), 0);
-  }
+	if (storage_.empty()) {
+		return std::make_pair(fawkes::Time(), 0);
+	}
 
-  const TransformStorage& ts = storage_.front();
-  return std::make_pair(ts.stamp, ts.frame_id);
+	const TransformStorage &ts = storage_.front();
+	return std::make_pair(ts.stamp, ts.frame_id);
 }
 
 fawkes::Time
 TimeCache::get_latest_timestamp() const
 {
-  if (storage_.empty()) return fawkes::Time(0,0); //empty list case
-  return storage_.front().stamp;
+	if (storage_.empty())
+		return fawkes::Time(0, 0); //empty list case
+	return storage_.front().stamp;
 }
 
 fawkes::Time
 TimeCache::get_oldest_timestamp() const
 {
-  if (storage_.empty()) return fawkes::Time(0,0); //empty list case
-  return storage_.back().stamp;
+	if (storage_.empty())
+		return fawkes::Time(0, 0); //empty list case
+	return storage_.back().stamp;
 }
 
 /** Prune storage list based on maximum cache lifetime. */
 void
 TimeCache::prune_list()
 {
-  fawkes::Time latest_time = storage_.begin()->stamp;
-  
-  while(!storage_.empty() &&
-        storage_.back().stamp + max_storage_time_ < latest_time)
-  {
-    storage_.pop_back();
-  }
+	fawkes::Time latest_time = storage_.begin()->stamp;
 
+	while (!storage_.empty() && storage_.back().stamp + max_storage_time_ < latest_time) {
+		storage_.pop_back();
+	}
 }
-
 
 } // end namespace tf
 } // end namespace fawkes

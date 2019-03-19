@@ -31,22 +31,21 @@ namespace firevision {
 
 class ImageCompressor;
 
-class CompressedImageWriter : public Writer {
+class CompressedImageWriter : public Writer
+{
+public:
+	CompressedImageWriter(ImageCompressor *ic = NULL);
+	virtual ~CompressedImageWriter();
 
- public:
-  CompressedImageWriter(ImageCompressor *ic = NULL);
-  virtual ~CompressedImageWriter();
+	virtual void set_filename(const char *filename);
+	virtual void set_dimensions(unsigned int width, unsigned int height);
+	virtual void set_buffer(colorspace_t cspace, unsigned char *buffer);
+	virtual void write();
 
-  virtual void             set_filename(const char *filename);
-  virtual void             set_dimensions(unsigned int width, unsigned int height);
-  virtual void             set_buffer(colorspace_t cspace, unsigned char *buffer);
-  virtual void             write();
+	virtual void set_image_compressor(ImageCompressor *ic);
 
-  virtual void             set_image_compressor(ImageCompressor *ic);
-
- private:
-  ImageCompressor *image_compressor;
-
+private:
+	ImageCompressor *image_compressor;
 };
 
 } // end namespace firevision

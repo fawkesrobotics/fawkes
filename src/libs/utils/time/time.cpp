@@ -22,19 +22,18 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <utils/time/time.h>
-#include <utils/time/clock.h>
-
 #include <core/exception.h>
 #include <core/exceptions/software.h>
+#include <utils/time/clock.h>
+#include <utils/time/time.h>
 
-#include <time.h>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <unistd.h>
 #include <limits>
+#include <time.h>
+#include <unistd.h>
 
 namespace fawkes {
 
@@ -88,30 +87,27 @@ const Time TIME_MIN = Time(0, 1);
 // as recommened in asctime_r() docs
 const unsigned int Time::TIMESTR_SIZE = 26;
 
-
 /** Constructor.
  * Sets time to the current time.
  */
 Time::Time()
 {
-  clock_ = Clock::instance();
-  clock_->get_time(&time_);
-  timestr_ = NULL;
+	clock_ = Clock::instance();
+	clock_->get_time(&time_);
+	timestr_ = NULL;
 }
-
 
 /** Constructor.
  * Sets time to the given time.
  * @param tv the Time object is initialized with the time given in this timeval
  */
-Time::Time(const timeval* tv)
+Time::Time(const timeval *tv)
 {
-  time_.tv_sec = tv->tv_sec;
-  time_.tv_usec = tv->tv_usec;
-  clock_ = Clock::instance();
-  timestr_ = NULL;
+	time_.tv_sec  = tv->tv_sec;
+	time_.tv_usec = tv->tv_usec;
+	clock_        = Clock::instance();
+	timestr_      = NULL;
 }
-
 
 /** Constructor.
  * Sets time to the given time. Basically the same as setting from a timeval struct
@@ -122,16 +118,15 @@ Time::Time(const timeval* tv)
  */
 Time::Time(long sec, long usec, Clock *clock)
 {
-  time_.tv_sec  = sec;
-  time_.tv_usec = usec;
-  if (clock) {
-    clock_ = clock;
-  } else {
-    clock_ = Clock::instance();
-  }
-  timestr_ = NULL;
+	time_.tv_sec  = sec;
+	time_.tv_usec = usec;
+	if (clock) {
+		clock_ = clock;
+	} else {
+		clock_ = Clock::instance();
+	}
+	timestr_ = NULL;
 }
-
 
 /** Constructor.
  * Sets time to given number of ms, use for time range.
@@ -139,15 +134,14 @@ Time::Time(long sec, long usec, Clock *clock)
  */
 Time::Time(long ms)
 {
-  time_t sec = (time_t) (ms / 1000.0);
-  suseconds_t usec =  (ms % 1000) * 1000;
+	time_t      sec  = (time_t)(ms / 1000.0);
+	suseconds_t usec = (ms % 1000) * 1000;
 
-  time_.tv_sec = sec;
-  time_.tv_usec = usec;
-  clock_ = Clock::instance();
-  timestr_ = NULL;
+	time_.tv_sec  = sec;
+	time_.tv_usec = usec;
+	clock_        = Clock::instance();
+	timestr_      = NULL;
 }
-
 
 /** Constructor.
  * Sets time to given number of ms, use for time range.
@@ -155,15 +149,14 @@ Time::Time(long ms)
  */
 Time::Time(double s)
 {
-  time_t sec = (time_t) s;
-  suseconds_t usec = (suseconds_t)roundf((s - sec) * 1000000.f);
+	time_t      sec  = (time_t)s;
+	suseconds_t usec = (suseconds_t)roundf((s - sec) * 1000000.f);
 
-  time_.tv_sec = sec;
-  time_.tv_usec = usec;
-  clock_ = Clock::instance();
-  timestr_ = NULL;
+	time_.tv_sec  = sec;
+	time_.tv_usec = usec;
+	clock_        = Clock::instance();
+	timestr_      = NULL;
 }
-
 
 /** Constructor.
  * This constructor uses the supplied clock for setting the time. The
@@ -172,52 +165,49 @@ Time::Time(double s)
  */
 Time::Time(Clock *clock)
 {
-  this->clock_ = clock;
-  clock_->get_time(&time_);
-  timestr_ = NULL;
+	this->clock_ = clock;
+	clock_->get_time(&time_);
+	timestr_ = NULL;
 }
-
 
 /** Copy constructor.
  * @param t time to copy
  */
 Time::Time(const Time &t)
 {
-  time_.tv_sec  = t.time_.tv_sec;
-  time_.tv_usec = t.time_.tv_usec;
-  clock_        = t.clock_;
-  if (t.timestr_) {
-    timestr_ = (char *)malloc(TIMESTR_SIZE);
-    strncpy(timestr_, t.timestr_, TIMESTR_SIZE);
-  } else {
-    timestr_ = NULL;
-  }
+	time_.tv_sec  = t.time_.tv_sec;
+	time_.tv_usec = t.time_.tv_usec;
+	clock_        = t.clock_;
+	if (t.timestr_) {
+		timestr_ = (char *)malloc(TIMESTR_SIZE);
+		strncpy(timestr_, t.timestr_, TIMESTR_SIZE);
+	} else {
+		timestr_ = NULL;
+	}
 }
-
 
 /** Copy constructor.
  * @param t time to copy
  */
 Time::Time(const Time *t)
 {
-  time_.tv_sec  = t->time_.tv_sec;
-  time_.tv_usec = t->time_.tv_usec;
-  clock_        = t->clock_;
-  if (t->timestr_) {
-    timestr_ = (char *)malloc(TIMESTR_SIZE);
-    strncpy(timestr_, t->timestr_, TIMESTR_SIZE);
-  } else {
-    timestr_ = NULL;
-  }
+	time_.tv_sec  = t->time_.tv_sec;
+	time_.tv_usec = t->time_.tv_usec;
+	clock_        = t->clock_;
+	if (t->timestr_) {
+		timestr_ = (char *)malloc(TIMESTR_SIZE);
+		strncpy(timestr_, t->timestr_, TIMESTR_SIZE);
+	} else {
+		timestr_ = NULL;
+	}
 }
-
 
 /** Destructor. */
 Time::~Time()
 {
-  if (timestr_)  free(timestr_);
+	if (timestr_)
+		free(timestr_);
 }
-
 
 /** Convet time to seconds.
  * Convert the stored time in a floating point number representing the
@@ -228,9 +218,8 @@ Time::~Time()
 double
 Time::in_sec() const
 {
-  return ((double)time_.tv_sec + (double)time_.tv_usec / 1000000.);
+	return ((double)time_.tv_sec + (double)time_.tv_usec / 1000000.);
 }
-
 
 /** Convert the stored time into milli-seconds.
  * @return the time in milli-seconds
@@ -238,9 +227,8 @@ Time::in_sec() const
 long
 Time::in_msec() const
 {
-  return (time_.tv_sec * 1000 + (long) (time_.tv_usec / 1000));
+	return (time_.tv_sec * 1000 + (long)(time_.tv_usec / 1000));
 }
-
 
 /** Convert the stored time into micro-seconds.
  * @return the time in micro-seconds
@@ -248,20 +236,18 @@ Time::in_msec() const
 long
 Time::in_usec() const
 {
-  return (time_.tv_sec * 1000000 + time_.tv_usec);
+	return (time_.tv_sec * 1000000 + time_.tv_usec);
 }
-
 
 /** Sets the time.
  * @param tv set the time to this value
  */
 void
-Time::set_time(const timeval* tv)
+Time::set_time(const timeval *tv)
 {
-  time_.tv_sec = tv->tv_sec;
-  time_.tv_usec = tv->tv_usec;
+	time_.tv_sec  = tv->tv_sec;
+	time_.tv_usec = tv->tv_usec;
 }
-
 
 /** Sets the time.
  * @param sec seconds part of the time
@@ -270,10 +256,9 @@ Time::set_time(const timeval* tv)
 void
 Time::set_time(long int sec, long int usec)
 {
-  time_.tv_sec  = sec;
-  time_.tv_usec = usec;
+	time_.tv_sec  = sec;
+	time_.tv_usec = usec;
 }
-
 
 /** Sets the time.
  * @param ms set the time to this value
@@ -281,10 +266,9 @@ Time::set_time(long int sec, long int usec)
 void
 Time::set_time(long ms)
 {
-  time_.tv_sec  = (time_t) (ms / 1000.0);
-  time_.tv_usec = (ms % 1000) * 1000;
+	time_.tv_sec  = (time_t)(ms / 1000.0);
+	time_.tv_usec = (ms % 1000) * 1000;
 }
-
 
 /** Sets the time.
  * @param s set the time to this value
@@ -292,8 +276,8 @@ Time::set_time(long ms)
 void
 Time::set_time(double s)
 {
-  time_.tv_sec  = (time_t)floor(s);
-  time_.tv_usec = (suseconds_t)(s - time_.tv_sec) * 1000000;
+	time_.tv_sec  = (time_t)floor(s);
+	time_.tv_usec = (suseconds_t)(s - time_.tv_sec) * 1000000;
 }
 
 /** Set time to given time.
@@ -304,9 +288,8 @@ Time::set_time(double s)
 void
 Time::set_time(const Time &t)
 {
-  *this = t;
+	*this = t;
 }
-
 
 /** Set time to given time.
  * @param t time to set to
@@ -314,10 +297,9 @@ Time::set_time(const Time &t)
 void
 Time::set_time(const Time *t)
 {
-  time_.tv_sec  = t->time_.tv_sec;
-  time_.tv_usec = t->time_.tv_usec;
+	time_.tv_sec  = t->time_.tv_sec;
+	time_.tv_usec = t->time_.tv_usec;
 }
-
 
 /** Set clock for this instance.
  * @param clock clock to use from now on
@@ -325,10 +307,10 @@ Time::set_time(const Time *t)
 void
 Time::set_clock(Clock *clock)
 {
-  if (clock == NULL) throw NullPointerException("Clock may not be NULL");
-  clock_ = clock;
+	if (clock == NULL)
+		throw NullPointerException("Clock may not be NULL");
+	clock_ = clock;
 }
-
 
 /** Add seconds.
  * The effect is equivalent to operator+=(const double sec), but this
@@ -339,7 +321,7 @@ Time::set_clock(Clock *clock)
 void
 Time::add(double seconds)
 {
-  *this += seconds;
+	*this += seconds;
 }
 
 /** Operator that adds times.
@@ -347,34 +329,29 @@ Time::add(double seconds)
  * @return the sum
  */
 Time
-Time::operator+(const Time& t) const
+Time::operator+(const Time &t) const
 {
-  Time ret(0,0);
-  if (time_.tv_usec + t.time_.tv_usec >= 1000000)
-  {
-    ret.time_.tv_usec = time_.tv_usec + t.time_.tv_usec - 1000000;
-    ret.time_.tv_sec = time_.tv_sec + t.time_.tv_sec + 1;
-  }
-  else
-  {
-    ret.time_.tv_usec = time_.tv_usec + t.time_.tv_usec;
-    ret.time_.tv_sec = time_.tv_sec + t.time_.tv_sec;
-  }
+	Time ret(0, 0);
+	if (time_.tv_usec + t.time_.tv_usec >= 1000000) {
+		ret.time_.tv_usec = time_.tv_usec + t.time_.tv_usec - 1000000;
+		ret.time_.tv_sec  = time_.tv_sec + t.time_.tv_sec + 1;
+	} else {
+		ret.time_.tv_usec = time_.tv_usec + t.time_.tv_usec;
+		ret.time_.tv_sec  = time_.tv_sec + t.time_.tv_sec;
+	}
 
-  return ret;
+	return ret;
 }
-
 
 /** Operator that adds times.
  * @param t the other summand
  * @return the sum
  */
 Time
-Time::operator+(const Time* t) const
+Time::operator+(const Time *t) const
 {
-  return *this + *t;
+	return *this + *t;
 }
-
 
 /** Operator that adds times.
  * @param sec number of seconds to add
@@ -383,23 +360,19 @@ Time::operator+(const Time* t) const
 Time
 Time::operator+(const double sec) const
 {
-  Time ret(0,0);
-  time_t sec_only = (time_t)floor(sec);
-  suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
-  if ((time_.tv_usec + usec_only) >= 1000000)
-  {
-    ret.time_.tv_usec = time_.tv_usec + usec_only - 1000000;
-    ret.time_.tv_sec = time_.tv_sec + sec_only + 1;
-  }
-  else
-  {
-    ret.time_.tv_usec = time_.tv_usec + usec_only;
-    ret.time_.tv_sec = time_.tv_sec + sec_only;
-  }
+	Time        ret(0, 0);
+	time_t      sec_only  = (time_t)floor(sec);
+	suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
+	if ((time_.tv_usec + usec_only) >= 1000000) {
+		ret.time_.tv_usec = time_.tv_usec + usec_only - 1000000;
+		ret.time_.tv_sec  = time_.tv_sec + sec_only + 1;
+	} else {
+		ret.time_.tv_usec = time_.tv_usec + usec_only;
+		ret.time_.tv_sec  = time_.tv_sec + sec_only;
+	}
 
-  return ret;
+	return ret;
 }
-
 
 /** Operator to add usec value.
  * @param usec microseconds to add
@@ -408,57 +381,48 @@ Time::operator+(const double sec) const
 Time
 Time::operator+(const long int usec) const
 {
-  Time ret(0,0);
-  if ( time_.tv_usec + usec >= 1000000 )
-  {
-    //usec + time_.tv_usec might be more than 1 second
-    long int tmp_usec = time_.tv_usec + usec;
-    ret.time_.tv_usec  = tmp_usec % 1000000;
-    ret.time_.tv_sec   = time_.tv_sec + (tmp_usec / 1000000);
-  }
-  else
-  {
-    ret.time_.tv_sec   = time_.tv_sec;
-    ret.time_.tv_usec += usec;
-  }
+	Time ret(0, 0);
+	if (time_.tv_usec + usec >= 1000000) {
+		//usec + time_.tv_usec might be more than 1 second
+		long int tmp_usec = time_.tv_usec + usec;
+		ret.time_.tv_usec = tmp_usec % 1000000;
+		ret.time_.tv_sec  = time_.tv_sec + (tmp_usec / 1000000);
+	} else {
+		ret.time_.tv_sec = time_.tv_sec;
+		ret.time_.tv_usec += usec;
+	}
 
-  return ret;
+	return ret;
 }
-
 
 /** Operator that substracts one Time from another.
  * @param t the Time that is substracted
  * @return the difference
  */
 Time
-Time::operator-(const Time& t) const
+Time::operator-(const Time &t) const
 {
-  Time ret(0,0);
-  if (time_.tv_usec < t.time_.tv_usec)
-  {
-    ret.time_.tv_usec = 1000000 + time_.tv_usec - t.time_.tv_usec;
-    ret.time_.tv_sec = time_.tv_sec - t.time_.tv_sec - 1;
-  }
-  else
-  {
-    ret.time_.tv_usec = time_.tv_usec - t.time_.tv_usec;
-    ret.time_.tv_sec = time_.tv_sec - t.time_.tv_sec;
-  }
+	Time ret(0, 0);
+	if (time_.tv_usec < t.time_.tv_usec) {
+		ret.time_.tv_usec = 1000000 + time_.tv_usec - t.time_.tv_usec;
+		ret.time_.tv_sec  = time_.tv_sec - t.time_.tv_sec - 1;
+	} else {
+		ret.time_.tv_usec = time_.tv_usec - t.time_.tv_usec;
+		ret.time_.tv_sec  = time_.tv_sec - t.time_.tv_sec;
+	}
 
-  return ret;
+	return ret;
 }
-
 
 /** Operator that substracts one Time from another.
  * @param t the Time that is substracted
  * @return the difference
  */
 double
-Time::operator-(const Time* t) const
+Time::operator-(const Time *t) const
 {
-  return time_diff_sec(time_, t->time_);
+	return time_diff_sec(time_, t->time_);
 }
-
 
 /** Operator that subtracts some time.
  * @param sec number of seconds to subtract
@@ -467,23 +431,19 @@ Time::operator-(const Time* t) const
 Time
 Time::operator-(const double sec) const
 {
-  Time ret(0,0);
-  time_t sec_only = (time_t)floor(sec);
-  suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
-  if (time_.tv_usec < usec_only)
-  {
-    ret.time_.tv_usec = 1000000 + time_.tv_usec - usec_only;
-    ret.time_.tv_sec = time_.tv_sec - sec_only - 1;
-  }
-  else
-  {
-    ret.time_.tv_usec = time_.tv_usec - usec_only;
-    ret.time_.tv_sec = time_.tv_sec - sec_only;
-  }
+	Time        ret(0, 0);
+	time_t      sec_only  = (time_t)floor(sec);
+	suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
+	if (time_.tv_usec < usec_only) {
+		ret.time_.tv_usec = 1000000 + time_.tv_usec - usec_only;
+		ret.time_.tv_sec  = time_.tv_sec - sec_only - 1;
+	} else {
+		ret.time_.tv_usec = time_.tv_usec - usec_only;
+		ret.time_.tv_sec  = time_.tv_sec - sec_only;
+	}
 
-  return ret;
+	return ret;
 }
-
 
 /** Operator that subtracts some time.
  * @param usec number of microseconds to subtract
@@ -492,45 +452,37 @@ Time::operator-(const double sec) const
 Time
 Time::operator-(const long int usec) const
 {
-  Time ret(0,0);
-  time_t sec_only = usec / 1000000;
-  suseconds_t usec_only = usec % 1000000;
-  if (time_.tv_usec < usec_only)
-  {
-    ret.time_.tv_usec = 1000000 + time_.tv_usec - usec_only;
-    ret.time_.tv_sec = time_.tv_sec - sec_only - 1;
-  }
-  else
-  {
-    ret.time_.tv_usec = time_.tv_usec - usec_only;
-    ret.time_.tv_sec = time_.tv_sec - sec_only;
-  }
+	Time        ret(0, 0);
+	time_t      sec_only  = usec / 1000000;
+	suseconds_t usec_only = usec % 1000000;
+	if (time_.tv_usec < usec_only) {
+		ret.time_.tv_usec = 1000000 + time_.tv_usec - usec_only;
+		ret.time_.tv_sec  = time_.tv_sec - sec_only - 1;
+	} else {
+		ret.time_.tv_usec = time_.tv_usec - usec_only;
+		ret.time_.tv_sec  = time_.tv_sec - sec_only;
+	}
 
-  return ret;
+	return ret;
 }
-
 
 /** += operator
  * @param t the other time
  * @return reference to this instance
  */
 Time &
-Time::operator+=(const Time& t)
+Time::operator+=(const Time &t)
 {
-  if (time_.tv_usec + t.time_.tv_usec >= 1000000)
-  {
-    time_.tv_usec += t.time_.tv_usec - 1000000;
-    time_.tv_sec  += t.time_.tv_sec + 1;
-  }
-  else
-  {
-    time_.tv_usec += t.time_.tv_usec;
-    time_.tv_sec  += t.time_.tv_sec;
-  }
+	if (time_.tv_usec + t.time_.tv_usec >= 1000000) {
+		time_.tv_usec += t.time_.tv_usec - 1000000;
+		time_.tv_sec += t.time_.tv_sec + 1;
+	} else {
+		time_.tv_usec += t.time_.tv_usec;
+		time_.tv_sec += t.time_.tv_sec;
+	}
 
-  return *this;
+	return *this;
 }
-
 
 /** += operator
  * @param usec microseconds to add
@@ -539,21 +491,17 @@ Time::operator+=(const Time& t)
 Time &
 Time::operator+=(const long int usec)
 {
-  if ( time_.tv_usec + usec >= 1000000 )
-  {
-    //usec + time_.tv_usec might be more than 1 second
-    long int tmp_usec = time_.tv_usec + usec;
-    time_.tv_usec = tmp_usec % 1000000;
-    time_.tv_sec  += tmp_usec / 1000000;
-  }
-  else
-  {
-    time_.tv_usec += usec;
-  }
+	if (time_.tv_usec + usec >= 1000000) {
+		//usec + time_.tv_usec might be more than 1 second
+		long int tmp_usec = time_.tv_usec + usec;
+		time_.tv_usec     = tmp_usec % 1000000;
+		time_.tv_sec += tmp_usec / 1000000;
+	} else {
+		time_.tv_usec += usec;
+	}
 
-  return *this;
+	return *this;
 }
-
 
 /** += operator for double seconds
  * @param sec number of seconds to add
@@ -562,34 +510,29 @@ Time::operator+=(const long int usec)
 Time &
 Time::operator+=(const double sec)
 {
-  time_t sec_only = (time_t)floor(sec);
-  suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
-  if ((time_.tv_usec + usec_only) >= 1000000)
-  {
-    time_.tv_usec += usec_only - 1000000;
-    time_.tv_sec  += sec_only + 1;
-  }
-  else
-  {
-    time_.tv_usec += usec_only;
-    time_.tv_sec  += sec_only;
-  }
+	time_t      sec_only  = (time_t)floor(sec);
+	suseconds_t usec_only = (suseconds_t)roundf((sec - sec_only) * 1000000);
+	if ((time_.tv_usec + usec_only) >= 1000000) {
+		time_.tv_usec += usec_only - 1000000;
+		time_.tv_sec += sec_only + 1;
+	} else {
+		time_.tv_usec += usec_only;
+		time_.tv_sec += sec_only;
+	}
 
-  return *this;
+	return *this;
 }
-
 
 /** -= operator.
  * @param t the other time
  * @return reference to this instance  after subtraction 
  */
 Time &
-Time::operator-=(const Time& t)
+Time::operator-=(const Time &t)
 {
-  *this = *this - t;
-  return *this;
+	*this = *this - t;
+	return *this;
 }
-
 
 /** -= operator.
  * @param sec seconds to subtract
@@ -598,10 +541,9 @@ Time::operator-=(const Time& t)
 Time &
 Time::operator-=(const double sec)
 {
-  *this = *this - sec;
-  return *this;
+	*this = *this - sec;
+	return *this;
 }
-
 
 /** -= operator.
  * @param usec microseconds to subtract
@@ -610,10 +552,9 @@ Time::operator-=(const double sec)
 Time &
 Time::operator-=(const long int usec)
 {
-  *this = *this - usec;
-  return *this;
+	*this = *this - usec;
+	return *this;
 }
-
 
 /** Assign operator.
  * @param t time to assign to this instance
@@ -622,156 +563,139 @@ Time::operator-=(const long int usec)
 Time &
 Time::operator=(const Time &t)
 {
-  time_.tv_sec  = t.time_.tv_sec;
-  time_.tv_usec = t.time_.tv_usec;
-  clock_        = t.clock_;
-  return *this;
+	time_.tv_sec  = t.time_.tv_sec;
+	time_.tv_usec = t.time_.tv_usec;
+	clock_        = t.clock_;
+	return *this;
 }
-
 
 /** Check equality of times.
  * @param t time to compare to
  * @return true if sec and usec of both times are the same, false otherwise
  */
 bool
-Time::operator==(const Time& t) const
+Time::operator==(const Time &t) const
 {
-  return (time_.tv_sec == t.time_.tv_sec) &&
-         (time_.tv_usec == t.time_.tv_usec);
+	return (time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec == t.time_.tv_usec);
 }
-
 
 /** Check equality of times.
  * @param t time to compare to
  * @return true if sec and usec of both times are the same, false otherwise
  */
 bool
-Time::operator==(const Time* t) const
+Time::operator==(const Time *t) const
 {
-  return (time_.tv_sec == t->time_.tv_sec) &&
-         (time_.tv_usec == t->time_.tv_usec);
+	return (time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec == t->time_.tv_usec);
 }
-
 
 /** Check inequality of times.
  * @param t time to compare to
  * @return true if sec or usec of both times are different, false otherwise
  */
 bool
-Time::operator!=(const Time& t) const
+Time::operator!=(const Time &t) const
 {
-  return (time_.tv_sec != t.time_.tv_sec) ||
-         (time_.tv_usec != t.time_.tv_usec);
+	return (time_.tv_sec != t.time_.tv_sec) || (time_.tv_usec != t.time_.tv_usec);
 }
-
 
 /** Check inequality of times.
  * @param t time to compare to
  * @return true if sec or usec of both times are different, false otherwise
  */
 bool
-Time::operator!=(const Time* t) const
+Time::operator!=(const Time *t) const
 {
-  return (time_.tv_sec != t->time_.tv_sec) ||
-         (time_.tv_usec != t->time_.tv_usec);
+	return (time_.tv_sec != t->time_.tv_sec) || (time_.tv_usec != t->time_.tv_usec);
 }
-
 
 /** Greater than operator.
  * @param t time to compare to
  * @return true if this time is greater than @p t, false otherwise
  */
 bool
-Time::operator>(const Time& t) const
+Time::operator>(const Time &t) const
 {
-  return (time_.tv_sec > t.time_.tv_sec) ||
-    ((time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec > t.time_.tv_usec));
+	return (time_.tv_sec > t.time_.tv_sec)
+	       || ((time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec > t.time_.tv_usec));
 }
-
 
 /** Greater than operator.
  * @param t time to compare to
  * @return true if this time is greater than @p t, false otherwise
  */
 bool
-Time::operator>(const Time* t) const
+Time::operator>(const Time *t) const
 {
-  return (time_.tv_sec > t->time_.tv_sec) ||
-    ((time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec > t->time_.tv_usec));
+	return (time_.tv_sec > t->time_.tv_sec)
+	       || ((time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec > t->time_.tv_usec));
 }
-
 
 /** Greater than or equal to operator.
  * @param t time to compare to
  * @return true if this time is greater than @p t, false otherwise
  */
 bool
-Time::operator>=(const Time& t) const
+Time::operator>=(const Time &t) const
 {
-  return (time_.tv_sec > t.time_.tv_sec) ||
-    ((time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec >= t.time_.tv_usec));
+	return (time_.tv_sec > t.time_.tv_sec)
+	       || ((time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec >= t.time_.tv_usec));
 }
-
 
 /** Greater than or equal to operator.
  * @param t time to compare to
  * @return true if this time is greater than @p t, false otherwise
  */
 bool
-Time::operator>=(const Time* t) const
+Time::operator>=(const Time *t) const
 {
-  return (time_.tv_sec > t->time_.tv_sec) ||
-    ((time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec >= t->time_.tv_usec));
+	return (time_.tv_sec > t->time_.tv_sec)
+	       || ((time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec >= t->time_.tv_usec));
 }
-
 
 /** Less than operator.
  * @param t time to compare to
  * @return true if this time is less than @p t, false otherwise
  */
 bool
-Time::operator<(const Time& t) const
+Time::operator<(const Time &t) const
 {
-  return (time_.tv_sec < t.time_.tv_sec) ||
-    ((time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec < t.time_.tv_usec));
+	return (time_.tv_sec < t.time_.tv_sec)
+	       || ((time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec < t.time_.tv_usec));
 }
-
 
 /** Less than operator.
  * @param t time to compare to
  * @return true if this time is less than @p t, false otherwise
  */
 bool
-Time::operator<(const Time* t) const
+Time::operator<(const Time *t) const
 {
-  return (time_.tv_sec < t->time_.tv_sec) ||
-    ((time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec < t->time_.tv_usec));
+	return (time_.tv_sec < t->time_.tv_sec)
+	       || ((time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec < t->time_.tv_usec));
 }
-
 
 /** Less than or equal to operator.
  * @param t time to compare to
  * @return true if this time is less than @p t, false otherwise
  */
 bool
-Time::operator<=(const Time& t) const
+Time::operator<=(const Time &t) const
 {
-  return (time_.tv_sec < t.time_.tv_sec) ||
-    ((time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec <= t.time_.tv_usec));
+	return (time_.tv_sec < t.time_.tv_sec)
+	       || ((time_.tv_sec == t.time_.tv_sec) && (time_.tv_usec <= t.time_.tv_usec));
 }
-
 
 /** Less than or equal to operator.
  * @param t time to compare to
  * @return true if this time is less than @p t, false otherwise
  */
 bool
-Time::operator<=(const Time* t) const
+Time::operator<=(const Time *t) const
 {
-  return (time_.tv_sec < t->time_.tv_sec) ||
-    ((time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec <= t->time_.tv_usec));
+	return (time_.tv_sec < t->time_.tv_sec)
+	       || ((time_.tv_sec == t->time_.tv_sec) && (time_.tv_usec <= t->time_.tv_usec));
 }
-
 
 /** Set this time to the current time.
  * @return reference to this instance
@@ -779,14 +703,13 @@ Time::operator<=(const Time* t) const
 Time &
 Time::stamp()
 {
-  if ( NULL != clock_ ) {
-    clock_->get_time(&time_);
-  } else {
-    throw Exception("Clock not set, cannot stamp time");
-  }
-  return *this;
+	if (NULL != clock_) {
+		clock_->get_time(&time_);
+	} else {
+		throw Exception("Clock not set, cannot stamp time");
+	}
+	return *this;
 }
-
 
 /** Set this time to the current system time.
  * This bypasses any possibly registered time source. Use with care and only
@@ -796,14 +719,13 @@ Time::stamp()
 Time &
 Time::stamp_systime()
 {
-  if ( NULL != clock_ ) {
-    clock_->get_systime(&time_);
-  } else {
-    throw Exception("Clock not set, cannot stamp time (systime)");
-  }
-  return *this;
+	if (NULL != clock_) {
+		clock_->get_systime(&time_);
+	} else {
+		throw Exception("Clock not set, cannot stamp time (systime)");
+	}
+	return *this;
 }
-
 
 /** Wait (sleep) for this time.
  * This waits for as much time as this instance provides. Note that you have to
@@ -813,20 +735,19 @@ Time::stamp_systime()
 void
 Time::wait()
 {
-  Time until, now;
-  until += *this;
+	Time until, now;
+	until += *this;
 
-  // we want to release run status at least shortly
-  usleep(0);
+	// we want to release run status at least shortly
+	usleep(0);
 
-  long int remaining_usec = (until - now).in_usec();
-  while ( remaining_usec > 0 ) {
-    usleep(remaining_usec);
-    now.stamp();
-    remaining_usec = (until - now).in_usec();
-  }
+	long int remaining_usec = (until - now).in_usec();
+	while (remaining_usec > 0) {
+		usleep(remaining_usec);
+		now.stamp();
+		remaining_usec = (until - now).in_usec();
+	}
 }
-
 
 /** Wait (sleep) for this system time.
  * This waits for as much time as this instance provides. Unlike wait() this
@@ -838,22 +759,22 @@ Time::wait()
 void
 Time::wait_systime()
 {
-  Time until, now;
+	Time until, now;
 
-  clock_->get_systime(until);
-  until += *this;
+	clock_->get_systime(until);
+	until += *this;
 
-  clock_->get_systime(now);
+	clock_->get_systime(now);
 
-  // we want to release run status at least shortly
-  usleep(0);
+	// we want to release run status at least shortly
+	usleep(0);
 
-  long int remaining_usec = (until - now).in_usec();
-  while ( remaining_usec > 0 ) {
-    usleep(remaining_usec);
-    clock_->get_systime(now);
-    remaining_usec = (until - now).in_usec();
-  }
+	long int remaining_usec = (until - now).in_usec();
+	while (remaining_usec > 0) {
+		usleep(remaining_usec);
+		clock_->get_systime(now);
+		remaining_usec = (until - now).in_usec();
+	}
 }
 
 /** Output function.
@@ -868,26 +789,26 @@ Time::wait_systime()
 const char *
 Time::str(bool utc) const
 {
-  // allocate time string if not done yet
-  if ( ! timestr_ )  timestr_ = (char *)malloc(TIMESTR_SIZE);
+	// allocate time string if not done yet
+	if (!timestr_)
+		timestr_ = (char *)malloc(TIMESTR_SIZE);
 
-  // heuristic to distinguish times and time ranges
-  if (time_.tv_sec < 1000000000) {
-    snprintf(timestr_, TIMESTR_SIZE, "%li:%li", time_.tv_sec, (long)time_.tv_usec);
-  } else {
-    tm time_tm;
-    if ( utc ) {
-      gmtime_r( &(time_.tv_sec), &time_tm );
-    } else {
-      localtime_r( &(time_.tv_sec), &time_tm );
-    }
-    asctime_r(&time_tm, timestr_);
-    timestr_[strlen(timestr_) - 1] = 0;
-  }
+	// heuristic to distinguish times and time ranges
+	if (time_.tv_sec < 1000000000) {
+		snprintf(timestr_, TIMESTR_SIZE, "%li:%li", time_.tv_sec, (long)time_.tv_usec);
+	} else {
+		tm time_tm;
+		if (utc) {
+			gmtime_r(&(time_.tv_sec), &time_tm);
+		} else {
+			localtime_r(&(time_.tv_sec), &time_tm);
+		}
+		asctime_r(&time_tm, timestr_);
+		timestr_[strlen(timestr_) - 1] = 0;
+	}
 
-  return timestr_;
+	return timestr_;
 }
-
 
 /** Output function.
  * This is the thread-safe version of str().
@@ -897,19 +818,19 @@ Time::str(bool utc) const
 void
 Time::str_r(char *s, bool utc)
 {
-  // heuristic to distinguish times and time ranges
-  if (time_.tv_sec < 1000000000) {
-    snprintf(s, TIMESTR_SIZE, "%li:%li", time_.tv_sec, (long)time_.tv_usec);
-  } else {
-    tm time_tm;
-    if ( utc ) {
-      gmtime_r( &(time_.tv_sec), &time_tm );
-    } else {
-      localtime_r( &(time_.tv_sec), &time_tm );
-    }
-    asctime_r(&time_tm, s);
-    s[strlen(s) - 1] = 0;
-  }
+	// heuristic to distinguish times and time ranges
+	if (time_.tv_sec < 1000000000) {
+		snprintf(s, TIMESTR_SIZE, "%li:%li", time_.tv_sec, (long)time_.tv_usec);
+	} else {
+		tm time_tm;
+		if (utc) {
+			gmtime_r(&(time_.tv_sec), &time_tm);
+		} else {
+			localtime_r(&(time_.tv_sec), &time_tm);
+		}
+		asctime_r(&time_tm, s);
+		s[strlen(s) - 1] = 0;
+	}
 }
 
 } // end namespace fawkes

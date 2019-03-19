@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  digest.cpp - Interface config parser
  *
@@ -22,9 +22,9 @@
 
 #include <interfaces/generator/digest.h>
 #include <interfaces/generator/exceptions.h>
+#include <openssl/evp.h>
 
 #include <cstdio>
-#include <openssl/evp.h>
 
 #define FILE_STEP 1024
 
@@ -36,58 +36,55 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-
 /** Constructor
  * @param config_filename file name of config (interface template)
  */
 InterfaceDigest::InterfaceDigest(std::string config_filename)
 {
-  digest = NULL;
+	digest = NULL;
 
-  EVP_MD_CTX *ctx = EVP_MD_CTX_create();
-  if ( ! EVP_DigestInit(ctx, EVP_md5())) {
-    EVP_MD_CTX_destroy(ctx);
-    throw Exception("Could not initialize digest context");
-  }
+	EVP_MD_CTX *ctx = EVP_MD_CTX_create();
+	if (!EVP_DigestInit(ctx, EVP_md5())) {
+		EVP_MD_CTX_destroy(ctx);
+		throw Exception("Could not initialize digest context");
+	}
 
-  FILE *f = fopen(config_filename.c_str(), "r");
-  void *buf = malloc(FILE_STEP);
-  while ( ! feof(f) && ! ferror(f) ) {
-    size_t rb;
-    if ((rb = fread(buf, 1, FILE_STEP, f)) > 0) {
-      if ( ! EVP_DigestUpdate(ctx, buf, rb) ) {
+	FILE *f   = fopen(config_filename.c_str(), "r");
+	void *buf = malloc(FILE_STEP);
+	while (!feof(f) && !ferror(f)) {
+		size_t rb;
+		if ((rb = fread(buf, 1, FILE_STEP, f)) > 0) {
+			if (!EVP_DigestUpdate(ctx, buf, rb)) {
+				fclose(f);
+				EVP_MD_CTX_destroy(ctx);
+				throw Exception("Failed to update digest");
+			}
+		}
+	}
+	if (ferror(f)) {
+		fclose(f);
+		EVP_MD_CTX_destroy(ctx);
+		throw Exception("Failure while reading the file");
+	}
 	fclose(f);
+
+	digest_size = EVP_MD_CTX_size(ctx);
+	digest      = new unsigned char[digest_size];
+
+	if (!EVP_DigestFinal(ctx, digest, NULL)) {
+		delete[] digest;
+		digest = NULL;
+		EVP_MD_CTX_destroy(ctx);
+		throw Exception("Could not finalize digest");
+	}
 	EVP_MD_CTX_destroy(ctx);
-	throw Exception("Failed to update digest");
-      }
-    }
-  }
-  if ( ferror(f) ) {
-    fclose(f);
-    EVP_MD_CTX_destroy(ctx);
-    throw Exception("Failure while reading the file");
-  }
-  fclose(f);
-
-  digest_size=EVP_MD_CTX_size(ctx);
-  digest = new unsigned char[digest_size];
-
-  if ( ! EVP_DigestFinal(ctx, digest, NULL) ) {
-    delete[] digest;
-    digest = NULL;
-    EVP_MD_CTX_destroy(ctx);
-    throw Exception("Could not finalize digest");
-  }
-  EVP_MD_CTX_destroy(ctx);
 }
-
 
 /** Destructor. */
 InterfaceDigest::~InterfaceDigest()
 {
-  delete[] digest;
+	delete[] digest;
 }
-
 
 /** Get hash.
  * @return hash
@@ -95,9 +92,8 @@ InterfaceDigest::~InterfaceDigest()
 const unsigned char *
 InterfaceDigest::get_hash()
 {
-  return digest;
+	return digest;
 }
-
 
 /** Get hash size.
  * @return hash size
@@ -105,5 +101,5 @@ InterfaceDigest::get_hash()
 size_t
 InterfaceDigest::get_hash_size()
 {
-  return digest_size;
+	return digest_size;
 }

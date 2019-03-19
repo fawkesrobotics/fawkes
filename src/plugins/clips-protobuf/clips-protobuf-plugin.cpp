@@ -21,6 +21,7 @@
  */
 
 #include "clips-protobuf-thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -30,16 +31,15 @@ using namespace fawkes;
  */
 class ClipsProtobufPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit ClipsProtobufPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new ClipsProtobufThread());
-  }
+	explicit ClipsProtobufPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new ClipsProtobufThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("Protobuf communication for CLIPS")
 EXPORT_PLUGIN(ClipsProtobufPlugin)

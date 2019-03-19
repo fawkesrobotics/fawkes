@@ -25,44 +25,43 @@
 #include <core/exception.h>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
 class TransformException : public fawkes::Exception
 {
- public:
-  TransformException();
+public:
+	TransformException();
 };
 
 class ConnectivityException : public TransformException
 {
- public:
-  ConnectivityException(const char *format, ...);
+public:
+	ConnectivityException(const char *format, ...);
 };
 
 class LookupException : public TransformException
 {
- public:
-  LookupException(const char *format, ...);
+public:
+	LookupException(const char *format, ...);
 };
 
 class ExtrapolationException : public TransformException
 {
- public:
-  ExtrapolationException(const char *format, ...);
+public:
+	ExtrapolationException(const char *format, ...);
 };
 
 class InvalidArgumentException : public TransformException
 {
- public:
-  InvalidArgumentException(const char *format, ...);
+public:
+	InvalidArgumentException(const char *format, ...);
 };
 
 class DisabledException : public TransformException
 {
- public:
-  DisabledException(const char *format, ...);
+public:
+	DisabledException(const char *format, ...);
 };
-
 
 } // end namespace tf
 } // end namespace fawkes

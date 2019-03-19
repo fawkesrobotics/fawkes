@@ -23,34 +23,35 @@
 #ifndef _PLUGINS_NAO_MOTION_STANDUP_TASK_H_
 #define _PLUGINS_NAO_MOTION_STANDUP_TASK_H_
 
-#include <interfaces/HumanoidMotionInterface.h>
-
-#include <althread/altask.h>
 #include <alcore/alptr.h>
 #include <alproxies/almotionproxy.h>
+#include <althread/altask.h>
+#include <interfaces/HumanoidMotionInterface.h>
 
 class NaoQiMotionStandupTask : public AL::ALTask
 {
- public:
-  NaoQiMotionStandupTask(AL::ALPtr<AL::ALMotionProxy> almotion,
-			 fawkes::HumanoidMotionInterface::StandupEnum from_pos,
-			 float accel_x, float accel_y, float accel_z);
-  virtual ~NaoQiMotionStandupTask();
+public:
+	NaoQiMotionStandupTask(AL::ALPtr<AL::ALMotionProxy>                 almotion,
+	                       fawkes::HumanoidMotionInterface::StandupEnum from_pos,
+	                       float                                        accel_x,
+	                       float                                        accel_y,
+	                       float                                        accel_z);
+	virtual ~NaoQiMotionStandupTask();
 
-  virtual void run();
+	virtual void run();
 
- private: /* methods */
-  void goto_start_pos();
-  void standup_from_back();
-  void standup_from_front();
+private: /* methods */
+	void goto_start_pos();
+	void standup_from_back();
+	void standup_from_front();
 
- private:
-  AL::ALPtr<AL::ALMotionProxy>  almotion_;
-  fawkes::HumanoidMotionInterface::StandupEnum from_pos_;
+private:
+	AL::ALPtr<AL::ALMotionProxy>                 almotion_;
+	fawkes::HumanoidMotionInterface::StandupEnum from_pos_;
 
-  float accel_x_;
-  float accel_y_;
-  float accel_z_;
+	float accel_x_;
+	float accel_y_;
+	float accel_z_;
 };
 
 #endif

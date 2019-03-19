@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <fvclassifiers/qualifiers.h>
 #include <core/exceptions/software.h>
+#include <fvclassifiers/qualifiers.h>
 #include <fvutils/color/yuv.h>
 
 #include <cstdlib>
@@ -40,11 +40,11 @@ namespace firevision {
  */
 Qualifier::Qualifier()
 {
-  buffer_     = 0;
-  width_      = 0;
-  height_     = 0;
-  size_       = 0;
-  colorspace_ = CS_UNKNOWN;
+	buffer_     = 0;
+	width_      = 0;
+	height_     = 0;
+	size_       = 0;
+	colorspace_ = CS_UNKNOWN;
 }
 
 /** Constructor.
@@ -53,18 +53,19 @@ Qualifier::Qualifier()
  * @param height of the image
  * @param colorspace the colorspace in action
  */
-Qualifier::Qualifier(unsigned char* buffer, unsigned int width,
-                     unsigned int height, colorspace_t colorspace)
+Qualifier::Qualifier(unsigned char *buffer,
+                     unsigned int   width,
+                     unsigned int   height,
+                     colorspace_t   colorspace)
 {
-  if (!buffer)
-    throw fawkes::NullPointerException("Qualifier: the buffer may not be null!");
-  if (!width || !height)
-    throw fawkes::IllegalArgumentException("Qualifier: width and height may not be 0!");
+	if (!buffer)
+		throw fawkes::NullPointerException("Qualifier: the buffer may not be null!");
+	if (!width || !height)
+		throw fawkes::IllegalArgumentException("Qualifier: width and height may not be 0!");
 
-  set_buffer(buffer, width, height);
-  colorspace_ = colorspace;
+	set_buffer(buffer, width, height);
+	colorspace_ = colorspace;
 }
-
 
 /** Destructor.
  */
@@ -75,10 +76,10 @@ Qualifier::~Qualifier()
 /** Get buffer.
  * @return pointer to buffer
  */
-unsigned char*
+unsigned char *
 Qualifier::get_buffer()
 {
-  return buffer_;
+	return buffer_;
 }
 
 /** buffer setter
@@ -87,23 +88,19 @@ Qualifier::get_buffer()
  * @param height of the image (if 0 the param will be ignored)
  */
 void
-Qualifier::set_buffer(unsigned char* buffer, unsigned int width,
-                      unsigned int height)
+Qualifier::set_buffer(unsigned char *buffer, unsigned int width, unsigned int height)
 {
-  buffer_ = buffer;
+	buffer_ = buffer;
 
-  if (width)
-    width_  = width;
+	if (width)
+		width_ = width;
 
-  if (height)
-    height_ = height;
+	if (height)
+		height_ = height;
 
-  if (width || height)
-    size_ = width_ * height_;
+	if (width || height)
+		size_ = width_ * height_;
 }
-
-
-
 
 /** Get colorspace.
  * @return colorspace
@@ -111,9 +108,8 @@ Qualifier::set_buffer(unsigned char* buffer, unsigned int width,
 colorspace_t
 Qualifier::get_colorspace()
 {
-  return colorspace_;
+	return colorspace_;
 }
-
 
 /** colorspace setter
  * @param colorspace the colorspace in action
@@ -121,13 +117,8 @@ Qualifier::get_colorspace()
 void
 Qualifier::set_colorspace(colorspace_t colorspace)
 {
-  colorspace_ = colorspace;
+	colorspace_ = colorspace;
 }
-
-
-
-
-
 
 /** @class LumaQualifier qualifiers.h <apps/nao_loc/qualifiers.h>
  * LumaQualifier for a single pixel.
@@ -136,19 +127,19 @@ Qualifier::set_colorspace(colorspace_t colorspace)
  * @author Christof Rath
  */
 
-
 /** Constructor.
  * @param buffer containing the image
  * @param width of the image
  * @param height of the image
  * @param colorspace the colorspace in action
  */
-LumaQualifier::LumaQualifier(unsigned char* buffer, unsigned int width,
-                             unsigned int height, colorspace_t colorspace)
- :Qualifier(buffer, width, height, colorspace)
+LumaQualifier::LumaQualifier(unsigned char *buffer,
+                             unsigned int   width,
+                             unsigned int   height,
+                             colorspace_t   colorspace)
+: Qualifier(buffer, width, height, colorspace)
 {
 }
-
 
 /** Getter.
  * @param pixel the pixel of interest
@@ -157,18 +148,19 @@ LumaQualifier::LumaQualifier(unsigned char* buffer, unsigned int width,
 int
 LumaQualifier::get(upoint_t pixel)
 {
-  if (pixel.x >= width_)
-    throw fawkes::OutOfBoundsException("LumaQualifier: requested Pixel is out of bounds!", pixel.x, 0, width_);
-  if (pixel.y >= height_)
-    throw fawkes::OutOfBoundsException("LumaQualifier: requested Pixel is out of bounds!", pixel.y, 0, height_);
+	if (pixel.x >= width_)
+		throw fawkes::OutOfBoundsException("LumaQualifier: requested Pixel is out of bounds!",
+		                                   pixel.x,
+		                                   0,
+		                                   width_);
+	if (pixel.y >= height_)
+		throw fawkes::OutOfBoundsException("LumaQualifier: requested Pixel is out of bounds!",
+		                                   pixel.y,
+		                                   0,
+		                                   height_);
 
-  return buffer_[pixel.y * width_ + pixel.x];
+	return buffer_[pixel.y * width_ + pixel.x];
 }
-
-
-
-
-
 
 /** @class SkyblueQualifier qualifiers.h <apps/nao_loc/qualifiers.h>
  * SkyblueQualifier for a single pixel.
@@ -183,12 +175,13 @@ LumaQualifier::get(upoint_t pixel)
  * @param height of the image
  * @param colorspace the colorspace in action
  */
-SkyblueQualifier::SkyblueQualifier(unsigned char* buffer, unsigned int width,
-           unsigned int height, colorspace_t colorspace)
- :Qualifier(buffer, width, height, colorspace)
+SkyblueQualifier::SkyblueQualifier(unsigned char *buffer,
+                                   unsigned int   width,
+                                   unsigned int   height,
+                                   colorspace_t   colorspace)
+: Qualifier(buffer, width, height, colorspace)
 {
 }
-
 
 /** Getter.
  * @param pixel the pixel of interest
@@ -197,25 +190,26 @@ SkyblueQualifier::SkyblueQualifier(unsigned char* buffer, unsigned int width,
 int
 SkyblueQualifier::get(upoint_t pixel)
 {
-  if (pixel.x >= width_)
-    throw fawkes::OutOfBoundsException("SkyblueQualifier: requested Pixel is out of bounds!", pixel.x, 0, width_);
-  if (pixel.y >= height_)
-    throw fawkes::OutOfBoundsException("SkyblueQualifier: requested Pixel is out of bounds!", pixel.y, 0, height_);
+	if (pixel.x >= width_)
+		throw fawkes::OutOfBoundsException("SkyblueQualifier: requested Pixel is out of bounds!",
+		                                   pixel.x,
+		                                   0,
+		                                   width_);
+	if (pixel.y >= height_)
+		throw fawkes::OutOfBoundsException("SkyblueQualifier: requested Pixel is out of bounds!",
+		                                   pixel.y,
+		                                   0,
+		                                   height_);
 
-  unsigned int u_addr = size_ + (pixel.y * width_ + pixel.x) / 2;
-  unsigned char u = buffer_[u_addr];
-  unsigned char v = 255 - buffer_[u_addr + size_ / 2];
+	unsigned int  u_addr = size_ + (pixel.y * width_ + pixel.x) / 2;
+	unsigned char u      = buffer_[u_addr];
+	unsigned char v      = 255 - buffer_[u_addr + size_ / 2];
 
-  if ((u < threshold_) || (v < threshold_))
-    return 0;
+	if ((u < threshold_) || (v < threshold_))
+		return 0;
 
-  return u + v;
+	return u + v;
 }
-
-
-
-
-
 
 /** @class YellowQualifier qualifiers.h <apps/nao_loc/qualifiers.h>
  * YellowQualifier for a single pixel.
@@ -230,12 +224,13 @@ SkyblueQualifier::get(upoint_t pixel)
  * @param height of the image
  * @param colorspace the colorspace in action
  */
-YellowQualifier::YellowQualifier(unsigned char* buffer, unsigned int width,
-         unsigned int height, colorspace_t colorspace)
- :Qualifier(buffer, width, height, colorspace)
+YellowQualifier::YellowQualifier(unsigned char *buffer,
+                                 unsigned int   width,
+                                 unsigned int   height,
+                                 colorspace_t   colorspace)
+: Qualifier(buffer, width, height, colorspace)
 {
 }
-
 
 /** Getter.
  * @param pixel the pixel of interest
@@ -244,21 +239,27 @@ YellowQualifier::YellowQualifier(unsigned char* buffer, unsigned int width,
 int
 YellowQualifier::get(upoint_t pixel)
 {
-  if (pixel.x >= width_)
-    throw fawkes::OutOfBoundsException("YellowQualifier: requested Pixel is out of bounds!", pixel.x, 0, width_);
-  if (pixel.y >= height_)
-    throw fawkes::OutOfBoundsException("YellowQualifier: requested Pixel is out of bounds!", pixel.y, 0, height_);
+	if (pixel.x >= width_)
+		throw fawkes::OutOfBoundsException("YellowQualifier: requested Pixel is out of bounds!",
+		                                   pixel.x,
+		                                   0,
+		                                   width_);
+	if (pixel.y >= height_)
+		throw fawkes::OutOfBoundsException("YellowQualifier: requested Pixel is out of bounds!",
+		                                   pixel.y,
+		                                   0,
+		                                   height_);
 
-  unsigned int y_addr = (pixel.y * width_ + pixel.x);
-  unsigned int u_addr = size_ + y_addr / 2;
-  unsigned char y = buffer_[y_addr];
-  unsigned int u = (255 - buffer_[u_addr]) * y;
-  unsigned int v = (255 - abs(127 - buffer_[u_addr + size_ / 2]) * 2) * y;
+	unsigned int  y_addr = (pixel.y * width_ + pixel.x);
+	unsigned int  u_addr = size_ + y_addr / 2;
+	unsigned char y      = buffer_[y_addr];
+	unsigned int  u      = (255 - buffer_[u_addr]) * y;
+	unsigned int  v      = (255 - abs(127 - buffer_[u_addr + size_ / 2]) * 2) * y;
 
-  if ((u <= threshold_) || (v <= threshold_))
-    return 0;
+	if ((u <= threshold_) || (v <= threshold_))
+		return 0;
 
-  return (u + v);
+	return (u + v);
 }
 
 } // end namespace firevision

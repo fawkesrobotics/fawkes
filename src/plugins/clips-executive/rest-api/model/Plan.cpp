@@ -14,9 +14,9 @@
 #include "Plan.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ Plan::Plan(const std::string &json)
 	from_json(json);
 }
 
-Plan::Plan(const rapidjson::Value& v)
+Plan::Plan(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ Plan::to_json(bool pretty) const
 }
 
 void
-Plan::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+Plan::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -92,13 +92,12 @@ Plan::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	}
 	rapidjson::Value v_actions(rapidjson::kArrayType);
 	v_actions.Reserve(actions_.size(), allocator);
-	for (const auto & e : actions_) {
+	for (const auto &e : actions_) {
 		rapidjson::Value v(rapidjson::kObjectType);
 		e->to_json_value(d, v);
 		v_actions.PushBack(v, allocator);
 	}
 	v.AddMember("actions", v_actions, allocator);
-
 }
 
 void
@@ -111,7 +110,7 @@ Plan::from_json(const std::string &json)
 }
 
 void
-Plan::from_json_value(const rapidjson::Value& d)
+Plan::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -129,29 +128,32 @@ Plan::from_json_value(const rapidjson::Value& d)
 		cost_ = d["cost"].GetFloat();
 	}
 	if (d.HasMember("actions") && d["actions"].IsArray()) {
-		const rapidjson::Value& a = d["actions"];
-		actions_ = std::vector<std::shared_ptr<PlanAction>>{};
-;
+		const rapidjson::Value &a = d["actions"];
+		actions_                  = std::vector<std::shared_ptr<PlanAction>>{};
+		;
 		actions_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			std::shared_ptr<PlanAction> nv{new PlanAction()};
 			nv->from_json_value(v);
 			actions_.push_back(std::move(nv));
 		}
 	}
-
 }
 
 void
 Plan::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! id_)  missing.push_back("id");
-	if (! goal_id_)  missing.push_back("goal-id");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!id_)
+		missing.push_back("id");
+	if (!goal_id_)
+		missing.push_back("goal-id");
 	for (size_t i = 0; i < actions_.size(); ++i) {
-		if (! actions_[i]) {
+		if (!actions_[i]) {
 			missing.push_back("actions[" + std::to_string(i) + "]");
 		} else {
 			try {
@@ -164,14 +166,12 @@ Plan::validate(bool subcall) const
 		}
 	}
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "Plan is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "Plan is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

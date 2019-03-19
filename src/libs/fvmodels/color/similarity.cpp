@@ -25,24 +25,28 @@
  */
 
 #include "similarity.h"
-#include <stddef.h>
-#include <fvutils/color/yuv.h>
+
 #include <fvutils/color/threshold.h>
+#include <fvutils/color/yuv.h>
+
 #include <math.h>
+#include <stddef.h>
 
-
-namespace firevision
-{
+namespace firevision {
 
 /** @class ColorModelSimilarity <fvmodels/color/similarity.cpp>
  * Matches colors that are similar to given reference colors.
  * @author Victor Mataré
  */
 
-ColorModelSimilarity::ColorModelSimilarity() {}
+ColorModelSimilarity::ColorModelSimilarity()
+{
+}
 
-const char * ColorModelSimilarity::get_name() {
-  return "ColorModelSimilarity";
+const char *
+ColorModelSimilarity::get_name()
+{
+	return "ColorModelSimilarity";
 }
 
 /** Determine the color class of a given YUV value.
@@ -55,48 +59,65 @@ const char * ColorModelSimilarity::get_name() {
  * @param v Chroma V
  * @return The color_t value from the matching color class, or C_OTHER if no match was found.
  */
-color_t ColorModelSimilarity::determine(unsigned int y, unsigned int u, unsigned int v) const {
-  for(std::vector<color_class_t *>::const_iterator it = color_classes_.begin();
-      it != color_classes_.end(); it++) {
-    if((*it)->luma_threshold >= 0) {
-      if (is_similar_y(y, u - 0x80, v - 0x80,
-        (*it)->ref_y, (*it)->ref_u, (*it)->ref_v, (*it)->ref_length,
-        (*it)->chroma_threshold, (*it)->saturation_threshold, (*it)->luma_threshold)) {
-        return (*it)->result;
-      }
-    }
-    else {
-      if(is_similar(u - 0x80, v - 0x80,
-        (*it)->ref_u, (*it)->ref_v, (*it)->ref_length,
-        (*it)->chroma_threshold, (*it)->saturation_threshold)) {
-        return (*it)->result;
-      }
-    }
-  }
-  return C_OTHER;
+color_t
+ColorModelSimilarity::determine(unsigned int y, unsigned int u, unsigned int v) const
+{
+	for (std::vector<color_class_t *>::const_iterator it = color_classes_.begin();
+	     it != color_classes_.end();
+	     it++) {
+		if ((*it)->luma_threshold >= 0) {
+			if (is_similar_y(y,
+			                 u - 0x80,
+			                 v - 0x80,
+			                 (*it)->ref_y,
+			                 (*it)->ref_u,
+			                 (*it)->ref_v,
+			                 (*it)->ref_length,
+			                 (*it)->chroma_threshold,
+			                 (*it)->saturation_threshold,
+			                 (*it)->luma_threshold)) {
+				return (*it)->result;
+			}
+		} else {
+			if (is_similar(u - 0x80,
+			               v - 0x80,
+			               (*it)->ref_u,
+			               (*it)->ref_v,
+			               (*it)->ref_length,
+			               (*it)->chroma_threshold,
+			               (*it)->saturation_threshold)) {
+				return (*it)->result;
+			}
+		}
+	}
+	return C_OTHER;
 }
 
 /** Add a color to be recognized by this colormodel.
  * @param color_class The ColorModelSimilarity::color_class_t that will be returned by
  * ColorModelSimilarity::determine on a match ColorModelSimilarity::color_class_t
  */
-void ColorModelSimilarity::add_color(color_class_t *color_class) {
-  color_classes_.push_back(color_class);
+void
+ColorModelSimilarity::add_color(color_class_t *color_class)
+{
+	color_classes_.push_back(color_class);
 }
 
 /** Add multiple colors to this colormodel.
  * @param color_classes A list of
  */
-void ColorModelSimilarity::add_colors(std::vector<color_class_t *> color_classes) {
-  color_classes_.insert(color_classes_.end(), color_classes.begin(), color_classes.end());
+void
+ColorModelSimilarity::add_colors(std::vector<color_class_t *> color_classes)
+{
+	color_classes_.insert(color_classes_.end(), color_classes.begin(), color_classes.end());
 }
 
 /** Remove all colors from this colormodel.
  */
-void ColorModelSimilarity::delete_colors() {
-  color_classes_.clear();
+void
+ColorModelSimilarity::delete_colors()
+{
+	color_classes_.clear();
 }
 
 } /* namespace firevision */
-
-

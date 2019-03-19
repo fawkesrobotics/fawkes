@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "pddl_robot_memory_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -33,15 +33,14 @@ using namespace fawkes;
  */
 class PddlRobotMemoryPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor
+public:
+	/** Constructor
    * @param config Fakwes configuration
    */
-  explicit PddlRobotMemoryPlugin(Configuration *config)
-     : Plugin(config)
-  {
-     thread_list.push_back(new PddlRobotMemoryThread());
-  }
+	explicit PddlRobotMemoryPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new PddlRobotMemoryThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Generate PDDL files from the robot memory")

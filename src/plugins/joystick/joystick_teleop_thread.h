@@ -22,86 +22,89 @@
 #ifndef _PLUGINS_JOYSTICK_JOYSTICK_TELEOP_THREAD_H_
 #define _PLUGINS_JOYSTICK_JOYSTICK_TELEOP_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
-#include <string>
 #include <cfloat>
+#include <string>
 
 namespace fawkes {
-  class MotorInterface;
-  class JoystickInterface;
-  class Laser360Interface;
-}
+class MotorInterface;
+class JoystickInterface;
+class Laser360Interface;
+} // namespace fawkes
 
-class JoystickTeleOpThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+class JoystickTeleOpThread : public fawkes::Thread,
+                             public fawkes::BlockedTimingAspect,
+                             public fawkes::LoggingAspect,
+                             public fawkes::ConfigurableAspect,
+                             public fawkes::BlackBoardAspect
 {
- public:
-  JoystickTeleOpThread();
+public:
+	JoystickTeleOpThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual bool prepare_finalize_user();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual bool prepare_finalize_user();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void stop();
-  bool is_area_free(float theta);
-  void send_transrot(float vx, float vy, float omega);
+private:
+	void stop();
+	bool is_area_free(float theta);
+	void send_transrot(float vx, float vy, float omega);
 
- private:
-  fawkes::MotorInterface     *motor_if_;
-  fawkes::JoystickInterface  *joystick_if_;
-  fawkes::Laser360Interface  *laser_if_;
+private:
+	fawkes::MotorInterface *   motor_if_;
+	fawkes::JoystickInterface *joystick_if_;
+	fawkes::Laser360Interface *laser_if_;
 
-  unsigned int cfg_axis_forward_;
-  unsigned int cfg_axis_sideward_;
-  unsigned int cfg_axis_rotation_;
-  float        cfg_axis_threshold_;
-  bool         cfg_deadman_use_axis_;
-  unsigned int cfg_deadman_axis_;
-  float        cfg_deadman_ax_thresh_;
-  unsigned int cfg_deadman_butmask_;
-  bool         cfg_drive_mode_use_axis_;
-  unsigned int cfg_drive_mode_axis_;
-  float        cfg_drive_mode_ax_thresh_;
-  unsigned int cfg_drive_mode_butmask_;
-  float        cfg_normal_max_vx_;
-  float        cfg_normal_max_vy_;
-  float        cfg_normal_max_omega_;
-  float        cfg_special_max_vx_;
-  float        cfg_special_max_vy_;
-  float        cfg_special_max_omega_;
-  bool         cfg_collision_safety_;
-  float        cfg_collision_safety_distance_;
-  unsigned int cfg_collision_safety_angle_;
-  std::string  cfg_ifid_motor_;
-  std::string  cfg_ifid_joystick_;
-  bool         cfg_use_laser_;
-  std::string  cfg_ifid_laser_;
-  bool         cfg_use_ff_;
-  unsigned int cfg_runstop_enable_buttons_;
-  unsigned int cfg_runstop_disable_buttons_;
-  
-  bool         stopped_;
-  float        min_distance_;
+	unsigned int cfg_axis_forward_;
+	unsigned int cfg_axis_sideward_;
+	unsigned int cfg_axis_rotation_;
+	float        cfg_axis_threshold_;
+	bool         cfg_deadman_use_axis_;
+	unsigned int cfg_deadman_axis_;
+	float        cfg_deadman_ax_thresh_;
+	unsigned int cfg_deadman_butmask_;
+	bool         cfg_drive_mode_use_axis_;
+	unsigned int cfg_drive_mode_axis_;
+	float        cfg_drive_mode_ax_thresh_;
+	unsigned int cfg_drive_mode_butmask_;
+	float        cfg_normal_max_vx_;
+	float        cfg_normal_max_vy_;
+	float        cfg_normal_max_omega_;
+	float        cfg_special_max_vx_;
+	float        cfg_special_max_vy_;
+	float        cfg_special_max_omega_;
+	bool         cfg_collision_safety_;
+	float        cfg_collision_safety_distance_;
+	unsigned int cfg_collision_safety_angle_;
+	std::string  cfg_ifid_motor_;
+	std::string  cfg_ifid_joystick_;
+	bool         cfg_use_laser_;
+	std::string  cfg_ifid_laser_;
+	bool         cfg_use_ff_;
+	unsigned int cfg_runstop_enable_buttons_;
+	unsigned int cfg_runstop_disable_buttons_;
 
-  bool         ff_weak_;
-  bool         ff_strong_;
+	bool  stopped_;
+	float min_distance_;
 
-  bool         runstop_pressed_;
+	bool ff_weak_;
+	bool ff_strong_;
+
+	bool runstop_pressed_;
 };
-
 
 #endif

@@ -20,7 +20,6 @@
  */
 
 #include <aspect/syncpoint.h>
-
 #include <core/threading/thread.h>
 
 namespace fawkes {
@@ -41,14 +40,18 @@ namespace fawkes {
  * @param identifier_out identifier of the output syncpoint.
  *          If this identifier is empty, no output syncpoint will be used.
  */
-SyncPointAspect::SyncPointAspect(SyncPoint::WakeupType type_in, std::string identifier_in,
-    std::string identifier_out /* = "" */)
-  : type_in_(type_in), identifier_in_(identifier_in),
-    identifier_out_(identifier_out), sp_in_(NULL), sp_out_(NULL)
+SyncPointAspect::SyncPointAspect(SyncPoint::WakeupType type_in,
+                                 std::string           identifier_in,
+                                 std::string           identifier_out /* = "" */)
+: type_in_(type_in),
+  identifier_in_(identifier_in),
+  identifier_out_(identifier_out),
+  sp_in_(NULL),
+  sp_out_(NULL)
 {
-  add_aspect("SyncPointAspect");
-  has_input_syncpoint_ = (identifier_in != "");
-  has_output_syncpoint_ = (identifier_out != "");
+	add_aspect("SyncPointAspect");
+	has_input_syncpoint_  = (identifier_in != "");
+	has_output_syncpoint_ = (identifier_out != "");
 }
 
 /** Constructor.
@@ -57,12 +60,15 @@ SyncPointAspect::SyncPointAspect(SyncPoint::WakeupType type_in, std::string iden
  * @param identifier_out identifier of the output syncpoint
  */
 SyncPointAspect::SyncPointAspect(std::string identifier_out)
-  : type_in_(SyncPoint::NONE), identifier_in_(""),
-    identifier_out_(identifier_out), sp_in_(NULL), sp_out_(NULL)
+: type_in_(SyncPoint::NONE),
+  identifier_in_(""),
+  identifier_out_(identifier_out),
+  sp_in_(NULL),
+  sp_out_(NULL)
 {
-  add_aspect("SyncPointAspect");
-  has_input_syncpoint_ = false;
-  has_output_syncpoint_ = true;
+	add_aspect("SyncPointAspect");
+	has_input_syncpoint_  = false;
+	has_output_syncpoint_ = true;
 }
 
 /** Destructor */
@@ -80,18 +86,18 @@ SyncPointAspect::~SyncPointAspect()
 void
 SyncPointAspect::init_SyncPointAspect(Thread *thread, SyncPointManager *manager)
 {
-  if (has_input_syncpoint_) {
-    sp_in_ = manager->get_syncpoint(thread->name(), identifier_in_);
-  }
+	if (has_input_syncpoint_) {
+		sp_in_ = manager->get_syncpoint(thread->name(), identifier_in_);
+	}
 
-  if (has_output_syncpoint_) {
-    sp_out_ = manager->get_syncpoint(thread->name(), identifier_out_);
-    sp_out_->register_emitter(thread->name());
-  }
+	if (has_output_syncpoint_) {
+		sp_out_ = manager->get_syncpoint(thread->name(), identifier_out_);
+		sp_out_->register_emitter(thread->name());
+	}
 
-  if (has_input_syncpoint_ || has_output_syncpoint_) {
-    thread->add_loop_listener(this);
-  }
+	if (has_input_syncpoint_ || has_output_syncpoint_) {
+		thread->add_loop_listener(this);
+	}
 }
 
 /** Finalize SyncPoint aspect.
@@ -102,18 +108,18 @@ SyncPointAspect::init_SyncPointAspect(Thread *thread, SyncPointManager *manager)
 void
 SyncPointAspect::finalize_SyncPointAspect(Thread *thread, SyncPointManager *manager)
 {
-  if (has_input_syncpoint_) {
-    manager->release_syncpoint(thread->name(), sp_in_);
-  }
+	if (has_input_syncpoint_) {
+		manager->release_syncpoint(thread->name(), sp_in_);
+	}
 
-  if (has_output_syncpoint_) {
-    sp_out_->unregister_emitter(thread->name());
-    manager->release_syncpoint(thread->name(), sp_out_);
-  }
+	if (has_output_syncpoint_) {
+		sp_out_->unregister_emitter(thread->name());
+		manager->release_syncpoint(thread->name(), sp_out_);
+	}
 
-  if (has_input_syncpoint_ || has_output_syncpoint_) {
-    thread->remove_loop_listener(this);
-  }
+	if (has_input_syncpoint_ || has_output_syncpoint_) {
+		thread->remove_loop_listener(this);
+	}
 }
 
 /** Wait for the input syncpoint before loop()
@@ -122,9 +128,9 @@ SyncPointAspect::finalize_SyncPointAspect(Thread *thread, SyncPointManager *mana
 void
 SyncPointAspect::pre_loop(Thread *thread)
 {
-  if (has_input_syncpoint_) {
-    sp_in_->wait(thread->name(), type_in_);
-  }
+	if (has_input_syncpoint_) {
+		sp_in_->wait(thread->name(), type_in_);
+	}
 }
 
 /** Emit the output syncpoint after loop()
@@ -133,9 +139,9 @@ SyncPointAspect::pre_loop(Thread *thread)
 void
 SyncPointAspect::post_loop(Thread *thread)
 {
-  if (has_output_syncpoint_) {
-    sp_out_->emit(thread->name());
-  }
+	if (has_output_syncpoint_) {
+		sp_out_->emit(thread->name());
+	}
 }
 
 } // end namespace fawkes

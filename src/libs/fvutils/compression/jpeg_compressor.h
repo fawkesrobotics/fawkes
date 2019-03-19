@@ -28,51 +28,85 @@
 
 namespace firevision {
 
-class JpegImageCompressor : public ImageCompressor {
- public:
+class JpegImageCompressor : public ImageCompressor
+{
+public:
+	/** JPEG color space. */
+	enum JpegColorspace {
+		JPEG_CS_RGB, /**< RGB */
+		JPEG_CS_YUV  /**< YUV444 packed */
+	};
 
-  /** JPEG color space. */
-  enum JpegColorspace {
-    JPEG_CS_RGB,	/**< RGB */
-    JPEG_CS_YUV		/**< YUV444 packed */
-  };
+	/** JPEG color space. */
+	enum JpegCompressorImplementation {
+		JPEG_CI_LIBJPEG, /**< Force usage of libjpeg for compression */
+		JPEG_CI_MMAL     /**< Force usage of MMAL for compression */
+	};
 
-  /** JPEG color space. */
-  enum JpegCompressorImplementation {
-    JPEG_CI_LIBJPEG,	/**< Force usage of libjpeg for compression */
-    JPEG_CI_MMAL	/**< Force usage of MMAL for compression */
-  };
+	explicit JpegImageCompressor(unsigned int quality = 80, JpegColorspace jcs = JPEG_CS_RGB);
+	explicit JpegImageCompressor(JpegCompressorImplementation impl_type,
+	                             unsigned int                 quality = 80,
+	                             JpegColorspace               jcs     = JPEG_CS_RGB);
+	virtual ~JpegImageCompressor();
 
-  explicit JpegImageCompressor(unsigned int quality = 80, JpegColorspace jcs = JPEG_CS_RGB);
-  explicit JpegImageCompressor(JpegCompressorImplementation impl_type,
-			       unsigned int quality = 80, JpegColorspace jcs = JPEG_CS_RGB);
-  virtual ~JpegImageCompressor();
+	virtual void
+	set_image_dimensions(unsigned int width, unsigned int height)
+	{
+		impl_->set_image_dimensions(width, height);
+	}
+	virtual void
+	set_image_buffer(colorspace_t cspace, unsigned char *buffer)
+	{
+		impl_->set_image_buffer(cspace, buffer);
+	}
+	virtual void
+	set_destination_buffer(unsigned char *buf, unsigned int buf_size)
+	{
+		impl_->set_destination_buffer(buf, buf_size);
+	}
+	virtual size_t
+	compressed_size()
+	{
+		return impl_->compressed_size();
+	}
+	virtual void
+	set_filename(const char *filename)
+	{
+		impl_->set_filename(filename);
+	}
+	virtual void
+	set_compression_destination(ImageCompressor::CompressionDestination cd)
+	{
+		impl_->set_compression_destination(cd);
+	}
+	virtual bool
+	supports_compression_destination(ImageCompressor::CompressionDestination cd)
+	{
+		return impl_->supports_compression_destination(cd);
+	}
+	virtual void
+	compress()
+	{
+		impl_->compress();
+	}
+	virtual size_t
+	recommended_compressed_buffer_size()
+	{
+		return impl_->recommended_compressed_buffer_size();
+	}
+	virtual bool
+	supports_vflip()
+	{
+		return impl_->supports_vflip();
+	}
+	virtual void
+	set_vflip(bool enable)
+	{
+		impl_->set_vflip(enable);
+	}
 
-  virtual void          set_image_dimensions(unsigned int width, unsigned int height)
-  { impl_->set_image_dimensions(width, height); }
-  virtual void          set_image_buffer(colorspace_t cspace, unsigned char *buffer)
-  { impl_->set_image_buffer(cspace, buffer); }
-  virtual void          set_destination_buffer(unsigned char *buf, unsigned int buf_size)
-  { impl_->set_destination_buffer(buf, buf_size); }
-  virtual size_t        compressed_size()
-  { return impl_->compressed_size(); }
-  virtual void          set_filename(const char *filename)
-  { impl_->set_filename(filename); }
-  virtual void          set_compression_destination(ImageCompressor::CompressionDestination cd)
-  { impl_->set_compression_destination(cd); }
-  virtual bool          supports_compression_destination(ImageCompressor::CompressionDestination cd)
-  { return impl_->supports_compression_destination(cd); }
-  virtual void          compress()
-  { impl_->compress(); }
-  virtual size_t        recommended_compressed_buffer_size()
-  { return impl_->recommended_compressed_buffer_size(); }
-  virtual bool          supports_vflip()
-  { return impl_->supports_vflip(); }
-  virtual void          set_vflip(bool enable)
-  { impl_->set_vflip(enable); }
-
- private:
-  ImageCompressor *impl_;
+private:
+	ImageCompressor *impl_;
 };
 
 } // end namespace firevision

@@ -19,22 +19,22 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/webview/webview_plugin.h>
-#include <core/exception.h>
-
 #include "webview_thread.h"
 
+#include <core/exception.h>
+#include <plugins/webview/webview_plugin.h>
+
 #ifdef HAVE_REST_APIS
-#  include "blackboard-rest-api/blackboard-rest-api.h"
-#  include "backendinfo-rest-api/backendinfo-rest-api.h"
-#  include "plugin-rest-api/plugin-rest-api.h"
-#  include "config-rest-api/config-rest-api.h"
-#  ifdef HAVE_JPEG
-#    include "image-rest-api/image-rest-api.h"
-#  endif
-#  ifdef HAVE_TF
-#    include "tf-rest-api/tf-rest-api.h"
-#  endif
+#	include "backendinfo-rest-api/backendinfo-rest-api.h"
+#	include "blackboard-rest-api/blackboard-rest-api.h"
+#	include "config-rest-api/config-rest-api.h"
+#	include "plugin-rest-api/plugin-rest-api.h"
+#	ifdef HAVE_JPEG
+#		include "image-rest-api/image-rest-api.h"
+#	endif
+#	ifdef HAVE_TF
+#		include "tf-rest-api/tf-rest-api.h"
+#	endif
 #endif
 
 using namespace fawkes;
@@ -48,27 +48,24 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-WebviewPlugin::WebviewPlugin(Configuration *config)
-  : Plugin(config)
+WebviewPlugin::WebviewPlugin(Configuration *config) : Plugin(config)
 {
-	bool enable_thread_pool =
-		config->get_bool("/webview/thread-pool/enable");
+	bool enable_thread_pool = config->get_bool("/webview/thread-pool/enable");
 
-  thread_list.push_back(new WebviewThread(enable_thread_pool));
+	thread_list.push_back(new WebviewThread(enable_thread_pool));
 #ifdef HAVE_REST_APIS
-  thread_list.push_back(new BlackboardRestApi());
-  thread_list.push_back(new BackendInfoRestApi());
-  thread_list.push_back(new PluginRestApi());
-  thread_list.push_back(new ConfigurationRestApi());
-#  ifdef HAVE_JPEG
-  thread_list.push_back(new ImageRestApi());
-#  endif
-#  ifdef HAVE_TF
-  thread_list.push_back(new TransformsRestApi());
-#  endif
+	thread_list.push_back(new BlackboardRestApi());
+	thread_list.push_back(new BackendInfoRestApi());
+	thread_list.push_back(new PluginRestApi());
+	thread_list.push_back(new ConfigurationRestApi());
+#	ifdef HAVE_JPEG
+	thread_list.push_back(new ImageRestApi());
+#	endif
+#	ifdef HAVE_TF
+	thread_list.push_back(new TransformsRestApi());
+#	endif
 #endif
 }
-
 
 PLUGIN_DESCRIPTION("Web interface for Fawkes")
 EXPORT_PLUGIN(WebviewPlugin)

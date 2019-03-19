@@ -25,6 +25,7 @@
 ///@cond QA
 
 #include <utils/system/pathparser.h>
+
 #include <cstdio>
 
 using namespace fawkes;
@@ -32,23 +33,22 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
+	printf("Trying /this/is/a/test/path foo/bar\n");
+	PathParser pp1("/this/is/a/test/path foo/bar");
+	pp1.print_debug();
+	printf("Re-generated: %s\n", pp1.path_as_string().c_str());
 
-  printf("Trying /this/is/a/test/path foo/bar\n");
-  PathParser pp1("/this/is/a/test/path foo/bar");
-  pp1.print_debug();
-  printf("Re-generated: %s\n", pp1.path_as_string().c_str());
+	printf("Trying relative/path/test\n");
+	PathParser pp2("relative/path/test");
+	pp2.print_debug();
+	printf("Re-generated: %s\n", pp2.path_as_string().c_str());
 
-  printf("Trying relative/path/test\n");
-  PathParser pp2("relative/path/test");
-  pp2.print_debug();
-  printf("Re-generated: %s\n", pp2.path_as_string().c_str());
+	printf("Trying relative/path/test/with/end/slash/\n");
+	PathParser pp3("relative/path/test/with/end/slash/");
+	pp3.print_debug();
+	printf("Re-generated: %s\n", pp3.path_as_string().c_str());
 
-  printf("Trying relative/path/test/with/end/slash/\n");
-  PathParser pp3("relative/path/test/with/end/slash/");
-  pp3.print_debug();
-  printf("Re-generated: %s\n", pp3.path_as_string().c_str());
-
-  return 0;
+	return 0;
 }
 
 /// @endcond

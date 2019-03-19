@@ -23,10 +23,10 @@
 #include <blackboard/blackboard.h>
 #include <blackboard/internal/notifier.h>
 
-#include <string>
-#include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <string>
 
 namespace fawkes {
 
@@ -157,7 +157,6 @@ namespace fawkes {
  *
  */
 
-
 /** Constructor.
  * @param create_notifier true to create the notifier used for event
  * notification, false not to create. Set to false only if you either
@@ -165,46 +164,44 @@ namespace fawkes {
  */
 BlackBoard::BlackBoard(bool create_notifier)
 {
-  if (create_notifier) {
-    notifier_ = new BlackBoardNotifier();
-  } else {
-    notifier_ = NULL;
-  }
+	if (create_notifier) {
+		notifier_ = new BlackBoardNotifier();
+	} else {
+		notifier_ = NULL;
+	}
 }
 
 /** Destructor. */
 BlackBoard::~BlackBoard()
 {
-  delete notifier_;
+	delete notifier_;
 }
-
 
 /** Register BB event listener.
  * @param listener BlackBoard event listener to register
  * @param flag flags what to register for
  */
 void
-BlackBoard::register_listener(BlackBoardInterfaceListener *listener,
-                              ListenerRegisterFlag flag)
+BlackBoard::register_listener(BlackBoardInterfaceListener *listener, ListenerRegisterFlag flag)
 {
-  if (! notifier_) throw NullPointerException("BlackBoard initialized without notifier");
-  notifier_->register_listener(listener, flag);
+	if (!notifier_)
+		throw NullPointerException("BlackBoard initialized without notifier");
+	notifier_->register_listener(listener, flag);
 }
-
 
 /** Update BB event listener.
  * @param listener BlackBoard event listener to update
  * @param flag flags what to update for
  */
 void
-BlackBoard::update_listener(BlackBoardInterfaceListener *listener,
-                            ListenerRegisterFlag flag)
+BlackBoard::update_listener(BlackBoardInterfaceListener *listener, ListenerRegisterFlag flag)
 {
-  if (! notifier_) throw NullPointerException("BlackBoard initialized without notifier");
-  if (! listener)  return;
-  notifier_->update_listener(listener, flag);
+	if (!notifier_)
+		throw NullPointerException("BlackBoard initialized without notifier");
+	if (!listener)
+		return;
+	notifier_->update_listener(listener, flag);
 }
-
 
 /** Unregister BB interface listener.
  * This will remove the given BlackBoard interface listener from any
@@ -214,11 +211,12 @@ BlackBoard::update_listener(BlackBoardInterfaceListener *listener,
 void
 BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
 {
-  if (! notifier_) throw NullPointerException("BlackBoard initialized without notifier");
-  if (! listener) return;
-  notifier_->unregister_listener(listener);
+	if (!notifier_)
+		throw NullPointerException("BlackBoard initialized without notifier");
+	if (!listener)
+		return;
+	notifier_->unregister_listener(listener);
 }
-
 
 /** Register BB interface observer.
  * @param observer BlackBoard interface observer to register
@@ -226,11 +224,12 @@ BlackBoard::unregister_listener(BlackBoardInterfaceListener *listener)
 void
 BlackBoard::register_observer(BlackBoardInterfaceObserver *observer)
 {
-  if (! notifier_) throw NullPointerException("BlackBoard initialized without notifier");
-  if (! observer) return;
-  notifier_->register_observer(observer);
+	if (!notifier_)
+		throw NullPointerException("BlackBoard initialized without notifier");
+	if (!observer)
+		return;
+	notifier_->register_observer(observer);
 }
-
 
 /** Unregister BB interface observer.
  * This will remove the given BlackBoard event listener from any event that it was
@@ -240,11 +239,12 @@ BlackBoard::register_observer(BlackBoardInterfaceObserver *observer)
 void
 BlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
 {
-  if (! notifier_) throw NullPointerException("BlackBoard initialized without notifier");
-  if (! observer) return;
-  notifier_->unregister_observer(observer);
+	if (!notifier_)
+		throw NullPointerException("BlackBoard initialized without notifier");
+	if (!observer)
+		return;
+	notifier_->unregister_observer(observer);
 }
-
 
 /** Produce interface name from C++ signature.
  * This extracts the interface name for a mangled signature. It has
@@ -256,13 +256,12 @@ BlackBoard::unregister_observer(BlackBoardInterfaceObserver *observer)
 std::string
 BlackBoard::demangle_fawkes_interface_name(const char *type)
 {
-  std::string t = type;
-  t = t.substr( 8 ); // Hack to remove N6fawkes namespace prefix
-  t = t.substr( t.find_first_not_of("0123456789") );
-  t = t.substr(0, t.length() - 1); // Hack to remove trailing letter
-  return t;
+	std::string t = type;
+	t             = t.substr(8); // Hack to remove N6fawkes namespace prefix
+	t             = t.substr(t.find_first_not_of("0123456789"));
+	t             = t.substr(0, t.length() - 1); // Hack to remove trailing letter
+	return t;
 }
-
 
 /** Get formatted identifier string.
  * @param identifier_format identifier format string (sprintf syntax)
@@ -272,14 +271,14 @@ BlackBoard::demangle_fawkes_interface_name(const char *type)
 std::string
 BlackBoard::format_identifier(const char *identifier_format, va_list arg)
 {
-  char *id;
-  if (vasprintf(&id, identifier_format, arg) != -1 ) {
-    std::string id_s(id);
-    free(id);
-    return id_s;
-  } else {
-    throw Exception("Failed to generate identifier from format");
-  }
+	char *id;
+	if (vasprintf(&id, identifier_format, arg) != -1) {
+		std::string id_s(id);
+		free(id);
+		return id_s;
+	} else {
+		throw Exception("Failed to generate identifier from format");
+	}
 }
 
 /** Open interface for reading with identifier format string.
@@ -293,18 +292,15 @@ BlackBoard::format_identifier(const char *identifier_format, va_list arg)
  * the requested interface.
  */
 Interface *
-BlackBoard::open_for_reading_f(const char *interface_type,
-			       const char *identifier, ...)
+BlackBoard::open_for_reading_f(const char *interface_type, const char *identifier, ...)
 {
-  va_list arg;
-  va_start(arg, identifier);
-  Interface *iface = open_for_reading(interface_type,
-				      format_identifier(identifier, arg).c_str());
+	va_list arg;
+	va_start(arg, identifier);
+	Interface *iface = open_for_reading(interface_type, format_identifier(identifier, arg).c_str());
 
-  va_end(arg);
-  return iface;
+	va_end(arg);
+	return iface;
 }
-
 
 /** Open interface for writing with identifier format string.
  * This will create a new interface instance of the given type. The result can be
@@ -320,17 +316,14 @@ BlackBoard::open_for_reading_f(const char *interface_type,
  * instance with the same type/id
  */
 Interface *
-BlackBoard::open_for_writing_f(const char *interface_type,
-			       const char *identifier, ...)
+BlackBoard::open_for_writing_f(const char *interface_type, const char *identifier, ...)
 {
-  va_list arg;
-  va_start(arg, identifier);
-  Interface *iface = open_for_writing(interface_type,
-				      format_identifier(identifier, arg).c_str());
+	va_list arg;
+	va_start(arg, identifier);
+	Interface *iface = open_for_writing(interface_type, format_identifier(identifier, arg).c_str());
 
-  va_end(arg);
-  return iface;
+	va_end(arg);
+	return iface;
 }
-
 
 } // end namespace fawkes

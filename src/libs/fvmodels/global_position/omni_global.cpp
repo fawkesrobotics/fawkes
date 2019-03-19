@@ -36,64 +36,54 @@ namespace firevision {
  */
 OmniGlobal::OmniGlobal(MirrorModel *mirror_model)
 {
-  this->mirror_model = mirror_model;
+	this->mirror_model = mirror_model;
 
-  ball_x = ball_y = 0.f;
+	ball_x = ball_y = 0.f;
 }
-
 
 void
 OmniGlobal::set_position_in_image(unsigned int x, unsigned int y)
 {
-  image_x = x;
-  image_y = y;
+	image_x = x;
+	image_y = y;
 }
-
 
 void
 OmniGlobal::set_robot_position(float x, float y, float ori)
 {
-  pose_x   = x;
-  pose_y   = y;
-  pose_ori = ori;
+	pose_x   = x;
+	pose_y   = y;
+	pose_ori = ori;
 }
-
 
 float
 OmniGlobal::get_y(void) const
 {
-  return ball_y;
+	return ball_y;
 }
-
 
 float
 OmniGlobal::get_x(void) const
 {
-  return ball_x;
+	return ball_x;
 }
-
 
 void
 OmniGlobal::calc()
 {
-  if ( mirror_model->isValidPoint( image_x, image_y ) ) {
+	if (mirror_model->isValidPoint(image_x, image_y)) {
+		fawkes::cart_coord_2d_t glob_pos =
+		  mirror_model->getWorldPointGlobal(image_x, image_y, pose_x, pose_y, pose_ori);
 
-    fawkes::cart_coord_2d_t glob_pos = mirror_model->getWorldPointGlobal( image_x,
-									  image_y,
-									  pose_x,
-									  pose_y,
-									  pose_ori);
-
-    ball_x = glob_pos.x;
-    ball_y = glob_pos.y;
-  }
+		ball_x = glob_pos.x;
+		ball_y = glob_pos.y;
+	}
 }
-
 
 bool
 OmniGlobal::is_pos_valid() const
 {
-  return mirror_model->isValidPoint( image_x, image_y );
+	return mirror_model->isValidPoint(image_x, image_y);
 }
 
 } // end namespace firevision

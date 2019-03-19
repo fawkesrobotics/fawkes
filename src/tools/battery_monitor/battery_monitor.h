@@ -26,56 +26,49 @@
 #include <netcomm/service_discovery/browse_handler.h>
 
 #include <gtkmm.h>
-
 #include <map>
 #include <string>
 
 class BatteryMonitorTreeView;
 
 namespace fawkes {
-  class AvahiThread;
+class AvahiThread;
 }
 
-class BatteryMonitor 
-: public Gtk::Window,
-  fawkes::ServiceBrowseHandler
+class BatteryMonitor : public Gtk::Window, fawkes::ServiceBrowseHandler
 {
- public:
-  BatteryMonitor(Glib::RefPtr<Gtk::Builder> builder);
-  ~BatteryMonitor();
+public:
+	BatteryMonitor(Glib::RefPtr<Gtk::Builder> builder);
+	~BatteryMonitor();
 
-  Gtk::Window& get_window() const;
+	Gtk::Window &get_window() const;
 
- protected:
-  // service browser handler
-  void all_for_now();
-  void cache_exhausted();
-  void browse_failed( const char* name,
-		      const char* type,
-		      const char* domain );
-  void service_added( const char* name,
-		      const char* type,
-		      const char* domain,
-		      const char* host_name,
-		      const char* interface,
-		      const struct sockaddr* addr,
-		      const socklen_t addr_size,
-		      uint16_t port,
-		      std::list<std::string>& txt,
-		      int flags );
-  void service_removed( const char* name,
-			const char* type,
-			const char* domain );
+protected:
+	// service browser handler
+	void all_for_now();
+	void cache_exhausted();
+	void browse_failed(const char *name, const char *type, const char *domain);
+	void service_added(const char *            name,
+	                   const char *            type,
+	                   const char *            domain,
+	                   const char *            host_name,
+	                   const char *            interface,
+	                   const struct sockaddr * addr,
+	                   const socklen_t         addr_size,
+	                   uint16_t                port,
+	                   std::list<std::string> &txt,
+	                   int                     flags);
+	void service_removed(const char *name, const char *type, const char *domain);
 
- private:
-  void on_btn_quit_clicked();
+private:
+	void on_btn_quit_clicked();
 
-  Gtk::Window* m_wnd_main;
-  BatteryMonitorTreeView* m_trv_battery;
-  Gtk::Button* m_btn_quit;
+	Gtk::Window *           m_wnd_main;
+	BatteryMonitorTreeView *m_trv_battery;
+	Gtk::Button *           m_btn_quit;
 
-  std::map< std::string, std::string > m_services;
-  fawkes::AvahiThread* m_avahi;
+	std::map<std::string, std::string> m_services;
+	fawkes::AvahiThread *              m_avahi;
 };
 
 #endif /*  TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_H__ */

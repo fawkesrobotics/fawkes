@@ -23,32 +23,33 @@
 #ifndef _PLUGINS_EXAMPLE_THREAD_H_
 #define _PLUGINS_EXAMPLE_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/logging.h>
+#include <core/threading/thread.h>
 
-class ExampleThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect
+class ExampleThread : public fawkes::Thread,
+                      public fawkes::BlockedTimingAspect,
+                      public fawkes::LoggingAspect
 {
+public:
+	ExampleThread(fawkes::BlockedTimingAspect::WakeupHook hook, const char *name, unsigned int modc);
+	virtual ~ExampleThread();
 
- public:
-  ExampleThread(fawkes::BlockedTimingAspect::WakeupHook hook,
-		const char *name, unsigned int modc);
-  virtual ~ExampleThread();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
-
- private:
-  unsigned int m;
-  unsigned int modc;
+private:
+	unsigned int m;
+	unsigned int modc;
 };
-
 
 #endif

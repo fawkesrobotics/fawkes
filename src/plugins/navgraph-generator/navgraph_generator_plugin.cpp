@@ -19,11 +19,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "navgraph_generator_thread.h"
+
+#include <core/plugin.h>
 #ifdef HAVE_VISUALIZATION
-#  include "visualization_thread.h"
+#	include "visualization_thread.h"
 #endif
 
 using namespace fawkes;
@@ -33,29 +33,29 @@ using namespace fawkes;
  */
 class NavGraphGeneratorPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit NavGraphGeneratorPlugin(Configuration *config)
-    : Plugin(config)
-  {
+	explicit NavGraphGeneratorPlugin(Configuration *config) : Plugin(config)
+	{
 #ifdef HAVE_VISUALIZATION
-    bool use_vis = false;
-    try {
-      use_vis = config->get_bool("/navgraph-generator/visualization/enable");
-    } catch (Exception &e) {} // ignored, use default
-    if (use_vis) {
-      NavGraphGeneratorVisualizationThread *vt = new NavGraphGeneratorVisualizationThread();
-      thread_list.push_back(new NavGraphGeneratorThread(vt));
-      thread_list.push_back(vt);
-    } else {
-      thread_list.push_back(new NavGraphGeneratorThread());
-    }
+		bool use_vis = false;
+		try {
+			use_vis = config->get_bool("/navgraph-generator/visualization/enable");
+		} catch (Exception &e) {
+		} // ignored, use default
+		if (use_vis) {
+			NavGraphGeneratorVisualizationThread *vt = new NavGraphGeneratorVisualizationThread();
+			thread_list.push_back(new NavGraphGeneratorThread(vt));
+			thread_list.push_back(vt);
+		} else {
+			thread_list.push_back(new NavGraphGeneratorThread());
+		}
 #else
-    thread_list.push_back(new NavGraphGeneratorThread());
+		thread_list.push_back(new NavGraphGeneratorThread());
 #endif
-  }
+	}
 };
 
 PLUGIN_DESCRIPTION("Plugin to instruct and perform navgraph generation")

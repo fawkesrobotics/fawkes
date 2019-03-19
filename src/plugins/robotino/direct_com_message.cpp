@@ -21,8 +21,9 @@
 #include "direct_com_message.h"
 
 #include <core/exception.h>
-#include <iomanip>
+
 #include <cstdlib>
+#include <iomanip>
 
 using namespace fawkes;
 
@@ -45,10 +46,16 @@ const unsigned int DirectRobotinoComMessage::MSG_METADATA_SIZE = 5;
  * @param byte1 First byte of actually received checksum
  * @param byte2 Second byte of actually received checksum
  */
-DirectRobotinoComMessage::ChecksumError::ChecksumError(unsigned int expected, unsigned int received,
-                                                       unsigned char byte1, unsigned char byte2)
-	: Exception("Checksum verification error for Robotino message, "
-	            "expected %u, got %u (%02x %02x)", expected, received, byte1, byte2)
+DirectRobotinoComMessage::ChecksumError::ChecksumError(unsigned int  expected,
+                                                       unsigned int  received,
+                                                       unsigned char byte1,
+                                                       unsigned char byte2)
+: Exception("Checksum verification error for Robotino message, "
+            "expected %u, got %u (%02x %02x)",
+            expected,
+            received,
+            byte1,
+            byte2)
 {
 }
 
@@ -91,26 +98,25 @@ DirectRobotinoComMessage::DirectRobotinoComMessage()
 /** Copy Constructor.
  * @param other instance to copy from
  */
-DirectRobotinoComMessage::DirectRobotinoComMessage(const DirectRobotinoComMessage& other)
+DirectRobotinoComMessage::DirectRobotinoComMessage(const DirectRobotinoComMessage &other)
 {
 	mode_ = other.mode_;
 
 	payload_size_ = other.payload_size_;
-	data_size_ = other.data_size_;
-	data_ = (unsigned char *)malloc(data_size_);
+	data_size_    = other.data_size_;
+	data_         = (unsigned char *)malloc(data_size_);
 	memcpy(data_, other.data_, data_size_);
 	cur_data_ = other.cur_data_;
-	cur_cmd_ = other.cur_cmd_;
+	cur_cmd_  = other.cur_cmd_;
 
 	if (other.escaped_data_) {
 		escaped_data_size_ = other.escaped_data_size_;
-		escaped_data_ = (unsigned char *)malloc(escaped_data_size_);
+		escaped_data_      = (unsigned char *)malloc(escaped_data_size_);
 		memcpy(escaped_data_, other.escaped_data_, escaped_data_size_);
 	} else {
 		escaped_data_ = NULL;
 	}
 }
-
 
 /** Constructor for initial command.
  * Create message for writing and add command for given message ID.
@@ -137,12 +143,12 @@ DirectRobotinoComMessage::DirectRobotinoComMessage(const unsigned char *msg, siz
 
 	escaped_data_ = (unsigned char *)malloc(msg_size);
 	memcpy(escaped_data_, msg, msg_size);
-	escaped_data_size_ = msg_size;
+	escaped_data_size_      = msg_size;
 	size_t escaped_consumed = unescape_data();
 
 	if (escaped_consumed < msg_size) {
 		unsigned char *old_data = escaped_data_;
-		escaped_data_ = (unsigned char *)realloc(escaped_data_, escaped_consumed);
+		escaped_data_           = (unsigned char *)realloc(escaped_data_, escaped_consumed);
 		if (!escaped_data_) {
 			free(old_data);
 			throw Exception("Failed to allocate more memory");
@@ -159,11 +165,11 @@ DirectRobotinoComMessage::ctor()
 	payload_size_ = 0;
 	// always allocate 128 bytes, increase if necessary
 	data_size_ = 128;
-	data_ = (unsigned char *)malloc(data_size_);
+	data_      = (unsigned char *)malloc(data_size_);
 	memset(data_, 0, data_size_);
-	data_[0] = MSG_HEAD;
+	data_[0]  = MSG_HEAD;
 	cur_data_ = data_ + 3;
-	cur_cmd_ = NULL;
+	cur_cmd_  = NULL;
 
 	escaped_data_ = NULL;
 
@@ -175,33 +181,38 @@ DirectRobotinoComMessage::~DirectRobotinoComMessage()
 {
 	::free(data_);
 	data_size_ = payload_size_ = 0;
-	if (escaped_data_)  ::free(escaped_data_);
+	if (escaped_data_)
+		::free(escaped_data_);
 	cur_data_ = NULL;
 }
-
 
 /** Assignment operator.
  * @param other instance to copy from
  * @return reference to this instance
  */
-DirectRobotinoComMessage&
-DirectRobotinoComMessage::operator=(const DirectRobotinoComMessage& other)
+DirectRobotinoComMessage &
+DirectRobotinoComMessage::operator=(const DirectRobotinoComMessage &other)
 {
+	if (&other == this)
+		return *this;
+
 	::free(data_);
-	if (escaped_data_)  ::free(escaped_data_);
+	if (escaped_data_) {
+		::free(escaped_data_);
+	}
 
 	mode_ = other.mode_;
 
 	payload_size_ = other.payload_size_;
-	data_size_ = other.data_size_;
-	data_ = (unsigned char *)malloc(data_size_);
+	data_size_    = other.data_size_;
+	data_         = (unsigned char *)malloc(data_size_);
 	memcpy(data_, other.data_, data_size_);
 	cur_data_ = other.cur_data_;
-	cur_cmd_ = other.cur_cmd_;
+	cur_cmd_  = other.cur_cmd_;
 
 	if (other.escaped_data_) {
 		escaped_data_size_ = other.escaped_data_size_;
-		escaped_data_ = (unsigned char *)malloc(escaped_data_size_);
+		escaped_data_      = (unsigned char *)malloc(escaped_data_size_);
 		memcpy(escaped_data_, other.escaped_data_, escaped_data_size_);
 	} else {
 		escaped_data_ = NULL;
@@ -209,7 +220,6 @@ DirectRobotinoComMessage::operator=(const DirectRobotinoComMessage& other)
 
 	return *this;
 }
-
 
 /** Assert a given message mode.
  * @param mode mode
@@ -225,14 +235,13 @@ DirectRobotinoComMessage::assert_mode(mode_t mode) const
 	}
 }
 
-
 /** Assert that a command has been selected.
  * @throw Exception if no command opened
  */
 void
 DirectRobotinoComMessage::assert_command() const
 {
-	if (! cur_cmd_) {
+	if (!cur_cmd_) {
 		throw Exception("No command has been opened for reading (call next_command)");
 	}
 }
@@ -246,7 +255,12 @@ DirectRobotinoComMessage::assert_command_data(uint8_t size) const
 {
 	if (payload_size_ < size || cur_data_ + size > cur_cmd_ + cur_cmd_[1] + 2) {
 		throw Exception("Cannot read beyond command length %x %x (%x + %u >= %x + %u + 2)",
-		                cur_data_ + size, cur_cmd_ + cur_cmd_[1] + 2, cur_data_, size, cur_cmd_, cur_cmd_[1]);
+		                cur_data_ + size,
+		                cur_cmd_ + cur_cmd_[1] + 2,
+		                cur_data_,
+		                size,
+		                cur_cmd_,
+		                cur_cmd_[1]);
 	}
 }
 
@@ -258,7 +272,7 @@ void
 DirectRobotinoComMessage::inc_payload_by(uint16_t count)
 {
 	assert_mode(WRITE);
-	if (! cur_cmd_) {
+	if (!cur_cmd_) {
 		throw Exception("Must add command before values");
 	}
 
@@ -275,7 +289,6 @@ DirectRobotinoComMessage::inc_payload_by(uint16_t count)
 	payload_size_ += count;
 	cur_cmd_[1] += count;
 }
-
 
 /** Add a command header.
  * This only allocates the header. You must call the appropriate methods to
@@ -349,9 +362,9 @@ DirectRobotinoComMessage::add_int32(int32_t value)
 {
 	inc_payload_by(4);
 	*(cur_data_++) = 0xFF & value;
-	*(cur_data_++) = 0xFF & ( value >> 8 );
-	*(cur_data_++) = 0xFF & ( value >> 16 );
-	*(cur_data_++) = 0xFF & ( value >> 24 );
+	*(cur_data_++) = 0xFF & (value >> 8);
+	*(cur_data_++) = 0xFF & (value >> 16);
+	*(cur_data_++) = 0xFF & (value >> 24);
 }
 
 /** Add 32-bit unsigned integer to current command.
@@ -363,9 +376,9 @@ DirectRobotinoComMessage::add_uint32(uint32_t value)
 {
 	inc_payload_by(4);
 	*(cur_data_++) = 0xFF & value;
-	*(cur_data_++) = 0xFF & ( value >> 8 );
-	*(cur_data_++) = 0xFF & ( value >> 16 );
-	*(cur_data_++) = 0xFF & ( value >> 24 );	
+	*(cur_data_++) = 0xFF & (value >> 8);
+	*(cur_data_++) = 0xFF & (value >> 16);
+	*(cur_data_++) = 0xFF & (value >> 24);
 }
 
 /** Add float to current command.
@@ -376,9 +389,9 @@ void
 DirectRobotinoComMessage::add_float(float value)
 {
 	inc_payload_by(4);
-	const char* p = reinterpret_cast<const char*>( &value );
+	const char *p = reinterpret_cast<const char *>(&value);
 
-	for(int i = 0; i < 4; ++i) {
+	for (int i = 0; i < 4; ++i) {
 		*(cur_data_++) = *(p++);
 	}
 }
@@ -391,7 +404,7 @@ DirectRobotinoComMessage::rewind()
 {
 	assert_mode(READ);
 	cur_data_ = data_ + 3;
-	cur_cmd_ = NULL;
+	cur_cmd_  = NULL;
 }
 
 /** Get next available command.
@@ -403,10 +416,12 @@ DirectRobotinoComMessage::next_command()
 	assert_mode(READ);
 	if (cur_cmd_ == NULL && payload_size_ >= 2) {
 		// no command set but payload that could hold one
-		cur_cmd_ = &data_[3];
+		cur_cmd_  = &data_[3];
 		cur_data_ = cur_cmd_ + 2;
 		return (command_id_t)cur_cmd_[0];
-	} else if (cur_cmd_ && ((data_ + payload_size_ + MSG_METADATA_SIZE - 2) - (cur_cmd_ + cur_cmd_[1] + 2)) >= 2) {
+	} else if (cur_cmd_
+	           && ((data_ + payload_size_ + MSG_METADATA_SIZE - 2) - (cur_cmd_ + cur_cmd_[1] + 2))
+	                >= 2) {
 		// we have a command and it does not extend beyond the payload, -2: subtract length of checksum
 		cur_cmd_ += cur_cmd_[1] + 2;
 		cur_data_ = cur_cmd_ + 2;
@@ -415,7 +430,6 @@ DirectRobotinoComMessage::next_command()
 		return CMDID_NONE;
 	}
 }
-
 
 /** Get length of current command.
  * @return length in bytes
@@ -427,7 +441,6 @@ DirectRobotinoComMessage::command_length() const
 	assert_command();
 	return cur_cmd_[1];
 }
-
 
 /** Get ID of current command.
  * @return command ID
@@ -487,7 +500,7 @@ DirectRobotinoComMessage::get_int16()
 	assert_command_data(2);
 
 	int16_t value = (uint8_t)cur_data_[0];
-	value |= ( (int16_t)cur_data_[1] << 8 );
+	value |= ((int16_t)cur_data_[1] << 8);
 	cur_data_ += 2;
 	return value;
 }
@@ -505,7 +518,7 @@ DirectRobotinoComMessage::get_uint16()
 	assert_command_data(2);
 
 	uint16_t value = (uint8_t)cur_data_[0];
-	uint16_t h = (uint8_t)cur_data_[1];
+	uint16_t h     = (uint8_t)cur_data_[1];
 	value |= (h << 8);
 	cur_data_ += 2;
 	return value;
@@ -520,7 +533,7 @@ uint16_t
 DirectRobotinoComMessage::parse_uint16(const unsigned char *buf)
 {
 	uint16_t value = (uint8_t)buf[0];
-	uint16_t h = (uint8_t)buf[1];
+	uint16_t h     = (uint8_t)buf[1];
 	value |= (h << 8);
 	return value;
 }
@@ -538,9 +551,9 @@ DirectRobotinoComMessage::get_int32()
 	assert_command_data(4);
 
 	int32_t value = (uint8_t)cur_data_[0];
-	int32_t h1 = (uint8_t)cur_data_[1];
-	int32_t h2 = (uint8_t)cur_data_[2];
-	int32_t h3 = (uint8_t)cur_data_[3];
+	int32_t h1    = (uint8_t)cur_data_[1];
+	int32_t h2    = (uint8_t)cur_data_[2];
+	int32_t h3    = (uint8_t)cur_data_[3];
 	value |= (h1 << 8);
 	value |= (h2 << 16);
 	value |= (h3 << 24);
@@ -561,9 +574,9 @@ DirectRobotinoComMessage::get_uint32()
 	assert_command_data(4);
 
 	uint32_t value = (uint8_t)cur_data_[0];
-	uint32_t h1 = (uint8_t)cur_data_[1];
-	uint32_t h2 = (uint8_t)cur_data_[2];
-	uint32_t h3 = (uint8_t)cur_data_[3];
+	uint32_t h1    = (uint8_t)cur_data_[1];
+	uint32_t h2    = (uint8_t)cur_data_[2];
+	uint32_t h3    = (uint8_t)cur_data_[3];
 	value |= (h1 << 8);
 	value |= (h2 << 16);
 	value |= (h3 << 24);
@@ -584,11 +597,11 @@ DirectRobotinoComMessage::get_float()
 	assert_command_data(4);
 
 	float value;
-	char* p = reinterpret_cast<char*>( &value );
-	*(p++) = cur_data_[0];
-	*(p++) = cur_data_[1];
-	*(p++) = cur_data_[2];
-	*(p++) = cur_data_[3];
+	char *p = reinterpret_cast<char *>(&value);
+	*(p++)  = cur_data_[0];
+	*(p++)  = cur_data_[1];
+	*(p++)  = cur_data_[2];
+	*(p++)  = cur_data_[3];
 	cur_data_ += 4;
 	return value;
 }
@@ -605,12 +618,11 @@ DirectRobotinoComMessage::get_string()
 	assert_command();
 	assert_command_data(1);
 
-	size_t remaining = (cur_cmd_ + cur_cmd_[1] + 2) - cur_data_;
+	size_t      remaining = (cur_cmd_ + cur_cmd_[1] + 2) - cur_data_;
 	std::string value((const char *)cur_data_, remaining);
 	cur_data_ += remaining;
 	return value;
 }
-
 
 /** Skip 8-bit signed integer from current command.
  * This also forwards the command-internal pointer appropriately.
@@ -710,7 +722,6 @@ DirectRobotinoComMessage::skip_float()
 	cur_data_ += 4;
 }
 
-
 /** Size of escaped buffer.
  * In particular, after calling the parsing ctor this denotes how many
  * bytes of the input buffer have been consumed.
@@ -723,7 +734,6 @@ DirectRobotinoComMessage::escaped_data_size()
 {
 	return escaped_data_size_;
 }
-
 
 /** Get payload size.
  * @return payload size
@@ -753,15 +763,16 @@ DirectRobotinoComMessage::escape()
 			++to_escape;
 		}
 	}
-	if (escaped_data_)  ::free(escaped_data_);
+	if (escaped_data_)
+		::free(escaped_data_);
 	escaped_data_size_ = payload_size_ + MSG_METADATA_SIZE + to_escape;
-	escaped_data_ = (unsigned char *)malloc(escaped_data_size_);
+	escaped_data_      = (unsigned char *)malloc(escaped_data_size_);
 
 	if (to_escape > 0) {
 		escaped_data_[0] = MSG_HEAD;
 		unsigned char *p = escaped_data_;
-		*p++ = MSG_HEAD;
-		for (unsigned int i = 1; i < payload_size_ + (MSG_METADATA_SIZE-1); ++i) {
+		*p++             = MSG_HEAD;
+		for (unsigned int i = 1; i < payload_size_ + (MSG_METADATA_SIZE - 1); ++i) {
 			if (data_[i] == MSG_HEAD || data_[i] == MSG_DATA_ESCAPE) {
 				*p++ = MSG_DATA_ESCAPE;
 				*p++ = data_[i] ^ MSG_DATA_MANGLE;
@@ -785,10 +796,13 @@ DirectRobotinoComMessage::escape()
  * @throw Exception if not enough bytes could be unescaped
  */
 size_t
-DirectRobotinoComMessage::unescape(unsigned char *unescaped, size_t unescaped_size,
-                                   const unsigned char *escaped, size_t escaped_size)
+DirectRobotinoComMessage::unescape(unsigned char *      unescaped,
+                                   size_t               unescaped_size,
+                                   const unsigned char *escaped,
+                                   size_t               escaped_size)
 {
-	if (unescaped_size == 0)  return 0;
+	if (unescaped_size == 0)
+		return 0;
 
 	unsigned int j = 0;
 	for (unsigned int i = 0; i < escaped_size; ++i) {
@@ -796,12 +810,13 @@ DirectRobotinoComMessage::unescape(unsigned char *unescaped, size_t unescaped_si
 			if (i >= escaped_size - 1) {
 				throw Exception("Read escaped byte last in message");
 			}
-			unescaped[j++] = escaped[i+1] ^ MSG_DATA_MANGLE;
+			unescaped[j++] = escaped[i + 1] ^ MSG_DATA_MANGLE;
 			i += 1;
 		} else {
 			unescaped[j++] = escaped[i];
 		}
-		if (j == unescaped_size)  return i+1;
+		if (j == unescaped_size)
+			return i + 1;
 	}
 
 	throw Exception("Not enough escaped bytes for unescaping");
@@ -813,13 +828,13 @@ DirectRobotinoComMessage::unescape(unsigned char *unescaped, size_t unescaped_si
 size_t
 DirectRobotinoComMessage::unescape_data()
 {
-	if (! escaped_data_ || escaped_data_size_ == 0) {
+	if (!escaped_data_ || escaped_data_size_ == 0) {
 		throw Exception("No escaped data to unescape");
 	}
 
 	if (data_size_ < 3) {
 		unsigned char *old_data = data_;
-		data_ = (unsigned char *)realloc(data_, 3);
+		data_                   = (unsigned char *)realloc(data_, 3);
 		if (!data_) {
 			free(old_data);
 			throw Exception("Failed to allocate more memory");
@@ -827,7 +842,7 @@ DirectRobotinoComMessage::unescape_data()
 		data_[0] = MSG_HEAD;
 	}
 	// +1: HEAD
-	size_t consumed_bytes = unescape(&data_[1], 2, &escaped_data_[1], escaped_data_size_-1) + 1;
+	size_t consumed_bytes = unescape(&data_[1], 2, &escaped_data_[1], escaped_data_size_ - 1) + 1;
 	size_t unescaped_size = parse_uint16(&data_[1]) + 2; // +2: checksum
 
 	if (data_size_ < unescaped_size + 3) {
@@ -841,13 +856,13 @@ DirectRobotinoComMessage::unescape_data()
 	}
 	payload_size_ = unescaped_size - 2; // -2: no checksum
 
-	consumed_bytes +=
-		unescape(&data_[3], unescaped_size,
-		         &escaped_data_[consumed_bytes], escaped_data_size_ - consumed_bytes);
+	consumed_bytes += unescape(&data_[3],
+	                           unescaped_size,
+	                           &escaped_data_[consumed_bytes],
+	                           escaped_data_size_ - consumed_bytes);
 
 	return consumed_bytes;
 }
-
 
 /** Get access to buffer for sending.
  * This implies packing. Note that after calling this methods later
@@ -868,12 +883,12 @@ DirectRobotinoComMessage::buffer()
 void
 DirectRobotinoComMessage::pack()
 {
-	if (! escaped_data_) {
-		data_[1] = 0xff & payload_size_;
-		data_[2] = payload_size_ >> 8;
+	if (!escaped_data_) {
+		data_[1]                      = 0xff & payload_size_;
+		data_[2]                      = payload_size_ >> 8;
 		unsigned short checksum_value = checksum();
-		data_[payload_size_ + 3] = 0xff & checksum_value;
-		data_[payload_size_ + 4] = checksum_value >> 8;
+		data_[payload_size_ + 3]      = 0xff & checksum_value;
+		data_[payload_size_ + 4]      = checksum_value >> 8;
 		escape();
 	}
 }
@@ -884,14 +899,14 @@ DirectRobotinoComMessage::pack()
 uint16_t
 DirectRobotinoComMessage::checksum() const
 {
-	uint16_t rv = 0;
-	const unsigned char* p = &data_[1];
+	uint16_t             rv = 0;
+	const unsigned char *p  = &data_[1];
 	// -3:  do not include the 0xAA header and checksum
-	for (unsigned int i = 0; i < payload_size_ + (MSG_METADATA_SIZE-3); ++i) {
+	for (unsigned int i = 0; i < payload_size_ + (MSG_METADATA_SIZE - 3); ++i) {
 		rv += (uint8_t)*p;
 		++p;
 	}
-	return 0xffff & ( (1<<16) - rv );
+	return 0xffff & ((1 << 16) - rv);
 }
 
 /** Check the checksum.
@@ -901,11 +916,13 @@ DirectRobotinoComMessage::checksum() const
 void
 DirectRobotinoComMessage::check_checksum() const
 {
-	uint16_t checksum_v = checksum();
+	uint16_t checksum_v      = checksum();
 	uint16_t packet_checksum = parse_uint16(&data_[payload_size_ + 3]);
 	if (checksum_v != packet_checksum) {
-		throw ChecksumError(checksum_v, packet_checksum,
-		                    data_[payload_size_ + 3], data_[payload_size_ + 4]);
+		throw ChecksumError(checksum_v,
+		                    packet_checksum,
+		                    data_[payload_size_ + 3],
+		                    data_[payload_size_ + 4]);
 	}
 }
 
@@ -918,14 +935,14 @@ std::string
 DirectRobotinoComMessage::to_string(bool escaped)
 {
 	boost::asio::const_buffer b;
-	const unsigned char *bp;
-	size_t bsize;
+	const unsigned char *     bp;
+	size_t                    bsize;
 	if (escaped) {
-		b = buffer();
-		bp = boost::asio::buffer_cast<const unsigned char*>(b);
+		b     = buffer();
+		bp    = boost::asio::buffer_cast<const unsigned char *>(b);
 		bsize = boost::asio::buffer_size(b);
 	} else {
-		bp = data_;
+		bp    = data_;
 		bsize = payload_size_ + MSG_METADATA_SIZE;
 	}
 
@@ -940,34 +957,34 @@ DirectRobotinoComMessage::to_string(bool escaped)
 	for (unsigned int i = 0; i < bsize; ++i) {
 		bool cmd_opened = false;
 		bool cmd_closed = false;
-		if (! escaped) {
+		if (!escaped) {
 			if (i == 3 && bsize > MSG_METADATA_SIZE) {
-				cmd_l = bp[i+1];
-				cmd_i = 0;
+				cmd_l      = bp[i + 1];
+				cmd_i      = 0;
 				cmd_opened = true;
 			} else if (i > 3 && cmd_l >= 0 && cmd_i == cmd_l) {
 				cmd_closed = true;
-				cmd_l = -1;
-				cmd_i = 0;
+				cmd_l      = -1;
+				cmd_i      = 0;
 			} else if (i > 3 && cmd_l < 0 && bsize - i > 2) {
 				cmd_opened = true;
-				cmd_l = bp[i+1];
-				cmd_i = 0;
+				cmd_l      = bp[i + 1];
+				cmd_i      = 0;
 			} else {
 				++cmd_i;
 			}
 		}
 
-		if (i > 0 && (i+1) % 16 == 0) {
+		if (i > 0 && (i + 1) % 16 == 0) {
 			snprintf(tmp, 8, "%s%02x%s\n", cmd_opened ? "(" : " ", bp[i], cmd_closed ? ")" : " ");
-		} else if (i > 0 && (i+1) % 8 == 0) {
+		} else if (i > 0 && (i + 1) % 8 == 0) {
 			snprintf(tmp, 8, "%s%02x%s   ", cmd_opened ? "(" : " ", bp[i], cmd_closed ? ")" : " ");
 		} else {
 			snprintf(tmp, 8, "%s%02x%s", cmd_opened ? "(" : " ", bp[i], cmd_closed ? ")" : " ");
 		}
 		rv += tmp;
 	}
-	if ((bsize-1) % 16 != 0) {
+	if ((bsize - 1) % 16 != 0) {
 		rv += "\n";
 	}
 

@@ -45,4 +45,3 @@
 TabletopVisualizationThreadBase::~TabletopVisualizationThreadBase()
 {
 }
-

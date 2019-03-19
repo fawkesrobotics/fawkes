@@ -25,6 +25,7 @@
 #define _NETCOMM_FAWKES_CLIENT_THREAD_H_
 
 #include <core/threading/thread.h>
+
 #include <list>
 
 namespace fawkes {
@@ -39,35 +40,40 @@ class FawkesNetworkServerClientSendThread;
 
 class FawkesNetworkServerClientThread : public Thread
 {
- public:
-  FawkesNetworkServerClientThread(StreamSocket *s, FawkesNetworkServerThread *parent);
-  ~FawkesNetworkServerClientThread();
+public:
+	FawkesNetworkServerClientThread(StreamSocket *s, FawkesNetworkServerThread *parent);
+	~FawkesNetworkServerClientThread();
 
-  virtual void once();
-  virtual void loop();
+	virtual void once();
+	virtual void loop();
 
-  unsigned int clid() const;
-  void         set_clid(unsigned int client_id);
+	unsigned int clid() const;
+	void         set_clid(unsigned int client_id);
 
-  bool alive() const;
-  void enqueue(FawkesNetworkMessage *msg);
+	bool alive() const;
+	void enqueue(FawkesNetworkMessage *msg);
 
-  void force_send();
-  void connection_died();
+	void force_send();
+	void connection_died();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void recv();
+private:
+	void recv();
 
-  unsigned int                _clid;
-  bool                        _alive;
-  StreamSocket               *_s;
-  FawkesNetworkServerThread  *_parent;
-  FawkesNetworkMessageQueue  *_inbound_queue;
+	unsigned int               _clid;
+	bool                       _alive;
+	StreamSocket *             _s;
+	FawkesNetworkServerThread *_parent;
+	FawkesNetworkMessageQueue *_inbound_queue;
 
-  FawkesNetworkServerClientSendThread  *_send_slave;
+	FawkesNetworkServerClientSendThread *_send_slave;
 };
 
 } // end namespace fawkes

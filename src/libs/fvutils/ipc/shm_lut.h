@@ -24,9 +24,10 @@
 #ifndef _FIREVISION_FVUTILS_IPC_SHM_LUT_H_
 #define _FIREVISION_FVUTILS_IPC_SHM_LUT_H_
 
+#include <fvutils/ipc/defs.h>
 #include <utils/ipc/shm.h>
 #include <utils/ipc/shm_lister.h>
-#include <fvutils/ipc/defs.h>
+
 #include <stdint.h>
 
 // Magic token to identify FireVision shared memory LUTs
@@ -35,119 +36,119 @@
 namespace firevision {
 
 /** Shared memory lookup table header struct. */
-typedef struct {
-  char      lut_id[LUT_ID_MAX_LENGTH];		/**< LUT ID */
-  uint32_t  width;		/**< LUT width */
-  uint32_t  height;		/**< LUT height */
-  uint32_t  depth;              /**< LUT depth */
-  uint32_t  bytes_per_cell;	/**< Bytes per cell */
+typedef struct
+{
+	char     lut_id[LUT_ID_MAX_LENGTH]; /**< LUT ID */
+	uint32_t width;                     /**< LUT width */
+	uint32_t height;                    /**< LUT height */
+	uint32_t depth;                     /**< LUT depth */
+	uint32_t bytes_per_cell;            /**< Bytes per cell */
 } SharedMemoryLookupTable_header_t;
-
 
 class SharedMemoryLookupTableHeader : public fawkes::SharedMemoryHeader
 {
- public:
-  SharedMemoryLookupTableHeader();
-  SharedMemoryLookupTableHeader(const char *lut_id,
-				unsigned int width,
-				unsigned int height,
-				unsigned int bytes_per_cell);
-  SharedMemoryLookupTableHeader(const char *lut_id,
-				unsigned int width,
-				unsigned int height,
-				unsigned int depth,
-				unsigned int bytes_per_cell);
-  SharedMemoryLookupTableHeader(const SharedMemoryLookupTableHeader *h);
-  virtual ~SharedMemoryLookupTableHeader();
+public:
+	SharedMemoryLookupTableHeader();
+	SharedMemoryLookupTableHeader(const char * lut_id,
+	                              unsigned int width,
+	                              unsigned int height,
+	                              unsigned int bytes_per_cell);
+	SharedMemoryLookupTableHeader(const char * lut_id,
+	                              unsigned int width,
+	                              unsigned int height,
+	                              unsigned int depth,
+	                              unsigned int bytes_per_cell);
+	SharedMemoryLookupTableHeader(const SharedMemoryLookupTableHeader *h);
+	virtual ~SharedMemoryLookupTableHeader();
 
-  virtual fawkes::SharedMemoryHeader *  clone() const;
-  virtual bool         matches(void *memptr);
-  virtual size_t       size();
-  virtual bool         create();
-  virtual void         initialize(void *memptr);
-  virtual void         set(void *memptr);
-  virtual void         reset();
-  virtual size_t       data_size();
-  virtual bool         operator==(const fawkes::SharedMemoryHeader & s) const;
+	virtual fawkes::SharedMemoryHeader *clone() const;
+	virtual bool                        matches(void *memptr);
+	virtual size_t                      size();
+	virtual bool                        create();
+	virtual void                        initialize(void *memptr);
+	virtual void                        set(void *memptr);
+	virtual void                        reset();
+	virtual size_t                      data_size();
+	virtual bool                        operator==(const fawkes::SharedMemoryHeader &s) const;
 
-  virtual void         print_info();
+	virtual void print_info();
 
-  const char *  lut_id() const;
-  void          set_lut_id(const char *lut_id);
-  unsigned int  width() const;
-  unsigned int  height() const;
-  unsigned int  depth() const;
-  unsigned int  bytes_per_cell() const;
+	const char * lut_id() const;
+	void         set_lut_id(const char *lut_id);
+	unsigned int width() const;
+	unsigned int height() const;
+	unsigned int depth() const;
+	unsigned int bytes_per_cell() const;
 
-  SharedMemoryLookupTable_header_t * raw_header();
+	SharedMemoryLookupTable_header_t *raw_header();
 
- private:
-  SharedMemoryLookupTable_header_t *header_;
+private:
+	SharedMemoryLookupTable_header_t *header_;
 
-  char          *lut_id_;
-  unsigned int   width_;
-  unsigned int   height_;
-  unsigned int   depth_;
-  unsigned int   bytes_per_cell_;
+	char *       lut_id_;
+	unsigned int width_;
+	unsigned int height_;
+	unsigned int depth_;
+	unsigned int bytes_per_cell_;
 };
 
 class SharedMemoryLookupTableLister : public fawkes::SharedMemoryLister
 {
- public:
-  SharedMemoryLookupTableLister();
-  virtual ~SharedMemoryLookupTableLister();
+public:
+	SharedMemoryLookupTableLister();
+	virtual ~SharedMemoryLookupTableLister();
 
-  virtual void print_header();
-  virtual void print_footer();
-  virtual void print_no_segments();
-  virtual void print_no_orphaned_segments();
-  virtual void print_info(const fawkes::SharedMemoryHeader *header,
-			  int shm_id, int semaphore, unsigned int mem_size,
-			  const void *memptr);
+	virtual void print_header();
+	virtual void print_footer();
+	virtual void print_no_segments();
+	virtual void print_no_orphaned_segments();
+	virtual void print_info(const fawkes::SharedMemoryHeader *header,
+	                        int                               shm_id,
+	                        int                               semaphore,
+	                        unsigned int                      mem_size,
+	                        const void *                      memptr);
 };
-
 
 class SharedMemoryLookupTable : public fawkes::SharedMemory
 {
+public:
+	SharedMemoryLookupTable(const char * lut_id,
+	                        unsigned int width,
+	                        unsigned int height,
+	                        unsigned int depth          = 1,
+	                        unsigned int bytes_per_cell = 1);
+	SharedMemoryLookupTable(const char *lut_id, bool is_read_only = true);
+	~SharedMemoryLookupTable();
 
- public:
+	const char *   lut_id() const;
+	bool           set_lut_id(const char *lut_id);
+	unsigned char *buffer() const;
+	unsigned int   width() const;
+	unsigned int   height() const;
+	unsigned int   depth() const;
+	unsigned int   bytes_per_cell() const;
 
-  SharedMemoryLookupTable( const char *lut_id,
-			   unsigned int width, unsigned int height,
-			   unsigned int depth = 1,
-			   unsigned int bytes_per_cell = 1
-			   );
-  SharedMemoryLookupTable(const char *lut_id , bool is_read_only = true);
-  ~SharedMemoryLookupTable();
+	static void list();
+	static void cleanup(bool use_lister = true);
+	static bool exists(const char *lut_id);
+	static void wipe(const char *lut_id);
 
-  const char *     lut_id() const;
-  bool             set_lut_id(const char *lut_id);
-  unsigned char *  buffer() const;
-  unsigned int     width() const;
-  unsigned int     height() const;
-  unsigned int     depth() const;
-  unsigned int     bytes_per_cell() const;
+private:
+	void constructor(const char * lut_id,
+	                 unsigned int width,
+	                 unsigned int height,
+	                 unsigned int depth,
+	                 unsigned int bytes_per_cell,
+	                 bool         is_read_only);
 
-  static void      list();
-  static void      cleanup(bool use_lister = true);
-  static bool      exists(const char *lut_id);
-  static void      wipe(const char *lut_id);
+	SharedMemoryLookupTableHeader *   priv_header_;
+	SharedMemoryLookupTable_header_t *raw_header_;
 
- private:
-  void constructor(const char *lut_id,
-		   unsigned int width, unsigned int height, unsigned int depth,
-		   unsigned int bytes_per_cell,
-		   bool is_read_only);
-
-  SharedMemoryLookupTableHeader    *priv_header_;
-  SharedMemoryLookupTable_header_t *raw_header_;
-
-  char          *lut_id_;
-  unsigned int   width_;
-  unsigned int   height_;
-  unsigned int   depth_;
-  unsigned int   bytes_per_cell_;
-
+	char *       lut_id_;
+	unsigned int width_;
+	unsigned int height_;
+	unsigned int depth_;
+	unsigned int bytes_per_cell_;
 };
 
 } // end namespace firevision

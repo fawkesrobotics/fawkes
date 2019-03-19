@@ -21,13 +21,15 @@
  */
 
 #include "kinova_jaco.h"
+
 #include "../manipulator.h"
 
 #include <utils/math/angle.h>
+
 #include <cmath>
 #include <cstdio>
 
- namespace fawkes {
+namespace fawkes {
 
 /** @class OpenRaveManipulatorKinovaJaco <plugins/openrave/manipulators/kinova_jaco.h>
  * Class containing information about all Kinova Jaco motors.
@@ -39,8 +41,9 @@
  * @param count number of motors of OpenRAVE model
  * @param countDevice number of motors of real device
  */
-OpenRaveManipulatorKinovaJaco::OpenRaveManipulatorKinovaJaco(unsigned int count, unsigned int countDevice) :
-  OpenRaveManipulator( count, countDevice )
+OpenRaveManipulatorKinovaJaco::OpenRaveManipulatorKinovaJaco(unsigned int count,
+                                                             unsigned int countDevice)
+: OpenRaveManipulator(count, countDevice)
 {
 }
 
@@ -55,74 +58,44 @@ OpenRaveManipulatorKinovaJaco::~OpenRaveManipulatorKinovaJaco()
 OpenRaveManipulatorPtr
 OpenRaveManipulatorKinovaJaco::copy()
 {
-  return RefPtr<OpenRaveManipulatorKinovaJaco>( new OpenRaveManipulatorKinovaJaco(*this) );
+	return RefPtr<OpenRaveManipulatorKinovaJaco>(new OpenRaveManipulatorKinovaJaco(*this));
 }
-
-
 
 /* ########## various ######### */
 float
 OpenRaveManipulatorKinovaJaco::angle_OR_to_device(unsigned int number, float angle) const
 {
-  float _angle;
+	float _angle;
 
-  switch( number ) {
-    case 0:
-      _angle = rad2deg(1.5*M_PI + angle);
-      break;
-    case 1:
-      _angle = rad2deg(M_PI + angle);
-      break;
-    case 2:
-      _angle = rad2deg(M_PI + angle);
-      break;
-    case 3:
-      _angle = rad2deg(angle);
-      break;
-    case 4:
-      _angle = rad2deg(angle);
-      break;
-    case 5:
-      _angle = rad2deg(M_PI + angle);
-      break;
+	switch (number) {
+	case 0: _angle = rad2deg(1.5 * M_PI + angle); break;
+	case 1: _angle = rad2deg(M_PI + angle); break;
+	case 2: _angle = rad2deg(M_PI + angle); break;
+	case 3: _angle = rad2deg(angle); break;
+	case 4: _angle = rad2deg(angle); break;
+	case 5: _angle = rad2deg(M_PI + angle); break;
 
-    default:
-      _angle = rad2deg(angle);
-      break;
-  }
+	default: _angle = rad2deg(angle); break;
+	}
 
-  return _angle;
+	return _angle;
 }
 
 float
 OpenRaveManipulatorKinovaJaco::angle_device_to_OR(unsigned int number, float angle) const
 {
-  float _angle;
+	float _angle;
 
-  switch( number ) {
-    case 0:
-      _angle = deg2rad(angle) - 1.5*M_PI;
-      break;
-    case 1:
-      _angle = deg2rad(angle) - M_PI;
-      break;
-    case 2:
-      _angle = deg2rad(angle) - M_PI;
-      break;
-    case 3:
-      _angle = deg2rad(angle);
-      break;
-    case 4:
-      _angle = deg2rad(angle);
-      break;
-    case 5:
-      _angle = deg2rad(angle) - M_PI;
-      break;
-    default:
-      _angle = deg2rad(angle);
-      break;
-  }
+	switch (number) {
+	case 0: _angle = deg2rad(angle) - 1.5 * M_PI; break;
+	case 1: _angle = deg2rad(angle) - M_PI; break;
+	case 2: _angle = deg2rad(angle) - M_PI; break;
+	case 3: _angle = deg2rad(angle); break;
+	case 4: _angle = deg2rad(angle); break;
+	case 5: _angle = deg2rad(angle) - M_PI; break;
+	default: _angle = deg2rad(angle); break;
+	}
 
-  return _angle;
+	return _angle;
 }
 } // end namespace fawkes

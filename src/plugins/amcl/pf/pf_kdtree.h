@@ -35,8 +35,9 @@
 #ifndef PF_KDTREE_H
 #define PF_KDTREE_H
 
+#include "pf_vector.h"
 #ifdef INCLUDE_RTKGUI
-#include "rtk.h"
+#	include "rtk.h"
 #endif
 
 /// @cond EXTERNAL
@@ -44,46 +45,44 @@
 // Info for a node in the tree
 typedef struct pf_kdtree_node
 {
-  // Depth in the tree
-  int leaf, depth;
+	// Depth in the tree
+	int leaf, depth;
 
-  // Pivot dimension and value
-  int pivot_dim;
-  double pivot_value;
+	// Pivot dimension and value
+	int    pivot_dim;
+	double pivot_value;
 
-  // The key for this node
-  int key[3];
+	// The key for this node
+	int key[3];
 
-  // The value for this node
-  double value;
+	// The value for this node
+	double value;
 
-  // The cluster label (leaf nodes)
-  int cluster;
+	// The cluster label (leaf nodes)
+	int cluster;
 
-  // Child nodes
-  struct pf_kdtree_node *children[2];
+	// Child nodes
+	struct pf_kdtree_node *children[2];
 
 } pf_kdtree_node_t;
-
 
 // A kd tree
 typedef struct
 {
-  // Cell size
-  double size[3];
+	// Cell size
+	double size[3];
 
-  // The root node of the tree
-  pf_kdtree_node_t *root;
+	// The root node of the tree
+	pf_kdtree_node_t *root;
 
-  // The number of nodes in the tree
-  int node_count, node_max_count;
-  pf_kdtree_node_t *nodes;
+	// The number of nodes in the tree
+	int               node_count, node_max_count;
+	pf_kdtree_node_t *nodes;
 
-  // The number of leaf nodes in the tree
-  int leaf_count;
+	// The number of leaf nodes in the tree
+	int leaf_count;
 
 } pf_kdtree_t;
-
 
 // Create a tree
 extern pf_kdtree_t *pf_kdtree_alloc(int max_size);
@@ -105,7 +104,6 @@ extern double pf_kdtree_get_prob(pf_kdtree_t *self, pf_vector_t pose);
 
 // Determine the cluster label for the given pose
 extern int pf_kdtree_get_cluster(pf_kdtree_t *self, pf_vector_t pose);
-
 
 #ifdef INCLUDE_RTKGUI
 

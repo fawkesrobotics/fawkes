@@ -24,60 +24,60 @@
 #ifndef _FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_
 #define _FIREVISIONE_FVUTILS_STATISTICAL_HISTOGRAM_BLOCK_H_
 
-#include <fvutils/fileformat/fvfile_block.h>
 #include <fvutils/base/roi.h>
-#include <stdint.h>
+#include <fvutils/fileformat/fvfile_block.h>
 
+#include <stdint.h>
 
 namespace firevision {
 
 /** Header for a histogram block. */
 typedef struct _histogram_block_header_t
 {
-  uint16_t width;          /**< the width of the histogram */
-  uint16_t height;         /**< the height of the histogram */
-  uint16_t depth;          /**< the depth of the histogram */
-  uint8_t  object_type;    /**< the type of object the histogram is associated with */
+	uint16_t width;       /**< the width of the histogram */
+	uint16_t height;      /**< the height of the histogram */
+	uint16_t depth;       /**< the depth of the histogram */
+	uint8_t  object_type; /**< the type of object the histogram is associated with */
 } histogram_block_header_t;
 
-
 /** The blocktype of a histogram block. */
-typedef enum _histogram_block_type_t
-{
-  FIREVISION_HISTOGRAM_TYPE_16 = 0,    /**< histogram uses 16 bits per cell */
-  FIREVISION_HISTOGRAM_TYPE_32 = 1     /**< histogram uses 32 bits per cell */
+typedef enum _histogram_block_type_t {
+	FIREVISION_HISTOGRAM_TYPE_16 = 0, /**< histogram uses 16 bits per cell */
+	FIREVISION_HISTOGRAM_TYPE_32 = 1  /**< histogram uses 32 bits per cell */
 } histogram_block_type_t;
-
 
 class HistogramBlock : public FireVisionDataFileBlock
 {
- public:
-  HistogramBlock(histogram_block_type_t type, hint_t object_type,
-		 uint16_t width, uint16_t height, uint16_t depth = 0);
-  HistogramBlock(FireVisionDataFileBlock* block);
+public:
+	HistogramBlock(histogram_block_type_t type,
+	               hint_t                 object_type,
+	               uint16_t               width,
+	               uint16_t               height,
+	               uint16_t               depth = 0);
+	HistogramBlock(FireVisionDataFileBlock *block);
 
-  virtual ~HistogramBlock();
+	virtual ~HistogramBlock();
 
-  uint16_t width() const;
-  uint16_t height() const;
-  uint16_t depth() const;
+	uint16_t width() const;
+	uint16_t height() const;
+	uint16_t depth() const;
 
-  hint_t object_type() const;
-  void set_object_type(hint_t object_type);
+	hint_t object_type() const;
+	void   set_object_type(hint_t object_type);
 
-  void set_data(uint32_t* data);
+	void set_data(uint32_t *data);
 
-  void set_value(uint16_t x, uint16_t y, uint32_t val);
-  void set_value(uint16_t x, uint16_t y, uint16_t z, uint32_t val);
+	void set_value(uint16_t x, uint16_t y, uint32_t val);
+	void set_value(uint16_t x, uint16_t y, uint16_t z, uint32_t val);
 
-  uint32_t get_value(uint16_t x, uint16_t y);
-  uint32_t get_value(uint16_t x, uint16_t y, uint16_t z);
+	uint32_t get_value(uint16_t x, uint16_t y);
+	uint32_t get_value(uint16_t x, uint16_t y, uint16_t z);
 
-  void reset();
+	void reset();
 
- private:
-  histogram_block_header_t* _block_header;
-  uint32_t* _histogram_data;
+private:
+	histogram_block_header_t *_block_header;
+	uint32_t *                _histogram_data;
 };
 
 } // end namespace firevision

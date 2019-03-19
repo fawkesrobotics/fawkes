@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/examples/basics/net_thread.h>
 #include <netcomm/fawkes/component_ids.h>
+#include <plugins/examples/basics/net_thread.h>
 
 #include <cstdlib>
 #include <unistd.h>
@@ -37,17 +37,14 @@ using namespace fawkes;
  * @param name thread name
  */
 ExampleNetworkThread::ExampleNetworkThread(const char *name)
-  : Thread(name, Thread::OPMODE_WAITFORWAKEUP),
-    FawkesNetworkHandler(FAWKES_CID_EXAMPLE_PLUGIN)
+: Thread(name, Thread::OPMODE_WAITFORWAKEUP), FawkesNetworkHandler(FAWKES_CID_EXAMPLE_PLUGIN)
 {
 }
-
 
 /** Destructor. */
 ExampleNetworkThread::~ExampleNetworkThread()
 {
 }
-
 
 /** Initialize thread.
  * This method is called just after all aspects have been initialized but before
@@ -60,17 +57,16 @@ ExampleNetworkThread::~ExampleNetworkThread()
 void
 ExampleNetworkThread::init()
 {
-  fnethub->add_handler( this );
+	fnethub->add_handler(this);
 }
-
 
 void
 ExampleNetworkThread::finalize()
 {
-  logger->log_info("ExampleNetworkThread", "Removing this thread from list of Fawkes network hub handlers");
-  fnethub->remove_handler( this );
+	logger->log_info("ExampleNetworkThread",
+	                 "Removing this thread from list of Fawkes network hub handlers");
+	fnethub->remove_handler(this);
 }
-
 
 /** Thread loop.
  * Nothing to do here since nobody will every wake us up (we do not have the
@@ -91,7 +87,6 @@ ExampleNetworkThread::loop()
 {
 }
 
-
 /** Handle network message.
  * The message is put into the inbound queue and processed in processAfterLoop().
  * @param msg message
@@ -99,19 +94,20 @@ ExampleNetworkThread::loop()
 void
 ExampleNetworkThread::handle_network_message(FawkesNetworkMessage *msg)
 {
-  if ( msg->payload_size() == sizeof(unsigned int) ) {
-    unsigned int *u = (unsigned int *)msg->payload();
-    logger->log_info("ExamplePlugin", "Message of type %u with payload u=%u received, sending reply", msg->msgid(), *u);
-    unsigned int *ru = (unsigned int *)malloc(sizeof(unsigned int));
-    *ru = *u;
-    fnethub->send(msg->clid(), FAWKES_CID_EXAMPLE_PLUGIN, msg->msgid(),
-		  ru, sizeof(unsigned int));
-    // ru is now owned by the generated message and will be automatically freed
-  } else {
-    logger->log_error("ExamplePlugin", "Message of invalid size received");
-  }
+	if (msg->payload_size() == sizeof(unsigned int)) {
+		unsigned int *u = (unsigned int *)msg->payload();
+		logger->log_info("ExamplePlugin",
+		                 "Message of type %u with payload u=%u received, sending reply",
+		                 msg->msgid(),
+		                 *u);
+		unsigned int *ru = (unsigned int *)malloc(sizeof(unsigned int));
+		*ru              = *u;
+		fnethub->send(msg->clid(), FAWKES_CID_EXAMPLE_PLUGIN, msg->msgid(), ru, sizeof(unsigned int));
+		// ru is now owned by the generated message and will be automatically freed
+	} else {
+		logger->log_error("ExamplePlugin", "Message of invalid size received");
+	}
 }
-
 
 /** Client connected.
  * Ignored.
@@ -120,9 +116,8 @@ ExampleNetworkThread::handle_network_message(FawkesNetworkMessage *msg)
 void
 ExampleNetworkThread::client_connected(unsigned int clid)
 {
-  logger->log_info("ExamplePlugin", "Client %u connected", clid);
+	logger->log_info("ExamplePlugin", "Client %u connected", clid);
 }
-
 
 /** Client disconnected.
  * If the client was a subscriber it is removed.
@@ -131,5 +126,5 @@ ExampleNetworkThread::client_connected(unsigned int clid)
 void
 ExampleNetworkThread::client_disconnected(unsigned int clid)
 {
-  logger->log_info("ExamplePlugin", "Client %u disconnected", clid);
+	logger->log_info("ExamplePlugin", "Client %u disconnected", clid);
 }

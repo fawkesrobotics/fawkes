@@ -14,9 +14,9 @@
 #include "DomainObjectType.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ DomainObjectType::DomainObjectType(const std::string &json)
 	from_json(json);
 }
 
-DomainObjectType::DomainObjectType(const rapidjson::Value& v)
+DomainObjectType::DomainObjectType(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ DomainObjectType::to_json(bool pretty) const
 }
 
 void
-DomainObjectType::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+DomainObjectType::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -85,7 +85,6 @@ DomainObjectType::to_json_value(rapidjson::Document& d, rapidjson::Value& v) con
 		v_super_type.SetString(*super_type_, allocator);
 		v.AddMember("super-type", v_super_type, allocator);
 	}
-
 }
 
 void
@@ -98,7 +97,7 @@ DomainObjectType::from_json(const std::string &json)
 }
 
 void
-DomainObjectType::from_json_value(const rapidjson::Value& d)
+DomainObjectType::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -112,26 +111,27 @@ DomainObjectType::from_json_value(const rapidjson::Value& d)
 	if (d.HasMember("super-type") && d["super-type"].IsString()) {
 		super_type_ = d["super-type"].GetString();
 	}
-
 }
 
 void
 DomainObjectType::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! name_)  missing.push_back("name");
-	if (! super_type_)  missing.push_back("super-type");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!name_)
+		missing.push_back("name");
+	if (!super_type_)
+		missing.push_back("super-type");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "DomainObjectType is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "DomainObjectType is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

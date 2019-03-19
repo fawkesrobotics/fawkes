@@ -21,6 +21,7 @@
  */
 
 #include "sensor_thread.h"
+
 #include "acquisition_thread.h"
 
 #include <interfaces/IMUInterface.h>
@@ -34,59 +35,56 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param cfg_name short name of configuration group
  * @param cfg_prefix configuration path prefix
  * @param aqt IMUAcquisitionThread to get data from
  */
-IMUSensorThread::IMUSensorThread(std::string &cfg_name,
-				     std::string &cfg_prefix,
-				     IMUAcquisitionThread *aqt)
-  : Thread("IMUSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
+IMUSensorThread::IMUSensorThread(std::string &         cfg_name,
+                                 std::string &         cfg_prefix,
+                                 IMUAcquisitionThread *aqt)
+: Thread("IMUSensorThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
-  set_name("IMUSensorThread(%s)", cfg_name.c_str());
-  aqt_        = aqt;
-  cfg_name_   = cfg_name;
-  cfg_prefix_ = cfg_prefix;
+	set_name("IMUSensorThread(%s)", cfg_name.c_str());
+	aqt_        = aqt;
+	cfg_name_   = cfg_name;
+	cfg_prefix_ = cfg_prefix;
 }
-
 
 void
 IMUSensorThread::init()
 {
-  imu_if_ = NULL;
+	imu_if_ = NULL;
 
-  cfg_frame_ = config->get_string((cfg_prefix_ + "frame").c_str());
+	cfg_frame_ = config->get_string((cfg_prefix_ + "frame").c_str());
 
-  std::string if_id = "IMU " + cfg_name_;
+	std::string if_id = "IMU " + cfg_name_;
 
-  imu_if_ = blackboard->open_for_writing<IMUInterface>(if_id.c_str());
-  imu_if_->set_auto_timestamping(false);
-  imu_if_->set_frame(cfg_frame_.c_str());
-  imu_if_->write();
+	imu_if_ = blackboard->open_for_writing<IMUInterface>(if_id.c_str());
+	imu_if_->set_auto_timestamping(false);
+	imu_if_->set_frame(cfg_frame_.c_str());
+	imu_if_->write();
 }
-
 
 void
 IMUSensorThread::finalize()
 {
-  blackboard->close(imu_if_);
+	blackboard->close(imu_if_);
 }
 
 void
 IMUSensorThread::loop()
 {
-  if (aqt_->lock_if_new_data()) {
-    imu_if_->set_timestamp(aqt_->get_timestamp());
-    imu_if_->set_orientation(aqt_->get_orientation());
-    imu_if_->set_orientation_covariance(aqt_->get_orientation_covariance());
-    imu_if_->set_angular_velocity(aqt_->get_angular_velocity());
-    imu_if_->set_angular_velocity_covariance(aqt_->get_angular_velocity_covariance());
-    imu_if_->set_linear_acceleration(aqt_->get_linear_acceleration());
-    imu_if_->set_linear_acceleration_covariance(aqt_->get_linear_acceleration_covariance());
-    imu_if_->write();
-    aqt_->unlock();
-  }
+	if (aqt_->lock_if_new_data()) {
+		imu_if_->set_timestamp(aqt_->get_timestamp());
+		imu_if_->set_orientation(aqt_->get_orientation());
+		imu_if_->set_orientation_covariance(aqt_->get_orientation_covariance());
+		imu_if_->set_angular_velocity(aqt_->get_angular_velocity());
+		imu_if_->set_angular_velocity_covariance(aqt_->get_angular_velocity_covariance());
+		imu_if_->set_linear_acceleration(aqt_->get_linear_acceleration());
+		imu_if_->set_linear_acceleration_covariance(aqt_->get_linear_acceleration_covariance());
+		imu_if_->write();
+		aqt_->unlock();
+	}
 }

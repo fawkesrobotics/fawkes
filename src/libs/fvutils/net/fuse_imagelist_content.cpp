@@ -21,13 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <core/exceptions/software.h>
 #include <fvutils/net/fuse_imagelist_content.h>
 #include <netcomm/utils/dynamic_buffer.h>
-#include <core/exceptions/software.h>
+#include <netinet/in.h>
 
 #include <cstdlib>
 #include <cstring>
-#include <netinet/in.h>
 
 using namespace fawkes;
 
@@ -47,12 +47,11 @@ namespace firevision {
  */
 FuseImageListContent::FuseImageListContent()
 {
-  list_ = new DynamicBuffer(&(imagelist_msg_.image_list));
-  
-  _payload_size = 0;
-  _payload      = NULL;
-}
+	list_ = new DynamicBuffer(&(imagelist_msg_.image_list));
 
+	_payload_size = 0;
+	_payload      = NULL;
+}
 
 /** Parsing constructor.
  * Can be used with the FuseMessage::msgc() method to get correctly parsed output.
@@ -63,23 +62,23 @@ FuseImageListContent::FuseImageListContent()
  */
 FuseImageListContent::FuseImageListContent(uint32_t type, void *payload, size_t payload_size)
 {
-  if ( type != FUSE_MT_IMAGE_LIST ) {
-    throw TypeMismatchException("Type %u not equal to expected type FUSE_MT_IMAGE_LIST (%u)",
-				type, FUSE_MT_IMAGE_LIST);
-  }
-  FUSE_imagelist_message_t *tmsg = (FUSE_imagelist_message_t *)payload;
-  void *list_payload = (void *)((size_t)payload + sizeof(FUSE_imagelist_message_t));
-  list_ = new DynamicBuffer(&(tmsg->image_list), list_payload,
-			     payload_size - sizeof(FUSE_imagelist_message_t));
+	if (type != FUSE_MT_IMAGE_LIST) {
+		throw TypeMismatchException("Type %u not equal to expected type FUSE_MT_IMAGE_LIST (%u)",
+		                            type,
+		                            FUSE_MT_IMAGE_LIST);
+	}
+	FUSE_imagelist_message_t *tmsg = (FUSE_imagelist_message_t *)payload;
+	void *list_payload             = (void *)((size_t)payload + sizeof(FUSE_imagelist_message_t));
+	list_                          = new DynamicBuffer(&(tmsg->image_list),
+                            list_payload,
+                            payload_size - sizeof(FUSE_imagelist_message_t));
 }
-
 
 /** Destructor. */
 FuseImageListContent::~FuseImageListContent()
 {
-  delete list_;
+	delete list_;
 }
-
 
 /** Add image info.
  * This can only be called on contents that have been newly created, it is
@@ -90,29 +89,29 @@ FuseImageListContent::~FuseImageListContent()
  * @param pixel_height height of image in pixels
  */
 void
-FuseImageListContent::add_imageinfo(const char *image_id, colorspace_t colorspace,
-				    unsigned int pixel_width, unsigned int pixel_height)
+FuseImageListContent::add_imageinfo(const char * image_id,
+                                    colorspace_t colorspace,
+                                    unsigned int pixel_width,
+                                    unsigned int pixel_height)
 {
-  FUSE_imageinfo_t imageinfo;
-  memset(&imageinfo, 0, sizeof(imageinfo));
+	FUSE_imageinfo_t imageinfo;
+	memset(&imageinfo, 0, sizeof(imageinfo));
 
-  strncpy(imageinfo.image_id, image_id, IMAGE_ID_MAX_LENGTH-1);
-  imageinfo.colorspace = htons(colorspace);
-  imageinfo.width = htonl(pixel_width);
-  imageinfo.height = htonl(pixel_height);
-  imageinfo.buffer_size = htonl(colorspace_buffer_size(colorspace, pixel_width, pixel_height));
+	strncpy(imageinfo.image_id, image_id, IMAGE_ID_MAX_LENGTH - 1);
+	imageinfo.colorspace  = htons(colorspace);
+	imageinfo.width       = htonl(pixel_width);
+	imageinfo.height      = htonl(pixel_height);
+	imageinfo.buffer_size = htonl(colorspace_buffer_size(colorspace, pixel_width, pixel_height));
 
-  list_->append(&imageinfo, sizeof(imageinfo));
+	list_->append(&imageinfo, sizeof(imageinfo));
 }
-
 
 /** Reset iterator. */
 void
 FuseImageListContent::reset_iterator()
 {
-  list_->reset_iterator();
+	list_->reset_iterator();
 }
-
 
 /** Check if another image info is available.
  * @return true if another image info is available, false otherwise
@@ -120,9 +119,8 @@ FuseImageListContent::reset_iterator()
 bool
 FuseImageListContent::has_next()
 {
-  return list_->has_next();
+	return list_->has_next();
 }
-
 
 /** Get next image info.
  * @return next image info
@@ -132,25 +130,24 @@ FuseImageListContent::has_next()
 FUSE_imageinfo_t *
 FuseImageListContent::next()
 {
-  size_t size;
-  void *tmp = list_->next(&size);
-  if ( size != sizeof(FUSE_imageinfo_t) ) {
-    throw TypeMismatchException("Image list content contains element that is of an "
-				"unexpected size");
-  }
+	size_t size;
+	void * tmp = list_->next(&size);
+	if (size != sizeof(FUSE_imageinfo_t)) {
+		throw TypeMismatchException("Image list content contains element that is of an "
+		                            "unexpected size");
+	}
 
-  return (FUSE_imageinfo_t *)tmp;
+	return (FUSE_imageinfo_t *)tmp;
 }
-
 
 void
 FuseImageListContent::serialize()
 {
-  _payload_size = sizeof(FUSE_imagelist_message_t) + list_->buffer_size();
-  _payload = malloc(_payload_size);
+	_payload_size = sizeof(FUSE_imagelist_message_t) + list_->buffer_size();
+	_payload      = malloc(_payload_size);
 
-  copy_payload(0, &imagelist_msg_, sizeof(FUSE_imagelist_message_t));
-  copy_payload(sizeof(FUSE_imagelist_message_t), list_->buffer(), list_->buffer_size());
+	copy_payload(0, &imagelist_msg_, sizeof(FUSE_imagelist_message_t));
+	copy_payload(sizeof(FUSE_imagelist_message_t), list_->buffer(), list_->buffer_size());
 }
 
 } // end namespace firevision

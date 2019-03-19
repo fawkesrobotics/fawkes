@@ -22,7 +22,6 @@
  */
 
 #include <fvfilters/morphology/closing.h>
-
 #include <fvfilters/morphology/dilation.h>
 #include <fvfilters/morphology/erosion.h>
 
@@ -36,67 +35,62 @@ namespace firevision {
  * @author Tim Niemueller
  */
 
-
 /** Constructor. */
-FilterClosing::FilterClosing()
-  : MorphologicalFilter("Morphological Closing")
+FilterClosing::FilterClosing() : MorphologicalFilter("Morphological Closing")
 {
-  dilate = new FilterDilation();
-  erode  = new FilterErosion();
+	dilate = new FilterDilation();
+	erode  = new FilterErosion();
 }
-
 
 /** Destructor. */
 FilterClosing::~FilterClosing()
 {
-  delete dilate;
-  delete erode;
+	delete dilate;
+	delete erode;
 }
-
-
 
 void
-FilterClosing::set_src_buffer(unsigned char *buf, ROI *roi,
-			      orientation_t ori, unsigned int buffer_num)
+FilterClosing::set_src_buffer(unsigned char *buf,
+                              ROI *          roi,
+                              orientation_t  ori,
+                              unsigned int   buffer_num)
 {
-  Filter::set_src_buffer(buf, roi, ori, buffer_num);
-  dilate->set_src_buffer( buf, roi, ori, buffer_num );
+	Filter::set_src_buffer(buf, roi, ori, buffer_num);
+	dilate->set_src_buffer(buf, roi, ori, buffer_num);
 }
-
 
 void
 FilterClosing::set_src_buffer(unsigned char *buf, ROI *roi, unsigned int buffer_num)
 {
-  Filter::set_src_buffer(buf, roi, buffer_num);
-  dilate->set_src_buffer( buf, roi, buffer_num );
+	Filter::set_src_buffer(buf, roi, buffer_num);
+	dilate->set_src_buffer(buf, roi, buffer_num);
 }
-
 
 void
 FilterClosing::set_dst_buffer(unsigned char *buf, ROI *roi)
 {
-  Filter::set_dst_buffer(buf, roi);
-  dilate->set_dst_buffer( buf, roi );
-  erode->set_src_buffer( buf, roi );
+	Filter::set_dst_buffer(buf, roi);
+	dilate->set_dst_buffer(buf, roi);
+	erode->set_src_buffer(buf, roi);
 }
-
 
 void
 FilterClosing::set_structuring_element(unsigned char *se,
-				       unsigned int se_width, unsigned int se_height,
-				       unsigned int se_anchor_x, unsigned int se_anchor_y)
+                                       unsigned int   se_width,
+                                       unsigned int   se_height,
+                                       unsigned int   se_anchor_x,
+                                       unsigned int   se_anchor_y)
 {
-  MorphologicalFilter::set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
-  dilate->set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
-  erode->set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
+	MorphologicalFilter::set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
+	dilate->set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
+	erode->set_structuring_element(se, se_width, se_height, se_anchor_x, se_anchor_y);
 }
-
 
 void
 FilterClosing::apply()
 {
-  dilate->apply();
-  erode->apply();
+	dilate->apply();
+	erode->apply();
 }
 
 } // end namespace firevision

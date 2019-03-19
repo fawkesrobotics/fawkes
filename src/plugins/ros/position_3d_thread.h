@@ -23,53 +23,51 @@
 #define _PLUGINS_ROS_POSITION_3D_THREAD_H_
 
 // TODO check includes
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
-#include <plugins/ros/aspect/ros.h>
+#include <aspect/logging.h>
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
 #include <core/threading/mutex.h>
+#include <core/threading/thread.h>
 #include <interfaces/Position3DInterface.h>
+#include <plugins/ros/aspect/ros.h>
 
 #include <list>
 
 // from ROS
 #include <ros/node_handle.h>
 
-class RosPosition3DThread
-: public fawkes::Thread,
-  public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ROSAspect,
-  public fawkes::BlackBoardInterfaceObserver,
-  public fawkes::BlackBoardInterfaceListener
+class RosPosition3DThread : public fawkes::Thread,
+                            public fawkes::ConfigurableAspect,
+                            public fawkes::LoggingAspect,
+                            public fawkes::BlackBoardAspect,
+                            public fawkes::ROSAspect,
+                            public fawkes::BlackBoardInterfaceObserver,
+                            public fawkes::BlackBoardInterfaceListener
 {
- public:
-  RosPosition3DThread();
-  virtual ~RosPosition3DThread();
+public:
+	RosPosition3DThread();
+	virtual ~RosPosition3DThread();
 
-  virtual void init();
-  virtual void finalize();
+	virtual void init();
+	virtual void finalize();
 
-  virtual void bb_interface_created(const char *type, const char *id) throw();
-  virtual void bb_interface_writer_removed(fawkes::Interface *interface,
-                                           unsigned int instance_serial) throw();
-  virtual void bb_interface_reader_removed(fawkes::Interface *interface,
-                                           unsigned int instance_serial) throw();
-  virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
+	                                         unsigned int       instance_serial) throw();
+	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
+	                                         unsigned int       instance_serial) throw();
+	virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
 
- private:
-  void conditional_close(fawkes::Interface *interface) throw();
+private:
+	void conditional_close(fawkes::Interface *interface) throw();
 
- private:
-  ros::Publisher ros_pub_;
-  std::list<fawkes::Position3DInterface *> ifs_;
-  std::string cfg_ros_topic_;
-
+private:
+	ros::Publisher                           ros_pub_;
+	std::list<fawkes::Position3DInterface *> ifs_;
+	std::string                              cfg_ros_topic_;
 };
 
 #endif

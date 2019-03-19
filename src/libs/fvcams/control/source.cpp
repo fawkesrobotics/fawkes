@@ -43,7 +43,7 @@ namespace firevision {
  * @param source id of the new source
  */
 
- /** Empty virtual destructor. */
+/** Empty virtual destructor. */
 CameraControlSource::~CameraControlSource()
 {
 }

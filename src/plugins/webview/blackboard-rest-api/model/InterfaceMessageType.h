@@ -14,22 +14,21 @@
 #pragma once
 
 #define RAPIDJSON_HAS_STDSTRING 1
-#include <rapidjson/fwd.h>
-
-#include <string>
-#include <cstdint>
-#include <vector>
-#include <memory>
-#include <optional>
-
 #include "InterfaceFieldType.h"
 
+#include <rapidjson/fwd.h>
+
+#include <cstdint>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
 /** InterfaceMessageType representation for JSON transfer. */
 class InterfaceMessageType
 
 {
- public:
+public:
 	/** Constructor. */
 	InterfaceMessageType();
 	/** Constructor from JSON.
@@ -39,7 +38,7 @@ class InterfaceMessageType
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	InterfaceMessageType(const rapidjson::Value& v);
+	InterfaceMessageType(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~InterfaceMessageType();
@@ -47,9 +46,10 @@ class InterfaceMessageType
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -61,19 +61,19 @@ class InterfaceMessageType
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -86,12 +86,12 @@ class InterfaceMessageType
 	virtual void validate(bool subcall = false) const;
 
 	// Schema: InterfaceMessageType
- public:
-  /** Get name value.
+public:
+	/** Get name value.
    * @return name value
    */
 	std::optional<std::string>
- name() const
+	name() const
 	{
 		return name_;
 	}
@@ -99,15 +99,16 @@ class InterfaceMessageType
 	/** Set name value.
 	 * @param name new value
 	 */
-	void set_name(const std::string& name)
+	void
+	set_name(const std::string &name)
 	{
 		name_ = name;
 	}
-  /** Get fields value.
+	/** Get fields value.
    * @return fields value
    */
 	std::vector<std::shared_ptr<InterfaceFieldType>>
- fields() const
+	fields() const
 	{
 		return fields_;
 	}
@@ -115,14 +116,16 @@ class InterfaceMessageType
 	/** Set fields value.
 	 * @param fields new value
 	 */
-	void set_fields(const std::vector<std::shared_ptr<InterfaceFieldType>>& fields)
+	void
+	set_fields(const std::vector<std::shared_ptr<InterfaceFieldType>> &fields)
 	{
 		fields_ = fields;
 	}
 	/** Add element to fields array.
 	 * @param fields new value
 	 */
-	void addto_fields(const std::shared_ptr<InterfaceFieldType>&& fields)
+	void
+	addto_fields(const std::shared_ptr<InterfaceFieldType> &&fields)
 	{
 		fields_.push_back(std::move(fields));
 	}
@@ -131,21 +134,21 @@ class InterfaceMessageType
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param fields new value
 	 */
-	void addto_fields(const std::shared_ptr<InterfaceFieldType>& fields)
+	void
+	addto_fields(const std::shared_ptr<InterfaceFieldType> &fields)
 	{
 		fields_.push_back(fields);
 	}
 	/** Add element to fields array.
 	 * @param fields new value
 	 */
-	void addto_fields(const InterfaceFieldType&& fields)
+	void
+	addto_fields(const InterfaceFieldType &&fields)
 	{
 		fields_.push_back(std::make_shared<InterfaceFieldType>(std::move(fields)));
 	}
- private:
-	std::optional<std::string>
- name_;
-	std::vector<std::shared_ptr<InterfaceFieldType>>
- fields_;
 
+private:
+	std::optional<std::string>                       name_;
+	std::vector<std::shared_ptr<InterfaceFieldType>> fields_;
 };

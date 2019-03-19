@@ -20,29 +20,27 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <navgraph/navgraph.h>
-#include <navgraph/constraints/constraint_repo.h>
-#include <navgraph/search_state.h>
 #include <core/exception.h>
-#include <utils/search/astar.h>
+#include <navgraph/constraints/constraint_repo.h>
+#include <navgraph/navgraph.h>
+#include <navgraph/search_state.h>
 #include <utils/math/common.h>
-
-#include <algorithm>
-#include <limits>
-#include <list>
-#include <set>
-#include <queue>
-#include <cmath>
-#include <cstdio>
+#include <utils/search/astar.h>
 
 #include <Eigen/Geometry>
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <limits>
+#include <list>
+#include <queue>
+#include <set>
 
 namespace fawkes {
 
 namespace navgraph {
-  const char *PROP_ORIENTATION = "orientation";
-} // end of namespace fawkes::navgraph
-
+const char *PROP_ORIENTATION = "orientation";
+} // namespace navgraph
 
 /** @class NavGraph <navgraph/navgraph.h>
  * Topological map graph.
@@ -66,17 +64,15 @@ namespace navgraph {
  */
 NavGraph::NavGraph(const std::string &graph_name)
 {
-  graph_name_ = graph_name;
-  constraint_repo_ = LockPtr<NavGraphConstraintRepo>(new NavGraphConstraintRepo(),
-						     /* recursive mutex */ true);
-  search_default_funcs_  = true;
-  search_estimate_func_  = NavGraphSearchState::straight_line_estimate;
-  search_cost_func_      = NavGraphSearchState::euclidean_cost;
-  reachability_calced_   = false;
-  notifications_enabled_ = true;
+	graph_name_            = graph_name;
+	constraint_repo_       = LockPtr<NavGraphConstraintRepo>(new NavGraphConstraintRepo(),
+                                                     /* recursive mutex */ true);
+	search_default_funcs_  = true;
+	search_estimate_func_  = NavGraphSearchState::straight_line_estimate;
+	search_cost_func_      = NavGraphSearchState::euclidean_cost;
+	reachability_calced_   = false;
+	notifications_enabled_ = true;
 }
-
-
 
 /** Copy constructor.
  * This method will remove internal data like nodes, and edges
@@ -87,18 +83,17 @@ NavGraph::NavGraph(const std::string &graph_name)
  */
 NavGraph::NavGraph(const NavGraph &g)
 {
-  graph_name_ = g.graph_name_;
-  nodes_.clear();
-  nodes_      = g.nodes_;
-  edges_.clear();
-  edges_      = g.edges_;
+	graph_name_ = g.graph_name_;
+	nodes_.clear();
+	nodes_ = g.nodes_;
+	edges_.clear();
+	edges_ = g.edges_;
 }
 
 /** Virtual empty destructor. */
 NavGraph::~NavGraph()
 {
 }
-
 
 /** Assign/copy structures from another graph.
  * This method will remove internal data like nodes, and edges
@@ -111,15 +106,15 @@ NavGraph::~NavGraph()
 NavGraph &
 NavGraph::operator=(const NavGraph &g)
 {
-  graph_name_ = g.graph_name_;
-  nodes_.clear();
-  nodes_      = g.nodes_;
-  edges_.clear();
-  edges_      = g.edges_;
+	graph_name_ = g.graph_name_;
+	nodes_.clear();
+	nodes_ = g.nodes_;
+	edges_.clear();
+	edges_ = g.edges_;
 
-  notify_of_change();
+	notify_of_change();
 
-  return *this;
+	return *this;
 }
 
 /** Get graph name.
@@ -128,9 +123,8 @@ NavGraph::operator=(const NavGraph &g)
 std::string
 NavGraph::name() const
 {
-  return graph_name_;
+	return graph_name_;
 }
-
 
 /** Get nodes of the graph.
  * @return const reference to vector of nodes of this graph
@@ -138,9 +132,8 @@ NavGraph::name() const
 const std::vector<NavGraphNode> &
 NavGraph::nodes() const
 {
-  return nodes_;
+	return nodes_;
 }
-
 
 /** Get edges of the graph.
  * @return const reference to vector of edges of this graph
@@ -148,9 +141,8 @@ NavGraph::nodes() const
 const std::vector<NavGraphEdge> &
 NavGraph::edges() const
 {
-  return edges_;
+	return edges_;
 }
-
 
 /** Get locked pointer to constraint repository.
  * @return locked pointer to navgraph constraint repo. Note that you must
@@ -159,7 +151,7 @@ NavGraph::edges() const
 fawkes::LockPtr<NavGraphConstraintRepo>
 NavGraph::constraint_repo() const
 {
-  return constraint_repo_;
+	return constraint_repo_;
 }
 
 /** Get a specified node.
@@ -170,18 +162,16 @@ NavGraph::constraint_repo() const
 NavGraphNode
 NavGraph::node(const std::string &name) const
 {
-  std::vector<NavGraphNode>::const_iterator n =
-    std::find_if(nodes_.begin(), nodes_.end(), 
-		 [&name](const NavGraphNode &node) {
-		   return node.name() == name;
-		 });
-  if (n != nodes_.end()) {
-    return *n;
-  } else {
-    return NavGraphNode();
-  }
+	std::vector<NavGraphNode>::const_iterator n =
+	  std::find_if(nodes_.begin(), nodes_.end(), [&name](const NavGraphNode &node) {
+		  return node.name() == name;
+	  });
+	if (n != nodes_.end()) {
+		return *n;
+	} else {
+		return NavGraphNode();
+	}
 }
-
 
 /** Get node closest to a specified point with a certain property.
  * This search does *NOT* consider unconnected nodes.
@@ -195,9 +185,8 @@ NavGraph::node(const std::string &name) const
 NavGraphNode
 NavGraph::closest_node(float pos_x, float pos_y, const std::string &property) const
 {
-  return closest_node(pos_x, pos_y, false, property);
+	return closest_node(pos_x, pos_y, false, property);
 }
-
 
 /** Get node closest to a specified point with a certain property.
  * This search *does* consider unconnected nodes.
@@ -209,10 +198,9 @@ NavGraph::closest_node(float pos_x, float pos_y, const std::string &property) co
  * invalid node if such a node cannot be found
  */
 NavGraphNode
-NavGraph::closest_node_with_unconnected(float pos_x, float pos_y,
-					const std::string &property) const
+NavGraph::closest_node_with_unconnected(float pos_x, float pos_y, const std::string &property) const
 {
-  return closest_node(pos_x, pos_y, true, property);
+	return closest_node(pos_x, pos_y, true, property);
 }
 
 /** Get node closest to another node with a certain property.
@@ -225,10 +213,9 @@ NavGraph::closest_node_with_unconnected(float pos_x, float pos_y,
  * not be the node with the name @p node_name.
  */
 NavGraphNode
-NavGraph::closest_node_to(const std::string &node_name,
-			  const std::string &property) const
+NavGraph::closest_node_to(const std::string &node_name, const std::string &property) const
 {
-  return closest_node_to(node_name, false, property);
+	return closest_node_to(node_name, false, property);
 }
 
 /** Get node closest to another node with a certain property.
@@ -242,9 +229,9 @@ NavGraph::closest_node_to(const std::string &node_name,
  */
 NavGraphNode
 NavGraph::closest_node_to_with_unconnected(const std::string &node_name,
-					   const std::string &property) const
+                                           const std::string &property) const
 {
-  return closest_node_to(node_name, true, property);
+	return closest_node_to(node_name, true, property);
 }
 
 /** Get node closest to a specified point with a certain property.
@@ -258,32 +245,35 @@ NavGraph::closest_node_to_with_unconnected(const std::string &node_name,
  * invalid node if such a node cannot be found
  */
 NavGraphNode
-NavGraph::closest_node(float pos_x, float pos_y, bool consider_unconnected,
-		       const std::string &property) const
+NavGraph::closest_node(float              pos_x,
+                       float              pos_y,
+                       bool               consider_unconnected,
+                       const std::string &property) const
 {
-  std::vector<NavGraphNode> nodes = search_nodes(property);
+	std::vector<NavGraphNode> nodes = search_nodes(property);
 
-  float min_dist = std::numeric_limits<float>::max();
+	float min_dist = std::numeric_limits<float>::max();
 
-  std::vector<NavGraphNode>::iterator i;
-  std::vector<NavGraphNode>::iterator elem = nodes.end();
-  for (i = nodes.begin(); i != nodes.end(); ++i) {
-    if (! consider_unconnected && i->unconnected())  continue;
+	std::vector<NavGraphNode>::iterator i;
+	std::vector<NavGraphNode>::iterator elem = nodes.end();
+	for (i = nodes.begin(); i != nodes.end(); ++i) {
+		if (!consider_unconnected && i->unconnected())
+			continue;
 
-    float dx   = i->x() - pos_x;
-    float dy   = i->y() - pos_y;
-    float dist = sqrtf(dx * dx + dy * dy);
-    if (sqrtf(dx * dx + dy * dy) < min_dist) {
-      min_dist = dist;
-      elem = i;
-    }
-  }
+		float dx   = i->x() - pos_x;
+		float dy   = i->y() - pos_y;
+		float dist = sqrtf(dx * dx + dy * dy);
+		if (sqrtf(dx * dx + dy * dy) < min_dist) {
+			min_dist = dist;
+			elem     = i;
+		}
+	}
 
-  if (elem == nodes.end()) {
-    return NavGraphNode();
-  } else {
-    return *elem;
-  }
+	if (elem == nodes.end()) {
+		return NavGraphNode();
+	} else {
+		return *elem;
+	}
 }
 
 /** Get node closest to another node with a certain property.
@@ -297,35 +287,36 @@ NavGraph::closest_node(float pos_x, float pos_y, bool consider_unconnected,
  * not be the node with the name @p node_name.
  */
 NavGraphNode
-NavGraph::closest_node_to(const std::string &node_name, bool consider_unconnected,
-			  const std::string &property) const
+NavGraph::closest_node_to(const std::string &node_name,
+                          bool               consider_unconnected,
+                          const std::string &property) const
 {
-  NavGraphNode n = node(node_name);
-  std::vector<NavGraphNode> nodes = search_nodes(property);
+	NavGraphNode              n     = node(node_name);
+	std::vector<NavGraphNode> nodes = search_nodes(property);
 
-  float min_dist = std::numeric_limits<float>::max();
+	float min_dist = std::numeric_limits<float>::max();
 
-  std::vector<NavGraphNode>::iterator i;
-  std::vector<NavGraphNode>::iterator elem = nodes.begin();
-  for (i = nodes.begin(); i != nodes.end(); ++i) {
-    if (! consider_unconnected && i->unconnected())  continue;
+	std::vector<NavGraphNode>::iterator i;
+	std::vector<NavGraphNode>::iterator elem = nodes.begin();
+	for (i = nodes.begin(); i != nodes.end(); ++i) {
+		if (!consider_unconnected && i->unconnected())
+			continue;
 
-    float dx   = i->x() - n.x();
-    float dy   = i->y() - n.y();
-    float dist = sqrtf(dx * dx + dy * dy);
-    if ((sqrtf(dx * dx + dy * dy) < min_dist) && (i->name() != node_name)) {
-      min_dist = dist;
-      elem = i;
-    }
-  }
+		float dx   = i->x() - n.x();
+		float dy   = i->y() - n.y();
+		float dist = sqrtf(dx * dx + dy * dy);
+		if ((sqrtf(dx * dx + dy * dy) < min_dist) && (i->name() != node_name)) {
+			min_dist = dist;
+			elem     = i;
+		}
+	}
 
-  if (elem == nodes.end()) {
-    return NavGraphNode();
-  } else {
-    return *elem;
-  }
+	if (elem == nodes.end()) {
+		return NavGraphNode();
+	} else {
+		return *elem;
+	}
 }
-
 
 /** Get a specified edge.
  * @param from originating node name
@@ -337,19 +328,17 @@ NavGraph::closest_node_to(const std::string &node_name, bool consider_unconnecte
 NavGraphEdge
 NavGraph::edge(const std::string &from, const std::string &to) const
 {
-  std::vector<NavGraphEdge>::const_iterator e =
-    std::find_if(edges_.begin(), edges_.end(), 
-		 [&from, &to](const NavGraphEdge &edge) {
-		   return (edge.from() == from && edge.to() == to) ||
-		     (! edge.is_directed() && (edge.to() == from && edge.from() == to));
-		 });
-  if (e != edges_.end()) {
-    return *e;
-  } else {
-    return NavGraphEdge();
-  }
+	std::vector<NavGraphEdge>::const_iterator e =
+	  std::find_if(edges_.begin(), edges_.end(), [&from, &to](const NavGraphEdge &edge) {
+		  return (edge.from() == from && edge.to() == to)
+		         || (!edge.is_directed() && (edge.to() == from && edge.from() == to));
+	  });
+	if (e != edges_.end()) {
+		return *e;
+	} else {
+		return NavGraphEdge();
+	}
 }
-
 
 /** Get edge closest to a specified point.
  * The point must be within an imaginery line segment parallel to
@@ -363,30 +352,30 @@ NavGraph::edge(const std::string &from, const std::string &to) const
 NavGraphEdge
 NavGraph::closest_edge(float pos_x, float pos_y) const
 {
-  float min_dist = std::numeric_limits<float>::max();
+	float min_dist = std::numeric_limits<float>::max();
 
-  NavGraphEdge rv;
+	NavGraphEdge rv;
 
-  Eigen::Vector2f point(pos_x, pos_y);
-  for (const NavGraphEdge &edge : edges_) {
-    const Eigen::Vector2f origin(edge.from_node().x(), edge.from_node().y());
-    const Eigen::Vector2f target(edge.to_node().x(), edge.to_node().y());
-    const Eigen::Vector2f direction(target - origin);
-    const Eigen::Vector2f direction_norm = direction.normalized();
-    const Eigen::Vector2f diff = point - origin;
-    const float t = direction.dot(diff) / direction.squaredNorm();
+	Eigen::Vector2f point(pos_x, pos_y);
+	for (const NavGraphEdge &edge : edges_) {
+		const Eigen::Vector2f origin(edge.from_node().x(), edge.from_node().y());
+		const Eigen::Vector2f target(edge.to_node().x(), edge.to_node().y());
+		const Eigen::Vector2f direction(target - origin);
+		const Eigen::Vector2f direction_norm = direction.normalized();
+		const Eigen::Vector2f diff           = point - origin;
+		const float           t              = direction.dot(diff) / direction.squaredNorm();
 
-    if (t >= 0.0 && t <= 1.0) {
-      // projection of the point onto the edge is within the line segment
-      float distance = (diff - direction_norm.dot(diff) * direction_norm).norm();
-      if (distance < min_dist) {
-	min_dist = distance;
-	rv = edge;
-      }
-    }
-  }
+		if (t >= 0.0 && t <= 1.0) {
+			// projection of the point onto the edge is within the line segment
+			float distance = (diff - direction_norm.dot(diff) * direction_norm).norm();
+			if (distance < min_dist) {
+				min_dist = distance;
+				rv       = edge;
+			}
+		}
+	}
 
-  return rv;
+	return rv;
 }
 
 /** Search nodes for given property.
@@ -396,20 +385,20 @@ NavGraph::closest_edge(float pos_x, float pos_y) const
 std::vector<NavGraphNode>
 NavGraph::search_nodes(const std::string &property) const
 {
-  if (property == "") {
-    return nodes();
-  } else {
-    std::vector<NavGraphNode> rv;
+	if (property == "") {
+		return nodes();
+	} else {
+		std::vector<NavGraphNode> rv;
 
-    std::vector<NavGraphNode>::const_iterator i;
-    for (i = nodes_.begin(); i != nodes_.end(); ++i) {
-      if ( i->has_property(property) )  rv.push_back(*i);
-    }
+		std::vector<NavGraphNode>::const_iterator i;
+		for (i = nodes_.begin(); i != nodes_.end(); ++i) {
+			if (i->has_property(property))
+				rv.push_back(*i);
+		}
 
-    return rv;
-  }
+		return rv;
+	}
 }
-
 
 /** Check if a certain node exists.
  * @param node node to look for (will check for a node with the same name)
@@ -418,11 +407,9 @@ NavGraph::search_nodes(const std::string &property) const
 bool
 NavGraph::node_exists(const NavGraphNode &node) const
 {
-  std::vector<NavGraphNode>::const_iterator n =
-    std::find(nodes_.begin(), nodes_.end(), node);
-  return (n != nodes_.end());
+	std::vector<NavGraphNode>::const_iterator n = std::find(nodes_.begin(), nodes_.end(), node);
+	return (n != nodes_.end());
 }
-
 
 /** Check if a certain node exists.
  * @param name name of the node to look for
@@ -431,12 +418,11 @@ NavGraph::node_exists(const NavGraphNode &node) const
 bool
 NavGraph::node_exists(const std::string &name) const
 {
-  std::vector<NavGraphNode>::const_iterator n =
-    std::find_if(nodes_.begin(), nodes_.end(),
-		 [&name](const NavGraphNode &node) {
-		   return node.name() == name;
-		 });
-  return (n != nodes_.end());
+	std::vector<NavGraphNode>::const_iterator n =
+	  std::find_if(nodes_.begin(), nodes_.end(), [&name](const NavGraphNode &node) {
+		  return node.name() == name;
+	  });
+	return (n != nodes_.end());
 }
 
 /** Check if a certain edge exists.
@@ -446,9 +432,8 @@ NavGraph::node_exists(const std::string &name) const
 bool
 NavGraph::edge_exists(const NavGraphEdge &edge) const
 {
-  std::vector<NavGraphEdge>::const_iterator e =
-    std::find(edges_.begin(), edges_.end(), edge);
-  return (e != edges_.end());
+	std::vector<NavGraphEdge>::const_iterator e = std::find(edges_.begin(), edges_.end(), edge);
+	return (e != edges_.end());
 }
 
 /** Check if a certain edge exists.
@@ -459,13 +444,12 @@ NavGraph::edge_exists(const NavGraphEdge &edge) const
 bool
 NavGraph::edge_exists(const std::string &from, const std::string &to) const
 {
-  std::vector<NavGraphEdge>::const_iterator e =
-    std::find_if(edges_.begin(), edges_.end(),
-		 [&from, &to](const NavGraphEdge &e)->bool {
-		   return (from == e.from() && to == e.to()) ||
-		     (! e.is_directed() && (from == e.to() && to == e.from()));
-		 });
-  return (e != edges_.end());
+	std::vector<NavGraphEdge>::const_iterator e =
+	  std::find_if(edges_.begin(), edges_.end(), [&from, &to](const NavGraphEdge &e) -> bool {
+		  return (from == e.from() && to == e.to())
+		         || (!e.is_directed() && (from == e.to() && to == e.from()));
+	  });
+	return (e != edges_.end());
 }
 
 /** Add a node.
@@ -475,26 +459,26 @@ NavGraph::edge_exists(const std::string &from, const std::string &to) const
 void
 NavGraph::add_node(const NavGraphNode &node)
 {
-  if (node_exists(node)) {
-    throw Exception("Node with name %s already exists", node.name().c_str());
-  } else {
-    nodes_.push_back(node);
-    apply_default_properties(nodes_.back());
-    reachability_calced_ = false;
-    notify_of_change();
-  }
+	if (node_exists(node)) {
+		throw Exception("Node with name %s already exists", node.name().c_str());
+	} else {
+		nodes_.push_back(node);
+		apply_default_properties(nodes_.back());
+		reachability_calced_ = false;
+		notify_of_change();
+	}
 }
 
 ///@cond INTERNAL
-template<class T>
+template <class T>
 typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
 almost_equal(T x, T y, int ulp)
 {
-  // the machine epsilon has to be scaled to the magnitude of the values used
-  // and multiplied by the desired precision in ULPs (units in the last place)
-  return (std::abs(x-y) < std::numeric_limits<T>::epsilon() * std::abs(x+y) * ulp)
-    // unless the result is subnormal
-    || std::abs(x-y) < std::numeric_limits<T>::min();
+	// the machine epsilon has to be scaled to the magnitude of the values used
+	// and multiplied by the desired precision in ULPs (units in the last place)
+	return (std::abs(x - y) < std::numeric_limits<T>::epsilon() * std::abs(x + y) * ulp)
+	       // unless the result is subnormal
+	       || std::abs(x - y) < std::numeric_limits<T>::min();
 }
 ///@endcond INTERNAL
 
@@ -514,24 +498,18 @@ almost_equal(T x, T y, int ulp)
 void
 NavGraph::add_node_and_connect(const NavGraphNode &node, ConnectionMode conn_mode)
 {
-  add_node(node);
-  switch (conn_mode) {
-  case CLOSEST_NODE:
-    connect_node_to_closest_node(node);
-    break;
+	add_node(node);
+	switch (conn_mode) {
+	case CLOSEST_NODE: connect_node_to_closest_node(node); break;
 
-  case CLOSEST_EDGE:
-    connect_node_to_closest_edge(node);
-    break;
+	case CLOSEST_EDGE: connect_node_to_closest_edge(node); break;
 
-  case CLOSEST_EDGE_OR_NODE:
-    try {
-      connect_node_to_closest_edge(node);
-    } catch (Exception &e) {
-      connect_node_to_closest_node(node);
-    }
-    break;
-  }
+	case CLOSEST_EDGE_OR_NODE: try { connect_node_to_closest_edge(node);
+		} catch (Exception &e) {
+			connect_node_to_closest_node(node);
+		}
+		break;
+	}
 }
 
 /** Connect node to closest node.
@@ -540,13 +518,12 @@ NavGraph::add_node_and_connect(const NavGraphNode &node, ConnectionMode conn_mod
 void
 NavGraph::connect_node_to_closest_node(const NavGraphNode &n)
 {
-  NavGraphNode closest = closest_node_to(n.name());
-  NavGraphEdge new_edge(n.name(), closest.name());
-  new_edge.set_property("created-for", n.name() + "--" + closest.name());
-  new_edge.set_property("generated", true);
-  add_edge(new_edge, EDGE_SPLIT_INTERSECTION);
+	NavGraphNode closest = closest_node_to(n.name());
+	NavGraphEdge new_edge(n.name(), closest.name());
+	new_edge.set_property("created-for", n.name() + "--" + closest.name());
+	new_edge.set_property("generated", true);
+	add_edge(new_edge, EDGE_SPLIT_INTERSECTION);
 }
-
 
 /** Connect node to closest edge
  * @param n node to connect to closest node
@@ -554,42 +531,42 @@ NavGraph::connect_node_to_closest_node(const NavGraphNode &n)
 void
 NavGraph::connect_node_to_closest_edge(const NavGraphNode &n)
 {
-  NavGraphEdge closest = closest_edge(n.x(), n.y());
-  cart_coord_2d_t p = closest.closest_point_on_edge(n.x(), n.y());
+	NavGraphEdge    closest = closest_edge(n.x(), n.y());
+	cart_coord_2d_t p       = closest.closest_point_on_edge(n.x(), n.y());
 
-  NavGraphNode closest_conn = closest_node(p.x, p.y);
-  NavGraphNode cn;
-  if (almost_equal(closest_conn.distance(p.x, p.y), 0.f, 2)) {
-    cn = closest_conn;
-  } else {
-    cn = NavGraphNode(NavGraph::format_name("C-%s", n.name().c_str()), p.x, p.y);
-  }
+	NavGraphNode closest_conn = closest_node(p.x, p.y);
+	NavGraphNode cn;
+	if (almost_equal(closest_conn.distance(p.x, p.y), 0.f, 2)) {
+		cn = closest_conn;
+	} else {
+		cn = NavGraphNode(NavGraph::format_name("C-%s", n.name().c_str()), p.x, p.y);
+	}
 
-  if (closest.from() == cn.name() || closest.to() == cn.name()) {
-    // we actually want to connect to one of the end nodes of the edge,
-    // simply add the new edge and we are done
-    NavGraphEdge new_edge(cn.name(), n.name());
-    new_edge.set_property("generated", true);
-    new_edge.set_property("created-for", cn.name() + "--" + n.name());
-    add_edge(new_edge, EDGE_SPLIT_INTERSECTION);
-  } else {
-    // we are inserting a new point into the edge
-    remove_edge(closest);
-    NavGraphEdge new_edge_1(closest.from(), cn.name());
-    NavGraphEdge new_edge_2(closest.to(), cn.name());
-    NavGraphEdge new_edge_3(cn.name(), n.name());
-    new_edge_1.set_properties(closest.properties());
-    new_edge_2.set_properties(closest.properties());
-    new_edge_3.set_property("created-for", cn.name() + "--" + n.name());
-    new_edge_3.set_property("generated", true);
+	if (closest.from() == cn.name() || closest.to() == cn.name()) {
+		// we actually want to connect to one of the end nodes of the edge,
+		// simply add the new edge and we are done
+		NavGraphEdge new_edge(cn.name(), n.name());
+		new_edge.set_property("generated", true);
+		new_edge.set_property("created-for", cn.name() + "--" + n.name());
+		add_edge(new_edge, EDGE_SPLIT_INTERSECTION);
+	} else {
+		// we are inserting a new point into the edge
+		remove_edge(closest);
+		NavGraphEdge new_edge_1(closest.from(), cn.name());
+		NavGraphEdge new_edge_2(closest.to(), cn.name());
+		NavGraphEdge new_edge_3(cn.name(), n.name());
+		new_edge_1.set_properties(closest.properties());
+		new_edge_2.set_properties(closest.properties());
+		new_edge_3.set_property("created-for", cn.name() + "--" + n.name());
+		new_edge_3.set_property("generated", true);
 
-    if (! node_exists(cn))  add_node(cn);
-    add_edge(new_edge_1, EDGE_SPLIT_INTERSECTION);
-    add_edge(new_edge_2, EDGE_SPLIT_INTERSECTION);
-    add_edge(new_edge_3, EDGE_SPLIT_INTERSECTION);
-  }
+		if (!node_exists(cn))
+			add_node(cn);
+		add_edge(new_edge_1, EDGE_SPLIT_INTERSECTION);
+		add_edge(new_edge_2, EDGE_SPLIT_INTERSECTION);
+		add_edge(new_edge_3, EDGE_SPLIT_INTERSECTION);
+	}
 }
-
 
 /** Add an edge.
  * @param edge edge to add
@@ -606,31 +583,27 @@ NavGraph::connect_node_to_closest_edge(const NavGraphNode &n)
 void
 NavGraph::add_edge(const NavGraphEdge &edge, NavGraph::EdgeMode mode, bool allow_existing)
 {
-  if (edge_exists(edge)) {
-    if (allow_existing)  return;
-    else throw Exception("Edge from %s to %s already exists",
-			 edge.from().c_str(), edge.to().c_str());
-  } else {
-    switch (mode) {
-    case EDGE_NO_INTERSECTION:
-      edge_add_no_intersection(edge);
-      break;
+	if (edge_exists(edge)) {
+		if (allow_existing)
+			return;
+		else
+			throw Exception("Edge from %s to %s already exists", edge.from().c_str(), edge.to().c_str());
+	} else {
+		switch (mode) {
+		case EDGE_NO_INTERSECTION: edge_add_no_intersection(edge); break;
 
-    case EDGE_SPLIT_INTERSECTION:
-      edge_add_split_intersection(edge);
-      break;
+		case EDGE_SPLIT_INTERSECTION: edge_add_split_intersection(edge); break;
 
-    case EDGE_FORCE:
-      edges_.push_back(edge);
-      edges_.back().set_nodes(node(edge.from()), node(edge.to()));
-      break;
-    }
-    
-    reachability_calced_ = false;
-    notify_of_change();
-  }
+		case EDGE_FORCE:
+			edges_.push_back(edge);
+			edges_.back().set_nodes(node(edge.from()), node(edge.to()));
+			break;
+		}
+
+		reachability_calced_ = false;
+		notify_of_change();
+	}
 }
-
 
 /** Remove a node.
  * @param node node to remove
@@ -638,14 +611,15 @@ NavGraph::add_edge(const NavGraphEdge &edge, NavGraph::EdgeMode mode, bool allow
 void
 NavGraph::remove_node(const NavGraphNode &node)
 {
-  nodes_.erase(std::remove(nodes_.begin(), nodes_.end(), node));
-  edges_.erase(
-    std::remove_if(edges_.begin(), edges_.end(),
-		   [&node](const NavGraphEdge &edge)->bool {
-		     return edge.from() == node.name() || edge.to() == node.name();
-		   }), edges_.end());
-  reachability_calced_ = false;
-  notify_of_change();
+	nodes_.erase(std::remove(nodes_.begin(), nodes_.end(), node));
+	edges_.erase(std::remove_if(edges_.begin(),
+	                            edges_.end(),
+	                            [&node](const NavGraphEdge &edge) -> bool {
+		                            return edge.from() == node.name() || edge.to() == node.name();
+	                            }),
+	             edges_.end());
+	reachability_calced_ = false;
+	notify_of_change();
 }
 
 /** Remove a node.
@@ -654,20 +628,21 @@ NavGraph::remove_node(const NavGraphNode &node)
 void
 NavGraph::remove_node(const std::string &node_name)
 {
-  nodes_.erase(
-    std::remove_if(nodes_.begin(), nodes_.end(),
-		   [&node_name](const NavGraphNode &node)->bool {
-		     return node.name() == node_name;
-		   }), nodes_.end());
-  edges_.erase(
-    std::remove_if(edges_.begin(), edges_.end(),
-		   [&node_name](const NavGraphEdge &edge)->bool {
-		     return edge.from() == node_name || edge.to() == node_name;
-		   }), edges_.end());
-  reachability_calced_ = false;
-  notify_of_change();
+	nodes_.erase(std::remove_if(nodes_.begin(),
+	                            nodes_.end(),
+	                            [&node_name](const NavGraphNode &node) -> bool {
+		                            return node.name() == node_name;
+	                            }),
+	             nodes_.end());
+	edges_.erase(std::remove_if(edges_.begin(),
+	                            edges_.end(),
+	                            [&node_name](const NavGraphEdge &edge) -> bool {
+		                            return edge.from() == node_name || edge.to() == node_name;
+	                            }),
+	             edges_.end());
+	reachability_calced_ = false;
+	notify_of_change();
 }
-
 
 /** Remove orphan nodes.
  *  Remove nodes which are neither marked unconnected nor participate
@@ -678,19 +653,21 @@ NavGraph::remove_orphan_nodes()
 {
 	std::list<std::string> to_remove;
 
-  for (const NavGraphNode &n : nodes_) {
-	  if (n.unconnected()) continue;
+	for (const NavGraphNode &n : nodes_) {
+		if (n.unconnected())
+			continue;
 
-	  for (const NavGraphEdge &e : edges_) {
-		  if (e.from_node() == n || e.to_node() == n)  continue;
-	  }
+		for (const NavGraphEdge &e : edges_) {
+			if (e.from_node() == n || e.to_node() == n)
+				continue;
+		}
 
-	  to_remove.push_back(n.name());
-  }
+		to_remove.push_back(n.name());
+	}
 
-  for (const auto &nn : to_remove) {
-	  remove_node(nn);
-  }
+	for (const auto &nn : to_remove) {
+		remove_node(nn);
+	}
 }
 
 /** Remove an edge
@@ -699,14 +676,16 @@ NavGraph::remove_orphan_nodes()
 void
 NavGraph::remove_edge(const NavGraphEdge &edge)
 {
-  edges_.erase(
-    std::remove_if(edges_.begin(), edges_.end(),
-		   [&edge](const NavGraphEdge &e)->bool {
-		     return (edge.from() == e.from() && edge.to() == e.to()) ||
-		       (! e.is_directed() && (edge.from() == e.to() && edge.to() == e.from()));
-		   }), edges_.end());
-  reachability_calced_ = false;
-  notify_of_change();
+	edges_.erase(std::remove_if(edges_.begin(),
+	                            edges_.end(),
+	                            [&edge](const NavGraphEdge &e) -> bool {
+		                            return (edge.from() == e.from() && edge.to() == e.to())
+		                                   || (!e.is_directed()
+		                                       && (edge.from() == e.to() && edge.to() == e.from()));
+	                            }),
+	             edges_.end());
+	reachability_calced_ = false;
+	notify_of_change();
 }
 
 /** Remove an edge
@@ -716,16 +695,17 @@ NavGraph::remove_edge(const NavGraphEdge &edge)
 void
 NavGraph::remove_edge(const std::string &from, const std::string &to)
 {
-  edges_.erase(
-    std::remove_if(edges_.begin(), edges_.end(),
-		   [&from, &to](const NavGraphEdge &edge)->bool {
-		     return (edge.from() == from && edge.to() == to) ||
-		       (! edge.is_directed() && (edge.to() == from && edge.from() == to));
-		   }), edges_.end());
-  reachability_calced_ = false;
-  notify_of_change();
+	edges_.erase(std::remove_if(edges_.begin(),
+	                            edges_.end(),
+	                            [&from, &to](const NavGraphEdge &edge) -> bool {
+		                            return (edge.from() == from && edge.to() == to)
+		                                   || (!edge.is_directed()
+		                                       && (edge.to() == from && edge.from() == to));
+	                            }),
+	             edges_.end());
+	reachability_calced_ = false;
+	notify_of_change();
 }
-
 
 /** Update a given node.
  * Will search for a node with the same name as the given node and will then
@@ -735,13 +715,12 @@ NavGraph::remove_edge(const std::string &from, const std::string &to)
 void
 NavGraph::update_node(const NavGraphNode &node)
 {
-  std::vector<NavGraphNode>::iterator n =
-    std::find(nodes_.begin(), nodes_.end(), node);
-  if (n != nodes_.end()) {
-    *n = node;
-  } else {
-    throw Exception("No node with name %s known", node.name().c_str());
-  }
+	std::vector<NavGraphNode>::iterator n = std::find(nodes_.begin(), nodes_.end(), node);
+	if (n != nodes_.end()) {
+		*n = node;
+	} else {
+		throw Exception("No node with name %s known", node.name().c_str());
+	}
 }
 
 /** Update a given edge.
@@ -753,16 +732,13 @@ NavGraph::update_node(const NavGraphNode &node)
 void
 NavGraph::update_edge(const NavGraphEdge &edge)
 {
-  std::vector<NavGraphEdge>::iterator e =
-    std::find(edges_.begin(), edges_.end(), edge);
-  if (e != edges_.end()) {
-    *e = edge;
-  } else {
-    throw Exception("No edge from %s to %s is known",
-		    edge.from().c_str(), edge.to().c_str());
-  }
+	std::vector<NavGraphEdge>::iterator e = std::find(edges_.begin(), edges_.end(), edge);
+	if (e != edges_.end()) {
+		*e = edge;
+	} else {
+		throw Exception("No edge from %s to %s is known", edge.from().c_str(), edge.to().c_str());
+	}
 }
-
 
 /** Remove all nodes and edges from navgraph.
  * Use with caution, this means that no more searches etc. are possible.
@@ -770,10 +746,10 @@ NavGraph::update_edge(const NavGraphEdge &edge)
 void
 NavGraph::clear()
 {
-  nodes_.clear();
-  edges_.clear();
-  default_properties_.clear();
-  notify_of_change();
+	nodes_.clear();
+	edges_.clear();
+	default_properties_.clear();
+	notify_of_change();
 }
 
 /** Get all default properties.
@@ -782,7 +758,7 @@ NavGraph::clear()
 const std::map<std::string, std::string> &
 NavGraph::default_properties() const
 {
-  return default_properties_;
+	return default_properties_;
 }
 
 /** Check if graph has specified default property.
@@ -792,7 +768,7 @@ NavGraph::default_properties() const
 bool
 NavGraph::has_default_property(const std::string &property) const
 {
-  return default_properties_.find(property) != default_properties_.end();
+	return default_properties_.find(property) != default_properties_.end();
 }
 
 /** Get specified default property as string.
@@ -802,12 +778,12 @@ NavGraph::has_default_property(const std::string &property) const
 std::string
 NavGraph::default_property(const std::string &prop) const
 {
-  std::map<std::string, std::string>::const_iterator p;
-  if ((p = default_properties_.find(prop)) != default_properties_.end()) {
-    return p->second;
-  } else {
-    return "";
-  }
+	std::map<std::string, std::string>::const_iterator p;
+	if ((p = default_properties_.find(prop)) != default_properties_.end()) {
+		return p->second;
+	} else {
+		return "";
+	}
 }
 
 /** Get property converted to float.
@@ -817,7 +793,7 @@ NavGraph::default_property(const std::string &prop) const
 float
 NavGraph::default_property_as_float(const std::string &prop) const
 {
-  return StringConversions::to_float(default_property(prop));
+	return StringConversions::to_float(default_property(prop));
 }
 
 /** Get property converted to int.
@@ -827,7 +803,7 @@ NavGraph::default_property_as_float(const std::string &prop) const
 int
 NavGraph::default_property_as_int(const std::string &prop) const
 {
-  return StringConversions::to_int(default_property(prop));
+	return StringConversions::to_int(default_property(prop));
 }
 
 /** Get property converted to bol.
@@ -837,7 +813,7 @@ NavGraph::default_property_as_int(const std::string &prop) const
 bool
 NavGraph::default_property_as_bool(const std::string &prop) const
 {
-  return StringConversions::to_bool(default_property(prop));
+	return StringConversions::to_bool(default_property(prop));
 }
 
 /** Set property.
@@ -847,7 +823,7 @@ NavGraph::default_property_as_bool(const std::string &prop) const
 void
 NavGraph::set_default_property(const std::string &property, const std::string &value)
 {
-  default_properties_[property] = value;
+	default_properties_[property] = value;
 }
 
 /** Set default properties.
@@ -857,9 +833,8 @@ NavGraph::set_default_property(const std::string &property, const std::string &v
 void
 NavGraph::set_default_properties(const std::map<std::string, std::string> &properties)
 {
-  default_properties_ = properties;
+	default_properties_ = properties;
 }
-
 
 /** Set property.
  * @param property property key
@@ -868,7 +843,7 @@ NavGraph::set_default_properties(const std::map<std::string, std::string> &prope
 void
 NavGraph::set_default_property(const std::string &property, float value)
 {
-  default_properties_[property] = StringConversions::to_string(value);
+	default_properties_[property] = StringConversions::to_string(value);
 }
 
 /** Set property.
@@ -878,7 +853,7 @@ NavGraph::set_default_property(const std::string &property, float value)
 void
 NavGraph::set_default_property(const std::string &property, int value)
 {
-  default_properties_[property] = StringConversions::to_string(value);
+	default_properties_[property] = StringConversions::to_string(value);
 }
 
 /** Set property.
@@ -888,9 +863,8 @@ NavGraph::set_default_property(const std::string &property, int value)
 void
 NavGraph::set_default_property(const std::string &property, bool value)
 {
-  default_properties_[property] = value ? "true" : "false";
+	default_properties_[property] = value ? "true" : "false";
 }
-
 
 /** Set default properties on node for which no local value exists.
  * This sets all default properties on the node, for which no
@@ -900,13 +874,12 @@ NavGraph::set_default_property(const std::string &property, bool value)
 void
 NavGraph::apply_default_properties(NavGraphNode &node)
 {
-  for (const auto &p : default_properties_) {
-    if (! node.has_property(p.first)) {
-      node.set_property(p.first, p.second);
-    }
-  }
+	for (const auto &p : default_properties_) {
+		if (!node.has_property(p.first)) {
+			node.set_property(p.first, p.second);
+		}
+	}
 }
-
 
 /** Get nodes reachable from specified nodes.
  * @param node_name name of the node to get reachable nodes for
@@ -915,31 +888,31 @@ NavGraph::apply_default_properties(NavGraphNode &node)
 std::vector<std::string>
 NavGraph::reachable_nodes(const std::string &node_name) const
 {
-  std::vector<std::string> rv;
+	std::vector<std::string> rv;
 
-  NavGraphNode n = node(node_name);
-  if (! n.is_valid())  return rv;
+	NavGraphNode n = node(node_name);
+	if (!n.is_valid())
+		return rv;
 
-  std::vector<NavGraphEdge>::const_iterator i;
-  for (i = edges_.begin(); i != edges_.end(); ++i) {
-    if (i->is_directed()) {
-      if (i->from() == node_name) {
-        rv.push_back(i->to());
-      }
-    } else {
-      if (i->from() == node_name) {
-        rv.push_back(i->to());
-      } else if (i->to() == node_name) {
-        rv.push_back(i->from());
-      }
-    }
-  }
+	std::vector<NavGraphEdge>::const_iterator i;
+	for (i = edges_.begin(); i != edges_.end(); ++i) {
+		if (i->is_directed()) {
+			if (i->from() == node_name) {
+				rv.push_back(i->to());
+			}
+		} else {
+			if (i->from() == node_name) {
+				rv.push_back(i->to());
+			} else if (i->to() == node_name) {
+				rv.push_back(i->from());
+			}
+		}
+	}
 
-  std::sort(rv.begin(), rv.end());
-  std::unique(rv.begin(), rv.end());
-  return rv;
+	std::sort(rv.begin(), rv.end());
+	std::unique(rv.begin(), rv.end());
+	return rv;
 }
-
 
 /** Set cost and cost estimation function for searching paths.
  * Note that this will influence each and every search (unless
@@ -956,24 +929,23 @@ NavGraph::reachable_nodes(const std::string &node_name) const
  */
 void
 NavGraph::set_search_funcs(navgraph::EstimateFunction estimate_func,
-			   navgraph::CostFunction     cost_func)
+                           navgraph::CostFunction     cost_func)
 {
-  if (! search_default_funcs_) {
-    throw Exception("Custom actual and estimated cost functions have already been set");
-  }
-  search_default_funcs_ = false;
-  search_estimate_func_ = estimate_func;
-  search_cost_func_     = cost_func;
+	if (!search_default_funcs_) {
+		throw Exception("Custom actual and estimated cost functions have already been set");
+	}
+	search_default_funcs_ = false;
+	search_estimate_func_ = estimate_func;
+	search_cost_func_     = cost_func;
 }
-
 
 /** Reset actual and estimated cost function to defaults. */
 void
 NavGraph::unset_search_funcs()
 {
-  search_default_funcs_ = true;
-  search_estimate_func_ = NavGraphSearchState::straight_line_estimate;
-  search_cost_func_     = NavGraphSearchState::euclidean_cost;
+	search_default_funcs_ = true;
+	search_estimate_func_ = NavGraphSearchState::straight_line_estimate;
+	search_cost_func_     = NavGraphSearchState::euclidean_cost;
 }
 
 /** Search for a path between two nodes with default distance costs.
@@ -996,12 +968,13 @@ NavGraph::unset_search_funcs()
  * or it was prohibited when using constraints.
  */
 fawkes::NavGraphPath
-NavGraph::search_path(const NavGraphNode &from, const NavGraphNode &to,
-		      bool use_constraints, bool compute_constraints)
+NavGraph::search_path(const NavGraphNode &from,
+                      const NavGraphNode &to,
+                      bool                use_constraints,
+                      bool                compute_constraints)
 {
-  return search_path(from, to,
-		     search_estimate_func_, search_cost_func_,
-		     use_constraints, compute_constraints);
+	return search_path(
+	  from, to, search_estimate_func_, search_cost_func_, use_constraints, compute_constraints);
 }
 
 /** Search for a path between two nodes with default distance costs.
@@ -1024,12 +997,13 @@ NavGraph::search_path(const NavGraphNode &from, const NavGraphNode &to,
  * or it was prohibited when using constraints.
  */
 fawkes::NavGraphPath
-NavGraph::search_path(const std::string &from, const std::string &to,
-		      bool use_constraints, bool compute_constraints)
+NavGraph::search_path(const std::string &from,
+                      const std::string &to,
+                      bool               use_constraints,
+                      bool               compute_constraints)
 {
-  return search_path(from, to,
-		     search_estimate_func_, search_cost_func_,
-		     use_constraints, compute_constraints);
+	return search_path(
+	  from, to, search_estimate_func_, search_cost_func_, use_constraints, compute_constraints);
 }
 
 /** Search for a path between two nodes.
@@ -1056,15 +1030,17 @@ NavGraph::search_path(const std::string &from, const std::string &to,
  * or it was prohibited when using constraints.
  */
 fawkes::NavGraphPath
-NavGraph::search_path(const std::string &from, const std::string &to,
-		      navgraph::EstimateFunction estimate_func,
-		      navgraph::CostFunction cost_func,
-		      bool use_constraints, bool compute_constraints)
+NavGraph::search_path(const std::string &        from,
+                      const std::string &        to,
+                      navgraph::EstimateFunction estimate_func,
+                      navgraph::CostFunction     cost_func,
+                      bool                       use_constraints,
+                      bool                       compute_constraints)
 {
-  NavGraphNode from_node(node(from));
-  NavGraphNode to_node(node(to));
-  return search_path(from_node, to_node, estimate_func, cost_func,
-		     use_constraints, compute_constraints);
+	NavGraphNode from_node(node(from));
+	NavGraphNode to_node(node(to));
+	return search_path(
+	  from_node, to_node, estimate_func, cost_func, use_constraints, compute_constraints);
 }
 
 /** Search for a path between two nodes.
@@ -1091,49 +1067,49 @@ NavGraph::search_path(const std::string &from, const std::string &to,
  * or it was prohibited when using constraints.
  */
 fawkes::NavGraphPath
-NavGraph::search_path(const NavGraphNode &from, const NavGraphNode &to,
-		      navgraph::EstimateFunction estimate_func,
-		      navgraph::CostFunction cost_func,
-		      bool use_constraints, bool compute_constraints)
+NavGraph::search_path(const NavGraphNode &       from,
+                      const NavGraphNode &       to,
+                      navgraph::EstimateFunction estimate_func,
+                      navgraph::CostFunction     cost_func,
+                      bool                       use_constraints,
+                      bool                       compute_constraints)
 {
-	if (! reachability_calced_)  calc_reachability(/* allow multi graph */ true);
+	if (!reachability_calced_)
+		calc_reachability(/* allow multi graph */ true);
 
-  AStar astar;
+	AStar astar;
 
-  std::vector<AStarState *> a_star_solution;
+	std::vector<AStarState *> a_star_solution;
 
-  if (use_constraints) {
-    constraint_repo_.lock();
-    if (compute_constraints && constraint_repo_->has_constraints()) {
-      constraint_repo_->compute();
-    }
+	if (use_constraints) {
+		constraint_repo_.lock();
+		if (compute_constraints && constraint_repo_->has_constraints()) {
+			constraint_repo_->compute();
+		}
 
-    NavGraphSearchState *initial_state =
-      new NavGraphSearchState(from, to, this, estimate_func, cost_func,
-			      *constraint_repo_);
-    a_star_solution =  astar.solve(initial_state);
-    constraint_repo_.unlock();
-  } else {
-    NavGraphSearchState *initial_state =
-      new NavGraphSearchState(from, to, this, estimate_func, cost_func);
-    a_star_solution =  astar.solve(initial_state);
-  }
+		NavGraphSearchState *initial_state =
+		  new NavGraphSearchState(from, to, this, estimate_func, cost_func, *constraint_repo_);
+		a_star_solution = astar.solve(initial_state);
+		constraint_repo_.unlock();
+	} else {
+		NavGraphSearchState *initial_state =
+		  new NavGraphSearchState(from, to, this, estimate_func, cost_func);
+		a_star_solution = astar.solve(initial_state);
+	}
 
-  std::vector<fawkes::NavGraphNode> path(a_star_solution.size());
-  NavGraphSearchState *solstate;
-  for (unsigned int i = 0; i < a_star_solution.size(); ++i ) {
-    solstate = dynamic_cast<NavGraphSearchState *>(a_star_solution[i]);
-    path[i] = solstate->node();
-  }
+	std::vector<fawkes::NavGraphNode> path(a_star_solution.size());
+	NavGraphSearchState *             solstate;
+	for (unsigned int i = 0; i < a_star_solution.size(); ++i) {
+		solstate = dynamic_cast<NavGraphSearchState *>(a_star_solution[i]);
+		path[i]  = solstate->node();
+	}
 
-  float cost =
-    (! a_star_solution.empty())
-      ? a_star_solution[a_star_solution.size() - 1]->total_estimated_cost
-      : -1;
+	float cost = (!a_star_solution.empty())
+	               ? a_star_solution[a_star_solution.size() - 1]->total_estimated_cost
+	               : -1;
 
-  return NavGraphPath(this, path, cost);
+	return NavGraphPath(this, path, cost);
 }
-
 
 /** Calculate cost between two adjacent nodes.
  * It is not verified whether the nodes are actually adjacent, but the cost
@@ -1146,277 +1122,284 @@ NavGraph::search_path(const NavGraphNode &from, const NavGraphNode &to,
 float
 NavGraph::cost(const NavGraphNode &from, const NavGraphNode &to) const
 {
-  return search_cost_func_(from, to);
+	return search_cost_func_(from, to);
 }
-
 
 /** Make sure each node in the edges exists. */
 void
 NavGraph::assert_valid_edges()
 {
-  for (size_t i = 0; i < edges_.size(); ++i) {
-    if (! node_exists(edges_[i].from())) {
-      throw Exception("Node '%s' for edge '%s' -> '%s' does not exist",
-                      edges_[i].from().c_str(), edges_[i].from().c_str(),
-                      edges_[i].to().c_str());
-    }
+	for (size_t i = 0; i < edges_.size(); ++i) {
+		if (!node_exists(edges_[i].from())) {
+			throw Exception("Node '%s' for edge '%s' -> '%s' does not exist",
+			                edges_[i].from().c_str(),
+			                edges_[i].from().c_str(),
+			                edges_[i].to().c_str());
+		}
 
-    if (! node_exists(edges_[i].to())) {
-      throw Exception("Node '%s' for edge '%s' -> '%s' does not exist",
-                      edges_[i].to().c_str(), edges_[i].from().c_str(),
-                      edges_[i].to().c_str());
-    }
-  }
+		if (!node_exists(edges_[i].to())) {
+			throw Exception("Node '%s' for edge '%s' -> '%s' does not exist",
+			                edges_[i].to().c_str(),
+			                edges_[i].from().c_str(),
+			                edges_[i].to().c_str());
+		}
+	}
 }
-
 
 void
 NavGraph::edge_add_no_intersection(const NavGraphEdge &edge)
 {
-  try {
-    const NavGraphNode &n1 = node(edge.from());
-    const NavGraphNode &n2 = node(edge.to());
-    for (const NavGraphEdge &ne : edges_) {
-      if (edge.from() == ne.from() || edge.from() == ne.to() ||
-	  edge.to() == ne.to() || edge.to() == ne.from())  continue;
+	try {
+		const NavGraphNode &n1 = node(edge.from());
+		const NavGraphNode &n2 = node(edge.to());
+		for (const NavGraphEdge &ne : edges_) {
+			if (edge.from() == ne.from() || edge.from() == ne.to() || edge.to() == ne.to()
+			    || edge.to() == ne.from())
+				continue;
 
-      if (ne.intersects(n1.x(), n1.y(), n2.x(), n2.y())) {
-	throw Exception("Edge %s-%s%s not added: intersects with %s-%s%s",
-			edge.from().c_str(), edge.is_directed() ? ">" : "-", edge.to().c_str(),
-			ne.from().c_str(), ne.is_directed() ? ">" : "-", ne.to().c_str());
-      }
-    }
-    add_edge(edge, EDGE_FORCE);
-  } catch (Exception &ex) {
-    throw Exception("Failed to add edge %s-%s%s: %s",
-		    edge.from().c_str(), edge.is_directed() ? ">" : "-", edge.to().c_str(),
-		    ex.what_no_backtrace());
-  }
+			if (ne.intersects(n1.x(), n1.y(), n2.x(), n2.y())) {
+				throw Exception("Edge %s-%s%s not added: intersects with %s-%s%s",
+				                edge.from().c_str(),
+				                edge.is_directed() ? ">" : "-",
+				                edge.to().c_str(),
+				                ne.from().c_str(),
+				                ne.is_directed() ? ">" : "-",
+				                ne.to().c_str());
+			}
+		}
+		add_edge(edge, EDGE_FORCE);
+	} catch (Exception &ex) {
+		throw Exception("Failed to add edge %s-%s%s: %s",
+		                edge.from().c_str(),
+		                edge.is_directed() ? ">" : "-",
+		                edge.to().c_str(),
+		                ex.what_no_backtrace());
+	}
 }
-
 
 void
 NavGraph::edge_add_split_intersection(const NavGraphEdge &edge)
 {
-  std::list<std::pair<cart_coord_2d_t, NavGraphEdge>> intersections;
-  const NavGraphNode &n1 = node(edge.from());
-  const NavGraphNode &n2 = node(edge.to());
+	std::list<std::pair<cart_coord_2d_t, NavGraphEdge>> intersections;
+	const NavGraphNode &                                n1 = node(edge.from());
+	const NavGraphNode &                                n2 = node(edge.to());
 
-  try {
+	try {
+		for (const NavGraphEdge &e : edges_) {
+			cart_coord_2d_t ip;
+			if (e.intersection(n1.x(), n1.y(), n2.x(), n2.y(), ip)) {
+				// we need to split the edge at the given intersection point,
+				// and the new line segments as well
+				intersections.push_back(std::make_pair(ip, e));
+			}
+		}
 
-    for (const NavGraphEdge &e : edges_) {
-      cart_coord_2d_t ip;
-      if (e.intersection(n1.x(), n1.y(), n2.x(), n2.y(), ip)) {
-	// we need to split the edge at the given intersection point,
-	// and the new line segments as well
-	intersections.push_back(std::make_pair(ip, e));
-      }
-    }
+		std::list<std::list<std::pair<cart_coord_2d_t, NavGraphEdge>>::iterator> deletions;
 
-    std::list<std::list<std::pair<cart_coord_2d_t, NavGraphEdge> >::iterator> deletions;
+		for (auto i1 = intersections.begin(); i1 != intersections.end(); ++i1) {
+			const std::pair<cart_coord_2d_t, NavGraphEdge> &p1 = *i1;
+			const cart_coord_2d_t &                         c1 = p1.first;
+			const NavGraphEdge &                            e1 = p1.second;
 
-    for (auto i1 = intersections.begin(); i1 != intersections.end(); ++i1) {
-      const std::pair<cart_coord_2d_t, NavGraphEdge> &p1 = *i1;
-      const cart_coord_2d_t &c1 = p1.first;
-      const NavGraphEdge    &e1 = p1.second;
+			const NavGraphNode &n1_from = node(e1.from());
+			const NavGraphNode &n1_to   = node(e1.to());
 
-      const NavGraphNode    &n1_from = node(e1.from());
-      const NavGraphNode    &n1_to   = node(e1.to());
+			for (auto i2 = std::next(i1); i2 != intersections.end(); ++i2) {
+				const std::pair<cart_coord_2d_t, NavGraphEdge> &p2 = *i2;
+				const cart_coord_2d_t &                         c2 = p2.first;
+				const NavGraphEdge &                            e2 = p2.second;
 
-      for (auto i2 = std::next(i1); i2 != intersections.end(); ++i2) {
-	const std::pair<cart_coord_2d_t, NavGraphEdge> &p2 = *i2;
-	const cart_coord_2d_t &c2 = p2.first;
-	const NavGraphEdge    &e2 = p2.second;
+				if (points_different(c1.x, c1.y, c2.x, c2.y))
+					continue;
 
-	if (points_different(c1.x, c1.y, c2.x, c2.y))  continue;
+				float d = 1.;
+				if (e1.from() == e2.from() || e1.from() == e2.to()) {
+					d = point_dist(n1_from.x(), n1_from.y(), c1.x, c1.y);
+				} else if (e1.to() == e2.to() || e1.to() == e2.from()) {
+					d = point_dist(n1_to.x(), n1_to.y(), c1.x, c1.y);
+				}
+				if (d < 1e-4) {
+					// the intersection point is the same as a common end
+					// point of the two edges, only keep it once
+					deletions.push_back(i1);
+					break;
+				}
+			}
+		}
+		for (auto d = deletions.rbegin(); d != deletions.rend(); ++d) {
+			intersections.erase(*d);
+		}
 
-	float d = 1.;
-	if (e1.from() == e2.from() || e1.from() == e2.to()) {
-	  d = point_dist(n1_from.x(), n1_from.y(), c1.x, c1.y);
-	} else if (e1.to() == e2.to() || e1.to() == e2.from()) {
-	  d = point_dist(n1_to.x(), n1_to.y(), c1.x, c1.y);
+		if (intersections.empty()) {
+			NavGraphEdge e(edge);
+			e.set_property("created-for", edge.from() + "--" + edge.to());
+			add_edge(e, EDGE_FORCE);
+		} else {
+			Eigen::Vector2f e_origin(n1.x(), n1.y());
+			Eigen::Vector2f e_target(n2.x(), n2.y());
+			Eigen::Vector2f e_dir = (e_target - e_origin).normalized();
+
+			intersections.sort([&e_origin, &e_dir](const std::pair<cart_coord_2d_t, NavGraphEdge> &p1,
+			                                       const std::pair<cart_coord_2d_t, NavGraphEdge> &p2) {
+				const Eigen::Vector2f p1p(p1.first.x, p1.first.y);
+				const Eigen::Vector2f p2p(p2.first.x, p2.first.y);
+				const float           k1 = e_dir.dot(p1p - e_origin);
+				const float           k2 = e_dir.dot(p2p - e_origin);
+				return k1 < k2;
+			});
+
+			std::string     en_from = edge.from();
+			cart_coord_2d_t ec_from(n1.x(), n1.y());
+			std::string     prev_to;
+			for (const auto &i : intersections) {
+				const cart_coord_2d_t &c = i.first;
+				const NavGraphEdge &   e = i.second;
+
+				// add intersection point (if necessary)
+				NavGraphNode ip = closest_node(c.x, c.y);
+				if (!ip || points_different(c.x, c.y, ip.x(), ip.y())) {
+					ip = NavGraphNode(gen_unique_name(), c.x, c.y);
+					add_node(ip);
+				}
+
+				// if neither edge end node is the intersection point, split the edge
+				if (ip.name() != e.from() && ip.name() != e.to()) {
+					NavGraphEdge e1(e.from(), ip.name(), e.is_directed());
+					NavGraphEdge e2(ip.name(), e.to(), e.is_directed());
+					remove_edge(e);
+					e1.set_properties(e.properties());
+					e2.set_properties(e.properties());
+					add_edge(e1, EDGE_FORCE, /* allow existing */ true);
+					add_edge(e2, EDGE_FORCE, /* allow existing */ true);
+
+					// this is a special case: we might intersect an edge
+					// which has the same end node and thus the new edge
+					// from the intersection node to the end node would
+					// be added twice
+					prev_to = e.to();
+				}
+
+				// add segment edge
+				if (en_from != ip.name() && prev_to != ip.name()) {
+					NavGraphEdge e3(en_from, ip.name(), edge.is_directed());
+					e3.set_property("created-for", en_from + "--" + ip.name());
+					add_edge(e3, EDGE_FORCE, /* allow existing */ true);
+				}
+
+				en_from = ip.name();
+				ec_from = c;
+			}
+
+			if (en_from != edge.to()) {
+				NavGraphEdge e3(en_from, edge.to(), edge.is_directed());
+				e3.set_property("created-for", en_from + "--" + edge.to());
+				add_edge(e3, EDGE_FORCE, /* allow existing */ true);
+			}
+		}
+
+	} catch (Exception &ex) {
+		throw Exception("Failed to add edge %s-%s%s: %s",
+		                edge.from().c_str(),
+		                edge.is_directed() ? ">" : "-",
+		                edge.to().c_str(),
+		                ex.what_no_backtrace());
 	}
-	if (d < 1e-4) {
-	  // the intersection point is the same as a common end
-	  // point of the two edges, only keep it once
-	  deletions.push_back(i1);
-	  break;
-	}
-      }
-    }
-    for (auto d = deletions.rbegin(); d != deletions.rend(); ++d) {
-      intersections.erase(*d);
-    }
-
-    if (intersections.empty()) {
-      NavGraphEdge e(edge);
-      e.set_property("created-for", edge.from() + "--" + edge.to());
-      add_edge(e, EDGE_FORCE);
-    } else {
-      Eigen::Vector2f e_origin(n1.x(), n1.y());
-      Eigen::Vector2f e_target(n2.x(), n2.y());
-      Eigen::Vector2f e_dir = (e_target - e_origin).normalized();
-
-      intersections.sort([&e_origin, &e_dir](const std::pair<cart_coord_2d_t, NavGraphEdge> &p1,
-					     const std::pair<cart_coord_2d_t, NavGraphEdge> &p2)
-			 {
-			   const Eigen::Vector2f p1p(p1.first.x, p1.first.y);
-			   const Eigen::Vector2f p2p(p2.first.x, p2.first.y);
-			   const float k1 = e_dir.dot(p1p - e_origin);
-			   const float k2 = e_dir.dot(p2p - e_origin);
-			   return k1 < k2;
-			 });
-
-      std::string     en_from = edge.from();
-      cart_coord_2d_t ec_from(n1.x(), n1.y());
-      std::string     prev_to;
-      for (const auto &i : intersections) {
-	const cart_coord_2d_t &c = i.first;
-	const NavGraphEdge    &e = i.second;
-
-	// add intersection point (if necessary)
-	NavGraphNode ip = closest_node(c.x, c.y);
-	if (! ip || points_different(c.x, c.y, ip.x(), ip.y())) {
-	  ip = NavGraphNode(gen_unique_name(), c.x, c.y);
-	  add_node(ip);
-	}
-
-	// if neither edge end node is the intersection point, split the edge
-	if (ip.name() != e.from() && ip.name() != e.to()) {
-	  NavGraphEdge e1(e.from(), ip.name(), e.is_directed());
-	  NavGraphEdge e2(ip.name(), e.to(), e.is_directed());
-	  remove_edge(e);
-	  e1.set_properties(e.properties());
-	  e2.set_properties(e.properties());
-	  add_edge(e1, EDGE_FORCE, /* allow existing */ true);
-	  add_edge(e2, EDGE_FORCE, /* allow existing */ true);
-
-	  // this is a special case: we might intersect an edge
-	  // which has the same end node and thus the new edge
-	  // from the intersection node to the end node would
-	  // be added twice
-	  prev_to = e.to();
-	}
-      
-	// add segment edge
-	if (en_from != ip.name() && prev_to != ip.name()) {
-	  NavGraphEdge e3(en_from, ip.name(), edge.is_directed());
-	  e3.set_property("created-for", en_from + "--" + ip.name());
-	  add_edge(e3, EDGE_FORCE, /* allow existing */ true);
-
-	}
-
-	en_from = ip.name();
-	ec_from = c;
-      }
-
-      if (en_from != edge.to()) {
-	NavGraphEdge e3(en_from, edge.to(), edge.is_directed());
-	e3.set_property("created-for", en_from + "--" + edge.to());
-	add_edge(e3, EDGE_FORCE, /* allow existing */ true);
-      }
-    }
-    
-  } catch (Exception &ex) {
-    throw Exception("Failed to add edge %s-%s%s: %s",
-		    edge.from().c_str(), edge.is_directed() ? ">" : "-", edge.to().c_str(),
-		    ex.what_no_backtrace());
-  }
 }
-
-
 
 void
 NavGraph::assert_connected()
 {
-  std::set<std::string> traversed;
-  std::set<std::string> nodeset;
-  std::queue<NavGraphNode> q;
+	std::set<std::string>    traversed;
+	std::set<std::string>    nodeset;
+	std::queue<NavGraphNode> q;
 
-  // find first connected not
-  auto fcon = std::find_if_not(nodes_.begin(), nodes_.end(),
-			       [](const NavGraphNode &n)
-			       { return n.unconnected(); });
-  if (fcon == nodes_.end()) {
-    // no connected nodes
-    return;
-  }
-
-  q.push(*fcon);
-
-  while (! q.empty()) {
-    NavGraphNode &n = q.front();
-    traversed.insert(n.name());
-
-    const std::vector<std::string> & reachable = n.reachable_nodes();
-
-    if (n.unconnected() && !reachable.empty()) {
-      throw Exception("Node %s is marked unconnected but nodes are reachable from it",
-		      n.name().c_str());
-    }
-    std::vector<std::string>::const_iterator r;
-    for (r = reachable.begin(); r != reachable.end(); ++r) {
-      NavGraphNode target(node(*r));
-      if (target.unconnected()) {
-	throw Exception("Node %s is marked unconnected but is reachable from node %s\n",
-			target.name().c_str(), n.name().c_str());
-      }
-      if (traversed.find(*r) == traversed.end()) q.push(node(*r));
-    }
-    q.pop();
-  }
-
-  std::vector<NavGraphNode>::iterator n;
-  for (n = nodes_.begin(); n != nodes_.end(); ++n) {
-    nodeset.insert(n->name());
-  }
-
-  if (traversed.size() != nodeset.size()) {
-    std::set<std::string> nodediff;
-    std::set_difference(nodeset.begin(), nodeset.end(),
-			traversed.begin(), traversed.end(),
-			std::inserter(nodediff, nodediff.begin()));
-
-    // the nodes might be unconnected, in which case it is not
-    // an error that they were mentioned. But it might still be
-    // a problem if there was a *directed* outgoing edge from the
-    // unconnected node, which we couldn't have spotted earlier
-    std::set<std::string>::const_iterator ud = nodediff.begin();
-    while (ud != nodediff.end()) {
-      NavGraphNode udnode(node(*ud));
-      if (udnode.unconnected()) {
-	// it's ok to be in the disconnected set, but check if it has any
-	// reachable nodes which is forbidden
-	if (! udnode.reachable_nodes().empty()) {
-	  throw Exception("Node %s is marked unconnected but nodes are reachable from it",
-			  ud->c_str());
+	// find first connected not
+	auto fcon = std::find_if_not(nodes_.begin(), nodes_.end(), [](const NavGraphNode &n) {
+		return n.unconnected();
+	});
+	if (fcon == nodes_.end()) {
+		// no connected nodes
+		return;
 	}
+
+	q.push(*fcon);
+
+	while (!q.empty()) {
+		NavGraphNode &n = q.front();
+		traversed.insert(n.name());
+
+		const std::vector<std::string> &reachable = n.reachable_nodes();
+
+		if (n.unconnected() && !reachable.empty()) {
+			throw Exception("Node %s is marked unconnected but nodes are reachable from it",
+			                n.name().c_str());
+		}
+		std::vector<std::string>::const_iterator r;
+		for (r = reachable.begin(); r != reachable.end(); ++r) {
+			NavGraphNode target(node(*r));
+			if (target.unconnected()) {
+				throw Exception("Node %s is marked unconnected but is reachable from node %s\n",
+				                target.name().c_str(),
+				                n.name().c_str());
+			}
+			if (traversed.find(*r) == traversed.end())
+				q.push(node(*r));
+		}
+		q.pop();
+	}
+
+	std::vector<NavGraphNode>::iterator n;
+	for (n = nodes_.begin(); n != nodes_.end(); ++n) {
+		nodeset.insert(n->name());
+	}
+
+	if (traversed.size() != nodeset.size()) {
+		std::set<std::string> nodediff;
+		std::set_difference(nodeset.begin(),
+		                    nodeset.end(),
+		                    traversed.begin(),
+		                    traversed.end(),
+		                    std::inserter(nodediff, nodediff.begin()));
+
+		// the nodes might be unconnected, in which case it is not
+		// an error that they were mentioned. But it might still be
+		// a problem if there was a *directed* outgoing edge from the
+		// unconnected node, which we couldn't have spotted earlier
+		std::set<std::string>::const_iterator ud = nodediff.begin();
+		while (ud != nodediff.end()) {
+			NavGraphNode udnode(node(*ud));
+			if (udnode.unconnected()) {
+				// it's ok to be in the disconnected set, but check if it has any
+				// reachable nodes which is forbidden
+				if (!udnode.reachable_nodes().empty()) {
+					throw Exception("Node %s is marked unconnected but nodes are reachable from it",
+					                ud->c_str());
+				}
 #if __cplusplus > 201100L || defined(__GXX_EXPERIMENTAL_CXX0X__)
-	ud = nodediff.erase(ud);
+				ud = nodediff.erase(ud);
 #else
-	std::set<std::string>::const_iterator delit = ud;
-	++ud;
-	nodediff.erase(delit);
+				std::set<std::string>::const_iterator delit = ud;
+				++ud;
+				nodediff.erase(delit);
 #endif
-      } else {
-	++ud;
-      }
-    }
+			} else {
+				++ud;
+			}
+		}
 
-    if (! nodediff.empty()) {
-      std::set<std::string>::iterator d = nodediff.begin();
-      std::string disconnected = *d;
-      for (++d; d != nodediff.end(); ++d) {
-	disconnected += ", " + *d;
-      }
-      throw Exception("The graph is not fully connected, "
-		      "cannot reach (%s) from '%s' for example",
-		      disconnected.c_str(), fcon->name().c_str());
-    }
-  }
+		if (!nodediff.empty()) {
+			std::set<std::string>::iterator d            = nodediff.begin();
+			std::string                     disconnected = *d;
+			for (++d; d != nodediff.end(); ++d) {
+				disconnected += ", " + *d;
+			}
+			throw Exception("The graph is not fully connected, "
+			                "cannot reach (%s) from '%s' for example",
+			                disconnected.c_str(),
+			                fcon->name().c_str());
+		}
+	}
 }
-
-
 
 /** Calculate eachability relations.
  * This will set the directly reachable nodes on each
@@ -1426,24 +1409,25 @@ NavGraph::assert_connected()
 void
 NavGraph::calc_reachability(bool allow_multi_graph)
 {
-  if (nodes_.empty())  return;
+	if (nodes_.empty())
+		return;
 
-  assert_valid_edges();
+	assert_valid_edges();
 
-  std::vector<NavGraphNode>::iterator i;
-  for (i = nodes_.begin(); i != nodes_.end(); ++i) {
-    i->set_reachable_nodes(reachable_nodes(i->name()));
-  }
+	std::vector<NavGraphNode>::iterator i;
+	for (i = nodes_.begin(); i != nodes_.end(); ++i) {
+		i->set_reachable_nodes(reachable_nodes(i->name()));
+	}
 
-  std::vector<NavGraphEdge>::iterator e;
-  for (e = edges_.begin(); e != edges_.end(); ++e) {
-    e->set_nodes(node(e->from()), node(e->to()));
-  }
+	std::vector<NavGraphEdge>::iterator e;
+	for (e = edges_.begin(); e != edges_.end(); ++e) {
+		e->set_nodes(node(e->from()), node(e->to()));
+	}
 
-  if (! allow_multi_graph)  assert_connected();
-  reachability_calced_ = true;
+	if (!allow_multi_graph)
+		assert_connected();
+	reachability_calced_ = true;
 }
-
 
 /** Generate a unique node name for the given prefix.
  * Will simply add a number and tries from 0 to MAXINT.
@@ -1455,15 +1439,14 @@ NavGraph::calc_reachability(bool allow_multi_graph)
 std::string
 NavGraph::gen_unique_name(const char *prefix)
 {
-  for (unsigned int i = 0; i < std::numeric_limits<unsigned int>::max(); ++i) {
-    std::string name = format_name("%s%i", prefix, i);
-    if (! node(name)) {
-      return name;
-    }
-  }
-  throw Exception("Cannot generate unique name for given prefix, all taken");
+	for (unsigned int i = 0; i < std::numeric_limits<unsigned int>::max(); ++i) {
+		std::string name = format_name("%s%i", prefix, i);
+		if (!node(name)) {
+			return name;
+		}
+	}
+	throw Exception("Cannot generate unique name for given prefix, all taken");
 }
-
 
 /** Create node name from a format string.
  * @param format format for the name according to sprintf arguments
@@ -1473,16 +1456,16 @@ NavGraph::gen_unique_name(const char *prefix)
 std::string
 NavGraph::format_name(const char *format, ...)
 {
-  va_list arg;
-  va_start(arg, format);
-  char *tmp;
-  std::string rv;
-  if (vasprintf(&tmp, format, arg) != -1) {
-    rv = tmp;
-    free(tmp);
-  }
-  va_end(arg);
-  return rv;
+	va_list arg;
+	va_start(arg, format);
+	char *      tmp;
+	std::string rv;
+	if (vasprintf(&tmp, format, arg) != -1) {
+		rv = tmp;
+		free(tmp);
+	}
+	va_end(arg);
+	return rv;
 }
 
 /** Add a change listener.
@@ -1491,7 +1474,7 @@ NavGraph::format_name(const char *format, ...)
 void
 NavGraph::add_change_listener(ChangeListener *listener)
 {
-  change_listeners_.push_back(listener);
+	change_listeners_.push_back(listener);
 }
 
 /** Remove a change listener.
@@ -1500,9 +1483,8 @@ NavGraph::add_change_listener(ChangeListener *listener)
 void
 NavGraph::remove_change_listener(ChangeListener *listener)
 {
-  change_listeners_.remove(listener);
+	change_listeners_.remove(listener);
 }
-
 
 /** Enable or disable notifications.
  * When performing many operations in a row, processing the individual
@@ -1515,21 +1497,22 @@ NavGraph::remove_change_listener(ChangeListener *listener)
 void
 NavGraph::set_notifications_enabled(bool enabled)
 {
-  notifications_enabled_ = enabled;
+	notifications_enabled_ = enabled;
 }
 
 /** Notify all listeners of a change. */
 void
 NavGraph::notify_of_change() throw()
 {
-  if (! notifications_enabled_) return;
+	if (!notifications_enabled_)
+		return;
 
-  std::list<ChangeListener *> tmp_listeners = change_listeners_;
+	std::list<ChangeListener *> tmp_listeners = change_listeners_;
 
-  std::list<ChangeListener *>::iterator l;
-  for (l = tmp_listeners.begin(); l != tmp_listeners.end(); ++l) {
-    (*l)->graph_changed();
-  }
+	std::list<ChangeListener *>::iterator l;
+	for (l = tmp_listeners.begin(); l != tmp_listeners.end(); ++l) {
+		(*l)->graph_changed();
+	}
 }
 
 /** @class NavGraph::ChangeListener <navgraph/navgraph.h>
@@ -1544,6 +1527,5 @@ NavGraph::notify_of_change() throw()
 NavGraph::ChangeListener::~ChangeListener()
 {
 }
-
 
 } // end of namespace fawkes

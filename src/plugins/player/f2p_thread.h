@@ -23,28 +23,30 @@
 #ifndef _PLUGINS_PLAYER_F2P_THREAD_H_
 #define _PLUGINS_PLAYER_F2P_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
+#include <core/threading/thread.h>
 
 class PlayerClientThread;
 
-class PlayerF2PThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect
+class PlayerF2PThread : public fawkes::Thread, public fawkes::BlockedTimingAspect
 {
- public:
-  PlayerF2PThread(PlayerClientThread *client_thread);
+public:
+	PlayerF2PThread(PlayerClientThread *client_thread);
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  PlayerClientThread *client_thread_;
+private:
+	PlayerClientThread *client_thread_;
 };
-
 
 #endif

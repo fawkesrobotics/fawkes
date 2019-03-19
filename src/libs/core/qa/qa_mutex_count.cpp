@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/threading/thread.h>
 #include <core/threading/mutex.h>
+#include <core/threading/thread.h>
 
 #include <iostream>
 
@@ -32,12 +32,11 @@
 using namespace std;
 using namespace fawkes;
 
-#define WASTETIME  \
-  for ( unsigned int i = 0; i < 1000000; i++) { \
-    unsigned int j;				\
-    j = i + i;					\
-  }
-
+#define WASTETIME                              \
+	for (unsigned int i = 0; i < 1000000; i++) { \
+		unsigned int j;                            \
+		j = i + i;                                 \
+	}
 
 /** Simple test class for counting with multiple threads.
  * Compile the test program and let it run. You will see that even after only a short time
@@ -46,93 +45,99 @@ using namespace fawkes;
 class ExampleMutexCountThread : public Thread
 {
 public:
-  /** Constructor
+	/** Constructor
    * @param s Short identifier, printed first in output
    * @param m The mutex used to protect count variable
    * @param mutex_count Protected count variable
    * @param non_mutex_count Unprotected count variable
    * @param sleep_time Variable sleep time at end of thread
    */
-  ExampleMutexCountThread(string s,
-			  Mutex *m, unsigned int *mutex_count, unsigned int *non_mutex_count,
-			  unsigned int sleep_time)
-    : Thread("ExampMutexCountThread", Thread::OPMODE_CONTINUOUS)
-  {
-    this->s   = s;
-    this->sl  = sl;
-    this->slt = sleep_time;
-    this->m   = m;
-    this->mc  = mutex_count;
-    this->nmc = non_mutex_count;
-  }
+	ExampleMutexCountThread(string        s,
+	                        Mutex *       m,
+	                        unsigned int *mutex_count,
+	                        unsigned int *non_mutex_count,
+	                        unsigned int  sleep_time)
+	: Thread("ExampMutexCountThread", Thread::OPMODE_CONTINUOUS)
+	{
+		this->s   = s;
+		this->sl  = sl;
+		this->slt = sleep_time;
+		this->m   = m;
+		this->mc  = mutex_count;
+		this->nmc = non_mutex_count;
+	}
 
-  /** Where the action happens
+	/** Where the action happens
    */
-  virtual void loop()
-  {
-    // unprotected modification, another thread could modify the value while
-    // we waste time
-    unsigned int n = *nmc;
-    n++;
-    sleep(0);
-    WASTETIME;
-    *nmc = n;
-      
-    // protected modification, no other thread can modify the value as long as
-    // we have the lock
-    if ( m != NULL )  m->lock();
-    unsigned o = *mc;
-    o++;
-    sleep(0);
-    WASTETIME;
-    *mc = o;
-    if ( m != NULL )  m->unlock();
-    
-    // Out is not mutexed, can lead to wrong printouts, try it (happens rarely)!
-    cout << s << ": mutex: " << *mc << "(non-mutex: " << *nmc << ")" << endl;
+	virtual void
+	loop()
+	{
+		// unprotected modification, another thread could modify the value while
+		// we waste time
+		unsigned int n = *nmc;
+		n++;
+		sleep(0);
+		WASTETIME;
+		*nmc = n;
 
-    if ( sl )   usleep(slt);
+		// protected modification, no other thread can modify the value as long as
+		// we have the lock
+		if (m != NULL)
+			m->lock();
+		unsigned o = *mc;
+		o++;
+		sleep(0);
+		WASTETIME;
+		*mc = o;
+		if (m != NULL)
+			m->unlock();
 
-    test_cancel();
-  }
+		// Out is not mutexed, can lead to wrong printouts, try it (happens rarely)!
+		cout << s << ": mutex: " << *mc << "(non-mutex: " << *nmc << ")" << endl;
 
- private:
-  string s;
-  bool   sl;
-  unsigned int slt;
-  Mutex *m;
-  unsigned int *mc;
-  unsigned int *nmc;
+		if (sl)
+			usleep(slt);
+
+		test_cancel();
+	}
+
+private:
+	string        s;
+	bool          sl;
+	unsigned int  slt;
+	Mutex *       m;
+	unsigned int *mc;
+	unsigned int *nmc;
 };
-
 
 int
 main(int argc, char **argv)
 {
+	Mutex *m = new Mutex();
 
-  Mutex *m = new Mutex();
+	unsigned int mutex_count     = 0;
+	unsigned int non_mutex_count = 0;
 
-  unsigned int mutex_count = 0;
-  unsigned int non_mutex_count = 0;
+	ExampleMutexCountThread *t1 =
+	  new ExampleMutexCountThread("t1", m, &mutex_count, &non_mutex_count, 1000);
+	ExampleMutexCountThread *t2 =
+	  new ExampleMutexCountThread("t2", m, &mutex_count, &non_mutex_count, 10000);
+	ExampleMutexCountThread *t3 =
+	  new ExampleMutexCountThread("t3", m, &mutex_count, &non_mutex_count, 100000);
 
-  ExampleMutexCountThread *t1 = new ExampleMutexCountThread("t1", m, &mutex_count, &non_mutex_count, 1000);
-  ExampleMutexCountThread *t2 = new ExampleMutexCountThread("t2", m, &mutex_count, &non_mutex_count, 10000);
-  ExampleMutexCountThread *t3 = new ExampleMutexCountThread("t3", m, &mutex_count, &non_mutex_count, 100000);
+	t1->start();
+	t2->start();
+	t3->start();
 
-  t1->start();
-  t2->start();
-  t3->start();
+	// Wait for all threads to finish
+	t1->join();
+	t2->join();
+	t3->join();
 
-  // Wait for all threads to finish
-  t1->join();
-  t2->join();
-  t3->join();
-
-  delete t1;
-  delete t2;
-  delete t3;
-  delete m;
+	delete t1;
+	delete t2;
+	delete t3;
+	delete m;
 }
-
 
 /// @endcond

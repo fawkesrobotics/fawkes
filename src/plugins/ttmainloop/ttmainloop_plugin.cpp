@@ -20,8 +20,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/ttmainloop/ttmainloop_plugin.h>
 #include <plugins/ttmainloop/thread.h>
+#include <plugins/ttmainloop/ttmainloop_plugin.h>
 
 using namespace fawkes;
 
@@ -36,10 +36,9 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-TimeTrackerMainLoopPlugin::TimeTrackerMainLoopPlugin(Configuration *config)
-  : Plugin(config)
+TimeTrackerMainLoopPlugin::TimeTrackerMainLoopPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new TimeTrackerMainLoopThread());
+	thread_list.push_back(new TimeTrackerMainLoopThread());
 }
 
 PLUGIN_DESCRIPTION("Replaces main loop with time tracked loop")

@@ -21,25 +21,23 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <sys/types.h>
 #include <utils/ipc/msg.h>
 #include <utils/ipc/msg_exceptions.h>
 
 #include <errno.h>
-
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
 
 namespace fawkes {
 
 /// @cond INTERNALS
 class IPCMessageQueueData
 {
- public:
-  key_t   key;
-  int     msgqid;
-  int     msgflg;
-
+public:
+	key_t key;
+	int   msgqid;
+	int   msgflg;
 };
 /// @endcond
 
@@ -58,11 +56,9 @@ class IPCMessageQueueData
  *
  */
 
-
 /** Maximum size of a message.
  */
 const int IPCMessageQueue::MaxMessageSize = 8192; // from linux/msg.h
-
 
 /** Create or open a message queue
  * If a message key with the given identification criteria exists it is
@@ -74,22 +70,20 @@ const int IPCMessageQueue::MaxMessageSize = 8192; // from linux/msg.h
  * @param create Create the queue if it does not exist, do not create the queue
  *               otherwise, use isValid() to check if queue was opened
  */
-IPCMessageQueue::IPCMessageQueue(const char *path, char id,
-				 bool create, bool destroy_on_delete)
+IPCMessageQueue::IPCMessageQueue(const char *path, char id, bool create, bool destroy_on_delete)
 {
-  data = new IPCMessageQueueData();
+	data = new IPCMessageQueueData();
 
-  this->destroy_on_delete = destroy_on_delete;
+	this->destroy_on_delete = destroy_on_delete;
 
-  data->msgflg = 0666;
-  if (create) {
-    data->msgflg |= IPC_CREAT;
-  }
+	data->msgflg = 0666;
+	if (create) {
+		data->msgflg |= IPC_CREAT;
+	}
 
-  data->key = ftok(path, id);
-  data->msgqid = msgget(data->key, data->msgflg);
+	data->key    = ftok(path, id);
+	data->msgqid = msgget(data->key, data->msgflg);
 }
-
 
 /** Create or open a message queue
  * This is a simplified version of the above function. The path is omitted
@@ -102,29 +96,27 @@ IPCMessageQueue::IPCMessageQueue(const char *path, char id,
  */
 IPCMessageQueue::IPCMessageQueue(int id, bool create, bool destroy_on_delete)
 {
-  data = new IPCMessageQueueData();
+	data = new IPCMessageQueueData();
 
-  this->destroy_on_delete = destroy_on_delete;
+	this->destroy_on_delete = destroy_on_delete;
 
-  data->msgflg = 0666;
-  if (create) {
-    data->msgflg |= IPC_CREAT;
-  }
+	data->msgflg = 0666;
+	if (create) {
+		data->msgflg |= IPC_CREAT;
+	}
 
-  data->key = id;
-  data->msgqid = msgget(data->key, data->msgflg);
+	data->key    = id;
+	data->msgqid = msgget(data->key, data->msgflg);
 }
-
 
 /** Destructor */
 IPCMessageQueue::~IPCMessageQueue()
 {
-  if ((data->msgqid != -1) && destroy_on_delete) {
-    msgctl(data->msgqid, IPC_RMID, 0);
-  }
-  delete data;
+	if ((data->msgqid != -1) && destroy_on_delete) {
+		msgctl(data->msgqid, IPC_RMID, 0);
+	}
+	delete data;
 }
-
 
 /** Check if the message queue is valid
  * If the queue could not be opened yet (for example if you gave create=false to the
@@ -135,30 +127,29 @@ IPCMessageQueue::~IPCMessageQueue()
 bool
 IPCMessageQueue::isValid()
 {
-  if (data->msgqid == -1) {
-    data->msgqid = msgget(data->key, data->msgflg);
-    if (data->msgqid == -1) {
-      return false;
-    } else {
-      struct msqid_ds m;
-      if (msgctl(data->msgqid, IPC_STAT, &m) != -1) {
-	return true;
-      } else {
-	data->msgqid = -1;
-	return false;
-      }
-    }
-  } else {
-    struct msqid_ds m;
-    if (msgctl(data->msgqid, IPC_STAT, &m) != -1) {
-      return true;
-    } else {
-      data->msgqid = -1;
-      return false;
-    }
-  }
+	if (data->msgqid == -1) {
+		data->msgqid = msgget(data->key, data->msgflg);
+		if (data->msgqid == -1) {
+			return false;
+		} else {
+			struct msqid_ds m;
+			if (msgctl(data->msgqid, IPC_STAT, &m) != -1) {
+				return true;
+			} else {
+				data->msgqid = -1;
+				return false;
+			}
+		}
+	} else {
+		struct msqid_ds m;
+		if (msgctl(data->msgqid, IPC_STAT, &m) != -1) {
+			return true;
+		} else {
+			data->msgqid = -1;
+			return false;
+		}
+	}
 }
-
 
 /** Receive messages from this queue of the given message type
  * @param mtype the message type
@@ -178,22 +169,22 @@ IPCMessageQueue::isValid()
 bool
 IPCMessageQueue::recv(long mtype, MessageStruct *msg, unsigned int data_size)
 {
-  if (data->msgqid == -1) return false;
+	if (data->msgqid == -1)
+		return false;
 
-  if ( msgrcv(data->msgqid, (struct msgbuf *)msg, data_size - sizeof(long),
-	      mtype, IPC_NOWAIT) == -1 ) {
-    if ((errno == EIDRM) || (errno == EINVAL)) {
-      data->msgqid = -1;
-    }
-    if (errno == E2BIG) {
-      throw MessageTooBigException();
-    }
-    return false;
-  } else {
-    return true;
-  }
+	if (msgrcv(data->msgqid, (struct msgbuf *)msg, data_size - sizeof(long), mtype, IPC_NOWAIT)
+	    == -1) {
+		if ((errno == EIDRM) || (errno == EINVAL)) {
+			data->msgqid = -1;
+		}
+		if (errno == E2BIG) {
+			throw MessageTooBigException();
+		}
+		return false;
+	} else {
+		return true;
+	}
 }
-
 
 /** Receive messages from this queue of any type
  * @param msg a pointer to a message struct of the appropriate size. This is
@@ -208,22 +199,22 @@ IPCMessageQueue::recv(long mtype, MessageStruct *msg, unsigned int data_size)
  * @see MessageStruct
  */
 bool
-IPCMessageQueue::recvNext(MessageStruct *msg, unsigned int max_data_size,
-		       int *data_size)
+IPCMessageQueue::recvNext(MessageStruct *msg, unsigned int max_data_size, int *data_size)
 {
-  if (data->msgqid == -1) return false;
+	if (data->msgqid == -1)
+		return false;
 
-  if ( (*data_size = msgrcv(data->msgqid, (struct msgbuf *)msg,
-			    max_data_size - sizeof(long), 0, IPC_NOWAIT)) == -1 ) {
-    if ((errno == EIDRM) || (errno == EINVAL)) {
-      data->msgqid = -1;
-    }
-    return false;
-  } else {
-    return true;
-  }
+	if ((*data_size =
+	       msgrcv(data->msgqid, (struct msgbuf *)msg, max_data_size - sizeof(long), 0, IPC_NOWAIT))
+	    == -1) {
+		if ((errno == EIDRM) || (errno == EINVAL)) {
+			data->msgqid = -1;
+		}
+		return false;
+	} else {
+		return true;
+	}
 }
-
 
 /** Receive messages from this queue of the given message type
  * @param msg The data to be sent, see note for recv()
@@ -235,17 +226,17 @@ IPCMessageQueue::recvNext(MessageStruct *msg, unsigned int max_data_size,
 bool
 IPCMessageQueue::send(MessageStruct *msg, unsigned int data_size)
 {
-  if (data->msgqid == -1) return false;
+	if (data->msgqid == -1)
+		return false;
 
-  if (msgsnd(data->msgqid, msg, data_size - sizeof(long), IPC_NOWAIT) == -1) {
-    if (errno == EIDRM) {
-      data->msgqid = -1;
-    }
-    return false;
-  } else {
-    return true;
-  }
+	if (msgsnd(data->msgqid, msg, data_size - sizeof(long), IPC_NOWAIT) == -1) {
+		if (errno == EIDRM) {
+			data->msgqid = -1;
+		}
+		return false;
+	} else {
+		return true;
+	}
 }
-
 
 } // end namespace fawkes

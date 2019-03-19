@@ -28,42 +28,40 @@
 
 #include <utils/math/types.h>
 
-#include <vector>
 #include <memory>
+#include <vector>
 
-namespace fawkes
-{
+namespace fawkes {
 
 class RoboShapeColli;
 
 class EscapeDriveModule : public AbstractDriveMode
 {
- public:
-  EscapeDriveModule( Logger* logger, Configuration* config );
-  ~EscapeDriveModule();
+public:
+	EscapeDriveModule(Logger *logger, Configuration *config);
+	~EscapeDriveModule();
 
-  virtual void update();
+	virtual void update();
 
-  void set_laser_data( std::vector<polar_coord_2d_t>& laser_points );
+	void set_laser_data(std::vector<polar_coord_2d_t> &laser_points);
 
- private:
-  std::vector<polar_coord_2d_t> laser_points_;
+private:
+	std::vector<polar_coord_2d_t> laser_points_;
 
-  std::unique_ptr<RoboShapeColli>  robo_shape_;
+	std::unique_ptr<RoboShapeColli> robo_shape_;
 
-  /// Readings without robolength in it
-  std::vector< float > readings_normalized_;
-  std::vector< float > readings_front_, readings_back_;
-  std::vector< float > readings_left_front_,  readings_left_back_;
-  std::vector< float > readings_right_front_, readings_right_back_;
+	/// Readings without robolength in it
+	std::vector<float> readings_normalized_;
+	std::vector<float> readings_front_, readings_back_;
+	std::vector<float> readings_left_front_, readings_left_back_;
+	std::vector<float> readings_right_front_, readings_right_back_;
 
+	void fill_normalized_readings();
+	void sort_normalized_readings();
 
-  void fill_normalized_readings();
-  void sort_normalized_readings();
-
-  bool check_danger( std::vector< float > readings );
-  bool turn_left_allowed();
-  bool turn_right_allowed();
+	bool check_danger(std::vector<float> readings);
+	bool turn_left_allowed();
+	bool turn_right_allowed();
 };
 
 } // end namespace fawkes

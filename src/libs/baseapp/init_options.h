@@ -28,111 +28,106 @@
 #include <utils/system/dynamic_module/module.h>
 
 namespace fawkes {
-  namespace runtime {
+namespace runtime {
 
 class InitOptions
 {
- public:
-  InitOptions(const char *basename);
-  InitOptions(int argc, char **argv);
-  InitOptions(const InitOptions &options);
-  ~InitOptions();
+public:
+	InitOptions(const char *basename);
+	InitOptions(int argc, char **argv);
+	InitOptions(const InitOptions &options);
+	~InitOptions();
 
-  InitOptions &  operator=(const InitOptions &options);
+	InitOptions &operator=(const InitOptions &options);
 
-  InitOptions &  net_tcp_port(unsigned short int port);
-  InitOptions &  net_service_name(const char *service_name);
-  InitOptions &  daemonize(bool daemonize,
-			   bool kill = false, bool status = false,
-			   const char *pid_file = 0);
-  InitOptions &  loggers(const char *loggers);
-  InitOptions &  log_level(Logger::LogLevel log_level);
-  InitOptions &  show_help(bool show_help);
-  InitOptions &  user(const char *username);
-  InitOptions &  group(const char *groupname);
-  InitOptions &  config_file(const char *config_file);
-  InitOptions &  bb_cleanup(bool bb_cleanup);
-  InitOptions &  init_plugin_cache(bool init_plugin_cache);
-  InitOptions &  load_plugins(const char *plugin_list);
-  InitOptions &  default_plugin(const char *default_plugin);
-  InitOptions &  plugin_module_flags(Module::ModuleFlags flags);
-  InitOptions &  default_signal_handlers(bool enable);
+	InitOptions &net_tcp_port(unsigned short int port);
+	InitOptions &net_service_name(const char *service_name);
+	InitOptions &
+	             daemonize(bool daemonize, bool kill = false, bool status = false, const char *pid_file = 0);
+	InitOptions &loggers(const char *loggers);
+	InitOptions &log_level(Logger::LogLevel log_level);
+	InitOptions &show_help(bool show_help);
+	InitOptions &user(const char *username);
+	InitOptions &group(const char *groupname);
+	InitOptions &config_file(const char *config_file);
+	InitOptions &bb_cleanup(bool bb_cleanup);
+	InitOptions &init_plugin_cache(bool init_plugin_cache);
+	InitOptions &load_plugins(const char *plugin_list);
+	InitOptions &default_plugin(const char *default_plugin);
+	InitOptions &plugin_module_flags(Module::ModuleFlags flags);
+	InitOptions &default_signal_handlers(bool enable);
 
-  const char *basename() const;
+	const char *basename() const;
 
-  bool has_net_tcp_port() const;
-  unsigned short int net_tcp_port() const;
-  bool has_net_service_name() const;
-  const char * net_service_name() const;
+	bool               has_net_tcp_port() const;
+	unsigned short int net_tcp_port() const;
+	bool               has_net_service_name() const;
+	const char *       net_service_name() const;
 
-  bool has_load_plugin_list() const;
-  const char * load_plugin_list() const;
-  const char * default_plugin() const;
-  
+	bool        has_load_plugin_list() const;
+	const char *load_plugin_list() const;
+	const char *default_plugin() const;
 
-  bool has_loggers() const;
-  const char *  loggers() const;
-  Logger::LogLevel log_level() const;
+	bool             has_loggers() const;
+	const char *     loggers() const;
+	Logger::LogLevel log_level() const;
 
-  bool show_help() const;
-  bool bb_cleanup() const;
-  bool init_plugin_cache() const;
+	bool show_help() const;
+	bool bb_cleanup() const;
+	bool init_plugin_cache() const;
 
-  bool daemonize() const;
-  bool daemonize_kill() const;
-  bool daemonize_status() const;
-  const char *  daemon_pid_file() const;
+	bool        daemonize() const;
+	bool        daemonize_kill() const;
+	bool        daemonize_status() const;
+	const char *daemon_pid_file() const;
 
+	bool        has_username() const;
+	const char *username() const;
+	bool        has_groupname() const;
+	const char *groupname() const;
 
-  bool has_username() const;
-  const char * username() const;
-  bool has_groupname() const;
-  const char * groupname() const;
+	const char *config_file() const;
 
-  const char * config_file() const;
+	Module::ModuleFlags plugin_module_flags() const;
 
-  Module::ModuleFlags plugin_module_flags() const;
+	bool default_signal_handlers() const;
 
-  bool  default_signal_handlers() const;
+private:
+	char *basename_;
 
- private:
-  char               *basename_;
+	bool               has_net_tcp_port_;
+	unsigned short int net_tcp_port_;
 
-  bool                has_net_tcp_port_;
-  unsigned short int  net_tcp_port_;
+	bool  has_load_plugin_list_;
+	char *load_plugin_list_;
+	char *default_plugin_;
 
-  bool                has_load_plugin_list_;
-  char               *load_plugin_list_;
-  char               *default_plugin_;
+	bool             has_loggers_;
+	char *           loggers_;
+	Logger::LogLevel log_level_;
 
-  bool                has_loggers_;
-  char               *loggers_;
-  Logger::LogLevel    log_level_;
+	bool  has_net_service_name_;
+	char *net_service_name_;
 
-  bool                has_net_service_name_;
-  char               *net_service_name_;
+	bool  has_username_;
+	char *username_;
+	bool  has_groupname_;
+	char *groupname_;
 
-  bool                has_username_;
-  char               *username_;
-  bool                has_groupname_;
-  char               *groupname_;
+	char *config_file_;
 
-  char               *config_file_;
+	bool  daemonize_;
+	char *daemon_pid_file_;
+	bool  daemonize_kill_;
+	bool  daemonize_status_;
 
-  bool                daemonize_;
-  char               *daemon_pid_file_;
-  bool                daemonize_kill_;
-  bool                daemonize_status_;
+	bool show_help_;
+	bool bb_cleanup_;
 
-  bool                show_help_;
-  bool                bb_cleanup_;
-
-  bool                init_plugin_cache_;
-  Module::ModuleFlags plugin_module_flags_;
-  bool                default_signal_handlers_;
-  
+	bool                init_plugin_cache_;
+	Module::ModuleFlags plugin_module_flags_;
+	bool                default_signal_handlers_;
 };
-
 
 } // end namespace runtime
 } // end namespace fawkes

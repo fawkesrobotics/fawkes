@@ -25,6 +25,7 @@
 #include <core/exception.h>
 #include <utils/math/angle.h>
 #include <utils/time/time.h>
+
 #include <algorithm>
 #include <cstring>
 
@@ -44,43 +45,41 @@ using namespace fawkes;
  * @param in_data_size number of entries in value arrays
  * @param in vector of input arrays
  */
-LaserCircleSectorDataFilter::LaserCircleSectorDataFilter(const std::string& filter_name,
-                                                         unsigned int from,
-                                                         unsigned int to,
-                                                         unsigned int in_data_size,
+LaserCircleSectorDataFilter::LaserCircleSectorDataFilter(const std::string &filter_name,
+                                                         unsigned int       from,
+                                                         unsigned int       to,
+                                                         unsigned int       in_data_size,
                                                          std::vector<LaserDataFilter::Buffer *> &in)
-	: LaserDataFilter(filter_name, in_data_size, in, in.size())
+: LaserDataFilter(filter_name, in_data_size, in, in.size())
 {
-  from_ = from;
-  to_   = to;
+	from_ = from;
+	to_   = to;
 }
-
 
 void
 LaserCircleSectorDataFilter::filter()
 {
-  const unsigned int vecsize = std::min(in.size(), out.size());
-  const unsigned int arrsize = std::min(in_data_size, out_data_size);
-  for (unsigned int a = 0; a < vecsize; ++a) {
+	const unsigned int vecsize = std::min(in.size(), out.size());
+	const unsigned int arrsize = std::min(in_data_size, out_data_size);
+	for (unsigned int a = 0; a < vecsize; ++a) {
+		reset_outbuf(out[a]);
+		out[a]->frame = in[a]->frame;
+		out[a]->timestamp->set_time(in[a]->timestamp);
 
-    reset_outbuf(out[a]);
-    out[a]->frame = in[a]->frame;
-    out[a]->timestamp->set_time(in[a]->timestamp);
+		float *inbuf  = in[a]->values;
+		float *outbuf = out[a]->values;
 
-    float *inbuf  = in[a]->values;
-    float *outbuf = out[a]->values;
-
-    if (from_ > to_) {
-      for (unsigned int i = from_; i < arrsize; ++i) {
-	outbuf[i] = inbuf[i];
-      }
-      for (unsigned int i = 0; i <= std::min(to_, arrsize-1); ++i) {
-	outbuf[i] = inbuf[i];
-      }
-    } else {
-      for (unsigned int i = from_; i <= std::min(to_, arrsize-1); ++i) {
-	outbuf[i] = inbuf[i];
-      }
-    }
-  }
+		if (from_ > to_) {
+			for (unsigned int i = from_; i < arrsize; ++i) {
+				outbuf[i] = inbuf[i];
+			}
+			for (unsigned int i = 0; i <= std::min(to_, arrsize - 1); ++i) {
+				outbuf[i] = inbuf[i];
+			}
+		} else {
+			for (unsigned int i = from_; i <= std::min(to_, arrsize - 1); ++i) {
+				outbuf[i] = inbuf[i];
+			}
+		}
+	}
 }

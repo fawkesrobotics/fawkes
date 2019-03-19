@@ -27,26 +27,23 @@
 
 namespace fawkes {
 
-
 class Thread;
 class ThreadList;
 
 class ThreadCollector
 {
- public:
-  virtual ~ThreadCollector();
+public:
+	virtual ~ThreadCollector();
 
-  virtual void add(ThreadList &tl)                                      = 0;
-  virtual void add(Thread *t)                                           = 0;
+	virtual void add(ThreadList &tl) = 0;
+	virtual void add(Thread *t)      = 0;
 
-  virtual void remove(ThreadList &tl)                                   = 0;
-  virtual void remove(Thread *t)                                        = 0;
+	virtual void remove(ThreadList &tl) = 0;
+	virtual void remove(Thread *t)      = 0;
 
-  virtual void force_remove(fawkes::ThreadList &tl)                     = 0;
-  virtual void force_remove(fawkes::Thread *t)                          = 0;
-
+	virtual void force_remove(fawkes::ThreadList &tl) = 0;
+	virtual void force_remove(fawkes::Thread *t)      = 0;
 };
-
 
 } // end namespace fawkes
 

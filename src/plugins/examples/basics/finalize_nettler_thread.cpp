@@ -38,17 +38,15 @@ using namespace fawkes;
  * @param name thread name
  */
 ExampleFinalizeNettlerThread::ExampleFinalizeNettlerThread(const char *name)
-  : Thread(name, Thread::OPMODE_WAITFORWAKEUP)
+: Thread(name, Thread::OPMODE_WAITFORWAKEUP)
 {
-  nagged = false;
+	nagged = false;
 }
-
 
 /** Destructor. */
 ExampleFinalizeNettlerThread::~ExampleFinalizeNettlerThread()
 {
 }
-
 
 /** Thread loop.
  * If num iterations module modc is 0 print out messaege, otherwise do nothing.
@@ -58,30 +56,27 @@ ExampleFinalizeNettlerThread::loop()
 {
 }
 
-
 void
 ExampleFinalizeNettlerThread::init()
 {
-  logger->log_info("ExampleFinalizeNettlerThread", "init() called");
+	logger->log_info("ExampleFinalizeNettlerThread", "init() called");
 }
-
 
 void
 ExampleFinalizeNettlerThread::finalize()
 {
-  logger->log_info("ExampleFinalizeNettlerThread", "finalize() called");
+	logger->log_info("ExampleFinalizeNettlerThread", "finalize() called");
 }
-
 
 bool
 ExampleFinalizeNettlerThread::prepare_finalize_user()
 {
-  if ( nagged ) {
-    logger->log_warn("ExampleFinalizeNettlerThread", "Allowing Finalization");
-    return true;
-  } else {
-    logger->log_warn("ExampleFinalizeNettlerThread", "NOT allowing Finalization");
-    nagged = true;
-    return false;
-  }
+	if (nagged) {
+		logger->log_warn("ExampleFinalizeNettlerThread", "Allowing Finalization");
+		return true;
+	} else {
+		logger->log_warn("ExampleFinalizeNettlerThread", "NOT allowing Finalization");
+		nagged = true;
+		return false;
+	}
 }

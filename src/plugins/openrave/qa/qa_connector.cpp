@@ -27,6 +27,7 @@
 #include <openrave/connector.h>
 #include <openrave/manipulators/katana6M180.h>
 #include <utils/logging/console.h>
+
 #include <cstdio>
 #include <iostream>
 #include <vector>
@@ -37,46 +38,39 @@ using namespace std;
 void
 printVector(vector<float> v)
 {
-  printf("## size:%zu \n", v.size());
-  for(unsigned int i=0; i<v.size(); i++)
-  {
-    printf("## %u:)%f \n", i, v[i]);
-  }
+	printf("## size:%zu \n", v.size());
+	for (unsigned int i = 0; i < v.size(); i++) {
+		printf("## %u:)%f \n", i, v[i]);
+	}
 }
 
 int
 main(int argc, char **argv)
 {
-  printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
+	printf("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
-  ConsoleLogger* cl = new ConsoleLogger();
-  string robotFile = "../src/plugins/openrave/xml/caesar.robot.xml";
+	ConsoleLogger *cl        = new ConsoleLogger();
+	string         robotFile = "../src/plugins/openrave/xml/caesar.robot.xml";
 
-  OpenRAVEConnector* con = new OpenRAVEConnector(cl);
-  con->setup(robotFile);
+	OpenRAVEConnector *con = new OpenRAVEConnector(cl);
+	con->setup(robotFile);
 
- // configure manipulator
-  OpenRAVEManipulatorKatana6M180* manipKatana_ = new OpenRAVEManipulatorKatana6M180(6, 5);
-  manipKatana_->addMotor(0,0);
-  manipKatana_->addMotor(1,1);
-  manipKatana_->addMotor(2,2);
-  manipKatana_->addMotor(4,3);
-  manipKatana_->addMotor(5,4);
+	// configure manipulator
+	OpenRAVEManipulatorKatana6M180 *manipKatana_ = new OpenRAVEManipulatorKatana6M180(6, 5);
+	manipKatana_->addMotor(0, 0);
+	manipKatana_->addMotor(1, 1);
+	manipKatana_->addMotor(2, 2);
+	manipKatana_->addMotor(4, 3);
+	manipKatana_->addMotor(5, 4);
 
-  con->setManipulator(manipKatana_);
+	con->setManipulator(manipKatana_);
 
-  //con->startViewer();
+	//con->startViewer();
 
+	//usleep(5000*1000);
+	//free(con);
 
-  //usleep(5000*1000);
-  //free(con);
-
-
-
-
-
-  return 1;
+	return 1;
 }
-
 
 /// @endcond

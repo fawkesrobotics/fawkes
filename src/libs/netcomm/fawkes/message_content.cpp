@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <netcomm/fawkes/message_content.h>
 #include <core/exceptions/software.h>
+#include <netcomm/fawkes/message_content.h>
 
 #include <cstring>
 
@@ -52,16 +52,14 @@ namespace fawkes {
 /** Constructor. */
 FawkesNetworkMessageContent::FawkesNetworkMessageContent()
 {
-  _payload = NULL;
-  _payload_size = 0;
+	_payload      = NULL;
+	_payload_size = 0;
 }
-
 
 /** Virtual empty destructor. */
 FawkesNetworkMessageContent::~FawkesNetworkMessageContent()
 {
 }
-
 
 /** Return pointer to payload.
  * @return pointer to payload
@@ -71,13 +69,11 @@ FawkesNetworkMessageContent::~FawkesNetworkMessageContent()
 void *
 FawkesNetworkMessageContent::payload()
 {
-  if ( (_payload == NULL) || (_payload_size == 0) ) {
-    throw NullPointerException("Payload in network message content may not be NULL");
-  }
-  return _payload;
+	if ((_payload == NULL) || (_payload_size == 0)) {
+		throw NullPointerException("Payload in network message content may not be NULL");
+	}
+	return _payload;
 }
-
-
 
 /** Return payload size
  * @return payload size
@@ -87,12 +83,11 @@ FawkesNetworkMessageContent::payload()
 size_t
 FawkesNetworkMessageContent::payload_size()
 {
-  if ( (_payload == NULL) || (_payload_size == 0) ) {
-    throw NullPointerException("Payload in network message content may not be NULL");
-  }
-  return _payload_size;
+	if ((_payload == NULL) || (_payload_size == 0)) {
+		throw NullPointerException("Payload in network message content may not be NULL");
+	}
+	return _payload_size;
 }
-
 
 /** Copy payload into payload buffer to a specified offset.
  * This assumes that you have made sure that the buffer is big enough!
@@ -103,8 +98,8 @@ FawkesNetworkMessageContent::payload_size()
 void
 FawkesNetworkMessageContent::copy_payload(size_t offset, const void *buf, size_t len)
 {
-  void *tmp = (void *)((size_t)_payload + offset);
-  memcpy(tmp, buf, len);
+	void *tmp = (void *)((size_t)_payload + offset);
+	memcpy(tmp, buf, len);
 }
 
 } // end namespace fawkes

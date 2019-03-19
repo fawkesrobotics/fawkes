@@ -22,28 +22,28 @@
 #ifndef _PLUGINS_ROS_ROBOT_DESCRIPTION_THREAD_H_
 #define _PLUGINS_ROS_ROBOT_DESCRIPTION_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/ros/aspect/ros.h>
 
 #include <string>
 
-class ROSRobotDescriptionThread
-: public fawkes::Thread,
-  public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ROSAspect
+class ROSRobotDescriptionThread : public fawkes::Thread,
+                                  public fawkes::ConfigurableAspect,
+                                  public fawkes::LoggingAspect,
+                                  public fawkes::ROSAspect
 {
- public:
-  ROSRobotDescriptionThread();
-  virtual ~ROSRobotDescriptionThread();
+public:
+	ROSRobotDescriptionThread();
+	virtual ~ROSRobotDescriptionThread();
 
-  virtual void init();
-  virtual void finalize();
- private:
-  std::string cfg_urdf_path_;
-  std::string cfg_ros_param_;
+	virtual void init();
+	virtual void finalize();
+
+private:
+	std::string cfg_urdf_path_;
+	std::string cfg_ros_param_;
 };
 
 #endif

@@ -45,12 +45,13 @@ namespace fawkes {
  */
 
 float
-LinearInterpolator::interpolate(float t_current, float t_end, float t_step,
-				float v_start, float v_end)
+LinearInterpolator::interpolate(float t_current,
+                                float t_end,
+                                float t_step,
+                                float v_start,
+                                float v_end)
 {
-  return (t_current / t_end) * (v_end - v_start) + v_start;
+	return (t_current / t_end) * (v_end - v_start) + v_start;
 }
 
-
 } // end namespace fawkes
-

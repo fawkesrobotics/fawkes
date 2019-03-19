@@ -23,8 +23,8 @@
 #ifndef _FIREVISION_FILTER_MEDIAN_H_
 #define _FIREVISION_FILTER_MEDIAN_H_
 
-#if ! (defined(HAVE_IPP) || defined(HAVE_OPENCV))
-#error "Neither IPP nor OpenCV installed"
+#if !(defined(HAVE_IPP) || defined(HAVE_OPENCV))
+#	error "Neither IPP nor OpenCV installed"
 #endif
 
 #include <fvfilters/filter.h>
@@ -33,13 +33,13 @@ namespace firevision {
 
 class FilterMedian : public Filter
 {
- public:
-  FilterMedian(unsigned int mask_size);
+public:
+	FilterMedian(unsigned int mask_size);
 
-  virtual void apply();
+	virtual void apply();
 
- private:
-  unsigned int   mask_size;
+private:
+	unsigned int mask_size;
 };
 
 } // end namespace firevision

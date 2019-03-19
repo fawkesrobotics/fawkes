@@ -14,9 +14,9 @@
 #include "PlanAction.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ PlanAction::PlanAction(const std::string &json)
 	from_json(json);
 }
 
-PlanAction::PlanAction(const rapidjson::Value& v)
+PlanAction::PlanAction(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ PlanAction::to_json(bool pretty) const
 }
 
 void
-PlanAction::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+PlanAction::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -87,7 +87,7 @@ PlanAction::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	}
 	rapidjson::Value v_param_values(rapidjson::kArrayType);
 	v_param_values.Reserve(param_values_.size(), allocator);
-	for (const auto & e : param_values_) {
+	for (const auto &e : param_values_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_param_values.PushBack(v, allocator);
@@ -120,7 +120,7 @@ PlanAction::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	}
 	rapidjson::Value v_preconditions(rapidjson::kArrayType);
 	v_preconditions.Reserve(preconditions_.size(), allocator);
-	for (const auto & e : preconditions_) {
+	for (const auto &e : preconditions_) {
 		rapidjson::Value v(rapidjson::kObjectType);
 		e->to_json_value(d, v);
 		v_preconditions.PushBack(v, allocator);
@@ -128,13 +128,12 @@ PlanAction::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 	v.AddMember("preconditions", v_preconditions, allocator);
 	rapidjson::Value v_effects(rapidjson::kArrayType);
 	v_effects.Reserve(effects_.size(), allocator);
-	for (const auto & e : effects_) {
+	for (const auto &e : effects_) {
 		rapidjson::Value v(rapidjson::kObjectType);
 		e->to_json_value(d, v);
 		v_effects.PushBack(v, allocator);
 	}
 	v.AddMember("effects", v_effects, allocator);
-
 }
 
 void
@@ -147,7 +146,7 @@ PlanAction::from_json(const std::string &json)
 }
 
 void
-PlanAction::from_json_value(const rapidjson::Value& d)
+PlanAction::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -162,11 +161,11 @@ PlanAction::from_json_value(const rapidjson::Value& d)
 		operator_name_ = d["operator-name"].GetString();
 	}
 	if (d.HasMember("param-values") && d["param-values"].IsArray()) {
-		const rapidjson::Value& a = d["param-values"];
-		param_values_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["param-values"];
+		param_values_             = std::vector<std::string>{};
+		;
 		param_values_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			param_values_.push_back(v.GetString());
 		}
 	}
@@ -183,47 +182,51 @@ PlanAction::from_json_value(const rapidjson::Value& d)
 		executable_ = d["executable"].GetBool();
 	}
 	if (d.HasMember("operator") && d["operator"].IsObject()) {
-		std::shared_ptr<DomainOperator>
-			nv{new DomainOperator(d["operator"])};
+		std::shared_ptr<DomainOperator> nv{new DomainOperator(d["operator"])};
 		_operator_ = std::move(nv);
 	}
 	if (d.HasMember("preconditions") && d["preconditions"].IsArray()) {
-		const rapidjson::Value& a = d["preconditions"];
-		preconditions_ = std::vector<std::shared_ptr<DomainPrecondition>>{};
-;
+		const rapidjson::Value &a = d["preconditions"];
+		preconditions_            = std::vector<std::shared_ptr<DomainPrecondition>>{};
+		;
 		preconditions_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			std::shared_ptr<DomainPrecondition> nv{new DomainPrecondition()};
 			nv->from_json_value(v);
 			preconditions_.push_back(std::move(nv));
 		}
 	}
 	if (d.HasMember("effects") && d["effects"].IsArray()) {
-		const rapidjson::Value& a = d["effects"];
-		effects_ = std::vector<std::shared_ptr<DomainEffect>>{};
-;
+		const rapidjson::Value &a = d["effects"];
+		effects_                  = std::vector<std::shared_ptr<DomainEffect>>{};
+		;
 		effects_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			std::shared_ptr<DomainEffect> nv{new DomainEffect()};
 			nv->from_json_value(v);
 			effects_.push_back(std::move(nv));
 		}
 	}
-
 }
 
 void
 PlanAction::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! id_)  missing.push_back("id");
-	if (! operator_name_)  missing.push_back("operator-name");
-	if (! state_)  missing.push_back("state");
-	if (! executable_)  missing.push_back("executable");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!id_)
+		missing.push_back("id");
+	if (!operator_name_)
+		missing.push_back("operator-name");
+	if (!state_)
+		missing.push_back("state");
+	if (!executable_)
+		missing.push_back("executable");
 	for (size_t i = 0; i < preconditions_.size(); ++i) {
-		if (! preconditions_[i]) {
+		if (!preconditions_[i]) {
 			missing.push_back("preconditions[" + std::to_string(i) + "]");
 		} else {
 			try {
@@ -236,7 +239,7 @@ PlanAction::validate(bool subcall) const
 		}
 	}
 	for (size_t i = 0; i < effects_.size(); ++i) {
-		if (! effects_[i]) {
+		if (!effects_[i]) {
 			missing.push_back("effects[" + std::to_string(i) + "]");
 		} else {
 			try {
@@ -249,14 +252,12 @@ PlanAction::validate(bool subcall) const
 		}
 	}
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "PlanAction is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "PlanAction is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

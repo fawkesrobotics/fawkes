@@ -23,10 +23,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvmodels/color/colormodel.h>
 #include <fvfilters/segment.h>
-
+#include <fvmodels/color/colormodel.h>
 #include <fvutils/color/yuv.h>
+
 #include <cstddef>
 
 namespace firevision {
@@ -42,61 +42,64 @@ namespace firevision {
  * @param cm color model to use
  * @param what what to mark
  */
-FilterSegment::FilterSegment(ColorModel *cm, color_t what)
-  : Filter("FilterSegment")
+FilterSegment::FilterSegment(ColorModel *cm, color_t what) : Filter("FilterSegment")
 {
-  this->cm = cm;
-  this->what = what;
+	this->cm   = cm;
+	this->what = what;
 }
-
 
 void
 FilterSegment::apply()
 {
-  unsigned int h = 0;
-  unsigned int w = 0;
+	unsigned int h = 0;
+	unsigned int w = 0;
 
-  // y-plane
-  unsigned char *yp   = src[0] + (src_roi[0]->start.y * src_roi[0]->line_step) + (src_roi[0]->start.x * src_roi[0]->pixel_step);
-  // u-plane
-  unsigned char *up   = YUV422_PLANAR_U_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
-                                   + ((src_roi[0]->start.y * src_roi[0]->line_step) / 2 + (src_roi[0]->start.x * src_roi[0]->pixel_step) / 2) ;
-  // v-plane
-  unsigned char *vp   = YUV422_PLANAR_V_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
-                                   + ((src_roi[0]->start.y * src_roi[0]->line_step) / 2 + (src_roi[0]->start.x * src_roi[0]->pixel_step) / 2);
+	// y-plane
+	unsigned char *yp = src[0] + (src_roi[0]->start.y * src_roi[0]->line_step)
+	                    + (src_roi[0]->start.x * src_roi[0]->pixel_step);
+	// u-plane
+	unsigned char *up =
+	  YUV422_PLANAR_U_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
+	  + ((src_roi[0]->start.y * src_roi[0]->line_step) / 2
+	     + (src_roi[0]->start.x * src_roi[0]->pixel_step) / 2);
+	// v-plane
+	unsigned char *vp =
+	  YUV422_PLANAR_V_PLANE(src[0], src_roi[0]->image_width, src_roi[0]->image_height)
+	  + ((src_roi[0]->start.y * src_roi[0]->line_step) / 2
+	     + (src_roi[0]->start.x * src_roi[0]->pixel_step) / 2);
 
-  // destination y-plane
-  unsigned char *dyp  = dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step);
+	// destination y-plane
+	unsigned char *dyp =
+	  dst + (dst_roi->start.y * dst_roi->line_step) + (dst_roi->start.x * dst_roi->pixel_step);
 
-  // line starts
-  unsigned char *lyp  = yp;   // y-plane
-  unsigned char *lup  = up;   // u-plane
-  unsigned char *lvp  = vp;   // v-plane
-  unsigned char *ldyp = dyp;  // destination y-plane
+	// line starts
+	unsigned char *lyp  = yp;  // y-plane
+	unsigned char *lup  = up;  // u-plane
+	unsigned char *lvp  = vp;  // v-plane
+	unsigned char *ldyp = dyp; // destination y-plane
 
-  for (h = 0; (h < src_roi[0]->height) && (h < dst_roi->height); ++h) {
-    for (w = 0; (w < src_roi[0]->width) && (w < dst_roi->width); w += 2) {
-      if ( (cm->determine(*yp++, *up, *vp) == what) ) {
-	*dyp++ = 255;
-      } else {
-	*dyp++ =   0;
-      }
-      if ( (cm->determine(*yp++, *up++, *vp++) == what) ) {
-	*dyp++ = 255;
-      } else {
-	*dyp++ =   0;
-      }
-    }
-    lyp  += src_roi[0]->line_step;
-    lup  += src_roi[0]->line_step / 2;
-    lvp  += src_roi[0]->line_step / 2;
-    ldyp += dst_roi->line_step;
-    yp    = lyp;
-    up    = lup;
-    vp    = lvp;
-    dyp   = ldyp;
-  }
-
+	for (h = 0; (h < src_roi[0]->height) && (h < dst_roi->height); ++h) {
+		for (w = 0; (w < src_roi[0]->width) && (w < dst_roi->width); w += 2) {
+			if ((cm->determine(*yp++, *up, *vp) == what)) {
+				*dyp++ = 255;
+			} else {
+				*dyp++ = 0;
+			}
+			if ((cm->determine(*yp++, *up++, *vp++) == what)) {
+				*dyp++ = 255;
+			} else {
+				*dyp++ = 0;
+			}
+		}
+		lyp += src_roi[0]->line_step;
+		lup += src_roi[0]->line_step / 2;
+		lvp += src_roi[0]->line_step / 2;
+		ldyp += dst_roi->line_step;
+		yp  = lyp;
+		up  = lup;
+		vp  = lvp;
+		dyp = ldyp;
+	}
 }
 
 } // end namespace firevision

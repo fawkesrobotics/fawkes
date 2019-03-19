@@ -23,10 +23,10 @@
 // Do not mention in API doc
 /// @cond EXAMPLES
 
-#include <core/threading/thread.h>
-#include <core/threading/wait_condition.h>
 #include <core/exception.h>
 #include <core/threading/mutex.h>
+#include <core/threading/thread.h>
+#include <core/threading/wait_condition.h>
 
 #include <iostream>
 #include <string>
@@ -34,74 +34,71 @@
 using namespace std;
 using namespace fawkes;
 
-typedef enum {
-  WAITER,
-  WAKER
-} threadmode_t;
+typedef enum { WAITER, WAKER } threadmode_t;
 
 class ExampleWaitCondThread : public Thread
 {
- public:
-  ExampleWaitCondThread(threadmode_t mode, string tname,
-			WaitCondition *waitcond, unsigned int sleep_time)
-    : Thread(tname.c_str(), Thread::OPMODE_CONTINUOUS)
-  {
-    mode_       = mode;
-    waitcond_   = waitcond;
-    sleep_time_ = sleep_time;
-  }
+public:
+	ExampleWaitCondThread(threadmode_t   mode,
+	                      string         tname,
+	                      WaitCondition *waitcond,
+	                      unsigned int   sleep_time)
+	: Thread(tname.c_str(), Thread::OPMODE_CONTINUOUS)
+	{
+		mode_       = mode;
+		waitcond_   = waitcond;
+		sleep_time_ = sleep_time;
+	}
 
-  virtual void loop()
-  {
-    if ( mode_ == WAITER ) {
-      usleep( sleep_time_ );
-      cout << name() << ": Waiting for waker" << endl;
-      try {
-	waitcond_->wait();
-	cout << name() << ": Woken up" << endl;
-      } catch (Exception &e) {
-	cout << name() << ": EXCEPTION" << endl;
-	e.print_trace();
-      }
-    } else { // WAKER
-      usleep( sleep_time_ );
-      cout << name() << ": Waking waiter" << endl;
-      waitcond_->wake_all();
-      cout << name() << ": Woke waiter" << endl;
-    }
-  }
+	virtual void
+	loop()
+	{
+		if (mode_ == WAITER) {
+			usleep(sleep_time_);
+			cout << name() << ": Waiting for waker" << endl;
+			try {
+				waitcond_->wait();
+				cout << name() << ": Woken up" << endl;
+			} catch (Exception &e) {
+				cout << name() << ": EXCEPTION" << endl;
+				e.print_trace();
+			}
+		} else { // WAKER
+			usleep(sleep_time_);
+			cout << name() << ": Waking waiter" << endl;
+			waitcond_->wake_all();
+			cout << name() << ": Woke waiter" << endl;
+		}
+	}
 
- private:
-  threadmode_t   mode_;
-  WaitCondition *waitcond_;
-  unsigned int   sleep_time_;
-
+private:
+	threadmode_t   mode_;
+	WaitCondition *waitcond_;
+	unsigned int   sleep_time_;
 };
-
 
 int
 main(int argc, char **argv)
 {
-  WaitCondition *w = new WaitCondition();
+	WaitCondition *w = new WaitCondition();
 
-  ExampleWaitCondThread *t1 = new ExampleWaitCondThread(WAITER, "waiter1", w, 0);
-  ExampleWaitCondThread *t2 = new ExampleWaitCondThread(WAITER, "waiter2", w, 0);
-  ExampleWaitCondThread *tw = new ExampleWaitCondThread(WAKER, "waker", w, 2458642);
+	ExampleWaitCondThread *t1 = new ExampleWaitCondThread(WAITER, "waiter1", w, 0);
+	ExampleWaitCondThread *t2 = new ExampleWaitCondThread(WAITER, "waiter2", w, 0);
+	ExampleWaitCondThread *tw = new ExampleWaitCondThread(WAKER, "waker", w, 2458642);
 
-  t1->start();
-  t2->start();
-  tw->start();
+	t1->start();
+	t2->start();
+	tw->start();
 
-  t1->join();
-  t2->join();
-  tw->join();
+	t1->join();
+	t2->join();
+	tw->join();
 
-  delete t1;
-  delete t2;
-  delete tw;
+	delete t1;
+	delete t2;
+	delete tw;
 
-  delete w;
+	delete w;
 }
-
 
 /// @endcond

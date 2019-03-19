@@ -22,6 +22,7 @@
  */
 
 #include <utils/misc/string_compare.h>
+
 #include <cstring>
 
 namespace fawkes {
@@ -45,9 +46,8 @@ namespace fawkes {
 bool
 StringEquality::operator()(const char *s1_, const char *s2_) const
 {
-  return ( strcmp(s1_, s2_) == 0 );
+	return (strcmp(s1_, s2_) == 0);
 }
-
 
 /** @class StringLess <utils/misc/string_compare.h>
  * String less than test.
@@ -68,8 +68,7 @@ StringEquality::operator()(const char *s1_, const char *s2_) const
 bool
 StringLess::operator()(const char *s1_, const char *s2_) const
 {
-  return ( strcmp(s1_, s2_) < 0 );
+	return (strcmp(s1_, s2_) < 0);
 }
-
 
 } // end namespace fawkes

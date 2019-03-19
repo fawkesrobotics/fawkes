@@ -21,22 +21,21 @@
 #ifndef _PLUGINS_SKILLER_SKILLER_FEATURE_H_
 #define _PLUGINS_SKILLER_SKILLER_FEATURE_H_
 
-#include <core/threading/thread.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  class LuaContext;
+class LuaContext;
 }
 
 class SkillerFeature
 {
- public:
-  virtual ~SkillerFeature();
+public:
+	virtual ~SkillerFeature();
 
-  virtual void init_lua_context(fawkes::LuaContext *context) = 0;
-  virtual void finalize_lua_context(fawkes::LuaContext *context) = 0;
-
+	virtual void init_lua_context(fawkes::LuaContext *context)     = 0;
+	virtual void finalize_lua_context(fawkes::LuaContext *context) = 0;
 };
 
 #endif

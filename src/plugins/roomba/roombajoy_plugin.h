@@ -27,8 +27,8 @@
 
 class RoombaJoystickPlugin : public fawkes::Plugin
 {
- public:
-  explicit RoombaJoystickPlugin(fawkes::Configuration *config);
+public:
+	explicit RoombaJoystickPlugin(fawkes::Configuration *config);
 };
 
 #endif

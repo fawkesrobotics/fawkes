@@ -26,23 +26,20 @@
 
 namespace firevision {
 
-class Scaler {
+class Scaler
+{
+public:
+	virtual ~Scaler();
 
- public:
-  virtual ~Scaler();
-
-  virtual void             set_scale_factor(float factor)                         = 0;
-  virtual void             set_original_dimensions(unsigned int width,
-						   unsigned int height)           = 0;
-  virtual void             set_scaled_dimensions(unsigned int width,
-						 unsigned int height)             = 0;
-  virtual void             set_original_buffer(unsigned char *buffer)             = 0;
-  virtual void             set_scaled_buffer(unsigned char *buffer)               = 0;
-  virtual void             scale()                                                = 0;
-  virtual unsigned int     needed_scaled_width()                                  = 0;
-  virtual unsigned int     needed_scaled_height()                                 = 0;
-  virtual float            get_scale_factor()                                     = 0;
-
+	virtual void         set_scale_factor(float factor)                                   = 0;
+	virtual void         set_original_dimensions(unsigned int width, unsigned int height) = 0;
+	virtual void         set_scaled_dimensions(unsigned int width, unsigned int height)   = 0;
+	virtual void         set_original_buffer(unsigned char *buffer)                       = 0;
+	virtual void         set_scaled_buffer(unsigned char *buffer)                         = 0;
+	virtual void         scale()                                                          = 0;
+	virtual unsigned int needed_scaled_width()                                            = 0;
+	virtual unsigned int needed_scaled_height()                                           = 0;
+	virtual float        get_scale_factor()                                               = 0;
 };
 
 } // end namespace firevision

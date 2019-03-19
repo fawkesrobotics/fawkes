@@ -30,19 +30,18 @@ namespace fawkes {
 
 class FawkesNetworkHandler
 {
- public:
-  FawkesNetworkHandler(unsigned short int id);
-  virtual ~FawkesNetworkHandler();
+public:
+	FawkesNetworkHandler(unsigned short int id);
+	virtual ~FawkesNetworkHandler();
 
-  unsigned short int id() const;
+	unsigned short int id() const;
 
-  virtual void handle_network_message(FawkesNetworkMessage *msg)           = 0;
-  virtual void client_connected(unsigned int clid)                         = 0;
-  virtual void client_disconnected(unsigned int clid)                      = 0;
+	virtual void handle_network_message(FawkesNetworkMessage *msg) = 0;
+	virtual void client_connected(unsigned int clid)               = 0;
+	virtual void client_disconnected(unsigned int clid)            = 0;
 
- private:
-  unsigned short int _id;
-
+private:
+	unsigned short int _id;
 };
 
 } // end namespace fawkes

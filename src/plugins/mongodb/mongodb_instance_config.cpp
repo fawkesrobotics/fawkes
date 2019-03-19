@@ -22,16 +22,15 @@
 #include "mongodb_instance_config.h"
 
 #include <config/config.h>
+#include <core/exceptions/system.h>
+#include <mongo/client/dbclient.h>
 #include <utils/sub_process/proc.h>
 #include <utils/time/wait.h>
-#include <core/exceptions/system.h>
 
 #include <boost/filesystem.hpp>
 #include <chrono>
 #include <numeric>
 #include <wordexp.h>
-
-#include <mongo/client/dbclient.h>
 
 using namespace fawkes;
 using namespace std::chrono_literals;
@@ -50,10 +49,11 @@ using namespace std::chrono_literals;
  * @param prefix configuration path prefix
  */
 MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
-                                             std::string cfgname, std::string prefix)
-	: Thread("MongoDBInstance", Thread::OPMODE_CONTINUOUS)
+                                             std::string    cfgname,
+                                             std::string    prefix)
+: Thread("MongoDBInstance", Thread::OPMODE_CONTINUOUS)
 {
-	set_name("MongoDBInstance|%s",  cfgname.c_str());
+	set_name("MongoDBInstance|%s", cfgname.c_str());
 	config_name_ = cfgname;
 
 	running_ = false;
@@ -61,37 +61,43 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 	enabled_ = false;
 	try {
 		enabled_ = config->get_bool(prefix + "enabled");
-	} catch (Exception &e) {}
+	} catch (Exception &e) {
+	}
 
 	if (enabled_) {
 		startup_grace_period_ = 10;
 		try {
 			startup_grace_period_ = config->get_uint(prefix + "startup-grace-period");
-		} catch (Exception &e) {} // ignored, use default
+		} catch (Exception &e) {
+		} // ignored, use default
 		loop_interval_ = 5.0;
 		try {
 			loop_interval_ = config->get_float(prefix + "loop-interval");
-		} catch (Exception &e) {} // ignored, use default
-		termination_grace_period_ = config->get_uint(prefix + "termination-grace-period");
+		} catch (Exception &e) {
+		} // ignored, use default
+		termination_grace_period_  = config->get_uint(prefix + "termination-grace-period");
 		clear_data_on_termination_ = config->get_bool(prefix + "clear-data-on-termination");
-		port_ = config->get_uint(prefix + "port");
-		data_path_ = config->get_string(prefix + "data-path");
-		log_path_ = config->get_string(prefix + "log/path");
-		log_append_ = config->get_bool(prefix + "log/append");
+		port_                      = config->get_uint(prefix + "port");
+		data_path_                 = config->get_string(prefix + "data-path");
+		log_path_                  = config->get_string(prefix + "log/path");
+		log_append_                = config->get_bool(prefix + "log/append");
 		try {
-			replica_set_ = config->get_string(prefix + "replica-set");;
-		} catch (Exception &e) {} // ignored, no replica set
-		if (! replica_set_.empty()) {
+			replica_set_ = config->get_string(prefix + "replica-set");
+			;
+		} catch (Exception &e) {
+		} // ignored, no replica set
+		if (!replica_set_.empty()) {
 			oplog_size_ = 0;
 			try {
 				oplog_size_ = config->get_uint(prefix + "oplog-size");
-			} catch (Exception &e) {} // ignored, use default
+			} catch (Exception &e) {
+			} // ignored, use default
 		}
 	}
 
-	argv_ =	{ "mongod", "--port", std::to_string(port_), "--dbpath", data_path_ };
+	argv_ = {"mongod", "--port", std::to_string(port_), "--dbpath", data_path_};
 
-	if (! log_path_.empty()) {
+	if (!log_path_.empty()) {
 		if (log_append_) {
 			argv_.push_back("--logappend");
 		}
@@ -99,7 +105,7 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 		argv_.push_back(log_path_);
 	}
 
-	if (! replica_set_.empty()) {
+	if (!replica_set_.empty()) {
 		argv_.push_back("--replSet");
 		argv_.push_back(replica_set_);
 		if (oplog_size_ > 0) {
@@ -110,31 +116,33 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 
 	if (enabled_) {
 		std::string extra_args = config->get_string_or_default((prefix + "args").c_str(), "");
-		if (! extra_args.empty()) {
+		if (!extra_args.empty()) {
 			wordexp_t p;
-			int wrv = wordexp(extra_args.c_str(), &p, WRDE_NOCMD | WRDE_UNDEF);
+			int       wrv = wordexp(extra_args.c_str(), &p, WRDE_NOCMD | WRDE_UNDEF);
 			switch (wrv) {
 			case 0: break; // all good
-			case WRDE_BADCHAR:
-				throw Exception("%s: invalid character in args", name());
-			case WRDE_BADVAL:
-				throw Exception("%s: undefined variable referenced in args", name());
+			case WRDE_BADCHAR: throw Exception("%s: invalid character in args", name());
+			case WRDE_BADVAL: throw Exception("%s: undefined variable referenced in args", name());
 			case WRDE_CMDSUB:
 				throw Exception("%s: running sub-commands has been disabled for args", name());
-			case WRDE_NOSPACE:
-				throw OutOfMemoryException("Cannot parse args");
-			case WRDE_SYNTAX:
-				throw Exception("%s: shell syntax error in args", name());
-			default:
-				throw Exception("Unexpected wordexp error %d when parsing args", wrv);
+			case WRDE_NOSPACE: throw OutOfMemoryException("Cannot parse args");
+			case WRDE_SYNTAX: throw Exception("%s: shell syntax error in args", name());
+			default: throw Exception("Unexpected wordexp error %d when parsing args", wrv);
 			}
 
 			// These arguments may not be passed, they are either configured through
 			// config values and could interfere, or they mess with our rs handling.
-			std::vector<std::string> invalid_args = {
-				"--port", "--dbpath", "--fork", "--logappend", "--logpath",
-				"--replSet", "--oplogSize", "--master", "--slave", "--source", "--only"
-			};
+			std::vector<std::string> invalid_args = {"--port",
+			                                         "--dbpath",
+			                                         "--fork",
+			                                         "--logappend",
+			                                         "--logpath",
+			                                         "--replSet",
+			                                         "--oplogSize",
+			                                         "--master",
+			                                         "--slave",
+			                                         "--source",
+			                                         "--only"};
 
 			// pass and verify arguments to be added to command line
 			for (size_t i = 0; i < p.we_wordc; ++i) {
@@ -150,11 +158,11 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 		}
 	}
 
-	command_line_ =
-		std::accumulate(std::next(argv_.begin()), argv_.end(), argv_.front(),
-		                [](std::string &s, const std::string &a) { return s + " " + a; });
+	command_line_ = std::accumulate(std::next(argv_.begin()),
+	                                argv_.end(),
+	                                argv_.front(),
+	                                [](std::string &s, const std::string &a) { return s + " " + a; });
 }
-
 
 void
 MongoDBInstanceConfig::init()
@@ -163,13 +171,16 @@ MongoDBInstanceConfig::init()
 		logger->log_debug(name(), "enabled: true");
 		logger->log_debug(name(), "TCP port: %u", port_);
 		logger->log_debug(name(), "Termination grace period: %u", termination_grace_period_);
-		logger->log_debug(name(), "clear data on termination: %s", clear_data_on_termination_ ? "yes" : "no");
+		logger->log_debug(name(),
+		                  "clear data on termination: %s",
+		                  clear_data_on_termination_ ? "yes" : "no");
 		logger->log_debug(name(), "data path: %s", data_path_.c_str());
 		logger->log_debug(name(), "log path: %s", log_path_.c_str());
 		logger->log_debug(name(), "log append: %s", log_append_ ? "yes" : "no");
-		logger->log_debug(name(), "replica set: %s",
-		                 replica_set_.empty() ? "DISABLED" : replica_set_.c_str());
-		if (! replica_set_.empty()) {
+		logger->log_debug(name(),
+		                  "replica set: %s",
+		                  replica_set_.empty() ? "DISABLED" : replica_set_.c_str());
+		if (!replica_set_.empty()) {
 			logger->log_debug(name(), "Op Log Size: %u MB", oplog_size_);
 		}
 
@@ -181,12 +192,11 @@ MongoDBInstanceConfig::init()
 	timewait_ = new TimeWait(clock, (int)(loop_interval_ * 1000000.));
 }
 
-
 void
 MongoDBInstanceConfig::loop()
 {
 	timewait_->mark_start();
-	if (! running_ || ! check_alive()) {
+	if (!running_ || !check_alive()) {
 		logger->log_error(name(), "MongoDB dead, restarting");
 		// on a crash, clean to make sure
 		try {
@@ -199,14 +209,12 @@ MongoDBInstanceConfig::loop()
 	timewait_->wait_systime();
 }
 
-
 void
 MongoDBInstanceConfig::finalize()
 {
 	kill_mongod(clear_data_on_termination_);
 	delete timewait_;
 }
-
 
 /** Get command line used to execute program.
  * @return command line to run mongod
@@ -226,22 +234,21 @@ MongoDBInstanceConfig::termination_grace_period() const
 	return termination_grace_period_;
 }
 
-
 bool
 MongoDBInstanceConfig::check_alive()
 {
 	try {
 		std::shared_ptr<mongo::DBClientConnection> client =
-			std::make_shared<mongo::DBClientConnection>();
-		std::string errmsg;
+		  std::make_shared<mongo::DBClientConnection>();
+		std::string        errmsg;
 		mongo::HostAndPort hostport("localhost", port_);
-		if (! client->connect(hostport, errmsg)) {
+		if (!client->connect(hostport, errmsg)) {
 			return false;
 		}
 		mongo::BSONObj cmd(BSON("isMaster" << 1));
 		mongo::BSONObj reply;
-		bool ok = client->runCommand("admin", cmd, reply);
-		if (! ok) {
+		bool           ok = client->runCommand("admin", cmd, reply);
+		if (!ok) {
 			logger->log_warn(name(), "Failed to connect: %s", reply.jsonString().c_str());
 		}
 		return ok;
@@ -255,7 +262,8 @@ MongoDBInstanceConfig::check_alive()
 void
 MongoDBInstanceConfig::start_mongod()
 {
-	if (running_)  return;
+	if (running_)
+		return;
 
 	if (check_alive()) {
 		logger->log_warn(name(), "MongoDB already running, not starting");
@@ -267,21 +275,26 @@ MongoDBInstanceConfig::start_mongod()
 		boost::filesystem::create_directories(data_path_);
 	} catch (boost::filesystem::filesystem_error &e) {
 		throw Exception("Failed to create data path '%s' for mongod(%s): %s",
-		                data_path_.c_str(), config_name_.c_str(), e.what());
+		                data_path_.c_str(),
+		                config_name_.c_str(),
+		                e.what());
 	}
 
-	if (! log_path_.empty()) {
+	if (!log_path_.empty()) {
 		boost::filesystem::path p(log_path_);
 		try {
 			boost::filesystem::create_directories(p.parent_path());
 		} catch (boost::filesystem::filesystem_error &e) {
 			throw Exception("Failed to create log path '%s' for mongod(%s): %s",
-			                p.parent_path().string().c_str(), config_name_.c_str(), e.what());
+			                p.parent_path().string().c_str(),
+			                config_name_.c_str(),
+			                e.what());
 		}
 	}
 
 	std::string progname = "mongod(" + config_name_ + ")";
-	proc_ = std::make_shared<SubProcess>(progname, "mongod", argv_, std::vector<std::string>{}, logger);
+	proc_ =
+	  std::make_shared<SubProcess>(progname, "mongod", argv_, std::vector<std::string>{}, logger);
 
 	for (unsigned i = 0; i < startup_grace_period_ * 4; ++i) {
 		if (check_alive()) {
@@ -290,7 +303,7 @@ MongoDBInstanceConfig::start_mongod()
 		}
 		std::this_thread::sleep_for(250ms);
 	}
-	if (! running_) {
+	if (!running_) {
 		proc_.reset();
 		throw Exception("%s: instance did not start in time", name());
 	}
@@ -307,7 +320,8 @@ MongoDBInstanceConfig::kill_mongod(bool clear_data)
 	if (proc_) {
 		proc_->kill(SIGINT);
 		for (unsigned i = 0; i < termination_grace_period_; ++i) {
-			if (! proc_->alive())  break;
+			if (!proc_->alive())
+				break;
 			std::this_thread::sleep_for(1s);
 		}
 		// This will send the term signal
@@ -318,8 +332,10 @@ MongoDBInstanceConfig::kill_mongod(bool clear_data)
 				boost::filesystem::remove_all(data_path_);
 			} catch (boost::filesystem::filesystem_error &e) {
 				throw Exception("Failed to create data path '%s' for mongod(%s): %s",
-				                data_path_.c_str(), config_name_.c_str(), e.what());
-			}			
+				                data_path_.c_str(),
+				                config_name_.c_str(),
+				                e.what());
+			}
 		}
 	}
 }

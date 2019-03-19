@@ -21,13 +21,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <arpa/inet.h>
 #include <gui_utils/service_model.h>
 #include <netcomm/dns-sd/avahi_thread.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <utils/misc/string_conversions.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
 #include <cerrno>
 
 using namespace std;
@@ -68,11 +68,11 @@ using namespace fawkes;
 
 /** @struct fawkes::ServiceModel::ServiceAddedRecord
  * Data structure to hold information about a newly added services.
- */ 
+ */
 
 /** @struct fawkes::ServiceModel::ServiceRemovedRecord
  * Data structure to hold information about a recently removed services.
- */ 
+ */
 
 /** @var fawkes::ServiceModel::m_added_services
  * Queue that holds the newly added services.
@@ -85,59 +85,58 @@ using namespace fawkes;
 /** Constructor.
  * @param service the service identifier
  */
-ServiceModel::ServiceModel(const char* service)
+ServiceModel::ServiceModel(const char *service)
 {
-  m_service_list = Gtk::ListStore::create(m_service_record);
+	m_service_list = Gtk::ListStore::create(m_service_record);
 
-  m_avahi = new AvahiThread();
-  m_avahi->watch_service(service, this);
-  m_avahi->start();
+	m_avahi = new AvahiThread();
+	m_avahi->watch_service(service, this);
+	m_avahi->start();
 
-  m_own_avahi_thread = true;
+	m_own_avahi_thread = true;
 
-  m_signal_service_added.connect( sigc::mem_fun(*this, &ServiceModel::on_service_added) );
-  m_signal_service_removed.connect( sigc::mem_fun(*this, &ServiceModel::on_service_removed) );
+	m_signal_service_added.connect(sigc::mem_fun(*this, &ServiceModel::on_service_added));
+	m_signal_service_removed.connect(sigc::mem_fun(*this, &ServiceModel::on_service_removed));
 }
 
 /** Constructor.
  * @param avahi_thread an AvahiThread that already watches for the
  * desired type of services
  */
-ServiceModel::ServiceModel(fawkes::AvahiThread* avahi_thread)
+ServiceModel::ServiceModel(fawkes::AvahiThread *avahi_thread)
 {
-  m_service_list = Gtk::ListStore::create(m_service_record);
+	m_service_list = Gtk::ListStore::create(m_service_record);
 
-  m_avahi = avahi_thread;
-  m_own_avahi_thread = false;
+	m_avahi            = avahi_thread;
+	m_own_avahi_thread = false;
 }
 
 /** Destructor. */
 ServiceModel::~ServiceModel()
 {
-  if (m_own_avahi_thread)
-    { 
-      m_avahi->cancel();
-      m_avahi->join();
-      delete m_avahi;
-    }
+	if (m_own_avahi_thread) {
+		m_avahi->cancel();
+		m_avahi->join();
+		delete m_avahi;
+	}
 }
 
 /** Get a reference to the model.
  * @return a reference to the model
  */
-Glib::RefPtr<Gtk::ListStore>&
+Glib::RefPtr<Gtk::ListStore> &
 ServiceModel::get_list_store()
 {
-  return m_service_list;
+	return m_service_list;
 }
 
 /** Access the column record.
  * @return the column record
  */
-ServiceModel::ServiceRecord&
+ServiceModel::ServiceRecord &
 ServiceModel::get_column_record()
 {
-  return m_service_record;
+	return m_service_record;
 }
 
 void
@@ -151,127 +150,127 @@ ServiceModel::cache_exhausted()
 }
 
 void
-ServiceModel::browse_failed( const char* name,
-			    const char* type,
-			    const char* domain )
+ServiceModel::browse_failed(const char *name, const char *type, const char *domain)
 {
 }
 
 void
-ServiceModel::service_added( const char* name, const char* type,
-                             const char* domain, const char* host_name, const char *interface,
-                             const struct sockaddr* addr, const socklen_t addr_size,
-                             uint16_t port, std::list<std::string>& txt, int flags )
+ServiceModel::service_added(const char *            name,
+                            const char *            type,
+                            const char *            domain,
+                            const char *            host_name,
+                            const char *            interface,
+                            const struct sockaddr * addr,
+                            const socklen_t         addr_size,
+                            uint16_t                port,
+                            std::list<std::string> &txt,
+                            int                     flags)
 {
-  ServiceAddedRecord s;
-  if (addr->sa_family == AF_INET) {
-	  char ipaddr[INET_ADDRSTRLEN];
-	  struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
-	  if (inet_ntop(AF_INET, &(saddr->sin_addr), ipaddr, sizeof(ipaddr)) != NULL) {
-		  s.ipaddr   = ipaddr;
-		  s.addrport = std::string(ipaddr) + ":" + StringConversions::to_string(port);
-	  } else {
-		  s.ipaddr = "";
-		  s.addrport = std::string("Failed to convert IPv4: ") + strerror(errno);
-	  }
-  } else if (addr->sa_family == AF_INET6) {
-	  char ipaddr[INET6_ADDRSTRLEN];
-	  struct sockaddr_in6 *saddr = (struct sockaddr_in6 *)addr;
-	  if (inet_ntop(AF_INET6, &(saddr->sin6_addr), ipaddr, sizeof(ipaddr)) != NULL) {
-		  s.ipaddr   = ipaddr;
-		  s.addrport = std::string("[") + ipaddr + "%" + interface + "]:" + StringConversions::to_string(port);
-	  } else {
-		  s.ipaddr = "";
-		  s.addrport = std::string("Failed to convert IPv6: ") + strerror(errno);
-	  }
-  } else {
-	  s.ipaddr = "";
-	  s.addrport = "Unknown address family";
-  }
+	ServiceAddedRecord s;
+	if (addr->sa_family == AF_INET) {
+		char                ipaddr[INET_ADDRSTRLEN];
+		struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
+		if (inet_ntop(AF_INET, &(saddr->sin_addr), ipaddr, sizeof(ipaddr)) != NULL) {
+			s.ipaddr   = ipaddr;
+			s.addrport = std::string(ipaddr) + ":" + StringConversions::to_string(port);
+		} else {
+			s.ipaddr   = "";
+			s.addrport = std::string("Failed to convert IPv4: ") + strerror(errno);
+		}
+	} else if (addr->sa_family == AF_INET6) {
+		char                 ipaddr[INET6_ADDRSTRLEN];
+		struct sockaddr_in6 *saddr = (struct sockaddr_in6 *)addr;
+		if (inet_ntop(AF_INET6, &(saddr->sin6_addr), ipaddr, sizeof(ipaddr)) != NULL) {
+			s.ipaddr = ipaddr;
+			s.addrport =
+			  std::string("[") + ipaddr + "%" + interface + "]:" + StringConversions::to_string(port);
+		} else {
+			s.ipaddr   = "";
+			s.addrport = std::string("Failed to convert IPv6: ") + strerror(errno);
+		}
+	} else {
+		s.ipaddr   = "";
+		s.addrport = "Unknown address family";
+	}
 
-  s.name      = name;
-  s.type      = type;
-  s.domain    = domain;
-  s.hostname  = host_name;
-  s.interface = interface;
-  s.port      = port;
-  memcpy(&s.sockaddr, addr, addr_size);
+	s.name      = name;
+	s.type      = type;
+	s.domain    = domain;
+	s.hostname  = host_name;
+	s.interface = interface;
+	s.port      = port;
+	memcpy(&s.sockaddr, addr, addr_size);
 
-  m_added_services.push_locked(s);
+	m_added_services.push_locked(s);
 
-  m_signal_service_added();
+	m_signal_service_added();
 }
 
 void
-ServiceModel::service_removed(const char* name, const char* type, const char* domain)
+ServiceModel::service_removed(const char *name, const char *type, const char *domain)
 {
-  ServiceRemovedRecord s;
-  s.name = string(name);
-  s.type = string(type);
-  s.domain = string(domain);
+	ServiceRemovedRecord s;
+	s.name   = string(name);
+	s.type   = string(type);
+	s.domain = string(domain);
 
-  m_removed_services.push_locked(s);
+	m_removed_services.push_locked(s);
 
-  m_signal_service_removed();
+	m_signal_service_removed();
 }
 
 /** Signal handler for the service-added signal. */
 void
 ServiceModel::on_service_added()
 {
-  m_added_services.lock();
+	m_added_services.lock();
 
-  while ( !m_added_services.empty() )
-    {
-      ServiceAddedRecord& s  = m_added_services.front();
+	while (!m_added_services.empty()) {
+		ServiceAddedRecord &s = m_added_services.front();
 
-      Gtk::TreeModel::Row row = *m_service_list->append();
-      
-      row[m_service_record.name]     = s.name;
-      row[m_service_record.type]     = s.type;
-      row[m_service_record.domain]   = s.domain;
-      row[m_service_record.hostname] = s.hostname;
-      row[m_service_record.interface] = s.interface;
-      row[m_service_record.ipaddr]   = s.ipaddr;
-      row[m_service_record.port]     = s.port;
-      row[m_service_record.addrport] = s.addrport;
-      row[m_service_record.sockaddr] = s.sockaddr;
-      
-      m_added_services.pop();
-    }
+		Gtk::TreeModel::Row row = *m_service_list->append();
 
-  m_added_services.unlock();
+		row[m_service_record.name]      = s.name;
+		row[m_service_record.type]      = s.type;
+		row[m_service_record.domain]    = s.domain;
+		row[m_service_record.hostname]  = s.hostname;
+		row[m_service_record.interface] = s.interface;
+		row[m_service_record.ipaddr]    = s.ipaddr;
+		row[m_service_record.port]      = s.port;
+		row[m_service_record.addrport]  = s.addrport;
+		row[m_service_record.sockaddr]  = s.sockaddr;
+
+		m_added_services.pop();
+	}
+
+	m_added_services.unlock();
 }
 
 /** Signal handler for the service-removed signal. */
 void
 ServiceModel::on_service_removed()
 {
-  m_removed_services.lock();
+	m_removed_services.lock();
 
-  while ( !m_removed_services.empty() )
-    {
-      ServiceRemovedRecord& s = m_removed_services.front();
+	while (!m_removed_services.empty()) {
+		ServiceRemovedRecord &s = m_removed_services.front();
 
-      Gtk::TreeIter iter;
-      iter = m_service_list->children().begin();
-      
-      while ( iter != m_service_list->children().end() )
-	{
-	  Gtk::TreeModel::Row row = *iter;
-	  if ( (row[m_service_record.name]   == s.name) &&
-	       (row[m_service_record.type]   == s.type) &&
-	       (row[m_service_record.domain] == s.domain) )
-	    {
-	      m_service_list->row_deleted( m_service_list->get_path(iter) );
-	      iter = m_service_list->erase(iter);
-	    }
-	  else
-	    { ++iter; }
+		Gtk::TreeIter iter;
+		iter = m_service_list->children().begin();
+
+		while (iter != m_service_list->children().end()) {
+			Gtk::TreeModel::Row row = *iter;
+			if ((row[m_service_record.name] == s.name) && (row[m_service_record.type] == s.type)
+			    && (row[m_service_record.domain] == s.domain)) {
+				m_service_list->row_deleted(m_service_list->get_path(iter));
+				iter = m_service_list->erase(iter);
+			} else {
+				++iter;
+			}
+		}
+
+		m_removed_services.pop();
 	}
 
-      m_removed_services.pop();
-    }
-
-  m_removed_services.unlock();
+	m_removed_services.unlock();
 }

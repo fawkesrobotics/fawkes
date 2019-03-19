@@ -27,8 +27,8 @@
 
 class KatanaPlugin : public fawkes::Plugin
 {
- public:
-  explicit KatanaPlugin(fawkes::Configuration *config);
+public:
+	explicit KatanaPlugin(fawkes::Configuration *config);
 };
 
 #endif

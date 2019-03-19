@@ -25,37 +25,41 @@
 
 #include "openrave_thread.h"
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/blocked_timing.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  class OpenRaveInterface;
+class OpenRaveInterface;
 }
 
-class OpenRaveMessageHandlerThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::BlackBoardAspect
+class OpenRaveMessageHandlerThread : public fawkes::Thread,
+                                     public fawkes::LoggingAspect,
+                                     public fawkes::ConfigurableAspect,
+                                     public fawkes::BlockedTimingAspect,
+                                     public fawkes::BlackBoardAspect
 {
- public:
-  OpenRaveMessageHandlerThread(OpenRaveThread* or_thread);
-  virtual ~OpenRaveMessageHandlerThread();
+public:
+	OpenRaveMessageHandlerThread(OpenRaveThread *or_thread);
+	virtual ~OpenRaveMessageHandlerThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  OpenRaveThread*		or_thread_;
-  fawkes::OpenRaveInterface*	if_openrave_;
+private:
+	OpenRaveThread *           or_thread_;
+	fawkes::OpenRaveInterface *if_openrave_;
 };
 
 #endif

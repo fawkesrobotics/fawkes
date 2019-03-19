@@ -32,14 +32,14 @@ class Logger;
 
 class LoggingAspectIniFin : public AspectIniFin
 {
- public:
-  LoggingAspectIniFin(Logger *logger);
+public:
+	LoggingAspectIniFin(Logger *logger);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  Logger *logger_;
+private:
+	Logger *logger_;
 };
 
 } // end namespace fawkes

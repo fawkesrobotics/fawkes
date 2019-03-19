@@ -20,11 +20,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugins/asp/aspect/clingo_access.h>
-#include <plugins/asp/aspect/clingo_control_manager.h>
-
 #include <core/exception.h>
 #include <logging/logger.h>
+#include <plugins/asp/aspect/clingo_access.h>
+#include <plugins/asp/aspect/clingo_control_manager.h>
 
 namespace fawkes {
 
@@ -34,8 +33,7 @@ namespace fawkes {
  */
 
 /** Constructor. */
-ClingoControlManager::ClingoControlManager(void)
-: logger_(nullptr)
+ClingoControlManager::ClingoControlManager(void) : logger_(nullptr)
 {
 }
 
@@ -48,7 +46,8 @@ ClingoControlManager::~ClingoControlManager(void)
  * @brief Sets the logger for all Clingo Controls.
  * @param[in] logger The logger.
  */
-void ClingoControlManager::set_logger(Logger *logger)
+void
+ClingoControlManager::set_logger(Logger *logger)
 {
 	logger_ = logger;
 }
@@ -62,14 +61,14 @@ void ClingoControlManager::set_logger(Logger *logger)
  * @return A new plain Clingo Control.
  */
 LockPtr<ClingoAccess>
-ClingoControlManager::create_control(const std::string& ctrl_name,
-                                     const std::string& log_component_name)
+ClingoControlManager::create_control(const std::string &ctrl_name,
+                                     const std::string &log_component_name)
 {
-	if ( controls_.count(ctrl_name) != 0 ) {
+	if (controls_.count(ctrl_name) != 0) {
 		throw Exception("Clingo Control '%s' already exists!", ctrl_name.c_str());
 	}
 
-	Clingo::SymbolSpan s;
+	Clingo::SymbolSpan    s;
 	LockPtr<ClingoAccess> ctrl(new ClingoAccess(logger_, log_component_name));
 
 	controls_.emplace(ctrl_name, ctrl);
@@ -83,7 +82,7 @@ ClingoControlManager::create_control(const std::string& ctrl_name,
  * @param[in] ctrl_name The name of the control to destroy.
  */
 void
-ClingoControlManager::destroy_control(const std::string& ctrl_name)
+ClingoControlManager::destroy_control(const std::string &ctrl_name)
 {
 	controls_.erase(ctrl_name);
 	return;
@@ -93,7 +92,7 @@ ClingoControlManager::destroy_control(const std::string& ctrl_name)
  * Get map of controls.
  * @return The map from control name to control lock ptr.
  */
-const std::unordered_map<std::string, LockPtr<ClingoAccess>>&
+const std::unordered_map<std::string, LockPtr<ClingoAccess>> &
 ClingoControlManager::controls(void) const
 {
 	return controls_;

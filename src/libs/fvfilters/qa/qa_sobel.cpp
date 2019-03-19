@@ -22,16 +22,16 @@
 
 /// @cond QA
 
+#include <fvfilters/sobel.h>
 #include <fvutils/adapters/iplimage.h>
 #include <fvutils/color/colorspaces.h>
-#include <fvutils/readers/jpeg.h>
 #include <fvutils/draw/drawer.h>
-#include <fvfilters/sobel.h>
+#include <fvutils/readers/jpeg.h>
 #include <fvwidgets/image_display.h>
 #include <utils/system/argparser.h>
 
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 using namespace fawkes;
@@ -40,53 +40,52 @@ using namespace firevision;
 int
 main(int argc, char **argv)
 {
-  ArgumentParser* argp = new ArgumentParser( argc, argv, "h:f:c:" );
+	ArgumentParser *argp = new ArgumentParser(argc, argv, "h:f:c:");
 
-  if (argp->has_arg( "f" ))
-    // read image from file
-  {
-    const char *image_file = argp->arg( "f" );
-    
-    JpegReader *reader = new JpegReader(image_file);
-    unsigned char *buffer = malloc_buffer(YUV422_PLANAR,
-					  reader->pixel_width(), reader->pixel_height());
-    
-    reader->set_buffer(buffer);
-    reader->read();
-    
-    unsigned char *sobeled = malloc_buffer(YUV422_PLANAR,
-					  reader->pixel_width(), reader->pixel_height());
-    memset(sobeled + reader->pixel_width() * reader->pixel_height(), 128,
-           reader->pixel_width() * reader->pixel_height());
+	if (argp->has_arg("f"))
+	// read image from file
+	{
+		const char *image_file = argp->arg("f");
 
-    ROI *roi = ROI::full_image(reader->pixel_width(), reader->pixel_height());
+		JpegReader *   reader = new JpegReader(image_file);
+		unsigned char *buffer =
+		  malloc_buffer(YUV422_PLANAR, reader->pixel_width(), reader->pixel_height());
 
+		reader->set_buffer(buffer);
+		reader->read();
 
-    FilterSobel *sobelf = new FilterSobel();
-    sobelf->set_src_buffer(buffer, roi, ORI_DEG_135);
-    sobelf->set_dst_buffer(sobeled, roi);
-    sobelf->apply();
-    
-    ImageDisplay *display = new ImageDisplay(reader->pixel_width(), reader->pixel_height());
-    display->show(sobeled);
-    display->loop_until_quit();
-    
-    delete display;
-    
-    delete roi;
-    free(buffer);
-    free(sobeled);
-    delete sobelf;
-    delete reader;
-  }
+		unsigned char *sobeled =
+		  malloc_buffer(YUV422_PLANAR, reader->pixel_width(), reader->pixel_height());
+		memset(sobeled + reader->pixel_width() * reader->pixel_height(),
+		       128,
+		       reader->pixel_width() * reader->pixel_height());
 
-  else
-  {
-    printf("Usage: %s -f <Image file as JPEG>\n", argv[0]);
-    exit(-1);
-  }
+		ROI *roi = ROI::full_image(reader->pixel_width(), reader->pixel_height());
 
-  delete argp;
+		FilterSobel *sobelf = new FilterSobel();
+		sobelf->set_src_buffer(buffer, roi, ORI_DEG_135);
+		sobelf->set_dst_buffer(sobeled, roi);
+		sobelf->apply();
+
+		ImageDisplay *display = new ImageDisplay(reader->pixel_width(), reader->pixel_height());
+		display->show(sobeled);
+		display->loop_until_quit();
+
+		delete display;
+
+		delete roi;
+		free(buffer);
+		free(sobeled);
+		delete sobelf;
+		delete reader;
+	}
+
+	else {
+		printf("Usage: %s -f <Image file as JPEG>\n", argv[0]);
+		exit(-1);
+	}
+
+	delete argp;
 }
 
 /// @endcond

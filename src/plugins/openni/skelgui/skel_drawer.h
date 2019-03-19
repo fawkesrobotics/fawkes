@@ -23,41 +23,39 @@
 #ifndef _PLUGINS_OPENNI_SKELGUI_SKEL_DRAWER_H_
 #define _PLUGINS_OPENNI_SKELGUI_SKEL_DRAWER_H_
 
-#include <plugins/openni/utils/types.h>
-
 #include <interfaces/HumanSkeletonInterface.h>
 #include <interfaces/HumanSkeletonProjectionInterface.h>
 #include <interfaces/ObjectPositionInterface.h>
+#include <plugins/openni/utils/types.h>
 
 class SkelGuiSkeletonDrawer
 {
- public:
-  /** Print state enum. */
-  typedef enum {
-    PRINT_NONE,		/**< Print neither ID nor state */
-    PRINT_ID,		/**< Print only ID */
-    PRINT_ID_STATE	/**< Print ID and state */
-  } PrintState;
+public:
+	/** Print state enum. */
+	typedef enum {
+		PRINT_NONE,    /**< Print neither ID nor state */
+		PRINT_ID,      /**< Print only ID */
+		PRINT_ID_STATE /**< Print ID and state */
+	} PrintState;
 
-  SkelGuiSkeletonDrawer(fawkes::openni::UserMap &users,
-			fawkes::openni::HandMap &hands);
+	SkelGuiSkeletonDrawer(fawkes::openni::UserMap &users, fawkes::openni::HandMap &hands);
 
-  void draw();
+	void draw();
 
-  void toggle_print_state();
-  void set_print_state(PrintState state);
+	void toggle_print_state();
+	void set_print_state(PrintState state);
 
- private:
-  void print_string(void *font, char *str);
-  void draw_limb(float *proj1, float conf1, float *proj2, float conf2);
-  void draw_user(fawkes::openni::UserInfo &user);
-  void draw_circle(unsigned int id, float *proj, float radius);
+private:
+	void print_string(void *font, char *str);
+	void draw_limb(float *proj1, float conf1, float *proj2, float conf2);
+	void draw_user(fawkes::openni::UserInfo &user);
+	void draw_circle(unsigned int id, float *proj, float radius);
 
- private:
-  fawkes::openni::UserMap  &users_;
-  fawkes::openni::HandMap  &hands_;
+private:
+	fawkes::openni::UserMap &users_;
+	fawkes::openni::HandMap &hands_;
 
-  PrintState print_state_;
+	PrintState print_state_;
 };
 
 #endif

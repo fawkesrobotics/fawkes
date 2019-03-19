@@ -21,25 +21,23 @@
 
 #pragma once
 
-#include <core/threading/thread.h>
+#include "model/TransformsGraph.h"
+
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/webview.h>
 #include <aspect/tf.h>
-
+#include <aspect/webview.h>
+#include <core/threading/thread.h>
 #include <webview/rest_api.h>
 #include <webview/rest_array.h>
 
-#include "model/TransformsGraph.h"
-
-class TransformsRestApi
-: public fawkes::Thread,
-	public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect,
-	public fawkes::WebviewAspect,
-	public fawkes::TransformAspect
+class TransformsRestApi : public fawkes::Thread,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::WebviewAspect,
+                          public fawkes::TransformAspect
 {
- public:
+public:
 	TransformsRestApi();
 	~TransformsRestApi();
 
@@ -47,9 +45,9 @@ class TransformsRestApi
 	virtual void loop();
 	virtual void finalize();
 
- private:
+private:
 	TransformsGraph cb_get_graph();
 
- private:
-	fawkes::WebviewRestApi        *rest_api_;
+private:
+	fawkes::WebviewRestApi *rest_api_;
 };

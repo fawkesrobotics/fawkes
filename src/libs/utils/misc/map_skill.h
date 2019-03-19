@@ -19,26 +19,26 @@
  */
 
 #include <map>
-#include <string>
 #include <regex>
+#include <string>
 
 namespace fawkes {
 
 class ActionSkillMapping
 {
- public:
+public:
 	ActionSkillMapping();
 	ActionSkillMapping(std::map<std::string, std::string> &mappings);
 
-	void add_mapping(const std::string& action_name, const std::string& skill_string_template);
-	bool has_mapping(const std::string& action_name) const;
+	void add_mapping(const std::string &action_name, const std::string &skill_string_template);
+	bool has_mapping(const std::string &action_name) const;
 
-	std::string
-		map_skill(const std::string &name, const std::map<std::string, std::string> &params,
-		          std::multimap<std::string, std::string> &messages) const;
+	std::string map_skill(const std::string &                       name,
+	                      const std::map<std::string, std::string> &params,
+	                      std::multimap<std::string, std::string> & messages) const;
 
- private:
+private:
 	std::map<std::string, std::string> mappings_;
 };
 
-}
+} // namespace fawkes

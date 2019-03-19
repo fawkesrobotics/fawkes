@@ -32,41 +32,38 @@ class FawkesNetworkMessageContent;
 
 class FawkesNetworkHub
 {
- public:
-  virtual ~FawkesNetworkHub();
+public:
+	virtual ~FawkesNetworkHub();
 
-  virtual void broadcast(FawkesNetworkMessage *msg)                        = 0;
+	virtual void broadcast(FawkesNetworkMessage *msg) = 0;
 
-  virtual void broadcast(unsigned short int component_id,
-			 unsigned short int msg_id,
-			 void *payload, unsigned int payload_size)         = 0;
+	virtual void broadcast(unsigned short int component_id,
+	                       unsigned short int msg_id,
+	                       void *             payload,
+	                       unsigned int       payload_size) = 0;
 
-  virtual void broadcast(unsigned short int component_id,
-			 unsigned short int msg_id)                        = 0;
+	virtual void broadcast(unsigned short int component_id, unsigned short int msg_id) = 0;
 
+	virtual void send(FawkesNetworkMessage *msg) = 0;
 
-  virtual void send(FawkesNetworkMessage *msg)                             = 0;
+	virtual void
+	send(unsigned int to_clid, unsigned short int component_id, unsigned short int msg_id) = 0;
 
-  virtual void send(unsigned int to_clid,
-		    unsigned short int component_id,
-		    unsigned short int msg_id)                             = 0;
+	virtual void send(unsigned int       to_clid,
+	                  unsigned short int component_id,
+	                  unsigned short int msg_id,
+	                  void *             payload,
+	                  unsigned int       payload_size) = 0;
 
-  virtual void send(unsigned int to_clid,
-		    unsigned short int component_id,
-		    unsigned short int msg_id,
-		    void *payload, unsigned int payload_size)              = 0;
+	virtual void send(unsigned int                 to_clid,
+	                  unsigned short int           component_id,
+	                  unsigned short int           msg_id,
+	                  FawkesNetworkMessageContent *content) = 0;
 
-  virtual void send(unsigned int to_clid,
-		    unsigned short int component_id,
-		    unsigned short int msg_id,
-		    FawkesNetworkMessageContent *content)                  = 0;
+	virtual void add_handler(FawkesNetworkHandler *handler)    = 0;
+	virtual void remove_handler(FawkesNetworkHandler *handler) = 0;
 
-  virtual void add_handler(FawkesNetworkHandler *handler)                  = 0;
-  virtual void remove_handler(FawkesNetworkHandler *handler)               = 0;
-
-
-  virtual void force_send()                                                = 0;
-
+	virtual void force_send() = 0;
 };
 
 } // end namespace fawkes

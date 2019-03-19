@@ -21,15 +21,14 @@
 
 #include "emergency_motor_instruct.h"
 
+#include <config/config.h>
 #include <interfaces/MotorInterface.h>
 #include <logging/logger.h>
-#include <config/config.h>
 #include <utils/math/common.h>
 
 #include <string>
 
-namespace fawkes
-{
+namespace fawkes {
 
 using namespace std;
 
@@ -47,24 +46,22 @@ using namespace std;
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-EmergencyMotorInstruct::EmergencyMotorInstruct( fawkes::MotorInterface* motor,
-                                                float frequency,
-                                                fawkes::Logger* logger,
-                                                fawkes::Configuration* config )
- : BaseMotorInstruct( motor, frequency, logger, config )
+EmergencyMotorInstruct::EmergencyMotorInstruct(fawkes::MotorInterface *motor,
+                                               float                   frequency,
+                                               fawkes::Logger *        logger,
+                                               fawkes::Configuration * config)
+: BaseMotorInstruct(motor, frequency, logger, config)
 {
-  logger_->log_debug("EmergencyMotorInstruct", "(Constructor): Entering");
-  logger_->log_debug("EmergencyMotorInstruct", "(Constructor): Exiting");
+	logger_->log_debug("EmergencyMotorInstruct", "(Constructor): Entering");
+	logger_->log_debug("EmergencyMotorInstruct", "(Constructor): Exiting");
 }
-
 
 /** Destructor. */
 EmergencyMotorInstruct::~EmergencyMotorInstruct()
 {
-  logger_->log_debug("EmergencyMotorInstruct", "(Destructor): Entering");
-  logger_->log_debug("EmergencyMotorInstruct", "(Destructor): Exiting");
+	logger_->log_debug("EmergencyMotorInstruct", "(Destructor): Entering");
+	logger_->log_debug("EmergencyMotorInstruct", "(Destructor): Exiting");
 }
-
 
 /** Implementation of Calculate Translation Function.
  * These are dangerous! Take care while modifying. Only a minus sign too few
@@ -76,50 +73,48 @@ EmergencyMotorInstruct::~EmergencyMotorInstruct()
  * @param time_factor The time_factor (should become deprecated!)
  * @return the new translation
  */
-float EmergencyMotorInstruct::calculate_translation( float current, float desired, float time_factor )
+float
+EmergencyMotorInstruct::calculate_translation(float current, float desired, float time_factor)
 {
-  float exec_trans = 0.0;
+	float exec_trans = 0.0;
 
-  if (desired < current) {
+	if (desired < current) {
+		if (current > 0.0) {
+			// decrease forward speed
+			exec_trans = desired;
 
-    if (current > 0.0) {
-      // decrease forward speed
-      exec_trans = desired;
+		} else if (current < 0.0) {
+			// increase backward speed
+			exec_trans = current - trans_acc_;
+			exec_trans = max(exec_trans, desired);
 
-    } else if (current < 0.0) {
-      // increase backward speed
-      exec_trans = current - trans_acc_;
-      exec_trans = max( exec_trans, desired );
+		} else {
+			// current == 0;
+			exec_trans = max(-trans_acc_, desired);
+		}
 
-    }  else {
-      // current == 0;
-      exec_trans = max( -trans_acc_, desired );
-    }
+	} else if (desired > current) {
+		if (current > 0.0) {
+			// increase forward speed
+			exec_trans = current + trans_acc_;
+			exec_trans = min(exec_trans, desired);
 
-  } else if (desired > current) {
+		} else if (current < 0.0) {
+			// decrease backward speed
+			exec_trans = desired;
 
-    if (current > 0.0) {
-      // increase forward speed
-      exec_trans = current + trans_acc_;
-      exec_trans = min( exec_trans, desired );
+		} else {
+			// current == 0
+			exec_trans = min(trans_acc_, desired);
+		}
 
-    } else if (current < 0.0) {
-      // decrease backward speed
-      exec_trans = desired;
+	} else {
+		// nothing to change!!!
+		exec_trans = desired;
+	}
 
-    } else {
-      // current == 0
-      exec_trans = min( trans_acc_, desired );
-    }
-
-  } else {
-    // nothing to change!!!
-    exec_trans = desired;
-  }
-
-  return exec_trans*time_factor;
+	return exec_trans * time_factor;
 }
-
 
 /** Implementation of Calculate Rotation Function.
  * These are dangerous! Take care while modifying. Only a minus sign too few
@@ -131,49 +126,49 @@ float EmergencyMotorInstruct::calculate_translation( float current, float desire
  * @param time_factor     The time_factor (should become deprecated!)
  * @return the new rotation
  */
-float EmergencyMotorInstruct::calculate_rotation( float current, float desired, float time_factor )
+float
+EmergencyMotorInstruct::calculate_rotation(float current, float desired, float time_factor)
 {
-  float exec_rot = 0.0;
+	float exec_rot = 0.0;
 
-  if (desired < current) {
+	if (desired < current) {
+		if (current > 0.0) {
+			// decrease right rot
+			exec_rot = current - rot_dec_;
+			exec_rot = max(exec_rot, desired);
 
-    if (current > 0.0) {
-      // decrease right rot
-      exec_rot = current - rot_dec_;
-      exec_rot = max( exec_rot, desired );
+		} else if (current < 0.0) {
+			// increase left rot
+			exec_rot = current - rot_acc_;
+			exec_rot = max(exec_rot, desired);
 
-    } else if (current < 0.0) {
-      // increase left rot
-      exec_rot = current - rot_acc_;
-      exec_rot = max( exec_rot, desired );
+		} else {
+			// current == 0;
+			exec_rot = max(-rot_acc_, desired);
+		}
 
-    } else {
-      // current == 0;
-      exec_rot = max( -rot_acc_, desired );
-    }
+	} else if (desired > current) {
+		if (current > 0.0) {
+			// increase right rot
+			exec_rot = current + rot_acc_;
+			exec_rot = min(exec_rot, desired);
 
-  } else if (desired > current) {
-    if (current > 0.0) {
-      // increase right rot
-      exec_rot = current + rot_acc_;
-      exec_rot = min( exec_rot, desired );
+		} else if (current < 0.0) {
+			// decrease left rot
+			exec_rot = current + rot_dec_;
+			exec_rot = min(exec_rot, desired);
 
-    } else if (current < 0.0) {
-      // decrease left rot
-      exec_rot = current + rot_dec_;
-      exec_rot = min( exec_rot, desired );
+		} else {
+			// current == 0
+			exec_rot = min(rot_acc_, desired);
+		}
 
-    } else {
-      // current == 0
-      exec_rot = min( rot_acc_, desired );
-    }
+	} else {
+		// nothing to change!!!
+		exec_rot = desired;
+	}
 
-  } else {
-    // nothing to change!!!
-    exec_rot = desired;
-  }
-
-  return exec_rot*time_factor;
+	return exec_rot * time_factor;
 }
 
 } // namespace fawkes

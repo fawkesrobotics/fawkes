@@ -23,8 +23,9 @@
 #ifndef _TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_PAPYRUS_H_
 #define _TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_PAPYRUS_H_
 
-#include <gvc.h>
 #include "graph_viewport.h"
+
+#include <gvc.h>
 
 extern void gvplugin_skillgui_setup(GVC_t *gvc, SkillGuiGraphViewport *sggvp);
 

@@ -44,20 +44,20 @@ namespace fawkes {
  * event handler has been called, false to drop the message afterwards.
  */
 InterfaceDispatcher::InterfaceDispatcher(const char *listener_name,
-					 Interface *iface,
-					 bool message_enqueueing)
-  : BlackBoardInterfaceListener(listener_name)
+                                         Interface * iface,
+                                         bool        message_enqueueing)
+: BlackBoardInterfaceListener(listener_name)
 {
-  message_enqueueing_ = message_enqueueing;
+	message_enqueueing_ = message_enqueueing;
 
-  bbil_add_data_interface(iface);
-  if ( iface->is_writer() ) {
-    bbil_add_message_interface(iface);
-  }
-  bbil_add_writer_interface(iface);
-  bbil_add_reader_interface(iface);
+	bbil_add_data_interface(iface);
+	if (iface->is_writer()) {
+		bbil_add_message_interface(iface);
+	}
+	bbil_add_writer_interface(iface);
+	bbil_add_reader_interface(iface);
 
-  setup_signals();
+	setup_signals();
 }
 
 /** Multi interface constructor.
@@ -68,36 +68,36 @@ InterfaceDispatcher::InterfaceDispatcher(const char *listener_name,
  * message received event handler has been called, false to drop the
  * message afterwards.
  */
-InterfaceDispatcher::InterfaceDispatcher(const char *listener_name,
-					 std::list<Interface *> ifaces,
-					 bool message_enqueueing)
-  : BlackBoardInterfaceListener(listener_name)
+InterfaceDispatcher::InterfaceDispatcher(const char *           listener_name,
+                                         std::list<Interface *> ifaces,
+                                         bool                   message_enqueueing)
+: BlackBoardInterfaceListener(listener_name)
 {
-  message_enqueueing_ = message_enqueueing;
+	message_enqueueing_ = message_enqueueing;
 
-  std::list<Interface *>::iterator i;
-  for (i = ifaces.begin(); i != ifaces.end(); ++i) {
-    bbil_add_data_interface(*i);
-    if ( (*i)->is_writer() ) {
-      bbil_add_message_interface(*i);
-    }
-    bbil_add_writer_interface(*i);
-    bbil_add_reader_interface(*i);
-  }
+	std::list<Interface *>::iterator i;
+	for (i = ifaces.begin(); i != ifaces.end(); ++i) {
+		bbil_add_data_interface(*i);
+		if ((*i)->is_writer()) {
+			bbil_add_message_interface(*i);
+		}
+		bbil_add_writer_interface(*i);
+		bbil_add_reader_interface(*i);
+	}
 
-  setup_signals();
+	setup_signals();
 }
-
 
 void
 InterfaceDispatcher::setup_signals()
 {
-  dispatcher_data_changed_.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_data_changed));
-  dispatcher_message_received_.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_message_received));
-  dispatcher_writer_added_.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_writer_added));
-  dispatcher_writer_removed_.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_writer_removed));
-  dispatcher_reader_added_.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_reader_added));
-  dispatcher_reader_removed_.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_writer_removed));
+	dispatcher_data_changed_.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_data_changed));
+	dispatcher_message_received_.connect(
+	  sigc::mem_fun(*this, &InterfaceDispatcher::on_message_received));
+	dispatcher_writer_added_.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_writer_added));
+	dispatcher_writer_removed_.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_writer_removed));
+	dispatcher_reader_added_.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_reader_added));
+	dispatcher_reader_removed_.connect(sigc::mem_fun(*this, &InterfaceDispatcher::on_writer_removed));
 }
 
 /** Set if received messages should be enqueued or not.
@@ -109,9 +109,8 @@ InterfaceDispatcher::setup_signals()
 void
 InterfaceDispatcher::set_message_enqueueing(bool enqueue)
 {
-  message_enqueueing_ = enqueue;
+	message_enqueueing_ = enqueue;
 }
-
 
 /** Internal event handler.
  * Called by dispatcher to emit signal.
@@ -119,15 +118,14 @@ InterfaceDispatcher::set_message_enqueueing(bool enqueue)
 void
 InterfaceDispatcher::on_data_changed()
 {
-  queue_data_changed_.lock();
-  while (! queue_data_changed_.empty()) {
-    Interface *iface = queue_data_changed_.front();
-    signal_data_changed_.emit(iface);
-    queue_data_changed_.pop();
-  }
-  queue_data_changed_.unlock();
+	queue_data_changed_.lock();
+	while (!queue_data_changed_.empty()) {
+		Interface *iface = queue_data_changed_.front();
+		signal_data_changed_.emit(iface);
+		queue_data_changed_.pop();
+	}
+	queue_data_changed_.unlock();
 }
-
 
 /** Internal event handler.
  * Called by dispatcher to emit signal.
@@ -135,16 +133,15 @@ InterfaceDispatcher::on_data_changed()
 void
 InterfaceDispatcher::on_message_received()
 {
-  queue_message_received_.lock();
-  while (! queue_message_received_.empty()) {
-    std::pair<Interface *, Message *> p = queue_message_received_.front();
-    signal_message_received_.emit(p.first, p.second);
-    p.second->unref();
-    queue_message_received_.pop();
-  }
-  queue_message_received_.unlock();
+	queue_message_received_.lock();
+	while (!queue_message_received_.empty()) {
+		std::pair<Interface *, Message *> p = queue_message_received_.front();
+		signal_message_received_.emit(p.first, p.second);
+		p.second->unref();
+		queue_message_received_.pop();
+	}
+	queue_message_received_.unlock();
 }
-
 
 /** Internal event handler.
  * Called by dispatcher to emit signal.
@@ -152,15 +149,14 @@ InterfaceDispatcher::on_message_received()
 void
 InterfaceDispatcher::on_writer_added()
 {
-  queue_writer_added_.lock();
-  while (! queue_writer_added_.empty()) {
-    Interface *iface = queue_writer_added_.front();
-    signal_writer_added_.emit(iface);
-    queue_writer_added_.pop();
-  }
-  queue_writer_added_.unlock();
+	queue_writer_added_.lock();
+	while (!queue_writer_added_.empty()) {
+		Interface *iface = queue_writer_added_.front();
+		signal_writer_added_.emit(iface);
+		queue_writer_added_.pop();
+	}
+	queue_writer_added_.unlock();
 }
-
 
 /** Internal event handler.
  * Called by dispatcher to emit signal.
@@ -168,15 +164,14 @@ InterfaceDispatcher::on_writer_added()
 void
 InterfaceDispatcher::on_writer_removed()
 {
-  queue_writer_removed_.lock();
-  while (! queue_writer_removed_.empty()) {
-    Interface *iface = queue_writer_removed_.front();
-    signal_writer_removed_.emit(iface);
-    queue_writer_removed_.pop();
-  }
-  queue_writer_removed_.unlock();
+	queue_writer_removed_.lock();
+	while (!queue_writer_removed_.empty()) {
+		Interface *iface = queue_writer_removed_.front();
+		signal_writer_removed_.emit(iface);
+		queue_writer_removed_.pop();
+	}
+	queue_writer_removed_.unlock();
 }
-
 
 /** Internal event handler.
  * Called by dispatcher to emit signal.
@@ -184,15 +179,14 @@ InterfaceDispatcher::on_writer_removed()
 void
 InterfaceDispatcher::on_reader_added()
 {
-  queue_reader_added_.lock();
-  while (! queue_reader_added_.empty()) {
-    Interface *iface = queue_reader_added_.front();
-    signal_reader_added_.emit(iface);
-    queue_reader_added_.pop();
-  }
-  queue_reader_added_.unlock();
+	queue_reader_added_.lock();
+	while (!queue_reader_added_.empty()) {
+		Interface *iface = queue_reader_added_.front();
+		signal_reader_added_.emit(iface);
+		queue_reader_added_.pop();
+	}
+	queue_reader_added_.unlock();
 }
-
 
 /** Internal event handler.
  * Called by dispatcher to emit signal.
@@ -200,62 +194,61 @@ InterfaceDispatcher::on_reader_added()
 void
 InterfaceDispatcher::on_reader_removed()
 {
-  queue_reader_removed_.lock();
-  while (! queue_reader_removed_.empty()) {
-    Interface *iface = queue_reader_removed_.front();
-    signal_reader_removed_.emit(iface);
-    queue_reader_removed_.pop();
-  }
-  queue_reader_removed_.unlock();
+	queue_reader_removed_.lock();
+	while (!queue_reader_removed_.empty()) {
+		Interface *iface = queue_reader_removed_.front();
+		signal_reader_removed_.emit(iface);
+		queue_reader_removed_.pop();
+	}
+	queue_reader_removed_.unlock();
 }
-
 
 void
 InterfaceDispatcher::bb_interface_data_changed(Interface *interface) throw()
 {
-  queue_data_changed_.push_locked(interface);
-  dispatcher_data_changed_();
+	queue_data_changed_.push_locked(interface);
+	dispatcher_data_changed_();
 }
 
 bool
 InterfaceDispatcher::bb_interface_message_received(Interface *interface, Message *message) throw()
 {
-  message->ref();
-  queue_message_received_.push_locked(std::make_pair(interface, message));
-  dispatcher_message_received_();
-  return message_enqueueing_;
+	message->ref();
+	queue_message_received_.push_locked(std::make_pair(interface, message));
+	dispatcher_message_received_();
+	return message_enqueueing_;
 }
 
 void
-InterfaceDispatcher::bb_interface_writer_added(Interface *interface,
-					       unsigned int instance_serial) throw()
+InterfaceDispatcher::bb_interface_writer_added(Interface *  interface,
+                                               unsigned int instance_serial) throw()
 {
-  queue_writer_added_.push_locked(interface);
-  dispatcher_writer_added_();
+	queue_writer_added_.push_locked(interface);
+	dispatcher_writer_added_();
 }
 
 void
-InterfaceDispatcher::bb_interface_writer_removed(Interface *interface,
-						 unsigned int instance_serial) throw()
+InterfaceDispatcher::bb_interface_writer_removed(Interface *  interface,
+                                                 unsigned int instance_serial) throw()
 {
-  queue_writer_removed_.push_locked(interface);
-  dispatcher_writer_removed_();
+	queue_writer_removed_.push_locked(interface);
+	dispatcher_writer_removed_();
 }
 
 void
-InterfaceDispatcher::bb_interface_reader_added(Interface *interface,
-					       unsigned int instance_serial) throw()
+InterfaceDispatcher::bb_interface_reader_added(Interface *  interface,
+                                               unsigned int instance_serial) throw()
 {
-  queue_reader_added_.push_locked(interface);
-  dispatcher_reader_added_();
+	queue_reader_added_.push_locked(interface);
+	dispatcher_reader_added_();
 }
 
 void
-InterfaceDispatcher::bb_interface_reader_removed(Interface *interface,
-						 unsigned int instance_serial) throw()
+InterfaceDispatcher::bb_interface_reader_removed(Interface *  interface,
+                                                 unsigned int instance_serial) throw()
 {
-  queue_reader_removed_.push_locked(interface);
-  dispatcher_reader_removed_();
+	queue_reader_removed_.push_locked(interface);
+	dispatcher_reader_removed_();
 }
 
 /** Get "data changed" signal.
@@ -265,9 +258,8 @@ InterfaceDispatcher::bb_interface_reader_removed(Interface *interface,
 sigc::signal<void, Interface *>
 InterfaceDispatcher::signal_data_changed()
 {
-  return signal_data_changed_;
+	return signal_data_changed_;
 }
-
 
 /** Get "message received" signal.
  * The signal is emitted if a message has been received via the watched
@@ -278,9 +270,8 @@ InterfaceDispatcher::signal_data_changed()
 sigc::signal<void, Interface *, Message *>
 InterfaceDispatcher::signal_message_received()
 {
-  return signal_message_received_;
+	return signal_message_received_;
 }
-
 
 /** Get "writer added" signal.
  * The signal is emitted if a writer has been added to the interface.
@@ -289,9 +280,8 @@ InterfaceDispatcher::signal_message_received()
 sigc::signal<void, Interface *>
 InterfaceDispatcher::signal_writer_added()
 {
-  return signal_writer_added_;
+	return signal_writer_added_;
 }
-
 
 /** Get "writer removed" signal.
  * The signal is emitted if a writer has been removed from the interface.
@@ -300,9 +290,8 @@ InterfaceDispatcher::signal_writer_added()
 sigc::signal<void, Interface *>
 InterfaceDispatcher::signal_writer_removed()
 {
-  return signal_writer_removed_;
+	return signal_writer_removed_;
 }
-
 
 /** Get "reader added" signal.
  * The signal is emitted if a reader has been added to the interface.
@@ -311,9 +300,8 @@ InterfaceDispatcher::signal_writer_removed()
 sigc::signal<void, Interface *>
 InterfaceDispatcher::signal_reader_added()
 {
-  return signal_reader_added_;
+	return signal_reader_added_;
 }
-
 
 /** Get "reader removed" signal.
  * The signal is emitted if a reader has been removed from the interface.
@@ -322,8 +310,7 @@ InterfaceDispatcher::signal_reader_added()
 sigc::signal<void, Interface *>
 InterfaceDispatcher::signal_reader_removed()
 {
-  return signal_reader_removed_;
+	return signal_reader_removed_;
 }
-
 
 } // end of namespace fawkes

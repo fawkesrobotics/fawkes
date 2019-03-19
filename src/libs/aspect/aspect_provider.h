@@ -34,15 +34,15 @@ class AspectIniFin;
 
 class AspectProviderAspect : public virtual Aspect
 {
- public:
-  AspectProviderAspect(AspectIniFin *inifin);
-  AspectProviderAspect(const std::list<AspectIniFin *> aspects);
-  virtual ~AspectProviderAspect();
+public:
+	AspectProviderAspect(AspectIniFin *inifin);
+	AspectProviderAspect(const std::list<AspectIniFin *> aspects);
+	virtual ~AspectProviderAspect();
 
-  const std::list<AspectIniFin *> &  aspect_provider_aspects() const;
+	const std::list<AspectIniFin *> &aspect_provider_aspects() const;
 
- private:
-  std::list<AspectIniFin *> aspect_provider_aspects_;
+private:
+	std::list<AspectIniFin *> aspect_provider_aspects_;
 };
 
 } // end namespace fawkes

@@ -23,42 +23,45 @@
 #ifndef _PLUGINS_JACO_INFO_THREAD_H_
 #define _PLUGINS_JACO_INFO_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 #include <string>
 
 namespace fawkes {
-  typedef struct jaco_arm_struct jaco_arm_t;
+typedef struct jaco_arm_struct jaco_arm_t;
 }
 
-class JacoInfoThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+class JacoInfoThread : public fawkes::Thread,
+                       public fawkes::BlockedTimingAspect,
+                       public fawkes::LoggingAspect,
+                       public fawkes::ConfigurableAspect,
+                       public fawkes::BlackBoardAspect
 {
- public:
-  JacoInfoThread(const char *name, fawkes::jaco_arm_t* arm);
-  virtual ~JacoInfoThread();
+public:
+	JacoInfoThread(const char *name, fawkes::jaco_arm_t *arm);
+	virtual ~JacoInfoThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  fawkes::jaco_arm_t *arm_;
+private:
+	fawkes::jaco_arm_t *arm_;
 
-  std::vector<float> cpos_;
-  std::vector<float> apos_;
+	std::vector<float> cpos_;
+	std::vector<float> apos_;
 };
-
 
 #endif

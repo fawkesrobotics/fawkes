@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  interface_observer.h - BlackBoard interface observer for net handler
  *
@@ -31,22 +31,21 @@ namespace fawkes {
 class FawkesNetworkHub;
 class BlackBoard;
 
-class BlackBoardNetHandlerInterfaceObserver
-: public BlackBoardInterfaceObserver
+class BlackBoardNetHandlerInterfaceObserver : public BlackBoardInterfaceObserver
 {
- public:
-  BlackBoardNetHandlerInterfaceObserver(BlackBoard *blackboard, FawkesNetworkHub *hub);
-  virtual ~BlackBoardNetHandlerInterfaceObserver();
+public:
+	BlackBoardNetHandlerInterfaceObserver(BlackBoard *blackboard, FawkesNetworkHub *hub);
+	virtual ~BlackBoardNetHandlerInterfaceObserver();
 
-  virtual void bb_interface_created(const char *type, const char *id) throw();
-  virtual void bb_interface_destroyed(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_destroyed(const char *type, const char *id) throw();
 
- private:
-  void send_event(unsigned int msg_id, const char *type, const char *id);
+private:
+	void send_event(unsigned int msg_id, const char *type, const char *id);
 
- private:
-  BlackBoard       *blackboard_;
-  FawkesNetworkHub *fnh_;
+private:
+	BlackBoard *      blackboard_;
+	FawkesNetworkHub *fnh_;
 };
 
 } // end namespace fawkes

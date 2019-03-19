@@ -24,29 +24,29 @@
 #define _LIBS_WEBVIEW_FILE_REPLY_H_
 
 #include <webview/reply.h>
+
 #include <cstdio>
 
 namespace fawkes {
 
 class DynamicFileWebReply : public DynamicWebReply
 {
- public:
-	DynamicFileWebReply(const std::string& filename,
-	                    const std::string& content_type = "");
-  DynamicFileWebReply(const char *filename);
-  DynamicFileWebReply(FILE *file, bool close_when_done = true);
-  virtual ~DynamicFileWebReply();
+public:
+	DynamicFileWebReply(const std::string &filename, const std::string &content_type = "");
+	DynamicFileWebReply(const char *filename);
+	DynamicFileWebReply(FILE *file, bool close_when_done = true);
+	virtual ~DynamicFileWebReply();
 
-  virtual size_t size();
-  virtual size_t next_chunk(size_t pos, char *buffer, size_t buf_max_size);
+	virtual size_t size();
+	virtual size_t next_chunk(size_t pos, char *buffer, size_t buf_max_size);
 
- private:
-  void determine_file_size();
+private:
+	void determine_file_size();
 
- private:
-  FILE   *file_;
-  size_t  size_;
-  bool    close_when_done_;
+private:
+	FILE * file_;
+	size_t size_;
+	bool   close_when_done_;
 };
 
 } // end namespace fawkes

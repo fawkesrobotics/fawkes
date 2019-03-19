@@ -48,8 +48,7 @@ namespace fawkes {
  * @param a2 the right operand
  * @return true, if a1 <= b1, else false
  */
- 
- 
+
 /** Constructor.
  *  This is the constructor for the AStar Object.
  */
@@ -62,14 +61,13 @@ AStar::AStar()
  */
 AStar::~AStar()
 {
-  AStarState * best = 0;
-  while ( ! open_list.empty() )
-  {
-    best = open_list.top();
-    open_list.pop();
-    delete best;
-  }
-  closed_list.clear();
+	AStarState *best = 0;
+	while (!open_list.empty()) {
+		best = open_list.top();
+		open_list.pop();
+		delete best;
+	}
+	closed_list.clear();
 }
 
 /** Solves a situation given by the initial state with AStar, and
@@ -77,62 +75,55 @@ AStar::~AStar()
  * @param initialState pointer of AStarState to the initial state
  * @return a vector of pointers of AStarState with the solution sequence
  */
-std::vector< AStarState * > AStar::solve( AStarState * initialState )
+std::vector<AStarState *>
+AStar::solve(AStarState *initialState)
 {
-  AStarState * best = 0;
-  while ( open_list.size() > 0 )
-  {
-    best = open_list.top();
-    open_list.pop();
-    delete best;
-  }
-  closed_list.clear();
+	AStarState *best = 0;
+	while (open_list.size() > 0) {
+		best = open_list.top();
+		open_list.pop();
+		delete best;
+	}
+	closed_list.clear();
 
-  open_list.push( initialState );
-  return solution_sequence( search() );
+	open_list.push(initialState);
+	return solution_sequence(search());
 }
-
 
 /** Search with astar. */
-AStarState * AStar::search( )
+AStarState *
+AStar::search()
 {
-  AStarState * best = 0;
-  long key = 0;
-  std::vector< AStarState * > children;
+	AStarState *              best = 0;
+	long                      key  = 0;
+	std::vector<AStarState *> children;
 
-  // while the openlist not is empty
-  while ( open_list.size() > 0 )
-  {
-    // take the best state, and check if it is on closed list
-    do
-    {
-      if ( open_list.size() > 0 )
-      {
-	best = open_list.top();
-	open_list.pop( );
-      }
-      else
+	// while the openlist not is empty
+	while (open_list.size() > 0) {
+		// take the best state, and check if it is on closed list
+		do {
+			if (open_list.size() > 0) {
+				best = open_list.top();
+				open_list.pop();
+			} else
+				return 0;
+			key = best->key();
+		} while (closed_list.find(key) != closed_list.end());
+
+		// put best state on closed list
+		closed_list[key] = best;
+
+		// check if its a goal.
+		if (best->is_goal()) {
+			return best;
+		}
+		// generate all its children
+		children = best->children();
+		for (unsigned int i = 0; i < children.size(); i++)
+			open_list.push(children[i]);
+	}
 	return 0;
-      key = best->key( );
-    }
-    while ( closed_list.find( key ) != closed_list.end() );
-      
-    // put best state on closed list
-    closed_list[key] = best;
-      
-    // check if its a goal.
-    if ( best->is_goal( ) ) 
-    {
-      return best;
-    }
-    // generate all its children
-    children = best->children( );
-    for ( unsigned int i = 0; i < children.size(); i++ )
-      open_list.push( children[i] );
-  }
-  return 0;
 }
-
 
 /** Generates a solution sequence for a given state
  * Initial solution is in solution[0]!
@@ -140,27 +131,24 @@ AStarState * AStar::search( )
  * @return the path from solution to initial solution
  */
 std::vector<AStarState *>
-AStar::solution_sequence(AStarState * node)
+AStar::solution_sequence(AStarState *node)
 {
-  solution.clear();
-  AStarState * state = node;
-  
-  while ( state != 0 )
-  {
-    closed_list.erase(state->key());
-    solution.insert( solution.begin(), state );
-    state = state->parent;
-  }
+	solution.clear();
+	AStarState *state = node;
 
-  //delete the states, which are not part of the solution
-  while ( closed_list.size() > 0 )
-  {
-    state = closed_list.begin()->second;
-    closed_list.erase(state->key());
-    delete state;
-  }
-  return solution;
+	while (state != 0) {
+		closed_list.erase(state->key());
+		solution.insert(solution.begin(), state);
+		state = state->parent;
+	}
+
+	//delete the states, which are not part of the solution
+	while (closed_list.size() > 0) {
+		state = closed_list.begin()->second;
+		closed_list.erase(state->key());
+		delete state;
+	}
+	return solution;
 }
-
 
 } // end namespace fawkes

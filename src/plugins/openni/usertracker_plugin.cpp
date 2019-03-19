@@ -21,6 +21,7 @@
  */
 
 #include "usertracker_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -32,14 +33,14 @@ using namespace fawkes;
  */
 class OpenNiUserTrackerPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit OpenNiUserTrackerPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new OpenNiUserTrackerThread());
-  }
+	explicit OpenNiUserTrackerPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new OpenNiUserTrackerThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("User tracker using OpenNI")

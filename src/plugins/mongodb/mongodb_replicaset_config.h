@@ -22,101 +22,110 @@
 #ifndef _PLUGINS_MONGODB_MONGODB_REPLICASET_CONFIG_H_
 #define _PLUGINS_MONGODB_MONGODB_REPLICASET_CONFIG_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/clock.h>
 #include <aspect/blackboard.h>
-
+#include <aspect/clock.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <interfaces/MongoDBManagedReplicaSetInterface.h>
-
-#include <string>
-#include <vector>
-#include <memory>
-
 #include <mongo/bson/bson.h>
 #include <mongo/client/dbclient.h>
 
+#include <memory>
+#include <string>
+#include <vector>
+
 namespace fawkes {
-	class Configuration;
-	class TimeWait;
-}
+class Configuration;
+class TimeWait;
+} // namespace fawkes
 
 namespace mongo {
-	class DBClientBase;
+class DBClientBase;
 }
 
-class MongoDBReplicaSetConfig
-: public fawkes::Thread,
-	public fawkes::LoggingAspect,
-	public fawkes::ClockAspect,
-	public fawkes::BlackBoardAspect
+class MongoDBReplicaSetConfig : public fawkes::Thread,
+                                public fawkes::LoggingAspect,
+                                public fawkes::ClockAspect,
+                                public fawkes::BlackBoardAspect
 {
- public:
+public:
 	MongoDBReplicaSetConfig(fawkes::Configuration *config,
-	                        std::string cfgname, std::string prefix,
-	                        std::string bootstrap_database);
+	                        std::string            cfgname,
+	                        std::string            prefix,
+	                        std::string            bootstrap_database);
 	void bootstrap(std::shared_ptr<mongo::DBClientBase> bootstrap_client);
 
 	/** Check if configuration is enabled.
 	 * @return true if configuration is enabled, false otherwise
 	 */
-	bool is_enabled() const { return enabled_; }
+	bool
+	is_enabled() const
+	{
+		return enabled_;
+	}
 
 	virtual void init();
 	virtual void loop();
 	virtual void finalize();
 
- private:
+private:
 	bool leader_elect(bool force = false);
 	void leader_resign();
 
-	struct ReplicaSetStatus {
-		fawkes::MongoDBManagedReplicaSetInterface::ReplicaSetMemberStatus   member_status;
-		fawkes::MongoDBManagedReplicaSetInterface::ReplicaSetPrimaryStatus  primary_status;
-		std::string                                                         error_msg;
+	struct ReplicaSetStatus
+	{
+		fawkes::MongoDBManagedReplicaSetInterface::ReplicaSetMemberStatus  member_status;
+		fawkes::MongoDBManagedReplicaSetInterface::ReplicaSetPrimaryStatus primary_status;
+		std::string                                                        error_msg;
 
-		bool operator!=(const ReplicaSetStatus& other) const {
-			return member_status != other.member_status ||
-				primary_status != other.primary_status ||
-				error_msg != other.error_msg;
+		bool
+		operator!=(const ReplicaSetStatus &other) const
+		{
+			return member_status != other.member_status || primary_status != other.primary_status
+			       || error_msg != other.error_msg;
 		}
 	};
 
 	ReplicaSetStatus rs_status(mongo::BSONObj &reply);
-	void rs_init();
-	void rs_monitor(const mongo::BSONObj &reply);
-	bool check_alive(const std::string &h);
-	bool rs_get_config(mongo::BSONObj &rs_config);
+	void             rs_init();
+	void             rs_monitor(const mongo::BSONObj &reply);
+	bool             check_alive(const std::string &h);
+	bool             rs_get_config(mongo::BSONObj &rs_config);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-	bool         enabled_;
+private:
+	bool enabled_;
 
-	std::string  config_name_;
+	std::string config_name_;
 
 	std::shared_ptr<mongo::DBClientBase> bootstrap_client_;
-	mongo::BSONObj leader_elec_query_;
-	mongo::BSONObj leader_elec_query_force_;
-	mongo::BSONObj leader_elec_update_;
-	std::string bootstrap_database_;
-	std::string bootstrap_collection_;
-	std::string bootstrap_ns_;
+	mongo::BSONObj                       leader_elec_query_;
+	mongo::BSONObj                       leader_elec_query_force_;
+	mongo::BSONObj                       leader_elec_update_;
+	std::string                          bootstrap_database_;
+	std::string                          bootstrap_collection_;
+	std::string                          bootstrap_ns_;
 
-	std::string local_client_cfg_;
+	std::string                          local_client_cfg_;
 	std::shared_ptr<mongo::DBClientBase> local_client_;
-	std::string local_hostport_;
-	std::set<std::string> hosts_;
+	std::string                          local_hostport_;
+	std::set<std::string>                hosts_;
 
-	bool is_leader_;
-	float loop_interval_;
-	int leader_expiration_;
-  fawkes::TimeWait *timewait_;
+	bool              is_leader_;
+	float             loop_interval_;
+	int               leader_expiration_;
+	fawkes::TimeWait *timewait_;
 
-  ReplicaSetStatus last_status_;
+	ReplicaSetStatus last_status_;
 
-  fawkes::MongoDBManagedReplicaSetInterface*  rs_status_if_;
+	fawkes::MongoDBManagedReplicaSetInterface *rs_status_if_;
 };
 
 #endif

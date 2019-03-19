@@ -27,39 +27,39 @@
 #include "state_handler.h"
 
 namespace fawkes {
-  class Logger;
-  class BlackBoard;
-  class GameStateInterface;
-}
+class Logger;
+class BlackBoard;
+class GameStateInterface;
+} // namespace fawkes
 
 class RemoteBlackBoardRefBoxProcessor : public RefBoxProcessor
 {
- public:
-  RemoteBlackBoardRefBoxProcessor(fawkes::Logger *logger,
-				  const char *bb_host,
-				  unsigned short int bb_port,
-				  const char *iface_id);
-  ~RemoteBlackBoardRefBoxProcessor();
+public:
+	RemoteBlackBoardRefBoxProcessor(fawkes::Logger *   logger,
+	                                const char *       bb_host,
+	                                unsigned short int bb_port,
+	                                const char *       iface_id);
+	~RemoteBlackBoardRefBoxProcessor();
 
-  bool check_connection();
-  void refbox_process();
+	bool check_connection();
+	void refbox_process();
 
- private: // methods
-  void reconnect();
+private: // methods
+	void reconnect();
 
- private:
-  fawkes::Logger     *logger_;
-  fawkes::BlackBoard *rbb_;
+private:
+	fawkes::Logger *    logger_;
+	fawkes::BlackBoard *rbb_;
 
-  fawkes::GameStateInterface *gamestate_if_;
+	fawkes::GameStateInterface *gamestate_if_;
 
-  const char *name_;
+	const char *name_;
 
-  char               *bb_host_;
-  unsigned short int  bb_port_;
-  char               *iface_id_;
+	char *             bb_host_;
+	unsigned short int bb_port_;
+	char *             iface_id_;
 
-  bool message_shown_;
+	bool message_shown_;
 };
 
 #endif

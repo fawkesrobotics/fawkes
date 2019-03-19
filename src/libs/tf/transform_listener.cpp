@@ -49,16 +49,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <tf/transform_listener.h>
-#include <tf/transformer.h>
-
 #include <blackboard/blackboard.h>
 #include <interfaces/TransformInterface.h>
+#include <tf/transform_listener.h>
+#include <tf/transformer.h>
 
 #include <cstring>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
 /** @class TransformListener <tf/transform_listener.h>
  * Receive transforms and answer queries.
@@ -75,149 +74,146 @@ namespace fawkes {
  * @param tf_transformer transformer to add transforms to
  * @param bb_is_remote must be true if the blackboard is a RemoteBlackboard
  */
-TransformListener::TransformListener(BlackBoard *bb,
-    Transformer *tf_transformer, bool bb_is_remote)
-  : BlackBoardInterfaceListener("TransformListener"),
-    bb_(bb), tf_transformer_(tf_transformer), bb_is_remote_(bb_is_remote)
+TransformListener::TransformListener(BlackBoard *bb, Transformer *tf_transformer, bool bb_is_remote)
+: BlackBoardInterfaceListener("TransformListener"),
+  bb_(bb),
+  tf_transformer_(tf_transformer),
+  bb_is_remote_(bb_is_remote)
 {
-  if (bb_) {
-    tfifs_ = bb_->open_multiple_for_reading<TransformInterface>("/tf*");
+	if (bb_) {
+		tfifs_ = bb_->open_multiple_for_reading<TransformInterface>("/tf*");
 
-    std::list<TransformInterface *>::iterator i;
-    for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
-      bbil_add_data_interface(*i);
-      // update data once we 
-      bb_interface_data_changed(*i);
-    }
-    bb_->register_listener(this);
+		std::list<TransformInterface *>::iterator i;
+		for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
+			bbil_add_data_interface(*i);
+			// update data once we
+			bb_interface_data_changed(*i);
+		}
+		bb_->register_listener(this);
 
-    bbio_add_observed_create("TransformInterface", "/tf*");
-    bb_->register_observer(this);
-    tf_transformer->set_enabled(true);
-  } else {
-    tf_transformer->set_enabled(false);
-  }
+		bbio_add_observed_create("TransformInterface", "/tf*");
+		bb_->register_observer(this);
+		tf_transformer->set_enabled(true);
+	} else {
+		tf_transformer->set_enabled(false);
+	}
 }
-
 
 /** Destructor. */
 TransformListener::~TransformListener()
 {
-  if (bb_) {
-    bb_->unregister_listener(this);
-    bb_->unregister_observer(this);
+	if (bb_) {
+		bb_->unregister_listener(this);
+		bb_->unregister_observer(this);
 
-    std::list<TransformInterface *>::iterator i;
-    for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
-      bb_->close(*i);
-    }
-    tfifs_.clear();
-  }
+		std::list<TransformInterface *>::iterator i;
+		for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
+			bb_->close(*i);
+		}
+		tfifs_.clear();
+	}
 }
-
 
 void
 TransformListener::bb_interface_created(const char *type, const char *id) throw()
 {
-  if (strncmp(type, "TransformInterface", INTERFACE_TYPE_SIZE_) != 0)  return;
+	if (strncmp(type, "TransformInterface", INTERFACE_TYPE_SIZE_) != 0)
+		return;
 
-  TransformInterface *tfif;
-  try {
-    tfif = bb_->open_for_reading<TransformInterface>(id, "TF-Listener");
-  } catch (Exception &e) {
-    // ignored
-    return;
-  }
+	TransformInterface *tfif;
+	try {
+		tfif = bb_->open_for_reading<TransformInterface>(id, "TF-Listener");
+	} catch (Exception &e) {
+		// ignored
+		return;
+	}
 
-  bb_interface_data_changed(tfif);
+	bb_interface_data_changed(tfif);
 
-  try {
-    bbil_add_data_interface(tfif);
-    bb_->update_listener(this);
-    tfifs_.push_back(tfif);
-  } catch (Exception &e) {
-    bb_->close(tfif);
-    return;
-  }
+	try {
+		bbil_add_data_interface(tfif);
+		bb_->update_listener(this);
+		tfifs_.push_back(tfif);
+	} catch (Exception &e) {
+		bb_->close(tfif);
+		return;
+	}
 }
 
 void
-TransformListener::bb_interface_writer_removed(Interface *interface,
-                                               unsigned int instance_serial)
-  throw()
+TransformListener::bb_interface_writer_removed(Interface *  interface,
+                                               unsigned int instance_serial) throw()
 {
-  conditional_close(interface);
+	conditional_close(interface);
 }
-
 
 void
-TransformListener::bb_interface_reader_removed(Interface *interface,
-                                               unsigned int instance_serial)
-  throw()
+TransformListener::bb_interface_reader_removed(Interface *  interface,
+                                               unsigned int instance_serial) throw()
 {
-  conditional_close(interface);
+	conditional_close(interface);
 }
-
 
 void
 TransformListener::conditional_close(Interface *interface) throw()
 {
-  if (bb_is_remote_) {
-    return;
-  }
-  // Verify it's a TransformInterface
-  TransformInterface *tfif = dynamic_cast<TransformInterface *>(interface);
-  if (! tfif) return;
-  
-  std::list<TransformInterface *>::iterator i;
-  for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
-    if (*interface == **i) {
-      if (! interface->has_writer() && (interface->num_readers() == 1)) {
-        // It's only us
-        bbil_remove_data_interface(*i);
-        bb_->update_listener(this);
-        bb_->close(*i);
-        tfifs_.erase(i);
-        break;
-      }
-    }
-  }
-}
+	if (bb_is_remote_) {
+		return;
+	}
+	// Verify it's a TransformInterface
+	TransformInterface *tfif = dynamic_cast<TransformInterface *>(interface);
+	if (!tfif)
+		return;
 
+	std::list<TransformInterface *>::iterator i;
+	for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
+		if (*interface == **i) {
+			if (!interface->has_writer() && (interface->num_readers() == 1)) {
+				// It's only us
+				bbil_remove_data_interface(*i);
+				bb_->update_listener(this);
+				bb_->close(*i);
+				tfifs_.erase(i);
+				break;
+			}
+		}
+	}
+}
 
 void
 TransformListener::bb_interface_data_changed(Interface *interface) throw()
 {
-  TransformInterface *tfif = dynamic_cast<TransformInterface *>(interface);
-  if (! tfif) return;
+	TransformInterface *tfif = dynamic_cast<TransformInterface *>(interface);
+	if (!tfif)
+		return;
 
-  tfif->read();
+	tfif->read();
 
-  std::string authority;
-  if (bb_is_remote_) {
-    authority = "remote";
-  } else {
-    std::string authority = tfif->writer();
-  }
-  
-  double *translation = tfif->translation();
-  double *rotation = tfif->rotation();
-  const Time *time = tfif->timestamp();
-  const std::string frame_id = tfif->frame();
-  const std::string child_frame_id = tfif->child_frame();
+	std::string authority;
+	if (bb_is_remote_) {
+		authority = "remote";
+	} else {
+		std::string authority = tfif->writer();
+	}
 
-  try {
-    Vector3 t(translation[0], translation[1], translation[2]);
-    Quaternion r(rotation[0], rotation[1], rotation[2], rotation[3]);
-    assert_quaternion_valid(r);
-    Transform tr(r, t);
+	double *          translation    = tfif->translation();
+	double *          rotation       = tfif->rotation();
+	const Time *      time           = tfif->timestamp();
+	const std::string frame_id       = tfif->frame();
+	const std::string child_frame_id = tfif->child_frame();
 
-    StampedTransform str(tr, *time, frame_id, child_frame_id);
+	try {
+		Vector3    t(translation[0], translation[1], translation[2]);
+		Quaternion r(rotation[0], rotation[1], rotation[2], rotation[3]);
+		assert_quaternion_valid(r);
+		Transform tr(r, t);
 
-    tf_transformer_->set_transform(str, authority, tfif->is_static_transform());
-  } catch (InvalidArgumentException &e) {
-    // ignore invalid, might just be not initialized, yet.
-  }
+		StampedTransform str(tr, *time, frame_id, child_frame_id);
+
+		tf_transformer_->set_transform(str, authority, tfif->is_static_transform());
+	} catch (InvalidArgumentException &e) {
+		// ignore invalid, might just be not initialized, yet.
+	}
 }
 
 } // end namespace tf

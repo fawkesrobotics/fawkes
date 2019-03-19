@@ -23,22 +23,21 @@
 #ifndef _LIBS_NAVGRAPH_GENERATOR_GRID_H_
 #define _LIBS_NAVGRAPH_GENERATOR_GRID_H_
 
-#include <navgraph/navgraph.h>
 #include <navgraph/generators/generator.h>
-
+#include <navgraph/navgraph.h>
 #include <utils/math/polygon.h>
 
 namespace fawkes {
 
 class NavGraphGeneratorGrid : public NavGraphGenerator
 {
- public:
+public:
 	NavGraphGeneratorGrid(const std::map<std::string, std::string> &params);
 	virtual ~NavGraphGeneratorGrid();
 
 	virtual void compute(fawkes::LockPtr<fawkes::NavGraph> graph);
 
- private:
+private:
 	float spacing_;
 	float margin_;
 	bool  add_diagonals_;

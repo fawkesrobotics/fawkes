@@ -21,8 +21,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <core/threading/scoped_rwlock.h>
 #include <core/threading/read_write_lock.h>
+#include <core/threading/scoped_rwlock.h>
 
 namespace fawkes {
 
@@ -82,6 +82,28 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
+/** Constructor.
+ * @param rwlock ReadWriteLock to lock/unlock appropriately.
+ * @param initially_lock true to lock the rwlock in the constructor,
+ * false to not lock
+ * @param lock_type locking type, lock either for writing or for reading
+ */
+ScopedRWLock::ScopedRWLock(RefPtr<ReadWriteLock>  rwlock,
+                           ScopedRWLock::LockType lock_type,
+                           bool                   initially_lock)
+{
+	rawrwlock_ = 0;
+	refrwlock_ = rwlock;
+	lock_type_ = lock_type;
+	if (initially_lock) {
+		if (lock_type_ == LOCK_WRITE) {
+			refrwlock_->lock_for_write();
+		} else {
+			refrwlock_->lock_for_read();
+		}
+	}
+	locked_ = initially_lock;
+}
 
 /** Constructor.
  * @param rwlock ReadWriteLock to lock/unlock appropriately.
@@ -89,57 +111,33 @@ namespace fawkes {
  * false to not lock
  * @param lock_type locking type, lock either for writing or for reading
  */
-ScopedRWLock::ScopedRWLock(RefPtr<ReadWriteLock> rwlock, ScopedRWLock::LockType lock_type,
-                           bool initially_lock)
+ScopedRWLock::ScopedRWLock(ReadWriteLock *        rwlock,
+                           ScopedRWLock::LockType lock_type,
+                           bool                   initially_lock)
 {
-  rawrwlock_ = 0;
-  refrwlock_ = rwlock;
-  lock_type_ = lock_type;
-  if ( initially_lock ) {
-    if (lock_type_ == LOCK_WRITE) {
-      refrwlock_->lock_for_write();
-    } else {
-      refrwlock_->lock_for_read();
-    }
-  }
-  locked_ = initially_lock;
+	rawrwlock_ = rwlock;
+	lock_type_ = lock_type;
+	if (initially_lock) {
+		if (lock_type_ == LOCK_WRITE) {
+			rawrwlock_->lock_for_write();
+		} else {
+			rawrwlock_->lock_for_read();
+		}
+	}
+	locked_ = initially_lock;
 }
-
-
-/** Constructor.
- * @param rwlock ReadWriteLock to lock/unlock appropriately.
- * @param initially_lock true to lock the rwlock in the constructor,
- * false to not lock
- * @param lock_type locking type, lock either for writing or for reading
- */
-ScopedRWLock::ScopedRWLock(ReadWriteLock *rwlock, ScopedRWLock::LockType lock_type,
-                           bool initially_lock)
-{
-  rawrwlock_ = rwlock;
-  lock_type_ = lock_type;
-  if ( initially_lock ) {
-    if (lock_type_ == LOCK_WRITE) {
-      rawrwlock_->lock_for_write();
-    } else {
-      rawrwlock_->lock_for_read();
-    }
-  }
-  locked_ = initially_lock;
-}
-
 
 /** Destructor */
 ScopedRWLock::~ScopedRWLock()
 {
-  if ( locked_ ) {
-    if ( rawrwlock_) {
-      rawrwlock_->unlock();
-    } else {
-      refrwlock_->unlock();
-    }
-  }
+	if (locked_) {
+		if (rawrwlock_) {
+			rawrwlock_->unlock();
+		} else {
+			refrwlock_->unlock();
+		}
+	}
 }
-
 
 /** Lock this rwlock, again.
  * Use this if you unlocked the rwlock from the outside.
@@ -147,34 +145,32 @@ ScopedRWLock::~ScopedRWLock()
 void
 ScopedRWLock::relock()
 {
-  if ( rawrwlock_ ) {
-    if (lock_type_ == LOCK_WRITE) {
-      rawrwlock_->lock_for_write();
-    } else {
-      rawrwlock_->lock_for_read();
-    }
-  } else {
-    if (lock_type_ == LOCK_WRITE) {
-      refrwlock_->lock_for_write();
-    } else {
-      refrwlock_->lock_for_read();
-    }
-  }
-  locked_ = true;
+	if (rawrwlock_) {
+		if (lock_type_ == LOCK_WRITE) {
+			rawrwlock_->lock_for_write();
+		} else {
+			rawrwlock_->lock_for_read();
+		}
+	} else {
+		if (lock_type_ == LOCK_WRITE) {
+			refrwlock_->lock_for_write();
+		} else {
+			refrwlock_->lock_for_read();
+		}
+	}
+	locked_ = true;
 }
-
 
 /** Unlock the rwlock. */
 void
 ScopedRWLock::unlock()
 {
-  locked_ = false;
-  if ( rawrwlock_ ) {
-    rawrwlock_->unlock();
-  } else {
-    refrwlock_->unlock();
-  }
+	locked_ = false;
+	if (rawrwlock_) {
+		rawrwlock_->unlock();
+	} else {
+		refrwlock_->unlock();
+	}
 }
-
 
 } // end namespace fawkes

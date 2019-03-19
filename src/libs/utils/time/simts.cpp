@@ -22,6 +22,7 @@
  */
 
 #include <utils/time/simts.h>
+
 #include <cstddef>
 
 namespace fawkes {
@@ -42,10 +43,10 @@ namespace fawkes {
 /** Constructor. */
 SimulatorTimeSource::SimulatorTimeSource()
 {
-  clock = Clock::instance();
-  clock->get_systime(start_time);
-  start_simoffset = 0;
-  current_simtime = start_time;
+	clock = Clock::instance();
+	clock->get_systime(start_time);
+	start_simoffset = 0;
+	current_simtime = start_time;
 }
 
 /** Destructor. */
@@ -53,44 +54,42 @@ SimulatorTimeSource::~SimulatorTimeSource()
 {
 }
 
-
 void
 SimulatorTimeSource::get_time(timeval *tv) const
 {
-  if ( tv != NULL ) {
-    const timeval *curt = current_simtime.get_timeval();
-    tv->tv_sec  = curt->tv_sec;
-    tv->tv_usec = curt->tv_usec;
-  }
+	if (tv != NULL) {
+		const timeval *curt = current_simtime.get_timeval();
+		tv->tv_sec          = curt->tv_sec;
+		tv->tv_usec         = curt->tv_usec;
+	}
 }
-
 
 timeval
 SimulatorTimeSource::conv_to_realtime(const timeval *tv) const
 {
-  float simdiff  = current_simoffset - start_simoffset;
-  float realdiff = current_realtime - &start_time;
+	float simdiff  = current_simoffset - start_simoffset;
+	float realdiff = current_realtime - &start_time;
 
-  float sim_to_real = realdiff / simdiff;
+	float sim_to_real = realdiff / simdiff;
 
-  Time query_simtime(tv);
-  query_simtime -= start_time;
-  float query_simtime_offset = query_simtime.in_sec() - start_simoffset;
+	Time query_simtime(tv);
+	query_simtime -= start_time;
+	float query_simtime_offset = query_simtime.in_sec() - start_simoffset;
 
-  query_simtime_offset *= sim_to_real;
+	query_simtime_offset *= sim_to_real;
 
-  Time final(query_simtime_offset);
-  final += start_time;
+	Time final(query_simtime_offset);
+	final += start_time;
 
-  return *(final.get_timeval());;
+	return *(final.get_timeval());
+	;
 }
-
 
 timeval
 SimulatorTimeSource::conv_native_to_exttime(const timeval *tv) const
 {
-  timeval rv = *tv;
-  return rv;
+	timeval rv = *tv;
+	return rv;
 }
 
 /** Set start time.
@@ -99,12 +98,11 @@ SimulatorTimeSource::conv_native_to_exttime(const timeval *tv) const
 void
 SimulatorTimeSource::set_start(float initial_offset)
 {
-  clock->get_systime(start_time);
-  start_simoffset = initial_offset;
-  current_simtime = start_time;
-  //printf("Start time: %s  Start offset: %f\n", start_time.str(), start_simoffset);
+	clock->get_systime(start_time);
+	start_simoffset = initial_offset;
+	current_simtime = start_time;
+	//printf("Start time: %s  Start offset: %f\n", start_time.str(), start_simoffset);
 }
-
 
 /** Set simulation offset.
  * @param sim_offset simulation offset in seconds.
@@ -112,11 +110,11 @@ SimulatorTimeSource::set_start(float initial_offset)
 void
 SimulatorTimeSource::set_sim_offset(float sim_offset)
 {
-  clock->get_systime(current_realtime);
-  current_simtime = start_time + (sim_offset - start_simoffset);
-  current_simoffset = sim_offset;
-  //printf("New current real time: %s  New current simtime: %s   new offset: %f\n",
-  //       start_time.str(), current_simtime.str(), current_simoffset);
+	clock->get_systime(current_realtime);
+	current_simtime   = start_time + (sim_offset - start_simoffset);
+	current_simoffset = sim_offset;
+	//printf("New current real time: %s  New current simtime: %s   new offset: %f\n",
+	//       start_time.str(), current_simtime.str(), current_simoffset);
 }
 
 } // end namespace fawkes

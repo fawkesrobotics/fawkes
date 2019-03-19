@@ -22,9 +22,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <fvmodels/relative_position/omni_relative.h>
+
 #include <cmath>
 #include <iostream>
-#include <fvmodels/relative_position/omni_relative.h>
 
 namespace firevision {
 
@@ -37,20 +38,20 @@ namespace firevision {
  */
 OmniRelative::OmniRelative(MirrorModel *mirror_model)
 {
-  this->mirror_model = mirror_model;
+	this->mirror_model = mirror_model;
 
-  avg_x = avg_y = avg_x_sum = avg_y_sum = 0.f;
-  avg_x_num = avg_y_num = 0;
+	avg_x = avg_y = avg_x_sum = avg_y_sum = 0.f;
+	avg_x_num = avg_y_num = 0;
 
-  ball_x = ball_y = bearing = slope = distance_ball_motor = distance_ball_cam = 0.f;
+	ball_x = ball_y = bearing = slope = distance_ball_motor = distance_ball_cam = 0.f;
 
-  // cannot calculate yet
-  slope = 0;
+	// cannot calculate yet
+	slope = 0;
 
-  DEFAULT_X_VARIANCE = 36.f;
-  DEFAULT_Y_VARIANCE = 25.f;
+	DEFAULT_X_VARIANCE = 36.f;
+	DEFAULT_Y_VARIANCE = 25.f;
 
-  /*
+	/*
   // initial variance for ball pos kf
   kalman_filter = new kalmanFilter2Dim();
   CMatrix<float> initialStateVarianceBall(2,2);
@@ -64,64 +65,54 @@ OmniRelative::OmniRelative(MirrorModel *mirror_model)
   kalman_filter->setProcessCovariance( DEFAULT_X_VARIANCE, DEFAULT_Y_VARIANCE );
   kalman_filter->setMeasurementCovariance( DEFAULT_X_VARIANCE, DEFAULT_Y_VARIANCE );
   */
-
 }
-
 
 float
-OmniRelative::get_distance() const 
+OmniRelative::get_distance() const
 {
-  return distance_ball_motor;
+	return distance_ball_motor;
 }
-
 
 float
 OmniRelative::get_bearing(void) const
 {
-  return bearing;
+	return bearing;
 }
-
 
 float
 OmniRelative::get_slope() const
 {
-  return slope;
+	return slope;
 }
-
 
 float
 OmniRelative::get_y(void) const
 {
-  return ball_y;
+	return ball_y;
 }
-
 
 float
 OmniRelative::get_x(void) const
 {
-  return ball_x;
+	return ball_x;
 }
-
 
 void
 OmniRelative::set_center(float x, float y)
 {
-  image_x = (unsigned int)roundf(x);
-  image_y = (unsigned int)roundf(y);
+	image_x = (unsigned int)roundf(x);
+	image_y = (unsigned int)roundf(y);
 }
-
 
 void
-OmniRelative::set_center(const center_in_roi_t& c)
+OmniRelative::set_center(const center_in_roi_t &c)
 {
 }
-
 
 void
 OmniRelative::set_radius(float r)
 {
 }
-
 
 /** Get radius.
  * @return always 0
@@ -129,84 +120,74 @@ OmniRelative::set_radius(float r)
 float
 OmniRelative::get_radius() const
 {
-  return 0;
+	return 0;
 }
-
 
 void
 OmniRelative::set_pan_tilt(float pan, float tilt)
 {
 }
 
-
 void
 OmniRelative::get_pan_tilt(float *pan, float *tilt) const
 {
 }
 
-
 const char *
 OmniRelative::get_name() const
 {
-  return "OmniRelative";
+	return "OmniRelative";
 }
-
 
 void
 OmniRelative::reset()
 {
-  last_available = false;
-  //kalman_filter->reset();
+	last_available = false;
+	//kalman_filter->reset();
 }
-
 
 void
 OmniRelative::calc()
 {
+	if (mirror_model->isValidPoint(image_x, image_y)) {
+		fawkes::polar_coord_2d_t rel_pos = mirror_model->getWorldPointRelative(image_x, image_y);
 
-  if ( mirror_model->isValidPoint( image_x, image_y ) ) {
-    fawkes::polar_coord_2d_t rel_pos = mirror_model->getWorldPointRelative( image_x, image_y );
+		distance_ball_cam = rel_pos.r;
+		bearing           = rel_pos.phi;
 
-    distance_ball_cam = rel_pos.r;
-    bearing           = rel_pos.phi;
+		// assumes camera to be centered on robot
+		ball_x = cos(bearing) * distance_ball_cam;
+		ball_y = sin(bearing) * distance_ball_cam;
 
-    // assumes camera to be centered on robot
-    ball_x = cos( bearing ) * distance_ball_cam;
-    ball_y = sin( bearing ) * distance_ball_cam;
+		// applyKalmanFilter();
 
-    // applyKalmanFilter();
-
-    distance_ball_motor = sqrt( ball_x * ball_x  +  ball_y * ball_y );
-  }
+		distance_ball_motor = sqrt(ball_x * ball_x + ball_y * ball_y);
+	}
 }
-
 
 bool
 OmniRelative::is_pos_valid() const
 {
-  return mirror_model->isValidPoint( image_x, image_y );
+	return mirror_model->isValidPoint(image_x, image_y);
 }
-
 
 void
 OmniRelative::calc_unfiltered()
 {
+	fawkes::polar_coord_2d_t rel_pos = mirror_model->getWorldPointRelative(image_x, image_y);
 
-  fawkes::polar_coord_2d_t rel_pos = mirror_model->getWorldPointRelative( image_x, image_y );
+	distance_ball_cam = rel_pos.r;
+	bearing           = rel_pos.phi;
 
-  distance_ball_cam = rel_pos.r;
-  bearing           = rel_pos.phi;
+	// cannot calculate yet
+	slope = 0;
 
-  // cannot calculate yet
-  slope = 0;
+	// assumes camera to be centered on robot
+	ball_x = cos(bearing) * distance_ball_cam;
+	ball_y = sin(bearing) * distance_ball_cam;
 
-  // assumes camera to be centered on robot
-  ball_x = cos( bearing ) * distance_ball_cam;
-  ball_y = sin( bearing ) * distance_ball_cam;
-
-  distance_ball_motor = sqrt( ball_x * ball_x  +  ball_y * ball_y );
+	distance_ball_motor = sqrt(ball_x * ball_x + ball_y * ball_y);
 }
-
 
 /*
 void

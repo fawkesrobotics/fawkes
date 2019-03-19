@@ -21,6 +21,7 @@
  */
 
 #include "fvbase_plugin.h"
+
 #include "base_thread.h"
 
 using namespace fawkes;
@@ -39,10 +40,9 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-FvBasePlugin::FvBasePlugin(Configuration *config)
-  : Plugin(config)
+FvBasePlugin::FvBasePlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new FvBaseThread());
+	thread_list.push_back(new FvBaseThread());
 }
 
 PLUGIN_DESCRIPTION("FireVision Base provides access to camera and handles timing")

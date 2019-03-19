@@ -34,11 +34,10 @@ namespace fawkes {
  * @param caller The calling component
  * @param wait_time The time the caller had to wait for the SyncPoint (wait calls)
  */
-SyncPointCall::SyncPointCall(const std::string & caller, Time call_time, Time wait_time)
-  : caller_(caller),
-    call_time_(call_time),
-    wait_time_(wait_time)
-{}
+SyncPointCall::SyncPointCall(const std::string &caller, Time call_time, Time wait_time)
+: caller_(caller), call_time_(call_time), wait_time_(wait_time)
+{
+}
 
 /** Get the time when the call was made
  * @return the call time
@@ -46,7 +45,7 @@ SyncPointCall::SyncPointCall(const std::string & caller, Time call_time, Time wa
 Time
 SyncPointCall::get_call_time() const
 {
-  return call_time_;
+	return call_time_;
 }
 
 /** Get the wait time
@@ -55,7 +54,7 @@ SyncPointCall::get_call_time() const
 Time
 SyncPointCall::get_wait_time() const
 {
-  return wait_time_;
+	return wait_time_;
 }
 
 /** Get the name of the component which made the call
@@ -64,8 +63,7 @@ SyncPointCall::get_wait_time() const
 std::string
 SyncPointCall::get_caller() const
 {
-  return caller_;
+	return caller_;
 }
-
 
 } // namespace fawkes

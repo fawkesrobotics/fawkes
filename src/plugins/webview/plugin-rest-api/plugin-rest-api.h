@@ -21,28 +21,26 @@
 
 #pragma once
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/webview.h>
-#include <aspect/plugin_director.h>
-
-#include <webview/rest_api.h>
-#include <webview/rest_array.h>
-
 #include "model/Plugin.h"
 #include "model/PluginOpRequest.h"
 #include "model/PluginOpResponse.h"
 
+#include <aspect/logging.h>
+#include <aspect/plugin_director.h>
+#include <aspect/webview.h>
+#include <core/threading/thread.h>
+#include <webview/rest_api.h>
+#include <webview/rest_array.h>
+
 #include <map>
 #include <string>
 
-class PluginRestApi
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-	public fawkes::PluginDirectorAspect,
-	public fawkes::WebviewAspect
+class PluginRestApi : public fawkes::Thread,
+                      public fawkes::LoggingAspect,
+                      public fawkes::PluginDirectorAspect,
+                      public fawkes::WebviewAspect
 {
- public:
+public:
 	PluginRestApi();
 	~PluginRestApi();
 
@@ -50,11 +48,10 @@ class PluginRestApi
 	virtual void loop();
 	virtual void finalize();
 
- private:
+private:
 	WebviewRestArray<::Plugin> cb_list_plugins();
-	PluginOpResponse cb_set_plugin_state(PluginOpRequest &request,
-	                                     fawkes::WebviewRestParams &params);
+	PluginOpResponse cb_set_plugin_state(PluginOpRequest &request, fawkes::WebviewRestParams &params);
 
- private:
-	fawkes::WebviewRestApi        *rest_api_;
+private:
+	fawkes::WebviewRestApi *rest_api_;
 };

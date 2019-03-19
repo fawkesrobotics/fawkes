@@ -26,53 +26,60 @@
 
 #include <blackboard/remote.h>
 #include <logging/logger.h>
-#include <vector>
 
 #include <cstdio>
+#include <vector>
 
 /** @class fawkes::EclExternalBlackBoard
  * Wrapper class for using the blackboard in the implementation of the external
  * predicates.
  * @author Daniel Beck
  */
-namespace fawkes
-{
+namespace fawkes {
 class EclExternalBlackBoard
 {
 private:
-  /** Constructor.
+	/** Constructor.
    * @param blackboard blackboard to use to open interfaces
    */
-  EclExternalBlackBoard(BlackBoard *blackboard, Logger *logger);
+	EclExternalBlackBoard(BlackBoard *blackboard, Logger *logger);
+
 public:
-  /** Destructor. */
-  ~EclExternalBlackBoard();
+	/** Destructor. */
+	~EclExternalBlackBoard();
 
-  static void create_initial_object(BlackBoard *bb, Logger *logger);
-  static void cleanup_instance();
-  static EclExternalBlackBoard* instance();
+	static void                   create_initial_object(BlackBoard *bb, Logger *logger);
+	static void                   cleanup_instance();
+	static EclExternalBlackBoard *instance();
 
-  static BlackBoard* blackboard_instance();
-  std::map<std::string, Interface *> & interfaces();
+	static BlackBoard *                 blackboard_instance();
+	std::map<std::string, Interface *> &interfaces();
 
-  /**
+	/**
    * @return A pointer to the plugin-central logger
    */
-  static Logger *logger() { return m_logger; }
+	static Logger *
+	logger()
+	{
+		return m_logger;
+	}
 
-  /**
+	/**
    * @return Name for logging
    */
-  static const char *name() { return "EclExternalBlackBoard"; }
+	static const char *
+	name()
+	{
+		return "EclExternalBlackBoard";
+	}
 
 private:
-  static EclExternalBlackBoard *      m_instance;
-  std::map<std::string, Interface *>  m_interfaces;
-  static BlackBoard *                 m_blackboard;
-  static Logger *                     m_logger;
+	static EclExternalBlackBoard *     m_instance;
+	std::map<std::string, Interface *> m_interfaces;
+	static BlackBoard *                m_blackboard;
+	static Logger *                    m_logger;
 };
-}
-
+} // namespace fawkes
 
 extern "C" int p_bb_open_interface();
 extern "C" int p_bb_close_interface();
@@ -96,4 +103,3 @@ extern "C" int p_bb_observe_pattern();
 extern "C" int p_bb_listen_for_change();
 
 #endif
-

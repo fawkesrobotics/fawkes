@@ -23,8 +23,9 @@
 #define FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLES_BLACKBOARD_COMPUTABLE_H_
 
 #include "../robot_memory.h"
-#include <blackboard/blackboard.h>
+
 #include <aspect/logging.h>
+#include <blackboard/blackboard.h>
 #include <config/config.h>
 
 /** @class BlackboardComputable  blackboard_computable.h
@@ -33,22 +34,22 @@
  */
 class BlackboardComputable
 {
-  public:
-    BlackboardComputable(RobotMemory* robot_memory,
-                         fawkes::BlackBoard* blackboard,
-                         fawkes::Logger* logger,
-                         fawkes::Configuration* config);
-    virtual ~BlackboardComputable();
+public:
+	BlackboardComputable(RobotMemory *          robot_memory,
+	                     fawkes::BlackBoard *   blackboard,
+	                     fawkes::Logger *       logger,
+	                     fawkes::Configuration *config);
+	virtual ~BlackboardComputable();
 
-  private:
-    std::list<mongo::BSONObj> compute_interfaces(const mongo::BSONObj& query,
-                                                 const std::string& collection);
+private:
+	std::list<mongo::BSONObj> compute_interfaces(const mongo::BSONObj &query,
+	                                             const std::string &   collection);
 
-    RobotMemory* robot_memory_;
-    fawkes::BlackBoard* blackboard_;
-    fawkes::Logger* logger_;
-    Computable* computable;
-    mongo::BSONArray get_interface_fields(fawkes::InterfaceFieldIterator it);
+	RobotMemory *       robot_memory_;
+	fawkes::BlackBoard *blackboard_;
+	fawkes::Logger *    logger_;
+	Computable *        computable;
+	mongo::BSONArray    get_interface_fields(fawkes::InterfaceFieldIterator it);
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLES_BLACKBOARD_COMPUTABLE_H_ */

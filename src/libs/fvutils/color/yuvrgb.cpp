@@ -22,9 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvutils/color/yuvrgb.h>
 #include <core/macros.h>
-
+#include <fvutils/color/yuvrgb.h>
 #include <fvutils/cpu/mmx.h>
 
 namespace firevision {
@@ -45,42 +44,42 @@ namespace firevision {
  * @param height Height of the image contained in the YUV buffer
  */
 void
-yuv411packed_to_rgb_plainc(const unsigned char *YUV, unsigned char *RGB,
-			   unsigned int width, unsigned int height)
+yuv411packed_to_rgb_plainc(const unsigned char *YUV,
+                           unsigned char *      RGB,
+                           unsigned int         width,
+                           unsigned int         height)
 {
-  int y0, y1, y2, y3, u, v;
-  unsigned int i = 0;
-  while (i < (width * height)*3/2) {
-    u  = YUV[i++] - 128;
-    y0 = YUV[i++] -  16;
-    y1 = YUV[i++] -  16;
-    v  = YUV[i++] - 128;
-    y2 = YUV[i++] -  16;
-    y3 = YUV[i++] -  16;
+	int          y0, y1, y2, y3, u, v;
+	unsigned int i = 0;
+	while (i < (width * height) * 3 / 2) {
+		u  = YUV[i++] - 128;
+		y0 = YUV[i++] - 16;
+		y1 = YUV[i++] - 16;
+		v  = YUV[i++] - 128;
+		y2 = YUV[i++] - 16;
+		y3 = YUV[i++] - 16;
 
-    // Set red, green and blue bytes for pixel 0
-    *RGB++ = clip( (76284 * y0 + 104595 * v             ) >> 16 );
-    *RGB++ = clip( (76284 * y0 -  25625 * u - 53281 * v ) >> 16 );
-    *RGB++ = clip( (76284 * y0 + 132252 * u             ) >> 16 );
+		// Set red, green and blue bytes for pixel 0
+		*RGB++ = clip((76284 * y0 + 104595 * v) >> 16);
+		*RGB++ = clip((76284 * y0 - 25625 * u - 53281 * v) >> 16);
+		*RGB++ = clip((76284 * y0 + 132252 * u) >> 16);
 
-    // Set red, green and blue bytes for pixel 1
-    *RGB++ = clip( (76284 * y1 + 104595 * v             ) >> 16 );
-    *RGB++ = clip( (76284 * y1 -  25625 * u - 53281 * v ) >> 16 );
-    *RGB++ = clip( (76284 * y1 + 132252 * u             ) >> 16 );
+		// Set red, green and blue bytes for pixel 1
+		*RGB++ = clip((76284 * y1 + 104595 * v) >> 16);
+		*RGB++ = clip((76284 * y1 - 25625 * u - 53281 * v) >> 16);
+		*RGB++ = clip((76284 * y1 + 132252 * u) >> 16);
 
-    // Set red, green and blue bytes for pixel 2
-    *RGB++ = clip( (76284 * y2 + 104595 * v             ) >> 16 );
-    *RGB++ = clip( (76284 * y2 -  25625 * u - 53281 * v ) >> 16 );
-    *RGB++ = clip( (76284 * y2 + 132252 * u             ) >> 16 );
+		// Set red, green and blue bytes for pixel 2
+		*RGB++ = clip((76284 * y2 + 104595 * v) >> 16);
+		*RGB++ = clip((76284 * y2 - 25625 * u - 53281 * v) >> 16);
+		*RGB++ = clip((76284 * y2 + 132252 * u) >> 16);
 
-    // Set red, green and blue bytes for pixel 3
-    *RGB++ = clip( (76284 * y3 + 104595 * v             ) >> 16 );
-    *RGB++ = clip( (76284 * y3 -  25625 * u - 53281 * v ) >> 16 );
-    *RGB++ = clip( (76284 * y3 + 132252 * u             ) >> 16 );
-
-  }
+		// Set red, green and blue bytes for pixel 3
+		*RGB++ = clip((76284 * y3 + 104595 * v) >> 16);
+		*RGB++ = clip((76284 * y3 - 25625 * u - 53281 * v) >> 16);
+		*RGB++ = clip((76284 * y3 + 132252 * u) >> 16);
+	}
 }
-
 
 /** YUV to RGB Conversion
  * B = 1.164(Y - 16)                  + 2.018(U - 128)
@@ -98,43 +97,41 @@ yuv411packed_to_rgb_plainc(const unsigned char *YUV, unsigned char *RGB,
  * @param height Height of the image contained in the YUV buffer
  */
 void
-yuv422planar_to_rgb_plainc(const unsigned char *planar, unsigned char *RGB, unsigned int width, unsigned int height)
+yuv422planar_to_rgb_plainc(const unsigned char *planar,
+                           unsigned char *      RGB,
+                           unsigned int         width,
+                           unsigned int         height)
 {
+	short                y1, y2, u, v;
+	const unsigned char *yp, *up, *vp;
+	unsigned int         i;
 
-  short y1, y2, u, v;
-  const unsigned char *yp, *up, *vp;
-  unsigned int i;
+	yp = planar;
+	up = planar + (width * height);
+	vp = up + (width * height / 2);
 
-  yp = planar;
-  up = planar + (width * height);
-  vp = up + (width * height / 2);
+	for (i = 0; i < (width * height / 2); ++i) {
+		y1 = *yp++;
+		y2 = *yp++;
+		u  = *up++;
+		v  = *vp++;
 
-  for (i = 0; i < (width * height / 2); ++i) {
+		y1 -= 16;
+		y2 -= 16;
+		u -= 128;
+		v -= 128;
 
-    y1 = *yp++;
-    y2 = *yp++;
-    u  = *up++;
-    v  = *vp++;
+		// Set red, green and blue bytes for pixel 0
+		*RGB++ = clip((76284 * y1 + 104595 * v) >> 16);
+		*RGB++ = clip((76284 * y1 - 25625 * u - 53281 * v) >> 16);
+		*RGB++ = clip((76284 * y1 + 132252 * u) >> 16);
 
-    y1 -=  16;
-    y2 -=  16;
-    u  -= 128;
-    v  -= 128;
-
-    // Set red, green and blue bytes for pixel 0
-    *RGB++ = clip( (76284 * y1 + 104595 * v             ) >> 16 );
-    *RGB++ = clip( (76284 * y1 -  25625 * u - 53281 * v ) >> 16 );
-    *RGB++ = clip( (76284 * y1 + 132252 * u             ) >> 16 );
-
-    // Set red, green and blue bytes for pixel 1
-    *RGB++ = clip( (76284 * y2 + 104595 * v             ) >> 16 );
-    *RGB++ = clip( (76284 * y2 -  25625 * u - 53281 * v ) >> 16 );
-    *RGB++ = clip( (76284 * y2 + 132252 * u             ) >> 16 );
-
-  }
+		// Set red, green and blue bytes for pixel 1
+		*RGB++ = clip((76284 * y2 + 104595 * v) >> 16);
+		*RGB++ = clip((76284 * y2 - 25625 * u - 53281 * v) >> 16);
+		*RGB++ = clip((76284 * y2 + 132252 * u) >> 16);
+	}
 }
-
-
 
 /** YUV to RGB Conversion
  * B = 1.164(Y - 16)                  + 2.018(U - 128)
@@ -152,27 +149,29 @@ yuv422planar_to_rgb_plainc(const unsigned char *planar, unsigned char *RGB, unsi
  * @param height Height of the image contained in the YUV buffer
  */
 void
-yuv422packed_to_rgb_plainc(const unsigned char *YUV, unsigned char *RGB,
-			   const unsigned int width, const unsigned int height)
+yuv422packed_to_rgb_plainc(const unsigned char *YUV,
+                           unsigned char *      RGB,
+                           const unsigned int   width,
+                           const unsigned int   height)
 {
-  int y0, y1, u, v;
-  unsigned int i = 0;
-  for (unsigned int pixel = 0; pixel < (width * height); pixel += 2) {
-    u  = YUV[i++] - 128;
-    y0 = YUV[i++] -  16;
-    v  = YUV[i++] - 128;
-    y1 = YUV[i++] -  16;
+	int          y0, y1, u, v;
+	unsigned int i = 0;
+	for (unsigned int pixel = 0; pixel < (width * height); pixel += 2) {
+		u  = YUV[i++] - 128;
+		y0 = YUV[i++] - 16;
+		v  = YUV[i++] - 128;
+		y1 = YUV[i++] - 16;
 
-    // Set red, green and blue bytes for pixel 0
-    *RGB++ = clip( (76284 * y0 + 104595 * v             ) >> 16 );
-    *RGB++ = clip( (76284 * y0 -  25625 * u - 53281 * v ) >> 16 );
-    *RGB++ = clip( (76284 * y0 + 132252 * u             ) >> 16 );
+		// Set red, green and blue bytes for pixel 0
+		*RGB++ = clip((76284 * y0 + 104595 * v) >> 16);
+		*RGB++ = clip((76284 * y0 - 25625 * u - 53281 * v) >> 16);
+		*RGB++ = clip((76284 * y0 + 132252 * u) >> 16);
 
-    // Set red, green and blue bytes for pixel 1
-    *RGB++ = clip( (76284 * y1 + 104595 * v             ) >> 16 );
-    *RGB++ = clip( (76284 * y1 -  25625 * u - 53281 * v ) >> 16 );
-    *RGB++ = clip( (76284 * y1 + 132252 * u             ) >> 16 );
-  }
+		// Set red, green and blue bytes for pixel 1
+		*RGB++ = clip((76284 * y1 + 104595 * v) >> 16);
+		*RGB++ = clip((76284 * y1 - 25625 * u - 53281 * v) >> 16);
+		*RGB++ = clip((76284 * y1 + 132252 * u) >> 16);
+	}
 }
 
 /** Convert YUV422 planar to BGR.
@@ -183,342 +182,331 @@ yuv422packed_to_rgb_plainc(const unsigned char *YUV, unsigned char *RGB,
  * @param height Height of the image contained in the YUV buffer
  */
 void
-yuv422planar_to_bgr_plainc(const unsigned char *planar, unsigned char *BGR,
-			   unsigned int width, unsigned int height)
+yuv422planar_to_bgr_plainc(const unsigned char *planar,
+                           unsigned char *      BGR,
+                           unsigned int         width,
+                           unsigned int         height)
 {
+	short                y1, y2, u, v;
+	const unsigned char *yp, *up, *vp;
+	unsigned int         i;
 
-  short y1, y2, u, v;
-  const unsigned char *yp, *up, *vp;
-  unsigned int i;
+	yp = planar;
+	up = planar + (width * height);
+	vp = up + (width * height / 2);
 
-  yp = planar;
-  up = planar + (width * height);
-  vp = up + (width * height / 2);
+	for (i = 0; i < (width * height / 2); ++i) {
+		y1 = *yp++;
+		y2 = *yp++;
+		u  = *up++;
+		v  = *vp++;
 
-  for (i = 0; i < (width * height / 2); ++i) {
+		y1 -= 16;
+		y2 -= 16;
+		u -= 128;
+		v -= 128;
 
-    y1 = *yp++;
-    y2 = *yp++;
-    u  = *up++;
-    v  = *vp++;
+		// Set red, green and blue bytes for pixel 0
+		*BGR++ = clip((76284 * y1 + 132252 * u) >> 16);
+		*BGR++ = clip((76284 * y1 - 25625 * u - 53281 * v) >> 16);
+		*BGR++ = clip((76284 * y1 + 104595 * v) >> 16);
 
-    y1 -=  16;
-    y2 -=  16;
-    u  -= 128;
-    v  -= 128;
-
-    // Set red, green and blue bytes for pixel 0
-    *BGR++ = clip( (76284 * y1 + 132252 * u             ) >> 16 );
-    *BGR++ = clip( (76284 * y1 -  25625 * u - 53281 * v ) >> 16 );
-    *BGR++ = clip( (76284 * y1 + 104595 * v             ) >> 16 );
-
-    // Set red, green and blue bytes for pixel 1
-    *BGR++ = clip( (76284 * y2 + 132252 * u             ) >> 16 );
-    *BGR++ = clip( (76284 * y2 -  25625 * u - 53281 * v ) >> 16 );
-    *BGR++ = clip( (76284 * y2 + 104595 * v             ) >> 16 );
-  }
+		// Set red, green and blue bytes for pixel 1
+		*BGR++ = clip((76284 * y2 + 132252 * u) >> 16);
+		*BGR++ = clip((76284 * y2 - 25625 * u - 53281 * v) >> 16);
+		*BGR++ = clip((76284 * y2 + 104595 * v) >> 16);
+	}
 }
-
 
 void
-yuv422planar_to_rgb_with_alpha_plainc(const unsigned char *planar, unsigned char *RGB, unsigned int width, unsigned int height)
+yuv422planar_to_rgb_with_alpha_plainc(const unsigned char *planar,
+                                      unsigned char *      RGB,
+                                      unsigned int         width,
+                                      unsigned int         height)
 {
+	short                y1, y2, u, v;
+	const unsigned char *yp, *up, *vp;
+	unsigned int         i;
 
-  short y1, y2, u, v;
-  const unsigned char *yp, *up, *vp;
-  unsigned int i;
+	yp = planar;
+	up = planar + (width * height);
+	vp = up + (width * height / 2);
 
-  yp = planar;
-  up = planar + (width * height);
-  vp = up + (width * height / 2);
+	for (i = 0; i < (width * height / 2); ++i) {
+		y1 = *yp++;
+		y2 = *yp++;
+		u  = *up++;
+		v  = *vp++;
 
-  for (i = 0; i < (width * height / 2); ++i) {
+		y1 -= 16;
+		y2 -= 16;
+		u -= 128;
+		v -= 128;
 
-    y1 = *yp++;
-    y2 = *yp++;
-    u  = *up++;
-    v  = *vp++;
+		// Set red, green and blue bytes for pixel 0
+		*RGB++ = clip((76284 * y1 + 104595 * v) >> 16);
+		*RGB++ = clip((76284 * y1 - 25625 * u - 53281 * v) >> 16);
+		*RGB++ = clip((76284 * y1 + 132252 * u) >> 16);
+		*RGB++ = 255;
 
-    y1 -=  16;
-    y2 -=  16;
-    u  -= 128;
-    v  -= 128;
-
-    // Set red, green and blue bytes for pixel 0
-    *RGB++ = clip( (76284 * y1 + 104595 * v             ) >> 16 );
-    *RGB++ = clip( (76284 * y1 -  25625 * u - 53281 * v ) >> 16 );
-    *RGB++ = clip( (76284 * y1 + 132252 * u             ) >> 16 );
-    *RGB++ = 255;
-
-    // Set red, green and blue bytes for pixel 1
-    *RGB++ = clip( (76284 * y2 + 104595 * v             ) >> 16 );
-    *RGB++ = clip( (76284 * y2 -  25625 * u - 53281 * v ) >> 16 );
-    *RGB++ = clip( (76284 * y2 + 132252 * u             ) >> 16 );
-    *RGB++ = 255;
-
-  }
-
+		// Set red, green and blue bytes for pixel 1
+		*RGB++ = clip((76284 * y2 + 104595 * v) >> 16);
+		*RGB++ = clip((76284 * y2 - 25625 * u - 53281 * v) >> 16);
+		*RGB++ = clip((76284 * y2 + 132252 * u) >> 16);
+		*RGB++ = 255;
+	}
 }
-
 
 void
-yuv422planar_to_bgr_with_alpha_plainc(const unsigned char *planar, unsigned char *BGR, unsigned int width, unsigned int height)
+yuv422planar_to_bgr_with_alpha_plainc(const unsigned char *planar,
+                                      unsigned char *      BGR,
+                                      unsigned int         width,
+                                      unsigned int         height)
 {
+	short                y1, y2, u, v;
+	const unsigned char *yp, *up, *vp;
+	unsigned int         i;
 
-  short y1, y2, u, v;
-  const unsigned char *yp, *up, *vp;
-  unsigned int i;
+	yp = planar;
+	up = planar + (width * height);
+	vp = up + (width * height / 2);
 
-  yp = planar;
-  up = planar + (width * height);
-  vp = up + (width * height / 2);
+	for (i = 0; i < (width * height / 2); ++i) {
+		y1 = *yp++;
+		y2 = *yp++;
+		u  = *up++;
+		v  = *vp++;
 
-  for (i = 0; i < (width * height / 2); ++i) {
+		y1 -= 16;
+		y2 -= 16;
+		u -= 128;
+		v -= 128;
 
-    y1 = *yp++;
-    y2 = *yp++;
-    u  = *up++;
-    v  = *vp++;
+		// Set red, green and blue bytes for pixel 0
+		*BGR++ = clip((76284 * y1 + 132252 * u) >> 16);
+		*BGR++ = clip((76284 * y1 - 25625 * u - 53281 * v) >> 16);
+		*BGR++ = clip((76284 * y1 + 104595 * v) >> 16);
+		*BGR++ = 255;
 
-    y1 -=  16;
-    y2 -=  16;
-    u  -= 128;
-    v  -= 128;
-
-    // Set red, green and blue bytes for pixel 0
-    *BGR++ = clip( (76284 * y1 + 132252 * u             ) >> 16 );
-    *BGR++ = clip( (76284 * y1 -  25625 * u - 53281 * v ) >> 16 );
-    *BGR++ = clip( (76284 * y1 + 104595 * v             ) >> 16 );
-    *BGR++ = 255;
-
-    // Set red, green and blue bytes for pixel 1
-    *BGR++ = clip( (76284 * y2 + 132252 * u             ) >> 16 );
-    *BGR++ = clip( (76284 * y2 -  25625 * u - 53281 * v ) >> 16 );
-    *BGR++ = clip( (76284 * y2 + 104595 * v             ) >> 16 );
-    *BGR++ = 255;
-
-  }
-
+		// Set red, green and blue bytes for pixel 1
+		*BGR++ = clip((76284 * y2 + 132252 * u) >> 16);
+		*BGR++ = clip((76284 * y2 - 25625 * u - 53281 * v) >> 16);
+		*BGR++ = clip((76284 * y2 + 104595 * v) >> 16);
+		*BGR++ = 255;
+	}
 }
-
 
 void
-yuv422packed_to_bgr_with_alpha_plainc(const unsigned char *YUV, unsigned char *BGR,
-				      unsigned int width, unsigned int height)
+yuv422packed_to_bgr_with_alpha_plainc(const unsigned char *YUV,
+                                      unsigned char *      BGR,
+                                      unsigned int         width,
+                                      unsigned int         height)
 {
+	int          y0, y1, u, v;
+	unsigned int i = 0;
+	while (i < (width * height * 2)) {
+		u  = YUV[i++] - 128;
+		y0 = YUV[i++] - 16;
+		v  = YUV[i++] - 128;
+		y1 = YUV[i++] - 16;
 
-  int y0, y1, u, v;
-  unsigned int i = 0;
-  while (i < (width * height * 2)) {
-    u  = YUV[i++] - 128;
-    y0 = YUV[i++] -  16;
-    v  = YUV[i++] - 128;
-    y1 = YUV[i++] -  16;
+		// Set red, green and blue bytes for pixel 0
+		*BGR++ = clip((76284 * y0 + 132252 * u) >> 16);
+		*BGR++ = clip((76284 * y0 - 25625 * u - 53281 * v) >> 16);
+		*BGR++ = clip((76284 * y0 + 104595 * v) >> 16);
+		*BGR++ = 255;
 
-    // Set red, green and blue bytes for pixel 0
-    *BGR++ = clip( (76284 * y0 + 132252 * u             ) >> 16 );
-    *BGR++ = clip( (76284 * y0 -  25625 * u - 53281 * v ) >> 16 );
-    *BGR++ = clip( (76284 * y0 + 104595 * v             ) >> 16 );
-    *BGR++ = 255;
-
-    // Set red, green and blue bytes for pixel 1
-    *BGR++ = clip( (76284 * y1 + 132252 * u             ) >> 16 );
-    *BGR++ = clip( (76284 * y1 -  25625 * u - 53281 * v ) >> 16 );
-    *BGR++ = clip( (76284 * y1 + 104595 * v             ) >> 16 );
-    *BGR++ = 255;
-
-  }
+		// Set red, green and blue bytes for pixel 1
+		*BGR++ = clip((76284 * y1 + 132252 * u) >> 16);
+		*BGR++ = clip((76284 * y1 - 25625 * u - 53281 * v) >> 16);
+		*BGR++ = clip((76284 * y1 + 104595 * v) >> 16);
+		*BGR++ = 255;
+	}
 }
 
+#if (defined __i386__ || defined __386__ || defined __X86__ || defined _M_IX86 || defined i386)
 
-#if ( \
-	 defined __i386__ || \
-	 defined __386__ || \
-	 defined __X86__ || \
-	 defined _M_IX86 || \
-	 defined i386)
-
-#define CRV    104595
-#define CBU    132251
-#define CGU    25624
-#define CGV    53280
-#define YMUL   76283
-#define OFF    32768
-#define BITRES 16
+#	define CRV 104595
+#	define CBU 132251
+#	define CGU 25624
+#	define CGV 53280
+#	define YMUL 76283
+#	define OFF 32768
+#	define BITRES 16
 
 /* calculation float resolution in bits */
 /* ie RES = 6 is 10.6 fixed point */
 /*    RES = 8 is 8.8 fixed point */
 /*    RES = 4 is 12.4 fixed point */
 /* NB: going above 6 will lead to overflow... :( */
-#define RES    6
+#	define RES 6
 
-#define RZ(i)  (i >> (BITRES - RES))
-#define FOUR(i) {i, i, i, i}
+#	define RZ(i) (i >> (BITRES - RES))
+#	define FOUR(i) \
+		{             \
+			i, i, i, i  \
+		}
 
 __aligned(8) const volatile unsigned short _const_crvcrv[4] = FOUR(RZ(CRV));
 __aligned(8) const volatile unsigned short _const_cbucbu[4] = FOUR(RZ(CBU));
 __aligned(8) const volatile unsigned short _const_cgucgu[4] = FOUR(RZ(CGU));
 __aligned(8) const volatile unsigned short _const_cgvcgv[4] = FOUR(RZ(CGV));
-__aligned(8) const volatile unsigned short _const_ymul  [4] = FOUR(RZ(YMUL));
-__aligned(8) const volatile unsigned short _const_128   [4] = FOUR(128);
-__aligned(8) const volatile unsigned short _const_32    [4] = FOUR(RZ(OFF));
-__aligned(8) const volatile unsigned short _const_16    [4] = FOUR(16);
+__aligned(8) const volatile unsigned short _const_ymul[4]   = FOUR(RZ(YMUL));
+__aligned(8) const volatile unsigned short _const_128[4]    = FOUR(128);
+__aligned(8) const volatile unsigned short _const_32[4]     = FOUR(RZ(OFF));
+__aligned(8) const volatile unsigned short _const_16[4]     = FOUR(16);
 
-#define CONST_CRVCRV *_const_crvcrv
-#define CONST_CBUCBU *_const_cbucbu
-#define CONST_CGUCGU *_const_cgucgu
-#define CONST_CGVCGV *_const_cgvcgv
-#define CONST_YMUL   *_const_ymul
-#define CONST_128    *_const_128
-#define CONST_32     *_const_32
-#define CONST_16     *_const_16
+#	define CONST_CRVCRV *_const_crvcrv
+#	define CONST_CBUCBU *_const_cbucbu
+#	define CONST_CGUCGU *_const_cgucgu
+#	define CONST_CGVCGV *_const_cgvcgv
+#	define CONST_YMUL *_const_ymul
+#	define CONST_128 *_const_128
+#	define CONST_32 *_const_32
+#	define CONST_16 *_const_16
 
 void
-yuv411planar_to_rgb_mmx (const unsigned char *yuv, unsigned char *rgb,
-			 unsigned int w, unsigned int h)
+yuv411planar_to_rgb_mmx(const unsigned char *yuv,
+                        unsigned char *      rgb,
+                        unsigned int         w,
+                        unsigned int         h)
 {
-  unsigned int xx, yy;
-  const unsigned char *yp1, *up, *vp;
-  unsigned char *dp1;
+	unsigned int         xx, yy;
+	const unsigned char *yp1, *up, *vp;
+	unsigned char *      dp1;
 
-  /* plane pointers */
-  yp1 = yuv;
-  up = yuv + (w * h);
-  vp = up + (w * (h / 4));
-  /* destination pointers */
-  dp1 = rgb;
+	/* plane pointers */
+	yp1 = yuv;
+	up  = yuv + (w * h);
+	vp  = up + (w * (h / 4));
+	/* destination pointers */
+	dp1 = rgb;
 
+	yp1 = yuv;
+	up  = yuv + (w * h);
+	vp  = up + ((w / 2) * (h / 2));
+	dp1 = rgb;
+	for (yy = 0; yy < h; yy++) {
+		for (xx = 0; xx < w; xx += 8) {
+			movq_m2r(*yp1, mm0);
+			movq_r2r(mm0, mm1);
+			psrlw_i2r(8, mm0);
+			psllw_i2r(8, mm1);
+			psrlw_i2r(8, mm1);
 
+			pxor_r2r(mm7, mm7);
+			movd_m2r(*up, mm3);
+			movd_m2r(*vp, mm2);
 
-  yp1 = yuv;
-  up = yuv + (w * h);
-  vp = up + ((w / 2) * (h / 2));
-  dp1 = rgb;
-  for (yy = 0; yy < h; yy++)
-    {
-      for (xx = 0; xx < w; xx += 8)
-	{
-	  movq_m2r(*yp1, mm0);
-	  movq_r2r(mm0, mm1);
-	  psrlw_i2r(8, mm0);
-	  psllw_i2r(8, mm1);
-	  psrlw_i2r(8, mm1);
+			punpcklbw_r2r(mm7, mm2);
+			punpcklbw_r2r(mm7, mm3);
 
-	  pxor_r2r(mm7, mm7);
-	  movd_m2r(*up, mm3);
-	  movd_m2r(*vp, mm2);
+			movq_m2r(CONST_16, mm4);
+			psubsw_r2r(mm4, mm0);
+			psubsw_r2r(mm4, mm1);
 
-	  punpcklbw_r2r(mm7, mm2);
-	  punpcklbw_r2r(mm7, mm3);
+			movq_m2r(CONST_128, mm5);
+			psubsw_r2r(mm5, mm2);
+			psubsw_r2r(mm5, mm3);
 
-	  movq_m2r(CONST_16, mm4);
-	  psubsw_r2r(mm4, mm0);
-	  psubsw_r2r(mm4, mm1);
+			movq_m2r(CONST_YMUL, mm4);
+			pmullw_r2r(mm4, mm0);
+			pmullw_r2r(mm4, mm1);
 
-	  movq_m2r(CONST_128, mm5);
-	  psubsw_r2r(mm5, mm2);
-	  psubsw_r2r(mm5, mm3);
+			movq_m2r(CONST_CRVCRV, mm7);
+			pmullw_r2r(mm3, mm7);
 
-	  movq_m2r(CONST_YMUL, mm4);
-	  pmullw_r2r(mm4, mm0);
-	  pmullw_r2r(mm4, mm1);
+			movq_m2r(CONST_CBUCBU, mm6);
+			pmullw_r2r(mm2, mm6);
 
-	  movq_m2r(CONST_CRVCRV, mm7);
-	  pmullw_r2r(mm3, mm7);
+			movq_m2r(CONST_CGUCGU, mm5);
+			pmullw_r2r(mm2, mm5);
 
-	  movq_m2r(CONST_CBUCBU, mm6);
-	  pmullw_r2r(mm2, mm6);
+			movq_m2r(CONST_CGVCGV, mm4);
+			pmullw_r2r(mm3, mm4);
 
-	  movq_m2r(CONST_CGUCGU, mm5);
-	  pmullw_r2r(mm2, mm5);
+			movq_r2r(mm0, mm2);
+			paddsw_r2r(mm7, mm2);
+			paddsw_r2r(mm1, mm7);
 
-	  movq_m2r(CONST_CGVCGV, mm4);
-	  pmullw_r2r(mm3, mm4);
+			psraw_i2r(RES, mm2);
+			psraw_i2r(RES, mm7);
+			packuswb_r2r(mm7, mm2);
 
-	  movq_r2r(mm0, mm2);
-	  paddsw_r2r(mm7, mm2);
-	  paddsw_r2r(mm1, mm7);
+			pxor_r2r(mm7, mm7);
+			movq_r2r(mm2, mm3);
+			punpckhbw_r2r(mm7, mm2);
+			punpcklbw_r2r(mm3, mm7);
+			por_r2r(mm7, mm2);
 
-	  psraw_i2r(RES, mm2);
-	  psraw_i2r(RES, mm7);
-	  packuswb_r2r(mm7, mm2);
+			movq_r2r(mm0, mm3);
+			psubsw_r2r(mm5, mm3);
+			psubsw_r2r(mm4, mm3);
+			paddsw_m2r(CONST_32, mm3);
 
-	  pxor_r2r(mm7, mm7);
-	  movq_r2r(mm2, mm3);
-	  punpckhbw_r2r(mm7, mm2);
-	  punpcklbw_r2r(mm3, mm7);
-	  por_r2r(mm7, mm2);
+			movq_r2r(mm1, mm7);
+			psubsw_r2r(mm5, mm7);
+			psubsw_r2r(mm4, mm7);
+			paddsw_m2r(CONST_32, mm7);
 
-	  movq_r2r(mm0, mm3);
-	  psubsw_r2r(mm5, mm3);
-	  psubsw_r2r(mm4, mm3);
-	  paddsw_m2r(CONST_32, mm3);
+			psraw_i2r(RES, mm3);
+			psraw_i2r(RES, mm7);
+			packuswb_r2r(mm7, mm3);
 
-	  movq_r2r(mm1, mm7);
-	  psubsw_r2r(mm5, mm7);
-	  psubsw_r2r(mm4, mm7);
-	  paddsw_m2r(CONST_32, mm7);
+			pxor_r2r(mm7, mm7);
+			movq_r2r(mm3, mm4);
+			punpckhbw_r2r(mm7, mm3);
+			punpcklbw_r2r(mm4, mm7);
+			por_r2r(mm7, mm3);
 
-	  psraw_i2r(RES, mm3);
-	  psraw_i2r(RES, mm7);
-	  packuswb_r2r(mm7, mm3);
+			movq_m2r(CONST_32, mm4);
+			paddsw_r2r(mm6, mm0);
+			paddsw_r2r(mm6, mm1);
+			paddsw_r2r(mm4, mm0);
+			paddsw_r2r(mm4, mm1);
+			psraw_i2r(RES, mm0);
+			psraw_i2r(RES, mm1);
+			packuswb_r2r(mm1, mm0);
 
-	  pxor_r2r(mm7, mm7);
-	  movq_r2r(mm3, mm4);
-	  punpckhbw_r2r(mm7, mm3);
-	  punpcklbw_r2r(mm4, mm7);
-	  por_r2r(mm7, mm3);
+			pxor_r2r(mm7, mm7);
+			movq_r2r(mm0, mm5);
+			punpckhbw_r2r(mm7, mm0);
+			punpcklbw_r2r(mm5, mm7);
+			por_r2r(mm7, mm0);
 
-	  movq_m2r(CONST_32, mm4);
-	  paddsw_r2r(mm6, mm0);
-	  paddsw_r2r(mm6, mm1);
-	  paddsw_r2r(mm4, mm0);
-	  paddsw_r2r(mm4, mm1);
-	  psraw_i2r(RES, mm0);
-	  psraw_i2r(RES, mm1);
-	  packuswb_r2r(mm1, mm0);
+			pxor_r2r(mm1, mm1);
+			movq_r2r(mm0, mm5);
+			movq_r2r(mm3, mm6);
+			movq_r2r(mm2, mm7);
+			punpckhbw_r2r(mm3, mm2);
+			punpcklbw_r2r(mm6, mm7);
+			punpckhbw_r2r(mm1, mm0);
+			punpcklbw_r2r(mm1, mm5);
 
-	  pxor_r2r(mm7, mm7);
-	  movq_r2r(mm0, mm5);
-	  punpckhbw_r2r(mm7, mm0);
-	  punpcklbw_r2r(mm5, mm7);
-	  por_r2r(mm7, mm0);
+			movq_r2r(mm7, mm1);
+			punpckhwd_r2r(mm5, mm7);
+			punpcklwd_r2r(mm5, mm1);
 
-	  pxor_r2r(mm1, mm1);
-	  movq_r2r(mm0, mm5);
-	  movq_r2r(mm3, mm6);
-	  movq_r2r(mm2, mm7);
-	  punpckhbw_r2r(mm3, mm2);
-	  punpcklbw_r2r(mm6, mm7);
-	  punpckhbw_r2r(mm1, mm0);
-	  punpcklbw_r2r(mm1, mm5);
+			movq_r2r(mm2, mm4);
+			punpckhwd_r2r(mm0, mm2);
+			punpcklwd_r2r(mm0, mm4);
 
-	  movq_r2r(mm7, mm1);
-	  punpckhwd_r2r(mm5, mm7);
-	  punpcklwd_r2r(mm5, mm1);
+			movntq_r2m(mm1, *(dp1));
+			movntq_r2m(mm7, *(dp1 + 8));
+			movntq_r2m(mm4, *(dp1 + 16));
+			movntq_r2m(mm2, *(dp1 + 24));
 
-	  movq_r2r(mm2, mm4);
-	  punpckhwd_r2r(mm0, mm2);
-	  punpcklwd_r2r(mm0, mm4);
-
-	  movntq_r2m(mm1, *(dp1));
-	  movntq_r2m(mm7, *(dp1 + 8));
-	  movntq_r2m(mm4, *(dp1 + 16));
-	  movntq_r2m(mm2, *(dp1 + 24));
-
-	  yp1 += 8;
-	  up += 4;
-	  vp += 4;
-	  dp1 += 8 * 4;
+			yp1 += 8;
+			up += 4;
+			vp += 4;
+			dp1 += 8 * 4;
+		}
+		if (yy & 0x1) {
+			up -= w / 2;
+			vp -= w / 2;
+		}
 	}
-      if (yy & 0x1)
-	{
-	  up -= w / 2;
-	  vp -= w / 2;
-	}
-    }
-  emms();
+	emms();
 }
 #endif
 

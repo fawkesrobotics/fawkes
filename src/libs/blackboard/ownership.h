@@ -25,48 +25,42 @@
 
 #include <blackboard/blackboard.h>
 
-
 namespace fawkes {
 
 class BlackBoardWithOwnership : public BlackBoard
 {
- public:
-  BlackBoardWithOwnership(BlackBoard *parent, const char *owner);
-  virtual ~BlackBoardWithOwnership();
+public:
+	BlackBoardWithOwnership(BlackBoard *parent, const char *owner);
+	virtual ~BlackBoardWithOwnership();
 
-  virtual Interface *  open_for_reading(const char *interface_type,
-					const char *identifier,
-					const char *owner = NULL);
-  virtual Interface *  open_for_writing(const char *interface_type,
-					const char *identifier,
-					const char *owner = NULL);
-  virtual void         close(Interface *interface);
+	virtual Interface *
+	open_for_reading(const char *interface_type, const char *identifier, const char *owner = NULL);
+	virtual Interface *
+	             open_for_writing(const char *interface_type, const char *identifier, const char *owner = NULL);
+	virtual void close(Interface *interface);
 
-  virtual InterfaceInfoList *  list_all();
-  virtual InterfaceInfoList *  list(const char *type_pattern,
-				    const char *id_pattern);
-  virtual bool                 is_alive() const throw();
-  virtual bool                 try_aliveness_restore() throw();
+	virtual InterfaceInfoList *list_all();
+	virtual InterfaceInfoList *list(const char *type_pattern, const char *id_pattern);
+	virtual bool               is_alive() const throw();
+	virtual bool               try_aliveness_restore() throw();
 
-  virtual std::list<Interface *>
-    open_multiple_for_reading(const char *type_pattern,
-			      const char *id_pattern = "*",
-			      const char *owner = NULL);
+	virtual std::list<Interface *> open_multiple_for_reading(const char *type_pattern,
+	                                                         const char *id_pattern = "*",
+	                                                         const char *owner      = NULL);
 
-  virtual void register_listener(BlackBoardInterfaceListener *listener,
-                                 ListenerRegisterFlag flag = BBIL_FLAG_ALL);
-  virtual void update_listener(BlackBoardInterfaceListener *listener,
-                                 ListenerRegisterFlag flag = BBIL_FLAG_ALL);
-  virtual void unregister_listener(BlackBoardInterfaceListener *listener);
+	virtual void register_listener(BlackBoardInterfaceListener *listener,
+	                               ListenerRegisterFlag         flag = BBIL_FLAG_ALL);
+	virtual void update_listener(BlackBoardInterfaceListener *listener,
+	                             ListenerRegisterFlag         flag = BBIL_FLAG_ALL);
+	virtual void unregister_listener(BlackBoardInterfaceListener *listener);
 
-  virtual void register_observer(BlackBoardInterfaceObserver *observer);
-  virtual void unregister_observer(BlackBoardInterfaceObserver *observer);
+	virtual void register_observer(BlackBoardInterfaceObserver *observer);
+	virtual void unregister_observer(BlackBoardInterfaceObserver *observer);
 
- private: /* members */
-  BlackBoard  *blackboard_;
-  std::string  owner_;
+private: /* members */
+	BlackBoard *blackboard_;
+	std::string owner_;
 };
-
 
 } // end namespace fawkes
 

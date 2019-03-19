@@ -25,14 +25,14 @@
 #define _FIREVISION_CLASSIFIERS_SIFTPP_H_
 
 #ifndef HAVE_SIFTPP
-#  error SIFTPP not available, you may not use the SiftppClassifier
+#	error SIFTPP not available, you may not use the SiftppClassifier
 #endif
 
-#include <vector>
+#include <fvclassifiers/classifier.h>
 #include <utils/time/clock.h>
 #include <utils/time/tracker.h>
 
-#include <fvclassifiers/classifier.h>
+#include <vector>
 
 // FIXME replace with forward declarations
 #include <siftpp/sift.hpp>
@@ -46,91 +46,90 @@ namespace firevision {
 
 class SiftppClassifier : public Classifier
 {
- public:
-  SiftppClassifier(const char * features_file,
-		   int samplingStep = 2,
-		   int octaves = 4,
-		   int levels = 3,
-		   float magnif = 3.0,
-		   int noorient = 0,
-		   int unnormalized = 0);
-  
-  virtual ~SiftppClassifier(); 
-  
-  virtual std::list< ROI > * classify();
+public:
+	SiftppClassifier(const char *features_file,
+	                 int         samplingStep = 2,
+	                 int         octaves      = 4,
+	                 int         levels       = 3,
+	                 float       magnif       = 3.0,
+	                 int         noorient     = 0,
+	                 int         unnormalized = 0);
 
-  /** Siftpp Feature struct. */
-  struct Feature {
-    VL::Sift::Keypoint key;    /**< keypoint */
-    int     number_of_desc;    /**< number of descriptors */
-    VL::float_t ** descs;      /**< descriptors */
-  };
+	virtual ~SiftppClassifier();
 
- private:
-  
-  // Find closest interest point in a list, given one interest point
-  int findMatch(const Feature & ip1, const std::vector< Feature > & ipts);
+	virtual std::list<ROI> *classify();
 
-  // Calculate square distance of two vectors
-  //double distSquare(double *v1, double *v2, int n);
-  double distSquare(VL::float_t *v1, VL::float_t *v2, int n);
+	/** Siftpp Feature struct. */
+	struct Feature
+	{
+		VL::Sift::Keypoint key;            /**< keypoint */
+		int                number_of_desc; /**< number of descriptors */
+		VL::float_t **     descs;          /**< descriptors */
+	};
 
-  // Object objects
-  VL::PgmBuffer      *obj_img_;
-  std::vector< Feature > obj_features_;
-  int obj_num_features_;
+private:
+	// Find closest interest point in a list, given one interest point
+	int findMatch(const Feature &ip1, const std::vector<Feature> &ipts);
 
-  // Image objects
-  VL::PgmBuffer      *image_;
-  std::vector< Feature > img_features_;
-  int img_num_features_;
+	// Calculate square distance of two vectors
+	//double distSquare(double *v1, double *v2, int n);
+	double distSquare(VL::float_t *v1, VL::float_t *v2, int n);
 
-  // Initial sampling step (default 2)
-  int samplingStep_;
-  // Number of analysed octaves (default 4)
-  int octaves_;
-  // Number of levels per octave (default 3)
-  int levels_;
-  // Blob response treshold
-  VL::float_t threshold_;
-  VL::float_t edgeThreshold_;
+	// Object objects
+	VL::PgmBuffer *      obj_img_;
+	std::vector<Feature> obj_features_;
+	int                  obj_num_features_;
 
-  int   first_;
+	// Image objects
+	VL::PgmBuffer *      image_;
+	std::vector<Feature> img_features_;
+	int                  img_num_features_;
 
-  //  float const sigman_;
-  //  float const sigma0_;
-  float sigman_;
-  float sigma0_;
+	// Initial sampling step (default 2)
+	int samplingStep_;
+	// Number of analysed octaves (default 4)
+	int octaves_;
+	// Number of levels per octave (default 3)
+	int levels_;
+	// Blob response treshold
+	VL::float_t threshold_;
+	VL::float_t edgeThreshold_;
 
-  // Keypoint magnification (default 3)
-  float magnif_;
-  // Upright SIFTPP or rotation invaraiant
-  int   noorient_;
-  // Normalize decriptors?
-  int   unnormalized_;
+	int first_;
 
-  // UNUSED
-//   int    stableorder    = 0 ;
-//   int    savegss        = 0 ;
-//   int    verbose        = 0 ;
-//   int    binary         = 0 ;
-//   int    haveKeypoints  = 0 ;
-//   int    fp             = 0 ;
+	//  float const sigman_;
+	//  float const sigma0_;
+	float sigman_;
+	float sigma0_;
 
-  // Length of descriptor vector
-  int vlen_;
+	// Keypoint magnification (default 3)
+	float magnif_;
+	// Upright SIFTPP or rotation invaraiant
+	int noorient_;
+	// Normalize decriptors?
+	int unnormalized_;
 
-  //#ifdef SIFTPP_TIMETRACKER
-  fawkes::TimeTracker *tt_;
-  unsigned int loop_count_;
-  unsigned int ttc_objconv_;
-  unsigned int ttc_objfeat_;
-  unsigned int ttc_imgconv_;
-  unsigned int ttc_imgfeat_;
-  unsigned int ttc_matchin_;
-  unsigned int ttc_roimerg_;
-  //#endif
+	// UNUSED
+	//   int    stableorder    = 0 ;
+	//   int    savegss        = 0 ;
+	//   int    verbose        = 0 ;
+	//   int    binary         = 0 ;
+	//   int    haveKeypoints  = 0 ;
+	//   int    fp             = 0 ;
 
+	// Length of descriptor vector
+	int vlen_;
+
+	//#ifdef SIFTPP_TIMETRACKER
+	fawkes::TimeTracker *tt_;
+	unsigned int         loop_count_;
+	unsigned int         ttc_objconv_;
+	unsigned int         ttc_objfeat_;
+	unsigned int         ttc_imgconv_;
+	unsigned int         ttc_imgfeat_;
+	unsigned int         ttc_matchin_;
+	unsigned int         ttc_roimerg_;
+	//#endif
 };
 
 } // end namespace firevision

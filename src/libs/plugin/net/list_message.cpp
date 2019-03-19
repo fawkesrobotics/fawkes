@@ -21,12 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <plugin/net/list_message.h>
-
-#include <netcomm/utils/dynamic_buffer.h>
-#include <netcomm/fawkes/component_ids.h>
 #include <core/exceptions/software.h>
+#include <netcomm/fawkes/component_ids.h>
+#include <netcomm/utils/dynamic_buffer.h>
+#include <plugin/net/list_message.h>
 #include <utils/misc/strndup.h>
+
 #include <cstdlib>
 #include <cstring>
 
@@ -44,9 +44,8 @@ namespace fawkes {
 /** Constructor. */
 PluginListMessage::PluginListMessage()
 {
-  plugin_list = new DynamicBuffer(&(msg.plugin_list));
+	plugin_list = new DynamicBuffer(&(msg.plugin_list));
 }
-
 
 /** Message content constructor.
  * This constructor is meant to be used with FawkesNetworkMessage::msgc().
@@ -56,30 +55,29 @@ PluginListMessage::PluginListMessage()
  * @param payload_size total payload size
  */
 PluginListMessage::PluginListMessage(unsigned int component_id,
-				     unsigned int msg_id,
-				     void *payload, size_t payload_size)
+                                     unsigned int msg_id,
+                                     void *       payload,
+                                     size_t       payload_size)
 {
-  if ( component_id != FAWKES_CID_PLUGINMANAGER ) {
-    throw TypeMismatchException("PluginListMessage: invalid component ID");
-  }
-  plugin_list_msg_t *tmsg = (plugin_list_msg_t *)payload;
-  void *plugin_list_payload = (void *)((size_t)payload + sizeof(msg));
-  plugin_list = new DynamicBuffer(&(tmsg->plugin_list), plugin_list_payload,
-				  payload_size - sizeof(msg));
+	if (component_id != FAWKES_CID_PLUGINMANAGER) {
+		throw TypeMismatchException("PluginListMessage: invalid component ID");
+	}
+	plugin_list_msg_t *tmsg                = (plugin_list_msg_t *)payload;
+	void *             plugin_list_payload = (void *)((size_t)payload + sizeof(msg));
+	plugin_list =
+	  new DynamicBuffer(&(tmsg->plugin_list), plugin_list_payload, payload_size - sizeof(msg));
 }
-
 
 /** Destructor. */
 PluginListMessage::~PluginListMessage()
 {
-  delete plugin_list;
-  if (_payload != NULL) {
-    free(_payload);
-    _payload = NULL;
-    _payload_size = 0;
-  }
+	delete plugin_list;
+	if (_payload != NULL) {
+		free(_payload);
+		_payload      = NULL;
+		_payload_size = 0;
+	}
 }
-
 
 /** Append plugin name.
  * @param plugin_name plugin name
@@ -89,19 +87,17 @@ PluginListMessage::~PluginListMessage()
 void
 PluginListMessage::append(const char *plugin_name, size_t len)
 {
-  plugin_list->append(plugin_name, len);
+	plugin_list->append(plugin_name, len);
 }
-
 
 void
 PluginListMessage::serialize()
 {
-  _payload_size = sizeof(msg) + plugin_list->buffer_size();
-  _payload = malloc(_payload_size);
-  copy_payload(0, &msg, sizeof(msg));
-  copy_payload(sizeof(msg), plugin_list->buffer(), plugin_list->buffer_size());
+	_payload_size = sizeof(msg) + plugin_list->buffer_size();
+	_payload      = malloc(_payload_size);
+	copy_payload(0, &msg, sizeof(msg));
+	copy_payload(sizeof(msg), plugin_list->buffer(), plugin_list->buffer_size());
 }
-
 
 /** Reset iterator.
  * For incoming messages only.
@@ -109,9 +105,8 @@ PluginListMessage::serialize()
 void
 PluginListMessage::reset_iterator()
 {
-  plugin_list->reset_iterator();
+	plugin_list->reset_iterator();
 }
-
 
 /** Check if more list elements are available.
  * For incoming messages only.
@@ -120,9 +115,8 @@ PluginListMessage::reset_iterator()
 bool
 PluginListMessage::has_next()
 {
-  return plugin_list->has_next();
+	return plugin_list->has_next();
 }
-
 
 /** Get next plugin from list.
  * @return next plugin from list. This string has been allocated via strndup, so
@@ -131,9 +125,9 @@ PluginListMessage::has_next()
 char *
 PluginListMessage::next()
 {
-  size_t size;
-  void *tmp = plugin_list->next(&size);
-  return strndup((const char *)tmp, size);
+	size_t size;
+	void * tmp = plugin_list->next(&size);
+	return strndup((const char *)tmp, size);
 }
 
 } // end namespace fawkes

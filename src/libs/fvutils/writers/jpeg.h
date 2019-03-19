@@ -30,21 +30,21 @@
 
 namespace firevision {
 
-class JpegWriter : public Writer {
+class JpegWriter : public Writer
+{
+public:
+	JpegWriter(int quality = 80);
+	JpegWriter(const char *filename, int quality = 80);
+	virtual ~JpegWriter();
 
- public:
-  JpegWriter(int quality = 80);
-  JpegWriter(const char *filename, int quality = 80);
-  virtual ~JpegWriter();
+	virtual void set_buffer(colorspace_t cspace, unsigned char *buffer);
+	virtual void write();
 
-  virtual void             set_buffer(colorspace_t cspace, unsigned char *buffer);
-  virtual void             write();
-  
- private:
-  unsigned char *row_buffer;
-  int            quality;
+private:
+	unsigned char *row_buffer;
+	int            quality;
 
-  FILE *outfile;
+	FILE *outfile;
 };
 
 } // end namespace firevision

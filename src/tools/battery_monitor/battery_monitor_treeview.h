@@ -25,68 +25,66 @@
 #define _TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_TREE_VIEW_H_
 
 #include <gtkmm.h>
-
 #include <map>
 #include <string>
 
 namespace fawkes {
-  class BlackBoard;
-  class Interface;
-  class BatteryInterface;
-  class InterfaceDispatcher;
-}
+class BlackBoard;
+class Interface;
+class BatteryInterface;
+class InterfaceDispatcher;
+} // namespace fawkes
 
 class BatteryMonitorTreeView : public Gtk::TreeView
 {
- public:
-  BatteryMonitorTreeView(BaseObjectType* cobject,
-                         const Glib::RefPtr<Gtk::Builder> &builder);
-  virtual ~BatteryMonitorTreeView();
+public:
+	BatteryMonitorTreeView(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &builder);
+	virtual ~BatteryMonitorTreeView();
 
-  void add_host( const char* host );
-  void rem_host( const char* host );
+	void add_host(const char *host);
+	void rem_host(const char *host);
 
- protected:
-  class BatteryRecord : public Gtk::TreeModelColumnRecord
-  {
-  public:
-    BatteryRecord()
-    {
-      add( fqdn );
-      add( short_name );
-      add( absolute_soc );
-      add( relative_soc );
-      add( current );
-      add( voltage );
-    }
-    
-    Gtk::TreeModelColumn< Glib::ustring > fqdn;         /**< The FQDN */
-    Gtk::TreeModelColumn< Glib::ustring > short_name;   /**< A shorter hostname (w/o domain) */
-    Gtk::TreeModelColumn< float >         absolute_soc; /**< The battery's absolute state of charge */
-    Gtk::TreeModelColumn< float >         relative_soc; /**< The battery's relative state of charge */
-    Gtk::TreeModelColumn< float >         current;      /**< The battery's current */
-    Gtk::TreeModelColumn< float >         voltage;      /**< The battery's voltage */
-  };
+protected:
+	class BatteryRecord : public Gtk::TreeModelColumnRecord
+	{
+	public:
+		BatteryRecord()
+		{
+			add(fqdn);
+			add(short_name);
+			add(absolute_soc);
+			add(relative_soc);
+			add(current);
+			add(voltage);
+		}
 
-  BatteryRecord m_battery_record;
-  Glib::RefPtr< Gtk::ListStore > m_battery_list;
+		Gtk::TreeModelColumn<Glib::ustring> fqdn;         /**< The FQDN */
+		Gtk::TreeModelColumn<Glib::ustring> short_name;   /**< A shorter hostname (w/o domain) */
+		Gtk::TreeModelColumn<float>         absolute_soc; /**< The battery's absolute state of charge */
+		Gtk::TreeModelColumn<float>         relative_soc; /**< The battery's relative state of charge */
+		Gtk::TreeModelColumn<float>         current;      /**< The battery's current */
+		Gtk::TreeModelColumn<float>         voltage;      /**< The battery's voltage */
+	};
 
-  std::map< std::string, fawkes::BlackBoard* > m_remote_bbs;
-  std::map< std::string, fawkes::BatteryInterface* > m_battery_interfaces;
-  std::map< std::string, fawkes::InterfaceDispatcher* > m_interface_dispatcher;
+	BatteryRecord                m_battery_record;
+	Glib::RefPtr<Gtk::ListStore> m_battery_list;
 
- private:
-  void on_data_changed( fawkes::Interface* interface );
-  void on_writer_added( fawkes::Interface* interface );
-  void on_writer_removed( fawkes::Interface* interface );
+	std::map<std::string, fawkes::BlackBoard *>          m_remote_bbs;
+	std::map<std::string, fawkes::BatteryInterface *>    m_battery_interfaces;
+	std::map<std::string, fawkes::InterfaceDispatcher *> m_interface_dispatcher;
 
-  void update();
+private:
+	void on_data_changed(fawkes::Interface *interface);
+	void on_writer_added(fawkes::Interface *interface);
+	void on_writer_removed(fawkes::Interface *interface);
 
-  Gtk::MessageDialog* m_dlg_warning;
+	void update();
 
-  Glib::Dispatcher m_trigger_update;
-  float m_relative_soc_threshold;
-  std::map< std::string, unsigned int > m_below_threshold_counter;
+	Gtk::MessageDialog *m_dlg_warning;
+
+	Glib::Dispatcher                    m_trigger_update;
+	float                               m_relative_soc_threshold;
+	std::map<std::string, unsigned int> m_below_threshold_counter;
 };
 
 #endif /* TOOLS_BATTERY_MONITOR_BATTERY_MONITOR_TREE_VIEW_H__ */

@@ -30,7 +30,7 @@
 #include <string>
 
 namespace CLIPS {
-  class Environment;
+class Environment;
 }
 
 namespace fawkes {
@@ -40,32 +40,31 @@ class CLIPSFeatureAspectIniFin;
 
 class CLIPSFeature
 {
- friend CLIPSEnvManager;
+	friend CLIPSEnvManager;
 
- public:
-  CLIPSFeature(const char *feature_name);
-  virtual ~CLIPSFeature();
+public:
+	CLIPSFeature(const char *feature_name);
+	virtual ~CLIPSFeature();
 
-  virtual void clips_context_init(const std::string &env_name,
-				  fawkes::LockPtr<CLIPS::Environment> &clips) = 0;
-  virtual void clips_context_destroyed(const std::string &env_name) = 0;
+	virtual void clips_context_init(const std::string &                  env_name,
+	                                fawkes::LockPtr<CLIPS::Environment> &clips) = 0;
+	virtual void clips_context_destroyed(const std::string &env_name)           = 0;
 
- protected:
-  const std::string clips_feature_name;	///< CLIPS feature name
-
+protected:
+	const std::string clips_feature_name; ///< CLIPS feature name
 };
 
 class CLIPSFeatureAspect : public virtual Aspect
 {
-  friend CLIPSFeatureAspectIniFin;
+	friend CLIPSFeatureAspectIniFin;
 
- public:
-  CLIPSFeatureAspect(CLIPSFeature *feature);
-  CLIPSFeatureAspect(const std::list<CLIPSFeature *> features);
-  virtual ~CLIPSFeatureAspect();
+public:
+	CLIPSFeatureAspect(CLIPSFeature *feature);
+	CLIPSFeatureAspect(const std::list<CLIPSFeature *> features);
+	virtual ~CLIPSFeatureAspect();
 
- private:
-  std::list<CLIPSFeature *> clips_features_;
+private:
+	std::list<CLIPSFeature *> clips_features_;
 };
 
 } // end namespace fawkes

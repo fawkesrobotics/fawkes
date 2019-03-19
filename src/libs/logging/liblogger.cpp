@@ -21,12 +21,11 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <logging/liblogger.h>
-#include <logging/multi.h>
-#include <logging/console.h>
-
 #include <core/exceptions/software.h>
 #include <core/threading/mutex.h>
+#include <logging/console.h>
+#include <logging/liblogger.h>
+#include <logging/multi.h>
 
 namespace fawkes {
 
@@ -47,12 +46,10 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** The internal multi logger. */
-MultiLogger *  LibLogger::logger = NULL;
+MultiLogger *LibLogger::logger = NULL;
 /** Internal mutex */
-Mutex *        LibLogger::mutex  = NULL;
-
+Mutex *LibLogger::mutex = NULL;
 
 /** Initialize logger.
  * @param multi_logger Logger to use in this multi logger. If NULL a new
@@ -62,18 +59,16 @@ Mutex *        LibLogger::mutex  = NULL;
 void
 LibLogger::init(MultiLogger *multi_logger)
 {
-  if ( logger != NULL ) {
-    throw AccessViolationException("LibLogger already initialized");
-  }
-  mutex = new Mutex();
-  if ( multi_logger == NULL ) {
-    logger = new MultiLogger(new ConsoleLogger());
-  } else {
-    logger = multi_logger;
-  }
-  
+	if (logger != NULL) {
+		throw AccessViolationException("LibLogger already initialized");
+	}
+	mutex = new Mutex();
+	if (multi_logger == NULL) {
+		logger = new MultiLogger(new ConsoleLogger());
+	} else {
+		logger = multi_logger;
+	}
 }
-
 
 /** Delete internal logger.
  * Note that the multi logger took over ownership of the loggers.
@@ -82,12 +77,11 @@ LibLogger::init(MultiLogger *multi_logger)
 void
 LibLogger::finalize()
 {
-  delete logger;
-  delete mutex;
-  logger = NULL;
-  mutex  = NULL;
+	delete logger;
+	delete mutex;
+	logger = NULL;
+	mutex  = NULL;
 }
-
 
 /** Add logger.
  * @param l sub-logger to add
@@ -96,12 +90,12 @@ LibLogger::finalize()
 void
 LibLogger::add_logger(Logger *l)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  logger->add_logger(l);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	logger->add_logger(l);
+	mutex->unlock();
 }
-
 
 /** Remove logger.
  * @param l sub-logger to remove
@@ -110,12 +104,12 @@ LibLogger::add_logger(Logger *l)
 void
 LibLogger::remove_logger(Logger *l)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  logger->remove_logger(l);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	logger->remove_logger(l);
+	mutex->unlock();
 }
-
 
 /** Log debug message.
  * @param component component, used to distuinguish logged messages
@@ -125,15 +119,15 @@ LibLogger::remove_logger(Logger *l)
 void
 LibLogger::log_debug(const char *component, const char *format, ...)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  va_list va;
-  va_start(va, format);
-  logger->vlog_debug(component, format, va);
-  va_end(va);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	va_list va;
+	va_start(va, format);
+	logger->vlog_debug(component, format, va);
+	va_end(va);
+	mutex->unlock();
 }
-
 
 /** Log informational message.
  * @param component component, used to distuinguish logged messages
@@ -143,15 +137,15 @@ LibLogger::log_debug(const char *component, const char *format, ...)
 void
 LibLogger::log_info(const char *component, const char *format, ...)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  va_list va;
-  va_start(va, format);
-  logger->vlog_info(component, format, va);
-  va_end(va);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	va_list va;
+	va_start(va, format);
+	logger->vlog_info(component, format, va);
+	va_end(va);
+	mutex->unlock();
 }
-
 
 /** Log warning message.
  * @param component component, used to distuinguish logged messages
@@ -161,15 +155,15 @@ LibLogger::log_info(const char *component, const char *format, ...)
 void
 LibLogger::log_warn(const char *component, const char *format, ...)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  va_list va;
-  va_start(va, format);
-  logger->vlog_warn(component, format, va);
-  va_end(va);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	va_list va;
+	va_start(va, format);
+	logger->vlog_warn(component, format, va);
+	va_end(va);
+	mutex->unlock();
 }
-
 
 /** Log error message.
  * @param component component, used to distuinguish logged messages
@@ -179,15 +173,15 @@ LibLogger::log_warn(const char *component, const char *format, ...)
 void
 LibLogger::log_error(const char *component, const char *format, ...)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  va_list va;
-  va_start(va, format);
-  logger->vlog_error(component, format, va);
-  va_end(va);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	va_list va;
+	va_start(va, format);
+	logger->vlog_error(component, format, va);
+	va_end(va);
+	mutex->unlock();
 }
-
 
 /** Log debug message.
  * @param component component, used to distuinguish logged messages
@@ -198,12 +192,12 @@ LibLogger::log_error(const char *component, const char *format, ...)
 void
 LibLogger::vlog_debug(const char *component, const char *format, va_list va)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  logger->vlog_debug(component, format, va);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	logger->vlog_debug(component, format, va);
+	mutex->unlock();
 }
-
 
 /** Log informational message.
  * @param component component, used to distuinguish logged messages
@@ -214,12 +208,12 @@ LibLogger::vlog_debug(const char *component, const char *format, va_list va)
 void
 LibLogger::vlog_info(const char *component, const char *format, va_list va)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  logger->vlog_info(component, format, va);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	logger->vlog_info(component, format, va);
+	mutex->unlock();
 }
-
 
 /** Log warning message.
  * @param component component, used to distuinguish logged messages
@@ -230,12 +224,12 @@ LibLogger::vlog_info(const char *component, const char *format, va_list va)
 void
 LibLogger::vlog_warn(const char *component, const char *format, va_list va)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  logger->vlog_warn(component, format, va);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	logger->vlog_warn(component, format, va);
+	mutex->unlock();
 }
-
 
 /** Log error message.
  * @param component component, used to distuinguish logged messages
@@ -246,13 +240,12 @@ LibLogger::vlog_warn(const char *component, const char *format, va_list va)
 void
 LibLogger::vlog_error(const char *component, const char *format, va_list va)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  logger->vlog_error(component, format, va);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	logger->vlog_error(component, format, va);
+	mutex->unlock();
 }
-
-
 
 /** Log debug message.
  * @param component component, used to distuinguish logged messages
@@ -261,10 +254,11 @@ LibLogger::vlog_error(const char *component, const char *format, va_list va)
 void
 LibLogger::log_debug(const char *component, Exception &e)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  logger->log_debug(component, e);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	logger->log_debug(component, e);
+	mutex->unlock();
 }
 
 /** Log informational message.
@@ -274,12 +268,12 @@ LibLogger::log_debug(const char *component, Exception &e)
 void
 LibLogger::log_info(const char *component, Exception &e)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  logger->log_info(component, e);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	logger->log_info(component, e);
+	mutex->unlock();
 }
-
 
 /** Log warning message.
  * @param component component, used to distuinguish logged messages
@@ -288,12 +282,12 @@ LibLogger::log_info(const char *component, Exception &e)
 void
 LibLogger::log_warn(const char *component, Exception &e)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  logger->log_warn(component, e);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	logger->log_warn(component, e);
+	mutex->unlock();
 }
-
 
 /** Log error message.
  * @param component component, used to distuinguish logged messages
@@ -302,11 +296,11 @@ LibLogger::log_warn(const char *component, Exception &e)
 void
 LibLogger::log_error(const char *component, Exception &e)
 {
-  if ( logger == NULL )  init();
-  mutex->lock();
-  logger->log_error(component, e);
-  mutex->unlock();
+	if (logger == NULL)
+		init();
+	mutex->lock();
+	logger->log_error(component, e);
+	mutex->unlock();
 }
-
 
 } // end namespace fawkes

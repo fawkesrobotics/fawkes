@@ -33,29 +33,30 @@ class FilterErosion;
 
 class FilterClosing : public MorphologicalFilter
 {
- public:
-  FilterClosing();
-  virtual ~FilterClosing();
+public:
+	FilterClosing();
+	virtual ~FilterClosing();
 
-  virtual void set_src_buffer(unsigned char *buf, ROI *roi,
-			      orientation_t ori = ORI_HORIZONTAL,
-			      unsigned int buffer_num = 0);
+	virtual void set_src_buffer(unsigned char *buf,
+	                            ROI *          roi,
+	                            orientation_t  ori        = ORI_HORIZONTAL,
+	                            unsigned int   buffer_num = 0);
 
-  virtual void set_src_buffer(unsigned char *buf, ROI *roi,
-			      unsigned int buffer_num);
+	virtual void set_src_buffer(unsigned char *buf, ROI *roi, unsigned int buffer_num);
 
-  virtual void set_dst_buffer(unsigned char *buf, ROI *roi);
+	virtual void set_dst_buffer(unsigned char *buf, ROI *roi);
 
-  virtual void set_structuring_element(unsigned char *se,
-				       unsigned int se_width, unsigned int se_height,
-				       unsigned int se_anchor_x, unsigned int se_anchor_y);
+	virtual void set_structuring_element(unsigned char *se,
+	                                     unsigned int   se_width,
+	                                     unsigned int   se_height,
+	                                     unsigned int   se_anchor_x,
+	                                     unsigned int   se_anchor_y);
 
-  virtual void apply();
+	virtual void apply();
 
- private:
-  FilterDilation *dilate;
-  FilterErosion  *erode;
-
+private:
+	FilterDilation *dilate;
+	FilterErosion * erode;
 };
 
 } // end namespace firevision

@@ -30,41 +30,38 @@ namespace firevision {
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param type block type, content specific
  * @param data_size size of the data segment
  * @param spec_header content-specific header
  * @param spec_header_size size of spec_header in bytes
  */
-ColormapFileBlock::ColormapFileBlock(unsigned int type, size_t data_size,
-				     void *spec_header, size_t spec_header_size)
-  : FireVisionDataFileBlock(type, data_size, spec_header, spec_header_size)
+ColormapFileBlock::ColormapFileBlock(unsigned int type,
+                                     size_t       data_size,
+                                     void *       spec_header,
+                                     size_t       spec_header_size)
+: FireVisionDataFileBlock(type, data_size, spec_header, spec_header_size)
 {
 }
-
 
 /** Constructor.
  * @param type block type, content specific
  * @param data_size size of the data segment
  * @param spec_header_size size of spec_header in bytes
  */
-ColormapFileBlock::ColormapFileBlock(unsigned int type, size_t data_size,
-				     size_t spec_header_size)
-  : FireVisionDataFileBlock(type, data_size, spec_header_size)
+ColormapFileBlock::ColormapFileBlock(unsigned int type, size_t data_size, size_t spec_header_size)
+: FireVisionDataFileBlock(type, data_size, spec_header_size)
 {
 }
-
 
 /** Constructor.
  * @param type block type, content specific
  * @param data_size size of the data segment
  */
 ColormapFileBlock::ColormapFileBlock(unsigned int type, size_t data_size)
-  : FireVisionDataFileBlock(type, data_size)
+: FireVisionDataFileBlock(type, data_size)
 {
 }
-
 
 /** Shallow copy constructor.
  * This creates a shallow copy of the given block. "Shallow" means that the data is not
@@ -73,10 +70,9 @@ ColormapFileBlock::ColormapFileBlock(unsigned int type, size_t data_size)
  * @param block block to copy
  */
 ColormapFileBlock::ColormapFileBlock(FireVisionDataFileBlock *block)
-  : FireVisionDataFileBlock(block)
+: FireVisionDataFileBlock(block)
 {
 }
-
 
 /** Virtual empty destructor. */
 ColormapFileBlock::~ColormapFileBlock()

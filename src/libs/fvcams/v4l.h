@@ -33,33 +33,33 @@ class CameraArgumentParser;
 
 class V4LCamera : public Camera
 {
- public:
-  V4LCamera(const char *device_name = "/dev/video0");
-  V4LCamera(const CameraArgumentParser *cap);
-  virtual ~V4LCamera();
+public:
+	V4LCamera(const char *device_name = "/dev/video0");
+	V4LCamera(const CameraArgumentParser *cap);
+	virtual ~V4LCamera();
 
-  virtual void open();
-  virtual void start();
-  virtual void stop();
-  virtual void close();
-  virtual void flush();
-  virtual void capture();
-  virtual void print_info();
-  virtual bool ready();
+	virtual void open();
+	virtual void start();
+	virtual void stop();
+	virtual void close();
+	virtual void flush();
+	virtual void capture();
+	virtual void print_info();
+	virtual bool ready();
 
-  virtual unsigned char* buffer();
-  virtual unsigned int   buffer_size();
-  virtual void           dispose_buffer();
+	virtual unsigned char *buffer();
+	virtual unsigned int   buffer_size();
+	virtual void           dispose_buffer();
 
-  virtual unsigned int    pixel_width();
-  virtual unsigned int    pixel_height();
-  virtual colorspace_t    colorspace();
+	virtual unsigned int pixel_width();
+	virtual unsigned int pixel_height();
+	virtual colorspace_t colorspace();
 
-  virtual void           set_image_number(unsigned int n);
+	virtual void set_image_number(unsigned int n);
 
- private:
-  Camera *_v4l_cam;
-  char *_device_name;
+private:
+	Camera *_v4l_cam;
+	char *  _device_name;
 };
 
 } // end namespace firevision

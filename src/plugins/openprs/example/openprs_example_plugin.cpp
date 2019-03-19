@@ -21,6 +21,7 @@
  */
 
 #include "openprs_example_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -30,16 +31,15 @@ using namespace fawkes;
  */
 class OpenPRSExamplePlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit OpenPRSExamplePlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new OpenPRSExampleThread());
-  }
+	explicit OpenPRSExamplePlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new OpenPRSExampleThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("OpenPRS example plugin")
 EXPORT_PLUGIN(OpenPRSExamplePlugin)

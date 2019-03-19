@@ -26,47 +26,44 @@
 #include "arm.h"
 #include "types.h"
 
-
 namespace fawkes {
 
 //class RefPtr;
 
 class JacoArmDummy : public JacoArm
 {
- public:
-  JacoArmDummy(const char *name);
-  virtual ~JacoArmDummy();
+public:
+	JacoArmDummy(const char *name);
+	virtual ~JacoArmDummy();
 
-  virtual void initialize();
+	virtual void initialize();
 
-  virtual bool final();
-  virtual bool initialized();
+	virtual bool final();
+	virtual bool initialized();
 
-  virtual void get_joints(std::vector<float> &to) const;
-  virtual void get_coords(std::vector<float> &to);
-  virtual void get_fingers(std::vector<float> &to) const;
+	virtual void get_joints(std::vector<float> &to) const;
+	virtual void get_coords(std::vector<float> &to);
+	virtual void get_fingers(std::vector<float> &to) const;
 
-  virtual void stop();
-  virtual void push_joystick(unsigned int button);
-  virtual void release_joystick();
+	virtual void stop();
+	virtual void push_joystick(unsigned int button);
+	virtual void release_joystick();
 
-  virtual void goto_trajec(std::vector< std::vector<float> >* trajec, std::vector<float> &fingers);
-  virtual void goto_joints(std::vector<float> &joints, std::vector<float> &fingers, bool followup=false);
-  virtual void goto_coords(std::vector<float> &coords, std::vector<float> &fingers);
-  virtual void goto_ready();
-  virtual void goto_retract();
+	virtual void goto_trajec(std::vector<std::vector<float>> *trajec, std::vector<float> &fingers);
+	virtual void
+	             goto_joints(std::vector<float> &joints, std::vector<float> &fingers, bool followup = false);
+	virtual void goto_coords(std::vector<float> &coords, std::vector<float> &fingers);
+	virtual void goto_ready();
+	virtual void goto_retract();
 
- private:
+private:
+	std::vector<float> coords_;
+	std::vector<float> joints_;
+	std::vector<float> fingers_;
 
-  std::vector<float> coords_;
-  std::vector<float> joints_;
-  std::vector<float> fingers_;
-
-  std::vector<float> pos_ready_;
-  std::vector<float> pos_retract_;
-
+	std::vector<float> pos_ready_;
+	std::vector<float> pos_retract_;
 };
-
 
 } // end of namespace fawkes
 

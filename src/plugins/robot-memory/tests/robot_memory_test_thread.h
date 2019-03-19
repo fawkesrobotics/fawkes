@@ -24,42 +24,44 @@
 #ifndef _PLUGINS_ROBOT_MEMORY_TESTTHREAD_H_
 #define _PLUGINS_ROBOT_MEMORY_TESTTHREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/blackboard.h>
-#include <aspect/configurable.h>
-#include <string>
-
 #include "plugins/robot-memory/aspect/robot_memory_aspect.h"
 #include "robot_memory_test.h"
 
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
-class RobotMemoryTestThread 
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::RobotMemoryAspect
+#include <string>
+
+class RobotMemoryTestThread : public fawkes::Thread,
+                              public fawkes::BlockedTimingAspect,
+                              public fawkes::LoggingAspect,
+                              public fawkes::ConfigurableAspect,
+                              public fawkes::BlackBoardAspect,
+                              public fawkes::RobotMemoryAspect
 {
+public:
+	RobotMemoryTestThread();
 
- public:
-  RobotMemoryTestThread();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
-  protected: virtual void run() { Thread::run(); }
+private:
+	int test_result_;
 
- private:
-  int test_result_;
-
-  //environment to make objects available for testing
-  RobotMemoryTestEnvironment* test_env_;
+	//environment to make objects available for testing
+	RobotMemoryTestEnvironment *test_env_;
 };
-
 
 #endif

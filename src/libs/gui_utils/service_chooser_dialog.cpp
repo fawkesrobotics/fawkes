@@ -21,24 +21,24 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <arpa/inet.h>
 #include <core/exception.h>
 #include <core/exceptions/software.h>
-#include <netcomm/fawkes/client.h>
-#include <netcomm/utils/resolver.h>
 #include <gui_utils/service_chooser_dialog.h>
 #include <gui_utils/service_model.h>
+#include <netcomm/fawkes/client.h>
+#include <netcomm/utils/resolver.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <utils/system/argparser.h>
 
 #include <algorithm>
 #include <cstring>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
 
 #ifdef HAVE_GCONFMM
-#  define GCONF_DIR "/apps/fawkes/service_chooser_dialog"
-#  define GCONF_PREFIX GCONF_DIR"/"
+#	define GCONF_DIR "/apps/fawkes/service_chooser_dialog"
+#	define GCONF_PREFIX GCONF_DIR "/"
 #endif
 
 namespace fawkes {
@@ -56,17 +56,15 @@ namespace fawkes {
  * @param title title of the dialog
  * @param service service string
  */
-ServiceChooserDialog::ServiceChooserDialog(Gtk::Window &parent,
-					   Glib::ustring title,
-					   const char *service)
-  : Gtk::Dialog(title, parent, /* modal */ true),
-    parent_(parent), expander_("Manual entry")
+ServiceChooserDialog::ServiceChooserDialog(Gtk::Window & parent,
+                                           Glib::ustring title,
+                                           const char *  service)
+: Gtk::Dialog(title, parent, /* modal */ true), parent_(parent), expander_("Manual entry")
 {
-  service_model_ = new ServiceModel(service);
-  ctor();
-  client_ = NULL;
+	service_model_ = new ServiceModel(service);
+	ctor();
+	client_ = NULL;
 }
-
 
 /** Constructor.
  * @param parent parent window
@@ -74,89 +72,88 @@ ServiceChooserDialog::ServiceChooserDialog(Gtk::Window &parent,
  * @param title title of the dialog
  * @param service service string
  */
-ServiceChooserDialog::ServiceChooserDialog(Gtk::Window &parent,
-					   FawkesNetworkClient *client,
-					   Glib::ustring title,
-					   const char *service)
-  : Gtk::Dialog(title, parent, /* modal */ true),
-    parent_(parent), expander_("Manual entry")
+ServiceChooserDialog::ServiceChooserDialog(Gtk::Window &        parent,
+                                           FawkesNetworkClient *client,
+                                           Glib::ustring        title,
+                                           const char *         service)
+: Gtk::Dialog(title, parent, /* modal */ true), parent_(parent), expander_("Manual entry")
 {
-  service_model_ = new ServiceModel(service);
-  ctor();
-  client_ = client;
+	service_model_ = new ServiceModel(service);
+	ctor();
+	client_ = client;
 }
-
 
 /** Destructor. */
 ServiceChooserDialog::~ServiceChooserDialog()
 {
 #ifdef HAVE_GCONFMM
-  if (expander_.get_expanded() && ! treeview_.has_focus() && entry_.get_text_length() > 0 ) {
-    gconf_->set(GCONF_PREFIX"manual_host", entry_.get_text());
-    gconf_->set(GCONF_PREFIX"manual_expanded", true);
-  } else {
-    gconf_->set(GCONF_PREFIX"manual_expanded", false);
-  }
+	if (expander_.get_expanded() && !treeview_.has_focus() && entry_.get_text_length() > 0) {
+		gconf_->set(GCONF_PREFIX "manual_host", entry_.get_text());
+		gconf_->set(GCONF_PREFIX "manual_expanded", true);
+	} else {
+		gconf_->set(GCONF_PREFIX "manual_expanded", false);
+	}
 #endif
-  delete service_model_;
+	delete service_model_;
 }
-
 
 void
 ServiceChooserDialog::ctor()
 {
-  set_default_size(480, 300);
+	set_default_size(480, 300);
 
-  treeview_.set_model(service_model_->get_list_store());
-  treeview_.append_column("Service", service_model_->get_column_record().name);
-  treeview_.append_column("Address/Port", service_model_->get_column_record().addrport);
-  scrollwin_.add(treeview_);
-  scrollwin_.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-  treeview_.show();
-  expander_.add(entry_);
-  entry_.show();
-  entry_.set_activates_default(true);
+	treeview_.set_model(service_model_->get_list_store());
+	treeview_.append_column("Service", service_model_->get_column_record().name);
+	treeview_.append_column("Address/Port", service_model_->get_column_record().addrport);
+	scrollwin_.add(treeview_);
+	scrollwin_.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+	treeview_.show();
+	expander_.add(entry_);
+	entry_.show();
+	entry_.set_activates_default(true);
 
-  Glib::ustring default_host("localhost");
+	Glib::ustring default_host("localhost");
 #ifdef HAVE_GCONFMM
-  gconf_ = Gnome::Conf::Client::get_default_client();
-  gconf_->add_dir(GCONF_DIR);
-  Gnome::Conf::Value host_val =
-    gconf_->get_without_default(GCONF_PREFIX"manual_host");
-  if (host_val.get_type() == Gnome::Conf::VALUE_STRING) {
-    default_host = host_val.get_string();
-  }
+	gconf_ = Gnome::Conf::Client::get_default_client();
+	gconf_->add_dir(GCONF_DIR);
+	Gnome::Conf::Value host_val = gconf_->get_without_default(GCONF_PREFIX "manual_host");
+	if (host_val.get_type() == Gnome::Conf::VALUE_STRING) {
+		default_host = host_val.get_string();
+	}
 #endif
 
-  char * fawkes_ip = getenv("FAWKES_IP");
-  if (fawkes_ip) entry_.set_text(fawkes_ip);
-  else entry_.set_text(default_host);
+	char *fawkes_ip = getenv("FAWKES_IP");
+	if (fawkes_ip)
+		entry_.set_text(fawkes_ip);
+	else
+		entry_.set_text(default_host);
 
-  Gtk::Box *vbox = get_vbox();
-  vbox->pack_start(scrollwin_);
-  vbox->pack_end(expander_, Gtk::PACK_SHRINK);
-  scrollwin_.show();
-  expander_.show();
+	Gtk::Box *vbox = get_vbox();
+	vbox->pack_start(scrollwin_);
+	vbox->pack_end(expander_, Gtk::PACK_SHRINK);
+	scrollwin_.show();
+	expander_.show();
 
-  add_button(Gtk::Stock::CANCEL, 0);
-  add_button(Gtk::Stock::OK, 1);
+	add_button(Gtk::Stock::CANCEL, 0);
+	add_button(Gtk::Stock::OK, 1);
 
-  set_default_response(1);
+	set_default_response(1);
 
-  treeview_.signal_row_activated().connect(sigc::bind(sigc::hide<0>(sigc::hide<0>(sigc::mem_fun(*this, &ServiceChooserDialog::response))), 1));
-
+	treeview_.signal_row_activated().connect(
+	  sigc::bind(sigc::hide<0>(sigc::hide<0>(sigc::mem_fun(*this, &ServiceChooserDialog::response))),
+	             1));
 
 #ifdef GLIBMM_PROPERTIES_ENABLED
-  expander_.property_expanded().signal_changed().connect(sigc::mem_fun(*this, &ServiceChooserDialog::on_expander_changed));
+	expander_.property_expanded().signal_changed().connect(
+	  sigc::mem_fun(*this, &ServiceChooserDialog::on_expander_changed));
 #endif
 
 #ifdef HAVE_GCONFMM
-  if (gconf_->get_bool(GCONF_PREFIX"manual_expanded")) {
-    expander_.set_expanded(true);
-  }
+	if (gconf_->get_bool(GCONF_PREFIX "manual_expanded")) {
+		expander_.set_expanded(true);
+	}
 #endif
 }
-
 
 /** Get selected service.
  * If a service has been selected use this method to get the IP Address as
@@ -167,31 +164,31 @@ ServiceChooserDialog::ctor()
  * @exception Exception thrown if no service has been selected
  */
 void
-ServiceChooserDialog::get_selected_service(Glib::ustring &name,
-                                           Glib::ustring &hostname,
+ServiceChooserDialog::get_selected_service(Glib::ustring &     name,
+                                           Glib::ustring &     hostname,
                                            unsigned short int &port)
 {
-  Glib::RefPtr<Gtk::TreeSelection> treesel = treeview_.get_selection();
-  if (expander_.get_expanded() && !treeview_.has_focus()) {
-    if ( entry_.get_text_length() > 0 ) {
-	    std::string tmp_hostname;
-	    ArgumentParser::parse_hostport_s(entry_.get_text().c_str(), tmp_hostname, port);
-	    hostname = tmp_hostname;
-	    name = hostname;
-	    return;
-    }
-  }
+	Glib::RefPtr<Gtk::TreeSelection> treesel = treeview_.get_selection();
+	if (expander_.get_expanded() && !treeview_.has_focus()) {
+		if (entry_.get_text_length() > 0) {
+			std::string tmp_hostname;
+			ArgumentParser::parse_hostport_s(entry_.get_text().c_str(), tmp_hostname, port);
+			hostname = tmp_hostname;
+			name     = hostname;
+			return;
+		}
+	}
 
-  Gtk::TreeModel::iterator iter = treesel->get_selected();
-  if (iter) {
-    Gtk::TreeModel::Row row = *iter;
-    name     = row[service_model_->get_column_record().name];
-    hostname = row[service_model_->get_column_record().ipaddr];
-    port     = row[service_model_->get_column_record().port];
+	Gtk::TreeModel::iterator iter = treesel->get_selected();
+	if (iter) {
+		Gtk::TreeModel::Row row = *iter;
+		name                    = row[service_model_->get_column_record().name];
+		hostname                = row[service_model_->get_column_record().ipaddr];
+		port                    = row[service_model_->get_column_record().port];
 
-  } else {
-    throw Exception("No host selected");
-  }
+	} else {
+		throw Exception("No host selected");
+	}
 }
 
 /** Get selected service.
@@ -204,25 +201,24 @@ ServiceChooserDialog::get_selected_service(Glib::ustring &name,
  * @exception Exception thrown if no service has been selected
  */
 void
-ServiceChooserDialog::get_selected_service(Glib::ustring &hostname,
+ServiceChooserDialog::get_selected_service(Glib::ustring &          hostname,
                                            struct sockaddr_storage &sockaddr)
 {
-  Glib::RefPtr<Gtk::TreeSelection> treesel = treeview_.get_selection();
-  if (expander_.get_expanded() && !treeview_.has_focus() &&  entry_.get_text_length() > 0) {
-	  throw Exception("May not be called for manual entry");
-  }
+	Glib::RefPtr<Gtk::TreeSelection> treesel = treeview_.get_selection();
+	if (expander_.get_expanded() && !treeview_.has_focus() && entry_.get_text_length() > 0) {
+		throw Exception("May not be called for manual entry");
+	}
 
-  Gtk::TreeModel::iterator iter = treesel->get_selected();
-  if (iter) {
-    Gtk::TreeModel::Row row = *iter;
-    hostname = row[service_model_->get_column_record().ipaddr];
-    sockaddr = row[service_model_->get_column_record().sockaddr];
+	Gtk::TreeModel::iterator iter = treesel->get_selected();
+	if (iter) {
+		Gtk::TreeModel::Row row = *iter;
+		hostname                = row[service_model_->get_column_record().ipaddr];
+		sockaddr                = row[service_model_->get_column_record().sockaddr];
 
-  } else {
-    throw Exception("No host selected");
-  }
+	} else {
+		throw Exception("No host selected");
+	}
 }
-
 
 /** Get raw address.
  * @param addr upon returns contains the raw representation of the IP address
@@ -255,7 +251,6 @@ ServiceChooserDialog::get_raw_address(struct sockaddr *addr, socklen_t addr_size
 	*/
 }
 
-
 /** Signal handler for expander event.
  * Called when expander is (de-)expanded. Only works with Glibmm properties
  * enabled, i.e. not on Maemo.
@@ -263,13 +258,12 @@ ServiceChooserDialog::get_raw_address(struct sockaddr *addr, socklen_t addr_size
 void
 ServiceChooserDialog::on_expander_changed()
 {
-  if (expander_.get_expanded()) {
-    entry_.grab_focus();
-  } else {
-    treeview_.grab_focus();
-  }
+	if (expander_.get_expanded()) {
+		entry_.grab_focus();
+	} else {
+		treeview_.grab_focus();
+	}
 }
-
 
 /** Run dialog and try to connect.
  * This runs the service chooser dialog and connects to the given service
@@ -281,33 +275,37 @@ ServiceChooserDialog::on_expander_changed()
 void
 ServiceChooserDialog::run_and_connect()
 {
-  if (! client_)  throw NullPointerException("FawkesNetworkClient not set");
-  if (client_->connected()) throw Exception("Client is already connected");
+	if (!client_)
+		throw NullPointerException("FawkesNetworkClient not set");
+	if (client_->connected())
+		throw Exception("Client is already connected");
 
-  if ( run() ) {
-    try {
-	    if (expander_.get_expanded() && !treeview_.has_focus() &&  entry_.get_text_length() > 0 ) {
-		    Glib::ustring name, hostname;
-		    unsigned short int port;
-		    get_selected_service(name, hostname, port);
-		    client_->connect(hostname.c_str(), port);
-		    
-	    } else {
-		    struct sockaddr_storage sockaddr;
-		    Glib::ustring hostname;
-		    get_selected_service(hostname, sockaddr);
-		    client_->connect(hostname.c_str(), sockaddr);
+	if (run()) {
+		try {
+			if (expander_.get_expanded() && !treeview_.has_focus() && entry_.get_text_length() > 0) {
+				Glib::ustring      name, hostname;
+				unsigned short int port;
+				get_selected_service(name, hostname, port);
+				client_->connect(hostname.c_str(), port);
 
-	    }
-    } catch (Exception &e) {
-      Glib::ustring message = *(e.begin());
-      Gtk::MessageDialog md(parent_, message, /* markup */ false,
-			    Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK,
-			    /* modal */ true);
-      md.set_title("Connection failed");
-      md.run();
-    }
-  }
+			} else {
+				struct sockaddr_storage sockaddr;
+				Glib::ustring           hostname;
+				get_selected_service(hostname, sockaddr);
+				client_->connect(hostname.c_str(), sockaddr);
+			}
+		} catch (Exception &e) {
+			Glib::ustring      message = *(e.begin());
+			Gtk::MessageDialog md(parent_,
+			                      message,
+			                      /* markup */ false,
+			                      Gtk::MESSAGE_ERROR,
+			                      Gtk::BUTTONS_OK,
+			                      /* modal */ true);
+			md.set_title("Connection failed");
+			md.run();
+		}
+	}
 }
 
 } // end of namespace fawkes

@@ -29,23 +29,20 @@ namespace firevision {
 
 class GlobalPositionModel
 {
+public:
+	virtual ~GlobalPositionModel();
 
- public:
-  virtual ~GlobalPositionModel();
+	virtual void set_robot_position(float x, float y, float ori)       = 0;
+	virtual void set_position_in_image(unsigned int x, unsigned int y) = 0;
 
-  virtual void		set_robot_position(float x, float y, float ori)	      = 0;
-  virtual void          set_position_in_image(unsigned int x, unsigned int y) = 0;
+	virtual float get_x() const = 0;
+	virtual float get_y() const = 0;
 
-  virtual float		get_x() const					      = 0;
-  virtual float		get_y() const					      = 0;
+	virtual void calc() = 0;
 
-  virtual void          calc()                                                = 0;
-
-  virtual bool          is_pos_valid() const                                  = 0;
-
+	virtual bool is_pos_valid() const = 0;
 };
 
 } // end namespace firevision
 
 #endif
-

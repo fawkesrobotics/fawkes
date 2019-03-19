@@ -33,13 +33,12 @@ namespace fawkes {
 /** Constructor.
  * @param format format of the message
  */
-ConnectionDiedException::ConnectionDiedException(const char *format, ...)
-  : Exception()
+ConnectionDiedException::ConnectionDiedException(const char *format, ...) : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append(format, va);
+	va_end(va);
 }
 
 } // end namespace fawkes

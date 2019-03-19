@@ -26,20 +26,20 @@
 #include "texture_drawer.h"
 
 namespace firevision {
-  class Camera;
+class Camera;
 }
 
 class SkelGuiImageDrawer : public SkelGuiTextureDrawer
 {
- public:
-  SkelGuiImageDrawer(firevision::Camera *cam);
-  ~SkelGuiImageDrawer();
+public:
+	SkelGuiImageDrawer(firevision::Camera *cam);
+	~SkelGuiImageDrawer();
 
-  void fill_texture();
+	void fill_texture();
 
- private:
-  firevision::Camera  *cam_;
-  unsigned char       *rgb_buf_;
+private:
+	firevision::Camera *cam_;
+	unsigned char *     rgb_buf_;
 };
 
 #endif

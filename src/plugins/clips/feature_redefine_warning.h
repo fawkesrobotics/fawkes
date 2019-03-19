@@ -29,27 +29,27 @@
 #include <string>
 
 namespace CLIPS {
-  class Environment;
+class Environment;
 }
 
 namespace fawkes {
-  class Logger;
+class Logger;
 }
 
 class RedefineWarningCLIPSFeature : public fawkes::CLIPSFeature
 {
- public:
-  RedefineWarningCLIPSFeature(fawkes::Logger *logger);
-  virtual ~RedefineWarningCLIPSFeature();
+public:
+	RedefineWarningCLIPSFeature(fawkes::Logger *logger);
+	virtual ~RedefineWarningCLIPSFeature();
 
-  // for CLIPSFeature
-  virtual void clips_context_init(const std::string &env_name,
-				  fawkes::LockPtr<CLIPS::Environment> &clips);
-  virtual void clips_context_destroyed(const std::string &env_name);
+	// for CLIPSFeature
+	virtual void clips_context_init(const std::string &                  env_name,
+	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_destroyed(const std::string &env_name);
 
- private: // members
-  fawkes::Logger     *logger_;
-  std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+private: // members
+	fawkes::Logger *                                           logger_;
+	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 };
 
 #endif

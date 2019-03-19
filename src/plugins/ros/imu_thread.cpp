@@ -21,7 +21,6 @@
 #include "imu_thread.h"
 
 #include <interface/interface_info.h>
-
 #include <ros/this_node.h>
 #include <sensor_msgs/Imu.h>
 
@@ -36,8 +35,7 @@ using namespace fawkes;
 
 /** Constructor. */
 RosIMUThread::RosIMUThread()
-  : Thread("RosIMUThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlackBoardInterfaceListener("RosIMUThread")
+: Thread("RosIMUThread", Thread::OPMODE_WAITFORWAKEUP), BlackBoardInterfaceListener("RosIMUThread")
 {
 }
 
@@ -53,43 +51,46 @@ RosIMUThread::~RosIMUThread()
 void
 RosIMUThread::init()
 {
-  std::string iface_name;
-  try {
-    iface_name = config->get_string("/ros/imu/interface");
-  } catch (Exception & e) {
-    InterfaceInfoList *imu_ifaces = blackboard->list("IMUInterface", "*");
-    if (imu_ifaces->empty()) {
-      logger->log_error(name(),
-        "Cannot use default IMUInterface: No IMUInterface found!");
-      throw;
-    } else {
-      iface_name = imu_ifaces->front().id();
-      logger->log_info(name(), "%s. Using first IMU interface '%s'.",
-        e.what_no_backtrace(), iface_name.c_str());
-    }
-  }
-  std::string ros_topic = "/imu/data";
-  try {
-    ros_topic = config->get_string("/ros/imu/topic");
-  } catch (Exception &e) {
-    // ignore, use default
-  }
-  logger->log_info(name(), "Publishing IMU '%s' to ROS topic '%s'.",
-    iface_name.c_str(), ros_topic.c_str());
-  ros_pub_ = rosnode->advertise<sensor_msgs::Imu>(ros_topic, 100);
+	std::string iface_name;
+	try {
+		iface_name = config->get_string("/ros/imu/interface");
+	} catch (Exception &e) {
+		InterfaceInfoList *imu_ifaces = blackboard->list("IMUInterface", "*");
+		if (imu_ifaces->empty()) {
+			logger->log_error(name(), "Cannot use default IMUInterface: No IMUInterface found!");
+			throw;
+		} else {
+			iface_name = imu_ifaces->front().id();
+			logger->log_info(name(),
+			                 "%s. Using first IMU interface '%s'.",
+			                 e.what_no_backtrace(),
+			                 iface_name.c_str());
+		}
+	}
+	std::string ros_topic = "/imu/data";
+	try {
+		ros_topic = config->get_string("/ros/imu/topic");
+	} catch (Exception &e) {
+		// ignore, use default
+	}
+	logger->log_info(name(),
+	                 "Publishing IMU '%s' to ROS topic '%s'.",
+	                 iface_name.c_str(),
+	                 ros_topic.c_str());
+	ros_pub_ = rosnode->advertise<sensor_msgs::Imu>(ros_topic, 100);
 
-  iface_ = blackboard->open_for_reading<IMUInterface>(iface_name.c_str());
-  bbil_add_data_interface(iface_);
-  blackboard->register_listener(this);
+	iface_ = blackboard->open_for_reading<IMUInterface>(iface_name.c_str());
+	bbil_add_data_interface(iface_);
+	blackboard->register_listener(this);
 }
 
 /** Close all interfaces and ROS handles. */
 void
 RosIMUThread::finalize()
 {
-  blackboard->unregister_listener(this);
-  blackboard->close(iface_);
-  ros_pub_.shutdown();
+	blackboard->unregister_listener(this);
+	blackboard->close(iface_);
+	ros_pub_.shutdown();
 }
 
 /** Handle interface changes.
@@ -99,33 +100,30 @@ RosIMUThread::finalize()
 void
 RosIMUThread::bb_interface_data_changed(Interface *interface) throw()
 {
-  IMUInterface *imu_iface = dynamic_cast<IMUInterface *>(interface);
-  if (!imu_iface) return;
-  imu_iface->read();
-  sensor_msgs::Imu ros_imu;
-  ros_imu.header.frame_id = imu_iface->frame();
-  ros_imu.orientation.x = imu_iface->orientation()[0];
-  ros_imu.orientation.y = imu_iface->orientation()[1];
-  ros_imu.orientation.z = imu_iface->orientation()[2];
-  ros_imu.orientation.w = imu_iface->orientation()[3];
-  for (uint i = 0; i < 9u; i++) {
-    ros_imu.orientation_covariance[i] =
-      imu_iface->orientation_covariance()[i];
-  }
-  ros_imu.angular_velocity.x = imu_iface->angular_velocity()[0];
-  ros_imu.angular_velocity.y = imu_iface->angular_velocity()[1];
-  ros_imu.angular_velocity.z = imu_iface->angular_velocity()[2];
-  for (uint i = 0; i < 9u; i++) {
-    ros_imu.angular_velocity_covariance[i] =
-      imu_iface->angular_velocity_covariance()[i];
-  }
-  ros_imu.linear_acceleration.x = imu_iface->linear_acceleration()[0];
-  ros_imu.linear_acceleration.y = imu_iface->linear_acceleration()[1];
-  ros_imu.linear_acceleration.z = imu_iface->linear_acceleration()[2];
-  for (uint i = 0; i < 9u; i++) {
-    ros_imu.linear_acceleration_covariance[i] =
-      imu_iface->linear_acceleration_covariance()[i];
-  }
-  ros_pub_.publish(ros_imu);
+	IMUInterface *imu_iface = dynamic_cast<IMUInterface *>(interface);
+	if (!imu_iface)
+		return;
+	imu_iface->read();
+	sensor_msgs::Imu ros_imu;
+	ros_imu.header.frame_id = imu_iface->frame();
+	ros_imu.orientation.x   = imu_iface->orientation()[0];
+	ros_imu.orientation.y   = imu_iface->orientation()[1];
+	ros_imu.orientation.z   = imu_iface->orientation()[2];
+	ros_imu.orientation.w   = imu_iface->orientation()[3];
+	for (uint i = 0; i < 9u; i++) {
+		ros_imu.orientation_covariance[i] = imu_iface->orientation_covariance()[i];
+	}
+	ros_imu.angular_velocity.x = imu_iface->angular_velocity()[0];
+	ros_imu.angular_velocity.y = imu_iface->angular_velocity()[1];
+	ros_imu.angular_velocity.z = imu_iface->angular_velocity()[2];
+	for (uint i = 0; i < 9u; i++) {
+		ros_imu.angular_velocity_covariance[i] = imu_iface->angular_velocity_covariance()[i];
+	}
+	ros_imu.linear_acceleration.x = imu_iface->linear_acceleration()[0];
+	ros_imu.linear_acceleration.y = imu_iface->linear_acceleration()[1];
+	ros_imu.linear_acceleration.z = imu_iface->linear_acceleration()[2];
+	for (uint i = 0; i < 9u; i++) {
+		ros_imu.linear_acceleration_covariance[i] = imu_iface->linear_acceleration_covariance()[i];
+	}
+	ros_pub_.publish(ros_imu);
 }
-

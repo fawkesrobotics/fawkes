@@ -29,7 +29,7 @@
 #include <memory>
 
 namespace KinDrv {
-  class JacoArm;
+class JacoArm;
 }
 
 namespace fawkes {
@@ -38,39 +38,38 @@ namespace fawkes {
 
 class JacoArmKindrv : public JacoArm
 {
- public:
-  JacoArmKindrv(const char *name = NULL);
-  virtual ~JacoArmKindrv();
+public:
+	JacoArmKindrv(const char *name = NULL);
+	virtual ~JacoArmKindrv();
 
-  virtual void initialize();
+	virtual void initialize();
 
-  virtual bool final();
-  virtual bool initialized();
+	virtual bool final();
+	virtual bool initialized();
 
-  virtual void get_joints(std::vector<float> &to) const;
-  virtual void get_coords(std::vector<float> &to);
-  virtual void get_fingers(std::vector<float> &to) const;
+	virtual void get_joints(std::vector<float> &to) const;
+	virtual void get_coords(std::vector<float> &to);
+	virtual void get_fingers(std::vector<float> &to) const;
 
-  virtual void stop();
-  virtual void push_joystick(unsigned int button);
-  virtual void release_joystick();
+	virtual void stop();
+	virtual void push_joystick(unsigned int button);
+	virtual void release_joystick();
 
-  virtual void goto_trajec(std::vector< std::vector<float> >* trajec, std::vector<float> &fingers);
-  virtual void goto_joints(std::vector<float> &joints, std::vector<float> &fingers, bool followup=false);
-  virtual void goto_coords(std::vector<float> &coords, std::vector<float> &fingers);
-  virtual void goto_ready();
-  virtual void goto_retract();
+	virtual void goto_trajec(std::vector<std::vector<float>> *trajec, std::vector<float> &fingers);
+	virtual void
+	             goto_joints(std::vector<float> &joints, std::vector<float> &fingers, bool followup = false);
+	virtual void goto_coords(std::vector<float> &coords, std::vector<float> &fingers);
+	virtual void goto_ready();
+	virtual void goto_retract();
 
- private:
+private:
 	std::unique_ptr<KinDrv::JacoArm> arm_;
 
-  fawkes::jaco_target_type_t target_type_;
-  bool final_;
+	fawkes::jaco_target_type_t target_type_;
+	bool                       final_;
 
-  bool ctrl_ang_;
+	bool ctrl_ang_;
 };
-
-
 
 } // end of namespace fawkes
 

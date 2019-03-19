@@ -3,16 +3,17 @@
 
 %- macro gen_schema(name, schema)
 	// Schema: {{ name }}
- public:
+public:
 % for propname, p in schema['properties'].items()
 %   if p.description
 	/** {{ p.description }}
 %   else
-  /** Get {{ propname }} value.
+	/** Get {{ propname }} value.
 %   endif
    * @return {{ propname }} value
    */
-	{{ common.option_type(p) }} {{ propname | sanitize }}() const
+	{{ common.option_type(p) }}
+	{{ propname | sanitize }}() const
 	{
 		return {{ propname | sanitize }}_;
 	}
@@ -20,7 +21,8 @@
 	/** Set {{ propname }} value.
 	 * @param {{ propname | sanitize }} new value
 	 */
-	void set_{{ propname | sanitize }}(const {{ common.type(p) }}& {{ propname | sanitize }})
+	void
+	set_{{ propname | sanitize }}(const {{ common.type(p) }} &{{ propname | sanitize }})
 	{
 		{{ propname | sanitize }}_ = {{ propname | sanitize }};
 	}
@@ -29,7 +31,8 @@
 	/** Add element to {{ propname }} array.
 	 * @param {{ propname | sanitize }} new value
 	 */
-	void addto_{{ propname | sanitize }}(const {{ common.type(p['items']) }}&& {{ propname | sanitize }})
+	void
+	addto_{{ propname | sanitize }}(const {{ common.type(p['items']) }} &&{{ propname | sanitize }})
 	{
 		{{ propname | sanitize }}_.push_back(std::move({{ propname | sanitize }}));
 	}
@@ -38,7 +41,8 @@
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param {{ propname | sanitize }} new value
 	 */
-	void addto_{{ propname | sanitize }}(const {{ common.type(p['items']) }}& {{ propname | sanitize }})
+	void
+	addto_{{ propname | sanitize }}(const {{ common.type(p['items']) }} &{{ propname | sanitize }})
 	{
 		{{ propname | sanitize }}_.push_back({{ propname | sanitize }});
 	}
@@ -46,7 +50,8 @@
 	/** Add element to {{ propname }} array.
 	 * @param {{ propname | sanitize }} new value
 	 */
-	void addto_{{ propname | sanitize }}(const {{ p['items']['$ref'] | reftype }}&& {{ propname | sanitize }})
+	void
+	addto_{{ propname | sanitize }}(const {{ p['items']['$ref'] | reftype }} &&{{ propname | sanitize }})
 	{
 		{{ propname | sanitize }}_.push_back(std::make_shared<{{ p['items']['$ref'] | reftype }}>(std::move({{ propname | sanitize }})));
 	}
@@ -54,35 +59,45 @@
 % endif
 % endfor
 
- private:
+{# Comment is workaround for missing newline #}
+private:
+% set width_ns = namespace(width=0)
 % for propname, p in schema['properties'].items()
-	{{ common.option_type(p) }} {{ propname | sanitize }}_;
+%   set width_ns.width = [width_ns.width, common.option_type(p)|length]|max
+% endfor
+% for propname, p in schema['properties'].items()
+	{{ "%-*s"|format(width_ns.width, common.option_type(p))|safe }} {{ propname | sanitize }}_;
 % endfor
 %- endmacro
 
-%- macro gen_includes(schema)
+{%- macro gen_includes(schema) -%}
+% set have_includes_ns = namespace(have_includes=False)
 % if schema.allOf
-%   for s in schema.allOf
-%     if '$ref' in s
-#include "{{ s['$ref'] | reftype }}.h"
-%     endif
+%   for s in schema.allOf|selectattr('$ref', 'defined')|sort(attribute='$reftype')
+%     set have_includes_ns.have_includes=True
+#include "{{ s['$reftype'] }}.h"
 %   endfor
 % elif schema.properties
 %   for propname, p in schema['properties'].items()
 %     if '$ref' in p
+%       set have_includes_ns.have_includes=True
 #include "{{ p['$ref'] | reftype }}.h"
 %     elif p.type == 'array' and '$ref' in p['items']
+%       set have_includes_ns.have_includes=True
 #include "{{ p['items']['$ref'] | reftype }}.h"
 %     endif
 %   endfor
 % endif
-%- endmacro
+% if have_includes_ns.have_includes
+
+% endif
+% endmacro
 
 %- macro gen_superclasses(schema)
 % if schema.allOf
 %   for r in schema.allOf | refs
 %     if loop.first
-:{#- comment to remove newline -#}
+ :{#- comment to remove newline -#}
 %     endif
  {% if not loop.first %} {% endif %}public {{ r | reftype }}{% if not loop.last %},{% endif %}
 %   endfor
@@ -105,21 +120,23 @@
 #pragma once
 
 #define RAPIDJSON_HAS_STDSTRING 1
+%- set includes=gen_includes(schema).split('\n')
+{{ includes|sort|join('\n') }}
+% if includes != ""
+{# Comment to avoid removal of newline #}
+% endif
 #include <rapidjson/fwd.h>
 
-#include <string>
 #include <cstdint>
-#include <vector>
 #include <memory>
 #include <optional>
-
-{{ gen_includes(schema) }}
+#include <string>
+#include <vector>
 
 /** {{ name }} representation for JSON transfer. */
-class {{ name }}
-{{ gen_superclasses(schema) }}
+class {{ name }}{{ gen_superclasses(schema) }}
 {
- public:
+public:
 	/** Constructor. */
 	{{ name }}();
 	/** Constructor from JSON.
@@ -129,7 +146,7 @@ class {{ name }}
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	{{ name }}(const rapidjson::Value& v);
+	{{ name }}(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~{{ name }}();
@@ -137,9 +154,10 @@ class {{ name }}
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "{{ spec.info.version }}";
+		return "{{ spec.info.version }}";
 	}
 
 	/** Render object to JSON.
@@ -151,19 +169,19 @@ class {{ name }}
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -176,14 +194,14 @@ class {{ name }}
 	virtual void validate(bool subcall = false) const;
 
 % if 'properties' in schema
-{{ gen_schema(name, schema) }}
+{{ gen_schema(name, schema) -}}
 % elif schema.allOf
 
 	// allOf
 %   for s in schema.allOf
 %     if 'type' in s and s['type'] == 'object'
-{{ gen_schema(name + "[" + loop.index | string + "]", s) }}
+{{ gen_schema(name + "[" + loop.index | string + "]", s) -}}
 %     endif
 %   endfor
-% endif
+{% endif -%}
 };

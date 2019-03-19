@@ -26,9 +26,8 @@
 
 #include <core/exception.h>
 #include <core/exceptions/software.h>
-
-#include <fvcams/camera.h>
 #include <fvcams/cam_exceptions.h>
+#include <fvcams/camera.h>
 
 #include <cstddef>
 
@@ -38,11 +37,11 @@ class CameraArgumentParser;
 
 class CameraFactory
 {
- public:
-  static Camera * instance(const char *as);
-  static Camera * instance(const CameraArgumentParser *cap);
+public:
+	static Camera *instance(const char *as);
+	static Camera *instance(const CameraArgumentParser *cap);
 
-  /** Get typed instance of camera.
+	/** Get typed instance of camera.
    * Creates a new instance and converts it to the requested type. If the type
    * does not match the requested camera an exception is thrown.
    * @param as camera argument string
@@ -50,21 +49,20 @@ class CameraFactory
    * @exception TypeMismatchException thrown, if requested camera does not match
    * requested type.
    */
-  template <class C>
-    static C* instance(const char *as);
+	template <class C>
+	static C *instance(const char *as);
 };
-
 
 template <class C>
 C *
 CameraFactory::instance(const char *as)
 {
-  Camera *c = CameraFactory::instance(as);
-  C *tc = dynamic_cast<C *>(c);
-  if ( tc == NULL ) {
-    throw fawkes::TypeMismatchException("Returned camera is not of expected type");
-  }
-  return tc;
+	Camera *c  = CameraFactory::instance(as);
+	C *     tc = dynamic_cast<C *>(c);
+	if (tc == NULL) {
+		throw fawkes::TypeMismatchException("Returned camera is not of expected type");
+	}
+	return tc;
 }
 
 } // end namespace firevision

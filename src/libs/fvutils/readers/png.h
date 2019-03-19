@@ -30,24 +30,24 @@ namespace firevision {
 
 class PNGReaderData;
 
-class PNGReader : public Reader {
+class PNGReader : public Reader
+{
+public:
+	PNGReader(const char *filename);
+	virtual ~PNGReader();
 
- public:
-  PNGReader(const char *filename);
-  virtual ~PNGReader();
+	virtual void         set_buffer(unsigned char *yuv422planar_buffer);
+	virtual colorspace_t colorspace();
+	virtual unsigned int pixel_width();
+	virtual unsigned int pixel_height();
+	virtual void         read();
 
-  virtual void             set_buffer(unsigned char *yuv422planar_buffer);
-  virtual colorspace_t     colorspace();
-  virtual unsigned int     pixel_width();
-  virtual unsigned int     pixel_height();
-  virtual void             read();
+private:
+	PNGReaderData *setup_read(const char *filename);
 
- private:
-  PNGReaderData *  setup_read(const char *filename);
-
-  PNGReaderData *d_;
-  bool opened;
-  unsigned char *buffer;
+	PNGReaderData *d_;
+	bool           opened;
+	unsigned char *buffer;
 };
 
 } // end namespace firevision

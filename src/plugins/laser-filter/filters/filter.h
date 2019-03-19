@@ -22,68 +22,76 @@
 #ifndef _PLUGINS_LASER_FILTER_FILTER_H_
 #define _PLUGINS_LASER_FILTER_FILTER_H_
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace fawkes {
-  class Time;
+class Time;
 }
 
 class LaserDataFilter
 {
- public:
-  class Buffer {
-   public:
-    Buffer(size_t num_values = 0);
-    Buffer(const Buffer& other);
-    ~Buffer();
-    Buffer& operator=(const Buffer& other);
-	  void resize(unsigned int num_values);
-	  std::string   name; ///< name of the input buffer
-    std::string   frame;		///< reference coordinate frame ID
-    float        *values;	///< values
-    fawkes::Time *timestamp;	///< timestamp of data
-  private:
-	  unsigned int num_values_;
-  };
+public:
+	class Buffer
+	{
+	public:
+		Buffer(size_t num_values = 0);
+		Buffer(const Buffer &other);
+		~Buffer();
+		Buffer &      operator=(const Buffer &other);
+		void          resize(unsigned int num_values);
+		std::string   name;      ///< name of the input buffer
+		std::string   frame;     ///< reference coordinate frame ID
+		float *       values;    ///< values
+		fawkes::Time *timestamp; ///< timestamp of data
+	private:
+		unsigned int num_values_;
+	};
 
-  LaserDataFilter(const std::string& filter_name,
-                  unsigned int in_data_size,
-                  const std::vector<Buffer *> &in, unsigned int out_size);
-  virtual ~LaserDataFilter();
+	LaserDataFilter(const std::string &          filter_name,
+	                unsigned int                 in_data_size,
+	                const std::vector<Buffer *> &in,
+	                unsigned int                 out_size);
+	virtual ~LaserDataFilter();
 
-  virtual std::vector<Buffer *>  & get_out_vector();
-  virtual void                     set_out_vector(std::vector<Buffer *> &out);
-  virtual unsigned int             get_out_data_size();
+	virtual std::vector<Buffer *> &get_out_vector();
+	virtual void                   set_out_vector(std::vector<Buffer *> &out);
+	virtual unsigned int           get_out_data_size();
 
-  virtual void                     filter()   = 0;
+	virtual void filter() = 0;
 
-  void  set_array_ownership(bool own_in, bool own_out);
-  /** Check if input arrays are owned by filter.
+	void set_array_ownership(bool own_in, bool own_out);
+	/** Check if input arrays are owned by filter.
    * @return true if arrays are owned by this filter, false otherwise. */
-  bool  owns_in()  const { return own_in_;  };
-  /** Check if output arrays are owned by filter.
+	bool
+	owns_in() const
+	{
+		return own_in_;
+	};
+	/** Check if output arrays are owned by filter.
    * @return true if arrays are owned by this filter, false otherwise. */
-  bool  owns_out() const { return own_out_; };
+	bool
+	owns_out() const
+	{
+		return own_out_;
+	};
 
- protected:
-  virtual void set_out_data_size(unsigned int data_size);
+protected:
+	virtual void set_out_data_size(unsigned int data_size);
 
-  void reset_outbuf(Buffer *b);
-  void copy_to_outbuf(Buffer *outbuf, const Buffer *inbuf);
+	void reset_outbuf(Buffer *b);
+	void copy_to_outbuf(Buffer *outbuf, const Buffer *inbuf);
 
+protected:
+	std::string           filter_name;
+	unsigned int          out_data_size;
+	unsigned int          in_data_size;
+	std::vector<Buffer *> in;
+	std::vector<Buffer *> out;
 
- protected:
-  std::string            filter_name;
-  unsigned int           out_data_size;
-  unsigned int           in_data_size;
-  std::vector<Buffer *>  in;
-  std::vector<Buffer *>  out;
-
- private:
-  bool own_in_;
-  bool own_out_;
+private:
+	bool own_in_;
+	bool own_out_;
 };
-
 
 #endif

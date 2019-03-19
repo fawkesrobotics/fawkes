@@ -23,14 +23,14 @@
 #ifndef _PLUGINS_MONGODB_LOG_MONGODB_LOG_IMAGE_THREAD_H_
 #define _PLUGINS_MONGODB_LOG_MONGODB_LOG_IMAGE_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <aspect/pointcloud.h>
-#include <plugins/mongodb/aspect/mongodb.h>
 #include <core/threading/mutex.h>
+#include <core/threading/thread.h>
+#include <plugins/mongodb/aspect/mongodb.h>
 
 #include <list>
 #include <queue>
@@ -38,67 +38,71 @@
 #include <string>
 
 namespace firevision {
-  class SharedMemoryImageBuffer;
+class SharedMemoryImageBuffer;
 }
 
 namespace fawkes {
-  class Mutex;
-  class TimeWait;
-}
+class Mutex;
+class TimeWait;
+} // namespace fawkes
 
 namespace mongo {
-  class GridFS;
+class GridFS;
 }
 
-class MongoLogImagesThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::MongoDBAspect
+class MongoLogImagesThread : public fawkes::Thread,
+                             public fawkes::ClockAspect,
+                             public fawkes::LoggingAspect,
+                             public fawkes::ConfigurableAspect,
+                             public fawkes::MongoDBAspect
 {
- public:
-  MongoLogImagesThread();
-  virtual ~MongoLogImagesThread();
+public:
+	MongoLogImagesThread();
+	virtual ~MongoLogImagesThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual bool prepare_finalize_user();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual bool prepare_finalize_user();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void update_images();
-  void get_sets(std::set<std::string> &missing_images,
-                std::set<std::string> &unbacked_images);
+private:
+	void update_images();
+	void get_sets(std::set<std::string> &missing_images, std::set<std::string> &unbacked_images);
 
- private:
-  /// @cond INTERNALS
-  typedef struct {
-    std::string				 topic_name;
-    fawkes::Time                         last_sent;
-    firevision::SharedMemoryImageBuffer *img;
-  } ImageInfo;
-  /// @endcond
-  std::map<std::string, ImageInfo> imgs_;
+private:
+	/// @cond INTERNALS
+	typedef struct
+	{
+		std::string                          topic_name;
+		fawkes::Time                         last_sent;
+		firevision::SharedMemoryImageBuffer *img;
+	} ImageInfo;
+	/// @endcond
+	std::map<std::string, ImageInfo> imgs_;
 
-  fawkes::Time *last_update_;
-  fawkes::Time *now_;
-  mongo::DBClientBase *mongodb_;
-  mongo::GridFS       *gridfs_;
-  std::string          collection_;
-  std::string          database_;
+	fawkes::Time *       last_update_;
+	fawkes::Time *       now_;
+	mongo::DBClientBase *mongodb_;
+	mongo::GridFS *      gridfs_;
+	std::string          collection_;
+	std::string          database_;
 
-  fawkes::Mutex       *mutex_;
-  fawkes::TimeWait    *wait_;
+	fawkes::Mutex *   mutex_;
+	fawkes::TimeWait *wait_;
 
-  std::vector<std::string> includes_;
-  std::vector<std::string> excludes_;
+	std::vector<std::string> includes_;
+	std::vector<std::string> excludes_;
 
-  unsigned int         cfg_chunk_size_;
-  float                cfg_storage_interval_;
+	unsigned int cfg_chunk_size_;
+	float        cfg_storage_interval_;
 };
 
 #endif

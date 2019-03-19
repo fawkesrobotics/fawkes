@@ -30,8 +30,7 @@
 #include <cmath>
 #include <vector>
 
-namespace fawkes
-{
+namespace fawkes {
 
 class Logger;
 class Configuration;
@@ -43,26 +42,25 @@ class Configuration;
 
 class RoboShapeColli : public RoboShape
 {
- public:
-  RoboShapeColli( const char * cfg_prefix,
-                  Logger* logger,
-                  Configuration* config,
-                  int readings_per_degree = 1 );
- ~RoboShapeColli();
+public:
+	RoboShapeColli(const char *   cfg_prefix,
+	               Logger *       logger,
+	               Configuration *config,
+	               int            readings_per_degree = 1);
+	~RoboShapeColli();
 
-  ///\brief Returns the robots length for a specific angle.
-  float get_robot_length_for_rad( float anglerad );
+	///\brief Returns the robots length for a specific angle.
+	float get_robot_length_for_rad(float anglerad);
 
-  ///\brief Returns the robots length for a specific angle.
-  float get_robot_length_for_deg( float angledeg );
+	///\brief Returns the robots length for a specific angle.
+	float get_robot_length_for_deg(float angledeg);
 
- private:
-  // precalculated robot size data
-  std::vector< float > robot_lengths_;
+private:
+	// precalculated robot size data
+	std::vector<float> robot_lengths_;
 
-  unsigned int resolution_;
+	unsigned int resolution_;
 };
-
 
 /* ************************************************************************************************* */
 /*                            IMPLEMENTATION DETAILS, DO NOT CARE!                                   */
@@ -74,25 +72,23 @@ class RoboShapeColli : public RoboShape
  * @param config Pointer to the fawkes configuration.
  * @param readings_per_degree Readings per degree constant (default=1)
  */
-inline
-RoboShapeColli::RoboShapeColli( const char * cfg_prefix,
-                                Logger* logger,
-                                Configuration* config,
-                                int readings_per_degree )
- : RoboShape( cfg_prefix, logger, config)
+inline RoboShapeColli::RoboShapeColli(const char *   cfg_prefix,
+                                      Logger *       logger,
+                                      Configuration *config,
+                                      int            readings_per_degree)
+: RoboShape(cfg_prefix, logger, config)
 {
-  resolution_ = readings_per_degree;
-  for ( int i = 0; i < 360*readings_per_degree; i++ ) {
-    float anglerad = (i / readings_per_degree) * M_PI / 180.f;
-    robot_lengths_.push_back( this->RoboShape::get_robot_length_for_rad( anglerad ) );
-  }
+	resolution_ = readings_per_degree;
+	for (int i = 0; i < 360 * readings_per_degree; i++) {
+		float anglerad = (i / readings_per_degree) * M_PI / 180.f;
+		robot_lengths_.push_back(this->RoboShape::get_robot_length_for_rad(anglerad));
+	}
 }
 
 /** Destructor */
-inline
-RoboShapeColli::~RoboShapeColli()
+inline RoboShapeColli::~RoboShapeColli()
 {
-  robot_lengths_.clear();
+	robot_lengths_.clear();
 }
 
 /** Returns the robots length for a specific angle.
@@ -100,9 +96,9 @@ RoboShapeColli::~RoboShapeColli()
  * @return the length in this direction.
  */
 inline float
-RoboShapeColli::get_robot_length_for_rad( float anglerad )
+RoboShapeColli::get_robot_length_for_rad(float anglerad)
 {
-  return (this->get_robot_length_for_deg( rad2deg( anglerad ) ));
+	return (this->get_robot_length_for_deg(rad2deg(anglerad)));
 }
 
 /** Returns the robots length for a specific angle.
@@ -110,10 +106,10 @@ RoboShapeColli::get_robot_length_for_rad( float anglerad )
  * @return the length in this direction.
  */
 inline float
-RoboShapeColli::get_robot_length_for_deg( float angledeg )
+RoboShapeColli::get_robot_length_for_deg(float angledeg)
 {
-  int number = (int)(angledeg*resolution_);
-  return robot_lengths_[number];
+	int number = (int)(angledeg * resolution_);
+	return robot_lengths_[number];
 }
 
 } // namespace fawkes

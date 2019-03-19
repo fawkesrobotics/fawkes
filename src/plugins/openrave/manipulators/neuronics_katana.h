@@ -29,15 +29,15 @@ namespace fawkes {
 
 class OpenRaveManipulatorNeuronicsKatana : public OpenRaveManipulator
 {
- public:
-  OpenRaveManipulatorNeuronicsKatana(unsigned int count, unsigned int countDevice);
-  virtual ~OpenRaveManipulatorNeuronicsKatana();
+public:
+	OpenRaveManipulatorNeuronicsKatana(unsigned int count, unsigned int countDevice);
+	virtual ~OpenRaveManipulatorNeuronicsKatana();
 
-  virtual OpenRaveManipulatorPtr copy();
+	virtual OpenRaveManipulatorPtr copy();
 
- private:
-  virtual float angle_OR_to_device(unsigned int number, float angle) const;
-  virtual float angle_device_to_OR(unsigned int number, float angle) const;
+private:
+	virtual float angle_OR_to_device(unsigned int number, float angle) const;
+	virtual float angle_device_to_OR(unsigned int number, float angle) const;
 };
 
 } // end of namespace fawkes

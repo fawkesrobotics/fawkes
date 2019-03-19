@@ -39,105 +39,103 @@ namespace firevision {
  */
 /** Hint about object. */
 typedef enum {
-  H_BALL          = 0,  /**< ball */
-  H_BACKGROUND    = 1,  /**< background */
-  H_ROBOT         = 2,  /**< robot */
-  H_FIELD         = 3,  /**< field */
-  H_GOAL_YELLOW   = 4,  /**< yellow goal */
-  H_GOAL_BLUE     = 5,  /**< blue goal */
-  H_LINE          = 6,  /**< line */
-  H_UNKNOWN       = 7,  /**< unknown */
-  H_ROBOT_OPP     = 8,  /**< opponents robot */
-  H_SIZE                /**< size of enum (Has to be the last entry) */
+	H_BALL        = 0, /**< ball */
+	H_BACKGROUND  = 1, /**< background */
+	H_ROBOT       = 2, /**< robot */
+	H_FIELD       = 3, /**< field */
+	H_GOAL_YELLOW = 4, /**< yellow goal */
+	H_GOAL_BLUE   = 5, /**< blue goal */
+	H_LINE        = 6, /**< line */
+	H_UNKNOWN     = 7, /**< unknown */
+	H_ROBOT_OPP   = 8, /**< opponents robot */
+	H_SIZE             /**< size of enum (Has to be the last entry) */
 } hint_t;
 
+class ROI
+{
+public:
+	ROI();
+	ROI(const ROI &roi);
+	ROI(const ROI *roi);
+	ROI(unsigned int start_x,
+	    unsigned int start_y,
+	    unsigned int width,
+	    unsigned int height,
+	    unsigned int image_width,
+	    unsigned int image_height);
 
-class ROI {
- public:
+	void set_start(fawkes::upoint_t p);
+	void set_start(unsigned int x, unsigned int y);
 
-  ROI();
-  ROI(const ROI &roi);
-  ROI(const ROI *roi);
-  ROI(unsigned int start_x, unsigned int start_y,
-      unsigned int width, unsigned int height,
-      unsigned int image_width, unsigned int image_height);
+	void         set_width(unsigned int width);
+	unsigned int get_width() const;
 
-  void         set_start(fawkes::upoint_t p);
-  void         set_start(unsigned int x, unsigned int y);
+	void         set_height(unsigned int height);
+	unsigned int get_height() const;
 
-  void         set_width(unsigned int width);
-  unsigned int get_width() const;
+	void         set_image_width(unsigned int image_width);
+	unsigned int get_image_width() const;
 
-  void         set_height(unsigned int height);
-  unsigned int get_height() const;
+	void         set_image_height(unsigned int image_height);
+	unsigned int get_image_height() const;
 
-  void         set_image_width(unsigned int image_width);
-  unsigned int get_image_width() const;
+	void         set_line_step(unsigned int step);
+	unsigned int get_line_step() const;
 
-  void         set_image_height(unsigned int image_height);
-  unsigned int get_image_height() const;
+	void         set_pixel_step(unsigned int step);
+	unsigned int get_pixel_step() const;
 
-  void         set_line_step(unsigned int step);
-  unsigned int get_line_step() const;
+	unsigned int get_hint() const;
+	void         set_hint(unsigned int);
 
-  void         set_pixel_step(unsigned int step);
-  unsigned int get_pixel_step() const;
+	bool contains(unsigned int x, unsigned int y);
+	ROI  intersect(ROI const &roi) const;
 
-  unsigned int get_hint() const;
-  void         set_hint(unsigned int);
+	bool neighbours(unsigned int x, unsigned int y, unsigned int margin) const;
+	bool neighbours(ROI *roi, unsigned int margin) const;
 
-  bool         contains(unsigned int x, unsigned int y);
-  ROI          intersect(ROI const &roi) const;
+	void extend(unsigned int x, unsigned int y);
+	ROI &operator+=(ROI &roi);
+	void grow(unsigned int margin);
 
-  bool         neighbours(unsigned int x, unsigned int y, unsigned int margin) const;
-  bool         neighbours(ROI *roi, unsigned int margin) const;
+	bool operator<(const ROI &roi) const;
+	bool operator>(const ROI &roi) const;
+	bool operator==(const ROI &roi) const;
+	bool operator!=(const ROI &roi) const;
+	ROI &operator=(const ROI &roi);
 
-  void         extend(unsigned int x, unsigned int y);
-  ROI&         operator+=(ROI &roi);
-  void         grow(unsigned int margin);
+	unsigned int get_num_hint_points() const;
 
+	unsigned char *get_roi_buffer_start(unsigned char *buffer) const;
 
-  bool         operator<(const ROI &roi) const;
-  bool         operator>(const ROI &roi) const;
-  bool         operator==(const ROI &roi) const;
-  bool         operator!=(const ROI &roi) const;
-  ROI&         operator=(const ROI &roi);
+	static ROI *full_image(unsigned int width, unsigned int height);
 
-  unsigned int get_num_hint_points() const;
+public: // Public for quick access
+	/** ROI start */
+	fawkes::upoint_t start;
+	/** ROI width */
+	unsigned int width;
+	/** ROI height */
+	unsigned int height;
+	/** width of image that contains this ROI */
+	unsigned int image_width;
+	/** height of image that contains this ROI */
+	unsigned int image_height;
+	/** line step */
+	unsigned int line_step;
+	/** pixel step */
+	unsigned int pixel_step;
+	/** ROI hint */
+	unsigned int hint;
 
+	/** ROI primary color */
+	color_t color;
 
-  unsigned char*  get_roi_buffer_start(unsigned char *buffer) const;
+	/** Minimum estimate of points in ROI that are attributed to the ROI hint */
+	unsigned int num_hint_points;
 
-  static ROI * full_image(unsigned int width, unsigned int height);
-
-
- public: // Public for quick access
-  /** ROI start */
-  fawkes::upoint_t start;
-  /** ROI width */
-  unsigned int width;
-  /** ROI height */
-  unsigned int height;
-  /** width of image that contains this ROI */
-  unsigned int image_width;
-  /** height of image that contains this ROI */
-  unsigned int image_height;
-  /** line step */
-  unsigned int line_step;
-  /** pixel step */
-  unsigned int pixel_step;
-  /** ROI hint */
-  unsigned int hint;
-
-  /** ROI primary color */
-  color_t      color;
-
-  /** Minimum estimate of points in ROI that are attributed to the ROI hint */
-  unsigned int num_hint_points;
-
- private:
-  static ROI  *roi_full_image;
-
+private:
+	static ROI *roi_full_image;
 };
 
 } // end namespace firevision

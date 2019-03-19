@@ -27,27 +27,31 @@
 
 class KatanaMotorControlThread : public KatanaMotionThread
 {
- public:
-  KatanaMotorControlThread(fawkes::RefPtr<fawkes::KatanaController> katana, fawkes::Logger *logger,
-		   unsigned int poll_interval_ms);
+public:
+	KatanaMotorControlThread(fawkes::RefPtr<fawkes::KatanaController> katana,
+	                         fawkes::Logger *                         logger,
+	                         unsigned int                             poll_interval_ms);
 
-  virtual void set_encoder(unsigned int nr, int value, bool inc=false);
-  virtual void set_angle(unsigned int nr, float value, bool inc=false);
+	virtual void set_encoder(unsigned int nr, int value, bool inc = false);
+	virtual void set_angle(unsigned int nr, float value, bool inc = false);
 
-  virtual void once();
+	virtual void once();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected:
-  virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  unsigned int nr_;
-  int encoder_;
-  float angle_;
+private:
+	unsigned int nr_;
+	int          encoder_;
+	float        angle_;
 
-  bool is_encoder_, is_inc_;
-  unsigned int poll_interval_usec_;
+	bool         is_encoder_, is_inc_;
+	unsigned int poll_interval_usec_;
 };
-
 
 #endif

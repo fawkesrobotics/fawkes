@@ -21,6 +21,7 @@
  */
 
 #include "rrd_plugin.h"
+
 #include "rrd_thread.h"
 
 using namespace fawkes;
@@ -37,12 +38,10 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-RRDPlugin::RRDPlugin(Configuration *config)
-  : Plugin(config)
+RRDPlugin::RRDPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new RRDThread());
+	thread_list.push_back(new RRDThread());
 }
-
 
 PLUGIN_DESCRIPTION("RRD management and graphing plugin")
 EXPORT_PLUGIN(RRDPlugin)

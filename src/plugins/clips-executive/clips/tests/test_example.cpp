@@ -23,21 +23,24 @@
 /** Simple Test class that shows how to do unit testing for CLIPS. */
 class SimpleCLIPSTest : public CLIPSTest
 {
-  protected:
-    /** Set up the test environment. */
-    virtual void SetUp() {
-      LoadCLIPSFiles({ "test_example.clp" });
-    }
+protected:
+	/** Set up the test environment. */
+	virtual void
+	SetUp()
+	{
+		LoadCLIPSFiles({"test_example.clp"});
+	}
 };
 
-TEST_F(SimpleCLIPSTest, SimpleTest) {
-  env.assert_fact("(testfact)");
-  env.assert_fact("(foo bar 4.2)");
-  CLIPS::Fact::pointer fact_p = env.get_facts();
-  env.run();
-  EXPECT_TRUE(has_fact("((?t testtempl))", "(eq ?t:name foo)"));
-  EXPECT_TRUE(has_fact("((?f foo))", "(eq ?f:implied (create$ bar 4.2))"));
-  EXPECT_FALSE(has_fact("((?t testtempl))", "(eq ?t:name bar)"));
-  EXPECT_FALSE(has_ordered_fact("foo"));
-  EXPECT_TRUE(has_ordered_fact("foo", { "bar", 4.2 }));
+TEST_F(SimpleCLIPSTest, SimpleTest)
+{
+	env.assert_fact("(testfact)");
+	env.assert_fact("(foo bar 4.2)");
+	CLIPS::Fact::pointer fact_p = env.get_facts();
+	env.run();
+	EXPECT_TRUE(has_fact("((?t testtempl))", "(eq ?t:name foo)"));
+	EXPECT_TRUE(has_fact("((?f foo))", "(eq ?f:implied (create$ bar 4.2))"));
+	EXPECT_FALSE(has_fact("((?t testtempl))", "(eq ?t:name bar)"));
+	EXPECT_FALSE(has_ordered_fact("foo"));
+	EXPECT_TRUE(has_ordered_fact("foo", {"bar", 4.2}));
 }

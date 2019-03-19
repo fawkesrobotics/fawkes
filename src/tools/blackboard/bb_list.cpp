@@ -20,12 +20,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <utils/ipc/shm.h>
-#include <config/sqlite.h>
+#include <blackboard/bbconfig.h>
+#include <blackboard/blackboard.h>
 #include <blackboard/shmem/header.h>
 #include <blackboard/shmem/lister.h>
-#include <blackboard/blackboard.h>
-#include <blackboard/bbconfig.h>
+#include <config/sqlite.h>
+#include <utils/ipc/shm.h>
+
 #include <iostream>
 
 using namespace std;
@@ -34,22 +35,22 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  SQLiteConfiguration config(CONFDIR);
-  config.load();
+	SQLiteConfiguration config(CONFDIR);
+	config.load();
 
-  std::string token = "";
-  try {
-    token = config.get_string("/fawkes/mainapp/blackboard_magic_token");
-  } catch (Exception &e) {
-    cout << "Could not read shared memory token for blackboard." << endl;
-    cout << "BlackBoard is probably running without shared memory." << endl;
-    return -1;
-  }
+	std::string token = "";
+	try {
+		token = config.get_string("/fawkes/mainapp/blackboard_magic_token");
+	} catch (Exception &e) {
+		cout << "Could not read shared memory token for blackboard." << endl;
+		cout << "BlackBoard is probably running without shared memory." << endl;
+		return -1;
+	}
 
-  BlackBoardSharedMemoryHeader *bbsh = new BlackBoardSharedMemoryHeader(BLACKBOARD_VERSION);
-  BlackBoardSharedMemoryLister *bblister = new BlackBoardSharedMemoryLister();
-  SharedMemory::list(token.c_str(), bbsh, bblister);
-  delete bblister;
-  delete bbsh;
-  return 0;
+	BlackBoardSharedMemoryHeader *bbsh     = new BlackBoardSharedMemoryHeader(BLACKBOARD_VERSION);
+	BlackBoardSharedMemoryLister *bblister = new BlackBoardSharedMemoryLister();
+	SharedMemory::list(token.c_str(), bbsh, bblister);
+	delete bblister;
+	delete bbsh;
+	return 0;
 }

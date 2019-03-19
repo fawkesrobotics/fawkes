@@ -26,7 +26,7 @@
 #ifndef _UTILS_HUNGARIAN_METHOD_HUNGARIAN_H_
 #define _UTILS_HUNGARIAN_METHOD_HUNGARIAN_H_
 
-#define HUNGARIAN_NOT_ASSIGNED 0 
+#define HUNGARIAN_NOT_ASSIGNED 0
 #define HUNGARIAN_ASSIGNED 1
 
 #define HUNGARIAN_MODE_MINIMIZE_COST 0
@@ -35,57 +35,54 @@
 namespace fawkes {
 
 /// @cond INTERNAL
-typedef struct {
-  int num_rows;
-  int num_cols;
-  int** cost;
-  int** assignment;  
+typedef struct
+{
+	int   num_rows;
+	int   num_cols;
+	int **cost;
+	int **assignment;
 } hungarian_problem_t;
 /// @endcond
 
 class HungarianMethod
 {
- public:
-  HungarianMethod();
-  ~HungarianMethod();
+public:
+	HungarianMethod();
+	~HungarianMethod();
 
-  int init( int** cost_matrix, 
-	    int rows, int cols, int mode);
-  
-  void free();
+	int init(int **cost_matrix, int rows, int cols, int mode);
 
-  void solve();
+	void free();
 
-  bool is_available();
+	void solve();
 
-  int  get_column_assignment( const int & col );
-  int  get_row_assignment( const int & row );
-  int* get_assignment(int & size);
+	bool is_available();
 
-  int** array_to_matrix(int* m, int rows, int cols);
+	int  get_column_assignment(const int &col);
+	int  get_row_assignment(const int &row);
+	int *get_assignment(int &size);
 
-  void print_assignment();
-  void print_cost_matrix();
-  void print_status();
+	int **array_to_matrix(int *m, int rows, int cols);
 
-  /** our problem instance member.  */
-  hungarian_problem_t * p;
+	void print_assignment();
+	void print_cost_matrix();
+	void print_status();
 
- protected:
-  void print_matrix( int** C, int rows, int cols );
+	/** our problem instance member.  */
+	hungarian_problem_t *p;
 
- private:
-  bool available_;
-  int  num_cols_;
-  int  num_rows_;
+protected:
+	void print_matrix(int **C, int rows, int cols);
 
-  int * col_mates_;
-  int * row_mates_;
+private:
+	bool available_;
+	int  num_cols_;
+	int  num_rows_;
+
+	int *col_mates_;
+	int *row_mates_;
 };
 
 } // end namespace fawkes
 
 #endif
-
-
-

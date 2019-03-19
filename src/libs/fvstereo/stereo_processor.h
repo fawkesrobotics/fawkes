@@ -32,23 +32,21 @@ class ROI;
 
 class StereoProcessor
 {
- public:
-  virtual ~StereoProcessor();
+public:
+	virtual ~StereoProcessor();
 
-  virtual bool get_xyz(unsigned int px, unsigned int py,
-		       float *x, float *y, float *z)                     = 0;
+	virtual bool get_xyz(unsigned int px, unsigned int py, float *x, float *y, float *z) = 0;
 
-  virtual bool get_world_xyz(unsigned int px, unsigned int py,
-			     float *x, float *y, float *z)               = 0;
+	virtual bool get_world_xyz(unsigned int px, unsigned int py, float *x, float *y, float *z) = 0;
 
-  virtual void             preprocess_stereo()                           = 0;
-  virtual void             calculate_disparity(ROI *roi = 0)             = 0;
-  virtual void             calculate_yuv(bool both = false)              = 0;
+	virtual void preprocess_stereo()               = 0;
+	virtual void calculate_disparity(ROI *roi = 0) = 0;
+	virtual void calculate_yuv(bool both = false)  = 0;
 
-  virtual unsigned char *  disparity_buffer()                            = 0;
-  virtual size_t           disparity_buffer_size() const                 = 0;
-  virtual unsigned char *  yuv_buffer_right()                            = 0;
-  virtual unsigned char *  yuv_buffer_left()                             = 0;
+	virtual unsigned char *disparity_buffer()            = 0;
+	virtual size_t         disparity_buffer_size() const = 0;
+	virtual unsigned char *yuv_buffer_right()            = 0;
+	virtual unsigned char *yuv_buffer_left()             = 0;
 };
 
 } // end namespace firevision

@@ -21,6 +21,7 @@
  */
 
 #include "plexil_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -39,7 +40,6 @@ public:
 		thread_list.push_back(new PlexilExecutiveThread());
 	}
 };
-
 
 PLUGIN_DESCRIPTION("PLEXIL Executive")
 EXPORT_PLUGIN(PlexilExecutivePlugin)

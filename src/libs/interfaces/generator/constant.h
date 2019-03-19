@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  constant.h - Interface generator constant representation
  *
@@ -27,20 +27,22 @@
 
 class InterfaceConstant
 {
- public:
-  InterfaceConstant(const std::string &name, const std::string &type,
-		    const std::string &value, const std::string &comment);
+public:
+	InterfaceConstant(const std::string &name,
+	                  const std::string &type,
+	                  const std::string &value,
+	                  const std::string &comment);
 
-  std::string getName();
-  std::string getValue();
-  std::string getType();
-  std::string getComment();
+	std::string getName();
+	std::string getValue();
+	std::string getType();
+	std::string getComment();
 
- private:
-  std::string name;
-  std::string type;
-  std::string value;
-  std::string comment;
+private:
+	std::string name;
+	std::string type;
+	std::string value;
+	std::string comment;
 };
 
 #endif

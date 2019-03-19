@@ -24,13 +24,14 @@
 #ifndef _UTILS_MISC_STRNDUP_H_
 #define _UTILS_MISC_STRNDUP_H_
 
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
-#if ! (defined(__USE_XOPEN2K8) || defined(__USE_GNU) || defined(__POSIX_VISIBLE) && __POSIX_VISIBLE >= 200809)
-#define COMPAT_STRNDUP_
+#if !(defined(__USE_XOPEN2K8) || defined(__USE_GNU) \
+      || defined(__POSIX_VISIBLE) && __POSIX_VISIBLE >= 200809)
+#	define COMPAT_STRNDUP_
 
-char * strndup(const char *s, size_t n);
+char *strndup(const char *s, size_t n);
 
 #endif
 

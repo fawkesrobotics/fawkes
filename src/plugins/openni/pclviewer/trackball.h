@@ -105,4 +105,4 @@ void tbMatrix();
 void tbReshape(int width, int height);
 void tbMouse(int button, int state, int x, int y);
 void tbMotion(int x, int y);
-void tbAnimate(GLboolean animate, void (* idle_func)() = 0);
+void tbAnimate(GLboolean animate, void (*idle_func)() = 0);

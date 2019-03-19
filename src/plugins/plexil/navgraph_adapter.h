@@ -26,31 +26,28 @@
 
 #include <InterfaceAdapter.hh>
 #include <Value.hh>
-
 #include <functional>
 #include <map>
 #include <string>
 
 namespace fawkes {
-	class BlackBoard;
-	class Logger;
-	class NavGraph;
-	class Position3DInterface;
-}
+class BlackBoard;
+class Logger;
+class NavGraph;
+class Position3DInterface;
+} // namespace fawkes
 
 /** Interface adapter to provide logging facilities. */
-class NavGraphPlexilAdapter
-	: public PLEXIL::InterfaceAdapter
+class NavGraphPlexilAdapter : public PLEXIL::InterfaceAdapter
 {
 public:
-	NavGraphPlexilAdapter(PLEXIL::AdapterExecInterface& execInterface);
-	NavGraphPlexilAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-	                      pugi::xml_node const xml);
+	NavGraphPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface);
+	NavGraphPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	NavGraphPlexilAdapter() = delete;
+	NavGraphPlexilAdapter()                              = delete;
 	NavGraphPlexilAdapter(const NavGraphPlexilAdapter &) = delete;
-	NavGraphPlexilAdapter & operator=(const NavGraphPlexilAdapter &) = delete;
+	NavGraphPlexilAdapter &operator=(const NavGraphPlexilAdapter &) = delete;
 	/// @endcond
 
 	virtual ~NavGraphPlexilAdapter();
@@ -62,26 +59,25 @@ public:
 	virtual bool shutdown();
 
 	void executeCommand(PLEXIL::Command *cmd);
-  void invokeAbort(PLEXIL::Command *cmd);
+	void invokeAbort(PLEXIL::Command *cmd);
 
 private:
-	void navgraph_get_nodes(PLEXIL::Command* cmd);
-	void navgraph_cost_to(PLEXIL::Command* cmd);
-	void navgraph_cost_between(PLEXIL::Command* cmd);
+	void navgraph_get_nodes(PLEXIL::Command *cmd);
+	void navgraph_cost_to(PLEXIL::Command *cmd);
+	void navgraph_cost_between(PLEXIL::Command *cmd);
 
 private:
-	fawkes::Logger *               logger_;
-	fawkes::BlackBoard *           blackboard_;
-	fawkes::Position3DInterface *  pose_if_;
+	fawkes::Logger *             logger_;
+	fawkes::BlackBoard *         blackboard_;
+	fawkes::Position3DInterface *pose_if_;
 
-	fawkes::LockPtr<fawkes::NavGraph>  navgraph_;
+	fawkes::LockPtr<fawkes::NavGraph> navgraph_;
 
-	std::map<std::string, std::function<void (PLEXIL::Command*)>> commands_;
-
+	std::map<std::string, std::function<void(PLEXIL::Command *)>> commands_;
 };
 
 extern "C" {
-  void initNavGraphAdapter();
+void initNavGraphAdapter();
 }
 
 #endif

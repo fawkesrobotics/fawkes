@@ -35,23 +35,22 @@ class ROI;
 
 class Shape
 {
- public:
-  virtual ~Shape();
+public:
+	virtual ~Shape();
 
-  virtual void setMargin( unsigned int margin )                      = 0;
-  virtual bool isClose(unsigned int in_roi_x, unsigned int in_roi_y) = 0;
-
+	virtual void setMargin(unsigned int margin)                        = 0;
+	virtual bool isClose(unsigned int in_roi_x, unsigned int in_roi_y) = 0;
 };
 
 class ShapeModel
 {
 public:
-  virtual   ~ShapeModel();
-  virtual   std::string	           getName(void)	const	                  = 0;
-  virtual   int		           parseImage( unsigned char* buffer, ROI *roi )  = 0;
-  virtual   int		           getShapeCount(void) const			  = 0;
-  virtual   Shape*	           getShape(int id) const			  = 0;
-  virtual   Shape*	           getMostLikelyShape(void) const		  = 0;
+	virtual ~ShapeModel();
+	virtual std::string getName(void) const                         = 0;
+	virtual int         parseImage(unsigned char *buffer, ROI *roi) = 0;
+	virtual int         getShapeCount(void) const                   = 0;
+	virtual Shape *     getShape(int id) const                      = 0;
+	virtual Shape *     getMostLikelyShape(void) const              = 0;
 };
 
 } // end namespace firevision

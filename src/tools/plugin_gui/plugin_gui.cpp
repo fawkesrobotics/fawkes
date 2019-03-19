@@ -22,6 +22,7 @@
  */
 
 #include "plugin_gui.h"
+
 #include <gui_utils/plugin_tree_view.h>
 #include <gui_utils/service_selector_cbe.h>
 
@@ -40,42 +41,44 @@ using namespace fawkes;
  * @param cobject C base object
  * @param builder Gtk Builder
  */
-PluginGuiGtkWindow::PluginGuiGtkWindow(BaseObjectType* cobject,
-				       const Glib::RefPtr<Gtk::Builder> builder)
-  : Gtk::Window(cobject)
+PluginGuiGtkWindow::PluginGuiGtkWindow(BaseObjectType *                 cobject,
+                                       const Glib::RefPtr<Gtk::Builder> builder)
+: Gtk::Window(cobject)
 {
-  builder->get_widget("stbStatus", m_stb_status);
-  builder->get_widget_derived("trvPlugins", m_trv_plugins);
+	builder->get_widget("stbStatus", m_stb_status);
+	builder->get_widget_derived("trvPlugins", m_trv_plugins);
 
 #ifdef HAVE_GCONFMM
-  m_trv_plugins->set_gconf_prefix(GCONF_PREFIX);
+	m_trv_plugins->set_gconf_prefix(GCONF_PREFIX);
 #endif
 
-  m_service_selector = new ServiceSelectorCBE(builder, "cbeHosts", "btnConnect", "wndMain");
-  m_trv_plugins->set_network_client( m_service_selector->get_network_client() );
+	m_service_selector = new ServiceSelectorCBE(builder, "cbeHosts", "btnConnect", "wndMain");
+	m_trv_plugins->set_network_client(m_service_selector->get_network_client());
 
-  m_service_selector->signal_connected().connect(sigc::mem_fun(*this, &PluginGuiGtkWindow::on_connect));
-  m_service_selector->signal_disconnected().connect(sigc::mem_fun(*this, &PluginGuiGtkWindow::on_disconnect));
+	m_service_selector->signal_connected().connect(
+	  sigc::mem_fun(*this, &PluginGuiGtkWindow::on_connect));
+	m_service_selector->signal_disconnected().connect(
+	  sigc::mem_fun(*this, &PluginGuiGtkWindow::on_disconnect));
 
-  m_stb_status->push("Started");
+	m_stb_status->push("Started");
 }
 
 /** Destructor. */
 PluginGuiGtkWindow::~PluginGuiGtkWindow()
 {
-  m_stb_status->push("Exiting");
+	m_stb_status->push("Exiting");
 }
 
 /** Connected handler. */
 void
 PluginGuiGtkWindow::on_connect()
 {
-  this->set_title(std::string("Fawkes Plugin Tool @ ") + m_service_selector->get_name());
+	this->set_title(std::string("Fawkes Plugin Tool @ ") + m_service_selector->get_name());
 }
 
 /** Disconnected handler. */
 void
 PluginGuiGtkWindow::on_disconnect()
 {
-  this->set_title("Fawkes Plugin Tool");
+	this->set_title("Fawkes Plugin Tool");
 }

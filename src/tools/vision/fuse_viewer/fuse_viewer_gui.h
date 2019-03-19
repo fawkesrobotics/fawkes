@@ -23,67 +23,64 @@
 #ifndef _FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H_
 #define _FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H_
 
-#define FUSE_PLUGIN_NAME      "fvfountain"
-#define FOUNTAIN_PORT_PATH    "/firevision/fountain/tcp_port"
+#define FUSE_PLUGIN_NAME "fvfountain"
+#define FOUNTAIN_PORT_PATH "/firevision/fountain/tcp_port"
 
 #include <netcomm/dns-sd/avahi_thread.h>
 
+#include <gtkmm.h>
 #include <map>
 
-#include <gtkmm.h>
-
 namespace firevision {
-  class NetworkCamera;
-  class FuseImageListWidget;
-  class ImageWidget;
-}
+class NetworkCamera;
+class FuseImageListWidget;
+class ImageWidget;
+} // namespace firevision
 namespace fawkes {
-  class AvahiDispatcher;
+class AvahiDispatcher;
 }
 
 class FuseViewerGtkWindow : public Gtk::Window
 {
 public:
-  FuseViewerGtkWindow(BaseObjectType* cobject,
-                      const Glib::RefPtr<Gtk::Builder> builder);
-  virtual ~FuseViewerGtkWindow();
+	FuseViewerGtkWindow(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> builder);
+	virtual ~FuseViewerGtkWindow();
 
 private:
-  void on_service_added(fawkes::NetworkService* service);
-  void on_service_removed(fawkes::NetworkService* service);
+	void on_service_added(fawkes::NetworkService *service);
+	void on_service_removed(fawkes::NetworkService *service);
 
-  void on_fuse_image_selected();
-  void on_auto_save_cbt_change();
-  void on_save_type_change();
-  void on_save_image_clicked();
+	void on_fuse_image_selected();
+	void on_auto_save_cbt_change();
+	void on_save_type_change();
+	void on_save_image_clicked();
 
-  void close_image();
-  void set_status(std::string img_id, std::string host = "", unsigned short port = 0);
+	void close_image();
+	void set_status(std::string img_id, std::string host = "", unsigned short port = 0);
 
 private:
-  // widgets
-  Gtk::ScrolledWindow     *image_list_scroll_;
-  Gtk::Viewport           *image_viewport_;
-  Gtk::AspectFrame        *save_box_;
-  Gtk::ComboBoxText       *save_type_;
-  Gtk::FileChooserButton  *save_filechooser_;
-  Gtk::CheckButton        *auto_save_;
-  Gtk::Button             *save_btn_;
-  Gtk::Statusbar          *statusbar_;
+	// widgets
+	Gtk::ScrolledWindow *   image_list_scroll_;
+	Gtk::Viewport *         image_viewport_;
+	Gtk::AspectFrame *      save_box_;
+	Gtk::ComboBoxText *     save_type_;
+	Gtk::FileChooserButton *save_filechooser_;
+	Gtk::CheckButton *      auto_save_;
+	Gtk::Button *           save_btn_;
+	Gtk::Statusbar *        statusbar_;
 
-  fawkes::AvahiThread     *avahi_thread_;
-  fawkes::AvahiDispatcher *avahi_dispatcher_;
+	fawkes::AvahiThread *    avahi_thread_;
+	fawkes::AvahiDispatcher *avahi_dispatcher_;
 
-  firevision::FuseImageListWidget     *img_list_widget_;
+	firevision::FuseImageListWidget *img_list_widget_;
 
-  firevision::ImageWidget             *img_widget_;
-  firevision::NetworkCamera           *cam_;
+	firevision::ImageWidget *  img_widget_;
+	firevision::NetworkCamera *cam_;
 
+	std::map<std::string, std::string> host_service_map_;
 
-  std::map<std::string, std::string> host_service_map_;
-
-  std::string    cur_service_name_;
-  unsigned int   img_num_;
+	std::string  cur_service_name_;
+	unsigned int img_num_;
 };
 
 #endif /* FIREVISION_TOOLS_LOC_VIEWER_LOC_VIEWER_GUI_H__ */

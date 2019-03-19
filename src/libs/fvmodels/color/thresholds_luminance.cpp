@@ -22,9 +22,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <iostream>
-
 #include <fvmodels/color/thresholds_luminance.h>
+
+#include <iostream>
 
 using namespace std;
 
@@ -40,38 +40,33 @@ namespace firevision {
  */
 ColorModelLuminance::ColorModelLuminance(const unsigned int threshold_white_low)
 {
-  threshold_white_low_ = threshold_white_low;
+	threshold_white_low_ = threshold_white_low;
 }
 
 color_t
-ColorModelLuminance::determine(unsigned int y,
-				unsigned int u,
-				unsigned int v) const
+ColorModelLuminance::determine(unsigned int y, unsigned int u, unsigned int v) const
 {
-  if ( y >= threshold_white_low_) {
-    return C_WHITE;
-  }
-  else {
-    return C_OTHER;
-  }
+	if (y >= threshold_white_low_) {
+		return C_WHITE;
+	} else {
+		return C_OTHER;
+	}
 }
 
 const char *
 ColorModelLuminance::get_name()
 {
-  return "ColorModelLuminance";
+	return "ColorModelLuminance";
 }
-
 
 /** Print the thresholds to stdout.
  */
 void
 ColorModelLuminance::print_thresholds()
 {
-  cout << "ColorModelLuminance" << endl
-       << "==========================================================" << endl
-       << "White:  y_low=" << threshold_white_low_
-       << endl;
+	cout << "ColorModelLuminance" << endl
+	     << "==========================================================" << endl
+	     << "White:  y_low=" << threshold_white_low_ << endl;
 }
 
 } // end namespace firevision

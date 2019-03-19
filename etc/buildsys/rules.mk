@@ -322,6 +322,11 @@ $(LIBDIR)/%.so: $$(OBJS_$$(call nametr,$$*))
 ### Include build statistics script
 include $(BUILDSYSDIR)/stats.mk
 
+### Include formatting targets
+ifneq ($(subst $(abspath $(TOP_BASEDIR)),,$(PWD)),)
+  include $(BUILDSYSDIR)/format.mk
+endif
+
 ### Check if there are special additions
 ifneq ($(wildcard $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk),)
   include $(BUILDSYSDIR)/btypes/rules_$(BUILD_TYPE).mk

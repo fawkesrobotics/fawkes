@@ -23,57 +23,61 @@
 #ifndef _PLUGINS_OPENNI_DEPTH_THREAD_H_
 #define _PLUGINS_OPENNI_DEPTH_THREAD_H_
 
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
-#include <aspect/blocked_timing.h>
 #include <plugins/openni/aspect/openni.h>
 
 // OpenNI relies on GNU extension to detect Linux
 #if defined(__linux__) && not defined(linux)
-#  define linux true
+#	define linux true
 #endif
 #if defined(__i386__) && not defined(i386)
-#  define i386 true
+#	define i386 true
 #endif
 #include <XnCppWrapper.h>
 
 namespace firevision {
-  class SharedMemoryImageBuffer;
+class SharedMemoryImageBuffer;
 }
 
-class OpenNiDepthThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::OpenNiAspect
+class OpenNiDepthThread : public fawkes::Thread,
+                          public fawkes::BlockedTimingAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::ClockAspect,
+                          public fawkes::OpenNiAspect
 {
- public:
-  OpenNiDepthThread();
-  virtual ~OpenNiDepthThread();
+public:
+	OpenNiDepthThread();
+	virtual ~OpenNiDepthThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  xn::DepthGenerator                  *depth_gen_;
-  xn::DepthMetaData                   *depth_md_;
+private:
+	xn::DepthGenerator *depth_gen_;
+	xn::DepthMetaData * depth_md_;
 
-  firevision::SharedMemoryImageBuffer *depth_buf_;
+	firevision::SharedMemoryImageBuffer *depth_buf_;
 
-  size_t                               depth_bufsize_;
-  unsigned int                         depth_width_;
-  unsigned int                         depth_height_;
+	size_t       depth_bufsize_;
+	unsigned int depth_width_;
+	unsigned int depth_height_;
 
-  fawkes::Time 			      *capture_start_;
+	fawkes::Time *capture_start_;
 };
 
 #endif

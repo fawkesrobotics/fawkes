@@ -31,39 +31,39 @@ namespace firevision {
 
 class CameraControlColor : virtual public CameraControl
 {
- public:
-  virtual ~CameraControlColor();
+public:
+	virtual ~CameraControlColor();
 
-  virtual bool         auto_gain()                                      = 0;
-  virtual void         set_auto_gain(bool enabled)                      = 0;
-  virtual bool         auto_white_balance()                             = 0;
-  virtual void         set_auto_white_balance(bool enabled)             = 0;
-  virtual unsigned int exposure_auto()                                  = 0;
-  virtual void         set_exposure_auto(unsigned int enabled)          = 0;
-  virtual void         set_auto_all(bool enabled);
+	virtual bool         auto_gain()                             = 0;
+	virtual void         set_auto_gain(bool enabled)             = 0;
+	virtual bool         auto_white_balance()                    = 0;
+	virtual void         set_auto_white_balance(bool enabled)    = 0;
+	virtual unsigned int exposure_auto()                         = 0;
+	virtual void         set_exposure_auto(unsigned int enabled) = 0;
+	virtual void         set_auto_all(bool enabled);
 
-  virtual int          red_balance()                                    = 0;
-  virtual void         set_red_balance(int red_balance)                 = 0;
-  virtual int          blue_balance()                                   = 0;
-  virtual void         set_blue_balance(int blue_balance)               = 0;
+	virtual int  red_balance()                      = 0;
+	virtual void set_red_balance(int red_balance)   = 0;
+	virtual int  blue_balance()                     = 0;
+	virtual void set_blue_balance(int blue_balance) = 0;
 
-  virtual int          u_balance()                                      = 0;
-  virtual void         set_u_balance(int u_balance)                     = 0;
-  virtual int          v_balance()                                      = 0;
-  virtual void         set_v_balance(int v_balance)                     = 0;
+	virtual int  u_balance()                  = 0;
+	virtual void set_u_balance(int u_balance) = 0;
+	virtual int  v_balance()                  = 0;
+	virtual void set_v_balance(int v_balance) = 0;
 
-  virtual unsigned int brightness()                                     = 0;
-  virtual void         set_brightness(unsigned int brightness)          = 0;
-  virtual unsigned int contrast()                                       = 0;
-  virtual void         set_contrast(unsigned int contrast)              = 0;
-  virtual unsigned int saturation()                                     = 0;
-  virtual void         set_saturation(unsigned int saturation)          = 0;
-  virtual int          hue()                                            = 0;
-  virtual void         set_hue(int hue)                                 = 0;
-  virtual unsigned int exposure()                                       = 0;
-  virtual void         set_exposure(unsigned int exposure)              = 0;
-  virtual unsigned int gain()                                           = 0;
-  virtual void         set_gain(unsigned int gain)                      = 0;
+	virtual unsigned int brightness()                            = 0;
+	virtual void         set_brightness(unsigned int brightness) = 0;
+	virtual unsigned int contrast()                              = 0;
+	virtual void         set_contrast(unsigned int contrast)     = 0;
+	virtual unsigned int saturation()                            = 0;
+	virtual void         set_saturation(unsigned int saturation) = 0;
+	virtual int          hue()                                   = 0;
+	virtual void         set_hue(int hue)                        = 0;
+	virtual unsigned int exposure()                              = 0;
+	virtual void         set_exposure(unsigned int exposure)     = 0;
+	virtual unsigned int gain()                                  = 0;
+	virtual void         set_gain(unsigned int gain)             = 0;
 };
 
 } // end namespace firevision

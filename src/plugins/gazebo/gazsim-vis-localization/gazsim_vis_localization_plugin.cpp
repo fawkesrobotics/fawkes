@@ -18,9 +18,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "gazsim_vis_localization_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,16 +31,14 @@ using namespace fawkes;
  */
 class GazsimVisLocalizationPlugin : public fawkes::Plugin
 {
- public:
-
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit GazsimVisLocalizationPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new VisLocalizationThread());
-  }
+	explicit GazsimVisLocalizationPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new VisLocalizationThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Visualization of the Localization in Gazebo")

@@ -23,8 +23,8 @@
 #ifndef _FIREVISION_FILTERS_GAUSS_H_
 #define _FIREVISION_FILTERS_GAUSS_H_
 
-#if ! (defined(HAVE_IPP) || defined(HAVE_OPENCV))
-#error "Neither IPP nor OpenCV installed"
+#if !(defined(HAVE_IPP) || defined(HAVE_OPENCV))
+#	error "Neither IPP nor OpenCV installed"
 #endif
 
 #include <fvfilters/filter.h>
@@ -33,10 +33,10 @@ namespace firevision {
 
 class FilterGauss : public Filter
 {
- public:
-  FilterGauss();
+public:
+	FilterGauss();
 
-  virtual void apply();
+	virtual void apply();
 };
 
 } // end namespace firevision

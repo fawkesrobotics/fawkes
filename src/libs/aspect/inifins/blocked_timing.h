@@ -30,11 +30,11 @@ namespace fawkes {
 
 class BlockedTimingAspectIniFin : public AspectIniFin
 {
- public:
-  BlockedTimingAspectIniFin();
+public:
+	BlockedTimingAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 };
 
 } // end namespace fawkes

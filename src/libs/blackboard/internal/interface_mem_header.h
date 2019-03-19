@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  interface_mem_header.h - BlackBoard interface memory header
  *
@@ -33,15 +33,16 @@ namespace fawkes {
 /** This struct is used as header for interfaces in memory chunks.
  * This header is stored at the beginning of each allocated memory chunk.
  */
-typedef struct {
-  char             type[INTERFACE_TYPE_SIZE_];	/**< interface type */
-  char             id[INTERFACE_ID_SIZE_];	/**< interface identifier */
-  unsigned char    hash[INTERFACE_HASH_SIZE_];	/**< interface type version hash */
-  uint16_t         flag_writer_active :  1;	/**< 1 if there is a writer, 0 otherwise */
-  uint16_t         flag_reserved      : 15;	/**< reserved for future use */
-  uint16_t         num_readers;			/**< number of active readers */
-  uint32_t         refcount;			/**< reference count */
-  uint32_t         serial;			/**< memory serial */
+typedef struct
+{
+	char          type[INTERFACE_TYPE_SIZE_]; /**< interface type */
+	char          id[INTERFACE_ID_SIZE_];     /**< interface identifier */
+	unsigned char hash[INTERFACE_HASH_SIZE_]; /**< interface type version hash */
+	uint16_t      flag_writer_active : 1;     /**< 1 if there is a writer, 0 otherwise */
+	uint16_t      flag_reserved : 15;         /**< reserved for future use */
+	uint16_t      num_readers;                /**< number of active readers */
+	uint32_t      refcount;                   /**< reference count */
+	uint32_t      serial;                     /**< memory serial */
 } interface_header_t;
 
 } // end namespace fawkes

@@ -19,17 +19,17 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-
 #ifndef _LIBS_WEBVIEW_ROUTER_H_
 #define _LIBS_WEBVIEW_ROUTER_H_
 
 #include <core/exceptions/software.h>
+#include <webview/request.h>
 
-#include <string>
-#include <map>
 #include <algorithm>
 #include <list>
+#include <map>
 #include <regex>
+#include <string>
 
 namespace fawkes {
 
@@ -42,7 +42,7 @@ namespace fawkes {
 template <typename T>
 class WebviewRouter
 {
- public:
+public:
 	/** Find a handler.
 	 * @param request incoming request object
 	 * @param path_args upon successful completion, will contain mappings from
@@ -51,14 +51,14 @@ class WebviewRouter
 	 * @exception NullPointerException thrown if no handler could be found
 	 */
 	T &
-	find_handler(const WebRequest *request, std::map<std::string, std::string>& path_args)
+	find_handler(const WebRequest *request, std::map<std::string, std::string> &path_args)
 	{
-		auto ri = std::find_if(routes_.begin(), routes_.end(),
-		                       [this, &path_args, request](auto &r) -> bool {
-			                       //printf("Comparing %s to %s\n", request->url().c_str(), std::get<2>(r).c_str());
-			                       return (std::get<1>(r) == request->method() &&
-			                               this->path_match(request->url(), std::get<3>(r), path_args));
-		                       });
+		auto ri =
+		  std::find_if(routes_.begin(), routes_.end(), [this, &path_args, request](auto &r) -> bool {
+			  //printf("Comparing %s to %s\n", request->url().c_str(), std::get<2>(r).c_str());
+			  return (std::get<1>(r) == request->method()
+			          && this->path_match(request->url(), std::get<3>(r), path_args));
+		  });
 		if (ri == routes_.end()) {
 			throw NullPointerException("No handler found");
 		}
@@ -74,14 +74,14 @@ class WebviewRouter
 	 * @exception NullPointerException thrown if no handler could be found
 	 */
 	T &
-	find_handler(WebRequest::Method method, const std::string& path,
-	             std::map<std::string, std::string>& path_args)
+	find_handler(WebRequest::Method                  method,
+	             const std::string &                 path,
+	             std::map<std::string, std::string> &path_args)
 	{
-		auto ri = std::find_if(routes_.begin(), routes_.end(),
-		                       [this, &path_args, &method, &path](auto &r) -> bool {
-			                       return (std::get<1>(r) == method &&
-			                               this->path_match(path, std::get<3>(r), path_args));
-		                       });
+		auto ri = std::find_if(
+		  routes_.begin(), routes_.end(), [this, &path_args, &method, &path](auto &r) -> bool {
+			  return (std::get<1>(r) == method && this->path_match(path, std::get<3>(r), path_args));
+		  });
 		if (ri == routes_.end()) {
 			throw NullPointerException("No handler found");
 		}
@@ -102,18 +102,16 @@ class WebviewRouter
 	void
 	add(WebRequest::Method method, const std::string &path, T handler, int weight)
 	{
-		auto ri = std::find_if(routes_.begin(), routes_.end(),
-		                       [method, &path, &weight](auto &r) -> bool {
-			                       return (std::get<0>(r) == weight &&
-			                               std::get<1>(r) == method &&
-			                               std::get<2>(r) == path);
-		                       });
+		auto ri =
+		  std::find_if(routes_.begin(), routes_.end(), [method, &path, &weight](auto &r) -> bool {
+			  return (std::get<0>(r) == weight && std::get<1>(r) == method && std::get<2>(r) == path);
+		  });
 		if (ri != routes_.end()) {
 			throw Exception("URL handler already registered for %s", path.c_str());
 		}
 		routes_.push_back(std::make_tuple(weight, method, path, gen_regex(path), handler));
-		routes_.sort([](const auto &a, const auto &b) -> bool
-		             { return (std::get<0>(a) < std::get<0>(b)); });
+		routes_.sort(
+		  [](const auto &a, const auto &b) -> bool { return (std::get<0>(a) < std::get<0>(b)); });
 	}
 
 	/** Add a handler.
@@ -130,7 +128,7 @@ class WebviewRouter
 	{
 		add(method, path, handler, 0);
 	}
-	
+
 	/** Remove a handler.
 	 * @param method HTTP method to match for
 	 * @param path path pattern that equals the one given when adding.
@@ -138,21 +136,19 @@ class WebviewRouter
 	void
 	remove(WebRequest::Method method, const std::string &path)
 	{
-		auto ri = std::find_if(routes_.begin(), routes_.end(),
-		                       [method, &path](auto &r) -> bool {
-			                       return (std::get<1>(r) == method &&
-			                               std::get<2>(r) == path);
-		                       });
+		auto ri = std::find_if(routes_.begin(), routes_.end(), [method, &path](auto &r) -> bool {
+			return (std::get<1>(r) == method && std::get<2>(r) == path);
+		});
 		if (ri != routes_.end()) {
 			routes_.erase(ri);
 		}
 	}
 
- private:
+private:
 	typedef std::pair<std::regex, std::vector<std::string>> path_regex;
 
 	std::pair<std::regex, std::vector<std::string>>
-		gen_regex(const std::string &  path)
+	gen_regex(const std::string &path)
 	{
 		std::string::size_type pos = 0;
 
@@ -161,10 +157,12 @@ class WebviewRouter
 		}
 		if ((pos = path.find_first_of("[]()^$")) != std::string::npos) {
 			throw Exception("Found illegal character '%c' at position '%zu' in '%s'",
-			                path[pos], pos, path.c_str());
+			                path[pos],
+			                pos,
+			                path.c_str());
 		}
 
-		std::regex to_re("\\{([^+*\\}]+?)[+*]?\\}");
+		std::regex  to_re("\\{([^+*\\}]+?)[+*]?\\}");
 		std::string m_path = path;
 		// escape special characters for regex
 		pos = 0;
@@ -174,22 +172,22 @@ class WebviewRouter
 		}
 		pos = 0;
 		while ((pos = m_path.find_first_of("+*", pos)) != std::string::npos) {
-			if (pos < m_path.length() - 1 && m_path[pos+1] != '}') {
-				m_path.replace(pos, 1, std::string("\\")+m_path[pos]);
+			if (pos < m_path.length() - 1 && m_path[pos + 1] != '}') {
+				m_path.replace(pos, 1, std::string("\\") + m_path[pos]);
 				pos += 2;
 			} else {
 				pos += 1;
 			}
 		}
-		std::string re_url;
-		std::smatch match;
+		std::string              re_url;
+		std::smatch              match;
 		std::vector<std::string> match_indexes;
 		while (regex_search(m_path, match, to_re)) {
 			std::string full_match = match[0];
 			re_url += match.prefix();
-			if (full_match[full_match.length()-2] == '+') {
+			if (full_match[full_match.length() - 2] == '+') {
 				re_url += "(.+?)";
-			} else if (full_match[full_match.length()-2] == '*') {
+			} else if (full_match[full_match.length() - 2] == '*') {
 				re_url += "(.*)";
 			} else {
 				re_url += "([^/]+?)";
@@ -202,15 +200,17 @@ class WebviewRouter
 
 		return std::make_pair(std::regex(re_url), match_indexes);
 	}
-	
+
 	/** Check if an actual path matches an API path pattern.
 	 * @param url requested
 	 * @param api_path configured API path to check
 	 * @param params object to set argument mappings
 	 * @return true if the path cold be matched, false otherwise.
 	 */
-	bool path_match(const std::string & url, const path_regex &path_re,
-	                std::map<std::string, std::string>& path_args)
+	bool
+	path_match(const std::string &                 url,
+	           const path_regex &                  path_re,
+	           std::map<std::string, std::string> &path_args)
 	{
 		std::smatch matches;
 		if (std::regex_match(url, matches, path_re.first)) {
@@ -219,15 +219,15 @@ class WebviewRouter
 			}
 			for (size_t i = 0; i < path_re.second.size(); ++i) {
 				//printf("arg %s = %s\n", path_re.second[i].c_str(), matches[i+1].str().c_str());
-				path_args[path_re.second[i]] = matches[i+1].str();
+				path_args[path_re.second[i]] = matches[i + 1].str();
 			}
 			return true;
 		} else {
 			return false;
-		}	
+		}
 	}
 
- private:
+private:
 	std::list<std::tuple<int, WebRequest::Method, std::string, path_regex, T>> routes_;
 };
 

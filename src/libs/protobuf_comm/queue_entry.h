@@ -37,28 +37,28 @@
 #ifndef _PROTOBUF_COMM_QUEUE_ENTRY_H_
 #define _PROTOBUF_COMM_QUEUE_ENTRY_H_
 
-#include <boost/asio.hpp>
 #include <array>
+#include <boost/asio.hpp>
 
 namespace protobuf_comm {
 
 /** Outgoing queue entry. */
-struct QueueEntry {
+struct QueueEntry
+{
 public:
-  /** Constructor. */
-  QueueEntry()
-  {
-    frame_header.header_version = PB_FRAME_V2;
-    frame_header.cipher         = PB_ENCRYPTION_NONE;
-  };
-  std::string  serialized_message;	///< serialized protobuf message
-  frame_header_t    frame_header;	///< Frame header (network byte order), never encrypted
-  frame_header_v1_t frame_header_v1;	///< Frame header (network byte order), never encrypted
-  message_header_t message_header;		///< Frame header (network byte order)
-  std::array<boost::asio::const_buffer, 3> buffers;	///< outgoing buffers
-  std::string   encrypted_message;	///< encrypted buffer if encryption is used
+	/** Constructor. */
+	QueueEntry()
+	{
+		frame_header.header_version = PB_FRAME_V2;
+		frame_header.cipher         = PB_ENCRYPTION_NONE;
+	};
+	std::string       serialized_message; ///< serialized protobuf message
+	frame_header_t    frame_header;       ///< Frame header (network byte order), never encrypted
+	frame_header_v1_t frame_header_v1;    ///< Frame header (network byte order), never encrypted
+	message_header_t  message_header;     ///< Frame header (network byte order)
+	std::array<boost::asio::const_buffer, 3> buffers; ///< outgoing buffers
+	std::string encrypted_message;                    ///< encrypted buffer if encryption is used
 };
-
 
 } // end namespace protobuf_comm
 

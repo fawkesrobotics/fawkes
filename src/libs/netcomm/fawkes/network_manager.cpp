@@ -21,19 +21,18 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <netcomm/fawkes/network_manager.h>
-#include <core/threading/thread_collector.h>
-
 #include <core/exceptions/system.h>
-#include <netcomm/fawkes/server_thread.h>
+#include <core/threading/thread_collector.h>
 #include <netcomm/fawkes/handler.h>
+#include <netcomm/fawkes/network_manager.h>
+#include <netcomm/fawkes/server_thread.h>
 #include <netcomm/utils/resolver.h>
 #ifdef HAVE_AVAHI
-#include <netcomm/dns-sd/avahi_thread.h>
-#include <netcomm/service_discovery/service.h>
+#	include <netcomm/dns-sd/avahi_thread.h>
+#	include <netcomm/service_discovery/service.h>
 #else
-#include <netcomm/service_discovery/dummy_service_publisher.h>
-#include <netcomm/service_discovery/dummy_service_browser.h>
+#	include <netcomm/service_discovery/dummy_service_browser.h>
+#	include <netcomm/service_discovery/dummy_service_publisher.h>
 #endif
 
 #include <cstdlib>
@@ -58,53 +57,50 @@ namespace fawkes {
  * @param fawkes_port port to listen on for Fawkes network connections
  * @param service_name Avahi service name for Fawkes network service
  */
-FawkesNetworkManager::FawkesNetworkManager(ThreadCollector *thread_collector,
-                                           bool enable_ipv4, bool enable_ipv6,
-                                           const std::string &listen_ipv4, const std::string &listen_ipv6,
+FawkesNetworkManager::FawkesNetworkManager(ThreadCollector *  thread_collector,
+                                           bool               enable_ipv4,
+                                           bool               enable_ipv6,
+                                           const std::string &listen_ipv4,
+                                           const std::string &listen_ipv6,
                                            unsigned short int fawkes_port,
-                                           const char *service_name)
+                                           const char *       service_name)
 {
-  fawkes_port_      = fawkes_port;
-  thread_collector_ = thread_collector;
-  fawkes_network_thread_ = new FawkesNetworkServerThread(enable_ipv4, enable_ipv6,
-                                                          listen_ipv4, listen_ipv6,
-                                                          fawkes_port_,
-                                                          thread_collector_);
-  thread_collector_->add(fawkes_network_thread_);
+	fawkes_port_           = fawkes_port;
+	thread_collector_      = thread_collector;
+	fawkes_network_thread_ = new FawkesNetworkServerThread(
+	  enable_ipv4, enable_ipv6, listen_ipv4, listen_ipv6, fawkes_port_, thread_collector_);
+	thread_collector_->add(fawkes_network_thread_);
 #ifdef HAVE_AVAHI
-  avahi_thread_          = new AvahiThread(enable_ipv4, enable_ipv6);
-  service_publisher_     = avahi_thread_;
-  service_browser_       = avahi_thread_;
-  thread_collector_->add(avahi_thread_);
-  nnresolver_ = new NetworkNameResolver(avahi_thread_);
-  NetworkService *fawkes_service = new NetworkService(nnresolver_, service_name,
-						      "_fawkes._tcp",
-						      fawkes_port_);
-  avahi_thread_->publish_service(fawkes_service);
-  delete fawkes_service;
+	avahi_thread_      = new AvahiThread(enable_ipv4, enable_ipv6);
+	service_publisher_ = avahi_thread_;
+	service_browser_   = avahi_thread_;
+	thread_collector_->add(avahi_thread_);
+	nnresolver_ = new NetworkNameResolver(avahi_thread_);
+	NetworkService *fawkes_service =
+	  new NetworkService(nnresolver_, service_name, "_fawkes._tcp", fawkes_port_);
+	avahi_thread_->publish_service(fawkes_service);
+	delete fawkes_service;
 #else
-  service_publisher_ = new DummyServicePublisher();
-  service_browser_   = new DummyServiceBrowser();
-  nnresolver_        = new NetworkNameResolver();
+	service_publisher_ = new DummyServicePublisher();
+	service_browser_   = new DummyServiceBrowser();
+	nnresolver_        = new NetworkNameResolver();
 #endif
 }
-
 
 /** Destructor. */
 FawkesNetworkManager::~FawkesNetworkManager()
 {
-  thread_collector_->remove(fawkes_network_thread_);
-  delete fawkes_network_thread_;
+	thread_collector_->remove(fawkes_network_thread_);
+	delete fawkes_network_thread_;
 #ifdef HAVE_AVAHI
-  thread_collector_->remove(avahi_thread_);
-  delete avahi_thread_;
+	thread_collector_->remove(avahi_thread_);
+	delete avahi_thread_;
 #else
-  delete service_publisher_;
-  delete service_browser_;
+	delete service_publisher_;
+	delete service_browser_;
 #endif
-  delete nnresolver_;
+	delete nnresolver_;
 }
-
 
 /** Get Fawkes network hub.
  * @return Fawkes network hub
@@ -112,9 +108,8 @@ FawkesNetworkManager::~FawkesNetworkManager()
 FawkesNetworkHub *
 FawkesNetworkManager::hub()
 {
-  return fawkes_network_thread_;
+	return fawkes_network_thread_;
 }
-
 
 /** Get network name resolver.
  * @return network name resolver
@@ -122,9 +117,8 @@ FawkesNetworkManager::hub()
 NetworkNameResolver *
 FawkesNetworkManager::nnresolver()
 {
-  return nnresolver_;
+	return nnresolver_;
 }
-
 
 /** Get service publisher
  * @return service publisher
@@ -132,9 +126,8 @@ FawkesNetworkManager::nnresolver()
 ServicePublisher *
 FawkesNetworkManager::service_publisher()
 {
-  return service_publisher_;
+	return service_publisher_;
 }
-
 
 /** Get service browser.
  * @return service browser
@@ -142,7 +135,7 @@ FawkesNetworkManager::service_publisher()
 ServiceBrowser *
 FawkesNetworkManager::service_browser()
 {
-  return service_browser_;
+	return service_browser_;
 }
 
 /** Get Fawkes TCP port.
@@ -151,8 +144,7 @@ FawkesNetworkManager::service_browser()
 unsigned short int
 FawkesNetworkManager::fawkes_port() const
 {
-  return fawkes_port_;
+	return fawkes_port_;
 }
-
 
 } // end namespace fawkes

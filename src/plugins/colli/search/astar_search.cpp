@@ -21,15 +21,15 @@
  */
 
 #include "astar_search.h"
+
 #include "astar.h"
 #include "og_laser.h"
 
-#include <utils/math/types.h>
-#include <logging/logger.h>
 #include <config/config.h>
+#include <logging/logger.h>
+#include <utils/math/types.h>
 
-namespace fawkes
-{
+namespace fawkes {
 
 /** @class search <plugins/colli/search/astar_search.h>
  * This class tries to translate the found plan to interpreteable
@@ -42,15 +42,14 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration.
  */
-Search::Search( LaserOccupancyGrid * occ_grid, Logger* logger, Configuration* config)
- : AbstractSearch( occ_grid, logger ),
-   logger_( logger )
+Search::Search(LaserOccupancyGrid *occ_grid, Logger *logger, Configuration *config)
+: AbstractSearch(occ_grid, logger), logger_(logger)
 {
-  logger_->log_debug("search", "(Constructor): Entering");
-  std::string cfg_prefix = "/plugins/colli/search/";
-  cfg_search_line_allowed_cost_max_  = config->get_int((cfg_prefix + "line/cost_max").c_str());
-  astar_.reset(new AStarColli(occ_grid, logger, config));
-  logger_->log_debug("search", "(Constructor): Exiting");
+	logger_->log_debug("search", "(Constructor): Entering");
+	std::string cfg_prefix            = "/plugins/colli/search/";
+	cfg_search_line_allowed_cost_max_ = config->get_int((cfg_prefix + "line/cost_max").c_str());
+	astar_.reset(new AStarColli(occ_grid, logger, config));
+	logger_->log_debug("search", "(Constructor): Exiting");
 }
 
 /** Destructor */
@@ -66,40 +65,39 @@ Search::~Search()
  * @param target_y Target y position in grid
    */
 void
-Search::update( int robo_x, int robo_y, int target_x, int target_y )
+Search::update(int robo_x, int robo_y, int target_x, int target_y)
 {
-  updated_successful_ = false;
+	updated_successful_ = false;
 
-  // check, if a position is in an obstacle
-  robo_position_    = point_t( robo_x, robo_y );
-  local_target_     = point_t( robo_x, robo_y );
-  local_trajec_ = point_t( robo_x, robo_y );
+	// check, if a position is in an obstacle
+	robo_position_ = point_t(robo_x, robo_y);
+	local_target_  = point_t(robo_x, robo_y);
+	local_trajec_  = point_t(robo_x, robo_y);
 
-  if ( occ_grid_->get_prob( target_x, target_y ) == cell_costs_.occ ) {
-    int step_x = 1;  // initializing to 1
-    int step_y = 1;
-    if ( robo_x < target_x ) // if we search in the other direction, inverse it!
-      step_x = -1;
+	if (occ_grid_->get_prob(target_x, target_y) == cell_costs_.occ) {
+		int step_x = 1; // initializing to 1
+		int step_y = 1;
+		if (robo_x < target_x) // if we search in the other direction, inverse it!
+			step_x = -1;
 
-    if ( robo_y < target_y )
-      step_y = -1;
+		if (robo_y < target_y)
+			step_y = -1;
 
-    target_position_ = astar_->remove_target_from_obstacle( target_x, target_y, step_x, step_y );
+		target_position_ = astar_->remove_target_from_obstacle(target_x, target_y, step_x, step_y);
 
-  } else {
-    target_position_ = point_t( target_x, target_y );
-  }
+	} else {
+		target_position_ = point_t(target_x, target_y);
+	}
 
-  astar_->solve( robo_position_, target_position_, plan_ );
+	astar_->solve(robo_position_, target_position_, plan_);
 
-  if (plan_.size() > 0) {
-    updated_successful_ = true;
-    local_target_     = calculate_local_target();
-    local_target_     = adjust_waypoint( local_target_ );
-    local_trajec_ = calculate_local_trajec_point();
-  }
+	if (plan_.size() > 0) {
+		updated_successful_ = true;
+		local_target_       = calculate_local_target();
+		local_target_       = adjust_waypoint(local_target_);
+		local_trajec_       = calculate_local_trajec_point();
+	}
 }
-
 
 /** Check, if the update was successful or not.
  * precondition: update had to be called.
@@ -108,16 +106,16 @@ Search::update( int robo_x, int robo_y, int target_x, int target_y )
 bool
 Search::updated_successful()
 {
-  return updated_successful_;
+	return updated_successful_;
 }
 
 /** Get the current plan
  * @return vector containing all the points in the grid along the plan
  */
-std::vector<point_t>*
+std::vector<point_t> *
 Search::get_plan()
 {
-  return &plan_;
+	return &plan_;
 }
 
 /** Get the robot's position in the grid, used for the plan
@@ -126,7 +124,7 @@ Search::get_plan()
 point_t
 Search::get_robot_position()
 {
-  return robo_position_;
+	return robo_position_;
 }
 
 /* **************************************************************************** */
@@ -135,174 +133,162 @@ Search::get_robot_position()
 /* **************************************************************************** */
 /* **************************************************************************** */
 
-
-
 point_t
 Search::calculate_local_target()
 {
-  point_t target = robo_position_;
-  point_t prev   = robo_position_;
+	point_t target = robo_position_;
+	point_t prev   = robo_position_;
 
-  if( plan_.size() >= 2 ) {
-    for ( std::vector<point_t>::iterator it = plan_.begin()+1; it != plan_.end(); ++it ) {
-      prev = target;
-      target = *it;
+	if (plan_.size() >= 2) {
+		for (std::vector<point_t>::iterator it = plan_.begin() + 1; it != plan_.end(); ++it) {
+			prev   = target;
+			target = *it;
 
-      if( is_obstacle_between( robo_position_, target, cfg_search_line_allowed_cost_max_ ) ) {
-        return prev;
-      }
-    }
-    return point_t( plan_.back() );
+			if (is_obstacle_between(robo_position_, target, cfg_search_line_allowed_cost_max_)) {
+				return prev;
+			}
+		}
+		return point_t(plan_.back());
 
-  } else {
-    // return the current position if there is no plan.
-    return robo_position_;
-  }
+	} else {
+		// return the current position if there is no plan.
+		return robo_position_;
+	}
 }
-
 
 point_t
-Search::adjust_waypoint( const point_t &local_target )
+Search::adjust_waypoint(const point_t &local_target)
 {
-  return local_target;
+	return local_target;
 }
-
-
 
 // forward and backward plans should no longer make a difference in
 //   trajectory searching
 point_t
-Search::calculate_local_trajec_point( )
+Search::calculate_local_trajec_point()
 {
-  int x = robo_position_.x;
-  int y = robo_position_.y;
+	int x = robo_position_.x;
+	int y = robo_position_.y;
 
-  int max_occ = 10;
+	int max_occ = 10;
 
-  if( x < local_target_.x ) {
-    ++x;
-    while( ( x < (int)occ_grid_->get_width() )
-        && ( x <= local_target_.x )
-        && (!is_obstacle_between( point_t(x, y), local_target_, max_occ ))
-        && (!is_obstacle_between( robo_position_, point_t(x, y), max_occ ) ) )
-    {
-      ++x;
-    }
+	if (x < local_target_.x) {
+		++x;
+		while ((x < (int)occ_grid_->get_width()) && (x <= local_target_.x)
+		       && (!is_obstacle_between(point_t(x, y), local_target_, max_occ))
+		       && (!is_obstacle_between(robo_position_, point_t(x, y), max_occ))) {
+			++x;
+		}
 
-    if ( x == local_target_.x && y == local_target_.y )
-      return point_t( x, y );
-    else
-      return point_t( x-1, y );
+		if (x == local_target_.x && y == local_target_.y)
+			return point_t(x, y);
+		else
+			return point_t(x - 1, y);
 
-  } else {
-    --x;
-    while( ( x > 0 )
-        && ( x >= (int)local_target_.x )
-        && (!is_obstacle_between( point_t(x, y), local_target_, max_occ ))
-        && (!is_obstacle_between( robo_position_, point_t(x, y), max_occ ) ) )
-    {
-      --x;
-    }
+	} else {
+		--x;
+		while ((x > 0) && (x >= (int)local_target_.x)
+		       && (!is_obstacle_between(point_t(x, y), local_target_, max_occ))
+		       && (!is_obstacle_between(robo_position_, point_t(x, y), max_occ))) {
+			--x;
+		}
 
-    if ( (x == local_target_.x) && (y == local_target_.y) )
-      return point_t( x, y );
-    else
-      return point_t( x+1, y );
-  }
+		if ((x == local_target_.x) && (y == local_target_.y))
+			return point_t(x, y);
+		else
+			return point_t(x + 1, y);
+	}
 }
-
 
 // checks per raytracing, if an obstacle is between two points.
 bool
-Search::is_obstacle_between( const point_t &a, const point_t &b, const int maxcount )
+Search::is_obstacle_between(const point_t &a, const point_t &b, const int maxcount)
 {
-  if (a.x == b.x && a.y == b.y)
-    return false;
+	if (a.x == b.x && a.y == b.y)
+		return false;
 
-  int count = 0;
-  float prob = 0.0;
+	int   count = 0;
+	float prob  = 0.0;
 
-  int _xDirInt, _yDirInt;
-  int _actXGrid = a.x;
-  int endXGrid = b.x;
-  int dX = abs(endXGrid - _actXGrid);
-  ( endXGrid > _actXGrid ? _xDirInt = 1 : _xDirInt = -1 );
-  int _actYGrid = a.y;
-  int endYGrid = b.y;
-  ( endYGrid > _actYGrid ? _yDirInt = 1 : _yDirInt = -1 );
-  int dY = abs(endYGrid - _actYGrid);
+	int _xDirInt, _yDirInt;
+	int _actXGrid = a.x;
+	int endXGrid  = b.x;
+	int dX        = abs(endXGrid - _actXGrid);
+	(endXGrid > _actXGrid ? _xDirInt = 1 : _xDirInt = -1);
+	int _actYGrid = a.y;
+	int endYGrid  = b.y;
+	(endYGrid > _actYGrid ? _yDirInt = 1 : _yDirInt = -1);
+	int dY = abs(endYGrid - _actYGrid);
 
-  // decide whether direction is more x or more y, and run the algorithm
-  if (dX > dY) {
-    int _P, _dPr, _dPru;
-    _dPr  = dY<<1; // amount to increment decision if right is chosen (always)
-    _dPru = _dPr - (dX<<1); // amount to increment decision if up is chosen
-    _P    = _dPr - dX; // decision variable start value
+	// decide whether direction is more x or more y, and run the algorithm
+	if (dX > dY) {
+		int _P, _dPr, _dPru;
+		_dPr  = dY << 1;          // amount to increment decision if right is chosen (always)
+		_dPru = _dPr - (dX << 1); // amount to increment decision if up is chosen
+		_P    = _dPr - dX;        // decision variable start value
 
-    for ( ; (_actXGrid != endXGrid) && (_actYGrid != endYGrid); _actXGrid += _xDirInt ) {
-      if( _actXGrid < 0 || _actXGrid > occ_grid_->get_width()
-       || _actYGrid < 0 || _actXGrid > occ_grid_->get_height() )
-      {
-        return false;
-      }
+		for (; (_actXGrid != endXGrid) && (_actYGrid != endYGrid); _actXGrid += _xDirInt) {
+			if (_actXGrid < 0 || _actXGrid > occ_grid_->get_width() || _actYGrid < 0
+			    || _actXGrid > occ_grid_->get_height()) {
+				return false;
+			}
 
-      prob = occ_grid_->get_prob( _actXGrid, _actYGrid );
+			prob = occ_grid_->get_prob(_actXGrid, _actYGrid);
 
-      if ( prob == cell_costs_.free )
-        ;
-      else if ( prob == cell_costs_.occ )
-        return true;
-      else if ( prob == cell_costs_.far )
-        ++count;
-      else if ( prob == cell_costs_.mid )
-        count += 2;
-      else if ( prob == cell_costs_.near )
-        count += 4;
-      else
-        logger_->log_warn("AStar_search", "(line 261) ERROR IN RAYTRACER!");
+			if (prob == cell_costs_.free)
+				;
+			else if (prob == cell_costs_.occ)
+				return true;
+			else if (prob == cell_costs_.far)
+				++count;
+			else if (prob == cell_costs_.mid)
+				count += 2;
+			else if (prob == cell_costs_.near)
+				count += 4;
+			else
+				logger_->log_warn("AStar_search", "(line 261) ERROR IN RAYTRACER!");
 
-      if ( count > maxcount )
-        return true;
+			if (count > maxcount)
+				return true;
 
-      ( ( _P > 0 ) ? _actYGrid += _yDirInt, _P += _dPru : _P += _dPr );
-    }
+			((_P > 0) ? _actYGrid += _yDirInt, _P += _dPru : _P += _dPr);
+		}
 
-  } else {
-    int _P, _dPr, _dPru;
-    _dPr         = dX<<1; // amount to increment decision if right is chosen (always)
-    _dPru        = _dPr - (dY<<1); // amount to increment decision if up is chosen
-    _P           = _dPr - dY; // decision variable start value
+	} else {
+		int _P, _dPr, _dPru;
+		_dPr  = dX << 1;          // amount to increment decision if right is chosen (always)
+		_dPru = _dPr - (dY << 1); // amount to increment decision if up is chosen
+		_P    = _dPr - dY;        // decision variable start value
 
-    for ( ; (_actXGrid != endXGrid) && (_actYGrid != endYGrid); _actYGrid += _yDirInt ) {
-      if( _actXGrid < 0 || _actXGrid > occ_grid_->get_width()
-       || _actYGrid < 0 || _actXGrid > occ_grid_->get_height() )
-      {
-        return false;
-      }
+		for (; (_actXGrid != endXGrid) && (_actYGrid != endYGrid); _actYGrid += _yDirInt) {
+			if (_actXGrid < 0 || _actXGrid > occ_grid_->get_width() || _actYGrid < 0
+			    || _actXGrid > occ_grid_->get_height()) {
+				return false;
+			}
 
-      prob = occ_grid_->get_prob( _actXGrid, _actYGrid );
+			prob = occ_grid_->get_prob(_actXGrid, _actYGrid);
 
-      if ( prob == cell_costs_.free )
-        ;
-      else if ( prob == cell_costs_.occ )
-        return true;
-      else if ( prob == cell_costs_.far )
-        ++count;
-      else if ( prob == cell_costs_.mid )
-        count += 2;
-      else if ( prob == cell_costs_.near )
-        count += 4;
-      else
-        logger_->log_warn("AStar_search", "(line 295) ERROR IN RAYTRACER!");
+			if (prob == cell_costs_.free)
+				;
+			else if (prob == cell_costs_.occ)
+				return true;
+			else if (prob == cell_costs_.far)
+				++count;
+			else if (prob == cell_costs_.mid)
+				count += 2;
+			else if (prob == cell_costs_.near)
+				count += 4;
+			else
+				logger_->log_warn("AStar_search", "(line 295) ERROR IN RAYTRACER!");
 
-      if ( count > maxcount )
-        return true;
+			if (count > maxcount)
+				return true;
 
-      ( ( _P > 0 ) ? _actXGrid += _xDirInt, _P += _dPru : _P += _dPr );
-    }
-  }
+			((_P > 0) ? _actXGrid += _xDirInt, _P += _dPru : _P += _dPr);
+		}
+	}
 
-  return false; // there is no obstacle between those two points.
+	return false; // there is no obstacle between those two points.
 }
 
 } // namespace fawkes

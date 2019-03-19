@@ -24,8 +24,8 @@
 #ifndef _PLUGIN_LOADER_H_
 #define _PLUGIN_LOADER_H_
 
-#include <core/plugin.h>
 #include <core/exception.h>
+#include <core/plugin.h>
 
 #include <string>
 
@@ -37,53 +37,52 @@ class ModuleManager;
 
 class PluginLoadException : public Exception
 {
- public:
-  PluginLoadException(const char *plugin, const char *message);
-  PluginLoadException(const char *plugin, const char *message, Exception &e);
-  ~PluginLoadException() throw();
+public:
+	PluginLoadException(const char *plugin, const char *message);
+	PluginLoadException(const char *plugin, const char *message, Exception &e);
+	~PluginLoadException() throw();
 
-  std::string  plugin_name() const;
+	std::string plugin_name() const;
 
- private:
-  std::string plugin_name_;
+private:
+	std::string plugin_name_;
 };
 
 class PluginUnloadException : public Exception
 {
- public:
-  PluginUnloadException(const char *plugin_type, const char *add_msg = NULL);
+public:
+	PluginUnloadException(const char *plugin_type, const char *add_msg = NULL);
 };
 
+class PluginLoader
+{
+public:
+	PluginLoader(const char *plugin_base_dir, Configuration *config);
+	~PluginLoader();
 
-class PluginLoader {
- public:
+	Plugin *load(const char *plugin_name);
+	void    unload(Plugin *plugin);
 
-  PluginLoader(const char *plugin_base_dir, Configuration *config);
-  ~PluginLoader();
+	std::string get_description(const char *plugin_name);
 
-  Plugin * load(const char *plugin_name);
-  void     unload(Plugin *plugin);
+	bool is_loaded(const char *plugin_name);
 
-  std::string  get_description(const char *plugin_name);
+	ModuleManager *get_module_manager() const;
 
-  bool     is_loaded(const char *plugin_name);
+private:
+	Module *    open_module(const char *plugin_name);
+	std::string get_string_symbol(const char *plugin_name,
+	                              const char *symbol_name,
+	                              const char *section_name = ".fawkes_plugin");
+	Plugin *    create_instance(const char *plugin_name, Module *module);
 
-  ModuleManager *  get_module_manager() const;
+private:
+	class Data;
 
- private:
-  Module * open_module(const char *plugin_name);
-  std::string  get_string_symbol(const char *plugin_name, const char *symbol_name,
-				 const char *section_name = ".fawkes_plugin");
-  Plugin * create_instance(const char *plugin_name, Module *module);
-
- private:
-  class Data;
-
-  Data *d_;
-  Configuration    *config_;
-  std::string       plugin_base_dir_;
+	Data *         d_;
+	Configuration *config_;
+	std::string    plugin_base_dir_;
 };
-
 
 } // end namespace fawkes
 

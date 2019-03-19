@@ -19,14 +19,14 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <utils/system/getkey.h>
 #include <core/exception.h>
+#include <utils/system/getkey.h>
+
 #include <cerrno>
 #include <cstdio>
-#include <unistd.h>
-#include <termios.h>
 #include <fcntl.h>
-
+#include <termios.h>
+#include <unistd.h>
 
 namespace fawkes {
 
@@ -36,27 +36,25 @@ namespace fawkes {
  * libc manual, pages 105 and 117).
  */
 static void
-set_nonblock_flag()  
+set_nonblock_flag()
 {
-  int oldflags;
+	int oldflags;
 
-  oldflags  = fcntl(STDIN_FILENO, F_GETFL, 0);
-  oldflags |= O_NONBLOCK;
-  fcntl(STDIN_FILENO, F_SETFL, oldflags);
+	oldflags = fcntl(STDIN_FILENO, F_GETFL, 0);
+	oldflags |= O_NONBLOCK;
+	fcntl(STDIN_FILENO, F_SETFL, oldflags);
 }
-
 
 /** Clear non-blocking flag on STDIN. */
 static void
 clear_nonblock_flag()
 {
-  int oldflags;
-  
-  oldflags  = fcntl(STDIN_FILENO, F_GETFL, 0);
-  oldflags &= ~O_NONBLOCK; 
-  fcntl(STDIN_FILENO, F_SETFL, oldflags);
-}
+	int oldflags;
 
+	oldflags = fcntl(STDIN_FILENO, F_GETFL, 0);
+	oldflags &= ~O_NONBLOCK;
+	fcntl(STDIN_FILENO, F_SETFL, oldflags);
+}
 
 /** Get value of a single key-press non-blocking.
  * This method checks if a new keypress has happened and returns the value in
@@ -69,42 +67,43 @@ clear_nonblock_flag()
 char
 getkey(int timeout_decisecs)
 {
-  bool blocking = (timeout_decisecs != 0);
-  char buf[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-  struct termios tattr,              // new terminal attributes
-    saved_attributes;                // restore the original settings
-  
-  if (! blocking) set_nonblock_flag();
-  tcgetattr(STDIN_FILENO, &saved_attributes);   // save the original attributes
-  
-  tcgetattr(STDIN_FILENO, &tattr);        // set the new attributes
-  tattr.c_lflag   &= ~(ICANON);		  // Clear ICANON
-  tattr.c_lflag   &= ~(ECHO);		  // and ECHO
-  if (timeout_decisecs < 0) {
-    tattr.c_cc[VMIN] = 1;                 // wait for one byte
-    tattr.c_cc[VTIME]= 0;                 // no timeout
-  } else if (timeout_decisecs > 0) {
-    tattr.c_cc[VMIN] = 0;                 // do not wait for incoming bytes
-    tattr.c_cc[VTIME]= timeout_decisecs;  // timeout
-  } else {
-    tattr.c_cc[VMIN] = 0;                 // do not wait for incoming bytes
-    tattr.c_cc[VTIME]= 0;                 // no timeout
-  }
-  tcsetattr(STDIN_FILENO, TCSANOW, &tattr);
-  
-  ssize_t read_bytes = read(STDIN_FILENO, buf, 1);
-  
-  tcsetattr(STDIN_FILENO, TCSANOW, &saved_attributes);
-  if (! blocking) clear_nonblock_flag();
-  
-  if (read_bytes == 1) {
-    return buf[0];
-  } else if (read_bytes < 0) {
-    throw Exception(errno, "Failed to read key from keyboard (getkey)");
-  } else {
-    return 0;
-  }
+	bool           blocking = (timeout_decisecs != 0);
+	char           buf[10]  = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	struct termios tattr, // new terminal attributes
+	  saved_attributes;   // restore the original settings
+
+	if (!blocking)
+		set_nonblock_flag();
+	tcgetattr(STDIN_FILENO, &saved_attributes); // save the original attributes
+
+	tcgetattr(STDIN_FILENO, &tattr); // set the new attributes
+	tattr.c_lflag &= ~(ICANON);      // Clear ICANON
+	tattr.c_lflag &= ~(ECHO);        // and ECHO
+	if (timeout_decisecs < 0) {
+		tattr.c_cc[VMIN]  = 1; // wait for one byte
+		tattr.c_cc[VTIME] = 0; // no timeout
+	} else if (timeout_decisecs > 0) {
+		tattr.c_cc[VMIN]  = 0;                // do not wait for incoming bytes
+		tattr.c_cc[VTIME] = timeout_decisecs; // timeout
+	} else {
+		tattr.c_cc[VMIN]  = 0; // do not wait for incoming bytes
+		tattr.c_cc[VTIME] = 0; // no timeout
+	}
+	tcsetattr(STDIN_FILENO, TCSANOW, &tattr);
+
+	ssize_t read_bytes = read(STDIN_FILENO, buf, 1);
+
+	tcsetattr(STDIN_FILENO, TCSANOW, &saved_attributes);
+	if (!blocking)
+		clear_nonblock_flag();
+
+	if (read_bytes == 1) {
+		return buf[0];
+	} else if (read_bytes < 0) {
+		throw Exception(errno, "Failed to read key from keyboard (getkey)");
+	} else {
+		return 0;
+	}
 }
 
 } // end namespace fawkes
-

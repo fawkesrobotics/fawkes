@@ -21,8 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <config/config.h>
 #include <config/change_handler.h>
+#include <config/config.h>
+
 #include <cstring>
 
 namespace fawkes {
@@ -417,41 +418,34 @@ namespace fawkes {
  * Thrown if there is no other matching exception.
  */
 
-
 /** Constructor.
  * @param msg message
  */
-ConfigurationException::ConfigurationException(const char *msg)
-  : Exception(msg)
+ConfigurationException::ConfigurationException(const char *msg) : Exception(msg)
 {
 }
-
 
 /** Constructor.
  * @param prefix Put as "prefix: " before the message, can be used to have a prefix
  * and put an error message from another API into msg.
  * @param msg message
  */
-ConfigurationException::ConfigurationException(const char *prefix, const char *msg)
-  : Exception()
+ConfigurationException::ConfigurationException(const char *prefix, const char *msg) : Exception()
 {
-  append("%s: %s", prefix, msg);
+	append("%s: %s", prefix, msg);
 }
-
 
 /** @class ConfigEntryNotFoundException config/config.h
  * Thrown if a config entry could not be found.
  */
 
-
 /** Constructor.
  * @param path path of value
  */
-ConfigEntryNotFoundException::ConfigEntryNotFoundException( const char *path)
-  : Exception("Config value for '%s' not found", path)
+ConfigEntryNotFoundException::ConfigEntryNotFoundException(const char *path)
+: Exception("Config value for '%s' not found", path)
 {
 }
-
 
 /** @class ConfigTypeMismatchException config/config.h
  * Thrown if there a type problem was detected for example if you tried
@@ -464,12 +458,11 @@ ConfigEntryNotFoundException::ConfigEntryNotFoundException( const char *path)
  * @param requested requested type
  */
 ConfigTypeMismatchException::ConfigTypeMismatchException(const char *path,
-							 const char *actual,
-							 const char *requested)
-  : Exception()
+                                                         const char *actual,
+                                                         const char *requested)
+: Exception()
 {
-  append("Config value for '%s' is not of type '%s', but of type '%s'",
-	 path, requested, actual);
+	append("Config value for '%s' is not of type '%s', but of type '%s'", path, requested, actual);
 }
 
 /** @class CouldNotOpenConfigException <config/config.h>
@@ -480,15 +473,13 @@ ConfigTypeMismatchException::ConfigTypeMismatchException(const char *path,
 /** Constructor.
  * @param format format of message to describe cause or symptom of failure
  */
-CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...)
-  : Exception()
+CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...) : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 /** @class Configuration::ValueIterator <config/config.h>
  * Iterator interface to iterate over config values. This does not implement a
@@ -603,8 +594,6 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...
  *
  */
 
-
-
 /** Add a configuration change handler.
  * The added handler is called whenever a value changes and the handler
  * desires to get notified for the given component.
@@ -613,14 +602,13 @@ CouldNotOpenConfigException::CouldNotOpenConfigException(const char *format, ...
 void
 Configuration::add_change_handler(ConfigurationChangeHandler *h)
 {
-  const char *c = h->config_monitor_prefix();
-  if ( c == NULL ) {
-    c = "";
-  }
+	const char *c = h->config_monitor_prefix();
+	if (c == NULL) {
+		c = "";
+	}
 
-  _change_handlers.insert(ChangeHandlerMultimap::value_type(c, h));
+	_change_handlers.insert(ChangeHandlerMultimap::value_type(c, h));
 }
-
 
 /** Remove a configuration change handler.
  * The handler is removed from the change handler list and no longer called on
@@ -630,27 +618,30 @@ Configuration::add_change_handler(ConfigurationChangeHandler *h)
 void
 Configuration::rem_change_handler(ConfigurationChangeHandler *h)
 {
-  const char *c = h->config_monitor_prefix();
-  if ( c == NULL ) {
-    c = "";
-  }
-  bool changed = true;
-  while (changed) {
-    changed = false;
-    for (ChangeHandlerMultimap::const_iterator j = _change_handlers.begin(); !changed && (j != _change_handlers.end()); ++j) {
-      _ch_range = _change_handlers.equal_range((*j).first);
-      for (ChangeHandlerMultimap::iterator i = _ch_range.first; !changed && (i != _ch_range.second); ++i) {
-	if ( (*i).second == h ) {
-	  _change_handlers.erase(i);
-	  changed = true;
-	  break;
+	const char *c = h->config_monitor_prefix();
+	if (c == NULL) {
+		c = "";
 	}
-      }
-      if ( changed)  break;
-    }
-  }
+	bool changed = true;
+	while (changed) {
+		changed = false;
+		for (ChangeHandlerMultimap::const_iterator j = _change_handlers.begin();
+		     !changed && (j != _change_handlers.end());
+		     ++j) {
+			_ch_range = _change_handlers.equal_range((*j).first);
+			for (ChangeHandlerMultimap::iterator i = _ch_range.first; !changed && (i != _ch_range.second);
+			     ++i) {
+				if ((*i).second == h) {
+					_change_handlers.erase(i);
+					changed = true;
+					break;
+				}
+			}
+			if (changed)
+				break;
+		}
+	}
 }
-
 
 /** Find handlers for given path.
  * @param path path to get handlers for
@@ -659,19 +650,20 @@ Configuration::rem_change_handler(ConfigurationChangeHandler *h)
 Configuration::ChangeHandlerList *
 Configuration::find_handlers(const char *path)
 {
-  ChangeHandlerList *rv = new ChangeHandlerList();
-  for (ChangeHandlerMultimap::const_iterator j = _change_handlers.begin(); j != _change_handlers.end(); ++j) {
-    if ( strstr(path, (*j).first) == path ) {
-      _ch_range = _change_handlers.equal_range((*j).first);
-      for (ChangeHandlerMultimap::const_iterator i = _ch_range.first; i != _ch_range.second; ++i) {
-	rv->push_back((*i).second);
-      }
-    }
-  }
+	ChangeHandlerList *rv = new ChangeHandlerList();
+	for (ChangeHandlerMultimap::const_iterator j = _change_handlers.begin();
+	     j != _change_handlers.end();
+	     ++j) {
+		if (strstr(path, (*j).first) == path) {
+			_ch_range = _change_handlers.equal_range((*j).first);
+			for (ChangeHandlerMultimap::const_iterator i = _ch_range.first; i != _ch_range.second; ++i) {
+				rv->push_back((*i).second);
+			}
+		}
+	}
 
-  return rv;
+	return rv;
 }
-
 
 /** Notify handlers for given path.
  * @param path path to notify handlers for
@@ -681,123 +673,124 @@ Configuration::find_handlers(const char *path)
 void
 Configuration::notify_handlers(const char *path, bool comment_changed)
 {
-  ChangeHandlerList *h = find_handlers(path);
-  Configuration::ValueIterator *value = get_value(path);
-  if (value->next()) {
-    for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-      if (comment_changed) {
-	(*i)->config_comment_changed(value);
-      } else {
-	(*i)->config_value_changed(value);
-      }
-    }
-  } else {
-    for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
-      (*i)->config_value_erased(path);
-    }
-  }
-  delete value;
-  delete h;
+	ChangeHandlerList *           h     = find_handlers(path);
+	Configuration::ValueIterator *value = get_value(path);
+	if (value->next()) {
+		for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
+			if (comment_changed) {
+				(*i)->config_comment_changed(value);
+			} else {
+				(*i)->config_value_changed(value);
+			}
+		}
+	} else {
+		for (ChangeHandlerList::const_iterator i = h->begin(); i != h->end(); ++i) {
+			(*i)->config_value_erased(path);
+		}
+	}
+	delete value;
+	delete h;
 }
 
 float
 Configuration::get_float_or_default(const char *path, const float &default_val)
 {
-  try {
-    return get_float(path);
-  } catch (ConfigEntryNotFoundException & e) {
-    return default_val;
-  }
+	try {
+		return get_float(path);
+	} catch (ConfigEntryNotFoundException &e) {
+		return default_val;
+	}
 }
 
 unsigned int
 Configuration::get_uint_or_default(const char *path, const unsigned int &default_val)
 {
-  try {
-    return get_uint(path);
-  } catch (ConfigEntryNotFoundException & e) {
-    return default_val;
-  }
+	try {
+		return get_uint(path);
+	} catch (ConfigEntryNotFoundException &e) {
+		return default_val;
+	}
 }
 
 int
 Configuration::get_int_or_default(const char *path, const int &default_val)
 {
-  try {
-    return get_int(path);
-  } catch (ConfigEntryNotFoundException & e) {
-    return default_val;
-  }
+	try {
+		return get_int(path);
+	} catch (ConfigEntryNotFoundException &e) {
+		return default_val;
+	}
 }
 
 bool
 Configuration::get_bool_or_default(const char *path, const bool &default_val)
 {
-  try {
-    return get_bool(path);
-  } catch (ConfigEntryNotFoundException & e) {
-    return default_val;
-  }
+	try {
+		return get_bool(path);
+	} catch (ConfigEntryNotFoundException &e) {
+		return default_val;
+	}
 }
 
 std::string
 Configuration::get_string_or_default(const char *path, const std::string &default_val)
 {
-  try {
-    return get_string(path);
-  } catch (ConfigEntryNotFoundException & e) {
-    return default_val;
-  }
+	try {
+		return get_string(path);
+	} catch (ConfigEntryNotFoundException &e) {
+		return default_val;
+	}
 }
 
 std::vector<float>
 Configuration::get_floats_or_defaults(const char *path, const std::vector<float> &default_val)
 {
-  try {
-    return get_floats(path);
-  } catch (ConfigEntryNotFoundException & e) {
-    return default_val;
-  }
+	try {
+		return get_floats(path);
+	} catch (ConfigEntryNotFoundException &e) {
+		return default_val;
+	}
 }
 
 std::vector<unsigned int>
 Configuration::get_uints_or_defaults(const char *path, const std::vector<unsigned int> &default_val)
 {
-  try {
-    return get_uints(path);
-  } catch (ConfigEntryNotFoundException & e) {
-    return default_val;
-  }
+	try {
+		return get_uints(path);
+	} catch (ConfigEntryNotFoundException &e) {
+		return default_val;
+	}
 }
 
 std::vector<int>
 Configuration::get_ints_or_defaults(const char *path, const std::vector<int> &default_val)
 {
-  try {
-    return get_ints(path);
-  } catch (ConfigEntryNotFoundException & e) {
-    return default_val;
-  }
+	try {
+		return get_ints(path);
+	} catch (ConfigEntryNotFoundException &e) {
+		return default_val;
+	}
 }
 
 std::vector<bool>
 Configuration::get_bools_or_defaults(const char *path, const std::vector<bool> &default_val)
 {
-  try {
-    return get_bools(path);
-  } catch (ConfigEntryNotFoundException & e) {
-    return default_val;
-  }
+	try {
+		return get_bools(path);
+	} catch (ConfigEntryNotFoundException &e) {
+		return default_val;
+	}
 }
 
 std::vector<std::string>
-Configuration::get_strings_or_defaults(const char *path, const std::vector<std::string> &default_val)
+Configuration::get_strings_or_defaults(const char *                    path,
+                                       const std::vector<std::string> &default_val)
 {
-  try {
-    return get_strings(path);
-  } catch (ConfigEntryNotFoundException & e) {
-    return default_val;
-  }
+	try {
+		return get_strings(path);
+	} catch (ConfigEntryNotFoundException &e) {
+		return default_val;
+	}
 }
 
 } // end namespace fawkes

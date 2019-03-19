@@ -23,46 +23,49 @@
 #ifndef _PLUGINS_CLIPS_PROTOBUF_CLIPS_PROTOBUF_THREAD_H_
 #define _PLUGINS_CLIPS_PROTOBUF_CLIPS_PROTOBUF_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips_feature.h>
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 namespace protobuf_clips {
-  class ClipsProtobufCommunicator;
+class ClipsProtobufCommunicator;
 }
 
-class ClipsProtobufThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::CLIPSFeature,
-  public fawkes::CLIPSFeatureAspect
+class ClipsProtobufThread : public fawkes::Thread,
+                            public fawkes::LoggingAspect,
+                            public fawkes::ConfigurableAspect,
+                            public fawkes::CLIPSFeature,
+                            public fawkes::CLIPSFeatureAspect
 {
- public:
-  ClipsProtobufThread();
-  virtual ~ClipsProtobufThread();
+public:
+	ClipsProtobufThread();
+	virtual ~ClipsProtobufThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  // for CLIPSFeature
-  virtual void clips_context_init(const std::string &env_name,
-				  fawkes::LockPtr<CLIPS::Environment> &clips);
-  virtual void clips_context_destroyed(const std::string &env_name);
+	// for CLIPSFeature
+	virtual void clips_context_init(const std::string &                  env_name,
+	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_destroyed(const std::string &env_name);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  std::map<std::string, protobuf_clips::ClipsProtobufCommunicator *> pb_comms_;
-  std::vector<std::string> cfg_proto_dirs_;
-
+private:
+	std::map<std::string, protobuf_clips::ClipsProtobufCommunicator *> pb_comms_;
+	std::vector<std::string>                                           cfg_proto_dirs_;
 };
 
 #endif

@@ -23,24 +23,21 @@
 #include <plugins/openni/utils/colors.h>
 
 namespace fawkes {
-  namespace openni {
+namespace openni {
 
-float USER_COLORS[][3] = {
-  {0,1,1},
-  {0,0,1},
-  {0,1,0},
-  {1,1,0},
-  {1,0,0},
-  {1,.5,0},
-  {.5,1,0},
-  {0,.5,1},
-  {.5,0,1},
-  {1,1,.5},
-  {1,1,1}
-};
+float USER_COLORS[][3] = {{0, 1, 1},
+                          {0, 0, 1},
+                          {0, 1, 0},
+                          {1, 1, 0},
+                          {1, 0, 0},
+                          {1, .5, 0},
+                          {.5, 1, 0},
+                          {0, .5, 1},
+                          {.5, 0, 1},
+                          {1, 1, .5},
+                          {1, 1, 1}};
 
 unsigned int NUM_USER_COLORS = 10;
 
-
-} // end namespace fawkes::openni
+} // namespace openni
 } // end namespace fawkes

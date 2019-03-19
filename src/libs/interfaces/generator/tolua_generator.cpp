@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  tolua_generator.cpp - ToLua++ Interface generator
  *
@@ -21,18 +21,18 @@
  */
 
 #include "tolua_generator.h"
+
 #include "exceptions.h"
 
 #include <utils/misc/string_conversions.h>
 
 #include <algorithm>
-#include <iostream>
-#include <vector>
-#include <time.h>
 #include <fstream>
+#include <iostream>
+#include <time.h>
+#include <vector>
 
 using namespace std;
-
 
 /** @class ToLuaInterfaceGenerator <interfaces/generator/tolua_generator.h>
  * Generator that transforms input from the InterfaceParser into valid
@@ -56,51 +56,53 @@ using namespace std;
  * @param pseudo_maps pseudo maps of the interface
  * @param messages messages defined in the interface
  */
-ToLuaInterfaceGenerator::ToLuaInterfaceGenerator(std::string directory, std::string interface_name,
-						 std::string config_basename, std::string author,
-						 std::string year, std::string creation_date,
-						 std::string data_comment,
-						 const unsigned char *hash, size_t hash_size,
-						 const std::vector<InterfaceConstant> &constants,
-						 const std::vector<InterfaceEnumConstant> &enum_constants,
-						 const std::vector<InterfaceField> &data_fields,
-						 const std::vector<InterfacePseudoMap> &pseudo_maps,
-						 const std::vector<InterfaceMessage> &messages
-						 )
+ToLuaInterfaceGenerator::ToLuaInterfaceGenerator(
+  std::string                               directory,
+  std::string                               interface_name,
+  std::string                               config_basename,
+  std::string                               author,
+  std::string                               year,
+  std::string                               creation_date,
+  std::string                               data_comment,
+  const unsigned char *                     hash,
+  size_t                                    hash_size,
+  const std::vector<InterfaceConstant> &    constants,
+  const std::vector<InterfaceEnumConstant> &enum_constants,
+  const std::vector<InterfaceField> &       data_fields,
+  const std::vector<InterfacePseudoMap> &   pseudo_maps,
+  const std::vector<InterfaceMessage> &     messages)
 {
-  this->dir    = directory;
-  if ( dir.find_last_of("/") != (dir.length() - 1) ) {
-    dir += "/";
-  }
-  this->author = author;
-  this->year   = year;
-  this->creation_date = creation_date;
-  this->data_comment  = data_comment;
-  this->hash = hash;
-  this->hash_size = hash_size;
-  this->constants = constants;
-  this->enum_constants = enum_constants;
-  this->data_fields = data_fields;
-  this->pseudo_maps = pseudo_maps;
-  this->messages = messages;
+	this->dir = directory;
+	if (dir.find_last_of("/") != (dir.length() - 1)) {
+		dir += "/";
+	}
+	this->author         = author;
+	this->year           = year;
+	this->creation_date  = creation_date;
+	this->data_comment   = data_comment;
+	this->hash           = hash;
+	this->hash_size      = hash_size;
+	this->constants      = constants;
+	this->enum_constants = enum_constants;
+	this->data_fields    = data_fields;
+	this->pseudo_maps    = pseudo_maps;
+	this->messages       = messages;
 
-  filename_tolua = config_basename + ".tolua";
-  filename_h     = config_basename + ".h";
+	filename_tolua = config_basename + ".tolua";
+	filename_h     = config_basename + ".h";
 
-  if ( interface_name.find("Interface", 0) == string::npos ) {
-    // append Interface
-    class_name = interface_name + "Interface";
-  } else {
-    class_name = interface_name;
-  }
+	if (interface_name.find("Interface", 0) == string::npos) {
+		// append Interface
+		class_name = interface_name + "Interface";
+	} else {
+		class_name = interface_name;
+	}
 }
-
 
 /** Destructor */
 ToLuaInterfaceGenerator::~ToLuaInterfaceGenerator()
 {
 }
-
 
 /** Convert C type to Lua type.
  * tolua++ does not deal well with stdint types, therefore we convert them
@@ -111,60 +113,58 @@ ToLuaInterfaceGenerator::~ToLuaInterfaceGenerator()
 const char *
 ToLuaInterfaceGenerator::convert_type(std::string c_type)
 {
-  if (c_type == "uint8_t") {
-    return "unsigned char";
-  } else if (c_type == "uint16_t") {
-    return "unsigned short";
-  } else if (c_type == "uint32_t") {
-    return "unsigned int";
-  } else if (c_type == "uint64_t") {
+	if (c_type == "uint8_t") {
+		return "unsigned char";
+	} else if (c_type == "uint16_t") {
+		return "unsigned short";
+	} else if (c_type == "uint32_t") {
+		return "unsigned int";
+	} else if (c_type == "uint64_t") {
 #if __WORDSIZE == 64 || defined(__x86_64__)
-    return "unsigned long";
+		return "unsigned long";
 #else
-    return "unsigned long long";
+		return "unsigned long long";
 #endif
-  } else if (c_type == "int8_t") {
-    return "char";
-  } else if (c_type == "int16_t") {
-    return "short";
-  } else if (c_type == "int32_t") {
-    return "int";
-  } else if (c_type == "int64_t") {
+	} else if (c_type == "int8_t") {
+		return "char";
+	} else if (c_type == "int16_t") {
+		return "short";
+	} else if (c_type == "int32_t") {
+		return "int";
+	} else if (c_type == "int64_t") {
 #if __WORDSIZE == 64 || defined(__x86_64__)
-    return "long";
+		return "long";
 #else
-    return "long long";
+		return "long long";
 #endif
-  } else if (c_type == "uint8_t *") {
-    return "unsigned char *";
-  } else if (c_type == "uint16_t *") {
-    return "unsigned short *";
-  } else if (c_type == "uint32_t *") {
-    return "unsigned int *";
-  } else if (c_type == "uint64_t *") {
+	} else if (c_type == "uint8_t *") {
+		return "unsigned char *";
+	} else if (c_type == "uint16_t *") {
+		return "unsigned short *";
+	} else if (c_type == "uint32_t *") {
+		return "unsigned int *";
+	} else if (c_type == "uint64_t *") {
 #if __WORDSIZE == 64 || defined(__x86_64__)
-    return "unsigned long *";
+		return "unsigned long *";
 #else
-    return "unsigned long long *";
+		return "unsigned long long *";
 #endif
-  } else if (c_type == "int8_t *") {
-    return "char *";
-  } else if (c_type == "int16_t *") {
-    return "short *";
-  } else if (c_type == "int32_t *") {
-    return "int *";
-  } else if (c_type == "int64_t *") {
+	} else if (c_type == "int8_t *") {
+		return "char *";
+	} else if (c_type == "int16_t *") {
+		return "short *";
+	} else if (c_type == "int32_t *") {
+		return "int *";
+	} else if (c_type == "int64_t *") {
 #if __WORDSIZE == 64 || defined(__x86_64__)
-    return "long *";
+		return "long *";
 #else
-    return "long long *";
+		return "long long *";
 #endif
-  } else {
-    return c_type.c_str();
-  }
+	} else {
+		return c_type.c_str();
+	}
 }
-
-
 
 /** Write header to file.
  * @param f file to write to
@@ -173,34 +173,38 @@ ToLuaInterfaceGenerator::convert_type(std::string c_type)
 void
 ToLuaInterfaceGenerator::write_header(FILE *f, std::string filename)
 {
-  fprintf(f, "\n/***************************************************************************\n");
-  fprintf(f, " *  %s - Fawkes BlackBoard Interface - %s - tolua++ wrapper\n", filename.c_str(), class_name.c_str());
-  fprintf(f, " *\n");
-  if ( creation_date.length() > 0 ) {
-    fprintf(f, " *  Interface created: %s\n", creation_date.c_str());
-  }
-  fprintf(f, " *  Templated created:   Thu Oct 12 10:49:19 2006\n");
-  fprintf(f, " *  Copyright  %s  %s\n", year.c_str(),
-	  ((author.length() > 0) ? author.c_str() : "AllemaniACs RoboCup Team") );
-  fprintf(f, " *\n");
-  fprintf(f, " ****************************************************************************/\n\n");
-  fprintf(f, "/*\n");
-  fprintf(f, " *  This program is free software; you can redistribute it and/or modify\n");
-  fprintf(f, " *  it under the terms of the GNU General Public License as published by\n");
-  fprintf(f, " *  the Free Software Foundation; either version 2 of the License, or\n");
-  fprintf(f, " *  (at your option) any later version.\n");
-  fprintf(f, " *\n");
-  fprintf(f, " *  This program is distributed in the hope that it will be useful,\n");
-  fprintf(f, " *  but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
-  fprintf(f, " *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n");
-  fprintf(f, " *  GNU Library General Public License for more details.\n");
-  fprintf(f, " *\n");
-  fprintf(f, " *  You should have received a copy of the GNU General Public License\n");
-  fprintf(f, " *  along with this program; if not, write to the Free Software Foundation,\n");
-  fprintf(f, " *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.\n");
-  fprintf(f, " */\n\n");
+	fprintf(f, "\n/***************************************************************************\n");
+	fprintf(f,
+	        " *  %s - Fawkes BlackBoard Interface - %s - tolua++ wrapper\n",
+	        filename.c_str(),
+	        class_name.c_str());
+	fprintf(f, " *\n");
+	if (creation_date.length() > 0) {
+		fprintf(f, " *  Interface created: %s\n", creation_date.c_str());
+	}
+	fprintf(f, " *  Templated created:   Thu Oct 12 10:49:19 2006\n");
+	fprintf(f,
+	        " *  Copyright  %s  %s\n",
+	        year.c_str(),
+	        ((author.length() > 0) ? author.c_str() : "AllemaniACs RoboCup Team"));
+	fprintf(f, " *\n");
+	fprintf(f, " ****************************************************************************/\n\n");
+	fprintf(f, "/*\n");
+	fprintf(f, " *  This program is free software; you can redistribute it and/or modify\n");
+	fprintf(f, " *  it under the terms of the GNU General Public License as published by\n");
+	fprintf(f, " *  the Free Software Foundation; either version 2 of the License, or\n");
+	fprintf(f, " *  (at your option) any later version.\n");
+	fprintf(f, " *\n");
+	fprintf(f, " *  This program is distributed in the hope that it will be useful,\n");
+	fprintf(f, " *  but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
+	fprintf(f, " *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n");
+	fprintf(f, " *  GNU Library General Public License for more details.\n");
+	fprintf(f, " *\n");
+	fprintf(f, " *  You should have received a copy of the GNU General Public License\n");
+	fprintf(f, " *  along with this program; if not, write to the Free Software Foundation,\n");
+	fprintf(f, " *  Inc., 51 Franklin Street, Fifth floor, Boston, MA 02111-1307, USA.\n");
+	fprintf(f, " */\n\n");
 }
-
 
 /** Write constants to h file
  * @param f file to write to
@@ -208,33 +212,33 @@ ToLuaInterfaceGenerator::write_header(FILE *f, std::string filename)
 void
 ToLuaInterfaceGenerator::write_constants_h(FILE *f)
 {
-  for ( vector<InterfaceConstant>::iterator i = constants.begin(); i != constants.end(); ++i) {
-    fprintf(f, "  static const %s %s;\n", convert_type(i->getType()),
-	    i->getName().c_str());
-  }
-  fprintf(f, "\n");
-
-  for ( vector<InterfaceEnumConstant>::iterator i = enum_constants.begin(); i != enum_constants.end(); ++i) {
-    fprintf(f, "  typedef enum {\n");
-    vector<InterfaceEnumConstant::EnumItem> items = (*i).get_items();
-    vector<InterfaceEnumConstant::EnumItem>::iterator j = items.begin();
-    while (j != items.end()) {
-      if (j->has_custom_value) {
-	fprintf(f, "    %s = %i", j->name.c_str(), j->custom_value);
-      } else {
-	fprintf(f, "    %s", j->name.c_str());
-      }
-      ++j;
-      if ( j != items.end() ) {
-	fprintf(f, ",\n");
-      } else {
+	for (vector<InterfaceConstant>::iterator i = constants.begin(); i != constants.end(); ++i) {
+		fprintf(f, "  static const %s %s;\n", convert_type(i->getType()), i->getName().c_str());
+	}
 	fprintf(f, "\n");
-      }
-    }
-    fprintf(f, "  } %s;\n\n", (*i).get_name().c_str());
-  }
-}
 
+	for (vector<InterfaceEnumConstant>::iterator i = enum_constants.begin();
+	     i != enum_constants.end();
+	     ++i) {
+		fprintf(f, "  typedef enum {\n");
+		vector<InterfaceEnumConstant::EnumItem>           items = (*i).get_items();
+		vector<InterfaceEnumConstant::EnumItem>::iterator j     = items.begin();
+		while (j != items.end()) {
+			if (j->has_custom_value) {
+				fprintf(f, "    %s = %i", j->name.c_str(), j->custom_value);
+			} else {
+				fprintf(f, "    %s", j->name.c_str());
+			}
+			++j;
+			if (j != items.end()) {
+				fprintf(f, ",\n");
+			} else {
+				fprintf(f, "\n");
+			}
+		}
+		fprintf(f, "  } %s;\n\n", (*i).get_name().c_str());
+	}
+}
 
 /** Write messages to h file.
  * @param f file to write to
@@ -242,18 +246,18 @@ ToLuaInterfaceGenerator::write_constants_h(FILE *f)
 void
 ToLuaInterfaceGenerator::write_messages_h(FILE *f)
 {
-  for (vector<InterfaceMessage>::iterator i = messages.begin(); i != messages.end(); ++i) {
-    fprintf(f, "  class %s : public Message\n"
-	    "  {\n", (*i).getName().c_str());
-    write_message_ctor_dtor_h(f, "    ", (*i).getName(), (*i).getFields());
-    write_message_superclass_h(f);
-    write_methods_h(f, "    ", (*i).getFields());
+	for (vector<InterfaceMessage>::iterator i = messages.begin(); i != messages.end(); ++i) {
+		fprintf(f,
+		        "  class %s : public Message\n"
+		        "  {\n",
+		        (*i).getName().c_str());
+		write_message_ctor_dtor_h(f, "    ", (*i).getName(), (*i).getFields());
+		write_message_superclass_h(f);
+		write_methods_h(f, "    ", (*i).getFields());
 
-    fprintf(f, "  };\n\n");
-  }
-
+		fprintf(f, "  };\n\n");
+	}
 }
-
 
 /** Write constructor and destructor to h file.
  * @param f file to write to
@@ -261,16 +265,18 @@ ToLuaInterfaceGenerator::write_messages_h(FILE *f)
  * @param classname name of class
  */
 void
-ToLuaInterfaceGenerator::write_ctor_dtor_h(FILE *f, std::string /* indent space */ is,
-					 std::string classname)
+ToLuaInterfaceGenerator::write_ctor_dtor_h(FILE *                         f,
+                                           std::string /* indent space */ is,
+                                           std::string                    classname)
 {
-  fprintf(f,
-	  "%s%s();\n"
-	  "%s~%s();\n\n",
-	  is.c_str(), classname.c_str(),
-	  is.c_str(), classname.c_str());
+	fprintf(f,
+	        "%s%s();\n"
+	        "%s~%s();\n\n",
+	        is.c_str(),
+	        classname.c_str(),
+	        is.c_str(),
+	        classname.c_str());
 }
-
 
 /** Write constructor and destructor for message to h file.
  * @param f file to write to
@@ -279,31 +285,29 @@ ToLuaInterfaceGenerator::write_ctor_dtor_h(FILE *f, std::string /* indent space 
  * @param fields vector of data fields of message
  */
 void
-ToLuaInterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* indent space */ is,
-						 std::string classname,
-						 std::vector<InterfaceField> fields)
+ToLuaInterfaceGenerator::write_message_ctor_dtor_h(FILE *                         f,
+                                                   std::string /* indent space */ is,
+                                                   std::string                    classname,
+                                                   std::vector<InterfaceField>    fields)
 {
-  vector<InterfaceField>::iterator i;
+	vector<InterfaceField>::iterator i;
 
-  if ( fields.size() > 0 ) {
+	if (fields.size() > 0) {
+		fprintf(f, "%s%s(", is.c_str(), classname.c_str());
 
-    fprintf(f, "%s%s(", is.c_str(), classname.c_str());
+		i = fields.begin();
+		while (i != fields.end()) {
+			fprintf(f, "%s ini_%s", convert_type(i->getAccessType()), i->getName().c_str());
+			++i;
+			if (i != fields.end()) {
+				fprintf(f, ", ");
+			}
+		}
 
-    i = fields.begin();
-    while (i != fields.end()) {
-      fprintf(f, "%s ini_%s",
-	      convert_type(i->getAccessType()), i->getName().c_str());
-      ++i;
-      if ( i != fields.end() ) {
-	fprintf(f, ", ");
-      }
-    }
+		fprintf(f, ");\n");
+	}
 
-    fprintf(f, ");\n");
-  }
-
-
-  write_ctor_dtor_h(f, is, classname);
+	write_ctor_dtor_h(f, is, classname);
 }
 
 /** Write superclass methods.
@@ -312,52 +316,51 @@ ToLuaInterfaceGenerator::write_message_ctor_dtor_h(FILE *f, std::string /* inden
 void
 ToLuaInterfaceGenerator::write_superclass_h(FILE *f)
 {
-  fprintf(f,
-          "  bool                    oftype(const char *interface_type) const;\n"
-          "  const void *            datachunk() const;\n"
-          "  unsigned int            datasize() const;\n"
-          "  const char *            type() const;\n"
-          "  const char *            id() const;\n"
-          "  const char *            uid() const;\n"
-          "  unsigned int            serial() const;\n"
-          "  unsigned int            mem_serial() const;\n"
-          "  bool                    operator== (Interface &comp) const;\n"
-          "  const unsigned char *   hash() const;\n"
-          "  int                     hash_size() const;\n"
-          "  const char *            hash_printable() const;\n"
-          "  bool                    is_writer() const;\n"
+	fprintf(f,
+	        "  bool                    oftype(const char *interface_type) const;\n"
+	        "  const void *            datachunk() const;\n"
+	        "  unsigned int            datasize() const;\n"
+	        "  const char *            type() const;\n"
+	        "  const char *            id() const;\n"
+	        "  const char *            uid() const;\n"
+	        "  unsigned int            serial() const;\n"
+	        "  unsigned int            mem_serial() const;\n"
+	        "  bool                    operator== (Interface &comp) const;\n"
+	        "  const unsigned char *   hash() const;\n"
+	        "  int                     hash_size() const;\n"
+	        "  const char *            hash_printable() const;\n"
+	        "  bool                    is_writer() const;\n"
 
-          "  void                    set_from_chunk(void *chunk);\n"
+	        "  void                    set_from_chunk(void *chunk);\n"
 
-          "  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) const;\n"
+	        "  virtual fawkes::Message *  create_message @ create_message_generic(const char *type) "
+	        "const;\n"
 
-          "  void          read();\n"
-          "  void          write();\n"
+	        "  void          read();\n"
+	        "  void          write();\n"
 
-          "  bool          has_writer() const;\n"
-          "  unsigned int  num_readers() const;\n"
+	        "  bool          has_writer() const;\n"
+	        "  unsigned int  num_readers() const;\n"
 
-	  "  bool          changed() const;\n"
-	  "  const fawkes::Time *  timestamp() const;\n"
-	  "  void          set_auto_timestamping(bool enabled);\n"
-	  "  void          set_timestamp(const fawkes::Time *t);\n"
-	  "  void          set_clock(fawkes::Clock *clock);\n"
+	        "  bool          changed() const;\n"
+	        "  const fawkes::Time *  timestamp() const;\n"
+	        "  void          set_auto_timestamping(bool enabled);\n"
+	        "  void          set_timestamp(const fawkes::Time *t);\n"
+	        "  void          set_clock(fawkes::Clock *clock);\n"
 
-          "  unsigned int  msgq_enqueue_copy(Message *message);\n"
-          "  void          msgq_remove(Message *message);\n"
-          "  void          msgq_remove(unsigned int message_id);\n"
-          "  unsigned int  msgq_size();\n"
-          "  void          msgq_flush();\n"
-          "  void          msgq_lock();\n"
-          "  bool          msgq_try_lock();\n"
-          "  void          msgq_unlock();\n"
-          "  void          msgq_pop();\n"
-          "  fawkes::Message * msgq_first @ msgq_first_generic();\n"
-          "  bool          msgq_empty();\n"
-          "\n");
-       
+	        "  unsigned int  msgq_enqueue_copy(Message *message);\n"
+	        "  void          msgq_remove(Message *message);\n"
+	        "  void          msgq_remove(unsigned int message_id);\n"
+	        "  unsigned int  msgq_size();\n"
+	        "  void          msgq_flush();\n"
+	        "  void          msgq_lock();\n"
+	        "  bool          msgq_try_lock();\n"
+	        "  void          msgq_unlock();\n"
+	        "  void          msgq_pop();\n"
+	        "  fawkes::Message * msgq_first @ msgq_first_generic();\n"
+	        "  bool          msgq_empty();\n"
+	        "\n");
 }
-
 
 /** Write superclass methods.
  * @param f file to write to
@@ -365,26 +368,25 @@ ToLuaInterfaceGenerator::write_superclass_h(FILE *f)
 void
 ToLuaInterfaceGenerator::write_message_superclass_h(FILE *f)
 {
-  fprintf(f,
-          "    unsigned int      id() const;\n"
-          "\n"
-          "    unsigned int      sender_id() const;\n"
-          "    const char *      sender_thread_name() const;\n"
-          "    Interface *       interface() const;\n"
-          "    const char *      type() const;\n"
-          "\n"
-          "    const void *      datachunk() const;\n"
-          "    unsigned int      datasize() const;\n"
-          "\n"
-          "    void              set_from_chunk(const void *chunk);\n"
-          "\n"
-          "    /* from RefCount */\n"
-          "    void              ref();\n"
-          "    void              unref();\n"
-          "    unsigned int      refcount();\n"
-          "\n");
+	fprintf(f,
+	        "    unsigned int      id() const;\n"
+	        "\n"
+	        "    unsigned int      sender_id() const;\n"
+	        "    const char *      sender_thread_name() const;\n"
+	        "    Interface *       interface() const;\n"
+	        "    const char *      type() const;\n"
+	        "\n"
+	        "    const void *      datachunk() const;\n"
+	        "    unsigned int      datasize() const;\n"
+	        "\n"
+	        "    void              set_from_chunk(const void *chunk);\n"
+	        "\n"
+	        "    /* from RefCount */\n"
+	        "    void              ref();\n"
+	        "    void              unref();\n"
+	        "    unsigned int      refcount();\n"
+	        "\n");
 }
-
 
 /** Write additional Lua code to file.
  * The code is required for correctly type message access.
@@ -403,7 +405,9 @@ ToLuaInterfaceGenerator::write_lua_code(FILE *f, std::string classname)
 	        "fawkes.%s.msgq_enqueue   = fawkes.Interface.msgq_enqueue\n"
 	        "fawkes.%s.create_message = fawkes.Interface.create_message\n"
 	        "\n$]\n\n",
-	        classname.c_str(), classname.c_str(), classname.c_str());
+	        classname.c_str(),
+	        classname.c_str(),
+	        classname.c_str());
 }
 
 /** Write methods to h file.
@@ -412,42 +416,43 @@ ToLuaInterfaceGenerator::write_lua_code(FILE *f, std::string classname)
  * @param fields fields to write accessor methods for.
  */
 void
-ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ is,
-					 std::vector<InterfaceField> fields)
+ToLuaInterfaceGenerator::write_methods_h(FILE *                         f,
+                                         std::string /* indent space */ is,
+                                         std::vector<InterfaceField>    fields)
 {
-  for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
+	for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
+		if ((i->getLengthValue() > 0) && (i->getType() != "string")) {
+			fprintf(f,
+			        "%s%s %s%s(int index);\n",
+			        is.c_str(),
+			        (i->getType() == "byte") ? "unsigned int" : convert_type(i->getPlainAccessType()),
+			        (((*i).getType() == "bool") ? "is_" : ""),
+			        (*i).getName().c_str());
 
-    if ( (i->getLengthValue() > 0) && (i->getType() != "string" ) ) {
-      fprintf(f,
-	      "%s%s %s%s(int index);\n",
-	      is.c_str(),
-	      (i->getType() == "byte") ? "unsigned int" : convert_type(i->getPlainAccessType()),
-	      ( ((*i).getType() == "bool" ) ? "is_" : ""),
-	      (*i).getName().c_str());
+			fprintf(f,
+			        "%svoid set_%s(unsigned int index, const %s new_%s);\n",
+			        is.c_str(),
+			        (*i).getName().c_str(),
+			        convert_type(i->getPlainAccessType()),
+			        i->getName().c_str());
+		} else {
+			fprintf(f,
+			        "%s%s %s%s();\n",
+			        is.c_str(),
+			        convert_type(i->getAccessType()),
+			        (((*i).getType() == "bool") ? "is_" : ""),
+			        (*i).getName().c_str());
 
-      fprintf(f,
-	      "%svoid set_%s(unsigned int index, const %s new_%s);\n",
-	      is.c_str(), (*i).getName().c_str(),
-	      convert_type(i->getPlainAccessType()), i->getName().c_str());
-    } else {
-      fprintf(f,
-	      "%s%s %s%s();\n",
-	      is.c_str(), convert_type(i->getAccessType()),
-	      ( ((*i).getType() == "bool" ) ? "is_" : ""),
-	      (*i).getName().c_str());
-
-      fprintf(f,
-	      "%svoid set_%s(const %s new_%s);\n",
-	      is.c_str(), (*i).getName().c_str(),
-	      convert_type(i->getAccessType()), i->getName().c_str());
-    }
-    fprintf(f,
-	    "%sint maxlenof_%s() const;\n",
-	    is.c_str(), (*i).getName().c_str()
-	    );
-  }
+			fprintf(f,
+			        "%svoid set_%s(const %s new_%s);\n",
+			        is.c_str(),
+			        (*i).getName().c_str(),
+			        convert_type(i->getAccessType()),
+			        i->getName().c_str());
+		}
+		fprintf(f, "%sint maxlenof_%s() const;\n", is.c_str(), (*i).getName().c_str());
+	}
 }
-
 
 /** Write methods to h file.
  * @param f file to write to
@@ -456,23 +461,27 @@ ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */
  * @param pseudo_maps pseudo maps
  */
 void
-ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */ is,
-					 std::vector<InterfaceField> fields,
-					 std::vector<InterfacePseudoMap> pseudo_maps)
+ToLuaInterfaceGenerator::write_methods_h(FILE *                          f,
+                                         std::string /* indent space */  is,
+                                         std::vector<InterfaceField>     fields,
+                                         std::vector<InterfacePseudoMap> pseudo_maps)
 {
-  write_methods_h(f, is, fields);
+	write_methods_h(f, is, fields);
 
-  for (vector<InterfacePseudoMap>::iterator i = pseudo_maps.begin(); i != pseudo_maps.end(); ++i) {
-    fprintf(f,
-	    "%s%s %s(%s key) const;\n"
-	    "%svoid set_%s(const %s key, const %s new_value);\n",
-	    is.c_str(), convert_type(i->getType()),
-	    (*i).getName().c_str(), convert_type(i->getKeyType()),
-	    is.c_str(), (*i).getName().c_str(),
-	    convert_type(i->getKeyType()), convert_type(i->getType()));
-  }
+	for (vector<InterfacePseudoMap>::iterator i = pseudo_maps.begin(); i != pseudo_maps.end(); ++i) {
+		fprintf(f,
+		        "%s%s %s(%s key) const;\n"
+		        "%svoid set_%s(const %s key, const %s new_value);\n",
+		        is.c_str(),
+		        convert_type(i->getType()),
+		        (*i).getName().c_str(),
+		        convert_type(i->getKeyType()),
+		        is.c_str(),
+		        (*i).getName().c_str(),
+		        convert_type(i->getKeyType()),
+		        convert_type(i->getType()));
+	}
 }
-
 
 /** Write h file.
  * @param f file to write to
@@ -480,49 +489,48 @@ ToLuaInterfaceGenerator::write_methods_h(FILE *f, std::string /* indent space */
 void
 ToLuaInterfaceGenerator::write_toluaf(FILE *f)
 {
-  fprintf(f,
-	  "$#include <interfaces/%s>\n"
-	  "$#include <utils/time/time.h>\n"
-	  "$#include <utils/time/clock.h>\n"
-	  "$using namespace fawkes;\n"
-	  "namespace fawkes {\n"
-	  "class %s : public Interface\n"
-	  "{\n",
-	  filename_h.c_str(),
-	  class_name.c_str());
+	fprintf(f,
+	        "$#include <interfaces/%s>\n"
+	        "$#include <utils/time/time.h>\n"
+	        "$#include <utils/time/clock.h>\n"
+	        "$using namespace fawkes;\n"
+	        "namespace fawkes {\n"
+	        "class %s : public Interface\n"
+	        "{\n",
+	        filename_h.c_str(),
+	        class_name.c_str());
 
-  write_constants_h(f);
-  write_messages_h(f);
-  //write_ctor_dtor_h(f, "  ", class_name);
-  write_methods_h(f, "  ", data_fields, pseudo_maps);
-  write_superclass_h(f);
-  fprintf(f, "\n};\n\n");
-  write_lua_code(f, class_name);
-  fprintf(f, "}\n");
+	write_constants_h(f);
+	write_messages_h(f);
+	//write_ctor_dtor_h(f, "  ", class_name);
+	write_methods_h(f, "  ", data_fields, pseudo_maps);
+	write_superclass_h(f);
+	fprintf(f, "\n};\n\n");
+	write_lua_code(f, class_name);
+	fprintf(f, "}\n");
 }
-
 
 /** Generator cpp and h files.
  */
 void
 ToLuaInterfaceGenerator::generate()
 {
-  char timestring[26]; // 26 is mentioned in man asctime_r
-  struct tm timestruct;
-  time_t t = time(NULL);
-  localtime_r(&t, &timestruct);
-  asctime_r(&timestruct, timestring);
-  gendate = timestring;
+	char      timestring[26]; // 26 is mentioned in man asctime_r
+	struct tm timestruct;
+	time_t    t = time(NULL);
+	localtime_r(&t, &timestruct);
+	asctime_r(&timestruct, timestring);
+	gendate = timestring;
 
-  FILE *toluaf;
+	FILE *toluaf;
 
-  toluaf = fopen(string(dir + filename_tolua).c_str(), "w");
+	toluaf = fopen(string(dir + filename_tolua).c_str(), "w");
 
-  if ( toluaf == NULL ) {
-    printf("Cannot open tolua file %s%s\n", dir.c_str(), filename_tolua.c_str());
-  }
+	if (toluaf == NULL) {
+		printf("Cannot open tolua file %s%s\n", dir.c_str(), filename_tolua.c_str());
+	}
 
-  write_toluaf(toluaf);
+	write_toluaf(toluaf);
 
-  fclose(toluaf);
+	fclose(toluaf);
 }

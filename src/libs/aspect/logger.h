@@ -32,14 +32,14 @@ class Logger;
 
 class LoggerAspect : public virtual Aspect
 {
- public:
-  LoggerAspect(Logger *logger) __attribute__((nonnull));
-  virtual ~LoggerAspect();
+public:
+	LoggerAspect(Logger *logger) __attribute__((nonnull));
+	virtual ~LoggerAspect();
 
-  Logger *  get_logger() const;
+	Logger *get_logger() const;
 
- private:
-  Logger *logger_;
+private:
+	Logger *logger_;
 };
 
 } // end namespace fawkes

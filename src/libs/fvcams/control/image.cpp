@@ -8,7 +8,6 @@
  *
  ****************************************************************************/
 
-
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -23,8 +22,8 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvcams/control/image.h>
 #include <core/exceptions/software.h>
+#include <fvcams/control/image.h>
 
 namespace firevision {
 
@@ -60,7 +59,6 @@ CameraControlImage::~CameraControlImage()
 {
 }
 
-
 /** Get the image format the camera currently uses.
  * Check implementation documentation for details on the format.
  * @return a string describing the image format
@@ -69,9 +67,8 @@ CameraControlImage::~CameraControlImage()
 const char *
 CameraControlImage::format()
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Set the image format the camera should use.
  * Check implementation documentation for details on the format.
@@ -81,9 +78,8 @@ CameraControlImage::format()
 void
 CameraControlImage::set_format(const char *format)
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Get the current image size.
  * @param[out] width upon return contains the width of the image
@@ -92,8 +88,8 @@ CameraControlImage::set_format(const char *format)
 void
 CameraControlImage::size(unsigned int &width, unsigned int &height)
 {
-  width = this->width();
-  height = this->height();
+	width  = this->width();
+	height = this->height();
 }
 
 /** Return whether the camera image is horizontally mirrored.
@@ -103,9 +99,8 @@ CameraControlImage::size(unsigned int &width, unsigned int &height)
 bool
 CameraControlImage::horiz_mirror()
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Return whether the camera image is vertically mirrored.
  * @return true if the image is vertically mirrored
@@ -114,9 +109,8 @@ CameraControlImage::horiz_mirror()
 bool
 CameraControlImage::vert_mirror()
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Get information about current camera image mirroring.
  * @param[out] horiz upon return contains flag if horizontal mirroring is enabled
@@ -126,10 +120,9 @@ CameraControlImage::vert_mirror()
 void
 CameraControlImage::mirror(bool &horiz, bool &vert)
 {
-  horiz = horiz_mirror();
-  vert = vert_mirror();
+	horiz = horiz_mirror();
+	vert  = vert_mirror();
 }
-
 
 /** Set whether the camera should mirror images horizontally.
  * @param enabled if true, images should be mirrored horizontally
@@ -138,9 +131,8 @@ CameraControlImage::mirror(bool &horiz, bool &vert)
 void
 CameraControlImage::set_horiz_mirror(bool enabled)
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Set whether the camera should mirror images vertically.
  * @param enabled if true, images should be mirrored vertically
@@ -149,9 +141,8 @@ CameraControlImage::set_horiz_mirror(bool enabled)
 void
 CameraControlImage::set_vert_mirror(bool enabled)
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Set whether the camera should mirror images.
  * @param horiz true to mirror images horizontally, false to disable mirroring
@@ -161,10 +152,9 @@ CameraControlImage::set_vert_mirror(bool enabled)
 void
 CameraControlImage::set_mirror(bool horiz, bool vert)
 {
-  set_horiz_mirror(horiz);
-  set_vert_mirror(vert);
+	set_horiz_mirror(horiz);
+	set_vert_mirror(vert);
 }
-
 
 /** Get the number of frames per second the camera tries to deliver.
  * @return the current fps
@@ -173,9 +163,8 @@ CameraControlImage::set_mirror(bool horiz, bool vert)
 unsigned int
 CameraControlImage::fps()
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Set the number of frames per second the camera tries to deliver.
  * @param fps the new fps
@@ -184,9 +173,8 @@ CameraControlImage::fps()
 void
 CameraControlImage::set_fps(unsigned int fps)
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Get current lens x correction
  * @return current lens x correction
@@ -195,9 +183,8 @@ CameraControlImage::set_fps(unsigned int fps)
 unsigned int
 CameraControlImage::lens_x_corr()
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Get current lens y correction
  * @return current lens y correction
@@ -206,9 +193,8 @@ CameraControlImage::lens_x_corr()
 unsigned int
 CameraControlImage::lens_y_corr()
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Get current lens correction
  * @param[out] x_corr where the current lens x correction will be stored
@@ -218,10 +204,9 @@ CameraControlImage::lens_y_corr()
 void
 CameraControlImage::lens_corr(unsigned int &x_corr, unsigned int &y_corr)
 {
-  x_corr = this->lens_x_corr();
-  y_corr = this->lens_y_corr();
+	x_corr = this->lens_x_corr();
+	y_corr = this->lens_y_corr();
 }
-
 
 /** Set lens x correction
  * @param x_corr new lens x correction
@@ -230,9 +215,8 @@ CameraControlImage::lens_corr(unsigned int &x_corr, unsigned int &y_corr)
 void
 CameraControlImage::set_lens_x_corr(unsigned int x_corr)
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Set lens y correction
  * @param y_corr new lens y correction
@@ -241,9 +225,8 @@ CameraControlImage::set_lens_x_corr(unsigned int x_corr)
 void
 CameraControlImage::set_lens_y_corr(unsigned int y_corr)
 {
-  throw NotImplementedException("Not implemented");
+	throw NotImplementedException("Not implemented");
 }
-
 
 /** Set lens correction
  * @param x_corr new lens x correction
@@ -253,8 +236,8 @@ CameraControlImage::set_lens_y_corr(unsigned int y_corr)
 void
 CameraControlImage::set_lens_corr(unsigned int x_corr, unsigned int y_corr)
 {
-  set_lens_x_corr(x_corr);
-  set_lens_y_corr(y_corr);
+	set_lens_x_corr(x_corr);
+	set_lens_y_corr(y_corr);
 }
 
 } // end namespace firevision

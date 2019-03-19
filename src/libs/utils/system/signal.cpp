@@ -26,6 +26,7 @@
  */
 
 #include <utils/system/signal.h>
+
 #include <cstdlib>
 
 namespace fawkes {
@@ -59,20 +60,18 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-SignalManager *  SignalManager::instance_ = NULL;
-SignalHandler *  SignalManager::signal_handlers_[NSIG];
+SignalManager *SignalManager::instance_ = NULL;
+SignalHandler *SignalManager::signal_handlers_[NSIG];
 
 /** Invalid constructor. */
 SignalManager::SignalManager()
 {
 }
 
-
 /** Invalid copy constructor. */
 SignalManager::SignalManager(const SignalManager &cc)
 {
 }
-
 
 /** Get the SignalManager instance
  * @return SignalManager instance
@@ -80,16 +79,15 @@ SignalManager::SignalManager(const SignalManager &cc)
 SignalManager *
 SignalManager::instance()
 {
-  if ( instance_ == NULL ) {
-    instance_ = new SignalManager();
-    for (unsigned int i = 0; i < NSIG; ++i) {
-      signal_handlers_[i] = NULL;
-    }
-  }
+	if (instance_ == NULL) {
+		instance_ = new SignalManager();
+		for (unsigned int i = 0; i < NSIG; ++i) {
+			signal_handlers_[i] = NULL;
+		}
+	}
 
-  return instance_;
+	return instance_;
 }
-
 
 /** Finalize (and free) the SignalManager instance, this does NOT
  * implicitly delete the signal handlers, you have to do this by yourself
@@ -97,15 +95,14 @@ SignalManager::instance()
 void
 SignalManager::finalize()
 {
-  if ( instance_ != NULL ) {
-    for (unsigned int i = 0; i < NSIG; ++i) {
-      restore_default(i);
-    }
-    delete instance_;
-    instance_ = NULL;
-  }
+	if (instance_ != NULL) {
+		for (unsigned int i = 0; i < NSIG; ++i) {
+			restore_default(i);
+		}
+		delete instance_;
+		instance_ = NULL;
+	}
 }
-
 
 /** Register a SignalHandler for a signal
  * @param signum The signal number from <signal.h>
@@ -115,23 +112,22 @@ SignalManager::finalize()
 SignalHandler *
 SignalManager::register_handler(int signum, SignalHandler *handler)
 {
-  if (signum < NSIG) {
-    SignalHandler *old = signal_handlers_[signum];
-    signal_handlers_[signum] = handler;
+	if (signum < NSIG) {
+		SignalHandler *old       = signal_handlers_[signum];
+		signal_handlers_[signum] = handler;
 
-    // Register the <dispatcher> to handle this <signum>.
-    struct sigaction sa;
-    sa.sa_handler = SignalManager::dispatcher;
-    sigemptyset (&sa.sa_mask);
-    sa.sa_flags = 0;
-    sigaction (signum, &sa, 0);
+		// Register the <dispatcher> to handle this <signum>.
+		struct sigaction sa;
+		sa.sa_handler = SignalManager::dispatcher;
+		sigemptyset(&sa.sa_mask);
+		sa.sa_flags = 0;
+		sigaction(signum, &sa, 0);
 
-    return old;
-  } else {
-    return NULL;
-  }
+		return old;
+	} else {
+		return NULL;
+	}
 }
-
 
 /** Unregister a SignalHandler for a signal
  * @param signum The signal number from <signal.h>
@@ -139,9 +135,8 @@ SignalManager::register_handler(int signum, SignalHandler *handler)
 void
 SignalManager::unregister_handler(int signum)
 {
-  restore_default(signum);
+	restore_default(signum);
 }
-
 
 /** Unregister a SignalHandler for a signal
  * @param handler The SignalHandler you want to unregister, will unregister
@@ -150,30 +145,27 @@ SignalManager::unregister_handler(int signum)
 void
 SignalManager::unregister_handler(SignalHandler *handler)
 {
-
-  for (unsigned int i = 0; i < NSIG; ++i) {
-    if ( signal_handlers_[i] == handler ) {
-      restore_default(i);
-    }
-  }
+	for (unsigned int i = 0; i < NSIG; ++i) {
+		if (signal_handlers_[i] == handler) {
+			restore_default(i);
+		}
+	}
 }
-
 
 void
 SignalManager::restore_default(int signum)
 {
-  if (signum < NSIG) {
-    signal_handlers_[signum] = NULL;
+	if (signum < NSIG) {
+		signal_handlers_[signum] = NULL;
 
-    // ignore this signal
-    struct sigaction sa;
-    sa.sa_handler = SIG_DFL;
-    sigemptyset (&sa.sa_mask);
-    sa.sa_flags = 0;
-    sigaction (signum, &sa, 0);
-  }
+		// ignore this signal
+		struct sigaction sa;
+		sa.sa_handler = SIG_DFL;
+		sigemptyset(&sa.sa_mask);
+		sa.sa_flags = 0;
+		sigaction(signum, &sa, 0);
+	}
 }
-
 
 /** Ignore a signal
  * @param signum The signal number from <signal.h>
@@ -181,18 +173,17 @@ SignalManager::restore_default(int signum)
 void
 SignalManager::ignore(int signum)
 {
-  if (signum < NSIG) {
-    signal_handlers_[signum] = NULL;
+	if (signum < NSIG) {
+		signal_handlers_[signum] = NULL;
 
-    // ignore this signal
-    struct sigaction sa;
-    sa.sa_handler = SIG_IGN;
-    sigemptyset (&sa.sa_mask);
-    sa.sa_flags = 0;
-    sigaction (signum, &sa, 0);
-  }
+		// ignore this signal
+		struct sigaction sa;
+		sa.sa_handler = SIG_IGN;
+		sigemptyset(&sa.sa_mask);
+		sa.sa_flags = 0;
+		sigaction(signum, &sa, 0);
+	}
 }
-
 
 /** Dispatch incoming signal to appropriate handler.
  * @param signum signal received.
@@ -200,9 +191,9 @@ SignalManager::ignore(int signum)
 void
 SignalManager::dispatcher(int signum)
 {
-  if (signal_handlers_[signum] != NULL) {
-    signal_handlers_[signum]->handle_signal(signum);
-  }
+	if (signal_handlers_[signum] != NULL) {
+		signal_handlers_[signum]->handle_signal(signum);
+	}
 }
 
 } // end namespace fawkes

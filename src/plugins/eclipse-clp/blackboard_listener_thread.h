@@ -20,132 +20,132 @@
 #ifndef BLACKBOARD_LISTENER_THREAD_H
 #define BLACKBOARD_LISTENER_THREAD_H
 
-
-#include <aspect/blackboard.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-
-#include <core/threading/thread.h>
-#include <core/threading/mutex.h>
-#include <libs/blackboard/interface_observer.h>
-#include <libs/blackboard/interface_listener.h>
-
-#include <map>
-#include <queue>
-#include <memory>
-
-#include <eclipseclass.h>
-
 #include "externals/blackboard.h"
 
+#include <aspect/blackboard.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/mutex.h>
+#include <core/threading/thread.h>
+#include <libs/blackboard/interface_listener.h>
+#include <libs/blackboard/interface_observer.h>
+
+#include <eclipseclass.h>
+#include <map>
+#include <memory>
+#include <queue>
 
 /** Keeps a queue of subscribed blackboard events that can be queried in a thread-safe manner */
-class BlackboardListenerThread
-    : public fawkes::Thread
-    , public fawkes::LoggingAspect
-    , public fawkes::ConfigurableAspect
-    , public fawkes::BlackBoardAspect
-    , public fawkes::BlackBoardInterfaceObserver
-    , public fawkes::BlackBoardInterfaceListener
+class BlackboardListenerThread : public fawkes::Thread,
+                                 public fawkes::LoggingAspect,
+                                 public fawkes::ConfigurableAspect,
+                                 public fawkes::BlackBoardAspect,
+                                 public fawkes::BlackBoardInterfaceObserver,
+                                 public fawkes::BlackBoardInterfaceListener
 {
 private:
-  using string = std::string;
-  template<class T> using queue = std::queue<T>;
-  template<class T> using shared_ptr = std::shared_ptr<T>;
-  template<class T1, class T2> using map = std::map<T1, T2>;
-  using Interface = fawkes::Interface;
-  using Mutex = fawkes::Mutex;
+	using string = std::string;
+	template <class T>
+	using queue = std::queue<T>;
+	template <class T>
+	using shared_ptr = std::shared_ptr<T>;
+	template <class T1, class T2>
+	using map       = std::map<T1, T2>;
+	using Interface = fawkes::Interface;
+	using Mutex     = fawkes::Mutex;
 
 public:
-  BlackboardListenerThread();
+	BlackboardListenerThread();
 
-  void observe_pattern(const char *type_pattern, const char *id_pattern) noexcept;
-  void listen_for_change(Interface *interface) noexcept;
+	void observe_pattern(const char *type_pattern, const char *id_pattern) noexcept;
+	void listen_for_change(Interface *interface) noexcept;
 
-  virtual void bb_interface_created(const char *type, const char *id) noexcept override;
-  virtual void bb_interface_destroyed(const char *type, const char *id) noexcept override;
-  virtual void bb_interface_data_changed(Interface *interface) noexcept override;
+	virtual void bb_interface_created(const char *type, const char *id) noexcept override;
+	virtual void bb_interface_destroyed(const char *type, const char *id) noexcept override;
+	virtual void bb_interface_data_changed(Interface *interface) noexcept override;
 
-  static BlackboardListenerThread *instance();
-  static void cleanup_instance();
+	static BlackboardListenerThread *instance();
+	static void                      cleanup_instance();
 
-
-  /** Abstract superclass for blackboard events */
-  class Event {
-  public:
-    /** Constructor
+	/** Abstract superclass for blackboard events */
+	class Event
+	{
+	public:
+		/** Constructor
      * @param type Blackboard interface type as string
      * @param id Blackboard interface ID
      */
-    Event(const std::string &type, const std::string &id)
-      : type(type), id(id)
-    {}
+		Event(const std::string &type, const std::string &id) : type(type), id(id)
+		{
+		}
 
-    virtual ~Event();
+		virtual ~Event();
 
-    /** Return an eclipse term representing the event (abstract)
+		/** Return an eclipse term representing the event (abstract)
      * @return An eclipse term representing the event (abstract)
      */
-    virtual operator EC_word () = 0;
+		virtual operator EC_word() = 0;
 
-    /** Return the UID (i.e. type::id) of the blackboard interface that triggered the event
+		/** Return the UID (i.e. type::id) of the blackboard interface that triggered the event
      * @return The UID (i.e. type::id) of the blackboard interface that triggered the event
      */
-    std::string uid()
-    { return type + "::" + id; }
+		std::string
+		uid()
+		{
+			return type + "::" + id;
+		}
 
-  protected:
-    /** Triggering interface's type name */
-    string type;
+	protected:
+		/** Triggering interface's type name */
+		string type;
 
-    /** Triggering interface's ID */
-    string id;
-  };
+		/** Triggering interface's ID */
+		string id;
+	};
 
+	/** A new interface was created */
+	class Created : public Event
+	{
+	public:
+		using Event::Event;
+		virtual operator EC_word();
+	};
 
-  /** A new interface was created */
-  class Created : public Event {
-  public:
-    using Event::Event;
-    virtual operator EC_word ();
-  };
+	/** An interface was destroyed */
+	class Destroyed : public Event
+	{
+	public:
+		using Event::Event;
+		virtual operator EC_word();
+	};
 
-
-  /** An interface was destroyed */
-  class Destroyed : public Event {
-  public:
-    using Event::Event;
-    virtual operator EC_word ();
-  };
-
-
-  /** An interface changed */
-  class Changed : public Event {
-  public:
-    /** Constructor
+	/** An interface changed */
+	class Changed : public Event
+	{
+	public:
+		/** Constructor
      * @param interface The interface that changed
      */
-    Changed(Interface *interface)
-      : Event(interface->type(), interface->id()), interface(interface)
-    {}
+		Changed(Interface *interface) : Event(interface->type(), interface->id()), interface(interface)
+		{
+		}
 
-    virtual operator EC_word ();
+		virtual operator EC_word();
 
-  private:
-    fawkes::Interface *interface;
-  };
+	private:
+		fawkes::Interface *interface;
+	};
 
-
-  bool event_pending();
-  shared_ptr<Event> event_pop();
+	bool              event_pending();
+	shared_ptr<Event> event_pop();
 
 private:
-  Mutex state_mutex_;
+	Mutex state_mutex_;
 
-  static BlackboardListenerThread *instance_;
+	static BlackboardListenerThread *instance_;
 
-  map<string, fawkes::Interface *> last_iface_of_type_;
-  queue<shared_ptr<Event>> iface_events_;
+	map<string, fawkes::Interface *> last_iface_of_type_;
+	queue<shared_ptr<Event>>         iface_events_;
 };
 
 #endif // BLACKBOARD_LISTENER_THREAD_H

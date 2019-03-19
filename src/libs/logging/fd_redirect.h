@@ -27,42 +27,46 @@
 #include <logging/logger.h>
 
 #include <boost/asio.hpp>
-#include <thread>
 #include <string>
+#include <thread>
 
 namespace fawkes {
 
-class LogFileDescriptorToLog {
- public:
-  LogFileDescriptorToLog(int fd, Logger *logger, const char *logname, Logger::LogLevel log_level);
-  ~LogFileDescriptorToLog();
+class LogFileDescriptorToLog
+{
+public:
+	LogFileDescriptorToLog(int fd, Logger *logger, const char *logname, Logger::LogLevel log_level);
+	~LogFileDescriptorToLog();
 
- private:
-  void start_log(const char *logname, Logger::LogLevel log_level,
-		 boost::asio::posix::stream_descriptor &sd, boost::asio::streambuf &buf);
-  void handle_log_line(const char *logname, Logger::LogLevel log_level,
-		       boost::asio::posix::stream_descriptor &sd, boost::asio::streambuf &buf,
-		       boost::system::error_code ec, size_t bytes_read);
+private:
+	void start_log(const char *                           logname,
+	               Logger::LogLevel                       log_level,
+	               boost::asio::posix::stream_descriptor &sd,
+	               boost::asio::streambuf &               buf);
+	void handle_log_line(const char *                           logname,
+	                     Logger::LogLevel                       log_level,
+	                     boost::asio::posix::stream_descriptor &sd,
+	                     boost::asio::streambuf &               buf,
+	                     boost::system::error_code              ec,
+	                     size_t                                 bytes_read);
 
- private:
-  int log_fd_;
-  int old_fd_;
-  int old_fd_dup_;
+private:
+	int log_fd_;
+	int old_fd_;
+	int old_fd_dup_;
 
-  boost::asio::io_service               io_service_;
-  std::thread                           io_service_thread_;
-  boost::asio::io_service::work         io_service_work_;
+	boost::asio::io_service       io_service_;
+	std::thread                   io_service_thread_;
+	boost::asio::io_service::work io_service_work_;
 
-  boost::asio::posix::stream_descriptor stream_;
-  boost::asio::streambuf                buffer_;
+	boost::asio::posix::stream_descriptor stream_;
+	boost::asio::streambuf                buffer_;
 
-  Logger           *logger_;
-  std::string       log_name_;
-  Logger::LogLevel  log_level_;
-
+	Logger *         logger_;
+	std::string      log_name_;
+	Logger::LogLevel log_level_;
 };
 
 } // end namespace fawkes
 
 #endif
-

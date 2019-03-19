@@ -35,12 +35,10 @@ PlexilNavgraphAccessThread::PlexilNavgraphAccessThread()
 {
 }
 
-
 /** Destructor. */
 PlexilNavgraphAccessThread::~PlexilNavgraphAccessThread()
 {
 }
-
 
 /** Get access to navgraph.
  * @return navgraph

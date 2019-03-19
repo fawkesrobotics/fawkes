@@ -27,37 +27,37 @@
 
 #include <webview/reply.h>
 
-#include <memory>
 #include <cstdio>
+#include <memory>
 
 namespace fawkes {
 
-class DynamicMJPEGStreamWebReply
-: public DynamicWebReply,
-  public WebviewJpegStreamProducer::Subscriber
+class DynamicMJPEGStreamWebReply : public DynamicWebReply,
+                                   public WebviewJpegStreamProducer::Subscriber
 {
- public:
+public:
 	DynamicMJPEGStreamWebReply(std::shared_ptr<WebviewJpegStreamProducer> stream_producer);
 	DynamicMJPEGStreamWebReply(const DynamicMJPEGStreamWebReply &other);
-  virtual ~DynamicMJPEGStreamWebReply();
+	virtual ~DynamicMJPEGStreamWebReply();
 
-	DynamicMJPEGStreamWebReply& operator=(const DynamicMJPEGStreamWebReply &other);
+	DynamicMJPEGStreamWebReply &operator=(const DynamicMJPEGStreamWebReply &other);
 
-  virtual size_t size();
-  virtual size_t next_chunk(size_t pos, char *buffer, size_t buf_max_size);
+	virtual size_t size();
+	virtual size_t next_chunk(size_t pos, char *buffer, size_t buf_max_size);
 
-  virtual void handle_buffer(std::shared_ptr<WebviewJpegStreamProducer::Buffer> buffer);
- private:
-  std::shared_ptr<WebviewJpegStreamProducer> stream_producer_;
+	virtual void handle_buffer(std::shared_ptr<WebviewJpegStreamProducer::Buffer> buffer);
 
-  std::shared_ptr<WebviewJpegStreamProducer::Buffer> buffer_;
-  size_t buffer_bytes_written_;
+private:
+	std::shared_ptr<WebviewJpegStreamProducer> stream_producer_;
 
-  std::shared_ptr<WebviewJpegStreamProducer::Buffer> next_buffer_;
-  fawkes::Mutex                                    *next_buffer_mutex_;
-  fawkes::WaitCondition                            *next_buffer_waitcond_;
+	std::shared_ptr<WebviewJpegStreamProducer::Buffer> buffer_;
+	size_t                                             buffer_bytes_written_;
 
-  bool next_frame_;
+	std::shared_ptr<WebviewJpegStreamProducer::Buffer> next_buffer_;
+	fawkes::Mutex *                                    next_buffer_mutex_;
+	fawkes::WaitCondition *                            next_buffer_waitcond_;
+
+	bool next_frame_;
 };
 
 } // end namespace fawkes

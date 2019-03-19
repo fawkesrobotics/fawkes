@@ -26,7 +26,7 @@
 #include <tf/types.h>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
 // The following classes are used for better Lua compatibility
 
@@ -34,41 +34,52 @@ namespace fawkes {
 
 class StampedQuaternion : public Stamped<Quaternion>
 {
- public:
- StampedQuaternion() : Stamped<Quaternion>() {}
-  StampedQuaternion(const Quaternion &input, const fawkes::Time &timestamp,
-                    const std::string &frame_id)
-    : Stamped<Quaternion>(input, timestamp, frame_id) {}
+public:
+	StampedQuaternion() : Stamped<Quaternion>()
+	{
+	}
+	StampedQuaternion(const Quaternion &  input,
+	                  const fawkes::Time &timestamp,
+	                  const std::string & frame_id)
+	: Stamped<Quaternion>(input, timestamp, frame_id)
+	{
+	}
 };
 
 class StampedVector3 : public Stamped<Vector3>
 {
- public:
- StampedVector3() : Stamped<Vector3>() {}
-  StampedVector3(const Vector3 &input, const fawkes::Time &timestamp,
-                    const std::string &frame_id)
-    : Stamped<Vector3>(input, timestamp, frame_id) {}
-
+public:
+	StampedVector3() : Stamped<Vector3>()
+	{
+	}
+	StampedVector3(const Vector3 &input, const fawkes::Time &timestamp, const std::string &frame_id)
+	: Stamped<Vector3>(input, timestamp, frame_id)
+	{
+	}
 };
-
 
 class StampedPoint : public Stamped<Point>
 {
- public:
- StampedPoint() : Stamped<Point>() {}
-  StampedPoint(const Point &input, const fawkes::Time &timestamp,
-                    const std::string &frame_id)
-    : Stamped<Point>(input, timestamp, frame_id) {}
-
+public:
+	StampedPoint() : Stamped<Point>()
+	{
+	}
+	StampedPoint(const Point &input, const fawkes::Time &timestamp, const std::string &frame_id)
+	: Stamped<Point>(input, timestamp, frame_id)
+	{
+	}
 };
 
 class StampedPose : public Stamped<Pose>
 {
- public:
- StampedPose() : Stamped<Pose>() {}
-  StampedPose(const Pose &input, const fawkes::Time &timestamp,
-                    const std::string &frame_id)
-    : Stamped<Pose>(input, timestamp, frame_id) {}
+public:
+	StampedPose() : Stamped<Pose>()
+	{
+	}
+	StampedPose(const Pose &input, const fawkes::Time &timestamp, const std::string &frame_id)
+	: Stamped<Pose>(input, timestamp, frame_id)
+	{
+	}
 };
 
 /// @endcond

@@ -28,30 +28,30 @@
 
 namespace firevision {
 
-class Writer {
+class Writer
+{
+public:
+	Writer(const char *extension = 0);
+	virtual ~Writer();
 
- public:
-  Writer(const char *extension = 0);
-  virtual ~Writer();
+	virtual void set_filename(const char *filename);
+	virtual void set_dimensions(unsigned int width, unsigned int height);
+	virtual void set_buffer(colorspace_t cspace, unsigned char *buffer);
+	virtual void write() = 0;
 
-  virtual void             set_filename(const char *filename);
-  virtual void             set_dimensions(unsigned int width, unsigned int height);
-  virtual void             set_buffer(colorspace_t cspace, unsigned char *buffer);
-  virtual void             write()                                                 = 0;
+protected:
+	virtual void set_extension(const char *extension);
 
- protected:
-  virtual void             set_extension(const char *extension);
+	char *filename;
+	char *basename;
+	char *extension;
 
-  char *filename;
-  char *basename;
-  char *extension;
-  
-  unsigned int width;
-  unsigned int height;
+	unsigned int width;
+	unsigned int height;
 
-  colorspace_t cspace;
+	colorspace_t cspace;
 
-  unsigned char *buffer;
+	unsigned char *buffer;
 };
 
 } // end namespace firevision

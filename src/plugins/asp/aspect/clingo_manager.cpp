@@ -54,7 +54,7 @@ ClingoManagerAspect::~ClingoManagerAspect(void)
  * @param[in] clingo_ctrl_mgr The Clingo Control Manager
  */
 void
-ClingoManagerAspect::init_ClingoManagerAspect(const LockPtr<ClingoControlManager>& clingo_ctrl_mgr)
+ClingoManagerAspect::init_ClingoManagerAspect(const LockPtr<ClingoControlManager> &clingo_ctrl_mgr)
 {
 	this->clingo_ctrl_mgr = clingo_ctrl_mgr;
 }

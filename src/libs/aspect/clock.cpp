@@ -35,7 +35,6 @@ namespace fawkes {
  * @author Daniel Beck
  */
 
-
 /** @var Clock ClockAspect::clock
  * By means of this member access to the clock is given.
  */
@@ -43,14 +42,13 @@ namespace fawkes {
 /** Constructor. */
 ClockAspect::ClockAspect()
 {
-  add_aspect("ClockAspect");
+	add_aspect("ClockAspect");
 }
 
 /** Virtual empty destructor. */
 ClockAspect::~ClockAspect()
 {
 }
-
 
 /** Set the clock.
  * It is guaranteed that this is called for a clock thread before
@@ -60,7 +58,7 @@ ClockAspect::~ClockAspect()
 void
 ClockAspect::init_ClockAspect(Clock *clock)
 {
-  this->clock = clock;
+	this->clock = clock;
 }
 
 } // end namespace fawkes

@@ -29,31 +29,39 @@
 
 class LaserDataFilterCascade : public LaserDataFilter
 {
- public:
-  LaserDataFilterCascade(const std::string& filter_name,
-                         unsigned int in_data_size, std::vector<Buffer *> &in);
-  ~LaserDataFilterCascade();
+public:
+	LaserDataFilterCascade(const std::string &    filter_name,
+	                       unsigned int           in_data_size,
+	                       std::vector<Buffer *> &in);
+	~LaserDataFilterCascade();
 
-  virtual void set_out_vector(std::vector<LaserDataFilter::Buffer *> &out);
+	virtual void set_out_vector(std::vector<LaserDataFilter::Buffer *> &out);
 
-  void add_filter(LaserDataFilter *filter);
-  void remove_filter(LaserDataFilter *filter);
-  void delete_filters();
+	void add_filter(LaserDataFilter *filter);
+	void remove_filter(LaserDataFilter *filter);
+	void delete_filters();
 
-  /** Check if filters have been added to the cascade.
+	/** Check if filters have been added to the cascade.
    * @return true if filters have been registered, false otherwise */
-  inline bool has_filters() const { return ! filters_.empty(); }
+	inline bool
+	has_filters() const
+	{
+		return !filters_.empty();
+	}
 
-  void filter();
+	void filter();
 
-  /** Get filters.
+	/** Get filters.
    * @return list of active filters. */
-  const std::list<LaserDataFilter *> &  get_filters() const { return filters_; }
+	const std::list<LaserDataFilter *> &
+	get_filters() const
+	{
+		return filters_;
+	}
 
- private:
-  std::list<LaserDataFilter *>           filters_;
-  std::list<LaserDataFilter *>::iterator fit_;
+private:
+	std::list<LaserDataFilter *>           filters_;
+	std::list<LaserDataFilter *>::iterator fit_;
 };
-
 
 #endif

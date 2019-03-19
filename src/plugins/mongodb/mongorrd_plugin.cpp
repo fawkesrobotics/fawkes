@@ -21,6 +21,7 @@
  */
 
 #include "mongorrd_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -31,14 +32,14 @@ using namespace fawkes;
  */
 class MongoRRDPlugin : public fawkes::Plugin
 {
- public:
-/** Constructor.
+public:
+	/** Constructor.
  * @param config Fawkes configuration
  */
-  explicit MongoRRDPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new MongoRRDThread());
-  }
+	explicit MongoRRDPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new MongoRRDThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Log MongoDB performance data using RRD")

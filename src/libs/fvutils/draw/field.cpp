@@ -19,9 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <fvutils/draw/field.h>
-
 #include <core/exceptions/software.h>
+#include <fvutils/draw/field.h>
 
 #include <cmath>
 #include <cstring>
@@ -44,8 +43,8 @@ namespace firevision {
 /** Dummy constructor */
 Field::Field(FieldLines *lines, bool manage_lines_memory)
 {
-  lines_ = lines;
-  manage_lines_memory_ = manage_lines_memory;
+	lines_               = lines;
+	manage_lines_memory_ = manage_lines_memory;
 }
 
 /**
@@ -53,20 +52,19 @@ Field::Field(FieldLines *lines, bool manage_lines_memory)
  */
 Field::~Field()
 {
-  if (manage_lines_memory_) delete lines_;
+	if (manage_lines_memory_)
+		delete lines_;
 }
-
 
 /**
  * Field length getter
  * @return the length of the soccer field
  */
 float
-Field::get_field_length()const
+Field::get_field_length() const
 {
-  return lines_->get_field_length();
+	return lines_->get_field_length();
 }
-
 
 /**
  * Field width getter
@@ -75,9 +73,8 @@ Field::get_field_length()const
 float
 Field::get_field_width() const
 {
-  return lines_->get_field_width();
+	return lines_->get_field_width();
 }
-
 
 /**
  * Prints the information to the console
@@ -86,19 +83,40 @@ Field::get_field_width() const
 void
 Field::print(bool in_mm) const
 {
-  printf("Field lines (start-x -y end-x -y):\n==================================\n");
-  for (FieldLines::const_iterator it = lines_->begin(); it != lines_->end(); ++it) {
-    if (in_mm) printf("%d %d %d %d\n", static_cast<int>(it->start.x * 1000), static_cast<int>(it->start.y * 1000), static_cast<int>(it->end.x * 1000), static_cast<int>(it->end.y * 1000));
-    else       printf("%0.03f %0.03f %0.03f %0.03f\n", it->start.x, it->start.y, it->end.x, it->end.y);
-  }
-  printf("\n");
+	printf("Field lines (start-x -y end-x -y):\n==================================\n");
+	for (FieldLines::const_iterator it = lines_->begin(); it != lines_->end(); ++it) {
+		if (in_mm)
+			printf("%d %d %d %d\n",
+			       static_cast<int>(it->start.x * 1000),
+			       static_cast<int>(it->start.y * 1000),
+			       static_cast<int>(it->end.x * 1000),
+			       static_cast<int>(it->end.y * 1000));
+		else
+			printf("%0.03f %0.03f %0.03f %0.03f\n", it->start.x, it->start.y, it->end.x, it->end.y);
+	}
+	printf("\n");
 
-  printf("Field circles (center-x/y radius start/end angle):\n=============================================\n");
-  for (field_circles_t::const_iterator it = lines_->get_circles().begin(); it != lines_->get_circles().end(); ++it) {
-    if (in_mm) printf("%d %d %d %0.03f %0.03f\n", static_cast<int>(it->center.x * 1000), static_cast<int>(it->center.y * 1000), static_cast<int>(it->radius * 1000), it->start_phi, it->end_phi);
-    else       printf("%0.03f %0.03f %0.03f %0.03f %0.03f\n", it->center.x, it->center.y, it->radius, it->start_phi, it->end_phi);
-  }
-  printf("\n\n");
+	printf("Field circles (center-x/y radius start/end "
+	       "angle):\n=============================================\n");
+	for (field_circles_t::const_iterator it = lines_->get_circles().begin();
+	     it != lines_->get_circles().end();
+	     ++it) {
+		if (in_mm)
+			printf("%d %d %d %0.03f %0.03f\n",
+			       static_cast<int>(it->center.x * 1000),
+			       static_cast<int>(it->center.y * 1000),
+			       static_cast<int>(it->radius * 1000),
+			       it->start_phi,
+			       it->end_phi);
+		else
+			printf("%0.03f %0.03f %0.03f %0.03f %0.03f\n",
+			       it->center.x,
+			       it->center.y,
+			       it->radius,
+			       it->start_phi,
+			       it->end_phi);
+	}
+	printf("\n\n");
 }
 
 /**
@@ -109,13 +127,18 @@ Field::print(bool in_mm) const
  * @param field_width the area of interest around the field
  * @return the Field object pointer
  */
-Field*
+Field *
 Field::field_for_name(std::string field_name, float field_length, float field_width)
 {
-  if (field_name == "Field6x4") return new Field(new FieldLines6x4(field_length, field_width));
-  else if (field_name == "FieldCityTower") return new Field(new FieldLinesCityTower(field_length, field_width));
-  else if (field_name == "FieldCityTowerSeminar") return new Field(new FieldLinesCityTowerSeminar(field_length, field_width));
-  else throw fawkes::IllegalArgumentException("Unknown field name! Please set field_name to a valid value (see field.h)");
+	if (field_name == "Field6x4")
+		return new Field(new FieldLines6x4(field_length, field_width));
+	else if (field_name == "FieldCityTower")
+		return new Field(new FieldLinesCityTower(field_length, field_width));
+	else if (field_name == "FieldCityTowerSeminar")
+		return new Field(new FieldLinesCityTowerSeminar(field_length, field_width));
+	else
+		throw fawkes::IllegalArgumentException(
+		  "Unknown field name! Please set field_name to a valid value (see field.h)");
 }
 
 } // end namespace firevision

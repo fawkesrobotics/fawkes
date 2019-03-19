@@ -32,14 +32,14 @@ class FawkesNetworkHub;
 
 class FawkesNetworkAspectIniFin : public AspectIniFin
 {
- public:
-  FawkesNetworkAspectIniFin(FawkesNetworkHub *hub);
+public:
+	FawkesNetworkAspectIniFin(FawkesNetworkHub *hub);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  FawkesNetworkHub *hub_;
+private:
+	FawkesNetworkHub *hub_;
 };
 
 } // end namespace fawkes

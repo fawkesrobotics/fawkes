@@ -43,12 +43,11 @@ namespace fawkes {
  * @brief Clingo Control for exclusive usage.
  */
 
-
 /** Constructor.
  * @param[in] control_name The desired control name.
  * @param[in] log_component The component for the logger.
  */
-ASPAspect::ASPAspect(const std::string&& control_name, const std::string&& log_component)
+ASPAspect::ASPAspect(const std::string &&control_name, const std::string &&log_component)
 : control_name_(std::move(control_name)), log_comp_(std::move(log_component))
 {
 	add_aspect("ASPAspect");
@@ -59,14 +58,13 @@ ASPAspect::~ASPAspect(void)
 {
 }
 
-
 /** Init ASP aspect.
  * This sets the Clingo Control.
  * It is guaranteed that this is called for an ASP Thread before start is called (when running regularly inside Fawkes).
  * @param[in] clingo The Clingo Control.
  */
 void
-ASPAspect::init_ASPAspect(const LockPtr<ClingoAccess>& clingo)
+ASPAspect::init_ASPAspect(const LockPtr<ClingoAccess> &clingo)
 {
 	this->clingo = clingo;
 }

@@ -19,13 +19,12 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <webview/request_manager.h>
 #include <core/threading/mutex_locker.h>
-#include <webview/server.h>
 #include <utils/time/time.h>
+#include <webview/request_manager.h>
+#include <webview/server.h>
 
 namespace fawkes {
-
 
 /** @class WebRequestManager <webview/nav_manager.h>
  * Probides information about ongoing requests.
@@ -38,25 +37,22 @@ namespace fawkes {
 /** Constructor. */
 WebRequestManager::WebRequestManager()
 {
-  mutex_  = new Mutex();
-  server_ = 0;
+	mutex_  = new Mutex();
+	server_ = 0;
 }
-
 
 /** Destructor. */
 WebRequestManager::~WebRequestManager()
 {
-  delete mutex_;
+	delete mutex_;
 }
-
 
 void
 WebRequestManager::set_server(WebServer *server)
 {
-  MutexLocker lock(mutex_);
-  server_ = server;
+	MutexLocker lock(mutex_);
+	server_ = server;
 }
-
 
 /** Get number of currently active requests.
  * @return number of currently active requests.
@@ -64,14 +60,13 @@ WebRequestManager::set_server(WebServer *server)
 unsigned int
 WebRequestManager::num_active_requests() const
 {
-  MutexLocker lock(mutex_);
-  if (server_) {
-    return server_->active_requests();
-  } else {
-    return 0;
-  }
+	MutexLocker lock(mutex_);
+	if (server_) {
+		return server_->active_requests();
+	} else {
+		return 0;
+	}
 }
-
 
 /** Get time when last request was completed.
  * If the number of active requests is zero this gives the time of
@@ -82,13 +77,12 @@ WebRequestManager::num_active_requests() const
 Time
 WebRequestManager::last_request_completion_time() const
 {
-  MutexLocker lock(mutex_);
-  if (server_) {
-    return server_->last_request_completion_time();
-  } else {
-    return Time(0,0);
-  }
+	MutexLocker lock(mutex_);
+	if (server_) {
+		return server_->last_request_completion_time();
+	} else {
+		return Time(0, 0);
+	}
 }
-
 
 } // end namespace fawkes

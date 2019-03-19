@@ -24,122 +24,124 @@
 #ifndef _FIREVISION_MODELS_SHAPE_ACCUMULATORS_HT_ACCUM_H_
 #define _FIREVISION_MODELS_SHAPE_ACCUMULATORS_HT_ACCUM_H_
 
-#include <stdlib.h>
 #include <ostream>
+#include <stdlib.h>
 #include <vector>
 
 namespace firevision {
 
 class RhtAccNode
 {
- public:
-  RhtAccNode();
-  virtual ~RhtAccNode();
-  virtual void clear(int ignore);
+public:
+	RhtAccNode();
+	virtual ~RhtAccNode();
+	virtual void clear(int ignore);
 
- protected:
-  /** left */
-  RhtAccNode* left;
-  /** right */
-  RhtAccNode* right;
-  /** used for recycling */
-  RhtAccNode* next;
+protected:
+	/** left */
+	RhtAccNode *left;
+	/** right */
+	RhtAccNode *right;
+	/** used for recycling */
+	RhtAccNode *next;
 };
 
 class RhtRNode : public RhtAccNode
 {
- public:
-  RhtRNode(int r);
-  void clear(void);
-  int  insert(int r);
-  void dump(std::ostream&, int x, int y);
-  void clear(int r);
-  void getNodes(std::vector< std::vector< int > > *rv, int min_votes, int x, int y);
+public:
+	RhtRNode(int r);
+	void clear(void);
+	int  insert(int r);
+	void dump(std::ostream &, int x, int y);
+	void clear(int r);
+	void getNodes(std::vector<std::vector<int>> *rv, int min_votes, int x, int y);
 
-  static RhtRNode* generate(int r);
-  static void reset(void);
-  static void cleanup(void);
+	static RhtRNode *generate(int r);
+	static void      reset(void);
+	static void      cleanup(void);
 
- protected:
-  /** r */
-  int r;
-  /** count */
-  int count;
+protected:
+	/** r */
+	int r;
+	/** count */
+	int count;
 
- private:
-  static RhtRNode* reuse_head;
-  static RhtRNode* reuse_tail;
+private:
+	static RhtRNode *reuse_head;
+	static RhtRNode *reuse_tail;
 };
 
 class RhtYNode : public RhtAccNode
 {
- private:
-  static RhtYNode* reuse_head;
-  static RhtYNode* reuse_tail;
- public:
-  static RhtYNode* generate(int y);
-  static void reset(void);
-  static void cleanup(void);
-	
- protected:
-  /** y */
-  int y;
-  /** r_root */
-  RhtRNode* r_root;
-	
- public:
-  RhtYNode(int y);
-  int insert(int y, int r);
-  void dump(std::ostream&, int x);
-  void clear(int y);
-  void getNodes(std::vector< std::vector< int > > *rv, int min_votes, int x);
+private:
+	static RhtYNode *reuse_head;
+	static RhtYNode *reuse_tail;
+
+public:
+	static RhtYNode *generate(int y);
+	static void      reset(void);
+	static void      cleanup(void);
+
+protected:
+	/** y */
+	int y;
+	/** r_root */
+	RhtRNode *r_root;
+
+public:
+	RhtYNode(int y);
+	int  insert(int y, int r);
+	void dump(std::ostream &, int x);
+	void clear(int y);
+	void getNodes(std::vector<std::vector<int>> *rv, int min_votes, int x);
 };
 
 class RhtXNode : public RhtAccNode
 {
- private:
-  static RhtXNode* reuse_head;
-  static RhtXNode* reuse_tail;
- public:
-  static RhtXNode* generate(int x);
-  static void reset(void);
-  static void cleanup(void);
+private:
+	static RhtXNode *reuse_head;
+	static RhtXNode *reuse_tail;
 
- protected:
-  /** x */
-  int x;
-  /** y root */
-  RhtYNode* y_root;
+public:
+	static RhtXNode *generate(int x);
+	static void      reset(void);
+	static void      cleanup(void);
 
- public:
-  RhtXNode(int x);
-  int insert(int x, int y, int r);
-  void dump(std::ostream&);
-  void clear (int x);
-  void getNodes(std::vector< std::vector< int > > *rv, int min_votes);
+protected:
+	/** x */
+	int x;
+	/** y root */
+	RhtYNode *y_root;
+
+public:
+	RhtXNode(int x);
+	int  insert(int x, int y, int r);
+	void dump(std::ostream &);
+	void clear(int x);
+	void getNodes(std::vector<std::vector<int>> *rv, int min_votes);
 };
 
 class RhtAccumulator
 {
- private:
-  int		x_max;
-  int		y_max;
-  int		r_max;
-  int		max;
+private:
+	int x_max;
+	int y_max;
+	int r_max;
+	int max;
 
-  RhtXNode*	root;
+	RhtXNode *root;
 
-  int             num_votes;
+	int num_votes;
 
- public:
-  RhtAccumulator();
-  ~RhtAccumulator();
-  int accumulate(int x, int y, int r);
-  int getMax(int& x, int& y, int& r) const;
-  void dump(std::ostream&);
-  void reset(void);
-  unsigned int getNumVotes() const;
-  std::vector< std::vector< int > > * getNodes(int min_count);
+public:
+	RhtAccumulator();
+	~RhtAccumulator();
+	int                            accumulate(int x, int y, int r);
+	int                            getMax(int &x, int &y, int &r) const;
+	void                           dump(std::ostream &);
+	void                           reset(void);
+	unsigned int                   getNumVotes() const;
+	std::vector<std::vector<int>> *getNodes(int min_count);
 };
 
 } // end namespace firevision

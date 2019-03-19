@@ -25,30 +25,28 @@
 #ifndef FIREVISION_UTILS_COLOR_YUVRGB_H_
 #define FIREVISION_UTILS_COLOR_YUVRGB_H_
 
-#include <fvutils/color/yuv.h>
 #include <fvutils/color/rgb.h>
+#include <fvutils/color/yuv.h>
 
 namespace firevision {
 
+#define YUV2RGB(y, u, v, r, g, b)        \
+	{                                      \
+		r = y + ((v * 1436) >> 10);          \
+		g = y - ((u * 352 + v * 731) >> 10); \
+		b = y + ((u * 1814) >> 10);          \
+		r = r < 0 ? 0 : r;                   \
+		g = g < 0 ? 0 : g;                   \
+		b = b < 0 ? 0 : b;                   \
+		r = r > 255 ? 255 : r;               \
+		g = g > 255 ? 255 : g;               \
+		b = b > 255 ? 255 : b;               \
+	}
 
-#define YUV2RGB(y, u, v, r, g, b) {\
-    r = y + ((v*1436) >> 10);			\
-    g = y - ((u*352 + v*731) >> 10);		\
-    b = y + ((u*1814) >> 10);			\
-    r = r < 0 ? 0 : r;				\
-    g = g < 0 ? 0 : g;				\
-    b = b < 0 ? 0 : b;				\
-    r = r > 255 ? 255 : r;			\
-    g = g > 255 ? 255 : g;			\
-    b = b > 255 ? 255 : b; }
+#define clip(x) (unsigned char)((x) < 0 ? 0 : ((x) > 255 ? 255 : (x)))
 
-
-#define clip(x) (unsigned char)( (x) < 0 ? 0 : ( (x) > 255 ? 255 : (x) ) )
-
-
-#define yuv411packed_to_rgb(YUV, RGB, width, height) yuv411packed_to_rgb_plainc(YUV, RGB, width, height)
-
-
+#define yuv411packed_to_rgb(YUV, RGB, width, height) \
+	yuv411packed_to_rgb_plainc(YUV, RGB, width, height)
 
 /** YUV to RGB Conversion
  * B = 1.164(Y - 16)                  + 2.018(U - 128)
@@ -65,9 +63,10 @@ namespace firevision {
  * @param width Width of the image contained in the YUV buffer
  * @param height Height of the image contained in the YUV buffer
  */
-void yuv411packed_to_rgb_plainc(const unsigned char *YUV, unsigned char *RGB,
-				unsigned int width, unsigned int height);
-
+void yuv411packed_to_rgb_plainc(const unsigned char *YUV,
+                                unsigned char *      RGB,
+                                unsigned int         width,
+                                unsigned int         height);
 
 /** YUV to RGB Conversion
  * B = 1.164(Y - 16)                  + 2.018(U - 128)
@@ -84,53 +83,61 @@ void yuv411packed_to_rgb_plainc(const unsigned char *YUV, unsigned char *RGB,
  * @param width Width of the image contained in the YUV buffer
  * @param height Height of the image contained in the YUV buffer
  */
-void yuv422planar_to_rgb_plainc(const unsigned char *planar, unsigned char *RGB,
-				unsigned int width, unsigned int height);
+void yuv422planar_to_rgb_plainc(const unsigned char *planar,
+                                unsigned char *      RGB,
+                                unsigned int         width,
+                                unsigned int         height);
 
-void yuv422packed_to_rgb_plainc(const unsigned char *planar, unsigned char *RGB,
-				const unsigned int width, const unsigned int height);
+void yuv422packed_to_rgb_plainc(const unsigned char *planar,
+                                unsigned char *      RGB,
+                                const unsigned int   width,
+                                const unsigned int   height);
 
-void yuv422planar_to_bgr_plainc(const unsigned char *planar, unsigned char *BGR,
-				unsigned int width, unsigned int height);
+void yuv422planar_to_bgr_plainc(const unsigned char *planar,
+                                unsigned char *      BGR,
+                                unsigned int         width,
+                                unsigned int         height);
 
+void yuv422planar_to_rgb_with_alpha_plainc(const unsigned char *planar,
+                                           unsigned char *      RGB,
+                                           unsigned int         width,
+                                           unsigned int         height);
 
-void yuv422planar_to_rgb_with_alpha_plainc(const unsigned char *planar, unsigned char *RGB,
-					   unsigned int width, unsigned int height);
+void yuv422planar_to_bgr_with_alpha_plainc(const unsigned char *planar,
+                                           unsigned char *      BGR,
+                                           unsigned int         width,
+                                           unsigned int         height);
 
-void yuv422planar_to_bgr_with_alpha_plainc(const unsigned char *planar, unsigned char *BGR,
-					   unsigned int width, unsigned int height);
+void yuv422packed_to_bgr_with_alpha_plainc(const unsigned char *YUV,
+                                           unsigned char *      BGR,
+                                           unsigned int         width,
+                                           unsigned int         height);
 
-void yuv422packed_to_bgr_with_alpha_plainc(const unsigned char *YUV, unsigned char *BGR,
-					   unsigned int width, unsigned int height);
-
-
-#if (defined __i386__ ||    \
-     defined __386__ ||	    \
-     defined __X86__ ||	    \
-     defined _M_IX86 ||	    \
-     defined i386 )
-void yuv411planar_to_rgb_mmx (const unsigned char *yuv, unsigned char *rgb,
-			      unsigned int w, unsigned int h);
+#if (defined __i386__ || defined __386__ || defined __X86__ || defined _M_IX86 || defined i386)
+void yuv411planar_to_rgb_mmx(const unsigned char *yuv,
+                             unsigned char *      rgb,
+                             unsigned int         w,
+                             unsigned int         h);
 #endif
 
-
-
 inline void
-pixel_yuv_to_rgb(const unsigned char y, unsigned u, unsigned char v,
-		 unsigned char *r, unsigned char *g, unsigned char *b)
+pixel_yuv_to_rgb(const unsigned char y,
+                 unsigned            u,
+                 unsigned char       v,
+                 unsigned char *     r,
+                 unsigned char *     g,
+                 unsigned char *     b)
 {
-  int yt, ut, vt;
+	int yt, ut, vt;
 
-  yt = y - 16;
-  ut = u - 128;
-  vt = v - 128;
+	yt = y - 16;
+	ut = u - 128;
+	vt = v - 128;
 
-  *r = clip( (76284 * yt + 104595 * vt              ) >> 16 );
-  *g = clip( (76284 * yt -  25625 * ut - 53281 * vt ) >> 16 );
-  *b = clip( (76284 * yt + 132252 * ut              ) >> 16 );
-
+	*r = clip((76284 * yt + 104595 * vt) >> 16);
+	*g = clip((76284 * yt - 25625 * ut - 53281 * vt) >> 16);
+	*b = clip((76284 * yt + 132252 * ut) >> 16);
 }
-
 
 /* Convert a line of a RGB buffer to a line in a planar YUV422 buffer, see above for general
  * notes about color space conversion from RGB to YUV
@@ -144,31 +151,34 @@ pixel_yuv_to_rgb(const unsigned char y, unsigned u, unsigned char v,
  * @param yuv_line the index of the line to convert to in the YUV buffer
  */
 inline void
-convert_line_yuv422planar_to_rgb(const unsigned char *YUV, unsigned char *RGB,
-				 unsigned int width, unsigned int height,
-				 unsigned int yuv_line, unsigned int rgb_line)
+convert_line_yuv422planar_to_rgb(const unsigned char *YUV,
+                                 unsigned char *      RGB,
+                                 unsigned int         width,
+                                 unsigned int         height,
+                                 unsigned int         yuv_line,
+                                 unsigned int         rgb_line)
 {
-  unsigned int i = 0;
-  RGB_t *r1, *r2;
-  const unsigned char *yp, *up, *vp;
+	unsigned int         i = 0;
+	RGB_t *              r1, *r2;
+	const unsigned char *yp, *up, *vp;
 
-  yp = YUV + (width * yuv_line);
-  up = YUV422_PLANAR_U_PLANE(YUV, width, height) + (width * yuv_line / 2);
-  vp = YUV422_PLANAR_V_PLANE(YUV, width, height) + (width * yuv_line / 2);
+	yp = YUV + (width * yuv_line);
+	up = YUV422_PLANAR_U_PLANE(YUV, width, height) + (width * yuv_line / 2);
+	vp = YUV422_PLANAR_V_PLANE(YUV, width, height) + (width * yuv_line / 2);
 
-  RGB += 3 * width * rgb_line;
+	RGB += 3 * width * rgb_line;
 
-  while (i < width) {
-    r1 = (RGB_t *)RGB;
-    RGB += 3;
-    r2 = (RGB_t *)RGB;
-    RGB += 3;
+	while (i < width) {
+		r1 = (RGB_t *)RGB;
+		RGB += 3;
+		r2 = (RGB_t *)RGB;
+		RGB += 3;
 
-    pixel_yuv_to_rgb(*yp++, *up, *vp, &(r1->R), &(r1->G), &(r1->B));
-    pixel_yuv_to_rgb(*yp++, *up++, *vp++, &(r2->R), &(r2->G), &(r2->B));
+		pixel_yuv_to_rgb(*yp++, *up, *vp, &(r1->R), &(r1->G), &(r1->B));
+		pixel_yuv_to_rgb(*yp++, *up++, *vp++, &(r2->R), &(r2->G), &(r2->B));
 
-    i += 2;
-  }
+		i += 2;
+	}
 }
 
 } // end namespace firevision

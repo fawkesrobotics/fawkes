@@ -26,18 +26,19 @@
 
 namespace fawkes {
 
-class MemAutoFree {
- public:
-  MemAutoFree(void *ptr);
-  ~MemAutoFree();
+class MemAutoFree
+{
+public:
+	MemAutoFree(void *ptr);
+	~MemAutoFree();
 
-  void release();
-  void reset(void *new_ptr);
+	void release();
+	void reset(void *new_ptr);
 
-	void * operator*() const;
+	void *operator*() const;
 
- private:
-  void *ptr_;
+private:
+	void *ptr_;
 };
 
 } // end namespace fawkes

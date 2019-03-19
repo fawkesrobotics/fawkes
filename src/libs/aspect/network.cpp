@@ -39,7 +39,6 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** @var NetworkNameResolver NetworkAspect::nnresolver
  * Network name resolver to lookup IP addresses of hostnames and vice versa.
  * The nnresolver will remain valid for the whole lifetime of the
@@ -61,14 +60,13 @@ namespace fawkes {
 /** Constructor. */
 NetworkAspect::NetworkAspect()
 {
-  add_aspect("NetworkAspect");
+	add_aspect("NetworkAspect");
 }
 
 /** Virtual empty Destructor. */
 NetworkAspect::~NetworkAspect()
 {
 }
-
 
 /** Init network aspect.
  * It is guaranteed that this is called for a thread having the
@@ -80,12 +78,12 @@ NetworkAspect::~NetworkAspect()
  */
 void
 NetworkAspect::init_NetworkAspect(NetworkNameResolver *resolver,
-				  ServicePublisher *service_publisher,
-				  ServiceBrowser *service_browser)
+                                  ServicePublisher *   service_publisher,
+                                  ServiceBrowser *     service_browser)
 {
-  this->nnresolver = resolver;
-  this->service_publisher = service_publisher;
-  this->service_browser = service_browser;
+	this->nnresolver        = resolver;
+	this->service_publisher = service_publisher;
+	this->service_browser   = service_browser;
 }
 
 } // end namespace fawkes

@@ -30,15 +30,14 @@ class SyncPointManager;
 
 class SyncPointManagerAspectIniFin : public AspectIniFin
 {
-  public:
-    SyncPointManagerAspectIniFin(SyncPointManager *syncpoint_manager);
+public:
+	SyncPointManagerAspectIniFin(SyncPointManager *syncpoint_manager);
 
-    virtual void init(Thread *thread);
-    virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
-  private:
-    SyncPointManager *syncpoint_manager_;
-
+private:
+	SyncPointManager *syncpoint_manager_;
 };
 
 } // end namespace fawkes

@@ -23,37 +23,37 @@
 #ifndef _PLUGINS_OPENNI_UTILS_HAND_IF_OBSERVER_H_
 #define _PLUGINS_OPENNI_UTILS_HAND_IF_OBSERVER_H_
 
-#include <plugins/openni/utils/types.h>
 #include <blackboard/interface_observer.h>
+#include <plugins/openni/utils/types.h>
 
 #include <queue>
 #include <string>
 
 namespace fawkes {
-  class BlackBoard;
-  class Mutex;
+class BlackBoard;
+class Mutex;
 
-  namespace openni {
+namespace openni {
 
 class HandIfObserver : public BlackBoardInterfaceObserver
 {
- public:
-  HandIfObserver(BlackBoard *bb, HandMap &hands);
-  ~HandIfObserver();
+public:
+	HandIfObserver(BlackBoard *bb, HandMap &hands);
+	~HandIfObserver();
 
-  virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) throw();
 
-  void process_queue();
+	void process_queue();
 
- private:
-  HandMap &hands_;
-  BlackBoard *bb_;
-  Mutex *queue_lock_;
-  unsigned int active_queue_;
-  std::queue<std::string> queues_[2];
+private:
+	HandMap &               hands_;
+	BlackBoard *            bb_;
+	Mutex *                 queue_lock_;
+	unsigned int            active_queue_;
+	std::queue<std::string> queues_[2];
 };
 
-} // end namespace fawkes::openni
+} // namespace openni
 } // end namespace fawkes
 
 #endif

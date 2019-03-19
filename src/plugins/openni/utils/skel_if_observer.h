@@ -23,37 +23,37 @@
 #ifndef _PLUGINS_OPENNI_UTILS_SKEL_IF_OBSERVER_H_
 #define _PLUGINS_OPENNI_UTILS_SKEL_IF_OBSERVER_H_
 
-#include <plugins/openni/utils/types.h>
 #include <blackboard/interface_observer.h>
+#include <plugins/openni/utils/types.h>
 
 #include <queue>
 #include <string>
 
 namespace fawkes {
-  class BlackBoard;
-  class Mutex;
+class BlackBoard;
+class Mutex;
 
-  namespace openni {
+namespace openni {
 
 class SkelIfObserver : public BlackBoardInterfaceObserver
 {
- public:
-  SkelIfObserver(BlackBoard *bb, UserMap &users);
-  ~SkelIfObserver();
+public:
+	SkelIfObserver(BlackBoard *bb, UserMap &users);
+	~SkelIfObserver();
 
-  virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_created(const char *type, const char *id) throw();
 
-  void process_queue();
+	void process_queue();
 
- private:
-  UserMap &users_;
-  BlackBoard *bb_;
-  Mutex *queue_lock_;
-  unsigned int active_queue_;
-  std::queue<std::string> queues_[2];
+private:
+	UserMap &               users_;
+	BlackBoard *            bb_;
+	Mutex *                 queue_lock_;
+	unsigned int            active_queue_;
+	std::queue<std::string> queues_[2];
 };
 
-} // end namespace fawkes::openni
+} // namespace openni
 } // end namespace fawkes
 
 #endif

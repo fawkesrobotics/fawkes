@@ -20,13 +20,13 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <navgraph/navgraph_path.h>
-#include <navgraph/navgraph.h>
 #include <core/exceptions/software.h>
+#include <navgraph/navgraph.h>
+#include <navgraph/navgraph_path.h>
 #include <utils/misc/string_split.h>
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
 namespace fawkes {
 
@@ -45,12 +45,10 @@ namespace fawkes {
 /** Default constructor.
  * Creates an invalid path.
  */
-NavGraphPath::NavGraphPath()
-  : graph_(NULL)
+NavGraphPath::NavGraphPath() : graph_(NULL)
 {
-  cost_ = -1;
+	cost_ = -1;
 }
-
 
 /** Constructor.
  * @param graph navgraph this path is based on
@@ -59,9 +57,8 @@ NavGraphPath::NavGraphPath()
  * This is not verified internally.
  * @param cost cost of the path, set to a value less than zero if unknown
  */
-NavGraphPath::NavGraphPath(const NavGraph *graph,
-			   std::vector<NavGraphNode> &nodes, float cost)
-  : graph_(graph), nodes_(nodes), cost_(cost)
+NavGraphPath::NavGraphPath(const NavGraph *graph, std::vector<NavGraphNode> &nodes, float cost)
+: graph_(graph), nodes_(nodes), cost_(cost)
 {
 }
 
@@ -77,10 +74,10 @@ NavGraphPath::NavGraphPath(const NavGraph *graph,
 bool
 NavGraphPath::operator<(const NavGraphPath &p) const
 {
-  if (cost_ < 0 && p.cost_ < 0)  return false;
-  return cost_ < p.cost_;
+	if (cost_ < 0 && p.cost_ < 0)
+		return false;
+	return cost_ < p.cost_;
 }
-
 
 /** Check if two paths are the same.
  * Two paths are the same iff they contain the same nodes in the
@@ -95,17 +92,19 @@ NavGraphPath::operator<(const NavGraphPath &p) const
 bool
 NavGraphPath::operator==(const NavGraphPath &p) const
 {
-  if (nodes_.size() != p.nodes_.size())  return false;
+	if (nodes_.size() != p.nodes_.size())
+		return false;
 
-  for (size_t i = 0; i < nodes_.size(); ++i) {
-    if (nodes_[i] != p.nodes_[i])  return false;
-  }
+	for (size_t i = 0; i < nodes_.size(); ++i) {
+		if (nodes_[i] != p.nodes_[i])
+			return false;
+	}
 
-  if (cost_ >= 0 && p.cost_ >= 0 && fabs(cost_ - p.cost_) <= 0.00001)  return false;
+	if (cost_ >= 0 && p.cost_ >= 0 && fabs(cost_ - p.cost_) <= 0.00001)
+		return false;
 
-  return true;
+	return true;
 }
-
 
 /** Add a node to the path.
  * The node must be reachable directly from the last node in the
@@ -118,12 +117,11 @@ NavGraphPath::operator==(const NavGraphPath &p) const
 void
 NavGraphPath::add_node(const NavGraphNode &node, float cost_from_end)
 {
-  nodes_.push_back(node);
-  if (cost_from_end > 0) {
-    cost_ += cost_from_end;
-  }
+	nodes_.push_back(node);
+	if (cost_from_end > 0) {
+		cost_ += cost_from_end;
+	}
 }
-
 
 /** Set nodes erasing the current path.
  * @param nodes nodes that the path should follow. The nodes must build
@@ -135,10 +133,9 @@ NavGraphPath::add_node(const NavGraphNode &node, float cost_from_end)
 void
 NavGraphPath::set_nodes(const std::vector<NavGraphNode> &nodes, float cost)
 {
-  nodes_        = nodes;
-  cost_         = cost;
+	nodes_ = nodes;
+	cost_  = cost;
 }
-
 
 /** Check if path is empty.
  * @return true if path is empty, i.e. it has no nodes at all,
@@ -147,9 +144,8 @@ NavGraphPath::set_nodes(const std::vector<NavGraphNode> &nodes, float cost)
 bool
 NavGraphPath::empty() const
 {
-  return nodes_.empty();
+	return nodes_.empty();
 }
-
 
 /** Get size of path.
  * @return number of nodes in path
@@ -157,9 +153,8 @@ NavGraphPath::empty() const
 size_t
 NavGraphPath::size() const
 {
-  return nodes_.size();
+	return nodes_.size();
 }
-
 
 /** Clear all nodes on this path.
  * This sets the length of the path to zero and cost to unknown.
@@ -167,10 +162,9 @@ NavGraphPath::size() const
 void
 NavGraphPath::clear()
 {
-  nodes_.clear();
-  cost_ = -1;
+	nodes_.clear();
+	cost_ = -1;
 }
-
 
 /** Check if the path contains a given node.
  * @param node node to check for in current path
@@ -179,9 +173,8 @@ NavGraphPath::clear()
 bool
 NavGraphPath::contains(const NavGraphNode &node) const
 {
-  return (std::find(nodes_.begin(), nodes_.end(), node) != nodes_.end());
+	return (std::find(nodes_.begin(), nodes_.end(), node) != nodes_.end());
 }
-
 
 /** Get goal of path.
  * @return goal of this path, i.e. the last node in the sequence of nodes.
@@ -190,13 +183,12 @@ NavGraphPath::contains(const NavGraphNode &node) const
 const NavGraphNode &
 NavGraphPath::goal() const
 {
-  if (nodes_.empty()) {
-    throw Exception("No nodes in plan, cannot retrieve goal");
-  }
+	if (nodes_.empty()) {
+		throw Exception("No nodes in plan, cannot retrieve goal");
+	}
 
-  return nodes_[nodes_.size() - 1];
+	return nodes_[nodes_.size() - 1];
 }
-
 
 /** Get graph this path is based on.
  * @return const reference to graph this path is based on
@@ -204,9 +196,8 @@ NavGraphPath::goal() const
 const NavGraph &
 NavGraphPath::graph() const
 {
-  return *graph_;
+	return *graph_;
 }
-
 
 /** Get a new path traversal handle.
  * @return new path traversal handle
@@ -214,7 +205,7 @@ NavGraphPath::graph() const
 NavGraphPath::Traversal
 NavGraphPath::traversal() const
 {
-  return Traversal(this);
+	return Traversal(this);
 }
 
 /** @class NavGraphPath::Traversal <navgraph/navgraph_path.h>
@@ -240,22 +231,17 @@ NavGraphPath::traversal() const
  * @author Tim Niemueller
  */
 
-
 /** Constructor. */
-NavGraphPath::Traversal::Traversal()
-  : path_(NULL), current_(-1)
+NavGraphPath::Traversal::Traversal() : path_(NULL), current_(-1)
 {
 }
-
 
 /** Constructor.
  * @param path parent path to traverse
  */
-NavGraphPath::Traversal::Traversal(const NavGraphPath *path)
-  : path_(path), current_(-1)
+NavGraphPath::Traversal::Traversal(const NavGraphPath *path) : path_(path), current_(-1)
 {
 }
-
 
 /** Invalidate this traversal.
  * This will reset the parent path and the current node.
@@ -265,14 +251,15 @@ NavGraphPath::Traversal::Traversal(const NavGraphPath *path)
 void
 NavGraphPath::Traversal::invalidate()
 {
-  current_ = -1;
-  path_ = NULL;
+	current_ = -1;
+	path_    = NULL;
 }
 
 void
 NavGraphPath::Traversal::assert_initialized() const
 {
-  if (! path_) throw NullPointerException("Traversal has not been properly initialized");
+	if (!path_)
+		throw NullPointerException("Traversal has not been properly initialized");
 }
 
 /** Get current node in path.
@@ -283,14 +270,13 @@ NavGraphPath::Traversal::assert_initialized() const
 const NavGraphNode &
 NavGraphPath::Traversal::current() const
 {
-  assert_initialized();
-  if (current_ >= 0 && current_ < (ssize_t)path_->nodes_.size()) {
-    return path_->nodes_[current_];
-  } else {
-    throw OutOfBoundsException("No more nodes in path to query.");
-  }
+	assert_initialized();
+	if (current_ >= 0 && current_ < (ssize_t)path_->nodes_.size()) {
+		return path_->nodes_[current_];
+	} else {
+		throw OutOfBoundsException("No more nodes in path to query.");
+	}
 }
-
 
 /** Peek on the next node.
  * Get the node following the current node without advancing
@@ -303,14 +289,13 @@ NavGraphPath::Traversal::current() const
 const NavGraphNode &
 NavGraphPath::Traversal::peek_next() const
 {
-  assert_initialized();
-  if (current_ >= 0 && current_ < (ssize_t)path_->nodes_.size() - 1) {
-    return path_->nodes_[current_ + 1];
-  } else {
-    throw OutOfBoundsException("Next node not available, cannot peek");
-  }
+	assert_initialized();
+	if (current_ >= 0 && current_ < (ssize_t)path_->nodes_.size() - 1) {
+		return path_->nodes_[current_ + 1];
+	} else {
+		throw OutOfBoundsException("Next node not available, cannot peek");
+	}
 }
-
 
 /** Check if traversal is currently runnung.
  * @return true if current() will return a valid result
@@ -318,7 +303,7 @@ NavGraphPath::Traversal::peek_next() const
 bool
 NavGraphPath::Traversal::running() const
 {
-  return (current_ >= 0 && current_ < (ssize_t)path_->nodes_.size());
+	return (current_ >= 0 && current_ < (ssize_t)path_->nodes_.size());
 }
 
 /** Get index of current node in path.
@@ -329,12 +314,12 @@ NavGraphPath::Traversal::running() const
 size_t
 NavGraphPath::Traversal::current_index() const
 {
-  assert_initialized();
-  if (current_ >= 0 && current_ < (ssize_t)path_->nodes_.size()) {
-    return current_;
-  } else {
-    throw OutOfBoundsException("No more nodes in path to query.");
-  }
+	assert_initialized();
+	if (current_ >= 0 && current_ < (ssize_t)path_->nodes_.size()) {
+		return current_;
+	} else {
+		throw OutOfBoundsException("No more nodes in path to query.");
+	}
 }
 
 /** Move on traversal to next node.
@@ -343,12 +328,12 @@ NavGraphPath::Traversal::current_index() const
 bool
 NavGraphPath::Traversal::next()
 {
-  assert_initialized();
-  if (current_ < (ssize_t)path_->nodes_.size())  current_ += 1;
+	assert_initialized();
+	if (current_ < (ssize_t)path_->nodes_.size())
+		current_ += 1;
 
-  return (current_ < (ssize_t)path_->nodes_.size());
+	return (current_ < (ssize_t)path_->nodes_.size());
 }
-
 
 /** Check if the current node is the last node in the path.
  * @return true if the current node is the last node in the path,
@@ -357,10 +342,9 @@ NavGraphPath::Traversal::next()
 bool
 NavGraphPath::Traversal::last() const
 {
-  assert_initialized();
-  return (current_ >= 0 && (size_t)current_ == (path_->nodes_.size() - 1));
+	assert_initialized();
+	return (current_ >= 0 && (size_t)current_ == (path_->nodes_.size() - 1));
 }
-
 
 /** Get the number of remaining nodes in path traversal.
  * The number of remaining nodes is the number of nodes
@@ -370,11 +354,11 @@ NavGraphPath::Traversal::last() const
 size_t
 NavGraphPath::Traversal::remaining() const
 {
-  assert_initialized();
-  if (current_ < 0)  return path_->nodes_.size();
-  return path_->nodes_.size() - (size_t)current_;
+	assert_initialized();
+	if (current_ < 0)
+		return path_->nodes_.size();
+	return path_->nodes_.size() - (size_t)current_;
 }
-
 
 /** Get the remaining cost to the goal.
  * This sums the costs from the current to the goal node using
@@ -384,21 +368,21 @@ NavGraphPath::Traversal::remaining() const
 float
 NavGraphPath::Traversal::remaining_cost() const
 {
-  assert_initialized();
-  if (! path_->graph_) {
-    throw NullPointerException("Parent graph has not been set");
-  }
+	assert_initialized();
+	if (!path_->graph_) {
+		throw NullPointerException("Parent graph has not been set");
+	}
 
-  if (current_ < 0)  return path_->cost();
+	if (current_ < 0)
+		return path_->cost();
 
-  float cost = 0.;
-  for (ssize_t i = current_; i < (ssize_t)path_->nodes_.size() - 1; ++i) {
-    cost += path_->graph_->cost(path_->nodes_[i], path_->nodes_[i+1]);
-  }
+	float cost = 0.;
+	for (ssize_t i = current_; i < (ssize_t)path_->nodes_.size() - 1; ++i) {
+		cost += path_->graph_->cost(path_->nodes_[i], path_->nodes_[i + 1]);
+	}
 
-  return cost;
+	return cost;
 }
-
 
 /** Reset an ongoing traversal.
  * A new traversal afterwards will start the traversal from the beginning.
@@ -406,9 +390,8 @@ NavGraphPath::Traversal::remaining_cost() const
 void
 NavGraphPath::Traversal::reset()
 {
-  current_ = -1;
+	current_ = -1;
 }
-
 
 /** Set the current node.
  * @param new_current new current node
@@ -418,13 +401,12 @@ NavGraphPath::Traversal::reset()
 void
 NavGraphPath::Traversal::set_current(size_t new_current)
 {
-  assert_initialized();
-  if (new_current >= path_->nodes_.size()) {
-    throw OutOfBoundsException("Invalid new index, is beyond path length");
-  }
-  current_ = new_current;
+	assert_initialized();
+	if (new_current >= path_->nodes_.size()) {
+		throw OutOfBoundsException("Invalid new index, is beyond path length");
+	}
+	current_ = new_current;
 }
-
 
 /** Get string representation of path.
  * @param delim custom delimiter
@@ -443,7 +425,7 @@ std::vector<std::string>
 NavGraphPath::get_node_names() const
 {
 	std::vector<std::string> nodes(nodes_.size());
-	for (size_t i = 0; i < nodes_.size(); ++i){
+	for (size_t i = 0; i < nodes_.size(); ++i) {
 		nodes[i] = nodes_[i].name();
 	}
 	return nodes;

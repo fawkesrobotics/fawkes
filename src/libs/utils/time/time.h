@@ -25,6 +25,7 @@
 #define _UTILS_TIME_TIME_H_
 
 #include <sys/time.h>
+
 #include <cmath>
 
 namespace fawkes {
@@ -39,11 +40,10 @@ namespace fawkes {
 inline double
 time_diff_sec(const timeval &a, const timeval &b)
 {
-  //double required if we do not want to loose the usecs
-  double res = a.tv_sec  - b.tv_sec + (a.tv_usec - b.tv_usec) / 1000000.0;
-  return res;
+	//double required if we do not want to loose the usecs
+	double res = a.tv_sec - b.tv_sec + (a.tv_usec - b.tv_usec) / 1000000.0;
+	return res;
 }
-
 
 /** Calculate time difference of two time structs.
  * The calculated time is t = a - b, where t is a represented as the number of
@@ -55,14 +55,15 @@ time_diff_sec(const timeval &a, const timeval &b)
  * @return a_sec - b_sec  + (a_usec - b_usec) / 1000000.f
  */
 inline double
-time_diff_sec(const long int a_sec, const long int a_usec,
-	      const long int b_sec, const long int b_usec)
+time_diff_sec(const long int a_sec,
+              const long int a_usec,
+              const long int b_sec,
+              const long int b_usec)
 {
-  //double required if we do not want to loose the usecs
-  double res = a_sec - b_sec + (a_usec - b_usec) / 1000000.0;
-  return res;
+	//double required if we do not want to loose the usecs
+	double res = a_sec - b_sec + (a_usec - b_usec) / 1000000.0;
+	return res;
 }
-
 
 /** Convert seconds to micro seconds.
  * @param sec seconds to convert
@@ -71,7 +72,7 @@ time_diff_sec(const long int a_sec, const long int a_usec,
 inline long int
 time_sec_to_usec(double sec)
 {
-  return (long)round(sec * 1000000.);
+	return (long)round(sec * 1000000.);
 }
 
 /** Get difference between two time structs in microseconds.
@@ -83,92 +84,121 @@ time_sec_to_usec(double sec)
 inline long int
 time_diff_usec(const timeval &a, const timeval &b)
 {
-  return (a.tv_sec - b.tv_sec) * 1000000 + (a.tv_usec - b.tv_usec);
+	return (a.tv_sec - b.tv_sec) * 1000000 + (a.tv_usec - b.tv_usec);
 }
 
 class Clock;
 
 class Time
 {
- friend Clock;
- public:
-  Time();
-  Time(const timeval* tv);
-  Time(long sec, long usec, Clock *clock = 0);
-  Time(long ms);
-  Time(double sec);
-  Time(Clock *clock);
-  Time(const Time &t);
-  Time(const Time *t);
-  ~Time();
+	friend Clock;
 
-  double in_sec() const;
-  long   in_msec() const;
-  long   in_usec() const;
+public:
+	Time();
+	Time(const timeval *tv);
+	Time(long sec, long usec, Clock *clock = 0);
+	Time(long ms);
+	Time(double sec);
+	Time(Clock *clock);
+	Time(const Time &t);
+	Time(const Time *t);
+	~Time();
 
-  const timeval * get_timeval() const { return &time_; }
-  long            get_sec() const  { return time_.tv_sec; }
-  long            get_msec() const { return time_.tv_usec / 1000; }
-  long            get_usec() const { return time_.tv_usec; }
-  long            get_nsec() const { return time_.tv_usec * 1000; }
-  void            get_timestamp(long &sec, long &usec) const
-                  { sec  = time_.tv_sec; usec = time_.tv_usec; }
-  bool            is_zero() const { return (time_.tv_sec == 0) && (time_.tv_usec == 0); }
+	double in_sec() const;
+	long   in_msec() const;
+	long   in_usec() const;
 
-  void set_time(const timeval* tv);
-  void set_time(long int sec, long int usec);
-  void set_time(long ms);
-  void set_time(double sec);
-  void set_time(const Time &t);
-  void set_time(const Time *t);
+	const timeval *
+	get_timeval() const
+	{
+		return &time_;
+	}
+	long
+	get_sec() const
+	{
+		return time_.tv_sec;
+	}
+	long
+	get_msec() const
+	{
+		return time_.tv_usec / 1000;
+	}
+	long
+	get_usec() const
+	{
+		return time_.tv_usec;
+	}
+	long
+	get_nsec() const
+	{
+		return time_.tv_usec * 1000;
+	}
+	void
+	get_timestamp(long &sec, long &usec) const
+	{
+		sec  = time_.tv_sec;
+		usec = time_.tv_usec;
+	}
+	bool
+	is_zero() const
+	{
+		return (time_.tv_sec == 0) && (time_.tv_usec == 0);
+	}
 
-  void set_clock(Clock *clock);
+	void set_time(const timeval *tv);
+	void set_time(long int sec, long int usec);
+	void set_time(long ms);
+	void set_time(double sec);
+	void set_time(const Time &t);
+	void set_time(const Time *t);
 
-  void add(double seconds);
+	void set_clock(Clock *clock);
 
-  Time & stamp();
-  Time & stamp_systime();
+	void add(double seconds);
 
-  Time   operator+(const double sec) const;
-  Time   operator+(const long int usec) const;
-  Time   operator+(const Time& t) const;
-  Time   operator+(const Time* t) const;
-  Time   operator-(const Time& t) const;
-  double operator-(const Time* t) const;
-  Time   operator-(const long int usec) const;
-  Time   operator-(const double sec) const;
-  Time & operator+=(const long int usec);
-  Time & operator+=(const Time& t);
-  Time & operator+=(const double sec);
-  Time & operator-=(const Time& t);
-  Time & operator-=(const double sec);
-  Time & operator-=(const long int usec);
-  Time & operator=(const Time& t);
-  bool   operator==(const Time& t) const;
-  bool   operator==(const Time* t) const;
-  bool   operator!=(const Time& t) const;
-  bool   operator!=(const Time* t) const;
-  bool   operator>(const Time& t) const;
-  bool   operator>(const Time* t) const;
-  bool   operator>=(const Time& t) const;
-  bool   operator>=(const Time* t) const;
-  bool   operator<(const Time& t) const;
-  bool   operator<(const Time* t) const;
-  bool   operator<=(const Time& t) const;
-  bool   operator<=(const Time* t) const;
+	Time &stamp();
+	Time &stamp_systime();
 
-  void wait();
-  void wait_systime();
+	Time   operator+(const double sec) const;
+	Time   operator+(const long int usec) const;
+	Time   operator+(const Time &t) const;
+	Time   operator+(const Time *t) const;
+	Time   operator-(const Time &t) const;
+	double operator-(const Time *t) const;
+	Time   operator-(const long int usec) const;
+	Time   operator-(const double sec) const;
+	Time & operator+=(const long int usec);
+	Time & operator+=(const Time &t);
+	Time & operator+=(const double sec);
+	Time & operator-=(const Time &t);
+	Time & operator-=(const double sec);
+	Time & operator-=(const long int usec);
+	Time & operator=(const Time &t);
+	bool   operator==(const Time &t) const;
+	bool   operator==(const Time *t) const;
+	bool   operator!=(const Time &t) const;
+	bool   operator!=(const Time *t) const;
+	bool   operator>(const Time &t) const;
+	bool   operator>(const Time *t) const;
+	bool   operator>=(const Time &t) const;
+	bool   operator>=(const Time *t) const;
+	bool   operator<(const Time &t) const;
+	bool   operator<(const Time *t) const;
+	bool   operator<=(const Time &t) const;
+	bool   operator<=(const Time *t) const;
 
-  const char * str(bool utc = false) const;
-  void         str_r(char *s, bool utc = false);
+	void wait();
+	void wait_systime();
 
-  static const unsigned int TIMESTR_SIZE;
+	const char *str(bool utc = false) const;
+	void        str_r(char *s, bool utc = false);
 
- private:
-  Clock   *clock_;
-  timeval  time_;
-  mutable char    *timestr_;
+	static const unsigned int TIMESTR_SIZE;
+
+private:
+	Clock *       clock_;
+	timeval       time_;
+	mutable char *timestr_;
 };
 
 extern const Time TIME_MAX;

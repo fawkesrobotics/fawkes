@@ -26,18 +26,16 @@
 
 namespace fawkes {
 
-
 class Thread;
 
 class ThreadLoopListener
 {
- public:
-  virtual ~ThreadLoopListener();
+public:
+	virtual ~ThreadLoopListener();
 
-  virtual void pre_loop(Thread *thread);
-  virtual void post_loop(Thread *thread);
+	virtual void pre_loop(Thread *thread);
+	virtual void post_loop(Thread *thread);
 };
-
 
 } // end namespace fawkes
 

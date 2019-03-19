@@ -25,72 +25,76 @@
 
 #include <XabslEngine/XabslBasicBehavior.h>
 
-#include <map>
 #include <list>
-#include <utility>
+#include <map>
 #include <string>
+#include <utility>
 
 class XabslSkillWrapper : public xabsl::BasicBehavior
 {
- public:
-  /** Parameter list.
+public:
+	/** Parameter list.
    * Defines the parameters of a skill. It's a list of name/type pairs. The name
    * is the name of the parameter, the type is the value type.
    */
-  typedef std::list<std::pair<std::string, std::string> > ParameterList;
+	typedef std::list<std::pair<std::string, std::string>> ParameterList;
 
-  XabslSkillWrapper(const char *name, xabsl::ErrorHandler &error_handler,
-		    ParameterList &params);
-  ~XabslSkillWrapper();
+	XabslSkillWrapper(const char *name, xabsl::ErrorHandler &error_handler, ParameterList &params);
+	~XabslSkillWrapper();
 
-  virtual void registerParameters();
-  virtual void execute();
+	virtual void registerParameters();
+	virtual void execute();
 
-  const char * name();
+	const char *name();
 
-  std::string skill_string();
+	std::string skill_string();
 
- private:
-  bool execute_;
+private:
+	bool execute_;
 
-  /// @cond INTERNALS
-  class ParameterValueBase
-  {
-   public:
-    virtual ~ParameterValueBase() {}
-  };
+	/// @cond INTERNALS
+	class ParameterValueBase
+	{
+	public:
+		virtual ~ParameterValueBase()
+		{
+		}
+	};
 
-  template <typename T>
-    class ParameterValue : public ParameterValueBase
-  {
-   public:
-    ParameterValue()
-    {
-      value_ = 0;
-    }
+	template <typename T>
+	class ParameterValue : public ParameterValueBase
+	{
+	public:
+		ParameterValue()
+		{
+			value_ = 0;
+		}
 
-    T    get_value() const
-    {
-      return value_;
-    }
+		T
+		get_value() const
+		{
+			return value_;
+		}
 
-    T *  get_value_ptr()
-    {
-      return &value_;
-    }
+		T *
+		get_value_ptr()
+		{
+			return &value_;
+		}
 
-    void set_value(T value)
-    {
-      value_ = value;
-    }
-   private:
-    T value_;
-  };
-  /// @endcond
+		void
+		set_value(T value)
+		{
+			value_ = value;
+		}
 
-  std::map<std::string, ParameterValueBase *> param_values_;
-  ParameterList params_;
+	private:
+		T value_;
+	};
+	/// @endcond
+
+	std::map<std::string, ParameterValueBase *> param_values_;
+	ParameterList                               params_;
 };
-
 
 #endif

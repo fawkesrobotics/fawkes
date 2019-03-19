@@ -23,44 +23,45 @@
 #ifndef _PLUGINS_ROBOTINO_ROS_JOINTS_THREAD_H_
 #define _PLUGINS_ROBOTINO_ROS_JOINTS_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/ros/aspect/ros.h>
-
 #include <ros/publisher.h>
 #include <sensor_msgs/JointState.h>
 
 namespace fawkes {
-  class RobotinoSensorInterface;
+class RobotinoSensorInterface;
 }
 
-class RobotinoRosJointsThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ROSAspect
+class RobotinoRosJointsThread : public fawkes::Thread,
+                                public fawkes::BlockedTimingAspect,
+                                public fawkes::BlackBoardAspect,
+                                public fawkes::LoggingAspect,
+                                public fawkes::ROSAspect
 {
- public:
-  RobotinoRosJointsThread();
+public:
+	RobotinoRosJointsThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private: // members
-  fawkes::RobotinoSensorInterface *sens_if_;
+private: // members
+	fawkes::RobotinoSensorInterface *sens_if_;
 
-  ros::Publisher pub_joints_;
-  sensor_msgs::JointState joint_state_msg_;
-
+	ros::Publisher          pub_joints_;
+	sensor_msgs::JointState joint_state_msg_;
 };
-
 
 #endif

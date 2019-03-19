@@ -23,149 +23,134 @@
 #ifndef PLUGINS_PDDL_AST_H_
 #define PLUGINS_PDDL_AST_H_
 
-#include <boost/spirit/include/qi.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/std_pair.hpp>
+#include <boost/spirit/include/qi.hpp>
 #include <string>
 #include <vector>
 
 namespace pddl_parser {
-  namespace qi = boost::spirit::qi;
-  namespace ascii = boost::spirit::ascii;
+namespace qi    = boost::spirit::qi;
+namespace ascii = boost::spirit::ascii;
 
-  typedef std::pair<std::string, std::string> pair_type;
-  typedef std::vector<pair_type> pairs_type;
+typedef std::pair<std::string, std::string> pair_type;
+typedef std::vector<pair_type>              pairs_type;
 
-  typedef std::vector<std::string> type_list;
-  typedef std::pair<type_list, std::string> pair_multi_const;
-  typedef std::vector<pair_multi_const> pairs_multi_consts;
+typedef std::vector<std::string>          type_list;
+typedef std::pair<type_list, std::string> pair_multi_const;
+typedef std::vector<pair_multi_const>     pairs_multi_consts;
 
-  typedef std::pair<std::string, std::string> string_pair_type;
-  typedef std::vector<string_pair_type> string_pairs_type;
-  typedef std::pair<std::string, string_pairs_type> predicate_type;
+typedef std::pair<std::string, std::string>       string_pair_type;
+typedef std::vector<string_pair_type>             string_pairs_type;
+typedef std::pair<std::string, string_pairs_type> predicate_type;
 
-  using Atom = std::string;
+using Atom = std::string;
 
-  struct Predicate;
+struct Predicate;
 
-  using Expression = boost::variant<Atom, Predicate>;
+using Expression = boost::variant<Atom, Predicate>;
 
-  /** @class Predicate
+/** @class Predicate
    * A PDDL formula (either part of a precondition or an effect(.
    * Note that this is NOT necesarily a PDDL predicate, but may also be a
    * compound formula. For a conjunction, the function would be 'and', and the
    * arguments would be the subformulae.
    */
-  struct Predicate
-  {
-    /** The name of the predicate for atomic formulae, 'and' for a conjunction,
+struct Predicate
+{
+	/** The name of the predicate for atomic formulae, 'and' for a conjunction,
      * 'or' for a disjunction, 'not' for a negation.
      */
-    Atom function;
-    /** The arguments of the predicate or the subformulae of the compound
+	Atom function;
+	/** The arguments of the predicate or the subformulae of the compound
      * formula.
      */
-    std::vector<Expression> arguments;
-  };
+	std::vector<Expression> arguments;
+};
 
-  /** @class Action
+/** @class Action
    * A structured representation of a PDDL action.
    */
-  struct Action
-  {
-    /** The name of the action. */
-    std::string name;
-    /** A typed list of action parameters. */
-    string_pairs_type action_params;
-    /** The action duration in temporal domains. */
-    int duration;
-    /** The precondition of an action. May be a compound. */
-    Expression precondition;
-    /** The effect of an action. May be a compound. */
-    Expression effect;
-    /** Used by the STN generator to determine conditional break points in the
+struct Action
+{
+	/** The name of the action. */
+	std::string name;
+	/** A typed list of action parameters. */
+	string_pairs_type action_params;
+	/** The action duration in temporal domains. */
+	int duration;
+	/** The precondition of an action. May be a compound. */
+	Expression precondition;
+	/** The effect of an action. May be a compound. */
+	Expression effect;
+	/** Used by the STN generator to determine conditional break points in the
      * STN.
      */
-    Expression cond_breakup;
-    /** Used by the STN generator to determine temporal break points in the STN.
+	Expression cond_breakup;
+	/** Used by the STN generator to determine temporal break points in the STN.
      */
-    Expression temp_breakup;
-  };
+	Expression temp_breakup;
+};
 
-  /** @class Domain
+/** @class Domain
    * A structured representation of a PDDL domain.
    */
-  struct Domain
-  {
-    /** The name of the domain. */
-    std::string name;
-    /** A list of PDDL features required by the domain. */
-    std::vector<std::string> requirements;
-    /** A list of types with their super types. */
-    pairs_type types;
-    /** A typed list of constants defined in the domain. */
-    pairs_multi_consts constants;
-    /** A list of predicate names in the domain, including the types of their
+struct Domain
+{
+	/** The name of the domain. */
+	std::string name;
+	/** A list of PDDL features required by the domain. */
+	std::vector<std::string> requirements;
+	/** A list of types with their super types. */
+	pairs_type types;
+	/** A typed list of constants defined in the domain. */
+	pairs_multi_consts constants;
+	/** A list of predicate names in the domain, including the types of their
      * arguments.
      */
-    std::vector<predicate_type> predicates;
-    /** A list of actions defined in the domain. */
-    std::vector<Action> actions;
-  };
+	std::vector<predicate_type> predicates;
+	/** A list of actions defined in the domain. */
+	std::vector<Action> actions;
+};
 
-  /** @class Problem
+/** @class Problem
    * A structured representation of a PDDL problem.
    */
-  struct Problem
-  {
-    /** The name of the problem. */
-    std::string name;
-    /** The name of the domain this problem belongs to. */
-    std::string domain_name;
-    /** A typed list of objects in the domain. */
-    pairs_multi_consts objects;
-    /** A list of facts that are initially true. */
-    std::vector<Expression> init;
-    /** The goal of the problem. */
-    Expression goal;
-  };
+struct Problem
+{
+	/** The name of the problem. */
+	std::string name;
+	/** The name of the domain this problem belongs to. */
+	std::string domain_name;
+	/** A typed list of objects in the domain. */
+	pairs_multi_consts objects;
+	/** A list of facts that are initially true. */
+	std::vector<Expression> init;
+	/** The goal of the problem. */
+	Expression goal;
+};
 
-}
+} // namespace pddl_parser
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::Domain,
-    name,
-    requirements,
-    types,
-    constants,
-    predicates,
-    actions
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Domain,
+                          name,
+                          requirements,
+                          types,
+                          constants,
+                          predicates,
+                          actions)
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::Problem,
-    name,
-    domain_name,
-    objects,
-    init,
-    goal
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Problem, name, domain_name, objects, init, goal)
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::Action,
-    name,
-    action_params,
-    duration,
-    precondition,
-    effect,
-    cond_breakup,
-    temp_breakup
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Action,
+                          name,
+                          action_params,
+                          duration,
+                          precondition,
+                          effect,
+                          cond_breakup,
+                          temp_breakup)
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::Predicate,
-    function,
-    arguments
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Predicate, function, arguments)
 
 #endif

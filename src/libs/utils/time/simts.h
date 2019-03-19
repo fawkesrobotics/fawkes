@@ -31,24 +31,24 @@ namespace fawkes {
 
 class SimulatorTimeSource : public TimeSource
 {
- public:
-  SimulatorTimeSource();
-  virtual ~SimulatorTimeSource();
+public:
+	SimulatorTimeSource();
+	virtual ~SimulatorTimeSource();
 
-  virtual void get_time(timeval* tv) const;
-  virtual timeval conv_to_realtime(const timeval* tv) const;
-  virtual timeval conv_native_to_exttime(const timeval* tv) const;
+	virtual void    get_time(timeval *tv) const;
+	virtual timeval conv_to_realtime(const timeval *tv) const;
+	virtual timeval conv_native_to_exttime(const timeval *tv) const;
 
-  void set_start(float initial_offset);
-  void set_sim_offset(float sim_offset);
+	void set_start(float initial_offset);
+	void set_sim_offset(float sim_offset);
 
- private:
-  Clock *clock;
-  Time start_time; // sim AND realtime
-  Time current_simtime;
-  Time current_realtime;
-  float start_simoffset;
-  float current_simoffset;
+private:
+	Clock *clock;
+	Time   start_time; // sim AND realtime
+	Time   current_simtime;
+	Time   current_realtime;
+	float  start_simoffset;
+	float  current_simoffset;
 };
 
 } // end namespace fawkes

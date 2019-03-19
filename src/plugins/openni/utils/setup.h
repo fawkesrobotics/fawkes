@@ -29,15 +29,13 @@
 #include <string>
 
 namespace fawkes {
-  class Configuration;
+class Configuration;
 
-  namespace openni {
+namespace openni {
 
-void get_resolution(fawkes::Configuration *config,
-		    unsigned int &width, unsigned int &height);
+void get_resolution(fawkes::Configuration *config, unsigned int &width, unsigned int &height);
 
-void setup_map_generator(xn::MapGenerator &generator,
-			 fawkes::Configuration *config);
+void setup_map_generator(xn::MapGenerator &generator, fawkes::Configuration *config);
 
 void setup_alternate_viewpoint(xn::Generator &gen, xn::Generator &target);
 void setup_synchronization(xn::Generator &gen, xn::Generator &target);
@@ -55,37 +53,36 @@ void get_usb_info(xn::Generator &gen, unsigned short &vendor, unsigned short &pr
  * @exception Exception thrown if an error occurs while trying to find or
  * create the node. It may contain enumeration errors.
  */
-template<class ProdNodeClass>
-void find_or_create_node(fawkes::LockPtr<xn::Context> &openni,
-			 XnProductionNodeType type, ProdNodeClass *node)
+template <class ProdNodeClass>
+void
+find_or_create_node(fawkes::LockPtr<xn::Context> &openni,
+                    XnProductionNodeType          type,
+                    ProdNodeClass *               node)
 {
-  XnStatus st;
-  if ((st = openni->FindExistingNode(type, *node)) != XN_STATUS_OK) {
-    xn::EnumerationErrors errors;
-    if (node->Create(*(openni.operator->()), 0, &errors) != XN_STATUS_OK) {
-      fawkes::Exception e("Failed to create user generator (%s)",
-			  xnGetStatusString(st));
-      for (xn::EnumerationErrors::Iterator i = errors.Begin();
-           i != errors.End(); ++i)
-      {
-        XnProductionNodeDescription d = i.Description();
-        e.append("%s: %s/%s/%u.%u.%u.%u: %s",
-                 xnProductionNodeTypeToString(d.Type),
-                 d.strVendor, d.strName, d.Version.nMajor, d.Version.nMinor,
-                 d.Version.nMaintenance, d.Version.nBuild,
-                 xnGetStatusString(i.Error()));
-      }
+	XnStatus st;
+	if ((st = openni->FindExistingNode(type, *node)) != XN_STATUS_OK) {
+		xn::EnumerationErrors errors;
+		if (node->Create(*(openni.operator->()), 0, &errors) != XN_STATUS_OK) {
+			fawkes::Exception e("Failed to create user generator (%s)", xnGetStatusString(st));
+			for (xn::EnumerationErrors::Iterator i = errors.Begin(); i != errors.End(); ++i) {
+				XnProductionNodeDescription d = i.Description();
+				e.append("%s: %s/%s/%u.%u.%u.%u: %s",
+				         xnProductionNodeTypeToString(d.Type),
+				         d.strVendor,
+				         d.strName,
+				         d.Version.nMajor,
+				         d.Version.nMinor,
+				         d.Version.nMaintenance,
+				         d.Version.nBuild,
+				         xnGetStatusString(i.Error()));
+			}
 
-      throw e;
-    }
-  }
+			throw e;
+		}
+	}
 }
 
-} // end namespace fawkes::openni
+} // namespace openni
 } // end namespace fawkes
-
-
-
-
 
 #endif

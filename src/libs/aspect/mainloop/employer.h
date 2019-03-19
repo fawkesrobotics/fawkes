@@ -30,10 +30,10 @@ class Thread;
 
 class MainLoopEmployer
 {
- public:
-  virtual ~MainLoopEmployer();
+public:
+	virtual ~MainLoopEmployer();
 
-  virtual void set_mainloop_thread(Thread *mainloop_thread) = 0;
+	virtual void set_mainloop_thread(Thread *mainloop_thread) = 0;
 };
 
 } // end of namespace fawkes

@@ -24,49 +24,49 @@
 #ifndef _FIREVISION_MODELS_SHAPE_ACCUMULATORS_FC_ACCUM_H_
 #define _FIREVISION_MODELS_SHAPE_ACCUMULATORS_FC_ACCUM_H_
 
-#include <utils/math/types.h>
-#include <fvutils/base/types.h>
 #include <fvmodels/shape/circle.h>
+#include <fvutils/base/types.h>
+#include <utils/math/types.h>
 
 namespace firevision {
 
 class FittedCircle
 {
- private:
-  static const float TOO_SMALL_DELTA;
+private:
+	static const float TOO_SMALL_DELTA;
 
 private:
-  int count;
-  /// @cond INTERNALS
-  struct circle_matrix
-  {
-    float A00, A01, A02;
-    float A10, A11, A12;
-    float A20, A21, A22;
+	int count;
+	/// @cond INTERNALS
+	struct circle_matrix
+	{
+		float A00, A01, A02;
+		float A10, A11, A12;
+		float A20, A21, A22;
 
-    float  b0,  b1,  b2;
-  } circle_matrices[2];
-  /// @endcond
-  int current_circle;
-  bool point_added;
+		float b0, b1, b2;
+	} circle_matrices[2];
+	/// @endcond
+	int  current_circle;
+	bool point_added;
 
- public:
-  FittedCircle(void);
-  ~FittedCircle(void);
+public:
+	FittedCircle(void);
+	~FittedCircle(void);
 
-  void reset(void);
-  float addPoint(const fawkes::upoint_t&); // add a new point
-  // and return the distance from it to the fitted circle
-  void removePoint(const fawkes::upoint_t&); // remove a point
+	void  reset(void);
+	float addPoint(const fawkes::upoint_t &); // add a new point
+	// and return the distance from it to the fitted circle
+	void removePoint(const fawkes::upoint_t &); // remove a point
 
-  float distanceTo(const fawkes::upoint_t&, bool current = true);
+	float distanceTo(const fawkes::upoint_t &, bool current = true);
 
-  void commit(void);
-  int getCount(void) const;
-  Circle* getCircle(void) const;
+	void    commit(void);
+	int     getCount(void) const;
+	Circle *getCircle(void) const;
 
- private:
-  Circle* fitCircle(circle_matrix* p) const;
+private:
+	Circle *fitCircle(circle_matrix *p) const;
 };
 
 } // end namespace firevision

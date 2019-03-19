@@ -34,13 +34,12 @@ namespace fawkes {
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-KatanaNoSolutionException::KatanaNoSolutionException(const char *format, ...) throw()
-  : Exception()
+KatanaNoSolutionException::KatanaNoSolutionException(const char *format, ...) throw() : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
 
 /** @class KatanaOutOfRangeException <plugins/katana/exception.h>
@@ -50,13 +49,12 @@ KatanaNoSolutionException::KatanaNoSolutionException(const char *format, ...) th
 /** Constructor
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
-KatanaOutOfRangeException::KatanaOutOfRangeException(const char *format, ...) throw()
-  : Exception()
+KatanaOutOfRangeException::KatanaOutOfRangeException(const char *format, ...) throw() : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
 
 /** @class KatanaMotorCrashedException <plugins/katana/exception.h>
@@ -67,12 +65,12 @@ KatanaOutOfRangeException::KatanaOutOfRangeException(const char *format, ...) th
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
 KatanaMotorCrashedException::KatanaMotorCrashedException(const char *format, ...) throw()
-  : Exception()
+: Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
 
 /** @class KatanaUnsupportedException <plugins/katana/exception.h>
@@ -83,13 +81,12 @@ KatanaMotorCrashedException::KatanaMotorCrashedException(const char *format, ...
  * @param format message format, takes sprintf() parameters as variadic arguments
  */
 KatanaUnsupportedException::KatanaUnsupportedException(const char *format, ...) throw()
-  : Exception()
+: Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
-
 
 } // end namespace fawkes

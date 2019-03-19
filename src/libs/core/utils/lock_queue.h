@@ -26,6 +26,7 @@
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
+
 #include <queue>
 
 namespace fawkes {
@@ -42,128 +43,121 @@ namespace fawkes {
 template <typename Type>
 class LockQueue : public std::queue<Type>
 {
- public:
-  /** Constructor. */
-  LockQueue();
+public:
+	/** Constructor. */
+	LockQueue();
 
-  /** Copy constructor.
+	/** Copy constructor.
    * @param ll LockQueue to copy
    */
-  LockQueue(const LockQueue<Type> &ll);
+	LockQueue(const LockQueue<Type> &ll);
 
-  /** Destructor. */
-  virtual ~LockQueue();
+	/** Destructor. */
+	virtual ~LockQueue();
 
-  /** Lock queue. */
-  void           lock() const;
+	/** Lock queue. */
+	void lock() const;
 
-  /** Try to lock queue.
+	/** Try to lock queue.
    * @return true, if the lock has been aquired, false otherwise.
    */
-  bool           try_lock() const;
+	bool try_lock() const;
 
-  /** Unlock list. */
-  void           unlock() const;
+	/** Unlock list. */
+	void unlock() const;
 
-  /** Get access to the internal mutex.
+	/** Get access to the internal mutex.
    * Can be used with MutexLocker.
    * @return internal mutex
    */
-  RefPtr<Mutex>  mutex() const
-  { return mutex_; }
+	RefPtr<Mutex>
+	mutex() const
+	{
+		return mutex_;
+	}
 
-  /** Push element to queue with lock protection.
+	/** Push element to queue with lock protection.
    * @param x element to add
    */
-  void     push_locked(const Type& x);
+	void push_locked(const Type &x);
 
-  /** Pop element from queue with lock protection. */
-  void     pop_locked();
+	/** Pop element from queue with lock protection. */
+	void pop_locked();
 
-  /** Clear the queue. */
-  void clear();
+	/** Clear the queue. */
+	void clear();
 
-  // not needed, no change to mutex required (thus "incomplete" BigThree)
-  //LockList<Type> &  operator=(const LockList<Type> &ll);
- private:
-  mutable RefPtr<Mutex> mutex_;
-
+	// not needed, no change to mutex required (thus "incomplete" BigThree)
+	//LockList<Type> &  operator=(const LockList<Type> &ll);
+private:
+	mutable RefPtr<Mutex> mutex_;
 };
 
-
-
-
 template <typename Type>
-LockQueue<Type>::LockQueue()
-  : mutex_(new Mutex())
-{}
-
+LockQueue<Type>::LockQueue() : mutex_(new Mutex())
+{
+}
 
 template <typename Type>
 LockQueue<Type>::LockQueue(const LockQueue<Type> &ll)
-  : std::queue<Type>::queue(ll), mutex_(new Mutex())
-{}
-
+: std::queue<Type>::queue(ll), mutex_(new Mutex())
+{
+}
 
 template <typename Type>
 LockQueue<Type>::~LockQueue()
-{}
-
+{
+}
 
 template <typename Type>
 void
 LockQueue<Type>::lock() const
 {
-  mutex_->lock();
+	mutex_->lock();
 }
-
 
 template <typename Type>
 bool
 LockQueue<Type>::try_lock() const
 {
-  return mutex_->try_lock();
+	return mutex_->try_lock();
 }
-
 
 template <typename Type>
 void
 LockQueue<Type>::unlock() const
 {
-  return mutex_->unlock();
+	return mutex_->unlock();
 }
-
 
 template <typename Type>
 void
-LockQueue<Type>::push_locked(const Type& x)
+LockQueue<Type>::push_locked(const Type &x)
 {
-  mutex_->lock();
-  std::queue<Type>::push(x);
-  mutex_->unlock();
+	mutex_->lock();
+	std::queue<Type>::push(x);
+	mutex_->unlock();
 }
-
 
 template <typename Type>
 void
 LockQueue<Type>::pop_locked()
 {
-  mutex_->lock();
-  std::queue<Type>::pop();
-  mutex_->unlock();
+	mutex_->lock();
+	std::queue<Type>::pop();
+	mutex_->unlock();
 }
 
 template <typename Type>
 void
 LockQueue<Type>::clear()
 {
-  mutex_->lock();
-  while ( ! std::queue<Type>::empty() ) {
-    std::queue<Type>::pop();
-  }
-  mutex_->unlock();
+	mutex_->lock();
+	while (!std::queue<Type>::empty()) {
+		std::queue<Type>::pop();
+	}
+	mutex_->unlock();
 }
-
 
 } // end namespace fawkes
 

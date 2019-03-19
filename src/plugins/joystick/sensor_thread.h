@@ -23,44 +23,51 @@
 #ifndef _PLUGINS_JOYSTICK_SENSOR_THREAD_H_
 #define _PLUGINS_JOYSTICK_SENSOR_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  class JoystickInterface;
+class JoystickInterface;
 }
 
 class JoystickAcquisitionThread;
 
-class JoystickSensorThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+class JoystickSensorThread : public fawkes::Thread,
+                             public fawkes::BlockedTimingAspect,
+                             public fawkes::LoggingAspect,
+                             public fawkes::ConfigurableAspect,
+                             public fawkes::BlackBoardAspect
 {
- public:
-  JoystickSensorThread(JoystickAcquisitionThread *aqt);
+public:
+	JoystickSensorThread(JoystickAcquisitionThread *aqt);
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  /** Get joystick interface.
+	/** Get joystick interface.
    * @return joystick interface */
-  fawkes::JoystickInterface * joystick_interface() const { return joystick_if_; }
+	fawkes::JoystickInterface *
+	joystick_interface() const
+	{
+		return joystick_if_;
+	}
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  fawkes::JoystickInterface *joystick_if_;
+private:
+	fawkes::JoystickInterface *joystick_if_;
 
-  JoystickAcquisitionThread *aqt_;
+	JoystickAcquisitionThread *aqt_;
 };
-
 
 #endif

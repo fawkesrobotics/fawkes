@@ -23,33 +23,37 @@
 
 #include "skiller_feature.h"
 
-#include <core/threading/thread.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <navgraph/aspect/navgraph.h>
 
-class SkillerNavGraphFeature
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::NavGraphAspect,
-  public SkillerFeature
+class SkillerNavGraphFeature : public fawkes::Thread,
+                               public fawkes::LoggingAspect,
+                               public fawkes::ConfigurableAspect,
+                               public fawkes::NavGraphAspect,
+                               public SkillerFeature
 {
- public:
-  SkillerNavGraphFeature();
-  virtual ~SkillerNavGraphFeature();
+public:
+	SkillerNavGraphFeature();
+	virtual ~SkillerNavGraphFeature();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  virtual void init_lua_context(fawkes::LuaContext *context);
-  virtual void finalize_lua_context(fawkes::LuaContext *context);
+	virtual void init_lua_context(fawkes::LuaContext *context);
+	virtual void finalize_lua_context(fawkes::LuaContext *context);
 
-  /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run();}
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
+private:
 };
 
 #endif

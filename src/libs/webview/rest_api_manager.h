@@ -35,19 +35,19 @@ class WebviewRestApi;
 
 class WebviewRestApiManager
 {
- public:
-  WebviewRestApiManager();
-  ~WebviewRestApiManager();
+public:
+	WebviewRestApiManager();
+	~WebviewRestApiManager();
 
-  void register_api(WebviewRestApi *api);
-  void unregister_api(WebviewRestApi *api);
+	void register_api(WebviewRestApi *api);
+	void unregister_api(WebviewRestApi *api);
 
-  WebviewRestApi * get_api(std::string &name);
-  Mutex & mutex();
+	WebviewRestApi *get_api(std::string &name);
+	Mutex &         mutex();
 
- private:
-  Mutex                                    mutex_;
-  std::map<std::string, WebviewRestApi *>  apis_;
+private:
+	Mutex                                   mutex_;
+	std::map<std::string, WebviewRestApi *> apis_;
 };
 
 } // end namespace fawkes

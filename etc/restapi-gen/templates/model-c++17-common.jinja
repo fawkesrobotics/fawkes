@@ -35,9 +35,9 @@ std::shared_ptr<{{ property['$ref'] | reftype }}>
 % macro option_type(property)
 % if (property.type and property.type in ['array', 'object']) or '$ref' in property
 {{ type(property) }}
-% else
+%- else
 std::optional<{{ type(property) }}>
-% endif
+%- endif
 %- endmacro
 
 % macro make_optional(property, initializer=None)

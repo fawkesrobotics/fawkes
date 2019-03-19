@@ -23,9 +23,9 @@
 
 #include <utils/system/pathparser.h>
 
-#include <cstring>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 using namespace std;
 
@@ -43,54 +43,51 @@ namespace fawkes {
  */
 PathParser::PathParser(std::string &path)
 {
-  ctor(path);
+	ctor(path);
 }
-
 
 /** Constructor (C string).
  * @param path path to parse
  */
 PathParser::PathParser(const char *path)
 {
-  std::string spath = path;
-  ctor(spath);
+	std::string spath = path;
+	ctor(spath);
 }
-
 
 void
 PathParser::ctor(const std::string &path)
 {
-  abs_path_  = false;
+	abs_path_ = false;
 
-  char *p = strdup(path.c_str());
-  char *saveptr;
-  char *r = strtok_r(p, "/", &saveptr);
+	char *p = strdup(path.c_str());
+	char *saveptr;
+	char *r = strtok_r(p, "/", &saveptr);
 
-  if ( ! r ) {
-    // single string, no slash, does not end with slash
-    push_back(p);
-  } else {
-    abs_path_ = ( r != p );
+	if (!r) {
+		// single string, no slash, does not end with slash
+		push_back(p);
+	} else {
+		abs_path_ = (r != p);
 
-    while ( r ) {
-      if ( strlen(r) > 0 ) {
-	push_back(r);
-      }
-      r = strtok_r(NULL, "/", &saveptr);
-    }
-  }
+		while (r) {
+			if (strlen(r) > 0) {
+				push_back(r);
+			}
+			r = strtok_r(NULL, "/", &saveptr);
+		}
+	}
 
-  free(p);
+	free(p);
 }
-
 
 /** Debug print to stdout. */
 void
 PathParser::print_debug()
 {
-  for (size_type i = 0; i < size(); ++i) {
-    printf("Path element: %s\n", ((*this)[i]).c_str());
-  }
+	for (size_type i = 0; i < size(); ++i) {
+		printf("Path element: %s\n", ((*this)[i]).c_str());
+	}
 }
 
 /** Get path as string.
@@ -100,21 +97,20 @@ PathParser::print_debug()
 std::string
 PathParser::path_as_string()
 {
-  string rv = abs_path_ ? "/" : "";
+	string rv = abs_path_ ? "/" : "";
 
-  size_type sz = size();
+	size_type sz = size();
 
-  if ( sz > 0 ) {
-    rv += (*this)[0];
-  }
+	if (sz > 0) {
+		rv += (*this)[0];
+	}
 
-  for (size_type i = 1; i < sz; ++i) {
-    rv += "/" + (*this)[i];
-  }
+	for (size_type i = 1; i < sz; ++i) {
+		rv += "/" + (*this)[i];
+	}
 
-  return rv;
+	return rv;
 }
-
 
 /** Check if path is absolute.
  * @return true if path is absolute, false otherwise
@@ -122,7 +118,7 @@ PathParser::path_as_string()
 bool
 PathParser::is_absolute() const
 {
-  return abs_path_;
+	return abs_path_;
 }
 
 } // end namespace fawkes

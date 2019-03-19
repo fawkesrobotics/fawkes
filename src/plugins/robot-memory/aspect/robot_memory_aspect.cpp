@@ -20,8 +20,7 @@
  */
 #include "robot_memory_aspect.h"
 
-namespace fawkes
-{
+namespace fawkes {
 
 /** @class RobotMemoryAspect "robot_memory_aspect.h"
  * Thread aspect to get access to a the RobotMemory.
@@ -32,22 +31,23 @@ namespace fawkes
 
 RobotMemoryAspect::RobotMemoryAspect()
 {
-  add_aspect("RobotMemoryAspect");
+	add_aspect("RobotMemoryAspect");
 }
 
 RobotMemoryAspect::~RobotMemoryAspect()
-{}
+{
+}
 
 void
-RobotMemoryAspect::init_RobotMemoryAspect(RobotMemory* robot_memory)
+RobotMemoryAspect::init_RobotMemoryAspect(RobotMemory *robot_memory)
 {
-  this->robot_memory = robot_memory;
+	this->robot_memory = robot_memory;
 }
 
 void
 RobotMemoryAspect::finalize_RobotMemoryAspect()
 {
-  this->robot_memory = NULL;
+	this->robot_memory = NULL;
 }
 
 } /* namespace fawkes */

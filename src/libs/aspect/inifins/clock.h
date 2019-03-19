@@ -32,14 +32,14 @@ class Clock;
 
 class ClockAspectIniFin : public AspectIniFin
 {
- public:
-  ClockAspectIniFin(Clock *clock);
+public:
+	ClockAspectIniFin(Clock *clock);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  Clock *clock_;
+private:
+	Clock *clock_;
 };
 
 } // end namespace fawkes

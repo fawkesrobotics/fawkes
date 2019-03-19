@@ -16,19 +16,17 @@
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/fwd.h>
 
-#include <string>
 #include <cstdint>
-#include <vector>
 #include <memory>
 #include <optional>
-
-
+#include <string>
+#include <vector>
 
 /** InterfaceFieldType representation for JSON transfer. */
 class InterfaceFieldType
 
 {
- public:
+public:
 	/** Constructor. */
 	InterfaceFieldType();
 	/** Constructor from JSON.
@@ -38,7 +36,7 @@ class InterfaceFieldType
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	InterfaceFieldType(const rapidjson::Value& v);
+	InterfaceFieldType(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~InterfaceFieldType();
@@ -46,9 +44,10 @@ class InterfaceFieldType
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -60,19 +59,19 @@ class InterfaceFieldType
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -85,12 +84,12 @@ class InterfaceFieldType
 	virtual void validate(bool subcall = false) const;
 
 	// Schema: InterfaceFieldType
- public:
-  /** Get name value.
+public:
+	/** Get name value.
    * @return name value
    */
 	std::optional<std::string>
- name() const
+	name() const
 	{
 		return name_;
 	}
@@ -98,15 +97,16 @@ class InterfaceFieldType
 	/** Set name value.
 	 * @param name new value
 	 */
-	void set_name(const std::string& name)
+	void
+	set_name(const std::string &name)
 	{
 		name_ = name;
 	}
-  /** Get type value.
+	/** Get type value.
    * @return type value
    */
 	std::optional<std::string>
- type() const
+	type() const
 	{
 		return type_;
 	}
@@ -114,15 +114,16 @@ class InterfaceFieldType
 	/** Set type value.
 	 * @param type new value
 	 */
-	void set_type(const std::string& type)
+	void
+	set_type(const std::string &type)
 	{
 		type_ = type;
 	}
-  /** Get is_array value.
+	/** Get is_array value.
    * @return is_array value
    */
 	std::optional<bool>
- is_array() const
+	is_array() const
 	{
 		return is_array_;
 	}
@@ -130,7 +131,8 @@ class InterfaceFieldType
 	/** Set is_array value.
 	 * @param is_array new value
 	 */
-	void set_is_array(const bool& is_array)
+	void
+	set_is_array(const bool &is_array)
 	{
 		is_array_ = is_array;
 	}
@@ -138,7 +140,7 @@ class InterfaceFieldType
    * @return enums value
    */
 	std::vector<std::string>
- enums() const
+	enums() const
 	{
 		return enums_;
 	}
@@ -146,14 +148,16 @@ class InterfaceFieldType
 	/** Set enums value.
 	 * @param enums new value
 	 */
-	void set_enums(const std::vector<std::string>& enums)
+	void
+	set_enums(const std::vector<std::string> &enums)
 	{
 		enums_ = enums;
 	}
 	/** Add element to enums array.
 	 * @param enums new value
 	 */
-	void addto_enums(const std::string&& enums)
+	void
+	addto_enums(const std::string &&enums)
 	{
 		enums_.push_back(std::move(enums));
 	}
@@ -162,18 +166,15 @@ class InterfaceFieldType
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param enums new value
 	 */
-	void addto_enums(const std::string& enums)
+	void
+	addto_enums(const std::string &enums)
 	{
 		enums_.push_back(enums);
 	}
- private:
-	std::optional<std::string>
- name_;
-	std::optional<std::string>
- type_;
-	std::optional<bool>
- is_array_;
-	std::vector<std::string>
- enums_;
 
+private:
+	std::optional<std::string> name_;
+	std::optional<std::string> type_;
+	std::optional<bool>        is_array_;
+	std::vector<std::string>   enums_;
 };

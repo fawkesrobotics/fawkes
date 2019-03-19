@@ -38,40 +38,44 @@ using namespace std;
  *  @param config The network config to read from and write updates to
  *  @param config_path The config path to read from and write updates to
  */
-PitchCalibration::PitchCalibration(LaserInterface *laser,
-    tf::Transformer *tf_transformer,
-    NetworkConfiguration *config, string config_path)
-: LaserCalibration(laser, tf_transformer, config, config_path) {}
+PitchCalibration::PitchCalibration(LaserInterface *      laser,
+                                   tf::Transformer *     tf_transformer,
+                                   NetworkConfiguration *config,
+                                   string                config_path)
+: LaserCalibration(laser, tf_transformer, config, config_path)
+{
+}
 
 /** The actual calibration.
  * Apply the method continuously until the mean z reaches the threshold.
  * Write the upated pitch angle to the config in each iteration.
  */
 void
-PitchCalibration::calibrate() {
-  printf("Starting pitch angle calibration.\n");
-  float mean_z;
-  do {
-    laser_->read();
-    PointCloudPtr cloud = laser_to_pointcloud(*laser_);
-    transform_pointcloud("base_link", cloud);
-    PointCloudPtr rear_cloud = filter_cloud_in_rear(cloud);
-    printf("Rear cloud has %zu points.\n", rear_cloud->points.size());
-    try {
-      mean_z = get_mean_z(rear_cloud);
-    } catch (InsufficientDataException &e) {
-      printf("Insufficient data: %s\n", e.what_no_backtrace());
-      usleep(sleep_time_);
-      continue;
-    }
-    printf("Mean z is %f.\n", mean_z);
-    float old_pitch = config_->get_float(config_path_.c_str());
-    float new_pitch = get_new_pitch(mean_z, old_pitch);
-    printf("Updating pitch from %f to %f.\n", old_pitch, new_pitch);
-    config_->set_float(config_path_.c_str(), new_pitch);
-    usleep(sleep_time_);
-  } while (abs(mean_z) > threshold);
-  printf("Pitch calibration finished.\n");
+PitchCalibration::calibrate()
+{
+	printf("Starting pitch angle calibration.\n");
+	float mean_z;
+	do {
+		laser_->read();
+		PointCloudPtr cloud = laser_to_pointcloud(*laser_);
+		transform_pointcloud("base_link", cloud);
+		PointCloudPtr rear_cloud = filter_cloud_in_rear(cloud);
+		printf("Rear cloud has %zu points.\n", rear_cloud->points.size());
+		try {
+			mean_z = get_mean_z(rear_cloud);
+		} catch (InsufficientDataException &e) {
+			printf("Insufficient data: %s\n", e.what_no_backtrace());
+			usleep(sleep_time_);
+			continue;
+		}
+		printf("Mean z is %f.\n", mean_z);
+		float old_pitch = config_->get_float(config_path_.c_str());
+		float new_pitch = get_new_pitch(mean_z, old_pitch);
+		printf("Updating pitch from %f to %f.\n", old_pitch, new_pitch);
+		config_->set_float(config_path_.c_str(), new_pitch);
+		usleep(sleep_time_);
+	} while (abs(mean_z) > threshold);
+	printf("Pitch calibration finished.\n");
 }
 
 /** Compute the new pitch based on the old pitch and the mean z.
@@ -80,9 +84,9 @@ PitchCalibration::calibrate() {
  *  @return The new pitch angle.
  */
 float
-PitchCalibration::get_new_pitch(float z, float old_pitch) {
-  // Note: We could also compute a more accurate new value using the measured
-  // distance and height, but this works well enough.
-  return old_pitch - z;
+PitchCalibration::get_new_pitch(float z, float old_pitch)
+{
+	// Note: We could also compute a more accurate new value using the measured
+	// distance and height, but this works well enough.
+	return old_pitch - z;
 }
-

@@ -23,55 +23,60 @@
 #ifndef _PLUGINS_GAZEBO_NODE_THREAD_H_
 #define _PLUGINS_GAZEBO_NODE_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
-#include <aspect/blocked_timing.h>
 #include <aspect/aspect_provider.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/gazebo/aspect/gazebo_inifin.h>
+#include <sys/types.h>
 #include <utils/time/time.h>
+
 #include <string.h>
 
-#include <sys/types.h>
-
 namespace gazebo {
-  namespace transport {
-    class Node;
-  }
+namespace transport {
+class Node;
 }
+} // namespace gazebo
 
-class GazeboNodeThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::AspectProviderAspect
+class GazeboNodeThread : public fawkes::Thread,
+                         public fawkes::BlockedTimingAspect,
+                         public fawkes::LoggingAspect,
+                         public fawkes::ConfigurableAspect,
+                         public fawkes::ClockAspect,
+                         public fawkes::AspectProviderAspect
 {
- public:
-  GazeboNodeThread();
-  virtual ~GazeboNodeThread();
+public:
+	GazeboNodeThread();
+	virtual ~GazeboNodeThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  //Node for communication to gazebo-robot-plugins
-  gazebo::transport::NodePtr  gazebonode_;
-  //Node to control the gazebo world (e.g. spawn visual objects)
-  gazebo::transport::NodePtr  gazebo_world_node_;
-  //Publisher to send Messages:
-  gazebo::transport::PublisherPtr visual_publisher_, model_publisher_, request_publisher_, light_publisher_;
+private:
+	//Node for communication to gazebo-robot-plugins
+	gazebo::transport::NodePtr gazebonode_;
+	//Node to control the gazebo world (e.g. spawn visual objects)
+	gazebo::transport::NodePtr gazebo_world_node_;
+	//Publisher to send Messages:
+	gazebo::transport::PublisherPtr visual_publisher_, model_publisher_, request_publisher_,
+	  light_publisher_;
 
-  fawkes::GazeboAspectIniFin  gazebo_aspect_inifin_;
+	fawkes::GazeboAspectIniFin gazebo_aspect_inifin_;
 
-  //channel of a specified robot for the gazebo node communication
-  std::string robot_channel, world_name;
+	//channel of a specified robot for the gazebo node communication
+	std::string robot_channel, world_name;
 };
 
 #endif

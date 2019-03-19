@@ -21,68 +21,54 @@
  */
 
 #include "fawkes_logger.h"
+
+#include <core/exception.h>
+#include <logging/logger.h>
 #include <plugins/eclipse-clp/eclipse_thread.h>
 
-#include <logging/logger.h>
-#include <core/exception.h>
-
-#include <cstring>
 #include <cstdio>
+#include <cstring>
 
 int
 p_log(...)
 {
-  // log(+LogLevel, +LogString)
+	// log(+LogLevel, +LogString)
 
-  fawkes::Logger* logger;
-  try
-  {
-    logger = EclipseAgentThread::instance()->get_logger();
-  }
-  catch ( fawkes::Exception& e )
-  {
-    e.print_trace();
-    return EC_fail;
-  }
+	fawkes::Logger *logger;
+	try {
+		logger = EclipseAgentThread::instance()->get_logger();
+	} catch (fawkes::Exception &e) {
+		e.print_trace();
+		return EC_fail;
+	}
 
-  EC_atom log_level;
-  if ( EC_succeed != EC_arg( 1 ).is_atom( &log_level ) )
-  {
-    printf( "Could not obtain log level\n" );
-    return EC_fail;
-  }
+	EC_atom log_level;
+	if (EC_succeed != EC_arg(1).is_atom(&log_level)) {
+		printf("Could not obtain log level\n");
+		return EC_fail;
+	}
 
-  fawkes::Logger::LogLevel ll;
-  if ( 0 == strcmp( "ll_debug", log_level.name() ) )
-  {
-    ll = fawkes::Logger::LL_DEBUG;
-  }
-  else if ( 0 == strcmp( "ll_info", log_level.name() ) )
-  {
-    ll = fawkes::Logger::LL_INFO;
-  }
-  else if ( 0 == strcmp( "ll_warn", log_level.name() ) )
-  {
-    ll = fawkes::Logger::LL_WARN;
-  }
-  else if ( 0 == strcmp( "ll_error", log_level.name() ) )
-  {
-    ll = fawkes::Logger::LL_ERROR;
-  }
-  else
-  {
-    printf( "Unknown log level %s\n", log_level.name() );
-    return EC_fail;
-  }
+	fawkes::Logger::LogLevel ll;
+	if (0 == strcmp("ll_debug", log_level.name())) {
+		ll = fawkes::Logger::LL_DEBUG;
+	} else if (0 == strcmp("ll_info", log_level.name())) {
+		ll = fawkes::Logger::LL_INFO;
+	} else if (0 == strcmp("ll_warn", log_level.name())) {
+		ll = fawkes::Logger::LL_WARN;
+	} else if (0 == strcmp("ll_error", log_level.name())) {
+		ll = fawkes::Logger::LL_ERROR;
+	} else {
+		printf("Unknown log level %s\n", log_level.name());
+		return EC_fail;
+	}
 
-  char* log_string;
-  if ( EC_succeed != EC_arg( 2 ).is_string( &log_string ) )
-  {
-    printf( "Could not get 2nd argument of log/2\n" );
-    return EC_fail;
-  }
+	char *log_string;
+	if (EC_succeed != EC_arg(2).is_string(&log_string)) {
+		printf("Could not get 2nd argument of log/2\n");
+		return EC_fail;
+	}
 
-  logger->log( ll, "ECLiPSe CLP", log_string );
+	logger->log(ll, "ECLiPSe CLP", log_string);
 
-  return EC_succeed;
+	return EC_succeed;
 }

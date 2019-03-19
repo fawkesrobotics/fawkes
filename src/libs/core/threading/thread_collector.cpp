@@ -102,5 +102,4 @@ ThreadCollector::~ThreadCollector()
 {
 }
 
-
 } // end namespace fawkes

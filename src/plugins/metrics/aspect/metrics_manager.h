@@ -23,22 +23,22 @@
 #define _PLUGINS_METRICS_ASPECT_METRICS_MANAGER_H_
 
 #include <core/utils/lock_list.h>
-#include <plugins/metrics/protobuf/metrics.pb.h>
 #include <plugins/metrics/aspect/metrics_supplier.h>
+#include <plugins/metrics/protobuf/metrics.pb.h>
 
 namespace fawkes {
 
 class MetricsManager
 {
- public:
-  virtual ~MetricsManager();
+public:
+	virtual ~MetricsManager();
 
-  virtual std::list<io::prometheus::client::MetricFamily> all_metrics() = 0;
+	virtual std::list<io::prometheus::client::MetricFamily> all_metrics() = 0;
 
-  virtual void add_supplier(MetricsSupplier *supplier) = 0;
-  virtual void remove_supplier(MetricsSupplier *supplier) = 0;
+	virtual void add_supplier(MetricsSupplier *supplier)    = 0;
+	virtual void remove_supplier(MetricsSupplier *supplier) = 0;
 
-  virtual const fawkes::LockList<MetricsSupplier *> &  metrics_suppliers() const = 0;
+	virtual const fawkes::LockList<MetricsSupplier *> &metrics_suppliers() const = 0;
 };
 
 } // end namespace fawkes

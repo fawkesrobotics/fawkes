@@ -21,16 +21,15 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <fvclassifiers/faces.h>
-
 #include <core/exception.h>
 #include <core/exceptions/software.h>
+#include <fvclassifiers/faces.h>
+#include <fvutils/adapters/iplimage.h>
 #include <fvutils/color/colorspaces.h>
 #include <fvutils/color/conversions.h>
-#include <fvutils/adapters/iplimage.h>
+#include <opencv/cv.h>
 
 #include <cstddef>
-#include <opencv/cv.h>
 
 namespace firevision {
 
@@ -58,71 +57,72 @@ namespace firevision {
  * @param min_neighbours minimum neighbours
  * @param flags flags, can only be CV_HAAR_DO_CANNY_PRUNING at the moment.
  */
-FacesClassifier::FacesClassifier(const char *haarcascade_file,
-				 unsigned int pixel_width, unsigned int pixel_height,
-				 IplImage *image,
-				 float haar_scale_factor, int min_neighbours, int flags)
-  : Classifier("FacesClassifier")
+FacesClassifier::FacesClassifier(const char * haarcascade_file,
+                                 unsigned int pixel_width,
+                                 unsigned int pixel_height,
+                                 IplImage *   image,
+                                 float        haar_scale_factor,
+                                 int          min_neighbours,
+                                 int          flags)
+: Classifier("FacesClassifier")
 {
-  haar_scale_factor_ = haar_scale_factor;
-  min_neighbours_ = min_neighbours;
-  flags_ = flags;
+	haar_scale_factor_ = haar_scale_factor;
+	min_neighbours_    = min_neighbours;
+	flags_             = flags;
 
-  cascade_ = (CvHaarClassifierCascade *) cvLoad(haarcascade_file);
-  if ( ! cascade_ ) {
-    throw fawkes::Exception("Could not load Haar casca via OpenCV");
-  }
+	cascade_ = (CvHaarClassifierCascade *)cvLoad(haarcascade_file);
+	if (!cascade_) {
+		throw fawkes::Exception("Could not load Haar casca via OpenCV");
+	}
 
-  storage_ = cvCreateMemStorage(0);
-  if ( ! storage_ ) {
-    cvReleaseHaarClassifierCascade(&cascade_);
-    throw fawkes::Exception("Could not initialize OpenCV memory");
-  }
+	storage_ = cvCreateMemStorage(0);
+	if (!storage_) {
+		cvReleaseHaarClassifierCascade(&cascade_);
+		throw fawkes::Exception("Could not initialize OpenCV memory");
+	}
 
-  if ( image ) {
-    image_ = image;
-    own_image_ = false;
-  } else {
-    image_ = cvCreateImage(cvSize(pixel_width, pixel_height), IPL_DEPTH_8U, 3);
-    own_image_ = true;
-  }
+	if (image) {
+		image_     = image;
+		own_image_ = false;
+	} else {
+		image_     = cvCreateImage(cvSize(pixel_width, pixel_height), IPL_DEPTH_8U, 3);
+		own_image_ = true;
+	}
 }
-
 
 /** Destructor. */
 FacesClassifier::~FacesClassifier()
 {
-  cvReleaseHaarClassifierCascade(&cascade_);
-  cvReleaseMemStorage(&storage_);
-  if ( own_image_ ) {
-    cvReleaseImage(&image_);
-  }
+	cvReleaseHaarClassifierCascade(&cascade_);
+	cvReleaseMemStorage(&storage_);
+	if (own_image_) {
+		cvReleaseImage(&image_);
+	}
 }
 
-
-std::list< ROI > *
+std::list<ROI> *
 FacesClassifier::classify()
 {
-  std::list< ROI > *rv = new std::list< ROI >();
+	std::list<ROI> *rv = new std::list<ROI>();
 
-  if ( own_image_ ) {
-    IplImageAdapter::convert_image_bgr(_src, image_);
-  }
+	if (own_image_) {
+		IplImageAdapter::convert_image_bgr(_src, image_);
+	}
 
-  CvSeq *face_seq = cvHaarDetectObjects(image_, cascade_, storage_,
-					haar_scale_factor_, min_neighbours_, flags_);
+	CvSeq *face_seq =
+	  cvHaarDetectObjects(image_, cascade_, storage_, haar_scale_factor_, min_neighbours_, flags_);
 
-  for ( int i = 0; i < face_seq->total; ++i) {
-    CvAvgComp el = *(CvAvgComp*)cvGetSeqElem(face_seq, i);
-    ROI r(el.rect.x, el.rect.y, el.rect.width, el.rect.height, _width, _height);
-    r.num_hint_points = el.rect.width * el.rect.height;
-    rv->push_back(r);
-  }
+	for (int i = 0; i < face_seq->total; ++i) {
+		CvAvgComp el = *(CvAvgComp *)cvGetSeqElem(face_seq, i);
+		ROI       r(el.rect.x, el.rect.y, el.rect.width, el.rect.height, _width, _height);
+		r.num_hint_points = el.rect.width * el.rect.height;
+		rv->push_back(r);
+	}
 
-  // sort, smallest first, we define num_hint_points as area enclosed by the ROI
-  rv->sort();
+	// sort, smallest first, we define num_hint_points as area enclosed by the ROI
+	rv->sort();
 
-  return rv;
+	return rv;
 }
 
 } // end namespace firevision

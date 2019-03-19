@@ -25,6 +25,7 @@
 #define _FIREVISION_UTILS_HISTOGRAM_H_
 
 #include <fvutils/base/types.h>
+
 #include <iostream>
 
 namespace firevision {
@@ -33,54 +34,56 @@ class HistogramBlock;
 
 class Histogram
 {
- public:
-  Histogram(unsigned int width, unsigned int height,
-      unsigned int depth = 1, unsigned int num_undos = 1);
-  Histogram(HistogramBlock* histogram_block);
-  ~Histogram();
+public:
+	Histogram(unsigned int width,
+	          unsigned int height,
+	          unsigned int depth     = 1,
+	          unsigned int num_undos = 1);
+	Histogram(HistogramBlock *histogram_block);
+	~Histogram();
 
-  void           operator+=(fawkes::upoint_t *p);
-  void           operator+=(fawkes::upoint_t  p);
+	void operator+=(fawkes::upoint_t *p);
+	void operator+=(fawkes::upoint_t p);
 
-  unsigned int * get_histogram();
-  HistogramBlock* get_histogram_block();
-  void           get_dimensions(unsigned int& width, unsigned int& height, unsigned int& depth);
-  unsigned int   get_value(unsigned int x, unsigned int y);
-  unsigned int   get_value(unsigned int x, unsigned int y, unsigned int z);
-  void           set_value(unsigned int x, unsigned int y, unsigned int value);
-  void           set_value(unsigned int x, unsigned int y, unsigned int z, unsigned int value);
-  void           inc_value(unsigned int x, unsigned int y, unsigned int z = 0);
-  void           add(unsigned int x, unsigned int y, unsigned int z, unsigned int value);
-  void           sub(unsigned int x, unsigned int y, unsigned int z, unsigned int value);
-  void           reset();
-  unsigned int   get_median();
-  unsigned int   get_average();
+	unsigned int *  get_histogram();
+	HistogramBlock *get_histogram_block();
+	void            get_dimensions(unsigned int &width, unsigned int &height, unsigned int &depth);
+	unsigned int    get_value(unsigned int x, unsigned int y);
+	unsigned int    get_value(unsigned int x, unsigned int y, unsigned int z);
+	void            set_value(unsigned int x, unsigned int y, unsigned int value);
+	void            set_value(unsigned int x, unsigned int y, unsigned int z, unsigned int value);
+	void            inc_value(unsigned int x, unsigned int y, unsigned int z = 0);
+	void            add(unsigned int x, unsigned int y, unsigned int z, unsigned int value);
+	void            sub(unsigned int x, unsigned int y, unsigned int z, unsigned int value);
+	void            reset();
+	unsigned int    get_median();
+	unsigned int    get_average();
 
-  unsigned int   get_sum() const;
+	unsigned int get_sum() const;
 
-  void           reset_undo();
-  void           undo();
-  unsigned int   switch_undo( unsigned int undo_id );
-  unsigned int   get_num_undos();
+	void         reset_undo();
+	void         undo();
+	unsigned int switch_undo(unsigned int undo_id);
+	unsigned int get_num_undos();
 
-  void           print_to_stream(std::ostream &s);
-  void           save(const char * filename, bool formatted_output = false);
-  bool           load(const char * filename);
+	void print_to_stream(std::ostream &s);
+	void save(const char *filename, bool formatted_output = false);
+	bool load(const char *filename);
 
- private:
-  unsigned int  width;
-  unsigned int  height;
-  unsigned int  depth;
-  unsigned int  dimension;
-  unsigned int  histogram_size;
-  unsigned int* histogram;
-  HistogramBlock *histogram_block;
-  unsigned int  number_of_values;
+private:
+	unsigned int    width;
+	unsigned int    height;
+	unsigned int    depth;
+	unsigned int    dimension;
+	unsigned int    histogram_size;
+	unsigned int *  histogram;
+	HistogramBlock *histogram_block;
+	unsigned int    number_of_values;
 
-  unsigned int **undo_overlay;
-  unsigned int  *undo_num_vals;
-  unsigned int   undo_num;
-  unsigned int   undo_current;
+	unsigned int **undo_overlay;
+	unsigned int * undo_num_vals;
+	unsigned int   undo_num;
+	unsigned int   undo_current;
 };
 
 } // end namespace firevision

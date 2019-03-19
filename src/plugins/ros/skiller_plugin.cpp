@@ -19,8 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
 #include "skiller_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -29,15 +30,14 @@ using namespace fawkes;
  */
 class RosSkillerPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit RosSkillerPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new RosSkillerThread());
-  }
+	explicit RosSkillerPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RosSkillerThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Accept skiller commands from ROS")

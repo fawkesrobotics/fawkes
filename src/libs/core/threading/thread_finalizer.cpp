@@ -34,23 +34,20 @@ namespace fawkes {
 /** Constructor.
  * @param format message format (reason or symptom of failure)
  */
-CannotFinalizeThreadException::CannotFinalizeThreadException(const char *format, ...)
-  : Exception()
+CannotFinalizeThreadException::CannotFinalizeThreadException(const char *format, ...) : Exception()
 {
-  va_list va;
-  va_start(va, format);
-  append_va(format, va);
-  va_end(va);
+	va_list va;
+	va_start(va, format);
+	append_va(format, va);
+	va_end(va);
 }
 
 /** Constructor.
  * @param e exception to copy messages from
  */
-CannotFinalizeThreadException::CannotFinalizeThreadException(Exception &e)
-  : Exception(e)
+CannotFinalizeThreadException::CannotFinalizeThreadException(Exception &e) : Exception(e)
 {
 }
-
 
 /** @class ThreadFinalizer core/threading/thread_finalizer.h
  * Thread finalizer interface.
@@ -96,6 +93,5 @@ CannotFinalizeThreadException::CannotFinalizeThreadException(Exception &e)
 ThreadFinalizer::~ThreadFinalizer()
 {
 }
-
 
 } // end namespace fawkes

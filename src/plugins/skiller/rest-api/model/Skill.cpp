@@ -15,9 +15,9 @@
 #include "Skill.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -30,7 +30,7 @@ Skill::Skill(const std::string &json)
 	from_json(json);
 }
 
-Skill::Skill(const rapidjson::Value& v)
+Skill::Skill(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -59,9 +59,9 @@ Skill::to_json(bool pretty) const
 }
 
 void
-Skill::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+Skill::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -111,7 +111,6 @@ Skill::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_status.SetString(*status_, allocator);
 		v.AddMember("status", v_status, allocator);
 	}
-
 }
 
 void
@@ -124,7 +123,7 @@ Skill::from_json(const std::string &json)
 }
 
 void
-Skill::from_json_value(const rapidjson::Value& d)
+Skill::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -153,25 +152,25 @@ Skill::from_json_value(const rapidjson::Value& d)
 	if (d.HasMember("status") && d["status"].IsString()) {
 		status_ = d["status"].GetString();
 	}
-
 }
 
 void
 Skill::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! name_)  missing.push_back("name");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!name_)
+		missing.push_back("name");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "Skill is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "Skill is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

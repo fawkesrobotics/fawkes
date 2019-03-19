@@ -23,10 +23,10 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <cmath>
 #include <fvmodels/relative_position/box_relative.h>
 #include <utils/math/angle.h>
 
+#include <cmath>
 #include <iostream>
 
 using namespace std;
@@ -50,36 +50,36 @@ namespace firevision {
  * @param vertical_angle vertical viewing angle (in degree)
  */
 BoxRelative::BoxRelative(unsigned int image_width,
-			 unsigned int image_height,
-			 float camera_height,
-			 float camera_offset_x, float camera_offset_y,
-			 float camera_ori,
-			 float horizontal_angle, float vertical_angle
-			 )
+                         unsigned int image_height,
+                         float        camera_height,
+                         float        camera_offset_x,
+                         float        camera_offset_y,
+                         float        camera_ori,
+                         float        horizontal_angle,
+                         float        vertical_angle)
 {
+	this->image_width        = image_width;
+	this->image_height       = image_height;
+	this->horizontal_angle   = deg2rad(horizontal_angle);
+	this->vertical_angle     = deg2rad(vertical_angle);
+	this->camera_orientation = deg2rad(camera_ori);
+	this->camera_height      = camera_height;
+	this->camera_offset_x    = camera_offset_x;
+	this->camera_offset_y    = camera_offset_y;
 
-  this->image_width        = image_width;
-  this->image_height       = image_height;
-  this->horizontal_angle   = deg2rad( horizontal_angle );
-  this->vertical_angle     = deg2rad( vertical_angle   );
-  this->camera_orientation = deg2rad( camera_ori       );
-  this->camera_height      = camera_height;
-  this->camera_offset_x    = camera_offset_x;
-  this->camera_offset_y    = camera_offset_y;
+	center.x = center.y = 0.f;
+	pan                 = 0.0f;
+	tilt                = 0.0f;
 
-  center.x = center.y = 0.f;
-  pan	         = 0.0f;
-  tilt           = 0.0f;
+	pan_rad_per_pixel  = this->horizontal_angle / this->image_width;
+	tilt_rad_per_pixel = this->vertical_angle / this->image_height;
 
-  pan_rad_per_pixel  = this->horizontal_angle   / this->image_width;
-  tilt_rad_per_pixel = this->vertical_angle     / this->image_height;
+	box_x = box_y = bearing = slope = distance_box_motor = distance_box_cam = 0.f;
 
-  box_x = box_y = bearing = slope = distance_box_motor = distance_box_cam = 0.f;
+	DEFAULT_X_VARIANCE = 1500.f;
+	DEFAULT_Y_VARIANCE = 1000.f;
 
-  DEFAULT_X_VARIANCE = 1500.f;
-  DEFAULT_Y_VARIANCE = 1000.f;
-
-  /*
+	/*
   var_proc_x = 1500;
   var_proc_y = 1000;
   var_meas_x = 1500;
@@ -100,31 +100,27 @@ BoxRelative::BoxRelative(unsigned int image_width,
   */
 }
 
-
 /* Get the distance to the box - NOT IMPLEMENTED!
  * Was not needed, matching with laser data.
  * @return 0
  */
 float
-BoxRelative::get_distance() const 
+BoxRelative::get_distance() const
 {
-  return distance_box_motor;
+	return distance_box_motor;
 }
-
 
 float
 BoxRelative::get_bearing(void) const
 {
-  return bearing;
+	return bearing;
 }
-
 
 float
 BoxRelative::get_slope() const
 {
-  return slope;
+	return slope;
 }
-
 
 /* Get relative Y distance in local cartesian coordinate system - NOT IMPLEMENTED!
  * Was not needed, matching with laser data.
@@ -133,9 +129,8 @@ BoxRelative::get_slope() const
 float
 BoxRelative::get_y(void) const
 {
-  return box_y;
+	return box_y;
 }
-
 
 /* Get relative X distance in local cartesian coordinate system - NOT IMPLEMENTED!
  * Was not needed, matching with laser data.
@@ -144,7 +139,7 @@ BoxRelative::get_y(void) const
 float
 BoxRelative::get_x(void) const
 {
-  return box_x;
+	return box_x;
 }
 
 void
@@ -152,45 +147,39 @@ BoxRelative::set_radius(float r)
 {
 }
 
-
 void
 BoxRelative::set_center(float x, float y)
 {
-  center.x = x;
-  center.y = y;
+	center.x = x;
+	center.y = y;
 }
-
 
 void
-BoxRelative::set_center(const center_in_roi_t& c)
+BoxRelative::set_center(const center_in_roi_t &c)
 {
-  center.x = c.x;
-  center.y = c.y;
+	center.x = c.x;
+	center.y = c.y;
 }
-
 
 void
 BoxRelative::set_pan_tilt(float pan, float tilt)
 {
-  this->pan  = pan;
-  this->tilt = tilt;
+	this->pan  = pan;
+	this->tilt = tilt;
 }
-
 
 void
 BoxRelative::get_pan_tilt(float *pan, float *tilt) const
 {
-  *pan  = this->pan;
-  *tilt = this->tilt;
+	*pan  = this->pan;
+	*tilt = this->tilt;
 }
-
 
 const char *
 BoxRelative::get_name() const
 {
-  return "BoxRelative";
+	return "BoxRelative";
 }
-
 
 /** Set the horizontal viewing angle.
  * @param angle_deg horizontal viewing angle in degrees
@@ -198,9 +187,8 @@ BoxRelative::get_name() const
 void
 BoxRelative::set_horizontal_angle(float angle_deg)
 {
-  horizontal_angle = deg2rad( angle_deg );
+	horizontal_angle = deg2rad(angle_deg);
 }
-
 
 /** Set the vertical viewing angle.
  * @param angle_deg vertical viewing angle in degrees
@@ -208,22 +196,20 @@ BoxRelative::set_horizontal_angle(float angle_deg)
 void
 BoxRelative::set_vertical_angle(float angle_deg)
 {
-  vertical_angle = deg2rad( angle_deg );
+	vertical_angle = deg2rad(angle_deg);
 }
-
 
 void
 BoxRelative::reset()
 {
-  last_available = false;
-  // kalman_filter->reset();
+	last_available = false;
+	// kalman_filter->reset();
 }
 
 void
 BoxRelative::calc()
 {
-
-  /*
+	/*
   char user_input = toupper( getkey() );
 
   if (user_input == 'P') {
@@ -238,34 +224,30 @@ BoxRelative::calc()
   }
   */
 
-
-  calc_unfiltered();
-  // applyKalmanFilter();
-
+	calc_unfiltered();
+	// applyKalmanFilter();
 }
-
 
 bool
 BoxRelative::is_pos_valid() const
 {
-  return true;
+	return true;
 }
-
 
 void
 BoxRelative::calc_unfiltered()
 {
-  /* Pan to the right is positive. Therefore we add it,
+	/* Pan to the right is positive. Therefore we add it,
      because bearing to the right shall be positive */
-  bearing = ((center.x - image_width/2) * pan_rad_per_pixel + pan + camera_orientation);
+	bearing = ((center.x - image_width / 2) * pan_rad_per_pixel + pan + camera_orientation);
 
-  // invert sign, because slope downward shall be negative
-  slope = -((center.y - image_height / 2) * tilt_rad_per_pixel - tilt);
+	// invert sign, because slope downward shall be negative
+	slope = -((center.y - image_height / 2) * tilt_rad_per_pixel - tilt);
 
-  distance_box_cam = camera_height * tan(M_PI / 2 + slope);
-  distance_box_motor = distance_box_cam - camera_offset_x;
+	distance_box_cam   = camera_height * tan(M_PI / 2 + slope);
+	distance_box_motor = distance_box_cam - camera_offset_x;
 
-  /*
+	/*
   cout << "pan:" << pan << "  tilt:" << tilt
        << "  bearing: " << bearing << "  slope:" << slope
        << "  dist->cam:" << distance_box_cam
@@ -273,10 +255,9 @@ BoxRelative::calc_unfiltered()
        << endl;
   */
 
-  box_x = cos( bearing ) * distance_box_cam + camera_offset_x;
-  box_y = sin( bearing ) * distance_box_cam + camera_offset_y;
+	box_x = cos(bearing) * distance_box_cam + camera_offset_x;
+	box_y = sin(bearing) * distance_box_cam + camera_offset_y;
 }
-
 
 /*
 void

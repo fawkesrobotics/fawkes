@@ -23,56 +23,54 @@
 
 /// @cond QA
 
-#include <typeinfo>
-
 #include <stdio.h>
+#include <typeinfo>
 
 class A
 {
- public:
-  A()
-  {
-    printf("A: constructor called\n");
-  }
+public:
+	A()
+	{
+		printf("A: constructor called\n");
+	}
 
-  virtual ~A() {}
+	virtual ~A()
+	{
+	}
 
-  A *
-  clone()
-  {
-    typeof(this) a = new typeof(*this);
-    return a;
-  }
+	A *
+	clone()
+	{
+		typeof(this) a = new typeof(*this);
+		return a;
+	}
 };
-
 
 class B : public A
 {
- public:
-  B()
-  {
-    printf("B: constructor called\n");
-  }
-
+public:
+	B()
+	{
+		printf("B: constructor called\n");
+	}
 };
-
 
 int
 main(int argc, char **argv)
 {
-  B b;
-  A *a = b.clone();
+	B  b;
+	A *a = b.clone();
 
-  printf("Type of a: %s\n", typeid(a).name());
+	printf("Type of a: %s\n", typeid(a).name());
 
-  B *ba;
-  if ( (ba = dynamic_cast<B *>(a)) != NULL ) {
-    printf("Dynamic cast of a as B successful\n");
-  } else {
-    printf("Dynamic cast of a as B FAILED\n");
-  }
+	B *ba;
+	if ((ba = dynamic_cast<B *>(a)) != NULL) {
+		printf("Dynamic cast of a as B successful\n");
+	} else {
+		printf("Dynamic cast of a as B FAILED\n");
+	}
 
-  delete a;
+	delete a;
 }
 
 /// @endcond

@@ -26,12 +26,13 @@
 #include "types.h"
 
 #include <openrave/openrave.h>
+
 #include <string>
 
 namespace OpenRAVE {
-  class EnvironmentBase;
-  class RobotBase;
-}
+class EnvironmentBase;
+class RobotBase;
+} // namespace OpenRAVE
 
 namespace fawkes {
 
@@ -41,60 +42,66 @@ class OpenRaveRobot;
 /** OpenRaveEnvironment class */
 class OpenRaveEnvironment
 {
- public:
-  OpenRaveEnvironment(fawkes::Logger* logger = 0);
-  OpenRaveEnvironment(const OpenRaveEnvironment& src);
-  virtual ~OpenRaveEnvironment();
+public:
+	OpenRaveEnvironment(fawkes::Logger *logger = 0);
+	OpenRaveEnvironment(const OpenRaveEnvironment &src);
+	virtual ~OpenRaveEnvironment();
 
+	virtual void create();
+	virtual void destroy();
 
-  virtual void create();
-  virtual void destroy();
+	virtual void set_name(const char *name);
 
-  virtual void set_name(const char* name);
+	virtual void enable_debug(OpenRAVE::DebugLevel level = OpenRAVE::Level_Debug);
+	virtual void disable_debug();
 
-  virtual void enable_debug(OpenRAVE::DebugLevel level=OpenRAVE::Level_Debug);
-  virtual void disable_debug();
+	virtual void start_viewer();
+	virtual void load_IK_solver(OpenRaveRobotPtr &               robot,
+	                            OpenRAVE::IkParameterizationType iktype = OpenRAVE::IKP_Transform6D);
+	virtual void run_planner(OpenRaveRobotPtr &robot, float sampling = 0.01f);
+	virtual void run_graspplanning(const std::string &target_name,
+	                               OpenRaveRobotPtr & robot,
+	                               float              sampling = 0.01f);
 
-  virtual void start_viewer();
-  virtual void load_IK_solver(OpenRaveRobotPtr& robot, OpenRAVE::IkParameterizationType iktype=OpenRAVE::IKP_Transform6D);
-  virtual void run_planner(OpenRaveRobotPtr& robot, float sampling=0.01f);
-  virtual void run_graspplanning(const std::string& target_name, OpenRaveRobotPtr& robot, float sampling=0.01f);
+	virtual void add_robot(const std::string &filename);
+	virtual void add_robot(OpenRAVE::RobotBasePtr robot);
+	virtual void add_robot(OpenRaveRobotPtr &robot);
 
-  virtual void add_robot(const std::string& filename);
-  virtual void add_robot(OpenRAVE::RobotBasePtr robot);
-  virtual void add_robot(OpenRaveRobotPtr& robot);
+	virtual bool add_object(const std::string &name, const std::string &filename);
+	virtual bool delete_object(const std::string &name);
+	virtual bool delete_all_objects();
+	virtual bool rename_object(const std::string &name, const std::string &new_name);
+	virtual bool move_object(const std::string &name, float trans_x, float trans_y, float trans_z);
+	virtual bool move_object(const std::string &name,
+	                         float              trans_x,
+	                         float              trans_y,
+	                         float              trans_z,
+	                         OpenRaveRobotPtr & robot);
+	virtual bool
+	             rotate_object(const std::string &name, float quat_x, float quat_y, float quat_z, float quat_w);
+	virtual bool rotate_object(const std::string &name, float rot_x, float rot_y, float rot_z);
 
-  virtual bool add_object(const std::string& name, const std::string& filename);
-  virtual bool delete_object(const std::string& name);
-  virtual bool delete_all_objects();
-  virtual bool rename_object(const std::string& name, const std::string& new_name);
-  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z);
-  virtual bool move_object(const std::string& name, float trans_x, float trans_y, float trans_z, OpenRaveRobotPtr& robot);
-  virtual bool rotate_object(const std::string& name, float quat_x, float quat_y, float quat_z, float quat_w);
-  virtual bool rotate_object(const std::string& name, float rot_x, float rot_y, float rot_z);
+	virtual void clone_objects(OpenRaveEnvironmentPtr &env);
 
-  virtual void clone_objects(OpenRaveEnvironmentPtr& env);
+	//virtual RobotBasePtr getRobot() const;
+	virtual OpenRAVE::EnvironmentBasePtr get_env_ptr() const;
 
-  //virtual RobotBasePtr getRobot() const;
-  virtual OpenRAVE::EnvironmentBasePtr get_env_ptr() const;
+private:
+	fawkes::Logger *logger_;
 
- private:
-  fawkes::Logger* logger_;
+	std::string name_;
+	std::string name_str_;
 
-  std::string name_;
-  std::string name_str_;
+	OpenRAVE::EnvironmentBasePtr env_;
+	OpenRAVE::PlannerBasePtr     planner_;
+	OpenRAVE::ModuleBasePtr      mod_ikfast_;
 
-  OpenRAVE::EnvironmentBasePtr  env_;
-  OpenRAVE::PlannerBasePtr      planner_;
-  OpenRAVE::ModuleBasePtr       mod_ikfast_;
+	boost::thread *viewer_thread_;
+	bool           viewer_running_;
 
-  boost::thread*                viewer_thread_;
-  bool                          viewer_running_;
+	std::vector<OpenRAVE::GraphHandlePtr> graph_handle_;
 
-  std::vector<OpenRAVE::GraphHandlePtr> graph_handle_;
-
-  virtual const char* name() const;
-
+	virtual const char *name() const;
 };
 } // end of namespace fawkes
 

@@ -21,33 +21,31 @@
 
 #pragma once
 
-#include <core/threading/thread.h>
+#include "model/BlackboardGraph.h"
+#include "model/InterfaceData.h"
+#include "model/InterfaceInfo.h"
+
+#include <aspect/blackboard.h>
 #include <aspect/clock.h>
 #include <aspect/logging.h>
 #include <aspect/webview.h>
-#include <aspect/blackboard.h>
-
-#include <webview/rest_api.h>
-#include <webview/rest_array.h>
+#include <core/threading/thread.h>
 #include <interface/field_iterator.h>
 #include <interface/interface_info.h>
-
-#include "model/InterfaceInfo.h"
-#include "model/InterfaceData.h"
-#include "model/BlackboardGraph.h"
+#include <webview/rest_api.h>
+#include <webview/rest_array.h>
 
 #include <map>
 #include <string>
 #include <utility>
 
-class BlackboardRestApi
-: public fawkes::Thread,
-	public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-	public fawkes::BlackBoardAspect,
-	public fawkes::WebviewAspect
+class BlackboardRestApi : public fawkes::Thread,
+                          public fawkes::ClockAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::BlackBoardAspect,
+                          public fawkes::WebviewAspect
 {
- public:
+public:
 	BlackboardRestApi();
 	~BlackboardRestApi();
 
@@ -55,32 +53,28 @@ class BlackboardRestApi
 	virtual void loop();
 	virtual void finalize();
 
- private:
+private:
 	WebviewRestArray<InterfaceInfo> cb_list_interfaces();
 
-	InterfaceInfo
-		cb_get_interface_info(fawkes::WebviewRestParams& params);
+	InterfaceInfo cb_get_interface_info(fawkes::WebviewRestParams &params);
 
-	InterfaceData
-		cb_get_interface_data(fawkes::WebviewRestParams& params);
+	InterfaceData cb_get_interface_data(fawkes::WebviewRestParams &params);
 
 	BlackboardGraph cb_get_graph();
 
-	std::vector<std::shared_ptr<InterfaceFieldType>>
-		gen_fields(fawkes::InterfaceFieldIterator begin,
-		           fawkes::InterfaceFieldIterator end);
+	std::vector<std::shared_ptr<InterfaceFieldType>> gen_fields(fawkes::InterfaceFieldIterator begin,
+	                                                            fawkes::InterfaceFieldIterator end);
 
 	InterfaceInfo gen_interface_info(const fawkes::InterfaceInfo &ii);
 	InterfaceData gen_interface_data(fawkes::Interface *iface, bool pretty);
 
-	std::string generate_graph(const std::string& for_owner = "");
+	std::string generate_graph(const std::string &for_owner = "");
 
- private:
-	fawkes::WebviewRestApi        *rest_api_;
+private:
+	fawkes::WebviewRestApi *rest_api_;
 
-	std::map<std::string, std::pair<std::vector<std::shared_ptr<InterfaceFieldType>>,
-	                                std::vector<std::shared_ptr<InterfaceMessageType>>>>
-		type_info_cache_;
-	
-
+	std::map<std::string,
+	         std::pair<std::vector<std::shared_ptr<InterfaceFieldType>>,
+	                   std::vector<std::shared_ptr<InterfaceMessageType>>>>
+	  type_info_cache_;
 };

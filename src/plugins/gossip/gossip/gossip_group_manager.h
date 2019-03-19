@@ -26,8 +26,8 @@
 
 #include <core/utils/refptr.h>
 
-#include <map>
 #include <list>
+#include <map>
 #include <string>
 
 namespace fawkes {
@@ -41,44 +41,46 @@ class GossipGroupConfiguration
 public:
 	GossipGroupConfiguration();
 	GossipGroupConfiguration(const GossipGroupConfiguration &c);
-	GossipGroupConfiguration(std::string &name,
-	                         std::string &broadcast_address,
+	GossipGroupConfiguration(std::string &  name,
+	                         std::string &  broadcast_address,
 	                         unsigned short broadcast_port);
-  GossipGroupConfiguration(std::string &name,
-                           std::string &broadcast_address,
-                           unsigned short send_port, unsigned short recv_port);
+	GossipGroupConfiguration(std::string &  name,
+	                         std::string &  broadcast_address,
+	                         unsigned short send_port,
+	                         unsigned short recv_port);
 
-	GossipGroupConfiguration& operator=(const GossipGroupConfiguration& c);
+	GossipGroupConfiguration &operator=(const GossipGroupConfiguration &c);
 
-  std::string    name;			///< name of the group
-  std::string    broadcast_addr;	///< Broadcast IP Addr
-  unsigned short send_port;		///< UDP port to send messages to
-  unsigned short recv_port;		///< UDP port to list on for messages
-  std::string    crypto_key;		///< encryption key
-  std::string    crypto_cipher;		///< encryption cipher
+	std::string    name;           ///< name of the group
+	std::string    broadcast_addr; ///< Broadcast IP Addr
+	unsigned short send_port;      ///< UDP port to send messages to
+	unsigned short recv_port;      ///< UDP port to list on for messages
+	std::string    crypto_key;     ///< encryption key
+	std::string    crypto_cipher;  ///< encryption cipher
 };
 
 class GossipGroupManager
 {
-  friend GossipAspectIniFin;
- public:
-  GossipGroupManager(std::string &service_name, ServicePublisher *service_publisher,
-		     std::map<std::string, GossipGroupConfiguration> &initial_groups);
-  virtual ~GossipGroupManager();
+	friend GossipAspectIniFin;
 
-  virtual RefPtr<GossipGroup> join_group(const std::string &name);
-  virtual void                leave_group(RefPtr<GossipGroup> &group);
+public:
+	GossipGroupManager(std::string &                                    service_name,
+	                   ServicePublisher *                               service_publisher,
+	                   std::map<std::string, GossipGroupConfiguration> &initial_groups);
+	virtual ~GossipGroupManager();
 
- private:
-  void create_group(GossipGroupConfiguration &gc);
+	virtual RefPtr<GossipGroup> join_group(const std::string &name);
+	virtual void                leave_group(RefPtr<GossipGroup> &group);
 
- private:
-  std::string                                  service_name_;
-  ServicePublisher                            *service_publisher_;
-  std::map<std::string, RefPtr<GossipGroup> >  groups_;
+private:
+	void create_group(GossipGroupConfiguration &gc);
+
+private:
+	std::string                                service_name_;
+	ServicePublisher *                         service_publisher_;
+	std::map<std::string, RefPtr<GossipGroup>> groups_;
 };
 
 } // end namespace fawkes
 
 #endif
-

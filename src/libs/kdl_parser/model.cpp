@@ -53,26 +53,25 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "model.h"
-#include <urdf_parser/urdf_parser.h>
-
-#include <vector>
-#include <fstream>
-#include <iostream>
 
 #include <core/exceptions/system.h>
 #include <kdl_parser/exceptions.h>
+#include <urdf_parser/urdf_parser.h>
+
+#include <fstream>
+#include <iostream>
+#include <vector>
 
 using namespace fawkes;
 
 namespace urdf {
 
-static bool IsColladaData(const std::string& data)
+static bool
+IsColladaData(const std::string &data)
 {
-  return data.find("<COLLADA") != std::string::npos;
+	return data.find("<COLLADA") != std::string::npos;
 }
-
 
 /** @class Model <kdl_parser/model.h>
  * This class represents an URDF model. It can be initialized
@@ -86,93 +85,85 @@ static bool IsColladaData(const std::string& data)
  * @param filename The filename of the URDF file
  * @return true if the model was intialized successfully
  */
-bool Model::initFile(const std::string& filename)
+bool
+Model::initFile(const std::string &filename)
 {
-
-  // get the entire file
-  std::string xml_string;
-  std::fstream xml_file(filename.c_str(), std::fstream::in);
-  if (xml_file.is_open())
-  {
-    while ( xml_file.good() )
-    {
-      std::string line;
-      std::getline( xml_file, line);
-      xml_string += (line + "\n");
-    }
-    xml_file.close();
-    return Model::initString(xml_string);
-  }
-  else
-  {
-    throw CouldNotOpenFileException(filename.c_str());
-  }
-
+	// get the entire file
+	std::string  xml_string;
+	std::fstream xml_file(filename.c_str(), std::fstream::in);
+	if (xml_file.is_open()) {
+		while (xml_file.good()) {
+			std::string line;
+			std::getline(xml_file, line);
+			xml_string += (line + "\n");
+		}
+		xml_file.close();
+		return Model::initString(xml_string);
+	} else {
+		throw CouldNotOpenFileException(filename.c_str());
+	}
 }
 
 /** Initialize the model using a XML Document
  * @param xml_doc The robot model as TiXmlDocument
  * @return true if the model was intialized successfully
  */
-bool Model::initXml(TiXmlDocument *xml_doc)
+bool
+Model::initXml(TiXmlDocument *xml_doc)
 {
-  if (!xml_doc)
-  {
-    throw URDFXMLDocumentParseErrorException();
-  }
+	if (!xml_doc) {
+		throw URDFXMLDocumentParseErrorException();
+	}
 
-  std::stringstream ss;
-  ss << *xml_doc;
+	std::stringstream ss;
+	ss << *xml_doc;
 
-  return Model::initString(ss.str());
+	return Model::initString(ss.str());
 }
 
 /** Initialize the model using a XML Element
  * @param robot_xml The robot model as TiXmlElement
  * @return true if the model was intialized successfully
  */
-bool Model::initXml(TiXmlElement *robot_xml)
+bool
+Model::initXml(TiXmlElement *robot_xml)
 {
-  if (!robot_xml)
-  {
-    throw URDFXMLElementParseErrorException();
-  }
+	if (!robot_xml) {
+		throw URDFXMLElementParseErrorException();
+	}
 
-  std::stringstream ss;
-  ss << (*robot_xml);
+	std::stringstream ss;
+	ss << (*robot_xml);
 
-  return Model::initString(ss.str());
+	return Model::initString(ss.str());
 }
-
 
 /** Initialize the model using an URDF string
  * @param xml_string The robot description in URDF format
  * @return true if the model was intialized successfully
  */
-bool Model::initString(const std::string& xml_string)
+bool
+Model::initString(const std::string &xml_string)
 {
-  ModelInterfaceSharedPtr model;
+	ModelInterfaceSharedPtr model;
 
-  if( IsColladaData(xml_string) ) {
-    // currently, support for Collada is not implemented
-    throw URDFColladaNotSupportedException();
-  }
-  else {
-    model = parseURDF(xml_string);
-  }
+	if (IsColladaData(xml_string)) {
+		// currently, support for Collada is not implemented
+		throw URDFColladaNotSupportedException();
+	} else {
+		model = parseURDF(xml_string);
+	}
 
-  // copy data from model into this object
-  if (model){
-    this->links_ = model->links_;
-    this->joints_ = model->joints_;
-    this->materials_ = model->materials_;
-    this->name_ = model->name_;
-    this->root_link_ = model->root_link_;
-    return true;
-  }
-  else
-    return false;
+	// copy data from model into this object
+	if (model) {
+		this->links_     = model->links_;
+		this->joints_    = model->joints_;
+		this->materials_ = model->materials_;
+		this->name_      = model->name_;
+		this->root_link_ = model->root_link_;
+		return true;
+	} else
+		return false;
 }
 
-
-}// namespace urdf
+} // namespace urdf

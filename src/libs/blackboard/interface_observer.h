@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  interface_observer.h - BlackBoard interface observer
  *
@@ -35,35 +35,32 @@ class BlackBoardNotifier;
 
 class BlackBoardInterfaceObserver
 {
+	friend BlackBoardNotifier;
 
- friend BlackBoardNotifier;
+public:
+	BlackBoardInterfaceObserver();
+	virtual ~BlackBoardInterfaceObserver();
 
- public:
-  BlackBoardInterfaceObserver();
-  virtual ~BlackBoardInterfaceObserver();
+	virtual void bb_interface_created(const char *type, const char *id) throw();
+	virtual void bb_interface_destroyed(const char *type, const char *id) throw();
 
-  virtual void bb_interface_created(const char *type, const char *id) throw();
-  virtual void bb_interface_destroyed(const char *type, const char *id) throw();
+protected:
+	void bbio_add_observed_create(const char *type_pattern, const char *id_pattern = "*") throw();
+	void bbio_add_observed_destroy(const char *type_pattern, const char *id_pattern = "*") throw();
 
- protected:
-  void bbio_add_observed_create(const char *type_pattern,
-				const char *id_pattern = "*") throw();
-  void bbio_add_observed_destroy(const char *type_pattern,
-				 const char *id_pattern = "*") throw();
+	/** Type for lockable interface type hash sets. */
+	typedef LockMap<std::string, std::list<std::string>> ObservedInterfaceLockMap;
 
-  /** Type for lockable interface type hash sets. */
-  typedef  LockMap<std::string, std::list<std::string> >  ObservedInterfaceLockMap;
+	/** Type for iterator of lockable interface type hash sets. */
+	typedef ObservedInterfaceLockMap::iterator ObservedInterfaceLockMapIterator;
 
-  /** Type for iterator of lockable interface type hash sets. */
-  typedef  ObservedInterfaceLockMap::iterator   ObservedInterfaceLockMapIterator;
+	ObservedInterfaceLockMap *bbio_get_observed_create() throw();
+	ObservedInterfaceLockMap *bbio_get_observed_destroy() throw();
 
-  ObservedInterfaceLockMap *  bbio_get_observed_create() throw();
-  ObservedInterfaceLockMap *  bbio_get_observed_destroy() throw();
-
- private:
-  ObservedInterfaceLockMap         bbio_observed_create_;
-  ObservedInterfaceLockMap         bbio_observed_destroy_;
-  ObservedInterfaceLockMapIterator bbio_iti_;
+private:
+	ObservedInterfaceLockMap         bbio_observed_create_;
+	ObservedInterfaceLockMap         bbio_observed_destroy_;
+	ObservedInterfaceLockMapIterator bbio_iti_;
 };
 
 } // end namespace fawkes

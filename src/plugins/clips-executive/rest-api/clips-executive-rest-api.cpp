@@ -21,8 +21,8 @@
 
 #include "clips-executive-rest-api.h"
 
-#include <webview/rest_api_manager.h>
 #include <core/threading/mutex_locker.h>
+#include <webview/rest_api_manager.h>
 
 using namespace fawkes;
 
@@ -33,7 +33,7 @@ using namespace fawkes;
 
 /** Constructor. */
 ClipsExecutiveRestApi::ClipsExecutiveRestApi()
-	: Thread("ClipsWebviewThread", Thread::OPMODE_WAITFORWAKEUP)
+: Thread("ClipsWebviewThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
 
@@ -54,33 +54,38 @@ ClipsExecutiveRestApi::init()
 	}
 
 	rest_api_ = new WebviewRestApi("clips-executive", logger);
-	rest_api_->add_handler<WebviewRestArray<Goal>>
-		(WebRequest::METHOD_GET, "/goals",
-		 std::bind(&ClipsExecutiveRestApi::cb_list_goals, this));
-	rest_api_->add_handler<Goal>
-		(WebRequest::METHOD_GET, "/goals/{id}",
-		 std::bind(&ClipsExecutiveRestApi::cb_get_goal, this, std::placeholders::_1));
-	rest_api_->add_handler<WebviewRestArray<DomainOperator>>
-		(WebRequest::METHOD_GET, "/domain-operators",
-		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_operators, this));
-	rest_api_->add_handler<WebviewRestArray<DomainObject>>
-		(WebRequest::METHOD_GET, "/domain-objects",
-		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_objects, this));
-	rest_api_->add_handler<WebviewRestArray<DomainPredicate>>
-		(WebRequest::METHOD_GET, "/domain-predicates",
-		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_predicates, this));
-	rest_api_->add_handler<WebviewRestArray<DomainFact>>
-		(WebRequest::METHOD_GET, "/domain-facts",
-		 std::bind(&ClipsExecutiveRestApi::cb_list_domain_facts, this));
-	rest_api_->add_handler<WebviewRestArray<Plan>>
-		(WebRequest::METHOD_GET, "/plans",
-		 std::bind(&ClipsExecutiveRestApi::cb_list_plans, this));
-	rest_api_->add_handler<Plan>
-		(WebRequest::METHOD_GET, "/plans/{goal-id}/{id}",
-		 std::bind(&ClipsExecutiveRestApi::cb_get_plan, this, std::placeholders::_1));
+	rest_api_->add_handler<WebviewRestArray<Goal>>(
+	  WebRequest::METHOD_GET, "/goals", std::bind(&ClipsExecutiveRestApi::cb_list_goals, this));
+	rest_api_->add_handler<Goal>(WebRequest::METHOD_GET,
+	                             "/goals/{id}",
+	                             std::bind(&ClipsExecutiveRestApi::cb_get_goal,
+	                                       this,
+	                                       std::placeholders::_1));
+	rest_api_->add_handler<WebviewRestArray<DomainOperator>>(
+	  WebRequest::METHOD_GET,
+	  "/domain-operators",
+	  std::bind(&ClipsExecutiveRestApi::cb_list_domain_operators, this));
+	rest_api_->add_handler<WebviewRestArray<DomainObject>>(
+	  WebRequest::METHOD_GET,
+	  "/domain-objects",
+	  std::bind(&ClipsExecutiveRestApi::cb_list_domain_objects, this));
+	rest_api_->add_handler<WebviewRestArray<DomainPredicate>>(
+	  WebRequest::METHOD_GET,
+	  "/domain-predicates",
+	  std::bind(&ClipsExecutiveRestApi::cb_list_domain_predicates, this));
+	rest_api_->add_handler<WebviewRestArray<DomainFact>>(
+	  WebRequest::METHOD_GET,
+	  "/domain-facts",
+	  std::bind(&ClipsExecutiveRestApi::cb_list_domain_facts, this));
+	rest_api_->add_handler<WebviewRestArray<Plan>>(
+	  WebRequest::METHOD_GET, "/plans", std::bind(&ClipsExecutiveRestApi::cb_list_plans, this));
+	rest_api_->add_handler<Plan>(WebRequest::METHOD_GET,
+	                             "/plans/{goal-id}/{id}",
+	                             std::bind(&ClipsExecutiveRestApi::cb_get_plan,
+	                                       this,
+	                                       std::placeholders::_1));
 	webview_rest_api_manager->register_api(rest_api_);
 }
-
 
 void
 ClipsExecutiveRestApi::finalize()
@@ -88,7 +93,6 @@ ClipsExecutiveRestApi::finalize()
 	webview_rest_api_manager->unregister_api(rest_api_);
 	delete rest_api_;
 }
-
 
 void
 ClipsExecutiveRestApi::loop()
@@ -101,7 +105,8 @@ ClipsExecutiveRestApi::loop()
  * @return template-specific return value
  */
 template <typename T>
-T get_value(const CLIPS::Fact::pointer &fact, const std::string &slot_name)
+T
+get_value(const CLIPS::Fact::pointer &fact, const std::string &slot_name)
 {
 	CLIPS::Values v = fact->slot_value(slot_name);
 	if (v.empty()) {
@@ -119,7 +124,8 @@ T get_value(const CLIPS::Fact::pointer &fact, const std::string &slot_name)
  * @return boolean value
  */
 template <>
-bool get_value(const CLIPS::Fact::pointer &fact, const std::string &slot_name)
+bool
+get_value(const CLIPS::Fact::pointer &fact, const std::string &slot_name)
 {
 	CLIPS::Values v = fact->slot_value(slot_name);
 	if (v.empty()) {
@@ -142,29 +148,20 @@ bool get_value(const CLIPS::Fact::pointer &fact, const std::string &slot_name)
 static std::vector<std::string>
 get_values(const CLIPS::Fact::pointer &fact, const std::string &slot_name)
 {
-	CLIPS::Values v = fact->slot_value(slot_name);
+	CLIPS::Values            v = fact->slot_value(slot_name);
 	std::vector<std::string> rv(v.size());
 	for (size_t i = 0; i < v.size(); ++i) {
 		switch (v[i].type()) {
-		case CLIPS::TYPE_FLOAT:
-			rv[i] = std::to_string(static_cast<double>(v[i]));
-			break;
-		case CLIPS::TYPE_INTEGER:
-			rv[i] = std::to_string(static_cast<long long int>(v[i]));
-			break;
+		case CLIPS::TYPE_FLOAT: rv[i] = std::to_string(static_cast<double>(v[i])); break;
+		case CLIPS::TYPE_INTEGER: rv[i] = std::to_string(static_cast<long long int>(v[i])); break;
 		case CLIPS::TYPE_SYMBOL:
 		case CLIPS::TYPE_STRING:
-		case CLIPS::TYPE_INSTANCE_NAME:
-			rv[i] = static_cast<std::string&>(v[i]);
-			break;
-		default:
-			rv[i] = "CANNOT-REPRESENT";
-			break;
+		case CLIPS::TYPE_INSTANCE_NAME: rv[i] = static_cast<std::string &>(v[i]); break;
+		default: rv[i] = "CANNOT-REPRESENT"; break;
 		}
 	}
 	return rv;
 }
-
 
 Goal
 ClipsExecutiveRestApi::generate_goal(CLIPS::Fact::pointer fact)
@@ -195,7 +192,8 @@ ClipsExecutiveRestApi::generate_goal(CLIPS::Fact::pointer fact)
 				if (get_value<std::string>(pfact, "goal-id") == *g.id()) {
 					g.addto_plans(std::move(get_value<std::string>(pfact, "id")));
 				}
-			} catch (Exception &e) {}
+			} catch (Exception &e) {
+			}
 		}
 		pfact = pfact->next();
 	}
@@ -206,7 +204,7 @@ ClipsExecutiveRestApi::generate_goal(CLIPS::Fact::pointer fact)
 WebviewRestArray<Goal>
 ClipsExecutiveRestApi::cb_list_goals()
 {
-	MutexLocker lock(clips_.objmutex_ptr());
+	MutexLocker            lock(clips_.objmutex_ptr());
 	WebviewRestArray<Goal> rv;
 
 	CLIPS::Fact::pointer fact = clips_->get_facts();
@@ -222,16 +220,16 @@ ClipsExecutiveRestApi::cb_list_goals()
 
 		fact = fact->next();
 	}
-	
+
 	return rv;
 }
 
 Goal
-ClipsExecutiveRestApi::cb_get_goal(WebviewRestParams& params)
+ClipsExecutiveRestApi::cb_get_goal(WebviewRestParams &params)
 {
 	const std::string id = params.path_arg("id");
-	
-	MutexLocker lock(clips_.objmutex_ptr());
+
+	MutexLocker          lock(clips_.objmutex_ptr());
 	CLIPS::Fact::pointer fact = clips_->get_facts();
 	while (fact) {
 		CLIPS::Template::pointer tmpl = fact->get_template();
@@ -247,19 +245,18 @@ ClipsExecutiveRestApi::cb_get_goal(WebviewRestParams& params)
 
 		fact = fact->next();
 	}
-	
-	throw WebviewRestException(WebReply::HTTP_BAD_REQUEST,
-	                           "Goal '%s' is unknown", id.c_str());
+
+	throw WebviewRestException(WebReply::HTTP_BAD_REQUEST, "Goal '%s' is unknown", id.c_str());
 }
 
 WebviewRestArray<DomainOperator>
 ClipsExecutiveRestApi::cb_list_domain_operators()
 {
-	MutexLocker lock(clips_.objmutex_ptr());
+	MutexLocker                      lock(clips_.objmutex_ptr());
 	WebviewRestArray<DomainOperator> rv;
 
 	std::map<std::string, std::list<std::pair<std::string, std::string>>> op_params;
-	
+
 	CLIPS::Fact::pointer fact = clips_->get_facts();
 	while (fact) {
 		CLIPS::Template::pointer tmpl = fact->get_template();
@@ -268,8 +265,8 @@ ClipsExecutiveRestApi::cb_list_domain_operators()
 			if (op_params.find(operator_name) == op_params.end()) {
 				op_params[operator_name] = {};
 			}
-			op_params[operator_name].push_back(std::make_pair(get_value<std::string>(fact, "name"),
-			                                                  get_value<std::string>(fact, "type")));
+			op_params[operator_name].push_back(
+			  std::make_pair(get_value<std::string>(fact, "name"), get_value<std::string>(fact, "type")));
 		}
 		fact = fact->next();
 	}
@@ -308,7 +305,7 @@ ClipsExecutiveRestApi::cb_list_domain_operators()
 WebviewRestArray<DomainObject>
 ClipsExecutiveRestApi::cb_list_domain_objects()
 {
-	MutexLocker lock(clips_.objmutex_ptr());
+	MutexLocker                    lock(clips_.objmutex_ptr());
 	WebviewRestArray<DomainObject> rv;
 
 	CLIPS::Fact::pointer fact = clips_->get_facts();
@@ -331,7 +328,7 @@ ClipsExecutiveRestApi::cb_list_domain_objects()
 WebviewRestArray<DomainPredicate>
 ClipsExecutiveRestApi::cb_list_domain_predicates()
 {
-	MutexLocker lock(clips_.objmutex_ptr());
+	MutexLocker                       lock(clips_.objmutex_ptr());
 	WebviewRestArray<DomainPredicate> rv;
 
 	CLIPS::Fact::pointer fact = clips_->get_facts();
@@ -356,7 +353,7 @@ ClipsExecutiveRestApi::cb_list_domain_predicates()
 WebviewRestArray<DomainFact>
 ClipsExecutiveRestApi::cb_list_domain_facts()
 {
-	MutexLocker lock(clips_.objmutex_ptr());
+	MutexLocker                  lock(clips_.objmutex_ptr());
 	WebviewRestArray<DomainFact> rv;
 
 	CLIPS::Fact::pointer fact = clips_->get_facts();
@@ -376,7 +373,6 @@ ClipsExecutiveRestApi::cb_list_domain_facts()
 	return rv;
 }
 
-
 std::shared_ptr<DomainPreconditionAtom>
 ClipsExecutiveRestApi::gen_domain_precondition_atom(const CLIPS::Fact::pointer fact)
 {
@@ -388,13 +384,13 @@ ClipsExecutiveRestApi::gen_domain_precondition_atom(const CLIPS::Fact::pointer f
 	pre_atom->set_grounded(get_value<bool>(fact, "grounded"));
 	pre_atom->set_is_satisfied(get_value<bool>(fact, "is-satisfied"));
 	pre_atom->set_predicate(get_value<std::string>(fact, "predicate"));
-	for (const auto& s : get_values(fact, "param-names")) {
+	for (const auto &s : get_values(fact, "param-names")) {
 		pre_atom->addto_param_names(std::move(s));
 	}
-	for (const auto& s : get_values(fact, "param-values")) {
+	for (const auto &s : get_values(fact, "param-values")) {
 		pre_atom->addto_param_values(std::move(s));
 	}
-	for (const auto& s : get_values(fact, "param-constants")) {
+	for (const auto &s : get_values(fact, "param-constants")) {
 		pre_atom->addto_param_constants(std::move(s));
 	}
 	return pre_atom;
@@ -402,8 +398,9 @@ ClipsExecutiveRestApi::gen_domain_precondition_atom(const CLIPS::Fact::pointer f
 
 std::shared_ptr<DomainPreconditionCompound>
 ClipsExecutiveRestApi::gen_domain_precondition_compound(const CLIPS::Fact::pointer fact,
-                                                        const PlanActionKey &plan_action_key,
-                                                        PreCompoundMap &prec, PreAtomMap &prea)
+                                                        const PlanActionKey &      plan_action_key,
+                                                        PreCompoundMap &           prec,
+                                                        PreAtomMap &               prea)
 {
 	std::string prec_name = get_value<std::string>(fact, "name");
 
@@ -416,16 +413,17 @@ ClipsExecutiveRestApi::gen_domain_precondition_compound(const CLIPS::Fact::point
 	pre_comp->set_is_satisfied(get_value<bool>(fact, "is-satisfied"));
 
 	// elements of pre_compondition compound
-	for (const auto& prea_fact : prea[plan_action_key]) {
+	for (const auto &prea_fact : prea[plan_action_key]) {
 		std::string part_of = get_value<std::string>(prea_fact, "part-of");
 		if (part_of == prec_name) {
 			pre_comp->addto_elements(gen_domain_precondition_atom(prea_fact));
 		}
 	}
-	for (const auto& prec_fact : prec[plan_action_key]) {
+	for (const auto &prec_fact : prec[plan_action_key]) {
 		std::string part_of = get_value<std::string>(prec_fact, "part-of");
 		if (part_of == prec_name) {
-			pre_comp->addto_elements(gen_domain_precondition_compound(prec_fact, plan_action_key, prec, prea));
+			pre_comp->addto_elements(
+			  gen_domain_precondition_compound(prec_fact, plan_action_key, prec, prea));
 		}
 	}
 
@@ -433,21 +431,26 @@ ClipsExecutiveRestApi::gen_domain_precondition_compound(const CLIPS::Fact::point
 }
 
 void
-ClipsExecutiveRestApi::gen_plan_precompute(PlanMap &plans, PlanActionMap &plan_actions,
-                                           PreCompoundMap &prec, PreAtomMap &prea)
+ClipsExecutiveRestApi::gen_plan_precompute(PlanMap &       plans,
+                                           PlanActionMap & plan_actions,
+                                           PreCompoundMap &prec,
+                                           PreAtomMap &    prea)
 {
 	CLIPS::Fact::pointer fact = clips_->get_facts();
 	while (fact) {
 		CLIPS::Template::pointer tmpl = fact->get_template();
 		if (tmpl->name() == "plan") {
-			plans[std::make_pair(get_value<std::string>(fact, "goal-id"), get_value<std::string>(fact, "id"))] = fact;
+			plans[std::make_pair(get_value<std::string>(fact, "goal-id"),
+			                     get_value<std::string>(fact, "id"))] = fact;
 		} else if (tmpl->name() == "plan-action") {
-			plan_actions[std::make_pair(get_value<std::string>(fact, "goal-id"), get_value<std::string>(fact, "plan-id"))]
-				.push_back(fact);
-		} else if (tmpl->name() == "domain-precondition" || tmpl->name() == "domain-atomic-precondition") {
-			std::string goal_id = get_value<std::string>(fact, "goal-id");
-			std::string plan_id = get_value<std::string>(fact, "plan-id");
-			int64_t action_id = get_value<int64_t>(fact, "grounded-with");
+			plan_actions[std::make_pair(get_value<std::string>(fact, "goal-id"),
+			                            get_value<std::string>(fact, "plan-id"))]
+			  .push_back(fact);
+		} else if (tmpl->name() == "domain-precondition"
+		           || tmpl->name() == "domain-atomic-precondition") {
+			std::string goal_id   = get_value<std::string>(fact, "goal-id");
+			std::string plan_id   = get_value<std::string>(fact, "plan-id");
+			int64_t     action_id = get_value<int64_t>(fact, "grounded-with");
 			if (action_id != 0) {
 				if (tmpl->name() == "domain-precondition") {
 					prec[std::make_tuple(goal_id, plan_id, action_id)].push_back(fact);
@@ -461,10 +464,11 @@ ClipsExecutiveRestApi::gen_plan_precompute(PlanMap &plans, PlanActionMap &plan_a
 }
 
 Plan
-ClipsExecutiveRestApi::gen_plan(const PlanKey &plan_key,
+ClipsExecutiveRestApi::gen_plan(const PlanKey &            plan_key,
                                 const CLIPS::Fact::pointer fact,
-                                PlanActionMap &plan_actions,
-                                PreCompoundMap &prec, PreAtomMap &prea)
+                                PlanActionMap &            plan_actions,
+                                PreCompoundMap &           prec,
+                                PreAtomMap &               prea)
 {
 	const std::string &goal_id = get_value<std::string>(fact, "goal-id");
 	const std::string &plan_id = get_value<std::string>(fact, "id");
@@ -476,13 +480,12 @@ ClipsExecutiveRestApi::gen_plan(const PlanKey &plan_key,
 	p.set_id(plan_id);
 	p.set_cost(get_value<double>(fact, "cost"));
 	if (plan_actions.find(plan_key) != plan_actions.end()) {
-
 		std::vector<std::shared_ptr<PlanAction>> actions;
 
 		for (auto &pai : plan_actions[plan_key]) {
 			auto pa = std::make_shared<PlanAction>();
 
-			int64_t action_id = get_value<int64_t>(pai, "id");
+			int64_t     action_id     = get_value<int64_t>(pai, "id");
 			std::string operator_name = get_value<std::string>(pai, "action-name");
 
 			// general info
@@ -490,7 +493,7 @@ ClipsExecutiveRestApi::gen_plan(const PlanKey &plan_key,
 			pa->set_apiVersion(PlanAction::api_version());
 			pa->set_id(action_id);
 			pa->set_operator_name(operator_name);
-			for (const auto& pv : get_values(pai, "param-values")) {
+			for (const auto &pv : get_values(pai, "param-values")) {
 				pa->addto_param_values(std::move(pv));
 			}
 			pa->set_state(get_value<std::string>(pai, "state"));
@@ -501,20 +504,21 @@ ClipsExecutiveRestApi::gen_plan(const PlanKey &plan_key,
 			// preconditions
 			const PlanActionKey plan_action_key{std::make_tuple(goal_id, plan_id, action_id)};
 			if (prec.find(plan_action_key) != prec.end()) {
-				for (auto& prec_fact : prec[plan_action_key]) {
-					std::string part_of = get_value<std::string>(prec_fact, "part-of");
-					int64_t grounded_with = get_value<int64_t>(prec_fact, "grounded-with");
+				for (auto &prec_fact : prec[plan_action_key]) {
+					std::string part_of       = get_value<std::string>(prec_fact, "part-of");
+					int64_t     grounded_with = get_value<int64_t>(prec_fact, "grounded-with");
 					if (part_of == operator_name && grounded_with == action_id) {
-						pa->addto_preconditions(gen_domain_precondition_compound(prec_fact, plan_action_key, prec, prea));
+						pa->addto_preconditions(
+						  gen_domain_precondition_compound(prec_fact, plan_action_key, prec, prea));
 					}
 				}
 			}
 			actions.push_back(std::move(pa));
 		}
 
-		std::sort(actions.begin(), actions.end(),
-		          [](std::shared_ptr<PlanAction> &a, std::shared_ptr<PlanAction> &b)
-		          {
+		std::sort(actions.begin(),
+		          actions.end(),
+		          [](std::shared_ptr<PlanAction> &a, std::shared_ptr<PlanAction> &b) {
 			          return *a->id() < *b->id();
 		          });
 		p.set_actions(actions);
@@ -523,19 +527,18 @@ ClipsExecutiveRestApi::gen_plan(const PlanKey &plan_key,
 	return p;
 }
 
-
 WebviewRestArray<Plan>
 ClipsExecutiveRestApi::cb_list_plans()
 {
-	MutexLocker lock(clips_.objmutex_ptr());
+	MutexLocker            lock(clips_.objmutex_ptr());
 	WebviewRestArray<Plan> rv;
 
 	std::map<PlanKey, CLIPS::Fact::pointer> plans;
-	std::map<PlanKey, ClipsFactList> plan_actions;
-	PreCompoundMap prec;
-	PreAtomMap prea;
+	std::map<PlanKey, ClipsFactList>        plan_actions;
+	PreCompoundMap                          prec;
+	PreAtomMap                              prea;
 	gen_plan_precompute(plans, plan_actions, prec, prea);
-		
+
 	for (auto &pi : plans) {
 		rv.push_back(std::move(gen_plan(pi.first, pi.second, plan_actions, prec, prea)));
 	}
@@ -544,18 +547,18 @@ ClipsExecutiveRestApi::cb_list_plans()
 }
 
 Plan
-ClipsExecutiveRestApi::cb_get_plan(WebviewRestParams& params)
+ClipsExecutiveRestApi::cb_get_plan(WebviewRestParams &params)
 {
 	std::string goal_id = params.path_arg("goal-id");
 	std::string id      = params.path_arg("id");
 
-	MutexLocker lock(clips_.objmutex_ptr());
+	MutexLocker            lock(clips_.objmutex_ptr());
 	WebviewRestArray<Plan> rv;
 
 	std::map<PlanKey, CLIPS::Fact::pointer> plans;
-	std::map<PlanKey, ClipsFactList> plan_actions;
-	PreCompoundMap prec;
-	PreAtomMap prea;
+	std::map<PlanKey, ClipsFactList>        plan_actions;
+	PreCompoundMap                          prec;
+	PreAtomMap                              prea;
 
 	gen_plan_precompute(plans, plan_actions, prec, prea);
 
@@ -563,7 +566,8 @@ ClipsExecutiveRestApi::cb_get_plan(WebviewRestParams& params)
 	if (plans.find(plan_key) == plans.end()) {
 		throw WebviewRestException(WebReply::HTTP_BAD_REQUEST,
 		                           "No plan for goal '%s' with ID '%s' found",
-		                           goal_id.c_str(), id.c_str());
+		                           goal_id.c_str(),
+		                           id.c_str());
 	}
 
 	return gen_plan(plan_key, plans[plan_key], plan_actions, prec, prea);

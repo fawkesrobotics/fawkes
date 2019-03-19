@@ -27,7 +27,7 @@
 #include <core/exception.h>
 
 namespace fawkes {
-  class StreamSocket;
+class StreamSocket;
 }
 namespace firevision {
 
@@ -35,10 +35,10 @@ class FuseNetworkMessageQueue;
 
 class FuseNetworkTransceiver
 {
- public:
-  static void send(fawkes::StreamSocket *s, FuseNetworkMessageQueue *msgq);
-  static void recv(fawkes::StreamSocket *s, FuseNetworkMessageQueue *msgq,
-		   unsigned int max_num_msgs = 8);
+public:
+	static void send(fawkes::StreamSocket *s, FuseNetworkMessageQueue *msgq);
+	static void
+	recv(fawkes::StreamSocket *s, FuseNetworkMessageQueue *msgq, unsigned int max_num_msgs = 8);
 };
 
 } // end namespace firevision

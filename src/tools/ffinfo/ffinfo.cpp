@@ -24,7 +24,6 @@
 
 #include <cstdio>
 
-
 /** Info tool main.
  * @param argc argument count
  * @param argv arguments
@@ -32,8 +31,7 @@
 int
 main(int argc, char **argv)
 {
-  printf("Fawkes %u.%u.%u\n",
-	 FAWKES_VERSION_MAJOR, FAWKES_VERSION_MINOR, FAWKES_VERSION_MICRO);
+	printf("Fawkes %u.%u.%u\n", FAWKES_VERSION_MAJOR, FAWKES_VERSION_MINOR, FAWKES_VERSION_MICRO);
 
-  return 0;
+	return 0;
 }

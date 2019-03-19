@@ -54,27 +54,27 @@ namespace fawkes {
  */
 JacoArmDummy::JacoArmDummy(const char *name)
 {
-  name_ = name;
-  initialized_ = true;
+	name_        = name;
+	initialized_ = true;
 
-  // initialize target vectors for READY and RETRACT positions
-  pos_ready_.push_back(READY_J0);
-  pos_ready_.push_back(READY_J1);
-  pos_ready_.push_back(READY_J2);
-  pos_ready_.push_back(READY_J3);
-  pos_ready_.push_back(READY_J4);
-  pos_ready_.push_back(READY_J5);
-  pos_retract_.push_back(RETRACT_J0);
-  pos_retract_.push_back(RETRACT_J1);
-  pos_retract_.push_back(RETRACT_J2);
-  pos_retract_.push_back(RETRACT_J3);
-  pos_retract_.push_back(RETRACT_J4);
-  pos_retract_.push_back(RETRACT_J5);
+	// initialize target vectors for READY and RETRACT positions
+	pos_ready_.push_back(READY_J0);
+	pos_ready_.push_back(READY_J1);
+	pos_ready_.push_back(READY_J2);
+	pos_ready_.push_back(READY_J3);
+	pos_ready_.push_back(READY_J4);
+	pos_ready_.push_back(READY_J5);
+	pos_retract_.push_back(RETRACT_J0);
+	pos_retract_.push_back(RETRACT_J1);
+	pos_retract_.push_back(RETRACT_J2);
+	pos_retract_.push_back(RETRACT_J3);
+	pos_retract_.push_back(RETRACT_J4);
+	pos_retract_.push_back(RETRACT_J5);
 
-  // initialize position vectors
-  coords_.assign(6, 0.f);
-  joints_.assign(6, 0.f);
-  fingers_.assign(3, 0.f);
+	// initialize position vectors
+	coords_.assign(6, 0.f);
+	joints_.assign(6, 0.f);
+	fingers_.assign(3, 0.f);
 }
 
 /** Destructor. */
@@ -85,41 +85,38 @@ JacoArmDummy::~JacoArmDummy()
 void
 JacoArmDummy::initialize()
 {
-  goto_ready();
+	goto_ready();
 }
-
 
 bool
 JacoArmDummy::final()
 {
-  return true;
+	return true;
 }
 
 bool
 JacoArmDummy::initialized()
 {
-  return initialized_;
+	return initialized_;
 }
-
 
 void
 JacoArmDummy::get_coords(std::vector<float> &to)
 {
-  to = coords_;
+	to = coords_;
 }
 
 void
 JacoArmDummy::get_joints(std::vector<float> &to) const
 {
-  to = joints_;
+	to = joints_;
 }
 
 void
 JacoArmDummy::get_fingers(std::vector<float> &to) const
 {
-  to = fingers_;
+	to = fingers_;
 }
-
 
 void
 JacoArmDummy::stop()
@@ -144,12 +141,12 @@ JacoArmDummy::release_joystick()
  * @param fingers target finger positions
  */
 void
-JacoArmDummy::goto_trajec(std::vector< std::vector<float> >* trajec, std::vector<float> &fingers)
+JacoArmDummy::goto_trajec(std::vector<std::vector<float>> *trajec, std::vector<float> &fingers)
 {
-  for( unsigned int i=0; i<trajec->size(); ++i ) {
-    goto_joints(trajec->at(i), fingers);
-    usleep(10e3);
-  }
+	for (unsigned int i = 0; i < trajec->size(); ++i) {
+		goto_joints(trajec->at(i), fingers);
+		usleep(10e3);
+	}
 }
 
 /** Move the arm to given configuration.
@@ -165,11 +162,11 @@ JacoArmDummy::goto_trajec(std::vector< std::vector<float> >* trajec, std::vector
 void
 JacoArmDummy::goto_joints(std::vector<float> &joints, std::vector<float> &fingers, bool followup)
 {
-  if(followup)
-    usleep(10e3);
+	if (followup)
+		usleep(10e3);
 
-  joints_ = joints;
-  fingers_ = fingers;
+	joints_  = joints;
+	fingers_ = fingers;
 }
 
 /** Move the arm to given configuration.
@@ -182,21 +179,20 @@ JacoArmDummy::goto_joints(std::vector<float> &joints, std::vector<float> &finger
 void
 JacoArmDummy::goto_coords(std::vector<float> &coords, std::vector<float> &fingers)
 {
-  coords_ = coords;
-  fingers_ = fingers;
+	coords_  = coords;
+	fingers_ = fingers;
 }
 
 void
 JacoArmDummy::goto_ready()
 {
-  goto_joints(pos_ready_, fingers_);
+	goto_joints(pos_ready_, fingers_);
 }
 
 void
 JacoArmDummy::goto_retract()
 {
-  goto_joints(pos_retract_, fingers_);
+	goto_joints(pos_retract_, fingers_);
 }
-
 
 } // end of namespace fawkes

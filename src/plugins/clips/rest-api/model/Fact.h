@@ -14,22 +14,21 @@
 #pragma once
 
 #define RAPIDJSON_HAS_STDSTRING 1
-#include <rapidjson/fwd.h>
-
-#include <string>
-#include <cstdint>
-#include <vector>
-#include <memory>
-#include <optional>
-
 #include "SlotValue.h"
 
+#include <rapidjson/fwd.h>
+
+#include <cstdint>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
 
 /** Fact representation for JSON transfer. */
 class Fact
 
 {
- public:
+public:
 	/** Constructor. */
 	Fact();
 	/** Constructor from JSON.
@@ -39,7 +38,7 @@ class Fact
 	/** Constructor from JSON.
 	 * @param v RapidJSON value object to initialize from.
 	 */
-	Fact(const rapidjson::Value& v);
+	Fact(const rapidjson::Value &v);
 
 	/** Destructor. */
 	virtual ~Fact();
@@ -47,9 +46,10 @@ class Fact
 	/** Get version of implemented API.
 	 * @return string representation of version
 	 */
-	static std::string api_version()
+	static std::string
+	api_version()
 	{
-	  return "v1beta1";
+		return "v1beta1";
 	}
 
 	/** Render object to JSON.
@@ -61,19 +61,19 @@ class Fact
 	 * @param d RapidJSON document to retrieve allocator from
 	 * @param v RapidJSON value to add data to
 	 */
-	virtual void        to_json_value(rapidjson::Document& d, rapidjson::Value& v) const;
+	virtual void to_json_value(rapidjson::Document &d, rapidjson::Value &v) const;
 	/** Retrieve data from JSON string.
 	 * @param json JSON representation suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json(const std::string& json);
+	virtual void from_json(const std::string &json);
 	/** Retrieve data from JSON string.
 	 * @param v RapidJSON value suitable for this object.
 	 * Will allow partial assignment and not validate automaticaly.
 	 * @see validate()
 	 */
-	virtual void        from_json_value(const rapidjson::Value& v);
+	virtual void from_json_value(const rapidjson::Value &v);
 
 	/** Validate if all required fields have been set.
 	 * @param subcall true if this is called from another class, e.g.,
@@ -86,12 +86,12 @@ class Fact
 	virtual void validate(bool subcall = false) const;
 
 	// Schema: Fact
- public:
-  /** Get kind value.
+public:
+	/** Get kind value.
    * @return kind value
    */
 	std::optional<std::string>
- kind() const
+	kind() const
 	{
 		return kind_;
 	}
@@ -99,15 +99,16 @@ class Fact
 	/** Set kind value.
 	 * @param kind new value
 	 */
-	void set_kind(const std::string& kind)
+	void
+	set_kind(const std::string &kind)
 	{
 		kind_ = kind;
 	}
-  /** Get apiVersion value.
+	/** Get apiVersion value.
    * @return apiVersion value
    */
 	std::optional<std::string>
- apiVersion() const
+	apiVersion() const
 	{
 		return apiVersion_;
 	}
@@ -115,15 +116,16 @@ class Fact
 	/** Set apiVersion value.
 	 * @param apiVersion new value
 	 */
-	void set_apiVersion(const std::string& apiVersion)
+	void
+	set_apiVersion(const std::string &apiVersion)
 	{
 		apiVersion_ = apiVersion;
 	}
-  /** Get index value.
+	/** Get index value.
    * @return index value
    */
 	std::optional<int64_t>
- index() const
+	index() const
 	{
 		return index_;
 	}
@@ -131,15 +133,16 @@ class Fact
 	/** Set index value.
 	 * @param index new value
 	 */
-	void set_index(const int64_t& index)
+	void
+	set_index(const int64_t &index)
 	{
 		index_ = index;
 	}
-  /** Get template_name value.
+	/** Get template_name value.
    * @return template_name value
    */
 	std::optional<std::string>
- template_name() const
+	template_name() const
 	{
 		return template_name_;
 	}
@@ -147,15 +150,16 @@ class Fact
 	/** Set template_name value.
 	 * @param template_name new value
 	 */
-	void set_template_name(const std::string& template_name)
+	void
+	set_template_name(const std::string &template_name)
 	{
 		template_name_ = template_name;
 	}
-  /** Get formatted value.
+	/** Get formatted value.
    * @return formatted value
    */
 	std::optional<std::string>
- formatted() const
+	formatted() const
 	{
 		return formatted_;
 	}
@@ -163,15 +167,16 @@ class Fact
 	/** Set formatted value.
 	 * @param formatted new value
 	 */
-	void set_formatted(const std::string& formatted)
+	void
+	set_formatted(const std::string &formatted)
 	{
 		formatted_ = formatted;
 	}
-  /** Get slots value.
+	/** Get slots value.
    * @return slots value
    */
 	std::vector<std::shared_ptr<SlotValue>>
- slots() const
+	slots() const
 	{
 		return slots_;
 	}
@@ -179,14 +184,16 @@ class Fact
 	/** Set slots value.
 	 * @param slots new value
 	 */
-	void set_slots(const std::vector<std::shared_ptr<SlotValue>>& slots)
+	void
+	set_slots(const std::vector<std::shared_ptr<SlotValue>> &slots)
 	{
 		slots_ = slots;
 	}
 	/** Add element to slots array.
 	 * @param slots new value
 	 */
-	void addto_slots(const std::shared_ptr<SlotValue>&& slots)
+	void
+	addto_slots(const std::shared_ptr<SlotValue> &&slots)
 	{
 		slots_.push_back(std::move(slots));
 	}
@@ -195,29 +202,25 @@ class Fact
 	 * The move-semantics version (std::move) should be preferred.
 	 * @param slots new value
 	 */
-	void addto_slots(const std::shared_ptr<SlotValue>& slots)
+	void
+	addto_slots(const std::shared_ptr<SlotValue> &slots)
 	{
 		slots_.push_back(slots);
 	}
 	/** Add element to slots array.
 	 * @param slots new value
 	 */
-	void addto_slots(const SlotValue&& slots)
+	void
+	addto_slots(const SlotValue &&slots)
 	{
 		slots_.push_back(std::make_shared<SlotValue>(std::move(slots)));
 	}
- private:
-	std::optional<std::string>
- kind_;
-	std::optional<std::string>
- apiVersion_;
-	std::optional<int64_t>
- index_;
-	std::optional<std::string>
- template_name_;
-	std::optional<std::string>
- formatted_;
-	std::vector<std::shared_ptr<SlotValue>>
- slots_;
 
+private:
+	std::optional<std::string>              kind_;
+	std::optional<std::string>              apiVersion_;
+	std::optional<int64_t>                  index_;
+	std::optional<std::string>              template_name_;
+	std::optional<std::string>              formatted_;
+	std::vector<std::shared_ptr<SlotValue>> slots_;
 };

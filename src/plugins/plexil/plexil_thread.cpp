@@ -20,15 +20,16 @@
  */
 
 #include "plexil_thread.h"
-#include "log_stream.h"
+
+#include "be_adapter.h"
 #include "clock_adapter.h"
 #include "log_adapter.h"
-#include "be_adapter.h"
-#include "thread_adapter.h"
+#include "log_stream.h"
 #include "protobuf_adapter.h"
+#include "thread_adapter.h"
 #ifdef HAVE_NAVGRAPH
-#  include "navgraph_access_thread.h"
-#  include "navgraph_adapter.h"
+#	include "navgraph_access_thread.h"
+#	include "navgraph_adapter.h"
 #endif
 #include "utils.h"
 
@@ -36,18 +37,17 @@
 #include <utils/sub_process/proc.h>
 #include <utils/system/dynamic_module/module.h>
 
-#include <ExecApplication.hh>
-#include <Debug.hh>
-#include <InterfaceSchema.hh>
-#include <InterfaceManager.hh>
 #include <AdapterConfiguration.hh>
-#include <pugixml.hpp>
-
-#include <fstream>
-#include <cstring>
-#include <numeric>
+#include <Debug.hh>
+#include <ExecApplication.hh>
+#include <InterfaceManager.hh>
+#include <InterfaceSchema.hh>
 #include <boost/filesystem.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
+#include <cstring>
+#include <fstream>
+#include <numeric>
+#include <pugixml.hpp>
 
 using namespace fawkes;
 namespace fs = boost::filesystem;
@@ -67,12 +67,10 @@ PlexilExecutiveThread::PlexilExecutiveThread()
 	set_prepfin_conc_loop(true);
 }
 
-
 /** Destructor. */
 PlexilExecutiveThread::~PlexilExecutiveThread()
 {
 }
-
 
 void
 PlexilExecutiveThread::init()
@@ -81,8 +79,7 @@ PlexilExecutiveThread::init()
 
 	std::string cfg_prefix = "/plexil/" + cfg_spec_ + "/";
 
-	bool cfg_print_xml =
-	  config->get_bool_or_default((cfg_prefix + "debug/print-xml").c_str(), false);
+	bool cfg_print_xml = config->get_bool_or_default((cfg_prefix + "debug/print-xml").c_str(), false);
 
 	std::map<std::string, plexil_interface_config> cfg_adapters =
 	  read_plexil_interface_configs(cfg_prefix + "adapters/");
@@ -101,7 +98,8 @@ PlexilExecutiveThread::init()
 		if (a.type == "Utility") {
 			logger->log_warn(name(), "Utility adapter configured, consider using FawkesLogging instead");
 		} else if (a.type == "OSNativeTime") {
-			logger->log_warn(name(), "OSNativeTime adapter configured, consider using FawkesTime instead");
+			logger->log_warn(name(),
+			                 "OSNativeTime adapter configured, consider using FawkesTime instead");
 		} else if (a.type == "FawkesRemoteAdapter") {
 			logger->log_error(name(), "Cannot load FawkesRemoteAdapter when running internally");
 			throw Exception("Plexil: cannot load FawkesRemoteAdapter when running internally");
@@ -121,25 +119,27 @@ PlexilExecutiveThread::init()
 	PLEXIL::g_manager->setProperty("::Fawkes::Logger", logger);
 	PLEXIL::g_manager->setProperty("::Fawkes::BlackBoard", blackboard);
 
-	for (const auto &p: cfg_lib_path) {
+	for (const auto &p : cfg_lib_path) {
 		plexil_->addLibraryPath(p);
 	}
 
 	pugi::xml_document xml_config;
-	pugi::xml_node xml_interfaces =
+	pugi::xml_node     xml_interfaces =
 	  xml_config.append_child(PLEXIL::InterfaceSchema::INTERFACES_TAG());
 
-	add_plexil_interface_configs(xml_interfaces, cfg_adapters,
+	add_plexil_interface_configs(xml_interfaces,
+	                             cfg_adapters,
 	                             PLEXIL::InterfaceSchema::ADAPTER_TAG(),
 	                             PLEXIL::InterfaceSchema::ADAPTER_TYPE_ATTR());
-	add_plexil_interface_configs(xml_interfaces, cfg_listeners,
+	add_plexil_interface_configs(xml_interfaces,
+	                             cfg_listeners,
 	                             PLEXIL::InterfaceSchema::LISTENER_TAG(),
 	                             PLEXIL::InterfaceSchema::LISTENER_TYPE_ATTR());
 
-	auto navgraph_adapter_config = std::find_if(cfg_adapters.begin(), cfg_adapters.end(),
-	                                            [](const auto &entry) {
-		                                            return entry.second.type == "NavGraphAdapter";
-	                                            });
+	auto navgraph_adapter_config =
+	  std::find_if(cfg_adapters.begin(), cfg_adapters.end(), [](const auto &entry) {
+		  return entry.second.type == "NavGraphAdapter";
+	  });
 	if (navgraph_adapter_config != cfg_adapters.end()) {
 #ifdef HAVE_NAVGRAPH
 		navgraph_access_thread_ = new PlexilNavgraphAccessThread();
@@ -153,12 +153,13 @@ PlexilExecutiveThread::init()
 	}
 
 	if (cfg_print_xml) {
-		struct xml_string_writer: pugi::xml_writer
+		struct xml_string_writer : pugi::xml_writer
 		{
 			std::string result;
-			virtual void write(const void* data, size_t size)
+			virtual void
+			write(const void *data, size_t size)
 			{
-				result.append(static_cast<const char*>(data), size);
+				result.append(static_cast<const char *>(data), size);
 			}
 		};
 
@@ -182,7 +183,7 @@ PlexilExecutiveThread::init()
 	log_stream_.reset(new std::ostream(&*log_buffer_));
 	PLEXIL::setDebugOutputStream(*log_stream_);
 
-	if (! plexil_->initialize(xml_interfaces)) {
+	if (!plexil_->initialize(xml_interfaces)) {
 		throw Exception("Failed to initialize Plexil application");
 	}
 
@@ -190,25 +191,27 @@ PlexilExecutiveThread::init()
 		cfg_plan_ple_ = config->get_strings_or_defaults((cfg_prefix + "plan/ple").c_str(), {});
 	} else {
 		std::string ple = config->get_string_or_default((cfg_prefix + "plan/ple").c_str(), "");
-		if (! ple.empty()) {
+		if (!ple.empty()) {
 			cfg_plan_ple_ = {ple};
 		}
 	}
 	if (cfg_plan_ple_.empty()) {
 		throw Exception("No PLE configured");
 	}
-	cfg_plan_plx_           = config->get_string((cfg_prefix + "plan/plx").c_str());
-	cfg_plan_auto_compile_  = config->get_bool_or_default((cfg_prefix + "plan/compilation/enable").c_str(), false);
-	cfg_plan_force_compile_ = config->get_bool_or_default((cfg_prefix + "plan/compilation/force").c_str(), false);
+	cfg_plan_plx_ = config->get_string((cfg_prefix + "plan/plx").c_str());
+	cfg_plan_auto_compile_ =
+	  config->get_bool_or_default((cfg_prefix + "plan/compilation/enable").c_str(), false);
+	cfg_plan_force_compile_ =
+	  config->get_bool_or_default((cfg_prefix + "plan/compilation/force").c_str(), false);
 
-	if (! cfg_plan_plx_.empty()) {
+	if (!cfg_plan_plx_.empty()) {
 		cfg_plan_plx_ = cfg_basedir + "/" + cfg_plan_plx_;
 		replace_tokens(cfg_plan_plx_);
 	}
 
 	std::set<std::string> base_paths;
 
-	for (auto &p: cfg_plan_ple_) {
+	for (auto &p : cfg_plan_ple_) {
 		p = cfg_basedir + "/" + p;
 		replace_tokens(p);
 
@@ -221,26 +224,27 @@ PlexilExecutiveThread::init()
 		base_paths.insert(plx_path.parent_path().string());
 
 		if (cfg_plan_auto_compile_) {
-			if (cfg_plan_force_compile_ || ! fs::exists(plx_path) ||
-			    fs::last_write_time(plx_path) < fs::last_write_time(ple_path))
-			{
+			if (cfg_plan_force_compile_ || !fs::exists(plx_path)
+			    || fs::last_write_time(plx_path) < fs::last_write_time(ple_path)) {
 				logger->log_info(name(), "Compiling %s", ple_path.string().c_str());
 				plexil_compile(ple_path.string());
 			}
 		} else {
-			if (! fs::exists(plx_path)) {
+			if (!fs::exists(plx_path)) {
 				throw Exception("PLX %s does not exist and auto-compile disabled");
 			} else if (fs::last_write_time(plx_path) < fs::last_write_time(ple_path)) {
-				logger->log_warn(name(), "PLX %s older than PLE, auto-compile disabled", plx_path.string().c_str());
+				logger->log_warn(name(),
+				                 "PLX %s older than PLE, auto-compile disabled",
+				                 plx_path.string().c_str());
 			}
 		}
 	}
 
-	if (! fs::exists(cfg_plan_plx_)) {
+	if (!fs::exists(cfg_plan_plx_)) {
 		throw Exception("PLX %s does not exist", cfg_plan_plx_.c_str());
 	}
 
-	for (const auto &p: base_paths) {
+	for (const auto &p : base_paths) {
 		plexil_->addLibraryPath(p);
 	}
 
@@ -248,17 +252,18 @@ PlexilExecutiveThread::init()
 	pugi::xml_parse_result parse_result = plan_plx_->load_file(cfg_plan_plx_.c_str());
 	if (parse_result.status != pugi::status_ok) {
 		throw Exception("Failed to parse plan '%s': %s",
-		                cfg_plan_plx_.c_str(), parse_result.description());
+		                cfg_plan_plx_.c_str(),
+		                parse_result.description());
 	}
 }
 
 void
 PlexilExecutiveThread::once()
 {
-	if (! plexil_->startInterfaces()) {
+	if (!plexil_->startInterfaces()) {
 		throw Exception("Failed to start Plexil interfaces");
 	}
-	if (! plexil_->run()) {
+	if (!plexil_->run()) {
 		throw Exception("Failed to start Plexil");
 	}
 
@@ -269,11 +274,10 @@ PlexilExecutiveThread::once()
 	}
 }
 
-
 bool
 PlexilExecutiveThread::prepare_finalize_user()
 {
-	if (! plexil_->stop()) {
+	if (!plexil_->stop()) {
 		logger->log_error(name(), "Failed to stop Plexil");
 	}
 	plexil_->notifyExec();
@@ -283,7 +287,7 @@ PlexilExecutiveThread::prepare_finalize_user()
 void
 PlexilExecutiveThread::finalize()
 {
-	if (! plexil_->shutdown()) {
+	if (!plexil_->shutdown()) {
 		logger->log_error(name(), "Failed to shutdown Plexil");
 	}
 	PLEXIL::g_configuration->clearAdapterRegistry();
@@ -314,8 +318,7 @@ PlexilExecutiveThread::loop()
 	//plexil_->notifyExec();
 	//plexil_->waitForPlanFinished();
 	static PLEXIL::ExecApplication::ApplicationState state = PLEXIL::ExecApplication::APP_SHUTDOWN;
-	PLEXIL::ExecApplication::ApplicationState new_state =
-	  plexil_->getApplicationState();
+	PLEXIL::ExecApplication::ApplicationState        new_state = plexil_->getApplicationState();
 	if (new_state != state) {
 		logger->log_info(name(), "State changed to %s", plexil_->getApplicationStateName(new_state));
 		state = new_state;
@@ -325,15 +328,13 @@ PlexilExecutiveThread::loop()
 	std::this_thread::sleep_for(500ms);
 }
 
-
 // Parse adapter configurations
 std::map<std::string, PlexilExecutiveThread::plexil_interface_config>
-PlexilExecutiveThread::read_plexil_interface_configs(const std::string& config_prefix)
+PlexilExecutiveThread::read_plexil_interface_configs(const std::string &config_prefix)
 {
 	std::map<std::string, plexil_interface_config> cfg_adapters;
 
-	std::unique_ptr<Configuration::ValueIterator>
-	  cfg_item{config->search(config_prefix)};
+	std::unique_ptr<Configuration::ValueIterator> cfg_item{config->search(config_prefix)};
 	while (cfg_item->next()) {
 		std::string path = cfg_item->path();
 
@@ -342,39 +343,39 @@ PlexilExecutiveThread::read_plexil_interface_configs(const std::string& config_p
 		if (slash_pos != std::string::npos) {
 			std::string id = path.substr(start_pos, slash_pos - start_pos);
 
-			start_pos = slash_pos + 1;
-			slash_pos = path.find("/", start_pos);
+			start_pos        = slash_pos + 1;
+			slash_pos        = path.find("/", start_pos);
 			std::string what = path.substr(start_pos, slash_pos - start_pos);
 
 			if (what == "type") {
 				cfg_adapters[id].type = cfg_item->get_string();
 			} else if (what == "attr") {
-				start_pos = slash_pos + 1;
-				slash_pos = path.find("/", start_pos);
-				std::string key = path.substr(start_pos, slash_pos - start_pos);
+				start_pos                  = slash_pos + 1;
+				slash_pos                  = path.find("/", start_pos);
+				std::string key            = path.substr(start_pos, slash_pos - start_pos);
 				cfg_adapters[id].attr[key] = cfg_item->get_as_string();
 			} else if (what == "args") {
-				start_pos = slash_pos + 1;
-				slash_pos = path.find("/", start_pos);
-				std::string key = path.substr(start_pos, slash_pos - start_pos);
+				start_pos                  = slash_pos + 1;
+				slash_pos                  = path.find("/", start_pos);
+				std::string key            = path.substr(start_pos, slash_pos - start_pos);
 				cfg_adapters[id].args[key] = cfg_item->get_as_string();
 			} else if (what == "verbatim-args") {
-				start_pos = slash_pos + 1;
-				slash_pos = path.find("/", start_pos);
+				start_pos           = slash_pos + 1;
+				slash_pos           = path.find("/", start_pos);
 				std::string verb_id = path.substr(start_pos, slash_pos - start_pos);
 
-				start_pos = slash_pos + 1;
-				slash_pos = path.find("/", start_pos);
+				start_pos             = slash_pos + 1;
+				slash_pos             = path.find("/", start_pos);
 				std::string verb_what = path.substr(start_pos, slash_pos - start_pos);
 
 				if (verb_what == "tag") {
 					cfg_adapters[id].verbatim_args[verb_id].tag = cfg_item->get_as_string();
 				} else if (verb_what == "text") {
 					cfg_adapters[id].verbatim_args[verb_id].has_text = true;
-					cfg_adapters[id].verbatim_args[verb_id].text = cfg_item->get_as_string();
+					cfg_adapters[id].verbatim_args[verb_id].text     = cfg_item->get_as_string();
 				} else if (verb_what == "attr") {
-					start_pos = slash_pos + 1;
-					slash_pos = path.find("/", start_pos);
+					start_pos            = slash_pos + 1;
+					slash_pos            = path.find("/", start_pos);
 					std::string verb_key = path.substr(start_pos, slash_pos - start_pos);
 					cfg_adapters[id].verbatim_args[verb_id].attr[verb_key] = cfg_item->get_as_string();
 				}
@@ -384,7 +385,8 @@ PlexilExecutiveThread::read_plexil_interface_configs(const std::string& config_p
 				  cfg_adapters[id].verbatim.load_string(cfg_item->get_string().c_str());
 				if (parse_result.status != pugi::status_ok) {
 					throw Exception("Failed to parse verbatim-xml for '%s': %s",
-					                cfg_adapters[id].type.c_str(), parse_result.description());
+					                cfg_adapters[id].type.c_str(),
+					                parse_result.description());
 				}
 			}
 		}
@@ -392,15 +394,16 @@ PlexilExecutiveThread::read_plexil_interface_configs(const std::string& config_p
 	return cfg_adapters;
 }
 
-	// Add adapter configurations to Plexil interface XML config
+// Add adapter configurations to Plexil interface XML config
 void
 PlexilExecutiveThread::add_plexil_interface_configs(
-  pugi::xml_node &parent,
+  pugi::xml_node &                                                             parent,
   const std::map<std::string, PlexilExecutiveThread::plexil_interface_config> &configs,
-  const char* tag_name, const char* type_attr_name)
+  const char *                                                                 tag_name,
+  const char *                                                                 type_attr_name)
 {
 	for (const auto &a_item : configs) {
-		const auto &a = a_item.second;
+		const auto &   a           = a_item.second;
 		pugi::xml_node xml_adapter = parent.append_child(tag_name);
 		xml_adapter.append_attribute(type_attr_name).set_value(a.type.c_str());
 		for (const auto &attr : a.attr) {
@@ -412,9 +415,9 @@ PlexilExecutiveThread::add_plexil_interface_configs(
 			xml_adapter_arg.text().set(arg.second.c_str());
 		}
 		for (const auto &arg : a.verbatim_args) {
-			const auto &varg = arg.second;
+			const auto &   varg            = arg.second;
 			pugi::xml_node xml_adapter_arg = xml_adapter.append_child(varg.tag.c_str());
-			for (const auto &attr: varg.attr) {
+			for (const auto &attr : varg.attr) {
 				xml_adapter_arg.append_attribute(attr.first.c_str()).set_value(attr.second.c_str());
 			}
 			if (varg.has_text) {
@@ -422,7 +425,7 @@ PlexilExecutiveThread::add_plexil_interface_configs(
 			}
 		}
 		if (a.verbatim && a.verbatim.children().begin() != a.verbatim.children().end()) {
-			for (const auto &child: a.verbatim.children()) {
+			for (const auto &child : a.verbatim.children()) {
 				xml_adapter.append_copy(child);
 			}
 		}
@@ -430,21 +433,23 @@ PlexilExecutiveThread::add_plexil_interface_configs(
 }
 
 void
-PlexilExecutiveThread::plexil_compile(const std::string& ple_file)
+PlexilExecutiveThread::plexil_compile(const std::string &ple_file)
 {
 	std::vector<std::string> argv{"plexilc", ple_file};
-	std::string command_line =
-	  std::accumulate(std::next(argv.begin()), argv.end(), argv.front(),
+	std::string              command_line =
+	  std::accumulate(std::next(argv.begin()),
+	                  argv.end(),
+	                  argv.front(),
 	                  [](std::string &s, const std::string &a) { return s + " " + a; });
 	logger->log_debug(name(), "Compiler command: %s", command_line.c_str());
 
 	SubProcess proc("plexilc", "plexilc", argv, {}, logger);
 	using namespace std::chrono_literals;
 	auto compile_start = std::chrono::system_clock::now();
-	auto now = std::chrono::system_clock::now();
+	auto now           = std::chrono::system_clock::now();
 	do {
 		proc.check_proc();
-		if (! proc.alive()) {
+		if (!proc.alive()) {
 			if (proc.exit_status() != 0) {
 				throw Exception("Plexil compilation failed, check log for messages.");
 			} else {

@@ -23,55 +23,60 @@
 #ifndef _PLUGINS_STATIC_TRANSFORMS_STATIC_TRANSFORMS_THREAD_H_
 #define _PLUGINS_STATIC_TRANSFORMS_STATIC_TRANSFORMS_THREAD_H_
 
-#include <core/threading/thread.h>
+#include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <aspect/blackboard.h>
 #include <aspect/tf.h>
 #include <config/change_handler.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  class Time;
+class Time;
 }
 
-class StaticTransformsThread
-: public fawkes::Thread,
-  public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::TransformAspect,
-  public fawkes::ConfigurationChangeHandler
+class StaticTransformsThread : public fawkes::Thread,
+                               public fawkes::ClockAspect,
+                               public fawkes::LoggingAspect,
+                               public fawkes::ConfigurableAspect,
+                               public fawkes::BlackBoardAspect,
+                               public fawkes::TransformAspect,
+                               public fawkes::ConfigurationChangeHandler
 {
- public:
-  StaticTransformsThread();
-  virtual ~StaticTransformsThread();
+public:
+	StaticTransformsThread();
+	virtual ~StaticTransformsThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  /** Static transform entry to publish. */
-  typedef struct {
-    std::string name;	/**< Transform name */
-    fawkes::tf::StampedTransform *transform;	/**< Transform. */
-  } Entry;
+private:
+	/** Static transform entry to publish. */
+	typedef struct
+	{
+		std::string                   name;      /**< Transform name */
+		fawkes::tf::StampedTransform *transform; /**< Transform. */
+	} Entry;
 
-  std::list<Entry> entries_;
+	std::list<Entry> entries_;
 
-  void entries_delete();
-  void entries_get_from_config();
+	void entries_delete();
+	void entries_get_from_config();
 
-  virtual void config_tag_changed(const char *new_tag) { };
-  virtual void config_comment_changed(const fawkes::Configuration::ValueIterator *v) { };
-  virtual void config_value_changed(const fawkes::Configuration::ValueIterator *v);
-  virtual void config_value_erased(const char *path) {};
+	virtual void config_tag_changed(const char *new_tag){};
+	virtual void config_comment_changed(const fawkes::Configuration::ValueIterator *v){};
+	virtual void config_value_changed(const fawkes::Configuration::ValueIterator *v);
+	virtual void config_value_erased(const char *path){};
 };
 
 #endif

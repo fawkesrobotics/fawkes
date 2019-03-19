@@ -21,6 +21,7 @@
  */
 
 #include "fountain_plugin.h"
+
 #include "fountain_thread.h"
 
 using namespace fawkes;
@@ -37,10 +38,9 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-FvFountainPlugin::FvFountainPlugin(Configuration *config)
-  : Plugin(config)
+FvFountainPlugin::FvFountainPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new FountainThread());
+	thread_list.push_back(new FountainThread());
 }
 
 PLUGIN_DESCRIPTION("Provides access to images, colormaps etc. via network")

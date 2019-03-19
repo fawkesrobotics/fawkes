@@ -21,6 +21,7 @@
  */
 
 #include "writer_listener.h"
+
 #include "sync_thread.h"
 
 #include <blackboard/blackboard.h>
@@ -41,15 +42,15 @@ using namespace fawkes;
  * @param logger logger for informational output
  * @param desc description for this interface combination
  */
-SyncWriterInterfaceListener::SyncWriterInterfaceListener(BlackBoardSynchronizationThread *sync_thread,
-							 fawkes::Logger *logger,
-							 const char *desc)
-  : BlackBoardInterfaceListener("SyncWriterInterfaceListener(%s)", desc)
+SyncWriterInterfaceListener::SyncWriterInterfaceListener(
+  BlackBoardSynchronizationThread *sync_thread,
+  fawkes::Logger *                 logger,
+  const char *                     desc)
+: BlackBoardInterfaceListener("SyncWriterInterfaceListener(%s)", desc)
 {
-  logger_      = logger;
-  sync_thread_ = sync_thread;
+	logger_      = logger;
+	sync_thread_ = sync_thread;
 }
-
 
 /** Add an interface to listen to.
  * @param interface interface to listen to for writer events
@@ -57,9 +58,8 @@ SyncWriterInterfaceListener::SyncWriterInterfaceListener(BlackBoardSynchronizati
 void
 SyncWriterInterfaceListener::add_interface(Interface *interface)
 {
-  bbil_add_writer_interface(interface);
+	bbil_add_writer_interface(interface);
 }
-
 
 /** Remove an interface to listen to.
  * @param interface interface not to listen any longer for writer events
@@ -67,20 +67,19 @@ SyncWriterInterfaceListener::add_interface(Interface *interface)
 void
 SyncWriterInterfaceListener::remove_interface(Interface *interface)
 {
-  bbil_remove_writer_interface(interface);
+	bbil_remove_writer_interface(interface);
 }
 
 void
 SyncWriterInterfaceListener::bb_interface_writer_added(fawkes::Interface *interface,
-						       unsigned int instance_serial) throw()
+                                                       unsigned int       instance_serial) throw()
 {
-  sync_thread_->writer_added(interface);
+	sync_thread_->writer_added(interface);
 }
-
 
 void
 SyncWriterInterfaceListener::bb_interface_writer_removed(fawkes::Interface *interface,
-							 unsigned int instance_serial) throw()
+                                                         unsigned int       instance_serial) throw()
 {
-  sync_thread_->writer_removed(interface);
+	sync_thread_->writer_removed(interface);
 }

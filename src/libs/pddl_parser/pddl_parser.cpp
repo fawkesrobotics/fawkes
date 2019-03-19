@@ -4,7 +4,7 @@
  *  Created: Fri 19 May 2017 11:10:01 CEST
  *  Copyright  2017  Matthias Loebach     
  *                   Till Hofmann
- ****************************************************************************/     
+ ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include "pddl_parser.h"
+
 #include <fstream>
 #include <streambuf>
-
-#include "pddl_parser.h"
 
 namespace pddl_parser {
 
@@ -45,24 +45,23 @@ namespace pddl_parser {
 Domain
 PddlParser::parseDomain(const std::string pddl_domain)
 {
-  typedef std::string::const_iterator iterator_type;
-  typedef pddl_parser::grammar::domain_parser<iterator_type> grammar;
-  typedef pddl_parser::grammar::pddl_skipper<iterator_type> skipper;
+	typedef std::string::const_iterator                        iterator_type;
+	typedef pddl_parser::grammar::domain_parser<iterator_type> grammar;
+	typedef pddl_parser::grammar::pddl_skipper<iterator_type>  skipper;
 
-  grammar g;
-  skipper s;
-  Domain dom;
+	grammar g;
+	skipper s;
+	Domain  dom;
 
-  std::string::const_iterator iter = pddl_domain.begin();
-  std::string::const_iterator end = pddl_domain.end();
-  bool r = phrase_parse(iter, end, g, s, dom);
+	std::string::const_iterator iter = pddl_domain.begin();
+	std::string::const_iterator end  = pddl_domain.end();
+	bool                        r    = phrase_parse(iter, end, g, s, dom);
 
-  if ( !r ) {
-    throw PddlParserException("Parsing PDDL domain string failed!");
-  }
+	if (!r) {
+		throw PddlParserException("Parsing PDDL domain string failed!");
+	}
 
-
-  return dom;
+	return dom;
 }
 
 /** Parse the PDDL problem.
@@ -73,24 +72,23 @@ PddlParser::parseDomain(const std::string pddl_domain)
 Problem
 PddlParser::parseProblem(const std::string pddl_problem)
 {
+	typedef std::string::const_iterator                         iterator_type;
+	typedef pddl_parser::grammar::problem_parser<iterator_type> grammar;
+	typedef pddl_parser::grammar::pddl_skipper<iterator_type>   skipper;
 
-  typedef std::string::const_iterator iterator_type;
-  typedef pddl_parser::grammar::problem_parser<iterator_type> grammar;
-  typedef pddl_parser::grammar::pddl_skipper<iterator_type> skipper;
+	grammar g;
+	skipper s;
+	Problem prob;
 
-  grammar g;
-  skipper s;
-  Problem prob;
+	std::string::const_iterator iter = pddl_problem.begin();
+	std::string::const_iterator end  = pddl_problem.end();
+	bool                        r    = phrase_parse(iter, end, g, s, prob);
 
-  std::string::const_iterator iter = pddl_problem.begin();
-  std::string::const_iterator end = pddl_problem.end();
-  bool r = phrase_parse(iter, end, g, s, prob);
+	if (!r) {
+		throw PddlParserException("Parsing PDDL problem string failed!");
+	}
 
-  if ( !r ) {
-    throw PddlParserException("Parsing PDDL problem string failed!");
-  }
-
-  return prob;
+	return prob;
 }
 
-}
+} // namespace pddl_parser

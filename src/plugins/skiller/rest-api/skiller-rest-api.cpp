@@ -21,12 +21,11 @@
 
 #include "skiller-rest-api.h"
 
-#include <webview/rest_api_manager.h>
 #include <core/threading/mutex_locker.h>
-#include <utils/time/wait.h>
-
 #include <interfaces/SkillerDebugInterface.h>
 #include <interfaces/SkillerInterface.h>
+#include <utils/time/wait.h>
+#include <webview/rest_api_manager.h>
 
 using namespace fawkes;
 
@@ -36,8 +35,7 @@ using namespace fawkes;
  */
 
 /** Constructor. */
-SkillerRestApi::SkillerRestApi()
-	: Thread("ClipsWebviewThread", Thread::OPMODE_WAITFORWAKEUP)
+SkillerRestApi::SkillerRestApi() : Thread("ClipsWebviewThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
 
@@ -53,18 +51,21 @@ SkillerRestApi::init()
 	skiller_if_ = blackboard->open_for_reading<SkillerInterface>("Skiller");
 
 	rest_api_ = new WebviewRestApi("skiller", logger);
-	rest_api_->add_handler<WebviewRestArray<SkillInfo>>
-		(WebRequest::METHOD_GET, "/skills",
-		 std::bind(&SkillerRestApi::cb_list_skills, this));
-	rest_api_->add_handler<Skill>
-		(WebRequest::METHOD_GET, "/skills/{id}",
-		 std::bind(&SkillerRestApi::cb_get_skill, this, std::placeholders::_1));
-	rest_api_->add_handler
-		(WebRequest::METHOD_DELETE, "/skills/{id}",
-		 std::bind(&SkillerRestApi::cb_stop_skill, this, std::placeholders::_1));
-	rest_api_->add_handler<Skill, SkillCall>
-		(WebRequest::METHOD_POST, "/call",
-		 std::bind(&SkillerRestApi::cb_exec_skill, this, std::placeholders::_1));
+	rest_api_->add_handler<WebviewRestArray<SkillInfo>>(
+	  WebRequest::METHOD_GET, "/skills", std::bind(&SkillerRestApi::cb_list_skills, this));
+	rest_api_->add_handler<Skill>(WebRequest::METHOD_GET,
+	                              "/skills/{id}",
+	                              std::bind(&SkillerRestApi::cb_get_skill,
+	                                        this,
+	                                        std::placeholders::_1));
+	rest_api_->add_handler(WebRequest::METHOD_DELETE,
+	                       "/skills/{id}",
+	                       std::bind(&SkillerRestApi::cb_stop_skill, this, std::placeholders::_1));
+	rest_api_->add_handler<Skill, SkillCall>(WebRequest::METHOD_POST,
+	                                         "/call",
+	                                         std::bind(&SkillerRestApi::cb_exec_skill,
+	                                                   this,
+	                                                   std::placeholders::_1));
 	webview_rest_api_manager->register_api(rest_api_);
 }
 
@@ -74,7 +75,6 @@ SkillerRestApi::finalize()
 	webview_rest_api_manager->unregister_api(rest_api_);
 	delete rest_api_;
 }
-
 
 void
 SkillerRestApi::loop()
@@ -86,8 +86,7 @@ SkillerRestApi::set_and_wait_graph(const char *graph)
 {
 	if (strcmp(skdb_if_->graph_fsm(), graph) != 0) {
 		// It's not currently the desired graph
-		SkillerDebugInterface::SetGraphMessage *m =
-			new SkillerDebugInterface::SetGraphMessage(graph);
+		SkillerDebugInterface::SetGraphMessage *m = new SkillerDebugInterface::SetGraphMessage(graph);
 		skdb_if_->msgq_enqueue(m);
 		fawkes::Time start(clock);
 		fawkes::Time now(clock);
@@ -95,13 +94,13 @@ SkillerRestApi::set_and_wait_graph(const char *graph)
 			fawkes::TimeWait::wait_systime(50000);
 			skdb_if_->read();
 			now.stamp();
-		} while (strcmp(skdb_if_->graph_fsm(), graph) != 0 &&
-		         (now - &start) <= 5.0);
+		} while (strcmp(skdb_if_->graph_fsm(), graph) != 0 && (now - &start) <= 5.0);
 	}
 
 	if (strcmp(skdb_if_->graph_fsm(), graph) != 0) {
 		throw WebviewRestException(WebReply::HTTP_REQUEST_TIMEOUT,
-		                           "Did not receive '%s' in time from skiller", graph);
+		                           "Did not receive '%s' in time from skiller",
+		                           graph);
 	}
 }
 
@@ -111,7 +110,7 @@ SkillerRestApi::cb_list_skills()
 	WebviewRestArray<SkillInfo> rv;
 
 	skdb_if_->read();
-	if (! skdb_if_->has_writer() || ! skiller_if_->has_writer()) {
+	if (!skdb_if_->has_writer() || !skiller_if_->has_writer()) {
 		throw WebviewRestException(WebReply::HTTP_SERVICE_UNAVAILABLE,
 		                           "Behavior Engine plugin is not loaded");
 	}
@@ -121,7 +120,7 @@ SkillerRestApi::cb_list_skills()
 	set_and_wait_graph("LIST");
 
 	std::stringstream ss(skdb_if_->graph());
-	std::string skill_name;
+	std::string       skill_name;
 	while (std::getline(ss, skill_name, '\n')) {
 		SkillInfo s;
 		s.set_kind("SkillInfo");
@@ -131,14 +130,14 @@ SkillerRestApi::cb_list_skills()
 	}
 
 	SkillerDebugInterface::SetGraphMessage *m =
-		new SkillerDebugInterface::SetGraphMessage(prev_fsm.c_str());
+	  new SkillerDebugInterface::SetGraphMessage(prev_fsm.c_str());
 	skdb_if_->msgq_enqueue(m);
 
 	return rv;
 }
 
 Skill
-SkillerRestApi::cb_get_skill(WebviewRestParams& params)
+SkillerRestApi::cb_get_skill(WebviewRestParams &params)
 {
 	std::string skill_name{params.path_arg("id")};
 
@@ -148,7 +147,7 @@ SkillerRestApi::cb_get_skill(WebviewRestParams& params)
 
 	skdb_if_->read();
 	skiller_if_->read();
-	if (! skdb_if_->has_writer() || ! skiller_if_->has_writer()) {
+	if (!skdb_if_->has_writer() || !skiller_if_->has_writer()) {
 		throw WebviewRestException(WebReply::HTTP_SERVICE_UNAVAILABLE,
 		                           "Behavior Engine plugin is not loaded");
 	}
@@ -168,46 +167,35 @@ SkillerRestApi::cb_get_skill(WebviewRestParams& params)
 		s.set_msg_id(skiller_if_->msgid());
 		s.set_exclusive_controller(skiller_if_->exclusive_controller());
 		switch (skiller_if_->status()) {
-		case SkillerInterface::S_RUNNING:
-			s.set_status("RUNNING");
-			break;
-		case SkillerInterface::S_FINAL:
-			s.set_status("FINAL");
-			break;
-		case SkillerInterface::S_FAILED:
-			s.set_status("FAILED");
-			break;
-		default:
-			s.set_status("INACTIVE");
-			break;
-		}	
+		case SkillerInterface::S_RUNNING: s.set_status("RUNNING"); break;
+		case SkillerInterface::S_FINAL: s.set_status("FINAL"); break;
+		case SkillerInterface::S_FAILED: s.set_status("FAILED"); break;
+		default: s.set_status("INACTIVE"); break;
+		}
 	}
 
 	return s;
 }
 
-
 Skill
 SkillerRestApi::cb_exec_skill(const SkillCall &call)
 {
-	if (! call.skill_string()) {
-		throw WebviewRestException(WebReply::HTTP_BAD_REQUEST,
-		                           "Request lacks skill string");
+	if (!call.skill_string()) {
+		throw WebviewRestException(WebReply::HTTP_BAD_REQUEST, "Request lacks skill string");
 	}
 
 	skiller_if_->read();
-	if (! skiller_if_->has_writer()) {
+	if (!skiller_if_->has_writer()) {
 		throw WebviewRestException(WebReply::HTTP_SERVICE_UNAVAILABLE,
 		                           "Behavior Engine plugin is not loaded");
 	}
 
 	if (skiller_if_->exclusive_controller() != 0) {
-		throw WebviewRestException(WebReply::HTTP_CONFLICT,
-		                           "Another thread is exclusive controller");
+		throw WebviewRestException(WebReply::HTTP_CONFLICT, "Another thread is exclusive controller");
 	}
 
 	SkillerInterface::ExecSkillMessage *m =
-		new SkillerInterface::ExecSkillMessage(call.skill_string()->c_str());
+	  new SkillerInterface::ExecSkillMessage(call.skill_string()->c_str());
 	m->ref();
 
 	try {
@@ -215,7 +203,8 @@ SkillerRestApi::cb_exec_skill(const SkillCall &call)
 	} catch (Exception &e) {
 		logger->log_error(name(), "Failed to execute skill: %s", e.what_no_backtrace());
 		throw WebviewRestException(WebReply::HTTP_INTERNAL_SERVER_ERROR,
-		                           "Failed to execute skill: %s", e.what_no_backtrace());
+		                           "Failed to execute skill: %s",
+		                           e.what_no_backtrace());
 	}
 
 	Skill sk;
@@ -227,9 +216,8 @@ SkillerRestApi::cb_exec_skill(const SkillCall &call)
 	return sk;
 }
 
-
 std::unique_ptr<fawkes::WebviewRestReply>
-SkillerRestApi::cb_stop_skill(WebviewRestParams& params)
+SkillerRestApi::cb_stop_skill(WebviewRestParams &params)
 {
 	std::string skill_name{params.path_arg("id")};
 
@@ -239,14 +227,13 @@ SkillerRestApi::cb_stop_skill(WebviewRestParams& params)
 	}
 
 	skiller_if_->read();
-	if (! skiller_if_->has_writer()) {
+	if (!skiller_if_->has_writer()) {
 		throw WebviewRestException(WebReply::HTTP_SERVICE_UNAVAILABLE,
 		                           "Behavior Engine plugin is not loaded");
 	}
 
 	if (skiller_if_->exclusive_controller() != 0) {
-		throw WebviewRestException(WebReply::HTTP_CONFLICT,
-		                           "Another thread is exclusive controller");
+		throw WebviewRestException(WebReply::HTTP_CONFLICT, "Another thread is exclusive controller");
 	}
 
 	try {
@@ -254,7 +241,8 @@ SkillerRestApi::cb_stop_skill(WebviewRestParams& params)
 	} catch (Exception &e) {
 		logger->log_error(name(), "Failed to stop skill: %s", e.what_no_backtrace());
 		throw WebviewRestException(WebReply::HTTP_INTERNAL_SERVER_ERROR,
-		                           "Failed to execute skill: %s", e.what_no_backtrace());
+		                           "Failed to execute skill: %s",
+		                           e.what_no_backtrace());
 	}
 
 	return std::make_unique<WebviewRestReply>(WebReply::HTTP_OK, "OK", "text/plain");

@@ -18,27 +18,25 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "imu_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
 /** Plugin to publish IMU data to ROS.
  * @author Till Hofmann
  */
-class RosIMUPlugin
-: public fawkes::Plugin
+class RosIMUPlugin : public fawkes::Plugin
 {
- public:
-   /** Constructor.
+public:
+	/** Constructor.
     * @param config Fawkes configuration
     */
-   explicit RosIMUPlugin(Configuration *config)
-     : Plugin(config)
-   {
-     thread_list.push_back(new RosIMUThread());
-   }
+	explicit RosIMUPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RosIMUThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("ROS IMU Publisher Plugin")

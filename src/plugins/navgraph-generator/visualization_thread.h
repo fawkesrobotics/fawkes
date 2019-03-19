@@ -24,42 +24,39 @@
 
 #include "navgraph_generator_thread.h"
 
-#include <core/threading/thread.h>
-#include <core/threading/mutex.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <core/threading/mutex.h>
+#include <core/threading/thread.h>
 #include <plugins/ros/aspect/ros.h>
-
 #include <ros/publisher.h>
 #include <visualization_msgs/MarkerArray.h>
 
-
-class NavGraphGeneratorVisualizationThread
-: public fawkes::Thread,
-  public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ROSAspect
+class NavGraphGeneratorVisualizationThread : public fawkes::Thread,
+                                             public fawkes::ConfigurableAspect,
+                                             public fawkes::LoggingAspect,
+                                             public fawkes::ROSAspect
 {
- public:
-  NavGraphGeneratorVisualizationThread();
+public:
+	NavGraphGeneratorVisualizationThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  void publish(const NavGraphGeneratorThread::ObstacleMap &obstacles,
-	       const NavGraphGeneratorThread::ObstacleMap &map_obstacles,
-	       const NavGraphGeneratorThread::PoiMap      &pois);
+	void publish(const NavGraphGeneratorThread::ObstacleMap &obstacles,
+	             const NavGraphGeneratorThread::ObstacleMap &map_obstacles,
+	             const NavGraphGeneratorThread::PoiMap &     pois);
 
- private:
-  std::string  cfg_global_frame_;
+private:
+	std::string cfg_global_frame_;
 
-  size_t last_id_num_;
-  ros::Publisher vispub_;
+	size_t         last_id_num_;
+	ros::Publisher vispub_;
 
-  NavGraphGeneratorThread::ObstacleMap obstacles_;
-  NavGraphGeneratorThread::ObstacleMap map_obstacles_;
-  NavGraphGeneratorThread::PoiMap      pois_;
+	NavGraphGeneratorThread::ObstacleMap obstacles_;
+	NavGraphGeneratorThread::ObstacleMap map_obstacles_;
+	NavGraphGeneratorThread::PoiMap      pois_;
 };
 
 #endif

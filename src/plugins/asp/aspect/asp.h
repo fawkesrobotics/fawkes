@@ -36,17 +36,17 @@ class ClingoAccess;
 class ASPAspect : public virtual Aspect
 {
 public:
-	ASPAspect(const std::string&& control_name, const std::string&& log_component = std::string());
+	ASPAspect(const std::string &&control_name, const std::string &&log_component = std::string());
 	virtual ~ASPAspect(void);
 
 private:
 	const std::string control_name_;
 	const std::string log_comp_;
 
-	void init_ASPAspect(const LockPtr<ClingoAccess>& clingo);
+	void init_ASPAspect(const LockPtr<ClingoAccess> &clingo);
 	void finalize_ASPAspect(void);
 
-	protected:
+protected:
 	LockPtr<ClingoAccess> clingo;
 
 	/** Additional access by ASPAspectIniFin

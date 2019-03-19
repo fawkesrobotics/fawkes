@@ -23,8 +23,9 @@
 #include "node_thread.h"
 
 // from Gazebo
-#include <gazebo/transport/TransportIface.hh>
 #include <plugins/gazebo/gazebo_plugin.h>
+
+#include <gazebo/transport/TransportIface.hh>
 
 using namespace fawkes;
 
@@ -38,12 +39,10 @@ using namespace fawkes;
 /** Constructor.
  * @param config Fawkes configuration
  */
-GazeboPlugin::GazeboPlugin(Configuration *config)
-  : Plugin(config)
+GazeboPlugin::GazeboPlugin(Configuration *config) : Plugin(config)
 {
-  thread_list.push_back(new GazeboNodeThread());
+	thread_list.push_back(new GazeboNodeThread());
 }
-
 
 PLUGIN_DESCRIPTION("Provides access to Gazebo")
 EXPORT_PLUGIN(GazeboPlugin)

@@ -23,30 +23,27 @@
 #ifndef _PLUGINS_PANTILT_ACT_THREAD_H_
 #define _PLUGINS_PANTILT_ACT_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  class PanTiltInterface;
+class PanTiltInterface;
 }
 
-class PanTiltActThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+class PanTiltActThread : public fawkes::Thread,
+                         public fawkes::BlockedTimingAspect,
+                         public fawkes::LoggingAspect,
+                         public fawkes::ConfigurableAspect,
+                         public fawkes::BlackBoardAspect
 {
- public:
-  PanTiltActThread(const char *thread_name);
-  virtual ~PanTiltActThread();
+public:
+	PanTiltActThread(const char *thread_name);
+	virtual ~PanTiltActThread();
 
-  virtual void update_sensor_values() = 0;
-
+	virtual void update_sensor_values() = 0;
 };
-
 
 #endif

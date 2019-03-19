@@ -30,15 +30,15 @@ namespace fawkes {
 
 class PointCloudAspectIniFin : public AspectIniFin
 {
- public:
-  PointCloudAspectIniFin(Configuration *config);
-  virtual ~PointCloudAspectIniFin();
+public:
+	PointCloudAspectIniFin(Configuration *config);
+	virtual ~PointCloudAspectIniFin();
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
- private:
-  PointCloudManager *pcl_manager_;
+private:
+	PointCloudManager *pcl_manager_;
 };
 
 } // end namespace fawkes

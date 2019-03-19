@@ -23,23 +23,21 @@
 #ifndef __PLUGINS_PLEXIL_LOG_ADAPTER_H_
 #define __PLUGINS_PLEXIL_LOG_ADAPTER_H_
 
-#include <InterfaceAdapter.hh>
-
 #include <logging/logger.h>
 
+#include <InterfaceAdapter.hh>
+
 /** Interface adapter to provide logging facilities. */
-class LoggingPlexilAdapter
-	: public PLEXIL::InterfaceAdapter
+class LoggingPlexilAdapter : public PLEXIL::InterfaceAdapter
 {
 public:
-	LoggingPlexilAdapter(PLEXIL::AdapterExecInterface& execInterface);
-	LoggingPlexilAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-	                     pugi::xml_node const xml);
+	LoggingPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface);
+	LoggingPlexilAdapter(PLEXIL::AdapterExecInterface &execInterface, pugi::xml_node const xml);
 
 	/// @cond DELETED
-	LoggingPlexilAdapter() = delete;
+	LoggingPlexilAdapter()                             = delete;
 	LoggingPlexilAdapter(const LoggingPlexilAdapter &) = delete;
-	LoggingPlexilAdapter & operator=(const LoggingPlexilAdapter &) = delete;
+	LoggingPlexilAdapter &operator=(const LoggingPlexilAdapter &) = delete;
 	/// @endcond
 
 	virtual ~LoggingPlexilAdapter();
@@ -51,15 +49,14 @@ public:
 	virtual bool shutdown();
 
 	void executeCommand(PLEXIL::Command *cmd);
-  void invokeAbort(PLEXIL::Command *cmd);
+	void invokeAbort(PLEXIL::Command *cmd);
 
 private:
 	fawkes::Logger *logger_;
-	
 };
 
 extern "C" {
-  void initFawkesLoggingAdapter();
+void initFawkesLoggingAdapter();
 }
 
 #endif // POSIX_TIME_ADAPTER_H

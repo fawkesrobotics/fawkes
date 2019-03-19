@@ -1,4 +1,4 @@
- 
+
 /***************************************************************************
  *  enum_constant.cpp - Interface generator enum constant representation
  *
@@ -20,30 +20,27 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include <interfaces/generator/checker.h>
 #include <interfaces/generator/enum_constant.h>
 #include <interfaces/generator/exceptions.h>
-#include <interfaces/generator/checker.h>
 
 /** @class InterfaceEnumConstant interfaces/generator/enum_constant.h
  * Interface generator internal representation of a enum constant as parsed
  * from the XML template file.
  */
 
-
 /** Constructor.
  * @param name name of enumeration constant
  * @param comment comment of enumeration constant.
  */
-InterfaceEnumConstant::InterfaceEnumConstant(const std::string &name,
-					     const std::string &comment)
+InterfaceEnumConstant::InterfaceEnumConstant(const std::string &name, const std::string &comment)
 {
-  if (!InterfaceChecker::validName(name, reserved_names_interface()))
-    throw InterfaceGeneratorReservedIdentifierException("enum constant", name.c_str());
-  name_  = name;
-  comment_ = comment;
-  items_.clear();
+	if (!InterfaceChecker::validName(name, reserved_names_interface()))
+		throw InterfaceGeneratorReservedIdentifierException("enum constant", name.c_str());
+	name_    = name;
+	comment_ = comment;
+	items_.clear();
 }
-
 
 /** Get name of enum constant.
  * @return name of enum constant.
@@ -51,9 +48,8 @@ InterfaceEnumConstant::InterfaceEnumConstant(const std::string &name,
 const std::string &
 InterfaceEnumConstant::get_name() const
 {
-  return name_;
+	return name_;
 }
-
 
 /** Get comment of enum constant.
  * @return comment of enum constant.
@@ -61,9 +57,8 @@ InterfaceEnumConstant::get_name() const
 const std::string &
 InterfaceEnumConstant::get_comment() const
 {
-  return comment_;
+	return comment_;
 }
-
 
 /** Get enumeration items.
  * @return vector of enum items. First item in pair contains item name, second item
@@ -72,9 +67,8 @@ InterfaceEnumConstant::get_comment() const
 const std::vector<InterfaceEnumConstant::EnumItem> &
 InterfaceEnumConstant::get_items() const
 {
-  return items_;
+	return items_;
 }
-
 
 /** Add an item without custom value.
  * @param name name of item
@@ -83,18 +77,17 @@ InterfaceEnumConstant::get_items() const
 void
 InterfaceEnumConstant::add_item(std::string name, std::string comment)
 {
-  if (!InterfaceChecker::validName(name, reserved_names_interface()))
-    throw InterfaceGeneratorReservedIdentifierException("enum item", name.c_str());
-  std::vector<EnumItem>::iterator i;
-  for (i = items_.begin(); i != items_.end(); ++i) {
-    if (i->name == name) {
-      throw InterfaceGeneratorAmbiguousNameException(name.c_str(), "enum item");
-    }
-  }
-  EnumItem p = {name, comment, false, 0};
-  items_.push_back(p);
+	if (!InterfaceChecker::validName(name, reserved_names_interface()))
+		throw InterfaceGeneratorReservedIdentifierException("enum item", name.c_str());
+	std::vector<EnumItem>::iterator i;
+	for (i = items_.begin(); i != items_.end(); ++i) {
+		if (i->name == name) {
+			throw InterfaceGeneratorAmbiguousNameException(name.c_str(), "enum item");
+		}
+	}
+	EnumItem p = {name, comment, false, 0};
+	items_.push_back(p);
 }
-
 
 /** Add an item with custom value.
  * @param name name of item
@@ -104,12 +97,12 @@ InterfaceEnumConstant::add_item(std::string name, std::string comment)
 void
 InterfaceEnumConstant::add_item(std::string name, std::string comment, int value)
 {
-  std::vector<EnumItem>::iterator i;
-  for (i = items_.begin(); i != items_.end(); ++i) {
-    if (i->name == name) {
-      throw InterfaceGeneratorAmbiguousNameException(name.c_str(), "enum item");
-    }
-  }
-  EnumItem p = {name, comment, true, value};
-  items_.push_back(p);
+	std::vector<EnumItem>::iterator i;
+	for (i = items_.begin(); i != items_.end(); ++i) {
+		if (i->name == name) {
+			throw InterfaceGeneratorAmbiguousNameException(name.c_str(), "enum item");
+		}
+	}
+	EnumItem p = {name, comment, true, value};
+	items_.push_back(p);
 }

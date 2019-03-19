@@ -21,32 +21,30 @@
 
 #pragma once
 
-#include <core/threading/thread.h>
-#include <aspect/clock.h>
-#include <aspect/logging.h>
-#include <aspect/webview.h>
-#include <aspect/blackboard.h>
-
-#include <webview/rest_api.h>
-#include <webview/rest_array.h>
-
 #include "model/Skill.h"
 #include "model/SkillCall.h"
 #include "model/SkillInfo.h"
 
-namespace fawkes {
-	class SkillerDebugInterface;
-	class SkillerInterface;
-}
+#include <aspect/blackboard.h>
+#include <aspect/clock.h>
+#include <aspect/logging.h>
+#include <aspect/webview.h>
+#include <core/threading/thread.h>
+#include <webview/rest_api.h>
+#include <webview/rest_array.h>
 
-class SkillerRestApi
-: public fawkes::Thread,
-	public fawkes::ClockAspect,
-  public fawkes::LoggingAspect,
-	public fawkes::BlackBoardAspect,
-	public fawkes::WebviewAspect
+namespace fawkes {
+class SkillerDebugInterface;
+class SkillerInterface;
+} // namespace fawkes
+
+class SkillerRestApi : public fawkes::Thread,
+                       public fawkes::ClockAspect,
+                       public fawkes::LoggingAspect,
+                       public fawkes::BlackBoardAspect,
+                       public fawkes::WebviewAspect
 {
- public:
+public:
 	SkillerRestApi();
 	~SkillerRestApi();
 
@@ -54,20 +52,19 @@ class SkillerRestApi
 	virtual void loop();
 	virtual void finalize();
 
- private:
+private:
 	WebviewRestArray<SkillInfo> cb_list_skills();
 
-	Skill	cb_get_skill(fawkes::WebviewRestParams& params);
+	Skill cb_get_skill(fawkes::WebviewRestParams &params);
 
-	Skill	cb_exec_skill(const SkillCall &call);
+	Skill cb_exec_skill(const SkillCall &call);
 
-	std::unique_ptr<fawkes::WebviewRestReply>
-		cb_stop_skill(fawkes::WebviewRestParams& params);
+	std::unique_ptr<fawkes::WebviewRestReply> cb_stop_skill(fawkes::WebviewRestParams &params);
 
 	void set_and_wait_graph(const char *graph);
 
- private:
-	fawkes::WebviewRestApi        *rest_api_;
+private:
+	fawkes::WebviewRestApi *       rest_api_;
 	fawkes::SkillerDebugInterface *skdb_if_;
-	fawkes::SkillerInterface      *skiller_if_;
+	fawkes::SkillerInterface *     skiller_if_;
 };

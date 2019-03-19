@@ -31,17 +31,17 @@ namespace firevision {
 
 class CameraControlZoom : virtual public CameraControl
 {
- public:
-  virtual ~CameraControlZoom();
+public:
+	virtual ~CameraControlZoom();
 
-  virtual void         reset_zoom()                                     = 0;
-  virtual void         set_zoom(unsigned int zoom)                      = 0;
-  virtual unsigned int zoom()                                           = 0;
-  virtual unsigned int zoom_max()                                       = 0;
-  virtual unsigned int zoom_min()                                       = 0;
-  virtual void         set_zoom_speed_tele(unsigned int speed);
-  virtual void         set_zoom_speed_wide(unsigned int speed);
-  virtual void         set_zoom_digital_enabled(bool enabled);
+	virtual void         reset_zoom()                = 0;
+	virtual void         set_zoom(unsigned int zoom) = 0;
+	virtual unsigned int zoom()                      = 0;
+	virtual unsigned int zoom_max()                  = 0;
+	virtual unsigned int zoom_min()                  = 0;
+	virtual void         set_zoom_speed_tele(unsigned int speed);
+	virtual void         set_zoom_speed_wide(unsigned int speed);
+	virtual void         set_zoom_digital_enabled(bool enabled);
 };
 
 } // end namespace firevision

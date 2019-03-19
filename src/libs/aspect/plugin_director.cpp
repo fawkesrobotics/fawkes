@@ -38,7 +38,6 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** @var PluginManager *  PluginDirectorAspect::plugin_manager
  * This is the member used to access the PluginManager.
  * The plugin manager will remain valid for the whole lifetime of the
@@ -48,14 +47,13 @@ namespace fawkes {
 /** Constructor. */
 PluginDirectorAspect::PluginDirectorAspect()
 {
-  add_aspect("PluginDirectorAspect");
+	add_aspect("PluginDirectorAspect");
 }
 
 /** Virtual empty Destructor. */
 PluginDirectorAspect::~PluginDirectorAspect()
 {
 }
-
 
 /** Set the PluginManager.
  * It is guaranteed that this is called for a configurable thread before
@@ -65,7 +63,7 @@ PluginDirectorAspect::~PluginDirectorAspect()
 void
 PluginDirectorAspect::init_PluginDirectorAspect(PluginManager *manager)
 {
-  plugin_manager = manager;
+	plugin_manager = manager;
 }
 
 } // end namespace fawkes

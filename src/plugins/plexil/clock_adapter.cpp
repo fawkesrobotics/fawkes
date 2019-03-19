@@ -36,7 +36,7 @@
 /** Constructor.
  * @param execInterface Reference to the parent AdapterExecInterface object.
  */
-ClockPlexilTimeAdapter::ClockPlexilTimeAdapter(PLEXIL::AdapterExecInterface& execInterface)
+ClockPlexilTimeAdapter::ClockPlexilTimeAdapter(PLEXIL::AdapterExecInterface &execInterface)
 : TimeAdapter(execInterface)
 {
 }
@@ -46,8 +46,8 @@ ClockPlexilTimeAdapter::ClockPlexilTimeAdapter(PLEXIL::AdapterExecInterface& exe
  * @param xml A const reference to the XML element describing this adapter
  * @note The instance maintains a shared pointer to the XML.
  */
-ClockPlexilTimeAdapter::ClockPlexilTimeAdapter(PLEXIL::AdapterExecInterface& execInterface, 
-                                               pugi::xml_node const xml)
+ClockPlexilTimeAdapter::ClockPlexilTimeAdapter(PLEXIL::AdapterExecInterface &execInterface,
+                                               pugi::xml_node const          xml)
 : TimeAdapter(execInterface, xml)
 {
 }
@@ -56,7 +56,6 @@ ClockPlexilTimeAdapter::ClockPlexilTimeAdapter(PLEXIL::AdapterExecInterface& exe
 ClockPlexilTimeAdapter::~ClockPlexilTimeAdapter()
 {
 }
-
 
 /** Initialize adapter.
  * @return true if initialization was successful, false otherwise.
@@ -69,7 +68,6 @@ ClockPlexilTimeAdapter::initialize()
 	return true;
 }
 
-
 /** Start adapter.
  * @return true if starting was successful, false otherwise.
  */
@@ -80,10 +78,9 @@ ClockPlexilTimeAdapter::start()
 
 	timer_ = new PlexilTimerThread();
 	timer_->start();
-	
+
 	return true;
 }
-
 
 /** Stop adapter.
  * @return true if successful, false otherwise.
@@ -98,7 +95,6 @@ ClockPlexilTimeAdapter::stop()
 
 	return true;
 }
-
 
 /** Reset adapter.
  * @return true if successful, false otherwise.
@@ -134,12 +130,11 @@ ClockPlexilTimeAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCache
 	cache_entry.update(getCurrentTime());
 }
 
-
 /** Subscribe to updates for given state.
  * @param state state variable to subscribe for
  */
 void
-ClockPlexilTimeAdapter::subscribe(const PLEXIL::State& state)
+ClockPlexilTimeAdapter::subscribe(const PLEXIL::State &state)
 {
 	//debugMsg("TimeAdapter:subscribe", " called");
 }
@@ -148,7 +143,7 @@ ClockPlexilTimeAdapter::subscribe(const PLEXIL::State& state)
  * @param state state variable to unsubscribe from
  */
 void
-ClockPlexilTimeAdapter::unsubscribe(const PLEXIL::State& state)
+ClockPlexilTimeAdapter::unsubscribe(const PLEXIL::State &state)
 {
 	timer_->abort_timer();
 }
@@ -159,7 +154,7 @@ ClockPlexilTimeAdapter::unsubscribe(const PLEXIL::State& state)
  * @param lo low value
  */
 void
-ClockPlexilTimeAdapter::setThresholds(const PLEXIL::State& state, double hi, double lo)
+ClockPlexilTimeAdapter::setThresholds(const PLEXIL::State &state, double hi, double lo)
 {
 	if (state != PLEXIL::State::timeState()) {
 		//warn("TimeAdapter does not implement lookups for state " << state);
@@ -181,7 +176,7 @@ ClockPlexilTimeAdapter::setThresholds(const PLEXIL::State& state, double hi, dou
  * @param lo low value
  */
 void
-ClockPlexilTimeAdapter::setThresholds(const PLEXIL::State& state, int32_t hi, int32_t lo)
+ClockPlexilTimeAdapter::setThresholds(const PLEXIL::State &state, int32_t hi, int32_t lo)
 {
 	setThresholds(state, (double)hi, (double)lo);
 }
@@ -196,14 +191,16 @@ ClockPlexilTimeAdapter::timer_event()
  * @return A double representing the current time.
  */
 double
-ClockPlexilTimeAdapter::getCurrentTime() throw (PLEXIL::InterfaceError)
+ClockPlexilTimeAdapter::getCurrentTime() throw(PLEXIL::InterfaceError)
 {
 	fawkes::Time now(clock_);
 	return now.in_sec();
 }
 
 extern "C" {
-	void initFawkesTimeAdapter() {
-		REGISTER_ADAPTER(ClockPlexilTimeAdapter, "FawkesTimeAdapter");
-	}
+void
+initFawkesTimeAdapter()
+{
+	REGISTER_ADAPTER(ClockPlexilTimeAdapter, "FawkesTimeAdapter");
+}
 }

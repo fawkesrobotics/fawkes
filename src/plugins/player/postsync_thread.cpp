@@ -33,26 +33,22 @@ using namespace fawkes;
  * @todo needs real integration, currently only place holder
  */
 
-
 /** Constructor. */
 PlayerPostSyncThread::PlayerPostSyncThread()
-  : Thread("PlayerPostSyncThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP)
+: Thread("PlayerPostSyncThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_POST_LOOP)
 {
 }
-
 
 void
 PlayerPostSyncThread::init()
 {
 }
 
-
 void
 PlayerPostSyncThread::finalize()
 {
 }
-
 
 void
 PlayerPostSyncThread::loop()

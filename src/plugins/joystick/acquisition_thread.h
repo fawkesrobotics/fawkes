@@ -25,85 +25,91 @@
 
 #include "bb_handler.h"
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
 #include <aspect/configurable.h>
-
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <utils/math/types.h>
 
 #include <string>
 #include <vector>
 
 namespace fawkes {
-  class Mutex;
+class Mutex;
 }
 
 class JoystickForceFeedback;
 
-class JoystickAcquisitionThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect
+class JoystickAcquisitionThread : public fawkes::Thread,
+                                  public fawkes::LoggingAspect,
+                                  public fawkes::ConfigurableAspect
 {
- public:
+public:
 	JoystickAcquisitionThread();
-	JoystickAcquisitionThread(const char *device_file,
-                            JoystickBlackBoardHandler *handler,
-                            fawkes::Logger *logger);
+	JoystickAcquisitionThread(const char *               device_file,
+	                          JoystickBlackBoardHandler *handler,
+	                          fawkes::Logger *           logger);
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  bool lock_if_new_data();
-  void unlock();
+	bool lock_if_new_data();
+	void unlock();
 
-  char               num_axes() const;
-  char               num_buttons() const;
-  const char *       joystick_name() const;
-  unsigned int       pressed_buttons() const;
-  float *            axis_values();
+	char         num_axes() const;
+	char         num_buttons() const;
+	const char * joystick_name() const;
+	unsigned int pressed_buttons() const;
+	float *      axis_values();
 
-  /** Access force feedback of joystick.
+	/** Access force feedback of joystick.
    * @return instance of JoystickForceFeedback class for current joystick. */
-  JoystickForceFeedback *  ff() const { return ff_; }
+	JoystickForceFeedback *
+	ff() const
+	{
+		return ff_;
+	}
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void init(const std::string& device_file, bool allow_open_fail = false);
-  void open_joystick();
-  void open_forcefeedback();
-  
- private:
-  std::string  cfg_device_file_;
-  float        cfg_retry_interval_;
-  bool         cfg_lazy_init_;
-  float        cfg_safety_lockout_timeout_;
-  unsigned int cfg_safety_button_mask_;
-  unsigned int cfg_safety_bypass_button_mask_;
+private:
+	void init(const std::string &device_file, bool allow_open_fail = false);
+	void open_joystick();
+	void open_forcefeedback();
 
-  bool        safety_combo_[5];
-  bool        safety_lockout_;
+private:
+	std::string  cfg_device_file_;
+	float        cfg_retry_interval_;
+	bool         cfg_lazy_init_;
+	float        cfg_safety_lockout_timeout_;
+	unsigned int cfg_safety_button_mask_;
+	unsigned int cfg_safety_bypass_button_mask_;
 
-  int  fd_;
-  bool connected_;
-  bool just_connected_;
-  unsigned int axis_array_size_;
-  char num_axes_;
-  char num_buttons_;
-  char joystick_name_[128];
+	bool safety_combo_[5];
+	bool safety_lockout_;
 
-  bool            new_data_;
-  fawkes::Mutex  *data_mutex_;
+	int          fd_;
+	bool         connected_;
+	bool         just_connected_;
+	unsigned int axis_array_size_;
+	char         num_axes_;
+	char         num_buttons_;
+	char         joystick_name_[128];
 
-  unsigned int    pressed_buttons_;
-  float          *axis_values_;
+	bool           new_data_;
+	fawkes::Mutex *data_mutex_;
 
-  JoystickBlackBoardHandler *bbhandler_;
-  JoystickForceFeedback *ff_;
+	unsigned int pressed_buttons_;
+	float *      axis_values_;
+
+	JoystickBlackBoardHandler *bbhandler_;
+	JoystickForceFeedback *    ff_;
 };
-
 
 #endif

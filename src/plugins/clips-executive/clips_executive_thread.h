@@ -23,11 +23,11 @@
 #ifndef _PLUGINS_CLIPS_EXECUTIVE_CLIPS_EXECUTIVE_THREAD_H_
 #define _PLUGINS_CLIPS_EXECUTIVE_CLIPS_EXECUTIVE_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
-#include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips.h>
 #include <utils/time/time.h>
 
@@ -35,18 +35,17 @@
 #include <memory>
 
 namespace fawkes {
-	class ActionSkillMapping;
+class ActionSkillMapping;
 }
 
-class ClipsExecutiveThread
-: public fawkes::Thread,
-	public fawkes::BlockedTimingAspect,
-	public fawkes::LoggingAspect,
-	public fawkes::ConfigurableAspect,
-	public fawkes::ClockAspect,
-	public fawkes::CLIPSAspect
+class ClipsExecutiveThread : public fawkes::Thread,
+                             public fawkes::BlockedTimingAspect,
+                             public fawkes::LoggingAspect,
+                             public fawkes::ConfigurableAspect,
+                             public fawkes::ClockAspect,
+                             public fawkes::CLIPSAspect
 {
- public:
+public:
 	ClipsExecutiveThread();
 	virtual ~ClipsExecutiveThread();
 
@@ -55,13 +54,19 @@ class ClipsExecutiveThread
 	virtual void finalize();
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-	std::string clips_map_skill(std::string name, CLIPS::Values param_names, CLIPS::Values param_values);
+private:
+	std::string
+	clips_map_skill(std::string name, CLIPS::Values param_names, CLIPS::Values param_values);
 
- private:
-	bool        cfg_assert_time_each_loop_;
+private:
+	bool cfg_assert_time_each_loop_;
 
 	std::shared_ptr<fawkes::ActionSkillMapping> action_skill_mapping_;
 };

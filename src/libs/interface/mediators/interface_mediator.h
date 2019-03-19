@@ -38,36 +38,38 @@ class Interface;
  */
 class InterfaceMediator
 {
- public:
-  /** Virtual destructor */
-  virtual ~InterfaceMediator() {}
+public:
+	/** Virtual destructor */
+	virtual ~InterfaceMediator()
+	{
+	}
 
-  /** Check if a writer exists for the given interface.
+	/** Check if a writer exists for the given interface.
    * @param interface interface to check
    * @return true, if there is any writer for the given interface, false otherwise
    */
-  virtual bool exists_writer(const Interface *interface) const           = 0;
+	virtual bool exists_writer(const Interface *interface) const = 0;
 
-  /** Get number of readers.
+	/** Get number of readers.
    * Get the number of readers that the given interface has.
    * @param interface interface to check
    * @return number of readers currently registered for the given interface.
    */
-  virtual unsigned int num_readers(const Interface *interface) const     = 0;
+	virtual unsigned int num_readers(const Interface *interface) const = 0;
 
-  /** Get owners of interfaces who opened for reading.
+	/** Get owners of interfaces who opened for reading.
    * @param interface an interface to query for the UID
    * @return list of readers for this interface
    */
-  virtual std::list<std::string>  readers(const Interface *interface) const = 0;
+	virtual std::list<std::string> readers(const Interface *interface) const = 0;
 
-  /** Get writer of interface.
+	/** Get writer of interface.
    * @param interface an interface to query for the UID
    * @return owner name of writing interface instance, or empty string of no writer exists
    */
-  virtual std::string             writer(const Interface *interface) const = 0;
+	virtual std::string writer(const Interface *interface) const = 0;
 
-  /** Notify of data change.
+	/** Notify of data change.
    * Notify all subscribers of the given interface of a data change.
    * This also influences logging and sending data over the network so it is
    * mandatory to call this function! The interface base class write method does
@@ -75,7 +77,7 @@ class InterfaceMediator
    * @param interface interface whose subscribers to notify
    * @see Interface::write()
    */
-  virtual void notify_of_data_change(const Interface *interface)         = 0;
+	virtual void notify_of_data_change(const Interface *interface) = 0;
 };
 
 } // end namespace fawkes

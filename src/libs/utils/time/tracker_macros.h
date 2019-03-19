@@ -25,33 +25,28 @@
 #define _UTILS_TIME_TRACKER_MACROS_H_
 
 #ifndef TRACKER_VARIABLE
-#  define TRACKER_VARIABLE tt_
+#	define TRACKER_VARIABLE tt_
 #endif
 
 #ifdef USE_TIMETRACKER
-#  define TIMETRACK_START(c)			\
-  TRACKER_VARIABLE->ping_start(c);		\
-  
-#  define TIMETRACK_INTER(c1, c2)		\
-  TRACKER_VARIABLE->ping_end(c1);		\
-  TRACKER_VARIABLE->ping_start(c2);
+#	define TIMETRACK_START(c) TRACKER_VARIABLE->ping_start(c);
 
-#  define TIMETRACK_END(c)			\
-  TRACKER_VARIABLE->ping_end(c);
+#	define TIMETRACK_INTER(c1, c2)   \
+		TRACKER_VARIABLE->ping_end(c1); \
+		TRACKER_VARIABLE->ping_start(c2);
 
-#  define TIMETRACK_ABORT(c)			\
-  TRACKER_VARIABLE->ping_abort(c);
+#	define TIMETRACK_END(c) TRACKER_VARIABLE->ping_end(c);
 
-#  define TIMETRACK_SCOPE(c)                    \
-  fawkes::ScopedClassItemTracker tt_scope_sentry_(*TRACKER_VARIABLE, c);
+#	define TIMETRACK_ABORT(c) TRACKER_VARIABLE->ping_abort(c);
+
+#	define TIMETRACK_SCOPE(c) fawkes::ScopedClassItemTracker tt_scope_sentry_(*TRACKER_VARIABLE, c);
 
 #else
-#  define TIMETRACK_START(c)
-#  define TIMETRACK_INTER(c1, c2)
-#  define TIMETRACK_END(c)
-#  define TIMETRACK_ABORT(c)
-#  define TIMETRACK_SCOPE(c)
+#	define TIMETRACK_START(c)
+#	define TIMETRACK_INTER(c1, c2)
+#	define TIMETRACK_END(c)
+#	define TIMETRACK_ABORT(c)
+#	define TIMETRACK_SCOPE(c)
 #endif
-
 
 #endif

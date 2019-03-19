@@ -27,8 +27,8 @@
 
 class XmlRpcPlugin : public fawkes::Plugin
 {
- public:
-  explicit XmlRpcPlugin(fawkes::Configuration *config);
+public:
+	explicit XmlRpcPlugin(fawkes::Configuration *config);
 };
 
 #endif

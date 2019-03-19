@@ -22,6 +22,7 @@
  */
 
 #include <utils/system/filetype.h>
+
 #include <cstdio>
 
 using namespace fawkes;
@@ -29,9 +30,8 @@ using namespace fawkes;
 int
 main(int argc, char **argv)
 {
-  printf("File type: %s\n", filetype_file(argv[0]).c_str());
-  printf("Mime type: %s\n", mimetype_file(argv[0]).c_str());
+	printf("File type: %s\n", filetype_file(argv[0]).c_str());
+	printf("Mime type: %s\n", mimetype_file(argv[0]).c_str());
 
-  return 0;
+	return 0;
 }
-

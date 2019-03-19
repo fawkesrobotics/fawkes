@@ -23,8 +23,9 @@
 #include "procrrd_thread.h"
 
 #include <utils/time/wait.h>
-#include <stdio.h>
+
 #include <dirent.h>
+#include <stdio.h>
 #include <string.h>
 
 using namespace fawkes;
@@ -41,514 +42,452 @@ using namespace fawkes;
 
 /** Constructor. */
 ProcRRDThread::ProcRRDThread()
-  : Thread("ProcRRDThread", Thread::OPMODE_CONTINUOUS),
-    ConfigurationChangeHandler(PROC_CONF_PREFIX)
+: Thread("ProcRRDThread", Thread::OPMODE_CONTINUOUS), ConfigurationChangeHandler(PROC_CONF_PREFIX)
 {
-  set_prepfin_conc_loop(true);
+	set_prepfin_conc_loop(true);
 }
-
 
 /** Destructor. */
 ProcRRDThread::~ProcRRDThread()
 {
 }
 
-
 void
 ProcRRDThread::init()
 {
-  samplerate_ = 10;
-  try {
-    samplerate_ = config->get_uint("/plugins/procrrd/samplerate");
-  } catch (Exception &e) {}
+	samplerate_ = 10;
+	try {
+		samplerate_ = config->get_uint("/plugins/procrrd/samplerate");
+	} catch (Exception &e) {
+	}
 
-  timewait_ = new TimeWait(clock, samplerate_ * 1000000);
-  netinterface_ = "wlan0";
-  try {
-    netinterface_ = config->get_string("/plugins/procrrd/netinterface");
-  } catch (Exception &e) {}
+	timewait_     = new TimeWait(clock, samplerate_ * 1000000);
+	netinterface_ = "wlan0";
+	try {
+		netinterface_ = config->get_string("/plugins/procrrd/netinterface");
+	} catch (Exception &e) {
+	}
 
-  lastcpu_ = new unsigned long int[11];
-  get_cpu(lastcpu_);
+	lastcpu_ = new unsigned long int[11];
+	get_cpu(lastcpu_);
 
-  net_recv_graph_ = NULL;
-  net_trans_graph_ = NULL;
-  std::vector<RRDDataSource> rrds;
-  // /proc/net/dev
-  // use data for net_interface
-  // Receive bytes
-  rrds.push_back(RRDDataSource("net_recv_bytes", RRDDataSource::COUNTER));
-  // Receive packets
-  rrds.push_back(RRDDataSource("net_recv_packets", RRDDataSource::COUNTER));
-  // Receive errs
-  rrds.push_back(RRDDataSource("net_recv_errors", RRDDataSource::COUNTER));
-  // Transmit bytes
-  rrds.push_back(RRDDataSource("net_trans_bytes", RRDDataSource::COUNTER));
-  // Transmit packets
-  rrds.push_back(RRDDataSource("net_trans_packets", RRDDataSource::COUNTER));
-  // Transmit errs
-  rrds.push_back(RRDDataSource("net_trans_errors", RRDDataSource::COUNTER));
-  net_rrd_ = new RRDDefinition("network", rrds);
+	net_recv_graph_  = NULL;
+	net_trans_graph_ = NULL;
+	std::vector<RRDDataSource> rrds;
+	// /proc/net/dev
+	// use data for net_interface
+	// Receive bytes
+	rrds.push_back(RRDDataSource("net_recv_bytes", RRDDataSource::COUNTER));
+	// Receive packets
+	rrds.push_back(RRDDataSource("net_recv_packets", RRDDataSource::COUNTER));
+	// Receive errs
+	rrds.push_back(RRDDataSource("net_recv_errors", RRDDataSource::COUNTER));
+	// Transmit bytes
+	rrds.push_back(RRDDataSource("net_trans_bytes", RRDDataSource::COUNTER));
+	// Transmit packets
+	rrds.push_back(RRDDataSource("net_trans_packets", RRDDataSource::COUNTER));
+	// Transmit errs
+	rrds.push_back(RRDDataSource("net_trans_errors", RRDDataSource::COUNTER));
+	net_rrd_ = new RRDDefinition("network", rrds);
 
-  try {
-    rrd_manager->add_rrd(net_rrd_);
-  } catch (Exception &e) {
-    finalize();
-    throw;
-  }
+	try {
+		rrd_manager->add_rrd(net_rrd_);
+	} catch (Exception &e) {
+		finalize();
+		throw;
+	}
 
-  std::vector<RRDGraphDataDefinition> defs;
-  std::vector<RRDGraphElement *> els;
+	std::vector<RRDGraphDataDefinition> defs;
+	std::vector<RRDGraphElement *>      els;
 
-  defs.push_back(RRDGraphDataDefinition("net_recv_bytes", RRDArchive::AVERAGE,
-					net_rrd_));
-  defs.push_back(RRDGraphDataDefinition("net_recv_packets", RRDArchive::AVERAGE,
-					net_rrd_));
-  defs.push_back(RRDGraphDataDefinition("net_recv_errors", RRDArchive::AVERAGE,
-					net_rrd_));
+	defs.push_back(RRDGraphDataDefinition("net_recv_bytes", RRDArchive::AVERAGE, net_rrd_));
+	defs.push_back(RRDGraphDataDefinition("net_recv_packets", RRDArchive::AVERAGE, net_rrd_));
+	defs.push_back(RRDGraphDataDefinition("net_recv_errors", RRDArchive::AVERAGE, net_rrd_));
 
-  els.push_back(new RRDGraphLine("net_recv_bytes", 1, "006400", "Bytes"));
-  els.push_back(new RRDGraphGPrint("net_recv_bytes", RRDArchive::LAST,
-				   "  Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("net_recv_bytes", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("net_recv_bytes", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("net_recv_bytes", 1, "006400", "Bytes"));
+	els.push_back(new RRDGraphGPrint("net_recv_bytes", RRDArchive::LAST, "  Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("net_recv_bytes", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("net_recv_bytes", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphLine("net_recv_packets", 1, "808000", "Packets"));
-  els.push_back(new RRDGraphGPrint("net_recv_packets", RRDArchive::LAST,
-				   "Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("net_recv_packets", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("net_recv_packets", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("net_recv_packets", 1, "808000", "Packets"));
+	els.push_back(new RRDGraphGPrint("net_recv_packets", RRDArchive::LAST, "Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("net_recv_packets", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("net_recv_packets", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphLine("net_recv_errors", 1, "FF0000", "Errors"));
-  els.push_back(new RRDGraphGPrint("net_recv_errors", RRDArchive::LAST,
-				   " Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("net_recv_errors", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("net_recv_errors", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("net_recv_errors", 1, "FF0000", "Errors"));
+	els.push_back(new RRDGraphGPrint("net_recv_errors", RRDArchive::LAST, " Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("net_recv_errors", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("net_recv_errors", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  net_recv_graph_ = new RRDGraphDefinition("network_recv", net_rrd_,
-					      "Network Receive", "",
-					      defs, els);
+	net_recv_graph_ =
+	  new RRDGraphDefinition("network_recv", net_rrd_, "Network Receive", "", defs, els);
 
-  defs.clear();
-  els.clear();
+	defs.clear();
+	els.clear();
 
-  defs.push_back(RRDGraphDataDefinition("net_trans_bytes", RRDArchive::AVERAGE,
-					net_rrd_));
-  defs.push_back(RRDGraphDataDefinition("net_trans_packets", RRDArchive::AVERAGE,
-					net_rrd_));
-  defs.push_back(RRDGraphDataDefinition("net_trans_errors", RRDArchive::AVERAGE,
-					net_rrd_));
+	defs.push_back(RRDGraphDataDefinition("net_trans_bytes", RRDArchive::AVERAGE, net_rrd_));
+	defs.push_back(RRDGraphDataDefinition("net_trans_packets", RRDArchive::AVERAGE, net_rrd_));
+	defs.push_back(RRDGraphDataDefinition("net_trans_errors", RRDArchive::AVERAGE, net_rrd_));
 
-  els.push_back(new RRDGraphLine("net_trans_bytes", 1, "006400", "Bytes"));
-  els.push_back(new RRDGraphGPrint("net_trans_bytes", RRDArchive::LAST,
-				   "  Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("net_trans_bytes", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("net_trans_bytes", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("net_trans_bytes", 1, "006400", "Bytes"));
+	els.push_back(new RRDGraphGPrint("net_trans_bytes", RRDArchive::LAST, "  Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("net_trans_bytes", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("net_trans_bytes", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphLine("net_trans_packets", 1, "808000", "Packets"));
-  els.push_back(new RRDGraphGPrint("net_trans_packets", RRDArchive::LAST,
-				   "Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("net_trans_packets", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("net_trans_packets", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("net_trans_packets", 1, "808000", "Packets"));
+	els.push_back(new RRDGraphGPrint("net_trans_packets", RRDArchive::LAST, "Current\\:%8.2lf %s"));
+	els.push_back(
+	  new RRDGraphGPrint("net_trans_packets", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("net_trans_packets", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphLine("net_trans_errors", 1, "FF0000", "Errors"));
-  els.push_back(new RRDGraphGPrint("net_trans_errors", RRDArchive::LAST,
-				   " Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("net_trans_errors", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("net_trans_errors", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("net_trans_errors", 1, "FF0000", "Errors"));
+	els.push_back(new RRDGraphGPrint("net_trans_errors", RRDArchive::LAST, " Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("net_trans_errors", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("net_trans_errors", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  net_trans_graph_ = new RRDGraphDefinition("network_trans", net_rrd_,
-					      "Network Transmit", "",
-					      defs, els);
+	net_trans_graph_ =
+	  new RRDGraphDefinition("network_trans", net_rrd_, "Network Transmit", "", defs, els);
 
-  try {
-    rrd_manager->add_graph(net_recv_graph_);
-    rrd_manager->add_graph(net_trans_graph_);
-  } catch (Exception &e) {
-    finalize();
-    throw;
-  }
+	try {
+		rrd_manager->add_graph(net_recv_graph_);
+		rrd_manager->add_graph(net_trans_graph_);
+	} catch (Exception &e) {
+		finalize();
+		throw;
+	}
 
-  std::string procprefix = PROC_CONF_PREFIX;
+	std::string procprefix = PROC_CONF_PREFIX;
 
-  try {
-    std::string selfid = get_process_id("fawkes"); 
-    add_process((procprefix+"fawkes").c_str(), selfid, "fawkes");
-  } catch (Exception &e) {
-    logger->log_warn(name(), "Failed to add process: Fawkes, exception follows");
-    logger->log_warn(name(), e);
-    finalize();
-    throw;
-  }
+	try {
+		std::string selfid = get_process_id("fawkes");
+		add_process((procprefix + "fawkes").c_str(), selfid, "fawkes");
+	} catch (Exception &e) {
+		logger->log_warn(name(), "Failed to add process: Fawkes, exception follows");
+		logger->log_warn(name(), e);
+		finalize();
+		throw;
+	}
 
-  Configuration::ValueIterator *i = config->search(procprefix.c_str());
-  while (i->next()) {
+	Configuration::ValueIterator *i = config->search(procprefix.c_str());
+	while (i->next()) {
+		if (!i->is_string()) {
+			logger->log_warn(name(),
+			                 "Entry %s is not a string, but of type %s, "
+			                 "ignoring",
+			                 i->path(),
+			                 i->type());
+			continue;
+		}
 
-    if (! i->is_string()) {
-      logger->log_warn(name(), "Entry %s is not a string, but of type %s, "
-		       "ignoring", i->path(), i->type());
-      continue;
-    }
+		std::string name = i->get_string();
+		try {
+			std::string pid = get_process_id(name.c_str());
+			add_process(i->path(), pid, name);
+		} catch (Exception &e) {
+			logger->log_warn(this->name(), "Failed to add process: %s, exception follows", name.c_str());
+			logger->log_warn(this->name(), e);
+			finalize();
+			throw;
+		}
+	}
 
+	std::string          p;
+	ProcessMap::iterator pi = processes_.begin();
+	p                       = pi->second.name;
+	++pi;
+	for (; pi != processes_.end(); ++pi) {
+		p += ", " + pi->second.name;
+	}
 
-    std::string name = i->get_string();
-    try {
-      std::string pid = get_process_id(name.c_str());
-      add_process(i->path(), pid, name);
-    } catch (Exception &e) {
-      logger->log_warn(this->name(), "Failed to add process: %s, exception follows", name.c_str());
-      logger->log_warn(this->name(), e);
-      finalize();
-      throw;
-    }
-  }
+	logger->log_info(name(),
+	                 "ProcRRD logging network interface %s and "
+	                 "processes %s with a samplerate of %d second(s)",
+	                 netinterface_.c_str(),
+	                 p.c_str(),
+	                 samplerate_);
 
-  std::string p;
-  ProcessMap::iterator pi = processes_.begin();
-  p = pi->second.name;
-  ++pi;
-  for (; pi != processes_.end(); ++pi) {
-    p += ", "+pi->second.name;
-  }
-
-  
-
-  logger->log_info(name(), "ProcRRD logging network interface %s and "
-                           "processes %s with a samplerate of %d second(s)",
-                   netinterface_.c_str(), p.c_str(), samplerate_);
-
-  config->add_change_handler(this);
+	config->add_change_handler(this);
 }
-
 
 void
 ProcRRDThread::finalize()
 {
-  config->rem_change_handler(this);
-  delete timewait_;
+	config->rem_change_handler(this);
+	delete timewait_;
 
-  rrd_manager->remove_rrd(net_rrd_);
+	rrd_manager->remove_rrd(net_rrd_);
 
-  for (ProcessMap::iterator i = processes_.begin(); i != processes_.end(); ++i) {
-    ProcessInfo &info = i->second;
-    rrd_manager->remove_rrd(info.rrd);
-    delete info.cpu_graph;
-    delete info.mem_graph;
-    delete info.io_read_graph;
-    delete info.io_write_graph;
-    delete info.rrd;
-  }
-  processes_.clear();
+	for (ProcessMap::iterator i = processes_.begin(); i != processes_.end(); ++i) {
+		ProcessInfo &info = i->second;
+		rrd_manager->remove_rrd(info.rrd);
+		delete info.cpu_graph;
+		delete info.mem_graph;
+		delete info.io_read_graph;
+		delete info.io_write_graph;
+		delete info.rrd;
+	}
+	processes_.clear();
 
-  delete net_recv_graph_;
-  delete net_trans_graph_;
-  delete net_rrd_;
+	delete net_recv_graph_;
+	delete net_trans_graph_;
+	delete net_rrd_;
 }
 
 void
-ProcRRDThread::add_process(const char *path, const std::string& pid, const std::string& name)
+ProcRRDThread::add_process(const char *path, const std::string &pid, const std::string &name)
 {
-  if (processes_.find(path) != processes_.end()) {
-    throw Exception("Process stats for config %s already monitored", path);
-  }
-  if (pid == "") {
-    throw Exception("No PID set.");
-  }
+	if (processes_.find(path) != processes_.end()) {
+		throw Exception("Process stats for config %s already monitored", path);
+	}
+	if (pid == "") {
+		throw Exception("No PID set.");
+	}
 
-  ProcessInfo info;
-  info.last_cpu = new unsigned long int[3];
-  FILE *file;
-  file = fopen(("/proc/"+pid+"/stat").c_str(), "r");
-  if(file) {
-    // /proc/PID/stat
-    // 14th (utime %lu) and 15th (stime %lu) value
-    // number of jiffies that the process has executed in user mode and kernel mode
-    fscanf(file, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu %*d %*d %*d %*d %*d %*d %*u %*u %*d %*u %*u %*u %*u %*u %*u %*u %*u %*u %*u %*u %*u %*u %*d %*d %*u %*u %*u %*d", info.last_cpu+1, info.last_cpu+2);
-    // process cpu = utime + stime
-    info.last_cpu[0] = info.last_cpu[1] + info.last_cpu[2];
-    fclose(file);
-  }
+	ProcessInfo info;
+	info.last_cpu = new unsigned long int[3];
+	FILE *file;
+	file = fopen(("/proc/" + pid + "/stat").c_str(), "r");
+	if (file) {
+		// /proc/PID/stat
+		// 14th (utime %lu) and 15th (stime %lu) value
+		// number of jiffies that the process has executed in user mode and kernel mode
+		fscanf(
+		  file,
+		  "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu %*d %*d %*d %*d %*d %*d %*u %*u "
+		  "%*d %*u %*u %*u %*u %*u %*u %*u %*u %*u %*u %*u %*u %*u %*d %*d %*u %*u %*u %*d",
+		  info.last_cpu + 1,
+		  info.last_cpu + 2);
+		// process cpu = utime + stime
+		info.last_cpu[0] = info.last_cpu[1] + info.last_cpu[2];
+		fclose(file);
+	}
 
-  std::vector<RRDDataSource> rrds;
-  // totalcpu = sum of /proc/stat line 1
-  // usage% = 100 * process cpu / totalcpu
-  rrds.push_back(RRDDataSource("cpu_usage", RRDDataSource::GAUGE));
-  // Threads: number of currently running threads
-  rrds.push_back(RRDDataSource("cpu_threads", RRDDataSource::GAUGE));
-  // /proc/PID/status
-  // VmPeak: maximum virtual memory space used by the process, in kB (1024 bytes)
-  rrds.push_back(RRDDataSource("mem_maxvirt", RRDDataSource::GAUGE));
-  // VmSize: current virtual memory space used by the process, in kB (1024 bytes)
-  rrds.push_back(RRDDataSource("mem_curvirt", RRDDataSource::GAUGE));
-  // VmRss: amount of memory that have been mapped into the process' address space, or its resident set size, in kB (1024 bytes)
-  rrds.push_back(RRDDataSource("mem_rss", RRDDataSource::GAUGE));
+	std::vector<RRDDataSource> rrds;
+	// totalcpu = sum of /proc/stat line 1
+	// usage% = 100 * process cpu / totalcpu
+	rrds.push_back(RRDDataSource("cpu_usage", RRDDataSource::GAUGE));
+	// Threads: number of currently running threads
+	rrds.push_back(RRDDataSource("cpu_threads", RRDDataSource::GAUGE));
+	// /proc/PID/status
+	// VmPeak: maximum virtual memory space used by the process, in kB (1024 bytes)
+	rrds.push_back(RRDDataSource("mem_maxvirt", RRDDataSource::GAUGE));
+	// VmSize: current virtual memory space used by the process, in kB (1024 bytes)
+	rrds.push_back(RRDDataSource("mem_curvirt", RRDDataSource::GAUGE));
+	// VmRss: amount of memory that have been mapped into the process' address space, or its resident set size, in kB (1024 bytes)
+	rrds.push_back(RRDDataSource("mem_rss", RRDDataSource::GAUGE));
 
-  // /proc/PID/io
-  // rchar: number of bytes the process read, using any read-like system call (from files, pipes, tty...).
-  rrds.push_back(RRDDataSource("io_rchar", RRDDataSource::COUNTER));
-  // wchar: number of bytes the process wrote using any write-like system call. 
-  rrds.push_back(RRDDataSource("io_wchar", RRDDataSource::COUNTER));
-  // syscr: number of read-like system call invocations that the process performed. 
-  rrds.push_back(RRDDataSource("io_syscr", RRDDataSource::COUNTER));
-  // syscw: number of write-like system call invocations that the process performed.
-  rrds.push_back(RRDDataSource("io_syscw", RRDDataSource::COUNTER));
-  // read_bytes: number of bytes the process directly read from disk. 
-  rrds.push_back(RRDDataSource("io_read_bytes", RRDDataSource::COUNTER));
-  // write_bytes: number of bytes the process originally dirtied in the page-cache (assuming they will go to disk later). 
-  rrds.push_back(RRDDataSource("io_write_bytes", RRDDataSource::COUNTER));
-  // cancelled_write_bytes: number of bytes the process "un-dirtied" - e.g. using an "ftruncate" call that truncated pages from the page-cache. 
-  rrds.push_back(RRDDataSource("io_cancelled_write", RRDDataSource::COUNTER));
+	// /proc/PID/io
+	// rchar: number of bytes the process read, using any read-like system call (from files, pipes, tty...).
+	rrds.push_back(RRDDataSource("io_rchar", RRDDataSource::COUNTER));
+	// wchar: number of bytes the process wrote using any write-like system call.
+	rrds.push_back(RRDDataSource("io_wchar", RRDDataSource::COUNTER));
+	// syscr: number of read-like system call invocations that the process performed.
+	rrds.push_back(RRDDataSource("io_syscr", RRDDataSource::COUNTER));
+	// syscw: number of write-like system call invocations that the process performed.
+	rrds.push_back(RRDDataSource("io_syscw", RRDDataSource::COUNTER));
+	// read_bytes: number of bytes the process directly read from disk.
+	rrds.push_back(RRDDataSource("io_read_bytes", RRDDataSource::COUNTER));
+	// write_bytes: number of bytes the process originally dirtied in the page-cache (assuming they will go to disk later).
+	rrds.push_back(RRDDataSource("io_write_bytes", RRDDataSource::COUNTER));
+	// cancelled_write_bytes: number of bytes the process "un-dirtied" - e.g. using an "ftruncate" call that truncated pages from the page-cache.
+	rrds.push_back(RRDDataSource("io_cancelled_write", RRDDataSource::COUNTER));
 
-  info.pid = pid;
-  info.name = name;
+	info.pid  = pid;
+	info.name = name;
 
-  info.rrd_name = info.name + "_" + info.pid;
-  size_t pos = 0;
-  size_t at;
-  while((at = info.rrd_name.find_first_of(" .-", pos)) != std::string::npos) {
-    info.rrd_name.replace(at, 1, "_");
-    pos = pos + 1;
-  }
+	info.rrd_name = info.name + "_" + info.pid;
+	size_t pos    = 0;
+	size_t at;
+	while ((at = info.rrd_name.find_first_of(" .-", pos)) != std::string::npos) {
+		info.rrd_name.replace(at, 1, "_");
+		pos = pos + 1;
+	}
 
-  info.rrd = new RRDDefinition(info.rrd_name.c_str(), rrds);
+	info.rrd = new RRDDefinition(info.rrd_name.c_str(), rrds);
 
-  std::vector<RRDGraphDataDefinition> defs;
-  std::vector<RRDGraphElement *> els;
+	std::vector<RRDGraphDataDefinition> defs;
+	std::vector<RRDGraphElement *>      els;
 
-  defs.push_back(RRDGraphDataDefinition("cpu_usage", RRDArchive::AVERAGE,
-					info.rrd));
-  defs.push_back(RRDGraphDataDefinition("cpu_threads", RRDArchive::AVERAGE,
-					info.rrd));
+	defs.push_back(RRDGraphDataDefinition("cpu_usage", RRDArchive::AVERAGE, info.rrd));
+	defs.push_back(RRDGraphDataDefinition("cpu_threads", RRDArchive::AVERAGE, info.rrd));
 
-  els.push_back(new RRDGraphLine("cpu_usage", 1, "FF0000", "Usage %"));
-  els.push_back(new RRDGraphGPrint("cpu_usage", RRDArchive::LAST,
-				   "Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("cpu_usage", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("cpu_usage", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("cpu_usage", 1, "FF0000", "Usage %"));
+	els.push_back(new RRDGraphGPrint("cpu_usage", RRDArchive::LAST, "Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("cpu_usage", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("cpu_usage", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphLine("cpu_threads", 1, "008800", "Threads"));
-  els.push_back(new RRDGraphGPrint("cpu_threads", RRDArchive::LAST,
-				   "Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("cpu_threads", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("cpu_threads", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("cpu_threads", 1, "008800", "Threads"));
+	els.push_back(new RRDGraphGPrint("cpu_threads", RRDArchive::LAST, "Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("cpu_threads", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("cpu_threads", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  std::string g1name = info.rrd_name + "_cpu";
-  std::string g1title = std::string("CPU Usage in % and Number Threads for ") + info.name + "(" + pid + ")";
-  info.cpu_graph = new RRDGraphDefinition(g1name.c_str(), info.rrd,
-				       g1title.c_str(), "", defs, els);
+	std::string g1name = info.rrd_name + "_cpu";
+	std::string g1title =
+	  std::string("CPU Usage in % and Number Threads for ") + info.name + "(" + pid + ")";
+	info.cpu_graph = new RRDGraphDefinition(g1name.c_str(), info.rrd, g1title.c_str(), "", defs, els);
 
+	defs.clear();
+	els.clear();
+	defs.push_back(
+	  RRDGraphDataDefinition("mem_maxvirt_kb", RRDArchive::AVERAGE, info.rrd, "mem_maxvirt"));
+	defs.push_back(
+	  RRDGraphDataDefinition("mem_curvirt_kb", RRDArchive::AVERAGE, info.rrd, "mem_curvirt"));
+	defs.push_back(RRDGraphDataDefinition("mem_rss_kb", RRDArchive::AVERAGE, info.rrd, "mem_rss"));
+	defs.push_back(RRDGraphDataDefinition("mem_maxvirt", "mem_maxvirt_kb,1024,*"));
+	defs.push_back(RRDGraphDataDefinition("mem_curvirt", "mem_curvirt_kb,1024,*"));
+	defs.push_back(RRDGraphDataDefinition("mem_rss", "mem_rss_kb,1024,*"));
 
-  defs.clear(); els.clear();
-  defs.push_back(RRDGraphDataDefinition("mem_maxvirt_kb", RRDArchive::AVERAGE,
-					info.rrd, "mem_maxvirt"));
-  defs.push_back(RRDGraphDataDefinition("mem_curvirt_kb", RRDArchive::AVERAGE,
-					info.rrd, "mem_curvirt"));
-  defs.push_back(RRDGraphDataDefinition("mem_rss_kb", RRDArchive::AVERAGE,
-					info.rrd, "mem_rss"));
-  defs.push_back(RRDGraphDataDefinition("mem_maxvirt", "mem_maxvirt_kb,1024,*"));
-  defs.push_back(RRDGraphDataDefinition("mem_curvirt", "mem_curvirt_kb,1024,*"));
-  defs.push_back(RRDGraphDataDefinition("mem_rss", "mem_rss_kb,1024,*"));
+	els.push_back(new RRDGraphArea("mem_maxvirt", "3B7AD9", "VmPeak"));
+	els.push_back(new RRDGraphGPrint("mem_maxvirt", RRDArchive::LAST, "Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("mem_maxvirt", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("mem_maxvirt", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphArea("mem_maxvirt", "3B7AD9", "VmPeak"));
-  els.push_back(new RRDGraphGPrint("mem_maxvirt", RRDArchive::LAST,
-				   "Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("mem_maxvirt", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("mem_maxvirt", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphArea("mem_curvirt", "6FD1BF", "VmSize"));
+	els.push_back(new RRDGraphGPrint("mem_curvirt", RRDArchive::LAST, "Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("mem_curvirt", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("mem_curvirt", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphArea("mem_curvirt", "6FD1BF", "VmSize"));
-  els.push_back(new RRDGraphGPrint("mem_curvirt", RRDArchive::LAST,
-				   "Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("mem_curvirt", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("mem_curvirt", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphArea("mem_rss", "0E6E5C", "VmRSS"));
+	els.push_back(new RRDGraphGPrint("mem_rss", RRDArchive::LAST, " Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("mem_rss", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("mem_rss", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphArea("mem_rss", "0E6E5C", "VmRSS"));
-  els.push_back(new RRDGraphGPrint("mem_rss", RRDArchive::LAST,
-				   " Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("mem_rss", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("mem_rss", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	std::string g2name  = info.rrd_name + "_memory";
+	std::string g2title = std::string("Memory Usage for ") + info.name + "(" + pid + ")";
+	info.mem_graph =
+	  new RRDGraphDefinition(g2name.c_str(), info.rrd, g2title.c_str(), "Bytes", defs, els);
 
-  std::string g2name = info.rrd_name + "_memory";
-  std::string g2title = std::string("Memory Usage for ") + info.name + "(" + pid + ")";
-  info.mem_graph = new RRDGraphDefinition(g2name.c_str(), info.rrd,
-				       g2title.c_str(), "Bytes", defs, els);
+	defs.clear();
+	els.clear();
+	defs.push_back(RRDGraphDataDefinition("io_rchar", RRDArchive::AVERAGE, info.rrd));
+	defs.push_back(RRDGraphDataDefinition("io_syscr", RRDArchive::AVERAGE, info.rrd));
+	defs.push_back(RRDGraphDataDefinition("io_read_bytes", RRDArchive::AVERAGE, info.rrd));
 
+	els.push_back(new RRDGraphLine("io_rchar", 1, "556B2F", "rchar"));
+	els.push_back(new RRDGraphGPrint("io_rchar", RRDArchive::LAST, "Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("io_rchar", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("io_rchar", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  defs.clear();
-  els.clear();
-  defs.push_back(RRDGraphDataDefinition("io_rchar", RRDArchive::AVERAGE,
-					info.rrd));
-  defs.push_back(RRDGraphDataDefinition("io_syscr", RRDArchive::AVERAGE,
-					info.rrd));
-  defs.push_back(RRDGraphDataDefinition("io_read_bytes", RRDArchive::AVERAGE,
-					info.rrd));
-  
-  els.push_back(new RRDGraphLine("io_rchar", 1, "556B2F", "rchar"));
-  els.push_back(new RRDGraphGPrint("io_rchar", RRDArchive::LAST,
-				   "Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_rchar", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_rchar", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("io_syscr", 1, "9ACD32", "syscr"));
+	els.push_back(new RRDGraphGPrint("io_syscr", RRDArchive::LAST, "Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("io_syscr", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("io_syscr", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphLine("io_syscr", 1, "9ACD32", "syscr"));
-  els.push_back(new RRDGraphGPrint("io_syscr", RRDArchive::LAST,
-				   "Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_syscr", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_syscr", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("io_read_bytes", 1, "98FB98", "bytes"));
+	els.push_back(new RRDGraphGPrint("io_read_bytes", RRDArchive::LAST, "Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("io_read_bytes", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("io_read_bytes", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphLine("io_read_bytes", 1, "98FB98", "bytes"));
-  els.push_back(new RRDGraphGPrint("io_read_bytes", RRDArchive::LAST,
-				   "Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_read_bytes", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_read_bytes", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	std::string g3name  = info.rrd_name + "_io_read";
+	std::string g3title = std::string("IO Read Operations for ") + info.name + "(" + pid + ")";
+	info.io_read_graph =
+	  new RRDGraphDefinition(g3name.c_str(), info.rrd, g3title.c_str(), "Bytes", defs, els);
 
-  std::string g3name = info.rrd_name + "_io_read";
-  std::string g3title = std::string("IO Read Operations for ") + info.name + "(" + pid + ")";
-  info.io_read_graph = new RRDGraphDefinition(g3name.c_str(), info.rrd,
-				       g3title.c_str(), "Bytes", defs, els);
+	defs.clear();
+	els.clear();
+	defs.push_back(RRDGraphDataDefinition("io_wchar", RRDArchive::AVERAGE, info.rrd));
+	defs.push_back(RRDGraphDataDefinition("io_syscw", RRDArchive::AVERAGE, info.rrd));
+	defs.push_back(RRDGraphDataDefinition("io_write_bytes", RRDArchive::AVERAGE, info.rrd));
+	defs.push_back(RRDGraphDataDefinition("io_cancelled_write", RRDArchive::AVERAGE, info.rrd));
 
-  defs.clear();
-  els.clear();
-  defs.push_back(RRDGraphDataDefinition("io_wchar", RRDArchive::AVERAGE,
-					info.rrd));
-  defs.push_back(RRDGraphDataDefinition("io_syscw", RRDArchive::AVERAGE,
-					info.rrd));
-  defs.push_back(RRDGraphDataDefinition("io_write_bytes", RRDArchive::AVERAGE,
-					info.rrd));
-  defs.push_back(RRDGraphDataDefinition("io_cancelled_write", RRDArchive::AVERAGE,
-					info.rrd));
-  
-  els.push_back(new RRDGraphLine("io_wchar", 1, "800000", "wchar"));
-  els.push_back(new RRDGraphGPrint("io_wchar", RRDArchive::LAST,
-				   "    Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_wchar", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_wchar", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("io_wchar", 1, "800000", "wchar"));
+	els.push_back(new RRDGraphGPrint("io_wchar", RRDArchive::LAST, "    Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("io_wchar", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("io_wchar", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphLine("io_syscw", 1, "FF0000", "syscw"));
-  els.push_back(new RRDGraphGPrint("io_syscw", RRDArchive::LAST,
-				   "    Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_syscw", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_syscw", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("io_syscw", 1, "FF0000", "syscw"));
+	els.push_back(new RRDGraphGPrint("io_syscw", RRDArchive::LAST, "    Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("io_syscw", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("io_syscw", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphLine("io_write_bytes", 1, "FF8C00", "bytes"));
-  els.push_back(new RRDGraphGPrint("io_write_bytes", RRDArchive::LAST,
-				   "    Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_write_bytes", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_write_bytes", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("io_write_bytes", 1, "FF8C00", "bytes"));
+	els.push_back(new RRDGraphGPrint("io_write_bytes", RRDArchive::LAST, "    Current\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("io_write_bytes", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(new RRDGraphGPrint("io_write_bytes", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  els.push_back(new RRDGraphLine("io_cancelled_write", 1, "FFA07A", "cancelled"));
-  els.push_back(new RRDGraphGPrint("io_cancelled_write", RRDArchive::LAST,
-				   "Current\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_cancelled_write", RRDArchive::AVERAGE,
-				   "Average\\:%8.2lf %s"));
-  els.push_back(new RRDGraphGPrint("io_cancelled_write", RRDArchive::MAX,
-				   "Maximum\\:%8.2lf %s\\n"));
+	els.push_back(new RRDGraphLine("io_cancelled_write", 1, "FFA07A", "cancelled"));
+	els.push_back(new RRDGraphGPrint("io_cancelled_write", RRDArchive::LAST, "Current\\:%8.2lf %s"));
+	els.push_back(
+	  new RRDGraphGPrint("io_cancelled_write", RRDArchive::AVERAGE, "Average\\:%8.2lf %s"));
+	els.push_back(
+	  new RRDGraphGPrint("io_cancelled_write", RRDArchive::MAX, "Maximum\\:%8.2lf %s\\n"));
 
-  std::string g4name = info.rrd_name + "_io_write";
-  std::string g4title = std::string("IO Write Operations for ") + info.name + "(" + pid + ")";
-  info.io_write_graph = new RRDGraphDefinition(g4name.c_str(), info.rrd,
-				       g4title.c_str(), "Bytes", defs, els);
-  rrd_manager->add_rrd(info.rrd);
-  try {
-    rrd_manager->add_graph(info.cpu_graph);
-    rrd_manager->add_graph(info.mem_graph);
-    rrd_manager->add_graph(info.io_read_graph);
-    rrd_manager->add_graph(info.io_write_graph);
+	std::string g4name  = info.rrd_name + "_io_write";
+	std::string g4title = std::string("IO Write Operations for ") + info.name + "(" + pid + ")";
+	info.io_write_graph =
+	  new RRDGraphDefinition(g4name.c_str(), info.rrd, g4title.c_str(), "Bytes", defs, els);
+	rrd_manager->add_rrd(info.rrd);
+	try {
+		rrd_manager->add_graph(info.cpu_graph);
+		rrd_manager->add_graph(info.mem_graph);
+		rrd_manager->add_graph(info.io_read_graph);
+		rrd_manager->add_graph(info.io_write_graph);
 
-    processes_[path] = info;
-    logger->log_info(this->name(), "Started monitoring process: %s (PID: %s)",
-		     info.name.c_str(), info.pid.c_str());
-  } catch (Exception &e) {
-    rrd_manager->remove_rrd(info.rrd);
-    delete info.cpu_graph;
-    delete info.mem_graph;
-    delete info.io_read_graph;
-    delete info.io_write_graph;
-    delete info.rrd;
-    throw;
-  }
+		processes_[path] = info;
+		logger->log_info(this->name(),
+		                 "Started monitoring process: %s (PID: %s)",
+		                 info.name.c_str(),
+		                 info.pid.c_str());
+	} catch (Exception &e) {
+		rrd_manager->remove_rrd(info.rrd);
+		delete info.cpu_graph;
+		delete info.mem_graph;
+		delete info.io_read_graph;
+		delete info.io_write_graph;
+		delete info.rrd;
+		throw;
+	}
 }
-
 
 void
 ProcRRDThread::remove_process(const char *path)
 {
-  if (processes_.find(path) != processes_.end()) {
-    ProcessInfo &info = processes_[path];
-    rrd_manager->remove_rrd(info.rrd);
-    delete info.cpu_graph;
-    delete info.mem_graph;
-    delete info.io_read_graph;
-    delete info.io_write_graph;
-    delete info.rrd;
+	if (processes_.find(path) != processes_.end()) {
+		ProcessInfo &info = processes_[path];
+		rrd_manager->remove_rrd(info.rrd);
+		delete info.cpu_graph;
+		delete info.mem_graph;
+		delete info.io_read_graph;
+		delete info.io_write_graph;
+		delete info.rrd;
 
-    logger->log_info(name(), "Stopped monitoring process: %s (PID: %s)",
-		     info.name.c_str(), info.pid.c_str());
-    processes_.erase(path);
-  }
+		logger->log_info(name(),
+		                 "Stopped monitoring process: %s (PID: %s)",
+		                 info.name.c_str(),
+		                 info.pid.c_str());
+		processes_.erase(path);
+	}
 }
 
 std::string
 ProcRRDThread::get_process_id(const char *process)
 {
-	DIR *dir_p;
-  FILE *file;
+	DIR *          dir_p;
+	FILE *         file;
 	struct dirent *dir_entry_p;
-	std::string result;
-	result="";
+	std::string    result;
+	result = "";
 
-  // Open /proc/ directory
+	// Open /proc/ directory
 	dir_p = opendir("/proc/");
-  // Reading /proc/ entries
+	// Reading /proc/ entries
 	while (NULL != (dir_entry_p = readdir(dir_p))) {
 		// Checking for numbered directories
 		if (strspn(dir_entry_p->d_name, "0123456789") == strlen(dir_entry_p->d_name)) {
-      std::string f = "/proc/" + std::string(dir_entry_p->d_name) + "/status";
-      // open /proc/PID/status
-      file = fopen(f.c_str(), "r");
-      char name[256];
-      if (file) {
-        fscanf(file, "Name: %255s", name);
-        fclose(file);
-      }
-      name[0] = '\0';
-      if (strcmp(process, name) == 0) {
-        result = std::string(dir_entry_p->d_name);
-	      closedir(dir_p);
-	      return result;
-      }
+			std::string f = "/proc/" + std::string(dir_entry_p->d_name) + "/status";
+			// open /proc/PID/status
+			file = fopen(f.c_str(), "r");
+			char name[256];
+			if (file) {
+				fscanf(file, "Name: %255s", name);
+				fclose(file);
+			}
+			name[0] = '\0';
+			if (strcmp(process, name) == 0) {
+				result = std::string(dir_entry_p->d_name);
+				closedir(dir_p);
+				return result;
+			}
 		}
 	}
 	closedir(dir_p);
@@ -557,160 +496,209 @@ ProcRRDThread::get_process_id(const char *process)
 }
 
 void
-ProcRRDThread::get_cpu(unsigned long int* cpus)
+ProcRRDThread::get_cpu(unsigned long int *cpus)
 {
-  FILE *file;
-  file = fopen("/proc/stat", "r");
-  if (file) {
-	  int i = 0;
-	  i = fscanf(file, "cpu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
-	             cpus+1, cpus+2, cpus+3, cpus+4, cpus+5, cpus+6, cpus+7, cpus+8, cpus+9, cpus+10);
-	  cpus[0] = 0;
-	  for (int j=1; j<=i; j++) {
-		  cpus[0] += cpus[j];
-	  }
+	FILE *file;
+	file = fopen("/proc/stat", "r");
+	if (file) {
+		int i   = 0;
+		i       = fscanf(file,
+               "cpu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu",
+               cpus + 1,
+               cpus + 2,
+               cpus + 3,
+               cpus + 4,
+               cpus + 5,
+               cpus + 6,
+               cpus + 7,
+               cpus + 8,
+               cpus + 9,
+               cpus + 10);
+		cpus[0] = 0;
+		for (int j = 1; j <= i; j++) {
+			cpus[0] += cpus[j];
+		}
 
-	  fclose(file);
-  }
+		fclose(file);
+	}
 }
 
 void
 ProcRRDThread::loop()
 {
-  timewait_->mark_start();
-  FILE *file;
-  file = fopen("/proc/net/dev", "r");
-  unsigned long long int recv_bytes, recv_packets, recv_errors, trans_bytes, trans_packets, trans_errors;
-  recv_bytes = recv_packets = recv_errors = trans_bytes = trans_packets = trans_errors = 0;
-  char line[1024];
-  while (file && fgets(line, 1024, file) != NULL){
-    // sscanf the device to get rid of leading whitespaces
-    char dev[100];
-    sscanf(line, "%99s", dev);
+	timewait_->mark_start();
+	FILE *file;
+	file = fopen("/proc/net/dev", "r");
+	unsigned long long int recv_bytes, recv_packets, recv_errors, trans_bytes, trans_packets,
+	  trans_errors;
+	recv_bytes = recv_packets = recv_errors = trans_bytes = trans_packets = trans_errors = 0;
+	char line[1024];
+	while (file && fgets(line, 1024, file) != NULL) {
+		// sscanf the device to get rid of leading whitespaces
+		char dev[100];
+		sscanf(line, "%99s", dev);
 
-    if (strncmp(dev, (netinterface_+":").c_str(), netinterface_.length()+1) == 0){
-      sscanf(line, "%*s %llu %llu %llu %*u %*u %*u %*u %*u %llu %llu %llu %*u %*u %*u %*u %*u", &recv_bytes, &recv_packets, &recv_errors, &trans_bytes, &trans_packets, &trans_errors);
-      break;
-    }
-  }
-  if (file) fclose(file);
-  try {
-	  rrd_manager->add_data("network", "N:%llu:%llu:%llu:%llu:%llu:%llu",
-	                        recv_bytes, recv_packets, recv_errors,
-	                        trans_bytes, trans_packets, trans_errors);
-  } catch (Exception &e) {
-  	logger->log_warn(name(), "Failed to update network RRD, exception follows");
-  	logger->log_warn(name(), e);
-  }
+		if (strncmp(dev, (netinterface_ + ":").c_str(), netinterface_.length() + 1) == 0) {
+			sscanf(line,
+			       "%*s %llu %llu %llu %*u %*u %*u %*u %*u %llu %llu %llu %*u %*u %*u %*u %*u",
+			       &recv_bytes,
+			       &recv_packets,
+			       &recv_errors,
+			       &trans_bytes,
+			       &trans_packets,
+			       &trans_errors);
+			break;
+		}
+	}
+	if (file)
+		fclose(file);
+	try {
+		rrd_manager->add_data("network",
+		                      "N:%llu:%llu:%llu:%llu:%llu:%llu",
+		                      recv_bytes,
+		                      recv_packets,
+		                      recv_errors,
+		                      trans_bytes,
+		                      trans_packets,
+		                      trans_errors);
+	} catch (Exception &e) {
+		logger->log_warn(name(), "Failed to update network RRD, exception follows");
+		logger->log_warn(name(), e);
+	}
 
-  unsigned long int *curcpu = new unsigned long int[11];
-  get_cpu(curcpu);
+	unsigned long int *curcpu = new unsigned long int[11];
+	get_cpu(curcpu);
 
-  for (ProcessMap::iterator i = processes_.begin(); i != processes_.end(); ++i) {
-    file = fopen(("/proc/"+i->second.pid+"/stat").c_str(), "r");
-    unsigned long int cpu[3];
-    if(file) {
-      fscanf(file, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu", cpu+1, cpu+2);
-      cpu[0] = cpu[1] + cpu[2];
-      fclose(file);
-    }
-    file = fopen(("/proc/"+i->second.pid+"/status").c_str(), "r");
-    unsigned long long int vmpeak, vmsize, vmrss;
-    long int threads = 0;
-    vmpeak = vmsize = vmrss = 0;
-    char line[128];
-    while (file && fgets(line, 128, file) != NULL){
-      if (strncmp(line, "VmPeak:", 7) == 0){
-        sscanf(line, "VmPeak: %llu", &vmpeak);
-      }
-      else if (strncmp(line, "VmSize:", 7) == 0){
-        sscanf(line, "VmSize: %llu", &vmsize);
-      }
-      else if (strncmp(line, "VmRSS:", 6) == 0){
-        sscanf(line, "VmRSS: %llu", &vmrss);
-      }
-      else if (strncmp(line, "Threads:", 8) == 0){
-        sscanf(line, "Threads: %ld", &threads);
-        break;
-      }
-    }
-    if (file)  fclose(file);
-    file = fopen(("/proc/"+i->second.pid+"/io").c_str(), "r");
-    unsigned long long int rchar, wchar, syscr, syscw, read_bytes, write_bytes, cancelled_write_bytes;
-    rchar = wchar = syscr = syscw = read_bytes = write_bytes = cancelled_write_bytes = 0;
-    char line2[128];
-    while (file && fgets(line2, 128, file) != NULL){
-      if (strncmp(line2, "rchar:", 6) == 0){
-        sscanf(line2, "rchar: %llu", &rchar);
-      }
-      else if (strncmp(line2, "wchar:", 6) == 0){
-        sscanf(line2, "wchar: %llu", &wchar);
-      }
-      else if (strncmp(line2, "syscr:", 6) == 0){
-        sscanf(line2, "syscr: %llu", &syscr);
-      }
-      else if (strncmp(line2, "syscw:", 6) == 0){
-        sscanf(line2, "syscw: %llu", &syscw);
-      }
-      else if (strncmp(line2, "read_bytes:", 11) == 0){
-        sscanf(line2, "read_bytes: %llu", &read_bytes);
-      }
-      else if (strncmp(line2, "write_bytes:", 12) == 0){
-        sscanf(line2, "write_bytes: %llu", &write_bytes);
-      }
-      else if (strncmp(line2, "cancelled_write_bytes:", 22) == 0){
-        sscanf(line2, "cancelled_write_bytes: %llu", &cancelled_write_bytes);
-        break;
-      }
-    }
-    if(file)
-      fclose(file);
+	for (ProcessMap::iterator i = processes_.begin(); i != processes_.end(); ++i) {
+		file = fopen(("/proc/" + i->second.pid + "/stat").c_str(), "r");
+		unsigned long int cpu[3];
+		if (file) {
+			fscanf(file, "%*d %*s %*c %*d %*d %*d %*d %*d %*u %*u %*u %*u %*u %lu %lu", cpu + 1, cpu + 2);
+			cpu[0] = cpu[1] + cpu[2];
+			fclose(file);
+		}
+		file = fopen(("/proc/" + i->second.pid + "/status").c_str(), "r");
+		unsigned long long int vmpeak, vmsize, vmrss;
+		long int               threads = 0;
+		vmpeak = vmsize = vmrss = 0;
+		char line[128];
+		while (file && fgets(line, 128, file) != NULL) {
+			if (strncmp(line, "VmPeak:", 7) == 0) {
+				sscanf(line, "VmPeak: %llu", &vmpeak);
+			} else if (strncmp(line, "VmSize:", 7) == 0) {
+				sscanf(line, "VmSize: %llu", &vmsize);
+			} else if (strncmp(line, "VmRSS:", 6) == 0) {
+				sscanf(line, "VmRSS: %llu", &vmrss);
+			} else if (strncmp(line, "Threads:", 8) == 0) {
+				sscanf(line, "Threads: %ld", &threads);
+				break;
+			}
+		}
+		if (file)
+			fclose(file);
+		file = fopen(("/proc/" + i->second.pid + "/io").c_str(), "r");
+		unsigned long long int rchar, wchar, syscr, syscw, read_bytes, write_bytes,
+		  cancelled_write_bytes;
+		rchar = wchar = syscr = syscw = read_bytes = write_bytes = cancelled_write_bytes = 0;
+		char line2[128];
+		while (file && fgets(line2, 128, file) != NULL) {
+			if (strncmp(line2, "rchar:", 6) == 0) {
+				sscanf(line2, "rchar: %llu", &rchar);
+			} else if (strncmp(line2, "wchar:", 6) == 0) {
+				sscanf(line2, "wchar: %llu", &wchar);
+			} else if (strncmp(line2, "syscr:", 6) == 0) {
+				sscanf(line2, "syscr: %llu", &syscr);
+			} else if (strncmp(line2, "syscw:", 6) == 0) {
+				sscanf(line2, "syscw: %llu", &syscw);
+			} else if (strncmp(line2, "read_bytes:", 11) == 0) {
+				sscanf(line2, "read_bytes: %llu", &read_bytes);
+			} else if (strncmp(line2, "write_bytes:", 12) == 0) {
+				sscanf(line2, "write_bytes: %llu", &write_bytes);
+			} else if (strncmp(line2, "cancelled_write_bytes:", 22) == 0) {
+				sscanf(line2, "cancelled_write_bytes: %llu", &cancelled_write_bytes);
+				break;
+			}
+		}
+		if (file)
+			fclose(file);
 
-    if(curcpu[0] < lastcpu_[0] || curcpu[1] < lastcpu_[1] || curcpu[2] < lastcpu_[2] || curcpu[3] < lastcpu_[3] || curcpu[4] < lastcpu_[4] || curcpu[5] < lastcpu_[5] || curcpu[6] < lastcpu_[6] || curcpu[7] < lastcpu_[7] || curcpu[8] < lastcpu_[8] || curcpu[9] < lastcpu_[9] || curcpu[10] < lastcpu_[10] || cpu[0] < i->second.last_cpu[0] || cpu[1] < i->second.last_cpu[1] || cpu[2] < i->second.last_cpu[2]) {
-      // value rollover for atleast one value, ignore cpu data
-      try {
-      	rrd_manager->add_data(i->second.rrd_name.c_str(), "N:U:%ld:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu", threads, vmpeak, vmsize, vmrss, rchar, wchar, syscr, syscw, read_bytes, write_bytes, cancelled_write_bytes);
-      } catch (Exception &e) {
-      	logger->log_warn(name(), "Failed to update %s RRD, exception follows", i->second.rrd_name.c_str());
-      	logger->log_warn(name(), e);
-      }
-    }
-    else {
-      double cpuuse = 100.0 * (double)(cpu[0] - i->second.last_cpu[0]) / (double)(curcpu[0] - lastcpu_[0]);
-      try {
-      	rrd_manager->add_data(i->second.rrd_name.c_str(), "N:%f:%ld:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu", cpuuse, threads, vmpeak, vmsize, vmrss, rchar, wchar, syscr, syscw, read_bytes, write_bytes, cancelled_write_bytes);
-      } catch (Exception &e) {
-      	logger->log_warn(name(), "Failed to update %s RRD, exception follows", i->second.rrd_name.c_str());
-      	logger->log_warn(name(), e);
-      }
-    }
+		if (curcpu[0] < lastcpu_[0] || curcpu[1] < lastcpu_[1] || curcpu[2] < lastcpu_[2]
+		    || curcpu[3] < lastcpu_[3] || curcpu[4] < lastcpu_[4] || curcpu[5] < lastcpu_[5]
+		    || curcpu[6] < lastcpu_[6] || curcpu[7] < lastcpu_[7] || curcpu[8] < lastcpu_[8]
+		    || curcpu[9] < lastcpu_[9] || curcpu[10] < lastcpu_[10] || cpu[0] < i->second.last_cpu[0]
+		    || cpu[1] < i->second.last_cpu[1] || cpu[2] < i->second.last_cpu[2]) {
+			// value rollover for atleast one value, ignore cpu data
+			try {
+				rrd_manager->add_data(i->second.rrd_name.c_str(),
+				                      "N:U:%ld:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu",
+				                      threads,
+				                      vmpeak,
+				                      vmsize,
+				                      vmrss,
+				                      rchar,
+				                      wchar,
+				                      syscr,
+				                      syscw,
+				                      read_bytes,
+				                      write_bytes,
+				                      cancelled_write_bytes);
+			} catch (Exception &e) {
+				logger->log_warn(name(),
+				                 "Failed to update %s RRD, exception follows",
+				                 i->second.rrd_name.c_str());
+				logger->log_warn(name(), e);
+			}
+		} else {
+			double cpuuse =
+			  100.0 * (double)(cpu[0] - i->second.last_cpu[0]) / (double)(curcpu[0] - lastcpu_[0]);
+			try {
+				rrd_manager->add_data(i->second.rrd_name.c_str(),
+				                      "N:%f:%ld:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu:%llu",
+				                      cpuuse,
+				                      threads,
+				                      vmpeak,
+				                      vmsize,
+				                      vmrss,
+				                      rchar,
+				                      wchar,
+				                      syscr,
+				                      syscw,
+				                      read_bytes,
+				                      write_bytes,
+				                      cancelled_write_bytes);
+			} catch (Exception &e) {
+				logger->log_warn(name(),
+				                 "Failed to update %s RRD, exception follows",
+				                 i->second.rrd_name.c_str());
+				logger->log_warn(name(), e);
+			}
+		}
 
-    i->second.last_cpu[0] = cpu[0];
-  }
+		i->second.last_cpu[0] = cpu[0];
+	}
 
-  lastcpu_ = curcpu;
+	lastcpu_ = curcpu;
 
-  timewait_->wait_systime();
+	timewait_->wait_systime();
 }
 
 void
 ProcRRDThread::config_tag_changed(const char *new_tag)
 {
-  // ignored
+	// ignored
 }
-
 
 void
 ProcRRDThread::config_value_changed(const Configuration::ValueIterator *v)
 {
-  if (v->is_string()) {
-    remove_process(v->path());
-    std::string name = v->get_string();
-    std::string pid = get_process_id(name.c_str());
-    add_process(v->path(), pid, name);
-  } else {
-    logger->log_warn(name(), "Non-string value at %s, ignoring", v->path());
-  }
+	if (v->is_string()) {
+		remove_process(v->path());
+		std::string name = v->get_string();
+		std::string pid  = get_process_id(name.c_str());
+		add_process(v->path(), pid, name);
+	} else {
+		logger->log_warn(name(), "Non-string value at %s, ignoring", v->path());
+	}
 }
 
 void
@@ -721,6 +709,5 @@ ProcRRDThread::config_comment_changed(const Configuration::ValueIterator *v)
 void
 ProcRRDThread::config_value_erased(const char *path)
 {
-		   
-  remove_process(path);
+	remove_process(path);
 }

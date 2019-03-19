@@ -21,11 +21,11 @@
  */
 
 #include "biward_drive_mode.h"
-#include "forward_drive_mode.h"
-#include "backward_drive_mode.h"
 
-namespace fawkes
-{
+#include "backward_drive_mode.h"
+#include "forward_drive_mode.h"
+
+namespace fawkes {
 
 /** @class BiwardDriveModule <plugins/colli/drive_modes/biward_drive_mode.h>
  * This is the SlowBiward drive-module. It is inherited from  the abstract drive mode
@@ -39,34 +39,32 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-BiwardDriveModule::BiwardDriveModule( ForwardDriveModule*  forward,
-                                      BackwardDriveModule* backward,
-                                      Logger* logger,
-                                      Configuration* config )
- : AbstractDriveMode(logger, config)
+BiwardDriveModule::BiwardDriveModule(ForwardDriveModule * forward,
+                                     BackwardDriveModule *backward,
+                                     Logger *             logger,
+                                     Configuration *      config)
+: AbstractDriveMode(logger, config)
 {
-  logger_->log_debug("BiwardDriveModule", "(Constructor): Entering...");
-  drive_mode_ = NavigatorInterface::AllowBackward;
-  mod_forward_  = forward;
-  mod_backward_ = backward;
+	logger_->log_debug("BiwardDriveModule", "(Constructor): Entering...");
+	drive_mode_   = NavigatorInterface::AllowBackward;
+	mod_forward_  = forward;
+	mod_backward_ = backward;
 
-  count_forward_ = 1;
+	count_forward_ = 1;
 
-  max_trans_ = config_->get_float( "/plugins/colli/drive_mode/normal/max_trans" );
-  max_rot_    = config_->get_float( "/plugins/colli/drive_mode/normal/max_rot" );
+	max_trans_ = config_->get_float("/plugins/colli/drive_mode/normal/max_trans");
+	max_rot_   = config_->get_float("/plugins/colli/drive_mode/normal/max_rot");
 
-  logger_->log_debug("BiwardDriveModule", "(Constructor): Exiting...");
+	logger_->log_debug("BiwardDriveModule", "(Constructor): Exiting...");
 }
-
 
 /** Destruct your local values here.
  */
 BiwardDriveModule::~BiwardDriveModule()
 {
-  logger_->log_debug("BiwardDriveModule", "(Destructor): Entering...");
-  logger_->log_debug("BiwardDriveModule", "(Destructor): Exiting...");
+	logger_->log_debug("BiwardDriveModule", "(Destructor): Entering...");
+	logger_->log_debug("BiwardDriveModule", "(Destructor): Exiting...");
 }
-
 
 /* ************************************************************************** */
 /* ***********************        U P D A T E       ************************* */
@@ -98,51 +96,51 @@ BiwardDriveModule::~BiwardDriveModule()
 void
 BiwardDriveModule::update()
 {
-  // Just to take care.
-  proposed_.x = proposed_.y = proposed_.rot = 0.f;
+	// Just to take care.
+	proposed_.x = proposed_.y = proposed_.rot = 0.f;
 
-  // Our drive mode (choose between forward and backward)
-  AbstractDriveMode * drive_mode = NULL;
+	// Our drive mode (choose between forward and backward)
+	AbstractDriveMode *drive_mode = NULL;
 
-  // search the correct drive mode
-  float angle_to_target = atan2( local_target_.y, local_target_.x );
+	// search the correct drive mode
+	float angle_to_target = atan2(local_target_.y, local_target_.x);
 
-  if ( count_forward_ == 1 && fabs( angle_to_target ) > M_PI_2+0.1 )
-    count_forward_ = -1;
+	if (count_forward_ == 1 && fabs(angle_to_target) > M_PI_2 + 0.1)
+		count_forward_ = -1;
 
-  else if ( count_forward_ == 1 )
-    count_forward_ = 1;
+	else if (count_forward_ == 1)
+		count_forward_ = 1;
 
-  else if ( count_forward_ == -1 && fabs( angle_to_target ) < M_PI_2-0.1 )
-    count_forward_ = 1;
+	else if (count_forward_ == -1 && fabs(angle_to_target) < M_PI_2 - 0.1)
+		count_forward_ = 1;
 
-  else if ( count_forward_ == -1 )
-    count_forward_ = -1;
+	else if (count_forward_ == -1)
+		count_forward_ = -1;
 
-  else {
-    logger_->log_debug("BiwardDriveModule", "Undefined state");
-    count_forward_ = 0;
-  }
+	else {
+		logger_->log_debug("BiwardDriveModule", "Undefined state");
+		count_forward_ = 0;
+	}
 
-  if ( count_forward_ == 1 )
-    drive_mode = mod_forward_;
-  else
-    drive_mode = mod_backward_;
+	if (count_forward_ == 1)
+		drive_mode = mod_forward_;
+	else
+		drive_mode = mod_backward_;
 
-  // set the current info to the drive mode
-  drive_mode->set_current_robo_pos( robot_.x, robot_.y, robot_.ori );
-  drive_mode->set_current_robo_speed( robot_vel_.x, robot_vel_.y, robot_vel_.rot );
-  drive_mode->set_current_target( target_.x, target_.y, target_.ori );
-  drive_mode->set_local_target( local_target_.x, local_target_.y );
-  drive_mode->set_local_trajec( local_trajec_.x, local_trajec_.y );
-  drive_mode->set_current_colli_mode( orient_mode_, stop_at_target_ );
+	// set the current info to the drive mode
+	drive_mode->set_current_robo_pos(robot_.x, robot_.y, robot_.ori);
+	drive_mode->set_current_robo_speed(robot_vel_.x, robot_vel_.y, robot_vel_.rot);
+	drive_mode->set_current_target(target_.x, target_.y, target_.ori);
+	drive_mode->set_local_target(local_target_.x, local_target_.y);
+	drive_mode->set_local_trajec(local_trajec_.x, local_trajec_.y);
+	drive_mode->set_current_colli_mode(orient_mode_, stop_at_target_);
 
-  // update the drive mode
-  drive_mode->update();
+	// update the drive mode
+	drive_mode->update();
 
-  // get the values from the drive mode
-  proposed_.x   = drive_mode->get_proposed_trans_x();
-  proposed_.rot = drive_mode->get_proposed_rot();
+	// get the values from the drive mode
+	proposed_.x   = drive_mode->get_proposed_trans_x();
+	proposed_.rot = drive_mode->get_proposed_rot();
 }
 
 } // namespace fawkes

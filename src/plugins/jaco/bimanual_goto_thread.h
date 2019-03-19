@@ -25,65 +25,70 @@
 
 #include "types.h"
 
-#include <core/threading/thread.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
 
 namespace fawkes {
-  class Mutex;
+class Mutex;
 }
-class JacoBimanualGotoThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect
+class JacoBimanualGotoThread : public fawkes::Thread,
+                               public fawkes::LoggingAspect,
+                               public fawkes::ConfigurableAspect,
+                               public fawkes::BlackBoardAspect
 {
- public:
-  JacoBimanualGotoThread(fawkes::jaco_dual_arm_t *arms);
-  virtual ~JacoBimanualGotoThread();
+public:
+	JacoBimanualGotoThread(fawkes::jaco_dual_arm_t *arms);
+	virtual ~JacoBimanualGotoThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  virtual bool final();
+	virtual bool final();
 
-  virtual void stop();
-  virtual void move_gripper(float l_f1, float l_f2, float l_f3, float r_f1, float r_f2, float r_f3);
+	virtual void stop();
+	virtual void move_gripper(float l_f1, float l_f2, float l_f3, float r_f1, float r_f2, float r_f3);
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  void _lock_queues() const;
-  void _unlock_queues() const;
-  void _enqueue_targets(fawkes::RefPtr<fawkes::jaco_target_t> l,
-                        fawkes::RefPtr<fawkes::jaco_target_t> r);
+private:
+	void _lock_queues() const;
+	void _unlock_queues() const;
+	void _enqueue_targets(fawkes::RefPtr<fawkes::jaco_target_t> l,
+	                      fawkes::RefPtr<fawkes::jaco_target_t> r);
 
-  void _move_grippers();
-  void _exec_trajecs();
+	void _move_grippers();
+	void _exec_trajecs();
 
-  void _check_final();
+	void _check_final();
 
-  typedef struct arm_struct {
-    fawkes::jaco_arm_t                    *arm;
-    fawkes::RefPtr<fawkes::jaco_target_t> target;
-    float                                 finger_last[4]; // 3 positions + 1 counter
-  } arm_struct_t;
+	typedef struct arm_struct
+	{
+		fawkes::jaco_arm_t *                  arm;
+		fawkes::RefPtr<fawkes::jaco_target_t> target;
+		float                                 finger_last[4]; // 3 positions + 1 counter
+	} arm_struct_t;
 
-  struct {
-    arm_struct_t l;
-    arm_struct_t r;
-  } arms_;
+	struct
+	{
+		arm_struct_t l;
+		arm_struct_t r;
+	} arms_;
 
-  arm_struct_t* v_arms_[2]; // just a helper, to be able to iterate over both arms
+	arm_struct_t *v_arms_[2]; // just a helper, to be able to iterate over both arms
 
-  fawkes::jaco_dual_arm_t *dual_arms_; // have redundancy now, but keep this just to be sure
+	fawkes::jaco_dual_arm_t *dual_arms_; // have redundancy now, but keep this just to be sure
 
-  fawkes::Mutex* final_mutex_;
-  bool final_;
+	fawkes::Mutex *final_mutex_;
+	bool           final_;
 };
-
 
 #endif

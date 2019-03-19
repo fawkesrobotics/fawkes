@@ -21,13 +21,12 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <core/exceptions/software.h>
+#include <sys/utsname.h>
 #include <utils/system/hostinfo.h>
 
-#include <core/exceptions/software.h>
-
-#include <sys/utsname.h>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
 namespace fawkes {
 
@@ -42,29 +41,27 @@ namespace fawkes {
 /** Constructor. */
 HostInfo::HostInfo()
 {
-  utsname = (struct ::utsname *)malloc(sizeof(struct ::utsname));
+	utsname = (struct ::utsname *)malloc(sizeof(struct ::utsname));
 
-  if ( uname(utsname) != 0 ) {
-	  ::free(utsname);
-    utsname = NULL;
-    throw NullPointerException("Could not call uname");
-  }
+	if (uname(utsname) != 0) {
+		::free(utsname);
+		utsname = NULL;
+		throw NullPointerException("Could not call uname");
+	}
 
-  shortname_ = NULL;
-  domain_name = NULL;
+	shortname_  = NULL;
+	domain_name = NULL;
 
-  update();
+	update();
 }
-
 
 /** Destructor. */
 HostInfo::~HostInfo()
 {
-  free(utsname);
-  free(shortname_);
-  free(domain_name);
+	free(utsname);
+	free(shortname_);
+	free(domain_name);
 }
-
 
 /** Update information.
  * Gathers the information again.
@@ -72,30 +69,29 @@ HostInfo::~HostInfo()
 void
 HostInfo::update()
 {
-  if ( shortname_ != NULL ) {
-    free(shortname_);
-  }
-  if (domain_name != NULL) {
-    free(domain_name);
-  }
+	if (shortname_ != NULL) {
+		free(shortname_);
+	}
+	if (domain_name != NULL) {
+		free(domain_name);
+	}
 
-  char *dot;
-  if ( (dot = strchr(utsname->nodename, '.')) == NULL ) {
-    shortname_  = strdup(utsname->nodename);
-    domain_name = strdup("");
-  } else {
-    int short_length  = dot - utsname->nodename + 1;
-    int domain_length = strlen(utsname->nodename) - short_length + 1;
-    shortname_ = (char *)malloc(short_length);
-    shortname_[short_length - 1] = 0;
-    strncpy(shortname_, utsname->nodename, short_length - 1);
+	char *dot;
+	if ((dot = strchr(utsname->nodename, '.')) == NULL) {
+		shortname_  = strdup(utsname->nodename);
+		domain_name = strdup("");
+	} else {
+		int short_length             = dot - utsname->nodename + 1;
+		int domain_length            = strlen(utsname->nodename) - short_length + 1;
+		shortname_                   = (char *)malloc(short_length);
+		shortname_[short_length - 1] = 0;
+		strncpy(shortname_, utsname->nodename, short_length - 1);
 
-    domain_name = (char *)malloc(domain_length);
-    domain_name[domain_length - 1] = 0;
-    strncpy(domain_name, dot + 1, domain_length - 1);
-  }
+		domain_name                    = (char *)malloc(domain_length);
+		domain_name[domain_length - 1] = 0;
+		strncpy(domain_name, dot + 1, domain_length - 1);
+	}
 }
-
 
 /** Get full hostname.
  * @return hostname
@@ -103,9 +99,8 @@ HostInfo::update()
 const char *
 HostInfo::name()
 {
-  return utsname->nodename;
+	return utsname->nodename;
 }
-
 
 /** Get short hostname (up to first dot).
  * @return short hostname
@@ -113,9 +108,8 @@ HostInfo::name()
 const char *
 HostInfo::short_name()
 {
-  return shortname_;
+	return shortname_;
 }
-
 
 /** Get domain name (after first dot or none if no dot in name).
  * @return domain name
@@ -123,9 +117,8 @@ HostInfo::short_name()
 const char *
 HostInfo::domain()
 {
-  return domain_name;
+	return domain_name;
 }
-
 
 /** Get architecture (like i686 or x86_64).
  * @return architecture
@@ -133,9 +126,8 @@ HostInfo::domain()
 const char *
 HostInfo::arch()
 {
-  return utsname->machine;
+	return utsname->machine;
 }
-
 
 /** Get system name (like Linux).
  * @return system name
@@ -143,9 +135,8 @@ HostInfo::arch()
 const char *
 HostInfo::sys_name()
 {
-  return utsname->sysname;
+	return utsname->sysname;
 }
-
 
 /** Get system release (kernel version on Linux).
  * @return system release
@@ -153,9 +144,8 @@ HostInfo::sys_name()
 const char *
 HostInfo::sys_release()
 {
-  return utsname->release;
+	return utsname->release;
 }
-
 
 /** Get system version (build date on Linux).
  * @return system version
@@ -163,7 +153,7 @@ HostInfo::sys_release()
 const char *
 HostInfo::sys_version()
 {
-  return utsname->version;
+	return utsname->version;
 }
 
 } // end namespace fawkes

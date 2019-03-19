@@ -21,6 +21,7 @@
  */
 
 #include "motion_thread.h"
+
 #include "controller.h"
 
 /** @class KatanaMotionThread "motion_thread.h"
@@ -42,17 +43,16 @@
  * @param katana katana controller base class
  * @param logger logger
  */
-KatanaMotionThread::KatanaMotionThread(const char * thread_name,
-				       fawkes::RefPtr<fawkes::KatanaController> katana,
-				       fawkes::Logger *logger)
-  : Thread(thread_name, Thread::OPMODE_CONTINUOUS)
+KatanaMotionThread::KatanaMotionThread(const char *                             thread_name,
+                                       fawkes::RefPtr<fawkes::KatanaController> katana,
+                                       fawkes::Logger *                         logger)
+: Thread(thread_name, Thread::OPMODE_CONTINUOUS)
 {
-  _katana     = katana;
-  _logger     = logger;
-  _finished   = false;
-  _error_code = 0;
+	_katana     = katana;
+	_logger     = logger;
+	_finished   = false;
+	_error_code = 0;
 }
-
 
 /** Did the motion finish already?
  * @return true if the motion was finished, flase otherwise
@@ -60,9 +60,8 @@ KatanaMotionThread::KatanaMotionThread(const char * thread_name,
 bool
 KatanaMotionThread::finished() const
 {
-  return _finished;
+	return _finished;
 }
-
 
 /** Error code.
  * @return error code, one or more of the ERROR_* constants from the
@@ -71,9 +70,8 @@ KatanaMotionThread::finished() const
 unsigned int
 KatanaMotionThread::error_code() const
 {
-  return _error_code;
+	return _error_code;
 }
-
 
 /** Reset for next execution.
  * Resets _finished and _error_code. If you override this method call the base
@@ -83,6 +81,6 @@ KatanaMotionThread::error_code() const
 void
 KatanaMotionThread::reset()
 {
-  _finished   = false;
-  _error_code = 0;
+	_finished   = false;
+	_error_code = 0;
 }

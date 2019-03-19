@@ -23,49 +23,50 @@
 #ifndef _NAVGRAPH_CONSTRAINTS_TIMED_RESERVATION_LIST_NODE_CONSTRAINT_H_
 #define _NAVGRAPH_CONSTRAINTS_TIMED_RESERVATION_LIST_NODE_CONSTRAINT_H_
 
-#include <navgraph/constraints/static_list_node_constraint.h>
-
-#include <vector>
-#include <string>
-
-#include <utils/time/time.h>
-#include <navgraph/navgraph.h>
 #include <logging/logger.h>
+#include <navgraph/constraints/static_list_node_constraint.h>
+#include <navgraph/navgraph.h>
+#include <utils/time/time.h>
 
-namespace fawkes{
+#include <string>
+#include <vector>
 
+namespace fawkes {
 
 class NavGraphTimedReservationListNodeConstraint : public NavGraphNodeConstraint
 {
- public:
-   NavGraphTimedReservationListNodeConstraint(Logger *logger, std::string constraint_name, fawkes::Clock *clock);
+public:
+	NavGraphTimedReservationListNodeConstraint(Logger *       logger,
+	                                           std::string    constraint_name,
+	                                           fawkes::Clock *clock);
 
-   NavGraphTimedReservationListNodeConstraint(Logger *logger, std::string constraint_name, fawkes::Clock *clock,
-		   std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> node_time_list );
+	NavGraphTimedReservationListNodeConstraint(
+	  Logger *                                                   logger,
+	  std::string                                                constraint_name,
+	  fawkes::Clock *                                            clock,
+	  std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> node_time_list);
 
-  virtual ~NavGraphTimedReservationListNodeConstraint();
+	virtual ~NavGraphTimedReservationListNodeConstraint();
 
-  const std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> &  node_time_list() const;
+	const std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> &node_time_list() const;
 
-  void add_node(const fawkes::NavGraphNode &node, const fawkes::Time valid_time);
-  void add_nodes(const std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> &timed_nodes);
-  void remove_node(const fawkes::NavGraphNode &node);
-  void clear_nodes();
-  bool has_node(const fawkes::NavGraphNode &node);
+	void add_node(const fawkes::NavGraphNode &node, const fawkes::Time valid_time);
+	void add_nodes(const std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> &timed_nodes);
+	void remove_node(const fawkes::NavGraphNode &node);
+	void clear_nodes();
+	bool has_node(const fawkes::NavGraphNode &node);
 
-  virtual bool compute(void) throw();
-  virtual bool blocks(const fawkes::NavGraphNode &node) throw();
+	virtual bool compute(void) throw();
+	virtual bool blocks(const fawkes::NavGraphNode &node) throw();
 
- private:
-  std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> node_time_list_;
-  bool modified_;
-  Logger *logger_;
-  fawkes::Clock *clock_;
-  std::string constraint_name_;
-
+private:
+	std::vector<std::pair<fawkes::NavGraphNode, fawkes::Time>> node_time_list_;
+	bool                                                       modified_;
+	Logger *                                                   logger_;
+	fawkes::Clock *                                            clock_;
+	std::string                                                constraint_name_;
 };
 
 } // end namespace fawkes
 
 #endif
-

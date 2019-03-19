@@ -32,15 +32,15 @@ class AspectManager;
 
 class AspectProviderAspectIniFin : public AspectIniFin
 {
- public:
-  AspectProviderAspectIniFin(AspectManager *manager);
+public:
+	AspectProviderAspectIniFin(AspectManager *manager);
 
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
-  virtual bool prepare_finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
+	virtual bool prepare_finalize(Thread *thread);
 
- private:
-  AspectManager *aspect_manager_;
+private:
+	AspectManager *aspect_manager_;
 };
 
 } // end namespace fawkes

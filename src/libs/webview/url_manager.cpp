@@ -20,13 +20,11 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <webview/url_manager.h>
-#include <webview/router.h>
-#include <core/threading/mutex.h>
 #include <core/exception.h>
+#include <core/threading/mutex.h>
+#include <webview/url_manager.h>
 
 namespace fawkes {
-
 
 /** @class WebUrlManager <webview/url_manager.h>
  * Manage URL mappings.
@@ -36,17 +34,14 @@ namespace fawkes {
  */
 
 /** Constructor. */
-WebUrlManager::WebUrlManager()
-	: router_(std::make_shared<WebviewRouter<Handler>>())
+WebUrlManager::WebUrlManager() : router_(std::make_shared<WebviewRouter<Handler>>())
 {
 }
-
 
 /** Destructor. */
 WebUrlManager::~WebUrlManager()
 {
 }
-
 
 /** Add a request processor.
  * @param method HTTP method to register for
@@ -56,7 +51,7 @@ WebUrlManager::~WebUrlManager()
  * for the given URL prefix.
  */
 void
-WebUrlManager::add_handler(WebRequest::Method method, const std::string& path, Handler handler)
+WebUrlManager::add_handler(WebRequest::Method method, const std::string &path, Handler handler)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	router_->add(method, path, handler, 0);
@@ -72,22 +67,24 @@ WebUrlManager::add_handler(WebRequest::Method method, const std::string& path, H
  * for the given URL prefix.
  */
 void
-WebUrlManager::add_handler(WebRequest::Method method, const std::string& path, Handler handler, int weight)
+WebUrlManager::add_handler(WebRequest::Method method,
+                           const std::string &path,
+                           Handler            handler,
+                           int                weight)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
 	router_->add(method, path, handler, weight);
 }
-
 
 /** Remove a request processor.
  * @param method HTTP method to unregister from
  * @param path path pattern to unregister from
  */
 void
-WebUrlManager::remove_handler(WebRequest::Method method, const std::string& path)
+WebUrlManager::remove_handler(WebRequest::Method method, const std::string &path)
 {
 	std::lock_guard<std::mutex> lock(mutex_);
-  router_->remove(method, path);
+	router_->remove(method, path);
 }
 
 /** Lock mutex and find processor.
@@ -103,7 +100,7 @@ WebUrlManager::process_request(WebRequest *request)
 	std::lock_guard<std::mutex> lock(mutex_);
 	try {
 		std::map<std::string, std::string> path_args;
-		Handler handler = router_->find_handler(request, path_args);
+		Handler                            handler = router_->find_handler(request, path_args);
 		request->set_path_args(std::move(path_args));
 		return handler(request);
 	} catch (NullPointerException &e) {

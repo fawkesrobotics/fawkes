@@ -21,19 +21,19 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
-#include <netcomm/utils/resolver.h>
-#include <netcomm/utils/resolver_thread.h>
+#include <arpa/inet.h>
 #include <core/exceptions/system.h>
 #include <core/threading/mutex_locker.h>
+#include <netcomm/utils/resolver.h>
+#include <netcomm/utils/resolver_thread.h>
+#include <netinet/in.h>
+#include <sys/types.h>
 #include <utils/system/hostinfo.h>
 
-#include <sys/types.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <cstring>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <netdb.h>
 #include <unistd.h>
 
 namespace fawkes {
@@ -78,34 +78,32 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * This constructor us available if Avahi is available at compile time.
  * @param avahi_thread Optional avahi thread, Avahi is not used if NULL
  */
 NetworkNameResolver::NetworkNameResolver(AvahiThread *avahi_thread)
 {
-  addr2name_cache.clear();
-  name2addr_cache.clear();
-  cache_timeout_ = 30;
+	addr2name_cache.clear();
+	name2addr_cache.clear();
+	cache_timeout_ = 30;
 
-  resolver_thread = new NetworkNameResolverThread(this, avahi_thread);
-  resolver_thread->start();
-  // Wait for thread to start
-  usleep(0);
+	resolver_thread = new NetworkNameResolverThread(this, avahi_thread);
+	resolver_thread->start();
+	// Wait for thread to start
+	usleep(0);
 
-  host_info_ = new HostInfo();
+	host_info_ = new HostInfo();
 }
-
 
 /** Destructor. */
 NetworkNameResolver::~NetworkNameResolver()
 {
-  flush_cache();
-  resolver_thread->cancel();
-  resolver_thread->join();
-  delete resolver_thread;
-  delete host_info_;
+	flush_cache();
+	resolver_thread->cancel();
+	resolver_thread->join();
+	delete resolver_thread;
+	delete host_info_;
 }
 
 /** Set cache timeout.
@@ -117,9 +115,8 @@ NetworkNameResolver::~NetworkNameResolver()
 void
 NetworkNameResolver::set_cache_timeout(unsigned int sec)
 {
-  cache_timeout_ = sec;
+	cache_timeout_ = sec;
 }
-
 
 /** Get cache timeout.
  * @return resolution cache timeout in seconds
@@ -127,9 +124,8 @@ NetworkNameResolver::set_cache_timeout(unsigned int sec)
 unsigned int
 NetworkNameResolver::cache_timeout()
 {
-  return cache_timeout_;
+	return cache_timeout_;
 }
-
 
 /** Flush cache.
  * Flushes the caches for name to address and address to name mappings.
@@ -137,19 +133,19 @@ NetworkNameResolver::cache_timeout()
 void
 NetworkNameResolver::flush_cache()
 {
-  addr2name_cache.lock();
-  addr2name_cache.clear();
-  addr2name_cache.unlock();
-  name2addr_cache.lock();
-  while ( ! name2addr_cache.empty() ) {
-    n2acit = name2addr_cache.begin();
-    free(n2acit->second.first);
-    name2addr_cache.erase(n2acit);
-  }
-  name2addr_cache.unlock();
-  host_info_->update();
+	addr2name_cache.lock();
+	addr2name_cache.clear();
+	addr2name_cache.unlock();
+	name2addr_cache.lock();
+	while (!name2addr_cache.empty()) {
+		n2acit = name2addr_cache.begin();
+		free(n2acit->second.first);
+		name2addr_cache.erase(n2acit);
+	}
+	name2addr_cache.unlock();
+	host_info_->update();
 
-  /* Leads to a segfault, if one element is in the queue it is deleted
+	/* Leads to a segfault, if one element is in the queue it is deleted
    * two times, do not use
   for (n2acit = name2addr_cache.begin(); n2acit != name2addr_cache.end(); ++n2acit) {
     free((*n2acit).first);
@@ -157,7 +153,6 @@ NetworkNameResolver::flush_cache()
   }
   */
 }
-
 
 /** Resolve name.
  * This will lookup a name from the cache and return the value if available.
@@ -171,29 +166,27 @@ NetworkNameResolver::flush_cache()
  * @return true if resolution was successful, false otherwise
  */
 bool
-NetworkNameResolver::resolve_name(const char *name,
-				  struct sockaddr **addr, socklen_t *addrlen)
+NetworkNameResolver::resolve_name(const char *name, struct sockaddr **addr, socklen_t *addrlen)
 {
-  name2addr_cache.lock();
+	name2addr_cache.lock();
 
-  if ( name2addr_cache.find( (char *)name ) != name2addr_cache.end() ) {
-    // the name is in the cache, refetch?
-    std::pair<struct sockaddr *, time_t> &nrec = name2addr_cache[(char *)name];
-    if ( nrec.second <= time(NULL) ) {
-      // entry outdated, retry
-      resolver_thread->resolve_name(name);
-    }
-    *addr = nrec.first;
-    *addrlen = sizeof(struct sockaddr_in);
-    name2addr_cache.unlock();
-    return true;
-  } else {
-    name2addr_cache.unlock();
-    resolver_thread->resolve_name(name);
-    return false;
-  }
+	if (name2addr_cache.find((char *)name) != name2addr_cache.end()) {
+		// the name is in the cache, refetch?
+		std::pair<struct sockaddr *, time_t> &nrec = name2addr_cache[(char *)name];
+		if (nrec.second <= time(NULL)) {
+			// entry outdated, retry
+			resolver_thread->resolve_name(name);
+		}
+		*addr    = nrec.first;
+		*addrlen = sizeof(struct sockaddr_in);
+		name2addr_cache.unlock();
+		return true;
+	} else {
+		name2addr_cache.unlock();
+		resolver_thread->resolve_name(name);
+		return false;
+	}
 }
-
 
 /** Resolve name and wait for the result.
  * This will lookup a name from the cache and return the value if available.
@@ -207,25 +200,25 @@ NetworkNameResolver::resolve_name(const char *name,
  * @return true if resolution was successful, false otherwise
  */
 bool
-NetworkNameResolver::resolve_name_blocking(const char *name,
-					   struct sockaddr **addr, socklen_t *addrlen)
+NetworkNameResolver::resolve_name_blocking(const char *      name,
+                                           struct sockaddr **addr,
+                                           socklen_t *       addrlen)
 {
-  if ( resolve_name(name, addr, addrlen) ) {
-    return true;
-  } else {
-    struct sockaddr *_addr;
-    socklen_t _addrlen;
-    if ( resolver_thread->resolve_name_immediately(name, &_addr, &_addrlen) ) {
-      name_resolved(strdup(name), _addr, _addrlen);
-      *addr = _addr;
-      *addrlen = _addrlen;
-      return true;
-    } else {
-      return false;
-    }
-  }
+	if (resolve_name(name, addr, addrlen)) {
+		return true;
+	} else {
+		struct sockaddr *_addr;
+		socklen_t        _addrlen;
+		if (resolver_thread->resolve_name_immediately(name, &_addr, &_addrlen)) {
+			name_resolved(strdup(name), _addr, _addrlen);
+			*addr    = _addr;
+			*addrlen = _addrlen;
+			return true;
+		} else {
+			return false;
+		}
+	}
 }
-
 
 /** Resolve address.
  * This will lookup an address from the cache and return the value if available.
@@ -240,39 +233,40 @@ NetworkNameResolver::resolve_name_blocking(const char *name,
 bool
 NetworkNameResolver::resolve_address(struct sockaddr *addr, socklen_t addr_len, std::string &name)
 {
-  addr2name_cache.lock();
-  struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
+	addr2name_cache.lock();
+	struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
 
-  if ( addr2name_cache.find( saddr->sin_addr.s_addr ) != addr2name_cache.end() ) {
-    // the name is in the cache, refetch?
-	  std::pair<std::string, time_t> &nrec = addr2name_cache[saddr->sin_addr.s_addr];
-    name = nrec.first;
-    if ( nrec.second <= time(NULL) ) {
-      // entry outdated, retry
-      addr2name_cache.unlock();
-      resolver_thread->resolve_address(addr, addr_len);
-    } else {
-      addr2name_cache.unlock();
-    }
-  } else {
-    char tmp[INET_ADDRSTRLEN];
-    if ( inet_ntop(AF_INET, &(saddr->sin_addr), tmp, sizeof(tmp)) ) {
-      char *n = strdup(tmp);
+	if (addr2name_cache.find(saddr->sin_addr.s_addr) != addr2name_cache.end()) {
+		// the name is in the cache, refetch?
+		std::pair<std::string, time_t> &nrec = addr2name_cache[saddr->sin_addr.s_addr];
+		name                                 = nrec.first;
+		if (nrec.second <= time(NULL)) {
+			// entry outdated, retry
+			addr2name_cache.unlock();
+			resolver_thread->resolve_address(addr, addr_len);
+		} else {
+			addr2name_cache.unlock();
+		}
+	} else {
+		char tmp[INET_ADDRSTRLEN];
+		if (inet_ntop(AF_INET, &(saddr->sin_addr), tmp, sizeof(tmp))) {
+			char *n = strdup(tmp);
 
-      addr2name_cache[saddr->sin_addr.s_addr] = std::pair<char *, time_t>(n, time(NULL) + cache_timeout_);
-      name = n;
-      addr2name_cache.unlock();
-    } else {
-      addr2name_cache.unlock();
-      return false;
-    }
-    
-    resolver_thread->resolve_address(addr, addr_len);
-  }
+			addr2name_cache[saddr->sin_addr.s_addr] =
+			  std::pair<char *, time_t>(n, time(NULL) + cache_timeout_);
+			name = n;
+			addr2name_cache.unlock();
+		} else {
+			addr2name_cache.unlock();
+			return false;
+		}
 
-  return true;
+		resolver_thread->resolve_address(addr, addr_len);
+	}
 
-  /*
+	return true;
+
+	/*
   char hbuf[NI_MAXHOST];
   if ( getnameinfo(addr, addr_len, hbuf, sizeof(hbuf), NULL, 0, 0) == -1 ) {
     return false;
@@ -288,7 +282,6 @@ NetworkNameResolver::resolve_address(struct sockaddr *addr, socklen_t addr_len, 
   */
 }
 
-
 /** Name has been resolved by resolver thread.
  * This is an internal function, if you modify it, please make absolutely sure that you
  * understand the caches, especially when the key has to be freed! Also note that we
@@ -299,57 +292,51 @@ NetworkNameResolver::resolve_address(struct sockaddr *addr, socklen_t addr_len, 
  * @param addrlen length in bytes of addr
  */
 void
-NetworkNameResolver::name_resolved(std::string name, struct sockaddr *addr,
-                                   socklen_t addrlen)
+NetworkNameResolver::name_resolved(std::string name, struct sockaddr *addr, socklen_t addrlen)
 {
-  name2addr_cache.lock();
-  if ( (n2acit = name2addr_cache.find(name)) != name2addr_cache.end() ) {
-    // delete old entry
-    free(n2acit->second.first);
-    name2addr_cache.erase(n2acit);
-  }
-  name2addr_cache[name] = std::pair<struct sockaddr *, time_t>(addr, time(NULL) + cache_timeout_);
-  name2addr_cache.unlock();
+	name2addr_cache.lock();
+	if ((n2acit = name2addr_cache.find(name)) != name2addr_cache.end()) {
+		// delete old entry
+		free(n2acit->second.first);
+		name2addr_cache.erase(n2acit);
+	}
+	name2addr_cache[name] = std::pair<struct sockaddr *, time_t>(addr, time(NULL) + cache_timeout_);
+	name2addr_cache.unlock();
 }
-
 
 void
 NetworkNameResolver::addr_resolved(struct sockaddr *addr,
-                                   socklen_t addrlen,
-                                   std::string name, bool namefound)
+                                   socklen_t        addrlen,
+                                   std::string      name,
+                                   bool             namefound)
 {
-  addr2name_cache.lock();
-  struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
-  if (namefound) {
-    if ((a2ncit = addr2name_cache.find( saddr->sin_addr.s_addr )) != addr2name_cache.end() ) {
-      // delete old entry
-      addr2name_cache.erase(a2ncit);
-      addr2name_cache[saddr->sin_addr.s_addr] =
-	      std::make_pair(name, time(NULL) + cache_timeout_);
-    }
-  } else {
-    if ((a2ncit = addr2name_cache.find( saddr->sin_addr.s_addr )) == addr2name_cache.end() ) {
-      addr2name_cache[saddr->sin_addr.s_addr] = std::make_pair(name, 0);
-    }
-  }
-  free(addr);
-  addr2name_cache.unlock();
+	addr2name_cache.lock();
+	struct sockaddr_in *saddr = (struct sockaddr_in *)addr;
+	if (namefound) {
+		if ((a2ncit = addr2name_cache.find(saddr->sin_addr.s_addr)) != addr2name_cache.end()) {
+			// delete old entry
+			addr2name_cache.erase(a2ncit);
+			addr2name_cache[saddr->sin_addr.s_addr] = std::make_pair(name, time(NULL) + cache_timeout_);
+		}
+	} else {
+		if ((a2ncit = addr2name_cache.find(saddr->sin_addr.s_addr)) == addr2name_cache.end()) {
+			addr2name_cache[saddr->sin_addr.s_addr] = std::make_pair(name, 0);
+		}
+	}
+	free(addr);
+	addr2name_cache.unlock();
 }
-
 
 void
 NetworkNameResolver::name_resolution_failed(std::string name)
 {
 }
 
-
 void
-NetworkNameResolver::address_resolution_failed(struct sockaddr *addr,
-                                               socklen_t addrlen)
+NetworkNameResolver::address_resolution_failed(struct sockaddr *addr, socklen_t addrlen)
 {
 	free(addr);
 }
-
 
 /** Get long hostname.
  * @return host name
@@ -357,9 +344,8 @@ NetworkNameResolver::address_resolution_failed(struct sockaddr *addr,
 const char *
 NetworkNameResolver::hostname()
 {
-  return host_info_->name();
+	return host_info_->name();
 }
-
 
 /** Get short hostname.
  * @return short hostname
@@ -367,7 +353,7 @@ NetworkNameResolver::hostname()
 const char *
 NetworkNameResolver::short_hostname()
 {
-  return host_info_->short_name();
+	return host_info_->short_name();
 }
 
 } // end namespace fawkes

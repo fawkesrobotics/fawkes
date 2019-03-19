@@ -22,65 +22,67 @@
 #ifndef _FVUTILS_DRAWER_FIELD_DRAWER_H__
 #define _FVUTILS_DRAWER_FIELD_DRAWER_H__
 
-#include <fvutils/draw/field.h>
-
-#include <utils/math/types.h>
 #include <fvutils/color/yuv.h>
+#include <fvutils/draw/field.h>
+#include <utils/math/types.h>
 
 namespace firevision {
-
 
 class SharedMemoryImageBuffer;
 
 class FieldDrawer
 {
 public:
-  FieldDrawer(const FieldLines &lines);
-  virtual ~FieldDrawer();
+	FieldDrawer(const FieldLines &lines);
+	virtual ~FieldDrawer();
 
-  void set_head_yaw(float head_yaw);
-  void set_own_pos(fawkes::field_pos_t own_position);
-  void set_own_pos_est(fawkes::field_pos_t own_position_estimate);
+	void set_head_yaw(float head_yaw);
+	void set_own_pos(fawkes::field_pos_t own_position);
+	void set_own_pos_est(fawkes::field_pos_t own_position_estimate);
 
-  void set_line_points(const fld_line_points_t *points);
-  void set_line_points_est(const fld_line_points_t *points_est);
+	void set_line_points(const fld_line_points_t *points);
+	void set_line_points_est(const fld_line_points_t *points_est);
 
-  void set_color_background(YUV_t color);
-  void set_color_field(YUV_t color);
-  void set_color_lines(YUV_t color);
-  void set_color_line_points(YUV_t color);
-  void set_color_line_points_est(YUV_t color);
-  void set_color_own_pos(YUV_t color);
-  void set_color_own_pos_est(YUV_t color);
+	void set_color_background(YUV_t color);
+	void set_color_field(YUV_t color);
+	void set_color_lines(YUV_t color);
+	void set_color_line_points(YUV_t color);
+	void set_color_line_points_est(YUV_t color);
+	void set_color_own_pos(YUV_t color);
+	void set_color_own_pos_est(YUV_t color);
 
-  virtual void draw_field(unsigned char *yuv422_planar, unsigned int img_width, unsigned int img_height,
-                          bool draw_background = true, bool draw_landscape = true);
+	virtual void draw_field(unsigned char *yuv422_planar,
+	                        unsigned int   img_width,
+	                        unsigned int   img_height,
+	                        bool           draw_background = true,
+	                        bool           draw_landscape  = true);
 
 protected:
-  inline void clear_own_pos();
-  inline float get_scale(unsigned int img_width, unsigned int img_height, bool draw_landscape = true) const;
-  virtual void draw_line_points(bool draw_landscape = true, float scale = 0) const;
-  virtual void draw_lines(YUV_t color, bool draw_landscape = true, float scale = 0) const;
+	inline void clear_own_pos();
+	inline float
+	             get_scale(unsigned int img_width, unsigned int img_height, bool draw_landscape = true) const;
+	virtual void draw_line_points(bool draw_landscape = true, float scale = 0) const;
+	virtual void draw_lines(YUV_t color, bool draw_landscape = true, float scale = 0) const;
 
-  unsigned char *_img_buffer;
-  unsigned int   _img_width;
-  unsigned int   _img_height;
+	unsigned char *_img_buffer;
+	unsigned int   _img_width;
+	unsigned int   _img_height;
 
 private: //Members
-  const FieldLines     &lines_;
-  fawkes::field_pos_t   own_position_, own_pos_est_;
-  float                 head_yaw_;
+	const FieldLines &  lines_;
+	fawkes::field_pos_t own_position_, own_pos_est_;
+	float               head_yaw_;
 
-  const fld_line_points_t     *points_;
-  const fld_line_points_t     *points_est_;
+	const fld_line_points_t *points_;
+	const fld_line_points_t *points_est_;
 
-  YUV_t c_background_;
-  YUV_t c_field_;
-  YUV_t c_lines_;
-  YUV_t c_line_points_;
-  YUV_t c_line_points_est_;
-  YUV_t c_own_pos_;
-  YUV_t c_own_pos_est_;
+	YUV_t c_background_;
+	YUV_t c_field_;
+	YUV_t c_lines_;
+	YUV_t c_line_points_;
+	YUV_t c_line_points_est_;
+	YUV_t c_own_pos_;
+	YUV_t c_own_pos_est_;
 };
 
 } // end namespace firevision

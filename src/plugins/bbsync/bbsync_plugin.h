@@ -27,8 +27,8 @@
 
 class BlackBoardSynchronizationPlugin : public fawkes::Plugin
 {
- public:
-  explicit BlackBoardSynchronizationPlugin(fawkes::Configuration *config);
+public:
+	explicit BlackBoardSynchronizationPlugin(fawkes::Configuration *config);
 };
 
 #endif

@@ -43,8 +43,8 @@ sock_addr_cmp_addr(const struct sockaddr *a, const struct sockaddr *b)
 	} else if (a->sa_family == AF_INET) {
 		return (((sockaddr_in *)a)->sin_addr.s_addr - ((sockaddr_in *)b)->sin_addr.s_addr);
 	} else if (a->sa_family == AF_INET6) {
-		return (memcmp((char *) &((sockaddr_in6 *)a)->sin6_addr,
-		               (char *) &((sockaddr_in6 *)a)->sin6_addr,
+		return (memcmp((char *)&((sockaddr_in6 *)a)->sin6_addr,
+		               (char *)&((sockaddr_in6 *)a)->sin6_addr,
 		               sizeof(in6_addr)));
 	}
 }
@@ -60,12 +60,13 @@ struct SockAddrCompare
 	 * @param b second compare argument
 	 * @return true if a < b, false otherwise
 	 */
-	bool operator()(const struct sockaddr * & a, const struct sockaddr * & b) const
+	bool
+	operator()(const struct sockaddr *&a, const struct sockaddr *&b) const
 	{
 		return (sock_addr_cmp_addr(a, b) < 0);
 	}
 };
-	
+
 } // end namespace fawkes
 
 #endif

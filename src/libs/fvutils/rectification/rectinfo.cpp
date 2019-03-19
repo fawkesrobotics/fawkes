@@ -25,22 +25,8 @@
 
 namespace firevision {
 
-const char * rectinfo_camera_strings[] =
-  {
-    "Main",
-    "Left",
-    "Right",
-    "Center",
-    "Top",
-    0
-  };
+const char *rectinfo_camera_strings[] = {"Main", "Left", "Right", "Center", "Top", 0};
 
-
-const char * rectinfo_type_strings[] =
-  {
-    "Invalid format",
-    "Rectification LUT 16x16",
-    0
-  };
+const char *rectinfo_type_strings[] = {"Invalid format", "Rectification LUT 16x16", 0};
 
 } // end namespace firevision

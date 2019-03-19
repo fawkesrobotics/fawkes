@@ -14,9 +14,9 @@
 #include "InterfaceFieldType.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ InterfaceFieldType::InterfaceFieldType(const std::string &json)
 	from_json(json);
 }
 
-InterfaceFieldType::InterfaceFieldType(const rapidjson::Value& v)
+InterfaceFieldType::InterfaceFieldType(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -58,9 +58,9 @@ InterfaceFieldType::to_json(bool pretty) const
 }
 
 void
-InterfaceFieldType::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+InterfaceFieldType::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -82,13 +82,12 @@ InterfaceFieldType::to_json_value(rapidjson::Document& d, rapidjson::Value& v) c
 	}
 	rapidjson::Value v_enums(rapidjson::kArrayType);
 	v_enums.Reserve(enums_.size(), allocator);
-	for (const auto & e : enums_) {
+	for (const auto &e : enums_) {
 		rapidjson::Value v;
 		v.SetString(e, allocator);
 		v_enums.PushBack(v, allocator);
 	}
 	v.AddMember("enums", v_enums, allocator);
-
 }
 
 void
@@ -101,7 +100,7 @@ InterfaceFieldType::from_json(const std::string &json)
 }
 
 void
-InterfaceFieldType::from_json_value(const rapidjson::Value& d)
+InterfaceFieldType::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("name") && d["name"].IsString()) {
 		name_ = d["name"].GetString();
@@ -113,32 +112,31 @@ InterfaceFieldType::from_json_value(const rapidjson::Value& d)
 		is_array_ = d["is_array"].GetBool();
 	}
 	if (d.HasMember("enums") && d["enums"].IsArray()) {
-		const rapidjson::Value& a = d["enums"];
-		enums_ = std::vector<std::string>{};
-;
+		const rapidjson::Value &a = d["enums"];
+		enums_                    = std::vector<std::string>{};
+		;
 		enums_.reserve(a.Size());
-		for (auto& v : a.GetArray()) {
+		for (auto &v : a.GetArray()) {
 			enums_.push_back(v.GetString());
 		}
 	}
-
 }
 
 void
 InterfaceFieldType::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! name_)  missing.push_back("name");
-	if (! type_)  missing.push_back("type");
+	std::vector<std::string> missing;
+	if (!name_)
+		missing.push_back("name");
+	if (!type_)
+		missing.push_back("type");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "InterfaceFieldType is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "InterfaceFieldType is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

@@ -20,9 +20,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "pcl_db_merge_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -31,15 +31,14 @@ using namespace fawkes;
  */
 class PointCloudDBMergePlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit PointCloudDBMergePlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new PointCloudDBMergeThread());
-  }
+	explicit PointCloudDBMergePlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new PointCloudDBMergeThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Restore and merge point clouds from MongoDB")

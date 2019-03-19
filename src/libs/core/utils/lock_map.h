@@ -26,39 +26,33 @@
 
 #include <core/threading/mutex.h>
 #include <core/utils/refptr.h>
+
 #include <map>
 
 namespace fawkes {
 
-
-template <typename KeyType,
-          typename ValueType,
-          typename LessKey     = std::less<KeyType> >
+template <typename KeyType, typename ValueType, typename LessKey = std::less<KeyType>>
 class LockMap : public std::map<KeyType, ValueType, LessKey>
 {
- public:
-  LockMap();
-  LockMap(const LockMap<KeyType, ValueType, LessKey> &lm);
-  virtual ~LockMap();
+public:
+	LockMap();
+	LockMap(const LockMap<KeyType, ValueType, LessKey> &lm);
+	virtual ~LockMap();
 
-  void           lock() const;
-  bool           try_lock() const;
-  void           unlock() const;
-  RefPtr<Mutex>  mutex() const;
+	void          lock() const;
+	bool          try_lock() const;
+	void          unlock() const;
+	RefPtr<Mutex> mutex() const;
 
-  void     erase_locked(const KeyType &key);
+	void erase_locked(const KeyType &key);
 
-  LockMap<KeyType, ValueType, LessKey> &
-  operator=(const LockMap<KeyType, ValueType, LessKey> &ll);
+	LockMap<KeyType, ValueType, LessKey> &operator=(const LockMap<KeyType, ValueType, LessKey> &ll);
 
-  LockMap<KeyType, ValueType, LessKey> &
-  operator=(const std::map<KeyType, ValueType, LessKey> &l);
+	LockMap<KeyType, ValueType, LessKey> &operator=(const std::map<KeyType, ValueType, LessKey> &l);
 
- private:
-  mutable RefPtr<Mutex>  mutex_;
-
+private:
+	mutable RefPtr<Mutex> mutex_;
 };
-
 
 /** @class LockMap <core/utils/lock_map.h>
  * Map with a lock.
@@ -70,38 +64,34 @@ class LockMap : public std::map<KeyType, ValueType, LessKey>
  * @author Tim Niemueller
  */
 
-
 /** Constructor. */
 template <typename KeyType, typename ValueType, typename LessKey>
-LockMap<KeyType, ValueType, LessKey>::LockMap()
-  : mutex_(new Mutex())
-{}
-
+LockMap<KeyType, ValueType, LessKey>::LockMap() : mutex_(new Mutex())
+{
+}
 
 /** Copy constructor.
  * @param lm LockMap to copy
  */
 template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey>::LockMap(const LockMap<KeyType, ValueType, LessKey> &lm)
-  : std::map<KeyType, ValueType, LessKey>::map(lm),
-    mutex_(new Mutex())
-{}
-
+: std::map<KeyType, ValueType, LessKey>::map(lm), mutex_(new Mutex())
+{
+}
 
 /** Destructor. */
 template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey>::~LockMap()
-{}
-
+{
+}
 
 /** Lock list. */
 template <typename KeyType, typename ValueType, typename LessKey>
 void
 LockMap<KeyType, ValueType, LessKey>::lock() const
 {
-  mutex_->lock();
+	mutex_->lock();
 }
-
 
 /** Try to lock list.
  * @return true, if the lock has been aquired, false otherwise.
@@ -110,18 +100,16 @@ template <typename KeyType, typename ValueType, typename LessKey>
 bool
 LockMap<KeyType, ValueType, LessKey>::try_lock() const
 {
-  return mutex_->try_lock();
+	return mutex_->try_lock();
 }
-
 
 /** Unlock list. */
 template <typename KeyType, typename ValueType, typename LessKey>
 void
 LockMap<KeyType, ValueType, LessKey>::unlock() const
 {
-  return mutex_->unlock();
+	return mutex_->unlock();
 }
-
 
 /** Remove item with lock.
  * The map is automatically locked and unlocked during the removal.
@@ -131,11 +119,10 @@ template <typename KeyType, typename ValueType, typename LessKey>
 void
 LockMap<KeyType, ValueType, LessKey>::erase_locked(const KeyType &key)
 {
-  mutex_->lock();
-  std::map<KeyType, ValueType, LessKey>::erase(key);
-  mutex_->unlock();
+	mutex_->lock();
+	std::map<KeyType, ValueType, LessKey>::erase(key);
+	mutex_->unlock();
 }
-
 
 /** Get access to the internal mutex.
  * Can be used with MutexLocker.
@@ -145,10 +132,8 @@ template <typename KeyType, typename ValueType, typename LessKey>
 RefPtr<Mutex>
 LockMap<KeyType, ValueType, LessKey>::mutex() const
 {
-  return mutex_;
+	return mutex_;
 }
-
-
 
 /** Copy values from another LockMap.
  * Copies the values one by one. Both instances are locked during the copying and
@@ -160,19 +145,18 @@ template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey> &
 LockMap<KeyType, ValueType, LessKey>::operator=(const LockMap<KeyType, ValueType, LessKey> &ll)
 {
-  mutex_->lock();
-  ll.lock();
-  this->clear();
-  typename LockMap<KeyType, ValueType, LessKey>::const_iterator i;
-  for (i = ll.begin(); i != ll.end(); ++i) {
-    this->insert(*i);
-  }
-  ll.unlock();
-  mutex_->unlock();
+	mutex_->lock();
+	ll.lock();
+	this->clear();
+	typename LockMap<KeyType, ValueType, LessKey>::const_iterator i;
+	for (i = ll.begin(); i != ll.end(); ++i) {
+		this->insert(*i);
+	}
+	ll.unlock();
+	mutex_->unlock();
 
-  return *this;
+	return *this;
 }
-
 
 /** Copy values from a standard map.
  * Copies the values one by one. This instance is locked during the copying and
@@ -184,17 +168,16 @@ template <typename KeyType, typename ValueType, typename LessKey>
 LockMap<KeyType, ValueType, LessKey> &
 LockMap<KeyType, ValueType, LessKey>::operator=(const std::map<KeyType, ValueType, LessKey> &l)
 {
-  mutex_->lock();
-  this->clear();
-  typename std::map<KeyType, ValueType, LessKey>::const_iterator i;
-  for (i = l.begin(); i != l.end(); ++i) {
-    this->insert(*i);
-  }
-  mutex_->unlock();
+	mutex_->lock();
+	this->clear();
+	typename std::map<KeyType, ValueType, LessKey>::const_iterator i;
+	for (i = l.begin(); i != l.end(); ++i) {
+		this->insert(*i);
+	}
+	mutex_->unlock();
 
-  return *this;
+	return *this;
 }
-
 
 } // end namespace fawkes
 

@@ -23,20 +23,18 @@
 
 #include <core/threading/read_write_lock.h>
 
-#include <pthread.h>
 #include <cstring>
+#include <pthread.h>
 
 namespace fawkes {
-
 
 /// @cond INTERNALS
 class ReadWriteLockData
 {
- public:
-  pthread_rwlock_t rwlock;
+public:
+	pthread_rwlock_t rwlock;
 };
 /// @endcond
-
 
 /** @class ReadWriteLock core/threading/read_write_lock.h
  * Read/write lock to allow multiple readers but only a single writer
@@ -52,42 +50,39 @@ class ReadWriteLockData
  * @author Tim Niemueller
  */
 
-
 /** Constructor
  * @param policy The read/write lock policy to use. The default is to
  * prefer writers.
  */
 ReadWriteLock::ReadWriteLock(ReadWriteLockPolicy policy)
 {
-  rwlock_data = new ReadWriteLockData();
+	rwlock_data = new ReadWriteLockData();
 
 #if defined __USE_UNIX98 || defined __USE_XOPEN2K
-  pthread_rwlockattr_t attr;
-  pthread_rwlockattr_init( &attr );
+	pthread_rwlockattr_t attr;
+	pthread_rwlockattr_init(&attr);
 
-  switch (policy) {
-  case RWLockPolicyPreferWriter:
-    pthread_rwlockattr_setkind_np( &attr, PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP );
-    break;
-  case RWLockPolicyPreferReader:
-    pthread_rwlockattr_setkind_np( &attr, PTHREAD_RWLOCK_PREFER_READER_NP );
-    break;
-  }
+	switch (policy) {
+	case RWLockPolicyPreferWriter:
+		pthread_rwlockattr_setkind_np(&attr, PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP);
+		break;
+	case RWLockPolicyPreferReader:
+		pthread_rwlockattr_setkind_np(&attr, PTHREAD_RWLOCK_PREFER_READER_NP);
+		break;
+	}
 
-  pthread_rwlock_init( &(rwlock_data->rwlock), &attr );
+	pthread_rwlock_init(&(rwlock_data->rwlock), &attr);
 #else
-  pthread_rwlock_init( &(rwlock_data->rwlock), NULL );
+	pthread_rwlock_init(&(rwlock_data->rwlock), NULL);
 #endif
 }
-
 
 /** Destructor */
 ReadWriteLock::~ReadWriteLock()
 {
-  pthread_rwlock_destroy( &(rwlock_data->rwlock) );
-  delete rwlock_data;
+	pthread_rwlock_destroy(&(rwlock_data->rwlock));
+	delete rwlock_data;
 }
-
 
 /** Aquire a reader lock.
  * This will aquire the lock for reading. Multiple readers can aquire the
@@ -97,9 +92,8 @@ ReadWriteLock::~ReadWriteLock()
 void
 ReadWriteLock::lock_for_read()
 {
-  pthread_rwlock_rdlock( &(rwlock_data->rwlock) );
+	pthread_rwlock_rdlock(&(rwlock_data->rwlock));
 }
-
 
 /** Aquire a writer lock.
  * This will aquire the lock for writing. Only a single writer at a time
@@ -109,9 +103,8 @@ ReadWriteLock::lock_for_read()
 void
 ReadWriteLock::lock_for_write()
 {
-  pthread_rwlock_wrlock( &(rwlock_data->rwlock) );
+	pthread_rwlock_wrlock(&(rwlock_data->rwlock));
 }
-
 
 /** Tries to aquire a reader lock.
  * This will try to aquire the lock for reading. This will succeed if
@@ -122,9 +115,8 @@ ReadWriteLock::lock_for_write()
 bool
 ReadWriteLock::try_lock_for_read()
 {
-  return ( pthread_rwlock_tryrdlock( &(rwlock_data->rwlock) ) == 0 );
+	return (pthread_rwlock_tryrdlock(&(rwlock_data->rwlock)) == 0);
 }
-
 
 /** Tries to aquire a writer lock.
  * This will try to aquire the lock for writing. This will succeed if the
@@ -135,9 +127,8 @@ ReadWriteLock::try_lock_for_read()
 bool
 ReadWriteLock::try_lock_for_write()
 {
-  return ( pthread_rwlock_trywrlock( &(rwlock_data->rwlock) ) == 0 );
+	return (pthread_rwlock_trywrlock(&(rwlock_data->rwlock)) == 0);
 }
-
 
 /** Release the lock.
  * Releases the lock, no matter whether it was locked for reading or writing.
@@ -145,8 +136,7 @@ ReadWriteLock::try_lock_for_write()
 void
 ReadWriteLock::unlock()
 {
-  pthread_rwlock_unlock( &(rwlock_data->rwlock) );
+	pthread_rwlock_unlock(&(rwlock_data->rwlock));
 }
-
 
 } // end namespace fawkes

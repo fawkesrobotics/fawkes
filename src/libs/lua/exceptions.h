@@ -29,16 +29,15 @@ namespace fawkes {
 
 class LuaRuntimeException : public Exception
 {
- public:
-  LuaRuntimeException(const char *what, const char *errmsg);
+public:
+	LuaRuntimeException(const char *what, const char *errmsg);
 };
 
 class LuaErrorException : public Exception
 {
- public:
-  LuaErrorException(const char *what, const char *errmsg);
+public:
+	LuaErrorException(const char *what, const char *errmsg);
 };
-
 
 } // end of namespace fawkes
 

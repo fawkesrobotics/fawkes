@@ -38,21 +38,19 @@ namespace fawkes {
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param timesource the time source to provide to Fawkes
  */
 TimeSourceAspect::TimeSourceAspect(TimeSource *timesource)
 {
-  add_aspect("TimeSourceAspect");
-  time_source_ = timesource;
+	add_aspect("TimeSourceAspect");
+	time_source_ = timesource;
 }
 
 /** Virtual empty destructor. */
 TimeSourceAspect::~TimeSourceAspect()
 {
 }
-
 
 /** Get time source.
  * This method is called by the aspect initializer to get the time source
@@ -62,7 +60,7 @@ TimeSourceAspect::~TimeSourceAspect()
 TimeSource *
 TimeSourceAspect::get_timesource() const
 {
-  return time_source_;
+	return time_source_;
 }
 
 } // end namespace fawkes

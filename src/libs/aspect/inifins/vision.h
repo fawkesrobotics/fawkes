@@ -33,14 +33,14 @@ class VisionMasterAspectIniFin;
 
 class VisionAspectIniFin : public AspectIniFin
 {
- public:
-  VisionAspectIniFin(VisionMasterAspectIniFin *master_inifin);
-  virtual void init(Thread *thread);
-  virtual void finalize(Thread *thread);
-  virtual bool prepare_finalize(Thread *thread);
+public:
+	VisionAspectIniFin(VisionMasterAspectIniFin *master_inifin);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
+	virtual bool prepare_finalize(Thread *thread);
 
- private:
-  VisionMasterAspectIniFin *master_inifin_;
+private:
+	VisionMasterAspectIniFin *master_inifin_;
 };
 
 } // end namespace fawkes

@@ -24,29 +24,30 @@
 #define _TOOLS_SKILLGUI_GVPLUGIN_SKILLGUI_CAIRO_H_
 
 #include <cairomm/cairomm.h>
+
 #include <gvc.h>
 
 class SkillGuiCairoRenderInstructor
 {
- public:
-  /** Empty virtual destructor. */
-  virtual ~SkillGuiCairoRenderInstructor() {}
+public:
+	/** Empty virtual destructor. */
+	virtual ~SkillGuiCairoRenderInstructor()
+	{
+	}
 
-  virtual Cairo::RefPtr<Cairo::Context> get_cairo() = 0;
+	virtual Cairo::RefPtr<Cairo::Context> get_cairo() = 0;
 
-  virtual bool   scale_override() = 0;
-  virtual void   get_dimensions(double &width, double &height) = 0;
-  virtual double get_scale() = 0;
-  virtual void   set_scale(double scale) = 0;
-  virtual void   get_translation(double &tx, double &ty) = 0;
-  virtual void   set_translation(double tx, double ty) = 0;
-  virtual void   set_bb(double bbw, double bbh) = 0;
-  virtual void   set_pad(double pad_x, double pad_y) = 0;
-  virtual void   get_pad(double &pad_x, double &pad_y) = 0;
-
+	virtual bool   scale_override()                              = 0;
+	virtual void   get_dimensions(double &width, double &height) = 0;
+	virtual double get_scale()                                   = 0;
+	virtual void   set_scale(double scale)                       = 0;
+	virtual void   get_translation(double &tx, double &ty)       = 0;
+	virtual void   set_translation(double tx, double ty)         = 0;
+	virtual void   set_bb(double bbw, double bbh)                = 0;
+	virtual void   set_pad(double pad_x, double pad_y)           = 0;
+	virtual void   get_pad(double &pad_x, double &pad_y)         = 0;
 };
 
-extern void gvplugin_skillgui_cairo_setup(GVC_t *gvc,
-					  SkillGuiCairoRenderInstructor *sgcri);
+extern void gvplugin_skillgui_cairo_setup(GVC_t *gvc, SkillGuiCairoRenderInstructor *sgcri);
 
 #endif

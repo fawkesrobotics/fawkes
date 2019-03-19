@@ -23,50 +23,53 @@
 #ifndef _PLUGINS_ROS_NODE_THREAD_H_
 #define _PLUGINS_ROS_NODE_THREAD_H_
 
+#include <aspect/aspect_provider.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <core/utils/lockptr.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
-#include <aspect/clock.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/aspect_provider.h>
 #include <plugins/ros/aspect/ros_inifin.h>
+#include <sys/types.h>
 #include <utils/time/time.h>
 
-#include <sys/types.h>
-
 namespace ros {
-  class NodeHandle;
-  class AsyncSpinner;
-}
+class NodeHandle;
+class AsyncSpinner;
+} // namespace ros
 
-class ROSNodeThread
-: public fawkes::Thread,
-  public fawkes::BlockedTimingAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::ClockAspect,
-  public fawkes::AspectProviderAspect
+class ROSNodeThread : public fawkes::Thread,
+                      public fawkes::BlockedTimingAspect,
+                      public fawkes::LoggingAspect,
+                      public fawkes::ConfigurableAspect,
+                      public fawkes::ClockAspect,
+                      public fawkes::AspectProviderAspect
 {
- public:
-  ROSNodeThread();
-  virtual ~ROSNodeThread();
+public:
+	ROSNodeThread();
+	virtual ~ROSNodeThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  bool cfg_async_spinning_;
-  unsigned int cfg_async_num_threads_;
+private:
+	bool         cfg_async_spinning_;
+	unsigned int cfg_async_num_threads_;
 
-  fawkes::LockPtr<ros::NodeHandle>  rosnode_;
-  fawkes::ROSAspectIniFin           ros_aspect_inifin_;
+	fawkes::LockPtr<ros::NodeHandle> rosnode_;
+	fawkes::ROSAspectIniFin          ros_aspect_inifin_;
 
-  ros::AsyncSpinner                *async_spinner_;
+	ros::AsyncSpinner *async_spinner_;
 };
 
 #endif

@@ -61,7 +61,7 @@ format-branch-clang: check-parallel
 	HEAD_HASH=$$(git rev-parse --short HEAD); \
 	echo -e "$(INDENT_PRINT)[FMT] Processing range $$MERGE_BASE_SHORT..$$HEAD_HASH"; \
 	if type -p clang-format >/dev/null; then \
-		MERGE_BASE=$$MERGE_BASE git filter-branch -f --tree-filter 'PREV=$$(map $$(git rev-parse $$GIT_COMMIT^)); $(BUILDSYSDIR)/root/format-tree-filter.sh $$MERGE_BASE $$GIT_COMMIT $$PREV' -- $$MERGE_BASE..HEAD; \
+		MERGE_BASE=$$MERGE_BASE HEAD_HASH=$$HEAD_HASH git filter-branch -f --tree-filter 'PREV=$$(map $$(git rev-parse $$GIT_COMMIT^)); git show $$HEAD_HASH:etc/format-scripts/format-tree-filter.sh > etc/format-scripts/.format-tree-filter-outoftree.sh; chmod +x etc/format-scripts/.format-tree-filter-outoftree.sh; etc/format-scripts/.format-tree-filter-outoftree.sh $$MERGE_BASE $$GIT_COMMIT $$PREV; rm -f etc/format-scripts/.format-tree-filter-outoftree.sh' -- $$MERGE_BASE..HEAD; \
 	else \
 		echo -e "$(INDENT_PRINT)$(TRED)--- Cannot format code$(TNORMAL) (clang-format not found)"; \
     exit 1; \

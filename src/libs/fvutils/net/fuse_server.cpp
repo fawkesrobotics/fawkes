@@ -21,10 +21,9 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <core/threading/thread_collector.h>
 #include <fvutils/net/fuse_server.h>
 #include <fvutils/net/fuse_server_client_thread.h>
-
-#include <core/threading/thread_collector.h>
 #include <netcomm/utils/acceptor_thread.h>
 
 #include <algorithm>
@@ -54,73 +53,73 @@ namespace firevision {
  * @param port Port to listen on for incoming connections
  * @param collector optional thread collector
  */
-FuseServer::FuseServer(bool enable_ipv4, bool enable_ipv6,
-                       const std::string &listen_ipv4, const std::string &listen_ipv6,
-                       unsigned short int port, ThreadCollector *collector)
-  : Thread("FuseServer", Thread::OPMODE_WAITFORWAKEUP)
+FuseServer::FuseServer(bool               enable_ipv4,
+                       bool               enable_ipv6,
+                       const std::string &listen_ipv4,
+                       const std::string &listen_ipv6,
+                       unsigned short int port,
+                       ThreadCollector *  collector)
+: Thread("FuseServer", Thread::OPMODE_WAITFORWAKEUP)
 {
-  thread_collector_ = collector;
+	thread_collector_ = collector;
 
-  if (enable_ipv4) {
-	  acceptor_threads_.push_back(new NetworkAcceptorThread(this, Socket::IPv4, listen_ipv4, port,
-	                                                         "FuseNetworkAcceptorThread"));
-  }
-  if (enable_ipv6) {
-	  acceptor_threads_.push_back(new NetworkAcceptorThread(this, Socket::IPv6, listen_ipv6, port,
-	                                                         "FuseNetworkAcceptorThread"));
-  }
-  if (thread_collector_) {
-	  for (size_t i = 0; i < acceptor_threads_.size(); ++i) {
-		  thread_collector_->add(acceptor_threads_[i]);
-	  }
-  } else {
-	  for (size_t i = 0; i < acceptor_threads_.size(); ++i) {
-		  acceptor_threads_[i]->start();
-	  }
-  }
+	if (enable_ipv4) {
+		acceptor_threads_.push_back(new NetworkAcceptorThread(
+		  this, Socket::IPv4, listen_ipv4, port, "FuseNetworkAcceptorThread"));
+	}
+	if (enable_ipv6) {
+		acceptor_threads_.push_back(new NetworkAcceptorThread(
+		  this, Socket::IPv6, listen_ipv6, port, "FuseNetworkAcceptorThread"));
+	}
+	if (thread_collector_) {
+		for (size_t i = 0; i < acceptor_threads_.size(); ++i) {
+			thread_collector_->add(acceptor_threads_[i]);
+		}
+	} else {
+		for (size_t i = 0; i < acceptor_threads_.size(); ++i) {
+			acceptor_threads_[i]->start();
+		}
+	}
 }
-
 
 /** Destructor. */
 FuseServer::~FuseServer()
 {
-  for (size_t i = 0; i < acceptor_threads_.size(); ++i) {
-	  if ( thread_collector_ ) {
-		  thread_collector_->remove(acceptor_threads_[i]);
-	  } else {
-		  acceptor_threads_[i]->cancel();
-		  acceptor_threads_[i]->join();
-	  }
-	  delete acceptor_threads_[i];
-  }
-  acceptor_threads_.clear();
+	for (size_t i = 0; i < acceptor_threads_.size(); ++i) {
+		if (thread_collector_) {
+			thread_collector_->remove(acceptor_threads_[i]);
+		} else {
+			acceptor_threads_[i]->cancel();
+			acceptor_threads_[i]->join();
+		}
+		delete acceptor_threads_[i];
+	}
+	acceptor_threads_.clear();
 
-  for (cit_ = clients_.begin(); cit_ != clients_.end(); ++cit_) {
-    if ( thread_collector_ ) {
-      // ThreadCollector::remove also stops the threads!
-      thread_collector_->remove(*cit_);
-    } else {
-      (*cit_)->cancel();
-      (*cit_)->join();
-    }
-    delete *cit_;
-  }
-  clients_.clear();
+	for (cit_ = clients_.begin(); cit_ != clients_.end(); ++cit_) {
+		if (thread_collector_) {
+			// ThreadCollector::remove also stops the threads!
+			thread_collector_->remove(*cit_);
+		} else {
+			(*cit_)->cancel();
+			(*cit_)->join();
+		}
+		delete *cit_;
+	}
+	clients_.clear();
 }
-
 
 void
 FuseServer::add_connection(StreamSocket *s) throw()
 {
-  FuseServerClientThread *client = new FuseServerClientThread(this, s);
-  if ( thread_collector_) {
-    thread_collector_->add(client);
-  } else {
-    client->start();
-  }
-  clients_.push_back_locked(client);
+	FuseServerClientThread *client = new FuseServerClientThread(this, s);
+	if (thread_collector_) {
+		thread_collector_->add(client);
+	} else {
+		client->start();
+	}
+	clients_.push_back_locked(client);
 }
-
 
 /** Connection died.
  * @param client client whose connection died
@@ -128,41 +127,40 @@ FuseServer::add_connection(StreamSocket *s) throw()
 void
 FuseServer::connection_died(FuseServerClientThread *client) throw()
 {
-  dead_clients_.push_back_locked(client);
-  wakeup();
+	dead_clients_.push_back_locked(client);
+	wakeup();
 }
-
 
 void
 FuseServer::loop()
 {
-  // Check for dead clients, cancel and join if there are any
-  dead_clients_.lock();
-  clients_.lock();
+	// Check for dead clients, cancel and join if there are any
+	dead_clients_.lock();
+	clients_.lock();
 
-  LockList<FuseServerClientThread *>::iterator  dcit;
+	LockList<FuseServerClientThread *>::iterator dcit;
 
-  while ( ! dead_clients_.empty() ) {
-    dcit = dead_clients_.begin();
+	while (!dead_clients_.empty()) {
+		dcit = dead_clients_.begin();
 
-    if ( thread_collector_ ) {
-      // ThreadCollector::remove also stops the threads!
-      thread_collector_->remove(*dcit);
-    } else {
-      (*dcit)->cancel();
-      (*dcit)->join();
-    }
-    if ( (cit_ = find(clients_.begin(), clients_.end(), *dcit)) != clients_.end() ) {
-      clients_.erase(cit_);
-    }
+		if (thread_collector_) {
+			// ThreadCollector::remove also stops the threads!
+			thread_collector_->remove(*dcit);
+		} else {
+			(*dcit)->cancel();
+			(*dcit)->join();
+		}
+		if ((cit_ = find(clients_.begin(), clients_.end(), *dcit)) != clients_.end()) {
+			clients_.erase(cit_);
+		}
 
-    FuseServerClientThread *tc = *dcit;
-    dead_clients_.erase(dcit);
-    delete tc;
-  }
+		FuseServerClientThread *tc = *dcit;
+		dead_clients_.erase(dcit);
+		delete tc;
+	}
 
-  clients_.unlock();
-  dead_clients_.unlock();  
+	clients_.unlock();
+	dead_clients_.unlock();
 }
 
 } // end namespace firevision

@@ -21,36 +21,34 @@
 #ifndef _PLUGINS_ROS_IMU_THREAD_H_
 #define _PLUGINS_ROS_IMU_THREAD_H_
 
-#include <core/threading/thread.h>
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <blackboard/interface_listener.h>
-#include <plugins/ros/aspect/ros.h>
+#include <core/threading/thread.h>
 #include <interfaces/IMUInterface.h>
-
+#include <plugins/ros/aspect/ros.h>
 #include <ros/node_handle.h>
 
-class RosIMUThread
-: public fawkes::Thread,
-  public fawkes::ConfigurableAspect,
-  public fawkes::LoggingAspect,
-  public fawkes::ROSAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::BlackBoardInterfaceListener
+class RosIMUThread : public fawkes::Thread,
+                     public fawkes::ConfigurableAspect,
+                     public fawkes::LoggingAspect,
+                     public fawkes::ROSAspect,
+                     public fawkes::BlackBoardAspect,
+                     public fawkes::BlackBoardInterfaceListener
 {
- public:
-  RosIMUThread();
-  virtual ~RosIMUThread();
+public:
+	RosIMUThread();
+	virtual ~RosIMUThread();
 
-  virtual void init();
-  virtual void finalize();
+	virtual void init();
+	virtual void finalize();
 
-  virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
 
- private:
-  ros::Publisher ros_pub_;
-  fawkes::IMUInterface * iface_;
+private:
+	ros::Publisher        ros_pub_;
+	fawkes::IMUInterface *iface_;
 };
 
 #endif /* PLUGINS_ROS_IMU_THREAD_H__ */

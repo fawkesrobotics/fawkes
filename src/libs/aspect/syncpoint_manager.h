@@ -29,14 +29,14 @@ namespace fawkes {
 
 class SyncPointManagerAspect : public virtual Aspect
 {
-  public:
-  SyncPointManagerAspect();
-  virtual ~SyncPointManagerAspect();
+public:
+	SyncPointManagerAspect();
+	virtual ~SyncPointManagerAspect();
 
-  void init_SyncPointManagerAspect(SyncPointManager *syncpoint_manager);
+	void init_SyncPointManagerAspect(SyncPointManager *syncpoint_manager);
 
-  protected:
-  SyncPointManager *syncpoint_manager;
+protected:
+	SyncPointManager *syncpoint_manager;
 };
 
 } // end namespace fawkes

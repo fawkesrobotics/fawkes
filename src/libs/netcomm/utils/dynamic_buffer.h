@@ -26,59 +26,59 @@
 #define _NETCOMM_UTILS_DYNAMIC_BUFFER_H_
 
 #include <sys/types.h>
+
 #include <stdint.h>
 
 namespace fawkes {
 
-#pragma pack(push,4)
+#pragma pack(push, 4)
 
 /** Dynamic list type.
  * Use this element in your message struct if you want to add a dynamic list.
  * This is meant to be used in conjunction with DynamicBuffer.
  */
-typedef struct {
-  uint32_t  size;		/**< total size of list buffer */
-  uint32_t  num_elements;	/**< number of elements in list */
+typedef struct
+{
+	uint32_t size;         /**< total size of list buffer */
+	uint32_t num_elements; /**< number of elements in list */
 } dynamic_list_t;
 
 #pragma pack(pop)
 
 class DynamicBuffer
 {
- public:
-  DynamicBuffer(dynamic_list_t *db, size_t initial_buffer_size = 1024);
-  DynamicBuffer(dynamic_list_t *db, void *buf, size_t size);
-  virtual ~DynamicBuffer();
+public:
+	DynamicBuffer(dynamic_list_t *db, size_t initial_buffer_size = 1024);
+	DynamicBuffer(dynamic_list_t *db, void *buf, size_t size);
+	virtual ~DynamicBuffer();
 
-  void   append(const void *data, size_t data_size);
-  void * buffer();
-  size_t buffer_size();
-  unsigned int num_elements();
+	void         append(const void *data, size_t data_size);
+	void *       buffer();
+	size_t       buffer_size();
+	unsigned int num_elements();
 
-  size_t real_buffer_size();
+	size_t real_buffer_size();
 
-  bool   has_next();
-  void * next(size_t *size);
-  void   reset_iterator();
+	bool  has_next();
+	void *next(size_t *size);
+	void  reset_iterator();
 
- private:
+private:
+	typedef uint16_t element_header_t;
 
-  typedef uint16_t element_header_t;
+	void increase();
 
-  void   increase();
+	bool _read_only;
 
-  bool               _read_only;
+	dynamic_list_t *  _db;
+	void *            _buffer;
+	size_t            _buffer_size;
+	element_header_t *_curhead;
+	void *            _curdata;
 
-  dynamic_list_t    *_db;
-  void              *_buffer;
-  size_t             _buffer_size;
-  element_header_t  *_curhead;
-  void              *_curdata;
-
-  uint16_t           _it_curel;
-  element_header_t  *_it_curhead;
-  void              *_it_curdata;
-
+	uint16_t          _it_curel;
+	element_header_t *_it_curhead;
+	void *            _it_curdata;
 };
 
 } // end namespace fawkes

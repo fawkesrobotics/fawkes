@@ -24,52 +24,51 @@
 #ifndef _FIREVISION_FILTER_H_
 #define _FIREVISION_FILTER_H_
 
-#include <fvutils/base/types.h>
 #include <fvutils/base/roi.h>
+#include <fvutils/base/types.h>
 
 namespace firevision {
 
 class Filter
 {
- public:
-  Filter(const char *name, unsigned int max_num_buffers = 1);
-  virtual ~Filter();
+public:
+	Filter(const char *name, unsigned int max_num_buffers = 1);
+	virtual ~Filter();
 
-  virtual void set_src_buffer(unsigned char *buf, ROI *roi,
-			      orientation_t ori = ORI_HORIZONTAL,
-			      unsigned int buffer_num = 0);
+	virtual void set_src_buffer(unsigned char *buf,
+	                            ROI *          roi,
+	                            orientation_t  ori        = ORI_HORIZONTAL,
+	                            unsigned int   buffer_num = 0);
 
-  virtual void set_src_buffer(unsigned char *buf, ROI *roi,
-			      unsigned int buffer_num);
+	virtual void set_src_buffer(unsigned char *buf, ROI *roi, unsigned int buffer_num);
 
-  virtual void set_dst_buffer(unsigned char *buf, ROI *roi);
+	virtual void set_dst_buffer(unsigned char *buf, ROI *roi);
 
+	virtual void        set_orientation(orientation_t ori, unsigned int buffer_num);
+	virtual const char *name();
 
-  virtual void set_orientation(orientation_t ori, unsigned int buffer_num);
-  virtual const char * name();
+	virtual void apply() = 0;
 
-  virtual void apply() = 0 ;
+	void shrink_region(ROI *r, unsigned int n);
 
-  void shrink_region(ROI *r, unsigned int n);
+protected:
+	/** Maximum number of buffers */
+	unsigned int _max_num_buffers;
+	/** Filter name */
+	char *_name;
 
- protected:
-  /** Maximum number of buffers */
-  unsigned int    _max_num_buffers;
-  /** Filter name */
-  char           *_name;
+	/** Source buffers, dynamically allocated by Filter ctor. */
+	unsigned char **src;
+	/** Destination buffer */
+	unsigned char *dst;
 
-  /** Source buffers, dynamically allocated by Filter ctor. */
-  unsigned char  **src;
-  /** Destination buffer */
-  unsigned char  *dst;
+	/** Source ROIs, dynamically allocated by Filter ctor. */
+	ROI **src_roi;
+	/** Destination ROI */
+	ROI *dst_roi;
 
-  /** Source ROIs, dynamically allocated by Filter ctor. */
-  ROI            **src_roi;
-  /** Destination ROI */
-  ROI            *dst_roi;
-
-  /** Orientations, one for each source image */
-  orientation_t  *ori;
+	/** Orientations, one for each source image */
+	orientation_t *ori;
 };
 
 } // end namespace firevision

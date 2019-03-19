@@ -32,14 +32,14 @@ class TimeSource;
 
 class TimeSourceAspect : public virtual Aspect
 {
- public:
-  TimeSourceAspect(TimeSource *timesource) __attribute__((nonnull));
-  virtual ~TimeSourceAspect();
+public:
+	TimeSourceAspect(TimeSource *timesource) __attribute__((nonnull));
+	virtual ~TimeSourceAspect();
 
-  TimeSource *  get_timesource() const;
+	TimeSource *get_timesource() const;
 
- private:
-  TimeSource *time_source_;
+private:
+	TimeSource *time_source_;
 };
 
 } // end namespace fawkes

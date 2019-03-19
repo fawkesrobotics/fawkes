@@ -34,17 +34,16 @@
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <protobuf_comm/message_register.h>
-
 #include <google/protobuf/compiler/importer.h>
 #include <google/protobuf/dynamic_message.h>
 #include <netinet/in.h>
+#include <protobuf_comm/message_register.h>
 #include <sys/types.h>
+
 #include <dirent.h>
 #include <fnmatch.h>
 
 namespace protobuf_comm {
-
 
 /** @class MessageRegister <protobuf_comm/message_register.h>
  * Register to map msg type numbers to Protobuf messages.
@@ -57,11 +56,10 @@ namespace protobuf_comm {
 /** Constructor. */
 MessageRegister::MessageRegister()
 {
-  pb_srctree_  = NULL;
-  pb_importer_ = NULL;
-  pb_factory_  = NULL;
+	pb_srctree_  = NULL;
+	pb_importer_ = NULL;
+	pb_factory_  = NULL;
 }
-
 
 /** Constructor.
  * @param proto_path file paths to search for proto files. All message types
@@ -70,75 +68,72 @@ MessageRegister::MessageRegister()
  */
 MessageRegister::MessageRegister(const std::vector<std::string> &proto_path)
 {
-  pb_srctree_ = new google::protobuf::compiler::DiskSourceTree();
-  for (size_t i = 0; i < proto_path.size(); ++i) {
-    pb_srctree_->MapPath("", proto_path[i]);
-  }
-  pb_importer_ = new google::protobuf::compiler::Importer(pb_srctree_, NULL);
-  pb_factory_  = new google::protobuf::DynamicMessageFactory(pb_importer_->pool());
-
-  for (size_t i = 0; i < proto_path.size(); ++i) {
-    DIR *dir;
-    struct dirent *ent;
-    if ((dir = opendir(proto_path[i].c_str())) != NULL) {
-      while ((ent = readdir(dir)) != NULL) {
-	if (fnmatch("*.proto", ent->d_name, FNM_PATHNAME) != FNM_NOMATCH) {
-	  //printf ("%s\n", ent->d_name);
-	  const google::protobuf::FileDescriptor *fd =
-	    pb_importer_->Import(ent->d_name);
-	  for (int i = 0; i < fd->message_type_count(); ++i) {
-	    const google::protobuf::Descriptor *desc = fd->message_type(i);
-	    //printf("  Type: %s\n", desc->full_name().c_str());
-	    if (! desc->FindEnumTypeByName("CompType")) continue;
-
-	    try {
-	      add_message_type(desc->full_name());
-	    } catch (std::logic_error &e) {
-	      // cannot open for some reason
-	      failed_to_load_types_.insert(std::make_pair(desc->full_name(), e.what()));
-	    }
-	  }
+	pb_srctree_ = new google::protobuf::compiler::DiskSourceTree();
+	for (size_t i = 0; i < proto_path.size(); ++i) {
+		pb_srctree_->MapPath("", proto_path[i]);
 	}
-      }
-      closedir (dir);
-    }
-  }
+	pb_importer_ = new google::protobuf::compiler::Importer(pb_srctree_, NULL);
+	pb_factory_  = new google::protobuf::DynamicMessageFactory(pb_importer_->pool());
+
+	for (size_t i = 0; i < proto_path.size(); ++i) {
+		DIR *          dir;
+		struct dirent *ent;
+		if ((dir = opendir(proto_path[i].c_str())) != NULL) {
+			while ((ent = readdir(dir)) != NULL) {
+				if (fnmatch("*.proto", ent->d_name, FNM_PATHNAME) != FNM_NOMATCH) {
+					//printf ("%s\n", ent->d_name);
+					const google::protobuf::FileDescriptor *fd = pb_importer_->Import(ent->d_name);
+					for (int i = 0; i < fd->message_type_count(); ++i) {
+						const google::protobuf::Descriptor *desc = fd->message_type(i);
+						//printf("  Type: %s\n", desc->full_name().c_str());
+						if (!desc->FindEnumTypeByName("CompType"))
+							continue;
+
+						try {
+							add_message_type(desc->full_name());
+						} catch (std::logic_error &e) {
+							// cannot open for some reason
+							failed_to_load_types_.insert(std::make_pair(desc->full_name(), e.what()));
+						}
+					}
+				}
+			}
+			closedir(dir);
+		}
+	}
 }
 
 /** Destructor. */
 MessageRegister::~MessageRegister()
 {
-  TypeMap::iterator m;
-  for (m = message_by_comp_type_.begin(); m != message_by_comp_type_.end(); ++m) {
-    delete m->second;
-  }
-  delete pb_factory_;
-  delete pb_importer_;
-  delete pb_srctree_;
+	TypeMap::iterator m;
+	for (m = message_by_comp_type_.begin(); m != message_by_comp_type_.end(); ++m) {
+		delete m->second;
+	}
+	delete pb_factory_;
+	delete pb_importer_;
+	delete pb_srctree_;
 }
-
 
 google::protobuf::Message *
 MessageRegister::create_msg(const std::string &msg_type)
 {
-  const google::protobuf::DescriptorPool *pool =
-    google::protobuf::DescriptorPool::generated_pool();
-  google::protobuf::MessageFactory *factory =
-    google::protobuf::MessageFactory::generated_factory();
+	const google::protobuf::DescriptorPool *pool = google::protobuf::DescriptorPool::generated_pool();
+	google::protobuf::MessageFactory *factory = google::protobuf::MessageFactory::generated_factory();
 
-  const google::protobuf::Descriptor *desc = pool->FindMessageTypeByName(msg_type);
-  if (desc) {
-    return factory->GetPrototype(desc)->New();
-  } else if (pb_importer_) {
-    pool = pb_importer_->pool();
-    factory = pb_factory_;
+	const google::protobuf::Descriptor *desc = pool->FindMessageTypeByName(msg_type);
+	if (desc) {
+		return factory->GetPrototype(desc)->New();
+	} else if (pb_importer_) {
+		pool    = pb_importer_->pool();
+		factory = pb_factory_;
 
-    const google::protobuf::Descriptor *cdesc = pool->FindMessageTypeByName(msg_type);
-    if (cdesc) {
-      return factory->GetPrototype(cdesc)->New();
-    }
-  }
-  return NULL;
+		const google::protobuf::Descriptor *cdesc = pool->FindMessageTypeByName(msg_type);
+		if (cdesc) {
+			return factory->GetPrototype(cdesc)->New();
+		}
+	}
+	return NULL;
 }
 
 /** Add a message type from generated pool.
@@ -152,28 +147,27 @@ MessageRegister::create_msg(const std::string &msg_type)
 void
 MessageRegister::add_message_type(std::string msg_type)
 {
-  google::protobuf::Message *m = create_msg(msg_type);
-  if (m) {
-    KeyType key = key_from_desc(m->GetDescriptor());
-    std::lock_guard<std::mutex> lock(maps_mutex_);
-    if (message_by_comp_type_.find(key) != message_by_comp_type_.end()) {
+	google::protobuf::Message *m = create_msg(msg_type);
+	if (m) {
+		KeyType                     key = key_from_desc(m->GetDescriptor());
+		std::lock_guard<std::mutex> lock(maps_mutex_);
+		if (message_by_comp_type_.find(key) != message_by_comp_type_.end()) {
 #if defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6))
-      std::string msg = "Message type " + std::to_string((long long)key.first) + ":" +
-	std::to_string((long long)key.second) + " already registered";
+			std::string msg = "Message type " + std::to_string((long long)key.first) + ":"
+			                  + std::to_string((long long)key.second) + " already registered";
 #else
-      std::string msg = "Message type " + std::to_string(key.first) + ":" +
-	std::to_string(key.second) + " already registered";
+			std::string msg = "Message type " + std::to_string(key.first) + ":"
+			                  + std::to_string(key.second) + " already registered";
 #endif
-      throw std::runtime_error(msg);
-    }
-    //printf("Registering %s (%u:%u)\n", msg_type.c_str(), key.first, key.second);
-    message_by_comp_type_[key] = m;
-    message_by_typename_[m->GetTypeName()] = m;
-  } else {
-    throw std::runtime_error("Unknown message type");
-  }
+			throw std::runtime_error(msg);
+		}
+		//printf("Registering %s (%u:%u)\n", msg_type.c_str(), key.first, key.second);
+		message_by_comp_type_[key]             = m;
+		message_by_typename_[m->GetTypeName()] = m;
+	} else {
+		throw std::runtime_error("Unknown message type");
+	}
 }
-
 
 /** Remove the given message type.
  * @param component_id ID of component this message type belongs to
@@ -182,38 +176,35 @@ MessageRegister::add_message_type(std::string msg_type)
 void
 MessageRegister::remove_message_type(uint16_t component_id, uint16_t msg_type)
 {
-  KeyType key(component_id, msg_type);
-  std::lock_guard<std::mutex> lock(maps_mutex_);
-  if (message_by_comp_type_.find(key) != message_by_comp_type_.end()) {
-    message_by_typename_.erase(message_by_comp_type_[key]->GetDescriptor()->full_name());
-    message_by_comp_type_.erase(key);
-  }
+	KeyType                     key(component_id, msg_type);
+	std::lock_guard<std::mutex> lock(maps_mutex_);
+	if (message_by_comp_type_.find(key) != message_by_comp_type_.end()) {
+		message_by_typename_.erase(message_by_comp_type_[key]->GetDescriptor()->full_name());
+		message_by_comp_type_.erase(key);
+	}
 }
-
 
 MessageRegister::KeyType
 MessageRegister::key_from_desc(const google::protobuf::Descriptor *desc)
 {
-  const google::protobuf::EnumDescriptor *enumdesc = desc->FindEnumTypeByName("CompType");
-  if (! enumdesc) {
-    throw std::logic_error("Message does not have CompType enum");
-  }
-  const google::protobuf::EnumValueDescriptor *compdesc =
-    enumdesc->FindValueByName("COMP_ID");
-  const google::protobuf::EnumValueDescriptor *msgtdesc =
-    enumdesc->FindValueByName("MSG_TYPE");
-  if (! compdesc || ! msgtdesc) {
-    throw std::logic_error("Message CompType enum hs no COMP_ID or MSG_TYPE value");
-  }
-  int comp_id = compdesc->number();
-  int msg_type = msgtdesc->number();
-  if (comp_id < 0 || comp_id > std::numeric_limits<uint16_t>::max()) {
-    throw std::logic_error("Message has invalid COMP_ID");
-  }
-  if (msg_type < 0 || msg_type > std::numeric_limits<uint16_t>::max()) {
-    throw std::logic_error("Message has invalid MSG_TYPE");
-  }
-  return KeyType(comp_id, msg_type);
+	const google::protobuf::EnumDescriptor *enumdesc = desc->FindEnumTypeByName("CompType");
+	if (!enumdesc) {
+		throw std::logic_error("Message does not have CompType enum");
+	}
+	const google::protobuf::EnumValueDescriptor *compdesc = enumdesc->FindValueByName("COMP_ID");
+	const google::protobuf::EnumValueDescriptor *msgtdesc = enumdesc->FindValueByName("MSG_TYPE");
+	if (!compdesc || !msgtdesc) {
+		throw std::logic_error("Message CompType enum hs no COMP_ID or MSG_TYPE value");
+	}
+	int comp_id  = compdesc->number();
+	int msg_type = msgtdesc->number();
+	if (comp_id < 0 || comp_id > std::numeric_limits<uint16_t>::max()) {
+		throw std::logic_error("Message has invalid COMP_ID");
+	}
+	if (msg_type < 0 || msg_type > std::numeric_limits<uint16_t>::max()) {
+		throw std::logic_error("Message has invalid MSG_TYPE");
+	}
+	return KeyType(comp_id, msg_type);
 }
 
 /** Create a new message instance.
@@ -225,24 +216,23 @@ MessageRegister::key_from_desc(const google::protobuf::Descriptor *desc)
 std::shared_ptr<google::protobuf::Message>
 MessageRegister::new_message_for(uint16_t component_id, uint16_t msg_type)
 {
-  KeyType key(component_id, msg_type);
+	KeyType key(component_id, msg_type);
 
-  std::lock_guard<std::mutex> lock(maps_mutex_);
-  if (message_by_comp_type_.find(key) == message_by_comp_type_.end()) {
+	std::lock_guard<std::mutex> lock(maps_mutex_);
+	if (message_by_comp_type_.find(key) == message_by_comp_type_.end()) {
 #if defined(__GNUC__) && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 6))
-    std::string msg = "Message type " + std::to_string((long long)component_id) + ":" +
-      std::to_string((long long)msg_type) + " not registered";
+		std::string msg = "Message type " + std::to_string((long long)component_id) + ":"
+		                  + std::to_string((long long)msg_type) + " not registered";
 #else
-    std::string msg = "Message type " + std::to_string(component_id) + ":" +
-      std::to_string(msg_type) + " not registered";
+		std::string msg = "Message type " + std::to_string(component_id) + ":"
+		                  + std::to_string(msg_type) + " not registered";
 #endif
-    throw std::runtime_error(msg);
-  }
+		throw std::runtime_error(msg);
+	}
 
-  google::protobuf::Message *m = message_by_comp_type_[key]->New();
-  return std::shared_ptr<google::protobuf::Message>(m);
+	google::protobuf::Message *m = message_by_comp_type_[key]->New();
+	return std::shared_ptr<google::protobuf::Message>(m);
 }
-
 
 /** Create a new message instance.
  * @param full_name full message type name, i.e. the message type name
@@ -253,20 +243,19 @@ MessageRegister::new_message_for(uint16_t component_id, uint16_t msg_type)
 std::shared_ptr<google::protobuf::Message>
 MessageRegister::new_message_for(const std::string &full_name)
 {
-  std::lock_guard<std::mutex> lock(maps_mutex_);
-  if (message_by_typename_.find(full_name) == message_by_typename_.end()) {
-    google::protobuf::Message *m = create_msg(full_name);
-    if (m) {
-      return std::shared_ptr<google::protobuf::Message>(m);
-    } else {
-      throw std::runtime_error("Message type not registered");
-    }
-  } else {
-    google::protobuf::Message *m = message_by_typename_[full_name]->New();
-    return std::shared_ptr<google::protobuf::Message>(m);
-  }
+	std::lock_guard<std::mutex> lock(maps_mutex_);
+	if (message_by_typename_.find(full_name) == message_by_typename_.end()) {
+		google::protobuf::Message *m = create_msg(full_name);
+		if (m) {
+			return std::shared_ptr<google::protobuf::Message>(m);
+		} else {
+			throw std::runtime_error("Message type not registered");
+		}
+	} else {
+		google::protobuf::Message *m = message_by_typename_[full_name]->New();
+		return std::shared_ptr<google::protobuf::Message>(m);
+	}
 }
-
 
 /** Serialize a message.
  * @param component_id ID of component this message type belongs to
@@ -277,37 +266,36 @@ MessageRegister::new_message_for(const std::string &full_name)
  * @param message_header upon return, the frame header is filled out according to
  * the given information and message.
  * @param data upon return, contains the serialized message
- */ 
+ */
 void
-MessageRegister::serialize(uint16_t component_id, uint16_t msg_type,
-			   const google::protobuf::Message &msg,
-			   frame_header_t &frame_header,
-			   message_header_t &message_header, 
-			   std::string &data)
+MessageRegister::serialize(uint16_t                         component_id,
+                           uint16_t                         msg_type,
+                           const google::protobuf::Message &msg,
+                           frame_header_t &                 frame_header,
+                           message_header_t &               message_header,
+                           std::string &                    data)
 {
-  bool serialized = false;
+	bool serialized = false;
 #if GOOGLE_PROTOBUF_VERSION >= 2004000
-  try {
-    serialized = msg.SerializeToString(&data);
-  } catch (google::protobuf::FatalException &e) {
-    std::string error_msg = std::string("Failed to serialize message: ") + e.what();
-    throw std::runtime_error(error_msg);
-  }
+	try {
+		serialized = msg.SerializeToString(&data);
+	} catch (google::protobuf::FatalException &e) {
+		std::string error_msg = std::string("Failed to serialize message: ") + e.what();
+		throw std::runtime_error(error_msg);
+	}
 #else
-  // No exceptions in earlier versions
-  serialized = msg.SerializeToString(&data);
+	// No exceptions in earlier versions
+	serialized = msg.SerializeToString(&data);
 #endif
 
-
-  if (serialized) {
-    message_header.component_id = htons(component_id);
-    message_header.msg_type     = htons(msg_type);
-    frame_header.payload_size   = htonl(sizeof(message_header) + data.size());
-  } else {
-    throw std::runtime_error("Cannot serialize message");
-  }
+	if (serialized) {
+		message_header.component_id = htons(component_id);
+		message_header.msg_type     = htons(msg_type);
+		frame_header.payload_size   = htonl(sizeof(message_header) + data.size());
+	} else {
+		throw std::runtime_error("Cannot serialize message");
+	}
 }
-
 
 /** Deserialize message.
  * @param frame_header incoming message's frame header
@@ -320,19 +308,20 @@ MessageRegister::serialize(uint16_t component_id, uint16_t msg_type,
  * for the given component ID and message type.
  */
 std::shared_ptr<google::protobuf::Message>
-MessageRegister::deserialize(frame_header_t &frame_header, message_header_t &message_header, void *data)
+MessageRegister::deserialize(frame_header_t &  frame_header,
+                             message_header_t &message_header,
+                             void *            data)
 {
-  uint16_t comp_id   = ntohs(message_header.component_id);
-  uint16_t msg_type  = ntohs(message_header.msg_type);
-  size_t   data_size = ntohl(frame_header.payload_size) - sizeof(message_header);
+	uint16_t comp_id   = ntohs(message_header.component_id);
+	uint16_t msg_type  = ntohs(message_header.msg_type);
+	size_t   data_size = ntohl(frame_header.payload_size) - sizeof(message_header);
 
-  std::shared_ptr<google::protobuf::Message> m =
-    new_message_for(comp_id, msg_type);
-  if (! m->ParseFromArray(data, data_size)) {
-    throw std::runtime_error("Failed to parse message");
-  }
+	std::shared_ptr<google::protobuf::Message> m = new_message_for(comp_id, msg_type);
+	if (!m->ParseFromArray(data, data_size)) {
+		throw std::runtime_error("Failed to parse message");
+	}
 
-  return m;
+	return m;
 }
 
 } // end namespace protobuf_comm

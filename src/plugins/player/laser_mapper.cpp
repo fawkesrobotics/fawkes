@@ -23,9 +23,9 @@
 #include "laser_mapper.h"
 
 #include <core/exceptions/software.h>
-#include <utils/math/angle.h>
 #include <interfaces/Laser360Interface.h>
 #include <libplayerc++/playerc++.h>
+#include <utils/math/angle.h>
 
 /** @class PlayerLaserMapper "laser_mapper.h"
  * Laser mapper for player integration.
@@ -39,9 +39,9 @@
  * @param interface Fawkes interface instance
  * @param proxy Player proxy instance
  */
-PlayerLaserMapper::PlayerLaserMapper(const std::string& varname,
+PlayerLaserMapper::PlayerLaserMapper(const std::string &        varname,
                                      fawkes::Laser360Interface *interface,
-                                     PlayerCc::LaserProxy *proxy)
+                                     PlayerCc::LaserProxy *     proxy)
 : PlayerProxyFawkesInterfaceMapper(varname),
   interface_(interface),
   proxy_(proxy),
@@ -50,32 +50,31 @@ PlayerLaserMapper::PlayerLaserMapper(const std::string& varname,
 {
 }
 
-
 void
 PlayerLaserMapper::sync_player_to_fawkes()
 {
-  //printf("Laser interface, count: %u, min angle= %f, max angle = %f\n",
-  //	 proxy_->GetCount(), proxy_->GetMinAngle(), proxy_->GetMaxAngle());
+	//printf("Laser interface, count: %u, min angle= %f, max angle = %f\n",
+	//	 proxy_->GetCount(), proxy_->GetMinAngle(), proxy_->GetMaxAngle());
 
-  if ( proxy_->GetCount() != 360 )  return;
+	if (proxy_->GetCount() != 360)
+		return;
 
-  if ( proxy_->IsFresh() ) {
+	if (proxy_->IsFresh()) {
+		if (first_read_) {
+			index_offset_ = 360 + fawkes::rad2deg(proxy_->GetMinAngle());
+			first_read_   = false;
+		}
 
-    if ( first_read_ ) {
-      index_offset_ = 360 + fawkes::rad2deg(proxy_->GetMinAngle());
-      first_read_ = false;
-    }
-
-    //printf("Setting %s to (%f, %f, %f)\n", varname().c_str(), proxy_->GetXPos(),
-    //       proxy_->GetYPos(), proxy_->GetYaw());
-    float distances[360];
-    for (int i = 0; i < 360; ++i) {
-      distances[(i + index_offset_) % 360] = (*proxy_)[360 - i];
-    }
-    interface_->set_distances(distances);
-    interface_->write();
-    proxy_->NotFresh();
-  }
+		//printf("Setting %s to (%f, %f, %f)\n", varname().c_str(), proxy_->GetXPos(),
+		//       proxy_->GetYPos(), proxy_->GetYaw());
+		float distances[360];
+		for (int i = 0; i < 360; ++i) {
+			distances[(i + index_offset_) % 360] = (*proxy_)[360 - i];
+		}
+		interface_->set_distances(distances);
+		interface_->write();
+		proxy_->NotFresh();
+	}
 }
 
 void

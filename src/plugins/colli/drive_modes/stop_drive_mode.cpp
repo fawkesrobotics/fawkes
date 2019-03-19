@@ -22,8 +22,7 @@
 
 #include "stop_drive_mode.h"
 
-namespace fawkes
-{
+namespace fawkes {
 
 /** @class StopDriveModule <plugins/colli/drive_modes/stop_drive_mode.h>
  * Stop-Drive-Module. This module is called, if something goes wrong, or is not recognized.
@@ -34,22 +33,20 @@ namespace fawkes
  * @param logger The fawkes logger
  * @param config The fawkes configuration
  */
-StopDriveModule::StopDriveModule(Logger* logger, Configuration* config)
- : AbstractDriveMode(logger, config)
+StopDriveModule::StopDriveModule(Logger *logger, Configuration *config)
+: AbstractDriveMode(logger, config)
 {
-  logger_->log_debug("StopDriveModule", "(Constructor): Entering...");
-  drive_mode_ = NavigatorInterface::MovingNotAllowed;
-  logger_->log_debug("StopDriveModule", "(Constructor): Exiting...");
+	logger_->log_debug("StopDriveModule", "(Constructor): Entering...");
+	drive_mode_ = NavigatorInterface::MovingNotAllowed;
+	logger_->log_debug("StopDriveModule", "(Constructor): Exiting...");
 }
-
 
 /** Destruct your local values here. */
 StopDriveModule::~StopDriveModule()
 {
-  logger_->log_debug("StopDriveModule", "(Destructor): Entering...");
-  logger_->log_debug("StopDriveModule", "(Destructor): Exiting...");
+	logger_->log_debug("StopDriveModule", "(Destructor): Entering...");
+	logger_->log_debug("StopDriveModule", "(Destructor): Exiting...");
 }
-
 
 /* ************************************************************************** */
 /* ***********************        U P D A T E       ************************* */
@@ -81,7 +78,7 @@ StopDriveModule::~StopDriveModule()
 void
 StopDriveModule::update()
 {
-  proposed_.x = proposed_.y = proposed_.rot = 0.f;
+	proposed_.x = proposed_.y = proposed_.rot = 0.f;
 }
 
 } // namespace fawkes

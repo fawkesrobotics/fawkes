@@ -26,57 +26,61 @@
 #include <xmlrpc-c/registry.hpp>
 
 namespace fawkes {
-  class Logger;
-  class PluginManager;
-}
+class Logger;
+class PluginManager;
+} // namespace fawkes
 
-class XmlRpcPluginMethods {
- public:
+class XmlRpcPluginMethods
+{
+public:
 	XmlRpcPluginMethods(std::shared_ptr<xmlrpc_c::registry> registry,
-	                    fawkes::PluginManager *plugin_manager,
-	                    fawkes::Logger *logger);
-  ~XmlRpcPluginMethods();
+	                    fawkes::PluginManager *             plugin_manager,
+	                    fawkes::Logger *                    logger);
+	~XmlRpcPluginMethods();
 
-  class plugin_list : public xmlrpc_c::method {
-   public:
-    plugin_list(fawkes::PluginManager *plugin_manager);
-    virtual ~plugin_list();
-    virtual void execute(xmlrpc_c::paramList const& params,
-			 xmlrpc_c::value *   const  result);
-   private:
-    fawkes::PluginManager *plugin_manager_;
-  };
+	class plugin_list : public xmlrpc_c::method
+	{
+	public:
+		plugin_list(fawkes::PluginManager *plugin_manager);
+		virtual ~plugin_list();
+		virtual void execute(xmlrpc_c::paramList const &params, xmlrpc_c::value *const result);
 
-  class plugin_load : public xmlrpc_c::method {
-   public:
-    plugin_load(fawkes::PluginManager *plugin_manager, fawkes::Logger *logger);
-    virtual ~plugin_load();
-    virtual void execute(xmlrpc_c::paramList const& params,
-			 xmlrpc_c::value *   const  result);
-   private:
-    fawkes::PluginManager *plugin_manager_;
-    fawkes::Logger        *logger_;
-  };
+	private:
+		fawkes::PluginManager *plugin_manager_;
+	};
 
-  class plugin_unload : public xmlrpc_c::method {
-   public:
-    plugin_unload(fawkes::PluginManager *plugin_manager, fawkes::Logger *logger);
-    virtual ~plugin_unload();
-    virtual void execute(xmlrpc_c::paramList const& params,
-			 xmlrpc_c::value *   const  result);
-   private:
-    fawkes::PluginManager *plugin_manager_;
-    fawkes::Logger        *logger_;
-  };
+	class plugin_load : public xmlrpc_c::method
+	{
+	public:
+		plugin_load(fawkes::PluginManager *plugin_manager, fawkes::Logger *logger);
+		virtual ~plugin_load();
+		virtual void execute(xmlrpc_c::paramList const &params, xmlrpc_c::value *const result);
 
- private:
+	private:
+		fawkes::PluginManager *plugin_manager_;
+		fawkes::Logger *       logger_;
+	};
+
+	class plugin_unload : public xmlrpc_c::method
+	{
+	public:
+		plugin_unload(fawkes::PluginManager *plugin_manager, fawkes::Logger *logger);
+		virtual ~plugin_unload();
+		virtual void execute(xmlrpc_c::paramList const &params, xmlrpc_c::value *const result);
+
+	private:
+		fawkes::PluginManager *plugin_manager_;
+		fawkes::Logger *       logger_;
+	};
+
+private:
 	std::shared_ptr<xmlrpc_c::registry> xmlrpc_registry_;
 
-  fawkes::PluginManager *plugin_manager_;
-  fawkes::Logger        *logger_;
-	std::unique_ptr<plugin_list>    plugin_list_;
-	std::unique_ptr<plugin_load>    plugin_load_;
-	std::unique_ptr<plugin_unload>  plugin_unload_;
+	fawkes::PluginManager *        plugin_manager_;
+	fawkes::Logger *               logger_;
+	std::unique_ptr<plugin_list>   plugin_list_;
+	std::unique_ptr<plugin_load>   plugin_load_;
+	std::unique_ptr<plugin_unload> plugin_unload_;
 };
 
 #endif

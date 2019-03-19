@@ -20,11 +20,10 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <plugins/examples/basics/blackboard_thread.h>
 #include <interfaces/TestInterface.h>
+#include <plugins/examples/basics/blackboard_thread.h>
 
 using namespace fawkes;
-
 
 /** @class ExampleBlackBoardThread <plugins/examples/basics/blackboard_thread.h>
  * Simple demonstration for a thread using the BlackBoard.
@@ -32,37 +31,33 @@ using namespace fawkes;
  * @author Tim Niemueller
  */
 
-
 /** Constructor.
  * @param reader set to true, to make this bb thread to open the test interface
  * read-only, false to open it as a writer
  */
 ExampleBlackBoardThread::ExampleBlackBoardThread(bool reader)
-  : Thread("ExampleBlackBoardThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK)
+: Thread("ExampleBlackBoardThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK)
 {
-  this->reader = reader;
+	this->reader = reader;
 }
-
 
 /** Destructor. */
 ExampleBlackBoardThread::~ExampleBlackBoardThread()
 {
 }
 
-
 void
 ExampleBlackBoardThread::finalize()
 {
-  logger->log_debug(name(), "Closing test interface");
-  try {
-    blackboard->close(test_interface);
-  } catch (Exception &e) {
-    logger->log_error(name(), "Could not close kicker interface");
-    logger->log_error(name(), e);
-  }
+	logger->log_debug(name(), "Closing test interface");
+	try {
+		blackboard->close(test_interface);
+	} catch (Exception &e) {
+		logger->log_error(name(), "Could not close kicker interface");
+		logger->log_error(name(), e);
+	}
 }
-
 
 /** Initialize thread.
  * Here, the device and the BB-interface are opened.
@@ -70,17 +65,17 @@ ExampleBlackBoardThread::finalize()
 void
 ExampleBlackBoardThread::init()
 {
-  logger->log_debug(name(), "Opening test interface");
-  try {
-    if ( reader ) {
-      test_interface = blackboard->open_for_reading<TestInterface>("Test");
-    } else {
-      test_interface = blackboard->open_for_writing<TestInterface>("Test");
-    }
-  } catch (Exception& e) {
-    e.append("Opening test interface for writing failed");
-    throw;
-  }
+	logger->log_debug(name(), "Opening test interface");
+	try {
+		if (reader) {
+			test_interface = blackboard->open_for_reading<TestInterface>("Test");
+		} else {
+			test_interface = blackboard->open_for_writing<TestInterface>("Test");
+		}
+	} catch (Exception &e) {
+		e.append("Opening test interface for writing failed");
+		throw;
+	}
 }
 
 /** Thread loop.
@@ -89,5 +84,5 @@ ExampleBlackBoardThread::init()
 void
 ExampleBlackBoardThread::loop()
 {
-  // nothin'
+	// nothin'
 }

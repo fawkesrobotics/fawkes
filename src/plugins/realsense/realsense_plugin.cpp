@@ -21,9 +21,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "realsense_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -32,15 +32,14 @@ using namespace fawkes;
  */
 class RealsensePlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor
+public:
+	/** Constructor
    * @param config Fakwes configuration
    */
-  explicit RealsensePlugin(Configuration *config)
-     : Plugin(config)
-  {
-     thread_list.push_back(new RealsenseThread());
-  }
+	explicit RealsensePlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RealsenseThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Driver for Intel RealSense camera")

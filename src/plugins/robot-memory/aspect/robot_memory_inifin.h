@@ -21,25 +21,24 @@
 #ifndef FAWKES_SRC_PLUGINS_ROBOT_MEMORY_ASPECT_ROBOT_MEMORY_INIFIN_H_
 #define FAWKES_SRC_PLUGINS_ROBOT_MEMORY_ASPECT_ROBOT_MEMORY_INIFIN_H_
 
-#include <aspect/inifins/inifin.h>
 #include "robot_memory_aspect.h"
 
-namespace fawkes
-{
+#include <aspect/inifins/inifin.h>
 
+namespace fawkes {
 
 class RobotMemoryIniFin : public AspectIniFin
 {
-  public:
-    RobotMemoryIniFin();
+public:
+	RobotMemoryIniFin();
 
-    virtual void init(Thread *thread);
-    virtual void finalize(Thread *thread);
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
-    void set_robot_memory(RobotMemory* robot_memory);
+	void set_robot_memory(RobotMemory *robot_memory);
 
-  private:
-    RobotMemory* robot_memory_;
+private:
+	RobotMemory *robot_memory_;
 };
 
 } /* namespace fawkes */

@@ -19,9 +19,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include <core/plugin.h>
-
 #include "robot_state_publisher_thread.h"
+
+#include <core/plugin.h>
 
 using namespace fawkes;
 
@@ -33,14 +33,13 @@ using namespace fawkes;
 class RobotStatePublisherPlugin : public fawkes::Plugin
 {
 public:
-  /** Constructor.
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit RobotStatePublisherPlugin(Configuration *config)
-    : Plugin(config)
-  {
-    thread_list.push_back(new RobotStatePublisherThread());
-  }
+	explicit RobotStatePublisherPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new RobotStatePublisherThread());
+	}
 };
 
 PLUGIN_DESCRIPTION("Publishes transforms given a robot model and joint values")

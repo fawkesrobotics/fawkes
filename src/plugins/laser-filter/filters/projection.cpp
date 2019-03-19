@@ -23,11 +23,11 @@
 #include "projection.h"
 
 #include <core/exception.h>
+#include <sys/types.h>
 #include <utils/math/angle.h>
 
 #include <cstdlib>
 #include <cstring>
-#include <sys/types.h>
 
 using namespace fawkes;
 
@@ -54,37 +54,43 @@ using namespace fawkes;
  * @param in_data_size number of entries input value arrays
  * @param in vector of input arrays
  */
-LaserProjectionDataFilter::LaserProjectionDataFilter(const std::string& filter_name,
-                                                     tf::Transformer *tf,
-                                                     std::string target_frame,
-                                                     float not_from_x, float not_to_x,
-                                                     float not_from_y, float not_to_y,
-                                                     float only_from_z, float only_to_z,
-                                                     unsigned int in_data_size,
+LaserProjectionDataFilter::LaserProjectionDataFilter(const std::string &filter_name,
+                                                     tf::Transformer *  tf,
+                                                     std::string        target_frame,
+                                                     float              not_from_x,
+                                                     float              not_to_x,
+                                                     float              not_from_y,
+                                                     float              not_to_y,
+                                                     float              only_from_z,
+                                                     float              only_to_z,
+                                                     unsigned int       in_data_size,
                                                      std::vector<LaserDataFilter::Buffer *> &in)
 : LaserDataFilter(filter_name, in_data_size, in, in.size()),
-  tf_(tf), target_frame_(target_frame),
-  not_from_x_(not_from_x), not_to_x_(not_to_x),
-  not_from_y_(not_from_y), not_to_y_(not_to_y),
-  only_from_z_(only_from_z), only_to_z_(only_to_z)
+  tf_(tf),
+  target_frame_(target_frame),
+  not_from_x_(not_from_x),
+  not_to_x_(not_to_x),
+  not_from_y_(not_from_y),
+  not_to_y_(not_to_y),
+  only_from_z_(only_from_z),
+  only_to_z_(only_to_z)
 {
-  // Generate lookup tables for sin and cos
-  for (unsigned int i = 0; i < 360; ++i) {
-    sin_angles360[i] = sinf(deg2rad(i));
-    cos_angles360[i] = cosf(deg2rad(i));
-  }
-  for (unsigned int i = 0; i < 720; ++i) {
-    sin_angles720[i] = sinf(deg2rad((float)i / 2.));
-    cos_angles720[i] = cosf(deg2rad((float)i / 2.));
-  }
+	// Generate lookup tables for sin and cos
+	for (unsigned int i = 0; i < 360; ++i) {
+		sin_angles360[i] = sinf(deg2rad(i));
+		cos_angles360[i] = cosf(deg2rad(i));
+	}
+	for (unsigned int i = 0; i < 720; ++i) {
+		sin_angles720[i] = sinf(deg2rad((float)i / 2.));
+		cos_angles720[i] = cosf(deg2rad((float)i / 2.));
+	}
 
-  index_factor_ = out_data_size / 360.;
+	index_factor_ = out_data_size / 360.;
 }
 
 LaserProjectionDataFilter::~LaserProjectionDataFilter()
 {
 }
-
 
 /** Set the output buffer applying filtering.
  * This checks the given point against the configured bounds. If and
@@ -96,74 +102,78 @@ LaserProjectionDataFilter::~LaserProjectionDataFilter()
 inline void
 LaserProjectionDataFilter::set_output(float *outbuf, fawkes::tf::Point &p)
 {
-  if ( ((p.x() >= not_from_x_) && (p.x() <= not_to_x_) &&
-        (p.y() >= not_from_y_) && (p.y() <= not_to_y_)) ||
-       (p.z() < only_from_z_) || (p.z() > only_to_z_) )
-  {
-    // value is inside "forbidden" robot rectangle or
-    // below or above Z thresholds
-    return;
-  }
+	if (((p.x() >= not_from_x_) && (p.x() <= not_to_x_) && (p.y() >= not_from_y_)
+	     && (p.y() <= not_to_y_))
+	    || (p.z() < only_from_z_) || (p.z() > only_to_z_)) {
+		// value is inside "forbidden" robot rectangle or
+		// below or above Z thresholds
+		return;
+	}
 
-  p.setZ(0.);
-  float phi    = atan2f(p.y(), p.x());
-    
-  unsigned int j =
-    (unsigned int)roundf(rad2deg(normalize_rad(phi)) * index_factor_);
-  if (j > out_data_size) j = 0; // might happen just at the boundary
+	p.setZ(0.);
+	float phi = atan2f(p.y(), p.x());
 
-  if (outbuf[j] == 0.) {
-    outbuf[j] = (float)p.length();
-  } else {
-    outbuf[j] = std::min(outbuf[j], (float)p.length());
-  }
+	unsigned int j = (unsigned int)roundf(rad2deg(normalize_rad(phi)) * index_factor_);
+	if (j > out_data_size)
+		j = 0; // might happen just at the boundary
+
+	if (outbuf[j] == 0.) {
+		outbuf[j] = (float)p.length();
+	} else {
+		outbuf[j] = std::min(outbuf[j], (float)p.length());
+	}
 }
 
 void
 LaserProjectionDataFilter::filter()
 {
-  const unsigned int vecsize = std::min(in.size(), out.size());
-  for (unsigned int a = 0; a < vecsize; ++a) {
-    out[a]->frame = target_frame_;
-    out[a]->timestamp->set_time(in[a]->timestamp);
-    float* inbuf  = in[a]->values;
-    float* outbuf = out[a]->values;
-    memset(outbuf, 0, sizeof(float) * out_data_size);
+	const unsigned int vecsize = std::min(in.size(), out.size());
+	for (unsigned int a = 0; a < vecsize; ++a) {
+		out[a]->frame = target_frame_;
+		out[a]->timestamp->set_time(in[a]->timestamp);
+		float *inbuf  = in[a]->values;
+		float *outbuf = out[a]->values;
+		memset(outbuf, 0, sizeof(float) * out_data_size);
 
-    tf::StampedTransform t;
-    tf::Point p;
+		tf::StampedTransform t;
+		tf::Point            p;
 
-    tf_->lookup_transform(target_frame_, in[a]->frame,
-			  fawkes::Time(0, 0), t);
+		tf_->lookup_transform(target_frame_, in[a]->frame, fawkes::Time(0, 0), t);
 
-    if (in_data_size == 360) {
-      for (unsigned int i = 0; i < 360; ++i) {
-        if (inbuf[i] == 0.)  continue;
-        p.setValue((btScalar)inbuf[i] * cos_angles360[i], (btScalar)inbuf[i] * sin_angles360[i], 0.);
-        p = t * p;
+		if (in_data_size == 360) {
+			for (unsigned int i = 0; i < 360; ++i) {
+				if (inbuf[i] == 0.)
+					continue;
+				p.setValue((btScalar)inbuf[i] * cos_angles360[i],
+				           (btScalar)inbuf[i] * sin_angles360[i],
+				           0.);
+				p = t * p;
 
-        set_output(outbuf, p);
-      }
-    } else if (in_data_size == 720) {
-      for (unsigned int i = 0; i < 720; ++i) {
-        if (inbuf[i] == 0.)  continue;
+				set_output(outbuf, p);
+			}
+		} else if (in_data_size == 720) {
+			for (unsigned int i = 0; i < 720; ++i) {
+				if (inbuf[i] == 0.)
+					continue;
 
-        p.setValue((btScalar)inbuf[i] * cos_angles720[i], (btScalar)inbuf[i] * sin_angles720[i], 0.);
-        p = t * p;
+				p.setValue((btScalar)inbuf[i] * cos_angles720[i],
+				           (btScalar)inbuf[i] * sin_angles720[i],
+				           0.);
+				p = t * p;
 
-        set_output(outbuf, p);
-      }
-    } else {
-      for (unsigned int i = 0; i < in_data_size; ++i) {
-        if (inbuf[i] == 0.)  continue;
+				set_output(outbuf, p);
+			}
+		} else {
+			for (unsigned int i = 0; i < in_data_size; ++i) {
+				if (inbuf[i] == 0.)
+					continue;
 
-        float a = deg2rad(360.f / (float)i);
-        p.setValue((btScalar)inbuf[i] * cos(a), (btScalar)inbuf[i] * sin(a), 0.);
-        p = t * p;
+				float a = deg2rad(360.f / (float)i);
+				p.setValue((btScalar)inbuf[i] * cos(a), (btScalar)inbuf[i] * sin(a), 0.);
+				p = t * p;
 
-        set_output(outbuf, p);
-      }
-    }
-  }
+				set_output(outbuf, p);
+			}
+		}
+	}
 }
-

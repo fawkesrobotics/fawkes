@@ -26,128 +26,142 @@
 #include "sync_listener.h"
 #include "writer_listener.h"
 
-#include <core/threading/thread.h>
-#include <core/utils/lock_map.h>
-#include <aspect/logging.h>
-#include <aspect/configurable.h>
 #include <aspect/blackboard.h>
 #include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <core/threading/thread.h>
+#include <core/utils/lock_map.h>
 
-#include <string>
 #include <map>
+#include <string>
 #include <utility>
 
 namespace fawkes {
-  class TimeWait;
+class TimeWait;
 }
 
-class BlackBoardSynchronizationThread
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ClockAspect
+class BlackBoardSynchronizationThread : public fawkes::Thread,
+                                        public fawkes::LoggingAspect,
+                                        public fawkes::ConfigurableAspect,
+                                        public fawkes::BlackBoardAspect,
+                                        public fawkes::ClockAspect
 {
- public:
-  BlackBoardSynchronizationThread(std::string &bbsync_cfg_prefix,
-				  std::string &peer_cfg_prefix, std::string &peer);
-  virtual ~BlackBoardSynchronizationThread();
+public:
+	BlackBoardSynchronizationThread(std::string &bbsync_cfg_prefix,
+	                                std::string &peer_cfg_prefix,
+	                                std::string &peer);
+	virtual ~BlackBoardSynchronizationThread();
 
-  virtual void init();
-  virtual void loop();
-  virtual void finalize();
+	virtual void init();
+	virtual void loop();
+	virtual void finalize();
 
-  void writer_added(fawkes::Interface *interface) throw();
-  void writer_removed(fawkes::Interface *interface) throw();
+	void writer_added(fawkes::Interface *interface) throw();
+	void writer_removed(fawkes::Interface *interface) throw();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  /** Interface combo struct */
-  typedef struct {
-    std::string type;		/**< Combo type */
-    std::string reader_id;	/**< reader interface ID */
-    std::string writer_id;	/**< writer interface ID */
-    bool remote_writer;		/**< true if remote writer */
-  } combo_t;
+private:
+	/** Interface combo struct */
+	typedef struct
+	{
+		std::string type;          /**< Combo type */
+		std::string reader_id;     /**< reader interface ID */
+		std::string writer_id;     /**< writer interface ID */
+		bool        remote_writer; /**< true if remote writer */
+	} combo_t;
 
-  class InterfaceInfo {
-   public:
-    /** Combo configuration */
-    combo_t            *combo;
-    /** Writing interface */
-    fawkes::Interface  *writer;
-    /** Blackboard to read from */
-    fawkes::BlackBoard *reader_bb;
-    /** Blackboard to write to */
-    fawkes::BlackBoard *writer_bb;
+	class InterfaceInfo
+	{
+	public:
+		/** Combo configuration */
+		combo_t *combo;
+		/** Writing interface */
+		fawkes::Interface *writer;
+		/** Blackboard to read from */
+		fawkes::BlackBoard *reader_bb;
+		/** Blackboard to write to */
+		fawkes::BlackBoard *writer_bb;
 
-    /** Constructor. */
-    InterfaceInfo()
-    : combo(NULL), writer(NULL), reader_bb(NULL), writer_bb(NULL)
-    {}
+		/** Constructor. */
+		InterfaceInfo() : combo(NULL), writer(NULL), reader_bb(NULL), writer_bb(NULL)
+		{
+		}
 
-    /** Constructor.
+		/** Constructor.
      * @param pcombo combo configuration
      * @param pwriter Writing interface
      * @param preader_bb Blackboard to read from
      * @param pwriter_bb Blackboard to write to
      */
-    InterfaceInfo(combo_t *pcombo, fawkes::Interface  *pwriter,
-                  fawkes::BlackBoard *preader_bb, fawkes::BlackBoard *pwriter_bb)
-    : combo(pcombo), writer(pwriter), reader_bb(preader_bb), writer_bb(pwriter_bb)
-    {}
+		InterfaceInfo(combo_t *           pcombo,
+		              fawkes::Interface * pwriter,
+		              fawkes::BlackBoard *preader_bb,
+		              fawkes::BlackBoard *pwriter_bb)
+		: combo(pcombo), writer(pwriter), reader_bb(preader_bb), writer_bb(pwriter_bb)
+		{
+		}
 
-	  /** Copy constructor.
+		/** Copy constructor.
      * @param ii info to copy from
      */
-    InterfaceInfo(const InterfaceInfo &ii)
-    : combo(ii.combo), writer(ii.writer), reader_bb(ii.reader_bb), writer_bb(ii.writer_bb)
-    {}
+		InterfaceInfo(const InterfaceInfo &ii)
+		: combo(ii.combo), writer(ii.writer), reader_bb(ii.reader_bb), writer_bb(ii.writer_bb)
+		{
+		}
 
-    /** Assignment operator.
+		/** Assignment operator.
      * @param ii interface info to assign
      * @return reference to this instance
      */
-    InterfaceInfo & operator=(const InterfaceInfo &ii)
-    {
-      combo=ii.combo; writer=ii.writer; reader_bb=ii.reader_bb; writer_bb=ii.writer_bb;
-      return *this;
-    }
-  };
+		InterfaceInfo &
+		operator=(const InterfaceInfo &ii)
+		{
+			combo     = ii.combo;
+			writer    = ii.writer;
+			reader_bb = ii.reader_bb;
+			writer_bb = ii.writer_bb;
+			return *this;
+		}
+	};
 
-  typedef std::map<std::string, combo_t > ComboMap;
-  typedef fawkes::LockMap<fawkes::Interface *, InterfaceInfo> InterfaceMap;
-  typedef fawkes::LockMap<fawkes::Interface *, SyncInterfaceListener *> SyncListenerMap;
+	typedef std::map<std::string, combo_t>                                ComboMap;
+	typedef fawkes::LockMap<fawkes::Interface *, InterfaceInfo>           InterfaceMap;
+	typedef fawkes::LockMap<fawkes::Interface *, SyncInterfaceListener *> SyncListenerMap;
 
-  bool check_connection();
-  void read_config_combos(std::string prefix, bool writing);
-  void open_interfaces();
-  void close_interfaces();
+	bool check_connection();
+	void read_config_combos(std::string prefix, bool writing);
+	void open_interfaces();
+	void close_interfaces();
 
- private:
-  std::string   bbsync_cfg_prefix_;
-  std::string   peer_cfg_prefix_;
-  std::string   peer_;
+private:
+	std::string bbsync_cfg_prefix_;
+	std::string peer_cfg_prefix_;
+	std::string peer_;
 
-  std::string   host_;
-  unsigned int  port_;
+	std::string  host_;
+	unsigned int port_;
 
-  fawkes::TimeWait    *timewait_;
+	fawkes::TimeWait *timewait_;
 
-  fawkes::BlackBoard  *remote_bb_;
+	fawkes::BlackBoard *remote_bb_;
 
-  ComboMap combos_;
+	ComboMap combos_;
 
-  // Maps reading -> writing interface
-  InterfaceMap interfaces_;
-  // Maps reading interface -> sync lsitener
-  SyncListenerMap sync_listeners_;
+	// Maps reading -> writing interface
+	InterfaceMap interfaces_;
+	// Maps reading interface -> sync lsitener
+	SyncListenerMap sync_listeners_;
 
-  SyncWriterInterfaceListener *wsl_local_;
-  SyncWriterInterfaceListener *wsl_remote_;
+	SyncWriterInterfaceListener *wsl_local_;
+	SyncWriterInterfaceListener *wsl_remote_;
 };
-
 
 #endif

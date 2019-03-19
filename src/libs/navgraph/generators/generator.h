@@ -29,21 +29,20 @@ namespace fawkes {
 
 class NavGraphGenerator
 {
- public:
+public:
 	NavGraphGenerator();
 	NavGraphGenerator(std::map<std::string, std::string> params);
 	virtual ~NavGraphGenerator();
 
 	virtual void compute(fawkes::LockPtr<fawkes::NavGraph> graph) = 0;
 
-	virtual void set_bounding_box(float bbox_p1_x, float bbox_p1_y,
-	                              float bbox_p2_x, float bbox_p2_y);
+	virtual void set_bounding_box(float bbox_p1_x, float bbox_p1_y, float bbox_p2_x, float bbox_p2_y);
 	virtual void set_near_threshold(float near_threshold);
 	virtual void add_obstacle(float x, float y);
 
 	static std::string genname(unsigned int &i);
-	
- protected:
+
+protected:
 	bool  bbox_enabled_;   ///< True if bounding box requested, false otherwise
 	float bbox_p1_x_;      ///< X part of P1 for bounding box
 	float bbox_p1_y_;      ///< Y part of P1 for bounding box
@@ -53,7 +52,7 @@ class NavGraphGenerator
 
 	/// Obstacles to consider during navgraph generation.
 	std::list<std::pair<float, float>> obstacles_;
-  /// Parameters specific to the actual generator in a generic format.
+	/// Parameters specific to the actual generator in a generic format.
 	std::map<std::string, std::string> params_;
 };
 

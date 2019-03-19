@@ -28,7 +28,6 @@
 
 namespace fawkes {
 
-
 /** Convert an angle given in degrees to radians.
  * @param deg original value in degrees
  * @return converted value in radians
@@ -36,9 +35,8 @@ namespace fawkes {
 inline float
 deg2rad(float deg)
 {
-  return (deg * M_PI / 180.f);
+	return (deg * M_PI / 180.f);
 }
-
 
 /** Convert an angle given in radians to degrees.
  * @param rad original value in radians
@@ -47,9 +45,8 @@ deg2rad(float deg)
 inline float
 rad2deg(float rad)
 {
-  return (rad * 180.f / M_PI);
+	return (rad * 180.f / M_PI);
 }
-
 
 /** Get distance between two 2D cartesian coordinates.
  * @param x1 X coordinate of first point
@@ -61,7 +58,7 @@ rad2deg(float rad)
 inline float
 distance(float x1, float y1, float x2, float y2)
 {
-  return sqrt( (x2-x1) * (x2-x1) + (y2-y1) * (y2-y1) );
+	return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
 /** Normalize angle in radian between -PI (inclusive) and PI (exclusive).
@@ -71,15 +68,15 @@ distance(float x1, float y1, float x2, float y2)
  * @param angle_rad original value
  * @return normalized angle
  */
-inline float 
+inline float
 normalize_mirror_rad(float angle_rad)
 {
-  const float pi = static_cast<float>(M_PI);
-  if ( (angle_rad < -1.0f * pi) || (angle_rad >= pi) ) {
-    return ( angle_rad - 2.0f * pi * round(angle_rad / (2.0f * pi)) );
-  } else {
-    return angle_rad;
-  }
+	const float pi = static_cast<float>(M_PI);
+	if ((angle_rad < -1.0f * pi) || (angle_rad >= pi)) {
+		return (angle_rad - 2.0f * pi * round(angle_rad / (2.0f * pi)));
+	} else {
+		return angle_rad;
+	}
 }
 
 /** Normalize angle in radian between 0 (inclusive) and 2*PI (exclusive).
@@ -92,14 +89,13 @@ normalize_mirror_rad(float angle_rad)
 inline float
 normalize_rad(float angle_rad)
 {
-  const float twopi = static_cast<float>(2 * M_PI);
-  if ( (angle_rad < 0) || (angle_rad >= twopi) ) {
-    return angle_rad - twopi * floor(angle_rad / twopi);
-  } else {
-    return angle_rad;
-  }
+	const float twopi = static_cast<float>(2 * M_PI);
+	if ((angle_rad < 0) || (angle_rad >= twopi)) {
+		return angle_rad - twopi * floor(angle_rad / twopi);
+	} else {
+		return angle_rad;
+	}
 }
-
 
 /** Normalizes angle in radian between -3*PI and 3*PI.
  * If the angle is above 2*PI or below 2*PI the angle will be clipped.
@@ -111,24 +107,22 @@ normalize_rad(float angle_rad)
 inline float
 normalize_bigmirror_rad(float angle_rad)
 {
-  if ( (angle_rad < -2*M_PI) || (angle_rad > 2*M_PI) ) {
-    return (normalize_mirror_rad(angle_rad) + copysign(2*M_PI, angle_rad) );
-  } else {
-    return angle_rad;
-  }
+	if ((angle_rad < -2 * M_PI) || (angle_rad > 2 * M_PI)) {
+		return (normalize_mirror_rad(angle_rad) + copysign(2 * M_PI, angle_rad));
+	} else {
+		return angle_rad;
+	}
 }
-
 
 /** Determines the distance between two angle provided as radians. 
  * @param angle_rad1 first angle in radian
  * @param angle_rad2 second angle in radian
  * @return distance between the two angles
  */
-inline float 
-angle_distance(float angle_rad1,
-	       float angle_rad2)
+inline float
+angle_distance(float angle_rad1, float angle_rad2)
 {
-  return fabs( normalize_mirror_rad(angle_rad2 - angle_rad1) );
+	return fabs(normalize_mirror_rad(angle_rad2 - angle_rad1));
 }
 
 /** Determines the signed distance between from "angle_from" to "angle_to" provided as radians. 
@@ -136,13 +130,11 @@ angle_distance(float angle_rad1,
  * @param angle_from angle from which the signed value is calculated
  * @return signed distance from angle "angle_from" to "angle_to"
  */
-inline float 
+inline float
 angle_distance_signed(float angle_from, float angle_to)
 {
-  return normalize_mirror_rad(angle_to - angle_from);
+	return normalize_mirror_rad(angle_to - angle_from);
 }
-
-
 
 } // end namespace fawkes
 

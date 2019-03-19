@@ -25,6 +25,7 @@
 ///@cond QA
 
 #include <tf/transformer.h>
+
 #include <cstdio>
 
 using namespace fawkes::tf;
@@ -32,32 +33,36 @@ using namespace fawkes::tf;
 int
 main(int argc, char **argv)
 {
+	printf("Populating data\n");
+	Quaternion q(0, 0, 0, 1);
+	Vector3    v(1, 0, 0);
+	Transform  t(q, v);
 
-  printf("Populating data\n");
-  Quaternion q(0, 0, 0, 1);
-  Vector3 v(1, 0, 0);
-  Transform t(q, v);
+	fawkes::Time time;
 
-  fawkes::Time time;
+	StampedTransform st(t, time, "/world", "/robot");
 
-  StampedTransform st(t, time, "/world", "/robot");
+	printf("Setting transform\n");
+	Transformer transformer;
+	transformer.set_transform(st);
 
-  printf("Setting transform\n");
-  Transformer transformer;
-  transformer.set_transform(st);
+	printf("Looking up transform\n");
+	StampedTransform res;
+	transformer.lookupTransform("/robot", "/world", time, res);
 
-  printf("Looking up transform\n");
-  StampedTransform res;
-  transformer.lookupTransform("/robot", "/world", time, res);
+	Quaternion res_q(res.getRotation());
+	Vector3    res_v(res.getOrigin());
+	printf("Read transform Q (%f,%f,%f,%f) V (%f,%f,%f)\n",
+	       res_q.x(),
+	       res_q.y(),
+	       res_q.z(),
+	       res_q.w(),
+	       res_v.x(),
+	       res_v.y(),
+	       res_v.z());
+	printf("Done\n");
 
-  Quaternion res_q(res.getRotation());
-  Vector3 res_v(res.getOrigin());
-  printf("Read transform Q (%f,%f,%f,%f) V (%f,%f,%f)\n",
-         res_q.x(), res_q.y(), res_q.z(), res_q.w(),
-         res_v.x(), res_v.y(), res_v.z());
-  printf("Done\n");
-
-  return 0;
+	return 0;
 }
 
 /// @endcond

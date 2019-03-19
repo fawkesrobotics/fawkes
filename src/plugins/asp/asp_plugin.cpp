@@ -21,6 +21,7 @@
  */
 
 #include "asp_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -31,7 +32,7 @@ using namespace fawkes;
  */
 class ASPPlugin : public fawkes::Plugin
 {
-	public:
+public:
 	/** Constructor.
 	 * @param config Fawkes configuration
 	 */
@@ -40,7 +41,6 @@ class ASPPlugin : public fawkes::Plugin
 		thread_list.push_back(new ASPThread());
 	}
 };
-
 
 PLUGIN_DESCRIPTION("Provides Clingo environments")
 EXPORT_PLUGIN(ASPPlugin)

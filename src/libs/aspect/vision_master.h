@@ -27,22 +27,21 @@
 #include <aspect/aspect.h>
 
 namespace firevision {
-  class VisionMaster;
+class VisionMaster;
 }
 
 namespace fawkes {
 
-
 class VisionMasterAspect : public virtual Aspect
 {
- public:
-  VisionMasterAspect(firevision::VisionMaster *master) __attribute__((nonnull));
-  virtual ~VisionMasterAspect();
+public:
+	VisionMasterAspect(firevision::VisionMaster *master) __attribute__((nonnull));
+	virtual ~VisionMasterAspect();
 
-  firevision::VisionMaster *  vision_master();
+	firevision::VisionMaster *vision_master();
 
- private:
-  firevision::VisionMaster *master;
+private:
+	firevision::VisionMaster *master;
 };
 
 } // end namespace fawkes

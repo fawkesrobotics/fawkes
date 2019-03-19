@@ -29,8 +29,8 @@
 #include <netcomm/fawkes/hub.h>
 #include <netcomm/utils/incoming_connection_handler.h>
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace fawkes {
 
@@ -43,60 +43,71 @@ class FawkesNetworkMessage;
 class FawkesNetworkMessageQueue;
 class FawkesNetworkMessageContent;
 
-class FawkesNetworkServerThread
-: public Thread,
-  public FawkesNetworkHub,
-  public NetworkIncomingConnectionHandler
+class FawkesNetworkServerThread : public Thread,
+                                  public FawkesNetworkHub,
+                                  public NetworkIncomingConnectionHandler
 {
- public:
-  FawkesNetworkServerThread(bool enable_ipv4, bool enable_ipv6,
-                            const std::string &listen_ipv4, const std::string &listen_ipv6,
-                            unsigned int fawkes_port,
-                            ThreadCollector *thread_collector = 0);
-  virtual ~FawkesNetworkServerThread();
+public:
+	FawkesNetworkServerThread(bool               enable_ipv4,
+	                          bool               enable_ipv6,
+	                          const std::string &listen_ipv4,
+	                          const std::string &listen_ipv6,
+	                          unsigned int       fawkes_port,
+	                          ThreadCollector *  thread_collector = 0);
+	virtual ~FawkesNetworkServerThread();
 
-  virtual void loop();
+	virtual void loop();
 
-  virtual void add_handler(FawkesNetworkHandler *handler);
-  virtual void remove_handler(FawkesNetworkHandler *handler);
+	virtual void add_handler(FawkesNetworkHandler *handler);
+	virtual void remove_handler(FawkesNetworkHandler *handler);
 
-  virtual void broadcast(FawkesNetworkMessage *msg);
-  virtual void broadcast(unsigned short int component_id, unsigned short int msg_id,
-			 void *payload, unsigned int payload_size);
-  virtual void broadcast(unsigned short int component_id, unsigned short int msg_id);
+	virtual void broadcast(FawkesNetworkMessage *msg);
+	virtual void broadcast(unsigned short int component_id,
+	                       unsigned short int msg_id,
+	                       void *             payload,
+	                       unsigned int       payload_size);
+	virtual void broadcast(unsigned short int component_id, unsigned short int msg_id);
 
-  virtual void send(FawkesNetworkMessage *msg);
-  virtual void send(unsigned int to_clid,
-		    unsigned short int component_id, unsigned short int msg_id);
-  virtual void send(unsigned int to_clid,
-		    unsigned short int component_id, unsigned short int msg_id,
-		    void *payload, unsigned int payload_size);
-  virtual void send(unsigned int to_clid,
-		    unsigned short int component_id, unsigned short int msg_id,
-		    FawkesNetworkMessageContent *content);
+	virtual void send(FawkesNetworkMessage *msg);
+	virtual void
+	             send(unsigned int to_clid, unsigned short int component_id, unsigned short int msg_id);
+	virtual void send(unsigned int       to_clid,
+	                  unsigned short int component_id,
+	                  unsigned short int msg_id,
+	                  void *             payload,
+	                  unsigned int       payload_size);
+	virtual void send(unsigned int                 to_clid,
+	                  unsigned short int           component_id,
+	                  unsigned short int           msg_id,
+	                  FawkesNetworkMessageContent *content);
 
-  void add_connection(StreamSocket *s) throw();
-  void dispatch(FawkesNetworkMessage *msg);
+	void add_connection(StreamSocket *s) throw();
+	void dispatch(FawkesNetworkMessage *msg);
 
-  void force_send();
+	void force_send();
 
- /** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-  ThreadCollector       *thread_collector;
-  unsigned int           next_client_id;
-  std::vector<NetworkAcceptorThread *> acceptor_threads;
+private:
+	ThreadCollector *                    thread_collector;
+	unsigned int                         next_client_id;
+	std::vector<NetworkAcceptorThread *> acceptor_threads;
 
-  // key: component id,  value: handler
-  LockMap<unsigned int, FawkesNetworkHandler *> handlers;
-  LockMap<unsigned int, FawkesNetworkHandler *>::iterator hit;
+	// key: component id,  value: handler
+	LockMap<unsigned int, FawkesNetworkHandler *>           handlers;
+	LockMap<unsigned int, FawkesNetworkHandler *>::iterator hit;
 
-  // key: client id,     value: client thread
-  LockMap<unsigned int, FawkesNetworkServerClientThread *> clients;
-  LockMap<unsigned int, FawkesNetworkServerClientThread *>::iterator cit;
+	// key: client id,     value: client thread
+	LockMap<unsigned int, FawkesNetworkServerClientThread *>           clients;
+	LockMap<unsigned int, FawkesNetworkServerClientThread *>::iterator cit;
 
-  FawkesNetworkMessageQueue *inbound_messages;
+	FawkesNetworkMessageQueue *inbound_messages;
 };
 
 } // end namespace fawkes

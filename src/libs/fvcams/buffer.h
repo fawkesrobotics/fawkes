@@ -31,37 +31,37 @@ class CameraArgumentParser;
 
 class BufferCamera : public Camera
 {
- public:
-  BufferCamera(colorspace_t cspace, unsigned int width, unsigned int height);
-  ~BufferCamera();
+public:
+	BufferCamera(colorspace_t cspace, unsigned int width, unsigned int height);
+	~BufferCamera();
 
-  virtual void             open();
-  virtual void             start();
-  virtual void             stop();
-  virtual void             close();
-  virtual void             capture();
-  virtual void             flush();
+	virtual void open();
+	virtual void start();
+	virtual void stop();
+	virtual void close();
+	virtual void capture();
+	virtual void flush();
 
-  virtual bool             ready();
+	virtual bool ready();
 
-  virtual void             print_info();
+	virtual void print_info();
 
-  virtual unsigned char *  buffer();
-  virtual unsigned int     buffer_size();
-  virtual void             dispose_buffer();
+	virtual unsigned char *buffer();
+	virtual unsigned int   buffer_size();
+	virtual void           dispose_buffer();
 
-  virtual unsigned int     pixel_width();
-  virtual unsigned int     pixel_height();
-  virtual colorspace_t     colorspace();
+	virtual unsigned int pixel_width();
+	virtual unsigned int pixel_height();
+	virtual colorspace_t colorspace();
 
-  virtual void             set_image_number(unsigned int n);
+	virtual void set_image_number(unsigned int n);
 
- private:
-  unsigned char* buffer_;
-  unsigned int buffer_size_;
-  unsigned int width_;
-  unsigned int height_;
-  colorspace_t cspace_;
+private:
+	unsigned char *buffer_;
+	unsigned int   buffer_size_;
+	unsigned int   width_;
+	unsigned int   height_;
+	colorspace_t   cspace_;
 };
 
 } // end namespace firevision

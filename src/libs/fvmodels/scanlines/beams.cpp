@@ -61,210 +61,202 @@ namespace firevision {
  * @param num_beams number of beams to use
  * @exception Exception thrown if parameters are out of bounds
  */
-ScanlineBeams::ScanlineBeams(unsigned int image_width, unsigned int image_height,
-           unsigned int start_x, unsigned int start_y,
-           unsigned int stop_y, unsigned int offset_y,
-                             bool distribute_start_x,
-           float angle_from, float angle_range,
+ScanlineBeams::ScanlineBeams(unsigned int image_width,
+                             unsigned int image_height,
+                             unsigned int start_x,
+                             unsigned int start_y,
+                             unsigned int stop_y,
+                             unsigned int offset_y,
+                             bool         distribute_start_x,
+                             float        angle_from,
+                             float        angle_range,
                              unsigned int num_beams)
 {
-  if ( start_y < stop_y )  throw fawkes::Exception("start_y < stop_y");
-  if ( (stop_y > image_height) || (start_y > image_height) ) {
-    throw fawkes::Exception("(stop_y > height) || (start_y > height)");
-  }
+	if (start_y < stop_y)
+		throw fawkes::Exception("start_y < stop_y");
+	if ((stop_y > image_height) || (start_y > image_height)) {
+		throw fawkes::Exception("(stop_y > height) || (start_y > height)");
+	}
 
-  this->start_x = start_x;
-  this->start_y = start_y;
-  this->angle_from = angle_from;
-  this->angle_range = angle_range;
-  this->num_beams = num_beams;
-  this->stop_y = stop_y;
-  this->offset_y = offset_y;
-  this->image_width = image_width;
-  this->image_height = image_height;
-  this->distribute_start_x = distribute_start_x;
+	this->start_x            = start_x;
+	this->start_y            = start_y;
+	this->angle_from         = angle_from;
+	this->angle_range        = angle_range;
+	this->num_beams          = num_beams;
+	this->stop_y             = stop_y;
+	this->offset_y           = offset_y;
+	this->image_width        = image_width;
+	this->image_height       = image_height;
+	this->distribute_start_x = distribute_start_x;
 
-  reset();
+	reset();
 }
 
-
-upoint_t
-ScanlineBeams::operator*()
+upoint_t ScanlineBeams::operator*()
 {
-  return coord;
+	return coord;
 }
 
-upoint_t*
-ScanlineBeams::operator->()
+upoint_t *ScanlineBeams::operator->()
 {
-  return &coord;
+	return &coord;
 }
-
 
 bool
 ScanlineBeams::finished()
 {
-  return _finished;
+	return _finished;
 }
-
 
 void
 ScanlineBeams::advance()
 {
+	while (!_finished && (first_beam < last_beam)) {
+		unsigned int x_start = beam_current_pos[next_beam].x;
+		unsigned int y_start = beam_current_pos[next_beam].y;
 
-  while ( ! _finished && (first_beam < last_beam) ) {
+		unsigned int x_end = beam_end_pos[next_beam].x;
+		unsigned int y_end = beam_end_pos[next_beam].y;
 
-    unsigned int x_start = beam_current_pos[next_beam].x;
-    unsigned int y_start = beam_current_pos[next_beam].y;
+		int x, y, dist, xerr, yerr, dx, dy, incx, incy;
 
-    unsigned int x_end = beam_end_pos[next_beam].x;
-    unsigned int y_end = beam_end_pos[next_beam].y;
+		// calculate distance in both directions
+		dx = x_end - x_start;
+		dy = y_end - y_start;
 
-    int x, y, dist, xerr, yerr, dx, dy, incx, incy;
+		// Calculate sign of the increment
+		if (dx < 0) {
+			incx = -1;
+			dx   = -dx;
+		} else {
+			incx = dx ? 1 : 0;
+		}
 
-    // calculate distance in both directions
-    dx = x_end - x_start;
-    dy = y_end - y_start;
+		if (dy < 0) {
+			incy = -1;
+			dy   = -dy;
+		} else {
+			incy = dy ? 1 : 0;
+		}
 
-    // Calculate sign of the increment
-    if(dx < 0) {
-      incx = -1;
-      dx = -dx;
-    } else {
-      incx = dx ? 1 : 0;
-    }
+		// check which distance is larger
+		dist = (dx > dy) ? dx : dy;
 
-    if(dy < 0) {
-      incy = -1;
-      dy = -dy;
-    } else {
-      incy = dy ? 1 : 0;
-    }
+		// Initialize for loops
+		x    = x_start;
+		y    = y_start;
+		xerr = dx;
+		yerr = dy;
 
-    // check which distance is larger
-    dist = (dx > dy) ? dx : dy;
+		/* Calculate and draw pixels */
+		unsigned int offset = 0;
+		while ((x >= 0) && ((unsigned int)x < image_width) && ((unsigned int)y > stop_y)
+		       && (offset < offset_y)) {
+			++offset;
 
-    // Initialize for loops
-    x = x_start;
-    y = y_start;
-    xerr = dx;
-    yerr = dy;
+			xerr += dx;
+			yerr += dy;
 
-    /* Calculate and draw pixels */
-    unsigned int offset = 0;
-    while ( (x >= 0) && ((unsigned int )x < image_width) && ((unsigned int)y > stop_y) &&
-      (offset < offset_y) ) {
-      ++offset;
+			if (xerr > dist) {
+				xerr -= dist;
+				x += incx;
+			}
 
-      xerr += dx;
-      yerr += dy;
+			if (yerr > dist) {
+				yerr -= dist;
+				y += incy;
+			}
+		}
+		if ((y < 0) || (unsigned int)y <= stop_y) {
+			_finished = true;
+			break;
+		}
+		if (x < 0) {
+			first_beam = ++next_beam;
+			continue;
+		}
+		if ((unsigned int)x > image_width) {
+			last_beam = next_beam - 1;
+			next_beam = first_beam;
+			continue;
+		}
 
-      if(xerr > dist) {
-  xerr -= dist;
-  x += incx;
-      }
+		coord.x = x;
+		coord.y = y;
 
-      if(yerr>dist) {
-  yerr -= dist;
-  y += incy;
-      }
-    }
-    if ( (y < 0) || (unsigned int)y <= stop_y ) {
-      _finished = true;
-      break;
-    }
-    if ( x < 0 ) {
-      first_beam = ++next_beam;
-      continue;
-    }
-    if ( (unsigned int)x > image_width ) {
-      last_beam = next_beam - 1;
-      next_beam = first_beam;
-      continue;
-    }
+		beam_current_pos[next_beam] = coord;
 
-    coord.x = x;
-    coord.y = y;
-
-    beam_current_pos[next_beam] = coord;
-
-    if ( next_beam < last_beam) {
-      ++next_beam;
-    } else {
-      next_beam = first_beam;
-    }
-    break;
-  }
-
+		if (next_beam < last_beam) {
+			++next_beam;
+		} else {
+			next_beam = first_beam;
+		}
+		break;
+	}
 }
-
 
 upoint_t *
 ScanlineBeams::operator++()
 {
-  advance();
-  return &coord;
+	advance();
+	return &coord;
 }
-
 
 upoint_t *
 ScanlineBeams::operator++(int i)
 {
-  tmp_coord.x = coord.x;
-  tmp_coord.y = coord.y;
-  advance();
-  return &tmp_coord;
+	tmp_coord.x = coord.x;
+	tmp_coord.y = coord.y;
+	advance();
+	return &tmp_coord;
 }
-
 
 void
 ScanlineBeams::reset()
 {
-  _finished = false;
+	_finished = false;
 
-  beam_current_pos.clear();
-  if ( distribute_start_x ) {
-    unsigned int offset_start_x = image_width / (num_beams - 1);
-    for (unsigned int i = 0; i < num_beams; ++i) {
-      coord.x = i * offset_start_x;
-      coord.y = start_y;
-      beam_current_pos.push_back(coord);
-    }
-    coord.x = beam_current_pos[0].x;
-    coord.y = beam_current_pos[0].y;
-  } else {
-    coord.x = start_x;
-    coord.y = start_y;
-    beam_current_pos.resize( num_beams, coord );
-  }
+	beam_current_pos.clear();
+	if (distribute_start_x) {
+		unsigned int offset_start_x = image_width / (num_beams - 1);
+		for (unsigned int i = 0; i < num_beams; ++i) {
+			coord.x = i * offset_start_x;
+			coord.y = start_y;
+			beam_current_pos.push_back(coord);
+		}
+		coord.x = beam_current_pos[0].x;
+		coord.y = beam_current_pos[0].y;
+	} else {
+		coord.x = start_x;
+		coord.y = start_y;
+		beam_current_pos.resize(num_beams, coord);
+	}
 
-
-  beam_end_pos.clear();
-  next_beam = 0;
-  float angle_between_beams = angle_range / num_beams;
-  for (unsigned int i = 0; i < num_beams; ++i) {
-    float diff_y = beam_current_pos[i].y - stop_y;
-    float diff_x = diff_y * tan( angle_from + (float)i * angle_between_beams );
-    upoint_t end_point;
-    end_point.y = stop_y;
-    end_point.x = (int)roundf(diff_x) + start_x;
-    beam_end_pos.push_back(end_point);
-  }
-  first_beam = 0;
-  last_beam = beam_end_pos.size() - 1;
+	beam_end_pos.clear();
+	next_beam                 = 0;
+	float angle_between_beams = angle_range / num_beams;
+	for (unsigned int i = 0; i < num_beams; ++i) {
+		float    diff_y = beam_current_pos[i].y - stop_y;
+		float    diff_x = diff_y * tan(angle_from + (float)i * angle_between_beams);
+		upoint_t end_point;
+		end_point.y = stop_y;
+		end_point.x = (int)roundf(diff_x) + start_x;
+		beam_end_pos.push_back(end_point);
+	}
+	first_beam = 0;
+	last_beam  = beam_end_pos.size() - 1;
 }
 
 const char *
 ScanlineBeams::get_name()
 {
-  return "ScanlineModel::Beams";
+	return "ScanlineModel::Beams";
 }
-
 
 unsigned int
 ScanlineBeams::get_margin()
 {
-  return offset_y;
+	return offset_y;
 }
 
 } // end namespace firevision

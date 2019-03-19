@@ -36,14 +36,14 @@ using namespace fawkes;
  * update.
  */
 KatanaSensorThread::KatanaSensorThread(KatanaActThread *act_thread)
-  : Thread("KatanaSensorThread", Thread::OPMODE_WAITFORWAKEUP),
-    BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
+: Thread("KatanaSensorThread", Thread::OPMODE_WAITFORWAKEUP),
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE)
 {
-  act_thread_ = act_thread;
+	act_thread_ = act_thread;
 }
 
 void
 KatanaSensorThread::loop()
 {
-  act_thread_->update_sensor_values();
+	act_thread_->update_sensor_values();
 }

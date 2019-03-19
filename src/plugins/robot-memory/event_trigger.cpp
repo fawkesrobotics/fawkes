@@ -20,9 +20,10 @@
  */
 
 #include "event_trigger.h"
-#include "event_trigger_manager.h"
-#include <core/exception.h>
 
+#include "event_trigger_manager.h"
+
+#include <core/exception.h>
 
 /** @class EventTrigger  event_trigger.h
  * Class holding all information about an EventTrigger
@@ -34,15 +35,16 @@
  * @param ns namespace of the trigger, format db.collection
  * @param callback Reference to callback function
  */
-EventTrigger::EventTrigger(mongo::Query oplog_query, const std::string& ns,
-                           const boost::function<void (mongo::BSONObj)> &callback)
-	: oplog_query(oplog_query), ns(ns), ns_db(EventTriggerManager::get_db_name(ns)),
-	  callback(callback)
+EventTrigger::EventTrigger(mongo::Query                                 oplog_query,
+                           const std::string &                          ns,
+                           const boost::function<void(mongo::BSONObj)> &callback)
+: oplog_query(oplog_query), ns(ns), ns_db(EventTriggerManager::get_db_name(ns)), callback(callback)
 {
 	if (ns_db == "") {
 		throw fawkes::Exception("Invalid namespace, does not reference database");
 	}
 }
 
-EventTrigger::~EventTrigger(){}
-
+EventTrigger::~EventTrigger()
+{
+}

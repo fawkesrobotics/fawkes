@@ -15,9 +15,9 @@
 #include "SkillCall.h"
 
 #include <rapidjson/document.h>
-#include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 #include <sstream>
 
@@ -30,7 +30,7 @@ SkillCall::SkillCall(const std::string &json)
 	from_json(json);
 }
 
-SkillCall::SkillCall(const rapidjson::Value& v)
+SkillCall::SkillCall(const rapidjson::Value &v)
 {
 	from_json_value(v);
 }
@@ -59,9 +59,9 @@ SkillCall::to_json(bool pretty) const
 }
 
 void
-SkillCall::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
+SkillCall::to_json_value(rapidjson::Document &d, rapidjson::Value &v) const
 {
-	rapidjson::Document::AllocatorType& allocator = d.GetAllocator();
+	rapidjson::Document::AllocatorType &allocator = d.GetAllocator();
 	v.SetObject();
 	// Avoid unused variable warnings
 	(void)allocator;
@@ -81,7 +81,6 @@ SkillCall::to_json_value(rapidjson::Document& d, rapidjson::Value& v) const
 		v_skill_string.SetString(*skill_string_, allocator);
 		v.AddMember("skill_string", v_skill_string, allocator);
 	}
-
 }
 
 void
@@ -94,7 +93,7 @@ SkillCall::from_json(const std::string &json)
 }
 
 void
-SkillCall::from_json_value(const rapidjson::Value& d)
+SkillCall::from_json_value(const rapidjson::Value &d)
 {
 	if (d.HasMember("kind") && d["kind"].IsString()) {
 		kind_ = d["kind"].GetString();
@@ -105,25 +104,25 @@ SkillCall::from_json_value(const rapidjson::Value& d)
 	if (d.HasMember("skill_string") && d["skill_string"].IsString()) {
 		skill_string_ = d["skill_string"].GetString();
 	}
-
 }
 
 void
 SkillCall::validate(bool subcall) const
 {
-  std::vector<std::string> missing;
-	if (! kind_)  missing.push_back("kind");
-	if (! apiVersion_)  missing.push_back("apiVersion");
-	if (! skill_string_)  missing.push_back("skill_string");
+	std::vector<std::string> missing;
+	if (!kind_)
+		missing.push_back("kind");
+	if (!apiVersion_)
+		missing.push_back("apiVersion");
+	if (!skill_string_)
+		missing.push_back("skill_string");
 
-	if (! missing.empty()) {
+	if (!missing.empty()) {
 		if (subcall) {
 			throw missing;
 		} else {
 			std::ostringstream s;
-			s << "SkillCall is missing field"
-			  << ((missing.size() > 0) ? "s" : "")
-			  << ": ";
+			s << "SkillCall is missing field" << ((missing.size() > 0) ? "s" : "") << ": ";
 			for (std::vector<std::string>::size_type i = 0; i < missing.size(); ++i) {
 				s << missing[i];
 				if (i < (missing.size() - 1)) {

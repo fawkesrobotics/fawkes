@@ -26,30 +26,29 @@
 #include "mapper.h"
 
 namespace fawkes {
-  class Interface;
-  class ObjectPositionInterface;
-}
+class Interface;
+class ObjectPositionInterface;
+} // namespace fawkes
 
 namespace PlayerCc {
-  class ClientProxy;
-  class Position2dProxy;
-}
+class ClientProxy;
+class Position2dProxy;
+} // namespace PlayerCc
 
 class PlayerMapperFactory
 {
- public:
-  static PlayerProxyFawkesInterfaceMapper *create_mapper(std::string varname,
-							 fawkes::Interface *interface,
-							 PlayerCc::ClientProxy *proxy);
-							 
+public:
+	static PlayerProxyFawkesInterfaceMapper *
+	create_mapper(std::string varname, fawkes::Interface *interface, PlayerCc::ClientProxy *proxy);
 
- private:
-  PlayerMapperFactory() {}
+private:
+	PlayerMapperFactory()
+	{
+	}
 
-  template <class FawkesInterfaceType, class PlayerProxyType, class MapperType>
-    static PlayerProxyFawkesInterfaceMapper *  try_create(std::string varname,
-							  fawkes::Interface *interface,
-							  PlayerCc::ClientProxy *proxy);
+	template <class FawkesInterfaceType, class PlayerProxyType, class MapperType>
+	static PlayerProxyFawkesInterfaceMapper *
+	try_create(std::string varname, fawkes::Interface *interface, PlayerCc::ClientProxy *proxy);
 };
 
 /** Try to create a mapper instance.
@@ -64,22 +63,21 @@ class PlayerMapperFactory
  */
 template <class FawkesInterfaceType, class PlayerProxyType, class MapperType>
 PlayerProxyFawkesInterfaceMapper *
-PlayerMapperFactory::try_create(std::string varname,
-				fawkes::Interface *interface,
-				PlayerCc::ClientProxy *proxy)
+PlayerMapperFactory::try_create(std::string            varname,
+                                fawkes::Interface *    interface,
+                                PlayerCc::ClientProxy *proxy)
 {
-  FawkesInterfaceType *fi;
-  if ( (fi = dynamic_cast<FawkesInterfaceType *>(interface)) != NULL ) {
-    PlayerProxyType *pp;
-    if ( (pp = dynamic_cast<PlayerProxyType *>(proxy)) != NULL ) {
-      return new MapperType(varname, fi, pp);
-    } else {
-      return NULL;
-    }
-  } else {
-    return NULL;
-  }
+	FawkesInterfaceType *fi;
+	if ((fi = dynamic_cast<FawkesInterfaceType *>(interface)) != NULL) {
+		PlayerProxyType *pp;
+		if ((pp = dynamic_cast<PlayerProxyType *>(proxy)) != NULL) {
+			return new MapperType(varname, fi, pp);
+		} else {
+			return NULL;
+		}
+	} else {
+		return NULL;
+	}
 }
-
 
 #endif

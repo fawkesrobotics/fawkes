@@ -24,8 +24,8 @@
 #ifndef _UTILS_IPC_SHM_REGISTRY_H_
 #define _UTILS_IPC_SHM_REGISTRY_H_
 
-#include <semaphore.h>
 #include <list>
+#include <semaphore.h>
 
 #define MAGIC_TOKEN_SIZE 16
 #define MAXNUM_SHM_SEGMS 64
@@ -36,42 +36,42 @@ namespace fawkes {
 
 class SharedMemoryRegistry
 {
- public:
-  /** Shared memory identifier. */
-  typedef struct {
-    int  shmid;				/**< SysV IPC shared memory ID */
-    char magic_token[MAGIC_TOKEN_SIZE];	/**< Magic token */
-  } SharedMemID;
+public:
+	/** Shared memory identifier. */
+	typedef struct
+	{
+		int  shmid;                         /**< SysV IPC shared memory ID */
+		char magic_token[MAGIC_TOKEN_SIZE]; /**< Magic token */
+	} SharedMemID;
 
- public:
-  SharedMemoryRegistry(const char *name = 0);
-  ~SharedMemoryRegistry();
+public:
+	SharedMemoryRegistry(const char *name = 0);
+	~SharedMemoryRegistry();
 
-  std::list<SharedMemoryRegistry::SharedMemID> get_snapshot() const;
+	std::list<SharedMemoryRegistry::SharedMemID> get_snapshot() const;
 
-  std::list<SharedMemoryRegistry::SharedMemID>
-    find_segments(const char *magic_token) const;
+	std::list<SharedMemoryRegistry::SharedMemID> find_segments(const char *magic_token) const;
 
-  void add_segment(int shmid, const char *magic_token);
-  void remove_segment(int shmid);
+	void add_segment(int shmid, const char *magic_token);
+	void remove_segment(int shmid);
 
-  static void cleanup(const char *name = 0);
+	static void cleanup(const char *name = 0);
 
- private:
-  /// @cond INTERNALS
-  typedef struct {
-    SharedMemID segments[MAXNUM_SHM_SEGMS];
-  } MemInfo;
-  /// @endcond
+private:
+	/// @cond INTERNALS
+	typedef struct
+	{
+		SharedMemID segments[MAXNUM_SHM_SEGMS];
+	} MemInfo;
+	/// @endcond
 
-  bool  master_;
-  int   shmfd_;
-  char *shm_name_;
+	bool  master_;
+	int   shmfd_;
+	char *shm_name_;
 
-  sem_t   *sem_;
-  MemInfo *meminfo_;
+	sem_t *  sem_;
+	MemInfo *meminfo_;
 };
-
 
 } // end namespace fawkes
 

@@ -21,6 +21,7 @@
  */
 
 #include "gex_sender_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -30,16 +31,15 @@ using namespace fawkes;
  */
 class GossipExampleSenderPlugin : public fawkes::Plugin
 {
- public:
-  /** Constructor.
+public:
+	/** Constructor.
    * @param config Fawkes configuration
    */
-  explicit GossipExampleSenderPlugin(Configuration *config) : Plugin(config)
-  {
-    thread_list.push_back(new GossipExampleSenderThread());
-  }
+	explicit GossipExampleSenderPlugin(Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new GossipExampleSenderThread());
+	}
 };
-
 
 PLUGIN_DESCRIPTION("Gossip Example Plugin - Sender")
 EXPORT_PLUGIN(GossipExampleSenderPlugin)

@@ -21,9 +21,10 @@
  */
 
 #include "plugin.h"
+
+#include "blackboard_listener_thread.h"
 #include "control_thread.h"
 #include "eclipse_thread.h"
-#include "blackboard_listener_thread.h"
 
 /** @class EclipseCLPPlugin "plugin.h"
  * The ECLiPSe CLP plugin.
@@ -35,14 +36,13 @@ using namespace fawkes;
 /** Constructor.
  * @param config the configuration
  */
-EclipseCLPPlugin::EclipseCLPPlugin( Configuration* config )
-  : Plugin( config )
+EclipseCLPPlugin::EclipseCLPPlugin(Configuration *config) : Plugin(config)
 {
-  EclipseAgentThread* eclipse_thread = new EclipseAgentThread();
-  thread_list.push_back( eclipse_thread );
-  thread_list.push_back( new AgentControlThread( eclipse_thread ) );
-  thread_list.push_back( new BlackboardListenerThread() );
+	EclipseAgentThread *eclipse_thread = new EclipseAgentThread();
+	thread_list.push_back(eclipse_thread);
+	thread_list.push_back(new AgentControlThread(eclipse_thread));
+	thread_list.push_back(new BlackboardListenerThread());
 }
 
-PLUGIN_DESCRIPTION( "Runs the ECLiPSe CLP interpreter" )
-EXPORT_PLUGIN( EclipseCLPPlugin )
+PLUGIN_DESCRIPTION("Runs the ECLiPSe CLP interpreter")
+EXPORT_PLUGIN(EclipseCLPPlugin)

@@ -23,47 +23,43 @@
 #include <core/exception.h>
 #include <tools/plugin_gui/plugin_gui.h>
 #ifdef HAVE_GCONFMM
-#  include <gconfmm.h>
+#	include <gconfmm.h>
 #endif
 #include <iostream>
 
-#if GTK_VERSION_GE(3,0)
-#  define UI_FILE RESDIR"/guis/plugin_tool/plugin_gui.ui"
+#if GTK_VERSION_GE(3, 0)
+#	define UI_FILE RESDIR "/guis/plugin_tool/plugin_gui.ui"
 #else
-#  define UI_FILE RESDIR"/guis/plugin_tool/plugin_gui_gtk2.ui"
+#	define UI_FILE RESDIR "/guis/plugin_tool/plugin_gui_gtk2.ui"
 #endif
-
 
 using namespace std;
 
-int main(int argc, char** argv)
+int
+main(int argc, char **argv)
 {
-  try
-  {
-    Gtk::Main kit(argc, argv);
+	try {
+		Gtk::Main kit(argc, argv);
 #ifdef HAVE_GCONFMM
-    Gnome::Conf::init();
+		Gnome::Conf::init();
 #endif
 
-    Glib::RefPtr<Gtk::Builder> builder;
-    try {
-      builder =
-        Gtk::Builder::create_from_file(UI_FILE);
-    } catch (Gtk::BuilderError &e) {
-      printf("Failed to create GUI: %s\n", e.what().c_str());
-    }
+		Glib::RefPtr<Gtk::Builder> builder;
+		try {
+			builder = Gtk::Builder::create_from_file(UI_FILE);
+		} catch (Gtk::BuilderError &e) {
+			printf("Failed to create GUI: %s\n", e.what().c_str());
+		}
 
-    PluginGuiGtkWindow *window = NULL;
-    builder->get_widget_derived("wndMain", window);
+		PluginGuiGtkWindow *window = NULL;
+		builder->get_widget_derived("wndMain", window);
 
-    kit.run( *window );
+		kit.run(*window);
 
-    delete window;
-  }
-  catch (std::exception const& e)
-  {
-    std::cerr << "Error: " << e.what() << std::endl;
-  }
+		delete window;
+	} catch (std::exception const &e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+	}
 
-  return 0;
+	return 0;
 }

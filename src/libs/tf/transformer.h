@@ -56,92 +56,102 @@
 #include <tf/types.h>
 
 namespace fawkes {
-  namespace tf {
+namespace tf {
 
 class TimeCacheInterface;
 typedef std::shared_ptr<TimeCacheInterface> TimeCacheInterfacePtr;
 
 class Transformer : public BufferCore
 {
- public:
+public:
 	Transformer(float cache_time_sec = BufferCore::DEFAULT_CACHE_TIME);
-  virtual ~Transformer(void);
+	virtual ~Transformer(void);
 
-  void set_enabled(bool enabled);
-  bool is_enabled() const;
-  
-  float get_cache_time() const;
-  void lock();
-  bool try_lock();
-  void unlock();
+	void set_enabled(bool enabled);
+	bool is_enabled() const;
 
-  bool frame_exists(const std::string& frame_id_str) const;
-  TimeCacheInterfacePtr get_frame_cache(const std::string& frame_id) const;
-  std::vector<TimeCacheInterfacePtr> get_frame_caches() const;
-  std::vector<std::string> get_frame_id_mappings() const;
-  
-	void lookup_transform(const std::string& target_frame,
-                        const std::string& source_frame,
-                        const fawkes::Time& time,
-                        StampedTransform& transform) const;
+	float get_cache_time() const;
+	void  lock();
+	bool  try_lock();
+	void  unlock();
 
-  void lookup_transform(const std::string& target_frame,
-                        const fawkes::Time& target_time,
-                        const std::string& source_frame,
-                        const fawkes::Time& source_time,
-                        const std::string& fixed_frame,
-                        StampedTransform& transform) const;
- 
-  void lookup_transform(const std::string& target_frame,
-                        const std::string& source_frame,
-                        StampedTransform& transform) const;
-  
-  bool can_transform(const std::string& target_frame, const std::string& source_frame,
-                     const fawkes::Time& time, std::string* error_msg = NULL) const;
-  
-  bool can_transform(const std::string& target_frame, const fawkes::Time& target_time,
-                     const std::string& source_frame, const fawkes::Time& source_time,
-                     const std::string& fixed_frame, std::string* error_msg = NULL) const;
+	bool                               frame_exists(const std::string &frame_id_str) const;
+	TimeCacheInterfacePtr              get_frame_cache(const std::string &frame_id) const;
+	std::vector<TimeCacheInterfacePtr> get_frame_caches() const;
+	std::vector<std::string>           get_frame_id_mappings() const;
 
-  void transform_quaternion(const std::string& target_frame,
-                            const Stamped<Quaternion>& stamped_in,
-                            Stamped<Quaternion>& stamped_out) const;
-  void transform_vector(const std::string& target_frame,
-                        const Stamped<Vector3>& stamped_in,
-                        Stamped<Vector3>& stamped_out) const;
-  void transform_point(const std::string& target_frame,
-                       const Stamped<Point>& stamped_in, Stamped<Point>& stamped_out) const;
-  void transform_pose(const std::string& target_frame,
-                      const Stamped<Pose>& stamped_in, Stamped<Pose>& stamped_out) const;
+	void lookup_transform(const std::string & target_frame,
+	                      const std::string & source_frame,
+	                      const fawkes::Time &time,
+	                      StampedTransform &  transform) const;
 
-  bool transform_origin(const std::string& source_frame,
-                        const std::string& target_frame,
-                        Stamped<Pose>& stamped_out,
-                        const fawkes::Time time = fawkes::Time(0,0)) const;
+	void lookup_transform(const std::string & target_frame,
+	                      const fawkes::Time &target_time,
+	                      const std::string & source_frame,
+	                      const fawkes::Time &source_time,
+	                      const std::string & fixed_frame,
+	                      StampedTransform &  transform) const;
 
-  void transform_quaternion(const std::string& target_frame, const fawkes::Time& target_time,
-                            const Stamped<Quaternion>& stamped_in,
-                            const std::string& fixed_frame,
-                            Stamped<Quaternion>& stamped_out) const;
-  void transform_vector(const std::string& target_frame, const fawkes::Time& target_time,
-                       const Stamped<Vector3>& stamped_in,
-                       const std::string& fixed_frame,
-                       Stamped<Vector3>& stamped_out) const;
-  void transform_point(const std::string& target_frame, const fawkes::Time& target_time,
-                      const Stamped<Point>& stamped_in,
-                      const std::string& fixed_frame,
-                      Stamped<Point>& stamped_out) const;
-  void transform_pose(const std::string& target_frame, const fawkes::Time& target_time,
-                     const Stamped<Pose>& stamped_in,
-                     const std::string& fixed_frame,
-                     Stamped<Pose>& stamped_out) const;
+	void lookup_transform(const std::string &target_frame,
+	                      const std::string &source_frame,
+	                      StampedTransform & transform) const;
 
-  std::string all_frames_as_dot(bool print_time, fawkes::Time *time = 0) const;
+	bool can_transform(const std::string & target_frame,
+	                   const std::string & source_frame,
+	                   const fawkes::Time &time,
+	                   std::string *       error_msg = NULL) const;
 
- private:
-  bool enabled_;
+	bool can_transform(const std::string & target_frame,
+	                   const fawkes::Time &target_time,
+	                   const std::string & source_frame,
+	                   const fawkes::Time &source_time,
+	                   const std::string & fixed_frame,
+	                   std::string *       error_msg = NULL) const;
+
+	void transform_quaternion(const std::string &        target_frame,
+	                          const Stamped<Quaternion> &stamped_in,
+	                          Stamped<Quaternion> &      stamped_out) const;
+	void transform_vector(const std::string &     target_frame,
+	                      const Stamped<Vector3> &stamped_in,
+	                      Stamped<Vector3> &      stamped_out) const;
+	void transform_point(const std::string &   target_frame,
+	                     const Stamped<Point> &stamped_in,
+	                     Stamped<Point> &      stamped_out) const;
+	void transform_pose(const std::string &  target_frame,
+	                    const Stamped<Pose> &stamped_in,
+	                    Stamped<Pose> &      stamped_out) const;
+
+	bool transform_origin(const std::string &source_frame,
+	                      const std::string &target_frame,
+	                      Stamped<Pose> &    stamped_out,
+	                      const fawkes::Time time = fawkes::Time(0, 0)) const;
+
+	void transform_quaternion(const std::string &        target_frame,
+	                          const fawkes::Time &       target_time,
+	                          const Stamped<Quaternion> &stamped_in,
+	                          const std::string &        fixed_frame,
+	                          Stamped<Quaternion> &      stamped_out) const;
+	void transform_vector(const std::string &     target_frame,
+	                      const fawkes::Time &    target_time,
+	                      const Stamped<Vector3> &stamped_in,
+	                      const std::string &     fixed_frame,
+	                      Stamped<Vector3> &      stamped_out) const;
+	void transform_point(const std::string &   target_frame,
+	                     const fawkes::Time &  target_time,
+	                     const Stamped<Point> &stamped_in,
+	                     const std::string &   fixed_frame,
+	                     Stamped<Point> &      stamped_out) const;
+	void transform_pose(const std::string &  target_frame,
+	                    const fawkes::Time & target_time,
+	                    const Stamped<Pose> &stamped_in,
+	                    const std::string &  fixed_frame,
+	                    Stamped<Pose> &      stamped_out) const;
+
+	std::string all_frames_as_dot(bool print_time, fawkes::Time *time = 0) const;
+
+private:
+	bool enabled_;
 };
-
 
 } // end namespace tf
 } // end namespace fawkes

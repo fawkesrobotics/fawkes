@@ -27,8 +27,8 @@
 
 class BallPosLogPlugin : public fawkes::Plugin
 {
- public:
-  explicit BallPosLogPlugin(fawkes::Configuration *config);
+public:
+	explicit BallPosLogPlugin(fawkes::Configuration *config);
 };
 
 #endif
