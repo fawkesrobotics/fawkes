@@ -473,10 +473,7 @@ ProtobufCommPlexilAdapter::pb_create(PLEXIL::Command *cmd)
 		                     .from_port     = 0,
 		                     .message       = std::shared_ptr<google::protobuf::Message>(m)};
 
-		{
-			std::lock_guard<std::mutex> lock(queue_mutex_);
-			messages_[msg_id] = std::move(msgmeta);
-		}
+		messages_[msg_id] = std::move(msgmeta);
 
 		m_execInterface.handleCommandReturn(cmd, PLEXIL::Value(msg_id));
 		m_execInterface.handleCommandAck(cmd, PLEXIL::COMMAND_SUCCESS);
