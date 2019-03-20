@@ -82,7 +82,7 @@ PointCloudManager::add_pointcloud(const char *id, RefPtr<pcl::PointCloud<PointT>
 	if (clouds_.find(id) == clouds_.end()) {
 		clouds_[id] = new pcl_utils::PointCloudStorageAdapter<PointT>(cloud);
 	} else {
-		throw Exception("Cloud %s already registered");
+		throw Exception("Cloud %s already registered", id);
 	}
 }
 
