@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="HardwareModelsInterface" author="Daniel Habering" year="2019">
+  <data>
+    <comment>
+      Interface to inform the plugin about state changes in components
+    </comment>
+
+    <field type="string" length="1024" name="error">Error of last query</field>
+    <field type="string" length="1024" name="result">Result of last query</field>
+  </data>
+
+  <message name="StateChange">
+    <comment>
+      A component changed its state, by executing the transaction. 
+      Has to match the transactions defined in the yaml hardware model definitions
+    </comment>
+    <field type="string" length="1024" name="component">The component that changed its state</field>
+    <field type="string" length="1024" name="transaction">The transaction executed by the component</field>
+  </message>
+</interface>
