@@ -16,7 +16,7 @@
   (slot component (type STRING))
   (slot from (type STRING))
   (slot to (type STRING))
-  (slot transisiton (type STRING))
+  (slot transition (type STRING))
   (slot executable (type SYMBOL) (allowed-values FALSE TRUE))
 )
 

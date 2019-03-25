@@ -28,7 +28,7 @@
 #include <aspect/clock.h>
 #include <aspect/logging.h>
 #include <aspect/configurable.h>
-#include <plugins/clips/aspect/clips.h>
+#include <plugins/clips/aspect/clips_feature.h>
 #include <utils/time/time.h>
 
 #include <clipsmm.h>
@@ -39,26 +39,32 @@ namespace fawkes {
 
 class HardwareModelsThread
 : public fawkes::Thread,
-	public fawkes::BlockedTimingAspect,
 	public fawkes::LoggingAspect,
 	public fawkes::ConfigurableAspect,
-	public fawkes::ClockAspect,
-	public fawkes::CLIPSAspect
+	public fawkes::CLIPSFeature,
+	public fawkes::CLIPSFeatureAspect
 {
  public:
 	HardwareModelsThread();
-	virtual ~HardwareModelsThread();
 
 	virtual void init();
 	virtual void loop();
 	virtual void finalize();
 
+    // for CLIPSFeature
+  virtual void clips_context_init(const std::string &env_name,
+          fawkes::LockPtr<CLIPS::Environment> &clips);
+  virtual void clips_context_destroyed(const std::string &env_name);
+
+
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
  protected: virtual void run() { Thread::run(); }
 
  private:
-    void  clips_add_component(const std::string& component, const std::string& init_state);
-    void  clips_add_edge(const std::string& component, const std::string& from, const std::string& to, const std::string& trans);
+    std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+
+    void  clips_add_component(fawkes::LockPtr<CLIPS::Environment> &clips,const std::string& component, const std::string& init_state);
+    void  clips_add_edge(fawkes::LockPtr<CLIPS::Environment> &clips,const std::string& component, const std::string& from, const std::string& to, const std::string& trans);
 };
 
 #endif

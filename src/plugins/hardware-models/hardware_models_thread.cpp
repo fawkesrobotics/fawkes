@@ -39,20 +39,21 @@ using namespace fawkes;
 /** Constructor. */
 HardwareModelsThread::HardwareModelsThread()
 	: Thread("HardwareModelsThread", Thread::OPMODE_WAITFORWAKEUP),
-	  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_THINK),
-	  CLIPSAspect("executive", "CLIPS (executive)")
-{
-}
-
-
-/** Destructor. */
-HardwareModelsThread::~HardwareModelsThread()
+	  CLIPSFeature("hardware-models"), CLIPSFeatureAspect(this)
 {
 }
 
 
 void
 HardwareModelsThread::init()
+{
+
+}
+
+
+void
+HardwareModelsThread::clips_context_init(const std::string &env_name,
+          LockPtr<CLIPS::Environment> &clips)
 {
 	std::string models_dir;
 
@@ -77,12 +78,13 @@ HardwareModelsThread::init()
           std::vector<std::string> edges = config->get_strings(std::string(c + "/" + state + "/edges").c_str());
           for (const auto edge : edges) {
               std::string transition = config->get_string(std::string(c + "/" + state + "/" + edge).c_str());
-              logger->log_info(name(),"Edge from %s to %s via %s",state.c_str(),edge.c_str(),transition.c_str());
+              clips_add_edge(clips,c,state,edge,transition);
+              logger->log_debug(name(),"Edge from %s to %s via %s",state.c_str(),edge.c_str(),transition.c_str());
           }
         }
-        logger->log_info(name(),state.c_str());
+        logger->log_debug(name(),state.c_str());
       }
-      clips_add_component(c,states[0]);
+      clips_add_component(clips,c,states[0]);
     } else {
       logger->log_warn(name(),"No states for component %s in %s",c.c_str(),models_dir.c_str());
     }
@@ -90,7 +92,16 @@ HardwareModelsThread::init()
 }
 
 void
-HardwareModelsThread::clips_add_component(const std::string& component,const std::string& init_state)
+HardwareModelsThread::clips_context_destroyed(const std::string &env_name)
+{
+  envs_.erase(env_name);
+  logger->log_debug(name(), "Removing environment %s", env_name.c_str());
+}
+
+
+
+void
+HardwareModelsThread::clips_add_component(LockPtr<CLIPS::Environment> &clips, const std::string& component,const std::string& init_state)
 {
   CLIPS::Template::pointer temp = clips->get_template("hm-component");
   if (temp) {
@@ -110,7 +121,7 @@ HardwareModelsThread::clips_add_component(const std::string& component,const std
 }
 
 void
-HardwareModelsThread::clips_add_edge(const std::string& component, const std::string& from, const std::string& to, const std::string& trans)
+HardwareModelsThread::clips_add_edge(LockPtr<CLIPS::Environment> &clips, const std::string& component, const std::string& from, const std::string& to, const std::string& trans)
 {
   CLIPS::Template::pointer temp = clips->get_template("hm-edge");
   if (temp) {
