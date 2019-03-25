@@ -1,0 +1,6 @@
+hardware-models:
+  models-dir: /hardware-models
+  components:
+    - move-base
+    - gripper
+    - navgraph
