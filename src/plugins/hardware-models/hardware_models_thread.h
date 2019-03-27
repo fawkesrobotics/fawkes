@@ -46,7 +46,8 @@ class HardwareModelsThread
 	public fawkes::BlackBoardAspect,
 	public fawkes::ConfigurableAspect,
 	public fawkes::CLIPSFeature,
-	public fawkes::CLIPSFeatureAspect
+	public fawkes::CLIPSFeatureAspect,
+	public fawkes::BlackBoardInterfaceListener
 {
  public:
 	HardwareModelsThread();
@@ -67,15 +68,13 @@ class HardwareModelsThread
  private:
     std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
 
-    fawkes::LockPtr<CLIPS::Environment> clips_;
-
     std::vector<std::string> components_;
 
     fawkes::HardwareModelsInterface *hm_if_;
 
-    void  clips_add_component(const std::string& component, const std::string& init_state);
-    void  clips_add_edge(const std::string& component, const std::string& from, const std::string& to, const std::string& trans);
-    void  clips_add_transaction(const std::string& component, const std::string& transaction);
+    void  clips_add_component(fawkes::LockPtr<CLIPS::Environment> &clips,const std::string& component, const std::string& init_state);
+    void  clips_add_edge(fawkes::LockPtr<CLIPS::Environment> &clips,const std::string& component, const std::string& from, const std::string& to, const std::string& trans, const double prob);
+    void  clips_add_transaction(const std::string& component, const std::string& transaction) throw();
 };
 
 #endif

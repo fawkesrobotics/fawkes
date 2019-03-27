@@ -17,9 +17,11 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/clips.mk
 
+PRESUBDIRS = interfaces
+
 LIBS_hardware_models = \
 	fawkescore fawkesutils fawkesaspects fawkesblackboard \
-        fawkesinterface fawkesclipsaspect
+        fawkesinterface fawkesclipsaspect HardwareModelsInterface
 OBJS_hardware_models = hardware_models_plugin.o hardware_models_thread.o
 
 OBJS_all    = $(OBJS_hardware_models)
