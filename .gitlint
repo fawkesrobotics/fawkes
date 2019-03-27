@@ -31,7 +31,7 @@ line-length=80
 # commit-msg title must be matched to.
 # Note that the regex can contradict with other rules if not used correctly
 # (e.g. title-must-not-contain-word).
-regex=^[^:]+: .*
+regex=^[^:]+: [^:]+ .*$
 
 #[body-changed-file-mention]
 # List of files that need to be explicitly mentioned in the body when they are changed
