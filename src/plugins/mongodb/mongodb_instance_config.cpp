@@ -27,8 +27,8 @@
 #include <utils/time/wait.h>
 
 #include <boost/filesystem.hpp>
-#include <bsoncxx/builder/stream/document.hpp>
-#include <bsoncxx/builder/stream/helpers.hpp>
+#include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/json.hpp>
 #include <chrono>
 #include <mongocxx/client.hpp>
 #include <mongocxx/exception/exception.hpp>
@@ -249,15 +249,17 @@ MongoDBInstanceConfig::check_alive()
 		mongocxx::uri                     uri{hostport.str()};
 		std::shared_ptr<mongocxx::client> client = std::make_shared<mongocxx::client>(uri);
 		std::string                       errmsg;
+
 		using namespace bsoncxx::builder;
-		bsoncxx::document::value cmd = stream::document{} << "isMaster" << 1 << stream::finalize;
+		auto cmd{basic::document{}};
+		cmd.append(basic::kvp("isMaster", 1));
 
 		// TODO get reply
 		//mongo::BSONObj reply;
 		//bool           ok = client->runCommand("admin", cmd, reply);
 		bool ok = true;
 		if (!ok) {
-			//logger->log_warn(name(), "Failed to connect: %s", reply.jsonString().c_str());
+			logger->log_warn(name(), "Failed to connect: %s", bsoncxx::to_json(reply.view()).c_str());
 		}
 		return ok;
 	} catch (mongocxx::exception &e) {
