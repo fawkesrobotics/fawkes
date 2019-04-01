@@ -27,10 +27,11 @@
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <interfaces/MongoDBManagedReplicaSetInterface.h>
-#include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
 
+#include <bsoncxx/json.hpp>
 #include <memory>
+#include <mongocxx/client.hpp>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -53,7 +54,7 @@ public:
 	                        std::string            cfgname,
 	                        std::string            prefix,
 	                        std::string            bootstrap_database);
-	void bootstrap(std::shared_ptr<mongo::DBClientBase> bootstrap_client);
+	void bootstrap(std::shared_ptr<mongocxx::client> bootstrap_client);
 
 	/** Check if configuration is enabled.
 	 * @return true if configuration is enabled, false otherwise
@@ -86,11 +87,12 @@ private:
 		}
 	};
 
-	ReplicaSetStatus rs_status(mongo::BSONObj &reply);
+	// TODO: update signature
+	ReplicaSetStatus rs_status(bsoncxx::document::value &reply);
 	void             rs_init();
-	void             rs_monitor(const mongo::BSONObj &reply);
+	void             rs_monitor(const bsoncxx::document::view &reply);
 	bool             check_alive(const std::string &h);
-	bool             rs_get_config(mongo::BSONObj &rs_config);
+	bool             rs_get_config(bsoncxx::document::value &rs_config);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:
@@ -105,18 +107,18 @@ private:
 
 	std::string config_name_;
 
-	std::shared_ptr<mongo::DBClientBase> bootstrap_client_;
-	mongo::BSONObj                       leader_elec_query_;
-	mongo::BSONObj                       leader_elec_query_force_;
-	mongo::BSONObj                       leader_elec_update_;
-	std::string                          bootstrap_database_;
-	std::string                          bootstrap_collection_;
-	std::string                          bootstrap_ns_;
+	std::shared_ptr<mongocxx::client> bootstrap_client_;
+	bsoncxx::document::value          leader_elec_query_;
+	bsoncxx::document::value          leader_elec_query_force_;
+	bsoncxx::document::value          leader_elec_update_;
+	std::string                       bootstrap_database_;
+	std::string                       bootstrap_collection_;
+	std::string                       bootstrap_ns_;
 
-	std::string                          local_client_cfg_;
-	std::shared_ptr<mongo::DBClientBase> local_client_;
-	std::string                          local_hostport_;
-	std::set<std::string>                hosts_;
+	std::string                       local_client_cfg_;
+	std::shared_ptr<mongocxx::client> local_client_;
+	std::string                       local_hostport_;
+	std::set<std::string>             hosts_;
 
 	bool              is_leader_;
 	float             loop_interval_;

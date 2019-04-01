@@ -17,9 +17,13 @@ BASEDIR = ../../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(LIBSRCDIR)/utils/utils.mk
+include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
 LIBS_libfawkesmongodbaspect = fawkescore fawkesaspects
 OBJS_libfawkesmongodbaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
+
+CFLAGS += $(CFLAGS_MONGODB)
+LDFLAGS += $(LDFLAGS_MONGODB)
 
 OBJS_all    = $(OBJS_libfawkesmongodbaspect)
 LIBS_all    = $(LIBDIR)/libfawkesmongodbaspect.so

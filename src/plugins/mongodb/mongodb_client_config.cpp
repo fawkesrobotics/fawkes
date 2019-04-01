@@ -64,32 +64,40 @@ MongoDBClientConfig::MongoDBClientConfig(Configuration *config,
 		                 cfgname.c_str());
 	}
 
+	std::string auth_string = "";
+	if (!username.empty() && !password.empty()) {
+		auth_string = username + ":" + password + "@";
+	}
+
 	if (mode == "replica_set" || mode == "replicaset") {
 		mode_            = REPLICA_SET;
 		replicaset_name_ = config->get_string((prefix + "name").c_str());
 
 		std::vector<std::string> hosts = config->get_strings(prefix + "hosts");
-		std::transform(hosts.begin(),
-		               hosts.end(),
-		               std::back_inserter(replicaset_hostports_),
-		               [](const std::string &s) -> mongo::HostAndPort {
-			               return mongo::HostAndPort(s);
-		               });
+		std::string              uri{"mongodb://"};
+		for (auto it = hosts.begin(); it != hosts.end(); it++) {
+			uri += *it;
+			if (std::next(it) != hosts.end()) {
+				uri += ",";
+			}
+		}
+		uri += "/" + auth_dbname;
+		uri += "?replicaSet=" + replicaset_name_;
+		conn_uri_ = mongocxx::uri{uri};
 
 	} else if (mode == "sync_cluster" || mode == "synccluster") {
 		throw Exception("sync_cluster connections are no longer supported");
 
 	} else {
-		mode_ = CONNECTION;
-
-		conn_hostport_ = mongo::HostAndPort(config->get_string(prefix + "hostport"));
+		mode_     = CONNECTION;
+		conn_uri_ = mongocxx::uri{"mongodb://" + auth_string + config->get_string(prefix + "hostport")
+		                          + "/" + auth_dbname};
 	}
 }
 
 /** Read authentication info for given configuration.
- * This will first try to read the fields auth_dbname, auth_username, and
- * auth_password. If that fails, the auth/ subdirectory is crawled for subtrees
- * that contain the just named entries.
+ * This will try to read the fields auth_dbname, auth_username, and
+ * auth_password.
  * @param config configuration to query
  * @param logger logger for info messages
  * @param cfgname configuration name
@@ -101,93 +109,25 @@ MongoDBClientConfig::read_authinfo(Configuration *config,
                                    std::string    cfgname,
                                    std::string    prefix)
 {
-	std::set<std::string> authinfos;
-
 	try {
-		std::string dbname   = config->get_string((prefix + "auth_dbname").c_str());
-		std::string username = config->get_string((prefix + "auth_username").c_str());
-		std::string password = config->get_string((prefix + "auth_password").c_str());
-		auth_infos_.push_back(AuthInfo(dbname, username, password));
+		auth_dbname = config->get_string((prefix + "auth_dbname").c_str());
+		username    = config->get_string((prefix + "auth_username").c_str());
+		password    = config->get_string((prefix + "auth_password").c_str());
 	} catch (Exception &e) {
 		logger->log_info(logcomp_.c_str(),
 		                 "No default authentication info for "
 		                 "MongoDB client '%s'",
 		                 cfgname.c_str());
 	}
-
-	std::unique_ptr<Configuration::ValueIterator> i(config->search((prefix + "auth/").c_str()));
-	while (i->next()) {
-		std::string auth_name = std::string(i->path()).substr(prefix.length());
-		auth_name             = auth_name.substr(0, auth_name.find("/"));
-
-		if (authinfos.find(auth_name) == authinfos.end()) {
-			try {
-				std::string ap       = prefix + auth_name + "/";
-				std::string dbname   = config->get_string((ap + "auth_dbname").c_str());
-				std::string username = config->get_string((ap + "auth_username").c_str());
-				std::string password = config->get_string((ap + "auth_password").c_str());
-				auth_infos_.push_back(AuthInfo(dbname, username, password));
-			} catch (Exception &e) {
-				logger->log_info(logcomp_.c_str(),
-				                 "Incomplete extended auth info '%s' "
-				                 "for MongoDB client '%s'",
-				                 auth_name.c_str(),
-				                 cfgname.c_str());
-			}
-		}
-	}
 }
 
 /** Create MongoDB client for this configuration.
  * @return MongoDB client
  */
-mongo::DBClientBase *
+mongocxx::client *
 MongoDBClientConfig::create_client()
 {
-	mongo::DBClientBase *client;
-	std::string          errmsg;
-
-	switch (mode_) {
-	case REPLICA_SET: {
-		mongo::DBClientReplicaSet *repset =
-		  new mongo::DBClientReplicaSet(replicaset_name_, replicaset_hostports_);
-		client = repset;
-		if (!repset->connect())
-			throw Exception("Cannot connect to replica set %s", replicaset_name_.c_str());
-		std::list<AuthInfo>::iterator ai;
-		for (ai = auth_infos_.begin(); ai != auth_infos_.end(); ++ai) {
-			if (!repset->auth(ai->dbname, ai->username, ai->clearpwd, errmsg, false)) {
-				throw Exception("Authenticating for %s as %s failed: %s",
-				                ai->dbname.c_str(),
-				                ai->username.c_str(),
-				                errmsg.c_str());
-			}
-		}
-	} break;
-
-	default: {
-		mongo::DBClientConnection *clconn = new mongo::DBClientConnection(/* auto reconnect */ true);
-		client                            = clconn;
-		std::string errmsg;
-		if (!clconn->connect(conn_hostport_, errmsg)) {
-			throw Exception("Could not connect to MongoDB at %s: %s\n"
-			                "You probably forgot to start/enable the mongod service",
-			                conn_hostport_.toString().c_str(),
-			                errmsg.c_str());
-		}
-		std::list<AuthInfo>::iterator ai;
-		for (ai = auth_infos_.begin(); ai != auth_infos_.end(); ++ai) {
-			if (!clconn->auth(ai->dbname, ai->username, ai->clearpwd, errmsg, false)) {
-				throw Exception("Authenticating for %s as %s failed: %s",
-				                ai->dbname.c_str(),
-				                ai->username.c_str(),
-				                errmsg.c_str());
-			}
-		}
-	} break;
-	}
-
-	return client;
+	return new mongocxx::client(conn_uri_);
 }
 
 /** Write client configuration information to log.
@@ -201,35 +141,12 @@ MongoDBClientConfig::log(Logger *logger, const char *component, const char *inde
 	switch (mode_) {
 	case REPLICA_SET: {
 		logger->log_info(component, "%smode:   replica set", indent);
-		logger->log_info(component, "%shosts:", indent);
-		std::vector<mongo::HostAndPort>::iterator i;
-		for (i = replicaset_hostports_.begin(); i != replicaset_hostports_.end(); ++i) {
-			logger->log_info(component, "%s  - %s:", indent, i->toString().c_str());
-		}
-
-		if (!auth_infos_.empty()) {
-			logger->log_info(component, "%sauth infos:", indent);
-			std::list<AuthInfo>::iterator a;
-			for (a = auth_infos_.begin(); a != auth_infos_.end(); ++a) {
-				logger->log_info(
-				  component, "%s  - %s @ %s", indent, a->username.c_str(), a->dbname.c_str());
-			}
-		}
-	} break;
-
+	}
 	default: {
 		logger->log_info(component, "%smode:   connection", indent);
-		logger->log_info(component, "%shost:   %s", indent, conn_hostport_.toString().c_str());
-		if (!auth_infos_.empty()) {
-			logger->log_info(component, "%sauth infos:", indent);
-			std::list<AuthInfo>::iterator a;
-			for (a = auth_infos_.begin(); a != auth_infos_.end(); ++a) {
-				logger->log_info(
-				  component, "%s  - %s @ %s", indent, a->username.c_str(), a->dbname.c_str());
-			}
-		}
 	} break;
 	}
+	logger->log_info(component, "%suri:    %s", indent, conn_uri_.to_string().c_str());
 }
 
 /** Get host and port of configuration.
@@ -238,7 +155,13 @@ MongoDBClientConfig::log(Logger *logger, const char *component, const char *inde
 std::string
 MongoDBClientConfig::hostport() const
 {
-	return conn_hostport_.toString();
+	auto hosts = conn_uri_.hosts();
+	if (hosts.empty()) {
+		return "";
+	} else {
+		// If multiple hosts are specified, only use the first host.
+		return hosts[0].name + ":" + std::to_string(hosts[0].port);
+	}
 }
 
 /** Get client configuration mode.

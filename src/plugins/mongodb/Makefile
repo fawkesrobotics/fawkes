@@ -41,7 +41,7 @@ CFLAGS  += $(CFLAGS_MONGODB) $(CFLAGS_CPP11)
 LDFLAGS += $(LDFLAGS_MONGODB)
 
 OBJS_all    = $(OBJS_mongodb) $(OBJS_mongodb_rrd)
-PLUGINS_all = $(PLUGINDIR)/mongodb.$(SOEXT) $(PLUGINDIR)/mongodb-rrd.$(SOEXT)
+PLUGINS_all = $(PLUGINDIR)/mongodb.$(SOEXT) #$(PLUGINDIR)/mongodb-rrd.$(SOEXT)
 
 HAVE_MONGODB_REQ_BOOST_LIBS = $(call boost-have-libs,$(MONGODB_REQ_BOOST_LIBS))
 ifeq ($(HAVE_MONGODB_REQ_BOOST_LIBS),1)

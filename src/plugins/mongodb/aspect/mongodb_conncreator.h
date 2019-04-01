@@ -25,9 +25,8 @@
 
 #include <string>
 
-namespace mongo {
-class DBClientBase;
-}
+// We can't cleanly forward-declare mongocxx::client due to inline namespacing in mongocxx.
+#include <mongocxx/client.hpp>
 
 namespace fawkes {
 
@@ -45,12 +44,12 @@ public:
 	 * @exception thrown if the initialization fails or the configuration for
 	 * the given name does not exist.
 	 */
-	virtual mongo::DBClientBase *create_client(const std::string &config_name = "") = 0;
+	virtual mongocxx::client *create_client(const std::string &config_name = "") = 0;
 
 	/** Delete a client.
 	 * @param client client to delete
 	 */
-	virtual void delete_client(mongo::DBClientBase *client) = 0;
+	virtual void delete_client(mongocxx::client *client) = 0;
 };
 
 } // end namespace fawkes

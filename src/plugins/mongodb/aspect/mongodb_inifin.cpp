@@ -57,7 +57,7 @@ MongoDBAspectIniFin::init(Thread *thread)
 		                                      thread->name());
 	}
 
-	mongo::DBClientBase *client = nullptr;
+	mongocxx::client *client = nullptr;
 
 	if (!mongodb_thread->mongodb_config_name().empty()) {
 		conn_creator_->create_client(mongodb_thread->mongodb_config_name());

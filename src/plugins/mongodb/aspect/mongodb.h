@@ -27,9 +27,8 @@
 
 #include <string>
 
-namespace mongo {
-class DBClientBase;
-}
+// We can't cleanly forward-declare mongocxx::client due to inline namespacing in mongocxx.
+#include <mongocxx/client.hpp>
 
 namespace fawkes {
 class MongoDBConnCreator;
@@ -52,11 +51,11 @@ public:
 	}
 
 protected:
-	mongo::DBClientBase *mongodb_client;
-	MongoDBConnCreator * mongodb_connmgr;
+	mongocxx::client *  mongodb_client;
+	MongoDBConnCreator *mongodb_connmgr;
 
 private:
-	void init_MongoDBAspect(mongo::DBClientBase *mongodb_client, MongoDBConnCreator *mongodb_connmgr);
+	void init_MongoDBAspect(mongocxx::client *mongodb_client, MongoDBConnCreator *mongodb_connmgr);
 
 private:
 	std::string mongodb_config_name_;
