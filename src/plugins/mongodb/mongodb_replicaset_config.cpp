@@ -28,8 +28,6 @@
 #include <utils/time/wait.h>
 
 #include <bsoncxx/builder/basic/document.hpp>
-#include <bsoncxx/builder/stream/document.hpp>
-#include <bsoncxx/builder/stream/helpers.hpp>
 #include <chrono>
 #include <iterator>
 #include <mongocxx/exception/operation_exception.hpp>
@@ -116,8 +114,6 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
 			throw Exception("%s host list does not include local client", name());
 		}
 
-		//leader_elec_query_ = stream::document{} << "host" << local_hostport_ << "master" << false
-		//                                        << stream::finalize;
 		using namespace bsoncxx::builder::basic;
 
 		auto leader_elec_query_builder = basic::document{};
@@ -138,14 +134,6 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
 			subdoc.append(basic::kvp("host", local_hostport_));
 		}));
 		leader_elec_update_ = leader_elec_update_builder.extract();
-		/*
-		auto leader_elec_update_date_ = stream::document{} << "$currentDate" << stream::open_document
-		                                                   << "last_seen" << true
-		                                                   << stream::close_document;
-		leader_elec_update_ = leader_elec_update_date_ << "$set" << stream::open_document << "master"
-		                                               << true << "host" << local_hostport_
-		                                               << stream::close_document << stream::finalize;
-    */
 
 		local_client_.reset(client_config.create_client());
 	}
@@ -162,12 +150,13 @@ MongoDBReplicaSetConfig::bootstrap(std::shared_ptr<mongocxx::client> bootstrap_c
 			bootstrap_client_ = bootstrap_client;
 			auto database     = bootstrap_client_->database(bootstrap_database_);
 			auto collection   = database.create_collection(bootstrap_ns_);
-			collection.create_index(stream::document{} << "host" << 1 << stream::finalize);
-			collection.create_index(stream::document{} << "master" << 1 << stream::finalize,
-			                        stream::document{} << "unique" << true << stream::finalize);
-			collection.create_index(stream::document{} << "last_seen" << 1 << stream::finalize,
-			                        stream::document{} << "expireAfterSeconds" << leader_expiration_
-			                                           << stream::finalize);
+
+			collection.create_index(basic::make_document(basic::kvp("host", 1)));
+			collection.create_index(basic::make_document(basic::kvp("master", 1)),
+			                        basic::make_document(basic::kvp("unique", true)));
+			collection.create_index(basic::make_document(basic::kvp("last_seen", 1)),
+			                        basic::make_document(
+			                          basic::kvp("expireAfterSeconds", leader_expiration_)));
 		} catch (mongocxx::operation_exception &e) {
 			logger->log_error(name(), "Failed to initialize bootstrap client: %s", e.what());
 			throw;
@@ -321,7 +310,7 @@ MongoDBReplicaSetConfig::rs_status(bsoncxx::document::value &reply)
 	ReplicaSetStatus status = {.member_status  = MongoDBManagedReplicaSetInterface::ERROR,
 	                           .primary_status = MongoDBManagedReplicaSetInterface::PRIMARY_UNKNOWN};
 
-	auto cmd = stream::document{} << "replSetGetStatus" << 1 << stream::finalize;
+	auto cmd = basic::make_document(basic::kvp("replSetGetStatus", 1));
 	try {
 		reply = local_client_->database("admin").run_command(std::move(cmd));
 
@@ -396,8 +385,7 @@ void
 MongoDBReplicaSetConfig::rs_init()
 {
 	// using default configuration, this will just add ourself
-	auto cmd = stream::document{} << "replSetInitiate" << stream::open_document
-	                              << stream::close_document << stream::finalize;
+	auto cmd = basic::make_document(basic::kvp("replSetInitiate", basic::document{}));
 	bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
 	try {
 		reply = local_client_->database("admin").run_command(std::move(cmd));
@@ -418,7 +406,7 @@ MongoDBReplicaSetConfig::rs_init()
 bool
 MongoDBReplicaSetConfig::rs_get_config(bsoncxx::document::value &rs_config)
 {
-	auto cmd = stream::document{} << "replSetGetConfig" << 1 << stream::finalize;
+	auto cmd = basic::make_document(basic::kvp("replSetGetConfig", 1));
 
 	try {
 		bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
