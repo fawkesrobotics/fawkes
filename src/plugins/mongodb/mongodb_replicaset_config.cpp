@@ -312,9 +312,9 @@ MongoDBReplicaSetConfig::rs_status(bsoncxx::document::value &reply)
 
 	auto cmd = basic::make_document(basic::kvp("replSetGetStatus", 1));
 	try {
-		reply = local_client_->database("admin").run_command(std::move(cmd));
-
-		if (!reply.view()["ok"]) {
+		reply   = local_client_->database("admin").run_command(std::move(cmd));
+		bool ok = int(reply.view()["ok"].get_double()) == 1;
+		if (!ok) {
 			int error_code = reply.view()["code"].get_int32();
 			if (error_code == 94 /* NotYetInitialized */) {
 				logger->log_warn(name(), "Instance has not received replica set configuration, yet");
@@ -388,8 +388,9 @@ MongoDBReplicaSetConfig::rs_init()
 	auto cmd = basic::make_document(basic::kvp("replSetInitiate", basic::document{}));
 	bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
 	try {
-		reply = local_client_->database("admin").run_command(std::move(cmd));
-		if (!reply.view()["ok"]) {
+		reply   = local_client_->database("admin").run_command(std::move(cmd));
+		bool ok = int(reply.view()["ok"].get_double()) == 1;
+		if (!ok) {
 			logger->log_error(name(),
 			                  "RS initialization failed: %s",
 			                  reply.view()["errmsg"].get_utf8().value.to_string().c_str());
@@ -410,8 +411,9 @@ MongoDBReplicaSetConfig::rs_get_config(bsoncxx::document::value &rs_config)
 
 	try {
 		bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
-		reply = local_client_->database("admin").run_command(std::move(cmd));
-		if (reply.view()["ok"].get_bool()) {
+		reply   = local_client_->database("admin").run_command(std::move(cmd));
+		bool ok = int(reply.view()["ok"].get_double()) == 1;
+		if (!ok) {
 			rs_config = reply;
 			//logger->log_info(name(), "Config: %s", bsoncxx::to_json(rs_config.view()["config"]).c_str());
 		} else {
@@ -419,7 +421,7 @@ MongoDBReplicaSetConfig::rs_get_config(bsoncxx::document::value &rs_config)
 			                 "Failed to get RS config: %s (DB error)",
 			                 reply.view()["errmsg"].get_utf8().value.to_string().c_str());
 		}
-		return reply.view()["ok"].get_bool();
+		return ok;
 	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn(name(), "Failed to get RS config: %s", e.what());
 		return false;
@@ -525,7 +527,8 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 			logger->log_info(name(), "Running command");
 			auto reply = local_client_->database("admin").run_command(cmd.view());
 			logger->log_info(name(), "done");
-			if (!reply.view()["ok"].get_bool()) {
+			bool ok = int(reply.view()["ok"].get_double()) == 1;
+			if (!ok) {
 				logger->log_error(name(),
 				                  "RS reconfig failed: %s (DB error)",
 				                  reply.view()["errmsg"].get_utf8().value.to_string().c_str());
@@ -545,7 +548,7 @@ MongoDBReplicaSetConfig::check_alive(const std::string &h)
 		auto             cmd = basic::document{};
 		cmd.append(basic::kvp("isMaster", 1));
 		auto reply = client.database("admin").run_command(cmd.view());
-		bool ok    = reply.view()["ok"].get_bool();
+		bool ok    = int(reply.view()["ok"].get_double()) == 1;
 		if (!ok) {
 			logger->log_warn(name(), "Failed to connect: %s", bsoncxx::to_json(reply.view()).c_str());
 		}

@@ -254,10 +254,8 @@ MongoDBInstanceConfig::check_alive()
 		auto cmd{basic::document{}};
 		cmd.append(basic::kvp("isMaster", 1));
 
-		// TODO get reply
-		//mongo::BSONObj reply;
-		//bool           ok = client->runCommand("admin", cmd, reply);
-		bool ok = true;
+		auto reply = client->database("admin").run_command(cmd.view());
+		bool ok    = int(reply.view()["ok"].get_double()) == 1;
 		if (!ok) {
 			logger->log_warn(name(), "Failed to connect: %s", bsoncxx::to_json(reply.view()).c_str());
 		}
