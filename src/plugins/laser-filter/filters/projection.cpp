@@ -168,7 +168,7 @@ LaserProjectionDataFilter::filter()
 				if (inbuf[i] == 0.)
 					continue;
 
-				float a = deg2rad(360.f / (float)i);
+				float a = deg2rad((float)i / ((float)in_data_size / 360.f));
 				p.setValue((btScalar)inbuf[i] * cos(a), (btScalar)inbuf[i] * sin(a), 0.);
 				p = t * p;
 
