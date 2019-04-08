@@ -215,6 +215,7 @@ RealsenseThread::log_error()
 	if (rs_error_) {
 		logger->log_warn(name(), "Realsense Error: %s", rs_get_error_message(rs_error_));
 		rs_free_error(rs_error_);
+		rs_error_ = nullptr;
 	}
 }
 
