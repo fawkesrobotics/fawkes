@@ -95,5 +95,6 @@ check-parallel:
 
 .PHONY: check
 check: format-check-branch quickdoc $(if $(subst 0,,$(YAMLLINT)),yamllint) license-check
+	$(SILENT)touch $(BASEDIR)/.check_stamp
 
 endif # __buildsys_root_check_mk_
