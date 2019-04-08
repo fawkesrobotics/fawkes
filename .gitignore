@@ -18,6 +18,7 @@
 *.pb.cpp
 
 # Specific paths, _ variants for cross compilation environments
+/.check_stamp
 /access_log
 /bin/
 /bin/access_log
