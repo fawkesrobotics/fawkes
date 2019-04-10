@@ -22,9 +22,10 @@
 #include "event_trigger_manager.h"
 
 #include <boost/bind.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
 
 using namespace fawkes;
-using namespace mongo;
+using namespace mongocxx;
 
 /** @class EventTriggerManager  event_trigger_manager.h
  * Manager to realize triggers on events in the robot memory
@@ -84,21 +85,24 @@ EventTriggerManager::check_events()
 	for (EventTrigger *trigger : triggers) {
 		bool ok = true;
 		try {
-			while (trigger->oplog_cursor->more()) {
-				BSONObj change = trigger->oplog_cursor->next();
+			auto next = trigger->oplog_cursor.begin();
+			while (next != trigger->oplog_cursor.end()) {
 				//logger_->log_info(name.c_str(), "Triggering: %s", change.toString().c_str());
 				//actually call the callback function
-				trigger->callback(change);
+				trigger->callback(*next);
+				next++;
 			}
-		} catch (mongo::DBException &e) {
+		} catch (operation_exception &e) {
 			logger_->log_error(name.c_str(), "Error while reading the oplog");
 			ok = false;
 		}
-		if (!ok || trigger->oplog_cursor->isDead()) {
+		// TODO Do we still need to check whether the cursor is dead?
+		// (with old driver: (!ok || trigger->oplog_cursor->isDead()))
+		if (!ok) {
 			if (cfg_debug_)
 				logger_->log_debug(name.c_str(), "Tailable Cursor is dead, requerying");
 			//check if collection is local or replicated
-			mongo::DBClientBase *con;
+			client *con;
 			if (std::find(dbnames_distributed_.begin(),
 			              dbnames_distributed_.end(),
 			              get_db_name(trigger->ns_db))
@@ -108,7 +112,8 @@ EventTriggerManager::check_events()
 				con = con_local_;
 			}
 
-			trigger->oplog_cursor = create_oplog_cursor(con, "local.oplog.rs", trigger->oplog_query);
+			auto oplog            = con->database("local")["oplog.rs"];
+			trigger->oplog_cursor = create_oplog_cursor(oplog, trigger->oplog_query.view());
 		}
 	}
 }
@@ -124,16 +129,16 @@ EventTriggerManager::remove_trigger(EventTrigger *trigger)
 	delete trigger;
 }
 
-QResCursor
-EventTriggerManager::create_oplog_cursor(mongo::DBClientBase *con,
-                                         std::string          oplog,
-                                         mongo::Query         query)
+cursor
+EventTriggerManager::create_oplog_cursor(mongocxx::collection &coll, bsoncxx::document::view query)
 {
-	QResCursor res = con->query(oplog, query, 0, 0, 0, QueryOption_CursorTailable);
-	//Go to end of Oplog to get new updates from then on
-	while (res->more()) {
-		res->next();
-	}
+	mongocxx::options::find opts;
+	opts.cursor_type(mongocxx::cursor::type::k_tailable_await);
+	// TODO max time/timeouts?
+	cursor res = coll.find(query, opts);
+	// Go to end of oplog to get new updates from then on.
+	// Note that res->begin() forwards the cursor, no need to call next() or something similar.
+	while (res.begin() != res.end()) {}
 	return res;
 }
 

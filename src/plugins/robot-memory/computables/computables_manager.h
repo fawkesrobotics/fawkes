@@ -27,10 +27,10 @@
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
-#include <mongo/client/dbclient.h>
 
 #include <boost/bind.hpp>
 #include <map>
+#include <mongocxx/client.hpp>
 #include <tuple>
 #include <utility>
 
@@ -43,7 +43,7 @@ public:
 	ComputablesManager(fawkes::Configuration *config, RobotMemory *robot_memory);
 	virtual ~ComputablesManager();
 
-	bool check_and_compute(mongo::Query query, std::string collection);
+	bool check_and_compute(const bsoncxx::document::view &query, std::string collection);
 	void remove_computable(Computable *computable);
 	void cleanup_computed_docs();
 
@@ -59,10 +59,10 @@ public:
      */
 	template <typename T>
 	Computable *
-	register_computable(const mongo::Query &query_to_compute,
-	                    const std::string & collection,
-	                    std::list<mongo::BSONObj> (T::*compute_func)(const mongo::BSONObj &,
-	                                                                 const std::string &),
+	register_computable(bsoncxx::document::value &&query_to_compute,
+	                    const std::string &        collection,
+	                    std::list<bsoncxx::document::value> (
+	                      T::*compute_func)(const bsoncxx::document::view &, const std::string &),
 	                    T *    obj,
 	                    double caching_time = 0.0,
 	                    int    priority     = 0)

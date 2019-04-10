@@ -21,9 +21,11 @@
 
 #include "computable.h"
 
+#include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/document/value.hpp>
 #include <chrono>
 
-using namespace mongo;
+using namespace bsoncxx;
 
 /** @class Computable  computable.h
  * Class holding information for a single computable
@@ -40,15 +42,14 @@ using namespace mongo;
  * @param priority Computable priority ordering the evaluation
  */
 Computable::Computable(
-  Query                                                            query_to_compute,
-  std::string                                                      collection,
-  const boost::function<std::list<BSONObj>(BSONObj, std::string)> &compute_function,
-  double                                                           caching_time,
-  int                                                              priority)
+  bsoncxx::document::value query_to_compute,
+  std::string              collection,
+  const boost::function<std::list<document::value>(bsoncxx::document::view, std::string)>
+    &    compute_function,
+  double caching_time,
+  int    priority)
+: compute_function(compute_function), query_to_compute(query_to_compute), collection(collection)
 {
-	this->compute_function = compute_function;
-	this->query_to_compute = query_to_compute;
-	this->collection       = collection;
 	//convert caching time to milliseconds
 	this->caching_time = (int)(caching_time * 1000.0);
 	this->priority     = priority;
@@ -63,24 +64,26 @@ Computable::~Computable()
  * @param query The query demanding the computable information
  * @return Documents to insert extended with computable meta information (e.g. caching time)
  */
-std::list<BSONObj>
-Computable::compute(BSONObj query)
+std::list<bsoncxx::document::value>
+Computable::compute(bsoncxx::document::view query)
 {
 	// use provided function to compute demanded documents
-	std::list<BSONObj> docs = compute_function(query, collection);
-	long long          milliseconds_since_epoch =
+	std::list<bsoncxx::document::value> docs = compute_function(query, collection);
+	int64_t                             milliseconds_since_epoch =
 	  std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
-	long long cached_until = milliseconds_since_epoch + caching_time;
+	int64_t cached_until = milliseconds_since_epoch + caching_time;
 	//add metainformation for each document
-	for (BSONObj &obj : docs) {
-		BSONObjBuilder info_b;
-		info_b.append("computed", true);
-		info_b.append("cached_until", cached_until);
-		BSONObjBuilder obj_b;
-		obj_b.appendElements(obj);
-		obj_b.append("_robmem_info", info_b.obj());
+	for (auto obj : docs) {
+		using namespace bsoncxx::builder;
+		auto info = basic::document{};
+		info.append(basic::kvp("computed", true));
+		info.append(basic::kvp("cached_until", cached_until));
+
+		basic::document doc;
+		doc.append(concatenate(obj.view()));
+		doc.append(basic::kvp("_robmem_info", info));
 		//override
-		obj = obj_b.obj();
+		obj = doc.extract();
 	}
 	return docs;
 }
@@ -89,7 +92,7 @@ Computable::compute(BSONObj query)
  * Gets the query that defines what information is computed by the Computable
  * @return The query
  */
-mongo::Query
+bsoncxx::document::value
 Computable::get_query()
 {
 	return query_to_compute;

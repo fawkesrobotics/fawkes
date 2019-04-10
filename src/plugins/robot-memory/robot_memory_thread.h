@@ -36,7 +36,6 @@
 #include <aspect/logging.h>
 #include <aspect/tf.h>
 #include <core/threading/thread.h>
-#include <mongo/client/dbclient.h>
 #include <plugins/mongodb/aspect/mongodb.h>
 
 #include <string>

@@ -31,19 +31,14 @@
 #include <core/threading/mutex.h>
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
 
+#include <bsoncxx/json.hpp>
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace fawkes {
 class RobotMemoryInterface;
 }
-namespace mongo {
-class DBClientBase;
-class DBClientCursor;
-} // namespace mongo
-
-///typedef for shorter type description
-typedef std::unique_ptr<mongo::DBClientCursor> QResCursor;
 
 class RobotMemory
 {
@@ -59,38 +54,41 @@ public:
 	virtual ~RobotMemory();
 
 	//robot memory functions
-	QResCursor     query(mongo::Query query, const std::string &collection = "");
-	mongo::BSONObj aggregate(const std::vector<mongo::BSONObj> &pipeline,
-	                         const std::string &                collection = "");
-	int            insert(mongo::BSONObj obj, const std::string &collection = "");
-	int            insert(std::vector<mongo::BSONObj> v_obj, const std::string &collection = "");
-	int            insert(const std::string &obj_str, const std::string &collection = "");
-	int            update(mongo::Query       query,
-	                      mongo::BSONObj     update,
-	                      const std::string &collection = "",
-	                      bool               upsert     = false);
-	int            update(mongo::Query       query,
-	                      const std::string &update_str,
-	                      const std::string &collection = "",
-	                      bool               upsert     = false);
-	mongo::BSONObj find_one_and_update(const mongo::BSONObj &filter,
-	                                   const mongo::BSONObj &update,
-	                                   const std::string &   collection,
-	                                   bool                  upsert     = false,
-	                                   bool                  return_new = true);
-	int            remove(mongo::Query query, const std::string &collection = "");
-	mongo::BSONObj mapreduce(mongo::Query       query,
-	                         const std::string &collection,
-	                         const std::string &js_map_fun,
-	                         const std::string &js_reduce_fun);
-	QResCursor     aggregate(mongo::BSONObj pipeline, const std::string &collection = "");
-	int            drop_collection(const std::string &collection);
-	int            clear_memory();
-	int            restore_collection(const std::string &collection,
-	                                  const std::string &directory = "@CONFDIR@/robot-memory");
-	int            dump_collection(const std::string &collection,
-	                               const std::string &directory = "@CONFDIR@/robot-memory");
-	int create_index(mongo::BSONObj keys, const std::string &collection = "", bool unique = false);
+	mongocxx::cursor         query(bsoncxx::document::view query, const std::string &collection = "");
+	bsoncxx::document::value aggregate(const std::vector<bsoncxx::document::view> &pipeline,
+	                                   const std::string &                         collection = "");
+	// TODO fix int return codes, should be booleans
+	int insert(bsoncxx::document::view, const std::string &collection = "");
+	int insert(std::vector<bsoncxx::document::view> v_obj, const std::string &collection = "");
+	int insert(const std::string &obj_str, const std::string &collection = "");
+	int update(const bsoncxx::document::view &query,
+	           const bsoncxx::document::view &update,
+	           const std::string &            collection = "",
+	           bool                           upsert     = false);
+	int update(const bsoncxx::document::view &query,
+	           const std::string &            update_str,
+	           const std::string &            collection = "",
+	           bool                           upsert     = false);
+	bsoncxx::document::value find_one_and_update(const bsoncxx::document::view &filter,
+	                                             const bsoncxx::document::view &update,
+	                                             const std::string &            collection,
+	                                             bool                           upsert     = false,
+	                                             bool                           return_new = true);
+	int remove(const bsoncxx::document::view &query, const std::string &collection = "");
+	bsoncxx::document::value mapreduce(const bsoncxx::document::view &query,
+	                                   const std::string &            collection,
+	                                   const std::string &            js_map_fun,
+	                                   const std::string &            js_reduce_fun);
+	mongocxx::cursor aggregate(bsoncxx::document::view pipeline, const std::string &collection = "");
+	int              drop_collection(const std::string &collection);
+	int              clear_memory();
+	int              restore_collection(const std::string &collection,
+	                                    const std::string &directory = "@CONFDIR@/robot-memory");
+	int              dump_collection(const std::string &collection,
+	                                 const std::string &directory = "@CONFDIR@/robot-memory");
+	int              create_index(bsoncxx::document::view keys,
+	                              const std::string &     collection = "",
+	                              bool                    unique     = false);
 
 	//bool semaphore_create(const std::string& name, unsigned int value);
 	//bool semaphore_acquire(const std::string& name, unsigned int v = 1);
@@ -114,9 +112,9 @@ public:
      */
 	template <typename T>
 	EventTrigger *
-	register_trigger(mongo::Query       query,
-	                 const std::string &collection,
-	                 void (T::*callback)(mongo::BSONObj),
+	register_trigger(bsoncxx::document::view query,
+	                 const std::string &     collection,
+	                 void (T::*callback)(bsoncxx::document::value),
 	                 T *_obj)
 	{
 		return trigger_manager_->register_trigger(query, collection, callback, _obj);
@@ -133,10 +131,10 @@ public:
 	EventTrigger *
 	register_trigger(const std::string &query_str,
 	                 const std::string &collection,
-	                 void (T::*callback)(mongo::BSONObj),
+	                 void (T::*callback)(bsoncxx::document::value),
 	                 T *_obj)
 	{
-		return register_trigger(mongo::fromjson(query_str), collection, callback, _obj);
+		return register_trigger(bsoncxx::from_json(query_str), collection, callback, _obj);
 	}
 	void remove_trigger(EventTrigger *trigger);
 
@@ -153,23 +151,23 @@ public:
      */
 	template <typename T>
 	Computable *
-	register_computable(const mongo::Query &query_to_compute,
-	                    const std::string & collection,
-	                    std::list<mongo::BSONObj> (T::*compute_func)(const mongo::BSONObj &,
-	                                                                 const std::string &),
+	register_computable(bsoncxx::document::value &&query_to_compute,
+	                    const std::string &        collection,
+	                    std::list<bsoncxx::document::value> (
+	                      T::*compute_func)(const bsoncxx::document::view &, const std::string &),
 	                    T *    obj,
 	                    double caching_time = 0.0,
 	                    int    priority     = 0)
 	{
 		return computables_manager_->register_computable(
-		  query_to_compute, collection, compute_func, obj, caching_time, priority);
+		  std::move(query_to_compute), collection, compute_func, obj, caching_time, priority);
 	}
 	void remove_computable(Computable *computable);
 
 private:
 	fawkes::MongoDBConnCreator *mongo_connection_manager_;
-	mongo::DBClientBase *       mongodb_client_local_;
-	mongo::DBClientBase *       mongodb_client_distributed_;
+	mongocxx::client *          mongodb_client_local_;
+	mongocxx::client *          mongodb_client_distributed_;
 	bool                        distributed_;
 	fawkes::Configuration *     config_;
 	fawkes::Logger *            logger_;
@@ -193,20 +191,20 @@ private:
 	void init();
 	void loop();
 
+	// TODO make log level an enum (if we need it at all)
 	void log(const std::string &what, const std::string &level = "info");
 	void log_deb(const std::string &what, const std::string &level = "info");
-	void log(const mongo::Query &query, const std::string &what, const std::string &level = "info");
-	void log(const mongo::BSONObj &obj, const std::string &what, const std::string &level = "info");
-	void
-	log_deb(const mongo::Query &query, const std::string &what, const std::string &level = "info");
-	void
-	log_deb(const mongo::BSONObj &obj, const std::string &what, const std::string &level = "info");
+	void log(const bsoncxx::document::view &query,
+	         const std::string &            what,
+	         const std::string &            level = "info");
+	void log_deb(const bsoncxx::document::view &query,
+	             const std::string &            what,
+	             const std::string &            level = "info");
 
-	void set_fields(mongo::BSONObj &obj, const std::string &what);
-	void set_fields(mongo::Query &q, const std::string &what);
-	void remove_field(mongo::Query &q, const std::string &what);
-
-	mongo::DBClientBase *get_mongodb_client(const std::string &collection);
+	std::pair<std::string, std::string> split_db_collection_string(const std::string &dbcollection);
+	bool                                is_distributed_database(const std::string &dbcollection);
+	mongocxx::client *                  get_mongodb_client(const std::string &collection);
+	mongocxx::collection                get_collection(const std::string &dbcollection);
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_ROBOT_MEMORY_H_ */

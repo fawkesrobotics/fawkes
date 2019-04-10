@@ -22,32 +22,36 @@
 #ifndef FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLE_H_
 #define FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLE_H_
 
-#include <mongo/client/dbclient.h>
-
 #include <boost/function.hpp>
+#include <bsoncxx/document/value.hpp>
+#include <bsoncxx/document/view.hpp>
+#include <list>
+#include <mongocxx/client.hpp>
 
 class Computable
 {
 public:
 	Computable(
-	  mongo::Query                                                                   query_to_compute,
-	  std::string                                                                    collection,
-	  const boost::function<std::list<mongo::BSONObj>(mongo::BSONObj, std::string)> &compute_function,
+	  bsoncxx::document::value query_to_compute,
+	  std::string              collection,
+	  const boost::function<std::list<bsoncxx::document::value>(bsoncxx::document::view, std::string)>
+	    &    compute_function,
 	  double caching_time = 0.0,
 	  int    priority     = 0);
 	virtual ~Computable();
 
-	std::list<mongo::BSONObj> compute(mongo::BSONObj query);
-	mongo::Query              get_query();
-	std::string               get_collection();
-	int                       get_priority();
+	std::list<bsoncxx::document::value> compute(bsoncxx::document::view query);
+	bsoncxx::document::value            get_query();
+	std::string                         get_collection();
+	int                                 get_priority();
 
 private:
-	boost::function<std::list<mongo::BSONObj>(mongo::BSONObj, std::string)> compute_function;
-	mongo::Query                                                            query_to_compute;
-	std::string                                                             collection;
-	int caching_time; //in milliseconds
-	int priority;
+	boost::function<std::list<bsoncxx::document::value>(bsoncxx::document::view, std::string)>
+	                         compute_function;
+	bsoncxx::document::value query_to_compute;
+	std::string              collection;
+	int                      caching_time; //in milliseconds
+	int                      priority;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLE_H_ */

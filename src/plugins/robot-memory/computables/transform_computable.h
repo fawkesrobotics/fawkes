@@ -27,6 +27,9 @@
 #include <aspect/tf.h>
 #include <config/config.h>
 
+#include <bsoncxx/document/value.hpp>
+#include <bsoncxx/document/view.hpp>
+
 class TransformComputable
 {
 public:
@@ -37,8 +40,8 @@ public:
 	virtual ~TransformComputable();
 
 private:
-	std::list<mongo::BSONObj> compute_transform(const mongo::BSONObj &query,
-	                                            const std::string &   collection);
+	std::list<bsoncxx::document::value> compute_transform(const bsoncxx::document::view &query,
+	                                                      const std::string &            collection);
 
 	RobotMemory *             robot_memory_;
 	fawkes::Logger *          logger_;
