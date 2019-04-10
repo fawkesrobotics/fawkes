@@ -31,14 +31,20 @@
  */
 
 /** Constructor.
+ * @param cursor The cursor to the oplog, already moved to the end of the oplog
  * @param oplog_query The Query on the oplog, which defines which database update invokes the trigger
  * @param ns namespace of the trigger, format db.collection
  * @param callback Reference to callback function
  */
-EventTrigger::EventTrigger(mongo::Query                                 oplog_query,
-                           const std::string &                          ns,
-                           const boost::function<void(mongo::BSONObj)> &callback)
-: oplog_query(oplog_query), ns(ns), ns_db(EventTriggerManager::get_db_name(ns)), callback(callback)
+EventTrigger::EventTrigger(mongocxx::cursor &&                                   cursor,
+                           const bsoncxx::document::view &                       oplog_query,
+                           const std::string &                                   ns,
+                           const boost::function<void(bsoncxx::document::view)> &callback)
+: oplog_cursor(std::move(cursor)),
+  oplog_query(oplog_query),
+  ns(ns),
+  ns_db(EventTriggerManager::get_db_name(ns)),
+  callback(callback)
 {
 	if (ns_db == "") {
 		throw fawkes::Exception("Invalid namespace, does not reference database");
