@@ -23,6 +23,12 @@
 #include "clips_robot_memory_thread.h"
 
 #include <core/threading/mutex_locker.h>
+#include <plugins/mongodb/utils.h>
+
+#include <bsoncxx/document/element.hpp>
+#include <bsoncxx/exception/exception.hpp>
+#include <bsoncxx/types.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
 
 using namespace fawkes;
 
@@ -241,21 +247,16 @@ ClipsRobotMemoryThread::clips_context_destroyed(const std::string &env_name)
 CLIPS::Value
 ClipsRobotMemoryThread::clips_bson_create()
 {
-	mongo::BSONObjBuilder *b = new mongo::BSONObjBuilder();
-	return CLIPS::Value(b);
+	return CLIPS::Value(new bsoncxx::builder::basic::document());
 }
 
 CLIPS::Value
 ClipsRobotMemoryThread::clips_bson_parse(std::string document)
 {
-	mongo::BSONObjBuilder *b = new mongo::BSONObjBuilder();
+	auto b = new bsoncxx::builder::basic::document();
 	try {
-		b->appendElements(mongo::fromjson(document));
-#ifdef HAVE_MONGODB_VERSION_H
-	} catch (mongo::MsgAssertionException &e) {
-#else
-	} catch (mongo::AssertionException &e) {
-#endif
+		b->append(bsoncxx::builder::concatenate(bsoncxx::from_json(document)));
+	} catch (bsoncxx::exception &e) {
 		logger->log_error("MongoDB", "Parsing JSON doc failed: %s\n%s", e.what(), document.c_str());
 	}
 	return CLIPS::Value(b);
@@ -264,44 +265,43 @@ ClipsRobotMemoryThread::clips_bson_parse(std::string document)
 void
 ClipsRobotMemoryThread::clips_bson_destroy(void *bson)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 	delete b;
 }
 
 std::string
 ClipsRobotMemoryThread::clips_bson_tostring(void *bson)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
-	return b->asTempObj().jsonString(mongo::Strict, true);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
+	return bsoncxx::to_json(b->view());
 }
 
 void
 ClipsRobotMemoryThread::clips_bson_append(void *bson, std::string field_name, CLIPS::Value value)
 {
+	using namespace bsoncxx::builder;
 	try {
-		mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+		auto b = static_cast<basic::document *>(bson);
 		switch (value.type()) {
-		case CLIPS::TYPE_FLOAT: b->append(field_name, value.as_float()); break;
+		case CLIPS::TYPE_FLOAT: b->append(basic::kvp(field_name, value.as_float())); break;
 
-		case CLIPS::TYPE_INTEGER: b->append(field_name, value.as_integer()); break;
+		case CLIPS::TYPE_INTEGER:
+			b->append(basic::kvp(field_name, static_cast<int64_t>(value.as_integer())));
+			break;
 
 		case CLIPS::TYPE_SYMBOL:
 		case CLIPS::TYPE_INSTANCE_NAME:
-		case CLIPS::TYPE_STRING: b->append(field_name, value.as_string()); break;
+		case CLIPS::TYPE_STRING: b->append(basic::kvp(field_name, value.as_string())); break;
 		case CLIPS::TYPE_EXTERNAL_ADDRESS: {
-			mongo::BSONObjBuilder *subb = static_cast<mongo::BSONObjBuilder *>(value.as_address());
-			b->append(field_name, subb->asTempObj());
+			auto subb = static_cast<basic::document *>(value.as_address());
+			b->append(basic::kvp(field_name, subb->view()));
 		} break;
 
 		default:
 			logger->log_warn("RefBox", "Tried to add unknown type to BSON field %s", field_name.c_str());
 			break;
 		}
-#ifdef HAVE_MONGODB_VERSION_H
-	} catch (mongo::MsgAssertionException &e) {
-#else
-	} catch (mongo::AssertionException &e) {
-#endif
+	} catch (bsoncxx::exception &e) {
 		logger->log_error("MongoDB",
 		                  "Failed to append array value to field %s: %s",
 		                  field_name.c_str(),
@@ -314,37 +314,35 @@ ClipsRobotMemoryThread::clips_bson_append_array(void *        bson,
                                                 std::string   field_name,
                                                 CLIPS::Values values)
 {
+	using namespace bsoncxx::builder;
 	try {
-		mongo::BSONObjBuilder * b = static_cast<mongo::BSONObjBuilder *>(bson);
-		mongo::BSONArrayBuilder ab(b->subarrayStart(field_name));
+		auto b = static_cast<basic::document *>(bson);
 
-		for (auto value : values) {
-			switch (value.type()) {
-			case CLIPS::TYPE_FLOAT: ab.append(value.as_float()); break;
+		b->append(basic::kvp(field_name, [&](basic::sub_array array) {
+			for (auto value : values) {
+				switch (value.type()) {
+				case CLIPS::TYPE_FLOAT: array.append(value.as_float()); break;
 
-			case CLIPS::TYPE_INTEGER: ab.append(value.as_integer()); break;
+				case CLIPS::TYPE_INTEGER: array.append(static_cast<int64_t>(value.as_integer())); break;
 
-			case CLIPS::TYPE_SYMBOL:
-			case CLIPS::TYPE_STRING:
-			case CLIPS::TYPE_INSTANCE_NAME: ab.append(value.as_string()); break;
+				case CLIPS::TYPE_SYMBOL:
+				case CLIPS::TYPE_STRING:
+				case CLIPS::TYPE_INSTANCE_NAME: array.append(value.as_string()); break;
 
-			case CLIPS::TYPE_EXTERNAL_ADDRESS: {
-				mongo::BSONObjBuilder *subb = static_cast<mongo::BSONObjBuilder *>(value.as_address());
-				ab.append(subb->asTempObj());
-			} break;
+				case CLIPS::TYPE_EXTERNAL_ADDRESS: {
+					auto subb = static_cast<bsoncxx::builder::basic::document *>(value.as_address());
+					array.append(subb->view());
+				} break;
 
-			default:
-				logger->log_warn("MongoDB",
-				                 "Tried to add unknown type to BSON array field %s",
-				                 field_name.c_str());
-				break;
+				default:
+					logger->log_warn("MongoDB",
+					                 "Tried to add unknown type to BSON array field %s",
+					                 field_name.c_str());
+					break;
+				}
 			}
-		}
-#ifdef HAVE_MONGODB_VERSION_H
-	} catch (mongo::MsgAssertionException &e) {
-#else
-	} catch (mongo::AssertionException &e) {
-#endif
+		}));
+	} catch (bsoncxx::exception &e) {
 		logger->log_error("MongoDB",
 		                  "Failed to append array value to field %s: %s",
 		                  field_name.c_str(),
@@ -355,24 +353,34 @@ ClipsRobotMemoryThread::clips_bson_append_array(void *        bson,
 CLIPS::Value
 ClipsRobotMemoryThread::clips_bson_array_start(void *bson, std::string field_name)
 {
+	// With the new libmongocxx, we can no longer create an open array as
+	// sub-field of another document.
+	throw Exception("Not implemented");
+	/*
 	mongo::BSONObjBuilder *  b    = static_cast<mongo::BSONObjBuilder *>(bson);
 	mongo::BufBuilder &      bb   = b->subarrayStart(field_name);
 	mongo::BSONArrayBuilder *arrb = new mongo::BSONArrayBuilder(bb);
 	return CLIPS::Value(arrb);
+  */
 }
 
 void
 ClipsRobotMemoryThread::clips_bson_array_finish(void *barr)
 {
+	throw Exception("Not implemented");
+	/*
 	mongo::BSONArrayBuilder *ab = static_cast<mongo::BSONArrayBuilder *>(barr);
 	delete ab;
+  */
 }
 
 void
 ClipsRobotMemoryThread::clips_bson_array_append(void *barr, CLIPS::Value value)
 {
+	throw Exception("Not implemented");
+	/*
 	try {
-		mongo::BSONArrayBuilder *ab = static_cast<mongo::BSONArrayBuilder *>(barr);
+		auto *ab = static_cast<mongo::BSONArrayBuilder *>(barr);
 		switch (value.type()) {
 		case CLIPS::TYPE_FLOAT: ab->append(value.as_float()); break;
 
@@ -396,6 +404,7 @@ ClipsRobotMemoryThread::clips_bson_array_append(void *barr, CLIPS::Value value)
 #endif
 		logger->log_error("MongoDB", "Failed to append to array: %s", e.what());
 	}
+  */
 }
 
 void
@@ -413,15 +422,13 @@ ClipsRobotMemoryThread::clips_bson_append_time(void *        bson,
 	}
 
 	try {
-		mongo::BSONObjBuilder *b    = static_cast<mongo::BSONObjBuilder *>(bson);
-		struct timeval         now  = {time[0].as_integer(), time[1].as_integer()};
-		mongo::Date_t          nowd = now.tv_sec * 1000 + now.tv_usec / 1000;
-		b->appendDate(field_name, nowd);
-#ifdef HAVE_MONGODB_VERSION_H
-	} catch (mongo::MsgAssertionException &e) {
-#else
-	} catch (mongo::AssertionException &e) {
-#endif
+		auto                   b   = static_cast<bsoncxx::builder::basic::document *>(bson);
+		struct timeval         now = {time[0].as_integer(), time[1].as_integer()};
+		bsoncxx::types::b_date nowd{
+		  std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds>{
+		    std::chrono::milliseconds{now.tv_sec * 1000 + now.tv_usec / 1000}}};
+		b->append(bsoncxx::builder::basic::kvp(field_name, nowd));
+	} catch (bsoncxx::exception &e) {
 		logger->log_error("MongoDB",
 		                  "Failed to append time value to field %s: %s",
 		                  field_name.c_str(),
@@ -432,11 +439,11 @@ ClipsRobotMemoryThread::clips_bson_append_time(void *        bson,
 void
 ClipsRobotMemoryThread::clips_robotmemory_insert(std::string collection, void *bson)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 
 	try {
-		robot_memory->insert(b->asTempObj(), collection);
-	} catch (mongo::DBException &e) {
+		robot_memory->insert(b->view(), collection);
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn("MongoDB", "Insert failed: %s", e.what());
 	}
 }
@@ -444,11 +451,11 @@ ClipsRobotMemoryThread::clips_robotmemory_insert(std::string collection, void *b
 void
 ClipsRobotMemoryThread::clips_robotmemory_create_index(std::string collection, void *bson)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 
 	try {
-		robot_memory->create_index(b->asTempObj(), collection, /* unique */ false);
-	} catch (mongo::DBException &e) {
+		robot_memory->create_index(b->view(), collection, /* unique */ false);
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn("MongoDB", "Creating index failed: %s", e.what());
 	}
 }
@@ -456,41 +463,36 @@ ClipsRobotMemoryThread::clips_robotmemory_create_index(std::string collection, v
 void
 ClipsRobotMemoryThread::clips_robotmemory_create_unique_index(std::string collection, void *bson)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 
 	try {
-		robot_memory->create_index(b->asTempObj(), collection, /* unique */ true);
-	} catch (mongo::DBException &e) {
+		robot_memory->create_index(b->view(), collection, /* unique */ true);
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn("MongoDB", "Creating unique index failed: %s", e.what());
 	}
 }
 
 void
-ClipsRobotMemoryThread::robotmemory_update(std::string &  collection,
-                                           mongo::BSONObj obj,
-                                           CLIPS::Value & query,
-                                           bool           upsert)
+ClipsRobotMemoryThread::robotmemory_update(std::string &                  collection,
+                                           const bsoncxx::document::view &update,
+                                           CLIPS::Value &                 query,
+                                           bool                           upsert)
 {
 	try {
-		mongo::BSONObj query_obj;
 		if (query.type() == CLIPS::TYPE_STRING) {
-			query_obj = mongo::fromjson(query.as_string());
+			robot_memory->update(bsoncxx::from_json(query.as_string()), update, collection, upsert);
 		} else if (query.type() == CLIPS::TYPE_EXTERNAL_ADDRESS) {
-			mongo::BSONObjBuilder *qb = static_cast<mongo::BSONObjBuilder *>(query.as_address());
-			query_obj                 = qb->asTempObj();
+			bsoncxx::builder::basic::document *qb =
+			  static_cast<bsoncxx::builder::basic::document *>(query.as_address());
+			robot_memory->update(qb->view(), update, collection, upsert);
 		} else {
 			logger->log_warn("MongoDB", "Invalid query, must be string or BSON document");
 			return;
 		}
 
-		robot_memory->update(query_obj, obj, collection, upsert);
-#ifdef HAVE_MONGODB_VERSION_H
-	} catch (mongo::MsgAssertionException &e) {
-#else
-	} catch (mongo::AssertionException &e) {
-#endif
+	} catch (bsoncxx::exception &e) {
 		logger->log_warn("MongoDB", "Compiling query failed: %s", e.what());
-	} catch (mongo::DBException &e) {
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn("MongoDB", "Insert failed: %s", e.what());
 	}
 }
@@ -500,12 +502,12 @@ ClipsRobotMemoryThread::clips_robotmemory_upsert(std::string  collection,
                                                  void *       bson,
                                                  CLIPS::Value query)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 	if (!b) {
-		logger->log_warn("MongoDB", "Invalid BSON Obj Builder passed");
+		logger->log_warn("MongoDB", "Invalid BSON Builder passed");
 		return;
 	}
-	robotmemory_update(collection, b->asTempObj(), query, true);
+	robotmemory_update(collection, b->view(), query, true);
 }
 
 void
@@ -513,16 +515,17 @@ ClipsRobotMemoryThread::clips_robotmemory_update(std::string  collection,
                                                  void *       bson,
                                                  CLIPS::Value query)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 	if (!b) {
-		logger->log_warn("MongoDB", "Invalid BSON Obj Builder passed");
+		logger->log_warn("MongoDB", "Invalid BSON Builder passed");
 		return;
 	}
 
-	mongo::BSONObjBuilder update_doc;
-	update_doc.append("$set", b->asTempObj());
+	using namespace bsoncxx::builder;
+	basic::document update_doc;
+	update_doc.append(basic::kvp("$set", b->view()));
 
-	robotmemory_update(collection, update_doc.obj(), query, false);
+	robotmemory_update(collection, update_doc.view(), query, false);
 }
 
 void
@@ -530,10 +533,10 @@ ClipsRobotMemoryThread::clips_robotmemory_replace(std::string  collection,
                                                   void *       bson,
                                                   CLIPS::Value query)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 	if (!b)
-		logger->log_warn("MongoDB", "Invalid BSON Obj Builder passed");
-	robotmemory_update(collection, b->asTempObj(), query, false);
+		logger->log_warn("MongoDB", "Invalid BSON Builder passed");
+	robotmemory_update(collection, b->view(), query, false);
 }
 
 CLIPS::Value
@@ -541,27 +544,21 @@ ClipsRobotMemoryThread::clips_robotmemory_query_sort(std::string collection,
                                                      void *      bson,
                                                      void *      bson_sort)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 
 	try {
-		mongo::Query q(b->asTempObj());
+		mongocxx::options::find find_opts{};
 		if (bson_sort) {
-			mongo::BSONObjBuilder *bs = static_cast<mongo::BSONObjBuilder *>(bson_sort);
-			q.sort(bs->asTempObj());
+			auto *bs = static_cast<bsoncxx::builder::basic::document *>(bson_sort);
+			find_opts.sort(bs->view());
 		}
 
-#if __cplusplus >= 201103L
-		std::unique_ptr<mongo::DBClientCursor> c = robot_memory->query(q, collection);
-
-		return CLIPS::Value(new std::unique_ptr<mongo::DBClientCursor>(std::move(c)),
+		auto cursor = robot_memory->query(b->view(), collection, find_opts);
+		//std::unique_ptr<mongocxx::cursor> c = new mongocxx::cursor(std::move(cursor));
+		return CLIPS::Value(new std::unique_ptr<mongocxx::cursor>(
+		                      new mongocxx::cursor(std::move(cursor))),
 		                    CLIPS::TYPE_EXTERNAL_ADDRESS);
-#else
-		std::auto_ptr<mongo::DBClientCursor> c = robot_memory->query(collection, q);
-
-		return CLIPS::Value(new std::auto_ptr<mongo::DBClientCursor>(c), CLIPS::TYPE_EXTERNAL_ADDRESS);
-#endif
-
-	} catch (mongo::DBException &e) {
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn("MongoDB", "Query failed: %s", e.what());
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 	}
@@ -570,11 +567,10 @@ ClipsRobotMemoryThread::clips_robotmemory_query_sort(std::string collection,
 void
 ClipsRobotMemoryThread::clips_robotmemory_remove(std::string collection, void *bson)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 	try {
-		mongo::Query q(b->asTempObj());
-		robot_memory->remove(q, collection);
-	} catch (mongo::DBException &e) {
+		robot_memory->remove(b->view(), collection);
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn("MongoDB", "Remove failed: %s", e.what());
 	}
 }
@@ -588,14 +584,7 @@ ClipsRobotMemoryThread::clips_robotmemory_query(const std::string &collection, v
 void
 ClipsRobotMemoryThread::clips_robotmemory_cursor_destroy(void *cursor)
 {
-#if __cplusplus >= 201103L
-	std::unique_ptr<mongo::DBClientCursor> *c =
-	  static_cast<std::unique_ptr<mongo::DBClientCursor> *>(cursor);
-#else
-	std::auto_ptr<mongo::DBClientCursor> *c =
-	  static_cast<std::auto_ptr<mongo::DBClientCursor> *>(cursor);
-#endif
-
+	auto c = static_cast<std::unique_ptr<mongocxx::cursor> *>(cursor);
 	if (!c || !c->get()) {
 		logger->log_error("MongoDB", "mongodb-cursor-destroy: got invalid cursor");
 		return;
@@ -607,58 +596,34 @@ ClipsRobotMemoryThread::clips_robotmemory_cursor_destroy(void *cursor)
 CLIPS::Value
 ClipsRobotMemoryThread::clips_robotmemory_cursor_more(void *cursor)
 {
-#if __cplusplus >= 201103L
-	std::unique_ptr<mongo::DBClientCursor> *c =
-	  static_cast<std::unique_ptr<mongo::DBClientCursor> *>(cursor);
-#else
-	std::auto_ptr<mongo::DBClientCursor> *c =
-	  static_cast<std::auto_ptr<mongo::DBClientCursor> *>(cursor);
-#endif
-
-	if (!c || !c->get()) {
-		logger->log_error("MongoDB", "mongodb-cursor-more: got invalid cursor");
-		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
-	}
-
-	return CLIPS::Value((*c)->more() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+	throw Exception("The function cursor-more is no longer supported. Call cursor-next and check the "
+	                "return value for FALSE instead.");
 }
 
 CLIPS::Value
 ClipsRobotMemoryThread::clips_robotmemory_cursor_next(void *cursor)
 {
-#if __cplusplus >= 201103L
-	std::unique_ptr<mongo::DBClientCursor> *c =
-	  static_cast<std::unique_ptr<mongo::DBClientCursor> *>(cursor);
-#else
-	std::auto_ptr<mongo::DBClientCursor> *c =
-	  static_cast<std::auto_ptr<mongo::DBClientCursor> *>(cursor);
-#endif
+	auto c = static_cast<std::unique_ptr<mongocxx::cursor> *>(cursor);
 
 	if (!c || !c->get()) {
 		logger->log_error("MongoDB", "mongodb-cursor-next: got invalid cursor");
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 	}
 
-	mongo::BSONObjBuilder *b = new mongo::BSONObjBuilder();
-	try {
-		b->appendElements((*c)->nextSafe());
-#ifdef HAVE_MONGODB_VERSION_H
-	} catch (mongo::MsgAssertionException &e) {
-#else
-	} catch (mongo::AssertionException &e) {
-#endif
-		logger->log_error("MongoDB",
-		                  "mongodb-cursor: No more objects in result cursor. What: %s",
-		                  e.what());
+	auto it = (*c)->begin();
+	if (it == (*c)->end()) {
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+	} else {
+		auto b = new bsoncxx::builder::basic::document();
+		b->append(bsoncxx::builder::concatenate(*it));
+		return CLIPS::Value(b);
 	}
-	return CLIPS::Value(b);
 }
 
 CLIPS::Values
 ClipsRobotMemoryThread::clips_bson_field_names(void *bson)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 
 	if (!b) {
 		logger->log_error("MongoDB", "mongodb-bson-field-names: invalid object");
@@ -667,12 +632,9 @@ ClipsRobotMemoryThread::clips_bson_field_names(void *bson)
 		return rv;
 	}
 
-	std::set<std::string> field_names;
-	b->asTempObj().getFieldNames(field_names);
-
 	CLIPS::Values rv;
-	for (const std::string &n : field_names) {
-		rv.push_back(CLIPS::Value(n));
+	for (auto element : b->view()) {
+		rv.push_back(CLIPS::Value(std::string(element.key())));
 	}
 	return rv;
 }
@@ -680,7 +642,7 @@ ClipsRobotMemoryThread::clips_bson_field_names(void *bson)
 CLIPS::Value
 ClipsRobotMemoryThread::clips_bson_get(void *bson, std::string field_name)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 
 	if (!b) {
 		logger->log_error("MongoDB", "mongodb-bson-get: invalid object");
@@ -688,27 +650,25 @@ ClipsRobotMemoryThread::clips_bson_get(void *bson, std::string field_name)
 	}
 
 	try {
-		mongo::BSONObj o(b->asTempObj());
-
-		mongo::BSONElement el = o.getFieldDotted(field_name);
-
+		auto el = get_dotted_field(b->view(), field_name);
 		switch (el.type()) {
-		case mongo::NumberDouble: return CLIPS::Value(el.Double());
-		case mongo::String: return CLIPS::Value(el.String());
-		case mongo::Bool: return CLIPS::Value(el.Bool() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
-		case mongo::NumberInt: return CLIPS::Value(el.Int());
-		case mongo::NumberLong: return CLIPS::Value(el.Long());
-		case mongo::Object: {
-			mongo::BSONObjBuilder *b = new mongo::BSONObjBuilder();
-			b->appendElements(el.Obj());
+		case bsoncxx::type::k_double: return CLIPS::Value(el.get_double());
+		case bsoncxx::type::k_utf8: return CLIPS::Value(el.get_utf8().value.to_string());
+		case bsoncxx::type::k_bool:
+			return CLIPS::Value(el.get_bool() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL);
+		case bsoncxx::type::k_int32: return CLIPS::Value(el.get_int32());
+		case bsoncxx::type::k_int64: return CLIPS::Value(el.get_int64());
+		case bsoncxx::type::k_document: {
+			auto b = new bsoncxx::builder::basic::document();
+			b->append(bsoncxx::builder::concatenate(el.get_document().view()));
 			return CLIPS::Value(b);
 		}
-		case 7: //ObjectId
-			return CLIPS::Value(el.OID().toString());
+		case bsoncxx::type::k_oid: //ObjectId
+			return CLIPS::Value(el.get_oid().value.to_string());
 
 		default: return CLIPS::Value("INVALID_VALUE_TYPE", CLIPS::TYPE_SYMBOL);
 		}
-	} catch (mongo::DBException &e) {
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn(name(),
 		                 "mongodb-bson-get: failed to get '%s': %s",
 		                 field_name.c_str(),
@@ -720,26 +680,29 @@ ClipsRobotMemoryThread::clips_bson_get(void *bson, std::string field_name)
 CLIPS::Value
 ClipsRobotMemoryThread::clips_bson_has_field(void *bson, std::string field_name)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 
 	if (!b) {
 		logger->log_error("MongoDB", "mongodb-bson-get: invalid object");
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 	}
 
-	mongo::BSONObj o(b->asTempObj());
-
-	if (o.getFieldDotted(field_name).eoo()) {
+	try {
+		auto el = get_dotted_field(b->view(), field_name);
+		if (!el.key().empty()) {
+			return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
+		} else {
+			return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+		}
+	} catch (bsoncxx::exception &e) {
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
-	} else {
-		return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
 	}
 }
 
 CLIPS::Values
 ClipsRobotMemoryThread::clips_bson_get_array(void *bson, std::string field_name)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 
 	CLIPS::Values rv;
 
@@ -750,11 +713,9 @@ ClipsRobotMemoryThread::clips_bson_get_array(void *bson, std::string field_name)
 	}
 
 	try {
-		mongo::BSONObj o(b->asTempObj());
+		auto el = get_dotted_field(b->view(), field_name);
 
-		mongo::BSONElement el = o.getFieldDotted(field_name);
-
-		if (el.type() != mongo::Array) {
+		if (el.type() != bsoncxx::type::k_array) {
 			logger->log_error("MongoDB",
 			                  "mongodb-bson-get-array: field %s is not an array",
 			                  field_name.c_str());
@@ -762,20 +723,19 @@ ClipsRobotMemoryThread::clips_bson_get_array(void *bson, std::string field_name)
 			return rv;
 		}
 
-		std::vector<mongo::BSONElement> elements(el.Array());
-
-		for (const mongo::BSONElement &e : elements) {
+		bsoncxx::array::view array_view{el.get_array()};
+		for (const auto e : array_view) {
 			switch (e.type()) {
-			case mongo::NumberDouble: rv.push_back(CLIPS::Value(e.Double())); break;
-			case mongo::String: rv.push_back(CLIPS::Value(e.String())); break;
-			case mongo::Bool:
-				rv.push_back(CLIPS::Value(e.Bool() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL));
+			case bsoncxx::type::k_double: rv.push_back(CLIPS::Value(e.get_double())); break;
+			case bsoncxx::type::k_utf8: rv.push_back(CLIPS::Value(e.get_utf8().value.to_string())); break;
+			case bsoncxx::type::k_bool:
+				rv.push_back(CLIPS::Value(e.get_bool() ? "TRUE" : "FALSE", CLIPS::TYPE_SYMBOL));
 				break;
-			case mongo::NumberInt: rv.push_back(CLIPS::Value(e.Int())); break;
-			case mongo::NumberLong: rv.push_back(CLIPS::Value(e.Long())); break;
-			case mongo::Object: {
-				mongo::BSONObjBuilder *b = new mongo::BSONObjBuilder();
-				b->appendElements(e.Obj());
+			case bsoncxx::type::k_int32: rv.push_back(CLIPS::Value(e.get_int32())); break;
+			case bsoncxx::type::k_int64: rv.push_back(CLIPS::Value(e.get_int64())); break;
+			case bsoncxx::type::k_document: {
+				auto b = new bsoncxx::builder::basic::document();
+				b->append(bsoncxx::builder::concatenate(e.get_document().view()));
 				rv.push_back(CLIPS::Value(b));
 			} break;
 			default:
@@ -785,7 +745,7 @@ ClipsRobotMemoryThread::clips_bson_get_array(void *bson, std::string field_name)
 			}
 		}
 		return rv;
-	} catch (mongo::DBException &e) {
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn(name(),
 		                 "mongodb-bson-get: failed to get '%s': %s",
 		                 field_name.c_str(),
@@ -799,7 +759,7 @@ ClipsRobotMemoryThread::clips_bson_get_array(void *bson, std::string field_name)
 CLIPS::Values
 ClipsRobotMemoryThread::clips_bson_get_time(void *bson, std::string field_name)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(bson);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 
 	CLIPS::Values rv;
 
@@ -810,17 +770,17 @@ ClipsRobotMemoryThread::clips_bson_get_time(void *bson, std::string field_name)
 	}
 
 	try {
-		mongo::BSONObj o(b->asTempObj());
-
-		mongo::BSONElement el = o.getFieldDotted(field_name);
-
+		auto    el = get_dotted_field(b->view(), field_name);
 		int64_t ts = 0;
-		if (el.type() == mongo::Date) {
-			mongo::Date_t d = el.Date();
-			ts              = d.asInt64();
-		} else if (el.type() == mongo::Timestamp) {
-			mongo::Timestamp_t t = el.Timestamp();
+		if (el.type() == bsoncxx::type::k_date) {
+			bsoncxx::types::b_date d = el.get_date();
+			ts                       = d.to_int64();
+			/*
+    We do not support timestamps, as these are for internal use only.
+		} else if (el.type() == bsoncxx::type::timestamp) {
+      bsoncxx::types::b_timestamp t = el.get_timestamp();
 			ts                   = (int64_t)t.seconds() * 1000;
+    */
 		} else {
 			logger->log_error("MongoDB",
 			                  "mongodb-bson-get-time: field %s is not a time",
@@ -833,7 +793,7 @@ ClipsRobotMemoryThread::clips_bson_get_time(void *bson, std::string field_name)
 		rv[0] = CLIPS::Value((long long int)(ts / 1000));
 		rv[1] = CLIPS::Value((ts - (rv[0].as_integer() * 1000)) * 1000);
 		return rv;
-	} catch (mongo::DBException &e) {
+	} catch (mongocxx::operation_exception &e) {
 		rv.resize(2, CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
 		return rv;
 	}
@@ -845,16 +805,15 @@ ClipsRobotMemoryThread::clips_robotmemory_register_trigger(std::string env_name,
                                                            void *      query,
                                                            std::string assert_name)
 {
-	mongo::BSONObjBuilder *b = static_cast<mongo::BSONObjBuilder *>(query);
+	auto b = static_cast<bsoncxx::builder::basic::document *>(query);
 	try {
-		mongo::Query    q(b->asTempObj());
 		ClipsRmTrigger *clips_trigger =
 		  new ClipsRmTrigger(assert_name, robot_memory, envs_[env_name], logger);
-		clips_trigger->set_trigger(
-		  robot_memory->register_trigger(q, collection, &ClipsRmTrigger::callback, clips_trigger));
+		clips_trigger->set_trigger(robot_memory->register_trigger(
+		  b->view(), collection, &ClipsRmTrigger::callback, clips_trigger));
 		clips_triggers_.push_back(clips_trigger);
 		return CLIPS::Value(clips_trigger);
-	} catch (mongo::DBException &e) {
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn("CLIPS RobotMemory", "Trigger query failed: %s", e.what());
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 	}
