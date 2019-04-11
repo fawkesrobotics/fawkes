@@ -27,14 +27,14 @@
 #include <utils/time/wait.h>
 
 // from MongoDB
-#include <mongo/client/dbclient.h>
-#include <mongo/client/gridfs.h>
-
 #include <fnmatch.h>
+#include <mongocxx/client.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
+#include <mongocxx/gridfs/uploader.hpp>
 #include <unistd.h>
 
 using namespace fawkes;
-using namespace mongo;
+using namespace mongocxx;
 
 /** @class MongoLogPointCloudThread "mongodb_log_pcl_thread.h"
  * Thread to store point clouds to MongoDB.
@@ -92,7 +92,7 @@ MongoLogPointCloudThread::init()
 	} // ignored, no include rules
 
 	mongodb_ = mongodb_client;
-	gridfs_  = new GridFS(*mongodb_, database_);
+	gridfs_  = mongodb_->database(database_).gridfs_bucket();
 	//gridfs_->setChunkSize(cfg_chunk_size_);
 
 	adapter_ = new PointCloudAdapter(pcl_manager, logger);
@@ -175,7 +175,6 @@ void
 MongoLogPointCloudThread::finalize()
 {
 	delete adapter_;
-	delete gridfs_;
 	delete wait_;
 	delete mutex_;
 }
@@ -197,43 +196,49 @@ MongoLogPointCloudThread::loop()
 		fawkes::Time    time;
 		adapter_->get_data(
 		  p->first, frame_id, width, height, time, &point_data, point_size, num_points);
-		size_t data_size = point_size * num_points;
+		size_t data_size = point_size / sizeof(uint8_t) * num_points;
 
 		if (pi.last_sent != time) {
 			pi.last_sent = time;
 
 			fawkes::Time start(clock);
 
-			BSONObjBuilder document;
-			document.append("timestamp", (long long)time.in_msec());
-			BSONObjBuilder subb(document.subobjStart("pointcloud"));
-			subb.append("frame_id", pi.msg.header.frame_id);
-			subb.append("is_dense", pi.msg.is_dense);
-			subb.append("width", width);
-			subb.append("height", height);
-			subb.append("point_size", (unsigned int)point_size);
-			subb.append("num_points", (unsigned int)num_points);
-
+			using namespace bsoncxx::builder;
+			basic::document   document;
 			std::stringstream name;
 			name << pi.topic_name << "_" << time.in_msec();
-			subb.append("data", gridfs_->storeFile((char *)point_data, data_size, name.str()));
+			auto uploader = gridfs_.open_upload_stream(name.str());
+			uploader.write((uint8_t *)point_data, data_size);
+			auto result = uploader.close();
+			document.append(basic::kvp("timestamp", static_cast<int64_t>(time.in_msec())));
+			document.append(basic::kvp("pointcloud", [&](basic::sub_document subdoc) {
+				subdoc.append(basic::kvp("frame_id", pi.msg.header.frame_id));
+				subdoc.append(basic::kvp("is_dense", pi.msg.is_dense));
+				subdoc.append(basic::kvp("width", static_cast<int32_t>(width)));
+				subdoc.append(basic::kvp("height", static_cast<int32_t>(height)));
+				subdoc.append(basic::kvp("point_size", static_cast<int32_t>(point_size)));
+				subdoc.append(basic::kvp("num_points", static_cast<int32_t>(num_points)));
+				// TODO: We store the ID, is this correct?
+				subdoc.append(basic::kvp("data", result.id()));
+				subdoc.append(basic::kvp("field_info", [pi](basic::sub_array array) {
+					for (uint i = 0; i < pi.msg.fields.size(); i++) {
+						basic::document field_info_doc;
+						field_info_doc.append(basic::kvp("name", pi.msg.fields[i].name));
+						field_info_doc.append(
+						  basic::kvp("offset", static_cast<int32_t>(pi.msg.fields[i].offset)));
+						field_info_doc.append(
+						  basic::kvp("datatype", static_cast<int32_t>(pi.msg.fields[i].datatype)));
+						field_info_doc.append(
+						  basic::kvp("count", static_cast<int32_t>(pi.msg.fields[i].count)));
+						array.append(field_info_doc);
+					}
+				}));
+			}));
 
-			BSONArrayBuilder subb2(subb.subarrayStart("field_info"));
-			for (unsigned int i = 0; i < pi.msg.fields.size(); i++) {
-				BSONObjBuilder fi(subb2.subobjStart());
-				fi.append("name", pi.msg.fields[i].name);
-				fi.append("offset", pi.msg.fields[i].offset);
-				fi.append("datatype", pi.msg.fields[i].datatype);
-				fi.append("count", pi.msg.fields[i].count);
-				fi.doneFast();
-			}
-			subb2.doneFast();
-			subb.doneFast();
-			collection_ = database_ + "." + pi.topic_name;
 			try {
-				mongodb_->insert(collection_, document.obj());
+				mongodb_->database(database_)[pi.topic_name].insert_one(document.view());
 				++num_stored;
-			} catch (mongo::DBException &e) {
+			} catch (operation_exception &e) {
 				logger->log_warn(this->name(),
 				                 "Failed to insert into %s: %s",
 				                 collection_.c_str(),
@@ -264,17 +269,15 @@ MongoLogPointCloudThread::loop()
 
 	if (cfg_flush_after_write_) {
 		// flush database
-		BSONObjBuilder flush_cmd;
-		BSONObj        reply;
-		flush_cmd.append("fsync", 1);
-		flush_cmd.append("async", 1);
-		mongodb_client->runCommand("admin", flush_cmd.obj(), reply);
-		if (reply.hasField("ok")) {
-			if (!reply["ok"].trueValue()) {
-				logger->log_warn(name(), "fsync error: %s", reply["errmsg"].String().c_str());
-			}
-		} else {
-			logger->log_warn(name(), "fsync reply has no ok field");
+		using namespace bsoncxx::builder;
+		basic::document flush_cmd;
+		flush_cmd.append(basic::kvp("fsync", 1));
+		flush_cmd.append(basic::kvp("async", 1));
+		auto reply = mongodb_client->database("admin").run_command(flush_cmd.view());
+		if (reply.view()["ok"].get_double() != 1) {
+			logger->log_warn(name(),
+			                 "fsync error: %s",
+			                 reply.view()["errmsg"].get_utf8().value.to_string().c_str());
 		}
 	}
 	wait_->wait();

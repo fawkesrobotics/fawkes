@@ -20,19 +20,18 @@
  */
 
 #include <fvutils/writers/png.h>
-#include <mongo/client/dbclient.h>
-#include <mongo/client/gridfs.h>
 #include <utils/misc/string_conversions.h>
 #include <utils/system/argparser.h>
 
-using namespace firevision;
-using namespace mongo;
-using namespace fawkes;
+#include <mongocxx/client.hpp>
+#include <mongocxx/gridfs/bucket.hpp>
+#include <mongocxx/gridfs/downloader.hpp>
 
-#ifdef HAVE_MONGODB_VERSION_H
-// we are using mongo-cxx-driver which renamed QUERY to MONGO_QUERY
-#	define QUERY MONGO_QUERY
-#endif
+using namespace firevision;
+using namespace mongocxx;
+using namespace fawkes;
+using namespace bsoncxx;
+using namespace bsoncxx::builder;
 
 void
 print_usage(const char *progname)
@@ -65,8 +64,8 @@ main(int argc, char **argv)
 	const std::vector<const char *> &items = argp.items();
 
 	std::string output_dir = "tmp/";
-	std::string database   = "fflog";
-	std::string collection;
+	std::string db_name    = "fflog";
+	std::string collection_name;
 	std::string query_coll;
 	bool        filename_indexed = !argp.has_arg("f");
 
@@ -79,17 +78,15 @@ main(int argc, char **argv)
 		}
 	}
 	if (argp.has_arg("d")) {
-		database = argp.arg("d");
+		db_name = argp.arg("d");
 	}
 	if (argp.has_arg("c")) {
-		collection = argp.arg("c");
+		collection_name = argp.arg("c");
 	} else {
 		print_usage(argv[0]);
 		printf("No collection given\n");
 		exit(-1);
 	}
-
-	query_coll = database + "." + collection;
 
 	if (items.empty()) {
 		times.push_back(std::make_pair(0L, std::numeric_limits<long long>::max()));
@@ -114,38 +111,41 @@ main(int argc, char **argv)
 
 	unsigned int image_n = 0;
 
-	DBClientConnection *mongodb_client = new DBClientConnection(/* auto reconnect */ true);
-	std::string         errmsg;
-	mongodb_client->connect("localhost", errmsg);
+	client mongodb_client{uri{"localhost"}};
+	auto   collection = mongodb_client[db_name][collection_name];
 
-	GridFS *gridfs = new GridFS(*mongodb_client, "fflog");
+	gridfs::bucket gridfs = mongodb_client["fflog"].gridfs_bucket();
 
 	for (unsigned int i = 0; i < times.size(); ++i) {
-		Query q;
+		// Initialize the cursor with a lambda because there is no default
+		// constructor and we cannot define the cursor inside the conditional
+		// branches.
+		cursor cursor = [&]() {
+			if (times[i].first == times[i].second) {
+				printf("Querying for timestamp %lli\n", times[i].first);
+				return collection.find(
+				  basic::make_document(basic::kvp("timestamp", static_cast<int64_t>(times[i].first))),
+				  options::find().sort(basic::make_document(basic::kvp("timestamp", 1))));
+			} else {
+				printf("Querying for range %lli..%lli\n", times[i].first, times[i].second);
+				return collection.find(
+				  basic::make_document(
+				    basic::kvp("timestamp",
+				               [times, i](basic::sub_document subdoc) {
+					               subdoc.append(basic::kvp("$gt", static_cast<int64_t>(times[i].first)));
+					               subdoc.append(basic::kvp("$lt", static_cast<int64_t>(times[i].second)));
+				               })),
+				  options::find().sort(basic::make_document(basic::kvp("timestamp", 1))));
+			}
+		}();
 
-		if (times[i].first == times[i].second) {
-			printf("Querying for timestamp %lli\n", times[i].first);
-			q = QUERY("timestamp" << times[i].first).sort("timestamp", 1);
-		} else {
-			printf("Querying for range %lli..%lli\n", times[i].first, times[i].second);
-			q = QUERY("timestamp" << mongo::GTE << times[i].first << mongo::LTE << times[i].second)
-			      .sort("timestamp", 1);
-		}
-
-#if __cplusplus >= 201103L
-		std::unique_ptr<mongo::DBClientCursor> cursor = mongodb_client->query(query_coll, q);
-#else
-		std::auto_ptr<mongo::DBClientCursor> cursor = mongodb_client->query(query_coll, q);
-#endif
-
-		while (cursor->more()) {
-			BSONObj doc = cursor->next();
-
-			BSONObj imgdoc = doc.getObjectField("image");
-			if (imgdoc["colorspace"].String() == "RGB") {
-				std::string filename = imgdoc.getFieldDotted("data.filename").String();
-				long        filesize = imgdoc.getFieldDotted("data.length").numberLong();
-				std::string image_id = imgdoc["image_id"].String();
+		//auto it = cursor.begin();
+		for (auto doc : cursor) {
+			auto imgdoc = doc["image"];
+			if (imgdoc["colorspace"].get_utf8().value.to_string() == "RGB") {
+				types::value file_id  = imgdoc["data"]["id"].get_value();
+				std::string  filename = imgdoc["data"]["filename"].get_utf8().value.to_string();
+				std::string  image_id = imgdoc["image_id"].get_utf8().value.to_string();
 
 				std::string out_filename;
 				char *      fntmp;
@@ -165,14 +165,10 @@ main(int argc, char **argv)
 
 				printf("Restoring RGB image %s (%s)\n", filename.c_str(), out_filename.c_str());
 
-				GridFile file = gridfs->findFile(filename);
-				if (!file.exists()) {
-					printf("File %s does not exist\n", filename.c_str());
-					continue;
-				}
-
-				unsigned int width  = imgdoc["width"].Int();
-				unsigned int height = imgdoc["height"].Int();
+				auto    downloader = gridfs.open_download_stream(file_id);
+				int64_t filesize   = downloader.file_length();
+				int     width      = imgdoc["width"].get_int32();
+				int     height     = imgdoc["height"].get_int32();
 
 				if (colorspace_buffer_size(RGB, width, height) != (size_t)filesize) {
 					printf("Buffer size mismatch (DB %li vs. exp. %zu)\n",
@@ -181,15 +177,12 @@ main(int argc, char **argv)
 					continue;
 				}
 
+				auto buffer_size      = std::min(filesize, static_cast<int64_t>(downloader.chunk_size()));
 				unsigned char *buffer = malloc_buffer(RGB, width, height);
 
 				unsigned char *tmp = buffer;
-				for (int c = 0; c < file.getNumChunks(); ++c) {
-					mongo::GridFSChunk chunk      = file.getChunk(c);
-					int                len        = 0;
-					const char *       chunk_data = chunk.data(len);
-					memcpy(tmp, chunk_data, len);
-					tmp += len;
+				while (auto length_read = downloader.read(tmp, buffer_size)) {
+					tmp += length_read;
 				}
 
 				PNGWriter writer(out_filename.c_str(), width, height);
@@ -198,9 +191,7 @@ main(int argc, char **argv)
 
 				free(buffer);
 			}
+			//std::advance(it, 1);
 		}
 	}
-
-	delete gridfs;
-	delete mongodb_client;
 }

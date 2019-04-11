@@ -104,6 +104,7 @@ private:
 	tlog_insert_message(LogLevel ll, struct timeval *t, const char *component, fawkes::Exception &);
 
 private:
+	std::string    database_;
 	std::string    collection_;
 	fawkes::Mutex *mutex_;
 };

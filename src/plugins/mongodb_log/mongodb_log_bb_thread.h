@@ -70,7 +70,7 @@ private:
 	public:
 		InterfaceListener(fawkes::BlackBoard *          blackboard,
 		                  fawkes::Interface *           interface,
-		                  mongo::DBClientBase *         mongodb,
+		                  mongocxx::client *            mongodb,
 		                  std::string &                 database,
 		                  fawkes::LockSet<std::string> &colls,
 		                  fawkes::Logger *              logger,
@@ -79,7 +79,7 @@ private:
 
 		/** Get MongoDB Client.
      * @return MongoDB client */
-		mongo::DBClientBase *
+		mongocxx::client *
 		mongodb_client() const
 		{
 			return mongodb_;
@@ -91,7 +91,7 @@ private:
 	private:
 		fawkes::BlackBoard *          blackboard_;
 		fawkes::Interface *           interface_;
-		mongo::DBClientBase *         mongodb_;
+		mongocxx::client *            mongodb_;
 		fawkes::Logger *              logger_;
 		std::string                   collection_;
 		std::string &                 database_;

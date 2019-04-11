@@ -26,13 +26,11 @@
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
 
 #include <cstdlib>
-
-// from MongoDB
-#include <mongo/client/dbclient.h>
-
 #include <fnmatch.h>
+#include <mongocxx/client.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
 
-using namespace mongo;
+using namespace mongocxx;
 using namespace fawkes;
 
 /** @class MongoLogBlackboardThread "mongodb_thread.h"
@@ -102,7 +100,7 @@ MongoLogBlackboardThread::init()
 				continue;
 
 			logger->log_debug(name(), "Adding %s", (*i)->uid());
-			mongo::DBClientBase *mc = mongodb_connmgr->create_client();
+			client *mc = mongodb_connmgr->create_client();
 			listeners_[(*i)->uid()] =
 			  new InterfaceListener(blackboard, *i, mc, database_, collections_, logger, now_);
 		}
@@ -118,7 +116,7 @@ MongoLogBlackboardThread::finalize()
 
 	std::map<std::string, InterfaceListener *>::iterator i;
 	for (i = listeners_.begin(); i != listeners_.end(); ++i) {
-		mongo::DBClientBase *mc = i->second->mongodb_client();
+		client *mc = i->second->mongodb_client();
 		delete i->second;
 		mongodb_connmgr->delete_client(mc);
 	}
@@ -148,7 +146,7 @@ MongoLogBlackboardThread::bb_interface_created(const char *type, const char *id)
 		Interface *interface = blackboard->open_for_reading(type, id);
 		if (listeners_.find(interface->uid()) == listeners_.end()) {
 			logger->log_debug(name(), "Opening new %s", interface->uid());
-			mongo::DBClientBase *mc = mongodb_connmgr->create_client();
+			client *mc = mongodb_connmgr->create_client();
 			listeners_[interface->uid()] =
 			  new InterfaceListener(blackboard, interface, mc, database_, collections_, logger, now_);
 		} else {
@@ -172,7 +170,7 @@ MongoLogBlackboardThread::bb_interface_created(const char *type, const char *id)
  */
 MongoLogBlackboardThread::InterfaceListener::InterfaceListener(BlackBoard *          blackboard,
                                                                Interface *           interface,
-                                                               mongo::DBClientBase * mongodb,
+                                                               client *              mongodb,
                                                                std::string &         database,
                                                                LockSet<std::string> &colls,
                                                                Logger *              logger,
@@ -194,7 +192,7 @@ MongoLogBlackboardThread::InterfaceListener::InterfaceListener(BlackBoard *     
 		id.replace(pos, 1, "_");
 		pos = pos + 1;
 	}
-	collection_ = database_ + "." + interface->type() + "." + id;
+	collection_ = std::string(interface->type()) + "." + id;
 	if (collections_.find(collection_) != collections_.end()) {
 		throw Exception("Collection named %s already used, cannot log %s",
 		                collection_.c_str(),
@@ -219,186 +217,198 @@ MongoLogBlackboardThread::InterfaceListener::bb_interface_data_changed(Interface
 
 	try {
 		// write interface data
-		BSONObjBuilder document;
-		document.append("timestamp", (long long)now_->in_msec());
+		using namespace bsoncxx::builder;
+		basic::document document;
+		document.append(basic::kvp("timestamp", static_cast<int64_t>(now_->in_msec())));
 		InterfaceFieldIterator i;
 		for (i = interface->fields(); i != interface->fields_end(); ++i) {
 			size_t length   = i.get_length();
 			bool   is_array = (length > 1);
 
+			std::string key{i.get_name()};
 			switch (i.get_type()) {
 			case IFT_BOOL:
 				if (is_array) {
-					bool *           bools = i.get_bools();
-					BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-					for (size_t l = 0; l < length; ++l) {
-						subb.append(bools[l]);
-					}
-					subb.doneFast();
+					bool *bools = i.get_bools();
+					document.append(basic::kvp(key, [bools, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(bools[l]);
+						}
+					}));
 				} else {
-					document.append(i.get_name(), i.get_bool());
+					document.append(basic::kvp(key, i.get_bool()));
 				}
 				break;
 
 			case IFT_INT8:
 				if (is_array) {
-					int8_t *         ints = i.get_int8s();
-					BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-					for (size_t l = 0; l < length; ++l) {
-						subb.append(ints[l]);
-					}
-					subb.doneFast();
+					int8_t *ints = i.get_int8s();
+					document.append(basic::kvp(key, [ints, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(ints[l]);
+						}
+					}));
 				} else {
-					document.append(i.get_name(), i.get_int8());
+					document.append(basic::kvp(key, i.get_int8()));
 				}
 				break;
 
 			case IFT_UINT8:
 				if (is_array) {
-					uint8_t *        ints = i.get_uint8s();
-					BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-					for (size_t l = 0; l < length; ++l) {
-						subb.append(ints[l]);
-					}
-					subb.doneFast();
+					uint8_t *ints = i.get_uint8s();
+					document.append(basic::kvp(key, [ints, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(ints[l]);
+						}
+					}));
 				} else {
-					document.append(i.get_name(), i.get_uint8());
+					document.append(basic::kvp(key, i.get_uint8()));
 				}
 				break;
 
 			case IFT_INT16:
 				if (is_array) {
-					int16_t *        ints = i.get_int16s();
-					BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-					for (size_t l = 0; l < length; ++l) {
-						subb.append(ints[l]);
-					}
-					subb.doneFast();
+					int16_t *ints = i.get_int16s();
+					document.append(basic::kvp(key, [ints, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(ints[l]);
+						}
+					}));
 				} else {
-					document.append(i.get_name(), i.get_int16());
+					document.append(basic::kvp(key, i.get_int16()));
 				}
 				break;
 
 			case IFT_UINT16:
 				if (is_array) {
-					uint16_t *       ints = i.get_uint16s();
-					BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-					for (size_t l = 0; l < length; ++l) {
-						subb.append(ints[l]);
-					}
-					subb.doneFast();
+					uint16_t *ints = i.get_uint16s();
+					document.append(basic::kvp(key, [ints, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(ints[l]);
+						}
+					}));
 				} else {
-					document.append(i.get_name(), i.get_uint16());
+					document.append(basic::kvp(key, i.get_uint16()));
 				}
 				break;
 
 			case IFT_INT32:
 				if (is_array) {
-					int32_t *        ints = i.get_int32s();
-					BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-					for (size_t l = 0; l < length; ++l) {
-						subb.append(ints[l]);
-					}
-					subb.doneFast();
+					int32_t *ints = i.get_int32s();
+					document.append(basic::kvp(key, [ints, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(ints[l]);
+						}
+					}));
 				} else {
-					document.append(i.get_name(), i.get_int32());
+					document.append(basic::kvp(key, i.get_int32()));
 				}
 				break;
 
 			case IFT_UINT32:
 				if (is_array) {
-					uint32_t *       ints = i.get_uint32s();
-					BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-					for (size_t l = 0; l < length; ++l) {
-						subb.append(ints[l]);
-					}
-					subb.doneFast();
+					uint32_t *ints = i.get_uint32s();
+					document.append(basic::kvp(key, [ints, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(static_cast<int64_t>(ints[l]));
+						}
+					}));
 				} else {
-					document.append(i.get_name(), i.get_uint32());
+					document.append(basic::kvp(key, static_cast<int64_t>(i.get_uint32())));
 				}
 				break;
 
 			case IFT_INT64:
 				if (is_array) {
-					int64_t *        ints = i.get_int64s();
-					BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-					for (size_t l = 0; l < length; ++l) {
-						subb.append((long long int)ints[l]);
-					}
-					subb.doneFast();
+					int64_t *ints = i.get_int64s();
+					document.append(basic::kvp(key, [ints, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(ints[l]);
+						}
+					}));
 				} else {
-					document.append(i.get_name(), (long long int)i.get_int64());
+					document.append(basic::kvp(key, i.get_int64()));
 				}
 				break;
 
 			case IFT_UINT64:
 				if (is_array) {
-					uint64_t *       ints = i.get_uint64s();
-					BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-					for (size_t l = 0; l < length; ++l) {
-						subb.append((long long int)ints[l]);
-					}
-					subb.doneFast();
+					uint64_t *ints = i.get_uint64s();
+					document.append(basic::kvp(key, [ints, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(static_cast<int64_t>(ints[l]));
+						}
+					}));
 				} else {
-					document.append(i.get_name(), (long long int)i.get_uint64());
+					document.append(basic::kvp(key, static_cast<int64_t>(i.get_uint64())));
 				}
 				break;
 
 			case IFT_FLOAT:
 				if (is_array) {
-					float *          floats = i.get_floats();
-					BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-					for (size_t l = 0; l < length; ++l) {
-						subb.append(floats[l]);
-					}
-					subb.doneFast();
+					float *floats = i.get_floats();
+					document.append(basic::kvp(key, [floats, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(floats[l]);
+						}
+					}));
 				} else {
-					document.append(i.get_name(), i.get_float());
+					document.append(basic::kvp(key, i.get_float()));
 				}
 				break;
 
 			case IFT_DOUBLE:
 				if (is_array) {
-					double *         doubles = i.get_doubles();
-					BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-					for (size_t l = 0; l < length; ++l) {
-						subb.append(doubles[l]);
-					}
-					subb.doneFast();
+					double *doubles = i.get_doubles();
+					document.append(basic::kvp(key, [doubles, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(doubles[l]);
+						}
+					}));
 				} else {
-					document.append(i.get_name(), i.get_double());
+					document.append(basic::kvp(key, i.get_double()));
 				}
 				break;
 
-			case IFT_STRING: document.append(i.get_name(), i.get_string()); break;
+			case IFT_STRING: document.append(basic::kvp(key, i.get_string())); break;
 
 			case IFT_BYTE:
 				if (is_array) {
-					document.appendBinData(i.get_name(), length, BinDataGeneral, i.get_bytes());
+					uint8_t *bytes = i.get_bytes();
+					document.append(basic::kvp(key, [bytes, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(bytes[l]);
+						}
+					}));
 				} else {
-					document.append(i.get_name(), i.get_byte());
+					document.append(basic::kvp(key, i.get_byte()));
 				}
 				break;
 
 			case IFT_ENUM:
 				if (is_array) {
-					int32_t *        ints = i.get_enums();
-					BSONArrayBuilder subb(document.subarrayStart(i.get_name()));
-					for (size_t l = 0; l < length; ++l) {
-						subb.append(ints[l]);
-					}
-					subb.doneFast();
+					int32_t *ints = i.get_enums();
+					document.append(basic::kvp(key, [ints, length](basic::sub_array subarray) {
+						for (size_t l = 0; l < length; ++l) {
+							subarray.append(ints[l]);
+						}
+					}));
 				} else {
-					document.append(i.get_name(), i.get_enum());
+					document.append(basic::kvp(key, i.get_enum()));
 				}
 				break;
 			}
 		}
 
-		mongodb_->insert(collection_, document.obj());
-	} catch (mongo::DBException &e) {
-		logger_->log_warn(bbil_name(), "Failed to log to %s: %s", collection_.c_str(), e.what());
+		mongodb_->database(database_)[collection_].insert_one(document.view());
+	} catch (operation_exception &e) {
+		logger_->log_warn(
+		  bbil_name(), "Failed to log to %s.%s: %s", database_.c_str(), collection_.c_str(), e.what());
 	} catch (std::exception &e) {
-		logger_->log_warn(bbil_name(), "Failed to log to %s: %s (*)", collection_.c_str(), e.what());
+		logger_->log_warn(bbil_name(),
+		                  "Failed to log to %s.%s: %s (*)",
+		                  database_.c_str(),
+		                  collection_.c_str(),
+		                  e.what());
 	}
 }

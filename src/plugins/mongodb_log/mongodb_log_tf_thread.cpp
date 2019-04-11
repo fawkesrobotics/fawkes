@@ -26,12 +26,12 @@
 #include <tf/time_cache.h>
 #include <utils/time/wait.h>
 
-// from MongoDB
-#include <mongo/client/dbclient.h>
-
+#include <bsoncxx/builder/basic/document.hpp>
 #include <cstdlib>
+#include <mongocxx/client.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
 
-using namespace mongo;
+using namespace mongocxx;
 using namespace fawkes;
 
 /** @class MongoLogTransformsThread "mongodb_log_tf_thread.h"
@@ -168,10 +168,12 @@ MongoLogTransformsThread::store(std::vector<tf::TimeCacheInterfacePtr> &caches,
 		if (!tc)
 			continue;
 
-		BSONObjBuilder document;
-		document.append("timestamp", (long long)from[i].in_msec());
-		document.append("timestamp_from", (long long)from[i].in_msec());
-		document.append("timestamp_to", (long long)to[i].in_msec());
+		using namespace bsoncxx::builder;
+		basic::document document;
+
+		document.append(basic::kvp("timestamp", static_cast<int64_t>(from[i].in_msec())));
+		document.append(basic::kvp("timestamp_from", static_cast<int64_t>(from[i].in_msec())));
+		document.append(basic::kvp("timestamp_to", static_cast<int64_t>(to[i].in_msec())));
 		const tf::TimeCache::L_TransformStorage &storage = tc->get_storage();
 
 		if (storage.empty()) {
@@ -184,60 +186,53 @@ MongoLogTransformsThread::store(std::vector<tf::TimeCacheInterfacePtr> &caches,
 			continue;
 		}
 
-		document.append("frame", frame_map[storage.front().frame_id]);
-		document.append("child_frame", frame_map[storage.front().child_frame_id]);
+		document.append(basic::kvp("frame", frame_map[storage.front().frame_id]));
+		document.append(basic::kvp("child_frame", frame_map[storage.front().child_frame_id]));
 
-		BSONArrayBuilder tfl_array(document.subarrayStart("transforms"));
 		/*
     logger->log_debug(name(), "Writing %zu transforms for child frame %s",
 		      storage.size(), frame_map[i].c_str());
     */
 
-		tf::TimeCache::L_TransformStorage::const_iterator s;
-		for (s = storage.begin(); s != storage.end(); ++s) {
-			BSONObjBuilder tf_doc(tfl_array.subobjStart());
-
-			/*
-	"frame" : "/bl_caster_rotation_link",
-	"child_frame" : "/bl_caster_l_wheel_link",
-	"translation" : [
-		0,
-		0.049,
-		0
-	],
-	"rotation" : [
-		0,
-		0.607301261865804,
-		0,
-		0.7944716340664417
-	]
-      */
-
-			tf_doc.append("timestamp", (long long)s->stamp.in_msec());
-			tf_doc.append("frame", frame_map[s->frame_id]);
-			tf_doc.append("child_frame", frame_map[s->child_frame_id]);
-
-			BSONArrayBuilder rot_arr(tf_doc.subarrayStart("rotation"));
-			rot_arr.append(s->rotation.x());
-			rot_arr.append(s->rotation.y());
-			rot_arr.append(s->rotation.z());
-			rot_arr.append(s->rotation.w());
-			rot_arr.doneFast();
-
-			BSONArrayBuilder trans_arr(tf_doc.subarrayStart("translation"));
-			trans_arr.append(s->translation.x());
-			trans_arr.append(s->translation.y());
-			trans_arr.append(s->translation.z());
-			trans_arr.doneFast();
-
-			tf_doc.doneFast();
-		}
-
-		tfl_array.doneFast();
+		document.append(basic::kvp("transforms", [storage, frame_map](basic::sub_array array) {
+			for (auto s = storage.begin(); s != storage.end(); ++s) {
+				/*
+	      "frame" : "/bl_caster_rotation_link",
+	      "child_frame" : "/bl_caster_l_wheel_link",
+	      "translation" : [
+	      	0,
+	      	0.049,
+	      	0
+	      ],
+	      "rotation" : [
+	      	0,
+	      	0.607301261865804,
+	      	0,
+	      	0.7944716340664417
+	      ]
+        */
+				basic::document tf_doc;
+				tf_doc.append(basic::kvp("timestamp", static_cast<int64_t>(s->stamp.in_msec())));
+				tf_doc.append(basic::kvp("frame", frame_map[s->frame_id]));
+				tf_doc.append(basic::kvp("child_frame", frame_map[s->child_frame_id]));
+				tf_doc.append(basic::kvp("rotation", [s](basic::sub_array rot_array) {
+					rot_array.append(s->rotation.x());
+					rot_array.append(s->rotation.y());
+					rot_array.append(s->rotation.z());
+					rot_array.append(s->rotation.w());
+				}));
+				tf_doc.append(basic::kvp("translation", [s](basic::sub_array trans_array) {
+					trans_array.append(s->translation.x());
+					trans_array.append(s->translation.y());
+					trans_array.append(s->translation.z());
+				}));
+				array.append(tf_doc);
+			}
+		}));
 
 		try {
-			mongodb_client->insert(collection_, document.obj());
-		} catch (mongo::DBException &e) {
+			mongodb_client->database(database_)[collection_].insert_one(document.view());
+		} catch (operation_exception &e) {
 			logger->log_warn(name(), "Inserting TF failed: %s", e.what());
 
 		} catch (std::exception &e) {
