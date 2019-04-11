@@ -27,7 +27,9 @@ LDFLAGS += $(LDFLAGS_MONGODB)
 
 OBJS_all    = $(OBJS_libfawkesmongodbaspect)
 LIBS_all    = $(LIBDIR)/libfawkesmongodbaspect.so
-LIBS_build  = $(LIBS_all)
+ifeq ($(HAVE_MONGODB),1)
+  LIBS_build = $(LIBS_all)
+endif
 
 include $(BUILDSYSDIR)/base.mk
 
