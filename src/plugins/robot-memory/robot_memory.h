@@ -114,9 +114,9 @@ public:
      */
 	template <typename T>
 	EventTrigger *
-	register_trigger(bsoncxx::document::view query,
-	                 const std::string &     collection,
-	                 void (T::*callback)(bsoncxx::document::value),
+	register_trigger(const bsoncxx::document::view &query,
+	                 const std::string &            collection,
+	                 void (T::*callback)(const bsoncxx::document::view &),
 	                 T *_obj)
 	{
 		return trigger_manager_->register_trigger(query, collection, callback, _obj);

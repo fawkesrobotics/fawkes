@@ -55,9 +55,9 @@ public:
      */
 	template <typename T>
 	EventTrigger *
-	register_trigger(bsoncxx::document::value query,
-	                 std::string              collection,
-	                 void (T::*callback)(bsoncxx::document::value),
+	register_trigger(const bsoncxx::document::view &query,
+	                 std::string                    collection,
+	                 void (T::*callback)(const bsoncxx::document::view &),
 	                 T *obj)
 	{
 		//lock to be thread safe (e.g. registration during checking)
@@ -68,7 +68,7 @@ public:
 		auto oplog_query        = basic_builder::document{};
 		oplog_query.append(basic_builder::kvp("ns", collection));
 		// added/updated object is a subdocument in the oplog document
-		auto filter = query.view()["$filter"].get_document().view();
+		auto filter = query["$filter"].get_document().view();
 		for (auto &&it = filter.begin(); it != filter.end(); it++) {
 			auto elem = *it;
 			oplog_query.append(
