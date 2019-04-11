@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+############################################################################
+#  Check if 'make check' has been run after last modified file
+#
+#  Created: Mon Apr 08 15:01:19 2019 +0200
+#  Copyright  2019  Tim Niemueller [www.niemueller.org]
+############################################################################
+
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Library General Public License for more details.
+#
+#  Read the full text in the LICENSE.GPL file in the doc directory.
+
+# Error out on an error in the script
+set -eu
+
+# Some colors for nicer output
+TYELLOW="\033[0;33m"
+TRED="\033[0;31m"
+TNORMAL="\033[0;39m"
+TINVERSE="\033[0;7m"
+
+# Determine base dir
+BASEDIR=$(git rev-parse --show-toplevel)
+pushd $BASEDIR >/dev/null
+
+# Check make check has been run at all
+if [ ! -f .check_stamp ]; then
+	>&2 echo "The working copy has never been checked, aborting push"
+	>&2 echo "Run 'make check' and ensure all checks pass, then push again"
+	exit 1
+fi
+
+# We rely on GNU diffutils here, therefore apply heuristics to find it
+DIFF=diff
+if type -p gdiff >/dev/null; then
+	DIFF=gdiff
+fi
+
+# Make sure we have the latest origin master and find affected files
+git fetch -q origin master
+
+MERGE_BASE=$($DIFF --old-line-format='' --new-line-format='' \
+             <(git rev-list --first-parent "HEAD") \
+             <(git rev-list --first-parent "origin/master") \
+             | head -1)
+
+AFFECTED_FILES=$(git diff --name-only $MERGE_BASE HEAD)
+
+# Check for all files which have been modified after the last 'make check'
+if [ -n "$AFFECTED_FILES" ]; then
+	UNCHECKED_FILES=
+	for f in $AFFECTED_FILES; do
+		if [[ $f -nt .check_stamp ]]; then
+			UNCHECKED_FILES="$UNCHECKED_FILES $f"
+		fi
+	done
+	if [ -n "$UNCHECKED_FILES" ]; then
+		>&2 echo -e "\n${TYELLOW}The following files have been modified after running 'make check':${TNORMAL}"
+		for f in $UNCHECKED_FILES; do
+			>&2 echo -e "- $f"
+		done
+		>&2 echo -e "\n${TINVERSE}   Run 'make check' and ensure all checks pass, then push again.  ${TNORMAL}\n"
+		exit 2
+	fi
+fi
+
+popd >/dev/null
+
+exit 0
