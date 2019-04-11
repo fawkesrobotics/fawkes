@@ -16,7 +16,7 @@
 
 ifneq ($(PKGCONFIG),)
 	ifeq ($(HAVE_CPP11),1)
-    HAVE_MONGODB = $(if $(shell $(PKGCONFIG) --exists 'libmongocxx'; echo $${?/1/}),1,0)
+    HAVE_MONGODB = $(if $(shell $(PKGCONFIG) --exists --atleast-version=3 'libmongocxx'; echo $${?/1/}),1,0)
     CFLAGS_MONGODB = $(shell $(PKGCONFIG) --cflags 'libmongocxx')
     LDFLAGS_MONGODB = $(shell $(PKGCONFIG) --libs 'libmongocxx')
   endif
