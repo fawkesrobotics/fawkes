@@ -172,10 +172,13 @@ RobotMemory::loop()
  * Query information from the robot memory.
  * @param query The query returned documents have to match (essentially a BSONObj)
  * @param collection The database and collection to query as string (e.g. robmem.worldmodel)
+ * @param query_options Optional options to use to query the database
  * @return Cursor to get the documents from, NULL for invalid query
  */
 cursor
-RobotMemory::query(document::view query, const std::string &collection)
+RobotMemory::query(document::view          query,
+                   const std::string &     collection,
+                   mongocxx::options::find query_options)
 {
 	client *mongodb_client = get_mongodb_client(collection);
 	log_deb(std::string("Executing Query " + to_json(query) + " on collection " + collection));
@@ -187,7 +190,6 @@ RobotMemory::query(document::view query, const std::string &collection)
 	MutexLocker lock(mutex_);
 
 	//set read preference of query to nearest to read from the local replica set member first
-	options::find   query_options;
 	read_preference secondary;
 	secondary.mode(read_preference::read_mode::k_secondary);
 	query_options.read_preference(secondary);
