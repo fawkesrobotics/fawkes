@@ -33,6 +33,7 @@
 #include <plugins/clips/aspect/clips_feature.h>
 #include <plugins/robot-memory/aspect/robot_memory_aspect.h>
 
+#include <bsoncxx/document/view.hpp>
 #include <clipsmm.h>
 #include <future>
 #include <string>
@@ -86,14 +87,16 @@ private:
 	CLIPS::Values clips_bson_get_array(void *bson, std::string field_name);
 	CLIPS::Values clips_bson_get_time(void *bson, std::string field_name);
 
-	void clips_robotmemory_upsert(std::string collection, void *bson, CLIPS::Value query);
-	void clips_robotmemory_update(std::string collection, void *bson, CLIPS::Value query);
-	void clips_robotmemory_replace(std::string collection, void *bson, CLIPS::Value query);
-	void clips_robotmemory_insert(std::string collection, void *bson);
-	void clips_robotmemory_create_index(std::string collection, void *bson);
-	void clips_robotmemory_create_unique_index(std::string collection, void *bson);
-	void
-	             robotmemory_update(std::string &collection, mongo::BSONObj obj, CLIPS::Value &query, bool upsert);
+	void         clips_robotmemory_upsert(std::string collection, void *bson, CLIPS::Value query);
+	void         clips_robotmemory_update(std::string collection, void *bson, CLIPS::Value query);
+	void         clips_robotmemory_replace(std::string collection, void *bson, CLIPS::Value query);
+	void         clips_robotmemory_insert(std::string collection, void *bson);
+	void         clips_robotmemory_create_index(std::string collection, void *bson);
+	void         clips_robotmemory_create_unique_index(std::string collection, void *bson);
+	void         robotmemory_update(std::string &                  collection,
+	                                const bsoncxx::document::view &obj,
+	                                CLIPS::Value &                 query,
+	                                bool                           upsert);
 	CLIPS::Value clips_robotmemory_query_sort(std::string collection, void *bson, void *bson_sort);
 	CLIPS::Value clips_robotmemory_query(const std::string &collection, void *bson);
 	void         clips_robotmemory_remove(std::string collection, void *bson);
