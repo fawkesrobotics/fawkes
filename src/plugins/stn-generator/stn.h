@@ -27,11 +27,12 @@
 
 #include <aspect/logging.h>
 #include <graphviz/gvc.h>
-#include <mongo/client/dbclient.h>
 #include <pddl_parser/pddl_ast.h>
 
 #include <algorithm>
+#include <bsoncxx/document/value.hpp>
 #include <iterator>
+#include <mongocxx/client.hpp>
 #include <string>
 #include <vector>
 
@@ -45,13 +46,13 @@ public:
 	Stn(fawkes::Logger *logger, const std::string &classic_dom_path);
 	virtual ~Stn();
 
-	void                        add_plan_action(const std::string &name, const std::string &params);
-	void                        set_initial_state(const StnAction &action);
-	void                        read_initial_state(const std::string &pddl_problem_string);
-	void                        set_pddl_domain(const std::string &pddl_domain_string);
-	void                        generate();
-	void                        drawGraph();
-	std::vector<mongo::BSONObj> get_bson();
+	void add_plan_action(const std::string &name, const std::string &params);
+	void set_initial_state(const StnAction &action);
+	void read_initial_state(const std::string &pddl_problem_string);
+	void set_pddl_domain(const std::string &pddl_domain_string);
+	void generate();
+	void drawGraph();
+	std::vector<bsoncxx::document::value> get_bson();
 
 private:
 	struct plan_action

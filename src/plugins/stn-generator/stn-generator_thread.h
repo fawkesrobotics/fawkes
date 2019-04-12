@@ -30,7 +30,6 @@
 #include <blackboard/interface_listener.h>
 #include <core/threading/thread.h>
 #include <interfaces/PddlPlannerInterface.h>
-#include <mongo/client/dbclient.h>
 #include <plugins/robot-memory/aspect/robot_memory_aspect.h>
 
 namespace fawkes {

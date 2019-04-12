@@ -23,13 +23,16 @@
 
 #include <utils/misc/string_conversions.h>
 
+#include <bsoncxx/builder/basic/document.hpp>
 #include <chrono>
 #include <fstream>
+#include <mongocxx/client.hpp>
 #include <streambuf>
 #include <thread>
 
 using namespace fawkes;
-using namespace mongo;
+using namespace mongocxx;
+using namespace bsoncxx;
 
 /** @class StnGeneratorThread 'stn-generator_thread.h' 
  * Generates an STN representation of a sequential task plan
@@ -99,23 +102,23 @@ StnGeneratorThread::loop()
 	pddl_problem.assign((std::istreambuf_iterator<char>(s)), std::istreambuf_iterator<char>());
 	stn_->read_initial_state(pddl_problem);
 
-	QResCursor cursor = robot_memory->query(fromjson("{plan:1}"), cfg_plan_collection_);
-	while (cursor->more()) {
-		BSONObj                  obj     = cursor->next();
-		std::vector<BSONElement> actions = obj.getField("actions").Array();
+	auto cursor = robot_memory->query(from_json("{plan:1}"), cfg_plan_collection_);
+	for (auto doc : cursor) {
+		array::view actions = doc["actions"].get_array();
 		for (auto &a : actions) {
-			BSONObj     o = a.Obj();
 			std::string args;
-			bool        first = true;
-			for (auto &arg : o.getField("args").Array()) {
+			bool        first      = true;
+			array::view args_array = a["args"].get_array();
+			for (auto &arg : args_array) {
 				if (!first) {
 					args += " ";
 				}
 				first = false;
-				args += arg.str();
+				args += arg.get_utf8().value.to_string();
 			}
-			stn_->add_plan_action(o.getField("name").str(), args);
-			logger->log_debug(name(), "Added Plan action %s to STN", o.getField("name").str().c_str());
+			std::string action_name = a["name"].get_utf8().value.to_string();
+			stn_->add_plan_action(action_name, args);
+			logger->log_debug(name(), "Added Plan action %s to STN", action_name.c_str());
 		}
 	}
 	stn_->generate();
@@ -128,25 +131,23 @@ StnGeneratorThread::loop()
 	}
 	logger->log_info(name(), "STN Generation finished.");
 
+	using namespace bsoncxx::builder;
 	if (cfg_publish_to_robot_memory_) {
 		//TODO reset actions in robot-memory
 		for (auto &action : stn_->get_bson()) {
-			BSONObjBuilder rm_action;
-			rm_action << "relation"
-			          << "proposed-stn-action";
-			rm_action.appendElements(action);
-			robot_memory->insert(rm_action.obj(), cfg_output_collection_);
+			basic::document rm_action;
+			rm_action.append(basic::kvp("relation", "proposed-stn-action"));
+			rm_action.append(bsoncxx::builder::concatenate(action.view()));
+			robot_memory->insert(rm_action.view(), cfg_output_collection_);
 		}
 		// ensure all actions are written to RM before acknowledment
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		num_published_actions_ += stn_->get_bson().size();
-		BSONObjBuilder rm_final;
-		rm_final << "relation"
-		         << "stn-sync";
-		rm_final << "state"
-		         << "synced";
-		rm_final << "count" << std::to_string(num_published_actions_);
-		robot_memory->insert(rm_final.obj(), cfg_output_collection_);
+		basic::document rm_final;
+		rm_final.append(basic::kvp("relation", "stn-sync"));
+		rm_final.append(basic::kvp("state", "synced"));
+		rm_final.append(basic::kvp("count", std::to_string(num_published_actions_)));
+		robot_memory->insert(rm_final.view(), cfg_output_collection_);
 	}
 }
 
