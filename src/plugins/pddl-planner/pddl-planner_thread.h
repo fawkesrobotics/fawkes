@@ -33,6 +33,8 @@
 #include <interfaces/PddlPlannerInterface.h>
 #include <plugins/robot-memory/aspect/robot_memory_aspect.h>
 
+#include <bsoncxx/document/value.hpp>
+
 class PddlPlannerThread : public fawkes::Thread,
                           public fawkes::LoggingAspect,
                           public fawkes::ConfigurableAspect,
@@ -73,15 +75,15 @@ private:
 
 	std::function<void()> planner_;
 
-	void           ff_planner();
-	void           fd_planner();
-	void           dbmp_planner();
-	mongo::BSONObj BSONFromActionList();
-	static size_t  find_nth_space(const std::string &s, size_t nth);
-	void           print_action_list();
-	std::string    run_planner(std::string command);
-	virtual bool   bb_interface_message_received(fawkes::Interface *interface,
-	                                             fawkes::Message *  message) throw();
+	void                     ff_planner();
+	void                     fd_planner();
+	void                     dbmp_planner();
+	bsoncxx::document::value BSONFromActionList();
+	static size_t            find_nth_space(const std::string &s, size_t nth);
+	void                     print_action_list();
+	std::string              run_planner(std::string command);
+	virtual bool             bb_interface_message_received(fawkes::Interface *interface,
+	                                                       fawkes::Message *  message) throw();
 };
 
 #endif
