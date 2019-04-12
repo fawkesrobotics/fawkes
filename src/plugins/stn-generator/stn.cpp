@@ -23,6 +23,7 @@
 
 #include <pddl_parser/pddl_parser.h>
 
+#include <bsoncxx/builder/basic/document.hpp>
 #include <exception>
 #include <fstream>
 #include <iostream>
@@ -356,28 +357,29 @@ Stn::drawGraph()
 /** Get a BSON representation of the STN.
  * @return A vector of BSON objects, each element is an action.
  */
-std::vector<mongo::BSONObj>
+std::vector<bsoncxx::document::value>
 Stn::get_bson()
 {
-	std::vector<mongo::BSONObj> stn;
+	std::vector<bsoncxx::document::value> stn;
 	for (auto &action : stn_actions_) {
-		mongo::BSONObjBuilder bson_action;
-		bson_action << "id" << static_cast<long long>(action.id());
-		bson_action << "name" << action.name();
-		bson_action << "duration" << static_cast<long long>(action.duration());
-		mongo::BSONArrayBuilder cond_actions;
-		for (auto &cond : action.condActionIds()) {
-			cond_actions << static_cast<long long>(cond);
-		}
-		bson_action << "cond-actions" << cond_actions.arr();
-		mongo::BSONArrayBuilder            opts_arr;
-		std::stringstream                  opts_ss(action.opts());
-		std::istream_iterator<std::string> end;
-		for (std::istream_iterator<std::string> it(opts_ss); it != end; it++) {
-			opts_arr << *it;
-		}
-		bson_action << "opts" << opts_arr.arr();
-		stn.push_back(bson_action.obj());
+		using namespace bsoncxx::builder;
+		basic::document bson_action;
+		bson_action.append(basic::kvp("id", static_cast<int64_t>(action.id())));
+		bson_action.append(basic::kvp("name", action.name()));
+		bson_action.append(basic::kvp("duration", static_cast<int64_t>(action.duration())));
+		bson_action.append(basic::kvp("cond-actions", [action](basic::sub_array cond_actions) {
+			for (auto &cond : action.condActionIds()) {
+				cond_actions.append(static_cast<int64_t>(cond));
+			}
+		}));
+		bson_action.append(basic::kvp("opts", [action](basic::sub_array opts) {
+			std::stringstream                  opts_ss(action.opts());
+			std::istream_iterator<std::string> end;
+			for (std::istream_iterator<std::string> it(opts_ss); it != end; it++) {
+				opts.append(*it);
+			}
+		}));
+		stn.push_back(bson_action.extract());
 	}
 	return stn;
 }
