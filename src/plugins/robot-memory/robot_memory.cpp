@@ -714,12 +714,14 @@ RobotMemory::split_db_collection_string(const std::string &dbcollection)
 
 /** Check if the given database is a distributed database
  * @param dbcollection A database collection name pair of the form <dbname>.<collname>
- * @return true iff the datbase is distributed databsae
+ * @return true iff the database is distributed database
  */
 bool
 RobotMemory::is_distributed_database(const std::string &dbcollection)
 {
-	return std::find(distributed_dbs_.begin(), distributed_dbs_.end(), dbcollection)
+	return std::find(distributed_dbs_.begin(),
+	                 distributed_dbs_.end(),
+	                 split_db_collection_string(dbcollection).first)
 	       != distributed_dbs_.end();
 }
 
@@ -732,13 +734,6 @@ client *
 RobotMemory::get_mongodb_client(const std::string &collection)
 {
 	if (!distributed_) {
-		return mongodb_client_local_;
-	}
-	std::string db;
-	try {
-		db = split_db_collection_string(collection).first;
-	} catch (Exception &e) {
-		logger_->log_error(name_, "%s", e.what());
 		return mongodb_client_local_;
 	}
 	if (is_distributed_database(collection)) {
