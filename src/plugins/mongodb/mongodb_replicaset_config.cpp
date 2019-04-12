@@ -333,15 +333,17 @@ MongoDBReplicaSetConfig::rs_status(bsoncxx::document::value &reply)
 		} else {
 			//logger->log_warn(name(), "rs status reply: %s", bsoncxx::to_json(reply.view()).c_str());
 			try {
-				bool                                                      have_primary = false;
 				MongoDBManagedReplicaSetInterface::ReplicaSetMemberStatus self_status =
 				  MongoDBManagedReplicaSetInterface::REMOVED;
 				auto members = reply.view()["members"];
 				if (members && members.type() == bsoncxx::type::k_array) {
 					bsoncxx::array::view members_view{members.get_array().value};
+					bool                 have_primary = false;
 					for (bsoncxx::array::element member : members_view) {
-						int state    = member["state"].get_int32();
-						have_primary = state == 1;
+						int state = member["state"].get_int32();
+						if (state == 1) {
+							have_primary = true;
+						}
 						if (member["self"] && member["self"].get_bool()) {
 							switch (state) {
 							case 1: self_status = MongoDBManagedReplicaSetInterface::PRIMARY; break;
