@@ -45,8 +45,6 @@
 
 #define CFG_PREFIX "/perception/pcl-db/"
 
-#include <mongo/client/dbclient.h>
-#include <mongo/client/gridfs.h>
 #include <pcl/filters/approximate_voxel_grid.h>
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/filters/extract_indices.h>
@@ -56,6 +54,13 @@
 #include <pcl/point_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/surface/convex_hull.h>
+
+#include <bsoncxx/builder/basic/document.hpp>
+#include <mongocxx/client.hpp>
+#include <mongocxx/exception/gridfs_exception.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
+#include <mongocxx/gridfs/bucket.hpp>
+#include <mongocxx/gridfs/downloader.hpp>
 
 #ifdef HAVE_MONGODB_VERSION_H
 // we are using mongo-cxx-driver which renamed QUERY to MONGO_QUERY
@@ -110,7 +115,7 @@ public:
    * @param logger Logger
    * @param output output point cloud
    */
-	PointCloudDBPipeline(mongo::DBClientBase *  mongodb_client,
+	PointCloudDBPipeline(mongocxx::client *     mongodb_client,
 	                     fawkes::Configuration *config,
 	                     fawkes::Logger *       logger,
 	                     ColorCloudPtr          output)
@@ -157,26 +162,24 @@ public:
 		pcl::for_each_type<typename pcl::traits::fieldList<PointType>::type>(
 		  pcl::detail::FieldAdder<PointType>(pfields));
 
-		std::string fq_collection = database + "." + collection;
 		try {
 			for (unsigned int i = 0; i < num_clouds; ++i) {
-#if __cplusplus >= 201103L
-				std::unique_ptr<mongo::DBClientCursor> cursor =
-#else
-				std::auto_ptr<mongo::DBClientCursor> cursor =
-#endif
-				  mongodb_client_->query(fq_collection,
-				                         QUERY("timestamp" << mongo::LTE << times[i] << mongo::GTE
-				                                           << (times[i] - cfg_pcl_age_tolerance_))
-				                           .sort("timestamp", -1),
-				                         /* limit */ 1);
+				using namespace bsoncxx::builder;
+				auto result = mongodb_client_->database(database)[collection].find_one(
+				  basic::make_document(
+				    basic::kvp("timestamp",
+				               [&](basic::sub_document subdoc) {
+					               subdoc.append(basic::kvp("$lt", static_cast<int64_t>(times[i])));
+					               subdoc.append(
+					                 basic::kvp("$gt",
+					                            static_cast<int64_t>(times[i] - cfg_pcl_age_tolerance_)));
+				               })),
+				  mongocxx::options::find().sort(basic::make_document(basic::kvp("timestamp", -1))));
+				if (result) {
+					bsoncxx::document::view pcldoc = result->view()["pointcloud"].get_document().view();
+					bsoncxx::array::view    fields = pcldoc["field_info"].get_array();
 
-				if (cursor->more()) {
-					mongo::BSONObj                  p      = cursor->next();
-					mongo::BSONObj                  pcldoc = p.getObjectField("pointcloud");
-					std::vector<mongo::BSONElement> fields = pcldoc["field_info"].Array();
-
-					if (fields.size() == pfields.size()) {
+					if (fields.length() == pfields.size()) {
 						for (unsigned int i = 0; i < pfields.size(); ++i) {
 #if PCL_VERSION_COMPARE(>=, 1, 7, 0)
 							pcl::PCLPointField &pf = pfields[i];
@@ -185,11 +188,11 @@ public:
 #endif
 
 							bool found = false;
-							for (unsigned int j = 0; j < fields.size(); ++j) {
-								if ((fields[j]["name"].String() == pf.name)
-								    && (fields[j]["offset"].Int() == (int)pf.offset)
-								    && (fields[j]["datatype"].Int() == pf.datatype)
-								    && (fields[j]["count"].Int() == (int)pf.count)) {
+							for (unsigned int j = 0; j < fields.length(); ++j) {
+								if ((fields[j]["name"].get_utf8().value.to_string() == pf.name)
+								    && (fields[j]["offset"].get_int64() == (int64_t)pf.offset)
+								    && (fields[j]["datatype"].get_int64() == pf.datatype)
+								    && (fields[j]["count"].get_int64() == (int64_t)pf.count)) {
 									found = true;
 									break;
 								}
@@ -211,13 +214,14 @@ public:
 					}
 				} else {
 					logger_->log_warn(name_,
-					                  "No pointclouds for timestamp %lli in %s",
+					                  "No pointclouds for timestamp %lli in %s.%s",
 					                  times[i],
-					                  fq_collection.c_str());
+					                  database.c_str(),
+					                  collection.c_str());
 					return NO_POINTCLOUD;
 				}
 			}
-		} catch (mongo::DBException &e) {
+		} catch (mongocxx::operation_exception &e) {
 			logger_->log_warn(name_, "MongoDB query failed: %s", e.what());
 			return QUERY_FAILED;
 		}
@@ -230,31 +234,24 @@ protected: // methods
    * @param dataptr Pointer to buffer to read data to. Make sure it is of
    * sufficient size.
    * @param database database from which to read the file
-   * @param filename name of file to read from GridFS.
+   * @param file_id The bucket ID of the file to read
    */
 	void
-	read_gridfs_file(void *dataptr, std::string &database, std::string filename)
+	read_gridfs_file(void *dataptr, std::string &database, bsoncxx::types::value file_id)
 	{
-		char *        tmp = (char *)dataptr;
-		mongo::GridFS gridfs(*mongodb_client_, database);
-
-		mongo::GridFile file = gridfs.findFile(filename);
-		if (!file.exists()) {
+		auto gridfs = mongodb_client_->database(database).gridfs_bucket();
+		try {
+			auto downloader    = gridfs.open_download_stream(file_id);
+			auto file_length   = downloader.file_length();
+			auto buffer_size   = std::min(file_length, static_cast<int64_t>(downloader.chunk_size()));
+			unsigned char *tmp = (unsigned char *)dataptr;
+			while (auto length_read = downloader.read(tmp, static_cast<std::size_t>(buffer_size))) {
+				tmp += length_read;
+			}
+		} catch (mongocxx::gridfs_exception &e) {
 			logger_->log_warn(name_, "Grid file does not exist");
 			return;
 		}
-
-		size_t bytes = 0;
-		for (int c = 0; c < file.getNumChunks(); ++c) {
-			mongo::GridFSChunk chunk      = file.getChunk(c);
-			int                len        = 0;
-			const char *       chunk_data = chunk.data(len);
-			memcpy(tmp, chunk_data, len);
-			tmp += len;
-			bytes += len;
-			//logger_->log_info(name_, "Read chunk %i of %i bytes", c, len);
-		}
-		//logger_->log_info(name_, "%zu bytes restored", bytes);
 	}
 
 	/** Retrieve point clouds from database.
@@ -264,66 +261,57 @@ protected: // methods
    * @param actual_times upon return contains the actual times of the point
    * clouds retrieved based on the desired @p times.
    * @param database name of the database to retrieve data from
-   * @param collection name of the collection to retrieve data from.
+   * @param collection_name name of the collection to retrieve data from.
    * @return vector of shared pointers to retrieved point clouds
    */
 	std::vector<CloudPtr>
-	retrieve_clouds(std::vector<long long> &times,
-	                std::vector<long long> &actual_times,
-	                std::string &           database,
-	                std::string &           collection)
+	retrieve_clouds(std::vector<long> &times,
+	                std::vector<long> &actual_times,
+	                std::string &      database,
+	                std::string &      collection_name)
 	{
-#ifdef HAVE_MONGODB_VERSION_H
-		// mongodb-cxx-driver dropped ensureIndex and names it createIndex
-		mongodb_client_->createIndex(database + "." + collection, mongo::fromjson("{timestamp:1}"));
-#else
-		mongodb_client_->ensureIndex(database + "." + collection, mongo::fromjson("{timestamp:1}"));
-#endif
+		using namespace bsoncxx::builder;
+		auto collection = mongodb_client_->database(database)[collection_name];
+		collection.create_index(basic::make_document(basic::kvp("timestamp", 1)));
 
 		const unsigned int    num_clouds = times.size();
 		std::vector<CloudPtr> pcls(num_clouds);
 
 		// retrieve point clouds
 		for (unsigned int i = 0; i < num_clouds; ++i) {
-#if __cplusplus >= 201103L
-			std::unique_ptr<mongo::DBClientCursor> cursor =
-#else
-			std::auto_ptr<mongo::DBClientCursor> cursor =
-#endif
-			  mongodb_client_->query(database + "." + collection,
-			                         QUERY("timestamp" << mongo::LTE << times[i] << mongo::GTE
-			                                           << (times[i] - cfg_pcl_age_tolerance_))
-			                           .sort("timestamp", -1),
-			                         /* limit */ 1);
+			auto result = collection.find_one(
+			  basic::make_document(basic::kvp("timestamp",
+			                                  [&](basic::sub_document subdoc) {
+				                                  subdoc.append(basic::kvp("$lt", times[i]));
+				                                  subdoc.append(
+				                                    basic::kvp("$gt", times[i] - cfg_pcl_age_tolerance_));
+			                                  })),
+			  mongocxx::options::find().sort(basic::make_document(basic::kvp("timestamp", -1))));
+			if (result) {
+				bsoncxx::document::view pcldoc = result->view()["pointcloud"].get_document().view();
+				//bsoncxx::array::view    fields    = pcldoc["field_info"].get_array();
+				int64_t timestamp = result->view()["timestamp"].get_int64();
+				double  age       = (double)(times[i] - timestamp) / 1000.;
 
-			if (cursor->more()) {
-				mongo::BSONObj                  p      = cursor->next();
-				mongo::BSONObj                  pcldoc = p.getObjectField("pointcloud");
-				std::vector<mongo::BSONElement> fields = pcldoc["field_info"].Array();
-
-				long long timestamp = p["timestamp"].Long();
-				double    age       = (double)(times[i] - timestamp) / 1000.;
-				logger_->log_info(name_, "Restoring point cloud at %lli with age %f sec", timestamp, age);
+				logger_->log_info(name_, "Restoring point cloud at %li with age %f sec", timestamp, age);
 
 				// reconstruct point cloud
 				CloudPtr lpcl(new Cloud());
 				pcls[i] = lpcl;
 
-				actual_times[i] = p["timestamp"].Number();
+				actual_times[i] = timestamp;
 				fawkes::Time actual_time((long)actual_times[i]);
 
-				lpcl->header.frame_id = pcldoc["frame_id"].String();
-				lpcl->is_dense        = pcldoc["is_dense"].Bool();
-				lpcl->width           = pcldoc["width"].Int();
-				lpcl->height          = pcldoc["height"].Int();
+				lpcl->header.frame_id = pcldoc["frame_id"].get_utf8().value.to_string();
+				lpcl->is_dense        = pcldoc["is_dense"].get_bool();
+				lpcl->width           = pcldoc["width"].get_int64();
+				lpcl->height          = pcldoc["height"].get_int64();
 				fawkes::pcl_utils::set_time(lpcl, actual_time);
-				lpcl->points.resize(pcldoc["num_points"].Int());
+				lpcl->points.resize(pcldoc["num_points"].get_int64());
 
-				read_gridfs_file(&lpcl->points[0],
-				                 database,
-				                 pcldoc.getFieldDotted("data.filename").String());
+				read_gridfs_file(&lpcl->points[0], database, pcldoc["data"]["id"].get_value());
 			} else {
-				logger_->log_warn(name_, "Cannot retrieve document for time %lli", times[i]);
+				logger_->log_warn(name_, "Cannot retrieve document for time %li", times[i]);
 				return std::vector<CloudPtr>();
 			}
 		}
@@ -337,7 +325,7 @@ protected:           // members
 	long cfg_pcl_age_tolerance_;  /**< Age tolerance for retrieved point clouds. */
 	long cfg_transform_range_[2]; /**< Transform range start and end times. */
 
-	mongo::DBClientBase *mongodb_client_; /**< MongoDB client to retrieve data. */
+	mongocxx::client *mongodb_client_; /**< MongoDB client to retrieve data. */
 
 	fawkes::Logger *logger_; /**< Logger for informative messages. */
 

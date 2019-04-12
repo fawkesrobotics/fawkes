@@ -26,13 +26,16 @@
 #include <pcl_utils/pcl_adapter.h>
 
 // from MongoDB
-#include <mongo/client/dbclient.h>
-#include <mongo/client/gridfs.h>
+#include <bsoncxx/builder/basic/document.hpp>
+#include <mongocxx/client.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
+#include <mongocxx/gridfs/bucket.hpp>
+#include <mongocxx/gridfs/uploader.hpp>
 
 #define CFG_PREFIX "/perception/pcl-db/"
 
 using namespace fawkes;
-using namespace mongo;
+using namespace mongocxx;
 
 /** @class PointCloudDBStoreThread "pcl_db_store_thread.h"
  * Thread to store point clouds from database on request.
@@ -151,36 +154,41 @@ PointCloudDBStoreThread::store_pointcloud(std::string  pcl_id,
 
 	size_t data_size = point_size * num_points;
 
-	BSONObjBuilder document;
-	document.append("timestamp", (long long)time.in_msec());
-	BSONObjBuilder subb(document.subobjStart("pointcloud"));
-	subb.append("frame_id", frame_id);
-	subb.append("is_dense", is_dense);
-	subb.append("width", width);
-	subb.append("height", height);
-	subb.append("point_size", (unsigned int)point_size);
-	subb.append("num_points", (unsigned int)num_points);
-
-	GridFS gridfs(*mongodb_client, database);
+	auto gridfs = mongodb_client->database(database).gridfs_bucket();
 
 	std::stringstream name;
 	name << "pcl_" << time.in_msec();
-	subb.append("data", gridfs.storeFile((char *)point_data, data_size, name.str()));
+	auto uploader = gridfs.open_upload_stream(name.str());
+	uploader.write(static_cast<uint8_t *>(point_data), data_size);
+	auto result = uploader.close();
+	using namespace bsoncxx::builder;
+	basic::document document;
+	document.append(basic::kvp("timestamp", static_cast<int64_t>(time.in_msec())));
+	document.append(basic::kvp("pointcloud", [&](basic::sub_document subdoc) {
+		subdoc.append(basic::kvp("frame_id", frame_id));
+		subdoc.append(basic::kvp("is_dense", is_dense));
+		subdoc.append(basic::kvp("width", static_cast<int64_t>(width)));
+		subdoc.append(basic::kvp("height", static_cast<int64_t>(height)));
+		subdoc.append(basic::kvp("point_size", static_cast<int64_t>(point_size)));
+		subdoc.append(basic::kvp("num_points", static_cast<int64_t>(num_points)));
+		subdoc.append(basic::kvp("data", [&](basic::sub_document datadoc) {
+			datadoc.append(basic::kvp("id", result.id()));
+			datadoc.append(basic::kvp("filename", name.str()));
+		}));
+		subdoc.append(basic::kvp("field_info", [fieldinfo](basic::sub_array fi_array) {
+			for (auto fi : fieldinfo) {
+				basic::document fi_doc;
+				fi_doc.append(basic::kvp("name", fi.name));
+				fi_doc.append(basic::kvp("offset", static_cast<int64_t>(fi.offset)));
+				fi_doc.append(basic::kvp("datatype", fi.datatype));
+				fi_doc.append(basic::kvp("count", static_cast<int64_t>(fi.count)));
+			}
+		}));
+	}));
 
-	BSONArrayBuilder subb2(subb.subarrayStart("field_info"));
-	for (unsigned int i = 0; i < fieldinfo.size(); i++) {
-		BSONObjBuilder fi(subb2.subobjStart());
-		fi.append("name", fieldinfo[i].name);
-		fi.append("offset", fieldinfo[i].offset);
-		fi.append("datatype", fieldinfo[i].datatype);
-		fi.append("count", fieldinfo[i].count);
-		fi.doneFast();
-	}
-	subb2.doneFast();
-	subb.doneFast();
 	try {
-		mongodb_client->insert(collection, document.obj());
-	} catch (mongo::DBException &e) {
+		mongodb_client->database(database)[collection].insert_one(document.view());
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn(this->name(), "Failed to insert into %s: %s", collection.c_str(), e.what());
 		errmsg = e.what();
 		return false;

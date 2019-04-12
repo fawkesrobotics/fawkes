@@ -92,9 +92,9 @@ PointCloudDBMergeThread::finalize()
 void
 PointCloudDBMergeThread::loop()
 {
-	std::vector<long long> times;
-	std::string            database;
-	std::string            collection;
+	std::vector<long> times;
+	std::string       database;
+	std::string       collection;
 	//= "PointClouds.openni_pointcloud_xyz";
 
 	if (merge_if_->msgq_empty())
@@ -136,17 +136,18 @@ PointCloudDBMergeThread::loop()
 
 	logger->log_info(name(), "Restoring from '%s' for the following times", collection.c_str());
 	for (size_t i = 0; i < times.size(); ++i) {
-		logger->log_info(name(), "  %lli", times[i]);
+		logger->log_info(name(), "  %li", times[i]);
 	}
 
 	ApplicabilityStatus st_xyz, st_xyzrgb;
 
-	pl_xyz_->applicable(times, database, collection);
-	if ((st_xyz = pl_xyz_->applicable(times, database, collection)) == APPLICABLE) {
+	std::vector<long long> ll_times(times.begin(), times.end());
+	pl_xyz_->applicable(ll_times, database, collection);
+	if ((st_xyz = pl_xyz_->applicable(ll_times, database, collection)) == APPLICABLE) {
 		pl_xyz_->merge(times, database, collection);
 		Time now(clock);
 		pcl_utils::set_time(foutput_, now);
-	} else if ((st_xyzrgb = pl_xyzrgb_->applicable(times, database, collection)) == APPLICABLE) {
+	} else if ((st_xyzrgb = pl_xyzrgb_->applicable(ll_times, database, collection)) == APPLICABLE) {
 		pl_xyzrgb_->merge(times, database, collection);
 		Time now(clock);
 		pcl_utils::set_time(foutput_, now);

@@ -22,10 +22,11 @@
 #ifndef _PLUGINS_PERCEPTION_PCL_DB_MERGE_MONGODB_TF_TRANSFORMER_H_
 #define _PLUGINS_PERCEPTION_PCL_DB_MERGE_MONGODB_TF_TRANSFORMER_H_
 
-#include <mongo/client/dbclient.h>
 #include <tf/transformer.h>
 #include <tf/types.h>
 
+#include <bsoncxx/document/view.hpp>
+#include <mongocxx/client.hpp>
 #include <string>
 
 namespace fawkes {
@@ -34,9 +35,9 @@ namespace tf {
 class MongoDBTransformer : public Transformer
 {
 public:
-	MongoDBTransformer(mongo::DBClientBase *mongodb_client,
-	                   const std::string &  database_name,
-	                   bool                 ensure_index = true);
+	MongoDBTransformer(mongocxx::client * mongodb_client,
+	                   const std::string &database_name,
+	                   bool               ensure_index = true);
 	virtual ~MongoDBTransformer();
 
 	/** Restore transforms from database.
@@ -51,14 +52,16 @@ public:
 	}
 
 	void restore(fawkes::Time &start, fawkes::Time &end, fawkes::Time &new_start);
-	void restore(long long start_msec, long long end_msec, long long new_start_msec = 0);
+	void restore(long start_msec, long end_msec, long new_start_msec = 0);
 
 private:
-	void restore_tf_doc(mongo::BSONObj &doc, long long start_msec, long long new_start_msec);
+	void restore_tf_doc(const bsoncxx::document::view &doc,
+	                    long long                      start_msec,
+	                    long long                      new_start_msec);
 
 private:
-	mongo::DBClientBase *mongodb_client_;
-	std::string          database_;
+	mongocxx::client *mongodb_client_;
+	std::string       database_;
 };
 
 } // end namespace tf

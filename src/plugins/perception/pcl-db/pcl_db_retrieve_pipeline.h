@@ -36,10 +36,10 @@
 
 #define CFG_PREFIX_RETRV "/perception/pcl-db-retrieve/"
 
-#include <mongo/client/dbclient.h>
-#include <mongo/client/gridfs.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+
+#include <mongocxx/client.hpp>
 
 /** Point cloud retrieve pipeline.
  * This pipeline retrieves a point cloud from the database at a given point
@@ -64,7 +64,7 @@ public:
    * @param original input point cloud
    * @param output output point cloud
    */
-	PointCloudDBRetrievePipeline(mongo::DBClientBase *    mongodb_client,
+	PointCloudDBRetrievePipeline(mongocxx::client *       mongodb_client,
 	                             fawkes::Configuration *  config,
 	                             fawkes::Logger *         logger,
 	                             fawkes::tf::Transformer *transformer,
@@ -105,11 +105,11 @@ public:
    * which a point cloud was retrieved
    */
 	void
-	retrieve(long long    timestamp,
+	retrieve(long         timestamp,
 	         std::string &database,
 	         std::string &collection,
 	         std::string &target_frame,
-	         long long &  actual_time)
+	         long &       actual_time)
 	{
 		TIMETRACK_START(ttc_retrieve_);
 
@@ -118,8 +118,8 @@ public:
 		this->output_->width    = 0;
 		this->output_->is_dense = false;
 
-		std::vector<long long>                                          times(1, timestamp);
-		std::vector<long long>                                          actual_times(1, 0);
+		std::vector<long>                                               times(1, timestamp);
+		std::vector<long>                                               actual_times(1, 0);
 		std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> pcls(1);
 
 		TIMETRACK_START(ttc_retrieval_);
@@ -151,7 +151,7 @@ public:
 			transformer.restore(/* start */ actual_times[0] + this->cfg_transform_range_[0],
 			                    /* end */ actual_times[0] + this->cfg_transform_range_[1]);
 			this->logger_->log_debug(this->name_,
-			                         "Restored transforms for %zu frames for range (%lli..%lli)",
+			                         "Restored transforms for %zu frames for range (%li..%li)",
 			                         transformer.get_frame_caches().size(),
 			                         /* start */ actual_times[0] + this->cfg_transform_range_[0],
 			                         /* end */ actual_times[0] + this->cfg_transform_range_[1]);
