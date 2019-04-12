@@ -21,6 +21,7 @@
 
 #include "mongodb_tf_transformer.h"
 
+#include <bsoncxx/builder/basic/document.hpp>
 #include <list>
 
 #ifdef HAVE_MONGODB_VERSION_H
@@ -28,7 +29,7 @@
 #	define QUERY MONGO_QUERY
 #endif
 
-using namespace mongo;
+using namespace mongocxx;
 
 namespace fawkes {
 namespace tf {
@@ -43,22 +44,17 @@ namespace tf {
  * @param database_name name of database to restore transforms from
  * @param ensure_index if true ensures that the required index on timestamps exists
  */
-MongoDBTransformer::MongoDBTransformer(mongo::DBClientBase *mongodb_client,
-                                       const std::string &  database_name,
-                                       bool                 ensure_index)
+MongoDBTransformer::MongoDBTransformer(mongocxx::client * mongodb_client,
+                                       const std::string &database_name,
+                                       bool               ensure_index)
 : mongodb_client_(mongodb_client), database_(database_name)
 {
 	if (ensure_index) {
-#ifdef HAVE_MONGODB_VERSION_H
-		// mongodb-cxx-driver dropped ensureIndex and names it createIndex
-		mongodb_client_->createIndex(database_ + ".tf", mongo::fromjson("{timestamp:1}"));
-		mongodb_client_->createIndex(database_ + ".TransformInterface",
-		                             mongo::fromjson("{timestamp:1}"));
-#else
-		mongodb_client_->ensureIndex(database_ + ".tf", mongo::fromjson("{timestamp:1}"));
-		mongodb_client_->ensureIndex(database_ + ".TransformInterface",
-		                             mongo::fromjson("{timestamp:1}"));
-#endif
+		using namespace bsoncxx::builder;
+		mongodb_client_->database(database_)["tf"].create_index(
+		  basic::make_document(basic::kvp("timestamp", 1)));
+		mongodb_client_->database(database_)["TransformInterface"].create_index(
+		  basic::make_document(basic::kvp("timestamp", 1)));
 	}
 }
 
@@ -81,23 +77,25 @@ MongoDBTransformer::restore(fawkes::Time &start, fawkes::Time &end, fawkes::Time
 }
 
 void
-MongoDBTransformer::restore_tf_doc(BSONObj &doc, long long start_msec, long long new_start_msec)
+MongoDBTransformer::restore_tf_doc(const bsoncxx::document::view &doc,
+                                   long long                      start_msec,
+                                   long long                      new_start_msec)
 {
-	std::vector<BSONElement> trans = doc["translation"].Array();
-	std::vector<BSONElement> rot   = doc["rotation"].Array();
-	double                   rx, ry, rz, rw, tx, ty, tz;
-	std::string              frame, child_frame;
-	long                     timestamp = new_start_msec + (doc["timestamp"].Long() - start_msec);
-	Time                     time(timestamp);
-	rx          = rot[0].Double();
-	ry          = rot[1].Double();
-	rz          = rot[2].Double();
-	rw          = rot[3].Double();
-	tx          = trans[0].Double();
-	ty          = trans[1].Double();
-	tz          = trans[2].Double();
-	frame       = doc["frame"].String();
-	child_frame = doc["child_frame"].String();
+	bsoncxx::array::view trans = doc["translation"].get_array();
+	bsoncxx::array::view rot   = doc["rotation"].get_array();
+	double               rx, ry, rz, rw, tx, ty, tz;
+	std::string          frame, child_frame;
+	long                 timestamp = new_start_msec + (doc["timestamp"].get_int64() - start_msec);
+	Time                 time(timestamp);
+	rx          = rot[0].get_double();
+	ry          = rot[1].get_double();
+	rz          = rot[2].get_double();
+	rw          = rot[3].get_double();
+	tx          = trans[0].get_double();
+	ty          = trans[1].get_double();
+	tz          = trans[2].get_double();
+	frame       = doc["frame"].get_utf8().value.to_string();
+	child_frame = doc["child_frame"].get_utf8().value.to_string();
 
 	tf::Quaternion q(rx, ry, rz, rw);
 	tf::assert_quaternion_valid(q);
@@ -114,7 +112,7 @@ MongoDBTransformer::restore_tf_doc(BSONObj &doc, long long start_msec, long long
  * @p start time is subtracted and @p new_start is added.
  */
 void
-MongoDBTransformer::restore(long long start_msec, long long end_msec, long long new_start_msec)
+MongoDBTransformer::restore(long start_msec, long end_msec, long new_start_msec)
 {
 	cache_time_ = (double)(end_msec - start_msec) / 1000.;
 
@@ -122,32 +120,35 @@ MongoDBTransformer::restore(long long start_msec, long long end_msec, long long 
 		new_start_msec = start_msec;
 	}
 
-	std::list<std::string> collections = mongodb_client_->getCollectionNames(database_);
+	// requires mongo-cxx-driver 3.4.0
+	//std::list<std::string> collections = mongodb_client_->database(database_).list_collection_names();
+	std::list<std::string> collections;
+	for (auto c : mongodb_client_->database(database_).list_collections()) {
+		collections.push_back(c["name"].get_utf8().value.to_string());
+	}
 
-#if __cplusplus >= 201103L
-	std::unique_ptr<DBClientCursor> cursor;
-#else
-	std::auto_ptr<DBClientCursor> cursor;
-#endif
-	BSONObj                          doc;
 	std::list<std::string>::iterator c;
 	for (c = collections.begin(); c != collections.end(); ++c) {
 		if ((c->find(database_ + ".TransformInterface.") != 0) && (c->find(database_ + ".tf") != 0)) {
 			continue;
 		}
 
-		cursor = mongodb_client_->query(
-		  *c, QUERY("timestamp" << GTE << start_msec << LT << end_msec).sort("timestamp"));
+		auto collection = mongodb_client_->database(database_)[*c];
+		using namespace bsoncxx::builder;
+		auto result = collection.find(
+		  basic::make_document(
+		    basic::kvp("timestamp",
+		               [start_msec, end_msec](basic::sub_document subdoc) {
+			               subdoc.append(basic::kvp("$gt", static_cast<int64_t>(start_msec)));
+			               subdoc.append(basic::kvp("$lt", static_cast<int64_t>(end_msec)));
+		               })),
+		  mongocxx::options::find().sort(basic::make_document(basic::kvp("timestamp", 1))));
 
-		while (cursor->more()) {
-			doc = cursor->next();
-			if (doc.hasField("transforms")) {
-				// multi transforms document
-				BSONObj::iterator i = doc.getObjectField("transforms").begin();
-				while (i.more()) {
-					BSONElement e = i.next();
-					BSONObj     o = e.Obj();
-					restore_tf_doc(o, start_msec, new_start_msec);
+		for (auto doc : result) {
+			if (doc.find("transforms") != doc.end()) {
+				bsoncxx::array::view transforms = doc["transforms"].get_array();
+				for (auto el : transforms) {
+					restore_tf_doc(el.get_document().view(), start_msec, new_start_msec);
 				}
 			} else {
 				restore_tf_doc(doc, start_msec, new_start_msec);
