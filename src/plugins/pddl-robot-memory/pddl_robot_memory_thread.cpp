@@ -25,10 +25,13 @@
 
 #include <utils/misc/string_conversions.h>
 
+#include <bsoncxx/exception/exception.hpp>
 #include <fstream>
 
 using namespace fawkes;
-using namespace mongo;
+using namespace mongocxx;
+using namespace bsoncxx;
+using namespace bsoncxx::builder;
 
 /** @class PddlRobotMemoryThread 'pddl_robot_memory_thread.h' 
  * Generate PDDL files from the robot memory
@@ -113,7 +116,7 @@ PddlRobotMemoryThread::loop()
 	//Dictionary how to fill the templates
 	ctemplate::TemplateDictionary dict("pddl-rm");
 
-	BSONObjBuilder facets;
+	basic::document facets;
 
 	//find queries in template
 	size_t                             cur_pos = 0;
@@ -156,17 +159,12 @@ PddlRobotMemoryThread::loop()
         fill_dict_from_document(entry_dict, obj);
       }
 	    */
-			mongo::BufBuilder &      bb   = facets.subarrayStart(template_name);
-			mongo::BSONArrayBuilder *arrb = new mongo::BSONArrayBuilder(bb);
-			BSONObjBuilder           query;
-			query.append("$match", fromjson(query_str));
-			arrb->append(query.obj());
-			delete arrb;
-#ifdef HAVE_MONGODB_VERSION_H
-		} catch (mongo::MsgAssertionException &e) {
-#else
-		} catch (mongo::AssertionException &e) {
-#endif
+			facets.append(basic::kvp(template_name, [query_str](basic::sub_array array) {
+				basic::document query;
+				query.append(basic::kvp("$match", from_json(query_str)));
+				array.append(query.view());
+			}));
+		} catch (bsoncxx::exception &e) {
 			logger->log_error("PddlRobotMemory",
 			                  "Template query failed: %s\n%s",
 			                  e.what(),
@@ -174,18 +172,16 @@ PddlRobotMemoryThread::loop()
 		}
 	}
 
-	BSONObjBuilder aggregate_query;
-	aggregate_query.append("$facet", facets.obj());
-	BSONObj                     aggregate_query_obj(aggregate_query.obj());
-	std::vector<mongo::BSONObj> aggregate_pipeline{aggregate_query_obj};
-	BSONObj                     res    = robot_memory->aggregate(aggregate_pipeline, collection);
-	BSONObj                     result = res.getField("result").Obj()["0"].Obj();
-	for (BSONObj::iterator i = result.begin(); i.more();) {
-		BSONElement e = i.next();
-		for (BSONObj::iterator j = e.Obj().begin(); j.more();) {
-			BSONElement                    f          = j.next();
-			ctemplate::TemplateDictionary *entry_dict = dict.AddSectionDictionary(e.fieldName());
-			fill_dict_from_document(entry_dict, f.Obj());
+	basic::document aggregate_query;
+	aggregate_query.append(basic::kvp("$facet", facets.view()));
+	std::vector<document::view> aggregate_pipeline{aggregate_query.view()};
+	auto                        res    = robot_memory->aggregate(aggregate_pipeline, collection);
+	auto                        result = res.view()["result"]["0"].get_document().view();
+	//BSONObj                     result = res.getField("result").Obj()["0"].Obj();
+	for (auto e : result) {
+		for (auto f : e.get_document().view()) {
+			ctemplate::TemplateDictionary *entry_dict = dict.AddSectionDictionary(std::string(e.key()));
+			fill_dict_from_document(entry_dict, f.get_document().view());
 		}
 	}
 
@@ -253,45 +249,54 @@ PddlRobotMemoryThread::bb_interface_message_received(Interface *      interface,
  */
 void
 PddlRobotMemoryThread::fill_dict_from_document(ctemplate::TemplateDictionary *dict,
-                                               BSONObj                        obj,
+                                               const bsoncxx::document::view &doc,
                                                std::string                    prefix)
 {
-	for (BSONObjIterator it = obj.begin(); it.more();) {
-		BSONElement elem = it.next();
+	for (auto elem : doc) {
 		switch (elem.type()) {
-		case mongo::NumberDouble:
-			dict->SetValue(prefix + elem.fieldName(), std::to_string(elem.Double()));
+		case type::k_double:
+			dict->SetValue(prefix + std::string(elem.key()), std::to_string(elem.get_double()));
 			break;
-		case mongo::String: dict->SetValue(prefix + elem.fieldName(), elem.String()); break;
-		case mongo::Bool: dict->SetValue(prefix + elem.fieldName(), std::to_string(elem.Bool())); break;
-		case mongo::NumberInt: dict->SetIntValue(prefix + elem.fieldName(), elem.Int()); break;
-		case mongo::NumberLong:
-			dict->SetValue(prefix + elem.fieldName(), std::to_string(elem.Long()));
+		case type::k_utf8:
+			dict->SetValue(prefix + std::string(elem.key()), elem.get_utf8().value.to_string());
 			break;
-		case mongo::Object:
-			fill_dict_from_document(dict, elem.Obj(), prefix + elem.fieldName() + "_");
+		case type::k_bool:
+			dict->SetValue(prefix + std::string(elem.key()), std::to_string(elem.get_bool()));
 			break;
-		case 7: //ObjectId
-			dict->SetValue(prefix + elem.fieldName(), elem.OID().toString());
+		case type::k_int32:
+			dict->SetIntValue(prefix + std::string(elem.key()), elem.get_int32());
 			break;
-		case mongo::Array: {
+		case type::k_int64:
+			dict->SetIntValue(prefix + std::string(elem.key()), elem.get_int64());
+			break;
+		case type::k_document:
+			fill_dict_from_document(dict,
+			                        elem.get_document().view(),
+			                        prefix + std::string(elem.key()) + "_");
+			break;
+		case type::k_oid: //ObjectId
+			dict->SetValue(prefix + std::string(elem.key()), elem.get_oid().value.to_string());
+			break;
+		case type::k_array: {
 			// access array elements as if they were a subdocument with key-value pairs
 			// using the indices as keys
-			BSONObjBuilder b;
-			for (size_t i = 0; i < elem.Array().size(); i++) {
-				b.append(elem.Array()[i]);
+			basic::document b;
+			array::view     array = elem.get_array();
+			uint            i     = 0;
+			for (auto e : array) {
+				b.append(basic::kvp(std::to_string(i++), e.get_document().view()));
 			}
-			fill_dict_from_document(dict, b.obj(), prefix + elem.fieldName() + "_");
+			fill_dict_from_document(dict, b.view(), prefix + std::string(elem.key()) + "_");
 			// additionally feed the whole array as space-separated list
 			std::string array_string;
-			for (size_t i = 0; i < elem.Array().size(); i++) {
+			for (auto e : array) {
 				// TODO: This only works for string arrays, adapt to other types.
-				array_string += " " + elem.Array()[i].String();
+				array_string += " " + e.get_utf8().value.to_string();
 			}
-			dict->SetValue(prefix + elem.fieldName(), array_string);
+			dict->SetValue(prefix + std::string(elem.key()), array_string);
 			break;
 		}
-		default: dict->SetValue(prefix + elem.fieldName(), "INVALID_VALUE_TYPE");
+		default: dict->SetValue(prefix + std::string(elem.key()), "INVALID_VALUE_TYPE");
 		}
 	}
 }

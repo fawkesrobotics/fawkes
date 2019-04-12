@@ -34,6 +34,7 @@
 #include <ctemplate/template.h>
 #include <plugins/robot-memory/aspect/robot_memory_aspect.h>
 
+#include <bsoncxx/document/view.hpp>
 #include <string>
 
 namespace fawkes {
@@ -70,7 +71,7 @@ private:
 	std::string goal;
 
 	void fill_dict_from_document(ctemplate::TemplateDictionary *dict,
-	                             mongo::BSONObj                 obj,
+	                             const bsoncxx::document::view &obj,
 	                             std::string                    prefix = "");
 	void generate();
 
