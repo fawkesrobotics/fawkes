@@ -21,6 +21,8 @@
 
 #include "blackboard_computable.h"
 
+#include <bsoncxx/builder/basic/document.hpp>
+
 /** @class BlackboardComputable  blackboard_computable.h
  * Computable providing access to blackboard interfaces.
  * The Query has to match {interface:{$exists:true}} on the blackboard collection
@@ -48,11 +50,15 @@ BlackboardComputable::BlackboardComputable(RobotMemory *          robot_memory,
 	logger_       = logger;
 
 	//register computable
-	document::value query = from_json("{interface:{$exists:true}}");
-	int   priority        = config->get_int("plugins/robot-memory/computables/blackboard/priority");
+	using namespace bsoncxx::builder;
+	basic::document query;
+	query.append(basic::kvp("interface", [](basic::sub_document subdoc) {
+		subdoc.append(basic::kvp("$exists", true));
+	}));
+	int   priority = config->get_int("plugins/robot-memory/computables/blackboard/priority");
 	float caching_time =
 	  config->get_float("plugins/robot-memory/computables/blackboard/caching-time");
-	computable = robot_memory_->register_computable(std::move(query),
+	computable = robot_memory_->register_computable(query.extract(),
 	                                                "robmem.blackboard",
 	                                                &BlackboardComputable::compute_interfaces,
 	                                                this,
