@@ -332,7 +332,11 @@ MongoDBReplicaSetConfig::rs_status(bsoncxx::document::value &reply)
 	try {
 		reply = local_client_->database("admin").run_command(std::move(cmd));
 	} catch (mongocxx::operation_exception &e) {
-		int error_code = e.raw_server_error()->view()["code"].get_int32();
+		int  error_code         = -1;
+		auto error_code_element = e.raw_server_error()->view()["code"];
+		if (error_code_element && error_code_element.type() == bsoncxx::type::k_int32) {
+			error_code = e.raw_server_error()->view()["code"].get_int32();
+		}
 		if (error_code == 94 /* NotYetInitialized */) {
 			logger->log_warn(name(), "Instance has not received replica set configuration, yet");
 			status.member_status = MongoDBManagedReplicaSetInterface::NOT_INITIALIZED;
