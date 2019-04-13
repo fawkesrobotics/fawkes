@@ -212,8 +212,10 @@ MongoDBReplicaSetConfig::leader_elect(bool force)
 		}
 	} catch (mongocxx::operation_exception &e) {
 		if (boost::optional<bsoncxx::document::value> error = e.raw_server_error()) {
-			size_t num_errors = bsoncxx::array::view{error->view()["writeErrors"].get_array()}.length();
-			int    error_code = -1;
+			bsoncxx::array::view writeErrors = error->view()["writeErrors"].get_array();
+			// Do not use writeErrors.length(), which is not the number of errors!
+			auto num_errors = std::distance(writeErrors.begin(), writeErrors.end());
+			int  error_code = -1;
 			if (num_errors > 0) {
 				error_code = error->view()["writeErrors"][0]["code"].get_int32();
 			}
