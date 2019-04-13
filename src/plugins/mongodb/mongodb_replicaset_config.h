@@ -51,7 +51,9 @@ class MongoDBReplicaSetConfig : public fawkes::Thread,
                                 public fawkes::BlackBoardAspect
 {
 public:
-	MongoDBReplicaSetConfig(std::string cfgname, std::string prefix, std::string bootstrap_prefix);
+	MongoDBReplicaSetConfig(const std::string &cfgname,
+	                        const std::string &prefix,
+	                        const std::string &bootstrap_prefix);
 
 	/** Check if configuration is enabled.
 	 * @return true if configuration is enabled, false otherwise

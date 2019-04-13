@@ -52,9 +52,9 @@ using namespace bsoncxx::builder;
  * @param prefix configuration path prefix
  * @param bootstrap_prefix configuration path prefix for bootstrap configuration
  */
-MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(std::string cfgname,
-                                                 std::string prefix,
-                                                 std::string bootstrap_prefix)
+MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(const std::string &cfgname,
+                                                 const std::string &prefix,
+                                                 const std::string &bootstrap_prefix)
 : Thread("MongoDBReplicaSet", Thread::OPMODE_CONTINUOUS),
   leader_elec_query_(bsoncxx::builder::basic::document()),
   leader_elec_query_force_(bsoncxx::builder::basic::document()),
