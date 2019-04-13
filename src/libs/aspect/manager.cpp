@@ -125,7 +125,7 @@ AspectManager::init(Thread *thread)
 			for (i = aspects.begin(); i != aspects.end(); ++i) {
 				if (inifins_.find(*i) == inifins_.end()) {
 					throw CannotInitializeThreadException("Thread '%s' has the %s, "
-					                                      "but no initiliazer is known.",
+					                                      "but no initializer is known.",
 					                                      thread->name(),
 					                                      *i);
 				}
