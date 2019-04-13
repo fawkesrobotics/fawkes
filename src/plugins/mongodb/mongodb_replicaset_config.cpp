@@ -212,8 +212,12 @@ MongoDBReplicaSetConfig::leader_elect(bool force)
 		}
 	} catch (mongocxx::operation_exception &e) {
 		if (boost::optional<bsoncxx::document::value> error = e.raw_server_error()) {
-			int error_code = error->view()["code"].get_int32();
-			if (error_code != 11000) {
+			size_t num_errors = bsoncxx::array::view{error->view()["writeErrors"].get_array()}.length();
+			int    error_code = -1;
+			if (num_errors > 0) {
+				error_code = error->view()["writeErrors"][0]["code"].get_int32();
+			}
+			if (num_errors > 1 || error_code != 11000) {
 				// 11000: Duplicate key exception, occurs if we do not become leader, all fine
 				logger->log_error(name(),
 				                  "Leader election failed (%i): %s %s",
