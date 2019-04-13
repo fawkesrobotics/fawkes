@@ -48,47 +48,79 @@ using namespace bsoncxx::builder;
 
 /** Constructor.
  * This will read the given configuration.
- * @param config configuration to query
  * @param cfgname configuration name
  * @param prefix configuration path prefix
- * @param bootstrap_database database to hold leader election data
+ * @param bootstrap_prefix configuration path prefix for bootstrap configuration
  */
-MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
-                                                 std::string    cfgname,
-                                                 std::string    prefix,
-                                                 std::string    bootstrap_database)
+MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(std::string cfgname,
+                                                 std::string prefix,
+                                                 std::string bootstrap_prefix)
 : Thread("MongoDBReplicaSet", Thread::OPMODE_CONTINUOUS),
   leader_elec_query_(bsoncxx::builder::basic::document()),
   leader_elec_query_force_(bsoncxx::builder::basic::document()),
   leader_elec_update_(bsoncxx::builder::basic::document())
 {
 	set_name("MongoDBReplicaSet|%s", cfgname.c_str());
-	config_name_ = cfgname;
-	is_leader_   = false;
+	config_name_      = cfgname;
+	prefix_           = prefix;
+	bootstrap_prefix_ = bootstrap_prefix;
+	is_leader_        = false;
 	last_status_ =
 	  ReplicaSetStatus{.member_status  = MongoDBManagedReplicaSetInterface::ERROR,
 	                   .primary_status = MongoDBManagedReplicaSetInterface::PRIMARY_UNKNOWN};
 
 	enabled_ = false;
+}
+
+void
+MongoDBReplicaSetConfig::init()
+{
 	try {
-		enabled_ = config->get_bool(prefix + "enabled");
+		enabled_ = config->get_bool(prefix_ + "enabled");
 	} catch (Exception &e) {
 	}
+	if (!enabled_) {
+		throw Exception("Replica set manager '%s' cannot be started while disabled", name());
+	}
+
+	logger->log_debug(name(),
+	                  "Bootstrap Query:  %s",
+	                  bsoncxx::to_json(leader_elec_query_.view()).c_str());
+	logger->log_debug(name(),
+	                  "Bootstrap Update: %s",
+	                  bsoncxx::to_json(leader_elec_update_.view()).c_str());
+
+	rs_status_if_ =
+	  blackboard->open_for_writing<MongoDBManagedReplicaSetInterface>(config_name_.c_str());
+
+	timewait_ = new TimeWait(clock, (int)(loop_interval_ * 1000000.));
 
 	if (enabled_) {
-		bootstrap_database_ = bootstrap_database;
-		bootstrap_ns_       = bootstrap_database + "." + config_name_;
+		bootstrap_database_                      = config->get_string(bootstrap_prefix_ + "database");
+		std::string         bootstrap_client_cfg = config->get_string(bootstrap_prefix_ + "client");
+		MongoDBClientConfig bootstrap_client_config(config,
+		                                            logger,
+		                                            bootstrap_client_cfg,
+		                                            "/plugins/mongodb/clients/" + bootstrap_client_cfg
+		                                              + "/");
+		if (!bootstrap_client_config.is_enabled()) {
+			throw Exception("%s: bootstrap client configuration '%s' disabled",
+			                name(),
+			                bootstrap_client_cfg.c_str());
+		}
+		bootstrap_client_.reset(bootstrap_client_config.create_client());
+		bootstrap_ns_ = bootstrap_database_ + "." + config_name_;
 
-		local_client_cfg_ = config->get_string(prefix + "local-client");
+		local_client_cfg_ = config->get_string(prefix_ + "local-client");
 		loop_interval_    = 5.0;
 		try {
-			loop_interval_ = config->get_float(prefix + "loop-interval");
+			loop_interval_ = config->get_float(prefix_ + "loop-interval");
 		} catch (Exception &e) {
 		} // ignored, use default
 
 		leader_expiration_ = 10;
 		try {
-			leader_expiration_ = config->get_int(prefix + "leader-expiration");
+			leader_expiration_ = config->get_int(prefix_ + "leader-expiration");
 		} catch (Exception &e) {
 		} // ignored, use default
 
@@ -107,7 +139,7 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
 			                local_client_cfg_.c_str());
 		}
 		local_hostport_                = client_config.hostport();
-		std::vector<std::string> hostv = config->get_strings(prefix + "hosts");
+		std::vector<std::string> hostv = config->get_strings(prefix_ + "hosts");
 		std::copy(hostv.begin(), hostv.end(), std::inserter(hosts_, hosts_.end()));
 
 		if (std::find(hosts_.begin(), hosts_.end(), local_hostport_) == hosts_.end()) {
@@ -137,19 +169,19 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
 
 		local_client_.reset(client_config.create_client());
 	}
+	bootstrap();
 }
 
 /** Setup replicaset bootstrap client.
  * @param bootstrap_client MongoDB client to access bootstrap database
  */
 void
-MongoDBReplicaSetConfig::bootstrap(std::shared_ptr<mongocxx::client> bootstrap_client)
+MongoDBReplicaSetConfig::bootstrap()
 {
 	if (enabled_) {
 		try {
-			bootstrap_client_ = bootstrap_client;
-			auto database     = bootstrap_client_->database(bootstrap_database_);
-			auto collection   = database.create_collection(bootstrap_ns_);
+			auto database   = bootstrap_client_->database(bootstrap_database_);
+			auto collection = database.create_collection(bootstrap_ns_);
 
 			collection.create_index(basic::make_document(basic::kvp("host", 1)));
 			collection.create_index(basic::make_document(basic::kvp("master", 1)),
@@ -210,26 +242,6 @@ MongoDBReplicaSetConfig::leader_resign()
 		bootstrap_client_->database(bootstrap_database_)[bootstrap_ns_].delete_one(
 		  leader_elec_query_.view(), mongocxx::options::delete_options().write_concern(write_concern));
 	}
-}
-
-void
-MongoDBReplicaSetConfig::init()
-{
-	if (!enabled_) {
-		throw Exception("Replica set manager '%s' cannot be started while disabled", name());
-	}
-
-	logger->log_debug(name(),
-	                  "Bootstrap Query:  %s",
-	                  bsoncxx::to_json(leader_elec_query_.view()).c_str());
-	logger->log_debug(name(),
-	                  "Bootstrap Update: %s",
-	                  bsoncxx::to_json(leader_elec_update_.view()).c_str());
-
-	rs_status_if_ =
-	  blackboard->open_for_writing<MongoDBManagedReplicaSetInterface>(config_name_.c_str());
-
-	timewait_ = new TimeWait(clock, (int)(loop_interval_ * 1000000.));
 }
 
 void

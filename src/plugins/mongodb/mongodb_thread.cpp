@@ -174,13 +174,9 @@ MongoDBThread::init_replicaset_configs()
 			std::string cfg_prefix = prefix + cfg_name + "/";
 
 			try {
-				auto conf = std::make_shared<MongoDBReplicaSetConfig>(config,
-				                                                      cfg_name,
-				                                                      cfg_prefix,
-				                                                      bootstrap_database);
-				if (conf->is_enabled()) {
-					std::shared_ptr<mongocxx::client> bootstrap_client(create_client(bootstrap_client_cfg));
-					conf->bootstrap(bootstrap_client);
+				if (config->get_bool(cfg_prefix + "enabled")) {
+					auto conf =
+					  std::make_shared<MongoDBReplicaSetConfig>(cfg_name, cfg_prefix, bootstrap_prefix);
 					replicaset_configs_[cfg_name] = conf;
 					logger->log_info(name(), "Added MongoDB replica set configuration %s", cfg_name.c_str());
 				} else {
