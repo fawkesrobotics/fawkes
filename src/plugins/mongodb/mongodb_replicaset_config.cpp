@@ -324,72 +324,64 @@ MongoDBReplicaSetConfig::rs_status(bsoncxx::document::value &reply)
 
 	auto cmd = basic::make_document(basic::kvp("replSetGetStatus", 1));
 	try {
-		reply   = local_client_->database("admin").run_command(std::move(cmd));
-		bool ok = int(reply.view()["ok"].get_double()) == 1;
-		if (!ok) {
-			int error_code = reply.view()["code"].get_int32();
-			if (error_code == 94 /* NotYetInitialized */) {
-				logger->log_warn(name(), "Instance has not received replica set configuration, yet");
-				status.member_status = MongoDBManagedReplicaSetInterface::NOT_INITIALIZED;
-				status.error_msg     = "Instance has not received replica set configuration, yet";
-			} else if (error_code == 93 /* InvalidReplicaSetConfig */) {
-				logger->log_error(name(),
-				                  "Invalid replica set configuration: %s",
-				                  bsoncxx::to_json(reply.view()).c_str());
-				status.member_status = MongoDBManagedReplicaSetInterface::INVALID_CONFIG;
-				status.error_msg = "Invalid replica set configuration: " + bsoncxx::to_json(reply.view());
-			} else {
-				status.error_msg = "Unknown error";
+		reply = local_client_->database("admin").run_command(std::move(cmd));
+	} catch (mongocxx::operation_exception &e) {
+		int error_code = e.raw_server_error()->view()["code"].get_int32();
+		if (error_code == 94 /* NotYetInitialized */) {
+			logger->log_warn(name(), "Instance has not received replica set configuration, yet");
+			status.member_status = MongoDBManagedReplicaSetInterface::NOT_INITIALIZED;
+			status.error_msg     = "Instance has not received replica set configuration, yet";
+		} else if (error_code == 93 /* InvalidReplicaSetConfig */) {
+			logger->log_error(name(),
+			                  "Invalid replica set configuration: %s",
+			                  bsoncxx::to_json(reply.view()).c_str());
+			status.member_status = MongoDBManagedReplicaSetInterface::INVALID_CONFIG;
+			status.error_msg     = "Invalid replica set configuration: " + bsoncxx::to_json(reply.view());
+		} else {
+			status.error_msg = "Unknown error";
+		}
+		return status;
+	}
+	//logger->log_warn(name(), "rs status reply: %s", bsoncxx::to_json(reply.view()).c_str());
+	try {
+		MongoDBManagedReplicaSetInterface::ReplicaSetMemberStatus self_status =
+		  MongoDBManagedReplicaSetInterface::REMOVED;
+		auto members = reply.view()["members"];
+		if (members && members.type() == bsoncxx::type::k_array) {
+			bsoncxx::array::view members_view{members.get_array().value};
+			bool                 have_primary = false;
+			for (bsoncxx::array::element member : members_view) {
+				int state = member["state"].get_int32();
+				if (state == 1) {
+					have_primary = true;
+				}
+				if (member["self"] && member["self"].get_bool()) {
+					switch (state) {
+					case 1: self_status = MongoDBManagedReplicaSetInterface::PRIMARY; break;
+					case 2: self_status = MongoDBManagedReplicaSetInterface::SECONDARY; break;
+					case 3: // RECOVERING
+					case 5: // STARTUP2
+					case 9: // ROLLBACK
+						self_status = MongoDBManagedReplicaSetInterface::INITIALIZING;
+						break;
+					case 7: self_status = MongoDBManagedReplicaSetInterface::ARBITER; break;
+					default: self_status = MongoDBManagedReplicaSetInterface::ERROR; break;
+					}
+				}
 			}
+			status.primary_status = have_primary ? MongoDBManagedReplicaSetInterface::HAVE_PRIMARY
+			                                     : MongoDBManagedReplicaSetInterface::NO_PRIMARY;
+			status.member_status = self_status;
 			return status;
 		} else {
-			//logger->log_warn(name(), "rs status reply: %s", bsoncxx::to_json(reply.view()).c_str());
-			try {
-				MongoDBManagedReplicaSetInterface::ReplicaSetMemberStatus self_status =
-				  MongoDBManagedReplicaSetInterface::REMOVED;
-				auto members = reply.view()["members"];
-				if (members && members.type() == bsoncxx::type::k_array) {
-					bsoncxx::array::view members_view{members.get_array().value};
-					bool                 have_primary = false;
-					for (bsoncxx::array::element member : members_view) {
-						int state = member["state"].get_int32();
-						if (state == 1) {
-							have_primary = true;
-						}
-						if (member["self"] && member["self"].get_bool()) {
-							switch (state) {
-							case 1: self_status = MongoDBManagedReplicaSetInterface::PRIMARY; break;
-							case 2: self_status = MongoDBManagedReplicaSetInterface::SECONDARY; break;
-							case 3: // RECOVERING
-							case 5: // STARTUP2
-							case 9: // ROLLBACK
-								self_status = MongoDBManagedReplicaSetInterface::INITIALIZING;
-								break;
-							case 7: self_status = MongoDBManagedReplicaSetInterface::ARBITER; break;
-							default: self_status = MongoDBManagedReplicaSetInterface::ERROR; break;
-							}
-						}
-					}
-					status.primary_status = have_primary ? MongoDBManagedReplicaSetInterface::HAVE_PRIMARY
-					                                     : MongoDBManagedReplicaSetInterface::NO_PRIMARY;
-					status.member_status = self_status;
-					return status;
-				} else {
-					logger->log_error(name(),
-					                  "Received replica set status reply without members, unknown status");
-					self_status = MongoDBManagedReplicaSetInterface::ERROR;
-				}
-			} catch (mongocxx::operation_exception &e) {
-				logger->log_warn(name(), "Failed to analyze member info: %s", e.what());
-				status.member_status = MongoDBManagedReplicaSetInterface::ERROR;
-				status.error_msg     = std::string("Failed to analyze member info: ") + e.what();
-				return status;
-			}
+			logger->log_error(name(),
+			                  "Received replica set status reply without members, unknown status");
+			self_status = MongoDBManagedReplicaSetInterface::ERROR;
 		}
 	} catch (mongocxx::operation_exception &e) {
-		logger->log_warn(name(), "Failed to get RS status: %s", e.what());
+		logger->log_warn(name(), "Failed to analyze member info: %s", e.what());
 		status.member_status = MongoDBManagedReplicaSetInterface::ERROR;
-		status.error_msg     = std::string("Failed to get RS status: ") + e.what();
+		status.error_msg     = std::string("Failed to analyze member info: ") + e.what();
 		return status;
 	}
 	return status;
