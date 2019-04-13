@@ -378,20 +378,27 @@ ThreadList::init(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
 	bool                            success = true;
 	for (ThreadList::iterator i = begin(); i != end(); ++i) {
 		// if initializer fails, we assume it handles finalization
+#ifndef DEBUG_THREAD_INIT
 		try {
+#endif
 			initializer->init(*i);
+#ifndef DEBUG_THREAD_INIT
 		} catch (Exception &e) {
 			cite.append("Initialized failed to initialize thread '%s'", (*i)->name());
 			cite.append(e);
 			success = false;
 			break;
 		}
+#endif
 		// if the thread's init() method fails, we need to finalize that very
 		// thread only with the finalizer, already initialized threads muts be
 		// fully finalized
+#ifndef DEBUG_THREAD_INIT
 		try {
+#endif
 			(*i)->init();
 			initialized_threads.push_back(*i);
+#ifndef DEBUG_THREAD_INIT
 		} catch (CannotInitializeThreadException &e) {
 			notify_of_failed_init();
 			cite.append("Initializing thread '%s' in list '%s' failed", (*i)->name(), name_);
@@ -421,6 +428,7 @@ ThreadList::init(ThreadInitializer *initializer, ThreadFinalizer *finalizer)
 			success = false;
 			break;
 		}
+#endif
 	}
 
 	if (!success) {
