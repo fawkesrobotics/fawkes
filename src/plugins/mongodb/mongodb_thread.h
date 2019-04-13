@@ -31,6 +31,8 @@
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
 #include <plugins/mongodb/aspect/mongodb_inifin.h>
 
+#include <mongocxx/instance.hpp>
+
 // from MongoDB
 #include <list>
 #include <memory>
@@ -79,7 +81,8 @@ private:
 	std::map<std::string, std::shared_ptr<MongoDBInstanceConfig>>   instance_configs_;
 	std::map<std::string, std::shared_ptr<MongoDBReplicaSetConfig>> replicaset_configs_;
 
-	fawkes::MongoDBAspectIniFin mongodb_aspect_inifin_;
+	fawkes::MongoDBAspectIniFin         mongodb_aspect_inifin_;
+	std::unique_ptr<mongocxx::instance> instance_;
 };
 
 #endif

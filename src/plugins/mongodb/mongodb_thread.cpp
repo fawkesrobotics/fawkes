@@ -25,8 +25,6 @@
 #include "mongodb_instance_config.h"
 #include "mongodb_replicaset_config.h"
 
-#include <mongocxx/instance.hpp>
-
 using namespace mongocxx;
 using namespace fawkes;
 
@@ -55,8 +53,7 @@ MongoDBThread::~MongoDBThread()
 void
 MongoDBThread::init()
 {
-	instance{};
-
+	instance_.reset(new instance());
 	logger->log_info(name(), "Init instances");
 	init_instance_configs();
 	logger->log_info(name(), "Init clients");
@@ -223,9 +220,7 @@ MongoDBThread::finalize()
 
 	client_configs_.clear();
 
-#ifdef HAVE_MONGODB_VERSION_H
-	mongo::client::shutdown();
-#endif
+	instance_.release();
 }
 
 void
