@@ -20,6 +20,8 @@
 
 #include "transform_computable.h"
 
+#include <bsoncxx/builder/basic/document.hpp>
+
 using namespace fawkes;
 using namespace mongocxx;
 using namespace bsoncxx;
@@ -46,19 +48,19 @@ TransformComputable::TransformComputable(RobotMemory *            robot_memory,
 	config_       = config;
 
 	//register computable
-	document::value          query = from_json("{frame:{$exists:true},allow_tf:true}");
+	using namespace bsoncxx::builder;
+	basic::document query;
+	query.append(basic::kvp("frame", [](basic::sub_document subdoc) {
+		subdoc.append(basic::kvp("$exists", true));
+	}));
+	query.append(basic::kvp("allow_tf", true));
 	std::vector<std::string> collections =
 	  config->get_strings("plugins/robot-memory/computables/transform/collections");
 	int   priority     = config->get_int("plugins/robot-memory/computables/transform/priority");
 	float caching_time = config->get_float("plugins/robot-memory/computables/transform/caching-time");
 	for (std::string col : collections) {
-		computables.push_back(
-		  robot_memory_->register_computable(std::move(query),
-		                                     col,
-		                                     &TransformComputable::compute_transform,
-		                                     this,
-		                                     caching_time,
-		                                     priority));
+		computables.push_back(robot_memory_->register_computable(
+		  query.extract(), col, &TransformComputable::compute_transform, this, caching_time, priority));
 	}
 }
 
