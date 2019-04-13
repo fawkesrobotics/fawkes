@@ -24,6 +24,7 @@
 
 #include <aspect/blackboard.h>
 #include <aspect/clock.h>
+#include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <interfaces/MongoDBManagedReplicaSetInterface.h>
@@ -36,7 +37,6 @@
 #include <vector>
 
 namespace fawkes {
-class Configuration;
 class TimeWait;
 } // namespace fawkes
 
@@ -46,15 +46,12 @@ class DBClientBase;
 
 class MongoDBReplicaSetConfig : public fawkes::Thread,
                                 public fawkes::LoggingAspect,
+                                public fawkes::ConfigurableAspect,
                                 public fawkes::ClockAspect,
                                 public fawkes::BlackBoardAspect
 {
 public:
-	MongoDBReplicaSetConfig(fawkes::Configuration *config,
-	                        std::string            cfgname,
-	                        std::string            prefix,
-	                        std::string            bootstrap_database);
-	void bootstrap(std::shared_ptr<mongocxx::client> bootstrap_client);
+	MongoDBReplicaSetConfig(std::string cfgname, std::string prefix, std::string bootstrap_prefix);
 
 	/** Check if configuration is enabled.
 	 * @return true if configuration is enabled, false otherwise
@@ -70,6 +67,7 @@ public:
 	virtual void finalize();
 
 private:
+	void bootstrap();
 	bool leader_elect(bool force = false);
 	void leader_resign();
 
@@ -111,8 +109,9 @@ private:
 	bsoncxx::document::value          leader_elec_query_;
 	bsoncxx::document::value          leader_elec_query_force_;
 	bsoncxx::document::value          leader_elec_update_;
+	std::string                       prefix_;
+	std::string                       bootstrap_prefix_;
 	std::string                       bootstrap_database_;
-	std::string                       bootstrap_collection_;
 	std::string                       bootstrap_ns_;
 
 	std::string                       local_client_cfg_;
