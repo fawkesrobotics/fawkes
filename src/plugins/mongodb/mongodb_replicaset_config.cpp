@@ -181,7 +181,7 @@ MongoDBReplicaSetConfig::bootstrap()
 	if (enabled_) {
 		try {
 			auto database   = bootstrap_client_->database(bootstrap_database_);
-			auto collection = database.create_collection(bootstrap_ns_);
+			auto collection = database[bootstrap_ns_];
 
 			collection.create_index(basic::make_document(basic::kvp("host", 1)));
 			collection.create_index(basic::make_document(basic::kvp("master", 1)),
