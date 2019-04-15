@@ -373,7 +373,10 @@ RobotMemory::update(const bsoncxx::document::view &query,
 
 	//actually execute update
 	try {
-		collection.update_many(query, update, options::update().upsert(upsert));
+		collection.update_many(query,
+		                       builder::basic::make_document(
+		                         builder::basic::kvp("$set", builder::concatenate(update))),
+		                       options::update().upsert(upsert));
 	} catch (operation_exception &e) {
 		log_deb(std::string("Error for update " + to_json(update) + " for query " + to_json(query)
 		                    + "\n Exception: " + e.what()),
@@ -1127,7 +1130,7 @@ RobotMemory::mutex_expire_locks(float max_age_sec)
 		auto        write_concern = mongocxx::write_concern();
 		write_concern.majority(std::chrono::milliseconds(0));
 		collection.update_many(filter_doc.view(),
-		                       update_doc.view(),
+		                       basic::make_document(basic::kvp("$set", concatenate(update_doc.view()))),
 		                       options::update().write_concern(write_concern));
 		return true;
 	} catch (operation_exception &e) {
