@@ -68,11 +68,14 @@ public:
 		auto oplog_query        = basic_builder::document{};
 		oplog_query.append(basic_builder::kvp("ns", collection));
 		// added/updated object is a subdocument in the oplog document
-		auto filter = query["$filter"].get_document().view();
-		for (auto &&it = filter.begin(); it != filter.end(); it++) {
-			auto elem = *it;
-			oplog_query.append(
-			  basic_builder::kvp(std::string("o.") + std::string(elem.key()), elem.get_value()));
+		auto filter = query["$filter"];
+		if (filter) {
+			auto filter_view = filter.get_document().view();
+			for (auto &&it = filter_view.begin(); it != filter_view.end(); it++) {
+				auto elem = *it;
+				oplog_query.append(
+				  basic_builder::kvp(std::string("o.") + std::string(elem.key()), elem.get_value()));
+			}
 		}
 		//mongo::Query oplog_query = query_builder.obj();
 		// TODO: make sure we set the read preference of the client
