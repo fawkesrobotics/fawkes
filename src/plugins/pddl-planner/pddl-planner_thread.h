@@ -57,12 +57,12 @@ protected:
 		Thread::run();
 	}
 
-private:
-	struct action
-	{
-		std::string              name;
-		std::vector<std::string> args;
-	};
+ private:
+  struct action {
+    std::string name;
+    float cost = 0;
+    std::vector<std::string> args;
+  };
 
   fawkes::PddlPlannerInterface *plan_if_;
 	std::string cfg_descripton_path_;

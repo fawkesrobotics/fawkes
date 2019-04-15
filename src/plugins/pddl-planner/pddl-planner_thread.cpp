@@ -304,34 +304,32 @@ PddlPlannerThread::kstar_planner()
     }
     if (line.find("Plan length") != std::string::npos ||
         line.find("Plan cost") != std::string::npos ||
-        line.find("cost") != std::string::npos ||
+       // line.find("cost") != std::string::npos ||
         line.find("order") != std::string::npos ||
         line == ""){
       continue;
     }
 
     action a;
-    a.name = line.substr(0,find_nth_space(line, 1));
-    if ( find_nth_space(line, 1) != line.find(':') + 1 ) {
-      std::stringstream ss(line.substr(find_nth_space(line, 1),
-         line.find(':') - find_nth_space(line,1)));
-      std::string item;
-      while (getline(ss, item, ' ')) {
-        a.args.push_back(item);
+    if (line.find("cost") != std::string::npos) {
+      logger->log_info(name(),line.substr(line.find("cost") + 5 , line.length() - 1).c_str());
+      if (!curr_plan.empty() && curr_plan.back().cost == 0) {
+        curr_plan.back().cost = std::stof(line.substr(line.find("cost")+5, line.length() - 1));
+      } 
+      
+    } else {
+      a.name = line.substr(0,find_nth_space(line, 1));
+      if ( find_nth_space(line, 1) != line.find(':') + 1 ) {
+        std::stringstream ss(line.substr(find_nth_space(line, 1),
+              line.find(':') - find_nth_space(line,1)));
+        std::string item;
+        while (getline(ss, item, ' ')) {
+          a.args.push_back(item);
+        }
       }
+      curr_plan.push_back(a);
     }
-    curr_plan.push_back(a);
-  }
-  for(unsigned int i = 0; i < plan_list_.size(); ++i){
-    logger->log_error(name(),"Plan %d",i);
-    for(unsigned int j = 0; j < plan_list_[i].size(); ++j){
-      std::string params;
-      for(unsigned int k = 0; k < plan_list_[i][j].args.size();++k){
-        params += " ";
-        params +=  plan_list_[i][j].args[k].c_str();
-      }
-      logger->log_error(name(),"%s: %s",plan_list_[i][j].name.c_str(),params.c_str());
-    }
+   
   }
 
 }
@@ -394,10 +392,12 @@ PddlPlannerThread::BSONFromActionList(const std::vector<action>& action_list, in
 {
   using namespace bsoncxx::builder;
   basic::document plan;
+  float cost = 0;
   plan.append(basic::kvp("plan",static_cast<int64_t>(plan_id)));
   plan.append(basic::kvp("msg_id", static_cast<int64_t>(plan_if_->msg_id())));
 	plan.append(basic::kvp("actions", [&](basic::sub_array actions) {
 		for (action a : action_list) {
+		  cost += a.cost;
 			basic::document action;
 			action.append(basic::kvp("name", a.name));
 			action.append(basic::kvp("args", [a](basic::sub_array args) {
@@ -407,6 +407,7 @@ PddlPlannerThread::BSONFromActionList(const std::vector<action>& action_list, in
 			}));
 		}
 	}));
+  plan.append(basic::kvp("cost",cost));
   return plan.extract();
 }
 
