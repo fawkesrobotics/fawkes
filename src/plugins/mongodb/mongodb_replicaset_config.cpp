@@ -429,7 +429,7 @@ MongoDBReplicaSetConfig::rs_get_config(bsoncxx::document::value &rs_config)
 		bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
 		reply   = local_client_->database("admin").run_command(std::move(cmd));
 		bool ok = int(reply.view()["ok"].get_double()) == 1;
-		if (!ok) {
+		if (ok) {
 			rs_config = reply;
 			//logger->log_info(name(), "Config: %s", bsoncxx::to_json(rs_config.view()["config"]).c_str());
 		} else {
