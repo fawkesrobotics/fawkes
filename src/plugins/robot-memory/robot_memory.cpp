@@ -112,7 +112,6 @@ RobotMemory::init()
 	cfg_coord_database_ = config_->get_string("/plugins/robot-memory/coordination/database");
 	cfg_coord_mutex_collection_ =
 	  config_->get_string("/plugins/robot-memory/coordination/mutex-collection");
-	cfg_coord_mutex_collection_ = cfg_coord_database_ + "." + cfg_coord_mutex_collection_;
 
 	using namespace std::chrono_literals;
 
