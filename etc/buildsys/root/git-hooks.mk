@@ -17,8 +17,9 @@ ifndef __buildsys_config_mk_
 $(error config.mk must be included before check.mk)
 endif
 
-.git/hooks/pre-push: etc/git-hooks/pre-push
+$(TOP_BASEDIR)/.git/hooks/pre-push: $(FAWKES_BASEDIR)/etc/git-hooks/pre-push
+	$(SILENT)mkdir -p $(TOP_BASEDIR)/.git/hooks
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[GIT] installing pre-push hook $@"
 	$(SILENT)install -m 0755 $< $@
 
-all: .git/hooks/pre-push
+all: $(TOP_BASEDIR)/.git/hooks/pre-push
