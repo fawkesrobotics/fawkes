@@ -435,7 +435,7 @@ MongoDBReplicaSetConfig::rs_get_config(bsoncxx::document::value &rs_config)
 		} else {
 			logger->log_warn(name(),
 			                 "Failed to get RS config: %s (DB error)",
-			                 reply.view()["errmsg"].get_utf8().value.to_string().c_str());
+			                 bsoncxx::to_json(reply.view()).c_str());
 		}
 		return ok;
 	} catch (mongocxx::operation_exception &e) {
@@ -450,12 +450,12 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 	using namespace std::chrono_literals;
 
 	std::set<std::string> in_rs, unresponsive, new_alive, members;
-	//int last_member_id{0};
-	bsoncxx::array::view members_view{status_reply["members"].get_array().value};
+	int                   last_member_id{0};
+	bsoncxx::array::view  members_view{status_reply["members"].get_array().value};
 	for (bsoncxx::array::element member : members_view) {
 		std::string member_name = member["name"].get_utf8().value.to_string();
 		members.insert(member_name);
-		//last_member_id = std::max(int(member["_id"].get_int32()), last_member_id);
+		last_member_id = std::max(int(member["_id"].get_int32()), last_member_id);
 		if (member["self"] && member["self"].get_bool()) {
 			in_rs.insert(member_name);
 		} else {
@@ -497,10 +497,10 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 		logger->log_info(name(), "Creating new config");
 		auto new_config = basic::document{};
 		for (auto &&key_it = config.begin(); key_it != config.end(); key_it++) {
-			if (key_it->get_utf8().value == "version") {
+			if (key_it->key() == "version") {
 				new_config.append(basic::kvp("version", config["version"].get_int32() + 1));
 				//new_config = new_config << "version" << config["version"].get_int32() + 1;
-			} else if (key_it->get_utf8().value == "members") {
+			} else if (key_it->key() == "members") {
 				bsoncxx::array::view members_view{config["members"].get_array().value};
 				new_config.append(basic::kvp("members", [&](basic::sub_array array) {
 					for (bsoncxx::array::element member : members_view) {
@@ -513,23 +513,20 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 						} else if (unresponsive.find(host) == unresponsive.end()) {
 							// it's not unresponsive, add
 							logger->log_warn(name(), "Keeping RS member '%s'", host.c_str());
-							// TODO keep ID
-							array.append(
-							  [&](basic::sub_document subdoc) { subdoc.append(basic::kvp("host", host)); });
+							array.append(basic::make_document(basic::kvp("host", host),
+							                                  basic::kvp("_id", member["_id"].get_value())));
 						} else {
 							logger->log_warn(name(), "Removing RS member '%s'", host.c_str());
 						}
 					}
 					for (const std::string &h : new_alive) {
 						logger->log_info(name(), "Adding new RS member '%s'", h.c_str());
-						array.append([h](basic::sub_document subdoc) { subdoc.append(basic::kvp("host", h)); });
+						array.append(
+						  basic::make_document(basic::kvp("host", h), basic::kvp("_id", ++last_member_id)));
 					}
 				}));
 			} else {
-				// TODO keep/copy the entry
-				logger->log_warn(name(),
-				                 "Dropping entry with key %s from RS config",
-				                 key_it->get_utf8().value.to_string().c_str());
+				new_config.append(basic::kvp(key_it->key(), key_it->get_value()));
 			}
 		}
 
