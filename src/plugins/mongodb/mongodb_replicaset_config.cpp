@@ -202,13 +202,20 @@ MongoDBReplicaSetConfig::leader_elect(bool force)
 	try {
 		auto write_concern = mongocxx::write_concern();
 		write_concern.majority(std::chrono::milliseconds(0));
-		bootstrap_client_->database(bootstrap_database_)[bootstrap_ns_].update_one(
+		auto result = bootstrap_client_->database(bootstrap_database_)[bootstrap_ns_].update_one(
 		  force ? leader_elec_query_force_.view() : leader_elec_query_.view(),
 		  leader_elec_update_.view(),
 		  mongocxx::options::update().upsert(true).write_concern(write_concern));
-		if (!is_leader_) {
-			is_leader_ = true;
-			logger->log_info(name(), "Became replica set leader");
+		if (result) {
+			if (!is_leader_) {
+				is_leader_ = true;
+				logger->log_info(name(), "Became replica set leader");
+			}
+		} else {
+			if (is_leader_) {
+				is_leader_ = false;
+				logger->log_warn(name(), "Lost replica set leadership");
+			}
 		}
 	} catch (mongocxx::operation_exception &e) {
 		if (boost::optional<bsoncxx::document::value> error = e.raw_server_error()) {
