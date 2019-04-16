@@ -93,8 +93,6 @@ MongoDBReplicaSetConfig::init()
 	rs_status_if_ =
 	  blackboard->open_for_writing<MongoDBManagedReplicaSetInterface>(config_name_.c_str());
 
-	timewait_ = new TimeWait(clock, (int)(loop_interval_ * 1000000.));
-
 	if (enabled_) {
 		bootstrap_database_                      = config->get_string(bootstrap_prefix_ + "database");
 		std::string         bootstrap_client_cfg = config->get_string(bootstrap_prefix_ + "client");
@@ -117,6 +115,8 @@ MongoDBReplicaSetConfig::init()
 			loop_interval_ = config->get_float(prefix_ + "loop-interval");
 		} catch (Exception &e) {
 		} // ignored, use default
+
+		timewait_ = new TimeWait(clock, (int)(loop_interval_ * 1000000.));
 
 		leader_expiration_ = 10;
 		try {
