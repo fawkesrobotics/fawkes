@@ -520,12 +520,7 @@ ClipsRobotMemoryThread::clips_robotmemory_update(std::string  collection,
 		logger->log_warn("MongoDB", "Invalid BSON Builder passed");
 		return;
 	}
-
-	using namespace bsoncxx::builder;
-	basic::document update_doc;
-	update_doc.append(basic::kvp("$set", b->view()));
-
-	robotmemory_update(collection, update_doc.view(), query, false);
+	robotmemory_update(collection, b->view(), query, false);
 }
 
 void
