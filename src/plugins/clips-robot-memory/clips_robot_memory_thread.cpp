@@ -651,6 +651,13 @@ ClipsRobotMemoryThread::clips_bson_get(void *bson, std::string field_name)
 
 	try {
 		auto el = get_dotted_field(b->view(), field_name);
+		if (!el) {
+			logger->log_warn(name(),
+			                 "mongodb-bson-get: failed to get '%s', no such element in doc: %s",
+			                 field_name.c_str(),
+			                 bsoncxx::to_json(b->view()).c_str());
+			return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+		}
 		switch (el.type()) {
 		case bsoncxx::type::k_double: return CLIPS::Value(el.get_double());
 		case bsoncxx::type::k_utf8: return CLIPS::Value(el.get_utf8().value.to_string());
