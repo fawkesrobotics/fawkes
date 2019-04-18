@@ -76,8 +76,7 @@ private:
 	mongocxx::uri  conn_uri_;
 	std::string    replicaset_name_;
 	std::string    auth_dbname;
-	std::string    username;
-	std::string    password;
+	std::string    auth_string_;
 };
 
 #endif

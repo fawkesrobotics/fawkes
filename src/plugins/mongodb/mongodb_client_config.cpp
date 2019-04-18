@@ -64,10 +64,8 @@ MongoDBClientConfig::MongoDBClientConfig(Configuration *config,
 		                 cfgname.c_str());
 	}
 
-	std::string auth_string = "";
-	if (!username.empty() && !password.empty()) {
-		auth_string = username + ":" + password + "@";
-	}
+	auth_string_ = "";
+	read_authinfo(config, logger, cfgname, prefix);
 
 	if (mode == "replica_set" || mode == "replicaset") {
 		mode_            = REPLICA_SET;
@@ -99,7 +97,7 @@ MongoDBClientConfig::MongoDBClientConfig(Configuration *config,
 
 	} else {
 		mode_     = CONNECTION;
-		conn_uri_ = mongocxx::uri{"mongodb://" + auth_string + config->get_string(prefix + "hostport")
+		conn_uri_ = mongocxx::uri{"mongodb://" + auth_string_ + config->get_string(prefix + "hostport")
 		                          + "/" + auth_dbname};
 	}
 }
@@ -119,9 +117,12 @@ MongoDBClientConfig::read_authinfo(Configuration *config,
                                    std::string    prefix)
 {
 	try {
-		auth_dbname = config->get_string((prefix + "auth_dbname").c_str());
-		username    = config->get_string((prefix + "auth_username").c_str());
-		password    = config->get_string((prefix + "auth_password").c_str());
+		auth_dbname          = config->get_string((prefix + "auth_dbname").c_str());
+		std::string username = config->get_string((prefix + "auth_username").c_str());
+		std::string password = config->get_string((prefix + "auth_password").c_str());
+		if (!username.empty() && !password.empty()) {
+			auth_string_ = username + ":" + password + "@";
+		}
 	} catch (Exception &e) {
 		logger->log_info(logcomp_.c_str(),
 		                 "No default authentication info for "
@@ -150,12 +151,18 @@ MongoDBClientConfig::log(Logger *logger, const char *component, const char *inde
 	switch (mode_) {
 	case REPLICA_SET: {
 		logger->log_info(component, "%smode:   replica set", indent);
-	}
+	} break;
 	default: {
 		logger->log_info(component, "%smode:   connection", indent);
 	} break;
 	}
-	logger->log_info(component, "%suri:    %s", indent, conn_uri_.to_string().c_str());
+	std::string uri_string = conn_uri_.to_string();
+	if (!auth_string_.empty()) {
+		if (uri_string.find(auth_string_) != std::string::npos) {
+			uri_string.replace(uri_string.find(auth_string_), auth_string_.length(), "****@****");
+		}
+	}
+	logger->log_info(component, "%suri:    %s", indent, uri_string.c_str());
 }
 
 /** Get host and port of configuration.
