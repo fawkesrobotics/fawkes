@@ -203,10 +203,9 @@ private:
 	             const std::string &            what,
 	             const std::string &            level = "info");
 
-	std::pair<std::string, std::string> split_db_collection_string(const std::string &dbcollection);
-	bool                                is_distributed_database(const std::string &dbcollection);
-	mongocxx::client *                  get_mongodb_client(const std::string &collection);
-	mongocxx::collection                get_collection(const std::string &dbcollection);
+	bool                 is_distributed_database(const std::string &dbcollection);
+	mongocxx::client *   get_mongodb_client(const std::string &collection);
+	mongocxx::collection get_collection(const std::string &dbcollection);
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_ROBOT_MEMORY_H_ */

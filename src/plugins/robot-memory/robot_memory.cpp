@@ -24,6 +24,7 @@
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 #include <interfaces/RobotMemoryInterface.h>
+#include <plugins/mongodb/utils.h>
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
 #include <utils/system/hostinfo.h>
@@ -695,23 +696,6 @@ RobotMemory::log(const bsoncxx::document::view &query,
                  const std::string &            level)
 {
 	log(what + " " + to_json(query), level);
-}
-
-/**
- * Split a string of the form "<dbname>.<collname>" into a pair (<dbname>, <collname>).
- * @param dbcollection A string of the form "<dbname>.<collname>"
- * @return A pair consisting of the database name and the collection name
- */
-std::pair<std::string, std::string>
-RobotMemory::split_db_collection_string(const std::string &dbcollection)
-{
-	size_t point_pos = dbcollection.find(".");
-	if (point_pos == dbcollection.npos) {
-		throw Exception(
-		  "Improper database collection string: '%s', expected string of format '<dbname>.<collname>'");
-	}
-	return make_pair(dbcollection.substr(0, point_pos),
-	                 dbcollection.substr(point_pos + 1, std::string::npos));
 }
 
 /** Check if the given database is a distributed database
