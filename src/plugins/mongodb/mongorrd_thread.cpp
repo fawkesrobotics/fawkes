@@ -22,6 +22,8 @@
 
 #include "mongorrd_thread.h"
 
+#include "utils.h"
+
 #include <utils/time/wait.h>
 
 // from MongoDB
@@ -417,7 +419,7 @@ MongoRRDThread::loop()
 	try {
 		auto reply = mongodb_client->database("admin").run_command(
 		  basic::make_document(basic::kvp("serverStatus", 1)));
-		if (int(reply.view()["ok"].get_double()) == 1) {
+		if (check_mongodb_ok(reply.view())) {
 			auto    opcounters = reply.view()["opcounters"].get_document().view();
 			int64_t insert, query, update, del, getmore, command;
 			insert  = opcounters["insert"].get_int64();
