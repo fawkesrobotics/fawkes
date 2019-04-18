@@ -66,6 +66,9 @@ bool
 check_mongodb_ok(const bsoncxx::document::view &reply)
 {
 	try {
+		if (!reply["ok"]) {
+			return false;
+		}
 		return reply["ok"].get_double() > 0.5;
 	} catch (bsoncxx::exception &e) {
 		return false;
