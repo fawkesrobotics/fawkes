@@ -20,6 +20,8 @@
 
 #include "utils.h"
 
+#include <core/exception.h>
+
 #include <bsoncxx/types.hpp>
 
 using namespace bsoncxx;
@@ -36,4 +38,21 @@ get_dotted_field(const document::view &doc, const string &key)
 		subkey = subkey.substr(pos + 1);
 	}
 	return subdoc[subkey];
+}
+
+/**
+ * Split a string of the form "<dbname>.<collname>" into a pair (<dbname>, <collname>).
+ * @param dbcollection A string of the form "<dbname>.<collname>"
+ * @return A pair consisting of the database name and the collection name
+ */
+std::pair<std::string, std::string>
+split_db_collection_string(const std::string &dbcollection)
+{
+	size_t point_pos = dbcollection.find(".");
+	if (point_pos == dbcollection.npos) {
+		throw fawkes::Exception(
+		  "Improper database collection string: '%s', expected string of format '<dbname>.<collname>'");
+	}
+	return make_pair(dbcollection.substr(0, point_pos),
+	                 dbcollection.substr(point_pos + 1, std::string::npos));
 }

@@ -24,8 +24,10 @@
 #include <bsoncxx/document/element.hpp>
 #include <bsoncxx/document/view.hpp>
 #include <string>
+#include <utility>
 
-bsoncxx::document::element get_dotted_field(const bsoncxx::document::view &doc,
-                                            const std::string &            key);
+bsoncxx::document::element          get_dotted_field(const bsoncxx::document::view &doc,
+                                                     const std::string &            key);
+std::pair<std::string, std::string> split_db_collection_string(const std::string &dbcollection);
 
 #endif /* !_PLUGINS_MONGODB_UTILS_H_ */
