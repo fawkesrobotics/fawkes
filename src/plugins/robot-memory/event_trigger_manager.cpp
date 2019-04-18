@@ -140,7 +140,9 @@ EventTriggerManager::create_change_stream(mongocxx::collection &coll, bsoncxx::d
 	opts.max_await_time(std::chrono::milliseconds(0));
 	auto res = coll.watch(opts);
 	// Go to end of change stream to get new updates from then on.
-	while (res.begin() != res.end()) {}
+	auto it = res.begin();
+	while (std::next(it) != res.end()) {}
+
 	return res;
 }
 
