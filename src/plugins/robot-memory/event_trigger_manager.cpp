@@ -137,7 +137,7 @@ EventTriggerManager::create_change_stream(mongocxx::collection &coll, bsoncxx::d
 {
 	mongocxx::options::change_stream opts;
 	opts.full_document("updateLookup");
-	// TODO max await time
+	opts.max_await_time(std::chrono::milliseconds(0));
 	auto res = coll.watch(opts);
 	// Go to end of change stream to get new updates from then on.
 	while (res.begin() != res.end()) {}
