@@ -777,12 +777,9 @@ ClipsRobotMemoryThread::clips_bson_get_time(void *bson, std::string field_name)
 		if (el.type() == bsoncxx::type::k_date) {
 			bsoncxx::types::b_date d = el.get_date();
 			ts                       = d.to_int64();
-			/*
-    We do not support timestamps, as these are for internal use only.
-		} else if (el.type() == bsoncxx::type::timestamp) {
-      bsoncxx::types::b_timestamp t = el.get_timestamp();
-			ts                   = (int64_t)t.seconds() * 1000;
-    */
+		} else if (el.type() == bsoncxx::type::k_timestamp) {
+			bsoncxx::types::b_timestamp t = el.get_timestamp();
+			ts                            = (int64_t)t.timestamp * 1000;
 		} else {
 			logger->log_error("MongoDB",
 			                  "mongodb-bson-get-time: field %s is not a time",
