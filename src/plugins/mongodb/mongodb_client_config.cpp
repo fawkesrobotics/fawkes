@@ -83,6 +83,15 @@ MongoDBClientConfig::MongoDBClientConfig(Configuration *config,
 		}
 		uri += "/" + auth_dbname;
 		uri += "?replicaSet=" + replicaset_name_;
+		try {
+			uri += "&readPreference=" + config->get_string((prefix + "read-preference").c_str());
+		} catch (Exception &e) {
+			// use default read preference
+		}
+		try {
+			uri += "&readPreferenceTags=" + config->get_string((prefix + "read-preference-tags").c_str());
+		} catch (Exception &e) {
+		}
 		conn_uri_ = mongocxx::uri{uri};
 
 	} else if (mode == "sync_cluster" || mode == "synccluster") {
