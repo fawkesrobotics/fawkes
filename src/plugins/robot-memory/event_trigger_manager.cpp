@@ -21,7 +21,10 @@
 
 #include "event_trigger_manager.h"
 
+#include <plugins/mongodb/utils.h>
+
 #include <boost/bind.hpp>
+#include <bsoncxx/json.hpp>
 #include <mongocxx/exception/operation_exception.hpp>
 
 using namespace fawkes;
@@ -85,15 +88,15 @@ EventTriggerManager::check_events()
 	for (EventTrigger *trigger : triggers) {
 		bool ok = true;
 		try {
-			auto next = trigger->oplog_cursor.begin();
-			while (next != trigger->oplog_cursor.end()) {
-				//logger_->log_info(name.c_str(), "Triggering: %s", change.toString().c_str());
+			auto next = trigger->change_stream.begin();
+			while (next != trigger->change_stream.end()) {
+				//logger_->log_warn(name.c_str(), "Triggering: %s", bsoncxx::to_json(*next).c_str());
 				//actually call the callback function
 				trigger->callback(*next);
 				next++;
 			}
 		} catch (operation_exception &e) {
-			logger_->log_error(name.c_str(), "Error while reading the oplog");
+			logger_->log_error(name.c_str(), "Error while reading the change stream");
 			ok = false;
 		}
 		// TODO Do we still need to check whether the cursor is dead?
@@ -111,9 +114,9 @@ EventTriggerManager::check_events()
 			} else {
 				con = con_local_;
 			}
-
-			auto oplog            = con->database("local")["oplog.rs"];
-			trigger->oplog_cursor = create_oplog_cursor(oplog, trigger->oplog_query.view());
+			auto db_coll_pair      = split_db_collection_string(trigger->ns);
+			auto collection        = con->database(db_coll_pair.first)[db_coll_pair.second];
+			trigger->change_stream = create_change_stream(collection, trigger->filter_query.view());
 		}
 	}
 }
@@ -129,15 +132,14 @@ EventTriggerManager::remove_trigger(EventTrigger *trigger)
 	delete trigger;
 }
 
-cursor
-EventTriggerManager::create_oplog_cursor(mongocxx::collection &coll, bsoncxx::document::view query)
+change_stream
+EventTriggerManager::create_change_stream(mongocxx::collection &coll, bsoncxx::document::view query)
 {
-	mongocxx::options::find opts;
-	opts.cursor_type(mongocxx::cursor::type::k_tailable_await);
-	// TODO max time/timeouts?
-	cursor res = coll.find(query, opts);
-	// Go to end of oplog to get new updates from then on.
-	// Note that res->begin() forwards the cursor, no need to call next() or something similar.
+	mongocxx::options::change_stream opts;
+	opts.full_document("updateLookup");
+	// TODO max await time
+	auto res = coll.watch(opts);
+	// Go to end of change stream to get new updates from then on.
 	while (res.begin() != res.end()) {}
 	return res;
 }
