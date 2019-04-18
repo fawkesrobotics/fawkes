@@ -242,19 +242,13 @@ bool
 MongoDBInstanceConfig::check_alive()
 {
 	try {
-		std::ostringstream hostport;
-		hostport << "mongodb://"
-		         << "localhost"
-		         << ":" << port_;
-		mongocxx::uri                     uri{hostport.str()};
-		std::shared_ptr<mongocxx::client> client = std::make_shared<mongocxx::client>(uri);
-		std::string                       errmsg;
+		mongocxx::client client{mongocxx::uri("mongodb://localhost:" + std::to_string(port_))};
 
 		using namespace bsoncxx::builder;
 		auto cmd{basic::document{}};
 		cmd.append(basic::kvp("isMaster", 1));
 
-		auto reply = client->database("admin").run_command(cmd.view());
+		auto reply = client["admin"].run_command(cmd.view());
 		bool ok    = int(reply.view()["ok"].get_double()) == 1;
 		if (!ok) {
 			logger->log_warn(name(), "Failed to connect: %s", bsoncxx::to_json(reply.view()).c_str());
