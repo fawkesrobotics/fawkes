@@ -415,42 +415,20 @@
 )
 
 (deffunction mutex-trigger-update (?obj)
-	(bind ?id nil)
-	(if (bson-has-field ?obj "o._id")
-	then
-		(bind ?id (sym-cat (bson-get ?obj "o._id")))
-	else
-		(bind ?id (sym-cat (bson-get ?obj "o2._id")))
-	)	
+	(bind ?doc (bson-get ?obj "fullDocument"))
+	(bind ?id (sym-cat (bson-get ?doc "_id")))
 	(if ?id then
 		(bind ?set-missing-locked-field FALSE)
 		(bind ?locked FALSE)
 		(bind ?locked-by "")
 		(bind ?lock-time (create$ 0 0))
 
-		(if (bson-has-field ?obj "o.$set")
-		then
-			; It's an incremental update
-			(if (bson-has-field ?obj "o.$set.locked")
-				then (bind ?locked (bson-get ?obj "o.$set.locked"))
-				else (bind ?set-missing-locked-field TRUE)
-			)
-			(if (bson-has-field ?obj "o.$set.locked-by") then
-				(bind ?locked-by (bson-get ?obj "o.$set.locked-by"))
-				; else it's in $unset, lock is removed
-			)
-			(if (bson-has-field ?obj "o.$set.lock-time") then
-				(bind ?lock-time (bson-get-time ?obj "o.$set.lock-time"))
-				; else it's in $unset, lock is removed
-			)
-		else
-			(bind ?locked (bson-get ?obj "o.locked"))
-			(if (bson-has-field ?obj "o.locked-by") then
-				(bind ?locked-by (bson-get ?obj "o.locked-by"))
-			)
-			(if (bson-has-field ?obj "o.lock-time") then
-				(bind ?lock-time (bson-get-time ?obj "o.lock-time"))
-			)
+		(bind ?locked (bson-get ?doc "locked"))
+		(if (bson-has-field ?doc "locked-by") then
+			(bind ?locked-by (bson-get ?doc "locked-by"))
+		)
+		(if (bson-has-field ?doc "lock-time") then
+			(bind ?lock-time (bson-get-time ?doc "lock-time"))
 		)
 
 		(if (any-factp ((?m mutex)) (eq ?m:name ?id))
@@ -473,7 +451,7 @@
 )
 
 (deffunction mutex-trigger-delete (?obj)
-	(bind ?id (sym-cat (bson-get ?obj "o._id")))
+	(bind ?id (sym-cat (bson-get ?obj "fullDocument._id")))
 	(if ?id then
 		(do-for-fact ((?m mutex)) (eq ?m:name ?id)
 			(modify ?m (state OPEN) (locked-by ""))
@@ -485,13 +463,13 @@
 	(wm-fact (key cx identity) (value ?identity))
 	?rt <- (robmem-trigger (name "mutex-trigger") (ptr ?obj))
 	=>
-	(bind ?op (sym-cat (bson-get ?obj "op")))
+	(bind ?op (sym-cat (bson-get ?obj "operationType")))
 
 	;(printout warn "Trigger: " (bson-tostring ?obj) crlf)
 	(switch ?op
-		(case i then (mutex-trigger-update ?obj))
-		(case u then (mutex-trigger-update ?obj))
-		(case d then (mutex-trigger-delete ?obj))
+		(case insert then (mutex-trigger-update ?obj))
+		(case update then (mutex-trigger-update ?obj))
+		(case delete then (mutex-trigger-delete ?obj))
 	)
 
 	(bson-destroy ?obj)
