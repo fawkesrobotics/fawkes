@@ -22,6 +22,7 @@
 
 #include <core/exception.h>
 
+#include <bsoncxx/exception/exception.hpp>
 #include <bsoncxx/types.hpp>
 
 using namespace bsoncxx;
@@ -55,4 +56,18 @@ split_db_collection_string(const std::string &dbcollection)
 	}
 	return make_pair(dbcollection.substr(0, point_pos),
 	                 dbcollection.substr(point_pos + 1, std::string::npos));
+}
+
+/** Check if a mongodb command was successful.
+ *  @param reply The reply to the command from the server
+ *  @return true if the command was successful
+ */
+bool
+check_mongodb_ok(const bsoncxx::document::view &reply)
+{
+	try {
+		return reply["ok"].get_double() > 0.5;
+	} catch (bsoncxx::exception &e) {
+		return false;
+	}
 }

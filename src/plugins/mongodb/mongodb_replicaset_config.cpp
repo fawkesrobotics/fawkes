@@ -22,6 +22,7 @@
 #include "mongodb_replicaset_config.h"
 
 #include "mongodb_client_config.h"
+#include "utils.h"
 
 #include <config/config.h>
 #include <logging/logger.h>
@@ -412,7 +413,7 @@ MongoDBReplicaSetConfig::rs_init()
 	bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
 	try {
 		reply   = local_client_->database("admin").run_command(std::move(cmd));
-		bool ok = int(reply.view()["ok"].get_double()) == 1;
+		bool ok = check_mongodb_ok(reply.view());
 		if (!ok) {
 			logger->log_error(name(),
 			                  "RS initialization failed: %s",
@@ -435,7 +436,7 @@ MongoDBReplicaSetConfig::rs_get_config(bsoncxx::document::value &rs_config)
 	try {
 		bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
 		reply   = local_client_->database("admin").run_command(std::move(cmd));
-		bool ok = int(reply.view()["ok"].get_double()) == 1;
+		bool ok = check_mongodb_ok(reply.view());
 		if (ok) {
 			rs_config = reply;
 			//logger->log_info(name(), "Config: %s", bsoncxx::to_json(rs_config.view()["config"]).c_str());
@@ -547,7 +548,7 @@ MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 			logger->log_info(name(), "Running command");
 			auto reply = local_client_->database("admin").run_command(cmd.view());
 			logger->log_info(name(), "done");
-			bool ok = int(reply.view()["ok"].get_double()) == 1;
+			bool ok = check_mongodb_ok(reply.view());
 			if (!ok) {
 				logger->log_error(name(),
 				                  "RS reconfig failed: %s (DB error)",
@@ -568,7 +569,7 @@ MongoDBReplicaSetConfig::check_alive(const std::string &h)
 		auto             cmd = basic::document{};
 		cmd.append(basic::kvp("isMaster", 1));
 		auto reply = client.database("admin").run_command(cmd.view());
-		bool ok    = int(reply.view()["ok"].get_double()) == 1;
+		bool ok    = check_mongodb_ok(reply.view());
 		if (!ok) {
 			logger->log_warn(name(), "Failed to connect: %s", bsoncxx::to_json(reply.view()).c_str());
 		}

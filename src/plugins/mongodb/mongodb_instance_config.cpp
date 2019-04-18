@@ -21,6 +21,8 @@
 
 #include "mongodb_instance_config.h"
 
+#include "utils.h"
+
 #include <config/config.h>
 #include <core/exceptions/system.h>
 #include <utils/sub_process/proc.h>
@@ -249,7 +251,7 @@ MongoDBInstanceConfig::check_alive()
 		cmd.append(basic::kvp("isMaster", 1));
 
 		auto reply = client["admin"].run_command(cmd.view());
-		bool ok    = int(reply.view()["ok"].get_double()) == 1;
+		bool ok    = check_mongodb_ok(reply.view());
 		if (!ok) {
 			logger->log_warn(name(), "Failed to connect: %s", bsoncxx::to_json(reply.view()).c_str());
 		}
