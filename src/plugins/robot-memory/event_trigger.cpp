@@ -31,17 +31,17 @@
  */
 
 /** Constructor.
- * @param cursor The cursor to the oplog, already moved to the end of the oplog
- * @param oplog_query The Query on the oplog, which defines which database update invokes the trigger
+ * @param change_stream The change stream for the collection, already moved to the end
+ * @param filter_query The query to use for filtering the change stream
  * @param ns namespace of the trigger, format db.collection
  * @param callback Reference to callback function
  */
-EventTrigger::EventTrigger(mongocxx::cursor &&                                   cursor,
-                           const bsoncxx::document::view &                       oplog_query,
+EventTrigger::EventTrigger(mongocxx::change_stream &&                            change_stream,
+                           const bsoncxx::document::view &                       filter_query,
                            const std::string &                                   ns,
                            const boost::function<void(bsoncxx::document::view)> &callback)
-: oplog_cursor(std::move(cursor)),
-  oplog_query(oplog_query),
+: change_stream(std::move(change_stream)),
+  filter_query(filter_query),
   ns(ns),
   ns_db(EventTriggerManager::get_db_name(ns)),
   callback(callback)

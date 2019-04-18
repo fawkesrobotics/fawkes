@@ -34,15 +34,15 @@ class EventTrigger
 	friend class EventTriggerManager;
 
 public:
-	EventTrigger(mongocxx::cursor &&                                   cursor,
+	EventTrigger(mongocxx::change_stream &&                            change_stream,
 	             const bsoncxx::document::view &                       oplog_query,
 	             const std::string &                                   ns,
 	             const boost::function<void(bsoncxx::document::view)> &callback);
 	virtual ~EventTrigger();
 
 private:
-	mongocxx::cursor                               oplog_cursor;
-	bsoncxx::document::value                       oplog_query;
+	mongocxx::change_stream                        change_stream;
+	bsoncxx::document::value                       filter_query;
 	std::string                                    ns;
 	std::string                                    ns_db;
 	boost::function<void(bsoncxx::document::view)> callback;

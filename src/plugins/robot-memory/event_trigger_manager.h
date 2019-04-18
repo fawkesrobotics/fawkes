@@ -26,9 +26,11 @@
 
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <core/exception.h>
 #include <core/threading/mutex_locker.h>
 #include <plugin/loader.h>
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
+#include <plugins/mongodb/utils.h>
 
 #include <boost/bind.hpp>
 #include <bsoncxx/builder/basic/document.hpp>
@@ -48,7 +50,7 @@ public:
 	/**
      * Register a trigger to be notified when the robot memory is updated and the updated document matches the query
      * @param query Query the updated document has to match
-     * @param collection db.collection to use
+     * @param dbcollection db.collection to use
      * @param callback Callback function (e.g. &Class::callback)
      * @param obj Pointer to class the callback is a function of (usaually this)
      * @return Trigger object pointer, save it to remove the trigger later
@@ -56,45 +58,34 @@ public:
 	template <typename T>
 	EventTrigger *
 	register_trigger(const bsoncxx::document::view &query,
-	                 std::string                    collection,
+	                 std::string                    dbcollection,
 	                 void (T::*callback)(const bsoncxx::document::view &),
 	                 T *obj)
 	{
+		//logger_->log_warn("RM|EventTriggerManager", "Registering trigger on %s", dbcollection.c_str());
 		//lock to be thread safe (e.g. registration during checking)
 		fawkes::MutexLocker lock(mutex_);
 
-		//construct query for oplog
-		namespace basic_builder = bsoncxx::builder::basic;
-		auto oplog_query        = basic_builder::document{};
-		oplog_query.append(basic_builder::kvp("ns", collection));
-		// added/updated object is a subdocument in the oplog document
-		auto filter = query["$filter"];
-		if (filter) {
-			auto filter_view = filter.get_document().view();
-			for (auto &&it = filter_view.begin(); it != filter_view.end(); it++) {
-				auto elem = *it;
-				oplog_query.append(
-				  basic_builder::kvp(std::string("o.") + std::string(elem.key()), elem.get_value()));
-			}
+		if (!query.empty()) {
+			throw fawkes::Exception("Non-empty queries are not implemented!");
 		}
-		//mongo::Query oplog_query = query_builder.obj();
-		// TODO: make sure we set the read preference of the client
-		//oplog_query.readPref(mongo::ReadPreference_Nearest, mongo::BSONArray());
 
-		//check if collection is local or replicated
+		//check if dbcollection is local or replicated
 		mongocxx::client *con;
-		if (std::find(dbnames_distributed_.begin(), dbnames_distributed_.end(), get_db_name(collection))
+		if (std::find(dbnames_distributed_.begin(),
+		              dbnames_distributed_.end(),
+		              get_db_name(dbcollection))
 		    != dbnames_distributed_.end()) {
 			con = con_replica_;
 		} else {
 			con = con_local_;
 		}
-		auto oplog = con->database("local")["oplog.rs"];
-
-		EventTrigger *trigger = new EventTrigger(create_oplog_cursor(oplog, oplog_query.view()),
-		                                         oplog_query,
-		                                         collection,
-		                                         boost::bind(callback, obj, _1));
+		auto          db_coll_pair = split_db_collection_string(dbcollection);
+		auto          collection   = con->database(db_coll_pair.first)[db_coll_pair.second];
+		EventTrigger *trigger      = new EventTrigger(create_change_stream(collection, query),
+                                             query,
+                                             dbcollection,
+                                             boost::bind(callback, obj, _1));
 		triggers.push_back(trigger);
 		return trigger;
 	}
@@ -104,9 +95,9 @@ public:
 	static std::string get_db_name(const std::string &ns);
 
 private:
-	void             check_events();
-	mongocxx::cursor create_oplog_cursor(mongocxx::collection &  collection,
-	                                     bsoncxx::document::view query);
+	void                    check_events();
+	mongocxx::change_stream create_change_stream(mongocxx::collection &  collection,
+	                                             bsoncxx::document::view query);
 
 	std::string            name = "RobotMemory EventTriggerManager";
 	fawkes::Logger *       logger_;
