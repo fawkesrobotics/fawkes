@@ -292,8 +292,8 @@ FawkesNetworkServerThread::broadcast(unsigned short int component_id, unsigned s
 /** Send a message.
  * Method to send a message to a specific client.
  * The client ID provided in the message is used to determine the correct
- * recipient. If no client is connected for the given client ID the message
- * shall be silently ignored.
+ * recipient. If no client is connected for the given client ID or the client
+ * is not alive, the message shall be silently ignored.
  * This method will take ownership of the passed message. If you want to use
  * if after enqueing it you must reference it explicitly before calling this
  * method.
@@ -308,11 +308,7 @@ FawkesNetworkServerThread::send(FawkesNetworkMessage *msg)
 	if (clients.find(clid) != clients.end()) {
 		if (clients[clid]->alive()) {
 			clients[clid]->enqueue(msg);
-		} else {
-			throw Exception("Client %u not alive", clid);
 		}
-	} else {
-		throw Exception("Client %u not found", clid);
 	}
 }
 
