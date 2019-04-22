@@ -229,14 +229,14 @@
 (defrule wm-robmem-sync-fact-removed
 	(wm-fact (key cx identity) (value ?identity))
 	(wm-robmem-sync-conf (wm-fact-key-prefix $?key-prefix) (enabled TRUE))
-	?sm <- (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key $?key-prefix $?rest)
-																	 (update-timestamp $?update-timestamp))
+	?sm <- (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key $?key-prefix $?rest))
 	(not (wm-fact (id ?id)))
 	=>
 	;(printout error "Remove " ?id " from robot memory" crlf)
 	(retract ?sm)
-
-	(bind ?query (wm-robmem-sync-create-query ?id ?update-timestamp))
+	; We do not know when exactly the wm-fact was retracted, use the current time instead
+	(bind ?now (time-trunc-ms (now-systime)))
+	(bind ?query (wm-robmem-sync-create-query ?id ?now))
 
 	(robmem-remove ?*WM-ROBMEM-SYNC-COLLECTION* ?query)
 )
