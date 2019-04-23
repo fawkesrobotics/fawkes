@@ -25,6 +25,7 @@
 #include <plugins/robot-memory/robot_memory.h>
 
 #include <chrono>
+#include <mongocxx/exception/operation_exception.hpp>
 
 /** @class ComputablesManager  computables_manager.h
  *  This class manages registering computables and can check
@@ -100,7 +101,13 @@ ComputablesManager::check_and_compute(const document::view &query, std::string c
 	//check if the query is matched by the computable identifyer
 	//to do that we just insert the query as if it would be a document and query for it with the computable identifiers
 	std::string current_test_collection = matching_test_collection_ + std::to_string(rand());
-	robot_memory_->insert(query, current_test_collection);
+	try {
+		robot_memory_->insert(query, current_test_collection);
+	} catch (mongocxx::operation_exception &e) {
+		// This may happen if the query contains fields that cannot be inserted, e.g., a $regex
+		robot_memory_->drop_collection(current_test_collection);
+		return false;
+	}
 	for (std::list<Computable *>::iterator it = computables.begin(); it != computables.end(); ++it) {
 		auto cursor = robot_memory_->query((*it)->get_query(), current_test_collection);
 		if (collection == (*it)->get_collection() && cursor.begin() != cursor.end()) {
