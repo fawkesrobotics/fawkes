@@ -131,12 +131,31 @@
     <field type="float" name="y">Y-coordinate of the target, in the robot's coordinate system.</field>
     <field type="float" name="orientation">The desired orientation of the robot at the target.</field>
   </message>
+  <message name="CartesianGotoWithTolerance">
+    <comment>States the next target to navigate to.
+    Specify a certain translational and angular tolerance.</comment>
+    <field type="float" name="x">X-coordinate of the target, in the robot's coordinate system.</field>
+    <field type="float" name="y">Y-coordinate of the target, in the robot's coordinate system.</field>
+    <field type="float" name="orientation">The desired orientation of the robot at the target.</field>
+    <field type="float" name="translation_tolerance">The translation tolerance of the target, in meters.</field>
+    <field type="float" name="orientation_tolerance">The orientation tolerance of the target, in radians.</field>
+  </message>
   <message name="CartesianGotoWithFrame">
     <comment>States the next target to navigate to.</comment>
     <field type="float" name="x">X-coordinate of the target, in the robot's coordinate system.</field>
     <field type="float" name="y">Y-coordinate of the target, in the robot's coordinate system.</field>
     <field type="float" name="orientation">The desired orientation of the robot at the target.</field>
     <field type="string" length="64" name="target_frame">The target frame to plan in.</field>
+  </message>
+  <message name="CartesianGotoWithFrameWithTolerance">
+    <comment>States the next target to navigate to.
+    Specify a certain translational and angular tolerance.</comment>
+    <field type="float" name="x">X-coordinate of the target, in the robot's coordinate system.</field>
+    <field type="float" name="y">Y-coordinate of the target, in the robot's coordinate system.</field>
+    <field type="float" name="orientation">The desired orientation of the robot at the target.</field>
+    <field type="string" length="64" name="target_frame">The target frame to plan in.</field>
+    <field type="float" name="translation_tolerance">The translation tolerance of the target, in meters.</field>
+    <field type="float" name="orientation_tolerance">The orientation tolerance of the target, in radians.</field>
   </message>
   <message name="PolarGoto">
     <comment>States the next target to navigate to.</comment>
