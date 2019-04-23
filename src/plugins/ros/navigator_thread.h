@@ -120,6 +120,9 @@ private:
 	float                      goal_position_x;
 	float                      goal_position_y;
 	float                      goal_position_yaw;
+
+	float goal_tolerance_trans;
+	float goal_tolerance_yaw;
 };
 
 #endif /* ROS_NAVIGATOR_THREAD_H__ */
