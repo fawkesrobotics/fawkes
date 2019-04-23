@@ -29,6 +29,7 @@
 #include <bsoncxx/exception/exception.hpp>
 #include <bsoncxx/types.hpp>
 #include <mongocxx/exception/operation_exception.hpp>
+#include <mongocxx/exception/query_exception.hpp>
 
 using namespace fawkes;
 
@@ -605,13 +606,18 @@ ClipsRobotMemoryThread::clips_robotmemory_cursor_next(void *cursor)
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 	}
 
-	auto it = (*c)->begin();
-	if (it == (*c)->end()) {
+	try {
+		auto it = (*c)->begin();
+		if (it == (*c)->end()) {
+			return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+		} else {
+			auto b = new bsoncxx::builder::basic::document();
+			b->append(bsoncxx::builder::concatenate(*it));
+			return CLIPS::Value(b);
+		}
+	} catch (mongocxx::query_exception &e) {
+		logger->log_error("MongoDB", "mongodb-cursor-next: got invalid query: %s", e.what());
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
-	} else {
-		auto b = new bsoncxx::builder::basic::document();
-		b->append(bsoncxx::builder::concatenate(*it));
-		return CLIPS::Value(b);
 	}
 }
 
