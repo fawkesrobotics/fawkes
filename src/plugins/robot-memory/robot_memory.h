@@ -55,7 +55,7 @@ public:
 
 	//robot memory functions
 	mongocxx::cursor         query(bsoncxx::document::view query,
-	                               const std::string &     collection    = "",
+	                               const std::string &     collection_name = "",
 	                               mongocxx::options::find query_options = mongocxx::options::find());
 	bsoncxx::document::value aggregate(const std::vector<bsoncxx::document::view> &pipeline,
 	                                   const std::string &                         collection = "");
