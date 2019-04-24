@@ -637,6 +637,7 @@ ClipsRobotMemoryThread::clips_robotmemory_cursor_next(void *cursor)
 		} else {
 			auto b = new bsoncxx::builder::basic::document();
 			b->append(bsoncxx::builder::concatenate(*it));
+			it++;
 			return CLIPS::Value(b);
 		}
 	} catch (mongocxx::query_exception &e) {
