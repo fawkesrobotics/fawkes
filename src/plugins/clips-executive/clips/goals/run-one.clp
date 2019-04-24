@@ -57,7 +57,7 @@
 (defrule run-one-goal-reject
 	?gf <- (goal (id ?id) (type ACHIEVE) (sub-type RUN-ONE-OF-SUBGOALS) (mode EXPANDED))
 	(forall (goal (id ?sub-goal) (parent ?id) (type ACHIEVE))
-		(goal (id ?sub-goal) (mode EVALUATED) (outcome REJECTED)))
+		(goal (id ?sub-goal) (mode RETRACTED) (outcome REJECTED)))
 	=>
 	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to nil)
 	        (error SUB-GOALS-REJECTED))
