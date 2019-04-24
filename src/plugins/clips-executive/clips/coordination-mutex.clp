@@ -418,7 +418,6 @@
 	(bind ?doc (bson-get ?obj "fullDocument"))
 	(bind ?id (sym-cat (bson-get ?doc "_id")))
 	(if ?id then
-		(bind ?set-missing-locked-field FALSE)
 		(bind ?locked FALSE)
 		(bind ?locked-by "")
 		(bind ?lock-time (create$ 0 0))
@@ -434,12 +433,6 @@
 		(if (any-factp ((?m mutex)) (eq ?m:name ?id))
 		then
 			(do-for-fact ((?m mutex)) (eq ?m:name ?id)
-				; The following condition can happen on a re-new, the
-				; fields will be pruned by MongoDB as they are unchanged.
-				(if ?set-missing-locked-field then
-					(bind ?locked (eq ?m:state LOCKED))
-					(if ?locked then (bind ?locked-by ?m:locked-by))
-				)
 				(modify ?m (state (if ?locked then LOCKED else OPEN))
 				           (locked-by ?locked-by) (lock-time ?lock-time))
 			)
