@@ -454,7 +454,8 @@
 
 (defrule mutex-trigger-event
 	(wm-fact (key cx identity) (value ?identity))
-	?rt <- (robmem-trigger (name "mutex-trigger") (ptr ?obj))
+	?rt <- (robmem-trigger (name "mutex-trigger") (ptr ?obj) (rcvd-at $?recv-time))
+	(not (robmem-trigger (name "mutex-trigger") (rcvd-at $?comp-time&:(time> ?recv-time ?comp-time))))
 	=>
 	(bind ?op (sym-cat (bson-get ?obj "operationType")))
 
