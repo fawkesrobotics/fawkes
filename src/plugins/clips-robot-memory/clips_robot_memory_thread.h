@@ -71,12 +71,13 @@ protected:
 private:
 	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 
-	CLIPS::Value  clips_bson_create();
-	CLIPS::Value  clips_bson_parse(std::string document);
-	void          clips_bson_destroy(void *bson);
-	void          clips_bson_append(void *bson, std::string field_name, CLIPS::Value value);
-	void          clips_bson_append_array(void *bson, std::string field_name, CLIPS::Values values);
-	void          clips_bson_append_time(void *bson, std::string field_name, CLIPS::Values time);
+	CLIPS::Value clips_bson_create();
+	CLIPS::Value clips_bson_parse(std::string document);
+	void         clips_bson_destroy(void *bson);
+	void         clips_bson_append(void *bson, std::string field_name, CLIPS::Value value);
+	void clips_bson_append_regex(void *bson, std::string field_name, CLIPS::Value regex_string);
+	void clips_bson_append_array(void *bson, std::string field_name, CLIPS::Values values);
+	void clips_bson_append_time(void *bson, std::string field_name, CLIPS::Values time);
 	CLIPS::Value  clips_bson_array_start(void *bson, std::string field_name);
 	void          clips_bson_array_finish(void *barr);
 	void          clips_bson_array_append(void *barr, CLIPS::Value value);
