@@ -95,9 +95,12 @@ public:
 	static std::string get_db_name(const std::string &ns);
 
 private:
-	void                    check_events();
-	mongocxx::change_stream create_change_stream(mongocxx::collection &  collection,
-	                                             bsoncxx::document::view query);
+	void check_events();
+	mongocxx::change_stream
+	create_change_stream(mongocxx::collection &  collection,
+	                     bsoncxx::document::view query,
+	                     mongocxx::stdx::optional<bsoncxx::document::view_or_value> =
+	                       mongocxx::stdx::optional<bsoncxx::document::view_or_value>());
 
 	std::string            name = "RobotMemory EventTriggerManager";
 	fawkes::Logger *       logger_;

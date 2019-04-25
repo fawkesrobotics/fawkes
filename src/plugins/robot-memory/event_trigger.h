@@ -41,11 +41,12 @@ public:
 	virtual ~EventTrigger();
 
 private:
-	mongocxx::change_stream                        change_stream;
-	bsoncxx::document::value                       filter_query;
-	std::string                                    ns;
-	std::string                                    ns_db;
-	boost::function<void(bsoncxx::document::view)> callback;
+	mongocxx::change_stream                                    change_stream;
+	bsoncxx::document::value                                   filter_query;
+	mongocxx::stdx::optional<bsoncxx::document::view_or_value> resume_token;
+	std::string                                                ns;
+	std::string                                                ns_db;
+	boost::function<void(bsoncxx::document::view)>             callback;
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_EVENT_TRIGGER_H_ */

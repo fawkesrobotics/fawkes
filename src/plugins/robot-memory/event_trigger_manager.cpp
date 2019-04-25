@@ -94,6 +94,7 @@ EventTriggerManager::check_events()
 				//logger_->log_warn(name.c_str(), "Triggering: %s", bsoncxx::to_json(*next).c_str());
 				//actually call the callback function
 				trigger->callback(*next);
+				trigger->resume_token = *next;
 				next++;
 			}
 		} catch (operation_exception &e) {
@@ -118,7 +119,8 @@ EventTriggerManager::check_events()
 			auto db_coll_pair = split_db_collection_string(trigger->ns);
 			auto collection   = con->database(db_coll_pair.first)[db_coll_pair.second];
 			try {
-				trigger->change_stream = create_change_stream(collection, trigger->filter_query.view());
+				trigger->change_stream =
+				  create_change_stream(collection, trigger->filter_query.view(), trigger->resume_token);
 			} catch (mongocxx::query_exception &e) {
 				logger_->log_error(name.c_str(),
 				                   "Failed to create change stream, broken trigger for collection %s: %s",
@@ -141,16 +143,24 @@ EventTriggerManager::remove_trigger(EventTrigger *trigger)
 }
 
 change_stream
-EventTriggerManager::create_change_stream(mongocxx::collection &coll, bsoncxx::document::view query)
+EventTriggerManager::create_change_stream(
+  mongocxx::collection &                                     coll,
+  bsoncxx::document::view                                    query,
+  mongocxx::stdx::optional<bsoncxx::document::view_or_value> resume_token)
 {
 	mongocxx::options::change_stream opts;
 	opts.full_document("updateLookup");
 	opts.max_await_time(std::chrono::milliseconds(0));
+	if (resume_token) {
+		opts.resume_after(*resume_token);
+	}
 	auto res = coll.watch(opts);
-	// Go to end of change stream to get new updates from then on.
-	auto it = res.begin();
-	while (std::next(it) != res.end()) {}
-
+	if (!resume_token) {
+		// Go to end of change stream to get new updates from then on.
+		// TODO resume at right point if the previous change stream failed
+		auto it = res.begin();
+		while (std::next(it) != res.end()) {}
+	}
 	return res;
 }
 
