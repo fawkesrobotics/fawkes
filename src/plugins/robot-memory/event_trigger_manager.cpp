@@ -94,7 +94,7 @@ EventTriggerManager::check_events()
 				//logger_->log_warn(name.c_str(), "Triggering: %s", bsoncxx::to_json(*next).c_str());
 				//actually call the callback function
 				trigger->callback(*next);
-				trigger->resume_token = *next;
+				trigger->resume_token = bsoncxx::document::value(*next);
 				next++;
 			}
 		} catch (operation_exception &e) {
