@@ -26,6 +26,7 @@
 #include <boost/bind.hpp>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/exception/operation_exception.hpp>
+#include <mongocxx/exception/query_exception.hpp>
 
 using namespace fawkes;
 using namespace mongocxx;
@@ -114,9 +115,16 @@ EventTriggerManager::check_events()
 			} else {
 				con = con_local_;
 			}
-			auto db_coll_pair      = split_db_collection_string(trigger->ns);
-			auto collection        = con->database(db_coll_pair.first)[db_coll_pair.second];
-			trigger->change_stream = create_change_stream(collection, trigger->filter_query.view());
+			auto db_coll_pair = split_db_collection_string(trigger->ns);
+			auto collection   = con->database(db_coll_pair.first)[db_coll_pair.second];
+			try {
+				trigger->change_stream = create_change_stream(collection, trigger->filter_query.view());
+			} catch (mongocxx::query_exception &e) {
+				logger_->log_error(name.c_str(),
+				                   "Failed to create change stream, broken trigger for collection %s: %s",
+				                   trigger->ns.c_str(),
+				                   e.what());
+			}
 		}
 	}
 }
