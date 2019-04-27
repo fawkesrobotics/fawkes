@@ -151,7 +151,9 @@ RealsenseThread::connect_and_start_camera()
 	num_of_cameras_ = rs_get_device_count(rs_context_, &rs_error_);
 	logger->log_info(name(), "No. of cameras: %i ", num_of_cameras_);
 	if (num_of_cameras_ < 1) {
-		throw Exception("No camera detected!");
+		logger->log_error(name(), "No camera detected!");
+		camera_running_ = false;
+		return camera_running_;
 	}
 
 	rs_device_ = get_camera();
@@ -174,7 +176,7 @@ RealsenseThread::connect_and_start_camera()
 	realsense_depth_->height = z_intrinsic_.height;
 	realsense_depth_->resize(z_intrinsic_.width * z_intrinsic_.height);
 	logger->log_info(name(), "Height: %i, Width: %i", z_intrinsic_.height, z_intrinsic_.width);
-	return true;
+	return camera_running_;
 }
 
 /* Get the rs_device pointer and printout camera details
