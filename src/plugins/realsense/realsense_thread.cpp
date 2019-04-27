@@ -92,8 +92,10 @@ RealsenseThread::loop()
 		connect_and_start_camera();
 		// Start reading in the next loop
 		return;
-	} else if (!enable_camera_ && camera_running_) {
-		stop_camera();
+	} else if (!enable_camera_) {
+		if (camera_running_) {
+			stop_camera();
+		}
 		return;
 	}
 	if (rs_poll_for_frames(rs_device_, &rs_error_) == 1) {
