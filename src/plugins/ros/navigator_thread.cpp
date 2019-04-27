@@ -113,8 +113,8 @@ RosNavigatorThread::check_status()
 			double diff_y   = fabs(base_position_y - goal_position_y);
 			double diff_yaw = normalize_mirror_rad(base_position_yaw - goal_position_yaw);
 
-			if (diff_x >= cfg_trans_tolerance_ || diff_y >= cfg_trans_tolerance_
-			    || diff_yaw >= cfg_ori_tolerance_) {
+			if (diff_x >= goal_tolerance_trans || diff_y >= goal_tolerance_trans
+			    || diff_yaw >= goal_tolerance_yaw) {
 				nav_if_->set_error_code(NavigatorInterface::ERROR_OBSTRUCTION);
 			} else {
 				nav_if_->set_error_code(NavigatorInterface::ERROR_NONE);
@@ -281,6 +281,9 @@ RosNavigatorThread::loop()
 				goal_position_y   = nav_if_->dest_y();
 				goal_position_yaw = nav_if_->dest_ori();
 
+				goal_tolerance_trans = cfg_trans_tolerance_;
+				goal_tolerance_yaw   = cfg_ori_tolerance_;
+
 				// Transform the desired goal position into the fixed frame
 				// so we can check whether we reached the goal or not
 				if (strcmp(cfg_fixed_frame_.c_str(), nav_if_->target_frame()) != 0) {
@@ -311,6 +314,81 @@ RosNavigatorThread::loop()
 				goal_position_y   = nav_if_->dest_y();
 				goal_position_yaw = nav_if_->dest_ori();
 
+				goal_tolerance_trans = cfg_trans_tolerance_;
+				goal_tolerance_yaw   = cfg_ori_tolerance_;
+
+				// Transform the desired goal position into the fixed frame
+				// so we can check whether we reached the goal or not
+				if (strcmp(cfg_fixed_frame_.c_str(), nav_if_->target_frame()) != 0) {
+					transform_to_fixed_frame();
+				}
+
+				send_goal();
+			}
+
+			// cartesian goto with tolerance
+			else if (NavigatorInterface::CartesianGotoWithToleranceMessage *msg =
+			           nav_if_->msgq_first_safe(msg)) {
+				logger->log_info(name(),
+				                 "Cartesian goto with tolerance message received "
+				                 "(x,y,ori,trans_tolerance,ori_tolerance) = (%f,%f,%f,%f,%f)",
+				                 msg->x(),
+				                 msg->y(),
+				                 std::isfinite(msg->orientation()) ? msg->orientation() : 0.0,
+				                 msg->translation_tolerance(),
+				                 msg->orientation_tolerance());
+				nav_if_->set_dest_x(msg->x());
+				nav_if_->set_dest_y(msg->y());
+				nav_if_->set_dest_ori(msg->orientation());
+				nav_if_->set_target_frame("base_link");
+
+				nav_if_->set_msgid(msg->id());
+
+				nav_if_->write();
+
+				goal_position_x   = nav_if_->dest_x();
+				goal_position_y   = nav_if_->dest_y();
+				goal_position_yaw = nav_if_->dest_ori();
+
+				goal_tolerance_trans = msg->translation_tolerance();
+				goal_tolerance_yaw   = msg->orientation_tolerance();
+
+				// Transform the desired goal position into the fixed frame
+				// so we can check whether we reached the goal or not
+				if (strcmp(cfg_fixed_frame_.c_str(), nav_if_->target_frame()) != 0) {
+					transform_to_fixed_frame();
+				}
+
+				send_goal();
+			}
+
+			// cartesian goto with frame and tolerance
+			else if (NavigatorInterface::CartesianGotoWithFrameWithToleranceMessage *msg =
+			           nav_if_->msgq_first_safe(msg)) {
+				logger->log_info(name(),
+				                 "Cartesian goto with tolerance message received "
+				                 "(x,y,ori,trans_tolerance,ori_tolerance) = (%f,%f,%f,%f,%f)",
+				                 msg->x(),
+				                 msg->y(),
+				                 std::isfinite(msg->orientation()) ? msg->orientation() : 0.0,
+				                 msg->translation_tolerance(),
+				                 msg->orientation_tolerance());
+				nav_if_->set_dest_x(msg->x());
+				nav_if_->set_dest_y(msg->y());
+				nav_if_->set_dest_ori(msg->orientation());
+				nav_if_->set_target_frame(msg->target_frame());
+
+				nav_if_->set_msgid(msg->id());
+
+				nav_if_->write();
+
+				goal_position_x   = nav_if_->dest_x();
+				goal_position_y   = nav_if_->dest_y();
+				goal_position_yaw = nav_if_->dest_ori();
+
+				goal_tolerance_trans = msg->translation_tolerance();
+				goal_tolerance_yaw   = msg->orientation_tolerance();
+
 				// Transform the desired goal position into the fixed frame
 				// so we can check whether we reached the goal or not
 				if (strcmp(cfg_fixed_frame_.c_str(), nav_if_->target_frame()) != 0) {
@@ -331,6 +409,9 @@ RosNavigatorThread::loop()
 				nav_if_->set_dest_ori(msg->phi());
 				nav_if_->set_msgid(msg->id());
 				nav_if_->write();
+
+				goal_tolerance_trans = cfg_trans_tolerance_;
+				goal_tolerance_yaw   = cfg_ori_tolerance_;
 
 				send_goal();
 			}
