@@ -143,6 +143,13 @@ EventTriggerManager::remove_trigger(EventTrigger *trigger)
 change_stream
 EventTriggerManager::create_change_stream(mongocxx::collection &coll, bsoncxx::document::view query)
 {
+	// TODO Allow non-empty pipelines
+	// @body We used to have a regular mongodb query as input to the oplog, but
+	// now this needs to be a pipeline. Adapt the change stream creation and the
+	// robot-memory API so we also accept a non-empty pipeline.
+	if (!query.empty()) {
+		throw fawkes::Exception("Non-empty queries are not implemented!");
+	}
 	mongocxx::options::change_stream opts;
 	opts.full_document("updateLookup");
 	opts.max_await_time(std::chrono::milliseconds(0));
