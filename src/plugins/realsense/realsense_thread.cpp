@@ -68,28 +68,18 @@ RealsenseThread::init()
 	switch_if_->set_enabled(true);
 	switch_if_->write();
 
-	rs_stream_type_ = RS_STREAM_DEPTH;
-	connect_and_start_camera();
-
-	camera_scale_ = rs_get_device_depth_scale(rs_device_, NULL);
-
-	rs_get_stream_intrinsics(rs_device_, rs_stream_type_, &z_intrinsic_, &rs_error_);
-	logger->log_info(name(), "Height: %i, Width: %i", z_intrinsic_.height, z_intrinsic_.width);
-
+	camera_scale_ = 1;
 	//initalize pointcloud
 	realsense_depth_refptr_           = new Cloud();
 	realsense_depth_                  = pcl_utils::cloudptr_from_refptr(realsense_depth_refptr_);
 	realsense_depth_->header.frame_id = frame_id_;
-	realsense_depth_->width           = z_intrinsic_.width;
-	realsense_depth_->height          = z_intrinsic_.height;
+	realsense_depth_->width           = 0;
+	realsense_depth_->height          = 0;
+	realsense_depth_->resize(0);
 	pcl_manager->add_pointcloud(pcl_id_.c_str(), realsense_depth_refptr_);
-	//fill pointcloud with empty points
-	for (int i = 0; i < z_intrinsic_.height; i++) {
-		for (int j = 0; j < z_intrinsic_.width; j++) {
-			realsense_depth_->push_back(PointType(0, 0, 0));
-		}
-	}
-	realsense_depth_->resize(z_intrinsic_.width * z_intrinsic_.height);
+
+	rs_stream_type_ = RS_STREAM_DEPTH;
+	connect_and_start_camera();
 }
 
 void
@@ -178,6 +168,12 @@ RealsenseThread::connect_and_start_camera()
 	                   rs_get_stream_format(rs_device_, rs_stream_type_, &rs_error_)));
 
 	camera_running_ = true;
+	camera_scale_   = rs_get_device_depth_scale(rs_device_, NULL);
+	rs_get_stream_intrinsics(rs_device_, rs_stream_type_, &z_intrinsic_, &rs_error_);
+	realsense_depth_->width  = z_intrinsic_.width;
+	realsense_depth_->height = z_intrinsic_.height;
+	realsense_depth_->resize(z_intrinsic_.width * z_intrinsic_.height);
+	logger->log_info(name(), "Height: %i, Width: %i", z_intrinsic_.height, z_intrinsic_.width);
 	return true;
 }
 
