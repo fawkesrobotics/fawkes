@@ -95,7 +95,15 @@ RealsenseThread::init()
 void
 RealsenseThread::loop()
 {
-	if (cfg_use_switch_ && !read_switch()) {
+	if (cfg_use_switch_) {
+		read_switch();
+	}
+	if (enable_camera_ && !camera_running_) {
+		connect_and_start_camera();
+		// Start reading in the next loop
+		return;
+	} else if (!enable_camera_ && camera_running_) {
+		stop_camera();
 		return;
 	}
 	if (rs_poll_for_frames(rs_device_, &rs_error_) == 1) {
@@ -169,7 +177,7 @@ RealsenseThread::connect_and_start_camera()
 	                 rs_format_to_string(
 	                   rs_get_stream_format(rs_device_, rs_stream_type_, &rs_error_)));
 
-	camera_started_ = true;
+	camera_running_ = true;
 	return true;
 }
 
@@ -252,13 +260,13 @@ RealsenseThread::log_depths(const uint16_t *image)
 void
 RealsenseThread::stop_camera()
 {
-	if (camera_started_) {
+	if (camera_running_) {
 		logger->log_info(name(), "Stopping realsense camera ...");
 		rs_stop_device(rs_device_, &rs_error_);
 		rs_delete_context(rs_context_, &rs_error_);
 		log_error();
 		logger->log_info(name(), "Realsense camera stopped!");
-		camera_started_ = false;
+		camera_running_ = false;
 	}
 }
 
@@ -269,26 +277,16 @@ RealsenseThread::stop_camera()
 bool
 RealsenseThread::read_switch()
 {
-	bool enable_camera  = false;
-	bool disable_camera = false;
 	while (!switch_if_->msgq_empty()) {
 		Message *msg = switch_if_->msgq_first();
 		if (dynamic_cast<SwitchInterface::EnableSwitchMessage *>(msg)) {
-			disable_camera = false;
-			enable_camera  = true;
+			enable_camera_ = true;
 		} else if (dynamic_cast<SwitchInterface::DisableSwitchMessage *>(msg)) {
-			disable_camera = true;
-			enable_camera  = false;
+			enable_camera_ = false;
 		}
 		switch_if_->msgq_pop();
 	}
-	if (camera_started_ && disable_camera) {
-		stop_camera();
-		switch_if_->set_enabled(false);
-	} else if (!camera_started_ && enable_camera) {
-		connect_and_start_camera();
-		switch_if_->set_enabled(true);
-	}
+	switch_if_->set_enabled(enable_camera_);
 	switch_if_->write();
 	return switch_if_->is_enabled();
 }
