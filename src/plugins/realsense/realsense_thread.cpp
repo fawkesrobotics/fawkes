@@ -51,7 +51,7 @@ RealsenseThread::init()
 	pcl_id_                      = config->get_string(cfg_prefix + "pcl_id");
 	laser_power_                 = config->get_int(cfg_prefix + "device_options/laser_power");
 	restart_after_num_errors_ =
-	  config->get_uint_or_default(std::string(cfg_prefix + "restart_after_num_errors").c_str(), 10);
+	  config->get_uint_or_default(std::string(cfg_prefix + "restart_after_num_errors").c_str(), 50);
 
 	try {
 		cfg_use_switch_ = config->get_bool((cfg_prefix + "use_switch").c_str());
