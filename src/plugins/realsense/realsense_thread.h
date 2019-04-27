@@ -105,6 +105,8 @@ private:
 	std::string   pcl_id_;
 	bool          camera_started_ = false;
 	int           laser_power_;
+	uint          restart_after_num_errors_;
+	uint          error_counter_ = 0;
 };
 
 #endif

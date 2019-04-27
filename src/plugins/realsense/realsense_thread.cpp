@@ -50,6 +50,8 @@ RealsenseThread::init()
 	frame_id_                    = config->get_string(cfg_prefix + "frame_id");
 	pcl_id_                      = config->get_string(cfg_prefix + "pcl_id");
 	laser_power_                 = config->get_int(cfg_prefix + "device_options/laser_power");
+	restart_after_num_errors_ =
+	  config->get_uint_or_default(std::string(cfg_prefix + "restart_after_num_errors").c_str(), 10);
 
 	try {
 		cfg_use_switch_ = config->get_bool((cfg_prefix + "use_switch").c_str());
@@ -97,6 +99,7 @@ RealsenseThread::loop()
 		return;
 	}
 	if (rs_poll_for_frames(rs_device_, &rs_error_) == 1) {
+		error_counter_ = 0;
 		const uint16_t *image =
 		  reinterpret_cast<const uint16_t *>(rs_get_frame_data(rs_device_, rs_stream_type_, NULL));
 		log_error();
@@ -116,9 +119,16 @@ RealsenseThread::loop()
 		}
 		pcl_utils::set_time(realsense_depth_refptr_, fawkes::Time(clock));
 	} else {
+		error_counter_++;
 		logger->log_warn(name(),
 		                 "Poll for frames not successful (%s)",
 		                 rs_get_error_message(rs_error_));
+		if (error_counter_ >= restart_after_num_errors_) {
+			logger->log_warn(name(), "Polling failed, restarting device");
+			error_counter_ = 0;
+			stop_camera();
+			connect_and_start_camera();
+		}
 	}
 }
 
