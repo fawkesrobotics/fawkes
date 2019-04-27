@@ -154,6 +154,7 @@ RealsenseThread::connect_and_start_camera()
 	logger->log_info(name(), "No. of cameras: %i ", num_of_cameras_);
 	if (num_of_cameras_ < 1) {
 		logger->log_error(name(), "No camera detected!");
+		rs_delete_context(rs_context_, &rs_error_);
 		camera_running_ = false;
 		return camera_running_;
 	}
