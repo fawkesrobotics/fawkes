@@ -34,7 +34,7 @@
 #include <core/threading/wait_condition.h>
 #include <core/utils/lock_list.h>
 
-#if defined(gnu_linux___) && !defined(_GNU_SOURCE)
+#if defined(__gnu_linux__) && !defined(_GNU_SOURCE)
 // to get pthread_setname_np
 #	define _GNU_SOURCE
 #endif
@@ -190,7 +190,7 @@ pthread_mutex_t Thread::thread_key_mutex_ = PTHREAD_MUTEX_INITIALIZER;
 /** Key used to store a reference to the thread object as thread specific data. */
 pthread_key_t Thread::THREAD_KEY = PTHREAD_KEYS_MAX;
 
-#define MAIN_THREAD_NAME "MainThread___"
+#define MAIN_THREAD_NAME "MainThread"
 
 /** Standard thread flag: "thread is bad" */
 const unsigned int Thread::FLAG_BAD = 0x00000001;
@@ -512,8 +512,8 @@ Thread::start(bool wait)
 		// An error occured
 		throw Exception("Could not start thread", err);
 	}
-#if defined(_GNU_SOURCE) && defined(GLIBC___) \
-  && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
+#if defined(_GNU_SOURCE) && defined(__GLIBC__) \
+  && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 12) || __GLIBC__ > 2)
 	char tmpname[16];
 	strncpy(tmpname, name_, 15);
 	tmpname[15] = 0;
@@ -757,8 +757,8 @@ Thread::set_name(const char *format, ...)
 		free(old_name);
 	}
 	va_end(va);
-#if defined(_GNU_SOURCE) && defined(GLIBC___) \
-  && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
+#if defined(_GNU_SOURCE) && defined(__GLIBC__) \
+  && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 12) || __GLIBC__ > 2)
 	if (thread_id_) {
 		char tmpname[16];
 		strncpy(tmpname, name_, 15);
@@ -1320,8 +1320,8 @@ Thread::current_thread_name()
 	Thread *t = Thread::current_thread_noexc();
 	if (t) {
 		return t->name();
-#if defined(_GNU_SOURCE) && defined(GLIBC___) \
-  && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
+#if defined(_GNU_SOURCE) && defined(__GLIBC__) \
+  && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 12) || __GLIBC__ > 2)
 	} else {
 		char name[16];
 		if (pthread_getname_np(pthread_self(), name, 16) == 0) {
@@ -1345,8 +1345,8 @@ Thread::current_thread_name(const std::string &thread_name)
 	Thread *t = Thread::current_thread_noexc();
 	if (t) {
 		return t->set_name("%s", thread_name.c_str());
-#if defined(_GNU_SOURCE) && defined(GLIBC___) \
-  && ((GLIBC___ == 2 && GLIBC_MINOR___ >= 12) || GLIBC___ > 2)
+#if defined(_GNU_SOURCE) && defined(__GLIBC__) \
+  && ((__GLIBC__ == 2 && __GLIBC_MINOR__ >= 12) || __GLIBC__ > 2)
 	} else {
 		pthread_setname_np(pthread_self(), thread_name.c_str());
 #endif
