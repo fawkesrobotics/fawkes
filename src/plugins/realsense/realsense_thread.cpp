@@ -37,8 +37,7 @@ using namespace fawkes;
 RealsenseThread::RealsenseThread()
 : Thread("RealsenseThread", Thread::OPMODE_WAITFORWAKEUP),
   BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
-  switch_if_(NULL),
-  cfg_use_switch_(true)
+  switch_if_(NULL)
 {
 }
 
@@ -50,11 +49,10 @@ RealsenseThread::init()
 	frame_id_                    = config->get_string(cfg_prefix + "frame_id");
 	pcl_id_                      = config->get_string(cfg_prefix + "pcl_id");
 	laser_power_                 = config->get_int(cfg_prefix + "device_options/laser_power");
+	restart_after_num_errors_ =
+	  config->get_uint_or_default(std::string(cfg_prefix + "restart_after_num_errors").c_str(), 50);
 
-	try {
-		cfg_use_switch_ = config->get_bool((cfg_prefix + "use_switch").c_str());
-	} catch (Exception &e) {
-	} // ignore, use default
+	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
 
 	if (cfg_use_switch_) {
 		logger->log_info(name(), "Switch enabled");
@@ -66,37 +64,38 @@ RealsenseThread::init()
 	switch_if_->set_enabled(true);
 	switch_if_->write();
 
-	rs_stream_type_ = RS_STREAM_DEPTH;
-	connect_and_start_camera();
-
-	camera_scale_ = rs_get_device_depth_scale(rs_device_, NULL);
-
-	rs_get_stream_intrinsics(rs_device_, rs_stream_type_, &z_intrinsic_, &rs_error_);
-	logger->log_info(name(), "Height: %i, Width: %i", z_intrinsic_.height, z_intrinsic_.width);
-
+	camera_scale_ = 1;
 	//initalize pointcloud
 	realsense_depth_refptr_           = new Cloud();
 	realsense_depth_                  = pcl_utils::cloudptr_from_refptr(realsense_depth_refptr_);
 	realsense_depth_->header.frame_id = frame_id_;
-	realsense_depth_->width           = z_intrinsic_.width;
-	realsense_depth_->height          = z_intrinsic_.height;
+	realsense_depth_->width           = 0;
+	realsense_depth_->height          = 0;
+	realsense_depth_->resize(0);
 	pcl_manager->add_pointcloud(pcl_id_.c_str(), realsense_depth_refptr_);
-	//fill pointcloud with empty points
-	for (int i = 0; i < z_intrinsic_.height; i++) {
-		for (int j = 0; j < z_intrinsic_.width; j++) {
-			realsense_depth_->push_back(PointType(0, 0, 0));
-		}
-	}
-	realsense_depth_->resize(z_intrinsic_.width * z_intrinsic_.height);
+
+	rs_stream_type_ = RS_STREAM_DEPTH;
+	connect_and_start_camera();
 }
 
 void
 RealsenseThread::loop()
 {
-	if (cfg_use_switch_ && !read_switch()) {
+	if (cfg_use_switch_) {
+		read_switch();
+	}
+	if (enable_camera_ && !camera_running_) {
+		connect_and_start_camera();
+		// Start reading in the next loop
+		return;
+	} else if (!enable_camera_) {
+		if (camera_running_) {
+			stop_camera();
+		}
 		return;
 	}
 	if (rs_poll_for_frames(rs_device_, &rs_error_) == 1) {
+		error_counter_ = 0;
 		const uint16_t *image =
 		  reinterpret_cast<const uint16_t *>(rs_get_frame_data(rs_device_, rs_stream_type_, NULL));
 		log_error();
@@ -116,9 +115,16 @@ RealsenseThread::loop()
 		}
 		pcl_utils::set_time(realsense_depth_refptr_, fawkes::Time(clock));
 	} else {
+		error_counter_++;
 		logger->log_warn(name(),
 		                 "Poll for frames not successful (%s)",
 		                 rs_get_error_message(rs_error_));
+		if (error_counter_ >= restart_after_num_errors_) {
+			logger->log_warn(name(), "Polling failed, restarting device");
+			error_counter_ = 0;
+			stop_camera();
+			connect_and_start_camera();
+		}
 	}
 }
 
@@ -143,7 +149,10 @@ RealsenseThread::connect_and_start_camera()
 	num_of_cameras_ = rs_get_device_count(rs_context_, &rs_error_);
 	logger->log_info(name(), "No. of cameras: %i ", num_of_cameras_);
 	if (num_of_cameras_ < 1) {
-		throw Exception("No camera detected!");
+		logger->log_error(name(), "No camera detected!");
+		rs_delete_context(rs_context_, &rs_error_);
+		camera_running_ = false;
+		return camera_running_;
 	}
 
 	rs_device_ = get_camera();
@@ -159,8 +168,14 @@ RealsenseThread::connect_and_start_camera()
 	                 rs_format_to_string(
 	                   rs_get_stream_format(rs_device_, rs_stream_type_, &rs_error_)));
 
-	camera_started_ = true;
-	return true;
+	camera_running_ = true;
+	camera_scale_   = rs_get_device_depth_scale(rs_device_, NULL);
+	rs_get_stream_intrinsics(rs_device_, rs_stream_type_, &z_intrinsic_, &rs_error_);
+	realsense_depth_->width  = z_intrinsic_.width;
+	realsense_depth_->height = z_intrinsic_.height;
+	realsense_depth_->resize(z_intrinsic_.width * z_intrinsic_.height);
+	logger->log_info(name(), "Height: %i, Width: %i", z_intrinsic_.height, z_intrinsic_.width);
+	return camera_running_;
 }
 
 /* Get the rs_device pointer and printout camera details
@@ -242,13 +257,13 @@ RealsenseThread::log_depths(const uint16_t *image)
 void
 RealsenseThread::stop_camera()
 {
-	if (camera_started_) {
+	if (camera_running_) {
 		logger->log_info(name(), "Stopping realsense camera ...");
 		rs_stop_device(rs_device_, &rs_error_);
 		rs_delete_context(rs_context_, &rs_error_);
 		log_error();
 		logger->log_info(name(), "Realsense camera stopped!");
-		camera_started_ = false;
+		camera_running_ = false;
 	}
 }
 
@@ -259,26 +274,16 @@ RealsenseThread::stop_camera()
 bool
 RealsenseThread::read_switch()
 {
-	bool enable_camera  = false;
-	bool disable_camera = false;
 	while (!switch_if_->msgq_empty()) {
 		Message *msg = switch_if_->msgq_first();
 		if (dynamic_cast<SwitchInterface::EnableSwitchMessage *>(msg)) {
-			disable_camera = false;
-			enable_camera  = true;
+			enable_camera_ = true;
 		} else if (dynamic_cast<SwitchInterface::DisableSwitchMessage *>(msg)) {
-			disable_camera = true;
-			enable_camera  = false;
+			enable_camera_ = false;
 		}
 		switch_if_->msgq_pop();
 	}
-	if (camera_started_ && disable_camera) {
-		stop_camera();
-		switch_if_->set_enabled(false);
-	} else if (!camera_started_ && enable_camera) {
-		connect_and_start_camera();
-		switch_if_->set_enabled(true);
-	}
+	switch_if_->set_enabled(enable_camera_);
 	switch_if_->write();
 	return switch_if_->is_enabled();
 }

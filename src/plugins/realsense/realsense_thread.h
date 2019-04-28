@@ -103,8 +103,11 @@ private:
 	float         camera_scale_;
 	std::string   frame_id_;
 	std::string   pcl_id_;
-	bool          camera_started_ = false;
+	bool          enable_camera_  = true;
+	bool          camera_running_ = false;
 	int           laser_power_;
+	uint          restart_after_num_errors_;
+	uint          error_counter_ = 0;
 };
 
 #endif

@@ -10,6 +10,13 @@ realsense:
   # ID of the PointCloud
   pcl_id: "/camera/depth/points"
 
+  # If true, the camera will be enabled/disabled on incoming Enable/Disable
+  # messages. If false, switch messages will be ignored.
+  # use_switch: true
+
+  # Number of retries after unsuccessful polling before restarting the camera
+  # restart_after_num_errors: 50
+
   # Section to set the Realsense device options
   device_options:
     # Laser power from 0 - 15 as integer
