@@ -82,7 +82,7 @@
 	?sf <- (skill (id ?skill-id) (status S_FAILED) (error-msg ?error))
 	=>
 	(printout warn "Execution of " ?action-name " FAILED (" ?error ")" crlf)
-	(modify ?pa (state EXECUTION-FAILED))
+	(modify ?pa (state EXECUTION-FAILED) (error-msg ?error))
 	(retract ?sf ?pe)
 )
 
