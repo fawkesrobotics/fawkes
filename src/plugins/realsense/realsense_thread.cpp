@@ -37,8 +37,7 @@ using namespace fawkes;
 RealsenseThread::RealsenseThread()
 : Thread("RealsenseThread", Thread::OPMODE_WAITFORWAKEUP),
   BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
-  switch_if_(NULL),
-  cfg_use_switch_(true)
+  switch_if_(NULL)
 {
 }
 
@@ -53,10 +52,7 @@ RealsenseThread::init()
 	restart_after_num_errors_ =
 	  config->get_uint_or_default(std::string(cfg_prefix + "restart_after_num_errors").c_str(), 50);
 
-	try {
-		cfg_use_switch_ = config->get_bool((cfg_prefix + "use_switch").c_str());
-	} catch (Exception &e) {
-	} // ignore, use default
+	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
 
 	if (cfg_use_switch_) {
 		logger->log_info(name(), "Switch enabled");
