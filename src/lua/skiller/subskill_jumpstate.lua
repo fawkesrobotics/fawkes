@@ -306,15 +306,15 @@ end
 
 
 --- Execute exit routine.
--- This resets any subskills that have been added for this state and then executes
--- the state's exit() routine. Do not overwrite do_exit(), rather implement exit().
+-- This calls the state's exit() routine and then resets any subskill that have been
+-- added for this state. Do not overwrite do_exit(), rather implement exit().
 function SubSkillJumpState:do_exit()
+   self:exit()
    for _, s in ipairs(self.skills) do
       s.__args = nil
       s.status = skillstati.S_RUNNING
       s[1].reset()
    end
-   self:exit()
 end
 
 function SubSkillJumpState:skillstring(skill)
