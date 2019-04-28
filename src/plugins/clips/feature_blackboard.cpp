@@ -511,9 +511,7 @@ BlackboardCLIPSFeature::clips_blackboard_read(const std::string &env_name)
 				InterfaceFieldIterator f, f_end = i->fields_end();
 				for (f = i->fields(); f != f_end; ++f) {
 					std::string value;
-					if (f.get_type() == IFT_BOOL) {
-						value = f.get_bool() ? "TRUE" : "FALSE";
-					} else if (f.get_type() == IFT_STRING) {
+					if (f.get_type() == IFT_STRING) {
 						value                      = f.get_value_string();
 						std::string::size_type pos = 0;
 						while ((pos = value.find("\"", pos)) != std::string::npos) {
@@ -543,6 +541,14 @@ BlackboardCLIPSFeature::clips_blackboard_read(const std::string &env_name)
 							while ((pos = value.find("nan")) != std::string::npos) {
 								value =
 								  value.replace(pos, 3, std::to_string(std::numeric_limits<double>::max() - 1));
+							}
+						} else if (f.get_type() == IFT_BOOL) {
+							std::string::size_type pos;
+							while ((pos = value.find("false")) != std::string::npos) {
+								value = value.replace(pos, 5, "FALSE");
+							}
+							while ((pos = value.find("true")) != std::string::npos) {
+								value = value.replace(pos, 4, "TRUE");
 							}
 						}
 					}
