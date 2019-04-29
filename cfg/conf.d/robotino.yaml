@@ -168,3 +168,8 @@ hardware/robotino:
     # Currently not implemented
     # current-max: 1
     # current-max-time: 400
+
+
+  digital:
+    # Size of moving average
+    moving_average: 30

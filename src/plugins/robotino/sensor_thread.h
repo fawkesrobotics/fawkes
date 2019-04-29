@@ -69,6 +69,7 @@ protected:
 private: // methods
 	void process_sensor_msgs();
 	void update_distances(float *voltages);
+	void digital_in_moving_average(bool *new_data, bool **result);
 
 	// Voltage to distance data points
 	static const std::vector<std::pair<double, double>> voltage_to_dist_dps_;
@@ -76,8 +77,11 @@ private: // methods
 private: // members
 	RobotinoComThread *com_;
 
-	bool        cfg_enable_gyro_;
-	std::string cfg_imu_iface_id_;
+	bool                           cfg_enable_gyro_;
+	std::string                    cfg_imu_iface_id_;
+	int                            cfg_moving_average_size_;
+	std::vector<std::vector<bool>> moving_average_buffer_;
+	std::vector<int>               moving_average_current_;
 
 	fawkes::BatteryInterface *       batt_if_;
 	fawkes::RobotinoSensorInterface *sens_if_;

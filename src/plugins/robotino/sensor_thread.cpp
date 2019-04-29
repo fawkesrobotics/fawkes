@@ -65,8 +65,9 @@ RobotinoSensorThread::RobotinoSensorThread(RobotinoComThread *com_thread)
 void
 RobotinoSensorThread::init()
 {
-	cfg_enable_gyro_  = config->get_bool("/hardware/robotino/gyro/enable");
-	cfg_imu_iface_id_ = config->get_string("/hardware/robotino/gyro/interface_id");
+	cfg_enable_gyro_         = config->get_bool("/hardware/robotino/gyro/enable");
+	cfg_imu_iface_id_        = config->get_string("/hardware/robotino/gyro/interface_id");
+	cfg_moving_average_size_ = config->get_int("/hardware/robotino/digital/moving_average");
 
 	batt_if_ = NULL;
 	sens_if_ = NULL;
@@ -89,6 +90,30 @@ RobotinoSensorThread::finalize()
 }
 
 void
+RobotinoSensorThread::digital_in_moving_average(bool *new_data, bool **result)
+{
+	std::vector<bool> tmp;
+	for (int i = 0; i < 8; ++i) {
+		tmp.push_back(new_data[i]);
+	}
+	moving_average_buffer_.push_back(tmp);
+	if (moving_average_buffer_.size() > (size_t)cfg_moving_average_size_) {
+		for (size_t i = 0; i < 8; ++i) {
+			moving_average_current_[i] += (int)new_data[i] - (int)(moving_average_buffer_[0][i]);
+		}
+		moving_average_buffer_.erase(moving_average_buffer_.begin());
+	} else {
+		for (size_t i = 0; i < 8; ++i) {
+			moving_average_current_[i] += (int)new_data[i];
+		}
+	}
+	*result = (bool *)malloc(8 * sizeof(bool));
+	for (size_t i = 0; i < 8; ++i) {
+		(*result)[i] = moving_average_current_[i] / moving_average_buffer_.size() > 0.5;
+	}
+}
+
+void
 RobotinoSensorThread::loop()
 {
 	process_sensor_msgs();
@@ -100,7 +125,9 @@ RobotinoSensorThread::loop()
 		sens_if_->set_mot_current(data.mot_current);
 		sens_if_->set_bumper(data.bumper);
 		sens_if_->set_bumper_estop_enabled(data.bumper_estop_enabled);
-		sens_if_->set_digital_in(data.digital_in);
+		bool *tmp;
+		digital_in_moving_average(&data.digital_in[0], &tmp);
+		sens_if_->set_digital_in(tmp);
 		sens_if_->set_digital_out(data.digital_out);
 		sens_if_->set_analog_in(data.analog_in);
 		update_distances(data.ir_voltages);
