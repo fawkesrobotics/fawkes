@@ -87,6 +87,9 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &          env_name
 	clips->add_function("bson-append",
 	                    sigc::slot<void, void *, std::string, CLIPS::Value>(
 	                      sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_append)));
+	clips->add_function("bson-append-regex",
+	                    sigc::slot<void, void *, std::string, CLIPS::Value>(
+	                      sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_append_regex)));
 	clips->add_function("bson-append-array",
 	                    sigc::slot<void, void *, std::string, CLIPS::Values>(
 	                      sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_append_array)));
@@ -305,6 +308,27 @@ ClipsRobotMemoryThread::clips_bson_append(void *bson, std::string field_name, CL
 	} catch (bsoncxx::exception &e) {
 		logger->log_error("MongoDB",
 		                  "Failed to append array value to field %s: %s",
+		                  field_name.c_str(),
+		                  e.what());
+	}
+}
+
+void
+ClipsRobotMemoryThread::clips_bson_append_regex(void *       bson,
+                                                std::string  field_name,
+                                                CLIPS::Value regex_string)
+{
+	using namespace bsoncxx::builder;
+	if (regex_string.type() != CLIPS::TYPE_STRING) {
+		logger->log_error("MongoDB", "Regex string has to be of type string");
+		return;
+	}
+	try {
+		auto b = static_cast<basic::document *>(bson);
+		b->append(basic::kvp(field_name, bsoncxx::types::b_regex{regex_string.as_string()}));
+	} catch (bsoncxx::exception &e) {
+		logger->log_error("MongoDB",
+		                  "Failed to append regex to field %s: %s",
 		                  field_name.c_str(),
 		                  e.what());
 	}
@@ -613,6 +637,7 @@ ClipsRobotMemoryThread::clips_robotmemory_cursor_next(void *cursor)
 		} else {
 			auto b = new bsoncxx::builder::basic::document();
 			b->append(bsoncxx::builder::concatenate(*it));
+			it++;
 			return CLIPS::Value(b);
 		}
 	} catch (mongocxx::query_exception &e) {

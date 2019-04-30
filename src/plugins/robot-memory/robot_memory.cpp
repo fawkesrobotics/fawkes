@@ -171,32 +171,27 @@ RobotMemory::loop()
 /**
  * Query information from the robot memory.
  * @param query The query returned documents have to match (essentially a BSONObj)
- * @param collection The database and collection to query as string (e.g. robmem.worldmodel)
+ * @param collection_name The database and collection to query as string (e.g. robmem.worldmodel)
  * @param query_options Optional options to use to query the database
  * @return Cursor to get the documents from, NULL for invalid query
  */
 cursor
 RobotMemory::query(document::view          query,
-                   const std::string &     collection,
+                   const std::string &     collection_name,
                    mongocxx::options::find query_options)
 {
-	client *mongodb_client = get_mongodb_client(collection);
-	log_deb(std::string("Executing Query " + to_json(query) + " on collection " + collection));
+	collection collection = get_collection(collection_name);
+	log_deb(std::string("Executing Query " + to_json(query) + " on collection " + collection_name));
 
 	//check if computation on demand is necessary and execute Computables
-	computables_manager_->check_and_compute(query, collection);
+	computables_manager_->check_and_compute(query, collection_name);
 
 	//lock (mongo_client not thread safe)
 	MutexLocker lock(mutex_);
 
-	//set read preference of query to nearest to read from the local replica set member first
-	read_preference secondary;
-	secondary.mode(read_preference::read_mode::k_secondary);
-	query_options.read_preference(secondary);
-
 	//actually execute query
 	try {
-		return mongodb_client->database(database_name_)[collection].find(query, query_options);
+		return collection.find(query, query_options);
 	} catch (mongocxx::operation_exception &e) {
 		std::string error =
 		  std::string("Error for query ") + to_json(query) + "\n Exception: " + e.what();
