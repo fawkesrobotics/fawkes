@@ -125,7 +125,7 @@
 			(modify ?m (request UNLOCK) (response ERROR)
 			           (error-msg (str-cat "Lock held by " ?m:locked-by ". Cannot release foreign lock.")))
 			else
-				(if (and (eq ?m:request RENEW-LOCK) (not (member$ AUTO-RENEW-PROC ?m:pending-requests)))
+				(if (and (eq ?m:request RENEW-LOCK) (member$ AUTO-RENEW-PROC ?m:pending-requests))
 				then ; auto-renew is running, wait for this to finish and then unlock
 					(modify ?m (pending-requests ?m:pending-requests UNLOCK))
 				else
