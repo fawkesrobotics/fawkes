@@ -135,6 +135,7 @@ private:
 
 private:
 	std::list<ClipsRmTrigger *>              clips_triggers_;
+	fawkes::Mutex                            clips_triggers_mutex_;
 	std::map<std::string, std::future<bool>> mutex_futures_;
 	std::future<bool>                        mutex_expire_future_;
 };
