@@ -195,14 +195,7 @@
 )
 
 
-; ***** RULES ******
-
-(defrule mutex-init
-	(executive-init)
-	(not (executive-finalize))
-	(not (mutex-global-data))
-	=>
-
+(deffunction mutex-register-trigger ()
 	; Instead of using the defglobal, we could also read this from the config
 	; (config-load "/plugins/robot-memory/coordination")
 	
@@ -210,8 +203,33 @@
 	(bind ?trigger-ptr (robmem-trigger-register ?*MUTEX-COLLECTION*
 																							?trigger-query "mutex-trigger"))
 	(bson-destroy ?trigger-query)
+)
 
+; ***** RULES ******
+
+
+(defrule mutex-init
+	(executive-init)
+	(not (executive-finalize))
+	(not (mutex-global-data))
+	=>
+	(mutex-register-trigger)
+)
+
+(defrule mutex-init-register-trigger-done
+	?fb <- (mutex-trigger-register-feedback SUCCESS "mutex-trigger" ?trigger-ptr)
+	=>
+	(retract ?fb)
+	(printout info "Registered trigger 'mutex-trigger'" crlf)
 	(assert (mutex-global-data (trigger-ptr ?trigger-ptr)))
+)
+
+(defrule mutex-init-register-trigger-failed
+	?fb <- (mutex-trigger-register-feedback FAIL "mutex-trigger")
+	=>
+	(retract ?fb)
+	(printout warn "Failed to register trigger 'mutex-trigger', retrying" crlf)
+	(mutex-register-trigger)
 )
 
 (defrule mutex-finalize
