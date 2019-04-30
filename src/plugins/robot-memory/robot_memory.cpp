@@ -1101,10 +1101,12 @@ RobotMemory::mutex_expire_locks(float max_age_sec)
 	}));
 
 	basic::document update_doc;
-	update_doc.append(basic::kvp("locked", false));
 	update_doc.append(basic::kvp("$set", [](basic::sub_document subdoc) {
 		subdoc.append(basic::kvp("locked", false));
-		subdoc.append(basic::kvp("locked-by", ""));
+	}));
+	update_doc.append(basic::kvp("$unset", [](basic::sub_document subdoc) {
+		subdoc.append(basic::kvp("locked-by", true));
+		subdoc.append(basic::kvp("lock-time", true));
 	}));
 
 	try {
@@ -1113,10 +1115,11 @@ RobotMemory::mutex_expire_locks(float max_age_sec)
 		auto        write_concern = mongocxx::write_concern();
 		write_concern.majority(std::chrono::milliseconds(0));
 		collection.update_many(filter_doc.view(),
-		                       basic::make_document(basic::kvp("$set", concatenate(update_doc.view()))),
+		                       update_doc.view(),
 		                       options::update().write_concern(write_concern));
 		return true;
 	} catch (operation_exception &e) {
+		log(std::string("Failed to expire locks: " + std::string(e.what())), "error");
 		return false;
 	}
 }
