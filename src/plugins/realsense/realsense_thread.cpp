@@ -146,6 +146,12 @@ RealsenseThread::connect_and_start_camera()
 {
 	rs_context_ = rs_create_context(RS_API_VERSION, &rs_error_);
 	log_error();
+
+	if (!rs_context_) {
+		camera_running_ = false;
+		return camera_running_;
+	}
+
 	num_of_cameras_ = rs_get_device_count(rs_context_, &rs_error_);
 	logger->log_info(name(), "No. of cameras: %i ", num_of_cameras_);
 	if (num_of_cameras_ < 1) {
