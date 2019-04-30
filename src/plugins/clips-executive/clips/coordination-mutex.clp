@@ -262,13 +262,6 @@
 	(modify ?mf (response ERROR) (error-msg (str-cat "Mutex already locked by " ?lb)))
 )
 
-(defrule mutex-lock-acquired
-	?mf <- (mutex (name ?name) (request LOCK) (response PENDING)
-								(state LOCKED) (locked-by ?lb&:(eq ?lb (cx-identity))))
-	=>
-	(modify ?mf (response ACQUIRED))
-)
-
 (defrule mutex-lock-rejected
 	?mf <- (mutex (name ?name) (request LOCK) (response PENDING)
 								(state LOCKED) (locked-by ?lb&:(neq ?lb (cx-identity))))
@@ -314,14 +307,6 @@
 	(modify ?mf (response ERROR) (error-msg (str-cat "Mutex locked by " ?lb " (not '" (cx-identity) "')")))
 )
 
-(defrule mutex-renew-lock-op-succeeded
-	?mf <- (mutex (name ?name) (request RENEW-LOCK) (response PENDING))
-	?of <- (mutex-op-feedback renew-lock-async OK ?name)
-	=>
-	(retract ?of)
-	(modify ?mf (response ACQUIRED))
-)
-
 (defrule mutex-renew-lock-op-failed
 	?mf <- (mutex (name ?name) (request RENEW-LOCK) (response PENDING))
 	?of <- (mutex-op-feedback renew-lock-async FAIL ?name)
@@ -344,13 +329,6 @@
 								(state LOCKED|UNKNOWN) (locked-by ?lb&:(neq ?lb (cx-identity))))
 	=>
 	(modify ?mf (response ERROR) (error-msg (str-cat "Locked by " ?lb " (and not by us)")))
-)
-
-(defrule mutex-unlock-succeeded
-	?mf <- (mutex (name ?name) (request UNLOCK) (response PENDING)
-								(state OPEN))
-	=>
-	(modify ?mf (response UNLOCKED))
 )
 
 (defrule mutex-unlock-succeeded-already-reacquired
@@ -458,6 +436,19 @@
 			(assert (mutex (name ?id) (state (if ?locked then LOCKED else OPEN))
 			               (locked-by ?locked-by) (lock-time ?lock-time)))
 		)
+		(do-for-fact ((?m mutex)) (eq ?m:name ?id)
+      (if (or (eq ?m:state OPEN) (eq ?m:locked-by (cx-identity)))
+      then
+        (if (and (eq ?m:request UNLOCK) (not ?locked))
+        then
+          (modify ?m (response UNLOCKED))
+        )
+        (if (and (or (eq ?m:request LOCK) (eq ?m:request RENEW-LOCK)) ?locked)
+        then
+          (modify ?m (response ACQUIRED))
+        )
+		  )
+	  )
 	)
 )
 
