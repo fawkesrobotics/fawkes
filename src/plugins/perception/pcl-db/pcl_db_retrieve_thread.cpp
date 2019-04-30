@@ -102,7 +102,7 @@ PointCloudDBRetrieveThread::finalize()
 void
 PointCloudDBRetrieveThread::loop()
 {
-	long long              timestamp = 0;
+	long                   timestamp = 0;
 	std::vector<long long> times(1);
 	std::string            database;
 	std::string            collection;
@@ -131,10 +131,10 @@ PointCloudDBRetrieveThread::loop()
 	}
 	retrieve_if_->msgq_pop();
 
-	logger->log_info(name(), "Restoring from '%s' for the time %lli", collection.c_str(), timestamp);
+	logger->log_info(name(), "Restoring from '%s' for the time %li", collection.c_str(), timestamp);
 
 	ApplicabilityStatus st_xyz, st_xyzrgb;
-	long long           actual_time = 0;
+	long                actual_time = 0;
 
 	pl_xyz_->applicable(times, database, collection);
 	if ((st_xyz = pl_xyz_->applicable(times, database, collection)) == APPLICABLE) {

@@ -28,14 +28,15 @@
 #include <utils/time/wait.h>
 
 // from MongoDB
-#include <mongo/client/dbclient.h>
-#include <mongo/client/gridfs.h>
-
+#include <bsoncxx/builder/basic/document.hpp>
 #include <fnmatch.h>
+#include <mongocxx/client.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
+#include <mongocxx/gridfs/uploader.hpp>
 
 using namespace fawkes;
 using namespace firevision;
-using namespace mongo;
+using namespace mongocxx;
 
 /** @class MongoLogImagesThread "mongodb_log_image_thread.h"
  * Thread to export Fawkes images to MongoDB.
@@ -84,7 +85,7 @@ MongoLogImagesThread::init()
 	} // ignored, no include rules
 
 	mongodb_ = mongodb_client;
-	gridfs_  = new GridFS(*mongodb_, database_);
+	gridfs_  = mongodb_->database(database_).gridfs_bucket();
 
 	last_update_ = new Time(clock);
 	now_         = new Time(clock);
@@ -109,7 +110,6 @@ MongoLogImagesThread::finalize()
 		delete p->second.img;
 	}
 	imgs_.clear();
-	delete gridfs_;
 	delete wait_;
 	delete mutex_;
 	delete now_;
@@ -137,33 +137,37 @@ MongoLogImagesThread::loop()
 		fawkes::Time cap_time = imginfo.img->capture_time();
 
 		if ((imginfo.last_sent != cap_time)) {
-			BSONObjBuilder document;
+			using namespace bsoncxx::builder;
+			basic::document document;
 			imginfo.last_sent = cap_time;
-			document.append("timestamp", (long long)cap_time.in_msec());
+			document.append(basic::kvp("timestamp", static_cast<int64_t>(cap_time.in_msec())));
 
-			BSONObjBuilder subb(document.subobjStart("image"));
-			subb.append("image_id", imginfo.img->image_id());
-			subb.append("width", imginfo.img->width());
-			subb.append("height", imginfo.img->height());
-			subb.append("colorspace", colorspace_to_string(imginfo.img->colorspace()));
+			document.append(basic::kvp("image", [&](basic::sub_document subdoc) {
+				subdoc.append(basic::kvp("image_id", imginfo.img->image_id()));
+				subdoc.append(basic::kvp("width", static_cast<int32_t>(imginfo.img->width())));
+				subdoc.append(basic::kvp("height", static_cast<int32_t>(imginfo.img->height())));
+				subdoc.append(basic::kvp("colorspace", colorspace_to_string(imginfo.img->colorspace())));
 
-			std::stringstream name;
-			name << imginfo.topic_name << "_" << cap_time.in_msec();
-			subb.append("data",
-			            gridfs_->storeFile((char *)imginfo.img->buffer(),
-			                               imginfo.img->data_size(),
-			                               name.str()));
+				std::stringstream name;
+				name << imginfo.topic_name << "_" << cap_time.in_msec();
+				auto uploader = gridfs_.open_upload_stream(name.str());
+				uploader.write((uint8_t *)imginfo.img->buffer(), imginfo.img->data_size());
+				auto result = uploader.close();
+				subdoc.append(basic::kvp("data", [&](basic::sub_document subdoc) {
+					subdoc.append(basic::kvp("id", result.id()));
+					subdoc.append(basic::kvp("filename", name.str()));
+				}));
+			}));
 
-			subb.doneFast();
-			collection_ = database_ + "." + imginfo.topic_name;
 			try {
-				mongodb_->insert(collection_, document.obj());
+				mongodb_->database(database_)[imginfo.topic_name].insert_one(document.view());
 				++num_stored;
-			} catch (mongo::DBException &e) {
+			} catch (operation_exception &e) {
 				logger->log_warn(this->name(),
-				                 "Failed to insert image %s into %s: %s",
+				                 "Failed to insert image %s into %s.%s: %s",
 				                 imginfo.img->image_id(),
-				                 collection_.c_str(),
+				                 database_.c_str(),
+				                 imginfo.topic_name.c_str(),
 				                 e.what());
 			}
 		}

@@ -38,6 +38,10 @@ else
   CFLAGS += -DHAVE_EXECINFO
 endif
 
+# Enable this flag to get full backtraces of exceptions thrown during thread
+# initialization
+#CFLAGS += -DDEBUG_THREAD_INIT
+
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(ERROR_TARGETS)$(WARN_TARGETS),)
 all: $(ERROR_TARGETS) $(WARN_TARGETS)

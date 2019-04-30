@@ -23,10 +23,11 @@
 
 #include <core/threading/mutex_locker.h>
 
+#include <bsoncxx/builder/basic/document.hpp>
 #include <clipsmm.h>
 
 using namespace fawkes;
-using namespace mongo;
+using namespace mongocxx;
 
 /**
  * Constructor with references to objects of the plugin
@@ -69,7 +70,7 @@ ClipsRmTrigger::set_trigger(EventTrigger *trigger)
  * @param update updated object
  */
 void
-ClipsRmTrigger::callback(mongo::BSONObj update)
+ClipsRmTrigger::callback(const bsoncxx::document::view &update)
 {
 	MutexLocker locker(clips.objmutex_ptr());
 	clips->assert_fact_f("( %s)", assert_name.c_str());
@@ -83,15 +84,16 @@ ClipsRmTrigger::callback(mongo::BSONObj update)
 		rcvd_at[0] = tv.tv_sec;
 		rcvd_at[1] = tv.tv_usec;
 		fact->set_slot("rcvd-at", rcvd_at);
-		BSONObjBuilder *b = new BSONObjBuilder();
-		b->appendElements(update);
+		using namespace bsoncxx::builder;
+		basic::document *b = new basic::document();
+		b->append(bsoncxx::builder::concatenate(update));
 		void *ptr = b;
 		fact->set_slot("ptr", CLIPS::Value(ptr));
 		CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
 		if (!new_fact) {
 			logger->log_warn("CLIPS-RobotMemory", "Asserting robmem-trigger fact failed");
-			delete static_cast<BSONObjBuilder *>(ptr);
+			delete static_cast<basic::document *>(ptr);
 		}
 	} else {
 		logger->log_warn("CLIPS-RobotMemory", "Did not get template, did you load robot-memory.clp?");

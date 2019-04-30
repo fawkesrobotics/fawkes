@@ -26,6 +26,7 @@
 #include <logging/logger.h>
 #include <plugins/robot-memory/robot_memory.h>
 
+#include <bsoncxx/document/view.hpp>
 #include <clipsmm.h>
 #include <string>
 
@@ -42,7 +43,7 @@ public:
 	               fawkes::Logger *                     logger);
 	virtual ~ClipsRmTrigger();
 
-	void callback(mongo::BSONObj update);
+	void callback(const bsoncxx::document::view &update);
 	void set_trigger(EventTrigger *trigger);
 
 private:

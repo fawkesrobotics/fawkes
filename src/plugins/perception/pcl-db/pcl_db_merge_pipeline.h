@@ -63,9 +63,8 @@
 #	include <pcl/registration/ndt.h>
 #endif
 
-#include <mongo/client/dbclient.h>
-
 #include <Eigen/StdVector>
+#include <mongocxx/client.hpp>
 
 /** Point cloud merging pipeline.
  * This class can merge multiple point clouds which are restored from
@@ -84,7 +83,7 @@ public:
    * coordinate reference frames
    * @param output output point cloud
    */
-	PointCloudDBMergePipeline(mongo::DBClientBase *                                   mongodb_client,
+	PointCloudDBMergePipeline(mongocxx::client *                                      mongodb_client,
 	                          fawkes::Configuration *                                 config,
 	                          fawkes::Logger *                                        logger,
 	                          fawkes::tf::Transformer *                               transformer,
@@ -165,12 +164,12 @@ public:
    * @param collection collection from which to retrieve the data
    */
 	void
-	merge(std::vector<long long> &times, std::string &database, std::string &collection)
+	merge(std::vector<long> &times, std::string &database, std::string &collection)
 	{
 		TIMETRACK_START(ttc_merge_);
 		const unsigned int num_clouds = times.size();
 
-		std::vector<long long> actual_times(num_clouds);
+		std::vector<long> actual_times(num_clouds);
 
 		this->output_->points.clear();
 		this->output_->height   = 1;
@@ -222,7 +221,7 @@ public:
 			                    /* end */ actual_times[i] + this->cfg_transform_range_[1]);
 			this->logger_->log_debug(this->name_,
 			                         "Restored transforms for %zu frames "
-			                         "for range (%lli..%lli)",
+			                         "for range (%li..%li)",
 			                         transformer.get_frame_caches().size(),
 			                         /* start */ actual_times[i] + this->cfg_transform_range_[0],
 			                         /* end */ actual_times[i] + this->cfg_transform_range_[1]);
@@ -544,7 +543,7 @@ private: // methods
 	void
 	merge_output(std::string &                                                   database,
 	             std::vector<typename PointCloudDBPipeline<PointType>::CloudPtr> clouds,
-	             std::vector<long long> &                                        actual_times)
+	             std::vector<long> &                                             actual_times)
 	{
 		size_t       num_points = 0;
 		const size_t num_clouds = clouds.size();
@@ -586,7 +585,7 @@ private: // methods
 			transformer.restore(/* start */ actual_times[ref_pos] + this->cfg_transform_range_[0],
 			                    /* end */ actual_times[ref_pos] + this->cfg_transform_range_[1]);
 			this->logger_->log_debug(this->name_,
-			                         "Restored transforms for %zu frames for range (%lli..%lli)",
+			                         "Restored transforms for %zu frames for range (%li..%li)",
 			                         transformer.get_frame_caches().size(),
 			                         /* start */ actual_times[ref_pos] + this->cfg_transform_range_[0],
 			                         /* end */ actual_times[ref_pos] + this->cfg_transform_range_[1]);

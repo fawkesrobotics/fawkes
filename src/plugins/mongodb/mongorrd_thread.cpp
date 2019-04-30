@@ -22,12 +22,17 @@
 
 #include "mongorrd_thread.h"
 
+#include "utils.h"
+
 #include <utils/time/wait.h>
 
 // from MongoDB
-#include <mongo/client/dbclient.h>
+#include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/json.hpp>
+#include <mongocxx/client.hpp>
+#include <mongocxx/exception/exception.hpp>
 
-using namespace mongo;
+using namespace mongocxx;
 using namespace fawkes;
 
 #define DB_CONF_PREFIX "/plugins/mongorrd/databases/"
@@ -409,18 +414,20 @@ void
 MongoRRDThread::loop()
 {
 	timewait_->mark_start();
+	using namespace bsoncxx::builder;
 
 	try {
-		BSONObj reply;
-		if (mongodb_client->simpleCommand("admin", &reply, "serverStatus")) {
-			BSONObj opcounters = reply["opcounters"].Obj();
-			int     insert, query, update, del, getmore, command;
-			insert  = opcounters["insert"].Int();
-			query   = opcounters["query"].Int();
-			update  = opcounters["update"].Int();
-			del     = opcounters["delete"].Int();
-			getmore = opcounters["getmore"].Int();
-			command = opcounters["command"].Int();
+		auto reply = mongodb_client->database("admin").run_command(
+		  basic::make_document(basic::kvp("serverStatus", 1)));
+		if (check_mongodb_ok(reply.view())) {
+			auto    opcounters = reply.view()["opcounters"].get_document().view();
+			int64_t insert, query, update, del, getmore, command;
+			insert  = opcounters["insert"].get_int64();
+			query   = opcounters["query"].get_int64();
+			update  = opcounters["update"].get_int64();
+			del     = opcounters["delete"].get_int64();
+			getmore = opcounters["getmore"].get_int64();
+			command = opcounters["command"].get_int64();
 
 			try {
 				rrd_manager->add_data(
@@ -432,11 +439,11 @@ MongoRRDThread::loop()
 				logger->log_warn(name(), e);
 			}
 
-			BSONObj mem = reply["mem"].Obj();
-			int     resident, virtmem, mapped;
-			resident = mem["resident"].Int();
-			virtmem  = mem["virtual"].Int();
-			mapped   = mem["mapped"].Int();
+			auto    mem = reply.view()["mem"].get_document().view();
+			int64_t resident, virtmem, mapped;
+			resident = mem["resident"].get_int64();
+			virtmem  = mem["virtual"].get_int64();
+			mapped   = mem["mapped"].get_int64();
 
 			try {
 				rrd_manager->add_data("memory", "N:%i:%i:%i", resident, virtmem, mapped);
@@ -445,12 +452,12 @@ MongoRRDThread::loop()
 				logger->log_warn(name(), e);
 			}
 
-			BSONObj indexc = reply["indexCounters"].Obj()["btree"].Obj();
-			int     accesses, hits, misses, resets;
-			accesses = indexc["accesses"].Int();
-			hits     = indexc["hits"].Int();
-			misses   = indexc["misses"].Int();
-			resets   = indexc["resets"].Int();
+			auto indexc = reply.view()["indexCounters"]["btree"].get_document().view();
+			int  accesses, hits, misses, resets;
+			accesses = indexc["accesses"].get_int64();
+			hits     = indexc["hits"].get_int64();
+			misses   = indexc["misses"].get_int64();
+			resets   = indexc["resets"].get_int64();
 
 			try {
 				rrd_manager->add_data("indexes", "N:%i:%i:%i:%i", accesses, hits, misses, resets);
@@ -462,22 +469,23 @@ MongoRRDThread::loop()
 			}
 
 			for (DbStatsMap::iterator i = dbstats_.begin(); i != dbstats_.end(); ++i) {
-				BSONObj dbstats;
-				if (mongodb_client->simpleCommand(i->second.db_name, &dbstats, "dbStats")) {
+				auto dbstats = mongodb_client->database(i->second.db_name)
+				                 .run_command(basic::make_document(basic::kvp("dbStats", 1)));
+				if (int(dbstats.view()["ok"].get_double()) == 1) {
 					try {
-						long int collections, objects, numExtents, indexes, dataSize, storageSize, indexSize,
+						int64_t collections, objects, numExtents, indexes, dataSize, storageSize, indexSize,
 						  fileSize;
 						double avgObjSize;
 
-						collections = dbstats["collections"].numberLong();
-						objects     = dbstats["objects"].numberLong();
-						avgObjSize  = dbstats["avgObjSize"].Double();
-						dataSize    = dbstats["dataSize"].numberLong();
-						storageSize = dbstats["storageSize"].numberLong();
-						numExtents  = dbstats["numExtents"].numberLong();
-						indexes     = dbstats["indexes"].numberLong();
-						indexSize   = dbstats["indexSize"].numberLong();
-						fileSize    = dbstats["fileSize"].numberLong();
+						collections = dbstats.view()["collections"].get_int64();
+						objects     = dbstats.view()["objects"].get_int64();
+						avgObjSize  = dbstats.view()["avgObjSize"].get_double();
+						dataSize    = dbstats.view()["dataSize"].get_int64();
+						storageSize = dbstats.view()["storageSize"].get_int64();
+						numExtents  = dbstats.view()["numExtents"].get_int64();
+						indexes     = dbstats.view()["indexes"].get_int64();
+						indexSize   = dbstats.view()["indexSize"].get_int64();
+						fileSize    = dbstats.view()["fileSize"].get_int64();
 
 						try {
 							rrd_manager->add_data(i->second.rrd_name.c_str(),
@@ -499,36 +507,30 @@ MongoRRDThread::loop()
 							logger->log_warn(name(), e);
 						}
 
-					} catch (mongo::MsgAssertionException &ue) {
+					} catch (mongocxx::exception &e) {
 						logger->log_warn(name(),
 						                 "Failed to update MongoDB RRD for database "
 						                 "%s: %s",
 						                 i->second.db_name.c_str(),
-						                 ue.what());
-					} catch (mongo::UserException &ue) {
-						logger->log_warn(name(),
-						                 "Failed to update MongoDB RRD for database "
-						                 "%s: %s",
-						                 i->second.db_name.c_str(),
-						                 ue.what());
+						                 e.what());
 					}
 				} else {
 					logger->log_warn(name(),
-					                 "Failed to retrieve db stats for %s: %s",
+					                 "Failed to retrieve db stats for %s, reply: %s",
 					                 i->second.db_name.c_str(),
-					                 mongodb_client->getLastError().c_str());
+					                 bsoncxx::to_json(dbstats.view()).c_str());
 				}
 			}
 
-			//double locktime = reply["globalLock"].Obj()["lockTime"].Number();
+			//double locktime = reply.view()["globalLock"].get_document().view()["lockTime"].get_double();
 
 		} else {
 			logger->log_warn(name(),
-			                 "Failed to retrieve server status: %s",
-			                 mongodb_client->getLastError().c_str());
+			                 "Failed to retrieve server status, reply: %s",
+			                 bsoncxx::to_json(reply.view()).c_str());
 		}
 
-	} catch (mongo::UserException &e) {
+	} catch (mongocxx::exception &e) {
 		logger->log_warn(name(), "Failed to update MongoDB RRD: %s", e.what());
 	}
 

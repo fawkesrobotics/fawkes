@@ -36,6 +36,7 @@
 #include <plugins/mongodb/aspect/mongodb.h>
 
 #include <list>
+#include <mongocxx/gridfs/bucket.hpp>
 #include <queue>
 
 #if PCL_VERSION_COMPARE(>=, 1, 7, 0)
@@ -48,10 +49,6 @@ namespace fawkes {
 class Mutex;
 class TimeWait;
 } // namespace fawkes
-
-namespace mongo {
-class GridFS;
-}
 
 class MongoLogPointCloudThread : public fawkes::Thread,
                                  public fawkes::ClockAspect,
@@ -94,10 +91,10 @@ private:
 	/// @endcond
 	std::map<std::string, PointCloudInfo> pcls_;
 
-	mongo::DBClientBase *mongodb_;
-	mongo::GridFS *      gridfs_;
-	std::string          collection_;
-	std::string          database_;
+	mongocxx::client *       mongodb_;
+	mongocxx::gridfs::bucket gridfs_;
+	std::string              collection_;
+	std::string              database_;
 
 	fawkes::Mutex *   mutex_;
 	fawkes::TimeWait *wait_;

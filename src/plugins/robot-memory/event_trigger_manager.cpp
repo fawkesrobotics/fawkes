@@ -21,10 +21,15 @@
 
 #include "event_trigger_manager.h"
 
+#include <plugins/mongodb/utils.h>
+
 #include <boost/bind.hpp>
+#include <bsoncxx/json.hpp>
+#include <mongocxx/exception/operation_exception.hpp>
+#include <mongocxx/exception/query_exception.hpp>
 
 using namespace fawkes;
-using namespace mongo;
+using namespace mongocxx;
 
 /** @class EventTriggerManager  event_trigger_manager.h
  * Manager to realize triggers on events in the robot memory
@@ -84,21 +89,24 @@ EventTriggerManager::check_events()
 	for (EventTrigger *trigger : triggers) {
 		bool ok = true;
 		try {
-			while (trigger->oplog_cursor->more()) {
-				BSONObj change = trigger->oplog_cursor->next();
-				//logger_->log_info(name.c_str(), "Triggering: %s", change.toString().c_str());
+			auto next = trigger->change_stream.begin();
+			while (next != trigger->change_stream.end()) {
+				//logger_->log_warn(name.c_str(), "Triggering: %s", bsoncxx::to_json(*next).c_str());
 				//actually call the callback function
-				trigger->callback(change);
+				trigger->callback(*next);
+				next++;
 			}
-		} catch (mongo::DBException &e) {
-			logger_->log_error(name.c_str(), "Error while reading the oplog");
+		} catch (operation_exception &e) {
+			logger_->log_error(name.c_str(), "Error while reading the change stream");
 			ok = false;
 		}
-		if (!ok || trigger->oplog_cursor->isDead()) {
+		// TODO Do we still need to check whether the cursor is dead?
+		// (with old driver: (!ok || trigger->oplog_cursor->isDead()))
+		if (!ok) {
 			if (cfg_debug_)
 				logger_->log_debug(name.c_str(), "Tailable Cursor is dead, requerying");
 			//check if collection is local or replicated
-			mongo::DBClientBase *con;
+			client *con;
 			if (std::find(dbnames_distributed_.begin(),
 			              dbnames_distributed_.end(),
 			              get_db_name(trigger->ns_db))
@@ -107,8 +115,16 @@ EventTriggerManager::check_events()
 			} else {
 				con = con_local_;
 			}
-
-			trigger->oplog_cursor = create_oplog_cursor(con, "local.oplog.rs", trigger->oplog_query);
+			auto db_coll_pair = split_db_collection_string(trigger->ns);
+			auto collection   = con->database(db_coll_pair.first)[db_coll_pair.second];
+			try {
+				trigger->change_stream = create_change_stream(collection, trigger->filter_query.view());
+			} catch (mongocxx::query_exception &e) {
+				logger_->log_error(name.c_str(),
+				                   "Failed to create change stream, broken trigger for collection %s: %s",
+				                   trigger->ns.c_str(),
+				                   e.what());
+			}
 		}
 	}
 }
@@ -124,16 +140,24 @@ EventTriggerManager::remove_trigger(EventTrigger *trigger)
 	delete trigger;
 }
 
-QResCursor
-EventTriggerManager::create_oplog_cursor(mongo::DBClientBase *con,
-                                         std::string          oplog,
-                                         mongo::Query         query)
+change_stream
+EventTriggerManager::create_change_stream(mongocxx::collection &coll, bsoncxx::document::view query)
 {
-	QResCursor res = con->query(oplog, query, 0, 0, 0, QueryOption_CursorTailable);
-	//Go to end of Oplog to get new updates from then on
-	while (res->more()) {
-		res->next();
+	// TODO Allow non-empty pipelines
+	// @body We used to have a regular mongodb query as input to the oplog, but
+	// now this needs to be a pipeline. Adapt the change stream creation and the
+	// robot-memory API so we also accept a non-empty pipeline.
+	if (!query.empty()) {
+		throw fawkes::Exception("Non-empty queries are not implemented!");
 	}
+	mongocxx::options::change_stream opts;
+	opts.full_document("updateLookup");
+	opts.max_await_time(std::chrono::milliseconds(0));
+	auto res = coll.watch(opts);
+	// Go to end of change stream to get new updates from then on.
+	auto it = res.begin();
+	while (std::next(it) != res.end()) {}
+
 	return res;
 }
 

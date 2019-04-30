@@ -31,11 +31,12 @@
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
 #include <plugins/mongodb/aspect/mongodb_inifin.h>
 
-// from MongoDB
-#include <mongo/client/dbclient.h>
+#include <mongocxx/instance.hpp>
 
+// from MongoDB
 #include <list>
 #include <memory>
+#include <mongocxx/client.hpp>
 #include <string>
 #include <vector>
 
@@ -59,8 +60,8 @@ public:
 	virtual void loop();
 	virtual void finalize();
 
-	virtual mongo::DBClientBase *create_client(const std::string &config_name = "");
-	virtual void                 delete_client(mongo::DBClientBase *client);
+	virtual mongocxx::client *create_client(const std::string &config_name = "");
+	virtual void              delete_client(mongocxx::client *client);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
 protected:
@@ -80,7 +81,8 @@ private:
 	std::map<std::string, std::shared_ptr<MongoDBInstanceConfig>>   instance_configs_;
 	std::map<std::string, std::shared_ptr<MongoDBReplicaSetConfig>> replicaset_configs_;
 
-	fawkes::MongoDBAspectIniFin mongodb_aspect_inifin_;
+	fawkes::MongoDBAspectIniFin         mongodb_aspect_inifin_;
+	std::unique_ptr<mongocxx::instance> instance_;
 };
 
 #endif

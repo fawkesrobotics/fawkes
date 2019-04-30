@@ -30,7 +30,8 @@ LIBS_mongodb = fawkescore fawkesaspects fawkesmongodbaspect fawkesblackboard \
 OBJS_mongodb = mongodb_plugin.o mongodb_thread.o \
                mongodb_client_config.o \
                mongodb_instance_config.o \
-               mongodb_replicaset_config.o
+               mongodb_replicaset_config.o \
+               utils.o
 
 LIBS_mongodb_rrd = fawkescore fawkesutils fawkesaspects fawkesblackboard fawkesinterface \
                 fawkesconfig fawkesmongodbaspect fawkesrrdaspect

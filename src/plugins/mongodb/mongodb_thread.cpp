@@ -25,11 +25,7 @@
 #include "mongodb_instance_config.h"
 #include "mongodb_replicaset_config.h"
 
-#ifdef HAVE_MONGODB_VERSION_H
-#	include <mongo/client/init.h>
-#endif
-
-using namespace mongo;
+using namespace mongocxx;
 using namespace fawkes;
 
 /** @class MongoDBThread "mongodb_thread.h"
@@ -57,12 +53,12 @@ MongoDBThread::~MongoDBThread()
 void
 MongoDBThread::init()
 {
-#ifdef HAVE_MONGODB_VERSION_H
-	mongo::client::initialize();
-#endif
-
+	instance_.reset(new instance());
+	logger->log_info(name(), "Init instances");
 	init_instance_configs();
+	logger->log_info(name(), "Init clients");
 	init_client_configs();
+	logger->log_info(name(), "Init RS");
 	init_replicaset_configs();
 
 	if (client_configs_.empty() && instance_configs_.empty() && replicaset_configs_.empty()) {
@@ -175,14 +171,9 @@ MongoDBThread::init_replicaset_configs()
 			std::string cfg_prefix = prefix + cfg_name + "/";
 
 			try {
-				auto conf = std::make_shared<MongoDBReplicaSetConfig>(config,
-				                                                      cfg_name,
-				                                                      cfg_prefix,
-				                                                      bootstrap_database);
-				if (conf->is_enabled()) {
-					std::shared_ptr<mongo::DBClientBase> bootstrap_client(
-					  create_client(bootstrap_client_cfg));
-					conf->bootstrap(bootstrap_client);
+				if (config->get_bool(cfg_prefix + "enabled")) {
+					auto conf =
+					  std::make_shared<MongoDBReplicaSetConfig>(cfg_name, cfg_prefix, bootstrap_prefix);
 					replicaset_configs_[cfg_name] = conf;
 					logger->log_info(name(), "Added MongoDB replica set configuration %s", cfg_name.c_str());
 				} else {
@@ -229,9 +220,7 @@ MongoDBThread::finalize()
 
 	client_configs_.clear();
 
-#ifdef HAVE_MONGODB_VERSION_H
-	mongo::client::shutdown();
-#endif
+	instance_.release();
 }
 
 void
@@ -239,7 +228,7 @@ MongoDBThread::loop()
 {
 }
 
-mongo::DBClientBase *
+mongocxx::client *
 MongoDBThread::create_client(const std::string &config_name)
 {
 	const std::string cname{config_name.empty() ? "default" : config_name};
@@ -255,7 +244,7 @@ MongoDBThread::create_client(const std::string &config_name)
 }
 
 void
-MongoDBThread::delete_client(mongo::DBClientBase *client)
+MongoDBThread::delete_client(mongocxx::client *client)
 {
 	delete client;
 }

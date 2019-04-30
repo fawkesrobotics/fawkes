@@ -26,20 +26,15 @@
 
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <core/exception.h>
 #include <core/threading/mutex_locker.h>
 #include <plugin/loader.h>
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
+#include <plugins/mongodb/utils.h>
 
 #include <boost/bind.hpp>
+#include <bsoncxx/builder/basic/document.hpp>
 #include <list>
-
-namespace mongo {
-class DBClientBase;
-class DBClientCursor;
-} // namespace mongo
-
-///typedef for shorter type description
-typedef std::unique_ptr<mongo::DBClientCursor> QResCursor;
 
 class EventTriggerManager
 {
@@ -55,46 +50,42 @@ public:
 	/**
      * Register a trigger to be notified when the robot memory is updated and the updated document matches the query
      * @param query Query the updated document has to match
-     * @param collection db.collection to use
+     * @param dbcollection db.collection to use
      * @param callback Callback function (e.g. &Class::callback)
      * @param obj Pointer to class the callback is a function of (usaually this)
      * @return Trigger object pointer, save it to remove the trigger later
      */
 	template <typename T>
 	EventTrigger *
-	register_trigger(mongo::Query query,
-	                 std::string  collection,
-	                 void (T::*callback)(mongo::BSONObj),
+	register_trigger(const bsoncxx::document::view &query,
+	                 std::string                    dbcollection,
+	                 void (T::*callback)(const bsoncxx::document::view &),
 	                 T *obj)
 	{
+		//logger_->log_warn("RM|EventTriggerManager", "Registering trigger on %s", dbcollection.c_str());
 		//lock to be thread safe (e.g. registration during checking)
 		fawkes::MutexLocker lock(mutex_);
 
-		//construct query for oplog
-		mongo::BSONObjBuilder query_builder;
-		query_builder.append("ns", collection);
-		// added/updated object is a subdocument in the oplog document
-		for (mongo::BSONObjIterator it = query.getFilter().begin(); it.more();) {
-			mongo::BSONElement elem = it.next();
-			query_builder.appendAs(elem, std::string("o.") + elem.fieldName());
+		if (!query.empty()) {
+			throw fawkes::Exception("Non-empty queries are not implemented!");
 		}
-		mongo::Query oplog_query = query_builder.obj();
-		oplog_query.readPref(mongo::ReadPreference_Nearest, mongo::BSONArray());
 
-		//check if collection is local or replicated
-		mongo::DBClientBase *con;
-		std::string          oplog;
-		oplog = "local.oplog.rs";
-		if (std::find(dbnames_distributed_.begin(), dbnames_distributed_.end(), get_db_name(collection))
+		//check if dbcollection is local or replicated
+		mongocxx::client *con;
+		if (std::find(dbnames_distributed_.begin(),
+		              dbnames_distributed_.end(),
+		              get_db_name(dbcollection))
 		    != dbnames_distributed_.end()) {
 			con = con_replica_;
 		} else {
 			con = con_local_;
 		}
-
-		EventTrigger *trigger =
-		  new EventTrigger(oplog_query, collection, boost::bind(callback, obj, _1));
-		trigger->oplog_cursor = create_oplog_cursor(con, oplog, oplog_query);
+		auto          db_coll_pair = split_db_collection_string(dbcollection);
+		auto          collection   = con->database(db_coll_pair.first)[db_coll_pair.second];
+		EventTrigger *trigger      = new EventTrigger(create_change_stream(collection, query),
+                                             query,
+                                             dbcollection,
+                                             boost::bind(callback, obj, _1));
 		triggers.push_back(trigger);
 		return trigger;
 	}
@@ -104,8 +95,9 @@ public:
 	static std::string get_db_name(const std::string &ns);
 
 private:
-	void       check_events();
-	QResCursor create_oplog_cursor(mongo::DBClientBase *con, std::string oplog, mongo::Query query);
+	void                    check_events();
+	mongocxx::change_stream create_change_stream(mongocxx::collection &  collection,
+	                                             bsoncxx::document::view query);
 
 	std::string            name = "RobotMemory EventTriggerManager";
 	fawkes::Logger *       logger_;
@@ -114,8 +106,8 @@ private:
 
 	fawkes::MongoDBConnCreator *mongo_connection_manager_;
 	//MongoDB connections (necessary because the mongos instance used by the robot memory has no access to the oplog)
-	mongo::DBClientBase *con_local_;
-	mongo::DBClientBase *con_replica_;
+	mongocxx::client *con_local_;
+	mongocxx::client *con_replica_;
 
 	std::vector<std::string> dbnames_distributed_;
 	std::vector<std::string> dbnames_local_;

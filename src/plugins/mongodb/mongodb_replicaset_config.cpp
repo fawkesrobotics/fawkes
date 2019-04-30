@@ -22,18 +22,20 @@
 #include "mongodb_replicaset_config.h"
 
 #include "mongodb_client_config.h"
+#include "utils.h"
 
 #include <config/config.h>
 #include <logging/logger.h>
-#include <mongo/bson/bson.h>
-#include <mongo/client/dbclient.h>
 #include <utils/time/wait.h>
 
+#include <bsoncxx/builder/basic/document.hpp>
 #include <chrono>
 #include <iterator>
+#include <mongocxx/exception/operation_exception.hpp>
 #include <numeric>
 
 using namespace fawkes;
+using namespace bsoncxx::builder;
 
 /** @class MongoDBReplicaSetConfig "mongodb_replicaset_config.h"
  * MongoDB replica set configuration.
@@ -47,44 +49,79 @@ using namespace fawkes;
 
 /** Constructor.
  * This will read the given configuration.
- * @param config configuration to query
  * @param cfgname configuration name
  * @param prefix configuration path prefix
- * @param bootstrap_database database to hold leader election data
+ * @param bootstrap_prefix configuration path prefix for bootstrap configuration
  */
-MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
-                                                 std::string    cfgname,
-                                                 std::string    prefix,
-                                                 std::string    bootstrap_database)
-: Thread("MongoDBReplicaSet", Thread::OPMODE_CONTINUOUS)
+MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(const std::string &cfgname,
+                                                 const std::string &prefix,
+                                                 const std::string &bootstrap_prefix)
+: Thread("MongoDBReplicaSet", Thread::OPMODE_CONTINUOUS),
+  leader_elec_query_(bsoncxx::builder::basic::document()),
+  leader_elec_query_force_(bsoncxx::builder::basic::document()),
+  leader_elec_update_(bsoncxx::builder::basic::document())
 {
 	set_name("MongoDBReplicaSet|%s", cfgname.c_str());
-	config_name_ = cfgname;
-	is_leader_   = false;
+	config_name_      = cfgname;
+	prefix_           = prefix;
+	bootstrap_prefix_ = bootstrap_prefix;
+	is_leader_        = false;
 	last_status_ =
 	  ReplicaSetStatus{.member_status  = MongoDBManagedReplicaSetInterface::ERROR,
 	                   .primary_status = MongoDBManagedReplicaSetInterface::PRIMARY_UNKNOWN};
 
 	enabled_ = false;
+}
+
+void
+MongoDBReplicaSetConfig::init()
+{
 	try {
-		enabled_ = config->get_bool(prefix + "enabled");
+		enabled_ = config->get_bool(prefix_ + "enabled");
 	} catch (Exception &e) {
 	}
+	if (!enabled_) {
+		throw Exception("Replica set manager '%s' cannot be started while disabled", name());
+	}
+
+	logger->log_debug(name(),
+	                  "Bootstrap Query:  %s",
+	                  bsoncxx::to_json(leader_elec_query_.view()).c_str());
+	logger->log_debug(name(),
+	                  "Bootstrap Update: %s",
+	                  bsoncxx::to_json(leader_elec_update_.view()).c_str());
+
+	rs_status_if_ =
+	  blackboard->open_for_writing<MongoDBManagedReplicaSetInterface>(config_name_.c_str());
 
 	if (enabled_) {
-		bootstrap_database_ = bootstrap_database;
-		bootstrap_ns_       = bootstrap_database + "." + config_name_;
+		bootstrap_database_                      = config->get_string(bootstrap_prefix_ + "database");
+		std::string         bootstrap_client_cfg = config->get_string(bootstrap_prefix_ + "client");
+		MongoDBClientConfig bootstrap_client_config(config,
+		                                            logger,
+		                                            bootstrap_client_cfg,
+		                                            "/plugins/mongodb/clients/" + bootstrap_client_cfg
+		                                              + "/");
+		if (!bootstrap_client_config.is_enabled()) {
+			throw Exception("%s: bootstrap client configuration '%s' disabled",
+			                name(),
+			                bootstrap_client_cfg.c_str());
+		}
+		bootstrap_client_.reset(bootstrap_client_config.create_client());
+		bootstrap_ns_ = bootstrap_database_ + "." + config_name_;
 
-		local_client_cfg_ = config->get_string(prefix + "local-client");
+		local_client_cfg_ = config->get_string(prefix_ + "local-client");
 		loop_interval_    = 5.0;
 		try {
-			loop_interval_ = config->get_float(prefix + "loop-interval");
+			loop_interval_ = config->get_float(prefix_ + "loop-interval");
 		} catch (Exception &e) {
 		} // ignored, use default
 
+		timewait_ = new TimeWait(clock, (int)(loop_interval_ * 1000000.));
+
 		leader_expiration_ = 10;
 		try {
-			leader_expiration_ = config->get_int(prefix + "leader-expiration");
+			leader_expiration_ = config->get_int(prefix_ + "leader-expiration");
 		} catch (Exception &e) {
 		} // ignored, use default
 
@@ -103,41 +140,60 @@ MongoDBReplicaSetConfig::MongoDBReplicaSetConfig(Configuration *config,
 			                local_client_cfg_.c_str());
 		}
 		local_hostport_                = client_config.hostport();
-		std::vector<std::string> hostv = config->get_strings(prefix + "hosts");
+		std::vector<std::string> hostv = config->get_strings(prefix_ + "hosts");
 		std::copy(hostv.begin(), hostv.end(), std::inserter(hosts_, hosts_.end()));
 
 		if (std::find(hosts_.begin(), hosts_.end(), local_hostport_) == hosts_.end()) {
 			throw Exception("%s host list does not include local client", name());
 		}
 
-		leader_elec_query_       = BSON("host" << local_hostport_ << "master" << false);
-		leader_elec_query_force_ = BSON("master" << true);
+		using namespace bsoncxx::builder::basic;
 
-		mongo::BSONObjBuilder update;
-		update.append("$currentDate", BSON("last_seen" << true));
-		mongo::BSONObjBuilder update_set;
-		update_set.append("master", true);
-		update_set.append("host", local_hostport_);
-		update.append("$set", update_set.obj());
-		leader_elec_update_ = update.obj();
+		auto leader_elec_query_builder = basic::document{};
+		leader_elec_query_builder.append(basic::kvp("host", local_hostport_));
+		leader_elec_query_builder.append(basic::kvp("master", false));
+		leader_elec_query_ = leader_elec_query_builder.extract();
+
+		auto leader_elec_query_force_builder = basic::document{};
+		leader_elec_query_builder.append(basic::kvp("master", true));
+		leader_elec_query_force_ = leader_elec_query_force_builder.extract();
+
+		auto leader_elec_update_builder = basic::document{};
+		leader_elec_update_builder.append(basic::kvp("$currentDate", [](basic::sub_document subdoc) {
+			subdoc.append(basic::kvp("last_seen", true));
+		}));
+		leader_elec_update_builder.append(basic::kvp("$set", [this](basic::sub_document subdoc) {
+			subdoc.append(basic::kvp("master", true));
+			subdoc.append(basic::kvp("host", local_hostport_));
+		}));
+		leader_elec_update_ = leader_elec_update_builder.extract();
 
 		local_client_.reset(client_config.create_client());
 	}
+	bootstrap();
 }
 
 /** Setup replicaset bootstrap client.
  * @param bootstrap_client MongoDB client to access bootstrap database
  */
 void
-MongoDBReplicaSetConfig::bootstrap(std::shared_ptr<mongo::DBClientBase> bootstrap_client)
+MongoDBReplicaSetConfig::bootstrap()
 {
 	if (enabled_) {
-		bootstrap_client_ = bootstrap_client;
-		bootstrap_client_->createCollection(bootstrap_ns_);
-		bootstrap_client_->createIndex(bootstrap_ns_, mongo::IndexSpec().addKey("host"));
-		bootstrap_client_->createIndex(bootstrap_ns_, mongo::IndexSpec().addKey("master").unique());
-		bootstrap_client_->createIndex(
-		  bootstrap_ns_, mongo::IndexSpec().addKey("last_seen").expireAfterSeconds(leader_expiration_));
+		try {
+			auto database   = bootstrap_client_->database(bootstrap_database_);
+			auto collection = database[bootstrap_ns_];
+
+			collection.create_index(basic::make_document(basic::kvp("host", 1)));
+			collection.create_index(basic::make_document(basic::kvp("master", 1)),
+			                        basic::make_document(basic::kvp("unique", true)));
+			collection.create_index(basic::make_document(basic::kvp("last_seen", 1)),
+			                        basic::make_document(
+			                          basic::kvp("expireAfterSeconds", leader_expiration_)));
+		} catch (mongocxx::operation_exception &e) {
+			logger->log_error(name(), "Failed to initialize bootstrap client: %s", e.what());
+			throw;
+		}
 	}
 }
 
@@ -145,28 +201,46 @@ bool
 MongoDBReplicaSetConfig::leader_elect(bool force)
 {
 	try {
-		bootstrap_client_->update(bootstrap_ns_,
-		                          force ? leader_elec_query_force_ : leader_elec_query_,
-		                          leader_elec_update_,
-		                          /* upsert */ true,
-		                          /* multi */ false,
-		                          &mongo::WriteConcern::majority);
-		if (!is_leader_) {
-			is_leader_ = true;
-			logger->log_info(name(), "Became replica set leader");
+		auto write_concern = mongocxx::write_concern();
+		write_concern.majority(std::chrono::milliseconds(0));
+		auto result = bootstrap_client_->database(bootstrap_database_)[bootstrap_ns_].update_one(
+		  force ? leader_elec_query_force_.view() : leader_elec_query_.view(),
+		  leader_elec_update_.view(),
+		  mongocxx::options::update().upsert(true).write_concern(write_concern));
+		if (result) {
+			if (!is_leader_) {
+				is_leader_ = true;
+				logger->log_info(name(), "Became replica set leader");
+			}
+		} else {
+			if (is_leader_) {
+				is_leader_ = false;
+				logger->log_warn(name(), "Lost replica set leadership");
+			}
 		}
-	} catch (mongo::OperationException &e) {
-		if (e.obj()["code"].numberInt() != 11000) {
-			// 11000: Duplicate key exception, occurs if we do not become leader, all fine
-			logger->log_error(name(),
-			                  "Leader election failed (%i): %s %s",
-			                  e.getCode(),
-			                  e.what(),
-			                  e.obj().jsonString().c_str());
-			is_leader_ = false;
-		} else if (is_leader_) {
-			logger->log_warn(name(), "Lost replica set leadership");
-			is_leader_ = false;
+	} catch (mongocxx::operation_exception &e) {
+		if (boost::optional<bsoncxx::document::value> error = e.raw_server_error()) {
+			bsoncxx::array::view writeErrors = error->view()["writeErrors"].get_array();
+			// Do not use writeErrors.length(), which is not the number of errors!
+			auto num_errors = std::distance(writeErrors.begin(), writeErrors.end());
+			int  error_code = -1;
+			if (num_errors > 0) {
+				error_code = error->view()["writeErrors"][0]["code"].get_int32();
+			}
+			if (num_errors > 1 || error_code != 11000) {
+				// 11000: Duplicate key exception, occurs if we do not become leader, all fine
+				logger->log_error(name(),
+				                  "Leader election failed (%i): %s %s",
+				                  error_code,
+				                  e.what(),
+				                  bsoncxx::to_json(error->view()).c_str());
+				is_leader_ = false;
+			} else if (is_leader_) {
+				logger->log_warn(name(), "Lost replica set leadership");
+				is_leader_ = false;
+			}
+		} else {
+			logger->log_error(name(), "Leader election failed; failed to fetch error code: %s", e.what());
 		}
 	}
 	return is_leader_;
@@ -177,27 +251,11 @@ MongoDBReplicaSetConfig::leader_resign()
 {
 	if (is_leader_) {
 		logger->log_info(name(), "Resigning replica set leadership");
-		bootstrap_client_->remove(bootstrap_ns_,
-		                          leader_elec_query_,
-		                          /* just one */ true,
-		                          &mongo::WriteConcern::majority);
+		auto write_concern = mongocxx::write_concern();
+		write_concern.majority(std::chrono::milliseconds(0));
+		bootstrap_client_->database(bootstrap_database_)[bootstrap_ns_].delete_one(
+		  leader_elec_query_.view(), mongocxx::options::delete_options().write_concern(write_concern));
 	}
-}
-
-void
-MongoDBReplicaSetConfig::init()
-{
-	if (!enabled_) {
-		throw Exception("Replica set manager '%s' cannot be started while disabled", name());
-	}
-
-	logger->log_debug(name(), "Bootstrap Query:  %s", leader_elec_query_.jsonString().c_str());
-	logger->log_debug(name(), "Bootstrap Update: %s", leader_elec_update_.jsonString().c_str());
-
-	rs_status_if_ =
-	  blackboard->open_for_writing<MongoDBManagedReplicaSetInterface>(config_name_.c_str());
-
-	timewait_ = new TimeWait(clock, (int)(loop_interval_ * 1000000.));
 }
 
 void
@@ -213,8 +271,8 @@ void
 MongoDBReplicaSetConfig::loop()
 {
 	timewait_->mark_start();
-	mongo::BSONObj   reply;
-	ReplicaSetStatus status = rs_status(reply);
+	bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
+	ReplicaSetStatus         status = rs_status(reply);
 
 	if (status.primary_status == MongoDBManagedReplicaSetInterface::NO_PRIMARY) {
 		logger->log_warn(name(), "No primary, triggering leader election");
@@ -255,7 +313,7 @@ MongoDBReplicaSetConfig::loop()
 		// we might later want to cover some typical cases
 		logger->log_error(name(),
 		                  "Invalid configuration, hands-on required\n%s",
-		                  reply.jsonString().c_str());
+		                  bsoncxx::to_json(reply.view()).c_str());
 		break;
 	default: break;
 	}
@@ -273,72 +331,75 @@ MongoDBReplicaSetConfig::loop()
 }
 
 MongoDBReplicaSetConfig::ReplicaSetStatus
-MongoDBReplicaSetConfig::rs_status(mongo::BSONObj &reply)
+MongoDBReplicaSetConfig::rs_status(bsoncxx::document::value &reply)
 {
 	ReplicaSetStatus status = {.member_status  = MongoDBManagedReplicaSetInterface::ERROR,
 	                           .primary_status = MongoDBManagedReplicaSetInterface::PRIMARY_UNKNOWN};
 
-	mongo::BSONObj cmd(BSON("replSetGetStatus" << 1));
+	auto cmd = basic::make_document(basic::kvp("replSetGetStatus", 1));
 	try {
-		bool ok = local_client_->runCommand("admin", cmd, reply);
-
-		if (!ok) {
-			if (reply["code"].numberInt() == mongo::ErrorCodes::NotYetInitialized) {
-				logger->log_warn(name(), "Instance has not received replica set configuration, yet");
-				status.member_status = MongoDBManagedReplicaSetInterface::NOT_INITIALIZED;
-				status.error_msg     = "Instance has not received replica set configuration, yet";
-			} else if (reply["code"].numberInt() == mongo::ErrorCodes::InvalidReplicaSetConfig) {
-				logger->log_error(name(),
-				                  "Invalid replica set configuration: %s",
-				                  reply.jsonString().c_str());
-				status.member_status = MongoDBManagedReplicaSetInterface::INVALID_CONFIG;
-				status.error_msg     = "Invalid replica set configuration: " + reply.jsonString();
-			} else {
-				status.error_msg = "Unknown error";
-			}
-			return status;
+		reply = local_client_->database("admin").run_command(std::move(cmd));
+	} catch (mongocxx::operation_exception &e) {
+		int  error_code         = -1;
+		auto error_code_element = e.raw_server_error()->view()["code"];
+		if (error_code_element && error_code_element.type() == bsoncxx::type::k_int32) {
+			error_code = e.raw_server_error()->view()["code"].get_int32();
+		}
+		if (error_code == 94 /* NotYetInitialized */) {
+			logger->log_warn(name(), "Instance has not received replica set configuration, yet");
+			status.member_status = MongoDBManagedReplicaSetInterface::NOT_INITIALIZED;
+			status.error_msg     = "Instance has not received replica set configuration, yet";
+		} else if (error_code == 93 /* InvalidReplicaSetConfig */) {
+			logger->log_error(name(),
+			                  "Invalid replica set configuration: %s",
+			                  bsoncxx::to_json(reply.view()).c_str());
+			status.member_status = MongoDBManagedReplicaSetInterface::INVALID_CONFIG;
+			status.error_msg     = "Invalid replica set configuration: " + bsoncxx::to_json(reply.view());
 		} else {
-			//logger->log_warn(name(), "rs status reply: %s", reply.jsonString().c_str());
-			try {
-				mongo::BSONObjIterator members(reply.getObjectField("members"));
-				bool                   have_primary = false;
-				MongoDBManagedReplicaSetInterface::ReplicaSetMemberStatus self_status =
-				  MongoDBManagedReplicaSetInterface::REMOVED;
-				while (members.more()) {
-					mongo::BSONObj m     = members.next().Obj();
-					int            state = m["state"].Int();
-					if (state == 1)
-						have_primary = true;
-
-					if (m.hasField("self") && m["self"].boolean()) {
-						switch (state) {
-						case 1: self_status = MongoDBManagedReplicaSetInterface::PRIMARY; break;
-						case 2: self_status = MongoDBManagedReplicaSetInterface::SECONDARY; break;
-						case 3: // RECOVERING
-						case 5: // STARTUP2
-						case 9: // ROLLBACK
-							self_status = MongoDBManagedReplicaSetInterface::INITIALIZING;
-							break;
-						case 7: self_status = MongoDBManagedReplicaSetInterface::ARBITER; break;
-						default: self_status = MongoDBManagedReplicaSetInterface::ERROR; break;
-						}
+			status.error_msg = "Unknown error";
+		}
+		return status;
+	}
+	//logger->log_warn(name(), "rs status reply: %s", bsoncxx::to_json(reply.view()).c_str());
+	try {
+		MongoDBManagedReplicaSetInterface::ReplicaSetMemberStatus self_status =
+		  MongoDBManagedReplicaSetInterface::REMOVED;
+		auto members = reply.view()["members"];
+		if (members && members.type() == bsoncxx::type::k_array) {
+			bsoncxx::array::view members_view{members.get_array().value};
+			bool                 have_primary = false;
+			for (bsoncxx::array::element member : members_view) {
+				int state = member["state"].get_int32();
+				if (state == 1) {
+					have_primary = true;
+				}
+				if (member["self"] && member["self"].get_bool()) {
+					switch (state) {
+					case 1: self_status = MongoDBManagedReplicaSetInterface::PRIMARY; break;
+					case 2: self_status = MongoDBManagedReplicaSetInterface::SECONDARY; break;
+					case 3: // RECOVERING
+					case 5: // STARTUP2
+					case 9: // ROLLBACK
+						self_status = MongoDBManagedReplicaSetInterface::INITIALIZING;
+						break;
+					case 7: self_status = MongoDBManagedReplicaSetInterface::ARBITER; break;
+					default: self_status = MongoDBManagedReplicaSetInterface::ERROR; break;
 					}
 				}
-				status.primary_status = have_primary ? MongoDBManagedReplicaSetInterface::HAVE_PRIMARY
-				                                     : MongoDBManagedReplicaSetInterface::NO_PRIMARY;
-				status.member_status = self_status;
-				return status;
-			} catch (mongo::DBException &e) {
-				logger->log_warn(name(), "Failed to analyze member info: %s", e.what());
-				status.member_status = MongoDBManagedReplicaSetInterface::ERROR;
-				status.error_msg     = std::string("Failed to analyze member info: ") + e.what();
-				return status;
 			}
+			status.primary_status = have_primary ? MongoDBManagedReplicaSetInterface::HAVE_PRIMARY
+			                                     : MongoDBManagedReplicaSetInterface::NO_PRIMARY;
+			status.member_status = self_status;
+			return status;
+		} else {
+			logger->log_error(name(),
+			                  "Received replica set status reply without members, unknown status");
+			self_status = MongoDBManagedReplicaSetInterface::ERROR;
 		}
-	} catch (mongo::DBException &e) {
-		logger->log_warn(name(), "Failed to get RS status: %s", e.what());
+	} catch (mongocxx::operation_exception &e) {
+		logger->log_warn(name(), "Failed to analyze member info: %s", e.what());
 		status.member_status = MongoDBManagedReplicaSetInterface::ERROR;
-		status.error_msg     = std::string("Failed to get RS status: ") + e.what();
+		status.error_msg     = std::string("Failed to analyze member info: ") + e.what();
 		return status;
 	}
 	return status;
@@ -348,76 +409,74 @@ void
 MongoDBReplicaSetConfig::rs_init()
 {
 	// using default configuration, this will just add ourself
-	mongo::BSONObj conf;
-	mongo::BSONObj cmd(BSON("replSetInitiate" << conf));
-
-	mongo::BSONObj reply;
+	auto cmd = basic::make_document(basic::kvp("replSetInitiate", basic::document{}));
+	bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
 	try {
-		bool ok = local_client_->runCommand("admin", cmd, reply);
+		reply   = local_client_->database("admin").run_command(std::move(cmd));
+		bool ok = check_mongodb_ok(reply.view());
 		if (!ok) {
-			logger->log_error(name(), "RS initialization failed: %s", reply["errmsg"].toString().c_str());
+			logger->log_error(name(),
+			                  "RS initialization failed: %s",
+			                  reply.view()["errmsg"].get_utf8().value.to_string().c_str());
 		} else {
-			logger->log_debug(name(), "RS initialized successfully: %s", reply.jsonString().c_str());
+			logger->log_debug(name(),
+			                  "RS initialized successfully: %s",
+			                  bsoncxx::to_json(reply.view()).c_str());
 		}
-	} catch (mongo::DBException &e) {
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_error(name(), "RS initialization failed: %s", e.what());
 	}
 }
 
 bool
-MongoDBReplicaSetConfig::rs_get_config(mongo::BSONObj &rs_config)
+MongoDBReplicaSetConfig::rs_get_config(bsoncxx::document::value &rs_config)
 {
-	mongo::BSONObj cmd(BSON("replSetGetConfig" << 1));
+	auto cmd = basic::make_document(basic::kvp("replSetGetConfig", 1));
 
 	try {
-		mongo::BSONObj reply;
-		bool           ok = local_client_->runCommand("admin", cmd, reply);
+		bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
+		reply   = local_client_->database("admin").run_command(std::move(cmd));
+		bool ok = check_mongodb_ok(reply.view());
 		if (ok) {
-			rs_config = reply["config"].Obj().copy();
-			//logger->log_info(name(), "Config: %s", rs_config.jsonString(mongo::Strict, true).c_str());
+			rs_config = reply;
+			//logger->log_info(name(), "Config: %s", bsoncxx::to_json(rs_config.view()["config"]).c_str());
 		} else {
 			logger->log_warn(name(),
 			                 "Failed to get RS config: %s (DB error)",
-			                 reply["errmsg"].str().c_str());
+			                 bsoncxx::to_json(reply.view()).c_str());
 		}
 		return ok;
-	} catch (mongo::DBException &e) {
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn(name(), "Failed to get RS config: %s", e.what());
 		return false;
 	}
 }
 
 void
-MongoDBReplicaSetConfig::rs_monitor(const mongo::BSONObj &status_reply)
+MongoDBReplicaSetConfig::rs_monitor(const bsoncxx::document::view &status_reply)
 {
 	using namespace std::chrono_literals;
 
 	std::set<std::string> in_rs, unresponsive, new_alive, members;
-	int                   last_member_id = 0;
-
-	mongo::BSONObjIterator members_it(status_reply.getObjectField("members"));
-	while (members_it.more()) {
-		mongo::BSONObj m = members_it.next().Obj();
-		members.insert(m["name"].str());
-
-		last_member_id = std::max(m["_id"].numberInt(), last_member_id);
-
-		// determine members to remove
-		if (m.hasField("self") && m["self"].boolean()) {
-			in_rs.insert(m["name"].str());
+	int                   last_member_id{0};
+	bsoncxx::array::view  members_view{status_reply["members"].get_array().value};
+	for (bsoncxx::array::element member : members_view) {
+		std::string member_name = member["name"].get_utf8().value.to_string();
+		members.insert(member_name);
+		last_member_id = std::max(int(member["_id"].get_int32()), last_member_id);
+		if (member["self"] && member["self"].get_bool()) {
+			in_rs.insert(member_name);
 		} else {
 			std::chrono::time_point<std::chrono::high_resolution_clock> last_heartbeat_rcvd(
-			  std::chrono::milliseconds(m["lastHeartbeatRecv"].date()));
+			  std::chrono::milliseconds(member["lastHeartbeatRecv"].get_date()));
 			auto now = std::chrono::high_resolution_clock::now();
-			if ((m["health"].numberInt() != 1) || (now - last_heartbeat_rcvd) > 15s) {
-				//logger->log_info(name(), "Reply: %s", status_reply.jsonString(mongo::Strict, true).c_str());
-				unresponsive.insert(m["name"].str());
+			if ((int(member["health"].get_double()) != 1) || (now - last_heartbeat_rcvd) > 15s) {
+				unresponsive.insert(member_name);
 			} else {
-				in_rs.insert(m["name"].str());
+				in_rs.insert(member_name);
 			}
 		}
 	}
-
 	std::set<std::string> not_member;
 	std::set_difference(hosts_.begin(),
 	                    hosts_.end(),
@@ -437,71 +496,65 @@ MongoDBReplicaSetConfig::rs_monitor(const mongo::BSONObj &status_reply)
 
 	if (!unresponsive.empty() || !new_alive.empty()) {
 		// generate new config
-		mongo::BSONObj rs_config;
-		if (!rs_get_config(rs_config))
+		bsoncxx::document::value reply{bsoncxx::builder::basic::document()};
+		if (!rs_get_config(reply)) {
 			return;
-
-		mongo::BSONObjBuilder new_config;
-		std::set<std::string> field_names;
-		rs_config.getFieldNames(field_names);
-		for (const std::string &fn : field_names) {
-			if (fn == "version") {
-				new_config.append("version", rs_config["version"].numberInt() + 1);
-			} else if (fn == "members") {
-				mongo::BSONObjIterator members_it(rs_config.getObjectField("members"));
-
-				mongo::BSONArrayBuilder members_arr(new_config.subarrayStart("members"));
-
-				while (members_it.more()) {
-					mongo::BSONObj m    = members_it.next().Obj();
-					std::string    host = m["host"].str();
-					if (hosts_.find(host) == hosts_.end()) {
-						logger->log_warn(name(),
-						                 "Removing '%s', "
-						                 "not part of the replica set configuration",
-						                 host.c_str());
-					} else if (unresponsive.find(host) == unresponsive.end()) {
-						// it's not unresponsive, add
-						logger->log_warn(name(), "Keeping RS member '%s'", host.c_str());
-						members_arr.append(m);
-					} else {
-						logger->log_warn(name(), "Removing RS member '%s'", host.c_str());
+		}
+		auto config = reply.view()["config"].get_document().view();
+		using namespace bsoncxx::builder::basic;
+		logger->log_info(name(), "Creating new config");
+		auto new_config = basic::document{};
+		for (auto &&key_it = config.begin(); key_it != config.end(); key_it++) {
+			if (key_it->key() == "version") {
+				new_config.append(basic::kvp("version", config["version"].get_int32() + 1));
+				//new_config = new_config << "version" << config["version"].get_int32() + 1;
+			} else if (key_it->key() == "members") {
+				bsoncxx::array::view members_view{config["members"].get_array().value};
+				new_config.append(basic::kvp("members", [&](basic::sub_array array) {
+					for (bsoncxx::array::element member : members_view) {
+						std::string host = member["host"].get_utf8().value.to_string();
+						if (hosts_.find(host) == hosts_.end()) {
+							logger->log_warn(name(),
+							                 "Removing '%s', "
+							                 "not part of the replica set configuration",
+							                 host.c_str());
+						} else if (unresponsive.find(host) == unresponsive.end()) {
+							// it's not unresponsive, add
+							logger->log_warn(name(), "Keeping RS member '%s'", host.c_str());
+							array.append(basic::make_document(basic::kvp("host", host),
+							                                  basic::kvp("_id", member["_id"].get_value())));
+						} else {
+							logger->log_warn(name(), "Removing RS member '%s'", host.c_str());
+						}
 					}
-				}
-				for (const std::string &h : new_alive) {
-					logger->log_info(name(), "Adding new RS member '%s'", h.c_str());
-					mongo::BSONObjBuilder membuild;
-					membuild.append("_id", ++last_member_id);
-					membuild.append("host", h);
-					members_arr.append(membuild.obj());
-				}
-				members_arr.doneFast();
+					for (const std::string &h : new_alive) {
+						logger->log_info(name(), "Adding new RS member '%s'", h.c_str());
+						array.append(
+						  basic::make_document(basic::kvp("host", h), basic::kvp("_id", ++last_member_id)));
+					}
+				}));
 			} else {
-				try {
-					new_config.append(rs_config[fn]);
-				} catch (mongo::MsgAssertionException &e) {
-					logger->log_error(name(), "ERROR on RS reconfigure (%s): %s", fn.c_str(), e.what());
-					return;
-				}
+				new_config.append(basic::kvp(key_it->key(), key_it->get_value()));
 			}
 		}
 
-		mongo::BSONObj new_config_obj(new_config.obj());
+		//mongo::BSONObj new_config_obj(new_config.obj());
 		//logger->log_info(name(), "Reconfigure: %s", new_config_obj.jsonString(mongo::Strict, true).c_str());
 
-		mongo::BSONObjBuilder cmd;
-		cmd.append("replSetReconfig", new_config_obj);
-		cmd.append("force", true);
-
+		auto cmd = basic::document{};
+		cmd.append(basic::kvp("replSetReconfig", new_config));
+		cmd.append(basic::kvp("force", true));
 		try {
-			mongo::BSONObj reply;
-			bool           ok = local_client_->runCommand("admin", cmd.obj(), reply);
+			logger->log_info(name(), "Running command");
+			auto reply = local_client_->database("admin").run_command(cmd.view());
+			logger->log_info(name(), "done");
+			bool ok = check_mongodb_ok(reply.view());
 			if (!ok) {
 				logger->log_error(name(),
 				                  "RS reconfig failed: %s (DB error)",
-				                  reply["errmsg"].str().c_str());
+				                  reply.view()["errmsg"].get_utf8().value.to_string().c_str());
 			}
-		} catch (mongo::DBException &e) {
+		} catch (mongocxx::operation_exception &e) {
 			logger->log_warn(name(), "RS reconfig failed: %s (exception)", e.what());
 		}
 	}
@@ -510,22 +563,18 @@ MongoDBReplicaSetConfig::rs_monitor(const mongo::BSONObj &status_reply)
 bool
 MongoDBReplicaSetConfig::check_alive(const std::string &h)
 {
+	using namespace bsoncxx::builder::basic;
 	try {
-		std::shared_ptr<mongo::DBClientConnection> client =
-		  std::make_shared<mongo::DBClientConnection>();
-		std::string        errmsg;
-		mongo::HostAndPort hostport(h);
-		if (!client->connect(hostport, errmsg)) {
-			return false;
-		}
-		mongo::BSONObj cmd(BSON("isMaster" << 1));
-		mongo::BSONObj reply;
-		bool           ok = client->runCommand("admin", cmd, reply);
+		mongocxx::client client{mongocxx::uri{"mongodb://" + h}};
+		auto             cmd = basic::document{};
+		cmd.append(basic::kvp("isMaster", 1));
+		auto reply = client.database("admin").run_command(cmd.view());
+		bool ok    = check_mongodb_ok(reply.view());
 		if (!ok) {
-			logger->log_warn(name(), "Failed to connect: %s", reply.jsonString().c_str());
+			logger->log_warn(name(), "Failed to connect: %s", bsoncxx::to_json(reply.view()).c_str());
 		}
 		return ok;
-	} catch (mongo::DBException &e) {
+	} catch (mongocxx::operation_exception &e) {
 		logger->log_warn(name(), "Fail: %s", e.what());
 		return false;
 	}

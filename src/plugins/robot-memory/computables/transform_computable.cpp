@@ -20,8 +20,11 @@
 
 #include "transform_computable.h"
 
+#include <bsoncxx/builder/basic/document.hpp>
+
 using namespace fawkes;
-using namespace mongo;
+using namespace mongocxx;
+using namespace bsoncxx;
 
 /** @class TransformComputable  transform_computable.h
  * Computable proving positions in other frames by using transforms
@@ -45,14 +48,19 @@ TransformComputable::TransformComputable(RobotMemory *            robot_memory,
 	config_       = config;
 
 	//register computable
-	Query                    query = fromjson("{frame:{$exists:true},allow_tf:true}");
+	using namespace bsoncxx::builder;
+	basic::document query;
+	query.append(basic::kvp("frame", [](basic::sub_document subdoc) {
+		subdoc.append(basic::kvp("$exists", true));
+	}));
+	query.append(basic::kvp("allow_tf", true));
 	std::vector<std::string> collections =
 	  config->get_strings("plugins/robot-memory/computables/transform/collections");
 	int   priority     = config->get_int("plugins/robot-memory/computables/transform/priority");
 	float caching_time = config->get_float("plugins/robot-memory/computables/transform/caching-time");
 	for (std::string col : collections) {
 		computables.push_back(robot_memory_->register_computable(
-		  query, col, &TransformComputable::compute_transform, this, caching_time, priority));
+		  query.extract(), col, &TransformComputable::compute_transform, this, caching_time, priority));
 	}
 }
 
@@ -63,55 +71,70 @@ TransformComputable::~TransformComputable()
 	}
 }
 
-std::list<mongo::BSONObj>
-TransformComputable::compute_transform(const mongo::BSONObj &query, const std::string &collection)
+std::list<document::value>
+TransformComputable::compute_transform(const document::view &query, const std::string &collection)
 {
 	//get positions in other frames
-	BSONObjBuilder query_other_frames;
-	query_other_frames.appendElements(query.removeField("frame").removeField("allow_tf"));
-	query_other_frames.append("frame", fromjson("{$exists:true}"));
-	QResCursor cur = robot_memory_->query(query_other_frames.obj(), collection);
+	using namespace bsoncxx::builder;
+	basic::document query_other_frames;
+	for (auto it = query.begin(); it != query.end(); it++) {
+		if (it->key() == "frame" || it->key() == "allow_tf") {
+			continue;
+		}
+		query_other_frames.append(basic::kvp(it->key(), it->get_value()));
+	}
+	query_other_frames.append(basic::kvp("frame", [](basic::sub_document subdoc) {
+		subdoc.append(basic::kvp("$exists", true));
+	}));
+	cursor cur = robot_memory_->query(query_other_frames, collection);
 
 	//transform them is possible
-	std::list<mongo::BSONObj> res;
-	std::string               target_frame = query.getField("frame").String();
-	while (cur->more()) {
-		BSONObj pos = cur->next();
-		if (pos.hasField("frame") && pos.hasField("translation") && pos.hasField("rotation")) {
-			std::string src_frame = pos.getField("frame").String();
+	std::list<document::value> res;
+	std::string                target_frame = query["frame"].get_utf8().value.to_string();
+	auto                       it           = cur.begin();
+	while (it != cur.end()) {
+		document::view pos = *it;
+		if (pos.find("frame") != pos.end() && pos.find("translation") != pos.end()
+		    && pos.find("rotation") != pos.end()) {
+			std::string src_frame = pos["frame"].get_utf8().value.to_string();
 			Time        now(0, 0);
 			if (tf_->can_transform(target_frame.c_str(), src_frame.c_str(), now)) {
-				BSONObjBuilder           res_pos;
-				std::vector<BSONElement> src_trans = pos.getField("translation").Array();
-				std::vector<BSONElement> src_rot   = pos.getField("rotation").Array();
-				fawkes::tf::Transform    pose_tf(
-          fawkes::tf::Quaternion(
-            src_rot[0].Double(), src_rot[1].Double(), src_rot[2].Double(), src_rot[3].Double()),
-          fawkes::tf::Vector3(src_trans[0].Double(), src_trans[1].Double(), src_trans[2].Double()));
+				basic::document       res_pos;
+				array::view           src_trans = pos["translation"].get_array();
+				array::view           src_rot   = pos["rotation"].get_array();
+				fawkes::tf::Transform pose_tf(fawkes::tf::Quaternion(src_rot[0].get_double(),
+				                                                     src_rot[1].get_double(),
+				                                                     src_rot[2].get_double(),
+				                                                     src_rot[3].get_double()),
+				                              fawkes::tf::Vector3(src_trans[0].get_double(),
+				                                                  src_trans[1].get_double(),
+				                                                  src_trans[2].get_double()));
 				fawkes::tf::Stamped<fawkes::tf::Pose> src_stamped_pose(pose_tf,
 				                                                       Time(0, 0),
 				                                                       src_frame.c_str());
 				fawkes::tf::Stamped<fawkes::tf::Pose> res_stamped_pose;
 				tf_->transform_pose(target_frame.c_str(), src_stamped_pose, res_stamped_pose);
 
-				res_pos.appendElements(pos.removeField("frame")
-				                         .removeField("translation")
-				                         .removeField("rotation")
-				                         .removeField("_id"));
-				res_pos.append("frame", target_frame);
-				res_pos.append("allow_tf", true);
-				BSONArrayBuilder arrb_trans;
-				arrb_trans.append(res_stamped_pose.getOrigin().x());
-				arrb_trans.append(res_stamped_pose.getOrigin().y());
-				arrb_trans.append(res_stamped_pose.getOrigin().z());
-				res_pos.append("translation", arrb_trans.arr());
-				BSONArrayBuilder arrb_rot;
-				arrb_rot.append(res_stamped_pose.getRotation().x());
-				arrb_rot.append(res_stamped_pose.getRotation().y());
-				arrb_rot.append(res_stamped_pose.getRotation().z());
-				arrb_rot.append(res_stamped_pose.getRotation().w());
-				res_pos.append("rotation", arrb_rot.arr());
-				res.push_back(res_pos.obj());
+				for (auto it = pos.begin(); it != pos.end(); it++) {
+					if (!(it->key() == "frame" || it->key() == "translation" || it->key() == "rotation"
+					      || it->key() == "_id")) {
+						res_pos.append(basic::kvp(it->key(), it->get_value()));
+					}
+				}
+				res_pos.append(basic::kvp("frame", target_frame));
+				res_pos.append(basic::kvp("allow_tf", true));
+				res_pos.append(basic::kvp("translation", [res_stamped_pose](basic::sub_array array) {
+					array.append(res_stamped_pose.getOrigin().x());
+					array.append(res_stamped_pose.getOrigin().y());
+					array.append(res_stamped_pose.getOrigin().z());
+				}));
+				res_pos.append(basic::kvp("rotation", [res_stamped_pose](basic::sub_array array) {
+					array.append(res_stamped_pose.getRotation().x());
+					array.append(res_stamped_pose.getRotation().y());
+					array.append(res_stamped_pose.getRotation().z());
+					array.append(res_stamped_pose.getRotation().w());
+				}));
+				res.push_back(res_pos.extract());
 			}
 			//      else
 			//      {

@@ -22,8 +22,8 @@
 #ifndef _PLUGINS_MONGODB_MONGODB_CLIENT_CONFIG_H_
 #define _PLUGINS_MONGODB_MONGODB_CLIENT_CONFIG_H_
 
-#include <mongo/client/dbclient.h>
-
+#include <mongocxx/client.hpp>
+#include <mongocxx/uri.hpp>
 #include <string>
 #include <vector>
 
@@ -46,7 +46,7 @@ public:
 	                    fawkes::Logger *       logger,
 	                    std::string            cfgname,
 	                    std::string            prefix);
-	mongo::DBClientBase *create_client();
+	mongocxx::client *create_client();
 
 	/** Check if configuration is enabled.
 	 * @return true if configuration is enabled, false otherwise
@@ -70,29 +70,13 @@ private:
 	                   std::string            prefix);
 
 private:
-	std::string                     logcomp_;
-	bool                            enabled_;
-	ConnectionMode                  mode_;
-	mongo::HostAndPort              conn_hostport_;
-	std::vector<mongo::HostAndPort> replicaset_hostports_;
-	std::string                     replicaset_name_;
-
-	/// @cond INTERNALS
-	typedef struct _AuthInfo
-	{
-		_AuthInfo(std::string dbname, std::string username, std::string clearpwd)
-		{
-			this->dbname   = dbname;
-			this->username = username;
-			this->clearpwd = clearpwd;
-		}
-		std::string dbname;
-		std::string username;
-		std::string clearpwd;
-	} AuthInfo;
-	/// @endcond
-
-	std::list<AuthInfo> auth_infos_;
+	std::string    logcomp_;
+	bool           enabled_;
+	ConnectionMode mode_;
+	mongocxx::uri  conn_uri_;
+	std::string    replicaset_name_;
+	std::string    auth_dbname;
+	std::string    auth_string_;
 };
 
 #endif

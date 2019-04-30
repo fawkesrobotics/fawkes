@@ -33,6 +33,8 @@
 #include <plugins/mongodb/aspect/mongodb.h>
 
 #include <list>
+#include <mongocxx/client.hpp>
+#include <mongocxx/gridfs/bucket.hpp>
 #include <queue>
 #include <set>
 #include <string>
@@ -88,12 +90,12 @@ private:
 	/// @endcond
 	std::map<std::string, ImageInfo> imgs_;
 
-	fawkes::Time *       last_update_;
-	fawkes::Time *       now_;
-	mongo::DBClientBase *mongodb_;
-	mongo::GridFS *      gridfs_;
-	std::string          collection_;
-	std::string          database_;
+	fawkes::Time *           last_update_;
+	fawkes::Time *           now_;
+	mongocxx::client *       mongodb_;
+	mongocxx::gridfs::bucket gridfs_;
+	std::string              collection_;
+	std::string              database_;
 
 	fawkes::Mutex *   mutex_;
 	fawkes::TimeWait *wait_;

@@ -28,6 +28,8 @@
 #include <blackboard/blackboard.h>
 #include <config/config.h>
 
+#include <bsoncxx/document/value.hpp>
+
 /** @class BlackboardComputable  blackboard_computable.h
  *
  * @author Frederik Zwilling
@@ -42,14 +44,13 @@ public:
 	virtual ~BlackboardComputable();
 
 private:
-	std::list<mongo::BSONObj> compute_interfaces(const mongo::BSONObj &query,
-	                                             const std::string &   collection);
+	std::list<bsoncxx::document::value> compute_interfaces(const bsoncxx::document::view &query,
+	                                                       const std::string &            collection);
 
 	RobotMemory *       robot_memory_;
 	fawkes::BlackBoard *blackboard_;
 	fawkes::Logger *    logger_;
 	Computable *        computable;
-	mongo::BSONArray    get_interface_fields(fawkes::InterfaceFieldIterator it);
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLES_BLACKBOARD_COMPUTABLE_H_ */

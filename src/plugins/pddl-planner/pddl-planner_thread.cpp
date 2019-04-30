@@ -25,6 +25,8 @@
 
 #include <utils/misc/string_conversions.h>
 
+#include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/json.hpp>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -32,7 +34,8 @@
 #include <stdlib.h>
 
 using namespace fawkes;
-using namespace mongo;
+using namespace mongocxx;
+using namespace bsoncxx;
 
 /** @class PddlPlannerThread 'pddl-planner_thread.h' 
  * Starts a pddl planner and writes the resulting plan into the robot memory
@@ -105,14 +108,14 @@ PddlPlannerThread::loop()
 	planner_();
 
 	if (!action_list_.empty()) {
-		BSONObj plan = BSONFromActionList();
-		robot_memory->update(fromjson("{plan:{$exists:true}}"), plan, cfg_collection_, true);
+		auto plan = BSONFromActionList();
+		robot_memory->update(from_json("{plan:{$exists:true}}").view(), plan, cfg_collection_, true);
 		print_action_list();
 		plan_if_->set_success(true);
 	} else {
 		logger->log_error(name(), "Updating plan failed, action list empty!");
-		robot_memory->update(fromjson("{plan:{$exists:true}}"),
-		                     fromjson("{plan:0}"),
+		robot_memory->update(from_json("{plan:{$exists:true}}").view(),
+		                     from_json("{plan:0}").view(),
 		                     cfg_collection_,
 		                     true);
 		plan_if_->set_success(false);
@@ -145,8 +148,8 @@ PddlPlannerThread::ff_planner()
 	size_t cur_pos = 0;
 	if (result.find("found legal plan as follows", cur_pos) == std::string::npos) {
 		logger->log_error(name(), "Planning Failed: %s", result.c_str());
-		robot_memory->update(fromjson("{plan:{$exists:true}}"),
-		                     fromjson("{plan:1,fail:1,steps:[]}"),
+		robot_memory->update(from_json("{plan:{$exists:true}}").view(),
+		                     from_json("{plan:1,fail:1,steps:[]}").view(),
 		                     cfg_collection_,
 		                     true);
 		return;
@@ -199,8 +202,8 @@ PddlPlannerThread::dbmp_planner()
 	size_t cur_pos = 0;
 	if (result.find("Planner failed", cur_pos) != std::string::npos) {
 		logger->log_error(name(), "Planning Failed: %s", result.c_str());
-		robot_memory->update(fromjson("{plan:{$exists:true}}"),
-		                     fromjson("{plan:1,fail:1,steps:[]}"),
+		robot_memory->update(from_json("{plan:{$exists:true}}").view(),
+		                     from_json("{plan:1,fail:1,steps:[]}").view(),
 		                     cfg_collection_,
 		                     true);
 		return;
@@ -283,27 +286,26 @@ PddlPlannerThread::fd_planner()
 	}
 }
 
-BSONObj
+document::value
 PddlPlannerThread::BSONFromActionList()
 {
-	BSONObjBuilder plan_builder;
-	plan_builder << "plan" << 1;
-	plan_builder << "msg_id" << plan_if_->msg_id();
-	BSONArrayBuilder action_arr_builder;
-	for (action a : action_list_) {
-		BSONObjBuilder action_builder;
-		action_builder << "name" << a.name;
-		BSONArrayBuilder args_builder;
-		for (std::string args : a.args) {
-			args_builder << args;
+	using namespace bsoncxx::builder;
+	basic::document plan;
+	plan.append(basic::kvp("plan", 1));
+	plan.append(basic::kvp("msg_id", static_cast<int64_t>(plan_if_->msg_id())));
+	plan.append(basic::kvp("actions", [&](basic::sub_array actions) {
+		for (action &a : action_list_) {
+			basic::document action;
+			action.append(basic::kvp("name", a.name));
+			action.append(basic::kvp("args", [a](basic::sub_array args) {
+				for (std::string arg : a.args) {
+					args.append(arg);
+				}
+			}));
 		}
-		action_builder << "args" << args_builder.arr();
-		action_arr_builder << action_builder.obj();
-	}
+	}));
 
-	plan_builder << "actions" << action_arr_builder.arr();
-
-	return plan_builder.obj();
+	return plan.extract();
 }
 
 size_t

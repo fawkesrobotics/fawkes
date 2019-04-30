@@ -229,14 +229,14 @@
 (defrule wm-robmem-sync-fact-removed
 	(wm-fact (key cx identity) (value ?identity))
 	(wm-robmem-sync-conf (wm-fact-key-prefix $?key-prefix) (enabled TRUE))
-	?sm <- (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key $?key-prefix $?rest)
-																	 (update-timestamp $?update-timestamp))
+	?sm <- (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key $?key-prefix $?rest))
 	(not (wm-fact (id ?id)))
 	=>
 	;(printout error "Remove " ?id " from robot memory" crlf)
 	(retract ?sm)
-
-	(bind ?query (wm-robmem-sync-create-query ?id ?update-timestamp))
+	; We do not know when exactly the wm-fact was retracted, use the current time instead
+	(bind ?now (time-trunc-ms (now-systime)))
+	(bind ?query (wm-robmem-sync-create-query ?id ?now))
 
 	(robmem-remove ?*WM-ROBMEM-SYNC-COLLECTION* ?query)
 )
@@ -256,19 +256,23 @@
 )
 
 (deffunction wm-robmem-sync-update (?obj)
-	(bind ?id (bson-get ?obj "o._id"))
+	(bind ?id (bson-get ?obj "fullDocument._id"))
 	(if ?id then
-		(bind ?type (sym-cat (bson-get ?obj "o.type")))
-		(bind ?is-list (sym-cat (bson-get ?obj "o.is-list")))
-		(bind ?update-timestamp (bson-get-time ?obj "o.update-timestamp"))
-		(if (not (nth$ 1 ?update-timestamp)) then (bind ?update-timestamp (bson-get-time ?obj "ts")))
+		(bind ?type (sym-cat (bson-get ?obj "fullDocument.type")))
+		(bind ?is-list (sym-cat (bson-get ?obj "fullDocument.is-list")))
+		(bind ?update-timestamp (bson-get-time ?obj "fullDocument.update-timestamp"))
+		; TODO: check if this is the correct time
+		(if (not (nth$ 1 ?update-timestamp))
+		 then
+			(bind ?update-timestamp (bson-get-time ?obj "clusterTime"))
+		)
 		(bind ?value nil)
 		(bind ?values (create$))
 		(if ?is-list
 		then
-			(bind ?values (bson-get-array ?obj "o.values"))
+			(bind ?values (bson-get-array ?obj "fullDocument.values"))
 		else
-			(bind ?value (bson-get ?obj "o.value"))
+			(bind ?value (bson-get ?obj "fullDocument.value"))
 		)
 		(if (or (eq ?type SYMBOL) (eq ?type BOOL)) then
 			(bind ?value (sym-cat ?value))
@@ -332,8 +336,8 @@
 )
 
 (deffunction wm-robmem-sync-delete (?obj)
-	(bind ?id (bson-get ?obj "o._id"))
-	(bind ?ts (bson-get-time ?obj "ts"))
+	(bind ?id (bson-get ?obj "documentKey._id"))
+	(bind ?ts (bson-get-time ?obj "clusterTime"))
 	(do-for-fact ((?wf wm-fact) (?sm wm-robmem-sync-map-entry)) (and (eq ?sm:wm-fact-id ?id) (eq ?wf:id ?id))
 		(if (time> ?ts ?sm:update-timestamp)
 		then
@@ -350,23 +354,25 @@
 	(wm-fact (key cx identity) (value ?identity))
 	?rt <- (robmem-trigger (name "wm-robmem-sync-trigger") (ptr ?obj))
 	=>
-	(bind ?op (sym-cat (bson-get ?obj "op")))
+	(bind ?op (sym-cat (bson-get ?obj "operationType")))
 
-	;(printout warn "Trigger: " (bson-tostring ?obj) crlf)
-	(bind ?source (bson-get ?obj "o.source"))
-	(if (not ?source)
+	(printout warn "Trigger: " (bson-tostring ?obj) crlf)
+	(if (eq ?op delete)
 	 then
-		(printout error "Failed to determine input source. Broken contributor." crlf)
+		; We cannot check the source because it is not set for deletions
+		(wm-robmem-sync-delete ?obj)
 	 else
-	 (if (neq ?source ?identity)
-		then
-			(switch ?op
-				(case i then (wm-robmem-sync-update ?obj))
-				(case u then (wm-robmem-sync-update ?obj))
-				(case d then (wm-robmem-sync-delete ?obj))
+		(if (or (eq ?op insert) (eq ?op update))
+		 then
+			(bind ?source (bson-get ?obj "fullDocument.source"))
+			(if (neq ?source ?identity)
+			 then
+				(wm-robmem-sync-update ?obj)
+			;else
+			;	(printout t "Ignoring own update" crlf)
 			)
-		;else
-		;	(printout t "Ignoring own update" crlf)
+		 else
+			(printout error "Unknown operator " ?op)
 		)
 	)
 

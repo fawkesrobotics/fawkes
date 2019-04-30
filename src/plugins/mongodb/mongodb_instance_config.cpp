@@ -21,15 +21,21 @@
 
 #include "mongodb_instance_config.h"
 
+#include "utils.h"
+
 #include <config/config.h>
 #include <core/exceptions/system.h>
-#include <mongo/client/dbclient.h>
 #include <utils/sub_process/proc.h>
 #include <utils/time/wait.h>
 
 #include <boost/filesystem.hpp>
+#include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/json.hpp>
 #include <chrono>
+#include <mongocxx/client.hpp>
+#include <mongocxx/exception/exception.hpp>
 #include <numeric>
+#include <sstream>
 #include <wordexp.h>
 
 using namespace fawkes;
@@ -238,21 +244,19 @@ bool
 MongoDBInstanceConfig::check_alive()
 {
 	try {
-		std::shared_ptr<mongo::DBClientConnection> client =
-		  std::make_shared<mongo::DBClientConnection>();
-		std::string        errmsg;
-		mongo::HostAndPort hostport("localhost", port_);
-		if (!client->connect(hostport, errmsg)) {
-			return false;
-		}
-		mongo::BSONObj cmd(BSON("isMaster" << 1));
-		mongo::BSONObj reply;
-		bool           ok = client->runCommand("admin", cmd, reply);
+		mongocxx::client client{mongocxx::uri("mongodb://localhost:" + std::to_string(port_))};
+
+		using namespace bsoncxx::builder;
+		auto cmd{basic::document{}};
+		cmd.append(basic::kvp("isMaster", 1));
+
+		auto reply = client["admin"].run_command(cmd.view());
+		bool ok    = check_mongodb_ok(reply.view());
 		if (!ok) {
-			logger->log_warn(name(), "Failed to connect: %s", reply.jsonString().c_str());
+			logger->log_warn(name(), "Failed to connect: %s", bsoncxx::to_json(reply.view()).c_str());
 		}
 		return ok;
-	} catch (mongo::DBException &e) {
+	} catch (mongocxx::exception &e) {
 		logger->log_warn(name(), "Fail: %s", e.what());
 		return false;
 	}

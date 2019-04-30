@@ -22,9 +22,11 @@
 #include "openrave-robot-memory_thread.h"
 
 #include <algorithm>
+#include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/json.hpp>
 
 using namespace fawkes;
-using namespace mongo;
+using namespace bsoncxx;
 
 /** @class OpenraveRobotMemoryThread 'openrave-robot-memory_thread.h' 
  * Creates an OpenRave Scene for motion planning from data in the robot memory
@@ -88,18 +90,18 @@ OpenraveRobotMemoryThread::construct_scene()
 		std::string collection = config->get_string(cfg_prefix + "collection");
 
 		//construct query
-		BSONObjBuilder query_builder;
-		query_builder.appendElements(fromjson(config->get_string(cfg_prefix + "query")));
-		query_builder << "frame"
-		              << "base_link"
-		              << "allow_tf" << true;
-		BSONObj query = query_builder.obj();
-		logger->log_info(name(), "Querying: %s", query.toString().c_str());
-		QResCursor cur = robot_memory->query(query, collection);
-		while (cur->more()) {
-			BSONObj block = cur->next();
-			//logger->log_info(name(), "Adding: %s", cfg_prefix.c_str(), block.toString().c_str());
-			std::string block_name = block.getStringField(config->get_string(cfg_prefix + "name-key"));
+		using namespace bsoncxx::builder;
+		basic::document query;
+		query.append(builder::concatenate(from_json(config->get_string(cfg_prefix + "query"))));
+		query.append(basic::kvp("frame", "base_link"));
+		query.append(basic::kvp("allow_tf", true));
+		logger->log_info(name(), "Querying: %s", to_json(query).c_str());
+		auto cursor = robot_memory->query(query, collection);
+		//while (cur->more()) {
+		for (auto block : cursor) {
+			//logger->log_info(name(), "Adding: %s", cfg_prefix.c_str(), to_json(block).c_str());
+			std::string block_name =
+			  block[config->get_string(cfg_prefix + "name-key")].get_utf8().value.to_string();
 			if (std::find(added_objects_.begin(), added_objects_.end(), block_name)
 			    == added_objects_.end()) {
 				//add new object
@@ -113,17 +115,19 @@ OpenraveRobotMemoryThread::construct_scene()
 			//move object to right position
 			OpenRaveInterface::MoveObjectMessage move_msg;
 			move_msg.set_name(block_name.c_str());
-			move_msg.set_x(block.getField("translation").Array()[0].Double());
-			move_msg.set_y(block.getField("translation").Array()[1].Double());
-			move_msg.set_z(block.getField("translation").Array()[2].Double());
+			array::view translation = block["translation"].get_array();
+			move_msg.set_x(translation[0].get_double());
+			move_msg.set_y(translation[1].get_double());
+			move_msg.set_z(translation[2].get_double());
 			openrave_if_->msgq_enqueue_copy(&move_msg);
 			//rotate object
 			OpenRaveInterface::RotateObjectQuatMessage rotate_msg;
 			rotate_msg.set_name(block_name.c_str());
-			rotate_msg.set_x(block.getField("rotation").Array()[0].Double());
-			rotate_msg.set_y(block.getField("rotation").Array()[1].Double());
-			rotate_msg.set_z(block.getField("rotation").Array()[2].Double());
-			rotate_msg.set_w(block.getField("rotation").Array()[3].Double());
+			array::view rotation = block["rotation"].get_array();
+			rotate_msg.set_x(rotation[0].get_double());
+			rotate_msg.set_y(rotation[1].get_double());
+			rotate_msg.set_z(rotation[2].get_double());
+			rotate_msg.set_w(rotation[3].get_double());
 			openrave_if_->msgq_enqueue_copy(&rotate_msg);
 		}
 	}
