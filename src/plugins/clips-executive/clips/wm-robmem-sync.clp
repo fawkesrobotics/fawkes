@@ -136,6 +136,13 @@
 	)
 )
 
+(deffunction wm-robmem-trigger-register ()
+	; Register trigger on worldmodel collection
+	(bind ?trigger-query (bson-create))
+	(robmem-trigger-register ?*WM-ROBMEM-SYNC-COLLECTION*
+	                         ?trigger-query "wm-robmem-sync-trigger")
+	(bson-destroy ?trigger-query)
+)
 
 (defrule wm-robmem-sync-init
 	(executive-init)
@@ -149,17 +156,27 @@
 	;(robmem-create-unique-index ?*WM-ROBMEM-SYNC-COLLECTION* ?keys)
 	;(bson-destroy ?keys)
 
-	; Register trigger on worldmodel collection
-	(bind ?trigger-query (bson-create))
-	(bind ?trigger-ptr (robmem-trigger-register ?*WM-ROBMEM-SYNC-COLLECTION*
-																							?trigger-query "wm-robmem-sync-trigger"))
-	(bson-destroy ?trigger-query)
+	(wm-robmem-trigger-register)
 
 	(if (not (any-factp ((?wf wm-fact)) (eq ?wf:id "/cx/identity"))) then
 		(printout warn "*** /cx/identity is not set in world model, will not sync until it is set! ***" crlf)
 	)
+)
 
+(defrule wm-robmem-register-trigger-done
+	?fb <- (mutex-trigger-register-feedback SUCCESS "wm-robmem-sync-trigger" ?trigger-ptr)
+	=>
+	(retract ?fb)
+	(printout info "Registered trigger 'wm-robmem-sync-trigger'" crlf)
 	(assert (wm-robmem-sync-initialized (trigger-ptr ?trigger-ptr)))
+)
+
+(defrule wm-robmem-register-trigger-failed
+	?fb <- (mutex-trigger-register-feedback FAIL "wm-robmem-sync-trigger")
+	=>
+	(retract ?fb)
+	(printout warn "Failed to register trigger 'wm-robmem-sync-trigger', retrying" crlf)
+	(wm-robmem-trigger-register)
 )
 
 (defrule wm-robmem-sync-finalize
