@@ -810,24 +810,44 @@ ClipsRobotMemoryThread::clips_robotmemory_register_trigger(std::string env_name,
                                                            void *      query,
                                                            std::string assert_name)
 {
-	auto b = static_cast<bsoncxx::builder::basic::document *>(query);
-	try {
-		ClipsRmTrigger *clips_trigger =
-		  new ClipsRmTrigger(assert_name, robot_memory, envs_[env_name], logger);
-		clips_trigger->set_trigger(robot_memory->register_trigger(
-		  b->view(), collection, &ClipsRmTrigger::callback, clips_trigger));
-		clips_triggers_.push_back(clips_trigger);
-		return CLIPS::Value(clips_trigger);
-	} catch (mongocxx::operation_exception &e) {
-		logger->log_warn("CLIPS RobotMemory", "Trigger query failed: %s", e.what());
+	bsoncxx::document::value b{static_cast<bsoncxx::builder::basic::document *>(query)->view()};
+	std::string              future_name = "register_trigger_" + assert_name;
+	if (!mutex_future_ready(future_name)) {
+		MutexLocker clips_lock(envs_[env_name].objmutex_ptr());
+		envs_[env_name]->assert_fact_f("(mutex-trigger-register-feedback FAIL \"%s\")",
+		                               assert_name.c_str());
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 	}
+	auto fut = std::async(std::launch::async, [this, b, env_name, collection, assert_name] {
+		try {
+			ClipsRmTrigger *clips_trigger =
+			  new ClipsRmTrigger(assert_name, robot_memory, envs_[env_name], logger);
+			clips_trigger->set_trigger(robot_memory->register_trigger(
+			  b.view(), collection, &ClipsRmTrigger::callback, clips_trigger));
+			MutexLocker triggers_lock(&clips_triggers_mutex_);
+			clips_triggers_.push_back(clips_trigger);
+			MutexLocker clips_lock(envs_[env_name].objmutex_ptr());
+			envs_[env_name]->assert_fact_f("(mutex-trigger-register-feedback SUCCESS \"%s\" %p)",
+			                               assert_name.c_str(),
+			                               CLIPS::Value(clips_trigger).as_address());
+			return true;
+		} catch (mongocxx::operation_exception &e) {
+			MutexLocker clips_lock(envs_[env_name].objmutex_ptr());
+			envs_[env_name]->assert_fact_f("(mutex-trigger-register-feedback FAIL \"%s\")",
+			                               assert_name.c_str());
+			return false;
+		}
+	});
+
+	mutex_futures_[future_name] = std::move(fut);
+	return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
 }
 
 void
 ClipsRobotMemoryThread::clips_robotmemory_destroy_trigger(void *trigger)
 {
 	ClipsRmTrigger *clips_trigger = static_cast<ClipsRmTrigger *>(trigger);
+	MutexLocker     triggers_lock(&clips_triggers_mutex_);
 	clips_triggers_.remove(clips_trigger);
 	delete clips_trigger; //the triger unregisteres itself at the robot memory
 }
