@@ -133,7 +133,7 @@
     (if (not (any-factp ((?m mutex))
                         (and (eq ?m:name (resource-to-mutex ?res))
                              (or (eq ?m:request UNLOCK)
-                                 (not (member$ UNLOCK ?m:pending-requests))))))
+                                 (member$ UNLOCK ?m:pending-requests)))))
      then
       (printout warn "Unlocking resource " ?res crlf)
       (mutex-unlock-async (resource-to-mutex ?res))
