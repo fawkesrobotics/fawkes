@@ -73,6 +73,10 @@ RobotinoSensorThread::init()
 	sens_if_ = NULL;
 	imu_if_  = NULL;
 
+	for (int i = 0; i < 8; ++i) {
+		moving_average_current_.push_back(0);
+	}
+
 	batt_if_ = blackboard->open_for_writing<BatteryInterface>("Robotino");
 	sens_if_ = blackboard->open_for_writing<RobotinoSensorInterface>("Robotino");
 
