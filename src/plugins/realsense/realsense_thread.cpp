@@ -95,9 +95,9 @@ RealsenseThread::loop()
         }
 		return;
 	} else if (!enable_camera_) {
-		if (camera_running_) {
+        if (camera_running_ ) {
             // decrease laser power
-            set_laser_power(laser_power_high_);
+            set_laser_power(laser_power_low_);
 		}
 		return;
 	}
@@ -234,12 +234,19 @@ RealsenseThread::enable_depth_stream()
 
 void
 RealsenseThread::set_laser_power(int laser_power){
-    rs_device_ = get_camera();
-    rs_set_device_option(rs_device_, RS_OPTION_F200_LASER_POWER, laser_power_high_, &rs_error_);
-    log_error();
-    logger->log_info(name(),
-                     "set laser power to %i ",
-                     laser_power);
+    if(!rs_device_){
+        rs_device_ = get_camera();
+    }
+
+    double dev_laser_power = rs_get_device_option(rs_device_, RS_OPTION_F200_LASER_POWER, &rs_error_);
+    if ( dev_laser_power != laser_power){
+        rs_set_device_option(rs_device_, RS_OPTION_F200_LASER_POWER, laser_power_high_, &rs_error_);
+        log_error();
+        logger->log_info(name(),
+                         "set laser power to %i ",
+                         laser_power);
+    }
+
 }
 
 /*
