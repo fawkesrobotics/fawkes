@@ -65,6 +65,7 @@ private:
 	bool       connect_and_start_camera();
 	rs_device *get_camera();
 	void       enable_depth_stream();
+    void       set_laser_power(int laser_power);
 	void       log_error();
 	void       log_depths(const uint16_t *image);
 	void       fill_pointcloud();
@@ -105,7 +106,8 @@ private:
 	std::string   pcl_id_;
 	bool          enable_camera_  = true;
 	bool          camera_running_ = false;
-	int           laser_power_;
+    int           laser_power_high_;
+    int           laser_power_low_;
 	uint          restart_after_num_errors_;
 	uint          error_counter_ = 0;
 };

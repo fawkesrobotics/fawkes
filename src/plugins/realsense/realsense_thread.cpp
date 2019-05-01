@@ -48,7 +48,8 @@ RealsenseThread::init()
 	const std::string cfg_prefix = "/realsense/";
 	frame_id_                    = config->get_string(cfg_prefix + "frame_id");
 	pcl_id_                      = config->get_string(cfg_prefix + "pcl_id");
-	laser_power_                 = config->get_int(cfg_prefix + "device_options/laser_power");
+    laser_power_high_                 = config->get_int(cfg_prefix + "device_options/laser_power_high");
+    laser_power_low_                 = config->get_int(cfg_prefix + "device_options/laser_power_low");
 	restart_after_num_errors_ =
 	  config->get_uint_or_default(std::string(cfg_prefix + "restart_after_num_errors").c_str(), 50);
 
@@ -84,13 +85,19 @@ RealsenseThread::loop()
 	if (cfg_use_switch_) {
 		read_switch();
 	}
-	if (enable_camera_ && !camera_running_) {
-		connect_and_start_camera();
-		// Start reading in the next loop
+    if (enable_camera_){
+        if (!camera_running_){
+            connect_and_start_camera();
+            // Start reading in the next loop
+        }else{
+            // camera already runing. Increase laser power
+            set_laser_power(laser_power_high_);
+        }
 		return;
 	} else if (!enable_camera_) {
 		if (camera_running_) {
-			stop_camera();
+            // decrease laser power
+            set_laser_power(laser_power_high_);
 		}
 		return;
 	}
@@ -156,7 +163,7 @@ RealsenseThread::connect_and_start_camera()
 	}
 
 	rs_device_ = get_camera();
-	rs_set_device_option(rs_device_, RS_OPTION_F200_LASER_POWER, laser_power_, &rs_error_);
+    rs_set_device_option(rs_device_, RS_OPTION_F200_LASER_POWER, laser_power_high_, &rs_error_);
 	log_error();
 	enable_depth_stream();
 
@@ -219,6 +226,20 @@ RealsenseThread::enable_depth_stream()
 		throw Exception("Couldn't start depth stream! Stream type: %s",
 		                rs_stream_to_string(rs_stream_type_));
 	}
+}
+
+/*
+ * Set Laser Power from rs_device
+ */
+
+void
+RealsenseThread::set_laser_power(int laser_power){
+    rs_device_ = get_camera();
+    rs_set_device_option(rs_device_, RS_OPTION_F200_LASER_POWER, laser_power_high_, &rs_error_);
+    log_error();
+    logger->log_info(name(),
+                     "set laser power to %i ",
+                     laser_power);
 }
 
 /*
