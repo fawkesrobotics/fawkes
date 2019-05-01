@@ -110,6 +110,7 @@ private:
     int           laser_power_low_;
 	uint          restart_after_num_errors_;
 	uint          error_counter_ = 0;
+    int           current_laser_power_;
 };
 
 #endif

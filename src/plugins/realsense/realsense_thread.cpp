@@ -238,13 +238,14 @@ RealsenseThread::set_laser_power(int laser_power){
         rs_device_ = get_camera();
     }
 
-    double dev_laser_power = rs_get_device_option(rs_device_, RS_OPTION_F200_LASER_POWER, &rs_error_);
-    if ( dev_laser_power != laser_power){
+    //double dev_laser_power = rs_get_device_option(rs_device_, RS_OPTION_F200_LASER_POWER, &rs_error_);
+    if ( current_laser_power_ != laser_power){
+        current_laser_power_ = laser_power;
+        logger->log_info(name(),
+                         "set laser power to %i was %i",
+                         laser_power, current_laser_power_);
         rs_set_device_option(rs_device_, RS_OPTION_F200_LASER_POWER, laser_power_high_, &rs_error_);
         log_error();
-        logger->log_info(name(),
-                         "set laser power to %i ",
-                         laser_power);
     }
 
 }
