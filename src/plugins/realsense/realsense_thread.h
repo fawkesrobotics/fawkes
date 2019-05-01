@@ -85,6 +85,7 @@ protected:
 private:
 	fawkes::SwitchInterface *switch_if_;
 	bool                     cfg_use_switch_;
+    bool                     last_enable_camera_;
 
 	typedef pcl::PointXYZ              PointType;
 	typedef pcl::PointCloud<PointType> Cloud;

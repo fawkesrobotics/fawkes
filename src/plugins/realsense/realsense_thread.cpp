@@ -37,7 +37,8 @@ using namespace fawkes;
 RealsenseThread::RealsenseThread()
 : Thread("RealsenseThread", Thread::OPMODE_WAITFORWAKEUP),
   BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_ACQUIRE),
-  switch_if_(NULL)
+  switch_if_(NULL),
+  last_enable_camera_(true)
 {
 }
 
@@ -85,7 +86,7 @@ RealsenseThread::loop()
 	if (cfg_use_switch_) {
 		read_switch();
 	}
-    if (enable_camera_){
+    if (enable_camera_ && !last_enable_camera_){
         if (!camera_running_){
             connect_and_start_camera();
             // Start reading in the next loop
@@ -93,14 +94,18 @@ RealsenseThread::loop()
             // camera already runing. Increase laser power
             set_laser_power(laser_power_high_);
         }
-		return;
-	} else if (!enable_camera_) {
+
+        last_enable_camera_ = true;
+
+    } else if (!enable_camera_ && last_enable_camera_) {
         if (camera_running_ ) {
             // decrease laser power
             set_laser_power(laser_power_low_);
-		}
-		return;
+        }
+
+        last_enable_camera_ = false;
 	}
+
 	if (rs_poll_for_frames(rs_device_, &rs_error_) == 1) {
 		error_counter_ = 0;
 		const uint16_t *image =
