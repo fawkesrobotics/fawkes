@@ -25,6 +25,7 @@
 #include "exceptions.h"
 
 #include <interface/interface.h>
+#include <interface/message.h>
 #include <libxml++/libxml++.h>
 #include <utils/misc/string_conversions.h>
 
@@ -588,6 +589,10 @@ InterfaceParser::parse()
 				throw InterfaceGeneratorInvalidContentException("no name for message");
 			}
 			msg_name = attr->get_value();
+			if (msg_name.length() > INTERFACE_MESSAGE_TYPE_SIZE_) {
+				throw InterfaceGeneratorInvalidContentException(
+				  "Interface message name too long, max length is %u", INTERFACE_MESSAGE_TYPE_SIZE_);
+			}
 		} else {
 			throw InterfaceGeneratorInvalidContentException("message is not an element");
 		}
