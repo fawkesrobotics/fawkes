@@ -84,7 +84,7 @@ protected:
 private:
 	fawkes::SwitchInterface *switch_if_;
 	bool                     cfg_use_switch_;
-    bool                     last_enable_camera_;
+	bool                     last_enable_camera_;
 
 	typedef pcl::PointXYZ              PointType;
 	typedef pcl::PointCloud<PointType> Cloud;
@@ -106,7 +106,7 @@ private:
 	std::string   pcl_id_;
 	bool          enable_camera_  = true;
 	bool          camera_running_ = false;
-    int           laser_power_;
+	int           laser_power_;
 	uint          restart_after_num_errors_;
 	uint          error_counter_ = 0;
 };

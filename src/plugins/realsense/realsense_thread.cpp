@@ -49,7 +49,7 @@ RealsenseThread::init()
 	const std::string cfg_prefix = "/realsense/";
 	frame_id_                    = config->get_string(cfg_prefix + "frame_id");
 	pcl_id_                      = config->get_string(cfg_prefix + "pcl_id");
-    laser_power_                 = config->get_int(cfg_prefix + "device_options/laser_power");
+	laser_power_                 = config->get_int(cfg_prefix + "device_options/laser_power");
 	restart_after_num_errors_ =
 	  config->get_uint_or_default(std::string(cfg_prefix + "restart_after_num_errors").c_str(), 50);
 
@@ -85,20 +85,20 @@ RealsenseThread::loop()
 	if (cfg_use_switch_) {
 		read_switch();
 	}
-    if (enable_camera_ && !last_enable_camera_){
-        if (!camera_running_){
-            connect_and_start_camera();
-            // Start reading in the next loop
-        }
-        last_enable_camera_ = true;
+	if (enable_camera_ && !last_enable_camera_) {
+		if (!camera_running_) {
+			connect_and_start_camera();
+			// Start reading in the next loop
+		}
+		last_enable_camera_ = true;
 
-    } else if (!enable_camera_ && last_enable_camera_) {
-        if (camera_running_ ) {
-            // decrease laser power
-            stop_camera();
-        }
+	} else if (!enable_camera_ && last_enable_camera_) {
+		if (camera_running_) {
+			// decrease laser power
+			stop_camera();
+		}
 
-        last_enable_camera_ = false;
+		last_enable_camera_ = false;
 	}
 
 	if (rs_poll_for_frames(rs_device_, &rs_error_) == 1) {
@@ -122,17 +122,18 @@ RealsenseThread::loop()
 		}
 		pcl_utils::set_time(realsense_depth_refptr_, fawkes::Time(clock));
 	} else {
-		error_counter_++;
-		logger->log_warn(name(),
-		                 "Poll for frames not successful (%s)",
-		                 rs_get_error_message(rs_error_));
-		if (error_counter_ >= restart_after_num_errors_) {
-			error_counter_ = 0;
-			stop_camera();
-            if (enable_camera_){
-                logger->log_warn(name(), "Polling failed, restarting device");
-                connect_and_start_camera();
-            }
+		if (!enable_camera_) {
+			error_counter_++;
+			logger->log_warn(name(),
+			                 "Poll for frames not successful (%s)",
+			                 rs_get_error_message(rs_error_));
+			if (error_counter_ >= restart_after_num_errors_) {
+				error_counter_ = 0;
+				stop_camera();
+			} else {
+				logger->log_warn(name(), "Polling failed, restarting device");
+				connect_and_start_camera();
+			}
 		}
 	}
 }
@@ -143,7 +144,7 @@ RealsenseThread::finalize()
 	realsense_depth_refptr_.reset();
 	pcl_manager->remove_pointcloud(pcl_id_.c_str());
 	stop_camera();
-    rs_delete_context(rs_context_, &rs_error_);
+	rs_delete_context(rs_context_, &rs_error_);
 	blackboard->close(switch_if_);
 	//TODO Documentation with librealsense
 }
@@ -166,7 +167,7 @@ RealsenseThread::connect_and_start_camera()
 	}
 
 	rs_device_ = get_camera();
-    rs_set_device_option(rs_device_, RS_OPTION_F200_LASER_POWER, laser_power_, &rs_error_);
+	rs_set_device_option(rs_device_, RS_OPTION_F200_LASER_POWER, laser_power_, &rs_error_);
 	log_error();
 	enable_depth_stream();
 
