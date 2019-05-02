@@ -289,7 +289,7 @@
 	?mf <- (mutex (name ?name) (request RENEW-LOCK) (response NONE)
 								(state LOCKED) (locked-by ?lb&:(eq ?lb (cx-identity))))
 	=>
-	(printout t "Renewing lock " ?name crlf)
+	(printout debug "Renewing lock " ?name crlf)
 	(robmem-mutex-renew-lock-async (str-cat ?name) (cx-identity))
 	(modify ?mf (response PENDING))
 )
@@ -319,7 +319,7 @@
 	?mf <- (mutex (name ?name) (request UNLOCK) (response NONE)
 								(state LOCKED) (locked-by ?lb&:(eq ?lb (cx-identity))))
 	=>
-	(printout t "Requesting unlock " ?name crlf)
+	(printout debug "Requesting unlock " ?name crlf)
 	(robmem-mutex-unlock-async (str-cat ?name) (cx-identity))
 	(modify ?mf (response PENDING))
 )
@@ -342,7 +342,7 @@
 (defrule mutex-expire-locks-start
 	?mf <- (mutex-expire-task (task ?task) (state NONE) (max-age-sec ?max-age-sec))
 	=>
-	(printout t ?task " locks " crlf)
+	(printout debug ?task " locks " crlf)
 	(robmem-mutex-expire-locks-async ?max-age-sec)
 	(modify ?mf (state PENDING))
 )
@@ -370,7 +370,7 @@
 								(locked-by ?lb&:(eq ?lb (cx-identity)))
 								(lock-time $?lt&:(timeout (time-trunc-ms (now-systime)) ?lt ?renew-interval)))
 	=>
-	(printout t "Automatic renewal of lock for mutex " ?name crlf)
+	(printout debug "Automatic renewal of lock for mutex " ?name crlf)
 	(modify ?mf (request RENEW-LOCK) (response NONE) (pending-requests AUTO-RENEW-PROC))
 )
 
@@ -379,7 +379,7 @@
 								(request RENEW-LOCK) (response ACQUIRED)
 								(pending-requests AUTO-RENEW-PROC $?pending-requests))
 	=>
-	(printout t "Automatic renewal of lock for mutex " ?name " completed" crlf)
+	(printout debug "Automatic renewal of lock for mutex " ?name " completed" crlf)
 	(modify ?mf (request NONE) (response NONE) (pending-requests ?pending-requests))
 )
 
@@ -406,7 +406,7 @@
 (defrule mutex-run-pending-request
 	?mf <- (mutex (name ?name) (request NONE) (pending-requests ?request $?pending-requests))
 	=>
-	(printout t "Run pending request for mutex " ?name ": " ?request crlf)
+	(printout debug "Run pending request for mutex " ?name ": " ?request crlf)
 	(modify ?mf (request ?request) (response NONE) (pending-requests ?pending-requests))
 )
 
