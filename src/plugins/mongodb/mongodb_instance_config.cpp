@@ -101,7 +101,7 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 		}
 	}
 
-	argv_ = {"mongod", "--port", std::to_string(port_), "--dbpath", data_path_};
+	argv_ = {"mongod", "--bind_ip_all", "--port", std::to_string(port_), "--dbpath", data_path_};
 
 	if (!log_path_.empty()) {
 		if (log_append_) {
