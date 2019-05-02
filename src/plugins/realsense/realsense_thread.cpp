@@ -127,10 +127,12 @@ RealsenseThread::loop()
 		                 "Poll for frames not successful (%s)",
 		                 rs_get_error_message(rs_error_));
 		if (error_counter_ >= restart_after_num_errors_) {
-			logger->log_warn(name(), "Polling failed, restarting device");
 			error_counter_ = 0;
 			stop_camera();
-			connect_and_start_camera();
+            if (enable_camera_){
+                logger->log_warn(name(), "Polling failed, restarting device");
+                connect_and_start_camera();
+            }
 		}
 	}
 }
@@ -141,6 +143,7 @@ RealsenseThread::finalize()
 	realsense_depth_refptr_.reset();
 	pcl_manager->remove_pointcloud(pcl_id_.c_str());
 	stop_camera();
+    rs_delete_context(rs_context_, &rs_error_);
 	blackboard->close(switch_if_);
 	//TODO Documentation with librealsense
 }
@@ -267,7 +270,6 @@ RealsenseThread::stop_camera()
 	if (camera_running_) {
 		logger->log_info(name(), "Stopping realsense camera ...");
 		rs_stop_device(rs_device_, &rs_error_);
-		rs_delete_context(rs_context_, &rs_error_);
 		log_error();
 		logger->log_info(name(), "Realsense camera stopped!");
 		camera_running_ = false;
