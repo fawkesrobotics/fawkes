@@ -593,7 +593,7 @@ SyncPoint::is_pending(string component)
 void
 SyncPoint::handle_default(string component, WakeupType type)
 {
-	logger_->log_warn(component.c_str(),
+	logger_->log_debug(component.c_str(),
 	                  "Thread time limit exceeded while waiting for syncpoint '%s'. "
 	                  "Time limit: %f sec.",
 	                  get_identifier().c_str(),
@@ -605,9 +605,9 @@ SyncPoint::handle_default(string component, WakeupType type)
 		     it++) {
 			bad_components_string += " " + *it;
 		}
-		logger_->log_warn(component.c_str(), "bad components:%s", bad_components_string.c_str());
+		logger_->log_debug(component.c_str(), "bad components:%s", bad_components_string.c_str());
 	} else if (bad_components_.size() == 1) {
-		logger_->log_warn(component.c_str(), "bad component: %s", bad_components_.begin()->c_str());
+		logger_->log_debug(component.c_str(), "bad component: %s", bad_components_.begin()->c_str());
 	} else if (type == SyncPoint::WAIT_FOR_ALL) {
 		throw Exception("SyncPoints: component %s defaulted, "
 		                "but there is no pending emitter. This is probably a bug.",

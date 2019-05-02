@@ -304,7 +304,7 @@
 					(bind ?new-wf (modify ?wf (type ?type) (is-list ?is-list) (value ?value) (values ?values)))
 					(modify ?sm (wm-fact-idx (fact-index ?new-wf)))
 				else
-					(printout warn "wm-robmem-sync-update: received update for " ?id " with older data than our own" crlf)
+					(printout debug "wm-robmem-sync-update: received update for " ?id " with older data than our own" crlf)
 				)
 			)
 		else
@@ -359,7 +359,7 @@
 			(printout debug "wm-robmem-sync-delete: removing " ?id crlf)
 			(retract ?wf)
 		else
-			(printout warn "wm-robmem-sync-delete: received delete for " ?id
+			(printout debug "wm-robmem-sync-delete: received delete for " ?id
 								" with older timetamp than our own" crlf)
 		)
 	)
@@ -371,7 +371,7 @@
 	=>
 	(bind ?op (sym-cat (bson-get ?obj "operationType")))
 
-	(printout warn "Trigger: " (bson-tostring ?obj) crlf)
+	(printout debug "Trigger: " (bson-tostring ?obj) crlf)
 	(if (eq ?op delete)
 	 then
 		; We cannot check the source because it is not set for deletions
