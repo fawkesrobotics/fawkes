@@ -244,13 +244,13 @@
 (defrule wm-robmem-sync-fact-removed
 	(wm-fact (key cx identity) (value ?identity))
 	(wm-robmem-sync-conf (wm-fact-key-prefix $?key-prefix) (enabled TRUE))
-	?sm <- (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key $?key-prefix $?rest))
+	?sm <- (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-idx ~0) (wm-fact-key $?key-prefix $?rest))
 	(not (wm-fact (id ?id)))
 	=>
 	;(printout error "Remove " ?id " from robot memory" crlf)
-	(retract ?sm)
 	; We do not know when exactly the wm-fact was retracted, use the current time instead
 	(bind ?now (time-trunc-ms (now-systime)))
+	(modify ?sm (update-timestamp ?now) (wm-fact-idx 0))
 	(bind ?query (wm-robmem-sync-create-query ?id ?now))
 
 	(robmem-remove ?*WM-ROBMEM-SYNC-COLLECTION* ?query)
@@ -358,6 +358,7 @@
 		then
 			(printout debug "wm-robmem-sync-delete: removing " ?id crlf)
 			(retract ?wf)
+			(modify ?sm (wm-fact-idx 0) (update-timestamp ?ts))
 		else
 			(printout warn "wm-robmem-sync-delete: received delete for " ?id
 								" with older timetamp than our own" crlf)
