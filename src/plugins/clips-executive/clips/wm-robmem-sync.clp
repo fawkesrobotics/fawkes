@@ -329,7 +329,8 @@
 					; we don't have the fact locally, but a sync map entry.
 					; Maybe had just deleted this fact but haven't gotten around to
 					;	sync it, yet. If the update timestamp is fresher we take it
-					(do-for-fact ((?sm wm-robmem-sync-map-entry)) (eq ?sm:wm-fact-id ?id)
+					(do-for-fact ((?sm wm-robmem-sync-map-entry))
+					             (and (eq ?sm:wm-fact-id ?id) (time> ?update-timestamp ?sm:update-timestamp))
 						(printout debug "wm-robmem-sync-update: updating (no fact but sync map entry) " ?id crlf)
 						(bind ?new-wf (assert (wm-fact (id ?sm:wm-fact-id) (key ?sm:wm-fact-key)
 																					 (type ?type) (is-list ?is-list) (value ?value) (values ?values))))
