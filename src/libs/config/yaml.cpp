@@ -43,6 +43,7 @@
 #include <fstream>
 #include <queue>
 #include <regex>
+#include <unistd.h>
 
 namespace fawkes {
 
@@ -611,7 +612,7 @@ YamlConfiguration::read_meta_doc(YAML::Node &                doc,
 	try {
 		const YAML::Node &includes = doc["include"];
 		for (YAML::const_iterator it = includes.begin(); it != includes.end(); ++it) {
-			std::string include        = it->as<std::string>();
+			std::string include        = insert_hostname(it->as<std::string>());
 			bool        ignore_missing = false;
 			if (it->Tag() == "tag:fawkesrobotics.org,cfg/ignore-missing") {
 				ignore_missing = true;
@@ -621,7 +622,8 @@ YamlConfiguration::read_meta_doc(YAML::Node &                doc,
 				if (host_file != "") {
 					throw Exception("YamlConfig: Only one host-specific file can be specified");
 				}
-				host_file = abs_cfg_path(it->Scalar());
+
+				host_file = abs_cfg_path(insert_hostname(it->Scalar()));
 				continue;
 			}
 
