@@ -122,10 +122,22 @@ EventTriggerManager::check_events()
 				trigger->change_stream =
 				  create_change_stream(collection, trigger->filter_query.view(), trigger->resume_token);
 			} catch (mongocxx::query_exception &e) {
-				logger_->log_error(name.c_str(),
-				                   "Failed to create change stream, broken trigger for collection %s: %s",
-				                   trigger->ns.c_str(),
-				                   e.what());
+				logger_->log_warn(name.c_str(),
+				                  "Failed to create change stream for collection %s starting at resume "
+				                  "token, retrying starting from now (resume token %s, error: %s)",
+				                  trigger->ns.c_str(),
+				                  trigger->resume_token
+				                    ? bsoncxx::to_json(trigger->resume_token->view()).c_str()
+				                    : "{}",
+				                  e.what());
+				try {
+					trigger->change_stream = create_change_stream(collection, trigger->filter_query.view());
+				} catch (mongocxx::query_exception &e) {
+					logger_->log_error(name.c_str(),
+					                   "Failed to create change stream, broken trigger for collection %s: %s",
+					                   trigger->ns.c_str(),
+					                   e.what());
+				}
 			}
 		}
 	}
