@@ -651,6 +651,22 @@ InterfaceParser::parse()
 
 		messages.push_back(msg);
 	}
+	bool duplicateExists = false;
+	for (auto msg1 = messages.begin(); msg1 != messages.end(); ++msg1) {
+		for (auto msg2 = msg1 + 1; msg2 != messages.end(); ++msg2) {
+			if (strncmp(msg1->getName().c_str(),
+			            msg2->getName().c_str(),
+			            INTERFACE_MESSAGE_TYPE_SIZE_ - 1)
+			    == 0) {
+				cout << "Possible duplicate at message network syncing detected:" << endl;
+				cout << msg1->getName() << " and " << msg2->getName() << endl << endl;
+				duplicateExists = true;
+			}
+		}
+	}
+	if (duplicateExists)
+		throw InterfaceGeneratorInvalidContentException(
+		  "Duplicates after serializing by BB network handler exist!");
 }
 
 /** Get interface name.
