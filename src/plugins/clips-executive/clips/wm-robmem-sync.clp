@@ -380,11 +380,18 @@
 		(if (or (eq ?op insert) (eq ?op update))
 		 then
 			(bind ?source (bson-get ?obj "fullDocument.source"))
-			(if (neq ?source ?identity)
+			(if (not ?source)
 			 then
-				(wm-robmem-sync-update ?obj)
-			;else
-			;	(printout t "Ignoring own update" crlf)
+				(bind ?doc (bson-get ?obj "fullDocument"))
+				(bind ?id (bson-get ?obj "documentKey._id"))
+				(printout error "Received update for " ?id " with unknown source, update is lost! doc: " ?doc crlf)
+			 else
+				(if (neq ?source ?identity)
+				 then
+					(wm-robmem-sync-update ?obj)
+				;else
+				;	(printout t "Ignoring own update" crlf)
+				)
 			)
 		 else
 			(printout error "Unknown operator " ?op)
