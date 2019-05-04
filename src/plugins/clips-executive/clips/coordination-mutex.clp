@@ -307,6 +307,14 @@
 	(modify ?mf (response ERROR) (error-msg (str-cat "Mutex locked by " ?lb " (not '" (cx-identity) "')")))
 )
 
+(defrule mutex-renew-lock-op-succeeded
+	?mf <- (mutex (name ?name) (request RENEW-LOCK) (response PENDING))
+	?of <- (mutex-op-feedback renew-lock-async OK ?name)
+	=>
+	(retract ?of)
+	(modify ?mf (response ACQUIRED))
+)
+
 (defrule mutex-renew-lock-op-failed
 	?mf <- (mutex (name ?name) (request RENEW-LOCK) (response PENDING))
 	?of <- (mutex-op-feedback renew-lock-async FAIL ?name)
@@ -443,7 +451,7 @@
         then
           (modify ?m (response UNLOCKED))
         )
-        (if (and (or (eq ?m:request LOCK) (eq ?m:request RENEW-LOCK)) ?locked)
+        (if (and (eq ?m:request LOCK) ?locked)
         then
           (modify ?m (response ACQUIRED))
         )
