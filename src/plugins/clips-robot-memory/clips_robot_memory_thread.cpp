@@ -28,8 +28,7 @@
 #include <bsoncxx/document/element.hpp>
 #include <bsoncxx/exception/exception.hpp>
 #include <bsoncxx/types.hpp>
-#include <mongocxx/exception/operation_exception.hpp>
-#include <mongocxx/exception/query_exception.hpp>
+#include <mongocxx/exception/exception.hpp>
 
 using namespace fawkes;
 
@@ -468,7 +467,7 @@ ClipsRobotMemoryThread::clips_robotmemory_insert(std::string collection, void *b
 
 	try {
 		robot_memory->insert(b->view(), collection);
-	} catch (mongocxx::operation_exception &e) {
+	} catch (mongocxx::exception &e) {
 		logger->log_warn("MongoDB", "Insert failed: %s", e.what());
 	}
 }
@@ -480,7 +479,7 @@ ClipsRobotMemoryThread::clips_robotmemory_create_index(std::string collection, v
 
 	try {
 		robot_memory->create_index(b->view(), collection, /* unique */ false);
-	} catch (mongocxx::operation_exception &e) {
+	} catch (mongocxx::exception &e) {
 		logger->log_warn("MongoDB", "Creating index failed: %s", e.what());
 	}
 }
@@ -492,7 +491,7 @@ ClipsRobotMemoryThread::clips_robotmemory_create_unique_index(std::string collec
 
 	try {
 		robot_memory->create_index(b->view(), collection, /* unique */ true);
-	} catch (mongocxx::operation_exception &e) {
+	} catch (mongocxx::exception &e) {
 		logger->log_warn("MongoDB", "Creating unique index failed: %s", e.what());
 	}
 }
@@ -517,7 +516,7 @@ ClipsRobotMemoryThread::robotmemory_update(std::string &                  collec
 
 	} catch (bsoncxx::exception &e) {
 		logger->log_warn("MongoDB", "Compiling query failed: %s", e.what());
-	} catch (mongocxx::operation_exception &e) {
+	} catch (mongocxx::exception &e) {
 		logger->log_warn("MongoDB", "Insert failed: %s", e.what());
 	}
 }
@@ -578,7 +577,7 @@ ClipsRobotMemoryThread::clips_robotmemory_query_sort(std::string collection,
 		return CLIPS::Value(new std::unique_ptr<mongocxx::cursor>(
 		                      new mongocxx::cursor(std::move(cursor))),
 		                    CLIPS::TYPE_EXTERNAL_ADDRESS);
-	} catch (mongocxx::operation_exception &e) {
+	} catch (mongocxx::exception &e) {
 		logger->log_warn("MongoDB", "Query failed: %s", e.what());
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 	}
@@ -590,7 +589,7 @@ ClipsRobotMemoryThread::clips_robotmemory_remove(std::string collection, void *b
 	auto b = static_cast<bsoncxx::builder::basic::document *>(bson);
 	try {
 		robot_memory->remove(b->view(), collection);
-	} catch (mongocxx::operation_exception &e) {
+	} catch (mongocxx::exception &e) {
 		logger->log_warn("MongoDB", "Remove failed: %s", e.what());
 	}
 }
@@ -640,7 +639,7 @@ ClipsRobotMemoryThread::clips_robotmemory_cursor_next(void *cursor)
 			it++;
 			return CLIPS::Value(b);
 		}
-	} catch (mongocxx::query_exception &e) {
+	} catch (mongocxx::exception &e) {
 		logger->log_error("MongoDB", "mongodb-cursor-next: got invalid query: %s", e.what());
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 	}
@@ -701,7 +700,7 @@ ClipsRobotMemoryThread::clips_bson_get(void *bson, std::string field_name)
 
 		default: return CLIPS::Value("INVALID_VALUE_TYPE", CLIPS::TYPE_SYMBOL);
 		}
-	} catch (mongocxx::operation_exception &e) {
+	} catch (mongocxx::exception &e) {
 		logger->log_warn(name(),
 		                 "mongodb-bson-get: failed to get '%s': %s",
 		                 field_name.c_str(),
@@ -778,7 +777,7 @@ ClipsRobotMemoryThread::clips_bson_get_array(void *bson, std::string field_name)
 			}
 		}
 		return rv;
-	} catch (mongocxx::operation_exception &e) {
+	} catch (mongocxx::exception &e) {
 		logger->log_warn(name(),
 		                 "mongodb-bson-get: failed to get '%s': %s",
 		                 field_name.c_str(),
@@ -823,7 +822,7 @@ ClipsRobotMemoryThread::clips_bson_get_time(void *bson, std::string field_name)
 		rv[0] = CLIPS::Value((long long int)(ts / 1000));
 		rv[1] = CLIPS::Value((ts - (rv[0].as_integer() * 1000)) * 1000);
 		return rv;
-	} catch (mongocxx::operation_exception &e) {
+	} catch (mongocxx::exception &e) {
 		rv.resize(2, CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL));
 		return rv;
 	}
@@ -856,7 +855,7 @@ ClipsRobotMemoryThread::clips_robotmemory_register_trigger(std::string env_name,
 			                               assert_name.c_str(),
 			                               CLIPS::Value(clips_trigger).as_address());
 			return true;
-		} catch (mongocxx::operation_exception &e) {
+		} catch (mongocxx::exception &e) {
 			MutexLocker clips_lock(envs_[env_name].objmutex_ptr());
 			envs_[env_name]->assert_fact_f("(mutex-trigger-register-feedback FAIL \"%s\")",
 			                               assert_name.c_str());
