@@ -378,7 +378,7 @@
 								(locked-by ?lb&:(eq ?lb (cx-identity)))
 								(lock-time $?lt&:(timeout (time-trunc-ms (now-systime)) ?lt ?renew-interval)))
 	=>
-	(printout t "Automatic renewal of lock for mutex " ?name crlf)
+	;(printout t "Automatic renewal of lock for mutex " ?name crlf)
 	(modify ?mf (request RENEW-LOCK) (response NONE) (pending-requests AUTO-RENEW-PROC))
 )
 
@@ -387,7 +387,7 @@
 								(request RENEW-LOCK) (response ACQUIRED)
 								(pending-requests AUTO-RENEW-PROC $?pending-requests))
 	=>
-	(printout t "Automatic renewal of lock for mutex " ?name " completed" crlf)
+	;(printout t "Automatic renewal of lock for mutex " ?name " completed" crlf)
 	(modify ?mf (request NONE) (response NONE) (pending-requests ?pending-requests))
 )
 
