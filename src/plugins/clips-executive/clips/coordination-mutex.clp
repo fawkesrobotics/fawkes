@@ -248,6 +248,7 @@
 )
 
 (defrule mutex-lock-start
+	(mutex-global-data)
 	?mf <- (mutex (name ?name) (request LOCK) (response NONE) (state OPEN|UNKNOWN))
 	=>
 	(printout t "Requesting lock " ?name crlf)
@@ -286,6 +287,7 @@
 )
 
 (defrule mutex-renew-lock-start
+	(mutex-global-data)
 	?mf <- (mutex (name ?name) (request RENEW-LOCK) (response NONE)
 								(state LOCKED) (locked-by ?lb&:(eq ?lb (cx-identity))))
 	=>
@@ -316,6 +318,7 @@
 )
 
 (defrule mutex-unlock-start
+	(mutex-global-data)
 	?mf <- (mutex (name ?name) (request UNLOCK) (response NONE)
 								(state LOCKED) (locked-by ?lb&:(eq ?lb (cx-identity))))
 	=>
@@ -340,6 +343,7 @@
 )
 
 (defrule mutex-expire-locks-start
+	(mutex-global-data)
 	?mf <- (mutex-expire-task (task ?task) (state NONE) (max-age-sec ?max-age-sec))
 	=>
 	(printout t ?task " locks " crlf)
