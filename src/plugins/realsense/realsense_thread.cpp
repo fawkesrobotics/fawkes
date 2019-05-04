@@ -51,7 +51,8 @@ RealsenseThread::init()
 	laser_power_                 = config->get_int(cfg_prefix + "device_options/laser_power");
 	restart_after_num_errors_ =
 	  config->get_uint_or_default(std::string(cfg_prefix + "restart_after_num_errors").c_str(), 50);
-
+	cfg_pol_delay_ =
+	  config->get_float_or_default(std::string(cfg_prefix + "delay_between_pol_errors").c_str(), 1.0);
 	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
 
 	if (cfg_use_switch_) {
@@ -76,6 +77,7 @@ RealsenseThread::init()
 
 	rs_stream_type_ = RS_STREAM_DEPTH;
 	connect_and_start_camera();
+	next_pol_time_ = fawkes::Time(clock);
 }
 
 void
@@ -94,6 +96,11 @@ RealsenseThread::loop()
 		}
 		return;
 	}
+
+	if (error_counter_ > 0 && next_pol_time_ > fawkes::Time(clock)) {
+		return;
+	}
+
 	if (rs_poll_for_frames(rs_device_, &rs_error_) == 1) {
 		error_counter_ = 0;
 		const uint16_t *image =
@@ -116,6 +123,7 @@ RealsenseThread::loop()
 		pcl_utils::set_time(realsense_depth_refptr_, fawkes::Time(clock));
 	} else {
 		error_counter_++;
+		next_pol_time_ = fawkes::Time(clock) + cfg_pol_delay_;
 		logger->log_warn(name(),
 		                 "Poll for frames not successful (%s)",
 		                 rs_get_error_message(rs_error_));
