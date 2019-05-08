@@ -583,6 +583,26 @@ abs_cfg_path(const std::string &path)
 	}
 }
 
+/** Replace <> in string with hostname
+ * @param prelim preliminary filename (potentially with <>)
+ * @return filename with <> replaced with hostname
+ */
+static std::string
+insert_hostname(std::string prelim)
+{
+	static char *hostname = NULL;
+	if (hostname == NULL) {
+		hostname = new char[256];
+		gethostname(hostname, 256);
+	}
+	size_t repl_position = prelim.find("<>");
+	if (repl_position == std::string::npos) {
+		return prelim;
+	} else {
+		return prelim.replace(repl_position, 2, std::string(hostname));
+	}
+}
+
 void
 YamlConfiguration::read_meta_doc(YAML::Node &                doc,
                                  std::queue<LoadQueueEntry> &load_queue,
