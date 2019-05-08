@@ -113,6 +113,21 @@ PddlPlannerThread::loop()
   logger->log_info(name(), "Starting PDDL Planning...");
 
   //writes plan into action_list_ or plan_list_ if it is a diagnose
+  if (FILE *file = fopen(cfg_domain_path_.c_str(),"r")) {
+    fclose(file);
+  }
+  else {
+    logger->log_error(name(),"Can not find %s",cfg_domain_path_.c_str());
+    return;
+  }
+
+  if (FILE *file = fopen(cfg_problem_path_.c_str(),"r")) {
+    fclose(file);
+  } else {
+    logger->log_error(name(),"Can not find %s",cfg_problem_path_.c_str());
+    return;
+  }
+
   planner_();
 
   // Generated a diagnose
