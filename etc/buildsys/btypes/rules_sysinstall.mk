@@ -17,15 +17,15 @@ include $(BUILDSYSDIR)/btypes/rules_fawkes.mk
 include $(BUILDSYSDIR)/ext/gmsl
 
 # Plugins are installed to special directory
-$(foreach P,$(PLUGINS_all:$(PLUGINDIR)/%.so=%),$(eval INST_LIB_SUBDIR_$(call nametr,$P) = $(FFLIBSUBDIR)/plugins))
+$(foreach P,$(PLUGINS_build:$(PLUGINDIR)/%.so=%),$(eval INST_LIB_SUBDIR_$(call nametr,$P) = $(FFLIBSUBDIR)/plugins))
 
 # Library headers get subdir matching name if not set
-$(foreach P,$(LIBS_all:$(LIBDIR)/libfawkes%.so=%) $(LIBS_gui:$(LIBDIR)/libfawkes%.so=%),$(if $(and $(call not,$(INST_HDRS_SUBDIR_libfawkes$P)),$P),$(eval INST_HDRS_SUBDIR_libfawkes$P = $(P:_%=%))))
-$(foreach P,$(LIBS_all:$(LIBDIR)/libfv%.so=%) $(LIBS_gui:$(LIBDIR)/libfv%.so=%),$(if $(and $(call not,$(INST_HDRS_SUBDIR_libfv$P)),$P),$(eval INST_HDRS_SUBDIR_libfv$P = fv$P)))
+$(foreach P,$(LIBS_build:$(LIBDIR)/libfawkes%.so=%) $(LIBS_gui:$(LIBDIR)/libfawkes%.so=%),$(if $(and $(call not,$(INST_HDRS_SUBDIR_libfawkes$P)),$P),$(eval INST_HDRS_SUBDIR_libfawkes$P = $(P:_%=%))))
+$(foreach P,$(LIBS_build:$(LIBDIR)/libfv%.so=%) $(LIBS_gui:$(LIBDIR)/libfv%.so=%),$(if $(and $(call not,$(INST_HDRS_SUBDIR_libfv$P)),$P),$(eval INST_HDRS_SUBDIR_libfv$P = fv$P)))
 
 ifdef __buildsys_lua_mk_
 # Lua libraries are "inferred" and automatically installed to proper directory
-$(foreach L,$(LIBS_all:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval INST_LIB_SUBDIR_lua_$(call nametr,$L) = $(FFLIBSUBDIR))))
+$(foreach L,$(LIBS_build:$(LIBDIR)/lua/%.so=%),$(if $L,$(eval INST_LIB_SUBDIR_lua_$(call nametr,$L) = $(FFLIBSUBDIR))))
 endif
 
 # Prefix man pages with proper path
@@ -49,7 +49,7 @@ endif
 endif
 
 .PHONY: install_targets
-install_targets: $(subst $(LIBDIR),$(DESTDIR)$(EXEC_LIBDIR),$(LIBS_all) $(LIBS_gui)) $(subst $(PLUGINDIR),$(DESTDIR)$(EXEC_PLUGINDIR),$(PLUGINS_all)) $(subst $(BINDIR),$(DESTDIR)$(EXEC_BINDIR),$(BINS_all) $(BINS_gui)) $(MANPAGES_install)
+install_targets: $(subst $(LIBDIR),$(DESTDIR)$(EXEC_LIBDIR),$(LIBS_build) $(LIBS_gui)) $(subst $(PLUGINDIR),$(DESTDIR)$(EXEC_PLUGINDIR),$(PLUGINS_build)) $(subst $(BINDIR),$(DESTDIR)$(EXEC_BINDIR),$(BINS_build) $(BINS_gui)) $(MANPAGES_install)
 
 .PHONY: install_resdirs $(INST_RESDIRS)
 install_resdirs: $(INST_RESDIRS)
@@ -146,22 +146,22 @@ endif
 # uninstall target to remove files from system
 .PHONY: uninstall
 uninstall: presubdirs subdirs
-ifneq ($(BINS_all)$(BINS_gui),)
-	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Uninstalling binaries: $(subst $(BINDIR)/,,$(BINS_all) $(BINS_gui))"
-	$(SILENT)rm -f $(subst $(BINDIR),$(DESTDIR)$(EXEC_BINDIR),$(BINS_all) $(BINS_gui))
-	$(SILENT)$(foreach B,$(subst $(BINDIR)/,,$(BINS_all) $(BINS_gui)),$(if $(wildcard $(DESTDIR)$(EXEC_DFILEDIR)/$B.desktop),rm -f $(DESTDIR)$(EXEC_DFILEDIR)/$B.desktop;))
+ifneq ($(BINS_build)$(BINS_gui),)
+	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Uninstalling binaries: $(subst $(BINDIR)/,,$(BINS_build) $(BINS_gui))"
+	$(SILENT)rm -f $(subst $(BINDIR),$(DESTDIR)$(EXEC_BINDIR),$(BINS_build) $(BINS_gui))
+	$(SILENT)$(foreach B,$(subst $(BINDIR)/,,$(BINS_build) $(BINS_gui)),$(if $(wildcard $(DESTDIR)$(EXEC_DFILEDIR)/$B.desktop),rm -f $(DESTDIR)$(EXEC_DFILEDIR)/$B.desktop;))
 endif
-ifneq ($(LIBS_all)$(LIBS_gui),)
-	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Uninstalling libraries: $(subst $(LIBDIR)/,,$(LIBS_all) $(LIBS_gui))"
-	$(SILENT)$(foreach L,$(subst $(LIBDIR)/,,$(LIBS_all) $(LIBS_gui)), \
+ifneq ($(LIBS_build)$(LIBS_gui),)
+	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Uninstalling libraries: $(subst $(LIBDIR)/,,$(LIBS_build) $(LIBS_gui))"
+	$(SILENT)$(foreach L,$(subst $(LIBDIR)/,,$(LIBS_build) $(LIBS_gui)), \
 	rm -f $(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$(L:%.so=%))))/$L*; \
 	$(if $(HDRS_$(call nametr,$(L:%.so=%))), \
 	rm -f $(foreach h,$(HDRS_$(call nametr,$(L:%.so=%))),"$(DESTDIR)$(EXEC_INCDIR)/$(INST_HDRS_SUBDIR_$(call nametr,$(L:%.so=%)))/$(if $(HDR_RENAME_$h),$(HDR_RENAME_$h),$h)" ); \
 	))
 endif
-ifneq ($(PLUGINS_all)$(PLUGINS_gui),)
-	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Uninstalling plugins: $(subst $(PLUGINDIR)/,,$(PLUGINS_all) $(PLUGINS_gui))"
-	$(SILENT)rm -f $(subst $(PLUGINDIR),$(DESTDIR)$(EXEC_PLUGINDIR),$(PLUGINS_all) $(PLUGINS_gui))
+ifneq ($(PLUGINS_build)$(PLUGINS_gui),)
+	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Uninstalling plugins: $(subst $(PLUGINDIR)/,,$(PLUGINS_build) $(PLUGINS_gui))"
+	$(SILENT)rm -f $(subst $(PLUGINDIR),$(DESTDIR)$(EXEC_PLUGINDIR),$(PLUGINS_build) $(PLUGINS_gui))
 endif
 ifneq ($(INST_RESDIRS),)
 	$(SILENTSYMB)echo -e "$(INDENT_PRINT)--- Removing resource direcotries: $(INST_RESDIRS)"
