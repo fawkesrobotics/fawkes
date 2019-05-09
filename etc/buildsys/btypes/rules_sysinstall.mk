@@ -74,7 +74,7 @@ $(INST_RESDIRS):
 	$(SILENTSYMB) if [ -d "$(RESDIR)/$@" ]; then	\
 		echo -e "$(INDENT_PRINT)[DIR] $(DESTDIR)$(TBOLDGRAY)$(RESDIR)/$@$(TNORMAL)"; \
 		mkdir -p $(DESTDIR)$(EXEC_RESDIR)/$@ || exit $?; \
-		echo -e "$(INDENT_PRINT)[CPY] $(PARENTDIR)$(TBOLDGRAY)$@(TNORMAL) -> $(DESTDIR)$(EXEC_RESDIR)/$@"; \
+		echo -e "$(INDENT_PRINT)[CPY] $(PARENTDIR)$(TBOLDGRAY)$@$(TNORMAL) -> $(DESTDIR)$(EXEC_RESDIR)/$@"; \
 		cp -af $(RESDIR)/$@/* $(DESTDIR)$(EXEC_RESDIR)/$@ || exit $$?; \
 	fi
 endif
