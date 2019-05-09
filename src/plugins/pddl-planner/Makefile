@@ -18,8 +18,6 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 
-PRESUBDIRS = interfaces
-
 LIBS_pddl_planner = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                       fawkesblackboard fawkesinterface fawkesrobotmemory \
                       PddlPlannerInterface
@@ -30,6 +28,8 @@ OBJS_all    = $(OBJS_pddl_planner)
 PLUGINS_all = $(PLUGINDIR)/pddl-planner.$(SOEXT)
 
 ifeq ($(HAVE_CPP11)$(HAVE_MONGODB),11)
+  PRESUBDIRS = interfaces
+
   CFLAGS  += $(CFLAGS_CPP11) $(CFLAGS_MONGODB)
   LDFLAGS += $(LDFLAGS_CTEMPLATE) $(LDFLAGS_MONGODB)
 
