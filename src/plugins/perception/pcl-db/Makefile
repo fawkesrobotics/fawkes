@@ -23,8 +23,6 @@ include $(BASEDIR)/src/plugins/mongodb/mongodb.mk
 # Add -DUSE_TIMETRACKER to enable time tracking
 CFLAGS += -DUSE_TIMETRACKER
 
-PRESUBDIRS = interfaces
-
 ifeq ($(PCL_USES_OPENMP),1)
   ifneq ($(USE_OPENMP),1)
     CFLAGS  += $(CFLAGS_OPENMP)
@@ -57,6 +55,8 @@ PLUGINS_all = $(PLUGINDIR)/pcl-db-store.so \
               $(PLUGINDIR)/pcl-db-merge.so
 
 ifeq ($(HAVE_MONGODB)$(HAVE_PCL)$(HAVE_TF)$(HAVE_CPP11),1111)
+  PRESUBDIRS = interfaces
+
   CFLAGS += $(CFLAGS_PCL) $(CFLAGS_TF) $(CFLAGS_MONGODB) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_PCL) $(LDFLAGS_TF) $(LDFLAGS_MONGODB)
 
