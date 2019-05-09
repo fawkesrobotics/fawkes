@@ -19,8 +19,6 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/plugins/robot-memory/robot_memory.mk
 include $(BASEDIR)/src/plugins/pddl-robot-memory/ctemplate.mk
 
-PRESUBDIRS = interfaces
-
 LIBS_pddl_robot_memory = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                          fawkesblackboard fawkesinterface fawkesrobotmemory \
                          PddlGenInterface
@@ -31,6 +29,8 @@ OBJS_all   = $(OBJS_pddl_robot_memory)
 PLUGINS_all = $(PLUGINDIR)/pddl-robot-memory.$(SOEXT)	  
 
 ifeq ($(HAVE_CPP11)$(HAVE_ROBOT_MEMORY)$(HAVE_CTEMPLATE),111)
+  PRESUBDIRS = interfaces
+
   CFLAGS  += $(CFLAGS_CPP11) $(CFLAGS_ROBOT_MEMORY)
   LDFLAGS += $(LDFLAGS_CTEMPLATE) $(LDFLAGS_ROBOT_MEMORY)
 
