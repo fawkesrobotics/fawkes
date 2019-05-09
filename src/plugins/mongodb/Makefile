@@ -19,8 +19,6 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(LIBSRCDIR)/utils/utils.mk
 include $(BUILDSYSDIR)/boost.mk
 
-PRESUBDIRS = aspect interfaces
-
 INCDIRS += $(INCDIRS_MONGODB)
 
 MONGODB_REQ_BOOST_LIBS = system filesystem
@@ -51,6 +49,7 @@ ifeq ($(HAVE_MONGODB_REQ_BOOST_LIBS),1)
 endif
 
 ifeq ($(HAVE_MONGODB)$(HAVE_CPP14)$(HAVE_MONGODB_REQ_BOOST_LIBS),111)
+  PRESUBDIRS = aspect interfaces
   PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_MONGODB),1)
