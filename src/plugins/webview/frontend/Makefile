@@ -21,6 +21,7 @@ NPM = $(shell type -p npm)
 
 ifneq ($(NPM),)
   TARGETS_all += dist/index.html
+  INST_RESDIRS = webview
 
   SRCS_FRONTEND = $(shell find $(SRCDIR)/src/ -regex '.*\.\(html\|ts\|json\|js\|scss\)')
 else
