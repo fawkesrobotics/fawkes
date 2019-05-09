@@ -200,13 +200,16 @@ $(DESTDIR)$(EXEC_LIBDIR)/%.so: $(LIBDIR)/%.so
 	ln -sf "$(notdir $(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$*))),$<).$(SOVER_$(call nametr,$*)))" "$(subst $(LIBDIR),$(abspath $(DESTDIR)$(EXEC_LIBDIR)/$(INST_LIB_SUBDIR_$(call nametr,$*))),$<)" || exit $$?; \
 	)
 	$(SILENT) $(if $(HDRS_$(call nametr,$*)),$(foreach h,$(HDRS_$(call nametr,$*)), \
-	if [ -f "$(SRCDIR)/$h" ]; then \
-		echo -e "$(INDENT_PRINT)--- Copying header $h to $(DESTDIR)$(EXEC_INCDIR)/$(INST_HDRS_SUBDIR_$(call nametr,$*))/$(if $(HDR_RENAME_$h),$(HDR_RENAME_$h),$h)"; \
-		install -D -m 644 "$(SRCDIR)/$h" "$(DESTDIR)$(EXEC_INCDIR)/$(INST_HDRS_SUBDIR_$(call nametr,$*))/$(if $(HDR_RENAME_$h),$(HDR_RENAME_$h),$h)" || exit $$?; \
+	if [ -f "$(SRCDIR)/$h" ] ; then \
+		hpath=$(SRCDIR)/$h; \
+	elif [ -f "$(IFACESRCDIR)/$h" ]; then \
+		hpath=$(IFACESRCDIR)/$h; \
 	else \
 		echo -e "$(INDENT_PRINT)--- $(TRED)Header $h does not exist.$(TNORMAL)"; \
 		exit 1; \
 	fi; \
+	echo -e "$(INDENT_PRINT)--- Copying header $h to $(DESTDIR)$(EXEC_INCDIR)/$(INST_HDRS_SUBDIR_$(call nametr,$*))/$(if $(HDR_RENAME_$h),$(HDR_RENAME_$h),$h)"; \
+	install -D -m 644 "$$hpath" "$(DESTDIR)$(EXEC_INCDIR)/$(INST_HDRS_SUBDIR_$(call nametr,$*))/$(if $(HDR_RENAME_$h),$(HDR_RENAME_$h),$h)" || exit $$?; \
 	))
 
 #	$(SILENTSYMB) for h in $(HDRS_$(call nametr,$*)); do \
