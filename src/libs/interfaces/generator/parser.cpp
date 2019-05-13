@@ -32,7 +32,7 @@
 #include <iostream>
 #include <vector>
 
-//#define CHECK_MESSAGE_TYPE_SIZE
+#define CHECK_MESSAGE_TYPE_SIZE
 
 using namespace std;
 using namespace xmlpp;
