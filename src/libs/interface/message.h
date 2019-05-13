@@ -29,7 +29,7 @@
 #include <interface/field_iterator.h>
 #include <interface/types.h>
 
-#define INTERFACE_MESSAGE_TYPE_SIZE_ 32
+#define INTERFACE_MESSAGE_TYPE_SIZE_ 64
 
 namespace fawkes {
 
