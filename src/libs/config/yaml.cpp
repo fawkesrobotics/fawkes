@@ -584,23 +584,24 @@ abs_cfg_path(const std::string &path)
 	}
 }
 
-/** Replace <> in string with hostname
- * @param prelim preliminary filename (potentially with <>)
- * @return filename with <> replaced with hostname
+/** Replace $host in string with hostname
+ * @param prelim preliminary filename (potentially with $host)
+ * @return filename with $host replaced with hostname
  */
 static std::string
 insert_hostname(std::string prelim)
 {
-	static char *hostname = NULL;
+	const std::string to_replace = "$host";
+	static char *     hostname   = NULL;
 	if (hostname == NULL) {
 		hostname = new char[256];
 		gethostname(hostname, 256);
 	}
-	size_t repl_position = prelim.find("<>");
+	size_t repl_position = prelim.find(to_replace);
 	if (repl_position == std::string::npos) {
 		return prelim;
 	} else {
-		return prelim.replace(repl_position, 2, std::string(hostname));
+		return prelim.replace(repl_position, to_replace.length(), std::string(hostname));
 	}
 }
 
