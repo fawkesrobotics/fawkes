@@ -891,14 +891,13 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *                      f
 	        "/** Copy constructor.\n"
 	        " * @param m message to copy from\n"
 	        " */\n"
-	        "%s%s::%s(const %s *m) : %s(\"%s\")\n"
+	        "%s%s::%s(const %s *m) : %s(m)\n"
 	        "{\n",
 	        inclusion_prefix.c_str(),
 	        classname.c_str(),
 	        classname.c_str(),
 	        classname.c_str(),
-	        super_class.c_str(),
-	        classname.c_str());
+	        super_class.c_str());
 
 	fprintf(f,
 	        "  data_size = m->data_size;\n"
