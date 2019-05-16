@@ -90,16 +90,17 @@ Message::Message(const char *type)
  */
 Message::Message(const Message &mesg)
 {
-	message_id_    = 0;
-	hops_          = mesg.hops_;
-	enqueued_      = false;
-	num_fields_    = mesg.num_fields_;
-	data_size      = mesg.data_size;
-	data_ptr       = malloc(data_size);
-	data_ts        = (message_data_ts_t *)data_ptr;
-	_sender_id     = 0;
-	_type          = strdup(mesg._type);
-	time_enqueued_ = new Time(mesg.time_enqueued_);
+	message_id_         = 0;
+	hops_               = mesg.hops_;
+	enqueued_           = false;
+	num_fields_         = mesg.num_fields_;
+	data_size           = mesg.data_size;
+	data_ptr            = malloc(data_size);
+	data_ts             = (message_data_ts_t *)data_ptr;
+	_sender_id          = mesg.sender_id();
+	_sender_thread_name = strdup(mesg.sender_thread_name());
+	_type               = strdup(mesg._type);
+	time_enqueued_      = new Time(mesg.time_enqueued_);
 
 	_transmit_via_iface              = NULL;
 	sender_interface_instance_serial = 0;
@@ -118,13 +119,6 @@ Message::Message(const Message &mesg)
 		info_dest = &((*info_dest)->next);
 		info_src  = info_src->next;
 	}
-
-	Thread *t = Thread::current_thread_noexc();
-	if (t) {
-		_sender_thread_name = strdup(t->name());
-	} else {
-		_sender_thread_name = strdup("Unknown");
-	}
 }
 
 /** Copy constructor.
@@ -139,7 +133,8 @@ Message::Message(const Message *mesg)
 	data_size                        = mesg->data_size;
 	data_ptr                         = malloc(data_size);
 	data_ts                          = (message_data_ts_t *)data_ptr;
-	_sender_id                       = 0;
+	_sender_id                       = mesg->sender_id();
+	_sender_thread_name              = strdup(mesg->sender_thread_name());
 	_type                            = strdup(mesg->_type);
 	_transmit_via_iface              = NULL;
 	sender_interface_instance_serial = 0;
@@ -158,13 +153,6 @@ Message::Message(const Message *mesg)
 
 		info_dest = &((*info_dest)->next);
 		info_src  = info_src->next;
-	}
-
-	Thread *t = Thread::current_thread_noexc();
-	if (t) {
-		_sender_thread_name = strdup(t->name());
-	} else {
-		_sender_thread_name = strdup("Unknown");
 	}
 }
 
