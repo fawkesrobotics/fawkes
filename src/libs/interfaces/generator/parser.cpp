@@ -589,11 +589,11 @@ InterfaceParser::parse()
 				throw InterfaceGeneratorInvalidContentException("no name for message");
 			}
 			msg_name = attr->get_value();
-			if (msg_name.length() > INTERFACE_MESSAGE_TYPE_SIZE_ - 1 - 7) {
+			if (msg_name.length() + std::string("Message").length() > INTERFACE_MESSAGE_TYPE_SIZE_ - 1) {
 				throw InterfaceGeneratorInvalidContentException(
 				  "Interface message name '%s' too long, max length is %u",
 				  msg_name.c_str(),
-				  INTERFACE_MESSAGE_TYPE_SIZE_ - 1 - 7);
+				  INTERFACE_MESSAGE_TYPE_SIZE_ - 1 - std::string("Message").length());
 			}
 		} else {
 			throw InterfaceGeneratorInvalidContentException("message is not an element");
