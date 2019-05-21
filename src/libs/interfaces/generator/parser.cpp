@@ -32,8 +32,6 @@
 #include <iostream>
 #include <vector>
 
-#define CHECK_MESSAGE_TYPE_SIZE
-
 using namespace std;
 using namespace xmlpp;
 
@@ -591,14 +589,12 @@ InterfaceParser::parse()
 				throw InterfaceGeneratorInvalidContentException("no name for message");
 			}
 			msg_name = attr->get_value();
-#ifdef CHECK_MESSAGE_TYPE_SIZE
 			if (msg_name.length() > INTERFACE_MESSAGE_TYPE_SIZE_ - 1 - 7) {
 				throw InterfaceGeneratorInvalidContentException(
 				  "Interface message name '%s' too long, max length is %u",
 				  msg_name.c_str(),
 				  INTERFACE_MESSAGE_TYPE_SIZE_ - 1 - 7);
 			}
-#endif
 		} else {
 			throw InterfaceGeneratorInvalidContentException("message is not an element");
 		}
