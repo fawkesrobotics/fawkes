@@ -30,7 +30,9 @@ tracdoc: api-trac.doxygen
 	$(SILENT) rm -rf doc/api
 	$(SILENT) mkdir -p doc/api
 	$(SILENT) $(DOXYGEN) $(DOCDIR)/doxygen/$*$(if $(SUBMODULE_EXTERN),-submodule).doxygen >/dev/null 2>&1
-	$(SILENT) if [ "`wc -l warnings.txt | awk '{ print $$1 }'`" != "0" ]; then \
+	$(SILENT) git ls-files --full-name *.{h,cpp} | awk "{ print \"$$(git rev-parse --show-toplevel)/\"\$$1 }" > git-files.txt
+	$(SILENT) grep -E -e "^[^[:space:]:;,<>?\"*|\\]*:[0-9]+:" warnings.txt -o | grep -E -e "^[^[:space:]:;,<>?\"*|\\]*" warnings.txt -o > warning-files.txt || exit 0
+	$(SILENT) if [ "`grep -Fx -f git-files.txt warning-files.txt | wc -l`" != "0" ]; then \
 		echo -e "$(TRED)--> Warnings have been generated:$(TNORMAL)"; \
 		cat warnings.txt; \
 		exit 1; \
