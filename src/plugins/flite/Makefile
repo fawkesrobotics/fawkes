@@ -28,6 +28,8 @@ OBJS_all    = $(OBJS_flite)
 PLUGINS_all = $(PLUGINDIR)/flite.so
 
 ifeq ($(HAVE_FLITE)$(HAVE_ALSA),11)
+  CFLAGS += $(CFLAGS_ALSA)
+  LDFLAGS += $(LDFLAGS_ALSA)
   PLUGINS_build = $(PLUGINS_all)
 else
   ifneq ($(HAVE_FLITE),1)

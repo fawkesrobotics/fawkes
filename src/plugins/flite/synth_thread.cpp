@@ -22,10 +22,10 @@
 
 #include "synth_thread.h"
 
+#include <alsa/asoundlib.h>
 #include <interfaces/SpeechSynthInterface.h>
 #include <utils/time/wait.h>
 
-#include <asoundlib.h>
 #include <cmath>
 
 using namespace fawkes;

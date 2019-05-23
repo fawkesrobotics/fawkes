@@ -45,7 +45,6 @@ PLUGINS_all = $(PLUGINDIR)/webview.so
 
 ifeq ($(HAVE_BOOST_LIBS)$(HAVE_LIBMICROHTTPD),11)
   PLUGINS_build = $(PLUGINS_all)
-  INST_RESDIRS = webview
 
   CFLAGS  += $(call boost-libs-cflags,$(REQ_BOOST_LIBS))
   LDFLAGS += $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
