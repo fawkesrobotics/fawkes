@@ -1,11 +1,23 @@
 #!/usr/bin/perl
 
 use File::Find;
+use File::Spec;
 use Fcntl ':mode';
 use Getopt::Long;
 
+my @known_files = ();
+my $known_files_file;
+
 my @paths = ();
-GetOptions("p=s" => \@paths);
+GetOptions("p=s" => \@paths, "k=s" => \$known_files_file);
+
+$use_known_files = defined $known_files_file;
+
+if ($use_known_files) {
+  open(my $fh, '<', $known_files_file) or die "Could not open file with git-known files";
+  chomp(@known_files = <$fh>);
+  close($fh);
+}
 
 if ( scalar(@ARGV) == 0 ) {
   print("Insufficient number of arguments.\n");
@@ -71,9 +83,12 @@ sub check_file()
       return;
     }
   }
-
-  printf("** File %s did NOT match any license\n", $File::Find::dir . "/" . $entry);
-  $ok = 0;
+  if ( ! $use_known_files or File::Spec->rel2abs($entry) ~~ @known_files) { 
+    printf("** File %s did NOT match any license\n", $File::Find::dir . "/" . $entry);
+    $ok = 0;
+  } else {
+    printf("** File %s did NOT match any license, but is not known to git!\n", $File::Find::dir . "/" . $entry);
+  }
 }
 
 exit($ok ? 0 : 1);
