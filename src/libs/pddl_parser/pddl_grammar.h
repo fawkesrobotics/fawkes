@@ -1,221 +1,339 @@
-
-/***************************************************************************
- *  grammar.h
+/**
+ * This file is part of pddl_parser
  *
- *  Created: Fri 19 May 2017 14:07:29 CEST
- *  Copyright  2017  Matthias Loebach
- *                   Till Hofmann
- ****************************************************************************/
-
-/*  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * @copyright Nils Adermann <naderman@naderman.de>
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
- *
- *  Read the full text in the LICENSE.GPL file in the doc directory.
+ * For the full copyright and licensing information please review the LICENSE
+ * file that was distributed with this source code.
  */
 
-#ifndef PLUGINS_PDDL_GRAMMAR_H_
-#define PLUGINS_PDDL_GRAMMAR_H_
+#ifndef PDDLQI_PARSER_PDDLGRAMMAR_H
+#define PDDLQI_PARSER_PDDLGRAMMAR_H
 
 #include "pddl_ast.h"
+#include <boost/spirit/home/support/info.hpp>
 
-namespace pddl_parser {
-namespace grammar {
-/** @class pddl_skipper
-     * A skipper for PDDL files.
-     * This skipper skips spaces and comments starting with ';'
-     */
-template <typename Iterator>
-struct pddl_skipper : public qi::grammar<Iterator>
+#include <iostream>
+
+#include <sstream>
+#include <exception>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/repository/include/qi_distinct.hpp>
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix_fusion.hpp>
+#include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/spirit/include/phoenix_object.hpp>
+#include <boost/spirit/include/phoenix_bind.hpp>
+
+namespace pddl_parser
 {
-	pddl_skipper() : pddl_skipper::base_type(skip, "PDDL")
-	{
-		skip = ascii::space | (';' >> *(qi::char_ - qi::eol));
-	}
-	/** The actual skipping rule. */
-	qi::rule<Iterator> skip;
-};
+    class ParserException : std::exception
+      {
+        public:
+            ParserException() : exception()
+            {
+                message = "Unknown ParserException";
+            }
 
-/** @class domain_parser
-     * A Boost QI parser for a PDDL domain.
-     */
-template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
-struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
-{
-	domain_parser() : domain_parser::base_type(domain)
-	{
-		using namespace qi;
-		using ascii::alnum;
-		using ascii::blank;
-		using ascii::char_;
+            template <typename Iterator>
+            ParserException(Iterator start, Iterator current, Iterator end) :
+                exception()
+            {
+                message = "Unknown error occured here: ";
+                message += std::string(current, end);
+            }
 
-		name_type = lexeme[alnum >> *(alnum | char_('-') | char_('_'))];
+            template <typename Iterator>
+            ParserException(const boost::spirit::info& expectedRule, Iterator start, Iterator end, Iterator current) :
+                exception()
+            {
+                std::stringstream messageStream;
+                messageStream << "Parse Error: Expected: ";
+                messageStream << expectedRule;
+                messageStream << " here: ";
+                messageStream << std::string(current, end);
 
-		domain_name = lit("define") >> '(' >> lit("domain") >> +(char_ - ')') >> ')';
+                message = messageStream.str();
+            }
 
-		requirements = '(' >> lit(":requirements") >> *(':' >> lexeme[*qi::alnum]) >> ')';
+            ParserException(const ParserException& src)
+            {
+                message = src.message;
+            }
 
-		type_pair = name_type >> -('-' >> name_type);
-		types     = '(' >> lit(":types") >> +type_pair >> ')';
+            ParserException& operator=(const ParserException& rhs)
+            {
+                message = rhs.message;
+                return *this;
+            }
 
-		constant_value_list = +name_type;
-		constant_multi_pair = constant_value_list >> -('-' >> name_type);
-		constants           = '(' >> lit(":constants") >> +constant_multi_pair >> ')';
+            virtual ~ParserException() throw() {}
 
-		param_pair  = '?' >> name_type >> '-' >> name_type;
-		param_pairs = +param_pair;
-		pred        = '(' >> name_type >> -param_pairs >> ')';
-		predicates  = '(' >> lit(":predicates") >> +pred >> ')';
+            virtual const char* what() const throw()
+            {
+                return message.c_str();
+            }
+        protected:
+            std::string message;
+    };
 
-		atom          = +(graph - '(' - ')');
-		predicate     = '(' >> atom >> *expression >> ')';
-		expression    = atom | predicate;
-		temp_breakup  = lit(":temporal-breakup") >> expression;
-		cond_breakup  = lit(":conditional-breakup") >> expression;
-		effects       = lit(":effect") >> expression;
-		preconditions = lit(":precondition") >> expression;
-		duration      = lit(":duration") >> '(' >> '=' >> lit("?duration") >> uint_ >> ')';
-		action_params = lit(":parameters") >> '(' >> +param_pair >> ')';
-		action        = '(' >> (lit(":durative-action") | lit(":action")) >> name_type >> action_params
-		         >> -duration >> preconditions >> effects >> -cond_breakup >> -temp_breakup >> ')';
-		actions = +action;
 
-		domain = '(' >> domain_name >> requirements >> -types >> -constants >> predicates >> actions
-		         // make closing parenthesis optional to stay backwards compatible
-		         >> -lit(")");
-	}
+    namespace Grammar
+    {
+        namespace fusion = boost::fusion;
+        namespace phoenix = boost::phoenix;
+        namespace qi = boost::spirit::qi;
+        namespace ascii = boost::spirit::ascii;
 
-	/** Named placeholder for parsing a name. */
-	qi::rule<Iterator, std::string(), Skipper> name_type;
+        using qi::lexeme;
+        using qi::lit;
+        using qi::lazy;
+        using qi::on_error;
+        using qi::fail;
+        using boost::spirit::repository::distinct;
+        using ascii::char_;
+        using namespace qi::labels;
 
-	/** Named placeholder for parsing a domain name. */
-	qi::rule<Iterator, std::string(), Skipper> domain_name;
+        using phoenix::construct;
+        using phoenix::val;
+        using phoenix::ref;
+        using phoenix::at_c;
+        using phoenix::if_else;
+        using phoenix::bind;
+        using phoenix::push_back;
+        using phoenix::insert;
+        using phoenix::clear;
+        using phoenix::begin;
+        using phoenix::end;
 
-	/** Named placeholder for parsing requirements. */
-	qi::rule<Iterator, std::vector<std::string>(), Skipper> requirements;
+        /** @class pddl_skipper
+        * A skipper for PDDL files.
+        * This skipper skips spaces and comments starting with ';'
+        */
+        template <typename Iterator>
+        struct pddl_skipper : public qi::grammar<Iterator>
+        {
+	        pddl_skipper() : pddl_skipper::base_type(skip, "PDDL")
+	        {
+		        skip = ascii::space | (';' >> *(qi::char_ - qi::eol));
+	        }
+	        /** The actual skipping rule. */
+	        qi::rule<Iterator> skip;
+        };
 
-	/** Named placeholder for parsing types. */
-	qi::rule<Iterator, pairs_type(), Skipper> types;
-	/** Named placeholder for parsing type pairs. */
-	qi::rule<Iterator, pair_type(), Skipper> type_pair;
 
-	/** Named placeholder for parsing a list of constant values. */
-	qi::rule<Iterator, type_list(), Skipper> constant_value_list;
-	/** Named placeholder for parsing a list of predicate parameters. */
-	qi::rule<Iterator, type_list(), Skipper> predicate_params;
-	/** Named placeholder for parsing a list of typed constants. */
-	qi::rule<Iterator, pair_multi_const(), Skipper> constant_multi_pair;
-	/** Named placeholder for parsing a list of constants. */
-	qi::rule<Iterator, pairs_multi_consts(), Skipper> constants;
+        struct RequirementFlagSymbols_ :
+            qi::symbols<char, pddl_parser::RequirementFlag::EnumType>
+        {
+            RequirementFlagSymbols_()
+            {
+                add
+                    (":strips", RequirementFlag::eStrips)
+                    (":negative-preconditions", RequirementFlag::eNegativePreconditions)
+                    (":typing", RequirementFlag::typing)
+                    (":action-costs", RequirementFlag::action_cost)
+                    (":adl", RequirementFlag::adl)
+                   ;
+            }
+        };
 
-	/** Named placeholder for parsing a parameter pair. */
-	qi::rule<Iterator, string_pair_type(), Skipper> param_pair;
-	/** Named placeholder for parsing a list of parameter pairs. */
-	qi::rule<Iterator, string_pairs_type(), Skipper> param_pairs;
-	/** Named placeholder for parsing a predicate type. */
-	qi::rule<Iterator, predicate_type(), Skipper> pred;
-	/** Named placeholder for parsing a list of predicate types. */
-	qi::rule<Iterator, std::vector<predicate_type>(), Skipper> predicates;
+        void insert_typed_name_entities(TypedList& entities, const std::vector<std::string>& names, const std::string& type)
+        {
+            std::for_each(names.begin(), names.end(), (
+                phoenix::push_back(phoenix::ref(entities), phoenix::construct<struct Entity>(phoenix::arg_names::_1, phoenix::ref(type)))
+            ));
+        }
 
-	/** Named placeholder for parsing an atom. */
-	qi::rule<Iterator, Atom()> atom;
-	/** Named placeholder for parsing a predicate. */
-	qi::rule<Iterator, Predicate(), Skipper> predicate;
-	/** Named placeholder for parsing a PDDL expression. */
-	qi::rule<Iterator, Expression(), Skipper> expression;
-	/** Named placeholder for parsing a PDDL precondition. */
-	qi::rule<Iterator, Expression(), Skipper> preconditions;
-	/** Named placeholder for parsing a PDDL effect. */
-	qi::rule<Iterator, Expression(), Skipper> effects;
-	/** Named placeholder for parsing a temporal breakup. */
-	qi::rule<Iterator, Expression(), Skipper> temp_breakup;
-	/** Named placeholder for parsing a conditional breakup. */
-	qi::rule<Iterator, Expression(), Skipper> cond_breakup;
-	/** Named placeholder for parsing an action duration. */
-	qi::rule<Iterator, int(), Skipper> duration;
-	/** Named placeholder for parsing action parameters. */
-	qi::rule<Iterator, string_pairs_type(), Skipper> action_params;
-	/** Named placeholder for parsing an action. */
-	qi::rule<Iterator, Action(), Skipper> action;
-	/** Named placeholder for parsing a list of actions. */
-	qi::rule<Iterator, std::vector<Action>(), Skipper> actions;
+        template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
+        struct BaseGrammar
+        {
+            BaseGrammar()
+            {
+                name %= lexeme[char_("a-zA-Z") >> *(char_("a-zA-Z0-9_-"))];
+                name.name("name");
 
-	/** Named placeholder for parsing a domain. */
-	qi::rule<Iterator, Domain(), Skipper> domain;
-};
+                variable %= lit('?') > name;
+                variable.name("variable");
 
-/** @class problem_parser
-     * A Boost QI parser for a PDDL problem.
-     */
-template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
-struct problem_parser : qi::grammar<Iterator, Problem(), Skipper>
-{
-	problem_parser() : problem_parser::base_type(problem)
-	{
-		using namespace qi;
-		using ascii::alnum;
-		using ascii::blank;
-		using ascii::char_;
+                type %= name;
+                type.name("type");
 
-		name_type = lexeme[alnum >> *(alnum | char_('-') | char_('_'))];
+                typedListExplicitType = (+(lazy(_r1)[push_back(_a, _1)]))
+                     > lit('-')
+                     > type[bind(&insert_typed_name_entities, _val, _a, _1)];
+                typedListExplicitType.name("typedListExplicitType");
+                char obj[] = "object";
+                typedList =
+                    (*(typedListExplicitType(_r1)[insert(_val, end(_val), begin(_1), end(_1))]))
+                    > (*(lazy(_r1)[push_back(_val, construct<struct Entity>(_1, &obj[0]))]))
+                    ;
+                typedList.name("typedList");
 
-		problem_name = '(' >> lit("define") >> '(' >> lit("problem") >> name_type >> ')';
+                term = name[at_c<0>(_val) = false, at_c<1>(_val) = _1] |
+                    variable[at_c<0>(_val) = true, at_c<1>(_val) = _1];
+                term.name("term");
 
-		domain_name = '(' >> lit(":domain") >> name_type >> ')';
+                atomicFormula = name[at_c<0>(_val) = _1] > (*term)[at_c<1>(_val) = _1];
+                atomicFormula.name("atomicFormula");
 
-		constant_value_list = +name_type;
-		constant_multi_pair = constant_value_list >> -('-' >> name_type);
-		objects             = '(' >> lit(":objects") >> +constant_multi_pair >> ')';
+                literal = atomicFormula[at_c<0>(_val) = false, at_c<1>(_val) = _1] |
+                    ( lit("not") > lit('(') > atomicFormula[at_c<0>(_val) = true, at_c<1>(_val) = _1] > lit(')'));
+                literal.name("literal");
 
-		atom       = +(graph - '(' - ')');
-		predicate  = '(' >> atom >> *expression >> ')';
-		expression = atom | predicate;
-		init       = '(' >> lit(":init") >> +expression >> ')';
+                op = distinct(char_("a-zA-Z_0-9"))["and"] 
+                    | distinct(char_("a-zA-Z_0-9"))["when"] 
+                    | distinct(char_("a-zA-Z_0-9"))["or"] 
+                    | distinct(char_("a-zA-Z_0-9"))["not"] 
+                    | distinct(char_("a-zA-Z_0-9"))["imply"];
+                op.name("op");
 
-		goal = '(' >> lit(":goal") >> +expression >> ')';
+                conditionalEffect = lit('(') >> goalDescription > lit(')')
+                                    > effect;
+                conditionalEffect.name("conditionalEffect");
 
-		problem = problem_name >> domain_name >> objects >> init >> goal;
-	}
+                functionalEffect = op > ( +(effect) | conditionalEffect );
+                functionalEffect.name("functionalEffect");
 
-	/** Named placeholder for parsing a name. */
-	qi::rule<Iterator, std::string(), Skipper> name_type;
+                actionCost = distinct(char_("a-zA-Z_0-9"))["increase"]
+                            > lit('(')
+                            >> name
+                            > lit(')')
+                            >> qi::int_;
+                            
 
-	/** Named placeholder for parsing a problem name. */
-	qi::rule<Iterator, std::string(), Skipper> problem_name;
-	/** Named placeholder for parsing a domain name. */
-	qi::rule<Iterator, std::string(), Skipper> domain_name;
+                effect = lit('(') >>
+                            (functionalEffect | actionCost | atomicFormula )
+                            > lit(')');
+                effect.name("effect");
 
-	/** Named placeholder for parsing a list of constant values. */
-	qi::rule<Iterator, type_list(), Skipper> constant_value_list;
-	/** Named placeholder for parsing a list of predicate parameters. */
-	qi::rule<Iterator, type_list(), Skipper> predicate_params;
-	/** Named placeholder for parsing a list of typed constants. */
-	qi::rule<Iterator, pair_multi_const(), Skipper> constant_multi_pair;
-	/** Named placeholder for parsing a list of domain objects. */
-	qi::rule<Iterator, pairs_multi_consts(), Skipper> objects;
+                functionalCondition = op > +(goalDescription);
+                functionalCondition.name("functionalCondition");
 
-	/** Named placeholder for parsing an atom. */
-	qi::rule<Iterator, Atom()> atom;
-	/** Named placeholder for parsing a predicate. */
-	qi::rule<Iterator, Predicate(), Skipper> predicate;
-	/** Named placeholder for parsing a PDDL expression. */
-	qi::rule<Iterator, Expression(), Skipper> expression;
-	/** Named placeholder for parsing a PDDL goal. */
-	qi::rule<Iterator, Expression(), Skipper> goal;
-	/** Named placeholder for parsing the initial state. */
-	qi::rule<Iterator, std::vector<Expression>(), Skipper> init;
+                goalDescription = lit('(') >> (functionalCondition
+                    | atomicFormula
+                    ) > lit(')');
+                goalDescription.name("goalDescription");
 
-	/** Named placeholder for parsing a PDDL problem. */
-	qi::rule<Iterator, Problem(), Skipper> problem;
-};
+            }
 
-} // namespace grammar
-} // namespace pddl_parser
+            typedef qi::rule<Iterator, std::string(), Skipper> StringRule;
+
+            qi::rule<Iterator, Op(), Skipper> op;
+            qi::rule<Iterator, ConditionalEffect(), Skipper> conditionalEffect;
+            qi::rule<Iterator, FunctionalCondition(), Skipper> functionalCondition;
+            qi::rule<Iterator, FunctionalEffect(), Skipper> functionalEffect;
+            qi::rule<Iterator, ActionCost(), Skipper> actionCost;
+            qi::rule<Iterator, Effect(), Skipper> effect;
+            qi::rule<Iterator, GoalDescription(), Skipper> goalDescription;
+            qi::rule<Iterator, Literal(), Skipper> literal;
+            qi::rule<Iterator, AtomicFormula(), Skipper> atomicFormula;
+            qi::rule<Iterator, Term(), Skipper> term;
+            qi::rule<Iterator, TypedList(StringRule), Skipper> typedList;
+            qi::rule<Iterator, TypedList(StringRule), qi::locals<std::vector<std::string> >, Skipper> typedListExplicitType;
+            StringRule type;
+            StringRule name;
+            StringRule variable;
+        };
+
+        template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
+        struct Domain :
+            qi::grammar<Iterator, PddlDomain(), Skipper>, BaseGrammar<Iterator, Skipper>
+        {
+            typedef BaseGrammar<Iterator,Skipper> base;
+
+            Domain() :
+                Domain::base_type(pddlDomain, "PDDL Domain"), BaseGrammar<Iterator,Skipper>()
+            {
+                requireDef %= -(
+                    lit('(')
+                    >> lit(":requirements")
+                    > (+(requirementFlagSymbols))
+                    > lit(')')
+                    );
+                requireDef.name("requireDef");
+
+                typesDef %= -(
+                    lit('(')
+                    >> lit(":types")
+                    > base::typedList(phoenix::ref(base::name))
+                    > lit(')')
+                    );
+                typesDef.name("typesDef");
+
+                constantsDef %= -(
+                    lit('(')
+                    >> lit(":constants")
+                    > base::typedList(phoenix::ref(base::name))
+                    > lit(')')
+                    );
+                constantsDef.name("constantsDef");
+
+                predicatesDef = -(
+                    lit('(')
+                    >> lit(":predicates")
+                    > (+(lit('(')
+                        > base::name[_a = _1]
+                        >> base::typedList(phoenix::ref(base::variable))[_b = _1]
+                        > lit(')'))[push_back(_val, construct<std::pair<std::string, TypedList> >(_a, _b))]
+                    )
+                    > lit(')')
+                    );
+                predicatesDef.name("predicatesDef");
+
+                pddlAction =
+                    lit('(')
+                    > lit(":action")
+                    > base::name[at_c<0>(_val) = _1]
+                    > lit(":parameters")
+                    > lit("(")
+                    > base::typedList(phoenix::ref(base::variable))[at_c<1>(_val) = _1]
+                    > lit(")")
+                    > lit(":precondition")
+                    >> (base::goalDescription | (lit('(') > lit(')')))
+                    > (
+                        lit(":effect")
+                        >> base::effect
+                    )
+                    > lit(')');
+                pddlAction.name("pddlAction");
+
+                actionsDef = *pddlAction;
+                actionsDef.name("actionsDef");
+
+                pddlDomain =
+                    lit('(')
+                    > lit("define")
+                    > lit('(')
+                    > lit("domain")
+                    > base::name[at_c<0>(_val) = _1]
+                    > lit(')')
+                    > requireDef[at_c<1>(_val) = _1]
+                    > typesDef[at_c<2>(_val) = _1]
+                    > constantsDef[at_c<3>(_val) = _1]
+                    > predicatesDef[at_c<4>(_val) = _1]
+                    > actionsDef[at_c<5>(_val) = _1]
+                    > lit(')');
+                pddlDomain.name("pddlDomain");
+
+                on_error<fail>
+                (
+                    pddlDomain,
+                    construct<ParserException>(qi::_4, qi::_1, qi::_2, qi::_3)
+                );
+            }
+
+            qi::rule<Iterator, PddlDomain(), Skipper> pddlDomain;
+            qi::rule<Iterator, RequirementFlag::VectorType(), Skipper> requireDef;
+            qi::rule<Iterator, TypedList(), Skipper> typesDef;
+            qi::rule<Iterator, TypedList(), Skipper> constantsDef;
+            qi::rule<Iterator, PddlAction(), Skipper> pddlAction;
+            qi::rule<Iterator, ActionList(), Skipper> actionsDef;
+            qi::rule<Iterator, PredicateList(), qi::locals<std::string, TypedList>, Skipper> predicatesDef;
+
+            struct RequirementFlagSymbols_ requirementFlagSymbols;
+        };
+    }
+}
 
 #endif
