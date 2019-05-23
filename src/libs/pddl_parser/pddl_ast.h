@@ -1,156 +1,193 @@
-
-/***************************************************************************
- *  pddlast.h
+/**
+ * This file is part of pddl_parser
  *
- *  Created: Fri 19 May 2017 14:07:13 CEST
- *  Copyright  2017  Matthias Loebach
- *                   Till Hofmann
- ****************************************************************************/
-
-/*  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+ * @copyright Nils Adermann <naderman@naderman.de>
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
- *
- *  Read the full text in the LICENSE.GPL file in the doc directory.
+ * For the full copyright and licensing information please review the LICENSE
+ * file that was distributed with this source code.
  */
 
-#ifndef PLUGINS_PDDL_AST_H_
-#define PLUGINS_PDDL_AST_H_
+#ifndef PDDLQI_PARSER_PDDLAST_H
+#define PDDLQI_PARSER_PDDLAST_H
 
 #include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/fusion/include/std_pair.hpp>
-#include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_alternative.hpp>
+#include <boost/variant/recursive_variant.hpp>
 #include <string>
 #include <vector>
+using boost::variant;
 
-namespace pddl_parser {
-namespace qi    = boost::spirit::qi;
-namespace ascii = boost::spirit::ascii;
-
-typedef std::pair<std::string, std::string> pair_type;
-typedef std::vector<pair_type>              pairs_type;
-
-typedef std::vector<std::string>          type_list;
-typedef std::pair<type_list, std::string> pair_multi_const;
-typedef std::vector<pair_multi_const>     pairs_multi_consts;
-
-typedef std::pair<std::string, std::string>       string_pair_type;
-typedef std::vector<string_pair_type>             string_pairs_type;
-typedef std::pair<std::string, string_pairs_type> predicate_type;
-
-using Atom = std::string;
-
-struct Predicate;
-
-using Expression = boost::variant<Atom, Predicate>;
-
-/** @class Predicate
-   * A PDDL formula (either part of a precondition or an effect(.
-   * Note that this is NOT necesarily a PDDL predicate, but may also be a
-   * compound formula. For a conjunction, the function would be 'and', and the
-   * arguments would be the subformulae.
-   */
-struct Predicate
+namespace pddl_parser
 {
-	/** The name of the predicate for atomic formulae, 'and' for a conjunction,
-     * 'or' for a disjunction, 'not' for a negation.
-     */
-	Atom function;
-	/** The arguments of the predicate or the subformulae of the compound
-     * formula.
-     */
-	std::vector<Expression> arguments;
-};
+    typedef struct RequirementFlag_ {
+        typedef enum {
+            eStrips,
+            eNegativePreconditions,
+            typing,
+            action_cost,
+            adl
+        } EnumType;
+        typedef std::vector<EnumType> VectorType;
+    } RequirementFlag;
 
-/** @class Action
-   * A structured representation of a PDDL action.
-   */
-struct Action
-{
-	/** The name of the action. */
-	std::string name;
-	/** A typed list of action parameters. */
-	string_pairs_type action_params;
-	/** The action duration in temporal domains. */
-	int duration;
-	/** The precondition of an action. May be a compound. */
-	Expression precondition;
-	/** The effect of an action. May be a compound. */
-	Expression effect;
-	/** Used by the STN generator to determine conditional break points in the
-     * STN.
-     */
-	Expression cond_breakup;
-	/** Used by the STN generator to determine temporal break points in the STN.
-     */
-	Expression temp_breakup;
-};
+    struct Effect;
+    struct ConditionalEffect;
+    struct FunctionalCondition;
 
-/** @class Domain
-   * A structured representation of a PDDL domain.
-   */
-struct Domain
-{
-	/** The name of the domain. */
-	std::string name;
-	/** A list of PDDL features required by the domain. */
-	std::vector<std::string> requirements;
-	/** A list of types with their super types. */
-	pairs_type types;
-	/** A typed list of constants defined in the domain. */
-	pairs_multi_consts constants;
-	/** A list of predicate names in the domain, including the types of their
-     * arguments.
-     */
-	std::vector<predicate_type> predicates;
-	/** A list of actions defined in the domain. */
-	std::vector<Action> actions;
-};
+    struct Entity
+    {
+        std::string name;
+        std::string type;
+        Entity(const std::string n, const std::string t) : name(n), type(t) {}
+    };
 
-/** @class Problem
-   * A structured representation of a PDDL problem.
-   */
-struct Problem
-{
-	/** The name of the problem. */
-	std::string name;
-	/** The name of the domain this problem belongs to. */
-	std::string domain_name;
-	/** A typed list of objects in the domain. */
-	pairs_multi_consts objects;
-	/** A list of facts that are initially true. */
-	std::vector<Expression> init;
-	/** The goal of the problem. */
-	Expression goal;
-};
+    typedef std::vector<struct Entity> TypedList;
 
-} // namespace pddl_parser
+    typedef std::vector<std::pair<std::string, TypedList> > PredicateList;
 
-BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Domain,
-                          name,
-                          requirements,
-                          types,
-                          constants,
-                          predicates,
-                          actions)
+    typedef std::string Op;
 
-BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Problem, name, domain_name, objects, init, goal)
+    struct Term
+    {
+        bool isVariable;
+        std::string name;
+    };
 
-BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Action,
-                          name,
-                          action_params,
-                          duration,
-                          precondition,
-                          effect,
-                          cond_breakup,
-                          temp_breakup)
+    typedef std::vector<struct Term> TermList;
 
-BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Predicate, function, arguments)
+    struct AtomicFormula
+    {
+        std::string predicateName;
+        TermList args;
+    };
+
+    struct Literal
+    {
+        bool negate;
+        AtomicFormula atomicFormula;
+    };
+
+    struct FunctionalEffect
+    {
+      Op op;
+      variant<boost::recursive_wrapper<std::vector<Effect>>,boost::recursive_wrapper<ConditionalEffect>> effect;
+    };
+
+    struct ActionCost
+    {
+        std::string name;
+        int cost;
+    };
+
+    struct Effect
+    {
+        variant<FunctionalEffect,ActionCost,AtomicFormula> eff;
+    };
+
+    typedef boost::variant<boost::recursive_wrapper<FunctionalCondition>,AtomicFormula> GoalDescription;
+
+    struct ConditionalEffect
+    {
+      GoalDescription condition;
+      Effect effect;
+    };
+
+    struct FunctionalCondition
+    {
+      Op op;
+      std::vector<GoalDescription> condition;
+    };
+
+    struct PddlAction
+    {
+        std::string name;
+        TypedList parameters;
+        GoalDescription precondition;
+        Effect effect;
+    };
+
+    typedef std::vector<struct PddlAction> ActionList;
+
+    struct PddlDomain
+    {
+        std::string name;
+        RequirementFlag::VectorType requirements;
+        TypedList types;
+        TypedList constants;
+        PredicateList predicates;
+        ActionList actions;
+    };
+}
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::Entity,
+    (std::string, name)
+    (std::string, type)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::Term,
+    (bool, isVariable)
+    (std::string, name)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::AtomicFormula,
+    (std::string, predicateName)
+    (pddl_parser::TermList, args)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::Literal,
+    (bool, negate)
+    (pddl_parser::AtomicFormula, atomicFormula)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::FunctionalEffect,
+    op,
+    effect
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::ActionCost,
+    name,
+    cost
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::FunctionalCondition,
+    op,
+    condition
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::ConditionalEffect,
+    condition,
+    effect
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::Effect,
+    eff
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::PddlAction,
+    (std::string, name)
+    (pddl_parser::TypedList, parameters)
+    (pddl_parser::GoalDescription, precondition)
+    (pddl_parser::Effect, effect)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::PddlDomain,
+    (std::string, name)
+    (pddl_parser::RequirementFlag::VectorType, requirements)
+    (pddl_parser::TypedList, types)
+    (pddl_parser::TypedList, constants)
+    (pddl_parser::PredicateList, predicates)
+    (pddl_parser::ActionList, actions)
+)
 
 #endif

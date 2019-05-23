@@ -1,66 +1,56 @@
-
-/***************************************************************************     
- *  pddl_parser.h
- *     
- *  Created: Fri 19 May 2017 11:10:30 CEST
- *  Copyright  2017  Matthias Loebach     
- ****************************************************************************/
-
-/*  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
+/**
+ * This file is part of pddl_parser
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
+ * @copyright Nils Adermann <naderman@naderman.de>
  *
- *  Read the full text in the LICENSE.GPL file in the doc directory.
+ * For the full copyright and licensing information please review the LICENSE
+ * file that was distributed with this source code.
  */
 
-#ifndef PLUGINS_PDDL_PARSER_H_
-#define PLUGINS_PDDL_PARSER_H_
+#ifndef PDDLQI_PARSER_PARSER_H
+#define PDDLQI_PARSER_PARSER_H
 
 #include "pddl_grammar.h"
+#include <iostream>
 
-#include <core/exception.h>
-
-#include <string>
-
-namespace pddl_parser {
-
-class PddlParser
+namespace pddl_parser
 {
-public:
-	static Domain  parseDomain(const std::string pddl_domain);
-	static Problem parseProblem(const std::string pddl_problem);
+    class Parser
+    {
+        public:
+            PddlDomain parseDomain(const std::string& input)
+            {
+                return parse<Grammar::Domain<std::string::const_iterator>, Grammar::pddl_skipper<std::string::const_iterator>, PddlDomain>(input);
+            }
 
-private:
-};
+            template <typename Grammar, typename Skipper, typename Attribute>
+            Attribute parse(const std::string& input)
+            {
+                Skipper skipper;
 
-/** @class PddlParserException <pddl_parser/pddl_parser.h>
- * Exception thrown by the parser if an error occurs during parsing.
- */
+                Grammar grammar;
 
-class PddlParserException : public fawkes::Exception
-{
-public:
-	/** Constructor.
-    * @param msg A message describing the error.
-    */
-	PddlParserException(const char *msg) : fawkes::Exception(msg)
-	{
-	}
-	/** Constructor with a string message.
-   * This wraps the constructor with a char* message for usage with std::string.
-   * @param msg A message describing the error.
-   */
-	PddlParserException(const std::string &msg) : fawkes::Exception(msg.c_str())
-	{
-	}
-};
+                Attribute data;
 
-} // namespace pddl_parser
+                std::string::const_iterator iter = input.begin();
+                std::string::const_iterator end = input.end();
 
+                bool r = phrase_parse(
+                    iter,
+                    end,
+                    grammar,
+                    skipper,
+                    data
+                );
+
+                if (!r || iter != end)
+                {
+                    std::cout << "Failed randomly?" << std::endl;
+                    //throw ParserException(input.begin(), iter, end);
+                }
+
+                return data;
+            }
+    };
+}
 #endif
