@@ -41,8 +41,9 @@ using namespace pddl_parser;
 /** Initialize the CLIPS feature.
  * @param logger The logger to use for logging in the feature
  */
-PDDLCLIPSFeature::PDDLCLIPSFeature(fawkes::Logger *logger)
-: CLIPSFeature("pddl-parser"), logger_(logger)
+PDDLCLIPSFeature::PDDLCLIPSFeature()
+: CLIPSFeature("pddl-parser"), CLIPSFeatureAspect(this),
+Thread("ClipsPddlParserThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
 

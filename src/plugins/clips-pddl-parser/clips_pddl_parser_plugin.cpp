@@ -36,10 +36,10 @@ public:
 	/** Constructor.
    * @param config Fawkes configuration
    */
-	explicit ClipsPddlParserPlugin(Configuration *config) : Plugin(config)
-	{
-		thread_list.push_back(new ClipsPddlParserThread());
-	}
+  explicit ClipsPddlParserPlugin(Configuration *config) : Plugin(config)
+  {
+    thread_list.push_back(new PDDLCLIPSFeature());
+  }
 };
 
 PLUGIN_DESCRIPTION("CLIPS feature to parse PDDL domains")

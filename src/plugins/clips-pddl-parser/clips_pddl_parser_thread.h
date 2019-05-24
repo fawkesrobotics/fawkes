@@ -1,8 +1,8 @@
 /***************************************************************************
- *  clips_pddl_parser_thead.h - CLIPS feature for parsing PDDL domains
+ *  clips_pddl_parser_feature.h - CLIPS PDDL Parser feature
  *
- *  Created: Fri 16 Feb 2018 17:51:39 CET 17:51
- *  Copyright  2018  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
+ *  Created: Mon 16 Oct 2017 10:20:07 CEST 10:20
+ *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -18,19 +18,49 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef _PLUGINS_CLIPS_PDDL_PARSER_THEAD_H_
-#define _PLUGINS_CLIPS_PDDL_PARSER_THEAD_H_
+#ifndef _PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H_
+#define _PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H_
 
 #include <aspect/logging.h>
+#include <aspect/configurable.h>
 #include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips_feature.h>
 
-class ClipsPddlParserThread : public fawkes::Thread,
-                              public fawkes::LoggingAspect,
-                              public fawkes::CLIPSFeatureAspect
+#include <string>
+#include <clipsmm.h>
+#include <string>
+#include <map>
+
+namespace CLIPS {
+  class Environment;
+}
+
+namespace fawkes {
+}
+
+class PDDLCLIPSFeature 
+: public fawkes::Thread,
+  public fawkes::LoggingAspect,
+  public fawkes::CLIPSFeature,
+  public fawkes::CLIPSFeatureAspect
 {
-public:
-	ClipsPddlParserThread();
-	//virtual ~ClipsPddlParserThread();
+ public:
+  PDDLCLIPSFeature();
+
+  virtual void init();
+  virtual void finalize();
+  virtual void loop();
+
+  //virtual ~PDDLCLIPSFeature();
+  virtual void clips_context_init(const std::string &env_name,
+				  fawkes::LockPtr<CLIPS::Environment> &clips);
+  virtual void clips_context_destroyed(const std::string &env_name);
+
+ private:
+  void parse_domain(std::string env_name, std::string domain_file);
+
+ private:
+  std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
 };
-#endif /* !PLUGINS_CLIPS_PDDL_PARSER_THEAD_H__ */
+
+#endif /* !PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H__ */

@@ -22,7 +22,9 @@
 #define _PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H_
 
 #include <plugins/clips/aspect/clips_feature.h>
-
+#include <core/threading/thread.h>
+#include <aspect/logging.h>
+#include <string>
 #include <map>
 #include <string>
 
@@ -34,21 +36,24 @@ namespace fawkes {
 class Logger;
 }
 
-class PDDLCLIPSFeature : public fawkes::CLIPSFeature
+class PDDLCLIPSFeature : public fawkes::CLIPSFeature,
+                         public fawkes::LoggingAspect,
+                         public fawkes::CLIPSFeatureAspect,
+                         public fawkes::Thread
 {
-public:
-	PDDLCLIPSFeature(fawkes::Logger *logger);
-	//virtual ~PDDLCLIPSFeature();
-	virtual void clips_context_init(const std::string &                  env_name,
-	                                fawkes::LockPtr<CLIPS::Environment> &clips);
-	virtual void clips_context_destroyed(const std::string &env_name);
+ public:
+  PDDLCLIPSFeature();
+  //virtual ~PDDLCLIPSFeature();
+  virtual void clips_context_init(const std::string &env_name,
+				  fawkes::LockPtr<CLIPS::Environment> &clips);
+  virtual void clips_context_destroyed(const std::string &env_name);
 
-private:
-	void parse_domain(std::string env_name, std::string domain_file);
+ private:
+  void parse_domain(std::string env_name, std::string domain_file);
 
-private:
-	fawkes::Logger *                                           logger_;
-	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
+ private:
+  fawkes::Logger     *logger_;
+  std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
 };
 
 #endif /* !PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H__ */
