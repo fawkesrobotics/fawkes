@@ -34,7 +34,7 @@
 
 #define hton64_(x) ntohll(x)
 
-#ifdef OPTIMIZE___
+#ifdef __OPTIMIZE__
 #	define ntoh64(x) ntoh64_(x)
 #	define hton64(x) ntoh64_(x)
 #else
@@ -51,6 +51,6 @@ hton64(uint64_t x)
 	return ntoh64_(x);
 }
 
-#endif // OPTIMIZE___
+#endif // __OPTIMIZE__
 
 #endif // NETCOMM_UTILS_NTOH64__
