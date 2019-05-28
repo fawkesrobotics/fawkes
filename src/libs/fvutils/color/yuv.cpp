@@ -411,7 +411,7 @@ yuv444packed_to_yuv422planar(const unsigned char *yuv444,
 	u                = yuv422 + wh;
 	v                = u + wh2;
 
-#ifdef ___OPENMP
+#ifdef _OPENMP
 #	pragma omp parallel for firstprivate(wh2) private(i, iy, iiy) shared(y, u, v, yuv444) \
 	  schedule(static)
 #endif
@@ -436,7 +436,7 @@ yuv444packed_to_yuv422packed(const unsigned char *yvu444,
 	unsigned int wh  = (width * height);
 	int          wh2 = wh >> 1;
 
-#ifdef ___OPENMP
+#ifdef _OPENMP
 #	pragma omp parallel for firstprivate(wh2) private(i, iiy) shared(yuv422, yvu444) schedule(static)
 #endif
 	for (i = 0; i < wh2; i += 4) {
@@ -463,7 +463,7 @@ yvu444packed_to_yuv422planar(const unsigned char *yvu444,
 	u                = yuv422 + wh;
 	v                = u + wh2;
 
-#ifdef ___OPENMP
+#ifdef _OPENMP
 #	pragma omp parallel for firstprivate(wh2) private(i, iy, iiy) shared(y, u, v, yvu444) \
 	  schedule(static)
 #endif
@@ -488,7 +488,7 @@ yvu444packed_to_yuv422packed(const unsigned char *yvu444,
 	unsigned int wh  = (width * height);
 	int          wh2 = wh >> 1;
 
-#ifdef ___OPENMP
+#ifdef _OPENMP
 #	pragma omp parallel for firstprivate(wh2) private(i, iiy) shared(yuv422, yvu444) schedule(static)
 #endif
 	for (i = 0; i < wh2; i += 4) {
