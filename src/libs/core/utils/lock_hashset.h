@@ -31,7 +31,7 @@
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
 #	include <functional>
 #	include <unordered_set>
-#elif GLIBCXX___ > 20080305
+#elif __GLIBCXX__ > 20080305
 #	include <tr1/unordered_set>
 #else
 #	include <ext/hash_set>
@@ -44,7 +44,7 @@ template <class KeyType,
           class HashFunction = std::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType>>
 class LockHashSet : public std::unordered_set<KeyType, HashFunction, EqualKey>
-#elif GLIBCXX___ > 20080305
+#elif __GLIBCXX__ > 20080305
           class HashFunction = std::tr1::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType>>
 class LockHashSet : public std::tr1::unordered_set<KeyType, HashFunction, EqualKey>
@@ -97,7 +97,7 @@ LockHashSet<KeyType, HashFunction, EqualKey>::LockHashSet(
   const LockHashSet<KeyType, HashFunction, EqualKey> &lh)
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
 : std::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh),
-#elif GLIBCXX___ > 20080305
+#elif __GLIBCXX__ > 20080305
 : std::tr1::unordered_set<KeyType, HashFunction, EqualKey>::unordered_set(lh),
 #else
 : gnu_cxx_::hash_set<KeyType, HashFunction, EqualKey>::hash_set(lh),

@@ -31,7 +31,7 @@
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
 #	include <functional>
 #	include <unordered_map>
-#elif GLIBCXX___ > 20080305
+#elif __GLIBCXX__ > 20080305
 #	include <tr1/unordered_map>
 #else
 #	include <ext/hash_map>
@@ -45,7 +45,7 @@ template <class KeyType,
           class HashFunction = std::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType>>
 class LockHashMap : public std::unordered_map<KeyType, ValueType, HashFunction, EqualKey>
-#elif GLIBCXX___ > 20080305
+#elif __GLIBCXX__ > 20080305
           class HashFunction = std::tr1::hash<KeyType>,
           class EqualKey     = std::equal_to<KeyType>>
 class LockHashMap : public std::tr1::unordered_map<KeyType, ValueType, HashFunction, EqualKey>
@@ -96,7 +96,7 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::LockHashMap(
   const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &lh)
 #if __cplusplus >= 201103L || defined(_LIBCPP_VERSION)
 : std::unordered_map<KeyType, ValueType, HashFunction, EqualKey>::unordered_map(lh)
-#elif GLIBCXX___ > 20080305
+#elif __GLIBCXX__ > 20080305
 : std::tr1::unordered_map<KeyType, ValueType, HashFunction, EqualKey>::unordered_map(lh)
 #else
 : gnu_cxx_::hash_map<KeyType, ValueType, HashFunction, EqualKey>::hash_map(lh)
