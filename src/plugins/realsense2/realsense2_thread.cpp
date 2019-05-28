@@ -83,6 +83,36 @@ void
 Realsense2Thread::loop()
 {
 
+    if (cfg_use_switch_) {
+        read_switch();
+    }
+    if (enable_camera_ && !camera_running_) {
+        connect_and_start_camera();
+        // Start reading in the next loop
+        return;
+    } else if (!enable_camera_) {
+        if (camera_running_) {
+            stop_camera();
+        }
+        return;
+    }
+
+    std::thread wait_for_frames_thread([&]() {
+    rs_data_= rs_pipe_->wait_for_frames(); // Wait for next set of frames from the camera
+    frames_avalialble_ = true;
+    });
+
+    if (!frames_avalialble_){
+        return;
+    }
+
+    rs2::depth_frame depth_frame =  rs_data_.get_depth_frame();
+    logger->log_info(name(),
+                     "GOT RS2 DEPTH FRAME");
+
+
+
+
 }
 
 void
@@ -97,8 +127,22 @@ Realsense2Thread::finalize()
 bool
 Realsense2Thread::connect_and_start_camera()
 {
-
-    return true;
+    rs_config.enable_stream(RS2_STREAM_DEPTH,RS2_FORMAT_Z16, 30);
+    try {
+        rs_pipe_->start(rs_config);
+        camera_running_ = true;
+        return true;
+    }
+    catch (const rs2::error & e)
+    {
+        std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args() << "):\n    " << e.what() << std::endl;
+        return false;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        return false;
+    }
 }
 
 /* Get the rs_device pointer and printout camera details

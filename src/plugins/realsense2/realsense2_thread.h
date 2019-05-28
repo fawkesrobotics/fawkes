@@ -33,6 +33,7 @@
 #include <core/threading/thread.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <thread>
 
 #ifdef HAVE_REALSENSE2
 #	include <librealsense2/rs.hpp>
@@ -95,13 +96,18 @@ private:
 	CloudPtr              realsense_depth_;
 
     rs2::pipeline * rs_pipe_;
+    rs2::config  rs_config;
+    rs2::error * rs_error;
     rs2::stream_profile stream_profile_;
+    rs2::frameset rs_data_;
+
 	int           num_of_cameras_;
 	float         camera_scale_;
 	std::string   frame_id_;
 	std::string   pcl_id_;
 	bool          enable_camera_  = true;
 	bool          camera_running_ = false;
+    bool          frames_avalialble_ = false;
 	int           laser_power_;
 	uint          restart_after_num_errors_;
 	uint          error_counter_ = 0;
