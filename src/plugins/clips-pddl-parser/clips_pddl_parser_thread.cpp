@@ -19,17 +19,18 @@
  */
 
 #include "clips_pddl_parser_thread.h"
-#include "precondition_visitor.h"
-//#include "effect_visitor.h"
-
 #include <pddl_parser/pddl_parser.h>
+#include <core/threading/mutex_locker.h>
+#include "precondition_visitor.h"
+#include "effect_visitor.h"
+
 #include <core/threading/mutex_locker.h>
 
 #include <iostream>
 #include <fstream>
 
-using namespace std;
-using namespace pddl_parser;
+//using namespace std;
+//using namespace pddl_parser;
 
 using namespace fawkes;
 
@@ -65,13 +66,13 @@ PDDLCLIPSFeature::finalize()
 }
 
 void
-PDDLCLIPSFeature::clips_context_init(const string &env_name,
+PDDLCLIPSFeature::clips_context_init(const std::string &env_name,
 					   fawkes::LockPtr<CLIPS::Environment> &clips)
 {
   envs_[env_name] = clips;
   //clips->evaluate("(path-load \"pddl.clp\")");
   clips->add_function("parse-pddl-domain",
-      sigc::slot<void, string>(
+      sigc::slot<void, std::string>(
         sigc::bind<0>(
           sigc::mem_fun(*this, &PDDLCLIPSFeature::parse_domain),
           env_name)));
@@ -81,7 +82,7 @@ PDDLCLIPSFeature::clips_context_init(const string &env_name,
  * @param env_name The name of the environment to clean.
  */
 void
-PDDLCLIPSFeature::clips_context_destroyed(const string &env_name)
+PDDLCLIPSFeature::clips_context_destroyed(const std::string &env_name)
 {
   envs_.erase(env_name);
 }
@@ -97,22 +98,21 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
 {
   fawkes::MutexLocker lock(envs_[env_name].objmutex_ptr());
   CLIPS::Environment &env = **(envs_[env_name]);
-  PddlDomain domain;
-  Parser parser;
+  pddl_parser::PddlDomain domain;
+  pddl_parser::Parser parser;
   try {
     logger->log_info(name(),"Starting pddl parsing for %s on %s",env_name.c_str(),domain_file.c_str());
-    ifstream df(domain_file);
-    stringstream buffer;
+    std::ifstream df(domain_file);
+    std::stringstream buffer;
     buffer << df.rdbuf();
     domain = parser.parseDomain(buffer.str());
-  } catch (ParserException &e) {
+  } catch (pddl_parser::ParserException &e) {
     logger->log_error(("PDDLCLIPS|" + env_name).c_str(),
       "Failed to parse domain: %s", e.what());
     return;
   }
-  
   for (auto &type : domain.types) {
-    string super_type = "";
+    std::string super_type = "";
     if (!type.type.empty()) {
       super_type = "(super-type " + type.type + ")";
     }
@@ -122,8 +122,8 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
                     ")");
   }
   for (auto &predicate : domain.predicates) {
-    string param_string = "";
-    string type_string = "";
+    std::string param_string = "";
+    std::string type_string = "";
     for (auto &param : predicate.second) {
       param_string += " " + param.name;
       type_string += " " + param.type;
@@ -136,10 +136,10 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
   }
 
   for (auto &action : domain.actions) {
-    string params_string = "(param-names";
+    std::string params_string = "(param-names";
     for (auto &param_pair : action.parameters) {
-      string param_name = param_pair.name;
-      string param_type = param_pair.type;
+      std::string param_name = param_pair.name;
+      std::string param_type = param_pair.type;
       params_string += " " + param_name;
       env.assert_fact("(domain-operator-parameter"
                       " (name " + param_name + ")"
@@ -151,17 +151,20 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
     env.assert_fact(
       "(domain-operator (name " + action.name + ")" + params_string + ")"
     );
-    vector<string> precondition_facts =
+    
+    logger->log_info(name(), "Parsing %s",action.name.c_str());
+    std::vector<std::string> precondition_facts = 
       boost::apply_visitor(PreconditionToCLIPSFactVisitor(action.name, 1, true),
           action.precondition);
     for (auto &fact : precondition_facts) {
-      env.assert_fact(fact);
-    } /*
-    vector<string> effect_facts =
-      boost::apply_visitor(EffectToCLIPSFactVisitor(action.name, true),
-          action.effect);
+      logger->log_info(name(),fact.c_str());
+      env.assert_fact(fact); 
+    }  
+    std::vector<std::string> effect_facts =
+      boost::apply_visitor(EffectToCLIPSFactVisitor(action.name, true, "NONE"),
+          action.effect.eff);
     for (auto &fact : effect_facts) {
       env.assert_fact(fact);
-    } */
+    } 
   }
 }

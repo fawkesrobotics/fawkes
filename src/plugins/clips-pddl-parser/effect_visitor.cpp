@@ -19,8 +19,9 @@
  */
 
 #include "effect_visitor.h"
+#include "precondition_visitor.h"
+#include <iostream>
 
-using namespace std;
 using namespace pddl_parser;
 
 /** @class EffectToCLIPSFactVisitor "effect_visitor.h"
@@ -35,9 +36,42 @@ using namespace pddl_parser;
  * @param pddl_operator The name of the operator this effect belongs to.
  * @param positive True iff this is a positive (not a negative) effect.
  */
-EffectToCLIPSFactVisitor::EffectToCLIPSFactVisitor(const string &pddl_operator, bool positive)
-: pddl_operator_(pddl_operator), positive_effect_(positive)
-{
+EffectToCLIPSFactVisitor::EffectToCLIPSFactVisitor(
+    const std::string &pddl_operator, bool positive, std::string condition)
+: pddl_operator_(pddl_operator), positive_effect_(positive), condition_(condition) {}
+
+/** Translate an ConditionalEffect into a vector of strings.
+ * Note that this does not return a CLIPS fact because we do not store atoms
+ * (parameter names or constants) as separate facts. This needs to be further
+ * processed by the caller instead.
+ * @param a The atom to translate into a string.
+ * @return A vector that only contains the atom as is.
+ */
+std::vector<std::string>
+EffectToCLIPSFactVisitor::operator()(ConditionalEffect &ce) const {
+  std::vector<std::string> res;
+  return res;
+}
+
+/** Translate an ActionCost into a vector of strings.
+ * Note that this does not return a CLIPS fact because we do not store atoms
+ * (parameter names or constants) as separate facts. This needs to be further
+ * processed by the caller instead.
+ * @param a The atom to translate into a string.
+ * @return A vector that only contains the atom as is.
+ */
+std::vector<std::string>
+EffectToCLIPSFactVisitor::operator()(ActionCost &ce) const {
+  std::vector<std::string> res;
+  std::string cost_name = ce.name;
+  int cost = ce.cost;
+  res.push_back(std::string(
+          "(domain-action-cost"
+          " (part-of " + pddl_operator_ + ")"
+          " (cost-name" + cost_name + ")"
+          " (cost " + std::to_string(cost) + ")"
+          ")"));
+  return res;
 }
 
 /** Translate an Atom into a vector of strings.
@@ -47,10 +81,33 @@ EffectToCLIPSFactVisitor::EffectToCLIPSFactVisitor(const string &pddl_operator, 
  * @param a The atom to translate into a string.
  * @return A vector that only contains the atom as is.
  */
-vector<string>
-EffectToCLIPSFactVisitor::operator()(Atom &a) const
-{
-	return vector<string>({a});
+std::vector<std::string>
+EffectToCLIPSFactVisitor::operator()(AtomicFormula &af) const {
+    std::vector<std::string> res;
+  // We expect p.function to be a predicate name.
+    std::string params = "";
+    std::string constants = "";
+    for (Term &t: af.args) {
+      if (t.isVariable) {
+        // It's really a parameter.
+        params += " " + t.name;
+        constants += " nil";
+      } else {
+        // It's a constant.
+        params += " c";
+        constants += " " + t.name;
+      }
+    }
+    res.push_back(std::string(
+          "(domain-effect"
+          " (part-of " + pddl_operator_ + ")"
+          " (predicate " + af.predicateName + ")"
+          " (param-names " + params + ")"
+          " (param-constants " + constants + ")"
+          " (type " + (positive_effect_ ? "POSITIVE" : "NEGATIVE") + ")"
+          " (condition " + condition_ + ")"
+          ")"));
+    return res;
 }
 
 /** Translate a Predicate into a vector of strings.
@@ -60,66 +117,51 @@ EffectToCLIPSFactVisitor::operator()(Atom &a) const
  * @param p The predicate to translate.
  * @return A vector of strings, each string is a properly formed CLIPS fact.
  */
-vector<string>
-EffectToCLIPSFactVisitor::operator()(Predicate &p) const
-{
-	vector<string> res;
-	if (p.function == "and") {
-		for (Expression &sub : p.arguments) {
-			vector<string> sub_effects =
-			  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_), sub);
-			res.insert(res.end(), sub_effects.begin(), sub_effects.end());
-		}
-	} else if (p.function == "not") {
-		if (p.arguments.size() != 1) {
-			throw PddlParserException("Expected exactly one sub-formula for 'not'");
-		}
-		vector<string> sub_effects =
-		  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, !positive_effect_),
-		                       p.arguments[0]);
-		res.insert(res.end(), sub_effects.begin(), sub_effects.end());
-	} else {
-		// We expect p.function to be a predicate name.
-		string params    = "";
-		string constants = "";
-		for (auto &p : p.arguments) {
-			vector<string> p_strings =
-			  boost::apply_visitor(EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_), p);
-			if (p_strings.size() != 1) {
-				throw PddlParserException("Unexpected parameter length for a predicate parameter, "
-				                          "expected exactly one");
-			}
-			string p_string = p_strings[0];
-			if (p_string[0] == '?') {
-				// It's really a parameter.
-				if (p_string.length() <= 1) {
-					throw PddlParserException("Invalid parameter name " + p_string);
-				}
-				params += " " + p_string.substr(1);
-				constants += " nil";
-			} else {
-				// It's a constant.
-				params += " c";
-				constants += " " + p_string;
-			}
-		}
-		res.push_back(string("(domain-effect"
-		                     " (part-of "
-		                     + pddl_operator_
-		                     + ")"
-		                       " (predicate "
-		                     + p.function
-		                     + ")"
-		                       " (param-names "
-		                     + params
-		                     + ")"
-		                       " (param-constants "
-		                     + constants
-		                     + ")"
-		                       " (type "
-		                     + (positive_effect_ ? "POSITIVE" : "NEGATIVE")
-		                     + ")"
-		                       ")"));
-	}
-	return res;
+std::vector<std::string>
+EffectToCLIPSFactVisitor::operator()(FunctionalEffect &fe) const {
+  std::vector<std::string> res;
+  if (fe.op == pddl_parser::OperatorFlag::conjunction) {
+    if (fe.effect.type() != typeid(std::vector<pddl_parser::Effect>)){
+      throw ParserException("Unknown content of conjunction");
+    }
+    std::vector<pddl_parser::Effect> effects = boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
+    for (auto &eff : effects) {
+      std::vector<std::string> sub_effects = boost::apply_visitor(
+          EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_,condition_), eff.eff);
+      res.insert(res.end(), sub_effects.begin(), sub_effects.end());
+    }
+  } else if (fe.op == pddl_parser::OperatorFlag::negation) {
+    if (fe.effect.type() != typeid(std::vector<pddl_parser::Effect>)){
+      throw ParserException("Unknown content of conjunction");
+    }
+    std::vector<pddl_parser::Effect> effects = boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
+    if (effects.size() != 1) {
+      throw ParserException("Expected exactly one sub-formula for 'not'");
+    }
+    std::vector<std::string> sub_effects = boost::apply_visitor(
+        EffectToCLIPSFactVisitor(pddl_operator_, !positive_effect_,condition_),
+        effects[0].eff);
+    res.insert(res.end(), sub_effects.begin(), sub_effects.end());
+  } else if (fe.op == pddl_parser::OperatorFlag::condition) {
+    if (fe.effect.type() != typeid(pddl_parser::ConditionalEffect)){
+      throw ParserException("Unknown content of conditional effect");
+    }
+    pddl_parser::ConditionalEffect ce = boost::get<pddl_parser::ConditionalEffect>(fe.effect);
+    std::string ce_name;
+    if (condition_ == "NONE") {
+      ce_name = pddl_operator_ + "-ce";
+    } else {
+      ce_name = condition_ + "-ce";
+    }
+    std::vector<std::string> args = boost::apply_visitor(
+          PreconditionToCLIPSFactVisitor(ce_name, 1, false), ce.condition);
+    res.insert(res.end(), args.begin(), args.end());
+    args = boost::apply_visitor(
+          EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_,ce_name), ce.effect.eff);
+    res.insert(res.end(), args.begin(), args.end());
+
+  } else {
+    throw ParserException(std::string("Unknown operator" + fe.op));
+  }
+  return res;
 }

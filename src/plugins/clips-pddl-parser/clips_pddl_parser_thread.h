@@ -38,7 +38,7 @@ namespace CLIPS {
 namespace fawkes {
 }
 
-class PDDLCLIPSFeature 
+class PDDLCLIPSFeature
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::CLIPSFeature,

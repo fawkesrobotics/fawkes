@@ -53,34 +53,11 @@ PreconditionToCLIPSFactVisitor::PreconditionToCLIPSFactVisitor(const string &par
  * @return A vector of strings, each string is a properly formed CLIPS fact.
  */
 vector<string>
-PreconditionToCLIPSFactVisitor::operator()(GoalDescription gd) const {
-  vector<string> res;
+PreconditionToCLIPSFactVisitor::operator()(AtomicFormula af) const {
+    vector<string> res;
   stringstream namestream;
   namestream << parent_ << sub_counter_;
   string name = namestream.str();
-  if (gd.type() == typeid(FunctionalCondition)) {
-    FunctionalCondition fc = boost::get<FunctionalCondition>(gd);
-    std::string type;
-    if (fc.op == "and") {
-      type = "conjunction";
-    } else if(fc.op == "or") {
-      type = "disjunction";
-    } else if(fc.op == "not") {
-      type = "negation";
-    }
-    res.push_back(string("(domain-precondition"
-                         " (name " + name + ")"
-                         " (part-of " + parent_ + ")"
-                         " (type " + type + ")"
-                         ")"));
-    uint sub_counter = 1;
-    for (GoalDescription &sub : fc.condition) {
-      vector<string> args = boost::apply_visitor(
-          PreconditionToCLIPSFactVisitor(name, sub_counter++), sub);
-      res.insert(res.end(), args.begin(), args.end());
-    }
-  } else if (gd.type() == typeid(AtomicFormula)) {
-    AtomicFormula af = boost::get<AtomicFormula>(gd);
     string new_parent;
     if (is_main_) {
       // Special case: this is the main precondition, but it's an atomic
@@ -125,8 +102,42 @@ PreconditionToCLIPSFactVisitor::operator()(GoalDescription gd) const {
           " (param-names (create$" + params + "))"
           " (param-constants (create$" + constants + "))"
           ")"));
-  
-  }
+    return res;
+}
+
+/** Translate a GoalDescription into a vector of strings.
+ * This creates proper CLIPS precondition fact strings for the Predicate and all
+ * its arguments. For compound formulae (e.g., conjunctions), this also
+ * translates all sub-formulae recursively.
+ * @param p The predicate to translate.
+ * @return A vector of strings, each string is a properly formed CLIPS fact.
+ */
+vector<string>
+PreconditionToCLIPSFactVisitor::operator()(FunctionalCondition fc) const {
+      vector<string> res;
+  stringstream namestream;
+  namestream << parent_ << sub_counter_;
+  string name = namestream.str();
+    std::string type;
+    if (fc.op == OperatorFlag::EnumType::conjunction) {
+      type = "conjunction";
+    } else if(fc.op == OperatorFlag::EnumType::disjunction) {
+      type = "disjunction";
+    } else if(fc.op == OperatorFlag::EnumType::negation) {
+      type = "negation";
+    }
+    res.push_back(string("(domain-precondition"
+                         " (name " + name + ")"
+                         " (part-of " + parent_ + ")"
+                         " (type " + type + ")"
+                         ")"));
+    uint sub_counter = 1;
+    for (GoalDescription &sub : fc.condition) {
+      vector<string> args = boost::apply_visitor(
+          PreconditionToCLIPSFactVisitor(name, sub_counter++), sub);
+      res.insert(res.end(), args.begin(), args.end());
+    }
+   
   return res;
 }
 
