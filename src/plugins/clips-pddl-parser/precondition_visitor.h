@@ -32,7 +32,8 @@ class PreconditionToCLIPSFactVisitor : public boost::static_visitor<std::vector<
  public:
   PreconditionToCLIPSFactVisitor(const std::string &parent, int sub_counter,
       bool is_main=false);
-  std::vector<std::string> operator()(pddl_parser::GoalDescription gd) const;
+  std::vector<std::string> operator()(pddl_parser::AtomicFormula af) const;
+  std::vector<std::string> operator()(pddl_parser::FunctionalCondition fc) const;
  private:
   std::string parent_;
   uint sub_counter_;
