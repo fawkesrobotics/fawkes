@@ -333,7 +333,7 @@ PddlPlannerThread::kstar_planner()
       } 
       
     } else {
-      a.name = line.substr(0,find_nth_space(line, 1));
+      a.name = line.substr(0,find_nth_space(line, 1)-1);
       if ( find_nth_space(line, 1) != line.find(':') + 1 ) {
         std::stringstream ss(line.substr(find_nth_space(line, 1),
               line.find(':') - find_nth_space(line,1)));
