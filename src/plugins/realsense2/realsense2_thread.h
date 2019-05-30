@@ -37,8 +37,10 @@
 
 #ifdef HAVE_REALSENSE2
 #	include <librealsense2/rs.hpp>
+#   include <librealsense2/rsutil.h>
 #else
-#	include <librealsense2/rs.hpp>
+#   include <librealsense2/rs.hpp>
+#   include <librealsense2/rsutil.h>
 #endif
 
 #include <string>
@@ -96,10 +98,14 @@ private:
 	CloudPtr              realsense_depth_;
 
     rs2::pipeline * rs_pipe_;
-    rs2::config  rs_config;
-    rs2::error * rs_error;
+    rs2::pipeline_profile rs_pipeline_profile_;
+    rs2::context * rs_context_;
+    rs2::config  rs_config_;
+    rs2::error * rs_error_;
+    rs2::device  rs_device_;
     rs2::stream_profile stream_profile_;
     rs2::frameset rs_data_;
+    rs2_intrinsics intrinsics_;
 
 	int           num_of_cameras_;
 	float         camera_scale_;
