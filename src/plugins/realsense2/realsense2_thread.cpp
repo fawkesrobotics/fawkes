@@ -48,7 +48,6 @@ Realsense2Thread::init()
     const std::string cfg_prefix = "/realsense2/";
 	frame_id_                    = config->get_string(cfg_prefix + "frame_id");
 	pcl_id_                      = config->get_string(cfg_prefix + "pcl_id");
-	laser_power_                 = config->get_int(cfg_prefix + "device_options/laser_power");
 	restart_after_num_errors_ =
 	  config->get_uint_or_default(std::string(cfg_prefix + "restart_after_num_errors").c_str(), 50);
 
@@ -77,6 +76,14 @@ Realsense2Thread::init()
     rs_pipe_ = new rs2::pipeline();
 
 	connect_and_start_camera();
+
+//    std::thread wait_for_frames_thread([&]() {
+//        if (camera_running_){
+//            rs_data_= rs_pipe_->wait_for_frames(); // Wait for next set of frames from the camera
+//            std::cout << "NEW SET OF FRAMES AVAILABLE" << std::endl;
+//            frames_avalialble_ = true;
+//        }
+//    });
 
 
 }
@@ -182,14 +189,17 @@ Realsense2Thread::connect_and_start_camera()
                 } else std::cout << "serial not supported" << std::endl;
 
                 std::cout << "name: " << name << " SN: " << sn << std::endl;
-                rs_config_.enable_stream(RS2_STREAM_DEPTH,RS2_FORMAT_Z16, 30);
+                rs_config_.enable_stream(RS2_STREAM_DEPTH,RS2_FORMAT_Z16, 60);
                 rs_pipeline_profile_ = rs_pipe_->start(rs_config_);
                 auto depth_stream = rs_pipeline_profile_.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
                 intrinsics_ = depth_stream.get_intrinsics();
                 realsense_depth_->width  = intrinsics_.width;
                 realsense_depth_->height = intrinsics_.height;
                 realsense_depth_->resize(intrinsics_.width * intrinsics_.height);
-                std::cout <<  "Height: " << intrinsics_.height << " Width: " << intrinsics_.width << std::endl;
+                rs2::depth_sensor sensor = rs_device_.first<rs2::depth_sensor>();
+                camera_scale_ = sensor.get_depth_scale();
+
+                std::cout <<  "Height: " << intrinsics_.height << " Width: " << intrinsics_.width << " Scale: " << camera_scale_ << std::endl;
                 camera_running_ = true;
             }
         }
