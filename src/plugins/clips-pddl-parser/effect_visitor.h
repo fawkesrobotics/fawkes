@@ -30,7 +30,7 @@
 class EffectToCLIPSFactVisitor : public boost::static_visitor<std::vector<std::string>>
 {
  public:
-  EffectToCLIPSFactVisitor(const std::string &pddl_operator, bool positive, std::string condition);
+  EffectToCLIPSFactVisitor(const std::string &pddl_operator, bool positive, std::string condition, int eff_counter);
   std::vector<std::string> operator()(pddl_parser::FunctionalEffect &a) const;
   std::vector<std::string> operator()(pddl_parser::AtomicFormula &p) const;
   std::vector<std::string> operator()(pddl_parser::ActionCost &p) const;
@@ -39,6 +39,7 @@ class EffectToCLIPSFactVisitor : public boost::static_visitor<std::vector<std::s
   std::string pddl_operator_;
   bool positive_effect_;
   std::string condition_;
+  int eff_counter_;
 };
 
 #endif /* !PLUGINS_CLIPS_PDDL_PARSER_EFFECT_VISITOR_H__ */
