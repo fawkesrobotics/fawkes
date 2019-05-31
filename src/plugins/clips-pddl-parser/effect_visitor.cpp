@@ -37,8 +37,8 @@ using namespace pddl_parser;
  * @param positive True iff this is a positive (not a negative) effect.
  */
 EffectToCLIPSFactVisitor::EffectToCLIPSFactVisitor(
-    const std::string &pddl_operator, bool positive, std::string condition)
-: pddl_operator_(pddl_operator), positive_effect_(positive), condition_(condition) {}
+    const std::string &pddl_operator, bool positive, std::string condition, int eff_counter)
+: pddl_operator_(pddl_operator), positive_effect_(positive), condition_(condition), eff_counter_(eff_counter) {}
 
 /** Translate an ConditionalEffect into a vector of strings.
  * Note that this does not return a CLIPS fact because we do not store atoms
@@ -125,9 +125,10 @@ EffectToCLIPSFactVisitor::operator()(FunctionalEffect &fe) const {
       throw ParserException("Unknown content of conjunction");
     }
     std::vector<pddl_parser::Effect> effects = boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
+    int tmp_counter = eff_counter_;
     for (auto &eff : effects) {
       std::vector<std::string> sub_effects = boost::apply_visitor(
-          EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_,condition_), eff.eff);
+          EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_,condition_,tmp_counter++), eff.eff);
       res.insert(res.end(), sub_effects.begin(), sub_effects.end());
     }
   } else if (fe.op == pddl_parser::OperatorFlag::negation) {
@@ -136,31 +137,32 @@ EffectToCLIPSFactVisitor::operator()(FunctionalEffect &fe) const {
     }
     std::vector<pddl_parser::Effect> effects = boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
     if (effects.size() == 0) {
-      return res;
+      return res  ;
     }
     if (effects.size() != 1) {
       throw ParserException("Expected exactly one sub-formula for 'not'");
     }
     std::vector<std::string> sub_effects = boost::apply_visitor(
-        EffectToCLIPSFactVisitor(pddl_operator_, !positive_effect_,condition_),
+        EffectToCLIPSFactVisitor(pddl_operator_, !positive_effect_,condition_,eff_counter_),
         effects[0].eff);
     res.insert(res.end(), sub_effects.begin(), sub_effects.end());
   } else if (fe.op == pddl_parser::OperatorFlag::condition) {
     if (fe.effect.type() != typeid(pddl_parser::ConditionalEffect)){
+      std::cout << "Type: " << fe.effect.type().name() << std::endl;
       throw ParserException("Unknown content of conditional effect");
     }
     pddl_parser::ConditionalEffect ce = boost::get<pddl_parser::ConditionalEffect>(fe.effect);
     std::string ce_name;
     if (condition_ == "NONE") {
-      ce_name = pddl_operator_ + "-ce";
+      ce_name = pddl_operator_ + "-ce" + std::to_string(eff_counter_);
     } else {
-      ce_name = condition_ + "-ce";
+      ce_name = condition_ + std::to_string(eff_counter_);
     }
     std::vector<std::string> args = boost::apply_visitor(
           PreconditionToCLIPSFactVisitor(ce_name, 1, false), ce.condition);
     res.insert(res.end(), args.begin(), args.end());
     args = boost::apply_visitor(
-          EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_,ce_name), ce.effect.eff);
+          EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_,ce_name,eff_counter_), ce.effect.eff);
     res.insert(res.end(), args.begin(), args.end());
 
   } else {

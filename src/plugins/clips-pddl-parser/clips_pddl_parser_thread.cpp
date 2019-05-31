@@ -170,7 +170,7 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
 
     try{
       std::vector<std::string> effect_facts =
-      boost::apply_visitor(EffectToCLIPSFactVisitor(action.name, true, "NONE"),
+      boost::apply_visitor(EffectToCLIPSFactVisitor(action.name, true, "NONE", 0),
           action.effect.eff);
       for (auto &fact : effect_facts) {
         //logger->log_info(name(),fact.c_str());
