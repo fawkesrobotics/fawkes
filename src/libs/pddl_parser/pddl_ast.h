@@ -30,6 +30,17 @@ namespace pddl_parser
         typedef std::vector<EnumType> VectorType;
     } RequirementFlag;
 
+    typedef struct OperatorFlag_ {
+        typedef enum {
+            
+            negation,
+            conjunction,
+            disjunction,
+            condition
+        } EnumType;
+        typedef std::vector<EnumType> VectorType;
+    } OperatorFlag;
+
     struct Effect;
     struct ConditionalEffect;
     struct FunctionalCondition;
@@ -45,12 +56,10 @@ namespace pddl_parser
 
     typedef std::vector<std::pair<std::string, TypedList> > PredicateList;
 
-    typedef std::string Op;
-
     struct Term
     {
         bool isVariable;
-        std::string name;
+       std::string name;
     };
 
     typedef std::vector<struct Term> TermList;
@@ -69,8 +78,8 @@ namespace pddl_parser
 
     struct FunctionalEffect
     {
-      Op op;
-      variant<boost::recursive_wrapper<std::vector<Effect>>,boost::recursive_wrapper<ConditionalEffect>> effect;
+      OperatorFlag::EnumType op;
+      variant<boost::recursive_wrapper<std::vector<Effect>>,boost::recursive_wrapper<ConditionalEffect>,AtomicFormula> effect;
     };
 
     struct ActionCost
@@ -84,7 +93,7 @@ namespace pddl_parser
         variant<FunctionalEffect,ActionCost,AtomicFormula> eff;
     };
 
-    typedef boost::variant<boost::recursive_wrapper<FunctionalCondition>,AtomicFormula> GoalDescription;
+    using GoalDescription = boost::variant<boost::recursive_wrapper<FunctionalCondition>,AtomicFormula>;
 
     struct ConditionalEffect
     {
@@ -94,7 +103,7 @@ namespace pddl_parser
 
     struct FunctionalCondition
     {
-      Op op;
+      OperatorFlag::EnumType op;
       std::vector<GoalDescription> condition;
     };
 
@@ -157,8 +166,8 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
     pddl_parser::FunctionalCondition,
-    op,
-    condition
+    (pddl_parser::OperatorFlag::EnumType, op)
+    (std::vector<pddl_parser::GoalDescription>, condition)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(

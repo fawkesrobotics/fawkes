@@ -62,6 +62,11 @@ namespace pddl_parser
                 message = src.message;
             }
 
+            ParserException(const std::string& msg)
+            {
+                message = msg;
+            }
+
             ParserException& operator=(const ParserException& rhs)
             {
                 message = rhs.message;
@@ -137,6 +142,22 @@ namespace pddl_parser
                    ;
             }
         };
+
+        struct OperatorSymbols_ :
+            qi::symbols<char, pddl_parser::OperatorFlag::EnumType>
+        {
+            OperatorSymbols_()
+            {
+                this->add
+                    ("and", OperatorFlag::conjunction)
+                    ("not", OperatorFlag::negation)
+                    ("or", OperatorFlag::disjunction)
+                    ("when", OperatorFlag::condition)
+                   ;
+            }
+
+        };
+
         void insert_typed_name_entities(TypedList& entities, const std::vector<std::string>& names, const std::string& type);
               
         template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
@@ -146,7 +167,7 @@ namespace pddl_parser
                 
             BaseGrammar()
             {
-                
+               
                 name %= lexeme[char_("a-zA-Z") >> *(char_("a-zA-Z0-9_-"))];
                 name.name("name");
 
@@ -178,16 +199,11 @@ namespace pddl_parser
                     ( lit("not") > lit('(') > atomicFormula[at_c<0>(_val) = true, at_c<1>(_val) = _1] > lit(')'));
                 literal.name("literal");
 
-                op = distinct(char_("a-zA-Z_0-9"))["and"] 
-                    | distinct(char_("a-zA-Z_0-9"))["when"] 
-                    | distinct(char_("a-zA-Z_0-9"))["or"] 
-                    | distinct(char_("a-zA-Z_0-9"))["not"] 
-                    | distinct(char_("a-zA-Z_0-9"))["imply"];
-                op.name("op");
-
                 conditionalEffect = lit('(') >> goalDescription > lit(')')
                                     > effect;
                 conditionalEffect.name("conditionalEffect");
+
+                op %= operatorSymbols >> !(char_("a-zA-Z0-9_"));
 
                 functionalEffect = op > ( +(effect) | conditionalEffect );
                 functionalEffect.name("functionalEffect");
@@ -216,7 +232,7 @@ namespace pddl_parser
 
             typedef qi::rule<Iterator, std::string(), Skipper> StringRule;
 
-            qi::rule<Iterator, Op(), Skipper> op;
+            qi::rule<Iterator, OperatorFlag::VectorType(), Skipper> op;
             qi::rule<Iterator, ConditionalEffect(), Skipper> conditionalEffect;
             qi::rule<Iterator, FunctionalCondition(), Skipper> functionalCondition;
             qi::rule<Iterator, FunctionalEffect(), Skipper> functionalEffect;
@@ -231,17 +247,82 @@ namespace pddl_parser
             StringRule type;
             StringRule name;
             StringRule variable;
+
+            //qi::symbols<char,int> operatorSymbols;
+
+            struct OperatorSymbols_ operatorSymbols;
         };
 
         template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
         struct Domain :
-            qi::grammar<Iterator, PddlDomain(), Skipper>, BaseGrammar<Iterator, Skipper>
+            qi::grammar<Iterator, PddlDomain(), Skipper>//, BaseGrammar<Iterator, Skipper>
         {
-            typedef BaseGrammar<Iterator,Skipper> base;
+            //typedef BaseGrammar<Iterator,Skipper> base;
 
             Domain() :
-                Domain::base_type(pddlDomain, "PDDL Domain"), BaseGrammar<Iterator,Skipper>()
+                Domain::base_type(pddlDomain, "PDDL Domain")//, BaseGrammar<Iterator,Skipper>()
             {
+
+                name %= lexeme[char_("a-zA-Z") >> *(char_("a-zA-Z0-9_-"))];
+                name.name("name");
+
+                variable %= lit('?') > name;
+                variable.name("variable");
+
+                type %= name;
+                type.name("type");
+
+                typedListExplicitType = (+(lazy(_r1)[push_back(_a, _1)]))
+                     > lit('-')
+                     > type[bind(&insert_typed_name_entities, _val, _a, _1)];
+                typedListExplicitType.name("typedListExplicitType");
+                char obj[] = "object";
+                typedList =
+                    (*(typedListExplicitType(_r1)[insert(_val, end(_val), begin(_1), end(_1))]))
+                    > (*(lazy(_r1)[push_back(_val, construct<struct Entity>(_1, &obj[0]))]))
+                    ;
+                typedList.name("typedList");
+
+                term = name[at_c<0>(_val) = false, at_c<1>(_val) = _1] |
+                    variable[at_c<0>(_val) = true, at_c<1>(_val) = _1];
+                term.name("term");
+
+                atomicFormula = name[at_c<0>(_val) = _1] > (*term)[at_c<1>(_val) = _1];
+                atomicFormula.name("atomicFormula");
+
+                literal = atomicFormula[at_c<0>(_val) = false, at_c<1>(_val) = _1] |
+                    ( lit("not") > lit('(') > atomicFormula[at_c<0>(_val) = true, at_c<1>(_val) = _1] > lit(')'));
+                literal.name("literal");
+                
+
+                goalDescription %= lit('(') >> (functionalCondition[_val = _1]
+                    | atomicFormula[_val = _1]
+                    ) >> qi::eps >> lit(')');
+                goalDescription.name("goalDescription");
+
+                conditionalEffect = goalDescription >> effect;
+                conditionalEffect.name("conditionalEffect");
+
+                bool condition_flag;
+                functionalEffect = operatorSymbols[at_c<0>(_val) = _1, phoenix::ref(condition_flag) = qi::_1 == OperatorFlag::condition] >> !(char_("a-zA-Z0-9_")) 
+                                    >> ((qi::eps(phoenix::ref(condition_flag) == true) >> conditionalEffect)
+                                        | (qi::eps(phoenix::ref(condition_flag) == false) >> +(effect)))[at_c<1>(_val) = _1];
+                functionalEffect.name("functionalEffect");
+
+                actionCost = distinct(char_("a-zA-Z_0-9"))["increase"]
+                            > lit('(')
+                            >> name
+                            > lit(')')
+                            >> qi::int_;
+                            
+                effect = lit('(') >>
+                            (functionalEffect | actionCost | atomicFormula )
+                            > lit(')');
+                effect.name("effect");
+
+                functionalCondition = operatorSymbols >> !(char_("a-zA-Z0-9_")) >> +(goalDescription);
+                functionalCondition.name("functionalCondition");
+
                 requireDef %= -(
                     lit('(')
                     >> lit(":requirements")
@@ -253,7 +334,7 @@ namespace pddl_parser
                 typesDef %= -(
                     lit('(')
                     >> lit(":types")
-                    > base::typedList(phoenix::ref(base::name))
+                    > typedList(phoenix::ref(name))
                     > lit(')')
                     );
                 typesDef.name("typesDef");
@@ -261,7 +342,7 @@ namespace pddl_parser
                 constantsDef %= -(
                     lit('(')
                     >> lit(":constants")
-                    > base::typedList(phoenix::ref(base::name))
+                    > typedList(phoenix::ref(name))
                     > lit(')')
                     );
                 constantsDef.name("constantsDef");
@@ -270,8 +351,8 @@ namespace pddl_parser
                     lit('(')
                     >> lit(":predicates")
                     > (+(lit('(')
-                        > base::name[_a = _1]
-                        >> base::typedList(phoenix::ref(base::variable))[_b = _1]
+                        > name[_a = _1]
+                        >> typedList(phoenix::ref(variable))[_b = _1]
                         > lit(')'))[push_back(_val, construct<std::pair<std::string, TypedList> >(_a, _b))]
                     )
                     > lit(')')
@@ -281,16 +362,16 @@ namespace pddl_parser
                 pddlAction =
                     lit('(')
                     > lit(":action")
-                    > base::name[at_c<0>(_val) = _1]
+                    > name[at_c<0>(_val) = _1]
                     > lit(":parameters")
                     > lit("(")
-                    > base::typedList(phoenix::ref(base::variable))[at_c<1>(_val) = _1]
+                    > typedList(phoenix::ref(variable))[at_c<1>(_val) = _1]
                     > lit(")")
                     > lit(":precondition")
-                    >> (base::goalDescription | (lit('(') > lit(')')))
+                    >> (goalDescription[at_c<2>(_val) = _1] | (lit('(') > lit(')')))
                     > (
                         lit(":effect")
-                        >> base::effect
+                        >> (effect[at_c<3>(_val) = _1] | (lit('(') > lit(')')))
                     )
                     > lit(')');
                 pddlAction.name("pddlAction");
@@ -303,7 +384,7 @@ namespace pddl_parser
                     > lit("define")
                     > lit('(')
                     > lit("domain")
-                    > base::name[at_c<0>(_val) = _1]
+                    > name[at_c<0>(_val) = _1]
                     > lit(')')
                     > requireDef[at_c<1>(_val) = _1]
                     > typesDef[at_c<2>(_val) = _1]
@@ -329,6 +410,28 @@ namespace pddl_parser
             qi::rule<Iterator, PredicateList(), qi::locals<std::string, TypedList>, Skipper> predicatesDef;
 
             struct RequirementFlagSymbols_ requirementFlagSymbols;
+
+            typedef qi::rule<Iterator, std::string(), Skipper> StringRule;
+
+            qi::rule<Iterator, ConditionalEffect(), Skipper> conditionalEffect;
+
+            qi::rule<Iterator, FunctionalCondition(), Skipper> functionalCondition;
+            qi::rule<Iterator, FunctionalEffect(), Skipper> functionalEffect;
+            qi::rule<Iterator, ActionCost(), Skipper> actionCost;
+            qi::rule<Iterator, Effect(), Skipper> effect;
+            qi::rule<Iterator, GoalDescription(), Skipper> goalDescription;
+            qi::rule<Iterator, Literal(), Skipper> literal;
+            qi::rule<Iterator, AtomicFormula(), Skipper> atomicFormula;
+            qi::rule<Iterator, Term(), Skipper> term;
+            qi::rule<Iterator, TypedList(StringRule), Skipper> typedList;
+            qi::rule<Iterator, TypedList(StringRule), qi::locals<std::vector<std::string> >, Skipper> typedListExplicitType;
+            StringRule type;
+            StringRule name;
+            StringRule variable;
+
+            //qi::symbols<char,int> operatorSymbols;
+
+            struct OperatorSymbols_ operatorSymbols;
         };
     }
 }
