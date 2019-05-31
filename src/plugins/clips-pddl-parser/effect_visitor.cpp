@@ -68,7 +68,7 @@ EffectToCLIPSFactVisitor::operator()(ActionCost &ce) const {
   res.push_back(std::string(
           "(domain-action-cost"
           " (part-of " + pddl_operator_ + ")"
-          " (cost-name" + cost_name + ")"
+          " (cost-name " + cost_name + ")"
           " (cost " + std::to_string(cost) + ")"
           ")"));
   return res;
@@ -135,6 +135,9 @@ EffectToCLIPSFactVisitor::operator()(FunctionalEffect &fe) const {
       throw ParserException("Unknown content of conjunction");
     }
     std::vector<pddl_parser::Effect> effects = boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
+    if (effects.size() == 0) {
+      return res;
+    }
     if (effects.size() != 1) {
       throw ParserException("Expected exactly one sub-formula for 'not'");
     }
