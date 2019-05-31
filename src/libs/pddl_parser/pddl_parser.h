@@ -8,6 +8,7 @@
  */
 
 #ifndef PDDLQI_PARSER_PARSER_H
+#define BOOST_SPIRIT_DEBUG
 #define PDDLQI_PARSER_PARSER_H
 
 #include "pddl_grammar.h"
@@ -45,8 +46,8 @@ namespace pddl_parser
 
                 if (!r || iter != end)
                 {
-                    std::cout << "Failed randomly?" << std::endl;
-                    //throw ParserException(input.begin(), iter, end);
+                    //std::cout << "Failed randomly?" << std::endl;
+                    throw ParserException(input.begin(), iter, end);
                 }
 
                 return data;
