@@ -152,19 +152,35 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
       "(domain-operator (name " + action.name + ")" + params_string + ")"
     );
     
-    logger->log_info(name(), "Parsing %s",action.name.c_str());
-    std::vector<std::string> precondition_facts = 
-      boost::apply_visitor(PreconditionToCLIPSFactVisitor(action.name, 1, true),
-          action.precondition);
-    for (auto &fact : precondition_facts) {
-      logger->log_info(name(),fact.c_str());
-      env.assert_fact(fact); 
-    }  
-    std::vector<std::string> effect_facts =
+    try{
+      logger->log_info(name(), "Parsing %s",action.name.c_str());
+      std::vector<std::string> precondition_facts = 
+        boost::apply_visitor(PreconditionToCLIPSFactVisitor(action.name, 1, true),
+            action.precondition);
+      for (auto &fact : precondition_facts) {
+        //logger->log_info(name(),fact.c_str());
+        env.assert_fact(fact); 
+      }  
+    } catch (pddl_parser::ParserException &e) {
+      logger->log_error(("PDDLCLIPS|" + env_name).c_str(),
+        "Failed to parse domain: %s", e.what());
+      return;
+    }
+   
+
+    try{
+      std::vector<std::string> effect_facts =
       boost::apply_visitor(EffectToCLIPSFactVisitor(action.name, true, "NONE"),
           action.effect.eff);
-    for (auto &fact : effect_facts) {
-      env.assert_fact(fact);
-    } 
+      for (auto &fact : effect_facts) {
+        //logger->log_info(name(),fact.c_str());
+        env.assert_fact(fact);
+      }  
+    } catch (pddl_parser::ParserException &e) {
+      logger->log_error(("PDDLCLIPS|" + env_name).c_str(),
+        "Failed to parse domain: %s", e.what());
+      return;
+    }
+   
   }
 }
