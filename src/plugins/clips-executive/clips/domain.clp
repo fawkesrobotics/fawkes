@@ -165,11 +165,19 @@
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
   (slot part-of (type SYMBOL))
   (slot predicate (type SYMBOL))
+  (slot condition (type SYMBOL) (default NONE))
   (multislot param-names (default (create$)))
   (multislot param-values (default (create$)))
   (multislot param-constants (default (create$)))
   (slot type (type SYMBOL) (allowed-values POSITIVE NEGATIVE)
     (default POSITIVE))
+)
+
+(deftemplate domain-action-const
+  "Cost of an action"
+  (slot part-of (type SYMBOL))
+  (slot cost-name (type SYMBOL))
+  (slot cost (type INTEGER))
 )
 
 (deftemplate domain-error
@@ -373,10 +381,10 @@
   (plan (id ?p) (goal-id ?g))
   (plan-action (action-name ?op) (id ?action-id) (goal-id ?g) (plan-id ?p)
     (state EXECUTION-SUCCEEDED))
-  (domain-effect (name ?effect-name) (part-of ?op))
+  (domain-effect (name ?effect-name) (part-of ?op) (condition ?cond))
   ?precond <- (domain-precondition
                 (name ?precond-name)
-                (part-of ?effect-name)
+                (part-of ?cond)
                 (grounded FALSE))
   (not (domain-precondition (name ?precond-name) (goal-id ?g) (plan-id ?p)
          (grounded-with ?action-id) (grounded TRUE)))
@@ -781,14 +789,15 @@
 	=>
 	(do-for-all-facts ((?e domain-effect) (?pred domain-predicate))
 		(and (not ?pred:sensed) (eq ?e:part-of ?op) (eq ?e:predicate ?pred:name))
-
+    (printout t "Try effect: " ?e:predicate " of " ?e:part-of " with condition " ?e:condition crlf)
 		; apply if this effect is unconditional or the condition is satisfied
-		(if (or (not (any-factp ((?cep domain-precondition)) (eq ?cep:part-of ?e:name)))
+		(if (or (not (any-factp ((?cep domain-precondition)) (eq ?cep:part-of ?e:condition)))
 						(any-factp ((?cep domain-precondition))
-											 (and (eq ?cep:part-of ?e:name) ?cep:is-satisfied
+											 (and (eq ?cep:part-of ?e:condition) ?cep:is-satisfied
                             (eq ?cep:goal-id ?g) (eq ?cep:plan-id ?p)
                             ?cep:grounded (eq ?cep:grounded-with ?id))))
 		 then
+      (printout t "Apply Effect" crlf)
 			(bind ?values
 						(domain-ground-effect ?e:param-names ?e:param-constants
 																	?action-param-names ?action-param-values))
@@ -820,7 +829,8 @@
 			)
 		)
 	)
-	(modify ?pa (state EFFECTS-APPLIED))
+  (modify ?pa (state EFFECTS-APPLIED))
+
 )
 
 (defrule domain-effect-sensed-positive-holds
@@ -925,6 +935,7 @@
   (domain-precondition (name ?precond) (part-of ?parent))
   (not (domain-precondition (name ?parent)))
   (not (domain-operator (name ?parent)))
+  (not (domain-effect (condition ?parent)))
 =>
   (assert (domain-error (error-type precondition-without-parent)
     (error-msg

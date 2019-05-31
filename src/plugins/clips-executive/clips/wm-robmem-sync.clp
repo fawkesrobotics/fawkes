@@ -307,7 +307,7 @@
 			(do-for-fact ((?wf wm-fact) (?sm wm-robmem-sync-map-entry)) (and (eq ?sm:wm-fact-id ?id) (eq ?wf:id ?id))
 				(if (time> ?update-timestamp ?sm:update-timestamp)
 				then
-					(printout debug "wm-robmem-sync-update: updating (known fact) " ?id crlf)
+					(printout debug "updating (known fact) " ?id crlf)
 					(bind ?new-wf (modify ?wf (type ?type) (is-list ?is-list) (value ?value) (values ?values)))
 					(modify ?sm (wm-fact-idx (fact-index ?new-wf)) (update-timestamp ?update-timestamp))
 				else
