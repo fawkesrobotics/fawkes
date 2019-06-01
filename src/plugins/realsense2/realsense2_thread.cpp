@@ -244,7 +244,64 @@ void
 Realsense2Thread::enable_depth_stream()
 {
 
+    std::cout << "ENABLE DEPTH_STREAM:" << std::endl;
+    try {
+        rs2::depth_sensor depth_sensor = rs_device_.first<rs2::depth_sensor>();
+        if (depth_sensor.supports(RS2_OPTION_EMITTER_ENABLED)){
+            depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED, 1.f); // Enable emitter
+            depth_enabled_ = true;
+        }
+        if (depth_sensor.supports(RS2_OPTION_LASER_POWER)){
+            rs2::option_range range = depth_sensor.get_option_range(RS2_OPTION_LASER_POWER);
+            depth_sensor.set_option(RS2_OPTION_LASER_POWER, range.max); // Set max power
+            depth_enabled_ = true;
+        }
+
+    }
+    catch (const rs2::error & e)
+    {
+        std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args() << "):\n    " << e.what() << std::endl;
+        return;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        return;
+    }
 }
+
+/*
+ * Disable the depth stream from rs_device
+ */
+void
+Realsense2Thread::disable_depth_stream()
+{
+
+    std::cout << "DISABLE DEPTH_STREAM:" << std::endl;
+    try {
+        rs2::depth_sensor depth_sensor = rs_device_.first<rs2::depth_sensor>();
+            if (depth_sensor.supports(RS2_OPTION_EMITTER_ENABLED)){
+                depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED, 0.f); // Disable emitter
+                depth_enabled_ = false;
+            }
+            if (depth_sensor.supports(RS2_OPTION_LASER_POWER)){
+                depth_sensor.set_option(RS2_OPTION_LASER_POWER, 0.f); // Disable laser
+                depth_enabled_ = false;
+            }
+
+    }
+    catch (const rs2::error & e)
+    {
+        std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args() << "):\n    " << e.what() << std::endl;
+        return;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << e.what() << std::endl;
+        return;
+    }
+}
+
 
 /*
  * printout and free the rs_error if available
