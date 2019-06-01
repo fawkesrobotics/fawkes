@@ -65,9 +65,10 @@ public:
 	virtual void loop();
 
 private:
-	bool       connect_and_start_camera();
-    rs2::device *get_camera();
-	void       enable_depth_stream();
+    bool       start_camera();
+    void       get_camera(rs2::device &dev);
+    void       enable_depth_stream();
+    void       disable_depth_stream();
 	void       log_error();
 	void       log_depths(const uint16_t *image);
 	void       fill_pointcloud();
@@ -107,13 +108,12 @@ private:
     rs2::frameset rs_data_;
     rs2_intrinsics intrinsics_;
 
-	int           num_of_cameras_;
 	float         camera_scale_;
 	std::string   frame_id_;
 	std::string   pcl_id_;
-	bool          enable_camera_  = true;
-	bool          camera_running_ = false;
-    bool          frames_avalialble_ = false;
+    bool          camera_running_ = false;
+    bool          enable_camera_  = true;
+    bool          depth_enabled_  = false;
 	int           laser_power_;
 	uint          restart_after_num_errors_;
 	uint          error_counter_ = 0;

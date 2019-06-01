@@ -163,33 +163,11 @@ Realsense2Thread::connect_and_start_camera()
 {
     try {
         rs_pipe_->stop();
-    } catch (const std::exception& e) {
-
-    }
+    } catch (const std::exception& e) {}
 
     try {
-            std::cout << "create Context" << std::endl;
-            rs_context_ = new rs2::context();
-            std::cout << "querry devices" << std::endl;
-            rs2::device_list devlist = rs_context_->query_devices();
-            if (devlist.size() == 0){
-                 std::cerr << "No device connected, please connect a RealSense device" << std::endl;
-                 return false;
-            }else{
-                std::cout << "found devices: " << devlist.size() << std::endl;
-                rs_device_ = devlist.front();
-                std:: string name = "Unknown Device";
-                if (rs_device_.supports(RS2_CAMERA_INFO_NAME)){
-                    name = rs_device_.get_info(RS2_CAMERA_INFO_NAME);
-                } else std::cout << "name not supported" << std::endl;
-
-                std::string sn = "########";
-                if (rs_device_.supports(RS2_CAMERA_INFO_SERIAL_NUMBER)){
-                    sn = std::string("#") + rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
-                } else std::cout << "serial not supported" << std::endl;
-
-                std::cout << "name: " << name << " SN: " << sn << std::endl;
-                rs_config_.enable_stream(RS2_STREAM_DEPTH,RS2_FORMAT_Z16, 60);
+                get_camera(rs_device_);
+                rs_config_.enable_stream(RS2_STREAM_DEPTH,RS2_FORMAT_Z16, 30);
                 rs_pipeline_profile_ = rs_pipe_->start(rs_config_);
                 auto depth_stream = rs_pipeline_profile_.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
                 intrinsics_ = depth_stream.get_intrinsics();
@@ -213,19 +191,51 @@ Realsense2Thread::connect_and_start_camera()
             std::cerr << e.what() << std::endl;
             return false;
         }
-    return false;
+    return true;
 }
 
 /* Get the rs_device pointer and printout camera details
  * @return rs_device
  */
-//rs2::device *
-//Realsense2Thread::get_camera()
-//{
+void
+Realsense2Thread::get_camera(rs2::device &dev)
+{
+    try {
+            rs_context_ = new rs2::context();
+            rs2::device_list devlist = rs_context_->query_devices();
+            if (devlist.size() == 0){
+                 std::cerr << "No device connected, please connect a RealSense device" << std::endl;
+                 return;
+            }else{
+                std::cout << "found devices: " << devlist.size() << std::endl;
+                dev = devlist.front();
+                std::string name = "Unknown Device";
+                if (dev.supports(RS2_CAMERA_INFO_NAME)){
+                    name = dev.get_info(RS2_CAMERA_INFO_NAME);
+                } else std::cout << "name not supported" << std::endl;
+
+                std::string sn = "########";
+                if (dev.supports(RS2_CAMERA_INFO_SERIAL_NUMBER)){
+                    sn = std::string("#") + rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
+                } else std::cout << "serial not supported" << std::endl;
+
+                std::cout << "name: " << name << " SN: " << sn << std::endl;
+            }
+        }
+        catch (const rs2::error & e)
+        {
+            std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args() << "):\n    " << e.what() << std::endl;
+            return;
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << e.what() << std::endl;
+            return;
+        }
 
 
-//    return rs2::device();
-//}
+
+}
 
 /*
  * Enable the depth stream from rs_device
