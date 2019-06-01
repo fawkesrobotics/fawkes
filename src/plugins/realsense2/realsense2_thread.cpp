@@ -75,16 +75,7 @@ Realsense2Thread::init()
 
     rs_pipe_ = new rs2::pipeline();
 
-	connect_and_start_camera();
-
-//    std::thread wait_for_frames_thread([&]() {
-//        if (camera_running_){
-//            rs_data_= rs_pipe_->wait_for_frames(); // Wait for next set of frames from the camera
-//            std::cout << "NEW SET OF FRAMES AVAILABLE" << std::endl;
-//            frames_avalialble_ = true;
-//        }
-//    });
-
+    camera_running_ = start_camera();
 
 }
 
@@ -92,20 +83,21 @@ void
 Realsense2Thread::loop()
 {
 
+    if (!camera_running_){
+        camera_running_ = start_camera();
+    }
+
     if (cfg_use_switch_) {
         read_switch();
     }
-    if (enable_camera_ && !camera_running_) {
-        connect_and_start_camera();
-        // Start reading in the next loop
+
+    if (enable_camera_ && !depth_enabled_) {
+        enable_depth_stream();
         return;
-    } else if (!enable_camera_) {
-        if (camera_running_) {
-            stop_camera();
-        }
+    } else if (!enable_camera_){
+        disable_depth_stream();
         return;
     }
-
 
     if (rs_pipe_->poll_for_frames(&rs_data_))
     {
@@ -139,9 +131,11 @@ Realsense2Thread::loop()
             logger->log_warn(name(), "Polling failed, restarting device");
             error_counter_ = 0;
             stop_camera();
-            connect_and_start_camera();
+            start_camera();
         }
     }
+
+
 }
 
 void
@@ -159,7 +153,7 @@ Realsense2Thread::finalize()
  * @return true when succesfull
  */
 bool
-Realsense2Thread::connect_and_start_camera()
+Realsense2Thread::start_camera()
 {
     try {
         rs_pipe_->stop();
@@ -178,8 +172,6 @@ Realsense2Thread::connect_and_start_camera()
                 camera_scale_ = sensor.get_depth_scale();
 
                 std::cout <<  "Height: " << intrinsics_.height << " Width: " << intrinsics_.width << " Scale: " << camera_scale_ << std::endl;
-                camera_running_ = true;
-            }
         }
         catch (const rs2::error & e)
         {
@@ -327,7 +319,7 @@ Realsense2Thread::log_depths(const uint16_t *image)
 void
 Realsense2Thread::stop_camera()
 {
-    camera_running_ = false;
+
 }
 
 /**
