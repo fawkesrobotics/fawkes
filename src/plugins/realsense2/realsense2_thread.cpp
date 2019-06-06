@@ -28,7 +28,7 @@
 
 using namespace fawkes;
 
-/** @class RealsenseThread 'realsense_thread.h' 
+/** @class RealsenseThread 'realsense_thread.h'
  * Driver for the Intel RealSense Camera providing Depth Data as Pointcloud
  * Inspired by Intel® RealSense™ Camera - F200 ROS Nodelet
  * @author Johannes Rothe
@@ -44,8 +44,8 @@ Realsense2Thread::Realsense2Thread()
 void
 Realsense2Thread::init()
 {
-	//set config values
-    const std::string cfg_prefix = "/realsense2/";
+	// set config values
+	const std::string cfg_prefix = "/realsense2/";
 	frame_id_                    = config->get_string(cfg_prefix + "frame_id");
 	pcl_id_                      = config->get_string(cfg_prefix + "pcl_id");
 	restart_after_num_errors_ =
@@ -59,12 +59,12 @@ Realsense2Thread::init()
 		logger->log_info(name(), "Switch will be ignored");
 	}
 
-    switch_if_ = blackboard->open_for_writing<SwitchInterface>("realsense2");
+	switch_if_ = blackboard->open_for_writing<SwitchInterface>("realsense2");
 	switch_if_->set_enabled(true);
 	switch_if_->write();
 
 	camera_scale_ = 1;
-	//initalize pointcloud
+	// initalize pointcloud
 	realsense_depth_refptr_           = new Cloud();
 	realsense_depth_                  = pcl_utils::cloudptr_from_refptr(realsense_depth_refptr_);
 	realsense_depth_->header.frame_id = frame_id_;
@@ -73,82 +73,74 @@ Realsense2Thread::init()
 	realsense_depth_->resize(0);
 	pcl_manager->add_pointcloud(pcl_id_.c_str(), realsense_depth_refptr_);
 
-    rs_pipe_ = new rs2::pipeline();
+	rs_pipe_ = new rs2::pipeline();
 
-    camera_running_ = start_camera();
-
+	camera_running_ = start_camera();
 }
 
 void
 Realsense2Thread::loop()
 {
+	if (!camera_running_) {
+		camera_running_ = start_camera();
+	}
 
-    if (!camera_running_){
-        camera_running_ = start_camera();
-    }
+	if (cfg_use_switch_) {
+		read_switch();
+	}
 
-    if (cfg_use_switch_) {
-        read_switch();
-    }
+	if (enable_camera_ && !depth_enabled_) {
+		enable_depth_stream();
+		return;
+	} else if (!enable_camera_ && depth_enabled_) {
+		disable_depth_stream();
+		return;
+	} else if (!depth_enabled_) {
+		return;
+	}
 
-    if (enable_camera_ && !depth_enabled_) {
-        enable_depth_stream();
-        return;
-    } else if (!enable_camera_ && depth_enabled_){
-        disable_depth_stream();
-        return;
-    } else if (!depth_enabled_){
-        return;
-    }
-
-    if (rs_pipe_->poll_for_frames(&rs_data_))
-    {
-        rs2::frame depth_frame = rs_data_.first(RS2_STREAM_DEPTH);
-        logger->log_info(name(),
-                         "GOT RS2 DEPTH FRAME");
-        error_counter_ = 0;
-        const uint16_t *image =
-          reinterpret_cast<const uint16_t *>(depth_frame.get_data());
-        log_error();
-        Cloud::iterator it = realsense_depth_->begin();
-        for (int y = 0; y < intrinsics_.height; y++) {
-            for (int x = 0; x < intrinsics_.width; x++) {
-                float scaled_depth = camera_scale_ * (static_cast<float>(*image));
-                float depth_point[3];
-                float depth_pixel[2] = {static_cast<float>(x), static_cast<float>(y)};
-                rs2_deproject_pixel_to_point(depth_point, &intrinsics_, depth_pixel, scaled_depth);
-                it->x = depth_point[0];
-                it->y = depth_point[1];
-                it->z = depth_point[2];
-                ++image;
-                ++it;
-            }
-        }
-        pcl_utils::set_time(realsense_depth_refptr_, fawkes::Time(clock));
-    }else {
-        error_counter_++;
-        logger->log_warn(name(),
-                         "Poll for frames not successful ()");
-        if (error_counter_ >= restart_after_num_errors_) {
-            logger->log_warn(name(), "Polling failed, restarting device");
-            error_counter_ = 0;
-            stop_camera();
-            start_camera();
-        }
-    }
-
-
+	if (rs_pipe_->poll_for_frames(&rs_data_)) {
+		rs2::frame depth_frame = rs_data_.first(RS2_STREAM_DEPTH);
+		logger->log_info(name(), "GOT RS2 DEPTH FRAME");
+		error_counter_        = 0;
+		const uint16_t *image = reinterpret_cast<const uint16_t *>(depth_frame.get_data());
+		log_error();
+		Cloud::iterator it = realsense_depth_->begin();
+		for (int y = 0; y < intrinsics_.height; y++) {
+			for (int x = 0; x < intrinsics_.width; x++) {
+				float scaled_depth = camera_scale_ * (static_cast<float>(*image));
+				float depth_point[3];
+				float depth_pixel[2] = {static_cast<float>(x), static_cast<float>(y)};
+				rs2_deproject_pixel_to_point(depth_point, &intrinsics_, depth_pixel, scaled_depth);
+				it->x = depth_point[0];
+				it->y = depth_point[1];
+				it->z = depth_point[2];
+				++image;
+				++it;
+			}
+		}
+		pcl_utils::set_time(realsense_depth_refptr_, fawkes::Time(clock));
+	} else {
+		error_counter_++;
+		logger->log_warn(name(), "Poll for frames not successful ()");
+		if (error_counter_ >= restart_after_num_errors_) {
+			logger->log_warn(name(), "Polling failed, restarting device");
+			error_counter_ = 0;
+			stop_camera();
+			start_camera();
+		}
+	}
 }
 
 void
 Realsense2Thread::finalize()
 {
-    delete rs_pipe_;
-    delete rs_context_;
-    realsense_depth_refptr_.reset();
-    pcl_manager->remove_pointcloud(pcl_id_.c_str());
-    stop_camera();
-    blackboard->close(switch_if_);
+	delete rs_pipe_;
+	delete rs_context_;
+	realsense_depth_refptr_.reset();
+	pcl_manager->remove_pointcloud(pcl_id_.c_str());
+	stop_camera();
+	blackboard->close(switch_if_);
 }
 
 /* Create RS context and start the depth stream
@@ -157,35 +149,39 @@ Realsense2Thread::finalize()
 bool
 Realsense2Thread::start_camera()
 {
-    try {
-        rs_pipe_->stop();
-    } catch (const std::exception& e) {}
+	try {
+		rs_pipe_->stop();
+	} catch (const std::exception &e) {
+	}
 
-    try {
-                get_camera(rs_device_);
-                rs_config_.enable_stream(RS2_STREAM_DEPTH,RS2_FORMAT_Z16, 30);
-                rs_pipeline_profile_ = rs_pipe_->start(rs_config_);
-                auto depth_stream = rs_pipeline_profile_.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
-                intrinsics_ = depth_stream.get_intrinsics();
-                realsense_depth_->width  = intrinsics_.width;
-                realsense_depth_->height = intrinsics_.height;
-                realsense_depth_->resize(intrinsics_.width * intrinsics_.height);
-                rs2::depth_sensor sensor = rs_device_.first<rs2::depth_sensor>();
-                camera_scale_ = sensor.get_depth_scale();
+	try {
+		get_camera(rs_device_);
+		rs_config_.enable_stream(RS2_STREAM_DEPTH, RS2_FORMAT_Z16, 30);
+		rs_pipeline_profile_ = rs_pipe_->start(rs_config_);
+		auto depth_stream =
+		  rs_pipeline_profile_.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
+		intrinsics_              = depth_stream.get_intrinsics();
+		realsense_depth_->width  = intrinsics_.width;
+		realsense_depth_->height = intrinsics_.height;
+		realsense_depth_->resize(intrinsics_.width * intrinsics_.height);
+		rs2::depth_sensor sensor = rs_device_.first<rs2::depth_sensor>();
+		camera_scale_            = sensor.get_depth_scale();
 
-                std::cout <<  "Height: " << intrinsics_.height << " Width: " << intrinsics_.width << " Scale: " << camera_scale_ << std::endl;
-        }
-        catch (const rs2::error & e)
-        {
-            std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args() << "):\n    " << e.what() << std::endl;
-            return false;
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << e.what() << std::endl;
-            return false;
-        }
-    return true;
+		logger->log_info(name(),
+		                 "Height: %d Width: %d Scale: %f",
+		                 intrinsics_.height,
+		                 intrinsics_.width,
+		                 camera_scale_);
+
+	} catch (const rs2::error &e) {
+		std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args()
+		          << "):\n    " << e.what() << std::endl;
+		return false;
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		return false;
+	}
+	return true;
 }
 
 /* Get the rs_device pointer and printout camera details
@@ -194,41 +190,37 @@ Realsense2Thread::start_camera()
 void
 Realsense2Thread::get_camera(rs2::device &dev)
 {
-    try {
-            rs_context_ = new rs2::context();
-            rs2::device_list devlist = rs_context_->query_devices();
-            if (devlist.size() == 0){
-                 std::cerr << "No device connected, please connect a RealSense device" << std::endl;
-                 return;
-            }else{
-                std::cout << "found devices: " << devlist.size() << std::endl;
-                dev = devlist.front();
-                std::string name = "Unknown Device";
-                if (dev.supports(RS2_CAMERA_INFO_NAME)){
-                    name = dev.get_info(RS2_CAMERA_INFO_NAME);
-                } else std::cout << "name not supported" << std::endl;
+	try {
+		rs_context_              = new rs2::context();
+		rs2::device_list devlist = rs_context_->query_devices();
+		if (devlist.size() == 0) {
+			std::cerr << "No device connected, please connect a RealSense device" << std::endl;
+			return;
+		} else {
+			std::cout << "found devices: " << devlist.size() << std::endl;
+			dev              = devlist.front();
+			std::string name = "Unknown Device";
+			if (dev.supports(RS2_CAMERA_INFO_NAME)) {
+				name = dev.get_info(RS2_CAMERA_INFO_NAME);
+			} else
+				std::cout << "name not supported" << std::endl;
 
-                std::string sn = "########";
-                if (dev.supports(RS2_CAMERA_INFO_SERIAL_NUMBER)){
-                    sn = std::string("#") + rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
-                } else std::cout << "serial not supported" << std::endl;
+			std::string sn = "########";
+			if (dev.supports(RS2_CAMERA_INFO_SERIAL_NUMBER)) {
+				sn = std::string("#") + rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
+			} else
+				std::cout << "serial not supported" << std::endl;
 
-                std::cout << "name: " << name << " SN: " << sn << std::endl;
-            }
-        }
-        catch (const rs2::error & e)
-        {
-            std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args() << "):\n    " << e.what() << std::endl;
-            return;
-        }
-        catch (const std::exception& e)
-        {
-            std::cerr << e.what() << std::endl;
-            return;
-        }
-
-
-
+			std::cout << "name: " << name << " SN: " << sn << std::endl;
+		}
+	} catch (const rs2::error &e) {
+		std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args()
+		          << "):\n    " << e.what() << std::endl;
+		return;
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		return;
+	}
 }
 
 /*
@@ -237,25 +229,22 @@ Realsense2Thread::get_camera(rs2::device &dev)
 void
 Realsense2Thread::enable_depth_stream()
 {
-
-    std::cout << "ENABLE DEPTH_STREAM:" << std::endl;
-    try {
-        rs2::depth_sensor depth_sensor = rs_device_.first<rs2::depth_sensor>();
-        if (depth_sensor.supports(RS2_OPTION_EMITTER_ENABLED)){
-            depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED, 1.f); // Enable emitter
-            depth_enabled_ = true;
-        }
-    }
-    catch (const rs2::error & e)
-    {
-        std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args() << "):\n    " << e.what() << std::endl;
-        return;
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << e.what() << std::endl;
-        return;
-    }
+	std::cout << "ENABLE DEPTH_STREAM:" << std::endl;
+	try {
+		rs2::depth_sensor depth_sensor = rs_device_.first<rs2::depth_sensor>();
+		if (depth_sensor.supports(RS2_OPTION_EMITTER_ENABLED)) {
+			depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED,
+			                        1.f); // Enable emitter
+			depth_enabled_ = true;
+		}
+	} catch (const rs2::error &e) {
+		std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args()
+		          << "):\n    " << e.what() << std::endl;
+		return;
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		return;
+	}
 }
 
 /*
@@ -264,27 +253,23 @@ Realsense2Thread::enable_depth_stream()
 void
 Realsense2Thread::disable_depth_stream()
 {
-
-    std::cout << "DISABLE DEPTH_STREAM:" << std::endl;
-    try {
-        rs2::depth_sensor depth_sensor = rs_device_.first<rs2::depth_sensor>();
-            if (depth_sensor.supports(RS2_OPTION_EMITTER_ENABLED)){
-                depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED, 0.f); // Disable emitter
-                depth_enabled_ = false;
-            }
-    }
-    catch (const rs2::error & e)
-    {
-        std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args() << "):\n    " << e.what() << std::endl;
-        return;
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << e.what() << std::endl;
-        return;
-    }
+	std::cout << "DISABLE DEPTH_STREAM:" << std::endl;
+	try {
+		rs2::depth_sensor depth_sensor = rs_device_.first<rs2::depth_sensor>();
+		if (depth_sensor.supports(RS2_OPTION_EMITTER_ENABLED)) {
+			depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED,
+			                        0.f); // Disable emitter
+			depth_enabled_ = false;
+		}
+	} catch (const rs2::error &e) {
+		std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args()
+		          << "):\n    " << e.what() << std::endl;
+		return;
+	} catch (const std::exception &e) {
+		std::cerr << e.what() << std::endl;
+		return;
+	}
 }
-
 
 /*
  * printout and free the rs_error if available
@@ -292,7 +277,6 @@ Realsense2Thread::disable_depth_stream()
 void
 Realsense2Thread::log_error()
 {
-
 }
 
 /*
@@ -301,7 +285,6 @@ Realsense2Thread::log_error()
 void
 Realsense2Thread::log_depths(const uint16_t *image)
 {
-
 }
 
 /*
@@ -310,7 +293,6 @@ Realsense2Thread::log_depths(const uint16_t *image)
 void
 Realsense2Thread::stop_camera()
 {
-
 }
 
 /**
