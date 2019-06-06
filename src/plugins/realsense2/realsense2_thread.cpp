@@ -94,8 +94,10 @@ Realsense2Thread::loop()
     if (enable_camera_ && !depth_enabled_) {
         enable_depth_stream();
         return;
-    } else if (!enable_camera_){
+    } else if (!enable_camera_ && depth_enabled_){
         disable_depth_stream();
+        return;
+    } else if (!depth_enabled_){
         return;
     }
 
