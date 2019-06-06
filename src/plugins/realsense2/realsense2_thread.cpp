@@ -245,12 +245,6 @@ Realsense2Thread::enable_depth_stream()
             depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED, 1.f); // Enable emitter
             depth_enabled_ = true;
         }
-        if (depth_sensor.supports(RS2_OPTION_LASER_POWER)){
-            rs2::option_range range = depth_sensor.get_option_range(RS2_OPTION_LASER_POWER);
-            depth_sensor.set_option(RS2_OPTION_LASER_POWER, range.max); // Set max power
-            depth_enabled_ = true;
-        }
-
     }
     catch (const rs2::error & e)
     {
@@ -278,11 +272,6 @@ Realsense2Thread::disable_depth_stream()
                 depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED, 0.f); // Disable emitter
                 depth_enabled_ = false;
             }
-            if (depth_sensor.supports(RS2_OPTION_LASER_POWER)){
-                depth_sensor.set_option(RS2_OPTION_LASER_POWER, 0.f); // Disable laser
-                depth_enabled_ = false;
-            }
-
     }
     catch (const rs2::error & e)
     {
