@@ -57,7 +57,6 @@ HardwareModelsThread::init()
 
   hm_if_ = blackboard->open_for_writing<HardwareModelsInterface>(cfg_interface_.c_str());
   blackboard->register_listener(this);
-  logger->log_error(name(),"Init done");
   wakeup();
   bbil_add_message_interface(hm_if_);
 }
@@ -134,8 +133,8 @@ HardwareModelsThread::clips_add_component(LockPtr<CLIPS::Environment> &clips,con
   CLIPS::Template::pointer temp = clips->get_template("hm-component");
   if (temp) {
     CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-    fact->set_slot("name",component.c_str());
-    fact->set_slot("state",init_state.c_str());
+    fact->set_slot("name",CLIPS::Value(component.c_str(),CLIPS::TYPE_SYMBOL));
+    fact->set_slot("state",CLIPS::Value(init_state.c_str(),CLIPS::TYPE_SYMBOL));
 
     CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
@@ -154,10 +153,10 @@ HardwareModelsThread::clips_add_edge(LockPtr<CLIPS::Environment> &clips,const st
   CLIPS::Template::pointer temp = clips->get_template("hm-edge");
   if (temp) {
     CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-    fact->set_slot("component",component.c_str());
-    fact->set_slot("from",from.c_str());
-    fact->set_slot("to",to.c_str());
-    fact->set_slot("transition",trans.c_str());
+    fact->set_slot("component",CLIPS::Value(component.c_str(),CLIPS::TYPE_SYMBOL));
+    fact->set_slot("from",CLIPS::Value(from.c_str(),CLIPS::TYPE_SYMBOL));
+    fact->set_slot("to",CLIPS::Value(to.c_str(),CLIPS::TYPE_SYMBOL));
+    fact->set_slot("transition",CLIPS::Value(trans.c_str(),CLIPS::TYPE_SYMBOL));
     fact->set_slot("probability",prob);
 
     CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
