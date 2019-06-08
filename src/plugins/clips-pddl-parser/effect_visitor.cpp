@@ -63,14 +63,6 @@ EffectToCLIPSFactVisitor::operator()(ConditionalEffect &ce) const {
 std::vector<std::string>
 EffectToCLIPSFactVisitor::operator()(ActionCost &ce) const {
   std::vector<std::string> res;
-  std::string cost_name = ce.name;
-  int cost = ce.cost;
-  res.push_back(std::string(
-          "(domain-action-cost"
-          " (part-of " + pddl_operator_ + ")"
-          " (cost-name " + cost_name + ")"
-          " (cost " + std::to_string(cost) + ")"
-          ")"));
   return res;
 }
 

@@ -21,8 +21,6 @@
 #include "clips_pddl_parser_thread.h"
 #include <pddl_parser/pddl_parser.h>
 #include <core/threading/mutex_locker.h>
-#include "precondition_visitor.h"
-#include "effect_visitor.h"
 
 #include <core/threading/mutex_locker.h>
 
