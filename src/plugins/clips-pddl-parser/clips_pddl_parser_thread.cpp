@@ -52,6 +52,8 @@ PDDLCLIPSFeature::PDDLCLIPSFeature()
 void
 PDDLCLIPSFeature::init()
 {
+  domain_desc_timestamp_ = 0;
+  last_domain_file_ = "";
 }
 
 void
@@ -102,10 +104,25 @@ PDDLCLIPSFeature::parse_domain(std::string env_name, std::string domain_file)
   pddl_parser::Parser parser;
   try {
     logger->log_info(name(),"Starting pddl parsing for %s on %s",env_name.c_str(),domain_file.c_str());
-    std::ifstream df(domain_file);
-    std::stringstream buffer;
-    buffer << df.rdbuf();
-    domain = parser.parseDomain(buffer.str());
+    struct stat ts;
+    int last_change_time = -1;
+    if (stat(domain_file.c_str(),&ts)) {
+      last_change_time = ts.st_mtime;
+    }
+
+    if (last_change_time == domain_desc_timestamp_ && last_domain_file_ == domain_file) {
+      domain = domain_;
+      logger->log_error(name(),"Reused domain object");
+    } else {
+      std::ifstream df(domain_file);
+      std::stringstream buffer;
+      buffer << df.rdbuf();
+      domain_ = parser.parseDomain(buffer.str());
+      domain_desc_timestamp_ = last_change_time;
+      domain = domain_;
+      last_domain_file_ = domain_file;
+    }
+    
   } catch (pddl_parser::ParserException &e) {
     logger->log_error(("PDDLCLIPS|" + env_name).c_str(),
       "Failed to parse domain: %s", e.what());
