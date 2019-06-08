@@ -25,6 +25,14 @@
 #include <aspect/configurable.h>
 #include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips_feature.h>
+//#include <pddl_parser/pddl_parser.h>
+
+#include "precondition_visitor.h"
+#include "effect_visitor.h"
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <string>
 #include <clipsmm.h>
@@ -61,6 +69,10 @@ class PDDLCLIPSFeature
 
  private:
   std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+  pddl_parser::PddlDomain domain_;
+  int domain_desc_timestamp_;
+  std::string last_domain_file_;
+
 };
 
 #endif /* !PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H__ */
