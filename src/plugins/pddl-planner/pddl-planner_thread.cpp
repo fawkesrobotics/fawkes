@@ -113,6 +113,8 @@ PddlPlannerThread::loop()
   logger->log_info(name(), "Starting PDDL Planning...");
 
   //writes plan into action_list_ or plan_list_ if it is a diagnose
+
+  // Check if domain and problem file exist
   if (FILE *file = fopen(cfg_domain_path_.c_str(),"r")) {
     fclose(file);
   }
@@ -134,7 +136,7 @@ PddlPlannerThread::loop()
   // Have to add multiple plans (possible diagnosises) to robot memory
   if ( !plan_list_.empty() ) {
     int id = 0;
-    for(std::vector<action> plan : plan_list_){
+    for(std::vector<Action> plan : plan_list_){
       std::string matching = std::string(" { plan :" + std::to_string(id) + " } ");
       auto bson_plan = BSONFromActionList(plan,id++);
       if(robot_memory->update(from_json(matching).view(), bson_plan, cfg_collection_,true) == 0 ){
@@ -204,7 +206,7 @@ PddlPlannerThread::ff_planner()
 		                 result.substr(cur_pos, line_end - cur_pos).c_str(),
 		                 cur_pos,
 		                 line_end);
-		action a;
+		Action a;
 		if (line_end < result.find(" ", cur_pos)) {
 			a.name = result.substr(cur_pos, line_end - cur_pos);
 		} else {
@@ -261,7 +263,7 @@ PddlPlannerThread::dbmp_planner()
 		}
 		// remove parantheses
 		std::string action_str = line.substr(1, line.size() - 2);
-		action      a;
+		Action      a;
 		cur_pos = action_str.find(" ", cur_pos + 1);
 		a.name  = StringConversions::to_lower(action_str.substr(0, cur_pos));
 		while (cur_pos != std::string::npos) {
@@ -273,6 +275,10 @@ PddlPlannerThread::dbmp_planner()
 	}
 }
 
+/**
+ * @brief Use Kstar planner for generating the top k plans for the given pddl planning problem
+ * 
+ */
 void
 PddlPlannerThread::kstar_planner()
 {
@@ -302,14 +308,19 @@ PddlPlannerThread::kstar_planner()
 
   result.erase(0,cur_pos);
   size_t end_pos = result.find("Actual search time: ");
+  if (end_pos == std::string::npos) {
+    logger->log_error(name(),"Expected \"Actual search time: \" at the end of planner output but did not found");
+    throw Exception("Unexpected planner output");
+  }
   result.erase(end_pos, result.size()-1);
 
   std::istringstream iss(result);
   std::string line;
 
   // remove surplus line
-  std::vector<action> curr_plan;
+  std::vector<Action> curr_plan;
   while ( getline(iss, line) ) {
+    // Begin of a new plan. Push current plan to plan list
     if (line.find("Plan id:") != std::string::npos){
       if (!curr_plan.empty()) {
         plan_list_.push_back(curr_plan);
@@ -319,20 +330,21 @@ PddlPlannerThread::kstar_planner()
     }
     if (line.find("Plan length") != std::string::npos ||
         line.find("Plan cost") != std::string::npos ||
-       // line.find("cost") != std::string::npos ||
         line.find("order") != std::string::npos ||
         line == ""){
       continue;
     }
 
-    action a;
+    Action a;
     if (line.find("cost") != std::string::npos) {
-      logger->log_info(name(),line.substr(line.find("cost") + 5 , line.length() - 1).c_str());
+      // Update cost of last action in plan
       if (!curr_plan.empty() && curr_plan.back().cost == 0) {
         curr_plan.back().cost = std::stof(line.substr(line.find("cost")+5, line.length() - 1));
       } 
       
     } else {
+      // current line is assumed to contain an action
+      // Expected format eg. move-stuck r-1 c-cs2 wait c-cs2 input:
       a.name = line.substr(0,find_nth_space(line, 1)-1);
       if ( find_nth_space(line, 1) != line.find(':') + 1 ) {
         std::stringstream ss(line.substr(find_nth_space(line, 1),
@@ -388,7 +400,7 @@ PddlPlannerThread::fd_planner()
 	// remove surplus line
 	getline(iss, line);
 	while (getline(iss, line)) {
-		action a;
+		Action a;
 		a.name = line.substr(0, find_nth_space(line, 1));
 		if (find_nth_space(line, 2) != line.rfind(' ') + 1) {
 			std::stringstream ss(
@@ -411,7 +423,7 @@ PddlPlannerThread::BSONFromActionList(const std::vector<action>& action_list, in
   plan.append(basic::kvp("plan",static_cast<int64_t>(plan_id)));
   plan.append(basic::kvp("msg_id", static_cast<int64_t>(plan_if_->msg_id())));
 	plan.append(basic::kvp("actions", [&](basic::sub_array actions) {
-		for (action a : action_list) {
+		for (Action a : action_list) {
 		  cost += a.cost;
 			basic::document action;
 			action.append(basic::kvp("name", a.name));
@@ -426,6 +438,14 @@ PddlPlannerThread::BSONFromActionList(const std::vector<action>& action_list, in
   return plan.extract();
 }
 
+/**
+ * @brief Searches the position of the nth space in a string.
+ *        If there are less than n spaces in the string, the position of the last space is returned
+ * 
+ * @param s String that should be searched for the position of the nth space
+ * @param nth 
+ * @return size_t Position of the nth space in string s
+ */
 size_t
 PddlPlannerThread::find_nth_space(const std::string &s, size_t nth)
 {
@@ -442,15 +462,15 @@ PddlPlannerThread::find_nth_space(const std::string &s, size_t nth)
 void
 PddlPlannerThread::print_action_list()
 {
-	unsigned int count = 0;
-	for (action a : action_list_) {
-		count++;
-		std::string args;
-		for (std::string arg : a.args) {
-			args += arg + " ";
-		}
-		logger->log_info(name(), "Action %d %s with args %s", count, a.name.c_str(), args.c_str());
-	}
+  unsigned int count = 0;
+  for ( Action a : action_list_ ) {
+    count++;
+    std::string args;
+    for ( std::string arg : a.args ) {
+      args += arg + " ";
+    }
+    logger->log_info(name(),"Action %d %s with args %s", count, a.name.c_str(), args.c_str());
+  }
 }
 
 std::string
