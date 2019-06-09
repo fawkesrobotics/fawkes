@@ -200,4 +200,40 @@ gray8_to_rgb_plainc(const unsigned char *mono8,
 	}
 }
 
+/** Convert RGB to RGB_FLOAT
+ * @param rgb RGB source buffer
+ * @param rgb_float RGB_FLOAT destination buffer
+ * @param width width in pixels
+ * @param height height in pixels
+ */
+void
+rgb_to_rgbfloat(const unsigned char *rgb,
+                unsigned char *      rgb_float,
+                unsigned int         width,
+                unsigned int         height)
+{
+	float *float_rgb = reinterpret_cast<float *>(rgb_float);
+	for (unsigned int i = 0; i < 3 * width * height; ++i) {
+		*float_rgb++ = static_cast<float>(*rgb++);
+	}
+}
+
+/** Convert RGB_FLOAT to RGB
+ * @param rgb_float RGB_FLOAT source buffer
+ * @param rgb RGB destination buffer
+ * @param width width in pixels
+ * @param height height in pixels
+ */
+void
+rgbfloat_to_rgb(const unsigned char *rgb_float,
+                unsigned char *      rgb,
+                unsigned int         width,
+                unsigned int         height)
+{
+	const float *float_rgb = reinterpret_cast<const float *>(rgb_float);
+	for (unsigned int i = 0; i < 3 * width * height; ++i) {
+		*rgb++ = static_cast<unsigned char>(*float_rgb++);
+	}
+}
+
 } // end namespace firevision

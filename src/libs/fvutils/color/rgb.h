@@ -98,6 +98,16 @@ void gray8_to_rgb_plainc(const unsigned char *mono8,
                          unsigned int         width,
                          unsigned int         height);
 
+void rgb_to_rgbfloat(const unsigned char *rgb,
+                     unsigned char *      rgb_float,
+                     unsigned int         width,
+                     unsigned int         height);
+
+void rgbfloat_to_rgb(const unsigned char *rgb_float,
+                     unsigned char *      rgb,
+                     unsigned int         width,
+                     unsigned int         height);
+
 void bgr_to_rgb_plainc(const unsigned char *BGR,
                        unsigned char *      RGB,
                        unsigned int         width,
