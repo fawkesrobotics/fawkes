@@ -6,16 +6,16 @@
       Interface to inform the plugin about state changes in components
     </comment>
 
-    <field type="string" length="1024" name="error">Error of last query</field>
-    <field type="string" length="1024" name="result">Result of last query</field>
+    <field type="string" length="1024" name="error">Error state of the plugin</field>
+    <field type="bool" name="busy">Busy flag</field>
   </data>
 
   <message name="StateChange">
     <comment>
-      A component changed its state, by executing the transaction. 
-      Has to match the transactions defined in the yaml hardware model definitions
+      A component changed its state, by executing the transition. 
+      Has to match the transitions defined in the yaml hardware model definitions
     </comment>
     <field type="string" length="1024" name="component">The component that changed its state</field>
-    <field type="string" length="1024" name="transaction">The transaction executed by the component</field>
+    <field type="string" length="1024" name="transition">The transition executed by the component</field>
   </message>
 </interface>

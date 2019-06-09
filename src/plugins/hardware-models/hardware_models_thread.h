@@ -74,7 +74,7 @@ class HardwareModelsThread
 
     void  clips_add_component(fawkes::LockPtr<CLIPS::Environment> &clips,const std::string& component, const std::string& init_state);
     void  clips_add_edge(fawkes::LockPtr<CLIPS::Environment> &clips,const std::string& component, const std::string& from, const std::string& to, const std::string& trans, const double prob);
-    void  clips_add_transaction(const std::string& component, const std::string& transaction) throw();
+    void  clips_add_transition(const std::string& component, const std::string& transition) throw();
 };
 
 #endif
