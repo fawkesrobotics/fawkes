@@ -72,7 +72,9 @@ typedef enum {
 
 	RGB_PLANAR    = 26, /**< RGB with three successive planes of R, G, and B each */
 	YUV420_PLANAR = 27, /**< YUV 4:2:0 in planar format */
-	COLORSPACE_N  = 28  /**< number of colorspaces */
+	RGB_FLOAT     = 28, /**< RGB, 12 bytes per pixel, 4 byte per color, ordered, line by line */
+	BGR_FLOAT     = 29, /**< BGR, 12 bytes per pixel, 4 byte per color, ordered, line by line */
+	COLORSPACE_N  = 30  /**< number of colorspaces */
 } colorspace_t;
 
 size_t         colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int height);
