@@ -127,7 +127,7 @@ PreconditionToCLIPSFactVisitor::operator()(FunctionalCondition fc) const {
     } else if(fc.op == OperatorFlag::EnumType::negation) {
       type = "negation";
     } else {
-      throw ParserException("Unknown operator of functional condition in " + name + ": " + std::to_string(fc.op));
+      return res;
     }
     res.push_back(string("(domain-precondition"
                          " (name " + name + ")"

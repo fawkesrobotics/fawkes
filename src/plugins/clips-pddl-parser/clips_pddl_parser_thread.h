@@ -63,7 +63,7 @@ class PDDLClipsThread
   virtual void clips_context_destroyed(const std::string &env_name);
 
  private:
-  void parse_domain(std::string env_name, std::string domain_file);
+  CLIPS::Value parse_domain(std::string env_name, std::string domain_file);
 
  private:
   std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
