@@ -38,7 +38,7 @@ public:
    */
   explicit ClipsPddlParserPlugin(Configuration *config) : Plugin(config)
   {
-    thread_list.push_back(new PDDLCLIPSFeature());
+    thread_list.push_back(new PDDLClipsThread());
   }
 };
 

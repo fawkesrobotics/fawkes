@@ -20,8 +20,8 @@ include $(BUILDSYSDIR)/clips.mk
 
 LIBS_clips_pddl_parser = fawkescore fawkesclipsaspect fawkespddl_parser
 OBJS_clips_pddl_parser = clips_pddl_parser_plugin.o clips_pddl_parser_thread.o \
-												 clips_pddl_parser_feature.o \
-												 precondition_visitor.o effect_visitor.o
+                          precondition_visitor.o effect_visitor.o
+												  
 
 OBJS_all    = $(OBJS_clips_pddl_parser)
 PLUGINS_all = $(PLUGINDIR)/clips-pddl-parser.$(SOEXT)

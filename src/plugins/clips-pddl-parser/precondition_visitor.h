@@ -2,7 +2,7 @@
  *  precondition_visitor.h - A static visitor to translate a precondition
  *
  *  Created: Mon 16 Oct 2017 18:33:34 CEST 18:33
- *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
+ *  Copyright  2017  Till Hofmann <hofmann@kbsg.rwth-aachen.de> 2019 Daniel Habering
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -39,11 +39,4 @@ class PreconditionToCLIPSFactVisitor : public boost::static_visitor<std::vector<
   uint sub_counter_;
   bool is_main_;
 };
-
-private:
-	std::string parent_;
-	uint        sub_counter_;
-	bool        is_main_;
-};
-
 #endif /* !PLUGINS_CLIPS_PDDL_PARSER_PRECONDITION_VISITOR_H__ */
