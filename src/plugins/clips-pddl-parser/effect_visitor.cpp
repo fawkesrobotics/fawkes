@@ -135,6 +135,9 @@ EffectToCLIPSFactVisitor::operator()(FunctionalEffect &fe) const {
       throw ParserException(std::string("Unknown content of negation of " + pddl_operator_ + " expected vector<Effect>"));
     }
     std::vector<pddl_parser::Effect> effects = boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
+    // since negation is the default constructor for the operator, if the size is 0, we suspect that the effect is empty
+    if (effects.size() == 0) return res;
+    
     if (effects.size() != 1) {
       throw ParserException(std::string("Expected exactly one sub-formula for 'not' in " + pddl_operator_));
     }

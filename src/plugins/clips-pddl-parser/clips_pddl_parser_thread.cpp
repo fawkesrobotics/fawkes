@@ -66,7 +66,7 @@ PDDLClipsThread::clips_context_init(const std::string &env_name,
 {
   envs_[env_name] = clips;
   clips->add_function("parse-pddl-domain",
-      sigc::slot<void, std::string>(
+      sigc::slot<CLIPS::Value, std::string>(
         sigc::bind<0>(
           sigc::mem_fun(*this, &PDDLClipsThread::parse_domain),
           env_name)));
@@ -87,7 +87,7 @@ PDDLClipsThread::clips_context_destroyed(const std::string &env_name)
  * @param env_name The name of the calling environment
  * @param domain_file The path of the domain file to parse.
  */
-void
+CLIPS::Value
 PDDLClipsThread::parse_domain(std::string env_name, std::string domain_file)
 {
   fawkes::MutexLocker lock(envs_[env_name].objmutex_ptr());
@@ -125,7 +125,7 @@ PDDLClipsThread::parse_domain(std::string env_name, std::string domain_file)
   } catch (pddl_parser::ParserException &e) {
     logger->log_error(("PDDLCLIPS|" + env_name).c_str(),
       "Failed to parse domain: %s", e.what());
-    return;
+      return CLIPS::Value("FALSE",CLIPS::TYPE_SYMBOL);
   }
 
   // Add all domain object types
@@ -185,7 +185,7 @@ PDDLClipsThread::parse_domain(std::string env_name, std::string domain_file)
     } catch (pddl_parser::ParserException &e) {
       logger->log_error(("PDDLCLIPS|" + env_name).c_str(),
         "Failed to parse domain: %s", e.what());
-      return;
+      return CLIPS::Value("FALSE",CLIPS::TYPE_SYMBOL);
     }
    
     // ... and effects.
@@ -200,8 +200,9 @@ PDDLClipsThread::parse_domain(std::string env_name, std::string domain_file)
     } catch (pddl_parser::ParserException &e) {
       logger->log_error(("PDDLCLIPS|" + env_name).c_str(),
         "Failed to parse domain: %s", e.what());
-      return;
+      return CLIPS::Value("FALSE",CLIPS::TYPE_SYMBOL);
     }
    
   }
+  return CLIPS::Value("TRUE",CLIPS::TYPE_SYMBOL);
 }
