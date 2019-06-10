@@ -115,6 +115,9 @@ endif
 ifneq ($(HAVE_LIBJPEG),1)
   WARN_TARGETS += warning_libjpeg
 endif
+ifneq ($(HAVE_LIBPNG),1)
+  WARN_TARGETS += warning_libpng
+endif
 HDRS_libfvcams = $(patsubst %.o,%.h,$(OBJS_libfvcams))
 
 OBJS_all = $(OBJS_libfvcams)
@@ -126,7 +129,7 @@ LIBS_build = $(LIBS_all)
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_firewire warning_leutron warning_libjpeg warning_v4l1 warning_v4l2
+.PHONY: $(WARN_TARGETS)
 warning_firewire:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No Firewire support$(TNORMAL) (install libdc1394-devel)";
 
@@ -135,6 +138,9 @@ warning_leutron:
 
 warning_libjpeg:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No JPEG support in file loader$(TNORMAL) (install libjpeg[-devel])";
+
+warning_libpng:
+	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No PNG support in file loader$(TNORMAL) (install libpng[-devel])";
 
 warning_v4l1:
 	$(SILENT)echo -e "$(INDENT_PRINT)--- $(TRED)No V4L1 support$(TNORMAL) ($(HAVE_V4L1_FAIL_REASON))";
