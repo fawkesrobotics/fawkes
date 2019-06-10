@@ -25,7 +25,6 @@
 #include <aspect/configurable.h>
 #include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips_feature.h>
-//#include <pddl_parser/pddl_parser.h>
 
 #include "precondition_visitor.h"
 #include "effect_visitor.h"
@@ -46,20 +45,19 @@ namespace CLIPS {
 namespace fawkes {
 }
 
-class PDDLCLIPSFeature
+class PDDLClipsThread 
 : public fawkes::Thread,
   public fawkes::LoggingAspect,
   public fawkes::CLIPSFeature,
   public fawkes::CLIPSFeatureAspect
 {
  public:
-  PDDLCLIPSFeature();
+  PDDLClipsThread();
 
   virtual void init();
   virtual void finalize();
   virtual void loop();
 
-  //virtual ~PDDLCLIPSFeature();
   virtual void clips_context_init(const std::string &env_name,
 				  fawkes::LockPtr<CLIPS::Environment> &clips);
   virtual void clips_context_destroyed(const std::string &env_name);
@@ -69,6 +67,7 @@ class PDDLCLIPSFeature
 
  private:
   std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+  
   pddl_parser::PddlDomain domain_;
   int domain_desc_timestamp_;
   std::string last_domain_file_;
