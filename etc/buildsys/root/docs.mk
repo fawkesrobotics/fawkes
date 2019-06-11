@@ -25,16 +25,16 @@ apidoc: api.doxygen fawkes.luadoc skiller.luadoc
 quickdoc: api-quick.doxygen
 tracdoc: api-trac.doxygen
 
+GIT_FILES = git ls-files --full-name *.{h,cpp} | awk '{ print "'$$(git rev-parse --show-toplevel)'/"$$1 }'
+
 %.doxygen:
 	$(SILENT) echo -e "[DOC] Building documentation ($(TBOLDGRAY)$@$(TNORMAL)). This may take a while..."
 	$(SILENT) rm -rf doc/api
 	$(SILENT) mkdir -p doc/api
 	$(SILENT) $(DOXYGEN) $(DOCDIR)/doxygen/$*$(if $(SUBMODULE_EXTERN),-submodule).doxygen >/dev/null 2>&1
-	$(SILENT) git ls-files --full-name *.{h,cpp} | awk "{ print \"$$(git rev-parse --show-toplevel)/\"\$$1 }" > git-files.txt
-	$(SILENT) grep -E -e "^[^[:space:]:;,<>?\"*|\\]*:[0-9]+:" warnings.txt -o | grep -E -e "^[^[:space:]:;,<>?\"*|\\]*" warnings.txt -o > warning-files.txt || exit 0
-	$(SILENT) if [ "`grep -Fx -f git-files.txt warning-files.txt | wc -l`" != "0" ]; then \
+	$(SILENT) if [ "`$(FAWKES_BASEDIR)/etc/docscripts/print_known_warnings.pl -w warnings.txt -k <($(GIT_FILES)) | wc -l`" != "0" ]; then \
 		echo -e "$(TRED)--> Warnings have been generated:$(TNORMAL)"; \
-		cat warnings.txt; \
+		$(FAWKES_BASEDIR)/etc/docscripts/print_known_warnings.pl -w warnings.txt -k <($(GIT_FILES)); \
 		exit 1; \
 	else \
 		echo -e "$(TGREEN)--> No warnings. Nice job.$(TNORMAL)"; \
