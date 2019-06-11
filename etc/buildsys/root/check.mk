@@ -28,12 +28,13 @@ __buildsys_root_check_mk_ := 1
 
 YAMLLINT ?= 1
 
+GITFILES = git ls-files --full-name *.{h,cpp} | awk "{ print \"$$(git rev-parse --show-toplevel)/\"\$$1 }"
+
 .PHONY: license-check
 license-check:
 	$(SILENT) echo -e "$(INDENT_PRINT)[CHK] Checking license headers"
-	$(SILENT) git ls-files --full-name *.{h,cpp} | awk "{ print \"$$(git rev-parse --show-toplevel)/\"\$$1 }" > git-files.txt
 	$(SILENTSYMB)if which perl >/dev/null; then \
-		perl $(FAWKES_BASEDIR)/etc/licscripts/find_invlic.pl -k git-files.txt -p src -p etc $(if $(SUBMODULE_EXTERN),-p fawkes/src) $(wildcard $(FAWKES_BASEDIR)/doc/headers/lichead*.*); \
+		perl $(FAWKES_BASEDIR)/etc/licscripts/find_invlic.pl -k <($(GITFILES)) -p src -p etc $(if $(SUBMODULE_EXTERN),-p fawkes/src) $(wildcard $(FAWKES_BASEDIR)/doc/headers/lichead*.*); \
 		if [ $$? = 0 ]; then \
 			echo -e "$(INDENT_PRINT)$(TGREEN)--> All source files have a proper license header.$(TNORMAL)"; \
 		else \
