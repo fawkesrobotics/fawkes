@@ -134,6 +134,17 @@ convert(colorspace_t         from,
 		yvu444packed_to_yuv422planar(src, dst, width, height);
 	} else if ((from == YVU444_PACKED) && (to == YUV422_PACKED)) {
 		yvu444packed_to_yuv422packed(src, dst, width, height);
+	} else if ((from == RGB) && (to == RGB_FLOAT)) {
+		rgb_to_rgbfloat(src, dst, width, height);
+	} else if ((from == RGB_FLOAT) && (to == RGB)) {
+		rgbfloat_to_rgb(src, dst, width, height);
+	} else if ((from == BGR) && (to == BGR_FLOAT)) {
+		rgb_to_rgbfloat(src, dst, width, height); // does the job, see below
+	} else if ((from == BGR_FLOAT) && (to == BGR)) {
+		rgbfloat_to_rgb(src,
+		                dst,
+		                width,
+		                height); // does the job, bc byte order does not play a role for conversion
 	} else {
 		throw fawkes::Exception("Cannot convert image data from %s to %s",
 		                        colorspace_to_string(from),

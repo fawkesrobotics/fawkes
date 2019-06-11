@@ -80,6 +80,10 @@ colorspace_by_name(const char *mode)
 		return CARTESIAN_3D_DOUBLE;
 	} else if (strcmp(mode, "CARTESIAN_3D_FLOAT_RGB") == 0) {
 		return CARTESIAN_3D_FLOAT_RGB;
+	} else if (strcmp(mode, "RGB_FLOAT") == 0) {
+		return RGB_FLOAT;
+	} else if (strcmp(mode, "BGR_FLOAT") == 0) {
+		return BGR_FLOAT;
 	} else {
 		return CS_UNKNOWN;
 	}
@@ -114,6 +118,8 @@ colorspace_to_string(colorspace_t colorspace)
 	case CARTESIAN_3D_DOUBLE: return "CARTESIAN_3D_DOUBLE";
 	case CARTESIAN_3D_FLOAT_RGB: return "CARTESIAN_3D_FLOAT_RGB";
 	case RGB_PLANAR: return "RGB_PLANAR";
+	case RGB_FLOAT: return "RGB_FLOAT";
+	case BGR_FLOAT: return "BGR_FLOAT";
 	default: return "CS_UNKNOWN";
 	}
 }
@@ -164,6 +170,9 @@ colorspace_buffer_size(colorspace_t cspace, unsigned int width, unsigned int hei
 	case CARTESIAN_3D_DOUBLE: return (3 * (size_t)width * height * sizeof(double));
 
 	case CARTESIAN_3D_FLOAT_RGB: return (4 * (size_t)width * height * sizeof(float));
+
+	case RGB_FLOAT:
+	case BGR_FLOAT: return (3 * (size_t)width * height * sizeof(float));
 
 	case CS_UNKNOWN:
 	case COLORSPACE_N: return 0;
