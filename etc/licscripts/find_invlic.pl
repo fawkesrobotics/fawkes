@@ -4,6 +4,7 @@ use File::Find;
 use File::Spec;
 use Fcntl ':mode';
 use Getopt::Long;
+use List::Util qw(any);
 
 my @known_files = ();
 my $known_files_file;
@@ -83,11 +84,12 @@ sub check_file()
       return;
     }
   }
-  if ( ! $use_known_files or File::Spec->rel2abs($entry) ~~ @known_files) { 
+  if ( ! $use_known_files or any { $_ =~ File::Spec->rel2abs($entry) } @known_files) { 
+    #if ( ! $use_known_files or File::Spec->rel2abs($entry) ~~ known_files) { 
     printf("** File %s did NOT match any license\n", $File::Find::dir . "/" . $entry);
     $ok = 0;
   } else {
-    printf("** File %s did NOT match any license, but is not known to git!\n", $File::Find::dir . "/" . $entry);
+    printf("** File %s did NOT match any license, but is not known to git, ignored!\n", $File::Find::dir . "/" . $entry);
   }
 }
 
