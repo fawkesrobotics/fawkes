@@ -172,11 +172,14 @@ Realsense2Thread::start_camera()
 		                 camera_scale_);
 
 	} catch (const rs2::error &e) {
-		std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args()
-		          << "):\n    " << e.what() << std::endl;
+		logger->log_error(name(),
+		                  "RealSense error calling %s ( %s ):\n    %s",
+		                  e.get_failed_function().c_str(),
+		                  e.get_failed_args().c_str(),
+		                  e.what());
 		return false;
 	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
+		logger->log_error(name(), "%s", e.what());
 		return false;
 	}
 	return true;
@@ -199,24 +202,28 @@ Realsense2Thread::get_camera(rs2::device &dev)
 			dev              = devlist.front();
 			std::string name = "Unknown Device";
 			if (dev.supports(RS2_CAMERA_INFO_NAME)) {
-				name = dev.get_info(RS2_CAMERA_INFO_NAME);
-			} else
-				std::cout << "name not supported" << std::endl;
+				dev_name = dev.get_info(RS2_CAMERA_INFO_NAME);
+			} else {
+				logger->log_info(name(), "RS2Option RS2_CAMERA_INFO_NAME not supported %d", 1);
+			}
 
-			std::string sn = "########";
+			std::string dev_sn = "########";
 			if (dev.supports(RS2_CAMERA_INFO_SERIAL_NUMBER)) {
-				sn = std::string("#") + rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
-			} else
-				std::cout << "serial not supported" << std::endl;
-
-			std::cout << "name: " << name << " SN: " << sn << std::endl;
+				dev_sn = std::string("#") + rs_device_.get_info(RS2_CAMERA_INFO_SERIAL_NUMBER);
+			} else {
+				logger->log_info(name(), "RS2Option RS2_CAMERA_INFO_SERIAL_NUMBER not supported");
+			}
+			logger->log_info(name(), "Camera Name: %s, SN: %s", dev_name.c_str(), dev_sn.c_str());
 		}
 	} catch (const rs2::error &e) {
-		std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args()
-		          << "):\n    " << e.what() << std::endl;
+		logger->log_error(name(),
+		                  "RealSense error calling %s ( %s ):\n    %s",
+		                  e.get_failed_function().c_str(),
+		                  e.get_failed_args().c_str(),
+		                  e.what());
 		return;
 	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
+		logger->log_error(name(), "%s", e.what());
 		return;
 	}
 }
@@ -227,7 +234,6 @@ Realsense2Thread::get_camera(rs2::device &dev)
 void
 Realsense2Thread::enable_depth_stream()
 {
-	std::cout << "ENABLE DEPTH_STREAM:" << std::endl;
 	try {
 		rs2::depth_sensor depth_sensor = rs_device_.first<rs2::depth_sensor>();
 		if (depth_sensor.supports(RS2_OPTION_EMITTER_ENABLED)) {
@@ -236,11 +242,14 @@ Realsense2Thread::enable_depth_stream()
 			depth_enabled_ = true;
 		}
 	} catch (const rs2::error &e) {
-		std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args()
-		          << "):\n    " << e.what() << std::endl;
+		logger->log_error(name(),
+		                  "RealSense error calling %s ( %s ):\n    %s",
+		                  e.get_failed_function().c_str(),
+		                  e.get_failed_args().c_str(),
+		                  e.what());
 		return;
 	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
+		logger->log_error(name(), "%s", e.what());
 		return;
 	}
 }
@@ -251,7 +260,6 @@ Realsense2Thread::enable_depth_stream()
 void
 Realsense2Thread::disable_depth_stream()
 {
-	std::cout << "DISABLE DEPTH_STREAM:" << std::endl;
 	try {
 		rs2::depth_sensor depth_sensor = rs_device_.first<rs2::depth_sensor>();
 		if (depth_sensor.supports(RS2_OPTION_EMITTER_ENABLED)) {
@@ -260,11 +268,14 @@ Realsense2Thread::disable_depth_stream()
 			depth_enabled_ = false;
 		}
 	} catch (const rs2::error &e) {
-		std::cerr << "RealSense error calling " << e.get_failed_function() << "(" << e.get_failed_args()
-		          << "):\n    " << e.what() << std::endl;
+		logger->log_error(name(),
+		                  "RealSense error calling %s ( %s ):\n    %s",
+		                  e.get_failed_function().c_str(),
+		                  e.get_failed_args().c_str(),
+		                  e.what());
 		return;
 	} catch (const std::exception &e) {
-		std::cerr << e.what() << std::endl;
+		logger->log_error(name(), "%s", e.what());
 		return;
 	}
 }
