@@ -22,7 +22,7 @@ LIBS_refboxcomm = fawkescore fawkesutils fawkesaspects fawkesblackboard \
 		  fawkesinterface fawkesnetcomm \
 		  GameStateInterface SwitchInterface
 OBJS_refboxcomm = $(patsubst %.cpp,%.o,$(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.cpp))) \
-                  processor/processor.o processor/state_handler.o processor/remotebb.o
+                  processor/processor.o processor/state_handler.o processor/remotebb.o processor/enums.o
 OBJS_all    = $(OBJS_refboxcomm)
 PLUGINS_all = $(PLUGINDIR)/refboxcomm.so
 PLUGINS_build = $(PLUGINS_all)
