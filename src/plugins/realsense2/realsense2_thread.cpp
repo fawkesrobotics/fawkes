@@ -1,11 +1,10 @@
 
 /***************************************************************************
- *  realsense_thread.cpp - realsense
+ *  realsense2_plugin.cpp - realsense2
  *
- *  Plugin created: Mon Jun 13 17:09:44 2016
-
- *  Copyright  2016  Johannes Rothe
- *             2017  Till Hofmann
+ *  Plugin created: Wed May 22 10:09:22 2019
+ *
+ *  Copyright  2019 Christoph Gollok
  *
  ****************************************************************************/
 
@@ -28,10 +27,10 @@
 
 using namespace fawkes;
 
-/** @class RealsenseThread 'realsense_thread.h'
+/** @class Realsense2Thread 'realsense2_thread.h'
  * Driver for the Intel RealSense Camera providing Depth Data as Pointcloud
- * Inspired by Intel® RealSense™ Camera - F200 ROS Nodelet
- * @author Johannes Rothe
+ * Inspired by realsense fawkes plugin
+ * @author Christoph Gollok
  */
 
 Realsense2Thread::Realsense2Thread()
@@ -104,8 +103,7 @@ Realsense2Thread::loop()
 		logger->log_info(name(), "GOT RS2 DEPTH FRAME");
 		error_counter_        = 0;
 		const uint16_t *image = reinterpret_cast<const uint16_t *>(depth_frame.get_data());
-		log_error();
-		Cloud::iterator it = realsense_depth_->begin();
+		Cloud::iterator it    = realsense_depth_->begin();
 		for (int y = 0; y < intrinsics_.height; y++) {
 			for (int x = 0; x < intrinsics_.width; x++) {
 				float scaled_depth = camera_scale_ * (static_cast<float>(*image));
@@ -184,8 +182,8 @@ Realsense2Thread::start_camera()
 	return true;
 }
 
-/* Get the rs_device pointer and printout camera details
- * @return rs_device
+/*
+ * Get the rs_device pointer and printout camera details
  */
 void
 Realsense2Thread::get_camera(rs2::device &dev)
@@ -269,22 +267,6 @@ Realsense2Thread::disable_depth_stream()
 		std::cerr << e.what() << std::endl;
 		return;
 	}
-}
-
-/*
- * printout and free the rs_error if available
- */
-void
-Realsense2Thread::log_error()
-{
-}
-
-/*
- * Testing function to log the depth pixel distancens
- */
-void
-Realsense2Thread::log_depths(const uint16_t *image)
-{
 }
 
 /*
