@@ -198,9 +198,12 @@ Realsense2Thread::get_camera(rs2::device &dev)
 			std::cerr << "No device connected, please connect a RealSense device" << std::endl;
 			return;
 		} else {
-			std::cout << "found devices: " << devlist.size() << std::endl;
-			dev              = devlist.front();
-			std::string name = "Unknown Device";
+			logger->log_info(name(), "found devices: %d", devlist.size());
+			if (devlist.front().is<rs400::advanced_mode>())
+				dev = devlist.front().as<rs400::advanced_mode>();
+			else
+				dev = dev = devlist.front();
+			std::string dev_name = "Unknown Device";
 			if (dev.supports(RS2_CAMERA_INFO_NAME)) {
 				dev_name = dev.get_info(RS2_CAMERA_INFO_NAME);
 			} else {
