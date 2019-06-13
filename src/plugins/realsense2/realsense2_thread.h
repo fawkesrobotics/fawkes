@@ -1,10 +1,10 @@
 
 /***************************************************************************
- *  realsense_thread.h - realsense
+ *  realsense2_thread.h - realsense2
  *
- *  Plugin created: Mon Jun 13 17:09:44 2016
+ *  Plugin created: Wed May 22 10:09:22 2019
 
- *  Copyright  2016  Johannes Rothe
+ *  Copyright  2019 Christoph Gollok
  *
  ****************************************************************************/
 
@@ -72,9 +72,6 @@ private:
 	void get_camera(rs2::device &dev);
 	void enable_depth_stream();
 	void disable_depth_stream();
-	void log_error();
-	void log_depths(const uint16_t *image);
-	void fill_pointcloud();
 	void stop_camera();
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
