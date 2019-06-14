@@ -114,20 +114,36 @@ HardwareModelsThread::clips_context_init(const std::string &env_name,
           for (const auto edge : edges) {
 
               std::string transition = "";
-              try{
+              if (config->exists(std::string(c + "/" + state + "/" + edge + "/transition"))){
                 transition = config->get_string(std::string(c + "/" + state + "/" + edge + "/transition").c_str());
-              } catch (...){
-                logger->log_warn(name(),"Cant find transition value in %s",std::string(c+"/"+state+"/"+edge).c_str());
+
+                double prob = 0.0;
+                if (config->exists(std::string(c + "/" + state + "/" + edge + "/probability").c_str())) {
+                  prob = config->get_float(std::string(c + "/" + state + "/" + edge + "/probability").c_str());
+
+                  clips_add_edge(clips,c,state,edge,transition,prob);
+                  logger->log_debug(name(),"Edge from %s to %s via %s",state.c_str(),edge.c_str(),transition.c_str());
+                }
+
+              } else if (config->exists(std::string(c + "/" + state + "/" + edge + "/transitions"))){
+                std::vector<std::string> transitions = config->get_strings(std::string(c + "/" + state + "/" + edge + "/transitions"));
+                for (std::string transition : transitions) {
+
+                  double prob = 0.0;
+                  if (config->exists(std::string(c + "/" + state + "/" + edge + "/probability").c_str())) {
+                    prob = config->get_float(std::string(c + "/" + state + "/" + edge + "/probability").c_str());
+
+                    clips_add_edge(clips,c,state,edge,transition,prob);
+                    logger->log_debug(name(),"Edge from %s to %s via %s",state.c_str(),edge.c_str(),transition.c_str());
+                  }
+                }
+
+              } else {
+                logger->log_warn(name(),"Cant find transition/transitions value in %s",std::string(c+"/"+state+"/"+edge).c_str());
                 continue;
               }
 
-              double prob = 0.0;
-              if (config->exists(std::string(c + "/" + state + "/" + edge + "/probability").c_str())) {
-                prob = config->get_float(std::string(c + "/" + state + "/" + edge + "/probability").c_str());
-              }
-
-              clips_add_edge(clips,c,state,edge,transition,prob);
-              logger->log_debug(name(),"Edge from %s to %s via %s",state.c_str(),edge.c_str(),transition.c_str());
+              
           }
         } else {
           logger->log_warn(name(),"State %s of %s needs edges field",state.c_str(),c.c_str());
