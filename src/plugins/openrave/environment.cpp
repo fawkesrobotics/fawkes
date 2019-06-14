@@ -498,9 +498,9 @@ OpenRaveEnvironment::run_graspplanning(const std::string &target_name,
 	// Now we can safely run our python code
 
 	// using python C API
-	PyObject *py_main = PyImport_AddModule("main___"); // borrowed reference
+	PyObject *py_main = PyImport_AddModule("__main__"); // borrowed reference
 	if (!py_main) {
-		// main___ should always exist
+		// __main__ should always exist
 		fclose(py_file);
 		Py_EndInterpreter(int_state);
 		PyThreadState_Swap(cur_state);
@@ -511,7 +511,7 @@ OpenRaveEnvironment::run_graspplanning(const std::string &target_name,
 	}
 	PyObject *py_dict = PyModule_GetDict(py_main); // borrowed reference
 	if (!py_dict) {
-		// main___ should have a dictionary
+		// __main__ should have a dictionary
 		fclose(py_file);
 		Py_Finalize();
 		throw fawkes::Exception(
