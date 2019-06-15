@@ -132,11 +132,11 @@ Realsense2Thread::loop()
 void
 Realsense2Thread::finalize()
 {
+	stop_camera();
 	delete rs_pipe_;
 	delete rs_context_;
 	realsense_depth_refptr_.reset();
 	pcl_manager->remove_pointcloud(pcl_id_.c_str());
-	stop_camera();
 	blackboard->close(switch_if_);
 }
 
@@ -292,6 +292,12 @@ Realsense2Thread::disable_depth_stream()
 void
 Realsense2Thread::stop_camera()
 {
+	camera_running_ = false;
+	depth_enabled_  = false;
+	try {
+		rs_pipe_->stop();
+	} catch (const std::exception &e) {
+	}
 }
 
 /**
