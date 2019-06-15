@@ -72,9 +72,8 @@ Realsense2Thread::init()
 	realsense_depth_->resize(0);
 	pcl_manager->add_pointcloud(pcl_id_.c_str(), realsense_depth_refptr_);
 
-	rs_pipe_ = new rs2::pipeline();
-
-	camera_running_ = start_camera();
+	rs_pipe_    = new rs2::pipeline();
+	rs_context_ = new rs2::context();
 }
 
 void
@@ -192,7 +191,6 @@ void
 Realsense2Thread::get_camera(rs2::device &dev)
 {
 	try {
-		rs_context_              = new rs2::context();
 		rs2::device_list devlist = rs_context_->query_devices();
 		if (devlist.size() == 0) {
 			std::cerr << "No device connected, please connect a RealSense device" << std::endl;
