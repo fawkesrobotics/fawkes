@@ -37,6 +37,12 @@
 //forward declaration
 class RobotMemory;
 
+namespace fawkes {
+#ifdef USE_TIMETRACKER
+class TimeTracker;
+#endif
+} // namespace fawkes
+
 class ComputablesManager
 {
 public:
@@ -86,6 +92,13 @@ private:
 	std::string             matching_test_collection_;
 	//cached querries as ((collection, querry), cached_until)
 	std::map<std::tuple<std::string, std::string>, long long> cached_querries_;
+#ifdef USE_TIMETRACKER
+	fawkes::TimeTracker *tt_;
+	unsigned int         tt_loopcount_;
+	unsigned int         ttc_cleanup_;
+	unsigned int         ttc_cleanup_inner_loop_;
+	unsigned int         ttc_cleanup_remove_query_;
+#endif
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_COMPUTABLES_COMPUTABLES_MANAGER_H_ */

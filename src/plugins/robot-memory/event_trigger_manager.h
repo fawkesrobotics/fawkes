@@ -36,6 +36,12 @@
 #include <bsoncxx/builder/basic/document.hpp>
 #include <list>
 
+namespace fawkes {
+#ifdef USE_TIMETRACKER
+class TimeTracker;
+#endif
+} // namespace fawkes
+
 class EventTriggerManager
 {
 	/// Access for robot memory to use the check_events function in the loop
@@ -114,6 +120,15 @@ private:
 	bool                     cfg_debug_;
 
 	std::list<EventTrigger *> triggers;
+
+#ifdef USE_TIMETRACKER
+	fawkes::TimeTracker *tt_;
+	unsigned int         tt_loopcount_;
+	unsigned int         ttc_trigger_loop_;
+	unsigned int         ttc_callback_loop_;
+	unsigned int         ttc_callback_;
+	unsigned int         ttc_reinit_;
+#endif
 };
 
 #endif //FAWKES_SRC_PLUGINS_ROBOT_MEMORY_EVENT_TRIGGER_MANAGER_H_

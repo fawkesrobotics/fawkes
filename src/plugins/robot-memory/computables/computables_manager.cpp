@@ -22,7 +22,11 @@
 #include "computables_manager.h"
 
 #include <core/exception.h>
+#ifdef USE_TIMETRACKER
+#	include <utils/time/tracker.h>
+#endif
 #include <plugins/robot-memory/robot_memory.h>
+#include <utils/time/tracker_macros.h>
 
 #include <chrono>
 #include <mongocxx/exception/operation_exception.hpp>
@@ -54,10 +58,20 @@ ComputablesManager::ComputablesManager(fawkes::Configuration *config, RobotMemor
 	}
 
 	srand(time(NULL));
+#ifdef USE_TIMETRACKER
+	tt_                       = new TimeTracker();
+	tt_loopcount_             = 0;
+	ttc_cleanup_              = tt_->add_class("RobotMemory Cleanup Function Call");
+	ttc_cleanup_inner_loop_   = tt_->add_class("RobotMemory Cleanup Inner Loop");
+	ttc_cleanup_remove_query_ = tt_->add_class("RobotMemory Cleanup Database Remove Query");
+#endif
 }
 
 ComputablesManager::~ComputablesManager()
 {
+#ifdef USE_TIMETRACKER
+	delete tt_;
+#endif
 }
 
 /**
@@ -137,12 +151,14 @@ ComputablesManager::check_and_compute(const document::view &query, std::string c
 void
 ComputablesManager::cleanup_computed_docs()
 {
+	TIMETRACK_START(ttc_cleanup_);
 	long long current_time_ms =
 	  std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 	for (std::map<std::tuple<std::string, std::string>, long long>::iterator it =
 	       cached_querries_.begin();
 	     it != cached_querries_.end();
 	     ++it) {
+		TIMETRACK_START(ttc_cleanup_inner_loop_);
 		if (current_time_ms > it->second) {
 			using namespace bsoncxx::builder;
 			basic::document doc;
@@ -151,8 +167,17 @@ ComputablesManager::cleanup_computed_docs()
 			  basic::kvp("_robmem_info.cached_until", [current_time_ms](basic::sub_document subdoc) {
 				  subdoc.append(basic::kvp("$lt", static_cast<std::int64_t>(current_time_ms)));
 			  }));
+			TIMETRACK_START(ttc_cleanup_remove_query_);
 			robot_memory_->remove(doc, std::get<0>(it->first));
+			TIMETRACK_END(ttc_cleanup_remove_query_);
 			cached_querries_.erase(it->first);
 		}
+		TIMETRACK_END(ttc_cleanup_inner_loop_);
 	}
+	TIMETRACK_END(ttc_cleanup_);
+#ifdef USE_TIMETRACKER
+	if (++tt_loopcount_ % 5 == 0) {
+		tt_->print_to_stdout();
+	}
+#endif
 }

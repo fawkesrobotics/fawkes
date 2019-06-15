@@ -43,6 +43,9 @@
 namespace fawkes {
 class Mutex;
 class RobotMemoryInterface;
+#ifdef USE_TIMETRACKER
+class TimeTracker;
+#endif
 } // namespace fawkes
 
 class RobotMemoryThread : public fawkes::Thread,
@@ -76,6 +79,13 @@ private:
 	fawkes::RobotMemoryIniFin robot_memory_inifin_;
 	BlackboardComputable *    blackboard_computable;
 	TransformComputable *     transform_computable;
+
+#ifdef USE_TIMETRACKER
+	fawkes::TimeTracker *tt_;
+	unsigned int         tt_loopcount_;
+	unsigned int         ttc_msgproc_;
+	unsigned int         ttc_rmloop_;
+#endif
 };
 
 #endif
