@@ -71,7 +71,7 @@ public:
 
 private:
 	bool start_camera();
-	void get_camera(rs2::device &dev);
+	bool get_camera(rs2::device &dev);
 	void enable_depth_stream();
 	void disable_depth_stream();
 	void stop_camera();
@@ -100,15 +100,11 @@ private:
 	fawkes::RefPtr<Cloud> realsense_depth_refptr_;
 	CloudPtr              realsense_depth_;
 
-	rs2::pipeline *       rs_pipe_;
-	rs2::pipeline_profile rs_pipeline_profile_;
-	rs2::context *        rs_context_;
-	rs2::config           rs_config_;
-	rs2::error *          rs_error_;
-	rs2::device           rs_device_;
-	rs2::stream_profile   stream_profile_;
-	rs2::frameset         rs_data_;
-	rs2_intrinsics        intrinsics_;
+	rs2::pipeline *rs_pipe_;
+	rs2::context * rs_context_;
+	rs2::device    rs_device_;
+	rs2::frameset  rs_data_;
+	rs2_intrinsics intrinsics_;
 
 	float       camera_scale_;
 	std::string frame_id_;
@@ -116,7 +112,6 @@ private:
 	bool        camera_running_ = false;
 	bool        enable_camera_  = true;
 	bool        depth_enabled_  = false;
-	int         laser_power_;
 	uint        restart_after_num_errors_;
 	uint        error_counter_ = 0;
 };

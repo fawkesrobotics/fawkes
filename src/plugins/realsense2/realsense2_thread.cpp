@@ -81,6 +81,7 @@ Realsense2Thread::loop()
 {
 	if (!camera_running_) {
 		camera_running_ = start_camera();
+		return;
 	}
 
 	if (cfg_use_switch_) {
@@ -96,7 +97,6 @@ Realsense2Thread::loop()
 	} else if (!depth_enabled_) {
 		return;
 	}
-
 	if (rs_pipe_->poll_for_frames(&rs_data_)) {
 		rs2::frame depth_frame = rs_data_.first(RS2_STREAM_DEPTH);
 		logger->log_info(name(), "GOT RS2 DEPTH FRAME");
@@ -152,10 +152,13 @@ Realsense2Thread::start_camera()
 	}
 
 	try {
-		get_camera(rs_device_);
-		rs_config_.enable_stream(RS2_STREAM_DEPTH, RS2_FORMAT_Z16, 30);
-		rs_pipeline_profile_ = rs_pipe_->start(rs_config_);
-		auto depth_stream =
+		if (!get_camera(rs_device_)) {
+			return false;
+		}
+		rs2::config config;
+		config.enable_stream(RS2_STREAM_DEPTH, RS2_FORMAT_Z16, 30);
+		rs2::pipeline_profile rs_pipeline_profile_ = rs_pipe_->start(config);
+		auto                  depth_stream =
 		  rs_pipeline_profile_.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
 		intrinsics_              = depth_stream.get_intrinsics();
 		realsense_depth_->width  = intrinsics_.width;
@@ -163,12 +166,13 @@ Realsense2Thread::start_camera()
 		realsense_depth_->resize(intrinsics_.width * intrinsics_.height);
 		rs2::depth_sensor sensor = rs_device_.first<rs2::depth_sensor>();
 		camera_scale_            = sensor.get_depth_scale();
-
 		logger->log_info(name(),
 		                 "Height: %d Width: %d Scale: %f",
 		                 intrinsics_.height,
 		                 intrinsics_.width,
 		                 camera_scale_);
+
+		return true;
 
 	} catch (const rs2::error &e) {
 		logger->log_error(name(),
@@ -176,25 +180,25 @@ Realsense2Thread::start_camera()
 		                  e.get_failed_function().c_str(),
 		                  e.get_failed_args().c_str(),
 		                  e.what());
-		return false;
 	} catch (const std::exception &e) {
 		logger->log_error(name(), "%s", e.what());
-		return false;
 	}
-	return true;
+
+	return false;
 }
 
 /*
  * Get the rs_device pointer and printout camera details
  */
-void
+bool
 Realsense2Thread::get_camera(rs2::device &dev)
 {
+	dev = nullptr;
 	try {
 		rs2::device_list devlist = rs_context_->query_devices();
 		if (devlist.size() == 0) {
-			std::cerr << "No device connected, please connect a RealSense device" << std::endl;
-			return;
+			logger->log_warn(name(), "No device connected, please connect a RealSense device");
+			return false;
 		} else {
 			logger->log_info(name(), "found devices: %d", devlist.size());
 			if (devlist.front().is<rs400::advanced_mode>())
@@ -215,6 +219,7 @@ Realsense2Thread::get_camera(rs2::device &dev)
 				logger->log_info(name(), "RS2Option RS2_CAMERA_INFO_SERIAL_NUMBER not supported");
 			}
 			logger->log_info(name(), "Camera Name: %s, SN: %s", dev_name.c_str(), dev_sn.c_str());
+			return true;
 		}
 	} catch (const rs2::error &e) {
 		logger->log_error(name(),
@@ -222,10 +227,10 @@ Realsense2Thread::get_camera(rs2::device &dev)
 		                  e.get_failed_function().c_str(),
 		                  e.get_failed_args().c_str(),
 		                  e.what());
-		return;
+		return false;
 	} catch (const std::exception &e) {
 		logger->log_error(name(), "%s", e.what());
-		return;
+		return false;
 	}
 }
 
