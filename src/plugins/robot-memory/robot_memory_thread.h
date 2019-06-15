@@ -43,6 +43,7 @@
 namespace fawkes {
 class Mutex;
 class RobotMemoryInterface;
+class TimeWait;
 #ifdef USE_TIMETRACKER
 class TimeTracker;
 #endif
@@ -53,7 +54,6 @@ class RobotMemoryThread : public fawkes::Thread,
                           public fawkes::ConfigurableAspect,
                           public fawkes::ClockAspect,
                           public fawkes::MongoDBAspect,
-                          public fawkes::BlockedTimingAspect,
                           public fawkes::BlackBoardAspect,
                           public fawkes::TransformAspect,
                           public fawkes::AspectProviderAspect
@@ -79,6 +79,8 @@ private:
 	fawkes::RobotMemoryIniFin robot_memory_inifin_;
 	BlackboardComputable *    blackboard_computable;
 	TransformComputable *     transform_computable;
+
+	fawkes::TimeWait *timewait_;
 
 #ifdef USE_TIMETRACKER
 	fawkes::TimeTracker *tt_;
