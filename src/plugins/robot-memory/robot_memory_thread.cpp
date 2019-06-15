@@ -26,6 +26,10 @@
 
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
+#ifdef USE_TIMETRACKER
+#	include <utils/time/tracker.h>
+#endif
+#include <utils/time/tracker_macros.h>
 
 #include <bsoncxx/json.hpp>
 #include <chrono>
@@ -64,6 +68,13 @@ RobotMemoryThread::init()
 	//register computables
 	blackboard_computable = new BlackboardComputable(robot_memory, blackboard, logger, config);
 	transform_computable  = new TransformComputable(robot_memory, tf_listener, logger, config);
+
+#ifdef USE_TIMETRACKER
+	tt_           = new TimeTracker();
+	tt_loopcount_ = 0;
+	ttc_msgproc_  = tt_->add_class("Message Processing");
+	ttc_rmloop_   = tt_->add_class("Robot Memory Processing Loop");
+#endif
 }
 
 void
@@ -73,11 +84,15 @@ RobotMemoryThread::finalize()
 	delete transform_computable;
 	robot_memory_inifin_.set_robot_memory(NULL);
 	delete robot_memory;
+#ifdef USE_TIMETRACKER
+	delete tt_;
+#endif
 }
 
 void
 RobotMemoryThread::loop()
 {
+	TIMETRACK_START(ttc_msgproc_);
 	// process interface messages
 	while (!robot_memory->rm_if_->msgq_empty()) {
 		if (robot_memory->rm_if_->msgq_first_is<RobotMemoryInterface::QueryMessage>()) {
@@ -116,6 +131,15 @@ RobotMemoryThread::loop()
 
 		robot_memory->rm_if_->msgq_pop();
 	}
+	TIMETRACK_END(ttc_msgproc_);
 
+	TIMETRACK_START(ttc_rmloop_);
 	robot_memory->loop();
+	TIMETRACK_END(ttc_rmloop_);
+
+#ifdef USE_TIMETRACKER
+	if (++tt_loopcount_ % 5 == 0) {
+		tt_->print_to_stdout();
+	}
+#endif
 }

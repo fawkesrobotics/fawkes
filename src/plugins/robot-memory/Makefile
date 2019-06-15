@@ -29,6 +29,9 @@ OBJS_robot_memory += $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$
 OBJS_all    = $(OBJS_robot_memory)
 PLUGINS_all = $(PLUGINDIR)/robot-memory.so
 
+# Enable this flag for time tracking
+#CFLAGS += -DUSE_TIMETRACKER
+
 ifeq ($(HAVE_ROBOT_MEMORY)$(HAVE_CPP11),11)
   CFLAGS += $(CFLAGS_ROBOT_MEMORY) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_ROBOT_MEMORY)

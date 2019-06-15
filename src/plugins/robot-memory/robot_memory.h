@@ -38,7 +38,10 @@
 
 namespace fawkes {
 class RobotMemoryInterface;
-}
+#ifdef USE_TIMETRACKER
+class TimeTracker;
+#endif
+} // namespace fawkes
 
 class RobotMemory
 {
@@ -206,6 +209,13 @@ private:
 	bool                 is_distributed_database(const std::string &dbcollection);
 	mongocxx::client *   get_mongodb_client(const std::string &collection);
 	mongocxx::collection get_collection(const std::string &dbcollection);
+
+#ifdef USE_TIMETRACKER
+	fawkes::TimeTracker *tt_;
+	unsigned int         tt_loopcount_;
+	unsigned int         ttc_events_;
+	unsigned int         ttc_cleanup_;
+#endif
 };
 
 #endif /* FAWKES_SRC_PLUGINS_ROBOT_MEMORY_ROBOT_MEMORY_H_ */

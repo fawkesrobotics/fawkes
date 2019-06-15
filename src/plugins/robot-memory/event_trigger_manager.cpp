@@ -21,7 +21,11 @@
 
 #include "event_trigger_manager.h"
 
+#ifdef USE_TIMETRACKER
+#	include <utils/time/tracker.h>
+#endif
 #include <plugins/mongodb/utils.h>
+#include <utils/time/tracker_macros.h>
 
 #include <boost/bind.hpp>
 #include <bsoncxx/json.hpp>
@@ -68,6 +72,13 @@ EventTriggerManager::EventTriggerManager(Logger *            logger,
 		cfg_debug_ = config->get_bool("/plugins/robot-memory/more-debug-output");
 	} catch (...) {
 	}
+#ifdef USE_TIMETRACKER
+	tt_                = new fawkes::TimeTracker();
+	ttc_trigger_loop_  = tt_->add_class("RM Trigger Trigger Loop");
+	ttc_callback_loop_ = tt_->add_class("RM Trigger Callback Loop");
+	ttc_callback_      = tt_->add_class("RM Trigger Single Callback");
+	ttc_reinit_        = tt_->add_class("RM Trigger Reinit");
+#endif
 }
 
 EventTriggerManager::~EventTriggerManager()
@@ -78,6 +89,9 @@ EventTriggerManager::~EventTriggerManager()
 	mongo_connection_manager_->delete_client(con_local_);
 	mongo_connection_manager_->delete_client(con_replica_);
 	delete mutex_;
+#ifdef USE_TIMETRACKER
+	delete tt_;
+#endif
 }
 
 void
@@ -86,16 +100,21 @@ EventTriggerManager::check_events()
 	//lock to be thread safe (e.g. registration during checking)
 	MutexLocker lock(mutex_);
 
+	TIMETRACK_START(ttc_trigger_loop_);
 	for (EventTrigger *trigger : triggers) {
 		bool ok = true;
 		try {
 			auto next = trigger->change_stream.begin();
+			TIMETRACK_START(ttc_callback_loop_);
 			while (next != trigger->change_stream.end()) {
 				//logger_->log_warn(name.c_str(), "Triggering: %s", bsoncxx::to_json(*next).c_str());
 				//actually call the callback function
+				TIMETRACK_START(ttc_callback_);
 				trigger->callback(*next);
 				next++;
+				TIMETRACK_END(ttc_callback_);
 			}
+			TIMETRACK_END(ttc_callback_loop_);
 		} catch (operation_exception &e) {
 			logger_->log_error(name.c_str(), "Error while reading the change stream");
 			ok = false;
@@ -103,6 +122,7 @@ EventTriggerManager::check_events()
 		// TODO Do we still need to check whether the cursor is dead?
 		// (with old driver: (!ok || trigger->oplog_cursor->isDead()))
 		if (!ok) {
+			TIMETRACK_START(ttc_reinit_);
 			if (cfg_debug_)
 				logger_->log_debug(name.c_str(), "Tailable Cursor is dead, requerying");
 			//check if collection is local or replicated
@@ -125,8 +145,15 @@ EventTriggerManager::check_events()
 				                   trigger->ns.c_str(),
 				                   e.what());
 			}
+			TIMETRACK_END(ttc_reinit_);
 		}
 	}
+	TIMETRACK_END(ttc_trigger_loop_);
+#ifdef USE_TIMETRACKER
+	if (++tt_loopcount_ % 5 == 0) {
+		tt_->print_to_stdout();
+	}
+#endif
 }
 
 /**
