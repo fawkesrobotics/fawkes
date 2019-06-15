@@ -30,6 +30,7 @@
 #	include <utils/time/tracker.h>
 #endif
 #include <utils/time/tracker_macros.h>
+#include <utils/time/wait.h>
 
 #include <bsoncxx/json.hpp>
 #include <chrono>
@@ -45,8 +46,7 @@ using namespace fawkes;
 
 /** Constructor for thread */
 RobotMemoryThread::RobotMemoryThread()
-: Thread("RobotMemoryThread", Thread::OPMODE_WAITFORWAKEUP),
-  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SENSOR_PROCESS),
+: Thread("RobotMemoryThread", Thread::OPMODE_CONTINUOUS),
   AspectProviderAspect(&robot_memory_inifin_)
 {
 }
@@ -69,6 +69,22 @@ RobotMemoryThread::init()
 	blackboard_computable = new BlackboardComputable(robot_memory, blackboard, logger, config);
 	transform_computable  = new TransformComputable(robot_memory, tf_listener, logger, config);
 
+	int loop_time_microsec;
+	try {
+		float loop_interval = config->get_float("/plugins/robot-memory/loop-interval");
+		loop_time_microsec  = (int)loop_interval * 1e6;
+
+	} catch (Exception &e) {
+		int main_loop_time = config->get_int("/fawkes/mainapp/desired_loop_time");
+		if (main_loop_time > 0) {
+			loop_time_microsec = main_loop_time;
+		} else {
+			// use default of 0.1s
+			loop_time_microsec = 1e5;
+		}
+	}
+	timewait_ = new TimeWait(clock, loop_time_microsec);
+
 #ifdef USE_TIMETRACKER
 	tt_           = new TimeTracker();
 	tt_loopcount_ = 0;
@@ -84,6 +100,7 @@ RobotMemoryThread::finalize()
 	delete transform_computable;
 	robot_memory_inifin_.set_robot_memory(NULL);
 	delete robot_memory;
+	delete timewait_;
 #ifdef USE_TIMETRACKER
 	delete tt_;
 #endif
@@ -93,6 +110,7 @@ void
 RobotMemoryThread::loop()
 {
 	TIMETRACK_START(ttc_msgproc_);
+	timewait_->mark_start();
 	// process interface messages
 	while (!robot_memory->rm_if_->msgq_empty()) {
 		if (robot_memory->rm_if_->msgq_first_is<RobotMemoryInterface::QueryMessage>()) {
@@ -136,10 +154,11 @@ RobotMemoryThread::loop()
 	TIMETRACK_START(ttc_rmloop_);
 	robot_memory->loop();
 	TIMETRACK_END(ttc_rmloop_);
-
 #ifdef USE_TIMETRACKER
 	if (++tt_loopcount_ % 5 == 0) {
 		tt_->print_to_stdout();
 	}
 #endif
+
+	timewait_->wait_systime();
 }
