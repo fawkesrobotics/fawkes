@@ -53,7 +53,7 @@ format-check: check-parallel
 			for f in $$OFFENDING_FILES; do \
 				echo -e "$(INDENT_PRINT)$(TRED)--> $$f is not properly formatted$(TNORMAL)"; \
 			done; \
-			NUM_FILES=$$(git ls-files *.{h,cpp} | wc -l); \
+			NUM_FILES=$$(git ls-files \*.{h,cpp} | wc -l); \
 			BAD_FILES=$$(wc -w <<< "$$OFFENDING_FILES"); \
 			echo -e "$(INDENT_PRINT)$(TRED)--> $$BAD_FILES/$$NUM_FILES have bad formatting.$(TNORMAL)"; \
 			exit 1; \
