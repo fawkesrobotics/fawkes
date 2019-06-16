@@ -67,6 +67,19 @@ ComputablesManager::ComputablesManager(fawkes::Configuration *config, RobotMemor
 #endif
 }
 
+/**
+ * Copy-construct a ComputablesManager.
+ * Do *not* copy-construct the computables that are managed by the manager, but
+ * only call the constructor with the other's config and robot memory.
+ * If you want to use a computable with the new manager, you will need to
+ * register it again.
+ * @param other A reference to the other ComputablesManager to copy from.
+ */
+ComputablesManager::ComputablesManager(const ComputablesManager &other)
+: ComputablesManager(other.config_, other.robot_memory_)
+{
+}
+
 ComputablesManager::~ComputablesManager()
 {
 #ifdef USE_TIMETRACKER

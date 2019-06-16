@@ -84,6 +84,9 @@ public:
 	}
 
 private:
+	ComputablesManager(const ComputablesManager &other);
+
+private:
 	std::string            name = "RobotMemory ComputablesManager";
 	fawkes::Configuration *config_;
 	RobotMemory *          robot_memory_;
