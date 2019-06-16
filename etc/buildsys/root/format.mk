@@ -24,7 +24,7 @@ __buildsys_root_format_mk_ := 1
 format-clang: check-parallel
 	$(SILENT) echo -e "$(INDENT_PRINT)[FMT] Formatting full tree"
 	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
-		ALL_FILES=$$(git ls-files *.{h,cpp}); \
+		ALL_FILES=$$(git ls-files \*.{h,cpp}); \
 		if type -p parallel >/dev/null; then \
 			parallel -u --will-cite --bar clang-format -i ::: $$ALL_FILES; \
 		else \
@@ -39,7 +39,7 @@ format-clang: check-parallel
 format-modified-clang: check-parallel
 	$(SILENT) echo -e "$(INDENT_PRINT)[FMT] Formatting modified files (git)"
 	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
-		ALL_FILES=$$(git ls-files -m *.{h,cpp}); \
+		ALL_FILES=$$(git ls-files -m \*.{h,cpp}); \
 		if type -p parallel >/dev/null; then \
 			parallel -u --will-cite --bar clang-format -i ::: $$ALL_FILES; \
 		else \
@@ -72,7 +72,7 @@ format-emacs: check-parallel
 	$(SILENT) echo -e "$(INDENT_PRINT)[FMT] Formatting (emacs) where necessary"
 	$(SILENT) echo -e "$(INDENT_PRINT)[FMT] $(TYELLOW)Use 'format' target to use clang-format$(TNORMAL)"
 	$(SILENTSYMB)if type -p emacs >/dev/null; then \
-		ALL_FILES=$$(git ls-files *.{h,cpp}); \
+		ALL_FILES=$$(git ls-files \*.{h,cpp}); \
 		if type -p parallel >/dev/null; then \
 			export FAWKES_BASEDIR=$(abspath $(FAWKES_BASEDIR)); \
 			parallel -u --will-cite --bar --results /tmp/emacs-format -- emacs -q --batch {} -l $(abspath $(FAWKES_BASEDIR))/etc/format-scripts/emacs-format-cpp.el -f format-code ::: $$ALL_FILES; \

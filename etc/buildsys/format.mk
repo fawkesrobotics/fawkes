@@ -23,8 +23,8 @@ format-modified-clang:
 	$(SILENT) echo -e "$(INDENT_PRINT)[FMT] Formatting modified files (git)"
 	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
 		pushd $(SRCDIR) >/dev/null; \
-		MODIFIED_FILES=$$(git ls-files -m *.{h,cpp}); \
-		UNTRACKED_FILES=$$(git ls-files --exclude-standard --others *.{h,cpp}); \
+		MODIFIED_FILES=$$(git ls-files -m \*.{h,cpp}); \
+		UNTRACKED_FILES=$$(git ls-files --exclude-standard --others \*.{h,cpp}); \
 		FILES=$$(echo "$$MODIFIED_FILES" "$$UNTRACKED_FILES" | tr ' ' '\n' | sort -u); \
 		if [ -n "$$FILES" ]; then \
 			if type -p parallel >/dev/null; then \
@@ -44,7 +44,7 @@ format-all:
 	$(SILENT) echo -e "$(INDENT_PRINT)[FMT] Formatting all local files (git)"
 	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
 		pushd $(SRCDIR) >/dev/null; \
-		FILES=$$(git ls-files *.{h,cpp}); \
+		FILES=$$(git ls-files \*.{h,cpp}); \
 		if [ -n "$$FILES" ]; then \
 			if type -p parallel >/dev/null; then \
 				parallel -u --will-cite --bar clang-format -i ::: $$FILES; \
@@ -62,7 +62,7 @@ format-all:
 format-diff:
 	$(SILENTSYMB)if type -p clang-format >/dev/null; then \
 		pushd $(SRCDIR) >/dev/null; \
-		FILES=$$(git ls-files *.{h,cpp}); \
+		FILES=$$(git ls-files \*.{h,cpp}); \
 		if [ -n "$$FILES" ]; then \
 			for f in $$FILES; do \
 				DIFF=$$(diff -u $$f <(clang-format $$f)); \

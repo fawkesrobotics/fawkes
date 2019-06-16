@@ -33,7 +33,7 @@ MERGE_BASE=$($DIFF --old-line-format='' --new-line-format='' \
              | head -1)
 
 AFFECTED_FILES=$(git diff --name-only $MERGE_BASE HEAD | grep -E '\.(cpp|h)$' | paste -sd " " -)
-MODIFIED_FILES=$(git ls-files -m *.{h,cpp})
+MODIFIED_FILES=$(git ls-files -m \*.{h,cpp})
 
 # If no (C++) files are affected we are done
 if [ -z "$AFFECTED_FILES" -a -z "$MODIFIED_FILES" ]; then
