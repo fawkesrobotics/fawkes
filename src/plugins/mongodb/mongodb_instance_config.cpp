@@ -84,9 +84,10 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 		termination_grace_period_  = config->get_uint(prefix + "termination-grace-period");
 		clear_data_on_termination_ = config->get_bool(prefix + "clear-data-on-termination");
 		port_                      = config->get_uint(prefix + "port");
-		data_path_                 = config->get_string(prefix + "data-path");
-		log_path_                  = config->get_string(prefix + "log/path");
-		log_append_                = config->get_bool(prefix + "log/append");
+		bind_ip_    = config->get_string_or_default(std::string(prefix + "bind_ip").c_str(), "0.0.0.0");
+		data_path_  = config->get_string(prefix + "data-path");
+		log_path_   = config->get_string(prefix + "log/path");
+		log_append_ = config->get_bool(prefix + "log/append");
 		try {
 			replica_set_ = config->get_string(prefix + "replica-set");
 			;
@@ -101,7 +102,8 @@ MongoDBInstanceConfig::MongoDBInstanceConfig(Configuration *config,
 		}
 	}
 
-	argv_ = {"mongod", "--port", std::to_string(port_), "--dbpath", data_path_};
+	argv_ = {
+	  "mongod", "--bind_ip", bind_ip_, "--port", std::to_string(port_), "--dbpath", data_path_};
 
 	if (!log_path_.empty()) {
 		if (log_append_) {

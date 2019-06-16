@@ -75,6 +75,7 @@ private:
 	unsigned int termination_grace_period_;
 	float        loop_interval_;
 	bool         clear_data_on_termination_;
+	std::string  bind_ip_;
 	unsigned int port_;
 	std::string  data_path_;
 	std::string  log_path_;
