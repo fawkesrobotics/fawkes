@@ -28,6 +28,10 @@
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
 #include <utils/system/hostinfo.h>
+#ifdef USE_TIMETRACKER
+#	include <utils/time/tracker.h>
+#endif
+#include <utils/time/tracker_macros.h>
 
 #include <bsoncxx/builder/basic/document.hpp>
 #include <chrono>
@@ -82,6 +86,9 @@ RobotMemory::~RobotMemory()
 	mongo_connection_manager_->delete_client(mongodb_client_distributed_);
 	delete trigger_manager_;
 	blackboard_->close(rm_if_);
+#ifdef USE_TIMETRACKER
+	delete tt_;
+#endif
 }
 
 void
@@ -159,13 +166,29 @@ RobotMemory::init()
 	computables_manager_ = new ComputablesManager(config_, this);
 
 	log_deb("Initialized RobotMemory");
+
+#ifdef USE_TIMETRACKER
+	tt_           = new TimeTracker();
+	tt_loopcount_ = 0;
+	ttc_events_   = tt_->add_class("RobotMemory Events");
+	ttc_cleanup_  = tt_->add_class("RobotMemory Cleanup");
+#endif
 }
 
 void
 RobotMemory::loop()
 {
+	TIMETRACK_START(ttc_events_);
 	trigger_manager_->check_events();
+	TIMETRACK_END(ttc_events_);
+	TIMETRACK_START(ttc_cleanup_);
 	computables_manager_->cleanup_computed_docs();
+	TIMETRACK_END(ttc_cleanup_);
+#ifdef USE_TIMETRACKER
+	if (++tt_loopcount_ % 5 == 0) {
+		tt_->print_to_stdout();
+	}
+#endif
 }
 
 /**
