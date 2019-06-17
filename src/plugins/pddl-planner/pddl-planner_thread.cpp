@@ -28,11 +28,13 @@
 #include <bsoncxx/builder/basic/document.hpp>
 #include <bsoncxx/json.hpp>
 #include <fstream>
+#include <filesystem>
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <utils/misc/string_conversions.h>
+#include <utils/misc/string_split.h>
 #include <unistd.h>
 #include <ctime>
 #include <cstdlib>
@@ -40,6 +42,7 @@
 using namespace fawkes;
 using namespace mongocxx;
 using namespace bsoncxx;
+namespace fs = std::filesystem;
 
 /** @class PddlPlannerThread 'pddl-planner_thread.h' 
  * Starts a pddl planner and writes the resulting plan into the robot memory
@@ -295,8 +298,7 @@ PddlPlannerThread::kstar_planner()
 	std::string result = run_planner(command);
 
   logger->log_info(name(),"Removing temporary planner output.");
-  std::remove("output");
-  std::remove("output.sas");
+  fs::remove_all("found_plans");
 
   size_t cur_pos = 0;
   if ( result.find("Plan id:", cur_pos) == std::string::npos) {
@@ -307,57 +309,60 @@ PddlPlannerThread::kstar_planner()
   }
 
   result.erase(0,cur_pos);
-  size_t end_pos = result.find("Actual search time: ");
+  size_t end_pos = result.find("Number of plans found: ");
+
   if (end_pos == std::string::npos) {
-    logger->log_error(name(),"Expected \"Actual search time: \" at the end of planner output but did not found");
+    logger->log_error(name(),"Expected \"Number of plans found: \" at the end of planner output but did not found");
     throw Exception("Unexpected planner output");
   }
+  int plan_count = 0;
+  size_t new_line = result.find("\n",end_pos);
+  plan_count = std::stoi(result.substr(end_pos + 22, new_line - (end_pos + 22)));
+  if (plan_count == 0) {
+	  throw Exception("Could not find solutions");
+  }
+
   result.erase(end_pos, result.size()-1);
 
-  std::istringstream iss(result);
-  std::string line;
+  std::string found_plans_path = "found_plans";
 
-  // remove surplus line
   std::vector<Action> curr_plan;
-  while ( getline(iss, line) ) {
-    // Begin of a new plan. Push current plan to plan list
-    if (line.find("Plan id:") != std::string::npos){
-      if (!curr_plan.empty()) {
-        plan_list_.push_back(curr_plan);
-        curr_plan.clear();
-      }
-      continue;
-    }
-    if (line.find("Plan length") != std::string::npos ||
-        line.find("Plan cost") != std::string::npos ||
-        line.find("order") != std::string::npos ||
-        line == ""){
-      continue;
-    }
+  for (const auto & entry : fs::directory_iterator(found_plans_path)) {
+	  std::ifstream plan_file (entry.path().string());
+	  if(plan_file.is_open()) {
+		std::string line;
+		while (getline(plan_file,line)){
+			if (line.at(0) == ';') {
+				size_t cost_pos = line.find("cost = ");
+				if (cost_pos != std::string::npos) {
+					std::vector<std::string> line_splitted = str_split(line," ");
+					for (size_t i = 0; i < line_splitted.size() - 1; ++i) {
+						if (line_splitted[i] == "="){
+							curr_plan[curr_plan.size() - 1].cost = std::stof(line_splitted[i+1]);
+							break;
+						}
+					}
+				}
+			} else {
+				Action a;
+				line = line.substr(1,line.size() - 2);
+				std::vector<std::string> line_splitted = str_split(line," ");
+				a.name = line_splitted[0];
 
-    Action a;
-    if (line.find("cost") != std::string::npos) {
-      // Update cost of last action in plan
-      if (!curr_plan.empty() && curr_plan.back().cost == 0) {
-        curr_plan.back().cost = std::stof(line.substr(line.find("cost")+5, line.length() - 1));
-      } 
-      
-    } else {
-      // current line is assumed to contain an action
-      // Expected format eg. move-stuck r-1 c-cs2 wait c-cs2 input:
-      a.name = line.substr(0,find_nth_space(line, 1)-1);
-      if ( find_nth_space(line, 1) != line.find(':') + 1 ) {
-        std::stringstream ss(line.substr(find_nth_space(line, 1),
-              line.find(':') - find_nth_space(line,1)));
-        std::string item;
-        while (getline(ss, item, ' ')) {
-          a.args.push_back(item);
-        }
-      }
-      curr_plan.push_back(a);
-    }
-   
+				for (size_t i = 1; i < line_splitted.size(); ++i) {
+					a.args.push_back(line_splitted[i]);
+				}
+				curr_plan.push_back(a);
+			}
+		}
+	  } else {
+		  logger->log_error(name(),"Cant find %s",entry.path().string().c_str());
+		  continue;
+	  }
+	  plan_list_.push_back(curr_plan);
+	  curr_plan.clear();
   }
+
 
 }
 
