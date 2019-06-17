@@ -139,10 +139,11 @@ PddlPlannerThread::loop()
   // Have to add multiple plans (possible diagnosises) to robot memory
   if ( !plan_list_.empty() ) {
     int id = 0;
-    for(std::vector<Action> plan : plan_list_){
-      std::string matching = std::string(" { plan :" + std::to_string(id) + " } ");
+    for(std::vector<Action> plan : plan_list_) {
+      std::string matching = std::string(" { \"plan\" : " + std::to_string(id) + " } ");
       auto bson_plan = BSONFromActionList(plan,id++);
-      if(robot_memory->update(from_json(matching).view(), bson_plan, cfg_collection_,true) == 0 ){
+	  bsoncxx::document::view_or_value filter_doc = from_json(matching);
+      if(robot_memory->update(from_json(matching), bson_plan, cfg_collection_,true) == 0 ){
         logger->log_error(name(),"Failed to update plan");
       }
     }
@@ -156,8 +157,8 @@ PddlPlannerThread::loop()
   		plan_if_->set_success(true);
   	} else {
   		logger->log_error(name(), "Updating plan failed, action list empty!");
-  		robot_memory->update(from_json("{plan:{$exists:true}}").view(),
-		                     from_json("{plan:0}").view(),
+  		robot_memory->update(from_json("{\"plan\":{$exists:true}}"),
+		                     from_json("{\"plan\":0}"),
 		                     cfg_collection_,
 		                     true);
   		plan_if_->set_success(false);
@@ -427,7 +428,7 @@ PddlPlannerThread::BSONFromActionList(const std::vector<action>& action_list, in
   float cost = 0;
   plan.append(basic::kvp("plan",static_cast<int64_t>(plan_id)));
   plan.append(basic::kvp("msg_id", static_cast<int64_t>(plan_if_->msg_id())));
-	plan.append(basic::kvp("actions", [&](basic::sub_array actions) {
+  plan.append(basic::kvp("actions", [&](basic::sub_array actions) {
 		for (Action a : action_list) {
 		  cost += a.cost;
 			basic::document action;
@@ -437,6 +438,7 @@ PddlPlannerThread::BSONFromActionList(const std::vector<action>& action_list, in
 					args.append(arg);
 				}
 			}));
+			actions.append(action);
 		}
 	}));
   plan.append(basic::kvp("cost",cost));
