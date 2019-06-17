@@ -247,7 +247,14 @@ Realsense2Thread::enable_depth_stream()
 			depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED,
 			                        1.f); // Enable emitter
 			depth_enabled_ = true;
+		} else if (depth_sensor.supports(RS2_OPTION_LASER_POWER)) {
+			rs2::option_range range = depth_sensor.get_option_range(RS2_OPTION_LASER_POWER);
+			depth_sensor.set_option(RS2_OPTION_LASER_POWER, range.max); // Set max power
+			depth_enabled_ = true;
+		} else {
+			logger->log_warn(name(), "Enable depth stream not supported on device");
 		}
+
 	} catch (const rs2::error &e) {
 		logger->log_error(name(),
 		                  "RealSense error calling %s ( %s ):\n    %s",
@@ -273,6 +280,12 @@ Realsense2Thread::disable_depth_stream()
 			depth_sensor.set_option(RS2_OPTION_EMITTER_ENABLED,
 			                        0.f); // Disable emitter
 			depth_enabled_ = false;
+		} else if (depth_sensor.supports(RS2_OPTION_LASER_POWER)) {
+			rs2::option_range range = depth_sensor.get_option_range(RS2_OPTION_LASER_POWER);
+			depth_sensor.set_option(RS2_OPTION_LASER_POWER, range.min); // Set max power
+			depth_enabled_ = false;
+		} else {
+			logger->log_warn(name(), "Disable depth stream not supported on device");
 		}
 	} catch (const rs2::error &e) {
 		logger->log_error(name(),
