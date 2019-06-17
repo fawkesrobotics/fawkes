@@ -99,10 +99,9 @@ Realsense2Thread::loop()
 	}
 	if (rs_pipe_->poll_for_frames(&rs_data_)) {
 		rs2::frame depth_frame = rs_data_.first(RS2_STREAM_DEPTH);
-		logger->log_info(name(), "GOT RS2 DEPTH FRAME");
-		error_counter_        = 0;
-		const uint16_t *image = reinterpret_cast<const uint16_t *>(depth_frame.get_data());
-		Cloud::iterator it    = realsense_depth_->begin();
+		error_counter_         = 0;
+		const uint16_t *image  = reinterpret_cast<const uint16_t *>(depth_frame.get_data());
+		Cloud::iterator it     = realsense_depth_->begin();
 		for (int y = 0; y < intrinsics_.height; y++) {
 			for (int x = 0; x < intrinsics_.width; x++) {
 				float scaled_depth = camera_scale_ * (static_cast<float>(*image));
@@ -201,10 +200,12 @@ Realsense2Thread::get_camera(rs2::device &dev)
 			return false;
 		} else {
 			logger->log_info(name(), "found devices: %d", devlist.size());
-			if (devlist.front().is<rs400::advanced_mode>())
+			if (devlist.front().is<rs400::advanced_mode>()) {
 				dev = devlist.front().as<rs400::advanced_mode>();
-			else
-				dev = dev = devlist.front();
+			} else {
+				dev = devlist.front();
+			}
+
 			std::string dev_name = "Unknown Device";
 			if (dev.supports(RS2_CAMERA_INFO_NAME)) {
 				dev_name = dev.get_info(RS2_CAMERA_INFO_NAME);
