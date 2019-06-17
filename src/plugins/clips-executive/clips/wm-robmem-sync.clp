@@ -185,6 +185,12 @@
 	(retract ?wi)
 )
 
+(deffunction wm-robmem-flush ()
+	(bind ?query (bson-create))
+	(robmem-remove ?*WM-ROBMEM-SYNC-COLLECTION* ?query)
+	(bson-destroy ?query)
+)
+
 
 (deffunction wm-robmem-sync-create-fact-doc (?wf ?identity ?update-timestamp)
 	(bind ?doc (bson-create))
