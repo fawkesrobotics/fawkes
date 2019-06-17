@@ -99,22 +99,22 @@ RobotMemory::init()
 	default_collection_ = "robmem.test";
 	try {
 		default_collection_ = config_->get_string("/plugins/robot-memory/default-collection");
-	} catch (Exception &e) {
+	} catch (Exception &) {
 	}
 	try {
 		debug_ = config_->get_bool("/plugins/robot-memory/more-debug-output");
-	} catch (Exception &e) {
+	} catch (Exception &) {
 	}
 	database_name_ = "robmem";
 	try {
 		database_name_ = config_->get_string("/plugins/robot-memory/database");
-	} catch (Exception &e) {
+	} catch (Exception &) {
 	}
 	distributed_dbs_          = config_->get_strings("/plugins/robot-memory/distributed-db-names");
 	cfg_startup_grace_period_ = 10;
 	try {
 		cfg_startup_grace_period_ = config_->get_uint("/plugins/robot-memory/startup-grace-period");
-	} catch (Exception &e) {
+	} catch (Exception &) {
 	} // ignored, use default
 
 	cfg_coord_database_ = config_->get_string("/plugins/robot-memory/coordination/database");
@@ -131,7 +131,7 @@ RobotMemory::init()
 		try {
 			mongodb_client_local_ = mongo_connection_manager_->create_client("robot-memory-local");
 			break;
-		} catch (fawkes::Exception &e) {
+		} catch (fawkes::Exception &) {
 			logger_->log_info(name_, "Waiting for local");
 			std::this_thread::sleep_for(500ms);
 		}
@@ -147,7 +147,7 @@ RobotMemory::init()
 				mongodb_client_distributed_ =
 				  mongo_connection_manager_->create_client("robot-memory-distributed");
 				break;
-			} catch (fawkes::Exception &e) {
+			} catch (fawkes::Exception &) {
 				logger_->log_info(name_, "Waiting for distributed");
 				std::this_thread::sleep_for(500ms);
 			}
