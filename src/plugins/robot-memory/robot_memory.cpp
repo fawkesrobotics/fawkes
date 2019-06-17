@@ -876,10 +876,10 @@ RobotMemory::mutex_try_lock(const std::string &name, const std::string &identity
 	}
 
 	basic::document update_doc;
-	update_doc.append(kvp("$currentDate", [](basic::sub_document subdoc) {
+	update_doc.append(basic::kvp("$currentDate", [](basic::sub_document subdoc) {
 		subdoc.append(basic::kvp("lock-time", true));
 	}));
-	update_doc.append(kvp("$set", [locked_by](basic::sub_document subdoc) {
+	update_doc.append(basic::kvp("$set", [locked_by](basic::sub_document subdoc) {
 		subdoc.append(basic::kvp("locked", true));
 		subdoc.append(basic::kvp("locked-by", locked_by));
 	}));
@@ -1081,7 +1081,9 @@ RobotMemory::mutex_setup_ttl(float max_age_sec)
 
 	try {
 		collection collection = client->database(cfg_coord_database_)[cfg_coord_mutex_collection_];
-		collection.create_index(keys.view(), make_document(kvp("expireAfterSeconds", max_age_sec)));
+		collection.create_index(keys.view(),
+		                        builder::basic::make_document(
+		                          builder::basic::kvp("expireAfterSeconds", max_age_sec)));
 	} catch (operation_exception &e) {
 		logger_->log_warn(name_, "Creating TTL index failed: %s", e.what());
 		return false;
