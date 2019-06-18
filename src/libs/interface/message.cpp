@@ -101,6 +101,7 @@ Message::Message(const Message &mesg)
 	_sender_thread_name = strdup(mesg.sender_thread_name());
 	_type               = strdup(mesg._type);
 	time_enqueued_      = new Time(mesg.time_enqueued_);
+	fieldinfo_list_     = NULL;
 
 	_transmit_via_iface              = NULL;
 	sender_interface_instance_serial = 0;
@@ -140,6 +141,7 @@ Message::Message(const Message *mesg)
 	sender_interface_instance_serial = 0;
 	recipient_interface_mem_serial   = 0;
 	time_enqueued_                   = new Time(mesg->time_enqueued_);
+	fieldinfo_list_                  = NULL;
 
 	memcpy(data_ptr, mesg->data_ptr, data_size);
 
