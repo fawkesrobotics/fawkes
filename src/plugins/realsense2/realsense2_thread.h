@@ -109,6 +109,7 @@ private:
 	float       camera_scale_;
 	std::string frame_id_;
 	std::string pcl_id_;
+	std::string switch_if_name_;
 	bool        camera_running_ = false;
 	bool        enable_camera_  = true;
 	bool        depth_enabled_  = false;

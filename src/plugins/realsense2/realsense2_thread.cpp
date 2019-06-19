@@ -45,10 +45,12 @@ Realsense2Thread::init()
 {
 	// set config values
 	const std::string cfg_prefix = "/realsense2/";
-	frame_id_                    = config->get_string(cfg_prefix + "frame_id");
-	pcl_id_                      = config->get_string(cfg_prefix + "pcl_id");
+	frame_id_ = config->get_string_or_default((cfg_prefix + "frame_id").c_str(), "cam_conveyor");
+	pcl_id_ = config->get_string_or_default((cfg_prefix + "pcl_id").c_str(), "/camera/depth/points");
+	switch_if_name_ =
+	  config->get_string_or_default((cfg_prefix + "switch_if_name").c_str(), "realsense2");
 	restart_after_num_errors_ =
-	  config->get_uint_or_default(std::string(cfg_prefix + "restart_after_num_errors").c_str(), 50);
+	  config->get_uint_or_default((cfg_prefix + "restart_after_num_errors").c_str(), 50);
 
 	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
 
@@ -58,7 +60,7 @@ Realsense2Thread::init()
 		logger->log_info(name(), "Switch will be ignored");
 	}
 
-	switch_if_ = blackboard->open_for_writing<SwitchInterface>("realsense2");
+	switch_if_ = blackboard->open_for_writing<SwitchInterface>(switch_if_name_.c_str());
 	switch_if_->set_enabled(true);
 	switch_if_->write();
 
