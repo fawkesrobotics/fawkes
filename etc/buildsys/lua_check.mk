@@ -81,10 +81,17 @@ ifeq ($(HAVE_LUA),1)
         TOLUAPP := tolua++
       endif
 
-      # Gentoo (on x86_64, lib is a symlink to lib64)
-      ifneq ($(wildcard $(SYSROOT)/usr/lib/libtolua++.$(SOEXT)),)
-        _HAVE_TOLUA_LIB := 1
-        TOLUA_LIBS := tolua++ stdc++
+      # Gentoo
+      ifeq ($(ARCH),$(filter $(ARCH),x86_64 aarch64 ppc64 ppc64le s390x))
+        ifneq ($(wildcard $(SYSROOT)/usr/lib64/libtolua++.$(SOEXT)),)
+          _HAVE_TOLUA_LIB := 1
+          TOLUA_LIBS := tolua++ stdc++
+        endif
+      else
+        ifneq ($(wildcard $(SYSROOT)/usr/lib/libtolua++.$(SOEXT)),)
+          _HAVE_TOLUA_LIB := 1
+          TOLUA_LIBS := tolua++ stdc++
+        endif
       endif
       ifneq ($(wildcard $(SYSROOT)/usr/bin/tolua++),)
         _HAVE_TOLUA_BIN := 1
