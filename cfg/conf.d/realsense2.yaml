@@ -12,10 +12,14 @@ realsense2:
 
   # If true, the camera will be enabled/disabled on incoming Enable/Disable
   # messages. If false, switch messages will be ignored.
-  # use_switch: true
+  use_switch: true
+
+  # Desired Frame rate. Device will try deliver new frames in time.
+  # 0 for don't care
+  frame_rate: 30
 
   # Number of retries after unsuccessful polling before restarting the camera
-  # restart_after_num_errors: 50
+  restart_after_num_errors: 50
 
   # Section to set the Realsense device options
   device_options:

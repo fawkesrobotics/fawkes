@@ -110,6 +110,8 @@ private:
 	std::string frame_id_;
 	std::string pcl_id_;
 	std::string switch_if_name_;
+	uint        frame_rate_;
+	float       laser_power_;
 	bool        camera_running_ = false;
 	bool        enable_camera_  = true;
 	bool        depth_enabled_  = false;
