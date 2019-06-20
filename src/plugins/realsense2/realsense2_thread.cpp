@@ -51,6 +51,8 @@ Realsense2Thread::init()
 	  config->get_string_or_default((cfg_prefix + "switch_if_name").c_str(), "realsense2");
 	restart_after_num_errors_ =
 	  config->get_uint_or_default((cfg_prefix + "restart_after_num_errors").c_str(), 50);
+	frame_rate_  = config->get_uint_or_default((cfg_prefix + "frame_rate").c_str(), 30);
+	laser_power_ = config->get_float_or_default((cfg_prefix + "laser_power").c_str(), -1);
 
 	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
 
@@ -157,7 +159,7 @@ Realsense2Thread::start_camera()
 			return false;
 		}
 		rs2::config config;
-		config.enable_stream(RS2_STREAM_DEPTH, RS2_FORMAT_Z16, 30);
+		config.enable_stream(RS2_STREAM_DEPTH, RS2_FORMAT_Z16, frame_rate_);
 		rs2::pipeline_profile rs_pipeline_profile_ = rs_pipe_->start(config);
 		auto                  depth_stream =
 		  rs_pipeline_profile_.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
@@ -168,10 +170,11 @@ Realsense2Thread::start_camera()
 		rs2::depth_sensor sensor = rs_device_.first<rs2::depth_sensor>();
 		camera_scale_            = sensor.get_depth_scale();
 		logger->log_info(name(),
-		                 "Height: %d Width: %d Scale: %f",
+		                 "Height: %d Width: %d Scale: %f FPS: %d",
 		                 intrinsics_.height,
 		                 intrinsics_.width,
-		                 camera_scale_);
+		                 camera_scale_,
+		                 frame_rate_);
 
 		return true;
 
@@ -243,6 +246,8 @@ Realsense2Thread::get_camera(rs2::device &dev)
 void
 Realsense2Thread::enable_depth_stream()
 {
+	logger->log_info(name(), "Enable depth Stream");
+
 	try {
 		rs2::depth_sensor depth_sensor = rs_device_.first<rs2::depth_sensor>();
 		if (depth_sensor.supports(RS2_OPTION_EMITTER_ENABLED)) {
@@ -250,8 +255,12 @@ Realsense2Thread::enable_depth_stream()
 			                        1.f); // Enable emitter
 			depth_enabled_ = true;
 		} else if (depth_sensor.supports(RS2_OPTION_LASER_POWER)) {
-			rs2::option_range range = depth_sensor.get_option_range(RS2_OPTION_LASER_POWER);
-			depth_sensor.set_option(RS2_OPTION_LASER_POWER, range.max); // Set max power
+			if (laser_power_ == -1) {
+				rs2::option_range range = depth_sensor.get_option_range(RS2_OPTION_LASER_POWER);
+				laser_power_            = range.max;
+			}
+			logger->log_info(name(), "Enable depth stream with Laser Power: %f", laser_power_);
+			depth_sensor.set_option(RS2_OPTION_LASER_POWER, laser_power_); // Set max power
 			depth_enabled_ = true;
 		} else {
 			logger->log_warn(name(), "Enable depth stream not supported on device");
@@ -276,6 +285,8 @@ Realsense2Thread::enable_depth_stream()
 void
 Realsense2Thread::disable_depth_stream()
 {
+	logger->log_info(name(), "Disable Depth Stream");
+
 	try {
 		rs2::depth_sensor depth_sensor = rs_device_.first<rs2::depth_sensor>();
 		if (depth_sensor.supports(RS2_OPTION_EMITTER_ENABLED)) {
