@@ -20,7 +20,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 SUBDIRS	= bbsync bblogger webview ttmainloop rrd \
 	  laser imu flite festival joystick openrave \
 	  katana jaco pantilt roomba nao robotino \
-	  bumblebee2 realsense perception amcl \
+	  bumblebee2 realsense realsense2 perception amcl \
 	  skiller luaagent \
 	  laser-filter laser-lines laser-cluster laser-pointclouds \
 	  static_transforms navgraph navgraph-clusters navgraph-generator colli \
