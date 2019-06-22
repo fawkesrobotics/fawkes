@@ -4,6 +4,7 @@
 #   Created on Mon Jun 13 17:09:44 2016
 #   Copyright (C) 2016 by Johannes Rothe
 #                 2018 by Till Hofmann
+#                 2019 by Christoph Gollok
 #
 #*****************************************************************************
 #
