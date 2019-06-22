@@ -42,10 +42,10 @@
 #	include <librealsense2/rs.hpp>
 #	include <librealsense2/rs_advanced_mode.hpp>
 #else
-#	include <librealsense2/rsutil.h>
+#	include <librealsense/rsutil.h>
 
-#	include <librealsense2/rs.hpp>
-#	include <librealsense2/rs_advanced_mode.hpp>
+#	include <librealsense/rs.hpp>
+#	include <librealsense/rs_advanced_mode.hpp>
 #endif
 
 #include <string>
