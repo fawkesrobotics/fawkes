@@ -20,9 +20,11 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/pcl.mk
 include $(BUILDCONFDIR)/tf/tf.mk
 
-CFLAGS += $(CFLAGS_CPP11)
-CFLAGS  += $(CFLAGS_TF) $(CFLAGS_PCL) $(CFFLAGS_conveyor_pose)
-LDFLAGS += $(LDFLAGS_TF) $(LDFLAGS_PCL)
+CFLAGS  +=  $(CFLAGS_CPP11)
+CFLAGS  +=  $(CFLAGS_TF) $(CFLAGS_PCL) $(CFFLAGS_conveyor_pose)
+CFLAGS  += `$(PKGCONFIG) --cflags realsense2`
+LDFLAGS +=  $(LDFLAGS_TF) $(LDFLAGS_PCL)
+LDFLAGS += `$(PKGCONFIG) --libs realsense2`
 
 LIBS_realsense2 = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                       fawkesblackboard fawkesinterface \
@@ -33,29 +35,19 @@ OBJS_realsense2 = realsense2_plugin.o realsense2_thread.o
 OBJS_all    = $(OBJS_realsense2)
 PLUGINS_all = $(PLUGINDIR)/realsense2.$(SOEXT)
 
-REALSENSE2_INCLUDE_PATHS_ = /usr/include/librealsense2 /usr/local/include/librealsense2
-REALSENSE_INCLUDE_PATHS_ = /usr/include/librealsense /usr/local/include/librealsense
+REALSENSE_MIN_VERSION = 2.16.0
 
-ifneq ($(wildcard $(addsuffix /rs.h,$(REALSENSE2_INCLUDE_PATHS_))),)
-  # The old librealsense has been moved to librealsense1, librealsense is now
-  # librealsense2.
-  CFLAGS += -DHAVE_REALSENSE2
-  LIBS_realsense2 += realsense2
-  PLUGINS_build = $(PLUGINS_all)
-else ifneq ($(wildcard $(addsuffix /rs.h,$(REALSENSE_INCLUDE_PATHS_))),)
-  # No librealsense2 but there is a librealsense.
-  # Check its version by checking for RS_API_MAJOR_VERSION in the header.
-  REALSENSE_VERSION=$(shell awk \
-    '/^\#define\s+RS2_API_MAJOR_VERSION\s+\S+/{ print $$3; }' \
-    $(firstword $(wildcard $(addsuffix /rs.h,$(REALSENSE_INCLUDE_PATHS_)))))
-  ifeq ($(REALSENSE_VERSION),2)
-    LIBS_realsense2 += realsense2
-    PLUGINS_build = $(PLUGINS_all)
-  else
-    WARN_TARGETS += warning_librealsense_version
-  endif
+ifeq ($(shell $(PKGCONFIG) --exists realsense2; echo $$?),0)
+    ifeq ($(shell $(PKGCONFIG) --atleast-version $(REALSENSE_MIN_VERSION) realsense2; echo $$?),0)
+        CFLAGS += -DHAVE_REALSENSE2
+        LIBS_realsense2 += realsense2
+        PLUGINS_build = $(PLUGINS_all)
+    else
+        WARN_TARGETS += warning_librealsense_version
+	REALSENSE_VERSION = $(shell $(PKGCONFIG) --modversion realsense2)
+    endif
 else
-  WARN_TARGETS += warning_librealsense
+    WARN_TARGETS += warning_librealsense
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
@@ -63,9 +55,9 @@ all: $(WARN_TARGETS)
 
 .PHONY: warning_librealsense warning_librealsense_version
 warning_librealsense:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Realsense Plugin$(TNORMAL) (librealsense2 not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Realsense2 Plugin$(TNORMAL) (librealsense2 not found)"
 warning_librealsense_version:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Realsense Plugin$(TNORMAL) (incompatible librealsense version $(REALSENSE_VERSION))"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting Realsense2 Plugin$(TNORMAL) (incompatible librealsense version $(REALSENSE_VERSION); required >= $(REALSENSE_MIN_VERSION))"
 endif
 
 include $(BUILDSYSDIR)/base.mk
