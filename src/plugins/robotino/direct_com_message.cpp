@@ -758,7 +758,7 @@ void
 DirectRobotinoComMessage::escape()
 {
 	unsigned short to_escape = 0;
-	for (int i = 1; i < payload_size_ + 4; ++i) {
+	for (unsigned int i = 1; i < payload_size_ + MSG_METADATA_SIZE; ++i) {
 		if (data_[i] == MSG_HEAD || data_[i] == MSG_DATA_ESCAPE) {
 			++to_escape;
 		}
@@ -772,7 +772,7 @@ DirectRobotinoComMessage::escape()
 		escaped_data_[0] = MSG_HEAD;
 		unsigned char *p = escaped_data_;
 		*p++             = MSG_HEAD;
-		for (unsigned int i = 1; i < payload_size_ + (MSG_METADATA_SIZE - 1); ++i) {
+		for (unsigned int i = 1; i < payload_size_ + MSG_METADATA_SIZE; ++i) {
 			if (data_[i] == MSG_HEAD || data_[i] == MSG_DATA_ESCAPE) {
 				*p++ = MSG_DATA_ESCAPE;
 				*p++ = data_[i] ^ MSG_DATA_MANGLE;
