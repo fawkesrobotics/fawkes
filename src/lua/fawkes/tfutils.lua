@@ -28,7 +28,7 @@ module(..., fawkes.modinit.module_init)
 -- @param src_frame source coordinate frame
 function transform(src_pos, src_frame, target_frame)
    if not tf:can_transform(src_frame, target_frame, fawkes.Time:new(0,0)) then
-      -- no transform currently available
+      print_error("tfutils.transform: Transform from %s to %s unavailable", src_frame, target_frame)
       return nil
    end
 
@@ -71,7 +71,7 @@ end
 --         ori is either a Quaternion object if src.ori was an object, or an {x,y,z,w} table if src.ori was a table.
 function transform6D(src_pos, src_frame, target_frame)
    if not tf:can_transform(src_frame, target_frame, fawkes.Time:new(0,0)) then
-      -- no transform currently available
+      print_error("tfutils.transform6D: Transform from %s to %s unavailable", src_frame, target_frame)
       return nil
    end
 
@@ -92,13 +92,13 @@ function transform6D(src_pos, src_frame, target_frame)
       elseif is_quaternion(src_pos.ori) then
          from_r = src_pos.ori
       else
-         printf("tfutils.transform6D: invalid input data: tolua.type(src_pos.ori) = %s", tolua.type(src_pos.ori))
+         print_error("tfutils.transform6D: invalid input data: tolua.type(src_pos.ori) = %s", tolua.type(src_pos.ori))
          return nil
       end
       from_p = fawkes.tf.Pose:new(from_r, from_t)
       from_sp = fawkes.tf.StampedPose(from_p, fawkes.Time:new(0,0), src_frame)
    else
-      printf("tfutils.transform6D: invalid input data: tolua.type(src_pos) = %s", tolua.type(src_pos.ori))
+      print_error("tfutils.transform6D: invalid input data: tolua.type(src_pos) = %s", tolua.type(src_pos.ori))
       return nil
    end
    
