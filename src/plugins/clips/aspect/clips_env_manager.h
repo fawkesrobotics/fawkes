@@ -60,6 +60,7 @@ private:
 	CLIPS::Values clips_now();
 	CLIPS::Values clips_now_systime();
 	void          guarded_load(const std::string &env_name, const std::string &filename);
+	void          quit();
 
 private:
 	Logger *logger_;
