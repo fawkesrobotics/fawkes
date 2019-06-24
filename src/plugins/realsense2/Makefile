@@ -22,9 +22,7 @@ include $(BUILDCONFDIR)/tf/tf.mk
 
 CFLAGS  +=  $(CFLAGS_CPP11)
 CFLAGS  +=  $(CFLAGS_TF) $(CFLAGS_PCL) $(CFFLAGS_conveyor_pose)
-CFLAGS  += `$(PKGCONFIG) --cflags realsense2`
 LDFLAGS +=  $(LDFLAGS_TF) $(LDFLAGS_PCL)
-LDFLAGS += `$(PKGCONFIG) --libs realsense2`
 
 LIBS_realsense2 = m fawkescore fawkesutils fawkesaspects fawkesbaseapp \
                       fawkesblackboard fawkesinterface \
@@ -39,7 +37,9 @@ REALSENSE_MIN_VERSION = 2.16.0
 
 ifeq ($(shell $(PKGCONFIG) --exists realsense2; echo $$?),0)
     ifeq ($(shell $(PKGCONFIG) --atleast-version $(REALSENSE_MIN_VERSION) realsense2; echo $$?),0)
-        CFLAGS += -DHAVE_REALSENSE2
+        CFLAGS  += -DHAVE_REALSENSE2
+	CFLAGS  += $(shell $(PKGCONFIG) --cflags realsense2)
+	LDFLAGS += $(shell $(PKGCONFIG) --libs realsense2)
         LIBS_realsense2 += realsense2
         PLUGINS_build = $(PLUGINS_all)
     else
