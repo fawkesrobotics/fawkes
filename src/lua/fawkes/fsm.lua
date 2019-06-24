@@ -355,6 +355,10 @@ function FSM:reset()
       self.current:do_exit()
    end
 
+   for n,s in pairs(self.states) do
+      s:reset()
+   end
+
    for k,_ in pairs(self.vars) do
       self.vars[k] = nil
    end
@@ -367,9 +371,6 @@ function FSM:reset()
 	 s:prepare()
       end
       self.prepared = true
-   end
-   for n,s in pairs(self.states) do
-      s:reset()
    end
 
    self.trace         = {}
