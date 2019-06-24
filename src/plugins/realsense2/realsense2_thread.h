@@ -31,24 +31,14 @@
 #include <aspect/logging.h>
 #include <aspect/pointcloud.h>
 #include <core/threading/thread.h>
+#include <librealsense2/rsutil.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
-#include <thread>
-
-#ifdef HAVE_REALSENSE2
-#	include <librealsense2/rsutil.h>
-
-#	include <librealsense2/rs.hpp>
-#	include <librealsense2/rs_advanced_mode.hpp>
-#else
-#	include <librealsense/rsutil.h>
-
-#	include <librealsense/rs.hpp>
-#	include <librealsense/rs_advanced_mode.hpp>
-#endif
-
+#include <librealsense2/rs.hpp>
+#include <librealsense2/rs_advanced_mode.hpp>
 #include <string>
+#include <thread>
 
 namespace fawkes {
 class SwitchInterface;

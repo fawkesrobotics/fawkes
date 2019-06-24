@@ -37,7 +37,6 @@ REALSENSE_MIN_VERSION = 2.16.0
 
 ifeq ($(shell $(PKGCONFIG) --exists realsense2; echo $$?),0)
     ifeq ($(shell $(PKGCONFIG) --atleast-version $(REALSENSE_MIN_VERSION) realsense2; echo $$?),0)
-        CFLAGS  += -DHAVE_REALSENSE2
 	CFLAGS  += $(shell $(PKGCONFIG) --cflags realsense2)
 	LDFLAGS += $(shell $(PKGCONFIG) --libs realsense2)
         LIBS_realsense2 += realsense2
