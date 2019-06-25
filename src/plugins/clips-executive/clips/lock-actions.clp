@@ -103,7 +103,7 @@
 	                    (action-name unlock) (state RUNNING)
 	                    (param-names $?param-names) (param-values $?param-values))
 	?mf <- (mutex (name ?name&:(eq ?name (plan-action-arg name ?param-names ?param-values)))
-	              (request UNLOCK) (response UNLOCKED))
+	              (state OPEN) (request UNLOCK))
 	=>
 	(modify ?pa (state EXECUTION-SUCCEEDED))
 	(modify ?mf (request NONE) (response NONE))
