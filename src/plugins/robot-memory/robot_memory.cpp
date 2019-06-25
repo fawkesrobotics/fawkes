@@ -1052,7 +1052,7 @@ RobotMemory::mutex_renew_lock(const std::string &name, const std::string &identi
 		                                   .upsert(false)
 		                                   .return_document(options::return_document::k_after)
 		                                   .write_concern(write_concern));
-		return true;
+		return static_cast<bool>(new_doc);
 	} catch (operation_exception &e) {
 		logger_->log_warn(name_, "Renewing lock on mutex %s failed: %s", name.c_str(), e.what());
 		return false;
