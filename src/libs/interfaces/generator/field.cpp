@@ -153,6 +153,15 @@ InterfaceField::getLength() const
 	return length;
 }
 
+/** Get maximum index (length - 1)
+ * @return maximum index
+ */
+std::string
+InterfaceField::getMaxIdx() const
+{
+	return max_idx;
+}
+
 /** Get length value.
  * This gives the length of the value as a uint instead of a string
  * which is sufficient for the generation of the interface but may not
@@ -267,6 +276,7 @@ InterfaceField::setLength(const std::string &length)
 {
 	this->length_value = (unsigned int)atoi(length.c_str());
 	this->length       = length;
+	this->max_idx      = std::to_string(length_value - 1);
 }
 
 /** Set valid for time.

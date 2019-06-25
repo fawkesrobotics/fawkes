@@ -54,6 +54,7 @@ public:
 	std::string              getStructType() const;
 	std::string              getPlainAccessType() const;
 	std::string              getLength() const;
+	std::string              getMaxIdx() const;
 	unsigned int             getLengthValue() const;
 	std::vector<std::string> getFlags() const;
 	std::string              getValidFor() const;
@@ -74,6 +75,7 @@ private:
 	bool                                is_enum_type;
 	std::string                         comment;
 	std::string                         length;
+	std::string                         max_idx;
 	unsigned int                        length_value;
 	std::string                         validfor;
 	std::string                         default_value;
