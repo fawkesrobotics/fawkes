@@ -363,7 +363,7 @@
 		(if (time> ?ts ?sm:update-timestamp)
 		then
 			(printout debug "wm-robmem-sync-delete: removing " ?id crlf)
-			(retract ?wf)
+			(retract ?wf ?sm)
 		else
 			(printout warn "wm-robmem-sync-delete: received delete for " ?id
 								" with older timetamp than our own" crlf)
