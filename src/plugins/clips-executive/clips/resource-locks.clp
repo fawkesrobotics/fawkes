@@ -37,6 +37,7 @@
   "Request a mutex for each required resource if none of the respective mutexes
    is already locked or has a pending request."
   (goal (mode COMMITTED)
+        (id ?goal-id)
         (acquired-resources)
         (required-resources $?req&:(> (length$ ?req) 0)))
   (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
@@ -47,13 +48,14 @@
   (foreach ?res ?req
     (printout warn "Locking resource " ?res crlf)
     (mutex-try-lock-async (resource-to-mutex ?res))
+    (assert (resource-locks-resource-requested-for ?res ?goal-id))
   )
 )
 
-(defrule resource-locks-fast-reject-goal
-  "If a resource already locked, either by someone else or for a different
-   goal, we have not acquired any resources, and we have no pending requests,
-   then we can directly reject the goal."
+(defrule resource-locks-fast-reject-goal-locked-by-other-agent
+  "If a resource already locked by someone else, we have not acquired any
+   resources, and we have no pending requests, then we can directly reject the
+   goal."
   (wm-fact (key cx identity) (value ?identity))
   ?g <- (goal (mode COMMITTED)
               (id ?goal-id)
@@ -62,49 +64,55 @@
   ; The mutex is locked and there is no unprocessed request, which means that
   ; it was either locked by someone else or for a different goal.
   (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
-         (state LOCKED) (request NONE) (locked-by ?locker))
+         (state LOCKED) (request NONE) (locked-by ?locker&~?identity))
   (not (mutex (name ?n1&:(member$ (mutex-to-resource ?n1) ?req))
               (request ~NONE)))
   =>
-  (if (neq ?locker ?identity)
-    (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
-                   " is already locked by " ?locker crlf)
-  else
-    (if (not (do-for-fact ((?og goal))
-               (member$ (mutex-to-resource ?n) ?og:acquired-resources)
-               (printout warn "Rejecting goal " ?goal-id ", "
-                              (mutex-to-resource ?n)
-                              " is already locked for " ?og:id crlf)))
-     then
-      (printout error "Rejecting goal " ?goal-id ", resource "
-                      (mutex-to-resource ?n)
-                      " is already locked, but could not determine why!" crlf)
-    )
-  )
+  (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
+                 " is already locked by " ?locker crlf)
+  (modify ?g (mode FINISHED) (outcome REJECTED))
+)
+
+(defrule resource-locks-fast-reject-goal-locked-for-another-goal
+  "If a resource already locked for another goal, we have not acquired any
+   resources, and we have no pending requests, then we can directly reject the
+   goal."
+  ?g <- (goal (mode COMMITTED)
+              (id ?goal)
+              (acquired-resources)
+              (required-resources $? ?res $?))
+  (resource-locks-resource-requested-for ?res ?other-goal&~?goal)
+  (not (mutex (name ?n1&:(eq ?n1 (resource-to-mutex ?res)))
+              (request ~NONE)))
+  =>
+  (printout warn "Rejecting goal " ?goal ", " ?res
+                 " is already locked for " ?other-goal crlf)
   (modify ?g (mode FINISHED) (outcome REJECTED))
 )
 
 (defrule resource-locks-lock-acquired
-  ?m <- (mutex (name ?res) (request LOCK) (response ACQUIRED))
-  ?g <- (goal (mode COMMITTED)
+  (resource-locks-resource-requested-for ?res ?goal-id)
+  ?m <- (mutex (name ?n&:(eq ?n (resource-to-mutex ?res)))
+               (request LOCK) (response ACQUIRED))
+  ?g <- (goal (mode COMMITTED) (id ?goal-id)
               (required-resources $?req)
               (acquired-resources $?acq
-                &:(member$ (mutex-to-resource ?res) (set-diff ?req ?acq))))
+                &:(member$ ?res (set-diff ?req ?acq))))
   =>
-  (modify ?g (acquired-resources (append$ ?acq (mutex-to-resource ?res))))
+  (modify ?g (acquired-resources (append$ ?acq (mutex-to-resource ?n))))
   (modify ?m (request NONE) (response NONE))
 )
 
 (defrule resource-locks-lock-rejected-release-acquired-resources
   "A lock was rejected, therefore release all acquired resources."
-  ?m <- (mutex (name ?res)
+  ?m <- (mutex (name ?n)
                (request LOCK)
                (response REJECTED|ERROR)
                (error-msg ?err))
-  ?g <- (goal (mode COMMITTED)
+  ?g <- (goal (mode COMMITTED) (id ?goal-id)
               (required-resources $?req)
               (acquired-resources $?acq
-                &:(member$ (mutex-to-resource ?res) (set-diff ?req ?acq))))
+                &:(member$ (mutex-to-resource ?n) (set-diff ?req ?acq))))
   ; We cannot abort a pending request. Thus, we first need to wait to get
   ; responses for all requested locks.
   (not (mutex (name ?on&:(member$ (mutex-to-resource ?on) ?req))
@@ -165,4 +173,11 @@
   (modify ?g (acquired-resources
               (delete-member$ ?acq (mutex-to-resource ?res))))
   (modify ?m (request NONE) (response NONE))
+)
+
+(defrule resource-locks-cleanup-lock-requests
+  ?request <- (resource-locks-resource-requested-for ?res ?goal-id)
+  (not (goal (id ?goal-id) (mode COMMITTED)))
+  =>
+  (retract ?request)
 )
