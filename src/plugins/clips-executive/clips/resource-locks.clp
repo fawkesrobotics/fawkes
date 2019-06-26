@@ -51,20 +51,30 @@
 )
 
 (defrule resource-locks-fast-reject-goal
-  "If a resource is locked by someone else, we have not acquired any resources,
-   and we have no pending requests, then we can directly reject the goal."
+  "If a resource already locked, either by someone else or for a different
+   goal, we have not acquired any resources, and we have no pending requests,
+   then we can directly reject the goal."
   (wm-fact (key cx identity) (value ?identity))
   ?g <- (goal (mode COMMITTED)
               (id ?goal-id)
               (acquired-resources)
               (required-resources $?req))
+  ; The mutex is locked and there is no unprocessed request, which means that
+  ; it was either locked by someone else or for a different goal.
   (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
-         (state LOCKED) (locked-by ?locker&~?identity))
+         (state LOCKED) (request NONE) (locked-by ?locker))
   (not (mutex (name ?n1&:(member$ (mutex-to-resource ?n1) ?req))
               (request ~NONE)))
   =>
-  (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
-                 " is already locked by " ?locker crlf)
+  (if (neq ?locker ?identity)
+    (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
+                   " is already locked by " ?locker crlf)
+  else
+    (do-for-fact ((?og goal)) (member$ (mutex-to-resource ?n) ?og:acquired-resources)
+      (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
+                     " is already locked for " ?og:id crlf)
+    )
+  )
   (modify ?g (mode FINISHED) (outcome REJECTED))
 )
 
