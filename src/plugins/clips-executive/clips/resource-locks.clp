@@ -34,17 +34,17 @@
 )
 
 (defrule resource-locks-request-lock
+  "Request a mutex for each required resource if none of the respective mutexes
+   is already locked or has a pending request."
   (goal (mode COMMITTED)
-        (acquired-resources $?acq)
-        (required-resources $?req))
-  ; We may have multiple goals requiring the same resource. If that's the case,
-  ; wait until the other goal releases the resources.
+        (acquired-resources)
+        (required-resources $?req&:(> (length$ ?req) 0)))
   (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
               (request ~NONE)))
   (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
               (state LOCKED)))
   =>
-  (foreach ?res (set-diff ?req ?acq)
+  (foreach ?res ?req
     (printout warn "Locking resource " ?res crlf)
     (mutex-try-lock-async (resource-to-mutex ?res))
   )
