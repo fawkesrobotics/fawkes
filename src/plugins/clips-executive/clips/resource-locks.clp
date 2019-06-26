@@ -70,9 +70,15 @@
     (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
                    " is already locked by " ?locker crlf)
   else
-    (do-for-fact ((?og goal)) (member$ (mutex-to-resource ?n) ?og:acquired-resources)
-      (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
-                     " is already locked for " ?og:id crlf)
+    (if (not (do-for-fact ((?og goal))
+               (member$ (mutex-to-resource ?n) ?og:acquired-resources)
+               (printout warn "Rejecting goal " ?goal-id ", "
+                              (mutex-to-resource ?n)
+                              " is already locked for " ?og:id crlf)))
+     then
+      (printout error "Rejecting goal " ?goal-id ", resource "
+                      (mutex-to-resource ?n)
+                      " is already locked, but could not determine why!" crlf)
     )
   )
   (modify ?g (mode FINISHED) (outcome REJECTED))
