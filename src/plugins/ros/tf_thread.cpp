@@ -148,7 +148,15 @@ RosTfThread::loop()
 				if (!ts.child_frame_id.empty() && ts.child_frame_id[0] == '/') {
 					ts.child_frame_id = ts.child_frame_id.substr(1);
 				}
-				publish_transform_to_fawkes(ts);
+				try {
+					publish_transform_to_fawkes(ts);
+				} catch (fawkes::Exception &e) {
+					logger->log_error(name(),
+					                  "Error publishing transform from %s to %s: %s",
+					                  ts.header.frame_id.c_str(),
+					                  ts.child_frame_id.c_str(),
+					                  e.what());
+				}
 			}
 			tf_msg_queues_[queue].pop();
 		}
