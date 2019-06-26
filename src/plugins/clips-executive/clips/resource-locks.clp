@@ -60,7 +60,7 @@
               (required-resources $?req))
   (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
          (state LOCKED) (locked-by ?locker&~?identity))
-  (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
+  (not (mutex (name ?n1&:(member$ (mutex-to-resource ?n1) ?req))
               (request ~NONE)))
   =>
   (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
