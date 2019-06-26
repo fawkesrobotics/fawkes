@@ -99,22 +99,22 @@ RobotMemory::init()
 	default_collection_ = "robmem.test";
 	try {
 		default_collection_ = config_->get_string("/plugins/robot-memory/default-collection");
-	} catch (Exception &e) {
+	} catch (Exception &) {
 	}
 	try {
 		debug_ = config_->get_bool("/plugins/robot-memory/more-debug-output");
-	} catch (Exception &e) {
+	} catch (Exception &) {
 	}
 	database_name_ = "robmem";
 	try {
 		database_name_ = config_->get_string("/plugins/robot-memory/database");
-	} catch (Exception &e) {
+	} catch (Exception &) {
 	}
 	distributed_dbs_          = config_->get_strings("/plugins/robot-memory/distributed-db-names");
 	cfg_startup_grace_period_ = 10;
 	try {
 		cfg_startup_grace_period_ = config_->get_uint("/plugins/robot-memory/startup-grace-period");
-	} catch (Exception &e) {
+	} catch (Exception &) {
 	} // ignored, use default
 
 	cfg_coord_database_ = config_->get_string("/plugins/robot-memory/coordination/database");
@@ -131,7 +131,7 @@ RobotMemory::init()
 		try {
 			mongodb_client_local_ = mongo_connection_manager_->create_client("robot-memory-local");
 			break;
-		} catch (fawkes::Exception &e) {
+		} catch (fawkes::Exception &) {
 			logger_->log_info(name_, "Waiting for local");
 			std::this_thread::sleep_for(500ms);
 		}
@@ -147,7 +147,7 @@ RobotMemory::init()
 				mongodb_client_distributed_ =
 				  mongo_connection_manager_->create_client("robot-memory-distributed");
 				break;
-			} catch (fawkes::Exception &e) {
+			} catch (fawkes::Exception &) {
 				logger_->log_info(name_, "Waiting for distributed");
 				std::this_thread::sleep_for(500ms);
 			}
@@ -876,10 +876,10 @@ RobotMemory::mutex_try_lock(const std::string &name, const std::string &identity
 	}
 
 	basic::document update_doc;
-	update_doc.append(kvp("$currentDate", [](basic::sub_document subdoc) {
+	update_doc.append(basic::kvp("$currentDate", [](basic::sub_document subdoc) {
 		subdoc.append(basic::kvp("lock-time", true));
 	}));
-	update_doc.append(kvp("$set", [locked_by](basic::sub_document subdoc) {
+	update_doc.append(basic::kvp("$set", [locked_by](basic::sub_document subdoc) {
 		subdoc.append(basic::kvp("locked", true));
 		subdoc.append(basic::kvp("locked-by", locked_by));
 	}));
@@ -1081,7 +1081,9 @@ RobotMemory::mutex_setup_ttl(float max_age_sec)
 
 	try {
 		collection collection = client->database(cfg_coord_database_)[cfg_coord_mutex_collection_];
-		collection.create_index(keys.view(), make_document(kvp("expireAfterSeconds", max_age_sec)));
+		collection.create_index(keys.view(),
+		                        builder::basic::make_document(
+		                          builder::basic::kvp("expireAfterSeconds", max_age_sec)));
 	} catch (operation_exception &e) {
 		logger_->log_warn(name_, "Creating TTL index failed: %s", e.what());
 		return false;
