@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ############################################################################
-#  Check if 'make check' has been run after last modified file
+#  Check if 'make quick-check' has been run after last modified file
 #
 #  Created: Mon Apr 08 15:01:19 2019 +0200
 #  Copyright  2019  Tim Niemueller [www.niemueller.org]
@@ -35,7 +35,7 @@ pushd $BASEDIR >/dev/null
 # Check make check has been run at all
 if [ ! -f .check_stamp ]; then
 	>&2 echo "The working copy has never been checked, aborting push"
-	>&2 echo "Run 'make check' and ensure all checks pass, then push again"
+	>&2 echo "Run 'make quick-check' and ensure all checks pass, then push again"
 	exit 1
 fi
 
@@ -55,7 +55,7 @@ MERGE_BASE=$($DIFF --old-line-format='' --new-line-format='' \
 
 AFFECTED_FILES=$(git diff --name-only $MERGE_BASE HEAD)
 
-# Check for all files which have been modified after the last 'make check'
+# Check for all files which have been modified after the last 'make quick-check'
 if [ -n "$AFFECTED_FILES" ]; then
 	UNCHECKED_FILES=
 	for f in $AFFECTED_FILES; do
@@ -64,11 +64,11 @@ if [ -n "$AFFECTED_FILES" ]; then
 		fi
 	done
 	if [ -n "$UNCHECKED_FILES" ]; then
-		>&2 echo -e "\n${TYELLOW}The following files have been modified after running 'make check':${TNORMAL}"
+		>&2 echo -e "\n${TYELLOW}The following files have been modified after running 'make quick-check':${TNORMAL}"
 		for f in $UNCHECKED_FILES; do
 			>&2 echo -e "- $f"
 		done
-		>&2 echo -e "\n${TINVERSE}   Run 'make check' and ensure all checks pass, then push again.  ${TNORMAL}\n"
+		>&2 echo -e "\n${TINVERSE}   Run 'make quick-check' and ensure all checks pass, then push again.  ${TNORMAL}\n"
 		exit 2
 	fi
 fi
