@@ -22,4 +22,4 @@ $(TOP_BASEDIR)/.git/hooks/pre-push: $(FAWKES_BASEDIR)/etc/git-hooks/pre-push
 	$(SILENTSYMB) echo -e "$(INDENT_PRINT)[GIT] installing pre-push hook $@"
 	$(SILENT)install -m 0755 $< $@
 
-all: $(TOP_BASEDIR)/.git/hooks/pre-push
+all quick-check: $(TOP_BASEDIR)/.git/hooks/pre-push
