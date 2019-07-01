@@ -19,6 +19,11 @@
 ; Read the full text in the LICENSE.GPL file in the doc directory.
 ;
 
+(deftemplate resource-request
+	(slot resource (type SYMBOL))
+	(slot goal (type SYMBOL))
+)
+
 (deffunction resource-to-mutex (?resource)
   "Get the name of the mutex for the given resource."
   (return (sym-cat resource- ?resource))
@@ -34,33 +39,39 @@
 )
 
 (defrule resource-locks-request-lock
+  "Request a mutex for each required resource if none of the respective mutexes
+   is already locked or has a pending request."
   (goal (mode COMMITTED)
-        (acquired-resources $?acq)
-        (required-resources $?req))
-  ; We may have multiple goals requiring the same resource. If that's the case,
-  ; wait until the other goal releases the resources.
+        (id ?goal-id)
+        (acquired-resources)
+        (required-resources $?req&:(> (length$ ?req) 0)))
   (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
               (request ~NONE)))
   (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
               (state LOCKED)))
+  (not (resource-request (resource ?res&:(member$ ?res ?req))))
   =>
-  (foreach ?res (set-diff ?req ?acq)
+  (foreach ?res ?req
     (printout warn "Locking resource " ?res crlf)
     (mutex-try-lock-async (resource-to-mutex ?res))
+		(assert (resource-request (goal ?goal-id) (resource ?res)))
   )
 )
 
-(defrule resource-locks-fast-reject-goal
-  "If a resource is locked by someone else, we have not acquired any resources,
-   and we have no pending requests, then we can directly reject the goal."
+(defrule resource-locks-fast-reject-goal-locked-by-other-agent
+  "If a resource already locked by someone else, we have not acquired any
+   resources, and we have no pending requests, then we can directly reject the
+   goal."
   (wm-fact (key cx identity) (value ?identity))
   ?g <- (goal (mode COMMITTED)
               (id ?goal-id)
               (acquired-resources)
               (required-resources $?req))
+  ; The mutex is locked and there is no unprocessed request, which means that
+  ; it was either locked by someone else or for a different goal.
   (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
-         (state LOCKED) (locked-by ?locker&~?identity))
-  (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
+         (state LOCKED) (request NONE) (locked-by ?locker&~?identity))
+  (not (mutex (name ?n1&:(member$ (mutex-to-resource ?n1) ?req))
               (request ~NONE)))
   =>
   (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
@@ -68,27 +79,46 @@
   (modify ?g (mode FINISHED) (outcome REJECTED))
 )
 
-(defrule resource-locks-lock-acquired
-  ?m <- (mutex (name ?res) (request LOCK) (response ACQUIRED))
+(defrule resource-locks-fast-reject-goal-locked-for-another-goal
+  "If a resource already locked for another goal, we have not acquired any
+   resources, and we have no pending requests, then we can directly reject the
+   goal."
   ?g <- (goal (mode COMMITTED)
+              (id ?goal)
+              (acquired-resources)
+              (required-resources $? ?res $?))
+  (resource-request (resource ?res) (goal ?other-goal&~?goal))
+  (not (mutex (name ?n1&:(eq ?n1 (resource-to-mutex ?res)))
+              (request ~NONE)))
+  =>
+  (printout warn "Rejecting goal " ?goal ", " ?res
+                 " is already locked for " ?other-goal crlf)
+  (modify ?g (mode FINISHED) (outcome REJECTED))
+)
+
+(defrule resource-locks-lock-acquired
+	(resource-request (resource ?res) (goal ?goal-id))
+  ?m <- (mutex (name ?n&:(eq ?n (resource-to-mutex ?res)))
+               (request LOCK) (response ACQUIRED))
+  ?g <- (goal (mode COMMITTED) (id ?goal-id)
               (required-resources $?req)
               (acquired-resources $?acq
-                &:(member$ (mutex-to-resource ?res) (set-diff ?req ?acq))))
+                &:(member$ ?res (set-diff ?req ?acq))))
   =>
-  (modify ?g (acquired-resources (append$ ?acq (mutex-to-resource ?res))))
+  (modify ?g (acquired-resources (append$ ?acq (mutex-to-resource ?n))))
   (modify ?m (request NONE) (response NONE))
 )
 
 (defrule resource-locks-lock-rejected-release-acquired-resources
   "A lock was rejected, therefore release all acquired resources."
-  ?m <- (mutex (name ?res)
+  ?m <- (mutex (name ?n)
                (request LOCK)
                (response REJECTED|ERROR)
                (error-msg ?err))
-  ?g <- (goal (mode COMMITTED)
+  ?g <- (goal (mode COMMITTED) (id ?goal-id)
               (required-resources $?req)
               (acquired-resources $?acq
-                &:(member$ (mutex-to-resource ?res) (set-diff ?req ?acq))))
+                &:(member$ (mutex-to-resource ?n) (set-diff ?req ?acq))))
   ; We cannot abort a pending request. Thus, we first need to wait to get
   ; responses for all requested locks.
   (not (mutex (name ?on&:(member$ (mutex-to-resource ?on) ?req))
@@ -119,10 +149,11 @@
                  (mutex-to-resource ?res) " was rejected" crlf)
   (modify ?g (mode FINISHED) (outcome REJECTED) (message ?err))
   (delayed-do-for-all-facts
-    ((?om mutex))
-    (and (member$ ?om:response (create$ REJECTED ERROR))
-         (member$ (mutex-to-resource ?om:name) ?req))
+    ((?om mutex) (?request resource-request))
+    (and (or (eq ?om:response REJECTED) (eq ?om:response ERROR))
+         (eq ?request:resource (mutex-to-resource ?om:name)))
     (modify ?om (request NONE) (response NONE) (error-msg ""))
+		(retract ?request)
   )
 )
 
@@ -142,11 +173,12 @@
 )
 
 (defrule resource-locks-unlock-done
-  ?m <- (mutex (name ?res) (state OPEN) (request UNLOCK))
-  ?g <- (goal (acquired-resources $?acq
-                &:(member$ (mutex-to-resource ?res) ?acq)))
+  ?request <- (resource-request (resource ?res) (goal ?goal-id))
+  ?m <- (mutex (name ?n&:(eq ?n (resource-to-mutex ?res))) (state OPEN) (request UNLOCK))
+  ?g <- (goal (id ?goal-id) (acquired-resources $?acq))
   =>
   (modify ?g (acquired-resources
-              (delete-member$ ?acq (mutex-to-resource ?res))))
+              (delete-member$ ?acq ?res)))
   (modify ?m (request NONE) (response NONE))
+  (retract ?request)
 )
