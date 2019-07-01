@@ -143,10 +143,11 @@
                  (mutex-to-resource ?res) " was rejected" crlf)
   (modify ?g (mode FINISHED) (outcome REJECTED) (message ?err))
   (delayed-do-for-all-facts
-    ((?om mutex))
-    (and (member$ ?om:response (create$ REJECTED ERROR))
-         (member$ (mutex-to-resource ?om:name) ?req))
+    ((?om mutex) (?request resource-locks-resource-requested-for))
+    (and (or (eq ?om:response REJECTED) (eq ?om:response ERROR))
+		     (eq (nth$ 1 ?request:implied) (mutex-to-resource ?om:name)))
     (modify ?om (request NONE) (response NONE) (error-msg ""))
+		(retract ?request)
   )
 )
 
@@ -166,18 +167,12 @@
 )
 
 (defrule resource-locks-unlock-done
-  ?m <- (mutex (name ?res) (state OPEN) (request UNLOCK))
-  ?g <- (goal (acquired-resources $?acq
-                &:(member$ (mutex-to-resource ?res) ?acq)))
+  ?request <- (resource-locks-resource-requested-for ?res ?goal-id)
+  ?m <- (mutex (name ?n&:(eq ?n (resource-to-mutex ?res))) (state OPEN) (request UNLOCK))
+  ?g <- (goal (id ?goal-id) (acquired-resources $?acq))
   =>
   (modify ?g (acquired-resources
-              (delete-member$ ?acq (mutex-to-resource ?res))))
+              (delete-member$ ?acq ?res)))
   (modify ?m (request NONE) (response NONE))
-)
-
-(defrule resource-locks-cleanup-lock-requests
-  ?request <- (resource-locks-resource-requested-for ?res ?goal-id)
-  (not (goal (id ?goal-id) (mode COMMITTED)))
-  =>
-  (retract ?request)
+	(retract ?request)
 )
