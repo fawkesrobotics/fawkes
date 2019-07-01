@@ -19,6 +19,11 @@
 ; Read the full text in the LICENSE.GPL file in the doc directory.
 ;
 
+(deftemplate resource-request
+	(slot resource (type SYMBOL))
+	(slot goal (type SYMBOL))
+)
+
 (deffunction resource-to-mutex (?resource)
   "Get the name of the mutex for the given resource."
   (return (sym-cat resource- ?resource))
@@ -44,12 +49,12 @@
               (request ~NONE)))
   (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
               (state LOCKED)))
-	(not (resource-locks-resource-requested-for ?res&:(member$ ?res ?req) ?))
+  (not (resource-request (resource ?res&:(member$ ?res ?req))))
   =>
   (foreach ?res ?req
     (printout warn "Locking resource " ?res crlf)
     (mutex-try-lock-async (resource-to-mutex ?res))
-    (assert (resource-locks-resource-requested-for ?res ?goal-id))
+		(assert (resource-request (goal ?goal-id) (resource ?res)))
   )
 )
 
@@ -82,7 +87,7 @@
               (id ?goal)
               (acquired-resources)
               (required-resources $? ?res $?))
-  (resource-locks-resource-requested-for ?res ?other-goal&~?goal)
+  (resource-request (resource ?res) (goal ?other-goal&~?goal))
   (not (mutex (name ?n1&:(eq ?n1 (resource-to-mutex ?res)))
               (request ~NONE)))
   =>
@@ -92,7 +97,7 @@
 )
 
 (defrule resource-locks-lock-acquired
-  (resource-locks-resource-requested-for ?res ?goal-id)
+	(resource-request (resource ?res) (goal ?goal-id))
   ?m <- (mutex (name ?n&:(eq ?n (resource-to-mutex ?res)))
                (request LOCK) (response ACQUIRED))
   ?g <- (goal (mode COMMITTED) (id ?goal-id)
@@ -144,9 +149,9 @@
                  (mutex-to-resource ?res) " was rejected" crlf)
   (modify ?g (mode FINISHED) (outcome REJECTED) (message ?err))
   (delayed-do-for-all-facts
-    ((?om mutex) (?request resource-locks-resource-requested-for))
+    ((?om mutex) (?request resource-request))
     (and (or (eq ?om:response REJECTED) (eq ?om:response ERROR))
-		     (eq (nth$ 1 ?request:implied) (mutex-to-resource ?om:name)))
+         (eq ?request:resource (mutex-to-resource ?om:name)))
     (modify ?om (request NONE) (response NONE) (error-msg ""))
 		(retract ?request)
   )
@@ -168,12 +173,12 @@
 )
 
 (defrule resource-locks-unlock-done
-  ?request <- (resource-locks-resource-requested-for ?res ?goal-id)
+  ?request <- (resource-request (resource ?res) (goal ?goal-id))
   ?m <- (mutex (name ?n&:(eq ?n (resource-to-mutex ?res))) (state OPEN) (request UNLOCK))
   ?g <- (goal (id ?goal-id) (acquired-resources $?acq))
   =>
   (modify ?g (acquired-resources
               (delete-member$ ?acq ?res)))
   (modify ?m (request NONE) (response NONE))
-	(retract ?request)
+  (retract ?request)
 )
