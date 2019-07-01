@@ -28,7 +28,7 @@ __buildsys_root_check_mk_ := 1
 
 YAMLLINT ?= 1
 
-GITFILES = git ls-files --full-name *.{h,cpp} | awk "{ print \"$$(git rev-parse --show-toplevel)/\"\$$1 }"
+GITFILES = git ls-files --full-name \*.{h,cpp} | awk "{ print \"$$(git rev-parse --show-toplevel)/\"\$$1 }"
 
 .PHONY: license-check
 license-check:
