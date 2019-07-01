@@ -346,7 +346,7 @@
 	(mutex-global-data)
 	?mf <- (mutex-expire-task (task ?task) (state NONE) (max-age-sec ?max-age-sec))
 	=>
-	(printout t ?task " locks " crlf)
+	(printout debug ?task " locks " crlf)
 	(robmem-mutex-expire-locks-async ?max-age-sec)
 	(modify ?mf (state PENDING))
 )
