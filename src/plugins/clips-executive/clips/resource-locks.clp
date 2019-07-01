@@ -43,6 +43,7 @@
    is already locked or has a pending request."
   (goal (mode COMMITTED)
         (id ?goal-id)
+        (verbosity ?verbosity)
         (acquired-resources)
         (required-resources $?req&:(> (length$ ?req) 0)))
   (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
@@ -52,7 +53,9 @@
   (not (resource-request (resource ?res&:(member$ ?res ?req))))
   =>
   (foreach ?res ?req
-    (printout warn "Locking resource " ?res crlf)
+    (if (neq ?verbosity QUIET) then
+      (printout warn "Locking resource " ?res crlf)
+    )
     (mutex-try-lock-async (resource-to-mutex ?res))
 		(assert (resource-request (goal ?goal-id) (resource ?res)))
   )
@@ -65,6 +68,7 @@
   (wm-fact (key cx identity) (value ?identity))
   ?g <- (goal (mode COMMITTED)
               (id ?goal-id)
+              (verbosity ?verbosity)
               (acquired-resources)
               (required-resources $?req))
   ; The mutex is locked and there is no unprocessed request, which means that
@@ -74,8 +78,10 @@
   (not (mutex (name ?n1&:(member$ (mutex-to-resource ?n1) ?req))
               (request ~NONE)))
   =>
-  (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
-                 " is already locked by " ?locker crlf)
+  (if (neq ?verbosity QUIET) then
+    (printout warn "Rejecting goal " ?goal-id ", " (mutex-to-resource ?n)
+                   " is already locked by " ?locker crlf)
+  )
   (modify ?g (mode FINISHED) (outcome REJECTED))
 )
 
@@ -85,14 +91,17 @@
    goal."
   ?g <- (goal (mode COMMITTED)
               (id ?goal)
+              (verbosity ?verbosity)
               (acquired-resources)
               (required-resources $? ?res $?))
   (resource-request (resource ?res) (goal ?other-goal&~?goal))
   (not (mutex (name ?n1&:(eq ?n1 (resource-to-mutex ?res)))
               (request ~NONE)))
   =>
-  (printout warn "Rejecting goal " ?goal ", " ?res
-                 " is already locked for " ?other-goal crlf)
+  (if (neq ?verbosity QUIET) then
+    (printout warn "Rejecting goal " ?goal ", " ?res
+                  " is already locked for " ?other-goal crlf)
+  )
   (modify ?g (mode FINISHED) (outcome REJECTED))
 )
 
@@ -136,6 +145,7 @@
   (mutex (name ?res) (request LOCK) (response REJECTED|ERROR) (error-msg ?err))
   ?g <- (goal (mode COMMITTED)
               (id ?goal-id)
+              (verbosity ?verbosity)
               (required-resources $?req
                 &:(member$ (mutex-to-resource ?res) ?req))
               (acquired-resources))
@@ -145,8 +155,10 @@
   (not (mutex (name ?ores&:(member$ (mutex-to-resource ?ores) ?req))
               (response PENDING|ACQUIRED)))
   =>
-  (printout warn "Rejecting goal " ?goal-id ", resource lock "
-                 (mutex-to-resource ?res) " was rejected" crlf)
+  (if (neq ?verbosity QUIET) then
+    (printout warn "Rejecting goal " ?goal-id ", resource lock "
+                   (mutex-to-resource ?res) " was rejected" crlf)
+  )
   (modify ?g (mode FINISHED) (outcome REJECTED) (message ?err))
   (delayed-do-for-all-facts
     ((?om mutex) (?request resource-request))
@@ -158,7 +170,7 @@
 )
 
 (defrule resource-locks-unlock-start
-  ?g <- (goal (mode RETRACTED) (acquired-resources $?acq))
+  ?g <- (goal (mode RETRACTED) (verbosity ?verbosity) (acquired-resources $?acq))
   =>
   (foreach ?res ?acq
     (if (not (any-factp ((?m mutex))
@@ -166,8 +178,10 @@
                              (or (eq ?m:request UNLOCK)
                                  (member$ UNLOCK ?m:pending-requests)))))
      then
-      (printout warn "Unlocking resource " ?res crlf)
       (mutex-unlock-async (resource-to-mutex ?res))
+      (if (neq ?verbosity QUIET) then
+        (printout warn "Unlocking resource " ?res crlf)
+      )
     )
   )
 )
