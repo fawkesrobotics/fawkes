@@ -38,6 +38,18 @@
   (return FALSE)
 )
 
+(defrule resource-locks-append-action-resources
+  (declare (salience 1))
+  ?g <- (goal (mode COMMITTED)
+        (id ?goal-id)
+        (required-resources $?req))
+  (plan-action (goal-id ?goal-id)
+               (required-resources $? ?res&:(not (member$ ?res $?req)) $?))
+  =>
+  (printout warn "Add resource to goal resources: " ?res crlf)
+  (modify ?g (required-resources (create$ ?req ?res)))
+)
+
 (defrule resource-locks-request-lock
   "Request a mutex for each required resource if none of the respective mutexes
    is already locked or has a pending request."
@@ -166,6 +178,21 @@
          (eq ?request:resource (mutex-to-resource ?om:name)))
     (modify ?om (request NONE) (response NONE) (error-msg ""))
 		(retract ?request)
+  )
+)
+
+(defrule resource-locks-preemptive-unlock
+  ?g <- (goal (id ?goal-id) (mode DISPATCHED) (acquired-resources $? ?res $?))
+  (plan-action (goal-id ?goal-id) (required-resources $? ?res $?))
+  (not (plan-action (goal-id ?goal-id) (required-resources $? ?res $?) (state ~FINAL)))
+  =>
+  (if (not (any-factp ((?m mutex))
+                      (and (eq ?m:name (resource-to-mutex ?res))
+                           (or (eq ?m:request UNLOCK)
+                               (member$ UNLOCK ?m:pending-requests)))))
+  then
+    (printout warn "Unlocking resource " ?res " since no plan-action needs it anymore" crlf)
+    (mutex-unlock-async (resource-to-mutex ?res))
   )
 )
 

@@ -23,6 +23,7 @@
 	(slot action-name (type SYMBOL))
 	(multislot param-names)
 	(multislot param-values)
+	(multislot required-resources)
 	(slot duration (type FLOAT))
 	(slot dispatch-time (type FLOAT) (default -1.0))
 	(slot state (type SYMBOL)
