@@ -25,7 +25,7 @@ apidoc: api.doxygen fawkes.luadoc skiller.luadoc
 quickdoc: api-quick.doxygen
 tracdoc: api-trac.doxygen
 
-GIT_FILES = git ls-files --full-name *.{h,cpp} | awk '{ print "'$$(git rev-parse --show-toplevel)'/"$$1 }'
+GIT_FILES = git ls-files --full-name \*.{h,cpp} | awk '{ print "'$$(git rev-parse --show-toplevel)'/"$$1 }'
 
 %.doxygen:
 	$(SILENT) echo -e "[DOC] Building documentation ($(TBOLDGRAY)$@$(TNORMAL)). This may take a while..."
