@@ -44,6 +44,7 @@
               (request ~NONE)))
   (not (mutex (name ?n&:(member$ (mutex-to-resource ?n) ?req))
               (state LOCKED)))
+	(not (resource-locks-resource-requested-for ?res&:(member$ ?res ?req) ?))
   =>
   (foreach ?res ?req
     (printout warn "Locking resource " ?res crlf)
