@@ -28,6 +28,24 @@ TRED="\033[0;31m"
 TNORMAL="\033[0;39m"
 TINVERSE="\033[0;7m"
 
+# Determine number of available CPU cores
+NPROC=1
+if type -p nproc >/dev/null; then
+	# Linux
+	NPROC=$(nproc)
+elif sysctl -n hw.ncpu >/dev/null 2>&1; then
+	# FreeBSD
+	NPROC=$(sysctl -n hw.ncpu)
+fi
+export NPROC
+
+# Determine GNU Make executable
+MAKE=make
+if type -p gmake >/dev/null; then
+	MAKE=gmake
+fi
+export MAKE
+
 # Determine base dir
 BASEDIR=$(git rev-parse --show-toplevel)
 pushd $BASEDIR >/dev/null
@@ -68,8 +86,8 @@ if [ -n "$AFFECTED_FILES" ]; then
 		for f in $UNCHECKED_FILES; do
 			>&2 echo -e "- $f"
 		done
-		>&2 echo -e "\n${TINVERSE}   Run 'make quick-check' and ensure all checks pass, then push again.  ${TNORMAL}\n"
-		exit 2
+		>&2 echo -e "\n${TINVERSE}'make quick-check' is run now ${TNORMAL}\n"
+		>&2 $MAKE quick-check -j $NPROC
 	fi
 fi
 
