@@ -30,6 +30,7 @@
 #include <fvutils/color/yuvrgb.h>
 
 #include <cstring>
+#include <cstdlib>
 
 namespace firevision {
 
@@ -145,6 +146,15 @@ convert(colorspace_t         from,
 		                dst,
 		                width,
 		                height); // does the job, bc byte order does not play a role for conversion
+  } else if ((from == YUY2) && (to == RGB)) {
+    unsigned char *intermediate = malloc_buffer(YUV422_PLANAR, width, height);
+    try{
+      yuy2_to_yuv422planar(src,intermediate,width, height);
+      yuv422planar_to_rgb_plainc(intermediate,dst,width,height);
+    } catch( ... ) {
+      free(intermediate);
+      throw;
+    }
 	} else {
 		throw fawkes::Exception("Cannot convert image data from %s to %s",
 		                        colorspace_to_string(from),
