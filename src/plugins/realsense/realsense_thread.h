@@ -108,8 +108,8 @@ private:
 	int           laser_power_;
 	uint          restart_after_num_errors_;
 	uint          error_counter_ = 0;
-	fawkes::Time  next_pol_time_;
-	float         cfg_pol_delay_;
+	fawkes::Time  next_poll_time_;
+	float         cfg_poll_delay_;
 };
 
 #endif
