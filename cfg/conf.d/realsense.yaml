@@ -14,8 +14,10 @@ realsense:
   # messages. If false, switch messages will be ignored.
   # use_switch: true
 
-  # Number of retries after unsuccessful polling before restarting the camera
-  # restart_after_num_errors: 50
+  # restart device after num retries
+  restart_after_num_errors: 20
+  # wait time before polling new images
+  delay_between_poll_errors: 0.5
 
   # Section to set the Realsense device options
   device_options:
