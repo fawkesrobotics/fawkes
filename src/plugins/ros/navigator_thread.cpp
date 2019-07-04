@@ -227,6 +227,8 @@ RosNavigatorThread::loop()
 			logger->log_warn(name(),
 			                 "Command received while ROS ActionClient "
 			                 "not reachable, ignoring");
+			nav_if_->set_error_code(NavigatorInterface::ERROR_PATH_GEN_FAIL);
+			nav_if_->write();
 			nav_if_->msgq_flush();
 		}
 
