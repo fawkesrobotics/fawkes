@@ -519,7 +519,7 @@ LaserFilterThread::create_filter(std::string                             filter_
 	} else if (filter_type == "map_filter") {
 #ifdef HAVE_TF
 		return new LaserMapFilterDataFilter(
-		  filter_name, in_data_size, inbufs, tf_listener, config, logger);
+		  filter_name, in_data_size, inbufs, tf_listener, config, prefix, logger);
 #else
 		throw Exception("Projection filter unavailable, tf missing");
 #endif

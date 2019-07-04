@@ -42,6 +42,7 @@ private:
 	map_t *     map_;
 	std::string frame_map_;
 	float       cfg_occupied_thresh_;
+	int         num_pixels_;
 
 public:
 	LaserMapFilterDataFilter(const std::string &                     filter_name,
@@ -49,6 +50,7 @@ public:
 	                         std::vector<LaserDataFilter::Buffer *> &in,
 	                         fawkes::tf::Transformer *               tf_listener,
 	                         fawkes::Configuration *                 config,
+	                         const std::string &                     prefix,
 	                         fawkes::Logger *                        logger);
 
 	virtual void filter();
