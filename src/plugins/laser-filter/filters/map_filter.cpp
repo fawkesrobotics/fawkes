@@ -23,6 +23,7 @@
 
 #include "map_filter.h"
 
+#include <config/config.h>
 #include <core/exception.h>
 #include <utils/math/coord.h>
 #include <utils/time/time.h>
@@ -42,6 +43,7 @@
  * @param in vector of input arrays
  * @param tf_listener to access the tf::Transformer aspect
  * @param config to access the Configuration aspect
+ * @param prefix configuration prefix specifying the config path
  * @param logger to access the Logger aspect
  */
 LaserMapFilterDataFilter::LaserMapFilterDataFilter(const std::string &filter_name,
@@ -49,6 +51,7 @@ LaserMapFilterDataFilter::LaserMapFilterDataFilter(const std::string &filter_nam
                                                    std::vector<LaserDataFilter::Buffer *> &in,
                                                    fawkes::tf::Transformer *tf_listener,
                                                    fawkes::Configuration *  config,
+                                                   const std::string &      prefix,
                                                    fawkes::Logger *         logger)
 : LaserDataFilter(filter_name, in_data_size, in, 1)
 {
@@ -57,6 +60,7 @@ LaserMapFilterDataFilter::LaserMapFilterDataFilter(const std::string &filter_nam
 	logger_              = logger;
 	map_                 = load_map();
 	frame_map_           = config_->get_string("/frames/fixed");
+	num_pixels_          = config_->get_int_or_default((prefix + "num_pixels").c_str(), 2);
 	cfg_occupied_thresh_ = std::numeric_limits<float>::max();
 }
 
@@ -161,9 +165,10 @@ LaserMapFilterDataFilter::filter()
 				int cell_x = (int)MAP_GXWX(map_, p.getX());
 				int cell_y = (int)MAP_GYWY(map_, p.getY());
 
-				// search in 8-neighborhood and itself for occupied pixels in map
-				for (int ox = -2; add && ox <= 2; ++ox) {
-					for (int oy = -2; oy <= 2; ++oy) {
+				// search in for a neighborhood in num_pixels_ * num_pixels_ - 1
+				// and itself for occupied pixels in map
+				for (int ox = -num_pixels_; add && ox <= num_pixels_; ++ox) {
+					for (int oy = -num_pixels_; oy <= num_pixels_; ++oy) {
 						int x = cell_x + ox;
 						int y = cell_y + oy;
 						if (MAP_VALID(map_, x, y)) {
