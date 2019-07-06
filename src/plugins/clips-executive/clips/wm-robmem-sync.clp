@@ -360,16 +360,23 @@
 (deffunction wm-robmem-sync-delete (?obj)
 	(bind ?id (bson-get ?obj "documentKey._id"))
 	(bind ?ts (bson-get-time ?obj "clusterTime"))
-	(do-for-fact ((?wf wm-fact) (?sm wm-robmem-sync-map-entry)) (and (eq ?sm:wm-fact-id ?id) (eq ?wf:id ?id))
+	(if (not (do-for-fact ((?sm wm-robmem-sync-map-entry)) (eq ?sm:wm-fact-id ?id)
 		(if (time> ?ts ?sm:update-timestamp)
 		then
-			(printout debug "wm-robmem-sync-delete: removing " ?id crlf)
-			(retract ?wf)
 			(modify ?sm (wm-fact-idx 0) (update-timestamp ?ts))
-		else
+			(do-for-fact ((?wf wm-fact)) (eq ?wf:id ?id)
+				(printout debug "wm-robmem-sync-delete: removing " ?id crlf)
+				(retract ?wf)
+			)
+		 else
 			(printout warn "wm-robmem-sync-delete: received delete for " ?id
-								" with older timetamp than our own" crlf)
-		)
+			               " with older timetamp than our own" crlf)
+	)))
+	then
+			; We have never seen the fact yet, create a sync map entry to keep the timestamp of the delete.
+			(assert (wm-robmem-sync-map-entry (wm-fact-id ?id)
+			        (wm-fact-key (wm-id-to-key ?id)) (wm-fact-idx 0)
+			        (update-timestamp ?ts)))
 	)
 )
 
