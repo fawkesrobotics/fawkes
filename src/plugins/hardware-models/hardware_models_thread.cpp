@@ -149,7 +149,9 @@ HardwareModelsThread::clips_context_init(const std::string &env_name,
           logger->log_warn(name(),"State %s of %s needs edges field",state.c_str(),c.c_str());
           continue;
         }
-
+        if (config->exists(std::string(c + "/" + state + "/terminal").c_str()) && config->get_bool(c + "/" + state + "/terminal")) {
+          clips_add_terminal_state(clips,c,state);
+        }
         logger->log_debug(name(),state.c_str());
       }
       clips_add_component(clips,c,states[0]);
@@ -168,6 +170,27 @@ HardwareModelsThread::clips_context_destroyed(const std::string &env_name)
   logger->log_error(name(), "Removing environment %s", env_name.c_str());
 }
 
+void
+HardwareModelsThread::clips_add_terminal_state(LockPtr<CLIPS::Environment> &clips, const std::string& component, const std::string& state)
+{
+  CLIPS::Template::pointer temp = clips->get_template("hm-terminal-state");
+  if (temp) {
+    CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
+    fact->set_slot("name",CLIPS::Value(component.c_str(),CLIPS::TYPE_SYMBOL));
+    fact->set_slot("state",CLIPS::Value(state.c_str(),CLIPS::TYPE_SYMBOL));
+
+    CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
+
+    if(!new_fact) {
+      logger->log_warn(name(), "Asserting terminal state %s failed", component.c_str());
+    }
+    
+  }
+  else {
+    logger->log_warn(name(),"Did not get terminal state template, did you load hardware_models.clp?");
+  }
+}
+
 /**
  * @brief Adds a hardware component fact to the given clips environment
  * 
@@ -182,7 +205,7 @@ HardwareModelsThread::clips_add_component(LockPtr<CLIPS::Environment> &clips,con
   if (temp) {
     CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
     fact->set_slot("name",CLIPS::Value(component.c_str(),CLIPS::TYPE_SYMBOL));
-    fact->set_slot("state",CLIPS::Value(init_state.c_str(),CLIPS::TYPE_SYMBOL));
+    fact->set_slot("initial-state",CLIPS::Value(init_state.c_str(),CLIPS::TYPE_SYMBOL));
 
     CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 

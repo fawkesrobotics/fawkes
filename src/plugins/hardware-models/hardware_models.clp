@@ -9,6 +9,11 @@
 
 (deftemplate hm-component
   (slot name (type SYMBOL))
+  (slot initial-state (type SYMBOL))
+)
+
+(deftemplate hm-terminal-state
+  (slot name (type SYMBOL))
   (slot state (type SYMBOL))
 )
 

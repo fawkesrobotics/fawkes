@@ -72,6 +72,7 @@ class HardwareModelsThread
 
     fawkes::HardwareModelsInterface *hm_if_;
 
+    void  clips_add_terminal_state(fawkes::LockPtr<CLIPS::Environment> &clips, const std::string& component, const std::string& state);
     void  clips_add_component(fawkes::LockPtr<CLIPS::Environment> &clips,const std::string& component, const std::string& init_state);
     void  clips_add_edge(fawkes::LockPtr<CLIPS::Environment> &clips,const std::string& component, const std::string& from, const std::string& to, const std::string& trans, const double prob);
     void  clips_add_transition(const std::string& component, const std::string& transition) throw();
