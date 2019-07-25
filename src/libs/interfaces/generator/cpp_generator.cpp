@@ -132,7 +132,7 @@ CppInterfaceGenerator::write_struct(FILE *                         f,
 
 	fprintf(f,
 	        "%s/** Internal data storage, do NOT modify! */\n"
-	        "%stypedef struct __attribute__((packed)) {\n"
+	        "%stypedef struct {\n"
 	        "%s  int64_t timestamp_sec;  /**< Interface Unix timestamp, seconds */\n"
 	        "%s  int64_t timestamp_usec; /**< Interface Unix timestamp, micro-seconds */\n",
 	        is.c_str(),
