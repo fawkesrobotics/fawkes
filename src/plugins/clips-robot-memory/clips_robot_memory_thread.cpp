@@ -856,6 +856,7 @@ ClipsRobotMemoryThread::clips_robotmemory_register_trigger(std::string env_name,
 			                               CLIPS::Value(clips_trigger).as_address());
 			return true;
 		} catch (std::system_error &e) {
+			logger->log_warn(name(), "Error while registering trigger: %s", e.what());
 			MutexLocker clips_lock(envs_[env_name].objmutex_ptr());
 			envs_[env_name]->assert_fact_f("(mutex-trigger-register-feedback FAIL \"%s\")",
 			                               assert_name.c_str());
