@@ -4,52 +4,102 @@
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <blackboard/interface_listener.h>
 #include <blackboard/interface_observer.h>
 #include <core/threading/thread.h>
 #include <golog++/model/action.h>
+#include <golog++/model/execution.h>
 
-class GologppBlackboardManager : public fawkes::BlackBoardInterfaceObserver,
-                                 public fawkes::BlackBoardInterfaceListener,
-                                 public fawkes::BlackBoardAspect,
-                                 public fawkes::ConfigurableAspect,
-                                 public fawkes::Thread,
-                                 public fawkes::BlockedTimingAspect
+namespace gologpp {
+class Type;
+}
+
+namespace fawkes_gpp {
+
+///////////////////////////////////////////////////////////////////////////////
+class ConfigError : public fawkes::Exception
 {
 public:
-	GologppBlackboardManager();
+	ConfigError(const std::string &);
+};
+
+///////////////////////////////////////////////////////////////////////////////
+class ExogManager : public fawkes::BlackBoardAspect,
+                    public fawkes::ConfigurableAspect,
+                    public fawkes::LoggingAspect,
+                    public fawkes::Thread,
+                    public fawkes::BlockedTimingAspect
+{
+public:
+	ExogManager(gologpp::ExecutionContext &ctx);
 
 	virtual void init() override;
 	virtual void finalize() override;
 
-	void sense(gologpp::Activity &sensing_activity);
-
-	virtual void bb_interface_created(const char *type, const char *id) throw() override;
-	virtual void bb_interface_destroyed(const char *type, const char *id) throw() override;
-	virtual void bb_interface_data_changed(fawkes::Interface *) throw() override;
-	virtual bool bb_interface_message_received(fawkes::Interface *,
-	                                           fawkes::Message *) throw() override;
-
 	static const std::string cfg_prefix;
 
 private:
-	void init_watchers();
+	void                                     exog_queue_push(gologpp::shared_ptr<gologpp::ExogEvent>);
+	gologpp::shared_ptr<gologpp::ExogAction> find_mapped_exog(const std::string &mapped_name);
+	gologpp::ExecutionContext &              golog_exec_ctx_;
 
-	class WatchedInterface
+	///////////////////////////////////////////////////////////////////
+	class BlackboardEventHandler
 	{
 	public:
-		WatchedInterface(fawkes::Interface *, gologpp::shared_ptr<gologpp::ExogAction> target_exog);
-		void add_field(const std::string &name, gologpp::arity_t param_idx);
-		gologpp::shared_ptr<gologpp::ExogEvent> get_event() const;
+		BlackboardEventHandler(fawkes::BlackBoard *,
+		                       gologpp::shared_ptr<gologpp::ExogAction>,
+		                       ExogManager &exog_mgr);
 
-	private:
-		fawkes::Interface *                      iface_;
-		gologpp::shared_ptr<gologpp::ExogAction> target_exog_;
+		gologpp::shared_ptr<gologpp::ExogEvent> make_exog_event(fawkes::Interface *) const;
 
-		std::unordered_map<std::string, gologpp::arity_t> fields_to_params_;
+	protected:
+		fawkes::BlackBoard *                              blackboard_;
+		gologpp::shared_ptr<gologpp::ExogAction>          target_exog_;
+		std::unordered_map<std::string, gologpp::arity_t> fields_order_;
+		ExogManager &                                     exog_manager_;
 	};
 
-	std::unordered_map<std::string, WatchedInterface> id_to_exog_action_;
+	///////////////////////////////////////////////////////////////////
+	class InterfaceWatcher : public BlackboardEventHandler, public fawkes::BlackBoardInterfaceListener
+	{
+	public:
+		InterfaceWatcher(fawkes::BlackBoard *,
+		                 const std::string &id,
+		                 gologpp::shared_ptr<gologpp::ExogAction>,
+		                 ExogManager &exog_mgr);
+		virtual ~InterfaceWatcher() override;
+
+		virtual void bb_interface_data_changed(fawkes::Interface *) throw() override;
+
+	private:
+		fawkes::Interface *      iface_;
+		std::vector<std::string> fields_ordered_;
+	};
+
+	//////////////////////////////////////////////////////////////////
+	class PatternObserver : public BlackboardEventHandler, public fawkes::BlackBoardInterfaceObserver
+	{
+	public:
+		PatternObserver(fawkes::BlackBoard *,
+		                const std::string &pattern,
+		                gologpp::shared_ptr<gologpp::ExogAction>,
+		                ExogManager &exog_mgr);
+		virtual ~PatternObserver() override;
+
+		virtual void bb_interface_created(const char *type, const char *id) throw() override;
+
+	private:
+		std::string pattern_;
+	};
+
+	//////////////////////////////////////////////////////////////////
+	std::unordered_map<std::string, gologpp::shared_ptr<gologpp::ExogAction>> mapped_exogs_;
+	std::vector<InterfaceWatcher>                                             watchers_;
+	std::vector<PatternObserver>                                              observers_;
 };
+
+} // namespace fawkes_gpp
 
 #endif

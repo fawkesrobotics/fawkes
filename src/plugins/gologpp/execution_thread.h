@@ -5,7 +5,7 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
-#include <model/execution.h>
+#include <golog++/model/execution.h>
 
 class GologppThread : public fawkes::Thread,
                       public fawkes::LoggingAspect,

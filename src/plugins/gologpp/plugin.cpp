@@ -12,3 +12,6 @@ public:
 		thread_list.push_back(new GologppThread());
 	}
 };
+
+PLUGIN_DESCRIPTION("Detect the conveyor belt in a pointcloud")
+EXPORT_PLUGIN(GologppPlugin)

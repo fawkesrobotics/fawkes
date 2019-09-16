@@ -1,5 +1,6 @@
+#include "execution_thread.h"
+
 #include "gologpp_fawkes_backend.h"
-#include "gologpp_thread.h"
 
 #include <golog++/model/procedural.h>
 #include <golog++/parser/parser.h>
