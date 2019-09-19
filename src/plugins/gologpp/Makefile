@@ -17,7 +17,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_gologpp = fawkescore fawkesutils fawkesblackboard \
            fawkesinterface 
-OBJS_gologpp = plugin.o execution_thread.o gologpp_fawkes_backend.o blackboard.o
+OBJS_gologpp = plugin.o execution_thread.o gologpp_fawkes_backend.o exog_manager.o
 
 OBJS_all    = $(OBJS_gologpp)
 PLUGINS_all = $(PLUGINDIR)/gologpp.so
