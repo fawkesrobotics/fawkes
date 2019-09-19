@@ -115,10 +115,7 @@ ExogManager::InterfaceWatcher::InterfaceWatcher(BlackBoard *           bb,
   BlackBoardInterfaceListener("gologpp_blackboard_manager"),
   iface_(blackboard_->open_for_reading<Interface>(id.c_str()))
 {
-	fields_ordered_.resize(exog->arity());
-
 	bbil_add_data_interface(iface_);
-
 	blackboard_->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
 }
 

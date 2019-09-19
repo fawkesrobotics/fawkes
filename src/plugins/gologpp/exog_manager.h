@@ -94,8 +94,7 @@ private:
 		virtual void bb_interface_data_changed(fawkes::Interface *) throw() override;
 
 	private:
-		fawkes::Interface *      iface_;
-		std::vector<std::string> fields_ordered_;
+		fawkes::Interface *iface_;
 	};
 
 	//////////////////////////////////////////////////////////////////
