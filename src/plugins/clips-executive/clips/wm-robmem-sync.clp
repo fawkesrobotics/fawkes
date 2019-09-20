@@ -250,11 +250,12 @@
 (defrule wm-robmem-sync-fact-removed
 	(wm-fact (key cx identity) (value ?identity))
 	(wm-robmem-sync-conf (wm-fact-key-prefix $?key-prefix) (enabled TRUE))
-	?sm <- (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key $?key-prefix $?rest))
+	?sm <- (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-idx ?idx&~0) (wm-fact-key $?key-prefix $?rest))
 	(not (wm-fact (id ?id)))
 	=>
 	;(printout error "Remove " ?id " from robot memory" crlf)
-	(retract ?sm)
+	(bind ?now (time-trunc-ms (now-systime)))
+	(modify ?sm (wm-fact-idx 0) (update-timestamp ?now))
 	; We do not know when exactly the wm-fact was retracted, use the current time instead
 	(bind ?now (time-trunc-ms (now-systime)))
 	(bind ?query (wm-robmem-sync-create-query ?id ?now))
@@ -359,15 +360,23 @@
 (deffunction wm-robmem-sync-delete (?obj)
 	(bind ?id (bson-get ?obj "documentKey._id"))
 	(bind ?ts (bson-get-time ?obj "clusterTime"))
-	(do-for-fact ((?wf wm-fact) (?sm wm-robmem-sync-map-entry)) (and (eq ?sm:wm-fact-id ?id) (eq ?wf:id ?id))
+	(if (not (do-for-fact ((?sm wm-robmem-sync-map-entry)) (eq ?sm:wm-fact-id ?id)
 		(if (time> ?ts ?sm:update-timestamp)
 		then
-			(printout debug "wm-robmem-sync-delete: removing " ?id crlf)
-			(retract ?wf ?sm)
-		else
+			(modify ?sm (wm-fact-idx 0) (update-timestamp ?ts))
+			(do-for-fact ((?wf wm-fact)) (eq ?wf:id ?id)
+				(printout debug "wm-robmem-sync-delete: removing " ?id crlf)
+				(retract ?wf)
+			)
+		 else
 			(printout warn "wm-robmem-sync-delete: received delete for " ?id
-								" with older timetamp than our own" crlf)
-		)
+			               " with older timetamp than our own" crlf)
+	)))
+	then
+			; We have never seen the fact yet, create a sync map entry to keep the timestamp of the delete.
+			(assert (wm-robmem-sync-map-entry (wm-fact-id ?id)
+			        (wm-fact-key (wm-id-to-key ?id)) (wm-fact-idx 0)
+			        (update-timestamp ?ts)))
 	)
 )
 
