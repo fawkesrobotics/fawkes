@@ -19,9 +19,7 @@
  */
 
 #ifndef _PLUGINS_SKILLER_SIMULATOR_EXEC_THREAD_H_
-#	define _PLUGINS_SKILLER_SIMULATOR_EXEC_THREAD_H_
-
-#endif /* !_PLUGINS_SKILLER_SIMULATOR_EXEC_THREAD_H_ */
+#define _PLUGINS_SKILLER_SIMULATOR_EXEC_THREAD_H_
 
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
@@ -57,3 +55,5 @@ private:
 	double                    skill_runtime_;
 	fawkes::Time              skill_starttime_;
 };
+
+#endif /* !_PLUGINS_SKILLER_SIMULATOR_EXEC_THREAD_H_ */
