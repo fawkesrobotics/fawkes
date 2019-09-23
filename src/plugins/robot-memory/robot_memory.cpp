@@ -996,7 +996,10 @@ RobotMemory::mutex_unlock(const std::string &name, const std::string &identity)
 		                                   .upsert(true)
 		                                   .return_document(options::return_document::k_after)
 		                                   .write_concern(write_concern));
-		return true;
+		if (!new_doc) {
+			return false;
+		}
+		return new_doc->view()["locked"].get_bool();
 	} catch (operation_exception &e) {
 		return false;
 	}
