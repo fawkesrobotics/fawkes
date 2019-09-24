@@ -128,7 +128,7 @@ namespace fawkes {
  * @return true if the aliveness could be restored and the BlackBoard is
  * operational again, false otherwise.
  *
- * @fn std::list<Interface *>  BlackBoard::open_multiple_for_reading(const char *type_pattern, const char *id_pattern = "*", const char *owner = NULL)
+ * @fn std::list<Interface *>  BlackBoard::open_multiple_for_reading(const char *type_pattern, const char *id_pattern, const char *owner)
  * Open multiple interfaces for reading.
  * This will create interface instances for currently registered interfaces of
  * the given type that match the given ID pattern. The result can be casted to
