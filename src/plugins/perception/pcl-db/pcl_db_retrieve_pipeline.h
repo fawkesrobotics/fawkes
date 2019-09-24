@@ -58,7 +58,6 @@ public:
    * @param mongodb_client MongoDB client
    * @param config configuration
    * @param logger Logger
-   * @param output output point cloud
    * @param transformer TF transformer for point cloud transformations between
    * coordinate reference frames
    * @param original input point cloud
