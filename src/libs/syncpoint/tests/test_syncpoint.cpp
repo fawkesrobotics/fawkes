@@ -75,14 +75,12 @@ protected:
 		delete logger_;
 	}
 
-	/**@{*/
-	/**
-     * Syncpoints for testing purposes
-     */
+	/** A syncpoint for testing */
 	RefPtr<SyncPoint> sp1;
+	/** A syncpoint for testing */
 	RefPtr<SyncPoint> sp2;
+	/** A syncpoint for testing */
 	RefPtr<SyncPoint> sp3;
-	/**@}*/
 
 	/** Logger for testing */
 	MultiLogger *logger_;
