@@ -41,13 +41,22 @@ namespace firevision {
  */
 
 /** Constructor.
- * @param nr_candidates number of candidates
- * @param angle_from slope of lines from
- * @param angle_range angle range
- * @param r_scale r scale
- * @param min_votes_ratio min votes ratio
- * @param min_votes minimum number of votes for a candidate to consider
- */
+  * Creates a new HtLinesModel instance
+  * @param nr_candidates the nr of candidates that is considered per pixel (the hole angle
+  *                      range is devided in this many parts/lines
+  * @param angle_from The angle to start the candidates from, given in rad, 0 is straight up
+  * @param angle_range the angle range the candidates are taken from starting at angle_from,
+  *                    given in rad, can be used for example to only search for horizontal lines
+  * @param r_scale This can be done to reduce the size of the hough space and to map more lines
+  *                to one line
+  * @param min_votes_ratio The minimum ratio num_votes_per_line/total_num_votes that we have to
+  *                        have before a point in the hough space is considered to be a line,
+  *                        this may actually be higher if you use min_votes and set it to a higher
+  *                        number (set min_votes to 0 to only use min_votes_ration)
+  * @param min_votes the minimum number of votes a point in the hough space has to have before it
+  *                  is considered to be a line. The number may actually be higher if min_votes_ratio
+  *                  is set too high (set min_votes_ration to 0 to use only min_votes)
+  */
 HtLinesModel::HtLinesModel(unsigned int nr_candidates,
                            float        angle_from,
                            float        angle_range,
