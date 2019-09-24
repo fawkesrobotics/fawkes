@@ -268,11 +268,6 @@ public:
 		cookies_[key] = value;
 	}
 
-	/** Set a POST value.
-   * @param key key of the cookie
-   * @param data incoming data
-   * @param size size in bytes of @p data
-   */
 	void set_post_value(const char *key, const char *data, size_t size);
 
 	/** Set a GET value.
