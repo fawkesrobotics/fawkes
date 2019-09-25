@@ -76,6 +76,15 @@ ExogManager::init()
 	}
 }
 
+void
+ExogManager::finalize()
+{
+}
+
+void ExogManager::exog_queue_push(shared_ptr<ExogEvent>)
+{
+}
+
 shared_ptr<ExogAction>
 ExogManager::find_mapped_exog(const std::string &mapped_name)
 {
