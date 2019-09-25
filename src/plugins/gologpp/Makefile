@@ -26,8 +26,8 @@ PLUGINS_all = $(PLUGINDIR)/gologpp.so
 ifneq ($(PKGCONFIG),)
   HAVE_GOLOGPP = $(if $(shell $(PKGCONFIG) --exists golog++; echo $${?/1/}),1,0)
   ifeq ($(HAVE_GOLOGPP),1)
-    CFLAGS += $(shell $(PKGCONFIG) --cflags readylog++)
-    LDFLAGS += $(shell $(PKGCONFIG) --libs readylog++)
+    CFLAGS += $(shell $(PKGCONFIG) --cflags readylog++ parsegolog++)
+    LDFLAGS += $(shell $(PKGCONFIG) --libs readylog++ parsegolog++)
     PLUGINS_build = $(PLUGINS_all)
   else
     WARN_TARGETS += warning_gologpp
