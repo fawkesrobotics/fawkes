@@ -31,14 +31,6 @@ namespace fawkes {
  * tasks, which are executed before and after every loop.
  *
  * @author Till Hofmann
- *
- * @fn void ThreadLoopListener::pre_loop(Thread thread*)
- * This is called by the thread every time before loop() is called.
- * @param thread thread whose loop() is will be called.
- *
- * @fn void ThreadLoopListener::post_loop(Thread thread*)
- * This is called by the thread every time after loop() returned.
- * @param thread thread whose loop() just returned.
  */
 
 /** Virtual empty destructor. */
@@ -47,7 +39,7 @@ ThreadLoopListener::~ThreadLoopListener()
 }
 
 /** Empty stub for the pre loop function of the loop listener.
- * This function is called right before the loop of the thread with the aspect.
+ * This function is called by the thread every time before loop() is called.
  * Provide a stub such that not every derived class must implement the function.
  * @param thread thread this loop listener belongs to
  */
@@ -57,7 +49,7 @@ ThreadLoopListener::pre_loop(Thread *thread)
 }
 
 /** Empty stub for the post loop function of the loop listener.
- * This function is called right after the loop of the thread with the aspect.
+ * This function is called by the thread every time after loop() returned.
  * Provide a stub such that not every derived class must implement the function.
  * @param thread thread this loop listener belongs to
  */

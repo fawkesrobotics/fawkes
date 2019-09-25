@@ -272,28 +272,23 @@ ClingoAccess::alloc_control()
 		argumentsChar.push_back(argumentsString.back().c_str());
 	}
 
-	control_ = new Clingo::Control(argumentsChar,
-	                               [this](const Clingo::WarningCode code, char const *msg) {
-		                               fawkes::Logger::LogLevel level = fawkes::Logger::LL_NONE;
-		                               switch (code) {
-		                               case Clingo::WarningCode::AtomUndefined:
-		                               case Clingo::WarningCode::OperationUndefined:
-		                               case Clingo::WarningCode::RuntimeError:
-			                               level = fawkes::Logger::LL_ERROR;
-			                               break;
-		                               case Clingo::WarningCode::Other:
-		                               case Clingo::WarningCode::VariableUnbounded:
-			                               level = fawkes::Logger::LL_WARN;
-			                               break;
-		                               case Clingo::WarningCode::FileIncluded:
-		                               case Clingo::WarningCode::GlobalVariable:
-			                               level = fawkes::Logger::LL_INFO;
-			                               break;
-		                               }
-		                               logger_->log(level, log_comp_.c_str(), msg);
-		                               return;
-	                               },
-	                               100);
+	control_ = new Clingo::Control(
+	  argumentsChar,
+	  [this](const Clingo::WarningCode code, char const *msg) {
+		  fawkes::Logger::LogLevel level = fawkes::Logger::LL_NONE;
+		  switch (code) {
+		  case Clingo::WarningCode::AtomUndefined:
+		  case Clingo::WarningCode::OperationUndefined:
+		  case Clingo::WarningCode::RuntimeError: level = fawkes::Logger::LL_ERROR; break;
+		  case Clingo::WarningCode::Other:
+		  case Clingo::WarningCode::VariableUnbounded: level = fawkes::Logger::LL_WARN; break;
+		  case Clingo::WarningCode::FileIncluded:
+		  case Clingo::WarningCode::GlobalVariable: level = fawkes::Logger::LL_INFO; break;
+		  }
+		  logger_->log(level, log_comp_.c_str(), msg);
+		  return;
+	  },
+	  100);
 	return;
 }
 
@@ -617,18 +612,19 @@ ClingoAccess::assign_external(const Clingo::Symbol &atom, const Clingo::TruthVal
 	}
 
 	if (debug_level_ >= ASP_DBG_EXTERNALS) {
-		logger_->log_info(log_comp_.c_str(),
-		                  "Assigning %s to %s.",
-		                  [value](void) {
-			                  const char *ret = "Unknown Value";
-			                  switch (value) {
-			                  case Clingo::TruthValue::Free: ret = "Free"; break;
-			                  case Clingo::TruthValue::True: ret = "True"; break;
-			                  case Clingo::TruthValue::False: ret = "False"; break;
-			                  }
-			                  return ret;
-		                  }(),
-		                  atom.to_string().c_str());
+		logger_->log_info(
+		  log_comp_.c_str(),
+		  "Assigning %s to %s.",
+		  [value](void) {
+			  const char *ret = "Unknown Value";
+			  switch (value) {
+			  case Clingo::TruthValue::Free: ret = "Free"; break;
+			  case Clingo::TruthValue::True: ret = "True"; break;
+			  case Clingo::TruthValue::False: ret = "False"; break;
+			  }
+			  return ret;
+		  }(),
+		  atom.to_string().c_str());
 	}
 	control_->assign_external(atom, value);
 	return true;
