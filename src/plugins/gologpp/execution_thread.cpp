@@ -26,6 +26,8 @@
 #include <golog++/parser/parser.h>
 #include <golog++/semantics/readylog/execution.h>
 
+namespace fawkes_gpp {
+
 using namespace fawkes;
 
 const std::string cfg_prefix("/plugins/gologpp");
@@ -62,3 +64,5 @@ GologppThread::finalize()
 {
 	gologpp::ReadylogContext::shutdown();
 }
+
+} // namespace fawkes_gpp

@@ -37,6 +37,8 @@ class Type;
 
 namespace fawkes_gpp {
 
+class GologppThread;
+
 ///////////////////////////////////////////////////////////////////////////////
 class ConfigError : public fawkes::Exception
 {
@@ -45,14 +47,14 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-class ExogManager : public fawkes::BlackBoardAspect,
-                    public fawkes::ConfigurableAspect,
-                    public fawkes::LoggingAspect,
-                    public fawkes::Thread,
-                    public fawkes::BlockedTimingAspect
+class ExogManagerThread : public fawkes::BlackBoardAspect,
+                          public fawkes::ConfigurableAspect,
+                          public fawkes::LoggingAspect,
+                          public fawkes::Thread,
+                          public fawkes::BlockedTimingAspect
 {
 public:
-	ExogManager(gologpp::ExecutionContext &ctx);
+	ExogManagerThread(GologppThread *exec_thread);
 
 	virtual void init() override;
 	virtual void finalize() override;
@@ -62,7 +64,6 @@ public:
 private:
 	void                                     exog_queue_push(gologpp::shared_ptr<gologpp::ExogEvent>);
 	gologpp::shared_ptr<gologpp::ExogAction> find_mapped_exog(const std::string &mapped_name);
-	gologpp::ExecutionContext &              golog_exec_ctx_;
 
 	///////////////////////////////////////////////////////////////////
 	class BlackboardEventHandler
@@ -70,7 +71,7 @@ private:
 	public:
 		BlackboardEventHandler(fawkes::BlackBoard *,
 		                       gologpp::shared_ptr<gologpp::ExogAction>,
-		                       ExogManager &exog_mgr);
+		                       ExogManagerThread &exog_mgr);
 
 		gologpp::shared_ptr<gologpp::ExogEvent> make_exog_event(fawkes::Interface *) const;
 
@@ -78,7 +79,7 @@ private:
 		fawkes::BlackBoard *                              blackboard_;
 		gologpp::shared_ptr<gologpp::ExogAction>          target_exog_;
 		std::unordered_map<std::string, gologpp::arity_t> fields_order_;
-		ExogManager &                                     exog_manager_;
+		ExogManagerThread &                               exog_manager_;
 	};
 
 	///////////////////////////////////////////////////////////////////
@@ -88,7 +89,7 @@ private:
 		InterfaceWatcher(fawkes::BlackBoard *,
 		                 const std::string &id,
 		                 gologpp::shared_ptr<gologpp::ExogAction>,
-		                 ExogManager &exog_mgr);
+		                 ExogManagerThread &exog_mgr);
 		virtual ~InterfaceWatcher() override;
 
 		virtual void bb_interface_data_changed(fawkes::Interface *) throw() override;
@@ -104,7 +105,7 @@ private:
 		PatternObserver(fawkes::BlackBoard *,
 		                const std::string &pattern,
 		                gologpp::shared_ptr<gologpp::ExogAction>,
-		                ExogManager &exog_mgr);
+		                ExogManagerThread &exog_mgr);
 		virtual ~PatternObserver() override;
 
 		virtual void bb_interface_created(const char *type, const char *id) throw() override;
@@ -117,6 +118,7 @@ private:
 	std::unordered_map<std::string, gologpp::shared_ptr<gologpp::ExogAction>> mapped_exogs_;
 	std::vector<InterfaceWatcher>                                             watchers_;
 	std::vector<PatternObserver>                                              observers_;
+	GologppThread *                                                           exec_thread_;
 };
 
 } // namespace fawkes_gpp

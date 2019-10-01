@@ -21,6 +21,8 @@
 
 #include "gologpp_fawkes_backend.h"
 
+namespace fawkes_gpp {
+
 using namespace gologpp;
 using namespace fawkes;
 
@@ -44,3 +46,5 @@ void
 GologppFawkesBackend::execute_activity(shared_ptr<Activity> a)
 {
 }
+
+} // namespace fawkes_gpp

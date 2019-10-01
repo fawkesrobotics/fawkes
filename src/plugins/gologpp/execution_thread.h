@@ -27,6 +27,8 @@
 #include <core/threading/thread.h>
 #include <golog++/model/execution.h>
 
+namespace fawkes_gpp {
+
 class GologppThread : public fawkes::Thread,
                       public fawkes::LoggingAspect,
                       public fawkes::ConfigurableAspect
@@ -38,8 +40,12 @@ public:
 	virtual void once() override;
 	virtual void finalize() override;
 
+	gologpp::ExecutionContext &gologpp_context();
+
 private:
 	std::unique_ptr<gologpp::Expression> main_prog_;
 };
+
+} // namespace fawkes_gpp
 
 #endif

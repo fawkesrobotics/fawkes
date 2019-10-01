@@ -18,6 +18,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 #include "execution_thread.h"
+#include "exog_manager.h"
 
 #include <core/plugin.h>
 
@@ -26,11 +27,20 @@ using namespace fawkes;
 class GologppPlugin : public Plugin
 {
 public:
-	explicit GologppPlugin(Configuration *cfg) : Plugin(cfg)
-	{
-		thread_list.push_back(new GologppThread());
-	}
+	explicit GologppPlugin(Configuration *cfg);
+	virtual ~GologppPlugin() override;
 };
+
+GologppPlugin::GologppPlugin(Configuration *cfg) : Plugin(cfg)
+{
+	fawkes_gpp::GologppThread *exec_thread = new fawkes_gpp::GologppThread();
+	thread_list.push_back(exec_thread);
+	thread_list.push_back(new fawkes_gpp::ExogManagerThread(exec_thread));
+}
+
+GologppPlugin::~GologppPlugin()
+{
+}
 
 PLUGIN_DESCRIPTION("Detect the conveyor belt in a pointcloud")
 EXPORT_PLUGIN(GologppPlugin)

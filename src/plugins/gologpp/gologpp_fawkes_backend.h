@@ -28,6 +28,8 @@
 #include <aspect/logging.h>
 #include <golog++/model/platform_backend.h>
 
+namespace fawkes_gpp {
+
 class GologppFawkesBackend : public gologpp::PlatformBackend,
                              public fawkes::ClockAspect,
                              public fawkes::LoggingAspect
@@ -43,5 +45,7 @@ private:
 
 	GologppThread *main_thread_;
 };
+
+} // namespace fawkes_gpp
 
 #endif

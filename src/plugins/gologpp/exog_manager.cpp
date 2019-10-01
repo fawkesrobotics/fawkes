@@ -20,6 +20,8 @@
 
 #include "exog_manager.h"
 
+#include "execution_thread.h"
+
 #include <core/exception.h>
 #include <libs/interface/field_iterator.h>
 
@@ -28,7 +30,7 @@ using namespace gologpp;
 
 namespace fawkes_gpp {
 
-const string ExogManager::cfg_prefix{"/plugins/gologpp/blackboard"};
+const string ExogManagerThread::cfg_prefix{"/plugins/gologpp/blackboard"};
 
 static Value *field_to_value(InterfaceFieldIterator &fi, unsigned int idx);
 
@@ -36,31 +38,34 @@ ConfigError::ConfigError(const std::string &msg) : Exception(msg.c_str())
 {
 }
 
-ExogManager::ExogManager(ExecutionContext &ctx)
+ExogManagerThread::ExogManagerThread(GologppThread *exec_thread)
 : Thread("gologpp_blackboard_manager", Thread::OPMODE_WAITFORWAKEUP),
   BlockedTimingAspect(WakeupHook::WAKEUP_HOOK_WORLDSTATE),
-  golog_exec_ctx_(ctx)
+  exec_thread_(exec_thread)
 {
 }
 
 void
-ExogManager::init()
+ExogManagerThread::init()
 {
-	// We know that lists of elementary types will most likely occur, so simply define the types unconditionally
-	// The elementary types themselves are already defined.
+	// We know that lists of elementary types will most likely occur, so simply
+	// define the types unconditionally The elementary types themselves are
+	// already defined.
 	global_scope().register_type(new ListType(*global_scope().lookup_type(BoolType::name())));
 	global_scope().register_type(new ListType(*global_scope().lookup_type(NumberType::name())));
 	global_scope().register_type(new ListType(*global_scope().lookup_type(SymbolType::name())));
 
-	// Build a map to lookup all exog actions by their mapped name (i.e. the interface ID or pattern)
+	// Build a map to lookup all exog actions by their mapped name (i.e. the
+	// interface ID or pattern)
 	for (shared_ptr<Global> g : global_scope().globals()) {
 		shared_ptr<ExogAction> exog = std::dynamic_pointer_cast<ExogAction>(g);
 		if (g)
 			mapped_exogs_.emplace(exog->mapping().backend_name(), exog);
 	}
 
-	// Register an InterfaceWatcher and a PatternObserver for each watched/observed interface (pattern)
-	// These also implement the event handlers.
+	// Register an InterfaceWatcher and a PatternObserver for each
+	// watched/observed interface (pattern) These also implement the event
+	// handlers.
 	std::unique_ptr<Configuration::ValueIterator> watch_it(config->search(cfg_prefix + "/watch"));
 	while (watch_it->next()) {
 		string                 id   = config->get_string(string(watch_it->path()) + "/id");
@@ -77,16 +82,12 @@ ExogManager::init()
 }
 
 void
-ExogManager::finalize()
-{
-}
-
-void ExogManager::exog_queue_push(shared_ptr<ExogEvent>)
+ExogManagerThread::finalize()
 {
 }
 
 shared_ptr<ExogAction>
-ExogManager::find_mapped_exog(const std::string &mapped_name)
+ExogManagerThread::find_mapped_exog(const std::string &mapped_name)
 {
 	auto map_it = mapped_exogs_.find(mapped_name);
 
@@ -96,16 +97,23 @@ ExogManager::find_mapped_exog(const std::string &mapped_name)
 	return map_it->second;
 }
 
-ExogManager::BlackboardEventHandler::BlackboardEventHandler(fawkes::BlackBoard *   bb,
-                                                            shared_ptr<ExogAction> exog,
-                                                            ExogManager &          exog_mgr)
+void
+ExogManagerThread::exog_queue_push(shared_ptr<ExogEvent> evt)
+{
+	exec_thread_->gologpp_context().exog_queue_push(evt);
+}
+
+ExogManagerThread::BlackboardEventHandler::BlackboardEventHandler(fawkes::BlackBoard *   bb,
+                                                                  shared_ptr<ExogAction> exog,
+                                                                  ExogManagerThread &    exog_mgr)
 : blackboard_(bb), target_exog_(exog), exog_manager_(exog_mgr)
 {
 	for (const auto &pair : target_exog_->mapping().arg_mapping()) {
-		/* TODO: This is not very nice. First we have to look up the index of the mapped parameter variable
-		 * and then remember to put arg values at that index when an actual event happens.
-		 * This is necessary because the ExogEvent (or rather the ReferenceBase) constructor accepts only
-		 * vectors with positional arguments.
+		/* TODO: This is not very nice. First we have to look up the index of the
+		 * mapped parameter variable and then remember to put arg values at that
+		 * index when an actual event happens. This is necessary because the
+		 * ExogEvent (or rather the ReferenceBase) constructor accepts only vectors
+		 * with positional arguments.
 		 */
 
 		auto &var_ref = dynamic_cast<Reference<Variable> &>(*pair.second);
@@ -116,10 +124,10 @@ ExogManager::BlackboardEventHandler::BlackboardEventHandler(fawkes::BlackBoard *
 	}
 }
 
-ExogManager::InterfaceWatcher::InterfaceWatcher(BlackBoard *           bb,
-                                                const string &         id,
-                                                shared_ptr<ExogAction> exog,
-                                                ExogManager &          exog_mgr)
+ExogManagerThread::InterfaceWatcher::InterfaceWatcher(BlackBoard *           bb,
+                                                      const string &         id,
+                                                      shared_ptr<ExogAction> exog,
+                                                      ExogManagerThread &    exog_mgr)
 : BlackboardEventHandler(bb, exog, exog_mgr),
   BlackBoardInterfaceListener("gologpp_blackboard_manager"),
   iface_(blackboard_->open_for_reading<Interface>(id.c_str()))
@@ -128,14 +136,14 @@ ExogManager::InterfaceWatcher::InterfaceWatcher(BlackBoard *           bb,
 	blackboard_->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
 }
 
-ExogManager::InterfaceWatcher::~InterfaceWatcher()
+ExogManagerThread::InterfaceWatcher::~InterfaceWatcher()
 {
 	blackboard_->unregister_listener(this);
 	blackboard_->close(iface_);
 }
 
 shared_ptr<ExogEvent>
-ExogManager::BlackboardEventHandler::make_exog_event(Interface *iface) const
+ExogManagerThread::BlackboardEventHandler::make_exog_event(Interface *iface) const
 {
 	InterfaceFieldIterator    fi = iface->fields();
 	vector<unique_ptr<Value>> args;
@@ -158,28 +166,28 @@ ExogManager::BlackboardEventHandler::make_exog_event(Interface *iface) const
 }
 
 void
-ExogManager::InterfaceWatcher::bb_interface_data_changed(Interface *iface) throw()
+ExogManagerThread::InterfaceWatcher::bb_interface_data_changed(Interface *iface) throw()
 {
 	exog_manager_.exog_queue_push(make_exog_event(iface));
 }
 
-ExogManager::PatternObserver::PatternObserver(BlackBoard *           bb,
-                                              const std::string &    pattern,
-                                              shared_ptr<ExogAction> exog,
-                                              ExogManager &          exog_mgr)
+ExogManagerThread::PatternObserver::PatternObserver(BlackBoard *           bb,
+                                                    const std::string &    pattern,
+                                                    shared_ptr<ExogAction> exog,
+                                                    ExogManagerThread &    exog_mgr)
 : BlackboardEventHandler(bb, exog, exog_mgr)
 {
 	bbio_add_observed_create("*", pattern.c_str());
 	blackboard_->register_observer(this);
 }
 
-ExogManager::PatternObserver::~PatternObserver()
+ExogManagerThread::PatternObserver::~PatternObserver()
 {
 	blackboard_->unregister_observer(this);
 }
 
 void
-ExogManager::PatternObserver::bb_interface_created(const char *type, const char *id) throw()
+ExogManagerThread::PatternObserver::bb_interface_created(const char *type, const char *id) throw()
 {
 	Interface *iface = blackboard_->open_for_reading(type, id);
 	exog_manager_.exog_queue_push(make_exog_event(iface));
