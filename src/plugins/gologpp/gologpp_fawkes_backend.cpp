@@ -150,7 +150,23 @@ GologppFawkesBackend::map_activity_to_skill(std::shared_ptr<Activity> activity)
 		params[arg.first] = activity->mapped_arg_value(arg.first).to_string("");
 	}
 	std::multimap<std::string, std::string> messages;
-	return action_skill_mapping_.map_skill(activity->mapped_name(), params, messages);
+	if (!action_skill_mapping_.has_mapping(activity->mapped_name())) {
+		throw Exception(std::string("No mapping for action " + activity->mapped_name()).c_str());
+	}
+	auto mapping{action_skill_mapping_.map_skill(activity->mapped_name(), params, messages)};
+	for (auto m = messages.find("ERROR"); m != messages.end();) {
+		logger_->log_error(name(),
+		                   "Error occurred while mapping action '%s': %s",
+		                   activity->mapped_name().c_str(),
+		                   m->second.c_str());
+	}
+	for (auto m = messages.find("WARNING"); m != messages.end();) {
+		logger_->log_warn(name(),
+		                  "Warning occurred while mapping action '%s': %s",
+		                  activity->mapped_name().c_str(),
+		                  m->second.c_str());
+	}
+	return mapping;
 }
 
 void
