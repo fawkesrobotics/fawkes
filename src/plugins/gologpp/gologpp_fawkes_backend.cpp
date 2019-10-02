@@ -106,22 +106,9 @@ GologppFawkesBackend::execute_activity(shared_ptr<Activity> a)
 	if (running_activity_) {
 		stop_running_activity();
 	}
-	std::stringstream skill_string;
-	skill_string << a->mapped_name() << "{";
-	std::string arg_separator{""};
-	for (auto &arg : a->target()->mapping().arg_mapping()) {
-		skill_string << arg_separator;
-		auto        v         = a->mapped_arg_value(arg.first);
-		std::string arg_quote = "";
-		if (v.type().is<gologpp::StringType>()) {
-			arg_quote = "\"";
-		}
-		skill_string << arg.first << "=" << arg_quote << a->mapped_arg_value(arg.first) << arg_quote;
-		arg_separator = ", ";
-	}
-	skill_string << "}";
 
-	skiller_if_->msgq_enqueue(new SkillerInterface::ExecSkillMessage(skill_string.str().c_str()));
+	std::string skill_string{map_activity_to_skill(a)};
+	skiller_if_->msgq_enqueue(new SkillerInterface::ExecSkillMessage(skill_string.c_str()));
 	running_activity_ = a;
 }
 
@@ -149,6 +136,27 @@ GologppFawkesBackend::bb_interface_data_changed(Interface *iface) throw()
 	case SkillerInterface::S_RUNNING: running_activity_->update(Transition::Hook::START); break;
 	default: break;
 	}
+}
+
+std::string
+GologppFawkesBackend::map_activity_to_skill(std::shared_ptr<Activity> activity)
+{
+	std::stringstream skill_string;
+	skill_string << activity->mapped_name() << "{";
+	std::string arg_separator{""};
+	for (auto &arg : activity->target()->mapping().arg_mapping()) {
+		skill_string << arg_separator;
+		auto        v         = activity->mapped_arg_value(arg.first);
+		std::string arg_quote = "";
+		if (v.type().is<gologpp::StringType>()) {
+			arg_quote = "\"";
+		}
+		skill_string << arg.first << "=" << arg_quote << activity->mapped_arg_value(arg.first)
+		             << arg_quote;
+		arg_separator = ", ";
+	}
+	skill_string << "}";
+	return skill_string.str();
 }
 
 const char *

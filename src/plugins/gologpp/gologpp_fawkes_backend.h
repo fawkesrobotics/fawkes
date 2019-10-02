@@ -54,6 +54,7 @@ private:
 	virtual void execute_activity(std::shared_ptr<gologpp::Activity>) override;
 	void         stop_running_activity();
 	const char * name();
+	std::string  map_activity_to_skill(std::shared_ptr<gologpp::Activity> activity);
 
 	GologppThread *                    main_thread_;
 	fawkes::SkillerInterface *         skiller_if_;
