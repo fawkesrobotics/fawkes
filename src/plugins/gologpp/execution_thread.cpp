@@ -43,7 +43,7 @@ GologppThread::GologppThread() : fawkes::Thread("gologpp_agent", Thread::OPMODE_
 void
 GologppThread::init()
 {
-	std::string prog_file = this->config->get_string(cfg_prefix + "/program_path");
+	std::string prog_file = config->get_string(cfg_prefix + "/program_path");
 	if (prog_file[0] != '/')
 		prog_file = SRCDIR "/" + prog_file;
 
