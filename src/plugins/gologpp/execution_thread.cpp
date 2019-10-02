@@ -70,4 +70,14 @@ GologppThread::finalize()
 	gologpp::ReadylogContext::shutdown();
 }
 
+/**
+ * @brief GologppThread::gologpp_context
+ * @return the currently used golog++ execution context.
+ */
+gologpp::ExecutionContext &
+GologppThread::gologpp_context()
+{
+	return gologpp::ReadylogContext::instance();
+}
+
 } // namespace fawkes_gpp
