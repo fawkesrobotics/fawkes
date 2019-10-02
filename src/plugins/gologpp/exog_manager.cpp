@@ -76,7 +76,7 @@ ExogManagerThread::init()
 	// interface ID or pattern)
 	for (shared_ptr<Global> g : global_scope().globals()) {
 		shared_ptr<ExogAction> exog = std::dynamic_pointer_cast<ExogAction>(g);
-		if (g)
+		if (exog)
 			mapped_exogs_.emplace(exog->mapping().backend_name(), exog);
 	}
 
