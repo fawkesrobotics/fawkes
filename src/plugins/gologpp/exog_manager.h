@@ -50,8 +50,7 @@ public:
 class ExogManagerThread : public fawkes::BlackBoardAspect,
                           public fawkes::ConfigurableAspect,
                           public fawkes::LoggingAspect,
-                          public fawkes::Thread,
-                          public fawkes::BlockedTimingAspect
+                          public fawkes::Thread
 {
 public:
 	ExogManagerThread(GologppThread *exec_thread);

@@ -56,9 +56,7 @@ ConfigError::ConfigError(const std::string &msg) : Exception(msg.c_str())
  * @param exec_thread The Golog++ ExecutionContext to use
  */
 ExogManagerThread::ExogManagerThread(GologppThread *exec_thread)
-: Thread("gologpp_blackboard_manager", Thread::OPMODE_WAITFORWAKEUP),
-  BlockedTimingAspect(WakeupHook::WAKEUP_HOOK_WORLDSTATE),
-  exec_thread_(exec_thread)
+: Thread("gologpp_blackboard_manager", Thread::OPMODE_WAITFORWAKEUP), exec_thread_(exec_thread)
 {
 }
 
