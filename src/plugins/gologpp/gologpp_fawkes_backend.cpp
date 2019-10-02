@@ -40,14 +40,17 @@ using namespace fawkes;
 
 /** Constructor.
  *  @param main_thread the main thread of the Golog++ plugin
+ *  @param config The configuration to read from
  *  @param logger The logger to use for log messages
  *  @param blackboard The blackboard to use to access the skiller
  */
 GologppFawkesBackend::GologppFawkesBackend(GologppThread *main_thread,
+                                           Configuration *config,
                                            Logger *       logger,
                                            BlackBoard *   blackboard)
 : BlackBoardInterfaceListener("gologpp_agent"),
   main_thread_(main_thread),
+  config_(config),
   logger_(logger),
   blackboard_(blackboard)
 {
@@ -65,6 +68,7 @@ GologppFawkesBackend::GologppFawkesBackend(GologppThread *main_thread,
 		throw Exception("No writer for Skiller interface");
 	}
 	skiller_if_->msgq_enqueue(new SkillerInterface::AcquireControlMessage());
+	initialize_action_skill_mapping();
 }
 
 GologppFawkesBackend::~GologppFawkesBackend()
@@ -141,22 +145,27 @@ GologppFawkesBackend::bb_interface_data_changed(Interface *iface) throw()
 std::string
 GologppFawkesBackend::map_activity_to_skill(std::shared_ptr<Activity> activity)
 {
-	std::stringstream skill_string;
-	skill_string << activity->mapped_name() << "{";
-	std::string arg_separator{""};
+	std::map<std::string, std::string> params;
 	for (auto &arg : activity->target()->mapping().arg_mapping()) {
-		skill_string << arg_separator;
-		auto        v         = activity->mapped_arg_value(arg.first);
-		std::string arg_quote = "";
-		if (v.type().is<gologpp::StringType>()) {
-			arg_quote = "\"";
-		}
-		skill_string << arg.first << "=" << arg_quote << activity->mapped_arg_value(arg.first)
-		             << arg_quote;
-		arg_separator = ", ";
+		params[arg.first] = activity->mapped_arg_value(arg.first).to_string("");
 	}
-	skill_string << "}";
-	return skill_string.str();
+	std::multimap<std::string, std::string> messages;
+	return action_skill_mapping_.map_skill(activity->mapped_name(), params, messages);
+}
+
+void
+GologppFawkesBackend::initialize_action_skill_mapping()
+{
+	// TODO: use const for config prefix
+	std::string                        action_mapping_cfg_path = "/plugins/gologpp/action-mapping/";
+	auto                               cfg_iterator{config_->search(action_mapping_cfg_path)};
+	std::map<std::string, std::string> mapping;
+	while (cfg_iterator->next()) {
+		std::string action_name{
+		  std::string(cfg_iterator->path()).substr(action_mapping_cfg_path.length())};
+		mapping[action_name] = cfg_iterator->get_as_string();
+	}
+	action_skill_mapping_ = ActionSkillMapping(mapping);
 }
 
 const char *

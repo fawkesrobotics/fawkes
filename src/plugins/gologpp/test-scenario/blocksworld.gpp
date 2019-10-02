@@ -29,8 +29,9 @@ effect:
 	loc(x) = y;
 
 mapping:
-  "say" {
-    text = y
+  "stack" {
+    x = x,
+    y = y
   }
 }
 
