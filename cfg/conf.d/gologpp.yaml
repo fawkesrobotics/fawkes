@@ -1,0 +1,5 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+/plugins/gologpp:
+  program_path: test-scenario/blocksworld.gpp
