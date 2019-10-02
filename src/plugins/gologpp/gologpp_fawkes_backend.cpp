@@ -135,7 +135,10 @@ GologppFawkesBackend::bb_interface_data_changed(Interface *iface) throw()
 	}
 	skiller_if->read();
 	switch (skiller_if->status()) {
-	case SkillerInterface::S_FINAL: running_activity_->update(Transition::Hook::FINISH); break;
+	case SkillerInterface::S_FINAL:
+		running_activity_->update(Transition::Hook::FINISH);
+		running_activity_.reset();
+		break;
 	case SkillerInterface::S_FAILED: running_activity_->update(Transition::Hook::FAIL); break;
 	case SkillerInterface::S_RUNNING: running_activity_->update(Transition::Hook::START); break;
 	default: break;
