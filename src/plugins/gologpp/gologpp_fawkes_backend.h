@@ -26,24 +26,40 @@
 
 #include <aspect/clock.h>
 #include <aspect/logging.h>
+#include <blackboard/interface_listener.h>
 #include <golog++/model/platform_backend.h>
+
+namespace fawkes {
+class SkillerInterface;
+}
 
 namespace fawkes_gpp {
 
 class GologppFawkesBackend : public gologpp::PlatformBackend,
-                             public fawkes::ClockAspect,
-                             public fawkes::LoggingAspect
+                             public fawkes::BlackBoardInterfaceListener,
+                             public fawkes::ClockAspect
 {
 public:
-	GologppFawkesBackend(GologppThread *main_thread);
+	GologppFawkesBackend(GologppThread *     main_thread,
+	                     fawkes::Logger *    logger,
+	                     fawkes::BlackBoard *blackboard);
+	virtual ~GologppFawkesBackend();
 
-	virtual void preempt_activity(std::shared_ptr<gologpp::Transition>) override;
+	virtual void preempt_activity(std::shared_ptr<gologpp::Transition> t) override;
 	virtual gologpp::Clock::time_point time() const noexcept override;
+
+	virtual void bb_interface_data_changed(fawkes::Interface *) throw() override;
 
 private:
 	virtual void execute_activity(std::shared_ptr<gologpp::Activity>) override;
+	void         stop_running_activity();
+	const char * name();
 
-	GologppThread *main_thread_;
+	GologppThread *                    main_thread_;
+	fawkes::SkillerInterface *         skiller_if_;
+	fawkes::Logger *                   logger_;
+	fawkes::BlackBoard *               blackboard_;
+	std::shared_ptr<gologpp::Activity> running_activity_;
 };
 
 } // namespace fawkes_gpp

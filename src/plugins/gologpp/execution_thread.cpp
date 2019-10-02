@@ -48,7 +48,8 @@ GologppThread::init()
 	logger->log_info(name(), "... parsing done");
 
 	logger->log_info(name(), "Initializing ReadyLog context...");
-	gologpp::ReadylogContext::init({}, std::make_unique<GologppFawkesBackend>(this));
+	gologpp::ReadylogContext::init({},
+	                               std::make_unique<GologppFawkesBackend>(this, logger, blackboard));
 	logger->log_info(name(), "... initialization done");
 }
 

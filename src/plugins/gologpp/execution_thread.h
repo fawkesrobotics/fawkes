@@ -24,13 +24,19 @@
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <blackboard/interface_listener.h>
 #include <core/threading/thread.h>
 #include <golog++/model/execution.h>
+
+namespace fawkes {
+class SkillerInterface;
+}
 
 namespace fawkes_gpp {
 
 class GologppThread : public fawkes::Thread,
                       public fawkes::LoggingAspect,
+                      public fawkes::BlackBoardAspect,
                       public fawkes::ConfigurableAspect
 {
 public:
@@ -44,6 +50,7 @@ public:
 
 private:
 	std::unique_ptr<gologpp::Expression> main_prog_;
+	fawkes::SkillerInterface *           skiller_if_;
 };
 
 } // namespace fawkes_gpp
