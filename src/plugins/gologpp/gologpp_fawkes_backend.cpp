@@ -113,7 +113,7 @@ GologppFawkesBackend::execute_activity(shared_ptr<Activity> a)
 		skill_string << arg_separator;
 		auto        v         = a->mapped_arg_value(arg.first);
 		std::string arg_quote = "";
-		if (v.representation().type() == typeid(std::string)) {
+		if (v.type().is<gologpp::StringType>()) {
 			arg_quote = "\"";
 		}
 		skill_string << arg.first << "=" << arg_quote << a->mapped_arg_value(arg.first) << arg_quote;
