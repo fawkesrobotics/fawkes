@@ -24,6 +24,11 @@
 
 using namespace fawkes;
 
+/** @class GologppPlugin
+ *  A plugin to integrate Golog++ into Fawkes.
+ *  @author Victor Mataré
+ */
+
 class GologppPlugin : public Plugin
 {
 public:
@@ -31,6 +36,10 @@ public:
 	virtual ~GologppPlugin() override;
 };
 
+/** Constructor.
+	 *  Create a thread that runs Golog++.
+	 *  @param cfg The Fawkes configuration to be used by the plugin.
+	 */
 GologppPlugin::GologppPlugin(Configuration *cfg) : Plugin(cfg)
 {
 	fawkes_gpp::GologppThread *exec_thread = new fawkes_gpp::GologppThread();
@@ -42,5 +51,5 @@ GologppPlugin::~GologppPlugin()
 {
 }
 
-PLUGIN_DESCRIPTION("Detect the conveyor belt in a pointcloud")
+PLUGIN_DESCRIPTION("Golog++ Executive")
 EXPORT_PLUGIN(GologppPlugin)

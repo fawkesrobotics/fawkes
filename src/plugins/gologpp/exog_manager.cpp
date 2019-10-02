@@ -30,14 +30,31 @@ using namespace gologpp;
 
 namespace fawkes_gpp {
 
+/** @class ExogManagerThread
+ *  A Golog++ ExogManager that watches the blackboard for changes and passes the changed values to
+ * Golog++.
+ */
+
+/** The prefix to use for the config of the ExogManager. */
 const string ExogManagerThread::cfg_prefix{"/plugins/gologpp/blackboard"};
 
 static Value *field_to_value(InterfaceFieldIterator &fi, unsigned int idx);
 
+/** @class ConfigError
+ *  An error in the configuration, e.g., a missing key.
+ */
+
+/** Construct a ConfigError.
+ * @param msg A message describing the error.
+ */
 ConfigError::ConfigError(const std::string &msg) : Exception(msg.c_str())
 {
 }
 
+/** Constructor.
+ * Construct an ExogManager thread and attach it to the main loop.
+ * @param exec_thread The Golog++ ExecutionContext to use
+ */
 ExogManagerThread::ExogManagerThread(GologppThread *exec_thread)
 : Thread("gologpp_blackboard_manager", Thread::OPMODE_WAITFORWAKEUP),
   BlockedTimingAspect(WakeupHook::WAKEUP_HOOK_WORLDSTATE),

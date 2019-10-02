@@ -32,6 +32,12 @@ namespace fawkes_gpp {
 using namespace gologpp;
 using namespace fawkes;
 
+/** @class GologppFawkesBackend
+ *  A Golog++ backend to get data from and send commands to Fawkes.
+ *  The backend currently only provides access to the skiller for action
+ *  execution.
+ */
+
 /** Constructor.
  *  @param main_thread the main thread of the Golog++ plugin
  *  @param logger The logger to use for log messages
@@ -80,6 +86,9 @@ GologppFawkesBackend::preempt_activity(shared_ptr<Transition> t)
 	}
 }
 
+/** Get the current time from Fawkes.
+ *  @return the current time
+ */
 gologpp::Clock::time_point
 GologppFawkesBackend::time() const noexcept
 {
