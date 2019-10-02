@@ -1,0 +1,64 @@
+symbol domain blocks = {a, b, c}
+symbol domain locations = blocks | {table}
+
+symbol fluent loc(symbol x) {
+domain:
+	x in blocks;
+initially:
+	(a) = c;
+	(b) = table;
+	(c) = b;
+// 	(d) = a; //*/
+}
+
+action stack(symbol x, symbol y) {
+domain:
+	x in blocks;
+	y in locations;
+precondition:
+	  x != y // Can't stack x on x
+	& x != table // Can't stack table
+	& loc(x) != y // Can't stack the same thing twice
+	& (!exists(symbol z) loc(z) == x) // Nothing is on x
+	& (
+		y == table // either y is the table...
+		| !exists(symbol z) loc(z) == y // or nothing is on y
+	)
+
+effect:
+	loc(x) = y;
+
+mapping:
+  "say" {
+    text = y
+  }
+}
+
+
+procedure bla() {
+	stack(a,b);
+	stack(a,table);
+}
+
+
+bool function goal() {
+	return loc(a) == table & loc(b) == a & loc(c) == b
+// 	& loc(d) == c
+	;
+}
+
+number function reward() {
+	if (goal())
+		return 100;
+	else
+		return -1;
+}
+
+
+{
+	solve(8, reward())
+		while (!goal())
+			pick (symbol x in {a, b, c})
+				pick(symbol y in {table, a, b, c})
+					stack(x, y);
+}
