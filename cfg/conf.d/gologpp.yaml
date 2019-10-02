@@ -4,4 +4,4 @@
 /plugins/gologpp:
   program_path: test-scenario/blocksworld.gpp
   action-mapping:
-    stack: say{text="Stacking ?(x)y on ?(y)y"}
+    stack: say{text="Stacking ?(x)y on ?(y)y", wait=true}
