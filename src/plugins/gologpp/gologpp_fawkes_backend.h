@@ -22,14 +22,14 @@
 #ifndef FAWKES_GOLOGPP_FAWKES_BACKEND_H_
 #define FAWKES_GOLOGPP_FAWKES_BACKEND_H_
 
+#include "action_executor.h"
+#include "action_executor_dispatcher.h"
 #include "execution_thread.h"
 
 #include <aspect/clock.h>
-#include <blackboard/interface_listener.h>
 #include <config/config.h>
 #include <golog++/model/platform_backend.h>
 #include <logging/logger.h>
-#include <utils/misc/map_skill.h>
 
 namespace fawkes {
 class SkillerInterface;
@@ -51,14 +51,10 @@ public:
 	virtual void preempt_activity(std::shared_ptr<gologpp::Transition> t) override;
 	virtual gologpp::Clock::time_point time() const noexcept override;
 
-	virtual void bb_interface_data_changed(fawkes::Interface *) throw() override;
-
 private:
 	virtual void execute_activity(std::shared_ptr<gologpp::Activity>) override;
 	void         stop_running_activity();
-	void         initialize_action_skill_mapping();
 	const char * name();
-	std::string  map_activity_to_skill(std::shared_ptr<gologpp::Activity> activity);
 
 	GologppThread *                    main_thread_;
 	fawkes::SkillerInterface *         skiller_if_;
@@ -66,7 +62,7 @@ private:
 	fawkes::Logger *                   logger_;
 	fawkes::BlackBoard *               blackboard_;
 	std::shared_ptr<gologpp::Activity> running_activity_;
-	fawkes::ActionSkillMapping         action_skill_mapping_;
+	ActionExecutorDispatcher           action_dispatcher_;
 };
 
 } // namespace fawkes_gpp

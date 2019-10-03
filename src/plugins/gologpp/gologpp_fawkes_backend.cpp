@@ -21,11 +21,10 @@
 
 #include "gologpp_fawkes_backend.h"
 
+#include "skiller_action_executor.h"
+
 #include <golog++/model/activity.h>
 #include <golog++/model/transition.h>
-#include <interfaces/SkillerInterface.h>
-
-#include <sstream>
 
 namespace fawkes_gpp {
 
@@ -54,28 +53,12 @@ GologppFawkesBackend::GologppFawkesBackend(GologppThread *main_thread,
   logger_(logger),
   blackboard_(blackboard)
 {
-	try {
-		skiller_if_ = blackboard_->open_for_reading<SkillerInterface>("Skiller");
-	} catch (Exception &e) {
-		logger_->log_error(name(), "Failed to open skiller interface: %s", e.what_no_backtrace());
-	}
-	bbil_add_data_interface(skiller_if_);
-	blackboard_->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
-	skiller_if_->read();
-	if (!skiller_if_->has_writer()) {
-		blackboard->unregister_listener(this);
-		blackboard->close(skiller_if_);
-		throw Exception("No writer for Skiller interface");
-	}
-	skiller_if_->msgq_enqueue(new SkillerInterface::AcquireControlMessage());
-	initialize_action_skill_mapping();
+	action_dispatcher_.register_executor(
+	  std::make_shared<SkillerActionExecutor>(logger, blackboard, config));
 }
 
 GologppFawkesBackend::~GologppFawkesBackend()
 {
-	skiller_if_->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
-	blackboard_->unregister_listener(this);
-	blackboard_->close(skiller_if_);
 }
 
 /** Preempt the currently running activity.
@@ -107,84 +90,20 @@ GologppFawkesBackend::time() const noexcept
 void
 GologppFawkesBackend::execute_activity(shared_ptr<Activity> a)
 {
-	if (running_activity_) {
-		stop_running_activity();
-	}
-
-	std::string skill_string{map_activity_to_skill(a)};
-	skiller_if_->msgq_enqueue(new SkillerInterface::ExecSkillMessage(skill_string.c_str()));
+	stop_running_activity();
+	auto executor = action_dispatcher_.get_executor(a);
+	executor->start(a);
 	running_activity_ = a;
 }
 
 void
 GologppFawkesBackend::stop_running_activity()
 {
-	skiller_if_->msgq_enqueue(new SkillerInterface::StopExecMessage());
-	running_activity_.reset();
-}
-
-void
-GologppFawkesBackend::bb_interface_data_changed(Interface *iface) throw()
-{
-	if (!running_activity_) {
-		return;
-	}
-	SkillerInterface *skiller_if = dynamic_cast<SkillerInterface *>(iface);
-	if (!skiller_if) {
-		return;
-	}
-	skiller_if->read();
-	switch (skiller_if->status()) {
-	case SkillerInterface::S_FINAL:
-		running_activity_->update(Transition::Hook::FINISH);
+	if (running_activity_) {
+		auto executor = action_dispatcher_.get_executor(running_activity_);
+		executor->stop(running_activity_);
 		running_activity_.reset();
-		break;
-	case SkillerInterface::S_FAILED: running_activity_->update(Transition::Hook::FAIL); break;
-	case SkillerInterface::S_RUNNING: running_activity_->update(Transition::Hook::START); break;
-	default: break;
 	}
-}
-
-std::string
-GologppFawkesBackend::map_activity_to_skill(std::shared_ptr<Activity> activity)
-{
-	std::map<std::string, std::string> params;
-	for (auto &arg : activity->target()->mapping().arg_mapping()) {
-		params[arg.first] = activity->mapped_arg_value(arg.first).to_string("");
-	}
-	std::multimap<std::string, std::string> messages;
-	if (!action_skill_mapping_.has_mapping(activity->mapped_name())) {
-		throw Exception(std::string("No mapping for action " + activity->mapped_name()).c_str());
-	}
-	auto mapping{action_skill_mapping_.map_skill(activity->mapped_name(), params, messages)};
-	for (auto m = messages.find("ERROR"); m != messages.end();) {
-		logger_->log_error(name(),
-		                   "Error occurred while mapping action '%s': %s",
-		                   activity->mapped_name().c_str(),
-		                   m->second.c_str());
-	}
-	for (auto m = messages.find("WARNING"); m != messages.end();) {
-		logger_->log_warn(name(),
-		                  "Warning occurred while mapping action '%s': %s",
-		                  activity->mapped_name().c_str(),
-		                  m->second.c_str());
-	}
-	return mapping;
-}
-
-void
-GologppFawkesBackend::initialize_action_skill_mapping()
-{
-	// TODO: use const for config prefix
-	std::string                        action_mapping_cfg_path = "/plugins/gologpp/action-mapping/";
-	auto                               cfg_iterator{config_->search(action_mapping_cfg_path)};
-	std::map<std::string, std::string> mapping;
-	while (cfg_iterator->next()) {
-		std::string action_name{
-		  std::string(cfg_iterator->path()).substr(action_mapping_cfg_path.length())};
-		mapping[action_name] = cfg_iterator->get_as_string();
-	}
-	action_skill_mapping_ = ActionSkillMapping(mapping);
 }
 
 const char *
