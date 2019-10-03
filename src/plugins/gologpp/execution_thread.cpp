@@ -53,7 +53,7 @@ GologppThread::init()
 
 	logger->log_info(name(), "Initializing ReadyLog context...");
 	gologpp::ReadylogContext::init(
-	  {}, std::make_unique<GologppFawkesBackend>(this, config, logger, blackboard));
+	  {}, std::make_unique<GologppFawkesBackend>(config, logger, blackboard));
 	logger->log_info(name(), "... initialization done");
 }
 

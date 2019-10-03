@@ -38,20 +38,14 @@ using namespace fawkes;
  */
 
 /** Constructor.
- *  @param main_thread the main thread of the Golog++ plugin
  *  @param config The configuration to read from
  *  @param logger The logger to use for log messages
  *  @param blackboard The blackboard to use to access the skiller
  */
-GologppFawkesBackend::GologppFawkesBackend(GologppThread *main_thread,
-                                           Configuration *config,
+GologppFawkesBackend::GologppFawkesBackend(Configuration *config,
                                            Logger *       logger,
                                            BlackBoard *   blackboard)
-: BlackBoardInterfaceListener("gologpp_agent"),
-  main_thread_(main_thread),
-  config_(config),
-  logger_(logger),
-  blackboard_(blackboard)
+: config_(config), logger_(logger), blackboard_(blackboard)
 {
 	action_dispatcher_.register_executor(
 	  std::make_shared<SkillerActionExecutor>(logger, blackboard, config));
@@ -93,12 +87,6 @@ GologppFawkesBackend::execute_activity(shared_ptr<Activity> a)
 {
 	auto executor = action_dispatcher_.get_executor(a);
 	executor->start(a);
-}
-
-const char *
-GologppFawkesBackend::name()
-{
-	return main_thread_->name();
 }
 
 } // namespace fawkes_gpp

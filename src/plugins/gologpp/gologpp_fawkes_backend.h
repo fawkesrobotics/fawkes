@@ -24,9 +24,9 @@
 
 #include "action_executor.h"
 #include "action_executor_dispatcher.h"
-#include "execution_thread.h"
 
 #include <aspect/clock.h>
+#include <blackboard/blackboard.h>
 #include <config/config.h>
 #include <golog++/model/platform_backend.h>
 #include <logging/logger.h>
@@ -37,13 +37,10 @@ class SkillerInterface;
 
 namespace fawkes_gpp {
 
-class GologppFawkesBackend : public gologpp::PlatformBackend,
-                             public fawkes::BlackBoardInterfaceListener,
-                             public fawkes::ClockAspect
+class GologppFawkesBackend : public gologpp::PlatformBackend, public fawkes::ClockAspect
 {
 public:
-	GologppFawkesBackend(GologppThread *        main_thread,
-	                     fawkes::Configuration *config,
+	GologppFawkesBackend(fawkes::Configuration *config,
 	                     fawkes::Logger *       logger,
 	                     fawkes::BlackBoard *   blackboard);
 	virtual ~GologppFawkesBackend();
@@ -53,9 +50,7 @@ public:
 
 private:
 	virtual void execute_activity(std::shared_ptr<gologpp::Activity>) override;
-	const char * name();
 
-	GologppThread *           main_thread_;
 	fawkes::SkillerInterface *skiller_if_;
 	fawkes::Configuration *   config_;
 	fawkes::Logger *          logger_;
