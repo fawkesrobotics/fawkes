@@ -1,5 +1,5 @@
 symbol domain blocks = {a, b, c}
-symbol domain locations = blocks | {table}
+symbol domain locations = blocks | {table, hand}
 
 symbol fluent loc(symbol x) {
 domain:
@@ -16,10 +16,10 @@ domain:
 	x in blocks;
 	y in locations;
 precondition:
-	  x != y // Can't stack x on x
+	loc(x) == hand
+	& x != y // Can't stack x on x
+  & x != hand
 	& x != table // Can't stack table
-	& loc(x) != y // Can't stack the same thing twice
-	& (!exists(symbol z) loc(z) == x) // Nothing is on x
 	& (
 		y == table // either y is the table...
 		| !exists(symbol z) loc(z) == y // or nothing is on y
@@ -33,6 +33,21 @@ mapping:
     x = x,
     y = y
   }
+}
+
+action unstack(symbol x) {
+domain:
+	x in blocks;
+precondition:
+	loc(x) != hand & (!exists(symbol z) (loc(z) == x))
+
+effect:
+	loc(x) = hand;
+
+mapping:
+	"unstack" {
+		x = x
+	}
 }
 
 
@@ -57,9 +72,11 @@ number function reward() {
 
 
 {
-	solve(8, reward())
+	solve(20, reward())
 		while (!goal())
 			pick (symbol x in {a, b, c})
-				pick(symbol y in {table, a, b, c})
+				pick(symbol y in {table, a, b, c}) {
+					unstack(x);
 					stack(x, y);
+        }
 }
