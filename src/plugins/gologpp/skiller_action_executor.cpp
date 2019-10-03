@@ -126,10 +126,12 @@ SkillerActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
  * @param activity The activity to stop
  */
 void
-SkillerActionExecutor::stop(std::shared_ptr<gologpp::Activity> activity)
+SkillerActionExecutor::stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity)
 {
-	skiller_if_->msgq_enqueue(new SkillerInterface::StopExecMessage());
-	running_activity_.reset();
+	if (*running_activity_ == *activity) {
+		skiller_if_->msgq_enqueue(new SkillerInterface::StopExecMessage());
+		running_activity_.reset();
+	}
 }
 
 const char *

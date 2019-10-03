@@ -53,16 +53,14 @@ public:
 
 private:
 	virtual void execute_activity(std::shared_ptr<gologpp::Activity>) override;
-	void         stop_running_activity();
 	const char * name();
 
-	GologppThread *                    main_thread_;
-	fawkes::SkillerInterface *         skiller_if_;
-	fawkes::Configuration *            config_;
-	fawkes::Logger *                   logger_;
-	fawkes::BlackBoard *               blackboard_;
-	std::shared_ptr<gologpp::Activity> running_activity_;
-	ActionExecutorDispatcher           action_dispatcher_;
+	GologppThread *           main_thread_;
+	fawkes::SkillerInterface *skiller_if_;
+	fawkes::Configuration *   config_;
+	fawkes::Logger *          logger_;
+	fawkes::BlackBoard *      blackboard_;
+	ActionExecutorDispatcher  action_dispatcher_;
 };
 
 } // namespace fawkes_gpp

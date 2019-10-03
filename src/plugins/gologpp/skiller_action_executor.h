@@ -44,7 +44,7 @@ public:
 	                      fawkes::Configuration *config);
 	virtual ~SkillerActionExecutor();
 	void         start(std::shared_ptr<gologpp::Activity> activity) override;
-	void         stop(std::shared_ptr<gologpp::Activity> activity) override;
+	void         stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity) override;
 	bool         can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
 	virtual void bb_interface_data_changed(fawkes::Interface *) throw() override;
 

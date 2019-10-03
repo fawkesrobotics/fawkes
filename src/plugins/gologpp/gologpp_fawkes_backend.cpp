@@ -62,14 +62,16 @@ GologppFawkesBackend::~GologppFawkesBackend()
 }
 
 /** Preempt the currently running activity.
- *  If the currently running activity is the given activity, stop it, otherwise do nothing.
- *  @param t The transition to do, used to check if this is the currently running activity.
+ *  Tell all executors to stop the given transition. Only the executor that is
+ *  currently executing the respective Activity should stop execution, all
+ *  other executors should do nothing.
+ *  @param t The transition of the activity to be stopped
  */
 void
 GologppFawkesBackend::preempt_activity(shared_ptr<Transition> t)
 {
-	if (*running_activity_ == *t) {
-		stop_running_activity();
+	for (auto &executor : action_dispatcher_.get_executors()) {
+		executor->stop(t);
 	}
 }
 
@@ -83,27 +85,14 @@ GologppFawkesBackend::time() const noexcept
 	  gologpp::Clock::duration{clock->now().in_sec() / gologpp::Clock::duration::period::den}};
 }
 
-/** Execute the given activity using the skiller.
- *  Construct a skill string from the activity and send it to the skiller.
+/** Execute the given activity using a suitable executor.
  *  @param a The activity to start.
  */
 void
 GologppFawkesBackend::execute_activity(shared_ptr<Activity> a)
 {
-	stop_running_activity();
 	auto executor = action_dispatcher_.get_executor(a);
 	executor->start(a);
-	running_activity_ = a;
-}
-
-void
-GologppFawkesBackend::stop_running_activity()
-{
-	if (running_activity_) {
-		auto executor = action_dispatcher_.get_executor(running_activity_);
-		executor->stop(running_activity_);
-		running_activity_.reset();
-	}
 }
 
 const char *

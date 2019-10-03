@@ -58,4 +58,13 @@ ActionExecutorDispatcher::register_executor(std::shared_ptr<ActionExecutor> exec
 	action_executors_.push_back(executor);
 }
 
+/** Get the currently registered executors.
+ * @return a vector of currently registered executors.
+ */
+std::vector<std::shared_ptr<ActionExecutor>>
+ActionExecutorDispatcher::get_executors() const
+{
+	return action_executors_;
+}
+
 } // namespace fawkes_gpp
