@@ -24,7 +24,7 @@ CFLAGS += $(CFLAGS_CPP11)
 REQ_BOOST_LIBS = asio system
 HAVE_BOOST_LIBS = $(call boost-have-libs,$(REQ_BOOST_LIBS))
 
-LIBS_libfawkesgossipaspect = stdc++ fawkescore fawkesaspects fawkesutils fawkesgossip
+LIBS_libfawkesgossipaspect = stdc++ pthread fawkescore fawkesaspects fawkesutils fawkesgossip
 OBJS_libfawkesgossipaspect = gossip.o gossip_inifin.o
 
 OBJS_all = $(OBJS_libfawkesgossipaspect)
