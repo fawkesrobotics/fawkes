@@ -31,8 +31,10 @@ using namespace gologpp;
 namespace fawkes_gpp {
 
 /** @class ExogManagerThread
- *  A Golog++ ExogManager that watches the blackboard for changes and passes the changed values to
- * Golog++.
+ * Watch/observe blackboard interfaces according to the mappings
+ * specified for exogenous actions in the agent program. The config
+ * has to specify whether some mapped backend name is supposed to be
+ * an interface ID or a pattern.
  */
 
 /** The prefix to use for the config of the ExogManager. */
@@ -41,7 +43,7 @@ const string ExogManagerThread::cfg_prefix{"/plugins/gologpp/blackboard"};
 static Value *field_to_value(InterfaceFieldIterator &fi, unsigned int idx);
 
 /** @class ConfigError
- *  An error in the configuration, e.g., a missing key.
+ * Thrown if the config is somehow inconsistent with the agent program.
  */
 
 /** Construct a ConfigError.

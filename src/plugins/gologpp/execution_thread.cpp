@@ -33,7 +33,8 @@ using namespace fawkes;
 const std::string cfg_prefix("/plugins/gologpp");
 
 /** @class GologppThread
- *  The thread that runs Golog++.
+ * Main golog++ thread that handles program execution, i.e. spawns an execution
+ * context, loads a program and executes it.
  */
 
 GologppThread::GologppThread() : fawkes::Thread("gologpp_agent", Thread::OPMODE_WAITFORWAKEUP)
