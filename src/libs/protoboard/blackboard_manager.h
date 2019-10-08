@@ -46,13 +46,6 @@ namespace protoboard {
 template <class IfaceT>
 std::string iface_id_for_type();
 
-template <class IfaceT>
-std::string
-iface_id_for_type(size_t idx)
-{
-	return iface_id_for_type<IfaceT>() + std::to_string(idx);
-}
-
 std::vector<std::string> proto_dirs();
 pb_conversion_map        make_receiving_interfaces_map();
 

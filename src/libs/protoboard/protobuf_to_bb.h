@@ -38,8 +38,6 @@ namespace protoboard {
 
 template <class IfaceT>
 std::string iface_id_for_type();
-template <class IfaceT>
-std::string iface_id_for_type(size_t idx);
 
 class pb_convert : public std::enable_shared_from_this<pb_convert>
 {
@@ -102,10 +100,16 @@ public:
 	init(fawkes::BlackBoard *blackboard, fawkes::Logger *logger, size_t id = 0) override
 	{
 		pb_convert::init(blackboard, logger);
-		interface_ = blackboard_->open_for_writing<IfaceT>(iface_id_for_type<IfaceT>(id).c_str());
+		std::string iface_id = iface_id_for_type<IfaceT>();
+
+		if (iface_id.back() != '/')
+			iface_id += '/';
+		iface_id += std::to_string(id);
+
+		interface_ = blackboard_->open_for_writing<IfaceT>(iface_id.c_str());
 		logger->log_info(boost::core::demangle(typeid(*this).name()).c_str(),
 		                 "Initialized %s.",
-		                 iface_id_for_type<IfaceT>(id).c_str());
+		                 iface_id.c_str());
 	}
 
 	virtual void
