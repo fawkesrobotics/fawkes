@@ -92,6 +92,8 @@ public:
 	virtual ~AbstractProtobufSender();
 	virtual bool process_sending_interfaces() = 0;
 
+	virtual void init() = 0;
+
 protected:
 	BlackboardManager *bb_manager;
 
@@ -113,6 +115,8 @@ class ProtobufSender : public AbstractProtobufSender
 {
 public:
 	ProtobufSender(BlackboardManager *bb_mgr);
+
+	virtual void init() override;
 
 	virtual bool
 	process_sending_interfaces() override
@@ -189,6 +193,12 @@ private:
 template <class... IfaceManagerTs>
 ProtobufSender<IfaceManagerTs...>::ProtobufSender(BlackboardManager *bb_mgr)
 : AbstractProtobufSender(bb_mgr)
+{
+}
+
+template <class... IfaceManagerTs>
+void
+ProtobufSender<IfaceManagerTs...>::init()
 {
 	boost::fusion::for_each(bb_sending_interfaces_, [this](auto &iface_mgr) {
 		iface_mgr.init(this->bb_manager->get_blackboard(), this->bb_manager);

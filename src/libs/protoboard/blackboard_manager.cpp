@@ -56,6 +56,7 @@ BlackboardManager::set_protobuf_sender(AbstractProtobufSender *sender)
 void
 BlackboardManager::init()
 {
+	pb_sender_->init();
 	peer_iface_ = blackboard->open_for_writing<ProtobufPeerInterface>("/protoboard/peers");
 
 	on_message_waker_ = new fawkes::BlackBoardOnMessageWaker(blackboard, peer_iface_, this);
