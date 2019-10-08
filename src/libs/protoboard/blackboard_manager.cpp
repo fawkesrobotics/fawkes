@@ -34,6 +34,10 @@ AbstractProtobufSender::AbstractProtobufSender(BlackboardManager *bb_mgr) : bb_m
 {
 }
 
+AbstractProtobufSender::~AbstractProtobufSender()
+{
+}
+
 BlackboardManager::BlackboardManager(ProtobufThead *msg_handler)
 : fawkes::Thread("ProtoboardBlackboardManager", Thread::OPMODE_WAITFORWAKEUP),
   message_handler_(msg_handler),
@@ -106,6 +110,12 @@ BlackboardManager::loop()
 	if (!did_something)
 		// Thread woke up, but nothing was handled
 		logger->log_warn(name(), "Spurious wakeup. WTF?");
+}
+
+BlackBoard *
+BlackboardManager::get_blackboard()
+{
+	return blackboard;
 }
 
 void
