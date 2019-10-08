@@ -32,7 +32,7 @@ LIBS_libfawkesprotoboard = \
   fawkes_protobuf_comm \
   ProtobufPeerInterface
 
-OBJS_libfawkesprotoboard = protobuf_thread.o protobuf_to_bb.o
+OBJS_libfawkesprotoboard = protobuf_thread.o protobuf_to_bb.o blackboard_manager.o
  
 LIBS_all = $(LIBDIR)/libfawkesprotoboard.$(SOEXT)
 OBJS_all = $(OBJS_libfawkesprotoboard)
