@@ -69,6 +69,7 @@ void
 BlackboardManager::finalize()
 {
 	delete on_message_waker_;
+	bb_receiving_interfaces_.clear();
 	blackboard->close(peer_iface_);
 }
 

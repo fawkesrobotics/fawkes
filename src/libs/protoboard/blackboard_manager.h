@@ -65,12 +65,13 @@ public:
 		waker_      = new fawkes::BlackBoardOnMessageWaker(blackboard, interface_, thread);
 	}
 
-	~bb_iface_manager()
+	void
+	finalize()
 	{
-		if (blackboard_ && interface_)
-			blackboard_->close(interface_);
 		if (waker_)
 			delete waker_;
+		if (blackboard_ && interface_)
+			blackboard_->close(interface_);
 	}
 
 	IfaceT *
@@ -92,7 +93,8 @@ public:
 	virtual ~AbstractProtobufSender();
 	virtual bool process_sending_interfaces() = 0;
 
-	virtual void init() = 0;
+	virtual void init()     = 0;
+	virtual void finalize() = 0;
 
 protected:
 	BlackboardManager *bb_manager;
@@ -117,6 +119,7 @@ public:
 	ProtobufSender(BlackboardManager *bb_mgr);
 
 	virtual void init() override;
+	virtual void finalize() override;
 
 	virtual bool
 	process_sending_interfaces() override
@@ -203,6 +206,14 @@ ProtobufSender<IfaceManagerTs...>::init()
 	boost::fusion::for_each(bb_sending_interfaces_, [this](auto &iface_mgr) {
 		iface_mgr.init(this->bb_manager->get_blackboard(), this->bb_manager);
 	});
+}
+
+template <class... IfaceManagerTs>
+void
+ProtobufSender<IfaceManagerTs...>::finalize()
+{
+	boost::fusion::for_each(bb_sending_interfaces_,
+	                        [this](auto &iface_mgr) { iface_mgr.finalize(); });
 }
 
 template <class IfaceT, class MessageT>
