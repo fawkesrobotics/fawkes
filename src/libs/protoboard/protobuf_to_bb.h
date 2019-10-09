@@ -177,7 +177,7 @@ class pb_sequence_converter : public pb_convert
 public:
 	typedef google::protobuf::RepeatedPtrField<typename OutputT::input_type> sequence_type;
 
-	pb_sequence_converter() : sub_converters_(), seq_id_(0)
+	pb_sequence_converter() : seq_id_(0)
 	{
 	}
 
@@ -186,6 +186,15 @@ public:
 	{
 		typename std::vector<OutputT>::iterator out_it = sub_converters_.begin();
 		sequence_type fields = extract_sequence(dynamic_cast<const ProtoT &>(msg));
+
+		if (fields.empty()) {
+			logger_->log_warn(
+			  boost::core::demangle(typeid(pb_sequence_converter<ProtoT, OutputT>).name()).c_str(),
+			  "Received empty sequence of %s",
+			  sequence_type::value_type::descriptor()->name().c_str());
+			return;
+		}
+
 		typename sequence_type::const_iterator field_it = fields.begin();
 
 		for (; field_it != fields.end(); ++field_it) {
