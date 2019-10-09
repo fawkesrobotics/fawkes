@@ -1,0 +1,46 @@
+symbol domain GameState = { INIT, WAIT_START, RUNNING, PAUSED }
+symbol domain GamePhase = { PRE_GAME, SETUP, EXPLORATION, PRODUCTION }
+
+compound GameTime {
+	number sec,
+	number nsec
+}
+
+symbol fluent game_state() {
+initially:
+	() = INIT;
+}
+
+symbol fluent game_phase() {
+initially:
+	() = PRE_GAME;
+}
+
+GameTime fluent game_time() {
+initially:
+	() = GameTime { sec = 0, nsec = 0 };
+}
+
+exog_action game_state(number t_sec, number t_nsec, symbol state, symbol phase) {
+domain:
+	state in GameState;
+	phase in GamePhase;
+mapping:
+	"/protoboard/game_state/0" {
+		game_time_sec = t_sec,
+		game_time_nsec = t_nsec,
+		state = state,
+		phase = phase
+	}
+effect:
+	game_state() = state;
+	game_phase() = phase;
+	game_time().sec = t_sec;
+	game_time().nsec = t_nsec;
+}
+
+
+// main program
+{
+	test(game_phase() == PRODUCTION & game_state() == RUNNING);
+}
