@@ -85,16 +85,22 @@ ExogManagerThread::init()
 	// handlers.
 	std::unique_ptr<Configuration::ValueIterator> watch_it(config->search(cfg_prefix + "/watch"));
 	while (watch_it->next()) {
-		string                 id   = config->get_string(string(watch_it->path()) + "/id");
-		shared_ptr<ExogAction> exog = find_mapped_exog(id);
-		watchers_.push_back(InterfaceWatcher{blackboard, id, exog, *this});
+		if (cfg_prefix + "/watch/id" == watch_it->path()) {
+			string                 id   = config->get_string(watch_it->path());
+			shared_ptr<ExogAction> exog = find_mapped_exog(id);
+			watchers_.push_back(InterfaceWatcher{blackboard, id, exog, *this});
+		} else
+			logger->log_error(name(), "Unexpected config entry %s", watch_it->path());
 	}
 
 	std::unique_ptr<Configuration::ValueIterator> observe_it(config->search(cfg_prefix + "/observe"));
 	while (observe_it->next()) {
-		string                 id   = config->get_string(string(observe_it->path()) + "/pattern");
-		shared_ptr<ExogAction> exog = find_mapped_exog(id);
-		observers_.push_back(PatternObserver{blackboard, id, exog, *this});
+		if (cfg_prefix + "/observe/pattern" == observe_it->path()) {
+			string                 id   = config->get_string(observe_it->path());
+			shared_ptr<ExogAction> exog = find_mapped_exog(id);
+			observers_.push_back(PatternObserver{blackboard, id, exog, *this});
+		} else
+			logger->log_error(name(), "Unexpected config entry %s", watch_it->path());
 	}
 }
 
