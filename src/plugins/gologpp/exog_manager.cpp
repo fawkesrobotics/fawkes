@@ -66,7 +66,7 @@ void
 ExogManagerThread::init()
 {
 	// We know that lists of elementary types will most likely occur, so simply
-	// define the types unconditionally The elementary types themselves are
+	// define the types unconditionally. The elementary types themselves are
 	// already defined.
 	global_scope().register_type(new ListType(*global_scope().lookup_type(BoolType::name())));
 	global_scope().register_type(new ListType(*global_scope().lookup_type(NumberType::name())));
@@ -81,7 +81,7 @@ ExogManagerThread::init()
 	}
 
 	// Register an InterfaceWatcher and a PatternObserver for each
-	// watched/observed interface (pattern) These also implement the event
+	// watched/observed interface (pattern). These also implement the event
 	// handlers.
 	std::unique_ptr<Configuration::ValueIterator> watch_it(config->search(cfg_prefix + "/watch"));
 	while (watch_it->next()) {
