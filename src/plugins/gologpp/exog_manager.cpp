@@ -71,7 +71,14 @@ ExogManagerThread::init()
 	global_scope().register_type(new ListType(*global_scope().lookup_type(BoolType::name())));
 	global_scope().register_type(new ListType(*global_scope().lookup_type(NumberType::name())));
 	global_scope().register_type(new ListType(*global_scope().lookup_type(SymbolType::name())));
+}
 
+/**
+ * Load the config and match it to all exog_actions defined in the main program.
+ */
+void
+ExogManagerThread::load_exogs()
+{
 	// Build a map to lookup all exog actions by their mapped name (i.e. the
 	// interface ID or pattern)
 	for (shared_ptr<Global> g : global_scope().globals()) {

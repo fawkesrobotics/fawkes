@@ -42,9 +42,11 @@ public:
 	 */
 GologppPlugin::GologppPlugin(Configuration *cfg) : Plugin(cfg)
 {
-	fawkes_gpp::GologppThread *exec_thread = new fawkes_gpp::GologppThread();
+	fawkes_gpp::GologppThread *    exec_thread = new fawkes_gpp::GologppThread();
+	fawkes_gpp::ExogManagerThread *exog_mgr    = new fawkes_gpp::ExogManagerThread(exec_thread);
+	exec_thread->set_exog_mgr(exog_mgr);
 	thread_list.push_back(exec_thread);
-	thread_list.push_back(new fawkes_gpp::ExogManagerThread(exec_thread));
+	thread_list.push_back(exog_mgr);
 }
 
 GologppPlugin::~GologppPlugin()

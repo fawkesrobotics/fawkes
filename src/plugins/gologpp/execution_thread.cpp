@@ -20,6 +20,7 @@
 
 #include "execution_thread.h"
 
+#include "exog_manager.h"
 #include "gologpp_fawkes_backend.h"
 
 #include <golog++/model/procedural.h>
@@ -61,6 +62,8 @@ GologppThread::init()
 void
 GologppThread::once()
 {
+	exog_mgr_->load_exogs();
+
 	gologpp::ReadylogContext::instance().run(
 	  gologpp::Block{new gologpp::Scope{gologpp::global_scope()}, {main_prog_.release()}});
 }
@@ -69,6 +72,12 @@ void
 GologppThread::finalize()
 {
 	gologpp::ReadylogContext::shutdown();
+}
+
+void
+GologppThread::set_exog_mgr(ExogManagerThread *exog_mgr)
+{
+	exog_mgr_ = exog_mgr;
 }
 
 /**

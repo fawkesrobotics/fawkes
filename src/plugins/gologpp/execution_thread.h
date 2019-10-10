@@ -34,6 +34,8 @@ class SkillerInterface;
 
 namespace fawkes_gpp {
 
+class ExogManagerThread;
+
 class GologppThread : public fawkes::Thread,
                       public fawkes::LoggingAspect,
                       public fawkes::BlackBoardAspect,
@@ -46,11 +48,14 @@ public:
 	virtual void once() override;
 	virtual void finalize() override;
 
+	void set_exog_mgr(ExogManagerThread *);
+
 	gologpp::ExecutionContext &gologpp_context();
 
 private:
 	std::unique_ptr<gologpp::Expression> main_prog_;
 	fawkes::SkillerInterface *           skiller_if_;
+	ExogManagerThread *                  exog_mgr_;
 };
 
 } // namespace fawkes_gpp

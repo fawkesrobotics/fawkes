@@ -58,6 +58,8 @@ public:
 	virtual void init() override;
 	virtual void finalize() override;
 
+	void load_exogs();
+
 	static const std::string cfg_prefix;
 
 private:
