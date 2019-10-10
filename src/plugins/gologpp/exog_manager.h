@@ -76,6 +76,9 @@ private:
 
 		gologpp::shared_ptr<gologpp::ExogEvent> make_exog_event(fawkes::Interface *) const;
 
+		static std::string extract_type_name(const std::string &iface_uid);
+		static std::string extract_id(const std::string &iface_uid);
+
 	protected:
 		fawkes::BlackBoard *                              blackboard_;
 		gologpp::shared_ptr<gologpp::ExogAction>          target_exog_;

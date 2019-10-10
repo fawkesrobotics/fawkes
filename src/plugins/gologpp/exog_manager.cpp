@@ -154,13 +154,31 @@ ExogManagerThread::BlackboardEventHandler::BlackboardEventHandler(fawkes::BlackB
 	}
 }
 
+std::string
+ExogManagerThread::BlackboardEventHandler::extract_type_name(const std::string &iface_uid)
+{
+	auto idx = iface_uid.find("::");
+	if (idx == std::string::npos)
+		throw ConfigError(iface_uid + " is not an interface UID. Must be IFACE_TYPE::IFACE_ID.");
+	return iface_uid.substr(0, idx);
+}
+
+std::string
+ExogManagerThread::BlackboardEventHandler::extract_id(const std::string &iface_uid)
+{
+	auto idx = iface_uid.find("::");
+	if (idx == std::string::npos)
+		throw ConfigError(iface_uid + " is not an interface UID. Must be IFACE_TYPE::IFACE_ID.");
+	return iface_uid.substr(idx + 2);
+}
+
 ExogManagerThread::InterfaceWatcher::InterfaceWatcher(BlackBoard *           bb,
-                                                      const string &         id,
+                                                      const string &         uid,
                                                       shared_ptr<ExogAction> exog,
                                                       ExogManagerThread &    exog_mgr)
 : BlackboardEventHandler(bb, exog, exog_mgr),
   BlackBoardInterfaceListener("gologpp_blackboard_manager"),
-  iface_(blackboard_->open_for_reading<Interface>(id.c_str()))
+  iface_(blackboard_->open_for_reading(extract_type_name(uid).c_str(), extract_id(uid).c_str()))
 {
 	bbil_add_data_interface(iface_);
 	blackboard_->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
@@ -207,7 +225,7 @@ ExogManagerThread::PatternObserver::PatternObserver(BlackBoard *           bb,
                                                     ExogManagerThread &    exog_mgr)
 : BlackboardEventHandler(bb, exog, exog_mgr)
 {
-	bbio_add_observed_create("*", pattern.c_str());
+	bbio_add_observed_create(extract_type_name(pattern).c_str(), extract_id(pattern).c_str());
 	blackboard_->register_observer(this);
 }
 
