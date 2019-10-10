@@ -49,13 +49,19 @@ GologppThread::init()
 	if (prog_file[0] != '/')
 		prog_file = SRCDIR "/" + prog_file;
 
+	// Clear the global scope because it's a static variable that may already contain
+	// things from a previous (unsuccessful) attempt to initialize this plugin.
+	gologpp::global_scope().clear();
+
 	logger->log_info(name(), "Parsing %s...", prog_file.c_str());
 	main_prog_ = gologpp::parser::parse_file(prog_file);
 	logger->log_info(name(), "... parsing done");
 
 	logger->log_info(name(), "Initializing ReadyLog context...");
+
 	gologpp::ReadylogContext::init(
 	  {}, std::make_unique<GologppFawkesBackend>(config, logger, blackboard));
+
 	logger->log_info(name(), "... initialization done");
 }
 
