@@ -68,8 +68,7 @@ GologppThread::init()
 void
 GologppThread::once()
 {
-	exog_mgr_->load_exogs();
-
+	exog_mgr_ = new ExogManager(this, config, blackboard, logger);
 	gologpp::ReadylogContext::instance().run(
 	  gologpp::Block{new gologpp::Scope{gologpp::global_scope()}, {main_prog_.release()}});
 }
@@ -77,13 +76,9 @@ GologppThread::once()
 void
 GologppThread::finalize()
 {
+	gologpp::ReadylogContext::instance().terminate();
+	delete exog_mgr_;
 	gologpp::ReadylogContext::shutdown();
-}
-
-void
-GologppThread::set_exog_mgr(ExogManagerThread *exog_mgr)
-{
-	exog_mgr_ = exog_mgr;
 }
 
 /**

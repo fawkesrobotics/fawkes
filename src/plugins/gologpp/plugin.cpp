@@ -18,7 +18,6 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 #include "execution_thread.h"
-#include "exog_manager.h"
 
 #include <core/plugin.h>
 
@@ -42,11 +41,8 @@ public:
 	 */
 GologppPlugin::GologppPlugin(Configuration *cfg) : Plugin(cfg)
 {
-	fawkes_gpp::GologppThread *    exec_thread = new fawkes_gpp::GologppThread();
-	fawkes_gpp::ExogManagerThread *exog_mgr    = new fawkes_gpp::ExogManagerThread(exec_thread);
-	exec_thread->set_exog_mgr(exog_mgr);
+	fawkes_gpp::GologppThread *exec_thread = new fawkes_gpp::GologppThread();
 	thread_list.push_back(exec_thread);
-	thread_list.push_back(exog_mgr);
 }
 
 GologppPlugin::~GologppPlugin()
