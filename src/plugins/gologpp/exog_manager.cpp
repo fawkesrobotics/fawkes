@@ -86,7 +86,7 @@ ExogManager::ExogManager(GologppThread *exec_thread,
 		if (cfg_prefix + "/watch/id" == watch_it->path()) {
 			string                 id   = config->get_string(watch_it->path());
 			shared_ptr<ExogAction> exog = find_mapped_exog(id);
-			watchers_.push_back(InterfaceWatcher{blackboard, id, exog, *this});
+			watchers_.push_back(std::make_unique<InterfaceWatcher>(blackboard, id, exog, *this));
 		} else
 			logger->log_error(name(), "Unexpected config entry %s", watch_it->path());
 	}

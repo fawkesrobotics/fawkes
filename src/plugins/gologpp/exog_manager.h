@@ -69,6 +69,9 @@ private:
 		BlackboardEventHandler(fawkes::BlackBoard *,
 		                       gologpp::shared_ptr<gologpp::ExogAction>,
 		                       ExogManager &exog_mgr);
+		BlackboardEventHandler(const BlackboardEventHandler &) = delete;
+		BlackboardEventHandler &operator=(const BlackboardEventHandler &) = delete;
+		BlackboardEventHandler(BlackboardEventHandler &&)                 = default;
 
 		gologpp::shared_ptr<gologpp::ExogEvent> make_exog_event(fawkes::Interface *) const;
 
@@ -116,8 +119,8 @@ private:
 
 	//////////////////////////////////////////////////////////////////
 	std::unordered_map<std::string, gologpp::shared_ptr<gologpp::ExogAction>> mapped_exogs_;
-	std::vector<InterfaceWatcher>                                             watchers_;
-	std::vector<PatternObserver>                                              observers_;
+	std::vector<std::unique_ptr<InterfaceWatcher>>                            watchers_;
+	std::vector<std::unique_ptr<PatternObserver>>                             observers_;
 	GologppThread *                                                           exec_thread_;
 	fawkes::Configuration *                                                   config_;
 	fawkes::BlackBoard *                                                      blackboard_;
