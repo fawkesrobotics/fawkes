@@ -122,7 +122,7 @@ ExogManagerThread::find_mapped_exog(const std::string &mapped_name)
 	auto map_it = mapped_exogs_.find(mapped_name);
 
 	if (map_it == mapped_exogs_.end())
-		throw ConfigError("No exogenous action handles" + mapped_name);
+		throw ConfigError("No exogenous action handles " + mapped_name);
 
 	return map_it->second;
 }
