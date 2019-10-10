@@ -141,7 +141,7 @@ ExogManager::BlackboardEventHandler::BlackboardEventHandler(fawkes::BlackBoard *
 		auto &var_ref = dynamic_cast<Reference<Variable> &>(*pair.second);
 		auto  param_it =
 		  std::find(target_exog_->params().begin(), target_exog_->params().end(), var_ref.target());
-		auto param_idx = target_exog_->params().end() - param_it;
+		auto param_idx = param_it - target_exog_->params().begin();
 		fields_order_.emplace(pair.first, arity_t(param_idx));
 	}
 }
@@ -185,24 +185,39 @@ ExogManager::InterfaceWatcher::~InterfaceWatcher()
 shared_ptr<ExogEvent>
 ExogManager::BlackboardEventHandler::make_exog_event(Interface *iface) const
 {
-	InterfaceFieldIterator    fi = iface->fields();
-	vector<unique_ptr<Value>> args;
-	args.resize(target_exog_->arity());
+	// clang-format off
+	// alignment of assignments just makes this unreadable
+	iface->read();
+	InterfaceFieldIterator fi = iface->fields();
+	vector<unique_ptr<Value>> args(target_exog_->arity());
+
 	while (fi != iface->fields_end()) {
 		if (target_exog_->mapping().is_mapped(fi.get_name())) {
-			if (fi.get_length() > 0) {
+			auto order_it = fields_order_.find(fi.get_name());
+
+			if (fi.get_length() > 1) {
 				vector<unique_ptr<Value>> list_init;
 				for (unsigned int idx = 0; idx < fi.get_length(); ++idx)
-					list_init.emplace_back(field_to_value(fi, idx));
-				auto                   order_it = fields_order_.find(fi.get_name());
-				shared_ptr<const Type> list_type =
-				  global_scope().lookup_type("list[" + list_init[0]->type_name() + "]");
-				args[order_it->second].reset(new Value(list_type->name(), list_init));
+					list_init.emplace_back(
+						field_to_value(fi, idx)
+					);
+				shared_ptr<const Type> list_type = global_scope().lookup_type(
+					"list[" + list_init[0]->type_name() + "]"
+				);
+				args[order_it->second].reset(
+					new Value(list_type->name(), list_init)
+				);
 			}
+			else if (fi.get_length() == 1)
+				args[order_it->second].reset(field_to_value(fi, 0));
+			else
+				throw fawkes::IllegalArgumentException("%s: Field %s has length 0, which shouldn't happen", iface->uid(), fi.get_name());
 		}
 		++fi;
 	}
+
 	return std::make_shared<ExogEvent>(target_exog_, std::move(args));
+	// clang-format on
 }
 
 void
