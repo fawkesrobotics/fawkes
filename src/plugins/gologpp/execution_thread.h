@@ -46,6 +46,9 @@ public:
 
 	virtual void init() override;
 	virtual void once() override;
+
+	virtual bool prepare_finalize_user() override;
+
 	virtual void finalize() override;
 
 	gologpp::ExecutionContext &gologpp_context();
@@ -54,6 +57,7 @@ private:
 	std::unique_ptr<gologpp::Expression> main_prog_;
 	fawkes::SkillerInterface *           skiller_if_;
 	ExogManager *                        exog_mgr_;
+	std::mutex                           run_mutex_;
 };
 
 } // namespace fawkes_gpp

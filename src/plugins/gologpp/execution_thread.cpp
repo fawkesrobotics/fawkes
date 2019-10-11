@@ -40,6 +40,7 @@ const std::string cfg_prefix("/plugins/gologpp");
 
 GologppThread::GologppThread() : fawkes::Thread("gologpp_agent", Thread::OPMODE_WAITFORWAKEUP)
 {
+	set_prepfin_conc_loop(true);
 }
 
 void
@@ -69,15 +70,26 @@ void
 GologppThread::once()
 {
 	exog_mgr_ = new ExogManager(this, config, blackboard, logger);
+	std::lock_guard<std::mutex> l{run_mutex_};
 	gologpp::ReadylogContext::instance().run(
 	  gologpp::Block{new gologpp::Scope{gologpp::global_scope()}, {main_prog_.release()}});
+	logger->log_info(name(), "golog++ main program has ended");
+}
+
+bool
+GologppThread::prepare_finalize_user()
+{
+	gologpp::ReadylogContext::instance().terminate();
+	std::lock_guard<std::mutex> l{run_mutex_};
+	return true;
 }
 
 void
 GologppThread::finalize()
 {
-	gologpp::ReadylogContext::instance().terminate();
+	main_prog_.reset();
 	delete exog_mgr_;
+	gologpp::global_scope().clear();
 	gologpp::ReadylogContext::shutdown();
 }
 
