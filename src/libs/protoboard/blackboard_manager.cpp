@@ -45,6 +45,7 @@ BlackboardManager::BlackboardManager(ProtobufThead *msg_handler)
   on_message_waker_(nullptr),
   next_peer_idx_(0)
 {
+	set_coalesce_wakeups(true);
 }
 
 void

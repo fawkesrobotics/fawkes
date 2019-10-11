@@ -146,26 +146,14 @@ public:
 		return interface_;
 	}
 
-	virtual bool
-	corresponds_to(const ProtoT &msg)
+	static size_t
+	get_sequence_index(const ProtoT &)
 	{
-		if (is_open()) {
-			interface()->read();
-			return corresponds(msg, interface());
-		} else
-			return true;
+		return 0;
 	}
 
 protected:
 	virtual void handle(const ProtoT &msg, IfaceT *iface);
-	static bool
-	corresponds(const ProtoT &, const IfaceT *)
-	{
-		throw fawkes::Exception(
-		  boost::core::demangle(typeid(pb_converter<ProtoT, IfaceT>).name()).c_str(),
-		  "BUG: corresponds(...) must "
-		  "be overridden for every converter used in a sequence.");
-	}
 
 private:
 	IfaceT *interface_;
@@ -177,52 +165,38 @@ class pb_sequence_converter : public pb_convert
 public:
 	typedef google::protobuf::RepeatedPtrField<typename OutputT::input_type> sequence_type;
 
-	pb_sequence_converter() : seq_id_(0)
+	pb_sequence_converter()
 	{
 	}
 
 	virtual void
 	handle(const google::protobuf::Message &msg) override
 	{
-		typename std::vector<OutputT>::iterator out_it = sub_converters_.begin();
 		sequence_type fields = extract_sequence(dynamic_cast<const ProtoT &>(msg));
 
-		if (fields.empty()) {
-			logger_->log_warn(
-			  boost::core::demangle(typeid(pb_sequence_converter<ProtoT, OutputT>).name()).c_str(),
-			  "Received empty sequence of %s",
-			  sequence_type::value_type::descriptor()->name().c_str());
+		if (fields.empty())
 			return;
-		}
 
 		typename sequence_type::const_iterator field_it = fields.begin();
 
 		for (; field_it != fields.end(); ++field_it) {
-			// Try to find a corresponding output converter
-			for (out_it = sub_converters_.begin(); out_it != sub_converters_.end(); ++out_it) {
-				if (out_it->corresponds_to(*field_it))
-					break;
+			size_t seq_idx = OutputT::get_sequence_index(*field_it);
+			auto   map_it  = sub_converters_.find(seq_idx);
+			if (map_it == sub_converters_.end()) {
+				sub_converters_.insert({seq_idx, OutputT()});
+				map_it = sub_converters_.find(seq_idx);
 			}
 
-			if (out_it == sub_converters_.end()) {
-				// No corresponding converter found, create new
-				sub_converters_.emplace_back();
-				out_it = --sub_converters_.end();
-			}
-
-			if (!out_it->is_open())
-				out_it->init(blackboard_, logger_, seq_id_++);
-			out_it->handle(*field_it);
+			if (!map_it->second.is_open())
+				map_it->second.init(blackboard_, logger_, seq_idx);
+			map_it->second.handle(*field_it);
 		}
-
-		sub_converters_.erase(out_it + 1, sub_converters_.end());
 	}
 
 	virtual const sequence_type &extract_sequence(const ProtoT &msg);
 
 private:
-	std::vector<OutputT> sub_converters_;
-	size_t               seq_id_;
+	std::unordered_map<size_t, OutputT> sub_converters_;
 };
 
 } // namespace protoboard
