@@ -18,7 +18,8 @@ include $(BASEDIR)/etc/buildsys/config.mk
 LIBS_gologpp = fawkescore fawkesutils fawkesblackboard \
            fawkesinterface SkillerInterface
 OBJS_gologpp = plugin.o execution_thread.o gologpp_fawkes_backend.o exog_manager.o \
-							 action_executor.o skiller_action_executor.o action_executor_dispatcher.o
+							 action_executor.o skiller_action_executor.o \
+							 aspect/action_executor_dispatcher.o aspect/action_executor_dispatcher_inifin.o
 
 OBJS_all    = $(OBJS_gologpp)
 PLUGINS_all = $(PLUGINDIR)/gologpp.so

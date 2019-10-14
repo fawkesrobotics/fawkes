@@ -23,9 +23,12 @@
 #define FAWKES_GOLOGPP_FAWKES_BACKEND_H_
 
 #include "action_executor.h"
-#include "action_executor_dispatcher.h"
+#include "aspect/action_executor_dispatcher.h"
+#include "aspect/action_executor_dispatcher_inifin.h"
 
+#include <aspect/aspect_provider.h>
 #include <aspect/clock.h>
+#include <aspect/inifins/inifin.h>
 #include <blackboard/blackboard.h>
 #include <config/config.h>
 #include <golog++/model/platform_backend.h>
@@ -35,9 +38,26 @@ namespace fawkes {
 class SkillerInterface;
 }
 
+//namespace fawkes {
+//
+//class GologppDispatcherAspectIniFin : public virtual AspectIniFin
+//{
+//  public:
+//  GologppDispatcherAspectIniFin(fawkes_gpp::ActionExecutorDispatcher *dispatcher);
+//	void init(Thread *thread);
+//	void finalize(Thread *thread);
+//  private:
+//	  fawkes_gpp::ActionExecutorDispatcher *dispatcher_;
+//};
+//
+//} // namespace fawkes
+
 namespace fawkes_gpp {
 
-class GologppFawkesBackend : public gologpp::PlatformBackend, public fawkes::ClockAspect
+class GologppFawkesBackend : public gologpp::PlatformBackend,
+                             public fawkes::ClockAspect,
+                             public fawkes::GologppDispatcherAspect,
+                             public fawkes::AspectProviderAspect
 {
 public:
 	GologppFawkesBackend(fawkes::Configuration *config,
@@ -51,11 +71,12 @@ public:
 private:
 	virtual void execute_activity(std::shared_ptr<gologpp::Activity>) override;
 
-	fawkes::SkillerInterface *skiller_if_;
-	fawkes::Configuration *   config_;
-	fawkes::Logger *          logger_;
-	fawkes::BlackBoard *      blackboard_;
-	ActionExecutorDispatcher  action_dispatcher_;
+	fawkes::SkillerInterface *            skiller_if_;
+	fawkes::Configuration *               config_;
+	fawkes::Logger *                      logger_;
+	fawkes::BlackBoard *                  blackboard_;
+	ActionExecutorDispatcher              action_dispatcher_;
+	fawkes::GologppDispatcherAspectIniFin dispatcher_inifin_;
 };
 
 } // namespace fawkes_gpp

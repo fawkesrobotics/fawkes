@@ -1,7 +1,7 @@
 /***************************************************************************
- *  action_executor_dispatcher.h - Dispatch a Golog++ activity to executors
+ *  action_executor_dispatcher_inifin.h - Inifin for the Golog++ Executor
  *
- *  Created: Thu 03 Oct 2019 10:43:28 CEST 10:43
+ *  Created: Sat 12 Oct 2019 12:06:31 CEST 12:06
  *  Copyright  2019  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
@@ -18,24 +18,28 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#ifndef FAWKES_GOLOGPP_ACTION_EXECUTOR_DISPATCHER_H
-#define FAWKES_GOLOGPP_ACTION_EXECUTOR_DISPATCHER_H
+#ifndef FAWKES_GOLOGPP_ASPECT_ACTION_EXECUTOR_DISPATCHER_INIFIN_H
+#define FAWKES_GOLOGPP_ASPECT_ACTION_EXECUTOR_DISPATCHER_INIFIN_H
 
-#include "action_executor.h"
+#include "action_executor_dispatcher.h"
 
-namespace fawkes_gpp {
+#include <aspect/inifins/inifin.h>
 
-class ActionExecutorDispatcher
+namespace fawkes {
+
+class GologppDispatcherAspectIniFin : public virtual AspectIniFin
 {
 public:
-	std::shared_ptr<ActionExecutor> get_executor(std::shared_ptr<gologpp::Activity>);
-	void                            register_executor(std::shared_ptr<ActionExecutor> executor);
-	std::vector<std::shared_ptr<ActionExecutor>> get_executors() const;
+	GologppDispatcherAspectIniFin();
+	virtual ~GologppDispatcherAspectIniFin();
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
 private:
-	std::vector<std::shared_ptr<ActionExecutor>> action_executors_;
+	GologppDispatcherAspect *             get_aspect(Thread *thread) const;
+	fawkes_gpp::ActionExecutorDispatcher *dispatcher_;
 };
 
-} // namespace fawkes_gpp
+} // namespace fawkes
 
-#endif /* !FAWKES_GOLOGPP_ACTION_EXECUTOR_DISPATCHER_H */
+#endif /* !FAWKES_GOLOGPP_ASPECT_ACTION_EXECUTOR_DISPATCHER_INIFIN_H */

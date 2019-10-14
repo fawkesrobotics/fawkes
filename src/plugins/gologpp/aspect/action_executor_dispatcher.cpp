@@ -28,7 +28,9 @@ using fawkes::Exception;
 namespace fawkes_gpp {
 
 /** @class ActionExecutorDispatcher
- * Dispatch an activity to a number of registered executors.
+ * Dispatch an activity to a number of registered executors by checking all
+ * registered executors subsequently, whether they can execute the given
+ * activity. The first suitable executor is used to execute the activity.
  * @author Till Hofmann
  */
 
@@ -68,3 +70,47 @@ ActionExecutorDispatcher::get_executors() const
 }
 
 } // namespace fawkes_gpp
+
+namespace fawkes {
+
+/** @class GologppDispatcherAspect
+ * An aspect that provides access to the Golog++ Action Executor Dispatcher.
+ * Use this if you implement an executor for Golog++. Your action executor
+ * should register itself by calling
+ * fawkes_gpp::ActionExecutorDispatcher::register_executor().
+ * @author Till Hofmann
+ * @see fawkes_gpp::ActionExecutorDispatcher
+ * @see fawkes_gpp::ActionExecutor
+ */
+
+/** @var GologppDispatcherAspect::gologpp_dispatcher
+ * A pointer to the dispatcher that the aspect provides.
+ * Use this dispatcher to register your executor.
+ */
+
+/** Constructor. */
+GologppDispatcherAspect::GologppDispatcherAspect()
+{
+	add_aspect("GologppDispatcherAspect");
+	gologpp_dispatcher = 0;
+}
+
+/** Init GologppDispatcherAspect.
+ * Initialize the aspect with the given dispatcher instance.
+ * @param dispatcher The dispatcher to use
+ */
+void
+GologppDispatcherAspect::init_GologppDispatcherAspect(
+  fawkes_gpp::ActionExecutorDispatcher *dispatcher)
+{
+	gologpp_dispatcher = dispatcher;
+}
+
+/** Finalize the GologppDispatcherAspect.
+ */
+void
+GologppDispatcherAspect::finalize_GologppDispatcherAspect()
+{
+}
+
+} // namespace fawkes
