@@ -49,7 +49,8 @@ public:
 
 	virtual ~pb_convert();
 
-	virtual void init(fawkes::BlackBoard *blackboard, fawkes::Logger *logger, size_t = 0);
+	virtual void
+	init(fawkes::BlackBoard *blackboard, fawkes::Logger *logger, const std::string & = "");
 
 	virtual void handle(std::shared_ptr<google::protobuf::Message> msg);
 
@@ -67,7 +68,8 @@ public:
 	typedef ProtoT input_type;
 	typedef IfaceT output_type;
 
-	pb_converter() : pb_convert(), interface_(nullptr)
+	pb_converter()
+	: pb_convert(), interface_(nullptr), name_(boost::core::demangle(typeid(*this).name()))
 	{
 	}
 
@@ -77,7 +79,9 @@ public:
 
 	// Only move!
 	pb_converter(pb_converter<ProtoT, IfaceT> &&o)
-	: pb_convert(o), interface_(std::move(o.interface_))
+	: pb_convert(o),
+	  interface_(std::move(o.interface_)),
+	  name_(boost::core::demangle(typeid(*this).name()))
 	{
 		o.interface_ = nullptr;
 	}
@@ -88,6 +92,7 @@ public:
 		pb_convert::operator=(o);
 		this->interface_    = o.interface_;
 		o.interface_        = nullptr;
+		name_               = boost::core::demangle(typeid(*this).name());
 		return *this;
 	}
 
@@ -97,19 +102,19 @@ public:
 	}
 
 	virtual void
-	init(fawkes::BlackBoard *blackboard, fawkes::Logger *logger, size_t id = 0) override
+	init(fawkes::BlackBoard *blackboard, fawkes::Logger *logger, const std::string &id = "") override
 	{
 		pb_convert::init(blackboard, logger);
 		std::string iface_id = iface_id_for_type<IfaceT>();
 
-		if (iface_id.back() != '/')
-			iface_id += '/';
-		iface_id += std::to_string(id);
+		if (id.length()) {
+			if (iface_id.back() != '/')
+				iface_id += '/';
+			iface_id += id;
+		}
 
 		interface_ = blackboard_->open_for_writing<IfaceT>(iface_id.c_str());
-		logger->log_info(boost::core::demangle(typeid(*this).name()).c_str(),
-		                 "Initialized %s.",
-		                 iface_id.c_str());
+		logger->log_info(name(), "Initialized %s.", iface_id.c_str());
 	}
 
 	virtual void
@@ -146,17 +151,24 @@ public:
 		return interface_;
 	}
 
-	static size_t
-	get_sequence_index(const ProtoT &)
+	static std::string
+	get_sequence_id(const ProtoT &)
 	{
-		return 0;
+		return "";
+	}
+
+	const char *
+	name()
+	{
+		return name_.c_str();
 	}
 
 protected:
 	virtual void handle(const ProtoT &msg, IfaceT *iface);
 
 private:
-	IfaceT *interface_;
+	IfaceT *    interface_;
+	std::string name_;
 };
 
 template <class ProtoT, class OutputT>
@@ -180,15 +192,15 @@ public:
 		typename sequence_type::const_iterator field_it = fields.begin();
 
 		for (; field_it != fields.end(); ++field_it) {
-			size_t seq_idx = OutputT::get_sequence_index(*field_it);
-			auto   map_it  = sub_converters_.find(seq_idx);
+			std::string seq_id = OutputT::get_sequence_id(*field_it);
+			auto        map_it = sub_converters_.find(seq_id);
 			if (map_it == sub_converters_.end()) {
-				sub_converters_.insert({seq_idx, OutputT()});
-				map_it = sub_converters_.find(seq_idx);
+				sub_converters_.insert({seq_id, OutputT()});
+				map_it = sub_converters_.find(seq_id);
 			}
 
 			if (!map_it->second.is_open())
-				map_it->second.init(blackboard_, logger_, seq_idx);
+				map_it->second.init(blackboard_, logger_, seq_id);
 			map_it->second.handle(*field_it);
 		}
 	}
@@ -196,7 +208,7 @@ public:
 	virtual const sequence_type &extract_sequence(const ProtoT &msg);
 
 private:
-	std::unordered_map<size_t, OutputT> sub_converters_;
+	std::unordered_map<std::string, OutputT> sub_converters_;
 };
 
 } // namespace protoboard

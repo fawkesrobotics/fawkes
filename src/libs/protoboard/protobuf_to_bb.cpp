@@ -34,7 +34,7 @@ pb_convert::~pb_convert()
 }
 
 void
-pb_convert::init(fawkes::BlackBoard *blackboard, fawkes::Logger *logger, size_t)
+pb_convert::init(fawkes::BlackBoard *blackboard, fawkes::Logger *logger, const std::string &)
 {
 	blackboard_ = blackboard;
 	logger_     = logger;
