@@ -47,7 +47,6 @@ namespace fawkes {
 class BatteryInterface;
 class IMUInterface;
 class MotorInterface;
-class RobotinoSensorInterface;
 class SwitchInterface;
 } // namespace fawkes
 
@@ -82,12 +81,9 @@ private:
 	//Handler functions for incoming messages
 	void on_gyro_msg(ConstVector3dPtr &msg);
 	void on_infrared_puck_sensor_msg(ConstLaserScanStampedPtr &msg);
-	void on_gripper_laser_left_sensor_msg(ConstFloatPtr &msg);
-	void on_gripper_laser_right_sensor_msg(ConstFloatPtr &msg);
 	void on_pos_msg(ConstPosePtr &msg);
 
 	//provided interfaces
-	fawkes::RobotinoSensorInterface *sens_if_;
 	fawkes::MotorInterface *         motor_if_;
 	fawkes::SwitchInterface *        switch_if_;
 	fawkes::IMUInterface *           imu_if_;
@@ -95,17 +91,12 @@ private:
 	//config values
 	std::string cfg_frame_odom_;
 	std::string cfg_frame_base_;
-	std::string cfg_frame_imu_;
-	double      gripper_laser_threshold_;
-	double      gripper_laser_value_far_;
-	double      gripper_laser_value_near_;
+	std::string cfg_frame_imu_;;
 	bool        slippery_wheels_enabled_;
 	double      slippery_wheels_threshold_;
 	double      moving_speed_factor_;
 	double      rotation_speed_factor_;
 	bool        have_gripper_sensors_;
-	int         gripper_laser_left_pos_;
-	int         gripper_laser_right_pos_;
 	int         infrared_sensor_index_;
 
 	//Helper variables for motor:
