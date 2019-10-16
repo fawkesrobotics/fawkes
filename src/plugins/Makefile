@@ -31,7 +31,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd \
 	  openrave-robot-memory openni refboxcomm ros player xmlrpc gossip \
 	  robot_state_publisher gazebo dynamixel navgraph-interactive \
 	  pddl-planner stn-generator clips-executive \
-	  asp plexil cedar
+	  asp plexil cedar gologpp
 
 include $(BUILDSYSDIR)/rules.mk
 
