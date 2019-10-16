@@ -37,10 +37,10 @@ namespace protoboard {
 
 ProtobufThead::ProtobufThead()
 : Thread("ProtoboardMessageHandler", Thread::OPMODE_CONTINUOUS),
-  bb_manager_(nullptr),
   message_register_(nullptr),
   server_(nullptr),
-  next_client_id_(0)
+  next_client_id_(0),
+  bb_manager_(nullptr)
 {
 }
 
@@ -78,8 +78,8 @@ ProtobufThead::pb_queue_pop()
 
 /** Enable protobuf peer.
  * @param address IP address to send messages to
- * @param send_port UDP port to send messages to
- * @param recv_port UDP port to receive messages on, 0 to use the same as the @p send_port
+ * @param send_to_port UDP port to send messages to
+ * @param recv_on_port UDP port to receive messages on, 0 to use the same as the @p send_port
  * @param crypto_key encryption key
  * @param cipher cipher suite, see BufferEncryptor for supported types
  * @return peer identifier
@@ -147,8 +147,8 @@ ProtobufThead::peer_create(const std::string &address, int port)
 
 /** Enable protobuf peer.
  * @param address IP address to send messages to
- * @param send_port UDP port to send messages to
- * @param recv_port UDP port to receive messages on, 0 to use the same as the @p send_port
+ * @param send_to_port UDP port to send messages to
+ * @param recv_on_port UDP port to receive messages on, 0 to use the same as the @p send_port
  * @return peer identifier
  */
 long int

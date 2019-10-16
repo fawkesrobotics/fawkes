@@ -28,10 +28,19 @@
 
 #include <core/plugin.h>
 
+/**
+ * The main class template that generates a domain-specific plugin
+ * @tparam IfaceManagerTs A list of @a bb_iface_manager instantiations that specify
+ * what message types should be handled on a given interface type.
+ */
 template <class... IfaceManagerTs>
 class ProtoboardPlugin : public fawkes::Plugin
 {
 public:
+	/**
+	 * Initializes all threads required for the plugin.
+	 * @param cfg The fawkes config
+	 */
 	ProtoboardPlugin(fawkes::Configuration *cfg) : Plugin(cfg)
 	{
 		protoboard::ProtobufThead *    protobuf_thread = new protoboard::ProtobufThead();

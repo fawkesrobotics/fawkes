@@ -129,6 +129,11 @@ BlackboardManager::add_peer(ProtobufPeerInterface *iface, long peer_id)
 	iface->write();
 }
 
+/**
+ * Local specialization for the CreatePeerMessage that establishes ProtoBuf communication
+ * @param iface The ProtobufPeerInterface
+ * @param msg The incoming CreatePeerMessage
+ */
 template <>
 void
 BlackboardManager::handle_message(ProtobufPeerInterface *                   iface,
@@ -137,6 +142,11 @@ BlackboardManager::handle_message(ProtobufPeerInterface *                   ifac
 	add_peer(iface, message_handler_->peer_create(msg->address(), msg->port()));
 }
 
+/**
+ * Local specialization for the CreatePeerLocalMessage that establishes ProtoBuf communication
+ * @param iface The ProtobufPeerInterface
+ * @param msg The incoming CreatePeerLocalMessage
+ */
 template <>
 void
 BlackboardManager::handle_message(ProtobufPeerInterface *                        iface,
@@ -148,6 +158,11 @@ BlackboardManager::handle_message(ProtobufPeerInterface *                       
 	                                             msg->recv_on_port()));
 }
 
+/**
+ * Local specialization for the CreatePeerCryptoMessage that establishes ProtoBuf communication
+ * @param iface The ProtobufPeerInterface
+ * @param msg The incoming CreatePeerCryptoMessage
+ */
 template <>
 void
 BlackboardManager::handle_message(ProtobufPeerInterface *                         iface,
@@ -158,6 +173,11 @@ BlackboardManager::handle_message(ProtobufPeerInterface *                       
 	           msg->address(), msg->port(), msg->crypto_key(), msg->cipher()));
 }
 
+/**
+ * Local specialization for the CreatePeerLocalCryptoMessage that establishes ProtoBuf communication
+ * @param iface The ProtobufPeerInterface
+ * @param msg The incoming CreatePeerLocalCryptoMessage
+ */
 template <>
 void
 BlackboardManager::handle_message(ProtobufPeerInterface *                              iface,

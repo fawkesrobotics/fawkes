@@ -39,45 +39,83 @@ namespace protoboard {
 template <class IfaceT>
 std::string iface_id_for_type();
 
+/**
+ * Must be implemented by the user.
+ * @return A map of ProtoBuf type names to their appropriate @a pb_converter instances
+ */
+pb_conversion_map make_receiving_interfaces_map();
+
+/**
+ * Default ProtoBuf to blackboard converter. This class just defines the necessary operations
+ * but does nothing in itself. Thus it can be used to silently ignore certain incoming ProtoBuf
+ * message types.
+ */
 class pb_convert : public std::enable_shared_from_this<pb_convert>
 {
 public:
+	/// Empty-init constructor
 	pb_convert();
-
+	/// Default copy constructor
 	pb_convert(const pb_convert &) = default;
-	pb_convert &operator=(const pb_convert &) = default;
-
+	/// Destructor. Does nothing since members aren't owned by this class.
 	virtual ~pb_convert();
 
+	/** Default copy assignment
+	 * @return The left-hand side */
+	pb_convert &operator=(const pb_convert &) = default;
+
+	/** Deferred initialization
+	 * @param blackboard A pointer to a ready-to-use blackboard
+	 * @param logger A pointer to a ready-to-use logger */
 	virtual void
 	init(fawkes::BlackBoard *blackboard, fawkes::Logger *logger, const std::string & = "");
 
+	/** Dereference @a msg and pass it on to handle it by reference
+	 * @param msg shared_ptr to a ProtoBuf message */
 	virtual void handle(std::shared_ptr<google::protobuf::Message> msg);
 
-	virtual void handle(const google::protobuf::Message &);
+	/** Handle a ProtoBuf message by reference. Overridden in @ref pb_converter
+	 * @param msg Reference to a generic ProtoBuf message */
+	virtual void handle(const google::protobuf::Message &msg);
 
 protected:
+	/// Blackboard used by the main thread
 	fawkes::BlackBoard *blackboard_;
-	fawkes::Logger *    logger_;
+	/// Logger from the main thread
+	fawkes::Logger *logger_;
 };
 
+/**
+ * The workhorse of the ProtoBuf to Blackboard conversion
+ * @tparam A concrete ProtoBuf message type
+ * @tparam The BlackBoard interface type that the ProtoBuf type should be mapped to
+ */
 template <class ProtoT, class IfaceT>
 class pb_converter : public pb_convert
 {
 public:
+	/// The ProtoBuf message type that goes in
 	typedef ProtoT input_type;
+	/// The blackboard interface type that the ProtoBuf contents are written to
 	typedef IfaceT output_type;
 
+	/// Empty-init
 	pb_converter()
 	: pb_convert(), interface_(nullptr), name_(boost::core::demangle(typeid(*this).name()))
 	{
 	}
 
-	// Don't copy this
+	/** Copying this is prohibited
+	 * @param "" deleted */
 	pb_converter(const pb_converter<ProtoT, IfaceT> &) = delete;
+
+	/** Copying this is prohibited
+	 * @param "" deleted
+	 * @return deleted */
 	pb_converter<ProtoT, IfaceT> &operator=(const pb_converter<ProtoT, IfaceT> &) = delete;
 
-	// Only move!
+	/** Move construction
+	 * @param o Another pb_converter to move from */
 	pb_converter(pb_converter<ProtoT, IfaceT> &&o)
 	: pb_convert(o),
 	  interface_(std::move(o.interface_)),
@@ -86,6 +124,9 @@ public:
 		o.interface_ = nullptr;
 	}
 
+	/** Move assignment
+	 * @param o Another pb_converter to move from
+	 * @return A reference to this pb_converter */
 	pb_converter<ProtoT, IfaceT> &
 	operator=(pb_converter<ProtoT, IfaceT> &&o)
 	{
@@ -96,11 +137,16 @@ public:
 		return *this;
 	}
 
+	/// Close blackboard interface on destruction
 	virtual ~pb_converter()
 	{
 		close();
 	}
 
+	/** Deferred initialization, coincides with main thread initialization
+	 * @param blackboard Initialized blackboard
+	 * @param logger Logger used by the main thread
+	 * @param id Blackboard interface ID to open */
 	virtual void
 	init(fawkes::BlackBoard *blackboard, fawkes::Logger *logger, const std::string &id = "") override
 	{
@@ -123,6 +169,9 @@ public:
 		handle(dynamic_cast<const ProtoT &>(msg));
 	}
 
+	/** Handle a ProtoBuf message with known type. Just delegates to a user-definable method
+	 * where the ProtoBuf message is matched up with the appropriate blackboard interface.
+	 * @param msg The incoming ProtoBuf message */
 	virtual void
 	handle(const ProtoT &msg)
 	{
@@ -130,12 +179,14 @@ public:
 		interface_->write();
 	}
 
+	/// @return whether we have a Blackboard interface
 	virtual bool
 	is_open()
 	{
 		return interface_;
 	}
 
+	/// Give up the current blackboard interface (closes it)
 	virtual void
 	close()
 	{
@@ -145,18 +196,23 @@ public:
 		}
 	}
 
+	/// @return the current blackboard interface
 	IfaceT *
 	interface()
 	{
 		return interface_;
 	}
 
+	/** @return The blackboard ID suffix if this is part of a sequence. Defaults to "".
+	 * Must be overriden for ProtoBuf message types that are part of a sequence and should be put
+	 * in separate interfaces. */
 	static std::string
 	get_sequence_id(const ProtoT &)
 	{
 		return "";
 	}
 
+	/// @return The demangled class name for logging
 	const char *
 	name()
 	{
@@ -164,6 +220,10 @@ public:
 	}
 
 protected:
+	/** Write the contents of a ProtoBuf message into the appropriate blackboard interface.
+	 * Must be specialized by the user for each ProtoBuf message -> blackboard interface pair
+	 * @param msg The message received
+	 * @param iface The appropriate interface */
 	virtual void handle(const ProtoT &msg, IfaceT *iface);
 
 private:
@@ -171,16 +231,26 @@ private:
 	std::string name_;
 };
 
+/**
+ * A special handler for repeated ProtoBuf fields.
+ * @tparam ProtoT the ProtoBuf message type that contains a repeated field we want to unwrap
+ * @tparam The @a pb_converter type that should be used (repeatedly) on the repeated field
+ */
 template <class ProtoT, class OutputT>
 class pb_sequence_converter : public pb_convert
 {
-public:
+private:
 	typedef google::protobuf::RepeatedPtrField<typename OutputT::input_type> sequence_type;
 
+public:
+	/// Default constructor
 	pb_sequence_converter()
 	{
 	}
 
+	/** Handle a repeated field inside a ProtoBuf message, where the individual repeated
+	 * sub-messages should be mapped to a blackboard interface each.
+	 * @param msg The message containing the repeated field that should be extracted */
 	virtual void
 	handle(const google::protobuf::Message &msg) override
 	{
@@ -205,6 +275,9 @@ public:
 		}
 	}
 
+	/** Must be implemented by the user.
+	 * @param msg The message containing the repeated field
+	 * @return The repeated field */
 	virtual const sequence_type &extract_sequence(const ProtoT &msg);
 
 private:

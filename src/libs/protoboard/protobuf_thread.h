@@ -44,26 +44,40 @@ namespace protoboard {
 
 class BlackboardManager;
 
+/**
+ * Receive incoming ProtoBuf messages and pass them on to the @a BlackboardManager
+ * for publication to the appropriate blackboard interface.
+ */
 class ProtobufThead : public fawkes::Thread,
                       public fawkes::LoggingAspect,
                       public fawkes::ConfigurableAspect,
                       public fawkes::BlackBoardAspect
 {
 public:
+	/// Empty-initialization constructor
 	ProtobufThead();
+	/// Destructor
 	virtual ~ProtobufThead() override;
 
+	/// @return whether incoming ProtoBuf messages are in the queue
 	bool pb_queue_incoming();
 
+	/// Wrapper for a ProtoBuf message and its metadata
 	struct incoming_message
 	{
-		long int                                   peer_id;
-		boost::asio::ip::udp::endpoint             endpoint;
-		uint16_t                                   component_id;
-		uint16_t                                   msg_type;
+		/// The ProtoBuf peer ID that received this message
+		long int peer_id;
+		/// The boost::asio UDP endpoint used by the receiving peer
+		boost::asio::ip::udp::endpoint endpoint;
+		/// The ProtoBuf component ID
+		uint16_t component_id;
+		/// The ProtoBuf type ID
+		uint16_t msg_type;
+		/// The message itself
 		std::shared_ptr<google::protobuf::Message> msg;
 	};
 
+	/// @return The head of the incoming ProtoBuf message queue (popped)
 	incoming_message pb_queue_pop();
 
 	long int peer_create(const std::string &host, int port);
@@ -79,22 +93,27 @@ public:
 	                                  const std::string &cipher     = "");
 	void     peer_destroy(long int peer_id);
 
+	/**
+	 * Send a ProtoBuf message to the given peer
+	 * @param peer_id The peer to send to
+	 * @param msg The message
+	 */
 	void send(long int peer_id, std::shared_ptr<google::protobuf::Message> msg);
 
-	/** Get the communicator's message register.
-   * @return message register */
-	protobuf_comm::MessageRegister &
-	message_register()
-	{
-		return *message_register_;
-	}
-
+	/**
+	 * Deferred initialization of the pointer to the BlackboardManager
+	 * @param bb_manager the BlackboardManager to use
+	 */
 	void
 	set_bb_manager(BlackboardManager *bb_manager)
 	{
 		bb_manager_ = bb_manager;
 	}
 
+	/**
+	 * Helper to give ProtoBuf converters access to the BlackBoard instance in use
+	 * @return A ready-to-use pointer to the BlackBoard
+	 */
 	fawkes::BlackBoard *
 	get_blackboard()
 	{
@@ -112,8 +131,6 @@ private:
 	{
 		return peers_;
 	}
-
-	BlackboardManager *bb_manager_;
 
 	/** Signal invoked for a message that has been sent via broadcast.
    * @return signal
@@ -149,6 +166,7 @@ private:
 
 	std::map<long int, protobuf_comm::ProtobufBroadcastPeer *> peers_;
 
+	BlackboardManager *          bb_manager_;
 	std::queue<incoming_message> pb_queue_;
 };
 

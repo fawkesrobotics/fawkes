@@ -32,6 +32,9 @@ class pb_convert;
 
 typedef std::unordered_map<std::string, std::shared_ptr<pb_convert>> pb_conversion_map;
 
+/**
+ * Helper structure to wrap a list of types into a single type.
+ */
 template <typename... Ts>
 struct type_list
 {
@@ -42,22 +45,42 @@ class BlackboardManager;
 template <class IfaceT>
 struct InterfaceMessageHandler;
 
+/**
+ * A compile-time constant bidirectional map that can be used to match blackboard interface enum
+ * values to ProtoBuf's enum values
+ * @tparam pbEnumT a ProtoBuf enum type
+ * @tparam bbEnumT a blackboard interface enum type
+ */
 template <class pbEnumT, class bbEnumT>
 class enum_map
 {
-public:
+private:
 	typedef boost::bimap<pbEnumT, bbEnumT> bimapT;
+
+public:
+	/**
+	 * constexpr constructor
+	 * @param init A curly-brace initializer list that defines the entire mapping
+	 */
 	constexpr enum_map(std::initializer_list<typename bimapT::value_type> init)
 	: list(init), map(list.begin(), list.end())
 	{
 	}
 
+	/**
+	 * @param v a ProtoBuf enum value
+	 * @return the mapped blackboard interface enum value
+	 */
 	constexpr bbEnumT
 	of(pbEnumT v) const
 	{
 		return map.left.at(v);
 	}
 
+	/**
+	 * @param v a blackboard interface enum value
+	 * @return the mapped ProtoBuf enum value
+	 */
 	constexpr pbEnumT
 	of(bbEnumT v) const
 	{

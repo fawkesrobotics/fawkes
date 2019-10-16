@@ -43,20 +43,35 @@
 
 namespace protoboard {
 
+/** Map a blackboard interface type to a blackboard interface ID.
+ * Must be implemented by the user. Will be called for every type used with
+ * an @a bb_iface_manager.
+ * @return The interface name (ID) that should be used for the given @tparam type */
 template <class IfaceT>
 std::string iface_id_for_type();
 
+/** Must be implemented by the user.
+ * @return a vector of paths where ProtoBuf should look for message definitions */
 std::vector<std::string> proto_dirs();
-pb_conversion_map        make_receiving_interfaces_map();
 
+/**
+ * Container for an opened interface of type @tparam IfaceT.
+ * @tparam MessageTypeList must be a @a type_list of the message types that should be
+ * handled on @tparam IfaceT.
+ */
 template <class IfaceT, class MessageTypeList>
 class bb_iface_manager
 {
 public:
+	/// Constructor. Not responsible for actual initialization.
 	bb_iface_manager() : interface_(nullptr), blackboard_(nullptr), waker_(nullptr)
 	{
 	}
 
+	/** Open an interface of the given type with the ID supplied by @a iface_id_for_type and
+	 * register to wake the given thread when any of the given types arrives.
+	 * @param blackboard The blackboard to use
+	 * @param thread The thread to wake */
 	void
 	init(fawkes::BlackBoard *blackboard, fawkes::Thread *thread)
 	{
@@ -65,6 +80,7 @@ public:
 		waker_      = new fawkes::BlackBoardOnMessageWaker(blackboard, interface_, thread);
 	}
 
+	/// Cleanup.
 	void
 	finalize()
 	{
@@ -74,6 +90,7 @@ public:
 			blackboard_->close(interface_);
 	}
 
+	/// @return The managed interface
 	IfaceT *
 	interface() const
 	{
@@ -86,36 +103,73 @@ private:
 	fawkes::BlackBoardOnMessageWaker *waker_;
 };
 
+/**
+ * Abstract superclass for sending out ProtoBuf messages
+ */
 class AbstractProtobufSender
 {
 public:
+	/** Constructor.
+	 * @param bb_mgr The BlackboardManager that uses this */
 	AbstractProtobufSender(BlackboardManager *bb_mgr);
+
+	/// Destructor
 	virtual ~AbstractProtobufSender();
+
+	/** Go through all interface managers, empty all blackboard message queues and send out
+	 * ProtoBuf messages accordingly.
+	 * @return whether anything was sent */
 	virtual bool process_sending_interfaces() = 0;
 
-	virtual void init()     = 0;
+	/// Deferred initialization, coincides with the main thread.
+	virtual void init() = 0;
+	/// Deferred cleanup, concides with the main thread.
 	virtual void finalize() = 0;
 
 protected:
+	/// Pointer to the main thread that uses this
 	BlackboardManager *bb_manager;
 
+	/**
+	 * Functor that iterates over all message types that should be handled on a given interface type
+	 * and calls the approate handlers for each message type in turn.
+	 */
 	struct handle_messages
 	{
+		/// Pointer to the main thread
 		BlackboardManager *manager;
 
+		/** Handle a specific blackboard message type on a given interface manager
+		 * @tparam IfaceT the interface type handled by the interface manager
+		 * @tparam MessageT the current
+		 * @param iface_mgr a bb_iface_manager for a specific message type
+		 * @return Whether any ProtoBuf message was sent */
 		template <class IfaceT, class MessageT>
-		bool operator()(const bb_iface_manager<IfaceT, type_list<MessageT>> &pair) const;
+		bool operator()(const bb_iface_manager<IfaceT, type_list<MessageT>> &iface_mgr) const;
 
+		/** Iterate through all given message types on a certain interface and
+		 * handle them individually
+		 * @tparam IfaceT the interface type
+		 * @tparam MessageT1 First message type in the list
+		 * @tparam MessageTs Remaining message types
+		 * @param iface_mgr a bb_iface_manager with a list of message type to go through
+		 * @return Whether any ProtoBuf message was sent */
 		template <class IfaceT, class MessageT1, class... MessageTs>
 		bool
 		operator()(const bb_iface_manager<IfaceT, type_list<MessageT1, MessageTs...>> &iface_mgr) const;
 	};
 };
 
+/**
+ * Sends out ProtoBuf messages for all given interface managers
+ * @tparam IfaceManagerTs a set of @a bb_iface_manager instantiations
+ */
 template <class... IfaceManagerTs>
 class ProtobufSender : public AbstractProtobufSender
 {
 public:
+	/** Constructor
+	 * @param bb_mgr A pointer to the main thread */
 	ProtobufSender(BlackboardManager *bb_mgr);
 
 	virtual void init() override;
@@ -131,6 +185,10 @@ private:
 	std::tuple<IfaceManagerTs...> bb_sending_interfaces_;
 };
 
+/**
+ * The main thread that is woken each time a message arrives on any of the interfaces
+ * watched by a @a bb_iface_manager.
+ */
 class BlackboardManager : public fawkes::Thread,
                           public fawkes::LoggingAspect,
                           public fawkes::ConfigurableAspect,
@@ -138,22 +196,34 @@ class BlackboardManager : public fawkes::Thread,
                           public fawkes::ClockAspect
 {
 public:
+	/** Main thread constructor
+	 * @param msg_handler A pointer to the thread that receives incoming ProtoBuf messages */
 	BlackboardManager(ProtobufThead *msg_handler);
 
+	/** Helper for other classes to get access to the blackboard
+	 * @return Pointer to the blackboard used by this thread */
 	fawkes::BlackBoard *get_blackboard();
-	void                set_protobuf_sender(AbstractProtobufSender *sender);
 
-	friend AbstractProtobufSender;
+	/** The ProtoBuf sender must be initialized after construction to beak a dependency loop
+	 * @param sender The initialized ProtobufSender */
+	void set_protobuf_sender(AbstractProtobufSender *sender);
 
 protected:
 	virtual void init() override;
 	virtual void finalize() override;
 	virtual void loop() override;
 
+	/** Act on a given message on a given blackboard interface. Must be implemented by the user.
+	 * @tparam the blackboard interface type
+	 * @tparam the blackboard message type
+	 * @param iface a pointer to the concrete interface
+	 * @param msg a pointer to the concrete message that came in on that interface */
 	template <class InterfaceT, class MessageT>
 	void handle_message(InterfaceT *iface, MessageT *msg);
 
 private:
+	friend AbstractProtobufSender;
+
 	ProtobufThead *                         message_handler_;
 	fawkes::ProtobufPeerInterface *         peer_iface_;
 	pb_conversion_map                       bb_receiving_interfaces_;
