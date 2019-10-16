@@ -66,9 +66,9 @@ private:
 	class BlackboardEventHandler
 	{
 	public:
-		BlackboardEventHandler(fawkes::BlackBoard *,
-		                       gologpp::shared_ptr<gologpp::ExogAction>,
-		                       ExogManager &exog_mgr);
+		BlackboardEventHandler(fawkes::BlackBoard *                     bb,
+		                       gologpp::shared_ptr<gologpp::ExogAction> exog,
+		                       ExogManager &                            exog_mgr);
 		BlackboardEventHandler(const BlackboardEventHandler &) = delete;
 		BlackboardEventHandler &operator=(const BlackboardEventHandler &) = delete;
 		BlackboardEventHandler(BlackboardEventHandler &&)                 = default;

@@ -30,7 +30,7 @@ using namespace gologpp;
 
 namespace fawkes_gpp {
 
-/** @class ExogManagerThread
+/** @class ExogManager
  * Watch/observe blackboard interfaces according to the mappings
  * specified for exogenous actions in the agent program. The config
  * has to specify whether some mapped backend name is supposed to be
@@ -54,8 +54,11 @@ ConfigError::ConfigError(const std::string &msg) : Exception(msg.c_str())
 }
 
 /** Constructor.
- * Construct an ExogManager thread and attach it to the main loop.
+ * Construct an ExogManager.
  * @param exec_thread The Golog++ ExecutionContext to use
+ * @param config The Fawkes configuration to read config values from
+ * @param blackboard The blackboard to use to read data from
+ * @param logger A logger instance to use for logging messages
  */
 ExogManager::ExogManager(GologppThread *exec_thread,
                          Configuration *config,
@@ -102,6 +105,9 @@ ExogManager::ExogManager(GologppThread *exec_thread,
 	}
 }
 
+/** Get the ExogManager's thread name.
+ * @return the thread name
+ */
 const char *
 ExogManager::name()
 {
@@ -125,9 +131,15 @@ ExogManager::exog_queue_push(shared_ptr<ExogEvent> evt)
 	exec_thread_->gologpp_context().exog_queue_push(evt);
 }
 
-ExogManager::BlackboardEventHandler::BlackboardEventHandler(fawkes::BlackBoard *   bb,
-                                                            shared_ptr<ExogAction> exog,
-                                                            ExogManager &          exog_mgr)
+/** Construct an event handler.
+ * @param bb The fawkes blackboard to listen to
+ * @param exog The ExogAction to trigger on data change
+ * @param exog_mgr The ExogManager to send the ExogAction to
+ */
+fawkes_gpp::ExogManager::BlackboardEventHandler::BlackboardEventHandler(
+  fawkes::BlackBoard *                     bb,
+  gologpp::shared_ptr<gologpp::ExogAction> exog,
+  ExogManager &                            exog_mgr)
 : blackboard_(bb), target_exog_(exog), exog_manager_(exog_mgr)
 {
 	for (const auto &pair : target_exog_->mapping().arg_mapping()) {
