@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 merged-pr-plugin: &merged-pr-plugin
-  seek-oss/github-merged-pr#v1.0.1:
+  seek-oss/github-merged-pr#v1.1.2:
     mode: checkout
 
 docker-plugin-base: &docker-plugin-base
@@ -16,7 +16,7 @@ steps:
     command: .buildkite/lint
     plugins:
       - *merged-pr-plugin
-      - docker#v3.0.1:
+      - docker#v3.3.0:
           <<: *docker-plugin-base
           environment:
             - BUILDKITE
@@ -38,7 +38,7 @@ steps:
       - .buildkite/annotate
     plugins:
       - *merged-pr-plugin
-      - docker#v3.0.1:
+      - docker#v3.3.0:
           <<: *docker-plugin-base
           volumes:
             - /var/lib/buildkite-agent/ccache_fedora:/var/cache/ccache
@@ -50,7 +50,7 @@ steps:
       - .buildkite/annotate
     plugins:
       - *merged-pr-plugin
-      - docker#v3.0.1:
+      - docker#v3.3.0:
           <<: *docker-plugin-base
           image: fawkesrobotics/fawkes-builder:ubuntu1804-melodic
           volumes:
