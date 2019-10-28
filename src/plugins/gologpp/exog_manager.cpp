@@ -66,13 +66,6 @@ ExogManager::ExogManager(GologppThread *exec_thread,
                          Logger *       logger)
 : exec_thread_(exec_thread), config_(config), blackboard_(blackboard), logger_(logger)
 {
-	// We know that lists of elementary types will most likely occur, so simply
-	// define the types unconditionally. The elementary types themselves are
-	// already defined.
-	global_scope().register_type(new ListType(*global_scope().lookup_type(BoolType::name())));
-	global_scope().register_type(new ListType(*global_scope().lookup_type(NumberType::name())));
-	global_scope().register_type(new ListType(*global_scope().lookup_type(SymbolType::name())));
-
 	// Build a map to lookup all exog actions by their mapped name (i.e. the
 	// interface ID or pattern)
 	for (shared_ptr<Global> g : global_scope().globals()) {

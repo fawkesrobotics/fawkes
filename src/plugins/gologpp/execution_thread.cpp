@@ -30,6 +30,7 @@
 namespace fawkes_gpp {
 
 using namespace fawkes;
+using namespace gologpp;
 
 const std::string cfg_prefix("/plugins/gologpp");
 
@@ -54,14 +55,20 @@ GologppThread::init()
 	// things from a previous (unsuccessful) attempt to initialize this plugin.
 	gologpp::global_scope().clear();
 
+	// We know that lists of elementary types will most likely occur, so simply
+	// define the types unconditionally. The elementary types themselves are
+	// already defined.
+	global_scope().register_type(new ListType(*global_scope().lookup_type(BoolType::name())));
+	global_scope().register_type(new ListType(*global_scope().lookup_type(NumberType::name())));
+	global_scope().register_type(new ListType(*global_scope().lookup_type(SymbolType::name())));
+
 	logger->log_info(name(), "Parsing %s...", prog_file.c_str());
 	main_prog_ = gologpp::parser::parse_file(prog_file);
 	logger->log_info(name(), "... parsing done");
 
 	logger->log_info(name(), "Initializing ReadyLog context...");
 
-	gologpp::ReadylogContext::init(
-	  {}, std::make_unique<GologppFawkesBackend>(config, logger, blackboard));
+	exog_mgr_ = new ExogManager(this, config, blackboard, logger);
 
 	logger->log_info(name(), "... initialization done");
 }
@@ -69,7 +76,9 @@ GologppThread::init()
 void
 GologppThread::once()
 {
-	exog_mgr_ = new ExogManager(this, config, blackboard, logger);
+	gologpp::ReadylogContext::init(
+	  {}, std::make_unique<GologppFawkesBackend>(config, logger, blackboard));
+
 	std::lock_guard<std::mutex> l{run_mutex_};
 	gologpp::ReadylogContext::instance().run(
 	  gologpp::Block{new gologpp::Scope{gologpp::global_scope()}, {main_prog_.release()}});
