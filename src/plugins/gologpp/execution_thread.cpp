@@ -76,13 +76,19 @@ GologppThread::init()
 void
 GologppThread::once()
 {
-	gologpp::ReadylogContext::init(
-	  {}, std::make_unique<GologppFawkesBackend>(config, logger, blackboard));
+	try {
+		gologpp::ReadylogContext::init(
+		  {}, std::make_unique<GologppFawkesBackend>(config, logger, blackboard));
 
-	std::lock_guard<std::mutex> l{run_mutex_};
-	gologpp::ReadylogContext::instance().run(
-	  gologpp::Block{new gologpp::Scope{gologpp::global_scope()}, {main_prog_.release()}});
-	logger->log_info(name(), "golog++ main program has ended");
+		std::lock_guard<std::mutex> l{run_mutex_};
+		gologpp::ReadylogContext::instance().run(
+		  gologpp::Block{new gologpp::Scope{gologpp::global_scope()}, {main_prog_.release()}});
+		logger->log_info(name(), "golog++ main program has ended");
+	} catch (gologpp::UserError &e) {
+		logger->log_error(name(), "User Error: %s", e.what());
+	} catch (gologpp::EclipseError &e) {
+		logger->log_error(name(), "Eclipse Error: %s", e.what());
+	}
 }
 
 bool
