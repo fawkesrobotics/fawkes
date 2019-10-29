@@ -47,9 +47,19 @@ GologppThread::GologppThread() : fawkes::Thread("gologpp_agent", Thread::OPMODE_
 void
 GologppThread::init()
 {
+	const std::unordered_map<std::string, std::string> mapping = {{"@BASEDIR@", BASEDIR},
+	                                                              {"@SRCDIR@", SRCDIR}};
+	std::string program_dir = config->get_string(cfg_prefix + "/program_dir");
+	for (auto &entry : mapping) {
+		size_t start_pos = program_dir.find(entry.first);
+		if (start_pos != std::string::npos) {
+			program_dir.replace(start_pos, entry.first.length(), entry.second);
+		}
+	}
+	logger->log_debug(name(), "program dir: %s", program_dir.c_str());
 	std::string prog_file = config->get_string(cfg_prefix + "/program_path");
 	if (prog_file[0] != '/')
-		prog_file = SRCDIR "/" + prog_file;
+		prog_file = program_dir + "/" + prog_file;
 
 	// Clear the global scope because it's a static variable that may already contain
 	// things from a previous (unsuccessful) attempt to initialize this plugin.
