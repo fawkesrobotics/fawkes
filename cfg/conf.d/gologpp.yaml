@@ -2,8 +2,10 @@
 %TAG ! tag:fawkesrobotics.org,cfg/
 ---
 /plugins/gologpp:
-  program_dir: "@SRCDIR@/test-scenario"
-  program_path: blocksworld.gpp
-  action-mapping:
-    stack: say{text="Stacking ?(x)y on ?(y)y", wait=true}
-    unstack: say{text="Unstacking ?(x)y", wait=true}
+  gologpp-dirs: ["@SRCDIR@/test-scenarios"]
+  spec: blocksworld
+  specs:
+    blocksworld:
+      action-mapping:
+        stack: say{text="Stacking ?(x)y on ?(y)y", wait=true}
+        unstack: say{text="Unstacking ?(x)y", wait=true}
