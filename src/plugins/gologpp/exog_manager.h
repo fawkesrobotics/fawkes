@@ -51,12 +51,11 @@ class ExogManager
 public:
 	ExogManager(GologppThread *exec_thread,
 	            fawkes::Configuration *,
+	            std::string cfg_prefix,
 	            fawkes::BlackBoard *,
 	            fawkes::Logger *);
 
 	const char *name();
-
-	static const std::string cfg_prefix;
 
 private:
 	void                                     exog_queue_push(gologpp::shared_ptr<gologpp::ExogEvent>);

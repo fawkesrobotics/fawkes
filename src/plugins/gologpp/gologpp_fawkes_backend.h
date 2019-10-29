@@ -61,6 +61,7 @@ class GologppFawkesBackend : public gologpp::PlatformBackend,
 {
 public:
 	GologppFawkesBackend(fawkes::Configuration *config,
+	                     std::string            cfg_prefix,
 	                     fawkes::Logger *       logger,
 	                     fawkes::BlackBoard *   blackboard);
 	virtual ~GologppFawkesBackend();

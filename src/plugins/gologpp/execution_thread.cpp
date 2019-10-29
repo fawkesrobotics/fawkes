@@ -76,6 +76,8 @@ GologppThread::init()
 	if (!std::filesystem::exists(prog_file)) {
 		throw Exception("Could not find Golog++ spec dir for '%s'", spec.c_str());
 	}
+	std::string spec_cfg_prefix{cfg_prefix + "/specs/" + spec.string()};
+	logger->log_debug(name(), "spec config: %s", spec_cfg_prefix.c_str());
 
 	// Clear the global scope because it's a static variable that may already contain
 	// things from a previous (unsuccessful) attempt to initialize this plugin.
@@ -94,10 +96,10 @@ GologppThread::init()
 
 	logger->log_info(name(), "Initializing ReadyLog context...");
 
-	exog_mgr_ = new ExogManager(this, config, blackboard, logger);
+	exog_mgr_ = new ExogManager(this, config, spec_cfg_prefix, blackboard, logger);
 
 	gologpp::ReadylogContext::init(
-	  {}, std::make_unique<GologppFawkesBackend>(config, logger, blackboard));
+	  {}, std::make_unique<GologppFawkesBackend>(config, spec_cfg_prefix, logger, blackboard));
 
 	logger->log_info(name(), "... initialization done");
 }

@@ -46,14 +46,17 @@ using gologpp::Transition;
  * @param logger A logger instance to use
  * @param blackboard The blackboard to use to connect to the SkillerInterface
  * @param config The config to read the skill mapping from
+ * @param cfg_prefix The spec-specific config prefix to use
  */
 SkillerActionExecutor::SkillerActionExecutor(fawkes::Logger *       logger,
                                              fawkes::BlackBoard *   blackboard,
-                                             fawkes::Configuration *config)
+                                             fawkes::Configuration *config,
+                                             std::string            cfg_prefix)
 : ActionExecutor(logger),
   BlackBoardInterfaceListener("Golog++SkillerActionExecutor"),
   blackboard_(blackboard),
-  config_(config)
+  config_(config),
+  cfg_prefix_(cfg_prefix)
 {
 	try {
 		skiller_if_ = blackboard_->open_for_reading<SkillerInterface>("Skiller");
@@ -75,8 +78,7 @@ SkillerActionExecutor::SkillerActionExecutor(fawkes::Logger *       logger,
 void
 SkillerActionExecutor::initialize_action_skill_mapping()
 {
-	// TODO: use const for config prefix
-	std::string                        action_mapping_cfg_path = "/plugins/gologpp/action-mapping/";
+	std::string                        action_mapping_cfg_path = cfg_prefix_ + "/action-mapping/";
 	auto                               cfg_iterator{config_->search(action_mapping_cfg_path)};
 	std::map<std::string, std::string> mapping;
 	while (cfg_iterator->next()) {

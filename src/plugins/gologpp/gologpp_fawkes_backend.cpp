@@ -39,16 +39,18 @@ using namespace fawkes;
 
 /** Constructor.
  *  @param config The configuration to read from
+ *  @param cfg_prefix The spec-specific config prefix to use
  *  @param logger The logger to use for log messages
  *  @param blackboard The blackboard to use to access the skiller
  */
 GologppFawkesBackend::GologppFawkesBackend(Configuration *config,
+                                           std::string    cfg_prefix,
                                            Logger *       logger,
                                            BlackBoard *   blackboard)
 : AspectProviderAspect(&dispatcher_inifin_), logger_(logger), blackboard_(blackboard)
 {
 	action_dispatcher_.register_executor(
-	  std::make_shared<SkillerActionExecutor>(logger, blackboard, config));
+	  std::make_shared<SkillerActionExecutor>(logger, blackboard, config, cfg_prefix));
 }
 
 GologppFawkesBackend::~GologppFawkesBackend()

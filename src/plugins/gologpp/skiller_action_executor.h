@@ -41,7 +41,8 @@ class SkillerActionExecutor : public ActionExecutor, public fawkes::BlackBoardIn
 public:
 	SkillerActionExecutor(fawkes::Logger *       logger,
 	                      fawkes::BlackBoard *   blackboard,
-	                      fawkes::Configuration *config);
+	                      fawkes::Configuration *config,
+	                      std::string            cfg_prefix);
 	virtual ~SkillerActionExecutor();
 	void         start(std::shared_ptr<gologpp::Activity> activity) override;
 	void         stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity) override;
@@ -56,6 +57,7 @@ private:
 	fawkes::BlackBoard *       blackboard_;
 	fawkes::SkillerInterface * skiller_if_;
 	fawkes::Configuration *    config_;
+	const std::string          cfg_prefix_;
 };
 
 } // namespace fawkes_gpp

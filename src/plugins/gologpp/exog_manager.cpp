@@ -37,9 +37,6 @@ namespace fawkes_gpp {
  * an interface ID or a pattern.
  */
 
-/** The prefix to use for the config of the ExogManager. */
-const string ExogManager::cfg_prefix{"/plugins/gologpp/blackboard"};
-
 static Value *field_to_value(InterfaceFieldIterator &fi, unsigned int idx);
 
 /** @class ConfigError
@@ -57,11 +54,13 @@ ConfigError::ConfigError(const std::string &msg) : Exception(msg.c_str())
  * Construct an ExogManager.
  * @param exec_thread The Golog++ ExecutionContext to use
  * @param config The Fawkes configuration to read config values from
+ * @param cfg_prefix The spec-specific config prefix to use
  * @param blackboard The blackboard to use to read data from
  * @param logger A logger instance to use for logging messages
  */
 ExogManager::ExogManager(GologppThread *exec_thread,
                          Configuration *config,
+                         std::string    cfg_prefix,
                          BlackBoard *   blackboard,
                          Logger *       logger)
 : exec_thread_(exec_thread), config_(config), blackboard_(blackboard), logger_(logger)
