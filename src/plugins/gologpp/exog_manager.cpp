@@ -189,7 +189,9 @@ ExogManager::BlackboardEventHandler::make_exog_event(Interface *iface) const
 		if (target_exog_->mapping().is_mapped(fi.get_name())) {
 			auto order_it = fields_order_.find(fi.get_name());
 
-			if (fi.get_length() > 1) {
+			if (fi.get_length() == 1 || (fi.get_length() > 1 && fi.get_type() == IFT_STRING))
+				args[order_it->second].reset(field_to_value(fi, 0));
+			else if (fi.get_length() > 1) {
 				vector<unique_ptr<Value>> list_init;
 				for (unsigned int idx = 0; idx < fi.get_length(); ++idx)
 					list_init.emplace_back(
@@ -202,10 +204,9 @@ ExogManager::BlackboardEventHandler::make_exog_event(Interface *iface) const
 					new Value(list_type->name(), list_init)
 				);
 			}
-			else if (fi.get_length() == 1)
-				args[order_it->second].reset(field_to_value(fi, 0));
 			else
-				throw fawkes::IllegalArgumentException("%s: Field %s has length 0, which shouldn't happen", iface->uid(), fi.get_name());
+				throw fawkes::IllegalArgumentException("%s: Field %s has length %d and type %s, which shouldn't happen",
+			                                           iface->uid(), fi.get_name(), fi.get_length(), fi.get_typename());
 		}
 		++fi;
 	}
