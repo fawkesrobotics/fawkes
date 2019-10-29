@@ -76,24 +76,14 @@ ExogManager::ExogManager(GologppThread *exec_thread,
 	// Register an InterfaceWatcher and a PatternObserver for each
 	// watched/observed interface (pattern). These also implement the event
 	// handlers.
-	std::unique_ptr<Configuration::ValueIterator> watch_it(config->search(cfg_prefix + "/watch"));
-	while (watch_it->next()) {
-		if (cfg_prefix + "/watch/id" == watch_it->path()) {
-			string                 id   = config->get_string(watch_it->path());
-			shared_ptr<ExogAction> exog = find_mapped_exog(id);
-			watchers_.push_back(std::make_unique<InterfaceWatcher>(blackboard, id, exog, *this));
-		} else
-			logger->log_error(name(), "Unexpected config entry %s", watch_it->path());
+	for (const string &id : config->get_strings((cfg_prefix + "/blackboard/watch").c_str())) {
+		shared_ptr<ExogAction> exog = find_mapped_exog(id);
+		watchers_.push_back(std::make_unique<InterfaceWatcher>(blackboard, id, exog, *this));
 	}
 
-	std::unique_ptr<Configuration::ValueIterator> observe_it(config->search(cfg_prefix + "/observe"));
-	while (observe_it->next()) {
-		if (cfg_prefix + "/observe/pattern" == observe_it->path()) {
-			string                 id   = config->get_string(observe_it->path());
-			shared_ptr<ExogAction> exog = find_mapped_exog(id);
-			observers_.push_back(std::make_unique<PatternObserver>(blackboard, id, exog, *this));
-		} else
-			logger->log_error(name(), "Unexpected config entry %s", watch_it->path());
+	for (const string &pattern : config->get_strings((cfg_prefix + "/blackboard/observe").c_str())) {
+		shared_ptr<ExogAction> exog = find_mapped_exog(pattern);
+		observers_.push_back(std::make_unique<PatternObserver>(blackboard, pattern, exog, *this));
 	}
 }
 
