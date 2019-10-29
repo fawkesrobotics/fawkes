@@ -239,9 +239,9 @@ ExogManager::PatternObserver::~PatternObserver()
 void
 ExogManager::PatternObserver::bb_interface_created(const char *type, const char *id) throw()
 {
-	Interface *iface = blackboard_->open_for_reading(type, id);
-	exog_manager_.exog_queue_push(make_exog_event(iface));
-	blackboard_->close(iface);
+	std::lock_guard locked{handler_mutex_};
+	exog_manager_.watchers_.push_back(std::make_unique<InterfaceWatcher>(
+	  blackboard_, string(type) + "::" + id, target_exog_, exog_manager_));
 }
 
 static Value *

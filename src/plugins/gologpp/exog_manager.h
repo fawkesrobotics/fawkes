@@ -114,6 +114,7 @@ private:
 
 	private:
 		std::string pattern_;
+		std::mutex  handler_mutex_;
 	};
 
 	//////////////////////////////////////////////////////////////////
