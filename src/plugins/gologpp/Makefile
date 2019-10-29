@@ -25,24 +25,30 @@ OBJS_all    = $(OBJS_gologpp)
 PLUGINS_all = $(PLUGINDIR)/gologpp.so
 
 
-ifneq ($(PKGCONFIG),)
-  HAVE_GOLOGPP = $(if $(shell $(PKGCONFIG) --exists golog++; echo $${?/1/}),1,0)
-  ifeq ($(HAVE_GOLOGPP),1)
-    CFLAGS += $(shell $(PKGCONFIG) --cflags readylog++ parsegolog++)
-    LDFLAGS += $(shell $(PKGCONFIG) --libs readylog++ parsegolog++)
-    PLUGINS_build = $(PLUGINS_all)
+ifneq ($(HAVE_CPP17),)
+  ifneq ($(PKGCONFIG),)
+    HAVE_GOLOGPP = $(if $(shell $(PKGCONFIG) --exists golog++; echo $${?/1/}),1,0)
+    ifeq ($(HAVE_GOLOGPP),1)
+      CFLAGS += $(shell $(PKGCONFIG) --cflags readylog++ parsegolog++) $(CFLAGS_CPP17)
+      LDFLAGS += $(shell $(PKGCONFIG) --libs readylog++ parsegolog++) $(LDFLAGS_CPP17)
+      PLUGINS_build = $(PLUGINS_all)
+    else
+      WARN_TARGETS += warning_gologpp
+    endif
   else
-    WARN_TARGETS += warning_gologpp
+    WARN_TARGETS += warning_pkgconfig
   endif
 else
-  WARN_TARGETS += warning_pkgconfig
+  WARN_TARGETS += warning_cpp17
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
   ifneq ($(WARN_TARGETS),)
 all: $(WARN_TARGETS)
   endif
-.PHONY: warning_pkgconfig warning_gologpp
+.PHONY: $(WARN_TARGETS)
+warning_cpp17:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting golog++ plugin$(TNORMAL) (C++17 not supported)"
 warning_pkgconfig:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot search for golog++$(TNORMAL) (pkg-config not found)"
 warning_gologpp:
