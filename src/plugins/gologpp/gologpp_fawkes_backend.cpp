@@ -45,10 +45,7 @@ using namespace fawkes;
 GologppFawkesBackend::GologppFawkesBackend(Configuration *config,
                                            Logger *       logger,
                                            BlackBoard *   blackboard)
-: AspectProviderAspect(&dispatcher_inifin_),
-  config_(config),
-  logger_(logger),
-  blackboard_(blackboard)
+: AspectProviderAspect(&dispatcher_inifin_), logger_(logger), blackboard_(blackboard)
 {
 	action_dispatcher_.register_executor(
 	  std::make_shared<SkillerActionExecutor>(logger, blackboard, config));

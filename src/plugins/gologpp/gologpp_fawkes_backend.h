@@ -30,13 +30,13 @@
 #include <aspect/clock.h>
 #include <aspect/inifins/inifin.h>
 #include <blackboard/blackboard.h>
-#include <config/config.h>
 #include <golog++/model/platform_backend.h>
 #include <logging/logger.h>
 
 namespace fawkes {
 class SkillerInterface;
-}
+class Configuration;
+} // namespace fawkes
 
 //namespace fawkes {
 //
@@ -72,7 +72,6 @@ private:
 	virtual void execute_activity(std::shared_ptr<gologpp::Activity>) override;
 
 	fawkes::SkillerInterface *            skiller_if_;
-	fawkes::Configuration *               config_;
 	fawkes::Logger *                      logger_;
 	fawkes::BlackBoard *                  blackboard_;
 	ActionExecutorDispatcher              action_dispatcher_;
