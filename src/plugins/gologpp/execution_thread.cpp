@@ -80,6 +80,9 @@ GologppThread::init()
 
 	exog_mgr_ = new ExogManager(this, config, blackboard, logger);
 
+	gologpp::ReadylogContext::init(
+	  {}, std::make_unique<GologppFawkesBackend>(config, logger, blackboard));
+
 	logger->log_info(name(), "... initialization done");
 }
 
@@ -87,9 +90,6 @@ void
 GologppThread::once()
 {
 	try {
-		gologpp::ReadylogContext::init(
-		  {}, std::make_unique<GologppFawkesBackend>(config, logger, blackboard));
-
 		std::lock_guard<std::mutex> l{run_mutex_};
 		gologpp::ReadylogContext::instance().run(
 		  gologpp::Block{new gologpp::Scope{gologpp::global_scope()}, {main_prog_.release()}});
