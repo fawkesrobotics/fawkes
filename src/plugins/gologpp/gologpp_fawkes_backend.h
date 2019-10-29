@@ -38,20 +38,6 @@ class SkillerInterface;
 class Configuration;
 } // namespace fawkes
 
-//namespace fawkes {
-//
-//class GologppDispatcherAspectIniFin : public virtual AspectIniFin
-//{
-//  public:
-//  GologppDispatcherAspectIniFin(fawkes_gpp::ActionExecutorDispatcher *dispatcher);
-//	void init(Thread *thread);
-//	void finalize(Thread *thread);
-//  private:
-//	  fawkes_gpp::ActionExecutorDispatcher *dispatcher_;
-//};
-//
-//} // namespace fawkes
-
 namespace fawkes_gpp {
 
 class GologppFawkesBackend : public gologpp::PlatformBackend,
