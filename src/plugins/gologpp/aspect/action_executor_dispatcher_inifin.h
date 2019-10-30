@@ -36,8 +36,8 @@ public:
 	virtual void finalize(Thread *thread);
 
 private:
-	GologppDispatcherAspect *             get_aspect(Thread *thread) const;
-	fawkes_gpp::ActionExecutorDispatcher *dispatcher_;
+	GologppDispatcherAspect *      get_aspect(Thread *thread) const;
+	gpp::ActionExecutorDispatcher *dispatcher_;
 };
 
 } // namespace fawkes

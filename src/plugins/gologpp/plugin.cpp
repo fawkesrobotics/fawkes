@@ -41,7 +41,7 @@ public:
 	 */
 GologppPlugin::GologppPlugin(Configuration *cfg) : Plugin(cfg)
 {
-	fawkes_gpp::GologppThread *exec_thread = new fawkes_gpp::GologppThread();
+	gpp::GologppThread *exec_thread = new gpp::GologppThread();
 	thread_list.push_back(exec_thread);
 }
 

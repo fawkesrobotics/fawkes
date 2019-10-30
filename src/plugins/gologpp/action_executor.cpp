@@ -20,7 +20,8 @@
 
 #include "action_executor.h"
 
-namespace fawkes_gpp {
+namespace fawkes {
+namespace gpp {
 
 /** @class ActionExecutor
  * Abstract class to execute a Golog++ activity.
@@ -58,4 +59,5 @@ ActionExecutor::ActionExecutor(fawkes::Logger *logger) : logger_(logger)
 {
 }
 
-} // namespace fawkes_gpp
+} // namespace gpp
+} // namespace fawkes

@@ -32,34 +32,34 @@ namespace fawkes {
 class Blackboard;
 class Configuration;
 class SkillerInterface;
-} // namespace fawkes
 
-namespace fawkes_gpp {
+namespace gpp {
 
-class SkillerActionExecutor : public ActionExecutor, public fawkes::BlackBoardInterfaceListener
+class SkillerActionExecutor : public ActionExecutor, public BlackBoardInterfaceListener
 {
 public:
-	SkillerActionExecutor(fawkes::Logger *       logger,
-	                      fawkes::BlackBoard *   blackboard,
-	                      fawkes::Configuration *config,
-	                      std::string            cfg_prefix);
+	SkillerActionExecutor(Logger *       logger,
+	                      BlackBoard *   blackboard,
+	                      Configuration *config,
+	                      std::string    cfg_prefix);
 	virtual ~SkillerActionExecutor();
 	void         start(std::shared_ptr<gologpp::Activity> activity) override;
 	void         stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity) override;
 	bool         can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
-	virtual void bb_interface_data_changed(fawkes::Interface *) throw() override;
+	virtual void bb_interface_data_changed(Interface *) throw() override;
 
 private:
-	const char *               name() const;
-	void                       initialize_action_skill_mapping();
-	std::string                map_activity_to_skill(std::shared_ptr<gologpp::Activity> activity);
-	fawkes::ActionSkillMapping action_skill_mapping_;
-	fawkes::BlackBoard *       blackboard_;
-	fawkes::SkillerInterface * skiller_if_;
-	fawkes::Configuration *    config_;
-	const std::string          cfg_prefix_;
+	const char *       name() const;
+	void               initialize_action_skill_mapping();
+	std::string        map_activity_to_skill(std::shared_ptr<gologpp::Activity> activity);
+	ActionSkillMapping action_skill_mapping_;
+	BlackBoard *       blackboard_;
+	SkillerInterface * skiller_if_;
+	Configuration *    config_;
+	const std::string  cfg_prefix_;
 };
 
-} // namespace fawkes_gpp
+} // namespace gpp
+} // namespace fawkes
 
 #endif /* !FAWKES_GOLOGPP_SKILLER_ACTION_EXECUTOR_H */

@@ -29,20 +29,22 @@ namespace fawkes {
 class Logger;
 }
 
-namespace fawkes_gpp {
+namespace fawkes {
+namespace gpp {
 class ActionExecutor
 {
 public:
-	ActionExecutor(fawkes::Logger *logger);
+	ActionExecutor(Logger *logger);
 	virtual void start(std::shared_ptr<gologpp::Activity> activity)                      = 0;
 	virtual void stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity)     = 0;
 	virtual bool can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const = 0;
 
 protected:
 	std::shared_ptr<gologpp::Activity> running_activity_;
-	fawkes::Logger *                   logger_;
+	Logger *                           logger_;
 };
 
-} // namespace fawkes_gpp
+} // namespace gpp
+} // namespace fawkes
 
 #endif /* !FAWKES_GOLOGPP_ACTION_EXECUTOR_H */

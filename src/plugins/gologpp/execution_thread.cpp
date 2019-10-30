@@ -29,9 +29,9 @@
 
 #include <filesystem>
 
-namespace fawkes_gpp {
+namespace fawkes {
+namespace gpp {
 
-using namespace fawkes;
 using namespace gologpp;
 
 const std::string cfg_prefix("/plugins/gologpp");
@@ -41,7 +41,7 @@ const std::string cfg_prefix("/plugins/gologpp");
  * context, loads a program and executes it.
  */
 
-GologppThread::GologppThread() : fawkes::Thread("gologpp_agent", Thread::OPMODE_WAITFORWAKEUP)
+GologppThread::GologppThread() : Thread("gologpp_agent", Thread::OPMODE_WAITFORWAKEUP)
 {
 	set_prepfin_conc_loop(true);
 }
@@ -146,4 +146,5 @@ GologppThread::gologpp_context()
 	return gologpp::ReadylogContext::instance();
 }
 
-} // namespace fawkes_gpp
+} // namespace gpp
+} // namespace fawkes

@@ -23,9 +23,8 @@
 #include <core/exception.h>
 #include <golog++/model/activity.h>
 
-using fawkes::Exception;
-
-namespace fawkes_gpp {
+namespace fawkes {
+namespace gpp {
 
 /** @class ActionExecutorDispatcher
  * Dispatch an activity to a number of registered executors by checking all
@@ -38,7 +37,7 @@ namespace fawkes_gpp {
  * Check all registered executors if any of them can execute the given activity.
  * @param activity The activity to execute.
  * @return The executor that can execute the activity.
- * @throws fawkes::Exception If no suitable executor for the given activity exists.
+ * @throws Exception If no suitable executor for the given activity exists.
  */
 std::shared_ptr<ActionExecutor>
 ActionExecutorDispatcher::get_executor(std::shared_ptr<gologpp::Activity> activity)
@@ -69,18 +68,16 @@ ActionExecutorDispatcher::get_executors() const
 	return action_executors_;
 }
 
-} // namespace fawkes_gpp
-
-namespace fawkes {
+} // namespace gpp
 
 /** @class GologppDispatcherAspect
  * An aspect that provides access to the Golog++ Action Executor Dispatcher.
  * Use this if you implement an executor for Golog++. Your action executor
  * should register itself by calling
- * fawkes_gpp::ActionExecutorDispatcher::register_executor().
+ * gpp::ActionExecutorDispatcher::register_executor().
  * @author Till Hofmann
- * @see fawkes_gpp::ActionExecutorDispatcher
- * @see fawkes_gpp::ActionExecutor
+ * @see gpp::ActionExecutorDispatcher
+ * @see gpp::ActionExecutor
  */
 
 /** @var GologppDispatcherAspect::gologpp_dispatcher
@@ -100,8 +97,7 @@ GologppDispatcherAspect::GologppDispatcherAspect()
  * @param dispatcher The dispatcher to use
  */
 void
-GologppDispatcherAspect::init_GologppDispatcherAspect(
-  fawkes_gpp::ActionExecutorDispatcher *dispatcher)
+GologppDispatcherAspect::init_GologppDispatcherAspect(gpp::ActionExecutorDispatcher *dispatcher)
 {
 	gologpp_dispatcher = dispatcher;
 }

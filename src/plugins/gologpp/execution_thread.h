@@ -32,14 +32,15 @@ namespace fawkes {
 class SkillerInterface;
 }
 
-namespace fawkes_gpp {
+namespace fawkes {
+namespace gpp {
 
 class ExogManager;
 
-class GologppThread : public fawkes::Thread,
-                      public fawkes::LoggingAspect,
-                      public fawkes::BlackBoardAspect,
-                      public fawkes::ConfigurableAspect
+class GologppThread : public Thread,
+                      public LoggingAspect,
+                      public BlackBoardAspect,
+                      public ConfigurableAspect
 {
 public:
 	GologppThread();
@@ -55,11 +56,12 @@ public:
 
 private:
 	std::unique_ptr<gologpp::Expression> main_prog_;
-	fawkes::SkillerInterface *           skiller_if_;
+	SkillerInterface *                   skiller_if_;
 	ExogManager *                        exog_mgr_;
 	std::mutex                           run_mutex_;
 };
 
-} // namespace fawkes_gpp
+} // namespace gpp
+} // namespace fawkes
 
 #endif

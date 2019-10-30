@@ -26,9 +26,8 @@
 #include <interfaces/SkillerInterface.h>
 #include <logging/logger.h>
 
-namespace fawkes_gpp {
-
-using namespace fawkes;
+namespace fawkes {
+namespace gpp {
 
 using gologpp::Transition;
 
@@ -37,7 +36,7 @@ using gologpp::Transition;
  * An action is translated to a skill using the skill mapping from the configuration.
  * If the Skiller's status changes, the activity's status is updated accordingly.
  * @author Till Hofmann
- * @see fawkes::ActionSkillMapping
+ * @see ActionSkillMapping
  */
 
 /** Constructor.
@@ -48,10 +47,10 @@ using gologpp::Transition;
  * @param config The config to read the skill mapping from
  * @param cfg_prefix The spec-specific config prefix to use
  */
-SkillerActionExecutor::SkillerActionExecutor(fawkes::Logger *       logger,
-                                             fawkes::BlackBoard *   blackboard,
-                                             fawkes::Configuration *config,
-                                             std::string            cfg_prefix)
+SkillerActionExecutor::SkillerActionExecutor(Logger *       logger,
+                                             BlackBoard *   blackboard,
+                                             Configuration *config,
+                                             std::string    cfg_prefix)
 : ActionExecutor(logger),
   BlackBoardInterfaceListener("Golog++SkillerActionExecutor"),
   blackboard_(blackboard),
@@ -194,4 +193,5 @@ SkillerActionExecutor::bb_interface_data_changed(Interface *iface) throw()
 	}
 }
 
-} // namespace fawkes_gpp
+} // namespace gpp
+} // namespace fawkes

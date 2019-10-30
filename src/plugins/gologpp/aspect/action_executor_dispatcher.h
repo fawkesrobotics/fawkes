@@ -25,7 +25,8 @@
 
 #include <aspect/aspect.h>
 
-namespace fawkes_gpp {
+namespace fawkes {
+namespace gpp {
 
 class ActionExecutorDispatcher
 {
@@ -38,19 +39,17 @@ private:
 	std::vector<std::shared_ptr<ActionExecutor>> action_executors_;
 };
 
-} // namespace fawkes_gpp
-
-namespace fawkes {
+} // namespace gpp
 
 class GologppDispatcherAspect : public virtual Aspect
 {
 public:
 	GologppDispatcherAspect();
-	void init_GologppDispatcherAspect(fawkes_gpp::ActionExecutorDispatcher *dispatcher);
+	void init_GologppDispatcherAspect(gpp::ActionExecutorDispatcher *dispatcher);
 	void finalize_GologppDispatcherAspect();
 
 protected:
-	fawkes_gpp::ActionExecutorDispatcher *gologpp_dispatcher;
+	gpp::ActionExecutorDispatcher *gologpp_dispatcher;
 };
 
 } // namespace fawkes

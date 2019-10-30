@@ -36,20 +36,19 @@
 namespace fawkes {
 class SkillerInterface;
 class Configuration;
-} // namespace fawkes
 
-namespace fawkes_gpp {
+namespace gpp {
 
 class GologppFawkesBackend : public gologpp::PlatformBackend,
-                             public fawkes::ClockAspect,
-                             public fawkes::GologppDispatcherAspect,
-                             public fawkes::AspectProviderAspect
+                             public ClockAspect,
+                             public GologppDispatcherAspect,
+                             public AspectProviderAspect
 {
 public:
-	GologppFawkesBackend(fawkes::Configuration *config,
-	                     std::string            cfg_prefix,
-	                     fawkes::Logger *       logger,
-	                     fawkes::BlackBoard *   blackboard);
+	GologppFawkesBackend(Configuration *config,
+	                     std::string    cfg_prefix,
+	                     Logger *       logger,
+	                     BlackBoard *   blackboard);
 	virtual ~GologppFawkesBackend();
 
 	virtual void preempt_activity(std::shared_ptr<gologpp::Transition> t) override;
@@ -58,13 +57,14 @@ public:
 private:
 	virtual void execute_activity(std::shared_ptr<gologpp::Activity>) override;
 
-	fawkes::SkillerInterface *            skiller_if_;
-	fawkes::Logger *                      logger_;
-	fawkes::BlackBoard *                  blackboard_;
-	ActionExecutorDispatcher              action_dispatcher_;
-	fawkes::GologppDispatcherAspectIniFin dispatcher_inifin_;
+	SkillerInterface *            skiller_if_;
+	Logger *                      logger_;
+	BlackBoard *                  blackboard_;
+	ActionExecutorDispatcher      action_dispatcher_;
+	GologppDispatcherAspectIniFin dispatcher_inifin_;
 };
 
-} // namespace fawkes_gpp
+} // namespace gpp
+} // namespace fawkes
 
 #endif

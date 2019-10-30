@@ -34,12 +34,13 @@ namespace gologpp {
 class Type;
 }
 
-namespace fawkes_gpp {
+namespace fawkes {
+namespace gpp {
 
 class GologppThread;
 
 ///////////////////////////////////////////////////////////////////////////////
-class ConfigError : public fawkes::Exception
+class ConfigError : public Exception
 {
 public:
 	ConfigError(const std::string &);
@@ -50,10 +51,10 @@ class ExogManager
 {
 public:
 	ExogManager(GologppThread *exec_thread,
-	            fawkes::Configuration *,
+	            Configuration *,
 	            std::string cfg_prefix,
-	            fawkes::BlackBoard *,
-	            fawkes::Logger *);
+	            BlackBoard *,
+	            Logger *);
 
 	const char *name();
 
@@ -65,46 +66,46 @@ private:
 	class BlackboardEventHandler
 	{
 	public:
-		BlackboardEventHandler(fawkes::BlackBoard *                     bb,
+		BlackboardEventHandler(BlackBoard *                             bb,
 		                       gologpp::shared_ptr<gologpp::ExogAction> exog,
 		                       ExogManager &                            exog_mgr);
 		BlackboardEventHandler(const BlackboardEventHandler &) = delete;
 		BlackboardEventHandler &operator=(const BlackboardEventHandler &) = delete;
 		BlackboardEventHandler(BlackboardEventHandler &&)                 = default;
 
-		gologpp::shared_ptr<gologpp::ExogEvent> make_exog_event(fawkes::Interface *) const;
+		gologpp::shared_ptr<gologpp::ExogEvent> make_exog_event(Interface *) const;
 
 		static std::string extract_type_name(const std::string &iface_uid);
 		static std::string extract_id(const std::string &iface_uid);
 
 	protected:
-		fawkes::BlackBoard *                              blackboard_;
+		BlackBoard *                                      blackboard_;
 		gologpp::shared_ptr<gologpp::ExogAction>          target_exog_;
 		std::unordered_map<std::string, gologpp::arity_t> fields_order_;
 		ExogManager &                                     exog_manager_;
 	};
 
 	///////////////////////////////////////////////////////////////////
-	class InterfaceWatcher : public BlackboardEventHandler, public fawkes::BlackBoardInterfaceListener
+	class InterfaceWatcher : public BlackboardEventHandler, public BlackBoardInterfaceListener
 	{
 	public:
-		InterfaceWatcher(fawkes::BlackBoard *,
+		InterfaceWatcher(BlackBoard *,
 		                 const std::string &id,
 		                 gologpp::shared_ptr<gologpp::ExogAction>,
 		                 ExogManager &exog_mgr);
 		virtual ~InterfaceWatcher() override;
 
-		virtual void bb_interface_data_changed(fawkes::Interface *) throw() override;
+		virtual void bb_interface_data_changed(Interface *) throw() override;
 
 	private:
-		fawkes::Interface *iface_;
+		Interface *iface_;
 	};
 
 	//////////////////////////////////////////////////////////////////
-	class PatternObserver : public BlackboardEventHandler, public fawkes::BlackBoardInterfaceObserver
+	class PatternObserver : public BlackboardEventHandler, public BlackBoardInterfaceObserver
 	{
 	public:
-		PatternObserver(fawkes::BlackBoard *,
+		PatternObserver(BlackBoard *,
 		                const std::string &pattern,
 		                gologpp::shared_ptr<gologpp::ExogAction>,
 		                ExogManager &exog_mgr);
@@ -122,11 +123,12 @@ private:
 	std::vector<std::unique_ptr<InterfaceWatcher>>                            watchers_;
 	std::vector<std::unique_ptr<PatternObserver>>                             observers_;
 	GologppThread *                                                           exec_thread_;
-	fawkes::Configuration *                                                   config_;
-	fawkes::BlackBoard *                                                      blackboard_;
-	fawkes::Logger *                                                          logger_;
+	Configuration *                                                           config_;
+	BlackBoard *                                                              blackboard_;
+	Logger *                                                                  logger_;
 };
 
-} // namespace fawkes_gpp
+} // namespace gpp
+} // namespace fawkes
 
 #endif

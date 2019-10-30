@@ -26,10 +26,10 @@
 #include <golog++/model/activity.h>
 #include <golog++/model/transition.h>
 
-namespace fawkes_gpp {
+namespace fawkes {
+namespace gpp {
 
 using namespace gologpp;
-using namespace fawkes;
 
 /** @class GologppFawkesBackend
  *  A Golog++ backend to get data from and send commands to Fawkes.
@@ -91,4 +91,5 @@ GologppFawkesBackend::execute_activity(shared_ptr<Activity> a)
 	executor->start(a);
 }
 
-} // namespace fawkes_gpp
+} // namespace gpp
+} // namespace fawkes

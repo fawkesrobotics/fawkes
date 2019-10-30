@@ -28,7 +28,8 @@
 using namespace fawkes;
 using namespace gologpp;
 
-namespace fawkes_gpp {
+namespace fawkes {
+namespace gpp {
 
 /** @class ExogManager
  * Watch/observe blackboard interfaces according to the mappings
@@ -118,8 +119,8 @@ ExogManager::exog_queue_push(shared_ptr<ExogEvent> evt)
  * @param exog The ExogAction to trigger on data change
  * @param exog_mgr The ExogManager to send the ExogAction to
  */
-fawkes_gpp::ExogManager::BlackboardEventHandler::BlackboardEventHandler(
-  fawkes::BlackBoard *                     bb,
+ExogManager::BlackboardEventHandler::BlackboardEventHandler(
+  BlackBoard *                             bb,
   gologpp::shared_ptr<gologpp::ExogAction> exog,
   ExogManager &                            exog_mgr)
 : blackboard_(bb), target_exog_(exog), exog_manager_(exog_mgr)
@@ -205,7 +206,7 @@ ExogManager::BlackboardEventHandler::make_exog_event(Interface *iface) const
 				);
 			}
 			else
-				throw fawkes::IllegalArgumentException("%s: Field %s has length %d and type %s, which shouldn't happen",
+				throw IllegalArgumentException("%s: Field %s has length %d and type %s, which shouldn't happen",
 			                                           iface->uid(), fi.get_name(), fi.get_length(), fi.get_typename());
 		}
 		++fi;
@@ -263,7 +264,8 @@ field_to_value(InterfaceFieldIterator &fi, unsigned int idx)
 	case IFT_UINT32: return new Value(NumberType::name(), fi.get_uint32(idx));
 	case IFT_UINT64: return new Value(NumberType::name(), fi.get_uint64(idx));
 	}
-	throw fawkes::Exception("Unhandled interface field type");
+	throw Exception("Unhandled interface field type");
 }
 
-} // namespace fawkes_gpp
+} // namespace gpp
+} // namespace fawkes

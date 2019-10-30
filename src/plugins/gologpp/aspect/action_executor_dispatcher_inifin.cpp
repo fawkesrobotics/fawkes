@@ -32,7 +32,7 @@ namespace fawkes {
 GologppDispatcherAspectIniFin::GologppDispatcherAspectIniFin()
 : AspectIniFin("GologppDispatcherAspect")
 {
-	dispatcher_ = new fawkes_gpp::ActionExecutorDispatcher();
+	dispatcher_ = new gpp::ActionExecutorDispatcher();
 }
 
 /** Destructor*. */
