@@ -34,7 +34,9 @@ namespace fawkes_gpp {
  *
  * @fn ActionExecutor::stop(std::shared_ptr<gologpp::Activity> activity)
  * Stop the given activity.
- * The executor is expected to keep track of the currently executed activity. Only stop the activity if the executor is actually executing it. If the given activity is not executed by this executor, do nothing.
+ * The executor is expected to keep track of the currently executed activity.
+ * Only stop the activity if the executor is actually executing it. If the
+ * given activity is not executed by this executor, do nothing.
  * @param activity The activity to stop.
  *
  * @fn ActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity> activity)
