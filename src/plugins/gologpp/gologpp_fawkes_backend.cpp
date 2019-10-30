@@ -21,6 +21,7 @@
 
 #include "gologpp_fawkes_backend.h"
 
+#include "message_action_executor.h"
 #include "skiller_action_executor.h"
 
 #include <golog++/model/activity.h>
@@ -51,6 +52,8 @@ GologppFawkesBackend::GologppFawkesBackend(Configuration *config,
 {
 	action_dispatcher_.register_executor(
 	  std::make_shared<SkillerActionExecutor>(logger, blackboard, config, cfg_prefix));
+	action_dispatcher_.register_executor(
+	  std::make_shared<BBMessageActionExecutor>(logger, blackboard, config, cfg_prefix));
 }
 
 GologppFawkesBackend::~GologppFawkesBackend()
