@@ -38,10 +38,10 @@ namespace gpp {
 class SkillerActionExecutor : public ActionExecutor, public BlackBoardInterfaceListener
 {
 public:
-	SkillerActionExecutor(Logger *       logger,
-	                      BlackBoard *   blackboard,
-	                      Configuration *config,
-	                      std::string    cfg_prefix);
+	SkillerActionExecutor(Logger *           logger,
+	                      BlackBoard *       blackboard,
+	                      Configuration *    config,
+	                      const std::string &cfg_prefix);
 	virtual ~SkillerActionExecutor();
 	void         start(std::shared_ptr<gologpp::Activity> activity) override;
 	void         stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity) override;

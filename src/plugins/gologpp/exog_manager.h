@@ -52,7 +52,7 @@ class ExogManager
 public:
 	ExogManager(GologppThread *exec_thread,
 	            Configuration *,
-	            std::string cfg_prefix,
+	            const std::string &cfg_prefix,
 	            BlackBoard *,
 	            Logger *);
 

@@ -47,10 +47,10 @@ using gologpp::Transition;
  * @param config The config to read the skill mapping from
  * @param cfg_prefix The spec-specific config prefix to use
  */
-SkillerActionExecutor::SkillerActionExecutor(Logger *       logger,
-                                             BlackBoard *   blackboard,
-                                             Configuration *config,
-                                             std::string    cfg_prefix)
+SkillerActionExecutor::SkillerActionExecutor(Logger *           logger,
+                                             BlackBoard *       blackboard,
+                                             Configuration *    config,
+                                             const std::string &cfg_prefix)
 : ActionExecutor(logger),
   BlackBoardInterfaceListener("Golog++SkillerActionExecutor"),
   blackboard_(blackboard),
