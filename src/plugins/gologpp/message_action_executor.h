@@ -24,7 +24,6 @@
 
 #include <map>
 #include <string>
-#include <vector>
 
 namespace fawkes {
 
@@ -47,21 +46,12 @@ public:
 	bool can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
 
 private:
-	struct MessageMapping
-	{
-		std::string action_name;
-		std::string interface_id;
-		std::string interface_type;
-		std::string message_type;
-		Interface * interface = nullptr;
-	};
-	void                        initialize_message_mapping();
-	void                        open_interfaces();
-	void                        close_interfaces();
-	BlackBoard *                blackboard_;
-	Configuration *             config_;
-	std::string                 cfg_prefix_;
-	std::vector<MessageMapping> message_mappings_;
+	void                               open_interfaces();
+	void                               close_interfaces();
+	BlackBoard *                       blackboard_;
+	Configuration *                    config_;
+	std::string                        cfg_prefix_;
+	std::map<std::string, Interface *> open_interfaces_;
 };
 } // namespace gpp
 } // namespace fawkes

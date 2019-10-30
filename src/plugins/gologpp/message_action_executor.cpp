@@ -50,7 +50,6 @@ BBMessageActionExecutor::BBMessageActionExecutor(Logger *           logger,
                                                  const std::string &cfg_prefix)
 : ActionExecutor(logger), blackboard_(blackboard), config_(config), cfg_prefix_(cfg_prefix)
 {
-	initialize_message_mapping();
 	open_interfaces();
 }
 
@@ -63,73 +62,52 @@ BBMessageActionExecutor::~BBMessageActionExecutor()
 }
 
 void
-BBMessageActionExecutor::initialize_message_mapping()
-{
-	message_mappings_.clear();
-	std::string message_mapping_cfg_path = cfg_prefix_ + "/message-mapping/";
-	auto        cfg_iterator{config_->search(message_mapping_cfg_path)};
-	while (cfg_iterator->next()) {
-		MessageMapping mapping;
-		mapping.action_name =
-		  std::string(cfg_iterator->path()).substr(message_mapping_cfg_path.length());
-		mapping.interface_id = config_->get_string(std::string(cfg_iterator->path()) + "/interface_id");
-		mapping.interface_type =
-		  config_->get_string(std::string(cfg_iterator->path()) + "/interface_type");
-		mapping.message_type = config_->get_string(std::string(cfg_iterator->path()) + "/message_type");
-		message_mappings_.push_back(mapping);
-	}
-}
-
-void
 BBMessageActionExecutor::open_interfaces()
 {
-	for (auto &mapping : message_mappings_) {
-		if (mapping.interface) {
-			blackboard_->close(mapping.interface);
-		}
-		Interface *iface =
-		  blackboard_->open_for_reading(mapping.interface_type.c_str(), mapping.interface_id.c_str());
-		mapping.interface = iface;
-	}
+	return;
 }
 
 void
 BBMessageActionExecutor::close_interfaces()
 {
-	for (auto &mapping : message_mappings_) {
-		blackboard_->close(mapping.interface);
+	for (auto interface : open_interfaces_) {
+		blackboard_->close(interface.second);
 	}
 }
 
 bool
 BBMessageActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const
 {
-	for (auto &mapping : message_mappings_) {
-		if (mapping.action_name == activity->mapped_name()) {
-			return true;
-		}
-	}
-	return false;
+	return activity->mapped_name() == "send_message";
 }
 
 void
 BBMessageActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
-	for (auto &mapping : message_mappings_) {
-		if (mapping.action_name == activity->mapped_name()) {
-			assert(mapping.interface);
-			auto msg = mapping.interface->create_message(mapping.message_type.c_str());
-			for (auto field = msg->fields(); field != msg->fields_end(); field++) {
-				if (activity->target()->mapping().is_mapped(field.get_name())) {
-					auto value = activity->mapped_arg_value(field.get_name());
-					value_to_field(value, &field);
-				}
-			}
-			mapping.interface->msgq_enqueue(msg);
-			activity->update(gologpp::Transition::Hook::FINISH);
-			return;
+	if (!can_execute_activity(activity)) {
+		throw Exception("Cannot execute activity '%s' with BBMessageActionExecutor",
+		                activity->mapped_name().c_str());
+	}
+	activity->update(gologpp::Transition::Hook::START);
+	std::string interface_type = activity->mapped_arg_value("interface_type");
+	std::string interface_id   = activity->mapped_arg_value("interface_id");
+	std::string message_type   = activity->mapped_arg_value("message_type");
+	if (open_interfaces_.find(interface_id) == open_interfaces_.end()) {
+		open_interfaces_[interface_id] =
+		  blackboard_->open_for_reading(interface_type.c_str(), interface_id.c_str());
+	}
+	Interface *interface = open_interfaces_[interface_id];
+	auto       msg       = interface->create_message(message_type.c_str());
+
+	for (auto field = msg->fields(); field != msg->fields_end(); field++) {
+		if (activity->target()->mapping().is_mapped(field.get_name())) {
+			auto value = activity->mapped_arg_value(field.get_name());
+			value_to_field(value, &field);
 		}
 	}
+	interface->msgq_enqueue(msg);
+	activity->update(gologpp::Transition::Hook::FINISH);
+	return;
 }
 
 void
