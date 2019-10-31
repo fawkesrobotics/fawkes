@@ -499,6 +499,7 @@ Interface::write()
 
 	rwlock_->lock_for_write();
 	data_mutex_->lock();
+	bool do_notify = false;
 	if (valid_) {
 		if (data_changed) {
 			if (auto_timestamping_)
@@ -508,6 +509,7 @@ Interface::write()
 			data_ts->timestamp_sec  = sec;
 			data_ts->timestamp_usec = usec;
 			data_changed            = false;
+			do_notify               = true;
 		}
 		memcpy(mem_data_ptr_, data_ptr, data_size);
 	} else {
@@ -518,7 +520,8 @@ Interface::write()
 	data_mutex_->unlock();
 	rwlock_->unlock();
 
-	interface_mediator_->notify_of_data_change(this);
+	if (do_notify)
+		interface_mediator_->notify_of_data_change(this);
 }
 
 /** Get data size.
