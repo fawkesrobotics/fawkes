@@ -1022,26 +1022,17 @@ CppInterfaceGenerator::write_methods_cpp(FILE *                      f,
 		        (*i).getName().c_str(),
 		        (*i).getAccessType().c_str(),
 		        (*i).getName().c_str());
-		if ((*i).getType() == "string") {
-			fprintf(f,
-			        "  strncpy(data->%s, new_%s, sizeof(data->%s)-1);\n"
-			        "  data->%s[sizeof(data->%s)-1] = 0;\n",
-			        (*i).getName().c_str(),
-			        (*i).getName().c_str(),
-			        (*i).getName().c_str(),
-			        (*i).getName().c_str(),
-			        (*i).getName().c_str());
-		} else if ((*i).getLength() != "") {
-			fprintf(f,
-			        "  memcpy(data->%s, new_%s, sizeof(%s) * %s);\n",
-			        (*i).getName().c_str(),
-			        (*i).getName().c_str(),
-			        (*i).getPlainAccessType().c_str(),
-			        (*i).getLength().c_str());
-		} else {
-			fprintf(f, "  data->%s = new_%s;\n", (*i).getName().c_str(), (*i).getName().c_str());
-		}
-		fprintf(f, "%s}\n\n", write_data_changed ? "  data_changed = true;\n" : "");
+
+		if (write_data_changed)
+			fprintf(f, "  data_changed |= ");
+		else
+			fprintf(f, "  ");
+
+		fprintf(f,
+		        "change_field(data->%s, new_%s);\n"
+		        "}\n\n",
+		        (*i).getName().c_str(),
+		        (*i).getName().c_str());
 
 		if (((*i).getType() != "string") && ((*i).getLengthValue() > 0)) {
 			fprintf(f,
@@ -1053,11 +1044,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *                      f,
 			        "void\n"
 			        "%s%s::set_%s(unsigned int index, const %s new_%s)\n"
 			        "{\n"
-			        "  if (index > %s) {\n"
-			        "    throw Exception(\"Index value %%u out of bounds (0..%s)\", index);\n"
-			        "  }\n"
-			        "  data->%s[index] = new_%s;\n"
-			        "%s"
+			        "  %schange_field(data->%s, index, new_%s);\n"
 			        "}\n",
 			        (*i).getName().c_str(),
 			        (*i).getComment().c_str(),
@@ -1068,11 +1055,9 @@ CppInterfaceGenerator::write_methods_cpp(FILE *                      f,
 			        (*i).getName().c_str(),
 			        (*i).getPlainAccessType().c_str(),
 			        i->getName().c_str(),
-			        i->getMaxIdx().c_str(),
-			        i->getMaxIdx().c_str(),
+			        write_data_changed ? "  data_changed |= " : "",
 			        i->getName().c_str(),
-			        i->getName().c_str(),
-			        write_data_changed ? "  data_changed = true;\n" : "");
+			        i->getName().c_str());
 		}
 	}
 }
