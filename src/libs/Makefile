@@ -21,7 +21,7 @@ SUBDIRS = core utils interface netcomm blackboard interfaces config logging tf \
 	  plugin lua aspect network_logger webview gui_utils baseapp navgraph \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
 	  kdl_parser protobuf_comm protobuf_clips pcl_utils pddl_parser syncpoint \
-	  googletest
+	  googletest protoboard
 
 ifeq ($(HAVE_SIFT),1)
   SUBDIRS += extlib/sift
@@ -70,6 +70,7 @@ pcl_utils: core tf
 kdl_parser: core
 pddl_parser: core
 syncpoint: core googletest logging utils
+protoboard: core aspect blackboard interface protobuf_comm interfaces
 
 include $(BUILDSYSDIR)/rules.mk
 include $(LIBSRCDIR)/extlibs.mk
