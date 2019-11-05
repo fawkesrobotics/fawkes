@@ -84,20 +84,21 @@ private:
 	void on_pos_msg(ConstPosePtr &msg);
 
 	//provided interfaces
-	fawkes::MotorInterface *         motor_if_;
-	fawkes::SwitchInterface *        switch_if_;
-	fawkes::IMUInterface *           imu_if_;
+	fawkes::MotorInterface * motor_if_;
+	fawkes::SwitchInterface *switch_if_;
+	fawkes::IMUInterface *   imu_if_;
 
 	//config values
 	std::string cfg_frame_odom_;
 	std::string cfg_frame_base_;
-	std::string cfg_frame_imu_;;
-	bool        slippery_wheels_enabled_;
-	double      slippery_wheels_threshold_;
-	double      moving_speed_factor_;
-	double      rotation_speed_factor_;
-	bool        have_gripper_sensors_;
-	int         infrared_sensor_index_;
+	std::string cfg_frame_imu_;
+	;
+	bool   slippery_wheels_enabled_;
+	double slippery_wheels_threshold_;
+	double moving_speed_factor_;
+	double rotation_speed_factor_;
+	bool   have_gripper_sensors_;
+	int    infrared_sensor_index_;
 
 	//Helper variables for motor:
 
