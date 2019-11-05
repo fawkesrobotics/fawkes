@@ -70,13 +70,22 @@ number function reward() {
 		return -1;
 }
 
+action msg(string msg) {
+mapping:
+  "print" {
+    message = msg,
+  }
+}
+
 
 {
-	solve(20, reward())
+	solve(20, reward()) {
+		msg("hello");
 		while (!goal())
 			pick (symbol x in {a, b, c})
 				pick(symbol y in {table, a, b, c}) {
 					unstack(x);
 					stack(x, y);
         }
+  }
 }
