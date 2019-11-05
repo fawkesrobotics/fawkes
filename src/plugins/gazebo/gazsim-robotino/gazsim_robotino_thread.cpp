@@ -69,9 +69,9 @@ RobotinoSimThread::init()
 	slippery_wheels_threshold_ = config->get_float("gazsim/robotino/motor/slippery-wheels-threshold");
 	moving_speed_factor_       = config->get_float("gazsim/robotino/motor/moving-speed-factor");
 	rotation_speed_factor_     = config->get_float("gazsim/robotino/motor/rotation-speed-factor");
-	gyro_buffer_size_      = config->get_int("/gazsim/robotino/gyro-buffer-size");
-	gyro_delay_            = config->get_float("/gazsim/robotino/gyro-delay");
-	infrared_sensor_index_ = config->get_int("/gazsim/robotino/infrared-sensor-index");
+	gyro_buffer_size_          = config->get_int("/gazsim/robotino/gyro-buffer-size");
+	gyro_delay_                = config->get_float("/gazsim/robotino/gyro-delay");
+	infrared_sensor_index_     = config->get_int("/gazsim/robotino/infrared-sensor-index");
 
 	tf_enable_publisher(cfg_frame_base_.c_str());
 
