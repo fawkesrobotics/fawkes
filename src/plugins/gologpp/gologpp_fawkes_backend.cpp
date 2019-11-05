@@ -22,6 +22,7 @@
 #include "gologpp_fawkes_backend.h"
 
 #include "message_action_executor.h"
+#include "print_action_executor.h"
 #include "skiller_action_executor.h"
 #include "sleep_action_executor.h"
 
@@ -56,6 +57,7 @@ GologppFawkesBackend::GologppFawkesBackend(Configuration *config,
 	action_dispatcher_.register_executor(
 	  std::make_shared<BBMessageActionExecutor>(logger, blackboard, config, cfg_prefix));
 	action_dispatcher_.register_executor(std::make_shared<SleepActionExecutor>(logger));
+	action_dispatcher_.register_executor(std::make_shared<PrintActionExecutor>(logger));
 }
 
 GologppFawkesBackend::~GologppFawkesBackend()
