@@ -31,6 +31,14 @@ namespace gpp {
 
 using gologpp::Transition;
 
+InvalidArgumentException::InvalidArgumentException(const char *format, ...) : Exception()
+{
+	va_list args;
+	va_start(args, format);
+	append_nolock_va(format, args);
+	va_end(args);
+}
+
 /** @class SkillerActionExecutor
  * An ActionExecutor that executes an activity using the Skiller.
  * An action is translated to a skill using the skill mapping from the configuration.
@@ -117,9 +125,14 @@ SkillerActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity> a
 void
 SkillerActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
-	skiller_if_->msgq_enqueue(
-	  new SkillerInterface::ExecSkillMessage(map_activity_to_skill(activity).c_str()));
-	running_activity_ = activity;
+	try {
+		skiller_if_->msgq_enqueue(
+		  new SkillerInterface::ExecSkillMessage(map_activity_to_skill(activity).c_str()));
+		running_activity_ = activity;
+	} catch (InvalidArgumentException &e) {
+		logger_->log_error(name(), "Failed to start %s: %s", activity->name().c_str(), e.what());
+		activity->update(Transition::Hook::FAIL);
+	}
 }
 
 /** Stop the activity if it is currently running.
@@ -149,7 +162,9 @@ SkillerActionExecutor::map_activity_to_skill(std::shared_ptr<gologpp::Activity> 
 		try {
 			params[arg.first] = static_cast<std::string>(activity->mapped_arg_value(arg.first));
 		} catch (boost::bad_get &e) {
-			logger_->log_error(name(), "Failed to cast parameter %s: %s", arg.first.c_str(), e.what());
+			throw InvalidArgumentException("Failed to cast parameter %s: %s",
+			                               arg.first.c_str(),
+			                               e.what());
 		}
 	}
 	std::multimap<std::string, std::string> messages;
@@ -158,10 +173,9 @@ SkillerActionExecutor::map_activity_to_skill(std::shared_ptr<gologpp::Activity> 
 	}
 	auto mapping{action_skill_mapping_.map_skill(activity->mapped_name(), params, messages)};
 	for (auto m = messages.find("ERROR"); m != messages.end();) {
-		logger_->log_error(name(),
-		                   "Error occurred while mapping action '%s': %s",
-		                   activity->mapped_name().c_str(),
-		                   m->second.c_str());
+		throw InvalidArgumentException("Error occurred while mapping action '%s': %s",
+		                               activity->mapped_name().c_str(),
+		                               m->second.c_str());
 	}
 	for (auto m = messages.find("WARNING"); m != messages.end();) {
 		logger_->log_warn(name(),
