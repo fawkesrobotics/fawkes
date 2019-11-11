@@ -102,7 +102,18 @@ BBMessageActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 	for (auto field = msg->fields(); field != msg->fields_end(); field++) {
 		if (activity->target()->mapping().is_mapped(field.get_name())) {
 			auto value = activity->mapped_arg_value(field.get_name());
-			value_to_field(value, &field);
+			try {
+				value_to_field(value, &field);
+			} catch (boost::bad_get &e) {
+				logger_->log_error("BBMessageActionExecutor",
+				                   "Failed to convert value '%s' of field '%s' with type '%s': '%s'",
+				                   value.string_representation().c_str(),
+				                   field.get_name(),
+				                   field.get_typename(),
+				                   e.what());
+				activity->update(gologpp::Transition::Hook::FAIL);
+				return;
+			}
 		}
 	}
 	interface->msgq_enqueue(msg);
