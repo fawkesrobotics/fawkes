@@ -30,7 +30,7 @@ void
 value_to_field(const gologpp::Value &value, InterfaceFieldIterator *field)
 {
 	switch (field->get_type()) {
-	case IFT_BOOL: field->set_bool(value); break;
+	case IFT_BOOL: field->set_bool((bool)value); break;
 	case IFT_INT8: field->set_int8((int)value); break;
 	case IFT_UINT8: field->set_uint8((uint)value); break;
 	case IFT_INT16: field->set_int16((int)value); break;
@@ -42,7 +42,7 @@ value_to_field(const gologpp::Value &value, InterfaceFieldIterator *field)
 	case IFT_FLOAT: field->set_float((double)value); break;
 	case IFT_DOUBLE: field->set_float((double)value); break;
 	case IFT_STRING: field->set_string(static_cast<std::string>(value).c_str()); break;
-	case IFT_ENUM: field->set_enum(value); break;
+	case IFT_ENUM: field->set_enum_string(static_cast<std::string>(value).c_str()); break;
 	case IFT_BYTE: throw NotImplementedException("Cannot convert Golog++ value into byte"); break;
 	}
 }
