@@ -37,10 +37,10 @@ namespace fawkes {
  * @return true if the lines intersect, false otherwise
  */
 bool
-line_segm_intersect(const Eigen::Vector2f l1_from,
-                    const Eigen::Vector2f l1_to,
-                    const Eigen::Vector2f l2_from,
-                    const Eigen::Vector2f l2_to)
+line_segm_intersect(const Eigen::Vector2f &l1_from,
+                    const Eigen::Vector2f &l1_to,
+                    const Eigen::Vector2f &l2_from,
+                    const Eigen::Vector2f &l2_to)
 {
 	const Eigen::ParametrizedLine<float, 2> edge_seg(
 	  Eigen::ParametrizedLine<float, 2>::Through(l1_from, l1_to));
@@ -114,10 +114,10 @@ line_segm_intersect(const Eigen::Vector2f l1_from,
  * no intersection point exists.
  */
 Eigen::Vector2f
-line_segm_intersection(const Eigen::Vector2f l1_from,
-                       const Eigen::Vector2f l1_to,
-                       const Eigen::Vector2f l2_from,
-                       const Eigen::Vector2f l2_to)
+line_segm_intersection(const Eigen::Vector2f &l1_from,
+                       const Eigen::Vector2f &l1_to,
+                       const Eigen::Vector2f &l2_from,
+                       const Eigen::Vector2f &l2_to)
 {
 	const Eigen::ParametrizedLine<float, 2> edge_seg(
 	  Eigen::ParametrizedLine<float, 2>::Through(l1_from, l1_to));
