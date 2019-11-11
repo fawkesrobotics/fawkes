@@ -146,7 +146,11 @@ SkillerActionExecutor::map_activity_to_skill(std::shared_ptr<gologpp::Activity> 
 {
 	std::map<std::string, std::string> params;
 	for (auto &arg : activity->target()->mapping().arg_mapping()) {
-		params[arg.first] = activity->mapped_arg_value(arg.first).to_string("");
+		try {
+			params[arg.first] = static_cast<std::string>(activity->mapped_arg_value(arg.first));
+		} catch (boost::bad_get &e) {
+			logger_->log_error(name(), "Failed to cast parameter %s: %s", arg.first.c_str(), e.what());
+		}
 	}
 	std::multimap<std::string, std::string> messages;
 	if (!action_skill_mapping_.has_mapping(activity->mapped_name())) {
