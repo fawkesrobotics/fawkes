@@ -20,7 +20,7 @@ LIBS_gologpp = fawkescore fawkesutils fawkesblackboard \
 OBJS_gologpp = plugin.o execution_thread.o gologpp_fawkes_backend.o exog_manager.o \
                action_executor.o skiller_action_executor.o \
                aspect/action_executor_dispatcher.o aspect/action_executor_dispatcher_inifin.o \
-               utils.o message_action_executor.o
+               utils.o message_action_executor.o sleep_action_executor.o
 
 OBJS_all    = $(OBJS_gologpp)
 PLUGINS_all = $(PLUGINDIR)/gologpp.so
