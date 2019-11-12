@@ -35,6 +35,12 @@ class SkillerInterface;
 
 namespace gpp {
 
+class InvalidArgumentException : public fawkes::Exception
+{
+public:
+	InvalidArgumentException(const char *format, ...);
+};
+
 class SkillerActionExecutor : public ActionExecutor, public BlackBoardInterfaceListener
 {
 public:
