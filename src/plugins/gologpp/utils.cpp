@@ -26,25 +26,110 @@
 namespace fawkes {
 namespace gpp {
 
+ValueToFieldVisitor::ValueToFieldVisitor(InterfaceFieldIterator *field) : field(field)
+{
+}
+
+void
+ValueToFieldVisitor::operator()(unsigned int v)
+{
+	switch (field->get_type()) {
+	case IFT_INT32: field->set_int32(v); break;
+	case IFT_INT64: field->set_int64(v); break;
+	case IFT_UINT16: field->set_uint16(v); break;
+	case IFT_UINT32: field->set_uint32(v); break;
+	case IFT_UINT64: field->set_uint64(v); break;
+	default: throw Exception("Invalid cast from unsigned int to %s", field->get_typename());
+	}
+}
+
+void
+ValueToFieldVisitor::operator()(int v)
+{
+	switch (field->get_type()) {
+	case IFT_INT32: field->set_int32(v); break;
+	case IFT_INT64: field->set_int64(v); break;
+	default: throw Exception("Invalid cast from int to %s", field->get_typename());
+	}
+}
+
+void
+ValueToFieldVisitor::operator()(unsigned long v)
+{
+	switch (field->get_type()) {
+	case IFT_INT64: field->set_int64(v); break;
+	case IFT_UINT32: field->set_uint32(v); break;
+	case IFT_UINT64: field->set_uint64(v); break;
+	default: throw Exception("Invalid cast from unsigned long to %s", field->get_typename());
+	}
+}
+
+void
+ValueToFieldVisitor::operator()(long v)
+{
+	switch (field->get_type()) {
+	case IFT_UINT32: field->set_uint32(v); break;
+	case IFT_INT64: field->set_int64(v); break;
+	default: throw Exception("Invalid cast from long to %s", field->get_typename());
+	}
+}
+
+void
+ValueToFieldVisitor::operator()(double v)
+{
+	switch (field->get_type()) {
+	case IFT_DOUBLE: field->set_double(v); break;
+	default: throw Exception("Invalid cast from double to %s", field->get_typename());
+	}
+}
+
+void
+ValueToFieldVisitor::operator()(std::string v)
+{
+	switch (field->get_type()) {
+	case IFT_STRING: field->set_string(v.c_str());
+	default: throw Exception("Invalid cast from string to %s", field->get_typename());
+	}
+}
+
+void
+ValueToFieldVisitor::operator()(bool v)
+{
+	switch (field->get_type()) {
+	case IFT_BOOL: field->set_bool(v);
+	default: throw Exception("Invalid cast from bool to %s", field->get_typename());
+	}
+}
+
+void
+ValueToFieldVisitor::operator()(void *v)
+{
+	switch (field->get_type()) {
+	default: throw Exception("Invalid cast from void* to %s", field->get_typename());
+	}
+}
+
+void
+ValueToFieldVisitor::operator()(gologpp::CompoundType::Representation v)
+{
+	switch (field->get_type()) {
+	default: throw Exception("Invalid cast from compound to %s", field->get_typename());
+	}
+}
+
+void
+ValueToFieldVisitor::operator()(gologpp::ListType::Representation v)
+{
+	switch (field->get_type()) {
+	default: throw Exception("Invalid cast from list to %s", field->get_typename());
+	}
+}
+
 void
 value_to_field(const gologpp::Value &value, InterfaceFieldIterator *field)
 {
-	switch (field->get_type()) {
-	case IFT_BOOL: field->set_bool((bool)value); break;
-	case IFT_INT8: field->set_int8((int)value); break;
-	case IFT_UINT8: field->set_uint8((uint)value); break;
-	case IFT_INT16: field->set_int16((int)value); break;
-	case IFT_UINT16: field->set_uint16((uint)value); break;
-	case IFT_INT32: field->set_int32((int)value); break;
-	case IFT_UINT32: field->set_uint32((uint)value); break;
-	case IFT_INT64: field->set_int64((long)value); break;
-	case IFT_UINT64: field->set_uint64((unsigned long)value); break;
-	case IFT_FLOAT: field->set_float((double)value); break;
-	case IFT_DOUBLE: field->set_float((double)value); break;
-	case IFT_STRING: field->set_string(static_cast<std::string>(value).c_str()); break;
-	case IFT_ENUM: field->set_enum_string(static_cast<std::string>(value).c_str()); break;
-	case IFT_BYTE: throw NotImplementedException("Cannot convert Golog++ value into byte"); break;
-	}
+	ValueToFieldVisitor visitor(field);
+	boost::apply_visitor(visitor, value.representation());
 }
 
 } // namespace gpp

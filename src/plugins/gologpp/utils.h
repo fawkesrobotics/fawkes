@@ -20,6 +20,10 @@
 
 #pragma once
 
+#include <golog++/model/value.h>
+
+#include <boost/variant/variant.hpp>
+
 namespace gologpp {
 class Value;
 }
@@ -28,6 +32,25 @@ namespace fawkes {
 class InterfaceFieldIterator;
 
 namespace gpp {
+
+class ValueToFieldVisitor : public boost::static_visitor<>
+{
+public:
+	ValueToFieldVisitor(InterfaceFieldIterator *field);
+	void operator()(unsigned int v);
+	void operator()(int v);
+	void operator()(unsigned long v);
+	void operator()(long v);
+	void operator()(double v);
+	void operator()(std::string v);
+	void operator()(bool v);
+	void operator()(gologpp::CompoundType::Representation v);
+	void operator()(gologpp::ListType::Representation v);
+	void operator()(void *v);
+
+private:
+	InterfaceFieldIterator *field;
+};
 
 void value_to_field(const gologpp::Value &value, InterfaceFieldIterator *field);
 
