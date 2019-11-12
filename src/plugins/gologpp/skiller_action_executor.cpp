@@ -31,6 +31,13 @@ namespace gpp {
 
 using gologpp::Transition;
 
+/** @class InvalidArgumentException
+ * An exception that is thrown if the given arguments do not match the skill's arguments.
+ */
+
+/** Constructor.
+ * @param format A format string for the format message
+ */
 InvalidArgumentException::InvalidArgumentException(const char *format, ...) : Exception()
 {
 	va_list args;
