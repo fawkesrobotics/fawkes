@@ -26,10 +26,23 @@
 namespace fawkes {
 namespace gpp {
 
+/** @class ValueToFieldVisitor
+ * A visitor that converts a gologpp::Value to an interface field value.
+ * The visitor checks the types of the input gologpp::Value and the ouput
+ * InterfaceFieldIterator. If they match, the field is set. Otherwise, an
+ * exception is thrown.
+ */
+
+/** Constructor.
+ * @param field The field to set.
+ */
 ValueToFieldVisitor::ValueToFieldVisitor(InterfaceFieldIterator *field) : field(field)
 {
 }
 
+/** Convert the given value and set the field accordingly.
+ * @param v The value to set the field to.
+ */
 void
 ValueToFieldVisitor::operator()(unsigned int v)
 {
@@ -43,6 +56,9 @@ ValueToFieldVisitor::operator()(unsigned int v)
 	}
 }
 
+/** Convert the given value and set the field accordingly.
+ * @param v The value to set the field to.
+ */
 void
 ValueToFieldVisitor::operator()(int v)
 {
@@ -53,6 +69,9 @@ ValueToFieldVisitor::operator()(int v)
 	}
 }
 
+/** Convert the given value and set the field accordingly.
+ * @param v The value to set the field to.
+ */
 void
 ValueToFieldVisitor::operator()(unsigned long v)
 {
@@ -64,6 +83,9 @@ ValueToFieldVisitor::operator()(unsigned long v)
 	}
 }
 
+/** Convert the given value and set the field accordingly.
+ * @param v The value to set the field to.
+ */
 void
 ValueToFieldVisitor::operator()(long v)
 {
@@ -74,6 +96,9 @@ ValueToFieldVisitor::operator()(long v)
 	}
 }
 
+/** Convert the given value and set the field accordingly.
+ * @param v The value to set the field to.
+ */
 void
 ValueToFieldVisitor::operator()(double v)
 {
@@ -83,19 +108,23 @@ ValueToFieldVisitor::operator()(double v)
 	}
 }
 
+/** Convert the given value and set the field accordingly.
+ * @param v The value to set the field to.
+ */
 void
 ValueToFieldVisitor::operator()(std::string v)
 {
 	switch (field->get_type()) {
-	case IFT_STRING:
-		field->set_string(v.c_str());
-		break;
+	case IFT_STRING: field->set_string(v.c_str()); break;
 	// TODO: check that the given string is a valid enum
 	case IFT_ENUM: field->set_enum_string(v.c_str()); break;
 	default: throw Exception("Invalid cast from string to %s", field->get_typename());
 	}
 }
 
+/** Convert the given value and set the field accordingly.
+ * @param v The value to set the field to.
+ */
 void
 ValueToFieldVisitor::operator()(bool v)
 {
@@ -105,6 +134,9 @@ ValueToFieldVisitor::operator()(bool v)
 	}
 }
 
+/** Golog++ does not support void* types. Thus, this always throws.
+ * @param v The value to set the field to.
+ */
 void
 ValueToFieldVisitor::operator()(void *v)
 {
@@ -113,6 +145,9 @@ ValueToFieldVisitor::operator()(void *v)
 	}
 }
 
+/** Not implemented yet.
+ * @param v The value to set the field to.
+ */
 void
 ValueToFieldVisitor::operator()(gologpp::CompoundType::Representation v)
 {
@@ -121,6 +156,9 @@ ValueToFieldVisitor::operator()(gologpp::CompoundType::Representation v)
 	}
 }
 
+/** Not implemented yet.
+ * @param v The value to set the field to.
+ */
 void
 ValueToFieldVisitor::operator()(gologpp::ListType::Representation v)
 {
