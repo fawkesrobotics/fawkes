@@ -104,6 +104,7 @@ void
 ValueToFieldVisitor::operator()(double v)
 {
 	switch (field->get_type()) {
+	case IFT_FLOAT: field->set_float(v, index); break;
 	case IFT_DOUBLE: field->set_double(v, index); break;
 	default: throw Exception("Invalid cast from double to %s", field->get_typename());
 	}
