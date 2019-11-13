@@ -35,6 +35,7 @@ namespace gpp {
 
 /** Constructor.
  * @param field The field to set.
+ * @param index The index to set if field is an array.
  */
 ValueToFieldVisitor::ValueToFieldVisitor(InterfaceFieldIterator *field, unsigned int index)
 : field(field), index(index)
