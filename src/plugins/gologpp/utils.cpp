@@ -170,6 +170,9 @@ ValueToFieldVisitor::operator()(gologpp::CompoundType::Representation v)
 void
 ValueToFieldVisitor::operator()(gologpp::ListType::Representation v)
 {
+	if (index != 0) {
+		throw Exception("Invalid cast, cannot convert a list with an offset or nested lists");
+	}
 	for (size_t i = 0; i < v.size(); i++) {
 		ValueToFieldVisitor visitor(field, i);
 		boost::apply_visitor(visitor, v[i]->representation());
