@@ -24,20 +24,19 @@
 #include "pddl-planner_thread.h"
 
 #include <utils/misc/string_conversions.h>
+#include <utils/misc/string_split.h>
 
 #include <bsoncxx/builder/basic/document.hpp>
 #include <bsoncxx/json.hpp>
-#include <fstream>
+#include <cstdlib>
+#include <ctime>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <utils/misc/string_conversions.h>
-#include <utils/misc/string_split.h>
 #include <unistd.h>
-#include <ctime>
-#include <cstdlib>
 
 using namespace fawkes;
 using namespace mongocxx;
@@ -66,9 +65,9 @@ PddlPlannerThread::init()
 	cfg_result_path_  = cfg_descripton_path_ + config->get_string((cfg_prefix + "result-file"));
 	cfg_domain_path_  = cfg_descripton_path_ + config->get_string(cfg_prefix + "domain-description");
 	cfg_problem_path_ = cfg_descripton_path_ + config->get_string(cfg_prefix + "problem-description");
-	cfg_fd_options_ = config->get_string(cfg_prefix + "fd-search-opts");
+	cfg_fd_options_   = config->get_string(cfg_prefix + "fd-search-opts");
 	cfg_kstar_options_ = config->get_string(cfg_prefix + "kstar-search-opts");
-  cfg_collection_ = config->get_string(cfg_prefix + "collection");
+	cfg_collection_    = config->get_string(cfg_prefix + "collection");
 
 	//set configured planner
 	std::string planner_string = config->get_string((cfg_prefix + "planner").c_str());
@@ -81,10 +80,10 @@ PddlPlannerThread::init()
 	} else if (planner_string == "dbmp") {
 		planner_ = std::bind(&PddlPlannerThread::dbmp_planner, this);
 		logger->log_info(name(), "DBMP selected.");
-	} else if ( planner_string == "kstar" ) {
-    planner_ = std::bind(&PddlPlannerThread::kstar_planner, this);
-    logger->log_info(name(), "KStar selected.");
-  }	else {
+	} else if (planner_string == "kstar") {
+		planner_ = std::bind(&PddlPlannerThread::kstar_planner, this);
+		logger->log_info(name(), "KStar selected.");
+	} else {
 		planner_ = std::bind(&PddlPlannerThread::ff_planner, this);
 		logger->log_warn(name(), "No planner configured.\nDefaulting to ff.");
 	}
@@ -113,60 +112,61 @@ PddlPlannerThread::init()
 void
 PddlPlannerThread::loop()
 {
-  logger->log_info(name(), "Starting PDDL Planning...");
+	logger->log_info(name(), "Starting PDDL Planning...");
 
-  //writes plan into action_list_ or plan_list_ if it is a diagnose
+	//writes plan into action_list_ or plan_list_ if it is a diagnose
 
-  // Check if domain and problem file exist
-  if (FILE *file = fopen(cfg_domain_path_.c_str(),"r")) {
-    fclose(file);
-  }
-  else {
-    logger->log_error(name(),"Can not find %s",cfg_domain_path_.c_str());
-    return;
-  }
+	// Check if domain and problem file exist
+	if (FILE *file = fopen(cfg_domain_path_.c_str(), "r")) {
+		fclose(file);
+	} else {
+		logger->log_error(name(), "Can not find %s", cfg_domain_path_.c_str());
+		return;
+	}
 
-  if (FILE *file = fopen(cfg_problem_path_.c_str(),"r")) {
-    fclose(file);
-  } else {
-    logger->log_error(name(),"Can not find %s",cfg_problem_path_.c_str());
-    return;
-  }
+	if (FILE *file = fopen(cfg_problem_path_.c_str(), "r")) {
+		fclose(file);
+	} else {
+		logger->log_error(name(), "Can not find %s", cfg_problem_path_.c_str());
+		return;
+	}
 
-  planner_();
+	planner_();
 
-  // Generated a diagnose
-  // Have to add multiple plans (possible diagnosises) to robot memory
-  if ( !plan_list_.empty() ) {
-    int id = 0;
-    for(std::vector<Action> plan : plan_list_) {
-      std::string matching = std::string(" { \"plan\" : " + std::to_string(id) + " } ");
-      auto bson_plan = BSONFromActionList(plan,id++);
-	  bsoncxx::document::view_or_value filter_doc = from_json(matching);
-      if(robot_memory->update(from_json(matching), bson_plan, cfg_collection_,true) == 0 ){
-        logger->log_error(name(),"Failed to update plan");
-      }
-    }
-    plan_if_->set_success(true);
-  } else {
-    // Standard plan
-    if ( !action_list_.empty() ) {
-  		auto plan = BSONFromActionList(action_list_,0);
-  		robot_memory->update(from_json("{plan:{$exists:true}}").view(), plan, cfg_collection_, true);
-  		print_action_list();
-  		plan_if_->set_success(true);
-  	} else {
-  		logger->log_error(name(), "Updating plan failed, action list empty!");
-  		robot_memory->update(from_json("{\"plan\":{$exists:true}}"),
-		                     from_json("{\"plan\":0}"),
-		                     cfg_collection_,
-		                     true);
-  		plan_if_->set_success(false);
-    }
-  }
+	// Generated a diagnose
+	// Have to add multiple plans (possible diagnosises) to robot memory
+	if (!plan_list_.empty()) {
+		int id = 0;
+		for (std::vector<Action> plan : plan_list_) {
+			std::string matching  = std::string(" { \"plan\" : " + std::to_string(id) + " } ");
+			auto        bson_plan = BSONFromActionList(plan, id++);
+			bsoncxx::document::view_or_value filter_doc = from_json(matching);
+			if (robot_memory->update(from_json(matching), bson_plan, cfg_collection_, true) == 0) {
+				logger->log_error(name(), "Failed to update plan");
+			}
+		}
+		plan_list_.clear();
+		plan_if_->set_success(true);
+	} else {
+		// Standard plan
+		if (!action_list_.empty()) {
+			auto plan = BSONFromActionList(action_list_, 0);
+			robot_memory->update(from_json("{plan:{$exists:true}}").view(), plan, cfg_collection_, true);
+			print_action_list();
+			plan_if_->set_success(true);
+			action_list_.clear();
+		} else {
+			logger->log_error(name(), "Updating plan failed, action list empty!");
+			robot_memory->update(from_json("{\"plan\":{$exists:true}}"),
+			                     from_json("{\"plan\":0}"),
+			                     cfg_collection_,
+			                     true);
+			plan_if_->set_success(false);
+		}
+	}
 
-  plan_if_->set_final(true);
-  plan_if_->write();
+	plan_if_->set_final(true);
+	plan_if_->write();
 }
 
 void
@@ -286,96 +286,84 @@ PddlPlannerThread::dbmp_planner()
 void
 PddlPlannerThread::kstar_planner()
 {
-  logger->log_info(name(), "Starting PDDL Planning with Fast-Downward: KStar...");
+	logger->log_info(name(), "Starting PDDL Planning with Fast-Downward: KStar...");
 
-	std::string command = "fast-downward.py"
-		+ std::string(" ") + cfg_domain_path_
-		+ std::string(" ") + cfg_problem_path_;
+	std::string command =
+	  "fast-downward.py" + std::string(" ") + cfg_domain_path_ + std::string(" ") + cfg_problem_path_;
 
-	if ( !cfg_fd_options_.empty() ) {
+	if (!cfg_fd_options_.empty()) {
 		command += std::string(" ") + cfg_kstar_options_;
 	}
+	fs::remove_all("found_plans");
 
 	std::string result = run_planner(command);
 
-  logger->log_info(name(),"Removing temporary planner output.");
-  fs::remove_all("found_plans");
+	size_t end_pos = result.find("Number of plans found: ");
 
-  size_t cur_pos = 0;
-  if ( result.find("Plan id:", cur_pos) == std::string::npos) {
-    logger->log_error(name(), "Planning Failed: %s", result.c_str());
-    throw Exception("No solution found");
-  } else {
-    cur_pos = result.find("Plan id:", cur_pos);
-  }
+	if (end_pos == std::string::npos) {
+		logger->log_error(
+		  name(),
+		  "Expected \"Number of plans found: \" at the end of planner output but did not found");
+		throw Exception("Unexpected planner output");
+	}
+	int    plan_count = 0;
+	size_t new_line   = result.find("\n", end_pos);
+	plan_count        = std::stoi(result.substr(end_pos + 22, new_line - (end_pos + 22)));
+	if (plan_count == 0) {
+		throw Exception("Could not find solutions");
+	}
 
-  result.erase(0,cur_pos);
-  size_t end_pos = result.find("Number of plans found: ");
+	result.erase(end_pos, result.size() - 1);
 
-  if (end_pos == std::string::npos) {
-    logger->log_error(name(),"Expected \"Number of plans found: \" at the end of planner output but did not found");
-    throw Exception("Unexpected planner output");
-  }
-  int plan_count = 0;
-  size_t new_line = result.find("\n",end_pos);
-  plan_count = std::stoi(result.substr(end_pos + 22, new_line - (end_pos + 22)));
-  if (plan_count == 0) {
-	  throw Exception("Could not find solutions");
-  }
+	std::string found_plans_path = "found_plans";
 
-  result.erase(end_pos, result.size()-1);
-
-  std::string found_plans_path = "found_plans";
-
-  std::vector<Action> curr_plan;
-  for (const auto & entry : fs::directory_iterator(found_plans_path)) {
-	  std::ifstream plan_file (entry.path().string());
-	  if(plan_file.is_open()) {
-		std::string line;
-		while (getline(plan_file,line)){
-			if (line.at(0) == ';') {
-				size_t cost_pos = line.find("cost = ");
-				if (cost_pos != std::string::npos) {
-					std::vector<std::string> line_splitted = str_split(line," ");
-					for (size_t i = 0; i < line_splitted.size() - 1; ++i) {
-						if (line_splitted[i] == "="){
-							curr_plan[curr_plan.size() - 1].cost = std::stof(line_splitted[i+1]);
-							break;
+	std::vector<Action> curr_plan;
+	for (const auto &entry : fs::directory_iterator(found_plans_path)) {
+		std::ifstream plan_file(entry.path().string());
+		if (plan_file.is_open()) {
+			std::string line;
+			while (getline(plan_file, line)) {
+				if (line.at(0) == ';') {
+					size_t cost_pos = line.find("cost = ");
+					if (cost_pos != std::string::npos) {
+						std::vector<std::string> line_splitted = str_split(line, " ");
+						for (size_t i = 0; i < line_splitted.size() - 1; ++i) {
+							if (line_splitted[i] == "=") {
+								curr_plan[curr_plan.size() - 1].cost = std::stof(line_splitted[i + 1]);
+								break;
+							}
 						}
 					}
-				}
-			} else {
-				Action a;
-				line = line.substr(1,line.size() - 2);
-				std::vector<std::string> line_splitted = str_split(line," ");
-				a.name = line_splitted[0];
+				} else {
+					Action a;
+					line                                   = line.substr(1, line.size() - 2);
+					std::vector<std::string> line_splitted = str_split(line, " ");
+					a.name                                 = line_splitted[0];
+					if (a.name.find("order_") != std::string::npos)
+						continue;
 
-				for (size_t i = 1; i < line_splitted.size(); ++i) {
-					a.args.push_back(line_splitted[i]);
+					for (size_t i = 1; i < line_splitted.size(); ++i) {
+						a.args.push_back(line_splitted[i]);
+					}
+					curr_plan.push_back(a);
 				}
-				curr_plan.push_back(a);
 			}
+		} else {
+			logger->log_error(name(), "Cant find %s", entry.path().string().c_str());
+			continue;
 		}
-	  } else {
-		  logger->log_error(name(),"Cant find %s",entry.path().string().c_str());
-		  continue;
-	  }
-	  plan_list_.push_back(curr_plan);
-	  curr_plan.clear();
-  }
-
-
+		plan_list_.push_back(curr_plan);
+		curr_plan.clear();
+	}
 }
-
 
 void
 PddlPlannerThread::fd_planner()
 {
 	logger->log_info(name(), "Starting PDDL Planning with Fast-Downward...");
 
-	std::string command = "fast-downward.py"
-		+ std::string(" ") + cfg_domain_path_
-		+ std::string(" ") + cfg_problem_path_;
+	std::string command =
+	  "fast-downward.py" + std::string(" ") + cfg_domain_path_ + std::string(" ") + cfg_problem_path_;
 
 	if (!cfg_fd_options_.empty()) {
 		command += std::string(" ") + cfg_fd_options_;
@@ -421,16 +409,16 @@ PddlPlannerThread::fd_planner()
 }
 
 document::value
-PddlPlannerThread::BSONFromActionList(const std::vector<action>& action_list, int plan_id)
+PddlPlannerThread::BSONFromActionList(const std::vector<Action> &action_list, int plan_id)
 {
-  using namespace bsoncxx::builder;
-  basic::document plan;
-  float cost = 0;
-  plan.append(basic::kvp("plan",static_cast<int64_t>(plan_id)));
-  plan.append(basic::kvp("msg_id", static_cast<int64_t>(plan_if_->msg_id())));
-  plan.append(basic::kvp("actions", [&](basic::sub_array actions) {
+	using namespace bsoncxx::builder;
+	basic::document plan;
+	float           cost = 0;
+	plan.append(basic::kvp("plan", static_cast<int64_t>(plan_id)));
+	plan.append(basic::kvp("msg_id", static_cast<int64_t>(plan_if_->msg_id())));
+	plan.append(basic::kvp("actions", [&](basic::sub_array actions) {
 		for (Action a : action_list) {
-		  cost += a.cost;
+			cost += a.cost;
 			basic::document action;
 			action.append(basic::kvp("name", a.name));
 			action.append(basic::kvp("args", [a](basic::sub_array args) {
@@ -441,8 +429,8 @@ PddlPlannerThread::BSONFromActionList(const std::vector<action>& action_list, in
 			actions.append(action);
 		}
 	}));
-  plan.append(basic::kvp("cost",cost));
-  return plan.extract();
+	plan.append(basic::kvp("cost", cost));
+	return plan.extract();
 }
 
 /**
@@ -469,15 +457,15 @@ PddlPlannerThread::find_nth_space(const std::string &s, size_t nth)
 void
 PddlPlannerThread::print_action_list()
 {
-  unsigned int count = 0;
-  for ( Action a : action_list_ ) {
-    count++;
-    std::string args;
-    for ( std::string arg : a.args ) {
-      args += arg + " ";
-    }
-    logger->log_info(name(),"Action %d %s with args %s", count, a.name.c_str(), args.c_str());
-  }
+	unsigned int count = 0;
+	for (Action a : action_list_) {
+		count++;
+		std::string args;
+		for (std::string arg : a.args) {
+			args += arg + " ";
+		}
+		logger->log_info(name(), "Action %d %s with args %s", count, a.name.c_str(), args.c_str());
+	}
 }
 
 std::string

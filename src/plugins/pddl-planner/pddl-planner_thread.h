@@ -57,24 +57,25 @@ protected:
 		Thread::run();
 	}
 
- private:
-  struct Action {
-    std::string name;
-    float cost = 0;
-    std::vector<std::string> args;
-  };
+private:
+	struct Action
+	{
+		std::string              name;
+		float                    cost = 0;
+		std::vector<std::string> args;
+	};
 
-  fawkes::PddlPlannerInterface *plan_if_;
-	std::string cfg_descripton_path_;
-	std::string cfg_result_path_;
-	std::string cfg_domain_path_;
-	std::string cfg_problem_path_;
-	std::string cfg_fd_options_;
-  std::string cfg_kstar_options_;
-  std::string cfg_collection_;
+	fawkes::PddlPlannerInterface *plan_if_;
+	std::string                   cfg_descripton_path_;
+	std::string                   cfg_result_path_;
+	std::string                   cfg_domain_path_;
+	std::string                   cfg_problem_path_;
+	std::string                   cfg_fd_options_;
+	std::string                   cfg_kstar_options_;
+	std::string                   cfg_collection_;
 
-  std::vector<Action> action_list_;
-  std::vector<std::vector<Action>> plan_list_;
+	std::vector<Action>              action_list_;
+	std::vector<std::vector<Action>> plan_list_;
 
 	std::function<void()> planner_;
 
@@ -82,13 +83,12 @@ protected:
 	void                     fd_planner();
 	void                     kstar_planner();
 	void                     dbmp_planner();
-	bsoncxx::document::value BSONFromActionList(const std::vector<Action>& action_list, int plan_id);
+	bsoncxx::document::value BSONFromActionList(const std::vector<Action> &action_list, int plan_id);
 	static size_t            find_nth_space(const std::string &s, size_t nth);
 	void                     print_action_list();
 	std::string              run_planner(std::string command);
 	virtual bool             bb_interface_message_received(fawkes::Interface *interface,
 	                                                       fawkes::Message *  message) throw();
-
 };
 
 #endif
