@@ -31,6 +31,22 @@ using namespace gologpp;
 namespace fawkes {
 namespace gpp {
 
+const std::unordered_map<interface_fieldtype_t, std::string> ExogManager::iface_type_to_golog_type_{
+  {IFT_BOOL, BoolType::name()},
+  {IFT_BYTE, NumberType::name()},
+  {IFT_ENUM, SymbolType::name()},
+  {IFT_INT8, NumberType::name()},
+  {IFT_FLOAT, NumberType::name()},
+  {IFT_INT16, NumberType::name()},
+  {IFT_INT32, NumberType::name()},
+  {IFT_INT64, NumberType::name()},
+  {IFT_UINT8, NumberType::name()},
+  {IFT_DOUBLE, NumberType::name()},
+  {IFT_STRING, StringType::name()},
+  {IFT_UINT16, NumberType::name()},
+  {IFT_UINT32, NumberType::name()},
+  {IFT_UINT64, NumberType::name()}};
+
 /** @class ExogManager
  * Watch/observe blackboard interfaces according to the mappings
  * specified for exogenous actions in the agent program. The config
@@ -134,7 +150,36 @@ ExogManager::BlackboardEventHandler::BlackboardEventHandler(
 		 */
 
 		auto &var_ref = dynamic_cast<Reference<Variable> &>(*pair.second);
-		auto  param_it =
+
+		// Make sure argument types match interface
+		string     iface_type = extract_type_name(target_exog_->mapping().backend_name());
+		Interface *iface =
+		  blackboard_->open_for_reading(iface_type.c_str(), "/gologpp_interface_analysis");
+		InterfaceFieldIterator fi;
+		for (fi = iface->fields(); fi != iface->fields_end(); ++fi) {
+			if (pair.first == fi.get_name())
+				break;
+		}
+		if (fi == iface->fields_end())
+			throw ConfigError("Interface type " + iface_type + " does not have a field `" + pair.first
+			                  + "'");
+		else {
+			auto it = iface_type_to_golog_type_.find(fi.get_type());
+			if (it == iface_type_to_golog_type_.end())
+				throw Exception("Unhandled interface field type %s", fi.get_typename());
+
+			string desired_type = it->second;
+			if (desired_type != StringType::name() && fi.get_length() > 1)
+				desired_type = static_cast<string>(ListType(desired_type));
+
+			if (var_ref.type() != desired_type)
+				throw ConfigError(target_exog_->name() + "'s argument " + var_ref.target()->name()
+				                  + " is a " + var_ref.type_name() + ", but the interface field requires "
+				                  + desired_type);
+		}
+		blackboard_->close(iface);
+
+		auto param_it =
 		  std::find(target_exog_->params().begin(), target_exog_->params().end(), var_ref.target());
 		auto param_idx = param_it - target_exog_->params().begin();
 		fields_order_.emplace(pair.first, arity_t(param_idx));
