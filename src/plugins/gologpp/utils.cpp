@@ -35,8 +35,10 @@ namespace gpp {
 
 /** Constructor.
  * @param field The field to set.
+ * @param index The index to set if field is an array.
  */
-ValueToFieldVisitor::ValueToFieldVisitor(InterfaceFieldIterator *field) : field(field)
+ValueToFieldVisitor::ValueToFieldVisitor(InterfaceFieldIterator *field, unsigned int index)
+: field(field), index(index)
 {
 }
 
@@ -47,11 +49,11 @@ void
 ValueToFieldVisitor::operator()(unsigned int v)
 {
 	switch (field->get_type()) {
-	case IFT_INT32: field->set_int32(v); break;
-	case IFT_INT64: field->set_int64(v); break;
-	case IFT_UINT16: field->set_uint16(v); break;
-	case IFT_UINT32: field->set_uint32(v); break;
-	case IFT_UINT64: field->set_uint64(v); break;
+	case IFT_INT32: field->set_int32(v, index); break;
+	case IFT_INT64: field->set_int64(v, index); break;
+	case IFT_UINT16: field->set_uint16(v, index); break;
+	case IFT_UINT32: field->set_uint32(v, index); break;
+	case IFT_UINT64: field->set_uint64(v, index); break;
 	default: throw Exception("Invalid cast from unsigned int to %s", field->get_typename());
 	}
 }
@@ -63,8 +65,8 @@ void
 ValueToFieldVisitor::operator()(int v)
 {
 	switch (field->get_type()) {
-	case IFT_INT32: field->set_int32(v); break;
-	case IFT_INT64: field->set_int64(v); break;
+	case IFT_INT32: field->set_int32(v, index); break;
+	case IFT_INT64: field->set_int64(v, index); break;
 	default: throw Exception("Invalid cast from int to %s", field->get_typename());
 	}
 }
@@ -76,9 +78,9 @@ void
 ValueToFieldVisitor::operator()(unsigned long v)
 {
 	switch (field->get_type()) {
-	case IFT_INT64: field->set_int64(v); break;
-	case IFT_UINT32: field->set_uint32(v); break;
-	case IFT_UINT64: field->set_uint64(v); break;
+	case IFT_INT64: field->set_int64(v, index); break;
+	case IFT_UINT32: field->set_uint32(v, index); break;
+	case IFT_UINT64: field->set_uint64(v, index); break;
 	default: throw Exception("Invalid cast from unsigned long to %s", field->get_typename());
 	}
 }
@@ -90,8 +92,8 @@ void
 ValueToFieldVisitor::operator()(long v)
 {
 	switch (field->get_type()) {
-	case IFT_UINT32: field->set_uint32(v); break;
-	case IFT_INT64: field->set_int64(v); break;
+	case IFT_UINT32: field->set_uint32(v, index); break;
+	case IFT_INT64: field->set_int64(v, index); break;
 	default: throw Exception("Invalid cast from long to %s", field->get_typename());
 	}
 }
@@ -103,7 +105,8 @@ void
 ValueToFieldVisitor::operator()(double v)
 {
 	switch (field->get_type()) {
-	case IFT_DOUBLE: field->set_double(v); break;
+	case IFT_FLOAT: field->set_float(v, index); break;
+	case IFT_DOUBLE: field->set_double(v, index); break;
 	default: throw Exception("Invalid cast from double to %s", field->get_typename());
 	}
 }
@@ -115,7 +118,12 @@ void
 ValueToFieldVisitor::operator()(std::string v)
 {
 	switch (field->get_type()) {
-	case IFT_STRING: field->set_string(v.c_str()); break;
+	case IFT_STRING:
+		if (index != 0) {
+			throw Exception("Invalid cast, string arrays are not supported");
+		}
+		field->set_string(v.c_str());
+		break;
 	// TODO: check that the given string is a valid enum
 	case IFT_ENUM: field->set_enum_string(v.c_str()); break;
 	default: throw Exception("Invalid cast from string to %s", field->get_typename());
@@ -129,7 +137,7 @@ void
 ValueToFieldVisitor::operator()(bool v)
 {
 	switch (field->get_type()) {
-	case IFT_BOOL: field->set_bool(v);
+	case IFT_BOOL: field->set_bool(v, index);
 	default: throw Exception("Invalid cast from bool to %s", field->get_typename());
 	}
 }
@@ -156,14 +164,18 @@ ValueToFieldVisitor::operator()(gologpp::CompoundType::Representation v)
 	}
 }
 
-/** Not implemented yet.
+/** Convert the given list by calling a visitor recursively for each item of the list.
  * @param v The value to set the field to.
  */
 void
 ValueToFieldVisitor::operator()(gologpp::ListType::Representation v)
 {
-	switch (field->get_type()) {
-	default: throw Exception("Invalid cast from list to %s", field->get_typename());
+	if (index != 0) {
+		throw Exception("Invalid cast, cannot convert a list with an offset or nested lists");
+	}
+	for (size_t i = 0; i < v.size(); i++) {
+		ValueToFieldVisitor visitor(field, i);
+		boost::apply_visitor(visitor, v[i]->representation());
 	}
 }
 

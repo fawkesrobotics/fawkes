@@ -36,7 +36,7 @@ namespace gpp {
 class ValueToFieldVisitor : public boost::static_visitor<>
 {
 public:
-	ValueToFieldVisitor(InterfaceFieldIterator *field);
+	ValueToFieldVisitor(InterfaceFieldIterator *field, unsigned int index = 0);
 	void operator()(unsigned int v);
 	void operator()(int v);
 	void operator()(unsigned long v);
@@ -50,6 +50,7 @@ public:
 
 private:
 	InterfaceFieldIterator *field;
+	unsigned int            index;
 };
 
 void value_to_field(const gologpp::Value &value, InterfaceFieldIterator *field);

@@ -126,6 +126,8 @@ private:
 	Configuration *                                                           config_;
 	BlackBoard *                                                              blackboard_;
 	Logger *                                                                  logger_;
+
+	static const std::unordered_map<interface_fieldtype_t, std::string> iface_type_to_golog_type_;
 };
 
 } // namespace gpp
