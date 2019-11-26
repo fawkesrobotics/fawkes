@@ -84,6 +84,7 @@ mapping:
 		while (!goal())
 			pick (symbol x in {a, b, c})
 				pick(symbol y in {table, a, b, c}) {
+					msg("Unstacking " + to_string(x));
 					unstack(x);
 					stack(x, y);
         }
