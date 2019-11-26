@@ -53,9 +53,11 @@ PrintActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity> act
 void
 PrintActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
+	activity->update(gologpp::Transition::Hook::START);
 	logger_->log_info("Golog++",
 	                  "%s",
 	                  static_cast<std::string>(activity->mapped_arg_value("message")).c_str());
+	activity->update(gologpp::Transition::Hook::FINISH);
 }
 
 void
