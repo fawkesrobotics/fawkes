@@ -1,3 +1,5 @@
+#include "logger.gpp"
+
 symbol domain blocks = {a, b, c}
 symbol domain locations = blocks | {table, hand}
 
@@ -70,21 +72,14 @@ number function reward() {
 		return -1;
 }
 
-action msg(string msg) {
-mapping:
-  "print" {
-    message = msg
-  }
-}
-
 
 {
 	solve(20, reward()) {
-		msg("hello");
+		log_info("hello");
 		while (!goal())
 			pick (symbol x in {a, b, c})
 				pick(symbol y in {table, a, b, c}) {
-					msg("Unstacking " + to_string(x));
+					log_warn("Unstacking " + to_string(x));
 					unstack(x);
 					stack(x, y);
         }
