@@ -73,7 +73,7 @@ number function reward() {
 action msg(string msg) {
 mapping:
   "print" {
-    message = msg,
+    message = msg
   }
 }
 
