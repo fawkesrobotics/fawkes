@@ -54,9 +54,23 @@ void
 PrintActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
 	activity->update(gologpp::Transition::Hook::START);
-	logger_->log_info("Golog++",
-	                  "%s",
-	                  static_cast<std::string>(activity->mapped_arg_value("message")).c_str());
+	std::map<std::string, Logger::LogLevel> log_levels = {{"debug", Logger::LL_DEBUG},
+	                                                      {"info", Logger::LL_INFO},
+	                                                      {"warn", Logger::LL_WARN},
+	                                                      {"error", Logger::LL_ERROR},
+	                                                      {"none", Logger::LL_NONE}};
+	Logger::LogLevel                        log_level  = Logger::LL_INFO;
+	if (activity->target()->mapping().arg_mapping().count("level") > 0) {
+		std::string level_str = static_cast<std::string>(activity->mapped_arg_value("level"));
+		if (log_levels.count(level_str) > 0) {
+			log_level = log_levels[level_str];
+		}
+	}
+
+	logger_->log(log_level,
+	             "Golog++",
+	             "%s",
+	             static_cast<std::string>(activity->mapped_arg_value("message")).c_str());
 	activity->update(gologpp::Transition::Hook::FINISH);
 }
 
