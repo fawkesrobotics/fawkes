@@ -49,34 +49,9 @@ GologppThread::GologppThread() : Thread("gologpp_agent", Thread::OPMODE_WAITFORW
 void
 GologppThread::init()
 {
-	const std::unordered_map<std::string, std::string> mapping = {{"@BASEDIR@", BASEDIR},
-	                                                              {"@SRCDIR@", SRCDIR}};
-	auto gologpp_cfg_dirs = config->get_strings(cfg_prefix + "/gologpp-dirs");
-	std::vector<std::filesystem::path> gologpp_dirs;
-	for (auto &dir : gologpp_cfg_dirs) {
-		for (auto &entry : mapping) {
-			size_t start_pos = dir.find(entry.first);
-			if (start_pos != std::string::npos) {
-				dir.replace(start_pos, entry.first.length(), entry.second);
-			}
-		}
-		gologpp_dirs.push_back(std::filesystem::path{dir});
-		logger->log_debug(name(), "Golog++ dir: %s", dir.c_str());
-	}
 	std::filesystem::path spec{config->get_string(cfg_prefix + "/spec")};
-	std::filesystem::path prog_file;
-	std::filesystem::path spec_file{spec};
-	spec_file += ".gpp";
-	for (auto &dir : gologpp_dirs) {
-		prog_file = dir / spec / spec_file;
-		if (std::filesystem::exists(prog_file)) {
-			break;
-		}
-	}
-	if (!std::filesystem::exists(prog_file)) {
-		throw Exception("Could not find Golog++ spec dir for '%s'", spec.c_str());
-	}
-	std::string spec_cfg_prefix{cfg_prefix + "/specs/" + spec.string()};
+	auto                  prog_file = find_prog_file(spec);
+	std::string           spec_cfg_prefix{cfg_prefix + "/specs/" + spec.string()};
 	logger->log_debug(name(), "spec config: %s", spec_cfg_prefix.c_str());
 
 	// Clear the global scope because it's a static variable that may already contain
@@ -147,6 +122,35 @@ gologpp::ExecutionContext &
 GologppThread::gologpp_context()
 {
 	return gologpp::ReadylogContext::instance();
+}
+
+std::filesystem::path
+GologppThread::find_prog_file(const std::filesystem::path &spec) const
+{
+	const std::unordered_map<std::string, std::string> mapping = {{"@BASEDIR@", BASEDIR},
+	                                                              {"@SRCDIR@", SRCDIR}};
+	auto gologpp_cfg_dirs = config->get_strings(cfg_prefix + "/gologpp-dirs");
+	std::vector<std::filesystem::path> gologpp_dirs;
+	for (auto &dir : gologpp_cfg_dirs) {
+		for (auto &entry : mapping) {
+			size_t start_pos = dir.find(entry.first);
+			if (start_pos != std::string::npos) {
+				dir.replace(start_pos, entry.first.length(), entry.second);
+			}
+		}
+		gologpp_dirs.push_back(std::filesystem::path{dir});
+		logger->log_debug(name(), "Golog++ dir: %s", dir.c_str());
+	}
+	std::filesystem::path prog_file;
+	std::filesystem::path spec_file{spec};
+	spec_file += ".gpp";
+	for (auto &dir : gologpp_dirs) {
+		prog_file = dir / spec / spec_file;
+		if (std::filesystem::exists(prog_file)) {
+			return prog_file;
+		}
+	}
+	throw Exception("Could not find Golog++ spec dir for '%s'", spec.c_str());
 }
 
 } // namespace gpp

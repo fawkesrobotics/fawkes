@@ -28,6 +28,9 @@
 #include <core/threading/thread.h>
 #include <golog++/model/execution.h>
 
+#include <filesystem>
+#include <string>
+
 namespace fawkes {
 class SkillerInterface;
 }
@@ -55,6 +58,7 @@ public:
 	gologpp::ExecutionContext &gologpp_context();
 
 private:
+	std::filesystem::path                find_prog_file(const std::filesystem::path &spec) const;
 	std::unique_ptr<gologpp::Expression> main_prog_;
 	SkillerInterface *                   skiller_if_;
 	ExogManager *                        exog_mgr_;
