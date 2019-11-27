@@ -65,17 +65,14 @@ GologppFawkesBackend::~GologppFawkesBackend()
 }
 
 /** Preempt the currently running activity.
- *  Tell all executors to stop the given transition. Only the executor that is
- *  currently executing the respective Activity should stop execution, all
- *  other executors should do nothing.
- *  @param t The transition of the activity to be stopped
+ *  Determine the right executor and instruct the executor to stop the activity.
+ *  @param a The activity to stop
  */
 void
-GologppFawkesBackend::preempt_activity(shared_ptr<Transition> t)
+GologppFawkesBackend::preempt_activity(shared_ptr<Activity> a)
 {
-	for (auto &executor : action_dispatcher_.get_executors()) {
-		executor->stop(t);
-	}
+	auto executor = action_dispatcher_.get_executor(a);
+	executor->stop(a);
 }
 
 /** Get the current time from Fawkes.
