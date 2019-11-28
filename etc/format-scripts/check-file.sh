@@ -18,6 +18,10 @@ set -eu
 
 FILE=$1
 
+if [ ! -e $FILE ] ; then
+	exit 0
+fi
+
 if ! cmp -s <(clang-format $FILE) $FILE; then
 	echo $FILE
 fi
