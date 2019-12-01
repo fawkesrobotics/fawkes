@@ -24,6 +24,11 @@ namespace pddl_parser
                 return parse<Grammar::Domain<std::string::const_iterator>, Grammar::pddl_skipper<std::string::const_iterator>, PddlDomain>(input);
             }
 
+            PddlProblem parseProblem(const std::string& input)
+            {
+                return parse<Grammar::Problem<std::string::const_iterator>, Grammar::pddl_skipper<std::string::const_iterator>, PddlProblem>(input);
+            }
+
             template <typename Grammar, typename Skipper, typename Attribute>
             Attribute parse(const std::string& input)
             {

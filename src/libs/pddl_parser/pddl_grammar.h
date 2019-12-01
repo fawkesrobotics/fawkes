@@ -433,6 +433,123 @@ namespace pddl_parser
 
             struct OperatorSymbols_ operatorSymbols;
         };
+
+        template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
+        struct Problem :
+            qi::grammar<Iterator, PddlProblem(), Skipper>//, BaseGrammar<Iterator, Skipper>
+        {
+            //typedef BaseGrammar<Iterator,Skipper> base;
+
+            Problem() :
+                Problem::base_type(pddlProblem, "PDDL Domain")//, BaseGrammar<Iterator,Skipper>()
+            {
+
+                name %= lexeme[char_("a-zA-Z") >> *(char_("a-zA-Z0-9_-"))];
+                name.name("name");
+
+                variable %= lit('?') > name;
+                variable.name("variable");
+
+                type %= name;
+                type.name("type");
+
+                typedListExplicitType = (+(lazy(_r1)[push_back(_a, _1)]))
+                     > lit('-')
+                     > type[bind(&insert_typed_name_entities, _val, _a, _1)];
+                typedListExplicitType.name("typedListExplicitType");
+                char obj[] = "object";
+
+                typedList =
+                    (*(typedListExplicitType(_r1)[insert(_val, end(_val), begin(_1), end(_1))]))
+                    > (*(lazy(_r1)[push_back(_val, construct<struct Entity>(_1, &obj[0]))]))
+                    ;
+                typedList.name("typedList");
+
+                term = name[at_c<0>(_val) = false, at_c<1>(_val) = _1] |
+                    variable[at_c<0>(_val) = true, at_c<1>(_val) = _1];
+                term.name("term");
+
+                atomicFormula = name[at_c<0>(_val) = _1] > (*term)[at_c<1>(_val) = _1];
+                atomicFormula.name("atomicFormula");
+
+                literal = atomicFormula[at_c<0>(_val) = false, at_c<1>(_val) = _1] |
+                    ( lit("not") > lit('(') > atomicFormula[at_c<0>(_val) = true, at_c<1>(_val) = _1] > lit(')'));
+                literal.name("literal");
+
+                goalDescription %= lit('(') >> (functionalCondition[_val = _1]
+                    | atomicFormula[_val = _1]
+                    ) >> qi::eps >> lit(')');
+                goalDescription.name("goalDescription");
+
+                functionalCondition = operatorSymbols >> !(char_("a-zA-Z0-9_")) >> +(goalDescription);
+                functionalCondition.name("functionalCondition");
+
+                goalDef = lit('(') >> lit(":goal") >> goalDescription > lit(')');
+                goalDef.name("goalDef");
+
+                objectsDef %= -(
+                    lit('(')
+                    >> lit(":objects")
+                    > typedList(phoenix::ref(name))
+                    > lit(')')
+                    );
+                objectsDef.name("objectsDef");
+
+                initialFacts = (
+                    lit('(')
+                    >> lit(":init")
+                    > (+(lit('(')
+                        >> atomicFormula 
+                        > lit(')'))
+                    )
+                    > lit(')')
+                    );
+                initialFacts.name("initialFacts");
+
+                pddlProblem =
+                    lit('(')
+                    > lit("define")
+                    > lit('(')
+                    > lit("problem")
+                    > name[at_c<0>(_val) = _1]
+                    > lit(')')
+                    > lit('(')
+                    > lit("(:domain")
+                    > name[at_c<1>(_val) = _1]
+                    > objectsDef[at_c<2>(_val) = _1]
+                    > initialFacts[at_c<3>(_val) = _1]
+                    > goalDef[at_c<4>(_val) = _1]
+                    > lit(')');
+                pddlProblem.name("pddlProblem");
+
+                on_error<fail>
+                (
+                    pddlProblem,
+                    construct<ParserException>(qi::_4, qi::_1, qi::_2, qi::_3)
+                );
+            }
+
+            qi::rule<Iterator, PddlProblem(), Skipper> pddlProblem;
+            qi::rule<Iterator, TypedList(), Skipper> objectsDef;
+            qi::rule<Iterator, PredicateList(), qi::locals<std::string, TypedList>, Skipper> predicatesDef;
+            qi::rule<Iterator, FactList(), Skipper> initialFacts;
+            typedef qi::rule<Iterator, std::string(), Skipper> StringRule;
+            qi::rule<Iterator, FunctionalCondition(), Skipper> functionalCondition;
+            qi::rule<Iterator, GoalDescription(), Skipper> goalDescription;
+            qi::rule<Iterator, GoalDescription(), Skipper> goalDef;
+            qi::rule<Iterator, Literal(), Skipper> literal;
+            qi::rule<Iterator, AtomicFormula(), Skipper> atomicFormula;
+            qi::rule<Iterator, Term(), Skipper> term;
+            qi::rule<Iterator, TypedList(StringRule), Skipper> typedList;
+            qi::rule<Iterator, TypedList(StringRule), qi::locals<std::vector<std::string> >, Skipper> typedListExplicitType;
+            StringRule type;
+            StringRule name;
+            StringRule variable;
+
+            //qi::symbols<char,int> operatorSymbols;
+
+            struct OperatorSymbols_ operatorSymbols;
+        };
     }
 }
 

@@ -58,7 +58,7 @@ namespace pddl_parser
 
     struct Term
     {
-        bool isVariable;
+       bool isVariable;
        std::string name;
     };
 
@@ -69,6 +69,8 @@ namespace pddl_parser
         std::string predicateName;
         TermList args;
     };
+
+    typedef std::vector<AtomicFormula> FactList;
 
     struct Literal
     {
@@ -125,6 +127,15 @@ namespace pddl_parser
         TypedList constants;
         PredicateList predicates;
         ActionList actions;
+    };
+
+    struct PddlProblem
+    {
+        std::string name;
+        std::string domain;
+        TypedList objects;
+        FactList facts;
+        GoalDescription goal;
     };
 }
 
@@ -197,6 +208,15 @@ BOOST_FUSION_ADAPT_STRUCT(
     (pddl_parser::TypedList, constants)
     (pddl_parser::PredicateList, predicates)
     (pddl_parser::ActionList, actions)
+)
+
+BOOST_FUSION_ADAPT_STRUCT(
+    pddl_parser::PddlProblem,
+    (std::string, name)
+    (std::string, domain)
+    (pddl_parser::TypedList, objects)
+    (pddl_parser::FactList, facts)
+    (pddl_parser::GoalDescription, goal)
 )
 
 #endif
