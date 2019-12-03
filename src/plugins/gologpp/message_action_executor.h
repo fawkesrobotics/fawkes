@@ -46,8 +46,6 @@ public:
 	bool can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
 
 private:
-	void                               open_interfaces();
-	void                               close_interfaces();
 	BlackBoard *                       blackboard_;
 	Configuration *                    config_;
 	std::string                        cfg_prefix_;
