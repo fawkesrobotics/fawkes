@@ -132,6 +132,10 @@ SkillerActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity> a
 void
 SkillerActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
+	if (!can_execute_activity(activity)) {
+		throw Exception("Cannot execute activity '%s' with SkillerActionExecutor",
+		                activity->mapped_name().c_str());
+	}
 	try {
 		skiller_if_->msgq_enqueue(
 		  new SkillerInterface::ExecSkillMessage(map_activity_to_skill(activity).c_str()));

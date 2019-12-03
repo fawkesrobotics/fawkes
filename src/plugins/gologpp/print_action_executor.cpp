@@ -53,6 +53,10 @@ PrintActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity> act
 void
 PrintActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
+	if (!can_execute_activity(activity)) {
+		throw Exception("Cannot execute activity '%s' with PrintActionExecutor",
+		                activity->mapped_name().c_str());
+	}
 	activity->update(gologpp::Transition::Hook::START);
 	std::map<std::string, Logger::LogLevel> log_levels = {{"debug", Logger::LL_DEBUG},
 	                                                      {"info", Logger::LL_INFO},
