@@ -94,15 +94,13 @@ ExogManager::ExogManager(GologppThread *    exec_thread,
 	// watched/observed interface (pattern). These also implement the event
 	// handlers.
 	for (const string &id :
-	     config->get_strings_or_defaults((cfg_prefix + "/blackboard/watch").c_str(),
-	                                     std::vector<std::string>{})) {
+	     config->get_strings_or_defaults((cfg_prefix + "/blackboard/watch").c_str(), {})) {
 		shared_ptr<ExogAction> exog = find_mapped_exog(id);
 		watchers_.push_back(std::make_unique<InterfaceWatcher>(blackboard, id, exog, *this));
 	}
 
 	for (const string &pattern :
-	     config->get_strings_or_defaults((cfg_prefix + "/blackboard/observe").c_str(),
-	                                     std::vector<std::string>{})) {
+	     config->get_strings_or_defaults((cfg_prefix + "/blackboard/observe").c_str(), {})) {
 		shared_ptr<ExogAction> exog = find_mapped_exog(pattern);
 		observers_.push_back(std::make_unique<PatternObserver>(blackboard, pattern, exog, *this));
 	}
