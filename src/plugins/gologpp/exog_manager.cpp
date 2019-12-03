@@ -21,6 +21,7 @@
 #include "exog_manager.h"
 
 #include "execution_thread.h"
+#include "utils.h"
 
 #include <core/exception.h>
 #include <libs/interface/field_iterator.h>
@@ -53,8 +54,6 @@ const std::unordered_map<interface_fieldtype_t, std::string> ExogManager::iface_
  * has to specify whether some mapped backend name is supposed to be
  * an interface ID or a pattern.
  */
-
-static Value *field_to_value(InterfaceFieldIterator &fi, unsigned int idx);
 
 /** @class ConfigError
  * Thrown if the config is somehow inconsistent with the agent program.
@@ -169,18 +168,18 @@ ExogManager::BlackboardEventHandler::BlackboardEventHandler(
 		auto it = iface_type_to_golog_type_.find(fi.get_type());
 		if (it == iface_type_to_golog_type_.end()) {
 			throw Exception("Unhandled interface field type %s", fi.get_typename());
-    }
+		}
 
 		string desired_type = it->second;
 		if (desired_type != StringType::name() && fi.get_length() > 1) {
 			desired_type = static_cast<string>(ListType(desired_type));
-    }
+		}
 
 		if (var_ref.type() != desired_type) {
 			throw ConfigError(target_exog_->name() + "'s argument " + var_ref.target()->name() + " is a "
 			                  + var_ref.type_name() + ", but the interface field requires "
 			                  + desired_type);
-    }
+		}
 		blackboard_->close(iface);
 
 		auto param_it =
@@ -298,28 +297,6 @@ ExogManager::PatternObserver::bb_interface_created(const char *type, const char 
 	std::lock_guard<std::mutex> locked{handler_mutex_};
 	exog_manager_.watchers_.push_back(std::make_unique<InterfaceWatcher>(
 	  blackboard_, string(type) + "::" + id, target_exog_, exog_manager_));
-}
-
-static Value *
-field_to_value(InterfaceFieldIterator &fi, unsigned int idx)
-{
-	switch (fi.get_type()) {
-	case IFT_BOOL: return new Value(BoolType::name(), fi.get_bool(idx));
-	case IFT_BYTE: return new Value(NumberType::name(), fi.get_byte(idx));
-	case IFT_ENUM: return new Value(SymbolType::name(), fi.get_enum_string(idx));
-	case IFT_INT8: return new Value(NumberType::name(), fi.get_int8(idx));
-	case IFT_FLOAT: return new Value(NumberType::name(), fi.get_float(idx));
-	case IFT_INT16: return new Value(NumberType::name(), fi.get_int16(idx));
-	case IFT_INT32: return new Value(NumberType::name(), fi.get_int32(idx));
-	case IFT_INT64: return new Value(NumberType::name(), fi.get_int64(idx));
-	case IFT_UINT8: return new Value(NumberType::name(), fi.get_uint8(idx));
-	case IFT_DOUBLE: return new Value(NumberType::name(), fi.get_double(idx));
-	case IFT_STRING: return new Value(StringType::name(), fi.get_string());
-	case IFT_UINT16: return new Value(NumberType::name(), fi.get_uint16(idx));
-	case IFT_UINT32: return new Value(NumberType::name(), fi.get_uint32(idx));
-	case IFT_UINT64: return new Value(NumberType::name(), fi.get_uint64(idx));
-	}
-	throw Exception("Unhandled interface field type");
 }
 
 } // namespace gpp
