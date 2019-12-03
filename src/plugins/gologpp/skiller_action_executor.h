@@ -54,12 +54,14 @@ public:
 	bool         can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
 	virtual void bb_interface_data_changed(Interface *) throw() override;
 
-private:
+protected:
 	const char *       name() const;
+	BlackBoard *       blackboard_;
+
+private:
 	void               initialize_action_skill_mapping();
 	std::string        map_activity_to_skill(std::shared_ptr<gologpp::Activity> activity);
 	ActionSkillMapping action_skill_mapping_;
-	BlackBoard *       blackboard_;
 	SkillerInterface * skiller_if_;
 	Configuration *    config_;
 	const std::string  cfg_prefix_;

@@ -159,6 +159,9 @@ SkillerActionExecutor::stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>>
 	}
 }
 
+/** Get the name of the executor; mainly used for logging.
+ * @return The human-readable name of the executor
+ */
 const char *
 SkillerActionExecutor::name() const
 {
