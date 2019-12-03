@@ -20,7 +20,7 @@ domain:
 precondition:
 	loc(x) == hand
 	& x != y // Can't stack x on x
-  & x != hand
+	& x != hand
 	& x != table // Can't stack table
 	& (
 		y == table // either y is the table...
