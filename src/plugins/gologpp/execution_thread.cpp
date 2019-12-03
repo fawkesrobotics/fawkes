@@ -133,9 +133,10 @@ GologppThread::find_prog_file(const std::filesystem::path &spec) const
 	std::vector<std::filesystem::path> gologpp_dirs;
 	for (auto &dir : gologpp_cfg_dirs) {
 		for (auto &entry : mapping) {
-			size_t start_pos = dir.find(entry.first);
-			if (start_pos != std::string::npos) {
+			size_t start_pos = 0;
+			while ((start_pos = dir.find(entry.first, start_pos)) != std::string::npos) {
 				dir.replace(start_pos, entry.first.length(), entry.second);
+				start_pos += entry.second.length();
 			}
 		}
 		gologpp_dirs.push_back(std::filesystem::path{dir});
