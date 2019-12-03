@@ -55,8 +55,9 @@ public:
 	virtual void bb_interface_data_changed(Interface *) throw() override;
 
 protected:
-	const char *       name() const;
-	BlackBoard *       blackboard_;
+	const char *name() const;
+	BlackBoard *blackboard_;
+	bool        blackboard_owner_;
 
 private:
 	void               initialize_action_skill_mapping();

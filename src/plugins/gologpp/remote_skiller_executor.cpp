@@ -56,12 +56,11 @@ RemoteSkillerActionExecutor::RemoteSkillerActionExecutor(Logger *           logg
   agent_name_key_(agent_name_key),
   agent_name_value_(agent_name_value)
 {
+	blackboard_owner_ = true;
 }
 
 RemoteSkillerActionExecutor::~RemoteSkillerActionExecutor()
 {
-	// We manually created a remote blackboard, so we also need to delete it manually.
-	delete blackboard_;
 }
 
 bool
