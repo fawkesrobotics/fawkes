@@ -86,10 +86,9 @@ ActionExecutorDispatcher::get_executors() const
  */
 
 /** Constructor. */
-GologppDispatcherAspect::GologppDispatcherAspect()
+GologppDispatcherAspect::GologppDispatcherAspect() : gologpp_dispatcher(nullptr)
 {
 	add_aspect("GologppDispatcherAspect");
-	gologpp_dispatcher = 0;
 }
 
 /** Init GologppDispatcherAspect.
