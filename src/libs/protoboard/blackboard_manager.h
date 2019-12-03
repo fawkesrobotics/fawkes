@@ -84,8 +84,7 @@ public:
 	void
 	finalize()
 	{
-		if (waker_)
-			delete waker_;
+		delete waker_;
 		if (blackboard_ && interface_)
 			blackboard_->close(interface_);
 	}

@@ -94,19 +94,20 @@ BlackboardManager::loop()
 		pb_conversion_map::iterator     it;
 
 		if ((it = bb_receiving_interfaces_.find(inc.msg->GetTypeName()))
-		    == bb_receiving_interfaces_.end())
+		    == bb_receiving_interfaces_.end()) {
 			logger->log_error(name(),
 			                  "Received message of unregistered type `%s'",
 			                  inc.msg->GetTypeName().c_str());
-		else
-			try {
-				it->second->handle(inc.msg);
-			} catch (std::exception &e) {
-				logger->log_error(name(),
-				                  "Exception while handling %s: %s",
-				                  inc.msg->GetTypeName().c_str(),
-				                  e.what());
-			}
+			continue;
+		}
+		try {
+			it->second->handle(inc.msg);
+		} catch (std::exception &e) {
+			logger->log_error(name(),
+			                  "Exception while handling %s: %s",
+			                  inc.msg->GetTypeName().c_str(),
+			                  e.what());
+		}
 
 		did_something = true;
 	}
