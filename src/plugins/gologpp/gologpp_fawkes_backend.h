@@ -51,7 +51,7 @@ public:
 	                     BlackBoard *   blackboard);
 	virtual ~GologppFawkesBackend();
 
-	virtual void preempt_activity(std::shared_ptr<gologpp::Transition> t) override;
+	virtual void preempt_activity(std::shared_ptr<gologpp::Activity> a) override;
 	virtual gologpp::Clock::time_point time() const noexcept override;
 
 private:
