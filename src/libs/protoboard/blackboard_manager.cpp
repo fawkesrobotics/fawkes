@@ -125,8 +125,7 @@ BlackboardManager::get_blackboard()
 void
 BlackboardManager::add_peer(ProtobufPeerInterface *iface, long peer_id)
 {
-	// TODO: Properly handle overflow.
-	iface->set_peers(next_peer_idx_++ % iface->maxlenof_peers(), peer_id);
+	iface->set_peers(next_peer_idx_++, peer_id);
 	iface->write();
 }
 
