@@ -162,23 +162,25 @@ ExogManager::BlackboardEventHandler::BlackboardEventHandler(
 			if (pair.first == fi.get_name())
 				break;
 		}
-		if (fi == iface->fields_end())
+		if (fi == iface->fields_end()) {
 			throw ConfigError("Interface type " + iface_type + " does not have a field `" + pair.first
 			                  + "'");
-		else {
-			auto it = iface_type_to_golog_type_.find(fi.get_type());
-			if (it == iface_type_to_golog_type_.end())
-				throw Exception("Unhandled interface field type %s", fi.get_typename());
-
-			string desired_type = it->second;
-			if (desired_type != StringType::name() && fi.get_length() > 1)
-				desired_type = static_cast<string>(ListType(desired_type));
-
-			if (var_ref.type() != desired_type)
-				throw ConfigError(target_exog_->name() + "'s argument " + var_ref.target()->name()
-				                  + " is a " + var_ref.type_name() + ", but the interface field requires "
-				                  + desired_type);
 		}
+		auto it = iface_type_to_golog_type_.find(fi.get_type());
+		if (it == iface_type_to_golog_type_.end()) {
+			throw Exception("Unhandled interface field type %s", fi.get_typename());
+    }
+
+		string desired_type = it->second;
+		if (desired_type != StringType::name() && fi.get_length() > 1) {
+			desired_type = static_cast<string>(ListType(desired_type));
+    }
+
+		if (var_ref.type() != desired_type) {
+			throw ConfigError(target_exog_->name() + "'s argument " + var_ref.target()->name() + " is a "
+			                  + var_ref.type_name() + ", but the interface field requires "
+			                  + desired_type);
+    }
 		blackboard_->close(iface);
 
 		auto param_it =
