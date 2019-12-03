@@ -124,8 +124,11 @@ ValueToFieldVisitor::operator()(std::string v)
 		}
 		field->set_string(v.c_str());
 		break;
-	// TODO: check that the given string is a valid enum
-	case IFT_ENUM: field->set_enum_string(v.c_str()); break;
+	case IFT_ENUM: try { field->set_enum_string(v.c_str());
+		} catch (IllegalArgumentException &e) {
+			throw Exception("Cannot convert string '%s' into enum: %s", v.c_str(), e.what_no_backtrace());
+		}
+		break;
 	default: throw Exception("Invalid cast from string to %s", field->get_typename());
 	}
 }
