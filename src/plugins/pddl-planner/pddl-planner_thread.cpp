@@ -138,9 +138,8 @@ PddlPlannerThread::loop()
 	if (!plan_list_.empty()) {
 		int id = 0;
 		for (std::vector<Action> plan : plan_list_) {
-			std::string matching  = std::string(" { \"plan\" : " + std::to_string(id) + " } ");
-			auto        bson_plan = BSONFromActionList(plan, id++);
-			bsoncxx::document::view_or_value filter_doc = from_json(matching);
+			const std::string matching{" { \"plan\" : " + std::to_string(id) + " } "};
+			auto              bson_plan = BSONFromActionList(plan, id++);
 			if (robot_memory->update(from_json(matching), bson_plan, cfg_collection_, true) == 0) {
 				logger->log_error(name(), "Failed to update plan");
 			}
@@ -289,7 +288,7 @@ PddlPlannerThread::kstar_planner()
 	logger->log_info(name(), "Starting PDDL Planning with Fast-Downward: KStar...");
 
 	std::string command =
-	  "fast-downward.py" + std::string(" ") + cfg_domain_path_ + std::string(" ") + cfg_problem_path_;
+	  "fast-downward" + std::string(" ") + cfg_domain_path_ + std::string(" ") + cfg_problem_path_;
 
 	if (!cfg_fd_options_.empty()) {
 		command += std::string(" ") + cfg_kstar_options_;
@@ -306,9 +305,11 @@ PddlPlannerThread::kstar_planner()
 		  "Expected \"Number of plans found: \" at the end of planner output but did not found");
 		throw Exception("Unexpected planner output");
 	}
-	int    plan_count = 0;
-	size_t new_line   = result.find("\n", end_pos);
-	plan_count        = std::stoi(result.substr(end_pos + 22, new_line - (end_pos + 22)));
+	int          plan_count   = 0;
+	size_t       new_line     = result.find("\n", end_pos);
+	const size_t count_offset = std::string{"Number of plans found: "}.length();
+	plan_count =
+	  std::stoi(result.substr(end_pos + count_offset, new_line - (end_pos + count_offset)));
 	if (plan_count == 0) {
 		throw Exception("Could not find solutions");
 	}
@@ -323,30 +324,7 @@ PddlPlannerThread::kstar_planner()
 		if (plan_file.is_open()) {
 			std::string line;
 			while (getline(plan_file, line)) {
-				if (line.at(0) == ';') {
-					size_t cost_pos = line.find("cost = ");
-					if (cost_pos != std::string::npos) {
-						std::vector<std::string> line_splitted = str_split(line, " ");
-						for (size_t i = 0; i < line_splitted.size() - 1; ++i) {
-							if (line_splitted[i] == "=") {
-								curr_plan[curr_plan.size() - 1].cost = std::stof(line_splitted[i + 1]);
-								break;
-							}
-						}
-					}
-				} else {
-					Action a;
-					line                                   = line.substr(1, line.size() - 2);
-					std::vector<std::string> line_splitted = str_split(line, " ");
-					a.name                                 = line_splitted[0];
-					if (a.name.find("order_") != std::string::npos)
-						continue;
-
-					for (size_t i = 1; i < line_splitted.size(); ++i) {
-						a.args.push_back(line_splitted[i]);
-					}
-					curr_plan.push_back(a);
-				}
+				read_planner_output_line(line, curr_plan);
 			}
 		} else {
 			logger->log_error(name(), "Cant find %s", entry.path().string().c_str());
@@ -452,6 +430,33 @@ PddlPlannerThread::find_nth_space(const std::string &s, size_t nth)
 	}
 
 	return pos + 1;
+}
+
+void
+PddlPlannerThread::read_planner_output_line(std::string line, std::vector<Action> &curr_plan)
+{
+	if (line.at(0) == ';') {
+		//curr_plan[curr_plan.size() - 1].cost = get_cost()
+		size_t cost_pos = line.find("cost = ");
+		if (cost_pos != std::string::npos) {
+			std::vector<std::string> line_splitted = str_split(line, " ");
+			for (size_t i = 0; i < line_splitted.size() - 1; ++i) {
+				if (line_splitted[i] == "=") {
+					curr_plan[curr_plan.size() - 1].cost = std::stof(line_splitted[i + 1]);
+					break;
+				}
+			}
+		}
+	} else {
+		Action a;
+		line                                   = line.substr(1, line.size() - 2);
+		std::vector<std::string> line_splitted = str_split(line, " ");
+		a.name                                 = line_splitted[0];
+		if (a.name.find("order_") == std::string::npos) {
+			std::move(std::next(line_splitted.begin()), line_splitted.end(), a.args.begin());
+			curr_plan.push_back(a);
+		}
+	}
 }
 
 void

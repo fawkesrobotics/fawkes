@@ -85,10 +85,11 @@ private:
 	void                     dbmp_planner();
 	bsoncxx::document::value BSONFromActionList(const std::vector<Action> &action_list, int plan_id);
 	static size_t            find_nth_space(const std::string &s, size_t nth);
-	void                     print_action_list();
-	std::string              run_planner(std::string command);
-	virtual bool             bb_interface_message_received(fawkes::Interface *interface,
-	                                                       fawkes::Message *  message) throw();
+	void         read_planner_output_line(std::string line, std::vector<Action> &curr_plan);
+	void         print_action_list();
+	std::string  run_planner(std::string command);
+	virtual bool bb_interface_message_received(fawkes::Interface *interface,
+	                                           fawkes::Message *  message) throw();
 };
 
 #endif
