@@ -79,14 +79,14 @@ void
 BlackboardManager::loop()
 {
 	// Handle CreatePeer* messages
-	bool did_something = on_interface<ProtobufPeerInterface>{peer_iface_, this}
-	                       .handle_msg_types<ProtobufPeerInterface::CreatePeerMessage,
-	                                         ProtobufPeerInterface::CreatePeerLocalMessage,
-	                                         ProtobufPeerInterface::CreatePeerCryptoMessage,
-	                                         ProtobufPeerInterface::CreatePeerLocalCryptoMessage>();
+	on_interface<ProtobufPeerInterface>{peer_iface_, this}
+	  .handle_msg_types<ProtobufPeerInterface::CreatePeerMessage,
+	                    ProtobufPeerInterface::CreatePeerLocalMessage,
+	                    ProtobufPeerInterface::CreatePeerCryptoMessage,
+	                    ProtobufPeerInterface::CreatePeerLocalCryptoMessage>();
 
 	// Handle sending blackboard interfaces
-	did_something |= pb_sender_->process_sending_interfaces();
+	pb_sender_->process_sending_interfaces();
 
 	// Handle receiving blackboard interfaces
 	while (message_handler_->pb_queue_incoming()) {
@@ -108,13 +108,7 @@ BlackboardManager::loop()
 			                  inc.msg->GetTypeName().c_str(),
 			                  e.what());
 		}
-
-		did_something = true;
 	}
-
-	if (!did_something)
-		// Thread woke up, but nothing was handled
-		logger->log_warn(name(), "Spurious wakeup. WTF?");
 }
 
 BlackBoard *

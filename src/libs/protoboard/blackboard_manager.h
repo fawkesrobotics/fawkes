@@ -118,7 +118,7 @@ public:
 	/** Go through all interface managers, empty all blackboard message queues and send out
 	 * ProtoBuf messages accordingly.
 	 * @return whether anything was sent */
-	virtual bool process_sending_interfaces() = 0;
+	virtual void process_sending_interfaces() = 0;
 
 	/// Deferred initialization, coincides with the main thread.
 	virtual void init() = 0;
@@ -144,7 +144,7 @@ protected:
 		 * @param iface_mgr a bb_iface_manager for a specific message type
 		 * @return Whether any ProtoBuf message was sent */
 		template <class IfaceT, class MessageT>
-		bool operator()(const bb_iface_manager<IfaceT, type_list<MessageT>> &iface_mgr) const;
+		void operator()(const bb_iface_manager<IfaceT, type_list<MessageT>> &iface_mgr) const;
 
 		/** Iterate through all given message types on a certain interface and
 		 * handle them individually
@@ -154,7 +154,7 @@ protected:
 		 * @param iface_mgr a bb_iface_manager with a list of message type to go through
 		 * @return Whether any ProtoBuf message was sent */
 		template <class IfaceT, class MessageT1, class... MessageTs>
-		bool
+		void
 		operator()(const bb_iface_manager<IfaceT, type_list<MessageT1, MessageTs...>> &iface_mgr) const;
 	};
 };
@@ -174,10 +174,10 @@ public:
 	virtual void init() override;
 	virtual void finalize() override;
 
-	virtual bool
+	virtual void
 	process_sending_interfaces() override
 	{
-		return boost::fusion::any(bb_sending_interfaces_, handle_messages{this->bb_manager});
+		boost::fusion::for_each(bb_sending_interfaces_, handle_messages{this->bb_manager});
 	}
 
 private:
@@ -233,7 +233,7 @@ private:
 	void add_peer(fawkes::ProtobufPeerInterface *iface, long peer_id);
 
 	template <class MessageT, class InterfaceT>
-	bool handle_message_type(InterfaceT *iface);
+	void handle_message_type(InterfaceT *iface);
 
 	template <class InterfaceT>
 	struct on_interface
@@ -246,18 +246,19 @@ private:
 		}
 
 		template <class MessageT>
-		bool
+		void
 		handle_msg_types()
 		{
-			return manager->handle_message_type<MessageT>(iface);
+			manager->handle_message_type<MessageT>(iface);
 		}
 
 		// This template is disabled if MessageTs is {} to resolve ambiguity
 		template <class MessageT1, class... MessageTs>
-		typename std::enable_if<(sizeof...(MessageTs) > 0), bool>::type
+		typename std::enable_if<(sizeof...(MessageTs) > 0)>::type
 		handle_msg_types()
 		{
-			return handle_msg_types<MessageTs...>() || handle_msg_types<MessageT1>();
+			handle_msg_types<MessageT1>();
+			handle_msg_types<MessageTs...>();
 		}
 	};
 };
@@ -286,29 +287,29 @@ ProtobufSender<IfaceManagerTs...>::finalize()
 }
 
 template <class IfaceT, class MessageT>
-bool
+void
 AbstractProtobufSender::handle_messages::
 operator()(const bb_iface_manager<IfaceT, type_list<MessageT>> &pair) const
 {
-	return manager->handle_message_type<MessageT>(pair.interface());
+	manager->handle_message_type<MessageT>(pair.interface());
 }
 
 template <class IfaceT, class MessageT1, class... MessageTs>
-bool
+void
 AbstractProtobufSender::handle_messages::
 operator()(const bb_iface_manager<IfaceT, type_list<MessageT1, MessageTs...>> &iface_mgr) const
 {
-	return BlackboardManager::on_interface<IfaceT>{iface_mgr.interface(), manager}
-	         .template handle_msg_types<MessageTs...>()
-	       || manager->handle_message_type<MessageT1>(iface_mgr.interface());
+	BlackboardManager::on_interface<IfaceT>{iface_mgr.interface(), manager}
+	  .template handle_msg_types<MessageTs...>();
+
+	manager->handle_message_type<MessageT1>(iface_mgr.interface());
 }
 
 template <class MessageT, class InterfaceT>
-bool
+void
 BlackboardManager::handle_message_type(InterfaceT *iface)
 {
 	if (!iface->msgq_empty()) {
-		bool rv = false;
 		while (MessageT *msg = iface->msgq_first_safe(msg)) {
 			try {
 				handle_message(iface, msg);
@@ -318,11 +319,8 @@ BlackboardManager::handle_message_type(InterfaceT *iface)
 				  name(), "Exception handling %s on %s: %s", msg->type(), iface->uid(), e.what());
 			}
 			iface->msgq_pop();
-			rv = true;
 		}
-		return rv;
-	} else
-		return false;
+	}
 }
 
 } // namespace protoboard
