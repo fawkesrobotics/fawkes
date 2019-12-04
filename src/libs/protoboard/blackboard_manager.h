@@ -77,7 +77,12 @@ public:
 	{
 		blackboard_ = blackboard;
 		interface_  = blackboard_->open_for_writing<IfaceT>(iface_id_for_type<IfaceT>().c_str());
-		waker_      = new fawkes::BlackBoardOnMessageWaker(blackboard, interface_, thread);
+
+		// TODO: This rather unspecific waker just triggers a loop(), so we need to go over all the interfaces
+		//       each time and check where there's a message in the queue. This should be converted to a
+		//       BlackBoardInterfaceListener, which calls a specific method and passes in the affected interface
+		//       right away. That should allow significant simplification of all this template hackery.
+		waker_ = new fawkes::BlackBoardOnMessageWaker(blackboard, interface_, thread);
 	}
 
 	/// Cleanup.
