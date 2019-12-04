@@ -1,0 +1,93 @@
+#include "logger.gpp"
+
+symbol domain blocks = {a, b, c}
+symbol domain robots = { robot1, robot2 }
+symbol domain locations = blocks | robots | {table}
+
+symbol fluent loc(symbol x) {
+domain:
+	x in blocks;
+initially:
+	(a) = c;
+	(b) = table;
+	(c) = b;
+// 	(d) = a; //*/
+}
+
+action stack(symbol robot, symbol x, symbol y) {
+domain:
+	robot in robots;
+	x in blocks;
+	y in locations;
+precondition:
+	loc(x) == robot
+	& x != y // Can't stack x on x
+	& x != table // Can't stack table
+	& (
+		y == table // either y is the table...
+		| !exists(symbol z) loc(z) == y // or nothing is on y
+	)
+
+effect:
+	loc(x) = y;
+
+mapping:
+  "stack" {
+    robot = robot,
+    x = x,
+    y = y
+  }
+}
+
+action unstack(symbol robot, symbol x, symbol y) {
+domain:
+	robot in robots;
+	x in blocks;
+	y in locations;
+precondition:
+	loc(x) == y
+	// The robot is not holding anything
+	& !exists(symbol z) loc(z) == robot
+	// There is nothing on x
+	& !exists(symbol z) loc(z) == x
+
+effect:
+	loc(x) = robot;
+
+mapping:
+	"unstack" {
+    robot = robot,
+		x = x
+	}
+}
+
+
+procedure bla() {
+	stack(robot1, a,b);
+	stack(robot1, a,table);
+}
+
+
+bool function goal() {
+	return loc(a) == table & loc(b) == a & loc(c) == b
+// 	& loc(d) == c
+	;
+}
+
+number function reward() {
+	if (goal())
+		return 100;
+	else
+		return -1;
+}
+
+
+{
+  unstack(robot1, a, c);
+  unstack(robot2, c, b);
+  stack(robot2, c, table);
+  unstack(robot2, b, table);
+  stack(robot2, b, c);
+  stack(robot1, a, b);
+  test(loc(c) == table & loc(b) == c & loc(a) == b);
+}

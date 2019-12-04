@@ -9,3 +9,14 @@
       action-mapping:
         stack: say{text="Stacking ?(x)y on ?(y)y", wait=true}
         unstack: say{text="Unstacking ?(x)y", wait=true}
+    blocksworld-multi-agent:
+      agents:
+        names: [robot1, robot2]
+        robot1:
+          host: localhost
+          port: 1921
+        robot2:
+          port: 1922
+      action-mapping:
+        stack: say{text="Stacking ?(x)y on ?(y)y", wait=true}
+        unstack: say{text="Unstacking ?(x)y", wait=true}
