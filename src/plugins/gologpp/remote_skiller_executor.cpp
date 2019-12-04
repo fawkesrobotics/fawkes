@@ -38,23 +38,23 @@ namespace gpp {
 /** Constructor.
  * Connect to the given remote host and use that host's skiller interface.
  * @param logger The logger instance to use
- * @param agent_name_key The parameter key to use for checking if this action should be executed on this agent
- * @param agent_name_value The name of the remote agent; only execute the action if it matches this agent name
+ * @param agent_param_name The parameter key to use for checking if this action should be executed on this agent
+ * @param agent_param_value The name of the remote agent; only execute the action if it matches this agent name
  * @param hostname The remote hostname to connect to
  * @param port The port to connect to
  * @param config The config to read the skill mapping from
  * @param cfg_prefix The spec-specific config prefix to use
  */
 RemoteSkillerActionExecutor::RemoteSkillerActionExecutor(Logger *           logger,
-                                                         const std::string &agent_name_key,
-                                                         const std::string &agent_name_value,
+                                                         const std::string &agent_param_name,
+                                                         const std::string &agent_param_value,
                                                          const std::string &hostname,
                                                          unsigned short int port,
                                                          Configuration *    config,
                                                          const std::string &cfg_prefix)
 : SkillerActionExecutor(logger, new RemoteBlackBoard(hostname.c_str(), port), config, cfg_prefix),
-  agent_name_key_(agent_name_key),
-  agent_name_value_(agent_name_value)
+  agent_param_name_(agent_param_name),
+  agent_param_value_(agent_param_value)
 {
 	blackboard_owner_ = true;
 }
@@ -69,11 +69,11 @@ RemoteSkillerActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activ
 	if (!SkillerActionExecutor::can_execute_activity(activity)) {
 		return false;
 	}
-	if (!activity->target()->mapping().is_mapped(agent_name_key_)) {
+	if (!activity->target()->mapping().is_mapped(agent_param_name_)) {
 		return false;
 	}
-	return (static_cast<std::string>(activity->mapped_arg_value(agent_name_key_))
-	        == agent_name_value_);
+	return (static_cast<std::string>(activity->mapped_arg_value(agent_param_name_))
+	        == agent_param_value_);
 }
 
 /** Get the name of the executor; mainly used for logging.

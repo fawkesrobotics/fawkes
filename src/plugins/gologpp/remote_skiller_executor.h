@@ -41,8 +41,8 @@ protected:
 	const char *name() const;
 
 private:
-	const std::string agent_name_key_;
-	const std::string agent_name_value_;
+	const std::string agent_param_name_;
+	const std::string agent_param_value_;
 };
 } // namespace gpp
 } // namespace fawkes
