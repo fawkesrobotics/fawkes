@@ -312,6 +312,7 @@ BlackboardManager::handle_message_type(InterfaceT *iface)
 		while (MessageT *msg = iface->msgq_first_safe(msg)) {
 			try {
 				handle_message(iface, msg);
+				iface->write();
 			} catch (std::exception &e) {
 				logger->log_error(
 				  name(), "Exception handling %s on %s: %s", msg->type(), iface->uid(), e.what());
@@ -319,7 +320,6 @@ BlackboardManager::handle_message_type(InterfaceT *iface)
 			iface->msgq_pop();
 			rv = true;
 		}
-		iface->write();
 		return rv;
 	} else
 		return false;
