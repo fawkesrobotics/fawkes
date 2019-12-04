@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="ProtobufPeerInterface" author="Victor Mataré" year="2017">
+  <data>
+    <comment>Current peers maintained by the protoboard plugin</comment>
+    <field type="int64" name="peers" length="16">Currently active peers</field>
+  </data>
+  <message name="CreatePeer">
+    <comment>Create a peer without encryption</comment>
+    <field type="string" name="address" length="255">IP address or host name</field>
+    <field type="int32" name="port">Port to send to/receive on</field>
+  </message>
+  <message name="CreatePeerLocal">
+    <comment>Create a local peer without encryption (mainly for simulation)</comment>
+    <field type="string" name="address" length="255">IP address or host name</field>
+    <field type="int32" name="send_to_port">Port to send to</field>
+    <field type="int32" name="recv_on_port">Port to receive on</field>
+  </message>
+  <message name="CreatePeerCrypto">
+    <comment>Create a peer with encryption</comment>
+    <field type="string" name="address" length="255">IP address or host name</field>
+    <field type="int32" name="port">Port to send to/receive on</field>
+    <field type="string" name="crypto_key" length="1024">Crypto key</field>
+    <field type="string" name="cipher" length="255">Cipher name</field>
+  </message>
+  <message name="CreatePeerLocalCrypto">
+    <comment>Create a local peer with encryption</comment>
+    <field type="string" name="address" length="255">IP address or host name</field>
+    <field type="int32" name="send_to_port">Port to send to</field>
+    <field type="int32" name="recv_on_port">Port to receive on</field>
+    <field type="string" name="crypto_key" length="1024">Crypto key</field>
+    <field type="string" name="cipher" length="255">Cipher name</field>
+  </message>
+</interface>
+
