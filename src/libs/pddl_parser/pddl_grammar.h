@@ -14,7 +14,7 @@
 #include <boost/spirit/home/support/info.hpp>
 
 #include <iostream>
-
+#include <boost/spirit/include/qi_real.hpp>
 #include <sstream>
 #include <exception>
 #include <boost/spirit/include/qi.hpp>
@@ -96,6 +96,7 @@ namespace pddl_parser
         using qi::lazy;
         using qi::on_error;
         using qi::fail;
+        using qi::float_;
         using boost::spirit::repository::distinct;
         using ascii::char_;
         using namespace qi::labels;
@@ -361,7 +362,7 @@ namespace pddl_parser
 
                 pddlAction =
                     lit('(')
-                    > lit(":action")
+                    > (lit(":action") | lit("durative-action"))
                     > name[at_c<0>(_val) = _1]
                     > lit(":parameters")
                     > lit("(")
@@ -373,6 +374,11 @@ namespace pddl_parser
                         lit(":effect")
                         >> (effect[at_c<3>(_val) = _1] | (lit('(') > lit(')')))
                     )
+                    > -(lit(":duration")
+                        >> float_
+                    )
+                    > -(lit(":cond-breakup") >> goalDescription)
+                    > -(lit(":temp-breakup") >> goalDescription)
                     > lit(')');
                 pddlAction.name("pddlAction");
 

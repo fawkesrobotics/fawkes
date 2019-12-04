@@ -115,6 +115,9 @@ namespace pddl_parser
         TypedList parameters;
         GoalDescription precondition;
         Effect effect;
+        GoalDescription cond_breakup;
+        GoalDescription temp_breakup;
+        float duration;
     };
 
     typedef std::vector<struct PddlAction> ActionList;
@@ -198,6 +201,9 @@ BOOST_FUSION_ADAPT_STRUCT(
     (pddl_parser::TypedList, parameters)
     (pddl_parser::GoalDescription, precondition)
     (pddl_parser::Effect, effect)
+    (pddl_parser::GoalDescription, cond_breakup)
+    (pddl_parser::GoalDescription, temp_breakup)
+    (float, duration)
 )
 
 BOOST_FUSION_ADAPT_STRUCT(
