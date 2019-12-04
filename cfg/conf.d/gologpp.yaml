@@ -12,6 +12,7 @@
     blocksworld-multi-agent:
       agents:
         names: [robot1, robot2]
+        # Network config for each agent name. Defaults to localhost:1910.
         robot1:
           host: localhost
           port: 1921
