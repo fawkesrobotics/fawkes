@@ -120,6 +120,12 @@ BlackboardManager::get_blackboard()
 void
 BlackboardManager::add_peer(ProtobufPeerInterface *iface, long peer_id)
 {
+	if (next_peer_idx_ >= iface->maxlenof_peers()) {
+		logger->log_error(name(),
+		                  "Maximum number of peers reached. Can't create new peer with index %d!",
+		                  next_peer_idx_);
+		return;
+	}
 	iface->set_peers(next_peer_idx_++, peer_id);
 	iface->write();
 }
