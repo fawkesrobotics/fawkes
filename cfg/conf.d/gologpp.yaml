@@ -10,6 +10,8 @@
         stack: say{text="Stacking ?(x)y on ?(y)y", wait=true}
         unstack: say{text="Unstacking ?(x)y", wait=true}
     blocksworld-multi-agent:
+      # Set to false if you do not want to use the local skiller.
+      use_local_skiller: true
       agents:
         names: [robot1, robot2]
         # Network config for each agent name. Defaults to localhost:1910.

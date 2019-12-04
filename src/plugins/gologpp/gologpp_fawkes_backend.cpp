@@ -67,8 +67,10 @@ GologppFawkesBackend::GologppFawkesBackend(Configuration *config,
 		action_dispatcher_.register_executor(std::make_shared<RemoteSkillerActionExecutor>(
 		  logger, "robot", robot, hostname, port, config, cfg_prefix));
 	}
-	action_dispatcher_.register_executor(
-	  std::make_shared<SkillerActionExecutor>(logger, blackboard, config, cfg_prefix));
+	if (config->get_bool_or_default((cfg_prefix + "/use_local_skiller").c_str(), true)) {
+		action_dispatcher_.register_executor(
+		  std::make_shared<SkillerActionExecutor>(logger, blackboard, config, cfg_prefix));
+	}
 	action_dispatcher_.register_executor(
 	  std::make_shared<BBMessageActionExecutor>(logger, blackboard, config, cfg_prefix));
 	action_dispatcher_.register_executor(std::make_shared<SleepActionExecutor>(logger));
