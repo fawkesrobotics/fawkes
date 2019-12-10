@@ -53,7 +53,8 @@ private:
 	unsigned int            index;
 };
 
-void value_to_field(const gologpp::Value &value, InterfaceFieldIterator *field);
+void            value_to_field(const gologpp::Value &value, InterfaceFieldIterator *field);
+gologpp::Value *field_to_value(InterfaceFieldIterator &fi, unsigned int idx);
 
 } // namespace gpp
 } // namespace fawkes

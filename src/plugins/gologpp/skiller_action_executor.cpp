@@ -132,6 +132,10 @@ SkillerActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity> a
 void
 SkillerActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
+	if (!can_execute_activity(activity)) {
+		throw Exception("Cannot execute activity '%s' with SkillerActionExecutor",
+		                activity->mapped_name().c_str());
+	}
 	try {
 		skiller_if_->msgq_enqueue(
 		  new SkillerInterface::ExecSkillMessage(map_activity_to_skill(activity).c_str()));
@@ -212,7 +216,10 @@ SkillerActionExecutor::bb_interface_data_changed(Interface *iface) throw()
 		running_activity_->update(Transition::Hook::FINISH);
 		running_activity_.reset();
 		break;
-	case SkillerInterface::S_FAILED: running_activity_->update(Transition::Hook::FAIL); break;
+	case SkillerInterface::S_FAILED:
+		running_activity_->update(Transition::Hook::FAIL);
+		running_activity_.reset();
+		break;
 	case SkillerInterface::S_RUNNING: running_activity_->update(Transition::Hook::START); break;
 	default: break;
 	}

@@ -154,8 +154,7 @@ private:
 	                            std::string                     msg);
 	void handle_peer_send_error(long int peer_id, std::string msg);
 
-	protobuf_comm::MessageRegister *     message_register_;
-	protobuf_comm::ProtobufStreamServer *server_;
+	protobuf_comm::MessageRegister *message_register_;
 
 	boost::signals2::signal<void(long int, std::shared_ptr<google::protobuf::Message>)>
 	  sig_peer_sent_;

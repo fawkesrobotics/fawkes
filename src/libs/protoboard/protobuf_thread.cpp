@@ -28,7 +28,6 @@
 #include <google/protobuf/descriptor.h>
 #include <protobuf_comm/client.h>
 #include <protobuf_comm/peer.h>
-#include <protobuf_comm/server.h>
 
 using namespace google::protobuf;
 using namespace protobuf_comm;
@@ -38,7 +37,6 @@ namespace protoboard {
 ProtobufThead::ProtobufThead()
 : Thread("ProtoboardMessageHandler", Thread::OPMODE_CONTINUOUS),
   message_register_(nullptr),
-  server_(nullptr),
   next_client_id_(0),
   bb_manager_(nullptr)
 {
@@ -47,7 +45,6 @@ ProtobufThead::ProtobufThead()
 ProtobufThead::~ProtobufThead()
 {
 	delete message_register_;
-	delete server_;
 }
 
 void

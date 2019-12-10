@@ -71,7 +71,7 @@ public:
 	 * @param v a ProtoBuf enum value
 	 * @return the mapped blackboard interface enum value
 	 */
-	constexpr bbEnumT
+	constexpr const bbEnumT &
 	of(pbEnumT v) const
 	{
 		return map.left.at(v);
@@ -81,7 +81,7 @@ public:
 	 * @param v a blackboard interface enum value
 	 * @return the mapped ProtoBuf enum value
 	 */
-	constexpr pbEnumT
+	constexpr const pbEnumT &
 	of(bbEnumT v) const
 	{
 		return map.right.at(v);

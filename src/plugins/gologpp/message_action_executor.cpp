@@ -50,25 +50,12 @@ BBMessageActionExecutor::BBMessageActionExecutor(Logger *           logger,
                                                  const std::string &cfg_prefix)
 : ActionExecutor(logger), blackboard_(blackboard), config_(config), cfg_prefix_(cfg_prefix)
 {
-	open_interfaces();
 }
 
 /** Destructor.
  * Clean up and close all interfaces.
  */
 BBMessageActionExecutor::~BBMessageActionExecutor()
-{
-	close_interfaces();
-}
-
-void
-BBMessageActionExecutor::open_interfaces()
-{
-	return;
-}
-
-void
-BBMessageActionExecutor::close_interfaces()
 {
 	for (auto interface : open_interfaces_) {
 		blackboard_->close(interface.second);

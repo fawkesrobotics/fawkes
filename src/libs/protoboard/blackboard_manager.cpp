@@ -79,14 +79,14 @@ void
 BlackboardManager::loop()
 {
 	// Handle CreatePeer* messages
-	bool did_something = on_interface<ProtobufPeerInterface>{peer_iface_, this}
-	                       .handle_msg_types<ProtobufPeerInterface::CreatePeerMessage,
-	                                         ProtobufPeerInterface::CreatePeerLocalMessage,
-	                                         ProtobufPeerInterface::CreatePeerCryptoMessage,
-	                                         ProtobufPeerInterface::CreatePeerLocalCryptoMessage>();
+	on_interface<ProtobufPeerInterface>{peer_iface_, this}
+	  .handle_msg_types<ProtobufPeerInterface::CreatePeerMessage,
+	                    ProtobufPeerInterface::CreatePeerLocalMessage,
+	                    ProtobufPeerInterface::CreatePeerCryptoMessage,
+	                    ProtobufPeerInterface::CreatePeerLocalCryptoMessage>();
 
 	// Handle sending blackboard interfaces
-	did_something |= pb_sender_->process_sending_interfaces();
+	pb_sender_->process_sending_interfaces();
 
 	// Handle receiving blackboard interfaces
 	while (message_handler_->pb_queue_incoming()) {
@@ -94,26 +94,21 @@ BlackboardManager::loop()
 		pb_conversion_map::iterator     it;
 
 		if ((it = bb_receiving_interfaces_.find(inc.msg->GetTypeName()))
-		    == bb_receiving_interfaces_.end())
+		    == bb_receiving_interfaces_.end()) {
 			logger->log_error(name(),
 			                  "Received message of unregistered type `%s'",
 			                  inc.msg->GetTypeName().c_str());
-		else
-			try {
-				it->second->handle(inc.msg);
-			} catch (std::exception &e) {
-				logger->log_error(name(),
-				                  "Exception while handling %s: %s",
-				                  inc.msg->GetTypeName().c_str(),
-				                  e.what());
-			}
-
-		did_something = true;
+			continue;
+		}
+		try {
+			it->second->handle(inc.msg);
+		} catch (std::exception &e) {
+			logger->log_error(name(),
+			                  "Exception while handling %s: %s",
+			                  inc.msg->GetTypeName().c_str(),
+			                  e.what());
+		}
 	}
-
-	if (!did_something)
-		// Thread woke up, but nothing was handled
-		logger->log_warn(name(), "Spurious wakeup. WTF?");
 }
 
 BlackBoard *
@@ -125,8 +120,13 @@ BlackboardManager::get_blackboard()
 void
 BlackboardManager::add_peer(ProtobufPeerInterface *iface, long peer_id)
 {
-	// TODO: Properly handle overflow.
-	iface->set_peers(next_peer_idx_++ % iface->maxlenof_peers(), peer_id);
+	if (next_peer_idx_ >= iface->maxlenof_peers()) {
+		logger->log_error(name(),
+		                  "Maximum number of peers reached. Can't create new peer with index %d!",
+		                  next_peer_idx_);
+		return;
+	}
+	iface->set_peers(next_peer_idx_++, peer_id);
 	iface->write();
 }
 

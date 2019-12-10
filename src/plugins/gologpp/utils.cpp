@@ -23,6 +23,8 @@
 #include <blackboard/blackboard.h>
 #include <golog++/model/value.h>
 
+using gologpp::Value;
+
 namespace fawkes {
 namespace gpp {
 
@@ -124,8 +126,11 @@ ValueToFieldVisitor::operator()(std::string v)
 		}
 		field->set_string(v.c_str());
 		break;
-	// TODO: check that the given string is a valid enum
-	case IFT_ENUM: field->set_enum_string(v.c_str()); break;
+	case IFT_ENUM: try { field->set_enum_string(v.c_str());
+		} catch (IllegalArgumentException &e) {
+			throw Exception("Cannot convert string '%s' into enum: %s", v.c_str(), e.what_no_backtrace());
+		}
+		break;
 	default: throw Exception("Invalid cast from string to %s", field->get_typename());
 	}
 }
@@ -184,6 +189,28 @@ value_to_field(const gologpp::Value &value, InterfaceFieldIterator *field)
 {
 	ValueToFieldVisitor visitor(field);
 	boost::apply_visitor(visitor, value.representation());
+}
+
+Value *
+field_to_value(InterfaceFieldIterator &fi, unsigned int idx)
+{
+	switch (fi.get_type()) {
+	case IFT_BOOL: return new Value(gologpp::BoolType::name(), fi.get_bool(idx));
+	case IFT_BYTE: return new Value(gologpp::NumberType::name(), fi.get_byte(idx));
+	case IFT_ENUM: return new Value(gologpp::SymbolType::name(), fi.get_enum_string(idx));
+	case IFT_INT8: return new Value(gologpp::NumberType::name(), fi.get_int8(idx));
+	case IFT_FLOAT: return new Value(gologpp::NumberType::name(), fi.get_float(idx));
+	case IFT_INT16: return new Value(gologpp::NumberType::name(), fi.get_int16(idx));
+	case IFT_INT32: return new Value(gologpp::NumberType::name(), fi.get_int32(idx));
+	case IFT_INT64: return new Value(gologpp::NumberType::name(), fi.get_int64(idx));
+	case IFT_UINT8: return new Value(gologpp::NumberType::name(), fi.get_uint8(idx));
+	case IFT_DOUBLE: return new Value(gologpp::NumberType::name(), fi.get_double(idx));
+	case IFT_STRING: return new Value(gologpp::StringType::name(), fi.get_string());
+	case IFT_UINT16: return new Value(gologpp::NumberType::name(), fi.get_uint16(idx));
+	case IFT_UINT32: return new Value(gologpp::NumberType::name(), fi.get_uint32(idx));
+	case IFT_UINT64: return new Value(gologpp::NumberType::name(), fi.get_uint64(idx));
+	}
+	throw Exception("Unhandled interface field type");
 }
 
 } // namespace gpp
