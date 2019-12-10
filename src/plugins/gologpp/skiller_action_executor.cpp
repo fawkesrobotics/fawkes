@@ -52,6 +52,12 @@ InvalidArgumentException::InvalidArgumentException(const char *format, ...) : Ex
  * If the Skiller's status changes, the activity's status is updated accordingly.
  * @author Till Hofmann
  * @see ActionSkillMapping
+ *
+ * @var SkillerActionExecutor::blackboard_
+ * The blackboard to use to access the skiller.
+ *
+ * @var SkillerActionExecutor::blackboard_owner_
+ * True if this executor is owning its blackboard.
  */
 
 /** Constructor.
@@ -69,6 +75,7 @@ SkillerActionExecutor::SkillerActionExecutor(Logger *           logger,
 : ActionExecutor(logger),
   BlackBoardInterfaceListener("Golog++SkillerActionExecutor"),
   blackboard_(blackboard),
+  blackboard_owner_(false),
   config_(config),
   cfg_prefix_(cfg_prefix)
 {
@@ -111,6 +118,9 @@ SkillerActionExecutor::~SkillerActionExecutor()
 	skiller_if_->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
 	blackboard_->unregister_listener(this);
 	blackboard_->close(skiller_if_);
+	if (blackboard_owner_) {
+		delete blackboard_;
+	}
 }
 
 /** Check if we can execute the given activity.
@@ -159,6 +169,9 @@ SkillerActionExecutor::stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>>
 	}
 }
 
+/** Get the name of the executor; mainly used for logging.
+ * @return The human-readable name of the executor
+ */
 const char *
 SkillerActionExecutor::name() const
 {
