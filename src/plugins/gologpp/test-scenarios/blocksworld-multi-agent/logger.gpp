@@ -1,0 +1,31 @@
+action log_debug(string msg) {
+mapping:
+  "print" {
+    level = "debug",
+    message = msg
+  }
+}
+
+action log_info(string msg) {
+mapping:
+  "print" {
+    level = "info",
+    message = msg
+  }
+}
+
+action log_warn(string msg) {
+mapping:
+  "print" {
+    level = "warn",
+    message = msg
+  }
+}
+
+action log_error(string msg) {
+mapping:
+  "print" {
+    level = "error",
+    message = msg
+  }
+}
