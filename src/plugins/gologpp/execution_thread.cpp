@@ -61,9 +61,12 @@ GologppThread::init()
 	// We know that lists of elementary types will most likely occur, so simply
 	// define the types unconditionally. The elementary types themselves are
 	// already defined.
-	global_scope().register_type(new ListType(*global_scope().lookup_type(BoolType::name())));
-	global_scope().register_type(new ListType(*global_scope().lookup_type(NumberType::name())));
-	global_scope().register_type(new ListType(*global_scope().lookup_type(SymbolType::name())));
+	global_scope().register_type_raw(
+	  new ListType(*global_scope().lookup_type(BoolType::static_name())));
+	global_scope().register_type_raw(
+	  new ListType(*global_scope().lookup_type(NumberType::static_name())));
+	global_scope().register_type_raw(
+	  new ListType(*global_scope().lookup_type(SymbolType::static_name())));
 
 	logger->log_info(name(), "Parsing %s...", prog_file.c_str());
 	main_prog_ = gologpp::parser::parse_file(prog_file);
