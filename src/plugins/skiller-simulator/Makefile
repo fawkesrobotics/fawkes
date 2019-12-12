@@ -21,7 +21,9 @@ include $(LIBSRCDIR)/utils/utils.mk
 LIBS_skiller_simulator  = fawkescore fawkesutils fawkesaspects \
                           fawkesblackboard fawkesinterface fawkeslogging \
                           SkillerInterface
-OBJS_skiller_simulator  = skiller_simulator_plugin.o exec_thread.o
+OBJS_skiller_simulator  = skiller_simulator_plugin.o exec_thread.o \
+                          execution_time_estimator_aspect/execution_time_estimator_aspect.o \
+                          execution_time_estimator_aspect/execution_time_estimator_aspect_inifin.o
 OBJS_all                = $(OBJS_skiller_simulator)
 PLUGINS_all             = $(PLUGINDIR)/skiller-simulator.so
 PLUGINS_build           = $(PLUGINS_all)
