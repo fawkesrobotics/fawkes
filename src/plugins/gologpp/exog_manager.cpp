@@ -176,11 +176,13 @@ ExogManager::BlackboardEventHandler::BlackboardEventHandler(
 			                it->second.c_str(),
 			                pair.first.c_str());
 
-		if (!(*desired_type <= gologpp::get_type<StringType>()) && fi.get_length() > 1) {
+		if (!(*desired_type <= gologpp::get_type<StringType>()
+		      || *desired_type >= gologpp::get_type<StringType>())
+		    && fi.get_length() > 1) {
 			desired_type = gologpp::global_scope().lookup_list_type(*desired_type);
 		}
 
-		if (!(var_ref.type() >= *desired_type)) {
+		if (!(var_ref.type() <= *desired_type || var_ref.type() >= *desired_type)) {
 			throw ConfigError(target_exog_->name() + "'s argument " + var_ref.target()->name() + " is a "
 			                  + var_ref.type().name() + ", but the interface field requires "
 			                  + desired_type->name());
