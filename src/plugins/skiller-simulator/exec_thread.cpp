@@ -41,8 +41,9 @@ SkillerSimulatorExecutionThread::SkillerSimulatorExecutionThread()
 void
 SkillerSimulatorExecutionThread::init()
 {
-	skiller_if_      = blackboard->open_for_writing<SkillerInterface>("Skiller");
-	skill_runtime_   = config->get_float_or_default("/plugins/skiller-simulation/skill-runtime", 1);
+	skiller_if_ = blackboard->open_for_writing<SkillerInterface>("Skiller");
+	default_skill_runtime_ =
+	  config->get_float_or_default("/plugins/skiller-simulation/skill-runtime", 1);
 	skill_starttime_ = Time();
 }
 
@@ -145,7 +146,7 @@ SkillerSimulatorExecutionThread::loop()
 	if (!skill_enqueued) {
 		if (skiller_if_->status() == SkillerInterface::S_RUNNING) {
 			Time now = Time();
-			if (Time() > skill_starttime_ + skill_runtime_) {
+			if (Time() > skill_starttime_ + get_skill_runtime(skiller_if_->skill_string())) {
 				logger->log_info(name(), "Skill '%s' is final", skiller_if_->skill_string());
 				skiller_if_->set_skill_string("");
 				skiller_if_->set_status(SkillerInterface::S_FINAL);
@@ -163,4 +164,10 @@ void
 SkillerSimulatorExecutionThread::finalize()
 {
 	blackboard->close(skiller_if_);
+}
+
+float
+SkillerSimulatorExecutionThread::get_skill_runtime(const std::string &skill) const
+{
+	return default_skill_runtime_;
 }

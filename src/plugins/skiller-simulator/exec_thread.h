@@ -51,8 +51,9 @@ protected:
 	}
 
 private:
+	float                     get_skill_runtime(const std::string &skill) const;
 	fawkes::SkillerInterface *skiller_if_;
-	double                    skill_runtime_;
+	float                     default_skill_runtime_;
 	fawkes::Time              skill_starttime_;
 };
 
