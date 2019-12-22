@@ -22,13 +22,14 @@
 #ifndef PLUGINS_STN_H_
 #define PLUGINS_STN_H_
 
+#include "boost/variant/static_visitor.hpp"
 #include "domain_action.h"
 #include "stn_action.h"
 
 #include <aspect/logging.h>
 #include <graphviz/gvc.h>
 #include <pddl_parser/pddl_ast.h>
-#include "boost/variant/static_visitor.hpp"
+
 #include <algorithm>
 #include <bsoncxx/document/value.hpp>
 #include <iterator>
@@ -41,56 +42,56 @@ namespace stn {
 
 class PreconditionVisitor : public boost::static_visitor<void>
 {
-	public:
-		PreconditionVisitor(std::vector<Predicate> *preconds, bool condition);
+public:
+	PreconditionVisitor(std::vector<Predicate> *preconds, bool condition);
 
-		void operator()(pddl_parser::AtomicFormula& a);
-		void operator()(pddl_parser::FunctionalCondition& c);
-		std::vector<Predicate> *preconds_;
-		bool condition_;
+	void                    operator()(pddl_parser::AtomicFormula &a);
+	void                    operator()(pddl_parser::FunctionalCondition &c);
+	std::vector<Predicate> *preconds_;
+	bool                    condition_;
 };
 
 class PddlStringPreconditionVisitor : public boost::static_visitor<void>
 {
-	public:
-		PddlStringPreconditionVisitor(std::ofstream &pddl_string);
+public:
+	PddlStringPreconditionVisitor(std::ofstream &pddl_string);
 
-		void operator()(pddl_parser::AtomicFormula& a);
-		void operator()(pddl_parser::FunctionalCondition& c);
-		std::ofstream& pddl_string_;
+	void           operator()(pddl_parser::AtomicFormula &a);
+	void           operator()(pddl_parser::FunctionalCondition &c);
+	std::ofstream &pddl_string_;
 };
 
 class BreakupVisitor : public boost::static_visitor<void>
 {
-	public:
-		BreakupVisitor(std::vector<std::string> *breakup);
+public:
+	BreakupVisitor(std::vector<std::string> *breakup);
 
-		void operator()(pddl_parser::AtomicFormula& a);
-		void operator()(pddl_parser::FunctionalCondition& c);
-		std::vector<std::string> *breakup_;
+	void                      operator()(pddl_parser::AtomicFormula &a);
+	void                      operator()(pddl_parser::FunctionalCondition &c);
+	std::vector<std::string> *breakup_;
 };
 
 class EffectVisitor : public boost::static_visitor<void>
 {
-	public:
-		EffectVisitor(std::vector<Predicate> *effects, bool condition);
+public:
+	EffectVisitor(std::vector<Predicate> *effects, bool condition);
 
-		void operator()(pddl_parser::AtomicFormula& a);
-		void operator()(pddl_parser::FunctionalEffect& fc);
-		void operator()(pddl_parser::ActionCost& ac);
-		std::vector<Predicate> *effects_;
-		bool condition_;
+	void                    operator()(pddl_parser::AtomicFormula &a);
+	void                    operator()(pddl_parser::FunctionalEffect &fc);
+	void                    operator()(pddl_parser::ActionCost &ac);
+	std::vector<Predicate> *effects_;
+	bool                    condition_;
 };
 
 class PddlStringEffectVisitor : public boost::static_visitor<void>
 {
-	public:
-		PddlStringEffectVisitor(std::ofstream &pddl_string);
+public:
+	PddlStringEffectVisitor(std::ofstream &pddl_string);
 
-		void operator()(pddl_parser::AtomicFormula& a);
-		void operator()(pddl_parser::FunctionalEffect& fc);
-		void operator()(pddl_parser::ActionCost& ac);
-		std::ofstream& pddl_string_;
+	void           operator()(pddl_parser::AtomicFormula &a);
+	void           operator()(pddl_parser::FunctionalEffect &fc);
+	void           operator()(pddl_parser::ActionCost &ac);
+	std::ofstream &pddl_string_;
 };
 
 class Stn
@@ -134,7 +135,8 @@ private:
 	void      log(const std::string &s, Stn::LogLevel log_leve);
 	StnAction findActionById(size_t id);
 	void      add_domain_action(const DomainAction &action);
-	void generate_classic_pddl_domain(pddl_parser::PddlDomain *dom, const std::string &classic_dom_path);
+	void      generate_classic_pddl_domain(pddl_parser::PddlDomain *dom,
+	                                       const std::string &      classic_dom_path);
 };
 
 } // namespace stn

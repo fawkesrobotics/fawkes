@@ -93,8 +93,8 @@ Stn::set_initial_state(const StnAction &action)
 void
 Stn::read_initial_state(const std::string &pddl_problem_string)
 {
-	pddl_parser::Parser parser;
-	pddl_parser::PddlProblem    prob = parser.parseProblem(pddl_problem_string);
+	pddl_parser::Parser      parser;
+	pddl_parser::PddlProblem prob = parser.parseProblem(pddl_problem_string);
 
 	log_info("Parsing PDDL Problem for STN generation.");
 
@@ -102,15 +102,15 @@ Stn::read_initial_state(const std::string &pddl_problem_string)
 	std::vector<stn::Predicate> init_predicates;
 	for (auto fact : prob.facts) {
 		std::vector<std::string> attrs;
-		std::string              log_string = "Adding init-predicate "
-		                         + fact.predicateName
-		                         + " with arguments:";
+		std::string log_string = "Adding init-predicate " + fact.predicateName + " with arguments:";
 		for (pddl_parser::Term a : fact.args) {
 			attrs.push_back(a.name);
 			log_string += " " + a.name;
 		}
 		log_info(log_string);
-		stn::Predicate init_pred(boost::get<pddl_parser::AtomicFormula>(fact).predicateName, true, attrs);
+		stn::Predicate init_pred(boost::get<pddl_parser::AtomicFormula>(fact).predicateName,
+		                         true,
+		                         attrs);
 		init_predicates.push_back(init_pred);
 	}
 	stn::StnAction init_action(prob.name, {}, init_predicates, std::string(""));
@@ -126,8 +126,8 @@ Stn::read_initial_state(const std::string &pddl_problem_string)
 void
 Stn::set_pddl_domain(const std::string &pddl_domain_string)
 {
-	pddl_parser::Parser parser;
-	pddl_parser::PddlDomain     dom = parser.parseDomain(pddl_domain_string);
+	pddl_parser::Parser     parser;
+	pddl_parser::PddlDomain dom = parser.parseDomain(pddl_domain_string);
 
 	log_info("Loading extended PDDL domain into STN.");
 
@@ -138,17 +138,17 @@ Stn::set_pddl_domain(const std::string &pddl_domain_string)
 			params.push_back(param.name);
 		}
 		std::vector<Predicate> preconds;
-		PreconditionVisitor precond_visitor(&preconds,true);
+		PreconditionVisitor    precond_visitor(&preconds, true);
 		boost::apply_visitor(precond_visitor, action.precondition);
 
-//		build_precon_list(action.precondition, &preconds, true);
+		//		build_precon_list(action.precondition, &preconds, true);
 		std::vector<Predicate> effects;
 		//EffectVisitor eff_visitor(&effects,true);
 		EffectVisitor eff_visitor(&effects, true);
 		boost::apply_visitor(eff_visitor, action.effect.eff);
-//		build_eff_list(action.effect, &effects, true);
+		//		build_eff_list(action.effect, &effects, true);
 
-		int duration = action.duration;
+		int                      duration = action.duration;
 		std::vector<std::string> cond_breakups;
 		log_info(std::to_string(action.cond_breakup.which()));
 		if (action.cond_breakup.which() == 1) { // only if type is Expression
@@ -174,10 +174,11 @@ Stn::set_pddl_domain(const std::string &pddl_domain_string)
 
 PreconditionVisitor::PreconditionVisitor(std::vector<Predicate> *preconds, bool condition)
 : preconds_(preconds), condition_(condition)
-{	
+{
 }
 
-void PreconditionVisitor::operator()(pddl_parser::AtomicFormula& a)
+void
+PreconditionVisitor::operator()(pddl_parser::AtomicFormula &a)
 {
 	std::vector<std::string> args;
 	for (pddl_parser::Term arg : a.args) {
@@ -187,9 +188,11 @@ void PreconditionVisitor::operator()(pddl_parser::AtomicFormula& a)
 	this->preconds_->push_back(p);
 }
 
-void PreconditionVisitor::operator()(pddl_parser::FunctionalCondition& c)
+void
+PreconditionVisitor::operator()(pddl_parser::FunctionalCondition &c)
 {
-	if (c.op == pddl_parser::OperatorFlag_::conjunction || c.op == pddl_parser::OperatorFlag_::negation) {
+	if (c.op == pddl_parser::OperatorFlag_::conjunction
+	    || c.op == pddl_parser::OperatorFlag_::negation) {
 		if (c.op == pddl_parser::OperatorFlag_::negation) {
 			condition_ = !condition_;
 		}
@@ -205,21 +208,25 @@ EffectVisitor::EffectVisitor(std::vector<Predicate> *effects, bool condition)
 {
 }
 
-void EffectVisitor::operator()(pddl_parser::FunctionalEffect& fe)
+void
+EffectVisitor::operator()(pddl_parser::FunctionalEffect &fe)
 {
-	if (fe.op == pddl_parser::OperatorFlag_::conjunction || fe.op == pddl_parser::OperatorFlag_::negation) {
+	if (fe.op == pddl_parser::OperatorFlag_::conjunction
+	    || fe.op == pddl_parser::OperatorFlag_::negation) {
 		if (fe.op == pddl_parser::OperatorFlag_::negation) {
 			condition_ = !condition_;
 		}
-		std::vector<pddl_parser::Effect> effects = boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
+		std::vector<pddl_parser::Effect> effects =
+		  boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
 		for (auto eff : effects) {
 			EffectVisitor eff_visitor(this->effects_, this->condition_);
 			boost::apply_visitor(eff_visitor, eff.eff);
-		}	
+		}
 	}
 }
 
-void EffectVisitor::operator()(pddl_parser::AtomicFormula& a)
+void
+EffectVisitor::operator()(pddl_parser::AtomicFormula &a)
 {
 	std::vector<std::string> args;
 	for (pddl_parser::Term arg : a.args) {
@@ -229,30 +236,32 @@ void EffectVisitor::operator()(pddl_parser::AtomicFormula& a)
 	this->effects_->push_back(p);
 }
 
-void EffectVisitor::operator()(pddl_parser::ActionCost& ac)
+void
+EffectVisitor::operator()(pddl_parser::ActionCost &ac)
 {
 }
 
-BreakupVisitor::BreakupVisitor(std::vector<std::string> *breakup)
-: breakup_(breakup)
-{	
+BreakupVisitor::BreakupVisitor(std::vector<std::string> *breakup) : breakup_(breakup)
+{
 }
 
-void BreakupVisitor::operator()(pddl_parser::AtomicFormula& a)
+void
+BreakupVisitor::operator()(pddl_parser::AtomicFormula &a)
 {
 	this->breakup_->push_back(a.predicateName);
 }
 
-void BreakupVisitor::operator()(pddl_parser::FunctionalCondition& c)
+void
+BreakupVisitor::operator()(pddl_parser::FunctionalCondition &c)
 {
-	if (c.op == pddl_parser::OperatorFlag_::conjunction || c.op == pddl_parser::OperatorFlag_::negation) {
+	if (c.op == pddl_parser::OperatorFlag_::conjunction
+	    || c.op == pddl_parser::OperatorFlag_::negation) {
 		for (auto child : c.condition) {
 			BreakupVisitor breakup_visitor(this->breakup_);
 			boost::apply_visitor(breakup_visitor, child);
 		}
 	}
 }
-
 
 /** Regenerate the STN. */
 void
@@ -533,12 +542,13 @@ Stn::generate_classic_pddl_domain(pddl_parser::PddlDomain *dom, const std::strin
 	out.close();
 }
 
-PddlStringPreconditionVisitor::PddlStringPreconditionVisitor(std::ofstream &pddl_string )
+PddlStringPreconditionVisitor::PddlStringPreconditionVisitor(std::ofstream &pddl_string)
 : pddl_string_(pddl_string)
-{	
+{
 }
 
-void PddlStringPreconditionVisitor::operator()(pddl_parser::AtomicFormula& a)
+void
+PddlStringPreconditionVisitor::operator()(pddl_parser::AtomicFormula &a)
 {
 	pddl_string_ << "(" << a.predicateName;
 	for (pddl_parser::Term arg : a.args) {
@@ -547,9 +557,11 @@ void PddlStringPreconditionVisitor::operator()(pddl_parser::AtomicFormula& a)
 	pddl_string_ << ")";
 }
 
-void PddlStringPreconditionVisitor::operator()(pddl_parser::FunctionalCondition& c)
+void
+PddlStringPreconditionVisitor::operator()(pddl_parser::FunctionalCondition &c)
 {
-	if (c.op == pddl_parser::OperatorFlag_::conjunction || c.op == pddl_parser::OperatorFlag_::negation) {
+	if (c.op == pddl_parser::OperatorFlag_::conjunction
+	    || c.op == pddl_parser::OperatorFlag_::negation) {
 		if (c.op == pddl_parser::OperatorFlag_::negation) {
 			pddl_string_ << "(not ";
 		} else if (c.op == pddl_parser::OperatorFlag_::conjunction) {
@@ -567,23 +579,27 @@ PddlStringEffectVisitor::PddlStringEffectVisitor(std::ofstream &pddl_string)
 {
 }
 
-void PddlStringEffectVisitor::operator()(pddl_parser::FunctionalEffect& fe)
+void
+PddlStringEffectVisitor::operator()(pddl_parser::FunctionalEffect &fe)
 {
-	if (fe.op == pddl_parser::OperatorFlag_::conjunction || fe.op == pddl_parser::OperatorFlag_::negation) {
+	if (fe.op == pddl_parser::OperatorFlag_::conjunction
+	    || fe.op == pddl_parser::OperatorFlag_::negation) {
 		if (fe.op == pddl_parser::OperatorFlag_::negation) {
 			pddl_string_ << "(not ";
 		} else if (fe.op == pddl_parser::OperatorFlag_::conjunction) {
 			pddl_string_ << "(and ";
 		}
-		std::vector<pddl_parser::Effect> effects = boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
+		std::vector<pddl_parser::Effect> effects =
+		  boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
 		for (auto eff : effects) {
 			PddlStringEffectVisitor eff_visitor(this->pddl_string_);
 			boost::apply_visitor(eff_visitor, eff.eff);
-		}	
+		}
 	}
 }
 
-void PddlStringEffectVisitor::operator()(pddl_parser::AtomicFormula& a)
+void
+PddlStringEffectVisitor::operator()(pddl_parser::AtomicFormula &a)
 {
 	pddl_string_ << "(" << a.predicateName;
 	for (pddl_parser::Term arg : a.args) {
@@ -592,7 +608,8 @@ void PddlStringEffectVisitor::operator()(pddl_parser::AtomicFormula& a)
 	pddl_string_ << ")";
 }
 
-void PddlStringEffectVisitor::operator()(pddl_parser::ActionCost& ac)
+void
+PddlStringEffectVisitor::operator()(pddl_parser::ActionCost &ac)
 {
 }
 

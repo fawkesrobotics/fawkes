@@ -19,6 +19,7 @@
  */
 
 #include "precondition_visitor.h"
+
 #include <iostream>
 
 using namespace std;
@@ -46,64 +47,70 @@ PreconditionToCLIPSFactVisitor::PreconditionToCLIPSFactVisitor(const string &par
 {
 }
 
-
 /** Translate an AtomicFormula into a vector of strings.
  * This creates proper CLIPS atomic precondition fact strings for the atomic formula.
  * @param af The atomic formula to translate
  * @return A vector of strings, each string is a properly formed CLIPS fact.
  */
 vector<string>
-PreconditionToCLIPSFactVisitor::operator()(AtomicFormula af) const {
-  vector<string> res;
-  stringstream namestream;
-  namestream << parent_ << sub_counter_;
-  string name = namestream.str();
+PreconditionToCLIPSFactVisitor::operator()(AtomicFormula af) const
+{
+	vector<string> res;
+	stringstream   namestream;
+	namestream << parent_ << sub_counter_;
+	string name = namestream.str();
 
-  string new_parent;
-  if (is_main_) {
-    // Special case: this is the main precondition, but it's an atomic
-    // condition. Add an additional condition so we never have an atomic
-    // precondition as the main precondition.
-    res.push_back(string(
-          "(domain-precondition"
-          " (part-of " + parent_ + ")"
-          " (name " + name + ")"
-          " (type conjunction)"
-          ")"));
-    // Also adapt parent and name, the parent is now the new precondition
-    // above.
-    new_parent = name;
-    stringstream child_name;
-    child_name << name << 1;
-    name = child_name.str();
-  } else {
-    new_parent = parent_;
-  }
-  string params = "";
-  string constants = "";
-  for (Term &t: af.args) {
-    if (t.isVariable) {
-      // It's really a parameter.
-      params += " " + t.name;
-      constants += " nil";
-    } else {
-      // It's a constant.
-      params += " c";
-      constants += " " + t.name;
-    }
-  }
-  string predicate_string;
-  predicate_string = " (predicate " + af.predicateName + ")";
+	string new_parent;
+	if (is_main_) {
+		// Special case: this is the main precondition, but it's an atomic
+		// condition. Add an additional condition so we never have an atomic
+		// precondition as the main precondition.
+		res.push_back(string("(domain-precondition"
+		                     " (part-of "
+		                     + parent_
+		                     + ")"
+		                       " (name "
+		                     + name
+		                     + ")"
+		                       " (type conjunction)"
+		                       ")"));
+		// Also adapt parent and name, the parent is now the new precondition
+		// above.
+		new_parent = name;
+		stringstream child_name;
+		child_name << name << 1;
+		name = child_name.str();
+	} else {
+		new_parent = parent_;
+	}
+	string params    = "";
+	string constants = "";
+	for (Term &t : af.args) {
+		if (t.isVariable) {
+			// It's really a parameter.
+			params += " " + t.name;
+			constants += " nil";
+		} else {
+			// It's a constant.
+			params += " c";
+			constants += " " + t.name;
+		}
+	}
+	string predicate_string;
+	predicate_string = " (predicate " + af.predicateName + ")";
 
-  res.push_back(string(
-        "(domain-atomic-precondition"
-        " (part-of " + new_parent + ")"
-        " (name " + name + ")"
-        + predicate_string +
-        " (param-names (create$" + params + "))"
-        " (param-constants (create$" + constants + "))"
-        ")"));
-  return res;
+	res.push_back(string("(domain-atomic-precondition"
+	                     " (part-of "
+	                     + new_parent
+	                     + ")"
+	                       " (name "
+	                     + name + ")" + predicate_string + " (param-names (create$" + params
+	                     + "))"
+	                       " (param-constants (create$"
+	                     + constants
+	                     + "))"
+	                       ")"));
+	return res;
 }
 
 /** Translate a FunctionalCondition into a vector of strings.
@@ -114,33 +121,39 @@ PreconditionToCLIPSFactVisitor::operator()(AtomicFormula af) const {
  * @return A vector of strings, each string is a properly formed CLIPS fact.
  */
 vector<string>
-PreconditionToCLIPSFactVisitor::operator()(FunctionalCondition fc) const {
-      vector<string> res;
-  stringstream namestream;
-  namestream << parent_ << sub_counter_;
-  string name = namestream.str();
-    std::string type;
-    if (fc.op == OperatorFlag::EnumType::conjunction) {
-      type = "conjunction";
-    } else if(fc.op == OperatorFlag::EnumType::disjunction) {
-      type = "disjunction";
-    } else if(fc.op == OperatorFlag::EnumType::negation) {
-      type = "negation";
-    } else {
-      return res;
-    }
-    res.push_back(string("(domain-precondition"
-                         " (name " + name + ")"
-                         " (part-of " + parent_ + ")"
-                         " (type " + type + ")"
-                         ")"));
-    uint sub_counter = 1;
-    for (GoalDescription &sub : fc.condition) {
-      vector<string> args = boost::apply_visitor(
-          PreconditionToCLIPSFactVisitor(name, sub_counter++), sub);
-      res.insert(res.end(), args.begin(), args.end());
-    }
-   
-  return res;
-}
+PreconditionToCLIPSFactVisitor::operator()(FunctionalCondition fc) const
+{
+	vector<string> res;
+	stringstream   namestream;
+	namestream << parent_ << sub_counter_;
+	string      name = namestream.str();
+	std::string type;
+	if (fc.op == OperatorFlag::EnumType::conjunction) {
+		type = "conjunction";
+	} else if (fc.op == OperatorFlag::EnumType::disjunction) {
+		type = "disjunction";
+	} else if (fc.op == OperatorFlag::EnumType::negation) {
+		type = "negation";
+	} else {
+		return res;
+	}
+	res.push_back(string("(domain-precondition"
+	                     " (name "
+	                     + name
+	                     + ")"
+	                       " (part-of "
+	                     + parent_
+	                     + ")"
+	                       " (type "
+	                     + type
+	                     + ")"
+	                       ")"));
+	uint sub_counter = 1;
+	for (GoalDescription &sub : fc.condition) {
+		vector<string> args =
+		  boost::apply_visitor(PreconditionToCLIPSFactVisitor(name, sub_counter++), sub);
+		res.insert(res.end(), args.begin(), args.end());
+	}
 
+	return res;
+}
