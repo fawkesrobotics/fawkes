@@ -19,7 +19,9 @@
  */
 
 #include "effect_visitor.h"
+
 #include "precondition_visitor.h"
+
 #include <iostream>
 
 using namespace pddl_parser;
@@ -38,9 +40,16 @@ using namespace pddl_parser;
  * @param condition Name of the condition this effect is bound to if it is an conditional effect
  * @param eff_counter Counter of all effects, used to create ids for conditional effects
  */
-EffectToCLIPSFactVisitor::EffectToCLIPSFactVisitor(
-    const std::string &pddl_operator, bool positive, std::string condition, int eff_counter)
-: pddl_operator_(pddl_operator), positive_effect_(positive), condition_(condition), eff_counter_(eff_counter) {}
+EffectToCLIPSFactVisitor::EffectToCLIPSFactVisitor(const std::string &pddl_operator,
+                                                   bool               positive,
+                                                   std::string        condition,
+                                                   int                eff_counter)
+: pddl_operator_(pddl_operator),
+  positive_effect_(positive),
+  condition_(condition),
+  eff_counter_(eff_counter)
+{
+}
 
 /** Translate an ConditionalEffect into a vector of strings.
  * Note that this does not return a CLIPS fact because we do not store atoms
@@ -51,10 +60,11 @@ EffectToCLIPSFactVisitor::EffectToCLIPSFactVisitor(
  * @return An empty vector since this should not be reached by the parser.
  */
 std::vector<std::string>
-EffectToCLIPSFactVisitor::operator()(ConditionalEffect &ce) const {
-  std::cout << "Should not reach this!!!!!!!!!!!!!!!!" << std::endl;
-  std::vector<std::string> res;
-  return res;
+EffectToCLIPSFactVisitor::operator()(ConditionalEffect &ce) const
+{
+	std::cout << "Should not reach this!!!!!!!!!!!!!!!!" << std::endl;
+	std::vector<std::string> res;
+	return res;
 }
 
 /** Translate an ActionCost into a vector of strings.
@@ -63,9 +73,10 @@ EffectToCLIPSFactVisitor::operator()(ConditionalEffect &ce) const {
  * @return An empty vector
  */
 std::vector<std::string>
-EffectToCLIPSFactVisitor::operator()(ActionCost &ce) const {
-  std::vector<std::string> res;
-  return res;
+EffectToCLIPSFactVisitor::operator()(ActionCost &ce) const
+{
+	std::vector<std::string> res;
+	return res;
 }
 
 /** Translate an AtomicFormula into a vector of strings.
@@ -76,33 +87,45 @@ EffectToCLIPSFactVisitor::operator()(ActionCost &ce) const {
  * @return A vector that only contains AtomicFormula as clips domain effect fact string
  */
 std::vector<std::string>
-EffectToCLIPSFactVisitor::operator()(AtomicFormula &af) const {
-    std::vector<std::string> res;
+EffectToCLIPSFactVisitor::operator()(AtomicFormula &af) const
+{
+	std::vector<std::string> res;
 
-    std::string params = "";
-    std::string constants = "";
+	std::string params    = "";
+	std::string constants = "";
 
-    for (Term &t: af.args) {
-      if (t.isVariable) {
-        // It's really a parameter.
-        params += " " + t.name;
-        constants += " nil";
-      } else {
-        // It's a constant.
-        params += " c";
-        constants += " " + t.name;
-      }
-    }
-    res.push_back(std::string(
-          "(domain-effect"
-          " (part-of " + pddl_operator_ + ")"
-          " (predicate " + af.predicateName + ")"
-          " (param-names " + params + ")"
-          " (param-constants " + constants + ")"
-          " (type " + (positive_effect_ ? "POSITIVE" : "NEGATIVE") + ")"
-          " (condition " + condition_ + ")"
-          ")"));
-    return res;
+	for (Term &t : af.args) {
+		if (t.isVariable) {
+			// It's really a parameter.
+			params += " " + t.name;
+			constants += " nil";
+		} else {
+			// It's a constant.
+			params += " c";
+			constants += " " + t.name;
+		}
+	}
+	res.push_back(std::string("(domain-effect"
+	                          " (part-of "
+	                          + pddl_operator_
+	                          + ")"
+	                            " (predicate "
+	                          + af.predicateName
+	                          + ")"
+	                            " (param-names "
+	                          + params
+	                          + ")"
+	                            " (param-constants "
+	                          + constants
+	                          + ")"
+	                            " (type "
+	                          + (positive_effect_ ? "POSITIVE" : "NEGATIVE")
+	                          + ")"
+	                            " (condition "
+	                          + condition_
+	                          + ")"
+	                            ")"));
+	return res;
 }
 
 /** Translate a FunctionalEffect into a vector of strings. A functional effect is
@@ -114,68 +137,78 @@ EffectToCLIPSFactVisitor::operator()(AtomicFormula &af) const {
  * @return A vector of strings, each string is a properly formed CLIPS fact.
  */
 std::vector<std::string>
-EffectToCLIPSFactVisitor::operator()(FunctionalEffect &fe) const {
-  std::vector<std::string> res;
-  if (fe.op == pddl_parser::OperatorFlag::conjunction) {
-    //Its a conjunction and the variant has to be a vector of effects
-    if (fe.effect.type() != typeid(std::vector<pddl_parser::Effect>)){
-      throw ParserException(std::string("Unknown content of conjunction of " + pddl_operator_ + " expected vector<Effect>"));
-    }
-    std::vector<pddl_parser::Effect> effects = boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
-    int tmp_counter = eff_counter_;
-    for (auto &eff : effects) {
-      std::vector<std::string> sub_effects = boost::apply_visitor(
-          EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_,condition_,tmp_counter++), eff.eff);
-      res.insert(res.end(), sub_effects.begin(), sub_effects.end());
-    }
+EffectToCLIPSFactVisitor::operator()(FunctionalEffect &fe) const
+{
+	std::vector<std::string> res;
+	if (fe.op == pddl_parser::OperatorFlag::conjunction) {
+		//Its a conjunction and the variant has to be a vector of effects
+		if (fe.effect.type() != typeid(std::vector<pddl_parser::Effect>)) {
+			throw ParserException(std::string("Unknown content of conjunction of " + pddl_operator_
+			                                  + " expected vector<Effect>"));
+		}
+		std::vector<pddl_parser::Effect> effects =
+		  boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
+		int tmp_counter = eff_counter_;
+		for (auto &eff : effects) {
+			std::vector<std::string> sub_effects = boost::apply_visitor(
+			  EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_, condition_, tmp_counter++),
+			  eff.eff);
+			res.insert(res.end(), sub_effects.begin(), sub_effects.end());
+		}
 
-  } else if (fe.op == pddl_parser::OperatorFlag::negation) {
-    //Its a negation and the variant should contain a vector of Effect of size 1
-    if (fe.effect.type() != typeid(std::vector<pddl_parser::Effect>)){
-      throw ParserException(std::string("Unknown content of negation of " + pddl_operator_ + " expected vector<Effect>"));
-    }
-    std::vector<pddl_parser::Effect> effects = boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
-    // since negation is the default constructor for the operator, if the size is 0, we suspect that the effect is empty
-    if (effects.size() == 0) return res;
-    
-    if (effects.size() != 1) {
-      throw ParserException(std::string("Expected exactly one sub-formula for 'not' in " + pddl_operator_));
-    }
-    std::vector<std::string> sub_effects = boost::apply_visitor(
-        EffectToCLIPSFactVisitor(pddl_operator_, !positive_effect_,condition_,eff_counter_),
-        effects[0].eff);
-    res.insert(res.end(), sub_effects.begin(), sub_effects.end());
+	} else if (fe.op == pddl_parser::OperatorFlag::negation) {
+		//Its a negation and the variant should contain a vector of Effect of size 1
+		if (fe.effect.type() != typeid(std::vector<pddl_parser::Effect>)) {
+			throw ParserException(std::string("Unknown content of negation of " + pddl_operator_
+			                                  + " expected vector<Effect>"));
+		}
+		std::vector<pddl_parser::Effect> effects =
+		  boost::get<std::vector<pddl_parser::Effect>>(fe.effect);
+		// since negation is the default constructor for the operator, if the size is 0, we suspect that the effect is empty
+		if (effects.size() == 0)
+			return res;
 
-  } else if (fe.op == pddl_parser::OperatorFlag::condition) {
-    //Its a conditional effect, the variant should be a conditional effect, which contains a goal condition and an effect
-    if (fe.effect.type() != typeid(pddl_parser::ConditionalEffect)){
-      std::cout << "Type: " << fe.effect.type().name() << std::endl;
-      throw ParserException(std::string("Unknown content of conditional effect in " + pddl_operator_));
-    }
-    pddl_parser::ConditionalEffect ce = boost::get<pddl_parser::ConditionalEffect>(fe.effect);
-    
-    std::string ce_name;
+		if (effects.size() != 1) {
+			throw ParserException(
+			  std::string("Expected exactly one sub-formula for 'not' in " + pddl_operator_));
+		}
+		std::vector<std::string> sub_effects = boost::apply_visitor(
+		  EffectToCLIPSFactVisitor(pddl_operator_, !positive_effect_, condition_, eff_counter_),
+		  effects[0].eff);
+		res.insert(res.end(), sub_effects.begin(), sub_effects.end());
 
-    //Create an id for the conditional effect to link the condition to the effect
-    //If it is a nested conditional effect, add the effect counter to the current condition id
-    //Otherwise its the operater id + "-ce"
-    if (condition_ == "NONE") {
-      ce_name = pddl_operator_ + "-ce" + std::to_string(eff_counter_);
-    } else {
-      ce_name = condition_ + std::to_string(eff_counter_);
-    }
+	} else if (fe.op == pddl_parser::OperatorFlag::condition) {
+		//Its a conditional effect, the variant should be a conditional effect, which contains a goal condition and an effect
+		if (fe.effect.type() != typeid(pddl_parser::ConditionalEffect)) {
+			std::cout << "Type: " << fe.effect.type().name() << std::endl;
+			throw ParserException(
+			  std::string("Unknown content of conditional effect in " + pddl_operator_));
+		}
+		pddl_parser::ConditionalEffect ce = boost::get<pddl_parser::ConditionalEffect>(fe.effect);
 
-    //Parse the condition
-    std::vector<std::string> args = boost::apply_visitor(
-          PreconditionToCLIPSFactVisitor(ce_name, 1, false), ce.condition);
-    res.insert(res.end(), args.begin(), args.end());
-    //Parse the effect
-    args = boost::apply_visitor(
-          EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_,ce_name,eff_counter_), ce.effect.eff);
-    res.insert(res.end(), args.begin(), args.end());
+		std::string ce_name;
 
-  } else {
-    throw ParserException(std::string("Unknown operator" + fe.op));
-  }
-  return res;
+		//Create an id for the conditional effect to link the condition to the effect
+		//If it is a nested conditional effect, add the effect counter to the current condition id
+		//Otherwise its the operater id + "-ce"
+		if (condition_ == "NONE") {
+			ce_name = pddl_operator_ + "-ce" + std::to_string(eff_counter_);
+		} else {
+			ce_name = condition_ + std::to_string(eff_counter_);
+		}
+
+		//Parse the condition
+		std::vector<std::string> args =
+		  boost::apply_visitor(PreconditionToCLIPSFactVisitor(ce_name, 1, false), ce.condition);
+		res.insert(res.end(), args.begin(), args.end());
+		//Parse the effect
+		args = boost::apply_visitor(
+		  EffectToCLIPSFactVisitor(pddl_operator_, positive_effect_, ce_name, eff_counter_),
+		  ce.effect.eff);
+		res.insert(res.end(), args.begin(), args.end());
+
+	} else {
+		throw ParserException(std::string("Unknown operator" + fe.op));
+	}
+	return res;
 }

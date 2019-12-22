@@ -29,19 +29,22 @@
 
 class EffectToCLIPSFactVisitor : public boost::static_visitor<std::vector<std::string>>
 {
- public:
-  EffectToCLIPSFactVisitor(const std::string &pddl_operator, bool positive, std::string condition, int eff_counter);
+public:
+	EffectToCLIPSFactVisitor(const std::string &pddl_operator,
+	                         bool               positive,
+	                         std::string        condition,
+	                         int                eff_counter);
 
-  std::vector<std::string> operator()(pddl_parser::FunctionalEffect &a) const;
-  std::vector<std::string> operator()(pddl_parser::AtomicFormula &p) const;
-  std::vector<std::string> operator()(pddl_parser::ActionCost &p) const;
-  std::vector<std::string> operator()(pddl_parser::ConditionalEffect &ce) const;
-  
- private:
-  std::string pddl_operator_;
-  bool positive_effect_;
-  std::string condition_;
-  int eff_counter_;
+	std::vector<std::string> operator()(pddl_parser::FunctionalEffect &a) const;
+	std::vector<std::string> operator()(pddl_parser::AtomicFormula &p) const;
+	std::vector<std::string> operator()(pddl_parser::ActionCost &p) const;
+	std::vector<std::string> operator()(pddl_parser::ConditionalEffect &ce) const;
+
+private:
+	std::string pddl_operator_;
+	bool        positive_effect_;
+	std::string condition_;
+	int         eff_counter_;
 };
 
 #endif /* !PLUGINS_CLIPS_PDDL_PARSER_EFFECT_VISITOR_H__ */

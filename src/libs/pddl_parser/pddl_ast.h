@@ -17,212 +17,172 @@
 #include <vector>
 using boost::variant;
 
-namespace pddl_parser
+namespace pddl_parser {
+typedef struct RequirementFlag_
 {
-    typedef struct RequirementFlag_ {
-        typedef enum {
-            eStrips,
-            eNegativePreconditions,
-            typing,
-            action_cost,
-            adl
-        } EnumType;
-        typedef std::vector<EnumType> VectorType;
-    } RequirementFlag;
+	typedef enum { eStrips, eNegativePreconditions, typing, action_cost, adl } EnumType;
+	typedef std::vector<EnumType> VectorType;
+} RequirementFlag;
 
-    typedef struct OperatorFlag_ {
-        typedef enum {
-            
-            negation,
-            conjunction,
-            disjunction,
-            condition
-        } EnumType;
-        typedef std::vector<EnumType> VectorType;
-    } OperatorFlag;
+typedef struct OperatorFlag_
+{
+	typedef enum {
 
-    struct Effect;
-    struct ConditionalEffect;
-    struct FunctionalCondition;
+		negation,
+		conjunction,
+		disjunction,
+		condition
+	} EnumType;
+	typedef std::vector<EnumType> VectorType;
+} OperatorFlag;
 
-    struct Entity
-    {
-        std::string name;
-        std::string type;
-        Entity(const std::string n, const std::string t) : name(n), type(t) {}
-    };
+struct Effect;
+struct ConditionalEffect;
+struct FunctionalCondition;
 
-    typedef std::vector<struct Entity> TypedList;
+struct Entity
+{
+	std::string name;
+	std::string type;
+	Entity(const std::string n, const std::string t) : name(n), type(t)
+	{
+	}
+};
 
-    typedef std::vector<std::pair<std::string, TypedList> > PredicateList;
+typedef std::vector<struct Entity> TypedList;
 
-    struct Term
-    {
-       bool isVariable;
-       std::string name;
-    };
+typedef std::vector<std::pair<std::string, TypedList>> PredicateList;
 
-    typedef std::vector<struct Term> TermList;
+struct Term
+{
+	bool        isVariable;
+	std::string name;
+};
 
-    struct AtomicFormula
-    {
-        std::string predicateName;
-        TermList args;
-    };
+typedef std::vector<struct Term> TermList;
 
-    typedef std::vector<AtomicFormula> FactList;
+struct AtomicFormula
+{
+	std::string predicateName;
+	TermList    args;
+};
 
-    struct Literal
-    {
-        bool negate;
-        AtomicFormula atomicFormula;
-    };
+typedef std::vector<AtomicFormula> FactList;
 
-    struct FunctionalEffect
-    {
-      OperatorFlag::EnumType op;
-      variant<boost::recursive_wrapper<std::vector<Effect>>,boost::recursive_wrapper<ConditionalEffect>,AtomicFormula> effect;
-    };
+struct Literal
+{
+	bool          negate;
+	AtomicFormula atomicFormula;
+};
 
-    struct ActionCost
-    {
-        std::string name;
-        int cost;
-    };
+struct FunctionalEffect
+{
+	OperatorFlag::EnumType op;
+	variant<boost::recursive_wrapper<std::vector<Effect>>,
+	        boost::recursive_wrapper<ConditionalEffect>,
+	        AtomicFormula>
+	  effect;
+};
 
-    struct Effect
-    {
-        variant<FunctionalEffect,ActionCost,AtomicFormula> eff;
-    };
+struct ActionCost
+{
+	std::string name;
+	int         cost;
+};
 
-    using GoalDescription = boost::variant<boost::recursive_wrapper<FunctionalCondition>,AtomicFormula>;
+struct Effect
+{
+	variant<FunctionalEffect, ActionCost, AtomicFormula> eff;
+};
 
-    struct ConditionalEffect
-    {
-      GoalDescription condition;
-      Effect effect;
-    };
+using GoalDescription =
+  boost::variant<boost::recursive_wrapper<FunctionalCondition>, AtomicFormula>;
 
-    struct FunctionalCondition
-    {
-      OperatorFlag::EnumType op;
-      std::vector<GoalDescription> condition;
-    };
+struct ConditionalEffect
+{
+	GoalDescription condition;
+	Effect          effect;
+};
 
-    struct PddlAction
-    {
-        std::string name;
-        TypedList parameters;
-        GoalDescription precondition;
-        Effect effect;
-        GoalDescription cond_breakup;
-        GoalDescription temp_breakup;
-        float duration;
-    };
+struct FunctionalCondition
+{
+	OperatorFlag::EnumType       op;
+	std::vector<GoalDescription> condition;
+};
 
-    typedef std::vector<struct PddlAction> ActionList;
+struct PddlAction
+{
+	std::string     name;
+	TypedList       parameters;
+	GoalDescription precondition;
+	Effect          effect;
+	GoalDescription cond_breakup;
+	GoalDescription temp_breakup;
+	float           duration;
+};
 
-    struct PddlDomain
-    {
-        std::string name;
-        RequirementFlag::VectorType requirements;
-        TypedList types;
-        TypedList constants;
-        PredicateList predicates;
-        ActionList actions;
-    };
+typedef std::vector<struct PddlAction> ActionList;
 
-    struct PddlProblem
-    {
-        std::string name;
-        std::string domain;
-        TypedList objects;
-        FactList facts;
-        GoalDescription goal;
-    };
-}
+struct PddlDomain
+{
+	std::string                 name;
+	RequirementFlag::VectorType requirements;
+	TypedList                   types;
+	TypedList                   constants;
+	PredicateList               predicates;
+	ActionList                  actions;
+};
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::Entity,
-    (std::string, name)
-    (std::string, type)
-)
+struct PddlProblem
+{
+	std::string     name;
+	std::string     domain;
+	TypedList       objects;
+	FactList        facts;
+	GoalDescription goal;
+};
+} // namespace pddl_parser
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::Term,
-    (bool, isVariable)
-    (std::string, name)
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Entity, (std::string, name)(std::string, type))
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::AtomicFormula,
-    (std::string, predicateName)
-    (pddl_parser::TermList, args)
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Term, (bool, isVariable)(std::string, name))
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::Literal,
-    (bool, negate)
-    (pddl_parser::AtomicFormula, atomicFormula)
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::AtomicFormula,
+                          (std::string, predicateName)(pddl_parser::TermList, args))
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::FunctionalEffect,
-    op,
-    effect
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Literal,
+                          (bool, negate)(pddl_parser::AtomicFormula, atomicFormula))
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::ActionCost,
-    name,
-    cost
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::FunctionalEffect, op, effect)
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::FunctionalCondition,
-    (pddl_parser::OperatorFlag::EnumType, op)
-    (std::vector<pddl_parser::GoalDescription>, condition)
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::ActionCost, name, cost)
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::ConditionalEffect,
-    condition,
-    effect
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::FunctionalCondition,
+                          (pddl_parser::OperatorFlag::EnumType,
+                           op)(std::vector<pddl_parser::GoalDescription>, condition))
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::Effect,
-    eff
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::ConditionalEffect, condition, effect)
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::PddlAction,
-    (std::string, name)
-    (pddl_parser::TypedList, parameters)
-    (pddl_parser::GoalDescription, precondition)
-    (pddl_parser::Effect, effect)
-    (pddl_parser::GoalDescription, cond_breakup)
-    (pddl_parser::GoalDescription, temp_breakup)
-    (float, duration)
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Effect, eff)
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::PddlDomain,
-    (std::string, name)
-    (pddl_parser::RequirementFlag::VectorType, requirements)
-    (pddl_parser::TypedList, types)
-    (pddl_parser::TypedList, constants)
-    (pddl_parser::PredicateList, predicates)
-    (pddl_parser::ActionList, actions)
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::PddlAction,
+                          (std::string, name)(pddl_parser::TypedList, parameters)(
+                            pddl_parser::GoalDescription,
+                            precondition)(pddl_parser::Effect,
+                                          effect)(pddl_parser::GoalDescription,
+                                                  cond_breakup)(pddl_parser::GoalDescription,
+                                                                temp_breakup)(float, duration))
 
-BOOST_FUSION_ADAPT_STRUCT(
-    pddl_parser::PddlProblem,
-    (std::string, name)
-    (std::string, domain)
-    (pddl_parser::TypedList, objects)
-    (pddl_parser::FactList, facts)
-    (pddl_parser::GoalDescription, goal)
-)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::PddlDomain,
+                          (std::string, name)(pddl_parser::RequirementFlag::VectorType,
+                                              requirements)(pddl_parser::TypedList, types)(
+                            pddl_parser::TypedList,
+                            constants)(pddl_parser::PredicateList,
+                                       predicates)(pddl_parser::ActionList, actions))
+
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::PddlProblem,
+                          (std::string, name)(std::string, domain)(pddl_parser::TypedList, objects)(
+                            pddl_parser::FactList,
+                            facts)(pddl_parser::GoalDescription, goal))
 
 #endif

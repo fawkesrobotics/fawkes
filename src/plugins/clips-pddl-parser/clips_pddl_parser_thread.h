@@ -21,57 +21,53 @@
 #ifndef _PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H_
 #define _PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H_
 
-#include <aspect/logging.h>
+#include "effect_visitor.h"
+#include "precondition_visitor.h"
+
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips_feature.h>
-
-#include "precondition_visitor.h"
-#include "effect_visitor.h"
-
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+
+#include <clipsmm.h>
+#include <map>
+#include <string>
 #include <unistd.h>
 
-#include <string>
-#include <clipsmm.h>
-#include <string>
-#include <map>
-
 namespace CLIPS {
-  class Environment;
+class Environment;
 }
 
 namespace fawkes {
 }
 
-class PDDLClipsThread 
-: public fawkes::Thread,
-  public fawkes::LoggingAspect,
-  public fawkes::CLIPSFeature,
-  public fawkes::CLIPSFeatureAspect
+class PDDLClipsThread : public fawkes::Thread,
+                        public fawkes::LoggingAspect,
+                        public fawkes::CLIPSFeature,
+                        public fawkes::CLIPSFeatureAspect
 {
- public:
-  PDDLClipsThread();
+public:
+	PDDLClipsThread();
 
-  virtual void init();
-  virtual void finalize();
-  virtual void loop();
+	virtual void init();
+	virtual void finalize();
+	virtual void loop();
 
-  virtual void clips_context_init(const std::string &env_name,
-				  fawkes::LockPtr<CLIPS::Environment> &clips);
-  virtual void clips_context_destroyed(const std::string &env_name);
+	virtual void clips_context_init(const std::string &                  env_name,
+	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_destroyed(const std::string &env_name);
 
- private:
-  CLIPS::Value parse_domain(std::string env_name, std::string domain_file);
+private:
+	CLIPS::Value parse_domain(std::string env_name, std::string domain_file);
 
- private:
-  std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
-  
-  pddl_parser::PddlDomain domain_;
-  int domain_desc_timestamp_;
-  std::string last_domain_file_;
+private:
+	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 
+	pddl_parser::PddlDomain domain_;
+	int                     domain_desc_timestamp_;
+	std::string             last_domain_file_;
 };
 
 #endif /* !PLUGINS_CLIPS_PDDL_PARSER_FEATURE_PDDL_H__ */
