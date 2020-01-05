@@ -20,14 +20,16 @@
  */
 
 #include "hardware_models_thread.h"
-#include <utils/time/wait.h>
-#include <unistd.h>
+
+#include <config/yaml.h>
+#include <core/threading/mutex_locker.h>
+#include <interfaces/SwitchInterface.h>
+#include <utils/misc/map_skill.h>
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
-#include <utils/misc/map_skill.h>
-#include <interfaces/SwitchInterface.h>
-#include <core/threading/mutex_locker.h>
-#include <config/yaml.h>
+#include <utils/time/wait.h>
+
+#include <unistd.h>
 
 using namespace fawkes;
 
@@ -37,14 +39,14 @@ using namespace fawkes;
  * Parses yaml files that are assumend to have the following format:
  * COMPONENT-NAME:
  *  states:
- *      <List of states, the first state is assumed to be the initial state>
+ *      \verbatim<List of states, the first state is assumed to be the initial state>\endverbatim
  * 
  *  STATE_1:
  *   edges:
- *    <List of states the state has an edge to>
+ *    \verbatim<List of states the state has an edge to>\endverbatim
  *   edge_1:
- *    transition: <name of the action that causes the transition>
- *    (optional)probability: <probability of the transition if it is an exogenous action>
+ *    transition: \verbatim<name of the action that causes the transition>\endverbatim
+ *    (optional)probability: \verbatim<probability of the transition if it is an exogenous action>\endverbatim
  *     
  *  Any component plugin can inform the HardwareModel Plugin about state changes
  *  by sending a HardwareModelInterfaceMessage.
@@ -53,25 +55,26 @@ using namespace fawkes;
 
 /** Constructor. */
 HardwareModelsThread::HardwareModelsThread()
-	: Thread("HardwareModelsThread", Thread::OPMODE_WAITFORWAKEUP),
-	CLIPSFeature("hardware-models"), CLIPSFeatureAspect(this), BlackBoardInterfaceListener("HardwareModelsThread")
+: Thread("HardwareModelsThread", Thread::OPMODE_WAITFORWAKEUP),
+  CLIPSFeature("hardware-models"),
+  CLIPSFeatureAspect(this),
+  BlackBoardInterfaceListener("HardwareModelsThread")
 
 {
 }
 
-
 void
 HardwareModelsThread::init()
 {
-  std::string cfg_interface_ = "HardwareModels";
-  if (config->exists("/hardware-models/interface")) {
-    cfg_interface_ = config->get_string("/hardware-models/interface");
-  }
+	std::string cfg_interface_ = "HardwareModels";
+	if (config->exists("/hardware-models/interface")) {
+		cfg_interface_ = config->get_string("/hardware-models/interface");
+	}
 
-  hm_if_ = blackboard->open_for_writing<HardwareModelsInterface>(cfg_interface_.c_str());
-  blackboard->register_listener(this);
-  wakeup();
-  bbil_add_message_interface(hm_if_);
+	hm_if_ = blackboard->open_for_writing<HardwareModelsInterface>(cfg_interface_.c_str());
+	blackboard->register_listener(this);
+	wakeup();
+	bbil_add_message_interface(hm_if_);
 }
 
 /**
@@ -81,114 +84,107 @@ HardwareModelsThread::init()
  * @param clips Pointer to clips environment
  */
 void
-HardwareModelsThread::clips_context_init(const std::string &env_name,
-          LockPtr<CLIPS::Environment> &clips)
+HardwareModelsThread::clips_context_init(const std::string &          env_name,
+                                         LockPtr<CLIPS::Environment> &clips)
 {
-	std::string models_dir_;
+	envs_[env_name] = clips;
 
-  models_dir_ = config->get_string("/hardware-models/models-dir");
-  if (models_dir_[models_dir_.size()-1] != '/') {
-    models_dir_ += "/";
-  }
+	clips->batch_evaluate(SRCDIR "/hardware_models.clp");
 
+	components_ = config->get_strings("/hardware-models/components");
+	for (const auto &c : components_) {
+		if (!config->exists(std::string(c + "/states").c_str())) {
+			logger->log_warn(name(), "Component config is missing for %s", c.c_str());
+			continue;
+		}
 
-  envs_[env_name] = clips;
+		//First state in the config file is assumend to be the initial state
+		std::vector<std::string> states = config->get_strings(std::string(c + "/states").c_str());
 
-  clips->batch_evaluate(SRCDIR"/hardware_models.clp");
+		//Check if any states are defined
+		if (states.empty()) {
+			logger->log_warn(name(), "No states for component %s", c.c_str());
+			continue;
+		}
 
-  components_  = config->get_strings("/hardware-models/components");
-  for (const auto c : components_) {
+		for (const auto &state : states) {
+			// Check if edges are defined
+			if (!(config->is_list(std::string(c + "/" + state + "/edges").c_str()))) {
+				logger->log_warn(name(), "State %s of %s needs edges field", state.c_str(), c.c_str());
+				continue;
+			}
 
-    logger->log_info(name(),c.c_str());
-    if (!config->exists(std::string(c + "/states").c_str())) {
-      logger->log_warn(name(),"Component config file is missing in %s : %s", models_dir_.c_str(),c.c_str());
-      continue;
-    }
+			std::vector<std::string> edges =
+			  config->get_strings(std::string(c + "/" + state + "/edges").c_str());
+			for (const auto &edge : edges) {
+				std::string transition = "";
 
-    //First state in the config file is assumend to be the initial state
-    std::vector<std::string> states = config->get_strings(std::string(c + "/states").c_str());
-    if (!states.empty()) {
-      for (const auto state : states) {
-        if (config->is_list(std::string(c + "/" + state + "/edges").c_str())) {
-          std::vector<std::string> edges = config->get_strings(std::string(c + "/" + state + "/edges").c_str());
-          for (const auto edge : edges) {
+				// An edge can have one or mulitple transition conditions
+				if (config->exists(std::string(c + "/" + state + "/" + edge + "/transition"))) {
+					transition =
+					  config->get_string(std::string(c + "/" + state + "/" + edge + "/transition").c_str());
 
-              std::string transition = "";
-              if (config->exists(std::string(c + "/" + state + "/" + edge + "/transition"))){
-                transition = config->get_string(std::string(c + "/" + state + "/" + edge + "/transition").c_str());
+					if (config->exists(std::string(c + "/" + state + "/" + edge + "/probability").c_str())) {
+						clips_add_edge(clips, c, state, edge, transition);
+					}
 
-                double prob = 0.0;
-                if (config->exists(std::string(c + "/" + state + "/" + edge + "/probability").c_str())) {
-                  prob = config->get_float(std::string(c + "/" + state + "/" + edge + "/probability").c_str());
+				} else if (config->exists(std::string(c + "/" + state + "/" + edge + "/transitions"))) {
+					std::vector<std::string> transitions =
+					  config->get_strings(std::string(c + "/" + state + "/" + edge + "/transitions"));
+					for (std::string transition : transitions) {
+						if (config->exists(
+						      std::string(c + "/" + state + "/" + edge + "/probability").c_str())) {
+							clips_add_edge(clips, c, state, edge, transition);
+						}
+					}
+				} else {
+					logger->log_warn(name(),
+					                 "Cant find transition/transitions value in %s",
+					                 std::string(c + "/" + state + "/" + edge).c_str());
+					continue;
+				}
+			}
 
-                  clips_add_edge(clips,c,state,edge,transition,prob);
-                  logger->log_debug(name(),"Edge from %s to %s via %s",state.c_str(),edge.c_str(),transition.c_str());
-                }
-
-              } else if (config->exists(std::string(c + "/" + state + "/" + edge + "/transitions"))){
-                std::vector<std::string> transitions = config->get_strings(std::string(c + "/" + state + "/" + edge + "/transitions"));
-                for (std::string transition : transitions) {
-
-                  double prob = 0.0;
-                  if (config->exists(std::string(c + "/" + state + "/" + edge + "/probability").c_str())) {
-                    prob = config->get_float(std::string(c + "/" + state + "/" + edge + "/probability").c_str());
-
-                    clips_add_edge(clips,c,state,edge,transition,prob);
-                    logger->log_debug(name(),"Edge from %s to %s via %s",state.c_str(),edge.c_str(),transition.c_str());
-                  }
-                }
-
-              } else {
-                logger->log_warn(name(),"Cant find transition/transitions value in %s",std::string(c+"/"+state+"/"+edge).c_str());
-                continue;
-              }
-
-              
-          }
-        } else {
-          logger->log_warn(name(),"State %s of %s needs edges field",state.c_str(),c.c_str());
-          continue;
-        }
-        if (config->exists(std::string(c + "/" + state + "/terminal").c_str()) && config->get_bool(c + "/" + state + "/terminal")) {
-          clips_add_terminal_state(clips,c,state);
-        }
-        logger->log_debug(name(),state.c_str());
-      }
-      clips_add_component(clips,c,states[0]);
-    } else {
-      logger->log_warn(name(),"No states for component %s in %s",c.c_str(),models_dir_.c_str());
-    }
-  }
-  hm_if_->set_busy(false);
-  hm_if_->write();
+			// Check if the state is a terminal state
+			if (config->exists(std::string(c + "/" + state + "/terminal").c_str())
+			    && config->get_bool(c + "/" + state + "/terminal")) {
+				clips_add_terminal_state(clips, c, state);
+			}
+		}
+		clips_add_component(clips, c, states[0]);
+	}
+	hm_if_->set_busy(false);
+	hm_if_->write();
 }
 
 void
 HardwareModelsThread::clips_context_destroyed(const std::string &env_name)
 {
-  envs_.erase(env_name);
-  logger->log_error(name(), "Removing environment %s", env_name.c_str());
+	envs_.erase(env_name);
+	logger->log_error(name(), "Removing environment %s", env_name.c_str());
 }
 
 void
-HardwareModelsThread::clips_add_terminal_state(LockPtr<CLIPS::Environment> &clips, const std::string& component, const std::string& state)
+HardwareModelsThread::clips_add_terminal_state(LockPtr<CLIPS::Environment> &clips,
+                                               const std::string &          component,
+                                               const std::string &          state)
 {
-  CLIPS::Template::pointer temp = clips->get_template("hm-terminal-state");
-  if (temp) {
-    CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-    fact->set_slot("name",CLIPS::Value(component.c_str(),CLIPS::TYPE_SYMBOL));
-    fact->set_slot("state",CLIPS::Value(state.c_str(),CLIPS::TYPE_SYMBOL));
+	CLIPS::Template::pointer temp = clips->get_template("hm-terminal-state");
+	if (temp) {
+		CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
+		fact->set_slot("name", CLIPS::Value(component.c_str(), CLIPS::TYPE_SYMBOL));
+		fact->set_slot("state", CLIPS::Value(state.c_str(), CLIPS::TYPE_SYMBOL));
 
-    CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
+		CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
-    if(!new_fact) {
-      logger->log_warn(name(), "Asserting terminal state %s failed", component.c_str());
-    }
-    
-  }
-  else {
-    logger->log_warn(name(),"Did not get terminal state template, did you load hardware_models.clp?");
-  }
+		if (!new_fact) {
+			logger->log_warn(name(), "Asserting terminal state %s failed", component.c_str());
+		}
+
+	} else {
+		logger->log_warn(name(),
+		                 "Did not get terminal state template, did you load hardware_models.clp?");
+	}
 }
 
 /**
@@ -199,23 +195,25 @@ HardwareModelsThread::clips_add_terminal_state(LockPtr<CLIPS::Environment> &clip
  * @param init_state Name of the initial state of the component
  */
 void
-HardwareModelsThread::clips_add_component(LockPtr<CLIPS::Environment> &clips,const std::string& component,const std::string& init_state)
+HardwareModelsThread::clips_add_component(LockPtr<CLIPS::Environment> &clips,
+                                          const std::string &          component,
+                                          const std::string &          init_state)
 {
-  CLIPS::Template::pointer temp = clips->get_template("hm-component");
-  if (temp) {
-    CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-    fact->set_slot("name",CLIPS::Value(component.c_str(),CLIPS::TYPE_SYMBOL));
-    fact->set_slot("initial-state",CLIPS::Value(init_state.c_str(),CLIPS::TYPE_SYMBOL));
+	CLIPS::Template::pointer temp = clips->get_template("hm-component");
+	if (temp) {
+		CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
+		fact->set_slot("name", CLIPS::Value(component.c_str(), CLIPS::TYPE_SYMBOL));
+		fact->set_slot("initial-state", CLIPS::Value(init_state.c_str(), CLIPS::TYPE_SYMBOL));
 
-    CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
+		CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
-    if (!new_fact) {
-      logger->log_warn(name(), "Asserting component %s failed", component.c_str());
-    }
+		if (!new_fact) {
+			logger->log_warn(name(), "Asserting component %s failed", component.c_str());
+		}
 
-  } else {
-    logger->log_warn(name(),"Did not get component template, did you load hardware_models.clp?");
-  }
+	} else {
+		logger->log_warn(name(), "Did not get component template, did you load hardware_models.clp?");
+	}
 }
 
 /**
@@ -229,32 +227,36 @@ HardwareModelsThread::clips_add_component(LockPtr<CLIPS::Environment> &clips,con
  * @param prob Probability of the action if it is an exogenous action
  */
 void
-HardwareModelsThread::clips_add_edge(LockPtr<CLIPS::Environment> &clips,const std::string& component, 
-                                                  const std::string& from, 
-                                                  const std::string& to, 
-                                                  const std::string& trans, 
-                                                  const double prob)
+HardwareModelsThread::clips_add_edge(LockPtr<CLIPS::Environment> &clips,
+                                     const std::string &          component,
+                                     const std::string &          from,
+                                     const std::string &          to,
+                                     const std::string &          trans)
 {
-  CLIPS::Template::pointer temp = clips->get_template("hm-edge");
-  if (temp) {
-    CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-    fact->set_slot("component",CLIPS::Value(component.c_str(),CLIPS::TYPE_SYMBOL));
-    fact->set_slot("from",CLIPS::Value(from.c_str(),CLIPS::TYPE_SYMBOL));
-    fact->set_slot("to",CLIPS::Value(to.c_str(),CLIPS::TYPE_SYMBOL));
-    fact->set_slot("transition",CLIPS::Value(trans.c_str(),CLIPS::TYPE_SYMBOL));
-    fact->set_slot("probability",prob);
+	double prob = 0.0;
+	prob = config->get_float(std::string(component + "/" + from + "/" + to + "/probability").c_str());
 
-    CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
+	CLIPS::Template::pointer temp = clips->get_template("hm-edge");
+	if (temp) {
+		CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
+		fact->set_slot("component", CLIPS::Value(component.c_str(), CLIPS::TYPE_SYMBOL));
+		fact->set_slot("from", CLIPS::Value(from.c_str(), CLIPS::TYPE_SYMBOL));
+		fact->set_slot("to", CLIPS::Value(to.c_str(), CLIPS::TYPE_SYMBOL));
+		fact->set_slot("transition", CLIPS::Value(trans.c_str(), CLIPS::TYPE_SYMBOL));
+		fact->set_slot("probability", prob);
 
-    if (!new_fact) {
-      logger->log_warn(name(), "Asserting edge from %s to %s failed", from.c_str(),to.c_str());
-    }
+		CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
-  } else {
-    logger->log_warn(name(),"Did not get edge template, did you load hardware_models.clp?");
-  }
+		if (!new_fact) {
+			logger->log_warn(name(), "Asserting edge from %s to %s failed", from.c_str(), to.c_str());
+		} else {
+			logger->log_debug(
+			  name(), "Edge from %s to %s via %s", from.c_str(), to.c_str(), trans.c_str());
+		}
 
-
+	} else {
+		logger->log_warn(name(), "Did not get edge template, did you load hardware_models.clp?");
+	}
 }
 
 /**
@@ -265,30 +267,34 @@ HardwareModelsThread::clips_add_edge(LockPtr<CLIPS::Environment> &clips,const st
  * @param transition Name of the transition action
  */
 void
-HardwareModelsThread::clips_add_transition(const std::string& component, const std::string& transition) throw()
+HardwareModelsThread::clips_add_transition(const std::string &component,
+                                           const std::string &transition) throw()
 {
-  for (const auto e : envs_) {
-    fawkes::LockPtr<CLIPS::Environment> clips = e.second;
-    clips.lock();
-    CLIPS::Template::pointer temp = clips->get_template("hm-transition");
-    if (temp) {
-      CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
-      fact->set_slot("component",component.c_str());
-      fact->set_slot("transition",transition.c_str());
+	for (const auto e : envs_) {
+		fawkes::LockPtr<CLIPS::Environment> clips = e.second;
+		clips.lock();
+		CLIPS::Template::pointer temp = clips->get_template("hm-transition");
+		if (temp) {
+			CLIPS::Fact::pointer fact = CLIPS::Fact::create(**clips, temp);
+			fact->set_slot("component", component.c_str());
+			fact->set_slot("transition", transition.c_str());
 
-      CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
+			CLIPS::Fact::pointer new_fact = clips->assert_fact(fact);
 
-      if (!new_fact) {
-        logger->log_warn(name(), "Asserting transition of %s: %s failed", component.c_str(),transition.c_str());
-      }
+			if (!new_fact) {
+				logger->log_warn(name(),
+				                 "Asserting transition of %s: %s failed",
+				                 component.c_str(),
+				                 transition.c_str());
+			}
 
-    } else {
-      logger->log_warn(name(),"Did not get edge template, did you load hardware_models.clp?");
-    }
-    clips.unlock();
-    logger->log_error(name(),"Added transition in env: %s",e.first.c_str());
-  }
-  logger->log_error(name(),"Done");
+		} else {
+			logger->log_warn(name(), "Did not get edge template, did you load hardware_models.clp?");
+		}
+		clips.unlock();
+		logger->log_error(name(), "Added transition in env: %s", e.first.c_str());
+	}
+	logger->log_error(name(), "Done");
 }
 
 void
@@ -303,24 +309,23 @@ HardwareModelsThread::finalize()
 void
 HardwareModelsThread::loop()
 {
-  hm_if_->read();
-  while (!hm_if_->msgq_empty())
-  {
-    if (hm_if_->msgq_first_is<HardwareModelsInterface::StateChangeMessage>())
-    {
-      HardwareModelsInterface::StateChangeMessage *msg = hm_if_->msgq_first(msg);
+	hm_if_->read();
+	while (!hm_if_->msgq_empty()) {
+		if (hm_if_->msgq_first_is<HardwareModelsInterface::StateChangeMessage>()) {
+			HardwareModelsInterface::StateChangeMessage *msg = hm_if_->msgq_first(msg);
 
-      std::string comp = std::string(msg->component());
-      std::string trans = std::string(msg->transition());
+			std::string comp  = std::string(msg->component());
+			std::string trans = std::string(msg->transition());
 
-      logger->log_error(name(),"Component: %s changed state by executing transition: %s",comp.c_str(),trans.c_str());
+			logger->log_error(name(),
+			                  "Component: %s changed state by executing transition: %s",
+			                  comp.c_str(),
+			                  trans.c_str());
 
-      clips_add_transition(comp.c_str(),trans.c_str());
-    } else {
-      logger->log_error(name(),"Recieved unknown message type");
-    }
-    hm_if_->msgq_pop();
-  }
+			clips_add_transition(comp, trans);
+		} else {
+			logger->log_error(name(), "Recieved unknown message type");
+		}
+		hm_if_->msgq_pop();
+	}
 }
-
-

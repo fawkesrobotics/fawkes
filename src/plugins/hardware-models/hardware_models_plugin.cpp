@@ -21,6 +21,7 @@
  */
 
 #include "hardware_models_thread.h"
+
 #include <core/plugin.h>
 
 using namespace fawkes;
@@ -39,7 +40,6 @@ public:
 		thread_list.push_back(new HardwareModelsThread());
 	}
 };
-
 
 PLUGIN_DESCRIPTION("Hardware Models")
 EXPORT_PLUGIN(HardwareModelsPlugin)

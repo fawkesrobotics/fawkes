@@ -23,16 +23,16 @@
 #ifndef _PLUGINS_HARDWARE_MODELS_HARDWARE_MODELS_THREAD_H_
 #define _PLUGINS_HARDWARE_MODELS_HARDWARE_MODELS_THREAD_H_
 
-#include <core/threading/thread.h>
-#include <aspect/blocked_timing.h>
 #include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
-#include <aspect/logging.h>
 #include <aspect/configurable.h>
+#include <aspect/logging.h>
 #include <blackboard/interface_listener.h>
+#include <core/threading/thread.h>
+#include <interfaces/HardwareModelsInterface.h>
 #include <plugins/clips/aspect/clips_feature.h>
 #include <utils/time/time.h>
-#include <interfaces/HardwareModelsInterface.h>
 
 #include <clipsmm.h>
 #include <memory>
@@ -40,42 +40,53 @@
 namespace fawkes {
 }
 
-class HardwareModelsThread
-: public fawkes::Thread,
-	public fawkes::LoggingAspect,
-	public fawkes::BlackBoardAspect,
-	public fawkes::ConfigurableAspect,
-	public fawkes::CLIPSFeature,
-	public fawkes::CLIPSFeatureAspect,
-	public fawkes::BlackBoardInterfaceListener
+class HardwareModelsThread : public fawkes::Thread,
+                             public fawkes::LoggingAspect,
+                             public fawkes::BlackBoardAspect,
+                             public fawkes::ConfigurableAspect,
+                             public fawkes::CLIPSFeature,
+                             public fawkes::CLIPSFeatureAspect,
+                             public fawkes::BlackBoardInterfaceListener
 {
- public:
+public:
 	HardwareModelsThread();
 
 	virtual void init();
 	virtual void loop();
 	virtual void finalize();
 
-    // for CLIPSFeature
-  virtual void clips_context_init(const std::string &env_name,
-          fawkes::LockPtr<CLIPS::Environment> &clips);
-  virtual void clips_context_destroyed(const std::string &env_name);
-
+	// for CLIPSFeature
+	virtual void clips_context_init(const std::string &                  env_name,
+	                                fawkes::LockPtr<CLIPS::Environment> &clips);
+	virtual void clips_context_destroyed(const std::string &env_name);
 
 	/** Stub to see name in backtrace for easier debugging. @see Thread::run() */
- protected: virtual void run() { Thread::run(); }
+protected:
+	virtual void
+	run()
+	{
+		Thread::run();
+	}
 
- private:
-    std::map<std::string, fawkes::LockPtr<CLIPS::Environment> >  envs_;
+private:
+	std::map<std::string, fawkes::LockPtr<CLIPS::Environment>> envs_;
 
-    std::vector<std::string> components_;
+	std::vector<std::string> components_;
 
-    fawkes::HardwareModelsInterface *hm_if_;
+	fawkes::HardwareModelsInterface *hm_if_;
 
-    void  clips_add_terminal_state(fawkes::LockPtr<CLIPS::Environment> &clips, const std::string& component, const std::string& state);
-    void  clips_add_component(fawkes::LockPtr<CLIPS::Environment> &clips,const std::string& component, const std::string& init_state);
-    void  clips_add_edge(fawkes::LockPtr<CLIPS::Environment> &clips,const std::string& component, const std::string& from, const std::string& to, const std::string& trans, const double prob);
-    void  clips_add_transition(const std::string& component, const std::string& transition) throw();
+	void clips_add_terminal_state(fawkes::LockPtr<CLIPS::Environment> &clips,
+	                              const std::string &                  component,
+	                              const std::string &                  state);
+	void clips_add_component(fawkes::LockPtr<CLIPS::Environment> &clips,
+	                         const std::string &                  component,
+	                         const std::string &                  init_state);
+	void clips_add_edge(fawkes::LockPtr<CLIPS::Environment> &clips,
+	                    const std::string &                  component,
+	                    const std::string &                  from,
+	                    const std::string &                  to,
+	                    const std::string &                  trans);
+	void clips_add_transition(const std::string &component, const std::string &transition) throw();
 };
 
 #endif

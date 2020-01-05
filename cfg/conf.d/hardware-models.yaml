@@ -1,3 +1,8 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+doc-url: !url http://trac.fawkesrobotics.org/wiki/Plugins/hardware-models
+---
 hardware-models:
   models-dir: /hardware-models
   components:
