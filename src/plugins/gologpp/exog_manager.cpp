@@ -33,20 +33,20 @@ namespace fawkes {
 namespace gpp {
 
 const std::unordered_map<interface_fieldtype_t, std::string> ExogManager::iface_type_to_golog_type_{
-  {IFT_BOOL, BoolType::name()},
-  {IFT_BYTE, NumberType::name()},
-  {IFT_ENUM, SymbolType::name()},
-  {IFT_INT8, NumberType::name()},
-  {IFT_FLOAT, NumberType::name()},
-  {IFT_INT16, NumberType::name()},
-  {IFT_INT32, NumberType::name()},
-  {IFT_INT64, NumberType::name()},
-  {IFT_UINT8, NumberType::name()},
-  {IFT_DOUBLE, NumberType::name()},
-  {IFT_STRING, StringType::name()},
-  {IFT_UINT16, NumberType::name()},
-  {IFT_UINT32, NumberType::name()},
-  {IFT_UINT64, NumberType::name()}};
+  {IFT_BOOL, BoolType::static_name()},
+  {IFT_BYTE, NumberType::static_name()},
+  {IFT_ENUM, SymbolType::static_name()},
+  {IFT_INT8, NumberType::static_name()},
+  {IFT_FLOAT, NumberType::static_name()},
+  {IFT_INT16, NumberType::static_name()},
+  {IFT_INT32, NumberType::static_name()},
+  {IFT_INT64, NumberType::static_name()},
+  {IFT_UINT8, NumberType::static_name()},
+  {IFT_DOUBLE, NumberType::static_name()},
+  {IFT_STRING, StringType::static_name()},
+  {IFT_UINT16, NumberType::static_name()},
+  {IFT_UINT32, NumberType::static_name()},
+  {IFT_UINT64, NumberType::static_name()}};
 
 /** @class ExogManager
  * Watch/observe blackboard interfaces according to the mappings
@@ -170,15 +170,22 @@ ExogManager::BlackboardEventHandler::BlackboardEventHandler(
 			throw Exception("Unhandled interface field type %s", fi.get_typename());
 		}
 
-		string desired_type = it->second;
-		if (desired_type != StringType::name() && fi.get_length() > 1) {
-			desired_type = static_cast<string>(ListType(desired_type));
+		shared_ptr<const Type> desired_type = gologpp::global_scope().lookup_type(it->second);
+		if (!desired_type)
+			throw Exception("Type %s required for field %s is not defined in the golog++ code model",
+			                it->second.c_str(),
+			                pair.first.c_str());
+
+		if (!(*desired_type <= gologpp::get_type<StringType>()
+		      || *desired_type >= gologpp::get_type<StringType>())
+		    && fi.get_length() > 1) {
+			desired_type = gologpp::global_scope().lookup_list_type(*desired_type);
 		}
 
-		if (var_ref.type() != desired_type) {
+		if (!(var_ref.type() <= *desired_type || var_ref.type() >= *desired_type)) {
 			throw ConfigError(target_exog_->name() + "'s argument " + var_ref.target()->name() + " is a "
-			                  + var_ref.type_name() + ", but the interface field requires "
-			                  + desired_type);
+			                  + var_ref.type().name() + ", but the interface field requires "
+			                  + desired_type->name());
 		}
 		blackboard_->close(iface);
 
@@ -246,11 +253,9 @@ ExogManager::BlackboardEventHandler::make_exog_event(Interface *iface) const
 					list_init.emplace_back(
 						field_to_value(fi, idx)
 					);
-				shared_ptr<const Type> list_type = global_scope().lookup_type(
-					"list[" + list_init[0]->type_name() + "]"
-				);
+				shared_ptr<const Type> list_type = global_scope().lookup_list_type(list_init[0]->type());
 				args[order_it->second].reset(
-					new Value(list_type->name(), list_init)
+					new Value(*list_type, list_init)
 				);
 			}
 			else
@@ -273,6 +278,10 @@ ExogManager::InterfaceWatcher::bb_interface_data_changed(Interface *iface) throw
 		exog_manager_.logger_->log_error(exog_manager_.name(),
 		                                 "Error when creating exogenous event: %s, ignoring event!",
 		                                 e.what_no_backtrace());
+	} catch (gologpp::UserError &e) {
+		exog_manager_.logger_->log_error(exog_manager_.name(),
+		                                 "Error when creating exogenous event: %s, ignoring event!",
+		                                 e.what());
 	}
 }
 
