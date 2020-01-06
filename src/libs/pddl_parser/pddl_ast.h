@@ -29,12 +29,23 @@
 using boost::variant;
 
 namespace pddl_parser {
+
+/**
+ * @brief Requirement flag struct. 
+ *        Will be instanciated for each requirement of a PDDL Domain
+ * 
+ */
 typedef struct RequirementFlag_
 {
 	typedef enum { eStrips, eNegativePreconditions, typing, action_cost, adl } EnumType;
 	typedef std::vector<EnumType> VectorType;
 } RequirementFlag;
 
+/**
+ * @brief Operator flag struct
+ *        Will be instanciated for each operator symbol
+ * 
+ */
 typedef struct OperatorFlag_
 {
 	typedef enum {
@@ -51,6 +62,11 @@ struct Effect;
 struct ConditionalEffect;
 struct FunctionalCondition;
 
+/**
+ * @brief Struct representing an entity of a PDDL Domain.
+ *        Contains name and type of the entity.
+ * 
+ */
 struct Entity
 {
 	std::string name;
@@ -60,32 +76,69 @@ struct Entity
 	}
 };
 
+/**
+ * @brief List of typed entities
+ * 
+ */
 typedef std::vector<struct Entity> TypedList;
 
+/**
+ * @brief List of predicates
+ *        A predicate contains of a name and a list of entities, representing the typed arguments
+ * 
+ */
 typedef std::vector<std::pair<std::string, TypedList>> PredicateList;
 
+/**
+ * @brief Struct representing a term, which is either a variable or a constant
+ * 
+ */
 struct Term
 {
 	bool        isVariable;
 	std::string name;
 };
 
+/**
+ * @brief List of terms
+ * 
+ */
 typedef std::vector<struct Term> TermList;
 
+/**
+ * @brief Struct representing an atomic formula.
+ *        An atomic formula consists of an instanciated predicate.
+ *        Thus, containing a predicate name and a list of terms (either variables or constants)
+ * 
+ */
 struct AtomicFormula
 {
 	std::string predicateName;
 	TermList    args;
 };
 
+/**
+ * @brief List of atomic formulas, representing a list of facts
+ * 
+ */
 typedef std::vector<AtomicFormula> FactList;
 
+/**
+ * @brief Struct representing a literal
+ * 
+ */
 struct Literal
 {
 	bool          negate;
 	AtomicFormula atomicFormula;
 };
 
+/**
+ * @brief Struct representing a functional effect
+ *        A functional effect consists of an operator, which is succeeded either by a list of effects, 
+ *        a conditional effect or a single atomic formula
+ * 
+ */
 struct FunctionalEffect
 {
 	OperatorFlag::EnumType op;
@@ -95,32 +148,61 @@ struct FunctionalEffect
 	  effect;
 };
 
+/**
+ * @brief Struct representing an action cost variable
+ * 
+ */
 struct ActionCost
 {
 	std::string name;
 	int         cost;
 };
 
+/**
+ * @brief Struct representing an effect
+ *        An effect can either be a functional effect, an atomic formula or an action cost
+ * 
+ */
 struct Effect
 {
 	variant<FunctionalEffect, ActionCost, AtomicFormula> eff;
 };
 
+/**
+ * @brief Definition of a goal description
+ *        A goal description is either a single atomic formula or a functional condition
+ * 
+ */
 using GoalDescription =
   boost::variant<boost::recursive_wrapper<FunctionalCondition>, AtomicFormula>;
 
+/**
+ * @brief A struct representing a conditional effect
+ *        A conditional effect is an effect guarded by a condition. 
+ *        Only if the condition is true, the effect is applied
+ * 
+ */
 struct ConditionalEffect
 {
 	GoalDescription condition;
 	Effect          effect;
 };
 
+/**
+ * @brief Struct representing a functional condition
+ *        A functional condition is a list of conditions combined by an operator (eg. and, or)
+ * 
+ */
 struct FunctionalCondition
 {
 	OperatorFlag::EnumType       op;
 	std::vector<GoalDescription> condition;
 };
 
+/**
+ * @brief Struct representing a PDDL action
+ * 
+ */
 struct PddlAction
 {
 	std::string     name;
@@ -132,8 +214,16 @@ struct PddlAction
 	float           duration;
 };
 
+/**
+ * @brief A list of actions
+ * 
+ */
 typedef std::vector<struct PddlAction> ActionList;
 
+/**
+ * @brief Struct representing a PDDL Domain
+ * 
+ */
 struct PddlDomain
 {
 	std::string                 name;
@@ -144,6 +234,10 @@ struct PddlDomain
 	ActionList                  actions;
 };
 
+/**
+ * @brief Struct representing a PDDL Problem
+ * 
+ */
 struct PddlProblem
 {
 	std::string     name;

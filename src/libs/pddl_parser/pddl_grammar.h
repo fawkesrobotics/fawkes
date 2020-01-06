@@ -143,6 +143,10 @@ struct pddl_skipper : public qi::grammar<Iterator>
 	qi::rule<Iterator> skip;
 };
 
+/**
+ * @brief boost::spirit::qi::symbols struct defining all possible requirements symbols
+ * 
+ */
 struct RequirementFlagSymbols_ : qi::symbols<char, pddl_parser::RequirementFlag::EnumType>
 {
 	RequirementFlagSymbols_()
@@ -155,6 +159,10 @@ struct RequirementFlagSymbols_ : qi::symbols<char, pddl_parser::RequirementFlag:
 	}
 };
 
+/**
+ * @brief boost::spirit::qi::symbols struct defining operator symbols
+ * 
+ */
 struct OperatorSymbols_ : qi::symbols<char, pddl_parser::OperatorFlag::EnumType>
 {
 	OperatorSymbols_()
@@ -168,91 +176,16 @@ void insert_typed_name_entities(TypedList &                     entities,
                                 const std::vector<std::string> &names,
                                 const std::string &             type);
 
+/**
+ * @brief Struct defining the grammar for PDDL Domains.
+ * 
+ * @tparam Iterator to the string to be parsed
+ * @tparam pddl_skipper<Iterator> Skipper defining what parts of the input to be skipped (e.g. comments, spaces)
+ */
 template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
-struct BaseGrammar
+struct Domain : qi::grammar<Iterator, PddlDomain(), Skipper>
 {
-	BaseGrammar()
-	{
-		name %= lexeme[char_("a-zA-Z") >> *(char_("a-zA-Z0-9_-"))];
-		name.name("name");
-
-		variable %= lit('?') > name;
-		variable.name("variable");
-
-		type %= name;
-		type.name("type");
-
-		typedListExplicitType = (+(lazy(_r1)[push_back(_a, _1)])) > lit('-')
-		                        > type[bind(&insert_typed_name_entities, _val, _a, _1)];
-		typedListExplicitType.name("typedListExplicitType");
-		char obj[] = "object";
-		typedList  = (*(typedListExplicitType(_r1)[insert(_val, end(_val), begin(_1), end(_1))]))
-		            > (*(lazy(_r1)[push_back(_val, construct<struct Entity>(_1, &obj[0]))]));
-		typedList.name("typedList");
-
-		term = name[at_c<0>(_val) = false, at_c<1>(_val) = _1]
-		       | variable[at_c<0>(_val) = true, at_c<1>(_val) = _1];
-		term.name("term");
-
-		atomicFormula = name[at_c<0>(_val) = _1] > (*term)[at_c<1>(_val) = _1];
-		atomicFormula.name("atomicFormula");
-
-		literal = atomicFormula[at_c<0>(_val) = false, at_c<1>(_val) = _1]
-		          | (lit("not") > lit('(') > atomicFormula[at_c<0>(_val) = true, at_c<1>(_val) = _1]
-		             > lit(')'));
-		literal.name("literal");
-
-		conditionalEffect = lit('(') >> goalDescription > lit(')') > effect;
-		conditionalEffect.name("conditionalEffect");
-
-		op %= operatorSymbols >> !(char_("a-zA-Z0-9_"));
-
-		functionalEffect = op > (+(effect) | conditionalEffect);
-		functionalEffect.name("functionalEffect");
-
-		actionCost =
-		  distinct(char_("a-zA-Z_0-9"))["increase"] > lit('(') >> name > lit(')') >> qi::int_;
-
-		effect = lit('(') >> (functionalEffect | actionCost | atomicFormula) > lit(')');
-		effect.name("effect");
-
-		functionalCondition = op > +(goalDescription);
-		functionalCondition.name("functionalCondition");
-
-		goalDescription = lit('(') >> (functionalCondition | atomicFormula) > lit(')');
-		goalDescription.name("goalDescription");
-	}
-
-	typedef qi::rule<Iterator, std::string(), Skipper> StringRule;
-
-	qi::rule<Iterator, OperatorFlag::VectorType(), Skipper> op;
-	qi::rule<Iterator, ConditionalEffect(), Skipper>        conditionalEffect;
-	qi::rule<Iterator, FunctionalCondition(), Skipper>      functionalCondition;
-	qi::rule<Iterator, FunctionalEffect(), Skipper>         functionalEffect;
-	qi::rule<Iterator, ActionCost(), Skipper>               actionCost;
-	qi::rule<Iterator, Effect(), Skipper>                   effect;
-	qi::rule<Iterator, GoalDescription(), Skipper>          goalDescription;
-	qi::rule<Iterator, Literal(), Skipper>                  literal;
-	qi::rule<Iterator, AtomicFormula(), Skipper>            atomicFormula;
-	qi::rule<Iterator, Term(), Skipper>                     term;
-	qi::rule<Iterator, TypedList(StringRule), Skipper>      typedList;
-	qi::rule<Iterator, TypedList(StringRule), qi::locals<std::vector<std::string>>, Skipper>
-	           typedListExplicitType;
-	StringRule type;
-	StringRule name;
-	StringRule variable;
-
-	//qi::symbols<char,int> operatorSymbols;
-
-	struct OperatorSymbols_ operatorSymbols;
-};
-
-template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
-struct Domain : qi::grammar<Iterator, PddlDomain(), Skipper> //, BaseGrammar<Iterator, Skipper>
-{
-	//typedef BaseGrammar<Iterator,Skipper> base;
-
-	Domain() : Domain::base_type(pddlDomain, "PDDL Domain") //, BaseGrammar<Iterator,Skipper>()
+	Domain() : Domain::base_type(pddlDomain, "PDDL Domain")
 	{
 		name %= lexeme[char_("a-zA-Z") >> *(char_("a-zA-Z0-9_-"))];
 		name.name("name");
@@ -380,12 +313,16 @@ struct Domain : qi::grammar<Iterator, PddlDomain(), Skipper> //, BaseGrammar<Ite
 	struct OperatorSymbols_ operatorSymbols;
 };
 
+/**
+ * @brief Struct defining the grammar for a PDDL Problem description
+ * 
+ * @tparam Iterator Iterator for the input string
+ * @tparam pddl_skipper<Iterator> A skipper defining what parts of the inputs to be ignored (e.g. comments, spaces)
+ */
 template <typename Iterator, typename Skipper = pddl_skipper<Iterator>>
-struct Problem : qi::grammar<Iterator, PddlProblem(), Skipper> //, BaseGrammar<Iterator, Skipper>
+struct Problem : qi::grammar<Iterator, PddlProblem(), Skipper>
 {
-	//typedef BaseGrammar<Iterator,Skipper> base;
-
-	Problem() : Problem::base_type(pddlProblem, "PDDL Domain") //, BaseGrammar<Iterator,Skipper>()
+	Problem() : Problem::base_type(pddlProblem, "PDDL Domain")
 	{
 		name %= lexeme[char_("a-zA-Z") >> *(char_("a-zA-Z0-9_-"))];
 		name.name("name");
@@ -460,8 +397,6 @@ struct Problem : qi::grammar<Iterator, PddlProblem(), Skipper> //, BaseGrammar<I
 	StringRule type;
 	StringRule name;
 	StringRule variable;
-
-	//qi::symbols<char,int> operatorSymbols;
 
 	struct OperatorSymbols_ operatorSymbols;
 };
