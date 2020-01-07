@@ -48,7 +48,7 @@ public:
 	                      BlackBoard *       blackboard,
 	                      Configuration *    config,
 	                      const std::string &cfg_prefix);
-	virtual ~SkillerActionExecutor() override;
+	virtual ~SkillerActionExecutor();
 	void         start(std::shared_ptr<gologpp::Activity> activity) override;
 	void         stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity) override;
 	bool         can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
