@@ -30,7 +30,7 @@ namespace skiller_simulator {
 class ExecutionTimeEstimatorsAspectIniFin : public virtual AspectIniFin
 {
 public:
-	ExecutionTimeEstimatorsAspectIniFin();
+	ExecutionTimeEstimatorsAspectIniFin(ExecutionTimeEstimatorManager *manager);
 	virtual ~ExecutionTimeEstimatorsAspectIniFin();
 	virtual void init(Thread *thread);
 	virtual void finalize(Thread *thread);

@@ -27,17 +27,18 @@ namespace skiller_simulator {
  * The Aspect IniFin for the ExecutionTimeEstimatorsAspect.
  */
 
-/** Constructor. */
-ExecutionTimeEstimatorsAspectIniFin::ExecutionTimeEstimatorsAspectIniFin()
+/** Constructor.
+ * @param manager The manager for the time estimators to use in the aspect */
+ExecutionTimeEstimatorsAspectIniFin::ExecutionTimeEstimatorsAspectIniFin(
+  ExecutionTimeEstimatorManager *manager)
 : AspectIniFin("SkillExecutionTimeEstimatorAspect")
 {
-	execution_time_estimator_manager_ = new ExecutionTimeEstimatorManager();
+	execution_time_estimator_manager_ = manager;
 }
 
 /** Destructor. */
 ExecutionTimeEstimatorsAspectIniFin::~ExecutionTimeEstimatorsAspectIniFin()
 {
-	delete execution_time_estimator_manager_;
 }
 
 ExecutionTimeEstimatorsAspect *

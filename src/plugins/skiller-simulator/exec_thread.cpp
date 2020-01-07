@@ -35,7 +35,8 @@ using namespace fawkes;
 SkillerSimulatorExecutionThread::SkillerSimulatorExecutionThread()
 : Thread("SkillerSimulatorExecutionThread", Thread::OPMODE_WAITFORWAKEUP),
   BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL),
-  AspectProviderAspect(&provider_inifin_)
+  AspectProviderAspect(&provider_inifin_),
+  provider_inifin_(&execution_time_estimator_manager_)
 {
 }
 
