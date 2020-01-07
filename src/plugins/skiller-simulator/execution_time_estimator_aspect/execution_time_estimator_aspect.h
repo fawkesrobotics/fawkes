@@ -25,6 +25,7 @@
 #include <aspect/aspect.h>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace fawkes {
@@ -33,7 +34,8 @@ namespace skiller_simulator {
 class ExecutionTimeEstimatorManager
 {
 public:
-	std::shared_ptr<ExecutionTimeEstimator> get_provider(const std::string &skill_string) const;
+	std::optional<std::shared_ptr<ExecutionTimeEstimator>>
+	     get_provider(const std::string &skill_string) const;
 	void register_provider(std::shared_ptr<ExecutionTimeEstimator> provider);
 
 private:

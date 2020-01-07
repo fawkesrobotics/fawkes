@@ -23,10 +23,14 @@ LIBS_skiller_simulator  = fawkescore fawkesutils fawkesaspects \
                           fawkes_skiller_time_estimator \
                           SkillerInterface
 LIBS_libfawkes_skiller_time_estimator = fawkescore
+
+CFLAGS += $(CFLAGS_CPP17)
+
 OBJS_skiller_simulator  = skiller_simulator_plugin.o exec_thread.o \
                           execution_time_estimator_aspect/execution_time_estimator_aspect.o \
                           execution_time_estimator_aspect/execution_time_estimator_aspect_inifin.o
 OBJS_libfawkes_skiller_time_estimator = execution_time_estimator.o
+
 OBJS_all                = $(OBJS_skiller_simulator) $(OBJS_libfawkes_skiller_time_estimator)
 PLUGINS_all             = $(PLUGINDIR)/skiller-simulator.so
 LIBS_all                = $(LIBDIR)/libfawkes_skiller_time_estimator.so

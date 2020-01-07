@@ -171,5 +171,10 @@ SkillerSimulatorExecutionThread::finalize()
 float
 SkillerSimulatorExecutionThread::get_skill_runtime(const std::string &skill) const
 {
-	return default_skill_runtime_;
+	auto provider = execution_time_estimator_manager_.get_provider(skill);
+	if (provider) {
+		return (*provider)->get_execution_time(skill);
+	} else {
+		return default_skill_runtime_;
+	}
 }

@@ -31,18 +31,18 @@ namespace skiller_simulator {
 
 /** Get the running time provider for the given skill string.
  * @param skill_string The string to get the running time for
- * @return a pointer to the provider
+ * @return an optional with a pointer to the provider, an optional without a
+ * value if no provider exists
  */
-std::shared_ptr<ExecutionTimeEstimator>
+std::optional<std::shared_ptr<ExecutionTimeEstimator>>
 ExecutionTimeEstimatorManager::get_provider(const std::string &skill_string) const
 {
 	for (auto &provider : execution_time_estimators_) {
 		if (provider->can_execute(skill_string)) {
-			return provider;
+			return std::make_optional<std::shared_ptr<ExecutionTimeEstimator>>(provider);
 		}
 	}
-	throw Exception(
-	  std::string("No known execution time estimator for skill '" + skill_string + "'").c_str());
+	return std::optional<std::shared_ptr<ExecutionTimeEstimator>>();
 }
 
 /** Add a running time provider.
