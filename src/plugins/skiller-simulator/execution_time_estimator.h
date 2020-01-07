@@ -21,6 +21,8 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace fawkes {
 namespace skiller_simulator {
@@ -28,8 +30,25 @@ namespace skiller_simulator {
 class ExecutionTimeEstimator
 {
 public:
-	virtual float get_executioN_time(const std::string &skill_string) const = 0;
-	virtual bool  can_execute(const std::string &skill_string) const        = 0;
+	/** A structured representation of a skill. */
+	class Skill
+	{
+	public:
+		Skill(const std::string &skill_string);
+
+		/** The name of the skill */
+		std::string skill_name = "";
+		/** A map of the skill's argument keys to argument values */
+		std::unordered_map<std::string, std::string> skill_args = {};
+
+	private:
+		void parse_args(const std::string &args);
+	};
+
+	virtual float get_execution_time(const std::string &skill_string) const;
+	virtual bool  can_execute(const std::string &skill_string) const;
+	virtual float get_execution_time(const Skill &skill) const = 0;
+	virtual bool  can_execute(const Skill &skill) const        = 0;
 };
 
 } // namespace skiller_simulator
