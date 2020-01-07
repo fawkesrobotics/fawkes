@@ -20,12 +20,19 @@ include $(LIBSRCDIR)/utils/utils.mk
 
 LIBS_skiller_simulator  = fawkescore fawkesutils fawkesaspects \
                           fawkesblackboard fawkesinterface fawkeslogging \
+                          fawkes_skiller_time_estimator \
                           SkillerInterface
+LIBS_libfawkes_skiller_time_estimator = fawkescore
 OBJS_skiller_simulator  = skiller_simulator_plugin.o exec_thread.o \
                           execution_time_estimator_aspect/execution_time_estimator_aspect.o \
                           execution_time_estimator_aspect/execution_time_estimator_aspect_inifin.o
-OBJS_all                = $(OBJS_skiller_simulator)
+OBJS_libfawkes_skiller_time_estimator = execution_time_estimator.o
+OBJS_all                = $(OBJS_skiller_simulator) $(OBJS_libfawkes_skiller_time_estimator)
 PLUGINS_all             = $(PLUGINDIR)/skiller-simulator.so
+LIBS_all                = $(LIBDIR)/libfawkes_skiller_time_estimator.so
+LIBS_build              = $(LIBS_all)
 PLUGINS_build           = $(PLUGINS_all)
+
+$(PLUGINS_build): | $(LIBDIR)/libfawkes_skiller_time_estimator.$(SOEXT)
 
 include $(BUILDSYSDIR)/base.mk
