@@ -36,15 +36,6 @@ using Skill = ExecutionTimeEstimator::Skill;
  * An abstract estimator for the execution time of a skill.
  * Inherit from this class if you want to implement an estimator for a skill or
  * a set of skills.
- * @fn float ExecutionTimeEstimator::get_execution_time(const std::string &skill_string) const
- * Get the estimated execution time for the given skill string.
- * @param skill_string The skill string to compute the execution time for.
- * @return The execution time in seconds.
- *
- * @fn ExecutionTimeEstimator::can_execute(const std::string &skill_string) const
- * Check if this estimator can give an estimate for the given
- * @param skill_string The skill string to check.
- * @return true if this estimator can give an execution time estimate for the given skill.
  *
  * @fn float ExecutionTimeEstimator::get_execution_time(const Skill &skill) const
  * Get the estimated execution time for the given skill string.

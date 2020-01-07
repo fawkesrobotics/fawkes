@@ -45,8 +45,6 @@ public:
 		void parse_args(const std::string &args);
 	};
 
-	virtual float get_execution_time(const std::string &skill_string) const;
-	virtual bool  can_execute(const std::string &skill_string) const;
 	virtual float get_execution_time(const Skill &skill) const = 0;
 	virtual bool  can_execute(const Skill &skill) const        = 0;
 };
