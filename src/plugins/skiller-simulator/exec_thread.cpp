@@ -122,6 +122,10 @@ SkillerSimulatorExecutionThread::loop()
 			skiller_if_->set_msgid(m->id());
 			skiller_if_->set_error("");
 			skiller_if_->set_status(SkillerInterface::S_RUNNING);
+			logger->log_info(name(),
+			                 "Executing '%s', will take %.2f seconds",
+			                 m->skill_string(),
+			                 get_skill_runtime(m->skill_string()));
 			skill_starttime_ = Time();
 			write_interface  = true;
 			skill_enqueued   = true;
