@@ -278,10 +278,6 @@ ExogManager::InterfaceWatcher::bb_interface_data_changed(Interface *iface) throw
 		exog_manager_.logger_->log_error(exog_manager_.name(),
 		                                 "Error when creating exogenous event: %s, ignoring event!",
 		                                 e.what_no_backtrace());
-	} catch (gologpp::UserError &e) {
-		exog_manager_.logger_->log_error(exog_manager_.name(),
-		                                 "Error when creating exogenous event: %s, ignoring event!",
-		                                 e.what());
 	}
 }
 
