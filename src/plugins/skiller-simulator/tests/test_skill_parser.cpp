@@ -66,3 +66,11 @@ TEST(SkillParserTest, SkillWithMultipleArgs)
 	ASSERT_EQ(s.skill_args["text"], "hello");
 	ASSERT_EQ(s.skill_args["second"], "bye");
 }
+
+TEST(SkillParserTest, SkillWithNewline)
+{
+	Skill s("say{text=\n\"hello\"}");
+	ASSERT_EQ(s.skill_name, "say");
+	ASSERT_EQ(s.skill_args.size(), 1);
+	ASSERT_EQ(s.skill_args["text"], "hello");
+}

@@ -54,12 +54,15 @@ using Skill = ExecutionTimeEstimator::Skill;
  */
 Skill::Skill(const std::string &skill_string)
 {
-	if (skill_string.empty()) {
+	std::string skill_no_newlines(skill_string);
+	skill_no_newlines.erase(std::remove(skill_no_newlines.begin(), skill_no_newlines.end(), '\n'),
+	                        skill_no_newlines.end());
+	if (skill_no_newlines.empty()) {
 		return;
 	}
 	const std::regex regex("(\\w+)(?:\\(\\)|\\{(.+)?})");
 	std::smatch      match;
-	if (std::regex_match(skill_string, match, regex)) {
+	if (std::regex_match(skill_no_newlines, match, regex)) {
 		assert(match.size() > 1);
 		skill_name = match[1];
 		if (match.size() > 2) {
@@ -67,7 +70,7 @@ Skill::Skill(const std::string &skill_string)
 			parse_args(args);
 		}
 	} else {
-		throw Exception("Unexpected skill string");
+		throw Exception("Unexpected skill string: '%s'", skill_no_newlines.c_str());
 	}
 }
 
