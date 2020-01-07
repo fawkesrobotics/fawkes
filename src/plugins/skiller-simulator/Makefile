@@ -28,7 +28,8 @@ CFLAGS += $(CFLAGS_CPP17)
 
 OBJS_skiller_simulator  = skiller_simulator_plugin.o exec_thread.o \
                           execution_time_estimator_aspect/execution_time_estimator_aspect.o \
-                          execution_time_estimator_aspect/execution_time_estimator_aspect_inifin.o
+                          execution_time_estimator_aspect/execution_time_estimator_aspect_inifin.o \
+                          estimators/config_estimator.o
 OBJS_libfawkes_skiller_time_estimator = execution_time_estimator.o
 
 OBJS_all                = $(OBJS_skiller_simulator) $(OBJS_libfawkes_skiller_time_estimator)

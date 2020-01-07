@@ -20,6 +20,8 @@
 
 #include "exec_thread.h"
 
+#include "estimators/config_estimator.h"
+
 using namespace std;
 using namespace fawkes;
 
@@ -47,6 +49,8 @@ SkillerSimulatorExecutionThread::init()
 	default_skill_runtime_ =
 	  config->get_float_or_default("/plugins/skiller-simulation/skill-runtime", 1);
 	skill_starttime_ = Time();
+	execution_time_estimator_manager_.register_provider(
+	  std::make_shared<skiller_simulator::ConfigExecutionTimeEstimator>(config));
 }
 
 void
