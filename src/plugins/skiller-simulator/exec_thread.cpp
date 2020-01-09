@@ -47,7 +47,7 @@ SkillerSimulatorExecutionThread::init()
 {
 	skiller_if_ = blackboard->open_for_writing<SkillerInterface>("Skiller");
 	default_skill_runtime_ =
-	  config->get_float_or_default("/plugins/skiller-simulation/execution-times/default", 1);
+	  config->get_float_or_default("/plugins/skiller-simulator/execution-times/default", 1);
 	skill_starttime_ = Time();
 	execution_time_estimator_manager_.register_provider(
 	  std::make_shared<skiller_simulator::ConfigExecutionTimeEstimator>(config));

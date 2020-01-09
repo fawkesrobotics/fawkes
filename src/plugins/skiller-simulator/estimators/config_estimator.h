@@ -35,7 +35,7 @@ public:
 
 private:
 	Configuration *const  config_;
-	constexpr static char cfg_prefix_[] = "/plugins/skiller-simulation/execution-times/";
+	constexpr static char cfg_prefix_[] = "/plugins/skiller-simulator/execution-times/";
 };
 
 } // namespace skiller_simulator
