@@ -17,7 +17,7 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gtest.mk
 
-LIBS_gtest_skiller_simulator_skill_parser = fawkes_skiller_time_estimator
+LIBS_gtest_skiller_simulator_skill_parser = m fawkes_skiller_time_estimator
 OBJS_gtest_skiller_simulator_skill_parser = test_skill_parser.o
 OBJS_all = $(OBJS_gtest_skiller_simulator_skill_parser)
 BINS_all = $(BINDIR)/gtest_skiller_simulator_skill_parser
