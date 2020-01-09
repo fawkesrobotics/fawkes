@@ -1,0 +1,12 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+plugins/skiller-simulator:
+  execution-times:
+    default: 1
+    say: 2.5
+  estimators:
+    navgraph:
+      speed: 0.5
+      skills:
+        - goto
