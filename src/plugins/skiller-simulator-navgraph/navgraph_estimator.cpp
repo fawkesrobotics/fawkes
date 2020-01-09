@@ -39,12 +39,15 @@ NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph> navgraph, Configuration *
 	last_pose_y_ = config->get_float_or_default("plugins/amcl/init_pose_y", 0);
 	speed_ =
 	  config->get_float_or_default("plugins/skiller-simulation/estimators/navgraph/speed", 0.5);
+	skills_ = config->get_strings_or_defaults("plugins/skiller-simulation/estimators/navgraph/skills",
+	                                          {"goto"});
 }
 
 bool
 NavGraphEstimator::can_execute(const Skill &skill) const
 {
-	return skill.skill_name == "goto" && navgraph_->node_exists(skill.skill_args.at("place"));
+	return std::find(skills_.begin(), skills_.end(), skill.skill_name) != skills_.end()
+	       && navgraph_->node_exists(skill.skill_args.at("place"));
 }
 
 float
