@@ -40,6 +40,7 @@ private:
 	LockPtr<NavGraph> navgraph_;
 	float             last_pose_x_;
 	float             last_pose_y_;
+	float             speed_;
 };
 } // namespace skiller_simulator
 } // namespace fawkes

@@ -37,6 +37,8 @@ NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph> navgraph, Configuration *
 {
 	last_pose_x_ = config->get_float_or_default("plugins/amcl/init_pose_x", 0);
 	last_pose_y_ = config->get_float_or_default("plugins/amcl/init_pose_y", 0);
+	speed_ =
+	  config->get_float_or_default("plugins/skiller-simulation/estimators/navgraph/speed", 0.5);
 }
 
 bool
@@ -48,7 +50,8 @@ NavGraphEstimator::can_execute(const Skill &skill) const
 float
 NavGraphEstimator::get_execution_time(const Skill &skill) const
 {
-	return navgraph_->node(skill.skill_args.at("place")).distance(last_pose_x_, last_pose_y_);
+	return navgraph_->node(skill.skill_args.at("place")).distance(last_pose_x_, last_pose_y_)
+	       / speed_;
 }
 
 void
