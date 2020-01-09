@@ -65,7 +65,7 @@ Skill::Skill(const std::string &skill_string)
 	if (skill_no_newlines.empty()) {
 		return;
 	}
-	const std::regex regex("(\\w+)(?:\\(\\)|\\{(.+)?})");
+	const std::regex regex("(\\w+)(?:\\(\\)|\\{(.+)?\\})");
 	std::smatch      match;
 	if (std::regex_match(skill_no_newlines, match, regex)) {
 		assert(match.size() > 1);
