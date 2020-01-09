@@ -47,6 +47,7 @@ public:
 
 	virtual float get_execution_time(const Skill &skill) const = 0;
 	virtual bool  can_execute(const Skill &skill) const        = 0;
+	virtual void  execute(const Skill &skill){};
 };
 
 } // namespace skiller_simulator

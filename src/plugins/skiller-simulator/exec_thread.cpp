@@ -158,6 +158,7 @@ SkillerSimulatorExecutionThread::loop()
 			Time now = Time();
 			if (Time() > skill_starttime_ + get_skill_runtime(skiller_if_->skill_string())) {
 				logger->log_info(name(), "Skill '%s' is final", skiller_if_->skill_string());
+				execute_skill(skiller_if_->skill_string());
 				skiller_if_->set_skill_string("");
 				skiller_if_->set_status(SkillerInterface::S_FINAL);
 				write_interface = true;
@@ -184,5 +185,14 @@ SkillerSimulatorExecutionThread::get_skill_runtime(const std::string &skill) con
 		return (*provider)->get_execution_time(skill);
 	} else {
 		return default_skill_runtime_;
+	}
+}
+
+void
+SkillerSimulatorExecutionThread::execute_skill(const std::string &skill)
+{
+	auto provider = execution_time_estimator_manager_.get_provider(skill);
+	if (provider) {
+		(*provider)->execute(skill);
 	}
 }

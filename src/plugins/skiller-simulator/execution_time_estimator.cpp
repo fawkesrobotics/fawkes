@@ -46,6 +46,11 @@ using Skill = ExecutionTimeEstimator::Skill;
  * Check if this estimator can give an estimate for the given
  * @param skill The skill object to check.
  * @return true if this estimator can give an execution time estimate for the given skill.
+ *
+ * @fn void ExecutionTimeEstimator::execute(const Skill &skill) const
+ * Let the estimator know that we are executing this skill, so it can apply
+ * possible side effects.
+ * @param skill The skill to execute
  */
 
 /** Constructor.
