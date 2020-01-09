@@ -30,11 +30,13 @@ namespace skiller_simulator {
 
 /** Constructor.
  * @param navgraph The navgraph to read the node positions from
- * @param pose The Position3DInterface to read the current position from
+ * @param config The config to read the initial position from
  */
-NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph> navgraph, Position3DInterface *pose)
-: navgraph_(navgraph), pose_(pose)
+NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph> navgraph, Configuration *config)
+: navgraph_(navgraph)
 {
+	last_pose_x_ = config->get_float_or_default("plugins/amcl/init_pose_x", 0);
+	last_pose_y_ = config->get_float_or_default("plugins/amcl/init_pose_y", 0);
 }
 
 bool
@@ -46,9 +48,16 @@ NavGraphEstimator::can_execute(const Skill &skill) const
 float
 NavGraphEstimator::get_execution_time(const Skill &skill) const
 {
-	pose_->read();
-	return navgraph_->node(skill.skill_args.at("place"))
-	  .distance(pose_->translation(0), pose_->translation(1));
+	return navgraph_->node(skill.skill_args.at("place")).distance(last_pose_x_, last_pose_y_);
 }
+
+void
+NavGraphEstimator::execute(const Skill &skill)
+{
+	auto node    = navgraph_->node(skill.skill_args.at("place"));
+	last_pose_x_ = node.x();
+	last_pose_y_ = node.y();
+}
+
 } // namespace skiller_simulator
 } // namespace fawkes

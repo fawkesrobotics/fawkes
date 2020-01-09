@@ -22,6 +22,7 @@
 
 #include "interfaces/Position3DInterface.h"
 
+#include <config/config.h>
 #include <navgraph/navgraph.h>
 #include <plugins/skiller-simulator/execution_time_estimator.h>
 
@@ -30,13 +31,15 @@ namespace skiller_simulator {
 class NavGraphEstimator : public ExecutionTimeEstimator
 {
 public:
-	NavGraphEstimator(LockPtr<NavGraph> navgraph, Position3DInterface *pose);
+	NavGraphEstimator(LockPtr<NavGraph> navgraph, Configuration *config);
 	float get_execution_time(const Skill &skill) const override;
 	bool  can_execute(const Skill &skill) const override;
+	void  execute(const Skill &skill) override;
 
 private:
-	LockPtr<NavGraph>    navgraph_;
-	Position3DInterface *pose_;
+	LockPtr<NavGraph> navgraph_;
+	float             last_pose_x_;
+	float             last_pose_y_;
 };
 } // namespace skiller_simulator
 } // namespace fawkes

@@ -20,24 +20,20 @@
 
 #pragma once
 
-#include "interfaces/Position3DInterface.h"
-#include "navgraph/aspect/navgraph.h"
-
 #include <aspect/blackboard.h>
+#include <aspect/configurable.h>
 #include <core/threading/thread.h>
+#include <navgraph/aspect/navgraph.h>
 #include <plugins/skiller-simulator/execution_time_estimator_aspect/execution_time_estimator_aspect.h>
 
 class SkillerSimulatorNavgraphEstimatorThread
 : public fawkes::Thread,
   public fawkes::BlackBoardAspect,
+  public fawkes::ConfigurableAspect,
   public fawkes::NavGraphAspect,
   public fawkes::skiller_simulator::ExecutionTimeEstimatorsAspect
 {
 public:
 	SkillerSimulatorNavgraphEstimatorThread();
-	virtual void init();
-	virtual void finalize();
-
-private:
-	fawkes::Position3DInterface *pose_;
+	void init();
 };

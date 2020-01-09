@@ -34,16 +34,10 @@ SkillerSimulatorNavgraphEstimatorThread::SkillerSimulatorNavgraphEstimatorThread
 {
 }
 
+/** Initializer. */
 void
 SkillerSimulatorNavgraphEstimatorThread::init()
 {
-	pose_ = blackboard->open_for_reading<fawkes::Position3DInterface>("Pose");
 	execution_time_estimator_manager_->register_provider(
-	  std::make_shared<fawkes::skiller_simulator::NavGraphEstimator>(navgraph, pose_));
-}
-
-void
-SkillerSimulatorNavgraphEstimatorThread::finalize()
-{
-	blackboard->close(pose_);
+	  std::make_shared<fawkes::skiller_simulator::NavGraphEstimator>(navgraph, config));
 }
