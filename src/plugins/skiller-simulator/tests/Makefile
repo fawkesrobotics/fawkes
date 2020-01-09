@@ -22,17 +22,23 @@ OBJS_gtest_skiller_simulator_skill_parser = test_skill_parser.o
 OBJS_all = $(OBJS_gtest_skiller_simulator_skill_parser)
 BINS_all = $(BINDIR)/gtest_skiller_simulator_skill_parser
 
-ifeq ($(HAVE_GTEST),1)
-  CFLAGS += $(CFLAGS_GTEST)
-  LDFLAGS += $(LDFLAGS_GTEST)
-  BINS_test = $(BINS_all)
+ifeq ($(HAVE_CPP17),1)
+  ifeq ($(HAVE_GTEST),1)
+    CFLAGS += $(CFLAGS_GTEST)
+    LDFLAGS += $(LDFLAGS_GTEST)
+    BINS_test = $(BINS_all)
+  else
+    WARN_TARGETS += warn_gtest
+  endif
 else
-  WARN_TARGETS += warn_gtest
+  WARN_TARGETS += warning_cpp17
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 test: $(WARN_TARGETS)
 .PHONY: $(WARN_TARGETS)
+warning_cpp17:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting skiller simulator tests$(TNORMAL) (C++17 not supported)"
 warning_gtest:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build skiller simulator tests$(TNORMAL) (gtest not found)"
 endif
