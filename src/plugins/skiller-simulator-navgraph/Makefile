@@ -24,9 +24,22 @@ OBJS_skiller_simulator_navgraph = skiller_simulator_navgraph_plugin.o \
                                   skiller_simulator_navgraph_thread.o \
                                   navgraph_estimator.o
 
-CFLAGS       += $(CFLAGS_CPP17)
 OBJS_all      = $(OBJS_skiller_simulator_navgraph)
 PLUGINS_all   = $(PLUGINDIR)/skiller-simulator-navgraph.so
-PLUGINS_build = $(PLUGINS_all)
+
+ifeq ($(HAVE_CPP17),1)
+  CFLAGS       += $(CFLAGS_CPP17)
+  PLUGINS_build = $(PLUGINS_all)
+else
+  WARN_TARGETS += warning_cpp17
+endif
+
+ifeq ($(OBJSSUBMAKE),1)
+all: $(WARN_TARGETS)
+.PHONY: $(WARN_TARGETS)
+
+warning_cpp17:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting skiller simulator navgraph$(TNORMAL) (C++17 not supported)"
+endif
 
 include $(BUILDSYSDIR)/base.mk
