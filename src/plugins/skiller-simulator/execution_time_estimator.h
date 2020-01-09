@@ -45,6 +45,9 @@ public:
 		void parse_args(const std::string &args);
 	};
 
+	/** Destructor. */
+	virtual ~ExecutionTimeEstimator() = default;
+
 	virtual float get_execution_time(const Skill &skill) const = 0;
 	virtual bool  can_execute(const Skill &skill) const        = 0;
 	virtual void  execute(const Skill &skill){};
