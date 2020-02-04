@@ -580,13 +580,24 @@ RobotMemory::clear_memory()
  * Restore a previously dumped collection from a directory
  * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
  * @param directory Directory of the dump
+ * @param target_collection Optional different database and collection where the dump is restored to.
+ *                          If not set, the dump will be restored in the previous place
  * @return 1: Success 0: Error
  */
 int
-RobotMemory::restore_collection(const std::string &collection, const std::string &directory)
+RobotMemory::restore_collection(const std::string &collection,
+                                const std::string &directory,
+                                const std::string &target_collection)
 {
+	std::string target_coll;
+	if (target_collection == "noop") {
+		target_coll = std::move(collection);
+	} else {
+		target_coll = std::move(target_collection);
+	}
 	std::string coll{std::move(collection)};
-	drop_collection(coll);
+
+	drop_collection(target_coll);
 
 	//lock (mongo_client not thread safe)
 	MutexLocker lock(mutex_);
@@ -602,7 +613,10 @@ RobotMemory::restore_collection(const std::string &collection, const std::string
 	log_deb(std::string("Restore collection " + collection + " from " + path), "warn");
 
 	//call mongorestore from folder with initial restores
-	std::string command = "/usr/bin/mongorestore --dir " + path + " --host=127.0.0.1 --quiet";
+	std::vector<std::string> split = str_split(target_coll, '.');
+
+	std::string command = "/usr/bin/mongorestore --dir " + path + " -d " + split[0] + " -c "
+	                      + split[1] + " --host=127.0.0.1 --port 27021";
 	log_deb(std::string("Restore command: " + command), "warn");
 	FILE *bash_output = popen(command.c_str(), "r");
 
@@ -650,10 +664,12 @@ RobotMemory::dump_collection(const std::string &collection, const std::string &d
 	log_deb(std::string("Dump collection " + collection + " into " + path), "warn");
 
 	//call mongorestore from folder with initial restores
-	std::vector<std::string> split   = str_split(collection, '.');
-	std::string              command = "/usr/bin/mongodump --out=" + path + " --db=" + split[0]
-	                      + " --collection=" + split[1] + " --host=127.0.0.1 --quiet";
-	log_deb(std::string("Dump command: " + command), "warn");
+	std::vector<std::string> split = str_split(collection, '.');
+
+	//TODO Get Port dynamically
+	std::string command = "/usr/bin/mongodump --out=" + path + " --db=" + split[0] + " --collection="
+	                      + split[1] + " --host=127.0.0.1 --forceTableScan --port 27021";
+	log(std::string("Dump command: " + command), "info");
 	FILE *bash_output = popen(command.c_str(), "r");
 	//check if output is ok
 	if (!bash_output) {
