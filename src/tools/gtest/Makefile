@@ -28,7 +28,9 @@ LIBS_all = $(LIBDIR)/test/fawkes.so
 
 ifeq ($(HAVE_GTEST)$(HAVE_CPP11),11)
   CFLAGS += $(CFLAGS_GTEST)
-  CFLAGS += -Wno-unused-but-set-variable
+  ifneq ($(CC),clang)
+    CFLAGS += -Wno-unused-but-set-variable
+  endif
   CFLAGS += $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_GTEST)
   LIBS_test = $(LIBS_all)
