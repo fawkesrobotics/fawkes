@@ -275,21 +275,19 @@ $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 	fi
 
 # execute every test in $(BINS_test)
-exec_test: $(patsubst $(BINDIR)/%,exec_%,$(BINS_test))
+exec_test: $(patsubst $(BINDIR)/%,exec_gtest_%,$(BINS_gtest)) $(patsubst $(BINDIR)/%,exec_catch2test_%,$(BINS_catch2test))
 
 # execution of a single test.
-exec_gtest_%: $(BINDIR)/gtest_%
+exec_gtest_%: $(BINDIR)/%
 	$(eval BUILT_PARTS += $@)
-	$(SILENT)echo -e "$(INDENT_PRINT)[TEST] $(BINDIR)/gtest_$*"
-	$(SILENT)exec $(BINDIR)/gtest_$* --gtest_color=$(if $(COLORED),yes,no) | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
+	$(SILENT)echo -e "$(INDENT_PRINT)[TEST] Running gtest $(BINDIR)/$*"
+	$(SILENT)exec $(BINDIR)/$* --gtest_color=$(if $(COLORED),yes,no) | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
 		test $${PIPESTATUS[0]} -eq 0
 
-exec_c2test_%: $(BINDIR)/c2test_%
-	$(SILENT)exec $(BINDIR)/test_$* --use-colour $(if $(COLORED),yes,no) | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
-		test $${PIPESTATUS[0]} -eq 0
-
-exec_test_%: $(BINDIR)/test_%
-	$(SILENT)exec $(BINDIR)/test_$* | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
+exec_catch2test_%: $(BINDIR)/%
+	$(eval BUILT_PARTS += $@)
+	$(SILENT)echo -e "$(INDENT_PRINT)[TEST] Running catch2 test $(BINDIR)/$*"
+	$(SILENT)exec $(BINDIR)/$* --use-colour $(if $(COLORED),yes,no) | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
 		test $${PIPESTATUS[0]} -eq 0
 
 exec_gdb_gtest_%: $(BINDIR)/gtest_%
