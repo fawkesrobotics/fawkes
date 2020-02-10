@@ -284,6 +284,10 @@ exec_gtest_%: $(BINDIR)/gtest_%
 	$(SILENT)exec $(BINDIR)/gtest_$* --gtest_color=yes | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
 		test $${PIPESTATUS[0]} -eq 0
 
+exec_c2test_%: $(BINDIR)/c2test_%
+	$(SILENT)exec $(BINDIR)/test_$* --use-colour yes | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
+		test $${PIPESTATUS[0]} -eq 0
+
 exec_test_%: $(BINDIR)/test_%
 	$(SILENT)exec $(BINDIR)/test_$* | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
 		test $${PIPESTATUS[0]} -eq 0
