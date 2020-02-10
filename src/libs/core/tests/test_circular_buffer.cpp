@@ -19,71 +19,64 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#define CATCH_CONFIG_MAIN
 #include <core/utils/circular_buffer.h>
-#include <gtest/gtest.h>
 
+#include <catch2/catch.hpp>
 #include <stdexcept>
 
 using namespace fawkes;
 
-TEST(CircularBufferTest, ElementAccess)
+TEST_CASE("Access elements", "[circular_buffer]")
 {
 	CircularBuffer<int> buffer(1000);
 	for (int i = 0; i < 1000; i++) {
 		buffer.push_back(i);
 	}
 	for (int i = 0; i < 1000; i++) {
-		ASSERT_EQ(i, buffer[i]);
-		ASSERT_EQ(i, buffer.at(i));
+		REQUIRE(buffer[i] == i);
+		REQUIRE(buffer.at(i) == i);
 	}
 }
 
-TEST(CircularBufferTest, ElementDeletion)
+TEST_CASE("Delete elements", "[circular_buffer]")
 {
 	CircularBuffer<int> buffer(1);
 	buffer.push_back(1);
 	buffer.push_back(2);
-	ASSERT_EQ(1, buffer.size());
-	ASSERT_EQ(2, buffer[0]);
+	REQUIRE(buffer.size() == 1);
+	REQUIRE(buffer[0] == 2);
 }
 
-TEST(CircularBufferTest, OutOfMaxRange)
+TEST_CASE("Out of max range", "[circular_buffer]")
 {
 	CircularBuffer<int> buffer(1);
 	int                 i;
-	ASSERT_NO_THROW(i = buffer[1]);
-	ASSERT_THROW(i = buffer.at(1), std::out_of_range);
+	CHECK_NOTHROW(i = buffer[1]);
+	REQUIRE_THROWS_AS(i = buffer.at(1), std::out_of_range);
 }
 
-TEST(CircularBufferTest, OutOfRange)
+TEST_CASE("Out of range", "[circular_buffer]")
 {
 	CircularBuffer<int> buffer(2);
 	buffer.push_back(1);
 	int i;
-	ASSERT_NO_THROW(i = buffer[1]);
-	ASSERT_THROW(i = buffer.at(1), std::out_of_range);
+	REQUIRE_NOTHROW(i = buffer[1]);
+	REQUIRE_THROWS_AS(i = buffer.at(1), std::out_of_range);
 }
 
-TEST(CircularBufferTest, ConstValues)
-{
-	CircularBuffer<int> buffer(5);
-	// buffer[0] = 2; // won't compile
-	CircularBuffer<int>::iterator it = buffer.begin();
-	// *it = 2; // won't compile
-}
-
-TEST(CircularBufferTest, CopyConstructor)
+TEST_CASE("Copy constructor", "[circular_buffer]")
 {
 	CircularBuffer<int> b1(5);
 	b1.push_back(1);
 	b1.push_back(2);
 	CircularBuffer<int> b2(b1);
-	ASSERT_EQ(5, b2.get_max_size());
-	ASSERT_EQ(1, b2[0]);
-	ASSERT_EQ(2, b2[1]);
+	REQUIRE(b2.get_max_size() == 5);
+	REQUIRE(b2[0] == 1);
+	REQUIRE(b2[1] == 2);
 	b2.push_back(3);
-	ASSERT_EQ(3, b2[2]);
-	ASSERT_EQ(1, b1[0]);
-	ASSERT_EQ(2, b1[1]);
-	ASSERT_THROW(b1.at(2), std::out_of_range);
+	REQUIRE(b2[2] == 3);
+	REQUIRE(b1[0] == 1);
+	REQUIRE(b1[1] == 2);
+	REQUIRE_THROWS_AS(b1.at(2), std::out_of_range);
 }
