@@ -87,9 +87,9 @@ public:
 	mongocxx::cursor aggregate(bsoncxx::document::view pipeline, const std::string &collection = "");
 	int              drop_collection(const std::string &collection);
 	int              clear_memory();
-	int              restore_collection(const std::string &collection,
+	int              restore_collection(const std::string &dbcollection,
 	                                    const std::string &directory = "@CONFDIR@/robot-memory",
-	                                    const std::string &target_collection = "");
+	                                    std::string        target_dbcollection = "");
 	int              dump_collection(const std::string &collection,
 	                                 const std::string &directory = "@CONFDIR@/robot-memory");
 	int              create_index(bsoncxx::document::view keys,

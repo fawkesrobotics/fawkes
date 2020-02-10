@@ -578,51 +578,44 @@ RobotMemory::clear_memory()
 
 /**
  * Restore a previously dumped collection from a directory
- * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @param dbcollection The database and collection to use as string (e.g.
+ * robmem.worldmodel)
  * @param directory Directory of the dump
- * @param target_collection Optional different database and collection where the dump is restored to.
- *                          If not set, the dump will be restored in the previous place
+ * @param target_dbcollection Optional different database and collection where
+ * the dump is restored to.  If not set, the dump will be restored in the
+ * previous place
  * @return 1: Success 0: Error
  */
 int
-RobotMemory::restore_collection(const std::string &collection,
+RobotMemory::restore_collection(const std::string &dbcollection,
                                 const std::string &directory,
-                                const std::string &target_collection)
+                                std::string        target_dbcollection)
 {
-	std::string target_coll;
-	if (target_collection == "") {
-		target_coll = std::move(collection);
-	} else {
-		target_coll = std::move(target_collection);
+	if (target_dbcollection == "") {
+		target_dbcollection = dbcollection;
 	}
-	std::string coll{std::move(collection)};
 
-	drop_collection(target_coll);
+	drop_collection(target_dbcollection);
 
 	//lock (mongo_client not thread safe)
 	MutexLocker lock(mutex_);
 
-	//resolve path to restore
-	if (coll.find(".") == std::string::npos) {
-		log(std::string("Unable to restore collection" + coll), "error");
-		log(std::string("Specify collection like 'db.collection'"), "error");
-		return 0;
-	}
-	std::string path = StringConversions::resolve_path(directory) + "/"
-	                   + coll.replace(coll.find("."), 1, "/") + ".bson";
+	auto [db, collection] = split_db_collection_string(dbcollection);
+	std::string path =
+	  StringConversions::resolve_path(directory) + "/" + db + "/" + collection + ".bson";
 	log_deb(std::string("Restore collection " + collection + " from " + path), "warn");
 
-	//call mongorestore from folder with initial restores
-	std::vector<std::string> split = str_split(target_coll, '.');
+	auto [target_db, target_collection] = split_db_collection_string(target_dbcollection);
 
-	std::string command = "/usr/bin/mongorestore --dir " + path + " -d " + split[0] + " -c "
-	                      + split[1] + " --host=127.0.0.1 --port 27021";
+	//call mongorestore from folder with initial restores
+	std::string command = "/usr/bin/mongorestore --dir " + path + " -d " + target_db + " -c "
+	                      + target_collection + " --host=127.0.0.1 --port 27021";
 	log_deb(std::string("Restore command: " + command), "warn");
 	FILE *bash_output = popen(command.c_str(), "r");
 
 	//check if output is ok
 	if (!bash_output) {
-		log(std::string("Unable to restore collection" + coll), "error");
+		log(std::string("Unable to restore collection" + collection), "error");
 		return 0;
 	}
 	std::string output_string = "";
@@ -635,7 +628,7 @@ RobotMemory::restore_collection(const std::string &collection,
 	}
 	pclose(bash_output);
 	if (output_string.find("Failed") != std::string::npos) {
-		log(std::string("Unable to restore collection" + coll), "error");
+		log(std::string("Unable to restore collection" + collection), "error");
 		log_deb(output_string, "error");
 		return 0;
 	}
