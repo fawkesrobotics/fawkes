@@ -590,7 +590,7 @@ RobotMemory::restore_collection(const std::string &collection,
                                 const std::string &target_collection)
 {
 	std::string target_coll;
-	if (target_collection == "noop") {
+	if (target_collection == "") {
 		target_coll = std::move(collection);
 	} else {
 		target_coll = std::move(target_collection);

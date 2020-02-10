@@ -89,7 +89,7 @@ public:
 	int              clear_memory();
 	int              restore_collection(const std::string &collection,
 	                                    const std::string &directory = "@CONFDIR@/robot-memory",
-	                                    const std::string &target_collection = "noop");
+	                                    const std::string &target_collection = "");
 	int              dump_collection(const std::string &collection,
 	                                 const std::string &directory = "@CONFDIR@/robot-memory");
 	int              create_index(bsoncxx::document::view keys,
