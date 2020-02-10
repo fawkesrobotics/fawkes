@@ -281,11 +281,11 @@ exec_test: $(patsubst $(BINDIR)/%,exec_%,$(BINS_test))
 exec_gtest_%: $(BINDIR)/gtest_%
 	$(eval BUILT_PARTS += $@)
 	$(SILENT)echo -e "$(INDENT_PRINT)[TEST] $(BINDIR)/gtest_$*"
-	$(SILENT)exec $(BINDIR)/gtest_$* --gtest_color=yes | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
+	$(SILENT)exec $(BINDIR)/gtest_$* --gtest_color=$(if $(COLORED),yes,no) | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
 		test $${PIPESTATUS[0]} -eq 0
 
 exec_c2test_%: $(BINDIR)/c2test_%
-	$(SILENT)exec $(BINDIR)/test_$* --use-colour yes | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
+	$(SILENT)exec $(BINDIR)/test_$* --use-colour $(if $(COLORED),yes,no) | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
 		test $${PIPESTATUS[0]} -eq 0
 
 exec_test_%: $(BINDIR)/test_%
