@@ -21,32 +21,33 @@ include $(BASEDIR)/etc/buildsys/catch2.mk
 LIBS_test_circular_buffer += stdc++ fawkescore fawkesutils
 OBJS_test_circular_buffer += test_circular_buffer.o
 
-LIBS_gtest_wait_condition += stdc++ fawkescore pthread
-OBJS_gtest_wait_condition += test_wait_condition.o
+LIBS_test_wait_condition += stdc++ fawkescore pthread
+OBJS_test_wait_condition += test_wait_condition.o
 
-OBJS_all    = $(OBJS_test_circular_buffer) $(OBJS_gtest_wait_condition)
+OBJS_all    = $(OBJS_test_circular_buffer) $(OBJS_test_wait_condition)
 
 ifeq ($(HAVE_CATCH2),1)
   CFLAGS_test_circular_buffer += $(CFLAGS_CATCH2)
   LDFLAGS_test_circular_buffer += $(LDFLAGS_CATCH2)
-  BINS_test += $(BINDIR)/test_circular_buffer
+  BINS_catch2test += $(BINDIR)/test_circular_buffer
 else
   WARN_TARGETS += warning_catch2
 endif
 
 ifeq ($(HAVE_GTEST),1)
-  CFLAGS_gtest_wait_condition += $(CFLAGS_GTEST)
-  LDFLAGS_gtest_wait_condition += $(LDFLAGS_GTEST)
+  CFLAGS_test_wait_condition += $(CFLAGS_GTEST)
+  LDFLAGS_test_wait_condition += $(LDFLAGS_GTEST)
   ifeq ($(CC),clang)
-    CFLAGS_gtest_wait_condition += -Wno-unused-variable
+    CFLAGS_test_wait_condition += -Wno-unused-variable
   else
-    CFLAGS_gtest_wait_condition += -Wno-unused-but-set-variable
+    CFLAGS_test_wait_condition += -Wno-unused-but-set-variable
   endif
-  BINS_test += $(BINDIR)/gtest_wait_condition
+  BINS_gtest += $(BINDIR)/test_wait_condition
 else
   WARN_TARGETS += warning_gtest
 endif
 
+BINS_test = $(BINS_gtest) $(BINS_catch2test)
 BINS_all = $(BINS_test)
 
 ifeq ($(OBJSSUBMAKE),1)
