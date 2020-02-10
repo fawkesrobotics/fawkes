@@ -19,13 +19,12 @@ include $(BASEDIR)/etc/buildsys/gtest.mk
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/src/libs/netcomm/netcomm.mk
 
-LIBS_gtest_fawkes += stdc++ fawkescore fawkesutils fawkesblackboard fawkesnetcomm \
+LIBS_test_fawkes += stdc++ fawkescore fawkesutils fawkesblackboard fawkesnetcomm \
 	fawkesconfig fawkesplugin fawkesaspects fawkesbaseapp
-OBJS_gtest_fawkes += gtest_fawkes.o
+OBJS_test_fawkes += gtest_fawkes.o
 
-OBJS_all = $(OBJS_gtest_fawkes)
+OBJS_all = $(OBJS_test_fawkes)
 LIBS_all = $(LIBDIR)/test/fawkes.so
-BINS_all = $(BINDIR)/gtest_fawkes
 
 ifeq ($(HAVE_GTEST)$(HAVE_CPP11),11)
   CFLAGS += $(CFLAGS_GTEST)
@@ -33,10 +32,12 @@ ifeq ($(HAVE_GTEST)$(HAVE_CPP11),11)
   CFLAGS += $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_GTEST)
   LIBS_test = $(LIBS_all)
-  BINS_test = $(BINS_all)
+  BINS_test =  $(BINDIR)/test_fawkes
 else
   WARN_TARGETS += warning_gtest
 endif
+
+BINS_all = $(BINS_test)
 
 ifeq ($(OBJSSUBMAKE),1)
 test: $(WARN_TARGETS)
