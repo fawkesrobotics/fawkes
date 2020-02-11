@@ -208,6 +208,7 @@ private:
 	             const std::string &            level = "info");
 
 	bool                 is_distributed_database(const std::string &dbcollection);
+	std::string          get_hostport(const std::string &dbcollection);
 	mongocxx::client *   get_mongodb_client(const std::string &collection);
 	mongocxx::collection get_collection(const std::string &dbcollection);
 

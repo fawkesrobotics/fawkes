@@ -609,7 +609,7 @@ RobotMemory::restore_collection(const std::string &dbcollection,
 
 	//call mongorestore from folder with initial restores
 	std::string command = "/usr/bin/mongorestore --dir " + path + " -d " + target_db + " -c "
-	                      + target_collection + " --host=127.0.0.1 --port 27021";
+	                      + target_collection + " --host=" + get_hostport(dbcollection);
 	log_deb(std::string("Restore command: " + command), "warn");
 	FILE *bash_output = popen(command.c_str(), "r");
 
@@ -652,8 +652,9 @@ RobotMemory::dump_collection(const std::string &dbcollection, const std::string 
 
 	auto [db, collection] = split_db_collection_string(dbcollection);
 
-	std::string command = "/usr/bin/mongodump --out=" + path + " --db=" + db + " --collection="
-	                      + collection + " --host=127.0.0.1 --forceTableScan --port 27021";
+	std::string command = "/usr/bin/mongodump --out=" + path + " --db=" + db
+	                      + " --collection=" + collection + " --forceTableScan"
+	                      + " --host=" + get_hostport(dbcollection);
 	log(std::string("Dump command: " + command), "info");
 	FILE *bash_output = popen(command.c_str(), "r");
 	//check if output is ok
@@ -728,6 +729,16 @@ RobotMemory::is_distributed_database(const std::string &dbcollection)
 	                 distributed_dbs_.end(),
 	                 split_db_collection_string(dbcollection).first)
 	       != distributed_dbs_.end();
+}
+
+std::string
+RobotMemory::get_hostport(const std::string &dbcollection)
+{
+	if (distributed_ && is_distributed_database(dbcollection)) {
+		return config_->get_string("/plugins/mongodb/clients/robot-memory-distributed-direct/hostport");
+	} else {
+		return config_->get_string("/plugins/mongodb/clients/robot-memory-local-direct/hostport");
+	}
 }
 
 /**
