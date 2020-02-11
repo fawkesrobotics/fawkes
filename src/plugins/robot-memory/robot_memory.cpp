@@ -637,31 +637,23 @@ RobotMemory::restore_collection(const std::string &dbcollection,
 
 /**
  * Dump (= save) a collection to the filesystem to restore it later
- * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @param dbcollection The database and collection to use as string (e.g. robmem.worldmodel)
  * @param directory Directory to dump the collection to
  * @return 1: Success 0: Error
  */
 int
-RobotMemory::dump_collection(const std::string &collection, const std::string &directory)
+RobotMemory::dump_collection(const std::string &dbcollection, const std::string &directory)
 {
 	//lock (mongo_client not thread safe)
 	MutexLocker lock(mutex_);
 
-	//resolve path to dump to
-	if (collection.find(".") == std::string::npos) {
-		log(std::string("Unable to dump collection" + collection), "error");
-		log(std::string("Specify collection like 'db.collection'"), "error");
-		return 0;
-	}
 	std::string path = StringConversions::resolve_path(directory);
-	log_deb(std::string("Dump collection " + collection + " into " + path), "warn");
+	log_deb(std::string("Dump collection " + dbcollection + " into " + path), "warn");
 
-	//call mongorestore from folder with initial restores
-	std::vector<std::string> split = str_split(collection, '.');
+	auto [db, collection] = split_db_collection_string(dbcollection);
 
-	//TODO Get Port dynamically
-	std::string command = "/usr/bin/mongodump --out=" + path + " --db=" + split[0] + " --collection="
-	                      + split[1] + " --host=127.0.0.1 --forceTableScan --port 27021";
+	std::string command = "/usr/bin/mongodump --out=" + path + " --db=" + db + " --collection="
+	                      + collection + " --host=127.0.0.1 --forceTableScan --port 27021";
 	log(std::string("Dump command: " + command), "info");
 	FILE *bash_output = popen(command.c_str(), "r");
 	//check if output is ok

@@ -90,7 +90,7 @@ public:
 	int              restore_collection(const std::string &dbcollection,
 	                                    const std::string &directory = "@CONFDIR@/robot-memory",
 	                                    std::string        target_dbcollection = "");
-	int              dump_collection(const std::string &collection,
+	int              dump_collection(const std::string &dbcollection,
 	                                 const std::string &directory = "@CONFDIR@/robot-memory");
 	int              create_index(bsoncxx::document::view keys,
 	                              const std::string &     collection = "",
