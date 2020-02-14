@@ -35,6 +35,12 @@ namespace gpp {
 /** @class BBMessageActionExecutor
  * A Golog++ action executor that sends a message to a blackboard interface.
  * @author Till Hofmann
+ *
+ * @var BBMessageActionExecutor::blackboard_
+ * The blackboard to use to access the skiller.
+ *
+ * @var BBMessageActionExecutor::blackboard_owner_
+ * True if this executor is owning its blackboard.
  */
 
 /** Constructor.
@@ -48,7 +54,11 @@ BBMessageActionExecutor::BBMessageActionExecutor(Logger *           logger,
                                                  BlackBoard *       blackboard,
                                                  Configuration *    config,
                                                  const std::string &cfg_prefix)
-: ActionExecutor(logger), blackboard_(blackboard), config_(config), cfg_prefix_(cfg_prefix)
+: ActionExecutor(logger),
+  blackboard_(blackboard),
+  blackboard_owner_(false),
+  config_(config),
+  cfg_prefix_(cfg_prefix)
 {
 }
 

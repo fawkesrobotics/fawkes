@@ -45,8 +45,11 @@ public:
 	void stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity) override;
 	bool can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
 
+protected:
+	BlackBoard *blackboard_;
+	bool        blackboard_owner_;
+
 private:
-	BlackBoard *                       blackboard_;
 	Configuration *                    config_;
 	std::string                        cfg_prefix_;
 	std::map<std::string, Interface *> open_interfaces_;

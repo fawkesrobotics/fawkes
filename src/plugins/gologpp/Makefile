@@ -21,7 +21,7 @@ OBJS_gologpp = plugin.o execution_thread.o gologpp_fawkes_backend.o exog_manager
                action_executor.o skiller_action_executor.o \
                aspect/action_executor_dispatcher.o aspect/action_executor_dispatcher_inifin.o \
                utils.o message_action_executor.o sleep_action_executor.o print_action_executor.o \
-               remote_skiller_executor.o
+               remote_skiller_executor.o remote_message_executor.o
 
 OBJS_all    = $(OBJS_gologpp)
 PLUGINS_all = $(PLUGINDIR)/gologpp.so
