@@ -23,6 +23,7 @@
 
 #include "message_action_executor.h"
 #include "print_action_executor.h"
+#include "remote_message_executor.h"
 #include "remote_skiller_executor.h"
 #include "skiller_action_executor.h"
 #include "sleep_action_executor.h"
@@ -54,9 +55,9 @@ GologppFawkesBackend::GologppFawkesBackend(Configuration *config,
                                            BlackBoard *   blackboard)
 : AspectProviderAspect(&dispatcher_inifin_), logger_(logger), blackboard_(blackboard)
 {
-	// Register RemoteSkillerActionExecutors before the local
-	// SkillerActionExecutor. This way, any action that cannot be executed on any
-	// remote will be tried locally.
+	// Register RemoteSkillerActionExecutors and RemoteBBMessageActionExecutors
+	// before the local executors. This way, any action that cannot
+	// be executed on any remote will be tried locally.
 	for (const string &robot :
 	     config->get_strings_or_defaults((cfg_prefix + "/agents/names").c_str(), {})) {
 		const std::string  agent_prefix = cfg_prefix + "/agents/" + robot;
@@ -65,6 +66,8 @@ GologppFawkesBackend::GologppFawkesBackend(Configuration *config,
 		const unsigned short int &port =
 		  config->get_uint_or_default((agent_prefix + "/port").c_str(), 1910);
 		action_dispatcher_.register_executor(std::make_shared<RemoteSkillerActionExecutor>(
+		  logger, "robot", robot, hostname, port, config, cfg_prefix));
+		action_dispatcher_.register_executor(std::make_shared<RemoteBBMessageActionExecutor>(
 		  logger, "robot", robot, hostname, port, config, cfg_prefix));
 	}
 	if (config->get_bool_or_default((cfg_prefix + "/use_local_skiller").c_str(), true)) {
