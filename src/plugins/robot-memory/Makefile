@@ -32,8 +32,8 @@ PLUGINS_all = $(PLUGINDIR)/robot-memory.so
 # Enable this flag for time tracking
 #CFLAGS += -DUSE_TIMETRACKER
 
-ifeq ($(HAVE_ROBOT_MEMORY)$(HAVE_CPP11),11)
-  CFLAGS += $(CFLAGS_ROBOT_MEMORY) $(CFLAGS_CPP11)
+ifeq ($(HAVE_ROBOT_MEMORY)$(HAVE_CPP17),11)
+  CFLAGS += $(CFLAGS_ROBOT_MEMORY) $(CFLAGS_CPP17)
   LDFLAGS += $(LDFLAGS_ROBOT_MEMORY)
 
   PLUGINS_build = $(PLUGINS_all)
@@ -41,8 +41,8 @@ else
   ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS += warning_mongodb
   endif
-  ifneq ($(HAVE_CPP11),1)
-    WARN_TARGETS += warning_cpp11
+  ifneq ($(HAVE_CPP17),1)
+    WARN_TARGETS += warning_cpp17
   endif
   ifneq ($(HAVE_TF),1)
     WARN_TARGETS += warning_tf
@@ -59,8 +59,8 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_cpp11 warning_mongodb warning_tf warning_ubuntu
-warning_cpp11:
+.PHONY: warning_cpp17 warning_mongodb warning_tf warning_ubuntu
+warning_cpp17:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (C++11 required)"
 warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemory Plugin$(TNORMAL) (mongodb[-devel] not installed)"

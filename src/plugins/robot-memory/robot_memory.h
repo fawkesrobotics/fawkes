@@ -87,10 +87,10 @@ public:
 	mongocxx::cursor aggregate(bsoncxx::document::view pipeline, const std::string &collection = "");
 	int              drop_collection(const std::string &collection);
 	int              clear_memory();
-	int              restore_collection(const std::string &collection,
+	int              restore_collection(const std::string &dbcollection,
 	                                    const std::string &directory = "@CONFDIR@/robot-memory",
-	                                    const std::string &target_collection = "noop");
-	int              dump_collection(const std::string &collection,
+	                                    std::string        target_dbcollection = "");
+	int              dump_collection(const std::string &dbcollection,
 	                                 const std::string &directory = "@CONFDIR@/robot-memory");
 	int              create_index(bsoncxx::document::view keys,
 	                              const std::string &     collection = "",
@@ -208,6 +208,7 @@ private:
 	             const std::string &            level = "info");
 
 	bool                 is_distributed_database(const std::string &dbcollection);
+	std::string          get_hostport(const std::string &dbcollection);
 	mongocxx::client *   get_mongodb_client(const std::string &collection);
 	mongocxx::collection get_collection(const std::string &dbcollection);
 
