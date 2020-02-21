@@ -21,6 +21,10 @@
 #ifndef _PLUGINS_SKILLER_SIMULATOR_EXEC_THREAD_H_
 #define _PLUGINS_SKILLER_SIMULATOR_EXEC_THREAD_H_
 
+#include "execution_time_estimator_aspect/execution_time_estimator_aspect.h"
+#include "execution_time_estimator_aspect/execution_time_estimator_aspect_inifin.h"
+
+#include <aspect/aspect_provider.h>
 #include <aspect/blackboard.h>
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
@@ -34,7 +38,8 @@ class SkillerSimulatorExecutionThread : public fawkes::Thread,
                                         public fawkes::BlockedTimingAspect,
                                         public fawkes::LoggingAspect,
                                         public fawkes::BlackBoardAspect,
-                                        public fawkes::ConfigurableAspect
+                                        public fawkes::ConfigurableAspect,
+                                        public fawkes::AspectProviderAspect
 {
 public:
 	SkillerSimulatorExecutionThread();
@@ -51,9 +56,13 @@ protected:
 	}
 
 private:
+	float                     get_skill_runtime(const std::string &skill) const;
+	void                      execute_skill(const std::string &skill);
 	fawkes::SkillerInterface *skiller_if_;
-	double                    skill_runtime_;
+	float                     default_skill_runtime_;
 	fawkes::Time              skill_starttime_;
+	fawkes::skiller_simulator::ExecutionTimeEstimatorManager       execution_time_estimator_manager_;
+	fawkes::skiller_simulator::ExecutionTimeEstimatorsAspectIniFin provider_inifin_;
 };
 
 #endif /* !_PLUGINS_SKILLER_SIMULATOR_EXEC_THREAD_H_ */

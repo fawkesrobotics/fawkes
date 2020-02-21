@@ -21,7 +21,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd \
 	  laser imu flite festival joystick openrave \
 	  katana jaco pantilt roomba nao robotino \
 	  bumblebee2 realsense realsense2 perception amcl \
-	  skiller skiller-simulator luaagent \
+	  skiller skiller-simulator skiller-simulator-navgraph luaagent \
 	  laser-filter laser-lines laser-cluster laser-pointclouds \
 	  static_transforms navgraph navgraph-clusters navgraph-generator colli \
 	  clips clips-agent clips-protobuf clips-navgraph \
@@ -52,6 +52,7 @@ pddl-planner: robot-memory
 gazebo: robotino
 skiller: navgraph
 skiller-simulator: skiller
+skiller-simulator-navgraph: skiller-simulator
 perception: mongodb
 navgraph-generator: navgraph amcl
 openprs-agent: openprs
