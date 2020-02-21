@@ -334,10 +334,15 @@ NavGraphVisualizationThread::regenerate()
 		//bool is_next    = (plan_.size() >= 2) && (plan_[1].name() == nodes[i].name());
 		bool is_active = (plan_to_ == nodes[i].name());
 
+		std::string ns = "navgraph";
+		if (nodes[i].has_property("group")) {
+			ns += "-" + nodes[i].property("group");
+		}
+
 		visualization_msgs::Marker sphere;
 		sphere.header.frame_id    = cfg_global_frame_;
 		sphere.header.stamp       = ros::Time::now();
-		sphere.ns                 = "navgraph";
+		sphere.ns                 = ns;
 		sphere.id                 = id_num++;
 		sphere.type               = visualization_msgs::Marker::SPHERE;
 		sphere.action             = visualization_msgs::Marker::ADD;
@@ -456,7 +461,7 @@ NavGraphVisualizationThread::regenerate()
 			visualization_msgs::Marker arrow;
 			arrow.header.frame_id    = cfg_global_frame_;
 			arrow.header.stamp       = ros::Time::now();
-			arrow.ns                 = "navgraph";
+			arrow.ns                 = ns;
 			arrow.id                 = id_num++;
 			arrow.type               = visualization_msgs::Marker::ARROW;
 			arrow.action             = visualization_msgs::Marker::ADD;
@@ -490,7 +495,7 @@ NavGraphVisualizationThread::regenerate()
 		visualization_msgs::Marker text;
 		text.header.frame_id    = cfg_global_frame_;
 		text.header.stamp       = ros::Time::now();
-		text.ns                 = "navgraph";
+		text.ns                 = ns;
 		text.id                 = id_num++;
 		text.type               = visualization_msgs::Marker::TEXT_VIEW_FACING;
 		text.action             = visualization_msgs::Marker::ADD;
