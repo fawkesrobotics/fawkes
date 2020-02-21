@@ -46,7 +46,6 @@ NavGraphVisualizationThread::NavGraphVisualizationThread()
 : fawkes::Thread("NavGraphVisualizationThread", Thread::OPMODE_WAITFORWAKEUP),
   fawkes::BlockedTimingAspect(fawkes::BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
 {
-	set_coalesce_wakeups(true);
 	graph_ = NULL;
 	crepo_ = NULL;
 }
@@ -120,7 +119,7 @@ NavGraphVisualizationThread::set_graph(fawkes::LockPtr<NavGraph> &graph)
 	graph_ = graph;
 	traversal_.invalidate();
 	plan_to_ = plan_from_ = "";
-	wakeup();
+	regenerate();
 }
 
 /** Set the constraint repo.
@@ -140,7 +139,7 @@ NavGraphVisualizationThread::set_traversal(NavGraphPath::Traversal &traversal)
 {
 	traversal_ = traversal;
 	plan_to_ = plan_from_ = "";
-	wakeup();
+	regenerate();
 }
 
 /** Reset the current plan. */
@@ -149,7 +148,7 @@ NavGraphVisualizationThread::reset_plan()
 {
 	traversal_.invalidate();
 	plan_to_ = plan_from_ = "";
-	wakeup();
+	regenerate();
 }
 
 /** Set the currently executed edge of the plan.
