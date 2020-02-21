@@ -18,7 +18,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gtest.mk
 include $(BASEDIR)/etc/buildsys/catch2.mk
 
-LIBS_test_circular_buffer += stdc++ fawkescore fawkesutils
+LIBS_test_circular_buffer += stdc++ fawkescore m
 OBJS_test_circular_buffer += test_circular_buffer.o
 
 LIBS_test_wait_condition += stdc++ fawkescore pthread
