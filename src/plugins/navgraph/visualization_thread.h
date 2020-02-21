@@ -22,6 +22,8 @@
 #ifndef _PLUGINS_VISPATHPLAN_VISPATHPLAN_THREAD_H_
 #define _PLUGINS_VISPATHPLAN_VISPATHPLAN_THREAD_H_
 
+#include "aspect/blocked_timing.h"
+
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 #include <core/threading/mutex.h>
@@ -34,6 +36,7 @@
 #include <visualization_msgs/MarkerArray.h>
 
 class NavGraphVisualizationThread : public fawkes::Thread,
+                                    public fawkes::BlockedTimingAspect,
                                     public fawkes::ConfigurableAspect,
                                     public fawkes::LoggingAspect,
                                     public fawkes::ROSAspect,
@@ -57,6 +60,7 @@ public:
 
 private:
 	void  publish();
+	void  regenerate();
 	void  add_circle_markers(visualization_msgs::MarkerArray &m,
 	                         size_t &                         id_num,
 	                         float                            center_x,
@@ -88,6 +92,8 @@ private:
 	fawkes::LockPtr<fawkes::NavGraphConstraintRepo> crepo_;
 
 	std::string cfg_global_frame_;
+
+	visualization_msgs::MarkerArray markers_;
 };
 
 #endif

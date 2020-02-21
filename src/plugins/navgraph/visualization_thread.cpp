@@ -21,6 +21,8 @@
 
 #include "visualization_thread.h"
 
+#include "aspect/blocked_timing.h"
+
 #include <navgraph/constraints/constraint_repo.h>
 #include <navgraph/constraints/polygon_edge_constraint.h>
 #include <navgraph/constraints/polygon_node_constraint.h>
@@ -41,7 +43,8 @@ typedef std::multimap<std::string, std::string> ConnMap;
 
 /** Constructor. */
 NavGraphVisualizationThread::NavGraphVisualizationThread()
-: fawkes::Thread("NavGraphVisualizationThread", Thread::OPMODE_WAITFORWAKEUP)
+: fawkes::Thread("NavGraphVisualizationThread", Thread::OPMODE_WAITFORWAKEUP),
+  fawkes::BlockedTimingAspect(fawkes::BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
 {
 	set_coalesce_wakeups(true);
 	graph_ = NULL;
@@ -166,7 +169,7 @@ NavGraphVisualizationThread::set_current_edge(const std::string &from, const std
 void
 NavGraphVisualizationThread::graph_changed() throw()
 {
-	wakeup();
+	regenerate();
 }
 
 void
@@ -233,7 +236,7 @@ NavGraphVisualizationThread::add_circle_markers(visualization_msgs::MarkerArray 
 }
 
 void
-NavGraphVisualizationThread::publish()
+NavGraphVisualizationThread::regenerate()
 {
 	if (!graph_)
 		return;
@@ -979,5 +982,11 @@ NavGraphVisualizationThread::publish()
 	last_id_num_             = id_num;
 	constraints_last_id_num_ = constraints_id_num;
 
-	vispub_.publish(m);
+	markers_ = m;
+}
+
+void
+NavGraphVisualizationThread::publish()
+{
+	vispub_.publish(markers_);
 }
