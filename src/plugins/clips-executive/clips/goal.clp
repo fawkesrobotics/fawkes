@@ -187,7 +187,7 @@
 	; Once committing to a goal, this identifies the goal or plan to
 	; which we have committed, in particular if there are multiple
 	; possible sub-goals or associated plans.
-	(slot committed-to (type SYMBOL))
+	(multislot committed-to (type SYMBOL))
 
 	; Amount of information to print. If set to quiet, regular events such as a
 	; committed or dispatched goal will only be logged to the debug log.

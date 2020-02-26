@@ -126,7 +126,7 @@
 	             (type ACHIEVE) (mode RETRACTED) (outcome ?outcome&FAILED|REJECTED))
  =>
 	(bind ?error-code (if (> (length$ ?error) 0) then (nth$ 1 ?error) else (sym-cat SUBGOAL- ?outcome)))
-	(modify ?gf (mode FINISHED) (outcome ?outcome) (committed-to nil) (error ?error-code)
+	(modify ?gf (mode FINISHED) (outcome ?outcome) (committed-to (create$ )) (error ?error-code)
 	        (message (str-cat "TIMEOUT goal '" ?id "' sub-goal '" ?sub-goal
 	                          "' " ?outcome " (error " ?error-code ")")))
 )
