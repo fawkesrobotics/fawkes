@@ -276,26 +276,22 @@ $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 		echo -e "$(INDENT_PRINT)=== $(TYELLOW)Cannot generate man page for $* (asciidoc not installed)$(TNORMAL)"; \
 	fi
 
-# execute every test in $(BINS_test)
+# execute every test
 exec_test: $(patsubst $(BINDIR)/%,exec_gtest_%,$(BINS_gtest)) $(patsubst $(BINDIR)/%,exec_catch2test_%,$(BINS_catch2test))
 
-# execution of a single test.
+# execute a single gtest
 exec_gtest_%: $(BINDIR)/%
 	$(eval BUILT_PARTS += $@)
 	$(SILENT)echo -e "$(INDENT_PRINT)[TEST] Running gtest $(BINDIR)/$*"
 	$(SILENT)exec $(BINDIR)/$* --gtest_color=$(if $(COLORED),yes,no) | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
 		test $${PIPESTATUS[0]} -eq 0
 
+# execute a single catch2test
 exec_catch2test_%: $(BINDIR)/%
 	$(eval BUILT_PARTS += $@)
 	$(SILENT)echo -e "$(INDENT_PRINT)[TEST] Running catch2 test $(BINDIR)/$*"
 	$(SILENT)exec $(BINDIR)/$* --use-colour $(if $(COLORED),yes,no) | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
 		test $${PIPESTATUS[0]} -eq 0
-
-exec_gdb_gtest_%: $(BINDIR)/gtest_%
-	$(eval BUILT_PARTS += $@)
-	$(SILENT)echo -e "$(INDENT_PRINT)[TEST-GDB] $(BINDIR)/gtest_$*"
-	$(SILENT)exec gdb $(BINDIR)/gtest_$*
 
 .SECONDEXPANSION:
 $(BINDIR)/%: $$(OBJS_$$(call nametr,$$*))
