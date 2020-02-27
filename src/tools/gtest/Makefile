@@ -39,8 +39,6 @@ else
   WARN_TARGETS += warning_gtest
 endif
 
-BINS_all = $(BINS_test)
-
 ifeq ($(OBJSSUBMAKE),1)
 test: $(WARN_TARGETS)
 
