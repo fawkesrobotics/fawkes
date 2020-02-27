@@ -99,6 +99,8 @@ UNLISTED_libs = $(strip $(filter-out $(LIBS_all:%.so=%.$(SOEXT)),$(LIBS_build:%.
 UNLISTED_plugins = $(strip $(filter-out $(PLUGINS_all:%.so=%.$(SOEXT)),$(PLUGINS_build:%.so=%.$(SOEXT))))
 UNLISTED_all = $(strip $(UNLISTED_bins) $(UNLISTED_libs) $(UNLISTED_plugins))
 
+BINS_test = $(BINS_gtest) $(BINS_catch2test)
+
 all: $(if $(UNLISTED_all),error_unlisted,presubdirs $(PLUGINS_build:%.so=%.$(SOEXT)) $(LIBS_build:%.so=%.$(SOEXT)) $(BINS_build) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) stats subdirs | silent-nothing-to-do-all)
 gui: $(if $(UNLISTED_all),error_unlisted,presubdirs $(LIBS_gui:%.so=%.$(SOEXT)) $(PLUGINS_gui:%.so=%.$(SOEXT)) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) stats-gui subdirs | silent-nothing-to-do-gui)
 test: $(if $(UNLISTED_all),error_unlisted,presubdirs $(LIBS_test:%.so=%.$(SOEXT)) $(PLUGINS_test:%.so=%.$(SOEXT)) $(BINS_test) $(TARGETS_test) exec_test stats-test subdirs | silent-nothing-to-do-test)
