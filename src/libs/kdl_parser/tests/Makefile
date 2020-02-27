@@ -28,7 +28,4 @@ ifeq ($(HAVE_GTEST)$(HAVE_KDLPARSER),11)
   BINS_gtest = $(BINDIR)/test_kdlparser
 endif
 
-BINS_test = $(BINS_gtest)
-BINS_all = $(BINDIR)/test_kdlparser
-
 include $(BUILDSYSDIR)/base.mk
