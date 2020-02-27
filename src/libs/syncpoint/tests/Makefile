@@ -41,9 +41,6 @@ else
   endif
 endif
 
-BINS_test = $(BINS_gtest)
-BINS_all = $(BINS_test)
-
 ifeq ($(OBJSSUBMAKE),1)
 test: $(WARN_TARGETS)
 .PHONY: $(WARN_TARGETS)
