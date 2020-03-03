@@ -501,16 +501,16 @@ Interface::write()
 	data_mutex_->lock();
 	bool do_notify = false;
 	if (valid_) {
-		if (data_changed) {
-			if (auto_timestamping_)
-				timestamp_->stamp();
-			long sec = 0, usec = 0;
-			timestamp_->get_timestamp(sec, usec);
-			data_ts->timestamp_sec  = sec;
-			data_ts->timestamp_usec = usec;
-			data_changed            = false;
-			do_notify               = true;
-		}
+		if (auto_timestamping_)
+			timestamp_->stamp();
+		long sec = 0, usec = 0;
+		timestamp_->get_timestamp(sec, usec);
+		data_ts->timestamp_sec  = sec;
+		data_ts->timestamp_usec = usec;
+
+		do_notify    = data_changed;
+		data_changed = false;
+
 		memcpy(mem_data_ptr_, data_ptr, data_size);
 	} else {
 		data_mutex_->unlock();
