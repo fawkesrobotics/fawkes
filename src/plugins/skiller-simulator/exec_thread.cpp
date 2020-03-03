@@ -20,6 +20,8 @@
 
 #include "exec_thread.h"
 
+#include "estimators/config_estimator.h"
+
 using namespace std;
 using namespace fawkes;
 
@@ -34,16 +36,21 @@ using namespace fawkes;
 /** Constructor. */
 SkillerSimulatorExecutionThread::SkillerSimulatorExecutionThread()
 : Thread("SkillerSimulatorExecutionThread", Thread::OPMODE_WAITFORWAKEUP),
-  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL)
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL),
+  AspectProviderAspect(&provider_inifin_),
+  provider_inifin_(&execution_time_estimator_manager_)
 {
 }
 
 void
 SkillerSimulatorExecutionThread::init()
 {
-	skiller_if_      = blackboard->open_for_writing<SkillerInterface>("Skiller");
-	skill_runtime_   = config->get_float_or_default("/plugins/skiller-simulation/skill-runtime", 1);
+	skiller_if_ = blackboard->open_for_writing<SkillerInterface>("Skiller");
+	default_skill_runtime_ =
+	  config->get_float_or_default("/plugins/skiller-simulator/execution-times/default", 1);
 	skill_starttime_ = Time();
+	execution_time_estimator_manager_.register_provider(
+	  std::make_shared<skiller_simulator::ConfigExecutionTimeEstimator>(config));
 }
 
 void
@@ -115,6 +122,10 @@ SkillerSimulatorExecutionThread::loop()
 			skiller_if_->set_msgid(m->id());
 			skiller_if_->set_error("");
 			skiller_if_->set_status(SkillerInterface::S_RUNNING);
+			logger->log_info(name(),
+			                 "Executing '%s', will take %.2f seconds",
+			                 m->skill_string(),
+			                 get_skill_runtime(m->skill_string()));
 			skill_starttime_ = Time();
 			write_interface  = true;
 			skill_enqueued   = true;
@@ -145,8 +156,9 @@ SkillerSimulatorExecutionThread::loop()
 	if (!skill_enqueued) {
 		if (skiller_if_->status() == SkillerInterface::S_RUNNING) {
 			Time now = Time();
-			if (Time() > skill_starttime_ + skill_runtime_) {
+			if (Time() > skill_starttime_ + get_skill_runtime(skiller_if_->skill_string())) {
 				logger->log_info(name(), "Skill '%s' is final", skiller_if_->skill_string());
+				execute_skill(skiller_if_->skill_string());
 				skiller_if_->set_skill_string("");
 				skiller_if_->set_status(SkillerInterface::S_FINAL);
 				write_interface = true;
@@ -163,4 +175,24 @@ void
 SkillerSimulatorExecutionThread::finalize()
 {
 	blackboard->close(skiller_if_);
+}
+
+float
+SkillerSimulatorExecutionThread::get_skill_runtime(const std::string &skill) const
+{
+	auto provider = execution_time_estimator_manager_.get_provider(skill);
+	if (provider) {
+		return (*provider)->get_execution_time(skill);
+	} else {
+		return default_skill_runtime_;
+	}
+}
+
+void
+SkillerSimulatorExecutionThread::execute_skill(const std::string &skill)
+{
+	auto provider = execution_time_estimator_manager_.get_provider(skill);
+	if (provider) {
+		(*provider)->execute(skill);
+	}
 }

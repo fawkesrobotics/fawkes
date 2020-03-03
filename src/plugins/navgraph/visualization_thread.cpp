@@ -21,6 +21,8 @@
 
 #include "visualization_thread.h"
 
+#include "aspect/blocked_timing.h"
+
 #include <navgraph/constraints/constraint_repo.h>
 #include <navgraph/constraints/polygon_edge_constraint.h>
 #include <navgraph/constraints/polygon_node_constraint.h>
@@ -41,9 +43,9 @@ typedef std::multimap<std::string, std::string> ConnMap;
 
 /** Constructor. */
 NavGraphVisualizationThread::NavGraphVisualizationThread()
-: fawkes::Thread("NavGraphVisualizationThread", Thread::OPMODE_WAITFORWAKEUP)
+: fawkes::Thread("NavGraphVisualizationThread", Thread::OPMODE_WAITFORWAKEUP),
+  fawkes::BlockedTimingAspect(fawkes::BlockedTimingAspect::WAKEUP_HOOK_WORLDSTATE)
 {
-	set_coalesce_wakeups(true);
 	graph_ = NULL;
 	crepo_ = NULL;
 }
@@ -117,7 +119,7 @@ NavGraphVisualizationThread::set_graph(fawkes::LockPtr<NavGraph> &graph)
 	graph_ = graph;
 	traversal_.invalidate();
 	plan_to_ = plan_from_ = "";
-	wakeup();
+	regenerate();
 }
 
 /** Set the constraint repo.
@@ -137,7 +139,7 @@ NavGraphVisualizationThread::set_traversal(NavGraphPath::Traversal &traversal)
 {
 	traversal_ = traversal;
 	plan_to_ = plan_from_ = "";
-	wakeup();
+	regenerate();
 }
 
 /** Reset the current plan. */
@@ -146,7 +148,7 @@ NavGraphVisualizationThread::reset_plan()
 {
 	traversal_.invalidate();
 	plan_to_ = plan_from_ = "";
-	wakeup();
+	regenerate();
 }
 
 /** Set the currently executed edge of the plan.
@@ -166,7 +168,7 @@ NavGraphVisualizationThread::set_current_edge(const std::string &from, const std
 void
 NavGraphVisualizationThread::graph_changed() throw()
 {
-	wakeup();
+	regenerate();
 }
 
 void
@@ -233,7 +235,7 @@ NavGraphVisualizationThread::add_circle_markers(visualization_msgs::MarkerArray 
 }
 
 void
-NavGraphVisualizationThread::publish()
+NavGraphVisualizationThread::regenerate()
 {
 	if (!graph_)
 		return;
@@ -331,10 +333,15 @@ NavGraphVisualizationThread::publish()
 		//bool is_next    = (plan_.size() >= 2) && (plan_[1].name() == nodes[i].name());
 		bool is_active = (plan_to_ == nodes[i].name());
 
+		std::string ns = "navgraph";
+		if (nodes[i].has_property("group")) {
+			ns += "-" + nodes[i].property("group");
+		}
+
 		visualization_msgs::Marker sphere;
 		sphere.header.frame_id    = cfg_global_frame_;
 		sphere.header.stamp       = ros::Time::now();
-		sphere.ns                 = "navgraph";
+		sphere.ns                 = ns;
 		sphere.id                 = id_num++;
 		sphere.type               = visualization_msgs::Marker::SPHERE;
 		sphere.action             = visualization_msgs::Marker::ADD;
@@ -453,7 +460,7 @@ NavGraphVisualizationThread::publish()
 			visualization_msgs::Marker arrow;
 			arrow.header.frame_id    = cfg_global_frame_;
 			arrow.header.stamp       = ros::Time::now();
-			arrow.ns                 = "navgraph";
+			arrow.ns                 = ns;
 			arrow.id                 = id_num++;
 			arrow.type               = visualization_msgs::Marker::ARROW;
 			arrow.action             = visualization_msgs::Marker::ADD;
@@ -487,7 +494,7 @@ NavGraphVisualizationThread::publish()
 		visualization_msgs::Marker text;
 		text.header.frame_id    = cfg_global_frame_;
 		text.header.stamp       = ros::Time::now();
-		text.ns                 = "navgraph";
+		text.ns                 = ns;
 		text.id                 = id_num++;
 		text.type               = visualization_msgs::Marker::TEXT_VIEW_FACING;
 		text.action             = visualization_msgs::Marker::ADD;
@@ -979,5 +986,11 @@ NavGraphVisualizationThread::publish()
 	last_id_num_             = id_num;
 	constraints_last_id_num_ = constraints_id_num;
 
-	vispub_.publish(m);
+	markers_ = m;
+}
+
+void
+NavGraphVisualizationThread::publish()
+{
+	vispub_.publish(markers_);
 }

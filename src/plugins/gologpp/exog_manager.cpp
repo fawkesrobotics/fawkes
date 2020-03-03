@@ -24,6 +24,7 @@
 #include "utils.h"
 
 #include <core/exception.h>
+#include <golog++/model/grounding.h>
 #include <libs/interface/field_iterator.h>
 
 using namespace fawkes;

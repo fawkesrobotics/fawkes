@@ -130,6 +130,13 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &          env_name
 	                    sigc::slot<CLIPS::Value, std::string, void *, void *>(
 	                      sigc::mem_fun(*this,
 	                                    &ClipsRobotMemoryThread::clips_robotmemory_query_sort)));
+	clips->add_function("robmem-dump-collection",
+	                    sigc::slot<CLIPS::Value, std::string, std::string>(
+	                      sigc::mem_fun(*this,
+	                                    &ClipsRobotMemoryThread::clips_robotmemory_dump_collection)));
+	clips->add_function("robmem-restore-collection",
+	                    sigc::slot<CLIPS::Value, std::string, std::string, std::string>(sigc::mem_fun(
+	                      *this, &ClipsRobotMemoryThread::clips_robotmemory_restore_collection)));
 	clips->add_function("robmem-cursor-destroy",
 	                    sigc::slot<void, void *>(
 	                      sigc::mem_fun(*this,
@@ -579,6 +586,49 @@ ClipsRobotMemoryThread::clips_robotmemory_query_sort(std::string collection,
 		                    CLIPS::TYPE_EXTERNAL_ADDRESS);
 	} catch (std::system_error &e) {
 		logger->log_warn("MongoDB", "Query failed: %s", e.what());
+		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+	}
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_dump_collection(std::string collection,
+                                                          std::string directory)
+{
+	try {
+		int succ = robot_memory->dump_collection(collection, directory);
+		if (succ == 1) {
+			return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
+		} else {
+			return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+		}
+	} catch (mongocxx::exception &e) {
+		logger->log_error("MongoDB",
+		                  "Dumping collection %s to %s failed: \n %s",
+		                  collection.c_str(),
+		                  directory.c_str(),
+		                  e.what());
+		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+	}
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_restore_collection(std::string collection,
+                                                             std::string directory,
+                                                             std::string target_collection)
+{
+	try {
+		int succ = robot_memory->restore_collection(collection, directory, target_collection);
+		if (succ == 1) {
+			return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
+		} else {
+			return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+		}
+	} catch (mongocxx::exception &e) {
+		logger->log_error("MongoDB",
+		                  "Restoring collection %s to %s failed: \n %s",
+		                  collection.c_str(),
+		                  directory.c_str(),
+		                  e.what());
 		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
 	}
 }

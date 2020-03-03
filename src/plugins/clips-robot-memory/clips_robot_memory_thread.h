@@ -104,6 +104,10 @@ private:
 	CLIPS::Value clips_robotmemory_cursor_more(void *cursor);
 	CLIPS::Value clips_robotmemory_cursor_next(void *cursor);
 	void         clips_robotmemory_cursor_destroy(void *cursor);
+	CLIPS::Value clips_robotmemory_dump_collection(std::string collection, std::string directory);
+	CLIPS::Value clips_robotmemory_restore_collection(std::string collection,
+	                                                  std::string directory,
+	                                                  std::string target_collection);
 
 	CLIPS::Value clips_robotmemory_mutex_create(std::string name);
 	CLIPS::Value clips_robotmemory_mutex_destroy(std::string name);

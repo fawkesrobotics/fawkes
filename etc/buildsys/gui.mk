@@ -72,7 +72,7 @@ ifeq ($(HAVE_HILDONMM)$(HAVE_HILDONFMMM),11)
 endif
 
 ifeq ($(HAVE_GTKMM),1)
-  CFLAGS_GTKMM     = -DHAVE_GTKMM $(shell $(PKGCONFIG) --cflags '$(PC_GTKMM)')
+  CFLAGS_GTKMM     = -DHAVE_GTKMM $(shell $(PKGCONFIG) --cflags '$(PC_GTKMM)') -DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_44 -DGLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_2_60
   LDFLAGS_GTKMM    = $(shell $(PKGCONFIG) --libs '$(PC_GTKMM)')
   ifeq ($(CC),clang)
     CFLAGS_GTKMM += -Wno-overloaded-virtual $(if $(HAVE_GTKMM_2),-Wno-mismatched-tags)
