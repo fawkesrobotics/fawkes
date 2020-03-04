@@ -16,29 +16,33 @@
 BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gtest.mk
+include $(BASEDIR)/etc/buildsys/catch2.mk
 
-LIBS_gtest_circular_buffer += stdc++ fawkescore fawkesutils
-OBJS_gtest_circular_buffer += test_circular_buffer.o
+LIBS_test_circular_buffer += stdc++ fawkescore m
+OBJS_test_circular_buffer += test_circular_buffer.o
 
-LIBS_gtest_wait_condition += stdc++ fawkescore pthread
-OBJS_gtest_wait_condition += test_wait_condition.o
+LIBS_test_wait_condition += stdc++ fawkescore pthread
+OBJS_test_wait_condition += test_wait_condition.o
 
-OBJS_all    = $(OBJS_gtest_circular_buffer) $(OBJS_gtest_wait_condition)
+OBJS_all    = $(OBJS_test_circular_buffer) $(OBJS_test_wait_condition)
+
+ifeq ($(HAVE_CATCH2),1)
+  CFLAGS_test_circular_buffer += $(CFLAGS_CATCH2)
+  LDFLAGS_test_circular_buffer += $(LDFLAGS_CATCH2)
+  BINS_catch2test += $(BINDIR)/test_circular_buffer
+else
+  WARN_TARGETS += warning_catch2
+endif
 
 ifeq ($(HAVE_GTEST),1)
-  CFLAGS += $(CFLAGS_GTEST)
+  CFLAGS_test_wait_condition += $(CFLAGS_GTEST)
+  LDFLAGS_test_wait_condition += $(LDFLAGS_GTEST)
   ifeq ($(CC),clang)
-    CFLAGS += -Wno-unused-variable
+    CFLAGS_test_wait_condition += -Wno-unused-variable
   else
-    CFLAGS += -Wno-unused-but-set-variable
+    CFLAGS_test_wait_condition += -Wno-unused-but-set-variable
   endif
-  LDFLAGS += $(LDFLAGS_GTEST)
-  LIBS_test = $(LIBDIR)/test/circular_buffer.so \
-              $(LIBDIR)/test/wait_condition.so
-  BINS_test = $(BINDIR)/gtest_circular_buffer \
-              $(BINDIR)/gtest_wait_condition
-  LIBS_all = $(LIBS_test)
-  BINS_all = $(BINS_test)
+  BINS_gtest += $(BINDIR)/test_wait_condition
 else
   WARN_TARGETS += warning_gtest
 endif
@@ -46,10 +50,11 @@ endif
 ifeq ($(OBJSSUBMAKE),1)
 test: $(WARN_TARGETS)
 
-.PHONY: warning_gtest
+.PHONY: $(WARN_TARGETS)
 warning_gtest:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting unit tests for CircularBuffer and WaitCondition$(TNORMAL) (gtest not available)"
-
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting unit tests for WaitCondition$(TNORMAL) (gtest not available)"
+warning_catch2:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting unit tests for CircularBuffer$(TNORMAL) (catch2 not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

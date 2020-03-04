@@ -17,13 +17,11 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gtest.mk
 
-LIBS_gtest_syncpoint += stdc++ fawkescore fawkesutils fawkessyncpoint pthread \
+LIBS_test_syncpoint += stdc++ fawkescore fawkesutils fawkessyncpoint pthread \
                         fawkeslogging
 
-OBJS_gtest_syncpoint += test_syncpoint.o
-OBJS_all = $(OBJS_gtest_syncpoint)
-LIBS_all = $(LIBDIR)/test/syncpoint.so
-BINS_all = $(BINDIR)/gtest_syncpoint
+OBJS_test_syncpoint += test_syncpoint.o
+OBJS_all = $(OBJS_test_syncpoint)
 
 CFLAGS += -Wno-unused-variable
 ifneq ($(CC),clang)
@@ -33,8 +31,7 @@ endif
 ifeq ($(HAVE_GTEST)$(HAVE_CPP11),11)
   CFLAGS += $(CFLAGS_GTEST) $(CFLAGS_CPP11)
   LDFLAGS += $(LDFLAGS_GTEST)
-  LIBS_test = $(LIBS_all)
-  BINS_test = $(BINS_all)
+  BINS_gtest = $(BINDIR)/test_syncpoint
 else
   ifneq ($(HAVE_GTEST),1)
     WARN_TARGETS += warning_gtest

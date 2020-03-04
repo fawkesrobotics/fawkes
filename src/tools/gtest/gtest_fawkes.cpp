@@ -60,13 +60,13 @@ main(int argc, char **argv)
 		//init arguments to start fawkes with
 		char **fawkes_argv;
 		fawkes_argv    = new char *[5];
-		fawkes_argv[0] = new char[6];
+		fawkes_argv[0] = new char[7];
 		strcpy(fawkes_argv[0], "fawkes");
-		fawkes_argv[1] = new char[2];
+		fawkes_argv[1] = new char[3];
 		strcpy(fawkes_argv[1], "-p");
 		fawkes_argv[2] = new char[128];
 		strcpy(fawkes_argv[2], plugins.c_str());
-		fawkes_argv[3] = new char[2];
+		fawkes_argv[3] = new char[3];
 		strcpy(fawkes_argv[3], "-c");
 		fawkes_argv[4] = new char[128];
 		strcpy(fawkes_argv[4], config_path.c_str());
