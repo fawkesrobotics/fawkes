@@ -77,6 +77,7 @@ private:
 	gazebo::transport::SubscriberPtr infrared_puck_sensor_sub_;
 	gazebo::transport::SubscriberPtr gripper_laser_left_sensor_sub_;
 	gazebo::transport::SubscriberPtr gripper_laser_right_sensor_sub_;
+	gazebo::transport::SubscriberPtr gripper_has_puck_sub_;
 	gazebo::transport::SubscriberPtr pos_sub_;
 
 	//Handler functions for incoming messages
@@ -84,6 +85,7 @@ private:
 	void on_infrared_puck_sensor_msg(ConstLaserScanStampedPtr &msg);
 	void on_gripper_laser_left_sensor_msg(ConstFloatPtr &msg);
 	void on_gripper_laser_right_sensor_msg(ConstFloatPtr &msg);
+	void on_gripper_has_puck_msg(ConstIntPtr &msg);
 	void on_pos_msg(ConstPosePtr &msg);
 
 	//provided interfaces
