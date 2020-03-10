@@ -17,7 +17,7 @@ BASEDIR = ../..
 
 SUBDIRS = plugin logview config plugin_gui netloggui \
           lasergui skillgui battery_monitor ffinfo vision set_pose \
-          eclipse_debugger plugin_generator pddl_parser laser_calibration
+          eclipse_debugger plugin_generator pddl_parser laser_calibration gtest
 
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BUILDSYSDIR)/rules.mk

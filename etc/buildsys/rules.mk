@@ -99,6 +99,8 @@ UNLISTED_libs = $(strip $(filter-out $(LIBS_all:%.so=%.$(SOEXT)),$(LIBS_build:%.
 UNLISTED_plugins = $(strip $(filter-out $(PLUGINS_all:%.so=%.$(SOEXT)),$(PLUGINS_build:%.so=%.$(SOEXT))))
 UNLISTED_all = $(strip $(UNLISTED_bins) $(UNLISTED_libs) $(UNLISTED_plugins))
 
+BINS_test = $(BINS_gtest) $(BINS_catch2test)
+
 all: $(if $(UNLISTED_all),error_unlisted,presubdirs $(PLUGINS_build:%.so=%.$(SOEXT)) $(LIBS_build:%.so=%.$(SOEXT)) $(BINS_build) $(MANPAGES_all) $(TARGETS_all) $(EXTRA_ALL) stats subdirs | silent-nothing-to-do-all)
 gui: $(if $(UNLISTED_all),error_unlisted,presubdirs $(LIBS_gui:%.so=%.$(SOEXT)) $(PLUGINS_gui:%.so=%.$(SOEXT)) $(BINS_gui) $(MANPAGES_gui) $(TARGETS_gui) stats-gui subdirs | silent-nothing-to-do-gui)
 test: $(if $(UNLISTED_all),error_unlisted,presubdirs $(LIBS_test:%.so=%.$(SOEXT)) $(PLUGINS_test:%.so=%.$(SOEXT)) $(BINS_test) $(TARGETS_test) exec_test stats-test subdirs | silent-nothing-to-do-test)
@@ -274,20 +276,22 @@ $(foreach MS,$(MANPAGE_SECTIONS),$(MANDIR)/man$(MS)/%.$(MS)): %.txt
 		echo -e "$(INDENT_PRINT)=== $(TYELLOW)Cannot generate man page for $* (asciidoc not installed)$(TNORMAL)"; \
 	fi
 
-# execute every test in $(BINS_test)
-exec_test: $(patsubst $(BINDIR)/%,exec_%,$(BINS_test))
+# execute every test
+exec_test: $(patsubst $(BINDIR)/%,exec_gtest_%,$(BINS_gtest)) $(patsubst $(BINDIR)/%,exec_catch2test_%,$(BINS_catch2test))
 
-# execution of a single test.
-exec_gtest_%: $(BINDIR)/gtest_%
+# execute a single gtest
+exec_gtest_%: $(BINDIR)/%
 	$(eval BUILT_PARTS += $@)
-	$(SILENT)echo -e "$(INDENT_PRINT)[TEST] $(BINDIR)/gtest_$*"
-	$(SILENT)exec $(BINDIR)/gtest_$* --gtest_color=yes | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
+	$(SILENT)echo -e "$(INDENT_PRINT)[TEST] Running gtest $(BINDIR)/$*"
+	$(SILENT)exec $(BINDIR)/$* --gtest_color=$(if $(COLORED),yes,no) | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
 		test $${PIPESTATUS[0]} -eq 0
 
-exec_gdb_gtest_%: $(BINDIR)/gtest_%
+# execute a single catch2test
+exec_catch2test_%: $(BINDIR)/%
 	$(eval BUILT_PARTS += $@)
-	$(SILENT)echo -e "$(INDENT_PRINT)[TEST-GDB] $(BINDIR)/gtest_$*"
-	$(SILENT)exec gdb $(BINDIR)/gtest_$*
+	$(SILENT)echo -e "$(INDENT_PRINT)[TEST] Running catch2 test $(BINDIR)/$*"
+	$(SILENT)exec $(BINDIR)/$* --use-colour $(if $(COLORED),yes,no) | sed 's/^/$(INDENT_PRINT)[TEST] /'; \
+		test $${PIPESTATUS[0]} -eq 0
 
 .SECONDEXPANSION:
 $(BINDIR)/%: $$(OBJS_$$(call nametr,$$*))
