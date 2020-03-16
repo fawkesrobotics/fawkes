@@ -36,6 +36,8 @@ steps:
       - .buildkite/build
       - .buildkite/test
       - .buildkite/annotate
+    artifact_paths:
+      - bin/*.log
     plugins:
       - *merged-pr-plugin
       - docker#v3.3.0:
