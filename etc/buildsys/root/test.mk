@@ -13,8 +13,7 @@
 #
 #*****************************************************************************
 
-test: exec_testscripts
-exec_testscripts:
+integration-test:
 	$(SILENT) if [ -d $(TOP_BASEDIR)/tests.d/ ] ; then \
 		for test in $$(ls $(TOP_BASEDIR)/tests.d/) ; do \
 			if [ -x $(TOP_BASEDIR)/tests.d/$$test ] ; then \
