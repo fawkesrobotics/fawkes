@@ -15,12 +15,12 @@
 
 integration-test:
 	$(SILENT) if [ -d $(TOP_BASEDIR)/tests.d/ ] ; then \
-		for test in $$(ls $(TOP_BASEDIR)/tests.d/) ; do \
-			if [ -x $(TOP_BASEDIR)/tests.d/$$test ] ; then \
-				echo -e $(INDENT_PRINT)"[TEST] Executing test $(TOP_BASEDIR)/tests.d/$$test"; \
-				exec $(TOP_BASEDIR)/tests.d/$$test | sed s'/^/$(INDENT_PRINT)[TEST] /'; \
+		for test in $(TOP_BASEDIR)/tests.d/* ; do \
+			if [ -x $$test ] ; then \
+				echo -e $(INDENT_PRINT)"[TEST] Executing test $$test"; \
+				exec $$test | sed s'/^/$(INDENT_PRINT)[TEST] /'; \
 				if [ $${PIPESTATUS[0]}  -ne 0 ] ; then \
-					echo -e $(INDENT_PRINT)"[TEST] $(TBOLDRED)Failed test: $(TOP_BASEDIR)/tests.d/$$test$(TNORMAL)"; \
+					echo -e $(INDENT_PRINT)"[TEST] $(TBOLDRED)Failed test: $$test$(TNORMAL)"; \
 					exit 1; \
 				fi \
 			fi \
