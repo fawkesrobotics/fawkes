@@ -38,6 +38,7 @@ steps:
       - .buildkite/annotate
     artifact_paths:
       - bin/*.log
+    timeout_in_minutes: 15
     plugins:
       - *merged-pr-plugin
       - docker#v3.3.0:
