@@ -33,6 +33,7 @@
 #include <netcomm/service_discovery/service_publisher.h>
 #include <netinet/in.h>
 
+#include <chrono>
 #include <string>
 #include <utility>
 
@@ -96,8 +97,8 @@ private:
 	                            AvahiLookupResultFlags flags,
 	                            void *                 instance);
 
-	static void resolve_callback(AvahiServiceResolver *r,
-	                             AVAHI_GCC_UNUSED AvahiIfIndex interface,
+	static void resolve_callback(AvahiServiceResolver *         r,
+	                             AVAHI_GCC_UNUSED AvahiIfIndex  interface,
 	                             AVAHI_GCC_UNUSED AvahiProtocol protocol,
 	                             AvahiResolverEvent             event,
 	                             const char *                   name,
@@ -185,10 +186,11 @@ private:
 	bool do_erase_browsers;
 	bool do_reset_groups;
 
-	AvahiSimplePoll *simple_poll;
-	AvahiClient *    client;
-	AvahiClientState client_state;
-	AvahiProtocol    service_protocol;
+	AvahiSimplePoll *                 simple_poll;
+	AvahiClient *                     client;
+	AvahiClientState                  client_state;
+	AvahiProtocol                     service_protocol;
+	const static std::chrono::seconds wait_on_init_failure;
 
 	WaitCondition *init_wc;
 
