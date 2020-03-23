@@ -382,7 +382,9 @@
 
 (defrule wm-robmem-sync-fact-trigger-event
 	(wm-fact (key cx identity) (value ?identity))
-	?rt <- (robmem-trigger (name "wm-robmem-sync-trigger") (ptr ?obj))
+	?rt <- (robmem-trigger (name "wm-robmem-sync-trigger") (ptr ?obj) (rcvd-at $?recv-time))
+	(not (robmem-trigger (name "wm-robmem-sync-trigger")
+                       (rcvd-at $?comp-time&:(time> ?recv-time ?comp-time))))
 	=>
 	(bind ?op (sym-cat (bson-get ?obj "operationType")))
 
