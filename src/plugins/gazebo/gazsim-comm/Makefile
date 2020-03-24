@@ -25,8 +25,7 @@ include $(BUILDSYSDIR)/protobuf.mk
 
 CFLAGS += $(CFLAGS_CPP11)
 
-LIBS_gazsim_comm = fawkescore fawkesutils fawkesaspects fawkes_protobuf_comm \
-                   fawkesgazeboaspect gazsim_msgs 
+LIBS_gazsim_comm = fawkescore fawkesaspects fawkes_protobuf_comm
 OBJS_gazsim_comm = gazsim_comm_plugin.o gazsim_comm_thread.o
 
 OBJS_all    = $(OBJS_gazsim_comm)
