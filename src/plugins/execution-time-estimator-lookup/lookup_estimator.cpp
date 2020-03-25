@@ -51,6 +51,8 @@ LookupEstimator::LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
 : mongo_connection_manager_(mongo_connection_manager), config_(config), logger_(logger)
 {
 	skills_ = config_->get_strings_or_defaults((std::string(cfg_prefix_) + "/skills").c_str(), {});
+	try_by_default_ =
+	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/try-by-default").c_str(), false);
 	database_ =
 	  config_->get_string_or_default((std::string(cfg_prefix_) + "/database").c_str(), "skills");
 	collection_ = config_->get_string_or_default((std::string(cfg_prefix_) + "/collection").c_str(),
@@ -93,7 +95,8 @@ LookupEstimator::can_execute(const Skill &skill)
 {
 	// if all skills should be looked up by default, then the skills_ contain
 	// those skills that should not be estimated via lookup
-	if (std::find(skills_.begin(), skills_.end(), skill.skill_name) != skills_.end()) {
+	if (try_by_default_
+	    ^ (std::find(skills_.begin(), skills_.end(), skill.skill_name) != skills_.end())) {
 		MutexLocker lock(mutex_);
 		try {
 			using bsoncxx::builder::basic::kvp;

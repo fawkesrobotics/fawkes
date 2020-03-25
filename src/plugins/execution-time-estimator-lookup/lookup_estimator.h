@@ -59,6 +59,8 @@ private:
 	fawkes::Mutex            mutex_;
 	mongocxx::client *       mongodb_client_lookup_;
 
+	bool try_by_default_;
+
 	std::string database_;
 	std::string collection_;
 	std::string skill_name_field_;
