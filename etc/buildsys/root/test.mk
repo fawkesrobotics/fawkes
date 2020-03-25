@@ -18,7 +18,7 @@ integration-test:
 		for test in $(TOP_BASEDIR)/tests.d/* ; do \
 			if [ -x $$test ] ; then \
 				echo -e $(INDENT_PRINT)"[TEST] Executing test $$test"; \
-				exec $$test | sed s'/^/$(INDENT_PRINT)[TEST] /'; \
+				exec $$test | sed s'/^/$(INDENT_PRINT)[TEST] --> /'; \
 				if [ $${PIPESTATUS[0]}  -ne 0 ] ; then \
 					echo -e $(INDENT_PRINT)"[TEST] $(TBOLDRED)Failed test: $$test$(TNORMAL)"; \
 					exit 1; \
