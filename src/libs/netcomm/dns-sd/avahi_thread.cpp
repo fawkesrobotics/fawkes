@@ -45,6 +45,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <netdb.h>
+#include <thread>
 
 namespace fawkes {
 
@@ -56,6 +57,9 @@ namespace fawkes {
  * @ingroup NetComm
  * @author Tim Niemueller
  */
+
+/** Time to wait if creating an avahi client fails. **/
+const std::chrono::seconds AvahiThread::wait_on_init_failure{5};
 
 /** Constructor.
  * You can choose whether to announce IPv4 or IPv6 only or both.
@@ -167,6 +171,10 @@ AvahiThread::loop()
 		need_recover = false;
 
 		avahi_simple_poll_iterate(simple_poll, -1);
+	} else {
+		// We failed to create a client, e.g., because the daemon is not running.
+		// Wait for a while and try again.
+		std::this_thread::sleep_for(wait_on_init_failure);
 	}
 }
 
@@ -823,8 +831,8 @@ AvahiThread::browse_callback(AvahiServiceBrowser *  b,
  * the search
  */
 void
-AvahiThread::resolve_callback(AvahiServiceResolver *r,
-                              AvahiIfIndex          interface,
+AvahiThread::resolve_callback(AvahiServiceResolver *         r,
+                              AvahiIfIndex                   interface,
                               AVAHI_GCC_UNUSED AvahiProtocol protocol,
                               AvahiResolverEvent             event,
                               const char *                   name,

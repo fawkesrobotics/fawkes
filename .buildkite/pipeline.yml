@@ -36,6 +36,9 @@ steps:
       - .buildkite/build
       - .buildkite/test
       - .buildkite/annotate
+    artifact_paths:
+      - tests.out.d/**/*
+    timeout_in_minutes: 30
     plugins:
       - *merged-pr-plugin
       - docker#v3.3.0:

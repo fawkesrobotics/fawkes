@@ -29,6 +29,7 @@ include $(BUILDSYSDIR)/root/parallel.mk
 include $(BUILDSYSDIR)/root/uncolored.mk
 include $(BUILDSYSDIR)/root/stats.mk
 include $(BUILDSYSDIR)/root/git-hooks.mk
+include $(BUILDSYSDIR)/root/test.mk
 
 endif # __buildsys_root_root_mk_
 

@@ -20,6 +20,7 @@
  *  Read the full text in the LICENSE.GPL_WRE file in the doc directory.
  */
 
+#include <baseapp/run.h>
 #include <logging/logger.h>
 #include <plugins/clips/aspect/clips_env_manager.h>
 #include <plugins/clips/aspect/clips_feature.h>
@@ -396,6 +397,7 @@ CLIPSEnvManager::add_functions(const std::string &env_name, LockPtr<CLIPS::Envir
 	clips->add_function("now-systime",
 	                    sigc::slot<CLIPS::Values>(
 	                      sigc::mem_fun(*this, &CLIPSEnvManager::clips_now_systime)));
+	clips->add_function("quit", sigc::slot<void>(sigc::mem_fun(*this, &CLIPSEnvManager::quit)));
 }
 
 void
@@ -506,6 +508,12 @@ CLIPSEnvManager::guarded_load(const std::string &env_name, const std::string &fi
 			throw Exception("%s: CLIPS code error in %s", env_name.c_str(), filename.c_str());
 		}
 	}
+}
+
+void
+CLIPSEnvManager::quit()
+{
+	fawkes::runtime::quit();
 }
 
 } // end namespace fawkes

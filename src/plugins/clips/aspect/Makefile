@@ -22,7 +22,7 @@ include $(BUILDSYSDIR)/clips.mk
 CFLAGS  += $(CFLAGS_CLIPS)
 LDFLAGS += $(LDFLAGS_CLIPS)
 
-LIBS_libfawkesclipsaspect = stdc++ fawkescore fawkesaspects fawkesutils
+LIBS_libfawkesclipsaspect = stdc++ fawkescore fawkesaspects fawkesutils fawkesbaseapp
 OBJS_libfawkesclipsaspect = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp)))))
 
 OBJS_all = $(OBJS_libfawkesclipsaspect)
