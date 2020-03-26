@@ -39,14 +39,14 @@ ConfigExecutionTimeEstimator::ConfigExecutionTimeEstimator(Configuration *    co
 }
 
 bool
-ConfigExecutionTimeEstimator::can_execute(const Skill &skill) const
+ConfigExecutionTimeEstimator::can_execute(const Skill &skill)
 {
 	return config_->exists(cfg_prefix_ + "skills/" + skill.skill_name)
 	       || config_->exists(cfg_prefix_ + "default");
 }
 
 float
-ConfigExecutionTimeEstimator::get_execution_time(const Skill &skill) const
+ConfigExecutionTimeEstimator::get_execution_time(const Skill &skill)
 {
 	if (const std::string cfg_path = cfg_prefix_ + "skills/" + skill.skill_name;
 	    config_->exists(cfg_path)) {
