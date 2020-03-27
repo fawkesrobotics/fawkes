@@ -43,7 +43,7 @@ NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph>  navgraph,
 }
 
 bool
-NavGraphEstimator::can_execute(const Skill &skill) const
+NavGraphEstimator::can_execute(const Skill &skill)
 {
 	const std::string target_cfg = cfg_prefix_ + "skills/" + skill.skill_name + "/target";
 	return config_->exists(target_cfg)
@@ -51,7 +51,7 @@ NavGraphEstimator::can_execute(const Skill &skill) const
 }
 
 float
-NavGraphEstimator::get_execution_time(const Skill &skill) const
+NavGraphEstimator::get_execution_time(const Skill &skill)
 {
 	const std::string skill_cfg      = cfg_prefix_ + "skills/" + skill.skill_name;
 	float             current_pose_x = last_pose_x_;
