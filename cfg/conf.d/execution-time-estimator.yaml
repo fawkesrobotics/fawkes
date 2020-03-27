@@ -16,3 +16,13 @@ plugins/execution-time-estimator:
         # start: from
         # The name of the skill parameter for the target location
         target: place
+  lookup:
+    # if true, lookup all skills except the ones listed in 'skills'
+    # else only lookup the ones in 'skills'
+    try-by-default: true
+    skills:
+      - goto
+    database: "skills"
+    collection: "exec_times"
+    skill-field: "name"
+    duration-field: "duration"
