@@ -114,10 +114,11 @@ SkillerSimulatorExecutionThread::loop()
 			skiller_if_->set_msgid(m->id());
 			skiller_if_->set_error("");
 			skiller_if_->set_status(SkillerInterface::S_RUNNING);
+			current_skill_runtime_ = get_skill_runtime(m->skill_string());
 			logger->log_info(name(),
 			                 "Executing '%s', will take %.2f seconds",
 			                 m->skill_string(),
-			                 get_skill_runtime(m->skill_string()));
+			                 current_skill_runtime_);
 			skill_starttime_ = Time();
 			write_interface  = true;
 			skill_enqueued   = true;
@@ -148,12 +149,13 @@ SkillerSimulatorExecutionThread::loop()
 	if (!skill_enqueued) {
 		if (skiller_if_->status() == SkillerInterface::S_RUNNING) {
 			Time now = Time();
-			if (Time() > skill_starttime_ + get_skill_runtime(skiller_if_->skill_string())) {
+			if (Time() > skill_starttime_ + current_skill_runtime_) {
 				logger->log_info(name(), "Skill '%s' is final", skiller_if_->skill_string());
 				execute_skill(skiller_if_->skill_string());
-				skiller_if_->set_skill_string("");
+				skiller_if_->set_skill_string(skiller_if_->skill_string());
 				skiller_if_->set_status(SkillerInterface::S_FINAL);
-				write_interface = true;
+				write_interface        = true;
+				current_skill_runtime_ = default_skill_runtime_;
 			}
 		}
 	}
