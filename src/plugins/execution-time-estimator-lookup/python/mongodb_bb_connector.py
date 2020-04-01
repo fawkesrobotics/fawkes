@@ -30,8 +30,11 @@ import argparse
 import pymongo
 import re
 
-STATUS_SUCCESS = 1
-STATUS_RUNNING = 2
+# Accourding to SkillStatusEnum
+S_INACTIVE = 0
+S_RUNNING = 2
+S_FINAL = 1
+S_FAILED = 3
 
 def time_diff_in_sec(end, start):
     return int(max((end - start)/1000, 0))
@@ -62,16 +65,17 @@ class MongoTransformer:
   def transform(self, src_mongodb_uri, src_database, src_collection):
     self.clone_collection(src_mongodb_uri, src_database, src_collection)
     col = self.client[src_database][src_collection]
-    for skill_start in col.find({"status": STATUS_RUNNING}).sort("timestamp", 1):
+    for skill_start in col.find({"status": S_RUNNING}).sort("timestamp", 1):
         for skill_end in col.find({"skill_string": skill_start["skill_string"],
                                "thread": skill_start["thread"],
                                "timestamp": {"$gt": skill_start["timestamp"]}
                               }).sort("timestamp", 1).limit(1):
-          if skill_end["status"] == STATUS_SUCCESS:
+          if skill_end["status"] == S_FINAL or skill_end["status"] == S_FAILED:
             name, args = split_skill_string(skill_start["skill_string"])
             lookup_entry = {"_id": {"thread": skill_start["thread"],
                                     "start_time": skill_start["timestamp"],
                                     "end_time": skill_end["timestamp"]},
+                            "outcome": skill_end["status"],
                             "name": name,
                             "args": args,
                             "duration": time_diff_in_sec(skill_end["timestamp"],skill_start["timestamp"])}
