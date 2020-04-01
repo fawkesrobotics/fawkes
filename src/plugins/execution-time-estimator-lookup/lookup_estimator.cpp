@@ -154,7 +154,7 @@ LookupEstimator::get_execution_time(const Skill &skill)
 		std::string error =
 		  std::string("Error for lookup of " + skill.skill_name + "\n Exception: " + e.what());
 		logger_->log_error(name_, "%s", error.c_str());
-		return 1.f;
+		return config_->get_float_or_default("plugins/skiller-simulator/execution-times/default", 1);
 	}
 }
 
