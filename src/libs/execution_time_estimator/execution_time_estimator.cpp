@@ -47,10 +47,12 @@ using Skill = ExecutionTimeEstimator::Skill;
  * @param skill The skill object to check.
  * @return true if this estimator can give an execution time estimate for the given skill.
  *
- * @fn void ExecutionTimeEstimator::execute(const Skill &skill) const
+ * @fn SkillerSimulator::SkillStatusEnum ExecutionTimeEstimator::execute(const Skill &skill, std::string &error_feedback) const
  * Let the estimator know that we are executing this skill, so it can apply
  * possible side effects.
  * @param skill The skill to execute
+ * @param error_feedback error message that may be produced while simulating execution
+ * @return skill status after simulated execution
  */
 
 /** Constructor.

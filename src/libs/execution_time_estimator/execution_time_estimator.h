@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <interfaces/SkillerInterface.h>
+
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -49,7 +51,11 @@ public:
 
 	virtual float get_execution_time(const Skill &skill) = 0;
 	virtual bool  can_execute(const Skill &skill)        = 0;
-	virtual void  execute(const Skill &skill){};
+	virtual SkillerInterface::SkillStatusEnum
+	execute(const Skill &skill, std::string &error_feedback)
+	{
+		return SkillerInterface::SkillStatusEnum::S_FINAL;
+	};
 };
 
 } // namespace fawkes

@@ -53,12 +53,12 @@ protected:
 	}
 
 private:
-	float                     get_skill_runtime(const std::string &skill) const;
-	void                      execute_skill(const std::string &skill);
-	fawkes::SkillerInterface *skiller_if_;
-	float                     default_skill_runtime_;
-	float                     current_skill_runtime_;
-	fawkes::Time              skill_starttime_;
+	float                                     get_skill_runtime(const std::string &skill) const;
+	fawkes::SkillerInterface::SkillStatusEnum execute_skill(const std::string &skill,
+	                                                        std::string &      error_feedback);
+	fawkes::SkillerInterface *                skiller_if_;
+	float                                     current_skill_runtime_;
+	fawkes::Time                              skill_starttime_;
 };
 
 #endif /* !_PLUGINS_SKILLER_SIMULATOR_EXEC_THREAD_H_ */
