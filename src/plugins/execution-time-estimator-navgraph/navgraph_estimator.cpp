@@ -68,12 +68,13 @@ NavGraphEstimator::get_execution_time(const Skill &skill)
 	       / speed_;
 }
 
-void
-NavGraphEstimator::execute(const Skill &skill)
+SkillerInterface::SkillStatusEnum
+NavGraphEstimator::execute(const Skill &skill, std::string &error_feedback)
 {
 	auto node    = navgraph_->node(skill.skill_args.at("place"));
 	last_pose_x_ = node.x();
 	last_pose_y_ = node.y();
+	return SkillerInterface::SkillStatusEnum::S_FINAL;
 }
 
 } // namespace fawkes
