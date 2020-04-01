@@ -63,19 +63,20 @@ class MongoTransformer:
     self.clone_collection(src_mongodb_uri, src_database, src_collection)
     col = self.client[src_database][src_collection]
     for skill_start in col.find({"status": STATUS_RUNNING}).sort("timestamp", 1):
-        for skill_end in col.find({"status": STATUS_SUCCESS, "skill_string": skill_start["skill_string"],
+        for skill_end in col.find({"skill_string": skill_start["skill_string"],
                                "thread": skill_start["thread"],
                                "timestamp": {"$gt": skill_start["timestamp"]}
                               }).sort("timestamp", 1).limit(1):
-          name, args = split_skill_string(skill_start["skill_string"])
-          lookup_entry = {"_id": {"thread": skill_start["thread"],
-                                  "start_time": skill_start["timestamp"],
-                                  "end_time": skill_end["timestamp"]},
-                          "name": name,
-                          "args": args,
-                          "duration": time_diff_in_sec(skill_end["timestamp"],skill_start["timestamp"])}
-          if not self.lookup_col.find_one(lookup_entry):
-            self.lookup_col.insert_one(lookup_entry)
+          if skill_end["status"] == STATUS_SUCCESS:
+            name, args = split_skill_string(skill_start["skill_string"])
+            lookup_entry = {"_id": {"thread": skill_start["thread"],
+                                    "start_time": skill_start["timestamp"],
+                                    "end_time": skill_end["timestamp"]},
+                            "name": name,
+                            "args": args,
+                            "duration": time_diff_in_sec(skill_end["timestamp"],skill_start["timestamp"])}
+            if not self.lookup_col.find_one(lookup_entry):
+              self.lookup_col.insert_one(lookup_entry)
     self.client.drop_database(src_database)
 
   def clone_collection(self, src_mongodb_uri, src_database,src_collection):
