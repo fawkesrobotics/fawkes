@@ -126,6 +126,11 @@ LookupEstimator::get_execution_time(const Skill &skill)
 	mongocxx::pipeline p{};
 	p.match(make_document(kvp(skill_name_field_, skill.skill_name)));
 	p.sample(1);
+
+	// default values in case lookup fails
+	error_   = "";
+	outcome_ = SkillerInterface::SkillStatusEnum::S_FINAL;
+
 	// lock as mongocxx::client is not thread-safe
 	MutexLocker lock(mutex_);
 	try {
@@ -142,6 +147,8 @@ LookupEstimator::get_execution_time(const Skill &skill)
 			                         + " when looking up skill exec duration.")
 			                          .c_str());
 		}
+		error_   = doc["error"].get_utf8().value.to_string();
+		outcome_ = SkillerInterface::SkillStatusEnum(doc["outcome"].get_int32().value);
 		return res;
 	} catch (mongocxx::operation_exception &e) {
 		std::string error =
@@ -151,9 +158,11 @@ LookupEstimator::get_execution_time(const Skill &skill)
 	}
 }
 
-void
-LookupEstimator::execute(const Skill &skill)
+SkillerInterface::SkillStatusEnum
+LookupEstimator::execute(const Skill &skill, std::string &error_feedback)
 {
+	error_feedback = error_;
+	return outcome_;
 }
 
 } // namespace fawkes
