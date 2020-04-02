@@ -44,7 +44,14 @@ def split_skill_string(skill):
     skill_regex = "([\w_-]+)\{(.*)\}"
     try_match = re.match(skill_regex, skill)
     if try_match:
-        return try_match.group(1,2)
+        name, args_str = try_match.group(1,2)
+        arg_regex = '([\w_-]+)=\\"([\w_-]+)\\"(?:,)?'
+        # split along the regex, filtering empty matches
+        arg_list = list(filter(None,re.split(arg_regex, args_str)))
+        # convert list to dictionary with even odd matching
+        # see https://stackoverflow.com/a/23286311
+        args = dict(zip(arg_list[::2], arg_list[1::2]))
+        return name, args
     else:
         raise Exception("invalid skill format", skill)
 
