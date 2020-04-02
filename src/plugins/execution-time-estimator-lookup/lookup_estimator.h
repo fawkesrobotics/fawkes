@@ -61,6 +61,7 @@ private:
 	mongocxx::client *       mongodb_client_lookup_;
 
 	bool try_by_default_;
+	bool match_args_;
 
 	std::string database_;
 	std::string collection_;

@@ -51,6 +51,8 @@ LookupEstimator::LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
 : mongo_connection_manager_(mongo_connection_manager), config_(config), logger_(logger)
 {
 	skills_ = config_->get_strings_or_defaults((std::string(cfg_prefix_) + "/skills").c_str(), {});
+	match_args_ =
+	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/match-args").c_str(), true);
 	try_by_default_ =
 	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/try-by-default").c_str(), false);
 	database_ =
@@ -100,10 +102,19 @@ LookupEstimator::can_execute(const Skill &skill)
 		MutexLocker lock(mutex_);
 		try {
 			using bsoncxx::builder::basic::kvp;
-			using bsoncxx::builder::basic::make_document;
+			using bsoncxx::builder::basic::document;
+			using bsoncxx::builder::basic::sub_document;
+			document query = document();
+			query.append(kvp(skill_name_field_, skill.skill_name));
+			if (match_args_) {
+				query.append(kvp("args", [skill](sub_document sub_doc) {
+					for (const auto &skill_arg : skill.skill_args) {
+						sub_doc.append(kvp(skill_arg.first, skill_arg.second));
+					}
+				}));
+			}
 			bsoncxx::stdx::optional<bsoncxx::document::value> found_entry =
-			  mongodb_client_lookup_->database(database_)[collection_].find_one(
-			    make_document(kvp(skill_name_field_, skill.skill_name)));
+			  mongodb_client_lookup_->database(database_)[collection_].find_one(query.view());
 			return bool(found_entry);
 		} catch (mongocxx::operation_exception &e) {
 			std::string error =
@@ -120,11 +131,21 @@ float
 LookupEstimator::get_execution_time(const Skill &skill)
 {
 	using bsoncxx::builder::basic::kvp;
-	using bsoncxx::builder::basic::make_document;
+	using bsoncxx::builder::basic::document;
+	using bsoncxx::builder::basic::sub_document;
 	// pipeline to pick a random sample out of all documents with matching name
 	// field
+	document query = document();
+	query.append(kvp(skill_name_field_, skill.skill_name));
+	if (match_args_) {
+		query.append(kvp("args", [skill](sub_document sub_doc) {
+			for (const auto &skill_arg : skill.skill_args) {
+				sub_doc.append(kvp(skill_arg.first, skill_arg.second));
+			}
+		}));
+	}
 	mongocxx::pipeline p{};
-	p.match(make_document(kvp(skill_name_field_, skill.skill_name)));
+	p.match(query.view());
 	p.sample(1);
 
 	// default values in case lookup fails
