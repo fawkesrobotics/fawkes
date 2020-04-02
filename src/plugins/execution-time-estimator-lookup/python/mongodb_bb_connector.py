@@ -87,8 +87,12 @@ class MongoTransformer:
                             "name": name,
                             "args": args,
                             "duration": time_diff_in_sec(skill_end["timestamp"],skill_start["timestamp"])}
-            if not self.lookup_col.find_one(lookup_entry):
-              self.lookup_col.insert_one(lookup_entry)
+            if lookup_entry["duration"] > 60:
+              print("Warning: suspiciously long duration of {} seconds\n{}\n{}".format(lookup_entry["duration"], skill_start, skill_end))
+            else:
+              if not self.lookup_col.find_one(lookup_entry):
+                self.lookup_col.insert_one(lookup_entry)
+                print("Adding: {}".format(lookup_entry))
     self.client.drop_database(src_database)
 
   def clone_collection(self, src_mongodb_uri, src_database,src_collection):

@@ -53,6 +53,8 @@ LookupEstimator::LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
 	skills_ = config_->get_strings_or_defaults((std::string(cfg_prefix_) + "/skills").c_str(), {});
 	match_args_ =
 	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/match-args").c_str(), true);
+	include_failures_ =
+	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/include-failures").c_str(), false);
 	try_by_default_ =
 	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/try-by-default").c_str(), false);
 	database_ =
@@ -101,11 +103,12 @@ LookupEstimator::can_execute(const Skill &skill)
 	    ^ (std::find(skills_.begin(), skills_.end(), skill.skill_name) != skills_.end())) {
 		MutexLocker lock(mutex_);
 		try {
-			using bsoncxx::builder::basic::kvp;
 			using bsoncxx::builder::basic::document;
+			using bsoncxx::builder::basic::kvp;
 			using bsoncxx::builder::basic::sub_document;
 			document query = document();
 			query.append(kvp(skill_name_field_, skill.skill_name));
+			query.append(kvp("outcome", (int)SkillerInterface::SkillStatusEnum::S_FINAL));
 			if (match_args_) {
 				query.append(kvp("args", [skill](sub_document sub_doc) {
 					for (const auto &skill_arg : skill.skill_args) {
@@ -130,8 +133,8 @@ LookupEstimator::can_execute(const Skill &skill)
 float
 LookupEstimator::get_execution_time(const Skill &skill)
 {
-	using bsoncxx::builder::basic::kvp;
 	using bsoncxx::builder::basic::document;
+	using bsoncxx::builder::basic::kvp;
 	using bsoncxx::builder::basic::sub_document;
 	// pipeline to pick a random sample out of all documents with matching name
 	// field
@@ -144,6 +147,9 @@ LookupEstimator::get_execution_time(const Skill &skill)
 			}
 		}));
 	}
+	if (!include_failures_) {
+		query.append(kvp("outcome", (int)SkillerInterface::SkillStatusEnum::S_FINAL));
+	}
 	mongocxx::pipeline p{};
 	p.match(query.view());
 	p.sample(1);
@@ -155,6 +161,9 @@ LookupEstimator::get_execution_time(const Skill &skill)
 	// lock as mongocxx::client is not thread-safe
 	MutexLocker lock(mutex_);
 	try {
+		if (!include_failures_) {
+			query.append(kvp("outcome", (int)SkillerInterface::SkillStatusEnum::S_FINAL));
+		}
 		mongocxx::cursor sample_cursor =
 		  mongodb_client_lookup_->database(database_)[collection_].aggregate(p);
 		auto  doc = *(sample_cursor.begin());
