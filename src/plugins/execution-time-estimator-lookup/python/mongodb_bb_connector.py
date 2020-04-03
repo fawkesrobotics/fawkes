@@ -76,6 +76,7 @@ class MongoTransformer:
                                     "start_time": skill_start["timestamp"],
                                     "end_time": skill_end["timestamp"]},
                             "outcome": skill_end["status"],
+                            "error": skill_end["error"],
                             "name": name,
                             "args": args,
                             "duration": time_diff_in_sec(skill_end["timestamp"],skill_start["timestamp"])}
