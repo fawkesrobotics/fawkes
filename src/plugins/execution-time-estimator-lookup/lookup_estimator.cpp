@@ -105,16 +105,14 @@ LookupEstimator::can_execute(const Skill &skill)
 		try {
 			using bsoncxx::builder::basic::document;
 			using bsoncxx::builder::basic::kvp;
-			using bsoncxx::builder::basic::sub_document;
+
 			document query = document();
 			query.append(kvp(skill_name_field_, skill.skill_name));
 			query.append(kvp("outcome", (int)SkillerInterface::SkillStatusEnum::S_FINAL));
 			if (match_args_) {
-				query.append(kvp("args", [skill](sub_document sub_doc) {
-					for (const auto &skill_arg : skill.skill_args) {
-						sub_doc.append(kvp(skill_arg.first, skill_arg.second));
-					}
-				}));
+				for (const auto &skill_arg : skill.skill_args) {
+					query.append(kvp("args." + skill_arg.first, skill_arg.second));
+				}
 			}
 			bsoncxx::stdx::optional<bsoncxx::document::value> found_entry =
 			  mongodb_client_lookup_->database(database_)[collection_].find_one(query.view());
@@ -135,17 +133,14 @@ LookupEstimator::get_execution_time(const Skill &skill)
 {
 	using bsoncxx::builder::basic::document;
 	using bsoncxx::builder::basic::kvp;
-	using bsoncxx::builder::basic::sub_document;
 	// pipeline to pick a random sample out of all documents with matching name
 	// field
 	document query = document();
 	query.append(kvp(skill_name_field_, skill.skill_name));
 	if (match_args_) {
-		query.append(kvp("args", [skill](sub_document sub_doc) {
-			for (const auto &skill_arg : skill.skill_args) {
-				sub_doc.append(kvp(skill_arg.first, skill_arg.second));
-			}
-		}));
+		for (const auto &skill_arg : skill.skill_args) {
+			query.append(kvp("args." + skill_arg.first, skill_arg.second));
+		}
 	}
 	if (!include_failures_) {
 		query.append(kvp("outcome", (int)SkillerInterface::SkillStatusEnum::S_FINAL));
