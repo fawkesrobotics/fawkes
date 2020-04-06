@@ -64,6 +64,8 @@ private:
 	bool match_args_;
 	bool include_failures_;
 
+	float speed_;
+
 	std::string database_;
 	std::string collection_;
 	std::string skill_name_field_;

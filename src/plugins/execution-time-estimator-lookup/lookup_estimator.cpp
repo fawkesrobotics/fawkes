@@ -57,6 +57,7 @@ LookupEstimator::LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
 	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/include-failures").c_str(), false);
 	try_by_default_ =
 	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/try-by-default").c_str(), false);
+	speed_ = config_->get_float_or_default((std::string(cfg_prefix_) + "/speed").c_str(), 1);
 	database_ =
 	  config_->get_string_or_default((std::string(cfg_prefix_) + "/database").c_str(), "skills");
 	collection_ = config_->get_string_or_default((std::string(cfg_prefix_) + "/collection").c_str(),
@@ -174,7 +175,7 @@ LookupEstimator::get_execution_time(const Skill &skill)
 		}
 		error_   = doc["error"].get_utf8().value.to_string();
 		outcome_ = SkillerInterface::SkillStatusEnum(doc["outcome"].get_int32().value);
-		return res;
+		return res / speed_;
 	} catch (mongocxx::operation_exception &e) {
 		std::string error =
 		  std::string("Error for lookup of " + skill.skill_name + "\n Exception: " + e.what());
