@@ -228,8 +228,13 @@ function SubSkillJumpState:do_init()
 
    self:skill_reset()
    self.skill_status = skillstati.S_RUNNING
-
+   
    self.args = {}
+
+   -- store expected size of arguments table to compare after run of init()
+   local exp_sizeof_args = 0
+   local act_sizeof_args = 0
+
    for _, s in ipairs(self.skills) do
 			if s[1] ~= nil then
 				 local sname = ""
@@ -239,9 +244,19 @@ function SubSkillJumpState:do_init()
 						sname = s[1].name
 				 end
 				 self.args[sname] = {}
+             exp_sizeof_args = exp_sizeof_args + 1
 			end
 	 end
    self:init()
+   -- compare size of expected argument table with actual argument table
+   for skillname, skill in pairs(self.args) do
+      act_sizeof_args = act_sizeof_args + 1
+   end
+   if exp_sizeof_args ~= act_sizeof_args then 
+      print_warn("Expected size of self.args: " .. tostring(exp_sizeof_args) .. ", actual size of self.args: "
+      .. tostring(act_sizeof_args) .. ". Make sure you set the correct key in self.args[key]")
+   end
+
    for _, s in ipairs(self.skills) do
       local set_already = false
       local args = {}
