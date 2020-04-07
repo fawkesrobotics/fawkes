@@ -114,7 +114,7 @@ check_build_creator () {
 			IFS=","
 			declare -a EMAILS=(${AUTHOR_EMAILS[$i]})
 			IFS=$OIFS
-			for E in $EMAILS; do
+			for E in "${EMAILS[@]}"; do
 				if [[ "$E" == "$ce" || "$E" == "$g@users.noreply.github.com" ]]; then
 					AUTHOR_INDEX=$i
 				fi
