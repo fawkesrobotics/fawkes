@@ -62,11 +62,8 @@ LookupEstimator::LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
 	  config_->get_string_or_default((std::string(cfg_prefix_) + "/database").c_str(), "skills");
 	collection_ = config_->get_string_or_default((std::string(cfg_prefix_) + "/collection").c_str(),
 	                                             "exec_times");
-	skill_name_field_ =
-	  config_->get_string_or_default((std::string(cfg_prefix_) + "/skill-field").c_str(), "name");
-	duration_field_ =
-	  config_->get_string_or_default((std::string(cfg_prefix_) + "/duration-field").c_str(),
-	                                 "duration");
+	skill_name_field_ = "name";
+	duration_field_   = "duration";
 	logger_->log_info(name_,
 	                  ("Using database " + database_ + " collection " + collection_
 	                   + " lookup fields: " + skill_name_field_ + " : " + duration_field_)

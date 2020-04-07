@@ -24,5 +24,3 @@ plugins/execution-time-estimator:
       - goto
     database: "skills"
     collection: "exec_times"
-    skill-field: "name"
-    duration-field: "duration"
