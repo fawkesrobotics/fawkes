@@ -2,25 +2,75 @@
 %TAG ! tag:fawkesrobotics.org,cfg/
 ---
 plugins/execution-time-estimator:
+  # Make sure to load the corresponding plugins when using special estimators
+  # (the config estimator is loaded by default)
+  #
+  # common options for each estimator:
+  #  priority: order in which different executors get queried
+  #  speed: control the execution speed through applying a factor on each
+  #         individual estimator
+  #  blacklist: do not use executor for blacklisted skills
+  #  whitelist: only use executor for whitelisted skills, if unspecified all
+  #             skills are whitelisted
+
+  # Reads skill execution times from this config
+  # Does not work with empty whitelist
   static:
     priority: -1
-    default: 1
-    skills:
-      say: 2.5
+    speed: 1
+
+    # global whitelist options
+    # The static estimator may also provide default execution times even for
+    # entries not mentioned in the whitelist when specifying the exec-time
+    # globally
+    exec-time: 3
+
+    # whitelist and blacklist
+    whitelist:
+      # matches all "say" skills if the other entries do not match
+      # (determined by lexicographical order)
+      99-default-say:
+        name: say
+        exec-time: 12
+      # matches, if "hello world" has to be said
+      01-say-hello-world:
+        name: say
+        args: ["text=hello world"]
+        exec-time: 17
+
+  # Estimates exec times of driving skills by taking distances from NavGraph
+  # as reference.
   navgraph:
+    # misc options
     priority: 1
     speed: 0.5
-    skills:
-      goto:
-        # The name of the skill parameter for the start location
-        # start: from
-        # The name of the skill parameter for the target location
-        target: place
+
+    # global whitelist options
+    target: place
+
+    # whitelist and blacklist
+    whitelist:
+      # defaults to target place as specified above
+      movement:
+        name: goto
+      # a sill with different start and target arg names
+      from-to-move:
+        name: move
+        target: from
+        start: to
+
+  # Takes samples from a mongodb database to provide skill exec times
   lookup:
-    # if true, lookup all skills except the ones listed in 'skills'
-    # else only lookup the ones in 'skills'
-    try-by-default: true
-    skills:
-      - goto
+    # misc options
+    priority: 0
+    speed: 1.0
     database: "skills"
     collection: "exec_times"
+
+    # global whitelist options
+    fully-match-args: true
+    include-failures: false
+    # whitelist and blacklist
+    blacklist:
+      movement:
+        name: goto
