@@ -232,8 +232,10 @@ function SubSkillJumpState:do_init()
    self.args = {}
 
    -- store expected size of arguments table to compare after run of init()
-   local exp_sizeof_args = 0
-   local act_sizeof_args = 0
+   -- local exp_sizeof_args = 0
+   -- local act_sizeof_args = 0
+   
+   local exp_args = {}
 
    for _, s in ipairs(self.skills) do
       if s[1] ~= nil then
@@ -244,17 +246,36 @@ function SubSkillJumpState:do_init()
             sname = s[1].name
          end
          self.args[sname] = {}
-         exp_sizeof_args = exp_sizeof_args + 1
+         --  exp_sizeof_args = exp_sizeof_args + 1
       end
    end
+   -- copy expexted arguments table for later comparison
+   exp_args = table.deepcopy(self.args)
+
    self:init()
+   
+   -- copy actual arguments table for comparison
+   act_args = table.deepcopy(self.args)
+
    -- compare size of expected argument table with actual argument table
-   for skillname, skill in pairs(self.args) do
-      act_sizeof_args = act_sizeof_args + 1
+   -- for skillname, skill in pairs(self.args) do
+   --   act_sizeof_args = act_sizeof_args + 1
+   -- end
+   -- if exp_sizeof_args ~= act_sizeof_args then 
+   --   print_warn("Expected size of self.args: " .. tostring(exp_sizeof_args) .. ", actual size of self.args: "
+   --   .. tostring(act_sizeof_args) .. ". Make sure you set the correct key in self.args[key]")
+   -- end
+
+   -- compare keys of copies to determine unexpected key names
+   for act_args_key,act_args_val in pairs(act_args) do
+      for exp_args_key,act_args_val in pairs(exp_args) do 
+         if act_args_key == exp_args_key then
+            act_args[act_args_key] = nil
+         end
+      end
    end
-   if exp_sizeof_args ~= act_sizeof_args then 
-      print_warn("Expected size of self.args: " .. tostring(exp_sizeof_args) .. ", actual size of self.args: "
-      .. tostring(act_sizeof_args) .. ". Make sure you set the correct key in self.args[key]")
+   for unexp_skillname,_ in pairs(act_args) do
+      print_warn("Unexpected skillname: " .. unexp_skillname .. " in self.args")
    end
 
    for _, s in ipairs(self.skills) do
