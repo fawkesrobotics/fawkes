@@ -62,7 +62,7 @@
 	(forall (goal (id ?sub-goal) (parent ?id) (type ACHIEVE))
 		(goal (id ?sub-goal) (mode EVALUATED) (outcome REJECTED)))
 	=>
-	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to nil)
+	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to (create$ ))
 	        (error SUB-GOALS-REJECTED))
 )
 
@@ -72,7 +72,7 @@
 		(goal (id ?sub-goal) (mode EVALUATED) (outcome FAILED|REJECTED)))
 	(goal (id ?some-subgoal) (mode EVALUATED) (outcome FAILED))
 	=>
-	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to nil)
+	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to (create$ ))
 	        (error SUB-GOALS-FAILED))
 )
 
@@ -102,7 +102,7 @@
 	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
 	             (type ACHIEVE) (mode RETRACTED) (outcome FAILED|REJECTED))
 	=>
-	(modify ?gf (mode EXPANDED) (committed-to nil))
+	(modify ?gf (mode EXPANDED) (committed-to (create$ )))
 )
 
 (defrule try-all-goal-subgoal-completed-resources-clear
@@ -112,5 +112,5 @@
 	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
 	             (type ACHIEVE) (mode RETRACTED) (outcome COMPLETED))
 	=>
-	(modify ?gf (mode FINISHED) (outcome COMPLETED) (committed-to nil))
+	(modify ?gf (mode FINISHED) (outcome COMPLETED) (committed-to (create$ )))
 )

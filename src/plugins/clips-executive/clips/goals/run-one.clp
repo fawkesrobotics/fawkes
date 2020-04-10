@@ -59,7 +59,7 @@
 	(forall (goal (id ?sub-goal) (parent ?id) (type ACHIEVE))
 		(goal (id ?sub-goal) (mode RETRACTED) (outcome REJECTED)))
 	=>
-	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to nil)
+	(modify ?gf (mode FINISHED) (outcome REJECTED) (committed-to (create$ ))
 	        (error SUB-GOALS-REJECTED))
 )
 
@@ -88,7 +88,7 @@
 	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
 	             (type ACHIEVE) (mode RETRACTED) (outcome REJECTED))
 	=>
-	(modify ?gf (mode EXPANDED) (committed-to nil))
+	(modify ?gf (mode EXPANDED) (committed-to (create$ )))
 )
 
 (defrule run-one-goal-subgoal-failed-resources-clear
@@ -97,7 +97,7 @@
 	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
 	             (type ACHIEVE) (mode RETRACTED) (outcome FAILED))
 	=>
-	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to nil)
+	(modify ?gf (mode FINISHED) (outcome FAILED) (committed-to (create$ ))
 					(error SUB-GOAL-FAILED)
 					(message (str-cat "Sub-goal '" ?sub-goal "' of RUN-ONE goal '" ?id "' has failed")))
 )
@@ -108,5 +108,5 @@
 	?sg <- (goal (id ?sub-goal) (parent ?id) (acquired-resources)
 	             (type ACHIEVE) (mode RETRACTED) (outcome COMPLETED))
 	=>
-	(modify ?gf (mode FINISHED) (outcome COMPLETED) (committed-to nil))
+	(modify ?gf (mode FINISHED) (outcome COMPLETED) (committed-to create$ ))
 )

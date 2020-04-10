@@ -131,13 +131,13 @@
 	=>
 	(if (= ?num-tries ?max-tries)
 	then
-		(modify ?gf (mode FINISHED) (outcome ?outcome) (committed-to nil)
+		(modify ?gf (mode FINISHED) (outcome ?outcome) (committed-to (create$ ))
 		            (error (sym-cat SUB-GOAL- ?outcome))
 		            (message (str-cat "RETRY goal '" ?id "' sub-goal '" ?sub-goal
 		                              "' " ?outcome " in try " ?num-tries "/" ?max-tries)))
 	else
 		(modify ?sg (mode FORMULATED) (outcome UNKNOWN))
-		(modify ?gf (mode EXPANDED) (committed-to nil))
+		(modify ?gf (mode EXPANDED) (committed-to (create$ )))
 	)
 )
 
