@@ -1,0 +1,26 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+
+gripper:
+  states:
+    - INIT
+    - CALIBRATED
+    - BROKEN
+
+  INIT:
+    edges:
+      - CALIBRATED
+      - BROKEN
+    CALIBRATED: calibrate()
+    BROKEN: break()
+
+  CALIBRATED:
+    edges:
+      - INIT
+      - BROKEN
+    INIT: uncalibrate()
+    BROKEN: break()
+
+  BROKEN:
+    edges:
+

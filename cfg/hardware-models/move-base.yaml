@@ -1,0 +1,25 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+move-base:
+  states:
+    - INIT
+    - LOCKED
+    - BROKEN
+
+  INIT:
+    edges:
+      - LOCKED
+      - BROKEN
+    LOCKED: lock()
+    BROKEN: break()
+
+  LOCKED:
+    edges:
+      - INIT
+      - BROKEN
+    INIT: unlock()
+    BROKEN: break()
+
+  BROKEN:
+    edges:
+

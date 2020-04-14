@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE interface SYSTEM "interface.dtd">
+<interface name="HardwareModelsInterface" author="Daniel Habering" year="2019">
+  <data>
+    <comment>
+      Interface to inform the plugin about state changes in components
+    </comment>
+
+    <field type="string" length="1024" name="error">Error state of the plugin</field>
+    <field type="bool" name="busy">Busy flag</field>
+  </data>
+
+  <message name="StateChange">
+    <comment>
+      A component changed its state, by executing the transition. 
+      Has to match the transitions defined in the yaml hardware model definitions
+    </comment>
+    <field type="string" length="1024" name="component">The component that changed its state</field>
+    <field type="string" length="1024" name="transition">The transition executed by the component</field>
+  </message>
+</interface>
