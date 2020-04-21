@@ -37,16 +37,14 @@ public:
 	                  Configuration *    config,
 	                  const std::string &cfg_prefix);
 	float                             get_execution_time(const Skill &skill) override;
-	bool                              can_execute(const Skill &skill) override;
+	bool                              can_provide_exec_time(const Skill &skill) override;
 	SkillerInterface::SkillStatusEnum execute(const Skill &skill,
 	                                          std::string &error_feedback) override;
 
 private:
-	Configuration *   config_;
-	const std::string cfg_prefix_;
-	LockPtr<NavGraph> navgraph_;
-	float             last_pose_x_;
-	float             last_pose_y_;
-	float             speed_;
+	LockPtr<NavGraph>     navgraph_;
+	float                 last_pose_x_;
+	float                 last_pose_y_;
+	constexpr static char name_[] = "navgraph";
 };
 } // namespace fawkes

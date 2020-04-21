@@ -43,7 +43,7 @@ NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph>  navgraph,
 }
 
 bool
-NavGraphEstimator::can_execute(const Skill &skill)
+NavGraphEstimator::can_provide_exec_time(const Skill &skill)
 {
 	const std::string target_cfg = cfg_prefix_ + "skills/" + skill.skill_name + "/target";
 	return config_->exists(target_cfg)
