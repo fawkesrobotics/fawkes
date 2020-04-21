@@ -67,10 +67,12 @@ class MongoTransformer:
           dst_database,
           dst_collection):
     self.client = pymongo.MongoClient(dst_mongodb_uri)
+    self.dst_mongodb_uri = dst_mongodb_uri
     self.lookup_col = self.client[dst_database][dst_collection]
 
   def transform(self, src_mongodb_uri, src_database, src_collection):
-    self.clone_collection(src_mongodb_uri, src_database, src_collection)
+    if src_mongodb_uri != self.dst_mongodb_uri:
+      self.clone_collection(src_mongodb_uri, src_database, src_collection)
     col = self.client[src_database][src_collection]
     for skill_start in col.find({"status": S_RUNNING}).sort("timestamp", 1):
         for skill_end in col.find({"skill_string": skill_start["skill_string"],
@@ -93,7 +95,8 @@ class MongoTransformer:
               if not self.lookup_col.find_one(lookup_entry):
                 self.lookup_col.insert_one(lookup_entry)
                 print("Adding: {}".format(lookup_entry))
-    self.client.drop_database(src_database)
+    if src_mongodb_uri != self.dst_mongodb_uri:
+      self.client.drop_database(src_database)
 
   def clone_collection(self, src_mongodb_uri, src_database,src_collection):
     # drop "mongodb://" suffix from uri
@@ -114,7 +117,7 @@ def main():
       '--dst-uri',
       type=str,
       help='The MongoDB URI of the skiller simulator lookup connection',
-      default='mongodb://localhost:27019/')
+      default='mongodb://localhost:27017/')
   parser.add_argument(
       '--src-db',
       type=str,
