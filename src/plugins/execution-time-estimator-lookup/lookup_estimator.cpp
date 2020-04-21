@@ -56,6 +56,8 @@ LookupEstimator::LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
 {
 	include_failures_ =
 	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/include-failures").c_str(), false);
+	instance_ =
+	  config_->get_string_or_default((std::string(cfg_prefix_) + "/instance").c_str(), "default");
 	database_ =
 	  config_->get_string_or_default((std::string(cfg_prefix_) + "/database").c_str(), "skills");
 	collection_ = config_->get_string_or_default((std::string(cfg_prefix_) + "/collection").c_str(),
@@ -63,27 +65,28 @@ LookupEstimator::LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
 	match_args_ =
 	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/match_args_").c_str(), false);
 	logger_->log_info(logger_name_,
-	                  ("Using database " + database_ + " collection " + collection_
-	                   + " lookup fields: " + skill_name_field_ + " : " + duration_field_)
+	                  ("Using instance " + instance_ + " database " + database_ + " collection "
+	                   + collection_)
 	                    .c_str());
 }
 
 void
 LookupEstimator::init()
 {
+	std::string  mongo_cfg_prefix = "/plugins/mongodb/instances/" + instance_ + "/";
 	unsigned int startup_grace_period =
-	  config_->get_uint_or_default("/plugins/mongodb/instances/statistics-local/startup-grace-period",
-	                               10);
-	logger_->log_info(logger_name_, "Connect to mongodb statistics-local instance");
+	  config_->get_uint_or_default((mongo_cfg_prefix + "startup-grace-period").c_str(), 10);
+	logger_->log_info(logger_name_, ("Connect to mongodb " + instance_ + " instance").c_str());
 	unsigned int startup_tries = 0;
 	for (; startup_tries < startup_grace_period * 2; ++startup_tries) {
 		try {
-			mongodb_client_lookup_ = mongo_connection_manager_->create_client("statistics-local");
-			logger_->log_info(logger_name_, "Successfully connected to statistics-local instance");
+			mongodb_client_lookup_ = mongo_connection_manager_->create_client(instance_);
+			logger_->log_info(logger_name_,
+			                  ("Successfully connected to " + instance_ + " instance").c_str());
 			return;
 		} catch (fawkes::Exception &) {
 			using namespace std::chrono_literals;
-			logger_->log_info(logger_name_, "Waiting for mongodb statistics-local instance");
+			logger_->log_info(logger_name_, ("Waiting for mongodb " + instance_ + " instance").c_str());
 			std::this_thread::sleep_for(500ms);
 		}
 	}

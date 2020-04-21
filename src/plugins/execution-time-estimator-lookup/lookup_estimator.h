@@ -53,7 +53,9 @@ private:
 	MongoDBConnCreator *mongo_connection_manager_;
 	Logger *            logger_;
 
-	constexpr static char logger_name_[] = "LookupEstimator";
+	constexpr static char logger_name_[]      = "LookupEstimator";
+	constexpr static char skill_name_field_[] = "name";
+	constexpr static char duration_field_[]   = "duration";
 
 	fawkes::Mutex     mutex_;
 	mongocxx::client *mongodb_client_lookup_;
@@ -61,10 +63,9 @@ private:
 	bool include_failures_;
 	bool match_args_;
 
+	std::string instance_;
 	std::string database_;
 	std::string collection_;
-	std::string skill_name_field_;
-	std::string duration_field_;
 
 	std::string                       error_;
 	SkillerInterface::SkillStatusEnum outcome_;
