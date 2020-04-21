@@ -43,28 +43,26 @@ namespace fawkes {
 /** Constructor.
  * @param mongo_connection_manager The mongodb manager to connect to a lookup collection
  * @param config The config to retrieve database related info and the skills to estimates
+ * @param cfg_prefix The config prefix under which the estimator-specific configurations are found
  * @param logger The logger to inform about client connection status
  */
 LookupEstimator::LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
                                  Configuration *     config,
+                                 const std::string & cfg_prefix,
                                  Logger *            logger)
-: mongo_connection_manager_(mongo_connection_manager), config_(config), logger_(logger)
+: ExecutionTimeEstimator(config, cfg_prefix),
+  mongo_connection_manager_(mongo_connection_manager),
+  logger_(logger)
 {
-	skills_ = config_->get_strings_or_defaults((std::string(cfg_prefix_) + "/skills").c_str(), {});
-	match_args_ =
-	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/match-args").c_str(), true);
 	include_failures_ =
 	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/include-failures").c_str(), false);
-	try_by_default_ =
-	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/try-by-default").c_str(), false);
-	speed_ = config_->get_float_or_default((std::string(cfg_prefix_) + "/speed").c_str(), 1);
 	database_ =
 	  config_->get_string_or_default((std::string(cfg_prefix_) + "/database").c_str(), "skills");
 	collection_ = config_->get_string_or_default((std::string(cfg_prefix_) + "/collection").c_str(),
 	                                             "exec_times");
-	skill_name_field_ = "name";
-	duration_field_   = "duration";
-	logger_->log_info(name_,
+	match_args_ =
+	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/match_args_").c_str(), false);
+	logger_->log_info(logger_name_,
 	                  ("Using database " + database_ + " collection " + collection_
 	                   + " lookup fields: " + skill_name_field_ + " : " + duration_field_)
 	                    .c_str());
@@ -76,52 +74,46 @@ LookupEstimator::init()
 	unsigned int startup_grace_period =
 	  config_->get_uint_or_default("/plugins/mongodb/instances/statistics-local/startup-grace-period",
 	                               10);
-	logger_->log_info(name_, "Connect to mongodb statistics-local instance");
+	logger_->log_info(logger_name_, "Connect to mongodb statistics-local instance");
 	unsigned int startup_tries = 0;
 	for (; startup_tries < startup_grace_period * 2; ++startup_tries) {
 		try {
 			mongodb_client_lookup_ = mongo_connection_manager_->create_client("statistics-local");
-			logger_->log_info(name_, "Successfully connected to statistics-local instance");
+			logger_->log_info(logger_name_, "Successfully connected to statistics-local instance");
 			return;
 		} catch (fawkes::Exception &) {
 			using namespace std::chrono_literals;
-			logger_->log_info(name_, "Waiting for mongodb statistics-local instance");
+			logger_->log_info(logger_name_, "Waiting for mongodb statistics-local instance");
 			std::this_thread::sleep_for(500ms);
 		}
 	}
-	logger_->log_error(name_, "%s", "Failed to connect to mongodb statistics-local instance");
+	logger_->log_error(logger_name_, "%s", "Failed to connect to mongodb statistics-local instance");
 }
 
 bool
-LookupEstimator::can_execute(const Skill &skill)
+LookupEstimator::can_provide_exec_time(const Skill &skill)
 {
 	// if all skills should be looked up by default, then the skills_ contain
 	// those skills that should not be estimated via lookup
-	if (try_by_default_
-	    ^ (std::find(skills_.begin(), skills_.end(), skill.skill_name) != skills_.end())) {
-		MutexLocker lock(mutex_);
-		try {
-			using bsoncxx::builder::basic::document;
-			using bsoncxx::builder::basic::kvp;
+	try {
+		using bsoncxx::builder::basic::document;
+		using bsoncxx::builder::basic::kvp;
 
-			document query = document();
-			query.append(kvp(skill_name_field_, skill.skill_name));
-			query.append(kvp("outcome", (int)SkillerInterface::SkillStatusEnum::S_FINAL));
-			if (match_args_) {
-				for (const auto &skill_arg : skill.skill_args) {
-					query.append(kvp("args." + skill_arg.first, skill_arg.second));
-				}
+		document query = document();
+		query.append(kvp(skill_name_field_, skill.skill_name));
+		query.append(kvp("outcome", (int)SkillerInterface::SkillStatusEnum::S_FINAL));
+		if (match_args_) {
+			for (const auto &skill_arg : skill.skill_args) {
+				query.append(kvp("args." + skill_arg.first, skill_arg.second));
 			}
-			bsoncxx::stdx::optional<bsoncxx::document::value> found_entry =
-			  mongodb_client_lookup_->database(database_)[collection_].find_one(query.view());
-			return bool(found_entry);
-		} catch (mongocxx::operation_exception &e) {
-			std::string error =
-			  std::string("Error trying to lookup " + skill.skill_name + "\n Exception: " + e.what());
-			logger_->log_error(name_, "%s", error.c_str());
-			return false;
 		}
-	} else {
+		bsoncxx::stdx::optional<bsoncxx::document::value> found_entry =
+		  mongodb_client_lookup_->database(database_)[collection_].find_one(query.view());
+		return bool(found_entry);
+	} catch (mongocxx::operation_exception &e) {
+		std::string error =
+		  std::string("Error trying to lookup " + skill.skill_name + "\n Exception: " + e.what());
+		logger_->log_error(logger_name_, "%s", error.c_str());
 		return false;
 	}
 }
@@ -176,8 +168,8 @@ LookupEstimator::get_execution_time(const Skill &skill)
 	} catch (mongocxx::operation_exception &e) {
 		std::string error =
 		  std::string("Error for lookup of " + skill.skill_name + "\n Exception: " + e.what());
-		logger_->log_error(name_, "%s", error.c_str());
-		return config_->get_float_or_default("plugins/skiller-simulator/execution-times/default", 1);
+		logger_->log_error(logger_name_, "%s", error.c_str());
+		throw;
 	}
 }
 
