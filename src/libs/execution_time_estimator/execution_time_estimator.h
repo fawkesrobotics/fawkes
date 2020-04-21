@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <config/config.h>
 #include <interfaces/SkillerInterface.h>
 
 #include <string>
@@ -31,6 +32,7 @@ namespace fawkes {
 class ExecutionTimeEstimator
 {
 public:
+	ExecutionTimeEstimator(Configuration *config, const ::std::string &cfg_prefix);
 	/** A structured representation of a skill. */
 	class Skill
 	{
@@ -49,13 +51,28 @@ public:
 	/** Destructor. */
 	virtual ~ExecutionTimeEstimator() = default;
 
-	virtual float get_execution_time(const Skill &skill) = 0;
-	virtual bool  can_execute(const Skill &skill)        = 0;
+	virtual float get_execution_time(const Skill &skill)    = 0;
+	virtual bool  can_provide_exec_time(const Skill &skill) = 0;
+	bool          can_execute(const Skill &skill);
 	virtual SkillerInterface::SkillStatusEnum
 	execute(const Skill &skill, std::string &error_feedback)
 	{
 		return SkillerInterface::SkillStatusEnum::S_FINAL;
 	};
+
+protected:
+	/** Config to obtain common configurables */
+	Configuration *const config_;
+	/** config prefix of the estimator */
+	const std::string cfg_prefix_;
+	/** config estimato-specific speedup factor */
+	const float speed_;
+	/** whitelist of skills that the estimator is allowed to process */
+	const std::vector<std::string> whitelist_;
+	/** blacklist of skills that the estimator must not process */
+	const std::vector<std::string> blacklist_;
+
+private:
 };
 
 } // namespace fawkes

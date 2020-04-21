@@ -29,11 +29,11 @@ class ConfigExecutionTimeEstimator : public ExecutionTimeEstimator
 public:
 	ConfigExecutionTimeEstimator(Configuration *config, const std::string &cfg_prefix);
 	float get_execution_time(const Skill &skill) override;
-	bool  can_execute(const Skill &skill) override;
+	bool  can_provide_exec_time(const Skill &skill) override;
 
 private:
 	Configuration *const config_;
 	const std::string    cfg_prefix_;
+	constexpr static char name_[] = "config";
 };
-
 } // namespace fawkes

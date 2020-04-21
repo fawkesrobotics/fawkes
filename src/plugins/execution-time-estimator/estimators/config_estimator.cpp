@@ -34,21 +34,21 @@ namespace fawkes {
  */
 ConfigExecutionTimeEstimator::ConfigExecutionTimeEstimator(Configuration *    config,
                                                            const std::string &cfg_prefix)
-: config_(config), cfg_prefix_(cfg_prefix)
+: ExecutionTimeEstimator(config, cfg_prefix)
 {
 }
 
 bool
-ConfigExecutionTimeEstimator::can_execute(const Skill &skill)
+ConfigExecutionTimeEstimator::can_provide_exec_time(const Skill &skill)
 {
-	return config_->exists(cfg_prefix_ + "skills/" + skill.skill_name)
+	return config_->exists(cfg_prefix_ + "times/" + skill.skill_name)
 	       || config_->exists(cfg_prefix_ + "default");
 }
 
 float
 ConfigExecutionTimeEstimator::get_execution_time(const Skill &skill)
 {
-	if (const std::string cfg_path = cfg_prefix_ + "skills/" + skill.skill_name;
+	if (const std::string cfg_path = cfg_prefix_ + "times/" + skill.skill_name;
 	    config_->exists(cfg_path)) {
 		return config_->get_float(cfg_path);
 	} else if (const std::string default_path = cfg_prefix_ + "default";

@@ -42,8 +42,13 @@ using Skill = ExecutionTimeEstimator::Skill;
  * @param skill The skill object to compute the execution time for.
  * @return The execution time in seconds.
  *
- * @fn bool ExecutionTimeEstimator::can_execute(const Skill &skill) const
- * Check if this estimator can give an estimate for the given
+ * @fn bool ExecutionTimeEstimator::can_provide_exec_time(const Skill &skill)
+ * Check if this estimator can give an estimate for a given
+ * @param skill The skill object to check.
+ * @return true if this estimator can give an execution time estimate for the given skill.
+ *
+ * @fn bool ExecutionTimeEstimator::can_execute(const Skill &skill)
+ * Check if this estimator is both allowed and able to give an estimate for a given
  * @param skill The skill object to check.
  * @return true if this estimator can give an execution time estimate for the given skill.
  *
@@ -54,6 +59,38 @@ using Skill = ExecutionTimeEstimator::Skill;
  * @param error_feedback error message that may be produced while simulating execution
  * @return skill status after simulated execution
  */
+
+/** Constructor.
+ * Load config values that are common for all executors.
+ * @param config configuration to read all values from
+ * @param cfg_prefix prefix where the estimator-specific configs are located
+ */
+ExecutionTimeEstimator::ExecutionTimeEstimator(Configuration *config, const ::std::string &cfg_prefix)
+: config_(config),
+  cfg_prefix_(cfg_prefix),
+  speed_(config->get_float_or_default((cfg_prefix_ + "speed").c_str(), 1)),
+  whitelist_(config->get_strings_or_defaults((cfg_prefix_ + "whitelist").c_str(), {})),
+  blacklist_(config->get_strings_or_defaults((cfg_prefix_ + "blacklist").c_str(), {}))
+{
+}
+
+bool
+ExecutionTimeEstimator::can_execute(const Skill &skill)
+{
+	bool allowed_to_execute = false;
+	if (whitelist_.empty()) {
+		allowed_to_execute = true;
+	} else {
+		allowed_to_execute =
+		  whitelist_.end() != std::find(whitelist_.begin(), whitelist_.end(), skill.skill_name);
+	}
+	if (!blacklist_.empty()) {
+		allowed_to_execute =
+		  allowed_to_execute
+		  && blacklist_.end() == std::find(blacklist_.begin(), blacklist_.end(), skill.skill_name);
+	}
+	return allowed_to_execute && can_provide_exec_time(skill);
+}
 
 /** Constructor.
  * Create a skill from the skill string.
