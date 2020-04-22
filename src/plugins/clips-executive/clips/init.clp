@@ -9,6 +9,7 @@
 
 (defglobal
   ?*CONFIG_PREFIX* = "/clips-executive"
+  ?*AGENT_PREFIX* = "/fawkes/agent"
 	?*INIT-STAGES* = (create$ STAGE-1 STAGE-2 STAGE-3)
 	?*CX-STAGE2-FILES* = (create$ "plan.clp" "goal.clp" "domain.clp"
 	                              "worldmodel.clp" "cx-identity.clp"  "wm-domain-sync.clp"
@@ -39,6 +40,7 @@
   (executive-init)
   =>
   (config-load ?*CONFIG_PREFIX*)
+  (config-load ?*AGENT_PREFIX*)
 )
 
 (deffunction cx-debug-unwatch-facts ($?templates)

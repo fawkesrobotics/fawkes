@@ -20,3 +20,16 @@
   (assert (wm-fact (id ?id) (type ?type) (value ?value) (is-list ?is-list) (values ?list-value)))
   (retract ?cf)
 )
+
+(defrule wm-config-load-fawkes-agent-cfg-from-confval
+  "Convert fawkes-wide agent configurations to world model facts"
+	(executive-init)
+  ?cf <- (confval (path ?path&:(str-prefix "/fawkes/agent/" ?path))
+									(type ?type) (value ?value) (is-list ?is-list) (list-value $?list-value))
+	=>
+  (bind ?prefix "/fawkes/agent/")
+  (bind ?name (sub-string (str-length ?prefix) (str-length ?path) ?path))
+  (bind ?id (str-cat "/config/agent" ?name))
+  (assert (wm-fact (id ?id) (type ?type) (value ?value) (is-list ?is-list) (values ?list-value)))
+  (retract ?cf)
+)
