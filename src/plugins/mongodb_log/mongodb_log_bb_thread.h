@@ -73,6 +73,7 @@ private:
 		                  mongocxx::client *            mongodb,
 		                  std::string &                 database,
 		                  fawkes::LockSet<std::string> &colls,
+		                  const std::string &           agent_name,
 		                  fawkes::Logger *              logger,
 		                  fawkes::Time *                now);
 		~InterfaceListener();
@@ -96,6 +97,7 @@ private:
 		std::string                   collection_;
 		std::string &                 database_;
 		fawkes::LockSet<std::string> &collections_;
+		const std::string             agent_name_;
 		fawkes::Time *                now_;
 	};
 
