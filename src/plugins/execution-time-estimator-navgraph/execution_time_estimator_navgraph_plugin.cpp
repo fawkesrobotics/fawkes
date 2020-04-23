@@ -1,5 +1,5 @@
 /***************************************************************************
- *  skiller_simulator_navgraph_plugin.cpp - Skill exec times from navgraph
+ *  execution_time_estimator_navgraph_plugin.cpp - Skill exec times from navgraph
  *
  *  Created: Tue 07 Jan 2020 15:36:35 CET 15:36
  *  Copyright  2020  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
@@ -18,7 +18,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "skiller_simulator_navgraph_thread.h"
+#include "execution_time_estimator_navgraph_thread.h"
 
 #include <core/plugin.h>
 

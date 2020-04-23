@@ -30,7 +30,6 @@
 #include <vector>
 
 namespace fawkes {
-namespace skiller_simulator {
 class NavGraphEstimator : public ExecutionTimeEstimator
 {
 public:
@@ -46,5 +45,4 @@ private:
 	float                    last_pose_y_;
 	float                    speed_;
 };
-} // namespace skiller_simulator
 } // namespace fawkes

@@ -1,5 +1,5 @@
 /***************************************************************************
- *  skiller_simulator_navgraph_thread.h - Skill exec times from navgraph
+ *  execution_time_estimator_navgraph_thread.h - Skill exec times from navgraph
  *
  *  Created: Tue 07 Jan 2020 15:40:18 CET 15:40
  *  Copyright  2020  Till Hofmann <hofmann@kbsg.rwth-aachen.de>

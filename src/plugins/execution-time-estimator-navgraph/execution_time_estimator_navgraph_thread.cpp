@@ -1,5 +1,5 @@
 /***************************************************************************
- *  skiller_simulator_navgraph_thread.cpp - Skill exec times from navgraph
+ *  execution_time_estimator_navgraph_thread.cpp - Skill exec times from navgraph
  *
  *  Created: Tue 07 Jan 2020 16:02:38 CET 16:02
  *  Copyright  2020  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
@@ -18,7 +18,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "skiller_simulator_navgraph_thread.h"
+#include "execution_time_estimator_navgraph_thread.h"
 
 #include "navgraph_estimator.h"
 
@@ -39,5 +39,5 @@ void
 SkillerSimulatorNavgraphEstimatorThread::init()
 {
 	execution_time_estimator_manager_->register_provider(
-	  std::make_shared<fawkes::skiller_simulator::NavGraphEstimator>(navgraph, config));
+	  std::make_shared<fawkes::NavGraphEstimator>(navgraph, config));
 }
