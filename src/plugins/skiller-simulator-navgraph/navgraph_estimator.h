@@ -24,7 +24,7 @@
 
 #include <config/config.h>
 #include <navgraph/navgraph.h>
-#include <plugins/skiller-simulator/execution_time_estimator.h>
+#include <plugins/execution-time-estimator/execution_time_estimator.h>
 
 #include <string>
 #include <vector>

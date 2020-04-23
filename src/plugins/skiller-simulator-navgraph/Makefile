@@ -19,7 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_skiller_simulator_navgraph = fawkescore fawkesutils fawkesaspects \
                                   fawkesblackboard fawkesinterface \
-                                  fawkeslogging fawkes_skiller_time_estimator
+                                  fawkeslogging fawkes_execution_time_estimator
 OBJS_skiller_simulator_navgraph = skiller_simulator_navgraph_plugin.o \
                                   skiller_simulator_navgraph_thread.o \
                                   navgraph_estimator.o

@@ -52,7 +52,7 @@ pddl-planner: robot-memory
 gazebo: robotino
 skiller: navgraph
 skiller-simulator: skiller execution-time-estimator
-skiller-simulator-navgraph: skiller-simulator
+skiller-simulator-navgraph: execution-time-estimator
 perception: mongodb
 navgraph-generator: navgraph amcl
 openprs-agent: openprs

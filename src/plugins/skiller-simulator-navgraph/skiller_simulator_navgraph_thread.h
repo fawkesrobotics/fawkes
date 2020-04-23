@@ -24,14 +24,13 @@
 #include <aspect/configurable.h>
 #include <core/threading/thread.h>
 #include <navgraph/aspect/navgraph.h>
-#include <plugins/skiller-simulator/execution_time_estimator_aspect/execution_time_estimator_aspect.h>
+#include <plugins/execution-time-estimator/execution_time_estimator_aspect/execution_time_estimator_aspect.h>
 
-class SkillerSimulatorNavgraphEstimatorThread
-: public fawkes::Thread,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::NavGraphAspect,
-  public fawkes::skiller_simulator::ExecutionTimeEstimatorsAspect
+class SkillerSimulatorNavgraphEstimatorThread : public fawkes::Thread,
+                                                public fawkes::BlackBoardAspect,
+                                                public fawkes::ConfigurableAspect,
+                                                public fawkes::NavGraphAspect,
+                                                public fawkes::ExecutionTimeEstimatorsAspect
 {
 public:
 	SkillerSimulatorNavgraphEstimatorThread();
