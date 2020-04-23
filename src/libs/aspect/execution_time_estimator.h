@@ -35,6 +35,7 @@ public:
 	std::optional<std::shared_ptr<ExecutionTimeEstimator>>
 	     get_provider(const std::string &skill_string) const;
 	void register_provider(std::shared_ptr<ExecutionTimeEstimator> provider);
+	void unregister_provider(std::shared_ptr<ExecutionTimeEstimator> provider);
 
 private:
 	std::vector<std::shared_ptr<ExecutionTimeEstimator>> execution_time_estimators_;

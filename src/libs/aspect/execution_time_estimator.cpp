@@ -22,6 +22,8 @@
 
 #include <core/exception.h>
 
+#include <algorithm>
+
 namespace fawkes {
 
 /** @class ExecutionTimeEstimatorManager
@@ -51,6 +53,18 @@ void
 ExecutionTimeEstimatorManager::register_provider(std::shared_ptr<ExecutionTimeEstimator> provider)
 {
 	execution_time_estimators_.push_back(provider);
+}
+
+/** Remove an execution time estimate provider.
+ * @param provider The provider to remove
+ */
+void
+ExecutionTimeEstimatorManager::unregister_provider(std::shared_ptr<ExecutionTimeEstimator> provider)
+{
+	execution_time_estimators_.erase(std::remove(execution_time_estimators_.begin(),
+	                                             execution_time_estimators_.end(),
+	                                             provider),
+	                                 execution_time_estimators_.end());
 }
 
 /** @class ExecutionTimeEstimatorsAspect
