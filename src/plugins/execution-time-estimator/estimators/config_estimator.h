@@ -20,9 +20,8 @@
 
 #pragma once
 
-#include "../execution_time_estimator.h"
-
 #include <config/config.h>
+#include <execution_time_estimator/execution_time_estimator.h>
 
 namespace fawkes {
 class ConfigExecutionTimeEstimator : public ExecutionTimeEstimator

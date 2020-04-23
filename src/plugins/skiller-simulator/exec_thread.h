@@ -25,10 +25,10 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
+#include <aspect/execution_time_estimator.h>
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <interfaces/SkillerInterface.h>
-#include <plugins/execution-time-estimator/execution_time_estimator_aspect/execution_time_estimator_aspect.h>
 #include <plugins/skiller/skiller_feature.h>
 
 class SkillerSimulatorExecutionThread : public fawkes::Thread,

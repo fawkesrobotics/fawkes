@@ -22,9 +22,9 @@
 
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
+#include <aspect/execution_time_estimator.h>
 #include <core/threading/thread.h>
 #include <navgraph/aspect/navgraph.h>
-#include <plugins/execution-time-estimator/execution_time_estimator_aspect/execution_time_estimator_aspect.h>
 
 class SkillerSimulatorNavgraphEstimatorThread : public fawkes::Thread,
                                                 public fawkes::BlackBoardAspect,

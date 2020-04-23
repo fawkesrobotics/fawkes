@@ -20,9 +20,8 @@
 
 #pragma once
 
-#include "../execution_time_estimator.h"
-
 #include <aspect/aspect.h>
+#include <execution_time_estimator/execution_time_estimator.h>
 
 #include <memory>
 #include <optional>

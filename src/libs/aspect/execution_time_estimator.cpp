@@ -1,5 +1,5 @@
 /***************************************************************************
- *  execution_time_estimator_aspect.cpp - Aspect for a running time provider
+ *  execution_time_estimator.cpp - Aspect for a running time provider
  *
  *  Created: Thu 12 Dec 2019 19:03:19 CET 19:03
  *  Copyright  2019  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
@@ -18,7 +18,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "execution_time_estimator_aspect.h"
+#include "execution_time_estimator.h"
 
 #include <core/exception.h>
 

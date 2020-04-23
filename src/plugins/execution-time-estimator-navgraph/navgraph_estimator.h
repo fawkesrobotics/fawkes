@@ -22,9 +22,9 @@
 
 #include "interfaces/Position3DInterface.h"
 
+#include <aspect/execution_time_estimator.h>
 #include <config/config.h>
 #include <navgraph/navgraph.h>
-#include <plugins/execution-time-estimator/execution_time_estimator.h>
 
 #include <string>
 #include <vector>
