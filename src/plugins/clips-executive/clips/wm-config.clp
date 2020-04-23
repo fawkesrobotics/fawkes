@@ -10,9 +10,6 @@
 (defrule wm-config-load-from-confval
   "Convert parameters from configuration to world model facts"
 	(executive-init)
-  (confval (path "/clips-executive/spec") (type STRING) (value ?spec))
-  ?cf <- (confval (path ?path&:(str-prefix (str-cat "/clips-executive/specs/" ?spec "/parameters/") ?path))
-									(type ?type) (value ?value) (is-list ?is-list) (list-value $?list-value))
 	=>
   (do-for-all-facts ((?cf-spec confval) (?cf confval))
     (and (eq ?cf-spec:path "/clips-executive/spec")
