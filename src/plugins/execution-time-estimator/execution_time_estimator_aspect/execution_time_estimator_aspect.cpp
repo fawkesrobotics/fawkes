@@ -23,7 +23,6 @@
 #include <core/exception.h>
 
 namespace fawkes {
-namespace skiller_simulator {
 
 /** @class ExecutionTimeEstimatorManager
  * A manager for a vector of running time providers for skill simulation.
@@ -86,5 +85,4 @@ ExecutionTimeEstimatorsAspect::finalize_ExecutionTimeEstimatorsAspect()
 {
 }
 
-} // namespace skiller_simulator
 } // namespace fawkes

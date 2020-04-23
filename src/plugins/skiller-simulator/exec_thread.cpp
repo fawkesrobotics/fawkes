@@ -20,8 +20,6 @@
 
 #include "exec_thread.h"
 
-#include "estimators/config_estimator.h"
-
 using namespace std;
 using namespace fawkes;
 
@@ -36,9 +34,7 @@ using namespace fawkes;
 /** Constructor. */
 SkillerSimulatorExecutionThread::SkillerSimulatorExecutionThread()
 : Thread("SkillerSimulatorExecutionThread", Thread::OPMODE_WAITFORWAKEUP),
-  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL),
-  AspectProviderAspect(&provider_inifin_),
-  provider_inifin_(&execution_time_estimator_manager_)
+  BlockedTimingAspect(BlockedTimingAspect::WAKEUP_HOOK_SKILL)
 {
 }
 
@@ -49,8 +45,6 @@ SkillerSimulatorExecutionThread::init()
 	default_skill_runtime_ =
 	  config->get_float_or_default("/plugins/skiller-simulator/execution-times/default", 1);
 	skill_starttime_ = Time();
-	execution_time_estimator_manager_.register_provider(
-	  std::make_shared<skiller_simulator::ConfigExecutionTimeEstimator>(config));
 }
 
 void
@@ -180,7 +174,7 @@ SkillerSimulatorExecutionThread::finalize()
 float
 SkillerSimulatorExecutionThread::get_skill_runtime(const std::string &skill) const
 {
-	auto provider = execution_time_estimator_manager_.get_provider(skill);
+	auto provider = execution_time_estimator_manager_->get_provider(skill);
 	if (provider) {
 		return (*provider)->get_execution_time(skill);
 	} else {
@@ -191,7 +185,7 @@ SkillerSimulatorExecutionThread::get_skill_runtime(const std::string &skill) con
 void
 SkillerSimulatorExecutionThread::execute_skill(const std::string &skill)
 {
-	auto provider = execution_time_estimator_manager_.get_provider(skill);
+	auto provider = execution_time_estimator_manager_->get_provider(skill);
 	if (provider) {
 		(*provider)->execute(skill);
 	}

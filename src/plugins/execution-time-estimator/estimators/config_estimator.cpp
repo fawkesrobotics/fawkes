@@ -21,7 +21,6 @@
 #include "config_estimator.h"
 
 namespace fawkes {
-namespace skiller_simulator {
 
 constexpr char ConfigExecutionTimeEstimator::cfg_prefix_[];
 
@@ -49,5 +48,4 @@ ConfigExecutionTimeEstimator::get_execution_time(const Skill &skill) const
 {
 	return config_->get_float(cfg_prefix_ + skill.skill_name);
 }
-} // namespace skiller_simulator
 } // namespace fawkes

@@ -28,8 +28,8 @@
 #include <string>
 
 namespace fawkes {
-namespace skiller_simulator {
 
+/** Use the ExecutionTimeEstimator's skill. */
 using Skill = ExecutionTimeEstimator::Skill;
 
 /** @class ExecutionTimeEstimator
@@ -96,5 +96,4 @@ Skill::parse_args(const std::string &args)
 	}
 }
 
-} // namespace skiller_simulator
 } // namespace fawkes

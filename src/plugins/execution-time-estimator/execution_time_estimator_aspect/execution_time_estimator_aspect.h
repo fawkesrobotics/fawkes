@@ -29,7 +29,6 @@
 #include <vector>
 
 namespace fawkes {
-namespace skiller_simulator {
 
 class ExecutionTimeEstimatorManager
 {
@@ -53,5 +52,4 @@ protected:
 	ExecutionTimeEstimatorManager *execution_time_estimator_manager_;
 };
 
-} // namespace skiller_simulator
 } // namespace fawkes

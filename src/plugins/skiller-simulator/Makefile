@@ -20,29 +20,20 @@ include $(LIBSRCDIR)/utils/utils.mk
 
 LIBS_skiller_simulator  = fawkescore fawkesutils fawkesaspects \
                           fawkesblackboard fawkesinterface fawkeslogging \
-                          fawkes_skiller_time_estimator \
+                          fawkes_execution_time_estimator \
                           SkillerInterface
-LIBS_libfawkes_skiller_time_estimator = m fawkescore
 
-OBJS_skiller_simulator  = skiller_simulator_plugin.o exec_thread.o \
-                          execution_time_estimator_aspect/execution_time_estimator_aspect.o \
-                          execution_time_estimator_aspect/execution_time_estimator_aspect_inifin.o \
-                          estimators/config_estimator.o
-OBJS_libfawkes_skiller_time_estimator = execution_time_estimator.o
+OBJS_skiller_simulator  = skiller_simulator_plugin.o exec_thread.o
 
-OBJS_all                = $(OBJS_skiller_simulator) $(OBJS_libfawkes_skiller_time_estimator)
+OBJS_all                = $(OBJS_skiller_simulator)
 PLUGINS_all             = $(PLUGINDIR)/skiller-simulator.so
-LIBS_all                = $(LIBDIR)/libfawkes_skiller_time_estimator.so
 
 ifeq ($(HAVE_CPP17),1)
   CFLAGS        += $(CFLAGS_CPP17)
-  LIBS_build     = $(LIBS_all)
   PLUGINS_build  = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_cpp17
 endif
-
-$(PLUGINS_build): | $(LIBDIR)/libfawkes_skiller_time_estimator.$(SOEXT)
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)

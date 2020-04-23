@@ -1,7 +1,7 @@
 /***************************************************************************
- *  execution_time_estimator_plugin.cpp - Estimate execution times
+ *  execution_time_estimator_thread.cpp - 
  *
- *  Created: Thu 23 Apr 2020 16:36:22 CEST 16:36
+ *  Created: Thu 23 Apr 2020 17:07:11 CEST 17:07
  *  Copyright  2020  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
@@ -20,26 +20,24 @@
 
 #include "execution_time_estimator_thread.h"
 
-#include <core/plugin.h>
+#include "estimators/config_estimator.h"
 
-/** @class ExecutionTimeEstimatorsPlugin
- *  Estimate skill execution times.
- *  This plugin provides an aspect that allows estimators to register.
+/** @class ExecutionTimeEstimatorsThread
+ *  The plugin thread, initializes the aspect.
  *
  *  @author Till Hofmann
  */
 
-class ExecutionTimeEstimatorsPlugin : public fawkes::Plugin
+ExecutionTimeEstimatorsThread::ExecutionTimeEstimatorsThread()
+: Thread("ExecutionTimeEstimatorThread", Thread::OPMODE_WAITFORWAKEUP),
+  AspectProviderAspect(&provider_inifin_),
+  provider_inifin_(&execution_time_estimator_manager_)
 {
-public:
-	/** Constructor.
-     *  @param config Fawkes configuration to read config values from.
-     */
-	explicit ExecutionTimeEstimatorsPlugin(fawkes::Configuration *config) : Plugin(config)
-	{
-		thread_list.push_back(new ExecutionTimeEstimatorsThread());
-	}
-};
+}
 
-PLUGIN_DESCRIPTION("Provider for execution time estimates")
-EXPORT_PLUGIN(ExecutionTimeEstimatorsPlugin)
+void
+ExecutionTimeEstimatorsThread::init()
+{
+	execution_time_estimator_manager_.register_provider(
+	  std::make_shared<fawkes::ConfigExecutionTimeEstimator>(config));
+}
