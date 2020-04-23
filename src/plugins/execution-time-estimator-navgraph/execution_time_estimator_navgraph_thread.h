@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "navgraph_estimator.h"
+
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
 #include <aspect/execution_time_estimator.h>
@@ -35,4 +37,8 @@ class SkillerSimulatorNavgraphEstimatorThread : public fawkes::Thread,
 public:
 	SkillerSimulatorNavgraphEstimatorThread();
 	void init();
+	void finalize();
+
+private:
+	std::shared_ptr<fawkes::NavGraphEstimator> estimator_;
 };

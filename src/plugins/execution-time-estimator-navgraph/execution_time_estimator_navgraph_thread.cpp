@@ -34,10 +34,17 @@ SkillerSimulatorNavgraphEstimatorThread::SkillerSimulatorNavgraphEstimatorThread
 {
 }
 
-/** Initializer. */
+/** Register the estimator. */
 void
 SkillerSimulatorNavgraphEstimatorThread::init()
 {
-	execution_time_estimator_manager_->register_provider(
-	  std::make_shared<fawkes::NavGraphEstimator>(navgraph, config));
+	estimator_ = std::make_shared<fawkes::NavGraphEstimator>(navgraph, config);
+	execution_time_estimator_manager_->register_provider(estimator_);
+}
+
+/** Unregister the estimator. */
+void
+SkillerSimulatorNavgraphEstimatorThread::finalize()
+{
+	execution_time_estimator_manager_->unregister_provider(estimator_);
 }
