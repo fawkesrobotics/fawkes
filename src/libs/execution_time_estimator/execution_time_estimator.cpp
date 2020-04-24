@@ -21,9 +21,11 @@
 #include "execution_time_estimator.h"
 
 #include <core/exception.h>
+#include <utils/misc/string_split.h>
 
 #include <cassert>
 #include <iostream>
+#include <map>
 #include <regex>
 #include <string>
 
@@ -58,6 +60,17 @@ using Skill = ExecutionTimeEstimator::Skill;
  * @param skill The skill to execute
  * @param error_feedback error message that may be produced while simulating execution
  * @return skill status after simulated execution
+ *
+ * @fn std::map<std::string, Skill> ExecutionTimeEstimator::get_skills_from_config(const std::string &path) const
+ * Load skill descriptions from a yaml config. The skills are represented via
+ * suffixes /<description-id>/name and /<description-id>/args following the
+ * @param path config path under which the skill descriptions are located
+ * @return all skills found under the given path sorted by <description-id>.
+ *
+ *  @fn bool Skill::matches(const Skill &other) const
+ * Check, whether the skill matches another skill description.
+ * @param other The skill description that should be matched
+ * @return true if all skill args in other are contained in the args of this skill and the skill names match
  */
 
 /** Constructor.
@@ -69,9 +82,36 @@ ExecutionTimeEstimator::ExecutionTimeEstimator(Configuration *config, const ::st
 : config_(config),
   cfg_prefix_(cfg_prefix),
   speed_(config->get_float_or_default((cfg_prefix_ + "speed").c_str(), 1)),
-  whitelist_(config->get_strings_or_defaults((cfg_prefix_ + "whitelist").c_str(), {})),
-  blacklist_(config->get_strings_or_defaults((cfg_prefix_ + "blacklist").c_str(), {}))
+  whitelist_(get_skills_from_config(cfg_prefix_ + "whitelist")),
+  blacklist_(get_skills_from_config(cfg_prefix_ + "blacklist"))
 {
+}
+
+std::map<std::string, Skill>
+ExecutionTimeEstimator::get_skills_from_config(const std::string &path) const
+{
+	const int                                     ID       = 0;
+	const int                                     PROPERTY = 1;
+	std::unique_ptr<Configuration::ValueIterator> it(config_->search(path.c_str()));
+	std::map<std::string, std::string>            skill_strings;
+	while (it->next()) {
+		std::vector<std::string> skill_property =
+		  str_split(std::string(it->path()).substr(path.size()));
+		if (skill_property.size() != 2) {
+			break;
+		}
+		if (skill_property[PROPERTY] == "args") {
+			skill_strings[skill_property[ID]] += str_join(it->get_strings(), ',');
+		} else if (skill_property[PROPERTY] == "name") {
+			skill_strings[skill_property[ID]] =
+			  it->get_string() + "{" + skill_strings[skill_property[ID]];
+		}
+	}
+	std::map<std::string, Skill> res;
+	for (const auto &skill_string : skill_strings) {
+		res.insert(std::make_pair(skill_string.first, Skill(skill_string.second + "}")));
+	}
+	return res;
 }
 
 bool
@@ -79,15 +119,23 @@ ExecutionTimeEstimator::can_execute(const Skill &skill)
 {
 	bool allowed_to_execute = false;
 	if (whitelist_.empty()) {
-		allowed_to_execute = true;
+		allowed_to_execute      = true;
+		active_whitelist_entry_ = whitelist_.end();
 	} else {
-		allowed_to_execute =
-		  whitelist_.end() != std::find(whitelist_.begin(), whitelist_.end(), skill.skill_name);
+		active_whitelist_entry_ =
+		  std::find_if(whitelist_.begin(), whitelist_.end(), [skill](const auto &s) {
+			  return skill.matches(s.second);
+		  });
+
+		allowed_to_execute = active_whitelist_entry_ != whitelist_.end();
 	}
 	if (!blacklist_.empty()) {
 		allowed_to_execute =
 		  allowed_to_execute
-		  && blacklist_.end() == std::find(blacklist_.begin(), blacklist_.end(), skill.skill_name);
+		  && blacklist_.end()
+		       == std::find_if(blacklist_.begin(), blacklist_.end(), [skill](const auto &s) {
+			          return skill.matches(s.second);
+		          });
 	}
 	return allowed_to_execute && can_provide_exec_time(skill);
 }
@@ -116,6 +164,20 @@ Skill::Skill(const std::string &skill_string)
 	} else {
 		throw Exception("Unexpected skill string: '%s'", skill_no_newlines.c_str());
 	}
+}
+
+bool
+Skill::matches(const Skill &other) const
+{
+	bool args_match = true;
+	for (const auto &arg : other.skill_args) {
+		auto search_arg = skill_args.find(arg.first);
+		if (search_arg == skill_args.end() || search_arg->second != arg.second) {
+			args_match = false;
+			break;
+		}
+	}
+	return args_match && skill_name == other.skill_name;
 }
 
 void

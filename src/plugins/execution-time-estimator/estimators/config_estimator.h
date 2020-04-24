@@ -23,6 +23,8 @@
 #include <config/config.h>
 #include <execution_time_estimator/execution_time_estimator.h>
 
+#include <map>
+
 namespace fawkes {
 class ConfigExecutionTimeEstimator : public ExecutionTimeEstimator
 {
@@ -32,8 +34,9 @@ public:
 	bool  can_provide_exec_time(const Skill &skill) override;
 
 private:
-	Configuration *const config_;
-	const std::string    cfg_prefix_;
-	constexpr static char name_[] = "config";
+	std::map<std::string, float>
+	                                   get_exec_times_from_config(const std::string &path_suffix = "whitelist") const;
+	constexpr static char              name_[] = "config";
+	const std::map<std::string, float> exec_times_;
 };
 } // namespace fawkes

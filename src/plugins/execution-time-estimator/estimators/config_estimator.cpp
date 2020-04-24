@@ -20,6 +20,10 @@
 
 #include "config_estimator.h"
 
+#include <utils/misc/string_split.h>
+
+#include <memory>
+
 namespace fawkes {
 
 /** @class ConfigExecutionTimeEstimator
@@ -32,29 +36,55 @@ namespace fawkes {
  * @param config The config to read from
  * @param cfg_prefix The config prefix to read from
  */
+
 ConfigExecutionTimeEstimator::ConfigExecutionTimeEstimator(Configuration *    config,
                                                            const std::string &cfg_prefix)
-: ExecutionTimeEstimator(config, cfg_prefix)
+: ExecutionTimeEstimator(config, cfg_prefix), exec_times_(get_exec_times_from_config())
 {
+}
+
+/** Load execution time from config
+ * @param path_suffix The suffix under which the skill specifications are found
+ * @return map from skill entry id to execution time
+ */
+std::map<std::string, float>
+ConfigExecutionTimeEstimator::get_exec_times_from_config(const std::string &path_suffix) const
+{
+	const int                                     ID       = 0;
+	const int                                     PROPERTY = 1;
+	std::unique_ptr<Configuration::ValueIterator> it(
+	  config_->search((cfg_prefix_ + path_suffix).c_str()));
+	std::map<std::string, float> res;
+	while (it->next()) {
+		std::vector<std::string> skill_property =
+		  str_split(std::string(it->path()).substr((cfg_prefix_ + path_suffix).size()));
+		if (skill_property.size() != 2) {
+			break;
+		}
+		if (skill_property[PROPERTY] == "time") {
+			res[skill_property[ID]] += it->get_float();
+		}
+	}
+	return res;
 }
 
 bool
 ConfigExecutionTimeEstimator::can_provide_exec_time(const Skill &skill)
 {
-	return config_->exists(cfg_prefix_ + "times/" + skill.skill_name)
-	       || config_->exists(cfg_prefix_ + "default");
+	if (active_whitelist_entry_ == whitelist_.end()) {
+		return config_->exists(cfg_prefix_ + "default");
+	} else {
+		return exec_times_.find(active_whitelist_entry_->first) != exec_times_.end() || config_->exists(cfg_prefix_ + "default");
+	}
 }
 
 float
 ConfigExecutionTimeEstimator::get_execution_time(const Skill &skill)
 {
-	if (const std::string cfg_path = cfg_prefix_ + "times/" + skill.skill_name;
-	    config_->exists(cfg_path)) {
-		return config_->get_float(cfg_path);
-	} else if (const std::string default_path = cfg_prefix_ + "default";
-	           config_->exists(default_path)) {
-		return config_->get_float(default_path);
-	} else
-		throw Exception("No config value for %s", cfg_path.c_str());
+	if (auto curr_exec_time = exec_times_.find(active_whitelist_entry_->first) == exec_times_.end()) {
+    return config_->get_float(cfg_prefix_ + "default");
+  } else {
+    return curr_exec_time->second;
+  }
 }
 } // namespace fawkes

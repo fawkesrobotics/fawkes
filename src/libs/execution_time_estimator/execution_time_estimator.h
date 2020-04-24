@@ -38,6 +38,7 @@ public:
 	{
 	public:
 		Skill(const std::string &skill_string);
+		bool matches(const Skill &skill) const;
 
 		/** The name of the skill */
 		std::string skill_name = "";
@@ -61,16 +62,20 @@ public:
 	};
 
 protected:
+	std::map<std::string, Skill> get_skills_from_config(const std::string &path) const;
+
 	/** Config to obtain common configurables */
 	Configuration *const config_;
-	/** config prefix of the estimator */
+	/** Config prefix of the estimator */
 	const std::string cfg_prefix_;
-	/** config estimato-specific speedup factor */
+	/** Config estimator-specific speedup factor */
 	const float speed_;
-	/** whitelist of skills that the estimator is allowed to process */
-	const std::vector<std::string> whitelist_;
-	/** blacklist of skills that the estimator must not process */
-	const std::vector<std::string> blacklist_;
+	/** Points to the whitelist entry that matches the skill to execute. */
+	std::map<std::string, Skill>::const_iterator active_whitelist_entry_;
+	/** Whitelist of skills that the estimator is allowed to process */
+	const std::map<std::string, Skill> whitelist_;
+	/** Blacklist of skills that the estimator must not process */
+	const std::map<std::string, Skill> blacklist_;
 
 private:
 };
