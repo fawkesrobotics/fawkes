@@ -112,7 +112,7 @@ RobotinoSimThread::init()
 		                        this);
 	}
 
-     gripper_has_puck_sub_ =
+	gripper_has_puck_sub_ =
 	  gazebonode->Subscribe(config->get_string("/gazsim/topics/gripper-has-puck"),
 	                        &RobotinoSimThread::on_gripper_has_puck_msg,
 	                        this);
@@ -126,7 +126,7 @@ RobotinoSimThread::init()
 	switch_if_->set_enabled(true);
 	switch_if_->write();
 
-     // puck sensor connected to first 2 inputs of RobotinoInterface
+	// puck sensor connected to first 2 inputs of RobotinoInterface
 	sens_if_->set_digital_in(0, false);
 	sens_if_->set_digital_in(1, false);
 	sens_if_->write();

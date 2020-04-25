@@ -1,5 +1,5 @@
 /***************************************************************************
- *  execution_time_estimator_aspect.cpp - Aspect for a running time provider
+ *  execution_time_estimator.cpp - Aspect for a running time provider
  *
  *  Created: Thu 12 Dec 2019 19:03:19 CET 19:03
  *  Copyright  2019  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
@@ -18,12 +18,13 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "execution_time_estimator_aspect.h"
+#include "execution_time_estimator.h"
 
 #include <core/exception.h>
 
+#include <algorithm>
+
 namespace fawkes {
-namespace skiller_simulator {
 
 /** @class ExecutionTimeEstimatorManager
  * A manager for a vector of running time providers for skill simulation.
@@ -52,6 +53,18 @@ void
 ExecutionTimeEstimatorManager::register_provider(std::shared_ptr<ExecutionTimeEstimator> provider)
 {
 	execution_time_estimators_.push_back(provider);
+}
+
+/** Remove an execution time estimate provider.
+ * @param provider The provider to remove
+ */
+void
+ExecutionTimeEstimatorManager::unregister_provider(std::shared_ptr<ExecutionTimeEstimator> provider)
+{
+	execution_time_estimators_.erase(std::remove(execution_time_estimators_.begin(),
+	                                             execution_time_estimators_.end(),
+	                                             provider),
+	                                 execution_time_estimators_.end());
 }
 
 /** @class ExecutionTimeEstimatorsAspect
@@ -86,5 +99,4 @@ ExecutionTimeEstimatorsAspect::finalize_ExecutionTimeEstimatorsAspect()
 {
 }
 
-} // namespace skiller_simulator
 } // namespace fawkes

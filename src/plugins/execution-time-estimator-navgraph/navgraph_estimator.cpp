@@ -21,7 +21,6 @@
 #include "navgraph_estimator.h"
 
 namespace fawkes {
-namespace skiller_simulator {
 
 /** @class NavGraphEstimator
  * Estimate the execution time for the skill goto by querying the distance from
@@ -64,5 +63,4 @@ NavGraphEstimator::execute(const Skill &skill)
 	last_pose_y_ = node.y();
 }
 
-} // namespace skiller_simulator
 } // namespace fawkes

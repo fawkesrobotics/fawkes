@@ -18,10 +18,9 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "execution_time_estimator_aspect_inifin.h"
+#include "execution_time_estimator.h"
 
 namespace fawkes {
-namespace skiller_simulator {
 
 /** @class ExecutionTimeEstimatorsAspectIniFin
  * The Aspect IniFin for the ExecutionTimeEstimatorsAspect.
@@ -72,5 +71,4 @@ ExecutionTimeEstimatorsAspectIniFin::finalize(Thread *thread)
 	get_aspect(thread)->finalize_ExecutionTimeEstimatorsAspect();
 }
 
-} // namespace skiller_simulator
 } // namespace fawkes

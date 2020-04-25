@@ -22,15 +22,14 @@
 
 #include "interfaces/Position3DInterface.h"
 
+#include <aspect/execution_time_estimator.h>
 #include <config/config.h>
 #include <navgraph/navgraph.h>
-#include <plugins/skiller-simulator/execution_time_estimator.h>
 
 #include <string>
 #include <vector>
 
 namespace fawkes {
-namespace skiller_simulator {
 class NavGraphEstimator : public ExecutionTimeEstimator
 {
 public:
@@ -46,5 +45,4 @@ private:
 	float                    last_pose_y_;
 	float                    speed_;
 };
-} // namespace skiller_simulator
 } // namespace fawkes

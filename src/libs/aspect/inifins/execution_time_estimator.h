@@ -1,7 +1,7 @@
 /***************************************************************************
- *  config_estimator.h - Read estimated execution time from config
+ *  execution_time_estimator.h - Aspect INiFin
  *
- *  Created: Sun 22 Dec 2019 17:16:23 CET 17:16
+ *  Created: Thu 12 Dec 2019 19:00:07 CET 19:00
  *  Copyright  2019  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
@@ -22,21 +22,22 @@
 
 #include "../execution_time_estimator.h"
 
-#include <config/config.h>
+#include <aspect/aspect.h>
+#include <aspect/inifins/inifin.h>
 
 namespace fawkes {
-namespace skiller_simulator {
-class ConfigExecutionTimeEstimator : public ExecutionTimeEstimator
+
+class ExecutionTimeEstimatorsAspectIniFin : public virtual AspectIniFin
 {
 public:
-	ConfigExecutionTimeEstimator(Configuration *config);
-	float get_execution_time(const Skill &skill) const override;
-	bool  can_execute(const Skill &skill) const override;
+	ExecutionTimeEstimatorsAspectIniFin(ExecutionTimeEstimatorManager *manager);
+	virtual ~ExecutionTimeEstimatorsAspectIniFin();
+	virtual void init(Thread *thread);
+	virtual void finalize(Thread *thread);
 
 private:
-	Configuration *const  config_;
-	constexpr static char cfg_prefix_[] = "/plugins/skiller-simulator/execution-times/";
+	ExecutionTimeEstimatorsAspect *get_aspect(Thread *thread) const;
+	ExecutionTimeEstimatorManager *execution_time_estimator_manager_;
 };
 
-} // namespace skiller_simulator
 } // namespace fawkes

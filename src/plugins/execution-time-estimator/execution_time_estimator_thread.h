@@ -1,7 +1,7 @@
 /***************************************************************************
- *  skiller_simulator_navgraph_thread.cpp - Skill exec times from navgraph
+ *  execution_time_estimator_thread.h - Estimate execution times
  *
- *  Created: Tue 07 Jan 2020 16:02:38 CET 16:02
+ *  Created: Thu 23 Apr 2020 17:07:11 CEST 17:07
  *  Copyright  2020  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
@@ -18,26 +18,24 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "skiller_simulator_navgraph_thread.h"
+#pragma once
 
-#include "navgraph_estimator.h"
+#include <aspect/aspect_provider.h>
+#include <aspect/configurable.h>
+#include <aspect/execution_time_estimator.h>
+#include <aspect/inifins/execution_time_estimator.h>
+#include <core/threading/thread.h>
 
-#include <interfaces/Position3DInterface.h>
-
-/** @class SkillerSimulatorNavgraphEstimatorThread
- * Get estimates for skill execution times from the navgraph.
- */
-
-/** Constructor. */
-SkillerSimulatorNavgraphEstimatorThread::SkillerSimulatorNavgraphEstimatorThread()
-: Thread("SkillerSimulatorNavgraphEstimatorThread", Thread::OPMODE_WAITFORWAKEUP)
+class ExecutionTimeEstimatorsThread : public fawkes::Thread,
+                                      public fawkes::ConfigurableAspect,
+                                      public fawkes::AspectProviderAspect
 {
-}
+public:
+	ExecutionTimeEstimatorsThread();
 
-/** Initializer. */
-void
-SkillerSimulatorNavgraphEstimatorThread::init()
-{
-	execution_time_estimator_manager_->register_provider(
-	  std::make_shared<fawkes::skiller_simulator::NavGraphEstimator>(navgraph, config));
-}
+	void init() override;
+
+private:
+	fawkes::ExecutionTimeEstimatorManager       execution_time_estimator_manager_;
+	fawkes::ExecutionTimeEstimatorsAspectIniFin provider_inifin_;
+};

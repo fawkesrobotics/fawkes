@@ -1,8 +1,10 @@
+
 /***************************************************************************
- *  skiller_simulator_navgraph_plugin.cpp - Skill exec times from navgraph
+ *  hardware_models_plugin.cpp - Hardware Models
  *
- *  Created: Tue 07 Jan 2020 15:36:35 CET 15:36
- *  Copyright  2020  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
+ *  Created: Sun Mar 24 11:51:53 2019
+ *  Copyright  2019 Daniel Habering (daniel@habering.de)
+ *
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -18,25 +20,26 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "skiller_simulator_navgraph_thread.h"
+#include "hardware_models_thread.h"
 
 #include <core/plugin.h>
 
-/** @class SkillerSimulatorNavgraphPlugin
- * Plugin to get estimates for skill execution times from the navgraph.
- */
+using namespace fawkes;
 
-class SkillerSimulatorNavgraphPlugin : public fawkes::Plugin
+/** Hardware Models plugin.
+ * @author Daniel Habering
+ */
+class HardwareModelsPlugin : public fawkes::Plugin
 {
 public:
 	/** Constructor.
-   * @param config The fawkes config to use
-   */
-	explicit SkillerSimulatorNavgraphPlugin(fawkes::Configuration *config) : Plugin(config)
+	 * @param config Fawkes configuration
+	 */
+	explicit HardwareModelsPlugin(Configuration *config) : Plugin(config)
 	{
-		thread_list.push_back(new SkillerSimulatorNavgraphEstimatorThread());
+		thread_list.push_back(new HardwareModelsThread());
 	}
 };
 
-PLUGIN_DESCRIPTION("Estimate skill execution times with the navgraph")
-EXPORT_PLUGIN(SkillerSimulatorNavgraphPlugin)
+PLUGIN_DESCRIPTION("Hardware Models")
+EXPORT_PLUGIN(HardwareModelsPlugin)

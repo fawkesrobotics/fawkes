@@ -1,7 +1,7 @@
 /***************************************************************************
- *  skiller_simulator_navgraph_thread.h - Skill exec times from navgraph
+ *  execution_time_estimator_plugin.cpp - Estimate execution times
  *
- *  Created: Tue 07 Jan 2020 15:40:18 CET 15:40
+ *  Created: Thu 23 Apr 2020 16:36:22 CEST 16:36
  *  Copyright  2020  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
@@ -18,22 +18,28 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#pragma once
+#include "execution_time_estimator_thread.h"
 
-#include <aspect/blackboard.h>
-#include <aspect/configurable.h>
-#include <core/threading/thread.h>
-#include <navgraph/aspect/navgraph.h>
-#include <plugins/skiller-simulator/execution_time_estimator_aspect/execution_time_estimator_aspect.h>
+#include <core/plugin.h>
 
-class SkillerSimulatorNavgraphEstimatorThread
-: public fawkes::Thread,
-  public fawkes::BlackBoardAspect,
-  public fawkes::ConfigurableAspect,
-  public fawkes::NavGraphAspect,
-  public fawkes::skiller_simulator::ExecutionTimeEstimatorsAspect
+/** @class ExecutionTimeEstimatorsPlugin
+ *  Estimate skill execution times.
+ *  This plugin provides an aspect that allows estimators to register.
+ *
+ *  @author Till Hofmann
+ */
+
+class ExecutionTimeEstimatorsPlugin : public fawkes::Plugin
 {
 public:
-	SkillerSimulatorNavgraphEstimatorThread();
-	void init();
+	/** Constructor.
+     *  @param config Fawkes configuration to read config values from.
+     */
+	explicit ExecutionTimeEstimatorsPlugin(fawkes::Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new ExecutionTimeEstimatorsThread());
+	}
 };
+
+PLUGIN_DESCRIPTION("Provider for execution time estimates")
+EXPORT_PLUGIN(ExecutionTimeEstimatorsPlugin)

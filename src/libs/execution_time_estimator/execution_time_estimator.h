@@ -1,7 +1,7 @@
 /***************************************************************************
- *  execution_time_estimator_aspect_inifin.h - Aspect INiFin
+ *  execution_time_estimator.h - An execution time estimator for skills
  *
- *  Created: Thu 12 Dec 2019 19:00:07 CET 19:00
+ *  Created: Thu 12 Dec 2019 15:10:06 CET 15:10
  *  Copyright  2019  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
@@ -20,25 +20,36 @@
 
 #pragma once
 
-#include "execution_time_estimator_aspect.h"
-
-#include <aspect/aspect.h>
-#include <aspect/inifins/inifin.h>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 namespace fawkes {
-namespace skiller_simulator {
-class ExecutionTimeEstimatorsAspectIniFin : public virtual AspectIniFin
+
+class ExecutionTimeEstimator
 {
 public:
-	ExecutionTimeEstimatorsAspectIniFin(ExecutionTimeEstimatorManager *manager);
-	virtual ~ExecutionTimeEstimatorsAspectIniFin();
-	virtual void init(Thread *thread);
-	virtual void finalize(Thread *thread);
+	/** A structured representation of a skill. */
+	class Skill
+	{
+	public:
+		Skill(const std::string &skill_string);
 
-private:
-	ExecutionTimeEstimatorsAspect *get_aspect(Thread *thread) const;
-	ExecutionTimeEstimatorManager *execution_time_estimator_manager_;
+		/** The name of the skill */
+		std::string skill_name = "";
+		/** A map of the skill's argument keys to argument values */
+		std::unordered_map<std::string, std::string> skill_args = {};
+
+	private:
+		void parse_args(const std::string &args);
+	};
+
+	/** Destructor. */
+	virtual ~ExecutionTimeEstimator() = default;
+
+	virtual float get_execution_time(const Skill &skill) const = 0;
+	virtual bool  can_execute(const Skill &skill) const        = 0;
+	virtual void  execute(const Skill &skill){};
 };
 
-} // namespace skiller_simulator
 } // namespace fawkes

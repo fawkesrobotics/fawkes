@@ -22,7 +22,7 @@
 
 #include <gtest/gtest.h>
 
-using Skill = fawkes::skiller_simulator::ExecutionTimeEstimator::Skill;
+using Skill = fawkes::ExecutionTimeEstimator::Skill;
 
 TEST(SkillParserTest, EmptySkill)
 {
