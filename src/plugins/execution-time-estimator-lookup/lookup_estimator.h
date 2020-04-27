@@ -60,12 +60,14 @@ private:
 	fawkes::Mutex     mutex_;
 	mongocxx::client *mongodb_client_lookup_;
 
-	bool include_failures_;
-	bool match_args_;
+	Property<bool> fully_match_args_;
+	Property<bool> include_failures_;
 
-	std::string instance_;
-	std::string database_;
-	std::string collection_;
+	const std::string instance_;
+	const std::string database_;
+	const std::string collection_;
+
+	const std::map<std::string, bool> skill_match_args;
 
 	std::string                       error_;
 	SkillerInterface::SkillStatusEnum outcome_;

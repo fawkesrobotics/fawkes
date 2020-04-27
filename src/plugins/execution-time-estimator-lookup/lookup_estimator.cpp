@@ -52,18 +52,16 @@ LookupEstimator::LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
                                  Logger *            logger)
 : ExecutionTimeEstimator(config, cfg_prefix),
   mongo_connection_manager_(mongo_connection_manager),
-  logger_(logger)
+  logger_(logger),
+  fully_match_args_(config_, cfg_prefix_, "fully-match-args", true),
+  include_failures_(config, cfg_prefix_, "include-failures", false),
+  instance_(
+    config_->get_string_or_default((std::string(cfg_prefix_) + "/instance").c_str(), "default")),
+  database_(
+    config_->get_string_or_default((std::string(cfg_prefix_) + "/database").c_str(), "skills")),
+  collection_(config_->get_string_or_default((std::string(cfg_prefix_) + "/collection").c_str(),
+                                             "exec_times"))
 {
-	include_failures_ =
-	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/include-failures").c_str(), false);
-	instance_ =
-	  config_->get_string_or_default((std::string(cfg_prefix_) + "/instance").c_str(), "default");
-	database_ =
-	  config_->get_string_or_default((std::string(cfg_prefix_) + "/database").c_str(), "skills");
-	collection_ = config_->get_string_or_default((std::string(cfg_prefix_) + "/collection").c_str(),
-	                                             "exec_times");
-	match_args_ =
-	  config_->get_bool_or_default((std::string(cfg_prefix_) + "/match_args_").c_str(), false);
 	logger_->log_info(logger_name_,
 	                  ("Using instance " + instance_ + " database " + database_ + " collection "
 	                   + collection_)
@@ -105,8 +103,12 @@ LookupEstimator::can_provide_exec_time(const Skill &skill)
 		document query = document();
 		query.append(kvp(skill_name_field_, skill.skill_name));
 		query.append(kvp("outcome", (int)SkillerInterface::SkillStatusEnum::S_FINAL));
-		if (match_args_) {
+		if (get_property(fully_match_args_)) {
 			for (const auto &skill_arg : skill.skill_args) {
+				query.append(kvp("args." + skill_arg.first, skill_arg.second));
+			}
+		} else if (active_whitelist_entry_ != whitelist_.end()) {
+			for (const auto &skill_arg : active_whitelist_entry_->second.skill_args) {
 				query.append(kvp("args." + skill_arg.first, skill_arg.second));
 			}
 		}
@@ -130,12 +132,16 @@ LookupEstimator::get_execution_time(const Skill &skill)
 	// field
 	document query = document();
 	query.append(kvp(skill_name_field_, skill.skill_name));
-	if (match_args_) {
+	if (get_property(fully_match_args_)) {
 		for (const auto &skill_arg : skill.skill_args) {
 			query.append(kvp("args." + skill_arg.first, skill_arg.second));
 		}
+	} else if (active_whitelist_entry_ != whitelist_.end()) {
+		for (const auto &skill_arg : active_whitelist_entry_->second.skill_args) {
+			query.append(kvp("args." + skill_arg.first, skill_arg.second));
+		}
 	}
-	if (!include_failures_) {
+	if (!get_property(include_failures_)) {
 		query.append(kvp("outcome", (int)SkillerInterface::SkillStatusEnum::S_FINAL));
 	}
 	mongocxx::pipeline p{};
@@ -149,7 +155,7 @@ LookupEstimator::get_execution_time(const Skill &skill)
 	// lock as mongocxx::client is not thread-safe
 	MutexLocker lock(mutex_);
 	try {
-		if (!include_failures_) {
+		if (get_property(include_failures_)) {
 			query.append(kvp("outcome", (int)SkillerInterface::SkillStatusEnum::S_FINAL));
 		}
 		mongocxx::cursor sample_cursor =
