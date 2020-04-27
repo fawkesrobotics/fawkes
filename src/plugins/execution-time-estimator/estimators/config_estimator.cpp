@@ -28,44 +28,23 @@ namespace fawkes {
 
 /** @class ConfigExecutionTimeEstimator
  * Get a static estimate for the skill execution time from the config.
- * This simply reads the execution time from the config. It only considers
- * the skill name, the arguments are ignored.
+ * This simply reads the execution time from the config.
  */
 
 /** Constructor
  * @param config The config to read from
  * @param cfg_prefix The config prefix to read from
  */
-
 ConfigExecutionTimeEstimator::ConfigExecutionTimeEstimator(Configuration *    config,
                                                            const std::string &cfg_prefix)
-: ExecutionTimeEstimator(config, cfg_prefix), exec_times_(get_exec_times_from_config())
+: ExecutionTimeEstimator(config, cfg_prefix),
+  exec_times_(config_,
+              cfg_prefix_,
+              "time",
+              config->exists(cfg_prefix + "default")
+                ? std::optional<float>(config->get_float(cfg_prefix + "default"))
+                : std::nullopt)
 {
-}
-
-/** Load execution time from config
- * @param path_suffix The suffix under which the skill specifications are found
- * @return map from skill entry id to execution time
- */
-std::map<std::string, float>
-ConfigExecutionTimeEstimator::get_exec_times_from_config(const std::string &path_suffix) const
-{
-	const int                                     ID       = 0;
-	const int                                     PROPERTY = 1;
-	std::unique_ptr<Configuration::ValueIterator> it(
-	  config_->search((cfg_prefix_ + path_suffix).c_str()));
-	std::map<std::string, float> res;
-	while (it->next()) {
-		std::vector<std::string> skill_property =
-		  str_split(std::string(it->path()).substr((cfg_prefix_ + path_suffix).size()));
-		if (skill_property.size() != 2) {
-			break;
-		}
-		if (skill_property[PROPERTY] == "time") {
-			res[skill_property[ID]] += it->get_float();
-		}
-	}
-	return res;
 }
 
 bool
@@ -74,17 +53,14 @@ ConfigExecutionTimeEstimator::can_provide_exec_time(const Skill &skill)
 	if (active_whitelist_entry_ == whitelist_.end()) {
 		return config_->exists(cfg_prefix_ + "default");
 	} else {
-		return exec_times_.find(active_whitelist_entry_->first) != exec_times_.end() || config_->exists(cfg_prefix_ + "default");
+		return exec_times_.property_entries.find(active_whitelist_entry_->first)
+		       != exec_times_.property_entries.end();
 	}
 }
 
 float
 ConfigExecutionTimeEstimator::get_execution_time(const Skill &skill)
 {
-	if (auto curr_exec_time = exec_times_.find(active_whitelist_entry_->first) == exec_times_.end()) {
-    return config_->get_float(cfg_prefix_ + "default");
-  } else {
-    return curr_exec_time->second;
-  }
+	return get_property(exec_times_) / speed_;
 }
 } // namespace fawkes

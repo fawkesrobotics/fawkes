@@ -67,10 +67,32 @@ using Skill = ExecutionTimeEstimator::Skill;
  * @param path config path under which the skill descriptions are located
  * @return all skills found under the given path sorted by <description-id>.
  *
+ * @fn template <typename T> T ExecutionTimeEstimator::get_property(const Property<T> &property) const
+ * Get the current property value for \a active_whitelist_entry_.
+ * @param property property where the current value should be retrieved from
+ * @return property accoring to \a active_whitelist_entry_ or the default value if no whitelist entry is active
+ *
  *  @fn bool Skill::matches(const Skill &other) const
  * Check, whether the skill matches another skill description.
  * @param other The skill description that should be matched
  * @return true if all skill args in other are contained in the args of this skill and the skill names match
+ *
+ * @fn template <typename T> ExecutionTimeEstimator::Property<T>::Property(fawkes::Configuration *config, const std::string & path, const std::string &property, const T &default_value)
+ * Constructor.
+ * Create a property by reading all values from the config.
+ * @param config Config to read form
+ * @param path Path under which the config values can be found
+ * @param property Property name
+ * @param default_value Default value in case values are not specified
+ *
+ * @fn template <typename T> T ExecutionTimeEstimator::Property<T>::get_default_value() const
+ * Get the default value if it is set, otherwise throw an exception
+ * @return the default value for the property
+ *
+ * @fn template <typename T> T ExecutionTimeEstimator::Property<T>::get_property(const std::string &key) const
+ * Get the property falue for a given
+ * @param key Skill entry id
+ * @return Value associated with \a key or the default value, if no skill-specific value can be found
  */
 
 /** Constructor.
@@ -78,40 +100,14 @@ using Skill = ExecutionTimeEstimator::Skill;
  * @param config configuration to read all values from
  * @param cfg_prefix prefix where the estimator-specific configs are located
  */
-ExecutionTimeEstimator::ExecutionTimeEstimator(Configuration *config, const ::std::string &cfg_prefix)
+ExecutionTimeEstimator::ExecutionTimeEstimator(Configuration *      config,
+                                               const ::std::string &cfg_prefix)
 : config_(config),
   cfg_prefix_(cfg_prefix),
   speed_(config->get_float_or_default((cfg_prefix_ + "speed").c_str(), 1)),
   whitelist_(get_skills_from_config(cfg_prefix_ + "whitelist")),
   blacklist_(get_skills_from_config(cfg_prefix_ + "blacklist"))
 {
-}
-
-std::map<std::string, Skill>
-ExecutionTimeEstimator::get_skills_from_config(const std::string &path) const
-{
-	const int                                     ID       = 0;
-	const int                                     PROPERTY = 1;
-	std::unique_ptr<Configuration::ValueIterator> it(config_->search(path.c_str()));
-	std::map<std::string, std::string>            skill_strings;
-	while (it->next()) {
-		std::vector<std::string> skill_property =
-		  str_split(std::string(it->path()).substr(path.size()));
-		if (skill_property.size() != 2) {
-			break;
-		}
-		if (skill_property[PROPERTY] == "args") {
-			skill_strings[skill_property[ID]] += str_join(it->get_strings(), ',');
-		} else if (skill_property[PROPERTY] == "name") {
-			skill_strings[skill_property[ID]] =
-			  it->get_string() + "{" + skill_strings[skill_property[ID]];
-		}
-	}
-	std::map<std::string, Skill> res;
-	for (const auto &skill_string : skill_strings) {
-		res.insert(std::make_pair(skill_string.first, Skill(skill_string.second + "}")));
-	}
-	return res;
 }
 
 bool
@@ -197,4 +193,115 @@ Skill::parse_args(const std::string &args)
 	}
 }
 
+std::map<std::string, Skill>
+ExecutionTimeEstimator::get_skills_from_config(const std::string &path) const
+{
+	const int                                     ID       = 0;
+	const int                                     PROPERTY = 1;
+	std::unique_ptr<Configuration::ValueIterator> it(config_->search(path.c_str()));
+	std::map<std::string, std::string>            skill_strings;
+	while (it->next()) {
+		std::vector<std::string> skill_property =
+		  str_split(std::string(it->path()).substr(path.size()));
+		if (skill_property.size() != 2) {
+			break;
+		}
+		if (skill_property[PROPERTY] == "args") {
+			skill_strings[skill_property[ID]] += str_join(it->get_strings(), ',');
+		} else if (skill_property[PROPERTY] == "name") {
+			skill_strings[skill_property[ID]] =
+			  it->get_string() + "{" + skill_strings[skill_property[ID]];
+		}
+	}
+	std::map<std::string, Skill> res;
+	for (const auto &skill_string : skill_strings) {
+		res.insert(std::make_pair(skill_string.first, Skill(skill_string.second + "}")));
+	}
+	return res;
+}
+
+template <typename T>
+T
+ExecutionTimeEstimator::get_property(const Property<T> &property) const
+{
+	if (active_whitelist_entry_ == whitelist_.end()) {
+		return property.get_default_value();
+		;
+	} else {
+		return property.get_property(active_whitelist_entry_->first);
+	}
+}
+
+template <typename T>
+ExecutionTimeEstimator::Property<T>::Property(fawkes::Configuration * config,
+                                              const std::string &     path,
+                                              const std::string &     property,
+                                              const std::optional<T> &default_val)
+{
+	try {
+		if constexpr (std::is_same<T, std::string>()) {
+			default_value = config->get_string((path + property).c_str());
+		} else if constexpr (std::is_same<T, float>()) {
+			default_value = config->get_float((path + property).c_str());
+		} else if constexpr (std::is_same<T, bool>()) {
+			default_value = config->get_bool((path + property).c_str());
+		} else {
+			throw Exception("Unsupported type");
+		}
+	} catch (Exception &e) {
+		default_value = default_val;
+	}
+	const int                                     ID             = 0;
+	const int                                     PROPERTY       = 1;
+	std::string                                   whitelist_path = path + "whitelist";
+	std::unique_ptr<Configuration::ValueIterator> it(config->search(whitelist_path.c_str()));
+	while (it->next()) {
+		std::vector<std::string> skill_property =
+		  str_split(std::string(it->path()).substr(whitelist_path.size()));
+		if (skill_property.size() != 2) {
+			break;
+		}
+		if (skill_property[PROPERTY] == property) {
+			if constexpr (std::is_same<T, std::string>()) {
+				property_entries[skill_property[ID]] += it->get_string();
+			} else if constexpr (std::is_same<T, float>()) {
+				property_entries[skill_property[ID]] += it->get_float();
+			} else if constexpr (std::is_same<T, bool>()) {
+				property_entries[skill_property[ID]] += it->get_bool();
+			} else {
+				throw Exception("Unsupported type");
+			}
+		}
+	}
+}
+
+template <typename T>
+T
+ExecutionTimeEstimator::Property<T>::get_default_value() const
+{
+	if (default_value) {
+		return default_value.value();
+	} else {
+		throw Exception("failed to get property");
+	}
+}
+
+template <typename T>
+T
+ExecutionTimeEstimator::Property<T>::get_property(const std::string &key) const
+{
+	auto property_specified = property_entries.find(key);
+	if (property_specified == property_entries.end()) {
+		return get_default_value();
+	}
+	return property_specified->second;
+}
+
+template class ExecutionTimeEstimator::Property<std::string>;
+template class ExecutionTimeEstimator::Property<bool>;
+template class ExecutionTimeEstimator::Property<float>;
+template std::string
+               ExecutionTimeEstimator::get_property(const Property<std::string> &property) const;
+template bool  ExecutionTimeEstimator::get_property(const Property<bool> &property) const;
+template float ExecutionTimeEstimator::get_property(const Property<float> &property) const;
 } // namespace fawkes

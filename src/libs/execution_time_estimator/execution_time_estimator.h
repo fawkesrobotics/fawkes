@@ -23,6 +23,7 @@
 #include <config/config.h>
 #include <interfaces/SkillerInterface.h>
 
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -49,6 +50,26 @@ public:
 		void parse_args(const std::string &args);
 	};
 
+	/** A configurable property that is skill-specific and may have a default value. */
+	template <typename T>
+	class Property
+	{
+	public:
+		Property(fawkes::Configuration * config,
+		         const std::string &     path,
+		         const std::string &     property,
+		         const std::optional<T> &default_value = std::nullopt);
+		T get_property(const std::string &key) const;
+		T get_default_value() const;
+
+		/** Mapping from skill entry id to property value */
+		std::map<std::string, T> property_entries;
+
+	private:
+		/** Global default value that is used whenever no property entry is found */
+		std::optional<T> default_value;
+	};
+
 	/** Destructor. */
 	virtual ~ExecutionTimeEstimator() = default;
 
@@ -64,6 +85,8 @@ public:
 protected:
 	std::map<std::string, Skill> get_skills_from_config(const std::string &path) const;
 
+	template <typename T>
+	T get_property(const Property<T> &property) const;
 	/** Config to obtain common configurables */
 	Configuration *const config_;
 	/** Config prefix of the estimator */
