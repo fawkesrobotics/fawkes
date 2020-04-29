@@ -18,7 +18,7 @@ BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(LIBSRCDIR)/utils/utils.mk
 
-LIBS_execution_time_estimator = fawkescore fawkes_execution_time_estimator
+LIBS_execution_time_estimator = fawkescore fawkes_execution_time_estimator fawkes_execution_time_estimator_aspect
 
 OBJS_execution_time_estimator = execution_time_estimator_plugin.o \
                                 execution_time_estimator_thread.o \

@@ -22,9 +22,9 @@
 
 #include <aspect/aspect_provider.h>
 #include <aspect/configurable.h>
-#include <aspect/execution_time_estimator.h>
-#include <aspect/inifins/execution_time_estimator.h>
 #include <core/threading/thread.h>
+#include <execution_time_estimator/aspect/execution_time_estimator.h>
+#include <execution_time_estimator/aspect/execution_time_estimator_inifin.h>
 
 class ExecutionTimeEstimatorsThread : public fawkes::Thread,
                                       public fawkes::ConfigurableAspect,
