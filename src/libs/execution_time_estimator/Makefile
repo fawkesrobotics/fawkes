@@ -19,7 +19,7 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 SUBDIRS = aspect
 
-LIBS_libfawkes_execution_time_estimator = fawkescore
+LIBS_libfawkes_execution_time_estimator = fawkescore m
 OBJS_libfawkes_execution_time_estimator = execution_time_estimator.o
 
 OBJS_all = $(OBJS_libfawkes_execution_time_estimator)
