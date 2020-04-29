@@ -24,7 +24,6 @@
 
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
-#include <aspect/execution_time_estimator.h>
 #include <core/threading/thread.h>
 #include <navgraph/aspect/navgraph.h>
 

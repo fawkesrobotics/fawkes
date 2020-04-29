@@ -22,8 +22,8 @@
 
 #include "interfaces/Position3DInterface.h"
 
-#include <aspect/execution_time_estimator.h>
 #include <config/config.h>
+#include <execution_time_estimator/aspect/execution_time_estimator.h>
 #include <navgraph/navgraph.h>
 
 #include <string>

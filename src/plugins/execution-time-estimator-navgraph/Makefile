@@ -19,8 +19,9 @@ include $(BASEDIR)/etc/buildsys/config.mk
 
 LIBS_execution_time_estimator_navgraph = fawkescore fawkesutils fawkesaspects \
                                   fawkesblackboard fawkesinterface \
-                                  fawkeslogging fawkes_execution_time_estimator \
-																	fawkesnavgraphaspect
+                                  fawkeslogging \
+                                  fawkes_execution_time_estimator fawkes_execution_time_estimator_aspect \
+                                  fawkesnavgraphaspect
 
 OBJS_execution_time_estimator_navgraph = execution_time_estimator_navgraph_plugin.o \
                                   execution_time_estimator_navgraph_thread.o \
