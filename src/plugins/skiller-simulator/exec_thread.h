@@ -25,9 +25,9 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
-#include <aspect/execution_time_estimator.h>
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
+#include <execution_time_estimator/aspect/execution_time_estimator.h>
 #include <interfaces/SkillerInterface.h>
 #include <plugins/skiller/skiller_feature.h>
 
