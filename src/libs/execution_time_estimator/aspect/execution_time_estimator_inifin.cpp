@@ -18,7 +18,7 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "execution_time_estimator.h"
+#include "execution_time_estimator_inifin.h"
 
 namespace fawkes {
 

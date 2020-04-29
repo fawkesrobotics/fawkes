@@ -49,14 +49,6 @@ else
   LDFLAGS += $(LDFLAGS_PCL)
 endif
 
-ifeq ($(HAVE_CPP17),1)
-  CFLAGS += $(CFLAGS_CPP17)
-else
-  OBJS_FILTER_OUT += $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/execution_time_estimator.cpp \
-                     $(SRCDIR)/inifins/execution_time_estimator.cpp))
-  WARN_TARGETS += warning_cpp17
-endif
-
 OBJS_libfawkesaspects = $(patsubst %.cpp,%.o,$(filter-out $(OBJS_FILTER_OUT),$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp))))))
 HDRS_libfawkesaspects = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h))
 INST_HDRS_SUBDIR_libfawkesaspects = aspect
@@ -75,8 +67,6 @@ warning_tf:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Excluding TransformAspect$(TNORMAL) (libfawkestf not built)"
 warning_pcl:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Excluding PointCloudAspect$(TNORMAL) (PCL not available)"
-warning_cpp17:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Excluding ExecutionTimeEstimatorAspect$(TNORMAL) (C++17 not available)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

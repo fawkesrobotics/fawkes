@@ -1,5 +1,5 @@
 /***************************************************************************
- *  execution_time_estimator.h - Aspect INiFin
+ *  execution_time_estimator_inifin.h - Aspect INiFin
  *
  *  Created: Thu 12 Dec 2019 19:00:07 CET 19:00
  *  Copyright  2019  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "../execution_time_estimator.h"
+#include "execution_time_estimator.h"
 
 #include <aspect/aspect.h>
 #include <aspect/inifins/inifin.h>

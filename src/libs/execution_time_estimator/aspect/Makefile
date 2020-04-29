@@ -1,7 +1,7 @@
 #*****************************************************************************
 #                      Makefile Build System for Fawkes
 #                            -------------------
-#   Created on Thu 23 Apr 2020 19:36:47 CEST
+#   Created on Wed 29 Apr 2020 15:39:53 CEST
 #   Copyright (C) 2020 by Till Hofmann <hofmann@kbsg.rwth-aachen.de>
 #
 #*****************************************************************************
@@ -13,33 +13,29 @@
 #
 #*****************************************************************************
 
+BASEDIR = ../../../..
 
-BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 
-SUBDIRS = aspect
+LIBS_libfawkes_execution_time_estimator_aspect = fawkescore fawkesaspects fawkes_execution_time_estimator
+OBJS_libfawkes_execution_time_estimator_aspect = execution_time_estimator.o execution_time_estimator_inifin.o
 
-LIBS_libfawkes_execution_time_estimator = fawkescore
-OBJS_libfawkes_execution_time_estimator = execution_time_estimator.o
-
-OBJS_all = $(OBJS_libfawkes_execution_time_estimator)
-
-LIBS_all = $(LIBDIR)/libfawkes_execution_time_estimator.so
+OBJS_all = $(OBJS_libfawkes_execution_time_estimator_aspect)
+LIBS_all = $(LIBDIR)/libfawkes_execution_time_estimator_aspect.so
 
 ifeq ($(HAVE_CPP17),1)
-  CFLAGS        += $(CFLAGS_CPP17)
-  LIBS_build     = $(LIBS_all)
-  PLUGINS_build  = $(PLUGINS_all)
+  CFLAGS += $(CFLAGS_CPP17)
+  LIBS_build = $(LIBS_all)
 else
-  WARN_TARGETS += warning_cpp17
+  WARN_TARGETS = warning_cpp17
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-.PHONY: $(WARN_TARGETS)
 
+.PHONY: $(WARN_TARGETS)
 warning_cpp17:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting exeuction time estimator$(TNORMAL) (C++17 not supported)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting execution time estimator aspect$(TNORMAL) (C++17 support required)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
