@@ -42,4 +42,9 @@ warning_cpp17:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting exeuction time estimator$(TNORMAL) (C++17 not supported)"
 endif
 
+ifneq ($(MAKECMDGOALS),clean)
+aspect: | $(LIBDIR)/libfawkes_execution_time_estimator.so
+endif
+
+
 include $(BUILDSYSDIR)/base.mk
