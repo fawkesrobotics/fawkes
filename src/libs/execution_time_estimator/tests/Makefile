@@ -17,15 +17,15 @@ BASEDIR = ../../../..
 include $(BASEDIR)/etc/buildsys/config.mk
 include $(BASEDIR)/etc/buildsys/gtest.mk
 
-LIBS_test_skiller_simulator_skill_parser = m fawkes_execution_time_estimator
-OBJS_test_skiller_simulator_skill_parser = test_skill_parser.o
-OBJS_all = $(OBJS_gtest_skiller_simulator_skill_parser)
+LIBS_test_execution_time_estimator_skill_parser = m fawkes_execution_time_estimator
+OBJS_test_execution_time_estimator_skill_parser = test_skill_parser.o
+OBJS_all = $(OBJS_gtest_execution_time_estimator_skill_parser)
 
 ifeq ($(HAVE_CPP17),1)
   ifeq ($(HAVE_GTEST),1)
     CFLAGS += $(CFLAGS_GTEST)
     LDFLAGS += $(LDFLAGS_GTEST)
-    BINS_gtest = $(BINDIR)/test_skiller_simulator_skill_parser
+    BINS_gtest = $(BINDIR)/test_execution_time_estimator_skill_parser
   else
     WARN_TARGETS += warn_gtest
   endif
