@@ -40,12 +40,14 @@ ConfigExecutionTimeEstimator::ConfigExecutionTimeEstimator(Configuration *config
 bool
 ConfigExecutionTimeEstimator::can_execute(const Skill &skill) const
 {
-	return config_->exists(cfg_prefix_ + skill.skill_name);
+	return config_->exists(cfg_prefix_ + skill.skill_name)
+	       || config_->exists(cfg_prefix_ + std::string{"default"});
 }
 
 float
 ConfigExecutionTimeEstimator::get_execution_time(const Skill &skill) const
 {
-	return config_->get_float(cfg_prefix_ + skill.skill_name);
+	return config_->get_float_or_default((cfg_prefix_ + skill.skill_name).c_str(),
+	                                     config_->get_float(cfg_prefix_ + std::string{"default"}));
 }
 } // namespace fawkes
