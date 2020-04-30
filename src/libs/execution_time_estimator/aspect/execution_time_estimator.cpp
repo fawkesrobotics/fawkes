@@ -21,6 +21,7 @@
 #include "execution_time_estimator.h"
 
 #include <core/exception.h>
+#include <core/exceptions/software.h>
 
 #include <algorithm>
 
@@ -32,18 +33,18 @@ namespace fawkes {
 
 /** Get the running time provider for the given skill string.
  * @param skill_string The string to get the running time for
- * @return an optional with a pointer to the provider, an optional without a
- * value if no provider exists
+ * @return a pointer to the provider
+ * @throws IllegalArgumentException if no provider for the given skill exists
  */
-std::optional<std::shared_ptr<ExecutionTimeEstimator>>
+std::shared_ptr<ExecutionTimeEstimator>
 ExecutionTimeEstimatorManager::get_provider(const std::string &skill_string) const
 {
 	for (auto &provider : execution_time_estimators_) {
 		if (provider->can_execute(skill_string)) {
-			return std::make_optional<std::shared_ptr<ExecutionTimeEstimator>>(provider);
+			return std::shared_ptr<ExecutionTimeEstimator>(provider);
 		}
 	}
-	return std::optional<std::shared_ptr<ExecutionTimeEstimator>>();
+	throw IllegalArgumentException("No provider found for %s", skill_string.c_str());
 }
 
 /** Add a running time provider.

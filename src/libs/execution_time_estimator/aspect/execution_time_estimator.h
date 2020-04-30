@@ -24,7 +24,6 @@
 #include <execution_time_estimator/execution_time_estimator.h>
 
 #include <memory>
-#include <optional>
 #include <vector>
 
 namespace fawkes {
@@ -32,8 +31,7 @@ namespace fawkes {
 class ExecutionTimeEstimatorManager
 {
 public:
-	std::optional<std::shared_ptr<ExecutionTimeEstimator>>
-	     get_provider(const std::string &skill_string) const;
+	std::shared_ptr<ExecutionTimeEstimator> get_provider(const std::string &skill_string) const;
 	void register_provider(std::shared_ptr<ExecutionTimeEstimator> provider);
 	void unregister_provider(std::shared_ptr<ExecutionTimeEstimator> provider);
 
