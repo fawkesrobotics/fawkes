@@ -56,7 +56,6 @@ private:
 	float                     get_skill_runtime(const std::string &skill) const;
 	void                      execute_skill(const std::string &skill);
 	fawkes::SkillerInterface *skiller_if_;
-	float                     default_skill_runtime_;
 	fawkes::Time              skill_starttime_;
 };
 

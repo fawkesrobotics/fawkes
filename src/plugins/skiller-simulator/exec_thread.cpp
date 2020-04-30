@@ -41,9 +41,7 @@ SkillerSimulatorExecutionThread::SkillerSimulatorExecutionThread()
 void
 SkillerSimulatorExecutionThread::init()
 {
-	skiller_if_ = blackboard->open_for_writing<SkillerInterface>("Skiller");
-	default_skill_runtime_ =
-	  config->get_float_or_default("/plugins/skiller-simulator/execution-times/default", 1);
+	skiller_if_      = blackboard->open_for_writing<SkillerInterface>("Skiller");
 	skill_starttime_ = Time();
 }
 
@@ -175,18 +173,12 @@ float
 SkillerSimulatorExecutionThread::get_skill_runtime(const std::string &skill) const
 {
 	auto provider = execution_time_estimator_manager_->get_provider(skill);
-	if (provider) {
-		return (*provider)->get_execution_time(skill);
-	} else {
-		return default_skill_runtime_;
-	}
+	return provider->get_execution_time(skill);
 }
 
 void
 SkillerSimulatorExecutionThread::execute_skill(const std::string &skill)
 {
 	auto provider = execution_time_estimator_manager_->get_provider(skill);
-	if (provider) {
-		(*provider)->execute(skill);
-	}
+	return provider->execute(skill);
 }
