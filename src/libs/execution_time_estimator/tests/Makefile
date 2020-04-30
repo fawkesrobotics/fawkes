@@ -37,9 +37,9 @@ ifeq ($(OBJSSUBMAKE),1)
 test: $(WARN_TARGETS)
 .PHONY: $(WARN_TARGETS)
 warning_cpp17:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting skiller simulator tests$(TNORMAL) (C++17 not supported)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting execution time estimator tests$(TNORMAL) (C++17 not supported)"
 warning_gtest:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Cannot build skiller simulator tests$(TNORMAL) (gtest not found)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting execution time estimator tests$(TNORMAL) (gtest not found)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

@@ -1,5 +1,5 @@
 /***************************************************************************
- *  execution_time_estimator.cpp - Aspect for a running time provider
+ *  execution_time_estimator.cpp - Aspect for a execution time provider
  *
  *  Created: Thu 12 Dec 2019 19:03:19 CET 19:03
  *  Copyright  2019  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
@@ -28,11 +28,11 @@
 namespace fawkes {
 
 /** @class ExecutionTimeEstimatorManager
- * A manager for a vector of running time providers for skill simulation.
+ * A manage for execution time providers.
  */
 
-/** Get the running time provider for the given skill string.
- * @param skill_string The string to get the running time for
+/** Get the execution time provider for the given skill string.
+ * @param skill_string The string to get the execution time for
  * @return a pointer to the provider
  * @throws IllegalArgumentException if no provider for the given skill exists
  */
@@ -47,7 +47,7 @@ ExecutionTimeEstimatorManager::get_provider(const std::string &skill_string) con
 	throw IllegalArgumentException("No provider found for %s", skill_string.c_str());
 }
 
-/** Add a running time provider.
+/** Add an execution time provider.
  * @param provider The provider to add
  */
 void
@@ -69,8 +69,8 @@ ExecutionTimeEstimatorManager::unregister_provider(std::shared_ptr<ExecutionTime
 }
 
 /** @class ExecutionTimeEstimatorsAspect
- * An aspect to give access to the skiller simulator's running time providers.
- * Use this aspect to add a running time provider.
+ * An aspect to give access to the execution time estimator manager.
+ * Use this aspect to add an execution time provider.
  *
  * @var ExecutionTimeEstimatorsAspect::execution_time_estimator_manager_
  * The ExecutionTimeEstimatorManager that is used to manage the estimators.
@@ -85,7 +85,7 @@ ExecutionTimeEstimatorsAspect::ExecutionTimeEstimatorsAspect()
 }
 
 /** Initialize the aspect with a provider manager.
- * @param provider_manager The manager of the running time providers
+ * @param provider_manager The manager of the execution time providers
  */
 void
 ExecutionTimeEstimatorsAspect::init_ExecutionTimeEstimatorsAspect(
