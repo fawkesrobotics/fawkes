@@ -22,6 +22,8 @@
 
 namespace fawkes {
 
+constexpr char NavGraphEstimator::cfg_prefix_[];
+
 /** @class NavGraphEstimator
  * Estimate the execution time for the skill goto by querying the distance from
  * the navgraph.
@@ -36,9 +38,9 @@ NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph> navgraph, Configuration *
 {
 	last_pose_x_ = config->get_float_or_default("plugins/amcl/init_pose_x", 0);
 	last_pose_y_ = config->get_float_or_default("plugins/amcl/init_pose_y", 0);
-	speed_ = config->get_float_or_default("plugins/skiller-simulator/estimators/navgraph/speed", 0.5);
-	skills_ = config->get_strings_or_defaults("plugins/skiller-simulator/estimators/navgraph/skills",
-	                                          {"goto"});
+	speed_       = config->get_float_or_default((std::string{cfg_prefix_} + "speed").c_str(), 0.5);
+	skills_ =
+	  config->get_strings_or_defaults((std::string{cfg_prefix_} + "skills").c_str(), {"goto"});
 }
 
 bool
