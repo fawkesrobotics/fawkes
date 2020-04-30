@@ -1,0 +1,11 @@
+%YAML 1.2
+%TAG ! tag:fawkesrobotics.org,cfg/
+---
+plugins/execution-time-estimator:
+  static:
+    default: 1
+    say: 2.5
+  navgraph:
+    speed: 0.5
+    skills:
+      - goto
