@@ -22,21 +22,21 @@
 
 #include <core/plugin.h>
 
-/** @class SkillerSimulatorNavgraphPlugin
+/** @class ExecutionTimeEstimatorNavgraphPlugin
  * Plugin to get estimates for skill execution times from the navgraph.
  */
 
-class SkillerSimulatorNavgraphPlugin : public fawkes::Plugin
+class ExecutionTimeEstimatorNavgraphPlugin : public fawkes::Plugin
 {
 public:
 	/** Constructor.
    * @param config The fawkes config to use
    */
-	explicit SkillerSimulatorNavgraphPlugin(fawkes::Configuration *config) : Plugin(config)
+	explicit ExecutionTimeEstimatorNavgraphPlugin(fawkes::Configuration *config) : Plugin(config)
 	{
-		thread_list.push_back(new SkillerSimulatorNavgraphEstimatorThread());
+		thread_list.push_back(new ExecutionTimeEstimatorNavgraphThread());
 	}
 };
 
 PLUGIN_DESCRIPTION("Estimate skill execution times with the navgraph")
-EXPORT_PLUGIN(SkillerSimulatorNavgraphPlugin)
+EXPORT_PLUGIN(ExecutionTimeEstimatorNavgraphPlugin)

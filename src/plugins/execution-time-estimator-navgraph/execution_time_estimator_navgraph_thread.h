@@ -27,14 +27,14 @@
 #include <core/threading/thread.h>
 #include <navgraph/aspect/navgraph.h>
 
-class SkillerSimulatorNavgraphEstimatorThread : public fawkes::Thread,
-                                                public fawkes::BlackBoardAspect,
-                                                public fawkes::ConfigurableAspect,
-                                                public fawkes::NavGraphAspect,
-                                                public fawkes::ExecutionTimeEstimatorsAspect
+class ExecutionTimeEstimatorNavgraphThread : public fawkes::Thread,
+                                             public fawkes::BlackBoardAspect,
+                                             public fawkes::ConfigurableAspect,
+                                             public fawkes::NavGraphAspect,
+                                             public fawkes::ExecutionTimeEstimatorsAspect
 {
 public:
-	SkillerSimulatorNavgraphEstimatorThread();
+	ExecutionTimeEstimatorNavgraphThread();
 	void init();
 	void finalize();
 

@@ -42,7 +42,7 @@ all: $(WARN_TARGETS)
 .PHONY: $(WARN_TARGETS)
 
 warning_cpp17:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting skiller simulator navgraph$(TNORMAL) (C++17 not supported)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting execution time estimator navgraph plugin$(TNORMAL) (C++17 not supported)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

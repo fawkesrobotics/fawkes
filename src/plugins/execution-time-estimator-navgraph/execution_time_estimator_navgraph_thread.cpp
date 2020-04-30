@@ -24,19 +24,19 @@
 
 #include <interfaces/Position3DInterface.h>
 
-/** @class SkillerSimulatorNavgraphEstimatorThread
+/** @class ExecutionTimeEstimatorNavgraphThread
  * Get estimates for skill execution times from the navgraph.
  */
 
 /** Constructor. */
-SkillerSimulatorNavgraphEstimatorThread::SkillerSimulatorNavgraphEstimatorThread()
-: Thread("SkillerSimulatorNavgraphEstimatorThread", Thread::OPMODE_WAITFORWAKEUP)
+ExecutionTimeEstimatorNavgraphThread::ExecutionTimeEstimatorNavgraphThread()
+: Thread("ExecutionTimeEstimatorNavgraphThread", Thread::OPMODE_WAITFORWAKEUP)
 {
 }
 
 /** Register the estimator. */
 void
-SkillerSimulatorNavgraphEstimatorThread::init()
+ExecutionTimeEstimatorNavgraphThread::init()
 {
 	estimator_ = std::make_shared<fawkes::NavGraphEstimator>(navgraph, config);
 	execution_time_estimator_manager_->register_provider(estimator_);
@@ -44,7 +44,7 @@ SkillerSimulatorNavgraphEstimatorThread::init()
 
 /** Unregister the estimator. */
 void
-SkillerSimulatorNavgraphEstimatorThread::finalize()
+ExecutionTimeEstimatorNavgraphThread::finalize()
 {
 	execution_time_estimator_manager_->unregister_provider(estimator_);
 }
