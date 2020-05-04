@@ -38,7 +38,7 @@ ifeq ($(CGAL_HAVE_BOOST_LIBS),1)
         # Disable this runtime check since it fails when using valgrind
         CFLAGS_CGAL += -DCGAL_DISABLE_ROUNDING_MATH_CHECK
 
-        LDFLAGS_CGAL:=-lCGAL -lCGAL_Core -lgmp -lmpfr -lm \
+        LDFLAGS_CGAL:=-lgmp -lmpfr -lm \
 		      $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
 
         ifeq ($(CC),clang)
