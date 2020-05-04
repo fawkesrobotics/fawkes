@@ -25,6 +25,8 @@
 #include <core/exception.h>
 #include <core/threading/thread.h>
 
+#include <stdexcept>
+
 namespace fawkes {
 
 /** @class BlockedTimingAspect <aspect/blocked_timing.h>
