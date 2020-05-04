@@ -44,6 +44,6 @@ private:
 	float                    last_pose_x_;
 	float                    last_pose_y_;
 	float                    speed_;
-	constexpr static char    cfg_prefix_[] = "plugins/execution-time-estimator/navgraph";
+	constexpr static char    cfg_prefix_[] = "plugins/execution-time-estimator/navgraph/";
 };
 } // namespace fawkes
