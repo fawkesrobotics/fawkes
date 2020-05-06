@@ -39,5 +39,5 @@ void
 ExecutionTimeEstimatorsThread::init()
 {
 	execution_time_estimator_manager_.register_provider(
-	  std::make_shared<fawkes::ConfigExecutionTimeEstimator>(config));
+	  std::make_shared<fawkes::ConfigExecutionTimeEstimator>(config), -1);
 }
