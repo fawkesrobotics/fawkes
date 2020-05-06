@@ -23,8 +23,12 @@ OBJS_libfawkes_execution_time_estimator_aspect = execution_time_estimator.o exec
 OBJS_all = $(OBJS_libfawkes_execution_time_estimator_aspect)
 LIBS_all = $(LIBDIR)/libfawkes_execution_time_estimator_aspect.so
 
-ifeq ($(HAVE_CPP17),1)
-  CFLAGS += $(CFLAGS_CPP17)
+ifneq ($(HAVE_CPP17)$(HAVE_CPP20),)
+  ifeq ($(HAVE_CPP20),1)
+    CFLAGS += $(CFLAGS_CPP20)
+  else
+    CFLAGS += $(CFLAGS_CPP17)
+  endif
   LIBS_build = $(LIBS_all)
 else
   WARN_TARGETS = warning_cpp17

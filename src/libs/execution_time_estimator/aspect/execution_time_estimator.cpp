@@ -28,7 +28,9 @@
 namespace fawkes {
 
 /** @class ExecutionTimeEstimatorManager
- * A manage for execution time providers.
+ * A manager for execution time providers.
+ * It stores prioritized providers, where the provider with the maximal
+ * priority is considered first.
  */
 
 /** Get the execution time provider for the given skill string.
@@ -39,9 +41,10 @@ namespace fawkes {
 std::shared_ptr<ExecutionTimeEstimator>
 ExecutionTimeEstimatorManager::get_provider(const std::string &skill_string) const
 {
-	for (auto &provider : execution_time_estimators_) {
+	for (const auto &pair : execution_time_estimators_) {
+		const auto &provider = pair.second;
 		if (provider->can_execute(skill_string)) {
-			return std::shared_ptr<ExecutionTimeEstimator>(provider);
+			return provider;
 		}
 	}
 	throw IllegalArgumentException("No provider found for %s", skill_string.c_str());
@@ -49,11 +52,13 @@ ExecutionTimeEstimatorManager::get_provider(const std::string &skill_string) con
 
 /** Add an execution time provider.
  * @param provider The provider to add
+ * @param priority The priority of the new provider
  */
 void
-ExecutionTimeEstimatorManager::register_provider(std::shared_ptr<ExecutionTimeEstimator> provider)
+ExecutionTimeEstimatorManager::register_provider(std::shared_ptr<ExecutionTimeEstimator> provider,
+                                                 int                                     priority)
 {
-	execution_time_estimators_.push_back(provider);
+	execution_time_estimators_.insert(std::make_pair(priority, provider));
 }
 
 /** Remove an execution time estimate provider.
@@ -62,10 +67,17 @@ ExecutionTimeEstimatorManager::register_provider(std::shared_ptr<ExecutionTimeEs
 void
 ExecutionTimeEstimatorManager::unregister_provider(std::shared_ptr<ExecutionTimeEstimator> provider)
 {
-	execution_time_estimators_.erase(std::remove(execution_time_estimators_.begin(),
-	                                             execution_time_estimators_.end(),
-	                                             provider),
-	                                 execution_time_estimators_.end());
+#if __GNUC__ >= 9
+	std::erase_if(execution_time_estimators_, [&](auto &pair) { return provider == pair.second; });
+#else
+	for (auto it = execution_time_estimators_.begin(); it != execution_time_estimators_.end();) {
+		if (it->second == provider) {
+			it = execution_time_estimators_.erase(it);
+		} else {
+			it++;
+		}
+	}
+#endif
 }
 
 /** @class ExecutionTimeEstimatorsAspect
