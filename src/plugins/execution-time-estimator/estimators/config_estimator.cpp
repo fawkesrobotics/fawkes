@@ -47,7 +47,12 @@ ConfigExecutionTimeEstimator::can_execute(const Skill &skill) const
 float
 ConfigExecutionTimeEstimator::get_execution_time(const Skill &skill) const
 {
-	return config_->get_float_or_default((cfg_prefix_ + skill.skill_name).c_str(),
-	                                     config_->get_float(cfg_prefix_ + std::string{"default"}));
+	if (const std::string cfg_path = cfg_prefix_ + skill.skill_name; config_->exists(cfg_path)) {
+		return config_->get_float(cfg_path);
+	} else if (const std::string default_path = cfg_prefix_ + std::string{"default"};
+	           config_->exists(default_path)) {
+		return config_->get_float(default_path);
+	} else
+		throw Exception("No config value for %s", cfg_path.c_str());
 }
 } // namespace fawkes
