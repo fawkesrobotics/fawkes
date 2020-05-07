@@ -11,4 +11,8 @@ plugins/execution-time-estimator:
     priority: 1
     speed: 0.5
     skills:
-      - goto
+      goto:
+        # The name of the skill parameter for the start location
+        # start: from
+        # The name of the skill parameter for the target location
+        target: place

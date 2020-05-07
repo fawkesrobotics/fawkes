@@ -41,11 +41,11 @@ public:
 	void  execute(const Skill &skill) override;
 
 private:
-	const std::string        cfg_prefix_;
-	LockPtr<NavGraph>        navgraph_;
-	std::vector<std::string> skills_;
-	float                    last_pose_x_;
-	float                    last_pose_y_;
-	float                    speed_;
+	Configuration *   config_;
+	const std::string cfg_prefix_;
+	LockPtr<NavGraph> navgraph_;
+	float             last_pose_x_;
+	float             last_pose_y_;
+	float             speed_;
 };
 } // namespace fawkes
