@@ -22,8 +22,6 @@
 
 namespace fawkes {
 
-constexpr char NavGraphEstimator::cfg_prefix_[];
-
 /** @class NavGraphEstimator
  * Estimate the execution time for the skill goto by querying the distance from
  * the navgraph.
@@ -32,15 +30,17 @@ constexpr char NavGraphEstimator::cfg_prefix_[];
 /** Constructor.
  * @param navgraph The navgraph to read the node positions from
  * @param config The config to read the initial position from
+ * @param cfg_prefix The config prefix to use for config parameters
  */
-NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph> navgraph, Configuration *config)
-: navgraph_(navgraph)
+NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph>  navgraph,
+                                     Configuration *    config,
+                                     const std::string &cfg_prefix)
+: cfg_prefix_(cfg_prefix), navgraph_(navgraph)
 {
 	last_pose_x_ = config->get_float_or_default("plugins/amcl/init_pose_x", 0);
 	last_pose_y_ = config->get_float_or_default("plugins/amcl/init_pose_y", 0);
-	speed_       = config->get_float_or_default((std::string{cfg_prefix_} + "speed").c_str(), 0.5);
-	skills_ =
-	  config->get_strings_or_defaults((std::string{cfg_prefix_} + "skills").c_str(), {"goto"});
+	speed_       = config->get_float_or_default((cfg_prefix_ + "speed").c_str(), 0.5);
+	skills_      = config->get_strings_or_defaults((cfg_prefix_ + "skills").c_str(), {"goto"});
 }
 
 bool

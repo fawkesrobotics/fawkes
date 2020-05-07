@@ -28,6 +28,8 @@
  * Get estimates for skill execution times from the navgraph.
  */
 
+constexpr char ExecutionTimeEstimatorNavgraphThread::cfg_prefix_[];
+
 /** Constructor. */
 ExecutionTimeEstimatorNavgraphThread::ExecutionTimeEstimatorNavgraphThread()
 : Thread("ExecutionTimeEstimatorNavgraphThread", Thread::OPMODE_WAITFORWAKEUP)
@@ -38,8 +40,9 @@ ExecutionTimeEstimatorNavgraphThread::ExecutionTimeEstimatorNavgraphThread()
 void
 ExecutionTimeEstimatorNavgraphThread::init()
 {
-	estimator_ = std::make_shared<fawkes::NavGraphEstimator>(navgraph, config);
-	execution_time_estimator_manager_->register_provider(estimator_);
+	estimator_ = std::make_shared<fawkes::NavGraphEstimator>(navgraph, config, cfg_prefix_);
+	execution_time_estimator_manager_->register_provider(
+	  estimator_, config->get_int_or_default((std::string{cfg_prefix_} + "priority").c_str(), 0));
 }
 
 /** Unregister the estimator. */

@@ -39,5 +39,6 @@ public:
 	void finalize();
 
 private:
+	constexpr static char cfg_prefix_[] = "plugins/execution-time-estimator/navgraph/";
 	std::shared_ptr<fawkes::NavGraphEstimator> estimator_;
 };
