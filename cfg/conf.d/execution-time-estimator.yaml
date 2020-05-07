@@ -3,10 +3,12 @@
 ---
 plugins/execution-time-estimator:
   static:
+    priority: -1
     default: 1
     skills:
       say: 2.5
   navgraph:
+    priority: 1
     speed: 0.5
     skills:
       - goto
