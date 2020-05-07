@@ -41,5 +41,6 @@ void
 ExecutionTimeEstimatorsThread::init()
 {
 	execution_time_estimator_manager_.register_provider(
-	  std::make_shared<fawkes::ConfigExecutionTimeEstimator>(config, cfg_prefix_), -1);
+	  std::make_shared<fawkes::ConfigExecutionTimeEstimator>(config, cfg_prefix_),
+	  config->get_int_or_default((std::string{cfg_prefix_} + "priority").c_str(), 0));
 }
