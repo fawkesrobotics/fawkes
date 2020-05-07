@@ -17,15 +17,18 @@ BASEDIR = ../../..
 
 include $(BASEDIR)/etc/buildsys/config.mk
 
-LIBS_skiller_simulator_navgraph = fawkescore fawkesutils fawkesaspects \
+LIBS_execution_time_estimator_navgraph = fawkescore fawkesutils fawkesaspects \
                                   fawkesblackboard fawkesinterface \
-                                  fawkeslogging fawkes_skiller_time_estimator
-OBJS_skiller_simulator_navgraph = skiller_simulator_navgraph_plugin.o \
-                                  skiller_simulator_navgraph_thread.o \
+                                  fawkeslogging \
+                                  fawkes_execution_time_estimator fawkes_execution_time_estimator_aspect \
+                                  fawkesnavgraphaspect
+
+OBJS_execution_time_estimator_navgraph = execution_time_estimator_navgraph_plugin.o \
+                                  execution_time_estimator_navgraph_thread.o \
                                   navgraph_estimator.o
 
-OBJS_all      = $(OBJS_skiller_simulator_navgraph)
-PLUGINS_all   = $(PLUGINDIR)/skiller-simulator-navgraph.so
+OBJS_all      = $(OBJS_execution_time_estimator_navgraph)
+PLUGINS_all   = $(PLUGINDIR)/execution-time-estimator-navgraph.so
 
 ifeq ($(HAVE_CPP17),1)
   CFLAGS       += $(CFLAGS_CPP17)
@@ -39,7 +42,7 @@ all: $(WARN_TARGETS)
 .PHONY: $(WARN_TARGETS)
 
 warning_cpp17:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting skiller simulator navgraph$(TNORMAL) (C++17 not supported)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting execution time estimator navgraph plugin$(TNORMAL) (C++17 not supported)"
 endif
 
 include $(BUILDSYSDIR)/base.mk

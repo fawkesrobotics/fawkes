@@ -1,7 +1,7 @@
 /***************************************************************************
- *  execution_time_estimator.h - An execution time estimator for skills
+ *  config_estimator.h - Read estimated execution time from config
  *
- *  Created: Thu 12 Dec 2019 15:10:06 CET 15:10
+ *  Created: Sun 22 Dec 2019 17:16:23 CET 17:16
  *  Copyright  2019  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
@@ -20,38 +20,20 @@
 
 #pragma once
 
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <config/config.h>
+#include <execution_time_estimator/execution_time_estimator.h>
 
 namespace fawkes {
-namespace skiller_simulator {
-
-class ExecutionTimeEstimator
+class ConfigExecutionTimeEstimator : public ExecutionTimeEstimator
 {
 public:
-	/** A structured representation of a skill. */
-	class Skill
-	{
-	public:
-		Skill(const std::string &skill_string);
+	ConfigExecutionTimeEstimator(Configuration *config, const std::string &cfg_prefix);
+	float get_execution_time(const Skill &skill) const override;
+	bool  can_execute(const Skill &skill) const override;
 
-		/** The name of the skill */
-		std::string skill_name = "";
-		/** A map of the skill's argument keys to argument values */
-		std::unordered_map<std::string, std::string> skill_args = {};
-
-	private:
-		void parse_args(const std::string &args);
-	};
-
-	/** Destructor. */
-	virtual ~ExecutionTimeEstimator() = default;
-
-	virtual float get_execution_time(const Skill &skill) const = 0;
-	virtual bool  can_execute(const Skill &skill) const        = 0;
-	virtual void  execute(const Skill &skill){};
+private:
+	Configuration *const config_;
+	const std::string    cfg_prefix_;
 };
 
-} // namespace skiller_simulator
 } // namespace fawkes

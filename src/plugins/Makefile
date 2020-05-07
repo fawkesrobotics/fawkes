@@ -21,7 +21,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd \
 	  laser imu flite festival joystick openrave \
 	  katana jaco pantilt roomba nao robotino \
 	  bumblebee2 realsense realsense2 perception amcl \
-	  skiller skiller-simulator skiller-simulator-navgraph luaagent \
+	  skiller skiller-simulator execution-time-estimator-navgraph luaagent \
 	  laser-filter laser-lines laser-cluster laser-pointclouds \
 	  static_transforms navgraph navgraph-clusters navgraph-generator colli \
 	  clips clips-agent clips-protobuf clips-navgraph \
@@ -31,7 +31,7 @@ SUBDIRS	= bbsync bblogger webview ttmainloop rrd \
 	  openrave-robot-memory openni refboxcomm ros player xmlrpc gossip \
 	  robot_state_publisher gazebo dynamixel navgraph-interactive \
 	  pddl-planner stn-generator clips-executive \
-	  asp plexil cedar gologpp hardware-models
+	  asp plexil cedar gologpp hardware-models execution-time-estimator
 
 include $(BUILDSYSDIR)/rules.mk
 
@@ -51,8 +51,8 @@ openrave-robot-memory: robot-memory openrave
 pddl-planner: robot-memory
 gazebo: robotino
 skiller: navgraph
-skiller-simulator: skiller
-skiller-simulator-navgraph: skiller-simulator
+skiller-simulator: skiller execution-time-estimator
+execution-time-estimator-navgraph: execution-time-estimator
 perception: mongodb
 navgraph-generator: navgraph amcl
 openprs-agent: openprs

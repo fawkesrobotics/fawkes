@@ -63,6 +63,10 @@ ifeq ($(call gcc_atleast_version,6,0),1)
   CFLAGS_CPP11=
   CFLAGS_CPP14=
 endif
+ifeq ($(call gcc_atleast_version,9,0),1)
+  HAVE_CPP20=1
+  CFLAGS_CPP20=-std=c++2a
+endif
 
 ifeq ($(call gcc_lessthan_version,4,7),1)
   # Older GCC version can screw up CPU identification when running in QEMU KVM

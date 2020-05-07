@@ -1,7 +1,7 @@
 /***************************************************************************
- *  skiller_simulator_navgraph_thread.cpp - Skill exec times from navgraph
+ *  execution_time_estimator_plugin.cpp - Estimate execution times
  *
- *  Created: Tue 07 Jan 2020 16:02:38 CET 16:02
+ *  Created: Thu 23 Apr 2020 16:36:22 CEST 16:36
  *  Copyright  2020  Till Hofmann <hofmann@kbsg.rwth-aachen.de>
  ****************************************************************************/
 
@@ -18,26 +18,28 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
-#include "skiller_simulator_navgraph_thread.h"
+#include "execution_time_estimator_thread.h"
 
-#include "navgraph_estimator.h"
+#include <core/plugin.h>
 
-#include <interfaces/Position3DInterface.h>
-
-/** @class SkillerSimulatorNavgraphEstimatorThread
- * Get estimates for skill execution times from the navgraph.
+/** @class ExecutionTimeEstimatorsPlugin
+ *  Estimate skill execution times.
+ *  This plugin provides an aspect that allows estimators to register.
+ *
+ *  @author Till Hofmann
  */
 
-/** Constructor. */
-SkillerSimulatorNavgraphEstimatorThread::SkillerSimulatorNavgraphEstimatorThread()
-: Thread("SkillerSimulatorNavgraphEstimatorThread", Thread::OPMODE_WAITFORWAKEUP)
+class ExecutionTimeEstimatorsPlugin : public fawkes::Plugin
 {
-}
+public:
+	/** Constructor.
+     *  @param config Fawkes configuration to read config values from.
+     */
+	explicit ExecutionTimeEstimatorsPlugin(fawkes::Configuration *config) : Plugin(config)
+	{
+		thread_list.push_back(new ExecutionTimeEstimatorsThread());
+	}
+};
 
-/** Initializer. */
-void
-SkillerSimulatorNavgraphEstimatorThread::init()
-{
-	execution_time_estimator_manager_->register_provider(
-	  std::make_shared<fawkes::skiller_simulator::NavGraphEstimator>(navgraph, config));
-}
+PLUGIN_DESCRIPTION("Provider for execution time estimates")
+EXPORT_PLUGIN(ExecutionTimeEstimatorsPlugin)

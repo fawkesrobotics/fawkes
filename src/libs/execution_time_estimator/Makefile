@@ -1,8 +1,8 @@
 #*****************************************************************************
 #                      Makefile Build System for Fawkes
 #                            -------------------
-#   Created on Mon 06 May 2019 08:54:03 CEST
-#   Copyright (C) 2019 by Till Hofmann <hofmann@kbsg.rwth-aachen.de>
+#   Created on Thu 23 Apr 2020 19:36:47 CEST
+#   Copyright (C) 2020 by Till Hofmann <hofmann@kbsg.rwth-aachen.de>
 #
 #*****************************************************************************
 #
@@ -13,23 +13,22 @@
 #
 #*****************************************************************************
 
+
 BASEDIR = ../../..
-
 include $(BASEDIR)/etc/buildsys/config.mk
-include $(LIBSRCDIR)/utils/utils.mk
 
-LIBS_skiller_simulator  = fawkescore fawkesutils fawkesaspects \
-                          fawkesblackboard fawkesinterface fawkeslogging \
-                          fawkes_execution_time_estimator fawkes_execution_time_estimator_aspect \
-                          SkillerInterface
+SUBDIRS = aspect
 
-OBJS_skiller_simulator  = skiller_simulator_plugin.o exec_thread.o
+LIBS_libfawkes_execution_time_estimator = fawkescore m
+OBJS_libfawkes_execution_time_estimator = execution_time_estimator.o
 
-OBJS_all                = $(OBJS_skiller_simulator)
-PLUGINS_all             = $(PLUGINDIR)/skiller-simulator.so
+OBJS_all = $(OBJS_libfawkes_execution_time_estimator)
+
+LIBS_all = $(LIBDIR)/libfawkes_execution_time_estimator.so
 
 ifeq ($(HAVE_CPP17),1)
   CFLAGS        += $(CFLAGS_CPP17)
+  LIBS_build     = $(LIBS_all)
   PLUGINS_build  = $(PLUGINS_all)
 else
   WARN_TARGETS += warning_cpp17
@@ -40,7 +39,12 @@ all: $(WARN_TARGETS)
 .PHONY: $(WARN_TARGETS)
 
 warning_cpp17:
-	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting skiller simulator$(TNORMAL) (C++17 not supported)"
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting exeuction time estimator$(TNORMAL) (C++17 not supported)"
 endif
+
+ifneq ($(MAKECMDGOALS),clean)
+aspect: | $(LIBDIR)/libfawkes_execution_time_estimator.so
+endif
+
 
 include $(BUILDSYSDIR)/base.mk

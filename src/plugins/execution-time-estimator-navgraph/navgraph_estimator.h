@@ -23,28 +23,29 @@
 #include "interfaces/Position3DInterface.h"
 
 #include <config/config.h>
+#include <execution_time_estimator/aspect/execution_time_estimator.h>
 #include <navgraph/navgraph.h>
-#include <plugins/skiller-simulator/execution_time_estimator.h>
 
 #include <string>
 #include <vector>
 
 namespace fawkes {
-namespace skiller_simulator {
 class NavGraphEstimator : public ExecutionTimeEstimator
 {
 public:
-	NavGraphEstimator(LockPtr<NavGraph> navgraph, Configuration *config);
+	NavGraphEstimator(LockPtr<NavGraph>  navgraph,
+	                  Configuration *    config,
+	                  const std::string &cfg_prefix);
 	float get_execution_time(const Skill &skill) const override;
 	bool  can_execute(const Skill &skill) const override;
 	void  execute(const Skill &skill) override;
 
 private:
-	LockPtr<NavGraph>        navgraph_;
-	std::vector<std::string> skills_;
-	float                    last_pose_x_;
-	float                    last_pose_y_;
-	float                    speed_;
+	Configuration *   config_;
+	const std::string cfg_prefix_;
+	LockPtr<NavGraph> navgraph_;
+	float             last_pose_x_;
+	float             last_pose_y_;
+	float             speed_;
 };
-} // namespace skiller_simulator
 } // namespace fawkes

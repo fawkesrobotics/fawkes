@@ -20,26 +20,24 @@
 
 #pragma once
 
-#include "../execution_time_estimator.h"
-
 #include <aspect/aspect.h>
+#include <execution_time_estimator/execution_time_estimator.h>
 
+#include <map>
 #include <memory>
-#include <optional>
-#include <vector>
 
 namespace fawkes {
-namespace skiller_simulator {
 
 class ExecutionTimeEstimatorManager
 {
 public:
-	std::optional<std::shared_ptr<ExecutionTimeEstimator>>
-	     get_provider(const std::string &skill_string) const;
-	void register_provider(std::shared_ptr<ExecutionTimeEstimator> provider);
+	std::shared_ptr<ExecutionTimeEstimator> get_provider(const std::string &skill_string) const;
+	void register_provider(std::shared_ptr<ExecutionTimeEstimator> provider, int priority = 0);
+	void unregister_provider(std::shared_ptr<ExecutionTimeEstimator> provider);
 
 private:
-	std::vector<std::shared_ptr<ExecutionTimeEstimator>> execution_time_estimators_;
+	std::multimap<int, std::shared_ptr<ExecutionTimeEstimator>, std::greater<int>>
+	  execution_time_estimators_;
 };
 
 class ExecutionTimeEstimatorsAspect : public virtual Aspect
@@ -53,5 +51,4 @@ protected:
 	ExecutionTimeEstimatorManager *execution_time_estimator_manager_;
 };
 
-} // namespace skiller_simulator
 } // namespace fawkes

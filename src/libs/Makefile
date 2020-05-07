@@ -21,7 +21,7 @@ SUBDIRS = core utils interface netcomm blackboard interfaces config logging tf \
 	  plugin lua aspect network_logger webview gui_utils baseapp navgraph \
 	  fvutils fvcams fvmodels fvfilters fvclassifiers fvstereo fvwidgets \
 	  kdl_parser protobuf_comm protobuf_clips pcl_utils pddl_parser syncpoint \
-	  googletest protoboard
+	  googletest protoboard execution_time_estimator
 
 ifeq ($(HAVE_SIFT),1)
   SUBDIRS += extlib/sift
@@ -49,6 +49,7 @@ interfaces: core interface
 config: core netcomm utils logging
 plugin: core netcomm utils config logging
 aspect: core utils blackboard netcomm config plugin webview logging tf pcl_utils syncpoint
+execution_time_estimator: core aspect
 lua: core utils blackboard config logging
 interfaces: core interface
 gui_utils: core netcomm blackboard interface plugin logging utils

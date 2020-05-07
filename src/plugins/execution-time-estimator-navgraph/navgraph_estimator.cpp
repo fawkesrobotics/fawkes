@@ -21,7 +21,6 @@
 #include "navgraph_estimator.h"
 
 namespace fawkes {
-namespace skiller_simulator {
 
 /** @class NavGraphEstimator
  * Estimate the execution time for the skill goto by querying the distance from
@@ -31,28 +30,41 @@ namespace skiller_simulator {
 /** Constructor.
  * @param navgraph The navgraph to read the node positions from
  * @param config The config to read the initial position from
+ * @param cfg_prefix The config prefix to use for config parameters
  */
-NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph> navgraph, Configuration *config)
-: navgraph_(navgraph)
+NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph>  navgraph,
+                                     Configuration *    config,
+                                     const std::string &cfg_prefix)
+: config_(config), cfg_prefix_(cfg_prefix), navgraph_(navgraph)
 {
 	last_pose_x_ = config->get_float_or_default("plugins/amcl/init_pose_x", 0);
 	last_pose_y_ = config->get_float_or_default("plugins/amcl/init_pose_y", 0);
-	speed_ = config->get_float_or_default("plugins/skiller-simulator/estimators/navgraph/speed", 0.5);
-	skills_ = config->get_strings_or_defaults("plugins/skiller-simulator/estimators/navgraph/skills",
-	                                          {"goto"});
+	speed_       = config->get_float_or_default((cfg_prefix_ + "speed").c_str(), 0.5);
 }
 
 bool
 NavGraphEstimator::can_execute(const Skill &skill) const
 {
-	return std::find(skills_.begin(), skills_.end(), skill.skill_name) != skills_.end()
-	       && navgraph_->node_exists(skill.skill_args.at("place"));
+	const std::string target_cfg = cfg_prefix_ + "skills/" + skill.skill_name + "/target";
+	return config_->exists(target_cfg)
+	       && navgraph_->node_exists(skill.skill_args.at(config_->get_string(target_cfg)));
 }
 
 float
 NavGraphEstimator::get_execution_time(const Skill &skill) const
 {
-	return navgraph_->node(skill.skill_args.at("place")).distance(last_pose_x_, last_pose_y_)
+	const std::string skill_cfg      = cfg_prefix_ + "skills/" + skill.skill_name;
+	float             current_pose_x = last_pose_x_;
+	float             current_pose_y = last_pose_y_;
+	if (config_->exists(skill_cfg + "/start")) {
+		const std::string start = skill.skill_args.at(config_->get_string(skill_cfg + "/start"));
+		if (navgraph_->node_exists(start)) {
+			current_pose_x = navgraph_->node(start).x();
+			current_pose_y = navgraph_->node(start).y();
+		}
+	}
+	return navgraph_->node(skill.skill_args.at(config_->get_string(skill_cfg + "/target")))
+	         .distance(current_pose_x, current_pose_y)
 	       / speed_;
 }
 
@@ -64,5 +76,4 @@ NavGraphEstimator::execute(const Skill &skill)
 	last_pose_y_ = node.y();
 }
 
-} // namespace skiller_simulator
 } // namespace fawkes
