@@ -27,13 +27,13 @@ namespace fawkes {
 class ConfigExecutionTimeEstimator : public ExecutionTimeEstimator
 {
 public:
-	ConfigExecutionTimeEstimator(Configuration *config);
+	ConfigExecutionTimeEstimator(Configuration *config, const std::string &cfg_prefix);
 	float get_execution_time(const Skill &skill) const override;
 	bool  can_execute(const Skill &skill) const override;
 
 private:
-	Configuration *const  config_;
-	constexpr static char cfg_prefix_[] = "/plugins/execution-time-estimator/static/";
+	Configuration *const config_;
+	const std::string    cfg_prefix_;
 };
 
 } // namespace fawkes

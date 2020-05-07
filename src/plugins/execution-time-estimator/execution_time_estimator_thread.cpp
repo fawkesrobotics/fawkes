@@ -28,6 +28,8 @@
  *  @author Till Hofmann
  */
 
+constexpr char ExecutionTimeEstimatorsThread::cfg_prefix_[];
+
 ExecutionTimeEstimatorsThread::ExecutionTimeEstimatorsThread()
 : Thread("ExecutionTimeEstimatorThread", Thread::OPMODE_WAITFORWAKEUP),
   AspectProviderAspect(&provider_inifin_),
@@ -39,5 +41,5 @@ void
 ExecutionTimeEstimatorsThread::init()
 {
 	execution_time_estimator_manager_.register_provider(
-	  std::make_shared<fawkes::ConfigExecutionTimeEstimator>(config), -1);
+	  std::make_shared<fawkes::ConfigExecutionTimeEstimator>(config, cfg_prefix_), -1);
 }

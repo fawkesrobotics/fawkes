@@ -38,4 +38,5 @@ public:
 private:
 	fawkes::ExecutionTimeEstimatorManager       execution_time_estimator_manager_;
 	fawkes::ExecutionTimeEstimatorsAspectIniFin provider_inifin_;
+	constexpr static char cfg_prefix_[] = "/plugins/execution-time-estimator/static/";
 };

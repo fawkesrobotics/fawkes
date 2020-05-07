@@ -22,8 +22,6 @@
 
 namespace fawkes {
 
-constexpr char ConfigExecutionTimeEstimator::cfg_prefix_[];
-
 /** @class ConfigExecutionTimeEstimator
  * Get a static estimate for the skill execution time from the config.
  * This simply reads the execution time from the config. It only considers
@@ -31,26 +29,29 @@ constexpr char ConfigExecutionTimeEstimator::cfg_prefix_[];
  */
 
 /** Constructor
- * @param config The config to read the execution times from
+ * @param config The config to read from
+ * @param cfg_prefix The config prefix to read from
  */
-ConfigExecutionTimeEstimator::ConfigExecutionTimeEstimator(Configuration *config) : config_(config)
+ConfigExecutionTimeEstimator::ConfigExecutionTimeEstimator(Configuration *    config,
+                                                           const std::string &cfg_prefix)
+: config_(config), cfg_prefix_(cfg_prefix)
 {
 }
 
 bool
 ConfigExecutionTimeEstimator::can_execute(const Skill &skill) const
 {
-	return config_->exists(std::string{cfg_prefix_} + "skills/" + skill.skill_name)
-	       || config_->exists(std::string{cfg_prefix_} + "default");
+	return config_->exists(cfg_prefix_ + "skills/" + skill.skill_name)
+	       || config_->exists(cfg_prefix_ + "default");
 }
 
 float
 ConfigExecutionTimeEstimator::get_execution_time(const Skill &skill) const
 {
-	if (const std::string cfg_path = std::string{cfg_prefix_} + "skills/" + skill.skill_name;
+	if (const std::string cfg_path = cfg_prefix_ + "skills/" + skill.skill_name;
 	    config_->exists(cfg_path)) {
 		return config_->get_float(cfg_path);
-	} else if (const std::string default_path = cfg_prefix_ + std::string{"default"};
+	} else if (const std::string default_path = cfg_prefix_ + "default";
 	           config_->exists(default_path)) {
 		return config_->get_float(default_path);
 	} else
