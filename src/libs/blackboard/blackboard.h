@@ -258,8 +258,8 @@ operator|(const BlackBoard::ListenerRegisterFlag &a, const BlackBoard::ListenerR
  * @param b flags to test for
  * @return resulting flags
  */
-inline BlackBoard::ListenerRegisterFlag operator&(const BlackBoard::ListenerRegisterFlag &a,
-                                                  const BlackBoard::ListenerRegisterFlag &b)
+inline BlackBoard::ListenerRegisterFlag
+operator&(const BlackBoard::ListenerRegisterFlag &a, const BlackBoard::ListenerRegisterFlag &b)
 {
 	return (BlackBoard::ListenerRegisterFlag)((int)a & (int)b);
 }
