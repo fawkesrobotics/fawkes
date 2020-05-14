@@ -168,7 +168,8 @@ Skill::matches(const Skill &other) const
 	bool args_match = true;
 	for (const auto &arg : other.skill_args) {
 		auto search_arg = skill_args.find(arg.first);
-		if (search_arg == skill_args.end() || search_arg->second != arg.second) {
+		if (search_arg == skill_args.end()
+		    || !std::regex_match(search_arg->second, std::regex(arg.second))) {
 			args_match = false;
 			break;
 		}
