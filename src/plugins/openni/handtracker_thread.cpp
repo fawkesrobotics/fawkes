@@ -53,51 +53,51 @@ OpenNiHandTrackerThread::~OpenNiHandTrackerThread()
 }
 
 static void XN_CALLBACK_TYPE
-            cb_hand_create(xn::HandsGenerator &generator,
-                           XnUserID            user,
-                           const XnPoint3D *   position,
-                           XnFloat             time,
-                           void *              cookie)
+cb_hand_create(xn::HandsGenerator &generator,
+               XnUserID            user,
+               const XnPoint3D *   position,
+               XnFloat             time,
+               void *              cookie)
 {
 	OpenNiHandTrackerThread *t = static_cast<OpenNiHandTrackerThread *>(cookie);
 	t->hand_create(user, position, time);
 }
 
 static void XN_CALLBACK_TYPE
-            cb_hand_destroy(xn::HandsGenerator &generator, XnUserID user, XnFloat time, void *cookie)
+cb_hand_destroy(xn::HandsGenerator &generator, XnUserID user, XnFloat time, void *cookie)
 {
 	OpenNiHandTrackerThread *t = static_cast<OpenNiHandTrackerThread *>(cookie);
 	t->hand_destroy(user, time);
 }
 
 static void XN_CALLBACK_TYPE
-            cb_hand_update(xn::HandsGenerator &generator,
-                           XnUserID            user,
-                           const XnPoint3D *   position,
-                           XnFloat             time,
-                           void *              cookie)
+cb_hand_update(xn::HandsGenerator &generator,
+               XnUserID            user,
+               const XnPoint3D *   position,
+               XnFloat             time,
+               void *              cookie)
 {
 	OpenNiHandTrackerThread *t = static_cast<OpenNiHandTrackerThread *>(cookie);
 	t->hand_update(user, position, time);
 }
 
 static void XN_CALLBACK_TYPE
-            cb_gesture_recognized(xn::GestureGenerator &generator,
-                                  const XnChar *        gesture_name,
-                                  const XnPoint3D *     position,
-                                  const XnPoint3D *     end_position,
-                                  void *                cookie)
+cb_gesture_recognized(xn::GestureGenerator &generator,
+                      const XnChar *        gesture_name,
+                      const XnPoint3D *     position,
+                      const XnPoint3D *     end_position,
+                      void *                cookie)
 {
 	OpenNiHandTrackerThread *t = static_cast<OpenNiHandTrackerThread *>(cookie);
 	t->gesture_recognized(gesture_name, position, end_position);
 }
 
 static void XN_CALLBACK_TYPE
-            cb_gesture_progress(xn::GestureGenerator &generator,
-                                const XnChar *        gesture_name,
-                                const XnPoint3D *     position,
-                                XnFloat               progress,
-                                void *                cookie)
+cb_gesture_progress(xn::GestureGenerator &generator,
+                    const XnChar *        gesture_name,
+                    const XnPoint3D *     position,
+                    XnFloat               progress,
+                    void *                cookie)
 {
 	OpenNiHandTrackerThread *t = static_cast<OpenNiHandTrackerThread *>(cookie);
 	t->gesture_progress(gesture_name, position, progress);
