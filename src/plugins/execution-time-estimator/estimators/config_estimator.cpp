@@ -37,18 +37,13 @@ namespace fawkes {
  */
 ConfigExecutionTimeEstimator::ConfigExecutionTimeEstimator(Configuration *    config,
                                                            const std::string &cfg_prefix)
-: ExecutionTimeEstimator(config, cfg_prefix),
-  exec_times_(config_,
-              cfg_prefix_,
-              "time",
-              config->exists(cfg_prefix + "default")
-                ? std::optional<float>(config->get_float(cfg_prefix + "default"))
-                : std::nullopt)
+: ExecutionTimeEstimator(config, cfg_prefix), exec_times_(config_, cfg_prefix_, "exec-time")
 {
 }
 
 bool
-ConfigExecutionTimeEstimator::can_execute(const Skill &skill) {
+ConfigExecutionTimeEstimator::can_execute(const Skill &skill)
+{
 	return ExecutionTimeEstimator::can_execute(skill) || can_provide_exec_time(skill);
 }
 
@@ -56,7 +51,7 @@ bool
 ConfigExecutionTimeEstimator::can_provide_exec_time(const Skill &skill)
 {
 	if (active_whitelist_entry_ == whitelist_.end()) {
-		return config_->exists(cfg_prefix_ + "default") || exec_times_.get_default_value();
+		return config_->exists(cfg_prefix_ + "exec-time") || exec_times_.get_default_value();
 	} else {
 		return exec_times_.property_entries.find(active_whitelist_entry_->first)
 		       != exec_times_.property_entries.end();
