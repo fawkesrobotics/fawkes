@@ -22,12 +22,13 @@ OBJS_test_execution_time_estimator_skill_parser = test_skill_parser.o
 OBJS_all = $(OBJS_gtest_execution_time_estimator_skill_parser)
 
 ifeq ($(HAVE_CPP17),1)
+  CFLAGS += $(CFLAGS_CPP17)
   ifeq ($(HAVE_GTEST),1)
     CFLAGS += $(CFLAGS_GTEST)
     LDFLAGS += $(LDFLAGS_GTEST)
     BINS_gtest = $(BINDIR)/test_execution_time_estimator_skill_parser
   else
-    WARN_TARGETS += warn_gtest
+    WARN_TARGETS += warning_gtest
   endif
 else
   WARN_TARGETS += warning_cpp17
