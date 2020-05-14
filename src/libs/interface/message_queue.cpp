@@ -462,7 +462,8 @@ MessageQueue::MessageIterator::operator!=(const MessageIterator &c) const
  * points to.
  * @return pointer to memory
  */
-Message *MessageQueue::MessageIterator::operator*() const
+Message *
+MessageQueue::MessageIterator::operator*() const
 {
 	return (cur != NULL) ? cur->msg : NULL;
 }
@@ -471,7 +472,8 @@ Message *MessageQueue::MessageIterator::operator*() const
  * Node that you have to make sure that this is not called on the end node!
  * @return current message
  */
-Message *MessageQueue::MessageIterator::operator->() const
+Message *
+MessageQueue::MessageIterator::operator->() const
 {
 	return cur->msg;
 }

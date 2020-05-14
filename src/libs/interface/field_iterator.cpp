@@ -162,7 +162,8 @@ InterfaceFieldIterator::operator!=(const InterfaceFieldIterator &fi) const
 /** Get FieldHeader.
  * @return shared memory header
  */
-const void *InterfaceFieldIterator::operator*() const
+const void *
+InterfaceFieldIterator::operator*() const
 {
 	if (infol_ == NULL) {
 		throw NullPointerException("Cannot get value of end element");
