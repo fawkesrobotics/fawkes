@@ -75,7 +75,7 @@ public:
 
 	virtual float get_execution_time(const Skill &skill)    = 0;
 	virtual bool  can_provide_exec_time(const Skill &skill) = 0;
-	bool          can_execute(const Skill &skill);
+	virtual bool  can_execute(const Skill &skill);
 	virtual SkillerInterface::SkillStatusEnum
 	execute(const Skill &skill, std::string &error_feedback)
 	{

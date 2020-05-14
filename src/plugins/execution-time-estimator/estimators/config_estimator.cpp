@@ -48,10 +48,15 @@ ConfigExecutionTimeEstimator::ConfigExecutionTimeEstimator(Configuration *    co
 }
 
 bool
+ConfigExecutionTimeEstimator::can_execute(const Skill &skill) {
+	return ExecutionTimeEstimator::can_execute(skill) || can_provide_exec_time(skill);
+}
+
+bool
 ConfigExecutionTimeEstimator::can_provide_exec_time(const Skill &skill)
 {
 	if (active_whitelist_entry_ == whitelist_.end()) {
-		return config_->exists(cfg_prefix_ + "default");
+		return config_->exists(cfg_prefix_ + "default") || exec_times_.get_default_value();
 	} else {
 		return exec_times_.property_entries.find(active_whitelist_entry_->first)
 		       != exec_times_.property_entries.end();
