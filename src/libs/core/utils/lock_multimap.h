@@ -146,8 +146,8 @@ LockMultiMap<KeyType, ValueType, LessKey>::mutex() const
  */
 template <typename KeyType, typename ValueType, typename LessKey>
 LockMultiMap<KeyType, ValueType, LessKey> &
-LockMultiMap<KeyType, ValueType, LessKey>::
-operator=(const LockMultiMap<KeyType, ValueType, LessKey> &ll)
+LockMultiMap<KeyType, ValueType, LessKey>::operator=(
+  const LockMultiMap<KeyType, ValueType, LessKey> &ll)
 {
 	mutex_->lock();
 	ll.lock();

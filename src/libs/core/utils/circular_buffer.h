@@ -124,7 +124,8 @@ public:
    * @param n position of the element
    * @return reference to the n-th element
    */
-	const Type &operator[](size_type n) const
+	const Type &
+	operator[](size_type n) const
 	{
 		return deque_[n];
 	}

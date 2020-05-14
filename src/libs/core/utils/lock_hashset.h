@@ -169,8 +169,8 @@ LockHashSet<KeyType, HashFunction, EqualKey>::mutex() const
  */
 template <typename KeyType, class HashFunction, class EqualKey>
 LockHashSet<KeyType, HashFunction, EqualKey> &
-LockHashSet<KeyType, HashFunction, EqualKey>::
-operator=(const LockHashSet<KeyType, HashFunction, EqualKey> &ll)
+LockHashSet<KeyType, HashFunction, EqualKey>::operator=(
+  const LockHashSet<KeyType, HashFunction, EqualKey> &ll)
 {
 	mutex_->lock();
 	ll.lock();

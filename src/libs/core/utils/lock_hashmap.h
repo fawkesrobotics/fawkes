@@ -157,8 +157,8 @@ LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::mutex() const
  */
 template <typename KeyType, typename ValueType, class HashFunction, typename EqualKey>
 LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &
-LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::
-operator=(const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &ll)
+LockHashMap<KeyType, ValueType, HashFunction, EqualKey>::operator=(
+  const LockHashMap<KeyType, ValueType, HashFunction, EqualKey> &ll)
 {
 	mutex_->lock();
 	ll.lock();
