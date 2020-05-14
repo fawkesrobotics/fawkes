@@ -42,9 +42,10 @@ public:
 	                                          std::string &error_feedback) override;
 
 private:
-	LockPtr<NavGraph>     navgraph_;
-	float                 last_pose_x_;
-	float                 last_pose_y_;
-	constexpr static char name_[] = "navgraph";
+	LockPtr<NavGraph>           navgraph_;
+	float                       last_pose_x_;
+	float                       last_pose_y_;
+	const Property<std::string> source_names_;
+	const Property<std::string> dest_names_;
 };
 } // namespace fawkes

@@ -35,35 +35,36 @@ namespace fawkes {
 NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph>  navgraph,
                                      Configuration *    config,
                                      const std::string &cfg_prefix)
-: config_(config), cfg_prefix_(cfg_prefix), navgraph_(navgraph)
+: ExecutionTimeEstimator(config, cfg_prefix),
+  navgraph_(navgraph),
+  source_names_(config_, cfg_prefix_, "start", ""),
+  dest_names_(config_, cfg_prefix_, "target")
 {
 	last_pose_x_ = config->get_float_or_default("plugins/amcl/init_pose_x", 0);
 	last_pose_y_ = config->get_float_or_default("plugins/amcl/init_pose_y", 0);
-	speed_       = config->get_float_or_default((cfg_prefix_ + "speed").c_str(), 0.5);
 }
 
 bool
 NavGraphEstimator::can_provide_exec_time(const Skill &skill)
 {
-	const std::string target_cfg = cfg_prefix_ + "skills/" + skill.skill_name + "/target";
-	return config_->exists(target_cfg)
-	       && navgraph_->node_exists(skill.skill_args.at(config_->get_string(target_cfg)));
+	const std::string dest_name = get_property(dest_names_);
+	return navgraph_->node_exists(skill.skill_args.at(dest_name));
 }
 
 float
 NavGraphEstimator::get_execution_time(const Skill &skill)
 {
-	const std::string skill_cfg      = cfg_prefix_ + "skills/" + skill.skill_name;
-	float             current_pose_x = last_pose_x_;
-	float             current_pose_y = last_pose_y_;
-	if (config_->exists(skill_cfg + "/start")) {
-		const std::string start = skill.skill_args.at(config_->get_string(skill_cfg + "/start"));
+	float       current_pose_x = last_pose_x_;
+	float       current_pose_y = last_pose_y_;
+	std::string source_name    = get_property(source_names_);
+	if (source_name != "") {
+		const std::string start = skill.skill_args.at(source_name);
 		if (navgraph_->node_exists(start)) {
 			current_pose_x = navgraph_->node(start).x();
 			current_pose_y = navgraph_->node(start).y();
 		}
 	}
-	return navgraph_->node(skill.skill_args.at(config_->get_string(skill_cfg + "/target")))
+	return navgraph_->node(skill.skill_args.at(get_property(dest_names_)))
 	         .distance(current_pose_x, current_pose_y)
 	       / speed_;
 }
