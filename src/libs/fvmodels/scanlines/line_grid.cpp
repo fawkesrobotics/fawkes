@@ -73,12 +73,14 @@ ScanlineLineGrid::~ScanlineLineGrid()
 	delete roi_;
 }
 
-upoint_t ScanlineLineGrid::operator*()
+upoint_t
+ScanlineLineGrid::operator*()
 {
 	return *cur_;
 }
 
-upoint_t *ScanlineLineGrid::operator->()
+upoint_t *
+ScanlineLineGrid::operator->()
 {
 	return &*cur_;
 }

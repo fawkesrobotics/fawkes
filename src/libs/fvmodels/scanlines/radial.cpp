@@ -74,12 +74,14 @@ ScanlineRadial::ScanlineRadial(unsigned int width,
 	reset();
 }
 
-upoint_t ScanlineRadial::operator*()
+upoint_t
+ScanlineRadial::operator*()
 {
 	return coord;
 }
 
-upoint_t *ScanlineRadial::operator->()
+upoint_t *
+ScanlineRadial::operator->()
 {
 	return &coord;
 }
