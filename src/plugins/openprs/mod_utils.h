@@ -58,10 +58,10 @@ Symbol              wait_sym;
 typedef enum { LOGICAL_VARIABLE, PROGRAM_VARIABLE } Variable_Type;
 
 struct envar
-{                      /* Un envar */
-	Symbol        name;  /* son name */
-	Term *        value; /* le term sur lequel elle pointe */
-	Type *        unif_type;
+{                           /* Un envar */
+	Symbol             name;  /* son name */
+	Term *             value; /* le term sur lequel elle pointe */
+	Type *             unif_type;
 	Variable_Type type BITFIELDS( : 8); /* Le type de la variable */
 };
 
