@@ -293,16 +293,16 @@ ProtobufSender<IfaceManagerTs...>::finalize()
 
 template <class IfaceT, class MessageT>
 void
-AbstractProtobufSender::handle_messages::
-operator()(const bb_iface_manager<IfaceT, type_list<MessageT>> &pair) const
+AbstractProtobufSender::handle_messages::operator()(
+  const bb_iface_manager<IfaceT, type_list<MessageT>> &pair) const
 {
 	manager->handle_message_type<MessageT>(pair.interface());
 }
 
 template <class IfaceT, class MessageT1, class... MessageTs>
 void
-AbstractProtobufSender::handle_messages::
-operator()(const bb_iface_manager<IfaceT, type_list<MessageT1, MessageTs...>> &iface_mgr) const
+AbstractProtobufSender::handle_messages::operator()(
+  const bb_iface_manager<IfaceT, type_list<MessageT1, MessageTs...>> &iface_mgr) const
 {
 	BlackboardManager::on_interface<IfaceT>{iface_mgr.interface(), manager}
 	  .template handle_msg_types<MessageTs...>();
