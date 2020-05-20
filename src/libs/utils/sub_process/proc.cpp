@@ -23,7 +23,7 @@
 
 #include <core/exception.h>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 #ifdef HAVE_LIBDAEMON
 #	include <libdaemon/dfork.h>
