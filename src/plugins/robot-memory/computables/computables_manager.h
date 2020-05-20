@@ -28,7 +28,7 @@
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <map>
 #include <mongocxx/client.hpp>
 #include <tuple>
@@ -42,6 +42,8 @@ namespace fawkes {
 class TimeTracker;
 #endif
 } // namespace fawkes
+
+using namespace boost::placeholders;
 
 class ComputablesManager
 {
