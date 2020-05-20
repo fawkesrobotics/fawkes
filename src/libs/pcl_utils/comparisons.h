@@ -22,6 +22,8 @@
 #ifndef _LIBS_PCL_UTILS_COMPARISONS_H_
 #define _LIBS_PCL_UTILS_COMPARISONS_H_
 
+#include "compatibility.h"
+
 #include <pcl/ModelCoefficients.h>
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/point_cloud.h>

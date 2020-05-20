@@ -22,6 +22,8 @@
 #ifndef _LIBS_PCL_UTILS_UTILS_H_
 #define _LIBS_PCL_UTILS_UTILS_H_
 
+#include "compatibility.h"
+
 #include <config/config.h>
 #include <core/utils/refptr.h>
 #include <pcl/console/print.h>
