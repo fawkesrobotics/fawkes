@@ -485,7 +485,7 @@ private: // methods
 		//pcl::console::VERBOSITY_LEVEL old_level = pcl::console::getVerbosityLevel();
 		//pcl::console::setVerbosityLevel(pcl::console::L_DEBUG);
 		pcl::IterativeClosestPoint<PointType, PointType> icp;
-		icp.setInputCloud(source);
+		icp.setInputSource(source);
 		icp.setInputTarget(target);
 
 		icp.setRANSACIterations(cfg_icp_ransac_iterations_);
