@@ -112,11 +112,11 @@ set_time(fawkes::RefPtr<pcl::PointCloud<PointT>> &cloud, const fawkes::Time &tim
  * @param cloud cloud of which to set the time
  * @param time time to use
  */
-template <typename PointT>
+template <typename CloudPtrT>
 inline void
-set_time(boost::shared_ptr<pcl::PointCloud<PointT>> &cloud, const fawkes::Time &time)
+set_time(CloudPtrT &cloud, const fawkes::Time &time)
 {
-	set_time<PointT>(*cloud, time);
+	set_time<typename CloudPtrT::element_type::PointType>(*cloud, time);
 }
 
 /** Get time of a point cloud as a fawkes::Time instance.
@@ -125,32 +125,9 @@ set_time(boost::shared_ptr<pcl::PointCloud<PointT>> &cloud, const fawkes::Time &
  * @param cloud cloud of which to get the time
  * @param time upon return contains the timestamp of the cloud
  */
-template <typename PointT>
+template <typename CloudPtrT>
 inline void
-get_time(const fawkes::RefPtr<const pcl::PointCloud<PointT>> &cloud, fawkes::Time &time)
-{
-#if PCL_VERSION_COMPARE(>=, 1, 7, 0)
-	time.set_time(cloud->header.stamp / 1000000U, cloud->header.stamp % 1000000);
-#else
-#	if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
-	time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
-#	else
-	PointCloudTimestamp pclts;
-	pclts.timestamp = cloud->header.stamp;
-	time.set_time(pclts.time.sec, pclts.time.usec);
-#	endif
-#endif
-}
-
-/** Get time of a point cloud as a fawkes::Time instance.
- * This uses the PointCloudTimestamp struct to set the time in the PCL
- * timestamp field (if non-ROS PCL is used).
- * @param cloud cloud of which to get the time
- * @param time upon return contains the timestamp of the cloud
- */
-template <typename PointT>
-inline void
-get_time(const fawkes::RefPtr<pcl::PointCloud<PointT>> &cloud, fawkes::Time &time)
+get_time(const CloudPtrT &cloud, fawkes::Time &time)
 {
 #if PCL_VERSION_COMPARE(>=, 1, 7, 0)
 	time.set_time(cloud->header.stamp / 1000000U, cloud->header.stamp % 1000000);
@@ -188,83 +165,13 @@ get_time(const pcl::PointCloud<PointT> &cloud, fawkes::Time &time)
 #endif
 }
 
-/** Get time of a point cloud as a fawkes::Time instance.
- * This uses the PointCloudTimestamp struct to set the time in the PCL
- * timestamp field (if non-ROS PCL is used).
- * @param cloud cloud of which to get the time
- * @param time upon return contains the timestamp of the cloud
- */
-template <typename PointT>
-inline void
-get_time(const boost::shared_ptr<pcl::PointCloud<PointT>> &cloud, fawkes::Time &time)
-{
-#if PCL_VERSION_COMPARE(>=, 1, 7, 0)
-	time.set_time(cloud->header.stamp / 1000000U, cloud->header.stamp % 1000000);
-#else
-#	if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
-	time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
-#	else
-	PointCloudTimestamp pclts;
-	pclts.timestamp = cloud->header.stamp;
-	time.set_time(pclts.time.sec, pclts.time.usec);
-#	endif
-#endif
-}
-
-/** Get time of a point cloud as a fawkes::Time instance.
- * This uses the PointCloudTimestamp struct to set the time in the PCL
- * timestamp field (if non-ROS PCL is used).
- * @param cloud cloud of which to get the time
- * @param time upon return contains the timestamp of the cloud
- */
-template <typename PointT>
-inline void
-get_time(const boost::shared_ptr<const pcl::PointCloud<PointT>> &cloud, fawkes::Time &time)
-{
-#if PCL_VERSION_COMPARE(>=, 1, 7, 0)
-	time.set_time(cloud->header.stamp / 1000000U, cloud->header.stamp % 1000000);
-#else
-#	if defined(HAVE_ROS_PCL) || defined(ROSCPP_TYPES_H)
-	time.set_time(cloud->header.stamp.sec, cloud->header.stamp.nsec / 1000);
-#	else
-	PointCloudTimestamp pclts;
-	pclts.timestamp = cloud->header.stamp;
-	time.set_time(pclts.time.sec, pclts.time.usec);
-#	endif
-#endif
-}
-
 /** Copy time from one point cloud to another.
  * @param from point cloud to copy time from
  * @param to point cloud to copy time to
  */
-template <typename PointT1, typename PointT2>
+template <typename CloudPtrT, typename PointT2>
 inline void
-copy_time(fawkes::RefPtr<const pcl::PointCloud<PointT1>> &from,
-          fawkes::RefPtr<pcl::PointCloud<PointT2>> &      to)
-{
-	to->header.stamp = from->header.stamp;
-}
-
-/** Copy time from one point cloud to another.
- * @param from point cloud to copy time from
- * @param to point cloud to copy time to
- */
-template <typename PointT1, typename PointT2>
-inline void
-copy_time(boost::shared_ptr<const pcl::PointCloud<PointT1>> &from,
-          fawkes::RefPtr<pcl::PointCloud<PointT2>> &         to)
-{
-	to->header.stamp = from->header.stamp;
-}
-
-/** Copy time from one point cloud to another.
- * @param from point cloud to copy time from
- * @param to point cloud to copy time to
- */
-template <typename PointT1, typename PointT2>
-inline void
-copy_time(const pcl::PointCloud<PointT1> &from, pcl::PointCloud<PointT2> &to)
+copy_time(const CloudPtrT &from, fawkes::RefPtr<pcl::PointCloud<PointT2>> &to)
 {
 	to->header.stamp = from->header.stamp;
 }
@@ -279,11 +186,10 @@ copy_time(const pcl::PointCloud<PointT1> &from, pcl::PointCloud<PointT2> &to)
 struct PointCloudNonDeleter
 {
 	/** Delete operator that does nothing.
-   * @param t object to destroy
    */
 	template <typename T>
 	void
-	operator()(T *t)
+	operator()(T *)
 	{
 	}
 };
@@ -292,14 +198,14 @@ template <typename PointT>
 typename pcl::PointCloud<PointT>::Ptr
 cloudptr_from_refptr(const fawkes::RefPtr<pcl::PointCloud<PointT>> &in)
 {
-	return boost::shared_ptr<pcl::PointCloud<PointT>>(*in, PointCloudNonDeleter());
+	return typename pcl::PointCloud<PointT>::Ptr(*in, PointCloudNonDeleter());
 }
 
 template <typename PointT>
 typename pcl::PointCloud<PointT>::ConstPtr
 cloudptr_from_refptr(const fawkes::RefPtr<const pcl::PointCloud<PointT>> &in)
 {
-	return boost::shared_ptr<const pcl::PointCloud<PointT>>(*in, PointCloudNonDeleter());
+	return typename pcl::PointCloud<PointT>::ConstPtr(*in, PointCloudNonDeleter());
 }
 
 } // namespace pcl_utils
