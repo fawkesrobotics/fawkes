@@ -76,10 +76,10 @@ public:
 	virtual float get_execution_time(const Skill &skill)    = 0;
 	virtual bool  can_provide_exec_time(const Skill &skill) = 0;
 	virtual bool  can_execute(const Skill &skill);
-	virtual SkillerInterface::SkillStatusEnum
-	execute(const Skill &skill, std::string &error_feedback)
+	virtual std::pair<SkillerInterface::SkillStatusEnum, std::string>
+	execute(const Skill &skill)
 	{
-		return SkillerInterface::SkillStatusEnum::S_FINAL;
+		return std::make_pair(SkillerInterface::SkillStatusEnum::S_FINAL, "");
 	};
 
 protected:

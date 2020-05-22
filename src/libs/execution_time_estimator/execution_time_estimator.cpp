@@ -50,16 +50,15 @@ using Skill = ExecutionTimeEstimator::Skill;
  * @return true if this estimator can give an execution time estimate for the given skill.
  *
  * @fn bool ExecutionTimeEstimator::can_execute(const Skill &skill)
- * Check if this estimator is both allowed and able to give an estimate for a given
+ * Check if this estimator is both allowed and able to give an estimate for a given skill.
  * @param skill The skill object to check.
  * @return true if this estimator can give an execution time estimate for the given skill.
  *
- * @fn SkillerSimulator::SkillStatusEnum ExecutionTimeEstimator::execute(const Skill &skill, std::string &error_feedback) const
+ * @fn std::pair<SkillerInterface::SkillStatusEnum, std::string> ExecutionTimeEstimator::execute(const Skill &skill) const
  * Let the estimator know that we are executing this skill, so it can apply
  * possible side effects.
  * @param skill The skill to execute
- * @param error_feedback error message that may be produced while simulating execution
- * @return skill status after simulated execution
+ * @return skill status after simulated execution along with an error description in case the skill fails
  *
  * @fn std::map<std::string, Skill> ExecutionTimeEstimator::get_skills_from_config(const std::string &path) const
  * Load skill descriptions from a yaml config. The skills are represented via
@@ -90,7 +89,7 @@ using Skill = ExecutionTimeEstimator::Skill;
  * @return the default value for the property
  *
  * @fn template <typename T> T ExecutionTimeEstimator::Property<T>::get_property(const std::string &key) const
- * Get the property falue for a given
+ * Get the property falue for a given sill.
  * @param key Skill entry id
  * @return Value associated with \a key or the default value, if no skill-specific value can be found
  */
