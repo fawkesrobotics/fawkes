@@ -63,9 +63,10 @@ LookupEstimator::LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
                                              "exec_times"))
 {
 	logger_->log_info(logger_name_,
-	                  ("Using instance " + instance_ + " database " + database_ + " collection "
-	                   + collection_)
-	                    .c_str());
+	                  "Using instance %s, database %s, collection %s",
+	                  instance_.c_str(),
+	                  database_.c_str(),
+	                  collection_.c_str());
 }
 
 void
@@ -74,21 +75,20 @@ LookupEstimator::init()
 	std::string  mongo_cfg_prefix = "/plugins/mongodb/instances/" + instance_ + "/";
 	unsigned int startup_grace_period =
 	  config_->get_uint_or_default((mongo_cfg_prefix + "startup-grace-period").c_str(), 10);
-	logger_->log_info(logger_name_, ("Connect to mongodb " + instance_ + " instance").c_str());
+	logger_->log_info(logger_name_, "Connect to mongodb %s instance", instance_.c_str());
 	unsigned int startup_tries = 0;
 	for (; startup_tries < startup_grace_period * 2; ++startup_tries) {
 		try {
 			mongodb_client_lookup_ = mongo_connection_manager_->create_client(instance_);
-			logger_->log_info(logger_name_,
-			                  ("Successfully connected to " + instance_ + " instance").c_str());
+			logger_->log_info(logger_name_, "Successfully connected to %s instance", instance_.c_str());
 			return;
 		} catch (fawkes::Exception &) {
 			using namespace std::chrono_literals;
-			logger_->log_info(logger_name_, ("Waiting for mongodb " + instance_ + " instance").c_str());
+			logger_->log_info(logger_name_, "Waiting for mongodb %s instance", instance_.c_str());
 			std::this_thread::sleep_for(500ms);
 		}
 	}
-	logger_->log_error(logger_name_, "%s", "Failed to connect to mongodb statistics-local instance");
+	logger_->log_error(logger_name_, "Failed to connect to mongodb %s instance", instance_.c_str());
 }
 
 bool
@@ -102,7 +102,7 @@ LookupEstimator::can_provide_exec_time(const Skill &skill)
 
 		document query = document();
 		query.append(kvp(skill_name_field_, skill.skill_name));
-		query.append(kvp("outcome", (int)SkillerInterface::SkillStatusEnum::S_FINAL));
+		query.append(kvp("outcome", static_cast<int>(SkillerInterface::SkillStatusEnum::S_FINAL)));
 		if (get_property(fully_match_args_)) {
 			for (const auto &skill_arg : skill.skill_args) {
 				query.append(kvp("args." + skill_arg.first, skill_arg.second));
@@ -114,7 +114,7 @@ LookupEstimator::can_provide_exec_time(const Skill &skill)
 		}
 		bsoncxx::stdx::optional<bsoncxx::document::value> found_entry =
 		  mongodb_client_lookup_->database(database_)[collection_].find_one(query.view());
-		return bool(found_entry);
+		return found_entry.has_value();
 	} catch (mongocxx::operation_exception &e) {
 		std::string error =
 		  std::string("Error trying to lookup " + skill.skill_name + "\n Exception: " + e.what());
@@ -142,7 +142,7 @@ LookupEstimator::get_execution_time(const Skill &skill)
 		}
 	}
 	if (!get_property(include_failures_)) {
-		query.append(kvp("outcome", (int)SkillerInterface::SkillStatusEnum::S_FINAL));
+		query.append(kvp("outcome", static_cast<int>(SkillerInterface::SkillStatusEnum::S_FINAL)));
 	}
 	mongocxx::pipeline p{};
 	p.match(query.view());
@@ -163,8 +163,12 @@ LookupEstimator::get_execution_time(const Skill &skill)
 		auto  doc = *(sample_cursor.begin());
 		float res = 0.f;
 		switch (doc[duration_field_].get_value().type()) {
-		case bsoncxx::type::k_double: res = float(doc[duration_field_].get_double().value); break;
-		case bsoncxx::type::k_int32: res = float(doc[duration_field_].get_int32().value); break;
+		case bsoncxx::type::k_double:
+			res = static_cast<float>(doc[duration_field_].get_double().value);
+			break;
+		case bsoncxx::type::k_int32:
+			res = static_cast<float>(doc[duration_field_].get_int32().value);
+			break;
 		default:
 			throw fawkes::Exception(("Unexpected type "
 			                         + bsoncxx::to_string(doc[duration_field_].get_value().type())
