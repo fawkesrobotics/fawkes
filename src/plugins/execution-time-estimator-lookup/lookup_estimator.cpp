@@ -94,6 +94,8 @@ LookupEstimator::init()
 bool
 LookupEstimator::can_provide_exec_time(const Skill &skill) const
 {
+	// lock as mongocxx::client is not thread-safe
+	MutexLocker lock(mutex_);
 	// if all skills should be looked up by default, then the skills_ contain
 	// those skills that should not be estimated via lookup
 	try {
