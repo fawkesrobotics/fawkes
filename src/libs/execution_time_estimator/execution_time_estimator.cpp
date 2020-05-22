@@ -107,6 +107,7 @@ ExecutionTimeEstimator::ExecutionTimeEstimator(Configuration *      config,
   whitelist_(get_skills_from_config(cfg_prefix_ + "whitelist")),
   blacklist_(get_skills_from_config(cfg_prefix_ + "blacklist"))
 {
+	assert(speed_ > 0);
 }
 
 bool
