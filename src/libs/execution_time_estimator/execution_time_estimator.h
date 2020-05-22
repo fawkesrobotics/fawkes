@@ -73,8 +73,7 @@ public:
 	/** Destructor. */
 	virtual ~ExecutionTimeEstimator() = default;
 
-	virtual float get_execution_time(const Skill &skill)    = 0;
-	virtual bool  can_provide_exec_time(const Skill &skill) = 0;
+	virtual float get_execution_time(const Skill &skill) = 0;
 	virtual bool  can_execute(const Skill &skill);
 	virtual std::pair<SkillerInterface::SkillStatusEnum, std::string>
 	execute(const Skill &skill)
@@ -84,6 +83,8 @@ public:
 
 protected:
 	std::map<std::string, Skill> get_skills_from_config(const std::string &path) const;
+
+	virtual bool can_provide_exec_time(const Skill &skill) const = 0;
 
 	template <typename T>
 	T get_property(const Property<T> &property) const;

@@ -48,7 +48,7 @@ ConfigExecutionTimeEstimator::can_execute(const Skill &skill)
 }
 
 bool
-ConfigExecutionTimeEstimator::can_provide_exec_time(const Skill &skill)
+ConfigExecutionTimeEstimator::can_provide_exec_time(const Skill &skill) const
 {
 	if (active_whitelist_entry_ == whitelist_.end()) {
 		return config_->exists(cfg_prefix_ + "exec-time") || exec_times_.get_default_value();

@@ -44,8 +44,8 @@ using Skill = ExecutionTimeEstimator::Skill;
  * @param skill The skill object to compute the execution time for.
  * @return The execution time in seconds.
  *
- * @fn bool ExecutionTimeEstimator::can_provide_exec_time(const Skill &skill)
- * Check if this estimator can give an estimate for a given
+ * @fn bool ExecutionTimeEstimator::can_provide_exec_time(const Skill &skill) const
+ * Check if this estimator can give an estimate for a given skill.
  * @param skill The skill object to check.
  * @return true if this estimator can give an execution time estimate for the given skill.
  *
