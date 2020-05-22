@@ -92,7 +92,7 @@ LookupEstimator::init()
 }
 
 bool
-LookupEstimator::can_provide_exec_time(const Skill &skill)
+LookupEstimator::can_provide_exec_time(const Skill &skill) const
 {
 	// if all skills should be looked up by default, then the skills_ contain
 	// those skills that should not be estimated via lookup
@@ -186,11 +186,10 @@ LookupEstimator::get_execution_time(const Skill &skill)
 	}
 }
 
-SkillerInterface::SkillStatusEnum
-LookupEstimator::execute(const Skill &skill, std::string &error_feedback)
+std::pair<SkillerInterface::SkillStatusEnum, std::string>
+LookupEstimator::execute(const Skill &skill)
 {
-	error_feedback = error_;
-	return outcome_;
+	return make_pair(outcome_, error_);
 }
 
 } // namespace fawkes

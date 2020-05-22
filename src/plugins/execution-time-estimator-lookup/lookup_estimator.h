@@ -42,10 +42,9 @@ public:
 	                Configuration *     config,
 	                const std::string & cfg_prefix,
 	                Logger *            logger);
-	float                             get_execution_time(const Skill &skill) override;
-	bool                              can_provide_exec_time(const Skill &skill) override;
-	SkillerInterface::SkillStatusEnum execute(const Skill &skill,
-	                                          std::string &error_feedback) override;
+	float get_execution_time(const Skill &skill) override;
+	bool  can_provide_exec_time(const Skill &skill) const override;
+	std::pair<SkillerInterface::SkillStatusEnum, std::string> execute(const Skill &skill) override;
 
 private:
 	void init();
@@ -57,8 +56,8 @@ private:
 	constexpr static char skill_name_field_[] = "name";
 	constexpr static char duration_field_[]   = "duration";
 
-	fawkes::Mutex     mutex_;
-	mongocxx::client *mongodb_client_lookup_;
+	mutable fawkes::Mutex mutex_;
+	mongocxx::client *    mongodb_client_lookup_;
 
 	Property<bool> fully_match_args_;
 	Property<bool> include_failures_;
