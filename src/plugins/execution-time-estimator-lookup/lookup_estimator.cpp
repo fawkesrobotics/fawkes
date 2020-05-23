@@ -102,18 +102,8 @@ LookupEstimator::can_provide_exec_time(const Skill &skill) const
 		using bsoncxx::builder::basic::document;
 		using bsoncxx::builder::basic::kvp;
 
-		document query = document();
-		query.append(kvp(skill_name_field_, skill.skill_name));
+		document query = get_skill_query(skill);
 		query.append(kvp("outcome", static_cast<int>(SkillerInterface::SkillStatusEnum::S_FINAL)));
-		if (get_property(fully_match_args_)) {
-			for (const auto &skill_arg : skill.skill_args) {
-				query.append(kvp("args." + skill_arg.first, skill_arg.second));
-			}
-		} else if (active_whitelist_entry_ != whitelist_.end()) {
-			for (const auto &skill_arg : active_whitelist_entry_->second.skill_args) {
-				query.append(kvp("args." + skill_arg.first, skill_arg.second));
-			}
-		}
 		bsoncxx::stdx::optional<bsoncxx::document::value> found_entry =
 		  mongodb_client_lookup_->database(database_)[collection_].find_one(query.view());
 		return found_entry.has_value();
@@ -132,17 +122,7 @@ LookupEstimator::get_execution_time(const Skill &skill)
 	using bsoncxx::builder::basic::kvp;
 	// pipeline to pick a random sample out of all documents with matching name
 	// field
-	document query = document();
-	query.append(kvp(skill_name_field_, skill.skill_name));
-	if (get_property(fully_match_args_)) {
-		for (const auto &skill_arg : skill.skill_args) {
-			query.append(kvp("args." + skill_arg.first, skill_arg.second));
-		}
-	} else if (active_whitelist_entry_ != whitelist_.end()) {
-		for (const auto &skill_arg : active_whitelist_entry_->second.skill_args) {
-			query.append(kvp("args." + skill_arg.first, skill_arg.second));
-		}
-	}
+	document query = get_skill_query(skill);
 	if (!get_property(include_failures_)) {
 		query.append(kvp("outcome", static_cast<int>(SkillerInterface::SkillStatusEnum::S_FINAL)));
 	}
@@ -192,6 +172,27 @@ std::pair<SkillerInterface::SkillStatusEnum, std::string>
 LookupEstimator::execute(const Skill &skill)
 {
 	return make_pair(outcome_, error_);
+}
+
+bsoncxx::builder::basic::document
+LookupEstimator::get_skill_query(const Skill &skill) const
+{
+	using bsoncxx::builder::basic::document;
+	using bsoncxx::builder::basic::kvp;
+	// pipeline to pick a random sample out of all documents with matching name
+	// field
+	document query = document();
+	query.append(kvp(skill_name_field_, skill.skill_name));
+	if (get_property(fully_match_args_)) {
+		for (const auto &skill_arg : skill.skill_args) {
+			query.append(kvp("args." + skill_arg.first, skill_arg.second));
+		}
+	} else if (active_whitelist_entry_ != whitelist_.end()) {
+		for (const auto &skill_arg : active_whitelist_entry_->second.skill_args) {
+			query.append(kvp("args." + skill_arg.first, skill_arg.second));
+		}
+	}
+	return query;
 }
 
 } // namespace fawkes

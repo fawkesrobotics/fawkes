@@ -26,6 +26,7 @@
 #include <execution_time_estimator/aspect/execution_time_estimator.h>
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
 
+#include <bsoncxx/builder/basic/document.hpp>
 #include <string>
 #include <vector>
 
@@ -47,7 +48,8 @@ public:
 	std::pair<SkillerInterface::SkillStatusEnum, std::string> execute(const Skill &skill) override;
 
 private:
-	void init();
+	void                              init();
+	bsoncxx::builder::basic::document get_skill_query(const Skill &skill) const;
 
 	MongoDBConnCreator *mongo_connection_manager_;
 	Logger *            logger_;
