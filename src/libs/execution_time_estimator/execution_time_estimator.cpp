@@ -29,6 +29,13 @@
 #include <regex>
 #include <string>
 
+// implementation workaround for type dependent static_assert
+// see https://en.cppreference.com/w/cpp/language/if#Constexpr_If
+template <class T>
+struct dependent_false : std::false_type
+{
+};
+
 namespace fawkes {
 
 /** Use the ExecutionTimeEstimator's skill. */
@@ -247,7 +254,8 @@ ExecutionTimeEstimator::Property<T>::Property(fawkes::Configuration * config,
 		} else if constexpr (std::is_same<T, bool>()) {
 			default_value = config->get_bool((path + property).c_str());
 		} else {
-			throw Exception("Unsupported type");
+			static_assert(dependent_false<T>::value,
+			              "Property with this template type is not implemented");
 		}
 	} catch (Exception &e) {
 		default_value = default_val;
@@ -270,7 +278,8 @@ ExecutionTimeEstimator::Property<T>::Property(fawkes::Configuration * config,
 			} else if constexpr (std::is_same<T, bool>()) {
 				property_entries[skill_property[id_index]] += it->get_bool();
 			} else {
-				throw Exception("Unsupported type");
+				static_assert(dependent_false<T>::value,
+				              "Property with this template type is not implemented");
 			}
 		}
 	}
