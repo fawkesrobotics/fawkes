@@ -197,8 +197,8 @@ Skill::parse_args(const std::string &args)
 std::map<std::string, Skill>
 ExecutionTimeEstimator::get_skills_from_config(const std::string &path) const
 {
-	const int                                     ID       = 0;
-	const int                                     PROPERTY = 1;
+	const int                                     id_index       = 0;
+	const int                                     property_index = 1;
 	std::unique_ptr<Configuration::ValueIterator> it(config_->search(path.c_str()));
 	std::map<std::string, std::string>            skill_strings;
 	while (it->next()) {
@@ -207,11 +207,11 @@ ExecutionTimeEstimator::get_skills_from_config(const std::string &path) const
 		if (skill_property.size() != 2) {
 			break;
 		}
-		if (skill_property[PROPERTY] == "args") {
-			skill_strings[skill_property[ID]] += str_join(it->get_strings(), ',');
-		} else if (skill_property[PROPERTY] == "name") {
-			skill_strings[skill_property[ID]] =
-			  it->get_string() + "{" + skill_strings[skill_property[ID]];
+		if (skill_property[property_index] == "args") {
+			skill_strings[skill_property[id_index]] += str_join(it->get_strings(), ',');
+		} else if (skill_property[property_index] == "name") {
+			skill_strings[skill_property[id_index]] =
+			  it->get_string() + "{" + skill_strings[skill_property[id_index]];
 		}
 	}
 	std::map<std::string, Skill> res;
@@ -252,8 +252,8 @@ ExecutionTimeEstimator::Property<T>::Property(fawkes::Configuration * config,
 	} catch (Exception &e) {
 		default_value = default_val;
 	}
-	const int                                     ID             = 0;
-	const int                                     PROPERTY       = 1;
+	const int                                     id_index       = 0;
+	const int                                     property_index = 1;
 	std::string                                   whitelist_path = path + "whitelist";
 	std::unique_ptr<Configuration::ValueIterator> it(config->search(whitelist_path.c_str()));
 	while (it->next()) {
@@ -262,13 +262,13 @@ ExecutionTimeEstimator::Property<T>::Property(fawkes::Configuration * config,
 		if (skill_property.size() != 2) {
 			break;
 		}
-		if (skill_property[PROPERTY] == property) {
+		if (skill_property[property_index] == property) {
 			if constexpr (std::is_same<T, std::string>()) {
-				property_entries[skill_property[ID]] += it->get_string();
+				property_entries[skill_property[id_index]] += it->get_string();
 			} else if constexpr (std::is_same<T, float>()) {
-				property_entries[skill_property[ID]] += it->get_float();
+				property_entries[skill_property[id_index]] += it->get_float();
 			} else if constexpr (std::is_same<T, bool>()) {
-				property_entries[skill_property[ID]] += it->get_bool();
+				property_entries[skill_property[id_index]] += it->get_bool();
 			} else {
 				throw Exception("Unsupported type");
 			}
