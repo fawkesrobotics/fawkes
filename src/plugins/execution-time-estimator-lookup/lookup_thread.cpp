@@ -38,7 +38,6 @@ ExecutionTimeEstimatorLookupEstimatorThread::init()
 {
 	estimator_ =
 	  std::make_shared<fawkes::LookupEstimator>(mongodb_connmgr, config, cfg_prefix_, logger);
-	estimator_->init();
 	execution_time_estimator_manager_->register_provider(
 	  estimator_, config->get_int_or_default((std::string{cfg_prefix_} + "priority").c_str(), 0));
 }

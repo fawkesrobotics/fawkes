@@ -62,33 +62,12 @@ LookupEstimator::LookupEstimator(MongoDBConnCreator *mongo_connection_manager,
   collection_(config_->get_string_or_default((std::string(cfg_prefix_) + "/collection").c_str(),
                                              "exec_times"))
 {
+	mongodb_client_lookup_ = mongo_connection_manager_->create_client(instance_);
 	logger_->log_info(logger_name_,
 	                  "Using instance %s, database %s, collection %s",
 	                  instance_.c_str(),
 	                  database_.c_str(),
 	                  collection_.c_str());
-}
-
-void
-LookupEstimator::init()
-{
-	std::string  mongo_cfg_prefix = "/plugins/mongodb/instances/" + instance_ + "/";
-	unsigned int startup_grace_period =
-	  config_->get_uint_or_default((mongo_cfg_prefix + "startup-grace-period").c_str(), 10);
-	logger_->log_info(logger_name_, "Connect to mongodb %s instance", instance_.c_str());
-	unsigned int startup_tries = 0;
-	for (; startup_tries < startup_grace_period * 2; ++startup_tries) {
-		try {
-			mongodb_client_lookup_ = mongo_connection_manager_->create_client(instance_);
-			logger_->log_info(logger_name_, "Successfully connected to %s instance", instance_.c_str());
-			return;
-		} catch (fawkes::Exception &) {
-			using namespace std::chrono_literals;
-			logger_->log_info(logger_name_, "Waiting for mongodb %s instance", instance_.c_str());
-			std::this_thread::sleep_for(500ms);
-		}
-	}
-	logger_->log_error(logger_name_, "Failed to connect to mongodb %s instance", instance_.c_str());
 }
 
 bool

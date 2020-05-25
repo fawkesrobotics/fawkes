@@ -48,7 +48,6 @@ public:
 	std::pair<SkillerInterface::SkillStatusEnum, std::string> execute(const Skill &skill) override;
 
 private:
-	void                              init();
 	bsoncxx::builder::basic::document get_skill_query(const Skill &skill) const;
 
 	MongoDBConnCreator *mongo_connection_manager_;
