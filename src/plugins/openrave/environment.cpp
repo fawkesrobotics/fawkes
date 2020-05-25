@@ -199,7 +199,6 @@ OpenRaveEnvironment::disable_debug()
 
 /** Add a robot into the scene.
  * @param robot RobotBasePtr of robot to add
- * @return 1 if succeeded, 0 if not able to add robot
  */
 void
 OpenRaveEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
@@ -220,7 +219,6 @@ OpenRaveEnvironment::add_robot(OpenRAVE::RobotBasePtr robot)
 
 /** Add a robot into the scene.
  * @param filename path to robot's xml file
- * @return 1 if succeeded, 0 if not able to load file
  */
 void
 OpenRaveEnvironment::add_robot(const std::string &filename)
@@ -245,7 +243,6 @@ OpenRaveEnvironment::add_robot(const std::string &filename)
 
 /** Add a robot into the scene.
  * @param robot pointer to OpenRaveRobot object of robot to add
- * @return 1 if succeeded, 0 if not able to add robot
  */
 void
 OpenRaveEnvironment::add_robot(OpenRaveRobotPtr &robot)
