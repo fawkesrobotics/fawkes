@@ -73,6 +73,7 @@ private:
 	std::string    logcomp_;
 	bool           enabled_;
 	ConnectionMode mode_;
+	unsigned int   startup_grace_period_;
 	mongocxx::uri  conn_uri_;
 	std::string    replicaset_name_;
 	std::string    auth_dbname;
