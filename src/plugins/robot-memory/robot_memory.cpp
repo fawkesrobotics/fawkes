@@ -110,12 +110,7 @@ RobotMemory::init()
 		database_name_ = config_->get_string("/plugins/robot-memory/database");
 	} catch (Exception &) {
 	}
-	distributed_dbs_          = config_->get_strings("/plugins/robot-memory/distributed-db-names");
-	cfg_startup_grace_period_ = 10;
-	try {
-		cfg_startup_grace_period_ = config_->get_uint("/plugins/robot-memory/startup-grace-period");
-	} catch (Exception &) {
-	} // ignored, use default
+	distributed_dbs_ = config_->get_strings("/plugins/robot-memory/distributed-db-names");
 
 	cfg_coord_database_ = config_->get_string("/plugins/robot-memory/coordination/database");
 	cfg_coord_mutex_collection_ =
@@ -125,33 +120,14 @@ RobotMemory::init()
 
 	//initiate mongodb connections:
 	log("Connect to local mongod");
-	unsigned int startup_tries = 0;
-	for (; startup_tries < cfg_startup_grace_period_ * 2; ++startup_tries) {
-		// TODO if the last try fails, the client remains uninitialized
-		try {
-			mongodb_client_local_ = mongo_connection_manager_->create_client("robot-memory-local");
-			break;
-		} catch (fawkes::Exception &) {
-			logger_->log_info(name_, "Waiting for local");
-			std::this_thread::sleep_for(500ms);
-		}
-	}
+	mongodb_client_local_ = mongo_connection_manager_->create_client("robot-memory-local");
 
 	if (config_->exists("/plugins/mongodb/clients/robot-memory-distributed/enabled")
 	    && config_->get_bool("/plugins/mongodb/clients/robot-memory-distributed/enabled")) {
 		distributed_ = true;
 		log("Connect to distributed mongod");
-		for (startup_tries = 0; startup_tries < cfg_startup_grace_period_ * 2; ++startup_tries) {
-			// TODO if the last try fails, the client remains uninitialized
-			try {
-				mongodb_client_distributed_ =
-				  mongo_connection_manager_->create_client("robot-memory-distributed");
-				break;
-			} catch (fawkes::Exception &) {
-				logger_->log_info(name_, "Waiting for distributed");
-				std::this_thread::sleep_for(500ms);
-			}
-		}
+		mongodb_client_distributed_ =
+		  mongo_connection_manager_->create_client("robot-memory-distributed");
 	}
 
 	//init blackboard interface

@@ -190,9 +190,8 @@ private:
 	ComputablesManager *          computables_manager_;
 	std::vector<std::string>      distributed_dbs_;
 
-	unsigned int cfg_startup_grace_period_;
-	std::string  cfg_coord_database_;
-	std::string  cfg_coord_mutex_collection_;
+	std::string cfg_coord_database_;
+	std::string cfg_coord_mutex_collection_;
 
 	void init();
 	void loop();
