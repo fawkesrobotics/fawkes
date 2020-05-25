@@ -122,7 +122,7 @@ public:
 
 	/** Go through all interface managers, empty all blackboard message queues and send out
 	 * ProtoBuf messages accordingly.
-	 * @return whether anything was sent */
+   */
 	virtual void process_sending_interfaces() = 0;
 
 	/// Deferred initialization, coincides with the main thread.
@@ -147,7 +147,7 @@ protected:
 		 * @tparam IfaceT the interface type handled by the interface manager
 		 * @tparam MessageT the current
 		 * @param iface_mgr a bb_iface_manager for a specific message type
-		 * @return Whether any ProtoBuf message was sent */
+     */
 		template <class IfaceT, class MessageT>
 		void operator()(const bb_iface_manager<IfaceT, type_list<MessageT>> &iface_mgr) const;
 
@@ -157,7 +157,7 @@ protected:
 		 * @tparam MessageT1 First message type in the list
 		 * @tparam MessageTs Remaining message types
 		 * @param iface_mgr a bb_iface_manager with a list of message type to go through
-		 * @return Whether any ProtoBuf message was sent */
+		 */
 		template <class IfaceT, class MessageT1, class... MessageTs>
 		void
 		operator()(const bb_iface_manager<IfaceT, type_list<MessageT1, MessageTs...>> &iface_mgr) const;
