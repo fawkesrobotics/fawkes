@@ -121,7 +121,6 @@ MessageQueue::append(Message *msg)
 /** Enqueue message after given iterator.
  * @param it Iterator
  * @param msg Message to enqueue
- * @return message queue id of the appended message.
  * @exception NullPointerException thrown if iterator is end iterator.
  * @exception NotLockedException thrown if message queue is not locked during this operation.
  * @exception MessageAlreadyQueuedException thrown if the message has already been
