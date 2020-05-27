@@ -36,10 +36,9 @@ public:
 	NavGraphEstimator(LockPtr<NavGraph>  navgraph,
 	                  Configuration *    config,
 	                  const std::string &cfg_prefix);
-	float                             get_execution_time(const Skill &skill) override;
-	bool                              can_provide_exec_time(const Skill &skill) override;
-	SkillerInterface::SkillStatusEnum execute(const Skill &skill,
-	                                          std::string &error_feedback) override;
+	float get_execution_time(const Skill &skill) override;
+	bool  can_provide_exec_time(const Skill &skill) const override;
+	std::pair<SkillerInterface::SkillStatusEnum, std::string> execute(const Skill &skill) override;
 
 private:
 	LockPtr<NavGraph>           navgraph_;

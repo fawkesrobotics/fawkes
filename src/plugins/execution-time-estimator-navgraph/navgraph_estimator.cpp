@@ -45,7 +45,7 @@ NavGraphEstimator::NavGraphEstimator(LockPtr<NavGraph>  navgraph,
 }
 
 bool
-NavGraphEstimator::can_provide_exec_time(const Skill &skill)
+NavGraphEstimator::can_provide_exec_time(const Skill &skill) const
 {
 	const std::string dest_name = get_property(dest_names_);
 	return navgraph_->node_exists(skill.skill_args.at(dest_name));
@@ -69,13 +69,13 @@ NavGraphEstimator::get_execution_time(const Skill &skill)
 	       / speed_;
 }
 
-SkillerInterface::SkillStatusEnum
-NavGraphEstimator::execute(const Skill &skill, std::string &error_feedback)
+std::pair<SkillerInterface::SkillStatusEnum, std::string>
+NavGraphEstimator::execute(const Skill &skill)
 {
 	auto node    = navgraph_->node(skill.skill_args.at("place"));
 	last_pose_x_ = node.x();
 	last_pose_y_ = node.y();
-	return SkillerInterface::SkillStatusEnum::S_FINAL;
+	return std::make_pair(SkillerInterface::SkillStatusEnum::S_FINAL, "");
 }
 
 } // namespace fawkes
