@@ -18,8 +18,6 @@ plugins/robot-memory:
   # instance and not in the local one:
   distributed-db-names: ["syncedrobmem", "robmem_coordination"]
 
-  startup-grace-period: 30
-
   computables:
     blackboard:
       priority: 10

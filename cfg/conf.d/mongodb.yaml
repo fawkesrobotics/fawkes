@@ -27,11 +27,13 @@ plugins/mongodb:
     robot-memory-local-direct:
       enabled: true
       mode: connection
+      startup-grace-period: 30
       hostport: localhost:27021
 
     robot-memory-local:
       enabled: true
       mode: replica_set
+      startup-grace-period: 30
       name: robot-memory-local
       hosts:
         - localhost:27021
@@ -39,12 +41,14 @@ plugins/mongodb:
     robot-memory-distributed-direct:
       enabled: true
       mode: connection
+      startup-grace-period: 30
       hostport: localhost:27022
 
     robot-memory-distributed:
       enabled: true
       mode: replica_set
       name: robot-memory-distributed
+      startup-grace-period: 30
       hosts:
         - localhost:27022
 
