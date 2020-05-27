@@ -96,7 +96,7 @@ using Skill = ExecutionTimeEstimator::Skill;
  * @return the default value for the property
  *
  * @fn template <typename T> T ExecutionTimeEstimator::Property<T>::get_property(const std::string &key) const
- * Get the property falue for a given sill.
+ * Get the property falue for a given skill.
  * @param key Skill entry id
  * @return Value associated with \a key or the default value, if no skill-specific value can be found
  */
