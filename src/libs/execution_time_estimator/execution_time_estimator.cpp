@@ -204,8 +204,8 @@ Skill::parse_args(const std::string &args)
 std::map<std::string, Skill>
 ExecutionTimeEstimator::get_skills_from_config(const std::string &path) const
 {
-	const int                                     id_index       = 0;
-	const int                                     property_index = 1;
+	const size_t                                  id_index       = 0;
+	const size_t                                  property_index = 1;
 	std::unique_ptr<Configuration::ValueIterator> it(config_->search(path.c_str()));
 	std::map<std::string, std::string>            skill_strings;
 	while (it->next()) {
@@ -260,8 +260,8 @@ ExecutionTimeEstimator::Property<T>::Property(fawkes::Configuration * config,
 	} catch (Exception &e) {
 		default_value = default_val;
 	}
-	const int                                     id_index       = 0;
-	const int                                     property_index = 1;
+	const size_t                                  id_index       = 0;
+	const size_t                                  property_index = 1;
 	std::string                                   whitelist_path = path + "whitelist";
 	std::unique_ptr<Configuration::ValueIterator> it(config->search(whitelist_path.c_str()));
 	while (it->next()) {
