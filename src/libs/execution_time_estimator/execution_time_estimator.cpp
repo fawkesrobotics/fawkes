@@ -212,7 +212,7 @@ ExecutionTimeEstimator::get_skills_from_config(const std::string &path) const
 		std::vector<std::string> skill_property =
 		  str_split(std::string(it->path()).substr(path.size()));
 		if (skill_property.size() != 2) {
-			break;
+			continue;
 		}
 		if (skill_property[property_index] == "args") {
 			skill_strings[skill_property[id_index]] += str_join(it->get_strings(), ',');
