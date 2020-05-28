@@ -31,7 +31,6 @@ LDFLAGS += $(LDFLAGS_execution_time_estimator_lookup)
 
 OBJS_all      = $(OBJS_execution_time_estimator_lookup)
 PLUGINS_all   = $(PLUGINDIR)/execution-time-estimator-lookup.so
-SCRIPTS_all   = $(SRCDIR)/python/mongodb_bb_connector.py
 
 ifeq ($(HAVE_CPP17)$(HAVE_MONGODB),11)
   CFLAGS       += $(CFLAGS_CPP17)
@@ -47,7 +46,6 @@ endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
-	@$(foreach script, $(SCRIPTS_all), ln -fs $(script)  $(BINDIR)/$(notdir $(script)))
 .PHONY: $(WARN_TARGETS)
 
 warning_cpp17:
