@@ -36,16 +36,15 @@ public:
 	NavGraphEstimator(LockPtr<NavGraph>  navgraph,
 	                  Configuration *    config,
 	                  const std::string &cfg_prefix);
-	float get_execution_time(const Skill &skill) const override;
-	bool  can_execute(const Skill &skill) const override;
-	void  execute(const Skill &skill) override;
+	float get_execution_time(const Skill &skill) override;
+	bool  can_provide_exec_time(const Skill &skill) const override;
+	std::pair<SkillerInterface::SkillStatusEnum, std::string> execute(const Skill &skill) override;
 
 private:
-	Configuration *   config_;
-	const std::string cfg_prefix_;
-	LockPtr<NavGraph> navgraph_;
-	float             last_pose_x_;
-	float             last_pose_y_;
-	float             speed_;
+	LockPtr<NavGraph>           navgraph_;
+	float                       last_pose_x_;
+	float                       last_pose_y_;
+	const Property<std::string> source_names_;
+	const Property<std::string> dest_names_;
 };
 } // namespace fawkes

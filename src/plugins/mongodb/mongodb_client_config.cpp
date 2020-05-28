@@ -24,6 +24,9 @@
 #include <config/config.h>
 #include <logging/logger.h>
 
+#include <chrono>
+#include <thread>
+
 using namespace fawkes;
 
 /** @class MongoDBClientConfig "mongodb_client_config.h"
@@ -61,6 +64,16 @@ MongoDBClientConfig::MongoDBClientConfig(Configuration *config,
 		logger->log_info(logcomp_.c_str(),
 		                 "MongoDB config '%s' specifies no client "
 		                 "mode, assuming 'connection'.",
+		                 cfgname.c_str());
+	}
+
+	startup_grace_period_ = 10;
+	try {
+		startup_grace_period_ = config->get_uint(prefix + "startup_grace_period");
+	} catch (Exception &e) {
+		logger->log_info(logcomp_.c_str(),
+		                 "MongoDB config '%s' specifies no startup grace period "
+		                 ", assuming 10 seconds.",
 		                 cfgname.c_str());
 	}
 
@@ -137,7 +150,15 @@ MongoDBClientConfig::read_authinfo(Configuration *config,
 mongocxx::client *
 MongoDBClientConfig::create_client()
 {
-	return new mongocxx::client(conn_uri_);
+	for (unsigned int startup_tries = 0; startup_tries < startup_grace_period_ * 2; ++startup_tries) {
+		try {
+			return new mongocxx::client(conn_uri_);
+		} catch (fawkes::Exception &) {
+			using namespace std::chrono_literals;
+			std::this_thread::sleep_for(500ms);
+		}
+	}
+	throw Exception("Failed to create client with uri: '%s'", conn_uri_.to_string().c_str());
 }
 
 /** Write client configuration information to log.

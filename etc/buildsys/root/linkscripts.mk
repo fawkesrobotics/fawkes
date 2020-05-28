@@ -22,22 +22,29 @@ __buildsys_root_linkscripts_mk_ := 1
 
 all: linkscripts
 
+SCRIPTS = $(BASEDIR)/etc/scripts
+ifneq ($(abspath $(BASEDIR)),$(abspath $(FAWKES_BASEDIR)))
+SCRIPTS += $(FAWKES_BASEDIR)/etc/scripts
+endif
+
 .PHONY: linkscripts
 linkscripts:
 	$(SILENT) if [ -d $(BASEDIR)/etc/scripts ]; then \
 		mkdir -p $(BINDIR); \
-		for f in $$(ls $(BASEDIR)/etc/scripts); do \
-			if [ -x "$(BASEDIR)/etc/scripts/$$f" ]; then \
-				if [[ -a "$(BINDIR)/$$f" && ! -L "$(BINDIR)/$$f" ]]; then \
-					echo -e "$(INDENT_PRINT)$(TRED)[ERR] Non-symbolic link bin/$$f exists, *not* linking to etc/scripts/$$f$(TNORMAL)"; \
+		for path in $(SCRIPTS); do \
+			for f in $$(ls $${path}); do \
+				if [ -x "$${path}/$$f" ]; then \
+					if [[ -a "$(BINDIR)/$$f" && ! -L "$(BINDIR)/$$f" ]]; then \
+						echo -e "$(INDENT_PRINT)$(TRED)[ERR] Non-symbolic link bin/$$f exists, *not* linking to etc/scripts/$$f$(TNORMAL)"; \
+					else \
+						echo -e "$(INDENT_PRINT)[LNK] bin/$$f -> $${path}/$$f"; \
+						rm -f $(BINDIR)/$$f; \
+						ln -s ../$${path}/$$f $(BINDIR)/$$f; \
+					fi \
 				else \
-					echo -e "$(INDENT_PRINT)[LNK] bin/$$f -> etc/scripts/$$f"; \
-					rm -f $(BINDIR)/$$f; \
-					ln -s ../etc/scripts/$$f $(BINDIR)/$$f; \
+					echo -e "$(INDENT_PRINT)$(TYELLOW)[WARN] Omitting $${path}/$$f (not executable)$(TNORMAL)"; \
 				fi \
-			else \
-				echo -e "$(INDENT_PRINT)$(TYELLOW)[WARN] Omitting etc/scripts/$$f (not executable)$(TNORMAL)"; \
-			fi \
+			done; \
 		done; \
 	fi
 

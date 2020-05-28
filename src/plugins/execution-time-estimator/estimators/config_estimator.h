@@ -23,17 +23,19 @@
 #include <config/config.h>
 #include <execution_time_estimator/execution_time_estimator.h>
 
+#include <map>
+
 namespace fawkes {
 class ConfigExecutionTimeEstimator : public ExecutionTimeEstimator
 {
 public:
 	ConfigExecutionTimeEstimator(Configuration *config, const std::string &cfg_prefix);
-	float get_execution_time(const Skill &skill) const override;
-	bool  can_execute(const Skill &skill) const override;
+	bool  can_execute(const Skill &skill) override;
+	float get_execution_time(const Skill &skill) override;
+	bool  can_provide_exec_time(const Skill &skill) const override;
 
 private:
-	Configuration *const config_;
-	const std::string    cfg_prefix_;
+	/** Execution times of all whitelisted skills */
+	const Property<float> exec_times_;
 };
-
 } // namespace fawkes

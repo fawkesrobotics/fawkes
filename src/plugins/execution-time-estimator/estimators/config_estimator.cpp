@@ -20,12 +20,15 @@
 
 #include "config_estimator.h"
 
+#include <utils/misc/string_split.h>
+
+#include <memory>
+
 namespace fawkes {
 
 /** @class ConfigExecutionTimeEstimator
  * Get a static estimate for the skill execution time from the config.
- * This simply reads the execution time from the config. It only considers
- * the skill name, the arguments are ignored.
+ * This simply reads the execution time from the config.
  */
 
 /** Constructor
@@ -34,27 +37,30 @@ namespace fawkes {
  */
 ConfigExecutionTimeEstimator::ConfigExecutionTimeEstimator(Configuration *    config,
                                                            const std::string &cfg_prefix)
-: config_(config), cfg_prefix_(cfg_prefix)
+: ExecutionTimeEstimator(config, cfg_prefix), exec_times_(config_, cfg_prefix_, "exec-time")
 {
 }
 
 bool
-ConfigExecutionTimeEstimator::can_execute(const Skill &skill) const
+ConfigExecutionTimeEstimator::can_execute(const Skill &skill)
 {
-	return config_->exists(cfg_prefix_ + "skills/" + skill.skill_name)
-	       || config_->exists(cfg_prefix_ + "default");
+	return ExecutionTimeEstimator::can_execute(skill) || can_provide_exec_time(skill);
+}
+
+bool
+ConfigExecutionTimeEstimator::can_provide_exec_time(const Skill &skill) const
+{
+	if (active_whitelist_entry_ == whitelist_.end()) {
+		return config_->exists(cfg_prefix_ + "exec-time") || exec_times_.get_default_value();
+	} else {
+		return exec_times_.property_entries.find(active_whitelist_entry_->first)
+		       != exec_times_.property_entries.end();
+	}
 }
 
 float
-ConfigExecutionTimeEstimator::get_execution_time(const Skill &skill) const
+ConfigExecutionTimeEstimator::get_execution_time(const Skill &skill)
 {
-	if (const std::string cfg_path = cfg_prefix_ + "skills/" + skill.skill_name;
-	    config_->exists(cfg_path)) {
-		return config_->get_float(cfg_path);
-	} else if (const std::string default_path = cfg_prefix_ + "default";
-	           config_->exists(default_path)) {
-		return config_->get_float(default_path);
-	} else
-		throw Exception("No config value for %s", cfg_path.c_str());
+	return get_property(exec_times_) / speed_;
 }
 } // namespace fawkes
