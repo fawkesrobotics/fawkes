@@ -30,7 +30,7 @@
 #endif
 #include <utils/time/tracker_macros.h>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

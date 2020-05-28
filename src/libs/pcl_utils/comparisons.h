@@ -22,6 +22,8 @@
 #ifndef _LIBS_PCL_UTILS_COMPARISONS_H_
 #define _LIBS_PCL_UTILS_COMPARISONS_H_
 
+#include "compatibility.h"
+
 #include <pcl/ModelCoefficients.h>
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/point_cloud.h>
@@ -45,9 +47,9 @@ class PolygonComparison : public pcl::ComparisonBase<PointT>
 
 public:
 	/// Shared pointer.
-	typedef boost::shared_ptr<PolygonComparison<PointT>> Ptr;
+	typedef pcl::shared_ptr<PolygonComparison<PointT>> Ptr;
 	/// Constant shared pointer.
-	typedef boost::shared_ptr<const PolygonComparison<PointT>> ConstPtr;
+	typedef pcl::shared_ptr<const PolygonComparison<PointT>> ConstPtr;
 
 	/** Constructor.
    * @param polygon polygon to compare against, it must have at least three points
@@ -101,9 +103,9 @@ class PlaneDistanceComparison : public pcl::ComparisonBase<PointT>
 
 public:
 	/// Shared pointer.
-	typedef boost::shared_ptr<PlaneDistanceComparison<PointT>> Ptr;
+	typedef pcl::shared_ptr<PlaneDistanceComparison<PointT>> Ptr;
 	/// Constant shared pointer.
-	typedef boost::shared_ptr<const PlaneDistanceComparison<PointT>> ConstPtr;
+	typedef pcl::shared_ptr<const PlaneDistanceComparison<PointT>> ConstPtr;
 
 	/** Constructor.
    * @param coeff planar model coefficients

@@ -46,6 +46,7 @@
 
 using namespace google::protobuf;
 using namespace protobuf_comm;
+using namespace boost::placeholders;
 
 namespace protobuf_clips {
 

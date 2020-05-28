@@ -212,7 +212,7 @@ LaserCalibration::get_matching_cost(PointCloudPtr cloud1, PointCloudPtr cloud2, 
 		throw InsufficientDataException(error.str().c_str());
 	}
 	pcl::IterativeClosestPoint<Point, Point> icp;
-	icp.setInputCloud(cloud2);
+	icp.setInputSource(cloud2);
 	icp.setInputTarget(cloud1);
 	PointCloud final;
 	icp.align(final);

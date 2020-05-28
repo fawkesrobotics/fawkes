@@ -41,6 +41,7 @@
 
 using namespace boost::asio;
 using namespace boost::system;
+using namespace boost::placeholders;
 
 namespace protobuf_comm {
 

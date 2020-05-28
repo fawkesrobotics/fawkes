@@ -32,7 +32,7 @@
 #include <plugins/mongodb/aspect/mongodb_conncreator.h>
 #include <plugins/mongodb/utils.h>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <bsoncxx/builder/basic/document.hpp>
 #include <list>
 
@@ -41,6 +41,8 @@ namespace fawkes {
 class TimeTracker;
 #endif
 } // namespace fawkes
+
+using namespace boost::placeholders;
 
 class EventTriggerManager
 {

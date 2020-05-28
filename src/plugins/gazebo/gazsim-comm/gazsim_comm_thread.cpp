@@ -33,6 +33,7 @@
 
 using namespace fawkes;
 using namespace protobuf_comm;
+using namespace boost::placeholders;
 
 /** @class GazsimCommThread "clips_thread.h"
  * Plugin simulates and manages communication for Simulation in Gazebo
