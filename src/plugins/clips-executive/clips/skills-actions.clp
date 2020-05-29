@@ -40,6 +40,8 @@
 	(skill-action-mapping (name ?action-name))
 	(not (skill-action-execinfo))
 	(skiller-control (acquired TRUE))
+	(wm-fact (key domain fact self args? r ?self))
+	(test (member$ ?self ?param-values))
 	=>
 	(bind ?skill-id (skill-call ?action-name ?params ?param-values))
 	(modify ?pa (state WAITING))
