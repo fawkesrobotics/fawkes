@@ -202,7 +202,12 @@
 	(bson-append ?doc "is-list" (fact-slot-value ?wf is-list))
 	(if (fact-slot-value ?wf is-list)
 	 then
-		(bson-append-array ?doc "values" (fact-slot-value ?wf values))
+		(bind ?values (create$) )
+		(progn$ (?v (fact-slot-value ?wf values))
+			(if (stringp ?v)
+				then (bind ?values (append$ ?values (str-cat "\"" ?v "\"")))
+				else (bind ?values (append$ ?values ?v))))
+		(bson-append-array ?doc "values" ?values)
 	 else
 		(bson-append ?doc "value" (fact-slot-value ?wf value))
 	)
