@@ -105,12 +105,12 @@ FawkesTimingThread::loop()
 			// give some extra 10% to eliminate frequent false warnings due to regular
 			// time jitter (TimeWait might not be all that precise)
 			if (loop_time > 1.1 * desired_loop_time_sec_) {
-				logger->log_warn(name(),
-				                 "Loop time exceeded, "
-				                 "desired: %f sec (%u usec),  actual: %f sec",
-				                 desired_loop_time_sec_,
-				                 desired_loop_time_usec_,
-				                 loop_time);
+				//	logger->log_warn(name(),
+				//	                 "Loop time exceeded, "
+				//	                 "desired: %f sec (%u usec),  actual: %f sec",
+				//	                 desired_loop_time_sec_,
+				//	                 desired_loop_time_usec_,
+				//	                 loop_time);
 			} else {
 				logger->log_warn(name(),
 				                 "Desired loop time achieved, "
