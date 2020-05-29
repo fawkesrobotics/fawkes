@@ -236,6 +236,21 @@
 	(bson-destroy ?query)
 )
 
+(defrule wm-robmem-sync-fact-removed
+	(wm-fact (key cx identity) (value ?identity))
+	(wm-robmem-sync-conf (wm-fact-key-prefix $?key-prefix) (enabled TRUE))
+	?sm <- (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-idx ?idx&~0) (wm-fact-key $?key-prefix $?rest))
+	(not (wm-fact (id ?id)))
+	=>
+	;(printout error "Remove " ?id " from robot memory" crlf)
+	(bind ?now (time-trunc-ms (now-systime)))
+	(modify ?sm (wm-fact-idx 0) (update-timestamp ?now))
+	; We do not know when exactly the wm-fact was retracted, use the current time instead
+	(bind ?query (wm-robmem-sync-create-query ?id ?now))
+
+	(robmem-remove ?*WM-ROBMEM-SYNC-COLLECTION* ?query)
+)
+
 (defrule wm-robmem-sync-fact-added
 	(wm-fact (key cx identity) (value ?identity))
 	(wm-robmem-sync-conf (wm-fact-key-prefix $?key-prefix) (enabled TRUE))
@@ -248,25 +263,10 @@
 	(assert (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-key ?key-prefix ?rest)
 																		(wm-fact-idx (fact-index ?wf))
 																		(update-timestamp ?now)))
-	
+
 	(wm-robmem-sync-fact-update ?wf ?identity ?now)
 )
 
-(defrule wm-robmem-sync-fact-removed
-	(wm-fact (key cx identity) (value ?identity))
-	(wm-robmem-sync-conf (wm-fact-key-prefix $?key-prefix) (enabled TRUE))
-	?sm <- (wm-robmem-sync-map-entry (wm-fact-id ?id) (wm-fact-idx ?idx&~0) (wm-fact-key $?key-prefix $?rest))
-	(not (wm-fact (id ?id)))
-	=>
-	;(printout error "Remove " ?id " from robot memory" crlf)
-	(bind ?now (time-trunc-ms (now-systime)))
-	(modify ?sm (wm-fact-idx 0) (update-timestamp ?now))
-	; We do not know when exactly the wm-fact was retracted, use the current time instead
-	(bind ?now (time-trunc-ms (now-systime)))
-	(bind ?query (wm-robmem-sync-create-query ?id ?now))
-
-	(robmem-remove ?*WM-ROBMEM-SYNC-COLLECTION* ?query)
-)
 
 (defrule wm-robmem-sync-fact-modified
 	(wm-fact (key cx identity) (value ?identity))
