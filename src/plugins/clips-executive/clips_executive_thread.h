@@ -26,6 +26,7 @@
 #include <aspect/blocked_timing.h>
 #include <aspect/clock.h>
 #include <aspect/configurable.h>
+#include <aspect/execution_time_estimator.h>
 #include <aspect/logging.h>
 #include <core/threading/thread.h>
 #include <plugins/clips/aspect/clips.h>
@@ -43,7 +44,8 @@ class ClipsExecutiveThread : public fawkes::Thread,
                              public fawkes::LoggingAspect,
                              public fawkes::ConfigurableAspect,
                              public fawkes::ClockAspect,
-                             public fawkes::CLIPSAspect
+                             public fawkes::CLIPSAspect,
+                             public fawkes::ExecutionTimeEstimatorsAspect
 {
 public:
 	ClipsExecutiveThread();
@@ -64,6 +66,10 @@ protected:
 private:
 	std::string
 	clips_map_skill(std::string name, CLIPS::Values param_names, CLIPS::Values param_values);
+
+	float clips_estimate_action_duration(std::string   name,
+	                                     CLIPS::Values param_names,
+	                                     CLIPS::Values param_values);
 
 private:
 	bool cfg_assert_time_each_loop_;

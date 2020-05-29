@@ -21,7 +21,7 @@ SUBDIRS += rest-api
 
 LIBS_clips_executive = \
 	fawkescore fawkesutils fawkesaspects fawkesblackboard \
-        fawkesinterface fawkesclipsaspect
+        fawkesinterface fawkesclipsaspect fawkes_execution_time_estimator
 OBJS_clips_executive = clips_executive_plugin.o clips_executive_thread.o
 
 OBJS_all    = $(OBJS_clips_executive)
@@ -31,15 +31,20 @@ PLUGINS_all = $(PLUGINDIR)/clips-executive.so
 FILES_clips_files   = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/clips/*.clp))
 DESTDIR_clips_files = $(EXEC_SHAREDIR)/clips/clips-executive
 
-ifeq ($(HAVE_CLIPS),1)
-  CFLAGS  += $(CFLAGS_CLIPS)
+ifeq ($(HAVE_CLIPS)$(HAVE_CPP17),11)
+  CFLAGS  += $(CFLAGS_CLIPS) $(CFLAGS_CPP17)
   LDFLAGS += $(LDFLAGS_CLIPS)
 
   PLUGINS_build = $(PLUGINS_all)
 
 	INSTALL_extra = clips_files
 else
-  WARN_TARGETS += warning_clips
+  ifneq ($(HAVE_CLIPS),1)
+    WARN_TARGETS += warning_clips
+  endif
+  ifneq ($(HAVE_CPP17),1)
+    WARN_TARGETS += warning_cpp17
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
@@ -48,6 +53,8 @@ all: $(WARN_TARGETS)
 .PHONY: warning_clips
 warning_clips:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting clips-executive plugin$(TNORMAL) ($(CLIPS_ERROR))"
+warning_cpp17:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting clips-executive plugin$(TNORMAL) (C++17 not supported))"
 endif
 
 include $(BUILDSYSDIR)/base.mk

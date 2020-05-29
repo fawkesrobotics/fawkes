@@ -27,6 +27,7 @@
 #include <utils/misc/string_conversions.h>
 #include <utils/misc/string_split.h>
 
+using namespace std;
 using namespace fawkes;
 
 /** @class ClipsExecutiveThread "clips_executive_thread.h"
@@ -110,6 +111,11 @@ ClipsExecutiveThread::init()
 	clips->add_function("map-action-skill",
 	                    sigc::slot<std::string, std::string, CLIPS::Values, CLIPS::Values>(
 	                      sigc::mem_fun(*this, &ClipsExecutiveThread::clips_map_skill)));
+
+	clips->add_function("estimate-action-duration",
+	                    sigc::slot<float, std::string, CLIPS::Values, CLIPS::Values>(
+	                      sigc::mem_fun(*this,
+	                                    &ClipsExecutiveThread::clips_estimate_action_duration)));
 
 	bool cfg_req_redefwarn_feature = true;
 	try {
@@ -242,4 +248,26 @@ ClipsExecutiveThread::clips_map_skill(std::string   action_name,
 		}
 	}
 	return rv;
+}
+
+float
+ClipsExecutiveThread::clips_estimate_action_duration(std::string   action_name,
+                                                     CLIPS::Values param_names,
+                                                     CLIPS::Values param_values)
+{
+	const std::string &skill_string = clips_map_skill(action_name, param_names, param_values);
+
+	if (skill_string == "")
+		return 0;
+
+	auto provider = execution_time_estimator_manager_->get_provider(skill_string);
+	if (provider)
+		return (*provider)->get_execution_time(skill_string);
+	else
+		logger->log_error(name(),
+		                  "Execution estimator not found for skill '%s' for action '%s ",
+		                  skill_string.c_str(),
+		                  action_name.c_str());
+
+	return 0;
 }
