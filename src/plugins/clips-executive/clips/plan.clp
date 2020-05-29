@@ -23,8 +23,8 @@
 	(slot action-name (type SYMBOL))
 	(multislot param-names)
 	(multislot param-values)
-	(slot duration (type FLOAT))
-	(slot dispatch-time (type FLOAT) (default -1.0))
+	(slot duration (type FLOAT INTEGER))
+	(slot dispatch-time (type FLOAT INTEGER) (default -1.0))
 	(slot state (type SYMBOL)
 	            (allowed-values FORMULATED PENDING WAITING RUNNING EXECUTION-SUCCEEDED
 	                            SENSED-EFFECTS-WAIT SENSED-EFFECTS-HOLD EFFECTS-APPLIED
