@@ -359,7 +359,7 @@
   (declare (salience ?*SALIENCE-WM-SYNC-ADD*))
 	(domain-predicate (name ?name) (param-names $?param-names))
 	?wf <- (wm-fact (id ?id) (key $?key) (type BOOL) (value TRUE))
-	?wm <- (wm-sync-map-fact (domain-fact-name ?name) (domain-fact-idx 0)
+	?wm <- (wm-sync-map-fact (domain-fact-name ?name)
 													 (wm-fact-id ?id) (wm-fact-idx ?idx&:(< ?idx (fact-index ?wf))))
 	=>
 	(if (not (any-factp ((?df domain-fact))
