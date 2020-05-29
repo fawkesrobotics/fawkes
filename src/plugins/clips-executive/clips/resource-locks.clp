@@ -85,25 +85,25 @@
   (modify ?g (mode FINISHED) (outcome REJECTED))
 )
 
-(defrule resource-locks-fast-reject-goal-locked-for-another-goal
-  "If a resource already locked for another goal, we have not acquired any
-   resources, and we have no pending requests, then we can directly reject the
-   goal."
-  ?g <- (goal (mode COMMITTED)
-              (id ?goal)
-              (verbosity ?verbosity)
-              (acquired-resources)
-              (required-resources $? ?res $?))
-  (resource-request (resource ?res) (goal ?other-goal&~?goal))
-  (not (mutex (name ?n1&:(eq ?n1 (resource-to-mutex ?res)))
-              (request ~NONE)))
-  =>
-  (if (neq ?verbosity QUIET) then
-    (printout warn "Rejecting goal " ?goal ", " ?res
-                  " is already locked for " ?other-goal crlf)
-  )
-  (modify ?g (mode FINISHED) (outcome REJECTED))
-)
+;(defrule resource-locks-fast-reject-goal-locked-for-another-goal
+;  "If a resource already locked for another goal, we have not acquired any
+;   resources, and we have no pending requests, then we can directly reject the
+;   goal."
+;  ?g <- (goal (mode COMMITTED)
+;              (id ?goal)
+;              (verbosity ?verbosity)
+;              (acquired-resources)
+;              (required-resources $? ?res $?))
+;  (resource-request (resource ?res) (goal ?other-goal&~?goal))
+;  (not (mutex (name ?n1&:(eq ?n1 (resource-to-mutex ?res)))
+;              (request ~NONE)))
+;  =>
+;  (if (neq ?verbosity QUIET) then
+;    (printout warn "Rejecting goal " ?goal ", " ?res
+;                  " is already locked for " ?other-goal crlf)
+;  )
+;  (modify ?g (mode FINISHED) (outcome REJECTED))
+;)
 
 (defrule resource-locks-lock-acquired
 	(resource-request (resource ?res) (goal ?goal-id))
