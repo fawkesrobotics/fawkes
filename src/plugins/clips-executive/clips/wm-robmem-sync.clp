@@ -342,10 +342,16 @@
 					; Maybe had just deleted this fact but haven't gotten around to
 					;	sync it, yet. If the update timestamp is fresher we take it
 					(do-for-fact ((?sm wm-robmem-sync-map-entry)) (eq ?sm:wm-fact-id ?id)
-						(printout debug "wm-robmem-sync-update: updating (no fact but sync map entry) " ?id crlf)
-						(bind ?new-wf (assert (wm-fact (id ?sm:wm-fact-id) (key ?sm:wm-fact-key)
-																					 (type ?type) (is-list ?is-list) (value ?value) (values ?values))))
-						(modify ?sm (wm-fact-idx (fact-index ?new-wf)) (update-timestamp ?update-timestamp))
+						(if (time> ?update-timestamp ?sm:update-timestamp)
+						then
+							(printout debug "wm-robmem-sync-update: updating (no fact but sync map entry) " ?id crlf)
+							(bind ?key (wm-id-to-key ?id))
+							(bind ?new-wf (assert (wm-fact (id ?id) (key ?key)
+							                               (type ?type) (is-list ?is-list) (value ?value) (values ?values))))
+							(modify ?sm (wm-fact-idx (fact-index ?new-wf)) (update-timestamp ?update-timestamp))
+						else
+							(printout warn "wm-robmem-sync-update: received update for " ?id " with older data than our own" crlf)
+						)
 					)
 				else
 					; we have nothing about this update, yet. Just assert everything necessary.
