@@ -30,7 +30,7 @@
 	                            SENSED-EFFECTS-WAIT SENSED-EFFECTS-HOLD EFFECTS-APPLIED
 	                            FINAL EXECUTION-FAILED FAILED))
 	(slot executable (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
-	(slot error-msg (type STRING))
+	(slot error-msg (type STRING) (default "na"))
 	(multislot start-time (type INTEGER) (cardinality 2 2) (default 0 0))
 )
 
