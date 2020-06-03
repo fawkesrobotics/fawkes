@@ -24,7 +24,7 @@
 
 namespace fawkes {
 
-#define REGEX_PARAM "\\?\\(([a-zA-Z0-9_-]+)((\\|/([^/]+)/([^/]+)/)*)\\)(s|S|i|f|y|Y)"
+#define REGEX_PARAM "\\?\\(([a-zA-Z0-9_-]+)((\\|/([^/]+)/([^/]*)/)*)\\)(s|S|i|f|y|Y)"
 
 /** @class ActionSkillMapping "map_skill.h"
  * Class to maintain and perform mapping from actions to skills.
