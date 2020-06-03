@@ -51,8 +51,15 @@ NavGraphEstimator::can_execute(const Skill &skill) const
 float
 NavGraphEstimator::get_execution_time(const Skill &skill) const
 {
-	return navgraph_->node(skill.skill_args.at("place")).distance(last_pose_x_, last_pose_y_)
-	       / speed_;
+	float distance;
+	if (skill.skill_args.find("from") != skill.skill_args.end()
+	    && navgraph_->node_exists(skill.skill_args.at("from")))
+		distance = navgraph_->node(skill.skill_args.at("place"))
+		             .distance(navgraph_->node(skill.skill_args.at("from")));
+	else
+		distance = navgraph_->node(skill.skill_args.at("place")).distance(last_pose_x_, last_pose_y_);
+
+	return distance / speed_;
 }
 
 void
