@@ -55,35 +55,38 @@
 
 (defrule skill-action-running
 	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
-	                    (action-name ?action-name) (state WAITING))
+	                    (action-name ?action-name) (state WAITING)
+	                    (param-values $?param-values))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
 	                              (action-id ?id) (skill-id ?skill-id))
 	(skill (id ?skill-id) (status S_RUNNING))
 	=>
-	(printout t "Action " ?action-name " is running" crlf)
+	(printout t "Action " ?action-name "(" ?param-values ") is running" crlf)
 	(modify ?pa (state RUNNING))
 )
 
 (defrule skill-action-final
 	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
-	                    (action-name ?action-name) (state WAITING|RUNNING))
+	                    (action-name ?action-name) (state WAITING|RUNNING)
+	                    (param-values $?param-values))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
 	                              (action-id ?id) (skill-id ?skill-id))
 	?sf <- (skill (id ?skill-id) (status S_FINAL))
 	=>
-	(printout t "Execution of " ?action-name " completed successfully" crlf)
+	(printout t "Execution of " ?action-name "(" ?param-values ") completed successfully" crlf)
 	(modify ?pa (state EXECUTION-SUCCEEDED))
 	(retract ?sf ?pe)
 )
 
 (defrule skill-action-failed
 	?pa <- (plan-action (goal-id ?goal-id) (plan-id ?plan-id) (id ?id)
-	                    (action-name ?action-name) (state WAITING|RUNNING))
+	                    (action-name ?action-name) (state WAITING|RUNNING)
+	                    (param-values $?param-values))
 	?pe <- (skill-action-execinfo (goal-id ?goal-id) (plan-id ?plan-id)
 	                              (action-id ?id) (skill-id ?skill-id))
 	?sf <- (skill (id ?skill-id) (status S_FAILED) (error-msg ?error))
 	=>
-	(printout warn "Execution of " ?action-name " FAILED (" ?error ")" crlf)
+	(printout warn "Execution of " ?action-name "( " ?param-values ") FAILED (" ?error ")" crlf)
 	(modify ?pa (state EXECUTION-FAILED) (error-msg ?error))
 	(retract ?sf ?pe)
 )
