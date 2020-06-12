@@ -281,7 +281,7 @@
     ((?precond domain-precondition))
     (eq ?precond:name ?precond-name)
     (if (any-factp ((?op domain-operator)) (eq ?op:name ?precond:part-of)) then
-      return (eq ?precond:type negation)
+      (return (eq ?precond:type negation))
     )
     (bind ?parent-is-negative (domain-is-precond-negative ?precond:part-of))
     (return (neq (eq ?precond:type negation) ?parent-is-negative))
