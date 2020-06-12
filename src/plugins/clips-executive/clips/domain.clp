@@ -205,6 +205,7 @@
 (defrule domain-amend-action-params
   "If a plan action has no action-params specified, copy the params from the
    operator."
+  (declare (salience ?*SALIENCE-DOMAIN-CHECK*))
   ?a <- (plan-action
           (action-name ?op-name)
           (param-names $?ap-names&:(= (length$ ?ap-names) 0))
