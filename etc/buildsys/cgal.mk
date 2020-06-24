@@ -34,12 +34,24 @@ ifeq ($(CGAL_HAVE_BOOST_LIBS),1)
       ifneq ($(wildcard $(SYSROOT)/usr/include/mpfr.h $(SYSROOT)/usr/local/include/mpfr.h),)
         HAVE_CGAL:=1
         CFLAGS_CGAL:= -DHAVE_CGAL $(call boost-libs-cflags,$(CGAL_REQ_BOOST_LIBS)) -Wno-deprecated-register
-
         # Disable this runtime check since it fails when using valgrind
         CFLAGS_CGAL += -DCGAL_DISABLE_ROUNDING_MATH_CHECK
 
+        ifneq ($(wildcard $(SYSROOT)/usr/local/include/CGAL/version.h),)
+          CGAL_VERSION_HEADER=$(SYSROOT)/usr/local/include/CGAL/version.h
+        else
+          CGAL_VERSION_HEADER=$(SYSROOT)/usr/include/CGAL/version.h
+        endif
+        CGAL_VERSION=$(shell grep -oP "CGAL_VERSION\s+\K.*" $(CGAL_VERSION_HEADER))
+        CGAL_VERSION_SPLITTED=$(call split,.,$(CGAL_VERSION))
+        CGAL_VERSION_MAJOR=$(word 1,$(CGAL_VERSION_SPLITTED))
+        CGAL_VERSION_MINOR=$(word 2,$(CGAL_VERSION_SPLITTED))
+        HAVE_CGAL5 = $(if $(call gte,$(CGAL_VERSION_MAJOR),5),1)
         LDFLAGS_CGAL:=-lgmp -lmpfr -lm \
 		      $(call boost-libs-ldflags,$(REQ_BOOST_LIBS))
+        ifneq ($(HAVE_CGAL5),1)
+          LDFLAGS_CGAL += -lCGAL -lCGAL_Core
+        endif
 
         ifeq ($(CC),clang)
           CFLAGS_CGAL += -Wno-unused-local-typedef
