@@ -42,7 +42,7 @@ ifeq ($(CGAL_HAVE_BOOST_LIBS),1)
         else
           CGAL_VERSION_HEADER=$(SYSROOT)/usr/include/CGAL/version.h
         endif
-        CGAL_VERSION=$(shell grep -oP "CGAL_VERSION\s+\K.*" $(CGAL_VERSION_HEADER))
+        CGAL_VERSION=$(shell sed -n -e 's/.*CGAL_VERSION[[:space:]]\(.*\)/\1/p' $(CGAL_VERSION_HEADER))
         CGAL_VERSION_SPLITTED=$(call split,.,$(CGAL_VERSION))
         CGAL_VERSION_MAJOR=$(word 1,$(CGAL_VERSION_SPLITTED))
         CGAL_VERSION_MINOR=$(word 2,$(CGAL_VERSION_SPLITTED))
