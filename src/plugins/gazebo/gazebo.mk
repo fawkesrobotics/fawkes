@@ -32,7 +32,7 @@ ifeq ($(HAVE_GAZEBO),1)
   # Gazebo 8 declared several symbols as deprecated but still uses them.
   # Disable the deprecated declarations warning until this is fixed.
   CFLAGS_GAZEBO  = -DHAVE_GAZEBO $(shell $(PKGCONFIG) --cflags 'gazebo') \
-                   -Wno-deprecated-declarations
+                   -Wno-deprecated-declarations -DTBB_SUPPRESS_DEPRECATED_MESSAGES
   LDFLAGS_GAZEBO = $(shell $(PKGCONFIG) --libs 'gazebo') -ldl
 
   ifeq ($(HAVE_GAZEBO_96)$(boost-have-lib system),11)
