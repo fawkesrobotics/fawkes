@@ -60,6 +60,8 @@ require("fawkes.modinit")
 -- @author Tim Niemueller
 module(..., fawkes.modinit.module_init)
 
+require("fawkes.tableext")
+
 require("fawkes.fsm.jumpstate")
 local skillstati = require("skiller.skillstati")
 
@@ -158,21 +160,21 @@ function SubSkillJumpState:set_transition_labels()
    if self.skills and #self.skills > 0 then
       local snames = {}
       for _,s in ipairs(self.skills) do
-	 if s[1] == nil then
-	    error("Skill entry is nil, forgot to add skill to dependencies?")
-	 elseif type(s[1]) == "string" then
-	    table.insert(snames, s[1])
-	 else
-	    table.insert(snames, s[1].name)
-	 end
+         if s[1] == nil then
+          error("Skill entry is nil, forgot to add skill to dependencies?")
+         elseif type(s[1]) == "string" then
+          table.insert(snames, s[1])
+         else
+          table.insert(snames, s[1].name)
+         end
       end
       self.skill_names = table.concat(snames, ", ")
       if self.failure_transition then
-	 self.failure_transition.description =
+         self.failure_transition.description =
             table.concat(snames, " or ") .. " failed"
       end
       if self.final_transition then
-	 self.final_transition.description =
+         self.final_transition.description =
             table.concat(snames, " and ")
          if self.final_fail_trans then
             self.final_transition.description =
@@ -186,10 +188,10 @@ function SubSkillJumpState:set_transition_labels()
    else
       self.skill_names = ""
       if self.failure_transition then
-	 self.failure_transition.description = "Skills failed"
+         self.failure_transition.description = "Skills failed"
       end
       if self.final_transition then
-	 self.final_transition.description   = "Skills succeeded"
+         self.final_transition.description   = "Skills succeeded"
       end
    end
    self.fsm:mark_changed()
@@ -208,7 +210,7 @@ function SubSkillJumpState:jumpcond_skill_failed()
       local error = ""
 
       if error and error ~= "" then
-	 self.fsm:set_error(self.name .. "()/" .. self.skill_names ..
+         self.fsm:set_error(self.name .. "()/" .. self.skill_names ..
                             " failed: " .. error)
       end
       return true
@@ -228,20 +230,45 @@ function SubSkillJumpState:do_init()
 
    self:skill_reset()
    self.skill_status = skillstati.S_RUNNING
-
+   
    self.args = {}
+
+   -- initialize empty tables to compare expected arguments (exp_args) and potential unexpected arguments (unexp_args)
+   -- by the user
+   local exp_args = {}
+   local unexp_args = {}
+
    for _, s in ipairs(self.skills) do
-			if s[1] ~= nil then
-				 local sname = ""
-				 if type(s[1]) == "string" then
-						sname = s[1]
-				 else
-						sname = s[1].name
-				 end
-				 self.args[sname] = {}
-			end
-	 end
+      if s[1] ~= nil then
+         local sname = ""
+         if type(s[1]) == "string" then
+            sname = s[1]
+         else
+            sname = s[1].name
+         end
+         self.args[sname] = {}
+      end
+   end
+   -- copy expected arguments table for later comparison
+   exp_args = table.deepcopy(self.args)
+
    self:init()
+   
+   -- copy actual arguments table to single out unexpected arguments
+   unexp_args = table.deepcopy(self.args)
+
+   -- compare keys of copies to determine unexpected key names
+   for act_args_key,act_args_val in pairs(unexp_args) do
+      for exp_args_key,act_args_val in pairs(exp_args) do 
+         if act_args_key == exp_args_key then
+            unexp_args[act_args_key] = nil
+         end
+      end
+   end
+   for unexp_skillname,_ in pairs(unexp_args) do
+      print_warn("Unexpected skillname: " .. unexp_skillname .. " in self.args")
+   end
+
    for _, s in ipairs(self.skills) do
       local set_already = false
       local args = {}
@@ -250,21 +277,21 @@ function SubSkillJumpState:do_init()
          if k ~= 1 then
             set_already = true
             if type(k) == "number" and type(v) == "table" then
-	       -- assuming this is the default args table, passed in define_states
+               -- assuming this is the default args table, passed in define_states
                for k2, v2 in pairs(v) do
                   if type(v2) == "table" then
-		     args[k2] = table.deepcopy(v2)
-		  else
-		     args[k2] = v2
-		  end
+                     args[k2] = table.deepcopy(v2)
+                  else
+                     args[k2] = v2
+                  end
                end
 
             elseif type(k) ~= "string" or (k ~= "status" and k ~= "args") then
-	       print_warn("You have set the subskill "..s[1].name.."'s field '"..tostring(k).."'."
-			  .." Please pass the subskill's arguments in the 'args' field of subskills,"
-			  .." or the 'args' field of the state that envokes the subskill(s).")
+               print_warn("You have set the subskill "..s[1].name.."'s field '"..tostring(k).."'."
+                          .." Please pass the subskill's arguments in the 'args' field of subskills,"
+                          .." or the 'args' field of the state that envokes the subskill(s).")
                args[k] = v
-	    end
+            end
          end
       end
 
@@ -290,7 +317,7 @@ function SubSkillJumpState:do_init()
    if self.skills then
       local t = {}
       for _, skill in ipairs(self.skills) do
-	 table.insert(t, self:skillstring(skill))
+         table.insert(t, self:skillstring(skill))
       end
       print_debug("%s: executing %s", self.name, table.concat(t, "; "))
    --elseif self.skill then
@@ -374,10 +401,10 @@ end
 function SubSkillJumpState:skill_reset()
    if self.skills then
       for _, s in ipairs(self.skills) do
-	 s.args = nil
-	 s.__args = nil
-	 s.status = skillstati.S_RUNNING
-	 s[1].reset()
+         s.args = nil
+         s.__args = nil
+         s.status = skillstati.S_RUNNING
+         s[1].reset()
       end
    end
 end
