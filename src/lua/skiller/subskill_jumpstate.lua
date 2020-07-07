@@ -233,9 +233,10 @@ function SubSkillJumpState:do_init()
    
    self.args = {}
 
-   -- store expected size of arguments table to compare after run of init()
+   -- initialize empty tables to compare expected arguments (exp_args) and potential unexpected arguments (unexp_args)
+   -- by the user
    local exp_args = {}
-   local act_args = {}
+   local unexp_args = {}
 
    for _, s in ipairs(self.skills) do
       if s[1] ~= nil then
@@ -253,18 +254,18 @@ function SubSkillJumpState:do_init()
 
    self:init()
    
-   -- copy actual arguments table for comparison
-   act_args = table.deepcopy(self.args)
+   -- copy actual arguments table to single out unexpected arguments
+   unexp_args = table.deepcopy(self.args)
 
    -- compare keys of copies to determine unexpected key names
-   for act_args_key,act_args_val in pairs(act_args) do
+   for act_args_key,act_args_val in pairs(unexp_args) do
       for exp_args_key,act_args_val in pairs(exp_args) do 
          if act_args_key == exp_args_key then
-            act_args[act_args_key] = nil
+            unexp_args[act_args_key] = nil
          end
       end
    end
-   for unexp_skillname,_ in pairs(act_args) do
+   for unexp_skillname,_ in pairs(unexp_args) do
       print_warn("Unexpected skillname: " .. unexp_skillname .. " in self.args")
    end
 
