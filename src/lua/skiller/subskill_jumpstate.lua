@@ -246,7 +246,6 @@ function SubSkillJumpState:do_init()
             sname = s[1].name
          end
          self.args[sname] = {}
-         --  exp_sizeof_args = exp_sizeof_args + 1
       end
    end
    -- copy expected arguments table for later comparison
