@@ -188,6 +188,7 @@
 (defrule domain-translate-obj-slot-type-to-ordered-fact
   "Translate the slot type of a domain-object into the ordered fact
    domain-obj-is-of-type."
+  (declare (salience ?*SALIENCE-HIGH*))
   (domain-object (name ?obj) (type ?type))
 =>
   (assert (domain-obj-is-of-type ?obj ?type))
@@ -195,6 +196,7 @@
 
 (defrule domain-get-transitive-types
   "An object of type t also has each super-type of t as its type."
+  (declare (salience ?*SALIENCE-HIGH*))
   (domain-obj-is-of-type ?obj ?type)
   (domain-object-type (name ?type&~object) (super-type ?super-type))
   (not (domain-obj-is-of-type ?obj ?super-type))
