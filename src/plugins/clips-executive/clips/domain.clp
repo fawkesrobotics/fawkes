@@ -275,6 +275,29 @@
                     (retract ?precond))
 )
 
+(deffunction domain-retract-action-grounding (?goal-id ?plan-id ?action-id)
+  "Retract all ground preconditions."
+  (do-for-all-facts ((?precond domain-precondition))
+                    (and (eq ?precond:grounded TRUE)
+                         (eq ?precond:goal-id ?goal-id)
+                         (eq ?precond:plan-id ?plan-id)
+                         (eq ?precond:grounded-with ?action-id))
+                    (retract ?precond))
+  (do-for-all-facts ((?precond domain-atomic-precondition))
+                    (and (eq ?precond:grounded TRUE)
+                         (eq ?precond:goal-id ?goal-id)
+                         (eq ?precond:plan-id ?plan-id)
+                         (eq ?precond:grounded-with ?action-id))
+                    (retract ?precond))
+  ;(do-for-all-facts ((?effect domain-effect))
+  ;                  (eq ?effect:grounded TRUE)
+  ;                  (retract ?effect))
+  ; Doing this increases the amount of asserts and retracts unncessarly
+  ; for the moment we only use the grounded effects when deducing the
+  ; plan's precond and effects
+
+)
+
 
 (deffunction domain-is-precond-negative
   "Check if a non-atomic precondition is negative by checking all its parents
@@ -896,10 +919,10 @@
 (defrule domain-action-final
   "After the effects of an action have been applied, change it to FINAL."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
-  ?a <- (plan-action (id ?action-id) (state EFFECTS-APPLIED))
+  ?a <- (plan-action (goal-id ?g) (plan-id ?p) (id ?action-id) (state EFFECTS-APPLIED))
   =>
   (modify ?a (state FINAL))
-  (domain-retract-grounding)
+  (domain-retract-action-grounding ?g ?p ?action-id)
 )
 
 ; This might be extended: if an action failed, but still all effects
@@ -910,10 +933,10 @@
 (defrule domain-action-failed
   "An action has failed."
   (declare (salience ?*SALIENCE-DOMAIN-APPLY*))
-  ?a <- (plan-action (id ?action-id) (state EXECUTION-FAILED))
+  ?a <- (plan-action (goal-id ?g) (plan-id ?p) (id ?action-id) (state EXECUTION-FAILED))
   =>
   (modify ?a (state FAILED))
-  (domain-retract-grounding)
+  (domain-retract-action-grounding ?g ?p ?action-id)
 )
 
 (defrule domain-check-if-action-is-executable
