@@ -164,10 +164,14 @@
    which are applied after the action was executed successfully."
   (slot name (type SYMBOL) (default-dynamic (gensym*)))
   (slot part-of (type SYMBOL))
+  (slot goal-id (type SYMBOL))
+  (slot plan-id (type SYMBOL))
+  (slot grounded-with (type INTEGER) (default 0))
   (slot predicate (type SYMBOL))
   (multislot param-names (default (create$)))
   (multislot param-values (default (create$)))
   (multislot param-constants (default (create$)))
+  (slot grounded (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
   (slot type (type SYMBOL) (allowed-values POSITIVE NEGATIVE)
     (default POSITIVE))
 )
@@ -724,6 +728,34 @@
   )
   (return ?values)
 )
+
+(defrule domain-ground-effects
+  "Ground an effect. Grounding here merely means that we
+   duplicate the effect and tie it to one specific action-id."
+  (declare (salience ?*SALIENCE-DOMAIN-GROUND*))
+  (goal (id ?g))
+  (plan (id ?p) (goal-id ?g))
+  (plan-action (action-name ?op) (goal-id ?g) (plan-id ?p) (id ?action-id)
+               (param-names $?action-param-names)
+               (param-values $?action-param-values)
+               (state FORMULATED|PENDING|WAITING))
+  ?effect <- (domain-effect
+                (part-of ?op)
+                (grounded FALSE)
+                (name ?effect-name)
+                (param-names $?effect-param-names)
+                (param-constants $?effect-param-constants))
+  (not (domain-effect (name ?effect-name) (goal-id ?g) (plan-id ?p)
+                      (grounded-with ?action-id) (grounded TRUE)))
+=>
+  (bind ?values (domain-ground-effect ?effect-param-names ?effect-param-constants
+							   ?action-param-names ?action-param-values))
+
+  (duplicate ?effect
+    (goal-id ?g) (plan-id ?p) (grounded-with ?action-id)
+    (grounded TRUE) (param-values ?values))
+)
+
 
 ; TODO: ?action-name should be ?op
 (defrule domain-effects-check-for-sensed
