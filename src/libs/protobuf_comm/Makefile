@@ -34,7 +34,7 @@ ifeq ($(HAVE_LIBCRYPTO),1)
   LDFLAGS_LIBCRYPTO += $(shell $(PKGCONFIG) --libs $(LIBCRYPTO_PKG))
 endif
 
-LIBS_libfawkes_protobuf_comm = stdc++ m
+LIBS_libfawkes_protobuf_comm = stdc++ m pthread
 OBJS_libfawkes_protobuf_comm = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCDIR)/,,$(realpath $(wildcard $(SRCDIR)/*.cpp $(SRCDIR)/*/*.cpp $(SRCDIR)/*/*/*.cpp)))))
 HDRS_libfawkes_protobuf_comm = $(subst $(SRCDIR)/,,$(wildcard $(SRCDIR)/*.h $(SRCDIR)/*/*.h $(SRCDIR)/*/*/*.h))
 

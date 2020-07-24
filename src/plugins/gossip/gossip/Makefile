@@ -21,6 +21,7 @@ include $(BUILDSYSDIR)/boost.mk
 CFLAGS += $(CFLAGS_CPP11)
 
 LIBS_libfawkesgossip = \
+	pthread \
 	fawkescore fawkesutils fawkesnetcomm fawkes_protobuf_comm
 OBJS_libfawkesgossip = gossip_group.o gossip_group_manager.o
 
