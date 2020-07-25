@@ -204,7 +204,7 @@ InterfaceDispatcher::on_reader_removed()
 }
 
 void
-InterfaceDispatcher::bb_interface_data_changed(Interface *interface) throw()
+InterfaceDispatcher::bb_interface_data_refreshed(Interface *interface) throw()
 {
 	queue_data_changed_.push_locked(interface);
 	dispatcher_data_changed_();
