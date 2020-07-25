@@ -87,7 +87,7 @@ TransformListener::TransformListener(BlackBoard *bb, Transformer *tf_transformer
 		for (i = tfifs_.begin(); i != tfifs_.end(); ++i) {
 			bbil_add_data_interface(*i);
 			// update data once we
-			bb_interface_data_changed(*i);
+			bb_interface_data_refreshed(*i);
 		}
 		bb_->register_listener(this);
 
@@ -128,7 +128,7 @@ TransformListener::bb_interface_created(const char *type, const char *id) throw(
 		return;
 	}
 
-	bb_interface_data_changed(tfif);
+	bb_interface_data_refreshed(tfif);
 
 	try {
 		bbil_add_data_interface(tfif);
@@ -181,7 +181,7 @@ TransformListener::conditional_close(Interface *interface) throw()
 }
 
 void
-TransformListener::bb_interface_data_changed(Interface *interface) throw()
+TransformListener::bb_interface_data_refreshed(Interface *interface) throw()
 {
 	TransformInterface *tfif = dynamic_cast<TransformInterface *>(interface);
 	if (!tfif)
