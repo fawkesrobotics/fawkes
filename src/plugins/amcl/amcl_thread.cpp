@@ -439,7 +439,7 @@ AmclThread::loop()
 	tf::Stamped<tf::Pose> odom_pose;
 	pf_vector_t           pose;
 
-	if (laser_if_->changed()) {
+	if (laser_if_->refreshed()) {
 		if (!get_odom_pose(
 		      odom_pose, pose.v[0], pose.v[1], pose.v[2], laser_if_->timestamp(), base_frame_id_)) {
 			if (cfg_buffer_debug_) {

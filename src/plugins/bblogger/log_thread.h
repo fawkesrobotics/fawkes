@@ -68,7 +68,7 @@ public:
 
 	virtual bool bb_interface_message_received(fawkes::Interface *interface,
 	                                           fawkes::Message *  message) throw();
-	virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
 	virtual void bb_interface_writer_added(fawkes::Interface *interface,
 	                                       unsigned int       instance_serial) throw();
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,

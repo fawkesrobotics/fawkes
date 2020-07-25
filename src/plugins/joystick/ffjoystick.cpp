@@ -129,7 +129,7 @@ public:
 	}
 
 	virtual void
-	bb_interface_data_changed(Interface *interface) throw()
+	bb_interface_data_refreshed(Interface *interface) throw()
 	{
 		if (!bb_->is_alive()) {
 			if (bb_->try_aliveness_restore()) {

@@ -169,7 +169,7 @@ RoombaJoystickThread::loop()
 		}
 	}
 
-	if (joy_if_->changed()) {
+	if (joy_if_->refreshed()) {
 		if (joy_if_->num_axes() == 0) {
 			logger->log_debug(name(), "Joystick disconnected, stopping");
 			stop();

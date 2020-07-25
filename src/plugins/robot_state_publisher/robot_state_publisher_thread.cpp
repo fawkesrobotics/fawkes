@@ -307,7 +307,7 @@ RobotStatePublisherThread::conditional_close(Interface *interface) throw()
 }
 
 void
-RobotStatePublisherThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
+RobotStatePublisherThread::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
 {
 	JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
 	if (!jiface)

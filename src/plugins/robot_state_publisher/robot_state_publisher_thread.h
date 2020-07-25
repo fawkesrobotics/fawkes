@@ -120,7 +120,7 @@ public:
 	virtual void bb_interface_created(const char *type, const char *id) throw();
 
 	// InterfaceListener
-	virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
 	virtual void bb_interface_writer_removed(fawkes::Interface *interface,
 	                                         unsigned int       instance_serial) throw();
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,

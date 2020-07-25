@@ -62,7 +62,7 @@ public:
 	void executeCommand(PLEXIL::Command *cmd);
 	void invokeAbort(PLEXIL::Command *cmd);
 
-	virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
 
 private:
 	struct skill_config

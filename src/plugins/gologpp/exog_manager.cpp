@@ -271,7 +271,7 @@ ExogManager::BlackboardEventHandler::make_exog_event(Interface *iface) const
 }
 
 void
-ExogManager::InterfaceWatcher::bb_interface_data_changed(Interface *iface) throw()
+ExogManager::InterfaceWatcher::bb_interface_data_refreshed(Interface *iface) throw()
 {
 	try {
 		exog_manager_.exog_queue_push(make_exog_event(iface));

@@ -71,7 +71,7 @@ RobotinoRosJointsThread::loop()
 	// update sensor values in interface
 	sens_if_->read();
 
-	if (sens_if_->changed()) {
+	if (sens_if_->refreshed()) {
 		const Time *ct           = sens_if_->timestamp();
 		float *     mot_velocity = sens_if_->mot_velocity();
 		int32_t *   mot_position = sens_if_->mot_position();

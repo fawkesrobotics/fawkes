@@ -375,7 +375,7 @@ BBLoggerThread::bb_interface_message_received(Interface *interface, Message *mes
 }
 
 void
-BBLoggerThread::bb_interface_data_changed(Interface *interface) throw()
+BBLoggerThread::bb_interface_data_refreshed(Interface *interface) throw()
 {
 	if (!enabled_)
 		return;
