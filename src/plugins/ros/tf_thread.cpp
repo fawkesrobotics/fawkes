@@ -163,7 +163,7 @@ RosTfThread::loop()
 }
 
 void
-RosTfThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
+RosTfThread::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
 {
 	TransformInterface *tfif = dynamic_cast<TransformInterface *>(interface);
 	if (!tfif)

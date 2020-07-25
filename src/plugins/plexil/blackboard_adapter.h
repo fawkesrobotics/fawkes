@@ -70,7 +70,7 @@ public:
 	virtual void executeCommand(PLEXIL::Command *cmd);
 
 private:
-	virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
 
 	void bb_open_for_reading(PLEXIL::Command *cmd);
 	void bb_close(PLEXIL::Command *cmd);

@@ -176,7 +176,7 @@ BlackboardPlexilAdapter::lookupNow(PLEXIL::State const &state, PLEXIL::StateCach
 			cache_entry.setUnknown();
 			return;
 		}
-		cache_entry.update(ifs_read_[uid]->changed());
+		cache_entry.update(ifs_read_[uid]->refreshed());
 	} else if (state.name() == "BB_int" || state.name() == "BB_int_at" || state.name() == "BB_real"
 	           || state.name() == "BB_real_at" || state.name() == "BB_bool"
 	           || state.name() == "BB_bool_at" || state.name() == "BB_string"
@@ -411,7 +411,7 @@ BlackboardPlexilAdapter::unsubscribe(const PLEXIL::State &state)
 }
 
 void
-BlackboardPlexilAdapter::bb_interface_data_changed(fawkes::Interface *interface) throw()
+BlackboardPlexilAdapter::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
 {
 	//logger_->log_debug("PlexilBB", "Event for %s", interface->uid());
 	interface->read();

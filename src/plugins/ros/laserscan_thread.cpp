@@ -256,7 +256,7 @@ RosLaserScanThread::loop()
 }
 
 void
-RosLaserScanThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
+RosLaserScanThread::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
 {
 	Laser360Interface * ls360if  = dynamic_cast<Laser360Interface *>(interface);
 	Laser720Interface * ls720if  = dynamic_cast<Laser720Interface *>(interface);

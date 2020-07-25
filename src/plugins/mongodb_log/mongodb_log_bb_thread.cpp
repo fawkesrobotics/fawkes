@@ -215,7 +215,8 @@ MongoLogBlackboardThread::InterfaceListener::~InterfaceListener()
 }
 
 void
-MongoLogBlackboardThread::InterfaceListener::bb_interface_data_changed(Interface *interface) throw()
+MongoLogBlackboardThread::InterfaceListener::bb_interface_data_refreshed(
+  Interface *interface) throw()
 {
 	now_->stamp();
 	interface->read();

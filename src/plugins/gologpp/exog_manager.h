@@ -95,7 +95,7 @@ private:
 		                 ExogManager &exog_mgr);
 		virtual ~InterfaceWatcher() override;
 
-		virtual void bb_interface_data_changed(Interface *) throw() override;
+		virtual void bb_interface_data_refreshed(Interface *) throw() override;
 
 	private:
 		Interface *iface_;

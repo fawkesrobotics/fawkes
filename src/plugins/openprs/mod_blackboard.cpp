@@ -283,7 +283,7 @@ static void
 post_interface(Interface *i)
 {
 	i->read();
-	if (i->changed()) {
+	if (i->refreshed()) {
 		const Time *t = i->timestamp();
 
 		TermList tl = sl_make_slist();
