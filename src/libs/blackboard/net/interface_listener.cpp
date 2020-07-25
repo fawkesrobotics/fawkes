@@ -78,7 +78,7 @@ BlackBoardNetHandlerInterfaceListener::~BlackBoardNetHandlerInterfaceListener()
 }
 
 void
-BlackBoardNetHandlerInterfaceListener::bb_interface_data_changed(Interface *interface) throw()
+BlackBoardNetHandlerInterfaceListener::bb_interface_data_refreshed(Interface *interface) throw()
 {
 	// send out data changed notification
 	interface->read();

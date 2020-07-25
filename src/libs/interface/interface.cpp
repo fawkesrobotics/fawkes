@@ -245,6 +245,7 @@ Interface::Interface()
 	auto_timestamping_    = true;
 	owner_                = strdup("?");
 	data_changed          = false;
+	data_refreshed        = false;
 	memset(hash_, 0, INTERFACE_HASH_SIZE_);
 	memset(hash_printable_, 0, INTERFACE_HASH_SIZE_ * 2 + 1);
 
@@ -499,17 +500,15 @@ Interface::write()
 
 	rwlock_->lock_for_write();
 	data_mutex_->lock();
-	bool do_notify = false;
 	if (valid_) {
-		if (data_changed) {
+		if (data_refreshed) {
 			if (auto_timestamping_)
 				timestamp_->stamp();
 			long sec = 0, usec = 0;
 			timestamp_->get_timestamp(sec, usec);
 			data_ts->timestamp_sec  = sec;
 			data_ts->timestamp_usec = usec;
-			data_changed            = false;
-			do_notify               = true;
+			data_refreshed          = false;
 		}
 		memcpy(mem_data_ptr_, data_ptr, data_size);
 	} else {
@@ -520,8 +519,7 @@ Interface::write()
 	data_mutex_->unlock();
 	rwlock_->unlock();
 
-	if (do_notify)
-		interface_mediator_->notify_of_data_change(this);
+	interface_mediator_->notify_of_data_refresh(this);
 }
 
 /** Get data size.
@@ -755,9 +753,9 @@ Interface::set_auto_timestamping(bool enabled)
  * actually set.
  */
 void
-Interface::mark_data_changed()
+Interface::mark_data_refreshed()
 {
-	data_changed = true;
+	data_refreshed = true;
 }
 
 /** Check if data has been changed.
@@ -777,10 +775,10 @@ Interface::mark_data_changed()
  * false otherwise
  */
 bool
-Interface::changed() const
+Interface::refreshed() const
 {
 	if (write_access_) {
-		return data_changed;
+		return data_refreshed;
 	} else {
 		return (*timestamp_ != local_read_timestamp_);
 	}

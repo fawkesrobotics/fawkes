@@ -120,7 +120,7 @@ BlackBoardInterfaceListener::bbil_name() const
  * @param interface interface instance that you supplied to bbil_add_data_interface()
  */
 void
-BlackBoardInterfaceListener::bb_interface_data_changed(Interface *interface) throw()
+BlackBoardInterfaceListener::bb_interface_data_refreshed(Interface *interface) throw()
 {
 }
 

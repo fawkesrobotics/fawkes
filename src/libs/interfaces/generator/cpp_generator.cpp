@@ -410,7 +410,7 @@ CppInterfaceGenerator::write_messages_cpp(FILE *f)
 		        (*i).getComment().c_str());
 
 		write_message_ctor_dtor_cpp(f, (*i).getName(), "Message", class_name + "::", (*i).getFields());
-		write_methods_cpp(f, class_name, (*i).getName(), (*i).getFields(), class_name + "::", false);
+		write_methods_cpp(f, class_name, (*i).getName(), (*i).getFields(), class_name + "::");
 		write_message_clone_method_cpp(f, (class_name + "::" + (*i).getName()).c_str());
 	}
 	fprintf(f,
@@ -925,8 +925,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *                      f,
                                          std::string                 interface_classname,
                                          std::string                 classname,
                                          std::vector<InterfaceField> fields,
-                                         std::string                 inclusion_prefix,
-                                         bool                        write_data_changed)
+                                         std::string                 inclusion_prefix)
 {
 	fprintf(f, "/* Methods */\n");
 	for (vector<InterfaceField>::iterator i = fields.begin(); i != fields.end(); ++i) {
@@ -1023,13 +1022,8 @@ CppInterfaceGenerator::write_methods_cpp(FILE *                      f,
 		        (*i).getAccessType().c_str(),
 		        (*i).getName().c_str());
 
-		if (write_data_changed)
-			fprintf(f, "  data_changed |= ");
-		else
-			fprintf(f, "  ");
-
 		fprintf(f,
-		        "change_field(data->%s, new_%s);\n"
+		        "  set_field(data->%s, new_%s);\n"
 		        "}\n\n",
 		        (*i).getName().c_str(),
 		        (*i).getName().c_str());
@@ -1044,7 +1038,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *                      f,
 			        "void\n"
 			        "%s%s::set_%s(unsigned int index, const %s new_%s)\n"
 			        "{\n"
-			        "  %schange_field(data->%s, index, new_%s);\n"
+			        "  set_field(data->%s, index, new_%s);\n"
 			        "}\n",
 			        (*i).getName().c_str(),
 			        (*i).getComment().c_str(),
@@ -1055,7 +1049,6 @@ CppInterfaceGenerator::write_methods_cpp(FILE *                      f,
 			        (*i).getName().c_str(),
 			        (*i).getPlainAccessType().c_str(),
 			        i->getName().c_str(),
-			        write_data_changed ? "  data_changed |= " : "",
 			        i->getName().c_str(),
 			        i->getName().c_str());
 		}
@@ -1078,7 +1071,7 @@ CppInterfaceGenerator::write_methods_cpp(FILE *                          f,
                                          std::vector<InterfacePseudoMap> pseudo_maps,
                                          std::string                     inclusion_prefix)
 {
-	write_methods_cpp(f, interface_classname, classname, fields, inclusion_prefix, true);
+	write_methods_cpp(f, interface_classname, classname, fields, inclusion_prefix);
 
 	for (vector<InterfacePseudoMap>::iterator i = pseudo_maps.begin(); i != pseudo_maps.end(); ++i) {
 		fprintf(f,
