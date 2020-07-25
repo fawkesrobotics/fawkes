@@ -77,7 +77,7 @@ public:
    * @param interface interface whose subscribers to notify
    * @see Interface::write()
    */
-	virtual void notify_of_data_change(const Interface *interface) = 0;
+	virtual void notify_of_data_refresh(const Interface *interface) = 0;
 };
 
 } // end namespace fawkes

@@ -143,7 +143,7 @@ BlackBoardInterfaceProxy::process_data_changed(FawkesNetworkMessage *msg)
 
 	memcpy(data_chunk_, (char *)payload + sizeof(bb_idata_msg_t), data_size_);
 
-	notifier_->notify_of_data_change(interface_);
+	notifier_->notify_of_data_refresh(interface_);
 }
 
 /** Process MSG_BB_INTERFACE message.
@@ -310,7 +310,7 @@ BlackBoardInterfaceProxy::writer(const Interface *interface) const
 }
 
 void
-BlackBoardInterfaceProxy::notify_of_data_change(const Interface *interface)
+BlackBoardInterfaceProxy::notify_of_data_refresh(const Interface *interface)
 {
 	// need to send write message
 	size_t          payload_size = sizeof(bb_idata_msg_t) + interface->datasize();

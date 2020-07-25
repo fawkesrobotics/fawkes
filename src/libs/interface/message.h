@@ -26,11 +26,9 @@
 
 #include <core/exceptions/software.h>
 #include <core/utils/refcount.h>
+#include <interface/change_field.h>
 #include <interface/field_iterator.h>
 #include <interface/types.h>
-
-#include <cstring>
-#include <type_traits>
 
 #define INTERFACE_MESSAGE_TYPE_SIZE_ 64
 
@@ -125,6 +123,20 @@ protected:
 	                   const char *                enumtype = 0,
 	                   const interface_enum_map_t *enum_map = 0);
 
+	template <class FieldT, class DataT>
+	void
+	set_field(FieldT &field, DataT &data)
+	{
+		change_field(field, data);
+	}
+
+	template <class FieldT, class DataT>
+	void
+	set_field(FieldT &field, unsigned int index, DataT &data)
+	{
+		change_field(field, index, data);
+	}
+
 	void *       data_ptr;
 	unsigned int data_size;
 
@@ -155,66 +167,6 @@ Message::as_type()
 	} else {
 		throw fawkes::TypeMismatchException("Message is not of requested type");
 	}
-}
-
-/** Set a field and return whether it changed
- * @param field The interface field to change
- * @param value The new value
- * @return Whether the new value is different from the old
- */
-template <class FieldT, class DataT>
-bool
-change_field(FieldT &field, const DataT &value)
-{
-	bool rv = field != value;
-	field   = value;
-	return rv;
-}
-
-/** Set a string field and return whether it changed
- * @param field The interface field to change
- * @param value The new value
- * @return Whether the new value is different from the old
- */
-template <class FieldT, std::size_t Size>
-bool
-change_field(FieldT (&field)[Size], const char *value)
-{
-	bool change = ::strncmp(field, value, Size);
-	::strncpy(field, value, Size - 1);
-	field[Size - 1] = 0;
-	return change;
-}
-
-/** Set an array field and return whether it changed
- * @param field The interface field to change
- * @param value The new value
- * @return Whether the new value is different from the old
- */
-template <class FieldT, std::size_t Size, class DataT>
-typename std::enable_if<!std::is_same<FieldT, char>::value, bool>::type
-change_field(FieldT (&field)[Size], const DataT *value)
-{
-	bool change = ::memcmp(field, value, Size);
-	::memcpy(field, value, sizeof(FieldT) * Size);
-	return change;
-}
-
-/** Set an array field value at a certain index and return whether it changed
- * @param field The interface field to change
- * @param index Index into the array field
- * @param value The new value
- * @return Whether the new value is different from the old
- */
-template <class FieldT, std::size_t Size, class DataT>
-bool
-change_field(FieldT (&field)[Size], unsigned int index, const DataT &value)
-{
-	if (index >= Size)
-		throw Exception("Index value %u is out of bounds (0..%u)", index, Size - 1);
-	bool change  = field[index] != value;
-	field[index] = value;
-	return change;
 }
 
 } // end namespace fawkes
