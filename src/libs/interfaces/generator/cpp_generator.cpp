@@ -916,9 +916,6 @@ CppInterfaceGenerator::write_message_ctor_dtor_cpp(FILE *                      f
  * @param classname name of class (can be interface or message)
  * @param fields fields
  * @param inclusion_prefix used if class is included in another class.
- * @param write_data_changed if true writes code that sets the interface's
- * data_changed flag. Set to true for interface methods, false for message
- * methods.
  */
 void
 CppInterfaceGenerator::write_methods_cpp(FILE *                      f,

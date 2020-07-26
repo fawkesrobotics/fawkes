@@ -123,19 +123,20 @@ protected:
 	                   const char *                enumtype = 0,
 	                   const interface_enum_map_t *enum_map = 0);
 
+	/** Set a field
+	 * @param field Reference to the field
+	 * @param data New field value
+	 */
 	template <class FieldT, class DataT>
-	void
-	set_field(FieldT &field, DataT &data)
-	{
-		change_field(field, data);
-	}
+	void set_field(FieldT &field, DataT &data);
 
+	/** Set an array field at a given index
+	 * @param field Reference to the array field
+	 * @param index Index into the array field
+	 * @param data New value to put at given index
+	 */
 	template <class FieldT, class DataT>
-	void
-	set_field(FieldT &field, unsigned int index, DataT &data)
-	{
-		change_field(field, index, data);
-	}
+	void set_field(FieldT &field, unsigned int index, DataT &data);
 
 	void *       data_ptr;
 	unsigned int data_size;
@@ -167,6 +168,20 @@ Message::as_type()
 	} else {
 		throw fawkes::TypeMismatchException("Message is not of requested type");
 	}
+}
+
+template <class FieldT, class DataT>
+void
+Message::set_field(FieldT &field, DataT &data)
+{
+	change_field(field, data);
+}
+
+template <class FieldT, class DataT>
+void
+Message::set_field(FieldT &field, unsigned int index, DataT &data)
+{
+	change_field(field, index, data);
 }
 
 } // end namespace fawkes

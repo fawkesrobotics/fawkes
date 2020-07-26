@@ -644,9 +644,9 @@ BlackBoardInterfaceManager::writer_for_mem_serial(unsigned int mem_serial)
 }
 
 void
-BlackBoardInterfaceManager::notify_of_data_refresh(const Interface *interface)
+BlackBoardInterfaceManager::notify_of_data_refresh(const Interface *interface, bool has_changed)
 {
-	notifier->notify_of_data_refresh(interface);
+	notifier->notify_of_data_refresh(interface, has_changed);
 }
 
 bool

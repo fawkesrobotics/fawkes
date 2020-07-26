@@ -680,11 +680,13 @@ BlackBoardNotifier::process_reader_queue()
  * mandatory to call this function! The interface base class write method does
  * that for you.
  * @param interface interface whose subscribers to notify
+ * @param has_changed whether the current data is different from the last time write() was
+ * called on the interface
  * @see Interface::write()
  * @see BlackBoardInterfaceListener::bb_interface_data_changed()
  */
 void
-BlackBoardNotifier::notify_of_data_refresh(const Interface *interface)
+BlackBoardNotifier::notify_of_data_refresh(const Interface *interface, bool has_changed)
 {
 	bbil_data_mutex_->lock();
 	bbil_data_events_ += 1;
@@ -698,6 +700,8 @@ BlackBoardNotifier::notify_of_data_refresh(const Interface *interface)
 			Interface *bbil_iface = bbil->bbil_data_interface(uid);
 			if (bbil_iface != NULL) {
 				bbil->bb_interface_data_refreshed(bbil_iface);
+				if (has_changed)
+					bbil->bb_interface_data_changed(bbil_iface);
 			} else {
 				LibLogger::log_warn("BlackBoardNotifier",
 				                    "BBIL[%s] registered for data change events "

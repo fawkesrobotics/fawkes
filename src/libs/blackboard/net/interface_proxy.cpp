@@ -107,13 +107,13 @@ BlackBoardInterfaceProxy::~BlackBoardInterfaceProxy()
 	free(mem_chunk_);
 }
 
-/** Process MSG_BB_DATA_CHANGED message.
+/** Process MSG_BB_DATA_CHANGED/REFRESHED message.
  * @param msg message to process.
  */
 void
 BlackBoardInterfaceProxy::process_data_changed(FawkesNetworkMessage *msg)
 {
-	if (msg->msgid() != MSG_BB_DATA_CHANGED) {
+	if (msg->msgid() != MSG_BB_DATA_CHANGED && msg->msgid() != MSG_BB_DATA_REFRESHED) {
 		LibLogger::log_error("BlackBoardInterfaceProxy",
 		                     "Expected data changed BB message, but "
 		                     "received message of type %u, ignoring.",
@@ -143,7 +143,7 @@ BlackBoardInterfaceProxy::process_data_changed(FawkesNetworkMessage *msg)
 
 	memcpy(data_chunk_, (char *)payload + sizeof(bb_idata_msg_t), data_size_);
 
-	notifier_->notify_of_data_refresh(interface_);
+	notifier_->notify_of_data_refresh(interface_, msg->msgid() == MSG_BB_DATA_CHANGED);
 }
 
 /** Process MSG_BB_INTERFACE message.
@@ -310,7 +310,7 @@ BlackBoardInterfaceProxy::writer(const Interface *interface) const
 }
 
 void
-BlackBoardInterfaceProxy::notify_of_data_refresh(const Interface *interface)
+BlackBoardInterfaceProxy::notify_of_data_refresh(const Interface *interface, bool has_changed)
 {
 	// need to send write message
 	size_t          payload_size = sizeof(bb_idata_msg_t) + interface->datasize();
@@ -320,8 +320,12 @@ BlackBoardInterfaceProxy::notify_of_data_refresh(const Interface *interface)
 	dm->data_size                = htonl(interface->datasize());
 	memcpy((char *)payload + sizeof(bb_idata_msg_t), interface->datachunk(), interface->datasize());
 
-	FawkesNetworkMessage *omsg = new FawkesNetworkMessage(
-	  clid_, FAWKES_CID_BLACKBOARD, MSG_BB_DATA_CHANGED, payload, payload_size);
+	FawkesNetworkMessage *omsg =
+	  new FawkesNetworkMessage(clid_,
+	                           FAWKES_CID_BLACKBOARD,
+	                           has_changed ? MSG_BB_DATA_CHANGED : MSG_BB_DATA_REFRESHED,
+	                           payload,
+	                           payload_size);
 	fnc_->enqueue(omsg);
 }
 
