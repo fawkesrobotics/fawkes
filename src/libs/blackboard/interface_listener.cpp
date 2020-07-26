@@ -114,13 +114,25 @@ BlackBoardInterfaceListener::bbil_name() const
 	return name_;
 }
 
-/** BlackBoard data changed notification.
+/** BlackBoard data refreshed notification.
  * This is called whenever the data in an interface that you registered for is
  * modified. This happens if a writer calls the Interface::write() method.
  * @param interface interface instance that you supplied to bbil_add_data_interface()
  */
 void
 BlackBoardInterfaceListener::bb_interface_data_refreshed(Interface *interface) throw()
+{
+}
+
+/** BlackBoard data changed notification.
+ * This is called whenever the data in an interface that you registered for is
+ * changed. This happens if any field has been changed to a different value before a write().
+ * Note that a change implies a refresh, so when data change, both this method AND
+ * @ref bb_interface_data_refreshed will be called!
+ * @param interface interface instance that you supplied to bbil_add_data_interface()
+ */
+void
+BlackBoardInterfaceListener::bb_interface_data_changed(Interface *interface) throw()
 {
 }
 
