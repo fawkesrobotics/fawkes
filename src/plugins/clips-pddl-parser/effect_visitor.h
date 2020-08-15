@@ -35,9 +35,9 @@ public:
 	                         const std::string &condition,
 	                         int                eff_counter);
 
-	std::vector<std::string> operator()(pddl_parser::FunctionalEffect &a) const;
-	std::vector<std::string> operator()(pddl_parser::AtomicFormula &p) const;
-	std::vector<std::string> operator()(pddl_parser::ActionCost &p) const;
+	std::vector<std::string> operator()(pddl_parser::FunctionalEffect &fe) const;
+	std::vector<std::string> operator()(pddl_parser::AtomicFormula &af) const;
+	std::vector<std::string> operator()(pddl_parser::ActionCost &ac) const;
 	std::vector<std::string> operator()(pddl_parser::ConditionalEffect &ce) const;
 
 private:

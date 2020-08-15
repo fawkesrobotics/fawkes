@@ -34,7 +34,6 @@ using namespace fawkes;
  */
 
 /** Initialize the CLIPS feature.
- * @param logger The logger to use for logging in the feature
  */
 PDDLClipsThread::PDDLClipsThread()
 : Thread("ClipsPddlParser", Thread::OPMODE_WAITFORWAKEUP),

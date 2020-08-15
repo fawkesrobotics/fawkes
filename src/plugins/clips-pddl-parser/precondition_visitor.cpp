@@ -117,7 +117,7 @@ PreconditionToCLIPSFactVisitor::operator()(AtomicFormula af) const
  * This creates proper CLIPS precondition fact strings for the GoalDescription and all
  * its arguments. For compound formulae (e.g., conjunctions), this also
  * translates all sub-formulae recursively.
- * @param p The predicate to translate.
+ * @param fc The functional conditon to translate.
  * @return A vector of strings, each string is a properly formed CLIPS fact.
  */
 vector<string>

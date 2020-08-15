@@ -69,11 +69,11 @@ EffectToCLIPSFactVisitor::operator()(ConditionalEffect &ce) const
 
 /** Translate an ActionCost into a vector of strings.
  * Action cost are not used by clips currently. Therefore, return an empty vector.
- * @param ce The ActionCost object that should be parsed
+ * @param ac The ActionCost object that should be parsed
  * @return An empty vector
  */
 std::vector<std::string>
-EffectToCLIPSFactVisitor::operator()(ActionCost &ce) const
+EffectToCLIPSFactVisitor::operator()(ActionCost &ac) const
 {
 	std::vector<std::string> res;
 	return res;
@@ -129,7 +129,7 @@ EffectToCLIPSFactVisitor::operator()(AtomicFormula &af) const
 }
 
 /** Translate a FunctionalEffect into a vector of strings. A functional effect is
- * a construct of the form (and <effect>),(not <effect>) or (when <condition> <effect>)
+ * a construct of the form (and effect),(not effect) or (when condition effect)
  * This creates proper CLIPS effect fact strings for the Effect and all its
  * arguments. For compound formulae (e.g., conjunctions), this also translates
  * all sub-formulae recursively.

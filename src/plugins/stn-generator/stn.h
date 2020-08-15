@@ -40,57 +40,211 @@
 namespace fawkes {
 namespace stn {
 
+/**
+ * @brief Visitor class to access Boost spirit Precondition objects
+ *        Parses the predicates of the precondition into a vector of predicates
+ * 
+ */
 class PreconditionVisitor : public boost::static_visitor<void>
 {
 public:
+	/**
+	 * @brief Construct a new Precondition Visitor object
+	 * 
+	 * @param preconds pointer to a vector of Predicate objects, to be filled with the predicates of the precondition
+	 * @param condition Bool for denoting if the precondition is a negation
+	 */
 	PreconditionVisitor(std::vector<Predicate> *preconds, bool condition);
 
-	void                    operator()(pddl_parser::AtomicFormula &a);
-	void                    operator()(pddl_parser::FunctionalCondition &c);
+	/**
+	 * @brief Handler if the precondition is an atomic formula
+	 * 
+	 * @param a pddl_parser AtomicFormula struct
+	 */
+	void operator()(pddl_parser::AtomicFormula &a);
+
+	/**
+	 * @brief Handler if the precondition is a functional condition
+	 * 
+	 * @param c pddl_parser FunctionalCondition struct
+	 */
+	void operator()(pddl_parser::FunctionalCondition &c);
+
+	/**
+	 * @brief Pointer to a vector of predicates, to be filled by the handler functions
+	 * 
+	 */
 	std::vector<Predicate> *preconds_;
-	bool                    condition_;
+
+	/**
+	 * @brief Boolean denoting the current negation status
+	 * 
+	 */
+	bool condition_;
 };
 
+/**
+ * @brief Visitor class to access Boost spirit Precondition objects
+ *        Parses the predicates of the precondition into a ofstream, to be later used as string
+ * 
+ */
 class PddlStringPreconditionVisitor : public boost::static_visitor<void>
 {
 public:
+	/**
+	 * @brief Construct a new Pddl String Precondition Visitor object
+	 * 
+	 * @param pddl_string ofstream to collect the predicates of the precondition
+	 */
 	PddlStringPreconditionVisitor(std::ofstream &pddl_string);
 
-	void           operator()(pddl_parser::AtomicFormula &a);
-	void           operator()(pddl_parser::FunctionalCondition &c);
+	/**
+	 * @brief Handler if the precondition is an atomic formula
+	 * 
+	 * @param a pddl_parser AtomicFormula struct
+	 */
+	void operator()(pddl_parser::AtomicFormula &a);
+
+	/**
+	 * @brief Handler if the precondition is a functional condition
+	 * 
+	 * @param c pddl_parser FunctionalCondition struct
+	 */
+	void operator()(pddl_parser::FunctionalCondition &c);
+
+	/**
+	 * @brief ofstream to store the parsed predicates of the precondition as string
+	 * 
+	 */
 	std::ofstream &pddl_string_;
 };
 
+/**
+ * @brief Visitor class to access Boost spirit Breakup objects
+ *        Parses the predicates of the breakup into a vector of strings
+ * 
+ */
 class BreakupVisitor : public boost::static_visitor<void>
 {
 public:
+	/**
+	 * @brief Construct a new Breakup Visitor object
+	 * 
+	 * @param breakup pointer to a vector of strings the breakup predicates are parsed into
+	 */
 	BreakupVisitor(std::vector<std::string> *breakup);
 
-	void                      operator()(pddl_parser::AtomicFormula &a);
-	void                      operator()(pddl_parser::FunctionalCondition &c);
+	/**
+	 * @brief Handler if the Breakup is an atomic formula
+	 * 
+	 * @param a pddl_parser AtomicFormula struct
+	 */
+	void operator()(pddl_parser::AtomicFormula &a);
+
+	/**
+	 * @brief Handler if the Breakup is a functional condition
+	 * 
+	 * @param c pddl_parser FunctionCondition struct
+	 */
+	void operator()(pddl_parser::FunctionalCondition &c);
+
+	/**
+	 * @brief pointer to a vector of strings, to store the parsed predicates
+	 * 
+	 */
 	std::vector<std::string> *breakup_;
 };
 
+/**
+ * @brief Visitor class to access Boost spirit Effect objects
+ *        Parses the predicates of the effect into a vector of predicates
+ * 
+ */
 class EffectVisitor : public boost::static_visitor<void>
 {
 public:
+	/**
+	 * @brief Construct a new Effect Visitor object
+	 * 
+	 * @param effects Pointer to a vector of predicates where the predicates of the effect are parsed into
+	 * @param condition Bool for denoting if the predicate is a negation
+	 */
 	EffectVisitor(std::vector<Predicate> *effects, bool condition);
 
-	void                    operator()(pddl_parser::AtomicFormula &a);
-	void                    operator()(pddl_parser::FunctionalEffect &fc);
-	void                    operator()(pddl_parser::ActionCost &ac);
+	/**
+	 * @brief Handler if the effect is an atomic formula
+	 * 
+	 * @param a pddl_parser AtomicFormula struct
+	 */
+	void operator()(pddl_parser::AtomicFormula &a);
+
+	/**
+	 * @brief Handler if the effect is a functional effect (e.g. (and A B) )
+	 * 
+	 * @param fc pddl_parser FunctionalEffect struct
+	 */
+	void operator()(pddl_parser::FunctionalEffect &fc);
+
+	/**
+	 * @brief Handler if the visited effect is the action cost
+	 * 
+	 * @param ac pddl_parser ActionCost struct
+	 */
+	void operator()(pddl_parser::ActionCost &ac);
+
+	/**
+	 * @brief pointer to a vector of predicates. Will be filled by the handler functions
+	 * 
+	 */
 	std::vector<Predicate> *effects_;
-	bool                    condition_;
+
+	/**
+	 * @brief Boolean to denote the current negation status of the visited effect
+	 * 
+	 */
+	bool condition_;
 };
 
+/**
+ * @brief Visitor class to access Boost spirit Effect objects
+ *        Parses the predicates of the effect into a vector of strings
+ * 
+ */
 class PddlStringEffectVisitor : public boost::static_visitor<void>
 {
 public:
+	/**
+	 * @brief Construct a new Pddl String Effect Visitor object
+	 * 
+	 * @param pddl_string stringstream to collect the predicates of the effect as string
+	 */
 	PddlStringEffectVisitor(std::ofstream &pddl_string);
 
-	void           operator()(pddl_parser::AtomicFormula &a);
-	void           operator()(pddl_parser::FunctionalEffect &fc);
-	void           operator()(pddl_parser::ActionCost &ac);
+	/**
+	 * @brief Handler if the effect is an atomic formula
+	 * 
+	 * @param a pddl_parser AtomicFormula struct
+	 */
+	void operator()(pddl_parser::AtomicFormula &a);
+
+	/**
+	 * @brief Handler if the effect is a functional effect (e.g. (and A B) )
+	 * 
+	 * @param fc pddl_parser FunctionalEffect struct
+	 */
+	void operator()(pddl_parser::FunctionalEffect &fc);
+
+	/**
+	 * @brief Handler if the visited effect is the action cost
+	 * 
+	 * @param ac pddl_parser ActionCost struct
+	 */
+	void operator()(pddl_parser::ActionCost &ac);
+
+	/**
+	 * @brief ofstream to store the parsed predicates as string
+	 * 
+	 */
 	std::ofstream &pddl_string_;
 };
 
