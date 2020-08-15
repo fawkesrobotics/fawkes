@@ -1,8 +1,8 @@
 /***************************************************************************
- *  stn.cpp - stn-generator
+ *  pddl_ast.h - A static visitor to translate an effect
  *
- *  Created: Sun Dec 22 22:41 2019
- *  Copyright  Nils Adermann <naderman@naderman.de>, Daniel Habering
+ *  Created: Sun 22 Dec 2019 12:39:10 CET 12:39
+ *  Copyright  2019 Daniel Habering <daniel.habering@rwth-aachen.de>
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -17,6 +17,8 @@
  *
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
+
+/*  This is based on pddl-qi (https://github.com/naderman/pddl-qi) */
 
 #ifndef PDDLQI_PARSER_PDDLAST_H
 #define PDDLQI_PARSER_PDDLAST_H

@@ -42,7 +42,7 @@ using namespace pddl_parser;
  */
 EffectToCLIPSFactVisitor::EffectToCLIPSFactVisitor(const std::string &pddl_operator,
                                                    bool               positive,
-                                                   std::string        condition,
+                                                   const std::string &condition,
                                                    int                eff_counter)
 : pddl_operator_(pddl_operator),
   positive_effect_(positive),

@@ -39,7 +39,8 @@ using namespace fawkes;
 PDDLClipsThread::PDDLClipsThread()
 : Thread("ClipsPddlParser", Thread::OPMODE_WAITFORWAKEUP),
   CLIPSFeature("pddl-parser"),
-  CLIPSFeatureAspect(this)
+  CLIPSFeatureAspect(this),
+  domain_desc_timestamp_(0)
 {
 }
 

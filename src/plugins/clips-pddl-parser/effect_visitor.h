@@ -32,7 +32,7 @@ class EffectToCLIPSFactVisitor : public boost::static_visitor<std::vector<std::s
 public:
 	EffectToCLIPSFactVisitor(const std::string &pddl_operator,
 	                         bool               positive,
-	                         std::string        condition,
+	                         const std::string &condition,
 	                         int                eff_counter);
 
 	std::vector<std::string> operator()(pddl_parser::FunctionalEffect &a) const;
