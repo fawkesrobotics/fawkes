@@ -497,7 +497,7 @@ BlackboardCLIPSFeature::clips_blackboard_read(const std::string &env_name)
 	for (auto &iface_map : interfaces_[env_name].reading) {
 		for (auto i : iface_map.second) {
 			i->read();
-			if (i->changed()) {
+			if (i->refreshed()) {
 				if (!cfg_retract_early_) {
 					std::string fun = std::string("(") + i->type() + "-cleanup-late \"" + i->id() + "\")";
 					env.evaluate(fun);
