@@ -163,7 +163,7 @@ LaserPointCloudThread::loop()
 	LockList<InterfaceCloudMapping>::iterator m;
 	for (m = mappings_.begin(); m != mappings_.end(); ++m) {
 		m->interface->read();
-		if (!m->interface->changed()) {
+		if (!m->interface->refreshed()) {
 			continue;
 		}
 		if (m->size == 360) {
