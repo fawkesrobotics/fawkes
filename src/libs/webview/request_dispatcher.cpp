@@ -19,6 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include "microhttpd_compat.h"
+
 #include <core/exception.h>
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
@@ -36,7 +38,6 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>
-#include <microhttpd.h>
 
 #define UNAUTHORIZED_REPLY                                         \
 	"<html>\n"                                                       \
@@ -162,14 +163,14 @@ WebRequestDispatcher::uri_log_cb(void *cls, const char *uri)
  * @param session_data session data pointer
  * @return appropriate return code for libmicrohttpd
  */
-int
+MHD_RESULT
 WebRequestDispatcher::process_request_cb(void *                 callback_data,
                                          struct MHD_Connection *connection,
                                          const char *           url,
                                          const char *           method,
                                          const char *           version,
                                          const char *           upload_data,
-                                         size_t *               upload_data_size,
+                                         long unsigned int *    upload_data_size,
                                          void **                session_data)
 {
 	WebRequestDispatcher *rd = static_cast<WebRequestDispatcher *>(callback_data);
@@ -267,7 +268,7 @@ WebRequestDispatcher::prepare_static_response(StaticWebReply *sreply)
  * @param sreply static reply
  * @return response struct ready to be enqueued
  */
-int
+MHD_RESULT
 WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection *connection,
                                           WebRequest *           request,
                                           DynamicWebReply *      dreply)
@@ -286,7 +287,7 @@ WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection *connection,
 		MHD_add_response_header(response, i->first.c_str(), i->second.c_str());
 	}
 
-	int ret = MHD_queue_response(connection, dreply->code(), response);
+	MHD_RESULT ret = MHD_queue_response(connection, dreply->code(), response);
 	MHD_destroy_response(response);
 
 	return ret;
@@ -298,7 +299,7 @@ WebRequestDispatcher::queue_dynamic_reply(struct MHD_Connection *connection,
  * @param sreply static web reply to queue
  * @return suitable libmicrohttpd return code
  */
-int
+MHD_RESULT
 WebRequestDispatcher::queue_static_reply(struct MHD_Connection *connection,
                                          WebRequest *           request,
                                          StaticWebReply *       sreply)
@@ -307,7 +308,7 @@ WebRequestDispatcher::queue_static_reply(struct MHD_Connection *connection,
 
 	struct MHD_Response *response = prepare_static_response(sreply);
 
-	int rv = MHD_queue_response(connection, sreply->code(), response);
+	MHD_RESULT rv = MHD_queue_response(connection, sreply->code(), response);
 	MHD_destroy_response(response);
 	return rv;
 }
@@ -316,7 +317,7 @@ WebRequestDispatcher::queue_static_reply(struct MHD_Connection *connection,
  * @param connection libmicrohttpd connection to queue response to
  * @return suitable libmicrohttpd return code
  */
-int
+MHD_RESULT
 WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection *connection, WebRequest *request)
 {
 	StaticWebReply sreply(WebReply::HTTP_UNAUTHORIZED, UNAUTHORIZED_REPLY);
@@ -326,13 +327,14 @@ WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection *connection, W
 	sreply.pack();
 	struct MHD_Response *response = prepare_static_response(&sreply);
 
-	int rv = MHD_queue_basic_auth_fail_response(connection, realm_, response);
+	MHD_RESULT rv =
+	  static_cast<MHD_RESULT>(MHD_queue_basic_auth_fail_response(connection, realm_, response));
 	MHD_destroy_response(response);
 #else
 	sreply.add_header(MHD_HTTP_HEADER_WWW_AUTHENTICATE,
 	                  (std::string("Basic realm=") + realm_).c_str());
 
-	int rv = queue_static_reply(connection, request, &sreply);
+	MHD_RESULT rv = queue_static_reply(connection, request, &sreply);
 #endif
 	return rv;
 }
@@ -356,7 +358,7 @@ WebRequestDispatcher::queue_basic_auth_fail(struct MHD_Connection *connection, W
  * @return MHD_YES to continue iterating,
  *         MHD_NO to abort the iteration
  */
-static int
+static MHD_RESULT
 post_iterator(void *             cls,
               enum MHD_ValueKind kind,
               const char *       key,
@@ -398,7 +400,7 @@ WebRequestDispatcher::log_uri(const char *uri)
  * @param session_data session data pointer
  * @return appropriate return code for libmicrohttpd
  */
-int
+MHD_RESULT
 WebRequestDispatcher::process_request(struct MHD_Connection *connection,
                                       const char *           url,
                                       const char *           method,
@@ -498,8 +500,8 @@ WebRequestDispatcher::process_request(struct MHD_Connection *connection,
 	}
 
 	try {
-		WebReply *reply = url_manager_->process_request(request);
-		int       ret;
+		WebReply * reply = url_manager_->process_request(request);
+		MHD_RESULT ret;
 
 		if (reply) {
 			if (cors_allow_all_) {
