@@ -64,12 +64,14 @@ ScanlineGrid::~ScanlineGrid()
 	delete this->roi;
 }
 
-upoint_t ScanlineGrid::operator*()
+upoint_t
+ScanlineGrid::operator*()
 {
 	return coord;
 }
 
-upoint_t *ScanlineGrid::operator->()
+upoint_t *
+ScanlineGrid::operator->()
 {
 	return &coord;
 }

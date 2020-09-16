@@ -26,13 +26,18 @@ __buildsys_gazebo_mk_ := 1
 ifneq ($(PKGCONFIG),)
   HAVE_GAZEBO   = $(if $(shell $(PKGCONFIG) --atleast-version=1.0.1 'gazebo'; echo $${?/1/}),1,0)
   HAVE_GAZEBO_96 = $(if $(shell $(PKGCONFIG) --atleast-version=9.6.0 'gazebo'; echo $${?/1/}),1,0)
+  HAVE_GAZEBO_10 = $(if $(shell $(PKGCONFIG) --atleast-version=10 'gazebo'; echo $${?/1/}),1,0)
 endif
 
 ifeq ($(HAVE_GAZEBO),1)
-  # Gazebo 8 declared several symbols as deprecated but still uses them.
-  # Disable the deprecated declarations warning until this is fixed.
   CFLAGS_GAZEBO  = -DHAVE_GAZEBO $(shell $(PKGCONFIG) --cflags 'gazebo') \
-                   -Wno-deprecated-declarations
+                   -DTBB_SUPPRESS_DEPRECATED_MESSAGES
+  ifneq ($(HAVE_GAZEBO_101),1)
+    # Gazebo 8 declared several symbols as deprecated but still uses them.
+		# Those were fixed in Gazebo 10.
+    # Disable the deprecated declarations warning with older gazebo versions.
+    CFLAGS += -Wno-deprecated-declarations
+  endif
   LDFLAGS_GAZEBO = $(shell $(PKGCONFIG) --libs 'gazebo') -ldl
 
   ifeq ($(HAVE_GAZEBO_96)$(boost-have-lib system),11)

@@ -102,50 +102,94 @@ public:
 		return pcl_utils::cloudptr_from_refptr(cloud);
 	}
 
+	/** Clone this storage adapter.
+   * @return A pointer to a copy of this storage adapter.
+   */
 	virtual StorageAdapter *clone() const;
 
+	/** Transform the point cloud.
+   * @param target_frame frame to transform to
+   * @param transformer transformer to get transform from
+   */
 	virtual void transform(const std::string &target_frame, const tf::Transformer &transformer);
 
+	/** Transform point cloud.
+   *  @param target_frame frame to transform to
+   *  @param target_time time for which to transform
+   *  @param fixed_frame frame fixed over time
+   *  @param transformer transformer to get transform from
+   */
 	virtual void transform(const std::string &    target_frame,
 	                       const Time &           target_time,
 	                       const std::string &    fixed_frame,
 	                       const tf::Transformer &transformer);
 
+	/** Get typename of storage adapter.
+  * @return type name
+  */
 	virtual const char *
 	get_typename()
 	{
 		return typeid(this).name();
 	}
+
+	/** Get size of a point.
+   * @return size in bytes of a single point
+   */
 	virtual size_t
 	point_size() const
 	{
 		return sizeof(PointT);
 	}
+
+	/** Get width of point cloud.
+   * @return width of point cloud
+   */
 	virtual unsigned int
 	width() const
 	{
 		return cloud->width;
 	}
+
+	/** Get height of point cloud.
+   * @return height of point cloud
+   */
 	virtual unsigned int
 	height() const
 	{
 		return cloud->height;
 	}
+
+	/** Get numer of points in point cloud.
+   * @return number of points
+   */
 	virtual size_t
 	num_points() const
 	{
 		return cloud->points.size();
 	}
+
+	/** Get pointer on data.
+  * @return pointer on data
+  */
 	virtual void *
 	data_ptr() const
 	{
 		return &cloud->points[0];
 	}
+
+	/** Get frame ID of point cloud.
+   * @return Frame ID of point cloud.
+   */
 	virtual std::string
 	frame_id() const
 	{
 		return cloud->header.frame_id;
 	}
+
+	/** Get last capture time.
+   * @param time upon return contains last capture time
+   */
 	virtual void get_time(fawkes::Time &time) const;
 };
 

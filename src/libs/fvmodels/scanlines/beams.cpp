@@ -92,12 +92,14 @@ ScanlineBeams::ScanlineBeams(unsigned int image_width,
 	reset();
 }
 
-upoint_t ScanlineBeams::operator*()
+upoint_t
+ScanlineBeams::operator*()
 {
 	return coord;
 }
 
-upoint_t *ScanlineBeams::operator->()
+upoint_t *
+ScanlineBeams::operator->()
 {
 	return &coord;
 }

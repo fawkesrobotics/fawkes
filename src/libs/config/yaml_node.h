@@ -424,7 +424,8 @@ public:
 		return this->name_ < n.name_;
 	}
 
-	std::shared_ptr<YamlConfigurationNode> operator[](const std::string &p)
+	std::shared_ptr<YamlConfigurationNode>
+	operator[](const std::string &p)
 	{
 		std::map<std::string, std::shared_ptr<YamlConfigurationNode>>::iterator i;
 		if ((i = children_.find(p)) != children_.end()) {

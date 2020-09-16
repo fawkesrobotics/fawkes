@@ -55,41 +55,41 @@ OpenNiUserTrackerThread::~OpenNiUserTrackerThread()
 }
 
 static void XN_CALLBACK_TYPE
-            cb_new_user(xn::UserGenerator &generator, XnUserID id, void *cookie)
+cb_new_user(xn::UserGenerator &generator, XnUserID id, void *cookie)
 {
 	OpenNiUserTrackerThread *t = static_cast<OpenNiUserTrackerThread *>(cookie);
 	t->new_user(id);
 }
 
 static void XN_CALLBACK_TYPE
-            cb_lost_user(xn::UserGenerator &generator, XnUserID id, void *cookie)
+cb_lost_user(xn::UserGenerator &generator, XnUserID id, void *cookie)
 {
 	OpenNiUserTrackerThread *t = static_cast<OpenNiUserTrackerThread *>(cookie);
 	t->lost_user(id);
 }
 
 static void XN_CALLBACK_TYPE
-            cb_pose_start(xn::PoseDetectionCapability &capability,
-                          const XnChar *               pose_name,
-                          XnUserID                     id,
-                          void *                       cookie)
+cb_pose_start(xn::PoseDetectionCapability &capability,
+              const XnChar *               pose_name,
+              XnUserID                     id,
+              void *                       cookie)
 {
 	OpenNiUserTrackerThread *t = static_cast<OpenNiUserTrackerThread *>(cookie);
 	t->pose_start(id, pose_name);
 }
 
 static void XN_CALLBACK_TYPE
-            cb_pose_end(xn::PoseDetectionCapability &capability,
-                        const XnChar *               pose_name,
-                        XnUserID                     id,
-                        void *                       cookie)
+cb_pose_end(xn::PoseDetectionCapability &capability,
+            const XnChar *               pose_name,
+            XnUserID                     id,
+            void *                       cookie)
 {
 	OpenNiUserTrackerThread *t = static_cast<OpenNiUserTrackerThread *>(cookie);
 	t->pose_end(id, pose_name);
 }
 
 static void XN_CALLBACK_TYPE
-            cb_calibration_start(xn::SkeletonCapability &capability, XnUserID id, void *cookie)
+cb_calibration_start(xn::SkeletonCapability &capability, XnUserID id, void *cookie)
 {
 	OpenNiUserTrackerThread *t = static_cast<OpenNiUserTrackerThread *>(cookie);
 	t->calibration_start(id);
@@ -97,17 +97,17 @@ static void XN_CALLBACK_TYPE
 
 #if XN_VERSION_GE(1, 3, 2, 0)
 static void XN_CALLBACK_TYPE
-            cb_calibration_complete(xn::SkeletonCapability &capability,
-                                    XnUserID                id,
-                                    XnCalibrationStatus     status,
-                                    void *                  cookie)
+cb_calibration_complete(xn::SkeletonCapability &capability,
+                        XnUserID                id,
+                        XnCalibrationStatus     status,
+                        void *                  cookie)
 {
 	OpenNiUserTrackerThread *t = static_cast<OpenNiUserTrackerThread *>(cookie);
 	t->calibration_end(id, status == XN_CALIBRATION_STATUS_OK);
 }
 #else
 static void XN_CALLBACK_TYPE
-            cb_calibration_end(xn::SkeletonCapability &capability, XnUserID id, XnBool success, void *cookie)
+cb_calibration_end(xn::SkeletonCapability &capability, XnUserID id, XnBool success, void *cookie)
 {
 	OpenNiUserTrackerThread *t = static_cast<OpenNiUserTrackerThread *>(cookie);
 	t->calibration_end(id, success);

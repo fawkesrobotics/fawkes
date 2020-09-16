@@ -25,6 +25,7 @@
 
 #include <core/utils/lockptr.h>
 
+#include <string>
 #include <unordered_map>
 
 namespace fawkes {

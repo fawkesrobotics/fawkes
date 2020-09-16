@@ -105,12 +105,14 @@ CornerHorizon::~CornerHorizon()
 	delete model;
 }
 
-upoint_t CornerHorizon::operator*()
+upoint_t
+CornerHorizon::operator*()
 {
 	return coord;
 }
 
-upoint_t *CornerHorizon::operator->()
+upoint_t *
+CornerHorizon::operator->()
 {
 	return &coord;
 }

@@ -1015,7 +1015,8 @@ BlackBoardMemoryManager::ChunkIterator::operator!=(const ChunkIterator &c) const
  * points to.
  * @return pointer to memory
  */
-void *BlackBoardMemoryManager::ChunkIterator::operator*() const
+void *
+BlackBoardMemoryManager::ChunkIterator::operator*() const
 {
 	if (cur_ == NULL)
 		return NULL;

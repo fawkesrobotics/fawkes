@@ -180,7 +180,7 @@ Time::Time(const Time &t)
 	clock_        = t.clock_;
 	if (t.timestr_) {
 		timestr_ = (char *)malloc(TIMESTR_SIZE);
-		strncpy(timestr_, t.timestr_, TIMESTR_SIZE);
+		strncpy(timestr_, t.timestr_, TIMESTR_SIZE - 1);
 	} else {
 		timestr_ = NULL;
 	}
@@ -196,7 +196,7 @@ Time::Time(const Time *t)
 	clock_        = t->clock_;
 	if (t->timestr_) {
 		timestr_ = (char *)malloc(TIMESTR_SIZE);
-		strncpy(timestr_, t->timestr_, TIMESTR_SIZE);
+		strncpy(timestr_, t->timestr_, TIMESTR_SIZE - 1);
 	} else {
 		timestr_ = NULL;
 	}

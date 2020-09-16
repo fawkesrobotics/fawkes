@@ -245,7 +245,6 @@ ArgumentParser::parse_hostport(const char *argn, char **host, unsigned short int
  * @param host Upon successful return contains a pointer to a newly alloated string
  * with the hostname part. Free it after you are finished.
  * @param port upon successful return contains the port part
- * @return true, if the argument was supplied, false otherwise
  * @exception Exception thrown on parsing error
  */
 void
@@ -336,7 +335,6 @@ ArgumentParser::parse_hostport(const char *argn, std::string &host, unsigned sho
  * @param s string to parse
  * @param host Upon successful return contains the hostname part
  * @param port upon successful return contains the port part (unchanged if not supplied)
- * @return true, if the argument was supplied, false otherwise
  * @exception OutOfBoundsException thrown if port is not in the range [0..65535]
  */
 void

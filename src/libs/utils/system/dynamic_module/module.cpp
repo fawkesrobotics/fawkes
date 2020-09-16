@@ -79,7 +79,6 @@ Module::~Module()
 }
 
 /** Open the module
- * @return true if the module could be opened, false otherwise
  * @exception ModuleOpenException thrown if there was any problem
  * while loading the module
  */

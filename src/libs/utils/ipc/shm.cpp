@@ -244,7 +244,7 @@ SharedMemory::SharedMemory(const char *magic_token,
 {
 	_magic_token = new char[MagicTokenSize];
 	memset(_magic_token, 0, MagicTokenSize);
-	strncpy(_magic_token, magic_token, MagicTokenSize);
+	strncpy(_magic_token, magic_token, MagicTokenSize - 1);
 
 	_is_read_only      = is_read_only;
 	_destroy_on_delete = destroy_on_delete;
@@ -280,7 +280,7 @@ SharedMemory::SharedMemory(const SharedMemory &s)
 {
 	_magic_token = new char[MagicTokenSize];
 	memset(_magic_token, 0, MagicTokenSize);
-	strncpy(_magic_token, s._magic_token, MagicTokenSize);
+	strncpy(_magic_token, s._magic_token, MagicTokenSize - 1);
 
 	_is_read_only      = s._is_read_only;
 	_destroy_on_delete = s._destroy_on_delete;
@@ -354,7 +354,7 @@ SharedMemory::SharedMemory(const char *        magic_token,
 {
 	_magic_token = new char[MagicTokenSize];
 	memset(_magic_token, 0, MagicTokenSize);
-	strncpy(_magic_token, magic_token, MagicTokenSize);
+	strncpy(_magic_token, magic_token, MagicTokenSize - 1);
 
 	_header            = header;
 	_is_read_only      = is_read_only;
@@ -437,7 +437,7 @@ SharedMemory::operator=(const SharedMemory &s)
 
 	_magic_token = new char[MagicTokenSize];
 	memset(_magic_token, 0, MagicTokenSize);
-	strncpy(_magic_token, s._magic_token, MagicTokenSize);
+	strncpy(_magic_token, s._magic_token, MagicTokenSize - 1);
 
 	_is_read_only      = s._is_read_only;
 	_destroy_on_delete = s._destroy_on_delete;
@@ -596,7 +596,7 @@ SharedMemory::attach()
 					_shm_offset             = 0;
 					shared_mem_upper_bound_ = _shm_upper_bound;
 
-					strncpy(_shm_magic_token, _magic_token, MagicTokenSize);
+					strncpy(_shm_magic_token, _magic_token, MagicTokenSize - 1);
 
 					_header->initialize((char *)shared_mem_ + MagicTokenSize + sizeof(SharedMemory_header_t));
 				} else {
@@ -1532,7 +1532,8 @@ SharedMemory::SharedMemoryIterator::operator!=(const SharedMemoryIterator &s) co
 /** Get SharedMemoryHeader.
  * @return shared memory header
  */
-const SharedMemoryHeader *SharedMemory::SharedMemoryIterator::operator*() const
+const SharedMemoryHeader *
+SharedMemory::SharedMemoryIterator::operator*() const
 {
 	return header_;
 }

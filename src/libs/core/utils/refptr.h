@@ -257,13 +257,15 @@ private:
 // If it would come after them it wouldn't be inlined.
 
 template <class T_CppObject>
-inline T_CppObject *RefPtr<T_CppObject>::operator->() const
+inline T_CppObject *
+RefPtr<T_CppObject>::operator->() const
 {
 	return cpp_object_;
 }
 
 template <class T_CppObject>
-inline T_CppObject *RefPtr<T_CppObject>::operator*() const
+inline T_CppObject *
+RefPtr<T_CppObject>::operator*() const
 {
 	return cpp_object_;
 }

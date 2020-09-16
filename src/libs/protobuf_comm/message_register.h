@@ -77,8 +77,10 @@ public:
    * @param component_id ID of component this message type belongs to
    * @param msg_type message type
    */
-	template <class MT>
-	typename std::enable_if<std::is_base_of<google::protobuf::Message, MT>::value, void>::type
+	template <
+	  class MT,
+	  typename = typename std::enable_if<std::is_base_of<google::protobuf::Message, MT>::value>::type>
+	void
 	add_message_type(uint16_t component_id, uint16_t msg_type)
 	{
 		KeyType key(component_id, msg_type);
@@ -101,8 +103,11 @@ public:
    * The template parameter must be a sub-class of google::protobuf::Message.
    * An instance is spawned and kept internally to spawn more on incoming messages.
    */
-	template <class MT>
-	typename std::enable_if<std::is_base_of<google::protobuf::Message, MT>::value, void>::type
+	template <
+	  class MT,
+	  typename =
+	    typename std::enable_if<std::is_base_of<google::protobuf::Message, MT>::value, void>::type>
+	void
 	add_message_type()
 	{
 		MT                                  m;

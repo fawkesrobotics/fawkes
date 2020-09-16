@@ -101,12 +101,14 @@ ScanlineStar::~ScanlineStar()
 	}
 }
 
-upoint_t ScanlineStar::operator*()
+upoint_t
+ScanlineStar::operator*()
 {
 	return m_current_point;
 }
 
-upoint_t *ScanlineStar::operator->()
+upoint_t *
+ScanlineStar::operator->()
 {
 	return &m_current_point;
 }

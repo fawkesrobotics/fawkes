@@ -121,7 +121,6 @@ MessageQueue::append(Message *msg)
 /** Enqueue message after given iterator.
  * @param it Iterator
  * @param msg Message to enqueue
- * @return message queue id of the appended message.
  * @exception NullPointerException thrown if iterator is end iterator.
  * @exception NotLockedException thrown if message queue is not locked during this operation.
  * @exception MessageAlreadyQueuedException thrown if the message has already been
@@ -462,7 +461,8 @@ MessageQueue::MessageIterator::operator!=(const MessageIterator &c) const
  * points to.
  * @return pointer to memory
  */
-Message *MessageQueue::MessageIterator::operator*() const
+Message *
+MessageQueue::MessageIterator::operator*() const
 {
 	return (cur != NULL) ? cur->msg : NULL;
 }
@@ -471,7 +471,8 @@ Message *MessageQueue::MessageIterator::operator*() const
  * Node that you have to make sure that this is not called on the end node!
  * @return current message
  */
-Message *MessageQueue::MessageIterator::operator->() const
+Message *
+MessageQueue::MessageIterator::operator->() const
 {
 	return cur->msg;
 }

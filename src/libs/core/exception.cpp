@@ -770,7 +770,8 @@ Exception::iterator::operator!=(const iterator &i) const
  * Get message at current position. Returns NULL for the invalid ieterator.
  * @return message or NULL if iterator is invalid
  */
-const char *Exception::iterator::operator*() const
+const char *
+Exception::iterator::operator*() const
 {
 	if (mlist != NULL) {
 		return mlist->msg;

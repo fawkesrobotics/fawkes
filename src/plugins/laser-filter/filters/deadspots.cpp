@@ -81,7 +81,7 @@ LaserDeadSpotsDataFilter::LaserDeadSpotsDataFilter(const std::string &    filter
 	while (vit->next()) {
 		const char *path = vit->path();
 		if (regexec(&pathre, path, 2, matches, 0) == 0) {
-			unsigned int match1_length = matches[1].rm_eo - matches[1].rm_so;
+			size_t match1_length = matches[1].rm_eo - matches[1].rm_so;
 
 			char entry[match1_length + 1];
 			entry[match1_length] = 0;

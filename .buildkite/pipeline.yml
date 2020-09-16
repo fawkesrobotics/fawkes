@@ -6,7 +6,7 @@ merged-pr-plugin: &merged-pr-plugin
     mode: checkout
 
 docker-plugin-base: &docker-plugin-base
-  image: fawkesrobotics/fawkes-builder:fedora31-melodic
+  image: fawkesrobotics/fawkes-builder:fedora32-noetic
   always-pull: true
   debug: true
   environment: ["BUILDKITE", "BUILDKITE_LABEL"]

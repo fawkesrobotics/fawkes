@@ -137,7 +137,6 @@ SonyEviD100PControl::~SonyEviD100PControl()
 }
 
 /** Open visca device.
- * @return true on success
  */
 void
 SonyEviD100PControl::open()
