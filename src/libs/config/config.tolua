@@ -70,6 +70,9 @@ class Configuration
   std::string     get_string(const char *path);
   ValueIterator * get_value(const char *path);
 
+  float         get_float_or_default(char *path, float f);
+  int           get_int_or_default(char *path, int i);
+
   void          set_float(const char *path, float f);
   void          set_uint(const char *path, unsigned int uint);
   void          set_int(const char *path, int i);
