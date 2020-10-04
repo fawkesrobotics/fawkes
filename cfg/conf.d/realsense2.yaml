@@ -25,3 +25,9 @@ realsense2:
   device_options:
     # Laser power from 0 - 15 as integer
     laser_power: 15
+
+  # Path to directory to save images
+  rgb_path: "/home/robotino/realsense_images"
+
+  # Camera Control Interface name
+  camera_interface_name: "realsense2_cam"
