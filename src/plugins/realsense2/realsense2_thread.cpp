@@ -75,7 +75,7 @@ Realsense2Thread::init()
 	switch_if_->write();
 
 	//CameraControlInterface
-	camera_if_ = blackboard->open_for_reading<CameraControlInterface>(camera_if_name_.c_str());
+	camera_if_ = blackboard->open_for_writing<CameraControlInterface>(camera_if_name_.c_str());
 
 	camera_scale_ = 1;
 	// initalize pointcloud
