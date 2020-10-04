@@ -22,27 +22,23 @@
  */
 
 #ifndef _PLUGINS_REALSENSE2THREAD_H_
-#	define _PLUGINS_REALSENSE2THREAD_H_
+#define _PLUGINS_REALSENSE2THREAD_H_
 
-#	ifndef STB_IMAGE_WRTIE_IMPLEMENTATION
-#		define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <aspect/blackboard.h>
+#include <aspect/blocked_timing.h>
+#include <aspect/clock.h>
+#include <aspect/configurable.h>
+#include <aspect/logging.h>
+#include <aspect/pointcloud.h>
+#include <core/threading/thread.h>
+#include <librealsense2/rsutil.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 
-#		include <aspect/blackboard.h>
-#		include <aspect/blocked_timing.h>
-#		include <aspect/clock.h>
-#		include <aspect/configurable.h>
-#		include <aspect/logging.h>
-#		include <aspect/pointcloud.h>
-#		include <core/threading/thread.h>
-#		include <librealsense2/rsutil.h>
-#		include <pcl/point_cloud.h>
-#		include <pcl/point_types.h>
-
-#		include <librealsense2/rs.hpp>
-#		include <librealsense2/rs_advanced_mode.hpp>
-#		include <stb_image_write.h>
-#		include <string>
-#		include <thread>
+#include <librealsense2/rs.hpp>
+#include <librealsense2/rs_advanced_mode.hpp>
+#include <string>
+#include <thread>
 
 namespace fawkes {
 class SwitchInterface;
@@ -120,4 +116,4 @@ private:
 	uint        error_counter_ = 0;
 };
 
-#	endif
+#endif

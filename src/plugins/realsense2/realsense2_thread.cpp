@@ -26,6 +26,9 @@
 #include <interfaces/CameraControlInterface.h>
 #include <interfaces/SwitchInterface.h>
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 using namespace fawkes;
 
 /** @class Realsense2Thread 'realsense2_thread.h'
