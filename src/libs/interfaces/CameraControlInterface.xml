@@ -26,6 +26,7 @@
     <field type="uint32" name="zoom_min">Minimum zoom</field>
     <field type="bool"   name="mirror">Is the image mirrored?</field>
     <field type="bool"   name="mirror_supported">Is mirroring supported?</field>
+    <field type="string" name="image_name" length="32">Filename of the image file</field>
   </data>
 
   <message name="SetEffect">
@@ -41,5 +42,10 @@
   <message name="SetMirror">
     <comment>Set mirror state.</comment>
     <ref>mirror</ref>
+  </message>
+  
+  <message name="SaveImage">
+    <comment>Take a frame as an image</comment>
+    <ref>image_name</ref>
   </message>
 </interface>
