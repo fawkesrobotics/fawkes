@@ -22,27 +22,32 @@
  */
 
 #ifndef _PLUGINS_REALSENSE2THREAD_H_
-#define _PLUGINS_REALSENSE2THREAD_H_
+#	define _PLUGINS_REALSENSE2THREAD_H_
 
-#include <aspect/blackboard.h>
-#include <aspect/blocked_timing.h>
-#include <aspect/clock.h>
-#include <aspect/configurable.h>
-#include <aspect/logging.h>
-#include <aspect/pointcloud.h>
-#include <core/threading/thread.h>
-#include <librealsense2/rsutil.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
+#	ifndef STB_IMAGE_WRTIE_IMPLEMENTATION
+#		define STB_IMAGE_WRITE_IMPLEMENTATION
 
-#include <librealsense2/rs.hpp>
-#include <librealsense2/rs_advanced_mode.hpp>
-#include <string>
-#include <thread>
+#		include <aspect/blackboard.h>
+#		include <aspect/blocked_timing.h>
+#		include <aspect/clock.h>
+#		include <aspect/configurable.h>
+#		include <aspect/logging.h>
+#		include <aspect/pointcloud.h>
+#		include <core/threading/thread.h>
+#		include <librealsense2/rsutil.h>
+#		include <pcl/point_cloud.h>
+#		include <pcl/point_types.h>
+
+#		include <librealsense2/rs.hpp>
+#		include <librealsense2/rs_advanced_mode.hpp>
+#		include <stb_image_write.h>
+#		include <string>
+#		include <thread>
 
 namespace fawkes {
 class SwitchInterface;
-}
+class CameraControlInterface;
+} // namespace fawkes
 
 class Realsense2Thread : public fawkes::Thread,
                          public fawkes::BlockedTimingAspect,
@@ -75,11 +80,13 @@ protected:
 	}
 
 protected:
-	bool read_switch();
+	bool        read_switch();
+	std::string read_camera_control();
 
 private:
-	fawkes::SwitchInterface *switch_if_;
-	bool                     cfg_use_switch_;
+	fawkes::SwitchInterface *       switch_if_;
+	bool                            cfg_use_switch_;
+	fawkes::CameraControlInterface *camera_if_;
 
 	typedef pcl::PointXYZ              PointType;
 	typedef pcl::PointCloud<PointType> Cloud;
@@ -95,11 +102,15 @@ private:
 	rs2::device    rs_device_;
 	rs2::frameset  rs_data_;
 	rs2_intrinsics intrinsics_;
+	rs2_intrinsics rgb_intrinsics_;
 
 	float       camera_scale_;
 	std::string frame_id_;
 	std::string pcl_id_;
 	std::string switch_if_name_;
+	std::string rgb_path_;
+	std::string image_name_;
+	std::string camera_if_name_;
 	uint        frame_rate_;
 	float       laser_power_;
 	bool        camera_running_ = false;
@@ -109,4 +120,4 @@ private:
 	uint        error_counter_ = 0;
 };
 
-#endif
+#	endif

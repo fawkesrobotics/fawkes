@@ -23,6 +23,7 @@
 
 #include "realsense2_thread.h"
 
+#include <interfaces/CameraControlInterface.h>
 #include <interfaces/SwitchInterface.h>
 
 using namespace fawkes;
@@ -30,6 +31,7 @@ using namespace fawkes;
 /** @class Realsense2Thread 'realsense2_thread.h'
  * Driver for the Intel RealSense Camera providing Depth Data as Pointcloud
  * Inspired by realsense fawkes plugin
+ * Provides functionality to save a camera frame into a PNG File
  * @author Christoph Gollok
  */
 
@@ -56,6 +58,12 @@ Realsense2Thread::init()
 
 	cfg_use_switch_ = config->get_bool_or_default((cfg_prefix + "use_switch").c_str(), true);
 
+	//rgb image path
+	rgb_path_ = config->get_string_or_default((cfg_prefix + "rgb_path").c_str(),
+	                                          "/home/robotino/realsense_images");
+	camera_if_name_ =
+	  config->get_string_or_default((cfg_prefix + "camera_interface_name").c_str(), "realsense2_cam");
+
 	if (cfg_use_switch_) {
 		logger->log_info(name(), "Switch enabled");
 	} else {
@@ -65,6 +73,9 @@ Realsense2Thread::init()
 	switch_if_ = blackboard->open_for_writing<SwitchInterface>(switch_if_name_.c_str());
 	switch_if_->set_enabled(true);
 	switch_if_->write();
+
+	//CameraControlInterface
+	camera_if_ = blackboard->open_for_reading<CameraControlInterface>(camera_if_name_.c_str());
 
 	camera_scale_ = 1;
 	// initalize pointcloud
@@ -86,6 +97,31 @@ Realsense2Thread::loop()
 	if (!camera_running_) {
 		camera_running_ = start_camera();
 		return;
+	}
+	// take picture
+	if (enable_camera_ && read_camera_control() != "") {
+		if (rs_pipe_->poll_for_frames(&rs_data_)) {
+			error_counter_               = 0;
+			rs2::video_frame color_frame = rs_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_YUYV);
+			image_name_ =
+			  rgb_path_ + read_camera_control() + color_frame.get_profile().stream_name() + ".png";
+			stbi_write_png(image_name_.c_str(),
+			               color_frame.get_width(),
+			               color_frame.get_height(),
+			               color_frame.get_bytes_per_pixel(),
+			               color_frame.get_data(),
+			               color_frame.get_stride_in_bytes());
+			logger->log_info(name(), "Saving image to %s", image_name_.c_str());
+		} else {
+			error_counter_++;
+			logger->log_warn(name(), "Poll for frames not successful ()");
+			if (error_counter_ >= restart_after_num_errors_) {
+				logger->log_warn(name(), "Polling failed, restarting device");
+				error_counter_ = 0;
+				stop_camera();
+				start_camera();
+			}
+		}
 	}
 
 	if (cfg_use_switch_) {
@@ -158,6 +194,7 @@ Realsense2Thread::start_camera()
 		if (!get_camera(rs_device_)) {
 			return false;
 		}
+		// depth config
 		rs2::config config;
 		config.enable_stream(RS2_STREAM_DEPTH, RS2_FORMAT_Z16, frame_rate_);
 		rs2::pipeline_profile rs_pipeline_profile_ = rs_pipe_->start(config);
@@ -174,6 +211,20 @@ Realsense2Thread::start_camera()
 		                 intrinsics_.height,
 		                 intrinsics_.width,
 		                 camera_scale_,
+		                 frame_rate_);
+
+		//rgb config
+		rs2::config rgb_config;
+		rgb_config.enable_stream(RS2_STREAM_COLOR, 1920, 1080, RS2_FORMAT_YUYV, frame_rate_);
+		rs2::pipeline_profile rs_pipeline_profile_rgb_ = rs_pipe_->start(rgb_config);
+		auto                  rgb_stream =
+		  rs_pipeline_profile_rgb_.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
+		rgb_intrinsics_              = rgb_stream.get_intrinsics();
+		rs2::color_sensor rgb_sensor = rs_device_.first<rs2::color_sensor>();
+		logger->log_info(name(),
+		                 "RGB Height: %d RGB Width: %d FPS: %d",
+		                 rgb_intrinsics_.height,
+		                 rgb_intrinsics_.width,
 		                 frame_rate_);
 
 		return true;
@@ -346,4 +397,25 @@ Realsense2Thread::read_switch()
 	switch_if_->set_enabled(enable_camera_);
 	switch_if_->write();
 	return switch_if_->is_enabled();
+}
+
+/**
+ * Read the CameraControl interface to take a picture.
+ * @return object name.
+ */
+std::string
+Realsense2Thread::read_camera_control()
+{
+	std::string object_name_ = "";
+	while (!camera_if_->msgq_empty()) {
+		if (camera_if_->msgq_first_is<CameraControlInterface::SaveImageMessage>()) {
+			CameraControlInterface::SaveImageMessage *msg =
+			  camera_if_->msgq_first<CameraControlInterface::SaveImageMessage>();
+			object_name_ = std::string(msg->image_name());
+		} else {
+			logger->log_warn(name(), "Unknown message received");
+		}
+		camera_if_->msgq_pop();
+	}
+	return object_name_;
 }
