@@ -33,7 +33,7 @@ OBJS_realsense2 = realsense2_plugin.o realsense2_thread.o
 OBJS_all    = $(OBJS_realsense2)
 PLUGINS_all = $(PLUGINDIR)/realsense2.$(SOEXT)
 
-REALSENSE_MIN_VERSION = 2.16.0
+REALSENSE_MIN_VERSION = 2.32.0
 
 ifeq ($(shell $(PKGCONFIG) --exists realsense2; echo $$?),0)
     ifeq ($(shell $(PKGCONFIG) --atleast-version $(REALSENSE_MIN_VERSION) realsense2; echo $$?),0)
