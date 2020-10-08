@@ -45,7 +45,7 @@
   </message>
   
   <message name="SaveImage">
-    <comment>Take a frame as an image</comment>
+    <comment>Save a frame as an image.</comment>
     <ref>image_name</ref>
   </message>
 </interface>
