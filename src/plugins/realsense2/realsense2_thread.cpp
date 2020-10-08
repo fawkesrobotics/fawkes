@@ -90,8 +90,9 @@ Realsense2Thread::init()
 	realsense_depth_->resize(0);
 	pcl_manager->add_pointcloud(pcl_id_.c_str(), realsense_depth_refptr_);
 
-	rs_pipe_    = new rs2::pipeline();
-	rs_context_ = new rs2::context();
+	rs_pipe_     = new rs2::pipeline();
+	rs_context_  = new rs2::context();
+	rs_rgb_pipe_ = new rs2::pipeline();
 }
 
 void
@@ -103,9 +104,9 @@ Realsense2Thread::loop()
 	}
 	// take picture
 	if (enable_camera_ && read_camera_control() != "") {
-		if (rs_pipe_->poll_for_frames(&rs_data_)) {
+		if (rs_rgb_pipe_->poll_for_frames(&rs_rgb_data_)) {
 			error_counter_               = 0;
-			rs2::video_frame color_frame = rs_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_YUYV);
+			rs2::video_frame color_frame = rs_rgb_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_YUYV);
 			image_name_ =
 			  rgb_path_ + read_camera_control() + color_frame.get_profile().stream_name() + ".png";
 			stbi_write_png(image_name_.c_str(),
@@ -177,9 +178,11 @@ Realsense2Thread::finalize()
 	stop_camera();
 	delete rs_pipe_;
 	delete rs_context_;
+	delete rs_rgb_pipe_;
 	realsense_depth_refptr_.reset();
 	pcl_manager->remove_pointcloud(pcl_id_.c_str());
 	blackboard->close(switch_if_);
+	blackboard->close(camera_if_);
 }
 
 /* Create RS context and start the depth stream
@@ -190,6 +193,10 @@ Realsense2Thread::start_camera()
 {
 	try {
 		rs_pipe_->stop();
+	} catch (const std::exception &e) {
+	}
+	try {
+		rs_rgb_pipe_->stop();
 	} catch (const std::exception &e) {
 	}
 
@@ -219,7 +226,7 @@ Realsense2Thread::start_camera()
 		//rgb config
 		rs2::config rgb_config;
 		rgb_config.enable_stream(RS2_STREAM_COLOR, 1920, 1080, RS2_FORMAT_YUYV, frame_rate_);
-		rs2::pipeline_profile rs_pipeline_profile_rgb_ = rs_pipe_->start(rgb_config);
+		rs2::pipeline_profile rs_pipeline_profile_rgb_ = rs_rgb_pipe_->start(rgb_config);
 		auto                  rgb_stream =
 		  rs_pipeline_profile_rgb_.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
 		rgb_intrinsics_              = rgb_stream.get_intrinsics();
@@ -377,6 +384,10 @@ Realsense2Thread::stop_camera()
 	depth_enabled_  = false;
 	try {
 		rs_pipe_->stop();
+	} catch (const std::exception &e) {
+	}
+	try {
+		rs_rgb_pipe_->stop();
 	} catch (const std::exception &e) {
 	}
 }
