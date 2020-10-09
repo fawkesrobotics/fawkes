@@ -59,7 +59,7 @@ public:
 	                                     const char *           method,
 	                                     const char *           version,
 	                                     const char *           upload_data,
-	                                     long unsigned int *    upload_data_size,
+	                                     size_t *               upload_data_size,
 	                                     void **                session_data);
 
 	static void request_completed_cb(void *                          cls,

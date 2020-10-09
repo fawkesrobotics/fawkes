@@ -170,7 +170,7 @@ WebRequestDispatcher::process_request_cb(void *                 callback_data,
                                          const char *           method,
                                          const char *           version,
                                          const char *           upload_data,
-                                         long unsigned int *    upload_data_size,
+                                         size_t *               upload_data_size,
                                          void **                session_data)
 {
 	WebRequestDispatcher *rd = static_cast<WebRequestDispatcher *>(callback_data);
