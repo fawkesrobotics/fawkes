@@ -47,6 +47,7 @@ clips-navgraph navgraph-clusters: navgraph
 clips-ros: clips ros
 robot-memory: mongodb
 clips-robot-memory: robot-memory
+hardware-models: clips
 pddl-robot-memory: robot-memory
 openrave-robot-memory: robot-memory openrave
 pddl-planner: robot-memory
