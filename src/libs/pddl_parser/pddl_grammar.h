@@ -25,6 +25,8 @@
 
 #include "pddl_ast.h"
 
+#include <boost/spirit/include/qi_expect.hpp>
+
 namespace pddl_parser {
 namespace grammar {
 /** @class pddl_skipper
@@ -55,40 +57,41 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		using ascii::blank;
 		using ascii::char_;
 
-		name_type = lexeme[alnum >> *(alnum | char_('-') | char_('_'))];
+		name_type = lexeme[alnum > *(alnum | char_('-') | char_('_'))];
 
-		domain_name = lit("define") >> '(' >> lit("domain") >> +(char_ - ')') >> ')';
+		domain_name = lit("define") > '(' > lit("domain") > +(char_ - ')') > ')';
 
-		requirements = '(' >> lit(":requirements") >> *(':' >> lexeme[*qi::alnum]) >> ')';
+		requirements = '(' > lit(":requirements") > *(':' > lexeme[*qi::alnum]) > ')';
 
-		type_pair = name_type >> -('-' >> name_type);
-		types     = '(' >> lit(":types") >> +type_pair >> ')';
+		type_pair = name_type > -('-' > name_type);
+		types     = '(' > lit(":types") > +type_pair > ')';
 
 		constant_value_list = +name_type;
-		constant_multi_pair = constant_value_list >> -('-' >> name_type);
-		constants           = '(' >> lit(":constants") >> +constant_multi_pair >> ')';
+		constant_multi_pair = constant_value_list > -('-' > name_type);
+		constants           = '(' > lit(":constants") > +constant_multi_pair > ')';
 
-		param_pair  = '?' >> name_type >> '-' >> name_type;
+		param_pair  = '?' > name_type > '-' > name_type;
 		param_pairs = +param_pair;
-		pred        = '(' >> name_type >> -param_pairs >> ')';
-		predicates  = '(' >> lit(":predicates") >> +pred >> ')';
+		pred        = '(' > name_type > -param_pairs > ')';
+		predicates  = '(' > lit(":predicates") > +pred > ')';
 
 		atom          = +(graph - '(' - ')');
-		predicate     = '(' >> atom >> *expression >> ')';
+		predicate     = '(' > atom > *expression > ')';
 		expression    = atom | predicate;
-		temp_breakup  = lit(":temporal-breakup") >> expression;
-		cond_breakup  = lit(":conditional-breakup") >> expression;
-		effects       = lit(":effect") >> expression;
-		preconditions = lit(":precondition") >> expression;
-		duration      = lit(":duration") >> '(' >> '=' >> lit("?duration") >> uint_ >> ')';
-		action_params = lit(":parameters") >> '(' >> +param_pair >> ')';
-		action        = '(' >> (lit(":durative-action") | lit(":action")) >> name_type >> action_params
-		         >> -duration >> preconditions >> effects >> -cond_breakup >> -temp_breakup >> ')';
+		temp_breakup  = lit(":temporal-breakup") > expression;
+		cond_breakup  = lit(":conditional-breakup") > expression;
+		effects       = lit(":effect") > expression;
+		preconditions = lit(":precondition") > expression;
+		duration      = lit(":duration") > '(' > '=' > lit("?duration") > uint_ > ')';
+		action_params = lit(":parameters") > '(' > +param_pair > ')';
+		action        = '(' > (lit(":durative-action") | lit(":action")) > name_type > action_params
+		         > -duration > preconditions > effects > -cond_breakup > -temp_breakup > ')';
 		actions = +action;
 
-		domain = '(' >> domain_name >> requirements >> -types >> -constants >> predicates >> actions
+		domain = '(' > domain_name > requirements > -types > -constants > predicates > -fluents
+		         > actions
 		         // make closing parenthesis optional to stay backwards compatible
-		         >> -lit(")");
+		         > -lit(")");
 	}
 
 	/** Named placeholder for parsing a name. */
@@ -163,24 +166,24 @@ struct problem_parser : qi::grammar<Iterator, Problem(), Skipper>
 		using ascii::blank;
 		using ascii::char_;
 
-		name_type = lexeme[alnum >> *(alnum | char_('-') | char_('_'))];
+		name_type = lexeme[alnum > *(alnum | char_('-') | char_('_'))];
 
-		problem_name = '(' >> lit("define") >> '(' >> lit("problem") >> name_type >> ')';
+		problem_name = '(' > lit("define") > '(' > lit("problem") > name_type > ')';
 
-		domain_name = '(' >> lit(":domain") >> name_type >> ')';
+		domain_name = '(' > lit(":domain") > name_type > ')';
 
 		constant_value_list = +name_type;
-		constant_multi_pair = constant_value_list >> -('-' >> name_type);
-		objects             = '(' >> lit(":objects") >> +constant_multi_pair >> ')';
+		constant_multi_pair = constant_value_list > -('-' > name_type);
+		objects             = '(' > lit(":objects") > +constant_multi_pair > ')';
 
 		atom       = +(graph - '(' - ')');
-		predicate  = '(' >> atom >> *expression >> ')';
+		predicate  = '(' > atom > *expression > ')';
 		expression = atom | predicate;
-		init       = '(' >> lit(":init") >> +expression >> ')';
+		init       = '(' > lit(":init") > +expression > ')';
 
-		goal = '(' >> lit(":goal") >> +expression >> ')';
+		goal = '(' > lit(":goal") > +expression > ')';
 
-		problem = problem_name >> domain_name >> objects >> init >> goal;
+		problem = problem_name > domain_name > objects > init > goal;
 	}
 
 	/** Named placeholder for parsing a name. */
