@@ -26,6 +26,7 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/support_line_pos_iterator.hpp>
 #include <string>
 #include <vector>
 
@@ -44,11 +45,21 @@ typedef std::pair<std::string, std::string>       string_pair_type;
 typedef std::vector<string_pair_type>             string_pairs_type;
 typedef std::pair<std::string, string_pairs_type> predicate_type;
 
+typedef boost::spirit::line_pos_iterator<std::string::const_iterator> iterator_type;
+
 using Atom = std::string;
 
 struct Predicate;
 
-using Expression = boost::variant<Atom, Predicate>;
+enum ExpressionType { BOOL, FLUENT, PREDICATE, FLUENT_CHANGE, VALUE, ATOM };
+
+typedef boost::variant<Atom, boost::recursive_wrapper<Predicate>> expression_t;
+
+struct Expression
+{
+	ExpressionType type;
+	expression_t   expression;
+};
 
 /** @class Predicate
    * A PDDL formula (either part of a precondition or an effect(.
@@ -152,5 +163,7 @@ BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Action,
                           temp_breakup)
 
 BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Predicate, function, arguments)
+
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Expression, type, expression)
 
 #endif

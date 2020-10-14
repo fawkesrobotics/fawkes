@@ -31,8 +31,6 @@
 
 namespace pddl_parser {
 
-typedef boost::spirit::line_pos_iterator<std::string::const_iterator> iterator_type;
-
 class PddlParser
 {
 public:

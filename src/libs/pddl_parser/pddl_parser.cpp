@@ -69,17 +69,17 @@ PddlParser::getErrorContext(const iterator_type &start_it,
 Domain
 PddlParser::parseDomain(const std::string &pddl_domain)
 {
-	typedef boost::spirit::line_pos_iterator<std::string::const_iterator> iterator_type;
-	typedef pddl_parser::grammar::domain_parser<iterator_type>            grammar;
-	typedef pddl_parser::grammar::pddl_skipper<iterator_type>             skipper;
+	typedef pddl_parser::grammar::domain_parser<iterator_type> grammar;
+	typedef pddl_parser::grammar::pddl_skipper<iterator_type>  skipper;
 
-	grammar g;
 	skipper s;
 	Domain  dom;
 	bool    r = false;
 
 	iterator_type iter(pddl_domain.begin());
 	iterator_type end(pddl_domain.end());
+
+	grammar g;
 
 	try {
 		r = phrase_parse(iter, end, g, s, dom);

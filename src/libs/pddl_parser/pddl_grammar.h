@@ -24,8 +24,12 @@
 #define PLUGINS_PDDL_GRAMMAR_H_
 
 #include "pddl_ast.h"
+#include "pddl_semantics.h"
 
 #include <boost/spirit/include/qi_expect.hpp>
+#include <boost/spirit/repository/include/qi_iter_pos.hpp>
+
+namespace qr = boost::spirit::repository::qi;
 
 namespace pddl_parser {
 namespace grammar {
@@ -75,17 +79,37 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		pred        = '(' > name_type > -param_pairs > ')';
 		predicates  = '(' > lit(":predicates") > +pred > ')';
 
-		atom          = +(graph - '(' - ')');
-		predicate     = '(' > atom > *expression > ')';
-		expression    = atom | predicate;
+
+		atom    = +(graph - '(' - ')');
+		bool_op = qi::string("and") | qi::string("or") | qi::string("not");
+		comparison_op =
+		  qi::string("<") | qi::string(">") | qi::string("=") | qi::string("<=") | qi::string(">=");
+		numerical_op = qi::string("+") | qi::string("-") | qi::string("/") | qi::string("*")
+		               | qi::string("=") | string("increase") | string("decrease");
+
+		// no expectation parsing to allow proper backtracking
+		numerical_expression = attr(ExpressionType::VALUE) >> qi::as_string[qi::float_];
+		pred_expression      = attr(ExpressionType::PREDICATE)
+		                  >> qi::as<Predicate>()[atom >> *(hold[attr(ExpressionType::ATOM) >> atom])];
+		bool_expression = attr(ExpressionType::BOOL) >> qi::as<Predicate>()[(bool_op >> +expression)];
+
+		// hold to backtrack the ExpressionType
+		expression = '(' >> hold[(hold[bool_expression] |
+		                          //	hold[fluent_expression] | hold[fluent_change_expression] |
+		                          hold[pred_expression])]
+		             >> ')';
 		temp_breakup  = lit(":temporal-breakup") > expression;
 		cond_breakup  = lit(":conditional-breakup") > expression;
 		effects       = lit(":effect") > expression;
 		preconditions = lit(":precondition") > expression;
 		duration      = lit(":duration") > '(' > '=' > lit("?duration") > uint_ > ')';
 		action_params = lit(":parameters") > '(' > +param_pair > ')';
-		action        = '(' > (lit(":durative-action") | lit(":action")) > name_type > action_params
-		         > -duration > preconditions > effects > -cond_breakup > -temp_breakup > ')';
+
+		action =
+		  ('(' >> qr::iter_pos
+		   >> qi::as<Action>()[(lit(":durative-action") | lit(":action")) > name_type > action_params
+		                       > -duration > preconditions > effects > -cond_breakup > -temp_breakup
+		                       > ')']);
 		actions = +action;
 
 		domain = '(' > domain_name > requirements > -types > -constants > predicates > -fluents
@@ -126,10 +150,22 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 	/** Named placeholder for parsing a list of predicate types. */
 	qi::rule<Iterator, std::vector<predicate_type>(), Skipper> predicates;
 
-	/** Named placeholder for parsing an atom. */
+	/** Named placeholder for parsing any atom. */
 	qi::rule<Iterator, Atom()> atom;
+	/** Named placeholder for parsing an atom that is a logical operator. */
+	qi::rule<Iterator, Atom()> bool_op;
+	/** Named placeholder for parsing an atom that is a comparison operator. */
+	qi::rule<Iterator, Atom()> comparison_op;
+	/** Named placeholder for parsing an atom that is a numerical operator. */
+	qi::rule<Iterator, Atom()> numerical_op;
 	/** Named placeholder for parsing a predicate. */
 	qi::rule<Iterator, Predicate(), Skipper> predicate;
+	/** Named placeholder for parsing a PDDL predicate expression. */
+	qi::rule<Iterator, Expression(), Skipper> pred_expression;
+	/** Named placeholder for parsing a PDDL numeric expression. */
+	qi::rule<Iterator, Expression(), Skipper> numerical_expression;
+	/** Named placeholder for parsing a PDDL bool expression. */
+	qi::rule<Iterator, Expression(), Skipper> bool_expression;
 	/** Named placeholder for parsing a PDDL expression. */
 	qi::rule<Iterator, Expression(), Skipper> expression;
 	/** Named placeholder for parsing a PDDL precondition. */
@@ -178,10 +214,10 @@ struct problem_parser : qi::grammar<Iterator, Problem(), Skipper>
 
 		atom       = +(graph - '(' - ')');
 		predicate  = '(' > atom > *expression > ')';
-		expression = atom | predicate;
+		expression = attr(ExpressionType::PREDICATE) > predicate;
 		init       = '(' > lit(":init") > +expression > ')';
 
-		goal = '(' > lit(":goal") > +expression > ')';
+		goal = '(' > lit(":goal") > expression > ')';
 
 		problem = problem_name > domain_name > objects > init > goal;
 	}
