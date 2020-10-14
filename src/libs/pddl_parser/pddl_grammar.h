@@ -26,9 +26,12 @@
 #include "pddl_ast.h"
 #include "pddl_semantics.h"
 
+#include <boost/spirit/include/phoenix.hpp>
+#include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/qi_expect.hpp>
 #include <boost/spirit/repository/include/qi_iter_pos.hpp>
 
+namespace px = boost::phoenix;
 namespace qr = boost::spirit::repository::qi;
 
 namespace pddl_parser {
@@ -105,19 +108,24 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		duration      = lit(":duration") > '(' > '=' > lit("?duration") > uint_ > ')';
 		action_params = lit(":parameters") > '(' > +param_pair > ')';
 
+		// validate action semantics after parsing
 		action =
 		  ('(' >> qr::iter_pos
 		   >> qi::as<Action>()[(lit(":durative-action") | lit(":action")) > name_type > action_params
 		                       > -duration > preconditions > effects > -cond_breakup > -temp_breakup
-		                       > ')']);
-		actions = +action;
+		                       > ')'])[_val = action_semantics_(qi::_1, qi::_2, qi::_r1)];
+		// pass down the domain for semantics check
+		actions = +(action(qi::_r1));
 
 		domain = '(' > domain_name > requirements > -types > -constants > predicates > -fluents
-		         > actions
+		         > actions(qi::_val) // pass down the domain for semantic check
 		         // make closing parenthesis optional to stay backwards compatible
 		         > -lit(")");
 	}
 
+private:
+	/** Semantic checks for each parsed action. */
+	px::function<pddl_parser::ActionSemantics> action_semantics_;
 	/** Named placeholder for parsing a name. */
 	qi::rule<Iterator, std::string(), Skipper> name_type;
 
@@ -180,10 +188,14 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 	qi::rule<Iterator, int(), Skipper> duration;
 	/** Named placeholder for parsing action parameters. */
 	qi::rule<Iterator, string_pairs_type(), Skipper> action_params;
-	/** Named placeholder for parsing an action. */
-	qi::rule<Iterator, Action(), Skipper> action;
+	/** Named placeholder for parsing an action. Inherits a domain. */
+	qi::rule<Iterator, Action(const Domain &), Skipper> action;
+	/** Named placeholder for parsing a fluent type. */
+	qi::rule<Iterator, Fluent(), Skipper> fluent;
+	/** Named placeholder for parsing a list of fluents. */
+	qi::rule<Iterator, std::vector<Fluent>(), Skipper> fluents;
 	/** Named placeholder for parsing a list of actions. */
-	qi::rule<Iterator, std::vector<Action>(), Skipper> actions;
+	qi::rule<Iterator, std::vector<Action>(const Domain &), Skipper> actions;
 
 	/** Named placeholder for parsing a domain. */
 	qi::rule<Iterator, Domain(), Skipper> domain;

@@ -86,7 +86,11 @@ PddlParser::parseDomain(const std::string &pddl_domain)
 	} catch (qi::expectation_failure<iterator_type> const &e) {
 		throw PddlParserException(std::string("Expectation failed: ") + e.what()
 		                          + getErrorContext(iter, end, e.first));
+	} catch (PddlSemanticsException const &e) {
+		throw PddlParserException(std::string("Expectation failed: ") + e.what()
+		                          + getErrorContext(iter, end, e.pos));
 	}
+
 	if (!r) {
 		throw PddlParserException("Parsing PDDL domain string failed!");
 	}
