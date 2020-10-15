@@ -25,6 +25,45 @@
 #include <algorithm>
 
 namespace pddl_parser {
+
+pair_multi_const
+ConstantSemantics::operator()(const iterator_type &   where,
+                              const pair_multi_const &parsed,
+                              const Domain &          domain) const
+{
+	// typing test:
+	if (domain.requirements.end()
+	    != std::find(domain.requirements.begin(), domain.requirements.end(), "typing")) {
+		auto search =
+		  std::find_if(domain.types.begin(), domain.types.end(), [parsed](const pair_type &p) {
+			  return p.first == parsed.second || p.second == parsed.second;
+		  });
+		if (search == domain.types.end()) {
+			throw PddlSemanticsException(std::string("Unknown type: ") + parsed.second,
+			                             PddlErrorType::TYPE_ERROR,
+			                             where);
+		}
+	}
+	for (const auto &constant : parsed.first) {
+		for (const auto &dom_constants : domain.constants) {
+			auto already_defined =
+			  std::find_if(dom_constants.first.begin(),
+			               dom_constants.first.end(),
+			               [parsed, constant, dom_constants](const auto &c) {
+				               return c == constant && parsed.second != dom_constants.second;
+			               });
+			if (already_defined != dom_constants.first.end()) {
+				throw PddlSemanticsException(std::string("Duplicate type: ") + constant + " type "
+				                               + parsed.second + " conflicts with earlier type "
+				                               + dom_constants.second,
+				                             PddlErrorType::TYPE_ERROR,
+				                             where);
+			}
+		}
+	}
+	return parsed;
+}
+
 Action
 ActionSemantics::operator()(const iterator_type &where,
                             const Action &       parsed,

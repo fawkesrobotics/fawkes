@@ -74,8 +74,10 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		types     = '(' >> lit(":types") > +type_pair > ')';
 
 		constant_value_list = +name_type;
-		constant_multi_pair = constant_value_list > -('-' > name_type);
-		constants           = '(' >> lit(":constants") > +constant_multi_pair > ')';
+		constant_multi_pair =
+		  (qr::iter_pos >> qi::as<pair_multi_const>()[(constant_value_list > -('-' > name_type))])
+		    [_val = constant_semantics_(qi::_1, qi::_2, qi::_r1)];
+		constants = '(' >> lit(":constants") > +constant_multi_pair(qi::_r1) > ')';
 
 		param_pair  = '?' > name_type > (('-' >> name_type) | attr(""));
 		param_pairs = +param_pair;
@@ -117,8 +119,8 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		// pass down the domain for semantics check
 		actions = +(action(qi::_r1));
 
-		domain = '(' > domain_name > requirements > -types > -constants > predicates > -fluents
-		         > actions(qi::_val) // pass down the domain for semantic check
+		domain = '(' > domain_name > requirements > -types > -constants(qi::_val) > predicates
+		         > -fluents > actions(qi::_val) // pass down the domain for semantic check
 		         // make closing parenthesis optional to stay backwards compatible
 		         > -lit(")");
 	}
@@ -126,6 +128,8 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 private:
 	/** Semantic checks for each parsed action. */
 	px::function<pddl_parser::ActionSemantics> action_semantics_;
+	/** Semantic checks for each parsed constants. */
+	px::function<pddl_parser::ConstantSemantics> constant_semantics_;
 	/** Named placeholder for parsing a name. */
 	qi::rule<Iterator, std::string(), Skipper> name_type;
 
@@ -144,10 +148,10 @@ private:
 	qi::rule<Iterator, type_list(), Skipper> constant_value_list;
 	/** Named placeholder for parsing a list of predicate parameters. */
 	qi::rule<Iterator, type_list(), Skipper> predicate_params;
-	/** Named placeholder for parsing a list of typed constants. */
-	qi::rule<Iterator, pair_multi_const(), Skipper> constant_multi_pair;
-	/** Named placeholder for parsing a list of constants. */
-	qi::rule<Iterator, pairs_multi_consts(), Skipper> constants;
+	/** Named placeholder for parsing a list of typed constants. Pass the domai nfor semantic checks. */
+	qi::rule<Iterator, pair_multi_const(const Domain &), Skipper> constant_multi_pair;
+	/** Named placeholder for parsing a list of constants. Pass the domain for semantic checks. */
+	qi::rule<Iterator, pairs_multi_consts(const Domain &), Skipper> constants;
 
 	/** Named placeholder for parsing a parameter pair. */
 	qi::rule<Iterator, string_pair_type(), Skipper> param_pair;
