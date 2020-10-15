@@ -23,8 +23,6 @@
 
 #include "pddl_ast.h"
 
-#include <core/exception.h>
-
 #include <typeindex>
 
 namespace pddl_parser {
@@ -42,25 +40,7 @@ struct ExpressionTypeVisitor : public boost::static_visitor<std::type_index>
 	}
 };
 
-class PddlSemanticsException : public fawkes::Exception
 {
-public:
-	iterator_type pos;
-	/** Constructor.
-    * @param msg A message describing the error.
-    */
-	PddlSemanticsException(const char *msg, const iterator_type &pos)
-	: fawkes::Exception(msg), pos(pos)
-	{
-	}
-	/** Constructor with a string message.
-   * This wraps the constructor with a char* message for usage with std::string.
-   * @param msg A message describing the error.
-   */
-	PddlSemanticsException(const std::string &msg, const iterator_type &pos)
-	: fawkes::Exception(msg.c_str()), pos(pos)
-	{
-	}
 };
 
 struct ActionSemantics

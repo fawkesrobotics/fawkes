@@ -20,6 +20,8 @@
 
 #include "pddl_semantics.h"
 
+#include "pddl_exception.h"
+
 #include <algorithm>
 
 namespace pddl_parser {
@@ -38,7 +40,9 @@ ActionSemantics::operator()(const iterator_type &where,
 				  return p.first == action_param.second || p.second == action_param.second;
 			  });
 			if (search == domain.types.end()) {
-				throw PddlSemanticsException(std::string("Unknown type: ") + action_param.second, where);
+				throw PddlSemanticsException(std::string("Unknown type: ") + action_param.second,
+				                             PddlErrorType::TYPE_ERROR,
+				                             where);
 			}
 		}
 	}
@@ -82,6 +86,7 @@ ActionSemantics::check_action_predicates(iterator_type     where,
 	    != std::type_index(typeid(Predicate))) {
 		throw PddlSemanticsException(std::string("Unexpected Atom in expression: ")
 		                               + boost::get<Atom>(expr.expression),
+		                             PddlErrorType::EXPRESSION_ERROR,
 		                             where);
 	}
 	Predicate pred = boost::get<Predicate>(expr.expression);
@@ -101,20 +106,25 @@ ActionSemantics::check_action_predicates(iterator_type     where,
 		               [pred](const predicate_type &p) { return pred.function == p.first; });
 		if (defined_pred == domain.predicates.end()) {
 			// ... if it is not, then this predicate is invalid
-			throw PddlSemanticsException(std::string("Unknown predicate: ") + pred.function, where);
+			throw PddlSemanticsException(std::string("Unknown predicate: ") + pred.function,
+			                             PddlErrorType::PREDICATE_ERROR,
+			                             where);
 		} else {
 			// If the predicate is defined, the signature has to match
 			if (defined_pred->second.size() != pred.arguments.size()) {
 				throw PddlSemanticsException(std::string("Predicate argument length missmatch, expected ")
 				                               + std::to_string(defined_pred->second.size()) + " but got "
 				                               + std::to_string(pred.arguments.size()),
+				                             PddlErrorType::PREDICATE_ERROR,
 				                             where);
 			} else {
 				// and all arguments must be atomic expressions
 				for (size_t i = 0; i < pred.arguments.size(); i++) {
 					if (boost::apply_visitor(ExpressionTypeVisitor(), pred.arguments[i].expression)
 					    != std::type_index(typeid(Atom))) {
-						throw PddlSemanticsException(std::string("Unexpected nested predicate."), where);
+						throw PddlSemanticsException(std::string("Unexpected nested predicate."),
+						                             PddlErrorType::PREDICATE_ERROR,
+						                             where);
 					} else {
 						Atom        curr_arg = boost::get<Atom>(pred.arguments[i].expression);
 						std::string arg_type = "";
@@ -133,6 +143,7 @@ ActionSemantics::check_action_predicates(iterator_type     where,
 							               });
 							if (constant_match == domain.constants.end()) {
 								throw PddlSemanticsException(std::string("Unknown constant ") + curr_arg,
+								                             PddlErrorType::CONSTANT_ERROR,
 								                             where);
 							} else {
 								arg_type = constant_match->second;
@@ -146,6 +157,7 @@ ActionSemantics::check_action_predicates(iterator_type     where,
 							               });
 							if (parameter_match == curr_action.action_params.end()) {
 								throw PddlSemanticsException(std::string("Unknown Parameter ") + curr_arg,
+								                             PddlErrorType::PARAMETER_ERROR,
 								                             where);
 							} else {
 								arg_type = parameter_match->second;
@@ -158,6 +170,7 @@ ActionSemantics::check_action_predicates(iterator_type     where,
 							                               + std::to_string(i) + " of " + defined_pred->first
 							                               + " expects " + defined_pred->second[i].second
 							                               + " but got " + arg_type,
+							                             PddlErrorType::TYPE_ERROR,
 							                             where);
 						}
 					}

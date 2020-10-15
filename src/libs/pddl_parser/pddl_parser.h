@@ -22,9 +22,8 @@
 #ifndef PLUGINS_PDDL_PARSER_H_
 #define PLUGINS_PDDL_PARSER_H_
 
+#include "pddl_exception.h"
 #include "pddl_grammar.h"
-
-#include <core/exception.h>
 
 #include <boost/spirit/include/support_line_pos_iterator.hpp>
 #include <string>
