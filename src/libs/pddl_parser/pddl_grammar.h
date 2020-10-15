@@ -71,13 +71,13 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		requirements = '(' > lit(":requirements") > *(':' > lexeme[*qi::alnum]) > ')';
 
 		type_pair = name_type > -('-' > name_type);
-		types     = '(' > lit(":types") > +type_pair > ')';
+		types     = '(' >> lit(":types") > +type_pair > ')';
 
 		constant_value_list = +name_type;
 		constant_multi_pair = constant_value_list > -('-' > name_type);
-		constants           = '(' > lit(":constants") > +constant_multi_pair > ')';
+		constants           = '(' >> lit(":constants") > +constant_multi_pair > ')';
 
-		param_pair  = '?' > name_type > '-' > name_type;
+		param_pair  = '?' > name_type > (('-' >> name_type) | attr(""));
 		param_pairs = +param_pair;
 		pred        = '(' > name_type > -param_pairs > ')';
 		predicates  = '(' > lit(":predicates") > +pred > ')';
