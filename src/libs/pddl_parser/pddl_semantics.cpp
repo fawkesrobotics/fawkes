@@ -26,14 +26,53 @@
 
 namespace pddl_parser {
 
+namespace semantics_utils {
+bool
+typing_required(const Domain &d)
+{
+	auto typing_reqs = {"typing", "adl", "ucpop"};
+	for (const auto &type_req : typing_reqs) {
+		if (d.requirements.end() != std::find(d.requirements.begin(), d.requirements.end(), type_req)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void
+check_type_vs_requirement(const iterator_type &where, bool typing_required, const std::string &type)
+{
+	if ((type == "") && typing_required) {
+		throw PddlSemanticsException(std::string("Missing type."), PddlErrorType::TYPE_ERROR, where);
+	}
+	if ((type != "") && !typing_required) {
+		throw PddlSemanticsException(std::string("Requirement typing disabled, unexpected type found."),
+		                             PddlErrorType::TYPE_ERROR,
+		                             where);
+	}
+}
+
+} // end namespace semantics_utils
+
+pair_type
+TypeSemantics::operator()(const iterator_type &where,
+                          const pair_type &    parsed,
+                          const Domain &       domain) const
+{
+	semantics_utils::check_type_vs_requirement(where,
+	                                           semantics_utils::typing_required(domain),
+	                                           parsed.second);
+	return parsed;
+}
+
 pair_multi_const
 ConstantSemantics::operator()(const iterator_type &   where,
                               const pair_multi_const &parsed,
                               const Domain &          domain) const
 {
 	// typing test:
-	if (domain.requirements.end()
-	    != std::find(domain.requirements.begin(), domain.requirements.end(), "typing")) {
+	bool typing_enabled = semantics_utils::typing_required(domain);
+	if (typing_enabled) {
 		auto search =
 		  std::find_if(domain.types.begin(), domain.types.end(), [parsed](const pair_type &p) {
 			  return p.first == parsed.second || p.second == parsed.second;
@@ -44,6 +83,7 @@ ConstantSemantics::operator()(const iterator_type &   where,
 			                             where);
 		}
 	}
+	semantics_utils::check_type_vs_requirement(where, typing_enabled, parsed.second);
 	for (const auto &constant : parsed.first) {
 		for (const auto &dom_constants : domain.constants) {
 			auto already_defined =
@@ -69,21 +109,21 @@ ActionSemantics::operator()(const iterator_type &where,
                             const Action &       parsed,
                             const Domain &       domain) const
 {
-	// typing test:
-	// TODO: test type object
-	if (domain.requirements.end()
-	    != std::find(domain.requirements.begin(), domain.requirements.end(), "typing")) {
-		for (const auto &action_param : parsed.action_params) {
+	bool typing_enabled = semantics_utils::typing_required(domain);
+	for (const auto &action_param : parsed.action_params) {
+		if (typing_enabled) {
 			auto search =
 			  std::find_if(domain.types.begin(), domain.types.end(), [action_param](const pair_type &p) {
 				  return p.first == action_param.second || p.second == action_param.second;
 			  });
 			if (search == domain.types.end()) {
-				throw PddlSemanticsException(std::string("Unknown type: ") + action_param.second,
+				throw PddlSemanticsException(std::string("Unknown type: ") + action_param.first + " - "
+				                               + action_param.second,
 				                             PddlErrorType::TYPE_ERROR,
 				                             where);
 			}
 		}
+		semantics_utils::check_type_vs_requirement(where, typing_enabled, action_param.second);
 	}
 	// predicate signature test:
 	check_action_predicates(where, parsed.precondition, domain, parsed);
@@ -113,13 +153,12 @@ ActionSemantics::check_type(const iterator_type &where,
 }
 
 bool
-ActionSemantics::check_action_predicates(iterator_type     where,
-                                         const Expression &expr,
-                                         const Domain &    domain,
-                                         const Action &    curr_action)
+ActionSemantics::check_action_predicates(const iterator_type &where,
+                                         const Expression &   expr,
+                                         const Domain &       domain,
+                                         const Action &       curr_action)
 {
-	bool check_types = domain.requirements.end()
-	                   != std::find(domain.requirements.begin(), domain.requirements.end(), "typing");
+	bool typing_enabled = semantics_utils::typing_required(domain);
 	// this function checks predicates, if the expression is not a predicate then the action has an invalid structure
 	if (boost::apply_visitor(ExpressionTypeVisitor(), expr.expression)
 	    != std::type_index(typeid(Predicate))) {
@@ -203,7 +242,7 @@ ActionSemantics::check_action_predicates(iterator_type     where,
 							}
 						}
 						// and if typing is required, then the types should match the signature
-						if (check_types
+						if (typing_enabled
 						    && !check_type(where, arg_type, defined_pred->second[i].second, domain)) {
 							throw PddlSemanticsException(std::string("Type missmatch: Argument ")
 							                               + std::to_string(i) + " of " + defined_pred->first

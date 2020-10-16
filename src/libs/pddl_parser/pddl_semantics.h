@@ -40,6 +40,12 @@ struct ExpressionTypeVisitor : public boost::static_visitor<std::type_index>
 	}
 };
 
+struct TypeSemantics
+{
+	pair_type
+	operator()(const iterator_type &where, const pair_type &parsed, const Domain &domain) const;
+};
+
 struct ConstantSemantics
 {
 	pair_multi_const operator()(const iterator_type &   where,
