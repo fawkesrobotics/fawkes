@@ -51,7 +51,7 @@ using Atom = std::string;
 
 struct Predicate;
 
-enum ExpressionType { BOOL, FLUENT, PREDICATE, FLUENT_CHANGE, VALUE, ATOM };
+enum ExpressionType { BOOL, FLUENT, PREDICATE, FLUENT_CHANGE, VALUE, ATOM, DURATIVE};
 
 typedef boost::variant<Atom, boost::recursive_wrapper<Predicate>> expression_t;
 
@@ -89,7 +89,7 @@ struct Action
 	/** A typed list of action parameters. */
 	string_pairs_type action_params;
 	/** The action duration in temporal domains. */
-	int duration;
+	float duration;
 	/** The precondition of an action. May be a compound. */
 	Expression precondition;
 	/** The effect of an action. May be a compound. */

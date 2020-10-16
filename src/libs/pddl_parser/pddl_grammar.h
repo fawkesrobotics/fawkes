@@ -97,17 +97,21 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		pred_expression      = attr(ExpressionType::PREDICATE)
 		                  >> qi::as<Predicate>()[atom >> *(hold[attr(ExpressionType::ATOM) >> atom])];
 		bool_expression = attr(ExpressionType::BOOL) >> qi::as<Predicate>()[(bool_op >> +expression)];
+		durative_expression = attr(ExpressionType::DURATIVE)
+		                      >> qi::as<Predicate>()[(qi::string("at start") | qi::string("at end")
+		                                              | qi::string("over all"))
+		                                             > expression];
 
 		// hold to backtrack the ExpressionType
-		expression = '(' >> hold[(hold[bool_expression] |
-		                          //	hold[fluent_expression] | hold[fluent_change_expression] |
-		                          hold[pred_expression])]
-		             >> ')';
+		expression =
+		  '(' >> hold[(hold[bool_expression] |
+		               hold[durative_expression] | hold[pred_expression])]
+		  >> ')';
 		temp_breakup  = lit(":temporal-breakup") > expression;
 		cond_breakup  = lit(":conditional-breakup") > expression;
 		effects       = lit(":effect") > expression;
-		preconditions = lit(":precondition") > expression;
-		duration      = lit(":duration") > '(' > '=' > lit("?duration") > uint_ > ')';
+		preconditions = (lit(":precondition") | lit(":condition")) > expression;
+		duration      = lit(":duration") > '(' > '=' > lit("?duration") > qi::float_ > ')';
 		action_params = lit(":parameters") > '(' > +param_pair > ')';
 
 		// validate action semantics after parsing
@@ -178,6 +182,8 @@ private:
 	qi::rule<Iterator, Expression(), Skipper> numerical_expression;
 	/** Named placeholder for parsing a PDDL bool expression. */
 	qi::rule<Iterator, Expression(), Skipper> bool_expression;
+	/** Named placeholder for parsing a PDDL durative expression. */
+	qi::rule<Iterator, Expression(), Skipper> durative_expression;
 	/** Named placeholder for parsing a PDDL expression. */
 	qi::rule<Iterator, Expression(), Skipper> expression;
 	/** Named placeholder for parsing a PDDL precondition. */
