@@ -68,7 +68,7 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 
 		domain_name = lit("define") > '(' > lit("domain") > +(char_ - ')') > ')';
 
-		requirements = '(' > lit(":requirements") > *(':' > lexeme[*qi::alnum]) > ')';
+		requirements = '(' > lit(":requirements") > *(':' > name_type) > ')';
 
 		type_pair = name_type > -('-' > name_type);
 		types     = '(' >> lit(":types") > +type_pair > ')';
