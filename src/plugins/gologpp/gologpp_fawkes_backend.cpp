@@ -28,8 +28,8 @@
 #include "sleep_action_executor.h"
 
 #include <config/config.h>
-#include <golog++/model/activity.h>
-#include <golog++/model/transition.h>
+#include <golog++/execution/activity.h>
+#include <golog++/execution/transition.h>
 
 namespace fawkes {
 namespace gpp {
@@ -100,6 +100,14 @@ GologppFawkesBackend::time() const noexcept
 {
 	return gologpp::Clock::time_point{
 	  gologpp::Clock::duration{clock->now().in_sec() / gologpp::Clock::duration::period::den}};
+}
+
+/** Terminate execution of running actions
+ */
+void
+GologppFawkesBackend::terminate_()
+{
+	action_dispatcher_.terminate();
 }
 
 /** Execute the given activity using a suitable executor.

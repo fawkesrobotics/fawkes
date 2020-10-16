@@ -20,7 +20,7 @@
 
 #include "sleep_action_executor.h"
 
-#include <golog++/model/activity.h>
+#include <golog++/execution/activity.h>
 #include <logging/logger.h>
 
 #include <chrono>
@@ -62,6 +62,11 @@ SleepActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity> act
 }
 
 void
+SleepActionExecutor::terminate()
+{
+}
+
+void
 SleepActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
 	if (!can_execute_activity(activity)) {
@@ -85,8 +90,7 @@ SleepActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 	});
 }
 
-void
-SleepActionExecutor::stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity)
+void SleepActionExecutor::stop(std::shared_ptr<gologpp::Activity>)
 {
 }
 

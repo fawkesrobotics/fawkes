@@ -42,8 +42,9 @@ public:
 	                        const std::string &cfg_prefix);
 	virtual ~BBMessageActionExecutor();
 	void start(std::shared_ptr<gologpp::Activity> activity) override;
-	void stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity) override;
+	void stop(std::shared_ptr<gologpp::Activity> activity) override;
 	bool can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
+	void terminate() override;
 
 private:
 	BlackBoard *                       blackboard_;

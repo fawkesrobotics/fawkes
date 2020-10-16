@@ -21,7 +21,7 @@
 #include "action_executor_dispatcher.h"
 
 #include <core/exception.h>
-#include <golog++/model/activity.h>
+#include <golog++/execution/activity.h>
 
 namespace fawkes {
 namespace gpp {
@@ -57,6 +57,15 @@ void
 ActionExecutorDispatcher::register_executor(std::shared_ptr<ActionExecutor> executor)
 {
 	action_executors_.push_back(executor);
+}
+
+/** Terminate all executors
+ */
+void
+ActionExecutorDispatcher::terminate()
+{
+	for (auto &executor : action_executors_)
+		executor->terminate();
 }
 
 } // namespace gpp

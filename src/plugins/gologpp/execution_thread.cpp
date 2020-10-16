@@ -69,7 +69,8 @@ GologppThread::init()
 	  new ListType(*global_scope().lookup_type(SymbolType::static_name())));
 
 	logger->log_info(name(), "Parsing %s...", prog_file.c_str());
-	main_prog_ = gologpp::parser::parse_file(prog_file);
+	gologpp::parser::parse_file(prog_file);
+	main_prog_ = gologpp::global_scope().lookup_global<Procedure>("main");
 	logger->log_info(name(), "... parsing done");
 
 	logger->log_info(name(), "Initializing ReadyLog context...");
@@ -90,8 +91,7 @@ GologppThread::once()
 {
 	try {
 		std::lock_guard<std::mutex> l{run_mutex_};
-		gologpp::ReadylogContext::instance().run(
-		  gologpp::Block{new gologpp::Scope{gologpp::global_scope()}, {main_prog_.release()}});
+		gologpp::ReadylogContext::instance().run(main_prog_->definition());
 		logger->log_info(name(), "golog++ main program has ended");
 	} catch (gologpp::UserError &e) {
 		logger->log_error(name(), "User Error: %s", e.what());
@@ -121,7 +121,7 @@ GologppThread::finalize()
  * @brief GologppThread::gologpp_context
  * @return the currently used golog++ execution context.
  */
-gologpp::ExecutionContext &
+gologpp::ExecutionController &
 GologppThread::gologpp_context()
 {
 	return gologpp::ReadylogContext::instance();

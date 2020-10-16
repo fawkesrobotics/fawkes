@@ -22,6 +22,8 @@
 
 #include "utils.h"
 
+#include <golog++/execution/activity.h>
+#include <golog++/model/mapping.h>
 #include <logging/logger.h>
 
 namespace fawkes {
@@ -48,6 +50,11 @@ bool
 PrintActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const
 {
 	return activity->mapped_name() == "print";
+}
+
+void
+PrintActionExecutor::terminate()
+{
 }
 
 void
@@ -78,8 +85,7 @@ PrintActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 	activity->update(gologpp::Transition::Hook::FINISH);
 }
 
-void
-PrintActionExecutor::stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity)
+void PrintActionExecutor::stop(std::shared_ptr<gologpp::Activity>)
 {
 	logger_->log_error("PrintActionExecutor", "Cannot stop printing a message!");
 }

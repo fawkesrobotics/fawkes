@@ -21,7 +21,8 @@
 #include "remote_skiller_executor.h"
 
 #include <blackboard/remote.h>
-#include <golog++/model/activity.h>
+#include <golog++/execution/activity.h>
+#include <golog++/model/mapping.h>
 
 namespace fawkes {
 namespace gpp {

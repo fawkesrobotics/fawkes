@@ -24,7 +24,8 @@
 
 #include <blackboard/blackboard.h>
 #include <config/config.h>
-#include <golog++/model/activity.h>
+#include <golog++/execution/activity.h>
+#include <golog++/model/mapping.h>
 #include <logging/logger.h>
 
 #include <algorithm>
@@ -69,6 +70,11 @@ BBMessageActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity>
 }
 
 void
+BBMessageActionExecutor::terminate()
+{
+}
+
+void
 BBMessageActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
 	if (!can_execute_activity(activity)) {
@@ -110,7 +116,7 @@ BBMessageActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 }
 
 void
-BBMessageActionExecutor::stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity)
+BBMessageActionExecutor::stop(std::shared_ptr<gologpp::Activity> activity)
 {
 	logger_->log_error("BBMessageActionExecutor",
 	                   "Cannot stop a message that has already been sent!");
