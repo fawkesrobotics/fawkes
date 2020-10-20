@@ -71,6 +71,8 @@ GologppThread::init()
 	logger->log_info(name(), "Parsing %s...", prog_file.c_str());
 	gologpp::parser::parse_file(prog_file);
 	main_prog_ = gologpp::global_scope().lookup_global<Procedure>("main");
+	if (!main_prog_)
+		throw fawkes::NullPointerException("No procedure main() in %s", prog_file.string().c_str());
 	logger->log_info(name(), "... parsing done");
 
 	logger->log_info(name(), "Initializing ReadyLog context...");
