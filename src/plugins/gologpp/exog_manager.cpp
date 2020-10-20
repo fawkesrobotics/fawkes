@@ -237,24 +237,34 @@ ExogManager::BlackboardEventHandler::make_exog_event(Interface *iface) const
 	Binding                binding;
 
 	while (fi != iface->fields_end()) {
-		shared_ptr<const Variable> mapped_var = target_exog_->mapping().mapped_var(fi.get_name());
-		if (mapped_var) {
-			if (fi.get_length() == 1 || (fi.get_length() > 1 && fi.get_type() == IFT_STRING))
-				binding.bind(mapped_var, gologpp::unique_ptr<Expression>(field_to_value(fi, 0)));
-			else if (fi.get_length() > 1) {
-				vector<unique_ptr<Value>> list_value;
-				for (unsigned int idx = 0; idx < fi.get_length(); ++idx)
-					list_value.emplace_back(field_to_value(fi, idx));
-				shared_ptr<const Type> list_type = global_scope().lookup_list_type(list_value[0]->type());
-				binding.bind(mapped_var,
-				             gologpp::unique_ptr<Expression>(new Value(*list_type, list_value)));
-			} else
-				throw IllegalArgumentException(
-				  "%s: Field %s has length %d and type %s, which shouldn't happen",
-				  iface->uid(),
-				  fi.get_name(),
-				  fi.get_length(),
-				  fi.get_typename());
+		try {
+			shared_ptr<const Variable> mapped_var = target_exog_->mapping().mapped_var(fi.get_name());
+			if (mapped_var) {
+				if (fi.get_length() == 1 || (fi.get_length() > 1 && fi.get_type() == IFT_STRING))
+					binding.bind(mapped_var, gologpp::unique_ptr<Expression>(field_to_value(fi, 0)));
+				else if (fi.get_length() > 1) {
+					vector<unique_ptr<Value>> list_value;
+					for (unsigned int idx = 0; idx < fi.get_length(); ++idx)
+						list_value.emplace_back(field_to_value(fi, idx));
+					shared_ptr<const Type> list_type = global_scope().lookup_list_type(list_value[0]->type());
+					binding.bind(mapped_var,
+					             gologpp::unique_ptr<Expression>(new Value(*list_type, list_value)));
+				} else
+					throw IllegalArgumentException(
+					  "Field %s has length %d and type %s, which shouldn't happen",
+					  fi.get_name(),
+					  fi.get_length(),
+					  fi.get_typename());
+			} else {
+				throw fawkes::IllegalArgumentException(
+				  "Field %s maps to an expression that is not a variable", fi.get_name());
+			}
+		} catch (gologpp::NameNotMapped &) {
+			exog_manager_.logger_->log_debug(exog_manager_.name(),
+			                                "%s event for %s: Field %s is not mapped (ignoring).",
+			                                target_exog_->name().c_str(),
+			                                iface->id(),
+			                                fi.get_name());
 		}
 		++fi;
 	}
@@ -269,11 +279,13 @@ ExogManager::InterfaceWatcher::bb_interface_data_refreshed(Interface *iface) thr
 		exog_manager_.exog_queue_push(make_exog_event(iface));
 	} catch (IllegalArgumentException &e) {
 		exog_manager_.logger_->log_error(exog_manager_.name(),
-		                                 "Error when creating exogenous event: %s, ignoring event!",
+		                                 "Error creating exogenous event for %s: %s, ignoring event!",
+		                                 iface->id(),
 		                                 e.what_no_backtrace());
 	} catch (gologpp::UserError &e) {
 		exog_manager_.logger_->log_error(exog_manager_.name(),
-		                                 "Error when creating exogenous event: %s, ignoring event!",
+		                                 "Error creating exogenous event for %s: %s, ignoring event!",
+		                                 iface->id(),
 		                                 e.what());
 	}
 }
