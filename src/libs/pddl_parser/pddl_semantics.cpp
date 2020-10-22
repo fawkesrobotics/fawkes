@@ -103,7 +103,7 @@ ConstantSemantics::operator()(const iterator_type &     where,
 		for (const auto &dom_constants : domain.constants) {
 			std::for_each(dom_constants.first.begin(),
 			              dom_constants.first.end(),
-			              [parsed, constant, dom_constants, warnings](const auto &c) mutable {
+			              [&parsed, &constant, &dom_constants, &warnings](const auto &c) mutable {
 				              if (c == constant && parsed.second != dom_constants.second) {
 					              warnings.push_back(std::string("Ambiguous type: ") + constant + " type "
 					                                 + parsed.second + " and " + dom_constants.second);
@@ -136,8 +136,9 @@ ActionSemantics::operator()(const iterator_type &where,
 		semantics_utils::check_type_vs_requirement(where, typing_enabled, action_param.second);
 	}
 	// predicate signature test:
-	check_action_predicates(where, parsed.precondition, domain, parsed);
-	check_action_predicates(where, parsed.effect, domain, parsed);
+	string_pairs_type bound_vars;
+	check_action_condition(where, parsed.precondition, domain, parsed, bound_vars);
+	check_action_condition(where, parsed.effect, domain, parsed, bound_vars);
 
 	return parsed;
 }
@@ -163,26 +164,47 @@ ActionSemantics::check_type(const iterator_type &where,
 }
 
 bool
-ActionSemantics::check_action_predicates(const iterator_type &where,
-                                         const Expression &   expr,
-                                         const Domain &       domain,
-                                         const Action &       curr_action)
+ActionSemantics::check_action_condition(const iterator_type &where,
+                                        const Expression &   expr,
+                                        const Domain &       domain,
+                                        const Action &       curr_action,
+                                        string_pairs_type &  bound_vars)
 {
-	bool typing_enabled = semantics_utils::typing_required(domain);
-	// this function checks predicates, if the expression is not a predicate then the action has an invalid structure
-	if (boost::apply_visitor(ExpressionTypeVisitor(), expr.expression)
-	    != std::type_index(typeid(Predicate))) {
+	auto curr_obj_type = boost::apply_visitor(ExpressionTypeVisitor(), expr.expression);
+	// this function checks conditions, if the expression is an atom, then the action has an invalid structure
+	if (curr_obj_type == std::type_index(typeid(Atom))) {
 		throw PddlSemanticsException(std::string("Unexpected Atom in expression: ")
 		                               + boost::get<Atom>(expr.expression),
 		                             PddlErrorType::EXPRESSION_ERROR,
 		                             where);
 	}
-	Predicate pred = boost::get<Predicate>(expr.expression);
-	switch (expr.type) {
+	if (curr_obj_type == std::type_index(typeid(QuantifiedFormula))) {
+		QuantifiedFormula f = boost::get<QuantifiedFormula>(expr.expression);
+		bound_vars.insert(bound_vars.end(), f.args.begin(), f.args.end());
+		return check_action_condition(where, f.sub_expr, domain, curr_action, bound_vars);
+	}
+
+	if (curr_obj_type == std::type_index(typeid(Predicate))) {
+		return check_action_predicate(
+		  where, boost::get<Predicate>(expr.expression), expr.type, domain, curr_action, bound_vars);
+	}
+	return true;
+}
+
+bool
+ActionSemantics::check_action_predicate(const iterator_type & where,
+                                        const Predicate &     pred,
+                                        const ExpressionType &type,
+                                        const Domain &        domain,
+                                        const Action &        curr_action,
+                                        string_pairs_type &   bound_vars)
+{
+	bool typing_enabled = semantics_utils::typing_required(domain);
+	switch (type) {
 	case ExpressionType::BOOL: {
 		for (const auto &sub_expr : pred.arguments) {
 			// recursively check sub expressions of booelean expressions, they all are predicate expressions
-			check_action_predicates(where, sub_expr, domain, curr_action);
+			check_action_condition(where, sub_expr, domain, curr_action, bound_vars);
 		}
 		break;
 	}
@@ -223,7 +245,7 @@ ActionSemantics::check_action_predicates(const iterator_type &where,
 							auto constant_match = std::find_if(
 							  domain.constants.begin(),
 							  domain.constants.end(),
-							  [curr_arg, domain, defined_pred, i, where, constant_found, arg_type](
+							  [&curr_arg, &domain, &defined_pred, &i, &where, &constant_found, &arg_type](
 							    const pair_multi_const &c) mutable {
 								  if (c.first.end() != std::find(c.first.begin(), c.first.end(), curr_arg)) {
 									  constant_found = true;
@@ -242,21 +264,28 @@ ActionSemantics::check_action_predicates(const iterator_type &where,
 								}
 							}
 						} else {
-							auto parameter_match =
-							  std::find_if(curr_action.action_params.begin(),
-							               curr_action.action_params.end(),
-							               [curr_arg](const pair_type &c) {
-								               return c.first == curr_arg.substr(1, std::string::npos);
-							               });
-							if (parameter_match == curr_action.action_params.end()) {
-								throw PddlSemanticsException(std::string("Unknown Parameter ") + curr_arg,
-								                             PddlErrorType::PARAMETER_ERROR,
-								                             where);
+							auto bound_vars_match =
+							  std::find_if(bound_vars.begin(), bound_vars.end(), [curr_arg](const pair_type &c) {
+								  return c.first == curr_arg.substr(1, std::string::npos);
+							  });
+							if (bound_vars_match == bound_vars.end()) {
+								auto parameter_match =
+								  std::find_if(curr_action.action_params.begin(),
+								               curr_action.action_params.end(),
+								               [curr_arg](const pair_type &c) {
+									               return c.first == curr_arg.substr(1, std::string::npos);
+								               });
+								if (parameter_match == curr_action.action_params.end()) {
+									throw PddlSemanticsException(std::string("Unknown Parameter ") + curr_arg,
+									                             PddlErrorType::PARAMETER_ERROR,
+									                             where);
+								} else {
+									arg_type = parameter_match->second;
+								}
 							} else {
-								arg_type = parameter_match->second;
-								is_type_error =
-								  !check_type(where, arg_type, defined_pred->second[i].second, domain);
+								arg_type = bound_vars_match->second;
 							}
+							is_type_error = !check_type(where, arg_type, defined_pred->second[i].second, domain);
 						}
 						// and if typing is required, then the types should match the signature
 						if (typing_enabled && is_type_error) {

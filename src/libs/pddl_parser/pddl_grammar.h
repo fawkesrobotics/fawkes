@@ -112,6 +112,12 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		pred_expression = attr(ExpressionType::PREDICATE)
 		                  >> qi::as<Predicate>()[atom >> *(hold[attr(ExpressionType::ATOM) >> atom])];
 		bool_expression = attr(ExpressionType::BOOL) >> qi::as<Predicate>()[(bool_op >> +expression)];
+		quantified_expression =
+		  attr(ExpressionType::QUANTIFIED)
+		  >> qi::as<QuantifiedFormula>()[(qi::string("exists") | qi::string("forall")) > '('
+		                                 > param_pairs > ')' > expression];
+		cond_effect_expression = attr(ExpressionType::COND_EFFECT)
+		                         >> qi::as<Predicate>()[qi::string("when") > expression > expression];
 		durative_expression = attr(ExpressionType::DURATIVE)
 		                      >> qi::as<Predicate>()[(qi::string("at start") | qi::string("at end")
 		                                              | qi::string("over all"))
@@ -131,8 +137,10 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 
 		// hold to backtrack the ExpressionType
 		expression =
-		  '(' >> hold[(hold[bool_expression] | hold[function_expression] | hold[function_change_expression]
-		               | hold[durative_expression] | hold[pred_expression] | hold[unknown_expression])]
+		  '('
+		  >> hold[(hold[bool_expression] | hold[function_expression] | hold[function_change_expression]
+		           | hold[durative_expression] | hold[quantified_expression]
+		           | hold[cond_effect_expression] | hold[pred_expression] | hold[unknown_expression])]
 		  >> ')';
 		temp_breakup  = lit(":temporal-breakup") > expression;
 		cond_breakup  = lit(":conditional-breakup") > expression;
@@ -225,6 +233,10 @@ private:
 	qi::rule<Iterator, Expression(), Skipper> bool_expression;
 	/** Named placeholder for parsing a PDDL durative expression. */
 	qi::rule<Iterator, Expression(), Skipper> durative_expression;
+	/** Named placeholder for parsing a PDDL quantified expression. */
+	qi::rule<Iterator, Expression(), Skipper> quantified_expression;
+	/** Named placeholder for parsing a PDDL conditional effect expression. */
+	qi::rule<Iterator, Expression(), Skipper> cond_effect_expression;
 	/** Named placeholder for parsing an arbitrary  PDDL expression, where no semantic checks can be performed. */
 	qi::rule<Iterator, Expression(), Skipper> unknown_expression;
 	/** Named placeholder for parsing a PDDL expression. */

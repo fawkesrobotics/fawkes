@@ -50,6 +50,7 @@ typedef boost::spirit::line_pos_iterator<std::string::const_iterator> iterator_t
 using Atom = std::string;
 
 struct Predicate;
+struct QuantifiedFormula;
 
 enum ExpressionType {
 	BOOL,
@@ -60,15 +61,34 @@ enum ExpressionType {
 	VALUE,
 	ATOM,
 	DURATIVE,
+	QUANTIFIED,
+	COND_EFFECT,
 	UNKNOWN
 };
 
-typedef boost::variant<Atom, boost::recursive_wrapper<Predicate>> expression_t;
+typedef boost::
+  variant<Atom, boost::recursive_wrapper<Predicate>, boost::recursive_wrapper<QuantifiedFormula>>
+    expression_t;
 
 struct Expression
 {
 	ExpressionType type;
 	expression_t   expression;
+};
+
+/** @class Quantifier
+   * A PDDL quantified formula.
+   */
+struct QuantifiedFormula
+{
+	/** The name of the quantifier ('exists' or 'forall') */
+	Atom quantifier;
+
+	/** args that are bound by the quantifier */
+	string_pairs_type args;
+
+	/** Sub-expression that is quantified over */
+	Expression sub_expr;
 };
 
 /** @class Predicate
@@ -187,6 +207,7 @@ BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Action,
                           temp_breakup)
 
 BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Predicate, function, arguments)
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::QuantifiedFormula, quantifier, args, sub_expr)
 
 BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Function, name, object_params)
 BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Expression, type, expression)

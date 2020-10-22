@@ -38,6 +38,11 @@ struct ExpressionTypeVisitor : public boost::static_visitor<std::type_index>
 	{
 		return std::type_index(typeid(p));
 	}
+	std::type_index
+	operator()(const QuantifiedFormula &p) const
+	{
+		return std::type_index(typeid(p));
+	}
 };
 
 struct TypeSemantics
@@ -68,10 +73,17 @@ struct ActionSemantics
 	                       const std::string &  expected,
 	                       const Domain &       domain);
 
-	static bool check_action_predicates(const iterator_type &where,
-	                                    const Expression &   expr,
-	                                    const Domain &       domain,
-	                                    const Action &       action);
+	static bool check_action_condition(const iterator_type &where,
+	                                   const Expression &   expr,
+	                                   const Domain &       domain,
+	                                   const Action &       action,
+	                                   string_pairs_type &  bound_vars);
+	static bool check_action_predicate(const iterator_type & where,
+	                                   const Predicate &     pred,
+	                                   const ExpressionType &type,
+	                                   const Domain &        domain,
+	                                   const Action &        action,
+	                                   string_pairs_type &   bound_vars);
 
 	Action operator()(const iterator_type &where, const Action &parsed, const Domain &domain) const;
 };
