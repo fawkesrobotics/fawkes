@@ -51,7 +51,17 @@ using Atom = std::string;
 
 struct Predicate;
 
-enum ExpressionType { BOOL, FLUENT, PREDICATE, FLUENT_CHANGE, VALUE, ATOM, DURATIVE};
+enum ExpressionType {
+	BOOL,
+	NUMERIC_COMP,
+	PREDICATE,
+	NUMERIC,
+	NUMERIC_CHANGE,
+	VALUE,
+	ATOM,
+	DURATIVE,
+	UNKNOWN
+};
 
 typedef boost::variant<Atom, boost::recursive_wrapper<Predicate>> expression_t;
 
@@ -77,6 +87,17 @@ struct Predicate
      * formula.
      */
 	std::vector<Expression> arguments;
+};
+
+/** @class Function
+   * A structured representation of a PDDL function.
+   */
+struct Function
+{
+	/** The name of the function. */
+	std::string name;
+	/** A typed list of function parameters. */
+	string_pairs_type object_params;
 };
 
 /** @class Action
@@ -120,6 +141,8 @@ struct Domain
      * arguments.
      */
 	std::vector<predicate_type> predicates;
+	/** A list of numeric functions in the domain. */
+	std::vector<Function> functions;
 	/** A list of actions defined in the domain. */
 	std::vector<Action> actions;
 };
@@ -149,6 +172,7 @@ BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Domain,
                           types,
                           constants,
                           predicates,
+                          functions,
                           actions)
 
 BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Problem, name, domain_name, objects, init, goal)
@@ -164,6 +188,7 @@ BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Action,
 
 BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Predicate, function, arguments)
 
+BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Function, name, object_params)
 BOOST_FUSION_ADAPT_STRUCT(pddl_parser::Expression, type, expression)
 
 #endif

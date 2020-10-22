@@ -94,6 +94,8 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		pred        = '(' > name_type > -param_pairs > ')';
 		predicates  = '(' > lit(":predicates") > +pred > ')';
 
+		function  = '(' >> name_type > -param_pairs > ')' >> -("-" > lit("number"));
+		functions = '(' >> lit(":functions") > *function > ')';
 
 		atom    = +(graph - '(' - ')');
 		bool_op = qi::string("and") | qi::string("or") | qi::string("not");
@@ -103,19 +105,34 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		               | qi::string("=") | string("increase") | string("decrease");
 
 		// no expectation parsing to allow proper backtracking
-		numerical_expression = attr(ExpressionType::VALUE) >> qi::as_string[qi::float_];
-		pred_expression      = attr(ExpressionType::PREDICATE)
+		value_expression = attr(ExpressionType::VALUE) >> qi::as_string[qi::float_];
+		numeric_expression =
+		  attr(ExpressionType::NUMERIC)
+		  >> qi::as<Predicate>()[atom >> *(hold[attr(ExpressionType::ATOM) >> atom])];
+		pred_expression = attr(ExpressionType::PREDICATE)
 		                  >> qi::as<Predicate>()[atom >> *(hold[attr(ExpressionType::ATOM) >> atom])];
 		bool_expression = attr(ExpressionType::BOOL) >> qi::as<Predicate>()[(bool_op >> +expression)];
 		durative_expression = attr(ExpressionType::DURATIVE)
 		                      >> qi::as<Predicate>()[(qi::string("at start") | qi::string("at end")
 		                                              | qi::string("over all"))
 		                                             > expression];
+		unknown_expression =
+		  attr(ExpressionType::UNKNOWN) >> atom >> *(hold[attr(ExpressionType::ATOM) >> atom]);
+		function_expression =
+		  attr(ExpressionType::NUMERIC_COMP)
+		  >> qi::as<Predicate>()[qi::as<Atom>()[comparison_op] > (hold[expression >> value_expression]
+		                                                          | hold[value_expression >> expression]
+		                                                          | hold[expression >> expression])];
+		function_change_expression =
+		  attr(ExpressionType::NUMERIC_CHANGE)
+		  >> qi::as<Predicate>()[numerical_op > (hold[expression >> value_expression]
+		                                         | hold[value_expression >> expression]
+		                                         | hold[expression >> expression])];
 
 		// hold to backtrack the ExpressionType
 		expression =
-		  '(' >> hold[(hold[bool_expression] |
-		               hold[durative_expression] | hold[pred_expression])]
+		  '(' >> hold[(hold[bool_expression] | hold[function_expression] | hold[function_change_expression]
+		               | hold[durative_expression] | hold[pred_expression] | hold[unknown_expression])]
 		  >> ')';
 		temp_breakup  = lit(":temporal-breakup") > expression;
 		cond_breakup  = lit(":conditional-breakup") > expression;
@@ -136,7 +153,7 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		actions = +(action(qi::_r1));
 
 		domain = '(' > domain_name > requirements > -types(qi::_val) > -constants(qi::_val) > predicates
-		         > -fluents > actions(qi::_val) // pass down the domain for semantic check
+		         > -functions > actions(qi::_val) // pass down the domain for semantic check
 		         // make closing parenthesis optional to stay backwards compatible
 		         > -lit(")");
 	}
@@ -196,12 +213,20 @@ private:
 	qi::rule<Iterator, Predicate(), Skipper> predicate;
 	/** Named placeholder for parsing a PDDL predicate expression. */
 	qi::rule<Iterator, Expression(), Skipper> pred_expression;
+	/** Named placeholder for parsing a PDDL value expression. */
+	qi::rule<Iterator, Expression(), Skipper> value_expression;
 	/** Named placeholder for parsing a PDDL numeric expression. */
-	qi::rule<Iterator, Expression(), Skipper> numerical_expression;
+	qi::rule<Iterator, Expression(), Skipper> numeric_expression;
+	/** Named placeholder for parsing a PDDL function expression. */
+	qi::rule<Iterator, Expression(), Skipper> function_expression;
+	/** Named placeholder for parsing a PDDL function changing expression. */
+	qi::rule<Iterator, Expression(), Skipper> function_change_expression;
 	/** Named placeholder for parsing a PDDL bool expression. */
 	qi::rule<Iterator, Expression(), Skipper> bool_expression;
 	/** Named placeholder for parsing a PDDL durative expression. */
 	qi::rule<Iterator, Expression(), Skipper> durative_expression;
+	/** Named placeholder for parsing an arbitrary  PDDL expression, where no semantic checks can be performed. */
+	qi::rule<Iterator, Expression(), Skipper> unknown_expression;
 	/** Named placeholder for parsing a PDDL expression. */
 	qi::rule<Iterator, Expression(), Skipper> expression;
 	/** Named placeholder for parsing a PDDL precondition. */
@@ -218,10 +243,10 @@ private:
 	qi::rule<Iterator, string_pairs_type(), Skipper> action_params;
 	/** Named placeholder for parsing an action. Inherits a domain. */
 	qi::rule<Iterator, Action(const Domain &), Skipper> action;
-	/** Named placeholder for parsing a fluent type. */
-	qi::rule<Iterator, Fluent(), Skipper> fluent;
-	/** Named placeholder for parsing a list of fluents. */
-	qi::rule<Iterator, std::vector<Fluent>(), Skipper> fluents;
+	/** Named placeholder for parsing a function type. */
+	qi::rule<Iterator, Function(), Skipper> function;
+	/** Named placeholder for parsing a list of functions. */
+	qi::rule<Iterator, std::vector<Function>(), Skipper> functions;
 	/** Named placeholder for parsing a list of actions. */
 	qi::rule<Iterator, std::vector<Action>(const Domain &), Skipper> actions;
 
