@@ -80,9 +80,10 @@ ParamTransformer::operator()(const iterator_type &   where,
 }
 
 pair_multi_const
-ConstantSemantics::operator()(const iterator_type &   where,
-                              const pair_multi_const &parsed,
-                              const Domain &          domain) const
+ConstantSemantics::operator()(const iterator_type &     where,
+                              const pair_multi_const &  parsed,
+                              const Domain &            domain,
+                              std::vector<std::string> &warnings) const
 {
 	// typing test:
 	bool typing_enabled = semantics_utils::typing_required(domain);
@@ -100,19 +101,14 @@ ConstantSemantics::operator()(const iterator_type &   where,
 	semantics_utils::check_type_vs_requirement(where, typing_enabled, parsed.second);
 	for (const auto &constant : parsed.first) {
 		for (const auto &dom_constants : domain.constants) {
-			auto already_defined =
-			  std::find_if(dom_constants.first.begin(),
-			               dom_constants.first.end(),
-			               [parsed, constant, dom_constants](const auto &c) {
-				               return c == constant && parsed.second != dom_constants.second;
-			               });
-			if (already_defined != dom_constants.first.end()) {
-				throw PddlSemanticsException(std::string("Duplicate type: ") + constant + " type "
-				                               + parsed.second + " conflicts with earlier type "
-				                               + dom_constants.second,
-				                             PddlErrorType::TYPE_ERROR,
-				                             where);
-			}
+			std::for_each(dom_constants.first.begin(),
+			              dom_constants.first.end(),
+			              [parsed, constant, dom_constants, warnings](const auto &c) mutable {
+				              if (c == constant && parsed.second != dom_constants.second) {
+					              warnings.push_back(std::string("Ambiguous type: ") + constant + " type "
+					                                 + parsed.second + " and " + dom_constants.second);
+				              }
+			              });
 		}
 	}
 	return parsed;

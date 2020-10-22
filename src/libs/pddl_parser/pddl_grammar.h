@@ -77,7 +77,8 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		constant_value_list = +name_type;
 		constant_multi_pair =
 		  (qr::iter_pos >> qi::as<pair_multi_const>()[(constant_value_list > -('-' > name_type))])
-		    [_val = constant_semantics_(qi::_1, qi::_2, qi::_r1)];
+		    [_val =
+		       constant_semantics_(qi::_1, qi::_2, qi::_r1, px::bind(&domain_parser::warnings, this))];
 		constants = '(' >> lit(":constants") > +constant_multi_pair(qi::_r1) > ')';
 
 		param_pair =
@@ -143,6 +144,7 @@ private:
 	px::function<pddl_parser::ActionSemantics> action_semantics_;
 	/** Semantic checks for each parsed constants. */
 	px::function<pddl_parser::ConstantSemantics> constant_semantics_;
+	std::vector<std::string>                     warnings;
 	/** Named placeholder for parsing a name. */
 	qi::rule<Iterator, std::string(), Skipper> name_type;
 

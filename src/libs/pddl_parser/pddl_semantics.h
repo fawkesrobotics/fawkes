@@ -55,9 +55,10 @@ struct ParamTransformer
 
 struct ConstantSemantics
 {
-	pair_multi_const operator()(const iterator_type &   where,
-	                            const pair_multi_const &parsed,
-	                            const Domain &          domain) const;
+	pair_multi_const operator()(const iterator_type &     where,
+	                            const pair_multi_const &  parsed,
+	                            const Domain &            domain,
+	                            std::vector<std::string> &warnings) const;
 };
 
 struct ActionSemantics
