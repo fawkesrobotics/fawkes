@@ -70,11 +70,9 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 
 		requirements = '(' > lit(":requirements") > *(':' > name_type) > ')';
 
-		type_pair =
-		  (qr::iter_pos
-		   >> qi::as<pair_type>()[name_type > -(
-		                            '-' > name_type)])[_val = type_semantics_(qi::_1, qi::_2, qi::_r1)];
-		types = '(' >> lit(":types") > +type_pair(qi::_r1) > ')';
+		type_pair = (qr::iter_pos >> qi::as<pair_multi_const>()[+name_type > -('-' > name_type)])
+		  [_val = type_semantics_(qi::_1, param_transformer_(qi::_1, qi::_2, qi::_r2), qi::_r1)];
+		types = '(' >> lit(":types") > +type_pair(qi::_r1, qi::_val) > ')';
 
 		constant_value_list = +name_type;
 		constant_multi_pair =
@@ -82,8 +80,11 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		    [_val = constant_semantics_(qi::_1, qi::_2, qi::_r1)];
 		constants = '(' >> lit(":constants") > +constant_multi_pair(qi::_r1) > ')';
 
-		param_pair  = '?' > name_type > (('-' >> name_type) | attr(""));
-		param_pairs = +param_pair;
+		param_pair =
+		  (qr::iter_pos
+		   >> qi::as<pair_multi_const>()[+('?' > name_type) > (('-' >> name_type) | attr(""))])
+		    [_val = param_transformer_(qi::_1, qi::_2, qi::_r1)];
+		param_pairs = +param_pair(qi::_val);
 		pred        = '(' > name_type > -param_pairs > ')';
 		predicates  = '(' > lit(":predicates") > +pred > ')';
 
@@ -115,7 +116,7 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		effects       = lit(":effect") > expression;
 		preconditions = (lit(":precondition") | lit(":condition")) > expression;
 		duration      = lit(":duration") > '(' > '=' > lit("?duration") > qi::float_ > ')';
-		action_params = lit(":parameters") > '(' > +param_pair > ')';
+		action_params = lit(":parameters") > '(' > +param_pair(qi::_val) > ')';
 
 		// validate action semantics after parsing
 		action =
@@ -135,6 +136,9 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 private:
 	/** Semantic checks for each parsed type. */
 	px::function<pddl_parser::TypeSemantics> type_semantics_;
+	/** Transforms pair<vector<string>,string> to separate pair<string,string>
+	/**entries in the parent vector */
+	px::function<pddl_parser::ParamTransformer> param_transformer_;
 	/** Semantic checks for each parsed action. */
 	px::function<pddl_parser::ActionSemantics> action_semantics_;
 	/** Semantic checks for each parsed constants. */
@@ -151,7 +155,7 @@ private:
 	/** Named placeholder for parsing types. Pass the domain for semantic checks. */
 	qi::rule<Iterator, pairs_type(const Domain &), Skipper> types;
 	/** Named placeholder for parsing type pairs. Pass the domain for semantic checks. */
-	qi::rule<Iterator, pair_type(const Domain &), Skipper> type_pair;
+	qi::rule<Iterator, pair_type(const Domain &, string_pairs_type &), Skipper> type_pair;
 
 	/** Named placeholder for parsing a list of constant values. */
 	qi::rule<Iterator, type_list(), Skipper> constant_value_list;
@@ -163,7 +167,7 @@ private:
 	qi::rule<Iterator, pairs_multi_consts(const Domain &), Skipper> constants;
 
 	/** Named placeholder for parsing a parameter pair. */
-	qi::rule<Iterator, string_pair_type(), Skipper> param_pair;
+	qi::rule<Iterator, string_pair_type(string_pairs_type &), Skipper> param_pair;
 	/** Named placeholder for parsing a list of parameter pairs. */
 	qi::rule<Iterator, string_pairs_type(), Skipper> param_pairs;
 	/** Named placeholder for parsing a predicate type. */

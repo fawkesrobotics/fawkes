@@ -65,6 +65,18 @@ TypeSemantics::operator()(const iterator_type &where,
 	return parsed;
 }
 
+pair_type
+ParamTransformer::operator()(const iterator_type &   where,
+                             const pair_multi_const &parsed,
+                             string_pairs_type &     target) const
+{
+	std::transform(parsed.first.begin() + 1,
+	               parsed.first.end(),
+	               std::back_inserter(target),
+	               [parsed](const std::string &s) { return std::make_pair(s, parsed.second); });
+	return std::make_pair(parsed.first[0], parsed.second);
+}
+
 pair_multi_const
 ConstantSemantics::operator()(const iterator_type &   where,
                               const pair_multi_const &parsed,
