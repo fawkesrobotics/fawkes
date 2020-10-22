@@ -70,17 +70,22 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 
 		requirements = '(' > lit(":requirements") > *(':' > name_type) > ')';
 
+		// _r1: domain, _r2: parent list of pairs _val is parsed into
 		type_pair = (qr::iter_pos >> qi::as<pair_multi_const>()[+name_type > -('-' > name_type)])
 		  [_val = type_semantics_(qi::_1, param_transformer_(qi::_1, qi::_2, qi::_r2), qi::_r1)];
+		// _r1: domain
 		types = '(' >> lit(":types") > +type_pair(qi::_r1, qi::_val) > ')';
 
 		constant_value_list = +name_type;
+		// _r1: parent list of pairs _val is parsed into
 		constant_multi_pair =
 		  (qr::iter_pos >> qi::as<pair_multi_const>()[(constant_value_list > -('-' > name_type))])
 		    [_val =
 		       constant_semantics_(qi::_1, qi::_2, qi::_r1, px::bind(&domain_parser::warnings, this))];
+		// _r1: domain
 		constants = '(' >> lit(":constants") > +constant_multi_pair(qi::_r1) > ')';
 
+		// _r1: parent list of pairs _val is parsed into
 		param_pair =
 		  (qr::iter_pos
 		   >> qi::as<pair_multi_const>()[+('?' > name_type) > (('-' >> name_type) | attr(""))])
@@ -120,12 +125,14 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		action_params = lit(":parameters") > '(' > +param_pair(qi::_val) > ')';
 
 		// validate action semantics after parsing
+		// _r1: domain
 		action =
 		  ('(' >> qr::iter_pos
 		   >> qi::as<Action>()[(lit(":durative-action") | lit(":action")) > name_type > action_params
 		                       > -duration > preconditions > effects > -cond_breakup > -temp_breakup
 		                       > ')'])[_val = action_semantics_(qi::_1, qi::_2, qi::_r1)];
 		// pass down the domain for semantics check
+		// _r1: domain
 		actions = +(action(qi::_r1));
 
 		domain = '(' > domain_name > requirements > -types(qi::_val) > -constants(qi::_val) > predicates
