@@ -37,9 +37,10 @@ namespace ascii = boost::spirit::ascii;
 typedef std::pair<std::string, std::string> pair_type;
 typedef std::vector<pair_type>              pairs_type;
 
-typedef std::vector<std::string>          type_list;
-typedef std::pair<type_list, std::string> pair_multi_const;
-typedef std::vector<pair_multi_const>     pairs_multi_consts;
+typedef std::vector<std::string>                                      type_list;
+typedef std::pair<type_list, std::string>                             pair_multi_const;
+typedef std::vector<pair_multi_const>                                 pairs_multi_consts;
+typedef std::pair<std::vector<std::string>, std::vector<std::string>> pair_strings_type;
 
 typedef std::pair<std::string, std::string>       string_pair_type;
 typedef std::vector<string_pair_type>             string_pairs_type;

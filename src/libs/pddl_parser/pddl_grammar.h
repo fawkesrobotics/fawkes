@@ -71,8 +71,12 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		requirements = '(' > lit(":requirements") > *(':' > name_type) > ')';
 
 		// _r1: domain, _r2: parent list of pairs _val is parsed into
-		type_pair = (qr::iter_pos >> qi::as<pair_multi_const>()[+name_type > -('-' > name_type)])
-		  [_val = type_semantics_(qi::_1, param_transformer_(qi::_1, qi::_2, qi::_r2), qi::_r1)];
+		type_pair =
+		  (qr::iter_pos
+		   >> qi::as<pair_strings_type>()[+name_type
+		                                  > -('-' >> (qi::as<std::vector<std::string>>()[name_type]
+		                                              | ('(' > lit("either") > *name_type > ')')))])
+		    [_val = type_semantics_(qi::_1, param_transformer_(qi::_1, qi::_2, qi::_r2), qi::_r1)];
 		// _r1: domain
 		types = '(' >> lit(":types") > +type_pair(qi::_r1, qi::_val) > ')';
 
@@ -88,7 +92,9 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		// _r1: parent list of pairs _val is parsed into
 		param_pair =
 		  (qr::iter_pos
-		   >> qi::as<pair_multi_const>()[+('?' > name_type) > (('-' >> name_type) | attr(""))])
+		   >> qi::as<pair_strings_type>()[+('?' > name_type)
+		                                  > -('-' >> (qi::as<std::vector<std::string>>()[name_type]
+		                                              | ('(' > lit("either") > *name_type > ')')))])
 		    [_val = param_transformer_(qi::_1, qi::_2, qi::_r1)];
 		param_pairs = +param_pair(qi::_val);
 		pred        = '(' > name_type > -param_pairs > ')';
@@ -173,8 +179,7 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 private:
 	/** Semantic checks for each parsed type. */
 	px::function<pddl_parser::TypeSemantics> type_semantics_;
-	/** Transforms pair<vector<string>,string> to separate pair<string,string>
-	/**entries in the parent vector */
+	/** Transforms pair<vector<string>,vector<string>> to separate pair<string,string> entries in the parent vector */
 	px::function<pddl_parser::ParamTransformer> param_transformer_;
 	/** Semantic checks for each parsed action. */
 	px::function<pddl_parser::ActionSemantics> action_semantics_;

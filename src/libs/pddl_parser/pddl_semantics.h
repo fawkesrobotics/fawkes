@@ -53,9 +53,9 @@ struct TypeSemantics
 
 struct ParamTransformer
 {
-	pair_type operator()(const iterator_type &   where,
-	                     const pair_multi_const &parsed,
-	                     string_pairs_type &     target) const;
+	pair_type operator()(const iterator_type &    where,
+	                     const pair_strings_type &parsed,
+	                     string_pairs_type &      target) const;
 };
 
 struct ConstantSemantics
