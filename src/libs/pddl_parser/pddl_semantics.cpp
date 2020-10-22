@@ -218,27 +218,32 @@ ActionSemantics::check_action_predicates(const iterator_type &where,
 						                             PddlErrorType::PREDICATE_ERROR,
 						                             where);
 					} else {
-						Atom        curr_arg = boost::get<Atom>(pred.arguments[i].expression);
-						std::string arg_type = "";
+						Atom        curr_arg      = boost::get<Atom>(pred.arguments[i].expression);
+						bool        is_type_error = false;
+						std::string arg_type      = "";
 						if (curr_arg.front() != '?') {
 							// constants need to be known
-							auto constant_match =
-							  std::find_if(domain.constants.begin(),
-							               domain.constants.end(),
-							               [curr_arg](const pair_multi_const &c) {
-								               if (c.first.end()
-								                   != std::find(c.first.begin(), c.first.end(), curr_arg)) {
-									               return true;
-								               } else {
-									               return false;
-								               }
-							               });
+							bool constant_found = false;
+							auto constant_match = std::find_if(
+							  domain.constants.begin(),
+							  domain.constants.end(),
+							  [curr_arg, domain, defined_pred, i, where, constant_found, arg_type](
+							    const pair_multi_const &c) mutable {
+								  if (c.first.end() != std::find(c.first.begin(), c.first.end(), curr_arg)) {
+									  constant_found = true;
+									  arg_type += " " + c.second;
+									  return check_type(where, c.second, defined_pred->second[i].second, domain);
+								  } else {
+									  return false;
+								  }
+							  });
 							if (constant_match == domain.constants.end()) {
-								throw PddlSemanticsException(std::string("Unknown constant ") + curr_arg,
-								                             PddlErrorType::CONSTANT_ERROR,
-								                             where);
-							} else {
-								arg_type = constant_match->second;
+								is_type_error = true;
+								if (!constant_found) {
+									throw PddlSemanticsException(std::string("Unknown constant ") + curr_arg,
+									                             PddlErrorType::CONSTANT_ERROR,
+									                             where);
+								}
 							}
 						} else {
 							auto parameter_match =
@@ -253,11 +258,12 @@ ActionSemantics::check_action_predicates(const iterator_type &where,
 								                             where);
 							} else {
 								arg_type = parameter_match->second;
+								is_type_error =
+								  !check_type(where, arg_type, defined_pred->second[i].second, domain);
 							}
 						}
 						// and if typing is required, then the types should match the signature
-						if (typing_enabled
-						    && !check_type(where, arg_type, defined_pred->second[i].second, domain)) {
+						if (typing_enabled && is_type_error) {
 							throw PddlSemanticsException(std::string("Type missmatch: Argument ")
 							                               + std::to_string(i) + " of " + defined_pred->first
 							                               + " expects " + defined_pred->second[i].second
