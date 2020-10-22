@@ -130,7 +130,7 @@ struct Action
 	/** A typed list of action parameters. */
 	string_pairs_type action_params;
 	/** The action duration in temporal domains. */
-	float duration;
+	Expression duration;
 	/** The precondition of an action. May be a compound. */
 	Expression precondition;
 	/** The effect of an action. May be a compound. */

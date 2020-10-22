@@ -147,8 +147,11 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		cond_breakup  = lit(":conditional-breakup") > expression;
 		effects       = lit(":effect") > expression;
 		preconditions = (lit(":precondition") | lit(":condition")) > expression;
-		duration      = lit(":duration") > '(' > '=' > lit("?duration") > qi::float_ > ')';
-		action_params = lit(":parameters") > '(' > +param_pair(qi::_val) > ')';
+		duration      = lit(":duration") > '(' > '=' > lit("?duration")
+		           > (value_expression
+		              | ('(' > (hold[function_change_expression] | hold[pred_expression]) > ')'))
+		           > ')';
+		action_params = lit(":parameters") > '(' > *param_pair(qi::_val) > ')';
 
 		// validate action semantics after parsing
 		// _r1: domain
@@ -251,7 +254,7 @@ private:
 	/** Named placeholder for parsing a conditional breakup. */
 	qi::rule<Iterator, Expression(), Skipper> cond_breakup;
 	/** Named placeholder for parsing an action duration. */
-	qi::rule<Iterator, int(), Skipper> duration;
+	qi::rule<Iterator, Expression(), Skipper> duration;
 	/** Named placeholder for parsing action parameters. */
 	qi::rule<Iterator, string_pairs_type(), Skipper> action_params;
 	/** Named placeholder for parsing an action. Inherits a domain. */
