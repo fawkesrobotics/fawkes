@@ -124,11 +124,12 @@ struct domain_parser : qi::grammar<Iterator, Domain(), Skipper>
 		                                             > expression];
 		unknown_expression =
 		  attr(ExpressionType::UNKNOWN) >> atom >> *(hold[attr(ExpressionType::ATOM) >> atom]);
-		function_expression =
-		  attr(ExpressionType::NUMERIC_COMP)
-		  >> qi::as<Predicate>()[qi::as<Atom>()[comparison_op] > (hold[expression >> value_expression]
-		                                                          | hold[value_expression >> expression]
-		                                                          | hold[expression >> expression])];
+		function_expression = attr(ExpressionType::NUMERIC_COMP)
+		                      >> qi::as<Predicate>()[qi::as<Atom>()[comparison_op]
+		                                             > (hold[expression >> value_expression]
+		                                                | hold[value_expression >> expression]
+		                                                | hold[expression >> expression]
+		                                                | +(hold[attr(ExpressionType::ATOM) >> atom]))];
 		function_change_expression =
 		  attr(ExpressionType::NUMERIC_CHANGE)
 		  >> qi::as<Predicate>()[numerical_op > (hold[expression >> value_expression]
