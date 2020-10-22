@@ -59,9 +59,11 @@ TypeSemantics::operator()(const iterator_type &where,
                           const pair_type &    parsed,
                           const Domain &       domain) const
 {
-	semantics_utils::check_type_vs_requirement(where,
-	                                           semantics_utils::typing_required(domain),
-	                                           parsed.second);
+	if (!semantics_utils::typing_required(domain)) {
+		throw PddlSemanticsException(std::string("Requirement typing disabled, unexpected type found."),
+		                             PddlErrorType::TYPE_ERROR,
+		                             where);
+	}
 	return parsed;
 }
 
