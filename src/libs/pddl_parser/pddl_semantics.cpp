@@ -176,7 +176,7 @@ ActionSemantics::check_type(const iterator_type &where,
 	}
 }
 
-bool
+void
 ActionSemantics::check_action_condition(const iterator_type &where,
                                         const Expression &   expr,
                                         const Domain &       domain,
@@ -194,17 +194,16 @@ ActionSemantics::check_action_condition(const iterator_type &where,
 	if (curr_obj_type == std::type_index(typeid(QuantifiedFormula))) {
 		QuantifiedFormula f = boost::get<QuantifiedFormula>(expr.expression);
 		bound_vars.insert(bound_vars.end(), f.args.begin(), f.args.end());
-		return check_action_condition(where, f.sub_expr, domain, curr_action, bound_vars);
+		check_action_condition(where, f.sub_expr, domain, curr_action, bound_vars);
 	}
 
 	if (curr_obj_type == std::type_index(typeid(Predicate))) {
 		return check_action_predicate(
 		  where, boost::get<Predicate>(expr.expression), expr.type, domain, curr_action, bound_vars);
 	}
-	return true;
 }
 
-bool
+void
 ActionSemantics::check_action_predicate(const iterator_type & where,
                                         const Predicate &     pred,
                                         const ExpressionType &type,
@@ -317,6 +316,5 @@ ActionSemantics::check_action_predicate(const iterator_type & where,
 	}
 	default: break;
 	}
-	return true;
 }
 } // namespace pddl_parser

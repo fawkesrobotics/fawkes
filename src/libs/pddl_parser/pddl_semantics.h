@@ -73,12 +73,12 @@ struct ActionSemantics
 	                       const std::string &  expected,
 	                       const Domain &       domain);
 
-	static bool check_action_condition(const iterator_type &where,
+	static void check_action_condition(const iterator_type &where,
 	                                   const Expression &   expr,
 	                                   const Domain &       domain,
 	                                   const Action &       action,
 	                                   string_pairs_type &  bound_vars);
-	static bool check_action_predicate(const iterator_type & where,
+	static void check_action_predicate(const iterator_type & where,
 	                                   const Predicate &     pred,
 	                                   const ExpressionType &type,
 	                                   const Domain &        domain,
