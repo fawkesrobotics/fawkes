@@ -38,7 +38,7 @@ enum PddlErrorType {
 	UNKNOWN_ERROR
 };
 
-/** @class PddlParserException <pddl_parser/pddl_parser.h>
+/** @class PddlParserException <pddl_parser/pddl_exception.h>
  * Exception thrown by the parser if an error occurs during parsing.
  */
 
@@ -47,6 +47,7 @@ class PddlParserException : public fawkes::Exception
 public:
 	/** Constructor.
     * @param msg A message describing the error.
+    * @param error_type A classification of the error.
     */
 	PddlParserException(const char *         msg,
 	                    const PddlErrorType &error_type = PddlErrorType::UNKNOWN_ERROR)
@@ -56,22 +57,30 @@ public:
 	/** Constructor with a string message.
    * This wraps the constructor with a char* message for usage with std::string.
    * @param msg A message describing the error.
+    * @param error_type A classification of the error.
    */
 	PddlParserException(const std::string &  msg,
 	                    const PddlErrorType &error_type = PddlErrorType::UNKNOWN_ERROR)
 	: fawkes::Exception(msg.c_str()), error_type(error_type)
 	{
 	}
-
+	/** Classification of the error to easy distinguish between error cases. */
 	const PddlErrorType error_type;
 };
 
+/** @class PddlSemanticsException <pddl_parser/pddl_exception.h>
+ * Exception thrown by the parser if an error occurs during semantic checks
+ * during parsing.
+ */
 class PddlSemanticsException : public PddlParserException
 {
 public:
+	/** Position of the error to generate a helpful error message. */
 	const iterator_type pos;
 	/** Constructor.
     * @param msg A message describing the error.
+    * @param error_type A classification of the error.
+    * @param pos The position in the parsed string where the error occurs.
     */
 	PddlSemanticsException(const char *msg, const PddlErrorType &error_type, const iterator_type &pos)
 	: PddlParserException(msg, error_type), pos(pos)
@@ -80,6 +89,8 @@ public:
 	/** Constructor with a string message.
    * This wraps the constructor with a char* message for usage with std::string.
    * @param msg A message describing the error.
+   * @param error_type A classification of the error.
+   * @param pos The position in the parsed string where the error occurs.
    */
 	PddlSemanticsException(const std::string &  msg,
 	                       const PddlErrorType &error_type,

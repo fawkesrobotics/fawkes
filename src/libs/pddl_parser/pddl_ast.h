@@ -71,13 +71,18 @@ typedef boost::
   variant<Atom, boost::recursive_wrapper<Predicate>, boost::recursive_wrapper<QuantifiedFormula>>
     expression_t;
 
+/** @class Expression
+   * A PDDL Expression.
+   */
 struct Expression
 {
+	/** The type of the expression, determined at parsing time. */
 	ExpressionType type;
-	expression_t   expression;
+	/** The expression formula */
+	expression_t expression;
 };
 
-/** @class Quantifier
+/** @class QuantifiedFormula
    * A PDDL quantified formula.
    */
 struct QuantifiedFormula
