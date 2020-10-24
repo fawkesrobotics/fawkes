@@ -4,6 +4,7 @@
  *
  *  Created: Tue Dec 07 22:59:47 2010
  *  Copyright  2006-2017  Tim Niemueller [www.niemueller.de]
+ *             2020       Daniel Swoboda [swoboda@kbsg.rwth-aachen.de]
  ****************************************************************************/
 
 /*  This program is free software; you can redistribute it and/or modify
@@ -24,15 +25,22 @@
 #include <core/threading/mutex.h>
 #include <core/threading/mutex_locker.h>
 
+#include <bsoncxx/builder/basic/array.hpp>
 #include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/builder/basic/kvp.hpp>
+#include <bsoncxx/json.hpp>
+#include <iostream>
 #include <mongocxx/client.hpp>
 #include <mongocxx/exception/operation_exception.hpp>
-#include <bsoncxx/json.hpp>
-
-#include <iostream>
+#include <mongocxx/instance.hpp>
+#include <mongocxx/options/find.hpp>
+#include <mongocxx/uri.hpp>
 
 using namespace mongocxx;
 using namespace fawkes;
+
+using bsoncxx::builder::basic::kvp;
+using bsoncxx::builder::basic::make_document;
 
 /** @class MongoLogLoggerThread "mongodb_log_logger_thread.h"
  * Thread that provides a logger writing to MongoDB.
@@ -90,7 +98,6 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 		return;
 	}
 
-
 	using namespace bsoncxx::builder;
 	basic::document b;
 	switch (ll) {
@@ -104,13 +111,78 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 	b.append(basic::kvp("component", component));
 	b.append(basic::kvp("time", nowd));
 	b.append(basic::kvp("message", msg));
-	
-	free(msg);
+	b.append(basic::kvp("game", gametime_));
 
 	try {
 		mongodb_client->database(database_)[collection_].insert_one(b.view());
 	} catch (operation_exception &e) {
 	} // ignored
+
+	std::string msg_s(msg);
+
+	//track assertion
+	if (msg_s.find("(wm-fact (id \"/domain/") != std::string::npos
+	    && msg_s.find("==>") != std::string::npos) {
+		basic::document df;
+		basic::document dfc;
+		df.append(
+		  basic::kvp("id",
+		             msg_s.substr(msg_s.find("(id \"") + 5,
+		                          msg_s.find("\")") - msg_s.find("(id \"") - 5)));
+		df.append(basic::kvp(
+		  "is-list",
+		  msg_s.substr(msg_s.find("(is-list ") + 9)
+		    .substr(0, msg_s.substr(msg_s.find("(is-list ") + 9).find(")")))); 
+		df.append(basic::kvp("source",
+		                     config->get_string_or_default("fawkes/agent/name", "UNKN"))); 
+		df.append(
+		  basic::kvp("type",
+		             msg_s.substr(msg_s.find("(type ") + 6)
+		               .substr(0,
+		                       msg_s.substr(msg_s.find("(type ") + 6).find(")")))); 
+		if (msg_s.substr(msg_s.find("(is-list ") + 9)
+		      .substr(0, msg_s.substr(msg_s.find("(is-list ") + 9).find(")"))
+		    == "TRUE") {
+			auto array_builder = basic::array{};
+
+			std::string values_string = msg_s.substr(msg_s.find("(values") + 8)
+			                              .substr(0, msg_s.substr(msg_s.find("(values") + 8).find(")"));
+
+			size_t      pos = 0;
+			std::string token;
+			while ((pos = values_string.find(" ")) != std::string::npos) {
+				token = values_string.substr(0, pos);
+				array_builder.append(token);
+				values_string.erase(0, pos + 1);
+			}
+			df.append(basic::kvp("values", array_builder.extract()));
+		} else {
+			df.append(basic::kvp("value",
+			                     msg_s.substr(msg_s.find("(value ") + 7)
+			                       .substr(0, msg_s.substr(msg_s.find("(value ") + 7).find(")"))));
+		}
+		df.append(basic::kvp("update-timestamp", nowd));
+
+		dfc.append(basic::kvp("game", gametime_));
+		dfc.append(basic::kvp("asserted", nowd));
+		dfc.append(basic::kvp("retracted", "FALSE"));
+		dfc.append(basic::kvp("fact", df));
+		dfc.append(basic::kvp("msg", msg_s));
+		dfc.append(
+		  basic::kvp("clips-id", msg_s.substr(msg_s.find("==> ") + 4).substr(0, msg_s.find("(") - 6)));
+		mongodb_client->database(database_)["gamestate_recovery_test"].insert_one(dfc.view());
+	}
+
+	//track retraction
+	if (msg_s.find("(wm-fact (id \"/domain/") != std::string::npos
+	    && msg_s.find("<==") != std::string::npos) {
+		std::string clips_id = msg_s.substr(msg_s.find("<== ") + 4).substr(0, msg_s.find("(") - 6);
+
+		mongodb_client->database(database_)["gamestate_recovery_test"].update_one(
+		  make_document(kvp("clips-id", clips_id)),
+		  make_document(kvp("$set", make_document(kvp("retracted", nowd)))));
+	}
+	free(msg);
 }
 
 void
@@ -237,8 +309,8 @@ MongoLogLoggerThread::tlog_insert_message(LogLevel        ll,
 	}
 
 	bsoncxx::types::b_date nowd{
-		std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds>{
-		std::chrono::milliseconds{t->tv_sec * 1000 + t->tv_usec / 1000}}};
+	  std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds>{
+	    std::chrono::milliseconds{t->tv_sec * 1000 + t->tv_usec / 1000}}};
 
 	using namespace bsoncxx::builder;
 	basic::document b;
@@ -270,8 +342,8 @@ MongoLogLoggerThread::tlog_insert_message(LogLevel        ll,
 {
 	MutexLocker            lock(mutex_);
 	bsoncxx::types::b_date nowd{
-		std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds>{
-		std::chrono::milliseconds{t->tv_sec * 1000 + t->tv_usec / 1000}}};
+	  std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds>{
+	    std::chrono::milliseconds{t->tv_sec * 1000 + t->tv_usec / 1000}}};
 	for (Exception::iterator i = e.begin(); i != e.end(); ++i) {
 		using namespace bsoncxx::builder;
 		basic::document b;
