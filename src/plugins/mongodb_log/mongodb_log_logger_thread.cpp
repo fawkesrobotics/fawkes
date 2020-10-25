@@ -169,14 +169,14 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 		dfc.append(basic::kvp("fact", df));
 		dfc.append(basic::kvp("msg", msg_s));
 		dfc.append(
-		  basic::kvp("clips-id", msg_s.substr(msg_s.find("==> ") + 4).substr(0, msg_s.find("(") - 6)));
+		  basic::kvp("clips-id", msg_s.substr(msg_s.find("==> ") + 4).substr(0, msg_s.find("(") - 5)));
 		mongodb_client->database(database_)["gamestate_recovery_test"].insert_one(dfc.view());
 	}
 
 	//track retraction
 	if (msg_s.find("(wm-fact (id \"/domain/") != std::string::npos
 	    && msg_s.find("<==") != std::string::npos) {
-		std::string clips_id = msg_s.substr(msg_s.find("<== ") + 4).substr(0, msg_s.find("(") - 6);
+		std::string clips_id = msg_s.substr(msg_s.find("<== ") + 4).substr(0, msg_s.find("(") - 5);
 
 		mongodb_client->database(database_)["gamestate_recovery_test"].update_one(
 		  make_document(kvp("clips-id", clips_id)),
