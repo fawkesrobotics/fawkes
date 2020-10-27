@@ -124,13 +124,14 @@ ifeq ($(HAVE_OPENCV),1)
   CFLAGS_OPENCV      = -DHAVE_OPENCV -Wno-deprecated-declarations \
 		       $(shell $(PKGCONFIG) --cflags 'opencv$(OPENCV_VERSION_SUFFIX)') \
 		       $(CFLAG_W_NO_UNUSED_LOCAL_TYPEDEFS)
+  LDFLAGS_OPENCV     = $(shell $(PKGCONFIG) --libs-only-L 'opencv$(OPENCV_VERSION_SUFFIX)')
   ifeq ($(filter-out 2.0 2.1,$(VERSION_MAJOR_OPENCV).$(VERSION_MINOR_OPENCV)),)
-    LDFLAGS_OPENCV     = -lcxcore -lcv
-    LDFLAGS_OPENCV_GUI = -lhighgui
+    LDFLAGS_OPENCV      += -lcxcore -lcv
+    LDFLAGS_OPENCV_GUI   = -lhighgui
     LDFLAGS_OPENCV_CONT  = -lopencv_contrib
   else
-    LDFLAGS_OPENCV     = -lopencv_core -lopencv_imgproc -lopencv_ml
-    LDFLAGS_OPENCV_GUI = -lopencv_highgui
+    LDFLAGS_OPENCV      += -lopencv_core -lopencv_imgproc -lopencv_ml
+    LDFLAGS_OPENCV_GUI   = -lopencv_highgui
     LDFLAGS_OPENCV_CONT  = -lopencv_contrib
   endif
 endif
