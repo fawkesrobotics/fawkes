@@ -25,8 +25,8 @@ OBJS_libfawkesrobotmemory = $(patsubst %.cpp,%.o,$(patsubst qa/%,,$(subst $(SRCD
 OBJS_all = $(OBJS_libfawkesrobotmemory)
 LIBS_all = $(LIBDIR)/libfawkesrobotmemory.so
 
-ifeq ($(HAVE_MONGODB),1)
-  CFLAGS  += $(CFLAGS_MONGODB)
+ifeq ($(HAVE_MONGODB)$(HAVE_CPP17),11)
+  CFLAGS += $(CFLAGS_MONGODB) $(CFLAGS_CPP17)
   LDFLAGS += $(LDFLAGS_MONGODB)
 
   LIBS_build = $(LIBS_all)
@@ -34,14 +34,19 @@ else
   ifneq ($(HAVE_MONGODB),1)
     WARN_TARGETS += warning_mongodb
   endif
+  ifneq ($(HAVE_CPP17),1)
+    WARN_TARGETS += warning_cpp17
+  endif
 endif
 
 ifeq ($(OBJSSUBMAKE),1)
 all: $(WARN_TARGETS)
 
-.PHONY: warning_mongodb
+.PHONY: warning_mongodb warning_cpp17
 warning_mongodb:
 	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemoryAspect$(TNORMAL) (mongodb[-devel] not installed)"
+warning_cpp17:
+	$(SILENT)echo -e "$(INDENT_PRINT)--> $(TRED)Omitting RobotMemoryAspect$(TNORMAL) (C++17 required)"
 endif
 
 include $(BUILDSYSDIR)/base.mk
