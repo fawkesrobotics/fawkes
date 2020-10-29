@@ -307,8 +307,13 @@ PddlRobotMemoryThread::fill_dict_from_document(ctemplate::TemplateDictionary *di
 			// additionally feed the whole array as space-separated list
 			std::string array_string;
 			for (auto e : array) {
-				// TODO: This only works for string arrays, adapt to other types.
-				array_string += " " + e.get_utf8().value.to_string();
+				// TODO:adapt to other types.
+				array_string += " ";
+				switch (e.type()) {
+				case type::k_int64: array_string += std::to_string(e.get_int64()); break;
+				case type::k_utf8: array_string += e.get_utf8().value.to_string(); break;
+				default: throw Exception("Not implemented");
+				}
 			}
 			dict->SetValue(prefix + std::string(elem.key()), array_string);
 			break;
