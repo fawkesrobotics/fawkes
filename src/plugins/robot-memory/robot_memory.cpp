@@ -453,30 +453,26 @@ RobotMemory::mapreduce(const bsoncxx::document::view &query,
 /**
  * Performs an aggregation operation on the robot memory (https://docs.mongodb.com/v3.2/reference/method/db.collection.aggregate/)
  * @param pipeline A sequence of data aggregation operations or stages. See the https://docs.mongodb.com/v3.2/reference/operator/aggregation-pipeline/ for details
- * @param collection The database and collection to use as string (e.g. robmem.worldmodel)
+ * @param collection_name The database and collection to use as string (e.g. robmem.worldmodel)
  * @return Cursor to get the documents from, NULL for invalid pipeline
  */
 cursor
-RobotMemory::aggregate(bsoncxx::document::view pipeline, const std::string &collection)
+RobotMemory::aggregate(mongocxx::pipeline &pipeline, const std::string &collection_name)
 {
-	throw Exception("Not implemented");
-	/**
-	mongo::DBClientBase *mongodb_client = get_mongodb_client(collection);
-	MutexLocker          lock(mutex_);
-	log_deb(std::string("Executing Aggregation pipeline: " + pipeline.toString() + " on collection "
-	                    + collection));
-
-	QResCursor cursor;
+	collection collection = get_collection(collection_name);
+	log_deb(std::string("Aggregating in collection " + collection_name));
+	//lock (mongo_client not thread safe)
+	MutexLocker lock(mutex_);
+	//actually execute aggregate
 	try {
-		cursor = mongodb_client->aggregate(collection, pipeline);
-	} catch (DBException &e) {
+		return collection.aggregate(pipeline, mongocxx::options::aggregate{});
+	} catch (operation_exception &e) {
 		std::string error =
-		  std::string("Error for query ") + pipeline.toString() + "\n Exception: " + e.toString();
-		log(error, "error");
-		return NULL;
+		  std::string("Error when aggregating " + to_json(pipeline.view_array()) + "\n Exception: ")
+		  + e.what();
+		log_deb(error, "error");
+		throw;
 	}
-	return cursor;
-  */
 }
 
 /**
