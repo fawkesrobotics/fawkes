@@ -70,11 +70,9 @@ PddlRobotMemoryThread::init()
 	//read config values
 	collection = config->get_string("plugins/pddl-robot-memory/collection");
 	input_path = StringConversions::resolve_path(
-	  "@BASEDIR@/src/agents/"
-	  + config->get_string("plugins/pddl-robot-memory/input-problem-description"));
+	  "@BASEDIR@/src/" + config->get_string("plugins/pddl-robot-memory/input-problem-description"));
 	output_path = StringConversions::resolve_path(
-	  "@BASEDIR@/src/agents/"
-	  + config->get_string("plugins/pddl-robot-memory/output-problem-description"));
+	  "@BASEDIR@/src/" + config->get_string("plugins/pddl-robot-memory/output-problem-description"));
 	if (config->exists("plugins/pddl-robot-memory/goal"))
 		goal = config->get_string("plugins/pddl-robot-memory/goal");
 
