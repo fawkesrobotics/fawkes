@@ -172,16 +172,35 @@ PddlRobotMemoryThread::loop()
 		}
 	}
 
-	basic::document aggregate_query;
-	aggregate_query.append(basic::kvp("$facet", facets.view()));
-	std::vector<document::view> aggregate_pipeline{aggregate_query.view()};
-	auto                        res    = robot_memory->aggregate(aggregate_pipeline, collection);
-	auto                        result = res.view()["result"]["0"].get_document().view();
-	//BSONObj                     result = res.getField("result").Obj()["0"].Obj();
-	for (auto e : result) {
-		for (auto f : e.get_document().view()) {
-			ctemplate::TemplateDictionary *entry_dict = dict.AddSectionDictionary(std::string(e.key()));
-			fill_dict_from_document(entry_dict, f.get_document().view());
+	basic::document    aggregate_query;
+	mongocxx::pipeline aggregate_pipeline{};
+	aggregate_pipeline.facet(facets.view());
+	auto res = robot_memory->aggregate(aggregate_pipeline, collection);
+	for (auto doc : res) {
+		for (document::element ele : doc) {
+			// check validity && type before trying to iterate
+			if (ele && ele.type() == type::k_array) {
+				array::view subarray{ele.get_array().value};
+				for (array::element msg : subarray) {
+					if (msg.type() == bsoncxx::type::k_document) {
+						ctemplate::TemplateDictionary *entry_dict =
+						  dict.AddSectionDictionary(std::string(ele.key()).c_str());
+						fill_dict_from_document(entry_dict, msg.get_document().view());
+					} else {
+						throw Exception(
+						  (std::string("Error while retrieving domain facts and objects: expected document "
+						               "type but got ")
+						   + bsoncxx::to_string(msg.type()))
+						    .c_str());
+					}
+				}
+			} else {
+				throw Exception(
+				  (std::string(
+				     "Error while retrieving domain facts and objects: expected k_array type but got: ")
+				   + bsoncxx::to_string(ele.type()))
+				    .c_str());
+			}
 		}
 	}
 
