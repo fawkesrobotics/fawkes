@@ -298,10 +298,10 @@ PddlRobotMemoryThread::fill_dict_from_document(ctemplate::TemplateDictionary *di
 			// access array elements as if they were a subdocument with key-value pairs
 			// using the indices as keys
 			basic::document b;
-			array::view     array = elem.get_array();
+			array::view     array = elem.get_array().value;
 			uint            i     = 0;
 			for (auto e : array) {
-				b.append(basic::kvp(std::to_string(i++), e.get_document().view()));
+				b.append(basic::kvp(std::to_string(i++), e.get_value()));
 			}
 			fill_dict_from_document(dict, b.view(), prefix + std::string(elem.key()) + "_");
 			// additionally feed the whole array as space-separated list
