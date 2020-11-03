@@ -23,6 +23,7 @@
 #include "exog_manager.h"
 #include "gologpp_fawkes_backend.h"
 
+#include <golog++/model/logger.h>
 #include <golog++/model/procedural.h>
 #include <golog++/parser/parser.h>
 #include <golog++/semantics/readylog/execution.h>
@@ -67,6 +68,21 @@ GologppThread::init()
 	  new ListType(*global_scope().lookup_type(NumberType::static_name())));
 	global_scope().register_type_raw(
 	  new ListType(*global_scope().lookup_type(SymbolType::static_name())));
+
+	try {
+		gologpp::Logger::instance().log_lvl() =
+		  std::max(gologpp::LogLevel::ERR,
+		           std::min(gologpp::LogLevel::DBG,
+		                    static_cast<gologpp::LogLevel>(
+		                      config->get_uint((cfg_prefix + "/loglevel").c_str()))));
+		logger->log_info(name(),
+		                 "golog++ using loglevel %d",
+		                 static_cast<int>(gologpp::Logger::instance().log_lvl()));
+	} catch (fawkes::ConfigEntryNotFoundException &) {
+		logger->log_info(name(),
+		                 "golog++ using default loglevel %d",
+		                 static_cast<int>(gologpp::Logger::instance().log_lvl()));
+	}
 
 	logger->log_info(name(), "Parsing %s...", prog_file.c_str());
 	gologpp::parser::parse_file(prog_file);
