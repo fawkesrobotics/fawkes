@@ -29,7 +29,7 @@ ifeq ($(HAVE_LUA),1)
     CLEAN_FILES=*_tolua.{pkg,cpp}
 
 .SECONDEXPANSION:
-%_tolua.cpp: $$(TOLUA_$$(call nametr,$$*))
+%_tolua.cpp: $$(TOLUA_$$(call nametr,$$(*F)))
 	$(SILENT) echo -e "$(INDENT_PRINT)[LUA] $(PARENTDIR)$(TBOLDGRAY)$(@F)$(TNORMAL)"
 	$(SILENT)cat $(addprefix $(SRCDIR)/,$(subst $(SRCDIR)/,,$(filter %.tolua,$^))) > $(patsubst %.cpp,%.pkg,$@)
 	$(SILENT)$(TOLUAPP) -L "$(FAWKES_BASEDIR)/src/lua/fawkes/toluaext.lua" -n $(TOLUA_PKGPREFIX_$(call nametr,$*))$(notdir $*) $(patsubst %.cpp,%.pkg,$@) | \
