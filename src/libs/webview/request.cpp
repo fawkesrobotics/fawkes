@@ -19,6 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include "microhttpd_compat.h"
+
 #include <core/exception.h>
 #include <netinet/in.h>
 #include <sys/select.h>
@@ -26,14 +28,13 @@
 #include <webview/request.h>
 
 #include <cstring>
-#include <microhttpd.h>
 #include <stdint.h>
 #include <unistd.h>
 
 namespace fawkes {
 
 /// @cond INTERNAL
-static int
+static MHD_RESULT
 cookie_iterator(void *cls, enum MHD_ValueKind kind, const char *key, const char *value)
 {
 	WebRequest *request = static_cast<WebRequest *>(cls);
@@ -41,7 +42,7 @@ cookie_iterator(void *cls, enum MHD_ValueKind kind, const char *key, const char 
 	return MHD_YES;
 }
 
-static int
+static MHD_RESULT
 get_argument_iterator(void *cls, enum MHD_ValueKind kind, const char *key, const char *value)
 {
 	WebRequest *request = static_cast<WebRequest *>(cls);
@@ -52,7 +53,7 @@ get_argument_iterator(void *cls, enum MHD_ValueKind kind, const char *key, const
 	return MHD_YES;
 }
 
-static int
+static MHD_RESULT
 header_iterator(void *cls, enum MHD_ValueKind kind, const char *key, const char *value)
 {
 	WebRequest *request = static_cast<WebRequest *>(cls);

@@ -19,6 +19,8 @@
  *  Read the full text in the LICENSE.GPL file in the doc directory.
  */
 
+#include "microhttpd_compat.h"
+
 #include <core/exception.h>
 #include <core/exceptions/system.h>
 #include <core/threading/thread.h>
@@ -33,7 +35,6 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
-#include <microhttpd.h>
 
 namespace fawkes {
 
