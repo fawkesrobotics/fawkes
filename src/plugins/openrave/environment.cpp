@@ -31,7 +31,7 @@
 #include <openrave/planningutils.h>
 
 #include <Python.h>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/thread/thread.hpp>
 #include <cstdio>
 #include <openrave-core.h>
