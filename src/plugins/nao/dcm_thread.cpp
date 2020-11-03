@@ -33,7 +33,7 @@
 #include <interfaces/NaoJointStiffnessInterface.h>
 #include <interfaces/NaoSensorInterface.h>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 using namespace fawkes;
 

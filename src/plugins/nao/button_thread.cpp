@@ -33,7 +33,7 @@
 #include <interfaces/SwitchInterface.h>
 #include <sys/stat.h>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <cerrno>
 #include <cstring>
 
