@@ -22,8 +22,6 @@
 
 #include "action_executor.h"
 
-#include <golog++/model/activity.h>
-
 namespace fawkes {
 
 class Logger;
@@ -36,8 +34,9 @@ public:
 	virtual ~PrintActionExecutor();
 
 	void start(std::shared_ptr<gologpp::Activity> activity) override;
-	void stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity) override;
+	void stop(std::shared_ptr<gologpp::Activity> activity) override;
 	bool can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
+	void terminate() override;
 };
 } // namespace gpp
 } // namespace fawkes

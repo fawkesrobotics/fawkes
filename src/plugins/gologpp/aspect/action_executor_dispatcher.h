@@ -33,6 +33,7 @@ class ActionExecutorDispatcher
 public:
 	std::shared_ptr<ActionExecutor> get_executor(std::shared_ptr<gologpp::Activity>);
 	void                            register_executor(std::shared_ptr<ActionExecutor> executor);
+	void                            terminate();
 
 private:
 	std::vector<std::shared_ptr<ActionExecutor>> action_executors_;

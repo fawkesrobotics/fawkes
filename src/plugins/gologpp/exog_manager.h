@@ -26,8 +26,8 @@
 #include <blackboard/interface_observer.h>
 #include <config/config.h>
 #include <core/threading/thread.h>
+#include <golog++/execution/controller.h>
 #include <golog++/model/action.h>
-#include <golog++/model/execution.h>
 #include <logging/logger.h>
 
 namespace gologpp {
@@ -79,10 +79,9 @@ private:
 		static std::string extract_id(const std::string &iface_uid);
 
 	protected:
-		BlackBoard *                                      blackboard_;
-		gologpp::shared_ptr<gologpp::ExogAction>          target_exog_;
-		std::unordered_map<std::string, gologpp::arity_t> fields_order_;
-		ExogManager &                                     exog_manager_;
+		BlackBoard *                             blackboard_;
+		gologpp::shared_ptr<gologpp::ExogAction> target_exog_;
+		ExogManager &                            exog_manager_;
 	};
 
 	///////////////////////////////////////////////////////////////////

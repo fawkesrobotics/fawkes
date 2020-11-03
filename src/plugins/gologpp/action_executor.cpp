@@ -45,6 +45,9 @@ namespace gpp {
  * @param activity The activity to execute.
  * @return True iff the given activity can be executed by this executor.
  *
+ * @fn ActionExecutor::terminate()
+ * Stop running action(s)
+ *
  * @var ActionExecutor::running_activity_
  * A pointer to the currently running activity.
  *

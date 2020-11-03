@@ -26,7 +26,7 @@
 #include <aspect/logging.h>
 #include <blackboard/interface_listener.h>
 #include <core/threading/thread.h>
-#include <golog++/model/execution.h>
+#include <golog++/execution/controller.h>
 
 #include <filesystem>
 #include <string>
@@ -55,14 +55,14 @@ public:
 
 	virtual void finalize() override;
 
-	gologpp::ExecutionContext &gologpp_context();
+	gologpp::ExecutionController &gologpp_context();
 
 private:
-	std::filesystem::path                 find_prog_file(const std::filesystem::path &spec) const;
-	std::unique_ptr<gologpp::Instruction> main_prog_;
-	SkillerInterface *                    skiller_if_;
-	ExogManager *                         exog_mgr_;
-	std::mutex                            run_mutex_;
+	std::filesystem::path               find_prog_file(const std::filesystem::path &spec) const;
+	std::shared_ptr<gologpp::Procedure> main_prog_;
+	SkillerInterface *                  skiller_if_;
+	ExogManager *                       exog_mgr_;
+	std::mutex                          run_mutex_;
 };
 
 } // namespace gpp

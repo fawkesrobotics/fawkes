@@ -22,7 +22,8 @@
 
 #include <blackboard/blackboard.h>
 #include <config/config.h>
-#include <golog++/model/activity.h>
+#include <golog++/execution/activity.h>
+#include <golog++/model/mapping.h>
 #include <interfaces/SkillerInterface.h>
 #include <logging/logger.h>
 
@@ -161,7 +162,7 @@ SkillerActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
  * @param activity The activity to stop
  */
 void
-SkillerActionExecutor::stop(std::shared_ptr<gologpp::Grounding<gologpp::Action>> activity)
+SkillerActionExecutor::stop(std::shared_ptr<gologpp::Activity> activity)
 {
 	if (*running_activity_ == *activity) {
 		skiller_if_->msgq_enqueue(new SkillerInterface::StopExecMessage());
@@ -236,6 +237,14 @@ SkillerActionExecutor::bb_interface_data_changed(Interface *iface) throw()
 	case SkillerInterface::S_RUNNING: running_activity_->update(Transition::Hook::START); break;
 	default: break;
 	}
+}
+
+void
+SkillerActionExecutor::terminate()
+{
+	if (running_activity_)
+		skiller_if_->msgq_enqueue(new SkillerInterface::StopExecMessage());
+	running_activity_.reset();
 }
 
 } // namespace gpp

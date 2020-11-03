@@ -24,7 +24,8 @@
 #include "utils.h"
 
 #include <core/exception.h>
-#include <golog++/model/grounding.h>
+#include <golog++/model/mapping.h>
+#include <golog++/model/reference.h>
 #include <libs/interface/field_iterator.h>
 
 using namespace fawkes;
@@ -189,11 +190,6 @@ ExogManager::BlackboardEventHandler::BlackboardEventHandler(
 			                  + desired_type->name());
 		}
 		blackboard_->close(iface);
-
-		auto param_it =
-		  std::find(target_exog_->params().begin(), target_exog_->params().end(), var_ref.target());
-		auto param_idx = param_it - target_exog_->params().begin();
-		fields_order_.emplace(pair.first, arity_t(param_idx));
 	}
 }
 
@@ -236,38 +232,34 @@ ExogManager::InterfaceWatcher::~InterfaceWatcher()
 shared_ptr<ExogEvent>
 ExogManager::BlackboardEventHandler::make_exog_event(Interface *iface) const
 {
-	// clang-format off
-	// alignment of assignments just makes this unreadable
 	iface->read();
 	InterfaceFieldIterator fi = iface->fields();
-	vector<unique_ptr<Value>> args(target_exog_->arity());
+	Binding                binding;
 
 	while (fi != iface->fields_end()) {
-		if (target_exog_->mapping().is_mapped(fi.get_name())) {
-			auto order_it = fields_order_.find(fi.get_name());
-
+		shared_ptr<const Variable> mapped_var = target_exog_->mapping().mapped_var(fi.get_name());
+		if (mapped_var) {
 			if (fi.get_length() == 1 || (fi.get_length() > 1 && fi.get_type() == IFT_STRING))
-				args[order_it->second].reset(field_to_value(fi, 0));
+				binding.bind(mapped_var, gologpp::unique_ptr<Expression>(field_to_value(fi, 0)));
 			else if (fi.get_length() > 1) {
-				vector<unique_ptr<Value>> list_init;
+				vector<unique_ptr<Value>> list_value;
 				for (unsigned int idx = 0; idx < fi.get_length(); ++idx)
-					list_init.emplace_back(
-						field_to_value(fi, idx)
-					);
-				shared_ptr<const Type> list_type = global_scope().lookup_list_type(list_init[0]->type());
-				args[order_it->second].reset(
-					new Value(*list_type, list_init)
-				);
-			}
-			else
-				throw IllegalArgumentException("%s: Field %s has length %d and type %s, which shouldn't happen",
-			                                           iface->uid(), fi.get_name(), fi.get_length(), fi.get_typename());
+					list_value.emplace_back(field_to_value(fi, idx));
+				shared_ptr<const Type> list_type = global_scope().lookup_list_type(list_value[0]->type());
+				binding.bind(mapped_var,
+				             gologpp::unique_ptr<Expression>(new Value(*list_type, list_value)));
+			} else
+				throw IllegalArgumentException(
+				  "%s: Field %s has length %d and type %s, which shouldn't happen",
+				  iface->uid(),
+				  fi.get_name(),
+				  fi.get_length(),
+				  fi.get_typename());
 		}
 		++fi;
 	}
 
-	return std::make_shared<ExogEvent>(target_exog_, std::move(args));
-	// clang-format on
+	return gologpp::shared_ptr<ExogEvent>(new ExogEvent(target_exog_, std::move(binding)));
 }
 
 void

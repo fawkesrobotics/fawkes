@@ -30,7 +30,7 @@
 #include <aspect/clock.h>
 #include <aspect/inifins/inifin.h>
 #include <blackboard/blackboard.h>
-#include <golog++/model/platform_backend.h>
+#include <golog++/execution/platform_backend.h>
 #include <logging/logger.h>
 
 namespace fawkes {
@@ -51,10 +51,11 @@ public:
 	                     BlackBoard *   blackboard);
 	virtual ~GologppFawkesBackend();
 
-	virtual void preempt_activity(std::shared_ptr<gologpp::Activity> a) override;
 	virtual gologpp::Clock::time_point time() const noexcept override;
 
 private:
+	virtual void terminate_() override;
+	virtual void preempt_activity(std::shared_ptr<gologpp::Activity> a) override;
 	virtual void execute_activity(std::shared_ptr<gologpp::Activity>) override;
 
 	SkillerInterface *            skiller_if_;
