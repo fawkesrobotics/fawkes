@@ -23,7 +23,7 @@
 #include <logging/fd_redirect.h>
 #include <logging/logger.h>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 namespace fawkes {
 
