@@ -33,7 +33,7 @@
 #include <utils/math/angle.h>
 #include <utils/time/wait.h>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lambda/bind.hpp>
 #include <boost/lambda/lambda.hpp>
