@@ -20,6 +20,8 @@ endif
 
 ifeq ($(HAVE_LIBMICROHTTPD),1)
   CFLAGS_LIBMICROHTTPD  = -DHAVE_LIBMICROHTTPD $(shell $(PKGCONFIG) --cflags 'libmicrohttpd')
+  # boost's property_tree uses deprecated global placeholders
+  CFLAGS_LIBMICROHTTPD += -DBOOST_BIND_GLOBAL_PLACEHOLDERS
   LDFLAGS_LIBMICROHTTPD = $(shell $(PKGCONFIG) --libs 'libmicrohttpd')
   HAVE_WEBVIEW = 1
 else
@@ -31,8 +33,12 @@ else
   endif
 endif
 
+
 # RapidJSON is optional, but may be convenient
 ifeq ($(HAVE_RAPIDJSON),1)
   CFLAGS_RAPIDJSON  = -DHAVE_RAPIDJSON $(shell $(PKGCONFIG) --cflags 'RapidJSON')
   LDFLAGS_RAPIDJSON = $(shell $(PKGCONFIG) --libs 'RapidJSON')
 endif
+
+CFLAGS_WEBVIEW = $(CFLAGS_LIBMICROHTTPD) $(CFLAGS_RAPIDJSON)
+LDFLAGS_WEBVIEW = $(LDFLAGS_LIBMICROHTTPD) $(LDFLAGS_RAPIDJSON)
