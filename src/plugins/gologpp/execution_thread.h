@@ -24,6 +24,7 @@
 #include <aspect/blackboard.h>
 #include <aspect/configurable.h>
 #include <aspect/logging.h>
+#include <aspect/tf.h>
 #include <blackboard/interface_listener.h>
 #include <core/threading/thread.h>
 #include <golog++/execution/controller.h>
@@ -43,7 +44,8 @@ class ExogManager;
 class GologppThread : public Thread,
                       public LoggingAspect,
                       public BlackBoardAspect,
-                      public ConfigurableAspect
+                      public ConfigurableAspect,
+                      public TransformAspect
 {
 public:
 	GologppThread();

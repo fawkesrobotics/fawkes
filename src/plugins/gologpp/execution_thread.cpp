@@ -98,8 +98,9 @@ GologppThread::init()
 	gologpp::eclipse_opts options;
 	options.trace    = config->get_bool_or_default((cfg_prefix + "/trace").c_str(), false);
 	options.guitrace = options.trace;
-	gologpp::ReadylogContext::init(
-	  options, std::make_unique<GologppFawkesBackend>(config, spec_cfg_prefix, logger, blackboard));
+	gologpp::ReadylogContext::init(options,
+	                               std::make_unique<GologppFawkesBackend>(
+	                                 config, spec_cfg_prefix, logger, blackboard, tf_listener));
 
 	logger->log_info(name(), "... initialization done");
 }

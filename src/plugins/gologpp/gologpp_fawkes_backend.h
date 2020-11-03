@@ -30,8 +30,10 @@
 #include <aspect/clock.h>
 #include <aspect/inifins/inifin.h>
 #include <blackboard/blackboard.h>
+#include <config/config.h>
 #include <golog++/execution/platform_backend.h>
 #include <logging/logger.h>
+#include <tf/transformer.h>
 
 namespace fawkes {
 class SkillerInterface;
@@ -45,13 +47,19 @@ class GologppFawkesBackend : public gologpp::PlatformBackend,
                              public AspectProviderAspect
 {
 public:
-	GologppFawkesBackend(Configuration *config,
-	                     std::string    cfg_prefix,
-	                     Logger *       logger,
-	                     BlackBoard *   blackboard);
+	GologppFawkesBackend(Configuration *  config,
+	                     std::string      cfg_prefix,
+	                     Logger *         logger,
+	                     BlackBoard *     blackboard,
+	                     tf::Transformer *tf_listener);
 	virtual ~GologppFawkesBackend();
 
 	virtual gologpp::Clock::time_point time() const noexcept override;
+
+	virtual gologpp::Value
+	eval_exog_function(const gologpp::Type &                                  ret_type,
+	                   const std::string &                                    name,
+	                   const std::unordered_map<std::string, gologpp::Value> &args) override;
 
 private:
 	virtual void terminate_() override;
@@ -63,6 +71,8 @@ private:
 	BlackBoard *                  blackboard_;
 	ActionExecutorDispatcher      action_dispatcher_;
 	GologppDispatcherAspectIniFin dispatcher_inifin_;
+	tf::Transformer *             tf_listener_;
+	Configuration *               config_;
 };
 
 } // namespace gpp

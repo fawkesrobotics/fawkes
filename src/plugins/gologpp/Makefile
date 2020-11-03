@@ -14,8 +14,10 @@
 
 BASEDIR = ../../..
 include $(BASEDIR)/etc/buildsys/config.mk
+include $(BUILDCONFDIR)/tf/tf.mk
 
 LIBS_gologpp = fawkescore fawkesutils fawkesblackboard \
+               fawkestf \
                fawkesinterface SkillerInterface
 OBJS_gologpp = plugin.o execution_thread.o gologpp_fawkes_backend.o exog_manager.o \
                action_executor.o skiller_action_executor.o \
@@ -32,6 +34,7 @@ ifneq ($(HAVE_CPP17),)
     HAVE_GOLOGPP = $(if $(shell $(PKGCONFIG) --exists golog++; echo $${?/1/}),1,0)
     ifeq ($(HAVE_GOLOGPP),1)
       CFLAGS += $(shell $(PKGCONFIG) --cflags readylog++ parsegolog++) $(CFLAGS_CPP17)
+      CFLAGS += $(CFLAGS_TF)
       LDFLAGS += $(shell $(PKGCONFIG) --libs readylog++ parsegolog++) $(LDFLAGS_CPP17)
       PLUGINS_build = $(PLUGINS_all)
     else
