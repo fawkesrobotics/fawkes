@@ -27,7 +27,7 @@
 #include <plugins/mongodb/utils.h>
 #include <utils/time/tracker_macros.h>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/exception/operation_exception.hpp>
 #include <mongocxx/exception/query_exception.hpp>

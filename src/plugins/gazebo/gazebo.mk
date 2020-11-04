@@ -27,6 +27,7 @@ ifneq ($(PKGCONFIG),)
   HAVE_GAZEBO   = $(if $(shell $(PKGCONFIG) --atleast-version=1.0.1 'gazebo'; echo $${?/1/}),1,0)
   HAVE_GAZEBO_96 = $(if $(shell $(PKGCONFIG) --atleast-version=9.6.0 'gazebo'; echo $${?/1/}),1,0)
   HAVE_GAZEBO_10 = $(if $(shell $(PKGCONFIG) --atleast-version=10 'gazebo'; echo $${?/1/}),1,0)
+  HAVE_GAZEBO_11 = $(if $(shell $(PKGCONFIG) --atleast-version=11 'gazebo'; echo $${?/1/}),1,0)
 endif
 
 ifeq ($(HAVE_GAZEBO),1)
@@ -42,6 +43,10 @@ ifeq ($(HAVE_GAZEBO),1)
 
   ifeq ($(HAVE_GAZEBO_96)$(boost-have-lib system),11)
     LDFLAGS_GAZEBO += $(boost-lib-ldflags system)
+  endif
+	# Assume that this is no longer necessary in Gazebo 11.
+  ifneq ($(HAVE_GAZEBO_11),1)
+    CFLAGS_GAZEBO += -DBOOST_BIND_GLOBAL_PLACEHOLDERS
   endif
 
   # if ffmpeg is installed, gazebo may have been compiled with support for it

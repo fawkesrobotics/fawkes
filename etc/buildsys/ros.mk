@@ -66,7 +66,7 @@ else
 endif
 
 ifeq ($(HAVE_ROS),1)
-  CFLAGS_ROS  = -DHAVE_ROS $(call ros-pkg-cflags,roscpp)
+  CFLAGS_ROS  = -DHAVE_ROS $(call ros-pkg-cflags,roscpp) -DBOOST_BIND_GLOBAL_PLACEHOLDERS
   LDFLAGS_ROS = $(call ros-pkg-lflags,roscpp)
 endif
 

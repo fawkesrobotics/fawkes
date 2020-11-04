@@ -37,6 +37,7 @@
 using namespace fawkes;
 using namespace protobuf_comm;
 using namespace google::protobuf;
+using namespace boost::placeholders;
 
 /** @class ProtobufCommPlexilAdapter "protobuf_adapter.h"
  * Plexil adapter to provide access to protobuf_comm.

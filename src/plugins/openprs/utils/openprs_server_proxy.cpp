@@ -27,7 +27,7 @@
 #include <core/threading/mutex_locker.h>
 #include <logging/logger.h>
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/lexical_cast.hpp>
 
 using namespace boost::asio;
