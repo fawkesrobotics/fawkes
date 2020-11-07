@@ -27,6 +27,7 @@
 #include "skiller_action_executor.h"
 #include "sleep_action_executor.h"
 
+#include <blackboard/remote.h>
 #include <config/config.h>
 #include <golog++/execution/activity.h>
 #include <golog++/execution/transition.h>
@@ -70,12 +71,15 @@ GologppFawkesBackend::GologppFawkesBackend(Configuration *  config,
 		  config->get_string_or_default((agent_prefix + "/host").c_str(), "localhost");
 		const unsigned short int &port =
 		  config->get_uint_or_default((agent_prefix + "/port").c_str(), 1910);
+		std::shared_ptr<SkillerManager> skiller_mgr =
+		  std::make_shared<SkillerManager>(new RemoteBlackBoard(hostname.c_str(), port));
 		action_dispatcher_.register_executor(std::make_shared<RemoteSkillerActionExecutor>(
-		  logger, "robot", robot, hostname, port, config, cfg_prefix));
+		  logger, "robot", robot, skiller_mgr, config, cfg_prefix));
 	}
 	if (config->get_bool_or_default((cfg_prefix + "/use_local_skiller").c_str(), true)) {
+		local_skiller_mgr_ = std::make_shared<SkillerManager>(blackboard);
 		action_dispatcher_.register_executor(
-		  std::make_shared<SkillerActionExecutor>(logger, blackboard, config, cfg_prefix));
+		  std::make_shared<SkillerActionExecutor>(logger, local_skiller_mgr_, config, cfg_prefix));
 	}
 	action_dispatcher_.register_executor(
 	  std::make_shared<BBMessageActionExecutor>(logger, blackboard, config, cfg_prefix));
@@ -135,8 +139,8 @@ GologppFawkesBackend::eval_exog_function(const Type &                           
 
 		tf::Stamped<tf::Pose> out;
 		tf_listener_->transform_pose(to_frame,
-		                            tf::Stamped<tf::Pose>(pose_in, Time(0, 0), from_frame),
-		                            out);
+		                             tf::Stamped<tf::Pose>(pose_in, Time(0, 0), from_frame),
+		                             out);
 
 		CompoundType::Representation trans_raw;
 		trans_raw.emplace("x", new Value(number_type, out.getOrigin().getX()));
@@ -193,7 +197,7 @@ GologppFawkesBackend::eval_exog_function(const Type &                           
 		(void)dynamic_cast<const NumberType &>(ret_type);
 		return Value(number_type,
 		             config_->get_float_or_default(static_cast<std::string>(args.at("path")).c_str(),
-		                                          args.at("default").numeric_convert<float>()));
+		                                           args.at("default").numeric_convert<float>()));
 	} else
 		throw gologpp::UserError("No such exog_function: " + name);
 }

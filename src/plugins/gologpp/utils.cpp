@@ -21,6 +21,7 @@
 #include "utils.h"
 
 #include <blackboard/blackboard.h>
+#include <blackboard/remote.h>
 #include <golog++/model/value.h>
 
 using gologpp::Value;
@@ -213,6 +214,115 @@ field_to_value(InterfaceFieldIterator &fi, unsigned int idx)
 	case IFT_UINT64: return new Value(get_type<NumberType>(), fi.get_uint64(idx));
 	}
 	throw Exception("Unhandled interface field type");
+}
+
+/** A central point to interact with the skiller. There can only be one of these since it
+ * acquires exclusive control
+ * @param logger Initialized logger to use
+ * @param blackboard Initialized Blackboard to use. Deleted in destructor if it's a @ref RemoteBlackBoard.
+ */
+SkillerManager::SkillerManager(BlackBoard *blackboard)
+: BlackBoardInterfaceListener("Golog++SkillerManager"), blackboard_(blackboard), terminated_(false)
+{
+	skiller_iface_ = blackboard_->open_for_reading<SkillerInterface>("Skiller");
+	skiller_iface_->read();
+	if (!skiller_iface_->has_writer()) {
+		blackboard_->close(skiller_iface_);
+		delete blackboard_;
+		throw Exception("No writer for Skiller interface");
+	}
+
+	bbil_add_data_interface(skiller_iface_);
+	blackboard_->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
+
+	skiller_iface_->msgq_enqueue(new SkillerInterface::AcquireControlMessage());
+}
+
+/** Release exclusive control and free all resources
+ */
+SkillerManager::~SkillerManager()
+{
+	skiller_iface_->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
+	blackboard_->unregister_listener(this);
+	blackboard_->close(skiller_iface_);
+	if (dynamic_cast<RemoteBlackBoard *>(blackboard_))
+		delete blackboard_;
+}
+
+/** Start the given skillstring and call @ref end_cb when it ends
+ * @param skillstring Skillstring to run
+ * @param end_cb End callback. Status enum is either S_FINAL or S_FAILED.
+ */
+void
+SkillerManager::start_skill(const std::string &skillstring,
+                            const std::function<void(SkillerInterface::SkillStatusEnum)> &end_cb)
+{
+	std::lock_guard<std::recursive_mutex> l(mutex_);
+
+	if (terminated_)
+		return;
+
+	skiller_iface_->read();
+	if (end_callback_) {
+		throw IllegalArgumentException("Cannot execute \"%s\" while \"%s\" is still running",
+		                               skillstring.c_str(),
+		                               skiller_iface_->skill_string());
+	}
+
+	skiller_iface_->msgq_enqueue(new SkillerInterface::ExecSkillMessage(skillstring.c_str()));
+	end_callback_ = end_cb;
+}
+
+/** Stop execution of current skill (if any)
+ */
+void SkillerManager::stop_skill()
+{
+	std::lock_guard<std::recursive_mutex> l(mutex_);
+
+	if (terminated_)
+		return;
+
+	if (end_callback_)
+		skiller_iface_->msgq_enqueue(new SkillerInterface::StopExecMessage());
+
+	end_callback_ = nullptr;
+}
+
+void
+SkillerManager::bb_interface_data_refreshed(Interface *iface) throw()
+{
+	std::lock_guard<std::recursive_mutex> l(mutex_);
+
+	if (terminated_ || !end_callback_)
+		return;
+
+	SkillerInterface *skiller_if = dynamic_cast<SkillerInterface *>(iface);
+	if (!skiller_if) {
+		return;
+	}
+
+	skiller_if->read();
+	if (skiller_if->status() == SkillerInterface::SkillStatusEnum::S_FINAL
+	    || skiller_if->status() == SkillerInterface::SkillStatusEnum::S_FAILED) {
+		end_callback_(skiller_if->status());
+		end_callback_ = nullptr;
+	}
+}
+
+/** Prepare for shutdown by stopping skill execution.
+ */
+void SkillerManager::terminate()
+{
+	std::lock_guard<std::recursive_mutex> l(mutex_);
+
+	stop_skill();
+	terminated_ = true;
+}
+
+constexpr const char *
+SkillerManager::name() const
+{
+	return "Golog++SkillerManager";
 }
 
 } // namespace gpp

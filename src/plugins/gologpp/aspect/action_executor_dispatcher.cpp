@@ -19,6 +19,7 @@
  */
 
 #include "action_executor_dispatcher.h"
+#include "../skiller_action_executor.h"
 
 #include <core/exception.h>
 #include <golog++/execution/activity.h>
@@ -59,13 +60,16 @@ ActionExecutorDispatcher::register_executor(std::shared_ptr<ActionExecutor> exec
 	action_executors_.push_back(executor);
 }
 
-/** Terminate all executors
+/** Terminate all SkillerManagers
  */
 void
 ActionExecutorDispatcher::terminate()
 {
-	for (auto &executor : action_executors_)
-		executor->terminate();
+	for (auto &executor : action_executors_) {
+		auto sae = std::dynamic_pointer_cast<SkillerActionExecutor>(executor);
+		if (sae)
+			sae->skiller_manager()->terminate();
+	}
 }
 
 } // namespace gpp

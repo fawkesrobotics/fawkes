@@ -53,11 +53,6 @@ PrintActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity> act
 }
 
 void
-PrintActionExecutor::terminate()
-{
-}
-
-void
 PrintActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
 	if (!can_execute_activity(activity)) {

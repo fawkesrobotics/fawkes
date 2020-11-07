@@ -22,8 +22,8 @@
 #define FAWKES_GOLOGPP_SKILLER_ACTION_EXECUTOR_H
 
 #include "action_executor.h"
+#include "utils.h"
 
-#include <blackboard/interface_listener.h>
 #include <utils/misc/map_skill.h>
 
 #include <string>
@@ -41,32 +41,29 @@ public:
 	InvalidArgumentException(const char *format, ...);
 };
 
-class SkillerActionExecutor : public ActionExecutor, public BlackBoardInterfaceListener
+class SkillerActionExecutor : public ActionExecutor
 {
 public:
-	SkillerActionExecutor(Logger *           logger,
-	                      BlackBoard *       blackboard,
-	                      Configuration *    config,
-	                      const std::string &cfg_prefix);
-	virtual ~SkillerActionExecutor() override;
-	void         start(std::shared_ptr<gologpp::Activity> activity) override;
-	void         stop(std::shared_ptr<gologpp::Activity> activity) override;
-	bool         can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
-	virtual void bb_interface_data_changed(Interface *) throw() override;
-	virtual void terminate() override;
+	SkillerActionExecutor(Logger *                        logger,
+	                      std::shared_ptr<SkillerManager> skiller_manager,
+	                      Configuration *                 config,
+	                      const std::string &             cfg_prefix);
+	void start(std::shared_ptr<gologpp::Activity> activity) override;
+	void stop(std::shared_ptr<gologpp::Activity> activity) override;
+	bool can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
+	void skill_end_handler(SkillerInterface::SkillStatusEnum status);
+	std::shared_ptr<SkillerManager> skiller_manager();
 
 protected:
 	const char *name() const;
-	BlackBoard *blackboard_;
-	bool        blackboard_owner_;
 
 private:
 	void               initialize_action_skill_mapping();
 	std::string        map_activity_to_skill(std::shared_ptr<gologpp::Activity> activity);
 	ActionSkillMapping action_skill_mapping_;
-	SkillerInterface * skiller_if_;
 	Configuration *    config_;
-	const std::string  cfg_prefix_;
+	std::shared_ptr<SkillerManager> skiller_manager_;
+	const std::string               cfg_prefix_;
 };
 
 } // namespace gpp

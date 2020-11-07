@@ -53,47 +53,25 @@ InvalidArgumentException::InvalidArgumentException(const char *format, ...) : Ex
  * If the Skiller's status changes, the activity's status is updated accordingly.
  * @author Till Hofmann
  * @see ActionSkillMapping
- *
- * @var SkillerActionExecutor::blackboard_
- * The blackboard to use to access the skiller.
- *
- * @var SkillerActionExecutor::blackboard_owner_
- * True if this executor is owning its blackboard.
  */
 
 /** Constructor.
  * Create and initialize the executor, so a subsequent call to start() directly
  * starts executing a skill.
  * @param logger A logger instance to use
- * @param blackboard The blackboard to use to connect to the SkillerInterface
+ * @param skiller_manager The skiller manager
  * @param config The config to read the skill mapping from
  * @param cfg_prefix The spec-specific config prefix to use
  */
-SkillerActionExecutor::SkillerActionExecutor(Logger *           logger,
-                                             BlackBoard *       blackboard,
-                                             Configuration *    config,
-                                             const std::string &cfg_prefix)
+SkillerActionExecutor::SkillerActionExecutor(Logger *                        logger,
+                                             std::shared_ptr<SkillerManager> skiller_manager,
+                                             Configuration *                 config,
+                                             const std::string &             cfg_prefix)
 : ActionExecutor(logger),
-  BlackBoardInterfaceListener("Golog++SkillerActionExecutor"),
-  blackboard_(blackboard),
-  blackboard_owner_(false),
   config_(config),
+  skiller_manager_(skiller_manager),
   cfg_prefix_(cfg_prefix)
 {
-	try {
-		skiller_if_ = blackboard_->open_for_reading<SkillerInterface>("Skiller");
-	} catch (Exception &e) {
-		logger_->log_error(name(), "Failed to open skiller interface: %s", e.what_no_backtrace());
-	}
-	bbil_add_data_interface(skiller_if_);
-	blackboard_->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
-	skiller_if_->read();
-	if (!skiller_if_->has_writer()) {
-		blackboard->unregister_listener(this);
-		blackboard->close(skiller_if_);
-		throw Exception("No writer for Skiller interface");
-	}
-	skiller_if_->msgq_enqueue(new SkillerInterface::AcquireControlMessage());
 	initialize_action_skill_mapping();
 }
 
@@ -109,19 +87,6 @@ SkillerActionExecutor::initialize_action_skill_mapping()
 		mapping[action_name] = cfg_iterator->get_as_string();
 	}
 	action_skill_mapping_ = ActionSkillMapping(mapping);
-}
-
-/** Destructor.
- * Close all interfaces and unregister from the blackboard.
- */
-SkillerActionExecutor::~SkillerActionExecutor()
-{
-	skiller_if_->msgq_enqueue(new SkillerInterface::ReleaseControlMessage());
-	blackboard_->unregister_listener(this);
-	blackboard_->close(skiller_if_);
-	if (blackboard_owner_) {
-		delete blackboard_;
-	}
 }
 
 /** Check if we can execute the given activity.
@@ -143,13 +108,14 @@ SkillerActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity> a
 void
 SkillerActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
+	using namespace std::placeholders;
 	if (!can_execute_activity(activity)) {
 		throw Exception("Cannot execute activity '%s' with SkillerActionExecutor",
 		                activity->mapped_name().c_str());
 	}
 	try {
-		skiller_if_->msgq_enqueue(
-		  new SkillerInterface::ExecSkillMessage(map_activity_to_skill(activity).c_str()));
+		skiller_manager_->start_skill(map_activity_to_skill(activity),
+		                              std::bind(&SkillerActionExecutor::skill_end_handler, this, _1));
 		running_activity_ = activity;
 	} catch (InvalidArgumentException &e) {
 		logger_->log_error(name(), "Failed to start %s: %s", activity->name().c_str(), e.what());
@@ -165,7 +131,7 @@ void
 SkillerActionExecutor::stop(std::shared_ptr<gologpp::Activity> activity)
 {
 	if (*running_activity_ == *activity) {
-		skiller_if_->msgq_enqueue(new SkillerInterface::StopExecMessage());
+		skiller_manager_->stop_skill();
 		running_activity_.reset();
 	}
 }
@@ -212,20 +178,12 @@ SkillerActionExecutor::map_activity_to_skill(std::shared_ptr<gologpp::Activity> 
 }
 
 /** Update the status of the activity according to the Skiller status.
- * @param iface The interface that has changed
+ * @param status Skiller status
  */
 void
-SkillerActionExecutor::bb_interface_data_changed(Interface *iface) throw()
+SkillerActionExecutor::skill_end_handler(SkillerInterface::SkillStatusEnum status)
 {
-	if (!running_activity_) {
-		return;
-	}
-	SkillerInterface *skiller_if = dynamic_cast<SkillerInterface *>(iface);
-	if (!skiller_if) {
-		return;
-	}
-	skiller_if->read();
-	switch (skiller_if->status()) {
+	switch (status) {
 	case SkillerInterface::S_FINAL:
 		running_activity_->update(Transition::Hook::FINISH);
 		running_activity_.reset();
@@ -234,17 +192,20 @@ SkillerActionExecutor::bb_interface_data_changed(Interface *iface) throw()
 		running_activity_->update(Transition::Hook::FAIL);
 		running_activity_.reset();
 		break;
-	case SkillerInterface::S_RUNNING: running_activity_->update(Transition::Hook::START); break;
-	default: break;
+	default:
+		logger_->log_error(name(),
+		                   "Unexpected skill status %d on %s",
+		                   status,
+		                   running_activity_->str().c_str());
+		break;
 	}
 }
 
-void
-SkillerActionExecutor::terminate()
+/** @return the SkillerManager used to execute actions
+ */
+std::shared_ptr<SkillerManager> SkillerActionExecutor::skiller_manager()
 {
-	if (running_activity_)
-		skiller_if_->msgq_enqueue(new SkillerInterface::StopExecMessage());
-	running_activity_.reset();
+	return skiller_manager_;
 }
 
 } // namespace gpp

@@ -25,6 +25,7 @@
 #include "action_executor.h"
 #include "aspect/action_executor_dispatcher.h"
 #include "aspect/action_executor_dispatcher_inifin.h"
+#include "utils.h"
 
 #include <aspect/aspect_provider.h>
 #include <aspect/clock.h>
@@ -66,13 +67,14 @@ private:
 	virtual void preempt_activity(std::shared_ptr<gologpp::Activity> a) override;
 	virtual void execute_activity(std::shared_ptr<gologpp::Activity>) override;
 
-	SkillerInterface *            skiller_if_;
-	Logger *                      logger_;
-	BlackBoard *                  blackboard_;
-	ActionExecutorDispatcher      action_dispatcher_;
-	GologppDispatcherAspectIniFin dispatcher_inifin_;
-	tf::Transformer *             tf_listener_;
-	Configuration *               config_;
+	SkillerInterface *              skiller_if_;
+	Logger *                        logger_;
+	BlackBoard *                    blackboard_;
+	ActionExecutorDispatcher        action_dispatcher_;
+	GologppDispatcherAspectIniFin   dispatcher_inifin_;
+	tf::Transformer *               tf_listener_;
+	Configuration *                 config_;
+	std::shared_ptr<SkillerManager> local_skiller_mgr_;
 };
 
 } // namespace gpp

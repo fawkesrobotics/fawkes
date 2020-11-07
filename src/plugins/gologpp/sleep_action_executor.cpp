@@ -62,11 +62,6 @@ SleepActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity> act
 }
 
 void
-SleepActionExecutor::terminate()
-{
-}
-
-void
 SleepActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
 	if (!can_execute_activity(activity)) {

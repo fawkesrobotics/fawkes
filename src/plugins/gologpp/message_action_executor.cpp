@@ -70,11 +70,6 @@ BBMessageActionExecutor::can_execute_activity(std::shared_ptr<gologpp::Activity>
 }
 
 void
-BBMessageActionExecutor::terminate()
-{
-}
-
-void
 BBMessageActionExecutor::start(std::shared_ptr<gologpp::Activity> activity)
 {
 	if (!can_execute_activity(activity)) {

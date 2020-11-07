@@ -20,9 +20,14 @@
 
 #pragma once
 
+#include <blackboard/interface_listener.h>
 #include <golog++/model/value.h>
+#include <interfaces/SkillerInterface.h>
+#include <logging/logger.h>
 
 #include <boost/variant/variant.hpp>
+#include <functional>
+#include <mutex>
 
 namespace gologpp {
 class Value;
@@ -55,6 +60,29 @@ private:
 
 void            value_to_field(const gologpp::Value &value, InterfaceFieldIterator *field);
 gologpp::Value *field_to_value(InterfaceFieldIterator &fi, unsigned int idx);
+
+class SkillerManager : public BlackBoardInterfaceListener
+{
+public:
+	SkillerManager(BlackBoard *blackboard);
+	~SkillerManager();
+
+	void start_skill(const std::string &                                           skillstring,
+	                 const std::function<void(SkillerInterface::SkillStatusEnum)> &end_cb);
+	void stop_skill();
+
+	virtual void bb_interface_data_refreshed(Interface *) throw() override;
+	void terminate();
+
+private:
+	constexpr const char *name() const;
+
+	BlackBoard *                                           blackboard_;
+	std::function<void(SkillerInterface::SkillStatusEnum)> end_callback_;
+	SkillerInterface *skiller_iface_;
+	std::recursive_mutex mutex_;
+	bool terminated_;
+};
 
 } // namespace gpp
 } // namespace fawkes

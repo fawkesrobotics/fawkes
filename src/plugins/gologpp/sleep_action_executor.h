@@ -39,7 +39,6 @@ public:
 	void start(std::shared_ptr<gologpp::Activity> activity) override;
 	void stop(std::shared_ptr<gologpp::Activity> activity) override;
 	bool can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const override;
-	void terminate() override;
 
 private:
 	std::list<std::future<void>> running_sleeps_;
