@@ -78,8 +78,8 @@ private:
 	void clips_bson_append_regex(void *bson, std::string field_name, CLIPS::Value regex_string);
 	void clips_bson_append_array(void *bson, std::string field_name, CLIPS::Values values);
 	void clips_bson_append_time(void *bson, std::string field_name, CLIPS::Values time);
-	CLIPS::Value  clips_bson_array_start(void *bson, std::string field_name);
-	void          clips_bson_array_finish(void *barr);
+	CLIPS::Value  clips_bson_array_start();
+	void          clips_bson_array_finish(void *bson, std::string field_name, void *array);
 	void          clips_bson_array_append(void *barr, CLIPS::Value value);
 	std::string   clips_bson_tostring(void *bson);
 	CLIPS::Values clips_bson_field_names(void *bson);
