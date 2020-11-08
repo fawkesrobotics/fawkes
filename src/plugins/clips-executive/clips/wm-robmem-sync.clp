@@ -231,6 +231,51 @@
 	(bson-destroy ?query)
 )
 
+(deffunction wm-robmem-load-from-storage (?game ?timepoint)
+	(bind ?match (bson-create))
+	(bind ?match-lte-timestamp (bson-create))
+	(bind ?project (bson-create))
+	(bind ?doc1 (bson-create))
+	(bind ?doc2 (bson-create))
+	(bind ?doc21 (bson-create))
+
+	(bson-append ?doc1 "retracted" "FALSE")
+	(bson-append-time-iso ?doc21 "$gte" ?timepoint)
+	(bson-append ?doc2 "retracted" ?doc21)
+	(bson-append-time-iso ?match "game" ?game)
+	(bson-append-time-iso ?match-lte-timestamp "$lte" ?timepoint)
+	(bson-append ?match "asserted" ?match-lte-timestamp)
+
+	(bind ?limit-arr (bson-array-start))
+	(bson-array-append ?limit-arr ?doc1)  
+	(bson-array-append ?limit-arr ?doc2)  
+	(bson-array-finish ?match "$or" ?limit-arr)
+
+
+	(bson-append ?project "id" "$fact.id")
+	(bson-append ?project "source" "$fact.source")
+	(bson-append ?project "type" "$fact.type")
+	(bson-append ?project "is-list" "$fact.is-list")
+	(bson-append ?project "update-timestamp" "$fact.update-timestamp")
+	(bson-append ?project "value" "$fact.value")
+	(bson-append ?project "values" "$fact.values")
+
+	(bind ?pipeline (robmem-pipeline-create))
+	(robmem-pipeline-add-match ?pipeline ?match)
+	(robmem-pipeline-add-projection ?pipeline ?project)
+	(bind ?cursor (robmem-aggregate "fawkes.gamestate_recovery_test" ?pipeline))
+
+	(robmem-pipeline-destroy ?pipeline)
+	(bson-destroy ?match)
+	(bson-destroy ?match-lte-timestamp)
+	(bson-destroy ?project)
+	(bson-destroy ?doc1)
+	(bson-destroy ?doc2)
+	(bson-destroy ?doc21)
+
+	(return ?doc)
+)
+
 (defrule wm-robmem-sync-fact-added
 	(wm-fact (key cx identity) (value ?identity))
 	(wm-robmem-sync-conf (wm-fact-key-prefix $?key-prefix) (enabled TRUE))
