@@ -69,7 +69,7 @@ MongoLogLoggerThread::init()
 {
 	database_   = config->get_string_or_default("/plugins/mongodb/logger/database", "fawkes");
 	collection_ = config->get_string_or_default("/plugins/mongodb/logger/collection", "msglog");
-	mongocxx::uri uri("mongodb://localhost:27017");
+	mongocxx::uri uri("mongodb://localhost:27021");
 	mongodb_client = new mongocxx::client(uri);
 }
 
@@ -125,21 +125,16 @@ MongoLogLoggerThread::insert_message(LogLevel    ll,
 	    && msg_s.find("==>") != std::string::npos) {
 		basic::document df;
 		basic::document dfc;
-		df.append(
-		  basic::kvp("id",
-		             msg_s.substr(msg_s.find("(id \"") + 5,
-		                          msg_s.find("\")") - msg_s.find("(id \"") - 5)));
-		df.append(basic::kvp(
-		  "is-list",
-		  msg_s.substr(msg_s.find("(is-list ") + 9)
-		    .substr(0, msg_s.substr(msg_s.find("(is-list ") + 9).find(")")))); 
-		df.append(basic::kvp("source",
-		                     config->get_string_or_default("fawkes/agent/name", "UNKN"))); 
-		df.append(
-		  basic::kvp("type",
-		             msg_s.substr(msg_s.find("(type ") + 6)
-		               .substr(0,
-		                       msg_s.substr(msg_s.find("(type ") + 6).find(")")))); 
+		df.append(basic::kvp("id",
+		                     msg_s.substr(msg_s.find("(id \"") + 5,
+		                                  msg_s.find("\")") - msg_s.find("(id \"") - 5)));
+		df.append(basic::kvp("is-list",
+		                     msg_s.substr(msg_s.find("(is-list ") + 9)
+		                       .substr(0, msg_s.substr(msg_s.find("(is-list ") + 9).find(")"))));
+		df.append(basic::kvp("source", config->get_string_or_default("fawkes/agent/name", "UNKN")));
+		df.append(basic::kvp("type",
+		                     msg_s.substr(msg_s.find("(type ") + 6)
+		                       .substr(0, msg_s.substr(msg_s.find("(type ") + 6).find(")"))));
 		if (msg_s.substr(msg_s.find("(is-list ") + 9)
 		      .substr(0, msg_s.substr(msg_s.find("(is-list ") + 9).find(")"))
 		    == "TRUE") {
