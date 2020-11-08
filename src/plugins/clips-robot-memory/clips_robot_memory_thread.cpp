@@ -93,10 +93,10 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &          env_name
 	                    sigc::slot<void, void *, std::string, CLIPS::Values>(
 	                      sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_append_array)));
 	clips->add_function("bson-array-start",
-	                    sigc::slot<CLIPS::Value, void *, std::string>(
+	                    sigc::slot<CLIPS::Value>(
 	                      sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_array_start)));
 	clips->add_function("bson-array-finish",
-	                    sigc::slot<void, void *>(
+	                    sigc::slot<void, void *, std::string, void *>(
 	                      sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_array_finish)));
 	clips->add_function("bson-array-append",
 	                    sigc::slot<void, void *, CLIPS::Value>(
@@ -382,60 +382,43 @@ ClipsRobotMemoryThread::clips_bson_append_array(void *        bson,
 }
 
 CLIPS::Value
-ClipsRobotMemoryThread::clips_bson_array_start(void *bson, std::string field_name)
+ClipsRobotMemoryThread::clips_bson_array_start()
 {
-	// With the new libmongocxx, we can no longer create an open array as
-	// sub-field of another document.
-	throw Exception("Not implemented");
-	/*
-	mongo::BSONObjBuilder *  b    = static_cast<mongo::BSONObjBuilder *>(bson);
-	mongo::BufBuilder &      bb   = b->subarrayStart(field_name);
-	mongo::BSONArrayBuilder *arrb = new mongo::BSONArrayBuilder(bb);
-	return CLIPS::Value(arrb);
-  */
+	return CLIPS::Value(new bsoncxx::builder::basic::array{});
 }
 
 void
-ClipsRobotMemoryThread::clips_bson_array_finish(void *barr)
+ClipsRobotMemoryThread::clips_bson_array_finish(void *bson, std::string field_name, void *array)
 {
-	throw Exception("Not implemented");
-	/*
-	mongo::BSONArrayBuilder *ab = static_cast<mongo::BSONArrayBuilder *>(barr);
-	delete ab;
-  */
+	using namespace bsoncxx::builder;
+	auto doc       = static_cast<basic::document *>(bson);
+	auto array_doc = static_cast<bsoncxx::builder::basic::array *>(array);
+	doc->append(basic::kvp(field_name, array_doc->view()));
+	delete array_doc;
 }
 
 void
-ClipsRobotMemoryThread::clips_bson_array_append(void *barr, CLIPS::Value value)
+ClipsRobotMemoryThread::clips_bson_array_append(void *array, CLIPS::Value value)
 {
-	throw Exception("Not implemented");
-	/*
-	try {
-		auto *ab = static_cast<mongo::BSONArrayBuilder *>(barr);
-		switch (value.type()) {
-		case CLIPS::TYPE_FLOAT: ab->append(value.as_float()); break;
+	using namespace bsoncxx::builder;
+	auto array_doc = static_cast<bsoncxx::builder::basic::array *>(array);
+	switch (value.type()) {
+	case CLIPS::TYPE_FLOAT: array_doc->append(value.as_float()); break;
 
-		case CLIPS::TYPE_INTEGER: ab->append(value.as_integer()); break;
+	case CLIPS::TYPE_INTEGER: array_doc->append(static_cast<int64_t>(value.as_integer())); break;
 
-		case CLIPS::TYPE_SYMBOL:
-		case CLIPS::TYPE_STRING:
-		case CLIPS::TYPE_INSTANCE_NAME: ab->append(value.as_string()); break;
+	case CLIPS::TYPE_SYMBOL:
+	case CLIPS::TYPE_STRING:
+	case CLIPS::TYPE_INSTANCE_NAME: array_doc->append(value.as_string()); break;
 
-		case CLIPS::TYPE_EXTERNAL_ADDRESS: {
-			mongo::BSONObjBuilder *subb = static_cast<mongo::BSONObjBuilder *>(value.as_address());
-			ab->append(subb->asTempObj());
-		} break;
-
-		default: logger->log_warn("RefBox", "Tried to add unknown type to BSON array"); break;
-		}
-#ifdef HAVE_MONGODB_VERSION_H
-	} catch (mongo::MsgAssertionException &e) {
-#else
-	} catch (mongo::AssertionException &e) {
-#endif
-		logger->log_error("MongoDB", "Failed to append to array: %s", e.what());
+	case CLIPS::TYPE_EXTERNAL_ADDRESS: {
+		auto subb = static_cast<basic::document *>(value.as_address());
+		array_doc->append(subb->view());
+	} break;
+	default:
+		logger->log_warn("MongoDB", "bson-array-append: tried to add unknown type to BSON array field");
+		break;
 	}
-  */
 }
 
 void
