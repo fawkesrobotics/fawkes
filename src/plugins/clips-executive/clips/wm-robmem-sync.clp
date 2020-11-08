@@ -388,7 +388,7 @@
 	=>
 	(bind ?op (sym-cat (bson-get ?obj "operationType")))
 
-	(printout warn "Trigger: " (bson-tostring ?obj) crlf)
+	(printout debug "Trigger: " (bson-tostring ?obj) crlf)
 	(if (eq ?op delete)
 	 then
 		; We cannot check the source because it is not set for deletions

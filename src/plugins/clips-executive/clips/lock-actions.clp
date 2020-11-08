@@ -55,11 +55,16 @@
 	                    (param-values $?param-values))
 	=>
 	(bind ?lock-name (plan-action-arg name ?param-names ?param-values))
-	; The following performs a synchronous/blocking call
-	;(bind ?rv (robmem-mutex-try-lock (str-cat ?lock-name)))
-	;(modify ?pa (state (if ?rv then EXECUTION-SUCCEEDED else EXECUTION-FAILED)))
-	(mutex-try-lock-async ?lock-name)
-	(modify ?pa (state RUNNING))
+	(if (any-factp ((?mutex mutex))
+	               (and (eq ?mutex:name ?lock-name)
+	                    (or (neq ?mutex:request NONE)
+	                        (eq ?mutex:state LOCKED))))
+	 then
+		(modify ?pa (state EXECUTION-FAILED))
+	else
+		(mutex-try-lock-async ?lock-name)
+		(modify ?pa (state RUNNING))
+	)
 )
 
 (defrule lock-actions-lock-acquired
