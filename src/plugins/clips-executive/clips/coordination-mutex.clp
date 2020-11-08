@@ -460,6 +460,13 @@
         (if (and (or (eq ?m:request LOCK) (eq ?m:request RENEW-LOCK)) ?locked)
         then
           (modify ?m (response ACQUIRED))
+        else
+          (if (eq ?m:locked-by (cx-identity))
+           then
+            (printout error "Acquired a mutex without a request,"
+                            " releasing the mutex again!" crlf)
+            (mutex-unlock-async ?id)
+          )
         )
 		  )
 	  )
