@@ -490,7 +490,7 @@
 	=>
 	(bind ?op (sym-cat (bson-get ?obj "operationType")))
 
-	;(printout warn "Trigger: " (bson-tostring ?obj) crlf)
+	(printout debug "Trigger: " (bson-tostring ?obj) crlf)
 	(switch ?op
 		(case insert then (mutex-trigger-update ?obj))
 		(case update then (mutex-trigger-update ?obj))
