@@ -239,6 +239,10 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &          env_name
 	    sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_expire_locks_async),
 	    env_name)));
 
+	clips->add_function("bson-append-time-iso",
+	                    sigc::slot<void, void *, std::string, std::string>(
+	                      sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_append_iso_time)));
+
 	clips->build("(deffacts have-feature-mongodb (have-feature MongoDB))");
 
 	//load helper functions written in CLIPS
@@ -448,6 +452,33 @@ ClipsRobotMemoryThread::clips_bson_append_time(void *        bson,
 		                  field_name.c_str(),
 		                  e.what());
 	}
+}
+
+void
+ClipsRobotMemoryThread::clips_bson_append_iso_time(void *      bson,
+                                                   std::string field_name,
+                                                   std::string time_string)
+{
+	int         y, M, d, h, m;
+	float       s;
+	std::string dateStr = time_string;
+	sscanf(dateStr.c_str(), "%d-%d-%d %d:%d:%fZ", &y, &M, &d, &h, &m, &s);
+	tm time;
+	time.tm_year          = y - 1900; // Year since 1900
+	time.tm_mon           = M - 1;    // 0-11
+	time.tm_mday          = d;        // 1-31
+	time.tm_hour          = h;        // 0-23
+	time.tm_min           = m;        // 0-59
+	time.tm_sec           = (int)s;   // 0-61 (0-60 in C++11)
+	time_t timeSinceEpoch = timegm(&time);
+
+	auto res         = std::chrono::system_clock::from_time_t(timeSinceEpoch);
+	auto tms         = std::chrono::milliseconds(std::stoi(time_string.substr(20, 3)));
+	auto chrono_time = res + tms;
+
+	bsoncxx::types::b_date bson_time{chrono_time};
+	auto                   b = static_cast<bsoncxx::builder::basic::document *>(bson);
+	b->append(bsoncxx::builder::basic::kvp(field_name, bson_time));
 }
 
 void
