@@ -239,6 +239,24 @@ ClipsRobotMemoryThread::clips_context_init(const std::string &          env_name
 	    sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_mutex_expire_locks_async),
 	    env_name)));
 
+	clips->add_function("robmem-pipeline-create",
+	                    sigc::slot<CLIPS::Value>(
+	                      sigc::mem_fun(*this,
+	                                    &ClipsRobotMemoryThread::clips_robotmemory_pipeline_create)));
+	clips->add_function("robmem-pipeline-destroy",
+	                    sigc::slot<void, CLIPS::Value>(sigc::mem_fun(
+	                      *this, &ClipsRobotMemoryThread::clips_robotmemory_pipeline_destroy)));
+	clips->add_function("robmem-pipeline-add-match",
+	                    sigc::slot<CLIPS::Value, void *, void *>(sigc::mem_fun(
+	                      *this, &ClipsRobotMemoryThread::clips_robotmemory_pipeline_add_match)));
+	clips->add_function(
+	  "robmem-pipeline-add-projection",
+	  sigc::slot<CLIPS::Value, void *, void *>(
+	    sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_robotmemory_pipeline_add_projection)));
+	clips->add_function("robmem-aggregate",
+	                    sigc::slot<CLIPS::Value, std::string, void *>(
+	                      sigc::mem_fun(*this,
+	                                    &ClipsRobotMemoryThread::clips_robotmemory_aggregate)));
 	clips->add_function("bson-append-time-iso",
 	                    sigc::slot<void, void *, std::string, std::string>(
 	                      sigc::mem_fun(*this, &ClipsRobotMemoryThread::clips_bson_append_iso_time)));
@@ -1173,4 +1191,66 @@ ClipsRobotMemoryThread::clips_robotmemory_mutex_expire_locks_async(std::string e
 	mutex_expire_future_ = std::move(fut);
 
 	return CLIPS::Value("TRUE", CLIPS::TYPE_SYMBOL);
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_pipeline_create()
+{
+	return CLIPS::Value(new mongocxx::pipeline());
+}
+
+void
+ClipsRobotMemoryThread::clips_robotmemory_pipeline_destroy(void *pipeline)
+{
+	auto b = static_cast<mongocxx::pipeline *>(pipeline);
+	delete b;
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_pipeline_add_match(void *pipeline, void *match)
+{
+	try {
+		auto pipeline_obj = static_cast<mongocxx::pipeline *>(pipeline);
+		auto match_obj    = static_cast<bsoncxx::builder::basic::document *>(match);
+
+		pipeline_obj->match(match_obj->view());
+
+		return CLIPS::Value(pipeline_obj);
+	} catch (std::system_error &e) {
+		logger->log_warn("MongoDB", "Pipeline add match failed: %s", e.what());
+		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+	}
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_pipeline_add_projection(void *pipeline, void *projection)
+{
+	try {
+		auto pipeline_obj = static_cast<mongocxx::pipeline *>(pipeline);
+		auto proj_obj     = static_cast<bsoncxx::builder::basic::document *>(projection);
+
+		pipeline_obj->project(proj_obj->view());
+
+		return CLIPS::Value(pipeline_obj);
+	} catch (std::system_error &e) {
+		logger->log_warn("MongoDB", "Pipline add projection failed: %s", e.what());
+		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+	}
+}
+
+CLIPS::Value
+ClipsRobotMemoryThread::clips_robotmemory_aggregate(std::string collection, void *pipeline)
+{
+	auto pipeline_obj = static_cast<mongocxx::pipeline *>(pipeline);
+
+	try {
+		auto cursor = robot_memory->aggregate(*pipeline_obj, collection);
+
+		return CLIPS::Value(new std::unique_ptr<mongocxx::cursor>(
+		                      new mongocxx::cursor(std::move(cursor))),
+		                    CLIPS::TYPE_EXTERNAL_ADDRESS);
+	} catch (std::system_error &e) {
+		logger->log_warn("MongoDB", "Aggregate failed: %s", e.what());
+		return CLIPS::Value("FALSE", CLIPS::TYPE_SYMBOL);
+	}
 }

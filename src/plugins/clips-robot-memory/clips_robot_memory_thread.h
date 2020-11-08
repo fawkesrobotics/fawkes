@@ -139,6 +139,16 @@ private:
 
 	bool mutex_future_ready(const std::string &name);
 
+	CLIPS::Value clips_robotmemory_pipeline_create();
+	void         clips_robotmemory_pipeline_destroy(void *pipeline);
+	CLIPS::Value clips_robotmemory_pipeline_add_match(void *pipeline, void *match);
+	CLIPS::Value clips_robotmemory_pipeline_add_projection(void *pipeline, void *projection);
+	CLIPS::Value clips_robotmemory_aggregate(std::string collection, void *);
+	void         clips_bson_append_array_test(void *       bson,
+	                                          std::string  field_name,
+	                                          CLIPS::Value value1,
+	                                          CLIPS::Value value2);
+
 private:
 	std::list<ClipsRmTrigger *>              clips_triggers_;
 	fawkes::Mutex                            clips_triggers_mutex_;
