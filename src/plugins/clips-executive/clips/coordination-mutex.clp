@@ -440,6 +440,27 @@
 			(bind ?lock-time (bson-get-time ?doc "lock-time"))
 		)
 
+		(do-for-fact ((?m mutex)) (eq ?m:name ?id)
+      (if ?locked then
+        (if (eq ?locked-by (cx-identity)) then
+          (if (or (eq ?m:request LOCK) (eq ?m:request RENEW-LOCK)) then
+            ; Mutex is locked by us and we requested it, all good.
+            (modify ?m (response ACQUIRED))
+           else
+             (if (eq ?m:state OPEN) then
+               ; Mutex is newly locked by us but we never requested it.
+               (printout error "Acquired a mutex without a request,"
+                               " releasing the mutex again!" crlf)
+               (mutex-unlock-async ?id)
+             )
+          )
+        )
+       else ; Mutex is unlocked.
+        (if (eq ?m:request UNLOCK) then
+          (modify ?m (response UNLOCKED))
+        )
+      )
+    )
 		(if (any-factp ((?m mutex)) (eq ?m:name ?id))
 		then
 			(do-for-fact ((?m mutex)) (eq ?m:name ?id)
@@ -450,26 +471,6 @@
 			(assert (mutex (name ?id) (state (if ?locked then LOCKED else OPEN))
 			               (locked-by ?locked-by) (lock-time ?lock-time)))
 		)
-		(do-for-fact ((?m mutex)) (eq ?m:name ?id)
-      (if (or (eq ?m:state OPEN) (eq ?m:locked-by (cx-identity)))
-      then
-        (if (and (eq ?m:request UNLOCK) (not ?locked))
-        then
-          (modify ?m (response UNLOCKED))
-        )
-        (if (and (or (eq ?m:request LOCK) (eq ?m:request RENEW-LOCK)) ?locked)
-        then
-          (modify ?m (response ACQUIRED))
-        else
-          (if (eq ?m:locked-by (cx-identity))
-           then
-            (printout error "Acquired a mutex without a request,"
-                            " releasing the mutex again!" crlf)
-            (mutex-unlock-async ?id)
-          )
-        )
-		  )
-	  )
 	)
 )
 
