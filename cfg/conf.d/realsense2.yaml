@@ -16,7 +16,7 @@ realsense2:
 
   # Desired Frame rate. Device will try deliver new frames in time.
   # 0 for don't care
-  frame_rate: 30
+  frame_rate: 15
 
   # Number of retries after unsuccessful polling before restarting the camera
   restart_after_num_errors: 50
