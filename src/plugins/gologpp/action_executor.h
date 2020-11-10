@@ -35,6 +35,7 @@ class ActionExecutor
 {
 public:
 	ActionExecutor(Logger *logger);
+	virtual ~ActionExecutor() = default;
 	virtual void start(std::shared_ptr<gologpp::Activity> activity)                      = 0;
 	virtual void stop(std::shared_ptr<gologpp::Activity> activity)                       = 0;
 	virtual bool can_execute_activity(std::shared_ptr<gologpp::Activity> activity) const = 0;
