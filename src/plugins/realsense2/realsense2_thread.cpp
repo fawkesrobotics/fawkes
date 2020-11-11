@@ -26,9 +26,6 @@
 #include <interfaces/CameraControlInterface.h>
 #include <interfaces/SwitchInterface.h>
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
-
 using namespace fawkes;
 
 /** @class Realsense2Thread 'realsense2_thread.h'
@@ -64,6 +61,11 @@ Realsense2Thread::init()
 	//rgb image path
 	rgb_path_ = config->get_string_or_default((cfg_prefix + "rgb_path").c_str(),
 	                                          "/home/robotino/realsense_images");
+	//rgb camera resolution/frame rate
+	rgb_width_      = config->get_uint_or_default((cfg_prefix + "rgb_width").c_str(), 1920);
+	rgb_heigth_     = config->get_uint_or_default((cfg_prefix + "rgb_heigth").c_str(), 1080);
+	rgb_frame_rate_ = config->get_uint_or_default((cfg_prefix + "rgb_framerate").c_str(), 15);
+
 	camera_if_name_ =
 	  config->get_string_or_default((cfg_prefix + "camera_interface_name").c_str(), "realsense2_cam");
 
@@ -106,19 +108,17 @@ Realsense2Thread::loop()
 	if (enable_camera_ && read_camera_control() != "") {
 		if (rs_rgb_pipe_->poll_for_frames(&rs_rgb_data_)) {
 			error_counter_               = 0;
-			rs2::video_frame color_frame = rs_rgb_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_YUYV);
+			rs2::video_frame color_frame = rs_rgb_data_.first(RS2_STREAM_COLOR, RS2_FORMAT_RGB8);
 			image_name_ =
 			  rgb_path_ + read_camera_control() + color_frame.get_profile().stream_name() + ".png";
-			stbi_write_png(image_name_.c_str(),
-			               color_frame.get_width(),
-			               color_frame.get_height(),
-			               color_frame.get_bytes_per_pixel(),
-			               color_frame.get_data(),
-			               color_frame.get_stride_in_bytes());
+			png_writer_.set_filename(image_name_.c_str());
+			png_writer_.set_dimensions(color_frame.get_width(), color_frame.get_height());
+			png_writer_.set_buffer(firevision::RGB, (unsigned char *)color_frame.get_data());
+			png_writer_.write();
 			logger->log_info(name(), "Saving image to %s", image_name_.c_str());
 		} else {
 			error_counter_++;
-			logger->log_warn(name(), "Poll for frames not successful ()");
+			logger->log_warn(name(), "Poll for rgb frames not successful ()");
 			if (error_counter_ >= restart_after_num_errors_) {
 				logger->log_warn(name(), "Polling failed, restarting device");
 				error_counter_ = 0;
@@ -225,7 +225,8 @@ Realsense2Thread::start_camera()
 
 		//rgb config
 		rs2::config rgb_config;
-		rgb_config.enable_stream(RS2_STREAM_COLOR, 1920, 1080, RS2_FORMAT_YUYV, frame_rate_);
+		rgb_config.enable_stream(
+		  RS2_STREAM_COLOR, rgb_width_, rgb_heigth_, RS2_FORMAT_RGB8, rgb_frame_rate_);
 		rs2::pipeline_profile rs_pipeline_profile_rgb_ = rs_rgb_pipe_->start(rgb_config);
 		auto                  rgb_stream =
 		  rs_pipeline_profile_rgb_.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
@@ -235,7 +236,7 @@ Realsense2Thread::start_camera()
 		                 "RGB Height: %d RGB Width: %d FPS: %d",
 		                 rgb_intrinsics_.height,
 		                 rgb_intrinsics_.width,
-		                 frame_rate_);
+		                 rgb_frame_rate_);
 
 		return true;
 

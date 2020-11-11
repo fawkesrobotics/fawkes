@@ -31,6 +31,7 @@
 #include <aspect/logging.h>
 #include <aspect/pointcloud.h>
 #include <core/threading/thread.h>
+#include <fvutils/writers/png.h>
 #include <librealsense2/rsutil.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -90,6 +91,8 @@ private:
 	typedef Cloud::Ptr      CloudPtr;
 	typedef Cloud::ConstPtr CloudConstPtr;
 
+	firevision::PNGWriter png_writer_;
+
 	fawkes::RefPtr<Cloud> realsense_depth_refptr_;
 	CloudPtr              realsense_depth_;
 
@@ -110,6 +113,9 @@ private:
 	std::string image_name_;
 	std::string camera_if_name_;
 	uint        frame_rate_;
+	uint        rgb_frame_rate_;
+	uint        rgb_width_;
+	uint        rgb_heigth_;
 	float       laser_power_;
 	bool        camera_running_ = false;
 	bool        enable_camera_  = true;
