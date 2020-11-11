@@ -18,6 +18,12 @@ realsense2:
   # 0 for don't care
   frame_rate: 30
 
+  # Resolution of the RGB camera
+  rgb_width: 1920
+  rgb_heigth: 1080
+  # Desired/Supported RGB frame rate at the desired resolution
+  rgb_frame_rate: 15
+
   # Number of retries after unsuccessful polling before restarting the camera
   restart_after_num_errors: 50
 
@@ -27,7 +33,7 @@ realsense2:
     laser_power: 15
 
   # Path to directory to save images
-  rgb_path: "/home/robotino/realsense_images"
+  rgb_path: "/home/robotino/realsense_images/"
 
   # Camera Control Interface name
   camera_interface_name: "realsense2_cam"
