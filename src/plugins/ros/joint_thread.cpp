@@ -134,7 +134,7 @@ RosJointThread::conditional_close(Interface *interface) throw()
 }
 
 void
-RosJointThread::bb_interface_data_changed(Interface *interface) throw()
+RosJointThread::bb_interface_data_refreshed(Interface *interface) throw()
 {
 	JointInterface *jiface = dynamic_cast<JointInterface *>(interface);
 	if (!jiface)

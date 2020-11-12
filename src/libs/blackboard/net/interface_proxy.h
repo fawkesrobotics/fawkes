@@ -59,9 +59,9 @@ public:
 	Interface *  interface() const;
 
 	/* InterfaceMediator */
-	virtual bool                   exists_writer(const Interface *interface) const;
-	virtual unsigned int           num_readers(const Interface *interface) const;
-	virtual void                   notify_of_data_change(const Interface *interface);
+	virtual bool         exists_writer(const Interface *interface) const;
+	virtual unsigned int num_readers(const Interface *interface) const;
+	virtual void         notify_of_data_refresh(const Interface *interface, bool has_changed);
 	virtual std::list<std::string> readers(const Interface *interface) const;
 	virtual std::string            writer(const Interface *interface) const;
 

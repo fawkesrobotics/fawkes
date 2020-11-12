@@ -61,7 +61,7 @@ SyncInterfaceListener::SyncInterfaceListener(fawkes::Logger *    logger,
 
 	bbil_add_data_interface(reader_);
 	bbil_add_message_interface(writer_);
-	bb_interface_data_changed(reader_);
+	bb_interface_data_refreshed(reader_);
 
 	reader_bb_->register_listener(this, BlackBoard::BBIL_FLAG_DATA);
 	writer_bb_->register_listener(this, BlackBoard::BBIL_FLAG_MESSAGES);
@@ -100,7 +100,7 @@ SyncInterfaceListener::bb_interface_message_received(Interface *interface, Messa
 }
 
 void
-SyncInterfaceListener::bb_interface_data_changed(Interface *interface) throw()
+SyncInterfaceListener::bb_interface_data_refreshed(Interface *interface) throw()
 {
 	try {
 		if (interface == reader_) {

@@ -83,7 +83,7 @@ RobotinoIrPclThread::loop()
 	// update sensor values in interface
 	sens_if_->read();
 
-	if (sens_if_->changed()) {
+	if (sens_if_->refreshed()) {
 		const Time * ct        = sens_if_->timestamp();
 		const float *distances = sens_if_->distance();
 

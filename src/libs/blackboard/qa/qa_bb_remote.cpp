@@ -168,7 +168,7 @@ public:
 	}
 
 	void
-	bb_interface_data_changed(Interface *interface) throw()
+	bb_interface_data_refreshed(Interface *interface) throw()
 	{
 		try {
 			if (interface == reader_) {

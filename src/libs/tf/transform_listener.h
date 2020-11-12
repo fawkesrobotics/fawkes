@@ -77,7 +77,7 @@ public:
 	virtual void bb_interface_created(const char *type, const char *id) throw();
 
 	// for BlackBoardInterfaceListener
-	virtual void bb_interface_data_changed(Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(Interface *interface) throw();
 	virtual void bb_interface_writer_removed(Interface *  interface,
 	                                         unsigned int instance_serial) throw();
 	virtual void bb_interface_reader_removed(Interface *  interface,

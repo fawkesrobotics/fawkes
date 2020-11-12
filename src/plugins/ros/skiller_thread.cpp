@@ -232,7 +232,7 @@ RosSkillerThread::loop()
 		}
 	}
 
-	if (skiller_if_->changed()) {
+	if (skiller_if_->refreshed()) {
 		fawkes_msgs::SkillStatus msg;
 		const Time *             time = skiller_if_->timestamp();
 		msg.stamp                     = ros::Time(time->get_sec(), time->get_nsec());

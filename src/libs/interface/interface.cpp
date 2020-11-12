@@ -189,10 +189,16 @@ InterfaceInvalidException::InterfaceInvalidException(const Interface *interface,
  * Minimal data size to hold data storage.
  */
 
-/** @var Interface::data_changed
- * Indicator if data has changed.
+/** @var Interface::data_refreshed
+ * Indicator if data can be considered "current", i.e. the latest available.
  * This must be set by all methods that manipulate internal data or the
- * timestamp. Only if set to true a call to write() will update data_ts.
+ * timestamp. Always set to true by @ref set_field.
+ * Only if set to true a call to write() will update data_ts.
+ */
+
+/** @var Interface::data_changed
+ * Indicator if the current data is different from the last call to write()
+ * This must is automatically updated by @ref set_field.
  */
 
 /** @fn bool Interface::message_valid(const Message *message) const = 0
@@ -245,6 +251,7 @@ Interface::Interface()
 	auto_timestamping_    = true;
 	owner_                = strdup("?");
 	data_changed          = false;
+	data_refreshed        = false;
 	memset(hash_, 0, INTERFACE_HASH_SIZE_);
 	memset(hash_printable_, 0, INTERFACE_HASH_SIZE_ * 2 + 1);
 
@@ -499,17 +506,20 @@ Interface::write()
 
 	rwlock_->lock_for_write();
 	data_mutex_->lock();
-	bool do_notify = false;
+	bool has_changed = false;
 	if (valid_) {
-		if (data_changed) {
+		if (data_refreshed) {
 			if (auto_timestamping_)
 				timestamp_->stamp();
 			long sec = 0, usec = 0;
 			timestamp_->get_timestamp(sec, usec);
 			data_ts->timestamp_sec  = sec;
 			data_ts->timestamp_usec = usec;
-			data_changed            = false;
-			do_notify               = true;
+			data_refreshed          = false;
+		}
+		if (data_changed) {
+			has_changed  = true;
+			data_changed = false;
 		}
 		memcpy(mem_data_ptr_, data_ptr, data_size);
 	} else {
@@ -520,8 +530,7 @@ Interface::write()
 	data_mutex_->unlock();
 	rwlock_->unlock();
 
-	if (do_notify)
-		interface_mediator_->notify_of_data_change(this);
+	interface_mediator_->notify_of_data_refresh(this, has_changed);
 }
 
 /** Get data size.
@@ -755,18 +764,29 @@ Interface::set_auto_timestamping(bool enabled)
  * actually set.
  */
 void
-Interface::mark_data_changed()
+Interface::mark_data_refreshed()
 {
-	data_changed = true;
+	data_refreshed = true;
 }
 
-/** Check if data has been changed.
+/**
+ * @return Whether the data in this interface is actually different from the
+ * last time write() was called.
+ * @sa refreshed()
+ */
+bool
+Interface::changed() const
+{
+	return data_changed;
+}
+
+/** Check if data has been refreshed.
  * This method has slightly different semantics depending on whether
  * this interface is a writing or a reading instance.
  * For a reading instance:
- * Note that if the data has been modified this method will return
+ * If the data has been refreshed this method will return
  * true at least until the next call to read. From then on it will
- * return false if the data has not been modified between the two
+ * return false if the data has not been refreshed between the two
  * read() calls and still true otherwise.
  * For a writing instance:
  * The data is considered to have changed if any of the interface field
@@ -777,10 +797,10 @@ Interface::mark_data_changed()
  * false otherwise
  */
 bool
-Interface::changed() const
+Interface::refreshed() const
 {
 	if (write_access_) {
-		return data_changed;
+		return data_refreshed;
 	} else {
 		return (*timestamp_ != local_read_timestamp_);
 	}

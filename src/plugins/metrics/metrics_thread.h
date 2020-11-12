@@ -109,7 +109,7 @@ private:
 	                                         unsigned int       instance_serial) throw();
 	virtual void bb_interface_reader_removed(fawkes::Interface *interface,
 	                                         unsigned int       instance_serial) throw();
-	virtual void bb_interface_data_changed(fawkes::Interface *interface) throw();
+	virtual void bb_interface_data_refreshed(fawkes::Interface *interface) throw();
 
 	// for MetricsSupplier
 	virtual std::list<io::prometheus::client::MetricFamily> metrics();

@@ -379,7 +379,7 @@ BehaviorEnginePlexilAdapter::invokeAbort(PLEXIL::Command *cmd)
 }
 
 void
-BehaviorEnginePlexilAdapter::bb_interface_data_changed(fawkes::Interface *interface) throw()
+BehaviorEnginePlexilAdapter::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
 {
 	std::lock_guard<std::mutex> lock(exec_mutex_);
 	skiller_if_->read();

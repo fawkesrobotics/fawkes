@@ -350,7 +350,7 @@ MetricsThread::bb_interface_reader_removed(fawkes::Interface *interface,
 }
 
 void
-MetricsThread::bb_interface_data_changed(fawkes::Interface *interface) throw()
+MetricsThread::bb_interface_data_refreshed(fawkes::Interface *interface) throw()
 {
 	MetricFamilyInterface *mfi = dynamic_cast<MetricFamilyInterface *>(interface);
 	if (!mfi)

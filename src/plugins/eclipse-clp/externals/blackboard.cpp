@@ -314,7 +314,7 @@ p_bb_interface_changed()
 		return EC_fail;
 	}
 
-	return interfaces[uid]->changed() ? EC_succeed : EC_fail;
+	return interfaces[uid]->refreshed() ? EC_succeed : EC_fail;
 }
 
 int

@@ -303,7 +303,7 @@ RobotinoActThread::publish_odometry()
 			// velocity-based method
 			if (imu_if_ && imu_if_->has_writer()) {
 				imu_if_->read();
-				if (imu_if_->changed()) {
+				if (imu_if_->refreshed()) {
 					//float imu_age = now - imu_if_->timestamp();
 					//logger->log_debug(name(), "IMU age: %f sec", imu_age);
 					float *ori_q = imu_if_->orientation();

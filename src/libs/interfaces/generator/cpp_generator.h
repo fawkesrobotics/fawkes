@@ -87,8 +87,7 @@ public:
 	                       std::string                 interface_classname,
 	                       std::string                 classname,
 	                       std::vector<InterfaceField> fields,
-	                       std::string                 inclusion_prefix,
-	                       bool                        write_data_changed);
+	                       std::string                 inclusion_prefix);
 
 	void write_create_message_method_cpp(FILE *f);
 	void write_copy_value_method_cpp(FILE *f);

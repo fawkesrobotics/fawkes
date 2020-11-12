@@ -142,7 +142,7 @@ RosPosition3DThread::conditional_close(Interface *interface) throw()
 }
 
 void
-RosPosition3DThread::bb_interface_data_changed(Interface *interface) throw()
+RosPosition3DThread::bb_interface_data_refreshed(Interface *interface) throw()
 {
 	Position3DInterface *iface = dynamic_cast<Position3DInterface *>(interface);
 	if (!iface)

@@ -75,9 +75,11 @@ public:
    * mandatory to call this function! The interface base class write method does
    * that for you.
    * @param interface interface whose subscribers to notify
+   * @param has_changed whether the current data is different from the last time write()
+   * was called on the interface
    * @see Interface::write()
    */
-	virtual void notify_of_data_change(const Interface *interface) = 0;
+	virtual void notify_of_data_refresh(const Interface *interface, bool has_changed) = 0;
 };
 
 } // end namespace fawkes

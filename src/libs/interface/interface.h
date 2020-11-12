@@ -126,11 +126,12 @@ public:
 	std::list<std::string> readers() const;
 
 	bool        changed() const;
+	bool        refreshed() const;
 	const Time *timestamp() const;
 	void        set_auto_timestamping(bool enabled);
 	void        set_timestamp(const Time *t = NULL);
 	void        set_clock(Clock *clock);
-	void        mark_data_changed();
+	void        mark_data_refreshed();
 
 	std::list<const char *> get_message_types();
 
@@ -221,8 +222,26 @@ protected:
 	                   const interface_enum_map_t *enum_map = 0);
 	void add_messageinfo(const char *name);
 
+	/** Set a field, set @ref data_changed to true and update
+	 * @ref data_changed accordingly
+	 * @param field Reference to the field
+	 * @param data New field value
+	 */
+	template <class FieldT, class DataT>
+	void set_field(FieldT &field, DataT &data);
+
+	/** Set an array field at a given index, set @ref data_changed to true
+	 * and update @ref data_changed accordingly
+	 * @param field Reference to the array field
+	 * @param index Index into the array field
+	 * @param data New value to put at given index
+	 */
+	template <class FieldT, class DataT>
+	void set_field(FieldT &field, unsigned int index, DataT &data);
+
 	void *       data_ptr;
 	unsigned int data_size;
+	bool         data_refreshed;
 	bool         data_changed;
 
 	interface_data_ts_t *data_ts;
@@ -277,6 +296,22 @@ private:
 	Time * local_read_timestamp_;
 	bool   auto_timestamping_;
 };
+
+template <class FieldT, class DataT>
+void
+Interface::set_field(FieldT &field, DataT &data)
+{
+	data_changed |= change_field(field, data);
+	data_refreshed = true;
+}
+
+template <class FieldT, class DataT>
+void
+Interface::set_field(FieldT &field, unsigned int index, DataT &data)
+{
+	data_changed |= change_field(field, index, data);
+	data_refreshed = true;
+}
 
 template <class MessageType>
 MessageType *
