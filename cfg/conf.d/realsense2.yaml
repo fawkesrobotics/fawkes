@@ -20,9 +20,11 @@ realsense2:
 
   # Resolution of the RGB camera
   rgb_width: 1920
-  rgb_heigth: 1080
+  rgb_height: 1080
   # Desired/Supported RGB frame rate at the desired resolution
-  rgb_frame_rate: 15
+  # currently only 10 fps work
+  # this might be cause by hardware limitations
+  rgb_frame_rate: 10
 
   # Number of retries after unsuccessful polling before restarting the camera
   restart_after_num_errors: 50
