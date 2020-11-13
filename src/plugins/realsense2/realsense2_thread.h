@@ -113,9 +113,9 @@ private:
 	std::string image_name_;
 	std::string camera_if_name_;
 	uint        frame_rate_;
-	uint        rgb_frame_rate_;
-	uint        rgb_width_;
-	uint        rgb_heigth_;
+	int         rgb_frame_rate_;
+	int         rgb_width_;
+	int         rgb_height_;
 	float       laser_power_;
 	bool        camera_running_ = false;
 	bool        enable_camera_  = true;
