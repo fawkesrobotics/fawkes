@@ -93,14 +93,14 @@ GologppThread::init()
 
 	logger->log_info(name(), "Initializing ReadyLog context...");
 
-	exog_mgr_ = new ExogManager(this, config, spec_cfg_prefix, blackboard, logger);
-
 	gologpp::eclipse_opts options;
 	options.trace    = config->get_bool_or_default((cfg_prefix + "/trace").c_str(), false);
 	options.guitrace = options.trace;
 	gologpp::ReadylogContext::init(options,
 	                               std::make_unique<GologppFawkesBackend>(
 	                                 config, spec_cfg_prefix, logger, blackboard, tf_listener));
+
+	exog_mgr_ = new ExogManager(this, config, spec_cfg_prefix, blackboard, logger);
 
 	logger->log_info(name(), "... initialization done");
 }
