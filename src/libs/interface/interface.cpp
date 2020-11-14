@@ -757,16 +757,27 @@ Interface::set_auto_timestamping(bool enabled)
 	auto_timestamping_ = enabled;
 }
 
-/** Mark data as changed.
- * This m will mark the data as changed for a writing instance. One the
+/** Mark data as refreshed.
+ * This will mark the data as refreshed for a writing instance. On the
  * next write, the data will be written with an updated timestamp (if
- * auto timestamping is enabled), irregardless of whether new data was
+ * auto timestamping is enabled), regardless of whether new data was
  * actually set.
  */
 void
 Interface::mark_data_refreshed()
 {
 	data_refreshed = true;
+}
+
+/** Mark data as changed. There should be no sensible reason for
+ * user code to call this method. It is only used for remote blackboard
+ * synchronization. Will cause change notifications to be dispatched on
+ * write().
+ */
+void
+Interface::mark_data_changed()
+{
+	data_changed = true;
 }
 
 /**

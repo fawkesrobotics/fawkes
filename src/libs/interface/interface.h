@@ -132,6 +132,7 @@ public:
 	void        set_timestamp(const Time *t = NULL);
 	void        set_clock(Clock *clock);
 	void        mark_data_refreshed();
+	void        mark_data_changed();
 
 	std::list<const char *> get_message_types();
 

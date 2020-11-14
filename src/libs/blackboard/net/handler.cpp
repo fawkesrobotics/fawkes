@@ -256,25 +256,30 @@ BlackBoardNetworkHandler::loop()
 			//		     client_interfaces_.size());
 		} break;
 
-		case MSG_BB_DATA_CHANGED: {
-			void *          payload   = msg->payload();
-			bb_idata_msg_t *dm        = (bb_idata_msg_t *)payload;
-			unsigned int    dm_serial = ntohl(dm->serial);
+		case MSG_BB_DATA_CHANGED:
+		case MSG_BB_DATA_REFRESHED: {
+			bool            data_changed = msg->msgid() == MSG_BB_DATA_CHANGED;
+			void *          payload      = msg->payload();
+			bb_idata_msg_t *dm           = (bb_idata_msg_t *)payload;
+			unsigned int    dm_serial    = ntohl(dm->serial);
 			if (interfaces_.find(dm_serial) != interfaces_.end()) {
 				if (ntohl(dm->data_size) != interfaces_[dm_serial]->datasize()) {
 					LibLogger::log_error("BlackBoardNetworkHandler",
-					                     "DATA_CHANGED: Data size mismatch, "
-					                     "expected %zu, but got %zu, ignoring.",
+					                     "%s: Data size mismatch, expected %zu, but got %zu, ignoring.",
+					                     data_changed ? "DATA_CHANGED" : "DATA_REFRESHED",
 					                     interfaces_[dm_serial]->datasize(),
 					                     ntohl(dm->data_size));
 				} else {
 					interfaces_[dm_serial]->set_from_chunk((char *)payload + sizeof(bb_idata_msg_t));
+					if (data_changed)
+						interfaces_[dm_serial]->mark_data_changed();
 					interfaces_[dm_serial]->write();
 				}
 			} else {
 				LibLogger::log_error("BlackBoardNetworkHandler",
-				                     "DATA_CHANGED: Interface with "
+				                     "%s: Interface with "
 				                     "serial %u not found, ignoring.",
+				                     data_changed ? "DATA_CHANGED" : "DATA_REFRESHED",
 				                     dm_serial);
 			}
 		} break;

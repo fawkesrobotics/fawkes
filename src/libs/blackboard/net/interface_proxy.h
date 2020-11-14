@@ -47,7 +47,7 @@ public:
 	                         bool                  readwrite);
 	~BlackBoardInterfaceProxy();
 
-	void process_data_changed(FawkesNetworkMessage *msg);
+	void process_data_refreshed(FawkesNetworkMessage *msg);
 	void process_interface_message(FawkesNetworkMessage *msg);
 	void reader_added(unsigned int event_serial);
 	void reader_removed(unsigned int event_serial);

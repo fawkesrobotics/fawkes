@@ -458,10 +458,10 @@ RemoteBlackBoard::inbound_received(FawkesNetworkMessage *m, unsigned int id) thr
 	if (m->cid() == FAWKES_CID_BLACKBOARD) {
 		unsigned int msgid = m->msgid();
 		try {
-			if (msgid == MSG_BB_DATA_CHANGED) {
+			if (msgid == MSG_BB_DATA_CHANGED || msgid == MSG_BB_DATA_REFRESHED) {
 				unsigned int serial = ntohl(((unsigned int *)m->payload())[0]);
 				if (proxies_.find(serial) != proxies_.end()) {
-					proxies_[serial]->process_data_changed(m);
+					proxies_[serial]->process_data_refreshed(m);
 				}
 			} else if (msgid == MSG_BB_INTERFACE_MESSAGE) {
 				unsigned int serial = ntohl(((unsigned int *)m->payload())[0]);
