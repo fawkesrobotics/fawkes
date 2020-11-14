@@ -116,6 +116,8 @@ GologppThread::once()
 		logger->log_error(name(), "User Error: %s", e.what());
 	} catch (gologpp::EclipseError &e) {
 		logger->log_error(name(), "Eclipse Error: %s", e.what());
+	} catch (gologpp::EngineError &e) {
+		logger->log_error(name(), "Engine error: %s", e.what());
 	}
 }
 
