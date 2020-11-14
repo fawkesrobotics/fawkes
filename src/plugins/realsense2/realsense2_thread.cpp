@@ -60,7 +60,7 @@ Realsense2Thread::init()
 
 	//rgb image path
 	rgb_path_ = config->get_string_or_default((cfg_prefix + "rgb_path").c_str(),
-	                                          "/home/robotino/realsense_images");
+	                                          "/home/robotino/realsense_images/");
 	//rgb camera resolution/frame rate
 	rgb_width_      = config->get_int_or_default((cfg_prefix + "rgb_width").c_str(), 1920);
 	rgb_height_     = config->get_int_or_default((cfg_prefix + "rgb_height").c_str(), 1080);
@@ -426,7 +426,7 @@ Realsense2Thread::read_camera_control()
 		if (camera_if_->msgq_first_is<CameraControlInterface::SaveImageMessage>()) {
 			CameraControlInterface::SaveImageMessage *msg =
 			  camera_if_->msgq_first<CameraControlInterface::SaveImageMessage>();
-			object_name_ = std::string(msg->image_name());
+			std::string object_name_(msg->image_name());
 		} else {
 			logger->log_warn(name(), "Unknown message received");
 		}
