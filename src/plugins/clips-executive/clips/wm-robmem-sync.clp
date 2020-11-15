@@ -273,7 +273,7 @@
 	(bson-destroy ?doc2)
 	(bson-destroy ?doc21)
 
-	(return ?doc)
+	(return ?cursor)
 )
 
 (defrule wm-robmem-sync-fact-added
