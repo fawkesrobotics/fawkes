@@ -336,7 +336,7 @@
 
 (defrule mutex-unlock-succeeded-already-reacquired
 	"Someone else already acquired the lock in the meantime."
-	?mf <- (mutex (name ?name) (request LOCK) (response PENDING)
+	?mf <- (mutex (name ?name) (request UNLOCK) (response PENDING)
 	              (state LOCKED) (locked-by ?lb&:(neq ?lb (cx-identity))))
 	=>
 	(modify ?mf (response UNLOCKED))
