@@ -247,15 +247,31 @@
   "Remove an atomic precondition from its parent and clean up the precondition
    tree. If the parent is a disjunction with no other disjunct, simplify it to
    true by removing it recursively. If it is a negation, remove it recursively.
-   If it's a conjunction, only remove the conjunct."
-  (?precond-name)
-  (do-for-fact
-    ((?precond domain-atomic-precondition) (?parent domain-precondition))
-    (and (eq ?precond:name ?precond-name) (eq ?precond:part-of ?parent:name))
-    (if (or (eq ?parent:type disjunction) (eq ?parent:type negation)) then
-      (remove-precondition ?parent:name)
+   If it's a conjunction, only remove the conjunct.
+   If the top-most precondition is removed, replace it by a trivially true one
+   (empty conjunction)."
+  (?precond-fact)
+  (bind ?parent-facts (find-fact ((?parent domain-precondition))
+               (eq (fact-slot-value ?precond-fact part-of) ?parent:name)))
+  (if (= (length$ ?parent-facts) 1)
+   then
+    (bind ?parent (nth$ 1 ?parent-facts))
+    (if (or (eq (fact-slot-value ?parent type) negation)
+            (and (eq (fact-slot-value ?parent type) disjunction)
+                 (not (any-factp ((?sibling domain-precondition))
+                       (eq (fact-slot-value ?parent name) ?sibling:part-of)))
+                 (not (any-factp ((?sibling domain-atomic-precondition))
+                       (eq (fact-slot-value ?parent name) ?sibling:part-of)))))
+     then
+      (remove-precondition ?parent)
     )
-    (retract ?precond)
+    (retract ?precond-fact)
+   else
+    (assert (domain-precondition
+              (part-of (fact-slot-value ?precond-fact part-of))
+              (name (fact-slot-value ?precond-fact name))
+              (type conjunction)))
+    (retract ?precond-fact)
   )
 )
 
@@ -296,10 +312,11 @@
   (domain-predicate (name ?pred) (sensed TRUE) (value-predicate FALSE))
   (domain-effect (part-of ?op) (predicate ?pred)
     (param-names $?params) (param-constants $?constants))
-  (domain-atomic-precondition (name ?precond) (operator ?op) (grounded FALSE)
-    (predicate ?pred) (param-names $?params) (param-constants $?constants))
+  ?pre <- (domain-atomic-precondition (name ?precond) (operator ?op)
+    (grounded FALSE) (predicate ?pred) (param-names $?params)
+    (param-constants $?constants))
 =>
-  (remove-precondition ?precond)
+  (remove-precondition ?pre)
   ; If there are any grounded preconditions, we need to recompute them.
   (domain-retract-grounding)
 )
