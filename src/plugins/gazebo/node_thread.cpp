@@ -77,7 +77,18 @@ GazeboNodeThread::init()
 	//initialize node (this node only communicates with nodes that were initialized with the same string)
 	gazebonode_->Init(robot_channel.c_str());
 	gazebo_aspect_inifin_.set_gazebonode(gazebonode_);
-
+	// init Topic Manager, required to subscribe to topics
+	// and to init the connection manager
+	gazebo::transport::TopicManager::Instance();
+	std::string  uri;
+	unsigned int port;
+	bool         master_reached = gazebo::transport::get_master_uri(uri, port);
+	if (!master_reached) {
+		logger->log_error(name(), "Gazebo master uri could not be retrieved");
+	} else {
+		// init connection manager, required to publish topics
+		gazebo::transport::ConnectionManager::Instance()->Init(uri, port);
+	}
 	//and the node for world change messages
 	gazebo_world_node_ = gazebo::transport::NodePtr(new gazebo::transport::Node());
 	gazebo_world_node_->Init(world_name.c_str());
