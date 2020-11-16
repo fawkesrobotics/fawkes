@@ -111,7 +111,7 @@ BlackBoardInterfaceProxy::~BlackBoardInterfaceProxy()
  * @param msg message to process.
  */
 void
-BlackBoardInterfaceProxy::process_data_changed(FawkesNetworkMessage *msg)
+BlackBoardInterfaceProxy::process_data_refreshed(FawkesNetworkMessage *msg)
 {
 	if (msg->msgid() != MSG_BB_DATA_CHANGED && msg->msgid() != MSG_BB_DATA_REFRESHED) {
 		LibLogger::log_error("BlackBoardInterfaceProxy",

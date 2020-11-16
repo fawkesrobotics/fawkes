@@ -80,6 +80,27 @@ BlackBoardNetHandlerInterfaceListener::~BlackBoardNetHandlerInterfaceListener()
 void
 BlackBoardNetHandlerInterfaceListener::bb_interface_data_refreshed(Interface *interface) throw()
 {
+	// send out data refreshed notification
+	interface->read();
+
+	size_t          payload_size = sizeof(bb_idata_msg_t) + interface->datasize();
+	void *          payload      = malloc(payload_size);
+	bb_idata_msg_t *dm           = (bb_idata_msg_t *)payload;
+	dm->serial                   = htonl(interface->serial());
+	dm->data_size                = htonl(interface->datasize());
+	memcpy((char *)payload + sizeof(bb_idata_msg_t), interface->datachunk(), interface->datasize());
+
+	try {
+		fnh_->send(clid_, FAWKES_CID_BLACKBOARD, MSG_BB_DATA_REFRESHED, payload, payload_size);
+	} catch (Exception &e) {
+		LibLogger::log_warn(bbil_name(), "Failed to send BlackBoard data, exception follows");
+		LibLogger::log_warn(bbil_name(), e);
+	}
+}
+
+void
+BlackBoardNetHandlerInterfaceListener::bb_interface_data_changed(Interface *interface) throw()
+{
 	// send out data changed notification
 	interface->read();
 
