@@ -183,8 +183,7 @@ components:
           type: integer
           format: int64
         exclusive_controller:
-          type: integer
-          format: int64
+          type: string
         status:
           type: string
           enum: ["INACTIVE", "FINAL", "RUNNING", "FAILED"]
